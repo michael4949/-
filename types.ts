@@ -1,60 +1,114 @@
-export interface GroundingSource {
+// ===== 全网情报挖掘及分析系统 - 类型定义 =====
+
+// 情报来源
+export interface IntelSource {
   title: string;
   uri: string;
+  credibility: 'high' | 'medium' | 'low';
+  type: string; // 新闻、论坛、社交媒体、官方报告等
 }
 
-export interface MaturityDimension {
+// 威胁/风险条目
+export interface ThreatItem {
+  name: string;
+  level: 'critical' | 'high' | 'medium' | 'low';
+  score: number; // 0-100
+  category: string;
+  description: string;
+}
+
+// 趋势数据点
+export interface TrendDataPoint {
+  date: string;
+  热度: number;
+  正面: number;
+  负面: number;
+}
+
+// 关键实体
+export interface EntityInfo {
+  name: string;
+  type: 'person' | 'organization' | 'location' | 'event' | 'technology' | 'policy';
+  relevance: number; // 0-100
+  description: string;
+  connections: string[]; // 关联实体名称
+}
+
+// 情感分析数据
+export interface SentimentData {
+  category: string;
+  positive: number;
+  neutral: number;
+  negative: number;
+}
+
+// 事件时间线
+export interface TimelineEvent {
+  date: string;
+  title: string;
+  description: string;
+  importance: 'critical' | 'high' | 'medium' | 'low';
+  source: string;
+}
+
+// 威胁雷达维度
+export interface RadarDimension {
   dimension: string;
   score: number; // 0-100
   description: string;
 }
 
-export interface Scenario {
-  name: string;
-  impact: number; // 0-100
-  feasibility: number; // 0-100
-  description: string;
-}
-
-export interface Methodology {
+// 核心发现
+export interface KeyFinding {
   title: string;
-  iconType: 'chart' | 'process' | 'target' | 'puzzle';
   content: string;
+  category: 'threat' | 'opportunity' | 'trend' | 'insight';
+  priority: 'critical' | 'high' | 'medium' | 'low';
 }
 
-export interface RoadmapPhase {
-  phase: string;
-  timeframe: string;
+// 行动建议
+export interface ActionRecommendation {
   title: string;
-  items: string[];
+  description: string;
+  urgency: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+  category: string;
 }
 
-export interface ReportData {
-  companyName: string;
+// 完整情报报告
+export interface IntelligenceReport {
+  topic: string;
   reportTitle: string;
   executiveSummary: string;
-  backgroundImageKeyword: string; // Used to fetch a relevant placeholder
-  maturityModel: {
+  generatedAt: string;
+  overviewStats: {
+    totalSources: number;
+    threatLevel: string;
+    sentimentScore: number; // -100 到 100
+    keyEntities: number;
+    timeSpan: string;
+  };
+  radarAnalysis: {
     title: string;
     description: string;
-    data: MaturityDimension[];
+    dimensions: RadarDimension[];
   };
-  highValueScenarios: {
-    title: string;
-    description: string;
-    data: Scenario[];
-  };
-  methodologies: Methodology[];
-  roadmap: RoadmapPhase[];
+  threats: ThreatItem[];
+  trendData: TrendDataPoint[];
+  entities: EntityInfo[];
+  sentimentBreakdown: SentimentData[];
+  timeline: TimelineEvent[];
+  keyFindings: KeyFinding[];
+  recommendations: ActionRecommendation[];
   conclusion: string;
 }
 
-export interface ReportResponse {
-  report: ReportData;
-  sources: GroundingSource[];
+// 情报响应（包含来源）
+export interface IntelligenceResponse {
+  report: IntelligenceReport;
+  sources: IntelSource[];
 }
 
-// New types for the Refinement Step
+// 细化问题
 export interface RefinementOption {
   label: string;
   value: string;
