@@ -275,19 +275,14 @@ export const generateIntelligenceReport = async (
     const reportData = JSON.parse(cleanedText) as IntelligenceReport;
 
     // 提取信息来源
-    const rawSources = response.candidates?.[0]?.groundingMetadata?.groundingChunks
-      ?.map((chunk) => {
-        if (chunk.web) {
-          return {
-            title: chunk.web.title || "网络来源",
-            uri: chunk.web.uri || "#",
-            credibility: 'medium' as const,
-            type: '网络来源'
-          };
-        }
-        return null;
-      })
-      .filter((s): s is IntelSource => s !== null) || [];
+    const rawSources: IntelSource[] = (response.candidates?.[0]?.groundingMetadata?.groundingChunks || [])
+      .filter((chunk) => chunk.web)
+      .map((chunk) => ({
+        title: chunk.web!.title || "网络来源",
+        uri: chunk.web!.uri || "#",
+        credibility: 'medium' as const,
+        type: '网络来源'
+      }));
 
     const uniqueSources = Array.from(new Map(rawSources.map(s => [s.uri, s])).values());
 
