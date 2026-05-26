@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-gov: 248 250 252;
+    --bg-screen: 2 8 23;
+  }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+      "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 数字使用 mono 字体 */
+  .digital {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* 数据大屏 - 玻璃面板 */
+  .screen-panel {
+    @apply relative bg-[rgba(15,23,42,0.55)] border border-[rgba(56,189,248,0.18)] backdrop-blur-sm rounded-lg overflow-hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 24px rgba(8, 47, 73, 0.3);
+  }
+
+  .screen-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(56, 189, 248, 0.04) 0%, transparent 50%, rgba(168, 85, 247, 0.04) 100%);
+  }
+
+  /* 大屏角标 */
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: rgba(56, 189, 248, 0.7);
+  }
+  .corner-tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+  .corner-tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+  .corner-bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+  .corner-br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+
+  /* 大屏标题 */
+  .screen-title {
+    @apply text-cyan-300 text-sm font-medium tracking-[0.2em] flex items-center gap-2 py-2 px-3 border-b border-cyan-500/15;
+  }
+  .screen-title::before {
+    content: "";
+    width: 3px;
+    height: 14px;
+    background: linear-gradient(to bottom, #22d3ee, #3b82f6);
+    border-radius: 2px;
+  }
+
+  /* 政务卡片 */
+  .gov-card {
+    @apply bg-white border border-slate-200/80 rounded-lg shadow-sm transition-shadow hover:shadow-md;
+  }
+  .gov-card-header {
+    @apply px-5 pt-4 pb-3 border-b border-slate-100;
+  }
+  .gov-card-body {
+    @apply px-5 py-4;
+  }
+
+  /* KPI 大数 */
+  .kpi-value {
+    @apply digital text-3xl font-semibold tracking-tight;
+  }
+
+  /* 表格 */
+  .gov-table {
+    @apply w-full text-sm;
+  }
+  .gov-table thead th {
+    @apply text-left text-xs uppercase tracking-wider text-slate-500 font-medium px-4 py-2.5 bg-slate-50/80 border-b border-slate-200;
+  }
+  .gov-table tbody td {
+    @apply px-4 py-3 border-b border-slate-100 text-slate-700;
+  }
+  .gov-table tbody tr:hover {
+    @apply bg-slate-50/50;
+  }
+
+  /* 标签 */
+  .tag {
+    @apply inline-flex items-center text-xs px-2 py-0.5 rounded font-medium;
+  }
+  .tag-blue { @apply tag bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200; }
+  .tag-green { @apply tag bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200; }
+  .tag-amber { @apply tag bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200; }
+  .tag-red { @apply tag bg-red-50 text-red-700 ring-1 ring-inset ring-red-200; }
+  .tag-slate { @apply tag bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200; }
+  .tag-purple { @apply tag bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200; }
+  .tag-cyan { @apply tag bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-200; }
+
+  /* 按钮 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium transition-colors;
+  }
+  .btn-primary { @apply btn bg-gov-700 text-white hover:bg-gov-800; }
+  .btn-secondary { @apply btn bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50; }
+  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100; }
+  .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+
+  /* 滚动行 */
+  .marquee-row {
+    animation: marquee 28s linear infinite;
+  }
+
+  /* 进度条 */
+  .progress-bar {
+    @apply relative h-1.5 bg-slate-200 rounded-full overflow-hidden;
+  }
+  .progress-bar-fill {
+    @apply absolute inset-y-0 left-0 bg-gov-600 transition-all;
+  }
+}
+
+@layer utilities {
+  /* 大屏底色 */
+  .bg-screen {
+    background-color: #020817;
+    background-image:
+      radial-gradient(ellipse at top, rgba(30, 64, 175, 0.18) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(139, 92, 246, 0.14) 0%, transparent 50%),
+      linear-gradient(180deg, #020817 0%, #0c1426 100%);
+  }
+
+  /* 网格背景 */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* 滚动条隐藏 */
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+  /* 文本省略 */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* 滚动行需要全局 */
+@keyframes marquee {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
