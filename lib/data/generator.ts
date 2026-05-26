@@ -203,10 +203,11 @@ export function generateAll() {
   // 3. 算力中心
   const computeCenters: ComputeCenter[] = [];
   for (let i = 0; i < NUM_COMPUTE_CENTERS; i++) {
+    const typesArr = COMPUTE_CENTER_TYPES as readonly { code: string; name: string; color: string }[];
     const type = pickWeighted(rng, [
-      { item: COMPUTE_CENTER_TYPES[0], weight: 4 }, // 智算
-      { item: COMPUTE_CENTER_TYPES[1], weight: 1 }, // 超算
-      { item: COMPUTE_CENTER_TYPES[2], weight: 2 }, // 通算
+      { item: typesArr[0], weight: 4 }, // 智算
+      { item: typesArr[1], weight: 1 }, // 超算
+      { item: typesArr[2], weight: 2 }, // 通算
     ]);
     const district = pickWeighted(rng, DISTRICTS.map((d) => ({ item: d, weight: d.weight })));
     const chipMix: { code: string; count: number }[] = [];
@@ -397,12 +398,13 @@ export function generateAll() {
     if (!ent.certified) continue;
     const n = ent.scale === "LARGE" ? randInt(rng, 3, 8) : ent.scale === "MED" ? randInt(rng, 2, 5) : ent.scale === "SMALL" ? randInt(rng, 1, 3) : randInt(rng, 0, 2);
     for (let j = 0; j < n; j++) {
+      const vtsArr = VOUCHER_TYPES as readonly { code: string; name: string; desc: string; unit: string }[];
       const vt = pickWeighted(rng, [
-        { item: VOUCHER_TYPES[0], weight: 5 }, // Token
-        { item: VOUCHER_TYPES[1], weight: 2 }, // 算力
-        { item: VOUCHER_TYPES[2], weight: 2 }, // 模型
-        { item: VOUCHER_TYPES[3], weight: 0.7 }, // 数据
-        { item: VOUCHER_TYPES[4], weight: 0.5 }, // 语料
+        { item: vtsArr[0], weight: 5 }, // Token
+        { item: vtsArr[1], weight: 2 }, // 算力
+        { item: vtsArr[2], weight: 2 }, // 模型
+        { item: vtsArr[3], weight: 0.7 }, // 数据
+        { item: vtsArr[4], weight: 0.5 }, // 语料
       ]);
       const amount = vt.code === "TOKEN" ? randInt(rng, 1, 100) * 10000 : vt.code === "COMPUTE" ? randInt(rng, 10, 800) : randInt(rng, 1000, 50000);
       const used = Math.floor(amount * randFloat(rng, 0.1, 0.95));
@@ -439,12 +441,13 @@ export function generateAll() {
   let appId = 1;
   function genApp(status: VoucherApplication["status"]): VoucherApplication {
     const ent = pick(rng, enterprises);
+    const vtArr = VOUCHER_TYPES as readonly { code: string; name: string; desc: string; unit: string }[];
     const vt = pickWeighted(rng, [
-      { item: VOUCHER_TYPES[0], weight: 5 },
-      { item: VOUCHER_TYPES[1], weight: 2 },
-      { item: VOUCHER_TYPES[2], weight: 2 },
-      { item: VOUCHER_TYPES[3], weight: 0.7 },
-      { item: VOUCHER_TYPES[4], weight: 0.4 },
+      { item: vtArr[0], weight: 5 },
+      { item: vtArr[1], weight: 2 },
+      { item: vtArr[2], weight: 2 },
+      { item: vtArr[3], weight: 0.7 },
+      { item: vtArr[4], weight: 0.4 },
     ]);
     const requested = vt.code === "TOKEN" ? randInt(rng, 5, 200) * 10000 : vt.code === "COMPUTE" ? randInt(rng, 50, 1500) : randInt(rng, 2000, 80000);
     const submittedDaysAgo = status === "PENDING" ? randInt(rng, 0, 14) : randInt(rng, 5, 300);
@@ -499,7 +502,7 @@ export function generateAll() {
   const apps: MarketApp[] = [];
   for (let i = 0; i < NUM_APPS; i++) {
     const sc = pick(rng, APP_SCENARIOS);
-    const industries = sc.industries;
+    const industries = [...sc.industries] as string[];
     const vendor = pick(rng, ["智云科技", "九州 AI", "蓝海智能", "百川数智", "中科云脑", "海创智链", "鼎信 AI", "锐新数智", "未来科技", "卓越智能"]);
     const priceType = pickWeighted(rng, [
       { item: "FREE", weight: 1.5 },
