@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>大中矿业 · AI 法务审核智能体</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F1E8;
+  --bg-2:#FAF7EE;
+  --paper:#FFFFFF;
+  --paper-hover:#FBF8F0;
+  --paper-soft:#F8F5EB;
+  --line:#E5E0D0;
+  --line-2:#D6D0BC;
+  --line-3:#C2BCA5;
+  --shadow-sm:0 1px 3px rgba(72,55,20,.05),0 1px 2px rgba(72,55,20,.04);
+  --shadow-md:0 2px 8px rgba(72,55,20,.06),0 1px 3px rgba(72,55,20,.05);
+  --shadow-lg:0 8px 28px rgba(72,55,20,.08),0 2px 6px rgba(72,55,20,.05);
+
+  --text:#1A1A1A;
+  --text-2:#4A4A48;
+  --text-3:#84827C;
+  --text-4:#B3AFA0;
+  --text-5:#D5D0BD;
+
+  --primary:#1E3A2E;
+  --primary-2:#2D5A47;
+  --primary-soft:rgba(30,58,46,.08);
+  --primary-bg:#EDF1EE;
+
+  --gold:#8B6F47;
+  --gold-2:#A88A50;
+  --gold-3:#C9A961;
+  --gold-soft:rgba(139,111,71,.1);
+  --gold-bg:#F4EFE3;
+
+  --red:#9F1239;
+  --red-2:#BE123C;
+  --red-soft:rgba(159,18,57,.1);
+  --red-bg:#FBEEF1;
+
+  --amber:#B45309;
+  --amber-2:#D97706;
+  --amber-soft:rgba(180,83,9,.1);
+  --amber-bg:#FCF5E8;
+
+  --green:#166534;
+  --green-2:#15803D;
+  --green-soft:rgba(22,101,52,.1);
+  --green-bg:#EDF5EE;
+
+  --blue:#1E40AF;
+  --blue-soft:rgba(30,64,175,.1);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.6;letter-spacing:.005em;font-feature-settings:'tnum'}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(at 0% 0%,rgba(139,111,71,.06) 0%,transparent 50%),radial-gradient(at 100% 100%,rgba(30,58,46,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:5px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:var(--line-3)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes highlightPulse{0%{background:var(--gold-bg);box-shadow:0 0 0 3px rgba(139,111,71,.25)}100%{background:transparent;box-shadow:0 0 0 0 transparent}}
+@keyframes scan{0%{left:-30%}100%{left:130%}}
+
+/* ─── TOP BAR ─────────────────────────────── */
+.topbar{height:60px;background:linear-gradient(180deg,var(--paper) 0%,var(--bg-2) 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:relative;z-index:30;box-shadow:var(--shadow-sm)}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent 0%,var(--gold) 30%,var(--gold) 70%,transparent 100%);opacity:.4}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Noto Serif SC',serif;font-weight:700;font-size:18px;box-shadow:0 2px 8px rgba(30,58,46,.25),inset 0 1px 0 rgba(255,255,255,.15);position:relative}
+.brand-mark::after{content:"";position:absolute;inset:-3px;border:1px solid var(--gold);border-radius:50%;opacity:.55}
+.brand-text{display:flex;flex-direction:column;gap:2px}
+.brand-text .l1{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;color:var(--text);letter-spacing:2.5px}
+.brand-text .l1 .sep{color:var(--gold);margin:0 6px;font-weight:400}
+.brand-text .l2{font-size:9px;color:var(--text-3);letter-spacing:3.5px;text-transform:uppercase;font-weight:500}
+.top-status{display:flex;align-items:center;gap:14px}
+.ts-pill{display:flex;align-items:center;gap:7px;padding:6px 12px;background:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:11px;color:var(--text-2)}
+.ts-pill .dot{width:6px;height:6px;border-radius:50%}
+.ts-pill .dot.live{background:var(--green);box-shadow:0 0 0 2px rgba(22,101,52,.15)}
+.ts-pill b{color:var(--text);font-family:'JetBrains Mono',monospace;font-weight:600}
+.user{display:flex;align-items:center;gap:9px;padding:4px 4px 4px 12px;border:1px solid var(--line);background:var(--paper);border-radius:20px;font-size:11px;color:var(--text-2)}
+.user .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold-2),var(--gold-3));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Noto Serif SC',serif}
+
+/* ─── LAYOUT ─────────────────────────────── */
+.layout{display:grid;grid-template-columns:280px 1fr 400px;height:calc(100vh - 60px);gap:1px;background:var(--line);position:relative;z-index:1}
+.col{background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.col-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border-bottom:1px solid var(--line)}
+.col-head .lbl{font-family:'Noto Serif SC',serif;font-size:13px;font-weight:600;color:var(--primary);letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.col-head .lbl::before{content:"";width:3px;height:13px;background:var(--gold);border-radius:1px}
+.col-head .sub{font-size:10px;color:var(--text-3);letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.col-body{flex:1;overflow-y:auto;padding:16px 14px 110px}
+
+/* ─── LEFT SIDEBAR ─────────────────────────────── */
+.sec{margin-bottom:20px}
+.sec-tt{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px}
+.sec-tt .nm{font-size:10px;letter-spacing:2.5px;color:var(--primary);font-weight:700;text-transform:uppercase;font-family:'Noto Serif SC',serif}
+.sec-tt .nm::before{content:"§ ";color:var(--gold);font-weight:400}
+.sec-tt .ct{font-size:10px;color:var(--text-3);font-family:'JetBrains Mono',monospace;font-weight:500}
+
+/* Upload zone */
+.upload-zone{position:relative;border:1.5px dashed var(--line-2);border-radius:10px;padding:18px 14px;text-align:center;background:var(--paper);cursor:pointer;transition:.2s;overflow:hidden}
+.upload-zone:hover{border-color:var(--gold);background:var(--gold-bg)}
+.upload-zone.dragover{border-color:var(--primary);background:var(--primary-bg);border-style:solid}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.upload-icon{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1px solid var(--gold);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:8px;font-family:'Noto Serif SC',serif;font-weight:700}
+.upload-title{font-size:12px;color:var(--text);font-weight:600;margin-bottom:3px;font-family:'Noto Serif SC',serif;letter-spacing:.5px}
+.upload-hint{font-size:10px;color:var(--text-3);line-height:1.6}
+.upload-hint code{font-family:'JetBrains Mono',monospace;background:var(--paper-soft);padding:1px 5px;border-radius:3px;color:var(--text-2);font-size:9.5px}
+
+/* contract files */
+.file-list{display:flex;flex-direction:column;gap:5px}
+.file-tab{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;border:1px solid var(--line);background:var(--paper);cursor:pointer;transition:.15s;width:100%;text-align:left;font-family:inherit;color:var(--text-2);position:relative}
+.file-tab:hover{background:var(--paper-hover);border-color:var(--line-2)}
+.file-tab.active{background:linear-gradient(95deg,var(--gold-bg),var(--paper));border-color:var(--gold);box-shadow:var(--shadow-sm)}
+.file-tab.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:2px;background:var(--gold);border-radius:0 2px 2px 0}
+.file-tab .fi{width:28px;height:28px;border-radius:6px;background:var(--paper-soft);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;border:1px solid var(--line)}
+.file-tab.active .fi{background:var(--gold-bg);border-color:var(--gold)}
+.file-tab .info{flex:1;min-width:0}
+.file-tab .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.file-tab .meta{font-size:10px;color:var(--text-3);margin-top:1px;font-family:'JetBrains Mono',monospace;font-weight:500}
+.file-tab .file-stat{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-left:4px}
+.file-tab .file-stat.idle{background:var(--text-5)}
+.file-tab .file-stat.running{background:var(--gold);animation:pulse 1s infinite}
+.file-tab .file-stat.done{background:var(--green)}
+.file-tab .file-stat.risk{background:var(--red)}
+.file-tab .preset-mark{position:absolute;top:7px;right:9px;font-size:8.5px;color:var(--gold);font-weight:600;letter-spacing:1px;background:var(--gold-bg);padding:1px 5px;border-radius:3px;border:1px solid rgba(139,111,71,.2)}
+.file-tab .custom-mark{position:absolute;top:7px;right:9px;font-size:8.5px;color:var(--primary);font-weight:600;letter-spacing:1px;background:var(--primary-bg);padding:1px 5px;border-radius:3px;border:1px solid rgba(30,58,46,.2)}
+.file-tab .remove{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;background:var(--paper);border:1px solid var(--line);color:var(--red);cursor:pointer;font-size:11px;display:none;align-items:center;justify-content:center;font-weight:700}
+.file-tab .remove:hover{background:var(--red-bg);border-color:var(--red)}
+.file-tab.is-custom:hover .remove{display:flex}
+
+/* Dashboard */
+.dash{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.dash-cell{padding:12px 13px;border-radius:8px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.dash-cell::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--text-5)}
+.dash-cell.gold::before{background:var(--gold)}
+.dash-cell.red::before{background:var(--red)}
+.dash-cell.amber::before{background:var(--amber)}
+.dash-cell.green::before{background:var(--green)}
+.dash-cell .n{font-size:21px;font-weight:700;font-family:'Noto Serif SC',serif;line-height:1;color:var(--text)}
+.dash-cell .l{font-size:10px;color:var(--text-3);margin-top:4px;letter-spacing:.5px}
+.dash-cell.gold .n{color:var(--gold-2)}
+.dash-cell.red .n{color:var(--red)}
+.dash-cell.amber .n{color:var(--amber)}
+.dash-cell.green .n{color:var(--green)}
+
+/* Action buttons */
+.start-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 12px rgba(30,58,46,.2),inset 0 1px 0 rgba(255,255,255,.1);transition:.2s;margin-bottom:8px;position:relative;overflow:hidden}
+.start-btn::after{content:"";position:absolute;inset:1px;border-radius:7px;border:1px solid rgba(212,175,55,.3);pointer-events:none}
+.start-btn:hover{box-shadow:0 6px 18px rgba(30,58,46,.3),inset 0 1px 0 rgba(255,255,255,.15);transform:translateY(-1px)}
+.start-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.start-btn .ic{font-size:14px}
+.btn-row{display:flex;gap:6px}
+.btn-row button{flex:1;padding:9px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);color:var(--text-2);font-size:11px;font-family:inherit;cursor:pointer;font-weight:500;letter-spacing:.5px;transition:.15s}
+.btn-row button:hover{border-color:var(--gold);color:var(--gold-2);background:var(--gold-bg)}
+.btn-row button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ─── MIDDLE COLUMN ─────────────────────────────── */
+.mid-head{background:var(--bg-2);border-bottom:1px solid var(--line)}
+.c-tabs{display:flex;gap:0;padding:0 22px;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--bg)}
+.c-tabs::-webkit-scrollbar{height:0}
+.c-tab{padding:11px 18px;font-size:12px;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:.15s;font-weight:500;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.c-tab:hover{color:var(--text)}
+.c-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.c-tab .badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:17px;padding:0 5px;border-radius:9px;font-size:10px;background:var(--paper-soft);color:var(--text-3);font-family:'JetBrains Mono',monospace;border:1px solid var(--line);font-weight:600}
+.c-tab.active .badge{background:var(--primary-bg);color:var(--primary);border-color:rgba(30,58,46,.2)}
+.c-tab.active .badge.red{background:var(--red-bg);color:var(--red);border-color:rgba(159,18,57,.2)}
+
+.cmeta{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;gap:14px}
+.cm-left{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.cm-title{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;letter-spacing:1px}
+.cm-title .seal{display:inline-flex;align-items:center;font-size:9px;padding:2px 7px;background:var(--red-bg);color:var(--red);border:1px solid rgba(159,18,57,.2);border-radius:3px;font-weight:600;letter-spacing:1.5px;font-family:'Noto Sans SC',sans-serif}
+.cm-sub{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:0;font-family:'JetBrains Mono',monospace;font-weight:500;flex-wrap:wrap}
+.cm-sub span{padding-right:14px;margin-right:14px;border-right:1px solid var(--line)}
+.cm-sub span:last-child{border-right:none}
+.cm-right{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.cm-btn{padding:7px 12px;border:1px solid var(--line-2);border-radius:6px;background:var(--paper);color:var(--text-2);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:.15s;font-weight:500}
+.cm-btn:hover{border-color:var(--gold);color:var(--gold-2);background:var(--gold-bg)}
+.cm-btn.primary{background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#fff;border-color:var(--gold);font-weight:600;box-shadow:0 1px 3px rgba(139,111,71,.2)}
+.cm-btn.primary:hover{filter:brightness(1.05);color:#fff}
+.cm-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.progress-bar{height:3px;background:var(--line);position:relative;display:none}
+.progress-bar.show{display:block}
+.progress-bar .pb-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2),var(--gold-3));background-size:200% 100%;animation:shimmer 1.6s linear infinite;width:0;transition:width .5s ease}
+.progress-bar .pb-status{position:absolute;top:6px;left:22px;right:22px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--gold-2);font-family:'JetBrains Mono',monospace;letter-spacing:.5px;font-weight:600}
+.progress-bar .pb-status .left::before{content:"⏵ ";color:var(--gold)}
+
+.legend{display:flex;align-items:center;gap:14px;font-size:10px;color:var(--text-3);padding:9px 22px;background:var(--paper-soft);border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-weight:500}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:8px;height:8px;border-radius:2px}
+.legend-dot.red{background:var(--red)}
+.legend-dot.amber{background:var(--amber)}
+.legend-dot.green{background:var(--green)}
+.legend-dot.gold{background:var(--gold)}
+.legend .tip{margin-left:auto;color:var(--text-3);font-family:'Noto Sans SC',sans-serif}
+.legend .tip b{color:var(--gold-2)}
+
+.contract-viewer{flex:1;overflow-y:auto;background:var(--bg);padding:30px 26px 80px;position:relative}
+.contract-page{max-width:780px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:38px 48px;box-shadow:var(--shadow-md);position:relative;animation:slideUp .35s ease}
+.contract-page::before{content:"";position:absolute;left:8px;top:8px;right:8px;bottom:8px;border:1px solid var(--line);border-radius:4px;pointer-events:none;opacity:.5}
+.contract-header-doc{text-align:center;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid var(--gold)}
+.contract-header-doc::after{content:"";display:block;width:120px;height:1px;background:var(--gold);margin:3px auto 0}
+.contract-header-doc h1{font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;color:var(--text);letter-spacing:6px;margin-bottom:8px}
+.contract-header-doc .doc-sub{font-size:11px;color:var(--text-3);letter-spacing:2px;font-family:'JetBrains Mono',monospace;font-weight:500}
+
+.parties-block{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;padding:16px 18px;background:var(--paper-soft);border:1px solid var(--line);border-radius:6px}
+.party{font-size:12px;line-height:1.95}
+.party .role{font-family:'Noto Serif SC',serif;font-size:11px;color:var(--gold-2);letter-spacing:1.5px;margin-bottom:6px;font-weight:600}
+.party .nm{font-weight:700;color:var(--text);font-family:'Noto Serif SC',serif;font-size:13.5px;margin-bottom:6px;letter-spacing:.5px}
+.party .row{display:flex;color:var(--text-2)}
+.party .row .k{color:var(--text-3);width:64px;flex-shrink:0}
+
+.clause{margin-bottom:14px;padding:14px 16px;border-radius:6px;background:var(--paper);border:1px solid var(--line);transition:.2s;position:relative}
+.clause:hover{background:var(--paper-hover);border-color:var(--line-2);box-shadow:var(--shadow-sm)}
+.clause.has-risk{border-left:3px solid var(--text-5);padding-left:15px}
+.clause.has-risk.risk-high{border-left-color:var(--red)}
+.clause.has-risk.risk-medium{border-left-color:var(--amber)}
+.clause.has-risk.risk-low{border-left-color:var(--green)}
+.clause.related{background:var(--gold-bg);border-color:var(--gold);box-shadow:0 0 0 1px rgba(139,111,71,.18)}
+.clause.active-highlight{animation:highlightPulse 1.8s ease-out;background:var(--gold-bg)!important;border-color:var(--gold)!important}
+.clause-num{font-family:'Noto Serif SC',serif;font-weight:700;color:var(--primary);font-size:13px;margin-right:7px}
+.clause-h{font-weight:600;color:var(--text);font-size:13.5px;margin-bottom:7px;display:flex;align-items:center;gap:8px;font-family:'Noto Serif SC',serif;letter-spacing:.5px}
+.clause-marker{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;font-size:9.5px;border-radius:10px;font-weight:600;letter-spacing:.5px;margin-left:auto;font-family:'Noto Sans SC',sans-serif}
+.clause-marker.high{background:var(--red-bg);color:var(--red);border:1px solid rgba(159,18,57,.18)}
+.clause-marker.medium{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(180,83,9,.18)}
+.clause-marker.low{background:var(--green-bg);color:var(--green);border:1px solid rgba(22,101,52,.18)}
+.clause-text{font-size:13px;color:var(--text-2);line-height:1.9;text-align:justify;text-justify:inter-ideograph}
+.clause-text b{color:var(--text);font-weight:600}
+.clause-text .risk-mark{background:linear-gradient(180deg,transparent 60%,var(--amber-bg) 60%);padding:0 2px;color:var(--text);cursor:pointer;border-bottom:1px dashed var(--amber);transition:.15s;font-weight:500}
+.clause-text .risk-mark[data-level=high]{background:linear-gradient(180deg,transparent 60%,var(--red-bg) 60%);border-bottom-color:var(--red)}
+.clause-text .risk-mark[data-level=low]{background:linear-gradient(180deg,transparent 60%,var(--green-bg) 60%);border-bottom-color:var(--green)}
+.clause-text .risk-mark:hover{background:var(--gold-bg);border-bottom-color:var(--gold)}
+.clause-text .accepted-del{text-decoration:line-through;color:var(--red);opacity:.7;background:rgba(159,18,57,.06);padding:1px 4px;border-radius:2px}
+.clause-text .accepted-ins{background:var(--green-bg);color:var(--green);padding:1px 5px;border-radius:2px;border-bottom:1px solid var(--green);font-weight:500;margin-left:2px}
+
+.empty-doc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px;color:var(--text-3);text-align:center}
+.empty-doc .ico{font-size:46px;margin-bottom:16px;opacity:.5;color:var(--gold-2);font-family:'Noto Serif SC',serif}
+.empty-doc h3{font-family:'Noto Serif SC',serif;font-size:16px;color:var(--text-2);margin-bottom:8px;font-weight:600;letter-spacing:1px}
+.empty-doc p{font-size:12px;color:var(--text-3);max-width:420px;line-height:1.85}
+.empty-doc .upload-cta{margin-top:18px;padding:9px 18px;background:var(--paper);border:1px solid var(--gold);color:var(--gold-2);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.empty-doc .upload-cta:hover{background:var(--gold-bg)}
+
+/* Sign Block */
+.sign-block{margin-top:34px;padding:20px 24px;background:var(--paper-soft);border:1px dashed var(--line-2);border-radius:6px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:12px}
+.sign-col{display:flex;flex-direction:column;gap:11px}
+.sign-row{display:flex;color:var(--text-2)}
+.sign-row .k{color:var(--text-3);width:78px;font-family:'Noto Serif SC',serif}
+.sign-row .v{flex:1;border-bottom:1px dashed var(--line-2);min-height:18px;font-family:'Noto Serif SC',serif;color:var(--text);font-weight:500}
+
+/* ─── RIGHT COLUMN: RISK PANEL ─────────────────────────────── */
+.right-tabs{display:flex;gap:0;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+.rt{padding:11px 12px;font-size:11.5px;cursor:pointer;color:var(--text-3);border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;font-weight:500;background:none;border-left:none;border-right:none;border-top:none;font-family:inherit;transition:.15s}
+.rt:hover{color:var(--text)}
+.rt.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.rt .num{font-family:'JetBrains Mono',monospace;font-weight:700;padding:1px 6px;border-radius:8px;background:var(--paper-soft);color:var(--text-3);font-size:10px;border:1px solid var(--line)}
+.rt.active .num{background:var(--primary-bg);color:var(--primary);border-color:rgba(30,58,46,.2)}
+
+.risk-list{flex:1;overflow-y:auto;padding:13px;padding-bottom:90px}
+.empty-risk{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 22px;color:var(--text-3);text-align:center}
+.empty-risk .ico{font-size:42px;margin-bottom:12px;opacity:.4;font-family:'Noto Serif SC',serif;color:var(--gold-2)}
+.empty-risk h3{font-family:'Noto Serif SC',serif;font-size:13px;color:var(--text-2);margin-bottom:6px;letter-spacing:.5px}
+.empty-risk p{font-size:11px;line-height:1.75;color:var(--text-3);max-width:280px}
+
+.risk-card{background:var(--paper);border:1px solid var(--line);border-radius:8px;margin-bottom:10px;overflow:hidden;animation:slideIn .35s ease;transition:.2s;position:relative;box-shadow:var(--shadow-sm)}
+.risk-card:hover{border-color:var(--line-2);box-shadow:var(--shadow-md)}
+.risk-card.related{border-color:var(--gold);box-shadow:0 0 0 1px rgba(139,111,71,.2),var(--shadow-md)}
+.risk-card.accepted{opacity:.75}
+.risk-card.accepted::before{content:"✓ 已采纳";position:absolute;top:9px;right:9px;font-size:9px;color:#fff;background:var(--green-2);padding:2px 7px;border-radius:9px;font-weight:600;letter-spacing:.5px;z-index:2}
+.risk-card.rejected{opacity:.55}
+.risk-card.rejected::before{content:"✕ 已拒绝";position:absolute;top:9px;right:9px;font-size:9px;color:var(--text-2);background:var(--paper-soft);border:1px solid var(--line);padding:1px 7px;border-radius:9px;font-weight:600;z-index:2}
+
+.rc-head{padding:12px 13px 10px;display:flex;align-items:flex-start;gap:8px;cursor:pointer;transition:.15s;background:linear-gradient(180deg,var(--paper),var(--paper-soft) 200%)}
+.rc-head:hover{background:var(--paper-hover)}
+.rc-no{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);font-weight:700;padding:2px 6px;background:var(--paper-soft);border:1px solid var(--line);border-radius:3px;flex-shrink:0;line-height:1.35}
+.rc-lvl{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9px;font-size:9.5px;font-weight:700;letter-spacing:.5px;flex-shrink:0;border:1px solid}
+.rc-lvl.high{background:var(--red-bg);color:var(--red);border-color:rgba(159,18,57,.2)}
+.rc-lvl.medium{background:var(--amber-bg);color:var(--amber);border-color:rgba(180,83,9,.2)}
+.rc-lvl.low{background:var(--green-bg);color:var(--green);border-color:rgba(22,101,52,.2)}
+.rc-info{flex:1;min-width:0}
+.rc-tt{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:4px;font-family:'Noto Serif SC',serif;letter-spacing:.3px}
+.rc-meta{font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace}
+.rc-meta .src{padding:1px 6px;background:var(--paper-soft);border:1px solid var(--line);border-radius:8px;font-size:9px;color:var(--text-2);font-family:'Noto Sans SC',sans-serif;letter-spacing:.5px}
+.rc-chevron{color:var(--text-3);transition:.2s;font-size:11px;flex-shrink:0;margin-top:3px}
+.risk-card.open .rc-chevron{transform:rotate(180deg);color:var(--primary)}
+
+.rc-body{padding:0 13px 12px;display:none;animation:fadeIn .3s ease}
+.risk-card.open .rc-body{display:block}
+.rc-section{margin-bottom:10px}
+.rc-section .rs-lbl{font-size:9.5px;letter-spacing:1.5px;color:var(--primary);font-weight:700;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:5px;font-family:'Noto Serif SC',serif}
+.rc-section .rs-lbl::before{content:"";width:8px;height:1.5px;background:var(--gold)}
+.rc-section .rs-content{font-size:11.5px;color:var(--text-2);line-height:1.75;padding:9px 11px;background:var(--paper-soft);border-radius:5px;border-left:2px solid var(--line-2)}
+.rc-section .rs-content b{color:var(--text);font-weight:600}
+.rc-section.original .rs-content{border-left-color:var(--text-4);font-family:'Noto Serif SC',serif;color:var(--text-2);font-style:italic}
+.rc-section.suggest .rs-content{border-left-color:var(--gold);background:var(--gold-bg);color:var(--text)}
+.rc-section.suggest .rs-content b{color:var(--gold-2)}
+.rc-section.basis .rs-content{border-left-color:var(--blue);background:rgba(30,64,175,.04);color:var(--text-2);font-size:10.5px}
+.rc-section.basis .rs-content b{color:var(--blue)}
+
+.rc-actions{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.rc-btn{padding:7px 11px;font-size:11px;border-radius:6px;border:1px solid var(--line-2);background:var(--paper);color:var(--text-2);cursor:pointer;font-family:inherit;font-weight:500;display:flex;align-items:center;gap:5px;transition:.15s}
+.rc-btn:hover{border-color:var(--gold);color:var(--gold-2);background:var(--gold-bg)}
+.rc-btn.accept{background:linear-gradient(135deg,var(--green-2),var(--green));color:#fff;border-color:var(--green)}
+.rc-btn.accept:hover{filter:brightness(1.05);color:#fff}
+.rc-btn.locate{background:var(--gold-bg);color:var(--gold-2);border-color:var(--gold)}
+.rc-btn .ic{font-size:11px}
+
+/* Q&A composer */
+.qa-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(180deg,transparent,var(--bg) 30%);border-top:1px solid var(--line);display:flex;gap:7px;align-items:center}
+.qa-input{flex:1;background:var(--paper);border:1px solid var(--line-2);border-radius:7px;padding:9px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:.15s}
+.qa-input:focus{border-color:var(--gold);background:var(--paper);box-shadow:0 0 0 3px var(--gold-soft)}
+.qa-input::placeholder{color:var(--text-4)}
+.qa-send{width:34px;height:34px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));border-radius:7px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 6px rgba(30,58,46,.2)}
+.qa-send:hover{filter:brightness(1.1)}
+
+/* Q&A messages */
+.qa-msg{padding:10px 13px;border-radius:8px;margin-bottom:9px;font-size:11.5px;line-height:1.75;animation:fadeIn .3s ease}
+.qa-msg.user{background:var(--paper);border:1px solid var(--line);color:var(--text);box-shadow:var(--shadow-sm)}
+.qa-msg.ai{background:linear-gradient(135deg,var(--paper),var(--gold-bg) 200%);border:1px solid var(--gold);color:var(--text-2);position:relative;margin-top:14px;box-shadow:var(--shadow-sm)}
+.qa-msg.ai::before{content:"⚖ AI · 法务";position:absolute;top:-9px;left:12px;font-size:9px;background:var(--bg);color:var(--gold-2);padding:1px 8px;border-radius:8px;font-weight:600;letter-spacing:1px;border:1px solid var(--gold);font-family:'Noto Serif SC',serif}
+.qa-msg b{color:var(--text);font-weight:600}
+.qa-typing{display:inline-flex;gap:4px;padding:6px 0}
+.qa-typing span{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse .8s infinite}
+.qa-typing span:nth-child(2){animation-delay:.15s}
+.qa-typing span:nth-child(3){animation-delay:.3s}
+
+/* Selection menu */
+.sel-menu{position:fixed;display:none;background:var(--paper);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 32px rgba(0,0,0,.12),0 0 0 1px rgba(139,111,71,.1);padding:4px;z-index:100;animation:fadeIn .15s ease}
+.sel-menu.show{display:flex;gap:2px}
+.sel-menu button{padding:7px 12px;background:transparent;border:none;color:var(--text);font-size:11px;cursor:pointer;border-radius:5px;display:flex;align-items:center;gap:5px;font-family:inherit;white-space:nowrap;font-weight:500}
+.sel-menu button:hover{background:var(--gold-bg);color:var(--gold-2)}
+
+/* Modal */
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(35,30,18,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+.modal-mask.show{display:flex;animation:fadeIn .2s ease}
+.modal{width:720px;max-width:94vw;max-height:90vh;background:var(--paper);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.18),0 0 0 1px rgba(139,111,71,.1);position:relative}
+.modal::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--gold),var(--primary))}
+.modal-head{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--bg-2)}
+.modal-head .tt{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:700;color:var(--primary);letter-spacing:2.5px;display:flex;align-items:center;gap:11px}
+.modal-head .tt::before{content:"";width:3px;height:20px;background:var(--gold);border-radius:2px}
+.modal-close{width:30px;height:30px;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--text-2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.modal-body{flex:1;overflow-y:auto;padding:24px 28px;background:var(--bg)}
+.modal-foot{padding:14px 26px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:var(--bg-2)}
+
+.so-sec{margin-bottom:20px}
+.so-tt{font-family:'Noto Serif SC',serif;font-size:13.5px;color:var(--primary);font-weight:700;margin-bottom:10px;letter-spacing:1.5px;display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.so-tt::before{content:"";width:3px;height:14px;background:var(--gold)}
+.so-content{padding:13px 16px;background:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:12px;line-height:1.85;color:var(--text-2);box-shadow:var(--shadow-sm)}
+.so-content b{color:var(--text);font-weight:600}
+.so-content .strong{color:var(--gold-2);font-weight:700}
+.so-table{width:100%;font-size:11px;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.so-table th,.so-table td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.so-table th{background:var(--paper-soft);color:var(--primary);font-weight:600;letter-spacing:1px;font-size:10px;font-family:'Noto Serif SC',serif}
+.so-table tr:last-child td{border-bottom:none}
+.so-table tr:nth-child(even) td{background:var(--bg-2)}
+.so-table td{color:var(--text-2)}
+.so-conclusion{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.so-cc{padding:11px;border-radius:6px;border:1.5px solid;text-align:center;transition:.15s;background:var(--paper)}
+.so-cc.approve{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.so-cc.revise{border-color:var(--gold);background:var(--gold-bg);color:var(--gold-2)}
+.so-cc.reject{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.so-cc .ic{font-size:20px;font-family:'Noto Serif SC',serif;font-weight:700}
+.so-cc .l{font-size:11px;margin-top:3px;font-weight:600;letter-spacing:1px;font-family:'Noto Serif SC',serif}
+.so-cc.selected{outline:2px solid;outline-offset:3px;box-shadow:var(--shadow-md)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--primary);color:#fff;padding:11px 16px;border-radius:8px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(30,58,46,.3);z-index:300;display:none;align-items:center;gap:8px;animation:slideIn .25s ease;letter-spacing:.5px}
+.toast.show{display:flex}
+.toast .ic{font-size:14px;color:var(--gold-3)}
+.toast.error{background:var(--red)}
+
+@media(max-width:1280px){
+  .layout{grid-template-columns:260px 1fr 360px}
+  .contract-viewer{padding:24px 18px 80px}
+  .contract-page{padding:30px 36px}
+}
+@media(max-width:1100px){
+  .layout{grid-template-columns:240px 1fr 340px}
+}
+</style>
+</head>
+<body>
+
+<!-- ────── TOP BAR ────── -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">矿</div>
+    <div class="brand-text">
+      <div class="l1">大中矿业<span class="sep">·</span>AI 法务审核智能体</div>
+      <div class="l2">DAZHONG MINING · LEGAL AI</div>
+    </div>
+  </div>
+  <div class="top-status">
+    <div class="ts-pill"><span class="dot live"></span>引擎在线</div>
+    <div class="ts-pill">法规库 <b>3,286</b></div>
+    <div class="ts-pill">案例库 <b>12,800</b></div>
+    <div class="user"><span>张律师 · 法务总监</span><span class="avatar">Z</span></div>
+  </div>
+</header>
+
+<!-- ────── MAIN LAYOUT ────── -->
+<div class="layout">
+
+  <!-- LEFT COL -->
+  <div class="col">
+    <div class="col-head">
+      <span class="lbl">工作台</span>
+      <span class="sub" id="curTime"></span>
+    </div>
+    <div class="col-body">
+      <!-- Upload -->
+      <div class="sec">
+        <div class="sec-tt"><span class="nm">上传合同</span></div>
+        <div class="upload-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".txt,.docx,.pdf,.doc,.md">
+          <div class="upload-icon">↑</div>
+          <div class="upload-title">点击选择 / 拖拽上传</div>
+          <div class="upload-hint"><code>.txt</code> 全文解析 · <code>.docx</code> <code>.pdf</code> 文件名识别</div>
+        </div>
+      </div>
+
+      <!-- Contracts library -->
+      <div class="sec">
+        <div class="sec-tt"><span class="nm">合同库</span><span class="ct" id="ctCt">4 件</span></div>
+        <div class="file-list" id="fileTabs"></div>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="sec">
+        <div class="sec-tt"><span class="nm">审查仪表盘</span><span class="ct">实时</span></div>
+        <div class="dash">
+          <div class="dash-cell gold"><div class="n" id="dRisk">—</div><div class="l">总风险数</div></div>
+          <div class="dash-cell red"><div class="n" id="dHigh">—</div><div class="l">高风险</div></div>
+          <div class="dash-cell amber"><div class="n" id="dMed">—</div><div class="l">中风险</div></div>
+          <div class="dash-cell green"><div class="n" id="dProg">0%</div><div class="l">审查进度</div></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <button class="start-btn" id="startBtn"><span class="ic">▶</span><span id="startTxt">启动 AI 法务审核</span></button>
+      <div class="btn-row">
+        <button onclick="resetReview()" id="resetBtn">重置</button>
+        <button onclick="openSignoff()" id="signBtn">签批意见</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE COL -->
+  <div class="col">
+    <div class="mid-head">
+      <div class="c-tabs" id="cTabs"></div>
+      <div class="cmeta">
+        <div class="cm-left">
+          <div class="cm-title" id="cTitle">耐磨钢球及衬板年度集中采购合同<span class="seal">密级 · 内部</span></div>
+          <div class="cm-sub" id="cSub"><span>编号 PUR-2025-0136</span><span>金额 ¥6,800万</span><span>页数 18</span><span>字数 8,452</span></div>
+        </div>
+        <div class="cm-right">
+          <button class="cm-btn" id="dlContractBtn" onclick="downloadContract()"><span>⇩</span>下载合同</button>
+          <button class="cm-btn primary" id="dlReportBtn" onclick="downloadReport()" disabled><span>⇩</span>下载审查报告</button>
+        </div>
+      </div>
+      <div class="progress-bar" id="progBar">
+        <div class="pb-fill" id="pbFill"></div>
+        <div class="pb-status"><span class="left" id="pbLeft">待启动</span><span id="pbRight">0%</span></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot red"></span>高风险</span>
+      <span class="legend-item"><span class="legend-dot amber"></span>中风险</span>
+      <span class="legend-item"><span class="legend-dot green"></span>低风险/已通过</span>
+      <span class="legend-item"><span class="legend-dot gold"></span>AI审查标注</span>
+      <span class="tip">💡 选中正文 → <b>AI解读 / 查法规 / 起草替代</b></span>
+    </div>
+    <div class="contract-viewer" id="cView"></div>
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="col">
+    <div class="col-head">
+      <span class="lbl">审查结果</span>
+      <span class="sub" id="rcStatus">待审核</span>
+    </div>
+    <div class="right-tabs">
+      <button class="rt active" data-tab="all">全部 <span class="num" id="tAll">0</span></button>
+      <button class="rt" data-tab="high">高 <span class="num" id="tHi">0</span></button>
+      <button class="rt" data-tab="medium">中 <span class="num" id="tMd">0</span></button>
+      <button class="rt" data-tab="low">低 <span class="num" id="tLo">0</span></button>
+      <button class="rt" data-tab="qa">💬 对话</button>
+    </div>
+    <div class="risk-list" id="rList"></div>
+    <div class="qa-bar">
+      <input class="qa-input" id="qaInput" placeholder="追问条款、查法规、要修改建议..." onkeydown="if(event.key==='Enter')sendQa()">
+      <button class="qa-send" onclick="sendQa()">▶</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Selection menu -->
+<div class="sel-menu" id="selMenu">
+  <button onclick="selAction('explain')"><span>🔍</span>AI解读</button>
+  <button onclick="selAction('law')"><span>⚖</span>查法规</button>
+  <button onclick="selAction('draft')"><span>✍</span>起草替代</button>
+  <button onclick="selAction('risk')"><span>⚠</span>评估风险</button>
+</div>
+
+<!-- Signoff modal -->
+<div class="modal-mask" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="tt">法务部审查签批意见书</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="cm-btn" onclick="closeModal()">关闭</button>
+      <button class="cm-btn primary" onclick="downloadSignoff()">⇩ 下载签批意见书 (.txt)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="ic">●</span><span id="toastMsg"></span></div>
+
+<script>
+/* ═══════════════ DATA: 4 预设合同 ═══════════════ */
+const PRESET_CONTRACTS = {
+  purchase: {
+    id:'purchase', icon:'⛁', type:'采购合同', code:'PUR-2025-0136', isPreset:true,
+    title:'耐磨钢球及衬板年度集中采购合同',
+    amount:'¥6,800万', pages:18, words:8452,
+    parties:{
+      a:{role:'甲方（需方）',name:'大中矿业股份有限公司',regNo:'91150800705144800B',legal:'林甫生',addr:'内蒙古巴彦淖尔市乌拉特前旗',contact:'王建华  187-xxxx-1102'},
+      b:{role:'乙方（供方）',name:'安徽恒达耐磨材料有限公司',regNo:'91340100MA2TXXXX0A',legal:'陈志明',addr:'安徽省合肥市经开区',contact:'李海涛  138-xxxx-3088'},
+    },
+    body:[
+      {n:'第1条',t:'合同标的',c:'乙方向甲方供应<b>耐磨钢球</b>（HRC≥60，规格Φ80mm/Φ100mm/Φ120mm）及<b>球磨机衬板</b>（高铬铸铁、厚度≥80mm），用于甲方旗下乌拉特前旗东五份子链矿、四方井铁矿球磨车间。年度供货总量约 <b>4,500 吨</b>。'},
+      {n:'第2条',t:'合同期限',c:'本合同有效期自 <b>2025年4月1日 至 2026年3月31日</b>。期满前30日双方协商续约事宜，未续约的合同自动终止。'},
+      {n:'第5条',t:'质量标准',c:'钢球硬度 <span class="risk-mark" data-rid="r1" data-level="medium">HRC≥60</span>，衬板硬度 HRC≥55。<span class="risk-mark" data-rid="r1" data-level="medium">质量异议期为货到现场15日内</span>。'},
+      {n:'第6条',t:'交货方式',c:'乙方按月供货计划送货至甲方矿区指定仓库（运费由乙方承担），含装卸服务。每月供货计划由甲方在月底前书面通知乙方。'},
+      {n:'第8条',t:'价格与调价机制',c:'本合同单价以签约时确定为基准，<span class="risk-mark" data-rid="r2" data-level="medium">铬铁/废钢价格波动超±5%时双方协商调价</span>。'},
+      {n:'第9条',t:'付款方式',c:'月结，每月25日对账后甲方在 <b>次月30日内</b> 支付当月货款 95%，余款 5% 作为质量保证金，自交货验收合格后 <b>12个月</b> 无质量异议返还。'},
+      {n:'第10条',t:'违约责任',c:'乙方未按合同约定时间交货的，<span class="risk-mark" data-rid="r3" data-level="high">每日按延期金额的 0.5% 支付违约金，违约金累计不超过合同总额 5%</span>。乙方供货产品经质量异议确认不合格的，甲方有权按 1:1 退换货并要求 48 小时内补货。'},
+      {n:'第12条',t:'争议解决',c:'合同履行中发生争议，由双方协商解决；协商不成的，<span class="risk-mark" data-rid="r4" data-level="medium">向甲方所在地（内蒙古乌拉特前旗）人民法院提起诉讼</span>。'},
+      {n:'第15条',t:'保密条款',c:'<span class="risk-mark" data-rid="r5" data-level="high">本合同正文未约定保密义务条款</span>。'},
+      {n:'第16条',t:'不可抗力',c:'因不可抗力导致一方不能履行合同的，双方均不承担违约责任，<span class="risk-mark" data-rid="r6" data-level="medium">具体认定情形和通知义务由双方协商</span>。'},
+      {n:'第18条',t:'安全责任',c:'乙方应确保所供产品符合 <b>国家矿山安全标准</b>，并配合甲方进行入厂检验。乙方对产品在使用过程中因产品质量缺陷造成的人员伤害承担相应法律责任。'},
+      {n:'第20条',t:'合同解除',c:'<span class="risk-mark" data-rid="r7" data-level="high">甲方可随时书面通知乙方解除本合同</span>；乙方有重大违约行为时甲方可立即解除并要求乙方赔偿损失。'},
+      {n:'第22条',t:'知识产权',c:'<span class="risk-mark" data-rid="r8" data-level="low">本合同未约定第三方知识产权侵权时的责任承担</span>。'},
+    ],
+    risks:[
+      {id:'r1', level:'medium', no:'R-01', clause:'第5条', anchor:'5', title:'质量检测方法和异议期限不明确', src:'条款合规',
+        original:'"钢球硬度HRC≥60。质量异议期为货到现场15日内。"',
+        suggest:'增加："硬度检测按GB/T 230.1《金属材料洛氏硬度试验》执行，测试点位为钢球赤道面上120°均布取3点取平均值，单点允许偏差不超过2HRC。质量异议期延长至 <b>30日</b>，发现潜在缺陷的异议期为<b>使用6个月内</b>。"',
+        basis:'<b>《民法典》第617条</b>「买受人收到标的物时应当在约定的检验期间内检验」、<b>GB/T 17445-2009</b>《铸造磨球》第6.4条'
+      },
+      {id:'r2', level:'medium', no:'R-02', clause:'第8条', anchor:'8', title:'调价机制不完善，缺三大要素', src:'条款合规',
+        original:'"铬铁/废钢价格波动超±5%时双方协商调价。"',
+        suggest:'明确以下三要素：①<b>价格基准源</b>："以上海有色金属网SMM铬铁报价为基准"；②<b>生效时间</b>："调价通知后下一批次订单生效"；③<b>调价上限</b>："累计调价幅度不超过±15%"。',
+        basis:'<b>《民法典》第511条</b>「合同内容应当明确」、公司《合同管理制度》第14条'
+      },
+      {id:'r3', level:'high', no:'R-03', clause:'第10条', anchor:'10', title:'违约责任严重失衡 - 缺失甲方迟付违约条款', src:'风险识别',
+        original:'"乙方未按合同约定时间交货的，每日按延期金额的0.5%支付违约金，违约金累计不超过合同总额5%。"',
+        suggest:'增加甲方迟付违约条款："<b>甲方迟延付款的，每迟延一日按迟延金额的 0.05% 向乙方支付违约金</b>。" 单方违约条款可能被法院认定为格式条款无效。',
+        basis:'<b>《民法典》第497条</b>「格式条款」、<b>第585条</b>「迟延履行违约金」'
+      },
+      {id:'r4', level:'medium', no:'R-04', clause:'第12条', anchor:'12', title:'诉讼管辖法院约定不明', src:'权利义务',
+        original:'"向甲方所在地（内蒙古乌拉特前旗）人民法院提起诉讼。"',
+        suggest:'建议改为更清晰的"<b>合同履行地（内蒙古巴彦淖尔市乌拉特前旗）人民法院管辖</b>"，避免乙方主张甲方所在地与实际履行地不一致。',
+        basis:'<b>《民事诉讼法》第35条</b>「协议管辖」、<b>第34条</b>「合同纠纷管辖」'
+      },
+      {id:'r5', level:'high', no:'R-05', clause:'第15条', anchor:'15', title:'缺失保密条款 - 商业秘密暴露风险', src:'风险识别',
+        original:'"本合同正文未约定保密义务条款。"',
+        suggest:'新增第15.x条："<b>乙方对因履约而知悉的甲方生产工艺参数（球磨机转速、装球量、磨矿浓度等）、采购量、定价等信息负有保密义务，保密期限为合同终止后 3 年。违反保密义务的，赔偿甲方因此遭受的全部损失，并支付违约金 50 万元</b>。"',
+        basis:'<b>《反不正当竞争法》第9条</b>「商业秘密保护」、公司《保密管理制度》第8条'
+      },
+      {id:'r6', level:'medium', no:'R-06', clause:'第16条', anchor:'16', title:'不可抗力具体情形和通知义务未明确', src:'条款合规',
+        original:'"因不可抗力导致一方不能履行合同的，双方均不承担违约责任。"',
+        suggest:'补充："不可抗力<b>包括但不限于</b>：地震、洪水、政府禁令、战争、流行病。受影响方应在<b>48小时内书面通知</b>对方，并在<b>14日内提供具有公信力的证明文件</b>。"',
+        basis:'<b>《民法典》第180条</b>「不可抗力」'
+      },
+      {id:'r7', level:'high', no:'R-07', clause:'第20条', anchor:'20', title:'单方解除权无限制 - 索赔风险', src:'权利义务',
+        original:'"甲方可随时书面通知乙方解除本合同。"',
+        suggest:'增加约束条件："<b>任一方非因对方违约解除合同的，应提前 30 日书面通知对方；已下未交订单继续履行；乙方为本合同已备货未下单的，甲方应在解除通知后 15 日内答复是否接收</b>。"',
+        basis:'<b>《民法典》第563条</b>「合同解除」、<b>第566条</b>「解除权行使」'
+      },
+      {id:'r8', level:'low', no:'R-08', clause:'第22条', anchor:'22', title:'未约定知识产权侵权责任', src:'条款合规',
+        original:'"本合同未约定第三方知识产权侵权时的责任承担。"',
+        suggest:'新增："<b>乙方保证所供产品（含外形、工艺）不侵犯第三方知识产权。若发生第三方侵权指控，由乙方独立处理并赔偿甲方因此产生的全部损失（包括但不限于诉讼费、律师费、和解金）</b>。"',
+        basis:'<b>《民法典》第612条</b>「权利瑕疵担保」'
+      },
+      {id:'r9', level:'medium', no:'R-09', clause:'第9条', anchor:'9', title:'质保金返还时点过长', src:'权利义务',
+        original:'"余款5%作为质量保证金，自交货验收合格后12个月无质量异议返还。"',
+        suggest:'考虑到耐磨钢球的实际使用周期，建议将质保金返还期缩短为 <b>6 个月</b>，或采用 <b>分阶段返还（6个月返3%，12个月返2%）</b>，降低乙方资金占用，争取更优惠价格。',
+        basis:'公司《合同管理制度》第19条「质保金管理」、行业惯例'
+      },
+      {id:'r10', level:'low', no:'R-10', clause:'第18条', anchor:'18', title:'未要求MA矿用产品安全标志', src:'矿业合规',
+        original:'"乙方应确保所供产品符合国家矿山安全标准。"',
+        suggest:'增加具体要求："<b>乙方应提供产品的 MA 矿用产品安全标志认证证书（如适用）；产品质量保证书、出厂检验报告每批次随货提供</b>。"',
+        basis:'<b>《矿山安全法》第31条</b>、<b>第36条</b>「MA认证」'
+      },
+    ]
+  },
+  engineering:{
+    id:'engineering', icon:'⚒', type:'工程合同', code:'ENG-2025-0089', isPreset:true,
+    title:'井下采矿工程承包合同',
+    amount:'¥1.86亿', pages:42, words:21680,
+    parties:{
+      a:{role:'发包方',name:'大中矿业股份有限公司',regNo:'91150800705144800B',legal:'林甫生',addr:'内蒙古巴彦淖尔市',contact:'技术部 周振华'},
+      b:{role:'承包方',name:'山东中泰矿业工程有限公司',regNo:'91370900MA3M7XXX2D',legal:'王志远',addr:'山东省泰安市',contact:'孙立军  159-xxxx-7720'},
+    },
+    body:[
+      {n:'第1条',t:'工程概况',c:'四方井铁矿 -380m 中段 <b>井下采矿工程</b>，包括：①采准切割工程（3,200米）；②采场施工（12个采场）；③辅助巷道掘进（1,800米）。工期 <b>36 个月</b>，总价款 <b>1.86 亿元</b>（含税）。'},
+      {n:'第3条',t:'承包方资质',c:'<span class="risk-mark" data-rid="er1" data-level="high">乙方应具备矿山工程施工总承包二级及以上资质，并具备相应的安全生产许可证</span>。'},
+      {n:'第5条',t:'工程款支付',c:'按工程进度分期支付：①开工前预付20%；②主体工程完成50%支付30%；③主体完成支付30%；④<span class="risk-mark" data-rid="er2" data-level="high">竣工验收后支付15%，余5%作为质保金，自验收合格之日起5年返还</span>。'},
+      {n:'第8条',t:'工期与延误',c:'乙方应按合同工期完成工程，<span class="risk-mark" data-rid="er3" data-level="medium">如因甲方原因导致延误，工期相应顺延，但乙方不得主张工期延误损失</span>。乙方非因甲方原因延误工期的，按每日合同价 0.3‰ 支付违约金。'},
+      {n:'第10条',t:'安全责任',c:'<span class="risk-mark" data-rid="er4" data-level="high">乙方对本工程安全生产负全责</span>，包括但不限于人员伤亡、设备损失、第三方损失等。乙方应按规定办理工伤保险并配备专职安全员。'},
+      {n:'第12条',t:'分包管理',c:'<span class="risk-mark" data-rid="er5" data-level="medium">乙方可自行确定分包方并签订分包合同，无需甲方书面同意</span>。乙方对分包方的工作质量和安全负连带责任。'},
+      {n:'第14条',t:'隐蔽工程',c:'隐蔽工程在隐蔽前由乙方书面通知甲方监理工程师验收，<span class="risk-mark" data-rid="er6" data-level="medium">监理未在 24 小时内回复的视为同意</span>。'},
+      {n:'第16条',t:'设计变更',c:'工程设计变更需双方书面确认。<span class="risk-mark" data-rid="er7" data-level="high">变更引起的费用调整按变更工程量×市场单价计算，市场单价由乙方提供报价</span>。'},
+      {n:'第18条',t:'环境保护',c:'乙方应遵守环保相关法律法规，<span class="risk-mark" data-rid="er8" data-level="low">井下采矿产生的废石、尾砂处理方式按行业惯例执行</span>。'},
+      {n:'第20条',t:'保险与赔偿',c:'乙方应自行投保工程一切险、第三方责任险、人员意外险，<span class="risk-mark" data-rid="er9" data-level="high">总保险金额不低于 5,000 万元</span>。'},
+      {n:'第24条',t:'争议解决',c:'本合同争议提交甲方所在地有管辖权的人民法院诉讼解决。'},
+    ],
+    risks:[
+      {id:'er1', level:'high', no:'R-01', clause:'第3条', anchor:'3', title:'承包方资质要求偏低 - 重大施工风险', src:'主体审查',
+        original:'"乙方应具备矿山工程施工总承包二级及以上资质。"',
+        suggest:'根据本工程规模（1.86 亿元、井下 -380m 中段、36 个月工期），建议要求 <b>矿山工程施工总承包一级资质</b>，并增加近 5 年类似项目（井下中段开拓工程 ≥1亿元）2 个以上业绩证明。',
+        basis:'<b>《建筑业企业资质标准》</b>（建市〔2014〕159号）、<b>《建设工程承包合同司法解释》第8条</b>'
+      },
+      {id:'er2', level:'high', no:'R-02', clause:'第5条', anchor:'5', title:'质保金返还期 5 年过长，与法规冲突', src:'风险识别',
+        original:'"余 5% 作为质保金，自验收合格之日起 5 年返还。"',
+        suggest:'根据 <b>《建设工程质量保证金管理办法》</b>（建质〔2017〕138号），质保金留置期最长为 <b>2 年</b>，超出部分约定无效。建议修改为"<b>自验收合格之日起 2 年返还，且质保金总额不超过工程价款 3%</b>"。',
+        basis:'<b>《建设工程质量保证金管理办法》第7条</b>'
+      },
+      {id:'er3', level:'medium', no:'R-03', clause:'第8条', anchor:'8', title:'甲方延误免责条款显失公平', src:'权利义务',
+        original:'"如因甲方原因导致延误，工期相应顺延，但乙方不得主张工期延误损失。"',
+        suggest:'修改："<b>因甲方原因导致工期延误的，工期相应顺延，且乙方有权主张实际产生的窝工费、设备闲置费、人员误工费等直接损失（不含可得利益损失）</b>。"',
+        basis:'<b>《民法典》第577条</b>「违约责任」'
+      },
+      {id:'er4', level:'high', no:'R-04', clause:'第10条', anchor:'10', title:'安全责任"全责"约定过于宽泛', src:'矿业合规',
+        original:'"乙方对本工程安全生产负全责。"',
+        suggest:'细化："<b>乙方对承担施工现场及作业范围内的安全生产负责；甲方负责矿山整体的安全生产管理，并对乙方进行安全监督和技术交底</b>。"',
+        basis:'<b>《矿山安全法》第32条</b>、<b>《安全生产法》第48条</b>'
+      },
+      {id:'er5', level:'medium', no:'R-05', clause:'第12条', anchor:'12', title:'未限制分包行为 - 转包/违法分包风险', src:'风险识别',
+        original:'"乙方可自行确定分包方并签订分包合同，无需甲方书面同意。"',
+        suggest:'修改："<b>乙方分包工程的，应事先取得甲方书面同意；不得将主体工程分包；分包方应具有相应资质；不得多重分包</b>。"',
+        basis:'<b>《建筑法》第29条</b>'
+      },
+      {id:'er6', level:'medium', no:'R-06', clause:'第14条', anchor:'14', title:'隐蔽工程"视为同意"过于严苛', src:'条款合规',
+        original:'"监理未在 24 小时内回复的视为同意。"',
+        suggest:'井下隐蔽工程涉及顶板支护、爆破效果等关键安全要素，建议改为"<b>监理应在 48 小时内验收并回复，如未回复，乙方应再次书面通知后 24 小时未回复方视为同意</b>"。',
+        basis:'<b>《建设工程质量管理条例》第30条</b>'
+      },
+      {id:'er7', level:'high', no:'R-07', clause:'第16条', anchor:'16', title:'设计变更单价由乙方单方报价 - 严重失衡', src:'风险识别',
+        original:'"变更引起的费用调整按变更工程量×市场单价计算，市场单价由乙方提供报价。"',
+        suggest:'修改："<b>变更单价首先适用合同综合单价；合同无类似项的，参考定额并下浮 ×%；双方仍不能达成的，由独立造价咨询机构确认</b>。"',
+        basis:'<b>《建工解释一》第19条</b>「变更价款确定」'
+      },
+      {id:'er8', level:'low', no:'R-08', clause:'第18条', anchor:'18', title:'废石/尾砂处理"行业惯例"约定过于模糊', src:'矿业合规',
+        original:'"井下采矿产生的废石、尾砂处理方式按行业惯例执行。"',
+        suggest:'明确："<b>废石按甲方指定地点堆放并办理转运手续，符合GB 18599-2020；尾砂运至甲方四方井尾矿库；处理过程的环保责任由乙方承担</b>。"',
+        basis:'<b>《固体废物污染环境防治法》第55条</b>'
+      },
+      {id:'er9', level:'high', no:'R-09', clause:'第20条', anchor:'20', title:'保险金额不足 - 单次重大事故难覆盖', src:'风险识别',
+        original:'"总保险金额不低于 5,000 万元。"',
+        suggest:'对于 1.86 亿元井下工程，建议总保险金额提升至 <b>不低于 1 亿元</b>，并明确：①工程一切险按工程造价 100% 投保；②第三方责任险不低于 5,000 万元；③雇主责任险按法定标准。',
+        basis:'<b>《矿山安全法》第40条</b>「保险责任」、行业最佳实践'
+      },
+    ]
+  },
+  enviro:{
+    id:'enviro', icon:'❀', type:'环保治理合同', code:'ENV-2025-0024', isPreset:true,
+    title:'尾矿库环保治理工程合同',
+    amount:'¥3,420万', pages:28, words:13280,
+    parties:{
+      a:{role:'委托方',name:'大中矿业股份有限公司',regNo:'91150800705144800B',legal:'林甫生',addr:'内蒙古巴彦淖尔市',contact:'安环部 刘晓东'},
+      b:{role:'承担方',name:'北京中航瑞博环保科技有限公司',regNo:'91110108MA01XXXX4P',legal:'杨秀华',addr:'北京市海淀区',contact:'范磊 138-xxxx-5092'},
+    },
+    body:[
+      {n:'第1条',t:'治理目标',c:'对甲方四方井铁矿尾矿库（库容 1,200 万立方米）实施 <b>闭库治理及生态修复</b>，治理后达到《尾矿库安全监督管理规定》（应急部令第38号）"安全闭库"标准，且生态修复区植被覆盖率≥75%。'},
+      {n:'第3条',t:'合同期限',c:'治理工程期 <b>24 个月</b>，养护期 <b>3 年</b>。'},
+      {n:'第5条',t:'治理标准',c:'<span class="risk-mark" data-rid="en1" data-level="high">乙方完工以甲方书面确认为准，无需第三方验收</span>。养护期内甲方应配合乙方进行植被维护。'},
+      {n:'第7条',t:'环评手续',c:'<span class="risk-mark" data-rid="en2" data-level="high">本工程涉及的环境影响评价、水土保持方案、安全设施"三同时"验收等行政审批手续由乙方代为办理，办理失败甲方不退还已付款项</span>。'},
+      {n:'第9条',t:'付款方式',c:'按治理进度分阶段付款：①签约后 30% 预付款；②主体治理完工 40%；③竣工验收 25%；④养护期满 5%。'},
+      {n:'第11条',t:'环保事故责任',c:'治理期内发生 <span class="risk-mark" data-rid="en3" data-level="high">环境污染、生态破坏、水土流失、扬尘超标等环保事故，由乙方独立承担行政、民事责任，甲方不承担连带责任</span>。'},
+      {n:'第13条',t:'监测方式',c:'治理过程的环境监测由 <span class="risk-mark" data-rid="en4" data-level="medium">乙方自行委托具备资质的第三方机构进行</span>，监测数据作为验收依据。'},
+      {n:'第15条',t:'保险义务',c:'乙方应投保 <b>环境污染责任险</b>，保险金额不低于 <span class="risk-mark" data-rid="en5" data-level="medium">500 万元</span>。'},
+      {n:'第17条',t:'养护期违约',c:'养护期内植被覆盖率达不到约定标准的，<span class="risk-mark" data-rid="en6" data-level="medium">乙方应补种至达标，不另行支付费用</span>。'},
+      {n:'第19条',t:'解除合同',c:'<span class="risk-mark" data-rid="en7" data-level="low">合同期内任一方均可提前 60 日书面通知解除合同</span>。'},
+    ],
+    risks:[
+      {id:'en1', level:'high', no:'R-01', clause:'第5条', anchor:'5', title:'缺失第三方验收 - 闭库责任无法转移', src:'矿业合规',
+        original:'"乙方完工以甲方书面确认为准，无需第三方验收。"',
+        suggest:'强制要求："<b>治理工程完工后须经具有矿山安全评价资质的第三方机构验收，并向应急管理部门申请尾矿库安全闭库验收，取得《尾矿库安全闭库验收意见书》后方可视为完工</b>。"',
+        basis:'<b>《尾矿库安全监督管理规定》第38条</b>「闭库验收」'
+      },
+      {id:'en2', level:'high', no:'R-02', clause:'第7条', anchor:'7', title:'环评审批失败甲方损失 - 重大付款风险', src:'风险识别',
+        original:'"环评手续办理失败甲方不退还已付款项。"',
+        suggest:'修改："<b>因不可归责于双方的政策原因导致环评未通过的，甲方退还已付款项 60%；因乙方专业能力或材料瑕疵导致环评失败的，甲方有权全额追回已付款项并要求乙方赔偿损失</b>。"',
+        basis:'<b>《环境影响评价法》第22条</b>'
+      },
+      {id:'en3', level:'high', no:'R-03', clause:'第11条', anchor:'11', title:'"独立承担责任"对甲方有利但难抗辩', src:'权利义务',
+        original:'"环保事故由乙方独立承担行政、民事责任，甲方不承担连带责任。"',
+        suggest:'警惕：根据 <b>《民法典》第1229条</b>，环境污染责任为 <b>无过错责任 + 连带责任</b>，甲方作为发包方/项目业主仍可能被环保主管部门追责。建议修改："<b>乙方因施工原因造成环保事故的，甲方先行承担行政责任后有权全额追偿乙方</b>"。',
+        basis:'<b>《民法典》第1229条</b>「环境污染责任」'
+      },
+      {id:'en4', level:'medium', no:'R-04', clause:'第13条', anchor:'13', title:'乙方自委托监测 - 数据公正性存疑', src:'风险识别',
+        original:'"环境监测由乙方自行委托具备资质的第三方机构进行。"',
+        suggest:'修改："<b>环境监测由甲乙双方共同确认或甲方指定的具有CMA资质的第三方机构进行，监测费用由乙方承担；甲方有权对监测过程进行旁站监督</b>。"',
+        basis:'<b>《环境保护法》第42条</b>「在线监测」'
+      },
+      {id:'en5', level:'medium', no:'R-05', clause:'第15条', anchor:'15', title:'环境污染责任险金额偏低', src:'权利义务',
+        original:'"环境污染责任险，保险金额不低于 500 万元。"',
+        suggest:'尾矿库治理工程涉及水体污染风险极高，500 万元保额不足以覆盖单次重大污染事故损失。建议提升至 <b>不低于 2,000 万元</b>，并增加 <b>第三方责任险 1,000 万元</b>。',
+        basis:'参考2019年类似案例'
+      },
+      {id:'en6', level:'medium', no:'R-06', clause:'第17条', anchor:'17', title:'养护期违约约束力不足', src:'条款合规',
+        original:'"养护期内植被覆盖率达不到约定标准的，乙方应补种至达标，不另行支付费用。"',
+        suggest:'增加约束："<b>养护期满植被覆盖率仍达不到 75% 的，每差 1% 扣除质保金 2%；连续两次年度核查不达标的，甲方有权委托第三方代为补种，费用从质保金中扣除并由乙方承担超出部分</b>。"',
+        basis:'<b>《民法典》第585条</b>「违约金调整」'
+      },
+      {id:'en7', level:'low', no:'R-07', clause:'第19条', anchor:'19', title:'单方解除权过于宽松', src:'权利义务',
+        original:'"合同期内任一方均可提前 60 日书面通知解除合同。"',
+        suggest:'闭库治理工程具有 <b>不可中断性</b>，建议修改："<b>非因法定原因，任一方均不得任意解除合同。乙方违约解除的，赔偿甲方实际损失及预期利益的 20%；甲方违约解除的，向乙方支付已发生成本及 10% 利润</b>。"',
+        basis:'<b>《民法典》第563条</b>「合同解除条件」'
+      },
+    ]
+  },
+  lawsuit:{
+    id:'lawsuit', icon:'⚖', type:'诉讼应诉', code:'LIT-2025-0011', isPreset:true,
+    title:'中掘建设vs大中矿业建设工程施工合同纠纷案',
+    amount:'¥1,288.28万', pages:46, words:18620,
+    parties:{
+      a:{role:'原告',name:'安徽中掘建设工程有限公司',regNo:'91340621051469052A',legal:'匠义龙',addr:'安徽省淮北市高新区',contact:'代理律师 杨XX'},
+      b:{role:'被告（我方）',name:'大中矿业股份有限公司',regNo:'91150800705144800B',legal:'林甫生',addr:'内蒙古巴彦淖尔市',contact:'法务部 张律师'},
+    },
+    body:[
+      {n:'诉状概要',t:'',c:'2025年1月15日，安徽中掘建设工程有限公司向乌拉特前旗人民法院提起诉讼，案号 <b>(2025) 内0823民初0156号</b>，要求大中矿业承担：①解除《东五份子链矿地下采矿施工承包合同》；②支付中深孔工程款62.15万元；③停工损失347万元；④设备损失403万元；⑤可得利益476万元，合计 <b>1,288.28万元</b>。'},
+      {n:'诉求 1',t:'解除合同',c:'<span class="risk-mark" data-rid="lr1" data-level="high">原告依据《民法典》第563条第2/4/5款主张法定解除权</span>。'},
+      {n:'诉求 2',t:'中深孔工程款 62.15万',c:'<span class="risk-mark" data-rid="lr2" data-level="high">合同第20.7款约定：合同中途解除时未爆破中深孔按进尺12.4元/米结算</span>。'},
+      {n:'诉求 3',t:'停工损失 347万',c:'<span class="risk-mark" data-rid="lr3" data-level="medium">原告主张2023.12.9至2025.2.9共约14个月停工损失</span>。'},
+      {n:'诉求 4',t:'设备损失 403万',c:'<span class="risk-mark" data-rid="lr4" data-level="medium">原告主张设备闲置、折旧、维修等损失</span>。'},
+      {n:'诉求 5',t:'可得利益 476万',c:'<span class="risk-mark" data-rid="lr5" data-level="medium">原告主张预期利润损失</span>。'},
+      {n:'核心事实',t:'',c:'<b>已生效判决一：</b>(2023) 内0823民初3039号 - 大中矿业起诉解除合同，法院 <b>判决驳回</b> 大中矿业诉请，认定我方存在违约。<br><b>已生效判决二：</b>(2023) 内0823民初3024号 - 中掘建设起诉支付工程款，法院判决 <b>大中矿业支付 2,369.4万 工程款+52.1万利息</b>，二审 (2024) 内08民终2105号 维持原判。'},
+    ],
+    risks:[
+      {id:'lr1', level:'high', no:'R-01', clause:'诉求1', anchor:'诉求 1', title:'解除合同请求 - 被支持概率 70-80%', src:'风险识别',
+        original:'原告主张依据《民法典》第563条第2/4/5款行使法定解除权。',
+        suggest:'<b>抗辩空间有限</b>。结合两份已生效判决均认定我方违约，原告主张法定解除权的事实基础和法律基础均已被前案确认。建议接受合同解除，将抗辩重点放在 <b>解除后的清算金额</b> 而非解除本身。',
+        basis:'<b>《民法典》第563条</b>「合同的法定解除」、已生效 (2023) 内0823民初3039号判决'
+      },
+      {id:'lr2', level:'high', no:'R-02', clause:'诉求2', anchor:'诉求 2', title:'中深孔工程款 - 败诉风险 75-85%', src:'权利义务',
+        original:'合同第20.7款明确约定中深孔按进尺12.4元/米结算。',
+        suggest:'<b>合同明确约定，难以拒绝</b>。建议核心策略：①核实实际进尺数量，争取按 <b>实测工程量</b> 而非原告主张数量结算；②要求原告提供施工记录原件、监理签证；③对超出合理工程量部分提出异议。<b>可争取压低至 35-50 万</b>。',
+        basis:'合同第20.7款、<b>《民法典》第465条</b>「合同的相对性」'
+      },
+      {id:'lr3', level:'medium', no:'R-03', clause:'诉求3', anchor:'诉求 3', title:'停工损失 347万 - 核心抗辩 + 减损义务', src:'风险识别',
+        original:'原告主张2023.12.9至2025.2.9共14个月停工损失。',
+        suggest:'<b>核心抗辩：减损义务</b>。①依据 <b>《民法典》第591条</b> 守约方应采取适当措施防止损失扩大；②原告 14 个月未撤离设备人员，存在重大减损义务违反；③请求法院对停工损失酌情调减 50-70%。<b>可争取压至 100-150 万</b>。',
+        basis:'<b>《民法典》第591条</b>「减损义务」、<b>第584条</b>「可预见性」'
+      },
+      {id:'lr4', level:'medium', no:'R-04', clause:'诉求4', anchor:'诉求 4', title:'设备损失 403万 - 需司法鉴定', src:'风险识别',
+        original:'原告主张设备闲置、折旧、维修等损失。',
+        suggest:'<b>三步抗辩</b>：①要求原告提供 <b>设备购置发票、产权证明、折旧计算依据</b>；②对未提供的部分主张举证不能；③申请 <b>司法鉴定评估实际残值</b>。<b>可争取压至 100-180 万</b>。',
+        basis:'<b>《民法典》第584条</b>「实际损失」'
+      },
+      {id:'lr5', level:'medium', no:'R-05', clause:'诉求5', anchor:'诉求 5', title:'可得利益 476万 - 大幅压低空间', src:'权利义务',
+        original:'原告主张预期利润损失。',
+        suggest:'<b>《民法典》第584条</b>"不得超过可预见损失"是核心武器。①要求原告举证证明 <b>具体的利润计算方式</b>；②对方未提供前不予认可；③主张可得利益应扣除原告应支付的 <b>税费、管理费、风险准备金</b> 等成本。<b>判赔概率 30-50%，金额可压至 80-200 万</b>。',
+        basis:'<b>《民法典》第584条</b>「可预见损失」'
+      },
+      {id:'lr6', level:'low', no:'R-06', clause:'综合策略', anchor:'诉状概要', title:'整体应诉策略 - 优先和解', src:'矿业合规',
+        original:'综合评估全案应诉策略。',
+        suggest:'<b>建议优先和解</b>：①两份生效判决已认定我方违约，事实基础难以推翻；②14个月诉讼周期、声誉成本（上市公司）较高；③综合判赔风险 <b>500-800万</b>，建议以 <b>400-550万</b> 和解。',
+        basis:'综合判赔评估 + 上市公司信息披露义务考量'
+      },
+    ]
+  }
+};
+
+/* ═══════════════ STATE ═══════════════ */
+const state = {
+  contracts: JSON.parse(JSON.stringify(PRESET_CONTRACTS)),
+  currentContract: 'purchase',
+  reviewStatus: {},
+  activeTab: 'all',
+  selectedRange: null,
+  qaMessages: [],
+  customCounter: 0,
+};
+Object.keys(state.contracts).forEach(id=>{
+  state.reviewStatus[id]={progress:0,riskMap:{},isComplete:false,running:false};
+});
+
+/* ═══════════════ HELPERS ═══════════════ */
+function $(id){return document.getElementById(id)}
+function el(tag,attrs={},html){var e=document.createElement(tag);Object.keys(attrs).forEach(k=>{if(k==='className')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])});if(html!=null)e.innerHTML=html;return e}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function fmtTime(){var d=new Date();return d.toTimeString().slice(0,8)}
+function fmtDate(){var d=new Date();return d.toISOString().slice(0,10)}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function stripHtml(s){var d=document.createElement('div');d.innerHTML=s;return d.textContent||''}
+function toast(msg,type){
+  $('toastMsg').textContent=msg;
+  var t=$('toast');t.classList.remove('error');if(type==='error')t.classList.add('error');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* ═══════════════ RENDER: LEFT SIDEBAR ═══════════════ */
+function renderFileTabs(){
+  var box=$('fileTabs');box.innerHTML='';
+  Object.values(state.contracts).forEach(c=>{
+    var rev=state.reviewStatus[c.id];
+    var stat='idle';
+    if(rev.running)stat='running';
+    else if(rev.isComplete){
+      var highCt=c.risks.filter(r=>r.level==='high'&&!rev.riskMap[r.id]?.rejected).length;
+      stat=highCt>0?'risk':'done';
+    }
+    var active=c.id===state.currentContract?' active':'';
+    var customCls=c.isPreset?'':' is-custom';
+    var mark=c.isPreset?'<span class="preset-mark">预设</span>':'<span class="custom-mark">自定义</span>';
+    var removeBtn=c.isPreset?'':`<button class="remove" onclick="event.stopPropagation();removeContract('${c.id}')" title="删除">×</button>`;
+    var btn=el('div',{className:'file-tab'+active+customCls,onclick:()=>switchContract(c.id)},
+      `<div class="fi">${c.icon}</div><div class="info"><div class="nm">${escapeHtml(c.title.length>22?c.title.slice(0,22)+'…':c.title)}</div><div class="meta">${c.code} · ${c.amount}</div></div><span class="file-stat ${stat}"></span>${mark}${removeBtn}`);
+    box.appendChild(btn);
+  });
+  $('ctCt').textContent=Object.keys(state.contracts).length+' 件';
+}
+
+function renderDashboard(){
+  var c=state.contracts[state.currentContract];
+  var rev=state.reviewStatus[state.currentContract];
+  var found=Object.keys(rev.riskMap).filter(k=>rev.riskMap[k].found);
+  var hi=found.filter(k=>c.risks.find(r=>r.id===k)?.level==='high').length;
+  var md=found.filter(k=>c.risks.find(r=>r.id===k)?.level==='medium').length;
+  $('dRisk').textContent=rev.isComplete||rev.running?found.length:'—';
+  $('dHigh').textContent=rev.isComplete||rev.running?hi:'—';
+  $('dMed').textContent=rev.isComplete||rev.running?md:'—';
+  $('dProg').textContent=rev.progress+'%';
+}
+
+/* ═══════════════ RENDER: MIDDLE ═══════════════ */
+function renderContractTabs(){
+  var box=$('cTabs');box.innerHTML='';
+  Object.values(state.contracts).forEach(c=>{
+    var rev=state.reviewStatus[c.id];
+    var active=c.id===state.currentContract?' active':'';
+    var ct=rev.isComplete||rev.running?Object.keys(rev.riskMap).filter(k=>rev.riskMap[k].found).length:c.risks.length;
+    var hi=c.risks.filter(r=>r.level==='high').length;
+    var badge=`<span class="badge${hi>0?' red':''}">${ct}</span>`;
+    var title=c.title.length>14?c.title.slice(0,14)+'…':c.title;
+    box.appendChild(el('button',{className:'c-tab'+active,onclick:()=>switchContract(c.id)},
+      `${c.icon} ${c.type} ${badge}`));
+  });
+}
+
+function renderContract(){
+  var c=state.contracts[state.currentContract];
+  $('cTitle').innerHTML=escapeHtml(c.title)+'<span class="seal">密级 · 内部</span>';
+  $('cSub').innerHTML=`<span>编号 ${c.code}</span><span>金额 ${c.amount}</span><span>页数 ${c.pages}</span><span>字数 ${c.words.toLocaleString()}</span>`;
+  var v=$('cView');v.innerHTML='';
+  var page=el('div',{className:'contract-page'});
+  page.appendChild(el('div',{className:'contract-header-doc'},`<h1>${escapeHtml(c.title)}</h1><div class="doc-sub">合同编号: ${c.code} · 签订日期：${fmtDate()}</div>`));
+
+  // parties
+  var pp=el('div',{className:'parties-block'});
+  ['a','b'].forEach(k=>{var p=c.parties[k];if(!p)return;pp.innerHTML+=`<div class="party"><div class="role">${escapeHtml(p.role)}</div><div class="nm">${escapeHtml(p.name)}</div>${p.regNo?`<div class="row"><div class="k">统一代码</div><div>${escapeHtml(p.regNo)}</div></div>`:''}${p.legal?`<div class="row"><div class="k">法定代表人</div><div>${escapeHtml(p.legal)}</div></div>`:''}${p.addr?`<div class="row"><div class="k">注册地址</div><div>${escapeHtml(p.addr)}</div></div>`:''}${p.contact?`<div class="row"><div class="k">联系</div><div>${escapeHtml(p.contact)}</div></div>`:''}</div>`});
+  page.appendChild(pp);
+
+  var rev=state.reviewStatus[state.currentContract];
+  // clauses
+  c.body.forEach(b=>{
+    var related = c.risks.filter(r=>{
+      var found = rev.riskMap[r.id]?.found;
+      if(!found)return false;
+      if(c.id==='lawsuit'){return r.anchor===b.n}
+      var num=b.n?b.n.match(/\d+/):null;
+      return num && r.anchor===num[0];
+    });
+    var hasRisk=related.length>0;
+    var maxLevel='';
+    if(related.some(r=>r.level==='high'))maxLevel='risk-high';
+    else if(related.some(r=>r.level==='medium'))maxLevel='risk-medium';
+    else if(related.some(r=>r.level==='low'))maxLevel='risk-low';
+
+    var anchorVal = c.id==='lawsuit' ? b.n : (b.n?b.n.match(/\d+/)?.[0]:'')||'';
+    var clauseEl=el('div',{className:'clause'+(hasRisk?' has-risk '+maxLevel:''),'data-anchor':anchorVal,onmouseenter:()=>highlightRelatedRisks(anchorVal,true),onmouseleave:()=>highlightRelatedRisks(anchorVal,false)});
+    var markerHtml = hasRisk?`<span class="clause-marker ${related[0].level}">●${related.length>1?' '+related.length+' 项':''}</span>`:'';
+    clauseEl.innerHTML=`<div class="clause-h">${b.n?`<span class="clause-num">${escapeHtml(b.n)}</span>`:''}${escapeHtml(b.t||'')}${markerHtml}</div><div class="clause-text">${b.c}</div>`;
+
+    // apply accepted modifications
+    clauseEl.querySelectorAll('.risk-mark').forEach(m=>{
+      var rid=m.getAttribute('data-rid');
+      var st=rev.riskMap[rid];
+      if(st && st.accepted){
+        var risk=c.risks.find(rr=>rr.id===rid);
+        if(risk){
+          m.outerHTML=`<span class="accepted-del">${m.innerHTML}</span><span class="accepted-ins">✓ 已采纳修改</span>`;
+        }
+      }
+    });
+    page.appendChild(clauseEl);
+  });
+
+  // sign block
+  page.appendChild(el('div',{className:'sign-block'},`
+    <div class="sign-col"><div class="sign-row"><div class="k">甲方盖章：</div><div class="v"></div></div><div class="sign-row"><div class="k">法定代表人：</div><div class="v">${escapeHtml(c.parties.a?.legal||'')}</div></div><div class="sign-row"><div class="k">签订日期：</div><div class="v">${fmtDate()}</div></div></div>
+    <div class="sign-col"><div class="sign-row"><div class="k">乙方盖章：</div><div class="v"></div></div><div class="sign-row"><div class="k">法定代表人：</div><div class="v">${escapeHtml(c.parties.b?.legal||'')}</div></div><div class="sign-row"><div class="k">签订日期：</div><div class="v">${fmtDate()}</div></div></div>
+  `));
+  v.appendChild(page);
+
+  // bind click on risk-mark
+  v.querySelectorAll('.risk-mark').forEach(m=>{
+    m.addEventListener('click',e=>{
+      e.stopPropagation();
+      var rid=m.getAttribute('data-rid');
+      locateRisk(rid);
+    });
+  });
+}
+
+/* ═══════════════ RENDER: RIGHT RISKS ═══════════════ */
+function renderRiskList(){
+  var c=state.contracts[state.currentContract];
+  var rev=state.reviewStatus[state.currentContract];
+  var box=$('rList');
+
+  if(state.activeTab==='qa'){renderQA();return;}
+
+  var foundRisks=c.risks.filter(r=>rev.riskMap[r.id]?.found);
+  foundRisks.sort((a,b)=>{var ord={high:0,medium:1,low:2};return ord[a.level]-ord[b.level]||a.no.localeCompare(b.no)});
+  if(state.activeTab!=='all') foundRisks=foundRisks.filter(r=>r.level===state.activeTab);
+  var allCt=c.risks.filter(r=>rev.riskMap[r.id]?.found).length;
+  var hiCt=c.risks.filter(r=>r.level==='high'&&rev.riskMap[r.id]?.found).length;
+  var mdCt=c.risks.filter(r=>r.level==='medium'&&rev.riskMap[r.id]?.found).length;
+  var loCt=c.risks.filter(r=>r.level==='low'&&rev.riskMap[r.id]?.found).length;
+  $('tAll').textContent=allCt;$('tHi').textContent=hiCt;$('tMd').textContent=mdCt;$('tLo').textContent=loCt;
+
+  box.innerHTML='';
+  if(foundRisks.length===0){
+    var msg,h3,ico;
+    if(rev.isComplete){h3='本类别下无风险';msg='切换其他风险等级或重新审查';ico='◯'}
+    else if(rev.running){h3='AI审查进行中';msg='风险项将逐项展示...';ico='◌'}
+    else {h3='合同已就绪';msg='点击左侧 <b style="color:var(--gold-2)">启动 AI 法务审核</b> 开始智能审查';ico='⚖'}
+    box.innerHTML=`<div class="empty-risk"><div class="ico">${ico}</div><h3>${h3}</h3><p>${msg}</p></div>`;
+    $('rcStatus').textContent = rev.isComplete?'审查完成':rev.running?'审查中':'待审核';
+    return;
+  }
+  $('rcStatus').textContent = rev.isComplete?`共 ${allCt} 项`:`已发现 ${allCt} 项`;
+  foundRisks.forEach(r=>box.appendChild(buildRiskCard(r)));
+}
+
+function buildRiskCard(r){
+  var rev=state.reviewStatus[state.currentContract];
+  var st=rev.riskMap[r.id]||{};
+  var stateCls = st.accepted?' accepted':st.rejected?' rejected':'';
+  var card=el('div',{className:'risk-card'+stateCls,id:'risk-'+r.id,'data-rid':r.id,'data-anchor':r.anchor});
+  var lvlTxt={high:'高风险',medium:'中风险',low:'低风险'}[r.level];
+  card.innerHTML=`
+    <div class="rc-head" onclick="toggleRisk('${r.id}')">
+      <span class="rc-no">${r.no}</span>
+      <span class="rc-lvl ${r.level}">${lvlTxt}</span>
+      <div class="rc-info">
+        <div class="rc-tt">${r.title}</div>
+        <div class="rc-meta"><span class="src">${r.src}</span><span>${r.clause}</span></div>
+      </div>
+      <span class="rc-chevron">▾</span>
+    </div>
+    <div class="rc-body">
+      <div class="rc-section original"><div class="rs-lbl">原文</div><div class="rs-content">${r.original}</div></div>
+      <div class="rc-section suggest"><div class="rs-lbl">修改建议</div><div class="rs-content">${r.suggest}</div></div>
+      <div class="rc-section basis"><div class="rs-lbl">法律 / 内规 依据</div><div class="rs-content">${r.basis}</div></div>
+      <div class="rc-actions">
+        <button class="rc-btn locate" onclick="locateRisk('${r.id}')"><span class="ic">⌖</span>原文定位</button>
+        ${st.accepted?'':st.rejected?'':`<button class="rc-btn accept" onclick="acceptRisk('${r.id}')"><span class="ic">✓</span>接受修改</button><button class="rc-btn" onclick="rejectRisk('${r.id}')"><span class="ic">✕</span>拒绝</button>`}
+        <button class="rc-btn" onclick="askAboutRisk('${r.id}')"><span class="ic">💬</span>追问</button>
+      </div>
+    </div>`;
+  return card;
+}
+
+/* ═══════════════ INTERACTION ═══════════════ */
+function locateRisk(rid){
+  var c=state.contracts[state.currentContract];
+  var risk=c.risks.find(r=>r.id===rid);
+  if(!risk)return;
+  var card=document.getElementById('risk-'+rid);
+  if(card){
+    if(!card.classList.contains('open'))card.classList.add('open');
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  var view=$('cView');
+  var target=view.querySelector(`.clause[data-anchor="${risk.anchor}"]`);
+  if(target){
+    target.scrollIntoView({behavior:'smooth',block:'center'});
+    target.classList.remove('active-highlight');
+    void target.offsetWidth;
+    target.classList.add('active-highlight');
+    setTimeout(()=>target.classList.remove('active-highlight'),1800);
+  }
+}
+
+function highlightRelatedRisks(anchor,on){
+  document.querySelectorAll('.risk-card').forEach(card=>{
+    var a=card.getAttribute('data-anchor');
+    if(a===anchor){
+      if(on)card.classList.add('related');
+      else card.classList.remove('related');
+    }
+  });
+}
+
+function toggleRisk(rid){
+  var card=document.getElementById('risk-'+rid);
+  if(!card)return;
+  var willOpen=!card.classList.contains('open');
+  document.querySelectorAll('.risk-card.open').forEach(c=>{if(c!==card)c.classList.remove('open')});
+  card.classList.toggle('open');
+  if(willOpen)locateRisk(rid);
+}
+
+function acceptRisk(rid){
+  var rev=state.reviewStatus[state.currentContract];
+  rev.riskMap[rid].accepted=true;rev.riskMap[rid].rejected=false;
+  renderContract();renderRiskList();
+  toast('✓ 已采纳修改，原文已应用 diff 标记');
+}
+function rejectRisk(rid){
+  var rev=state.reviewStatus[state.currentContract];
+  rev.riskMap[rid].rejected=true;rev.riskMap[rid].accepted=false;
+  renderRiskList();
+  toast('已拒绝该修改建议');
+}
+
+function switchContract(id){
+  if(state.reviewStatus[state.currentContract].running)return;
+  state.currentContract=id;
+  state.activeTab='all';
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='all'));
+  rerenderAll();
+  updateProgressBar();
+  updateButtons();
+}
+
+function removeContract(id){
+  if(state.contracts[id]?.isPreset)return;
+  if(!confirm('确定删除该自定义合同？'))return;
+  delete state.contracts[id];
+  delete state.reviewStatus[id];
+  if(state.currentContract===id)state.currentContract='purchase';
+  rerenderAll();updateButtons();
+  toast('已删除自定义合同');
+}
+
+/* ═══════════════ FILE UPLOAD ═══════════════ */
+function setupUpload(){
+  var dz=$('dropZone');var inp=$('fileInput');
+  inp.addEventListener('change',e=>{var f=e.target.files[0];if(f)handleFile(f);e.target.value=''});
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');var f=e.dataTransfer.files[0];if(f)handleFile(f)});
+}
+
+function handleFile(file){
+  var sz=file.size>1048576?(file.size/1048576).toFixed(1)+'MB':(file.size/1024).toFixed(0)+'KB';
+  var ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(ext==='txt'||ext==='md'){
+    var reader=new FileReader();
+    reader.onload=e=>processUploadedText(file.name,e.target.result,sz);
+    reader.onerror=()=>toast('文件读取失败','error');
+    reader.readAsText(file);
+  } else if(ext==='docx'||ext==='pdf'||ext==='doc'){
+    // Not actually parseable in pure browser. Create entry with metadata + placeholder content.
+    processUploadedBinary(file.name,sz,ext);
+  } else {
+    toast('暂不支持该格式，请上传 .txt/.docx/.pdf','error');
+  }
+}
+
+function processUploadedText(fileName,text,sz){
+  var id='custom-'+(++state.customCounter);
+  var meta=detectType(fileName,text);
+  var body=parseClausesFromText(text);
+  var risks=generateRisksFromText(text,meta.type);
+  state.contracts[id]={
+    id, icon:meta.icon, type:meta.type,
+    title:fileName.replace(/\.[^.]+$/,''),
+    code:id.toUpperCase(), amount:meta.amount||'—',
+    pages:Math.max(1,Math.ceil(text.length/2000)),
+    words:text.length,
+    parties:{
+      a:{role:'甲方',name:'（待识别）',contact:'—'},
+      b:{role:'乙方',name:'（待识别）',contact:'—'},
+    },
+    body, risks, isPreset:false, rawText:text,
+  };
+  state.reviewStatus[id]={progress:0,riskMap:{},isComplete:false,running:false};
+  state.currentContract=id;
+  state.activeTab='all';
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='all'));
+  rerenderAll();updateButtons();
+  toast('✓ '+fileName+' ('+sz+') 已上传，AI 检测到 '+risks.length+' 个潜在风险点');
+}
+
+function processUploadedBinary(fileName,sz,ext){
+  var id='custom-'+(++state.customCounter);
+  var meta=detectType(fileName,'');
+  var notice = `<b>已上传 ${ext.toUpperCase()} 格式合同</b>。<br>本Demo 仅对 .txt 进行全文解析；正式部署版可对 .docx / .pdf 完整解析（含格式保留）。<br>下面演示的审查结果基于文件名启发式识别为 <b>${meta.type}</b>，并应用相应行业规则进行模拟审查。`;
+  state.contracts[id]={
+    id, icon:meta.icon, type:meta.type,
+    title:fileName.replace(/\.[^.]+$/,''),
+    code:id.toUpperCase(), amount:meta.amount||'—',
+    pages:1, words:0,
+    parties:{
+      a:{role:'甲方',name:'（待识别 - '+ext.toUpperCase()+'格式）',contact:'—'},
+      b:{role:'乙方',name:'（待识别 - '+ext.toUpperCase()+'格式）',contact:'—'},
+    },
+    body:[{n:'',t:'文件说明',c:notice}],
+    risks:generateGenericRisks(meta.type),
+    isPreset:false,
+  };
+  state.reviewStatus[id]={progress:0,riskMap:{},isComplete:false,running:false};
+  state.currentContract=id;
+  state.activeTab='all';
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='all'));
+  rerenderAll();updateButtons();
+  toast('✓ '+fileName+' ('+sz+') 已上传，识别为 '+meta.type);
+}
+
+function detectType(name,text){
+  var s=name+' '+text;
+  if(/劳动|劳务|聘用|雇佣|派遣/.test(s))return{type:'劳动合同',icon:'☻',amount:'—'};
+  if(/采购|采买|供货|供应/.test(s))return{type:'采购合同',icon:'⛁',amount:'—'};
+  if(/工程|施工|建设|承包|承建/.test(s))return{type:'工程合同',icon:'⚒',amount:'—'};
+  if(/环保|尾矿|污染|治理|生态/.test(s))return{type:'环保合同',icon:'❀',amount:'—'};
+  if(/起诉书|诉状|应诉书|答辩状|纠纷案|判决书|案件审/.test(s))return{type:'诉讼文书',icon:'⚖',amount:'—'};
+  if(/租赁|出租|承租/.test(s))return{type:'租赁合同',icon:'⌂',amount:'—'};
+  if(/保密|NDA/.test(s))return{type:'保密协议',icon:'⚿',amount:'—'};
+  return{type:'通用合同',icon:'⎙',amount:'—'};
+}
+
+function parseClausesFromText(text){
+  text=text.replace(/\r\n/g,'\n');
+  // Try 第X条
+  var clauseRe=/第\s*[一二三四五六七八九十百零\d]+\s*条[\s\S]*?(?=第\s*[一二三四五六七八九十百零\d]+\s*条|$)/g;
+  var matches=text.match(clauseRe);
+  if(matches && matches.length>=2){
+    return matches.map((m,i)=>{
+      var titleM=m.match(/^(第\s*[一二三四五六七八九十百零\d]+\s*条)\s*([^\n。]{0,18})?/);
+      var n=titleM?titleM[1].replace(/\s/g,''):'';
+      var t=titleM?(titleM[2]||'').trim():'';
+      var c=m.replace(/^第\s*[一二三四五六七八九十百零\d]+\s*条\s*[^\n。]{0,18}/,'').trim();
+      c=escapeHtml(c.slice(0,800)).replace(/\n/g,'<br>');
+      return {n,t,c};
+    });
+  }
+  // Try 一、二、 pattern
+  var cnRe=/(?:^|\n)[一二三四五六七八九十]+、[\s\S]*?(?=(?:^|\n)[一二三四五六七八九十]+、|$)/g;
+  var cnMatches=text.match(cnRe);
+  if(cnMatches && cnMatches.length>=2){
+    return cnMatches.map((m,i)=>{
+      var t=m.split('\n')[0].replace(/^[\s一二三四五六七八九十]+、/,'').trim();
+      var num=m.match(/[一二三四五六七八九十]+/);
+      return {n:num?num[0]+'、':'',t:t.slice(0,18),c:escapeHtml(m.replace(/^[\s\S]*?\n/,'').slice(0,800)).replace(/\n/g,'<br>')};
+    });
+  }
+  // Fallback: split by paragraphs
+  var paras=text.split(/\n\s*\n/).filter(p=>p.trim().length>10);
+  if(paras.length>=2){
+    return paras.slice(0,15).map((p,i)=>({n:'第'+(i+1)+'段',t:'',c:escapeHtml(p.slice(0,500)).replace(/\n/g,'<br>')}));
+  }
+  // Single block
+  return [{n:'',t:'合同正文',c:escapeHtml(text.slice(0,3000)).replace(/\n/g,'<br>')}];
+}
+
+function generateRisksFromText(text,type){
+  var risks=[];var no=1;
+  function add(r){r.no='R-'+String(no++).padStart(2,'0');risks.push(r)}
+
+  // 1. 保密条款缺失
+  if(!/保密|保密义务|商业秘密|信息保护/.test(text)){
+    add({id:'cr1',level:'high',clause:'全文',anchor:'',title:'合同缺失保密条款 - 商业秘密暴露风险',src:'风险识别',
+      original:'整份合同未发现保密义务相关条款。',
+      suggest:'建议增加保密条款：「双方对因履行本合同知悉的对方<b>技术信息、经营信息、客户信息、定价策略</b>等负有保密义务。保密期限为合同终止后 <b>3 年</b>。违反保密义务的，赔偿对方因此遭受的全部损失。」',
+      basis:'<b>《反不正当竞争法》第9条</b>「商业秘密保护」'
+    });
+  }
+  // 2. 违约金条款 - 找任一处 数字+% 附近 20 字内有"日/天"且文中提到违约/逾期
+  var pctM=text.match(/(\d+(?:\.\d+)?)\s*[%‰]/);
+  var flaggedPct=false;
+  if(pctM && /违约|逾期|滞纳/.test(text)){
+    var idx=text.indexOf(pctM[0]);
+    var nearby=text.substring(Math.max(0,idx-25),Math.min(text.length,idx+25));
+    if(/日|天/.test(nearby)){
+      var pct=parseFloat(pctM[1]);
+      if(pct>=0.3){
+        flaggedPct=true;
+        add({id:'cr2',level:'medium',clause:'违约责任',anchor:'',title:`违约金日利率 ${pct}% 偏高，存在被法院调减风险`,src:'权利义务',
+          original:`合同约定"${nearby.trim()}"`,
+          suggest:`年化测算：${pct}% × 365 ≈ ${(pct*365).toFixed(0)}%，明显高于同期银行贷款利率（LPR一年期约 3.85%）。<b>建议调整至 0.1%-0.3%/日范围，并设置 10% 累计上限</b>，更具可执行性。`,
+          basis:'<b>《民法典》第585条</b>「违约金过分高于实际损失的，法院可酌情调减」'
+        });
+      }
+    }
+  }
+  if(!flaggedPct && /违约|违反/.test(text) && !/违约金/.test(text)){
+    add({id:'cr2',level:'medium',clause:'违约责任',anchor:'',title:'违约责任约定不够具体 - 缺失量化标准',src:'条款合规',
+      original:'合同提及违约责任但未约定违约金计算方式。',
+      suggest:'建议明确：①<b>违约情形列举</b>（逾期交付、质量不达标、单方解除等）；②<b>违约金计算方式</b>（按合同标的额×日比例×天数）；③<b>违约金上限</b>（通常 5%-10% 合同总额）。',
+      basis:'<b>《民法典》第577条、第585条</b>'
+    });
+  }
+  // 3. 单方解除
+  if(/随时(解除|终止)|单方(解除|终止)|可解除合同/.test(text) && !/提前.{0,8}日.{0,8}通知/.test(text)){
+    add({id:'cr3',level:'high',clause:'合同解除',anchor:'',title:'单方解除权无限制 - 索赔风险',src:'风险识别',
+      original:'合同存在"随时解除"或"单方解除"约定，未限定通知期或赔偿。',
+      suggest:'增加约束："<b>任一方解除合同应提前 30 日书面通知对方</b>；解除时<b>已下未交订单继续履行</b>；非因对方违约解除的，承担对方实际损失。"',
+      basis:'<b>《民法典》第563条、第566条</b>'
+    });
+  }
+  // 4. 管辖法院
+  if(/(甲方|乙方)所在地.{0,8}(法院|管辖)|提请.{0,8}(法院|仲裁)/.test(text)){
+    if(!/合同履行地|主要营业地/.test(text)){
+      add({id:'cr4',level:'medium',clause:'争议解决',anchor:'',title:'诉讼管辖约定可能不清晰',src:'权利义务',
+        original:'管辖法院约定可能存在歧义。',
+        suggest:'建议改为"<b>合同履行地（XX省XX市）人民法院管辖</b>"，避免因当事人所在地与实际履行地不一致产生管辖权争议。',
+        basis:'<b>《民事诉讼法》第35条</b>「协议管辖」'
+      });
+    }
+  }
+  // 5. 不可抗力
+  if(/不可抗力/.test(text) && !/(地震|洪水|疫情|战争|政府禁令|流行病).{0,30}(不可抗力|包括)/.test(text)){
+    add({id:'cr5',level:'medium',clause:'不可抗力',anchor:'',title:'不可抗力具体情形和通知义务未明确',src:'条款合规',
+      original:'合同提及不可抗力但未列举具体情形。',
+      suggest:'补充："不可抗力<b>包括但不限于</b>：地震、洪水、台风、瘟疫流行、政府禁令、战争、罢工等。<br>受影响方应在<b>48小时内书面通知</b>对方，并在<b>14日内提供具有公信力机构出具的证明文件</b>。"',
+      basis:'<b>《民法典》第180条、第590条</b>'
+    });
+  }
+  // 6. 知识产权
+  if((/产品|技术|设备|软件|设计|工艺|材料/.test(text)) && !/知识产权|侵权/.test(text)){
+    add({id:'cr6',level:'low',clause:'知识产权',anchor:'',title:'未约定知识产权侵权责任',src:'条款合规',
+      original:'合同涉及产品/技术/工艺但未约定第三方知识产权侵权责任承担。',
+      suggest:'新增："<b>乙方保证所供产品/技术不侵犯第三方知识产权。若发生侵权指控，由乙方独立处理并赔偿甲方因此产生的全部损失（含诉讼费、律师费、和解金）</b>。"',
+      basis:'<b>《民法典》第612条</b>「权利瑕疵担保」'
+    });
+  }
+  // 7. 矿业合规
+  if(/矿|采矿|井下|尾矿|爆破|开采/.test(text) && !/矿山安全法|MA认证|安全生产/.test(text)){
+    add({id:'cr7',level:'medium',clause:'安全责任',anchor:'',title:'未明确《矿山安全法》合规要求',src:'矿业合规',
+      original:'合同涉及矿业生产/施工但未明确矿山安全法规要求。',
+      suggest:'增加合规要求："<b>乙方提供的产品/服务应符合《矿山安全法》《安全生产法》相关要求；矿用产品应具有 MA 矿用产品安全标志认证（如适用）；每批次随货提供出厂检验报告和质量保证书。</b>"',
+      basis:'<b>《矿山安全法》第31条、第36条</b>'
+    });
+  }
+  // 8. 付款流程
+  if(/(付款|支付|价款|货款)/.test(text) && !/(对账|发票|开票|增值税)/.test(text)){
+    add({id:'cr8',level:'low',clause:'付款条款',anchor:'',title:'付款流程约定不完整 - 缺失对账/开票要求',src:'条款合规',
+      original:'合同约定付款但未明确对账和开票流程。',
+      suggest:'建议补充："<b>付款条件：①月底前完成对账并由双方书面确认；②乙方在收到甲方付款前 5 个工作日开具合法增值税专用发票；③付款方式为银行转账，到账即视为支付完成。</b>"',
+      basis:'<b>《增值税暂行条例》及实施细则</b>'
+    });
+  }
+  // 9. 验收标准
+  if(/(验收|质检|检验|交付)/.test(text) && !/(国家标准|GB|行业标准|检测方法)/.test(text)){
+    add({id:'cr9',level:'medium',clause:'验收标准',anchor:'',title:'验收标准缺乏可执行的客观依据',src:'条款合规',
+      original:'合同涉及验收但未引用国家/行业标准。',
+      suggest:'增加："<b>验收标准：按 [国家标准/行业标准编号] 执行；检验方法：[具体检验流程]；异议期：到货后 [N] 个工作日内提出，逾期未提出视为验收合格。</b>"',
+      basis:'<b>《民法典》第621条</b>「验收期限和异议」'
+    });
+  }
+  return risks;
+}
+
+function generateGenericRisks(type){
+  // For binary uploads where we don't have actual text, return a sensible set
+  return [
+    {id:'g1',no:'R-01',level:'high',clause:'全文',anchor:'',title:'建议核查保密条款是否完整',src:'风险识别',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'建议人工核对：①是否约定双方保密义务；②保密期限是否合理（通常 2-5 年）；③违反保密的违约责任。<b>正式部署版本将自动解析全文</b>。',
+      basis:'<b>《反不正当竞争法》第9条</b>'
+    },
+    {id:'g2',no:'R-02',level:'high',clause:'违约责任',anchor:'',title:'核查违约责任对等性',src:'权利义务',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'重点核查：①双方违约责任是否对等；②违约金比例是否在合理区间（0.1%-0.5%/日）；③是否设置累计上限。',
+      basis:'<b>《民法典》第585条、第497条</b>'
+    },
+    {id:'g3',no:'R-03',level:'medium',clause:'争议解决',anchor:'',title:'核查管辖法院约定',src:'权利义务',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'建议：①明确约定为"合同履行地法院管辖"；②管辖法院应有便于诉讼的地理优势；③避免约定不明确导致管辖争议。',
+      basis:'<b>《民事诉讼法》第35条</b>'
+    },
+    {id:'g4',no:'R-04',level:'medium',clause:'付款条款',anchor:'',title:'核查付款流程和开票要求',src:'条款合规',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'重点核查：①是否明确对账流程；②是否要求开具增值税专用发票；③付款期限是否合理；④是否设置质保金。',
+      basis:'<b>《增值税暂行条例》</b>'
+    },
+    {id:'g5',no:'R-05',level:'medium',clause:'不可抗力',anchor:'',title:'核查不可抗力条款完整性',src:'条款合规',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'建议：①列举具体不可抗力情形；②约定 48 小时通知义务；③要求 14 日内提供证明文件。',
+      basis:'<b>《民法典》第180条、第590条</b>'
+    },
+    {id:'g6',no:'R-06',level:'low',clause:'知识产权',anchor:'',title:'建议补充知识产权条款',src:'条款合规',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'如涉及产品/技术/工艺，建议增加：「乙方保证不侵犯第三方知识产权；如有侵权指控由乙方独立处理并赔偿损失」。',
+      basis:'<b>《民法典》第612条</b>'
+    },
+    {id:'g7',no:'R-07',level:'medium',clause:'矿业合规',anchor:'',title:'矿业合规专项核查',src:'矿业合规',
+      original:'.docx/.pdf 文件未进行全文解析',
+      suggest:'如属矿业相关合同，需核查：①是否引用《矿山安全法》；②矿用产品是否要求MA认证；③安全生产责任分配；④环保责任承担。',
+      basis:'<b>《矿山安全法》《安全生产法》</b>'
+    },
+  ];
+}
+
+/* ═══════════════ START / RESET ═══════════════ */
+async function startReview(){
+  var rev=state.reviewStatus[state.currentContract];
+  if(rev.running||rev.isComplete)return;
+  rev.running=true;
+  rev.progress=0;
+  rev.riskMap={};
+  $('progBar').classList.add('show');
+  updateButtons();
+  renderDashboard();renderFileTabs();renderContractTabs();renderRiskList();updateProgressBar();
+
+  var c=state.contracts[state.currentContract];
+  var risks=c.risks.slice();
+  // Sort risks by clause anchor (sequential discovery feeling)
+  risks.sort((a,b)=>{
+    var na=parseInt(a.anchor)||999;var nb=parseInt(b.anchor)||999;
+    return na-nb;
+  });
+
+  var phases=[
+    {label:'解析合同主体与基本信息',duration:1100,progAt:15},
+    {label:'对照法规库与公司内部制度',duration:1300,progAt:35},
+    {label:'识别风险条款与潜在陷阱',duration:1500,progAt:65},
+    {label:'生成修改建议与法律依据',duration:1100,progAt:88},
+    {label:'生成审查报告',duration:600,progAt:100},
+  ];
+
+  var totalRisks=risks.length;
+  var revealAt=phases[2].progAt; // start revealing risks at phase 3 start
+
+  for(var pi=0;pi<phases.length;pi++){
+    var ph=phases[pi];
+    $('pbLeft').textContent=ph.label;
+    var startProg=rev.progress;var endProg=ph.progAt;
+    var steps=Math.max(8,Math.floor(ph.duration/120));
+    for(var s=1;s<=steps;s++){
+      await sleep(ph.duration/steps);
+      rev.progress=Math.round(startProg + (endProg-startProg)*(s/steps));
+      // Reveal risks progressively during phase 3 and 4
+      if(rev.progress>=15 && pi>=1){
+        var expectedRevealed = Math.floor(((rev.progress-15)/(88-15))*totalRisks);
+        expectedRevealed=Math.min(totalRisks,Math.max(0,expectedRevealed));
+        for(var ri=0;ri<expectedRevealed;ri++){
+          if(risks[ri] && !rev.riskMap[risks[ri].id]){
+            rev.riskMap[risks[ri].id]={found:true};
+          }
+        }
+      }
+      updateProgressBar();renderDashboard();renderRiskList();renderFileTabs();renderContractTabs();renderContract();
+    }
+  }
+  // Ensure all risks found
+  c.risks.forEach(r=>{if(!rev.riskMap[r.id])rev.riskMap[r.id]={found:true}});
+  rev.progress=100;rev.isComplete=true;rev.running=false;
+  $('pbLeft').textContent='✓ 审查完成';
+  updateProgressBar();renderDashboard();renderRiskList();renderFileTabs();renderContractTabs();renderContract();
+  updateButtons();
+  toast('✓ AI 审查完成，共识别 '+c.risks.length+' 项风险');
+}
+
+function resetReview(){
+  var rev=state.reviewStatus[state.currentContract];
+  if(rev.running){toast('审查进行中，请稍候','error');return}
+  rev.progress=0;rev.riskMap={};rev.isComplete=false;
+  $('progBar').classList.remove('show');
+  state.activeTab='all';
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='all'));
+  rerenderAll();updateButtons();
+  toast('已重置当前合同审查');
+}
+
+function updateButtons(){
+  var rev=state.reviewStatus[state.currentContract];
+  var btn=$('startBtn');var txt=$('startTxt');
+  btn.disabled=rev.running;
+  if(rev.running){txt.textContent='AI 审查中...';btn.querySelector('.ic').textContent='⟳';btn.querySelector('.ic').style.animation='spin 1s linear infinite'}
+  else if(rev.isComplete){txt.textContent='重新审查';btn.querySelector('.ic').textContent='↻';btn.querySelector('.ic').style.animation=''}
+  else{txt.textContent='启动 AI 法务审核';btn.querySelector('.ic').textContent='▶';btn.querySelector('.ic').style.animation=''}
+  $('signBtn').disabled = !rev.isComplete;
+  $('dlReportBtn').disabled = !rev.isComplete;
+  $('resetBtn').disabled = rev.running || (rev.progress===0 && !rev.isComplete);
+}
+
+function updateProgressBar(){
+  var rev=state.reviewStatus[state.currentContract];
+  $('pbFill').style.width=rev.progress+'%';
+  $('pbRight').textContent=rev.progress+'%';
+  if(!rev.running && !rev.isComplete){$('pbLeft').textContent='待启动'}
+}
+
+function rerenderAll(){
+  renderFileTabs();renderDashboard();renderContractTabs();renderContract();renderRiskList();updateProgressBar();
+}
+
+/* ═══════════════ TABS ═══════════════ */
+document.addEventListener('click',e=>{
+  if(e.target.closest('.rt')){
+    var rt=e.target.closest('.rt');
+    document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+    rt.classList.add('active');
+    state.activeTab=rt.dataset.tab;
+    renderRiskList();
+  }
+});
+
+/* ═══════════════ SELECTION MENU ═══════════════ */
+document.addEventListener('mouseup',e=>{
+  setTimeout(()=>{
+    var sel=window.getSelection();
+    var txt=sel.toString().trim();
+    if(txt.length>=2 && txt.length<=150){
+      var anch=sel.anchorNode;var inView=false;
+      while(anch){if(anch.id==='cView'){inView=true;break}anch=anch.parentNode}
+      if(inView){
+        var range=sel.getRangeAt(0);
+        var r=range.getBoundingClientRect();
+        var menu=$('selMenu');
+        var menuW=270;
+        menu.style.left=Math.max(10,Math.min(window.innerWidth-menuW-10,r.left+r.width/2-menuW/2))+'px';
+        menu.style.top=(r.top-46)+'px';
+        menu.classList.add('show');
+        state.selectedRange=txt;
+        return;
+      }
+    }
+    $('selMenu').classList.remove('show');
+  },10);
+});
+
+function selAction(act){
+  var txt=state.selectedRange;
+  if(!txt)return;
+  $('selMenu').classList.remove('show');
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='qa'));
+  state.activeTab='qa';
+  var prompt={explain:`请AI解读这段：「${txt}」`,law:`查找相关法规依据：「${txt}」`,draft:`请起草替代条款：「${txt}」`,risk:`评估风险：「${txt}」`}[act];
+  state.qaMessages.push({role:'user',text:prompt});
+  state.qaMessages.push({role:'typing'});
+  renderRiskList();
+  setTimeout(()=>{
+    state.qaMessages.pop();
+    state.qaMessages.push({role:'ai',text:simulateAiResponse(act,txt)});
+    renderRiskList();
+  },1300+Math.random()*700);
+}
+
+/* ═══════════════ Q&A ═══════════════ */
+function renderQA(){
+  var box=$('rList');box.innerHTML='';
+  if(state.qaMessages.length===0){
+    box.innerHTML=`<div class="empty-risk"><div class="ico">✎</div><h3>智能问答</h3><p>在合同正文选中文本 → 调用 AI 解读 / 查法规 / 起草替代<br>或在下方输入框追问任意法务问题</p></div>`;
+    return;
+  }
+  state.qaMessages.forEach(m=>{
+    if(m.role==='typing'){
+      box.appendChild(el('div',{className:'qa-msg ai'},'<div class="qa-typing"><span></span><span></span><span></span></div>'));
+    } else {
+      box.appendChild(el('div',{className:'qa-msg '+m.role},m.text));
+    }
+  });
+  box.scrollTop=box.scrollHeight;
+}
+
+function sendQa(){
+  var inp=$('qaInput');var q=inp.value.trim();if(!q)return;
+  inp.value='';
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='qa'));
+  state.activeTab='qa';
+  state.qaMessages.push({role:'user',text:q});
+  state.qaMessages.push({role:'typing'});
+  renderRiskList();
+  setTimeout(()=>{
+    state.qaMessages.pop();
+    state.qaMessages.push({role:'ai',text:simulateAiResponse('chat',q)});
+    renderRiskList();
+  },1300+Math.random()*900);
+}
+
+function askAboutRisk(rid){
+  var risk=state.contracts[state.currentContract].risks.find(r=>r.id===rid);
+  if(!risk)return;
+  document.querySelectorAll('.rt').forEach(t=>t.classList.toggle('active',t.dataset.tab==='qa'));
+  state.activeTab='qa';
+  state.qaMessages.push({role:'user',text:`关于 ${risk.no} · ${risk.title}，能详细说明修改方案的法律依据和实施步骤吗？`});
+  state.qaMessages.push({role:'typing'});
+  renderRiskList();
+  setTimeout(()=>{
+    state.qaMessages.pop();
+    state.qaMessages.push({role:'ai',text:`<b>风险 ${risk.no} 详细分析</b><br><br><b>法律依据：</b>${risk.basis}<br><br><b>实施步骤：</b><br>1. 与对方法务沟通条款修改意向；<br>2. 出具书面修改建议（参考 AI 修改建议文本）；<br>3. 重新议定双方签署补充协议或在原合同上批注；<br>4. 经双方法定代表人/授权签字代表确认后生效。<br><br><b>谈判要点：</b>本条款修改对乙方影响较小，对甲方风险防范意义重大，建议作为<span style="color:var(--gold-2)"><b>必改项</b></span>推进。`});
+    renderRiskList();
+  },1400);
+}
+
+function simulateAiResponse(act,query){
+  var c=state.contracts[state.currentContract];
+  if(act==='explain')return `<b>AI 解读：</b>选中文本是合同条款的一部分。根据语境分析，本段约定了双方在特定情形下的权利义务，重点关注：<br>① 条件触发情形是否完整明确；<br>② 双方义务是否对等；<br>③ 是否符合《民法典》及行业监管要求。<br><br>结合 <b>${c.title}</b> 的合同标的和金额体量，建议关注是否构成格式条款、是否存在隐藏失衡等问题。`;
+  if(act==='law')return `<b>相关法规：</b><br>• <b>《民法典》第465条</b>「合同的相对性」<br>• <b>《民法典》第497条</b>「格式条款无效情形」<br>• <b>《民法典》第585条</b>「违约金调整」<br>• <b>行业法规：</b>《矿山安全法》《安全生产法》《建工解释一》等<br>• <b>内部制度：</b>《大中矿业合同管理制度》第14条、第19条<br><br>具体适用需结合条款内容进一步分析。`;
+  if(act==='draft')return `<b>替代条款建议草拟：</b><br><br>"双方应本着诚实信用、公平合理的原则履行合同义务。<b>任一方</b>未按约定履行的，应承担相应违约责任。具体违约金按 [本合同总额]×[违约比例]×[迟延天数] 计算，<b>最高不超过合同总额的 10%</b>。双方对违约责任另有约定的，从其约定。"<br><br>建议进一步根据具体场景调整细节。`;
+  if(act==='risk')return `<b>风险评估：</b><br>本段文字风险等级：<b style="color:var(--amber)">中风险</b><br><br>主要风险点：<br>• 表述不够具体明确，履约过程中易产生争议<br>• 缺乏量化指标和验证方式<br>• 未约定违反后的补救/责任承担机制<br><br><b>建议：</b>对核心要件（时间、金额、责任主体、违约后果）进行细化约定。`;
+  if(query.match(/违约金|比例|0\.5|合理/))return `<b>关于违约金合理性分析：</b><br><br>根据 <b>《民法典》第585条</b>，违约金过分高于实际损失的，法院可酌情调减。常见合同约定 0.5%/日，需注意：<br><br>① 年化测算：0.5%×365≈182.5%，明显高于同期银行贷款利率（LPR一年期约 3.85%）；<br>② 行业惯例：原材料类合同通常 <b>0.1%-0.3%/日</b>，上限 10%；<br>③ 司法实践：超过实际损失 30% 的部分较常被调减。<br><br><b>建议调整为：0.3%/日，上限10%</b>，更具可执行性。`;
+  if(query.match(/矿山|安全/))return `<b>《矿山安全法》对本合同的要求：</b><br><br>• <b>第31条</b>：矿山企业必须使用符合国家安全标准的设备、器材、防护用品和安全检测仪器；<br>• <b>第36条</b>：矿山产品必须取得 <b>MA 矿用产品安全标志</b>；<br>• <b>第40条</b>：从事矿山建设、生产的单位应当投保 <b>安全生产责任险</b>。<br><br><b>建议条款引用：</b>"乙方所供产品/服务符合《矿山安全法》要求，矿用产品具有有效 MA 认证证书，并随货提供产品质量保证书。"`;
+  if(query.match(/保密|商业秘密/))return `<b>保密条款标准模板：</b><br><br>"乙方对因履行本合同而知悉的甲方信息（包括但不限于<b>生产工艺参数、采购需求、定价策略、客户名单、技术资料</b>等）负有保密义务。<br>① <b>保密期限</b>：合同终止后 3 年；<br>② <b>违约责任</b>：违反保密义务的，赔偿甲方因此遭受的全部损失，并支付违约金 50 万元；<br>③ <b>例外情形</b>：法律强制要求披露的、信息已为公众知悉的、双方书面同意披露的除外。"<br><br>依据：《反不正当竞争法》第9条、公司《保密管理制度》第8条。`;
+  if(query.match(/不可抗力/))return `<b>不可抗力条款建议：</b><br><br>"<b>不可抗力包括但不限于</b>：地震、洪水、台风、瘟疫流行、政府禁令、战争、罢工等不能预见、不能避免、不能克服的客观情况。<br><br>受影响方应在<b>48小时内</b>书面通知对方，并在<b>14日内</b>提供具有公信力机构出具的证明文件。否则视为放弃援引本条款。<br><br>不可抗力持续超过<b>60日</b>影响合同主要目的实现的，任一方均可解除合同。"<br><br>依据：《民法典》第180条、第590条。`;
+  return `<b>智能问答 · 检索完成</b><br><br>根据您的问题，结合 <b>${c.title}</b> 的合同内容、本公司内部制度及相关法规库，建议关注以下方面：<br><br>① 条款的合规性 — 是否符合《民法典》《行业监管法规》；<br>② 权利义务的对等性 — 双方责任是否相互对应；<br>③ 风险防范的完备性 — 是否覆盖了主要风险情形；<br>④ 实施可行性 — 条款约定是否便于实际履行和争议解决。<br><br>如需更具体分析，请追问具体条款编号或场景。`;
+}
+
+/* ═══════════════ DOWNLOADS ═══════════════ */
+function triggerDownload(filename,content,type){
+  var blob=new Blob([content],{type:type||'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),100);
+}
+
+function downloadContract(){
+  var c=state.contracts[state.currentContract];
+  var lines=[];
+  lines.push('═'.repeat(60));
+  lines.push('  '+c.title);
+  lines.push('  合同编号: '+c.code+'    类型: '+c.type+'    金额: '+c.amount);
+  lines.push('═'.repeat(60));
+  lines.push('');
+  ['a','b'].forEach((k,i)=>{var p=c.parties[k];if(!p)return;
+    lines.push('【'+p.role+'】');
+    lines.push('  名 称: '+p.name);
+    if(p.regNo)lines.push('  统一代码: '+p.regNo);
+    if(p.legal)lines.push('  法定代表人: '+p.legal);
+    if(p.addr)lines.push('  注册地址: '+p.addr);
+    if(p.contact)lines.push('  联系方式: '+p.contact);
+    lines.push('');
+  });
+  lines.push('─'.repeat(60));
+  c.body.forEach(b=>{
+    lines.push('');
+    lines.push('  '+(b.n||'')+'  '+(b.t||''));
+    lines.push('  '+stripHtml(b.c).replace(/\s+/g,' ').trim());
+  });
+  lines.push('');
+  lines.push('─'.repeat(60));
+  lines.push('');
+  lines.push('甲方盖章: ____________________      乙方盖章: ____________________');
+  lines.push('法定代表人: '+(c.parties.a?.legal||'').padEnd(16,' ')+'      法定代表人: '+(c.parties.b?.legal||''));
+  lines.push('日期: '+fmtDate()+'                       日期: '+fmtDate());
+  lines.push('');
+  lines.push('═'.repeat(60));
+  lines.push('  本文件由 大中矿业 AI 法务审核智能体 v4.0 导出');
+  lines.push('  导出时间: '+fmtDate()+' '+fmtTime());
+  lines.push('═'.repeat(60));
+  triggerDownload(c.title+' · 合同正文.txt',lines.join('\n'));
+  toast('✓ 合同已下载');
+}
+
+function downloadReport(){
+  var c=state.contracts[state.currentContract];
+  var rev=state.reviewStatus[state.currentContract];
+  if(!rev.isComplete){toast('请先完成审查','error');return}
+  var found=c.risks.filter(r=>rev.riskMap[r.id]?.found);
+  var hi=found.filter(r=>r.level==='high');
+  var md=found.filter(r=>r.level==='medium');
+  var lo=found.filter(r=>r.level==='low');
+  var lines=[];
+  lines.push('═'.repeat(70));
+  lines.push('       AI 法务审核报告');
+  lines.push('       '+c.title);
+  lines.push('═'.repeat(70));
+  lines.push('');
+  lines.push('合同编号: '+c.code);
+  lines.push('合同类型: '+c.type);
+  lines.push('合同金额: '+c.amount);
+  lines.push('审核日期: '+fmtDate()+' '+fmtTime());
+  lines.push('审核引擎: 大中矿业 AI 法务审核智能体 v4.0');
+  lines.push('');
+  lines.push('━'.repeat(70));
+  lines.push('  审查结果概览');
+  lines.push('━'.repeat(70));
+  lines.push('  共识别风险项：'+found.length+' 项');
+  lines.push('  ├─ 高风险：'+hi.length+' 项');
+  lines.push('  ├─ 中风险：'+md.length+' 项');
+  lines.push('  └─ 低风险：'+lo.length+' 项');
+  lines.push('  采纳建议：'+found.filter(r=>rev.riskMap[r.id].accepted).length+' 项');
+  lines.push('  拒绝建议：'+found.filter(r=>rev.riskMap[r.id].rejected).length+' 项');
+  lines.push('');
+  found.forEach((r,i)=>{
+    lines.push('━'.repeat(70));
+    var lvlTxt={high:'【高风险】',medium:'【中风险】',low:'【低风险】'}[r.level];
+    var stTxt = rev.riskMap[r.id].accepted?'  状态: ✓ 已采纳':rev.riskMap[r.id].rejected?'  状态: ✕ 已拒绝':'  状态: ○ 待处理';
+    lines.push('  '+r.no+'  '+lvlTxt+'  '+r.title);
+    lines.push('  条款定位: '+r.clause+'    发现来源: '+r.src);
+    lines.push(stTxt);
+    lines.push('');
+    lines.push('  · 合同原文 ─────');
+    lines.push('    '+stripHtml(r.original).replace(/\s+/g,' ').trim());
+    lines.push('');
+    lines.push('  · 修改建议 ─────');
+    var sugLines=stripHtml(r.suggest).replace(/\s+/g,' ').trim();
+    lines.push('    '+sugLines);
+    lines.push('');
+    lines.push('  · 法律依据 ─────');
+    lines.push('    '+stripHtml(r.basis).replace(/\s+/g,' ').trim());
+    lines.push('');
+  });
+  lines.push('═'.repeat(70));
+  lines.push('  END OF REPORT');
+  lines.push('═'.repeat(70));
+  triggerDownload(c.title+' · 审查报告.txt',lines.join('\n'));
+  toast('✓ 审查报告已下载');
+}
+
+/* ═══════════════ SIGN-OFF MODAL ═══════════════ */
+function openSignoff(){
+  var c=state.contracts[state.currentContract];
+  var rev=state.reviewStatus[state.currentContract];
+  if(!rev.isComplete){toast('请先完成 AI 审查再生成签批意见书','error');return}
+  var found=c.risks.filter(r=>rev.riskMap[r.id]?.found);
+  var hi=found.filter(r=>r.level==='high');
+  var md=found.filter(r=>r.level==='medium');
+  var lo=found.filter(r=>r.level==='low');
+  var accCt=found.filter(r=>rev.riskMap[r.id].accepted).length;
+  var conclusion = hi.length>0 ? 'revise' : md.length>0 ? 'revise' : 'approve';
+  var concText = {approve:'建议直接签署',revise:'建议修改后签署',reject:'建议拒签'}[conclusion];
+
+  var body=$('modalBody');
+  body.innerHTML=`
+    <div class="so-sec"><div class="so-tt">一、案件基本信息</div><div class="so-content">
+      <table class="so-table">
+        <tr><th>合同名称</th><td>${escapeHtml(c.title)}</td></tr>
+        <tr><th>合同编号</th><td>${c.code}</td></tr>
+        <tr><th>合同类型</th><td>${c.type}</td></tr>
+        <tr><th>合同金额</th><td>${c.amount}</td></tr>
+        <tr><th>甲方</th><td>${escapeHtml(c.parties.a?.name||'')}</td></tr>
+        <tr><th>乙方</th><td>${escapeHtml(c.parties.b?.name||'')}</td></tr>
+        <tr><th>审核日期</th><td>${fmtDate()} ${fmtTime()}</td></tr>
+        <tr><th>审核人</th><td>AI 法务审核智能体 v4.0 · 张律师（法务总监）</td></tr>
+      </table>
+    </div></div>
+    <div class="so-sec"><div class="so-tt">二、AI 审查结论</div><div class="so-content">
+      本合同经 AI 法务审核智能体扫描，共识别 <b class="strong">${found.length}</b> 项风险：
+      <b style="color:var(--red)">高风险 ${hi.length} 项</b>、
+      <b style="color:var(--amber)">中风险 ${md.length} 项</b>、
+      <b style="color:var(--green)">低风险 ${lo.length} 项</b>。<br>
+      法务部已采纳修改建议 <b class="strong">${accCt}</b> 项。
+    </div></div>
+    ${hi.length>0?`<div class="so-sec"><div class="so-tt">三、必须修改事项（高风险）</div><div class="so-content">
+      <table class="so-table"><tr><th>编号</th><th>条款</th><th>风险</th><th>建议（摘要）</th></tr>
+      ${hi.map(r=>`<tr><td>${r.no}</td><td>${r.clause}</td><td>${r.title}</td><td>${stripHtml(r.suggest).slice(0,60)}...</td></tr>`).join('')}
+      </table></div></div>`:''}
+    ${md.length>0?`<div class="so-sec"><div class="so-tt">四、建议修改事项（中风险）</div><div class="so-content">
+      <table class="so-table"><tr><th>编号</th><th>条款</th><th>风险</th></tr>
+      ${md.map(r=>`<tr><td>${r.no}</td><td>${r.clause}</td><td>${r.title}</td></tr>`).join('')}
+      </table></div></div>`:''}
+    <div class="so-sec"><div class="so-tt">五、法务部签批结论</div>
+      <div class="so-conclusion">
+        <div class="so-cc approve ${conclusion==='approve'?'selected':''}"><div class="ic">✓</div><div class="l">同意签署</div></div>
+        <div class="so-cc revise ${conclusion==='revise'?'selected':''}"><div class="ic">⚠</div><div class="l">修改后签署</div></div>
+        <div class="so-cc reject ${conclusion==='reject'?'selected':''}"><div class="ic">✕</div><div class="l">拒绝签署</div></div>
+      </div>
+      <div class="so-content" style="margin-top:10px"><b>结论：</b><span class="strong">${concText}</span>。${hi.length>0?`需先完成 <b>${hi.length} 项高风险</b>条款的修改，并由对方法务确认后再行签署。`:md.length>0?`建议争取完成 ${md.length} 项中风险条款的修改，以最大化我方权益保障。`:'本合同条款总体合规，建议直接签署。'}
+      <br><br><b>下一步行动：</b><br>
+      ① 由商务部门将本审查意见与对方法务沟通；<br>
+      ② 完成补充协议草拟（基于AI修改建议）；<br>
+      ③ 法务部复核确认；<br>
+      ④ 报呈分管副总裁审批；<br>
+      ⑤ 双方法定代表人/授权签字代表签署。
+      </div>
+    </div>
+  `;
+  $('modal').classList.add('show');
+}
+
+function closeModal(){$('modal').classList.remove('show')}
+
+function downloadSignoff(){
+  var c=state.contracts[state.currentContract];
+  var rev=state.reviewStatus[state.currentContract];
+  if(!rev.isComplete){toast('请先完成审查','error');return}
+  var found=c.risks.filter(r=>rev.riskMap[r.id]?.found);
+  var hi=found.filter(r=>r.level==='high');
+  var md=found.filter(r=>r.level==='medium');
+  var lo=found.filter(r=>r.level==='low');
+  var accCt=found.filter(r=>rev.riskMap[r.id].accepted).length;
+  var conclusion = hi.length>0 ? '修改后签署' : md.length>0 ? '修改后签署' : '同意签署';
+  var lines=[];
+  lines.push('═'.repeat(70));
+  lines.push('                  法务部审查签批意见书');
+  lines.push('═'.repeat(70));
+  lines.push('');
+  lines.push('  一、案件基本信息');
+  lines.push('  ─────────────────────────────────────────────────────────────');
+  lines.push('    合同名称：'+c.title);
+  lines.push('    合同编号：'+c.code);
+  lines.push('    合同类型：'+c.type);
+  lines.push('    合同金额：'+c.amount);
+  lines.push('    甲方：'+(c.parties.a?.name||''));
+  lines.push('    乙方：'+(c.parties.b?.name||''));
+  lines.push('    审核日期：'+fmtDate()+' '+fmtTime());
+  lines.push('    审核引擎：大中矿业 AI 法务审核智能体 v4.0');
+  lines.push('');
+  lines.push('  二、AI 审查结论');
+  lines.push('  ─────────────────────────────────────────────────────────────');
+  lines.push('    共识别风险 '+found.length+' 项');
+  lines.push('    ├─ 高风险：'+hi.length+' 项');
+  lines.push('    ├─ 中风险：'+md.length+' 项');
+  lines.push('    └─ 低风险：'+lo.length+' 项');
+  lines.push('    法务部已采纳建议 '+accCt+' 项');
+  lines.push('');
+  if(hi.length){
+    lines.push('  三、必须修改事项（高风险）');
+    lines.push('  ─────────────────────────────────────────────────────────────');
+    hi.forEach(r=>{
+      lines.push('    '+r.no+'  '+r.clause+'  '+r.title);
+      lines.push('      建议：'+stripHtml(r.suggest).slice(0,200));
+      lines.push('      依据：'+stripHtml(r.basis));
+      lines.push('');
+    });
+  }
+  if(md.length){
+    lines.push('  四、建议修改事项（中风险）');
+    lines.push('  ─────────────────────────────────────────────────────────────');
+    md.forEach(r=>{
+      lines.push('    '+r.no+'  '+r.clause+'  '+r.title);
+    });
+    lines.push('');
+  }
+  lines.push('  五、法务部签批结论');
+  lines.push('  ─────────────────────────────────────────────────────────────');
+  lines.push('    结论：'+conclusion);
+  if(hi.length>0)lines.push('    备注：需先完成 '+hi.length+' 项高风险条款的修改，由对方法务确认后再行签署。');
+  else if(md.length>0)lines.push('    备注：建议争取完成 '+md.length+' 项中风险条款的修改。');
+  else lines.push('    备注：本合同条款总体合规，建议直接签署。');
+  lines.push('');
+  lines.push('    下一步行动：');
+  lines.push('    ① 由商务部门将本审查意见与对方法务沟通');
+  lines.push('    ② 完成补充协议草拟（基于 AI 修改建议）');
+  lines.push('    ③ 法务部复核确认');
+  lines.push('    ④ 报呈分管副总裁审批');
+  lines.push('    ⑤ 双方法定代表人/授权签字代表签署');
+  lines.push('');
+  lines.push('  签批：____________________     日期：__________');
+  lines.push('  (法务总监 张律师)');
+  lines.push('');
+  lines.push('═'.repeat(70));
+  triggerDownload(c.title+' · 法务签批意见书.txt',lines.join('\n'));
+  toast('✓ 签批意见书已下载');
+}
+
+/* ═══════════════ INIT ═══════════════ */
+function init(){
+  $('startBtn').addEventListener('click',startReview);
+  setupUpload();
+  // close modal on backdrop
+  $('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+  rerenderAll();updateButtons();
+  setInterval(()=>{$('curTime').textContent=fmtTime()},1000);
+  $('curTime').textContent=fmtTime();
+}
+init();
+</script>
+</body>
+</html>
