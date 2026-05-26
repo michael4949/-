@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT 智能体 · Lovart.ai</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>PPT 智能体</h1>
+      <p class="subtitle">基于 lovart.ai 自动生成设计稿</p>
+    </header>
+
+    <section class="card">
+      <label for="prompt">主题 / 提示词</label>
+      <textarea id="prompt" rows="4"
+        placeholder="例如：一份关于 2026 年 AI 行业趋势的 PPT 封面，深蓝色科技感，极简风格"></textarea>
+
+      <label for="slides">需要的张数</label>
+      <input id="slides" type="number" min="1" max="10" value="3">
+
+      <button id="generate-btn">开始生成</button>
+    </section>
+
+    <section id="status" class="card hidden">
+      <h2>任务状态</h2>
+      <p id="status-message">等待中…</p>
+      <div class="spinner" id="spinner"></div>
+    </section>
+
+    <section id="results" class="card hidden">
+      <h2>生成结果</h2>
+      <div id="result-grid" class="result-grid"></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

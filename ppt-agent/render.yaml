@@ -1,0 +1,23 @@
+# Deployment config for Render (https://render.com).
+# If this repo gets connected to Render as a Blueprint, Render reads this file.
+# If you keep it in a subdirectory, set the service up manually using these values.
+services:
+  - type: web
+    name: ppt-agent
+    runtime: docker
+    dockerfilePath: ./ppt-agent/backend/Dockerfile
+    dockerContext: ./ppt-agent
+    plan: starter
+    envVars:
+      - key: LOVART_EMAIL
+        sync: false       # set in Render dashboard, NOT in this file
+      - key: LOVART_PASSWORD
+        sync: false       # set in Render dashboard, NOT in this file
+      - key: HEADLESS
+        value: "true"
+      - key: ALLOW_ORIGINS
+        value: "*"
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
