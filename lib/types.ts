@@ -246,3 +246,91 @@ export interface DistrictUsage {
   lat: number;
   lng: number;
 }
+
+export type MaturityLevel = "mature" | "scaling" | "pilot" | "emerging";
+
+// 场景价值指标集
+export interface ScenarioStats {
+  code: string;
+  name: string;
+  desc: string;
+  color: string;
+  industries: string[];
+  // 价值
+  enterprises: number;
+  monthActiveEnterprises: number;
+  totalCalls: number;
+  totalTokens: number;
+  totalCostSaved: number; // 元
+  totalHoursSaved: number; // 工时
+  avgEfficiencyGain: number; // 0-1
+  avgROI: number; // 倍数
+  monthlyGrowth: number; // -1 ~ +∞
+  maturity: MaturityLevel;
+  // 时序
+  dailyCalls: number[];      // 365
+  dailyCostSaved: number[];  // 365
+  dailyUsageHours: number[]; // 365
+  // 排序辅助
+  rank: number;
+}
+
+// 行业 × 场景 交叉
+export interface IndustryScenarioCell {
+  industryCode: string;
+  industryName: string;
+  scenarioCode: string;
+  scenarioName: string;
+  penetration: number; // 0-1：本行业企业中使用该场景的比例
+  enterprises: number;
+  costSaved: number;
+  efficiencyGain: number; // 0-1
+  maturity: MaturityLevel;
+  // 0-100 综合得分（penetration × maturity 权重 × efficiency）
+  heat: number;
+}
+
+// 标杆企业案例
+export interface BenchmarkCase {
+  id: string;
+  enterpriseId: string;
+  enterpriseName: string;
+  industryCode: string;
+  industryName: string;
+  scenarioCode: string;
+  scenarioName: string;
+  scenarioColor: string;
+  beforeMetric: string;
+  afterMetric: string;
+  efficiencyGain: number; // %
+  costSavedMonthly: number; // 元
+  hoursSavedMonthly: number;
+  roi: number;
+  durationMonths: number;
+  testimonial: string;
+}
+
+// 实时场景价值事件（替代部分调度日志的视觉地位）
+export interface ScenarioValueEvent {
+  id: string;
+  ts: string;
+  enterpriseId: string;
+  enterpriseName: string;
+  industryCode: string;
+  scenarioCode: string;
+  scenarioName: string;
+  action: string;     // 例："生成 12 份质检报告"
+  valueDelta: string; // 例："节省 5.4 小时人工 · 抵扣 ¥ 18"
+}
+
+// 产业价值大盘 KPI
+export interface IndustryValueKPI {
+  totalCostSavedYTD: number;     // 累计降本增效金额 (元)
+  totalHoursSavedYTD: number;    // 累计释放工时
+  activeScenarios: number;        // 在用场景数
+  benefitedEnterprises: number;   // 受益企业数
+  avgEfficiencyGain: number;      // 平均效率提升 %
+  avgROI: number;                 // 平均 ROI
+  todayCostSaved: number;
+  todayHoursSaved: number;
+}

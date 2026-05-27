@@ -18,6 +18,7 @@ import {
   VOUCHER_TYPES,
   POLICY_TAGS,
   APP_SCENARIOS,
+  MATURITY_LEVELS,
   ENT_PREFIXES,
   ENT_CORES,
   ENT_SUFFIXES,
@@ -38,6 +39,12 @@ import type {
   IndustryUsage,
   ModelUsage,
   DistrictUsage,
+  ScenarioStats,
+  IndustryScenarioCell,
+  BenchmarkCase,
+  ScenarioValueEvent,
+  IndustryValueKPI,
+  MaturityLevel,
 } from "../types";
 
 // ===== 配置 =====
@@ -759,6 +766,307 @@ export function generateAll() {
     };
   });
 
+  // ===== 场景价值数据扩展 =====
+  // 17. 场景价值指标集（含 365 天时序）
+  const scenarioStats: ScenarioStats[] = APP_SCENARIOS.map((sc, idx) => {
+    // 基线参数依"成熟度"取值
+    const baseByMaturity: Record<string, { ents: [number, number]; eff: [number, number]; growth: [number, number] }> = {
+      mature: { ents: [800, 2400], eff: [0.35, 0.6], growth: [0.08, 0.22] },
+      scaling: { ents: [220, 800], eff: [0.28, 0.55], growth: [0.22, 0.55] },
+      pilot: { ents: [40, 220], eff: [0.18, 0.45], growth: [0.45, 0.95] },
+      emerging: { ents: [8, 60], eff: [0.12, 0.38], growth: [0.85, 1.8] },
+    };
+    const b = baseByMaturity[sc.baseMaturity];
+    const enterprises = randInt(rng, b.ents[0], b.ents[1]);
+    const monthActive = Math.floor(enterprises * randFloat(rng, 0.55, 0.85));
+    const avgEff = randFloat(rng, b.eff[0], b.eff[1]);
+    const growth = randFloat(rng, b.growth[0], b.growth[1]);
+
+    // 时序：年初到当前增长 trend，叠加周末/月末效应
+    const dailyCalls: number[] = [];
+    const dailyCostSaved: number[] = [];
+    const dailyUsageHours: number[] = [];
+    const baseDayCalls = Math.floor(enterprises * randFloat(rng, 40, 180)); // 每企业日均 40-180 次
+    for (let day = DAYS - 1; day >= 0; day--) {
+      const progress = (DAYS - 1 - day) / DAYS;
+      const trend = 0.4 + progress * (1 + growth); // 趋势上行
+      const date = new Date();
+      date.setDate(date.getDate() - day);
+      const dow = date.getDay();
+      const weekly = dow === 0 || dow === 6 ? 0.55 : 1.0;
+      const noise = 0.85 + (Math.sin(day * 1.4 + idx) + Math.cos(day * 2.3 + idx)) * 0.06 + rng() * 0.15;
+      const factor = trend * weekly * noise;
+
+      const calls = Math.floor(baseDayCalls * factor);
+      // 每次调用平均节省金额 = avgEff * 60 元
+      const costSaved = Math.floor(calls * randFloat(rng, 0.5, 4.2));
+      // 每次调用平均节省 0.1-0.4 工时
+      const hoursSaved = Math.floor(calls * randFloat(rng, 0.05, 0.35) * 10) / 10;
+      dailyCalls.push(calls);
+      dailyCostSaved.push(costSaved);
+      dailyUsageHours.push(hoursSaved);
+    }
+
+    const totalCalls = dailyCalls.reduce((s, v) => s + v, 0);
+    const totalTokens = totalCalls * randInt(rng, 1200, 4200);
+    const totalCostSaved = dailyCostSaved.reduce((s, v) => s + v, 0);
+    const totalHoursSaved = dailyUsageHours.reduce((s, v) => s + v, 0);
+    const avgROI = Math.round((randFloat(rng, 3.5, 14) + (sc.baseMaturity === "mature" ? 2 : 0)) * 10) / 10;
+
+    return {
+      code: sc.code,
+      name: sc.name,
+      desc: sc.desc,
+      color: sc.color,
+      industries: [...sc.industries] as string[],
+      enterprises,
+      monthActiveEnterprises: monthActive,
+      totalCalls,
+      totalTokens,
+      totalCostSaved,
+      totalHoursSaved: Math.floor(totalHoursSaved),
+      avgEfficiencyGain: avgEff,
+      avgROI,
+      monthlyGrowth: growth,
+      maturity: sc.baseMaturity as MaturityLevel,
+      dailyCalls,
+      dailyCostSaved,
+      dailyUsageHours,
+      rank: 0,
+    } as ScenarioStats;
+  });
+  // 排名按累计降本金额
+  scenarioStats.sort((a, b) => b.totalCostSaved - a.totalCostSaved);
+  scenarioStats.forEach((s, i) => (s.rank = i + 1));
+
+  // 18. 行业 × 场景 矩阵
+  const industryScenarioMatrix: IndustryScenarioCell[] = [];
+  for (const ind of INDUSTRIES) {
+    const indEnterprises = enterprises.filter((e) => e.industryCode === ind.code).length;
+    for (const sc of scenarioStats) {
+      // 该场景列出的目标行业渗透率高，其他行业渗透率低
+      const isTarget = sc.industries.includes(ind.code);
+      const basePen = isTarget ? randFloat(rng, 0.18, 0.52) : randFloat(rng, 0.005, 0.08);
+      // 成熟度调整
+      const matFactor = { mature: 1.4, scaling: 1.0, pilot: 0.6, emerging: 0.25 }[sc.maturity];
+      const penetration = Math.min(0.88, basePen * matFactor);
+      const cellEnts = Math.floor(indEnterprises * penetration);
+      const effGain = sc.avgEfficiencyGain * (isTarget ? 1 : randFloat(rng, 0.4, 0.8));
+      const costSaved = Math.floor(sc.totalCostSaved * (cellEnts / Math.max(1, sc.enterprises)) * randFloat(rng, 0.6, 1.4));
+      const cellMaturity: MaturityLevel = isTarget
+        ? sc.maturity
+        : sc.maturity === "mature"
+          ? "scaling"
+          : sc.maturity === "scaling"
+            ? "pilot"
+            : "emerging";
+
+      // 综合热度 0-100
+      const heat = Math.round(
+        Math.min(100,
+          (penetration * 100 * 0.55) +
+          (effGain * 100 * 0.25) +
+          ({ mature: 20, scaling: 14, pilot: 8, emerging: 4 }[cellMaturity])
+        )
+      );
+
+      industryScenarioMatrix.push({
+        industryCode: ind.code,
+        industryName: ind.name,
+        scenarioCode: sc.code,
+        scenarioName: sc.name,
+        penetration,
+        enterprises: cellEnts,
+        costSaved,
+        efficiencyGain: effGain,
+        maturity: cellMaturity,
+        heat,
+      });
+    }
+  }
+
+  // 19. 标杆企业案例库
+  const caseTemplates: Record<string, { before: string[]; after: string[]; testimonial: string[] }> = {
+    kefu: {
+      before: ["人工客服日均接 320 通", "客服坐席 48 人，月薪支出 ¥ 38 万", "夜班缺人，工单堆积 12%"],
+      after: ["AI + 人工日均接 1850 通", "坐席压缩至 22 人，AI 自助率 73%", "7×24 自动应答，工单堆积 1.4%"],
+      testimonial: ["现在新员工培训也靠 AI，上手时间从 14 天压缩到 3 天", "客户满意度反而提升了 6 分", "晚上不用值班了，公司决定把省下来的预算投到客户体验"],
+    },
+    qc: {
+      before: ["质检员日均检 800 件，漏检率 1.8%", "夜班 4 班倒，每月误工成本 ¥ 18 万", "缺陷分类靠经验，新人需 6 个月培养"],
+      after: ["AI 视觉日均检 5200 件，漏检率 0.4%", "夜班保留 1 人巡检，月成本 ¥ 4 万", "缺陷自动分类标注，新人 2 周顶岗"],
+      testimonial: ["以前最怕新订单，现在产线敢接 3 倍订单", "省下来的人不是裁了，转去做工艺改进", "客户验厂指标全绿"],
+    },
+    doc: {
+      before: ["合同审查 1 份要 3 小时，月处理 80 份", "财务凭证人工录入错误率 2.3%", "客户报告交付周期 5 天"],
+      after: ["合同审查 1 份 8 分钟，月处理 580 份", "票据 OCR + LLM 校核，错误率 0.06%", "客户报告 1 天交付"],
+      testimonial: ["法务团队从救火队变成主动审查", "财务月底加班彻底没了", "客户主动给我们涨了服务费"],
+    },
+    risk: {
+      before: ["反欺诈规则维护 12 个工程师", "异常单识别滞后 48 小时", "误杀率 8%，客户投诉多"],
+      after: ["规则由 LLM 辅助生成与维护", "异常单识别 6 分钟内", "误杀率压到 1.2%，投诉降 80%"],
+      testimonial: ["风控团队转型搞策略而不是搞规则", "节省的 IT 预算够再开 2 条业务线", "信贷不良率创历史新低"],
+    },
+    "med-img": {
+      before: ["每片 CT 医生平均看 12 分钟", "门诊积压排到 2 周外", "肺结节漏诊偶发"],
+      after: ["AI 辅助每片 3 分钟", "门诊次日可约", "AI 双读 + 医生复核，漏诊率显著下降"],
+      testimonial: ["医生不再盯屏盯到颈椎病", "急诊周转时间砍半", "医院评级提了一个等级"],
+    },
+    code: {
+      before: ["研发人均日产代码 130 行", "Bug 修复平均周期 38 小时", "新人独立开发需 3 个月"],
+      after: ["Copilot 加持后日均 420 行", "Bug 修复 9 小时", "新人 6 周独立开发"],
+      testimonial: ["人均效率提升 2.3 倍", "团队规模没扩，多发了 4 个产品", "招聘门槛也降了"],
+    },
+    mkt: {
+      before: ["双 11 文案策划 12 人月", "素材 A/B 测试一轮 2 周", "投放 ROI 1.8"],
+      after: ["AI 一周出 3000 套文案", "A/B 自动迭代 1 天 1 轮", "ROI 提升到 3.6"],
+      testimonial: ["营销团队从执行变成审稿", "活动节奏快了一倍", "广告主自己来找我们做联合营销"],
+    },
+    logi: {
+      before: ["运力调度依赖老司机经验", "空驶率 28%", "客户取消订单率 11%"],
+      after: ["全局调度 AI + 司机端 App", "空驶率 14%", "客户取消率 3.2%"],
+      testimonial: ["油费一年省 ¥ 1100 万", "司机收入反而涨了", "客户复购率从 42% 提升到 68%"],
+    },
+    "edu-tutor": {
+      before: ["1 个老师辅导 30 个学生", "作业批改 2 小时/班", "弱科补习等通知"],
+      after: ["AI 1 对 1 全天候陪练", "批改 8 分钟/班", "实时弱点推送，主动补习"],
+      testimonial: ["家长群再没人投诉", "区期末平均分提升 11 分", "民办校都来咨询合作"],
+    },
+    meeting: {
+      before: ["1 小时会议要 1 个秘书记 2 小时", "纪要质量参差不齐", "待办遗忘率 40%"],
+      after: ["纪要 30 秒生成，待办自动派单", "格式标准，关键点自动高亮", "待办遗忘率 6%"],
+      testimonial: ["秘书岗 5 人减到 1 人审阅", "会议数量没变，会后执行变快", "管理层会议效率翻倍"],
+    },
+    rpa: {
+      before: ["发票录入 + 报销审批人工 14 人", "月末加班 80 小时", "错误率 1.2%"],
+      after: ["数字员工值守，人工 3 人复核", "月末不加班", "错误率 0.08%"],
+      testimonial: ["释放出来的 11 个人都转岗财务分析", "公司财务管理上了一个台阶", "审计周期从 1 周缩到 1 天"],
+    },
+    legal: {
+      before: ["律师日均审 5 份合同", "客户响应 24 小时", "案件检索 3 天"],
+      after: ["AI 初筛 + 律师复审，日均 32 份", "客户响应 30 分钟", "案件检索 20 分钟"],
+      testimonial: ["律所规模没扩，营收涨 2 倍", "客户复购率创新高", "年轻律师有时间出庭历练"],
+    },
+    design: {
+      before: ["概念稿 1 周 3 版", "客户改稿率 60%", "设计师离职率 22%"],
+      after: ["AI 辅助 1 天 30 版", "客户改稿率 18%", "设计师做更高阶工作，离职率 8%"],
+      testimonial: ["以前最烦改稿，现在 AI 替我背锅", "客户决策周期短了一半", "团队成员都说工作变开心"],
+    },
+    agri: {
+      before: ["1500 亩稻田巡查需 5 人 3 天", "病虫害发现滞后 7 天", "肥料用量经验主义"],
+      after: ["卫星 + AI 1 小时出报告", "病虫害 2 天内识别", "精准施肥，减肥 20%"],
+      testimonial: ["亩产增加 8%", "投入减 15%", "我们种粮户对 AI 不再陌生"],
+    },
+    qa: {
+      before: ["新员工查制度要找老员工", "客服答疑准确率 78%", "知识库更新滞后 2 个月"],
+      after: ["AI 知识库 RAG 实时答疑", "答疑准确率 96%", "新文档当天即生效"],
+      testimonial: ["老员工终于不用一直被打断了", "客户答疑专业度大幅提升", "新人融入时间从 30 天压到 7 天"],
+    },
+    hr: {
+      before: ["每个 JD 简历筛选 8 小时", "面试通过率波动大", "招聘周期 35 天"],
+      after: ["AI 初筛 20 分钟出 TOP 10", "AI 面试客观稳定", "招聘周期 12 天"],
+      testimonial: ["HR 团队从筛简历解放出来做 BP", "新人到岗速度翻 3 倍", "用人部门满意度大涨"],
+    },
+  };
+
+  const benchmarkCases: BenchmarkCase[] = [];
+  // 取 TOP 12 场景，每个挑 1 个匹配行业的代表企业
+  for (let i = 0; i < Math.min(12, scenarioStats.length); i++) {
+    const sc = scenarioStats[i];
+    const targetIndustry = sc.industries[0];
+    const candidates = enterprises.filter((e) => e.industryCode === targetIndustry && e.certified);
+    if (candidates.length === 0) continue;
+    const ent = candidates[Math.floor(rng() * candidates.length)];
+    const tpl = caseTemplates[sc.code] || caseTemplates.kefu;
+    const monthSaved = Math.floor((sc.totalCostSaved / Math.max(1, sc.enterprises)) * randFloat(rng, 0.8, 1.6) / 12);
+    const monthHours = Math.floor((sc.totalHoursSaved / Math.max(1, sc.enterprises)) * randFloat(rng, 0.8, 1.6) / 12);
+    const ind = INDUSTRIES.find((x) => x.code === ent.industryCode)!;
+    benchmarkCases.push({
+      id: "CASE" + pad(i + 1, 3),
+      enterpriseId: ent.id,
+      enterpriseName: ent.name,
+      industryCode: ent.industryCode,
+      industryName: ind.name,
+      scenarioCode: sc.code,
+      scenarioName: sc.name,
+      scenarioColor: sc.color,
+      beforeMetric: pick(rng, tpl.before),
+      afterMetric: pick(rng, tpl.after),
+      efficiencyGain: Math.round(sc.avgEfficiencyGain * randFloat(rng, 1.1, 1.6) * 100),
+      costSavedMonthly: monthSaved,
+      hoursSavedMonthly: monthHours,
+      roi: sc.avgROI,
+      durationMonths: randInt(rng, 3, 28),
+      testimonial: pick(rng, tpl.testimonial),
+    });
+  }
+
+  // 20. 场景价值实时流水（替代部分调度日志的视觉地位）
+  const valueEvents: ScenarioValueEvent[] = [];
+  const actionTemplates: Record<string, { actions: string[]; values: (sec: number) => string[] }> = {
+    kefu: { actions: ["处理客户咨询 {n} 通", "完成对话 {n} 轮", "解决工单 {n} 件"], values: (n) => [`节省 ${(n * 0.08).toFixed(1)} 小时人工`, `自动结案率 ${randInt(rng, 65, 92)}%`] },
+    qc: { actions: ["完成质检 {n} 件", "识别缺陷 {n} 处", "出具检测报告 {n} 份"], values: (n) => [`节省 ${(n * 0.04).toFixed(1)} 小时人工`, `避免不良品流出 ${randInt(rng, 0, 8)} 件`] },
+    doc: { actions: ["审查合同 {n} 份", "抽取财务凭证 {n} 张", "生成报告 {n} 份"], values: (n) => [`节省 ${(n * 0.25).toFixed(1)} 小时人工`, `抵扣 ¥ ${randInt(rng, 8, 120)}`] },
+    code: { actions: ["补全代码 {n} 段", "生成测试 {n} 个", "代码评审 {n} 次"], values: (n) => [`等效编写 ${(n * 12).toFixed(0)} 行代码`, `节省 ${(n * 0.15).toFixed(1)} 小时`] },
+    mkt: { actions: ["生成营销文案 {n} 套", "出图 {n} 张", "A/B 文案 {n} 组"], values: (n) => [`节省 ${(n * 0.4).toFixed(1)} 小时创作`, `预估 ROI ${randFloat(rng, 1.8, 4.2).toFixed(1)}`] },
+    risk: { actions: ["识别异常交易 {n} 笔", "评分授信 {n} 单", "反洗钱筛查 {n} 条"], values: (n) => [`拦截可疑 ${randInt(rng, 0, 6)} 笔`, `节省 ${(n * 0.05).toFixed(1)} 小时审核`] },
+    "med-img": { actions: ["辅助阅片 {n} 张", "出具影像报告 {n} 份"], values: (n) => [`节省医生 ${(n * 0.18).toFixed(1)} 小时`, `异常提示 ${randInt(rng, 0, 4)} 处`] },
+    "edu-tutor": { actions: ["辅导学生 {n} 人次", "批改作业 {n} 份"], values: (n) => [`节省教师 ${(n * 0.12).toFixed(1)} 小时`, `生成弱点报告 ${randInt(rng, 1, 12)} 份`] },
+    meeting: { actions: ["生成会议纪要 {n} 份", "提取待办 {n} 条"], values: (n) => [`节省 ${(n * 1.4).toFixed(1)} 小时`, `待办流转率 ${randInt(rng, 85, 98)}%`] },
+    rpa: { actions: ["执行流程 {n} 次", "完成审批 {n} 单"], values: (n) => [`节省 ${(n * 0.3).toFixed(1)} 小时`, `零差错执行`] },
+    legal: { actions: ["合同审查 {n} 份", "案件检索 {n} 次"], values: (n) => [`节省 ${(n * 0.8).toFixed(1)} 小时`, `检出风险 ${randInt(rng, 0, 5)} 处`] },
+    design: { actions: ["概念稿 {n} 版", "材质渲染 {n} 张"], values: (n) => [`节省 ${(n * 0.6).toFixed(1)} 小时`, `等效设计师 ${randInt(rng, 1, 3)} 人天`] },
+    agri: { actions: ["巡田分析 {n} 块", "病虫害识别 {n} 处"], values: (n) => [`节省 ${(n * 4).toFixed(0)} 小时巡田`, `预防损失 ¥ ${randInt(rng, 200, 8000)}`] },
+    qa: { actions: ["回答问题 {n} 个", "知识匹配 {n} 次"], values: (n) => [`节省 ${(n * 0.06).toFixed(1)} 小时`, `首答准确率 ${randInt(rng, 88, 98)}%`] },
+    hr: { actions: ["筛选简历 {n} 份", "AI 面试 {n} 人"], values: (n) => [`节省 ${(n * 0.2).toFixed(1)} 小时`, `优选率 ${randInt(rng, 12, 38)}%`] },
+  };
+  for (let i = 0; i < 80; i++) {
+    const sc = pickWeighted(rng, scenarioStats.map((s) => ({ item: s, weight: s.totalCalls / 1e6 })));
+    const ent = pick(rng, enterprises.filter((e) => e.certified) as Enterprise[]);
+    const tpl = actionTemplates[sc.code] || actionTemplates.kefu;
+    const n = randInt(rng, 1, 60);
+    const action = pick(rng, tpl.actions).replace("{n}", String(n));
+    const valueArr = tpl.values(n);
+    const valueDelta = pick(rng, valueArr);
+    const ts = new Date();
+    ts.setSeconds(ts.getSeconds() - randInt(rng, 0, 60 * 60 * 4));
+    valueEvents.push({
+      id: "EV" + pad(i + 1, 4),
+      ts: ts.toISOString(),
+      enterpriseId: ent.id,
+      enterpriseName: ent.name,
+      industryCode: ent.industryCode,
+      scenarioCode: sc.code,
+      scenarioName: sc.name,
+      action,
+      valueDelta,
+    });
+  }
+  valueEvents.sort((a, b) => b.ts.localeCompare(a.ts));
+
+  // 21. 产业价值大盘 KPI
+  const totalCostSavedYTD = scenarioStats.reduce((s, x) => s + x.totalCostSaved, 0);
+  const totalHoursSavedYTD = scenarioStats.reduce((s, x) => s + x.totalHoursSaved, 0);
+  const totalScenarioEnterprises = new Set<string>();
+  // 估算受益企业数
+  scenarioStats.forEach((sc) => {
+    for (let i = 0; i < sc.enterprises && i < enterprises.length; i++) {
+      totalScenarioEnterprises.add(enterprises[i].id);
+    }
+  });
+  const todayCostSaved = scenarioStats.reduce((s, x) => s + x.dailyCostSaved[x.dailyCostSaved.length - 1], 0);
+  const todayHoursSaved = scenarioStats.reduce((s, x) => s + x.dailyUsageHours[x.dailyUsageHours.length - 1], 0);
+  const valueKpi: IndustryValueKPI = {
+    totalCostSavedYTD,
+    totalHoursSavedYTD,
+    activeScenarios: scenarioStats.length,
+    benefitedEnterprises: Math.min(enterprises.length, scenarioStats.reduce((s, x) => s + x.enterprises, 0)),
+    avgEfficiencyGain: scenarioStats.reduce((s, x) => s + x.avgEfficiencyGain, 0) / scenarioStats.length,
+    avgROI: scenarioStats.reduce((s, x) => s + x.avgROI, 0) / scenarioStats.length,
+    todayCostSaved,
+    todayHoursSaved: Math.floor(todayHoursSaved),
+  };
+
   return {
     enterprises,
     models,
@@ -779,6 +1087,12 @@ export function generateAll() {
     industryUsage,
     modelUsage,
     districtUsage,
+    // 新增
+    scenarioStats,
+    industryScenarioMatrix,
+    benchmarkCases,
+    valueEvents,
+    valueKpi,
   };
 }
 

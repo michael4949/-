@@ -96,18 +96,30 @@ export const POLICY_TAGS = [
 
 // 应用场景
 export const APP_SCENARIOS = [
-  { code: "kefu", name: "智能客服", industries: ["BIZ", "FIN", "LOG"] },
-  { code: "qa", name: "知识问答", industries: ["EDU", "MED", "FIN"] },
-  { code: "doc", name: "文档智能", industries: ["FIN", "EDU", "MED", "LOG"] },
-  { code: "qc", name: "工业质检", industries: ["MFG"] },
-  { code: "design", name: "辅助设计", industries: ["MFG", "CUL"] },
-  { code: "mkt", name: "营销文案", industries: ["BIZ", "CUL"] },
-  { code: "code", name: "智能编程", industries: ["MFG", "FIN", "EDU"] },
-  { code: "med-img", name: "医学影像", industries: ["MED"] },
-  { code: "edu-tutor", name: "AI 助教", industries: ["EDU"] },
-  { code: "agri", name: "智慧农情", industries: ["AGR"] },
-  { code: "logi", name: "智能调度", industries: ["LOG"] },
-  { code: "risk", name: "风控反欺诈", industries: ["FIN"] },
+  { code: "kefu", name: "智能客服", industries: ["BIZ", "FIN", "LOG"], color: "#3b82f6", icon: "headset", baseMaturity: "mature", desc: "替代/辅助人工客服，7×24 自动答疑" },
+  { code: "qa", name: "知识问答", industries: ["EDU", "MED", "FIN"], color: "#22d3ee", icon: "book", baseMaturity: "scaling", desc: "企业知识库精确问答 + RAG 引用" },
+  { code: "doc", name: "文档智能", industries: ["FIN", "EDU", "MED", "LOG"], color: "#06b6d4", icon: "fileText", baseMaturity: "mature", desc: "合同/报告/票据自动抽取与生成" },
+  { code: "qc", name: "工业质检", industries: ["MFG"], color: "#a855f7", icon: "scan", baseMaturity: "scaling", desc: "视觉缺陷识别，替代人眼质检" },
+  { code: "design", name: "辅助设计", industries: ["MFG", "CUL"], color: "#ec4899", icon: "wand", baseMaturity: "pilot", desc: "工业/平面/3D 概念设计辅助" },
+  { code: "mkt", name: "营销文案", industries: ["BIZ", "CUL"], color: "#f59e0b", icon: "megaphone", baseMaturity: "mature", desc: "电商/广告文案与图文素材生成" },
+  { code: "code", name: "智能编程", industries: ["MFG", "FIN", "EDU"], color: "#10b981", icon: "code", baseMaturity: "scaling", desc: "IDE 辅助、代码补全与生成" },
+  { code: "med-img", name: "医学影像", industries: ["MED"], color: "#f43f5e", icon: "scan", baseMaturity: "pilot", desc: "CT/MRI/X 光辅助诊断" },
+  { code: "edu-tutor", name: "AI 助教", industries: ["EDU"], color: "#8b5cf6", icon: "graduation", baseMaturity: "scaling", desc: "K12/高校个性化辅导与作业批改" },
+  { code: "agri", name: "智慧农情", industries: ["AGR"], color: "#84cc16", icon: "leaf", baseMaturity: "pilot", desc: "卫星 + 大模型作物长势监测" },
+  { code: "logi", name: "智能调度", industries: ["LOG"], color: "#6366f1", icon: "truck", baseMaturity: "scaling", desc: "运力/路径/库存协同优化" },
+  { code: "risk", name: "风控反欺诈", industries: ["FIN"], color: "#dc2626", icon: "shield", baseMaturity: "scaling", desc: "信贷反欺诈、洗钱识别、信用评分" },
+  { code: "meeting", name: "智能会议纪要", industries: ["BIZ", "FIN", "EDU", "MFG"], color: "#0891b2", icon: "mic", baseMaturity: "scaling", desc: "会议实时转录、纪要、待办抽取" },
+  { code: "rpa", name: "数字员工", industries: ["BIZ", "FIN", "LOG"], color: "#7c3aed", icon: "bot", baseMaturity: "pilot", desc: "RPA + LLM 处理重复性流程" },
+  { code: "legal", name: "法律文书", industries: ["FIN", "BIZ"], color: "#475569", icon: "scale", baseMaturity: "pilot", desc: "合同审查、法务问答、起诉状起草" },
+  { code: "hr", name: "智能招聘", industries: ["BIZ", "FIN", "MFG", "EDU"], color: "#f97316", icon: "users", baseMaturity: "emerging", desc: "简历筛选、AI 面试、人才画像" },
+] as const;
+
+// 场景成熟度
+export const MATURITY_LEVELS = [
+  { code: "mature", name: "成熟", color: "#10b981", desc: "已大规模应用，效益稳定" },
+  { code: "scaling", name: "规模化", color: "#3b82f6", desc: "正在快速推广，效益显著" },
+  { code: "pilot", name: "试点", color: "#f59e0b", desc: "试点验证中，少量落地" },
+  { code: "emerging", name: "新兴", color: "#a855f7", desc: "前沿探索，待观察" },
 ] as const;
 
 // 企业名称生成片段
