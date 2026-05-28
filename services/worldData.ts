@@ -1,5 +1,6 @@
 import { feature, mesh } from 'topojson-client';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import bundled from '../data/atlas/countries-110m.json';
 
 /** Cached world atlas data loaded once on app boot. */
 export interface WorldAtlas {
@@ -10,32 +11,10 @@ export interface WorldAtlas {
 
 let cached: Promise<WorldAtlas> | null = null;
 
-const SOURCES = [
-  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-  'https://unpkg.com/world-atlas@2/countries-110m.json',
-];
-
-async function fetchOne(url: string): Promise<any> {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`world-atlas fetch ${r.status} from ${url}`);
-  return r.json();
-}
-
 export function loadWorld(): Promise<WorldAtlas> {
   if (cached) return cached;
   cached = (async () => {
-    let topo: any | null = null;
-    let lastErr: unknown = null;
-    for (const url of SOURCES) {
-      try {
-        topo = await fetchOne(url);
-        break;
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-    if (!topo) throw lastErr ?? new Error('world-atlas unreachable');
-
+    const topo: any = bundled;
     const countriesTopo = topo.objects.countries;
     const landTopo = topo.objects.land;
     const countries = feature(topo, countriesTopo) as unknown as FeatureCollection<Geometry, { name: string }>;
