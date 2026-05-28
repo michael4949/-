@@ -1,20 +1,58 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 世界神话地图 · World Mythology Map
 
-# Run and deploy your AI Studio app
+An interactive star-lit map of human storytelling — 189 hand-curated
+myths, legends, and fairy tales from 38 cultures, plottable on either
+a flat naturalEarth1 projection or a draggable 3D orthographic globe.
+Filter by theme (Sun, Flood, Fire, Dragon, Love, …) to surface
+cross-cultural narrative resonances; great-circle arcs connect myths
+that share a motif across continents.
 
-This contains everything you need to run your app locally.
+## Run locally
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ZYraPq2pmcsh3jikviG-CU_QADME2xew
+```bash
+npm install
+echo "GEMINI_API_KEY=your_key_here" > .env.local   # optional, for "Summon Myths"
+npm run dev
+```
 
-## Run Locally
+Open `http://localhost:3000`.
 
-**Prerequisites:**  Node.js
+## Tech
 
+- React 19 + TypeScript + Vite
+- d3-geo + topojson-client (world-atlas@2 fetched at runtime)
+- Tailwind via CDN, custom CSS for nebula / aurora effects
+- Canvas-driven parallax star field with occasional meteors
+- @google/genai for runtime myth expansion (`gemini-2.5-flash`)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Controls
+
+| Key / gesture | Action |
+|---|---|
+| Drag | Rotate globe / pan map |
+| Wheel | Zoom |
+| `G` | Toggle flat ↔ globe |
+| `R` | Auto-rotate (globe only) |
+| `L` | Toggle marker labels |
+| `+` / `-` | Zoom in / out |
+| `Esc` | Clear selection |
+| Click country | Open country detail panel |
+| Click marker | Open story card |
+| Theme chip | Filter + draw cross-culture arcs |
+
+## Data shape
+
+Each seed story (see `data/seeds.ts`) carries:
+
+```ts
+{
+  id, title: { zh, en }, country: 'GRC',
+  culture: { zh, en }, era: 'classical',
+  themes: ['fire', 'hero'],  year: -800,
+  emoji: '🔥', lnglat: [22.4, 39.0],
+  image: 'https://upload.wikimedia.org/...',
+  description: { zh, en },
+}
+```
+
+`generated: true` stories are added at runtime by the Gemini service.

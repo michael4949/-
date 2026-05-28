@@ -1,56 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Strategy Consultant Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#05060d" />
+    <title>世界神话地图 · World Mythology Map</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              sans: ['"Inter"', 'sans-serif'],
+              display: ['"Cinzel"', '"Noto Serif SC"', 'serif'],
+              serif: ['"Cormorant Garamond"', '"Noto Serif SC"', 'serif'],
+              sans: ['"Inter"', '"Noto Sans SC"', 'sans-serif'],
             },
             colors: {
-              corporate: {
-                900: '#0f172a', // Slate 900
-                800: '#1e293b', // Slate 800
-                accent: '#ca8a04', // Yellow 600 (Goldish)
-                light: '#f8fafc', // Slate 50
+              ink: {
+                950: '#03040a',
+                900: '#05060d',
+                800: '#0a0c18',
+                700: '#10131f',
+                600: '#171a2a',
+                500: '#1f2335',
+              },
+              parchment: {
+                50: '#fbf6ea',
+                100: '#f3e9cf',
+                200: '#e7d3a3',
+                300: '#d4b574',
+                400: '#bf964e',
+              },
+              ember: {
+                400: '#ff8a4c',
+                500: '#ff6a2c',
+                600: '#e54b18',
+              },
+              aurora: {
+                violet: '#8b5cf6',
+                blue: '#3b82f6',
+                cyan: '#22d3ee',
+                green: '#34d399',
+                gold: '#fbbf24',
+                rose: '#fb7185',
               }
-            }
+            },
+            animation: {
+              'aurora-spin': 'aurora-spin 40s linear infinite',
+              'twinkle': 'twinkle 4s ease-in-out infinite',
+              'meteor': 'meteor 2.4s ease-in forwards',
+              'float-in': 'float-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both',
+              'fade-in': 'fade-in 0.5s ease both',
+              'pulse-soft': 'pulse-soft 3.6s ease-in-out infinite',
+              'glow-breathe': 'glow-breathe 5s ease-in-out infinite',
+            },
+            keyframes: {
+              'aurora-spin': {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg)' },
+              },
+              'twinkle': {
+                '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                '50%': { opacity: '1', transform: 'scale(1.4)' },
+              },
+              'meteor': {
+                '0%': { transform: 'translate(0,0) scale(0)', opacity: '0' },
+                '10%': { opacity: '1', transform: 'translate(20px, 20px) scale(1)' },
+                '100%': { transform: 'translate(380px, 380px) scale(0.2)', opacity: '0' },
+              },
+              'float-in': {
+                '0%': { opacity: '0', transform: 'translateY(16px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              'fade-in': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              'pulse-soft': {
+                '0%, 100%': { opacity: '0.6' },
+                '50%': { opacity: '1' },
+              },
+              'glow-breathe': {
+                '0%, 100%': { filter: 'drop-shadow(0 0 6px currentColor) drop-shadow(0 0 12px currentColor)' },
+                '50%': { filter: 'drop-shadow(0 0 10px currentColor) drop-shadow(0 0 22px currentColor)' },
+              },
+            },
           },
         },
       }
     </script>
     <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
+      :root {
+        color-scheme: dark;
       }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #03040a;
+        color: #f3e9cf;
+        font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(212, 181, 116, 0.25); border-radius: 999px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(212, 181, 116, 0.55); }
+
+      .nebula-bg {
+        background:
+          radial-gradient(ellipse 80% 50% at 20% 15%, rgba(139, 92, 246, 0.18), transparent 60%),
+          radial-gradient(ellipse 70% 40% at 80% 80%, rgba(59, 130, 246, 0.16), transparent 60%),
+          radial-gradient(ellipse 60% 35% at 50% 50%, rgba(34, 211, 238, 0.10), transparent 65%),
+          radial-gradient(ellipse 90% 60% at 80% 20%, rgba(251, 191, 36, 0.06), transparent 60%),
+          linear-gradient(180deg, #03040a 0%, #05060d 60%, #03040a 100%);
+      }
+
+      .glass {
+        background: rgba(10, 12, 24, 0.62);
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+        border: 1px solid rgba(212, 181, 116, 0.14);
+      }
+      .glass-strong {
+        background: rgba(5, 7, 16, 0.78);
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        border: 1px solid rgba(212, 181, 116, 0.22);
+      }
+
+      .gold-text {
+        background: linear-gradient(135deg, #fbf6ea 0%, #e7d3a3 35%, #bf964e 60%, #e7d3a3 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .marker {
+        position: absolute;
+        will-change: transform, opacity;
+        pointer-events: auto;
+        transform: translate3d(-50%, -50%, 0);
+        font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+        line-height: 1;
+        user-select: none;
+        transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), filter 180ms ease;
+      }
+      .marker:hover {
+        z-index: 50 !important;
+        transform: translate3d(-50%, -50%, 0) scale(1.6);
+      }
+
+      .country-path {
+        transition: fill 220ms ease, stroke 220ms ease, opacity 220ms ease;
+      }
+
+      .label-chip {
+        font-family: 'Cinzel', serif;
+        letter-spacing: 0.08em;
+      }
+
+      .scroll-fade {
+        mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+      }
+
+      @keyframes shimmer {
+        0% { background-position: -400px 0; }
+        100% { background-position: 400px 0; }
+      }
+      .shimmer {
+        background: linear-gradient(90deg, rgba(212,181,116,0.05) 0px, rgba(212,181,116,0.18) 200px, rgba(212,181,116,0.05) 400px);
+        background-size: 800px 100%;
+        animation: shimmer 2.4s linear infinite;
       }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "d3-geo": "https://esm.sh/d3-geo@3.1.1",
+    "d3-array": "https://esm.sh/d3-array@3.2.4",
+    "topojson-client": "https://esm.sh/topojson-client@3.1.0"
   }
 }
 </script>
 </head>
-  <body>
+  <body class="bg-ink-950">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
