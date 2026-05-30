@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
+      // 用相对路径产出，方便部署到任意静态托管（含 GitHub Pages 子路径）
+      base: mode === 'production' ? './' : '/',
       server: {
         port: 3000,
         host: '0.0.0.0',

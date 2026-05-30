@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Link2, Sparkles, Loader2, Settings2, Wand2 } from "lucide-react";
+import { Link2, Sparkles, Loader2, Settings2, Wand2, KeyRound, Check } from "lucide-react";
 import { VideoOptions, ThemeId, AspectRatio } from "../../types";
 import { VOICES } from "../../services/ttsService";
+import { getStoredKey, setStoredKey, envKey } from "../../services/genai";
 
 interface Props {
   onSubmit: (input: string, options: VideoOptions) => void;
@@ -21,6 +22,9 @@ const STYLES = ["兴奋有感染力，像跟朋友安利", "悬念解说，娓�
 const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
   const [input, setInput] = useState("");
   const [showAdv, setShowAdv] = useState(false);
+  const [apiKey, setApiKey] = useState(getStoredKey());
+  const needKey = !envKey(); // 构建期没有密钥（公开托管）时，让用户自填
+  const onKey = (v: string) => { setApiKey(v); setStoredKey(v); };
   const [opt, setOpt] = useState<VideoOptions>({
     durationTarget: 45,
     voiceName: "Kore",
@@ -34,9 +38,10 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
 
   const set = <K extends keyof VideoOptions>(k: K, v: VideoOptions[K]) => setOpt((o) => ({ ...o, [k]: v }));
 
+  const ready = !!input.trim() && (!needKey || !!apiKey.trim());
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() && !isLoading) onSubmit(input.trim(), opt);
+    if (ready && !isLoading) onSubmit(input.trim(), opt);
   };
 
   return (
@@ -52,6 +57,27 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
           粘贴网页链接或文字，AI 帮你读全文、写爆款脚本、中文配音 + 字幕，导出可直接发抖音的竖屏视频。
         </p>
       </div>
+
+      {needKey && (
+        <div className="mb-4 bg-white/5 border border-white/15 rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <KeyRound className="w-4 h-4 text-amber-400" />
+            <span className="text-white/80 text-sm font-medium">先填入你的 Gemini API Key</span>
+            {apiKey && <span className="ml-auto flex items-center gap-1 text-emerald-400 text-xs"><Check className="w-3.5 h-3.5" /> 已保存到本机</span>}
+          </div>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => onKey(e.target.value)}
+            placeholder="粘贴你的 Gemini API Key（仅保存在你浏览器本地，不会上传）"
+            className="w-full bg-black/30 border border-white/15 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/35 focus:outline-none focus:border-amber-400/60 font-mono"
+          />
+          <div className="text-white/40 text-xs mt-2">
+            免费获取：<a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-amber-300 underline">aistudio.google.com/apikey</a>
+            ，密钥只存在你本地浏览器，刷新仍在。
+          </div>
+        </div>
+      )}
 
       <form onSubmit={submit} className="space-y-4">
         <div className="relative">
@@ -158,8 +184,8 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
 
         <button
           type="submit"
-          disabled={isLoading || !input.trim()}
-          className={`w-full rounded-2xl py-4 font-bold text-base flex items-center justify-center gap-2 transition ${isLoading || !input.trim() ? "bg-white/10 text-white/40 cursor-not-allowed" : "bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-0.5"}`}
+          disabled={isLoading || !ready}
+          className={`w-full rounded-2xl py-4 font-bold text-base flex items-center justify-center gap-2 transition ${isLoading || !ready ? "bg-white/10 text-white/40 cursor-not-allowed" : "bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-0.5"}`}
         >
           {isLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> 生成中…</> : <><Sparkles className="w-5 h-5" /> 一键生成视频</>}
         </button>
