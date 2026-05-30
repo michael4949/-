@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Brand theme (was the inline tailwind.config in index.html).
+   In Tailwind v4, @theme tokens generate utilities: --color-corporate-900
+   yields bg-/text-/border-corporate-900, etc. */
+@theme {
+  --color-corporate-900: #0f172a;
+  --color-corporate-800: #1e293b;
+  --color-corporate-accent: #ca8a04;
+  --color-corporate-light: #f8fafc;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+}

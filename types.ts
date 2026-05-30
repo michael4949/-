@@ -1,72 +1,78 @@
-export interface GroundingSource {
-  title: string;
-  uri: string;
+// Types for the Mnemo console (talks to the `mnemo serve` JSON API).
+
+export type EventType =
+  | 'assistant'
+  | 'tool_call'
+  | 'tool_result'
+  | 'skill'
+  | 'memory'
+  | 'compacted'
+  | 'final'
+  | 'error';
+
+export interface AgentEvent {
+  type: EventType;
+  text: string;
+  data: Record<string, any>;
+  created_at: number;
 }
 
-export interface MaturityDimension {
-  dimension: string;
-  score: number; // 0-100
-  description: string;
+export interface ChatResponse {
+  session: string | null;
+  answer: string;
+  events: AgentEvent[];
 }
 
-export interface Scenario {
+export interface SkillMeta {
   name: string;
-  impact: number; // 0-100
-  feasibility: number; // 0-100
   description: string;
+  category: string;
+  version: string;
+  tags: string[];
+  path: string;
 }
 
-export interface Methodology {
-  title: string;
-  iconType: 'chart' | 'process' | 'target' | 'puzzle';
-  content: string;
+export interface PromptMemoryScope {
+  chars: number;
+  cap: number;
+  bullets: number;
 }
 
-export interface RoadmapPhase {
-  phase: string;
-  timeframe: string;
-  title: string;
-  items: string[];
-}
-
-export interface ReportData {
-  companyName: string;
-  reportTitle: string;
-  executiveSummary: string;
-  backgroundImageKeyword: string; // Used to fetch a relevant placeholder
-  maturityModel: {
-    title: string;
-    description: string;
-    data: MaturityDimension[];
+export interface MemoryStats {
+  profile: string;
+  sessions: number;
+  messages: number;
+  vectors: number;
+  prompt_memory: {
+    memory: PromptMemoryScope;
+    user: PromptMemoryScope;
   };
-  highValueScenarios: {
-    title: string;
-    description: string;
-    data: Scenario[];
+  bullets: {
+    memory: string[];
+    user: string[];
   };
-  methodologies: Methodology[];
-  roadmap: RoadmapPhase[];
-  conclusion: string;
 }
 
-export interface ReportResponse {
-  report: ReportData;
-  sources: GroundingSource[];
-}
-
-// New types for the Refinement Step
-export interface RefinementOption {
-  label: string;
-  value: string;
-}
-
-export interface RefinementQuestion {
+export interface SessionRow {
   id: string;
-  question: string;
-  allowMultiple: boolean;
-  options: RefinementOption[];
+  title: string;
+  summary: string;
+  channel: string;
+  created_at: number;
+  updated_at: number;
 }
 
-export interface RefinementResponse {
-  questions: RefinementQuestion[];
+export interface RecallHit {
+  text: string;
+  score: number;
+  kind: string;
+  ref_id: string;
+}
+
+// One rendered turn in the chat transcript.
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  text: string;
+  events?: AgentEvent[];
+  pending?: boolean;
 }
