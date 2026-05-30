@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub AI 雷达 · 报告归档</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.65;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:54px 0 60px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--gold-soft);font-weight:600}
+.hero h1{font-size:clamp(30px,5vw,50px);margin:.28em 0 .12em;font-weight:700}
+.hero .date{color:#cbd5e1;font-size:15px}
+.hero .intro{margin-top:20px;max-width:760px;color:#e2e8f0;font-size:16.5px}
+.stats{display:flex;gap:30px;margin-top:26px;flex-wrap:wrap}
+.stat .n{font-size:30px;font-weight:700;color:#fff;font-family:'Playfair Display',serif}
+.stat .l{font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.12em}
+
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:30px 0 6px}
+.toc a{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;font-size:13.5px;color:var(--c700);font-weight:500}
+.toc a:hover{border-color:var(--gold);text-decoration:none;box-shadow:0 2px 10px rgba(202,138,4,.12)}
+.toc a .r{color:var(--gold);font-weight:700}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:24px 0;
+  padding:26px 28px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 12px 30px -18px rgba(15,23,42,.25);scroll-margin-top:18px}
+.card .top{display:flex;align-items:flex-start;gap:14px}
+.avatar{width:46px;height:46px;border-radius:11px;border:1px solid var(--line);flex:none;background:#f1f5f9}
+.rankbubble{flex:none;width:30px;height:30px;border-radius:50%;background:var(--c900);color:var(--gold-soft);
+  font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:6px;font-family:'Playfair Display',serif}
+.namewrap{flex:1;min-width:0}
+.namewrap h2{font-size:23px;margin:0 0 3px;line-height:1.25;word-break:break-word}
+.namewrap h2 a{color:var(--ink)}.namewrap h2 a:hover{color:var(--gold)}
+.owner{color:var(--muted);font-size:13.5px}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.badge{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.badge.cat{background:#eef2ff;color:#4338ca;border:1px solid #e0e7ff}
+.badge.rising{background:#ecfdf5;color:#047857;border:1px solid #d1fae5}
+.badge.active{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.badge.new{background:var(--gold);color:#3b2f00}
+
+.meta{display:flex;flex-wrap:wrap;gap:16px 22px;margin:18px 0 4px;padding:14px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.meta .m{display:flex;flex-direction:column;gap:1px}
+.meta .m .v{font-weight:700;font-size:15px;color:var(--ink)}
+.meta .m .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.chips{margin:14px 0 2px;display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:2px 9px}
+.desc{margin:14px 0 0;color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px}
+
+.why{margin-top:20px;background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f5e6b8;
+  border-radius:12px;padding:18px 20px}
+.why h3{margin:0 0 8px;font-size:17px;color:#92660a;display:flex;align-items:center;gap:8px}
+.why p{margin:.5em 0}.why ul,.why ol{margin:.4em 0;padding-left:1.3em}.why li{margin:.25em 0}
+.highlights{margin-top:14px;display:grid;gap:8px}
+.hl{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+
+details.readme{margin-top:16px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fcfcfd}
+details.readme summary{cursor:pointer;padding:11px 16px;font-weight:600;font-size:14px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:16px;white-space:pre-wrap;word-break:break-word;font-size:12.8px;line-height:1.6;
+  max-height:440px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+.links{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:9px;border:1px solid var(--line)}
+.btn.primary{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.primary:hover{background:var(--c800);text-decoration:none}
+.btn.ghost{background:#fff;color:var(--c700)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:40px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+@media(max-width:560px){.card{padding:20px 16px}.hero{padding:40px 0 44px}.meta{gap:12px 16px}}
+
+.g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin:30px 0}
+.g-card{display:block;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;color:var(--ink);
+  box-shadow:0 10px 26px -20px rgba(15,23,42,.4);transition:.15s}
+.g-card:hover{border-color:var(--gold);transform:translateY(-2px);text-decoration:none;box-shadow:0 16px 30px -18px rgba(202,138,4,.4)}
+.g-date{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:.08em}
+.g-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin:4px 0 8px}
+.g-meta{color:var(--c700);font-size:13.5px}
+.g-names{color:var(--muted);font-size:12.5px;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="kicker">GitHub · AI Radar</div>
+  <h1>报告归档</h1>
+  <div class="date">每日精选的留存档案 · 共 0 期</div>
+</div></header>
+<main class="wrap">
+  <div class="g-grid"><p style="color:#64748b">还没有报告。运行爬虫并确认后即可生成。</p></div>
+</main>
+<footer class="foot"><div class="wrap">GitHub AI 雷达 · 归档更新于 2026-05-30 05:29 UTC</div></footer>
+</body>
+</html>
