@@ -54,14 +54,33 @@ export function stripCodeFences(text: string): string {
 /** 把可能带噪声的文本解析为 JSON（容错：截取第一个 { 到最后一个 }）。 */
 export function parseJsonLoose<T>(text: string): T {
   const cleaned = stripCodeFences(text);
+  // 1) 直接解析
   try {
     return JSON.parse(cleaned) as T;
-  } catch {
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
-    if (start !== -1 && end !== -1 && end > start) {
-      return JSON.parse(cleaned.slice(start, end + 1)) as T;
-    }
-    throw new Error("模型返回的内容无法解析为 JSON。");
+  } catch { /* 继续尝试 */ }
+  // 2) 截取第一个 { 到最后一个 }
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start !== -1 && end !== -1 && end > start) {
+    const slice = cleaned.slice(start, end + 1);
+    try {
+      return JSON.parse(slice) as T;
+    } catch { /* 继续尝试修复 */ }
+    // 3) 修复常见错误：去掉尾随逗号
+    try {
+      return JSON.parse(slice.replace(/,\s*([}\]])/g, "$1")) as T;
+    } catch { /* 继续 */ }
   }
+  // 4) 对“被截断”的 JSON：从开头逐步回退到最后一个完整的 } 再尝试
+  if (start !== -1) {
+    const body = cleaned.slice(start);
+    for (let i = body.length; i > 0; i--) {
+      if (body[i - 1] !== "}") continue;
+      try {
+        return JSON.parse(body.slice(0, i).replace(/,\s*([}\]])/g, "$1")) as T;
+      } catch { /* 往前找下一个 } */ }
+    }
+  }
+  throw new Error("模型返回的内容无法解析为 JSON。");
 }
+
