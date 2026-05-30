@@ -3,9 +3,11 @@ name: Deploy to GitHub Pages
 # 构建并发布到 GitHub Pages，得到一个公开网址。
 # 应用为纯前端：用户在网页里填自己的 Gemini Key（存浏览器本地），
 # 因此无需任何密钥/Secrets 即可公开托管。
+#
+# 注意：本仓库的 Pages 当前用于「GitHub AI 雷达」报告画廊。为避免误覆盖，
+# 本工作流只支持「手动触发」(workflow_dispatch)。确认要用 Pages 发布本应用后，
+# 在 GitHub 仓库 Actions 页面手动运行即可。
 on:
-  push:
-    branches: ["main", "claude/upbeat-ritchie-eqiF1"]
   workflow_dispatch:
 
 permissions:
