@@ -34,6 +34,18 @@ npm run dev        # 打开 http://localhost:3000
 
 构建：`npm run build`（产物在 `dist/`）。
 
+## 部署成公开链接（Vercel · 推荐）
+
+应用是纯前端、密钥在网页里自填，所以**无需任何 Secrets** 即可公开托管。
+
+1. 用 GitHub 登录 <https://vercel.com>（免费）。
+2. **Add New → Project** → 导入本仓库 `michael4949/-`（仓库已含 `vercel.json`，框架自动识别为 Vite，无需改任何设置、无需填环境变量）。
+3. 因为最新代码在分支 `claude/upbeat-ritchie-eqiF1`：进 **Project → Settings → Git → Production Branch** 改成该分支并 **Redeploy**；或把该分支合并到 `main` 再部署。
+4. 部署完成得到 `https://xxx.vercel.app`。首次打开在页面顶部填入你的 Gemini API Key（<https://aistudio.google.com/apikey>，仅存浏览器本地）即可使用。
+
+> 不影响仓库现有的 GitHub Pages（「GitHub AI 雷达」报告画廊）。
+> 也可用 GitHub Pages 发布本应用（仓库已含手动触发的 `.github/workflows/deploy.yml`），但那会替换掉报告画廊的地址。
+
 ## 使用流程
 
 1. 粘贴链接或文字 → 选时长 / 音色 /（可选）风格、主题、画幅、AI 配图。
