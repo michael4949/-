@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>strukto-ai/mirage · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/248286111?v=4" alt="strukto-ai" loading="lazy">
+      <div>
+        <h1>mirage</h1>
+        <div class="owner">strukto-ai/mirage · by strukto-ai</div>
+      </div>
+    </div>
+    <p class="tagline">A Unified Virtual Filesystem For AI Agents</p>
+    <div class="badges"><span class="badge cat">Agent 抽象层</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/strukto-ai/mirage" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      <a class="btn ghost" href="https://www.strukto.ai/mirage" target="_blank" rel="noopener">🌐 项目主页</a>
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">2.8k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">189</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">39</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">TypeScript</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">Apache-2.0</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-05-06</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">昨天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>一个直击痛点的抽象：给 AI agent 的<strong>统一虚拟文件系统</strong>。把 S3、Google Drive、Slack、Gmail、Redis、GitHub、Notion…… 二十多种后端<strong>挂载成同一棵树</strong>。</p>
+<p>价值在于<strong>收敛复杂度</strong>：agent 不再面对「N 个 SDK + M 个 MCP」，而是用同一套 Unix 工具（<code>cat</code>/<code>grep</code>/<code>cp</code>/<code>jq</code>）跨服务操作，管线像在本地磁盘一样组合：</p>
+<p><code>grep alert /slack/general/*.json | wc -l</code><br><code>cp /s3/report.csv /data/local.csv</code></p>
+<p>最聪明的一点洞察——<strong>任何已经会 bash 的 LLM 开箱即用，零新词汇</strong>，直接吃掉了 LLM 最熟练的那套语料。还能注册新命令、按「资源 + 文件类型」覆盖命令（例如对 S3 上的 Parquet，<code>cat</code> 自动渲染成 JSON 行而非裸字节）。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span>把 <strong>20+ 后端挂成一棵文件树</strong>，agent 用统一 bash 工具跨服务操作</span></div><div class="hl"><span class="dot">◆</span><span><strong>零学习成本</strong>：复用 LLM 最擅长的 bash 词汇，免学 N 套 API</span></div><div class="hl"><span class="dot">◆</span><span>可注册/按资源·文件类型覆盖命令（如 Parquet 的 <code>cat</code> 渲染成 JSON）</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#agent-sandbox</span><span class="chip">#agent-tools</span><span class="chip">#ai-agents</span><span class="chip">#bash</span><span class="chip">#claude-code</span><span class="chip">#fuse</span><span class="chip">#langchain</span><span class="chip">#llm-agents</span><span class="chip">#openai-agents</span><span class="chip">#python</span><span class="chip">#typescript</span><span class="chip">#vfs</span><span class="chip">#virtual-filesystem</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre>Mirage is **a Unified Virtual File System for AI Agents**: a single tree that mounts services and data sources like S3, Google Drive, Slack, Gmail, and Redis side-by-side as one filesystem.
+
+AI agents reach every backend with the same handful of Unix-like tools, and pipelines compose across services as naturally as on a local disk. It&#x27;s a simulated environment, agents see one filesystem underneath. Any LLM that already knows bash can use Mirage out of the box, with zero new vocabulary.
+
+```ts
+const ws = new Workspace({
+  &#x27;/data&#x27;:   new RAMResource(),
+  &#x27;/s3&#x27;:     new S3Resource({ bucket: &#x27;logs&#x27; }),
+  &#x27;/slack&#x27;:  new SlackResource({}),
+  &#x27;/github&#x27;: new GitHubResource({}),
+})
+
+await ws.execute(&#x27;grep alert /slack/general/*.json | wc -l&#x27;)
+await ws.execute(&#x27;cat /github/mirage/README.md&#x27;)
+await ws.execute(&#x27;cp /s3/report.csv /data/local.csv&#x27;)
+
+// Register a new command, available across every mount.
+ws.command(&#x27;summarize&#x27;, ...)
+
+// Override a command for a specific resource + filetype —
+// `cat` on a Parquet file in /s3 renders rows as JSON instead of raw bytes.
+ws.command(&#x27;cat&#x27;, { resource: &#x27;s3&#x27;, filetype: &#x27;parquet&#x27; }, ...)
+
+await ws.execute(&#x27;summarize /github/mirage/README.md&#x27;)
+await ws.execute(&#x27;cat /s3/events/2026-05-06.parquet | jq .user&#x27;)
+```
+
+## About
+
+- **One filesystem, every backend.** Every service speaks the same filesystem semantics, so agents reason about one abstraction instead of N SDKs and M MCPs, leaning on the filesystem and bash vocabulary LLMs are most fluent in.
+- **Multiple resources, one filesystem:** RAM, Disk, Redis, S3 / R2 / OCI / Supabase / GCS, Gmail / GDrive / GDocs / GSheets / GSlides, GitHub / Linear / Notion / Trello, Slack / Discord / Telegram / Email, MongoDB, SSH, and more, mounted side-by-side under a single root.
+- **Familiar bash tools across every mount.** Agents reuse the same handful of Unix-like tools instead of learning a new API per service, and pipelines compose across services as naturally as on a local disk, the exact corpus modern LLMs are most heavily trained on.
+- **Portable workspaces:** clone, snapshot, and version your environment. Move agent runs between machines without restarting or reconfiguring the system.
+- **Embed in your apps and services:** Python and TypeScript SDKs let you give your AI agents a virtual filesystem directly inside FastAPI, Express, browser apps, or any async runtime, no separate process required. Clone, snapshot, and version the workspace from inside your code.
+- **Works with major agent application frameworks:** OpenAI Agents SDK, Vercel AI SDK (TypeScript), LangChain, Pydantic AI, CAMEL, and OpenHands.
+- **Lightweight CLI + daemon:** plugs into coding agents like Claude Code and Codex so they reach every mounted resource through familiar bash, getting more useful work done per turn.
+
+## Architecture
+
+## Installation
+
+### Prerequisites
+
+- **Python** ≥ 3.12 for the `mirage-ai` package and the `mirage` CLI
+- **Node.js** ≥ 20 for the TypeScript SDK
+- **macOS** or **Linux** (FUSE-based mounts require platform support)
+
+### Python
+
+```bash
+uv add mirage-ai
+```
+
+This installs both the `mirage` library and the `mirage` CLI binary.
+
+### TypeScript
+
+Pick the package that matches your runtime:
+
+```bash
+npm install @struktoai/mirage-node      # Node.js servers and CLIs
+npm install @struktoai/mirage-browser   # browser / edge runtimes
+npm install @struktoai/mirage-core      # runtime-agnostic primitives
+```
+
+`@struktoai/mirage-node` and `@struktoai/mirage-browser` both pull in `@struktoai/mirage-core` automatically.
+
+### CLI
+
+```bash
+curl -fsSL https://strukto.ai/mirage/install.sh | sh
+```
+
+Or via your package manager of choice:
+
+```bash
+npm install -g @struktoai/mirage-cli
+```
+
+```bash
+uvx mirage-ai
+```
+
+```bash
+npx @struktoai/mirage-cli
+```
+
+## Quickstart (Python)
+
+```python
+from mirage import Workspace
+from mirage.resource.gdocs import GDocsConfig, GDocsResource
+from mirage.resource.ram import RAMResource
+from mirage.resource.s3 import S3Config, S3Resource
+from mirage.resource.slack import SlackConfig, SlackResource
+
+ws = Workspace({
+    &quot;/data&quot;:  RAMResource(),
+    &quot;/s3&quot;:    S3Resource(S3Config(bucket=&quot;my-bucket&quot;)),
+    &quot;/slack&quot;: SlackResource(SlackConfig()), …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>

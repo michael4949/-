@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>esengine/DeepSeek-Reasonix · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/18465053?v=4" alt="esengine" loading="lazy">
+      <div>
+        <h1>DeepSeek-Reasonix</h1>
+        <div class="owner">esengine/DeepSeek-Reasonix · by esengine</div>
+      </div>
+    </div>
+    <p class="tagline">DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache stability — leave it running.</p>
+    <div class="badges"><span class="badge cat">终端编码 Agent</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/esengine/DeepSeek-Reasonix" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      <a class="btn ghost" href="https://esengine.github.io/DeepSeek-Reasonix/" target="_blank" rel="noopener">🌐 项目主页</a>
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">14.1k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">814</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">370</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">TypeScript</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">MIT</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-04-21</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">今天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>它把一个工程取舍<strong>推到极致</strong>做成了卖点：整个 agent loop 围绕「<strong>前缀缓存稳定性</strong>」这一<strong>不变量</strong>设计——正因如此它<strong>只支持 DeepSeek</strong>，每一层都为字节级稳定的 prefix-cache 机制调优。</p>
+<p>作者的表述很到位：「缓存稳定不是一个你打开的功能，而是这个 loop 被设计出来去维持的不变量。」</p>
+<p>效果有实测背书：<strong>单个真实用户、单日 4.35 亿输入 token、99.82% 缓存命中</strong>，最终花费约 <strong>$12</strong>，而同样负载在无缓存下约需 $61——长会话「挂着一直跑」也不肉疼。多语言文档、社区与贡献者流程都比较完善。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span>把「<strong>前缀缓存稳定</strong>」做成架构不变量，长会话 token 成本极低</span></div><div class="hl"><span class="dot">◆</span><span>真实用户单日 <strong>99.82% 缓存命中</strong>（$12 vs 无缓存 $61）</span></div><div class="hl"><span class="dot">◆</span><span>DeepSeek 原生、<code>npm i -g reasonix</code> 一行装，留着常驻跑</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#agent</span><span class="chip">#agent-framework</span><span class="chip">#ai-agent</span><span class="chip">#ai-coding</span><span class="chip">#cli</span><span class="chip">#coding-agent</span><span class="chip">#deepseek</span><span class="chip">#developer-tools</span><span class="chip">#ink</span><span class="chip">#llm</span><span class="chip">#prompt-caching</span><span class="chip">#r1</span><span class="chip">#terminal</span><span class="chip">#tool-use</span><span class="chip">#tui</span><span class="chip">#typescript</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre>English
+  &amp;nbsp;·&amp;nbsp;
+  简体中文
+  &amp;nbsp;·&amp;nbsp;
+  日本語
+  &amp;nbsp;·&amp;nbsp;
+  Website
+  &amp;nbsp;·&amp;nbsp;
+  Guide
+  &amp;nbsp;·&amp;nbsp;
+  Architecture
+  &amp;nbsp;·&amp;nbsp;
+  Benchmarks
+  &amp;nbsp;·&amp;nbsp;
+  Discord
+
+A DeepSeek-native AI coding agent for your terminal.
+Engineered around prefix-cache stability — so token costs stay low across long sessions, and you can leave it running.
+
+&gt; [!TIP]
+&gt; **Cache stability isn&#x27;t a feature you turn on; it&#x27;s an invariant the loop is designed around.** That&#x27;s the whole reason Reasonix is DeepSeek-only — every layer is tuned to the byte-stable prefix-cache mechanic.
+
+&gt; [!NOTE]
+&gt; **Real user, single day (2026-05-01):** 435M input tokens, **99.82% cache hit**, ~$12 instead of the ~$61 the same workload would cost with no cache on `v4-flash` — see the [case study](./benchmarks/real-world-cache/README.md). DeepSeek provides the cacheable bytes; the four mechanisms in [Pillar 1](./docs/ARCHITECTURE.md#pillar-1--cache-first-loop) are how Reasonix keeps them cacheable across long sessions.
+
+&gt; [!IMPORTANT]
+&gt; **Community · 加入社区** — bilingual Discord with channels for setup help (`#help` / `#求助`), workflow showcases, feature ideas, and contributor-only PR coordination. Verify your GitHub in-server to get the **Contributor** role automatically. → ****
+
+## Install
+
+Requires Node ≥ 22. Works on macOS · Linux · Windows (PowerShell · Git Bash · Windows Terminal).
+
+Install Reasonix globally if you want the `reasonix` command available on your `PATH`:
+
+~~~bash
+npm install -g reasonix
+reasonix code my-project   # paste a DeepSeek API key on first run; persists after
+~~~
+
+Or run it once without installing globally:
+
+~~~bash
+cd my-project
+npx reasonix code          # always uses the latest package by default
+~~~
+
+Grab a [DeepSeek API key →](https://platform.deepseek.com/api_keys) · `reasonix code --help` for flags.
+
+If you use Reasonix daily, global install is the simplest path. If you just want to try it, use `npx`.
+
+**Prefer fewer keystrokes?** The shorter `dsnix` alias resolves to the same CLI:
+
+~~~bash
+npm install -g dsnix       # exposes `dsnix` on PATH, depends on reasonix
+npx dsnix@latest code      # one-shot via the shorter command
+~~~
+
+A global `npm install -g reasonix` also drops a `dsnix` shim on PATH, so the two are interchangeable.
+
+Bare `reasonix` (no subcommand) launches `code` in the current directory — typing `reasonix` and `reasonix code` are equivalent.
+
+| Command | When |
+|---|---|
+| `reasonix` / `reasonix code [dir]` | The coding agent. **Start here.** |
+| `reasonix chat` | Plain chat — no filesystem or shell tools. |
+| `reasonix run &quot;task&quot;` | One-shot, streams to stdout. Good for pipes. |
+| `reasonix doctor` | Health check: Node, API key, MCP wiring. |
+| `reasonix update` | Upgrade Reasonix itself. |
+
+Other subcommands (`replay` · `diff` · `events` · `stats` · `index` · `mcp` · `prune-sessions`) are in `reasonix --help` and the [CLI reference](https://esengine.github.io/DeepSeek-Reasonix/#cli).
+
+### QQ channel
+
+QQ can extend an existing `chat`, `code`, or desktop session as a remote channel. It is part of the current session flow, not a separate runtime mode.
+
+- CLI: start a session, then run `/qq connect`
+- Desktop: open `Settings -&gt; General -&gt; QQ Channel`
+
+Once connected, QQ messages can enter the current session, assistant replies route back to QQ, and follow-up interactions can continue remotely.
+
+For full setup, desktop quick start, and troubleshooting, see [QQ channel setup](./docs/qq-connect.md).
+
+### Desktop client (prerelease)
+
+A native Tauri client for users who want a GUI over the same loop. Multi-tab, the right-panel shows files the agent has read or edited this session, the same cost / cache / token meters live at the bottom. Same DeepSeek API key, same `~/.reasonix` config — the desktop bundles its own Node runtime, no separate `npm install` step.
+
+Download platform installers from [GitHub Releases](https://github.com/esengine/DeepSeek-Reasonix/releases). The desktop ships as a **prerelease**: the loop and protocol are the same as the CLI, but the UI is still being polished and the installers aren&#x27;t code-signed yet.
+
+- **macOS** — first launch hits Gatekeeper. One-time fix: `xattr -dr com.apple. …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>raiyanyahya/how-to-train-your-gpt · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/23720340?v=4" alt="raiyanyahya" loading="lazy">
+      <div>
+        <h1>how-to-train-your-gpt</h1>
+        <div class="owner">raiyanyahya/how-to-train-your-gpt · by raiyanyahya</div>
+      </div>
+    </div>
+    <p class="tagline">Build a modern LLM from scratch. Every line commented. Explained like we are five.</p>
+    <div class="badges"><span class="badge cat">教育 · 从零造 LLM</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/raiyanyahya/how-to-train-your-gpt" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">2.2k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">275</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">0</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">Jupyter Notebook</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">MIT</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-05-03</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">3 天前</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>今天最「实在」的一个：一本 <strong>12 章、7500+ 行的交互式教科书</strong>，带你<strong>从绝对零开始亲手写一个现代 LLM</strong>（与 ChatGPT/Claude/LLaMA 同族架构）。</p>
+<p>它不让你 <code>model = GPT().fit(data)</code>，而是<strong>每一行都自己写</strong>：tokenizer、embedding、attention、训练循环、推理引擎，且<strong>每行都注释「做什么 + 为什么」</strong>。外加 <strong>21 个专题讲解</strong>（RoPE、attention、RMSNorm、SwiGLU、KV cache、AdamW、混合精度……）和两篇「一句话穿过整个模型」的叙事走读。</p>
+<p>定位精准地避开两个坑：太浅（只会调 API）和太学术（40 页论文）。读完你能真正讲清 <strong><code>1/√d_k</code> 背后的方差论证</strong>、RoPE 如何用旋转编码相对位置、为什么深网络里 pre-norm 优于 post-norm、以及反向传播时每个梯度流向哪里。零 ML 基础可入门。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span><strong>7500+ 行、每行注释</strong>，亲手写完整 LLM 而非调 API</span></div><div class="hl"><span class="dot">◆</span><span>21 个专题深挖 RoPE / SwiGLU / KV cache / AdamW 等</span></div><div class="hl"><span class="dot">◆</span><span>零 ML 基础可入，却能讲清 <code>1/√d_k</code>、pre-norm 等数学动机</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#attention-mechanism</span><span class="chip">#deep-learning</span><span class="chip">#educational</span><span class="chip">#from-scratch</span><span class="chip">#gpt</span><span class="chip">#language-model</span><span class="chip">#llama</span><span class="chip">#llm</span><span class="chip">#machine-learning</span><span class="chip">#natural-language-processing</span><span class="chip">#python</span><span class="chip">#pytorch</span><span class="chip">#tokenisation</span><span class="chip">#transformers</span><span class="chip">#tutorial</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre># 🧠 How to Train Your GPT
+
+&gt; *A guide to building a world-class language model from absolute scratch. Taught like you&#x27;re five. Built like you&#x27;re an engineer.*
+&gt;
+&gt; *I made this with the goal of learning something I didn&#x27;t understand completely. Specifically the attention part. I use AI a lot to understand key concepts and verifying them.*
+
+---
+
+## 📖 What Is This?
+
+This is a **12-chapter, 7,500+ line interactive textbook** that teaches you how to build, train and run a modern language model from absolute scratch. The same family of architecture behind ChatGPT, Claude, LLaMA and Mistral.
+
+Alongside the chapters there are **21 standalone topic explainers** covering every technique in depth. RoPE, attention, RMSNorm, SwiGLU, KV cache, AdamW, mixed precision and more. Plus two narrative walkthroughs that trace a single sentence through the entire model step by step. Each file follows the same style: child language, no jargon, a code example you can run.
+
+You won&#x27;t just read about Transformers. You&#x27;ll **write every line yourself**: tokenizer, embeddings, attention, training loop, inference engine. Every single line annotated to explain **what** it does and **why** it&#x27;s there.
+
+---
+
+## 🤔 Why This Exists
+
+Most ML tutorials fall into one of two traps:
+
+| ❌ Too Shallow | ❌ Too Academic | ✅ This Guide |
+|---|---|---|
+| `model = GPT().fit(data)` | 40-page papers, dense notation | 5-year-old analogies → full working code |
+| You learn to call APIs | Assumes PhD in ML | Zero ML experience required |
+| No understanding of internals | No worked examples | Every line annotated with WHAT &amp; WHY |
+
+**The goal:** After finishing, you won&#x27;t just know that attention &quot;works&quot;. You&#x27;ll understand the variance argument behind `1/√d_k`. How RoPE captures relative position through rotation. Why pre-norm beats post-norm for deep networks. And exactly where every gradient flows during backpropagation.
+
+---
+
+## 👥 Who Is This For?
+
+| 🧑‍💻 You Are... | 📚 You Need... |
+|---|---|
+| A Python developer curious about how ChatGPT actually works | Basic Python (functions, classes, lists). No ML experience |
+| A student who wants to deeply understand Transformers | Willingness to read ~3,500 lines of commented code |
+| An engineer evaluating LLM architectures | Understanding of tradeoffs (RoPE vs learned, RMSNorm vs LayerNorm) |
+| Someone who got lost at &quot;attention&quot; in other tutorials | Party analogy + worked numeric example with real numbers |
+
+**🔧 Prerequisites:** Python basics (variables, functions, classes, `pip install`). That&#x27;s it. No calculus, no linear algebra, no PyTorch experience required. We teach those as we go.
+
+---
+
+## 🗺️ Chapters
+
+| Chapter | What You&#x27;ll Learn |
+|---|---|
+| **[0: Overview](chapters/00_overview.md)** | What is a GPT? The big picture |
+| **[1: Setup](chapters/01_setup.md)** | Install tools, GPU vs CPU, venv, PyTorch basics |
+| **[2: Tokenization](chapters/02_tokenization.md)** | BPE walkthrough: how &quot;unbelievably&quot; becomes tokens |
+| **[3: Embeddings](chapters/03_embeddings.md)** | How numbers become meaning. king − man + woman = queen |
+| **[4: Positional Encoding](chapters/04_positional_encoding.md)** | RoPE: why LLaMA rotates vectors, not adds numbers |
+| **[5: Attention](chapters/05_attention.md)** | ⭐ THE CORE. Q,K,V, scaling, causal mask, 8-step walkthrough |
+| **[6: Transformer Block](chapters/06_transformer_block.md)** | RMSNorm, SwiGLU, residuals, pre-norm vs post-norm |
+| **[7: Complete GPT Model](chapters/07_gpt_model.md)** | 151M parameter model (with SwiGLU), weight tying, logits explained |
+| **[8: Training Pipeline](chapters/08_training.md)** | Cross-entropy, backprop, AdamW, cosine warmup, mixed precision |
+| **[9: Inference](chapters/09_inference.md)** | KV cache, temperature, top-k/p, beam search, repetition penalty |
+| **[10: Full Script](chapters/10_full_script.md)** | Runnable `main.py`: everything in one file |
+| **[11: Glossary](chapters/11_glossary.md)** | Architecture provenance table, parameter breakdown |
+
+&gt; ⭐ **Start with [Chapter 0](chapters/00_overview.md) and read sequentially.** Each builds on the previous.
+
+---
+
+## 🏗️ What You&#x27;ll Build
+
+| 🧩 Component | 📝 Lines | 💡 What You&#x27;ll Understand |
+|---|---|---|
+| …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>

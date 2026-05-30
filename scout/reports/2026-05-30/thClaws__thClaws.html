@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thClaws/thClaws · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/277590170?v=4" alt="thClaws" loading="lazy">
+      <div>
+        <h1>thClaws</h1>
+        <div class="owner">thClaws/thClaws · by thClaws</div>
+      </div>
+    </div>
+    <p class="tagline">Open-source AI agent harness in native Rust — GUI, CLI, headless, and webapp from one binary. Multi-provider, MCP, skills, plugins, agent teams.</p>
+    <div class="badges"><span class="badge cat">Agent 工作台 · 多端</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/thClaws/thClaws" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      <a class="btn ghost" href="https://thclaws.ai" target="_blank" rel="noopener">🌐 项目主页</a>
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">1.1k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">145</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">2</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">Rust</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">Apache-2.0</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-04-20</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">昨天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>一个<strong>原生 Rust</strong> 的 AI agent 工作台，最抓人的是形态：<strong>一份二进制同时是 GUI / CLI / headless / webapp</strong>（基于 Tauri），全程在你<strong>本机</strong>运行、主权自持。多模型供应商（Anthropic / OpenAI / Gemini / Ollama）、MCP、skills、插件、agent 团队一应俱全。</p>
+<p>v0.23 的<strong>动态工作流</strong>很能打——「LLM 写代码，Boa 跑 worker」：<code>/workflow run</code> 让模型<strong>现写一段 JS 编排脚本</strong>，把任务 fan-out 到任意多个并行子 agent；你<strong>先审脚本</strong>，再在<strong>沙箱化的 Boa 引擎</strong>里确定性执行，可取消/续跑、设时间与 token 预算、用 JSON schema 校验 worker 输出。</p>
+<p>节奏也说明问题：2026 年 4 月起步，已 <strong>20+ 版本、27 位贡献者、约一周一发</strong>，公开开发。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span><strong>一份 Rust 二进制 = GUI/CLI/headless/webapp</strong> 四种形态</span></div><div class="hl"><span class="dot">◆</span><span>LLM 现写 JS 编排、<strong>沙箱内确定性 fan-out</strong> 子 agent，执行前可审</span></div><div class="hl"><span class="dot">◆</span><span>本机主权 + 多供应商 + MCP/插件/agent 团队；约一周一发</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#agent-harness</span><span class="chip">#agent-teams</span><span class="chip">#ai-agent</span><span class="chip">#anthropic</span><span class="chip">#claude-code</span><span class="chip">#cli</span><span class="chip">#desktop-app</span><span class="chip">#developer-tools</span><span class="chip">#gemini</span><span class="chip">#kms</span><span class="chip">#llm</span><span class="chip">#llm-wiki</span><span class="chip">#mcp</span><span class="chip">#model-context-protocol</span><span class="chip">#multi-provider</span><span class="chip">#ollama</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre># thClaws 🦞
+
+**The open-source agent harness, in your terminal and on your desktop.**
+
+A native-Rust AI agent workspace that codes, automates, remembers, and coordinates — running on your own machine. One binary. Sovereign by design. Built by a small team hacking in public.
+
+[Website](https://thclaws.ai) · [Download](https://thclaws.ai/downloads.html) · [Manual](https://thclaws.ai/manual) · [Discussions](https://github.com/thClaws/thClaws/discussions) · [Contribute](#contribute)
+
+---
+
+## ✨ New in v0.23 — dynamic workflows
+
+**LLM writes the code. Boa runs the workers.**
+
+`/workflow run ` lets the model author a small JavaScript orchestration script that fans your task out across as many parallel subagents as it needs. You review the script before it executes — then thClaws runs it deterministically inside a sandboxed Boa engine. Cancel, resume, set time/token budgets, validate worker output against a JSON schema, all from one line.
+
+*Click to watch on thclaws.ai · 20s demo · `/workflow run summarize each .rs file under thclaws/crates/core/src in one line` → LLM authors JS → you approve → Boa fans out across subagents.*
+
+```js
+// llm wrote this
+const files = await thclaws.subagent({
+  prompt: &quot;list all .ts files in src/&quot;,
+});
+const list = files.split(&quot;\n&quot;);
+
+const reviews = await Promise.all(
+  list.map(f =&gt; thclaws.subagent({
+    prompt: `review ${f}`,
+  }))
+);
+```
+
+Read the chapter → [user-manual/ch25-workflows.md](user-manual/ch25-workflows.md) · or jump straight in with `/workflow run &quot;&quot;`.
+
+---
+
+## See it work
+
+Three tabs, one binary — captured from a live thClaws session looking at its own source.
+
+**Files** (codemirror + tiptap)  ·  **Terminal** (REPL · slash commands · ANSI tool output)  ·  **Chat** (markdown render · tool indicators)
+
+---
+
+## Hacking in public
+
+thClaws started in April 2026. As of this writing the project has shipped **20+ releases**, drawn **27 contributors**, and lands roughly a release a week. It&#x27;s developed by a small team at **ThaiGPT Co., Ltd.** — and a meaningful chunk of the codebase comes from outside contributors who heard about it and stayed.
+
+We&#x27;re aiming for **v1.0 = &quot;the multi-platform agent&quot;**: the same agent loop on your desktop, in your terminal, and bridged into Telegram, Discord, Slack, WhatsApp, Facebook Messenger, and LINE. Telegram, LINE, and Messenger are already shipping. Discord, Slack, and WhatsApp are next — and they&#x27;re great places to plug in. ([Contribute →](#contribute))
+
+&gt; Built in Thailand. Meant for the world.
+
+---
+
+## Four surfaces, one engine
+
+The same `Agent` loop, `Session`, and `ToolRegistry` back every UX:
+
+- **Desktop GUI** (`thclaws`) — native window with Terminal, Chat, Files, and optional Team tabs.
+- **CLI REPL** (`thclaws --cli`) — interactive terminal prompt for SSH, headless servers, or zero-GUI workflows.
+- **Non-interactive mode** (`thclaws -p &quot;prompt&quot;`) — single turn, exits. Pipe-friendly for scripts and CI. `-v` for token usage on stderr.
+- **Webapp** (`thclaws --serve --port 7878`) — same engine over WebSocket/HTTP. SSH-tunnel for &quot;Claude Code anywhere&quot; without opening a port.
+
+---
+
+## Features
+
+Everything&#x27;s in one binary. Pick the surface that fits the task, swap the provider, drop in a skill, glue in an MCP server, then walk away while a scheduled job or background agent finishes the work.
+
+- **Multi-provider** — Anthropic (native + Claude Agent SDK via Claude Code auth), OpenAI (Chat Completions + Responses/Codex), Google Gemini &amp; Gemma, Alibaba DashScope (Qwen), DeepSeek, Z.ai (GLM Coding Plan), NVIDIA NIM, NSTDA Thai LLM (OpenThaiGPT, Typhoon, Pathumma, THaLLE), OpenRouter, Agentic Press, Azure AI Foundry, Ollama (local + Anthropic-compatible + Cloud), LMStudio, plus a generic **OpenAI-compatible** slot (`oai/*`) for LiteLLM / Portkey / Helicone / vLLM / internal proxies. Switch mid-session with `/model` or `/provider`.
+- **Open standards, not a walled garden** — [Model Context Protocol](https://modelcontextprotocol.io/) for tools, [`AGENTS.md`](https://agents.md) for project instructions (adopted by Google, OpenAI, Factory, Sourcegraph, Cursor), `SKILL.md` with YAML frontmatter for packaged workflows. Configuration portable between thClaws, ot …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>

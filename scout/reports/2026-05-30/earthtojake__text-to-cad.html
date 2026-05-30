@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>earthtojake/text-to-cad · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/10742417?v=4" alt="earthtojake" loading="lazy">
+      <div>
+        <h1>text-to-cad</h1>
+        <div class="owner">earthtojake/text-to-cad · by earthtojake</div>
+      </div>
+    </div>
+    <p class="tagline">A collection of agent skills for CAD, robotics and hardware design</p>
+    <div class="badges"><span class="badge cat">Agent Skills · 硬件/CAD</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/earthtojake/text-to-cad" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      <a class="btn ghost" href="https://www.cadskills.xyz" target="_blank" rel="noopener">🌐 项目主页</a>
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">5.3k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">622</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">7</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">JavaScript</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">MIT</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-04-22</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">今天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>把 agent 的能力从「写软件」<strong>延伸到设计实体硬件</strong>，方向很新。它是一套面向 <strong>CAD、机器人、硬件设计</strong>的 agent skills 库。</p>
+<p>能让 agent 从<strong>自然语言或图片</strong>生成并编辑 CAD 模型（主输出 <strong>STEP</strong>，可导出 STL / 3MF / GLB），还能<strong>找现成标准件</strong>（螺丝、轴承、电机、连接器）、做切片、生成<strong>机器人描述文件（URDF/SRDF）</strong>、本地浏览器预览 G-code 与机器人文件。</p>
+<p>底层接的是 build123d / OpenCASCADE / WASM 等<strong>真实工程工具链</strong>，不是玩具——这意味着 agent 产出的是可直接交付制造的工件。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span><strong>自然语言/图片 → 可制造 CAD</strong>（STEP，并导出 STL/3MF/GLB）</span></div><div class="hl"><span class="dot">◆</span><span>覆盖找标准件、切片、<strong>URDF 机器人描述</strong>、本地预览全链路</span></div><div class="hl"><span class="dot">◆</span><span>接 build123d/OpenCASCADE 等真实工具链，把 agent 推向实体硬件</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#3mf</span><span class="chip">#agents</span><span class="chip">#ai-agents</span><span class="chip">#build123d</span><span class="chip">#cad</span><span class="chip">#dxf</span><span class="chip">#glb</span><span class="chip">#mechanical-engineering</span><span class="chip">#opencascade</span><span class="chip">#robotics</span><span class="chip">#sdf</span><span class="chip">#srdf</span><span class="chip">#step</span><span class="chip">#stl</span><span class="chip">#stp</span><span class="chip">#text-to-cad</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre>██████╗ █████╗ ██████╗       ███████╗██╗  ██╗██╗██╗     ██╗     ███████╗
+██╔════╝██╔══██╗██╔══██╗      ██╔════╝██║ ██╔╝██║██║     ██║     ██╔════╝
+██║     ███████║██║  ██║      ███████╗█████╔╝ ██║██║     ██║     ███████╗
+██║     ██╔══██║██║  ██║      ╚════██║██╔═██╗ ██║██║     ██║     ╚════██║
+╚██████╗██║  ██║██████╔╝      ███████║██║  ██╗██║███████╗███████╗███████║
+ ╚═════╝╚═╝  ╚═╝╚═════╝       ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
+
+A skills library for CAD, robotics, and hardware design agents
+
+[Docs](https://www.cadskills.xyz) | [Demo](https://demo.cadskills.xyz)
+
+# CAD Skills
+
+CAD Skills is a library of agent skills for generating, inspecting, sourcing,
+slicing, and handing off CAD and robot-description artifacts from local project
+files.
+
+## 🧰 Skills
+
+Install the library to give agents focused workflows for CAD, fabrication,
+robot description files, simulation, and local review.
+
+| Skill       | Summary                                                                                                                                            | Source                                            |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| CAD         | Creates and edits CAD models from plain-language or image requests, with STEP as the main output along with options to export to STL, 3MF and GLB. | [skills/cad](skills/cad/SKILL.md)                 |
+| CAD Viewer  | Shows local browser previews for CAD, G-code, and robot files.                                                                                     | [skills/cad-viewer](skills/cad-viewer/SKILL.md)   |
+| step.parts  | Finds off-the-shelf STEP parts like screws, bearings, motors, and connectors.                                                                      | [skills/step-parts](skills/step-parts/SKILL.md)   |
+| URDF        | Writes robot structure files with links, joints, limits, inertials, and meshes.                                                                    | [skills/urdf](skills/urdf/SKILL.md)               |
+| SRDF        | Adds MoveIt planning groups, end effectors, poses, and collision rules to a URDF.                                                                  | [skills/srdf](skills/srdf/SKILL.md)               |
+| SDF         | Creates simulator models and worlds with frames, physics, sensors, and lights.                                                                     | [skills/sdf](skills/sdf/SKILL.md)                 |
+| SendCutSend | Checks DXF and STEP files before upload to SendCutSend.                                                                                            | [skills/sendcutsend](skills/sendcutsend/SKILL.md) |
+| G-code      | Slices supported mesh files into validated, printer-profiled FDM `.gcode` with real slicer CLIs.                                                   | [skills/gcode](skills/gcode/SKILL.md)             |
+| Bambu Labs  | Dry-runs, uploads, and cautiously starts local Bambu Lab print jobs from validated `.gcode`.                                                       | [skills/bambu-labs](skills/bambu-labs/SKILL.md)   |
+
+## 💻 Installation
+
+### Skills
+
+Install CAD Skills with the Skills CLI:
+
+```bash
+npx skills install earthtojake/text-to-cad
+```
+
+This is the preferred installation path. It installs the individual skills
+directly for supported agents.
+
+### Plugins
+
+Provider-native plugin installs are also available for Codex and Claude Code:
+
+```bash
+# Codex
+codex plugin marketplace add earthtojake/text-to-cad
+codex plugin add cad@text-to-cad
+```
+
+```bash
+# Claude Code
+claude plugin marketplace add earthtojake/text-to-cad
+claude plugin install cad@text-to-cad
+```
+
+Restart your agent if newly installed skills do not appear. For local
+development symlink guidance, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📸 Screenshots
+
+      CAD
+
+      URDF
+
+      SRDF / MoveIt2
+
+## 🧪 Benchmarks
+
+The repo stores heavyweight assets in `assets/**` and `benchmarks/**` through Git LFS and excludes those trees from default LFS pulls …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>

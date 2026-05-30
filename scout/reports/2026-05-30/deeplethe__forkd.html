@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>deeplethe/forkd · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/282846749?v=4" alt="deeplethe" loading="lazy">
+      <div>
+        <h1>forkd</h1>
+        <div class="owner">deeplethe/forkd · by deeplethe</div>
+      </div>
+    </div>
+    <p class="tagline">Fork() for AI agent microVMs. Spawn 100 children in ~100ms from a warm parent; BRANCH a live VM in ~150ms. KVM-isolated, snapshot CoW.</p>
+    <div class="badges"><span class="badge cat">Agent 基础设施</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/deeplethe/forkd" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">1k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">73</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">9</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">Rust</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">Apache-2.0</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-05-11</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">今天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>这是今天<strong>工程密度最高</strong>的一个：给 AI agent 的大规模 fan-out 设计的 microVM 运行时，建在 Firecracker 之上。</p>
+<p>它同时拿到两个本来矛盾的属性——<strong>每个子机有 KVM 级硬隔离</strong>，而<strong>生成成本却接近 <code>fork(2)</code> 而非冷启动 VM</strong>。做法是：父 VM 预热一次（装好 Python 依赖、JIT 预热的 JVM、已加载的 ML 模型）后暂停到磁盘；每个子机用 <code>MAP_PRIVATE</code> mmap 父内存镜像，由内核做<strong>页级 copy-on-write</strong>，分叉前共享父进程常驻内存。</p>
+<p>数字很硬：<strong>101ms fork 出 100 个 microVM</strong>、<strong>150ms BRANCH 一个运行中的 VM</strong>——agent 可以「想到一半」就分叉，而不只在预热点分叉。v0.4 实验路径把 BRANCH 暂停窗口从 ~150ms 压到 <strong>~3ms/GiB</strong>。</p>
+<p>更难得的是工程透明度：README 直接贴 issue 编号、回归修复（第 6 次连续 BRANCH 提速 17.6×）与全部通过的 PoC 数据。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span>Firecracker + <strong>页级 CoW</strong>：101ms 拉起 100 个<strong>隔离</strong> microVM</span></div><div class="hl"><span class="dot">◆</span><span><strong>BRANCH</strong>：150ms 快照运行中 VM，让 agent 中途分叉「思维状态」</span></div><div class="hl"><span class="dot">◆</span><span>工程透明：issue 编号、回归基准、PoC 数据全部可查</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#ai-agents</span><span class="chip">#copy-on-write</span><span class="chip">#kvm</span><span class="chip">#microvm</span><span class="chip">#rust</span><span class="chip">#sandbox</span><span class="chip">#snapshot</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre>## Fork 100 microVMs in 101 ms. BRANCH a live VM in 150 ms.
+
+A microVM sandbox runtime for **AI agent fan-out**. Children fork
+from a warmed parent snapshot, inheriting its address space
+copy-on-write instead of cold-booting their own kernel.
+
+forkd is built on Firecracker. The parent VM boots once, imports
+your runtime (Python + your dependencies, a JIT-warmed JVM, an
+already-loaded ML model) and is paused to disk. Each child is a
+separate Firecracker process that `mmap`s the parent&#x27;s memory image
+with `MAP_PRIVATE`; the kernel implements copy-on-write at the page
+level, so children share the parent&#x27;s resident memory until they
+diverge.
+
+The result is two properties at once: per-child KVM isolation, and a
+spawn cost that&#x27;s closer to `fork(2)` than to a cold-boot VM.
+
+forkd also supports **BRANCH**: pause a running sandbox, snapshot its
+in-flight state, and resume — all in ~150 ms — so an agent can fork
+mid-thought, not only at warm-up. v0.3.4 fixed a slow-path regression
+where repeated BRANCHes on the same parent ballooned from 150 ms to
+2.7 s ([#146](https://github.com/deeplethe/forkd/issues/146)); the
+chain now stays flat (17.6× faster on the 6th consecutive BRANCH).
+
+**v0.4 preview**: an experimental live-fork path drops the BRANCH
+pause window from ~150 ms to ~3 ms per GiB by moving the memory
+write out of the critical section. Try the library API with
+`forkd wp-bench`:
+
+Full design: [`DESIGN-v0.4.md`](./DESIGN-v0.4.md). Empirical PoC data
+(4 PoCs, all passing): [`experiments/v0.4-*-poc/`](./experiments/).
+Tracking issue [#101](https://github.com/deeplethe/forkd/issues/101).
+
+## Demo: branch a thinking agent
+
+A 24-second walkthrough of the LangGraph branch-and-fan-out demo —
+source agent runs a ReAct loop, gets BRANCHed mid-thought, three
+grandchildren each receive a different steering hint, all three
+produce divergent itineraries while inheriting the same prior
+reasoning state.
+
+Headline divergence: the source (no hint) picks Nishiki Market for
+Day 1; all three hinted children independently substitute Arashiyama
+Bamboo Grove. The cost-focused child also adds &quot;may be pricey&quot;
+annotations the others don&#x27;t. **The model wasn&#x27;t told to swap places**
+— each hint perturbed the next LLM call, the rest of the prior
+reasoning came along unchanged.
+
+Full mechanism + numbers + raw transcripts in
+[`recipes/langgraph-react/`](./recipes/langgraph-react/) and
+[`recipes/langgraph-react/DEMO.md`](./recipes/langgraph-react/DEMO.md).
+
+### And: filesystem state, not just reasoning
+
+For the &quot;but couldn&#x27;t you just call the LLM 3 times in parallel?&quot;
+objection, see [`recipes/coding-agent-fork/`](./recipes/coding-agent-fork/) —
+a 50 MiB binary blob travels byte-identically across all 4 sandboxes
+through a single BRANCH. Three grandchildren each apply a different
+fix to a buggy Python package; their `__pycache__/` and edits stay
+isolated, but the 50 MiB inheritance is shared. Bytes can&#x27;t fit in
+a prompt. **3.3 s pause for the BRANCH operation.**
+
+## Properties
+
+- **Hardware isolation.** Each child is its own Firecracker microVM
+  backed by KVM. Escape requires a hypervisor or kernel vulnerability,
+  not a `runc` regression.
+- **Warmed runtimes inherit for free.** Imports, JIT compilation, model
+  weights, prefetched caches — anything the parent did is already
+  resident in the child.
+- **Real Linux per child.** Multi-vCPU, full TCP networking, `apt
+  install`, outbound HTTPS. Unlike function-level snapshot runtimes
+  that trade single-vCPU + serial-I/O for raw spawn speed, forkd
+  children can run real Python servers, model inference, or any
+  workload that needs a full kernel.
+- **Multi-tenant by construction.** Per-child network namespace, per-
+  child cgroup v2 memory limit, independent `/dev/urandom` re-seeded
+  by `vmgenid` (Linux 5.20+).
+- **Built for agent fan-out.** AI agent workloads that fan out into
+  many short-lived sandboxes — code-interpreter, tool-use, evaluation
+  rollouts — are the design point. The warmed parent collapses the
+  per-request `import numpy` / `import torch` cost across the entire
+  cohort.
+- **Operable.** Daemon process owning state, REST API on Unix or TCP,
+  Prometheus `/metrics`, append-only JSON audit log, s …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>
