@@ -173,7 +173,8 @@ def cmd_setup(args) -> int:
         import subprocess
 
         proc = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "anthropic"],
+            [sys.executable, "-m", "pip", "install",
+             "--timeout", "60", "--retries", "5", "anthropic"],
             capture_output=True, text=True,
         )
         try:
