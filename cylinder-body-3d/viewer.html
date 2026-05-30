@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>气缸体 3D 模型 · Cylinder body S1-2505</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font-family: system-ui, "Segoe UI", "PingFang SC", sans-serif;
+         background:#0e1116; color:#e6e6e6; }
+  header { padding:14px 20px; border-bottom:1px solid #222a35; }
+  header h1 { font-size:16px; margin:0 0 2px; font-weight:600; }
+  header p  { font-size:12px; margin:0; color:#8b97a7; }
+  model-viewer { width:100vw; height:calc(100vh - 120px); background:
+                 radial-gradient(circle at 50% 40%, #20262f 0%, #0e1116 70%); }
+  .bar { display:flex; gap:8px; flex-wrap:wrap; padding:10px 20px; border-top:1px solid #222a35; }
+  button { background:#1b2330; color:#cfd8e3; border:1px solid #2c3949; border-radius:7px;
+           padding:7px 12px; font-size:12px; cursor:pointer; }
+  button:hover { background:#243042; }
+  .hint { font-size:11px; color:#6b7686; margin-left:auto; align-self:center; }
+</style>
+<script type="module"
+  src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>气缸体 / Cylinder body — 图号 S1-2505 · 材料 ZG08Cr19Ni9</h1>
+    <p>八角形铸造气缸体 · 包络 ≈ 900 × 825 × 827 mm · 拖动旋转，滚轮缩放</p>
+  </header>
+
+  <model-viewer id="mv" src="cylinder_body.glb" alt="气缸体 3D 模型"
+    camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="0"
+    rotation-per-second="18deg" interpolation-decay="120"
+    shadow-intensity="1" shadow-softness="0.8" exposure="1.05"
+    environment-image="neutral" camera-orbit="40deg 68deg 2600mm"
+    min-camera-orbit="auto auto 1400mm" max-camera-orbit="auto auto 6000mm">
+  </model-viewer>
+
+  <div class="bar">
+    <button onclick="setView('40deg 68deg 2600mm')">等轴测 Iso</button>
+    <button onclick="setView('0deg 90deg 2400mm')">端面 End face</button>
+    <button onclick="setView('90deg 90deg 2600mm')">侧面 Side</button>
+    <button onclick="setView('0deg 0deg 2600mm')">顶面 Top</button>
+    <button onclick="toggleRotate()">⟳ 自动旋转</button>
+    <span class="hint">需联网加载 model-viewer（首次打开）。若离线，可用 cylinder_body.glb / .step / .stl 在任意 CAD 软件中查看。</span>
+  </div>
+
+<script>
+  const mv = document.getElementById('mv');
+  function setView(orbit){ mv.cameraOrbit = orbit; }
+  function toggleRotate(){ mv.autoRotate = !mv.autoRotate; }
+</script>
+</body>
+</html>
