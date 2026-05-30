@@ -2,10 +2,10 @@
 """GitHub AI 雷达 · 报告生成器（每个项目一个独立 HTML）
 
 输入：一份「已确认」JSON（你确认要纳入的仓库 + 我写的「厉害在哪」分析）
-输出：
-  scout/reports/<日期>/<owner>__<repo>.html   每个项目一个自包含、可离线、可下载的 HTML
-  scout/reports/index.html                     全部项目的归档画廊（按日期分组）
-  scout/reports/manifest.json                  归档索引数据
+输出（发布到仓库根 docs/，供 GitHub Pages 托管）：
+  docs/<日期>/<owner>__<repo>.html   每个项目一个自包含、可离线、可下载的 HTML
+  docs/index.html                     全部项目的归档画廊（按日期分组，站点首页）
+  docs/manifest.json                  归档索引数据
 
 已确认 JSON 结构见 scout/README.md。用法：
   python3 scout/generate_report.py                          # 读 data/confirmed-<今天>.json
@@ -22,8 +22,10 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(HERE)
 DATA_DIR = os.path.join(HERE, "data")
-REPORTS_DIR = os.path.join(HERE, "reports")
+# 发布站点放在仓库根 docs/（GitHub Pages 经典模式只支持根目录或 /docs）
+REPORTS_DIR = os.path.join(REPO_ROOT, "docs")
 MANIFEST_PATH = os.path.join(REPORTS_DIR, "manifest.json")
 
 LANE_LABEL = {"rising": "🆕 新星", "active": "🔥 热推"}
@@ -401,7 +403,7 @@ def main() -> int:
         fname = safe_name(fn) + ".html"
         with open(os.path.join(out_dir, fname), "w", encoding="utf-8") as f:
             f.write(render_project_page(it, date, day_title))
-        written.append(os.path.join("scout", "reports", date, fname))
+        written.append(os.path.join("docs", date, fname))
         entries.append({
             "date": date,
             "day_title": day_title,
@@ -423,7 +425,7 @@ def main() -> int:
     print(f"✅ 已为 {len(items)} 个项目各生成独立 HTML（{date}）：")
     for p in written:
         print(f"   · {p}")
-    print(f"✅ 归档画廊已更新: scout/reports/index.html（共 {len(manifest)} 篇）")
+    print(f"✅ 归档画廊（站点首页）已更新: docs/index.html（共 {len(manifest)} 篇）")
     return 0
 
 
