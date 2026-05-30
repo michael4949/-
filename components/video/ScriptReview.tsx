@@ -1,0 +1,73 @@
+import React from "react";
+import { Film, ArrowLeft, Clapperboard } from "lucide-react";
+import { VideoPlan, Scene } from "../../types";
+
+interface Props {
+  plan: VideoPlan;
+  onChange: (plan: VideoPlan) => void;
+  onConfirm: () => void;
+  onBack: () => void;
+}
+
+const roleLabel: Record<Scene["role"], string> = { hook: "钩子", body: "正文", cta: "结尾CTA" };
+const roleColor: Record<Scene["role"], string> = {
+  hook: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+  body: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+  cta: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+};
+
+const ScriptReview: React.FC<Props> = ({ plan, onChange, onConfirm, onBack }) => {
+  const estChars = plan.scenes.reduce((a, s) => a + s.narration.replace(/\s/g, "").length, 0);
+  const estSec = Math.round(estChars / 4.5);
+
+  const setScene = (id: number, patch: Partial<Scene>) =>
+    onChange({ ...plan, scenes: plan.scenes.map((s) => (s.id === id ? { ...s, ...patch } : s)) });
+
+  return (
+    <div className="w-full max-w-2xl mx-auto px-4">
+      <div className="flex items-center justify-between mb-5">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm">
+          <ArrowLeft className="w-4 h-4" /> 重来
+        </button>
+        <div className="text-white/40 text-xs">预计 ≈ {estSec}s · {plan.scenes.length} 镜 · {estChars} 字</div>
+      </div>
+
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-4">
+        <label className="text-white/40 text-xs">视频标题</label>
+        <input value={plan.title} onChange={(e) => onChange({ ...plan, title: e.target.value })}
+          className="w-full bg-transparent text-white text-xl font-bold focus:outline-none mt-1" />
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {plan.hashtags.map((h, i) => <span key={i} className="text-amber-300 text-xs">#{h}</span>)}
+        </div>
+      </div>
+
+      <div className="space-y-3 max-h-[46vh] overflow-y-auto pr-1">
+        {plan.scenes.map((s, i) => (
+          <div key={s.id} className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-white/30 text-xs font-mono">#{i + 1}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] border ${roleColor[s.role]}`}>{roleLabel[s.role]}</span>
+            </div>
+            <input value={s.caption} onChange={(e) => setScene(s.id, { caption: e.target.value })}
+              placeholder="屏幕大字"
+              className="w-full bg-transparent text-white font-bold text-lg focus:outline-none mb-1.5 border-b border-white/10 pb-1" />
+            <textarea value={s.narration} onChange={(e) => setScene(s.id, { narration: e.target.value })}
+              placeholder="口播文案（也是字幕）"
+              className="w-full bg-transparent text-white/70 text-sm focus:outline-none resize-none" rows={Math.max(2, Math.ceil(s.narration.length / 28))} />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 mt-5 text-white/40 text-xs">
+        <Film className="w-3.5 h-3.5" /> 可直接修改任意文案，满意后再生成。配音与渲染都在你本地浏览器完成。
+      </div>
+
+      <button onClick={onConfirm}
+        className="w-full mt-3 rounded-2xl py-4 font-bold flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:shadow-xl hover:shadow-amber-500/20 hover:-translate-y-0.5 transition">
+        <Clapperboard className="w-5 h-5" /> 配音并渲染成视频
+      </button>
+    </div>
+  );
+};
+
+export default ScriptReview;

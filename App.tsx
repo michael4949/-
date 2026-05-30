@@ -1,150 +1,141 @@
-import React, { useState } from 'react';
-import { ReportData, GroundingSource, RefinementQuestion } from './types';
-import { generateReport, generateRefinementQuestions } from './services/geminiService';
-import InputSection from './components/InputSection';
-import HeroSection from './components/HeroSection';
-import MethodologySection from './components/MethodologySection';
-import ChartsSection from './components/ChartsSection';
-import RoadmapSection from './components/RoadmapSection';
-import Footer from './components/Footer';
-import RefinementForm from './components/RefinementForm';
+import React, { useState } from "react";
+import { Clapperboard, AlertCircle } from "lucide-react";
+import { VideoOptions, SourceMaterial, VideoPlan, RenderResult, StageState } from "./types";
+import { extractContent } from "./services/contentService";
+import { writeViralScript } from "./services/scriptService";
+import { synthesizeScenes } from "./services/ttsService";
+import { generateSceneImages } from "./services/imageService";
+import { renderVideo } from "./services/videoEngine";
+import InputForm from "./components/video/InputForm";
+import StageProgress from "./components/video/StageProgress";
+import ScriptReview from "./components/video/ScriptReview";
+import ResultView from "./components/video/ResultView";
 
-type Step = 'input' | 'refining' | 'report';
+type View = "input" | "stages" | "review" | "result";
 
 const App: React.FC = () => {
-  const [step, setStep] = useState<Step>('input');
-  const [initialInput, setInitialInput] = useState('');
-  const [refinementQuestions, setRefinementQuestions] = useState<RefinementQuestion[]>([]);
-  
-  const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [sources, setSources] = useState<GroundingSource[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [view, setView] = useState<View>("input");
+  const [options, setOptions] = useState<VideoOptions | null>(null);
+  const [material, setMaterial] = useState<SourceMaterial | null>(null);
+  const [plan, setPlan] = useState<VideoPlan | null>(null);
+  const [result, setResult] = useState<RenderResult | null>(null);
+  const [stages, setStages] = useState<StageState[]>([]);
+  const [log, setLog] = useState<string[]>([]);
+  const [renderRatio, setRenderRatio] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // Step 1: Handle initial input and fetch refinement questions
-  const handleInitialSubmit = async (input: string) => {
-    setIsLoading(true);
-    setError(null);
-    setInitialInput(input);
-    
+  const addLog = (m: string) => setLog((l) => [...l, m]);
+  const setStage = (id: StageState["id"], patch: Partial<StageState>) =>
+    setStages((ss) => ss.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  const failActive = () => setStages((ss) => ss.map((s) => (s.status === "active" ? { ...s, status: "error" } : s)));
+
+  // 阶段 A：读取内容 → 写脚本
+  const handleSubmit = async (input: string, opts: VideoOptions) => {
+    setOptions(opts); setError(null); setLog([]); setResult(null);
+    setStages([
+      { id: "read", label: "读取网页 / 文字内容", status: "active" },
+      { id: "script", label: "撰写抖音爆款脚本", status: "pending" },
+    ]);
+    setView("stages");
     try {
-      const { questions } = await generateRefinementQuestions(input);
-      setRefinementQuestions(questions);
-      setStep('refining');
-    } catch (err) {
-      setError("无法分析该指令，请稍后重试。");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+      const mat = await extractContent(input, addLog);
+      setMaterial(mat);
+      setStage("read", { status: "done", detail: `《${mat.title}》· ${mat.keyPoints.length} 个要点` });
+      setStage("script", { status: "active" });
+      const p = await writeViralScript(mat, opts, addLog);
+      setPlan(p);
+      setStage("script", { status: "done", detail: `${p.scenes.length} 镜` });
+      setView("review");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "出错了，请重试。");
+      failActive();
     }
   };
 
-  // Step 2: Handle refinement answers and generate final report
-  const handleRefinementSubmit = async (answers: Record<string, string[]>) => {
-    setIsLoading(true);
-    setError(null);
-
-    // Map answer values back to labels for better context if needed, 
-    // but passing raw values is fine if they are descriptive.
-    // For now we pass the answers object directly to the service.
-
+  // 阶段 B：配音 →（配图）→ 渲染导出
+  const handleRender = async () => {
+    if (!plan || !options) return;
+    setError(null); setLog([]); setRenderRatio(0);
+    const st: StageState[] = [{ id: "voice", label: "合成中文配音", status: "active" }];
+    if (options.useAiImages) st.push({ id: "images", label: "生成 AI 配图", status: "pending" });
+    st.push({ id: "render", label: "渲染并导出视频", status: "pending" });
+    setStages(st);
+    setView("stages");
     try {
-      const { report, sources } = await generateReport(initialInput, answers);
-      setReportData(report);
-      setSources(sources);
-      setStep('report');
-    } catch (err) {
-      setError("报告生成失败。请检查您的 API 密钥并重试。");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+      const audios = await synthesizeScenes(plan, (done, total, est) =>
+        setStage("voice", { detail: `${done}/${total} 段${est ? "（含静音占位）" : ""}` })
+      );
+      setStage("voice", { status: "done", detail: `${audios.length} 段` });
+
+      let images: (ImageBitmap | null)[] = plan.scenes.map(() => null);
+      if (options.useAiImages) {
+        setStage("images", { status: "active" });
+        images = await generateSceneImages(plan.scenes, options.aspect, (d, t) =>
+          setStage("images", { detail: `${d}/${t}` })
+        );
+        setStage("images", { status: "done" });
+      }
+
+      setStage("render", { status: "active" });
+      const res = await renderVideo(plan, audios, images, options, (ratio, note) => {
+        setRenderRatio(ratio);
+        if (note) setStage("render", { detail: note });
+      });
+      setResult(res);
+      setStage("render", { status: "done", detail: `${res.ext.toUpperCase()} · ${res.durationSec.toFixed(1)}s` });
+      setView("result");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "渲染失败，请重试。");
+      failActive();
     }
   };
 
-  const handleReset = () => {
-    setStep('input');
-    setReportData(null);
-    setRefinementQuestions([]);
-    setInitialInput('');
+  const restart = () => {
+    if (result?.url) URL.revokeObjectURL(result.url);
+    setResult(null); setPlan(null); setMaterial(null); setError(null); setLog([]);
+    setView("input");
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
-      {/* Header / Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-            <div className="w-8 h-8 bg-corporate-900 rounded-lg flex items-center justify-center">
-               <span className="text-white font-serif font-bold text-xl">A</span>
-            </div>
-            <span className="font-semibold text-corporate-900 tracking-tight">AI Consultant Pro</span>
+    <div className="min-h-screen text-white relative overflow-hidden" style={{ background: "radial-gradient(1200px 600px at 50% -10%, #1e293b 0%, #0a0e1a 55%, #05070d 100%)" }}>
+      {/* 顶栏 */}
+      <nav className="relative z-10 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={restart}>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+            <Clapperboard className="w-5 h-5 text-black" />
           </div>
-          <div className="text-xs font-medium text-slate-400 uppercase tracking-widest hidden md:block">
-            企业专业版
-          </div>
+          <span className="font-bold tracking-tight">AI 爆款工厂</span>
         </div>
+        <span className="text-white/30 text-xs hidden sm:block">链接 → 中文配音竖屏视频</span>
       </nav>
 
-      {/* Main Content Area */}
-      <main className="flex-grow pt-20">
-        {step === 'input' && (
-          <div className="min-h-[80vh] flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden animate-in fade-in duration-500">
-             {/* Abstract Background Shapes */}
-             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-             <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-amber-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-             <div className="absolute bottom-[-20%] left-[20%] w-[500px] h-[500px] bg-slate-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-             
-             <InputSection onGenerate={handleInitialSubmit} isLoading={isLoading} />
-             
-             {error && (
-               <div className="mt-8 p-4 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm max-w-md text-center z-10">
-                 {error}
-               </div>
-             )}
-          </div>
-        )}
-
-        {step === 'refining' && (
-          <div className="min-h-[80vh] bg-slate-50 py-12">
-             <RefinementForm 
-               questions={refinementQuestions} 
-               onSubmit={handleRefinementSubmit}
-               isLoading={isLoading}
-             />
-             {error && (
-               <div className="fixed bottom-10 left-1/2 -translate-x-1/2 p-4 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm z-50 shadow-xl">
-                 {error}
-               </div>
-             )}
-          </div>
-        )}
-
-        {step === 'report' && reportData && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <HeroSection data={reportData} />
-            <MethodologySection methodologies={reportData.methodologies} />
-            <ChartsSection data={reportData} />
-            <RoadmapSection roadmap={reportData.roadmap} />
-            <section className="bg-slate-50 py-20">
-               <div className="container mx-auto px-6 text-center max-w-3xl">
-                  <h3 className="text-2xl font-serif font-bold text-corporate-900 mb-6">总结结论</h3>
-                  <p className="text-lg text-slate-600 leading-relaxed italic">"{reportData.conclusion}"</p>
-               </div>
-            </section>
-            <Footer sources={sources} companyName={reportData.companyName} />
-            
-            {/* Sticky "New Report" button for better UX */}
-            <div className="fixed bottom-6 right-6 z-40">
-              <button 
-                onClick={handleReset}
-                className="bg-corporate-900 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-corporate-800 transition-colors font-medium flex items-center gap-2"
-              >
-                <span>新分析</span>
-              </button>
+      <main className="relative z-10 py-8 md:py-12 flex flex-col items-center">
+        {error && (
+          <div className="w-full max-w-xl mx-auto px-4 mb-6">
+            <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl px-4 py-3 text-sm">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <div>{error}</div>
+                <button onClick={() => (view === "stages" && plan ? setView("review") : setView("input"))}
+                  className="mt-1 underline text-red-300 hover:text-red-200">返回</button>
+              </div>
             </div>
           </div>
         )}
+
+        {view === "input" && <InputForm onSubmit={handleSubmit} isLoading={false} />}
+        {view === "stages" && <StageProgress stages={stages} log={log} renderRatio={renderRatio} />}
+        {view === "review" && plan && (
+          <ScriptReview plan={plan} onChange={setPlan} onConfirm={handleRender} onBack={() => setView("input")} />
+        )}
+        {view === "result" && result && plan && (
+          <ResultView result={result} plan={plan} material={material} onRestart={restart} />
+        )}
       </main>
+
+      <footer className="relative z-10 text-center text-white/25 text-xs py-6 px-4">
+        全程在你的浏览器本地完成 · 内容由 Gemini 读取与生成，请自行核对事实后再发布 · 推荐 Chrome / Edge 导出 MP4
+      </footer>
     </div>
   );
 };
