@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Clapperboard, AlertCircle } from "lucide-react";
-import { VideoOptions, SourceMaterial, VideoPlan, RenderResult, StageState } from "./types";
+import { VideoOptions, SourceMaterial, VideoPlan, RenderResult, StageState, VisualAsset } from "./types";
 import { extractContent } from "./services/contentService";
 import { writeViralScript } from "./services/scriptService";
 import { synthesizeScenes } from "./services/ttsService";
 import { generateSceneImages } from "./services/imageService";
+import { collectVisuals, assignVisualsToScenes } from "./services/visualsService";
 import { renderVideo } from "./services/videoEngine";
 import InputForm from "./components/video/InputForm";
 import StageProgress from "./components/video/StageProgress";
@@ -52,13 +53,15 @@ const App: React.FC = () => {
     }
   };
 
-  // 阶段 B：配音 →（配图）→ 渲染导出
+  // 阶段 B：配音 → 截取网页真实画面 →（AI配图兜底）→ 渲染导出
   const handleRender = async () => {
-    if (!plan || !options) return;
+    if (!plan || !options || !material) return;
     setError(null); setLog([]); setRenderRatio(0);
-    const st: StageState[] = [{ id: "voice", label: "合成中文配音", status: "active" }];
-    if (options.useAiImages) st.push({ id: "images", label: "生成 AI 配图", status: "pending" });
-    st.push({ id: "render", label: "渲染并导出视频", status: "pending" });
+    const st: StageState[] = [
+      { id: "voice", label: "合成中文配音", status: "active" },
+      { id: "images", label: "截取网页真实画面", status: "pending" },
+      { id: "render", label: "渲染并导出视频", status: "pending" },
+    ];
     setStages(st);
     setView("stages");
     try {
@@ -67,17 +70,38 @@ const App: React.FC = () => {
       );
       setStage("voice", { status: "done", detail: `${audios.length} 段` });
 
-      let images: (ImageBitmap | null)[] = plan.scenes.map(() => null);
-      if (options.useAiImages) {
-        setStage("images", { status: "active" });
-        images = await generateSceneImages(plan.scenes, options.aspect, (d, t) =>
-          setStage("images", { detail: `${d}/${t}` })
+      // —— 关键：抓取网页实拍截图 + 页面真实配图，作为画面主体 ——
+      setStage("images", { status: "active" });
+      const roles = plan.scenes.map((s) => s.role);
+      let perScene: (VisualAsset | null)[] = plan.scenes.map(() => null);
+      try {
+        const assets = await collectVisuals(
+          { pageUrls: material.pageUrls, images: material.images, aspect: options.aspect },
+          addLog
         );
-        setStage("images", { status: "done" });
+        if (assets.length) {
+          perScene = assignVisualsToScenes(assets, plan.scenes.length, roles);
+          const shots = assets.filter((a) => a.kind === "screenshot").length;
+          setStage("images", { status: "done", detail: `${shots} 张网页截图 + ${assets.length - shots} 张配图` });
+        } else {
+          setStage("images", { status: "done", detail: "未取到网页画面，使用动效背景" });
+        }
+      } catch (e) {
+        console.warn(e);
+        setStage("images", { status: "done", detail: "网页画面抓取失败，使用动效背景" });
+      }
+
+      // 可选：对仍没有真实画面的场景，用 AI 配图补位
+      if (options.useAiImages && perScene.some((v) => !v)) {
+        addLog("为缺画面的场景生成 AI 配图…");
+        const aiBmps = await generateSceneImages(plan.scenes, options.aspect);
+        perScene = perScene.map((v, i) =>
+          v || (aiBmps[i] ? { kind: "image" as const, url: "ai", bitmap: aiBmps[i]!, w: aiBmps[i]!.width, h: aiBmps[i]!.height } : null)
+        );
       }
 
       setStage("render", { status: "active" });
-      const res = await renderVideo(plan, audios, images, options, (ratio, note) => {
+      const res = await renderVideo(plan, audios, perScene, options, (ratio, note) => {
         setRenderRatio(ratio);
         if (note) setStage("render", { detail: note });
       });

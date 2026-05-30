@@ -42,7 +42,8 @@ ${urls.map((u) => `- ${u}`).join("\n")}
   "summary": "3-5 句话的中文摘要，说清这是什么、核心是什么",
   "keyPoints": ["8-15 条关键信息点（中文），尽量具体，包含数据/名称/亮点"],
   "fullText": "尽可能完整、有条理的中文正文整理（可以较长，保留关键事实与细节）",
-  "links": [{"title":"子链接标题","uri":"你实际读取过的页内关键链接URL"}]
+  "links": [{"title":"子链接标题","uri":"你实际读取过的页内关键链接URL"}],
+  "images": ["页面正文里出现的真实配图的完整图片URL（如截图、产品图、示意图；尽量多列几张，必须是 http 开头的直链）"]
 }`;
 
   const config: Record<string, unknown> = {};
@@ -71,6 +72,10 @@ ${urls.map((u) => `- ${u}`).join("\n")}
     .filter((s): s is GroundingSource => !!s);
   const uniqueSources = Array.from(new Map(sources.map((s) => [s.uri, s])).values());
 
+  // 从 grounding 元数据里也尽量挖出真实页面地址，作为截图目标
+  const groundingUrls = uniqueSources.map((s) => s.uri).filter((u) => /^https?:\/\//.test(u));
+  const parsedImages = ((parsed as { images?: string[] }).images || []).filter((u) => /^https?:\/\//.test(u));
+
   const material: SourceMaterial = {
     title: parsed.title?.trim() || "未命名内容",
     summary: parsed.summary?.trim() || "",
@@ -78,12 +83,15 @@ ${urls.map((u) => `- ${u}`).join("\n")}
     fullText: parsed.fullText?.trim() || input,
     links: (parsed.links || []).filter((l) => l && l.uri),
     sources: uniqueSources,
+    // 截图目标：优先用户给的原始链接；没有则退而用 grounding 里出现的页面
+    pageUrls: Array.from(new Set([...urls, ...(urls.length ? [] : groundingUrls)])).slice(0, 5),
+    images: Array.from(new Set(parsedImages)).slice(0, 8),
   };
 
   if (!material.summary && !material.keyPoints.length) {
     throw new Error("内容解析为空，可能是页面需要登录或为动态加载。可尝试直接粘贴正文。");
   }
 
-  onLog?.(`已读取：《${material.title}》，提炼出 ${material.keyPoints.length} 个要点。`);
+  onLog?.(`已读取：《${material.title}》，提炼出 ${material.keyPoints.length} 个要点${material.pageUrls.length ? `，待截图网页 ${material.pageUrls.length} 个` : ""}。`);
   return material;
 }

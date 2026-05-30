@@ -98,6 +98,17 @@ export interface SourceMaterial {
   fullText: string;
   links: GroundingSource[];   // 实际读取过的页内关键子链接
   sources: GroundingSource[]; // grounding 来源
+  pageUrls: string[];         // 用户输入里出现的原始网页链接（用于截图）
+  images: string[];           // 从网页抓到的真实配图 URL（og:image / 正文图）
+}
+
+/** 网页“真实画面”素材：实拍截图 + 页面配图，均已转成可直接绘制的位图 */
+export interface VisualAsset {
+  kind: 'screenshot' | 'image';
+  url: string;            // 原始/代理后的图片地址
+  bitmap: ImageBitmap;    // 已解码、可用于 canvas 绘制（已解决跨域）
+  w: number;
+  h: number;
 }
 
 export interface Scene {
@@ -108,6 +119,7 @@ export interface Scene {
   bullets: string[];  // 可选要点
   emphasis: string;   // 需要高亮的词/短语
   bgKeyword: string;  // 英文关键词（用于配图 / 渐变种子）
+  visualHint?: 'screenshot' | 'image' | 'auto'; // 这一镜倾向用哪种真实画面
 }
 
 export interface VideoPlan {

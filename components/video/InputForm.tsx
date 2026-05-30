@@ -54,7 +54,7 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
           一条链接，<span className="text-amber-400">自动成片</span>
         </h1>
         <p className="text-white/60 text-base">
-          粘贴网页链接或文字，AI 帮你读全文、写爆款脚本、中文配音 + 字幕，导出可直接发抖音的竖屏视频。
+          粘贴网页链接，AI 自动<span className="text-amber-300">截取网页真实画面</span>＋读全文写爆款脚本、中文配音＋字幕，导出可直接发抖音的竖屏视频。
         </p>
       </div>
 
@@ -172,7 +172,7 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
             <div className="flex gap-4">
               <label className="flex items-center gap-2 text-white/70 text-sm cursor-pointer">
                 <input type="checkbox" checked={opt.useAiImages} onChange={(e) => set("useAiImages", e.target.checked)} className="accent-amber-400 w-4 h-4" />
-                AI 配图（更像大片，更慢）
+                AI 配图兜底（网页没图时才用，更慢）
               </label>
               <label className="flex items-center gap-2 text-white/70 text-sm cursor-pointer">
                 <input type="checkbox" checked={opt.bgm} onChange={(e) => set("bgm", e.target.checked)} className="accent-amber-400 w-4 h-4" />

@@ -130,24 +130,85 @@ function buildTimeline(plan: VideoPlan, audios: SceneAudio[], bgm: boolean): Tim
 }
 
 // ----------------------------- 画面绘制 -----------------------------
+interface Visual { bitmap: ImageBitmap; kind: 'screenshot' | 'image'; }
+
+/** 先铺一层主题渐变作为底（截图“包含”模式留边时用得到）。 */
+function paintGradient(ctx: CanvasRenderingContext2D, W: number, H: number, theme: Theme, seed: number, t: number) {
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, theme.a);
+  g.addColorStop(1, theme.b);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 3; i++) {
+    const ph = seed + i * 2.2;
+    const bx = W * (0.5 + 0.42 * Math.sin(t * 0.18 + ph));
+    const by = H * (0.4 + 0.4 * Math.cos(t * 0.14 + ph * 1.3));
+    const r = Math.min(W, H) * (0.45 + 0.1 * Math.sin(t * 0.2 + i));
+    const rg = ctx.createRadialGradient(bx, by, 0, bx, by, r);
+    const col = i % 2 ? theme.accent : theme.ink;
+    rg.addColorStop(0, col + "26");
+    rg.addColorStop(1, col + "00");
+    ctx.fillStyle = rg;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
 function drawBackground(
   ctx: CanvasRenderingContext2D, W: number, H: number, theme: Theme,
-  seed: number, img: ImageBitmap | null, p: number, t: number
+  seed: number, vis: Visual | null, p: number, t: number
 ) {
-  if (img) {
-    // Ken Burns：缓慢放大 + 轻微平移
-    const scale = 1.06 + 0.12 * easeInOut(p);
+  if (vis) {
+    const img = vis.bitmap;
     const iw = img.width, ih = img.height;
+
+    if (vis.kind === "screenshot") {
+      // 网页截图：用“包含”铺满上 70% 区域，完整可读；缓慢竖向滚动模拟“浏览网页”。
+      paintGradient(ctx, W, H, theme, seed, t);
+      const frameTop = H * 0.10;
+      const frameH = H * 0.62;          // 文字区留在下方
+      const fit = Math.min(W / iw, frameH / ih);
+      const dispW = iw * fit, dispH = ih * fit;
+      const dx = (W - dispW) / 2;
+      // 长截图：随时间向上滚动；普通图：居中
+      const overflow = Math.max(0, ih * fit - frameH);
+      const scrollExtra = ih * fit > frameH ? overflow * easeInOut(clamp(p, 0, 1)) : 0;
+      const dyBase = frameTop + (frameH - Math.min(dispH, frameH)) / 2;
+      // 用裁剪把内容限制在取景框内
+      ctx.save();
+      ctx.beginPath();
+      const rad = Math.round(W * 0.03);
+      roundRect(ctx, dx, frameTop, dispW, Math.min(dispH, frameH), rad);
+      ctx.clip();
+      // 白底（网页截图常带白边，避免透出渐变突兀）
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(dx, frameTop, dispW, Math.min(dispH, frameH));
+      ctx.drawImage(img, 0, 0, iw, ih, dx, dyBase - scrollExtra, dispW, dispH);
+      ctx.restore();
+      // 取景框描边 + 轻微阴影感
+      ctx.lineWidth = Math.max(2, W * 0.004);
+      ctx.strokeStyle = "rgba(255,255,255,0.55)";
+      roundRect(ctx, dx, frameTop, dispW, Math.min(dispH, frameH), Math.round(W * 0.03));
+      ctx.stroke();
+      // 底部加深，保证字幕/CTA 可读
+      const sg = ctx.createLinearGradient(0, H * 0.6, 0, H);
+      sg.addColorStop(0, "rgba(0,0,0,0)");
+      sg.addColorStop(1, "rgba(0,0,0,0.78)");
+      ctx.fillStyle = sg;
+      ctx.fillRect(0, H * 0.6, W, H * 0.4);
+      return;
+    }
+
+    // 真实配图：Ken Burns“覆盖”铺满全屏 + 压暗
+    const scale = 1.06 + 0.12 * easeInOut(p);
     const cover = Math.max(W / iw, H / ih) * scale;
     const dw = iw * cover, dh = ih * cover;
     const dx = (W - dw) / 2 + Math.sin(seed) * 30 * p;
     const dy = (H - dh) / 2 - 40 * p;
     ctx.drawImage(img, dx, dy, dw, dh);
-    // 压暗以便文字可读
     const g = ctx.createLinearGradient(0, 0, 0, H);
     g.addColorStop(0, "rgba(0,0,0,0.45)");
-    g.addColorStop(0.5, "rgba(0,0,0,0.25)");
-    g.addColorStop(1, "rgba(0,0,0,0.75)");
+    g.addColorStop(0.5, "rgba(0,0,0,0.28)");
+    g.addColorStop(1, "rgba(0,0,0,0.78)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
     return;
@@ -338,7 +399,7 @@ function drawBrand(ctx: CanvasRenderingContext2D, W: number, H: number, brand: s
 export async function renderVideo(
   plan: VideoPlan,
   audios: SceneAudio[],
-  images: (ImageBitmap | null)[],
+  visuals: (Visual | null)[],
   options: VideoOptions,
   onProgress?: (ratio: number, note?: string) => void
 ): Promise<RenderResult> {
@@ -369,7 +430,7 @@ export async function renderVideo(
     const win = tl.windows[idx];
     const scene = plan.scenes[idx];
     const p = clamp((t - win.start) / win.dur, 0, 1.2);
-    drawBackground(ctx, W, H, theme, sceneSeeds[idx], images[idx] || null, clamp(p, 0, 1), t);
+    drawBackground(ctx, W, H, theme, sceneSeeds[idx], visuals[idx] || null, clamp(p, 0, 1), t);
     drawProgress(ctx, W, theme, plan.scenes.length, idx, p);
     drawScene(ctx, W, H, theme, scene, clamp(p, 0, 1), scene.role === "hook", scene.role === "cta", plan);
     // 字幕
