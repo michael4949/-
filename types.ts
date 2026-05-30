@@ -29,6 +29,8 @@ export interface Health {
   provider?: string;
   model?: string;
   claude_configured?: boolean;
+  provider_ok?: boolean;
+  provider_error?: string;
 }
 
 export interface SkillMeta {

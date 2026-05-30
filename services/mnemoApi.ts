@@ -11,7 +11,16 @@ const BASE =
 
 async function getJSON<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    let detail = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (body?.error) detail = body.error;
+    } catch {
+      /* ignore non-JSON bodies */
+    }
+    throw new Error(detail);
+  }
   return res.json() as Promise<T>;
 }
 

@@ -30,6 +30,7 @@ const App: React.FC = () => {
   }, []);
 
   const usingClaude = health?.provider === 'anthropic';
+  const providerBroken = online && health?.provider_ok === false;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -39,7 +40,12 @@ const App: React.FC = () => {
         provider={usingClaude ? `Claude · ${health?.model || ''}` : health?.provider || 'scripted'}
         onRefresh={refresh}
       />
-      {online && !usingClaude && (
+      {providerBroken && (
+        <div className="bg-red-50 border-b border-red-200 text-red-700 text-xs px-6 py-2 text-center">
+          ⚠️ 大脑没接通：{health?.provider_error || '未知错误'}（记忆和技能仍可正常浏览）
+        </div>
+      )}
+      {online && !usingClaude && !providerBroken && (
         <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-xs px-6 py-2 text-center">
           当前是离线模式（只会记事/回忆）。想让它真正会思考、回答任意问题？在终端运行
           <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded">mnemo setup</code>

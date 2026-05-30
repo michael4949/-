@@ -31,10 +31,24 @@ if ! python3 -c "import sys; sys.path.insert(0,'core'); from mnemo.config import
   fi
 fi
 
-# 3) 启动后端大脑
+# 3) 启动后端大脑（先自检：Claude 接不通就自动退回离线模式，绝不让你卡在报错）
 echo ""
+SERVE_ARGS=""
+STATUS=$(cd "$DIR" && python3 -c "import sys; sys.path.insert(0,'core')
+from mnemo.config import MnemoConfig
+from mnemo.llm import build_provider
+cfg = MnemoConfig.load()
+try:
+    build_provider(cfg); print('OK')
+except Exception as e:
+    print('FAIL:' + str(e))" 2>/dev/null)
+if [[ "$STATUS" == FAIL:* ]]; then
+  echo "⚠️  Claude 暂时没接通：${STATUS#FAIL:}"
+  echo "   先用【离线模式】启动（记事/回忆照常用）。修好后重新双击即可切回 Claude。"
+  SERVE_ARGS="--provider scripted"
+fi
 echo "▎启动大脑（后端）…"
-( cd "$DIR/core" && python3 -m mnemo.cli serve ) &
+( cd "$DIR/core" && python3 -m mnemo.cli serve $SERVE_ARGS ) &
 API_PID=$!
 
 # 4) 首次运行装一下网页依赖

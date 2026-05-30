@@ -172,7 +172,21 @@ def cmd_setup(args) -> int:
         print("\n正在安装 Claude 依赖（只需一次，请稍候）…")
         import subprocess
 
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "anthropic"], check=False)
+        proc = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "anthropic"],
+            capture_output=True, text=True,
+        )
+        try:
+            import anthropic  # noqa: F401
+            print("✅ 依赖安装好了")
+        except ImportError:
+            print("⚠️  依赖没装上。常见于 Mac（python.org 版需要先装证书）。请按顺序试：")
+            print("   1) 打开 访达 → 应用程序 → Python 3.x 文件夹 → 双击 Install Certificates.command")
+            print(f"   2) 再运行： {sys.executable} -m pip install anthropic")
+            print("   key 已保存；装好依赖后直接重启即可。期间网页仍可用离线模式。")
+            if proc.stderr.strip():
+                print(f"   （技术细节：{proc.stderr.strip().splitlines()[-1][:160]}）")
+            return 1
 
     # Best-effort verification so the user knows it actually works.
     print("\n正在测试连接…")
@@ -197,8 +211,6 @@ def cmd_setup(args) -> int:
 
 
 def cmd_config(args) -> int:
-    cfg = MnemoConfig.load(profile=args.profile)
-    key = cfg.get_anthropic_key()
     masked = "（未设置）"
     if key:
         masked = key[:7] + "…" + key[-4:] if len(key) > 12 else "已设置"
@@ -296,6 +308,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     cf = sub.add_parser("config", help="show current settings")
     cf.set_defaults(func=cmd_config)
+
+    us = sub.add_parser("use", help="switch the default brain (scripted|anthropic)")
+    us.add_argument("target", choices=["scripted", "anthropic"])
+    us.set_defaults(func=cmd_use)
 
     s = sub.add_parser("skills", help="inspect skills")
     s.add_argument("action", nargs="?", default="list", choices=["list", "view"])

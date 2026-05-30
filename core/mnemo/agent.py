@@ -53,13 +53,22 @@ class Agent:
         workdir: str = ".",
     ):
         self.config = config
-        self.provider = provider or build_provider(config)
+        # Provider is built lazily (see the `provider` property) so that read-only
+        # work (memory/skills) never fails just because, say, Claude is misconfigured.
+        self._provider = provider
         self.memory = memory or MemoryManager(config)
         self.skills = skills or SkillManager(config.skills_dir)
         self.evolver = evolver or SkillEvolver(self.skills, toolcall_threshold=config.skill_toolcall_threshold)
         self.context = ToolContext(config, self.memory, self.skills, workdir=workdir)
         self.registry = registry or default_registry(self.context)
         self.workdir = workdir
+
+    @property
+    def provider(self) -> LLMProvider:
+        """Build the LLM provider on first use, then cache it."""
+        if self._provider is None:
+            self._provider = build_provider(self.config)
+        return self._provider
 
     # ----- prompt assembly ---------------------------------------------
     def build_system_prompt(self) -> str:

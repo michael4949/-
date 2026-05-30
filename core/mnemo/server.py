@@ -19,12 +19,25 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from .agent import Agent
 from .config import MnemoConfig
+from .llm import build_provider
 from .types import EventType
 
 
 def _agent(profile=None, provider=None) -> Agent:
     cfg = MnemoConfig.load(profile=profile, provider=provider)
     return Agent(cfg)
+
+
+def friendly_error(err: str) -> str:
+    """Map a raw exception string to actionable, localized guidance."""
+    low = err.lower()
+    if "anthropic" in low and ("包" in err or "install" in low or "module" in low):
+        return "Claude 依赖没装好。请在终端运行  pip install anthropic  后重启，或先用离线模式。"
+    if "还没配置" in err or "api key" in low or "api_key" in low:
+        return "还没配好 Claude 的 key。请运行  mnemo setup，或改用离线模式（mnemo serve --provider scripted）。"
+    if "401" in err or "authentication" in low or "x-api-key" in low:
+        return "Claude 的 key 无效或已失效。请去 console.anthropic.com 重新生成，再运行 mnemo setup。"
+    return f"出错了：{err}"
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -54,6 +67,13 @@ class _Handler(BaseHTTPRequestHandler):
         try:
             if path == "/api/health":
                 cfg = MnemoConfig.load(profile=self.profile, provider=self.provider)
+                # Probe the provider so the console can report the *real* status,
+                # instead of showing "connected" while chat is actually broken.
+                provider_ok, provider_error = True, None
+                try:
+                    build_provider(cfg)
+                except Exception as e:
+                    provider_ok, provider_error = False, friendly_error(str(e))
                 return self._send(200, {
                     "ok": True,
                     "service": "mnemo",
@@ -61,6 +81,8 @@ class _Handler(BaseHTTPRequestHandler):
                     "provider": cfg.provider,
                     "model": cfg.model,
                     "claude_configured": bool(cfg.get_anthropic_key()),
+                    "provider_ok": provider_ok,
+                    "provider_error": provider_error,
                 })
             if path == "/api/skills":
                 agent = _agent(self.profile, self.provider)
@@ -96,14 +118,19 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/chat":
             message = data.get("message", "")
             session = data.get("session")
-            agent = _agent(self.profile, self.provider)
-            events, answer, sid = [], "", session
-            for ev in agent.run(message, session_id=session, channel="web"):
-                events.append(ev.to_dict())
-                if ev.type == EventType.FINAL:
-                    answer = ev.text
-                    sid = ev.data.get("session_id", sid)
-            return self._send(200, {"session": sid, "answer": answer, "events": events})
+            try:
+                agent = _agent(self.profile, self.provider)
+                events, answer, sid = [], "", session
+                for ev in agent.run(message, session_id=session, channel="web"):
+                    events.append(ev.to_dict())
+                    if ev.type == EventType.FINAL:
+                        answer = ev.text
+                        sid = ev.data.get("session_id", sid)
+                return self._send(200, {"session": sid, "answer": answer, "events": events})
+            except Exception as e:
+                # Never surface a raw 500 to the chat UI — explain what to do.
+                msg = friendly_error(str(e))
+                return self._send(200, {"session": session, "answer": f"⛔ {msg}", "events": [], "error": msg})
         return self._send(404, {"error": "not found"})
 
 
