@@ -211,6 +211,8 @@ def cmd_setup(args) -> int:
 
 
 def cmd_config(args) -> int:
+    cfg = MnemoConfig.load(profile=args.profile)
+    key = cfg.get_anthropic_key()
     masked = "（未设置）"
     if key:
         masked = key[:7] + "…" + key[-4:] if len(key) > 12 else "已设置"
@@ -220,6 +222,16 @@ def cmd_config(args) -> int:
     print(f"model         : {cfg.model}")
     print(f"anthropic key : {masked}")
     print(f"config file   : {cfg.config_path}")
+    return 0
+
+
+def cmd_use(args) -> int:
+    """Quickly switch the default brain: `mnemo use scripted|anthropic`."""
+    cfg = MnemoConfig.load(profile=args.profile)
+    cfg.save_preferences(provider=args.target)
+    print(f"✅ 默认大脑已切换为：{args.target}")
+    if args.target == "anthropic" and not cfg.get_anthropic_key():
+        print("提示：还没配置 key，运行  mnemo setup")
     return 0
 
 
