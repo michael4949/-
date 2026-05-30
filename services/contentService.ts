@@ -22,26 +22,79 @@ const materialSchema: Schema = {
 
 const IMG_RE = /https?:\/\/[^\s)"'\]]+\.(?:png|jpe?g|webp|gif|avif)(?:\?[^\s)"'\]]*)?/gi;
 
-/** 用 r.jina.ai 直接抓取网页正文（Markdown）。可靠、带 CORS、能处理 JS 渲染页。 */
-async function fetchPageText(url: string, timeoutMs = 45000): Promise<string> {
-  const target = `https://r.jina.ai/${url}`;
+/** 判断抓回来的文本是不是“垃圾/错误页”，而不是真正的网页正文。 */
+function looksLikeGarbage(text: string): boolean {
+  const t = text.trim();
+  if (t.length < 120) return true;
+  const head = t.slice(0, 400).toLowerCase();
+  // jina 的使用说明/限流页、各类错误页特征
+  const bad = [
+    "[usage 1]", "your_url", "r.jina.ai/your_url",
+    "rate limit", "too many requests", "402 payment",
+    "page not found", "404 not found", "<title>404",
+    "access denied", "are you a robot", "captcha",
+    "enable javascript to", "checking your browser",
+  ];
+  if (bad.some((b) => head.includes(b))) return true;
+  // 纯说明页通常没有任何中文/句子，且极短
+  return false;
+}
+
+/** 把 HTML 粗清洗为可读文本，并附上图片直链。 */
+function htmlToText(html: string): string {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(br|\/p|\/div|\/li|\/h[1-6])\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n")
+    .trim();
+  const imgs = (html.match(IMG_RE) || []).join("\n");
+  return imgs ? `${text}\n\n${imgs}` : text;
+}
+
+/** 通道① 直接 fetch 原网页（很多站点带 CORS，可直连，最快最准）。 */
+async function fetchDirect(url: string, timeoutMs = 25000): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(target, {
-      signal: ctrl.signal,
-      headers: { "X-Return-Format": "markdown" },
-    });
-    if (!res.ok) throw new Error(`抓取返回 ${res.status}`);
-    const text = await res.text();
-    if (!text || text.trim().length < 80) throw new Error("正文过短");
+    const res = await fetch(url, { signal: ctrl.signal, mode: "cors", redirect: "follow" });
+    if (!res.ok) throw new Error(`直连返回 ${res.status}`);
+    const ctype = res.headers.get("content-type") || "";
+    const body = await res.text();
+    const text = /html/i.test(ctype) || /<\/?[a-z]/i.test(body.slice(0, 200)) ? htmlToText(body) : body;
+    if (looksLikeGarbage(text)) throw new Error("直连内容无效");
     return text;
   } finally {
     clearTimeout(timer);
   }
 }
 
-/** 备用：经 allorigins 取原始 HTML，再粗清洗为文本。 */
+/** 通道② r.jina.ai 抓正文（处理 JS 渲染页），并校验不是垃圾返回。 */
+async function fetchPageText(url: string, timeoutMs = 45000): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      signal: ctrl.signal,
+      headers: { "X-Return-Format": "markdown", "Accept": "text/plain" },
+    });
+    if (!res.ok) throw new Error(`抓取返回 ${res.status}`);
+    const text = await res.text();
+    if (looksLikeGarbage(text)) throw new Error("jina 返回的是说明/错误页，非正文");
+    return text;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** 通道③ allorigins 代理取原始 HTML 再清洗。 */
 async function fetchViaProxy(url: string, timeoutMs = 30000): Promise<string> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -49,17 +102,9 @@ async function fetchViaProxy(url: string, timeoutMs = 30000): Promise<string> {
     const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, { signal: ctrl.signal });
     if (!res.ok) throw new Error(`代理返回 ${res.status}`);
     const html = await res.text();
-    const text = html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (text.length < 80) throw new Error("正文过短");
-    // 顺带从原始 HTML 里抠图片
-    const imgs = (html.match(IMG_RE) || []).join("\n");
-    return `${text}\n\n${imgs}`;
+    const text = htmlToText(html);
+    if (looksLikeGarbage(text)) throw new Error("代理内容无效");
+    return text;
   } finally {
     clearTimeout(timer);
   }
@@ -126,22 +171,26 @@ export async function extractContent(
   const pages: { url: string; text: string }[] = [];
   const failed: string[] = [];
   for (const url of urls.slice(0, 4)) {
+    onLog?.(`读取：${url}`);
+    // 三通道依次尝试：直连 → jina → 代理；每个都会校验“不是垃圾/错误页”
+    const channels: { name: string; fn: () => Promise<string> }[] = [
+      { name: "直连", fn: () => fetchDirect(url) },
+      { name: "正文服务", fn: () => fetchPageText(url) },
+      { name: "代理", fn: () => fetchViaProxy(url) },
+    ];
     let text = "";
-    try {
-      onLog?.(`读取：${url}`);
-      text = await fetchPageText(url);
-    } catch (e1) {
+    const errs: string[] = [];
+    for (const ch of channels) {
       try {
-        onLog?.(`主通道失败，尝试备用通道：${url}`);
-        text = await fetchViaProxy(url);
-      } catch (e2) {
-        console.warn("两条通道都失败：", url, e1, e2);
-        failed.push(url);
-        continue;
+        text = await ch.fn();
+        if (text) { onLog?.(`✓ 已抓到正文（${ch.name}，${text.length} 字）`); break; }
+      } catch (e) {
+        errs.push(`${ch.name}:${e instanceof Error ? e.message : e}`);
+        text = "";
       }
     }
-    pages.push({ url, text });
-    onLog?.(`✓ 已抓到正文（${text.length} 字）`);
+    if (text) pages.push({ url, text });
+    else { console.warn("全部通道失败：", url, errs); failed.push(url); }
   }
 
   // 关键：一个都没抓到 → 明确报错，不硬生成
