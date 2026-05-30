@@ -20,7 +20,7 @@ def build_provider(config: MnemoConfig) -> LLMProvider:
     if name in ("anthropic", "claude"):
         from .anthropic_provider import AnthropicProvider  # lazy: optional SDK
 
-        return AnthropicProvider(model=config.model)
+        return AnthropicProvider(model=config.model, api_key=config.get_anthropic_key())
     raise ValueError(f"Unknown provider: {config.provider!r}")
 
 

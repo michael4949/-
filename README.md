@@ -59,6 +59,19 @@ npm run dev
 - **看得见的学习**:右侧面板能看它学了哪些技能、记了哪些事 —— 纯文本、可审查。
 - **接 Claude 升级**:换上 Anthropic key,同一套机器换成 Claude 来真正思考、做复杂任务。
 
+## 四、让它真正会思考(接入 Claude)
+
+离线模式只会记事/回忆。想让它能回答任意问题、做复杂任务,接上 Claude 即可:
+
+```bash
+cd core
+python3 -m mnemo.cli setup     # 按提示粘贴 key,会自动测试连接
+```
+
+需要一个 Anthropic API key:去 [console.anthropic.com](https://console.anthropic.com) →
+API Keys → Create Key,复制以 `sk-ant-` 开头的那串粘进去就行。key 只存在你本机
+(`~/.mnemo/credentials.json`,不会上传)。配好后,网页控制台顶部的提示会消失,大脑自动换成 Claude。
+
 更深入的架构说明见 [`core/README.md`](core/README.md),完整路线图见 [`ROADMAP.md`](ROADMAP.md)。
 
 ---

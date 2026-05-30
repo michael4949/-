@@ -13,7 +13,9 @@ Mirrors Hermes' ``~/.hermes`` layout with per-profile isolation:
 
 from __future__ import annotations
 
+import json
 import os
+import stat
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -69,9 +71,48 @@ class MnemoConfig:
     def user_path(self) -> Path:
         return self.profile_dir / "USER.md"
 
+    @property
+    def config_path(self) -> Path:
+        """Persisted preferences (provider, model) — shared across profiles."""
+        return self.home / "config.json"
+
+    @property
+    def credentials_path(self) -> Path:
+        """API keys — never committed (lives under ~/.mnemo)."""
+        return self.home / "credentials.json"
+
     def ensure_dirs(self) -> "MnemoConfig":
         self.skills_dir.mkdir(parents=True, exist_ok=True)
         return self
+
+    # ----- persisted preferences & secrets ------------------------------
+    def save_preferences(self, *, provider: str | None = None, model: str | None = None) -> None:
+        data = _read_json(self.config_path)
+        if provider is not None:
+            data["provider"] = provider
+            self.provider = provider
+        if model is not None:
+            data["model"] = model
+            self.model = model
+        self.home.mkdir(parents=True, exist_ok=True)
+        self.config_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    def get_anthropic_key(self) -> str | None:
+        """Resolve the key: env first (sandbox/CI honest), then credentials.json."""
+        env = os.environ.get("ANTHROPIC_API_KEY")
+        if env:
+            return env
+        return _read_json(self.credentials_path).get("anthropic_api_key")
+
+    def set_anthropic_key(self, key: str) -> None:
+        self.home.mkdir(parents=True, exist_ok=True)
+        data = _read_json(self.credentials_path)
+        data["anthropic_api_key"] = key.strip()
+        self.credentials_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        try:  # best-effort tighten perms (no-op on Windows)
+            self.credentials_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+        except OSError:
+            pass
 
     # ----- construction -------------------------------------------------
     @staticmethod
@@ -92,10 +133,16 @@ class MnemoConfig:
         model: str | None = None,
     ) -> "MnemoConfig":
         cfg = cls(home=cls.resolve_home(home))
-        if profile:
-            cfg.profile = profile
-        # Env overrides keep the sandbox/CI honest without editing files.
-        cfg.profile = os.environ.get("MNEMO_PROFILE", cfg.profile)
-        cfg.provider = provider or os.environ.get("MNEMO_PROVIDER", cfg.provider)
-        cfg.model = model or os.environ.get("MNEMO_MODEL", cfg.model)
+        saved = _read_json(cfg.config_path)  # persisted preferences from `mnemo setup`
+        # Precedence: explicit arg > env var > config.json > built-in default.
+        cfg.profile = profile or os.environ.get("MNEMO_PROFILE") or saved.get("profile", cfg.profile)
+        cfg.provider = provider or os.environ.get("MNEMO_PROVIDER") or saved.get("provider", cfg.provider)
+        cfg.model = model or os.environ.get("MNEMO_MODEL") or saved.get("model", cfg.model)
         return cfg.ensure_dirs()
+
+
+def _read_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}

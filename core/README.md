@@ -121,15 +121,29 @@ cd core && pip install -e .        # provides the `mnemo` entrypoint
 
 ## Switching onto real Claude
 
+The easy way — a guided one-time setup that saves your key and verifies it:
+
+```bash
+python3 -m mnemo.cli setup       # paste your key from console.anthropic.com
+```
+
+It writes the key to `~/.mnemo/credentials.json` (chmod 600, never committed),
+auto-installs the `anthropic` SDK, sends a tiny test call, and flips the default
+provider to `anthropic`. After that, `mnemo chat` / `mnemo serve` / the web
+console all use Claude. `mnemo config` shows the current settings.
+
+Prefer environment variables / CI? Those still win over the saved file:
+
 ```bash
 pip install -e ".[anthropic]"
-export ANTHROPIC_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
 python3 -m mnemo.cli --provider anthropic chat
 ```
 
 `AnthropicProvider` uses native tool use and marks the (large, stable) system
 prompt with `cache_control` for prompt caching — the same skills + memory
-machinery, now with Claude doing the reasoning.
+machinery, now with Claude doing the reasoning. Key resolution order:
+explicit `--provider`/arg > env var > `~/.mnemo/config.json` > default.
 
 ## HTTP API (for the React console)
 

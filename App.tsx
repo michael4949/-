@@ -4,21 +4,23 @@ import TopBar from './components/TopBar';
 import ChatPanel from './components/ChatPanel';
 import SkillsPanel from './components/SkillsPanel';
 import MemoryPanel from './components/MemoryPanel';
-import { checkHealth } from './services/mnemoApi';
+import { getHealth } from './services/mnemoApi';
+import type { Health } from './types';
 
 type Tab = 'skills' | 'memory';
 
 const App: React.FC = () => {
-  const [online, setOnline] = useState<boolean | null>(null);
+  const [health, setHealth] = useState<Health | null>(null);
   const [session, setSession] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('memory');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = () => setRefreshKey((k) => k + 1);
+  const online = health === null ? null : health.ok;
 
   useEffect(() => {
     let active = true;
-    const ping = () => checkHealth().then((ok) => active && setOnline(ok));
+    const ping = () => getHealth().then((h) => active && setHealth(h));
     ping();
     const id = setInterval(ping, 5000);
     return () => {
@@ -27,9 +29,23 @@ const App: React.FC = () => {
     };
   }, []);
 
+  const usingClaude = health?.provider === 'anthropic';
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <TopBar online={online} profile="default" provider="scripted" onRefresh={refresh} />
+      <TopBar
+        online={online}
+        profile={health?.profile || 'default'}
+        provider={usingClaude ? `Claude · ${health?.model || ''}` : health?.provider || 'scripted'}
+        onRefresh={refresh}
+      />
+      {online && !usingClaude && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-xs px-6 py-2 text-center">
+          当前是离线模式（只会记事/回忆）。想让它真正会思考、回答任意问题？在终端运行
+          <code className="mx-1 px-1.5 py-0.5 bg-amber-100 rounded">mnemo setup</code>
+          接入 Claude。
+        </div>
+      )}
 
       <main className="flex-1 p-4 md:p-6">
         <div className="max-w-7xl mx-auto h-[calc(100vh-130px)] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">

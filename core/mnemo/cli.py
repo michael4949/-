@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import sys
 import tempfile
 from pathlib import Path
@@ -145,6 +146,71 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def cmd_setup(args) -> int:
+    """Guided one-time setup to switch Mnemo onto real Claude."""
+    cfg = MnemoConfig.load(profile=args.profile)
+    print("═" * 60)
+    print("  配置 Claude 大脑 —— 让 Mnemo 真正会思考")
+    print("═" * 60)
+    print("1) 去 https://console.anthropic.com → API Keys → Create Key")
+    print("2) 复制那串 key（以 sk-ant- 开头），粘贴到下面：\n")
+
+    key = args.key or getpass.getpass("   粘贴 API key（输入时不显示）: ").strip()
+    if not key:
+        print("\n没收到 key，已取消。随时可以再运行 `mnemo setup`。")
+        return 1
+    cfg.set_anthropic_key(key)
+    model = args.model or "claude-opus-4-8"
+    cfg.save_preferences(provider="anthropic", model=model)
+    print(f"\n✅ 已保存到 {cfg.credentials_path}（仅本机可读，不会上传）")
+    print(f"✅ 默认大脑已切换为 Claude（模型 {model}）")
+
+    # Make sure the SDK is present so the user doesn't have to run a 2nd command.
+    try:
+        import anthropic  # noqa: F401
+    except ImportError:
+        print("\n正在安装 Claude 依赖（只需一次，请稍候）…")
+        import subprocess
+
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "anthropic"], check=False)
+
+    # Best-effort verification so the user knows it actually works.
+    print("\n正在测试连接…")
+    try:
+        from .llm.anthropic_provider import AnthropicProvider
+        from .types import Message, Role
+
+        prov = AnthropicProvider(model=model, api_key=key)
+        resp = prov.complete([Message(role=Role.USER, content="reply with the single word: ok")])
+        print(f"✅ 测试成功，Claude 回复：{resp.text.strip()[:40]}")
+    except Exception as e:
+        msg = str(e)
+        print("⚠️  测试没通过（key 已保存，可稍后重试）。")
+        if "401" in msg or "authentication" in msg.lower() or "x-api-key" in msg.lower():
+            print("   → 看起来是 key 不对或已失效。请去 console.anthropic.com 重新生成，再跑一次 `mnemo setup`。")
+        elif "anthropic" in msg and "包" in msg:
+            print("   → 缺少依赖，请运行：pip install anthropic")
+        else:
+            print(f"   原因：{msg}")
+    print("\n现在 `mnemo chat` / `mnemo serve` / 网页控制台都会用 Claude 了。")
+    return 0
+
+
+def cmd_config(args) -> int:
+    cfg = MnemoConfig.load(profile=args.profile)
+    key = cfg.get_anthropic_key()
+    masked = "（未设置）"
+    if key:
+        masked = key[:7] + "…" + key[-4:] if len(key) > 12 else "已设置"
+    print(f"home          : {cfg.home}")
+    print(f"profile       : {cfg.profile}")
+    print(f"provider      : {cfg.provider}")
+    print(f"model         : {cfg.model}")
+    print(f"anthropic key : {masked}")
+    print(f"config file   : {cfg.config_path}")
+    return 0
+
+
 def cmd_demo(args) -> int:
     return run_demo()
 
@@ -223,6 +289,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     d = sub.add_parser("demo", help="offline end-to-end proof")
     d.set_defaults(func=cmd_demo)
+
+    st = sub.add_parser("setup", help="connect Claude (saves your API key)")
+    st.add_argument("--key", default=None, help="API key (otherwise prompted, hidden)")
+    st.set_defaults(func=cmd_setup)
+
+    cf = sub.add_parser("config", help="show current settings")
+    cf.set_defaults(func=cmd_config)
 
     s = sub.add_parser("skills", help="inspect skills")
     s.add_argument("action", nargs="?", default="list", choices=["list", "view"])

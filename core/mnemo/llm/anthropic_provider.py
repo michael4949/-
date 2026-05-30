@@ -41,20 +41,26 @@ def _to_anthropic_messages(messages: list[Message]) -> list[dict]:
 class AnthropicProvider(LLMProvider):
     name = "anthropic"
 
-    def __init__(self, model: str = "claude-opus-4-8", max_tokens: int = 4096):
+    def __init__(self, model: str = "claude-opus-4-8", max_tokens: int = 4096, api_key: str | None = None):
         try:
             import anthropic  # noqa: F401
         except ImportError as exc:  # pragma: no cover - depends on env
             raise RuntimeError(
-                "The 'anthropic' package is required for the Claude provider. "
-                "Install it with `pip install anthropic`, or use provider='scripted'."
+                "Claude 模式需要 'anthropic' 这个包。请运行 `pip install anthropic`，"
+                "或先用离线模式（provider='scripted'）。"
             ) from exc
         from anthropic import Anthropic
 
         self.model = model
         self.max_tokens = max_tokens
-        # Honors ANTHROPIC_API_KEY / ANTHROPIC_BASE_URL from the environment.
-        self._client = Anthropic()
+        key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+        if not key:
+            raise RuntimeError(
+                "还没配置 Claude 的 API key。请运行 `mnemo setup` 一步步配置，"
+                "或设置环境变量 ANTHROPIC_API_KEY。"
+            )
+        # Honors ANTHROPIC_BASE_URL from the environment if a gateway is used.
+        self._client = Anthropic(api_key=key)
 
     def complete(self, messages: list[Message], *, system: str = "", tools: list[dict] | None = None) -> LLMResponse:
         kwargs: dict = {

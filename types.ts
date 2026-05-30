@@ -23,6 +23,14 @@ export interface ChatResponse {
   events: AgentEvent[];
 }
 
+export interface Health {
+  ok: boolean;
+  profile?: string;
+  provider?: string;
+  model?: string;
+  claude_configured?: boolean;
+}
+
 export interface SkillMeta {
   name: string;
   description: string;

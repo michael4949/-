@@ -53,7 +53,15 @@ class _Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0].rstrip("/")
         try:
             if path == "/api/health":
-                return self._send(200, {"ok": True, "service": "mnemo"})
+                cfg = MnemoConfig.load(profile=self.profile, provider=self.provider)
+                return self._send(200, {
+                    "ok": True,
+                    "service": "mnemo",
+                    "profile": cfg.profile,
+                    "provider": cfg.provider,
+                    "model": cfg.model,
+                    "claude_configured": bool(cfg.get_anthropic_key()),
+                })
             if path == "/api/skills":
                 agent = _agent(self.profile, self.provider)
                 return self._send(200, [m.__dict__ for m in agent.skills.list_meta()])

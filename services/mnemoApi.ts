@@ -4,7 +4,7 @@
 // use a relative base and there is no CORS to worry about. Override with
 // VITE_MNEMO_API when hosting the API elsewhere.
 
-import type { ChatResponse, MemoryStats, RecallHit, SessionRow, SkillMeta } from '../types';
+import type { ChatResponse, Health, MemoryStats, RecallHit, SessionRow, SkillMeta } from '../types';
 
 const BASE =
   (typeof process !== 'undefined' && (process as any).env && (process as any).env.MNEMO_API) || '';
@@ -15,12 +15,13 @@ async function getJSON<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function checkHealth(): Promise<boolean> {
+export async function getHealth(): Promise<Health> {
   try {
     const r = await fetch(`${BASE}/api/health`);
-    return r.ok;
+    if (!r.ok) return { ok: false };
+    return (await r.json()) as Health;
   } catch {
-    return false;
+    return { ok: false };
   }
 }
 
