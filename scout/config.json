@@ -1,0 +1,45 @@
+{
+  "_comment": "AI 雷达爬虫配置。所有阈值/窗口/查询都可改。日期占位符会被自动替换：{rising_date} {active_date} {min_rising} {min_active}",
+
+  "report_language": "zh",
+  "report_title": "GitHub AI 雷达 · 每日精选",
+
+  "rising_window_days": 45,
+  "min_rising": 80,
+  "active_pushed_window_days": 4,
+  "min_active": 1500,
+
+  "max_candidates": 18,
+  "enrich_readme_top": 18,
+  "readme_excerpt_chars": 4200,
+  "per_query_fetch": 40,
+  "query_spacing_seconds": 1.0,
+
+  "exclude_awesome_lists": true,
+  "exclude_archived": true,
+  "exclude_seen_before_today": true,
+
+  "queries": [
+    { "lane": "rising", "label": "新星·LLM",       "q": "topic:llm created:>{rising_date} stars:>{min_rising}",                "sort": "stars" },
+    { "lane": "rising", "label": "新星·智能体",     "q": "topic:ai-agents created:>{rising_date} stars:>{min_rising}",          "sort": "stars" },
+    { "lane": "rising", "label": "新星·生成式",     "q": "topic:generative-ai created:>{rising_date} stars:>{min_rising}",      "sort": "stars" },
+    { "lane": "rising", "label": "新星·机器学习",   "q": "topic:machine-learning created:>{rising_date} stars:>{min_rising}",   "sort": "stars" },
+    { "lane": "rising", "label": "新星·深度学习",   "q": "topic:deep-learning created:>{rising_date} stars:>{min_rising}",      "sort": "stars" },
+    { "lane": "rising", "label": "新星·扩散模型",   "q": "topic:diffusion-models created:>{rising_date} stars:>{min_rising}",   "sort": "stars" },
+    { "lane": "active", "label": "热推·智能体",     "q": "topic:ai-agents pushed:>{active_date} stars:>{min_active}",           "sort": "updated" },
+    { "lane": "active", "label": "热推·LLM",        "q": "topic:llm pushed:>{active_date} stars:>{min_active}",                 "sort": "updated" }
+  ],
+
+  "ai_topics": [
+    "ai", "artificial-intelligence", "machine-learning", "deep-learning", "llm",
+    "large-language-models", "generative-ai", "genai", "agents", "ai-agents",
+    "rag", "transformers", "diffusion-models", "multimodal", "mcp", "llmops",
+    "fine-tuning", "computer-vision", "nlp", "reinforcement-learning",
+    "stable-diffusion", "embeddings", "vector-database", "neural-network"
+  ],
+  "ai_keywords": [
+    "ai", "a.i.", "llm", "gpt", "agent", "rag", "diffusion", "neural", "machine learning",
+    "deep learning", "transformer", "multimodal", "embedding", "fine-tune", "fine tuning",
+    "inference", "copilot", "chatbot", "prompt", "generative", "foundation model"
+  ]
+}

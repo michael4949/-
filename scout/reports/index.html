@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub AI 雷达 · 报告归档</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+
+.g-date-h{display:flex;align-items:baseline;gap:14px;margin:34px 0 4px;border-bottom:2px solid var(--gold);padding-bottom:8px}
+.g-date-h .d{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--c900)}
+.g-date-h .t{color:var(--c700);font-size:15px}
+.g-date-h .c{margin-left:auto;color:var(--muted);font-size:13px}
+.g-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:16px;margin:16px 0}
+.g-card{display:block;background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 18px;color:var(--ink);
+  box-shadow:0 10px 24px -20px rgba(15,23,42,.4);transition:.15s}
+.g-card:hover{border-color:var(--gold);transform:translateY(-2px);text-decoration:none;box-shadow:0 16px 30px -18px rgba(202,138,4,.45)}
+.g-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.g-cat{color:#4338ca;background:#eef2ff;border:1px solid #e0e7ff;border-radius:999px;padding:2px 9px;font-weight:600}
+.g-star{color:var(--gold);font-weight:700}
+.g-name{font-weight:700;font-size:15.5px;margin:9px 0 5px;word-break:break-word}
+.g-desc{color:var(--muted);font-size:13px;line-height:1.55}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="kicker">GitHub · AI Radar</div>
+  <h1>报告归档</h1>
+  <div class="owner" style="margin-top:8px">每个项目一份独立报告 · 共 9 篇</div>
+</div></header>
+<main class="wrap">
+  
+    <div class="g-date-h"><span class="d">2026-05-30</span><span class="t">GitHub AI 雷达 · 每日精选</span><span class="c">9 个项目</span></div>
+    <div class="g-grid">
+        <a class="g-card" href="2026-05-30/esengine__DeepSeek-Reasonix.html">
+          <div class="g-row"><span class="g-cat">终端编码 Agent</span><span class="g-star">⭐14.1k</span></div>
+          <div class="g-name">esengine/DeepSeek-Reasonix</div>
+          <div class="g-desc">DeepSeek-native AI coding agent for your terminal. Engineered around prefix-cache st</div>
+        </a>
+        <a class="g-card" href="2026-05-30/browser-use__browser-harness.html">
+          <div class="g-row"><span class="g-cat">浏览器智能体</span><span class="g-star">⭐14k</span></div>
+          <div class="g-name">browser-use/browser-harness</div>
+          <div class="g-desc">Browser Harness | Self-healing harness that enables LLMs to complete any task.</div>
+        </a>
+        <a class="g-card" href="2026-05-30/earthtojake__text-to-cad.html">
+          <div class="g-row"><span class="g-cat">Agent Skills · 硬件/CAD</span><span class="g-star">⭐5.3k</span></div>
+          <div class="g-name">earthtojake/text-to-cad</div>
+          <div class="g-desc">A collection of agent skills for CAD, robotics and hardware design</div>
+        </a>
+        <a class="g-card" href="2026-05-30/strukto-ai__mirage.html">
+          <div class="g-row"><span class="g-cat">Agent 抽象层</span><span class="g-star">⭐2.8k</span></div>
+          <div class="g-name">strukto-ai/mirage</div>
+          <div class="g-desc">A Unified Virtual Filesystem For AI Agents</div>
+        </a>
+        <a class="g-card" href="2026-05-30/raiyanyahya__how-to-train-your-gpt.html">
+          <div class="g-row"><span class="g-cat">教育 · 从零造 LLM</span><span class="g-star">⭐2.2k</span></div>
+          <div class="g-name">raiyanyahya/how-to-train-your-gpt</div>
+          <div class="g-desc">Build a modern LLM from scratch. Every line commented. Explained like we are five.</div>
+        </a>
+        <a class="g-card" href="2026-05-30/lightseekorg__tokenspeed.html">
+          <div class="g-row"><span class="g-cat">LLM 推理引擎</span><span class="g-star">⭐1.3k</span></div>
+          <div class="g-name">lightseekorg/tokenspeed</div>
+          <div class="g-desc">TokenSpeed is a speed-of-light LLM inference engine.</div>
+        </a>
+        <a class="g-card" href="2026-05-30/future-agi__future-agi.html">
+          <div class="g-row"><span class="g-cat">LLMOps 平台</span><span class="g-star">⭐1.1k</span></div>
+          <div class="g-name">future-agi/future-agi</div>
+          <div class="g-desc">Open-source, end-to-end platform for evaluating, observing, and improving LLM and AI</div>
+        </a>
+        <a class="g-card" href="2026-05-30/thClaws__thClaws.html">
+          <div class="g-row"><span class="g-cat">Agent 工作台 · 多端</span><span class="g-star">⭐1.1k</span></div>
+          <div class="g-name">thClaws/thClaws</div>
+          <div class="g-desc">Open-source AI agent harness in native Rust — GUI, CLI, headless, and webapp from on</div>
+        </a>
+        <a class="g-card" href="2026-05-30/deeplethe__forkd.html">
+          <div class="g-row"><span class="g-cat">Agent 基础设施</span><span class="g-star">⭐1k</span></div>
+          <div class="g-name">deeplethe/forkd</div>
+          <div class="g-desc">Fork() for AI agent microVMs. Spawn 100 children in ~100ms from a warm parent; BRANC</div>
+        </a></div>
+</main>
+<footer class="foot"><div class="wrap">GitHub AI 雷达 · 归档更新于 2026-05-30 05:39 UTC</div></footer>
+</body>
+</html>

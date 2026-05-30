@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>future-agi/future-agi · GitHub AI 雷达</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c900:#0f172a; --c800:#1e293b; --c700:#334155; --gold:#ca8a04; --gold-soft:#fde68a;
+  --light:#f8fafc; --line:#e2e8f0; --muted:#64748b; --ink:#0f172a; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  color:var(--ink);background:var(--light);line-height:1.68;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Songti SC',serif}
+a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.08em .4em;font-size:.86em;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+.wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+.hero{background:linear-gradient(135deg,var(--c900),var(--c800) 55%,#243042);color:#fff;
+  padding:46px 0 40px;border-bottom:3px solid var(--gold)}
+.hero .kicker{letter-spacing:.3em;text-transform:uppercase;font-size:11.5px;color:var(--gold-soft);font-weight:600}
+.hero .toprow{display:flex;align-items:center;gap:16px;margin-top:16px}
+.hero .avatar{width:62px;height:62px;border-radius:14px;border:1px solid rgba(255,255,255,.2);flex:none;background:#1e293b}
+.hero h1{font-size:clamp(26px,4.4vw,42px);margin:.1em 0 .05em;font-weight:700;word-break:break-word}
+.hero .owner{color:#cbd5e1;font-size:14.5px}
+.hero .tagline{margin-top:16px;max-width:720px;color:#e8edf4;font-size:17px;line-height:1.6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}
+.badge.cat{background:rgba(99,102,241,.22);color:#c7d2fe;border:1px solid rgba(129,140,248,.4)}
+.badge.rising{background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(16,185,129,.4)}
+.badge.active{background:rgba(249,115,22,.18);color:#fed7aa;border:1px solid rgba(249,115,22,.4)}
+.badge.new{background:var(--gold);color:#3b2f00}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:-22px auto 0;position:relative;max-width:880px;padding:0 22px}
+.statbar{display:flex;flex-wrap:wrap;gap:0;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 30px -18px rgba(15,23,42,.4);overflow:hidden;width:100%}
+.statbar .s{flex:1 1 110px;padding:14px 16px;border-right:1px solid var(--line)}
+.statbar .s:last-child{border-right:none}
+.statbar .s .v{font-weight:700;font-size:18px;font-family:'Playfair Display',serif}
+.statbar .s .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:1px}
+
+section.block{background:#fff;border:1px solid var(--line);border-radius:16px;margin:22px 0;padding:24px 26px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)}
+section.why{background:linear-gradient(180deg,#fffdf5,#fff);border:1px solid #f3e3ad}
+h2.sec{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:9px}
+.why h2.sec{color:#92660a}
+.why p{margin:.6em 0;font-size:15.8px;color:#3a3320}.why ul,.why ol{margin:.5em 0;padding-left:1.35em}
+.why li{margin:.3em 0}
+.highlights{margin-top:16px;display:grid;gap:9px}
+.hl{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:15px}
+.hl .dot{color:var(--gold);font-weight:700;margin-top:1px}
+.desc{color:var(--c700);border-left:3px solid var(--gold);padding:2px 0 2px 14px;font-size:15.5px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{font-size:12.5px;color:var(--c700);background:#f1f5f9;border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+details.readme{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fcfcfd;margin-top:4px}
+details.readme summary{cursor:pointer;padding:13px 18px;font-weight:600;font-size:14.5px;color:var(--c700);
+  background:#f8fafc;user-select:none;list-style:none}
+details.readme summary::-webkit-details-marker{display:none}
+details.readme summary::before{content:'▸ ';color:var(--gold)}
+details.readme[open] summary::before{content:'▾ '}
+details.readme pre{margin:0;padding:18px;white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.65;
+  max-height:520px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace;color:#334155}
+
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid var(--line)}
+.btn.primary{background:#fff;color:var(--c900);border-color:#fff}.btn.primary:hover{background:#f1f5f9;text-decoration:none}
+.btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}.btn.ghost:hover{border-color:var(--gold);color:var(--gold-soft);text-decoration:none}
+.btn.dark{background:var(--c900);color:#fff;border-color:var(--c900)}.btn.dark:hover{background:var(--c800);text-decoration:none}
+.btn.line{background:#fff;color:var(--c700)}.btn.line:hover{border-color:var(--gold);color:var(--gold);text-decoration:none}
+
+.foot{color:var(--muted);font-size:13px;text-align:center;padding:36px 0 56px;line-height:1.9}
+.foot .sep{color:var(--line)}
+.backlink{display:inline-block;margin:20px 0 0;font-size:13.5px}
+@media(max-width:560px){section.block{padding:20px 16px}.hero{padding:36px 0 34px}.statbar .s{flex-basis:50%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">GitHub · AI Radar · 2026-05-30</div>
+    <div class="toprow">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/147392366?v=4" alt="future-agi" loading="lazy">
+      <div>
+        <h1>future-agi</h1>
+        <div class="owner">future-agi/future-agi · by future-agi</div>
+      </div>
+    </div>
+    <p class="tagline">Open-source, end-to-end platform for evaluating, observing, and improving LLM and AI agent applications. Tracing · Evals · Simulations · Datasets · Gateway · Guardrails. Self-hostable. Apache 2.0.</p>
+    <div class="badges"><span class="badge cat">LLMOps 平台</span><span class="badge rising">🆕 新星</span><span class="badge new">今日新出现</span></div>
+    <div class="acts">
+      <a class="btn primary" href="https://github.com/future-agi/future-agi" target="_blank" rel="noopener">↗ 在 GitHub 打开</a>
+      <a class="btn ghost" href="https://futureagi.com" target="_blank" rel="noopener">🌐 项目主页</a>
+    </div>
+  </div>
+</header>
+<div class="stats"><div class="statbar"><div class="s"><div class="v">1.1k</div><div class="k">⭐ Stars</div></div><div class="s"><div class="v">214</div><div class="k">🍴 Forks</div></div><div class="s"><div class="v">198</div><div class="k">💬 Issues</div></div><div class="s"><div class="v">Python</div><div class="k">🧩 语言</div></div><div class="s"><div class="v">Apache-2.0</div><div class="k">⚖️ 许可证</div></div><div class="s"><div class="v">2026-04-23</div><div class="k">🌱 创建</div></div><div class="s"><div class="v">昨天</div><div class="k">🔄 推送</div></div></div></div>
+<main class="wrap">
+  <section class="block why"><h2 class="sec">💡 厉害在哪</h2><p>一个<strong>开源、可自托管</strong>的 LLM/agent 全生命周期平台，主张把散落的工具收进<strong>一个平台、一个反馈闭环</strong>：<strong>模拟 → 评测 → 护栏 → 可观测 → 优化</strong>，数据回流形成闭环，让 agent 不只是被监控、而是<strong>自我改进</strong>。</p>
+<p>它直接对标「Langfuse + Braintrust + Helicone + Guardrails AI + 自研模拟器」的拼凑式现状。</p>
+<p>工程指标扎实：Go 网关 <strong>~9.9ns 加权路由</strong>、t3.xlarge 上 <strong>~29k req/s</strong>、开着护栏 <strong>P99 ≤ 21ms</strong>；OTel 原生、50+ 框架埋点；<strong>Apache 2.0</strong>，每个评测器/提示/trace 都可检查，<strong>非黑盒打分</strong>，可 OTel / OpenAI 兼容接口接入任意层。</p>
+<p>⚠️ 客观提示：当前是 <strong>nightly</strong> 早期版本，作者自己标注「会有粗糙之处」。</p><div class="highlights"><div class="hl"><span class="dot">◆</span><span>评测/追踪/模拟/护栏/网关<strong>一体化闭环</strong>，替掉多工具拼凑</span></div><div class="hl"><span class="dot">◆</span><span><strong>Apache 2.0 可自托管</strong>、评测非黑盒、OTel/OpenAI 兼容接入</span></div><div class="hl"><span class="dot">◆</span><span>高性能 Go 网关（~29k req/s，护栏开启 P99≤21ms）；当前 nightly</span></div></div></section>
+  <section class="block"><h2 class="sec">🏷️ 主题标签</h2><div class="chips"><span class="chip">#ai</span><span class="chip">#ai-gateway</span><span class="chip">#evals</span><span class="chip">#llm</span><span class="chip">#observability</span><span class="chip">#simulation</span></div></section>
+  <section class="block"><h2 class="sec">📄 README 摘录</h2><details class="readme" open><summary>原始 README（节选）</summary><pre>&gt; ⚠️ **Nightly release for early testing.** Expect rough edges. Stable version coming out soon — please open an issue if you hit anything.
+
+# AI Agents hallucinate. Fix it faster.
+
+**The open-source platform for shipping self-improving AI agents.** Evaluations, tracing, simulations, guardrails, gateway, optimization. Everything runs on one platform and one feedback loop, from first prototype to live deployment.
+
+  Try Cloud (Free) ·
+  Self-Host ·
+  Docs ·
+  Blog ·
+  Discord ·
+  Discussions
+
+---
+
+---
+
+## Why Future AGI?
+
+Most AI agents fail in production, and teams end up stitching together evals, observability, and guardrails that never close the loop.
+FutureAGI collapses all of it into one platform and one feedback loop. Simulate edge cases before launch, evaluate what happens in production, protect users in real time, and turn every trace into signal for the next version.
+The result: agents that don&#x27;t just get monitored, they self-improve.
+
+###  All-in-one
+No more stitching Langfuse + Braintrust + Helicone + Guardrails AI + a custom simulator. One platform covers the lifecycle: **simulate → evaluate → protect → monitor → optimize**, with data flowing back as a loop.
+
+###  Open &amp; self-hostable
+Apache 2.0 core. Every evaluator, every prompt, every trace is inspectable — **no black-box scoring**. Self-host for data sovereignty or use our managed Cloud. Drop in your own stack at any layer via OTel / OpenAI-compatible HTTP.
+
+###  Built for production
+Go-based gateway with **~9.9 ns weighted routing**, **~29 k req/s on t3.xlarge**, **P99 ≤ 21 ms with guardrails on**. OpenTelemetry-native traces. 50+ framework instrumentors. Every claim reproducible via the committed benchmark harness.
+
+---
+
+## 🚀 Quickstart (60 seconds)
+
+Two ways, picked by how much you want to install:
+
+Cloud (fastest)
+Self-host (Docker)
+
+**No install. Free tier.**
+
+```bash
+# Sign up free:
+#   app.futureagi.com
+
+pip install ai-evaluation
+```
+
+SOC 2 Type II · HIPAA · data stays in your region.
+
+**One command, full stack. Published images, no source build.**
+
+```bash
+# macOS / Linux / WSL
+git clone https://github.com/future-agi/future-agi.git
+cd future-agi
+./bin/install
+
+# Windows (PowerShell)
+git clone https://github.com/future-agi/future-agi.git
+cd future-agi
+.\bin\install.ps1
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+For production, use `./deploy/setup.sh` to generate required secrets and pin the image version.
+
+### Instrument your first agent
+
+**Python**
+```python
+from fi_instrumentation import register
+from traceai_openai import OpenAIInstrumentor
+
+register(project_name=&quot;my-agent&quot;)
+OpenAIInstrumentor().instrument()
+
+# Your existing OpenAI code is now traced.
+response = client.chat.completions.create(
+    model=&quot;gpt-4o&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: query}],
+)
+```
+
+**TypeScript**
+```typescript
+import { register } from &quot;@traceai/fi-core&quot;;
+import { OpenAIInstrumentation } from &quot;@traceai/openai&quot;;
+
+register({ projectName: &quot;my-agent&quot; });
+new OpenAIInstrumentation().instrument();
+
+// Your existing OpenAI code is now traced.
+const response = await openai.chat.completions.create({
+  model: &quot;gpt-4o&quot;,
+  messages: [{ role: &quot;user&quot;, content: query }],
+});
+```
+
+ [Full docs →](https://docs.futureagi.com)  ·  [Cookbooks →](https://docs.futureagi.com/docs/cookbook)  ·  [API reference →](https://docs.futureagi.com/docs/api)
+
+---
+
+## Core features
+
+Six pillars. Each one replaces a tool you probably have.
+
+### 🧪 Simulate
+Thousands of multi-turn conversations against realistic personas, adversarial inputs, and edge cases. Text **and voice** (LiveKit, VAPI, Retell, Pipecat).
+
+[Docs →](https://docs.futureagi.com/docs/simulation)
+
+### 📊 Evaluate
+50+ metrics under one `evaluate()` call: groundedness, hallucination, tool-use correctness, PII, tone, custom rubrics. **LLM-as-judge + heuristic + ML.**
+
+[Docs →](https://docs.futureagi.com/docs/evaluation)
+
+### 🛡️ Protect
+18 built-in scanners (PII, jailbreak, injection, …) + 15 vendor adapters (Lakera, Presidio, Llama Guard, …). Inline in gateway or standalone SDK.
+
+[Docs →](https://docs.futureagi.com/docs/protect)
+
+### 👁️ Monitor
+OpenTelemetry-native tracing across 50+ frameworks (LangChain, LlamaIndex, CrewA …</pre></details></section>
+  <a class="backlink" href="../index.html">← 返回 AI 雷达归档</a>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    《GitHub AI 雷达 · 每日精选》<span class="sep"> · </span>2026-05-30<br>
+    本页由 <strong>GitHub AI 雷达</strong> 自动采集、经你确认后生成。数据来源：GitHub 搜索 API；「厉害在哪」为 AI 分析。<br>
+    自包含单文件 · 可离线查看 · 可下载留存
+  </div>
+</footer>
+</body>
+</html>
