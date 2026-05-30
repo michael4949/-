@@ -77,8 +77,34 @@ export interface CollectInput {
   pageUrls: string[];
   images: string[];     // 内容服务已抓到的页面图片
   aspect: AspectRatio;
+  bodyText?: string;    // 抓到的网页正文，用于挖掘可生成大图的链接（如 GitHub 仓库）
   maxScreenshots?: number;
   maxImages?: number;
+}
+
+/**
+ * 从正文里挖掘“能稳定生成漂亮大图”的链接，目前覆盖 GitHub 仓库 → OpenGraph 社交卡片
+ * （opengraph.githubassets.com，1200×600，含星数/作者/描述，非常适合做视频配图）。
+ */
+function deriveRichImages(bodyText: string, pageUrls: string[]): string[] {
+  const out: string[] = [];
+  const haystack = `${bodyText}\n${pageUrls.join("\n")}`;
+  const repoRe = /github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)/gi;
+  const seenRepo = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = repoRe.exec(haystack))) {
+    const owner = m[1];
+    let repo = m[2].replace(/\.git$/i, "");
+    // 排除非仓库路径
+    if (/^(login|signup|features|about|topics|sponsors|marketplace|settings|orgs|users|search)$/i.test(owner)) continue;
+    const key = `${owner}/${repo}`.toLowerCase();
+    if (seenRepo.has(key)) continue;
+    seenRepo.add(key);
+    // 任意 hash 即可，GitHub 会重定向到该仓库最新的 OG 卡片
+    out.push(`https://opengraph.githubassets.com/1/${owner}/${repo}`);
+    if (out.length >= 4) break;
+  }
+  return out;
 }
 
 /**
@@ -113,15 +139,18 @@ export async function collectVisuals(
     for (const im of r.images) if (!extraImages.includes(im)) extraImages.push(im);
   }
 
-  // 2) 页面配图（og:image / 正文图）
-  const imgList = Array.from(new Set(extraImages)).filter((u) => /^https?:\/\//.test(u)).slice(0, maxImgs);
-  if (imgList.length) onLog?.(`正在抓取页面里的 ${imgList.length} 张配图…`);
+  // 2) 页面配图（og:image / 正文图）+ 从链接派生的大图（GitHub 仓库卡片等）
+  const rich = deriveRichImages(input.bodyText || "", pageUrls);
+  if (rich.length) onLog?.(`识别到 ${rich.length} 个可生成大图的链接（如 GitHub 仓库卡片）`);
+  // 派生大图放前面，优先使用
+  const imgList = Array.from(new Set([...rich, ...extraImages])).filter((u) => /^https?:\/\//.test(u)).slice(0, maxImgs + rich.length);
+  if (imgList.length) onLog?.(`正在抓取 ${imgList.length} 张配图…`);
   for (const im of imgList) {
     if (seen.has(im)) continue;
     seen.add(im);
     const bmp = await loadBitmap(proxied(im, 1080));
-    // 跳过过小的图标
-    if (bmp && bmp.width >= 240 && bmp.height >= 160) {
+    // 跳过过小的图标（GitHub 卡片 1200×600 等正常通过）
+    if (bmp && bmp.width >= 240 && bmp.height >= 140) {
       assets.push({ kind: "image", url: im, bitmap: bmp, w: bmp.width, h: bmp.height });
     }
   }
