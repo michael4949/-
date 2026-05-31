@@ -26,14 +26,15 @@ const InputForm: React.FC<Props> = ({ onSubmit, isLoading }) => {
   const needKey = !envKey(); // 构建期没有密钥（公开托管）时，让用户自填
   const onKey = (v: string) => { setApiKey(v); setStoredKey(v); };
   const [opt, setOpt] = useState<VideoOptions>({
-    durationTarget: 45,
-    voiceName: "Kore",
+    durationTarget: 35,
+    voiceName: "Charon",
     voiceStyleHint: STYLES[0],
     useAiImages: false,
     bgm: false,
     aspect: "9:16",
     theme: "midnight",
     brand: "",
+    template: "tech",
   });
 
   const set = <K extends keyof VideoOptions>(k: K, v: VideoOptions[K]) => setOpt((o) => ({ ...o, [k]: v }));

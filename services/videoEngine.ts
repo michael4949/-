@@ -1,6 +1,7 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 import { VideoPlan, SceneAudio, VideoOptions, RenderResult, SubtitleCue, ThemeId } from "../types";
 import { buildSceneCues, toSrt } from "./subtitles";
+import { drawTemplateFrame, TEMPLATE } from "./template";
 
 // ----------------------------- 视觉主题 -----------------------------
 interface Theme { a: string; b: string; accent: string; ink: string; }
@@ -406,7 +407,14 @@ export async function renderVideo(
   // 确保中文字体已加载，避免画布渲染成方框
   try {
     const fonts = (document as { fonts?: { load: (f: string) => Promise<unknown>; ready: Promise<unknown> } }).fonts;
-    if (fonts) { await fonts.load(`900 100px "Noto Sans SC"`); await fonts.load(`600 60px "Noto Sans SC"`); await fonts.ready; }
+    if (fonts) {
+      await Promise.all([
+        fonts.load(`900 100px "Noto Sans SC"`),
+        fonts.load(`800 60px "Noto Sans SC"`),
+        fonts.load(`700 80px "Noto Serif SC"`),  // 顶部横幅衬线标题
+      ]);
+      await fonts.ready;
+    }
   } catch { /* 忽略 */ }
 
   const { w: W, h: H } = dims(options.aspect);
@@ -421,6 +429,8 @@ export async function renderVideo(
 
   const sceneSeeds = plan.scenes.map((s) => (hashStr(s.bgKeyword + s.id) % 1000) / 159);
 
+  const isTech = options.template === "tech";
+
   const drawAt = (t: number) => {
     // 找到当前场景
     let idx = 0;
@@ -430,14 +440,30 @@ export async function renderVideo(
     const win = tl.windows[idx];
     const scene = plan.scenes[idx];
     const p = clamp((t - win.start) / win.dur, 0, 1.2);
+    const cue = tl.cues.find((c) => t >= c.start && t < c.end);
+
+    if (isTech) {
+      // 科技解说模板：固定顶部钩子横幅 + 网页截图 + 白字幕 + 底部二进制暗纹
+      const vis = visuals[idx] || null;
+      drawTemplateFrame(ctx, W, H, {
+        bannerTitle: plan.bannerTitle || plan.title,
+        shot: vis ? vis.bitmap : null,
+        subtitle: cue?.text || "",
+        sceneProgress: clamp(p, 0, 1),
+        t,
+        seed: Math.floor(sceneSeeds[idx] * 100),
+      });
+      if (options.brand) drawBrand(ctx, W, H, options.brand);
+      return;
+    }
+
     drawBackground(ctx, W, H, theme, sceneSeeds[idx], visuals[idx] || null, clamp(p, 0, 1), t);
     drawProgress(ctx, W, theme, plan.scenes.length, idx, p);
     drawScene(ctx, W, H, theme, scene, clamp(p, 0, 1), scene.role === "hook", scene.role === "cta", plan);
-    // 字幕
-    const cue = tl.cues.find((c) => t >= c.start && t < c.end);
     drawSubtitle(ctx, W, H, cue?.text || "");
     drawBrand(ctx, W, H, options.brand);
   };
+  void TEMPLATE;
 
   const srt = toSrt(tl.cues);
 

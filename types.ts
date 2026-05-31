@@ -86,9 +86,11 @@ export interface VideoOptions {
   aspect: AspectRatio;      // 画幅
   theme: ThemeId;           // 视觉主题
   brand: string;            // 右下角小水印/账号名（留空则不显示）
+  template: TemplateId;     // 视觉模板：tech=科技解说(对标爆款) / classic=渐变卡片
 }
 
 export type ThemeId = 'midnight' | 'sunset' | 'ocean' | 'mono' | 'candy';
+export type TemplateId = 'tech' | 'classic';
 
 /** 从网页/文字中抽取出的“原料” */
 export interface SourceMaterial {
@@ -124,6 +126,7 @@ export interface Scene {
 
 export interface VideoPlan {
   title: string;          // 视频标题
+  bannerTitle: string;    // 顶部固定钩子横幅（全程不变，对标爆款样板）
   hook: string;           // 前 3 秒钩子
   hashtags: string[];     // 抖音话题
   douyinCaption: string;  // 可直接粘贴的文案
