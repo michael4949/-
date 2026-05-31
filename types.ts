@@ -122,6 +122,18 @@ export interface Scene {
   emphasis: string;   // 需要高亮的词/短语
   bgKeyword: string;  // 英文关键词（用于配图 / 渐变种子）
   visualHint?: 'screenshot' | 'image' | 'auto'; // 这一镜倾向用哪种真实画面
+  evidence?: string;  // 这一镜口播所依据的真实事实（来自原文，防编造、可追溯）
+  cursorHint?: string; // 鼠标该指/点的元素（语义化，如"star数字""安装命令"）
+  cursorRegion?: CursorRegion; // 该元素在画面中的大致区域，驱动模拟鼠标落点
+}
+
+// 画面九宫格区域（左/中/右 × 上/中/下），让鼠标指向“正在讲的那个元素”
+export type CursorRegion = 'tl' | 'tc' | 'tr' | 'cl' | 'cc' | 'cr' | 'bl' | 'bc' | 'br';
+
+/** 含金量产出：一个具体、可验证、有冲击力的“金块” */
+export interface GoldNugget {
+  point: string;     // 金块本身（一句话）
+  evidence: string;  // 支撑数据/事实（来自原文）
 }
 
 export interface VideoPlan {
@@ -133,6 +145,10 @@ export interface VideoPlan {
   voiceName: string;
   voiceStyleHint: string;
   scenes: Scene[];
+  // —— 选题/含金量产出（先想透内容，再做视频）——
+  angle?: string;         // 选题判断：这是什么级别、最佳切入角度
+  audience?: string;      // 目标观众
+  nuggets?: GoldNugget[]; // 金块清单（口播据此展开，可追溯、防编造）
 }
 
 /** 单个场景合成出的音频（24kHz 单声道 PCM） */

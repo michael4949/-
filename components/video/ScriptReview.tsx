@@ -36,10 +36,32 @@ const ScriptReview: React.FC<Props> = ({ plan, onChange, onConfirm, onBack }) =>
         <label className="text-white/40 text-xs">视频标题</label>
         <input value={plan.title} onChange={(e) => onChange({ ...plan, title: e.target.value })}
           className="w-full bg-transparent text-white text-xl font-bold focus:outline-none mt-1" />
+        <label className="text-white/40 text-xs mt-3 block">顶部横幅大标题（全程固定在画面顶部，可手改 · 用回车换行）</label>
+        <textarea value={plan.bannerTitle} onChange={(e) => onChange({ ...plan, bannerTitle: e.target.value })}
+          placeholder="顶部固定钩子标题"
+          className="w-full bg-transparent text-[#e07a5f] text-lg font-bold focus:outline-none mt-1 resize-none border-b border-white/10 pb-1" rows={2} />
         <div className="flex flex-wrap gap-1.5 mt-2">
           {plan.hashtags.map((h, i) => <span key={i} className="text-amber-300 text-xs">#{h}</span>)}
         </div>
       </div>
+
+      {(plan.angle || (plan.nuggets && plan.nuggets.length > 0)) && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 mb-4">
+          <div className="text-emerald-300/80 text-xs font-semibold mb-1.5">📌 选题与含金量（先想透内容，再做视频）</div>
+          {plan.angle && <p className="text-white/70 text-sm mb-1"><span className="text-white/40">角度：</span>{plan.angle}</p>}
+          {plan.audience && <p className="text-white/70 text-sm mb-2"><span className="text-white/40">观众：</span>{plan.audience}</p>}
+          {plan.nuggets && plan.nuggets.length > 0 && (
+            <ul className="space-y-1">
+              {plan.nuggets.map((n, i) => (
+                <li key={i} className="text-white/80 text-sm flex gap-1.5">
+                  <span className="text-emerald-400">▸</span>
+                  <span><b>{n.point}</b>{n.evidence && <span className="text-white/35"> · 依据：{n.evidence}</span>}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3 max-h-[46vh] overflow-y-auto pr-1">
         {plan.scenes.map((s, i) => (
@@ -54,6 +76,11 @@ const ScriptReview: React.FC<Props> = ({ plan, onChange, onConfirm, onBack }) =>
             <textarea value={s.narration} onChange={(e) => setScene(s.id, { narration: e.target.value })}
               placeholder="口播文案（也是字幕）"
               className="w-full bg-transparent text-white/70 text-sm focus:outline-none resize-none" rows={Math.max(2, Math.ceil(s.narration.length / 28))} />
+            {s.cursorHint && (
+              <div className="text-white/35 text-xs mt-1.5 flex items-center gap-1">
+                🖱 鼠标指向：<span className="text-sky-300/70">{s.cursorHint}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>

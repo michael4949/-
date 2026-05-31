@@ -164,57 +164,61 @@ export function drawClick(ctx: Ctx, x: number, y: number, p: number, R: number) 
   ctx.restore();
 }
 
+export type CursorRegion = "tl" | "tc" | "tr" | "cl" | "cc" | "cr" | "bl" | "bc" | "br";
+// 九宫格 → 画面内归一化落点（鼠标指向“正在讲的那个元素”）
+const REGION_XY: Record<CursorRegion, [number, number]> = {
+  tl: [0.22, 0.20], tc: [0.50, 0.17], tr: [0.78, 0.20],
+  cl: [0.20, 0.50], cc: [0.50, 0.50], cr: [0.80, 0.50],
+  bl: [0.22, 0.80], bc: [0.50, 0.83], br: [0.78, 0.80],
+};
 type Frame = { x: number; y: number; w: number; visH: number };
-/** 每个镜头的鼠标落点 + 是否点击，按镜头序号确定（可复现）。 */
-function beatTarget(i: number, seed: number, f: Frame) {
-  const rng = mulberry32(seed * 131 + i * 977 + 7);
-  const x = f.x + (0.12 + 0.76 * rng()) * f.w;
-  const y = f.y + (0.14 + 0.62 * rng()) * f.visH;
-  const click = rng() > 0.32;
-  return { x, y, click };
+const regionPoint = (r: CursorRegion, f: Frame) => {
+  const [rx, ry] = REGION_XY[r] || REGION_XY.cc;
+  return { x: f.x + rx * f.w, y: f.y + ry * f.visH };
+};
+
+interface ShotState {
+  img: Bitmap | null;
+  p: number;             // 本镜进度 0..1
+  region: CursorRegion;  // 鼠标本镜要指的元素位置
+  prevRegion: CursorRegion;
+  scrollBias: number;    // 0..1：随分镜推进自上而下翻页（早镜看顶部、晚镜看下面）
+  seed: number;
 }
 
-/** 中部：取景框内画截图（带每镜的滚动/缩放）+ 模拟鼠标。 */
-function drawShotWithCursor(ctx: Ctx, W: number, H: number, shots: Bitmap[], t: number, seed: number) {
+/** 中部：取景框内画截图（按分镜滚动/缩放）+ 指向语义区域的模拟鼠标。 */
+function drawShotScene(ctx: Ctx, W: number, H: number, s: ShotState) {
   const top = H * TEMPLATE.shotTopRatio;
   const fh = H * TEMPLATE.shotHeightRatio;
   ctx.fillStyle = "#05070d"; ctx.fillRect(0, top - 10, W, fh + 20);
 
-  if (!shots.length) {
+  if (!s.img) {
     const g = ctx.createLinearGradient(0, top, W, top + fh);
     g.addColorStop(0, "#0b1026"); g.addColorStop(1, "#1d2b64");
     ctx.fillStyle = g; ctx.fillRect(0, top, W, fh);
     return;
   }
-
-  const beat = Math.floor(t / TEMPLATE.beatSec);
-  const bt = (t - beat * TEMPLATE.beatSec) / TEMPLATE.beatSec; // 0..1
-  const img = shots[beat % shots.length];
-
-  const pad = W * 0.04;
-  const boxW = W - pad * 2;
-  const x = pad, y = top;
+  const img = s.img, bt = clamp(s.p, 0, 1);
+  const pad = W * 0.04, boxW = W - pad * 2, x = pad, y = top;
   const fit = boxW / img.width;
   const dispH = img.height * fit;
   const visH = Math.min(dispH, fh);
   const rad = Math.round(W * 0.028);
   const frame: Frame = { x, y, w: boxW, visH };
 
-  // 翻页滚动（同一张长图，每镜滚到不同位置 → 画面更丰富）
+  // 翻页滚动：基准位置随分镜自上而下，镜内再轻微下滑（像在边讲边滚）
   const scrollMax = Math.max(0, dispH - fh);
-  const sr = mulberry32(seed * 977 + beat * 131 + 3);
-  const sFrom = sr() * scrollMax;
-  const sTo = clamp(sFrom + (sr() - 0.35) * fh * 1.1, 0, scrollMax);
-  const scroll = lerp(sFrom, sTo, easeInOut(bt));
+  const base = clamp(s.scrollBias, 0, 1) * scrollMax;
+  const pan = (mulberry32(s.seed * 131 + 9)() - 0.3) * fh * 0.5;
+  const scroll = clamp(base + pan * easeInOut(bt), 0, scrollMax);
 
-  // 切镜“咔”一下的轻微放大回弹（前 0.14s）
-  const z = 1 + 0.04 * (1 - clamp(bt / 0.14, 0, 1));
+  // 切镜“咔”一下的轻微放大回弹（前 8%）
+  const z = 1 + 0.04 * (1 - clamp(bt / 0.08, 0, 1));
   const dw = boxW * z, dh = dispH * z;
   const dx = x - (dw - boxW) / 2, dy = y - scroll - (dh - dispH) / 2;
 
   ctx.save();
-  roundRect(ctx, x, y, boxW, visH, rad);
-  ctx.clip();
+  roundRect(ctx, x, y, boxW, visH, rad); ctx.clip();
   ctx.fillStyle = "#ffffff"; ctx.fillRect(x, y, boxW, visH);
   ctx.drawImage(img, dx, dy, dw, dh);
   ctx.restore();
@@ -223,30 +227,35 @@ function drawShotWithCursor(ctx: Ctx, W: number, H: number, shots: Bitmap[], t: 
   ctx.strokeStyle = "rgba(255,255,255,0.5)";
   roundRect(ctx, x, y, boxW, visH, rad); ctx.stroke();
 
-  // —— 模拟鼠标：从上一镜落点平滑移动到本镜落点，到位后点击 ——
-  const cur = beatTarget(beat, seed, frame);
-  const prev = beatTarget(beat - 1, seed, frame);
+  // —— 模拟鼠标：从上一镜元素平滑移动到本镜元素，到位后点击 ——
+  const cur = regionPoint(s.region, frame);
+  const prev = regionPoint(s.prevRegion, frame);
   const moveP = easeInOut(clamp(bt / 0.5, 0, 1));
   const cx = lerp(prev.x, cur.x, moveP);
   const cy = lerp(prev.y, cur.y, moveP);
   const cScale = (W * 0.05) / 17;
 
-  // 点击涟漪（到位后 0.5→0.92）
-  if (cur.click && bt >= 0.5 && bt <= 0.95) {
-    drawClick(ctx, cur.x, cur.y, (bt - 0.5) / 0.45, W * 0.06);
-  }
-  const pressed = cur.click && bt >= 0.5 && bt < 0.6;
-  drawCursor(ctx, cx, cy, cScale, pressed);
+  // 到位后点击涟漪（0.52→0.95）
+  if (bt >= 0.52 && bt <= 0.97) drawClick(ctx, cur.x, cur.y, (bt - 0.52) / 0.45, W * 0.06);
+  drawCursor(ctx, cx, cy, cScale, bt >= 0.52 && bt < 0.62);
 }
 
-/** 一帧完整模板（tech）。t 为全局时间秒。 */
+/** 一帧完整模板（tech），由当前分镜驱动。 */
 export function drawTechFrame(
   ctx: Ctx, W: number, H: number,
-  state: { bannerTitle: string; shots: Bitmap[]; subtitle: string; t: number; seed: number },
+  state: {
+    bannerTitle: string; shot: Bitmap | null; subtitle: string; t: number;
+    sceneProgress: number; region?: CursorRegion; prevRegion?: CursorRegion;
+    scrollBias?: number; seed: number;
+  },
   fonts = { serif: TEMPLATE.serif, sans: TEMPLATE.sans }
 ) {
   ctx.fillStyle = "#05070d"; ctx.fillRect(0, 0, W, H);
-  drawShotWithCursor(ctx, W, H, state.shots, state.t, state.seed);
+  drawShotScene(ctx, W, H, {
+    img: state.shot, p: state.sceneProgress,
+    region: state.region || "cc", prevRegion: state.prevRegion || "cc",
+    scrollBias: state.scrollBias ?? 0, seed: state.seed,
+  });
   drawBottomMatrix(ctx, W, H, state.t, state.seed + 1);
   drawTopBanner(ctx, W, H, state.bannerTitle, fonts.serif);
   drawSubtitleBand(ctx, W, H, state.subtitle, fonts.sans);

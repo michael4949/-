@@ -455,13 +455,19 @@ export async function renderVideo(
     const cue = tl.cues.find((c) => t >= c.start && t < c.end);
 
     if (isTech) {
-      // 科技解说模板：固定顶部钩子横幅 + 网页截图(每2s切+模拟鼠标) + 白字幕 + 底部二进制暗纹
+      // 科技解说模板：固定顶部钩子横幅 + 网页截图(逐镜切+鼠标指向正在讲的元素) + 白字幕 + 底部二进制暗纹
+      const shotBmp = techShots.length ? techShots[idx % techShots.length] : (visuals[idx]?.bitmap ?? null);
+      const n = plan.scenes.length;
       drawTechFrame(ctx, W, H, {
         bannerTitle: plan.bannerTitle || plan.title,
-        shots: techShots,
+        shot: shotBmp,
         subtitle: cue?.text || "",
+        sceneProgress: clamp(p, 0, 1),
+        region: scene.cursorRegion,
+        prevRegion: plan.scenes[idx - 1]?.cursorRegion,
+        scrollBias: n > 1 ? idx / (n - 1) : 0,
+        seed: idx + 1,
         t,
-        seed: 7,
       });
       if (options.brand) drawBrand(ctx, W, H, options.brand);
       return;
