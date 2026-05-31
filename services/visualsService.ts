@@ -43,7 +43,8 @@ function viewportFor(aspect: AspectRatio): { w: number; h: number } {
 /** 向 Microlink 要一个链接的截图直链 + 页面图片。 */
 async function microlinkOf(
   pageUrl: string,
-  aspect: AspectRatio
+  aspect: AspectRatio,
+  fullPage = false
 ): Promise<{ screenshot?: string; images: string[] }> {
   const vp = viewportFor(aspect);
   const q = new URLSearchParams({
@@ -54,6 +55,8 @@ async function microlinkOf(
     "viewport.height": String(vp.h),
     "viewport.deviceScaleFactor": "2",
   });
+  // 科技解说模板：抓整页长截图，给“翻页滚动 + 鼠标操作”留出纵向内容
+  if (fullPage) q.set("screenshot.fullPage", "true");
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 30000);
@@ -80,6 +83,7 @@ export interface CollectInput {
   bodyText?: string;    // 抓到的网页正文，用于挖掘可生成大图的链接（如 GitHub 仓库）
   maxScreenshots?: number;
   maxImages?: number;
+  fullPage?: boolean;   // 截整页长图（tech 模板用，便于翻页滚动）
 }
 
 /**
@@ -126,7 +130,7 @@ export async function collectVisuals(
   const extraImages: string[] = [...input.images];
   if (urls.length) onLog?.(`正在截取 ${urls.length} 个网页的真实画面…`);
 
-  const shotResults = await Promise.all(urls.map((u) => microlinkOf(u, aspect)));
+  const shotResults = await Promise.all(urls.map((u) => microlinkOf(u, aspect, input.fullPage)));
   for (const r of shotResults) {
     if (r.screenshot && !seen.has(r.screenshot)) {
       seen.add(r.screenshot);

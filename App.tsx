@@ -76,7 +76,7 @@ const App: React.FC = () => {
       let perScene: (VisualAsset | null)[] = plan.scenes.map(() => null);
       try {
         const assets = await collectVisuals(
-          { pageUrls: material.pageUrls, images: material.images, aspect: options.aspect, bodyText: material.fullText },
+          { pageUrls: material.pageUrls, images: material.images, aspect: options.aspect, bodyText: material.fullText, fullPage: options.template === "tech" },
           addLog
         );
         if (assets.length) {

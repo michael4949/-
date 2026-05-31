@@ -1,7 +1,7 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 import { VideoPlan, SceneAudio, VideoOptions, RenderResult, SubtitleCue, ThemeId } from "../types";
 import { buildSceneCues, toSrt } from "./subtitles";
-import { drawTemplateFrame, TEMPLATE } from "./template";
+import { drawTechFrame } from "./template";
 
 // ----------------------------- 视觉主题 -----------------------------
 interface Theme { a: string; b: string; accent: string; ink: string; }
@@ -430,6 +430,18 @@ export async function renderVideo(
   const sceneSeeds = plan.scenes.map((s) => (hashStr(s.bgKeyword + s.id) % 1000) / 159);
 
   const isTech = options.template === "tech";
+  // tech 模板：把所有截图（其次配图）汇总成镜头池，每 ~2s 切一张
+  const techShots: ImageBitmap[] = (() => {
+    if (!isTech) return [];
+    const seen = new Set<ImageBitmap>();
+    const screens: ImageBitmap[] = [], others: ImageBitmap[] = [];
+    for (const v of visuals) {
+      if (!v || seen.has(v.bitmap)) continue;
+      seen.add(v.bitmap);
+      (v.kind === "screenshot" ? screens : others).push(v.bitmap);
+    }
+    return [...screens, ...others];
+  })();
 
   const drawAt = (t: number) => {
     // 找到当前场景
@@ -443,15 +455,13 @@ export async function renderVideo(
     const cue = tl.cues.find((c) => t >= c.start && t < c.end);
 
     if (isTech) {
-      // 科技解说模板：固定顶部钩子横幅 + 网页截图 + 白字幕 + 底部二进制暗纹
-      const vis = visuals[idx] || null;
-      drawTemplateFrame(ctx, W, H, {
+      // 科技解说模板：固定顶部钩子横幅 + 网页截图(每2s切+模拟鼠标) + 白字幕 + 底部二进制暗纹
+      drawTechFrame(ctx, W, H, {
         bannerTitle: plan.bannerTitle || plan.title,
-        shot: vis ? vis.bitmap : null,
+        shots: techShots,
         subtitle: cue?.text || "",
-        sceneProgress: clamp(p, 0, 1),
         t,
-        seed: Math.floor(sceneSeeds[idx] * 100),
+        seed: 7,
       });
       if (options.brand) drawBrand(ctx, W, H, options.brand);
       return;
@@ -463,7 +473,6 @@ export async function renderVideo(
     drawSubtitle(ctx, W, H, cue?.text || "");
     drawBrand(ctx, W, H, options.brand);
   };
-  void TEMPLATE;
 
   const srt = toSrt(tl.cues);
 
