@@ -240,19 +240,144 @@ function drawShotScene(ctx: Ctx, W: number, H: number, s: ShotState) {
   drawCursor(ctx, cx, cy, cScale, bt >= 0.52 && bt < 0.62);
 }
 
-/** 一帧完整模板（tech），由当前分镜驱动。 */
+/** 自适应字号：让文本在 maxW 宽、maxLines 行内放下。 */
+function fitFont(ctx: Ctx, text: string, maxW: number, maxLines: number, startPx: number, weight: string, family: string) {
+  let px = startPx;
+  while (px > 16) {
+    ctx.font = `${weight} ${px}px ${family}`;
+    if (wrapByWidth(ctx, text, maxW).length <= maxLines) break;
+    px -= 4;
+  }
+  ctx.font = `${weight} ${px}px ${family}`;
+  return { px, lines: wrapByWidth(ctx, text, maxW).slice(0, maxLines) };
+}
+
+/** 中部信息卡通用底板（科技暗卡 + 角标），返回内容区矩形。 */
+function cardPanel(ctx: Ctx, W: number, H: number, enter: number) {
+  const top = H * TEMPLATE.shotTopRatio, fh = H * TEMPLATE.shotHeightRatio;
+  const pad = W * 0.04, x = pad, y = top, w = W - pad * 2, h = fh;
+  ctx.fillStyle = "#05070d"; ctx.fillRect(0, y - 10, W, h + 20);
+  // 入场缩放
+  const s = 0.96 + 0.04 * enter;
+  ctx.save();
+  ctx.globalAlpha = enter;
+  ctx.translate(x + w / 2, y + h / 2); ctx.scale(s, s); ctx.translate(-(x + w / 2), -(y + h / 2));
+  const rad = Math.round(W * 0.028);
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0, "#0e1424"); g.addColorStop(1, "#171f37");
+  roundRect(ctx, x, y, w, h, rad); ctx.fillStyle = g; ctx.fill();
+  // 边框 + 四角科技角标
+  ctx.lineWidth = Math.max(2, W * 0.003); ctx.strokeStyle = "rgba(207,90,68,0.55)";
+  roundRect(ctx, x, y, w, h, rad); ctx.stroke();
+  const t = W * 0.05;
+  ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = Math.max(2, W * 0.004);
+  const corner = (cx: number, cy: number, sx: number, sy: number) => {
+    ctx.beginPath(); ctx.moveTo(cx, cy + sy * t); ctx.lineTo(cx, cy); ctx.lineTo(cx + sx * t, cy); ctx.stroke();
+  };
+  corner(x + 14, y + 14, 1, 1); corner(x + w - 14, y + 14, -1, 1);
+  corner(x + 14, y + h - 14, 1, -1); corner(x + w - 14, y + h - 14, -1, -1);
+  return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
+}
+
+/** 数据卡：超大数字/关键词 + 标签。 */
+function drawStatCard(ctx: Ctx, W: number, H: number, value: string, label: string, enter: number, sans: string) {
+  const r = cardPanel(ctx, W, H, enter);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const maxLines = value.includes("\n") ? 2 : 1;
+  const fit = fitFont(ctx, value, r.w * 0.86, maxLines, Math.round(W * 0.17), "900", sans);
+  const lh = fit.px * 1.06;
+  const blockH = fit.lines.length * lh;
+  const vy = r.cy - r.h * 0.07;  // 数字块中心略偏上
+  fit.lines.forEach((ln, i) => {
+    const y = vy - (blockH - lh) / 2 + i * lh;
+    ctx.lineJoin = "round"; ctx.lineWidth = fit.px * 0.06; ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.strokeText(ln, r.cx, y);
+    ctx.fillStyle = "#ffffff"; ctx.fillText(ln, r.cx, y);
+  });
+  // 数字块下方：强调横线 + 标签
+  const uy = vy + blockH / 2 + r.h * 0.07;
+  ctx.fillStyle = TEMPLATE.titleFill;
+  ctx.fillRect(r.cx - r.w * 0.15, uy, r.w * 0.3, Math.max(3, W * 0.005));
+  if (label) {
+    const lf = fitFont(ctx, label, r.w * 0.86, 2, Math.round(W * 0.05), "700", sans);
+    ctx.fillStyle = "rgba(255,255,255,0.78)";
+    lf.lines.forEach((ln, i) => ctx.fillText(ln, r.cx, uy + W * 0.055 + i * lf.px * 1.2));
+  }
+  ctx.restore();
+}
+
+/** 金句卡：衬线大字引语 + 出处标签。 */
+function drawQuoteCard(ctx: Ctx, W: number, H: number, text: string, label: string, enter: number, serif: string, sans: string) {
+  const r = cardPanel(ctx, W, H, enter);
+  // 大引号
+  ctx.fillStyle = "rgba(207,90,68,0.85)";
+  ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  ctx.font = `900 ${Math.round(W * 0.16)}px Georgia, ${serif}`;
+  ctx.fillText("“", r.x + r.w * 0.06, r.y + r.h * 0.34);
+  // 引语
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const fit = fitFont(ctx, text, r.w * 0.82, 3, Math.round(W * 0.082), "700", serif);
+  const lh = fit.px * 1.22;
+  const ty = r.cy - (label ? r.h * 0.05 : 0);
+  fit.lines.forEach((ln, i) => {
+    const y = ty - ((fit.lines.length - 1) * lh) / 2 + i * lh;
+    ctx.fillStyle = "#ffffff"; ctx.fillText(ln, r.cx, y);
+  });
+  if (label) {
+    const lf = fitFont(ctx, label, r.w * 0.8, 2, Math.round(W * 0.044), "600", sans);
+    ctx.fillStyle = "rgba(207,90,68,0.9)";
+    const ly = ty + (fit.lines.length * lh) / 2 + W * 0.05;
+    lf.lines.forEach((ln, i) => ctx.fillText(ln, r.cx, ly + i * lf.px * 1.2));
+  }
+  ctx.restore();
+}
+
+/** 流程卡：几个芯片用箭头串起 + 标签（讲机制/步骤）。 */
+function drawFlowCard(ctx: Ctx, W: number, H: number, steps: string[], label: string, enter: number, sans: string) {
+  const r = cardPanel(ctx, W, H, enter);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const n = Math.min(steps.length, 4);
+  const chipH = r.h * 0.13, gap = r.h * 0.055;
+  const totalH = n * chipH + (n - 1) * gap;
+  let y = r.cy - totalH / 2 + chipH / 2 - (label ? r.h * 0.04 : 0);
+  for (let i = 0; i < n; i++) {
+    const fit = fitFont(ctx, steps[i], r.w * 0.7, 1, Math.round(W * 0.05), "700", sans);
+    const cw = Math.min(r.w * 0.8, ctx.measureText(steps[i]).width + W * 0.08);
+    roundRect(ctx, r.cx - cw / 2, y - chipH / 2, cw, chipH, chipH / 2);
+    ctx.fillStyle = i === n - 1 ? "rgba(207,90,68,0.9)" : "rgba(255,255,255,0.1)"; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,0.25)"; roundRect(ctx, r.cx - cw / 2, y - chipH / 2, cw, chipH, chipH / 2); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; ctx.font = `700 ${fit.px}px ${sans}`; ctx.fillText(steps[i], r.cx, y);
+    if (i < n - 1) { ctx.fillStyle = "rgba(207,90,68,0.9)"; ctx.font = `900 ${Math.round(W * 0.045)}px ${sans}`; ctx.fillText("▼", r.cx, y + chipH / 2 + gap / 2); }
+    y += chipH + gap;
+  }
+  if (label) {
+    ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.font = `600 ${Math.round(W * 0.044)}px ${sans}`;
+    ctx.fillText(label, r.cx, r.y + r.h - W * 0.05);
+  }
+  ctx.restore();
+}
+
+export type VisualKind = "shot" | "stat" | "quote" | "flow";
+
+/** 一帧完整模板（tech），由当前分镜驱动：图卡讲要义、截图作证据。 */
 export function drawTechFrame(
   ctx: Ctx, W: number, H: number,
   state: {
-    bannerTitle: string; shot: Bitmap | null; subtitle: string; t: number;
-    sceneProgress: number; region?: CursorRegion; prevRegion?: CursorRegion;
-    scrollBias?: number; seed: number;
+    bannerTitle: string; subtitle: string; t: number; sceneProgress: number; seed: number;
+    visualKind?: VisualKind;
+    shot?: Bitmap | null; region?: CursorRegion; prevRegion?: CursorRegion; scrollBias?: number;
+    card?: { value?: string; label?: string; text?: string; steps?: string[] };
   },
   fonts = { serif: TEMPLATE.serif, sans: TEMPLATE.sans }
 ) {
   ctx.fillStyle = "#05070d"; ctx.fillRect(0, 0, W, H);
-  drawShotScene(ctx, W, H, {
-    img: state.shot, p: state.sceneProgress,
+  const enter = clamp(state.sceneProgress / 0.18, 0, 1);
+  const c = state.card || {};
+  const kind = state.visualKind || "shot";
+  if (kind === "stat") drawStatCard(ctx, W, H, c.value || "", c.label || "", enter, fonts.sans);
+  else if (kind === "quote") drawQuoteCard(ctx, W, H, c.text || c.value || "", c.label || "", enter, fonts.serif, fonts.sans);
+  else if (kind === "flow") drawFlowCard(ctx, W, H, c.steps || [], c.label || "", enter, fonts.sans);
+  else drawShotScene(ctx, W, H, {
+    img: state.shot || null, p: state.sceneProgress,
     region: state.region || "cc", prevRegion: state.prevRegion || "cc",
     scrollBias: state.scrollBias ?? 0, seed: state.seed,
   });

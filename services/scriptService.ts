@@ -35,12 +35,17 @@ const planSchema: Schema = {
           narration: { type: Type.STRING, description: "这一镜口播：展开某个金块，口语、含具体事实/数字，用于配音和字幕，中文" },
           evidence: { type: Type.STRING, description: "本镜口播依据的真实事实（来自原料，可追溯）。CTA镜可留空" },
           caption: { type: Type.STRING, description: "屏幕大字标题，极短（4-12字），中文" },
-          cursorHint: { type: Type.STRING, description: "本镜鼠标该指/点的页面元素（要和口播对上，如‘star数字’‘安装命令’‘那行性能数据’），中文" },
-          cursorRegion: { type: Type.STRING, enum: ["tl","tc","tr","cl","cc","cr","bl","bc","br"], description: "该元素在画面九宫格的大致位置：t上/c中/b下 × l左/c中/r右。如GitHub星数常在右上=tr" },
+          visualKind: { type: Type.STRING, enum: ["shot", "stat", "quote", "flow"], description: "本镜画面类型：stat=数据卡(讲数字/星数/价格) / quote=金句卡(讲原话/标语/定位) / flow=流程卡(讲机制或2-4步) / shot=真实网页截图(作证据，展示页面里看得到的东西)。一条片子要图卡和截图交替，别全是截图。" },
+          cardValue: { type: Type.STRING, description: "当 visualKind=stat：超大字的数字/关键词，如‘14.1k ★’‘≈1000 行’。其它类型留空" },
+          cardLabel: { type: Type.STRING, description: "stat/quote/flow 卡下方的小标签或出处（如‘GitHub Star’‘作者原话’），中文或原文短语" },
+          cardText: { type: Type.STRING, description: "当 visualKind=quote：引语正文（一句金句/标语，可中文或带原文），≤24字" },
+          cardSteps: { type: Type.ARRAY, items: { type: Type.STRING }, description: "当 visualKind=flow：2-4个步骤短语（每个≤8字），如[‘缺代码’,‘自动补全’,‘越跑越强’]" },
+          cursorHint: { type: Type.STRING, description: "当 visualKind=shot：鼠标该指的页面元素（和口播对上，如‘star数字’‘安装命令’），中文" },
+          cursorRegion: { type: Type.STRING, enum: ["tl","tc","tr","cl","cc","cr","bl","bc","br"], description: "shot 镜里该元素在九宫格位置：t上/c中/b下 × l左/c中/r右。如GitHub星数常在右上=tr" },
           emphasis: { type: Type.STRING, description: "本镜需要高亮强调的一个词或短语（中文），可为空" },
           bgKeyword: { type: Type.STRING, description: "1个英文关键词，描述画面意象" },
         },
-        required: ["role", "narration", "caption", "bgKeyword", "cursorRegion"],
+        required: ["role", "narration", "caption", "bgKeyword", "visualKind"],
       },
     },
   },
@@ -92,10 +97,14 @@ ${material.keyPoints.map((k, i) => `${i + 1}. ${k}`).join("\n")}
 - **hook = 最强的那个金块**，制造"必须看下去"。bannerTitle 也来自最强金块。
 - caption 是屏幕大字，比口播更短更爆。CTA 给明确动作。${tech ? "\n- ⚡信息密度高：每镜口播 10-16 字，快节奏、一句一个点、紧凑不拖。" : ""}
 
-# 第三步：让画面跟着内容走（关键！每镜的 cursorHint + cursorRegion）
-- 模拟鼠标要**指/点正在讲的那个元素**，让观众"耳朵听到啥、眼睛就被带到页面对应位置"。
-- 每镜根据 narration 填 cursorHint（指哪个元素）+ cursorRegion（它在画面九宫格的大致位置）。
-  例：讲star数→cursorHint"star数字"、region"tr"；讲安装命令→"安装命令"、"cc"；讲文件结构→"文件列表"、"cl"。
+# 第三步：把"要义"做成画面（关键！别只会放网页+鼠标）
+专业解说视频是在**「图卡(讲要义)」和「真实截图(作证据)」之间来回切**，不是干瞪着一个网页晃鼠标。
+每镜选一个 visualKind：
+- **stat（数据卡）**：讲数字/星数/价格/占比时用，cardValue 放超大字（如"14.1k ★""≈1000 行"），cardLabel 放小标签。
+- **quote（金句卡）**：讲原话/标语/定位时用，cardText 放那句金句（≤24字），cardLabel 放出处。
+- **flow（流程卡）**：讲机制/步骤时用，cardSteps 放2-4个短语（如["缺代码","自动补全","越跑越强"]）。
+- **shot（真实截图）**：当页面里真有可看的东西、需要"眼见为实"作证据时用，并填 cursorHint+cursorRegion 让鼠标指向它。
+要求：**图卡和截图交替**，至少一半镜用图卡把要义可视化；hook 用最有冲击力的 stat 或 quote 卡开场。
 
 请输出符合给定 JSON Schema 的结果（先 angle/audience/nuggets，再 scenes）。`;
 
@@ -121,22 +130,31 @@ ${material.keyPoints.map((k, i) => `${i + 1}. ${k}`).join("\n")}
     hook: string;
     hashtags: string[];
     douyinCaption: string;
-    scenes: (Omit<Scene, "id"> & { cursorRegion?: string })[];
+    scenes: (Omit<Scene, "id"> & { cursorRegion?: string; visualKind?: string })[];
   }>(text);
 
   const REGIONS = new Set(["tl","tc","tr","cl","cc","cr","bl","bc","br"]);
-  const scenes: Scene[] = (raw.scenes || []).map((s, i) => ({
-    id: i,
-    role: (s.role as Scene["role"]) || (i === 0 ? "hook" : "body"),
-    narration: (s.narration || "").trim(),
-    caption: (s.caption || "").trim(),
-    bullets: (s.bullets || []).filter(Boolean).slice(0, 3),
-    emphasis: (s.emphasis || "").trim(),
-    bgKeyword: (s.bgKeyword || "abstract").trim(),
-    evidence: (s.evidence || "").trim() || undefined,
-    cursorHint: (s.cursorHint || "").trim() || undefined,
-    cursorRegion: (REGIONS.has(s.cursorRegion as string) ? s.cursorRegion : "cc") as Scene["cursorRegion"],
-  })).filter((s) => s.narration);
+  const KINDS = new Set(["shot","stat","quote","flow"]);
+  const scenes: Scene[] = (raw.scenes || []).map((s, i) => {
+    const kind = (KINDS.has(s.visualKind as string) ? s.visualKind : "shot") as Scene["visualKind"];
+    return {
+      id: i,
+      role: (s.role as Scene["role"]) || (i === 0 ? "hook" : "body"),
+      narration: (s.narration || "").trim(),
+      caption: (s.caption || "").trim(),
+      bullets: (s.bullets || []).filter(Boolean).slice(0, 3),
+      emphasis: (s.emphasis || "").trim(),
+      bgKeyword: (s.bgKeyword || "abstract").trim(),
+      evidence: (s.evidence || "").trim() || undefined,
+      cursorHint: (s.cursorHint || "").trim() || undefined,
+      cursorRegion: (REGIONS.has(s.cursorRegion as string) ? s.cursorRegion : "cc") as Scene["cursorRegion"],
+      visualKind: kind,
+      cardValue: (s.cardValue || "").trim() || undefined,
+      cardLabel: (s.cardLabel || "").trim() || undefined,
+      cardText: (s.cardText || "").trim() || undefined,
+      cardSteps: (s.cardSteps || []).map((x) => (x || "").trim()).filter(Boolean).slice(0, 4),
+    };
+  }).filter((s) => s.narration);
 
   if (!scenes.length) throw new Error("脚本为空，请重试或更换内容。");
 

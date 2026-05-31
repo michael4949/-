@@ -123,12 +123,20 @@ export interface Scene {
   bgKeyword: string;  // 英文关键词（用于配图 / 渐变种子）
   visualHint?: 'screenshot' | 'image' | 'auto'; // 这一镜倾向用哪种真实画面
   evidence?: string;  // 这一镜口播所依据的真实事实（来自原文，防编造、可追溯）
-  cursorHint?: string; // 鼠标该指/点的元素（语义化，如"star数字""安装命令"）
+  cursorHint?: string; // 鼠标该指/点的元素（语义化，如”star数字””安装命令”）
   cursorRegion?: CursorRegion; // 该元素在画面中的大致区域，驱动模拟鼠标落点
+  // —— 把”要义”变成画面：图卡讲点、截图作证据 ——
+  visualKind?: VisualKind; // shot=真实截图(证据) / stat=数据卡 / quote=金句卡 / flow=流程卡
+  cardValue?: string;      // stat 卡的大字数字/关键词（如 “14.1k ★”）
+  cardLabel?: string;      // 卡片下方小标签/出处
+  cardText?: string;       // quote 卡的引语正文
+  cardSteps?: string[];    // flow 卡的 2-4 个步骤
 }
 
-// 画面九宫格区域（左/中/右 × 上/中/下），让鼠标指向“正在讲的那个元素”
+// 画面九宫格区域（左/中/右 × 上/中/下），让鼠标指向”正在讲的那个元素”
 export type CursorRegion = 'tl' | 'tc' | 'tr' | 'cl' | 'cc' | 'cr' | 'bl' | 'bc' | 'br';
+// 画面类型：把分析出的要义做成图卡，真实截图只作证据
+export type VisualKind = 'shot' | 'stat' | 'quote' | 'flow';
 
 /** 含金量产出：一个具体、可验证、有冲击力的“金块” */
 export interface GoldNugget {

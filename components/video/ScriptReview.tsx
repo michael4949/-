@@ -10,6 +10,7 @@ interface Props {
 }
 
 const roleLabel: Record<Scene["role"], string> = { hook: "钩子", body: "正文", cta: "结尾CTA" };
+const visualLabel: Record<string, string> = { stat: "📊 数据卡", quote: "💬 金句卡", flow: "🔀 流程卡", shot: "真实截图" };
 const roleColor: Record<Scene["role"], string> = {
   hook: "bg-rose-500/20 text-rose-300 border-rose-500/30",
   body: "bg-sky-500/20 text-sky-300 border-sky-500/30",
@@ -69,6 +70,14 @@ const ScriptReview: React.FC<Props> = ({ plan, onChange, onConfirm, onBack }) =>
             <div className="flex items-center gap-2 mb-2">
               <span className="text-white/30 text-xs font-mono">#{i + 1}</span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] border ${roleColor[s.role]}`}>{roleLabel[s.role]}</span>
+              {s.visualKind && s.visualKind !== "shot" && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] border bg-violet-500/15 text-violet-300 border-violet-500/30">
+                  {visualLabel[s.visualKind]}
+                </span>
+              )}
+              {s.visualKind === "shot" && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] border bg-white/5 text-white/45 border-white/15">真实截图</span>
+              )}
             </div>
             <input value={s.caption} onChange={(e) => setScene(s.id, { caption: e.target.value })}
               placeholder="屏幕大字"
@@ -76,7 +85,13 @@ const ScriptReview: React.FC<Props> = ({ plan, onChange, onConfirm, onBack }) =>
             <textarea value={s.narration} onChange={(e) => setScene(s.id, { narration: e.target.value })}
               placeholder="口播文案（也是字幕）"
               className="w-full bg-transparent text-white/70 text-sm focus:outline-none resize-none" rows={Math.max(2, Math.ceil(s.narration.length / 28))} />
-            {s.cursorHint && (
+            {(s.cardValue || s.cardText || (s.cardSteps && s.cardSteps.length > 0)) && (
+              <div className="text-white/45 text-xs mt-1.5">
+                🎴 画面卡：<span className="text-violet-200/80">{s.cardValue || s.cardText || (s.cardSteps || []).join(" → ")}</span>
+                {s.cardLabel && <span className="text-white/30"> · {s.cardLabel}</span>}
+              </div>
+            )}
+            {s.visualKind === "shot" && s.cursorHint && (
               <div className="text-white/35 text-xs mt-1.5 flex items-center gap-1">
                 🖱 鼠标指向：<span className="text-sky-300/70">{s.cursorHint}</span>
               </div>
