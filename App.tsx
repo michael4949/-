@@ -1,141 +1,87 @@
-import React, { useState } from "react";
-import { Clapperboard, AlertCircle } from "lucide-react";
-import { VideoOptions, SourceMaterial, VideoPlan, RenderResult, StageState } from "./types";
-import { extractContent } from "./services/contentService";
-import { writeViralScript } from "./services/scriptService";
-import { synthesizeScenes } from "./services/ttsService";
-import { generateSceneImages } from "./services/imageService";
-import { renderVideo } from "./services/videoEngine";
-import InputForm from "./components/video/InputForm";
-import StageProgress from "./components/video/StageProgress";
-import ScriptReview from "./components/video/ScriptReview";
-import ResultView from "./components/video/ResultView";
+import React, { useMemo, useState } from "react";
+import { filings as INITIAL, PERIOD } from "./data/mockData";
+import { Filing, FilingStatus, ViewId } from "./types";
+import Sidebar from "./components/tax/Sidebar";
+import Topbar from "./components/tax/Topbar";
+import Dashboard from "./components/tax/Dashboard";
+import AutoFileAgent from "./components/tax/AutoFileAgent";
+import FilingWorkspace from "./components/tax/FilingWorkspace";
+import RiskCenter from "./components/tax/RiskCenter";
+import OptimizationCenter from "./components/tax/OptimizationCenter";
+import InvoiceCenter from "./components/tax/InvoiceCenter";
+import Copilot from "./components/tax/Copilot";
 
-type View = "input" | "stages" | "review" | "result";
+const ACTION_TEXT: Record<string, string> = {
+  待审批: "复核通过，提交审批",
+  可申报: "审批通过",
+  已申报: "审批通过并一键申报至电子税务局",
+  已缴款: "扣款成功，缴款完成",
+};
+
+const VIEW_META: Partial<Record<ViewId, { title: string; sub: string }>> = {
+  filings: { title: "申报工作台", sub: "全集团申报事项 · 制单 → 复核 → 审批 → 申报，全程可溯源、可留痕" },
+  risk: { title: "风险中心", sub: "金税四期风险扫描 · 税负率体检 · 智能体处置建议" },
+  saving: { title: "节税优化", sub: "政策智能匹配 · 加计扣除 / 留抵退税 / 税率优惠，已量化收益" },
+  invoice: { title: "发票中心", sub: "数电发票进销项 · 验真匹配 · 认证抵扣 · 异常处置" },
+};
 
 const App: React.FC = () => {
-  const [view, setView] = useState<View>("input");
-  const [options, setOptions] = useState<VideoOptions | null>(null);
-  const [material, setMaterial] = useState<SourceMaterial | null>(null);
-  const [plan, setPlan] = useState<VideoPlan | null>(null);
-  const [result, setResult] = useState<RenderResult | null>(null);
-  const [stages, setStages] = useState<StageState[]>([]);
-  const [log, setLog] = useState<string[]>([]);
-  const [renderRatio, setRenderRatio] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<ViewId>("dashboard");
+  const [scope, setScope] = useState<string>("all");
+  const [filings, setFilings] = useState<Filing[]>(INITIAL);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const addLog = (m: string) => setLog((l) => [...l, m]);
-  const setStage = (id: StageState["id"], patch: Partial<StageState>) =>
-    setStages((ss) => ss.map((s) => (s.id === id ? { ...s, ...patch } : s)));
-  const failActive = () => setStages((ss) => ss.map((s) => (s.status === "active" ? { ...s, status: "error" } : s)));
+  const pending = useMemo(
+    () => filings.filter((f) => f.period === PERIOD && f.status !== "已申报" && f.status !== "已缴款").length,
+    [filings]
+  );
 
-  // 阶段 A：读取内容 → 写脚本
-  const handleSubmit = async (input: string, opts: VideoOptions) => {
-    setOptions(opts); setError(null); setLog([]); setResult(null);
-    setStages([
-      { id: "read", label: "读取网页 / 文字内容", status: "active" },
-      { id: "script", label: "撰写抖音爆款脚本", status: "pending" },
-    ]);
-    setView("stages");
-    try {
-      const mat = await extractContent(input, addLog);
-      setMaterial(mat);
-      setStage("read", { status: "done", detail: `《${mat.title}》· ${mat.keyPoints.length} 个要点` });
-      setStage("script", { status: "active" });
-      const p = await writeViralScript(mat, opts, addLog);
-      setPlan(p);
-      setStage("script", { status: "done", detail: `${p.scenes.length} 镜` });
-      setView("review");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "出错了，请重试。");
-      failActive();
-    }
+  const onAct = (id: string, to: FilingStatus, who: string) => {
+    const at = "2026-06-03 " + new Date().toTimeString().slice(0, 5);
+    setFilings((fs) =>
+      fs.map((f) =>
+        f.id === id
+          ? { ...f, status: to, updatedAt: at, audit: [...f.audit, { at, who, action: ACTION_TEXT[to] || `状态更新为 ${to}` }] }
+          : f
+      )
+    );
   };
 
-  // 阶段 B：配音 →（配图）→ 渲染导出
-  const handleRender = async () => {
-    if (!plan || !options) return;
-    setError(null); setLog([]); setRenderRatio(0);
-    const st: StageState[] = [{ id: "voice", label: "合成中文配音", status: "active" }];
-    if (options.useAiImages) st.push({ id: "images", label: "生成 AI 配图", status: "pending" });
-    st.push({ id: "render", label: "渲染并导出视频", status: "pending" });
-    setStages(st);
-    setView("stages");
-    try {
-      const audios = await synthesizeScenes(plan, (done, total, est) =>
-        setStage("voice", { detail: `${done}/${total} 段${est ? "（含静音占位）" : ""}` })
-      );
-      setStage("voice", { status: "done", detail: `${audios.length} 段` });
+  const openFiling = (id: string) => { setSelectedId(id); setView("filings"); };
 
-      let images: (ImageBitmap | null)[] = plan.scenes.map(() => null);
-      if (options.useAiImages) {
-        setStage("images", { status: "active" });
-        images = await generateSceneImages(plan.scenes, options.aspect, (d, t) =>
-          setStage("images", { detail: `${d}/${t}` })
-        );
-        setStage("images", { status: "done" });
-      }
-
-      setStage("render", { status: "active" });
-      const res = await renderVideo(plan, audios, images, options, (ratio, note) => {
-        setRenderRatio(ratio);
-        if (note) setStage("render", { detail: note });
-      });
-      setResult(res);
-      setStage("render", { status: "done", detail: `${res.ext.toUpperCase()} · ${res.durationSec.toFixed(1)}s` });
-      setView("result");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "渲染失败，请重试。");
-      failActive();
-    }
-  };
-
-  const restart = () => {
-    if (result?.url) URL.revokeObjectURL(result.url);
-    setResult(null); setPlan(null); setMaterial(null); setError(null); setLog([]);
-    setView("input");
-  };
+  const meta = VIEW_META[view];
 
   return (
-    <div className="min-h-screen text-white relative overflow-hidden" style={{ background: "radial-gradient(1200px 600px at 50% -10%, #1e293b 0%, #0a0e1a 55%, #05070d 100%)" }}>
-      {/* 顶栏 */}
-      <nav className="relative z-10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={restart}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-            <Clapperboard className="w-5 h-5 text-black" />
-          </div>
-          <span className="font-bold tracking-tight">AI 爆款工厂</span>
-        </div>
-        <span className="text-white/30 text-xs hidden sm:block">链接 → 中文配音竖屏视频</span>
-      </nav>
+    <div className="min-h-screen bg-page flex">
+      <Sidebar view={view} onNav={setView} pending={pending} riskHigh={2} />
 
-      <main className="relative z-10 py-8 md:py-12 flex flex-col items-center">
-        {error && (
-          <div className="w-full max-w-xl mx-auto px-4 mb-6">
-            <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 text-red-200 rounded-xl px-4 py-3 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <div>{error}</div>
-                <button onClick={() => (view === "stages" && plan ? setView("review") : setView("input"))}
-                  className="mt-1 underline text-red-300 hover:text-red-200">返回</button>
-              </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar scope={scope} setScope={setScope} onNav={setView} />
+
+        <main className="flex-1 px-6 py-6 max-w-[1400px] w-full mx-auto">
+          {meta && (
+            <div className="mb-5">
+              <h1 className="text-xl font-extrabold text-ink">{meta.title}</h1>
+              <p className="text-sm text-ink-muted mt-0.5">{meta.sub}</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {view === "input" && <InputForm onSubmit={handleSubmit} isLoading={false} />}
-        {view === "stages" && <StageProgress stages={stages} log={log} renderRatio={renderRatio} />}
-        {view === "review" && plan && (
-          <ScriptReview plan={plan} onChange={setPlan} onConfirm={handleRender} onBack={() => setView("input")} />
-        )}
-        {view === "result" && result && plan && (
-          <ResultView result={result} plan={plan} material={material} onRestart={restart} />
-        )}
-      </main>
+          {view === "dashboard" && <Dashboard scope={scope} filings={filings} onNav={setView} onOpenFiling={openFiling} />}
+          {view === "agent" && <AutoFileAgent scope={scope} onNav={setView} />}
+          {view === "filings" && (
+            <FilingWorkspace scope={scope} filings={filings} selectedId={selectedId} setSelectedId={setSelectedId} onAct={onAct} />
+          )}
+          {view === "risk" && <RiskCenter scope={scope} />}
+          {view === "saving" && <OptimizationCenter scope={scope} />}
+          {view === "invoice" && <InvoiceCenter />}
+        </main>
 
-      <footer className="relative z-10 text-center text-white/25 text-xs py-6 px-4">
-        全程在你的浏览器本地完成 · 内容由 Gemini 读取与生成，请自行核对事实后再发布 · 推荐 Chrome / Edge 导出 MP4
-      </footer>
+        <footer className="text-center text-ink-faint text-[11px] py-5 px-4 border-t border-line">
+          税擎 TaxPilot · AI 税务自动申报中枢 · 演示环境，数据为虚构样例 · 申报前请由税务负责人复核确认
+        </footer>
+      </div>
+
+      <Copilot />
     </div>
   );
 };
