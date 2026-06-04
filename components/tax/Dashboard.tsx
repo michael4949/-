@@ -62,9 +62,11 @@ const Dashboard: React.FC<{
   return (
     <div className="space-y-5">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-xl2 bg-gradient-to-br from-brand via-[#3D54E8] to-violet2 text-white p-6 shadow-soft">
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-white/10" />
-        <div className="absolute right-24 -bottom-16 w-40 h-40 rounded-full bg-white/10" />
+      <div className="relative overflow-hidden rounded-xl2 text-white p-6 md:p-7 shadow-soft"
+        style={{ background: "linear-gradient(118deg,#2544D4 0%,#3358F4 44%,#6D5EF6 100%)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(680px 260px at 86% -30%, rgba(255,255,255,.28), transparent 72%)" }} />
+        <div className="absolute -right-10 -top-12 w-52 h-52 rounded-full bg-white/10" />
+        <div className="absolute right-28 -bottom-20 w-44 h-44 rounded-full bg-white/10" />
         <div className="relative flex flex-col lg:flex-row lg:items-center gap-5">
           <div className="flex-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white/15 rounded-full px-2.5 py-1 mb-3">
@@ -92,7 +94,7 @@ const Dashboard: React.FC<{
               { k: "可优化", v: fmtCNYWan(savingTotal) },
               { k: "合规度", v: "86 分" },
             ].map((x) => (
-              <div key={x.k} className="bg-white/12 rounded-xl px-3 py-3 backdrop-blur-sm">
+              <div key={x.k} className="bg-white/15 border border-white/15 rounded-xl px-3 py-3 backdrop-blur-sm">
                 <div className="text-[11px] text-white/70">{x.k}</div>
                 <div className="text-lg font-extrabold tnum mt-0.5">{x.v}</div>
               </div>
