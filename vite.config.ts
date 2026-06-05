@@ -16,6 +16,15 @@ export default defineConfig(({ mode }) => {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
+      build: {
+        rollupOptions: {
+          // 多页面：保留原「AI 爆款工厂」入口，新增「隐身涂装配比智能体」入口
+          input: {
+            main: path.resolve(__dirname, 'index.html'),
+            stealth: path.resolve(__dirname, 'stealth.html'),
+          },
+        },
+      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
