@@ -1,0 +1,901 @@
+@prefix eps:     <https://example.org/ontology/enterprise-production#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
+
+#################################################################
+#    Ontology metadata / 本体元数据
+#################################################################
+
+<https://example.org/ontology/enterprise-production>
+    a owl:Ontology ;
+    dcterms:title "Enterprise Production Environment Ontology"@en ,
+                  "企业生产环境本体"@zh ;
+    dcterms:description """A reusable OWL ontology that models an enterprise's live IT
+production environment: the organization that runs it, the physical and virtual
+infrastructure, the software systems and services deployed on top, the deployment
+and release process, day-2 operations and reliability (incidents, alerts, SLOs),
+and the security & compliance posture. Designed as a lightweight CMDB / SRE
+knowledge model that can be queried with SPARQL and reasoned over with an OWL
+reasoner."""@en ,
+                  """一个可复用的 OWL 本体，用于建模企业的线上 IT 生产环境：运行它的组织、
+物理与虚拟基础设施、部署其上的软件系统与服务、部署与发布流程、Day-2 运维与可靠性
+（事件、告警、SLO），以及安全与合规态势。可作为轻量级 CMDB / SRE 知识模型，
+支持 SPARQL 查询与 OWL 推理。"""@zh ;
+    vann:preferredNamespacePrefix "eps" ;
+    vann:preferredNamespaceUri "https://example.org/ontology/enterprise-production#" ;
+    owl:versionInfo "1.0.0" ;
+    owl:versionIRI <https://example.org/ontology/enterprise-production/1.0.0> ;
+    dcterms:created "2026-06-06"^^xsd:date ;
+    dcterms:creator "Enterprise Architecture" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "All `eps:` IRIs use the namespace https://example.org/ontology/enterprise-production# — replace the host with your own domain before publishing."@en .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+dcterms:title       a owl:AnnotationProperty .
+dcterms:description a owl:AnnotationProperty .
+dcterms:created     a owl:AnnotationProperty .
+dcterms:creator     a owl:AnnotationProperty .
+dcterms:license     a owl:AnnotationProperty .
+dcterms:identifier  a owl:AnnotationProperty .
+vann:preferredNamespacePrefix a owl:AnnotationProperty .
+vann:preferredNamespaceUri    a owl:AnnotationProperty .
+skos:note           a owl:AnnotationProperty .
+skos:example        a owl:AnnotationProperty .
+
+#################################################################
+#################################################################
+##
+##   CLASSES / 类
+##
+#################################################################
+#################################################################
+
+### Root -------------------------------------------------------
+
+eps:Entity a owl:Class ;
+    rdfs:label "Entity"@en , "实体"@zh ;
+    rdfs:comment "Abstract root for every first-class thing modelled in an enterprise production environment."@en .
+
+#################################################################
+#  1. Organization & People / 组织与人员
+#################################################################
+
+eps:Actor a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Actor"@en , "行动者"@zh ;
+    rdfs:comment "Anything that can own, operate or be accountable for a system — an organization, a team or a person."@en .
+
+eps:Organization a owl:Class ;
+    rdfs:subClassOf eps:Actor ;
+    rdfs:label "Organization"@en , "组织"@zh ;
+    rdfs:comment "The enterprise, or a legal entity / business unit within it."@en .
+
+eps:OrganizationalUnit a owl:Class ;
+    rdfs:subClassOf eps:Actor ;
+    rdfs:label "Organizational Unit"@en , "组织单元"@zh ;
+    rdfs:comment "A department or business unit inside an organization."@en .
+
+eps:Team a owl:Class ;
+    rdfs:subClassOf eps:Actor ;
+    rdfs:label "Team"@en , "团队"@zh ;
+    rdfs:comment "A group of people that owns and operates one or more services (e.g. an SRE or product team)."@en .
+
+eps:Person a owl:Class ;
+    rdfs:subClassOf eps:Actor , foaf:Person ;
+    rdfs:label "Person"@en , "人员"@zh ;
+    rdfs:comment "An individual human — an employee, contractor or on-call engineer."@en .
+
+eps:Role a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Role"@en , "角色"@zh ;
+    rdfs:comment "A functional role a person can hold, such as Service Owner or On-call Engineer."@en .
+
+#################################################################
+#  2. Locations & Providers / 位置与云厂商
+#################################################################
+
+eps:Location a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Location"@en , "位置"@zh ;
+    rdfs:comment "A physical or logical place where infrastructure lives."@en .
+
+eps:DataCenter a owl:Class ;
+    rdfs:subClassOf eps:Location ;
+    rdfs:label "Data Center"@en , "数据中心"@zh .
+
+eps:CloudRegion a owl:Class ;
+    rdfs:subClassOf eps:Location ;
+    rdfs:label "Cloud Region"@en , "云区域"@zh ;
+    rdfs:comment "A provider region such as us-east-1 or cn-hangzhou."@en .
+
+eps:AvailabilityZone a owl:Class ;
+    rdfs:subClassOf eps:Location ;
+    rdfs:label "Availability Zone"@en , "可用区"@zh .
+
+eps:CloudProvider a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Cloud Provider"@en , "云服务商"@zh .
+
+#################################################################
+#  3. Infrastructure / 基础设施
+#################################################################
+
+eps:InfrastructureElement a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Infrastructure Element"@en , "基础设施元素"@zh ;
+    rdfs:comment "Any compute, network or storage resource that software runs on or through."@en .
+
+### --- Compute ---
+
+eps:ComputeResource a owl:Class ;
+    rdfs:subClassOf eps:InfrastructureElement ;
+    rdfs:label "Compute Resource"@en , "计算资源"@zh .
+
+eps:PhysicalServer a owl:Class ;
+    rdfs:subClassOf eps:ComputeResource ;
+    rdfs:label "Physical Server"@en , "物理服务器"@zh .
+
+eps:VirtualMachine a owl:Class ;
+    rdfs:subClassOf eps:ComputeResource ;
+    rdfs:label "Virtual Machine"@en , "虚拟机"@zh .
+
+eps:Container a owl:Class ;
+    rdfs:subClassOf eps:ComputeResource ;
+    rdfs:label "Container"@en , "容器"@zh .
+
+eps:Pod a owl:Class ;
+    rdfs:subClassOf eps:ComputeResource ;
+    rdfs:label "Pod"@en , "Pod"@zh ;
+    rdfs:comment "A Kubernetes pod: the smallest schedulable unit, grouping one or more containers."@en .
+
+eps:Cluster a owl:Class ;
+    rdfs:subClassOf eps:ComputeResource ;
+    rdfs:label "Cluster"@en , "集群"@zh .
+
+eps:KubernetesCluster a owl:Class ;
+    rdfs:subClassOf eps:Cluster ;
+    rdfs:label "Kubernetes Cluster"@en , "Kubernetes 集群"@zh .
+
+### --- Network ---
+
+eps:NetworkResource a owl:Class ;
+    rdfs:subClassOf eps:InfrastructureElement ;
+    rdfs:label "Network Resource"@en , "网络资源"@zh .
+
+eps:Network a owl:Class ;
+    rdfs:subClassOf eps:NetworkResource ;
+    rdfs:label "Network"@en , "网络"@zh ;
+    rdfs:comment "A virtual or physical network / VPC."@en .
+
+eps:Subnet a owl:Class ;
+    rdfs:subClassOf eps:NetworkResource ;
+    rdfs:label "Subnet"@en , "子网"@zh .
+
+eps:LoadBalancer a owl:Class ;
+    rdfs:subClassOf eps:NetworkResource ;
+    rdfs:label "Load Balancer"@en , "负载均衡器"@zh .
+
+eps:Firewall a owl:Class ;
+    rdfs:subClassOf eps:NetworkResource ;
+    rdfs:label "Firewall"@en , "防火墙"@zh .
+
+eps:APIGateway a owl:Class ;
+    rdfs:subClassOf eps:NetworkResource ;
+    rdfs:label "API Gateway"@en , "API 网关"@zh .
+
+### --- Storage ---
+
+eps:StorageResource a owl:Class ;
+    rdfs:subClassOf eps:InfrastructureElement ;
+    rdfs:label "Storage Resource"@en , "存储资源"@zh .
+
+eps:BlockVolume a owl:Class ;
+    rdfs:subClassOf eps:StorageResource ;
+    rdfs:label "Block Volume"@en , "块存储卷"@zh .
+
+eps:ObjectStore a owl:Class ;
+    rdfs:subClassOf eps:StorageResource ;
+    rdfs:label "Object Store"@en , "对象存储"@zh ;
+    rdfs:comment "Object storage such as S3, GCS or OSS buckets."@en .
+
+eps:FileShare a owl:Class ;
+    rdfs:subClassOf eps:StorageResource ;
+    rdfs:label "File Share"@en , "文件共享"@zh .
+
+#################################################################
+#  4. Software systems & services / 软件系统与服务
+#################################################################
+
+eps:SoftwareSystem a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Software System"@en , "软件系统"@zh ;
+    rdfs:comment "Any deployable piece of software: an application, a service, a datastore or middleware."@en .
+
+eps:Application a owl:Class ;
+    rdfs:subClassOf eps:SoftwareSystem ;
+    rdfs:label "Application"@en , "应用"@zh ;
+    rdfs:comment "A user-facing or batch application, typically composed of several services."@en .
+
+eps:Service a owl:Class ;
+    rdfs:subClassOf eps:SoftwareSystem ;
+    rdfs:label "Service"@en , "服务"@zh ;
+    rdfs:comment "An independently deployable, network-addressable software unit."@en .
+
+eps:Microservice a owl:Class ;
+    rdfs:subClassOf eps:Service ;
+    rdfs:label "Microservice"@en , "微服务"@zh .
+
+eps:Datastore a owl:Class ;
+    rdfs:subClassOf eps:SoftwareSystem ;
+    rdfs:label "Datastore"@en , "数据存储"@zh ;
+    rdfs:comment "Any stateful backing store: database, cache or message broker."@en .
+
+eps:Database a owl:Class ;
+    rdfs:subClassOf eps:Datastore ;
+    rdfs:label "Database"@en , "数据库"@zh .
+
+eps:RelationalDatabase a owl:Class ;
+    rdfs:subClassOf eps:Database ;
+    rdfs:label "Relational Database"@en , "关系型数据库"@zh .
+
+eps:NoSQLDatabase a owl:Class ;
+    rdfs:subClassOf eps:Database ;
+    rdfs:label "NoSQL Database"@en , "NoSQL 数据库"@zh .
+
+eps:CacheStore a owl:Class ;
+    rdfs:subClassOf eps:Datastore ;
+    rdfs:label "Cache Store"@en , "缓存"@zh .
+
+eps:MessageBroker a owl:Class ;
+    rdfs:subClassOf eps:Datastore ;
+    rdfs:label "Message Broker"@en , "消息队列 / 消息中间件"@zh .
+
+eps:Middleware a owl:Class ;
+    rdfs:subClassOf eps:SoftwareSystem ;
+    rdfs:label "Middleware"@en , "中间件"@zh .
+
+eps:APIEndpoint a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "API Endpoint"@en , "API 端点"@zh ;
+    rdfs:comment "A concrete, addressable interface (path/port) exposed by a service."@en .
+
+#################################################################
+#  5. Deployment, release & configuration / 部署、发布与配置
+#################################################################
+
+eps:Environment a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Environment"@en , "环境"@zh ;
+    rdfs:comment "A deployment tier such as Production, Staging or Development. Standard tiers are provided as individuals."@en .
+
+eps:Deployment a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Deployment"@en , "部署"@zh ;
+    rdfs:comment "A running instance of a release placed into a specific environment."@en .
+
+eps:Release a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Release"@en , "发布版本"@zh ;
+    rdfs:comment "A versioned, shippable cut of a software system."@en .
+
+eps:Artifact a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Artifact"@en , "制品"@zh ;
+    rdfs:comment "A build output that can be deployed, e.g. a container image or package."@en .
+
+eps:ContainerImage a owl:Class ;
+    rdfs:subClassOf eps:Artifact ;
+    rdfs:label "Container Image"@en , "容器镜像"@zh .
+
+eps:Package a owl:Class ;
+    rdfs:subClassOf eps:Artifact ;
+    rdfs:label "Package"@en , "软件包"@zh .
+
+eps:Pipeline a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Pipeline"@en , "流水线"@zh ;
+    rdfs:comment "A CI/CD pipeline that builds and/or deploys artifacts."@en .
+
+eps:Configuration a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Configuration"@en , "配置"@zh ;
+    rdfs:comment "Externalised configuration applied to a software system in an environment."@en .
+
+eps:Secret a owl:Class ;
+    rdfs:subClassOf eps:Configuration ;
+    rdfs:label "Secret"@en , "密钥 / 凭据"@zh ;
+    rdfs:comment "A sensitive configuration value such as a credential, token or certificate key."@en .
+
+eps:FeatureFlag a owl:Class ;
+    rdfs:subClassOf eps:Configuration ;
+    rdfs:label "Feature Flag"@en , "功能开关"@zh .
+
+#################################################################
+#  6. Operations & reliability / 运维与可靠性
+#################################################################
+
+eps:OperationalEvent a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Operational Event"@en , "运维事件"@zh ;
+    rdfs:comment "A time-stamped occurrence in the lifecycle of the production environment."@en .
+
+eps:Incident a owl:Class ;
+    rdfs:subClassOf eps:OperationalEvent ;
+    rdfs:label "Incident"@en , "事件 / 故障"@zh ;
+    rdfs:comment "An unplanned interruption or degradation of a service."@en .
+
+eps:Alert a owl:Class ;
+    rdfs:subClassOf eps:OperationalEvent ;
+    rdfs:label "Alert"@en , "告警"@zh ;
+    rdfs:comment "A signal raised by a monitor when a condition is breached."@en .
+
+eps:ChangeRequest a owl:Class ;
+    rdfs:subClassOf eps:OperationalEvent ;
+    rdfs:label "Change Request"@en , "变更请求"@zh .
+
+eps:MaintenanceWindow a owl:Class ;
+    rdfs:subClassOf eps:OperationalEvent ;
+    rdfs:label "Maintenance Window"@en , "维护窗口"@zh .
+
+eps:Monitor a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Monitor"@en , "监控"@zh ;
+    rdfs:comment "A check or probe that observes a system and can raise alerts."@en .
+
+eps:Metric a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Metric"@en , "指标"@zh .
+
+eps:Runbook a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Runbook"@en , "运维手册"@zh ;
+    rdfs:comment "Documented operational procedure for handling a known situation."@en .
+
+eps:ServiceLevelObjective a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Service Level Objective (SLO)"@en , "服务等级目标 (SLO)"@zh .
+
+eps:ServiceLevelIndicator a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Service Level Indicator (SLI)"@en , "服务等级指标 (SLI)"@zh .
+
+eps:ServiceLevelAgreement a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Service Level Agreement (SLA)"@en , "服务等级协议 (SLA)"@zh .
+
+eps:Severity a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Severity"@en , "严重级别"@zh ;
+    rdfs:comment "Severity classification for incidents and alerts. Standard levels are provided as individuals."@en .
+
+eps:IncidentStatus a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Incident Status"@en , "事件状态"@zh ;
+    rdfs:comment "Lifecycle status of an incident. Standard values are provided as individuals."@en .
+
+#################################################################
+#  7. Security & compliance / 安全与合规
+#################################################################
+
+eps:SecurityConcept a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Security Concept"@en , "安全概念"@zh .
+
+eps:Vulnerability a owl:Class ;
+    rdfs:subClassOf eps:SecurityConcept ;
+    rdfs:label "Vulnerability"@en , "漏洞"@zh .
+
+eps:Policy a owl:Class ;
+    rdfs:subClassOf eps:SecurityConcept ;
+    rdfs:label "Policy"@en , "策略"@zh .
+
+eps:AccessControlRule a owl:Class ;
+    rdfs:subClassOf eps:SecurityConcept ;
+    rdfs:label "Access Control Rule"@en , "访问控制规则"@zh .
+
+eps:Certificate a owl:Class ;
+    rdfs:subClassOf eps:SecurityConcept ;
+    rdfs:label "Certificate"@en , "证书"@zh ;
+    rdfs:comment "A TLS/X.509 certificate used to secure traffic."@en .
+
+eps:ComplianceStandard a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Compliance Standard"@en , "合规标准"@zh .
+
+#################################################################
+#  8. Business layer / 业务层
+#################################################################
+
+eps:BusinessService a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Business Service"@en , "业务服务"@zh ;
+    rdfs:comment "A customer-visible business capability supported by one or more technical services."@en .
+
+eps:Customer a owl:Class ;
+    rdfs:subClassOf eps:Entity ;
+    rdfs:label "Customer"@en , "客户"@zh .
+
+### --- Disjointness axioms / 不相交公理 ---
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( eps:Person eps:Team eps:Organization ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( eps:ComputeResource eps:NetworkResource eps:StorageResource ) .
+
+eps:PhysicalServer owl:disjointWith eps:VirtualMachine .
+eps:Service        owl:disjointWith eps:Datastore .
+
+#################################################################
+#################################################################
+##
+##   OBJECT PROPERTIES / 对象属性
+##
+#################################################################
+#################################################################
+
+### --- Organization / ownership ---
+
+eps:memberOf a owl:ObjectProperty ;
+    rdfs:label "member of"@en , "隶属于"@zh ;
+    rdfs:domain eps:Person ;
+    rdfs:range eps:Team ;
+    owl:inverseOf eps:hasMember .
+
+eps:hasMember a owl:ObjectProperty ;
+    rdfs:label "has member"@en , "包含成员"@zh ;
+    rdfs:domain eps:Team ;
+    rdfs:range eps:Person .
+
+eps:hasRole a owl:ObjectProperty ;
+    rdfs:label "has role"@en , "担任角色"@zh ;
+    rdfs:domain eps:Person ;
+    rdfs:range eps:Role .
+
+eps:belongsToOrganization a owl:ObjectProperty ;
+    rdfs:label "belongs to organization"@en , "属于组织"@zh ;
+    rdfs:domain eps:Actor ;
+    rdfs:range eps:Organization .
+
+eps:ownedBy a owl:ObjectProperty ;
+    rdfs:label "owned by"@en , "归属团队"@zh ;
+    rdfs:comment "Relates a software system to the team accountable for it."@en ;
+    rdfs:domain eps:SoftwareSystem ;
+    rdfs:range eps:Team ;
+    owl:inverseOf eps:owns .
+
+eps:owns a owl:ObjectProperty ;
+    rdfs:label "owns"@en , "负责"@zh ;
+    rdfs:domain eps:Team ;
+    rdfs:range eps:SoftwareSystem .
+
+eps:onCallFor a owl:ObjectProperty ;
+    rdfs:label "on call for"@en , "值班负责"@zh ;
+    rdfs:domain eps:Person ;
+    rdfs:range eps:Service .
+
+### --- Topology / hosting / location ---
+
+eps:hostedOn a owl:ObjectProperty ;
+    rdfs:label "hosted on"@en , "承载于"@zh ;
+    rdfs:comment "Relates a deployment or compute unit to the compute resource it runs on."@en ;
+    rdfs:range eps:ComputeResource ;
+    owl:inverseOf eps:hosts .
+
+eps:hosts a owl:ObjectProperty ;
+    rdfs:label "hosts"@en , "承载"@zh ;
+    rdfs:domain eps:ComputeResource .
+
+eps:locatedIn a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "located in"@en , "位于"@zh ;
+    rdfs:domain eps:InfrastructureElement ;
+    rdfs:range eps:Location .
+
+eps:partOfCluster a owl:ObjectProperty ;
+    rdfs:label "part of cluster"@en , "属于集群"@zh ;
+    rdfs:range eps:Cluster .
+
+eps:connectedTo a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:label "connected to"@en , "连接到"@zh ;
+    rdfs:domain eps:NetworkResource ;
+    rdfs:range eps:NetworkResource .
+
+eps:providedBy a owl:ObjectProperty ;
+    rdfs:label "provided by"@en , "由云厂商提供"@zh ;
+    rdfs:domain eps:InfrastructureElement ;
+    rdfs:range eps:CloudProvider .
+
+### --- Software dependency & interface ---
+
+eps:dependsOn a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "depends on"@en , "依赖"@zh ;
+    rdfs:comment "A software system requires another software system to function. Transitive."@en ;
+    rdfs:domain eps:SoftwareSystem ;
+    rdfs:range eps:SoftwareSystem ;
+    owl:inverseOf eps:dependencyOf .
+
+eps:dependencyOf a owl:ObjectProperty ;
+    rdfs:label "dependency of"@en , "被依赖于"@zh .
+
+eps:usesDatastore a owl:ObjectProperty ;
+    rdfs:label "uses datastore"@en , "使用数据存储"@zh ;
+    rdfs:subPropertyOf eps:dependsOn ;
+    rdfs:domain eps:Service ;
+    rdfs:range eps:Datastore .
+
+eps:exposesEndpoint a owl:ObjectProperty ;
+    rdfs:label "exposes endpoint"@en , "暴露端点"@zh ;
+    rdfs:domain eps:Service ;
+    rdfs:range eps:APIEndpoint ;
+    owl:inverseOf eps:endpointOf .
+
+eps:endpointOf a owl:ObjectProperty ;
+    rdfs:label "endpoint of"@en , "端点所属"@zh .
+
+eps:consumes a owl:ObjectProperty ;
+    rdfs:label "consumes"@en , "调用"@zh ;
+    rdfs:comment "A service calls an API endpoint exposed by another service."@en ;
+    rdfs:domain eps:Service ;
+    rdfs:range eps:APIEndpoint .
+
+eps:composedOf a owl:ObjectProperty ;
+    rdfs:label "composed of"@en , "由……组成"@zh ;
+    rdfs:domain eps:Application ;
+    rdfs:range eps:Service .
+
+### --- Deployment / release ---
+
+eps:deployedOn a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "deployed on"@en , "部署在"@zh ;
+    rdfs:comment "Relates a deployment to the single environment it targets."@en ;
+    rdfs:domain eps:Deployment ;
+    rdfs:range eps:Environment .
+
+eps:deploys a owl:ObjectProperty ;
+    rdfs:label "deploys"@en , "部署了"@zh ;
+    rdfs:comment "Relates a deployment to the release it puts live."@en ;
+    rdfs:domain eps:Deployment ;
+    rdfs:range eps:Release .
+
+eps:targetsSystem a owl:ObjectProperty ;
+    rdfs:label "targets system"@en , "目标系统"@zh ;
+    rdfs:domain eps:Deployment ;
+    rdfs:range eps:SoftwareSystem .
+
+eps:releaseOf a owl:ObjectProperty ;
+    rdfs:label "release of"@en , "发布自"@zh ;
+    rdfs:domain eps:Release ;
+    rdfs:range eps:SoftwareSystem .
+
+eps:hasArtifact a owl:ObjectProperty ;
+    rdfs:label "has artifact"@en , "含制品"@zh ;
+    rdfs:domain eps:Release ;
+    rdfs:range eps:Artifact .
+
+eps:builtBy a owl:ObjectProperty ;
+    rdfs:label "built by"@en , "由流水线构建"@zh ;
+    rdfs:domain eps:Artifact ;
+    rdfs:range eps:Pipeline .
+
+eps:configuredBy a owl:ObjectProperty ;
+    rdfs:label "configured by"@en , "由配置项配置"@zh ;
+    rdfs:domain eps:SoftwareSystem ;
+    rdfs:range eps:Configuration .
+
+eps:usesSecret a owl:ObjectProperty ;
+    rdfs:label "uses secret"@en , "使用密钥"@zh ;
+    rdfs:domain eps:SoftwareSystem ;
+    rdfs:range eps:Secret .
+
+### --- Operations / reliability ---
+
+eps:affects a owl:ObjectProperty ;
+    rdfs:label "affects"@en , "影响"@zh ;
+    rdfs:comment "An operational event impacts a software system."@en ;
+    rdfs:domain eps:OperationalEvent ;
+    rdfs:range eps:SoftwareSystem ;
+    owl:inverseOf eps:affectedBy .
+
+eps:affectedBy a owl:ObjectProperty ;
+    rdfs:label "affected by"@en , "受影响于"@zh .
+
+eps:triggeredBy a owl:ObjectProperty ;
+    rdfs:label "triggered by"@en , "触发自"@zh ;
+    rdfs:domain eps:Incident ;
+    rdfs:range eps:OperationalEvent .
+
+eps:hasSeverity a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "has severity"@en , "严重级别为"@zh ;
+    rdfs:range eps:Severity .
+
+eps:hasStatus a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "has status"@en , "状态为"@zh ;
+    rdfs:domain eps:Incident ;
+    rdfs:range eps:IncidentStatus .
+
+eps:assignedTo a owl:ObjectProperty ;
+    rdfs:label "assigned to"@en , "指派给"@zh ;
+    rdfs:domain eps:OperationalEvent ;
+    rdfs:range eps:Actor .
+
+eps:monitors a owl:ObjectProperty ;
+    rdfs:label "monitors"@en , "监控对象"@zh ;
+    rdfs:domain eps:Monitor ;
+    rdfs:range eps:Entity .
+
+eps:raisesAlert a owl:ObjectProperty ;
+    rdfs:label "raises alert"@en , "产生告警"@zh ;
+    rdfs:domain eps:Monitor ;
+    rdfs:range eps:Alert .
+
+eps:hasMetric a owl:ObjectProperty ;
+    rdfs:label "has metric"@en , "含指标"@zh ;
+    rdfs:range eps:Metric .
+
+eps:hasSLO a owl:ObjectProperty ;
+    rdfs:label "has SLO"@en , "含 SLO"@zh ;
+    rdfs:domain eps:Service ;
+    rdfs:range eps:ServiceLevelObjective .
+
+eps:measuredBy a owl:ObjectProperty ;
+    rdfs:label "measured by"@en , "由 SLI 度量"@zh ;
+    rdfs:domain eps:ServiceLevelObjective ;
+    rdfs:range eps:ServiceLevelIndicator .
+
+eps:documentedBy a owl:ObjectProperty ;
+    rdfs:label "documented by"@en , "由手册记录"@zh ;
+    rdfs:range eps:Runbook .
+
+eps:causedBy a owl:ObjectProperty ;
+    rdfs:label "caused by"@en , "根因"@zh ;
+    rdfs:comment "Relates an incident to its root cause (a change, a vulnerability, etc.)."@en ;
+    rdfs:domain eps:Incident ;
+    rdfs:range eps:Entity .
+
+### --- Security / compliance ---
+
+eps:hasVulnerability a owl:ObjectProperty ;
+    rdfs:label "has vulnerability"@en , "存在漏洞"@zh ;
+    rdfs:range eps:Vulnerability .
+
+eps:securedBy a owl:ObjectProperty ;
+    rdfs:label "secured by"@en , "由……保护"@zh ;
+    rdfs:domain eps:SoftwareSystem ;
+    rdfs:range eps:SecurityConcept .
+
+eps:compliantWith a owl:ObjectProperty ;
+    rdfs:label "compliant with"@en , "符合标准"@zh ;
+    rdfs:range eps:ComplianceStandard .
+
+### --- Business ---
+
+eps:supportedBy a owl:ObjectProperty ;
+    rdfs:label "supported by"@en , "由技术服务支撑"@zh ;
+    rdfs:domain eps:BusinessService ;
+    rdfs:range eps:Service ;
+    owl:inverseOf eps:supports .
+
+eps:supports a owl:ObjectProperty ;
+    rdfs:label "supports"@en , "支撑"@zh .
+
+eps:servesCustomer a owl:ObjectProperty ;
+    rdfs:label "serves customer"@en , "服务客户"@zh ;
+    rdfs:domain eps:BusinessService ;
+    rdfs:range eps:Customer .
+
+#################################################################
+#################################################################
+##
+##   DATATYPE PROPERTIES / 数据属性
+##
+#################################################################
+#################################################################
+
+eps:identifier a owl:DatatypeProperty ;
+    rdfs:label "identifier"@en , "标识符"@zh ;
+    rdfs:domain eps:Entity ;
+    rdfs:range xsd:string .
+
+eps:hostname a owl:DatatypeProperty ;
+    rdfs:label "hostname"@en , "主机名"@zh ;
+    rdfs:domain eps:ComputeResource ;
+    rdfs:range xsd:string .
+
+eps:ipAddress a owl:DatatypeProperty ;
+    rdfs:label "IP address"@en , "IP 地址"@zh ;
+    rdfs:range xsd:string .
+
+eps:fqdn a owl:DatatypeProperty ;
+    rdfs:label "FQDN"@en , "完全限定域名"@zh ;
+    rdfs:range xsd:string .
+
+eps:port a owl:DatatypeProperty ;
+    rdfs:label "port"@en , "端口"@zh ;
+    rdfs:domain eps:APIEndpoint ;
+    rdfs:range xsd:integer .
+
+eps:url a owl:DatatypeProperty ;
+    rdfs:label "URL"@en , "URL"@zh ;
+    rdfs:domain eps:APIEndpoint ;
+    rdfs:range xsd:anyURI .
+
+eps:version a owl:DatatypeProperty ;
+    rdfs:label "version"@en , "版本号"@zh ;
+    rdfs:range xsd:string .
+
+eps:cpuCores a owl:DatatypeProperty ;
+    rdfs:label "CPU cores"@en , "CPU 核数"@zh ;
+    rdfs:domain eps:ComputeResource ;
+    rdfs:range xsd:positiveInteger .
+
+eps:memoryGiB a owl:DatatypeProperty ;
+    rdfs:label "memory (GiB)"@en , "内存 (GiB)"@zh ;
+    rdfs:domain eps:ComputeResource ;
+    rdfs:range xsd:decimal .
+
+eps:replicaCount a owl:DatatypeProperty ;
+    rdfs:label "replica count"@en , "副本数"@zh ;
+    rdfs:domain eps:Deployment ;
+    rdfs:range xsd:nonNegativeInteger .
+
+eps:isProduction a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "is production"@en , "是否生产环境"@zh ;
+    rdfs:domain eps:Environment ;
+    rdfs:range xsd:boolean .
+
+eps:criticality a owl:DatatypeProperty ;
+    rdfs:label "criticality"@en , "关键等级"@zh ;
+    rdfs:comment "Business criticality tier, e.g. 'Tier-1'."@en ;
+    rdfs:range xsd:string .
+
+eps:createdAt a owl:DatatypeProperty ;
+    rdfs:label "created at"@en , "创建时间"@zh ;
+    rdfs:range xsd:dateTime .
+
+eps:detectedAt a owl:DatatypeProperty ;
+    rdfs:label "detected at"@en , "检测时间"@zh ;
+    rdfs:range xsd:dateTime .
+
+eps:resolvedAt a owl:DatatypeProperty ;
+    rdfs:label "resolved at"@en , "解决时间"@zh ;
+    rdfs:domain eps:Incident ;
+    rdfs:range xsd:dateTime .
+
+eps:targetAvailability a owl:DatatypeProperty ;
+    rdfs:label "target availability (%)"@en , "目标可用性 (%)"@zh ;
+    rdfs:comment "Availability objective as a percentage, e.g. 99.95."@en ;
+    rdfs:domain eps:ServiceLevelObjective ;
+    rdfs:range xsd:decimal .
+
+eps:cveId a owl:DatatypeProperty ;
+    rdfs:label "CVE ID"@en , "CVE 编号"@zh ;
+    rdfs:domain eps:Vulnerability ;
+    rdfs:range xsd:string .
+
+eps:cvssScore a owl:DatatypeProperty ;
+    rdfs:label "CVSS score"@en , "CVSS 评分"@zh ;
+    rdfs:domain eps:Vulnerability ;
+    rdfs:range xsd:decimal .
+
+#################################################################
+#################################################################
+##
+##   CLASS RESTRICTIONS / 类约束 (SubClassOf axioms)
+##
+#################################################################
+#################################################################
+
+# Every deployment targets exactly one environment.
+eps:Deployment rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty eps:deployedOn ; owl:someValuesFrom eps:Environment ] .
+
+# Every service must be owned by some team (governance invariant).
+eps:Service rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty eps:ownedBy ; owl:someValuesFrom eps:Team ] .
+
+# Every incident has exactly one severity and exactly one status.
+eps:Incident rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty eps:hasSeverity ; owl:someValuesFrom eps:Severity ] ,
+    [ a owl:Restriction ; owl:onProperty eps:hasStatus ;   owl:someValuesFrom eps:IncidentStatus ] .
+
+# An SLO must state a target availability.
+eps:ServiceLevelObjective rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty eps:targetAvailability ; owl:minCardinality 1 ] .
+
+# A business service is supported by at least one technical service.
+eps:BusinessService rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty eps:supportedBy ; owl:someValuesFrom eps:Service ] .
+
+#################################################################
+#################################################################
+##
+##   CONTROLLED-VOCABULARY INDIVIDUALS / 受控词表个体
+##
+#################################################################
+#################################################################
+
+### --- Standard environments / 标准环境 ---
+
+eps:Production a owl:NamedIndividual , eps:Environment ;
+    rdfs:label "Production"@en , "生产环境"@zh ;
+    eps:isProduction true .
+
+eps:Staging a owl:NamedIndividual , eps:Environment ;
+    rdfs:label "Staging"@en , "预发布环境"@zh ;
+    eps:isProduction false .
+
+eps:Testing a owl:NamedIndividual , eps:Environment ;
+    rdfs:label "Testing"@en , "测试环境"@zh ;
+    eps:isProduction false .
+
+eps:Development a owl:NamedIndividual , eps:Environment ;
+    rdfs:label "Development"@en , "开发环境"@zh ;
+    eps:isProduction false .
+
+eps:DisasterRecovery a owl:NamedIndividual , eps:Environment ;
+    rdfs:label "Disaster Recovery"@en , "灾备环境"@zh ;
+    eps:isProduction true .
+
+[] a owl:AllDifferent ;
+   owl:distinctMembers ( eps:Production eps:Staging eps:Testing eps:Development eps:DisasterRecovery ) .
+
+### --- Severity levels / 严重级别 ---
+
+eps:SEV1 a owl:NamedIndividual , eps:Severity ;
+    rdfs:label "SEV1 — Critical"@en , "SEV1 — 严重"@zh .
+eps:SEV2 a owl:NamedIndividual , eps:Severity ;
+    rdfs:label "SEV2 — High"@en , "SEV2 — 高"@zh .
+eps:SEV3 a owl:NamedIndividual , eps:Severity ;
+    rdfs:label "SEV3 — Medium"@en , "SEV3 — 中"@zh .
+eps:SEV4 a owl:NamedIndividual , eps:Severity ;
+    rdfs:label "SEV4 — Low"@en , "SEV4 — 低"@zh .
+
+[] a owl:AllDifferent ;
+   owl:distinctMembers ( eps:SEV1 eps:SEV2 eps:SEV3 eps:SEV4 ) .
+
+### --- Incident statuses / 事件状态 ---
+
+eps:StatusOpen a owl:NamedIndividual , eps:IncidentStatus ;
+    rdfs:label "Open"@en , "已发现"@zh .
+eps:StatusInvestigating a owl:NamedIndividual , eps:IncidentStatus ;
+    rdfs:label "Investigating"@en , "排查中"@zh .
+eps:StatusMitigated a owl:NamedIndividual , eps:IncidentStatus ;
+    rdfs:label "Mitigated"@en , "已缓解"@zh .
+eps:StatusResolved a owl:NamedIndividual , eps:IncidentStatus ;
+    rdfs:label "Resolved"@en , "已解决"@zh .
+eps:StatusClosed a owl:NamedIndividual , eps:IncidentStatus ;
+    rdfs:label "Closed"@en , "已关闭"@zh .
+
+### --- Roles / 角色 ---
+
+eps:ServiceOwner a owl:NamedIndividual , eps:Role ;
+    rdfs:label "Service Owner"@en , "服务负责人"@zh .
+eps:OnCallEngineer a owl:NamedIndividual , eps:Role ;
+    rdfs:label "On-call Engineer"@en , "值班工程师"@zh .
+eps:SRE a owl:NamedIndividual , eps:Role ;
+    rdfs:label "Site Reliability Engineer"@en , "SRE"@zh .
+eps:Developer a owl:NamedIndividual , eps:Role ;
+    rdfs:label "Developer"@en , "开发者"@zh .
+
+### --- Cloud providers / 云厂商 ---
+
+eps:AWS          a owl:NamedIndividual , eps:CloudProvider ; rdfs:label "Amazon Web Services"@en .
+eps:Azure        a owl:NamedIndividual , eps:CloudProvider ; rdfs:label "Microsoft Azure"@en .
+eps:GCP          a owl:NamedIndividual , eps:CloudProvider ; rdfs:label "Google Cloud Platform"@en .
+eps:AlibabaCloud a owl:NamedIndividual , eps:CloudProvider ; rdfs:label "Alibaba Cloud"@en , "阿里云"@zh .
+
+### --- Compliance standards / 合规标准 ---
+
+eps:ISO27001 a owl:NamedIndividual , eps:ComplianceStandard ; rdfs:label "ISO/IEC 27001"@en .
+eps:SOC2     a owl:NamedIndividual , eps:ComplianceStandard ; rdfs:label "SOC 2"@en .
+eps:GDPR     a owl:NamedIndividual , eps:ComplianceStandard ; rdfs:label "GDPR"@en .
+eps:PCIDSS   a owl:NamedIndividual , eps:ComplianceStandard ; rdfs:label "PCI DSS"@en .

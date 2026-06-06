@@ -1,0 +1,11 @@
+# CQ1 / 治理检查：哪些服务没有归属团队？
+# Governance check: which services have no owning team?
+# (Every eps:Service is expected to be eps:ownedBy some eps:Team.)
+PREFIX eps:  <https://example.org/ontology/enterprise-production#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?service ?label WHERE {
+  ?service a eps:Service .
+  OPTIONAL { ?service rdfs:label ?label }
+  FILTER NOT EXISTS { ?service eps:ownedBy ?team }
+}

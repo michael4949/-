@@ -1,0 +1,17 @@
+# CQ4 / 关键事件：列出所有 SEV1 事件、受影响服务、根因、负责人与状态。
+# All SEV1 incidents with the affected service, root cause, assignee and status.
+PREFIX eps: <https://example.org/ontology/enterprise-production#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?incident ?service ?cause ?assignee ?statusLabel WHERE {
+  ?incident a eps:Incident ;
+            eps:hasSeverity eps:SEV1 ;
+            eps:affects ?service .
+  OPTIONAL { ?incident eps:causedBy ?cause }
+  OPTIONAL { ?incident eps:assignedTo ?assignee }
+  OPTIONAL {
+    ?incident eps:hasStatus ?status .
+    ?status rdfs:label ?statusLabel .
+    FILTER (lang(?statusLabel) = "en")
+  }
+}

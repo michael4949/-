@@ -1,0 +1,16 @@
+# CQ5 / 安全暴露面：生产环境里跑着哪些含高危漏洞(CVSS>=7)的制品？
+# Which artifacts running in Production carry a high-severity vulnerability (CVSS >= 7)?
+PREFIX eps: <https://example.org/ontology/enterprise-production#>
+
+SELECT DISTINCT ?system ?artifact ?cve ?cvss WHERE {
+  ?deploy a eps:Deployment ;
+          eps:deployedOn eps:Production ;
+          eps:targetsSystem ?system ;
+          eps:deploys ?release .
+  ?release eps:hasArtifact ?artifact .
+  ?artifact eps:hasVulnerability ?vuln .
+  ?vuln eps:cveId ?cve ;
+        eps:cvssScore ?cvss .
+  FILTER (?cvss >= 7.0)
+}
+ORDER BY DESC(?cvss)

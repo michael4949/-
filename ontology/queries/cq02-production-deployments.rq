@@ -1,0 +1,14 @@
+# CQ2 / 生产环境部署清单：什么被部署到了生产、版本、副本数、运行在哪台机器。
+# What is running in Production: which system, which version, replicas, host.
+PREFIX eps: <https://example.org/ontology/enterprise-production#>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?system ?version ?replicas ?host WHERE {
+  ?deploy a eps:Deployment ;
+          eps:deployedOn eps:Production ;
+          eps:targetsSystem ?system ;
+          eps:deploys ?release .
+  ?release eps:version ?version .
+  OPTIONAL { ?deploy eps:replicaCount ?replicas }
+  OPTIONAL { ?deploy eps:hostedOn ?host }
+}

@@ -1,0 +1,10 @@
+# CQ3 / 影响面（爆炸半径）：如果某个数据存储/服务挂了，哪些服务会受牵连？
+# Blast radius: which services (transitively) depend on a given system?
+# Uses the transitive eps:dependsOn via a SPARQL property path (eps:dependsOn+),
+# so it works even without an OWL reasoner.
+PREFIX eps: <https://example.org/ontology/enterprise-production#>
+PREFIX ex:  <https://example.org/acme#>
+
+SELECT DISTINCT ?dependent WHERE {
+  ?dependent eps:dependsOn+ ex:PaymentService .
+}

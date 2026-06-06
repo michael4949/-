@@ -1,0 +1,205 @@
+@prefix eps: <https://example.org/ontology/enterprise-production#> .
+@prefix ex:  <https://example.org/acme#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################
+#  Example A-Box: a snapshot of "Acme" running its online
+#  checkout in production. Demonstrates how to instantiate the
+#  Enterprise Production Environment ontology.
+#  示例 A-Box：Acme 公司线上结算的生产环境快照。
+#################################################################
+
+<https://example.org/acme/production-snapshot>
+    a owl:Ontology ;
+    rdfs:label "Acme — production snapshot (example A-Box)"@en ;
+    owl:imports <https://example.org/ontology/enterprise-production> .
+
+### --- Organization & people / 组织与人员 ---
+
+ex:AcmeCorp a eps:Organization ;
+    rdfs:label "Acme Corp"@en .
+
+ex:PaymentsTeam a eps:Team ;
+    rdfs:label "Payments Team"@en ;
+    eps:belongsToOrganization ex:AcmeCorp ;
+    eps:owns ex:CheckoutService , ex:PaymentService .
+
+ex:alice a eps:Person ;
+    rdfs:label "Alice Wang"@en ;
+    eps:memberOf ex:PaymentsTeam ;
+    eps:hasRole eps:ServiceOwner ;
+    eps:onCallFor ex:CheckoutService .
+
+ex:bob a eps:Person ;
+    rdfs:label "Bob Li"@en ;
+    eps:memberOf ex:PaymentsTeam ;
+    eps:hasRole eps:SRE .
+
+### --- Business layer / 业务层 ---
+
+ex:RetailCustomers a eps:Customer ;
+    rdfs:label "Retail Customers"@en .
+
+ex:OnlineCheckout a eps:BusinessService ;
+    rdfs:label "Online Checkout"@en ;
+    eps:criticality "Tier-1" ;
+    eps:supportedBy ex:CheckoutService ;
+    eps:servesCustomer ex:RetailCustomers .
+
+### --- Services & datastores / 服务与数据存储 ---
+
+ex:CheckoutService a eps:Microservice ;
+    rdfs:label "checkout-service"@en ;
+    eps:ownedBy ex:PaymentsTeam ;
+    eps:dependsOn ex:PaymentService ;
+    eps:usesDatastore ex:OrdersDB , ex:SessionCache ;
+    eps:exposesEndpoint ex:CheckoutAPI ;
+    eps:hasSLO ex:CheckoutSLO ;
+    eps:configuredBy ex:CheckoutConfig ;
+    eps:usesSecret ex:StripeKey ;
+    eps:securedBy ex:CheckoutCert ;
+    eps:compliantWith eps:PCIDSS .
+
+ex:PaymentService a eps:Microservice ;
+    rdfs:label "payment-service"@en ;
+    eps:ownedBy ex:PaymentsTeam ;
+    eps:usesDatastore ex:PaymentsDB ;
+    eps:exposesEndpoint ex:PaymentAPI .
+
+ex:OrdersDB a eps:RelationalDatabase ;
+    rdfs:label "orders-db (PostgreSQL)"@en ;
+    eps:ownedBy ex:PaymentsTeam .
+
+ex:PaymentsDB a eps:RelationalDatabase ;
+    rdfs:label "payments-db (PostgreSQL)"@en ;
+    eps:ownedBy ex:PaymentsTeam .
+
+ex:SessionCache a eps:CacheStore ;
+    rdfs:label "session-cache (Redis)"@en .
+
+ex:CheckoutAPI a eps:APIEndpoint ;
+    rdfs:label "Checkout REST API"@en ;
+    eps:url "https://api.acme.example/checkout/v2"^^xsd:anyURI ;
+    eps:port 8443 .
+
+ex:PaymentAPI a eps:APIEndpoint ;
+    rdfs:label "Payment gRPC API"@en ;
+    eps:port 9443 .
+
+### Cross-service call: checkout consumes the payment API
+ex:CheckoutService eps:consumes ex:PaymentAPI .
+
+### --- SLO / SLI ---
+
+ex:CheckoutSLO a eps:ServiceLevelObjective ;
+    rdfs:label "Checkout availability SLO"@en ;
+    eps:targetAvailability 99.95 ;
+    eps:measuredBy ex:CheckoutAvailabilitySLI .
+
+ex:CheckoutAvailabilitySLI a eps:ServiceLevelIndicator ;
+    rdfs:label "Successful checkout request ratio"@en .
+
+### --- Infrastructure / 基础设施 ---
+
+ex:usEast1 a eps:CloudRegion ;
+    rdfs:label "us-east-1"@en ;
+    eps:providedBy eps:AWS .
+
+ex:usEast1a a eps:AvailabilityZone ;
+    rdfs:label "us-east-1a"@en ;
+    eps:locatedIn ex:usEast1 .
+
+ex:prodCluster a eps:KubernetesCluster ;
+    rdfs:label "prod-eks-cluster"@en ;
+    eps:locatedIn ex:usEast1 ;
+    eps:providedBy eps:AWS .
+
+ex:node1 a eps:VirtualMachine ;
+    rdfs:label "ip-10-0-1-23"@en ;
+    eps:partOfCluster ex:prodCluster ;
+    eps:locatedIn ex:usEast1a ;
+    eps:providedBy eps:AWS ;
+    eps:hostname "ip-10-0-1-23.ec2.internal" ;
+    eps:ipAddress "10.0.1.23" ;
+    eps:cpuCores 8 ;
+    eps:memoryGiB 32.0 .
+
+ex:checkoutPod a eps:Pod ;
+    rdfs:label "checkout-service-7d9f"@en ;
+    eps:hostedOn ex:node1 .
+
+### --- Deployment & release / 部署与发布 ---
+
+ex:checkoutDeploy a eps:Deployment ;
+    rdfs:label "checkout-service @ prod"@en ;
+    eps:deploys ex:checkoutRelease ;
+    eps:deployedOn eps:Production ;
+    eps:targetsSystem ex:CheckoutService ;
+    eps:hostedOn ex:node1 ;
+    eps:replicaCount 6 ;
+    eps:createdAt "2026-06-05T09:30:00Z"^^xsd:dateTime .
+
+ex:checkoutRelease a eps:Release ;
+    rdfs:label "checkout-service v2.4.1"@en ;
+    eps:releaseOf ex:CheckoutService ;
+    eps:version "2.4.1" ;
+    eps:hasArtifact ex:checkoutImage .
+
+ex:checkoutImage a eps:ContainerImage ;
+    rdfs:label "registry.acme.example/checkout:2.4.1"@en ;
+    eps:version "2.4.1" ;
+    eps:builtBy ex:mainPipeline ;
+    eps:hasVulnerability ex:cve_2026_12345 .
+
+ex:mainPipeline a eps:Pipeline ;
+    rdfs:label "checkout CI/CD pipeline"@en .
+
+ex:CheckoutConfig a eps:Configuration ;
+    rdfs:label "checkout-service config (prod)"@en .
+
+ex:StripeKey a eps:Secret ;
+    rdfs:label "stripe-api-key"@en .
+
+### --- Operations & reliability / 运维与可靠性 ---
+
+ex:mon7 a eps:Monitor ;
+    rdfs:label "checkout 5xx-rate monitor"@en ;
+    eps:monitors ex:CheckoutService ;
+    eps:raisesAlert ex:alert99 .
+
+ex:alert99 a eps:Alert ;
+    rdfs:label "Checkout 5xx rate > 5%"@en ;
+    eps:hasSeverity eps:SEV2 ;
+    eps:detectedAt "2026-06-05T09:42:00Z"^^xsd:dateTime .
+
+ex:chg17 a eps:ChangeRequest ;
+    rdfs:label "Deploy checkout v2.4.1"@en ;
+    eps:affects ex:CheckoutService .
+
+ex:inc42 a eps:Incident ;
+    rdfs:label "Checkout failures after v2.4.1 rollout"@en ;
+    eps:affects ex:CheckoutService ;
+    eps:hasSeverity eps:SEV1 ;
+    eps:hasStatus eps:StatusResolved ;
+    eps:assignedTo ex:PaymentsTeam ;
+    eps:triggeredBy ex:alert99 ;
+    eps:causedBy ex:chg17 ;
+    eps:documentedBy ex:checkoutRunbook ;
+    eps:detectedAt "2026-06-05T09:45:00Z"^^xsd:dateTime ;
+    eps:resolvedAt "2026-06-05T10:18:00Z"^^xsd:dateTime .
+
+ex:checkoutRunbook a eps:Runbook ;
+    rdfs:label "Checkout rollback runbook"@en .
+
+### --- Security / 安全 ---
+
+ex:CheckoutCert a eps:Certificate ;
+    rdfs:label "*.acme.example TLS cert"@en .
+
+ex:cve_2026_12345 a eps:Vulnerability ;
+    rdfs:label "openssl RCE"@en ;
+    eps:cveId "CVE-2026-12345" ;
+    eps:cvssScore 9.8 .
