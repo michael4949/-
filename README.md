@@ -79,6 +79,8 @@ npm run dev        # 打开 http://localhost:3000
 
 > 仓库里的 `scout/`（GitHub AI 雷达）是独立子系统，与本应用互不影响。
 >
-> 仓库还含一个独立子应用 **`stealth/`（飞机隐身涂装配比智能体）**：基于真实电磁物理
-> （传输线模型 + 有效介质理论 + 瑞利散射）做雷达吸波涂层配比寻优 + 天蓝伪装配色，
-> 入口 `stealth.html`（`npm run dev` 后访问 `/stealth.html`）。详见 `stealth/README.md`。
+> 仓库还含一个独立子应用 **飞机隐身涂装配比智能体**：基于真实电磁物理
+> （传输线模型 + 有效介质理论 + 瑞利散射）做雷达吸波涂层配比寻优 + 天蓝伪装配色。
+> - **`stealth-agent.html`** —— **纯单文件版**，零依赖零构建，**双击即可离线运行**；
+>   可选填入 Claude API Key 解锁「自然语言需求解析 + AI 方案解读」（直连 Anthropic，核心配比无需联网）。
+> - `stealth/` + `stealth.html` —— React/Vite 源码版（带物理自检），`npm run dev` 后访问 `/stealth.html`，详见 `stealth/README.md`。

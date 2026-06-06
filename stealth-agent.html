@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>飞机隐身涂装配比智能体 · 单文件版</title>
+<style>
+  :root{ --ink:#1e293b; --sub:#64748b; --sky:#7db4ee; --line:rgba(148,163,184,.35); }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    color:var(--ink); min-height:100vh; background:linear-gradient(180deg,#4f8fd6 0%,#7db4ee 42%,#cfe6fb 100%); background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 40px}
+  header h1{font-size:23px;font-weight:800;margin:0;letter-spacing:-.3px}
+  header p{margin:3px 0 0;font-size:13px;color:#334155;opacity:.9}
+  .logo{display:flex;align-items:center;gap:12px}
+  .badge{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(2,40,90,.12);font-size:22px}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:18px;margin-top:18px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:rgba(255,255,255,.80);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(2,40,90,.10);border:1px solid rgba(255,255,255,.6)}
+  .controls{align-self:start;position:sticky;top:16px}
+  .ttl{display:flex;align-items:center;gap:7px;font-weight:700;color:#334155;margin:0 0 12px;font-size:15px}
+  .fld{margin-bottom:15px}
+  .fld>label{display:block;font-size:12.5px;font-weight:600;color:#475569;margin-bottom:7px}
+  .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .chip{padding:7px 4px;border:none;border-radius:10px;background:rgba(255,255,255,.7);color:#475569;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+  .chip:hover{background:#dbeafe}
+  .chip.on{background:#0ea5e9;color:#fff;box-shadow:0 3px 8px rgba(14,165,233,.35)}
+  .note{font-size:11px;color:#94a3b8;margin-top:6px;line-height:1.5}
+  .row{display:flex;align-items:center;gap:10px}
+  input[type=range]{flex:1;accent-color:#0ea5e9}
+  .val{width:82px;text-align:right;font-weight:700;color:#0369a1;font-size:13.5px}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:1;padding:7px;border:none;border-radius:10px;background:rgba(255,255,255,.7);color:#475569;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px}
+  .seg button.on{background:#0ea5e9;color:#fff}
+  .btn{width:100%;padding:11px;border:none;border-radius:12px;color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;background:linear-gradient(90deg,#0ea5e9,#2563eb);box-shadow:0 6px 16px rgba(37,99,235,.3);font-family:inherit;transition:.15s}
+  .btn:hover{filter:brightness(1.05)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .btn.sec{background:linear-gradient(90deg,#38bdf8,#3b82f6)}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:560px){.metrics{grid-template-columns:repeat(2,1fr)}}
+  .metric{background:rgba(255,255,255,.82);border-radius:16px;padding:13px 14px;border:1px solid rgba(255,255,255,.6);box-shadow:0 6px 16px rgba(2,40,90,.07)}
+  .metric .big{font-size:21px;font-weight:800}
+  .metric .lab{font-size:11px;color:#64748b;margin-top:2px}
+  .sub-ok{color:#059669;font-size:10.5px;margin-top:2px}
+  .sub-warn{color:#d97706;font-size:10.5px;margin-top:2px}
+  .stack{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.stack{grid-template-columns:1fr}}
+  h3.sec{font-weight:700;color:#334155;margin:0 0 12px;font-size:15px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:#94a3b8;font-size:11px;font-weight:600;border-bottom:1px solid var(--line);padding:7px 6px 7px 0}
+  td{padding:8px 6px 8px 0;border-bottom:1px solid rgba(148,163,184,.15);color:#334155}
+  .tag{font-size:10px;padding:1px 5px;border-radius:5px;margin-left:5px}
+  .tag.mag{background:#fef3c7;color:#b45309}
+  .tag.die{background:#ede9fe;color:#7c3aed}
+  ul.reason{margin:0;padding:0;list-style:none}
+  ul.reason li{display:flex;gap:8px;font-size:13.5px;color:#475569;line-height:1.6;margin-bottom:6px}
+  ul.reason li b{color:#0c4a6e}
+  .arrow{color:#38bdf8;flex:none}
+  .swatches{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .sw{border-radius:14px;overflow:hidden;border:1px solid #e0f2fe;box-shadow:0 4px 12px rgba(2,40,90,.07)}
+  .sw .chip2{height:74px}
+  .sw .meta{background:#fff;padding:8px 10px}
+  .sw .meta .t{font-size:12px;font-weight:700;color:#334155}
+  .sw .meta .d{font-size:10.5px;color:#94a3b8}
+  .cmet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:14px}
+  .cmet .b{background:#fff;border:1px solid #e0f2fe;border-radius:11px;padding:8px 4px}
+  .cmet .v{font-weight:800;font-size:16px;color:#1e293b}
+  .cmet .v.good{color:#059669}
+  .cmet .l{font-size:10px;color:#94a3b8;margin-top:2px}
+  .pig{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .pig .nm{width:120px;font-size:11.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pig .bar{flex:1;height:13px;border-radius:7px;background:#eef2f7;overflow:hidden}
+  .pig .bar>i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,#38bdf8,#3b82f6)}
+  .pig .pc{width:40px;text-align:right;font-size:11.5px;font-weight:600;color:#334155}
+  .warn{display:flex;gap:7px;font-size:11.5px;line-height:1.55;border-radius:10px;padding:7px 10px;margin-top:8px}
+  .warn.sky{background:#f0f9ff;color:#075985}
+  .warn.amber{background:#fffbeb;color:#b45309}
+  .ai .keyrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .ai input[type=password],.ai input[type=text]{flex:1;min-width:180px;padding:9px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:13px;font-family:inherit;background:#fff}
+  .ai select{padding:9px;border:1px solid #cbd5e1;border-radius:10px;font-size:13px;font-family:inherit;background:#fff}
+  .ai .small{font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.5}
+  .nlrow{display:flex;gap:8px;margin-top:12px}
+  .nlrow input{flex:1}
+  .ai-out{white-space:pre-wrap;font-size:13.5px;line-height:1.7;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-top:12px;min-height:20px}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px}
+  .spin.dark{border-color:rgba(14,165,233,.3);border-top-color:#0ea5e9}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading{height:240px;display:flex;align-items:center;justify-content:center;color:#0369a1;gap:9px;font-weight:600}
+  .err{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:12px;padding:11px 14px;font-size:13px;margin-bottom:14px}
+  footer{text-align:center;font-size:11px;color:#3b5b80;opacity:.85;margin-top:26px;line-height:1.6}
+  .results>*{margin-bottom:18px}
+  .results>*:last-child{margin-bottom:0}
+  svg{display:block;width:100%;height:auto}
+  .collapse-h{cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:700;color:#334155;font-size:14px}
+  .altcard{background:rgba(240,249,255,.7);border:1px solid #e0f2fe;border-radius:12px;padding:11px 13px;font-size:13px}
+  .altcard .an{font-weight:700;color:#334155}
+  .altcard .ag{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:11.5px;color:#64748b;margin-top:5px}
+</style>
+</head>
+<body>
+
+<!-- ============================================================= -->
+<!-- 计算内核：纯物理 + 配比寻优 + 天蓝伪装。主线程与 Worker 共用此段源码。 -->
+<!-- 数值经验证：传输线反射损耗 / 有效介质理论 / 瑞利散射 / Kubelka–Munk。  -->
+<!-- ============================================================= -->
+<script id="engine">
+/* ---------- 复数 ---------- */
+function cx(re,im){return {re:re,im:im===undefined?0:im};}
+function cadd(a,b){return {re:a.re+b.re,im:a.im+b.im};}
+function csub(a,b){return {re:a.re-b.re,im:a.im-b.im};}
+function cscale(a,k){return {re:a.re*k,im:a.im*k};}
+function cmul(a,b){return {re:a.re*b.re-a.im*b.im,im:a.re*b.im+a.im*b.re};}
+function cabs2(a){return a.re*a.re+a.im*a.im;}
+function cabsv(a){return Math.hypot(a.re,a.im);}
+function cdiv(a,b){var d=cabs2(b);return {re:(a.re*b.re+a.im*b.im)/d,im:(a.im*b.re-a.re*b.im)/d};}
+function csqrt(z){if(z.re===0&&z.im===0)return{re:0,im:0};var r=Math.hypot(z.re,z.im);return{re:Math.sqrt((r+z.re)/2),im:Math.sqrt((r-z.re)/2)*(z.im<0?-1:1)};}
+function ctanh(z){var x=z.re,y=z.im;if(Math.abs(x)>20)return{re:x>0?1:-1,im:0};var den=Math.cosh(2*x)+Math.cos(2*y);return{re:Math.sinh(2*x)/den,im:Math.sin(2*y)/den};}
+function db20(z){return 20*Math.log10(Math.max(cabsv(z),1e-12));}
+
+/* ---------- 材料库（X 波段公开文献代表值，非机密/实测） ---------- */
+var MATERIALS={
+  cip:{id:"cip",name:"羰基铁粉",role:"magnetic",eps:cx(25,-3),mu:cx(3.5,-2.0),density:7.86,maxVolFrac:0.55,cost:3},
+  sendust:{id:"sendust",name:"铁硅铝扁平粉",role:"magnetic",eps:cx(30,-4),mu:cx(5.0,-3.0),density:6.9,maxVolFrac:0.45,cost:4},
+  nizn:{id:"nizn",name:"镍锌铁氧体",role:"magnetic",eps:cx(12,-0.5),mu:cx(2.5,-1.8),density:5.3,maxVolFrac:0.6,cost:2},
+  bam:{id:"bam",name:"钡铁氧体",role:"magnetic",eps:cx(15,-1),mu:cx(2.0,-1.4),density:5.3,maxVolFrac:0.5,cost:3},
+  cb:{id:"cb",name:"炭黑",role:"dielectric",eps:cx(18,-7),mu:cx(1,0),density:1.8,maxVolFrac:0.3,cost:1},
+  mwcnt:{id:"mwcnt",name:"多壁碳纳米管",role:"dielectric",eps:cx(35,-22),mu:cx(1,0),density:2.1,maxVolFrac:0.12,cost:8},
+  rgo:{id:"rgo",name:"还原氧化石墨烯",role:"dielectric",eps:cx(13,-9),mu:cx(1,0),density:2.2,maxVolFrac:0.15,cost:9},
+  sic:{id:"sic",name:"碳化硅",role:"dielectric",eps:cx(11,-3),mu:cx(1,0),density:3.2,maxVolFrac:0.4,cost:4},
+  pani:{id:"pani",name:"聚苯胺",role:"dielectric",eps:cx(11,-5),mu:cx(1,0),density:1.3,maxVolFrac:0.35,cost:5},
+  epoxy:{id:"epoxy",name:"环氧树脂",role:"matrix",eps:cx(3.6,-0.04),mu:cx(1,0),density:1.15,maxVolFrac:1,cost:1},
+  pu:{id:"pu",name:"聚氨酯",role:"matrix",eps:cx(3.0,-0.08),mu:cx(1,0),density:1.10,maxVolFrac:1,cost:1},
+  silicone:{id:"silicone",name:"硅橡胶",role:"matrix",eps:cx(2.8,-0.02),mu:cx(1,0),density:1.05,maxVolFrac:1,cost:2}
+};
+var PIGMENTS=[
+  {id:"tio2",name:"钛白（金红石）",rgb:[248,248,246],tint:1.4,radarSafe:true},
+  {id:"skyhue",name:"天蓝色相（锰蓝调）",rgb:[86,180,233],tint:1.3,radarSafe:true},
+  {id:"horizon",name:"地平线浅蓝（钴系）",rgb:[156,178,230],tint:1.0,radarSafe:true},
+  {id:"cerulean",name:"天蓝（铈蓝）",rgb:[42,122,190],tint:1.0,radarSafe:true},
+  {id:"cobalt",name:"钴蓝",rgb:[20,70,170],tint:1.2,radarSafe:true},
+  {id:"ultramarine",name:"群青",rgb:[18,20,130],tint:1.5,radarSafe:true},
+  {id:"phthalo",name:"酞菁蓝",rgb:[0,49,83],tint:3.0,radarSafe:true},
+  {id:"grey",name:"中性灰（无碳）",rgb:[128,130,132],tint:1.1,radarSafe:true},
+  {id:"carbonblack",name:"炭黑（导电·禁用）",rgb:[12,12,14],tint:4.0,radarSafe:false}
+];
+
+/* ---------- 有效介质理论 ---------- */
+function maxwellGarnett(epsM,epsF,f){
+  var beta=cscale(cdiv(csub(epsF,epsM),cadd(epsF,cscale(epsM,2))),f);
+  return cmul(epsM,cdiv(cadd(cx(1,0),cscale(beta,2)),csub(cx(1,0),beta)));
+}
+function bruggeman(epsM,epsF,f){
+  var b=cadd(cscale(epsF,3*f-1),cscale(epsM,2-3*f));
+  var disc=csqrt(cadd(cmul(b,b),cscale(cmul(epsF,epsM),8)));
+  var r1=cscale(cadd(b,disc),0.25),r2=cscale(csub(b,disc),0.25);
+  var ok=function(z){return z.re>0&&z.im<=1e-9;};
+  if(ok(r1)&&!ok(r2))return r1;
+  if(ok(r2)&&!ok(r1))return r2;
+  return r1.re>=r2.re?r1:r2;
+}
+function mixRule(epsM,epsF,f,rule){return rule==="bruggeman"?bruggeman(epsM,epsF,f):maxwellGarnett(epsM,epsF,f);}
+function compositeProps(matrix,filler,volFrac,rule){
+  rule=rule||"bruggeman";
+  var eps=mixRule(matrix.eps,filler.eps,volFrac,rule);
+  var mu=(filler.mu.re===1&&filler.mu.im===0)?cx(1,0):mixRule(matrix.mu,filler.mu,volFrac,rule);
+  return {eps:eps,mu:mu,density:volFrac*filler.density+(1-volFrac)*matrix.density};
+}
+
+/* ---------- 金属背衬多层传输线反射损耗 ---------- */
+var C0=2.99792458e8;
+function layerInputImpedance(zLoad,eps,mu,thicknessMM,freqHz){
+  var d=thicknessMM*1e-3, k0=2*Math.PI*freqHz/C0;
+  var eta=csqrt(cdiv(mu,eps)), s=csqrt(cmul(mu,eps));
+  var t=ctanh({re:-k0*d*s.im,im:k0*d*s.re});
+  return cmul(eta,cdiv(cadd(zLoad,cmul(eta,t)),cadd(eta,cmul(zLoad,t))));
+}
+function reflectionLoss(layers,freqHz){
+  var z=cx(0,0);
+  for(var i=layers.length-1;i>=0;i--) z=layerInputImpedance(z,layers[i].eps,layers[i].mu,layers[i].thickness,freqHz);
+  return db20(cdiv(csub(z,cx(1,0)),cadd(z,cx(1,0))));
+}
+function spectrum(layers,f0,f1,n){
+  var out=[];
+  for(var i=0;i<n;i++){var f=f0+(f1-f0)*i/(n-1);out.push({freqGHz:f,rl:reflectionLoss(layers,f*1e9)});}
+  return out;
+}
+function bandwidthBelow(spec,th){
+  if(spec.length<2)return 0;var step=spec[1].freqGHz-spec[0].freqGHz,c=0;
+  for(var i=0;i<spec.length;i++)if(spec[i].rl<=th)c++;
+  return c*step;
+}
+
+/* ---------- 色彩：瑞利散射算天空色 + Lab 色差 ---------- */
+function gauss(x,mu,s1,s2){var t=(x-mu)*(x<mu?1/s1:1/s2);return Math.exp(-0.5*t*t);}
+function cieX(l){return 1.056*gauss(l,599.8,37.9,31.0)+0.362*gauss(l,442.0,16.0,26.7)-0.065*gauss(l,501.1,20.4,26.2);}
+function cieY(l){return 0.821*gauss(l,568.8,46.9,40.5)+0.286*gauss(l,530.9,16.3,31.1);}
+function cieZ(l){return 1.217*gauss(l,437.0,11.8,36.0)+0.681*gauss(l,459.0,26.0,13.8);}
+function planck(lm,T){var c2=0.014387769;return 1/(Math.pow(lm,5)*(Math.exp(c2/(lm*T))-1));}
+function gammaEncode(c){c=Math.min(1,Math.max(0,c));var v=c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055;return Math.round(v*255);}
+function skyColor(T,aerosol,lMin,lMax,lum){
+  T=T||5778;aerosol=aerosol===undefined?0.6:aerosol;lMin=lMin||415;lMax=lMax||700;lum=lum===undefined?0.62:lum;
+  var air=aerosol/Math.pow(550e-9,4),X=0,Y=0,Z=0;
+  for(var l=lMin;l<=lMax;l+=5){var lm=l*1e-9;var sky=planck(lm,T)*(1/Math.pow(lm,4)+air);X+=sky*cieX(l);Y+=sky*cieY(l);Z+=sky*cieZ(l);}
+  var s=lum/Y;X*=s;Y*=s;Z*=s;
+  var r=3.2406*X-1.5372*Y-0.4986*Z,g=-0.9689*X+1.8758*Y+0.0415*Z,b=0.0557*X-0.2040*Y+1.0570*Z;
+  var mx=Math.max(r,g,b,1e-6);if(mx>0.96){var k=0.96/mx;r*=k;g*=k;b*=k;}
+  return [gammaEncode(r),gammaEncode(g),gammaEncode(b)];
+}
+function srgbToLinear(c){c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+function rgbToLab(rgb){
+  var R=srgbToLinear(rgb[0]),G=srgbToLinear(rgb[1]),B=srgbToLinear(rgb[2]);
+  var X=(0.4124*R+0.3576*G+0.1805*B)/0.95047,Y=(0.2126*R+0.7152*G+0.0722*B),Z=(0.0193*R+0.1192*G+0.9505*B)/1.08883;
+  var f=function(t){return t>0.008856?Math.cbrt(t):7.787*t+16/116;};
+  var fx=f(X),fy=f(Y),fz=f(Z);return [116*fy-16,500*(fx-fy),200*(fy-fz)];
+}
+function deltaE76(a,b){var p=rgbToLab(a),q=rgbToLab(b);return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]);}
+
+/* ---------- 差分进化 ---------- */
+function makeRng(seed){var s=(seed>>>0)||1;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function differentialEvolution(o){
+  var lower=o.lower,upper=o.upper,fn=o.fn,dim=lower.length;
+  var pop=o.pop||Math.min(60,12+dim*8),gens=o.gens||80,F=o.F||0.7,CR=o.CR||0.9,rng=makeRng(o.seed||12345);
+  var clamp=function(v,i){return Math.min(upper[i],Math.max(lower[i],v));};
+  var X=[],fX=[],i,d;
+  for(i=0;i<pop;i++){var x=lower.map(function(lo,k){return lo+rng()*(upper[k]-lo);});X.push(x);fX.push(fn(x));}
+  var best=0;for(i=1;i<pop;i++)if(fX[i]<fX[best])best=i;
+  for(var g=0;g<gens;g++)for(i=0;i<pop;i++){
+    var a=i,b=i,c=i;
+    while(a===i)a=(rng()*pop)|0;
+    while(b===i||b===a)b=(rng()*pop)|0;
+    while(c===i||c===a||c===b)c=(rng()*pop)|0;
+    var R=(rng()*dim)|0,trial=X[i].slice();
+    for(d=0;d<dim;d++)if(rng()<CR||d===R)trial[d]=clamp(X[a][d]+F*(X[b][d]-X[c][d]),d);
+    var ft=fn(trial);
+    if(ft<=fX[i]){X[i]=trial;fX[i]=ft;if(ft<fX[best])best=i;}
+  }
+  return {x:X[best],fx:fX[best]};
+}
+
+/* ---------- 天蓝伪装：Kubelka–Munk 调色 + 色相对齐 ---------- */
+function ksFromR(R){var r=Math.min(0.998,Math.max(0.002,R));return (1-r)*(1-r)/(2*r);}
+function rFromKS(ks){return 1+ks-Math.sqrt(ks*ks+2*ks);}
+function mixPigments(massFracs,palette){
+  var w=palette.map(function(p,i){return Math.max(0,massFracs[i])*p.tint;});
+  var wsum=w.reduce(function(a,b){return a+b;},0);
+  if(wsum<=0)return [0,0,0];
+  return [0,1,2].map(function(ch){
+    var ks=0;for(var i=0;i<palette.length;i++){if(w[i]<=0)continue;ks+=(w[i]/wsum)*ksFromR(srgbToLinear(palette[i].rgb[ch]));}
+    return gammaEncode(rFromKS(ks));
+  });
+}
+function hueDiffDeg(h1,h2){var d=Math.abs(h1-h2)*180/Math.PI;if(d>180)d=360-d;return d;}
+var STANDARDS=[
+  {name:"美军 浅蓝",code:"FS 35550",rgb:[120,158,190]},
+  {name:"美军 制空灰蓝",code:"FS 35622",rgb:[186,194,196]},
+  {name:"英军 方位蓝",code:"RAF Azure",rgb:[96,142,184]},
+  {name:"侦察机蓝",code:"PRU Blue",rgb:[70,104,150]},
+  {name:"以军 浅天蓝",code:"IAF Baby Blue",rgb:[176,206,222]}
+];
+function designCamouflage(T,allowConductive,aerosol){
+  aerosol=aerosol===undefined?0.6:aerosol;
+  var sky=skyColor(T,aerosol);var skyLab=rgbToLab(sky);
+  var skyHue=Math.atan2(skyLab[2],skyLab[1]),skyChroma=Math.hypot(skyLab[1],skyLab[2]);
+  var palette=PIGMENTS.filter(function(p){return allowConductive||p.radarSafe;});
+  var lower=palette.map(function(){return 0;}),upper=palette.map(function(){return 1;});
+  var objective=function(w){
+    var sum=w.reduce(function(a,b){return a+b;},0);if(sum<1e-6)return 1e3;
+    var frac=w.map(function(v){return v/sum;});var lab=rgbToLab(mixPigments(frac,palette));
+    var dHue=hueDiffDeg(Math.atan2(lab[2],lab[1]),skyHue);
+    var lightDef=Math.max(0,74-lab[0]),chromaShort=Math.max(0,14-Math.hypot(lab[1],lab[2]));
+    var sparsity=frac.filter(function(f){return f>0.02;}).length*0.4;
+    return dHue+0.6*lightDef+1.5*chromaShort+sparsity;
+  };
+  var x=differentialEvolution({lower:lower,upper:upper,fn:objective,pop:50,gens:140,seed:20260605}).x;
+  var sum=x.reduce(function(a,b){return a+b;},0)||1;var frac=x.map(function(v){return v/sum;});
+  frac=frac.map(function(f){return f>=0.01?f:0;});var s2=frac.reduce(function(a,b){return a+b;},0)||1;frac=frac.map(function(f){return f/s2;});
+  var paintRGB=mixPigments(frac,palette),pLab=rgbToLab(paintRGB);
+  var pigments=palette.map(function(p,i){return {id:p.id,name:p.name,massFrac:frac[i],radarSafe:p.radarSafe};})
+    .filter(function(p){return p.massFrac>0;}).sort(function(a,b){return b.massFrac-a.massFrac;});
+  var nearest=STANDARDS[0],nd=Infinity;
+  for(var i=0;i<STANDARDS.length;i++){var dd=deltaE76(paintRGB,STANDARDS[i].rgb);if(dd<nd){nd=dd;nearest=STANDARDS[i];}}
+  var warnings=[];
+  if(pigments.some(function(p){return !p.radarSafe;}))warnings.push("⚠ 配方含导电颜料，会抬高表层电损耗与 RCS，隐身面漆应剔除。");
+  warnings.push("面漆已强制排除导电炭黑，仅用非导电颜料，避免破坏吸波层。");
+  warnings.push("已对齐天空「色相」；亮度差为物理必然——晴空自发光亮度远超被动涂料反照（二战 Yehudi 补光灯即为此）。");
+  warnings.push("天蓝底属「向上观察」伪装；高空俯视宜配灰色顶面，形成上浅下灰的反荫蔽迷彩。");
+  return {skyRGB:sky,paintRGB:paintRGB,hueMatchDeg:hueDiffDeg(Math.atan2(pLab[2],pLab[1]),skyHue),
+    chromaGap:Math.abs(skyChroma-Math.hypot(pLab[1],pLab[2])),deltaE:deltaE76(paintRGB,sky),
+    pigments:pigments,nearestStandard:{name:nearest.name,code:nearest.code,deltaE:nd},warnings:warnings};
+}
+
+/* ---------- 配比优化器 ---------- */
+var TOPCOAT={eps:cx(4.2,-0.05),mu:cx(1,0),thickness:0.08,density:1.45};
+function resolveLayersRaw(cfgs){
+  return cfgs.map(function(c){
+    var r=compositeProps(MATERIALS[c.matrixId],MATERIALS[c.fillerId],c.volFrac);
+    return {matrixId:c.matrixId,fillerId:c.fillerId,volFrac:c.volFrac,thickness:c.thickness,eps:r.eps,mu:r.mu,density:r.density,arealMass:r.density*c.thickness};
+  });
+}
+function scoreResolved(absorber,req,nPts){
+  var stack=[TOPCOAT].concat(absorber.map(function(l){return {eps:l.eps,mu:l.mu,thickness:l.thickness};}));
+  var spec=spectrum(stack,req.fStartGHz,req.fEndGHz,nPts);
+  var rls=spec.map(function(p){return p.rl;});
+  var minRL=Math.min.apply(null,rls),worstRL=Math.max.apply(null,rls),bw=bandwidthBelow(spec,-10);
+  var totalThickness=TOPCOAT.thickness+absorber.reduce(function(a,l){return a+l.thickness;},0);
+  var arealMass=TOPCOAT.density*TOPCOAT.thickness+absorber.reduce(function(a,l){return a+l.arealMass;},0);
+  var relativeCost=absorber.reduce(function(a,l){return a+MATERIALS[l.fillerId].cost*l.volFrac*l.thickness;},0);
+  var wp=req.weightPriority,cover=Math.max(0,-worstRL),score=0;
+  score+=Math.min(cover,25)*4.0;
+  score+=bw*2.0;
+  score+=Math.min(-minRL,40)*0.3;
+  score-=worstRL>-10?(worstRL+10)*2:0;
+  score+=worstRL<=-10?8:0;
+  score-=arealMass*(0.8+3*wp);
+  score-=totalThickness*(0.4+0.8*wp);
+  score-=relativeCost*(0.3+0.8*wp);
+  if(totalThickness>req.maxThickness)score-=(totalThickness-req.maxThickness)*80;
+  if(arealMass>req.maxArealMass)score-=(arealMass-req.maxArealMass)*80;
+  return {spectrum:spec,score:score,minRL:minRL,worstRL:worstRL,bandwidth10:bw,totalThickness:totalThickness,arealMass:arealMass,relativeCost:relativeCost};
+}
+var TEMPLATES=[
+  {name:"Dallenbach 单层",slots:[{matrixId:"pu",fillers:["cip","sendust","nizn","bam","mwcnt","cb"]}]},
+  {name:"双层阻抗梯度",slots:[{matrixId:"pu",fillers:["cb","sic","pani","mwcnt"]},{matrixId:"epoxy",fillers:["cip","sendust","nizn"]}]},
+  {name:"三层梯度宽带",slots:[{matrixId:"pu",fillers:["sic","pani"]},{matrixId:"epoxy",fillers:["mwcnt","rgo","cb"]},{matrixId:"epoxy",fillers:["cip","sendust"]}]}
+];
+function optimizeChoice(template,fillerIds,req){
+  var L=template.slots.length,lower=[],upper=[],i;
+  for(i=0;i<L;i++){lower.push(0.03);upper.push(MATERIALS[fillerIds[i]].maxVolFrac);}
+  for(i=0;i<L;i++){lower.push(0.05);upper.push(Math.min(req.maxThickness,5));}
+  var build=function(x){return template.slots.map(function(s,k){return {matrixId:s.matrixId,fillerId:fillerIds[k],volFrac:x[k],thickness:x[L+k]};});};
+  var fn=function(x){return -scoreResolved(resolveLayersRaw(build(x)),req,21).score;};
+  var x=differentialEvolution({lower:lower,upper:upper,fn:fn,pop:Math.min(48,16+L*10),gens:70,seed:7+L}).x;
+  var cfgs=build(x);
+  return {cfgs:cfgs,metrics:scoreResolved(resolveLayersRaw(cfgs),req,81)};
+}
+function combos(slots,cap){
+  var out=[[]];
+  for(var i=0;i<slots.length;i++){var next=[];for(var j=0;j<out.length;j++)for(var k=0;k<slots[i].fillers.length;k++)next.push(out[j].concat([slots[i].fillers[k]]));out=next;}
+  if(out.length<=cap)return out;
+  var step=out.length/cap,picked=[];for(var m=0;m<cap;m++)picked.push(out[Math.floor(m*step)]);return picked;
+}
+function assemble(cfgs,metrics,template,camouflage){
+  var layers=resolveLayersRaw(cfgs);
+  var stack=[TOPCOAT].concat(layers.map(function(l){return {eps:l.eps,mu:l.mu,thickness:l.thickness};}));
+  return {layers:layers,spectrum:metrics.spectrum,wideSpectrum:spectrum(stack,1,18,101),
+    minRL:metrics.minRL,worstRL:metrics.worstRL,bandwidth10:metrics.bandwidth10,
+    totalThickness:metrics.totalThickness,arealMass:metrics.arealMass,relativeCost:metrics.relativeCost,
+    score:metrics.score,template:template,camouflage:camouflage};
+}
+function designCoating(req){
+  var camouflage=designCamouflage();var candidates=[];
+  for(var t=0;t<TEMPLATES.length;t++){
+    var tpl=TEMPLATES[t];if(tpl.slots.length>req.maxLayers)continue;
+    var cap=tpl.slots.length===1?99:tpl.slots.length===2?12:8;
+    var best=null,cs=combos(tpl.slots,cap);
+    for(var c=0;c<cs.length;c++){var r=optimizeChoice(tpl,cs[c],req);var d=assemble(r.cfgs,r.metrics,tpl.name,camouflage);if(!best||d.score>best.score)best=d;}
+    if(best)candidates.push(best);
+  }
+  candidates.sort(function(a,b){return b.score-a.score;});
+  return {best:candidates[0],alternatives:candidates.slice(1)};
+}
+
+/* ---------- 智能体门面 ---------- */
+var BANDS=[
+  {id:"L",label:"L 波段",f0:1,f1:2,note:"预警/对空搜索，波长大、需厚涂层"},
+  {id:"S",label:"S 波段",f0:2,f1:4,note:"对空监视、气象雷达"},
+  {id:"C",label:"C 波段",f0:4,f1:8,note:"多用途、部分火控"},
+  {id:"X",label:"X 波段",f0:8,f1:12,note:"机载火控/导引头主力，隐身最关注"},
+  {id:"Ku",label:"Ku 波段",f0:12,f1:18,note:"高分辨成像、末制导"},
+  {id:"X-Ku",label:"X–Ku 宽带",f0:8,f1:18,note:"覆盖主流火控+末制导的宽带需求"}
+];
+var DEFAULT_REQUIREMENT={bandLabel:"X",fStartGHz:8,fEndGHz:12,maxThickness:3.0,maxArealMass:6.0,maxLayers:3,weightPriority:0.5};
+function explain(d,req){
+  var r=[];
+  r.push("目标 "+req.bandLabel+" 波段 "+req.fStartGHz+"–"+req.fEndGHz+" GHz，限厚 ≤ "+req.maxThickness+" mm、限面密度 ≤ "+req.maxArealMass+" kg/m²。");
+  r.push("比选 Dallenbach 单层 / 双层梯度 / 三层宽带后，「"+d.template+"」综合评分最高，故选定。");
+  d.layers.forEach(function(l,i){
+    var f=MATERIALS[l.fillerId],m=MATERIALS[l.matrixId];
+    var role=f.role==="magnetic"?"磁损耗":"介电损耗";
+    var pos=i===0?"最外吸波层（先做阻抗匹配，让波尽量进入）":i===d.layers.length-1?"最内层（贴金属，承担主要损耗）":"中间过渡层";
+    r.push("第"+(i+1)+"层·"+pos+"："+f.name+"（"+role+"）填于"+m.name+"，体积分数 "+(l.volFrac*100).toFixed(0)+"%、厚 "+l.thickness.toFixed(2)+" mm。");
+  });
+  r.push("性能：带内最深吸收 "+d.minRL.toFixed(1)+" dB，最差 "+d.worstRL.toFixed(1)+" dB，−10 dB（90%吸收）带宽 "+d.bandwidth10.toFixed(1)+" GHz。");
+  r.push("代价：总厚 "+d.totalThickness.toFixed(2)+" mm，面密度 "+d.arealMass.toFixed(2)+" kg/m²"+(d.arealMass>req.maxArealMass?"（超限！）":"")+"。");
+  if(d.worstRL>-10)r.push("提示：此约束下未能全带 ≤ −10 dB；可放宽厚度/面密度，或缩窄目标频带。");
+  r.push("最外覆 0.08 mm 天蓝面漆（"+d.camouflage.pigments.map(function(p){return p.name;}).join(" + ")+"），低损耗近似电磁透明，不破坏吸波。");
+  return r;
+}
+function runAgent(req){
+  var dc=designCoating(req);
+  return {best:dc.best,alternatives:dc.alternatives,rationale:explain(dc.best,req),requirement:req};
+}
+</script>
+
+<!-- ============================================================= -->
+<!-- 界面 + Worker 调度 + 可选 Claude 接入                          -->
+<!-- ============================================================= -->
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="badge">✈️</div>
+      <div>
+        <h1>飞机隐身涂装配比智能体</h1>
+        <p>真实电磁物理 · 雷达吸波材料配比寻优 · 天蓝伪装配色（模拟天空）· 单文件 · 离线可用</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside class="card controls">
+      <div class="ttl">✨ 设计需求</div>
+
+      <div class="fld">
+        <label>目标雷达频段</label>
+        <div class="chips" id="bands"></div>
+        <div class="note" id="bandNote"></div>
+      </div>
+
+      <div class="fld">
+        <label>最大总厚度</label>
+        <div class="row"><input type="range" id="thk" min="0.5" max="6" step="0.1"><span class="val" id="thkV"></span></div>
+      </div>
+
+      <div class="fld">
+        <label>最大面密度（重量约束）</label>
+        <div class="row"><input type="range" id="mass" min="1" max="12" step="0.5"><span class="val" id="massV"></span></div>
+      </div>
+
+      <div class="fld">
+        <label>最多层数</label>
+        <div class="seg" id="layers"></div>
+      </div>
+
+      <div class="fld">
+        <label>设计取向：吸收性能 ↔ 轻量化</label>
+        <div class="row"><input type="range" id="wp" min="0" max="1" step="0.05"><span class="val" id="wpV"></span></div>
+      </div>
+
+      <button class="btn" id="run">⚙️ 开始智能配比</button>
+      <div class="note">基于公开文献材料代表值与经典电磁理论的<b>教学/科研仿真</b>，非机密或实测配方。</div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+      <div class="ttl">🤖 接入 Claude（可选）</div>
+      <div class="ai">
+        <div class="keyrow">
+          <input type="password" id="key" placeholder="粘贴 Claude API Key（仅存本地浏览器）" autocomplete="off">
+          <select id="model">
+            <option value="claude-opus-4-8">Opus 4.8</option>
+            <option value="claude-sonnet-4-6">Sonnet 4.6</option>
+            <option value="claude-haiku-4-5">Haiku 4.5</option>
+          </select>
+        </div>
+        <div class="nlrow">
+          <input type="text" id="nl" placeholder="用一句话描述需求，如：给战斗机做X波段隐身，越薄越好">
+          <button class="btn sec" id="parse" style="width:auto;padding:9px 14px;white-space:nowrap">解析</button>
+        </div>
+        <div class="small">填 Key 解锁：自然语言需求解析 + AI 方案解读（流式）。<b>核心配比无需联网。</b>Key 仅保存在你的浏览器本地，直连 Anthropic。</div>
+        <div id="aiMsg" class="small" style="color:#b45309"></div>
+      </div>
+    </aside>
+
+    <section class="results" id="results"></section>
+  </div>
+
+  <footer>
+    教学/科研仿真 · 物理引擎：传输线理论 + 有效介质理论 + 瑞利散射 + Kubelka–Munk · 材料参数取自公开文献代表值 · 不含任何机密或实测配方
+  </footer>
+</div>
+
+<script>
+/* ===== 天空背景（用物理算出的天空色） ===== */
+(function(){
+  try{
+    var s=skyColor();
+    var adj=function(k){return s.map(function(v){return Math.round(Math.min(255,Math.max(0,v*k)));});};
+    document.body.style.background=
+      "radial-gradient(1100px 520px at 78% -8%, rgba(255,250,235,.85), rgba(255,255,255,0) 60%),"+
+      "linear-gradient(180deg, rgb("+adj(0.62).join(',')+") 0%, rgb("+s.join(',')+") 42%, rgb("+adj(1.16).join(',')+") 100%)";
+    document.body.style.backgroundAttachment="fixed";
+  }catch(e){}
+})();
+
+/* ===== Worker（从内核源码构建；file:// 失败则回退主线程） ===== */
+var worker=null;
+(function(){
+  try{
+    var src=document.getElementById('engine').textContent+
+      "\nself.onmessage=function(e){try{var r=runAgent(e.data);self.postMessage({ok:true,result:r});}catch(err){self.postMessage({ok:false,error:String(err)});}};";
+    worker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+  }catch(e){worker=null;}
+})();
+function computeDesign(req){
+  return new Promise(function(resolve,reject){
+    function runMain(){setTimeout(function(){try{resolve(runAgent(req));}catch(err){reject(err);}},30);}
+    if(worker){
+      var done=false;
+      var cleanup=function(){worker.removeEventListener('message',onMsg);worker.removeEventListener('error',onErr);};
+      var onMsg=function(e){if(done)return;done=true;cleanup();(e.data&&e.data.ok)?resolve(e.data.result):reject(new Error((e.data&&e.data.error)||'compute failed'));};
+      var onErr=function(){if(done)return;done=true;cleanup();worker=null;runMain();};
+      worker.addEventListener('message',onMsg);worker.addEventListener('error',onErr);
+      try{worker.postMessage(req);}catch(_){if(!done){done=true;cleanup();worker=null;runMain();}}
+    }else runMain();
+  });
+}
+
+/* ===== 状态 ===== */
+var $=function(s){return document.querySelector(s);};
+/* localStorage 在 file:// / 隐私模式 / opaque origin 下可能抛错，统一兜底 */
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+var state={req:Object.assign({},DEFAULT_REQUIREMENT),res:null,loading:false};
+
+/* ===== 控件 ===== */
+function buildControls(){
+  $('#bands').innerHTML=BANDS.map(function(b){return '<button class="chip" data-id="'+b.id+'" title="'+b.note+'">'+b.label.replace(' 波段','')+'</button>';}).join('');
+  $('#bands').addEventListener('click',function(e){var t=e.target.closest('.chip');if(!t)return;var b=BANDS.find(function(x){return x.id===t.dataset.id;});state.req.bandLabel=b.id;state.req.fStartGHz=b.f0;state.req.fEndGHz=b.f1;syncControls();});
+  $('#layers').innerHTML=[1,2,3].map(function(n){return '<button data-n="'+n+'">'+n+' 层</button>';}).join('');
+  $('#layers').addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;state.req.maxLayers=+t.dataset.n;syncControls();});
+  $('#thk').addEventListener('input',function(e){state.req.maxThickness=+e.target.value;syncControls();});
+  $('#mass').addEventListener('input',function(e){state.req.maxArealMass=+e.target.value;syncControls();});
+  $('#wp').addEventListener('input',function(e){state.req.weightPriority=+e.target.value;syncControls();});
+  $('#run').addEventListener('click',runDesign);
+}
+function syncControls(){
+  var r=state.req;
+  Array.prototype.forEach.call($('#bands').children,function(c){c.classList.toggle('on',c.dataset.id===r.bandLabel);});
+  var bn=BANDS.find(function(b){return b.id===r.bandLabel;});
+  $('#bandNote').textContent=(bn?bn.note:'')+' · '+r.fStartGHz+'–'+r.fEndGHz+' GHz';
+  Array.prototype.forEach.call($('#layers').children,function(c){c.classList.toggle('on',+c.dataset.n===r.maxLayers);});
+  $('#thk').value=r.maxThickness;$('#thkV').textContent=r.maxThickness.toFixed(1)+' mm';
+  $('#mass').value=r.maxArealMass;$('#massV').textContent=r.maxArealMass.toFixed(1)+' kg/m²';
+  $('#wp').value=r.weightPriority;$('#wpV').textContent=r.weightPriority<0.33?'重性能':r.weightPriority>0.66?'重轻量':'均衡';
+}
+
+/* ===== 运行 ===== */
+function runDesign(){
+  state.loading=true;$('#run').disabled=true;$('#run').innerHTML='<span class="spin"></span> 智能体计算中…';
+  $('#results').innerHTML='<div class="card"><div class="loading"><span class="spin dark"></span> 正在求解最优配方…</div></div>';
+  computeDesign(state.req).then(function(res){
+    state.res=res;state.loading=false;$('#run').disabled=false;$('#run').innerHTML='⚙️ 开始智能配比';renderResult();
+  }).catch(function(err){
+    state.loading=false;$('#run').disabled=false;$('#run').innerHTML='⚙️ 开始智能配比';
+    $('#results').innerHTML='<div class="err">计算失败：'+String(err)+'</div>';
+  });
+}
+
+/* ===== 渲染：频谱 SVG ===== */
+function spectrumSVG(data,band){
+  var W=700,H=300,pL=46,pR=66,pT=14,pB=34;
+  var f0=data[0].freqGHz,f1=data[data.length-1].freqGHz;
+  var mn=Math.min.apply(null,data.map(function(d){return d.rl;}));
+  var yMin=Math.min(-30,Math.floor(mn/10)*10);
+  var X=function(f){return pL+(f-f0)/(f1-f0)*(W-pL-pR);};
+  var Y=function(rl){return pT+(-rl)/(-yMin)*(H-pT-pB);};
+  var g='',i;
+  for(i=0;i>=yMin;i-=10){var y=Y(i);g+='<line x1="'+pL+'" y1="'+y+'" x2="'+(W-pR)+'" y2="'+y+'" stroke="#cbd5e1" stroke-opacity=".5" stroke-dasharray="3 3"/>';g+='<text x="'+(pL-6)+'" y="'+(y+4)+'" font-size="11" fill="#64748b" text-anchor="end">'+i+'</text>';}
+  var ticks=[2,4,6,8,10,12,14,16,18];
+  for(i=0;i<ticks.length;i++){if(ticks[i]<f0||ticks[i]>f1)continue;var x=X(ticks[i]);g+='<text x="'+x+'" y="'+(H-pB+18)+'" font-size="11" fill="#64748b" text-anchor="middle">'+ticks[i]+'</text>';}
+  var band1=Math.max(f0,band[0]),band2=Math.min(f1,band[1]);
+  var shade=band2>band1?'<rect x="'+X(band1)+'" y="'+pT+'" width="'+(X(band2)-X(band1))+'" height="'+(H-pT-pB)+'" fill="#38bdf8" fill-opacity=".13"/>':'';
+  var ref='<line x1="'+pL+'" y1="'+Y(-10)+'" x2="'+(W-pR)+'" y2="'+Y(-10)+'" stroke="#16a34a" stroke-dasharray="5 4"/><text x="'+(W-pR+4)+'" y="'+(Y(-10)+4)+'" font-size="10" fill="#16a34a">−10dB</text>';
+  if(yMin<=-20)ref+='<line x1="'+pL+'" y1="'+Y(-20)+'" x2="'+(W-pR)+'" y2="'+Y(-20)+'" stroke="#0d9488" stroke-dasharray="2 4"/><text x="'+(W-pR+4)+'" y="'+(Y(-20)+4)+'" font-size="10" fill="#0d9488">−20dB</text>';
+  var pts=data.map(function(d){return X(d.freqGHz).toFixed(1)+','+Y(d.rl).toFixed(1);}).join(' ');
+  return '<svg viewBox="0 0 '+W+' '+H+'">'+g+shade+ref+
+    '<polyline points="'+pts+'" fill="none" stroke="#2563eb" stroke-width="2.5"/>'+
+    '<text x="'+(W-pR)+'" y="'+(H-2)+'" font-size="11" fill="#64748b" text-anchor="end">频率 GHz</text>'+
+    '<text x="14" y="'+(pT+4)+'" font-size="11" fill="#64748b">RL dB</text></svg>';
+}
+
+/* ===== 渲染：涂层剖面 SVG ===== */
+function layerStackSVG(layers,paintRGB,topT){
+  var W=360,H=300,x0=20,wBar=210,metalH=34,minH=26;
+  var all=[{name:"天蓝面漆",sub:"伪装层",t:topT,fill:'rgb('+paintRGB.join(',')+')',role:"paint"}];
+  layers.forEach(function(l){var f=MATERIALS[l.fillerId];all.push({name:f.name,sub:(l.volFrac*100).toFixed(0)+'vol% / '+MATERIALS[l.matrixId].name,t:l.thickness,role:f.role,fill:f.role==="magnetic"?'#f59e0b':'#8b5cf6'});});
+  var totalT=all.reduce(function(a,l){return a+l.t;},0),avail=H-metalH-30,extra=Math.max(0,avail-all.length*minH),y=20,s='';
+  var defs='<defs><pattern id="mtl" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#94a3b8"/><line x1="0" y1="0" x2="0" y2="8" stroke="#64748b" stroke-width="3"/></pattern>'+
+    '<marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#0ea5e9"/></marker></defs>';
+  s+='<text x="'+x0+'" y="12" font-size="11" fill="#0284c7">入射雷达波 ↓</text>';
+  [0,1,2].forEach(function(i){var xx=x0+6+i*26;s+='<line x1="'+xx+'" y1="2" x2="'+xx+'" y2="'+(y-2)+'" stroke="#0ea5e9" stroke-width="2" marker-end="url(#ar)" opacity=".8"/>';});
+  all.forEach(function(b){
+    var h=minH+extra*b.t/totalT,cy=y+(h-3)/2;
+    s+='<rect x="'+x0+'" y="'+y+'" width="'+wBar+'" height="'+(h-3)+'" rx="3" fill="'+b.fill+'" stroke="rgba(255,255,255,.6)"/>';
+    s+='<text x="'+(x0+10)+'" y="'+(cy-2)+'" font-size="12" font-weight="600" fill="'+(b.role==="paint"?'#0c4a6e':'#1e293b')+'">'+b.name+'</text>';
+    s+='<text x="'+(x0+10)+'" y="'+(cy+12)+'" font-size="9.5" fill="'+(b.role==="paint"?'#0c4a6e':'#334155')+'" opacity=".85">'+b.sub+'</text>';
+    s+='<text x="'+(x0+wBar+8)+'" y="'+(cy+3)+'" font-size="11" fill="#475569">'+b.t.toFixed(2)+' mm</text>';
+    y+=h;
+  });
+  s+='<rect x="'+x0+'" y="'+y+'" width="'+wBar+'" height="'+metalH+'" rx="3" fill="url(#mtl)"/>';
+  s+='<text x="'+(x0+wBar/2)+'" y="'+(y+metalH/2+4)+'" font-size="12" font-weight="700" fill="#1e293b" text-anchor="middle">金属机体（PEC 背衬）</text>';
+  return '<svg viewBox="0 0 '+W+' '+H+'">'+defs+s+'</svg>';
+}
+
+/* ===== 渲染：伪装卡 ===== */
+function hex(c){return '#'+c.map(function(v){return v.toString(16).padStart(2,'0');}).join('').toUpperCase();}
+function camouflageHTML(cam){
+  var good=cam.hueMatchDeg<3;
+  var sw=function(label,desc,c){return '<div class="sw"><div class="chip2" style="background:rgb('+c.join(',')+')"></div><div class="meta"><div class="t">'+label+'</div><div class="d">'+desc+' · '+hex(c)+'</div></div></div>';};
+  var pig=cam.pigments.map(function(p){return '<div class="pig"><div class="nm" title="'+p.name+'">'+p.name+'</div><div class="bar"><i style="width:'+Math.max(2,p.massFrac*100)+'%"></i></div><div class="pc">'+(p.massFrac*100).toFixed(0)+'%</div></div>';}).join('');
+  var warn=cam.warnings.map(function(w){var d=w.indexOf('⚠')===0;return '<div class="warn '+(d?'amber':'sky')+'"><span>'+(d?'⚠':'✓')+'</span><span>'+w.replace(/^⚠\s*/,'')+'</span></div>';}).join('');
+  return '<div class="card"><h3 class="sec">🎨 天蓝伪装配色（模拟天空）</h3>'+
+    '<div class="swatches">'+sw('真实天空色','瑞利散射计算',cam.skyRGB)+sw('隐身面漆色','颜料调配',cam.paintRGB)+'</div>'+
+    '<div class="cmet"><div class="b"><div class="v '+(good?'good':'')+'">'+cam.hueMatchDeg.toFixed(1)+'°</div><div class="l">色相吻合</div></div>'+
+    '<div class="b"><div class="v">'+cam.chromaGap.toFixed(1)+'</div><div class="l">彩度差</div></div>'+
+    '<div class="b"><div class="v" style="font-size:13px">'+cam.nearestStandard.code+'</div><div class="l">最接近标准</div></div></div>'+
+    '<div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:8px">颜料质量配比</div>'+pig+warn+'</div>';
+}
+
+/* ===== 渲染：配方表 ===== */
+function recipeHTML(d){
+  var rows='<tr style="background:rgba(224,242,254,.4)"><td style="color:#0369a1;font-weight:600">面漆</td><td colspan="2">天蓝伪装层（非导电颜料）</td><td style="color:#94a3b8">—</td><td>0.08 mm</td><td style="color:#94a3b8">~4.2</td><td style="color:#94a3b8">1.0</td><td style="color:#64748b">0.12</td></tr>';
+  d.layers.forEach(function(l,i){
+    var f=MATERIALS[l.fillerId],m=MATERIALS[l.matrixId];
+    var im=function(v){return (v<=0?'':'+')+v.toFixed(2)+'j';};
+    var im1=function(v){return (v<=0?'':'+')+v.toFixed(1)+'j';};
+    rows+='<tr><td style="font-weight:600;color:#475569">L'+(i+1)+'</td>'+
+      '<td><b style="color:#334155">'+f.name+'</b><span class="tag '+(f.role==="magnetic"?'mag':'die')+'">'+(f.role==="magnetic"?'磁损耗':'介电损耗')+'</span></td>'+
+      '<td>'+m.name+'</td><td>'+(l.volFrac*100).toFixed(0)+'%</td><td>'+l.thickness.toFixed(2)+' mm</td>'+
+      '<td style="font-size:12px;color:#64748b">'+l.eps.re.toFixed(1)+im1(l.eps.im)+'</td>'+
+      '<td style="font-size:12px;color:#64748b">'+l.mu.re.toFixed(2)+im(l.mu.im)+'</td>'+
+      '<td>'+l.arealMass.toFixed(2)+'</td></tr>';
+  });
+  return '<div class="card"><h3 class="sec">📋 逐层配方（外 → 内）</h3><div style="overflow-x:auto"><table><thead><tr><th>层</th><th>填料</th><th>基体</th><th>体积%</th><th>厚度</th><th>ε (复)</th><th>μ (复)</th><th>面密度</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+/* ===== 渲染：整体 ===== */
+function renderResult(){
+  var res=state.res,d=res.best,req=state.req,ok10=d.worstRL<=-10;
+  var metric=function(big,lab,cls,sub){return '<div class="metric"><div class="big" style="'+(cls||'')+'">'+big+'</div><div class="lab">'+lab+'</div>'+(sub||'')+'</div>';};
+  var metrics='<div class="metrics">'+
+    metric(d.minRL.toFixed(1)+' dB','最深吸收 (min RL)','color:#0284c7')+
+    metric(d.bandwidth10.toFixed(1)+' GHz','−10dB 带宽','',ok10?'<div class="sub-ok">全带达标 ✓</div>':'<div class="sub-warn">部分达标</div>')+
+    metric(d.totalThickness.toFixed(2)+' mm','总厚度')+
+    metric(d.arealMass.toFixed(2)+' kg/m²','面密度',d.arealMass<=req.maxArealMass?'color:#059669':'color:#d97706')+
+    '</div>';
+  var chart='<div class="card"><h3 class="sec">📈 反射损耗频谱 · '+d.template+'<span style="float:right;font-size:12px;color:#94a3b8;font-weight:400">阴影=目标频带</span></h3>'+spectrumSVG(d.wideSpectrum,[req.fStartGHz,req.fEndGHz])+'</div>';
+  var stack='<div class="stack"><div class="card"><h3 class="sec">🧱 涂层结构剖面</h3>'+layerStackSVG(d.layers,d.camouflage.paintRGB,0.08)+'</div>'+camouflageHTML(d.camouflage)+'</div>';
+  var reason='<div class="card"><h3 class="sec">🧠 智能体推理</h3><ul class="reason">'+res.rationale.map(function(t){return '<li><span class="arrow">▸</span><span>'+t+'</span></li>';}).join('')+'</ul></div>';
+  var alts='';
+  if(res.alternatives.length){
+    alts='<div class="card"><div class="collapse-h" id="altH">比选的备选方案（'+res.alternatives.length+'）<span id="altC">▾</span></div><div id="altBody" style="margin-top:12px;grid-template-columns:1fr 1fr;gap:12px;display:none">'+
+      res.alternatives.map(function(a){return '<div class="altcard"><div class="an">'+a.template+'</div><div class="ag"><span>min RL：'+a.minRL.toFixed(1)+' dB</span><span>带宽：'+a.bandwidth10.toFixed(1)+' GHz</span><span>厚度：'+a.totalThickness.toFixed(2)+' mm</span><span>面密度：'+a.arealMass.toFixed(2)+'</span></div></div>';}).join('')+'</div></div>';
+  }
+  var advisor='<div class="card"><div class="collapse-h">🤖 AI 工程顾问解读<button class="btn sec" id="ask" style="width:auto;padding:7px 13px;font-size:13px">让 Claude 解读此方案</button></div><div id="advOut" class="ai-out" style="display:none"></div></div>';
+  $('#results').innerHTML=metrics+chart+stack+recipeHTML(d)+reason+advisor+alts;
+
+  if(res.alternatives.length){
+    $('#altH').addEventListener('click',function(){var b=$('#altBody');var open=b.style.display!=='none';b.style.display=open?'none':'grid';$('#altC').textContent=open?'▾':'▴';});
+  }
+  $('#ask').addEventListener('click',askAdvisor);
+}
+
+/* ===== Claude 接入 ===== */
+function getKey(){return ($('#key').value||lsGet('claude_key')||'').trim();}
+function getModel(){return $('#model').value||'claude-opus-4-8';}
+function aiMsg(t){$('#aiMsg').textContent=t||'';}
+$('#key')&&$('#key').addEventListener('change',function(){lsSet('claude_key',$('#key').value.trim());});
+$('#model')&&$('#model').addEventListener('change',function(){lsSet('claude_model',$('#model').value);});
+
+async function claudeCall(opts){
+  var key=getKey();
+  if(!key)throw new Error('请先填入 Claude API Key');
+  var body={model:getModel(),max_tokens:opts.maxTokens||1024,messages:[{role:'user',content:opts.user}]};
+  if(opts.system)body.system=opts.system;
+  var stream=!!opts.onDelta;if(stream)body.stream=true;
+  var resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify(body)
+  });
+  if(!resp.ok){var t=await resp.text();throw new Error('Claude API '+resp.status+'：'+t.slice(0,300));}
+  if(!stream){var data=await resp.json();return (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');}
+  var reader=resp.body.getReader(),dec=new TextDecoder(),buf='',full='';
+  while(true){
+    var r=await reader.read();if(r.done)break;
+    buf+=dec.decode(r.value,{stream:true});var idx;
+    while((idx=buf.indexOf('\n'))>=0){
+      var line=buf.slice(0,idx);buf=buf.slice(idx+1);
+      if(line.indexOf('data:')===0){
+        var p=line.slice(5).trim();if(!p||p==='[DONE]')continue;
+        try{var ev=JSON.parse(p);if(ev.type==='content_block_delta'&&ev.delta&&ev.delta.type==='text_delta'){full+=ev.delta.text;opts.onDelta(ev.delta.text);}}catch(_){}
+      }
+    }
+  }
+  return full;
+}
+
+/* 自然语言 → 需求参数 */
+async function parseNL(){
+  var text=($('#nl').value||'').trim();if(!text){aiMsg('请先输入需求描述');return;}
+  if(!getKey()){aiMsg('请先填入 Claude API Key');return;}
+  aiMsg('解析中…');$('#parse').disabled=true;
+  var bandIds=BANDS.map(function(b){return b.id;}).join(', ');
+  var sys='你把中文的「飞机隐身雷达吸波涂层」设计需求转成严格 JSON。只输出一个 JSON 对象，不要任何解释或代码块标记。字段：bandLabel(从 ['+bandIds+'] 中选一个最贴切的), maxThickness(mm,0.5-6), maxArealMass(kg/m²,1-12), maxLayers(1-3整数), weightPriority(0-1, 越大越重视轻量化)。缺失项用合理默认。';
+  try{
+    var out=await claudeCall({system:sys,user:text,maxTokens:300});
+    var m=out.match(/\{[\s\S]*\}/);if(!m)throw new Error('未解析出 JSON');
+    var j=JSON.parse(m[0]);
+    var b=BANDS.find(function(x){return x.id===j.bandLabel;})||BANDS.find(function(x){return x.id==='X';});
+    state.req.bandLabel=b.id;state.req.fStartGHz=b.f0;state.req.fEndGHz=b.f1;
+    if(j.maxThickness)state.req.maxThickness=Math.min(6,Math.max(0.5,+j.maxThickness));
+    if(j.maxArealMass)state.req.maxArealMass=Math.min(12,Math.max(1,+j.maxArealMass));
+    if(j.maxLayers)state.req.maxLayers=Math.min(3,Math.max(1,Math.round(+j.maxLayers)));
+    if(j.weightPriority!=null)state.req.weightPriority=Math.min(1,Math.max(0,+j.weightPriority));
+    syncControls();aiMsg('已解析并应用，自动重新配比…');$('#parse').disabled=false;runDesign();
+    setTimeout(function(){aiMsg('');},2500);
+  }catch(err){aiMsg('解析失败：'+String(err).slice(0,160));$('#parse').disabled=false;}
+}
+$('#parse').addEventListener('click',parseNL);
+
+/* AI 方案解读（流式） */
+async function askAdvisor(){
+  if(!getKey()){aiMsg('请先填入 Claude API Key');return;}
+  var d=state.res.best,req=state.req;
+  var out=$('#advOut');out.style.display='block';out.textContent='';
+  var btn=$('#ask');btn.disabled=true;btn.innerHTML='<span class="spin"></span> 解读中…';
+  var summary={
+    需求:req,范式:d.template,
+    性能:{最深吸收dB:+d.minRL.toFixed(1),最差dB:+d.worstRL.toFixed(1),带宽_10dB_GHz:+d.bandwidth10.toFixed(1)},
+    代价:{总厚mm:+d.totalThickness.toFixed(2),面密度kg_m2:+d.arealMass.toFixed(2)},
+    层结构:d.layers.map(function(l){return {填料:MATERIALS[l.fillerId].name,类型:MATERIALS[l.fillerId].role,基体:MATERIALS[l.matrixId].name,体积分数:+(l.volFrac*100).toFixed(0),厚度mm:+l.thickness.toFixed(2),eps:[+l.eps.re.toFixed(1),+l.eps.im.toFixed(1)],mu:[+l.mu.re.toFixed(2),+l.mu.im.toFixed(2)]};}),
+    伪装:{天空色:d.camouflage.skyRGB,漆色:d.camouflage.paintRGB,色相吻合度:+d.camouflage.hueMatchDeg.toFixed(1),最接近标准:d.camouflage.nearestStandard.code}
+  };
+  var sys='你是资深隐身材料与雷达吸波(RAM)工程专家。基于给定的设计方案数据，用中文给出专业、务实的解读：①评价吸收性能与带宽是否达标；②点评层结构与材料选择的工程权衡；③分析面密度/厚度对飞机的实际影响；④评价天蓝伪装的合理性与局限；⑤给出1-2条可操作的改进建议。分点、简洁、避免空话。最后一句声明这是基于公开文献的教学/科研仿真。';
+  try{
+    await claudeCall({system:sys,user:'方案数据(JSON)：\n'+JSON.stringify(summary,null,1),maxTokens:1200,onDelta:function(t){out.textContent+=t;}});
+  }catch(err){out.textContent='解读失败：'+String(err);}
+  btn.disabled=false;btn.innerHTML='重新解读';
+}
+
+/* ===== 启动 ===== */
+(function init(){
+  var savedKey=lsGet('claude_key');if(savedKey)$('#key').value=savedKey;
+  var savedModel=lsGet('claude_model');if(savedModel)$('#model').value=savedModel;
+  buildControls();syncControls();runDesign();
+})();
+</script>
+</body>
+</html>
