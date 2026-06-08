@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能标书生成系统</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#fff; --muted:#64748b; --line:#e2e8f0;
+    --brand:#2563eb; --brand-d:#1d4ed8; --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --soft:#f8fafc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:#0f172a;background:#f1f5f9}
+  header{background:linear-gradient(120deg,#1e3a8a,#2563eb);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.5px}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:12px}
+  .chip b{font-weight:700}
+  .tabs{display:flex;gap:4px;background:#fff;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .tab{padding:13px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;font-weight:600}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  main{max-width:1080px;margin:22px auto;padding:0 20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .card h2{margin:0 0 14px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .card h2 .n{background:var(--brand);color:#fff;width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+  label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px}
+  input[type=text],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:200px}
+  button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:600}
+  button:hover{background:var(--brand-d)}
+  button.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+  button.sm{padding:5px 11px;font-size:12px}
+  button.danger{background:#fff;color:var(--bad);border:1px solid #fecaca}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .drop{border:2px dashed #cbd5e1;border-radius:10px;padding:24px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;background:var(--soft)}
+  .drop:hover,.drop.drag{border-color:var(--brand);background:#eff6ff;color:var(--brand)}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .progress{height:9px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin:10px 0}
+  .bar{height:100%;background:linear-gradient(90deg,#2563eb,#06b6d4);width:0;transition:width .4s}
+  .log{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#0f172a;color:#cbd5e1;border-radius:8px;padding:12px;max-height:230px;overflow:auto;line-height:1.7}
+  .log .s{color:#38bdf8}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-weight:700}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+  .t-high{background:#fef2f2;color:var(--bad)} .t-mid{background:#fffbeb;color:var(--warn)} .t-low{background:#f0fdf4;color:var(--ok)}
+  .t-star{background:#fef2f2;color:var(--bad)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .kv{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .kv .k{font-size:12px;color:var(--muted)} .kv .v{font-size:14px;font-weight:600;margin-top:3px;word-break:break-all}
+  .sec{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+  .sec>summary{padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec .body{padding:14px;white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:#1e293b}
+  .src{font-size:11px;color:var(--muted);margin-top:8px}
+  .muted{color:var(--muted)} .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .pill{font-size:12px;padding:3px 10px;border-radius:12px;background:#eff6ff;color:var(--brand);font-weight:600}
+  .doclist .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+  .banner{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px}
+  .banner.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+  .banner.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+  .hide{display:none}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .right{margin-left:auto}
+  .score{font-size:34px;font-weight:800}
+  a.dl{display:inline-block;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📋 智能标书生成系统</h1>
+    <div class="sub">本地大模型 + Agent + RAG · 面向管道行业标书制作 · 数据不出域</div>
+  </div>
+  <div class="chips" id="status-chips"><span class="chip">加载中…</span></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="gen">① 生成标书</div>
+  <div class="tab" data-tab="kb">② 企业知识库</div>
+  <div class="tab" data-tab="tasks">③ 历史任务</div>
+  <div class="tab" data-tab="about">④ 关于</div>
+</div>
+
+<main>
+  <!-- ============ 生成标书 ============ -->
+  <section id="tab-gen">
+    <div id="offline-banner" class="banner warn hide">
+      ⚠️ 当前未连接本地大模型（Ollama），系统正以<b>内置降级引擎</b>运行：抽取走规则引擎、生成走领域模板。
+      接入 Ollama 后将自动启用大模型，生成质量更高。详见「关于」页。
+    </div>
+    <div class="card">
+      <h2><span class="n">1</span> 上传招标文件</h2>
+      <div class="row">
+        <div>
+          <label>投标人（本公司）名称</label>
+          <input type="text" id="company" value="鸿源管道科技有限公司" />
+        </div>
+        <div>
+          <label>任务名称（可选）</label>
+          <input type="text" id="taskname" placeholder="默认取文件名" />
+        </div>
+      </div>
+      <label>招标文件（Word / PDF / TXT / Markdown）</label>
+      <div class="drop" id="drop">点击或拖拽上传招标文件 · 支持 .docx .pdf .txt .md</div>
+      <input type="file" id="file" class="hide" accept=".docx,.pdf,.txt,.md,.markdown" />
+      <div class="flex" style="margin-top:14px">
+        <button id="btn-gen" disabled>🚀 开始生成标书</button>
+        <button class="ghost sm" id="btn-sample">使用示例招标文件</button>
+        <span class="hint" id="file-name"></span>
+      </div>
+      <div class="hint">提示：先在「企业知识库」导入公司资质、业绩、产品参数等资料，生成质量更佳。</div>
+    </div>
+
+    <div class="card hide" id="progress-card">
+      <h2><span class="n">2</span> 生成进度</h2>
+      <div class="flex"><span class="pill" id="stage-pill">准备中</span><span class="right muted" id="pct">0%</span></div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div id="result"></div>
+  </section>
+
+  <!-- ============ 知识库 ============ -->
+  <section id="tab-kb" class="hide">
+    <div class="card">
+      <h2><span class="n">3</span> 知识库文档</h2>
+      <div class="row">
+        <div>
+          <label>文档分类</label>
+          <select id="kb-cat">
+            <option>公司简介</option><option>资质证书</option><option>产品参数</option>
+            <option>项目业绩</option><option>售后服务</option><option>实施方案</option><option>其他</option>
+          </select>
+        </div>
+        <div>
+          <label>上传文档（Word/PDF/TXT/MD）</label>
+          <input type="file" id="kb-file" accept=".docx,.pdf,.txt,.md,.markdown" />
+        </div>
+      </div>
+      <div class="flex" style="margin-top:10px">
+        <button id="btn-kb-upload" class="sm">＋ 导入知识库</button>
+        <button id="btn-seed" class="ghost sm">一键导入示例资料</button>
+        <span class="hint" id="kb-msg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>检索测试（混合检索 + 重排序）</h2>
+      <div class="flex">
+        <input type="text" id="kb-q" placeholder="例如：球墨铸铁管 技术参数 / 类似业绩" />
+        <button class="sm" id="btn-kb-search">检索</button>
+      </div>
+      <div id="kb-search-res" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h2>已入库文档 <span class="pill" id="kb-count">0</span></h2>
+      <div class="doclist" id="kb-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ 任务 ============ -->
+  <section id="tab-tasks" class="hide">
+    <div class="card">
+      <h2><span class="n">4</span> 历史任务</h2>
+      <div id="task-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ 关于 ============ -->
+  <section id="tab-about" class="hide">
+    <div class="card">
+      <h2>关于本系统</h2>
+      <p style="line-height:1.9;font-size:14px">
+        本系统基于「<b>本地大模型 + Agent + RAG</b>」架构，将标书编制从"数日鏖战"缩短到"数小时完成 + 人工最终确认"。
+        全流程在本地运行，<b>数据不出域</b>。
+      </p>
+      <h3 style="font-size:14px">四层架构</h3>
+      <ul style="line-height:1.9;font-size:13.5px">
+        <li><b>基础设施层</b>：通过 Ollama 在本地运行大模型（CPU/GPU），未连接时自动降级为内置确定性引擎。</li>
+        <li><b>向量化与检索层</b>：企业私有知识库，向量检索 + 关键词检索（BM25）混合，并做重排序。</li>
+        <li><b>智能体编排层</b>：StateGraph（LangGraph 风格）编排「解析→抽取→检索→生成→审核→导出」。</li>
+        <li><b>应用与交互层</b>：本 Web 界面。</li>
+      </ul>
+      <h3 style="font-size:14px">六大功能模块</h3>
+      <ol style="line-height:1.9;font-size:13.5px">
+        <li>招标文件解析（Word/PDF，含表格与结构）</li>
+        <li>招标需求智能抽取（NER / 废标项 / 评分细则 / 技术参数 / 合同风险）</li>
+        <li>企业知识库构建与检索</li>
+        <li>智能标书生成（多 Agent 分模块并行）</li>
+        <li>标书审核与校验（合规 + 完整性）</li>
+        <li>系统管理（知识库 / 任务 / 审计日志）</li>
+      </ol>
+      <h3 style="font-size:14px">接入本地大模型（推荐）</h3>
+      <pre style="background:#0f172a;color:#cbd5e1;padding:12px;border-radius:8px;font-size:12.5px;overflow:auto">
+# 安装 Ollama 后拉取模型
+ollama pull qwen2.5:7b-instruct
+ollama pull nomic-embed-text
+# 重启本服务即可自动启用（无需改代码）</pre>
+      <div id="about-runtime" class="hint"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = (p,o)=>fetch(p,o).then(r=>r.ok?r.json():r.json().then(e=>Promise.reject(e)));
+let selectedFile=null, pollTimer=null, useSample=false;
+
+// ---------- 状态栏 ----------
+async function loadInfo(){
+  try{
+    const i = await api('/api/info');
+    const llmOk = i.llm.available;
+    $('#status-chips').innerHTML = `
+      <span class="chip">大模型：<b>${llmOk?i.llm.name:'降级引擎'}</b> ${llmOk?'🟢':'🟡'}</span>
+      <span class="chip">嵌入：<b>${i.embedder}</b></span>
+      <span class="chip">知识库：<b>${i.kb.documents}</b> 篇 / <b>${i.kb.chunks}</b> 片段</span>`;
+    $('#offline-banner').classList.toggle('hide', llmOk);
+    $('#about-runtime').textContent = '当前运行：LLM='+(llmOk?i.llm.name:'内置降级引擎')+'，嵌入器='+i.embedder+'，向量后端='+i.vector_backend;
+  }catch(e){ $('#status-chips').innerHTML='<span class="chip">服务异常</span>'; }
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  ['gen','kb','tasks','about'].forEach(n=>$('#tab-'+n).classList.add('hide'));
+  $('#tab-'+t.dataset.tab).classList.remove('hide');
+  if(t.dataset.tab==='kb') loadKb();
+  if(t.dataset.tab==='tasks') loadTasks();
+});
+
+// ---------- 上传交互 ----------
+const drop=$('#drop'), fileInput=$('#file');
+drop.onclick=()=>fileInput.click();
+fileInput.onchange=()=>{ if(fileInput.files[0]) setFile(fileInput.files[0]); };
+['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop',ev=>{ if(ev.dataTransfer.files[0]) setFile(ev.dataTransfer.files[0]); });
+function setFile(f){ selectedFile=f; useSample=false; $('#file-name').textContent='已选择：'+f.name; $('#btn-gen').disabled=false; drop.textContent=f.name; }
+$('#btn-sample').onclick=()=>{ useSample=true; selectedFile=null; $('#file-name').textContent='将使用内置示例招标文件'; $('#btn-gen').disabled=false; drop.textContent='示例招标文件.md'; };
+
+// ---------- 生成 ----------
+$('#btn-gen').onclick=async()=>{
+  $('#btn-gen').disabled=true; $('#result').innerHTML='';
+  $('#progress-card').classList.remove('hide'); $('#log').innerHTML=''; setBar(0,'提交中');
+  try{
+    let task_id;
+    if(useSample){
+      const r=await api('/api/tasks/sample',{method:'POST',body:new URLSearchParams({company:$('#company').value,name:$('#taskname').value})});
+      task_id=r.task_id;
+    }else{
+      const fd=new FormData();
+      fd.append('file',selectedFile); fd.append('company',$('#company').value); fd.append('name',$('#taskname').value);
+      const r=await api('/api/tasks',{method:'POST',body:fd});
+      task_id=r.task_id;
+    }
+    poll(task_id);
+  }catch(e){ alert('提交失败：'+(e.detail||e.message||JSON.stringify(e))); $('#btn-gen').disabled=false; }
+};
+
+function setBar(p,stage){ $('#bar').style.width=p+'%'; $('#pct').textContent=p+'%'; if(stage)$('#stage-pill').textContent=stage; }
+function poll(id){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    let t; try{ t=await api('/api/tasks/'+id);}catch(e){return;}
+    renderLog(t.events||[]);
+    setBar(t.progress||0, stageName(t));
+    if(t.status==='done'){ clearInterval(pollTimer); setBar(100,'完成'); renderResult(t); $('#btn-gen').disabled=false; loadInfo(); }
+    else if(t.status==='failed'){ clearInterval(pollTimer); $('#stage-pill').textContent='失败'; $('#log').innerHTML+=`<div class="bad">✗ ${t.error||'生成失败'}</div>`; $('#btn-gen').disabled=false; }
+  },1200);
+}
+function stageName(t){ const last=(t.events||[]).slice(-1)[0]; return last?({parse:'解析中',extract:'需求抽取',generate:'标书生成',review:'审核校验',export:'导出'}[last.stage]||last.stage):'处理中'; }
+function renderLog(events){
+  $('#log').innerHTML = events.map(e=>`<div><span class="s">[${String(e.progress).padStart(3)}%]</span> ${e.message}</div>`).join('');
+  $('#log').scrollTop=$('#log').scrollHeight;
+}
+
+// ---------- 结果渲染 ----------
+function sev(s){return s==='高'?'t-high':s==='中'?'t-mid':'t-low';}
+function renderResult(t){
+  const r=t.requirement||{}, rv=t.review||{}, bid=t.bid||{};
+  const m=t.parse_meta||{};
+  let h='';
+  // 需求摘要
+  h+=`<div class="card"><h2>📑 招标需求摘要</h2>
+    <div class="grid">
+      ${kv('项目名称',r.project_name)} ${kv('项目编号',r.project_no)} ${kv('采购人',r.purchaser)}
+      ${kv('预算/限价',r.budget)} ${kv('投标保证金',r.bid_bond)} ${kv('投标截止',r.deadline)}
+      ${kv('交货/工期',r.delivery)} ${kv('解析规模',(m.page_count||'-')+'页 / '+(m.char_count||'-')+'字 / '+(m.table_count||0)+'表')}
+    </div>`;
+  // 废标项
+  if((r.mandatory_items||[]).length){
+    h+=`<h3 style="font-size:14px;margin:16px 0 8px">⚠️ 投标注意事项清单（废标项 / 实质性要求） <span class="pill">${r.mandatory_items.length}</span></h3>
+      <table><tr><th>#</th><th>类别</th><th>要求</th><th>级别</th></tr>`;
+    r.mandatory_items.forEach((x,i)=>{ h+=`<tr><td>${i+1}</td><td>${x.is_starred?'<span class="tag t-star">★</span> ':''}${x.category}</td><td>${esc(x.requirement)}</td><td><span class="tag ${sev(x.severity)}">${x.severity}</span></td></tr>`;});
+    h+=`</table>`;
+  }
+  // 评分
+  if((r.scoring_items||[]).length){
+    h+=`<h3 style="font-size:14px;margin:16px 0 8px">🎯 评分细则 <span class="pill">${r.scoring_items.length}</span></h3><table><tr><th>类别</th><th>评审因素</th><th>分值</th><th>标准</th></tr>`;
+    r.scoring_items.forEach(x=>{h+=`<tr><td>${x.category}</td><td>${esc(x.item)}</td><td>${x.max_score??'-'}</td><td>${esc(x.criteria)}</td></tr>`;});
+    h+=`</table>`;
+  }
+  // 技术参数
+  if((r.tech_params||[]).length){
+    h+=`<details class="sec" style="margin-top:14px"><summary>🔧 技术参数要求（${r.tech_params.length}）</summary><div class="body" style="white-space:normal">`;
+    h+='<table><tr><th>#</th><th>参数</th><th>要求</th></tr>'+r.tech_params.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${esc(x.requirement)}</td></tr>`).join('')+'</table></div></details>';
+  }
+  // 风险
+  if((r.risks||[]).length){
+    h+=`<details class="sec"><summary>📌 合同风险评估（${r.risks.length}）</summary><div class="body" style="white-space:normal"><table><tr><th>风险</th><th>级别</th><th>建议</th></tr>`+
+      r.risks.map(x=>`<tr><td>${esc(x.description)}</td><td><span class="tag ${sev(x.risk_level)}">${x.risk_level}</span></td><td>${esc(x.suggestion)}</td></tr>`).join('')+`</table></div></details>`;
+  }
+  h+=`</div>`;
+
+  // 审核
+  const pass=rv.passed;
+  h+=`<div class="card"><h2>✅ 审核报告</h2>
+    <div class="flex"><div class="score ${pass?'ok':'warn'}">${rv.score??'-'}</div><div><div class="${pass?'ok':'warn'}" style="font-weight:700">${pass?'初步通过（建议人工终审）':'存在需处理问题'}</div>
+    <div class="muted" style="font-size:13px">废标项响应 ${rv.responded_mandatory||0}/${rv.checked_mandatory||0}</div></div></div>
+    <p class="muted" style="font-size:13px">${esc(rv.summary||'')}</p>`;
+  if((rv.issues||[]).length){
+    h+=`<table><tr><th>级别</th><th>类别</th><th>位置</th><th>问题</th><th>建议</th></tr>`+
+      rv.issues.map(x=>`<tr><td><span class="tag ${sev(x.severity)}">${x.severity}</span></td><td>${x.category}</td><td>${esc(x.location)}</td><td>${esc(x.issue)}</td><td>${esc(x.suggestion)}</td></tr>`).join('')+`</table>`;
+  }
+  h+=`</div>`;
+
+  // 标书章节
+  h+=`<div class="card"><h2>📝 标书初稿（${(bid.sections||[]).length} 章）</h2>
+    <div class="flex" style="margin-bottom:12px">
+      <a class="dl" href="/api/tasks/${t.id}/download?type=bid"><button>⬇ 下载标书 Word</button></a>
+      <a class="dl" href="/api/tasks/${t.id}/download?type=review"><button class="ghost">⬇ 下载审核报告</button></a>
+    </div>`;
+  (bid.sections||[]).forEach(s=>{
+    h+=`<details class="sec"><summary><span>${s.order/10|0}. ${s.title}</span><span class="muted" style="font-weight:400;font-size:12px">${s.char_count}字 · ${s.status==='done'?'✓':'✗'}</span></summary>
+      <div class="body">${esc(s.content)}${tableHtml(s.table)}${s.sources&&s.sources.length?`<div class="src">参考资料：${s.sources.join('、')}</div>`:''}</div></details>`;
+  });
+  h+=`</div>`;
+  $('#result').innerHTML=h;
+}
+function kv(k,v){return `<div class="kv"><div class="k">${k}</div><div class="v">${v?esc(v):'<span class="muted">—</span>'}</div></div>`;}
+function tableHtml(rows){ if(!rows||!rows.length)return ''; let h='<table style="margin-top:10px">'; rows.forEach((r,i)=>{h+='<tr>'+r.map(c=>`<${i?'td':'th'}>${esc(c)}</${i?'td':'th'}>`).join('')+'</tr>';}); return h+'</table>'; }
+function esc(s){return (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+// ---------- 知识库 ----------
+async function loadKb(){
+  const d=await api('/api/kb/docs');
+  $('#kb-count').textContent=d.documents.length;
+  $('#kb-list').innerHTML = d.documents.length? d.documents.map(x=>`<div class="item"><div><b>${esc(x.source)}</b> <span class="pill">${x.category}</span><div class="muted" style="font-size:12px">${x.n_chunks} 片段 · ${x.chars} 字</div></div><button class="danger sm" onclick="delDoc('${x.doc_id}')">删除</button></div>`).join('') : '<p class="muted">知识库为空，请导入企业资料或点击「一键导入示例资料」。</p>';
+}
+window.delDoc=async(id)=>{ if(!confirm('确认删除该文档？'))return; await api('/api/kb/docs/'+id,{method:'DELETE'}); loadKb(); loadInfo(); };
+$('#btn-kb-upload').onclick=async()=>{
+  const f=$('#kb-file').files[0]; if(!f){alert('请选择文件');return;}
+  $('#kb-msg').textContent='导入中…';
+  const fd=new FormData(); fd.append('file',f); fd.append('category',$('#kb-cat').value);
+  try{ const r=await api('/api/kb/upload',{method:'POST',body:fd}); $('#kb-msg').textContent=`✓ ${r.source} 已入库（${r.chunks} 片段）`; loadKb(); loadInfo(); }
+  catch(e){ $('#kb-msg').textContent='✗ '+(e.detail||'失败'); }
+};
+$('#btn-seed').onclick=async()=>{ $('#kb-msg').textContent='导入示例资料中…'; try{ const r=await api('/api/kb/seed',{method:'POST'}); $('#kb-msg').textContent=`✓ 已导入 ${r.count} 篇示例资料`; loadKb(); loadInfo(); }catch(e){ $('#kb-msg').textContent='✗ '+(e.detail||'失败'); } };
+$('#btn-kb-search').onclick=async()=>{
+  const q=$('#kb-q').value.trim(); if(!q)return;
+  const d=await api('/api/kb/search?q='+encodeURIComponent(q)+'&k=5');
+  $('#kb-search-res').innerHTML = d.results.length? d.results.map(x=>`<div class="kv" style="margin-bottom:8px"><div class="flex"><b>${esc(x.source)}</b><span class="right pill">综合 ${x.score} · 向量 ${x.vector_score} · 关键词 ${x.keyword_score}</span></div><div style="font-size:13px;margin-top:6px;color:#334155">${esc(x.text.slice(0,160))}…</div></div>`).join('') : '<p class="muted">无匹配结果。</p>';
+};
+
+// ---------- 任务 ----------
+async function loadTasks(){
+  const d=await api('/api/tasks');
+  $('#task-list').innerHTML = d.tasks.length? `<table><tr><th>任务</th><th>文件</th><th>投标人</th><th>状态</th><th>操作</th></tr>`+
+    d.tasks.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.tender_filename)}</td><td>${esc(t.company)}</td>
+      <td>${statusTag(t.status,t.progress)}</td>
+      <td>${t.status==='done'?`<a class="dl" href="/api/tasks/${t.id}/download?type=bid"><button class="sm">下载</button></a> `:''}<button class="sm ghost" onclick="viewTask('${t.id}')">查看</button></td></tr>`).join('')+`</table>` : '<p class="muted">暂无任务。</p>';
+}
+function statusTag(s,p){return s==='done'?'<span class="tag t-low">完成</span>':s==='running'?`<span class="tag t-mid">运行中 ${p||0}%</span>`:s==='failed'?'<span class="tag t-high">失败</span>':'<span class="tag">等待</span>';}
+window.viewTask=async(id)=>{ document.querySelector('.tab[data-tab=gen]').click(); const t=await api('/api/tasks/'+id); if(t.status==='done'){renderResult(t);$('#progress-card').classList.add('hide');} else { $('#progress-card').classList.remove('hide'); poll(id);} window.scrollTo(0,0); };
+
+loadInfo(); setInterval(loadInfo, 15000);
+</script>
+</body>
+</html>

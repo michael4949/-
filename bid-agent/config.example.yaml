@@ -1,0 +1,24 @@
+# 复制为 config.yaml 即可生效（环境变量优先级更高）。
+
+# ===== 基础设施层：本地大模型（Ollama）=====
+ollama_base_url: "http://localhost:11434"
+llm_model: "qwen2.5:7b-instruct"
+embed_model: "nomic-embed-text"
+llm_mode: "auto"          # auto / on / off（off 强制使用内置降级引擎）
+temperature: 0.3
+max_tokens: 2048
+request_timeout: 120
+
+# ===== 向量化与检索层 =====
+vector_backend: "local"   # local / chroma
+chunk_size: 600
+chunk_overlap: 120
+retrieve_top_k: 6
+hybrid_alpha: 0.6         # 向量得分权重，其余给关键词得分
+
+# ===== 生成 =====
+max_parallel_sections: 4
+
+# ===== Web =====
+host: "0.0.0.0"
+port: 8000

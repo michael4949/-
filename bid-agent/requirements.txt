@@ -1,0 +1,24 @@
+# ===== 核心依赖（系统完整运行所需，零外部服务）=====
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+python-docx>=1.1.0          # Word 解析与生成
+pypdf>=4.0                  # PDF 文本提取
+numpy>=1.24                 # 向量检索
+requests>=2.31             # 调用本地 Ollama
+Jinja2>=3.1
+
+# ===== 可选增强 =====
+pdfplumber>=0.11           # PDF 表格提取（缺失时自动跳过表格）
+PyYAML>=6.0                # 读取 config.yaml
+
+# ===== 生产可选：替换内置降级实现（详见 README）=====
+# 本地大模型推理走 HTTP 调用 Ollama，无需 Python 依赖：
+#   ollama pull qwen2.5:7b-instruct
+#   ollama pull nomic-embed-text
+#
+# 如需用 LangGraph / ChromaDB / sentence-transformers 替换内置实现：
+# langgraph>=0.2
+# langchain>=0.2
+# chromadb>=0.5
+# sentence-transformers>=3.0
