@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业AI投入ROI测算器 | 奇点达科技</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* 应用自身主题：墨黑 + 翡翠绿 + 鎏金（财务/回报气质，与"场景识别"智能体差异化） */
+  --bg:#0d1117; --bg2:#11161f; --panel:#161c26; --panel2:#1c2330;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --emerald:#1fae82; --emerald-d:#0f7a5a; --emerald-l:#3ed6a6;
+  --gold:#d4af37; --gold-l:#f0d066;
+  --tx:#e8edf2; --tx2:#aab4c0; --tx3:#6b7686;
+  --usr:#13503c;
+}
+html,body{height:100%}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.7;-webkit-font-smoothing:antialiased}
+
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* 侧栏 */
+.sb{width:286px;background:linear-gradient(180deg,#0b0f15,#0e131b);border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.sb-top{padding:22px 20px 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--emerald),var(--emerald-d));display:flex;align-items:center;justify-content:center;font-weight:900;color:#06231a;font-size:17px;box-shadow:0 4px 16px rgba(31,174,130,.35)}
+.brand .tt{line-height:1.25}
+.brand .tt b{font-size:14px;font-weight:800;letter-spacing:.3px;display:block}
+.brand .tt span{font-size:9px;color:var(--tx3);letter-spacing:2.5px}
+.sb-sub{margin-top:12px;font-size:11px;color:var(--tx2);line-height:1.6}
+.ind-badge{display:none;margin-top:12px;align-items:center;gap:7px;padding:7px 11px;border-radius:9px;background:rgba(31,174,130,.1);border:1px solid rgba(31,174,130,.28);font-size:11px;color:var(--emerald-l)}
+.ind-badge.on{display:flex}
+.ind-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--emerald-l);box-shadow:0 0 8px var(--emerald-l)}
+
+.steps{flex:1;overflow-y:auto;padding:16px 14px}
+.steps-h{font-size:9px;letter-spacing:2px;color:var(--tx3);padding:0 6px 8px}
+.si{display:flex;gap:11px;padding:8px 6px;border-radius:9px;opacity:.45;transition:.3s}
+.si.on{opacity:1;background:rgba(255,255,255,.03)}
+.si.ok{opacity:.7}
+.si-dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--tx2)}
+.si.on .si-dot{border-color:var(--emerald);color:var(--emerald-l);background:rgba(31,174,130,.12)}
+.si.ok .si-dot{border-color:var(--emerald);background:var(--emerald);color:#06231a}
+.si-lbl b{font-size:12px;font-weight:600;display:block;color:var(--tx)}
+.si-lbl span{font-size:10px;color:var(--tx3)}
+.sb-ft{padding:13px 18px;border-top:1px solid var(--line);font-size:9px;color:var(--tx3);line-height:1.7}
+
+/* 主区 */
+.mn{flex:1;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(900px 500px at 70% -10%,#16202c 0%,var(--bg) 60%)}
+
+/* 欢迎页 */
+.welcome{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;overflow-y:auto}
+.wbox{max-width:620px;width:100%;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:40px 38px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.wbox .eyebrow{font-size:10px;letter-spacing:4px;color:var(--gold);margin-bottom:14px;font-weight:700}
+.wbox h1{font-family:'Noto Serif SC',serif;font-size:30px;font-weight:900;line-height:1.25;margin-bottom:14px}
+.wbox h1 em{font-style:normal;color:var(--emerald-l)}
+.wbox .lead{color:var(--tx2);font-size:14px;line-height:1.85;margin-bottom:24px}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:26px}
+.wcard{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px 12px;text-align:center}
+.wcard b{display:block;font-family:'Noto Serif SC',serif;font-size:20px;color:var(--gold-l);margin-bottom:3px}
+.wcard span{font-size:10px;color:var(--tx3)}
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--tx2);display:block;margin-bottom:6px;font-weight:500}
+.field label .opt{color:var(--tx3);font-weight:400}
+.field input{width:100%;padding:12px 14px;border:1px solid var(--line2);border-radius:11px;font-size:13px;font-family:inherit;background:var(--bg2);color:var(--tx);outline:none;transition:.2s}
+.field input:focus{border-color:var(--emerald);box-shadow:0 0 0 3px rgba(31,174,130,.15)}
+.field .hint{font-size:10px;color:var(--tx3);margin-top:5px}
+.toggle-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;margin-bottom:20px;cursor:pointer}
+.toggle-row .sw{width:38px;height:22px;border-radius:11px;background:#2a3340;position:relative;flex-shrink:0;transition:.2s}
+.toggle-row .sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+.toggle-row.on .sw{background:var(--emerald)}
+.toggle-row.on .sw::after{left:19px}
+.toggle-row .tl b{font-size:12px;display:block}
+.toggle-row .tl span{font-size:10px;color:var(--tx3)}
+.go{width:100%;padding:15px;background:linear-gradient(135deg,var(--emerald),var(--emerald-d));color:#fff;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:1px;transition:.2s;box-shadow:0 10px 30px rgba(31,174,130,.3)}
+.go:hover{transform:translateY(-1px);box-shadow:0 14px 38px rgba(31,174,130,.42)}
+.wfoot{text-align:center;font-size:10px;color:var(--tx3);margin-top:14px}
+
+/* 对话 */
+.chat{flex:1;overflow-y:auto;padding:26px 30px 10px;scroll-behavior:smooth}
+.chat-inner{max-width:780px;margin:0 auto}
+.msg{margin-bottom:18px;display:flex;flex-direction:column}
+.msg.usr{align-items:flex-end}
+.who{font-size:10px;color:var(--tx3);margin-bottom:5px;font-weight:600;letter-spacing:.5px}
+.bbl{max-width:88%;padding:14px 18px;border-radius:15px;font-size:13.5px;line-height:1.85}
+.msg.ai .bbl{background:var(--panel);border:1px solid var(--line);border-radius:4px 15px 15px 15px}
+.msg.usr .bbl{background:linear-gradient(135deg,var(--usr),#0d3e2e);color:#eafff6;border-radius:15px 4px 15px 15px}
+.bbl strong{color:var(--emerald-l);font-weight:700}
+.msg.usr .bbl strong{color:#fff}
+.web-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--gold-l);background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);padding:3px 9px;border-radius:8px;margin-bottom:8px}
+
+/* 选项 */
+.opts{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px;max-width:88%}
+.opts button{padding:11px 16px;border:1px solid var(--line2);border-radius:12px;font-size:12.5px;cursor:pointer;background:var(--panel2);color:var(--tx);font-family:inherit;transition:.18s;text-align:left;line-height:1.4}
+.opts button:hover{border-color:var(--emerald);background:rgba(31,174,130,.12);color:var(--emerald-l);transform:translateY(-1px)}
+.opts .opt-num{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:5px;background:rgba(255,255,255,.06);font-size:10px;margin-right:7px;color:var(--tx3)}
+.opts-hint{font-size:10px;color:var(--tx3);margin-top:9px;display:flex;align-items:center;gap:5px}
+
+.dots span{display:inline-block;width:7px;height:7px;background:var(--emerald-l);border-radius:50%;margin-right:4px;animation:pk 1.3s infinite}
+.dots span:nth-child(2){animation-delay:.18s}.dots span:nth-child(3){animation-delay:.36s}
+@keyframes pk{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* 输入条 */
+.inbar{border-top:1px solid var(--line);background:rgba(13,17,23,.85);backdrop-filter:blur(8px);padding:14px 30px 18px}
+.inbar-inner{max-width:780px;margin:0 auto}
+.frow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.up{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border:1px dashed var(--line2);border-radius:9px;font-size:11px;color:var(--tx2);cursor:pointer;background:transparent;transition:.2s}
+.up:hover{border-color:var(--emerald);color:var(--emerald-l)}
+.ftag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;font-size:11px;color:var(--emerald-l)}
+.ftag .x{cursor:pointer;color:var(--tx3)}.ftag .x:hover{color:#ff6b6b}
+.irow{display:flex;gap:10px;align-items:flex-end}
+.irow textarea{flex:1;border:1px solid var(--line2);border-radius:13px;padding:13px 16px;font-size:13.5px;font-family:inherit;resize:none;outline:none;min-height:48px;max-height:150px;line-height:1.5;background:var(--bg2);color:var(--tx);transition:.2s}
+.irow textarea:focus{border-color:var(--emerald);box-shadow:0 0 0 3px rgba(31,174,130,.13)}
+.irow textarea::placeholder{color:var(--tx3)}
+.send{width:48px;height:48px;background:linear-gradient(135deg,var(--emerald),var(--emerald-d));color:#fff;border:none;border-radius:13px;cursor:pointer;font-size:18px;flex-shrink:0;transition:.2s;box-shadow:0 6px 18px rgba(31,174,130,.3)}
+.send:hover{transform:translateY(-1px)}.send:disabled{background:#2a3340;box-shadow:none;cursor:not-allowed}
+.done-note{text-align:center;color:var(--tx3);font-size:12px;padding:8px}
+.done-note a{color:var(--emerald-l);cursor:pointer}
+
+/* 报告视图 */
+.rptview{flex:1;overflow-y:auto;padding:26px;background:#2b3340}
+.rptbar{max-width:794px;margin:0 auto 18px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.rptbar .lt{color:#cfd6df;font-size:13px}
+.rptbar .lt b{color:#fff}
+.rptbar .btns{display:flex;gap:9px}
+.btn{padding:11px 20px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.2s;display:inline-flex;align-items:center;gap:7px}
+.btn.pri{background:linear-gradient(135deg,var(--gold),#b8941f);color:#231c05;box-shadow:0 8px 22px rgba(212,175,55,.3)}
+.btn.pri:hover{transform:translateY(-1px)}
+.btn.pri:disabled{opacity:.6;cursor:wait;transform:none}
+.btn.sec{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.btn.sec:hover{background:rgba(255,255,255,.16)}
+
+/* A4 文档 —— 行业主题通过 .doc 上的 CSS 变量注入 */
+.doc{--p:#0f6b52;--pd:#0a4d3b;--ac:#d4af37;--tint:#eef7f3;--ink:#1d2530}
+.page{width:794px;margin:0 auto 22px;background:#fff;color:var(--ink);box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden}
+/* 封面 */
+.cover{width:794px;height:1123px;position:relative;overflow:hidden;background:var(--pd)}
+.cover-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover-ov{position:absolute;inset:0}
+.cover-grain{position:absolute;inset:0;opacity:.10;background-image:radial-gradient(circle at 1px 1px,#fff 1px,transparent 0);background-size:22px 22px}
+.cover-ct{position:absolute;inset:0;display:flex;flex-direction:column;padding:70px 64px;color:#fff}
+.cover-top{display:flex;align-items:center;justify-content:space-between}
+.cover-eye{display:flex;align-items:center;gap:11px;font-size:12px;letter-spacing:3px;font-weight:700;color:rgba(255,255,255,.92)}
+.cover-eye .lg{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:900}
+.seal{width:96px;height:96px;border-radius:50%;border:2px solid var(--ac);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--ac);transform:rotate(-8deg);background:rgba(0,0,0,.12)}
+.seal b{font-family:'Noto Serif SC',serif;font-size:22px;line-height:1}
+.seal span{font-size:8px;letter-spacing:2px;margin-top:3px}
+.cover-mid{margin-top:auto}
+.cover-kicker{font-size:14px;letter-spacing:6px;color:var(--ac);font-weight:700;margin-bottom:18px}
+.cover-title{font-family:'Noto Serif SC',serif;font-size:62px;font-weight:900;line-height:1.12;letter-spacing:1px;text-shadow:0 4px 30px rgba(0,0,0,.4)}
+.cover-rule{width:90px;height:4px;background:var(--ac);margin:26px 0 22px;border-radius:2px}
+.cover-sub{font-size:19px;color:rgba(255,255,255,.94);font-weight:500;line-height:1.6;max-width:560px}
+.cover-meta{margin-top:54px;display:flex;gap:42px;border-top:1px solid rgba(255,255,255,.25);padding-top:24px}
+.cover-meta div span{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.6);display:block;margin-bottom:4px}
+.cover-meta div b{font-size:15px;font-weight:600}
+.cover-foot{margin-top:18px;font-size:11px;color:rgba(255,255,255,.55)}
+
+/* 正文 */
+.body{padding:58px 64px 64px}
+.doc-h1{font-family:'Noto Serif SC',serif;font-size:23px;font-weight:900;color:var(--pd);margin:34px 0 14px;padding-bottom:11px;border-bottom:2px solid var(--p);display:flex;align-items:center;gap:12px}
+.doc-h1:first-child{margin-top:0}
+.doc-h1 .no{width:30px;height:30px;border-radius:8px;background:var(--p);color:#fff;font-family:'Noto Sans SC';font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-h2{font-size:15px;font-weight:700;color:var(--ink);margin:20px 0 8px}
+.doc p{font-size:13px;line-height:1.95;margin-bottom:9px;color:#36404d}
+.doc li{font-size:13px;line-height:1.9;margin:3px 0 3px 4px;color:#36404d;list-style:none;padding-left:18px;position:relative}
+.doc li::before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--p)}
+.doc strong{color:var(--pd);font-weight:700}
+.doc table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:12px;box-shadow:0 1px 0 var(--p)}
+.doc th{background:var(--p);color:#fff;padding:10px 12px;text-align:left;font-weight:600;font-size:12px}
+.doc td{padding:9px 12px;border-bottom:1px solid #e6ebf0;color:#36404d}
+.doc tr:nth-child(even) td{background:var(--tint)}
+.kpis{display:flex;gap:13px;flex-wrap:wrap;margin:14px 0 18px}
+.kpi{flex:1;min-width:150px;background:linear-gradient(160deg,var(--tint),#fff);border:1px solid #e3eae6;border-top:3px solid var(--ac);border-radius:13px;padding:18px 16px}
+.kpi .k-l{font-size:11px;color:#6b7686;margin-bottom:7px;font-weight:500}
+.kpi .k-v{font-family:'Noto Serif SC',serif;font-size:30px;font-weight:900;color:var(--pd);line-height:1}
+.kpi .k-s{font-size:10px;color:#8a94a0;margin-top:6px}
+.verdict{display:flex;align-items:center;gap:16px;background:linear-gradient(120deg,var(--p),var(--pd));color:#fff;border-radius:15px;padding:20px 24px;margin:16px 0 20px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.verdict .vbadge{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:900;padding:9px 16px;border-radius:10px;background:var(--ac);color:#231c05;white-space:nowrap;flex-shrink:0}
+.verdict .vtx{font-size:14px;line-height:1.6;font-weight:500}
+.note{background:var(--tint);border-left:4px solid var(--ac);border-radius:0 11px 11px 0;padding:13px 18px;margin:12px 0;font-size:12.5px;color:#3a4450;line-height:1.8}
+.note b{color:var(--pd)}
+.doc-foot{margin-top:40px;padding-top:16px;border-top:1px solid #e6ebf0;text-align:center;font-size:10px;color:#9aa4b0;line-height:1.8}
+
+@media(max-width:1040px){.sb{display:none}}
+@media(max-width:860px){.page,.cover{width:100%;height:auto}.cover{min-height:560px}.cover-title{font-size:40px}.body{padding:34px 24px}.rptview{padding:14px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sb">
+    <div class="sb-top">
+      <div class="brand">
+        <div class="logo">奇</div>
+        <div class="tt"><b>AI投入ROI测算器</b><span>SINGULARITY REACH</span></div>
+      </div>
+      <div class="sb-sub">用数字说服老板拍板——算清 AI 到底<b style="color:var(--gold-l)">值不值得投、投多少、多久回本</b>。</div>
+      <div class="ind-badge" id="indBadge"><span class="dot"></span><span id="indTx"></span></div>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div class="sb-ft">奇点达「3+2+1」标准化产品<br>软件第三件 · ROI 测算器<br>报告由 Claude 大模型 + 实时联网生成</div>
+  </aside>
+  <div class="mn" id="main"></div>
+</div>
+<input type="file" id="fileIn" multiple accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.xlsx,.docx" style="display:none">
+
+<script>
+/* ============== 配置 ============== */
+var MODEL = "claude-opus-4-8";          // 大模型
+var MAXTOK = 4200;
+
+var PHASES = [
+  {t:"企业经营基线",   d:"行业 / 营收 / 人员 / 成本"},
+  {t:"AI场景与投入",   d:"拟投场景 / 预算 / 周期"},
+  {t:"成本结构拆解",   d:"逐项量化当前成本"},
+  {t:"收益模型构建",   d:"降本 / 增效 / 增收"},
+  {t:"财务指标测算",   d:"ROI / NPV / IRR / 回本"},
+  {t:"测算报告输出",   d:"投资决策建议书"}
+];
+
+/* 行业 → 配色 + 封面图关键词（报告随客户行业属性变色 + 配封面图） */
+var INDUSTRY = {
+  manufacturing:{label:"制造业",   q:"modern factory automation robotics",      p:"#1f5673",pd:"#13384c",ac:"#e3902c",tint:"#eef3f7"},
+  healthcare:   {label:"医疗健康", q:"modern hospital healthcare technology",    p:"#0d8a7a",pd:"#075c52",ac:"#3ab5a3",tint:"#ecf7f4"},
+  finance:      {label:"金融",     q:"finance skyline business district",        p:"#1b3a5b",pd:"#102742",ac:"#c9a227",tint:"#eef1f6"},
+  retail:       {label:"零售电商", q:"retail store shopping ecommerce",           p:"#b8392b",pd:"#7d2419",ac:"#e3902c",tint:"#fbeeec"},
+  technology:   {label:"科技互联网",q:"data center technology server abstract",   p:"#5b3fc4",pd:"#3a268a",ac:"#22b8cf",tint:"#f0eefb"},
+  logistics:    {label:"物流供应链",q:"logistics warehouse shipping containers",  p:"#1c5d99",pd:"#103f6b",ac:"#ef7d23",tint:"#ecf2f8"},
+  realestate:   {label:"房地产建筑",q:"modern architecture building construction",p:"#8a6d3b",pd:"#5c4824",ac:"#c9a227",tint:"#f6f2ea"},
+  energy:       {label:"能源电力", q:"solar wind energy power renewable",         p:"#2e8b57",pd:"#1c5c39",ac:"#e3b32c",tint:"#edf6f1"},
+  agriculture:  {label:"农业食品", q:"smart agriculture farming green field",     p:"#4a7c2f","pd":"#2f521d",ac:"#d2a32c",tint:"#eff5ea"},
+  food:         {label:"餐饮",     q:"restaurant kitchen culinary modern",        p:"#c0392b",pd:"#86271d",ac:"#e0a52c",tint:"#fbeeec"},
+  automotive:   {label:"汽车出行", q:"automotive manufacturing car technology",   p:"#2c3e50",pd:"#1a262f",ac:"#d33b2c",tint:"#eef1f4"},
+  government:   {label:"政府公共", q:"government civic building city",            p:"#234e70",pd:"#15324a",ac:"#c0a04a",tint:"#eef2f6"},
+  hospitality:  {label:"文旅酒店", q:"luxury hotel lobby travel hospitality",     p:"#7d3b4a",pd:"#54262f",ac:"#cdab6a",tint:"#f7eef0"},
+  professional: {label:"专业服务", q:"corporate office meeting consulting",       p:"#2f5d62",pd:"#1d3d40",ac:"#c2913f",tint:"#edf4f4"},
+  media:        {label:"传媒广告", q:"creative studio media production neon",     p:"#5a2d82",pd:"#3a1c56",ac:"#e8568f",tint:"#f3eefa"},
+  education:    {label:"教育培训", q:"modern campus library education",           p:"#3b4fa0",pd:"#26336e",ac:"#f0a93b",tint:"#eef0fa"},
+  _default:     {label:"通用",     q:"abstract business technology network",      p:"#0f6b52",pd:"#0a4d3b",ac:"#d4af37",tint:"#eef7f3"}
+};
+
+/* ============== 状态 ============== */
+var phase=0, conv=[], apiKey="", busy=false, done=false, pendFiles=[];
+var useWeb=true, industryKey="", company="", report=null, coverTainted=false;
+try{ apiKey = localStorage.getItem("sr_anthropic_key")||""; }catch(e){}
+
+/* ============== 系统提示词 ============== */
+function getSys(){
+  var guides=[
+"【阶段0 经营基线】用一两个问题摸清：所在行业与主营业务、年营收规模、员工总数与构成、主要成本结构占比、最大的经营痛点。先问行业与主营业务。",
+"【阶段1 场景与投入】了解客户想在哪些环节上 AI：拟投场景（没想好就基于其行业主动建议2-3个最典型的让其选）、各场景预期目标、大致预算区间、期望落地周期。",
+"【阶段2 成本拆解】核心环节。针对每个拟投场景，把『感觉花了很多钱』拆成具体数字：该环节投入的人力(人数×薪资)、直接经济损失(停机/废品/差错/流失)、效率指标(时长/错误率/产出)、隐性成本(加班/外包/合规风险)。一次聚焦一个场景；说不出就用行业基准估算并标注(估算值)。至少拆3个场景。",
+"【阶段3 收益模型】为每个场景建收益预测，分三维：降本(替代人力/降损耗/省能耗)、增效(产能/响应/满意度)、增收(新机会/客单价/份额)。每项给保守/基准/乐观三档。同时列全 AI 投入成本：软件、硬件算力、实施部署、培训、年度运维。",
+"【阶段4 财务测算】基于已确认数据计算并向客户展示：首年投入总额、首年收益(三档)、首年ROI、三年TCO、三年累计收益、三年ROI、回本周期(月)、NPV(贴现率8%)、IRR。说明计算口径。",
+"【阶段5 报告输出】生成完整《企业AI投入ROI测算报告》（见下方报告规范）。"
+  ];
+  return (
+"你是奇点达科技的『企业AI投入ROI测算器』顾问——一位 CFO+CTO 合体的资深专家，精通 TCO / NPV / IRR 财务模型，掌握 38+ 行业 AI 投产基准与 128+ 真实项目 ROI 数据，最擅长把模糊的『感觉能省钱』变成精确的财务数字。\n\n"+
+"## 对话铁律（务必遵守）\n"+
+"1. 【强引导·选择题优先】每轮只聚焦『一个』核心问题。**只要能给选项就一定给**，用 [OPT]选项A|选项B|选项C[/OPT] 形式给 3-5 个互斥、覆盖常见情况的选项（可含『其他/不确定』）。只有当问题确实无法用选项覆盖（如具体公司名、具体金额）时才让客户开放填空，并提示『可直接点选，或在下方补充』。能选就别让客户打字。\n"+
+"2. 【及时纠偏】若客户回答跑题、前后矛盾、或明显不合理（如把收益夸大到离谱、把不相关的事扯进来），**先用一句话礼貌承接，再温和地把话题拉回当前阶段目标**，并立刻给出一个聚焦的选择题。绝不要顺着跑偏的方向展开。例：『这个想法很好，不过咱们先把这一笔账算扎实——回到 XX，您那边大概是？[OPT]…[/OPT]』\n"+
+"3. 【估算透明】客户给不出数据时，用其行业基准给一个合理区间，并明确标注『(估算值)』。\n"+
+"4. 【实时联网】仅当需要『实时/具体的行业基准、最新 AI 产品或算力报价、最新政策补贴』时才用 web_search 工具核实；普通问题不要联网。联网后用一句话说明依据。\n"+
+"5. 【识别标记】一旦判断出客户所在行业，立即输出一次行业标记 [IND]xxx[/IND]（xxx 只能从此列表选最接近的一个：manufacturing healthcare finance retail technology logistics realestate energy agriculture food automotive government hospitality professional education _default）。一旦得知公司/品牌名，输出一次 [CO]公司名[/CO]。这两个标记不会显示给客户，不影响正文。\n"+
+"6. 【简洁】对话回复≤200字（报告除外），以数字与要点为主，只给最终结论不要展示思考过程。\n"+
+"7. 【推进】当前阶段信息足够后，在回复末尾加 [NEXT] 进入下一阶段。\n\n"+
+"## 当前阶段\n第 "+phase+" 阶段。"+guides[Math.min(phase,5)]+"\n\n"+
+"## 报告规范（仅在阶段5输出）\n用 [RPT] 和 [/RPT] 包裹整份报告。先给封面两行：\n[COVERTITLE]企业AI投入ROI测算报告[/COVERTITLE]\n[COVERSUB]为「公司名」量身测算 · 行业名[/COVERSUB]\n正文使用如下标记：\n`# 一、章节标题`（一级章节，自动编号样式）\n`## 小标题`\n`| 表头 | … |` 表格（第二行可用 |---| 分隔，会被忽略）\n`- 列点`  和  `**重点**`\n`[KPI]指标名|数值|口径说明[/KPI]`（连续多条会自动排成指标卡片，建议执行摘要放4-6个核心指标：首年ROI、回本周期、三年ROI、NPV、IRR、三年净收益）\n`[VERDICT 值得投资]一句话投资结论[/VERDICT]`（方括号内三选一：值得投资 / 谨慎推进 / 暂缓投资）\n`[NOTE]关键假设或风险提示[/NOTE]`\n报告须包含：执行摘要(KPI卡+VERDICT)、经营基线汇总表、各场景成本拆解表、收益预测模型表(保守/基准/乐观)、投入成本明细表、核心财务指标汇总表、敏感性分析(收益仅达70%/50%时ROI与回本如何变)、投资决策建议(值不值得投/分几期/先投哪个场景)、推荐的奇点达产品与服务、免责声明与假设条件。数据详实、口径清晰、不夸大。"
+  );
+}
+
+/* ============== 渲染 ============== */
+function rSteps(){
+  var h='<div class="steps-h">测算进度</div>';
+  PHASES.forEach(function(p,i){
+    var c=i<phase?"ok":(i===phase?"on":"");
+    h+='<div class="si '+c+'"><div class="si-dot">'+(i<phase?"✓":(i+1))+'</div><div class="si-lbl"><b>'+p.t+'</b><span>'+p.d+'</span></div></div>';
+  });
+  document.getElementById("steps").innerHTML=h;
+  var b=document.getElementById("indBadge");
+  if(industryKey){ b.classList.add("on"); document.getElementById("indTx").textContent="已识别行业："+(INDUSTRY[industryKey]||INDUSTRY._default).label; }
+  else b.classList.remove("on");
+}
+function esc(t){return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function inl(t){return esc(t).replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");}
+function fmt(t){return inl(t).replace(/\n/g,"<br>");}
+
+function render(){
+  rSteps();
+  var mn=document.getElementById("main");
+  if(report){ renderReport(mn); return; }
+  if(conv.length===0 && !busy){ renderWelcome(mn); return; }
+  renderChat(mn);
+}
+
+function renderWelcome(mn){
+  var h='<div class="welcome"><div class="wbox">';
+  h+='<div class="eyebrow">SINGULARITY REACH · 投资决策工具</div>';
+  h+='<h1>这笔 AI，到底<em>值不值得投</em>？<br>我帮您算到小数点后。</h1>';
+  h+='<div class="lead">跟着几个问题走，<strong>能选就点、选不了再填</strong>。我会一路帮您把模糊的「感觉能省钱」拆成精确数字，必要时联网核对行业基准，最后输出一份<strong>按贵司行业属性配色、可一键下载的高端 PDF 报告</strong>——含 ROI、NPV、IRR、回本周期与敏感性分析。</div>';
+  h+='<div class="wgrid">';
+  [["ROI","投资回报率"],["回本","回收周期"],["NPV","净现值"],["IRR","内部收益率"],["TCO","总拥有成本"],["PDF","定制报告"]].forEach(function(m){
+    h+='<div class="wcard"><b>'+m[0]+'</b><span>'+m[1]+'</span></div>';
+  });
+  h+='</div>';
+  h+='<div class="field"><label>Anthropic API Key</label><input type="password" id="keyIn" placeholder="sk-ant-..." value="'+esc(apiKey)+'"><div class="hint">仅保存在你本地浏览器，不上传任何服务器。用于调用 Claude 大模型与联网搜索。</div></div>';
+  h+='<div class="toggle-row '+(useWeb?"on":"")+'" id="webTog" onclick="toggleWeb()"><div class="sw"></div><div class="tl"><b>实时联网核实</b><span>需要行业基准/最新报价时自动联网（Claude 内置 web_search）</span></div></div>';
+  h+='<button class="go" onclick="start()">开始 ROI 测算 →</button>';
+  h+='<div class="wfoot">预计 12–20 分钟 · 支持上传财务/经营材料 · 报告封面图按贵司行业自动匹配</div>';
+  h+='</div></div>';
+  mn.innerHTML=h;
+}
+
+function renderChat(mn){
+  var h='<div class="chat" id="chatArea"><div class="chat-inner">';
+  conv.forEach(function(m,idx){
+    var cls=m.from==="ai"?"ai":"usr";
+    h+='<div class="msg '+cls+'"><div class="who">'+(m.from==="ai"?"ROI 测算顾问":"您")+'</div><div class="bbl">';
+    if(m.web) h+='<div class="web-tag">🔎 已联网核实最新数据</div>';
+    h+=fmt(m.text);
+    h+='</div>';
+    if(m.opts && idx===conv.length-1 && !busy){
+      h+='<div class="opts">';
+      m.opts.forEach(function(o,i){ h+='<button onclick="pick('+i+')"><span class="opt-num">'+(i+1)+'</span>'+esc(o)+'</button>'; });
+      h+='</div><div class="opts-hint">💡 点击直接选择，或在下方输入框补充其它情况</div>';
+    }
+    h+='</div>';
+  });
+  if(busy) h+='<div class="msg ai"><div class="who">ROI 测算顾问</div><div class="bbl"><div class="dots"><span></span><span></span><span></span></div></div></div>';
+  h+='</div></div>';
+
+  h+='<div class="inbar"><div class="inbar-inner">';
+  if(done){
+    h+='<div class="done-note">本轮测算已完成。<a onclick="location.reload()">重新开始一份</a></div>';
+  }else{
+    h+='<div class="frow"><button class="up" onclick="document.getElementById(\'fileIn\').click()">📎 上传财务 / 经营材料</button>';
+    pendFiles.forEach(function(f,i){ h+='<span class="ftag">📎 '+esc(f.name)+' <span class="x" onclick="rmFile('+i+')">✕</span></span>'; });
+    h+='</div><div class="irow"><textarea id="ta" placeholder="点上方选项，或在此补充数字 / 回答…" rows="1" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg();}" oninput="grow(this)"></textarea>';
+    h+='<button class="send" onclick="sendMsg()" '+(busy?"disabled":"")+'>➤</button></div>';
+  }
+  h+='</div></div>';
+  mn.innerHTML=h;
+  var ca=document.getElementById("chatArea"); if(ca) ca.scrollTop=ca.scrollHeight;
+}
+function grow(t){t.style.height="48px";t.style.height=Math.min(t.scrollHeight,150)+"px";}
+
+/* ============== 交互 ============== */
+function toggleWeb(){ useWeb=!useWeb; document.getElementById("webTog").classList.toggle("on",useWeb); }
+function start(){
+  var k=document.getElementById("keyIn"); apiKey=k?k.value.trim():"";
+  if(!apiKey){ alert("请先填入 Anthropic API Key"); return; }
+  try{ localStorage.setItem("sr_anthropic_key",apiKey); }catch(e){}
+  conv.push({from:"usr",text:"你好，我想测算一下我们企业投入 AI 的 ROI，帮我算清楚这笔账该不该花。"});
+  render(); callAPI();
+}
+function pick(i){ if(busy)return; var last=conv[conv.length-1]; if(!last||!last.opts)return; conv.push({from:"usr",text:last.opts[i]}); render(); callAPI(); }
+function sendMsg(){
+  if(busy)return;
+  var ta=document.getElementById("ta"); var txt=ta?ta.value.trim():"";
+  if(!txt && pendFiles.length===0)return;
+  var disp=txt||"（请分析我上传的材料）";
+  var mf=pendFiles.length?pendFiles.slice():null;
+  if(mf) disp+="\n[附件："+mf.map(function(f){return f.name;}).join("、")+"]";
+  conv.push({from:"usr",text:disp,files:mf});
+  pendFiles=[]; render(); callAPI();
+}
+document.getElementById("fileIn").addEventListener("change",function(e){
+  Array.from(e.target.files).forEach(function(file){
+    if(pendFiles.length>=3)return;
+    var r=new FileReader();
+    r.onload=function(ev){ pendFiles.push({name:file.name,type:file.type,b64:ev.target.result.split(",")[1]}); render(); };
+    r.readAsDataURL(file);
+  });
+  e.target.value="";
+});
+function rmFile(i){ pendFiles.splice(i,1); render(); }
+
+/* ============== 调用 Claude ============== */
+function buildMsgs(){
+  var arr=[];
+  conv.slice(-20).forEach(function(m){
+    var role=m.from==="ai"?"assistant":"user", content;
+    if(m.files&&m.files.length){
+      var parts=[];
+      m.files.forEach(function(f){
+        if(f.type&&f.type.indexOf("image/")===0) parts.push({type:"image",source:{type:"base64",media_type:f.type,data:f.b64}});
+        else if(f.type==="application/pdf") parts.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:f.b64}});
+      });
+      parts.push({type:"text",text:m.text}); content=parts;
+    } else content=m.text;
+    if(arr.length&&arr[arr.length-1].role===role&&typeof arr[arr.length-1].content==="string"&&typeof content==="string")
+      arr[arr.length-1].content+="\n"+content;
+    else arr.push({role:role,content:content});
+  });
+  if(arr.length&&arr[0].role==="assistant") arr.unshift({role:"user",content:"开始测算"});
+  return arr;
+}
+
+function callAPI(){
+  busy=true; render();
+  var isReport=(phase>=5);
+  var body={ model:MODEL, max_tokens: isReport?8000:1600, system:getSys(), messages:buildMsgs(),
+             output_config:{ effort: isReport?"high":"medium" } };
+  if(useWeb) body.tools=[{type:"web_search_20260209",name:"web_search",max_uses:isReport?6:3}];
+
+  doFetch(body, false);
+}
+function doFetch(body, retried){
+  fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json();}).then(function(data){
+    if(data.error){
+      // 联网工具 / 参数不被支持时，去掉它们自动重试一次，保证可用性
+      if(!retried && (body.tools||body.output_config)){
+        var b2=JSON.parse(JSON.stringify(body)); delete b2.tools; delete b2.output_config; doFetch(b2,true); return;
+      }
+      busy=false; conv.push({from:"ai",text:"⚠️ 接口出错："+(data.error.message||JSON.stringify(data.error))}); render(); return;
+    }
+    if(data.stop_reason==="pause_turn" && (body._cont||0)<4){
+      var b3=JSON.parse(JSON.stringify(body)); b3.messages.push({role:"assistant",content:data.content}); b3._cont=(body._cont||0)+1; doFetch(b3,retried); return;
+    }
+    busy=false;
+    var txt="", used=false;
+    (data.content||[]).forEach(function(c){
+      if(c.type==="text") txt+=c.text;
+      if(c.type==="server_tool_use"||c.type==="web_search_tool_result") used=true;
+    });
+    if(!txt) txt="（未获取到内容，请再试一次或换种说法。）";
+    processResp(txt, used);
+  }).catch(function(err){ busy=false; conv.push({from:"ai",text:"⚠️ 连接失败："+err.message+"（请检查网络或 API Key）"}); render(); });
+}
+
+function processResp(raw, web){
+  var text=raw;
+  var mi=text.match(/\[IND\]\s*([a-z_]+)\s*\[\/IND\]/i);
+  if(mi){ var k=mi[1].toLowerCase(); if(INDUSTRY[k])industryKey=k; text=text.replace(/\[IND\][\s\S]*?\[\/IND\]/i,"").trim(); }
+  var mc=text.match(/\[CO\]([\s\S]*?)\[\/CO\]/);
+  if(mc){ company=mc[1].trim(); text=text.replace(/\[CO\][\s\S]*?\[\/CO\]/,"").trim(); }
+  var mr=text.match(/\[RPT\]([\s\S]*?)\[\/RPT\]/);
+  if(mr){ report=mr[1].trim(); text=text.replace(/\[RPT\][\s\S]*?\[\/RPT\]/,"").trim(); done=true; phase=5;
+          if(text) conv.push({from:"ai",text:text,web:web}); render(); return; }
+  if(text.indexOf("[RPT]")>=0){ report=text.slice(text.indexOf("[RPT]")+5).replace(/\[\/RPT\]/,"").trim(); done=true; phase=5; render(); return; } // 报告被截断时兜底
+  if(text.indexOf("[NEXT]")>=0){ text=text.replace(/\[NEXT\]/g,"").trim(); phase=Math.min(phase+1,5); }
+  var opts=null, mo=text.match(/\[OPT\]([\s\S]*?)\[\/OPT\]/);
+  if(mo){ opts=mo[1].split("|").map(function(s){return s.trim();}).filter(Boolean); text=text.replace(/\[OPT\][\s\S]*?\[\/OPT\]/,"").trim(); }
+  conv.push({from:"ai",text:text,opts:opts,web:web}); render();
+}
+
+/* ============== 报告 ============== */
+function theme(){ return INDUSTRY[industryKey]||INDUSTRY._default; }
+function hexA(hex,a){ var h=hex.replace("#",""); var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return "rgba("+r+","+g+","+b+","+a+")"; }
+function hashSeed(s){ var n=0; s=s||"ai"; for(var i=0;i<s.length;i++){n=(n*31+s.charCodeAt(i))>>>0;} return n%100000; }
+var IMGTAG={manufacturing:"factory,industry",healthcare:"hospital,medical",finance:"finance,city",retail:"retail,store",technology:"technology,data",logistics:"logistics,warehouse",realestate:"architecture,building",energy:"energy,solar",agriculture:"agriculture,farm",food:"restaurant,food",automotive:"car,automotive",government:"government,building",hospitality:"hotel,travel",professional:"office,business",media:"creative,studio",education:"university,campus",_default:"business,technology"};
+function coverURL(){
+  // loremflickr：按行业关键词联网检索一张真实图片，且带 CORS 头（可安全导出 PDF）；失败回退渐变封面。
+  var tag=IMGTAG[industryKey]||IMGTAG._default;
+  return "https://loremflickr.com/1200/1700/"+tag+"?lock="+hashSeed((company||industryKey||"ai"));
+}
+function coverFallback(img){
+  var t=theme();
+  if(img&&img.style) img.style.display="none";
+  var c=document.querySelector(".cover"); if(c) c.style.background="linear-gradient(150deg,"+t.p+",#0c1118 130%)";
+}
+var coverCustom=false;
+function changeCover(){
+  var u=prompt("粘贴一张图片网址作为封面背景（建议用 Unsplash 链接，可正常导出 PDF）。\n留空并确定 → 改为上传本地图片：","");
+  if(u===null) return;
+  u=u.trim();
+  if(!u){ document.getElementById("coverIn").click(); return; }
+  var img=document.getElementById("coverPhoto");
+  img.style.display=""; img.dataset.ok=""; coverCustom=true;
+  img.onerror=function(){ alert("这张图片不支持跨域嵌入（无法导出到 PDF）。请改用 Unsplash 链接，或上传本地图片。"); coverFallback(img); };
+  img.crossOrigin="anonymous"; img.src=u;
+}
+document.addEventListener("change",function(e){
+  if(e.target&&e.target.id==="coverIn"&&e.target.files&&e.target.files[0]){
+    var r=new FileReader();
+    r.onload=function(ev){ var img=document.getElementById("coverPhoto"); img.style.display=""; img.dataset.ok="1"; img.crossOrigin=""; img.src=ev.target.result; coverCustom=true; };
+    r.readAsDataURL(e.target.files[0]); e.target.value="";
+  }
+});
+
+function renderReport(mn){
+  var t=theme();
+  var docHTML=buildDoc(report,t);
+  var h='<div class="rptview"><div class="rptbar">';
+  h+='<div class="lt">报告已生成 · 行业主题：<b>'+t.label+'</b>'+(company?(' · <b>'+esc(company)+'</b>'):'')+'</div>';
+  h+='<div class="btns"><button class="btn sec" onclick="location.reload()">↺ 重新测算</button><button class="btn sec" onclick="changeCover()">🖼 更换封面</button><button class="btn pri" id="dlBtn" onclick="downloadPDF()">⬇ 下载高清 PDF</button></div>';
+  h+='<input type="file" id="coverIn" accept="image/*" style="display:none">';
+  h+='</div>';
+  h+=docHTML;
+  h+='</div>';
+  mn.innerHTML=h;
+}
+
+function buildDoc(raw,t){
+  // 抽取封面字段
+  var coverTitle="企业AI投入ROI测算报告", coverSub="";
+  var m1=raw.match(/\[COVERTITLE\]([\s\S]*?)\[\/COVERTITLE\]/); if(m1){coverTitle=m1[1].trim(); raw=raw.replace(m1[0],"");}
+  var m2=raw.match(/\[COVERSUB\]([\s\S]*?)\[\/COVERSUB\]/);   if(m2){coverSub=m2[1].trim();   raw=raw.replace(m2[0],"");}
+  if(!coverSub) coverSub=(company?("为「"+company+"」量身测算 · "):"")+t.label;
+
+  var styleVars='--p:'+t.p+';--pd:'+t.pd+';--ac:'+t.ac+';--tint:'+t.tint+';';
+  var dt=new Date(), ds=dt.getFullYear()+"年"+(dt.getMonth()+1)+"月"+dt.getDate()+"日";
+  var rno="SR-ROI-"+(""+dt.getFullYear()).slice(2)+(("0"+(dt.getMonth()+1)).slice(-2))+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
+
+  var ovBg='linear-gradient(180deg,rgba(0,0,0,.50),rgba(0,0,0,.12) 34%,rgba(0,0,0,0) 50%),'
+          +'linear-gradient(0deg,'+hexA(t.pd,1)+' 4%,'+hexA(t.pd,.55)+' 40%,'+hexA(t.pd,0)+' 66%)';
+  var cover='<div class="cover" id="pdfCover" style="'+styleVars+'background:'+t.pd+'">'
+    +'<img class="cover-photo" id="coverPhoto" crossorigin="anonymous" src="'+coverURL()+'" onload="this.dataset.ok=1" onerror="coverFallback(this)">'
+    +'<div class="cover-ov" style="background:'+ovBg+'"></div><div class="cover-grain"></div>'
+    +'<div class="cover-ct">'
+      +'<div class="cover-top"><div class="cover-eye"><span class="lg">奇</span>SINGULARITY REACH TECHNOLOGY</div>'
+      +'<div class="seal"><b>定制</b><span>CUSTOM</span></div></div>'
+      +'<div class="cover-mid">'
+        +'<div class="cover-kicker">AI 投资决策报告</div>'
+        +'<div class="cover-title">'+esc(coverTitle)+'</div>'
+        +'<div class="cover-rule"></div>'
+        +'<div class="cover-sub">'+esc(coverSub)+'</div>'
+        +'<div class="cover-meta">'
+          +'<div><span>报 告 日 期</span><b>'+ds+'</b></div>'
+          +'<div><span>报 告 编 号</span><b>'+rno+'</b></div>'
+          +'<div><span>测 算 引 擎</span><b>Claude · 实时联网</b></div>'
+        +'</div>'
+        +'<div class="cover-foot">本报告基于贵司经营数据与行业基准测算 · 仅供投资决策参考</div>'
+      +'</div>'
+    +'</div></div>';
+
+  var body='<div class="page" id="pdfBody" style="'+styleVars+'"><div class="body">'+parseBody(raw)+
+    '<div class="doc-foot">本报告由奇点达「企业AI投入ROI测算器」生成 · 数据含估算成分，精确测算请联系行业专家团队<br>SINGULARITY REACH TECHNOLOGY · '+rno+'</div></div></div>';
+
+  return '<div class="doc" style="'+styleVars+'">'+cover+body+'</div>';
+}
+
+function parseBody(raw){
+  var lines=raw.split("\n"), h="", i=0, hno=0;
+  function closeTable(st){ return st?"</tbody></table>":""; }
+  var inT=false;
+  function flushKpis(buf){ if(!buf.length)return""; var s='<div class="kpis">'; buf.forEach(function(k){ var p=k.split("|"); s+='<div class="kpi"><div class="k-l">'+inl((p[0]||"").trim())+'</div><div class="k-v">'+inl((p[1]||"").trim())+'</div><div class="k-s">'+inl((p[2]||"").trim())+'</div></div>'; }); return s+'</div>'; }
+
+  for(i=0;i<lines.length;i++){
+    var l=lines[i].trim();
+    // KPI 连续聚合
+    if(/^\[KPI\]/.test(l)){
+      var buf=[];
+      while(i<lines.length && /^\[KPI\]/.test(lines[i].trim())){ var mm=lines[i].trim().match(/^\[KPI\]([\s\S]*?)\[\/KPI\]/); if(mm)buf.push(mm[1]); i++; }
+      i--; if(inT){h+="</tbody></table>";inT=false;} h+=flushKpis(buf); continue;
+    }
+    if(!l){ if(inT){h+="</tbody></table>";inT=false;} continue; }
+    var mv=l.match(/^\[VERDICT\s*([^\]]*)\]([\s\S]*?)\[\/VERDICT\]/);
+    if(mv){ if(inT){h+="</tbody></table>";inT=false;} h+='<div class="verdict"><div class="vbadge">'+esc(mv[1].trim()||"测算结论")+'</div><div class="vtx">'+inl(mv[2].trim())+'</div></div>'; continue; }
+    var mn2=l.match(/^\[NOTE\]([\s\S]*?)\[\/NOTE\]/);
+    if(mn2){ if(inT){h+="</tbody></table>";inT=false;} h+='<div class="note">'+inl(mn2[1].trim())+'</div>'; continue; }
+    if(l.indexOf("# ")===0){ if(inT){h+="</tbody></table>";inT=false;} hno++; h+='<div class="doc-h1"><span class="no">'+hno+'</span>'+inl(l.slice(2).replace(/^[一二三四五六七八九十]+[、.\s]*/,"")) +'</div>'; continue; }
+    if(l.indexOf("## ")===0){ if(inT){h+="</tbody></table>";inT=false;} h+='<div class="doc-h2">'+inl(l.slice(3))+'</div>'; continue; }
+    if(l.indexOf("### ")===0){ if(inT){h+="</tbody></table>";inT=false;} h+='<div class="doc-h2">'+inl(l.slice(4))+'</div>'; continue; }
+    if(/\|/.test(l) && /\|.*\|/.test(l)){
+      if(/^[\|\s\-:]+$/.test(l)) continue;
+      var cells=l.split("|").filter(function(c){return c.trim()!=="";});
+      if(!inT){ h+='<table><thead><tr>'; cells.forEach(function(c){h+='<th>'+inl(c.trim())+'</th>';}); h+='</tr></thead><tbody>'; inT=true; }
+      else { h+='<tr>'; cells.forEach(function(c){h+='<td>'+inl(c.trim())+'</td>';}); h+='</tr>'; }
+      continue;
+    }
+    if(inT){h+="</tbody></table>";inT=false;}
+    if(/^[-•]\s/.test(l)){ h+='<li>'+inl(l.slice(2))+'</li>'; continue; }
+    if(/^\d+[.、]\s/.test(l)){ h+='<li>'+inl(l.replace(/^\d+[.、]\s/,''))+'</li>'; continue; }
+    h+='<p>'+inl(l)+'</p>';
+  }
+  if(inT)h+="</tbody></table>";
+  return h;
+}
+
+/* ============== 导出 PDF ============== */
+function downloadPDF(){
+  var btn=document.getElementById("dlBtn"); if(btn){btn.disabled=true; btn.textContent="⏳ 正在生成 PDF…";}
+  var fin=function(){ if(btn){btn.disabled=false; btn.textContent="⬇ 下载高清 PDF";} };
+  var waitImg=new Promise(function(res){
+    var img=document.getElementById("coverPhoto");
+    if(!img||img.dataset.ok==="1"||img.style.display==="none") return res();
+    var done=false, d=function(){ if(!done){done=true;res();} };
+    img.addEventListener("load",d); img.addEventListener("error",d); setTimeout(d,6000);
+  });
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){
+    return waitImg;
+  }).then(function(){
+    var jsPDF=window.jspdf.jsPDF;
+    var pdf=new jsPDF("p","pt","a4"); var W=595.28, H=841.89;
+    var cover=document.getElementById("pdfCover"), bodyEl=document.getElementById("pdfBody");
+    var opt={scale:2,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false};
+    html2canvas(cover,opt).then(function(c1){
+      pdf.addImage(c1.toDataURL("image/jpeg",0.94),"JPEG",0,0,W,H,"cover","FAST");
+      return html2canvas(bodyEl,opt);
+    }).then(function(c2){
+      var imgW=W, imgH=c2.height*imgW/c2.width, pos=0, data=c2.toDataURL("image/jpeg",0.94);
+      while(pos<imgH-2){
+        pdf.addPage();
+        pdf.addImage(data,"JPEG",0,-pos,imgW,imgH,"body","FAST");
+        pos+=H;
+      }
+      var fn=(company?company+"-":"")+"AI投入ROI测算报告.pdf";
+      pdf.save(fn); fin();
+    }).catch(function(e){
+      // 封面图跨域污染兜底：改用渐变封面后重试一次
+      if(!coverTainted){ coverTainted=true; coverFallback(document.getElementById("coverPhoto")); setTimeout(downloadPDF,350); return; }
+      alert("PDF 生成遇到问题："+e.message+"\n可改用浏览器菜单「打印 → 另存为 PDF」导出。"); fin();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
