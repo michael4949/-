@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能标书生成智能体 · 单文件版</title>
+<style>
+  :root{--muted:#64748b;--line:#e2e8f0;--brand:#2563eb;--brand-d:#1d4ed8;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--soft:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:#0f172a;background:#f1f5f9}
+  header{background:linear-gradient(120deg,#1e3a8a,#2563eb);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.5px}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:12px}
+  .tabs{display:flex;gap:4px;background:#fff;padding:0 24px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .tab{padding:13px 18px;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;font-weight:600}
+  .tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+  main{max-width:1080px;margin:22px auto;padding:0 20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .card h2{margin:0 0 14px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .card h2 .n{background:var(--brand);color:#fff;width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+  label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px}
+  input[type=text],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit}
+  textarea{min-height:150px;resize:vertical;line-height:1.6}
+  .row{display:flex;gap:14px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+  button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:600}
+  button:hover{background:var(--brand-d)}
+  button.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+  button.sm{padding:5px 11px;font-size:12px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .progress{height:9px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin:10px 0}
+  .bar{height:100%;background:linear-gradient(90deg,#2563eb,#06b6d4);width:0;transition:width .3s}
+  .log{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#0f172a;color:#cbd5e1;border-radius:8px;padding:12px;max-height:220px;overflow:auto;line-height:1.7}
+  .log .s{color:#38bdf8}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-weight:700}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+  .t-high{background:#fef2f2;color:var(--bad)}.t-mid{background:#fffbeb;color:var(--warn)}.t-low{background:#f0fdf4;color:var(--ok)}.t-star{background:#fef2f2;color:var(--bad)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .kv{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .kv .k{font-size:12px;color:var(--muted)}.kv .v{font-size:14px;font-weight:600;margin-top:3px;word-break:break-all}
+  .sec{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+  .sec>summary{padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;background:var(--soft);list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec .body{padding:14px;white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:#1e293b}
+  .src{font-size:11px;color:var(--muted);margin-top:8px}
+  .muted{color:var(--muted)}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+  .pill{font-size:12px;padding:3px 10px;border-radius:12px;background:#eff6ff;color:var(--brand);font-weight:600}
+  .banner{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+  .hide{display:none}.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.right{margin-left:auto}
+  .score{font-size:34px;font-weight:800}
+  .doclist .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📋 智能标书生成智能体 · 单文件版</h1>
+    <div class="sub">本地大模型 + Agent + RAG 架构（离线降级引擎）· 面向管道行业 · 纯浏览器运行，数据不外传</div>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="gen">① 生成标书</div>
+  <div class="tab" data-tab="kb">② 企业知识库</div>
+  <div class="tab" data-tab="about">③ 关于</div>
+</div>
+
+<main>
+  <section id="tab-gen">
+    <div class="banner">
+      💡 本文件为<b>单文件离线版</b>：抽取走规则引擎、检索走关键词(BM25)、生成走领域模板，全部在浏览器内完成、<b>不联网</b>。
+      完整版（Python）可接入本地大模型 Ollama 提升生成质量，并支持向量混合检索与 .docx/.pdf 解析。
+    </div>
+    <div class="card">
+      <h2><span class="n">1</span> 输入招标文件</h2>
+      <div class="row">
+        <div><label>投标人（本公司）名称</label><input type="text" id="company" value="鸿源管道科技有限公司"/></div>
+      </div>
+      <label>粘贴招标文件正文（或上传 .txt/.md，或载入示例）</label>
+      <textarea id="tender" placeholder="将招标文件正文粘贴到此处…"></textarea>
+      <div class="flex" style="margin-top:12px">
+        <button id="btn-gen">🚀 一键生成标书</button>
+        <button class="ghost sm" id="btn-sample">载入示例招标文件</button>
+        <label class="ghost sm" style="margin:0;padding:0"><button class="ghost sm" id="btn-upload">上传 .txt/.md</button></label>
+        <input type="file" id="file" class="hide" accept=".txt,.md,.markdown,.text"/>
+        <span class="hint" id="file-name"></span>
+      </div>
+    </div>
+    <div class="card hide" id="progress-card">
+      <h2><span class="n">2</span> 生成进度</h2>
+      <div class="flex"><span class="pill" id="stage">准备中</span><span class="right muted" id="pct">0%</span></div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="log" id="log"></div>
+    </div>
+    <div id="result"></div>
+  </section>
+
+  <section id="tab-kb" class="hide">
+    <div class="card">
+      <h2><span class="n">3</span> 添加企业资料（仅当前页面有效）</h2>
+      <div class="row">
+        <div><label>标题</label><input type="text" id="kb-title" placeholder="如：某某公司简介"/></div>
+        <div><label>分类</label><select id="kb-cat"><option>公司简介</option><option>资质证书</option><option>产品参数</option><option>项目业绩</option><option>售后服务</option><option>实施方案</option><option>其他</option></select></div>
+      </div>
+      <label>内容</label><textarea id="kb-text" placeholder="粘贴公司资质、业绩、产品参数等资料…"></textarea>
+      <div class="flex" style="margin-top:10px"><button class="sm" id="btn-kb-add">＋ 加入知识库</button><span class="hint" id="kb-msg"></span></div>
+    </div>
+    <div class="card">
+      <h2>检索测试（关键词 BM25 + 重排序）</h2>
+      <div class="flex"><input type="text" id="kb-q" placeholder="如：球墨铸铁管 技术参数 / 类似业绩"/><button class="sm" id="btn-kb-search">检索</button></div>
+      <div id="kb-res" style="margin-top:12px"></div>
+    </div>
+    <div class="card"><h2>已内置文档 <span class="pill" id="kb-count">0</span></h2><div class="doclist" id="kb-list"></div></div>
+  </section>
+
+  <section id="tab-about" class="hide">
+    <div class="card">
+      <h2>关于</h2>
+      <p style="line-height:1.9;font-size:14px">本页是「智能标书生成系统」的<b>单文件离线版</b>，把核心流水线（招标文件解析 → 需求/废标项抽取 → 企业知识库检索 → 多模块标书生成 → 合规审核 → 导出）移植到浏览器端，<b>无需安装、不联网、双击即用</b>，适合快速体验与分享。</p>
+      <h3 style="font-size:14px">五个步骤（对应完整版六大模块）</h3>
+      <ol style="line-height:1.9;font-size:13.5px">
+        <li><b>解析/抽取</b>：正则规则识别项目信息、★/▲废标项、评分细则、技术参数、合同风险。</li>
+        <li><b>知识库检索</b>：内置管道行业示例资料，关键词 BM25 检索 + 覆盖度重排序（完整版为向量+关键词混合检索）。</li>
+        <li><b>标书生成</b>：按标书结构分模块，用领域模板 + 检索资料合成各章节。</li>
+        <li><b>审核校验</b>：对照废标项逐条核验、检测占位符与空章节，给出合规度评分。</li>
+        <li><b>导出</b>：一键导出 Word(.doc) / 打印为 PDF。</li>
+      </ol>
+      <h3 style="font-size:14px">与完整版（Python）的差异</h3>
+      <ul style="line-height:1.9;font-size:13.5px">
+        <li>单文件版仅支持文本/Markdown 输入；完整版支持 <b>.docx / .pdf</b> 解析（含表格）。</li>
+        <li>单文件版为关键词检索；完整版为 <b>向量 + 关键词混合检索 + 重排序</b>。</li>
+        <li>单文件版为模板生成；完整版可接入 <b>本地大模型 Ollama</b>，由多 Agent 并行生成，质量更高。</li>
+        <li>导出：单文件版为 Word 兼容 .doc；完整版生成标准 .docx。</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script>
+/* =========================================================================
+ *  标书生成智能体 · 浏览器端离线引擎（移植自 Python 版降级引擎）
+ * ========================================================================= */
+
+/* ----------------------------- 内置示例数据 ----------------------------- */
+const SAMPLE_KB = [
+  {source:"公司简介", category:"公司简介", text:`鸿源管道科技有限公司成立于 2008 年，注册资本人民币 12,000 万元，是一家专注于给排水管道、燃气管道、市政管网及配套管件研发、生产、销售与工程服务的高新技术企业。公司总部位于江苏省，建有占地约 120 亩的现代化生产基地，拥有球墨铸铁管、PE 给水管、钢丝网骨架塑料复合管等多条自动化生产线，年产各类管材管件 8 万吨以上。
+公司现有员工 520 余人，其中工程技术人员 130 余人，高级工程师 22 人，建有省级企业技术中心和管道材料检测实验室。公司通过 ISO 9001 质量管理体系、ISO 14001 环境管理体系、ISO 45001 职业健康安全管理体系认证，取得全国工业产品生产许可证及多项产品认证。
+公司主营业务涵盖球墨铸铁管及管件（DN80–DN2000，K9/C 级）、PE100 给水与燃气管道、钢丝网骨架聚乙烯复合管，以及市政供水、排水、燃气管网工程的供货与施工配合。近三年累计承担各类市政及工业管道项目 300 余项，连续多年被评为"重合同守信用企业"和"管道行业优秀供应商"。`},
+  {source:"资质证书清单", category:"资质证书", text:`本公司具备承担给排水及燃气管道供货项目所需的完整资质：营业执照（经营范围涵盖管材管件生产、销售）；全国工业产品生产许可证（球墨铸铁管、PE 给水管）；ISO 9001:2015 质量管理体系认证；ISO 14001:2015 环境管理体系认证；ISO 45001:2018 职业健康安全管理体系认证；安全生产标准化证书；球墨铸铁管产品卫生许可批件（涉水产品卫生安全评价）；PE 给水管材 GB/T 13663 型式检验报告、燃气管 GB 15558 型式检验报告；高新技术企业证书；重合同守信用企业、AAA 级信用企业证书。
+资信状况：公司近三年连续盈利，资产负债率低于行业平均水平，银行授信充足，未被列入失信被执行人名单、政府采购严重违法失信名单。`},
+  {source:"产品技术参数", category:"产品参数", text:`球墨铸铁管（离心铸造）：执行标准 GB/T 13295、ISO 2531；规格 DN80–DN2000，壁厚等级 K9 / C 级；材质 QT450-10，球化率 ≥ 80%（三级及以上）；接口为 T 型滑入式柔性接口、N1 型机械式接口，配三元乙丙（EPDM）橡胶圈；内防腐为水泥离心衬里，外防腐喷锌 + 沥青漆，喷锌量 ≥ 130 g/m²；DN80–DN300 允许工作压力 ≥ 4.0 MPa；抗拉强度 ≥ 420 MPa，延伸率 ≥ 10%。
+PE100 给水管：执行标准 GB/T 13663.2；原料 PE100 级专用料，密度 ≥ 0.949 g/cm³；规格 dn20–dn800，SDR11（PN16）/ SDR17（PN10）；符合 GB/T 17219 生活饮用水卫生安全要求；20℃、100h 环应力 12.0 MPa 不破坏；氧化诱导时间（200℃）≥ 20 min。
+PE 燃气管：执行标准 GB 15558.1；规格 dn32–dn630，SDR11 / SDR17.6。配套法兰、三通、弯头等与主管材同标准配套，橡胶圈采用 EPDM，设计寿命满足 50 年。所有产品出厂 100% 检验，附质量合格证、材质报告与第三方型式检验报告。`},
+  {source:"类似项目业绩", category:"项目业绩", text:`近三年代表性业绩：
+1）某市城北供水管网改造工程，业主某市自来水有限公司，供应 DN300–DN800 球墨铸铁管及配套管件约 18 km，合同金额约 3,860 万元，2023 年完成并验收合格。
+2）某经济开发区燃气管网建设项目，业主某燃气集团有限公司，供应 PE100 燃气管 dn110–dn315 约 25 km 及配套件，合同金额约 2,450 万元，运行稳定。
+3）某县城乡供水一体化工程（一标段），业主某县水务投资集团，供应 PE100 给水管 dn63–dn400 约 40 km，合同金额约 4,120 万元，履约良好。
+4）某工业园区雨污分流管网项目，供应球墨铸铁排水管及钢丝网骨架复合管约 12 km，合同金额约 1,780 万元，按期保质交付。
+以上业绩均可提供中标通知书、采购合同及验收证明等佐证材料，近三年类似供货累计合同金额超过 1.5 亿元。`},
+  {source:"售后服务承诺", category:"售后服务", text:`质量保证期为自货物验收合格之日起不少于 24 个月（或按招标文件要求就高执行），质保期内因产品制造质量问题免费维修或更换并承担运输费用。
+服务响应：设立 7×24 小时客户服务热线，接到通知后 2 小时内响应，一般问题 24 小时内提出方案，需现场处理的 48 小时内派员到达，重大紧急问题 48 小时内到场处置。
+服务网络与备品备件：在华东、华中设区域服务网点，常备各规格橡胶密封圈、连接件等易损件。免费提供管材安装、连接工艺、试压验收等技术交底与培训，提供完整产品说明书、安装手册与质保资料。建立售后档案，质保期内定期回访。`},
+  {source:"质量保证与实施方案", category:"实施方案", text:`质量保证体系：按 ISO 9001 建立覆盖原料采购、生产制造、检验试验、仓储运输、交付服务全过程的质量管理体系；原材料入厂索证索票并抽检；关键工序（离心铸造、退火、挤出、衬里、防腐）设质量控制点；出厂进行外观、尺寸、力学性能、水压试验，100% 合格方可出厂；定期委托 CMA/CNAS 机构型式检验。
+供货组织与进度：成立由项目经理、技术负责人、质检员、物流专员组成的供货项目组；接到供货计划 3 个工作日内排产，按里程碑分批供货；自有及合作运输车队按现场需求配送，附送货单与质保资料；储备安全库存应对进度调整。
+安全文明：严格执行装卸、运输安全规范，管材堆放、吊装符合安全要求。质量承诺：所供货物为全新、未使用、符合招标技术要求的合格产品，绝不以次充好。`}
+];
+
+const SAMPLE_TENDER = `某市第二水厂供水管网工程管材采购招标文件
+
+第一章 招标公告
+项目名称：某市第二水厂供水管网工程管材采购
+项目编号：HYZB-2026-DN0612
+采购人：某市自来水有限公司
+采购代理机构：正信工程咨询有限公司
+预算金额：人民币 980 万元（最高限价 980 万元，投标报价超过最高限价的作无效投标处理）
+投标保证金：人民币 10 万元
+投标截止时间：2026 年 7 月 1 日 9:30
+开标时间：2026 年 7 月 1 日 9:30
+交货期：合同签订后 60 日历天内分批交付至采购人指定地点。
+
+第二章 投标人资格要求
+1. 投标人须为中华人民共和国境内依法注册、具有独立法人资格的供应商，提供有效的营业执照副本。
+2. 投标人须具有球墨铸铁管或 PE 给水管的生产能力或合法供货渠道，提供全国工业产品生产许可证或授权证明。
+3. ★投标人须通过 ISO 9001 质量管理体系认证，并在投标文件中提供有效认证证书复印件，否则按无效投标处理。
+4. 投标人近三年（2023 年至今）须具有至少 1 个单项合同金额不低于 500 万元的类似供水管材供货业绩，提供合同及验收证明。
+5. ★投标人未被列入"信用中国"网站失信被执行人、政府采购严重违法失信名单，否则其投标将被拒绝。
+
+第三章 投标人须知（实质性要求）
+3.1 ▲所供管材必须为全新合格产品，所投产品的卫生性能必须符合 GB/T 17219 涉水产品卫生安全评价要求，未提供有效卫生许可批件的，其投标将被否决。
+3.2 ★投标文件须由法定代表人或其授权委托人签字并加盖单位公章，未按要求签字盖章的投标文件视为无效。
+3.3 投标有效期为投标截止之日起 90 日历天。投标有效期不足的投标文件将被作为非响应性投标予以拒绝。
+3.4 ▲投标报价为完成本项目招标范围内全部内容的总价，应包含货物、运输、装卸、税费及售后服务等一切费用，否则作废标处理。
+
+第四章 技术规格要求
+1. 球墨铸铁管执行标准应符合 GB/T 13295，规格 DN300–DN600，壁厚等级不低于 K9 级。
+2. ★球墨铸铁管材质球化率不小于 80%，抗拉强度不低于 420 MPa。
+3. 内衬采用水泥砂浆离心衬里，外防腐喷锌量不小于 130 g/m²。
+4. PE100 给水管执行标准应符合 GB/T 13663，规格 dn110–dn400，公称压力不低于 1.0 MPa（SDR17）。
+5. ★PE 管原料须采用 PE100 级专用料，氧化诱导时间（200℃）不低于 20 min。
+6. 橡胶密封圈采用三元乙丙（EPDM）材质，设计使用寿命不低于 50 年。
+7. 所有管材工作压力不小于 1.0 MPa，并提供第三方型式检验报告。
+
+第五章 评标办法（综合评分法）
+评标采用综合评分法，满分 100 分，其中：
+投标报价 | 40 | 以满足招标要求且投标价最低的为评标基准价得满分，每高1%扣2分
+技术方案 | 25 | 技术参数响应程度、产品性能、工艺先进性综合评定
+类似业绩 | 15 | 近三年每提供一个不低于500万元的类似业绩得3分，最高15分
+售后服务 | 10 | 质保期、响应时效、服务网络综合评定
+企业资信 | 10 | 资质认证、信用等级、获奖情况综合评定
+
+第六章 合同主要条款
+6.1 交付与验收：供应商应按采购人通知分批交付，逾期交付的，每逾期一日按合同总价的 0.5% 支付违约金，违约金累计不超过合同总价的 10%。
+6.2 质量保证：质量保证期为验收合格之日起 24 个月。供应商应提交合同总价 5% 的质量保证金，质保期满无质量问题后无息退还。
+6.3 付款方式：货到验收合格后支付合同总价的 90%，质保期满后支付剩余 10%。
+6.4 因供应商提供产品质量问题造成采购人损失的，供应商应承担相应赔偿责任。
+
+第七章 投标文件组成
+投标文件应包括以下内容并按此顺序编制：
+1. 投标函及投标函附录
+2. 法定代表人身份证明及授权委托书
+3. 投标保证金证明
+4. 投标人资格及资信证明文件
+5. 类似项目业绩证明
+6. 技术方案及技术参数响应表
+7. 项目供货实施方案
+8. 售后服务方案
+9. 投标报价表
+10. 招标文件要求的其他材料`;
+
+/* ----------------------------- 文本工具 ----------------------------- */
+const STOP = new Set("的 了 和 与 及 或 在 是 为 对 等 中 上 下 a an the of to and or in on for is are be".split(" "));
+function tokenize(text){
+  if(!text) return [];
+  text = text.toLowerCase();
+  const tokens = [];
+  (text.match(/[a-z0-9][a-z0-9_\-.\/%]*/g)||[]).forEach(m=>{ if(!STOP.has(m)) tokens.push(m); });
+  (text.match(/[一-鿿]+/g)||[]).forEach(run=>{
+    const chars=[...run];
+    chars.forEach(c=>{ if(!STOP.has(c)) tokens.push(c); });
+    for(let i=0;i<chars.length-1;i++) tokens.push(chars[i]+chars[i+1]);
+  });
+  return tokens;
+}
+function cleanMd(t){ return t.split("\n").map(l=>l.replace(/^\s*#{1,6}\s*/,"").replace(/\*\*(.+?)\*\*/g,"$1")).join("\n").trim(); }
+
+/* ----------------------------- 知识库（关键词检索） ----------------------------- */
+const KB = { docs: [], chunks: [] };
+function kbAdd(source, category, text){
+  KB.docs.push({source, category, chars:text.length});
+  text.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean).forEach((para,i)=>{
+    KB.chunks.push({source, category, text:para, tokens:tokenize(para)});
+  });
+}
+function kbReset(){ KB.docs=[]; KB.chunks=[]; SAMPLE_KB.forEach(d=>kbAdd(d.source,d.category,d.text)); }
+function kbSearch(query, k=5){
+  const q = new Set(tokenize(query));
+  if(!KB.chunks.length || !q.size) return [];
+  const N = KB.chunks.length, avg = KB.chunks.reduce((s,c)=>s+c.tokens.length,0)/N || 1;
+  const df = {};
+  KB.chunks.forEach(c=>{ new Set(c.tokens).forEach(t=>df[t]=(df[t]||0)+1); });
+  const k1=1.5,b=0.75;
+  const qBig=[...q].filter(t=>t.length>=2);
+  const scored = KB.chunks.map(c=>{
+    const dl=c.tokens.length||1; let s=0;
+    const tf={}; c.tokens.forEach(t=>tf[t]=(tf[t]||0)+1);
+    q.forEach(t=>{ const f=tf[t]||0; if(!f) return; const idf=Math.log(1+(N-df[t]+0.5)/(df[t]+0.5)); s+=idf*(f*(k1+1))/(f+k1*(1-b+b*dl/avg)); });
+    const cov=qBig.length? qBig.filter(t=>c.text.includes(t)).length/qBig.length : 0;
+    return {chunk:c, score:s, cov};
+  });
+  const max=Math.max(...scored.map(x=>x.score),1e-9);
+  scored.forEach(x=>x.final=x.score/max + 0.15*x.cov);
+  return scored.filter(x=>x.score>0).sort((a,b)=>b.final-a.final).slice(0,k)
+    .map(x=>({source:x.chunk.source, text:x.chunk.text, score:+(x.final).toFixed(3), keyword:+(x.score/max).toFixed(3)}));
+}
+
+/* ----------------------------- 模块二：需求抽取 ----------------------------- */
+const STARS = "★☆▲△※●◆◇✦";
+const AMOUNT = "(?:人民币)?\\s*([0-9][0-9,，]*(?:\\.[0-9]+)?\\s*(?:万元|万|元))";
+const DT = "((?:20\\d{2})\\s*[年\\-/.]\\s*\\d{1,2}\\s*[月\\-/.]\\s*\\d{1,2}\\s*[日号]?(?:\\s*(?:上午|下午)?\\s*\\d{1,2}[:：]\\d{2}(?:[:：]\\d{2})?)?)";
+const REJECT = /否则.{0,12}(?:废标|拒绝|无效|否决)|(?:按|作|视为|属于).{0,6}(?:废标|无效标?|否决投标?|无效投标)|(?:将被|予以).{0,4}(?:拒绝|否决|废标)|实质性(?:要求|响应|条款|偏离)|未(?:能)?(?:实质性)?(?:响应|满足|提供|按.{0,6}).{0,12}(?:否决|废标|无效)|不(?:得|予)(?:接受|受理)/;
+const TECHOP = /≥|≤|＞|＜|>|<|不\s*(?:小于|低于|大于|高于|少于|超过)|不\s*得\s*(?:低|高)于|应\s*(?:不低于|不高于|达到)/;
+
+function first(re, text){ const m=text.match(re); return m? m[1].replace(/^[\s：:　]+|[\s：:　]+$/g,"") : ""; }
+function classifyMandatory(t){
+  if(/资质|资格|营业执照|许可证|认证|业绩|注册资本|信誉/.test(t)) return "资格资质";
+  if(/截止|时间|日期|有效期/.test(t)) return "时间要求";
+  if(/格式|签字|盖章|签署|装订|份数|密封|法定代表人/.test(t)) return "格式要求";
+  if(/报价|价格|总价|单价|费用/.test(t)) return "报价要求";
+  return "实质性要求";
+}
+function scoringCat(t){ if(/技术|方案|参数|性能|服务/.test(t)) return "技术"; if(/价格|报价|单价|总价/.test(t)) return "价格"; return "商务"; }
+
+function extract(text){
+  const lines = text.split("\n").map(l=>l.trim()).filter(Boolean);
+  const r = {project_name:"",project_no:"",purchaser:"",agent_org:"",budget:"",bid_bond:"",deadline:"",bid_open_time:"",delivery:"",
+    qualification:[],mandatory_items:[],scoring_items:[],tech_params:[],risks:[],bid_doc_outline:[],notes:[]};
+
+  r.project_name = first(/(?:项目名称|招标项目名称|采购项目名称)[:：\s]*([^\n，。；]{2,60})/, text);
+  r.project_no   = first(/(?:项目编号|招标编号|采购编号|招标文件编号)[:：\s]*([A-Za-z0-9\-—－（）()\[\]]{4,40})/, text);
+  r.purchaser    = first(/(?:采购人|招标人|采购单位|建设单位)(?:名称)?[:：\s]*([^\n，。；]{2,40})/, text);
+  r.agent_org    = first(/(?:采购代理机构|招标代理(?:机构)?|代理机构)(?:名称)?[:：\s]*([^\n，。；]{2,40})/, text);
+  let m;
+  if((m=text.match(new RegExp("(?:预算金额|采购预算|最高限价|招标控制价|预算价)[:：\\s]*"+AMOUNT)))) r.budget=m[1].replace(/\s/g,"");
+  if((m=text.match(new RegExp("投标保证金[^0-9]{0,12}"+AMOUNT)))) r.bid_bond=m[1].replace(/\s/g,"");
+  if((m=text.match(new RegExp("(?:投标(?:文件)?截止时间|递交投标文件截止时间|投标截止)[:：\\s（(]*"+DT)))) r.deadline=m[1].replace(/\s+/g," ").trim();
+  if((m=text.match(new RegExp("开标时间[:：\\s（(]*"+DT)))) r.bid_open_time=m[1].replace(/\s+/g," ").trim();
+  r.delivery = first(/(?:交货期|交货时间|供货周期|工期|交付期限|交货期限)[:：\s]*([^\n，。；]{2,40})/, text);
+
+  // 废标项 / 实质性要求
+  const seen=new Set();
+  for(const ln of lines){
+    if(/^#{1,6}\s|^第[一二三四五六七八九十百]+[章节]/.test(ln)) continue;
+    const starred=[...STARS].some(c=>ln.includes(c));
+    const hit=REJECT.test(ln);
+    if(!(starred||hit)) continue;
+    let clean=ln.replace(new RegExp("^["+STARS+" 　•·\\-]+"),"");
+    clean=clean.replace(/^(?:\d+(?:\.\d+)*[.、)）]?\s*|[（(][一二三四五六七八九十\d][)）]\s*|[一二三四五六七八九十]、\s*)/,"");
+    clean=clean.replace(new RegExp("^["+STARS+" 　]+"),"");
+    if(clean.length<6) continue;
+    const key=clean.slice(0,30); if(seen.has(key)) continue; seen.add(key);
+    r.mandatory_items.push({title:clean.slice(0,24)+(clean.length>24?"…":""), requirement:clean.slice(0,300),
+      category:classifyMandatory(clean), is_starred:starred, severity:"高"});
+  }
+
+  // 评分（评分章节下的竖线表格 / （x分））
+  let inT=false;
+  for(const ln of lines){
+    if(/^第[一二三四五六七八九十百]+[章节]/.test(ln) && !/评分|评标/.test(ln)) inT=false;
+    if(/评标办法|评分办法|评分标准|综合评分|评审因素|评分细则/.test(ln)){ inT=true; if(!ln.includes("|")) continue; }
+    if(!ln.includes("|")) continue;
+    const cells=ln.replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
+    if(!inT && /评分|分值|分数|评审因素|得分/.test(ln)){ inT=true; continue; }
+    if(!inT) continue;
+    if(cells.every(c=>/^[-—:\s]*$/.test(c))) continue;
+    if(!cells.some(Boolean)) continue;
+    let sc=null; for(const c of cells){ const mm=c.match(/^(\d+(?:\.\d+)?)\s*分?$/); if(mm){sc=+mm[1];break;} }
+    r.scoring_items.push({category:scoringCat(cells.join(" ")), item:cells[0].slice(0,60), max_score:sc, criteria:cells.filter(Boolean).join(" | ").slice(0,200)});
+  }
+  if(!r.scoring_items.length){
+    for(const ln of lines){ const mm=ln.match(/(.{4,40})[（(]\s*(\d+(?:\.\d+)?)\s*分\s*[）)]/); if(mm) r.scoring_items.push({category:scoringCat(ln),item:mm[1].replace(/[：:\s　]+$/,""),max_score:+mm[2],criteria:ln.slice(0,200)}); }
+  }
+
+  // 技术参数
+  let inTech=false; const seenT=new Set();
+  for(const ln of lines){
+    if(/技术(?:参数|要求|规格|规范|指标)|主要技术/.test(ln)) inTech=true;
+    if(/^(?:第[一二三四五六七八九十]+[章节]|[一二三四五六七八九十]+[、.]|附件)/.test(ln) && !ln.includes("技术")) inTech=false;
+    if(TECHOP.test(ln) && ln.length<=120){
+      const key=ln.slice(0,30); if(seenT.has(key)) continue; seenT.add(key);
+      const name=ln.split(/[:：]|不(?:小于|低于|大于|高于)|[≥≤><＞＜]/)[0].replace(/[\s•·\-、　]+$/,"");
+      r.tech_params.push({name:(name.slice(0,40)||ln.slice(0,40)), requirement:ln.slice(0,120),
+        is_mandatory:[...STARS].some(c=>ln.includes(c))||REJECT.test(ln)});
+    }
+    if(r.tech_params.length>=60) break;
+  }
+
+  // 合同风险
+  const rules=[
+    [/逾期|延期|延误/,"逾期交付/履约风险","明确不可抗力免责，评估自身交期能力，约定合理的逾期梯度。"],
+    [/违约金|罚款|扣款|扣罚/,"违约金/罚款风险","测算违约金上限对成本的影响，必要时在澄清阶段提出异议。"],
+    [/赔偿|连带责任|无限责任/,"赔偿责任风险","界定赔偿范围与上限，避免承担超出合同额的连带/无限责任。"],
+    [/质保金|履约保证金|质量保证金/,"保证金占用风险","关注保证金比例、退还条件与周期，纳入资金成本测算。"],
+    [/付款|结算|账期|质保期满后支付/,"付款账期风险","核算账期对现金流的占用，评估垫资压力。"]
+  ];
+  const seenR=new Set();
+  for(const ln of lines){ for(const [pat,name,sg] of rules){ if(pat.test(ln)){ if(seenR.has(name)) break; seenR.add(name);
+    const lvl=/无限|连带|废标|拒绝/.test(ln)?"高":"中"; r.risks.push({clause:ln.slice(0,160),risk_level:lvl,description:name,suggestion:sg}); break; } } }
+
+  // 资格要求 + 投标文件组成
+  let cap=false;
+  for(const ln of lines){
+    if(/投标人(?:资格|的资格)?要求|资格(?:要求|条件)|供应商资格/.test(ln)){ cap=true; continue; }
+    if(cap){
+      if(/^(?:第[一二三四五六七八九十]+[章节]|[一二三四五六七八九十]+[、.]\s*[^0-9])/.test(ln) && !/营业执照|资质|资格|业绩|认证|许可/.test(ln)){ cap=false; continue; }
+      if(/^(?:[（(]?\d+[)）.、]|[（(][一二三四五六七八九十][)）])/.test(ln) || /营业执照|资质|认证|许可证|注册资本|业绩/.test(ln)) r.qualification.push(ln.slice(0,160));
+      if(r.qualification.length>=15) break;
+    }
+  }
+  let capO=false;
+  for(const ln of lines){
+    if(/投标文件(?:的)?(?:组成|构成|格式|内容|编制)/.test(ln)){ capO=true; continue; }
+    if(capO){ const mm=ln.match(/^(?:[（(]?\d+[)）.、]\s*|[（(][一二三四五六七八九十][)）]\s*|[一二三四五六七八九十][、.]\s*)(.{2,40})/);
+      if(mm) r.bid_doc_outline.push(mm[1].trim()); else if(r.bid_doc_outline.length>=3) break; }
+    if(r.bid_doc_outline.length>=20) break;
+  }
+  r.notes.push(`共识别废标/实质性条款 ${r.mandatory_items.length} 条、评分项 ${r.scoring_items.length} 条、技术参数 ${r.tech_params.length} 条。`);
+  return r;
+}
+
+/* ----------------------------- 模块四：标书生成 ----------------------------- */
+const SPECS = [
+  {key:"bid_letter",title:"投标函",order:10,kb:false,fb:"bid_letter"},
+  {key:"authorization",title:"法定代表人身份证明及授权委托书",order:20,kb:false,fb:"authorization"},
+  {key:"company_profile",title:"公司简介",order:30,query:"公司简介 企业概况 成立时间 注册资本 主营业务 管道",fb:"company_profile"},
+  {key:"qualification",title:"资格及资信证明",order:40,query:"资质证书 营业执照 资格 认证 ISO 安全生产许可",fb:"qualification"},
+  {key:"performance",title:"类似项目业绩",order:50,query:"类似业绩 项目案例 合同 管道 供货 中标 业主",fb:"performance"},
+  {key:"tech_solution",title:"技术方案",order:60,query:"技术方案 管材 管件 产品 技术参数 材质 标准 性能 工艺",fb:"tech_solution"},
+  {key:"implementation",title:"项目实施方案",order:70,query:"项目实施 进度计划 组织机构 质量保证 安全文明施工 供货计划",fb:"implementation"},
+  {key:"after_sales",title:"售后服务承诺",order:80,query:"售后服务 质保 质量保证期 服务响应 维修 培训 备品备件",fb:"after_sales"},
+  {key:"pricing",title:"投标报价",order:90,kb:false,fb:"pricing"},
+  {key:"compliance",title:"实质性要求响应/偏离表",order:100,kb:false,fb:"compliance"}
+];
+function similar(a,b){ a=a.replace(/[及\s]/g,""); b=b.replace(/[及\s]/g,""); return a.includes(b)||b.includes(a)||[...new Set(a)].filter(c=>b.includes(c)).length>=Math.max(2,Math.floor(Math.min(a.length,b.length)/2)); }
+function buildOutline(req){
+  const specs=[...SPECS]; const titles=new Set(specs.map(s=>s.title)); let o=110;
+  for(const t of req.bid_doc_outline){ const tt=(t||"").trim(); if(!tt||tt.length>30) continue; if([...titles].some(k=>similar(tt,k))) continue;
+    specs.push({key:"extra_"+o,title:tt,order:o,query:tt,fb:"generic"}); titles.add(tt); o+=10; }
+  return specs.sort((a,b)=>a.order-b.order);
+}
+function kbText(hits,limit=4){ return hits.slice(0,limit).map(h=>cleanMd(h.text)).filter(Boolean).join("\n\n"); }
+
+const COMPOSERS = {
+  generic:(s,ctx,h)=>{ const b=kbText(h); return [b? b+"\n\n（以上内容依据企业知识库资料整理，请投标人结合本项目实际核对完善。）" : `本章节针对「${s.title}」编写。【请补充与本项目相关的具体内容。】`, []]; },
+  bid_letter:(s,ctx)=>{ const r=ctx.req; return [`致：${r.purchaser||"（采购人/招标人）"}
+
+根据贵方招标编号为 ${r.project_no||"【招标编号】"} 的《${r.project_name||"【项目名称】"}》招标文件，我方（投标人：${ctx.company}）愿就本项目进行投标，并郑重承诺如下：
+
+一、我方已仔细阅读并完全理解招标文件的全部内容，自愿按招标文件的各项要求参加投标。
+二、我方同意按招标文件规定的投标报价口径提交投标报价（详见《投标报价表》）；预算/最高限价为 ${r.budget||"【见招标文件】"}。
+三、我方承诺投标有效期为自投标截止之日起 90 日历天，在此期间本投标文件始终对我方具有约束力。
+四、我方承诺如中标，将严格按照招标文件、投标文件及合同约定履行全部义务，按期保质完成供货与服务。
+五、我方已按招标文件要求提交投标保证金人民币 ${r.bid_bond||"【见招标文件】"}。
+六、我方完全响应招标文件中带★/▲及"否则按废标处理"的实质性要求，无任何实质性偏离。
+
+投标人（盖章）：${ctx.company}
+法定代表人或其授权代表（签字）：____________
+日期：______年____月____日`, []]; },
+  authorization:(s,ctx)=>{ const r=ctx.req; return [`（一）法定代表人身份证明
+投标人名称：${ctx.company}
+姓名：________  性别：____  职务：____  系本单位法定代表人。特此证明。
+投标人（盖章）：${ctx.company}    日期：____年__月__日
+
+（二）授权委托书
+本人（法定代表人）________ 现授权委托 ________ 为我方就《${r.project_name||"【项目名称】"}》（招标编号：${r.project_no||"【招标编号】"}）投标活动的合法代理人，以我方名义处理一切与之有关的事务，代理人无转委托权。特此委托。
+法定代表人（签字）：________  授权代理人（签字）：________
+投标人（盖章）：${ctx.company}    日期：____年__月__日`, []]; },
+  company_profile:(s,ctx,h)=>{ const b=kbText(h,5); return [b? `${ctx.company}是一家专注于管道及相关产品研发、生产、供应与工程服务的企业。现将公司基本情况介绍如下：\n\n`+b : `${ctx.company}是一家专注于管道行业的专业企业，具备完善的生产/供应能力与质量管理体系。【请补充公司成立时间、注册资本、主营业务、生产规模、技术力量与荣誉资质等资料。】`, []]; },
+  qualification:(s,ctx,h)=>{ const b=kbText(h,5); const L=["本公司具备承担本项目所需的相应资质与资信，主要包括："];
+    if(ctx.req.qualification.length){ L.push("\n对照招标资格要求，我方逐项满足："); ctx.req.qualification.slice(0,12).forEach((q,i)=>L.push(`${i+1}. ${q} —— 满足（详见随附证明文件）。`)); }
+    L.push(b? "\n相关资质与认证摘录：\n"+b : "\n【请补充营业执照、行业资质、体系认证、安全生产许可等扫描件。】"); return [L.join("\n"),[]]; },
+  performance:(s,ctx,h)=>{ const b=kbText(h,6); const head="我方近年完成了大量与本项目类似的供货业绩，具备丰富的项目经验。代表性业绩如下：\n\n";
+    return [b? head+b+"\n\n（上述业绩可提供中标通知书、合同及验收证明等佐证材料。）" : head+"【请补充类似项目业绩：项目名称、业主、合同金额、规模、起止时间及联系人等。】", []]; },
+  tech_solution:(s,ctx,h)=>{ const r=ctx.req; const P=[`针对《${r.project_name||"本项目"}》的技术要求，我方提供如下技术方案。\n`]; const b=kbText(h,5);
+    P.push("一、产品选型与技术说明\n"+(b||"【请补充拟供管材/管件的型号、材质、规格、执行标准与技术说明。】")+"\n");
+    if(r.tech_params.length){ P.push("二、关键技术参数响应（逐条响应，确保实质性满足）："); r.tech_params.slice(0,25).forEach((p,i)=>P.push(`${i+1}. 招标要求：${p.requirement}\n   我方响应：满足，并优先选用符合或优于该要求的产品（具体指标见技术规格书）。`)); }
+    else P.push("二、我方所供产品全部满足招标文件技术规格要求，无实质性偏离。");
+    P.push("\n三、质量与标准\n所供产品严格执行国家及行业标准（如 GB/T、CJ/T、SY/T 等），出厂均经检验合格并提供质保书。"); return [P.join("\n"),[]]; },
+  implementation:(s,ctx,h)=>{ const b=kbText(h,4); const P=[
+    "一、项目组织机构\n我方将组建专门的项目团队，配备项目经理、技术负责人、质量与安全管理人员，明确职责与协作流程。",
+    "二、供货/进度计划\n根据招标文件交付要求"+(ctx.req.delivery?`（${ctx.req.delivery}）`:"")+"，编制详细的供货与进度计划，确保按期、按质、按量交付。",
+    "三、质量保证体系\n建立覆盖采购、生产、检验、运输、交付全过程的质量保证体系，关键环节设置质量控制点。",
+    "四、安全文明施工/作业\n严格执行安全生产规章，落实安全技术交底与现场管理，做到安全、文明、环保作业。"];
+    if(b) P.push("五、实施保障措施（结合企业经验）\n"+b); return [P.join("\n\n"),[]]; },
+  after_sales:(s,ctx,h)=>{ const b=kbText(h,4); const P=[
+    "一、质量保证期\n我方对所供产品提供不低于招标文件要求的质保期，质保期内因产品质量问题免费维修或更换。",
+    "二、服务响应\n设立专门售后服务团队，接到服务通知后在约定时限内响应，必要时派员赶赴现场处理。",
+    "三、服务网络与备品备件\n依托区域服务网络，保障备品备件供应，缩短故障处理周期。",
+    "四、技术培训\n根据需要为业主提供产品使用、维护等方面的技术培训。"];
+    if(b) P.push("五、服务承诺（企业既有承诺）\n"+b); return [P.join("\n\n"),[]]; },
+  pricing:(s,ctx)=>{ const r=ctx.req; const text=`我方对《${r.project_name||"本项目"}》的投标报价为人民币（大写）【______】元整（小写：￥______元），该报价为完成招标范围内全部内容的总价，已包含产品、运输、装卸、税费、服务及合理利润等一切费用。`+(r.budget?`招标预算/最高限价为 ${r.budget}，我方报价不超过该限价。`:"")+`\n\n投标报价一览表（示例，请据实填报）：`;
+    const rows=[["序号","货物/服务名称","规格型号","单位","数量","单价(元)","合计(元)","备注"]];
+    const items=r.tech_params.slice(0,8);
+    if(items.length) items.forEach((p,i)=>rows.push([i+1+"",(p.name.slice(0,24)||"项目"+(i+1)),"【】","【】","【】","【】","【】",""]));
+    else rows.push(["1","【货物/服务名称】","【】","【】","【】","【】","【】",""]);
+    rows.push(["","投标总报价（合计）","","","","","【】","应≤最高限价"]); return [text,rows]; },
+  compliance:(s,ctx)=>{ const r=ctx.req; const text="我方对招标文件中的废标项及实质性要求逐条响应如下，承诺完全满足、无实质性偏离。下表为实质性要求响应一览（详见对应章节）：";
+    const rows=[["序号","招标实质性/废标要求","类别","响应情况","说明"]];
+    if(r.mandatory_items.length) r.mandatory_items.slice(0,40).forEach((m,i)=>rows.push([i+1+"",m.requirement.slice(0,80),m.category,"满足/响应","见相应章节及证明材料"]));
+    else rows.push(["1","（未自动识别到明确废标项，请人工核对招标文件）","—","—","—"]); return [text,rows]; }
+};
+function generate(req, company){
+  const ctx={req, company}; const sections=[];
+  for(const spec of buildOutline(req)){
+    let hits=[]; if(spec.kb!==false && spec.query){ const extra= spec.key==="tech_solution"? req.tech_params.slice(0,5).map(p=>p.name).join(" "):""; hits=kbSearch(`${spec.query} ${req.project_name} ${extra}`,5); }
+    const [content,table]=(COMPOSERS[spec.fb]||COMPOSERS.generic)(spec,ctx,hits);
+    sections.push({key:spec.key,title:spec.title,order:spec.order,content,table,sources:[...new Set(hits.map(h=>h.source))],char_count:content.length,status:"done"});
+  }
+  return {project_name:req.project_name,company,sections};
+}
+
+/* ----------------------------- 模块五：审核 ----------------------------- */
+function review(bid, req){
+  const issues=[]; const full=bid.sections.map(s=>s.content).join("\n"); const ft=new Set(tokenize(full));
+  let responded=0;
+  for(const m of req.mandatory_items){
+    const toks=[...new Set(tokenize(m.requirement))].filter(t=>t.length>=2);
+    const cov=toks.length? toks.filter(t=>ft.has(t)).length/toks.length : 1;
+    if(cov>=0.5) responded++; else issues.push({severity:"高",category:"合规",location:"实质性要求响应/偏离表",issue:`废标项/实质性要求可能未充分响应：${m.requirement.slice(0,60)}`,suggestion:"请在相关章节明确逐条响应该要求，并提供证明材料，避免废标。"});
+  }
+  for(const s of bid.sections){
+    if(!s.content.trim()){ issues.push({severity:"高",category:"完整性",location:s.title,issue:"章节内容为空。",suggestion:"请补充该章节内容。"}); continue; }
+    const holes=(s.content.match(/【[^】]*】/g)||[]).concat((s.table||[]).flat().filter(c=>String(c).includes("【")));
+    if(holes.length){ const u=[...new Set(holes)].slice(0,8); issues.push({severity:"中",category:"完整性",location:s.title,issue:`存在 ${holes.length} 处待填写占位符，如：${u.join("、")}`,suggestion:"请补充企业实际数据（业绩、参数、报价等）后再定稿。"}); }
+    if(s.content.length<60 && s.key!=="authorization") issues.push({severity:"低",category:"完整性",location:s.title,issue:"章节内容过短。",suggestion:"建议结合项目实际充实内容。"});
+  }
+  if(!req.deadline) issues.push({severity:"中",category:"基础",location:"全局",issue:"未能识别投标截止时间。",suggestion:"请人工确认投标截止时间，避免逾期。"});
+  const pricing=bid.sections.find(s=>s.title.includes("报价"));
+  if(pricing && /￥______|【______】/.test(pricing.content)) issues.push({severity:"高",category:"完整性",location:"投标报价",issue:"投标报价尚未填写具体金额。",suggestion:"定稿前必须填写投标总报价及分项报价。"});
+  const checked=req.mandatory_items.length, ratio=checked? responded/checked : 1;
+  const high=issues.filter(i=>i.severity==="高").length, med=issues.filter(i=>i.severity==="中").length;
+  let score=Math.max(0,Math.min(100, 100*ratio - high*8 - med*3));
+  const passed = high===0 && score>=75;
+  const summary=`合规度 ${score.toFixed(1)} 分；废标项响应 ${responded}/${checked}；高风险问题 ${high} 项、需关注 ${med} 项。`+(passed?"初步通过，建议人工终审后定稿。":"存在需处理的问题，请按建议修改后再定稿。");
+  return {passed,score:+score.toFixed(1),issues,checked_mandatory:checked,responded_mandatory:responded,summary};
+}
+
+/* ============================ UI ============================ */
+const $=s=>document.querySelector(s); const esc=s=>(s==null?"":String(s)).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let lastBid=null,lastReq=null,lastReview=null;
+
+kbReset();
+function refreshChips(){ $("#chips").innerHTML=`<span class="chip">引擎：<b>离线规则/模板</b> 🟡</span><span class="chip">检索：<b>关键词 BM25</b></span><span class="chip">知识库：<b>${KB.docs.length}</b> 篇 / <b>${KB.chunks.length}</b> 片段</span>`; }
+refreshChips();
+
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active");
+  ["gen","kb","about"].forEach(n=>$("#tab-"+n).classList.add("hide")); $("#tab-"+t.dataset.tab).classList.remove("hide");
+  if(t.dataset.tab==="kb") renderKb();
+});
+
+$("#btn-sample").onclick=()=>{ $("#tender").value=SAMPLE_TENDER; $("#file-name").textContent="已载入示例招标文件"; };
+$("#btn-upload").onclick=()=>$("#file").click();
+$("#file").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ $("#tender").value=rd.result; $("#file-name").textContent="已读取："+f.name; }; rd.readAsText(f,"utf-8"); };
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setBar(p,stage){ $("#bar").style.width=p+"%"; $("#pct").textContent=p+"%"; if(stage)$("#stage").textContent=stage; }
+function logLine(p,msg){ $("#log").innerHTML+=`<div><span class="s">[${String(p).padStart(3)}%]</span> ${esc(msg)}</div>`; $("#log").scrollTop=$("#log").scrollHeight; }
+
+$("#btn-gen").onclick=async()=>{
+  const text=$("#tender").value.trim(); if(!text){ alert("请粘贴招标文件正文，或点击「载入示例招标文件」。"); return; }
+  const company=$("#company").value.trim()||"我公司";
+  $("#btn-gen").disabled=true; $("#result").innerHTML=""; $("#progress-card").classList.remove("hide"); $("#log").innerHTML=""; setBar(0,"开始");
+  try{
+    logLine(5,"正在解析招标文件…"); await sleep(120);
+    logLine(20,`解析完成：约 ${Math.max(1,Math.round(text.length/1200))} 页、${text.length} 字。`); await sleep(120);
+    setBar(25,"需求抽取"); logLine(25,"正在抽取招标需求与废标项…"); await sleep(150);
+    const req=extract(text); lastReq=req;
+    logLine(40,`抽取完成：废标项 ${req.mandatory_items.length} 条、评分项 ${req.scoring_items.length} 条、技术参数 ${req.tech_params.length} 条、风险 ${req.risks.length} 条。`); await sleep(120);
+    setBar(45,"标书生成"); logLine(45,"多模块正在生成标书…"); await sleep(150);
+    const bid=generate(req,company); lastBid=bid;
+    for(let i=0;i<bid.sections.length;i++){ logLine(45+Math.round(40*(i+1)/bid.sections.length),`已生成「${bid.sections[i].title}」（${i+1}/${bid.sections.length}）`); await sleep(40); }
+    setBar(88,"审核校验"); logLine(88,"正在进行合规与完整性审核…"); await sleep(150);
+    const rv=review(bid,req); lastReview=rv;
+    logLine(92,rv.summary); await sleep(100);
+    setBar(100,"完成"); logLine(100,"标书初稿与审核结论已生成。");
+    renderResult(req,bid,rv);
+  }catch(e){ logLine(100,"生成失败："+e.message); console.error(e); }
+  $("#btn-gen").disabled=false;
+};
+
+function sev(s){ return s==="高"?"t-high":s==="中"?"t-mid":"t-low"; }
+function kv(k,v){ return `<div class="kv"><div class="k">${k}</div><div class="v">${v?esc(v):'<span class="muted">—</span>'}</div></div>`; }
+function tableHtml(rows){ if(!rows||!rows.length) return ""; let h='<table style="margin-top:10px">'; rows.forEach((r,i)=>{ h+="<tr>"+r.map(c=>`<${i?"td":"th"}>${esc(c)}</${i?"td":"th"}>`).join("")+"</tr>"; }); return h+"</table>"; }
+
+function renderResult(r,bid,rv){
+  let h=`<div class="card"><h2>📑 招标需求摘要</h2><div class="grid">
+    ${kv("项目名称",r.project_name)}${kv("项目编号",r.project_no)}${kv("采购人",r.purchaser)}
+    ${kv("预算/限价",r.budget)}${kv("投标保证金",r.bid_bond)}${kv("投标截止",r.deadline)}
+    ${kv("交货/工期",r.delivery)}${kv("代理机构",r.agent_org)}</div>`;
+  if(r.mandatory_items.length){ h+=`<h3 style="font-size:14px;margin:16px 0 8px">⚠️ 投标注意事项清单（废标项 / 实质性要求） <span class="pill">${r.mandatory_items.length}</span></h3><table><tr><th>#</th><th>类别</th><th>要求</th><th>级别</th></tr>`;
+    r.mandatory_items.forEach((x,i)=>h+=`<tr><td>${i+1}</td><td>${x.is_starred?'<span class="tag t-star">★</span> ':''}${x.category}</td><td>${esc(x.requirement)}</td><td><span class="tag ${sev(x.severity)}">${x.severity}</span></td></tr>`); h+="</table>"; }
+  if(r.scoring_items.length){ h+=`<h3 style="font-size:14px;margin:16px 0 8px">🎯 评分细则 <span class="pill">${r.scoring_items.length}</span></h3><table><tr><th>类别</th><th>评审因素</th><th>分值</th><th>标准</th></tr>`;
+    r.scoring_items.forEach(x=>h+=`<tr><td>${x.category}</td><td>${esc(x.item)}</td><td>${x.max_score??"-"}</td><td>${esc(x.criteria)}</td></tr>`); h+="</table>"; }
+  if(r.tech_params.length){ h+=`<details class="sec" style="margin-top:14px"><summary>🔧 技术参数要求（${r.tech_params.length}）</summary><div class="body" style="white-space:normal"><table><tr><th>#</th><th>参数</th><th>要求</th></tr>`+r.tech_params.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${esc(x.requirement)}</td></tr>`).join("")+"</table></div></details>"; }
+  if(r.risks.length){ h+=`<details class="sec"><summary>📌 合同风险评估（${r.risks.length}）</summary><div class="body" style="white-space:normal"><table><tr><th>风险</th><th>级别</th><th>建议</th></tr>`+r.risks.map(x=>`<tr><td>${esc(x.description)}</td><td><span class="tag ${sev(x.risk_level)}">${x.risk_level}</span></td><td>${esc(x.suggestion)}</td></tr>`).join("")+"</table></div></details>"; }
+  h+="</div>";
+  h+=`<div class="card"><h2>✅ 审核报告</h2><div class="flex"><div class="score ${rv.passed?"ok":"warn"}">${rv.score}</div><div><div class="${rv.passed?"ok":"warn"}" style="font-weight:700">${rv.passed?"初步通过（建议人工终审）":"存在需处理问题"}</div><div class="muted" style="font-size:13px">废标项响应 ${rv.responded_mandatory}/${rv.checked_mandatory}</div></div></div><p class="muted" style="font-size:13px">${esc(rv.summary)}</p>`;
+  if(rv.issues.length){ h+=`<table><tr><th>级别</th><th>类别</th><th>位置</th><th>问题</th><th>建议</th></tr>`+rv.issues.map(x=>`<tr><td><span class="tag ${sev(x.severity)}">${x.severity}</span></td><td>${x.category}</td><td>${esc(x.location)}</td><td>${esc(x.issue)}</td><td>${esc(x.suggestion)}</td></tr>`).join("")+"</table>"; } h+="</div>";
+  h+=`<div class="card"><h2>📝 标书初稿（${bid.sections.length} 章）</h2><div class="flex" style="margin-bottom:12px"><button onclick="exportWord()">⬇ 导出 Word (.doc)</button><button class="ghost" onclick="window.print()">🖨 打印 / 存为 PDF</button></div>`;
+  bid.sections.forEach(s=>h+=`<details class="sec"><summary><span>${Math.floor(s.order/10)}. ${esc(s.title)}</span><span class="muted" style="font-weight:400;font-size:12px">${s.char_count}字 · ✓</span></summary><div class="body">${esc(s.content)}${tableHtml(s.table)}${s.sources.length?`<div class="src">参考资料：${s.sources.join("、")}</div>`:""}</div></details>`);
+  h+="</div>"; $("#result").innerHTML=h;
+}
+
+/* 导出 Word：HTML -> Word 兼容 .doc */
+function exportWord(){
+  if(!lastBid) return;
+  const r=lastReq,bid=lastBid;
+  let body=`<div style="text-align:center"><h1 style="font-size:26pt">${esc(bid.project_name||"投标文件")}</h1><h2>投 标 文 件</h2><br><br>
+    <p>投标人（盖章）：${esc(bid.company)}</p><p>项目编号：${esc(r.project_no||"")}</p><p>采购人：${esc(r.purchaser||"")}</p><p>日期：______年____月____日</p></div><br clear=all style="page-break-before:always">`;
+  body+="<h2>目  录</h2><ol>"+bid.sections.map(s=>`<li>${esc(s.title)}</li>`).join("")+"</ol><br clear=all style='page-break-before:always'>";
+  bid.sections.forEach((s,i)=>{ body+=`<h2>${i+1}、${esc(s.title)}</h2>`;
+    s.content.split("\n").forEach(p=>body+=`<p style="text-indent:2em;line-height:1.7">${esc(p)}</p>`);
+    if(s.table&&s.table.length){ body+="<table border=1 cellspacing=0 cellpadding=4 style='border-collapse:collapse'>"+s.table.map((row,ri)=>"<tr>"+row.map(c=>`<${ri?"td":"th"}>${esc(c)}</${ri?"td":"th"}>`).join("")+"</tr>").join("")+"</table>"; }
+    if(s.sources.length) body+=`<p style="color:#888;font-size:9pt">【参考企业资料：${esc(s.sources.join("、"))}】</p>`;
+    body+="<br clear=all style='page-break-before:always'>"; });
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>投标文件</title></head><body>${body}</body></html>`;
+  const blob=new Blob(["﻿"+html],{type:"application/msword"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(bid.project_name||"投标文件")+"-投标文件.doc"; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* 知识库页 */
+function renderKb(){
+  $("#kb-count").textContent=KB.docs.length;
+  $("#kb-list").innerHTML=KB.docs.map(d=>`<div class="item"><div><b>${esc(d.source)}</b> <span class="pill">${d.category}</span><div class="muted" style="font-size:12px">${d.chars} 字</div></div></div>`).join("");
+}
+$("#btn-kb-add").onclick=()=>{ const t=$("#kb-title").value.trim(),x=$("#kb-text").value.trim(); if(!t||!x){ $("#kb-msg").textContent="标题与内容不能为空"; return; } kbAdd(t,$("#kb-cat").value,x); $("#kb-msg").textContent=`✓ 已加入「${t}」`; $("#kb-title").value="";$("#kb-text").value=""; renderKb(); refreshChips(); };
+$("#btn-kb-search").onclick=()=>{ const q=$("#kb-q").value.trim(); if(!q) return; const res=kbSearch(q,5);
+  $("#kb-res").innerHTML=res.length? res.map(x=>`<div class="kv" style="margin-bottom:8px"><div class="flex"><b>${esc(x.source)}</b><span class="right pill">综合 ${x.score} · 关键词 ${x.keyword}</span></div><div style="font-size:13px;margin-top:6px;color:#334155">${esc(x.text.slice(0,160))}…</div></div>`).join("") : '<p class="muted">无匹配结果。</p>'; };
+</script>
+</body>
+</html>
