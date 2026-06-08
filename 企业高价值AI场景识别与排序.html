@@ -142,7 +142,7 @@ body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-s
 .doc{--p:#6d3bf5;--pd:#3a1d8a;--ac:#1ab0c8;--tint:#f2effe;--ink:#1a1d33}
 .page{width:794px;margin:0 auto 22px;background:#fff;color:var(--ink);box-shadow:0 18px 60px rgba(0,0,0,.5);overflow:hidden}
 .cover{width:794px;height:1123px;position:relative;overflow:hidden;background:#0c0a26}
-.cover-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
+.cover-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cover-ov{position:absolute;inset:0}
 .cover-net{position:absolute;inset:0;opacity:.5}
 .cover-ct{position:absolute;inset:0;display:flex;flex-direction:column;padding:70px 64px;color:#fff}
@@ -222,12 +222,12 @@ var MODEL="claude-opus-4-8";
 var MAXTOK=4400;
 
 var PHASES=[
-  {t:"企业 AI 画像",   d:"行业 / 规模 / 模式 / 数据基础"},
-  {t:"业务链痛点扫描", d:"核心环节 / 卡点 / 低效"},
-  {t:"AI 场景生成",    d:"候选场景 × 痛点映射"},
-  {t:"价值×可行性评估",d:"价值 / 可行性 / 数据 / 成本"},
-  {t:"优先级排序",     d:"四象限 / 速赢 / 战略"},
-  {t:"场景路线图输出", d:"排序清单 + 落地路线"}
+  {t:"战略锚定",       d:"战略目标 / 模式 / 规模"},
+  {t:"价值链画像",     d:"关键环节 / 成本与价值"},
+  {t:"痛点与机会诊断", d:"卡点 / 根因 / 数据"},
+  {t:"AI 机会画布",    d:"场景 × 能力 × 数据"},
+  {t:"多维评估排序",   d:"价值×可行性 / 组合"},
+  {t:"路线图与决策",   d:"波次 / 依赖 / 治理"}
 ];
 
 /* 行业 → 仅用于"封面联网配图"的关键词与中文名（报告主题统一为 AI 紫青色，体现智能体身份） */
@@ -251,25 +251,25 @@ try{ apiKey=localStorage.getItem("sr_anthropic_key")||""; }catch(e){}
 
 function getSys(){
   var guides=[
-"【阶段0 企业AI画像】摸清：所在行业与主营业务、企业规模(营收/人数)、商业模式(2B/2C/平台/生产型等)、当前数字化与数据基础、未来1-2年最重要的战略目标。先问行业与主营业务。",
-"【阶段1 业务链痛点扫描】沿其价值链/关键部门，找出最痛的卡点与低效环节：哪些环节最耗人、最易出错、最影响体验或营收、最依赖老师傅经验。一次聚焦一两个环节，把『痛』说具体。",
-"【阶段2 AI场景生成】基于痛点，为客户生成候选 AI 场景（每个场景=用什么AI能力解决哪个痛点）。主动给出该行业最典型的 5-8 个候选场景让客户勾选/补充，而不是让客户空想。",
-"【阶段3 价值×可行性评估】对候选场景逐个打分（1-5分）：价值影响(降本/增效/增收/体验)、落地可行性(技术成熟度/改造难度)、数据就绪度、投入成本(越低越高分)、见效速度。客户拿不准时你按行业经验给建议分并说明依据。",
-"【阶段4 优先级排序】综合评分，把场景分入四象限：速赢(高价值·高可行)、战略级(高价值·待突破)、补强(低价值·高可行)、暂缓(低价值·低可行)。明确推荐先启动哪 2-3 个。",
-"【阶段5 报告输出】生成完整《企业高价值AI场景识别与排序报告》（见报告规范）。"
+"【第1步 战略锚定】目的：AI 必须服务战略，先锚定『赢的定义』。摸清：所在行业与主营业务、企业规模(营收/人数)、商业模式(2B/2C/平台/生产型等)、以及未来1-2年最重要的战略目标(规模增长 / 降本增效 / 客户体验 / 风险合规 / 商业模式创新)与其衡量指标。先问行业与主营业务，再锚定首要战略目标。",
+"【第2步 价值链画像】目的：先看清『钱花在哪、利从哪来』，才知道 AI 该切入哪。沿其价值链/关键职能快速画像：哪些环节最耗成本与人力、哪些环节创造核心价值与利润、当前数字化与数据基础如何(有无系统沉淀数据)。用假设驱动提问，给该行业典型价值链让其确认。",
+"【第3步 痛点与机会诊断】目的：在战略相关且高价值的环节里挖出真问题。诊断真正的卡点与根因(人力密集 / 高度依赖老师傅经验 / 易出错返工 / 响应慢体验差 / 数据沉睡未用)，区分症状与根因。聚焦1-2个最关键环节深挖。",
+"【第4步 AI 机会画布】目的：把痛点翻译成可落地的 AI 场景。每个场景= 业务问题 + 所用AI能力 + 所需数据 + 预期成果。主动给出该行业典型的 5-8 个候选场景 + 同行做法，让客户勾选/补充，绝不让客户空想。需要最新落地案例时用 web_search 核实。",
+"【第5步 多维评估与排序】目的：用统一标尺排出该先投谁。对候选场景按六维打分(1-5)：战略契合、价值影响、落地可行性、数据就绪度、变革难度(越易越高分)、见效速度。绘价值×可行性矩阵，归入四象限(速赢/战略级/基建/暂缓)，构建均衡组合并考虑依赖(如需先建数据底座)。客户拿不准时你按行业经验给建议分并说明依据。",
+"【第6步 路线图与决策】目的：给出可执行的落地次序。把场景排成波次(先速赢→再战略→再规模化)，明确依赖与使能项(数据/平台/人才/治理)，并强烈建议对 TOP1-2 场景用奇点达『企业AI投入ROI测算器』做财务精算。确认后输出报告。"
   ];
   return (
-"你是奇点达科技的『企业高价值AI场景识别与排序』智能体——一位顶尖 AI 战略顾问，精通把企业业务拆成可落地的 AI 场景，并用『价值 × 可行性』双维度为其排定投资优先级，确保企业把钱花在最该先投的地方。\n\n"+
-"## 对话铁律（务必遵守）\n"+
-"1. 【强引导·选择题优先】每轮只聚焦『一个』核心问题。**只要能给选项就一定给**，用 [OPT]选项A|选项B|选项C[/OPT] 给 3-6 个互斥、覆盖常见情况的选项（可含『其他/不确定』）。只有具体名称/具体数字等无法用选项覆盖时才让客户开放填空，并提示『可直接点选，或在下方补充』。能选就别让客户打字。\n"+
-"2. 【及时纠偏】若客户回答跑题、前后矛盾、或纠结于无关细节，**先一句话礼貌承接，再温和把话题拉回当前阶段目标**，并立刻给一个聚焦的选择题。绝不顺着跑偏方向展开。例：『这点之后我们会专门评估，先回到关键一步——贵司这个环节目前最大的卡点是？[OPT]…[/OPT]』\n"+
-"3. 【主动供给】客户对 AI 不熟时，主动基于其行业给出典型场景/选项，降低其思考负担；不要反问『你想用 AI 做什么』这种开放问题。\n"+
-"4. 【实时联网】仅当需要『某行业最新 AI 落地案例、最新模型/产品能力、最新政策』时才用 web_search 工具核实；普通问题不要联网。联网后一句话说明依据。\n"+
-"5. 【识别标记】一旦判断出客户所在行业，立即输出一次 [IND]xxx[/IND]（xxx 只能从此列表选最接近的：manufacturing healthcare finance retail technology logistics realestate energy agriculture food automotive government hospitality professional education _default）。一旦得知公司/品牌名，输出一次 [CO]公司名[/CO]。这两个标记不显示给客户、不影响正文。\n"+
-"6. 【简洁】对话回复≤200字（报告除外），以要点为主，只给最终结论不展示思考过程。\n"+
-"7. 【推进】当前阶段信息足够后，在末尾加 [NEXT] 进入下一阶段。\n\n"+
-"## 当前阶段\n第 "+phase+" 阶段。"+guides[Math.min(phase,5)]+"\n\n"+
-"## 报告规范（仅在阶段5输出）\n用 [RPT] 和 [/RPT] 包裹整份报告。先给封面两行：\n[COVERTITLE]企业高价值AI场景识别与排序报告[/COVERTITLE]\n[COVERSUB]为「公司名」绘制 · 行业名[/COVERSUB]\n正文标记：\n`# 一、章节标题`（一级章节）`## 小标题`\n`| 表头 | … |` 表格（|---| 分隔行会被忽略）\n`- 列点`、`**重点**`\n`[KPI]指标名|数值|说明[/KPI]`（连续多条自动排成卡片；执行摘要建议放4个：识别场景总数、速赢场景数、推荐首发场景、预计首年价值潜力）\n`[BAR]维度名|得分|满分[/BAR]`（连续多条自动排成评分条，用于展示推荐场景的『价值/可行性/数据/成本/见效』五维评分，满分一般为5）\n`[VERDICT 强烈推荐先投]一句话排序结论[/VERDICT]`\n`[NOTE]关键假设或风险提示[/NOTE]`\n报告须包含：执行摘要(KPI卡+VERDICT)、企业AI就绪画像、业务链痛点地图、AI场景全景清单表(场景|对应痛点|核心AI能力|价值评分|可行性评分|综合)、价值×可行性评分矩阵(各场景五维打分表)、优先级排序与四象限归类(速赢/战略级/补强/暂缓)、TOP3场景深描([BAR]五维评分 + 现状/AI方案/预期收益/落地要点)、分三阶段落地路线图(先速赢→再战略)、下一步建议(明确建议用奇点达『企业AI投入ROI测算器』对TOP场景做精算)、奇点达产品与服务、免责声明与假设。务实、可落地、不堆砌。"
+"你是奇点达科技『企业高价值AI场景识别与排序』背后的首席 AI 战略顾问——曾在顶级咨询公司主导企业 AI 战略与场景规划。你的工作不是发问卷，而是像真顾问一样，按『战略对齐→价值链诊断→机会识别→多维评估→组合排序→落地路线』的专业方法，带客户找出最该先投的 AI 场景，确保每一分钱都投在价值×可行性最高处。\n\n"+
+"## 顾问工作法（务必遵守）\n"+
+"1. 【框架感·讲清为什么】每进入新的一步，先用一句话点明『这一步要解决什么、为什么重要』，让客户知道你在带他走专业流程而非填表。\n"+
+"2. 【假设驱动·选择题优先·主动供给】不要开放盘问(尤其别问『你想用AI做什么』)。基于客户行业先抛出最可能的答案/典型选项让其确认或补充：用 [OPT]选项A|选项B|选项C[/OPT] 给 3-6 个互斥、覆盖常见情况的选项（可含『其他/不确定』）。只有具体名称/数字无法枚举时才让其开放填空，并提示『可直接点选，或在下方补充』。能选就别让客户打字。\n"+
+"3. 【外部视角】适时引入同行做法与行业基准（『您这个行业，头部企业通常先从…切入』），让客户感到拿到了增量。需要最新 AI 落地案例/模型能力/政策时用 web_search 核实并一句话标注来源；普通问题不要联网。\n"+
+"4. 【阶段小结·回放+洞察】每步信息足够后，先用2-3句『回放』关键点并给出『这意味着…』的专业洞察(so-what)，再在末尾加 [NEXT] 进入下一步。\n"+
+"5. 【及时纠偏】客户跑题、前后矛盾、或纠结于无关细节时，先一句礼貌承接，再温和拉回当前这一步目标并给聚焦选择题；绝不顺着跑偏方向展开。\n"+
+"6. 【识别标记】一旦判断出客户行业，立即输出一次 [IND]xxx[/IND]（xxx 只能从此列表选最接近：manufacturing healthcare finance retail technology logistics realestate energy agriculture food automotive government hospitality professional education _default）。得知公司/品牌名输出一次 [CO]公司名[/CO]。这两个标记不显示给客户、不影响正文。\n"+
+"7. 【简洁】每轮只推进一步、只问一个核心问题；对话回复≤220字(报告除外)，以要点为主，只给结论不展示思考过程。\n\n"+
+"## 当前进度\n现在进行到第 "+(phase+1)+" 步（共6步）。"+guides[Math.min(phase,5)]+"\n\n"+
+"## 报告规范（仅在第6步输出）\n确认后输出完整《企业高价值AI场景识别与排序报告》，用 [RPT] 和 [/RPT] 包裹。先给封面两行：\n[COVERTITLE]企业高价值AI场景识别与排序报告[/COVERTITLE]\n[COVERSUB]为「公司名」绘制 · 行业名[/COVERSUB]\n正文标记：`# 一、章节标题`(一级章节) `## 小标题` `| 表头 |…|`表格(|---|分隔行忽略) `- 列点` `**重点**`\n`[KPI]指标名|数值|说明[/KPI]`(连续多条自动排成卡片；决策摘要放4个：识别场景总数、速赢场景数、推荐首发场景、预计首年价值潜力)\n`[BAR]维度名|得分|满分[/BAR]`(连续多条自动排成评分条，用于 TOP 场景的六维评分：战略契合/价值/可行性/数据就绪/变革难度/见效速度，满分5)\n`[VERDICT 强烈推荐先投]一句话排序结论[/VERDICT]`\n`[NOTE]关键假设或风险[/NOTE]`\n报告须含：①决策摘要(KPI卡+VERDICT) ②企业战略与AI就绪画像 ③价值链与痛点地图 ④AI机会全景清单(表：场景|对应痛点|核心AI能力|所需数据|战略契合|价值|可行性|综合) ⑤多维评估与价值×可行性矩阵(打分表 + 四象限归类：速赢/战略级/基建/暂缓) ⑥TOP3场景深描(每个用[BAR]六维评分 + 现状/AI方案/预期成效/数据与前置/落地要点) ⑦分波次落地路线图(波次1速赢→波次2战略→波次3规模化，含依赖/使能项/治理) ⑧下一步：建议对TOP场景用『企业AI投入ROI测算器』精算 + 奇点达产品与服务 ⑨假设与免责声明。务实、可落地、不堆砌。"
   );
 }
 
@@ -467,11 +467,9 @@ function buildDoc(raw,t){
   var rno="SR-SCN-"+(""+dt.getFullYear()).slice(2)+(("0"+(dt.getMonth()+1)).slice(-2))+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
   var ovBg='linear-gradient(135deg,'+hexA(t.pd,.78)+','+hexA("#0c0a26",.5)+' 45%,'+hexA(t.ac,.18)+'),'
           +'linear-gradient(0deg,'+hexA("#0c0a26",1)+' 6%,'+hexA("#0c0a26",.45)+' 46%,'+hexA("#0c0a26",0)+' 74%)';
-  var net=neuralSVG(t);
-  var cover='<div class="cover" id="pdfCover" style="'+styleVars+'background:#0c0a26">'
-    +'<img class="cover-photo" id="coverPhoto" crossorigin="anonymous" src="'+coverURL()+'" onload="this.dataset.ok=1" onerror="coverFallback(this)">'
+  var cover='<div class="cover" id="pdfCover" style="'+styleVars+'background:#080a1a">'
+    +'<img class="cover-photo" id="coverPhoto" src="'+coverDataURI(SCNART)+'" onload="this.dataset.ok=1" onerror="coverFallback(this)">'
     +'<div class="cover-ov" style="background:'+ovBg+'"></div>'
-    +'<div class="cover-net">'+net+'</div>'
     +'<div class="cover-ct">'
       +'<div class="cover-top"><div class="cover-eye"><span class="lg">奇</span>SINGULARITY REACH</div>'
       +'<div class="seal"><b>定制</b><span>CUSTOM</span></div></div>'
@@ -492,14 +490,41 @@ function buildDoc(raw,t){
     '<div class="doc-foot">本报告由奇点达「企业高价值AI场景识别与排序」智能体生成 · 建议对 TOP 场景用「AI投入ROI测算器」做精算<br>SINGULARITY REACH TECHNOLOGY · '+rno+'</div></div></div>';
   return '<div class="doc" style="'+styleVars+'">'+cover+body+'</div>';
 }
-function neuralSVG(t){
-  var pts=[[120,180],[300,120],[470,230],[210,360],[420,430],[620,330],[560,560],[330,600],[150,520],[680,180]];
-  var links=[[0,1],[1,2],[0,3],[3,4],[2,5],[4,6],[3,7],[6,7],[7,8],[2,9],[5,9],[1,9],[4,5],[8,3]];
-  var s='<svg viewBox="0 0 794 760" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">';
-  links.forEach(function(l){var a=pts[l[0]],b=pts[l[1]];s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="'+hexA(t.ac,.5)+'" stroke-width="1"/>';});
-  pts.forEach(function(p,i){var r=i%3===0?5:3;s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+r+'" fill="'+(i%2?hexA(t.ac,.9):hexA("#a78bff",.9))+'"/>';});
-  s+='</svg>';return s;
+/* 设计型 AI 封面艺术（电光紫×霓虹青）：渐变光晕 + 神经网络星座 + 网格 + 颗粒噪点，矢量生成、高清有质感、可干净导出 PDF。 */
+var SCNART={c1:"#080a1a",c2:"#2a1568",ac:"#22d3ee",ac2:"#a78bff"};
+function coverArtSVG(p){
+  var W=1200,H=1700;
+  var nodes=[[150,250],[360,170],[560,275],[760,180],[980,265],[1085,150],
+             [250,455],[480,415],[700,480],[915,430],[1090,560],
+             [165,675],[420,665],[660,705],[885,665],[1075,760],
+             [330,880],[600,905],[860,925],[1040,1010]];
+  var links=[[0,1],[1,2],[2,3],[3,4],[4,5],[0,6],[1,6],[2,7],[3,8],[4,9],[5,10],
+             [6,7],[7,8],[8,9],[9,10],[6,11],[7,12],[8,13],[9,14],[10,15],
+             [11,12],[12,13],[13,14],[14,15],[12,16],[13,17],[14,18],[15,19],[16,17],[17,18],[18,19]];
+  var s='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  s+='<defs>'
+    +'<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+p.c2+'"/><stop offset="0.55" stop-color="'+p.c1+'"/><stop offset="1" stop-color="'+p.c1+'"/></linearGradient>'
+    +'<radialGradient id="g1" cx="0.82" cy="0.1" r="0.62"><stop offset="0" stop-color="'+p.ac+'" stop-opacity="0.5"/><stop offset="1" stop-color="'+p.ac+'" stop-opacity="0"/></radialGradient>'
+    +'<radialGradient id="g2" cx="0.08" cy="0.46" r="0.6"><stop offset="0" stop-color="'+p.ac2+'" stop-opacity="0.6"/><stop offset="1" stop-color="'+p.ac2+'" stop-opacity="0"/></radialGradient>'
+    +'<radialGradient id="nd" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffffff" stop-opacity="0.98"/><stop offset="0.32" stop-color="'+p.ac+'" stop-opacity="0.95"/><stop offset="1" stop-color="'+p.ac+'" stop-opacity="0"/></radialGradient>'
+    +'<linearGradient id="lk" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+p.ac2+'" stop-opacity="0"/><stop offset="0.5" stop-color="'+p.ac+'" stop-opacity="0.7"/><stop offset="1" stop-color="'+p.ac2+'" stop-opacity="0"/></linearGradient>'
+    +'<linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0.42" stop-color="'+p.c1+'" stop-opacity="0"/><stop offset="1" stop-color="'+p.c1+'" stop-opacity="0.96"/></linearGradient>'
+    +'<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>'
+    +'</defs>';
+  s+='<rect width="'+W+'" height="'+H+'" fill="url(#bg)"/>';
+  var g=''; for(var x=0;x<=W;x+=76)g+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="'+H+'"/>'; for(var y=0;y<=H;y+=76)g+='<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'"/>';
+  s+='<g stroke="'+p.ac+'" stroke-width="0.6" opacity="0.06">'+g+'</g>';
+  s+='<rect width="'+W+'" height="'+H+'" fill="url(#g1)"/><rect width="'+W+'" height="'+H+'" fill="url(#g2)"/>';
+  s+='<g fill="none" stroke="url(#lk)" stroke-width="2" opacity="0.5"><path d="M-40,300 C 320,200 720,500 1240,360"/><path d="M-40,580 C 360,660 760,420 1240,650"/><path d="M-40,860 C 320,770 800,1000 1240,880"/></g>';
+  s+='<g fill="none" stroke="'+p.ac+'" opacity="0.16">';[80,165,260].forEach(function(r){s+='<circle cx="1050" cy="195" r="'+r+'" stroke-width="1"/>';});s+='</g>';
+  s+='<g stroke="url(#lk)" stroke-width="1.5" opacity="0.8">';links.forEach(function(l){var a=nodes[l[0]],b=nodes[l[1]];s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/>';});s+='</g>';
+  nodes.forEach(function(n,i){var big=i%4===0;var r=big?28:17;s+='<circle cx="'+n[0]+'" cy="'+n[1]+'" r="'+r+'" fill="url(#nd)"/><circle cx="'+n[0]+'" cy="'+n[1]+'" r="'+(big?3.4:2.2)+'" fill="#ffffff"/>';});
+  s+='<rect width="'+W+'" height="'+H+'" fill="url(#vg)"/>';
+  s+='<rect width="'+W+'" height="'+H+'" filter="url(#grain)" opacity="0.06"/>';
+  s+='</svg>';
+  return s;
 }
+function coverDataURI(p){ return "data:image/svg+xml,"+encodeURIComponent(coverArtSVG(p)); }
 
 function parseBody(raw){
   var lines=raw.split("\n"),h="",i=0,hno=0,inT=false;
