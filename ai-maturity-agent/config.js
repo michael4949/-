@@ -24,4 +24,9 @@ window.AIM2_CONFIG = {
   /* 是否允许智能体联网检索行业数据（true=允许 / false=关闭） */
   enableWebSearch: true
 
+  /* 高级（可选）：如贵司使用兼容 Anthropic 协议的企业网关/中转服务，
+     去掉下一行开头的 // 并改为该服务的 messages 接口地址：
+  ,apiUrl: "https://api.anthropic.com/v1/messages"
+  */
+
 };

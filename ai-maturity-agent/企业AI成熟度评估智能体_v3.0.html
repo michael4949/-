@@ -503,9 +503,10 @@ function chatArea(){return document.getElementById("chatArea");}
 
 /* ---------------- API key (local config) ---------------- */
 function getKey(){
+  // 页面内保存过的 Key 优先（便于在 config.js 的 Key 失效时直接更换）
+  try{ var s=localStorage.getItem("aim2_key"); if(s) return s; }catch(e){}
   var k=(CFG.apiKey||"").trim();
   if(k && k.length>20 && !/在此|粘贴|YOUR/i.test(k)) return k;
-  try{ var s=localStorage.getItem("aim2_key"); if(s) return s; }catch(e){}
   try{ var u=new URLSearchParams(location.search).get("key"); if(u) return u; }catch(e){}
   return "";
 }
@@ -522,9 +523,9 @@ function showSetup(){
   h+='<h3>首次使用 · 连接 Claude 模型</h3>';
   h+='<p>本智能体由 Claude（Opus 4.8）模型驱动，在您本机直连 Anthropic 官方接口，不经过任何第三方服务器。首次使用需配置一次访问密钥，之后即可直接打开使用。</p>';
   h+='<div class="way"><b>方式一（推荐）：配置文件，一次配置永久生效</b>用记事本打开本页面同目录下的 <code>config.js</code>，把您的 API Key 粘贴到 <code>apiKey: ""</code> 的引号内并保存，然后刷新本页面。</div>';
-  h+='<div class="way"><b>方式二：在下方粘贴，保存在本机浏览器中</b>密钥只写入您本机浏览器的本地存储，同样不会上传到任何服务器。</div>';
+  h+='<div class="way"><b>方式二：在下方粘贴，保存在本机浏览器中</b>密钥只写入您本机浏览器的本地存储，同样不会上传到任何服务器。此处保存的 Key 优先于 config.js 生效（更换 Key 时直接在这里粘贴新的即可）。</div>';
   h+='<input type="password" id="setupKey" placeholder="sk-ant-...">';
-  h+='<div class="setup-acts"><button class="btn-o" onclick="closeSetup()">稍后再说</button><button class="btn-g" onclick="saveSetupKey()">保存并开始评估</button></div>';
+  h+='<div class="setup-acts"><button class="btn-o" onclick="closeSetup()">稍后再说</button><button class="btn-g" onclick="saveSetupKey()">保存'+(conv.length?'并继续':'并开始评估')+'</button></div>';
   h+='</div></div>';
   document.getElementById("setupHost").innerHTML=h;
 }
@@ -534,7 +535,9 @@ function saveSetupKey(){
   if(!v){ alert("请粘贴您的 API Key，或改用 config.js 配置后刷新页面。"); return; }
   try{ localStorage.setItem("aim2_key", v); }catch(e){}
   closeSetup();
-  startChat(true);
+  // 已有进行中的评估：换完 Key 直接重试，不丢进度
+  if(view==="chat" && conv.length){ retryLast(); }
+  else{ startChat(true); }
 }
 
 /* ---------------- Persistence (断点续评) ---------------- */
@@ -846,6 +849,7 @@ function pickOpt(text){
   if(busy) return;
   // special routes
   if(text==="重试上一步"){ retryLast(); return; }
+  if(text==="更换 API Key"){ showSetup(); return; }
   if(text==="重新生成报告"||text==="继续生成报告"){ killOpts(text); startReport(null); return; }
   if(/上传/.test(text) && !/跳过|暂时|不/.test(text)){
     killOpts(text);
@@ -930,14 +934,31 @@ function openReport(){ if(REPORT){ showReport(); } }
 function autoGrow(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,150)+"px";}
 
 function pushErr(err, isReport){
-  var hint = "";
-  var msg = (err&&err.message)||"未知错误";
-  if(err&&err.status===401) hint="\n\n请检查 config.js 中的 API Key 是否正确、是否已失效。";
-  else if(err&&err.status===429) hint="\n\n请求过于频繁或额度受限，请稍候再试。";
-  else if(err&&(err.status===529||err.status>=500)) hint="\n\n模型服务暂时繁忙，请稍候重试。";
-  else if(!navigator.onLine) hint="\n\n当前网络似乎已断开，请检查网络后重试。";
-  else hint="\n\n请检查网络是否可访问 api.anthropic.com，然后点击下方重试。";
-  var m={from:"ai", err:true, text:"⚠️ "+(isReport?"报告生成中断：":"连接出现问题：")+msg+hint, opts:["重试上一步"]};
+  var hint="", msg=(err&&err.message)||"未知错误", keyIssue=false;
+  if(/organization has been disabled/i.test(msg)){
+    keyIssue=true;
+    hint="\n\n📌 这不是网络或程序问题：请求已到达 Anthropic 服务器，但这把 API Key 所属的账户（组织）已被官方停用。常见原因：①未绑定付费方式或额度用尽欠费；②账户在 Anthropic 官方支持地区之外注册/使用而被风控停用。\n\n处理：登录 console.anthropic.com 查看组织状态与账单（如认为误判可在其中申诉），或更换一个状态正常账户的 Key。";
+  }else if(/credit balance is too low|insufficient credit/i.test(msg)){
+    keyIssue=true;
+    hint="\n\n账户余额不足。请前往 console.anthropic.com → Billing 充值后重试。";
+  }else if(err&&err.status===401){
+    keyIssue=true;
+    hint="\n\nAPI Key 无效或已被撤销（认证失败）。请检查 Key 是否完整、是否已在控制台删除，必要时更换新 Key。";
+  }else if(err&&err.status===403){
+    keyIssue=true;
+    hint="\n\nAPI Key 没有访问权限（permission_error）。请在 console.anthropic.com 检查该 Key 所属工作区的权限与模型访问范围，或更换 Key。";
+  }else if(err&&err.status===429){
+    hint="\n\n请求过于频繁或速率受限，程序已自动重试过，请稍候 1 分钟再点重试。";
+  }else if(err&&(err.status===529||err.status>=500)){
+    hint="\n\n模型服务暂时繁忙，请稍候重试。";
+  }else if(!navigator.onLine){
+    hint="\n\n当前网络已断开，请联网后重试。";
+  }else{
+    hint="\n\n请检查网络是否可访问 api.anthropic.com（部分网络环境需要代理），然后点击下方重试。";
+  }
+  var opts=["重试上一步"];
+  if(keyIssue) opts.push("更换 API Key");
+  var m={from:"ai", err:true, text:"⚠️ "+(isReport?"报告生成中断：":"连接出现问题：")+msg+hint, opts:opts};
   conv.push(m); addMsgEl(m,true); scrollBottom(false);
 }
 
