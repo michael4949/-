@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江铜 APS · 智能排程智能体 — 工作流蓝图</title>
+<style>
+/* ============ 设计基调：浅色 · 高端 · 蓝×铜 ============ */
+:root{
+  --bg:#f6f8fb; --bg2:#eef2f8;
+  --card:#ffffff; --card-glass:rgba(255,255,255,.82);
+  --ink:#10233f; --ink2:#5b6b82; --ink3:#8a97ab;
+  --line:#e4eaf3; --line2:#d4dde9;
+  --blue:#1d5bdf; --blue-d:#1547b0; --blue-soft:#e9effd;
+  --copper:#c4742e; --copper-d:#a85e1f; --copper2:#e09a55; --copper-soft:#fcf1e5;
+  --green:#0f9d6e; --green-soft:#e3f6ee;
+  --red:#df5340; --red-soft:#fdecea;
+  --amber:#e8a23a; --amber-soft:#fdf4e3;
+  --violet:#6f5bd8; --violet-soft:#efecfb;
+  --shadow:0 14px 40px rgba(16,35,63,.09);
+  --shadow-sm:0 6px 18px rgba(16,35,63,.07);
+  --r:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65;
+  overflow-x:hidden;
+}
+/* 背景：柔光球 + 工程网格 */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(720px 460px at 88% -6%, rgba(224,154,85,.16), transparent 60%),
+    radial-gradient(820px 540px at -8% 18%, rgba(29,91,223,.10), transparent 60%),
+    radial-gradient(600px 420px at 50% 110%, rgba(111,91,216,.07), transparent 60%),
+    linear-gradient(180deg,#f8fafd,#f3f6fa);
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(16,35,63,.030) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(16,35,63,.030) 1px,transparent 1px);
+  background-size:34px 34px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 42%);
+          mask-image:linear-gradient(180deg,#000 0%,transparent 42%);
+}
+::selection{background:rgba(224,154,85,.35)}
+
+/* ============ 导航 ============ */
+nav{
+  position:sticky; top:0; z-index:60;
+  backdrop-filter:blur(16px) saturate(1.4); -webkit-backdrop-filter:blur(16px) saturate(1.4);
+  background:rgba(255,255,255,.74); border-bottom:1px solid rgba(16,35,63,.06);
+}
+.nav-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:26px;padding:13px 28px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.brand-mark{
+  width:34px;height:34px;border-radius:10px;flex:none;
+  background:conic-gradient(from 210deg,#1d5bdf,#3f7bf0 35%,#e09a55 70%,#c4742e);
+  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;
+  box-shadow:0 4px 12px rgba(29,91,223,.30);
+}
+.brand small{display:block;font-size:11px;font-weight:500;color:var(--ink3);letter-spacing:1.5px;line-height:1.2}
+.nav-links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{
+  color:var(--ink2);text-decoration:none;font-size:13.5px;padding:7px 13px;border-radius:9px;transition:.2s;
+}
+.nav-links a:hover{background:var(--blue-soft);color:var(--blue)}
+.nav-cta{
+  font-size:13px;color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0);
+  border:none;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600;white-space:nowrap;
+  box-shadow:0 6px 16px rgba(29,91,223,.28);transition:.25s;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(29,91,223,.36)}
+
+/* ============ 通用 ============ */
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+section{padding:64px 0 26px}
+.sec-tag{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:2.5px;
+  color:var(--copper-d);text-transform:uppercase;margin-bottom:12px;
+}
+.sec-tag::before{content:"";width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--copper),var(--copper2))}
+h2{font-size:30px;letter-spacing:.5px;margin-bottom:10px;font-weight:700}
+.sec-sub{color:var(--ink2);max-width:860px;margin-bottom:34px;font-size:14.5px}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+  padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.spark{color:var(--copper-d);font-weight:700}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ Hero ============ */
+.hero{padding:74px 0 28px}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+h1{
+  font-size:50px;line-height:1.18;letter-spacing:.5px;font-weight:800;max-width:900px;
+  background:linear-gradient(105deg,#10233f 18%,#1d5bdf 58%,#c4742e 95%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:16.5px;color:var(--ink2);max-width:780px;margin:18px 0 30px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:42px}
+.btn{
+  border:none;cursor:pointer;font-size:14.5px;font-weight:600;border-radius:12px;padding:12px 24px;transition:.25s;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;
+}
+.btn-primary{
+  color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0);
+  box-shadow:0 10px 24px rgba(29,91,223,.30);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(29,91,223,.38)}
+.btn-ghost{
+  color:var(--copper-d);background:var(--copper-soft);border:1px solid #f0dcc3;
+}
+.btn-ghost:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(196,116,46,.18)}
+.kpis{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+}
+.kpi{
+  background:var(--card-glass);backdrop-filter:blur(8px);border:1px solid var(--line);
+  border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.kpi::after{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--blue),var(--copper2))}
+.kpi b{font-size:27px;font-weight:800;letter-spacing:.5px;display:block;font-variant-numeric:tabular-nums}
+.kpi b em{font-style:normal;font-size:15px;color:var(--ink2);font-weight:600}
+.kpi span{font-size:12.5px;color:var(--ink2)}
+.kpi small{display:block;font-size:11px;color:var(--ink3);margin-top:3px}
+.pain-strip{
+  margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+.pain{
+  background:#fff;border:1px dashed var(--line2);border-radius:14px;padding:13px 16px;font-size:12.8px;color:var(--ink2);
+  display:flex;align-items:center;gap:10px;
+}
+.pain s{color:var(--ink3)}
+.pain .arr{color:var(--copper);font-weight:800}
+.pain b{color:var(--ink);font-size:12.8px}
+
+/* ============ 工作流画布 ============ */
+.canvas-card{
+  background:var(--card-glass);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
+  padding:30px 26px 18px;position:relative;
+}
+.canvas-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.3px;color:var(--ink2)}
+.legend i{display:inline-flex;align-items:center;gap:6px;font-style:normal}
+.lg-line{width:26px;height:0;border-top:2.5px solid var(--blue);border-radius:2px}
+.lg-dash{width:26px;height:0;border-top:2.5px dashed var(--copper);border-radius:2px}
+.canvas-wrap{overflow-x:auto;padding-bottom:8px}
+.canvas-wrap::-webkit-scrollbar{height:9px}
+.canvas-wrap::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+.canvas{min-width:1432px;display:flex;align-items:stretch}
+.phase{width:246px;display:flex;flex-direction:column;gap:12px;transition:.4s}
+.phase.tour{transform:translateY(-4px)}
+.phase.tour .phase-head{box-shadow:0 0 0 3px rgba(224,154,85,.35),0 10px 26px rgba(196,116,46,.25)}
+.phase-head{
+  border-radius:15px;padding:13px 16px;color:#fff;position:relative;overflow:hidden;transition:.4s;
+  background:linear-gradient(125deg,#16335f,#1d5bdf);box-shadow:0 8px 20px rgba(29,91,223,.22);
+}
+.phase-head.p-copper{background:linear-gradient(125deg,#9c561b,#d98c3f);box-shadow:0 8px 20px rgba(196,116,46,.26)}
+.phase-head .pno{position:absolute;right:10px;top:4px;font-size:34px;font-weight:800;opacity:.16;font-style:italic}
+.phase-head h3{font-size:16.5px;letter-spacing:1px}
+.phase-head p{font-size:10.5px;opacity:.78;letter-spacing:2.2px;text-transform:uppercase;margin-top:2px}
+.node{
+  background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 15px 12px;cursor:pointer;
+  box-shadow:var(--shadow-sm);transition:.28s;position:relative;flex:1;display:flex;flex-direction:column;
+}
+.node:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(16,35,63,.13);border-color:#c8d8f5}
+.node.enh{border:1px solid #f0d9bd;background:linear-gradient(160deg,#fffdf9,#fcf3e7)}
+.node.enh:hover{border-color:var(--copper2)}
+.node-top{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.node-ic{
+  width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;
+  background:var(--blue-soft);color:var(--blue);
+}
+.node.enh .node-ic{background:var(--copper-soft);color:var(--copper-d)}
+.node-ic svg{width:17px;height:17px}
+.node h4{font-size:14.5px;font-weight:700;line-height:1.3}
+.node .cnt{
+  margin-left:auto;flex:none;font-size:10.5px;font-weight:700;color:var(--blue);
+  background:var(--blue-soft);border-radius:999px;padding:2px 8px;white-space:nowrap;
+}
+.node.enh .cnt{color:var(--copper-d);background:#fbe9d2}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.chips i{
+  font-style:normal;font-size:10.8px;color:var(--ink2);background:var(--bg2);
+  border:1px solid var(--line);border-radius:6px;padding:2px 7px;white-space:nowrap;
+}
+.chips i.gold{color:var(--copper-d);background:var(--copper-soft);border-color:#f0dcc3}
+.node-foot{
+  margin-top:auto;font-size:11.5px;color:var(--blue);font-weight:600;display:flex;align-items:center;gap:4px;
+}
+.node.enh .node-foot{color:var(--copper-d)}
+.conn{width:50px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:64px}
+.conn svg{width:46px;height:22px;overflow:visible}
+.conn .lbl{font-size:10px;color:var(--ink3);writing-mode:initial;white-space:nowrap;transform:translateY(-3px);letter-spacing:.5px}
+.dashflow{stroke:var(--blue);stroke-width:2.4;stroke-dasharray:7 6;animation:dash 1.1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-13}}
+.loop-lane{min-width:1432px;height:86px;position:relative;margin-top:4px}
+.loop-lane svg{position:absolute;inset:0;width:100%;height:100%}
+.loop-path{fill:none;stroke:var(--copper);stroke-width:2.4;stroke-dasharray:8 7;animation:dashRev 1.2s linear infinite;opacity:.9}
+@keyframes dashRev{to{stroke-dashoffset:15}}
+.loop-chips{
+  position:absolute;left:50%;top:46px;transform:translate(-50%,-50%);
+  display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #f0dcc3;
+  border-radius:999px;padding:7px 16px;box-shadow:var(--shadow-sm);white-space:nowrap;
+}
+.loop-chips b{font-size:12.3px;color:var(--copper-d)}
+.loop-chips i{font-style:normal;font-size:11.5px;color:var(--ink2);background:var(--copper-soft);border-radius:7px;padding:3px 9px}
+
+/* ============ 智能体架构 ============ */
+.arch{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.arch-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;transition:.28s;
+}
+.arch-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.arch-card::before{content:"";position:absolute;left:0;top:0;height:100%;width:4px;background:var(--ac,linear-gradient(180deg,var(--blue),#7aa3f5))}
+.arch-card h4{font-size:16px;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.arch-card h4 .no{font-size:10.5px;color:var(--ink3);letter-spacing:2px;font-weight:600}
+.arch-card p{font-size:12.8px;color:var(--ink2);margin-bottom:10px}
+.arch-card .chips i{font-size:11px}
+.brain{
+  grid-column:1/-1;border-radius:20px;padding:26px 30px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#122a52 0%,#1d5bdf 52%,#b06a28 100%);
+  box-shadow:0 18px 44px rgba(18,42,82,.30);
+  display:flex;align-items:center;gap:30px;flex-wrap:wrap;
+}
+.brain::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(420px 200px at 80% 0%,rgba(255,255,255,.16),transparent 60%);
+}
+.brain-core{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.brain-ring{
+  width:62px;height:62px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.45);
+  animation:pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.25)}50%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+.brain-ring svg{width:28px;height:28px}
+.brain h3{font-size:21px;letter-spacing:1px}
+.brain p{font-size:12.8px;opacity:.85;max-width:430px}
+.brain-caps{display:flex;gap:9px;flex-wrap:wrap;position:relative;z-index:1;margin-left:auto}
+.brain-caps i{
+  font-style:normal;font-size:12px;font-weight:600;border-radius:9px;padding:7px 13px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.30);backdrop-filter:blur(4px);
+}
+
+/* ============ 交互演示 ============ */
+.demo{display:grid;grid-template-columns:1.06fr .94fr;gap:18px;align-items:stretch}
+.panel{
+  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.panel-head{
+  padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;
+  background:linear-gradient(180deg,#fbfcfe,#f6f8fc);
+}
+.panel-head .pic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none}
+.panel-head h4{font-size:15.5px}
+.panel-head p{font-size:11.5px;color:var(--ink3)}
+.p-live{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--green);font-weight:600}
+.p-live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse2 1.6s infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.35}}
+.chat-box{flex:1;min-height:380px;max-height:470px;overflow-y:auto;padding:18px 18px 8px;display:flex;flex-direction:column;gap:13px;background:linear-gradient(180deg,#fcfdff,#f7f9fc)}
+.chat-box::-webkit-scrollbar{width:7px}
+.chat-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:7px}
+.msg{max-width:88%;animation:popin .35s ease}
+@keyframes popin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.user{align-self:flex-end}
+.msg .bub{
+  border-radius:14px;padding:11px 15px;font-size:13.5px;line-height:1.6;
+}
+.msg.user .bub{background:linear-gradient(120deg,var(--blue),#3f7bf0);color:#fff;border-bottom-right-radius:5px;box-shadow:0 6px 16px rgba(29,91,223,.24)}
+.msg.bot .bub{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px;box-shadow:var(--shadow-sm)}
+.msg .who{font-size:10.8px;color:var(--ink3);margin:0 6px 4px}
+.msg.user .who{text-align:right}
+.steps{display:flex;flex-direction:column;gap:6px;margin:4px 0 2px}
+.step{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);
+  background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 11px;
+  opacity:0;transform:translateX(-6px);transition:.3s;
+}
+.step.show{opacity:1;transform:none}
+.step .st-ic{width:15px;height:15px;flex:none;border-radius:50%;border:2px solid var(--blue);border-top-color:transparent;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.step.done .st-ic{border:none;animation:none;background:var(--green);position:relative}
+.step.done .st-ic::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:9.5px;font-weight:800}
+.step code{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--blue-d);background:#eef3fe;border-radius:5px;padding:0 5px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 6px}
+.plan{
+  border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;font-size:11.4px;color:var(--ink2);background:#fff;
+}
+.plan.best{border-color:var(--copper2);background:var(--copper-soft);position:relative}
+.plan.best::after{
+  content:"推荐";position:absolute;top:-9px;right:8px;font-size:9.5px;font-weight:700;color:#fff;
+  background:linear-gradient(120deg,var(--copper),var(--copper2));border-radius:6px;padding:1px 7px;
+}
+.plan b{display:block;font-size:12.3px;color:var(--ink);margin-bottom:3px}
+.plan em{font-style:normal;display:block;color:var(--ink3);font-size:10.6px}
+.bub .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.mini-btn{
+  border:none;cursor:pointer;font-size:12px;font-weight:600;border-radius:8px;padding:7px 13px;font-family:inherit;transition:.2s;
+}
+.mini-btn.blue{color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0)}
+.mini-btn.ghost{color:var(--blue);background:var(--blue-soft)}
+.mini-btn:hover{transform:translateY(-1px)}
+.scen-row{display:flex;gap:8px;padding:11px 16px;border-top:1px solid var(--line);flex-wrap:wrap;background:#fbfcfe}
+.scen{
+  font-size:12.3px;font-weight:600;color:var(--copper-d);background:var(--copper-soft);
+  border:1px solid #f0dcc3;border-radius:999px;padding:7px 14px;cursor:pointer;transition:.2s;font-family:inherit;
+}
+.scen:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(196,116,46,.18)}
+.scen:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.input-row{display:flex;gap:9px;padding:12px 16px 15px;background:#fbfcfe}
+.input-row input{
+  flex:1;border:1.5px solid var(--line2);border-radius:11px;padding:11px 15px;font-size:13.5px;font-family:inherit;
+  outline:none;transition:.2s;background:#fff;color:var(--ink);
+}
+.input-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,91,223,.12)}
+.send-btn{
+  border:none;cursor:pointer;width:44px;border-radius:11px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(120deg,var(--blue),#3f7bf0);transition:.2s;
+}
+.send-btn:hover{transform:translateY(-1px)}
+/* 甘特 */
+.gantt-body{padding:18px 20px 8px;flex:1}
+.g-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.g-leg{display:flex;gap:13px;margin-left:auto;font-size:11.3px;color:var(--ink2);flex-wrap:wrap}
+.g-leg i{display:inline-flex;align-items:center;gap:5px;font-style:normal}
+.sw{width:13px;height:9px;border-radius:3px}
+.sw.b{background:linear-gradient(120deg,#4d82ec,#7aa3f5)}
+.sw.r{background:linear-gradient(120deg,#df6a40,#e8915b)}
+.sw.s{background:repeating-linear-gradient(135deg,#d8b691 0 4px,#efdcc3 4px 8px)}
+.g-axis{display:grid;grid-template-columns:78px 1fr;font-size:10.8px;color:var(--ink3);margin-bottom:5px}
+.g-axis .ticks{display:grid;grid-template-columns:repeat(6,1fr)}
+.g-axis .ticks span{border-left:1px dashed var(--line2);padding-left:5px}
+.g-row{display:grid;grid-template-columns:78px 1fr;align-items:center;margin-bottom:11px}
+.g-name{font-size:12.3px;font-weight:600;color:var(--ink2)}
+.g-name small{display:block;font-size:10px;color:var(--ink3);font-weight:500}
+.g-track{
+  position:relative;height:34px;background:var(--bg2);border-radius:9px;border:1px solid var(--line);
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(100%/6 - 1px),rgba(16,35,63,.05) calc(100%/6 - 1px) calc(100%/6));
+}
+.g-bar{
+  position:absolute;top:5px;height:24px;border-radius:7px;color:#fff;font-size:10.6px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;
+  background:linear-gradient(120deg,#4d82ec,#7aa3f5);box-shadow:0 4px 10px rgba(29,91,223,.22);
+  transition:left .8s cubic-bezier(.5,.1,.2,1),width .8s cubic-bezier(.5,.1,.2,1),opacity .5s;
+}
+.g-bar.urgent{background:linear-gradient(120deg,#df6a40,#e8915b);box-shadow:0 4px 12px rgba(223,83,64,.32)}
+.g-bar.setup{background:repeating-linear-gradient(135deg,#d8b691 0 5px,#efdcc3 5px 10px);box-shadow:none;color:#8a5a22}
+.g-bar.ghost{opacity:0;transform:scale(.85)}
+.g-delta{display:flex;gap:9px;flex-wrap:wrap;padding:4px 20px 16px}
+.g-delta i{
+  font-style:normal;font-size:11.6px;font-weight:600;color:var(--green);background:var(--green-soft);
+  border-radius:8px;padding:5px 11px;opacity:0;transform:translateY(6px);transition:.4s;
+}
+.g-delta i.bad{color:var(--copper-d);background:var(--copper-soft)}
+.g-delta i.show{opacity:1;transform:none}
+
+/* ============ 算法中心 ============ */
+.algo-chips{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.a-chip{
+  font-size:13px;font-weight:600;color:var(--ink2);background:#fff;border:1.5px solid var(--line);
+  border-radius:11px;padding:9px 17px;cursor:pointer;transition:.22s;font-family:inherit;
+}
+.a-chip:hover{border-color:#c8d8f5;color:var(--blue)}
+.a-chip.on{color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0);border-color:transparent;box-shadow:0 7px 18px rgba(29,91,223,.28)}
+.algo-panel{
+  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+  padding:26px 30px;display:grid;grid-template-columns:1.2fr .8fr;gap:26px;min-height:170px;
+}
+.algo-panel h4{font-size:19px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.algo-panel h4 .tag{
+  font-size:10.5px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:6px;padding:2.5px 9px;letter-spacing:1px;
+}
+.algo-panel p{font-size:13.8px;color:var(--ink2)}
+.algo-fit{
+  border-left:3px solid var(--copper2);background:var(--copper-soft);border-radius:0 13px 13px 0;padding:14px 17px;
+}
+.algo-fit b{font-size:12.5px;color:var(--copper-d);display:flex;align-items:center;gap:6px;margin-bottom:5px;letter-spacing:.5px}
+.algo-fit p{font-size:12.8px;color:#7c5526}
+
+/* ============ 覆盖矩阵 & 增强 ============ */
+.matrix-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.matrix-stats{display:flex;gap:0;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfcfe,#f6f8fc)}
+.m-stat{flex:1;padding:17px 22px;border-right:1px solid var(--line)}
+.m-stat:last-child{border-right:none}
+.m-stat b{font-size:23px;font-weight:800;display:block}
+.m-stat b.cu{color:var(--copper-d)}
+.m-stat b.bl{color:var(--blue)}
+.m-stat b.gr{color:var(--green)}
+.m-stat span{font-size:11.8px;color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:left;font-size:11.5px;letter-spacing:1.5px;color:var(--ink3);font-weight:700;
+  padding:13px 20px;border-bottom:1px solid var(--line);background:#fafbfd;white-space:nowrap;
+}
+td{padding:13px 20px;border-bottom:1px solid #eef2f8;vertical-align:middle;color:var(--ink2)}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:.18s}
+tbody tr:hover{background:#f5f8fe}
+td .mod{font-weight:700;color:var(--ink);font-size:13.5px;display:flex;align-items:center;gap:8px}
+td .mod::before{content:"";width:8px;height:8px;border-radius:3px;background:linear-gradient(120deg,var(--blue),var(--copper2));flex:none}
+.pill{
+  display:inline-block;font-size:11px;font-weight:600;border-radius:7px;padding:2.5px 9px;margin:1.5px 3px 1.5px 0;
+  color:var(--blue-d);background:var(--blue-soft);white-space:nowrap;
+}
+.pill.cu{color:var(--copper-d);background:var(--copper-soft)}
+.ok{
+  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--green);
+  background:var(--green-soft);border-radius:999px;padding:4px 12px;white-space:nowrap;
+}
+.cnt-b{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.enh-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:26px}
+.enh-card{
+  background:linear-gradient(160deg,#fffdf9,#fcf2e6);border:1px solid #f0dcc3;border-radius:15px;
+  padding:16px 17px;transition:.25s;position:relative;
+}
+.enh-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(196,116,46,.16)}
+.enh-card b{font-size:13.4px;display:flex;align-items:center;gap:7px;margin-bottom:5px;color:var(--ink)}
+.enh-card p{font-size:11.8px;color:#8a6a45}
+
+/* ============ 抽屉 ============ */
+.overlay{
+  position:fixed;inset:0;background:rgba(16,35,63,.34);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:.3s;z-index:80;
+}
+.overlay.open{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(460px,94vw);z-index:90;background:#fdfefe;
+  box-shadow:-18px 0 50px rgba(16,35,63,.18);transform:translateX(102%);transition:transform .38s cubic-bezier(.6,.1,.2,1);
+  display:flex;flex-direction:column;
+}
+.drawer.open{transform:none}
+.drawer-head{padding:22px 26px 18px;color:#fff;position:relative;background:linear-gradient(120deg,#16335f,#1d5bdf)}
+.drawer-head.cu{background:linear-gradient(120deg,#8d4d16,#d98c3f)}
+.drawer-head .ph{font-size:10.5px;letter-spacing:2.5px;opacity:.75;text-transform:uppercase;margin-bottom:6px}
+.drawer-head h3{font-size:21px;letter-spacing:.5px;margin-bottom:8px}
+.drawer-head .mods{display:flex;gap:6px;flex-wrap:wrap}
+.drawer-head .mods i{font-style:normal;font-size:11px;font-weight:600;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);border-radius:7px;padding:2.5px 9px}
+.drawer-x{
+  position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.16);color:#fff;font-size:15px;display:grid;place-items:center;transition:.2s;
+}
+.drawer-x:hover{background:rgba(255,255,255,.3)}
+.drawer-body{flex:1;overflow-y:auto;padding:20px 26px 30px}
+.drawer-body::-webkit-scrollbar{width:7px}
+.drawer-body::-webkit-scrollbar-thumb{background:var(--line2);border-radius:7px}
+.grp{margin-bottom:20px}
+.grp-t{
+  font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--blue-d);margin-bottom:9px;
+  display:flex;align-items:center;gap:8px;
+}
+.grp-t::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--blue);flex:none}
+.f-item{
+  background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 13px;margin-bottom:7px;transition:.2s;
+}
+.f-item:hover{border-color:#c8d8f5;box-shadow:var(--shadow-sm)}
+.f-item b{font-size:13.2px;display:flex;align-items:center;gap:7px}
+.f-item b .ln{font-size:9.5px;font-weight:700;color:var(--ink3);background:var(--bg2);border-radius:5px;padding:1px 6px;letter-spacing:.5px}
+.f-item p{font-size:11.8px;color:var(--ink2);margin-top:3px}
+.f-item.gold{background:linear-gradient(160deg,#fffdf9,#fcf3e7);border-color:#f0dcc3}
+.f-item.gold b{color:#7c4a13}
+.f-item.gold p{color:#8a6a45}
+.grp-t.cu{color:var(--copper-d)}
+.grp-t.cu::before{background:var(--copper)}
+
+/* ============ Toast / Footer ============ */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,90px);z-index:120;
+  background:#10233f;color:#fff;font-size:13.5px;border-radius:13px;padding:13px 22px;
+  box-shadow:0 16px 40px rgba(16,35,63,.4);transition:.4s cubic-bezier(.5,.1,.2,1.2);max-width:86vw;
+  display:flex;align-items:center;gap:10px;
+}
+.toast.show{transform:translate(-50%,0)}
+.toast .t-ic{width:20px;height:20px;border-radius:50%;background:var(--green);display:grid;place-items:center;font-size:11px;flex:none}
+footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
+.foot-in{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--ink3);font-size:12.5px}
+
+/* ============ 响应式 ============ */
+@media (max-width:1080px){
+  h1{font-size:38px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .pain-strip{grid-template-columns:1fr 1fr}
+  .arch{grid-template-columns:1fr 1fr}
+  .demo{grid-template-columns:1fr}
+  .algo-panel{grid-template-columns:1fr}
+  .enh-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .kpis,.pain-strip,.arch,.enh-grid{grid-template-columns:1fr}
+  h1{font-size:31px}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 导航 ================= -->
+<nav>
+  <div class="nav-in">
+    <div class="brand">
+      <div class="brand-mark">Cu</div>
+      <div>江铜 · APS 智能排程智能体<small>AGENTIC&nbsp;PLANNING&nbsp;&amp;&nbsp;SCHEDULING</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="#workflow">核心工作流</a>
+      <a href="#arch">智能体架构</a>
+      <a href="#demo">交互演示</a>
+      <a href="#algo">算法中心</a>
+      <a href="#matrix">需求覆盖</a>
+    </div>
+    <button class="nav-cta" onclick="playTour()">▶ 工作流演示</button>
+  </div>
+</nav>
+
+<!-- ================= Hero ================= -->
+<header class="hero wrap">
+  <div class="hero-badges reveal">
+    <span class="badge"><span class="dot"></span>客户：江西铜业 · 台意</span>
+    <span class="badge">场景：铜线材 / 镀锡铜线</span>
+    <span class="badge">排程粒度：<b style="color:var(--copper-d)">&nbsp;小时级</b></span>
+    <span class="badge">模式：AI 自动排程 + 排程员审核发布</span>
+  </div>
+  <h1 class="reveal">把排程员的经验，<br>装进一个会思考的工作流</h1>
+  <p class="hero-sub reveal">
+    以 <b>需求一《生产排程》功能清单</b> 为蓝本，将 10 大模块 · 96 项功能点编排为
+    「数据感知 → 智能建模 → 智能决策 → 人机协同 → 执行闭环」五段式智能体工作流，
+    并以 <span class="spark">✨ 12 项 AI 增强能力</span> 超出文档要求 —— 让急单不再延期、设备不再空转、经验不再只在老师傅脑子里。
+  </p>
+  <div class="hero-actions reveal">
+    <button class="btn btn-primary" onclick="playTour()">▶&nbsp; 播放工作流演示</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('demo').scrollIntoView()">✨&nbsp; 体验智能交互</button>
+  </div>
+  <div class="kpis reveal">
+    <div class="kpi"><b><span data-count="96">0</span><em> 项</em></b><span>需求一功能点全覆盖</span><small>10 大模块 · 三级菜单逐项落位</small></div>
+    <div class="kpi"><b><span data-count="12">0</span><em> 项</em></b><span>AI 增强能力（超出文档）</span><small>Copilot · 预测预警 · 经验学习</small></div>
+    <div class="kpi"><b>天 <em>→</em> 小时<em>级</em></b><span>排程颗粒度升级</span><small>消除空闲与空转时段</small></div>
+    <div class="kpi"><b>&lt;<span data-count="5">0</span><em> 分钟</em></b><span>急单可行性评估</span><small>三模式插单 · 多方案对比</small></div>
+    <div class="kpi"><b>-<span data-count="90">0</span><em>%</em></b><span>排程耗时（目标）</span><small>约 4 小时 → 15 分钟</small></div>
+  </div>
+  <div class="pain-strip reveal">
+    <div class="pain"><s>强专家经验</s><span class="arr">→</span><b>知识库沉淀 · 持续学习</b></div>
+    <div class="pain"><s>排程单不透明</s><span class="arr">→</span><b>全程可视 · 可解释报告</b></div>
+    <div class="pain"><s>急单可能延期</s><span class="arr">→</span><b>秒级插单评估 · 事件重排</b></div>
+    <div class="pain"><s>天级空转设备</s><span class="arr">→</span><b>小时级排程 · 负荷均衡</b></div>
+  </div>
+</header>
+
+<!-- ================= 核心工作流 ================= -->
+<section id="workflow" class="wrap">
+  <div class="sec-tag reveal">WORKFLOW · 智能体主干</div>
+  <h2 class="reveal">五段式核心工作流</h2>
+  <p class="sec-sub reveal">
+    点击任意节点，查看其承载的需求一功能映射与 AI 增强项；橙色虚线为<b>事件驱动闭环</b> ——
+    急单、设备故障、实绩偏差将自动触发增量重排，方案经排程员审核后发布。
+  </p>
+  <div class="canvas-card reveal">
+    <div class="canvas-top">
+      <span class="badge"><span class="dot"></span>实时运行视图 · 点击节点查看功能映射</span>
+      <div class="legend">
+        <i><span class="lg-line"></span>主流程（顺向）</i>
+        <i><span class="lg-dash"></span>事件闭环（回流）</i>
+        <i>✨ 超出文档的 AI 增强</i>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <div class="canvas" id="canvas"></div>
+      <div class="loop-lane">
+        <svg viewBox="0 0 1432 86" preserveAspectRatio="none">
+          <defs>
+            <marker id="arrUp" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#c4742e"/>
+            </marker>
+          </defs>
+          <path class="loop-path" marker-end="url(#arrUp)" d="M1307 2 V40 a10 10 0 0 1 -10 10 H733 a10 10 0 0 1 -10 -10 V8"/>
+        </svg>
+        <div class="loop-chips">
+          <b>事件驱动闭环</b>
+          <i>⚡ 急单插入</i><i>🔧 设备故障</i><i>📉 实绩偏差</i>
+          <span style="font-size:11.5px;color:var(--ink3)">→ 自动增量重排 → 人审发布</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 智能体架构 ================= -->
+<section id="arch" class="wrap">
+  <div class="sec-tag reveal">ARCHITECTURE · 智能体解剖</div>
+  <h2 class="reveal">一个中枢大脑，五层智能协同</h2>
+  <p class="sec-sub reveal">智能体 = 感知 + 认知 + 决策 + 交互 + 执行的闭环组织，所有层共享同一个排程大脑与知识库。</p>
+  <div class="arch">
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#1d5bdf,#7aa3f5)">
+      <h4><span class="no">L1</span>感知层 · Sense</h4>
+      <p>多源数据实时入流，事件总线替代微信群通知。</p>
+      <div class="chips"><i>订单 / 做市商系统</i><i>原料·在途·模具库存</i><i>设备 IoT 状态</i><i class="gold">✨ 数据质量哨兵</i></div>
+    </div>
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#6f5bd8,#a99af0)">
+      <h4><span class="no">L2</span>认知层 · Model</h4>
+      <p>构建工厂数字孪生：资源、工艺、约束、换型损耗。</p>
+      <div class="chips"><i>物料-产线-模具绑定</i><i>换型时间矩阵</i><i>工艺路径 / BOM</i><i class="gold">✨ 换型自学习</i></div>
+    </div>
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#c4742e,#e09a55)">
+      <h4><span class="no">L3</span>决策层 · Decide</h4>
+      <p>齐套引擎 + 9 类排程算法 + 多目标寻优求解。</p>
+      <div class="chips"><i>预处理→计算→优化</i><i>快速插单 ×3 模式</i><i class="gold">✨ What-if 沙盘</i><i class="gold">✨ 可解释报告</i></div>
+    </div>
+    <div class="brain reveal">
+      <div class="brain-core">
+        <div class="brain-ring">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>
+        </div>
+        <div>
+          <h3>排程大脑 · Scheduling Brain</h3>
+          <p>大语言模型负责理解与解释，运筹求解器负责计算与寻优，规则引擎承载排程员的专家经验 —— 三引擎共脑，人审后发布。</p>
+        </div>
+      </div>
+      <div class="brain-caps">
+        <i>🧠 LLM 推理与对话</i><i>⚙️ OR 求解器</i><i>📚 专家规则知识库</i><i>🔁 实绩反馈学习</i>
+      </div>
+    </div>
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#0f9d6e,#5fd3ab)">
+      <h4><span class="no">L4</span>交互层 · Collaborate</h4>
+      <p>甘特协同 + 自然语言 Copilot，排程员始终掌握终审权。</p>
+      <div class="chips"><i>拖拽调整 / 一键调度</i><i>冲突实时检测</i><i class="gold">✨ 对话式排程</i><i class="gold">✨ 移动审批</i></div>
+    </div>
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#e8a23a,#f3c47d)">
+      <h4><span class="no">L5</span>执行层 · Act</h4>
+      <p>工单下发到机台，验收回执实时回流，状态全程可追。</p>
+      <div class="chips"><i>电子作业指导书</i><i>下发履历</i><i>达成统计 / 异常预警</i><i class="gold">✨ 预测性预警</i></div>
+    </div>
+    <div class="arch-card reveal" style="--ac:linear-gradient(180deg,#df5340,#ef8b7d)">
+      <h4><span class="no">L∞</span>学习环 · Learn</h4>
+      <p>每一次人工调整都是一次训练：经验进库、参数自校准。</p>
+      <div class="chips"><i>换型/节拍回归校准</i><i class="gold">✨ 调整意图学习</i><i class="gold">✨ KPI 自动周报</i></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 交互演示 ================= -->
+<section id="demo" class="wrap">
+  <div class="sec-tag reveal">INTERACTIVE · 智能交互</div>
+  <h2 class="reveal">和排程智能体，像和老师傅一样对话</h2>
+  <p class="sec-sub reveal">左侧 Copilot 展示智能体的「思考 → 调用工具 → 给方案」过程；右侧甘特沙盘演示急单插入的自动重排。两侧联动，所有动作最终须经排程员审核发布。</p>
+  <div class="demo">
+    <div class="panel reveal">
+      <div class="panel-head">
+        <div class="pic" style="background:linear-gradient(120deg,#1d5bdf,#3f7bf0)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div><h4>APS Copilot · 排程智能体</h4><p>自然语言 · 工具调用 · 方案生成（演示数据为示意）</p></div>
+        <span class="p-live">在线</span>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="scen-row" id="scenRow">
+        <button class="scen" data-s="0">⚡ 急单能不能接？</button>
+        <button class="scen" data-s="1">🔧 设备故障怎么办？</button>
+        <button class="scen" data-s="2">📅 最早交期是哪天？</button>
+      </div>
+      <div class="input-row">
+        <input id="chatInput" type="text" placeholder="试着问：急单 20t 周五交付能排吗？（回车发送）">
+        <button class="send-btn" onclick="sendFree()" title="发送">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="panel reveal">
+      <div class="panel-head">
+        <div class="pic" style="background:linear-gradient(120deg,#c4742e,#e09a55)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="17" y2="12"/><line x1="8" y1="18" x2="13" y2="18"/><circle cx="4" cy="6" r="1.2"/><circle cx="4" cy="12" r="1.2"/><circle cx="4" cy="18" r="1.2"/></svg>
+        </div>
+        <div><h4>机台甘特 · 急单沙盘</h4><p>资源甘特图 + 快速插单（交期影响最小模式）</p></div>
+        <span class="p-live">仿真</span>
+      </div>
+      <div class="gantt-body">
+        <div class="g-toolbar">
+          <button class="btn btn-primary" style="padding:9px 18px;font-size:13px" id="ganttBtn" onclick="toggleUrgent()">⚡ 模拟急单插入</button>
+          <div class="g-leg">
+            <i><span class="sw b"></span>计划工单</i>
+            <i><span class="sw r"></span>急单</i>
+            <i><span class="sw s"></span>换模 / 换型</i>
+          </div>
+        </div>
+        <div class="g-axis"><span></span>
+          <div class="ticks"><span>6/10</span><span>6/11</span><span>6/12</span><span>6/13</span><span>6/14</span><span>6/15</span></div>
+        </div>
+        <div id="gantt"></div>
+      </div>
+      <div class="g-delta" id="gDelta">
+        <i id="d1">延期订单 0 张</i>
+        <i id="d2">设备利用率 +3.2%</i>
+        <i id="d3" class="bad">换型损耗 +2.0h（已最小化）</i>
+        <i id="d4">版本 V0610-3 · 待排程员审核</i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 算法中心 ================= -->
+<section id="algo" class="wrap">
+  <div class="sec-tag reveal">ALGORITHM · 核心算法</div>
+  <h2 class="reveal">九类排程算法，按场景自动选型</h2>
+  <p class="sec-sub reveal">完整承接需求一「核心算法」模块；智能体增强项 ✨：根据订单结构与负荷特征，自动推荐算法组合并给出推荐理由。</p>
+  <div class="algo-chips reveal" id="algoChips"></div>
+  <div class="algo-panel reveal" id="algoPanel"></div>
+</section>
+
+<!-- ================= 覆盖矩阵 ================= -->
+<section id="matrix" class="wrap">
+  <div class="sec-tag reveal">COVERAGE · 需求对照</div>
+  <h2 class="reveal">需求一 · 10 大模块覆盖矩阵</h2>
+  <p class="sec-sub reveal">逐模块映射到工作流落位（点击任意行可打开对应节点详情）；在 96 项全覆盖之上，叠加 12 项超出文档的 AI 增强。</p>
+  <div class="matrix-card reveal">
+    <div class="matrix-stats">
+      <div class="m-stat"><b class="bl">10 / 10</b><span>需求一模块全覆盖</span></div>
+      <div class="m-stat"><b class="gr">96 项</b><span>三级菜单功能点逐项落位</span></div>
+      <div class="m-stat"><b class="cu">+12 项</b><span>AI 增强（超出文档）</span></div>
+      <div class="m-stat"><b class="bl">5 段</b><span>工作流 · 1 条事件闭环</span></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>需求一模块</th><th>核心内容</th><th>工作流落位</th><th style="text-align:center">功能点</th><th>覆盖状态</th></tr></thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="enh-grid" id="enhGrid"></div>
+</section>
+
+<!-- ================= 抽屉 / Toast / Footer ================= -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head" id="drawerHead">
+    <button class="drawer-x" onclick="closeDrawer()">✕</button>
+    <div class="ph" id="dPhase"></div>
+    <h3 id="dTitle"></h3>
+    <div class="mods" id="dMods"></div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+<div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastTxt"></span></div>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>江铜 APS · 智能排程智能体 — 工作流蓝图 · 基于需求一功能清单设计（演示数据均为示意）</div>
+    <div>颗粒度 小时级 · AI 排程 · 人审发布 · 闭环学习</div>
+  </div>
+</footer>
+
+<script>
+/* ==================================================================
+   数据：需求一 → 工作流节点映射（96 项功能点 + ✨增强）
+================================================================== */
+const ICONS = {
+  db:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>',
+  cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  flow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+  cpu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>',
+  zap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
+  msg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>'
+};
+
+const PHASES = [
+  {name:'数据感知', en:'SENSE', copper:false},
+  {name:'智能建模', en:'MODEL', copper:false},
+  {name:'智能决策', en:'DECIDE', copper:true},
+  {name:'人机协同', en:'COLLABORATE', copper:false},
+  {name:'执行闭环', en:'ACT & LEARN', copper:false}
+];
+const CONN_LABELS = ['数据就绪','约束建模完成','候选方案生成','排程员审核发布'];
+
+const NODES = [
+ /* ---------- P1 数据感知 ---------- */
+ {id:'n-source', phase:0, icon:'db', title:'多源数据接入', cnt:'6 项', enh:false,
+  chips:['原料·在途','产成品·在制品','模具·呆滞·盘点'],
+  mods:['库存数据'],
+  groups:[
+   {t:'库存数据（实时同步）', items:[
+    ['原料库存及在途','对接 WMS / 采购系统，作为齐套检查与最早开工时间（EST）的硬约束'],
+    ['产成品实时库存','支撑备库模式与成品转单决策'],
+    ['模具库存','拉丝模等工器具的在库与占用状态'],
+    ['呆滞库存','识别长期未动用库存，优先消耗'],
+    ['在制品库存','各工序间 WIP 实时可见'],
+    ['产成品盘点库存','盘点数据回写，账实一致']]},
+   {t:'系统对接（数据底座）', items:[
+    ['订单系统 / ERP / 设备 IoT','统一接入订单、工艺、设备状态等数据流，替代手工查询', '联动']]}],
+  enhs:[
+   ['✨ 数据质量哨兵','接入即校验缺失 / 重复 / 异常值，问题数据熔断并告警，杜绝“脏数据排程”'],
+   ['✨ 事件总线','库存、订单、设备事件实时入流，全面替代微信群通知']]},
+
+ {id:'n-order', phase:0, icon:'cart', title:'订单与需求中枢', cnt:'11 项', enh:false,
+  chips:['销售/采购订单','产销平衡·预警','制造订单展开'],
+  mods:['订单管理'],
+  groups:[
+   {t:'主档管理', items:[
+    ['客户档案','客户主数据、优先级、奖惩信息——直接参与排程优先级计算'],
+    ['供应商档案','供应商主数据维护']]},
+   {t:'需求接入', items:[
+    ['销售订单','单号 / 物品 / 数量 / 交期 / 优先级，导入或录入，计划的核心输入'],
+    ['新品试用反馈','业务员回传客户新品试用结果'],
+    ['采购订单','采购在途作为供应来源；到货日期约束排程最早开始时间']]},
+   {t:'产销协同', items:[
+    ['产销平衡','产能资源定义 / 分配 / 监控，使产能与需求匹配'],
+    ['产能预警','延迟 / 产能不足 / 缺料 / 库存异常自动预警'],
+    ['成品转单','产成品库存在销售订单间转移'],
+    ['脱挂单处理','工序工单与销售订单灵活脱钩 / 挂接']]},
+   {t:'制造订单', items:[
+    ['制造订单','排程需求来源，支持指定工艺路径或一单一 BOM'],
+    ['制造订单展开','按工艺路径展开为工序，支持拆分 / 合并与选择性同步']]}],
+  enhs:[
+   ['✨ 订单智能解析','微信 / Excel / 邮件中的非结构化订单，LLM 自动结构化入系统']]},
+
+ /* ---------- P2 智能建模 ---------- */
+ {id:'n-base', phase:1, icon:'layers', title:'基础数据建模', cnt:'11 项', enh:false,
+  chips:['组织·产线·物料','计划期间/模式','三类绑定关系'],
+  mods:['基础管理'],
+  groups:[
+   {t:'组织与物料', items:[
+    ['生产组织','基地 / 工厂 / 车间多级组织'],
+    ['生产线','提供产能的人机总称：漆包机、连续冲床、虚拟产线等'],
+    ['物料管理','成品 / 半成品 / 原料主档，各属性即排程约束'],
+    ['单位维护','单位及换算关系']]},
+   {t:'计划参数', items:[
+    ['计划期间','滚动开始、排程范围、计划冻结等时间配置'],
+    ['计划模式','按单生产 / 备库生产 / 混合模式'],
+    ['计划命令参数','排程模式·对象·方向·规则·方法五类指令化配置']]},
+   {t:'关系绑定（台意关键）', items:[
+    ['物料与生产线关系','节拍 / 开动率 / 优先级 / 批量 / 提前期——“器件型号×设备型号”绑定的载体'],
+    ['模具与物料关系','物料适用模具定义'],
+    ['模具与生产线关系','产线适用模具定义'],
+    ['物料分段损耗率','按数量分段放大损耗，数量 / 百分比两种类型']]}],
+  enhs:[
+   ['✨ 绑定关系智能初始化','从历史排程 Excel 自动学习，生成绑定关系草案供确认']]},
+
+ {id:'n-res', phase:1, icon:'cal', title:'资源与产能建模', cnt:'15 项', enh:false,
+  chips:['日历·排班·产能','节拍·提前期','换型时间矩阵'],
+  mods:['资源管理'],
+  groups:[
+   {t:'资源定义', items:[
+    ['主资源定义','车间 / 产线 / 设备组等标准资源'],
+    ['工具资源','模具、工装夹具属性化管理，直接影响排程结果']]},
+   {t:'时间与产能', items:[
+    ['生产日历','班次×资源×时间组合，精细至机台与工人'],
+    ['设备排班','日历形态展示，支持临时非常态变更'],
+    ['设备产能','时段 / 时长 / 产量维护'],
+    ['提前期','前处理 + 处理 + TAKT×数量 + 后处理'],
+    ['节拍','小时产量或 TAKT 时间标定'],
+    ['安全生产周期','上下游间安全提前时间'],
+    ['最大提前生产周期','防过早生产导致积压'],
+    ['时间栏','需求 / 固定 / 冻结 / 顺排 / 下达等 8 类时间栏']]},
+   {t:'规则约束', items:[
+    ['规格关联对象','规格归属物品定义'],
+    ['规格匹配规则','完美匹配 / 区间匹配'],
+    ['设备允许规则','禁产特定颜色 / 尺寸 / 型号'],
+    ['设备组炉规则','符合规则的工序允许组同炉'],
+    ['生产换型时间','物品 / 规格 / 工器具切换耗时——换模损耗梳理的落点']]}],
+  enhs:[
+   ['✨ 换型时间自学习','依据实绩数据自动回归校准换模耗时，越用越准']]},
+
+ {id:'n-proc', phase:1, icon:'flow', title:'产品工艺建模', cnt:'10 项', enh:false,
+  chips:['工艺路径','BOM·替代方案','候选资源'],
+  mods:['产品工艺'],
+  groups:[
+   {t:'工艺定义', items:[
+    ['新品开发评审','评审通过后形成新品排产订单'],
+    ['工作中心','成本项目 / 设备 / 人员归集'],
+    ['标准工艺','工艺名称、代码与参数'],
+    ['工艺路径','标准 / 物品两类路径；顺序与并行两种工序衔接模式'],
+    ['工艺路径及 BOM','完整查看路径与 BOM 树']]},
+   {t:'BOM 体系', items:[
+    ['物品 BOM','多版本、关联工艺路径、替代与成套关系'],
+    ['BOM 替代方案','成本优先 / 主料优先 / 辅料优先策略']]},
+   {t:'文件与资源', items:[
+    ['SOP 文件','导入与查询'],
+    ['工艺文件','导入与查询'],
+    ['物品候选资源','按产品×工序维护设备与工装，含配套 / 替代 / 速度 / 清洗时间']]}],
+  enhs:[
+   ['✨ 工艺知识图谱','专家工艺经验结构化沉淀，可检索、可推荐']]},
+
+ /* ---------- P3 智能决策 ---------- */
+ {id:'n-kit', phase:2, icon:'box', title:'物料齐套引擎', cnt:'3 项', enh:false,
+  chips:['自动/手动分配','缺口计算','齐套约束排产'],
+  mods:['生产排程','订单管理'],
+  groups:[
+   {t:'齐套分配', items:[
+    ['物料齐套分配','供需双向明细查询；按交期与优先级自动分配，亦可手动灵活调整；齐套时间作为排产前置约束'],
+    ['制造订单物料需求','按 MO 展示各物品需求数量与时间'],
+    ['制造订单物料缺口','缺口清单与预计齐套时间']]},
+   {t:'供应约束（联动）', items:[
+    ['采购到货 / 提前期约束','限制排程最早开始时间（EST）','联动']]}],
+  enhs:[
+   ['✨ 缺料预测与采购联动','提前 N 天预测缺口并自动提醒采购——把“排程员发起采购通知”自动化']]},
+
+ {id:'n-engine', phase:2, icon:'cpu', title:'自动排程引擎', cnt:'4 项', enh:false,
+  chips:['预处理→计算→优化','快速插单×3','正排/倒排'],
+  mods:['生产排程','基础管理'],
+  groups:[
+   {t:'排程对象', items:[
+    ['工序工单','MO 按工艺路径展开为工序工单，支持拆分 / 合并、选择性同步']]},
+   {t:'自动排程（三步法）', items:[
+    ['① 预处理','确定 MO 范围、剔除已完成实绩、计算优先序与 EST'],
+    ['② 排程计算','按约束选线，结合产线日历与算法计算各时间'],
+    ['③ 计划优化','局部 / 全局优化，每个版本操作留痕']]},
+   {t:'插单与指令', items:[
+    ['快速插单','排到最前 / 同物品后且交期影响最小 / 排到最后，三种模式'],
+    ['计划命令参数执行','正排 / 倒排、有限 / 无限能力、优先级与选线规则组合','联动']]}],
+  enhs:[
+   ['✨ 多目标寻优','延期数 / 换型次数 / 利用率 / 在制品四目标，权重自适应推荐'],
+   ['✨ What-if 沙盘仿真','多方案并行仿真对比后择优'],
+   ['✨ 排程可解释报告','每张工单回答“为什么排在这台、这个时间”']]},
+
+ {id:'n-algo', phase:2, icon:'zap', title:'核心算法库', cnt:'9 项', enh:false,
+  chips:['Z/N/Z+N 选线','顺排·倒排·跟随','启发式寻优'],
+  mods:['核心算法'],
+  groups:[
+   {t:'选线策略', items:[
+    ['Z 型选线','满足交期前提下最少资源完成生产'],
+    ['N 型选线','满足交期前提下最早完成、均衡利用资源'],
+    ['Z+N 选线','资源占用与完成时间的平衡解'],
+    ['启发式选线','优先规则 / 遗传算法 / 模拟退火']]},
+   {t:'时序策略', items:[
+    ['顺排','自计划开始时间正向排列'],
+    ['有限能力倒排','考虑资源有限自交期反推'],
+    ['无限能力倒排','不考虑资源限制反推理论最晚开工'],
+    ['顺排+倒排','瓶颈工序前倒排、后顺排'],
+    ['跟随','前工序结束满足条件后续立即开始（连续流）']]}],
+  enhs:[
+   ['✨ 算法自动选型','按订单结构与负荷特征推荐算法组合并说明理由']]},
+
+ /* ---------- P4 人机协同 ---------- */
+ {id:'n-vis', phase:3, icon:'eye', title:'计划可视化', cnt:'10 项', enh:false,
+  chips:['四类甘特/负荷图','班次·机台计划','库存负荷'],
+  mods:['计划可视化'],
+  groups:[
+   {t:'计划视图', items:[
+    ['每日完工计划','按日聚合的完工视图'],
+    ['每日生产计划','按日聚合的生产任务'],
+    ['班次生产计划','精确到班次'],
+    ['机台产线计划','每台设备的任务序列'],
+    ['物料需求计划','MRP 视图']]},
+   {t:'图形视图', items:[
+    ['资源甘特图','资源×时间的任务编排全景'],
+    ['资源负荷图','负荷率热力展示'],
+    ['工序甘特图','工序维度联动视图'],
+    ['订单甘特图','订单交付视角'],
+    ['库存负荷图','时间维度的供需与库存水位']]}],
+  enhs:[
+   ['✨ 负荷热力着色与瓶颈聚焦','超载资源自动高亮并定位原因']]},
+
+ {id:'n-adjust', phase:3, icon:'user', title:'协同调整与审核', cnt:'2 项', enh:false,
+  chips:['拖拽·一键调度','版本留痕','人审后发布'],
+  mods:['生产排程'],
+  groups:[
+   {t:'人工调整', items:[
+    ['计划调整','手工拖拽后同步更新资源上的工序计划；多次拖拽后一键调度整体调平']]},
+   {t:'审核发布（呼应台意“排程员审核后发布”）', items:[
+    ['计划确认机制','AI 方案必经排程员确认方可下发，版本履历完整可追']]}],
+  enhs:[
+   ['✨ 冲突实时检测','拖拽即时校验约束并标记冲突原因'],
+   ['✨ 调整影响仿真','发布前预演本次调整对全局交期的影响'],
+   ['✨ 移动审批','企业微信 / 钉钉一键审核发布']]},
+
+ {id:'n-copilot', phase:3, icon:'msg', title:'排程 Copilot', cnt:'✨ 全增强', enh:true,
+  chips:['交期问答','急单评估','自然语言改排'],
+  mods:['AI 增强 · 超出文档'],
+  groups:[
+   {t:'对话式排程能力（全部为超出文档增强）', items:[
+    ['交期问答','“这批 0.18mm 最早哪天交？”——倒排测算秒级答复'],
+    ['急单评估','自动生成多插单方案并对比交期影响'],
+    ['异常问答','延期 / 缺料根因解释与处置建议'],
+    ['指令执行','“把 MO-12 提前到明早”——自然语言直接改排（仍需人审发布）']]}],
+  enhs:[
+   ['✨ 经验问答','沉淀老师傅排程问答对，新人即问即会']]},
+
+ /* ---------- P5 执行闭环 ---------- */
+ {id:'n-dispatch', phase:4, icon:'send', title:'下发与执行指导', cnt:'3 项', enh:false,
+  chips:['工单下发履历','电子作业指导书','退库处理'],
+  mods:['生产排程'],
+  groups:[
+   {t:'计划下发', items:[
+    ['工序工单下发','计划员确认后执行下发，生成下发履历（时间 / 明细可查）'],
+    ['作业指导书','按产品与客户生成电子 SOP，随制令单下发至机台']]},
+   {t:'逆向流程', items:[
+    ['中间品及成品退库处理','销售退货转发、成品退库再检验等流程']]}],
+  enhs:[
+   ['✨ 下游验收回执','产线接单 / 开工 / 完工电子确认——台意“下发通知与验收平台”的落点']]},
+
+ {id:'n-monitor', phase:4, icon:'bell', title:'执行监控与预警', cnt:'5 项', enh:false,
+  chips:['生产反馈','PSI 供需','异常预警'],
+  mods:['执行监控'],
+  groups:[
+   {t:'实绩回流', items:[
+    ['领料与入库','领料扣减下阶需求；完工入库增加库存供应'],
+    ['生产反馈','执行状态、实绩起止、实绩资源与数量回传']]},
+   {t:'监控分析', items:[
+    ['供需明细查询','计划期间内 PSI 进销存报表'],
+    ['产线达成统计','计划 vs 实绩差异汇总'],
+    ['生产异常预警','未及时开始 / 未及时完成自动报警']]}],
+  enhs:[
+   ['✨ 预测性预警','基于节拍偏差预测延期，提前干预而非事后报警'],
+   ['✨ 根因自动分析','异常自动归因到设备 / 物料 / 人员维度']]},
+
+ {id:'n-report', phase:4, icon:'chart', title:'报表与持续学习', cnt:'9 项', enh:false,
+  chips:['9 张经营报表','准时交付率','经验沉淀'],
+  mods:['报表'],
+  groups:[
+   {t:'生产报表', items:[
+    ['每日机台产量效率统计表',''],
+    ['漆包线机台实时规格',''],
+    ['生产实时跟踪表',''],
+    ['产品巡检表','']]},
+   {t:'库存报表', items:[
+    ['产品实时库存',''],
+    ['原料实时库存','']]},
+   {t:'经营分析', items:[
+    ['订单执行报表',''],
+    ['订单准时交付率分析',''],
+    ['生产效率分析','']]}],
+  enhs:[
+   ['✨ 专家经验沉淀','排程员每次手工调整被自动学习为可复用规则'],
+   ['✨ KPI 自动周报','自然语言生成排程质量分析简报']]}
+];
+
+/* ============ 渲染工作流画布 ============ */
+const canvas = document.getElementById('canvas');
+PHASES.forEach((p,i)=>{
+  const col = document.createElement('div');
+  col.className='phase'; col.id='phase-'+i;
+  col.innerHTML = `<div class="phase-head ${p.copper?'p-copper':''}">
+    <span class="pno">0${i+1}</span><h3>${p.name}</h3><p>${p.en}</p></div>`;
+  NODES.filter(n=>n.phase===i).forEach(n=>{
+    const d = document.createElement('div');
+    d.className='node'+(n.enh?' enh':''); d.onclick=()=>openDrawer(n.id);
+    d.innerHTML = `
+      <div class="node-top"><div class="node-ic">${ICONS[n.icon]}</div><h4>${n.title}</h4><span class="cnt">${n.cnt}</span></div>
+      <div class="chips">${n.chips.map(c=>`<i>${c}</i>`).join('')}${n.enhs&&!n.enh?`<i class="gold">✨ +${n.enhs.length} 增强</i>`:''}</div>
+      <div class="node-foot">查看功能映射 →</div>`;
+    col.appendChild(d);
+  });
+  canvas.appendChild(col);
+  if(i<PHASES.length-1){
+    const c = document.createElement('div');
+    c.className='conn';
+    c.innerHTML = `<span class="lbl">${CONN_LABELS[i]}</span>
+      <svg viewBox="0 0 46 22"><line class="dashflow" x1="2" y1="11" x2="36" y2="11"/><path d="M36 5 L44 11 L36 17" fill="none" stroke="var(--blue)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    canvas.appendChild(c);
+  }
+});
+
+/* ============ 抽屉 ============ */
+const drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
+function openDrawer(id){
+  const n = NODES.find(x=>x.id===id); if(!n) return;
+  const p = PHASES[n.phase];
+  document.getElementById('dPhase').textContent = `PHASE 0${n.phase+1} · ${p.name} ${p.en}`;
+  document.getElementById('dTitle').textContent = n.title;
+  document.getElementById('dMods').innerHTML = n.mods.map(m=>`<i>${n.enh?m:'需求一 · '+m}</i>`).join('');
+  document.getElementById('drawerHead').className = 'drawer-head'+(n.enh||p.copper?' cu':'');
+  let html='';
+  n.groups.forEach(g=>{
+    html += `<div class="grp"><div class="grp-t">${g.t}</div>`;
+    g.items.forEach(it=>{
+      html += `<div class="f-item"><b>${it[0]}${it[2]?`<span class="ln">${it[2]}</span>`:''}</b>${it[1]?`<p>${it[1]}</p>`:''}</div>`;
+    });
+    html += `</div>`;
+  });
+  if(n.enhs&&n.enhs.length){
+    html += `<div class="grp"><div class="grp-t cu">AI 增强 · 超出文档要求</div>`;
+    n.enhs.forEach(e=>{ html += `<div class="f-item gold"><b>${e[0]}</b><p>${e[1]}</p></div>`; });
+    html += `</div>`;
+  }
+  document.getElementById('drawerBody').innerHTML = html;
+  drawer.classList.add('open'); overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  drawer.classList.remove('open'); overlay.classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+/* ============ 演示巡游 ============ */
+let touring=false;
+function playTour(){
+  if(touring) return; touring=true;
+  document.getElementById('workflow').scrollIntoView({behavior:'smooth'});
+  const seq=[0,1,2,3,4];
+  seq.forEach((i,k)=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.phase').forEach(p=>p.classList.remove('tour'));
+      const ph=document.getElementById('phase-'+i);
+      if(ph){ ph.classList.add('tour'); ph.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+      if(k===seq.length-1){
+        setTimeout(()=>{
+          document.querySelectorAll('.phase').forEach(p=>p.classList.remove('tour'));
+          toast('演示完成：点击任意节点，可查看需求一 96 项功能的逐项映射');
+          touring=false;
+        },1100);
+      }
+    }, 700+k*950);
+  });
+}
+
+/* ============ Toast ============ */
+let toastTimer;
+function toast(txt){
+  const t=document.getElementById('toast');
+  document.getElementById('toastTxt').textContent=txt;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3600);
+}
+
+/* ============ Copilot 对话 ============ */
+const chatBox=document.getElementById('chatBox');
+const SCENARIOS=[
+ {user:'新增急单 SO-26061008：镀锡铜线 0.25mm × 20t，客户要求 6/13 交付，能不能接？',
+  steps:[['解析订单','copilot.parse(SO-26061008)'],['齐套检查：铜杆 / 锡锭 / 拉丝模','kit.check() → 库存 18t + 在途 2t（6/11 到）'],['候选资源匹配：L3 / L5 可产','resource.match(0.25mm)'],['有限产能仿真：快速插单 ×3 模式','engine.simulate(modes=3)']],
+  text:'可以承接 ✅ 已完成三模式插单仿真，推荐方案 B（同物品之后插入 · 交期影响最小）：',
+  rich:`<div class="plans">
+    <div class="plan"><b>方案 A · 排到最前</b>L3 · 6/10 22:00 开工<em>影响 2 张工单 · 换型 +3.5h</em></div>
+    <div class="plan best"><b>方案 B · 同规格后插入</b>L3 · 6/11 14:00 开工<em>完工 6/12 22:40 · 余量 1 天</em></div>
+    <div class="plan"><b>方案 C · 排到最后</b>L5 · 6/12 09:00 开工<em>完工 6/13 19:00 · 踩线交付</em></div>
+   </div>
+   <div style="font-size:12px;color:var(--ink2)">方案 B 仅影响 MO-0605-12（顺延 6h，仍满足 6/15 交期）；全局延期订单 0 张。</div>
+   <div class="acts"><button class="mini-btn blue" onclick="adoptPlan()">采纳方案 B</button><button class="mini-btn ghost" onclick="linkGantt()">在甘特图中查看</button></div>`},
+ {user:'L2 拉丝机刚报故障，预计停机 8 小时，怎么办？',
+  steps:[['接收设备事件','iot.event(L2, DOWN, 8h)'],['锁定受影响工单','plan.impact() → 3 张工单'],['增量重排（仅重算变更部分）','engine.reschedule(incremental)'],['交期风险评估与通知','risk.assess() → 推送计划员']],
+  text:'已生成应急方案 🔧：2 张工单转移至 L4（换型损耗 1.5h），1 张原机延后等待复机。MO-0608-05 存在交期风险——建议夜班加开 1 个班次即可完全消除延期。已生成版本 V0610-2，等待您审核发布。',
+  rich:`<div class="acts"><button class="mini-btn blue" onclick="toast('已发布应急排程 V0610-2 · 并通过事件总线通知 L4 产线与质检')">审核并发布</button><button class="mini-btn ghost" onclick="toast('已模拟加开夜班：MO-0608-05 提前 7.2h，延期风险清零')">模拟加开夜班</button></div>`},
+ {user:'客户问 0.18mm 镀锡线 35t，最早什么时候能交付？',
+  steps:[['工艺路径展开','route.expand(0.18mm 镀锡线)'],['齐套计算','kit.check() → 镀锡液 6/12 到货'],['有限能力倒排 + 顺排校验','engine.backward+forward()'],['瓶颈分析','bottleneck.scan() → 镀锡工序 92%']],
+  text:'最早可交付时间为 6/16（周二）14:00，含 4 小时安全生产周期 📅。当前瓶颈在镀锡工序（负荷 92%）；如启用周日班次，可提前至 6/15 18:00。本测算已考虑齐套时间与换型损耗，可直接答复客户。',
+  rich:`<div class="acts"><button class="mini-btn blue" onclick="toast('已生成交期答复单并同步业务员（含测算依据，可解释）')">生成交期答复单</button></div>`}
+];
+let chatBusy=false;
+function addMsg(role, html, who){
+  const m=document.createElement('div');
+  m.className='msg '+role;
+  m.innerHTML=`<div class="who">${who||(role==='user'?'排程员':'APS 智能体')}</div><div class="bub">${html}</div>`;
+  chatBox.appendChild(m);
+  chatBox.scrollTop=chatBox.scrollHeight;
+  return m;
+}
+function runScenario(idx){
+  if(chatBusy) return; chatBusy=true;
+  document.querySelectorAll('.scen').forEach(b=>b.disabled=true);
+  const s=SCENARIOS[idx];
+  addMsg('user', s.user);
+  setTimeout(()=>{
+    const bot=addMsg('bot', `<div class="steps">${s.steps.map(st=>`<div class="step"><span class="st-ic"></span>${st[0]}　<code>${st[1]}</code></div>`).join('')}</div><div class="ans"></div>`);
+    const steps=bot.querySelectorAll('.step');
+    steps.forEach((st,i)=>{
+      setTimeout(()=>{ st.classList.add('show'); chatBox.scrollTop=chatBox.scrollHeight; },300+i*620);
+      setTimeout(()=>{ st.classList.add('done'); },300+i*620+540);
+    });
+    const totalWait=300+steps.length*620+500;
+    setTimeout(()=>{
+      const ans=bot.querySelector('.ans');
+      typeText(ans, s.text, ()=>{
+        if(s.rich){ const r=document.createElement('div'); r.innerHTML=s.rich; ans.appendChild(r); chatBox.scrollTop=chatBox.scrollHeight; }
+        chatBusy=false; document.querySelectorAll('.scen').forEach(b=>b.disabled=false);
+      });
+    }, totalWait);
+  },420);
+}
+function typeText(el, text, done){
+  const span=document.createElement('div');
+  span.style.cssText='font-size:13.5px;margin-top:8px';
+  el.appendChild(span);
+  let i=0;
+  (function tick(){
+    span.textContent=text.slice(0,++i);
+    chatBox.scrollTop=chatBox.scrollHeight;
+    if(i<text.length) setTimeout(tick, 14);
+    else done&&done();
+  })();
+}
+document.querySelectorAll('.scen').forEach(b=>b.onclick=()=>runScenario(+b.dataset.s));
+function sendFree(){
+  if(chatBusy) return;
+  const inp=document.getElementById('chatInput');
+  const v=inp.value.trim(); if(!v) return;
+  inp.value='';
+  if(/急单|插单|能接|加单/.test(v)) { simFree(v,0); return; }
+  if(/故障|停机|坏了|维修/.test(v)) { simFree(v,1); return; }
+  if(/交期|什么时候|哪天|交付/.test(v)) { simFree(v,2); return; }
+  addMsg('user', v);
+  chatBusy=true;
+  setTimeout(()=>{
+    const bot=addMsg('bot','');
+    typeText(bot.querySelector('.bub'),
+      '我是 APS 排程智能体（演示环境）。我可以为您评估急单、应对设备故障、测算最早交期，也可以解释任何一张工单的排程理由。试试下方三个场景按钮，或直接描述您的排程问题。',
+      ()=>{ chatBusy=false; });
+  },420);
+}
+function simFree(v,idx){
+  // 用户自由输入命中关键词 → 走对应场景（保留用户原话）
+  if(chatBusy) return; chatBusy=true;
+  document.querySelectorAll('.scen').forEach(b=>b.disabled=true);
+  const s=SCENARIOS[idx];
+  addMsg('user', v);
+  setTimeout(()=>{
+    const bot=addMsg('bot', `<div class="steps">${s.steps.map(st=>`<div class="step"><span class="st-ic"></span>${st[0]}　<code>${st[1]}</code></div>`).join('')}</div><div class="ans"></div>`);
+    const steps=bot.querySelectorAll('.step');
+    steps.forEach((st,i)=>{
+      setTimeout(()=>{ st.classList.add('show'); chatBox.scrollTop=chatBox.scrollHeight; },300+i*620);
+      setTimeout(()=>{ st.classList.add('done'); },300+i*620+540);
+    });
+    setTimeout(()=>{
+      const ans=bot.querySelector('.ans');
+      typeText(ans, s.text, ()=>{
+        if(s.rich){ const r=document.createElement('div'); r.innerHTML=s.rich; ans.appendChild(r); chatBox.scrollTop=chatBox.scrollHeight; }
+        chatBusy=false; document.querySelectorAll('.scen').forEach(b=>b.disabled=false);
+      });
+    }, 300+steps.length*620+500);
+  },420);
+}
+document.getElementById('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter') sendFree(); });
+function adoptPlan(){
+  toast('已锁定方案 B 并生成排程版本 V0610-3 · 状态：待排程员审核发布');
+  setTimeout(()=>addMsg('bot','已按方案 B 锁定急单 SO-26061008，生成版本 V0610-3。依照流程，该版本将在您（排程员）审核确认后正式下发至 L3 产线，并通过事件总线同步通知物料与质检。'),600);
+}
+function linkGantt(){
+  document.getElementById('demo').scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>{ if(!urgentOn) toggleUrgent(); },650);
+}
+/* 开场欢迎 */
+setTimeout(()=>{
+  addMsg('bot','您好，我是台意产线的 APS 排程智能体 👋 当前在排工单 23 张、齐套率 96%、设备综合负荷 78%。您可以直接提问，或点击下方场景快速体验。');
+},800);
+
+/* ============ 甘特沙盘 ============ */
+const GANTT=[
+ {name:'L1 · 拉丝A', bars:[{id:'MO-0603-12',l:5,w:18},{id:'MO-0604-15',l:26,w:20}]},
+ {name:'L2 · 拉丝B', bars:[{id:'MO-0602-09',l:2,w:25},{id:'MO-0606-21',l:30,w:22}]},
+ {name:'L3 · 镀锡A', bars:[{id:'MO-0601-07',l:4,w:16},{id:'MO-0605-12',l:22,w:18,shift:38}]},
+ {name:'L4 · 镀锡B', bars:[{id:'MO-0605-18',l:10,w:30}]}
+];
+const ganttEl=document.getElementById('gantt');
+GANTT.forEach((row,ri)=>{
+  const r=document.createElement('div'); r.className='g-row';
+  r.innerHTML=`<div class="g-name">${row.name}<small>${ri<2?'Φ8→0.25mm':'镀锡·复绕'}</small></div><div class="g-track" id="track-${ri}"></div>`;
+  ganttEl.appendChild(r);
+  row.bars.forEach((b,bi)=>{
+    const bar=document.createElement('div');
+    bar.className='g-bar'; bar.id=`bar-${ri}-${bi}`;
+    bar.style.left=b.l+'%'; bar.style.width=b.w+'%';
+    bar.textContent=b.id; bar.title=b.id;
+    r.querySelector('.g-track').appendChild(bar);
+  });
+});
+/* 急单条与换模条（初始隐藏，挂在 L3） */
+const track3=document.getElementById('track-2');
+const setupBar=document.createElement('div');
+setupBar.className='g-bar setup ghost'; setupBar.style.left='20.5%'; setupBar.style.width='1.8%'; setupBar.title='换模 2.0h';
+const urgentBar=document.createElement('div');
+urgentBar.className='g-bar urgent ghost'; urgentBar.style.left='22.6%'; urgentBar.style.width='14%';
+urgentBar.textContent='急单 SO-1008'; urgentBar.title='急单 SO-26061008 · 0.25mm × 20t';
+track3.appendChild(setupBar); track3.appendChild(urgentBar);
+
+let urgentOn=false;
+function toggleUrgent(){
+  const btn=document.getElementById('ganttBtn');
+  const mo=document.getElementById('bar-2-1');
+  const deltas=['d1','d2','d3','d4'].map(i=>document.getElementById(i));
+  if(!urgentOn){
+    setupBar.classList.remove('ghost'); urgentBar.classList.remove('ghost');
+    mo.style.left='38%';
+    btn.textContent='↺ 撤销插单';
+    deltas.forEach((d,i)=>setTimeout(()=>d.classList.add('show'),500+i*160));
+    toast('急单已按「交期影响最小」模式插入 L3 · 受影响工单 1 张 · 延期订单 0');
+    urgentOn=true;
+  }else{
+    setupBar.classList.add('ghost'); urgentBar.classList.add('ghost');
+    mo.style.left='22%';
+    btn.textContent='⚡ 模拟急单插入';
+    deltas.forEach(d=>d.classList.remove('show'));
+    toast('已撤销插单，恢复基准计划 V0610-1');
+    urgentOn=false;
+  }
+}
+
+/* ============ 算法中心 ============ */
+const ALGOS=[
+ {n:'Z 型选线',t:'选线策略',d:'在订单满足交期的前提下，旨在减少计划占用的资源，实现在尽量少的资源（产线）下完成订单生产。',fit:'淡季订单平稳期使用：集中开机、空线停机，直接回应“天级排程存在空闲设备与空转设备”的痛点，并降低能耗。'},
+ {n:'N 型选线',t:'选线策略',d:'在订单满足交期的前提下，追求最早时间完成订单生产，充分利用资源，实现均衡化生产。',fit:'旺季冲交付期使用：火力全开抢交期，配合负荷图监控避免局部过载。'},
+ {n:'Z+N 选线',t:'选线策略',d:'既考虑资源的合理利用，又兼顾生产时间优化——在减少资源占用的同时尽可能早地完成订单，达到资源利用与生产效率的平衡。',fit:'台意日常排程的默认推荐策略，由智能体按当期负荷自动加权。'},
+ {n:'启发式选线',t:'选线策略',d:'采用优先规则算法、遗传算法、模拟退火等启发式方法，在大规模组合空间中快速逼近最优解。',fit:'订单量大、约束复杂时启用；✨智能体自动调参，求解时间控制在分钟级。'},
+ {n:'顺排',t:'时序策略',d:'将各生产任务自计划开始时间起依次排列到相应的设备、人员等资源上，确定生产时间与流程安排。',fit:'适合台意“一条流水线完成、无中间等待”的连续生产特征，逻辑直观、排程员易校验。'},
+ {n:'有限能力倒排',t:'时序策略',d:'在考虑生产资源有限性的基础上，从订单交货期开始反向推算生产计划。',fit:'交期紧的订单用它测算“最晚必须开工时间”，给采购与备料留出明确的齐套截止点。'},
+ {n:'无限能力倒排',t:'时序策略',d:'从交货日期按工艺反序依次确定各工序起止时间，不考虑资源限制。',fit:'用于理论极限测算与产能缺口分析：理想交期与实际交期之差即是产能缺口。'},
+ {n:'顺排 + 倒排',t:'时序策略',d:'存在瓶颈工序时，瓶颈工序之前倒排、瓶颈工序之后顺排，让瓶颈资源利用最大化。',fit:'镀锡工序为台意瓶颈时的首选：保镀锡机台连续满产，前后工序服从瓶颈节奏。'},
+ {n:'跟随',t:'时序策略',d:'前序工序一结束、满足一定条件后，后续工序马上开始，形成紧密衔接的连续流。',fit:'拉丝→退火→镀锡的连续流场景天然适配，最大限度压缩在制品停留。'}
+];
+const chipsEl=document.getElementById('algoChips'), panelEl=document.getElementById('algoPanel');
+ALGOS.forEach((a,i)=>{
+  const b=document.createElement('button');
+  b.className='a-chip'+(i===2?' on':''); b.textContent=a.n;
+  b.onclick=()=>{ document.querySelectorAll('.a-chip').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderAlgo(i); };
+  chipsEl.appendChild(b);
+});
+function renderAlgo(i){
+  const a=ALGOS[i];
+  panelEl.innerHTML=`
+    <div>
+      <h4>${a.n}<span class="tag">${a.t}</span></h4>
+      <p>${a.d}</p>
+      <p style="margin-top:10px;font-size:12.3px;color:var(--ink3)">来源：需求一 · 核心算法模块（共 9 类，全部内置）</p>
+    </div>
+    <div class="algo-fit"><b>⚒ 台意场景适配 · 智能体选型建议</b><p>${a.fit}</p></div>`;
+}
+renderAlgo(2);
+
+/* ============ 覆盖矩阵 ============ */
+const MATRIX=[
+ ['基础管理','生产组织 / 产线 / 物料 / 计划期间·模式 / 三类绑定关系 / 分段损耗率 / 计划命令参数',[['智能建模',''],['智能决策','cu']],11,'n-base'],
+ ['资源管理','日历 / 排班 / 产能 / 节拍 / 提前期 / 时间栏×8 / 允许·组炉规则 / 换型时间',[['智能建模','']],15,'n-res'],
+ ['产品工艺','工艺路径（顺序·并行）/ BOM 及替代 / SOP·工艺文件 / 候选资源',[['智能建模','']],10,'n-proc'],
+ ['库存数据','原料及在途 / 产成品 / 模具 / 呆滞 / 在制品 / 盘点',[['数据感知','']],6,'n-source'],
+ ['订单管理','客户·供应商档案 / 销售·采购订单 / 产销平衡 / 产能预警 / 转单·脱挂单 / 制造订单及展开',[['数据感知','']],11,'n-order'],
+ ['生产排程','工序工单 / 自动排程三步法 / 快速插单×3 / 齐套分配 / 计划调整 / 下发 / 作业指导书 / 退库',[['智能决策','cu'],['人机协同',''],['执行闭环','']],10,'n-engine'],
+ ['计划可视化','每日·班次·机台计划 / 资源·工序·订单甘特图 / 负荷图 / 库存负荷图',[['人机协同','']],10,'n-vis'],
+ ['核心算法','Z / N / Z+N / 启发式选线 + 顺排·倒排·混合·跟随',[['智能决策','cu']],9,'n-algo'],
+ ['执行监控','PSI 供需明细 / 领料入库 / 生产反馈 / 达成统计 / 异常预警',[['执行闭环','']],5,'n-monitor'],
+ ['报表','机台产量效率 / 漆包线实时规格 / 实时跟踪 / 库存 / 巡检 / 订单执行 / 交付率 / 效率分析',[['执行闭环','']],9,'n-report']
+];
+const mb=document.getElementById('matrixBody');
+MATRIX.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.onclick=()=>openDrawer(r[4]);
+  tr.innerHTML=`<td><span class="mod">${r[0]}</span></td>
+    <td style="max-width:380px;font-size:12.3px">${r[1]}</td>
+    <td>${r[2].map(p=>`<span class="pill ${p[1]}">${p[0]}</span>`).join('')}</td>
+    <td style="text-align:center"><span class="cnt-b">${r[3]}</span></td>
+    <td><span class="ok">✓ 全覆盖</span></td>`;
+  mb.appendChild(tr);
+});
+
+/* ============ 增强能力 ============ */
+const ENHS=[
+ ['💬 自然语言排程 Copilot','对话式查交期、评估急单、下达改排指令，新排程员当天上手'],
+ ['⚡ 急单秒级评估','三模式插单自动仿真对比，5 分钟内给出可行方案'],
+ ['🔧 设备故障应急重排','事件驱动自动触发增量重排，仅重算受影响部分'],
+ ['🧪 What-if 沙盘仿真','多方案并行模拟，发布前看清每个选择的代价'],
+ ['📈 预测性预警','基于节拍偏差预测延期与缺料，提前 N 天干预'],
+ ['🔍 异常根因分析','延期 / 缺料自动归因到设备、物料、人员维度'],
+ ['📚 专家经验知识库','老师傅的每次手工调整自动沉淀为可复用规则'],
+ ['🧾 排程可解释报告','每张工单回答“为什么排在这台机、这个时间”'],
+ ['🔁 自动滚动重排','实绩偏差超阈值即增量重排，计划永远贴合现场'],
+ ['🎯 多目标权重自适应','延期 / 换型 / 利用率 / 在制品四目标动态调权'],
+ ['📱 移动审批与通知','企业微信 / 钉钉一键审核发布，替代微信群'],
+ ['🗂 版本管理与一键回滚','每版排程留痕可对比，误发布 10 秒回滚']
+];
+const eg=document.getElementById('enhGrid');
+ENHS.forEach((e,i)=>{
+  const d=document.createElement('div');
+  d.className='enh-card reveal';
+  d.innerHTML=`<b>${e[0]}</b><p>${e[1]}</p><span style="position:absolute;top:12px;right:14px;font-size:10px;font-weight:800;color:#d8b58a">✨ 超出文档 ${String(i+1).padStart(2,'0')}</span>`;
+  eg.appendChild(d);
+});
+
+/* ============ 入场动画 & 计数器 ============ */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+const cio=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el=e.target, target=+el.dataset.count, dur=1100, t0=performance.now();
+    (function step(t){
+      const k=Math.min((t-t0)/dur,1);
+      el.textContent=Math.round(target*(1-Math.pow(1-k,3)));
+      if(k<1) requestAnimationFrame(step);
+    })(t0);
+    cio.unobserve(el);
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
+</script>
+</body>
+</html>
