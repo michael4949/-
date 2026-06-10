@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业AI成熟度评估智能体 v3.0 · 奇点达科技</title>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070611;--bg2:#0c0a1d;--bg3:#120e26;
+  --panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.07);--brd:rgba(255,255,255,.10);
+  --txt:#ecebf7;--mut:#9a96b8;--mut2:#6f6b8e;
+  --v:#8b5cff;--v2:#a982ff;--c:#26e0d6;--c2:#5ff0e8;--pink:#ff5ca8;
+  --grad:linear-gradient(120deg,#8b5cff 0%,#6a6bff 45%,#26e0d6 100%);
+  --glow:0 0 24px rgba(139,92,255,.45);
+}
+html,body{height:100%}
+body{font-family:'PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);line-height:1.7;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* animated ambient background */
+.amb{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.amb .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:float 18s ease-in-out infinite}
+.amb .b1{width:520px;height:520px;background:radial-gradient(circle,#7b3cff,transparent 70%);top:-160px;left:-120px}
+.amb .b2{width:460px;height:460px;background:radial-gradient(circle,#0fb9c4,transparent 70%);bottom:-180px;right:-120px;animation-delay:-6s}
+.amb .b3{width:380px;height:380px;background:radial-gradient(circle,#ff4d97,transparent 70%);top:40%;left:55%;opacity:.28;animation-delay:-11s}
+.amb .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:46px 46px;mask-image:radial-gradient(ellipse at 50% 40%,#000 30%,transparent 78%)}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.08)}}
+
+.shell{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
+
+/* ===== Sidebar ===== */
+.sb{width:288px;flex-shrink:0;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(18,14,38,.86),rgba(9,8,20,.92));backdrop-filter:blur(18px);border-right:1px solid var(--brd)}
+.sb-top{padding:22px 22px 18px;border-bottom:1px solid var(--brd)}
+.brand{display:flex;align-items:center;gap:12px}
+.orb{width:42px;height:42px;flex-shrink:0;border-radius:50%;background:var(--grad);position:relative;box-shadow:var(--glow);animation:pulse 3.2s ease-in-out infinite}
+.orb::before,.orb::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(139,92,255,.4);animation:ring 3.2s ease-out infinite}
+.orb::after{animation-delay:1.6s}
+.orb i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:18px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+@keyframes pulse{0%,100%{box-shadow:0 0 18px rgba(139,92,255,.4)}50%{box-shadow:0 0 30px rgba(38,224,214,.55)}}
+@keyframes ring{0%{transform:scale(.8);opacity:.7}100%{transform:scale(1.6);opacity:0}}
+.brand-tx .tag{font-size:8.5px;letter-spacing:3px;color:var(--mut2)}
+.brand-tx h1{font-size:14.5px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3}
+.brand-tx p{font-size:9px;color:var(--mut2);letter-spacing:1px}
+.sb-sub{margin-top:14px;font-size:10px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.live{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);animation:blink 1.8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+.sb-steps{flex:1;overflow-y:auto;padding:18px 16px}
+.sb-steps::-webkit-scrollbar{width:0}
+.si{display:flex;gap:12px;padding:9px 8px;border-radius:10px;opacity:.4;transition:.35s;position:relative}
+.si.on{opacity:1;background:var(--panel)}
+.si.ok{opacity:.72}
+.si-rail{position:absolute;left:19px;top:34px;bottom:-9px;width:1.5px;background:rgba(255,255,255,.08)}
+.si:last-child .si-rail{display:none}
+.si.ok .si-rail{background:linear-gradient(var(--c),rgba(38,224,214,.2))}
+.si-dot{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;z-index:1;background:var(--bg2);transition:.3s}
+.si.on .si-dot{border-color:transparent;background:var(--grad);color:#fff;box-shadow:var(--glow)}
+.si.ok .si-dot{border-color:var(--c);color:var(--c)}
+.si-lbl b{display:block;font-size:11.5px;font-weight:600}
+.si-lbl span{font-size:9px;color:var(--mut2);display:block}
+.si-lbl .hint{font-size:8.5px;color:var(--c2);margin-top:2px;display:block}
+.sb-ft{padding:14px 18px;border-top:1px solid var(--brd);font-size:8.5px;color:var(--mut2);line-height:1.8}
+.sb-ft b{color:var(--mut)}
+.pwr{margin-top:8px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid var(--brd);border-radius:20px;font-size:8px;color:var(--mut);letter-spacing:.5px}
+.pwr i{font-style:normal;width:6px;height:6px;border-radius:50%;background:var(--grad)}
+
+/* ===== Main ===== */
+.mn{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--brd);background:rgba(10,8,22,.5);backdrop-filter:blur(10px)}
+.topbar .now{font-size:12px;color:var(--txt);font-weight:600;display:flex;align-items:center;gap:9px;min-width:0}
+.topbar .now small{color:var(--mut2);font-weight:400;font-size:10px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.pgw{width:110px;height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.pgf{height:100%;border-radius:4px;background:var(--grad);transition:width .6s ease;width:4%}
+.skipbtn{font-size:10px;padding:6px 11px;border:1px solid var(--brd);border-radius:8px;background:var(--panel);color:var(--mut);cursor:pointer;font-family:inherit;transition:.2s;white-space:nowrap}
+.skipbtn:hover{color:var(--c2);border-color:rgba(38,224,214,.4)}
+.chip-ai{font-size:9px;color:var(--c2);border:1px solid rgba(38,224,214,.3);padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+
+.chat{flex:1;overflow-y:auto;padding:24px 28px 8px}
+.chat::-webkit-scrollbar{width:8px}.chat::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:8px}
+.msg{margin-bottom:18px;max-width:82%;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.ai{margin-right:auto}.msg.usr{margin-left:auto}
+.who{font-size:9px;color:var(--mut2);margin-bottom:5px;font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.msg.usr .who{justify-content:flex-end}
+.who .av{width:16px;height:16px;border-radius:50%;background:var(--grad);font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-style:normal}
+.bbl{padding:13px 17px;font-size:13.5px;line-height:1.85;border-radius:4px 16px 16px 16px;word-break:break-word}
+.msg.ai .bbl{background:var(--panel);border:1px solid var(--brd);backdrop-filter:blur(8px)}
+.msg.ai .bbl strong{color:var(--c2)}
+.msg.usr .bbl{background:var(--grad);color:#fff;border-radius:16px 4px 16px 16px;box-shadow:0 6px 20px rgba(139,92,255,.25)}
+.msg.err .bbl{border-color:rgba(255,92,120,.4);background:rgba(255,92,120,.07)}
+
+.cursorb{display:inline-block;width:8px;height:15px;background:var(--c);margin-left:3px;vertical-align:-2px;border-radius:2px;animation:blink 1s steps(2) infinite}
+.st-status{display:flex;align-items:center;gap:9px;margin-top:4px;font-size:11px;color:var(--mut)}
+.st-status em{font-style:normal}
+
+.ph-div{display:flex;align-items:center;gap:12px;margin:28px 0 20px;animation:rise .4s ease}
+.ph-div .ln{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,255,.45),transparent)}
+.ph-div .bx{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 22px;border:1px solid rgba(139,92,255,.35);border-radius:14px;background:rgba(139,92,255,.08)}
+.ph-div .bx b{font-size:11.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+.ph-div .bx span{font-size:9px;color:var(--mut)}
+
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.opts button{padding:9px 16px;border:1px solid var(--brd);border-radius:12px;font-size:12px;cursor:pointer;background:var(--panel);color:var(--txt);font-family:inherit;transition:.2s;position:relative;overflow:hidden}
+.opts button:hover{border-color:transparent;background:rgba(139,92,255,.16);box-shadow:0 0 0 1px var(--v),0 6px 18px rgba(139,92,255,.22);transform:translateY(-1px)}
+.opts.multi button.sel{background:linear-gradient(120deg,rgba(139,92,255,.3),rgba(38,224,214,.22));border-color:transparent;box-shadow:0 0 0 1px var(--c)}
+.opts .hint{width:100%;font-size:10px;color:var(--mut2);margin-bottom:1px}
+.opts.used button{opacity:.35;pointer-events:none;transform:none;box-shadow:none}
+.opts.used button.picked{opacity:.75;border-color:rgba(38,224,214,.5);color:var(--c2)}
+.confirm-m{margin-top:9px}
+.confirm-m button{padding:9px 20px;border:none;border-radius:12px;background:var(--grad);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:var(--glow)}
+.confirm-m button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+.dot-anim{display:inline-flex;gap:5px;align-items:center}
+.dot-anim span{width:6px;height:6px;border-radius:50%;background:var(--grad);animation:pk 1.3s infinite}
+.dot-anim span:nth-child(2){animation-delay:.18s}.dot-anim span:nth-child(3){animation-delay:.36s}
+@keyframes pk{0%,70%,100%{transform:scale(.6);opacity:.35}35%{transform:scale(1);opacity:1}}
+
+/* ===== Input ===== */
+.inp-bar{flex-shrink:0;border-top:1px solid var(--brd);background:rgba(10,8,22,.62);backdrop-filter:blur(12px);padding:12px 24px 14px}
+.done-row{display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.done-row .tip{width:100%;text-align:center;font-size:10px;color:var(--mut2)}
+.file-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.up-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border:1px dashed var(--brd);border-radius:9px;font-size:11px;color:var(--mut);cursor:pointer;background:var(--panel);transition:.2s}
+.up-btn:hover{border-color:var(--c);color:var(--c2)}
+.ftag{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;background:rgba(38,224,214,.1);border:1px solid rgba(38,224,214,.25);border-radius:9px;font-size:10.5px;color:var(--c2)}
+.ftag .x{cursor:pointer;opacity:.6}.ftag .x:hover{opacity:1}
+.inp-row{display:flex;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--brd);border-radius:16px;padding:7px 7px 7px 16px;transition:.2s}
+.inp-row:focus-within{border-color:var(--v);box-shadow:0 0 0 3px rgba(139,92,255,.14)}
+.inp-row textarea{flex:1;border:none;background:transparent;color:var(--txt);font-size:13.5px;font-family:inherit;resize:none;outline:none;min-height:30px;max-height:150px;line-height:1.6;padding:6px 0}
+.inp-row textarea::placeholder{color:var(--mut2)}
+.send-btn{width:42px;height:42px;background:var(--grad);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:17px;flex-shrink:0;transition:.2s;box-shadow:var(--glow)}
+.send-btn:hover{transform:scale(1.06)}
+.send-btn:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed;box-shadow:none;transform:none}
+.inp-foot{text-align:center;font-size:9.5px;color:var(--mut2);margin-top:8px}
+
+.btn-g{padding:10px 20px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:var(--glow);transition:.2s;display:inline-flex;align-items:center;gap:7px}
+.btn-g:hover{transform:translateY(-1px)}
+.btn-o{padding:10px 18px;border:1px solid var(--brd);border-radius:11px;background:var(--panel);color:var(--txt);font-size:12px;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-o:hover{border-color:var(--v);color:var(--v2)}
+
+/* ===== Welcome ===== */
+.welcome{flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:36px}
+.wbox{width:100%;max-width:620px;background:linear-gradient(160deg,rgba(24,18,48,.7),rgba(11,9,24,.78));border:1px solid var(--brd);border-radius:24px;padding:40px 40px 32px;backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.wbox .wtag{font-size:9px;letter-spacing:5px;color:var(--mut2);text-align:center}
+.wbox h2{font-size:26px;text-align:center;margin:12px 0 6px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;letter-spacing:1px}
+.wbox .lead{color:var(--mut);font-size:13px;text-align:center;line-height:1.9;max-width:500px;margin:0 auto 22px}
+.dims{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.dimc{background:var(--panel);border:1px solid var(--brd);border-radius:14px;padding:13px 10px;text-align:center;transition:.25s}
+.dimc:hover{border-color:rgba(139,92,255,.5);background:rgba(139,92,255,.08);transform:translateY(-2px)}
+.dimc .ic{font-size:19px}
+.dimc b{display:block;font-size:11.5px;margin-top:5px;color:var(--txt);font-weight:600}
+.dimc span{font-size:8.5px;color:var(--mut2);letter-spacing:1px}
+.flowstrip{display:flex;gap:3px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:24px;padding:12px 10px;border:1px dashed rgba(255,255,255,.12);border-radius:14px}
+.fs-i{font-size:10px;color:var(--mut);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.fs-i i{font-style:normal;width:16px;height:16px;border-radius:50%;background:rgba(139,92,255,.25);border:1px solid rgba(139,92,255,.5);color:var(--v2);font-size:8.5px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.fs-a{color:var(--mut2);font-size:9px;margin:0 4px}
+.go-btn{margin-top:4px;width:100%;padding:15px;background:var(--grad);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:2px;box-shadow:var(--glow);transition:.2s}
+.go-btn:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(139,92,255,.45)}
+.go-sec{margin-top:10px;width:100%;padding:12px;background:var(--panel);color:var(--mut);border:1px solid var(--brd);border-radius:14px;font-size:12px;cursor:pointer;font-family:inherit;transition:.2s}
+.go-sec:hover{color:var(--txt);border-color:var(--v)}
+.wnote{text-align:center;font-size:10px;color:var(--mut2);margin-top:14px}
+
+/* ===== Setup modal ===== */
+.setup-ov{position:fixed;inset:0;z-index:80;background:rgba(7,6,17,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+.setup-bx{width:min(500px,94vw);background:linear-gradient(160deg,rgba(26,20,52,.97),rgba(11,9,24,.99));border:1px solid var(--brd);border-radius:20px;padding:30px 32px}
+.setup-bx h3{font-size:17px;margin-bottom:6px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.setup-bx p{font-size:12px;color:var(--mut);line-height:1.9;margin-bottom:12px}
+.setup-bx .way{background:var(--panel);border:1px solid var(--brd);border-radius:12px;padding:13px 15px;margin-bottom:11px;font-size:11.5px;color:var(--mut);line-height:1.8}
+.setup-bx .way b{color:var(--c2);display:block;font-size:12px;margin-bottom:3px}
+.setup-bx .way code{background:rgba(38,224,214,.12);color:var(--c2);padding:1px 6px;border-radius:5px;font-size:10.5px}
+.setup-bx input{width:100%;padding:12px 15px;border:1px solid var(--brd);border-radius:11px;font-size:13px;font-family:inherit;outline:none;background:var(--panel);color:var(--txt);margin-bottom:12px}
+.setup-bx input:focus{border-color:var(--v)}
+.setup-acts{display:flex;gap:10px;justify-content:flex-end}
+
+/* ===== Report View ===== */
+.rview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#1a1726}
+.rview-bar{flex-shrink:0;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(10,8,22,.85);border-bottom:1px solid var(--brd)}
+.rview-bar .t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px}
+.rview-bar .acts{display:flex;gap:10px}
+.rstage{flex:1;overflow:auto;padding:30px 20px;display:flex;justify-content:center;align-items:flex-start}
+.rstage::-webkit-scrollbar{width:10px}.rstage::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+#reportScaler{transform-origin:top center}
+
+/* ===== The actual PDF document (A4 @96dpi = 794x1123) ===== */
+#reportDoc{width:794px;background:#fff;color:#1f2430;font-family:'PingFang SC','Microsoft YaHei',sans-serif;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+#reportDoc *{box-sizing:border-box}
+.rpage{width:794px;min-height:1123px;position:relative;overflow:hidden;padding:54px 58px;background:#fff}
+.rpage.pb{page-break-before:always}
+/* cover */
+.rcover{padding:0;display:flex;flex-direction:column;justify-content:space-between;color:#fff;background:#0a1020}
+.rcover .bgimg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
+.rcover .ov{position:absolute;inset:0;z-index:1}
+.rcover .ct{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;height:1123px;padding:64px 60px}
+.cov-top{display:flex;justify-content:space-between;align-items:flex-start}
+.cov-brand{display:flex;align-items:center;gap:12px}
+.cov-brand .cmark{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#fff}
+.cov-brand .bt small{font-size:9px;letter-spacing:4px;opacity:.8;display:block}
+.cov-brand .bt b{font-size:14px;letter-spacing:1px}
+.cov-date{font-size:11px;opacity:.85;text-align:right;letter-spacing:1px}
+.cov-mid{margin-top:auto;margin-bottom:auto}
+.cov-kick{font-size:12px;letter-spacing:8px;opacity:.85;margin-bottom:18px}
+.cov-mid h1{font-size:48px;font-weight:800;line-height:1.18;letter-spacing:2px;margin-bottom:18px;text-shadow:0 4px 30px rgba(0,0,0,.4)}
+.cov-mid .sub{font-size:14.5px;opacity:.9;line-height:1.9;max-width:560px}
+.cov-co{margin-top:26px;display:inline-flex;align-items:center;gap:12px;padding:12px 22px;border-radius:14px;backdrop-filter:blur(6px)}
+.cov-co .lab{font-size:10px;opacity:.7;letter-spacing:2px}
+.cov-co .nm{font-size:22px;font-weight:700}
+.cov-badge{position:relative;display:flex;align-items:center;gap:20px;margin-top:28px}
+.cov-badge .ring{width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,.55);backdrop-filter:blur(4px)}
+.cov-badge .ring b{font-size:34px;font-weight:800;line-height:1}
+.cov-badge .ring small{font-size:9px;letter-spacing:2px;opacity:.85;margin-top:3px}
+.cov-badge .meta b{font-size:19px;display:block}
+.cov-badge .meta span{font-size:11.5px;opacity:.85;line-height:1.7;max-width:380px;display:block}
+.cov-foot{display:flex;justify-content:space-between;align-items:flex-end;font-size:10px;opacity:.8;letter-spacing:1px;border-top:1px solid rgba(255,255,255,.25);padding-top:18px}
+
+/* report inner */
+.rh{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.rh .no{font-size:11px;font-weight:800;color:#fff;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rh h2{font-size:20px;font-weight:800;letter-spacing:1px}
+.rh .en{margin-left:auto;font-size:9px;letter-spacing:3px;color:#aeb3c2}
+.rdiv{height:3px;border-radius:3px;margin:10px 0 20px}
+.rlead{font-size:12.5px;line-height:2;color:#3a4150;background:#f6f7fb;border-radius:12px;padding:16px 19px;margin-bottom:18px}
+.rlead.bdr{border-left:4px solid}
+.grid2{display:flex;gap:22px}
+.col{flex:1;min-width:0}
+.radarwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8f9fc;border-radius:16px;padding:12px}
+.ladder{display:flex;flex-direction:column;gap:8px}
+.lvl{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:11px;background:#f6f7fb;border:1px solid #eceef4}
+.lvl.cur{color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.lvl .lc{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;flex-shrink:0;background:#e7e9f1;color:#666}
+.lvl.cur .lc{background:rgba(255,255,255,.25);color:#fff}
+.lvl .lt b{font-size:12px;display:block}.lvl .lt span{font-size:9.5px;opacity:.8}
+
+/* key metric cards */
+.kmrow{display:flex;gap:12px;margin:16px 0 18px}
+.kmc{flex:1;border:1px solid #ebedf3;border-radius:13px;padding:15px 10px;text-align:center;background:#fff}
+.kmc b{font-size:21px;display:block;line-height:1.2}
+.kmc span{font-size:10px;color:#6c7283;display:block;margin-top:4px;font-weight:600}
+.kmc small{font-size:8.5px;color:#9aa0b0;display:block;margin-top:3px;line-height:1.5}
+.concl{display:flex;gap:22px;align-items:center;border-radius:16px;padding:22px 26px;color:#fff}
+.concl .cring{width:96px;height:96px;flex-shrink:0;border-radius:50%;border:3px solid rgba(255,255,255,.6);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.concl .cring b{font-size:30px;font-weight:800;line-height:1.1}
+.concl .cring small{font-size:8.5px;letter-spacing:1px;opacity:.85}
+.concl .ct2 b{font-size:17px;display:block;margin-bottom:5px}
+.concl .ct2 p{font-size:11.5px;line-height:1.9;opacity:.92}
+
+/* benchmark bars */
+.bench{margin-top:18px}
+.bench .br{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.br .nm{width:92px;font-size:10.5px;font-weight:600;color:#3a4150;flex-shrink:0;text-align:right}
+.br .tk{flex:1;height:15px;background:#eef0f5;border-radius:8px;position:relative;overflow:visible}
+.br .fl{height:100%;border-radius:8px}
+.br .bm{position:absolute;top:-4px;width:2.5px;height:23px;border-radius:2px;background:#39404e}
+.br .vl{width:104px;font-size:9.5px;color:#6c7283;flex-shrink:0}
+.bench .legend{display:flex;gap:18px;font-size:9px;color:#8b91a2;margin-top:6px;justify-content:flex-end}
+.bench .legend i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+
+/* dimension deep card */
+.dcard{border:1px solid #ebedf3;border-radius:14px;padding:16px 18px;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid;background:#fff}
+.dcard .dt{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dcard .dt .dn{font-size:14.5px;font-weight:700}
+.dcard .dt .bmk{font-size:9px;color:#8b91a2;margin-left:8px}
+.dcard .dt .ds{margin-left:auto;font-size:18px;font-weight:800}
+.dcard .dt .ds small{font-size:11px;color:#9aa0b0;font-weight:500}
+.rbarT{height:8px;border-radius:6px;background:#eef0f5;overflow:hidden;margin-bottom:10px}
+.rbarF{height:100%;border-radius:6px}
+.dcard .an{font-size:11.5px;line-height:1.85;color:#414855;margin-bottom:9px;text-align:justify}
+.sub3{display:flex;gap:8px;margin-bottom:9px}
+.sub3 .sbi{flex:1;background:#f7f8fb;border-radius:9px;padding:7px 10px}
+.sub3 .sbi b{font-size:9.5px;color:#4a5060;display:block;margin-bottom:4px;font-weight:600}
+.sub3 .sbi .sbar{height:5px;border-radius:4px;background:#e7e9f1;overflow:hidden}
+.sub3 .sbi .sbar i{display:block;height:100%;border-radius:4px}
+.sub3 .sbi small{font-size:8.5px;color:#9aa0b0}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quad div{font-size:10px;padding:8px 11px;border-radius:9px;line-height:1.65}
+.quad b{display:block;font-size:8.5px;letter-spacing:1px;margin-bottom:2px;opacity:.85}
+.q-s{background:#eafaf3;color:#1c7a52}.q-g{background:#fdf0ec;color:#b65430}
+.q-r{background:#fdeeee;color:#ab3a3a}.q-w{background:#eef4fd;color:#2f5fa8}
+
+/* findings (SWOT) */
+.find{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.findcol{border-radius:14px;padding:16px 19px}
+.findcol h4{font-size:12.5px;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.findcol h4 small{font-size:8px;letter-spacing:2px;opacity:.6;font-weight:600}
+.findcol ul{list-style:none}
+.findcol li{font-size:11px;line-height:1.75;padding:7px 0 7px 18px;position:relative;border-bottom:1px dashed rgba(0,0,0,.07)}
+.findcol li:last-child{border:none}
+.findcol li::before{position:absolute;left:0;top:7px;font-weight:800}
+.f-s{background:#f0fbf6}.f-s h4{color:#1c7a52}.f-s li::before{content:"▲";color:#27ae7a;font-size:9px}
+.f-w{background:#fdf3ef}.f-w h4{color:#c0532e}.f-w li::before{content:"▼";color:#e07a48;font-size:9px}
+.f-o{background:#eef5fd}.f-o h4{color:#2f5fa8}.f-o li::before{content:"◆";color:#5b8cd6;font-size:9px}
+.f-r{background:#fdeef0}.f-r h4{color:#ab3a4e}.f-r li::before{content:"●";color:#d66a7e;font-size:9px}
+
+/* gap table */
+.gtab{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.gtab th{background:#f3f4f9;padding:9px 10px;text-align:left;font-size:10px;color:#4a5060;letter-spacing:1px;border-bottom:2px solid #e3e6ef}
+.gtab td{border-bottom:1px solid #eef0f5;padding:9px 10px;color:#414855;line-height:1.6;vertical-align:top}
+.gtab .sc{font-weight:800;white-space:nowrap}
+.gtab .ar{color:#9aa0b0;padding:0 2px}
+
+/* benefits */
+.benef{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px}
+.bnc{border:1px solid #ebedf3;border-radius:12px;padding:13px 16px;background:#fff}
+.bnc b{font-size:12px;display:block}
+.bnc .est{font-size:16px;font-weight:800;margin:3px 0}
+.bnc p{font-size:10px;color:#6c7283;line-height:1.6}
+
+/* roadmap */
+.road{display:flex;gap:13px}
+.rdc{flex:1;border-radius:14px;overflow:hidden;border:1px solid #ebedf3;background:#fff}
+.rdc .hd{padding:12px;color:#fff;text-align:center}
+.rdc .hd b{font-size:21px;font-weight:800;display:block}
+.rdc .hd span{font-size:9.5px;letter-spacing:2px;opacity:.9}
+.rdc .bd{padding:12px 14px}
+.rdc .it{padding:9px 0;border-bottom:1px dashed #eceef4}
+.rdc .it:last-child{border:none}
+.rdc .it b{font-size:11px;display:block;color:#2a3040}
+.rdc .it p{font-size:9.5px;line-height:1.65;color:#5a6272;margin-top:2px}
+.rdc .it .kpi{display:inline-block;margin-top:4px;font-size:8.5px;padding:2px 8px;border-radius:6px;background:#f3f4f9;color:#4a5060}
+.gov{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+.gov div{font-size:10.5px;line-height:1.7;padding:10px 13px;border-radius:10px;background:#f6f7fb;color:#414855;border-left:3px solid}
+
+/* products */
+.prod{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pcard{border:1px solid #ebedf3;border-radius:13px;padding:14px 16px;break-inside:avoid;background:#fff}
+.pcard .pt{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.pcard .cat{font-size:9px;font-weight:700;padding:3px 9px;border-radius:6px;color:#fff;letter-spacing:1px}
+.pcard .pn{font-size:13.5px;font-weight:700}
+.pcard .pr{font-size:10.5px;line-height:1.7;color:#525a68}
+.pcard .pv{margin-top:6px;font-size:9.5px;color:#2f5fa8;background:#eef4fd;border-radius:7px;padding:5px 9px;line-height:1.6}
+.svcbox{margin-top:16px;border-radius:14px;padding:16px 20px;color:#fff}
+.svcbox b{font-size:13px;display:block;margin-bottom:5px}
+.svcbox p{font-size:10.5px;line-height:1.8;opacity:.92}
+
+/* about & toc & appendix */
+.meth{display:flex;gap:10px;margin-bottom:18px}
+.meth .mi{flex:1;background:#f6f7fb;border-radius:11px;padding:12px 13px}
+.meth .mi i{font-style:normal;font-size:16px;display:block;margin-bottom:4px}
+.meth .mi b{font-size:10.5px;display:block;color:#2a3040;margin-bottom:3px}
+.meth .mi p{font-size:9px;line-height:1.6;color:#6c7283}
+.toc{margin-top:8px}
+.toc-i{display:flex;align-items:baseline;gap:10px;font-size:11.5px;padding:8px 2px;border-bottom:1px dashed #e8eaf1;color:#3a4150}
+.toc-i .tno{font-size:9px;font-weight:800;width:22px;color:#9aa0b0}
+.toc-i .dots{flex:1;border-bottom:1px dotted #c9cdd9;transform:translateY(-3px)}
+.toc-i .pg{font-size:10px;color:#6c7283;font-weight:700}
+.appx{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:18px}
+.appx th{padding:8px 10px;text-align:left;font-size:9.5px;color:#fff;letter-spacing:1px}
+.appx td{border-bottom:1px solid #eef0f5;padding:8px 10px;color:#414855;line-height:1.65;vertical-align:top}
+.appx .lk{font-weight:800;white-space:nowrap}
+.disclaim{font-size:9px;color:#8b91a2;line-height:1.8;background:#f7f8fb;border-radius:10px;padding:12px 15px}
+
+.rfoot{position:absolute;left:58px;right:58px;bottom:26px;padding-top:12px;border-top:1px solid #ebedf3;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#9aa0b0}
+.rfoot b{color:#5a6072}
+.backcov{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;min-height:1123px}
+.backcov .bm{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin-bottom:22px}
+.backcov h3{font-size:24px;font-weight:800;letter-spacing:2px;margin-bottom:10px}
+.backcov p{font-size:12px;opacity:.85;line-height:2;max-width:440px}
+.backcov .ln{margin-top:26px;font-size:10px;letter-spacing:3px;opacity:.7;border-top:1px solid rgba(255,255,255,.2);padding-top:18px}
+
+/* overlay loading */
+.loadov{position:fixed;inset:0;z-index:50;background:rgba(7,6,17,.82);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.loadov .spin{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--c);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loadov .lt{font-size:13px;color:var(--txt)}.loadov .ls{font-size:11px;color:var(--mut)}
+
+@media print{
+  .amb,.sb,.topbar,.inp-bar,.rview-bar{display:none!important}
+  body{overflow:visible;background:#fff}
+  .rstage{overflow:visible;padding:0}
+  #reportScaler{transform:none!important}
+  #reportDoc{box-shadow:none}
+  .rpage{page-break-after:always}
+}
+@media(max-width:820px){.sb{display:none}.msg{max-width:94%}.pgw{display:none}}
+</style>
+</head>
+<body>
+<div class="amb"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grid"></div></div>
+
+<div class="shell">
+  <aside class="sb">
+    <div class="sb-top">
+      <div class="brand">
+        <div class="orb"><i>AI</i></div>
+        <div class="brand-tx">
+          <div class="tag">SINGULARITY&nbsp;REACH</div>
+          <h1>企业AI成熟度评估</h1>
+          <p>AIM² Intelligent Assessment</p>
+        </div>
+      </div>
+      <div class="sb-sub"><span class="live"></span> 智能体在线 · 本地直连 Claude</div>
+    </div>
+    <div class="sb-steps" id="steps"></div>
+    <div class="sb-ft">
+      基于 <b>AIM² 企业AI成熟度模型</b><br>38+ 行业专家 · 128+ 落地案例<br>北京奇点达科技有限公司
+      <div class="pwr"><i></i> Powered by Claude Opus 4.8</div>
+    </div>
+  </aside>
+  <div class="mn" id="main"></div>
+</div>
+
+<input type="file" id="fileIn" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none">
+<div id="setupHost"></div>
+
+<script>
+/* ============================================================
+   企业AI成熟度评估智能体 v3.0 · 奇点达科技
+   本地版：双击直接打开 · Claude (Opus 4.8) 本地直连驱动
+   配置：同目录 config.js（apiKey / model / enableWebSearch）
+   ============================================================ */
+
+var CFG = window.AIM2_CONFIG || {};
+var MODEL = CFG.model || "claude-opus-4-8";
+var API_URL = CFG.apiUrl || "https://api.anthropic.com/v1/messages";
+var WEB_SEARCH = CFG.enableWebSearch !== false;
+
+var PHASES = [
+  {t:"开场引导",  d:"了解评估流程",        hint:"点选下方选项即可开始",                 ic:"✦"},
+  {t:"企业画像",  d:"行业 / 规模 / 业务",   hint:"约6个小问题，点选为主",                ic:"◈"},
+  {t:"材料解读",  d:"上传材料 · 可跳过",    hint:"可上传PPT/PDF/图片，也可直接跳过",      ic:"▤"},
+  {t:"六维诊断",  d:"顾问式深度访谈",       hint:"核心环节 · 每个问题都有选项可点",       ic:"◎"},
+  {t:"研判确认",  d:"信息汇总与确认",       hint:"确认信息无误，即可生成报告",            ic:"⟁"},
+  {t:"报告生成",  d:"13页定制化PDF",       hint:"AI自动撰写，约1-2分钟",                ic:"❖"}
+];
+
+var DIMS = [
+  {n:"AI战略与领导力",   s:"战略领导", en:"Strategy",   desc:"高层共识、战略规划、预算投入与责任机制"},
+  {n:"数据资产与治理",   s:"数据治理", en:"Data",       desc:"数据质量、打通程度、治理体系与数据文化"},
+  {n:"技术基础设施",     s:"技术基建", en:"Infra",      desc:"算力、平台工具链、系统集成与安全架构"},
+  {n:"AI人才与组织能力", s:"人才组织", en:"Talent",     desc:"专业人才、全员素养、组织机制与外部生态"},
+  {n:"AI应用场景与落地", s:"应用落地", en:"Adoption",   desc:"场景覆盖、落地深度、价值闭环与规模化能力"},
+  {n:"AI治理与合规",     s:"治理合规", en:"Governance", desc:"风险管控、合规审查、伦理规范与可信AI"}
+];
+
+var LEVELS = [
+  {k:"L1", n:"萌芽探索", d:"零散尝试，缺乏统一规划", tr:"个别员工自发使用AI工具；无预算、无团队、无规划"},
+  {k:"L2", n:"局部试点", d:"单点验证，初见成效",     tr:"在1-2个场景试点；有初步预算；尚未形成方法论"},
+  {k:"L3", n:"系统化应用", d:"成体系推进，多场景落地", tr:"有AI专项规划与团队；多场景落地并产生可量化收益"},
+  {k:"L4", n:"规模化赋能", d:"平台化能力，深度融入业务", tr:"平台化AI能力中心；AI深度嵌入核心业务流程"},
+  {k:"L5", n:"智能原生",  d:"AI驱动增长，行业引领",   tr:"AI成为商业模式核心驱动力；引领行业标准"}
+];
+
+var FALLBACK_OPTS = ["请给我几个参考选项","不太确定，请基于行业经验帮我判断","跳过这个问题，继续下一题"];
+
+/* ---------------- State ---------------- */
+var phase=0, conv=[], busy=false, done=false, pendFiles=[], multiSel={};
+var REPORT=null, PALETTE=null, coverData=null, themeKW="", view="welcome";
+var reportRequested=false, autoContinued={}, streamEl=null, followStream=true, picking=false;
+
+/* ---------------- Industry palette fallback ---------------- */
+var IND_PAL = [
+  {kw:["金融","银行","保险","证券","基金","投资","支付","信贷","财富"], p:{primary:"#0A2540",accent:"#C9A227",secondary:"#16324F",name:"金融·深蓝鎏金"}, img:"finance banking skyline night"},
+  {kw:["医疗","健康","医药","生物","制药","医院","诊断","基因"], p:{primary:"#0B3B40",accent:"#2BC4B4",secondary:"#0F5A57",name:"医疗·青绿生命"}, img:"healthcare medical technology"},
+  {kw:["制造","工业","机械","装备","汽车","电子","半导体","工厂"], p:{primary:"#1B2733",accent:"#F0792B",secondary:"#2C3E50",name:"制造·钢蓝橙焰"}, img:"smart factory automation industrial"},
+  {kw:["科技","互联网","软件","IT","SaaS","云计算","通信","数字"], p:{primary:"#160F35",accent:"#7C5CFF",secondary:"#241A52",name:"科技·量子紫青"}, img:"futuristic technology data network"},
+  {kw:["零售","电商","消费","快消","商超","品牌","百货"], p:{primary:"#3A152C",accent:"#FF6B6B",secondary:"#5A2543",name:"零售·暖橙活力"}, img:"retail shopping commerce modern"},
+  {kw:["教育","培训","学校","学习","高校"], p:{primary:"#142A52",accent:"#F2B33D",secondary:"#1E3E70",name:"教育·智蓝暖黄"}, img:"education learning campus"},
+  {kw:["能源","电力","石油","化工","新能源","电网","碳"], p:{primary:"#0E2A22",accent:"#37C871",secondary:"#143E32",name:"能源·墨绿生发"}, img:"renewable energy power grid"},
+  {kw:["地产","建筑","物业","房","工程","城市"], p:{primary:"#2A2118",accent:"#C49A5B",secondary:"#3E3322",name:"地产·砂金沉稳"}, img:"modern architecture city skyline"},
+  {kw:["物流","运输","供应链","快递","仓储","航运"], p:{primary:"#10243D",accent:"#FF8A3D",secondary:"#1A3A5C",name:"物流·海蓝橙动"}, img:"logistics supply chain transport"},
+  {kw:["农业","食品","餐饮","农","种植","养殖"], p:{primary:"#1E3318",accent:"#8FC93A",secondary:"#2E4A24",name:"农业·田野绿"}, img:"agriculture food technology"},
+  {kw:["传媒","文化","娱乐","广告","游戏","影视","内容"], p:{primary:"#2A1140",accent:"#FF4D97",secondary:"#421A5E",name:"传媒·品红创意"}, img:"creative media digital art"},
+  {kw:["法律","咨询","会计","审计","专业服务","事务所"], p:{primary:"#101C33",accent:"#B08D57",secondary:"#1C2E4A",name:"专业·藏青典金"}, img:"professional business consulting"},
+  {kw:["政府","公共","事业","机关","央企","国企"], p:{primary:"#16243F",accent:"#C0392B",secondary:"#22365C",name:"政务·稳重蓝红"}, img:"government public service city"}
+];
+var DEF_PAL = {primary:"#140E33",accent:"#26E0D6",secondary:"#241A52",name:"AI·量子青紫"};
+
+function isHex(s){return typeof s==="string" && /^#?[0-9a-fA-F]{6}$/.test(s.trim());}
+function nrmHex(s){s=s.trim();return s[0]==="#"?s:"#"+s;}
+function pickPalette(industry, modelPal){
+  var base=null, kw="";
+  var str=(industry||"")+"";
+  for(var i=0;i<IND_PAL.length;i++){
+    for(var j=0;j<IND_PAL[i].kw.length;j++){
+      if(str.indexOf(IND_PAL[i].kw[j])>=0){ base=IND_PAL[i].p; kw=IND_PAL[i].img; break; }
+    }
+    if(base) break;
+  }
+  if(!base){ base=DEF_PAL; kw="business technology abstract"; }
+  var out={primary:base.primary, accent:base.accent, secondary:base.secondary, name:base.name, kw:kw};
+  if(modelPal && typeof modelPal==="object"){
+    if(isHex(modelPal.primary)) out.primary=nrmHex(modelPal.primary);
+    if(isHex(modelPal.accent)) out.accent=nrmHex(modelPal.accent);
+    if(isHex(modelPal.secondary)) out.secondary=nrmHex(modelPal.secondary);
+    if(modelPal.name) out.name=modelPal.name;
+  }
+  return out;
+}
+
+/* ---------------- Helpers ---------------- */
+function esc(t){return (t==null?"":String(t)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmt(t){return esc(t).replace(/\n/g,"<br>").replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");}
+function jsStr(t){return String(t).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/</g,"\\x3c");}
+function fnum(v,d){var n=parseFloat(v);return isNaN(n)?(d||0):n;}
+function clampScore(v,d){var n=fnum(v,d==null?3:d);return Math.max(0.5,Math.min(5,n));}
+function trimS(s){return s.trim();}
+function arr(a){return Array.isArray(a)?a:[];}
+function strv(s,d){return (typeof s==="string"&&s.trim())?s.trim():(d||"");}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function chatArea(){return document.getElementById("chatArea");}
+
+/* ---------------- API key (local config) ---------------- */
+function getKey(){
+  var k=(CFG.apiKey||"").trim();
+  if(k && k.length>20 && !/在此|粘贴|YOUR/i.test(k)) return k;
+  try{ var s=localStorage.getItem("aim2_key"); if(s) return s; }catch(e){}
+  try{ var u=new URLSearchParams(location.search).get("key"); if(u) return u; }catch(e){}
+  return "";
+}
+function hdrs(){
+  return {
+    "Content-Type":"application/json",
+    "x-api-key":getKey(),
+    "anthropic-version":"2023-06-01",
+    "anthropic-dangerous-direct-browser-access":"true"
+  };
+}
+function showSetup(){
+  var h='<div class="setup-ov" id="setupOv"><div class="setup-bx">';
+  h+='<h3>首次使用 · 连接 Claude 模型</h3>';
+  h+='<p>本智能体由 Claude（Opus 4.8）模型驱动，在您本机直连 Anthropic 官方接口，不经过任何第三方服务器。首次使用需配置一次访问密钥，之后即可直接打开使用。</p>';
+  h+='<div class="way"><b>方式一（推荐）：配置文件，一次配置永久生效</b>用记事本打开本页面同目录下的 <code>config.js</code>，把您的 API Key 粘贴到 <code>apiKey: ""</code> 的引号内并保存，然后刷新本页面。</div>';
+  h+='<div class="way"><b>方式二：在下方粘贴，保存在本机浏览器中</b>密钥只写入您本机浏览器的本地存储，同样不会上传到任何服务器。</div>';
+  h+='<input type="password" id="setupKey" placeholder="sk-ant-...">';
+  h+='<div class="setup-acts"><button class="btn-o" onclick="closeSetup()">稍后再说</button><button class="btn-g" onclick="saveSetupKey()">保存并开始评估</button></div>';
+  h+='</div></div>';
+  document.getElementById("setupHost").innerHTML=h;
+}
+function closeSetup(){document.getElementById("setupHost").innerHTML="";}
+function saveSetupKey(){
+  var v=document.getElementById("setupKey").value.trim();
+  if(!v){ alert("请粘贴您的 API Key，或改用 config.js 配置后刷新页面。"); return; }
+  try{ localStorage.setItem("aim2_key", v); }catch(e){}
+  closeSetup();
+  startChat(true);
+}
+
+/* ---------------- Persistence (断点续评) ---------------- */
+function slimConv(){
+  return conv.map(function(m){
+    var o={};
+    for(var k in m){ if(k!=="files") o[k]=m[k]; }
+    if(m.files) o.files=m.files.map(function(f){return {name:f.name,type:f.type};});
+    return o;
+  });
+}
+function saveState(){
+  try{
+    localStorage.setItem("aim2_state", JSON.stringify({
+      v:3, ts:Date.now(), phase:phase, conv:slimConv(), done:done,
+      REPORT:REPORT, PALETTE:PALETTE, themeKW:themeKW
+    }));
+  }catch(e){}
+  if(coverData){ try{ localStorage.setItem("aim2_cover", coverData); }catch(e){} }
+}
+function loadState(){
+  try{
+    var s=JSON.parse(localStorage.getItem("aim2_state")||"null");
+    if(!s || s.v!==3 || !s.conv || !s.conv.length) return false;
+    phase=s.phase||0; conv=s.conv; done=!!s.done; REPORT=s.REPORT||null;
+    PALETTE=s.PALETTE||null; themeKW=s.themeKW||"";
+    try{ coverData=localStorage.getItem("aim2_cover")||null; }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
+function clearState(){
+  try{ localStorage.removeItem("aim2_state"); localStorage.removeItem("aim2_cover"); }catch(e){}
+}
+
+/* ---------------- System prompts ---------------- */
+function getSys(){
+  var guides=[
+"【当前环节0 · 开场引导】用2-3句话亲切而专业地介绍你自己与本次评估的价值（六维诊断 + 13页定制报告，全程以点选为主、约12-18分钟）。然后给出 [OPT]准备好了，开始评估|先简单了解六大维度和流程[/OPT]。若客户选择了解，用≤120字介绍后再次给出开始选项。客户表示开始后：按【环节衔接铁律】小结开场、宣布进入“企业画像”环节，并立即提出画像环节第一个问题（公司名称，给 [OPT]我来输入公司名称|暂不透露，用“贵公司”代称[/OPT]），末尾输出 [NEXT]。",
+
+"【当前环节1 · 企业画像】依次采集（每轮只问1项，每项必须给选项）：①公司名称（若客户选“我来输入”则请其输入）②所属行业 [OPT]制造业|金融业|医疗健康|零售/电商|能源/化工|物流/供应链|软件/互联网|专业服务|其他(请补充)[/OPT] ③企业规模 [OPT]50人以下|50-200人|200-1000人|1000-5000人|5000人以上[/OPT] ④年营收 [OPT]5000万以下|5000万-2亿|2亿-10亿|10亿-50亿|50亿以上|不便透露[/OPT] ⑤主营业务/商业模式（给4-5个该行业常见模式选项+其他）⑥当前最关心的AI议题 [OPTM]降本增效|新增长点|数据价值挖掘|智能化产品|组织能力建设|同行竞争压力|其他(请补充)[/OPTM]。6项齐全后：先输出 [THEME]name=行业名|primary=#RRGGBB|secondary=#RRGGBB|accent=#RRGGBB|keyword=英文行业封面图关键词[/THEME]（配色须贴合行业气质），再按【环节衔接铁律】小结画像、宣布进入“材料解读”环节并提问：邀请上传战略PPT/数据架构/组织架构/年报等材料 [OPT]我来上传材料|暂时跳过，直接进入六维诊断[/OPT]，末尾 [NEXT]。",
+
+"【当前环节2 · 材料解读】若客户上传了材料：用3-4个要点犀利解读（指出亮点与隐忧），并问是否还有补充材料 [OPT]还有材料要上传|没有了，继续[/OPT]。若客户选择跳过或表示没有了：按【环节衔接铁律】宣布进入“六维深度诊断”环节，说明将从六个维度各问1-2个问题、点选即可，然后立即提出第1维度（AI战略与领导力）的第一个问题并给选项，末尾 [NEXT]。",
+
+"【当前环节3 · 六维深度诊断】逐一覆盖六大维度，顺序固定：①AI战略与领导力 ②数据资产与治理 ③技术基础设施 ④AI人才与组织能力 ⑤AI应用场景与落地 ⑥AI治理与合规。每个维度：先用一句行业洞察过渡（可引用数据），再问1个犀利问题，每问必给选项。每维度1-2轮，参考题库（可按客户行业改写措辞，但必须保留选项形式）：\n维度1 [OPT]一把手亲自挂帅推动|有规划但高层关注一般|个别部门自发尝试|尚无明确规划[/OPT]；追问预算 [OPT]有专项预算且逐年增加|有少量预算|尚无预算，按需申请|不清楚[/OPT]。\n维度2 [OPT]数据已打通且质量高|部分打通，质量参差|烟囱式系统，数据孤岛严重|基本靠手工报表[/OPT]。\n维度3 [OPTM]已上云|有自建机房/算力|用过大模型API|有数据中台|基本没有这些|不清楚[/OPTM]。\n维度4 [OPT]有专职AI团队|IT团队兼任|靠外部供应商|没有相关人才[/OPT]；追问全员AI素养 [OPT]多数员工日常使用AI工具|少数骨干在用|基本没人用|明令限制使用[/OPT]。\n维度5 [OPTM]客服/营销|生产/运营|研发/设计|供应链/物流|财务/人事等职能|还没有落地场景[/OPTM]；追问效果 [OPT]已有可量化收益|有效果但未量化|效果不明显|刚起步看不出[/OPT]。\n维度6 [OPT]有明确的AI使用规范与审查机制|有初步意识，无正式制度|没考虑过|不清楚[/OPT]。\n六维全部覆盖后：按【环节衔接铁律】小结诊断完成、宣布进入“研判确认”环节，并立即给出要点式信息汇总（公司画像+六维各自的关键事实）与初步判断（总体等级倾向、最强/最弱维度），请客户确认 [OPT]确认无误，生成评估报告|我要补充或修正一些信息[/OPT]，末尾 [NEXT]。",
+
+"【当前环节4 · 研判确认】若客户要补充：耐心收集补充信息（仍然给选项），更新你的判断后再次请其确认 [OPT]确认无误，生成评估报告|还要再补充[/OPT]。客户确认后：告诉客户“信息确认完毕，我现在开始为您撰写定制化评估报告，约需1-2分钟，请稍候”，末尾输出 [NEXT]。注意：你不需要也不要输出报告内容本身，系统会自动调用报告引擎。",
+
+"【当前环节5 · 报告生成】报告由系统报告引擎自动生成。若客户此时提问，简要回应并告知报告正在生成/已生成，可点击下方按钮查看。"
+  ];
+  return "你是奇点达科技的 AIM² 企业AI成熟度评估智能体，一位资深AI战略咨询顾问，拥有38+行业、128+企业AI落地项目经验。精通六维评估模型：AI战略与领导力、数据资产与治理、技术基础设施、AI人才与组织能力、AI应用场景与落地、AI治理与合规。\n\n【风格】像每小时500美元的顶级顾问：犀利、有洞察、有数据感，不做冷冰冰的问卷。每轮回复≤180字。中文，专业但通俗。可联网检索行业最新数据佐证判断（引用时注明大致来源即可，不写链接）。\n\n【交互铁律 · 必须100%遵守】\n1. 选项铁律：你的每一条包含提问的回复，都必须附带 [OPT]选项A|选项B|...[/OPT]（单选）或 [OPTM]...[/OPTM]（多选），提供3-6个具体选项，可含“其他(请补充)”。没有任何例外——即使是开放性问题，也要给出引导性选项让客户可以点选。客户永远可以选择不点选而直接打字。\n2. 一次只聚焦一个核心问题，绝不在一条消息里抛出多个问题。\n3. 环节衔接铁律：当一个环节的信息收集完毕时，必须在同一条回复中完成三件事——①用一句话小结本环节收获；②宣布进入下一环节并用一句话说明该环节做什么、客户需要怎么配合；③立即提出下一环节的第一个问题并附选项。然后在回复最末尾单独输出 [NEXT]。绝不允许只说“我们进入下一环节吧”就停下等客户。\n4. 纠偏：若客户回答跑题、答非所问或试图让你做评估之外的事，先用一句话礼貌自然地拉回本次评估，重述当前问题与选项，再继续。绝不被带偏。\n5. 若客户点选了“请给我几个参考选项”，立即把当前问题改写为带 [OPT] 选项的形式重新提出。若客户选了“跳过这个问题”，礼貌跳过并继续下一问。若客户选了“不太确定，请基于行业经验帮我判断”，基于其行业给出你的推断并请客户确认。\n6. 不要解释或暴露 [OPT][OPTM][NEXT][THEME] 这些标记的含义，它们是系统指令。\n\n"+guides[Math.min(phase,5)];
+}
+
+function getReportSys(){
+  return "你是奇点达科技 AIM² 企业AI成熟度评估的首席报告撰写专家，文风对标麦肯锡/BCG的付费咨询报告：结论先行、量化表达、具体可执行、紧扣客户访谈中披露的事实，严禁空话套话。你将收到一份完整的评估访谈记录，请基于它输出一份结构化报告数据（JSON）。\n\n【撰写总则】\n1. 所有分析必须引用访谈中的具体事实（行业、规模、客户原话中的关键信息），让客户感到“这是为我写的”，而非模板。\n2. 评分一致性：六维评分必须与访谈内容可对应、可解释；overallScore 为六维加权平均（一位小数）；level 与 overallScore 匹配（≤1.7为L1，1.8-2.5为L2，2.6-3.4为L3，3.5-4.2为L4，≥4.3为L5）。\n3. benchmark 为该行业同等规模企业的合理均值估计（通常2.2-3.2之间，按行业数字化程度调整），用于对标。\n4. 建议必须具体到动作、责任角色与可衡量产出，避免“加强”“提升”类空泛措辞。\n\n【字段要求】\n- company/industry/scale/revenue：取自访谈，未知填“贵公司”或“未披露”。\n- summary：执行摘要，280-380字，包含总体定位、2个最关键发现、1句价值展望。\n- background：评估背景与目标，150-220字，说明本次评估的缘起（结合客户最关心的AI议题）、方法与范围。\n- keyMetrics：恰好4项关键数字卡片，如综合得分、最强维度分、最弱维度分、距下一等级差距等，value为简短数字/短语（如“3.2/5.0”“-1.4分”），note为一句说明。\n- dimensions：恰好6项，name 严格依次为：AI战略与领导力、数据资产与治理、技术基础设施、AI人才与组织能力、AI应用场景与落地、AI治理与合规。每项：score（0.5-5一位小数）、benchmark、analysis（160-240字深度分析：现状判断+行业对标+根因剖析）、subItems 恰好3个子能力项（name 4-8字，score 0.5-5）、strength（30-50字具体亮点）、gap（30-50字具体短板）、risk（30-50字若不改善的风险）、quickWin（30-50字30天内可做的速赢动作）。\n- findings：strengths 4条、weaknesses 4条、opportunities 3条、risks 3条，每条35-60字，具体且互不重复。\n- gapAnalysis：targetLevel 为下一目标等级（如L3），targetName 等级名，narrative 150-200字（达成目标等级的总体路径与时间预期），keyGaps 3-4项{dimension,current,target,action}，action 为40-70字具体举措。\n- roadmap：d30/d90/d180 各恰好3项{title(8-14字),detail(50-90字，含责任角色),kpi(可衡量指标，如“完成3场景POC”)}。30天=速赢与摸底，90天=筑基与试点，180天=规模化与机制化。\n- benefits：narrative 100-150字（价值测算逻辑说明），items 恰好4项{name(如“客服人力成本"+"”),estimate(如“降低25-35%”),basis(30-50字测算依据)}。估算要保守、可信、注明为区间预估。\n- products：从奇点达产品库中挑选3-5个最匹配的：软件类【AI成熟度评估系统（持续追踪成熟度演进）/ AI场景识别与优先级排序（用价值-可行性矩阵筛选场景）/ AI ROI测算器（投入产出量化测算）】、硬件类【老师傅宝盒（将一线老师傅经验数字化沉淀为AI助手）/ 老板盒子（管理层专属AI决策驾驶舱）】、认证类【FDE培训认证（前线部署工程师培养体系）】。每项 reason 60-100字、紧扣该客户的具体短板；value 为一句预期价值。\n- governance：恰好4条实施保障机制建议，每条30-50字（如成立AI专项小组、月度复盘机制、预算保障、试点-推广机制等）。\n- palette：贴合该行业气质的报告配色 {primary,secondary,accent,name}，十六进制。\n- coverKeyword：英文封面图检索关键词（行业场景，如 smart factory automation）。\n\n只输出符合既定结构的JSON数据，不输出任何其他文字。";
+}
+
+/* ---------------- Report JSON Schema (structured outputs) ---------------- */
+var STR={type:"string"};
+var NUM={type:"number"};
+function OBJ(props,req){return {type:"object",additionalProperties:false,required:req||Object.keys(props),properties:props};}
+function ARR(items){return {type:"array",items:items};}
+var REPORT_SCHEMA = OBJ({
+  company:STR, industry:STR, scale:STR, revenue:STR,
+  overallScore:NUM, level:{type:"string",enum:["L1","L2","L3","L4","L5"]}, levelName:STR, levelDesc:STR,
+  summary:STR, background:STR,
+  keyMetrics:ARR(OBJ({label:STR,value:STR,note:STR})),
+  dimensions:ARR(OBJ({
+    name:STR, score:NUM, benchmark:NUM, analysis:STR,
+    subItems:ARR(OBJ({name:STR,score:NUM})),
+    strength:STR, gap:STR, risk:STR, quickWin:STR
+  })),
+  findings:OBJ({strengths:ARR(STR),weaknesses:ARR(STR),opportunities:ARR(STR),risks:ARR(STR)}),
+  gapAnalysis:OBJ({targetLevel:STR,targetName:STR,narrative:STR,keyGaps:ARR(OBJ({dimension:STR,current:NUM,target:NUM,action:STR}))}),
+  roadmap:OBJ({d30:ARR(OBJ({title:STR,detail:STR,kpi:STR})),d90:ARR(OBJ({title:STR,detail:STR,kpi:STR})),d180:ARR(OBJ({title:STR,detail:STR,kpi:STR}))}),
+  benefits:OBJ({narrative:STR,items:ARR(OBJ({name:STR,estimate:STR,basis:STR}))}),
+  products:ARR(OBJ({name:STR,category:STR,reason:STR,value:STR})),
+  governance:ARR(STR),
+  palette:OBJ({primary:STR,secondary:STR,accent:STR,name:STR}),
+  coverKeyword:STR
+});
+
+/* ---------------- Sidebar / topbar ---------------- */
+function rSteps(){
+  var h="";
+  PHASES.forEach(function(p,i){
+    var c = (done&&i===5) ? "ok" : (i<phase ? "ok" : (i===phase ? "on" : ""));
+    h+='<div class="si '+c+'"><div class="si-rail"></div><div class="si-dot">'+((i<phase||(done&&i===5))?"✓":p.ic)+'</div><div class="si-lbl"><b>'+p.t+'</b><span>'+p.d+'</span>'+(i===phase&&!done?'<span class="hint">▸ '+p.hint+'</span>':"")+'</div></div>';
+  });
+  document.getElementById("steps").innerHTML=h;
+}
+function updateTopbar(){
+  var tp=document.getElementById("tb-phase"), ts=document.getElementById("tb-step"),
+      pg=document.getElementById("pgf"), sk=document.getElementById("skipBtn");
+  if(!tp) return;
+  var p=Math.min(phase,5);
+  tp.textContent=PHASES[p].t;
+  ts.textContent="· 环节 "+(p+1)+"/6 · "+PHASES[p].hint;
+  if(pg) pg.style.width=(done?100:Math.round((p/6)*100+4))+"%";
+  if(sk){
+    sk.style.display=(done||busy||phase>=5)?"none":"";
+    sk.textContent=(phase>=4)?"生成报告 ➝":"跳到下一环节 ➝";
+  }
+}
+
+/* ---------------- Views ---------------- */
+function showWelcome(){
+  view="welcome"; rSteps();
+  var hasSaved = conv.length>0;
+  var h='<div class="welcome"><div class="wbox">';
+  h+='<div class="wtag">SINGULARITY REACH TECHNOLOGY</div>';
+  h+='<h2>企业AI成熟度评估智能体</h2>';
+  h+='<p class="lead">我是您的专属AI战略顾问，由 <strong style="color:#a982ff">Claude 大模型</strong>本地直连驱动。通过一段全程点选为主的引导式对话，我将从六大维度精准诊断贵企业的AI发展水平，并生成一份 <strong style="color:#a982ff">13页·贴合行业气质的专业PDF评估报告</strong>。</p>';
+  h+='<div class="dims">';
+  var ics=["🎯","📊","⚙️","👥","🚀","🛡️"];
+  DIMS.forEach(function(d,i){ h+='<div class="dimc"><div class="ic">'+ics[i]+'</div><b>'+d.s+'</b><span>'+d.en+'</span></div>'; });
+  h+='</div>';
+  h+='<div class="flowstrip">';
+  PHASES.forEach(function(p,i){ h+='<span class="fs-i"><i>'+(i+1)+'</i>'+p.t+'</span>'+(i<5?'<span class="fs-a">➝</span>':''); });
+  h+='</div>';
+  if(hasSaved){
+    h+='<button class="go-btn" onclick="resumeChat()">▶ 继续上次评估'+(done?"（报告已生成）":"")+'</button>';
+    h+='<button class="go-sec" onclick="freshChat()">开始一次全新评估</button>';
+  }else{
+    h+='<button class="go-btn" onclick="startChat(true)">开 始 评 估</button>';
+  }
+  h+='<div class="wnote">预计 12-18 分钟 · 全程点选为主，轻松作答 · 中途退出可随时续评 · 本地直连，数据不经第三方</div>';
+  h+='</div></div>';
+  document.getElementById("main").innerHTML=h;
+}
+
+function buildChatShell(){
+  view="chat";
+  var h='<div class="topbar"><div class="now"><span id="tb-phase"></span> <small id="tb-step"></small></div>';
+  h+='<div class="tb-right"><div class="pgw"><div class="pgf" id="pgf"></div></div><button class="skipbtn" id="skipBtn" onclick="skipPhase()">跳到下一环节 ➝</button><div class="chip-ai"><span class="live"></span> Claude Opus 4.8'+(WEB_SEARCH?" · 联网":"")+'</div></div></div>';
+  h+='<div class="chat" id="chatArea"></div>';
+  h+='<div class="inp-bar" id="inpBar">';
+  h+='<div class="done-row" id="doneRow" style="display:none"><span class="tip">评估已完成 · 想微调报告？直接在下方输入调整要求（如“30天计划更聚焦数据治理”）</span><button class="btn-g" onclick="openReport()">❖ 查看评估报告</button><button class="btn-o" onclick="restart()">↺ 重新评估</button></div>';
+  h+='<div class="file-row" id="fileRow"></div>';
+  h+='<div class="inp-row"><textarea id="ta" placeholder="点选上方选项，或在此输入您的回答 / 补充说明…" rows="1" oninput="autoGrow(this)" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>';
+  h+='<button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button></div>';
+  h+='<div class="inp-foot">由 Claude Opus 4.8 驱动 · 本地直连 Anthropic API'+(WEB_SEARCH?" · 支持联网检索":"")+' · 报告可导出高端 PDF</div>';
+  h+='</div>';
+  document.getElementById("main").innerHTML=h;
+  var ca=chatArea();
+  ca.addEventListener("scroll", function(){
+    followStream = (ca.scrollHeight-ca.scrollTop-ca.clientHeight)<140;
+  });
+  updFiles(); updateTopbar(); rSteps(); updInputState();
+}
+
+function updInputState(){
+  var sb=document.getElementById("sendBtn"), dr=document.getElementById("doneRow"), fr=document.getElementById("fileRow");
+  if(sb) sb.disabled=busy;
+  if(dr) dr.style.display=(done&&!busy)?"":"none";
+  if(fr) fr.style.display=done?"none":"";
+  updateTopbar(); rSteps();
+}
+
+/* ---------------- Chat DOM (incremental, no full re-render) ---------------- */
+function nearBottom(){var c=chatArea(); return c ? (c.scrollHeight-c.scrollTop-c.clientHeight)<140 : true;}
+function scrollBottom(force){var c=chatArea(); if(!c)return; if(force||followStream){ c.scrollTop=c.scrollHeight; }}
+
+function killOpts(pickedText){
+  document.querySelectorAll(".opts-live").forEach(function(w){
+    w.classList.add("used"); w.classList.remove("opts-live");
+    w.querySelectorAll("button").forEach(function(b){
+      b.disabled=true;
+      if(pickedText && (b.textContent===pickedText || b.textContent==="✓ "+pickedText)) b.classList.add("picked");
+    });
+  });
+  var cm=document.querySelector(".confirm-m"); if(cm) cm.remove();
+}
+
+function addDividerEl(p){
+  var d=document.createElement("div");
+  d.className="ph-div";
+  var ph=PHASES[Math.min(p,5)];
+  d.innerHTML='<div class="ln"></div><div class="bx"><b>'+ph.ic+' 环节 '+(Math.min(p,5)+1)+'/6 · '+ph.t+'</b><span>'+esc(ph.hint)+'</span></div><div class="ln"></div>';
+  chatArea().appendChild(d);
+}
+
+function addMsgEl(m, live){
+  if(m.sys){ addDividerEl(m.ph||0); return; }
+  var d=document.createElement("div");
+  d.className="msg "+(m.from==="ai"?"ai":"usr")+(m.err?" err":"");
+  var h='<div class="who">'+(m.from==="ai"?'<span class="av">AI</span> AIM² 评估顾问':'您')+'</div><div class="bbl">'+fmt(m.text)+'</div>';
+  if(live && m.from==="ai" && m.opts && m.opts.length){
+    h+='<div class="opts opts-live"><span class="hint">'+(m.fallback?"辅助选项（也可直接在下方输入）：":"请选择（也可在下方直接补充）：")+'</span>';
+    m.opts.forEach(function(o){ h+='<button onclick="pickOpt(\''+jsStr(o)+'\')">'+esc(o)+'</button>'; });
+    h+='</div>';
+  }
+  if(live && m.from==="ai" && m.optsm && m.optsm.length){
+    h+='<div class="opts multi opts-live" id="optsmWrap"><span class="hint">可多选（点击切换，选好后确认）：</span>';
+    m.optsm.forEach(function(o,i){ h+='<button id="om-'+i+'" onclick="toggleMulti('+i+',\''+jsStr(o)+'\')">'+esc(o)+'</button>'; });
+    h+='</div><div class="confirm-m"><button id="omOk" onclick="confirmMulti()" disabled>确认选择</button></div>';
+  }
+  d.innerHTML=h;
+  chatArea().appendChild(d);
+  return d;
+}
+
+function renderAllMsgs(){
+  var ca=chatArea(); if(!ca) return;
+  ca.innerHTML="";
+  var lastAi=-1;
+  conv.forEach(function(m,i){ if(m.from==="ai"&&!m.hidden) lastAi=i; });
+  conv.forEach(function(m,i){
+    if(m.hidden) return;
+    addMsgEl(m, i===lastAi && !done && !busy);
+  });
+  followStream=true; scrollBottom(true);
+}
+
+/* streaming bubble */
+function startStreamBubble(label){
+  endStreamBubble();
+  var d=document.createElement("div");
+  d.className="msg ai";
+  d.innerHTML='<div class="who"><span class="av">AI</span> AIM² 评估顾问</div><div class="bbl"><span class="st-tx"></span><span class="cursorb" style="display:none"></span><div class="st-status"><span class="dot-anim"><span></span><span></span><span></span></span><em>'+esc(label||"思考中…")+'</em></div></div>';
+  chatArea().appendChild(d);
+  streamEl={root:d, tx:d.querySelector(".st-tx"), cur:d.querySelector(".cursorb"), st:d.querySelector(".st-status"), em:d.querySelector(".st-status em")};
+  followStream=nearBottom()||true;
+  scrollBottom(true);
+}
+var rafPending=false, rafText="";
+function streamUpdate(txt){
+  rafText=txt;
+  if(rafPending) return;
+  rafPending=true;
+  requestAnimationFrame(function(){
+    rafPending=false;
+    if(!streamEl) return;
+    var clean=cleanStream(rafText);
+    if(clean){
+      streamEl.tx.innerHTML=fmt(clean);
+      streamEl.cur.style.display="";
+      streamEl.st.style.display="none";
+      scrollBottom(false);
+    }
+  });
+}
+function streamStatus(s){
+  if(streamEl&&streamEl.em){ streamEl.em.textContent=s; streamEl.st.style.display=""; }
+}
+function endStreamBubble(){
+  if(streamEl){ streamEl.root.remove(); streamEl=null; }
+  rafText="";
+}
+/* hide protocol markers while streaming */
+function cleanStream(t){
+  t=t.replace(/\[THEME\][\s\S]*?\[\/THEME\]/g,"")
+     .replace(/\[OPTM\][\s\S]*?\[\/OPTM\]/g,"")
+     .replace(/\[OPT\][\s\S]*?\[\/OPT\]/g,"")
+     .replace(/\[NEXT\]/g,"");
+  // truncate at any unclosed marker opening
+  var mks=["[THEME]","[OPTM]","[OPT]","[RPTJSON]"];
+  for(var i=0;i<mks.length;i++){
+    var p=t.indexOf(mks[i]);
+    if(p>=0) t=t.slice(0,p);
+  }
+  // trailing partial bracket like "[OP" / "[NE"
+  var lb=t.lastIndexOf("[");
+  if(lb>=0 && lb>=t.length-10 && t.indexOf("]",lb)<0) t=t.slice(0,lb);
+  return t.trim();
+}
+
+/* ---------------- Files ---------------- */
+document.getElementById("fileIn").addEventListener("change",function(e){
+  Array.from(e.target.files).forEach(function(file){
+    if(pendFiles.length>=3) return;
+    var reader=new FileReader();
+    reader.onload=function(ev){ pendFiles.push({name:file.name,type:file.type,b64:ev.target.result.split(",")[1]}); updFiles(); };
+    reader.readAsDataURL(file);
+  });
+  e.target.value="";
+});
+function removeFile(i){pendFiles.splice(i,1);updFiles();}
+function updFiles(){
+  var fr=document.getElementById("fileRow"); if(!fr) return;
+  var h='<div class="up-btn" onclick="document.getElementById(\'fileIn\').click()">📎 上传企业材料</div>';
+  pendFiles.forEach(function(f,i){ h+='<div class="ftag">📎 '+esc(f.name)+' <span class="x" onclick="removeFile('+i+')">✕</span></div>'; });
+  fr.innerHTML=h;
+}
+
+/* ---------------- Conversation actions ---------------- */
+function freshChat(){ clearState(); phase=0;conv=[];done=false;REPORT=null;PALETTE=null;coverData=null;themeKW="";reportRequested=false;autoContinued={}; startChat(true); }
+function resumeChat(){ startChat(false); }
+
+function startChat(fresh){
+  if(!getKey()){ showSetup(); return; }
+  buildChatShell();
+  if(fresh || conv.length===0){
+    conv=[]; phase=0; done=false; REPORT=null; reportRequested=false; autoContinued={};
+    conv.push({sys:true, ph:0}); addDividerEl(0);
+    conv.push({from:"usr", hidden:true, text:"你好，我想做一次企业AI成熟度评估，请开始引导我。"});
+    saveState();
+    callAPI();
+  }else{
+    renderAllMsgs();
+    if(phase>=5 && !REPORT && !done){
+      var m={from:"ai", text:"检测到上次的报告尚未生成完成。", opts:["继续生成报告"]};
+      conv.push(m); addMsgEl(m, true);
+    }
+    updInputState();
+  }
+}
+
+function pickOpt(text){
+  if(busy) return;
+  // special routes
+  if(text==="重试上一步"){ retryLast(); return; }
+  if(text==="重新生成报告"||text==="继续生成报告"){ killOpts(text); startReport(null); return; }
+  if(/上传/.test(text) && !/跳过|暂时|不/.test(text)){
+    killOpts(text);
+    var m={from:"usr", text:text};
+    conv.push(m); addMsgEl(m); scrollBottom(true);
+    var tip={from:"ai", text:"好的，请点击下方 **📎 上传企业材料** 按钮选择文件（支持 PDF / 图片，最多3个），选好后点发送 ➤ 即可，我会立刻为您解读。"};
+    conv.push(tip); addMsgEl(tip,false); scrollBottom(true);
+    saveState();
+    document.getElementById("fileIn").click();
+    return;
+  }
+  killOpts(text);
+  var m={from:"usr", text:text};
+  conv.push(m); addMsgEl(m); followStream=true; scrollBottom(true);
+  saveState();
+  callAPI();
+}
+function toggleMulti(i,opt){
+  multiSel[opt]=!multiSel[opt];
+  var b=document.getElementById("om-"+i);
+  if(b){ b.classList.toggle("sel",!!multiSel[opt]); b.textContent=(multiSel[opt]?"✓ ":"")+opt; }
+  var cnt=Object.keys(multiSel).filter(function(k){return multiSel[k];}).length;
+  var ok=document.getElementById("omOk");
+  if(ok){ ok.disabled=!cnt; ok.textContent="确认选择"+(cnt?(" · "+cnt+"项"):""); }
+}
+function confirmMulti(){
+  if(busy) return;
+  var picks=Object.keys(multiSel).filter(function(k){return multiSel[k];});
+  if(!picks.length) return;
+  multiSel={};
+  killOpts();
+  var m={from:"usr", text:picks.join("、")};
+  conv.push(m); addMsgEl(m); followStream=true; scrollBottom(true);
+  saveState();
+  callAPI();
+}
+function sendMsg(){
+  if(busy) return;
+  var ta=document.getElementById("ta");
+  var txt=ta?ta.value.trim():"";
+  if(!txt && pendFiles.length===0) return;
+  if(ta){ ta.value=""; ta.style.height="auto"; }
+  killOpts();
+  if(done && REPORT){
+    var m0={from:"usr", text:txt||"请按我的要求微调报告。"};
+    conv.push(m0); addMsgEl(m0); scrollBottom(true);
+    saveState();
+    startReport(txt||"请优化报告整体质量。");
+    return;
+  }
+  var display=txt||"请分析我上传的材料。";
+  var msgFiles=pendFiles.length>0?pendFiles.slice():null;
+  if(msgFiles){ display+="\n[已上传附件: "+msgFiles.map(function(f){return f.name;}).join(", ")+"]"; }
+  var m={from:"usr", text:display, files:msgFiles};
+  pendFiles=[]; multiSel={}; updFiles();
+  conv.push(m); addMsgEl(m); followStream=true; scrollBottom(true);
+  saveState();
+  callAPI();
+}
+function skipPhase(){
+  if(busy||done) return;
+  killOpts();
+  var m={from:"usr", text:"这个环节就到这里，我们继续下一环节吧。"};
+  conv.push(m); addMsgEl(m); scrollBottom(true);
+  conv.push({from:"usr", hidden:true, text:"(系统提示：客户希望结束当前环节。请用一句话自然收尾，宣布并开始下一环节的第一个问题，附上选项，末尾输出[NEXT]。若当前已是研判确认环节，请直接给出汇总并请客户确认。)"});
+  saveState();
+  callAPI();
+}
+function retryLast(){
+  // drop trailing error bubbles then re-call
+  for(var i=conv.length-1;i>=0;i--){
+    if(conv[i].err){ conv.splice(i,1); } else break;
+  }
+  renderAllMsgs(); saveState();
+  if(phase>=5 && !REPORT){ startReport(null); } else { callAPI(); }
+}
+function restart(){
+  if(!confirm("确定要重新开始一次全新的评估吗？当前对话与报告将清空。")) return;
+  freshChat();
+}
+function openReport(){ if(REPORT){ showReport(); } }
+function autoGrow(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,150)+"px";}
+
+function pushErr(err, isReport){
+  var hint = "";
+  var msg = (err&&err.message)||"未知错误";
+  if(err&&err.status===401) hint="\n\n请检查 config.js 中的 API Key 是否正确、是否已失效。";
+  else if(err&&err.status===429) hint="\n\n请求过于频繁或额度受限，请稍候再试。";
+  else if(err&&(err.status===529||err.status>=500)) hint="\n\n模型服务暂时繁忙，请稍候重试。";
+  else if(!navigator.onLine) hint="\n\n当前网络似乎已断开，请检查网络后重试。";
+  else hint="\n\n请检查网络是否可访问 api.anthropic.com，然后点击下方重试。";
+  var m={from:"ai", err:true, text:"⚠️ "+(isReport?"报告生成中断：":"连接出现问题：")+msg+hint, opts:["重试上一步"]};
+  conv.push(m); addMsgEl(m,true); scrollBottom(false);
+}
+
+/* ---------------- Anthropic API (streaming) ---------------- */
+function buildApiMessages(){
+  var apiMsgs=[];
+  conv.slice(-60).forEach(function(m){
+    if(m.sys||m.err) return;
+    var role=m.from==="ai"?"assistant":"user";
+    var content;
+    if(m.files && m.files.length>0){
+      var parts=[];
+      m.files.forEach(function(f){
+        if(f.b64){
+          if(f.type && f.type.indexOf("image/")===0){ parts.push({type:"image",source:{type:"base64",media_type:f.type,data:f.b64}}); }
+          else if(f.type==="application/pdf"){ parts.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:f.b64}}); }
+        }
+      });
+      parts.push({type:"text",text:m.text});
+      content=parts.length>1?parts:m.text;
+    }else{ content=m.text; }
+    if(apiMsgs.length>0 && apiMsgs[apiMsgs.length-1].role===role && typeof apiMsgs[apiMsgs.length-1].content==="string" && typeof content==="string"){
+      apiMsgs[apiMsgs.length-1].content+="\n"+content;
+    }else{ apiMsgs.push({role:role,content:content}); }
+  });
+  if(apiMsgs.length===0 || apiMsgs[0].role==="assistant"){ apiMsgs.unshift({role:"user",content:"开始评估"}); }
+  return apiMsgs;
+}
+
+/* single streaming call: parses SSE, reconstructs content blocks */
+function streamCall(body, onDelta, onStatus){
+  return fetch(API_URL,{method:"POST",headers:hdrs(),body:JSON.stringify(body)}).then(function(resp){
+    if(!resp.ok){
+      return resp.json().catch(function(){return null;}).then(function(j){
+        var e=new Error((j&&j.error&&j.error.message)||("HTTP "+resp.status));
+        e.status=resp.status; e.etype=j&&j.error&&j.error.type;
+        throw e;
+      });
+    }
+    var reader=resp.body.getReader(), dec=new TextDecoder(), buf="";
+    var blocks=[], stop=null, acc="";
+    function handleLine(line){
+      line=line.replace(/\r$/,"");
+      if(line.indexOf("data:")!==0) return;
+      var data=line.slice(5).trim();
+      if(!data) return;
+      var ev; try{ ev=JSON.parse(data); }catch(e){ return; }
+      if(ev.type==="error"){
+        var er=new Error((ev.error&&ev.error.message)||"流式传输错误");
+        er.etype=ev.error&&ev.error.type; er.status=529;
+        throw er;
+      }
+      if(ev.type==="content_block_start"){
+        var blk=ev.content_block?JSON.parse(JSON.stringify(ev.content_block)):{};
+        blocks[ev.index]=blk;
+        if(blk.type==="thinking"&&onStatus) onStatus("深度思考中…");
+        else if(blk.type==="server_tool_use"&&onStatus) onStatus("正在联网检索行业数据…");
+        else if(blk.type==="web_search_tool_result"&&onStatus) onStatus("正在阅读检索结果…");
+        if(blk.type==="tool_use"||blk.type==="server_tool_use"){ blk.__pj=""; }
+      }else if(ev.type==="content_block_delta"){
+        var b=blocks[ev.index]; if(!b) return;
+        var d=ev.delta||{};
+        if(d.type==="text_delta"){ b.text=(b.text||"")+d.text; acc+=d.text; if(onDelta) onDelta(acc); }
+        else if(d.type==="thinking_delta"){ b.thinking=(b.thinking||"")+(d.thinking||""); }
+        else if(d.type==="input_json_delta"){ b.__pj=(b.__pj||"")+(d.partial_json||""); }
+        else if(d.type==="signature_delta"){ b.signature=(b.signature||"")+(d.signature||""); }
+      }else if(ev.type==="content_block_stop"){
+        var bb=blocks[ev.index];
+        if(bb && bb.__pj!==undefined){
+          try{ bb.input=bb.__pj?JSON.parse(bb.__pj):(bb.input||{}); }catch(e){ bb.input=bb.input||{}; }
+          delete bb.__pj;
+        }
+      }else if(ev.type==="message_delta"){
+        if(ev.delta && ev.delta.stop_reason) stop=ev.delta.stop_reason;
+      }
+    }
+    function pump(){
+      return reader.read().then(function(r){
+        if(r.done){
+          if(buf){ buf.split("\n").forEach(handleLine); }
+          return {blocks:blocks.filter(Boolean), stop_reason:stop, text:acc};
+        }
+        buf+=dec.decode(r.value,{stream:true});
+        var lines=buf.split("\n"); buf=lines.pop();
+        for(var i=0;i<lines.length;i++) handleLine(lines[i]);
+        return pump();
+      });
+    }
+    return pump();
+  });
+}
+
+/* full turn: retries + pause_turn continuation for server tools */
+function runTurn(messages, opt){
+  var base={model:MODEL, max_tokens:opt.max_tokens||16000, system:opt.system, stream:true, thinking:{type:"adaptive"}};
+  if(opt.tools) base.tools=opt.tools;
+  if(opt.output_config) base.output_config=opt.output_config;
+  var msgs=messages.slice(), iter=0, accPrefix="", attempt=0;
+  function once(){
+    var body={}; for(var k in base) body[k]=base[k];
+    body.messages=msgs;
+    return streamCall(body, function(t){ if(opt.onDelta) opt.onDelta(accPrefix+t); }, opt.onStatus)
+    .catch(function(err){
+      if(err.status===400 && base.tools){ delete base.tools; return once(); }
+      if(err.status===400 && base.output_config){ delete base.output_config; if(opt.onSchemaDrop) opt.onSchemaDrop(); return once(); }
+      var retriable=(err.status===429||err.status===529||(err.status>=500&&err.status<600)||err.etype==="overloaded_error");
+      if(retriable && attempt<2){
+        attempt++;
+        if(opt.onStatus) opt.onStatus("模型服务繁忙，"+(attempt*3)+" 秒后自动重试…");
+        return wait(attempt*3000).then(once);
+      }
+      throw err;
+    });
+  }
+  function step(){
+    return once().then(function(res){
+      if(res.stop_reason==="pause_turn" && iter<6){
+        iter++; accPrefix+=res.text;
+        msgs=msgs.concat([{role:"assistant",content:res.blocks}]);
+        return step();
+      }
+      res.text=accPrefix+res.text;
+      return res;
+    });
+  }
+  return step();
+}
+
+function callAPI(){
+  busy=true; updInputState();
+  startStreamBubble("思考中…");
+  var tools = WEB_SEARCH ? [{type:"web_search_20260209", name:"web_search", max_uses:4}] : null;
+  runTurn(buildApiMessages(), {
+    system:getSys(), tools:tools, max_tokens:16000,
+    onDelta:streamUpdate, onStatus:streamStatus
+  }).then(function(res){
+    busy=false; endStreamBubble();
+    processResp(res.text||"");
+    updInputState(); saveState();
+  }).catch(function(err){
+    busy=false; endStreamBubble();
+    pushErr(err,false); updInputState(); saveState();
+  });
+}
+
+/* ---------------- Parse model response ---------------- */
+function processResp(raw){
+  var text=(raw||"").trim();
+  if(!text){ text="抱歉，我没有接收到有效回复。"; }
+
+  var tm=text.match(/\[THEME\]([\s\S]*?)\[\/THEME\]/);
+  if(tm){ parseTheme(tm[1]); text=text.replace(/\[THEME\][\s\S]*?\[\/THEME\]/g,"").trim(); }
+
+  // safety: if model emitted report JSON in chat (legacy behaviour)
+  var rm=text.match(/\[RPTJSON\]([\s\S]*?)(\[\/RPTJSON\]|$)/);
+  if(rm){
+    text=text.replace(/\[RPTJSON\][\s\S]*?(\[\/RPTJSON\]|$)/,"").trim();
+    if(text){ var mx={from:"ai",text:text}; conv.push(mx); addMsgEl(mx,false); }
+    onReportJSON(rm[1]);
+    return;
+  }
+
+  var advance = text.indexOf("[NEXT]")>=0;
+  if(advance) text=text.replace(/\[NEXT\]/g,"").trim();
+
+  var opts=null, optsm=null, m;
+  if(m=text.match(/\[OPTM\]([\s\S]*?)\[\/OPTM\]/)){ optsm=m[1].split("|").map(trimS).filter(Boolean); text=text.replace(/\[OPTM\][\s\S]*?\[\/OPTM\]/g,"").trim(); }
+  if(m=text.match(/\[OPT\]([\s\S]*?)\[\/OPT\]/)){ opts=m[1].split("|").map(trimS).filter(Boolean); text=text.replace(/\[OPT\][\s\S]*?\[\/OPT\]/g,"").trim(); }
+  text=text.replace(/\[\/?(OPT|OPTM|THEME|NEXT|RPTJSON)\]/g,"").trim();
+
+  if(advance){
+    phase=Math.min(phase+1,5);
+    conv.push({sys:true, ph:phase}); addDividerEl(phase);
+  }
+
+  // fallback options: never leave a question without clickable choices
+  var msg={from:"ai", text:text, opts:opts, optsm:optsm};
+  if(!opts && !optsm && !done && phase>=1 && phase<=4 && /[?？]/.test(text)){
+    msg.opts=FALLBACK_OPTS.slice(); msg.fallback=true;
+  }
+  multiSel={};
+  conv.push(msg); addMsgEl(msg, true); scrollBottom(false);
+
+  if(advance && phase>=5 && !done && !reportRequested){ saveState(); startReport(null); return; }
+
+  // auto-continue: model advanced phase but forgot to ask the first question
+  if(advance && phase<=4 && !msg.opts && !msg.optsm && !/[?？]/.test(text) && !autoContinued[phase]){
+    autoContinued[phase]=true;
+    conv.push({from:"usr", hidden:true, text:"(系统提示：请立即提出本环节的第一个问题，并按规则附上选项。)"});
+    saveState();
+    callAPI();
+    return;
+  }
+  saveState();
+}
+
+function parseTheme(s){
+  var o={}; (s||"").split("|").forEach(function(kv){ var i=kv.indexOf("="); if(i>0){ o[kv.slice(0,i).trim()]=kv.slice(i+1).trim(); } });
+  var mp={};
+  if(isHex(o.primary)) mp.primary=o.primary;
+  if(isHex(o.secondary)) mp.secondary=o.secondary;
+  if(isHex(o.accent)) mp.accent=o.accent;
+  if(o.name) mp.name=o.name;
+  PALETTE=pickPalette(o.name||"", mp);
+  themeKW=o.keyword||PALETTE.kw||"";
+  if(themeKW){ loadCover(themeKW).then(function(d){ if(d && !coverData){ coverData=d; saveState(); } }); }
+}
+
+/* ---------------- Report generation (dedicated engine call) ---------------- */
+function buildTranscript(adjust){
+  var lines=[];
+  conv.forEach(function(m){
+    if(m.sys||m.err||m.hidden) return;
+    lines.push((m.from==="ai"?"顾问":"客户")+"："+m.text);
+  });
+  var t="以下是一次企业AI成熟度评估的完整访谈记录：\n\n"+lines.join("\n");
+  if(REPORT && adjust){ t+="\n\n【上一版报告数据】\n"+JSON.stringify(REPORT); }
+  if(adjust){ t+="\n\n【客户对报告的调整要求】\n"+adjust+"\n\n请在保持其余内容质量的前提下按要求调整。"; }
+  t+="\n\n请严格按系统要求输出完整的评估报告JSON数据。";
+  return t;
+}
+
+function startReport(adjust){
+  if(busy) return;
+  reportRequested=true; busy=true; updInputState();
+  startStreamBubble("正在汇总全部访谈信息，研判撰写专业报告…（约1-2分钟）");
+  var charCount=0;
+  runTurn([{role:"user", content:buildTranscript(adjust)}], {
+    system:getReportSys(),
+    max_tokens:64000,
+    output_config:{format:{type:"json_schema", schema:REPORT_SCHEMA}},
+    onDelta:function(t){
+      charCount=t.length;
+      streamStatus("正在撰写报告… 已生成 "+charCount+" 字");
+    },
+    onStatus:streamStatus,
+    onSchemaDrop:function(){ streamStatus("正在以兼容模式撰写报告…"); }
+  }).then(function(res){
+    busy=false; endStreamBubble();
+    onReportJSON(res.text);
+  }).catch(function(err){
+    busy=false; endStreamBubble(); reportRequested=false;
+    pushErr(err,true); updInputState(); saveState();
+  });
+}
+
+function parseReportJSON(s){
+  if(!s) return null;
+  s=String(s).trim().replace(/^```json/i,"").replace(/^```/,"").replace(/```$/,"").trim();
+  var a=s.indexOf("{"), b=s.lastIndexOf("}");
+  if(a>=0 && b>a) s=s.slice(a,b+1);
+  try{ return JSON.parse(s); }catch(e){}
+  try{ return JSON.parse(s.replace(/,(\s*[}\]])/g,"$1")); }catch(e){}
+  return null;
+}
+
+function normalizeReport(d){
+  var dmap={}; arr(d.dimensions).forEach(function(x){ if(x&&x.name) dmap[x.name]=x; });
+  d.dimensions=DIMS.map(function(D,i){
+    var x=dmap[D.n]||arr(d.dimensions)[i]||{};
+    return {
+      name:D.n, short:D.s,
+      score:clampScore(x.score,3), benchmark:clampScore(x.benchmark,2.8),
+      analysis:strv(x.analysis,"该维度信息有限，建议在后续专项诊断中深入评估。"),
+      subItems:arr(x.subItems).slice(0,3).map(function(si){return {name:strv(si&&si.name,"子能力"),score:clampScore(si&&si.score,3)};}),
+      strength:strv(x.strength,""), gap:strv(x.gap,""), risk:strv(x.risk,""), quickWin:strv(x.quickWin,"")
+    };
+  });
+  var avg=d.dimensions.reduce(function(a,b){return a+b.score;},0)/6;
+  d.overallScore=clampScore(d.overallScore, avg);
+  var lvKey=(d.level||"").toUpperCase();
+  if(["L1","L2","L3","L4","L5"].indexOf(lvKey)<0){
+    var sc=d.overallScore;
+    lvKey = sc<=1.7?"L1" : sc<=2.5?"L2" : sc<=3.4?"L3" : sc<=4.2?"L4" : "L5";
+  }
+  d.level=lvKey;
+  var lv=LEVELS[["L1","L2","L3","L4","L5"].indexOf(lvKey)];
+  d.levelName=strv(d.levelName,lv.n); d.levelDesc=strv(d.levelDesc,lv.d);
+  d.company=strv(d.company,"贵公司"); d.industry=strv(d.industry,"");
+  d.scale=strv(d.scale,"未披露"); d.revenue=strv(d.revenue,"未披露");
+  d.summary=strv(d.summary,""); d.background=strv(d.background,"");
+  d.keyMetrics=arr(d.keyMetrics).slice(0,4);
+  d.findings=d.findings||{};
+  d.findings.strengths=arr(d.findings.strengths); d.findings.weaknesses=arr(d.findings.weaknesses);
+  d.findings.opportunities=arr(d.findings.opportunities); d.findings.risks=arr(d.findings.risks);
+  d.gapAnalysis=d.gapAnalysis||{};
+  d.gapAnalysis.keyGaps=arr(d.gapAnalysis.keyGaps);
+  d.roadmap=d.roadmap||{}; d.roadmap.d30=arr(d.roadmap.d30); d.roadmap.d90=arr(d.roadmap.d90); d.roadmap.d180=arr(d.roadmap.d180);
+  d.benefits=d.benefits||{narrative:"",items:[]}; d.benefits.items=arr(d.benefits.items).slice(0,4);
+  d.products=arr(d.products).slice(0,5);
+  d.governance=arr(d.governance).slice(0,4);
+  if(!d.governance.length){
+    d.governance=["成立由高层牵头的AI推进专项小组，明确各业务线接口人","建立月度AI进展复盘机制，跟踪路线图落地与KPI达成","设立年度AI专项预算，并按“速赢-筑基-跃迁”分阶段投放","采用“试点-验证-推广”机制，成功场景方法论快速复制"];
+  }
+  return d;
+}
+
+function onReportJSON(jsonStr){
+  var data=parseReportJSON(jsonStr);
+  if(!data || !data.dimensions){
+    var m={from:"ai", text:"⚠️ 报告数据解析失败了。您可以点击下方按钮，我重新为您生成。", opts:["重新生成报告"]};
+    conv.push(m); addMsgEl(m,true); scrollBottom(true); saveState();
+    return;
+  }
+  REPORT=normalizeReport(data);
+  PALETTE=pickPalette(REPORT.industry||"", REPORT.palette);
+  done=true; phase=5; reportRequested=false;
+  var m={from:"ai", text:"✅ 您的专属《企业AI成熟度评估报告》已生成（共13页），正在为您打开预览。\n\n如需调整报告内容，随时在下方输入调整要求即可。"};
+  conv.push(m); addMsgEl(m,false); scrollBottom(true);
+  updInputState(); saveState();
+  busy=true; updInputState();
+  var kw=REPORT.coverKeyword||themeKW||PALETTE.kw||"business technology";
+  var prom=coverData?Promise.resolve(coverData):loadCover(kw);
+  prom.then(function(dd){
+    coverData=dd||coverData||null;
+    busy=false; saveState();
+    showReport();
+  });
+}
+
+/* ---------------- Cover image ---------------- */
+function fetchAsDataURL(url, timeoutMs){
+  return new Promise(function(resolve){
+    var fin=false;
+    var timer=setTimeout(function(){ if(!fin){fin=true;resolve(null);} },timeoutMs||8000);
+    fetch(url,{mode:"cors"}).then(function(res){
+      if(!res.ok) throw 0;
+      return res.blob();
+    }).then(function(blob){
+      if(!blob || !blob.type || blob.type.indexOf("image")!==0) throw 0;
+      var fr=new FileReader();
+      fr.onload=function(){ if(!fin){fin=true;clearTimeout(timer);resolve(fr.result);} };
+      fr.onerror=function(){ if(!fin){fin=true;clearTimeout(timer);resolve(null);} };
+      fr.readAsDataURL(blob);
+    }).catch(function(){ if(!fin){fin=true;clearTimeout(timer);resolve(null);} });
+  });
+}
+function loadCover(keyword){
+  var kwRaw=(keyword||"business technology").trim();
+  var prompt=encodeURIComponent("cinematic professional cover photograph of "+kwRaw+", modern high-end corporate, wide angle, dramatic lighting, depth of field, no text");
+  var tries=[
+    ["https://image.pollinations.ai/prompt/"+prompt+"?width=1600&height=900&nologo=true&seed=7",16000],
+    ["https://image.pollinations.ai/prompt/"+prompt+"?width=1600&height=900&nologo=true&seed=23",12000],
+    ["https://picsum.photos/seed/"+(kwRaw.replace(/[^a-z0-9]/gi,"")||"ai")+"/1600/900",8000]
+  ];
+  var i=0;
+  function next(){
+    if(i>=tries.length) return Promise.resolve(null);
+    var t=tries[i++];
+    return fetchAsDataURL(t[0],t[1]).then(function(d){ return d||next(); });
+  }
+  return next();
+}
+
+/* ============================================================
+   REPORT RENDERING (13 pages)
+   ============================================================ */
+var TOTAL_PAGES=13, pgN=0;
+function showReport(){
+  if(!REPORT||!PALETTE) return;
+  view="report";
+  var h='<div class="rview">';
+  h+='<div class="rview-bar"><div class="t"><span class="av" style="width:18px;height:18px;border-radius:50%;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff">❖</span> 评估报告预览 · '+esc(REPORT.company)+'（共'+TOTAL_PAGES+'页）</div>';
+  h+='<div class="acts"><button class="btn-o" onclick="backToChat()">← 返回对话 / 微调报告</button><button class="btn-g" id="pdfBtn" onclick="exportPDF()">⤓ 下载 PDF 报告</button></div></div>';
+  h+='<div class="rstage"><div id="reportScaler">'+buildReportDoc()+'</div></div></div>';
+  document.getElementById("main").innerHTML=h;
+  rSteps();
+  fitReport(); setTimeout(fitReport,150);
+  if(!resizeBound){ window.addEventListener("resize",fitReport); resizeBound=true; }
+}
+function backToChat(){
+  buildChatShell(); renderAllMsgs(); updInputState();
+}
+var resizeBound=false;
+function fitReport(){
+  var stage=document.querySelector(".rstage");
+  var scaler=document.getElementById("reportScaler");
+  if(!stage||!scaler) return;
+  var avail=stage.clientWidth-40;
+  var sc=Math.min(1, avail/794);
+  scaler.style.transform="scale("+sc+")";
+  var doc=document.getElementById("reportDoc");
+  if(doc){ stage.style.minHeight=(doc.offsetHeight*sc+40)+"px"; }
+}
+
+function radar(scores, benchmarks, fill, stroke){
+  var cx=170,cy=152,R=110,N=6;
+  function P(r,i){var a=(-90+i*360/N)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  var s='<svg width="340" height="306" viewBox="0 0 340 306">';
+  for(var k=1;k<=5;k++){var pts="";for(var i=0;i<N;i++){var p=P(R*k/5,i);pts+=p[0].toFixed(1)+","+p[1].toFixed(1)+" ";}s+='<polygon points="'+pts+'" fill="'+(k%2?"#fbfbfe":"#f3f4f9")+'" stroke="#e6e8f0" stroke-width="1"/>';}
+  for(var i=0;i<N;i++){var p=P(R,i);s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#e2e4ee" stroke-width="1"/>';}
+  // benchmark polygon (dashed grey)
+  var bp="";for(var i=0;i<N;i++){var sc=Math.max(0,Math.min(5,fnum(benchmarks[i],0)));var p=P(R*sc/5,i);bp+=p[0].toFixed(1)+","+p[1].toFixed(1)+" ";}
+  s+='<polygon points="'+bp+'" fill="none" stroke="#9aa0b0" stroke-width="1.5" stroke-dasharray="5,4"/>';
+  var dp="";for(var i=0;i<N;i++){var sc=Math.max(0,Math.min(5,fnum(scores[i],0)));var p=P(R*sc/5,i);dp+=p[0].toFixed(1)+","+p[1].toFixed(1)+" ";}
+  s+='<polygon points="'+dp+'" fill="'+fill+'" fill-opacity="0.22" stroke="'+stroke+'" stroke-width="2.5"/>';
+  for(var i=0;i<N;i++){var sc=Math.max(0,Math.min(5,fnum(scores[i],0)));var p=P(R*sc/5,i);s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="'+stroke+'"/>';}
+  for(var i=0;i<N;i++){var p=P(R+22,i);var anc="middle";if(p[0]>cx+8)anc="start";if(p[0]<cx-8)anc="end";s+='<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+4).toFixed(1)+'" font-size="11" font-weight="600" fill="#4a5060" text-anchor="'+anc+'">'+DIMS[i].s+'</text>';}
+  s+='</svg>';
+  return s;
+}
+
+function rhead(no,zh,en,acc,prim){
+  return '<div class="rh"><div class="no" style="background:linear-gradient(135deg,'+prim+','+acc+')">'+no+'</div><h2 style="color:'+prim+'">'+zh+'</h2><span class="en">'+en+'</span></div><div class="rdiv" style="background:linear-gradient(90deg,'+acc+','+prim+',transparent)"></div>';
+}
+function rsub(t,prim,acc){ return '<div style="display:flex;align-items:center;gap:10px;margin:4px 0 13px"><div style="width:5px;height:18px;border-radius:3px;background:'+acc+'"></div><div style="font-size:14.5px;font-weight:800;color:'+prim+';letter-spacing:1px">'+t+'</div></div>'; }
+function rfoot(){
+  pgN++;
+  return '<div class="rfoot"><span>奇点达 AIM² · 企业AI成熟度评估报告 · 机密</span><span><b>'+esc(REPORT.company)+'</b> · 第 '+pgN+' 页 / 共 '+TOTAL_PAGES+' 页</span></div>';
+}
+
+function buildReportDoc(){
+  var R=REPORT, P=PALETTE;
+  var prim=P.primary, sec=P.secondary, acc=P.accent;
+  var dims=R.dimensions;
+  var scores=dims.map(function(d){return d.score;});
+  var bms=dims.map(function(d){return d.benchmark;});
+  var overall=R.overallScore;
+  var lvIdx=["L1","L2","L3","L4","L5"].indexOf(R.level); if(lvIdx<0)lvIdx=2;
+  var dateStr=new Date().toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric"});
+  pgN=1; // cover counts as page 1
+
+  var ovOverlay="linear-gradient(135deg,"+prim+"f2 0%,"+prim+"cc 38%,"+sec+"b3 68%,#05060af2 100%)";
+  var coverBg=coverData ? ('<div class="bgimg" style="background-image:url('+coverData+')"></div>') : ('<div class="bgimg" style="background:radial-gradient(circle at 30% 20%,'+acc+'55,transparent 55%),radial-gradient(circle at 80% 70%,'+sec+'88,transparent 60%),'+prim+'"></div>');
+
+  var h='<div id="reportDoc">';
+
+  /* ============ P1 COVER ============ */
+  h+='<section class="rpage rcover">'+coverBg+'<div class="ov" style="background:'+ovOverlay+'"></div><div class="ct">';
+  h+='<div class="cov-top"><div class="cov-brand"><div class="cmark" style="background:linear-gradient(135deg,'+acc+','+sec+')">奇</div><div class="bt"><small>SINGULARITY REACH</small><b>奇点达科技</b></div></div><div class="cov-date">报告日期<br>'+dateStr+'</div></div>';
+  h+='<div class="cov-mid"><div class="cov-kick">AI MATURITY ASSESSMENT</div><h1>企业AI成熟度<br>评估报告</h1>';
+  h+='<div class="sub">基于 AIM² 六维成熟度模型的定制化深度诊断 · 为'+esc(R.industry||"贵行业")+'量身研判</div>';
+  h+='<div class="cov-co" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25)"><div><div class="lab">评 估 对 象</div><div class="nm">'+esc(R.company)+'</div></div></div>';
+  h+='<div class="cov-badge"><div class="ring" style="border-color:'+acc+'"><b>'+overall.toFixed(1)+'</b><small>综合评分</small></div><div class="meta"><b style="color:'+acc+'">'+R.level+' · '+esc(R.levelName)+'</b><span>'+esc(R.levelDesc)+'</span></div></div>';
+  h+='</div>';
+  h+='<div class="cov-foot"><span>北京奇点达科技有限公司 · AIM² Intelligent Assessment</span><span>CONFIDENTIAL · 机密</span></div>';
+  h+='</div></section>';
+
+  /* ============ P2 关于本报告 + 目录 ============ */
+  h+='<section class="rpage pb">';
+  h+=rhead("01","关于本报告","ABOUT THIS REPORT",acc,prim);
+  h+='<div class="rlead bdr" style="border-color:'+acc+'">'+fmt(R.background||("本报告基于奇点达 AIM² 企业AI成熟度模型，通过结构化深度访谈对"+R.company+"的AI能力现状进行系统诊断，旨在为企业制定AI战略与落地路径提供决策依据。"))+'</div>';
+  h+=rsub("评估方法 · METHODOLOGY",prim,acc);
+  h+='<div class="meth">';
+  [["📐","AIM² 模型","六大维度×18项子能力，融合38+行业、128+落地案例经验"],
+   ["💬","顾问式访谈","结构化深度对话采集一手信息，AI实时交叉验证"],
+   ["📊","五级标尺","L1萌芽探索 → L5智能原生，量化定位与行业对标"],
+   ["🗺️","行动导向","30/90/180天路线图 + 量化收益预估，可直接执行"]].forEach(function(x){
+    h+='<div class="mi"><i>'+x[0]+'</i><b>'+x[1]+'</b><p>'+x[2]+'</p></div>';
+  });
+  h+='</div>';
+  h+=rsub("报告目录 · CONTENTS",prim,acc);
+  h+='<div class="toc">';
+  [["02","执行摘要","3"],["03","评估总览与行业对标","4"],["04","六维深度诊断（一）战略 / 数据","5"],
+   ["04","六维深度诊断（二）基建 / 人才","6"],["04","六维深度诊断（三）落地 / 治理","7"],
+   ["05","核心发现（SWOT）","8"],["06","差距分析与价值预估","9"],["07","行动路线图与保障机制","10"],
+   ["08","推荐解决方案组合","11"],["09","附录：等级与维度定义","12"]].forEach(function(t){
+    h+='<div class="toc-i"><span class="tno" style="color:'+acc+'">'+t[0]+'</span><span>'+t[1]+'</span><span class="dots"></span><span class="pg">'+t[2]+'</span></div>';
+  });
+  h+='</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P3 执行摘要 ============ */
+  h+='<section class="rpage pb">';
+  h+=rhead("02","执行摘要","EXECUTIVE SUMMARY",acc,prim);
+  h+='<div class="rlead bdr" style="border-color:'+acc+'">'+fmt(R.summary)+'</div>';
+  h+='<div class="kmrow">';
+  R.keyMetrics.forEach(function(k){
+    h+='<div class="kmc"><b style="color:'+prim+'">'+esc(k.value||"—")+'</b><span>'+esc(k.label||"")+'</span><small>'+esc(k.note||"")+'</small></div>';
+  });
+  h+='</div>';
+  h+=rsub("总体结论 · CONCLUSION",prim,acc);
+  h+='<div class="concl" style="background:linear-gradient(120deg,'+prim+','+sec+')">';
+  h+='<div class="cring" style="border-color:'+acc+'"><b>'+overall.toFixed(1)+'</b><small>/ 5.0</small></div>';
+  h+='<div class="ct2"><b style="color:'+acc+'">'+R.level+' · '+esc(R.levelName)+'　<span style="font-size:11px;opacity:.8;font-weight:500">'+esc(LEVELS[lvIdx].d)+'</span></b>';
+  h+='<p>'+esc(R.levelDesc)+' 建议以本报告路线图为基线，6个月后进行复评，跟踪成熟度演进。</p></div>';
+  h+='</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P4 评估总览 ============ */
+  h+='<section class="rpage pb">';
+  h+=rhead("03","评估总览与行业对标","OVERVIEW & BENCHMARK",acc,prim);
+  h+='<div class="grid2"><div class="col"><div class="radarwrap">'+radar(scores,bms,acc,prim)+'<div style="font-size:9.5px;color:#9aa0b0;margin-top:2px">实线＝'+esc(R.company)+' · 虚线＝行业均值（满分5.0）</div></div></div>';
+  h+='<div class="col"><div style="font-size:12px;font-weight:700;color:'+prim+';margin-bottom:9px">成熟度等级定位</div><div class="ladder">';
+  LEVELS.forEach(function(l,i){
+    var cur=i===lvIdx;
+    h+='<div class="lvl'+(cur?" cur":"")+'"'+(cur?(' style="background:linear-gradient(120deg,'+prim+','+sec+')"'):"")+'><div class="lc">'+l.k+'</div><div class="lt"><b>'+esc(l.n)+'</b><span>'+esc(l.d)+'</span></div>'+(cur?'<div style="margin-left:auto;font-size:10px;font-weight:700;color:'+acc+'">◀ 当前</div>':"")+'</div>';
+  });
+  h+='</div></div></div>';
+  h+='<div class="bench">'+rsub("六维度 vs 行业均值",prim,acc);
+  dims.forEach(function(d){
+    var pct=d.score/5*100, bpct=d.benchmark/5*100;
+    var delta=d.score-d.benchmark;
+    var dtxt=(delta>=0?"领先 +":"落后 ")+delta.toFixed(1);
+    var dcol=delta>=0?"#1c7a52":"#b65430";
+    h+='<div class="br"><div class="nm">'+d.short+'</div><div class="tk"><div class="fl" style="width:'+pct+'%;background:linear-gradient(90deg,'+sec+','+acc+')"></div><div class="bm" style="left:'+bpct+'%"></div></div><div class="vl"><b style="color:'+prim+'">'+d.score.toFixed(1)+'</b> / 均值'+d.benchmark.toFixed(1)+' <span style="color:'+dcol+'">'+dtxt+'</span></div></div>';
+  });
+  h+='<div class="legend"><span><i style="background:linear-gradient(90deg,'+sec+','+acc+')"></i>'+esc(R.company)+'</span><span><i style="background:#39404e"></i>行业均值估计</span></div>';
+  h+='</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P5-P7 六维深度诊断 ============ */
+  var pageDefs=[["六维深度诊断（一）","战略领导 · 数据治理",0,2],["六维深度诊断（二）","技术基建 · 人才组织",2,4],["六维深度诊断（三）","应用落地 · 治理合规",4,6]];
+  pageDefs.forEach(function(pd){
+    h+='<section class="rpage pb">';
+    h+=rhead("04",pd[0],"DEEP DIVE · "+pd[1],acc,prim);
+    for(var di=pd[2];di<pd[3];di++){
+      var d=dims[di];
+      var pct=Math.max(0,Math.min(100,d.score/5*100));
+      var delta=d.score-d.benchmark;
+      h+='<div class="dcard"><div class="dt"><div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,'+prim+','+sec+');color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">'+(di+1)+'</div><div class="dn">'+esc(d.name)+'</div><span class="bmk">行业均值 '+d.benchmark.toFixed(1)+' · '+(delta>=0?"领先":"落后")+' '+Math.abs(delta).toFixed(1)+'</span><div class="ds" style="color:'+prim+'">'+d.score.toFixed(1)+'<small>/5</small></div></div>';
+      h+='<div class="rbarT"><div class="rbarF" style="width:'+pct+'%;background:linear-gradient(90deg,'+sec+','+acc+')"></div></div>';
+      h+='<div class="an">'+fmt(d.analysis)+'</div>';
+      if(d.subItems && d.subItems.length){
+        h+='<div class="sub3">';
+        d.subItems.forEach(function(si){
+          h+='<div class="sbi"><b>'+esc(si.name)+' <small>'+si.score.toFixed(1)+'</small></b><div class="sbar"><i style="width:'+(si.score/5*100)+'%;background:'+acc+'"></i></div></div>';
+        });
+        h+='</div>';
+      }
+      h+='<div class="quad">';
+      if(d.strength) h+='<div class="q-s"><b>▲ 优势亮点</b>'+fmt(d.strength)+'</div>';
+      if(d.gap) h+='<div class="q-g"><b>▼ 关键短板</b>'+fmt(d.gap)+'</div>';
+      if(d.risk) h+='<div class="q-r"><b>⚠ 风险提示</b>'+fmt(d.risk)+'</div>';
+      if(d.quickWin) h+='<div class="q-w"><b>⚡ 30天速赢</b>'+fmt(d.quickWin)+'</div>';
+      h+='</div></div>';
+    }
+    h+=rfoot();
+    h+='</section>';
+  });
+
+  /* ============ P8 核心发现 SWOT ============ */
+  var fnd=R.findings;
+  h+='<section class="rpage pb">';
+  h+=rhead("05","核心发现","KEY FINDINGS · SWOT",acc,prim);
+  h+='<div class="find">';
+  h+='<div class="findcol f-s"><h4>核心优势 <small>STRENGTHS</small></h4><ul>'+(fnd.strengths.length?fnd.strengths.map(function(x){return "<li>"+fmt(x)+"</li>";}).join(""):"<li>—</li>")+'</ul></div>';
+  h+='<div class="findcol f-w"><h4>关键短板 <small>WEAKNESSES</small></h4><ul>'+(fnd.weaknesses.length?fnd.weaknesses.map(function(x){return "<li>"+fmt(x)+"</li>";}).join(""):"<li>—</li>")+'</ul></div>';
+  h+='<div class="findcol f-o"><h4>战略机会 <small>OPPORTUNITIES</small></h4><ul>'+(fnd.opportunities.length?fnd.opportunities.map(function(x){return "<li>"+fmt(x)+"</li>";}).join(""):"<li>—</li>")+'</ul></div>';
+  h+='<div class="findcol f-r"><h4>外部风险 <small>RISKS</small></h4><ul>'+(fnd.risks.length?fnd.risks.map(function(x){return "<li>"+fmt(x)+"</li>";}).join(""):"<li>—</li>")+'</ul></div>';
+  h+='</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P9 差距分析 + 收益预估 ============ */
+  var ga=R.gapAnalysis;
+  h+='<section class="rpage pb">';
+  h+=rhead("06","差距分析与价值预估","GAP & VALUE",acc,prim);
+  h+=rsub("通往 "+esc(ga.targetLevel||"下一等级")+" · "+esc(ga.targetName||""),prim,acc);
+  if(ga.narrative) h+='<div class="rlead bdr" style="border-color:'+acc+'">'+fmt(ga.narrative)+'</div>';
+  if(ga.keyGaps.length){
+    h+='<table class="gtab"><tr><th>维度</th><th style="width:118px">现状 → 目标</th><th>关键举措</th></tr>';
+    ga.keyGaps.forEach(function(g){
+      h+='<tr><td style="font-weight:700;color:'+prim+';white-space:nowrap">'+esc(g.dimension||"")+'</td><td class="sc">'+clampScore(g.current,0).toFixed(1)+'<span class="ar">➝</span><span style="color:'+prim+'">'+clampScore(g.target,0).toFixed(1)+'</span></td><td>'+fmt(g.action||"")+'</td></tr>';
+    });
+    h+='</table>';
+  }
+  h+='<div style="height:16px"></div>'+rsub("预期价值测算 · EXPECTED VALUE",prim,acc);
+  if(R.benefits.narrative) h+='<div style="font-size:11px;color:#5a6272;line-height:1.85;margin-bottom:10px">'+fmt(R.benefits.narrative)+'</div>';
+  h+='<div class="benef">';
+  R.benefits.items.forEach(function(b){
+    h+='<div class="bnc"><b>'+esc(b.name||"")+'</b><div class="est" style="color:'+prim+'">'+esc(b.estimate||"")+'</div><p>'+fmt(b.basis||"")+'</p></div>';
+  });
+  h+='</div>';
+  h+='<div style="margin-top:12px;font-size:8.5px;color:#9aa0b0">* 以上为基于行业基准与访谈信息的区间预估，实际收益以落地验证为准。</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P10 路线图 + 保障 ============ */
+  var rd=R.roadmap;
+  h+='<section class="rpage pb">';
+  h+=rhead("07","行动路线图与保障机制","ROADMAP & GOVERNANCE",acc,prim);
+  h+='<div class="road">';
+  [["d30","30","天 · 速赢摸底"],["d90","90","天 · 筑基试点"],["d180","180","天 · 规模跃迁"]].forEach(function(g,gi){
+    var items=rd[g[0]]||[];
+    var bg=gi===0?prim:(gi===1?sec:acc);
+    h+='<div class="rdc"><div class="hd" style="background:linear-gradient(135deg,'+bg+','+(gi===2?prim:sec)+')"><b>'+g[1]+'</b><span>'+g[2]+'</span></div><div class="bd">';
+    if(items.length){
+      items.forEach(function(it){
+        h+='<div class="it"><b>'+esc(it.title||"")+'</b><p>'+fmt(it.detail||"")+'</p>'+(it.kpi?('<span class="kpi">KPI · '+esc(it.kpi)+'</span>'):"")+'</div>';
+      });
+    }else{ h+='<div class="it"><p>—</p></div>'; }
+    h+='</div></div>';
+  });
+  h+='</div>';
+  h+='<div style="height:16px"></div>'+rsub("实施保障机制 · GOVERNANCE",prim,acc);
+  h+='<div class="gov">';
+  R.governance.forEach(function(g,i){
+    h+='<div style="border-color:'+(i%2?acc:sec)+'">'+fmt(g)+'</div>';
+  });
+  h+='</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P11 解决方案 ============ */
+  h+='<section class="rpage pb">';
+  h+=rhead("08","推荐解决方案组合","SOLUTIONS",acc,prim);
+  h+='<div style="font-size:11.5px;color:#5a6272;margin-bottom:14px;line-height:1.8">基于贵企业当前成熟度与短板，我们推荐以下奇点达「软件 + 硬件 + 认证」组合，帮助您以最优路径实现 AI 能力跃迁：</div>';
+  h+='<div class="prod">';
+  R.products.forEach(function(p){
+    var cat=p.category||"软件";
+    var cc=cat.indexOf("硬")>=0?"#E8772E":(cat.indexOf("认")>=0?"#7C5CFF":acc);
+    h+='<div class="pcard"><div class="pt"><span class="cat" style="background:'+cc+'">'+esc(cat)+'</span><span class="pn" style="color:'+prim+'">'+esc(p.name||"")+'</span></div><div class="pr">'+fmt(p.reason||"")+'</div>'+(p.value?('<div class="pv">💡 预期价值：'+fmt(p.value)+'</div>'):"")+'</div>';
+  });
+  h+='</div>';
+  h+='<div class="svcbox" style="background:linear-gradient(120deg,'+prim+','+sec+')"><b style="color:'+acc+'">陪跑式落地服务</b><p>奇点达提供「评估 → 规划 → 试点 → 推广」全周期陪跑：行业专家驻场诊断、场景POC联合交付、内部人才带教认证，确保路线图不止于纸面。建议以30天速赢动作为切入点，尽快启动首场景验证。</p></div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P12 附录 ============ */
+  h+='<section class="rpage pb">';
+  h+=rhead("09","附录","APPENDIX",acc,prim);
+  h+=rsub("AIM² 成熟度等级定义",prim,acc);
+  h+='<table class="appx"><tr style="background:linear-gradient(120deg,'+prim+','+sec+')"><th style="width:74px">等级</th><th style="width:92px">名称</th><th>典型特征</th></tr>';
+  LEVELS.forEach(function(l,i){
+    h+='<tr'+(i===lvIdx?' style="background:#f6f9ff"':'')+'><td class="lk" style="color:'+(i===lvIdx?acc:prim)+'">'+l.k+(i===lvIdx?" ◀":"")+'</td><td style="font-weight:700">'+l.n+'</td><td>'+l.tr+'</td></tr>';
+  });
+  h+='</table>';
+  h+=rsub("六维度评估范围说明",prim,acc);
+  h+='<table class="appx"><tr style="background:linear-gradient(120deg,'+prim+','+sec+')"><th style="width:150px">维度</th><th>评估范围</th></tr>';
+  DIMS.forEach(function(d){ h+='<tr><td style="font-weight:700;color:'+prim+'">'+d.n+'</td><td>'+d.desc+'</td></tr>'; });
+  h+='</table>';
+  h+=rsub("声明",prim,acc);
+  h+='<div class="disclaim">本报告由奇点达 AIM² 企业AI成熟度评估智能体基于访谈信息生成，评分与建议反映评估时点的信息快照，供企业内部决策参考。报告中的行业均值为基于公开研究与项目经验的估计值；预期收益为区间预估，实际效果以落地验证为准。本报告内容属于商业机密，未经授权请勿外传。如需更深入的专项诊断、数据级审计或落地陪跑服务，欢迎联系奇点达行业专家团队。</div>';
+  h+=rfoot();
+  h+='</section>';
+
+  /* ============ P13 BACK COVER ============ */
+  h+='<section class="rpage pb backcov" style="background:linear-gradient(150deg,'+prim+','+sec+' 70%,#05060a)">';
+  h+='<div class="bm" style="background:linear-gradient(135deg,'+acc+','+sec+')">奇</div>';
+  h+='<h3>让每一家企业<br>都拥有 AI 竞争力</h3>';
+  h+='<p>本报告由奇点达 AIM² 企业AI成熟度评估智能体生成，融合 Claude 大模型实时研判与 128+ 落地案例经验。如需更深入的专项诊断与陪跑式落地，欢迎联系我们的行业专家团队。</p>';
+  h+='<div class="ln">北京奇点达科技有限公司 · SINGULARITY REACH TECHNOLOGY · 38+ 行业 · 128+ 案例</div>';
+  h+='</section>';
+
+  h+='</div>';
+  return h;
+}
+
+/* ---------------- PDF export ---------------- */
+function exportPDF(){
+  var el=document.getElementById("reportDoc");
+  var btn=document.getElementById("pdfBtn");
+  var scaler=document.getElementById("reportScaler");
+  if(!el){ alert("报告尚未就绪"); return; }
+  var prevT=scaler?scaler.style.transform:"";
+  if(scaler) scaler.style.transform="none";
+  if(btn){ btn.disabled=true; btn.innerHTML="⏳ 正在生成 PDF…"; }
+  function restore(){ if(scaler) scaler.style.transform=prevT; if(btn){ btn.disabled=false; btn.innerHTML="⤓ 下载 PDF 报告"; } fitReport(); }
+  if(typeof html2pdf==="undefined"){
+    restore(); window.print(); return;
+  }
+  var fname=((REPORT&&REPORT.company)?REPORT.company:"企业")+"_AI成熟度评估报告.pdf";
+  var opt={
+    margin:0,
+    filename:fname,
+    image:{type:"jpeg",quality:0.95},
+    html2canvas:{scale:2,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false,windowWidth:794},
+    jsPDF:{unit:"px",format:[794,1123],orientation:"portrait",compress:true},
+    pagebreak:{mode:["css","legacy"]}
+  };
+  html2pdf().set(opt).from(el).save().then(function(){ restore(); }).catch(function(e){
+    restore();
+    alert("自动导出遇到问题，将改用浏览器打印（可选择「另存为PDF」）。\n"+(e&&e.message?e.message:""));
+    window.print();
+  });
+}
+
+/* ---------------- Init ---------------- */
+(function init(){
+  loadState();
+  showWelcome();
+})();
+</script>
+</body>
+</html>
