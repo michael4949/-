@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>晨曦智询 · 计价知识助手 — 晨曦科技</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%232563eb"/><stop offset="1" stop-color="%2306b6d4"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(%23g)"/><path d="M15 28 A9 9 0 0 1 33 28 Z" fill="white"/><rect x="10" y="28" width="28" height="2.5" rx="1.25" fill="white"/></svg>'>
+<style>
+  :root{
+    --bg:#f4f7fb; --surface:rgba(255,255,255,.82); --surface-solid:#ffffff;
+    --border:#e3e9f2; --border-strong:#d3dce8;
+    --text:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --primary:#2563eb; --primary-2:#06b6d4; --dawn:#f59e0b; --dawn-2:#fb923c;
+    --grad:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
+    --grad-dawn:linear-gradient(135deg,#f59e0b,#fb923c);
+    --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --shadow-sm:0 1px 3px rgba(30,58,138,.06),0 4px 14px rgba(30,58,138,.05);
+    --shadow-md:0 4px 10px rgba(30,58,138,.07),0 12px 32px rgba(30,58,138,.08);
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); overflow:hidden;
+  }
+  /* ===== 背景：极光渐变 + 神经网络粒子 ===== */
+  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+  .aurora i:nth-child(1){width:560px;height:560px;background:#dbeafe;top:-180px;left:-120px}
+  .aurora i:nth-child(2){width:520px;height:520px;background:#cffafe;bottom:-200px;right:-100px;animation-delay:-6s}
+  .aurora i:nth-child(3){width:420px;height:420px;background:#fef3c7;top:30%;right:22%;opacity:.4;animation-delay:-12s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.12)}}
+
+  .app{position:relative;z-index:1;display:flex;height:100vh}
+
+  /* ===== 左侧栏 ===== */
+  .sidebar{
+    width:268px;flex-shrink:0;display:flex;flex-direction:column;
+    background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-right:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:18px 18px 14px}
+  .brand .logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(37,99,235,.35))}
+  .brand .bt{line-height:1.18}
+  .brand .bt b{font-size:17px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  .brand .bt small{font-size:10px;color:var(--faint);letter-spacing:2.5px;font-weight:600}
+  .ai-chip{
+    font-size:9px;font-weight:700;color:#fff;background:var(--grad);
+    padding:2px 6px;border-radius:6px;letter-spacing:1px;
+    box-shadow:0 2px 6px rgba(6,182,212,.4);
+  }
+  .new-chat{
+    margin:6px 16px 14px;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--grad);color:#fff;font-size:14px;font-weight:600;
+    box-shadow:0 6px 18px rgba(37,99,235,.28);transition:.2s;
+  }
+  .new-chat:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(37,99,235,.36)}
+  .side-sec{padding:4px 16px 10px;overflow-y:auto}
+  .side-sec h5{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:1px;margin:10px 2px 8px;display:flex;align-items:center;gap:6px}
+  .kb-item{
+    display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;
+    font-size:12.5px;color:var(--text);cursor:default;transition:.15s;
+  }
+  .kb-item:hover{background:rgba(37,99,235,.06)}
+  .kb-item .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15);flex-shrink:0;animation:breath 2.6s infinite}
+  .kb-item .dot.sync{background:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  @keyframes breath{0%,100%{opacity:1}50%{opacity:.45}}
+  .kb-item .ki{flex:1;min-width:0}
+  .kb-item .ki em{display:block;font-style:normal;font-size:10.5px;color:var(--faint);margin-top:1px}
+  .tag-new{font-size:9px;font-weight:700;color:#fff;background:var(--grad-dawn);padding:1.5px 5px;border-radius:5px}
+  .hist-item{
+    display:flex;align-items:center;gap:8px;padding:8.5px 10px;border-radius:10px;
+    font-size:12.5px;color:var(--muted);cursor:pointer;transition:.15s;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .hist-item:hover{background:rgba(37,99,235,.06);color:var(--text)}
+  .hist-item svg{flex-shrink:0;opacity:.55}
+  .side-foot{margin-top:auto;border-top:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;gap:10px}
+  .avatar-u{
+    width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#475569,#1e293b);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;
+  }
+  .side-foot .ui{flex:1;min-width:0;line-height:1.3}
+  .side-foot .ui b{font-size:13px;display:block}
+  .side-foot .ui span{font-size:11px;color:var(--faint)}
+  .lic{font-size:9.5px;font-weight:700;color:var(--primary);border:1px solid rgba(37,99,235,.35);padding:2px 6px;border-radius:6px;background:rgba(37,99,235,.06)}
+
+  /* ===== 主区域 ===== */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:62px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 22px;
+    background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+  }
+  .ptitle{display:flex;align-items:center;gap:10px}
+  .ptitle h1{font-size:16.5px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+  .ptitle .sub{font-size:12px;color:var(--muted);padding-left:10px;border-left:1px solid var(--border-strong)}
+  .kpis{display:flex;gap:8px;margin-left:8px}
+  .kpi{
+    font-size:11px;color:var(--muted);background:rgba(255,255,255,.7);border:1px solid var(--border);
+    padding:4px 9px;border-radius:8px;display:flex;align-items:center;gap:5px;
+  }
+  .kpi b{color:var(--primary);font-size:11.5px}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .model-pill{
+    display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);
+    background:rgba(255,255,255,.75);border:1px solid var(--border);padding:6px 11px;border-radius:99px;cursor:default;
+  }
+  .model-pill .led{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(16,185,129,.8);animation:breath 2s infinite}
+  .btn-human{
+    display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--primary);
+    background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3);padding:7px 13px;border-radius:99px;cursor:pointer;transition:.2s;
+  }
+  .btn-human:hover{background:rgba(37,99,235,.14)}
+
+  .notice{
+    flex-shrink:0;display:flex;align-items:center;gap:9px;padding:7px 22px;font-size:12px;color:#92590a;
+    background:linear-gradient(90deg,rgba(254,243,199,.85),rgba(255,237,213,.6));border-bottom:1px solid #fde9c0;
+  }
+  .notice b{font-weight:700}
+  .notice a{color:#b45309;font-weight:600;text-decoration:none;cursor:pointer}
+  .notice .x{margin-left:auto;cursor:pointer;color:#b45309;opacity:.7;font-size:14px;line-height:1}
+
+  /* ===== 对话区 ===== */
+  .chat{flex:1;overflow-y:auto;scroll-behavior:smooth;padding:26px 0 14px}
+  .chat::-webkit-scrollbar,.side-sec::-webkit-scrollbar{width:5px}
+  .chat::-webkit-scrollbar-thumb,.side-sec::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+  .chat-inner{max-width:820px;margin:0 auto;padding:0 24px}
+
+  /* 欢迎页 */
+  .hero{text-align:center;padding:34px 0 10px;animation:fadeUp .6s ease}
+  .hero-orb{position:relative;width:88px;height:88px;margin:0 auto 18px}
+  .hero-orb .logo{width:88px;height:88px;filter:drop-shadow(0 10px 26px rgba(37,99,235,.4));position:relative;z-index:2}
+  .hero-orb .ring{position:absolute;inset:0;border-radius:24px;border:1.5px solid rgba(37,99,235,.35);animation:ringp 2.6s ease-out infinite}
+  .hero-orb .ring:nth-child(3){animation-delay:1.3s}
+  @keyframes ringp{from{transform:scale(1);opacity:.8}to{transform:scale(1.65);opacity:0}}
+  .hero h2{font-size:25px;font-weight:700;letter-spacing:.5px}
+  .hero h2 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{font-size:13.5px;color:var(--muted);margin-top:9px;line-height:1.8}
+  .hero p .hl-dawn{color:#b45309;font-weight:600}
+  .cap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:26px 0 8px;text-align:left}
+  .cap{
+    display:flex;gap:12px;padding:15px 16px;border-radius:var(--radius);cursor:pointer;
+    background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);
+    transition:.22s;position:relative;overflow:hidden;
+  }
+  .cap::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,.05),rgba(6,182,212,.05));opacity:0;transition:.22s}
+  .cap:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:rgba(37,99,235,.35)}
+  .cap:hover::after{opacity:1}
+  .cap .ci{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(6,182,212,.12));color:var(--primary);
+  }
+  .cap:nth-child(2) .ci{background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(251,146,60,.14));color:#d97706}
+  .cap:nth-child(3) .ci{background:linear-gradient(135deg,rgba(16,185,129,.13),rgba(6,182,212,.13));color:#059669}
+  .cap:nth-child(4) .ci{background:linear-gradient(135deg,rgba(139,92,246,.13),rgba(37,99,235,.13));color:#7c3aed}
+  .cap b{font-size:13.5px;display:block;margin-bottom:3px}
+  .cap span{font-size:12px;color:var(--muted);line-height:1.5;display:block}
+  .sugg-title{font-size:12px;color:var(--faint);margin:18px 0 10px;display:flex;align-items:center;gap:8px;justify-content:center}
+  .sugg-title::before,.sugg-title::after{content:"";height:1px;width:56px;background:linear-gradient(90deg,transparent,var(--border-strong))}
+  .sugg-title::after{background:linear-gradient(90deg,var(--border-strong),transparent)}
+  .suggs{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .sugg{
+    font-size:12.5px;color:var(--text);background:var(--surface);border:1px solid var(--border);
+    padding:8px 14px;border-radius:99px;cursor:pointer;transition:.2s;box-shadow:var(--shadow-sm);
+    display:flex;align-items:center;gap:6px;
+  }
+  .sugg svg{color:var(--primary-2)}
+  .sugg:hover{border-color:rgba(37,99,235,.4);color:var(--primary);transform:translateY(-1px)}
+
+  /* 消息 */
+  .msg{display:flex;gap:12px;margin-bottom:26px;animation:fadeUp .35s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .msg.user{flex-direction:row-reverse}
+  .m-avatar{
+    width:36px;height:36px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:var(--grad);box-shadow:0 4px 12px rgba(37,99,235,.3);position:relative;
+  }
+  .m-avatar.pulse::before{content:"";position:absolute;inset:-3px;border-radius:14px;border:1.5px solid rgba(6,182,212,.5);animation:ringp 1.6s ease-out infinite}
+  .msg.user .m-avatar{background:linear-gradient(135deg,#475569,#1e293b);box-shadow:0 4px 12px rgba(30,41,59,.25);color:#fff;font-size:13px;font-weight:600}
+  .m-body{max-width:86%;min-width:0}
+  .msg.user .m-body{display:flex;flex-direction:column;align-items:flex-end}
+  .m-name{font-size:11.5px;color:var(--faint);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+  .msg.user .m-name{justify-content:flex-end}
+  .m-name .mtag{font-size:9.5px;font-weight:700;color:#0891b2;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.3);padding:1px 6px;border-radius:5px}
+  .bubble{
+    background:var(--surface-solid);border:1px solid var(--border);border-radius:4px 18px 18px 18px;
+    padding:15px 18px;font-size:13.8px;line-height:1.85;box-shadow:var(--shadow-sm);
+  }
+  .msg.user .bubble{
+    background:var(--grad);color:#fff;border:none;border-radius:18px 4px 18px 18px;
+    box-shadow:0 6px 18px rgba(37,99,235,.28);font-size:14px;
+  }
+  .bubble p{margin:0 0 10px}
+  .bubble p:last-child{margin-bottom:0}
+  .bubble h4{font-size:13.5px;margin:14px 0 8px;display:flex;align-items:center;gap:7px;color:#0f3a8f}
+  .bubble h4::before{content:"";width:3.5px;height:14px;border-radius:2px;background:var(--grad)}
+  .bubble ul,.bubble ol{padding-left:20px;margin:6px 0 10px}
+  .bubble li{margin-bottom:6px}
+  .bubble strong{color:#0f3a8f;font-weight:700}
+  .bubble .num{color:#b45309;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .bubble table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0 12px;border-radius:10px;overflow:hidden}
+  .bubble th{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.08));color:#0f3a8f;font-weight:700;text-align:left;padding:8px 10px;border:1px solid var(--border)}
+  .bubble td{padding:8px 10px;border:1px solid var(--border);color:var(--text);vertical-align:top}
+  .tip-line{
+    display:flex;gap:8px;margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12.8px;
+    background:linear-gradient(90deg,rgba(245,158,11,.09),rgba(251,146,60,.05));border:1px solid rgba(245,158,11,.25);color:#92590a;
+  }
+  .tip-line svg{flex-shrink:0;margin-top:2px}
+  .cursor{display:inline-block;width:8px;height:16px;background:var(--primary-2);border-radius:2px;vertical-align:-2px;animation:blink .8s steps(1) infinite;margin-left:1px}
+  @keyframes blink{50%{opacity:0}}
+
+  /* RAG 检索过程 */
+  .process{
+    border:1px dashed rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(6,182,212,.05));
+    border-radius:14px;padding:12px 15px;margin-bottom:12px;font-size:12.5px;
+  }
+  .p-step{display:flex;align-items:center;gap:9px;padding:4.5px 0;color:var(--muted);opacity:.35;transition:.3s}
+  .p-step.on{opacity:1;color:var(--text)}
+  .p-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .spinner{width:13px;height:13px;border:2px solid rgba(37,99,235,.25);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .p-step .chk{color:var(--ok);display:none}
+  .p-step.done .chk{display:block}
+  .p-step.done .spinner{display:none}
+  .p-step em{font-style:normal;color:var(--primary);font-weight:600}
+  .p-sum{display:none;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:12px}
+  .p-sum b{color:var(--primary)}
+  .p-sum .car{margin-left:auto;transition:.25s;color:var(--faint)}
+  .process.collapsed .p-steps{display:none}
+  .process.collapsed .p-sum{display:flex}
+  .process.expanded .p-sum .car{transform:rotate(180deg)}
+  .process.expanded.collapsed .p-steps{display:block;margin-top:8px;border-top:1px dashed rgba(37,99,235,.25);padding-top:6px}
+
+  /* 依据出处 */
+  .cites{margin-top:13px;border-top:1px solid var(--border);padding-top:12px}
+  .cites-t{font-size:11.5px;color:var(--faint);margin-bottom:8px;display:flex;align-items:center;gap:6px;font-weight:600}
+  .cite{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;margin-bottom:7px;
+    background:#f8fafc;border:1px solid var(--border);transition:.18s;cursor:pointer;
+  }
+  .cite:hover{border-color:rgba(37,99,235,.4);background:#f0f6ff}
+  .cite:last-child{margin-bottom:0}
+  .cite .cic{
+    width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(37,99,235,.1);color:var(--primary);
+  }
+  .cite .cb{flex:1;min-width:0;line-height:1.4}
+  .cite .cb b{font-size:12.3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cite .cb span{font-size:11px;color:var(--faint)}
+  .cite .ctag{font-size:10px;font-weight:600;padding:2.5px 7px;border-radius:6px;flex-shrink:0;background:rgba(37,99,235,.08);color:var(--primary);border:1px solid rgba(37,99,235,.22)}
+  .cite .ctag.t2{background:rgba(16,185,129,.08);color:#059669;border-color:rgba(16,185,129,.25)}
+  .cite .ctag.t3{background:rgba(245,158,11,.1);color:#b45309;border-color:rgba(245,158,11,.3)}
+  .cite .go{color:var(--faint);flex-shrink:0}
+
+  /* 置信度 + 反馈 */
+  .meta-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .conf{
+    display:flex;align-items:center;gap:7px;font-size:11.5px;color:#047857;font-weight:600;
+    background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);padding:4px 10px;border-radius:99px;
+  }
+  .conf.low{color:#b45309;background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
+  .conf .bar{width:54px;height:5px;border-radius:99px;background:rgba(16,185,129,.18);overflow:hidden}
+  .conf.low .bar{background:rgba(245,158,11,.2)}
+  .conf .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#06b6d4);width:0;transition:width 1s ease}
+  .conf.low .bar i{background:linear-gradient(90deg,#f59e0b,#fb923c)}
+  .fb{margin-left:auto;display:flex;gap:4px}
+  .fb button{
+    border:none;background:transparent;color:var(--faint);cursor:pointer;padding:5px 8px;border-radius:8px;
+    display:flex;align-items:center;gap:4px;font-size:11.5px;transition:.15s;font-family:inherit;
+  }
+  .fb button:hover{background:rgba(37,99,235,.07);color:var(--primary)}
+  .ai-note{font-size:11px;color:var(--faint);margin-top:10px;display:flex;align-items:center;gap:6px}
+
+  /* 快捷追问 / 转人工卡片 */
+  .qreplies{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .qreply{
+    font-size:12.3px;color:var(--primary);background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.3);
+    padding:6px 12px;border-radius:99px;cursor:pointer;transition:.18s;
+  }
+  .qreply:hover{background:rgba(37,99,235,.13);transform:translateY(-1px)}
+  .handoff{
+    margin-top:12px;border-radius:13px;padding:13px 15px;display:flex;gap:12px;align-items:flex-start;
+    background:linear-gradient(135deg,rgba(245,158,11,.07),rgba(251,146,60,.05));border:1px solid rgba(245,158,11,.35);
+  }
+  .handoff .hic{width:34px;height:34px;border-radius:11px;flex-shrink:0;background:var(--grad-dawn);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 10px rgba(245,158,11,.35)}
+  .handoff .hb{flex:1;font-size:12.6px;line-height:1.7;color:#7c4a05}
+  .handoff .hb b{display:block;color:#92590a;font-size:13px;margin-bottom:3px}
+  .handoff .hbtn{
+    margin-top:8px;display:inline-flex;align-items:center;gap:6px;font-size:12.3px;font-weight:600;color:#fff;
+    background:var(--grad-dawn);border:none;padding:7px 14px;border-radius:99px;cursor:pointer;box-shadow:0 4px 12px rgba(245,158,11,.35);transition:.2s;font-family:inherit;
+  }
+  .handoff .hbtn:hover{transform:translateY(-1px)}
+
+  /* ===== 输入区 ===== */
+  .composer-wrap{flex-shrink:0;padding:6px 24px 14px;background:linear-gradient(180deg,transparent,rgba(244,247,251,.9) 40%)}
+  .composer{max-width:820px;margin:0 auto}
+  .quick-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .quick{
+    font-size:11.8px;color:var(--muted);background:var(--surface);border:1px solid var(--border);
+    padding:5.5px 11px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:.18s;
+  }
+  .quick:hover{color:var(--primary);border-color:rgba(37,99,235,.4)}
+  .quick.dawn{color:#b45309;border-color:rgba(245,158,11,.4);background:rgba(254,243,199,.5)}
+  .input-card{
+    position:relative;background:var(--surface-solid);border:1.5px solid var(--border-strong);border-radius:18px;
+    box-shadow:var(--shadow-md);transition:.25s;overflow:hidden;
+  }
+  .input-card::before{
+    content:"";position:absolute;inset:-1.5px;border-radius:18px;padding:1.5px;opacity:0;transition:.3s;
+    background:var(--grad);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+  }
+  .input-card.focus::before{opacity:1}
+  .input-card textarea{
+    width:100%;border:none;outline:none;resize:none;background:transparent;
+    font-family:inherit;font-size:14px;line-height:1.6;color:var(--text);
+    padding:15px 60px 12px 18px;max-height:140px;display:block;
+  }
+  .input-card textarea::placeholder{color:var(--faint)}
+  .input-foot{display:flex;align-items:center;gap:10px;padding:0 14px 11px 18px;font-size:11px;color:var(--faint)}
+  .input-foot .net{display:flex;align-items:center;gap:5px}
+  .input-foot .net i{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:breath 2s infinite}
+  .send{
+    position:absolute;right:11px;bottom:11px;width:38px;height:38px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 5px 14px rgba(37,99,235,.35);transition:.2s;
+  }
+  .send:disabled{background:#dbe3ee;box-shadow:none;cursor:not-allowed;color:#9fb0c6}
+  .send:not(:disabled):hover{transform:translateY(-2px) scale(1.04)}
+  .legal{
+    max-width:820px;margin:9px auto 0;text-align:center;font-size:10.8px;color:var(--faint);line-height:1.7;
+  }
+  .legal b{color:#8a97ab;font-weight:600}
+  .legal .demo-badge{
+    display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:#7c3aed;
+    border:1px solid rgba(124,58,237,.3);background:rgba(124,58,237,.06);padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:1px;letter-spacing:.5px;
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-8px);z-index:99;
+    background:#0f172a;color:#fff;font-size:12.5px;padding:9px 18px;border-radius:99px;
+    box-shadow:0 10px 30px rgba(15,23,42,.3);opacity:0;pointer-events:none;transition:.3s;display:flex;align-items:center;gap:7px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast svg{color:#22d3ee}
+
+  @media (max-width:920px){
+    .sidebar{display:none}
+    .kpis{display:none}
+    .cap-grid{grid-template-columns:1fr}
+    .ptitle .sub{display:none}
+  }
+  @media (max-width:1240px){.kpis{display:none}}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="aurora"><i></i><i></i><i></i></div>
+
+<!-- 共用 SVG 资源 -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lgMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <symbol id="logoCX" viewBox="0 0 48 48">
+      <rect width="48" height="48" rx="13" fill="url(#lgMain)"/>
+      <g opacity=".9">
+        <line x1="24" y1="13" x2="24" y2="17.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="14.5" y1="17.5" x2="17.6" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="33.5" y1="17.5" x2="30.4" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+      <path d="M15 29.5 A9 9 0 0 1 33 29.5 Z" fill="#fff"/>
+      <rect x="10" y="29.5" width="28" height="2.6" rx="1.3" fill="#fff"/>
+      <rect x="14" y="35" width="20" height="2" rx="1" fill="#fff" opacity=".55"/>
+      <path d="M37.5 7 C38 9.2 38.8 10 41 10.5 C38.8 11 38 11.8 37.5 14 C37 11.8 36.2 11 34 10.5 C36.2 10 37 9.2 37.5 7 Z" fill="#fde68a"/>
+    </symbol>
+    <symbol id="icoSpark" viewBox="0 0 24 24">
+      <path d="M12 3c.7 3.9 2.4 5.6 6.3 6.3v.4c-3.9.7-5.6 2.4-6.3 6.3h-.4c-.7-3.9-2.4-5.6-6.3-6.3v-.4C9.2 8.6 10.9 6.9 11.6 3h.4Z" fill="currentColor"/>
+      <path d="M18.5 14.5c.35 1.95 1.2 2.8 3.15 3.15v.2c-1.95.35-2.8 1.2-3.15 3.15h-.2c-.35-1.95-1.2-2.8-3.15-3.15v-.2c1.95-.35 2.8-1.2 3.15-3.15h.2Z" fill="currentColor" opacity=".65"/>
+    </symbol>
+    <symbol id="icoDoc" viewBox="0 0 24 24">
+      <path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M13 2v6h6M8.5 13h7M8.5 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="icoSend" viewBox="0 0 24 24">
+      <path d="M3.5 11.2 20 4l-4.6 16.2a.7.7 0 0 1-1.3.15l-3-5.4-5.5-2.5a.7.7 0 0 1-.1-1.25Z" fill="currentColor"/>
+      <path d="M11 14.8 20 4" stroke="#fff" stroke-width="1.4" opacity=".7"/>
+    </symbol>
+    <symbol id="icoCheck" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".14"/>
+      <path d="m7.5 12.2 3 3 6-6.4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoHuman" viewBox="0 0 24 24">
+      <path d="M4 19.5c0-3.3 3.6-5 8-5s8 1.7 8 5" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.9" fill="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ============ 左侧栏 ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="logo"><use href="#logoCX"/></svg>
+      <div class="bt">
+        <b>晨曦科技 <span class="ai-chip">AI</span></b>
+        <small>CHENXI TECH</small>
+      </div>
+    </div>
+
+    <button class="new-chat" onclick="newChat()">
+      <svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      发起新咨询
+    </button>
+
+    <div class="side-sec">
+      <h5><svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoSpark"/></svg> 知识库 · RAG 检索源</h5>
+      <div class="kb-item"><span class="dot"></span><div class="ki">定额与计价依据库<em>已同步 · v2026.05</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">官方问答库<em>12,847 条 · 持续回灌</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">政策文件库<em>3,206 份 · 闽建发文全量</em></div></div>
+      <div class="kb-item"><span class="dot sync"></span><div class="ki">GB/T 50500-2024 专题库<em>新标准换轨专题</em></div><span class="tag-new">NEW</span></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">晨材网 · 材价数据<em>今日 09:00 已更新</em></div></div>
+
+      <h5 style="margin-top:18px"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 8v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg> 最近咨询</h5>
+      <div class="hist-item" onclick="fillAndSend('GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？')"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>新国标下限价编制依据变化</div>
+      <div class="hist-item" onclick="fillAndSend('措施项目费在新清单标准下如何计取？')"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>措施项目费计取口径</div>
+      <div class="hist-item" onclick="fillAndSend('安全文明施工费可以参与竞争性报价吗？')"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>安全文明施工费可否让利</div>
+      <div class="hist-item" onclick="fillAndSend('晨曦计价软件如何切换到 GB/T 50500-2024 计价依据？')"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>软件切换新计价依据操作</div>
+    </div>
+
+    <div class="side-foot">
+      <div class="avatar-u">张</div>
+      <div class="ui"><b>张工</b><span>福建 · 造价咨询单位</span></div>
+      <span class="lic">专业版</span>
+    </div>
+  </aside>
+
+  <!-- ============ 主区域 ============ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="ptitle">
+        <h1>晨曦智询</h1>
+        <span class="sub">计价知识助手 · 产品内副驾 + 智能客服</span>
+      </div>
+      <div class="kpis">
+        <span class="kpi">今日分流率 <b>38.6%</b></span>
+        <span class="kpi">抽检准确率 <b>93.2%</b></span>
+        <span class="kpi">平均首答 <b>1.8s</b></span>
+      </div>
+      <div class="top-right">
+        <span class="model-pill" title="主备双模型热切换：备用模型 Qwen-Max 待命中">
+          <span class="led"></span> 主模型 DeepSeek-V3 · 在线
+        </span>
+        <button class="btn-human" onclick="handoff()">
+          <svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoHuman"/></svg> 转人工坐席
+        </button>
+      </div>
+    </header>
+
+    <div class="notice" id="notice">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span><b>GB/T 50500-2024《建设工程工程量清单计价标准》</b>已于 2025-09-01 实施，2013 版规范同步废止。新标准专题库已上线。</span>
+      <a onclick="fillAndSend('GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？')">立即咨询 →</a>
+      <span class="x" onclick="document.getElementById('notice').style.display='none'">✕</span>
+    </div>
+
+    <div class="chat" id="chat">
+      <div class="chat-inner" id="chatInner">
+        <!-- 欢迎页由 JS 渲染 -->
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="quick-row">
+          <span class="quick dawn" onclick="fillAndSend('GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？')">
+            <svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoSpark"/></svg> 新标准专题
+          </span>
+          <span class="quick" onclick="fillInput('此费率调整依据哪份文件？')">费率与依据查询</span>
+          <span class="quick" onclick="fillInput('措施项目费在新清单标准下如何计取？')">措施项目计取</span>
+          <span class="quick" onclick="fillInput('晨曦计价软件如何切换到 GB/T 50500-2024 计价依据？')">软件操作指引</span>
+          <span class="quick" onclick="handoff()">
+            <svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoHuman"/></svg> 人工坐席
+          </span>
+        </div>
+        <div class="input-card" id="inputCard">
+          <textarea id="input" rows="1" placeholder="请输入您的计价问题，如：某措施项目在新清单标准下如何计取？（Enter 发送 / Shift+Enter 换行）"></textarea>
+          <div class="input-foot">
+            <span class="net"><i></i>知识库已连接 · 5 个检索源</span>
+            <span>·</span>
+            <span>回答均附依据出处</span>
+          </div>
+          <button class="send" id="sendBtn" disabled onclick="send()">
+            <svg width="17" height="17" viewBox="0 0 24 24"><use href="#icoSend"/></svg>
+          </button>
+        </div>
+        <div class="legal">
+          <b>「AI 起草 · 人工签发」</b>内容由 AI 生成并标注依据出处，仅供参考；可提交成果文件须经注册造价工程师审核签章 ｜ 低置信度自动转人工 ｜ 客户数据不用于模型训练
+          <span class="demo-badge">✦ DEMO 演示环境 · 示例数据</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoCheck"/></svg><span id="toastText"></span></div>
+
+<script>
+/* =========================================================
+   背景神经网络粒子
+========================================================= */
+(function(){
+  var cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d'),pts=[],N=55;
+  function rs(){cv.width=innerWidth;cv.height=innerHeight}
+  rs();addEventListener('resize',rs);
+  for(var i=0;i<N;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.8});
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<N;i++){
+      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(6,182,212,.22)';ctx.fill();
+      for(var j=i+1;j<N;j++){
+        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
+        if(d<150*150){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(37,99,235,'+(0.085*(1-d/22500))+')';ctx.lineWidth=1;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* =========================================================
+   知识库（演示语料）
+========================================================= */
+var ANSWERS={
+  /* —— U1 核心：新国标限价依据 —— */
+  a1:{
+    intent:'计价依据咨询 · GB/T 50500-2024 新标准专题',
+    kbs:'定额与计价依据库 · 政策文件库 · 官方问答库',
+    hits:4,time:'1.8s',conf:96,
+    blocks:[
+      '<p>根据<strong>《建设工程工程量清单计价标准》GB/T 50500-2024</strong>（2025 年 9 月 1 日起实施，2013 版规范同步废止），最高投标限价的编制依据发生了方向性调整：<strong>不再以政府定额和官方信息价为主要计价依据</strong>，转向综合采用市场化的价格信息。</p>',
+      '<h4>新旧标准核心对照</h4><table><tr><th style="width:88px">维度</th><th>GB 50500-2013（已废止）</th><th>GB/T 50500-2024（现行）</th></tr><tr><td>标准性质</td><td>强制性国家标准</td><td>推荐性国家标准，计价依据市场化</td></tr><tr><td>主要计价依据</td><td>政府定额 + 官方信息价</td><td><strong>市场价格信息、工程造价数据库、企业自身成本数据</strong>综合采用</td></tr><tr><td>价格形成机制</td><td>「量价合一」惯性较强</td><td>强调市场询价与企业造价数据积累</td></tr></table>',
+      '<h4>编制实务建议</h4><ul><li>主材价格优先采用<strong>近期中标价、市场询价记录与晨材网材价数据</strong>，并留存询价台账备查；</li><li>尚无企业成本数据积累的项目，可<strong>参照现行定额水平、结合市场价格信息修正</strong>，作为过渡期口径；</li><li>在招标文件中<strong>明确价格信息的采用口径与时点</strong>，避免开标后产生计价争议。</li></ul>',
+      '<div class="tip-line"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoSpark"/></svg><span><strong>软件操作提示：</strong>您可在晨曦计价软件「取费设置 → 计价依据」中选择 GB/T 50500-2024 模式，软件将自动切换费用架构、清单模板与报表体系，并联动晨材网一键载价。</span></div>'
+    ],
+    cites:[
+      {tag:'政策文件库',cls:'',title:'《建设工程工程量清单计价标准》GB/T 50500-2024',sub:'住房和城乡建设部发布 · 2025-09-01 实施 · 总则及计价依据章节'},
+      {tag:'官方问答库',cls:'t2',title:'新标准下最高投标限价编制热点答疑（QA-2025-1083）',sub:'福建省工程造价管理机构答复口径 · 2025-11 审核入库'},
+      {tag:'政策文件库',cls:'',title:'GB/T 50500-2024 实施配套释义（节选）',sub:'计价依据市场化转轨说明 · 新标准专题库'},
+      {tag:'材价数据',cls:'t3',title:'晨材网 · 福建地区材价数据快照',sub:'2026-06 月度数据 · 今日 09:00 已同步'}
+    ],
+    qreplies:['措施项目费在新清单标准下如何计取？','企业造价数据库应如何起步积累？','晨曦计价软件如何切换到 GB/T 50500-2024 计价依据？']
+  },
+
+  /* —— 措施项目费 —— */
+  a2:{
+    intent:'组价与费用计取咨询',
+    kbs:'定额与计价依据库 · 政策文件库 · 官方问答库',
+    hits:5,time:'1.6s',conf:95,
+    blocks:[
+      '<p>新清单标准下，措施项目费仍分为<strong>单价措施项目</strong>与<strong>总价措施项目</strong>两类，计取方式不同：</p>',
+      '<ul><li><strong>单价措施项目</strong>（脚手架、模板及支架、垂直运输、大型机械设备进出场及安拆等）：按<span class="num">清单工程量 × 综合单价</span>计取，工程量依据计量计价规则与施工组织设计确定；</li><li><strong>总价措施项目</strong>（安全文明施工费、夜间施工增加费、二次搬运费、冬雨季施工增加费等）：以<span class="num">计算基数 × 费率</span>计取，费率执行福建省费用定额及造价管理机构发布的最新调整文件。</li></ul>',
+      '<p>需要特别注意两点：① <strong>安全文明施工费为不可竞争费</strong>，必须按规定费率足额计取，不得让利下浮；② 新标准强调<strong>措施方案与报价匹配</strong>，投标报价时建议同步附施工组织设计要点说明，以备清标核查。</p>',
+      '<div class="tip-line"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoSpark"/></svg><span><strong>软件操作提示：</strong>晨曦计价软件「措施项目」页签已按 GB/T 50500-2024 预置两类措施清单模板，总价措施费率随福建省最新发文通过「政策推送」自动更新。</span></div>'
+    ],
+    cites:[
+      {tag:'政策文件库',cls:'',title:'GB/T 50500-2024 · 措施项目计价相关章节',sub:'单价/总价措施项目划分与计取规则'},
+      {tag:'定额库',cls:'t3',title:'《福建省建筑安装工程费用定额》及现行费率调整文件',sub:'总价措施费率执行依据 · 随版本同步'},
+      {tag:'官方问答库',cls:'t2',title:'措施项目费计取常见问题汇编（QA-2024-0457）',sub:'历史官方答复沉淀 · 人工审核后回灌'}
+    ],
+    qreplies:['安全文明施工费可以参与竞争性报价吗？','大型机械进出场费如何套项？']
+  },
+
+  /* —— 安全文明施工费 —— */
+  a3:{
+    intent:'不可竞争费咨询',
+    kbs:'政策文件库 · 定额与计价依据库',
+    hits:3,time:'1.4s',conf:97,
+    blocks:[
+      '<p><strong>不可以。</strong>安全文明施工费属于<strong>不可竞争费用</strong>，投标报价时必须按国家及福建省规定的计取基数与费率<strong>足额计取</strong>，不得作为竞争性费用让利或下浮。</p>',
+      '<ul><li><strong>费用构成：</strong>安全施工费、文明施工费、环境保护费、临时设施费四部分；</li><li><strong>计取方式：</strong>按规定基数 × 规定费率计取，列入总价措施项目；</li><li><strong>评标处理：</strong>报价低于规定标准的，清标时将被认定为不符合性报价，按当地公共资源交易规则处理（澄清或否决投标）。</li></ul>',
+      '<div class="tip-line"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoSpark"/></svg><span><strong>软件操作提示：</strong>晨曦计价软件中该费用默认<strong>锁定费率</strong>不可下调；当地造价管理机构发布调整文件后，软件将通过「政策推送」自动更新费率库。</span></div>'
+    ],
+    cites:[
+      {tag:'政策文件库',cls:'',title:'建筑工程安全防护、文明施工措施费用及使用管理相关规定',sub:'住建主管部门发文 · 不可竞争费执行依据'},
+      {tag:'定额库',cls:'t3',title:'《福建省建筑安装工程费用定额》· 安全文明施工费费率表',sub:'现行费率与计取基数'},
+      {tag:'官方问答库',cls:'t2',title:'不可竞争费清标认定口径答疑（QA-2024-0892)',sub:'省造价管理机构答复 · 已审核入库'}
+    ],
+    qreplies:['规费包含哪些内容？','措施项目费在新清单标准下如何计取？']
+  },
+
+  /* —— 软件操作：切换新标准 —— */
+  a4:{
+    intent:'软件操作指引',
+    kbs:'官方问答库 · 产品知识库',
+    hits:3,time:'1.2s',conf:98,
+    blocks:[
+      '<p>晨曦计价软件（房建 / 电力 / 水利水电 / 公路全系版本）已全面支持 GB/T 50500-2024，切换方式如下：</p>',
+      '<ol><li><strong>新建工程：</strong>在「新建工程 → 计价依据」中选择<strong>「GB/T 50500-2024 清单计价」</strong>，软件自动加载新费用架构、清单模板与报表体系；</li><li><strong>存量工程迁移：</strong>打开工程后使用<strong>「工具 → 标准转换助手」</strong>，一键迁移清单编码、费用项与取费表，转换报告会逐项列出需人工确认的差异项；</li><li><strong>版本要求：</strong>客户端需升级至 <span class="num">V2025.3</span> 及以上，可在「帮助 → 检查更新」中获取。</li></ol>',
+      '<p>转换完成后建议重点复核三处：<strong>措施项目映射、规费口径、报表样式</strong>，确认无误后再出具成果。</p>'
+    ],
+    cites:[
+      {tag:'官方问答库',cls:'t2',title:'新旧标准工程文件转换操作指引（QA-2025-1201）',sub:'客服高频问题 TOP3 · 含视频教程链接'},
+      {tag:'产品知识库',cls:'',title:'晨曦计价软件 V2025.3 升级公告',sub:'GB/T 50500-2024 适配说明 · 研发部发布'},
+      {tag:'产品知识库',cls:'',title:'标准转换助手 · 差异项核对清单模板',sub:'交付服务部整理'}
+    ],
+    qreplies:['转换后措施项目映射异常怎么处理？','GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？']
+  },
+
+  /* —— 费率依据：澄清式追问 —— */
+  a6:{
+    intent:'费率依据查询 · 待澄清',
+    kbs:'政策文件库 · 定额与计价依据库',
+    hits:6,time:'1.1s',conf:88,
+    blocks:[
+      '<p>好的。费率调整文件按<strong>费用项</strong>归口不同，为了给您精确到条文的出处，请补充您查询的具体费用项。我已按近期咨询热度为您列出高频方向，点击即可直接查询：</p>'
+    ],
+    cites:[
+      {tag:'政策文件库',cls:'',title:'福建省工程造价管理机构 · 近期费率调整发文索引',sub:'政策文件库自动归集 · 每日更新'},
+      {tag:'官方问答库',cls:'t2',title:'费率执行时点适用规则答疑（QA-2025-0966）',sub:'以招标文件发出时点为准的口径说明'}
+    ],
+    qreplies:['安全文明施工费可以参与竞争性报价吗？','规费费率的调整依据是哪份文件？','税金税率调整依据']
+  },
+
+  /* —— 问候 —— */
+  a7:{
+    intent:'会话问候',
+    kbs:'—',hits:0,time:'0.3s',conf:99,skipProcess:true,
+    blocks:[
+      '<p>您好，我是<strong>晨曦智询</strong>，晨曦科技的计价知识助手 ✦</p>',
+      '<p>我已接入定额与计价依据库、官方问答库、政策文件库、GB/T 50500-2024 新标准专题库与晨材网材价数据，可以为您解答<strong>计价依据、费率口径、定额换算、新旧标准对照与软件操作</strong>类问题，所有回答都会附依据出处。请问有什么可以帮您？</p>'
+    ],
+    cites:[],
+    qreplies:['GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？','措施项目费在新清单标准下如何计取？']
+  },
+
+  /* —— 低置信度 → 转人工 —— */
+  a5:{
+    intent:'个性化口径 · 低置信度',
+    kbs:'全库联合检索',
+    hits:2,time:'2.4s',conf:62,low:true,
+    blocks:[
+      '<p>您的问题可能涉及<strong>具体项目的个性化处理口径</strong>或尚未入库的最新地方发文。本轮知识库检索置信度为 <span class="num">62%</span>，低于可靠答复阈值（90%）。</p>',
+      '<p>按照「AI 起草 · 人工签发」的服务规范，<strong>我不直接给出结论性答复</strong>，以免误导您的成果编制。已为您检索到 2 条可能相关的参考线索（见下方出处），并建议转接人工坐席进行确认。</p>'
+    ],
+    cites:[
+      {tag:'政策文件库',cls:'',title:'福建省现行计价依据文件总索引',sub:'按费用项 / 专业 / 发文时间三维检索'},
+      {tag:'官方问答库',cls:'t2',title:'相似历史问题参考（语义相似度 71%）',sub:'口径可能已更新，请以人工确认为准'}
+    ],
+    handoff:true
+  }
+};
+
+var ROUTES=[
+  {id:'a3',keys:['安全文明','不可竞争','文明施工'],w:3},
+  {id:'a4',keys:['软件','切换','转换','新建工程','版本','升级','操作'],w:2},
+  {id:'a1',keys:['限价','最高投标','编制依据','信息价','市场价格','50500','新国标','新标准','变化','数据库'],w:2},
+  {id:'a2',keys:['措施','计取','脚手架','模板','垂直运输','二次搬运','夜间施工'],w:2},
+  {id:'a6',keys:['费率','哪份文件','什么文件','依据文件','调整依据'],w:1},
+  {id:'a7',keys:['你好','您好','你是谁','在吗','hi','hello'],w:4}
+];
+
+function route(q){
+  var best=null,bs=0;
+  ROUTES.forEach(function(r){
+    var s=0;
+    r.keys.forEach(function(k){if(q.indexOf(k)>-1)s+=r.w});
+    if(s>bs){bs=s;best=r.id}
+  });
+  return bs>=2?best:(bs>0?best:'a5');
+}
+
+/* =========================================================
+   DOM 工具
+========================================================= */
+var chat=document.getElementById('chat'),
+    inner=document.getElementById('chatInner'),
+    input=document.getElementById('input'),
+    sendBtn=document.getElementById('sendBtn'),
+    busy=false;
+
+function el(html){var d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function scrollBottom(){chat.scrollTop=chat.scrollHeight}
+function toast(t){
+  var x=document.getElementById('toast');
+  document.getElementById('toastText').textContent=t;
+  x.classList.add('show');clearTimeout(x._t);
+  x._t=setTimeout(function(){x.classList.remove('show')},2400);
+}
+function nowTime(){
+  var d=new Date();
+  return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+
+/* =========================================================
+   欢迎页
+========================================================= */
+function renderHero(){
+  inner.innerHTML=
+  '<div class="hero">'+
+    '<div class="hero-orb"><span class="ring"></span><span class="ring"></span><svg class="logo"><use href="#logoCX"/></svg></div>'+
+    '<h2>您好，我是 <span>晨曦智询</span></h2>'+
+    '<p>晨曦科技 · 计价知识助手，已接入 <b>5 大知识库</b>，覆盖福建省定额、计价依据与官方问答沉淀。<br>'+
+    '<span class="hl-dawn">GB/T 50500-2024 新标准专题库已上线</span>，正面承接计价依据换轨的每一个问题，回答均附依据出处。</p>'+
+    '<div class="cap-grid">'+
+      cap('政策与依据解读','「此费率调整依据哪份文件？」逐条溯源到发文原文','此费率调整依据哪份文件？','<path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13 2v6h6M8.5 13h7M8.5 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/>')+
+      cap('新旧标准对照','2013 版 → GB/T 50500-2024 换轨差异与过渡期实务','GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？','<path d="M8 7h13M8 12h13M8 17h13" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M3 7h.01M3 12h.01M3 17h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>')+
+      cap('定额与组价咨询','措施项目计取、定额换算、取费口径即问即答','措施项目费在新清单标准下如何计取？','<path d="M4 4h16v16H4z" fill="none" stroke="currentColor" stroke-width="1.7" rx="2"/><path d="M8 9h8M8 13h5M8 17h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>')+
+      cap('软件操作指引','晨曦计价软件全系功能与新标准切换教程','晨曦计价软件如何切换到 GB/T 50500-2024 计价依据？','<rect x="3" y="5" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 21h8M12 18v3M7.5 9.5l2.5 2-2.5 2M12.5 13.5H16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>')+
+    '</div>'+
+    '<div class="sugg-title">大家都在问</div>'+
+    '<div class="suggs">'+
+      sugg('GB/T 50500-2024 实施后，最高投标限价的编制依据有哪些变化？')+
+      sugg('措施项目费在新清单标准下如何计取？')+
+      sugg('安全文明施工费可以参与竞争性报价吗？')+
+      sugg('晨曦计价软件如何切换到 GB/T 50500-2024 计价依据？')+
+    '</div>'+
+  '</div>';
+}
+function cap(t,d,q,ic){
+  return '<div class="cap" onclick="fillAndSend(\''+q.replace(/'/g,"\\'")+'\')">'+
+    '<div class="ci"><svg width="20" height="20" viewBox="0 0 24 24">'+ic+'</svg></div>'+
+    '<div><b>'+t+'</b><span>'+d+'</span></div></div>';
+}
+function sugg(q){
+  return '<span class="sugg" onclick="fillAndSend(\''+q.replace(/'/g,"\\'")+'\')">'+
+  '<svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoSpark"/></svg>'+q+'</span>';
+}
+
+/* =========================================================
+   消息渲染
+========================================================= */
+function addUserMsg(text){
+  var hero=inner.querySelector('.hero');
+  if(hero)hero.remove();
+  inner.appendChild(el(
+    '<div class="msg user">'+
+      '<div class="m-avatar">张</div>'+
+      '<div class="m-body"><div class="m-name">'+nowTime()+' · 张工</div>'+
+      '<div class="bubble">'+esc(text)+'</div></div>'+
+    '</div>'));
+  scrollBottom();
+}
+
+function aiShell(){
+  var m=el(
+    '<div class="msg ai">'+
+      '<div class="m-avatar pulse"><svg width="19" height="19" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSpark"/></svg></div>'+
+      '<div class="m-body">'+
+        '<div class="m-name">晨曦智询 <span class="mtag">RAG 检索增强</span> '+nowTime()+'</div>'+
+        '<div class="bubble"><div class="proc-slot"></div><div class="ans-slot"></div></div>'+
+      '</div>'+
+    '</div>');
+  inner.appendChild(m);scrollBottom();
+  return m;
+}
+
+/* RAG 检索过程动画 */
+function runProcess(slot,a,cb){
+  var steps=[
+    ['意图识别','已识别：<em>'+a.intent+'</em>'],
+    ['检索知识库','<em>'+a.kbs+'</em>'],
+    ['依据召回与重排序','命中 <em>'+a.hits+' 条</em>相关依据'],
+    ['生成回答','逐条标注出处 · 合规校验']
+  ];
+  var p=el('<div class="process"><div class="p-sum"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoSpark"/></svg><span>已完成知识库检索 · 命中 <b>'+a.hits+' 条依据</b> · 用时 <b>'+a.time+'</b></span><svg class="car" width="13" height="13" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><div class="p-steps"></div></div>');
+  var box=p.querySelector('.p-steps');
+  steps.forEach(function(s){
+    box.appendChild(el('<div class="p-step"><span class="p-ico"><span class="spinner"></span><svg class="chk" width="16" height="16" viewBox="0 0 24 24"><use href="#icoCheck"/></svg></span><span>'+s[0]+'：'+s[1]+'</span></div>'));
+  });
+  slot.appendChild(p);scrollBottom();
+  p.querySelector('.p-sum').onclick=function(){p.classList.toggle('expanded')};
+  var i=0,nodes=box.children;
+  (function next(){
+    if(i>0)nodes[i-1].classList.add('done');
+    if(i>=nodes.length){
+      setTimeout(function(){p.classList.add('collapsed');cb()},300);
+      return;
+    }
+    nodes[i].classList.add('on');i++;
+    setTimeout(next,420+Math.random()*330);
+  })();
+}
+
+/* 流式输出：HTML 标签原子化 + 字符级打字机 */
+function streamBlocks(slot,blocks,done){
+  var bi=0;
+  function nextBlock(){
+    if(bi>=blocks.length){done();return}
+    var holder=document.createElement('div');
+    slot.appendChild(holder);
+    var tokens=blocks[bi].match(/<[^>]+>|[\s\S]/g)||[],buf='',ti=0;
+    var iv=setInterval(function(){
+      var step=0;
+      while(ti<tokens.length&&step<3){
+        var tk=tokens[ti++];
+        buf+=tk;
+        if(tk.charAt(0)!=='<')step++;
+      }
+      holder.innerHTML=buf+'<span class="cursor"></span>';
+      scrollBottom();
+      if(ti>=tokens.length){
+        clearInterval(iv);
+        holder.innerHTML=buf;
+        bi++;setTimeout(nextBlock,140);
+      }
+    },14);
+  }
+  nextBlock();
+}
+
+/* 出处 / 置信度 / 反馈 / 追问 */
+function renderTail(bubble,a){
+  if(a.cites&&a.cites.length){
+    var c='<div class="cites"><div class="cites-t"><svg width="12" height="12" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDoc"/></svg>依据出处（'+a.cites.length+'）· 点击查看原文</div>';
+    a.cites.forEach(function(x){
+      c+='<div class="cite" onclick="toast(\'演示环境：已模拟跳转《'+x.title.replace(/'/g,'')+'》原文定位\')">'+
+        '<div class="cic"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>'+
+        '<div class="cb"><b>'+x.title+'</b><span>'+x.sub+'</span></div>'+
+        '<span class="ctag '+x.cls+'">'+x.tag+'</span>'+
+        '<svg class="go" width="13" height="13" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'+
+      '</div>';
+    });
+    c+='</div>';
+    bubble.appendChild(el(c));
+  }
+  var meta=el(
+    '<div class="meta-row">'+
+      '<span class="conf '+(a.low?'low':'')+'">'+(a.low?'⚠ 置信度':'✓ 置信度')+' '+a.conf+'%<span class="bar"><i></i></span></span>'+
+      '<div class="fb">'+
+        '<button onclick="toast(\'感谢反馈！已记录并用于知识库优化\')"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4-7.5c1.6 0 2.6 1.1 2.6 2.5L13 9h5.4a2 2 0 0 1 2 2.4l-1.2 6A2 2 0 0 1 17.2 19H7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round"/></svg>有帮助</button>'+
+        '<button onclick="toast(\'已记录，该问答将进入人工复核队列并回灌知识库\')"><svg width="13" height="13" viewBox="0 0 24 24" style="transform:rotate(180deg)"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4-7.5c1.6 0 2.6 1.1 2.6 2.5L13 9h5.4a2 2 0 0 1 2 2.4l-1.2 6A2 2 0 0 1 17.2 19H7" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round"/></svg>不准确</button>'+
+        '<button onclick="copyMsg(this)"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>复制</button>'+
+        '<button onclick="handoff()"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoHuman"/></svg>转人工</button>'+
+      '</div>'+
+    '</div>');
+  bubble.appendChild(meta);
+  setTimeout(function(){meta.querySelector('.bar i').style.width=a.conf+'%'},60);
+
+  if(a.handoff){
+    bubble.appendChild(el(
+      '<div class="handoff">'+
+        '<div class="hic"><svg width="17" height="17" viewBox="0 0 24 24"><use href="#icoHuman"/></svg></div>'+
+        '<div class="hb"><b>建议转接人工坐席</b>低置信度问题已按服务规范拦截。人工坐席答复经审核后将回灌知识库——下次同类问题即可由 AI 直接作答。'+
+        '<br><button class="hbtn" onclick="handoff()">立即转接人工坐席 →</button></div>'+
+      '</div>'));
+  }
+  if(a.qreplies&&a.qreplies.length){
+    var q='<div class="qreplies">';
+    a.qreplies.forEach(function(x){
+      q+='<span class="qreply" onclick="fillAndSend(\''+x.replace(/'/g,"\\'")+'\')">'+x+'</span>';
+    });
+    q+='</div>';
+    bubble.appendChild(el(q));
+  }
+  bubble.appendChild(el('<div class="ai-note"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#94a3b8"><use href="#icoSpark"/></svg>本回答由 AI 基于晨曦知识库生成，仅供参考 · 可提交成果须经注册造价工程师审核签章</div>'));
+  scrollBottom();
+}
+
+function copyMsg(btn){
+  var b=btn.closest('.bubble');
+  var t=b?b.innerText.replace(/\n{3,}/g,'\n\n'):'';
+  if(navigator.clipboard){navigator.clipboard.writeText(t)}
+  toast('回答内容已复制到剪贴板');
+}
+
+/* =========================================================
+   主流程
+========================================================= */
+function send(){
+  var q=input.value.trim();
+  if(!q||busy)return;
+  input.value='';autoSize();sendBtn.disabled=true;busy=true;
+  addUserMsg(q);
+
+  var id=route(q),a=ANSWERS[id];
+  var m=aiShell(),
+      bubble=m.querySelector('.bubble'),
+      procSlot=m.querySelector('.proc-slot'),
+      ansSlot=m.querySelector('.ans-slot'),
+      avatar=m.querySelector('.m-avatar');
+
+  function answer(){
+    streamBlocks(ansSlot,a.blocks,function(){
+      avatar.classList.remove('pulse');
+      renderTail(bubble,a);
+      busy=false;
+      input.focus();
+    });
+  }
+  if(a.skipProcess){setTimeout(answer,350)}
+  else{setTimeout(function(){runProcess(procSlot,a,answer)},300)}
+}
+
+function handoff(){
+  if(busy)return;
+  var hero=inner.querySelector('.hero');
+  if(hero)hero.remove();
+  var no=Math.floor(Math.random()*900+100);
+  inner.appendChild(el(
+    '<div class="msg ai">'+
+      '<div class="m-avatar" style="background:var(--grad-dawn);box-shadow:0 4px 12px rgba(245,158,11,.35)"><svg width="18" height="18" viewBox="0 0 24 24" style="color:#fff"><use href="#icoHuman"/></svg></div>'+
+      '<div class="m-body">'+
+        '<div class="m-name">人工服务 · 系统消息 '+nowTime()+'</div>'+
+        '<div class="bubble">'+
+          '<p><strong>已为您创建人工服务工单 <span class="num">#CX-20260611-0'+no+'</span></strong></p>'+
+          '<p>当前排队 <span class="num">2</span> 位，预计等待约 <span class="num">3</span> 分钟。坐席将基于本会话上下文继续为您服务，无需重复描述问题。</p>'+
+          '<p style="font-size:12.3px;color:#64748b">人工答复经审核后将回灌知识库，持续提升 AI 直答覆盖率（当前重复咨询分流率 38.6%）。</p>'+
+        '</div>'+
+      '</div>'+
+    '</div>'));
+  scrollBottom();
+  toast('已转接人工坐席，工单创建成功');
+}
+
+function newChat(){
+  if(busy)return;
+  renderHero();
+  toast('已发起新咨询会话');
+  input.focus();
+}
+function fillInput(t){input.value=t;autoSize();sendBtn.disabled=false;input.focus()}
+function fillAndSend(t){if(busy)return;input.value=t;autoSize();sendBtn.disabled=false;send()}
+
+/* 输入框 */
+function autoSize(){
+  input.style.height='auto';
+  input.style.height=Math.min(input.scrollHeight,140)+'px';
+}
+input.addEventListener('input',function(){
+  sendBtn.disabled=!input.value.trim()||busy;
+  autoSize();
+});
+input.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}
+});
+var card=document.getElementById('inputCard');
+input.addEventListener('focus',function(){card.classList.add('focus')});
+input.addEventListener('blur',function(){card.classList.remove('focus')});
+
+renderHero();
+</script>
+</body>
+</html>
