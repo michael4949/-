@@ -3,1467 +3,263 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>江铜智能排产升级蓝图 · AI 排产智能体</title>
+<title>江铜 · AI 智能体方案演示中心</title>
 <style>
-/* ============ 设计基调：浅色 · 高端 · 蓝×铜 ============ */
 :root{
-  --bg:#f6f8fb; --bg2:#eef2f8;
-  --card:#ffffff; --card-glass:rgba(255,255,255,.84);
   --ink:#10233f; --ink2:#5b6b82; --ink3:#8a97ab;
-  --line:#e4eaf3; --line2:#d4dde9;
-  --blue:#1d5bdf; --blue-d:#1547b0; --blue-soft:#e9effd;
-  --copper:#c4742e; --copper-d:#a85e1f; --copper2:#e09a55; --copper-soft:#fcf1e5;
-  --green:#0f9d6e; --green-soft:#e3f6ee;
-  --red:#df5340; --red-soft:#fdecea;
-  --amber:#e8a23a; --amber-soft:#fdf4e3;
-  --shadow:0 14px 40px rgba(16,35,63,.09);
-  --shadow-sm:0 6px 18px rgba(16,35,63,.07);
+  --line:#e4eaf3;
+  --blue:#1d5bdf; --copper:#c4742e; --copper2:#e09a55; --green:#0f9d6e;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{
-  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",-apple-system,"Segoe UI",sans-serif;
-  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65; overflow-x:hidden;
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink); background:#f5f6f8; min-height:100vh; overflow-x:hidden;
 }
-body::before{
-  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
-  background:
-    radial-gradient(720px 460px at 88% -6%, rgba(224,154,85,.16), transparent 60%),
-    radial-gradient(820px 540px at -8% 18%, rgba(29,91,223,.10), transparent 60%),
-    radial-gradient(600px 420px at 50% 110%, rgba(111,91,216,.07), transparent 60%),
-    linear-gradient(180deg,#f8fafd,#f3f6fa);
+/* ===== 顶部 ===== */
+header{
+  display:flex;align-items:center;gap:14px;padding:22px 40px;flex-wrap:wrap;
 }
-body::after{
-  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background-image:
-    linear-gradient(rgba(16,35,63,.030) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(16,35,63,.030) 1px,transparent 1px);
-  background-size:34px 34px;
-  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 42%);
-          mask-image:linear-gradient(180deg,#000 0%,transparent 42%);
-}
-::selection{background:rgba(224,154,85,.35)}
-
-/* ============ 导航 ============ */
-nav{
-  position:sticky; top:0; z-index:60;
-  backdrop-filter:blur(16px) saturate(1.4); -webkit-backdrop-filter:blur(16px) saturate(1.4);
-  background:rgba(255,255,255,.74); border-bottom:1px solid rgba(16,35,63,.06);
-}
-.nav-in{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:26px;padding:13px 28px}
-.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:16px;letter-spacing:.5px}
 .brand-mark{
-  width:34px;height:34px;border-radius:10px;flex:none;
+  width:38px;height:38px;border-radius:11px;
   background:conic-gradient(from 210deg,#1d5bdf,#3f7bf0 35%,#e09a55 70%,#c4742e);
-  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;
-  box-shadow:0 4px 12px rgba(29,91,223,.30);
+  display:grid;place-items:center;color:#fff;font-size:14px;font-weight:800;
+  box-shadow:0 6px 16px rgba(29,91,223,.3);
 }
-.brand small{display:block;font-size:11px;font-weight:500;color:var(--ink3);letter-spacing:1.5px;line-height:1.2}
-.nav-links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
-.nav-links a{color:var(--ink2);text-decoration:none;font-size:13.5px;padding:7px 13px;border-radius:9px;transition:.2s}
-.nav-links a:hover{background:var(--blue-soft);color:var(--blue)}
-.nav-cta{
-  font-size:13px;color:#fff;background:linear-gradient(120deg,var(--copper),var(--copper2));
-  border:none;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600;white-space:nowrap;
-  box-shadow:0 6px 16px rgba(196,116,46,.30);transition:.25s;font-family:inherit;
-}
-.nav-cta:hover{transform:translateY(-1px);box-shadow:0 9px 22px rgba(196,116,46,.38)}
-
-/* ============ 通用 ============ */
-.wrap{max-width:1300px;margin:0 auto;padding:0 28px}
-section{padding:62px 0 24px}
-.sec-tag{
-  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:2.5px;
-  color:var(--copper-d);text-transform:uppercase;margin-bottom:12px;
-}
-.sec-tag::before{content:"";width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--copper),var(--copper2))}
-h2{font-size:30px;letter-spacing:.5px;margin-bottom:10px;font-weight:700}
-.sec-sub{color:var(--ink2);max-width:880px;margin-bottom:32px;font-size:14.5px}
+.brand small{display:block;font-size:10.5px;font-weight:500;color:var(--ink3);letter-spacing:2px}
+header .meta{margin-left:auto;display:flex;gap:9px;flex-wrap:wrap}
 .badge{
-  display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
-  padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+  font-size:12.5px;font-weight:600;color:var(--ink2);background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:6px 14px;display:inline-flex;align-items:center;gap:7px;
 }
 .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
-.reveal.in{opacity:1;transform:none}
-.btn{
-  border:none;cursor:pointer;font-size:14.5px;font-weight:600;border-radius:12px;padding:12px 24px;transition:.25s;
-  display:inline-flex;align-items:center;gap:8px;font-family:inherit;
-}
-.btn-primary{color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0);box-shadow:0 10px 24px rgba(29,91,223,.30)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(29,91,223,.38)}
-.btn-copper{color:#fff;background:linear-gradient(120deg,var(--copper),var(--copper2));box-shadow:0 10px 24px rgba(196,116,46,.30)}
-.btn-copper:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(196,116,46,.38)}
-
-/* ============ Hero ============ */
-.hero{padding:72px 0 26px}
-.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
-h1{
-  font-size:48px;line-height:1.2;letter-spacing:.5px;font-weight:800;max-width:940px;
-  background:linear-gradient(105deg,#10233f 18%,#1d5bdf 58%,#c4742e 95%);
+/* ===== 标题 ===== */
+.title{text-align:center;padding:26px 24px 36px}
+.title h1{font-size:34px;font-weight:900;letter-spacing:1px}
+.title h1 em{
+  font-style:normal;
+  background:linear-gradient(100deg,var(--blue),var(--copper) 60%,var(--green));
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
 }
-.hero-sub{font-size:16.5px;color:var(--ink2);max-width:820px;margin:18px 0 28px}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:40px}
-.pains{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
-.pain{
-  background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 17px;box-shadow:var(--shadow-sm);
-  position:relative;overflow:hidden;
+.title p{color:var(--ink2);font-size:14.5px;margin-top:9px}
+.title p b{color:var(--ink)}
+/* ===== 双门 ===== */
+.gates{
+  display:grid;grid-template-columns:1fr 1fr;gap:26px;
+  max-width:1280px;margin:0 auto;padding:0 40px 50px;align-items:stretch;
 }
-.pain::before{content:"";position:absolute;left:0;top:0;height:100%;width:3.5px;background:linear-gradient(180deg,var(--red),#f0907f)}
-.pain .src{font-size:10.5px;font-weight:700;letter-spacing:1.5px;color:var(--ink3);margin-bottom:5px}
-.pain b{font-size:14.5px;display:block;margin-bottom:4px}
-.pain p{font-size:12px;color:var(--ink2)}
-.pain .fix{
-  margin-top:9px;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
-  color:var(--green);background:var(--green-soft);border-radius:7px;padding:3px 9px;
+.gate{
+  position:relative;border-radius:28px;overflow:hidden;cursor:pointer;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);box-shadow:0 18px 50px rgba(16,35,63,.10);
+  transition:transform .35s cubic-bezier(.3,1.2,.4,1),box-shadow .35s;
+  display:flex;flex-direction:column;min-height:560px;
 }
-
-/* ============ 核心画布：三泳道 ============ */
-.canvas-card{
-  background:var(--card-glass);backdrop-filter:blur(10px);
-  border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
-  padding:24px 24px 16px;position:relative;
+.gate:hover{transform:translateY(-8px);box-shadow:0 30px 70px rgba(16,35,63,.16)}
+/* —— 门一：需求一（蓝×铜 · 网格） —— */
+.gate.g1{
+  background:
+    linear-gradient(rgba(16,35,63,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(16,35,63,.035) 1px,transparent 1px),
+    radial-gradient(560px 320px at 88% -8%,rgba(224,154,85,.18),transparent 60%),
+    radial-gradient(620px 380px at -8% 30%,rgba(29,91,223,.12),transparent 60%),
+    linear-gradient(180deg,#f8fafd,#eef2f8);
+  background-size:30px 30px,30px 30px,auto,auto,auto;
 }
-.canvas-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.mode-switch{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
-.mode-btn{
-  border:none;cursor:pointer;font-size:13.5px;font-weight:700;font-family:inherit;border-radius:9px;
-  padding:9px 20px;color:var(--ink2);background:transparent;transition:.25s;display:flex;align-items:center;gap:7px;
+/* —— 门二：需求二（三色 · 点阵 · 暖白） —— */
+.gate.g2{
+  background:
+    radial-gradient(rgba(27,36,51,.07) 1.2px,transparent 1.2px),
+    radial-gradient(520px 300px at 90% -6%,rgba(15,157,110,.14),transparent 60%),
+    radial-gradient(600px 360px at -6% 26%,rgba(29,91,223,.10),transparent 60%),
+    radial-gradient(480px 300px at 50% 110%,rgba(196,116,46,.12),transparent 60%),
+    linear-gradient(180deg,#fbfaf8,#f4f1ec);
+  background-size:24px 24px,auto,auto,auto,auto;
 }
-.mode-btn .md{width:8px;height:8px;border-radius:50%;background:var(--ink3)}
-.mode-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
-body.asis .mode-btn[data-m="asis"].on .md{background:var(--red)}
-body.tobe .mode-btn[data-m="tobe"].on .md{background:var(--green);animation:pulse2 1.6s infinite}
-.kchips{display:flex;gap:9px;flex-wrap:wrap;margin-left:auto}
-.kchip{font-size:11.8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;color:var(--ink2)}
-.kchip b{font-weight:800;color:var(--ink)}
-body.asis .kchip .vt{display:none}
-body.tobe .kchip .va{display:none}
-body.tobe .kchip b{color:var(--green)}
-.canvas-wrap{overflow-x:auto;padding-bottom:6px}
-.canvas-wrap::-webkit-scrollbar{height:9px}
-.canvas-wrap::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
-.board{min-width:1938px;display:flex;align-items:flex-start}
-.rail{width:86px;flex:none;position:relative;height:734px}
-.rail .rl{
-  position:absolute;left:0;width:74px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:800;letter-spacing:2px;color:#fff;text-align:center;line-height:1.5;
-  writing-mode:vertical-rl;
+.g-in{padding:34px 36px 30px;display:flex;flex-direction:column;flex:1}
+.g-no{
+  font-size:11.5px;font-weight:900;letter-spacing:3px;margin-bottom:14px;display:inline-flex;align-items:center;gap:9px;
 }
-.rl.r-h{top:68px;height:148px;background:linear-gradient(180deg,#0f9d6e,#3dbd92)}
-.rl.r-a{top:242px;height:330px;background:linear-gradient(180deg,#c4742e,#e09a55);box-shadow:0 8px 20px rgba(196,116,46,.25)}
-.rl.r-s{top:598px;height:136px;background:linear-gradient(180deg,#33507e,#5b7bab)}
-.stage{width:272px;flex:none;display:flex;flex-direction:column}
-.stage-head{
-  height:58px;border-radius:13px;padding:9px 14px;color:#fff;position:relative;overflow:hidden;margin-bottom:10px;
-  background:linear-gradient(125deg,#16335f,#1d5bdf);
+.g1 .g-no{color:var(--copper)}
+.g2 .g-no{color:var(--green)}
+.g-no::before{content:"";width:30px;height:3px;border-radius:3px;background:currentColor}
+.gate h2{font-size:29px;font-weight:900;line-height:1.3;margin-bottom:6px}
+.g1 h2 b{background:linear-gradient(100deg,#10233f,var(--blue) 60%,var(--copper));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.g2 h2 b{background:linear-gradient(100deg,var(--blue),var(--copper) 52%,var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.g-para{font-size:12px;font-weight:800;letter-spacing:1.5px;margin-bottom:12px}
+.g1 .g-para{color:var(--blue)}
+.g2 .g-para{color:var(--copper)}
+.gate p.desc{font-size:13.5px;color:var(--ink2);line-height:1.75;margin-bottom:16px}
+.g-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+.g-chips i{
+  font-style:normal;font-size:11.5px;font-weight:700;border-radius:8px;padding:4px 11px;background:#fff;
+  border:1px solid var(--line);color:var(--ink2);box-shadow:0 3px 8px rgba(16,35,63,.05);
 }
-.stage-head .sno{position:absolute;right:9px;top:2px;font-size:28px;font-weight:800;opacity:.16;font-style:italic}
-.stage-head h3{font-size:14.5px;letter-spacing:.5px}
-.stage-head p{font-size:9.5px;opacity:.75;letter-spacing:1.8px;text-transform:uppercase}
-.cell{border-radius:14px;position:relative;transition:.35s;overflow:hidden}
-.cell.human{height:148px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-sm);padding:11px 13px}
-.cell.sys{height:136px;background:#f4f7fb;border:1px solid var(--line);padding:11px 13px;cursor:pointer}
-.cell.sys:hover{border-color:#b9c9e2;box-shadow:var(--shadow-sm)}
-.cell.ai{
-  height:330px;border:1.5px solid #f0dcc3;box-shadow:var(--shadow-sm);padding:11px 12px;cursor:pointer;
-  background:linear-gradient(165deg,#fffdf9,#fcf3e7);
+/* —— 预览窗 —— */
+.preview{
+  background:rgba(255,255,255,.8);border:1px solid var(--line);border-radius:16px;padding:16px 18px;
+  margin-bottom:24px;backdrop-filter:blur(4px);
 }
-.cell.ai:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(196,116,46,.18);border-color:var(--copper2)}
-body.asis .cell.ai{filter:grayscale(.95);opacity:.42;transform:none!important;box-shadow:none}
-body.asis .cell.ai::after{
-  content:"AI 层 · 待启用 — 点击右上「升级」查看实时效果";position:absolute;inset:0;display:grid;place-items:center;
-  font-size:12px;font-weight:800;letter-spacing:2px;color:var(--ink3);text-align:center;padding:0 20px;line-height:2;
-  background:rgba(244,246,250,.82);backdrop-filter:blur(2px);
+.pv-cap{font-size:9.5px;font-weight:800;letter-spacing:2px;color:var(--ink3);margin-bottom:11px;display:flex;justify-content:space-between}
+.pv-cap em{font-style:normal;color:var(--green);display:flex;align-items:center;gap:5px}
+.pv-cap em::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+/* 门一预览：三泳道 + 流动 */
+.lane{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.lane .ll{
+  width:54px;flex:none;font-size:9px;font-weight:800;color:#fff;text-align:center;border-radius:6px;padding:3px 0;letter-spacing:1px;
 }
-body.tobe .cell.ai{opacity:0;transform:translateY(10px)}
-body.tobe .cell.ai.lit{opacity:1;transform:none}
-.cell h5{font-size:13.4px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:7px}
-.ai-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ai-head .aic{
-  width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;
-  background:linear-gradient(120deg,var(--copper),var(--copper2));
+.lane:nth-child(2) .ll{background:linear-gradient(120deg,#0f9d6e,#3dbd92)}
+.lane:nth-child(3) .ll{background:linear-gradient(120deg,#c4742e,#e09a55)}
+.lane:nth-child(4) .ll{background:linear-gradient(120deg,#33507e,#5b7bab)}
+.lane .lt{flex:1;height:22px;border-radius:7px;background:#eef2f8;border:1px solid var(--line);position:relative;overflow:hidden}
+.lane .lt i{
+  position:absolute;top:4px;height:12px;border-radius:4px;background:linear-gradient(120deg,#4d82ec,#7aa3f5);
 }
-.ai-head .aic svg{width:13px;height:13px}
-.ai-head b{font-size:13.2px;letter-spacing:.2px}
-.ai-head .live{
-  margin-left:auto;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0c7f59;
-  background:var(--green-soft);border:1px solid #c8ecdd;border-radius:5px;padding:1.5px 6px;
-  display:flex;align-items:center;gap:4px;
+.lane:nth-child(3) .lt{border-color:#f0dcc3;background:#fcf3e7}
+.lane:nth-child(3) .lt i{background:linear-gradient(120deg,#df6a40,#e8915b);animation:slide 3.2s ease-in-out infinite}
+@keyframes slide{0%,100%{left:6%}50%{left:58%}}
+.flowline{height:2px;margin:4px 0 0 64px;background:repeating-linear-gradient(90deg,var(--copper) 0 8px,transparent 8px 15px);animation:flow 1s linear infinite;border-radius:2px}
+@keyframes flow{to{background-position:15px 0}}
+/* 门二预览：时间轴接力 */
+.tline{position:relative;height:56px;margin-top:6px}
+.tline .bar{position:absolute;left:0;right:0;top:14px;height:5px;border-radius:5px;background:#eee9e0;overflow:hidden}
+.tline .bar i{
+  display:block;height:100%;width:100%;border-radius:5px;
+  background:linear-gradient(90deg,var(--blue) 0 33%,var(--copper) 33% 66%,var(--green) 66%);
+  transform-origin:left;animation:grow 5s ease-in-out infinite;
 }
-.ai-head .live::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse2 1.4s infinite}
-.cell p.desc{font-size:11.6px;color:var(--ink2);line-height:1.55;margin-bottom:7px}
-.tagrow{display:flex;flex-wrap:wrap;gap:4px}
-.tg{
-  font-size:10.3px;font-weight:600;border-radius:6px;padding:2px 7px;white-space:nowrap;
-  background:var(--bg2);border:1px solid var(--line);color:var(--ink2);
+@keyframes grow{0%{transform:scaleX(0)}55%,80%{transform:scaleX(1)}100%{transform:scaleX(1);opacity:.4}}
+.tnode{position:absolute;top:8px;transform:translateX(-50%);text-align:center}
+.tnode .nd{width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 8px rgba(16,35,63,.25);margin:0 auto}
+.tnode b{display:block;font-size:9.5px;margin-top:5px;font-variant-numeric:tabular-nums}
+.tnode small{font-size:8.5px;color:var(--ink3);white-space:nowrap}
+.tnode:nth-child(2) .nd{background:var(--blue)}
+.tnode:nth-child(3) .nd{background:var(--blue)}
+.tnode:nth-child(4) .nd{background:var(--copper)}
+.tnode:nth-child(5) .nd{background:var(--copper)}
+.tnode:nth-child(6) .nd{background:var(--green)}
+.agents-mini{display:flex;gap:7px;margin-top:8px;justify-content:center}
+.agents-mini i{
+  font-style:normal;font-size:9.5px;font-weight:800;color:#fff;border-radius:999px;padding:3px 11px;letter-spacing:1px;
 }
-.tg.red{color:#b8402e;background:var(--red-soft);border-color:#f6d3cd}
-.tg.green{color:#0c7f59;background:var(--green-soft);border-color:#c8ecdd}
-.tg.blue{color:var(--blue-d);background:var(--blue-soft);border-color:#d3e0fa}
-.cell .foot{position:absolute;left:12px;bottom:7px;font-size:10.5px;font-weight:700;color:var(--copper-d)}
-.cell.sys .foot{color:var(--blue-d);left:13px;bottom:9px;font-size:11px}
-.cell .sys-k{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:6px}
-.h-asis,.h-tobe{animation:popin .4s ease}
-body.asis .h-tobe{display:none}
-body.tobe .h-asis{display:none}
-@keyframes popin{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.vlink{height:26px;display:flex;align-items:center;justify-content:center;position:relative}
-.vlink span{font-size:10px;color:var(--ink3);background:var(--bg);padding:0 7px;position:relative;z-index:1;letter-spacing:.5px}
-.vlink::before{content:"";position:absolute;left:50%;top:2px;bottom:2px;border-left:2px dashed var(--line2)}
-body.tobe .vlink.up::before{border-color:#dcc39f}
-body.tobe .vlink span{color:var(--copper-d);font-weight:700}
-body.asis .vlink .vt2{display:none}
-body.tobe .vlink .va2{display:none}
-.hconn{width:44px;flex:none;position:relative;height:734px}
-.hconn svg{position:absolute;left:-3px;top:396px;width:50px;height:22px;overflow:visible}
-.dashflow{stroke:var(--copper);stroke-width:2.4;stroke-dasharray:7 6;animation:dash 1.1s linear infinite}
-body.asis .dashflow{stroke:var(--line2);animation:none}
-body.asis .hconn path{stroke:var(--line2)!important}
-@keyframes dash{to{stroke-dashoffset:-13}}
-.loop-lane{min-width:1938px;height:78px;position:relative;margin-top:8px;transition:.4s}
-body.asis .loop-lane{opacity:.15;filter:grayscale(1)}
-.loop-lane svg{position:absolute;inset:0;width:100%;height:100%}
-.loop-path{fill:none;stroke:var(--copper);stroke-width:2.4;stroke-dasharray:8 7;animation:dashRev 1.2s linear infinite;opacity:.9}
-@keyframes dashRev{to{stroke-dashoffset:15}}
-.loop-chips{
-  position:absolute;left:1170px;top:42px;transform:translate(-50%,-50%);
-  display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #f0dcc3;
-  border-radius:999px;padding:7px 16px;box-shadow:var(--shadow-sm);white-space:nowrap;
+.agents-mini i:nth-child(1){background:var(--blue)}
+.agents-mini i:nth-child(2){background:var(--copper)}
+.agents-mini i:nth-child(3){background:var(--green)}
+/* CTA */
+.g-cta{
+  margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
-.loop-chips b{font-size:12.3px;color:var(--copper-d)}
-.loop-chips i{font-style:normal;font-size:11.5px;color:var(--ink2);background:var(--copper-soft);border-radius:7px;padding:3px 9px}
-.canvas-note{display:flex;gap:18px;flex-wrap:wrap;font-size:12.3px;color:var(--ink2);margin-top:14px;align-items:center}
-.canvas-note i{display:inline-flex;align-items:center;gap:6px;font-style:normal}
-.sw2{width:12px;height:12px;border-radius:4px;flex:none}
-
-/* ============ AI 节点内：实时效果小屏幕 ============ */
-.scr{
-  background:#fff;border:1px solid #f1ddc4;border-radius:11px;padding:9px 10px;height:252px;
-  position:relative;overflow:hidden;
+.enter{
+  display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:800;color:#fff;border-radius:13px;
+  padding:13px 26px;transition:.25s;letter-spacing:.5px;
 }
-.fx{opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease}
-.fx.on{opacity:1;transform:none}
-.scr-cap{font-size:9.5px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.scr-cap em{font-style:normal;margin-left:auto;font-weight:600;letter-spacing:0;color:var(--ink3)}
-/* S1 订单解析 */
-.wx-bub{
-  background:#eaf7e9;border:1px solid #cfe9cd;border-radius:3px 10px 10px 10px;
-  padding:6px 9px;font-size:11px;color:#2c5232;line-height:1.5;
+.g1 .enter{background:linear-gradient(120deg,var(--blue),#3f7bf0);box-shadow:0 10px 26px rgba(29,91,223,.35)}
+.g2 .enter{background:#1b2433;box-shadow:0 10px 26px rgba(27,36,51,.35)}
+.gate:hover .enter{transform:translateX(4px)}
+.g-cta small{font-size:11px;color:var(--ink3);text-align:right;line-height:1.6}
+/* 区分提示带 */
+.diffbar{
+  max-width:1280px;margin:0 auto 60px;padding:0 40px;
 }
-.wx-bub b{color:#143d1c}
-.parse-arrow{
-  text-align:center;font-size:10px;color:var(--copper-d);font-weight:700;padding:3px 0;letter-spacing:1px;
+.diff-in{
+  background:#fff;border:1px dashed #d4dde9;border-radius:16px;padding:14px 24px;
+  display:flex;gap:26px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);
 }
-.parse-arrow .sweep{display:inline-block;animation:sweepY 1.1s ease infinite}
-@keyframes sweepY{0%,100%{transform:translateY(-1.5px)}50%{transform:translateY(1.5px)}}
-.pr{display:flex;justify-content:space-between;align-items:center;font-size:10.8px;color:var(--ink2);padding:3.5px 2px;border-bottom:1px dashed #f3e7d6}
-.pr b{color:var(--ink);font-size:11px}
-.pr .ok{color:var(--green);font-weight:800;font-size:10px}
-.vd{
-  margin-top:7px;background:var(--green-soft);border:1px solid #c8ecdd;color:#0c7f59;
-  font-weight:700;font-size:10.8px;border-radius:8px;padding:5px 8px;line-height:1.5;
+.diff-in b{color:var(--ink)}
+.diff-in .vs{
+  font-size:13px;font-weight:900;color:#fff;background:linear-gradient(120deg,var(--copper),var(--copper2));
+  border-radius:999px;padding:5px 14px;letter-spacing:1px;
 }
-.vd.amber{background:var(--amber-soft);border-color:#f3ddb4;color:#9a6a14}
-/* S2 齐套 */
-.kit-row{margin-bottom:7px}
-.kit-l{display:flex;justify-content:space-between;font-size:10.8px;color:var(--ink2);margin-bottom:3px}
-.kit-l b{color:var(--ink);font-size:10.8px}
-.kit-l .pct{font-weight:800;font-variant-numeric:tabular-nums}
-.kb{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden}
-.kb i{display:block;height:100%;width:0;border-radius:6px;transition:width 1s cubic-bezier(.4,.1,.2,1);background:linear-gradient(90deg,#0f9d6e,#3dbd92)}
-.kb i.am{background:linear-gradient(90deg,#e8a23a,#f3c47d)}
-.alert-li{
-  display:flex;gap:6px;align-items:flex-start;font-size:10.6px;line-height:1.5;border-radius:8px;padding:5px 8px;margin-top:6px;
-  background:var(--amber-soft);border:1px solid #f3ddb4;color:#9a6a14;
+footer{
+  text-align:center;color:var(--ink3);font-size:12px;padding:0 24px 36px;
 }
-/* S3 排产引擎 */
-.opt-status{font-size:10.3px;color:var(--copper-d);font-weight:700;margin-bottom:6px;min-height:16px;display:flex;align-items:center;gap:6px}
-.opt-status .spin{width:11px;height:11px;border-radius:50%;border:2px solid var(--copper2);border-top-color:transparent;animation:spin .7s linear infinite;flex:none}
-.mtk{height:17px;background:var(--bg2);border:1px solid var(--line);border-radius:5px;position:relative;margin-bottom:6px}
-.mtk small{position:absolute;left:-0px;top:-0px;font-size:8px;color:var(--ink3);transform:translateY(-1px);display:none}
-.mb{
-  position:absolute;top:3px;height:10px;border-radius:3px;
-  background:linear-gradient(120deg,#4d82ec,#7aa3f5);
-  transition:left 1s cubic-bezier(.5,.1,.2,1),width 1s cubic-bezier(.5,.1,.2,1),opacity .5s;
-}
-.mb.cu{background:linear-gradient(120deg,#df6a40,#e8915b)}
-.mb.ghost{opacity:0}
-.gap-tag{
-  position:absolute;font-size:8.5px;color:#b8402e;border:1px dashed #e8a193;border-radius:4px;padding:0 4px;top:2.5px;
-  background:rgba(253,236,234,.7);transition:opacity .5s;white-space:nowrap;
-}
-.opt-kpis{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
-.okpi{
-  flex:1;min-width:64px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:4px 7px;text-align:center;transition:.4s;
-}
-.okpi b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
-.okpi span{font-size:9px;color:var(--ink3)}
-.okpi.good{background:var(--green-soft);border-color:#c8ecdd}
-.okpi.good b{color:#0c7f59}
-.mode-pill{display:flex;gap:4px;margin-bottom:7px}
-.mode-pill i{
-  font-style:normal;flex:1;text-align:center;font-size:9.5px;font-weight:700;border-radius:6px;padding:2.5px 0;
-  background:var(--bg2);color:var(--ink3);border:1px solid var(--line);transition:.4s;
-}
-.mode-pill i.cur{background:var(--copper-soft);color:var(--copper-d);border-color:#f0dcc3}
-/* S4 守门下发 */
-.ck{display:flex;align-items:center;gap:7px;font-size:10.9px;color:var(--ink2);padding:4px 2px}
-.ck .ic{width:14px;height:14px;flex:none;border-radius:50%;border:2px solid var(--blue);border-top-color:transparent;animation:spin .7s linear infinite}
-.ck.done .ic{border:none;animation:none;background:var(--green);position:relative}
-.ck.done .ic::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:8.5px;font-weight:800}
-.ck b{color:var(--ink);font-weight:600}
-.ck .res{margin-left:auto;font-size:9.5px;color:var(--green);font-weight:700}
-.send-line{
-  margin-top:6px;border-top:1px dashed #f0e2cd;padding-top:7px;font-size:10.9px;color:var(--ink2);
-  display:flex;align-items:center;gap:7px;
-}
-.receipt{
-  margin-top:6px;background:var(--blue-soft);border:1px solid #d3e0fa;border-radius:8px;padding:5px 8px;
-  font-size:10.6px;color:var(--blue-d);line-height:1.5;
-}
-/* S5 事件流 */
-.lg{display:flex;gap:7px;font-size:10.5px;color:var(--ink2);padding:3.5px 1px;border-bottom:1px dashed #f3ead9;line-height:1.5;align-items:flex-start}
-.lg time{color:var(--ink3);font-variant-numeric:tabular-nums;flex:none;font-size:10px;padding-top:1px}
-.lg.crit{color:#b8402e}.lg.crit b{color:#b8402e}
-.lg.win{color:#0c7f59}.lg.win b{color:#0c7f59}
-.lg b{color:var(--ink)}
-.elapsed{
-  margin-top:7px;text-align:center;font-size:10.5px;font-weight:800;color:var(--copper-d);
-  background:var(--copper-soft);border:1px solid #f0dcc3;border-radius:8px;padding:4px;
-}
-/* S6 学习 */
-.learn-li{display:flex;gap:7px;font-size:10.7px;color:var(--ink2);padding:4px 1px;line-height:1.5;align-items:flex-start}
-.learn-li .who2{flex:none;font-size:9px;font-weight:800;border-radius:5px;padding:1px 5px;margin-top:1px}
-.learn-li .who2.h{color:#0c7f59;background:var(--green-soft)}
-.learn-li .who2.a{color:var(--copper-d);background:var(--copper-soft)}
-.rule-card{
-  margin-top:5px;background:linear-gradient(160deg,#fffdf9,#fcf3e7);border:1px solid #f0dcc3;border-radius:9px;
-  padding:6px 9px;font-size:10.6px;color:#7c4a13;line-height:1.55;
-}
-.rule-card b{display:block;color:#7c4a13}
-.meter-l{display:flex;justify-content:space-between;font-size:10.3px;color:var(--ink2);margin:7px 0 3px}
-.meter-l b{font-variant-numeric:tabular-nums;color:#0c7f59}
-
-/* ============ 五大策略 ============ */
-.strats{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}
-.strat{
-  background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px 17px 15px;box-shadow:var(--shadow-sm);
-  transition:.28s;position:relative;overflow:hidden;display:flex;flex-direction:column;
-}
-.strat:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.strat::after{content:"";position:absolute;top:0;left:0;width:100%;height:3.5px;background:linear-gradient(90deg,var(--blue),var(--copper2))}
-.strat .sno2{
-  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;
-  background:linear-gradient(120deg,var(--copper),var(--copper2));margin-bottom:10px;
-}
-.strat b{font-size:14.5px;display:block;margin-bottom:6px}
-.strat q{
-  display:block;font-size:11px;color:var(--ink3);border-left:2.5px solid var(--line2);padding-left:8px;margin-bottom:9px;
-  quotes:none;line-height:1.55;
-}
-.strat p{font-size:12px;color:var(--ink2);margin-bottom:10px}
-.strat .eat{margin-top:auto;display:flex;flex-wrap:wrap;gap:4px}
-
-/* ============ 体验区 ============ */
-.demo{display:grid;grid-template-columns:1.06fr .94fr;gap:18px;align-items:stretch}
-.panel{
-  background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;
-  display:flex;flex-direction:column;
-}
-.panel-head{
-  padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;
-  background:linear-gradient(180deg,#fbfcfe,#f6f8fc);
-}
-.panel-head .pic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none}
-.panel-head h4{font-size:15.5px}
-.panel-head p{font-size:11.5px;color:var(--ink3)}
-.p-live{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--green);font-weight:600}
-.p-live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse2 1.6s infinite}
-@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.35}}
-.chat-box{flex:1;min-height:380px;max-height:470px;overflow-y:auto;padding:18px 18px 8px;display:flex;flex-direction:column;gap:13px;background:linear-gradient(180deg,#fcfdff,#f7f9fc)}
-.chat-box::-webkit-scrollbar{width:7px}
-.chat-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:7px}
-.msg{max-width:88%;animation:popin .35s ease}
-.msg.user{align-self:flex-end}
-.msg .bub{border-radius:14px;padding:11px 15px;font-size:13.5px;line-height:1.6}
-.msg.user .bub{background:linear-gradient(120deg,var(--blue),#3f7bf0);color:#fff;border-bottom-right-radius:5px;box-shadow:0 6px 16px rgba(29,91,223,.24)}
-.msg.bot .bub{background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px;box-shadow:var(--shadow-sm)}
-.msg .who{font-size:10.8px;color:var(--ink3);margin:0 6px 4px}
-.msg.user .who{text-align:right}
-.steps{display:flex;flex-direction:column;gap:6px;margin:4px 0 2px}
-.step{
-  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);
-  background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 11px;
-  opacity:0;transform:translateX(-6px);transition:.3s;
-}
-.step.show{opacity:1;transform:none}
-.step .st-ic{width:15px;height:15px;flex:none;border-radius:50%;border:2px solid var(--blue);border-top-color:transparent;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.step.done .st-ic{border:none;animation:none;background:var(--green);position:relative}
-.step.done .st-ic::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:9.5px;font-weight:800}
-.step code{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--blue-d);background:#eef3fe;border-radius:5px;padding:0 5px}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 6px}
-.plan{border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;font-size:11.4px;color:var(--ink2);background:#fff}
-.plan.best{border-color:var(--copper2);background:var(--copper-soft);position:relative}
-.plan.best::after{
-  content:"推荐";position:absolute;top:-9px;right:8px;font-size:9.5px;font-weight:700;color:#fff;
-  background:linear-gradient(120deg,var(--copper),var(--copper2));border-radius:6px;padding:1px 7px;
-}
-.plan b{display:block;font-size:12.3px;color:var(--ink);margin-bottom:3px}
-.plan em{font-style:normal;display:block;color:var(--ink3);font-size:10.6px}
-.bub .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.mini-btn{border:none;cursor:pointer;font-size:12px;font-weight:600;border-radius:8px;padding:7px 13px;font-family:inherit;transition:.2s}
-.mini-btn.blue{color:#fff;background:linear-gradient(120deg,var(--blue),#3f7bf0)}
-.mini-btn.ghost{color:var(--blue);background:var(--blue-soft)}
-.mini-btn:hover{transform:translateY(-1px)}
-.scen-row{display:flex;gap:8px;padding:11px 16px;border-top:1px solid var(--line);flex-wrap:wrap;background:#fbfcfe}
-.scen{
-  font-size:12.3px;font-weight:600;color:var(--copper-d);background:var(--copper-soft);
-  border:1px solid #f0dcc3;border-radius:999px;padding:7px 14px;cursor:pointer;transition:.2s;font-family:inherit;
-}
-.scen:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(196,116,46,.18)}
-.scen:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-.input-row{display:flex;gap:9px;padding:12px 16px 15px;background:#fbfcfe}
-.input-row input{
-  flex:1;border:1.5px solid var(--line2);border-radius:11px;padding:11px 15px;font-size:13.5px;font-family:inherit;
-  outline:none;transition:.2s;background:#fff;color:var(--ink);
-}
-.input-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,91,223,.12)}
-.send-btn{
-  border:none;cursor:pointer;width:44px;border-radius:11px;display:grid;place-items:center;color:#fff;
-  background:linear-gradient(120deg,var(--blue),#3f7bf0);transition:.2s;
-}
-.send-btn:hover{transform:translateY(-1px)}
-.gantt-body{padding:18px 20px 8px;flex:1}
-.g-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.g-leg{display:flex;gap:13px;margin-left:auto;font-size:11.3px;color:var(--ink2);flex-wrap:wrap}
-.g-leg i{display:inline-flex;align-items:center;gap:5px;font-style:normal}
-.sw{width:13px;height:9px;border-radius:3px}
-.sw.b{background:linear-gradient(120deg,#4d82ec,#7aa3f5)}
-.sw.r{background:linear-gradient(120deg,#df6a40,#e8915b)}
-.sw.s{background:repeating-linear-gradient(135deg,#d8b691 0 4px,#efdcc3 4px 8px)}
-.g-axis{display:grid;grid-template-columns:78px 1fr;font-size:10.8px;color:var(--ink3);margin-bottom:5px}
-.g-axis .ticks{display:grid;grid-template-columns:repeat(6,1fr)}
-.g-axis .ticks span{border-left:1px dashed var(--line2);padding-left:5px}
-.g-row{display:grid;grid-template-columns:78px 1fr;align-items:center;margin-bottom:11px}
-.g-name{font-size:12.3px;font-weight:600;color:var(--ink2)}
-.g-name small{display:block;font-size:10px;color:var(--ink3);font-weight:500}
-.g-track{
-  position:relative;height:34px;background:var(--bg2);border-radius:9px;border:1px solid var(--line);
-  background-image:repeating-linear-gradient(90deg,transparent 0 calc(100%/6 - 1px),rgba(16,35,63,.05) calc(100%/6 - 1px) calc(100%/6));
-}
-.g-bar{
-  position:absolute;top:5px;height:24px;border-radius:7px;color:#fff;font-size:10.6px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;
-  background:linear-gradient(120deg,#4d82ec,#7aa3f5);box-shadow:0 4px 10px rgba(29,91,223,.22);
-  transition:left .8s cubic-bezier(.5,.1,.2,1),width .8s cubic-bezier(.5,.1,.2,1),opacity .5s;
-}
-.g-bar.urgent{background:linear-gradient(120deg,#df6a40,#e8915b);box-shadow:0 4px 12px rgba(223,83,64,.32)}
-.g-bar.setup{background:repeating-linear-gradient(135deg,#d8b691 0 5px,#efdcc3 5px 10px);box-shadow:none;color:#8a5a22}
-.g-bar.ghost{opacity:0;transform:scale(.85)}
-.g-delta{display:flex;gap:9px;flex-wrap:wrap;padding:4px 20px 16px}
-.g-delta i{
-  font-style:normal;font-size:11.6px;font-weight:600;color:var(--green);background:var(--green-soft);
-  border-radius:8px;padding:5px 11px;opacity:0;transform:translateY(6px);transition:.4s;
-}
-.g-delta i.bad{color:var(--copper-d);background:var(--copper-soft)}
-.g-delta i.show{opacity:1;transform:none}
-
-/* ============ 价值对比 ============ */
-.cmp-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:13.3px}
-th{
-  text-align:left;font-size:11.5px;letter-spacing:1.5px;color:var(--ink3);font-weight:700;
-  padding:14px 22px;border-bottom:1px solid var(--line);background:#fafbfd;white-space:nowrap;
-}
-td{padding:13px 22px;border-bottom:1px solid #eef2f8;vertical-align:middle;color:var(--ink2)}
-tr:last-child td{border-bottom:none}
-tbody tr:hover{background:#f8fafd}
-td.dim{font-weight:700;color:var(--ink);white-space:nowrap}
-td .as{color:#b8402e}
-td .to{color:var(--green);font-weight:600}
-
-/* ============ 落地路径 ============ */
-.road{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;position:relative}
-.road::before{
-  content:"";position:absolute;top:26px;left:8%;right:8%;height:2.5px;z-index:0;
-  background:repeating-linear-gradient(90deg,var(--copper2) 0 9px,transparent 9px 17px);opacity:.55;
-}
-.ph-card{
-  background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 20px 17px;box-shadow:var(--shadow-sm);
-  position:relative;z-index:1;transition:.28s;
-}
-.ph-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.ph-card .pno2{
-  width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;
-  background:linear-gradient(120deg,#16335f,#1d5bdf);margin-bottom:13px;box-shadow:0 8px 18px rgba(29,91,223,.25);
-}
-.ph-card:nth-child(2) .pno2{background:linear-gradient(120deg,#9c561b,#d98c3f);box-shadow:0 8px 18px rgba(196,116,46,.25)}
-.ph-card:nth-child(3) .pno2{background:linear-gradient(120deg,#0b7a56,#2eb88a);box-shadow:0 8px 18px rgba(15,157,110,.25)}
-.ph-card b{font-size:16.5px;display:block;margin-bottom:3px}
-.ph-card .dur{font-size:11px;font-weight:700;color:var(--copper-d);letter-spacing:1px;margin-bottom:10px;display:block}
-.ph-card ul{list-style:none}
-.ph-card li{
-  font-size:12.6px;color:var(--ink2);padding:5px 0 5px 20px;position:relative;border-bottom:1px dashed #eef2f8;
-}
-.ph-card li:last-child{border-bottom:none}
-.ph-card li::before{content:"✓";position:absolute;left:2px;color:var(--green);font-weight:800;font-size:11px}
-
-/* ============ 抽屉 / Toast / Footer ============ */
-.overlay{
-  position:fixed;inset:0;background:rgba(16,35,63,.34);backdrop-filter:blur(3px);
-  opacity:0;pointer-events:none;transition:.3s;z-index:80;
-}
-.overlay.open{opacity:1;pointer-events:auto}
-.drawer{
-  position:fixed;top:0;right:0;height:100%;width:min(470px,94vw);z-index:90;background:#fdfefe;
-  box-shadow:-18px 0 50px rgba(16,35,63,.18);transform:translateX(102%);transition:transform .38s cubic-bezier(.6,.1,.2,1);
-  display:flex;flex-direction:column;
-}
-.drawer.open{transform:none}
-.drawer-head{padding:22px 26px 18px;color:#fff;position:relative;background:linear-gradient(120deg,#8d4d16,#d98c3f)}
-.drawer-head.sys{background:linear-gradient(120deg,#16335f,#1d5bdf)}
-.drawer-head .ph{font-size:10.5px;letter-spacing:2.5px;opacity:.75;text-transform:uppercase;margin-bottom:6px}
-.drawer-head h3{font-size:21px;letter-spacing:.5px;margin-bottom:8px}
-.drawer-head .mods{display:flex;gap:6px;flex-wrap:wrap}
-.drawer-head .mods i{font-style:normal;font-size:11px;font-weight:600;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);border-radius:7px;padding:2.5px 9px}
-.drawer-x{
-  position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;border-radius:9px;cursor:pointer;
-  background:rgba(255,255,255,.16);color:#fff;font-size:15px;display:grid;place-items:center;transition:.2s;
-}
-.drawer-x:hover{background:rgba(255,255,255,.3)}
-.drawer-body{flex:1;overflow-y:auto;padding:20px 26px 30px}
-.drawer-body::-webkit-scrollbar{width:7px}
-.drawer-body::-webkit-scrollbar-thumb{background:var(--line2);border-radius:7px}
-.grp{margin-bottom:20px}
-.grp-t{
-  font-size:12px;font-weight:800;letter-spacing:1.5px;margin-bottom:9px;
-  display:flex;align-items:center;gap:8px;color:var(--blue-d);
-}
-.grp-t::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--blue);flex:none}
-.grp-t.red{color:#b8402e}.grp-t.red::before{background:var(--red)}
-.grp-t.cu{color:var(--copper-d)}.grp-t.cu::before{background:var(--copper)}
-.grp-t.gn{color:#0c7f59}.grp-t.gn::before{background:var(--green)}
-.f-item{background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 13px;margin-bottom:7px;transition:.2s}
-.f-item:hover{border-color:#c8d8f5;box-shadow:var(--shadow-sm)}
-.f-item b{font-size:13.2px;display:block}
-.f-item p{font-size:11.8px;color:var(--ink2);margin-top:3px}
-.f-item.gold{background:linear-gradient(160deg,#fffdf9,#fcf3e7);border-color:#f0dcc3}
-.f-item.gold b{color:#7c4a13}
-.f-item.gold p{color:#8a6a45}
-.f-item.redish{background:linear-gradient(160deg,#fffafa,#fdf0ee);border-color:#f6d3cd}
-.f-item.redish b{color:#9c3a2a}
-.f-item.redish p{color:#a06457}
-.toast{
-  position:fixed;left:50%;bottom:34px;transform:translate(-50%,90px);z-index:120;
-  background:#10233f;color:#fff;font-size:13.5px;border-radius:13px;padding:13px 22px;
-  box-shadow:0 16px 40px rgba(16,35,63,.4);transition:.4s cubic-bezier(.5,.1,.2,1.2);max-width:86vw;
-  display:flex;align-items:center;gap:10px;
-}
-.toast.show{transform:translate(-50%,0)}
-.toast .t-ic{width:20px;height:20px;border-radius:50%;background:var(--green);display:grid;place-items:center;font-size:11px;flex:none}
-footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
-.foot-in{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--ink3);font-size:12.5px}
-
-@media (max-width:1080px){
-  h1{font-size:36px}
-  .pains{grid-template-columns:1fr 1fr}
-  .strats{grid-template-columns:repeat(2,1fr)}
-  .demo{grid-template-columns:1fr}
-  .road{grid-template-columns:1fr}
-  .road::before{display:none}
-  .kchips{margin-left:0}
-}
-@media (max-width:640px){
-  .pains,.strats{grid-template-columns:1fr}
-  h1{font-size:30px}
-  .nav-links{display:none}
+@media (max-width:980px){
+  .gates{grid-template-columns:1fr}
+  .gate{min-height:auto}
+  .title h1{font-size:26px}
 }
 </style>
 </head>
-<body class="asis">
+<body>
 
-<!-- ================= 导航 ================= -->
-<nav>
-  <div class="nav-in">
-    <div class="brand">
-      <div class="brand-mark">Cu</div>
-      <div>江铜 · 智能排产升级蓝图<small>AI&nbsp;ON&nbsp;EXISTING&nbsp;SYSTEM&nbsp;·&nbsp;AGENTIC&nbsp;SCHEDULING</small></div>
-    </div>
-    <div class="nav-links">
-      <a href="#board">现状 → 智能升级</a>
-      <a href="#strat">五大优化策略</a>
-      <a href="#demo">智能体验区</a>
-      <a href="#compare">价值对比</a>
-      <a href="#road">落地路径</a>
-      <a href="req2.html" style="color:var(--copper-d);font-weight:700">需求二 · AI 价值链 ↗</a>
-    </div>
-    <button class="nav-cta" onclick="upgradeDemo()">⚡ 一键升级演示</button>
+<header>
+  <div class="brand">
+    <div class="brand-mark">Cu</div>
+    <div>江铜 · AI 智能体方案<small>DEMO&nbsp;PORTAL&nbsp;·&nbsp;演示中心</small></div>
   </div>
-</nav>
-
-<!-- ================= Hero ================= -->
-<header class="hero wrap">
-  <div class="hero-badges reveal">
+  <div class="meta">
     <span class="badge"><span class="dot"></span>客户：江西铜业 · 台意</span>
-    <span class="badge">原则：不替换现有系统 · 利旧升级</span>
-    <span class="badge">模式：AI 排产 + 排程员审核发布</span>
-    <span class="badge">颗粒度：天级 →<b style="color:var(--copper-d)">&nbsp;小时级</b></span>
-  </div>
-  <h1 class="reveal">给现有生产系统，<br>装上一颗「智能排产大脑」</h1>
-  <p class="hero-sub reveal">
-    江铜现有生产系统已经管住了<b>订单、库存、工艺、下发、监控、报表</b>六类业务数据——但「排产」这个决策环节，
-    仍依赖排程员手动整理 Excel、逐一查库存、微信群通知产线。
-    本方案<b>不推翻、不重建</b>：以 AI 智能体挂接现有系统，把人工经验决策升级为
-    <span style="color:var(--copper-d);font-weight:700">小时级智能排产 + 人审发布 + 事件闭环</span>
-    ——下面每个 AI 节点都是一块正在运行的小屏幕，效果直接看得见。
-  </p>
-  <div class="hero-actions reveal">
-    <button class="btn btn-copper" onclick="upgradeDemo()">⚡&nbsp; 一键升级：看 AI 实时效果</button>
-    <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView()">💬&nbsp; 体验排产智能体</button>
-  </div>
-  <div class="pains reveal">
-    <div class="pain"><div class="src">调研结论 · 痛点 01</div><b>强专家经验</b><p>排产规则沉淀在老师傅脑中，人走经验丢</p><span class="fix">AI 对策 → 经验知识库 · 持续学习</span></div>
-    <div class="pain"><div class="src">调研结论 · 痛点 02</div><b>排程单不透明</b><p>Excel 排程外人看不懂，追溯困难</p><span class="fix">AI 对策 → 全程可视 · 可解释报告</span></div>
-    <div class="pain"><div class="src">调研结论 · 痛点 03</div><b>急单可能延期</b><p>插单靠电话协调，影响范围拍脑袋</p><span class="fix">AI 对策 → 秒级评估 · 自动重排</span></div>
-    <div class="pain"><div class="src">调研结论 · 痛点 04</div><b>天级排程粗放</b><p>存在空闲设备与空转设备并存的浪费</p><span class="fix">AI 对策 → 小时级排产 · 负荷均衡</span></div>
+    <span class="badge">两套需求 · 两种范式 · 互不混用</span>
   </div>
 </header>
 
-<!-- ================= 核心画布 ================= -->
-<section id="board" class="wrap">
-  <div class="sec-tag reveal">AS-IS → TO-BE · 核心画布</div>
-  <h2 class="reveal">同一条生产流程，两种运转方式</h2>
-  <p class="sec-sub reveal">
-    三泳道描绘江铜从接单到复盘的六步业务主线：<b style="color:#33507e">底层是现有生产系统（保留利旧）</b>、
-    <b style="color:#0c7f59">顶层是人</b>、<b style="color:var(--copper-d)">中间是新增的 AI 排产智能体</b>。
-    切换到升级模式后，<b>每个 AI 节点都会实时演示它产出的结果</b>——微信订单被解析、齐套进度在跑、
-    甘特从天级压缩到小时级、产线回执到达、故障 3 分钟出方案、经验自动入库。点击任一 AI 节点，将进入该流程的<b>独立详情页</b>（完整步骤链 + 放大版实时演示）。
-  </p>
-  <div class="canvas-card reveal">
-    <div class="canvas-top">
-      <div class="mode-switch">
-        <button class="mode-btn on" data-m="asis" onclick="setMode('asis')"><span class="md"></span>现状 · 手动排程</button>
-        <button class="mode-btn" data-m="tobe" onclick="setMode('tobe')"><span class="md"></span>升级 · AI 智能排产</button>
+<div class="title">
+  <h1>请选择要演示的方案：<em>同一家工厂，两个不同的故事</em></h1>
+  <p>需求一讲<b>「排产环节的智能升级」</b>，需求二讲<b>「从报价到成本的一整条 AI 价值链」</b>——两套页面从叙事到视觉完全独立。</p>
+</div>
+
+<div class="gates">
+
+  <!-- 门一：需求一 -->
+  <a class="gate g1" href="req1/index.html">
+    <div class="g-in">
+      <span class="g-no">需求一 · REQUIREMENT 01</span>
+      <h2><b>给现有生产系统，<br>装上智能排产大脑</b></h2>
+      <div class="g-para">范式：三泳道升级画布 · 现状 ⇄ AI 一键切换</div>
+      <p class="desc">围绕台意调研结论：排程员手动 Excel、微信群通知、天级粗放。AI 智能体挂接现有系统六个环节，把排产决策升级为小时级智能排产 + 人审发布 + 事件闭环。</p>
+      <div class="g-chips"><i>泳道画布</i><i>现状⇄升级切换</i><i>6 块实时小屏幕</i><i>六幕流程动画</i><i>96 项功能映射</i></div>
+      <div class="preview">
+        <div class="pv-cap">页面风格预览 · 泳道画布<em>LIVE</em></div>
+        <div class="lane"><span style="width:54px;flex:none"></span><span style="flex:1;font-size:9px;color:var(--ink3);letter-spacing:1px">接单 → 备料 → 排产 → 下发 → 执行 → 复盘</span></div>
+        <div class="lane"><span class="ll">人</span><div class="lt"><i style="left:8%;width:22%"></i><i style="left:48%;width:18%"></i></div></div>
+        <div class="lane"><span class="ll">AI 智能体</span><div class="lt"><i style="width:26%"></i></div></div>
+        <div class="lane"><span class="ll">现有系统</span><div class="lt"><i style="left:14%;width:30%;background:linear-gradient(120deg,#5b7bab,#8fa6c8)"></i></div></div>
+        <div class="flowline"></div>
       </div>
-      <div class="kchips">
-        <span class="kchip">颗粒度 <b><span class="va">天级</span><span class="vt">小时级</span></b></span>
-        <span class="kchip">排程耗时 <b><span class="va">~4 小时</span><span class="vt">15 分钟</span></b></span>
-        <span class="kchip">急单评估 <b><span class="va">电话协调</span><span class="vt">&lt;5 分钟</span></b></span>
-        <span class="kchip">下发方式 <b><span class="va">微信群</span><span class="vt">自动下发+回执</span></b></span>
+      <div class="g-cta">
+        <span class="enter">进入需求一演示 →</span>
+        <small>蓝 × 铜 · 工程网格底<br>req1 / index.html</small>
       </div>
     </div>
-    <div class="canvas-wrap">
-      <div class="board" id="board-el"></div>
-      <div class="loop-lane">
-        <svg viewBox="0 0 1938 78" preserveAspectRatio="none">
-          <defs>
-            <marker id="arrUp" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="#c4742e"/>
-            </marker>
-          </defs>
-          <path class="loop-path" marker-end="url(#arrUp)" d="M1486 2 V34 a10 10 0 0 1 -10 10 H864 a10 10 0 0 1 -10 -10 V8"/>
-        </svg>
-        <div class="loop-chips">
-          <b>事件闭环</b>
-          <i>⚡ 急单插入</i><i>🔧 设备故障</i><i>📉 实绩偏差</i>
-          <span style="font-size:11.5px;color:var(--ink3)">→ 增量重排（回到 S3 排产引擎）→ 人审发布</span>
+  </a>
+
+  <!-- 门二：需求二 -->
+  <a class="gate g2" href="req2/index.html">
+    <div class="g-in">
+      <span class="g-no">需求二 · REQUIREMENT 02</span>
+      <h2><b>一张订单的一天：<br>三个智能体接力跟单</b></h2>
+      <div class="g-para">范式：滚动跟单纪实 · 时间戳叙事 · 三智能体三色</div>
+      <p class="desc">围绕需求二的三大板块：商务智能体管报价与接单（AI 应用 5 项）、排产智能体管计划与防错（18 项）、成本智能体管核算与反哺（10 项）。跟着订单 SO-26061122 从 08:02 的微信走到 16:40 的 Oracle 凭证。</p>
+      <div class="g-chips"><i>跟单进度条</i><i>滚动触发六幕</i><i>智能体交接仪式</i><i>三天 vs 一天时间轴</i><i>33 条需求落位</i></div>
+      <div class="preview">
+        <div class="pv-cap">页面风格预览 · 跟单时间轴<em>LIVE</em></div>
+        <div class="tline">
+          <div class="bar"><i></i></div>
+          <div class="tnode" style="left:5%"><span class="nd"></span><b>08:02</b><small>报价</small></div>
+          <div class="tnode" style="left:23%"><span class="nd"></span><b>08:30</b><small>评审</small></div>
+          <div class="tnode" style="left:43%"><span class="nd"></span><b>09:30</b><small>排产</small></div>
+          <div class="tnode" style="left:64%"><span class="nd"></span><b>10:10</b><small>防错</small></div>
+          <div class="tnode" style="left:90%"><span class="nd"></span><b>16:40</b><small>成本</small></div>
         </div>
+        <div class="agents-mini"><i>商务智能体</i><i>排产智能体</i><i>成本智能体</i></div>
+      </div>
+      <div class="g-cta">
+        <span class="enter">进入需求二演示 →</span>
+        <small>三色 · 暖白点阵底<br>req2 / index.html</small>
       </div>
     </div>
-    <div class="canvas-note">
-      <i><span class="sw2" style="background:linear-gradient(120deg,#0f9d6e,#3dbd92)"></span>人 · 排程员/业务/产线</i>
-      <i><span class="sw2" style="background:linear-gradient(120deg,#c4742e,#e09a55)"></span>AI 排产智能体（新增层 · 实时效果演示）</i>
-      <i><span class="sw2" style="background:linear-gradient(120deg,#33507e,#5b7bab)"></span>现有生产系统（保留利旧 · 仅打通接口）</i>
-      <i style="margin-left:auto;color:var(--ink3)">演示数据为示意 · 点击 AI 节点进入流程详情页</i>
-    </div>
+  </a>
+</div>
+
+<div class="diffbar">
+  <div class="diff-in">
+    <span><b>需求一</b>：流程升级故事 · 画布与开关 · 排产大脑</span>
+    <span class="vs">VS</span>
+    <span><b>需求二</b>：订单旅程故事 · 滚动与时钟 · 三智能体接力</span>
   </div>
-</section>
+</div>
 
-<!-- ================= 五大策略 ================= -->
-<section id="strat" class="wrap">
-  <div class="sec-tag reveal">STRATEGY · 与调研规划逐条对应</div>
-  <h2 class="reveal">五大 AI 优化策略</h2>
-  <p class="sec-sub reveal">每条策略均直接对应调研结论第 5 点「嵌入 MES 的 APS 规划」的原文要求，并标注它消灭的现状痛点。</p>
-  <div class="strats reveal" id="strats"></div>
-</section>
+<footer>江铜 · AI 智能体方案演示中心 — 演示数据均为示意 · 两套方案可独立打开各自文件夹中的 index.html</footer>
 
-<!-- ================= 体验区 ================= -->
-<section id="demo" class="wrap">
-  <div class="sec-tag reveal">INTERACTIVE · 智能排产体验区</div>
-  <h2 class="reveal">和排产智能体，像和老师傅一样对话</h2>
-  <p class="sec-sub reveal">左侧 Copilot 直连现有系统的订单与库存数据，展示智能体「理解 → 调用现有系统 → 给方案」的过程；右侧甘特沙盘演示急单插入的自动重排。所有方案均需排程员审核后发布。</p>
-  <div class="demo">
-    <div class="panel reveal">
-      <div class="panel-head">
-        <div class="pic" style="background:linear-gradient(120deg,#1d5bdf,#3f7bf0)">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div><h4>排产 Copilot · 智能体对话</h4><p>自然语言 · 调用现有系统数据 · 方案生成（演示示意）</p></div>
-        <span class="p-live">在线</span>
-      </div>
-      <div class="chat-box" id="chatBox"></div>
-      <div class="scen-row" id="scenRow">
-        <button class="scen" data-s="0">⚡ 急单能不能接？</button>
-        <button class="scen" data-s="1">🔧 设备故障怎么办？</button>
-        <button class="scen" data-s="2">📅 最早交期是哪天？</button>
-      </div>
-      <div class="input-row">
-        <input id="chatInput" type="text" placeholder="试着问：急单 20t 周五交付能排吗？（回车发送）">
-        <button class="send-btn" onclick="sendFree()" title="发送">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="panel reveal">
-      <div class="panel-head">
-        <div class="pic" style="background:linear-gradient(120deg,#c4742e,#e09a55)">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="17" y2="12"/><line x1="8" y1="18" x2="13" y2="18"/><circle cx="4" cy="6" r="1.2"/><circle cx="4" cy="12" r="1.2"/><circle cx="4" cy="18" r="1.2"/></svg>
-        </div>
-        <div><h4>机台甘特 · 急单沙盘</h4><p>小时级排产 + 快速插单（交期影响最小模式）</p></div>
-        <span class="p-live">仿真</span>
-      </div>
-      <div class="gantt-body">
-        <div class="g-toolbar">
-          <button class="btn btn-primary" style="padding:9px 18px;font-size:13px" id="ganttBtn" onclick="toggleUrgent()">⚡ 模拟急单插入</button>
-          <div class="g-leg">
-            <i><span class="sw b"></span>计划工单</i>
-            <i><span class="sw r"></span>急单</i>
-            <i><span class="sw s"></span>换模 / 换型</i>
-          </div>
-        </div>
-        <div class="g-axis"><span></span>
-          <div class="ticks"><span>6/10</span><span>6/11</span><span>6/12</span><span>6/13</span><span>6/14</span><span>6/15</span></div>
-        </div>
-        <div id="gantt"></div>
-      </div>
-      <div class="g-delta" id="gDelta">
-        <i id="d1">延期订单 0 张</i>
-        <i id="d2">设备利用率 +3.2%</i>
-        <i id="d3" class="bad">换型损耗 +2.0h（已最小化）</i>
-        <i id="d4">版本 V0610-3 · 待排程员审核</i>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= 价值对比 ================= -->
-<section id="compare" class="wrap">
-  <div class="sec-tag reveal">VALUE · 升级前后</div>
-  <h2 class="reveal">现状 vs AI 智能排产</h2>
-  <p class="sec-sub reveal">左列来自台意调研结论的现状描述，右列为 AI 智能体接管后的运转方式（量化值为实施目标）。</p>
-  <div class="cmp-card reveal">
-    <table>
-      <thead><tr><th style="width:150px">维度</th><th>现状（调研结论）</th><th>AI 智能排产后</th></tr></thead>
-      <tbody id="cmpBody"></tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ================= 落地路径 ================= -->
-<section id="road" class="wrap">
-  <div class="sec-tag reveal">ROADMAP · 嵌入式落地</div>
-  <h2 class="reveal">三步走，嵌入现有系统</h2>
-  <p class="sec-sub reveal">与调研规划一致：先打通数据源，再上线智能排产，最后闭环学习——每一步都在现有系统之上叠加，不影响在产业务。</p>
-  <div class="road reveal">
-    <div class="ph-card">
-      <div class="pno2">P1</div>
-      <b>打通数据源</b><span class="dur">第 1–4 周 · 利旧接口</span>
-      <ul>
-        <li>对接订单系统：订单数量、交付期限实时入流</li>
-        <li>对接库存数据：原料 / 在途 / 模具 / 在制品</li>
-        <li>梳理器件型号 × 设备型号绑定关系</li>
-        <li>数字化换模损耗时间矩阵（实测校准）</li>
-        <li>数据质量哨兵上线，杜绝脏数据排程</li>
-      </ul>
-    </div>
-    <div class="ph-card">
-      <div class="pno2">P2</div>
-      <b>智能排产上线</b><span class="dur">第 5–10 周 · 并行试运行</span>
-      <ul>
-        <li>小时级排产引擎：多目标寻优 + 约束求解</li>
-        <li>急单插单与设备故障应急重排方案</li>
-        <li>甘特可视 + 拖拽微调 + 冲突检测</li>
-        <li>排程员审核后一键发布（替代微信群）</li>
-        <li>与手工排程并行对比 2 周，验证后切换</li>
-      </ul>
-    </div>
-    <div class="ph-card">
-      <div class="pno2">P3</div>
-      <b>闭环与学习</b><span class="dur">第 11 周起 · 持续运营</span>
-      <ul>
-        <li>下游产线自动下发通知 + 电子验收回执</li>
-        <li>订单状态实时跟进，实绩自动回流</li>
-        <li>偏差超阈值自动滚动重排</li>
-        <li>专家经验持续入库，参数自学习校准</li>
-        <li>排产 Copilot 全员开放，KPI 自动周报</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- ================= 抽屉 / Toast / Footer ================= -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-<aside class="drawer" id="drawer">
-  <div class="drawer-head" id="drawerHead">
-    <button class="drawer-x" onclick="closeDrawer()">✕</button>
-    <div class="ph" id="dPhase"></div>
-    <h3 id="dTitle"></h3>
-    <div class="mods" id="dMods"></div>
-  </div>
-  <div class="drawer-body" id="drawerBody"></div>
-</aside>
-<div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastTxt"></span></div>
-
-<footer>
-  <div class="wrap foot-in">
-    <div>江铜 · 智能排产升级蓝图 — 基于现有生产系统的 AI 优化方案（演示数据均为示意）</div>
-    <div>利旧升级 · AI 排产 · 人审发布 · 事件闭环</div>
-  </div>
-</footer>
-
-<script>
-/* ==================================================================
-   六步业务主线 × 三泳道（人 / AI / 现有系统）
-   AI 泳道 = 实时效果小屏幕（所见即结果，循环演示）
-================================================================== */
-const AI_ICONS = {
-  doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
-  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
-  cpu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>',
-  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
-  zap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-  loop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>'
-};
-
-const STAGES = [
- {no:'S1', name:'接单与评审', en:'ORDER INTAKE',
-  h_asis:{txt:'业务微信 / 电话接单，凭经验判断能否接、何时能交。', tags:[['交期凭感觉','red'],['易过量承诺','red']]},
-  h_tobe:{txt:'业务实时拿到交期试算答复单，接单有依据、承诺可兑现。', tags:[['秒级答复','green'],['有据可依','green']]},
-  vTop_a:'人工经验判断', vTop_t:'↑ 交期答复 · ↓ 接单确认',
-  aiTitle:'订单解析 · 交期试算', aiIcon:'doc',
-  vBot_a:'↓ 人工录入订单系统', vBot_t:'↑ 订单/客户数据 · ↓ 评审结果回写',
-  sys:{k:'数据源 · 保留利旧', t:'订单管理', chips:['销售订单','客户档案 / 优先级','产销平衡 / 产能预警'],
-       items:[['销售订单','单号/物品/数量/交期/优先级——AI 的需求输入'],['客户档案','客户优先级与奖惩，参与排产权重'],['产销平衡 · 产能预警','产能与需求匹配评估，预警阈值机制']]}},
-
- {no:'S2', name:'备料与齐套', en:'MATERIAL KITTING',
-  h_asis:{txt:'排程员逐一查询订单系统与库存表，人工判断缺料并发起采购通知。', tags:[['手动查表','red'],['缺料后知后觉','red']]},
-  h_tobe:{txt:'齐套报告自动推送，排程员只处理缺料例外，采购通知自动发起。', tags:[['零手动查询','green'],['采购自动联动','green']]},
-  vTop_a:'人工逐表核对', vTop_t:'↑ 齐套报告 · ↓ 例外处理',
-  aiTitle:'齐套体检 · 缺料预测', aiIcon:'box',
-  vBot_a:'↓ 人工查询库存表', vBot_t:'↑ 库存/在途数据 · ↓ 锁定与占用',
-  sys:{k:'数据源 · 保留利旧', t:'库存数据 + 采购订单', chips:['原料/在途库存','模具 · 在制品','采购订单约束'],
-       items:[['原料库存及在途','齐套检查与最早开工时间（EST）的硬约束'],['模具库存','拉丝模等工器具在库与占用状态'],['在制品 / 呆滞 / 盘点库存','WIP 可见、呆滞优先消耗、账实一致'],['采购订单','到货日期约束排产最早开始时间']]}},
-
- {no:'S3', name:'排产决策', en:'SCHEDULING', core:true,
-  h_asis:{txt:'排程员用 Excel 手动排程，天级颗粒度；规则在老师傅脑中，外人看不懂。', tags:[['强专家经验','red'],['天级·不透明','red']]},
-  h_tobe:{txt:'排程员从“做计划”变“审计划”：看甘特、拖拽微调、一键确认。', tags:[['15 分钟全厂计划','green'],['规则透明可解释','green']]},
-  vTop_a:'Excel 手工编排（约 4 小时）', vTop_t:'↑ 候选方案+解释 · ↓ 审核/微调',
-  aiTitle:'小时级排产引擎', aiIcon:'cpu',
-  vBot_a:'↓ 仅作记录查询', vBot_t:'↑ 工艺/产能/算法底座 · ↓ 计划回写',
-  sys:{k:'模型底座 · 保留利旧', t:'基础数据 · 工艺 · 算法', chips:['物料×产线×模具绑定','换型/节拍/日历','工艺·BOM·算法库'],
-       items:[['物料与生产线关系','节拍/开动率/优先级/批量——“器件×设备绑定”的载体'],['模具与物料/产线关系 · 换型时间','换模损耗矩阵的数据来源'],['生产日历 · 排班 · 产能 · 节拍','小时级排产的时间与产能底座'],['工艺路径 / BOM','顺序与并行衔接、替代方案'],['核心算法（Z/N/Z+N/顺排/倒排/跟随等）','AI 引擎调用的求解策略库']]}},
-
- {no:'S4', name:'审核与下发', en:'REVIEW & RELEASE',
-  h_asis:{txt:'排程结果在微信群发给产线（订单号 + 特殊约束如精细加工），无回执、难追溯。', tags:[['微信群通知','red'],['无验收回执','red']]},
-  h_tobe:{txt:'移动端一键审核发布；下发状态、产线回执全程可追。', tags:[['替代微信群','green'],['全程留痕','green']]},
-  vTop_a:'微信群人工通知', vTop_t:'↑ 待审方案 · ↓ 一键发布',
-  aiTitle:'冲突守门 · 自动下发', aiIcon:'send',
-  vBot_a:'↓ 线下传达，系统滞后', vBot_t:'↓ 工序工单下发 · ↑ 下发履历',
-  sys:{k:'执行通道 · 保留利旧', t:'生产排程 · 下发', chips:['工序工单下发','下发履历','作业指导书'],
-       items:[['工序工单下发','确认后执行下发——AI 复用此通道替代微信群'],['下发履历','下发时间/明细可查，配合电子回执闭环'],['作业指导书','电子 SOP 随制令单到机台，承载“精细加工”等特殊约束']]}},
-
- {no:'S5', name:'生产与应急', en:'EXECUTION',
-  h_asis:{txt:'急单靠电话协调、可能延期；设备故障后人工重排往往要一天。', tags:[['急单可能延期','red'],['故障重排慢','red']]},
-  h_tobe:{txt:'异常出现时方案已在路上，人只做确认；产线按小时计划运转。', tags:[['急单不延期','green'],['分钟级响应','green']]},
-  vTop_a:'电话协调 · 拍脑袋插单', vTop_t:'↑ 应急方案 · ↓ 确认执行',
-  aiTitle:'事件应急重排', aiIcon:'zap',
-  vBot_a:'↓ 实绩滞后录入', vBot_t:'↑ 生产反馈/实绩 · ↓ 调整指令',
-  sys:{k:'实绩回流 · 保留利旧', t:'执行监控', chips:['生产反馈','领料与入库','异常预警'],
-       items:[['生产反馈','执行状态/实绩起止/实绩数量——事件闭环的触发源'],['领料与入库','领料扣减需求、完工增加供应'],['生产异常预警','未及时开始/完成自动报警，AI 在此之上做预测性预警'],['产线达成统计','计划 vs 实绩差异，喂给学习环']]}},
-
- {no:'S6', name:'复盘与学习', en:'REVIEW & LEARN',
-  h_asis:{txt:'报表手工整理、复盘滞后；排产经验沉淀在个人，新人上手慢。', tags:[['经验在脑中','red'],['复盘滞后','red']]},
-  h_tobe:{txt:'新人即问即会；每次人工调整都让系统更聪明。', tags:[['经验资产化','green'],['越用越准','green']]},
-  vTop_a:'经验口口相传', vTop_t:'↑ KPI 周报 · ↓ 调整被学习',
-  aiTitle:'经验学习闭环', aiIcon:'loop',
-  vBot_a:'↓ 手工汇总报表', vBot_t:'↑ 报表/达成数据 · ↓ 优化参数回写',
-  sys:{k:'展示层 · 保留利旧', t:'报表 · 计划可视化', chips:['产量效率 / 交付率','生产实时跟踪','甘特 / 负荷图'],
-       items:[['每日机台产量效率 · 生产效率分析','学习环的评估指标来源'],['订单准时交付率分析','智能排产成效的核心标尺'],['生产实时跟踪 · 实时库存','实时跟单的展示出口'],['资源/订单甘特图 · 负荷图','排程透明化的可视载体']]}}
-];
-
-/* ============ AI 实时效果小屏幕（HTML 模板） ============ */
-const AI_SCREENS = [
- /* S1 订单解析 */
- `<div class="scr">
-    <div class="scr-cap">💬 微信 · 台意业务群 <em id="w1-t">14:02</em></div>
-    <div class="wx-bub fx" id="w1-msg">李工：<b>急单！0.25mm 镀锡线 20 吨</b>，13 号要货，能不能做？</div>
-    <div class="parse-arrow fx" id="w1-arrow"><span class="sweep">⇣</span> AI 解析中 → 结构化订单</div>
-    <div id="w1-rows">
-      <div class="pr fx"><span>物品</span><b>0.25mm 镀锡铜线</b><span class="ok">✓</span></div>
-      <div class="pr fx"><span>数量</span><b>20 t</b><span class="ok">✓</span></div>
-      <div class="pr fx"><span>交期</span><b>6/13（急单）</b><span class="ok">✓</span></div>
-      <div class="pr fx"><span>齐套 / 产能</span><b>库存 18t + 在途 2t · L3 可产</b><span class="ok">✓</span></div>
-    </div>
-    <div class="vd fx" id="w1-vd">✅ 可接单 —— 预计 6/12 22:40 完工，交期余量 25h（用时 6 秒）</div>
-  </div>`,
- /* S2 齐套体检 */
- `<div class="scr">
-    <div class="scr-cap">📦 齐套体检 · MO-26061008 <em>实时</em></div>
-    <div class="kit-row fx"><div class="kit-l"><b>铜杆 Φ8mm</b><span class="pct" id="w2-p1">0%</span></div><div class="kb"><i id="w2-b1"></i></div></div>
-    <div class="kit-row fx"><div class="kit-l"><b>锡锭</b><span class="pct" id="w2-p2">0%</span></div><div class="kb"><i class="am" id="w2-b2"></i></div></div>
-    <div class="kit-row fx"><div class="kit-l"><b>拉丝模 D-025</b><span class="pct" id="w2-p3">0 副</span></div><div class="kb"><i id="w2-b3"></i></div></div>
-    <div class="alert-li fx" id="w2-alert">⚠ <span>锡锭短缺 <b>0.4t</b> → 已自动生成采购提醒 <b>PR-0610</b>，在途 6/11 09:00 到货</span></div>
-    <div class="vd fx" id="w2-vd">✓ 预计齐套 6/11 09:00 —— 已作为约束写入排产</div>
-  </div>`,
- /* S3 排产引擎 */
- `<div class="scr">
-    <div class="scr-cap">🧠 全厂排产 · 23 张工单 <em id="w3-mode">天级 · 手动</em></div>
-    <div class="mode-pill"><i id="w3-m1" class="cur">现状 · 天级</i><i id="w3-m2">AI · 小时级</i></div>
-    <div class="opt-status" id="w3-status"><span style="color:var(--ink3)">设备间隙大量空转，待优化…</span></div>
-    <div class="mtk" id="w3-t1"></div>
-    <div class="mtk" id="w3-t2"></div>
-    <div class="mtk" id="w3-t3"></div>
-    <div class="opt-kpis">
-      <div class="okpi" id="w3-k1"><b>2 张</b><span>预计延期</span></div>
-      <div class="okpi" id="w3-k2"><b>5 次</b><span>换型</span></div>
-      <div class="okpi" id="w3-k3"><b>71%</b><span>设备利用率</span></div>
-    </div>
-  </div>`,
- /* S4 守门下发 */
- `<div class="scr">
-    <div class="scr-cap">🛡 发布守门 · 版本 V0610-3 <em>审核中</em></div>
-    <div id="w4-checks">
-      <div class="ck fx"><span class="ic"></span><b>模具占用校验</b><span class="res"></span></div>
-      <div class="ck fx"><span class="ic"></span><b>规格禁排校验</b><span class="res"></span></div>
-      <div class="ck fx"><span class="ic"></span><b>日历 / 班次冲突</b><span class="res"></span></div>
-    </div>
-    <div class="send-line fx" id="w4-send"><span class="ic" style="width:13px;height:13px;border-radius:50%;border:2px solid var(--copper2);border-top-color:transparent;animation:spin .7s linear infinite;flex:none"></span><b id="w4-sendtxt">排程员已确认 → 下发 L3 产线终端…</b></div>
-    <div class="receipt fx" id="w4-rc">📩 <b>产线回执</b>：L3 已接收并确认开工序列（王班长 · 14:32）<br>📄 电子作业指导书已随单送达机台</div>
-    <div class="vd fx" id="w4-vd">✓ 全程留痕 · 微信群 0 条 —— 下发到回执仅 38 秒</div>
-  </div>`,
- /* S5 事件应急 */
- `<div class="scr">
-    <div class="scr-cap">⚡ 事件流 · 实时监听 <em>LIVE</em></div>
-    <div class="lg crit fx"><time>14:02</time><span>🔧 <b>L2 拉丝机故障</b>，预计停机 8h（来自设备反馈）</span></div>
-    <div class="lg fx"><time>14:02</time><span>⛓ 受影响工单 <b>3 张</b> 已锁定，开始增量重排</span></div>
-    <div class="lg win fx"><time>14:05</time><span>✅ <b>重排方案生成</b>：2 张转 L4（换型 1.5h），1 张原机延后</span></div>
-    <div class="lg fx"><time>14:06</time><span>📨 方案已推送排程员，附交期影响对比</span></div>
-    <div class="lg win fx"><time>14:12</time><span>🚀 审核通过 · <b>V0610-2 已发布</b>，延期订单 0 张</span></div>
-    <div class="elapsed fx" id="w5-el">故障 → 可执行方案：3 分钟（现状：约 1 天）</div>
-  </div>`,
- /* S6 经验学习 */
- `<div class="scr">
-    <div class="scr-cap">📚 经验学习 · 持续进行 <em>今日 +3 条</em></div>
-    <div class="learn-li fx"><span class="who2 h">排程员</span><span>把 MO-0609-12 从 L5 拖到 <b>L3</b>（手工微调）</span></div>
-    <div class="learn-li fx"><span class="who2 a">AI 归因</span><span>0.25mm 系列在 L3 换模可省 <b>1.5h</b>，且成材率高 0.8%</span></div>
-    <div class="rule-card fx" id="w6-rule"><b>✨ 新规则 #128 已入库</b>“0.25mm 镀锡线优先排 L3，除非负荷 &gt; 90%”——下次自动应用</div>
-    <div class="meter-l fx"><span>知识库规则数</span><b id="w6-n1">127 条</b></div>
-    <div class="kb fx"><i id="w6-b1" style="background:linear-gradient(90deg,#c4742e,#e09a55)"></i></div>
-    <div class="meter-l fx"><span>AI 方案一次采纳率</span><b id="w6-n2">78%</b></div>
-    <div class="kb fx"><i id="w6-b2"></i></div>
-  </div>`
-];
-
-/* ============ 渲染画布 ============ */
-const boardEl = document.getElementById('board-el');
-(function render(){
-  const rail = document.createElement('div');
-  rail.className='rail';
-  rail.innerHTML = `<div class="rl r-h">人 · 排程员/产线</div><div class="rl r-a">AI 排产智能体 · 实时效果</div><div class="rl r-s">现有生产系统</div>`;
-  boardEl.appendChild(rail);
-  STAGES.forEach((s,i)=>{
-    const col = document.createElement('div');
-    col.className='stage';
-    col.innerHTML = `
-      <div class="stage-head" ${s.core?'style="background:linear-gradient(125deg,#9c561b,#d98c3f)"':''}>
-        <span class="sno">${s.no}</span><h3>${s.name}</h3><p>${s.en}</p>
-      </div>
-      <div class="cell human">
-        <div class="h-asis"><h5>现状</h5><p class="desc">${s.h_asis.txt}</p>
-          <div class="tagrow">${s.h_asis.tags.map(t=>`<span class="tg ${t[1]}">${t[0]}</span>`).join('')}</div></div>
-        <div class="h-tobe"><h5>升级后</h5><p class="desc">${s.h_tobe.txt}</p>
-          <div class="tagrow">${s.h_tobe.tags.map(t=>`<span class="tg ${t[1]}">${t[0]}</span>`).join('')}</div></div>
-      </div>
-      <div class="vlink up"><span><i class="va2">${s.vTop_a}</i><i class="vt2">${s.vTop_t}</i></span></div>
-      <div class="cell ai" id="ai-${i}" onclick="openAI(${i})">
-        <div class="ai-head"><span class="aic">${AI_ICONS[s.aiIcon]}</span><b>${s.aiTitle}</b><span class="live">LIVE</span></div>
-        ${AI_SCREENS[i]}
-        <span class="foot">查看完整流程 ↗</span>
-      </div>
-      <div class="vlink"><span><i class="va2">${s.vBot_a}</i><i class="vt2">${s.vBot_t}</i></span></div>
-      <div class="cell sys" onclick="openSys(${i})">
-        <div class="sys-k">${s.sys.k}</div>
-        <h5>${s.sys.t}</h5>
-        <div class="tagrow">${s.sys.chips.map(c=>`<span class="tg blue">${c}</span>`).join('')}</div>
-        <span class="foot">数据依赖 →</span>
-      </div>`;
-    boardEl.appendChild(col);
-    if(i<STAGES.length-1){
-      const c=document.createElement('div');
-      c.className='hconn';
-      c.innerHTML=`<svg viewBox="0 0 50 22"><line class="dashflow" x1="2" y1="11" x2="38" y2="11"/><path d="M38 5 L47 11 L38 17" fill="none" stroke="var(--copper)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      boardEl.appendChild(c);
-    }
-  });
-})();
-
-/* ============ 小屏幕动画引擎 ============ */
-function seq(steps){ // steps: [[delay, fn], ...] 返回 {start, stop}
-  let timers=[], running=false;
-  function start(){
-    stop(); running=true;
-    let t=0;
-    steps.forEach(([d,fn])=>{ t+=d; timers.push(setTimeout(()=>{ if(running) fn(); }, t)); });
-  }
-  function stop(){ running=false; timers.forEach(clearTimeout); timers=[]; }
-  return {start, stop};
-}
-const $=id=>document.getElementById(id);
-const on=(...ids)=>ids.forEach(id=>{const e=$(id); if(e) e.classList.add('on');});
-const offAll=root=>root.querySelectorAll('.fx.on').forEach(e=>e.classList.remove('on'));
-function tick(el, from, to, suffix, dur=900){
-  const t0=performance.now();
-  (function f(t){
-    const k=Math.min((t-t0)/dur,1);
-    el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3)))+suffix;
-    if(k<1) requestAnimationFrame(f);
-  })(t0);
-}
-
-const WIDGETS=[];
-/* —— S1 订单解析 —— */
-WIDGETS.push((function(){
-  const cell=()=>$('ai-0');
-  function reset(){ offAll(cell()); }
-  const s=seq([
-    [300, ()=>on('w1-msg')],
-    [700, ()=>on('w1-arrow')],
-    [550, ()=>cell().querySelectorAll('#w1-rows .pr')[0].classList.add('on')],
-    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[1].classList.add('on')],
-    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[2].classList.add('on')],
-    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[3].classList.add('on')],
-    [600, ()=>on('w1-vd')],
-    [5200, ()=>{ reset(); s.start(); }]
-  ]);
-  return {start:s.start, stop:()=>{s.stop(); reset();}};
-})());
-/* —— S2 齐套 —— */
-WIDGETS.push((function(){
-  const cell=()=>$('ai-1');
-  function reset(){
-    offAll(cell());
-    $('w2-b1').style.width='0'; $('w2-b2').style.width='0'; $('w2-b3').style.width='0';
-    $('w2-p1').textContent='0%'; $('w2-p2').textContent='0%'; $('w2-p3').textContent='0 副';
-  }
-  const s=seq([
-    [300, ()=>{ cell().querySelectorAll('.kit-row')[0].classList.add('on'); $('w2-b1').style.width='100%'; tick($('w2-p1'),0,100,'%'); }],
-    [550, ()=>{ cell().querySelectorAll('.kit-row')[1].classList.add('on'); $('w2-b2').style.width='86%'; tick($('w2-p2'),0,86,'%'); }],
-    [550, ()=>{ cell().querySelectorAll('.kit-row')[2].classList.add('on'); $('w2-b3').style.width='100%'; $('w2-p3').textContent='2 副可用'; }],
-    [700, ()=>on('w2-alert')],
-    [900, ()=>on('w2-vd')],
-    [5200, ()=>{ reset(); s.start(); }]
-  ]);
-  return {start:s.start, stop:()=>{s.stop(); reset();}};
-})());
-/* —— S3 排产引擎（天级 → 小时级压缩） —— */
-WIDGETS.push((function(){
-  const BARS=[ /* track, beforeL, beforeW, afterL, afterW, urgent? */
-    [0,  2,15, 2,15],[0, 46,13, 19,13],
-    [1, 10,16, 2,16],[1, 60,14, 20,14],
-    [2, 24,11, 2,11],[2, 70,12, 15,12]
-  ];
-  let built=false, els=[], gap1, gap2, urg;
-  function build(){
-    if(built) return; built=true;
-    const tracks=[$('w3-t1'),$('w3-t2'),$('w3-t3')];
-    BARS.forEach(b=>{
-      const d=document.createElement('div'); d.className='mb';
-      d.style.left=b[1]+'%'; d.style.width=b[2]+'%';
-      tracks[b[0]].appendChild(d); els.push(d);
-    });
-    gap1=document.createElement('div'); gap1.className='gap-tag'; gap1.textContent='空转 9h'; gap1.style.left='28%'; tracks[1].appendChild(gap1);
-    gap2=document.createElement('div'); gap2.className='gap-tag'; gap2.textContent='空闲 11h'; gap2.style.left='40%'; tracks[2].appendChild(gap2);
-    urg=document.createElement('div'); urg.className='mb cu ghost'; urg.style.left='29%'; urg.style.width='9%'; urg.title='急单'; tracks[2].appendChild(urg);
-  }
-  function toBefore(){
-    els.forEach((d,i)=>{ d.style.left=BARS[i][1]+'%'; d.style.width=BARS[i][2]+'%'; });
-    gap1.style.opacity='1'; gap2.style.opacity='1'; urg.classList.add('ghost');
-    $('w3-m1').classList.add('cur'); $('w3-m2').classList.remove('cur');
-    $('w3-mode').textContent='天级 · 手动';
-    $('w3-status').innerHTML='<span style="color:var(--ink3)">设备间隙大量空转，待优化…</span>';
-    $('w3-k1').className='okpi'; $('w3-k2').className='okpi'; $('w3-k3').className='okpi';
-    $('w3-k1').querySelector('b').textContent='2 张';
-    $('w3-k2').querySelector('b').textContent='5 次';
-    $('w3-k3').querySelector('b').textContent='71%';
-  }
-  const s=seq([
-    [200, ()=>{ build(); toBefore(); }],
-    [1400, ()=>{ $('w3-status').innerHTML='<span class="spin"></span>AI 多目标寻优中 · 已评估 3,182 个方案…'; }],
-    [1500, ()=>{
-      els.forEach((d,i)=>{ d.style.left=BARS[i][3]+'%'; d.style.width=BARS[i][4]+'%'; });
-      gap1.style.opacity='0'; gap2.style.opacity='0';
-      $('w3-m2').classList.add('cur'); $('w3-m1').classList.remove('cur');
-      $('w3-mode').textContent='小时级 · AI';
-    }],
-    [800, ()=>{ urg.classList.remove('ghost'); $('w3-status').innerHTML='✅ 最优方案锁定（含 1 张急单）— 待排程员审核'; $('w3-status').style.color='var(--green)'; }],
-    [350, ()=>{
-      $('w3-k1').classList.add('good'); tickTxt($('w3-k1'),'0 张');
-      $('w3-k2').classList.add('good'); tickTxt($('w3-k2'),'2 次');
-      $('w3-k3').classList.add('good'); tick($('w3-k3').querySelector('b'),71,89,'%');
-    }],
-    [5200, ()=>{ $('w3-status').style.color=''; s.start(); }]
-  ]);
-  function tickTxt(kpi,txt){ kpi.querySelector('b').textContent=txt; }
-  return {start:s.start, stop:()=>{ s.stop(); if(built){ toBefore(); $('w3-status').style.color=''; } }};
-})());
-/* —— S4 守门下发 —— */
-WIDGETS.push((function(){
-  const cell=()=>$('ai-3');
-  function reset(){
-    offAll(cell());
-    cell().querySelectorAll('.ck').forEach(c=>{ c.classList.remove('done'); c.querySelector('.res').textContent=''; });
-    $('w4-sendtxt').textContent='排程员已确认 → 下发 L3 产线终端…';
-    const sp=$('w4-send').querySelector('.ic'); if(sp) sp.style.display='';
-  }
-  function check(i,res){
-    const c=cell().querySelectorAll('.ck')[i];
-    c.classList.add('on');
-    setTimeout(()=>{ c.classList.add('done'); c.querySelector('.res').textContent=res; }, 620);
-  }
-  const s=seq([
-    [300, ()=>check(0,'通过')],
-    [500, ()=>check(1,'通过')],
-    [500, ()=>check(2,'通过')],
-    [900, ()=>on('w4-send')],
-    [1100, ()=>{ $('w4-sendtxt').textContent='已下发 L3 产线终端 ✓'; const sp=$('w4-send').querySelector('.ic'); if(sp) sp.style.display='none'; on('w4-rc'); }],
-    [800, ()=>on('w4-vd')],
-    [5200, ()=>{ reset(); s.start(); }]
-  ]);
-  return {start:s.start, stop:()=>{s.stop(); reset();}};
-})());
-/* —— S5 事件应急 —— */
-WIDGETS.push((function(){
-  const cell=()=>$('ai-4');
-  function reset(){ offAll(cell()); }
-  const s=seq([
-    [300, ()=>cell().querySelectorAll('.lg')[0].classList.add('on')],
-    [750, ()=>cell().querySelectorAll('.lg')[1].classList.add('on')],
-    [900, ()=>cell().querySelectorAll('.lg')[2].classList.add('on')],
-    [700, ()=>cell().querySelectorAll('.lg')[3].classList.add('on')],
-    [800, ()=>cell().querySelectorAll('.lg')[4].classList.add('on')],
-    [600, ()=>on('w5-el')],
-    [5200, ()=>{ reset(); s.start(); }]
-  ]);
-  return {start:s.start, stop:()=>{s.stop(); reset();}};
-})());
-/* —— S6 学习 —— */
-WIDGETS.push((function(){
-  const cell=()=>$('ai-5');
-  function reset(){
-    offAll(cell());
-    $('w6-b1').style.width='0'; $('w6-b2').style.width='0';
-    $('w6-n1').textContent='127 条'; $('w6-n2').textContent='78%';
-  }
-  const s=seq([
-    [300, ()=>cell().querySelectorAll('.learn-li')[0].classList.add('on')],
-    [800, ()=>cell().querySelectorAll('.learn-li')[1].classList.add('on')],
-    [900, ()=>on('w6-rule')],
-    [700, ()=>{
-      cell().querySelectorAll('.meter-l')[0].classList.add('on');
-      cell().querySelectorAll('.kb')[0].classList.add('on');
-      $('w6-b1').style.width='86%';
-      setTimeout(()=>$('w6-n1').textContent='128 条',500);
-    }],
-    [600, ()=>{
-      cell().querySelectorAll('.meter-l')[1].classList.add('on');
-      cell().querySelectorAll('.kb')[1].classList.add('on');
-      $('w6-b2').style.width='91%'; tick($('w6-n2'),78,91,'%');
-    }],
-    [5200, ()=>{ reset(); s.start(); }]
-  ]);
-  return {start:s.start, stop:()=>{s.stop(); reset();}};
-})());
-
-/* ============ 模式切换 ============ */
-function setMode(m){
-  document.body.classList.remove('asis','tobe');
-  document.body.classList.add(m);
-  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
-  const cards=[...document.querySelectorAll('.cell.ai')];
-  if(m==='tobe'){
-    cards.forEach((c,i)=>{ c.classList.remove('lit'); setTimeout(()=>c.classList.add('lit'), 120+i*150); });
-    WIDGETS.forEach((w,i)=>setTimeout(()=>w.start(), 400+i*260));
-    toast('AI 排产智能体已上线——每个节点正在实时演示它产出的结果');
-  }else{
-    cards.forEach(c=>c.classList.remove('lit'));
-    WIDGETS.forEach(w=>w.stop());
-  }
-}
-function upgradeDemo(){
-  document.getElementById('board').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>setMode('tobe'), 600);
-}
-/* 首次滚动到画布自动升级，保证客户必看到实时效果 */
-let autoUp=false;
-const boardIO=new IntersectionObserver(es=>{
-  es.forEach(e=>{
-    if(e.isIntersecting && !autoUp){
-      autoUp=true;
-      setTimeout(()=>{ if(document.body.classList.contains('asis')) setMode('tobe'); }, 1100);
-      boardIO.disconnect();
-    }
-  });
-},{threshold:.25});
-boardIO.observe(document.querySelector('.canvas-card'));
-
-/* ============ 抽屉 ============ */
-const drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
-const AI_DETAIL=[
- {do:[['订单智能解析','微信 / Excel / 邮件中的订单描述，LLM 自动结构化为标准订单（物品·数量·交期·特殊约束），人工只确认不誊抄'],
-      ['交期可行性试算','基于现有系统的产能与库存数据做有限能力倒排，秒级回答“能不能接、最早何时交”'],
-      ['接单建议','结合客户优先级与当期负荷给出接单 / 议期建议，避免过量承诺']]},
- {do:[['库存实时感知','原料 / 在途 / 模具 / 在制品库存自动入流，替代排程员逐表查询'],
-      ['自动齐套计算','按交期与优先级自动分配供应，输出缺料清单与预计齐套时间'],
-      ['缺料预测与采购联动','提前 N 天预测缺口，自动生成采购提醒——把“排程员发起采购通知”自动化']]},
- {do:[['约束自动建模','器件型号×设备型号绑定、模具适配、换模损耗矩阵、节拍与日历全部数字化为求解约束'],
-      ['小时级多目标排产','最小化延期与换型、最大化利用率、控制在制品，15 分钟生成全厂小时级计划'],
-      ['What-if 沙盘','多方案并行仿真对比（如加班 vs 转线），代价看得见再拍板'],
-      ['可解释报告','每张工单回答“为什么排这台机、这个时段”，消除排程黑盒']]},
- {do:[['发布前冲突守门','全约束自动校验：模具占用、规格禁排、日历冲突逐项标红'],
-      ['一键发布 · 自动下发','审核通过即推送产线终端与电子作业指导书，电子回执确认接收——彻底替代微信群'],
-      ['版本管理与回滚','每版计划留痕可对比，误发布 10 秒回滚']]},
- {do:[['事件监听','急单 / 设备故障 / 实绩偏差三类事件实时触发，无需人来发现问题'],
-      ['增量重排','只重算受影响工单，5 分钟内输出多方案对比（含交期影响），排程员确认后生效'],
-      ['滚动校准','实绩偏差超阈值自动滚动重排，计划始终贴合现场']]},
- {do:[['专家经验入库','排程员每次手工调整的“原因与结果”被学习为规则，老师傅经验变成企业资产'],
-      ['参数自学习','换模耗时、节拍、成材率按实绩自动回归校准，越用越准'],
-      ['KPI 自动周报','交付率 / 利用率 / 换型损耗自然语言周报，复盘从月度变成实时']]}
-];
-function openAI(i){
-  location.href='stage.html#s'+(i+1);
-}
-function openSys(i){
-  const s=STAGES[i];
-  document.getElementById('dPhase').textContent=`${s.no} · ${s.name} — 现有生产系统（保留利旧）`;
-  document.getElementById('dTitle').textContent=s.sys.t;
-  document.getElementById('dMods').innerHTML=`<i>${s.sys.k}</i><i>仅打通接口 · 不改造业务</i>`;
-  document.getElementById('drawerHead').className='drawer-head sys';
-  let html=`<div class="grp"><div class="grp-t">该环节现有系统能力（AI 直接复用）</div>`;
-  s.sys.items.forEach(it=>{ html+=`<div class="f-item"><b>${it[0]}</b><p>${it[1]}</p></div>`; });
-  html+=`</div><div class="grp"><div class="grp-t cu">AI 在其上叠加什么</div>`;
-  AI_DETAIL[i].do.slice(0,2).forEach(d=>{ html+=`<div class="f-item gold"><b>${d[0]}</b><p>${d[1]}</p></div>`; });
-  html+=`</div>`;
-  document.getElementById('drawerBody').innerHTML=html;
-  drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden';
-}
-function closeDrawer(){
-  drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow='';
-}
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
-
-/* ============ 五大策略 ============ */
-const STRATS=[
- {t:'打通数据源', q:'规划原文：连接原料库存数据和订单数量及期限数据',
-  p:'订单、库存、模具、设备数据自动入流并校验，排程员告别逐表查询。', eat:['手动查表','缺料后知后觉']},
- {t:'沉淀绑定与换模矩阵', q:'规划原文：制定器件型号和设备型号的绑定关系，梳理切换模具的损耗时间',
-  p:'把老师傅脑中的“哪个件上哪台机、换模要多久”数字化为约束模型。', eat:['强专家经验']},
- {t:'小时级智能排产', q:'规划原文：精细化排程算法，具体至小时级，包括急单和设备故障的应急化排程方案，交由排程员审核后发布',
-  p:'多目标寻优生成小时级计划；急单与故障事件驱动增量重排；AI 建议、人来拍板。', eat:['天级空转','急单延期','不透明']},
- {t:'自动下发与验收', q:'规划原文：与下游产线的自动化下发通知和验收平台',
-  p:'审核通过自动推送产线终端，电子回执替代微信群，下发全程留痕。', eat:['微信群通知','无回执']},
- {t:'实时跟单与学习', q:'规划原文：实时跟进订单状态',
-  p:'实绩回流驱动滚动校准与经验学习，订单状态全程透明，越用越聪明。', eat:['复盘滞后','经验在脑中']}
-];
-const stEl=document.getElementById('strats');
-STRATS.forEach((s,i)=>{
-  const d=document.createElement('div');
-  d.className='strat';
-  d.innerHTML=`<div class="sno2">${i+1}</div><b>${s.t}</b><q>${s.q}</q><p>${s.p}</p>
-    <div class="eat">${s.eat.map(e=>`<span class="tg red">✂ ${e}</span>`).join('')}</div>`;
-  stEl.appendChild(d);
-});
-
-/* ============ Toast ============ */
-let toastTimer;
-function toast(txt){
-  const t=document.getElementById('toast');
-  document.getElementById('toastTxt').textContent=txt;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),3800);
-}
-
-/* ============ Copilot 对话 ============ */
-const chatBox=document.getElementById('chatBox');
-const SCENARIOS=[
- {user:'新增急单 SO-26061008：镀锡铜线 0.25mm × 20t，客户要求 6/13 交付，能不能接？',
-  steps:[['解析订单','copilot.parse(SO-26061008)'],['查现有系统库存：铜杆 / 锡 / 拉丝模','库存数据 → 18t 在库 + 2t 在途（6/11 到）'],['候选设备匹配（绑定关系）','基础数据 → L3 / L5 可产 0.25mm'],['有限产能仿真：插单 ×3 模式','排产引擎 → 多方案对比']],
-  text:'可以承接 ✅ 已完成三模式插单仿真，推荐方案 B（同规格之后插入 · 交期影响最小）：',
-  rich:`<div class="plans">
-    <div class="plan"><b>方案 A · 排到最前</b>L3 · 6/10 22:00 开工<em>影响 2 张工单 · 换型 +3.5h</em></div>
-    <div class="plan best"><b>方案 B · 同规格后插入</b>L3 · 6/11 14:00 开工<em>完工 6/12 22:40 · 余量 1 天</em></div>
-    <div class="plan"><b>方案 C · 排到最后</b>L5 · 6/12 09:00 开工<em>完工 6/13 19:00 · 踩线交付</em></div>
-   </div>
-   <div style="font-size:12px;color:var(--ink2)">方案 B 仅影响 MO-0605-12（顺延 6h，仍满足 6/15 交期）；全局延期订单 0 张。</div>
-   <div class="acts"><button class="mini-btn blue" onclick="adoptPlan()">采纳方案 B</button><button class="mini-btn ghost" onclick="linkGantt()">在甘特图中查看</button></div>`},
- {user:'L2 拉丝机刚报故障，预计停机 8 小时，怎么办？',
-  steps:[['接收设备事件','执行监控 → L2 DOWN 8h'],['锁定受影响工单','计划比对 → 3 张工单'],['增量重排（仅重算变更部分）','排产引擎 → 转线方案'],['交期风险评估与推送','风险 → 推送排程员审核']],
-  text:'已生成应急方案 🔧：2 张工单转移至 L4（换型损耗 1.5h），1 张原机延后等待复机。MO-0608-05 存在交期风险——建议夜班加开 1 个班次即可完全消除延期。已生成版本 V0610-2，等待您审核发布。',
-  rich:`<div class="acts"><button class="mini-btn blue" onclick="toast('已发布应急排程 V0610-2 · 自动下发 L4 产线并通知质检')">审核并发布</button><button class="mini-btn ghost" onclick="toast('已模拟加开夜班：MO-0608-05 提前 7.2h，延期风险清零')">模拟加开夜班</button></div>`},
- {user:'客户问 0.18mm 镀锡线 35t，最早什么时候能交付？',
-  steps:[['工艺路径展开','产品工艺 → 拉丝→退火→镀锡'],['齐套计算','库存数据 → 镀锡液 6/12 到货'],['有限能力倒排 + 顺排校验','排产引擎 → 最早完工测算'],['瓶颈分析','负荷扫描 → 镀锡工序 92%']],
-  text:'最早可交付时间为 6/16（周二）14:00，含 4 小时安全生产周期 📅。当前瓶颈在镀锡工序（负荷 92%）；如启用周日班次，可提前至 6/15 18:00。本测算已考虑齐套时间与换型损耗，可直接答复客户。',
-  rich:`<div class="acts"><button class="mini-btn blue" onclick="toast('已生成交期答复单并同步业务员（含测算依据，可解释）')">生成交期答复单</button></div>`}
-];
-let chatBusy=false;
-function addMsg(role, html, who){
-  const m=document.createElement('div');
-  m.className='msg '+role;
-  m.innerHTML=`<div class="who">${who||(role==='user'?'排程员':'排产智能体')}</div><div class="bub">${html}</div>`;
-  chatBox.appendChild(m);
-  chatBox.scrollTop=chatBox.scrollHeight;
-  return m;
-}
-function runScenarioMsg(userText, idx){
-  if(chatBusy) return; chatBusy=true;
-  document.querySelectorAll('.scen').forEach(b=>b.disabled=true);
-  const s=SCENARIOS[idx];
-  addMsg('user', userText);
-  setTimeout(()=>{
-    const bot=addMsg('bot', `<div class="steps">${s.steps.map(st=>`<div class="step"><span class="st-ic"></span>${st[0]}　<code>${st[1]}</code></div>`).join('')}</div><div class="ans"></div>`);
-    const steps=bot.querySelectorAll('.step');
-    steps.forEach((st,i)=>{
-      setTimeout(()=>{ st.classList.add('show'); chatBox.scrollTop=chatBox.scrollHeight; },300+i*620);
-      setTimeout(()=>{ st.classList.add('done'); },300+i*620+540);
-    });
-    setTimeout(()=>{
-      const ans=bot.querySelector('.ans');
-      typeText(ans, s.text, ()=>{
-        if(s.rich){ const r=document.createElement('div'); r.innerHTML=s.rich; ans.appendChild(r); chatBox.scrollTop=chatBox.scrollHeight; }
-        chatBusy=false; document.querySelectorAll('.scen').forEach(b=>b.disabled=false);
-      });
-    }, 300+steps.length*620+500);
-  },420);
-}
-function typeText(el, text, done){
-  const span=document.createElement('div');
-  span.style.cssText='font-size:13.5px;margin-top:8px';
-  el.appendChild(span);
-  let i=0;
-  (function tk(){
-    span.textContent=text.slice(0,++i);
-    chatBox.scrollTop=chatBox.scrollHeight;
-    if(i<text.length) setTimeout(tk, 14);
-    else done&&done();
-  })();
-}
-document.querySelectorAll('.scen').forEach(b=>b.onclick=()=>runScenarioMsg(SCENARIOS[+b.dataset.s].user, +b.dataset.s));
-function sendFree(){
-  if(chatBusy) return;
-  const inp=document.getElementById('chatInput');
-  const v=inp.value.trim(); if(!v) return;
-  inp.value='';
-  if(/急单|插单|能接|加单/.test(v)) { runScenarioMsg(v,0); return; }
-  if(/故障|停机|坏了|维修/.test(v)) { runScenarioMsg(v,1); return; }
-  if(/交期|什么时候|哪天|交付/.test(v)) { runScenarioMsg(v,2); return; }
-  addMsg('user', v);
-  chatBusy=true;
-  setTimeout(()=>{
-    const bot=addMsg('bot','');
-    typeText(bot.querySelector('.bub'),
-      '我是江铜排产智能体（演示环境），直连现有系统的订单、库存与产能数据。我可以评估急单、应对设备故障、测算最早交期，也能解释任何一张工单的排产理由。试试下方三个场景，或直接描述您的排产问题。',
-      ()=>{ chatBusy=false; });
-  },420);
-}
-document.getElementById('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter') sendFree(); });
-function adoptPlan(){
-  toast('已锁定方案 B 并生成排产版本 V0610-3 · 状态：待排程员审核发布');
-  setTimeout(()=>addMsg('bot','已按方案 B 锁定急单 SO-26061008，生成版本 V0610-3。该版本将在您（排程员）审核确认后，经现有系统的工单下发通道自动推送至 L3 产线，并回收电子验收回执。'),600);
-}
-function linkGantt(){
-  document.getElementById('demo').scrollIntoView({behavior:'smooth'});
-  setTimeout(()=>{ if(!urgentOn) toggleUrgent(); },650);
-}
-setTimeout(()=>{
-  addMsg('bot','您好，我是台意产线的排产智能体 👋 已接入现有系统：在排工单 23 张、齐套率 96%、设备综合负荷 78%。您可以直接提问，或点击下方场景快速体验。');
-},800);
-
-/* ============ 甘特沙盘 ============ */
-const GANTT=[
- {name:'L1 · 拉丝A', sub:'Φ8→0.25mm', bars:[{id:'MO-0603-12',l:5,w:18},{id:'MO-0604-15',l:26,w:20}]},
- {name:'L2 · 拉丝B', sub:'Φ8→0.25mm', bars:[{id:'MO-0602-09',l:2,w:25},{id:'MO-0606-21',l:30,w:22}]},
- {name:'L3 · 镀锡A', sub:'镀锡·复绕', bars:[{id:'MO-0601-07',l:4,w:16},{id:'MO-0605-12',l:22,w:18}]},
- {name:'L4 · 镀锡B', sub:'镀锡·复绕', bars:[{id:'MO-0605-18',l:10,w:30}]}
-];
-const ganttEl=document.getElementById('gantt');
-GANTT.forEach((row,ri)=>{
-  const r=document.createElement('div'); r.className='g-row';
-  r.innerHTML=`<div class="g-name">${row.name}<small>${row.sub}</small></div><div class="g-track" id="track-${ri}"></div>`;
-  ganttEl.appendChild(r);
-  row.bars.forEach((b,bi)=>{
-    const bar=document.createElement('div');
-    bar.className='g-bar'; bar.id=`bar-${ri}-${bi}`;
-    bar.style.left=b.l+'%'; bar.style.width=b.w+'%';
-    bar.textContent=b.id; bar.title=b.id;
-    r.querySelector('.g-track').appendChild(bar);
-  });
-});
-const track3=document.getElementById('track-2');
-const setupBar=document.createElement('div');
-setupBar.className='g-bar setup ghost'; setupBar.style.left='20.5%'; setupBar.style.width='1.8%'; setupBar.title='换模 2.0h';
-const urgentBar=document.createElement('div');
-urgentBar.className='g-bar urgent ghost'; urgentBar.style.left='22.6%'; urgentBar.style.width='14%';
-urgentBar.textContent='急单 SO-1008'; urgentBar.title='急单 SO-26061008 · 0.25mm × 20t';
-track3.appendChild(setupBar); track3.appendChild(urgentBar);
-
-let urgentOn=false;
-function toggleUrgent(){
-  const btn=document.getElementById('ganttBtn');
-  const mo=document.getElementById('bar-2-1');
-  const deltas=['d1','d2','d3','d4'].map(i=>document.getElementById(i));
-  if(!urgentOn){
-    setupBar.classList.remove('ghost'); urgentBar.classList.remove('ghost');
-    mo.style.left='38%';
-    btn.textContent='↺ 撤销插单';
-    deltas.forEach((d,i)=>setTimeout(()=>d.classList.add('show'),500+i*160));
-    toast('急单已按「交期影响最小」模式插入 L3 · 受影响工单 1 张 · 延期订单 0');
-    urgentOn=true;
-  }else{
-    setupBar.classList.add('ghost'); urgentBar.classList.add('ghost');
-    mo.style.left='22%';
-    btn.textContent='⚡ 模拟急单插入';
-    deltas.forEach(d=>d.classList.remove('show'));
-    toast('已撤销插单，恢复基准计划 V0610-1');
-    urgentOn=false;
-  }
-}
-
-/* ============ 价值对比 ============ */
-const CMP=[
- ['排产方式','排程员手动整理 Excel 表编排','AI 自动生成候选方案，排程员审核发布'],
- ['数据获取','人工查询订单系统、库存表','现有系统数据实时自动接入并校验'],
- ['排程颗粒度','天级（空闲与空转设备并存）','小时级（负荷均衡，消除空转）'],
- ['单次排程耗时','约 4 小时','约 15 分钟（目标）'],
- ['急单处理','电话协调、影响范围拍脑袋，可能延期','<5 分钟多方案评估，事件驱动自动重排'],
- ['通知下发','微信群发订单号与特殊约束，无回执','自动下发 + 电子作业指导书 + 验收回执'],
- ['订单跟进','口头反馈，状态滞后','实绩实时回流，全程透明跟单'],
- ['经验传承','强专家个人经验，人走经验丢','知识库沉淀，持续学习，新人即问即会']
-];
-const cb=document.getElementById('cmpBody');
-CMP.forEach(r=>{
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td class="dim">${r[0]}</td><td><span class="as">${r[1]}</span></td><td><span class="to">${r[2]}</span></td>`;
-  cb.appendChild(tr);
-});
-
-/* ============ 入场动画 ============ */
-const io=new IntersectionObserver(es=>{
-  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-},{threshold:.12});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-</script>
 </body>
 </html>
