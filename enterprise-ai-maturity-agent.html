@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业AI成熟度评估智能体 · AI Maturity Navigator</title>
+<meta name="description" content="覆盖各行业的企业AI成熟度评估智能体：引导式问答，生成含图表、对标行业基准的专业PDF评估报告。完全本地运行，零依赖。">
+<style>
+/* ============================================================
+   企业AI成熟度评估智能体 · AI Maturity Navigator
+   独立单文件应用 · 浅色主题 · 零外部依赖
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+:root{
+  --bg:#f4f6ff; --bg2:#fbf9ff;
+  --ink:#1d2240; --ink2:#555c7e; --ink3:#9aa1c2;
+  --brand:#5b5ce2; --brand2:#8b5cf6; --cyan:#06b6d4; --sky:#0ea5e9;
+  --grad:linear-gradient(120deg,#5b5ce2,#8b5cf6 48%,#06b6d4);
+  --card:#ffffff; --line:rgba(91,92,226,.14); --line2:rgba(91,92,226,.08);
+  --ok:#10b981; --warn:#f59e0b; --bad:#ef4444; --bench:#94a3b8;
+  --shadow:0 12px 44px -14px rgba(76,81,191,.20);
+  --shadow-s:0 4px 18px -6px rgba(76,81,191,.14);
+  --r:18px; --r-s:12px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Inter","HarmonyOS Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  color:var(--ink); background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 55%,#f3fbfd 100%);
+  min-height:100vh; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+#neuralBg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.mono{font-family:"JetBrains Mono","SF Mono",Consolas,"Courier New",monospace;letter-spacing:.08em}
+.muted{color:var(--ink2)} .faint{color:var(--ink3)}
+b,strong{font-weight:700}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font:inherit;color:inherit}
+
+/* ---------- 布局与通用 ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px;position:relative;z-index:2}
+.narrow{max-width:860px}
+.screen{display:none;animation:fadeUp .5s ease both;padding:34px 0 70px}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-s);padding:26px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:14px;padding:13px 26px;font-weight:600;font-size:15px;transition:all .22s ease;border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(99,102,241,.55)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px -10px rgba(99,102,241,.6);filter:saturate(1.1)}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--brand);box-shadow:var(--shadow-s)}
+.btn-ghost:hover{border-color:var(--brand);transform:translateY(-1px)}
+.btn-s{padding:9px 16px;font-size:13.5px;border-radius:11px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none!important}
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);background:#1d2240;color:#fff;padding:11px 22px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:99;box-shadow:0 14px 40px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%)}
+
+/* ---------- AI 智能体元素：能量球 / 对话气泡 ---------- */
+.orb{position:relative;border-radius:50%;flex:none;
+  background:conic-gradient(from 180deg,#5b5ce2,#8b5cf6,#06b6d4,#22d3ee,#5b5ce2);
+  animation:orbSpin 9s linear infinite;box-shadow:0 0 0 6px rgba(99,102,241,.08),0 14px 34px -10px rgba(99,102,241,.55)}
+.orb::before{content:'';position:absolute;inset:14%;border-radius:50%;background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.95),rgba(255,255,255,.25) 55%,rgba(255,255,255,.05))}
+.orb::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:1.5px dashed rgba(99,102,241,.35);animation:orbSpinR 14s linear infinite}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbSpinR{to{transform:rotate(-360deg)}}
+.orb-sm{width:46px;height:46px}
+.orb-xl{width:108px;height:108px}
+.orb-ring{position:absolute;inset:-26px;border-radius:50%;border:1px solid rgba(99,102,241,.25);animation:pulse 2.6s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.82);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+.agent-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+.agent-row.compact{margin-bottom:14px}
+.bubble{position:relative;background:#fff;border:1px solid var(--line);border-radius:4px 18px 18px 18px;padding:14px 18px;box-shadow:var(--shadow-s);font-size:15px;max-width:720px;white-space:pre-wrap}
+.bubble-s{font-size:13.5px;color:var(--ink2);padding:11px 16px}
+.bubble .caret{display:inline-block;width:8px;height:17px;background:var(--brand);margin-left:2px;vertical-align:-3px;animation:blink .8s steps(1) infinite;border-radius:2px}
+@keyframes blink{50%{opacity:0}}
+.agent-name{font-size:11px;color:var(--ink3);margin:4px 0 0 2px;text-align:center}
+
+/* ---------- 欢迎页 ---------- */
+.hero{text-align:center;padding-top:48px}
+.hero-orb{position:relative;width:108px;margin:0 auto 26px}
+.hero-tag{display:inline-block;font-size:11.5px;color:var(--brand);background:rgba(99,102,241,.09);border:1px solid rgba(99,102,241,.22);padding:6px 16px;border-radius:99px;margin-bottom:18px}
+.hero h1{font-size:46px;line-height:1.2;letter-spacing:.01em;font-weight:800}
+.hero-sub{max-width:640px;margin:18px auto 26px;color:var(--ink2);font-size:16px}
+.hero-dims{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:760px;margin:0 auto 22px}
+.dim-chip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:8px 16px;font-size:13.5px;font-weight:600;color:var(--ink2);box-shadow:var(--shadow-s)}
+.dim-chip i{font-style:normal}
+.hero-stats{font-size:13px;color:var(--ink3);letter-spacing:.12em;margin-bottom:30px}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.hero-note{margin-top:26px;font-size:12.5px;color:var(--ink3)}
+
+/* ---------- 企业画像表单 ---------- */
+.form-card{margin-top:4px}
+.field{margin-bottom:24px}
+.label{display:block;font-weight:700;font-size:14.5px;margin-bottom:10px}
+.label .req{color:var(--bad);font-style:normal}
+.label .muted{font-weight:400;font-size:12.5px}
+.input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;font-size:15px;background:#fcfcff;transition:border .2s}
+.input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{border:1.5px solid var(--line);background:#fcfcff;border-radius:99px;padding:8px 17px;font-size:13.5px;color:var(--ink2);transition:all .18s}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.sel{background:var(--grad);color:#fff;border-color:transparent;font-weight:600;box-shadow:0 6px 16px -6px rgba(99,102,241,.55)}
+.grid-ind{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.ind-card{display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--line);background:#fcfcff;border-radius:14px;padding:13px 6px;font-size:13px;color:var(--ink2);transition:all .18s}
+.ind-card i{font-style:normal;font-size:20px}
+.ind-card:hover{border-color:var(--brand);transform:translateY(-2px)}
+.ind-card.sel{border-color:var(--brand);background:linear-gradient(160deg,rgba(99,102,241,.10),rgba(6,182,212,.08));color:var(--brand);font-weight:700;box-shadow:0 8px 20px -8px rgba(99,102,241,.4)}
+.form-actions{display:flex;justify-content:space-between;margin-top:8px}
+
+/* ---------- 评估页 ---------- */
+.assess-top{margin-bottom:18px}
+.prog{height:8px;border-radius:99px;background:rgba(99,102,241,.12);overflow:hidden;position:relative}
+.prog-fill{height:100%;border-radius:99px;background:var(--grad);width:0%;transition:width .4s ease;position:relative;overflow:hidden}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:shimmer 1.8s linear infinite}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.prog-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink3);margin-top:7px}
+.assess-layout{display:grid;grid-template-columns:250px 1fr;gap:22px;align-items:start}
+.side{padding:18px;position:sticky;top:20px}
+.side-title{font-size:11px;color:var(--ink3);letter-spacing:.18em;margin-bottom:12px}
+.side-dim{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:11px;margin-bottom:4px;font-size:13.5px;color:var(--ink2);transition:background .2s}
+.side-dim i{font-style:normal;font-size:16px;flex:none}
+.side-dim .sd-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-dim .sd-st{font-size:11.5px;color:var(--ink3)}
+.side-dim.cur{background:linear-gradient(120deg,rgba(99,102,241,.12),rgba(6,182,212,.08));color:var(--ink);font-weight:700}
+.side-dim.done .sd-st{color:var(--ok);font-weight:700}
+.side-bar{height:4px;border-radius:99px;background:rgba(99,102,241,.12);margin:2px 10px 10px 36px;overflow:hidden}
+.side-bar>div{height:100%;border-radius:99px;background:var(--grad);transition:width .3s}
+.qcard{padding:28px 30px}
+.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:12.5px;color:var(--ink3)}
+.qdim{display:inline-flex;align-items:center;gap:6px;font-weight:700;padding:4px 12px;border-radius:99px;font-size:12.5px;border:1px solid}
+.qtitle{font-size:21px;line-height:1.45;margin-bottom:20px;font-weight:800}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:13px;align-items:flex-start;text-align:left;border:1.5px solid var(--line);border-radius:14px;padding:13px 16px;font-size:14.5px;color:var(--ink2);background:#fcfcff;transition:all .16s;line-height:1.55}
+.opt:hover{border-color:var(--brand);transform:translateX(4px);background:#fff}
+.opt .opt-lv{flex:none;font-size:11px;font-weight:700;color:var(--brand);background:rgba(99,102,241,.10);border-radius:8px;padding:3px 8px;margin-top:2px}
+.opt.sel{border-color:var(--brand);background:linear-gradient(120deg,rgba(99,102,241,.10),rgba(6,182,212,.07));color:var(--ink);font-weight:600;box-shadow:0 8px 22px -10px rgba(99,102,241,.45)}
+.opt.sel .opt-lv{background:var(--grad);color:#fff}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.key-hint{font-size:12px}
+.dim-intro{text-align:center;padding:42px 30px}
+.dim-intro-ic{font-size:44px;margin-bottom:10px}
+.dim-intro-kicker{font-size:11.5px;color:var(--brand);letter-spacing:.16em;margin-bottom:8px}
+.dim-intro h2{font-size:28px;margin-bottom:8px}
+.dim-intro .muted{max-width:480px;margin:0 auto}
+.dim-intro-meta{font-size:12.5px;color:var(--ink3);margin:16px 0 22px}
+
+/* ---------- 生成中 ---------- */
+.gen-wrap{text-align:center;padding-top:60px;max-width:560px}
+.gen-orb{position:relative;width:108px;margin:0 auto 30px}
+.gen-wrap h2{font-size:26px;margin-bottom:8px}
+.dots::after{content:'…';animation:dots 1.2s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+.gen-steps{margin-top:28px;text-align:left;padding:20px 24px}
+.gstep{display:flex;align-items:center;gap:12px;padding:9px 4px;font-size:14.5px;color:var(--ink3);transition:color .3s}
+.gstep .gs-ic{width:22px;height:22px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--line);color:transparent;transition:all .3s}
+.gstep.run{color:var(--ink);font-weight:600}
+.gstep.run .gs-ic{border-color:transparent;background:conic-gradient(var(--brand) 0 270deg,rgba(99,102,241,.15) 270deg 360deg);animation:orbSpin 1s linear infinite}
+.gstep.done{color:var(--ink2)}
+.gstep.done .gs-ic{background:var(--grad);border-color:transparent;color:#fff}
+
+/* ---------- 报告工具栏 ---------- */
+.toolbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);margin-bottom:14px}
+.toolbar-inner{display:flex;justify-content:space-between;align-items:center;padding-top:12px;padding-bottom:12px;max-width:1080px}
+.brand-mark{font-weight:800;font-size:13.5px;letter-spacing:.14em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.toolbar-btns{display:flex;gap:9px;flex-wrap:wrap}
+.print-hint{font-size:12.5px;color:var(--ink3);text-align:center;margin-bottom:18px}
+
+/* ---------- 报告页面 ---------- */
+#report{position:relative;z-index:2}
+.rp-page{width:210mm;max-width:100%;margin:0 auto 30px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:13mm 13mm 11mm;position:relative;overflow:hidden}
+.rp-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid transparent;border-image:linear-gradient(90deg,#5b5ce2,#8b5cf6,#06b6d4) 1;padding-bottom:10px;margin-bottom:18px}
+.rp-no{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:var(--grad);border-radius:7px;padding:2px 9px;letter-spacing:.1em;vertical-align:4px;margin-right:10px}
+.rp-h2{display:inline;font-size:21px;font-weight:800}
+.rp-en{display:block;font-size:10px;color:var(--ink3);letter-spacing:.22em;margin-top:4px}
+.brand-mini{font-size:9.5px;color:var(--ink3);letter-spacing:.16em}
+.rp-foot{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);border-top:1px solid var(--line2);padding-top:8px;margin-top:20px}
+.rp-sec{font-size:15px;font-weight:800;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.rp-sec::before{content:'';width:4px;height:16px;border-radius:4px;background:var(--grad)}
+.rp-p{font-size:13px;color:var(--ink2);text-align:justify;margin-bottom:10px}
+.note{font-size:11px;color:var(--ink3)}
+
+/* 封面 */
+.rp-cover{padding:0;display:flex}
+.cover-frame{flex:1;margin:8mm;border:1.5px solid rgba(99,102,241,.25);border-radius:12px;padding:14mm 13mm 10mm;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  background:linear-gradient(165deg,rgba(99,102,241,.05),rgba(255,255,255,0) 40%,rgba(6,182,212,.06)),
+  repeating-linear-gradient(0deg,rgba(99,102,241,.045) 0 1px,transparent 1px 34px),
+  repeating-linear-gradient(90deg,rgba(99,102,241,.045) 0 1px,transparent 1px 34px)}
+.cover-topline{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);letter-spacing:.14em}
+.cover-orb{margin:14mm auto 8mm;position:relative;width:108px}
+.cover-kicker{text-align:center;font-size:11px;letter-spacing:.34em;color:var(--brand);margin-bottom:12px;font-weight:600}
+.cover-title{text-align:center;font-size:46px;line-height:1.25;font-weight:900;letter-spacing:.04em}
+.cover-grad-bar{width:88px;height:5px;border-radius:99px;background:var(--grad);margin:22px auto}
+.cover-company{text-align:center;font-size:24px;font-weight:800}
+.cover-meta{text-align:center;font-size:12.5px;color:var(--ink2);margin-top:8px}
+.cover-score-card{margin:12mm auto 0;display:flex;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-s);background:#fff}
+.csc-cell{padding:16px 26px;text-align:center;border-right:1px solid var(--line2)}
+.csc-cell:last-child{border-right:none}
+.csc-cell .v{font-size:25px;font-weight:900;line-height:1.2}
+.csc-cell .v small{font-size:13px;font-weight:600;color:var(--ink3)}
+.csc-cell .k{font-size:10.5px;color:var(--ink3);letter-spacing:.1em;margin-top:3px}
+.lv-badge{display:inline-block;background:var(--grad);color:#fff;border-radius:99px;padding:5px 18px;font-weight:800;font-size:15px;box-shadow:0 8px 20px -8px rgba(99,102,241,.6)}
+.cover-foot{margin-top:auto;text-align:center;font-size:9.5px;color:var(--ink3);letter-spacing:.1em;padding-top:10mm}
+
+/* KPI 卡片 */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{border:1px solid var(--line);border-radius:13px;padding:12px 14px;background:linear-gradient(160deg,#fff,rgba(99,102,241,.04))}
+.kpi .v{font-size:21px;font-weight:900}
+.kpi .v small{font-size:11px;color:var(--ink3);font-weight:600}
+.kpi .k{font-size:11px;color:var(--ink3);margin-top:2px}
+
+/* 关键发现 */
+.findings{display:flex;flex-direction:column;gap:8px}
+.finding{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line2);border-radius:11px;padding:9px 13px;font-size:12.5px;color:var(--ink2);background:#fdfdff}
+.f-tag{flex:none;font-size:10.5px;font-weight:800;border-radius:7px;padding:2px 9px;margin-top:2px;letter-spacing:.06em}
+.f-tag.adv{background:#e5f8f0;color:#0f8a5f}.f-tag.gap{background:#fdeeee;color:#c43d3d}
+.f-tag.risk{background:#fff4e3;color:#b26a09}.f-tag.opp{background:#e9f0ff;color:#3f5ed7}
+
+/* 等级阶梯 */
+.ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:10px 0 4px}
+.lv-step{border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;font-size:11px;color:var(--ink3);position:relative;background:#fdfdff}
+.lv-step b{display:block;font-size:12.5px;color:var(--ink2)}
+.lv-step .lv-rg{font-size:9.5px}
+.lv-step.cur{border-color:transparent;background:var(--grad);color:rgba(255,255,255,.85);box-shadow:0 10px 24px -10px rgba(99,102,241,.6)}
+.lv-step.cur b{color:#fff}
+.lv-step.cur::after{content:'◆ 当前';position:absolute;top:-9px;right:8px;background:#1d2240;color:#fff;font-size:9px;padding:1px 8px;border-radius:99px}
+
+/* 图表容器 */
+.chart-block{border:1px solid var(--line2);border-radius:13px;padding:14px;background:#fdfdff;margin-bottom:12px}
+.chart-title{font-size:12.5px;font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--ink2)}
+.lg-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chart-svg{display:block;margin:0 auto;max-width:100%}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* 维度对标条形 */
+.cmp-row{display:grid;grid-template-columns:112px 1fr 86px;gap:10px;align-items:center;margin-bottom:9px;font-size:11.5px}
+.cmp-name{font-weight:700;color:var(--ink2);display:flex;gap:5px;align-items:center;white-space:nowrap}
+.cmp-track{position:relative;height:22px;background:rgba(99,102,241,.07);border-radius:7px;overflow:visible}
+.cmp-bar{position:absolute;left:0;top:3px;height:9px;border-radius:6px;background:var(--grad)}
+.cmp-bench{position:absolute;left:0;bottom:3px;height:5px;border-radius:6px;background:var(--bench)}
+.cmp-mark{position:absolute;top:-3px;bottom:-3px;width:1px;background:rgba(99,102,241,.18)}
+.cmp-vals{color:var(--ink2);white-space:nowrap;text-align:right}
+.delta{display:inline-block;font-size:10px;font-weight:800;border-radius:6px;padding:1px 7px;margin-left:4px}
+.delta.up{background:#e5f8f0;color:#0f8a5f}.delta.down{background:#fdeeee;color:#c43d3d}.delta.eq{background:#eef0f8;color:#6a7194}
+
+/* 维度详情卡 */
+.dim-card{border:1px solid var(--line);border-left:4px solid var(--dc,#5b5ce2);border-radius:13px;padding:15px 17px;margin-bottom:13px;background:#fff;break-inside:avoid}
+.dim-card-head{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+.dim-ic{font-size:23px}
+.dim-card-title h3{font-size:16.5px;font-weight:800}
+.dim-card-title .mono{font-size:9px;color:var(--ink3)}
+.dim-score-wrap{margin-left:auto;display:flex;align-items:center;gap:10px}
+.dim-score-txt{text-align:right;font-size:11px;color:var(--ink3)}
+.dim-score-txt b{font-size:21px;color:var(--ink)}
+.dim-analysis{font-size:12px;color:var(--ink2);text-align:justify;margin-bottom:10px}
+.dim-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;margin-bottom:10px}
+.qbar-row{display:grid;grid-template-columns:62px 1fr 26px;gap:8px;align-items:center;margin-bottom:6px;font-size:10.5px;color:var(--ink2)}
+.qbar{height:8px;border-radius:99px;background:rgba(99,102,241,.08);overflow:hidden}
+.qbar>div{height:100%;border-radius:99px}
+.qbar-val{font-weight:800;text-align:right}
+.sw-block{margin-bottom:8px}
+.sw-tag{display:inline-block;font-size:10px;font-weight:800;border-radius:6px;padding:2px 9px;margin-bottom:5px}
+.sw-tag.ok{background:#e5f8f0;color:#0f8a5f}.sw-tag.no{background:#fdeeee;color:#c43d3d}
+.sw-items{display:flex;flex-wrap:wrap;gap:5px}
+.sw-item{font-size:10.5px;border:1px solid var(--line2);border-radius:99px;padding:2px 10px;color:var(--ink2);background:#fdfdff}
+.dim-recs{border-top:1px dashed var(--line);padding-top:9px}
+.rec-title{font-size:12px;font-weight:800;color:var(--brand);margin-bottom:6px}
+.dim-recs ol{margin-left:18px}
+.dim-recs li{font-size:11.5px;color:var(--ink2);margin-bottom:4px;text-align:justify}
+
+/* 指标明细热力表 */
+.heat-table{width:100%;border-collapse:collapse;font-size:11px}
+.heat-table th{background:linear-gradient(120deg,rgba(99,102,241,.10),rgba(6,182,212,.08));color:var(--ink2);font-size:10.5px;letter-spacing:.06em;padding:7px 9px;text-align:left;border-bottom:1.5px solid var(--line)}
+.heat-table td{padding:5.5px 9px;border-bottom:1px solid var(--line2);color:var(--ink2);vertical-align:middle}
+.heat-table .ht-dim{font-weight:800;color:var(--ink);background:#fbfbff}
+.ht-score{display:inline-block;min-width:34px;text-align:center;font-weight:800;border-radius:7px;padding:1px 8px;font-size:10.5px}
+.hs1{background:#fdeaea;color:#b03030}.hs2{background:#fff1e2;color:#b26a09}.hs3{background:#fdf7dd;color:#937708}.hs4{background:#e7f8ef;color:#157f4f}.hs5{background:#e0f5f6;color:#0e7490}
+.ht-bar{height:7px;border-radius:99px;background:rgba(99,102,241,.08);overflow:hidden;min-width:70px}
+.ht-bar>div{height:100%;border-radius:99px;background:var(--grad)}
+
+/* 优先级矩阵 / 行动 */
+.quad-note{font-size:10.5px;color:var(--ink3);margin-top:4px}
+.prio-list{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+.prio{display:flex;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;background:#fdfdff;align-items:flex-start}
+.prio-rank{flex:none;width:30px;height:30px;border-radius:10px;background:var(--grad);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px}
+.prio h4{font-size:13px;font-weight:800;margin-bottom:2px}
+.prio p{font-size:11.5px;color:var(--ink2);text-align:justify}
+
+/* 路线图 */
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.road-col{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+.road-head{padding:10px 13px;color:#fff;font-weight:800;font-size:13px}
+.road-head small{display:block;font-weight:500;font-size:10px;opacity:.85;letter-spacing:.08em}
+.road-col:nth-child(1) .road-head{background:linear-gradient(120deg,#5b5ce2,#7c6cf0)}
+.road-col:nth-child(2) .road-head{background:linear-gradient(120deg,#8b5cf6,#a855f7)}
+.road-col:nth-child(3) .road-head{background:linear-gradient(120deg,#0891b2,#06b6d4)}
+.road-goal{font-size:10.5px;color:var(--ink3);padding:8px 13px;border-bottom:1px dashed var(--line2)}
+.road-items{padding:9px 13px 12px}
+.road-item{display:flex;gap:8px;font-size:11px;color:var(--ink2);padding:5px 0;border-bottom:1px dotted var(--line2);align-items:flex-start}
+.road-item:last-child{border-bottom:none}
+.road-item i{font-style:normal;flex:none}
+.road-item.hot{color:var(--ink);font-weight:600}
+.star{color:#f59e0b}
+
+/* 行业洞察 */
+.case-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.case-card{border:1px solid var(--line2);border-radius:11px;padding:9px 13px;font-size:11.5px;color:var(--ink2);background:linear-gradient(140deg,#fdfdff,rgba(6,182,212,.05));display:flex;gap:8px;align-items:center}
+.case-card i{font-style:normal}
+.bench-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+.bench-table th{font-size:10.5px;color:var(--ink3);text-align:left;padding:6px 9px;border-bottom:1.5px solid var(--line)}
+.bench-table td{padding:6px 9px;border-bottom:1px solid var(--line2);color:var(--ink2)}
+
+/* 方法论 */
+.meth-table{width:100%;border-collapse:collapse;font-size:11.5px;margin:6px 0 12px}
+.meth-table th{background:rgba(99,102,241,.07);font-size:10.5px;padding:6px 10px;text-align:left;color:var(--ink2);border-bottom:1.5px solid var(--line)}
+.meth-table td{padding:6px 10px;border-bottom:1px solid var(--line2);color:var(--ink2)}
+.lv-def{display:flex;gap:10px;margin-bottom:8px;font-size:11.5px;color:var(--ink2);align-items:flex-start}
+.lv-def .lv-pin{flex:none;font-weight:900;font-size:11px;color:#fff;background:var(--grad);border-radius:8px;padding:2px 9px;margin-top:2px}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:900px){
+  .assess-layout{grid-template-columns:1fr}
+  .side{position:static;display:none}
+  .grid-ind{grid-template-columns:repeat(3,1fr)}
+  .hero h1{font-size:32px}
+  .rp-page{padding:24px 18px;width:100%}
+  .kpis,.two-col,.road,.case-grid{grid-template-columns:1fr 1fr}
+  .dim-grid{grid-template-columns:1fr}
+  .ladder{grid-template-columns:repeat(2,1fr)}
+  .cover-title{font-size:34px}
+  .cover-score-card{flex-direction:column}
+  .csc-cell{border-right:none;border-bottom:1px solid var(--line2)}
+  .toolbar-inner{flex-direction:column;gap:8px;align-items:flex-start}
+}
+@media (max-width:560px){
+  .grid-ind{grid-template-columns:repeat(2,1fr)}
+  .kpis,.two-col,.road,.case-grid{grid-template-columns:1fr}
+}
+
+/* ---------- 打印 / PDF 导出 ---------- */
+@media print{
+  @page{size:A4;margin:10mm 9mm}
+  html,body{background:#fff !important}
+  #neuralBg,.toolbar,.print-hint,.no-print{display:none !important}
+  .screen{display:none !important;padding:0}
+  #screen-report{display:block !important;animation:none}
+  .wrap{max-width:none;padding:0}
+  .rp-page{width:auto;margin:0;border:none;border-radius:0;box-shadow:none;padding:2mm 1mm;page-break-after:always}
+  .rp-page:last-child{page-break-after:auto}
+  .rp-cover{display:flex;min-height:267mm}
+  .dim-card,.chart-block,.prio,.road-col,.finding{break-inside:avoid}
+  .heat-table tr{break-inside:avoid}
+  body{font-size:12px}
+}
+</style>
+</head>
+<body>
+<canvas id="neuralBg" aria-hidden="true"></canvas>
+<div id="toast" role="status"></div>
+
+<!-- ================= 欢迎页 ================= -->
+<section id="screen-welcome" class="screen active">
+  <div class="wrap hero">
+    <div class="hero-orb"><div class="orb orb-xl"></div><div class="orb-ring"></div></div>
+    <div class="hero-tag mono">AI AGENT · ENTERPRISE MATURITY ASSESSMENT</div>
+    <h1>企业 AI 成熟度评估<span class="grad-text">智能体</span></h1>
+    <p class="hero-sub">您好，我是您的 AI 成熟度评估顾问。通过约 <b>8 分钟</b>的引导式问答，我将从六大能力域对贵企业进行全面体检，对标行业基准，生成一份<b>详尽、专业、可导出 PDF</b> 的评估报告，并给出分阶段改进路线图。</p>
+    <div class="hero-dims" id="heroDims"></div>
+    <div class="hero-stats mono">6 大能力域 · 30 项核心指标 · 16 个行业基准 · 5 级成熟度模型</div>
+    <div class="hero-cta">
+      <button class="btn btn-primary" id="btnStart">开始评估 →</button>
+      <button class="btn btn-ghost" id="btnResume" style="display:none">↻ 继续上次评估</button>
+    </div>
+    <div class="hero-note">🔒 本工具完全在您的浏览器本地运行，作答数据不会上传至任何服务器</div>
+  </div>
+</section>
+
+<!-- ================= 企业画像 ================= -->
+<section id="screen-profile" class="screen">
+  <div class="wrap narrow">
+    <div class="agent-row">
+      <div><div class="orb orb-sm"></div><div class="agent-name">评估顾问</div></div>
+      <div class="bubble">开始之前，请告诉我一些贵企业的基本信息——我将据此匹配<b>行业基准</b>并定制分析建议。带 <span style="color:#ef4444">*</span> 为必填项。</div>
+    </div>
+    <div class="card form-card">
+      <div class="field">
+        <label class="label" for="inpCompany">企业名称 <span class="muted">（选填，将显示在报告封面）</span></label>
+        <input id="inpCompany" class="input" placeholder="例如：星河智造科技有限公司" maxlength="36">
+      </div>
+      <div class="field"><label class="label">所属行业 <i class="req">*</i></label><div class="grid-ind" id="gridIndustry"></div></div>
+      <div class="field"><label class="label">企业规模（员工数）<i class="req">*</i></label><div class="chips" id="chipsSize"></div></div>
+      <div class="field"><label class="label">年营收规模 <span class="muted">（选填）</span></label><div class="chips" id="chipsRevenue"></div></div>
+      <div class="field"><label class="label">您的角色 <span class="muted">（选填）</span></label><div class="chips" id="chipsRole"></div></div>
+      <div class="field"><label class="label">当前 AI 应用状态 <i class="req">*</i></label><div class="chips" id="chipsAdoption"></div></div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="btnBackWelcome">← 返回</button>
+        <button class="btn btn-primary" id="btnToAssess">进入评估 →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 评估问答 ================= -->
+<section id="screen-assess" class="screen">
+  <div class="wrap assess-top">
+    <div class="prog"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-meta"><span id="progText">已完成 0 / 30</span><span id="dimText"></span></div>
+  </div>
+  <div class="wrap assess-layout">
+    <aside class="side card" id="sideDims"></aside>
+    <main class="assess-main" id="assessMain"></main>
+  </div>
+</section>
+
+<!-- ================= 生成中 ================= -->
+<section id="screen-generating" class="screen">
+  <div class="wrap gen-wrap">
+    <div class="gen-orb"><div class="orb orb-xl"></div><div class="orb-ring"></div></div>
+    <h2>智能体正在生成评估报告<span class="dots"></span></h2>
+    <p class="muted">汇总 30 项指标 · 对标行业基准 · 撰写诊断与建议</p>
+    <div class="gen-steps card" id="genSteps"></div>
+  </div>
+</section>
+
+<!-- ================= 评估报告 ================= -->
+<section id="screen-report" class="screen">
+  <div class="toolbar no-print">
+    <div class="wrap toolbar-inner">
+      <span class="brand-mark mono">◆ AI MATURITY NAVIGATOR</span>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost btn-s" id="btnEdit">✎ 返回修改答案</button>
+        <button class="btn btn-ghost btn-s" id="btnRestart">↺ 重新评估</button>
+        <button class="btn btn-ghost btn-s" id="btnJson">⤓ 导出数据 (JSON)</button>
+        <button class="btn btn-primary btn-s" id="btnPdf">🖨 导出 PDF 报告</button>
+      </div>
+    </div>
+  </div>
+  <div class="wrap print-hint no-print">提示：点击「导出 PDF 报告」后，在打印对话框中选择「另存为 PDF」，并开启「背景图形」选项以保留完整配色与图表。</div>
+  <div id="report"></div>
+</section>
+
+<script>
+'use strict';
+/* ==================== 评估模型数据 ==================== */
+
+const DIMS = [
+  {id:'strat',  name:'战略与领导力',   en:'STRATEGY & LEADERSHIP', icon:'🎯', weight:0.20, color:'#5b5ce2', desc:'AI 愿景与战略、高层承诺、资源投入、路线图与创新文化'},
+  {id:'data',   name:'数据基础与治理', en:'DATA FOUNDATION',       icon:'🗄️', weight:0.18, color:'#8b5cf6', desc:'数据资产盘点、质量、平台架构、治理体系与数据安全'},
+  {id:'tech',   name:'技术与平台',     en:'TECHNOLOGY & PLATFORM', icon:'⚙️', weight:0.16, color:'#0ea5e9', desc:'算力设施、模型能力、工程化（MLOps/LLMOps）与系统集成'},
+  {id:'talent', name:'人才与组织',     en:'TALENT & ORGANIZATION', icon:'🧠', weight:0.16, color:'#06b6d4', desc:'专业人才梯队、全员 AI 素养、组织机制与外部生态'},
+  {id:'app',    name:'场景应用与价值', en:'USE CASES & VALUE',     icon:'🚀', weight:0.18, color:'#10b981', desc:'场景识别、落地广度、价值度量、用户采纳与规模化复制'},
+  {id:'gov',    name:'安全合规与伦理', en:'GOVERNANCE & ETHICS',   icon:'🛡️', weight:0.12, color:'#f97316', desc:'AI 风险框架、模型质量管控、法规遵从、伦理与持续监控'}
+];
+
+const LEVELS = [
+  {id:'L1', name:'初始探索级', min:1.0, max:1.8,
+   desc:'对 AI 的认知停留在概念层面，缺乏系统性投入与组织安排，仅有零散的个人化尝试。',
+   traits:'无战略共识 · 无专职团队 · 无落地场景 · 数据沉睡'},
+  {id:'L2', name:'主动试点级', min:1.8, max:2.6,
+   desc:'开始有组织地开展 AI 试点，但点状分散、基础能力薄弱，价值尚未得到充分验证。',
+   traits:'局部试点 · 项目制投入 · 能力点状分布 · 治理滞后'},
+  {id:'L3', name:'系统推进级', min:2.6, max:3.4,
+   desc:'建立了基础的战略、平台与团队体系，多场景应用初具规模，价值开始显现并可部分度量。',
+   traits:'专项战略 · 平台初成 · 多点开花 · 度量起步'},
+  {id:'L4', name:'规模运营级', min:3.4, max:4.2,
+   desc:'AI 深度融入核心业务流程，平台化复用与价值量化管理成熟，具备规模化运营能力。',
+   traits:'战略融合 · 中台复用 · 价值闭环 · 治理体系化'},
+  {id:'L5', name:'卓越引领级', min:4.2, max:5.01,
+   desc:'AI 驱动商业模式创新与流程原生重构，能力对外输出，引领行业标准与生态建设。',
+   traits:'AI 原生 · 生态引领 · 标准输出 · 持续进化'}
+];
+
+const QUESTIONS = [
+  /* ---- 战略与领导力 ---- */
+  {id:'S1', dim:'strat', short:'战略规划', title:'贵企业是否制定了清晰的 AI 战略与愿景？',
+   detail:'本题考察 AI 战略的明确性、书面化程度，及其与业务战略的融合深度。',
+   opts:['尚未讨论 AI 相关议题，缺乏基本共识','有零散讨论与意向，但未形成书面战略','已制定 AI 专项规划，但与业务战略衔接有限','AI 战略与业务战略深度融合，目标清晰可量化','AI 是核心战略支柱，战略动态迭代并引领行业方向']},
+  {id:'S2', dim:'strat', short:'高层投入', title:'管理层对 AI 转型的参与和支持程度如何？',
+   detail:'本题考察高层的重视程度——一把手工程往往是 AI 转型成败的分水岭。',
+   opts:['管理层基本不关注 AI 相关工作','个别高管表示关注，但缺乏实质性投入','设有分管高管，定期听取 AI 进展汇报','一把手亲自挂帅，AI 议题进入董事会/经营会','高层深度参与场景共创，并对外代言 AI 战略']},
+  {id:'S3', dim:'strat', short:'预算资源', title:'企业为 AI 建设投入的预算与资源保障情况？',
+   detail:'本题考察投入的稳定性与充足性，包括预算、算力、外部服务等资源。',
+   opts:['没有任何 AI 相关预算','临时性、项目制的零散投入','设有年度 AI 专项预算，但规模有限','预算稳定增长，建立专项基金或资源池','投入强度对标行业标杆，并有长期资本规划']},
+  {id:'S4', dim:'strat', short:'路线图', title:'是否有清晰的 AI 实施路线图与里程碑管理？',
+   detail:'本题考察从战略到执行的落地机制：计划、责任人、跟踪与复盘。',
+   opts:['没有任何实施计划','有粗略设想，缺少时间表和责任人','有年度计划与责任分工，但执行跟踪较弱','路线图分阶段滚动管理，里程碑定期复盘','路线图与 OKR/绩效深度联动，动态校准方向']},
+  {id:'S5', dim:'strat', short:'创新文化', title:'组织的创新文化与拥抱变革的氛围如何？',
+   detail:'本题考察组织对新技术的开放度、容错机制与变革管理能力。',
+   opts:['对新技术普遍持观望或抵触态度','少数团队愿意尝试，但缺乏组织层面的鼓励','公司倡导创新，偶有 AI 创新活动（如黑客松）','建立容错与激励机制，跨部门创新成为常态','创新文化深入人心，全员主动探索 AI 应用']},
+
+  /* ---- 数据基础与治理 ---- */
+  {id:'D1', dim:'data', short:'资产盘点', title:'企业数据资产的盘点与管理情况如何？',
+   detail:'本题考察是否“家底清晰”：数据分布、归属与可用性是否有全局视图。',
+   opts:['数据分散沉睡，从未系统性盘点','部分系统有数据积累，但缺乏全局视图','完成主要业务域盘点，建立初步数据目录','数据资产目录完善，关键数据可快速检索调用','数据资产化运营，纳入价值评估并持续增值']},
+  {id:'D2', dim:'data', short:'数据质量', title:'核心业务数据的质量水平如何？',
+   detail:'本题考察数据的完整性、准确性与一致性——这直接决定模型效果上限。',
+   opts:['数据缺失、错误普遍，难以支撑分析','质量问题较多，依赖人工清洗修补','建立基础质量规则，关键指标口径基本统一','全流程质量监控，问题自动告警、闭环整改','数据质量行业领先，“一数一源”全面落地']},
+  {id:'D3', dim:'data', short:'数据平台', title:'数据平台与架构的建设水平如何？',
+   detail:'本题考察数据的集中、打通与服务化能力，包括对 AI 训练/推理的支撑。',
+   opts:['没有统一数据平台，数据散落在各业务系统','建有数据库/报表系统，但集成度低','建成数据仓库或数据湖，可支撑常规分析','湖仓一体并具备实时能力，支撑 AI 训练与推理','智能数据平台，Data×AI 深度融合（向量库、特征平台等）']},
+  {id:'D4', dim:'data', short:'治理体系', title:'数据治理的组织与制度建设情况？',
+   detail:'本题考察数据标准、责任体系与治理流程是否落到实处。',
+   opts:['没有任何数据治理职能','由 IT 部门兼管，缺乏标准与流程','设立数据治理岗位或委员会，发布基础标准','治理体系覆盖全域，数据 Owner 权责清晰','治理融入业务流程，数据文化成为组织共识']},
+  {id:'D5', dim:'data', short:'安全合规', title:'数据安全与隐私保护能力如何？',
+   detail:'本题考察数据分级分类、权限管控与隐私合规（如个保法）落实情况。',
+   opts:['缺乏基本的数据安全防护措施','有基础防护（权限、备份），但未体系化','落实分级分类管理，满足主要合规要求','全生命周期安全管控，定期审计与攻防演练','应用隐私计算等前沿技术，安全能力可对外输出']},
+
+  /* ---- 技术与平台 ---- */
+  {id:'T1', dim:'tech', short:'算力设施', title:'支撑 AI 的算力与基础设施情况如何？',
+   detail:'本题考察算力资源（云/本地 GPU 等）的可得性、弹性与成本管理。',
+   opts:['没有任何 AI 算力资源储备','零散采购云资源或少量服务器','具备稳定算力供给，可支撑常规训练与推理','弹性算力调度体系，GPU 资源池化管理','算力布局前瞻（异构/智算），成本效率行业领先']},
+  {id:'T2', dim:'tech', short:'模型能力', title:'获取与应用 AI 模型能力的方式与深度？',
+   detail:'本题考察从调用 API 到微调、私有化部署、自研模型的能力纵深。',
+   opts:['尚未使用任何 AI 模型能力','试用过公开 AI 产品或 API，未进入业务','通过 API/开源模型在个别业务中应用','具备微调与私有化部署能力，多模型协同','自研或深度定制行业模型，形成技术壁垒']},
+  {id:'T3', dim:'tech', short:'工程化', title:'AI 工程化（MLOps / LLMOps）能力如何？',
+   detail:'本题考察模型从实验到生产的工程体系：部署、监控、评估、迭代。',
+   opts:['没有工程化概念，模型停留在实验阶段','手工部署个别模型，缺乏监控与版本管理','建立基本的模型上线与监控流程','CI/CD 全流程自动化，模型性能持续评估迭代','平台化 LLMOps/MLOps，支撑大规模模型资产运营']},
+  {id:'T4', dim:'tech', short:'系统集成', title:'AI 能力与现有业务系统的集成程度？',
+   detail:'本题考察 AI 是否真正“长进”业务系统，而非游离在外的工具。',
+   opts:['AI 与业务系统完全割裂','个别点状对接，依赖人工搬运数据','通过 API 实现主要系统对接','统一 AI 中台/网关，能力即服务、跨场景复用','AI 原生架构，智能体与业务流深度编织']},
+  {id:'T5', dim:'tech', short:'技术雷达', title:'技术选型与前沿跟踪机制如何？',
+   detail:'本题考察对快速演进的 AI 技术栈的评估、验证与引入机制。',
+   opts:['不了解 AI 技术发展动态','被动接收厂商信息，没有评估机制','定期跟踪主流技术，有基本选型流程','建立技术雷达与 POC 评估体系，快速验证新技术','参与开源共建或标准制定，技术影响力外溢']},
+
+  /* ---- 人才与组织 ---- */
+  {id:'P1', dim:'talent', short:'专业人才', title:'AI 专业人才（算法、数据、工程）的储备情况？',
+   detail:'本题考察专职 AI 人才的数量、结构与梯队厚度。',
+   opts:['没有任何 AI 相关专业人员','个别员工自学兼任，无专职人员','组建小型 AI 团队，覆盖核心技能','人才梯队完善，关键岗位有冗余与传承','拥有行业知名专家，人才吸引力强']},
+  {id:'P2', dim:'talent', short:'全员素养', title:'业务人员的 AI 素养与工具使用水平如何？',
+   detail:'本题考察非技术员工对 AI 的理解与日常使用渗透率。',
+   opts:['绝大多数员工不了解 AI','少数员工自发使用 AI 工具','开展过普及培训，部分岗位使用 AI 工具','分层分岗培训体系，AI 工具使用率过半','全员 AI 工作方式，人机协同成为日常']},
+  {id:'P3', dim:'talent', short:'组织设置', title:'AI 相关的组织设置与跨部门协作机制？',
+   detail:'本题考察是否有承载 AI 能力建设的组织形态（如卓越中心 CoE）。',
+   opts:['没有任何 AI 相关组织安排','临时项目组形式，随项目聚散','设立专职 AI 团队或卓越中心（CoE）雏形','CoE + 业务 BP 双轮驱动，跨部门协作顺畅','平台型组织，AI 能力嵌入每个业务单元']},
+  {id:'P4', dim:'talent', short:'激励发展', title:'AI 人才的激励与职业发展机制如何？',
+   detail:'本题考察对稀缺 AI 人才的吸引、保留与发展能力。',
+   opts:['无针对性激励，AI 人才流失明显','沿用通用薪酬体系，市场竞争力不足','提供有竞争力的薪酬，初设技术晋升通道','多元激励与双通道发展体系完善','行业标杆级雇主品牌，人才持续净流入']},
+  {id:'P5', dim:'talent', short:'外部生态', title:'与外部 AI 生态（厂商、高校、社区）的合作情况？',
+   detail:'本题考察借助外部生态弥补能力缺口、加速创新的程度。',
+   opts:['没有任何外部 AI 合作','偶发性采购或咨询合作','与厂商/高校建立稳定合作关系','多元生态布局（联合实验室、产学研、创投）','主导生态构建，成为合作网络的核心节点']},
+
+  /* ---- 场景应用与价值 ---- */
+  {id:'A1', dim:'app', short:'场景识别', title:'AI 应用场景的识别与优先级管理机制？',
+   detail:'本题考察是否系统性地发现、评估与排序 AI 机会点。',
+   opts:['不清楚 AI 能在哪些环节发挥价值','有想法但未系统梳理，凭感觉选择','完成核心业务场景盘点，形成场景清单','建立价值-可行性评估模型，场景组合滚动迭代','场景体系与战略联动，前瞻布局颠覆性场景']},
+  {id:'A2', dim:'app', short:'落地广度', title:'AI 应用在组织内的落地覆盖范围？',
+   detail:'本题考察应用从单点试点到全价值链覆盖的广度。',
+   opts:['没有任何 AI 应用落地','个别部门的零星试点','多个部门开展应用，部分场景稳定运行','核心价值链全面应用，跨部门协同场景涌现','全业务链 AI 化，并向产业链上下游延伸']},
+  {id:'A3', dim:'app', short:'价值度量', title:'AI 项目的价值评估与 ROI 管理情况？',
+   detail:'本题考察能否量化回答“AI 到底带来了多少价值”。',
+   opts:['从未评估 AI 的投入产出','只有定性感受，缺乏量化数据','对主要项目进行效果评估（效率、成本等）','统一价值度量体系，ROI 定期向管理层报告','AI 价值计入经营指标，驱动资源动态配置']},
+  {id:'A4', dim:'app', short:'用户采纳', title:'员工与客户对 AI 应用的接受与使用情况？',
+   detail:'本题考察 AI 应用的真实活跃度与用户口碑——上线不等于被使用。',
+   opts:['AI 应用无人使用或遭遇强烈抵触','使用率低，多数人持观望态度','核心用户群体稳定使用，反馈机制初步建立','高活跃度，用户主动提出改进与新需求','AI 成为离不开的工作/服务方式，口碑优秀']},
+  {id:'A5', dim:'app', short:'规模复制', title:'成功 AI 应用的规模化复制能力如何？',
+   detail:'本题考察从“试点盆景”到“规模风景”的复制推广机制。',
+   opts:['没有成功案例可复制','试点成功但难以推广，呈孤岛化','形成可复用的方案模板，开始跨部门推广','标准化复制机制（平台+方法论），推广周期短','对外输出产品/解决方案，创造第二增长曲线']},
+
+  /* ---- 安全合规与伦理 ---- */
+  {id:'G1', dim:'gov', short:'风险框架', title:'AI 风险管理框架的建立情况如何？',
+   detail:'本题考察对 AI 特有风险（幻觉、泄密、滥用等）的识别与管理体系。',
+   opts:['尚未意识到 AI 相关风险','意识到风险，但没有管理措施','识别主要风险，建立基础管控清单','体系化 AI 风险框架，融入企业风控体系','风险管理前瞻主动，参与行业标准制定']},
+  {id:'G2', dim:'gov', short:'模型质量', title:'对模型输出质量与安全的评估管控机制？',
+   detail:'本题考察对模型准确性、幻觉、偏见等问题的测试与持续监控。',
+   opts:['从不评估模型输出质量','依赖使用者自行判断，无统一机制','上线前进行基本测试（准确性、幻觉等）','建立评测基准与红队机制，持续监控退化与偏见','评测能力行业领先，自动化护栏全面部署']},
+  {id:'G3', dim:'gov', short:'合规遵从', title:'对 AI 相关法规监管要求的遵从情况？',
+   detail:'本题考察对《生成式人工智能服务管理暂行办法》、欧盟 AI 法案等法规的应对。',
+   opts:['不了解 AI 相关法规要求','大致了解，但未采取实际行动','完成主要合规要求的梳理与基本整改','合规融入 AI 项目全流程（评估-备案-审计）','合规能力成为竞争优势，深度参与监管沟通']},
+  {id:'G4', dim:'gov', short:'伦理透明', title:'AI 伦理审查与透明度机制的建设情况？',
+   detail:'本题考察负责任 AI 实践：使用准则、伦理审查、可解释与可追溯。',
+   opts:['从未考虑 AI 伦理问题','有零散讨论，无正式机制','发布 AI 使用准则，明确禁用场景','设立伦理审查机制，重要应用可解释、可追溯','负责任 AI 体系成熟，对外发布透明度报告']},
+  {id:'G5', dim:'gov', short:'应急监控', title:'AI 系统的持续监控与应急响应能力？',
+   detail:'本题考察 AI 系统运行期的监控告警、人工兜底与故障处置能力。',
+   opts:['AI 系统处于无人监管状态','出现问题被动响应，没有预案','关键系统有监控告警与人工兜底','完善的应急预案与演练，故障可快速回滚','智能化运维监控，以风险预测预防为主']}
+];
+
+const INDUSTRIES = [
+  {id:'internet', name:'互联网/软件', icon:'💻', bench:[3.8,3.7,3.9,3.6,3.7,3.2],
+   insight:'互联网与软件行业整体 AI 成熟度最高，竞争焦点已从“是否用 AI”转向“AI 原生产品与工程效率”。研发提效（编程助手）几乎成为标配，头部企业正以产品迭代速度放大与跟随者的差距；同时算法备案、内容安全等监管要求也在快速收紧。',
+   cases:['智能编程与研发提效','AIGC 内容生产','智能客服与增长营销','搜索推荐优化','AI 原生产品创新']},
+  {id:'finance', name:'金融', icon:'🏦', bench:[3.6,3.6,3.4,3.2,3.3,3.7],
+   insight:'金融业在严监管环境下走“合规先行”路线，风控、投研、客服是 AI 主战场。行业数据基础好、投入强度大，但模型可解释性、算法审计与数据出域限制是规模化的主要门槛，大模型应用多从员工助手与知识中台切入。',
+   cases:['智能风控与反欺诈','智能投研/投顾','客服与营销智能化','合规审查自动化','信贷审批辅助']},
+  {id:'manufacturing', name:'制造业', icon:'🏭', bench:[2.9,2.7,2.8,2.5,2.9,2.6],
+   insight:'制造业 AI 价值集中在质检、预测性维护、排产优化等 OT 场景，设备数据采集与 IT/OT 打通是普遍瓶颈。“灯塔工厂”与长尾企业差距显著；建议从单条产线的可量化场景切入，逐步沉淀工业数据底座与复制方法论。',
+   cases:['视觉质检','预测性维护','智能排产（APS）','工艺参数优化','设备知识库助手']},
+  {id:'retail', name:'零售/电商', icon:'🛒', bench:[3.2,3.1,3.0,2.8,3.3,2.7],
+   insight:'零售电商围绕“人货场”数字化重构，AIGC 营销内容与供应链需求预测回报最快、见效最直观。会员数据治理与隐私合规是关键约束；全渠道数据打通程度决定了个性化能力的上限。',
+   cases:['个性化推荐','AIGC 营销内容','智能选品与定价','需求预测与补货','数字人导购']},
+  {id:'healthcare', name:'医疗健康', icon:'🏥', bench:[2.9,2.8,2.7,2.6,2.8,3.1],
+   insight:'医疗行业中影像辅助诊断、病历质控等场景落地最快，但数据隐私、伦理审查与医疗器械审批门槛高，需要“临床价值 + 合规安全”双轮驱动。医院信息系统碎片化使数据治理成为先决条件。',
+   cases:['影像辅助诊断','电子病历质控与生成','智能导诊分诊','药物研发辅助','医保控费风控']},
+  {id:'energy', name:'能源/电力', icon:'⚡', bench:[2.8,2.9,2.8,2.5,2.7,2.9],
+   insight:'能源电力行业的负荷预测、无人巡检与安全生产是高价值场景，行业数据体量大但标准化程度参差。在央国企背景下，自主可控、数据安全与稳定可靠是技术选型的硬约束，AI 建设多与数字化转型专项统筹推进。',
+   cases:['负荷/出力预测','无人巡检与缺陷识别','设备故障预警','能耗优化','安全作业监控']},
+  {id:'education', name:'教育/培训', icon:'🎓', bench:[2.7,2.4,2.5,2.6,2.8,2.5],
+   insight:'教育行业在个性化学习与教研提效上空间巨大，生成式 AI 大幅降低了内容生产门槛。但需平衡教育公平、未成年人保护与学术诚信等伦理议题，面向师生的 AI 素养建设本身就是核心场景之一。',
+   cases:['智能批改与学情分析','个性化学习路径','AI 助教答疑','教研内容生成','招生服务智能化']},
+  {id:'government', name:'政务/公共服务', icon:'🏛️', bench:[2.6,2.5,2.4,2.3,2.5,3.0],
+   insight:'政务领域以“一网通办”与城市治理为主线，公文写作、政务问答等场景正在快速普及。国产化适配与数据安全是硬约束，成熟度建设强调“规范先行、试点验证、有序推广”，治理维度的要求显著高于平均水平。',
+   cases:['智能政务问答','公文辅助写作','城市治理感知分析','热线工单智能分派','监管风险筛查']},
+  {id:'logistics', name:'交通/物流', icon:'🚚', bench:[3.0,3.0,2.9,2.6,3.1,2.6],
+   insight:'物流行业的路径优化、仓储自动化与单证处理自动化回报明确，运筹优化与 AI 结合成熟。旺季弹性算力与全链路实时数据是技术挑战；头部企业已开始将 AI 能力对外输出为供应链服务。',
+   cases:['路径与运力优化','仓储分拣自动化','单证 OCR 智能录入','需求与时效预测','客服与异常处理']},
+  {id:'realestate', name:'房地产/建筑', icon:'🏗️', bench:[2.4,2.3,2.2,2.1,2.4,2.3],
+   insight:'房地产与建筑业整体处于 AI 起步期，设计审查、造价测算、工地安全等场景开始破冰。项目制运营导致数据沉淀薄弱、口径分散，是首要短板；建议以集团级知识管理与单点速赢场景建立信心。',
+   cases:['智能设计与审图','造价与成本测算','工地安全监控','营销内容与智能客服','项目知识管理']},
+  {id:'agriculture', name:'农业', icon:'🌾', bench:[2.2,2.1,2.0,1.9,2.3,2.0],
+   insight:'智慧农业仍处早期，遥感、气象与物联网数据融合是基础工程，数据采集成本高是普遍痛点。以病虫害识别、产量预测等单点速赢场景起步更务实，同时可借力公共数据平台与产业链龙头生态。',
+   cases:['病虫害识别','产量预测','精准灌溉施肥','农产品分级分选','农技知识问答']},
+  {id:'media', name:'传媒/文娱', icon:'🎬', bench:[3.1,2.8,2.9,2.9,3.3,2.5],
+   insight:'AIGC 正在重塑传媒内容生产全链路，文生图、视频生成、智能剪辑带来立竿见影的效率提升。版权归属、内容安全与“人机协同创作”机制是治理重点，行业应用领先而治理建设普遍滞后。',
+   cases:['AIGC 图文/视频生产','智能剪辑与字幕','内容审核','个性化分发','虚拟主播/数字人']},
+  {id:'telecom', name:'电信/通信', icon:'📡', bench:[3.4,3.5,3.4,3.0,3.2,3.3],
+   insight:'电信行业在网络智能运维（AIOps）与客服领域积累深厚，海量网络与用户数据是独特资产。运营商正从“连接服务”向“算力+AI 平台服务”转型，既是 AI 使用者也是 AI 基础设施供给者。',
+   cases:['网络智能运维 AIOps','智能客服','精准营销','反诈与风控','算力网络服务']},
+  {id:'profservices', name:'专业服务/咨询', icon:'💼', bench:[3.0,2.8,2.9,3.1,3.1,2.8],
+   insight:'知识密集型的专业服务业受生成式 AI 冲击与赋能并存：知识资产化与交付提效是核心命题。率先把方法论、案例库转化为 AI 可调用知识资产的机构，正在重构人效与定价模式。',
+   cases:['知识库问答（RAG）','报告/标书辅助撰写','合同智能审阅','尽调资料分析','项目交付提效']},
+  {id:'pharma', name:'生物医药', icon:'🧬', bench:[2.9,3.0,2.8,2.7,2.7,3.2],
+   insight:'AI 正在显著缩短医药研发周期，靶点发现、分子设计与临床试验优化是热点方向。GxP 合规与数据完整性要求高，研发场景与生产质量场景并进；与 CRO/AI 制药公司的生态合作日趋普遍。',
+   cases:['靶点发现与分子生成','临床试验优化','文献情报挖掘','生产质量分析','注册申报辅助']},
+  {id:'other', name:'其他行业', icon:'🧩', bench:[2.8,2.7,2.7,2.6,2.8,2.6],
+   insight:'跨行业通用场景（知识管理、办公提效、智能客服、营销内容）是普适的起步点，通常 3 个月内即可见效。建议结合价值链分析定位行业差异化场景，把通用能力的速赢转化为组织信心与数据积累。',
+   cases:['企业知识库助手','办公与会议提效','智能客服','营销内容生成','数据分析助手']}
+];
+
+const SIZES = ['300人以下','300-1,000人','1,000-5,000人','5,000-20,000人','20,000人以上'];
+const REVENUES = ['1亿以下','1-10亿','10-50亿','50-200亿','200亿以上','不便透露'];
+const ROLES = ['董事会/CEO','CIO/CTO/CDO','IT/数字化部门','业务部门负责人','战略/创新部门','其他'];
+const ADOPTIONS = ['尚未使用 AI','员工自发使用工具','部门级试点中','多场景规模应用'];
+
+/* 维度 × 等级带（L1-L5）诊断分析 */
+const ANALYSIS = {
+  strat:[
+    'AI 尚未进入企业的战略视野，相关探索处于自发、零散状态。在行业智能化竞争加速的背景下，战略缺位将导致资源难以聚焦、试点难以为继，建议尽快在管理层建立基本共识并明确牵头责任人。',
+    '企业已开始关注 AI 价值，但战略意图尚未转化为书面规划与稳定的资源承诺，试点缺乏顶层牵引，容易出现方向摇摆与重复投入。当前最关键的一步是形成首版 AI 战略并设定可量化目标。',
+    '已具备明确的 AI 专项规划与基本投入保障，正处于从“项目驱动”迈向“战略驱动”的关键期。下一步重点是深化战略与业务的咬合度，把 AI 目标分解进经营计划与部门考核。',
+    'AI 战略与业务战略实现深度融合，高层投入坚定、路线图清晰，战略执行体系基本成熟，已具备规模化跃迁的顶层条件。建议强化投资组合管理，确保资源持续投向高回报场景。',
+    '战略层面已达到行业引领水平，AI 被作为核心战略支柱进行长期经营。建议保持战略敏捷，前瞻布局 AI 原生商业模式与生态投资，把战略优势转化为结构性竞争壁垒。'],
+  data:[
+    '数据基础薄弱：资产底数不清、质量缺乏保障，是当前制约 AI 落地的首要瓶颈——再强的模型能力也难以在缺乏可用数据的环境中发挥价值。建议从核心业务域的数据普查与质量底线治理起步。',
+    '已有局部数据积累，但平台化、标准化程度低，数据“看不见、连不通、不敢用”的问题仍较突出。需要尽快补齐治理短板，优先打通支撑重点 AI 场景的数据链路。',
+    '数据平台与治理框架初步建立，可支撑常规分析与部分 AI 应用。下一步应面向 AI 训练与推理的需求升级数据架构（实时化、向量化），并将质量管理从“事后修补”转向“全程监控”。',
+    '数据基础扎实，平台、治理、安全三位一体运转良好，已具备支撑大规模 AI 应用的数据能力。可向数据资产化运营进阶，并启动面向大模型的高质量语料工程。',
+    '数据能力处于行业标杆水平，Data×AI 形成飞轮效应。建议在高质量语料工程、跨域数据流通（隐私计算）与数据资产价值化上持续构筑壁垒。'],
+  tech:[
+    '技术储备几乎空白，尚无可用的算力、模型与工程能力。建议以“借力”为主策略：通过成熟 API 与 SaaS 快速获得能力起点，把有限资源投向场景验证而非重资产自建。',
+    '已开展初步技术尝试，但能力点状分散、缺乏工程化支撑，模型难以稳定进入生产环境。当前应聚焦 1-2 条端到端链路打通，沉淀第一批可复用的工程实践。',
+    '具备基础的模型应用与上线能力，技术路线渐趋清晰，瓶颈在于平台化复用不足与工程化深度有限。建议建设统一 AI 网关/中台，引入 MLOps/LLMOps 工具链，降低单场景边际成本。',
+    '技术平台与工程化体系较为完善，具备多模型管理与持续迭代能力，已能高效支撑业务规模化用 AI。可向智能体平台与成本精细化运营（单位 Token 成本）深化。',
+    '技术能力行业领先，平台化、智能体化架构成熟。建议向行业模型自研/深度定制与开源生态影响力延伸，构建难以复制的技术纵深。'],
+  talent:[
+    'AI 人才几乎空缺、组织未做任何适配，是最需要“从 0 到 1”突破的领域之一。建议以最小可行团队（1-2 名骨干）+ 全员通识扫盲并举起步，同时借助外部生态弥补短期能力缺口。',
+    '已有零星人才与自发学习行为，但缺乏组织化的能力建设机制，人才密度不足以支撑持续的 AI 项目交付。应尽快明确组织载体与培训体系，把个体热情转化为组织能力。',
+    '专职团队与培训机制初步建立，组织开始系统性积累 AI 能力。需重点解决人才梯队厚度与业务渗透度问题——让 AI 能力从技术团队走进每个业务单元。',
+    '人才梯队与组织机制健全，AI 能力已较好地嵌入业务单元，人机协同的工作方式正在形成。建议完善双通道发展与多元激励，巩固人才保留优势。',
+    '人才与组织能力达到行业标杆，具备强大的人才吸引力与培养体系。建议持续经营雇主品牌，通过开源、论文与行业分享向生态输出影响力。'],
+  app:[
+    'AI 应用尚未真正落地，业务价值无从谈起。建议从低风险、高频次的速赢场景（知识问答、文档处理等）切入，用 90 天内看得见的效果撬动组织信心。',
+    '已有零星试点但覆盖面窄、价值证据不足，试点经验未能沉淀复用，存在“试而不广、点状熄火”的风险。应建立场景清单与评估标准，集中资源做透 2-3 个标杆场景。',
+    '多部门应用初具规模，部分场景稳定产生价值。当前关键是建立统一的价值度量与规模化复制机制，避免停留在“盆景”阶段——让成功经验以标准化方式跨部门流动。',
+    'AI 应用已覆盖核心价值链并形成可量化回报，复制推广机制运转有效，具备向全业务链 AI 化冲刺的基础。建议以价值仪表盘驱动资源动态配置。',
+    '应用深度与广度行业领先，AI 已成为业务增长的核心引擎。建议探索对外输出与 AI 原生流程重构，打开第二增长曲线。'],
+  gov:[
+    'AI 风险与合规基本处于无人管理状态。随着应用增多，数据泄露、输出失准、合规违规等风险敞口将快速放大，需尽快建立底线管控：员工使用规范、数据红线与人工复核机制。',
+    '已意识到 AI 相关风险，但管控手段零散、被动，治理建设滞后于应用步伐。建议优先发布 AI 使用规范，完成对照监管要求的合规差距分析。',
+    '基础治理框架已建立，主要风险可控。下一步应将治理要求嵌入 AI 项目全流程（立项评估-上线测试-运行监控），实现“边发展边治理”。',
+    '治理体系较为完善，风险管理、模型评估与合规管理协同运转，能够支撑 AI 应用的稳健扩张。建议向自动化护栏与常态化红队评测演进。',
+    '治理能力行业领先，负责任 AI 已成为品牌资产与竞争优势。建议持续参与标准制定与监管沟通，保持前瞻性布局。']
+};
+
+/* 维度 × 分数带（低/中/高）改进建议库 */
+const RECS = {
+  strat:{
+    low:['组织高层 AI 认知工作坊，邀请外部专家对标行业案例，建立管理层基本共识','任命 AI 转型牵头人（建议为高管层成员），明确第一责任人与汇报机制','制定首版《AI 战略规划》：聚焦 1-2 个核心业务痛点，设定 12 个月可量化目标','设立种子预算与快速试点机制，以小步快跑验证价值、积累组织信心'],
+    mid:['将 AI 目标纳入年度经营计划与部门 KPI，实现战略-执行联动','建立 AI 投资组合管理：按“降本-增效-创新”分类管理项目组合与预算','推行季度战略复盘机制，根据技术演进与试点反馈滚动修订路线图','打造内部标杆案例并体系化传播，强化转型叙事与变革动能'],
+    high:['探索 AI 原生商业模式（智能产品、数据服务），布局第二增长曲线','将 AI 成熟度纳入对外披露与品牌叙事，塑造行业引领者形象','建立生态投资机制（CVC/战略合作），前瞻卡位关键技术与场景','输出方法论与最佳实践，参与行业白皮书与标准制定']},
+  data:{
+    low:['启动数据资产普查，绘制核心业务域数据地图，识别高价值数据集','优先治理 1-2 个核心主数据（如客户、产品），统一关键指标口径','制定数据管理基本制度：明确数据录入规范与质量责任','评估并选型基础数据平台，避免烟囱式重复建设'],
+    mid:['建设湖仓一体平台，打通核心系统数据链路，支撑 AI 训练与分析','设立数据治理委员会与数据 Owner 制度，发布企业级数据标准','上线数据质量监控看板，建立“发现-整改-复盘”闭环机制','落实数据分级分类与权限管控，夯实合规底线'],
+    high:['建设面向大模型的数据基础设施：向量数据库、知识图谱与高质量语料工程','推进数据资产化运营：计量、定价与内部市场化结算','引入隐私计算/联邦学习，安全释放跨域数据价值','建立 AI-Ready 数据认证机制，持续提升训练数据浓度']},
+  tech:{
+    low:['以成熟 API/SaaS 快速接入 AI 能力，先验证价值再考虑自建','制定云算力使用规范，小规模储备试验环境','完成 1-2 个端到端技术 POC，沉淀第一批工程经验','建立技术选型评估清单（安全、成本、生态、可替换性）'],
+    mid:['建设统一 AI 网关/中台，实现模型能力的集中管理与跨场景复用','引入 MLOps/LLMOps 工具链，规范模型上线、监控与迭代流程','构建混合模型策略：商用 API + 开源微调组合，平衡成本与可控性','推进核心系统 API 化改造，为智能体应用打好集成基础'],
+    high:['建设企业级智能体（Agent）平台，编排多模型多工具协同作业','优化算力资源池化与调度，建立单位 Token 成本管理体系','探索行业模型自研或深度定制，构建差异化技术壁垒','参与开源社区与技术标准建设，提升技术品牌影响力']},
+  talent:{
+    low:['招募或内部转培 1-2 名 AI 骨干，组建最小可行团队','开展全员 AI 通识培训（提示词工程、工具使用），消除认知鸿沟','与高校/厂商建立合作，借力外脑弥补能力缺口','在招聘要求中纳入 AI 技能项，渐进优化人才结构'],
+    mid:['成立 AI 卓越中心（CoE），建立“集中赋能 + 业务嵌入”协作模式','构建分层分岗培训体系：高管研修班 / 业务训练营 / 技术深造营','设计 AI 人才双通道晋升与专项激励，提升关键人才保留率','推行“AI 大使”机制，在各部门培养种子用户与内部布道者'],
+    high:['打造行业级技术雇主品牌：技术博客、开源贡献、行业会议分享','建立内部 AI 人才市场与轮岗机制，促进能力跨域流动','与顶尖院校共建联合实验室，锁定前沿人才管道','将人机协同能力纳入全员胜任力模型与绩效评估']},
+  app:{
+    low:['开展 AI 机会扫描工作坊，按“价值 × 可行性”筛选 3-5 个速赢场景','优先落地低风险高频场景：知识问答、文档处理、会议纪要等','为每个试点设定明确的成功指标与评估周期（建议 90 天）','建立试点案例库，记录经验教训供后续复用'],
+    mid:['将试点成果产品化：统一入口、标准流程、运营 SOP','建立 AI 项目价值度量体系，定期向管理层汇报 ROI','围绕核心价值链（营销、供应链、服务等）系统布局场景组合','设立用户反馈与迭代机制，持续提升采纳率与体验'],
+    high:['推进业务流程 AI 原生重构，从“工具辅助”走向“流程再造”','将成熟方案对外产品化输出，探索新收入来源','建设场景创新漏斗：全员提案 - 快速验证 - 规模放大','以 AI 价值仪表盘驱动资源动态配置与投资决策']},
+  gov:{
+    low:['制定《员工 AI 使用规范》，明确数据红线与禁用场景','对现有 AI 应用开展风险快速摸底，识别高风险暴露点','对照《生成式人工智能服务管理暂行办法》等法规完成合规差距分析','为关键 AI 输出建立人工复核机制，防范幻觉与错误传播'],
+    mid:['建立 AI 风险分级管理制度，高风险应用强制评估审批','引入模型评测基准（准确性、偏见、安全），上线前测试 + 上线后监控','设立跨部门 AI 治理委员会（法务、安全、业务、技术共同参与）','制定 AI 事件应急预案并组织演练'],
+    high:['建设自动化 AI 护栏与红队评测体系，实现治理工程化','发布负责任 AI 报告，将治理能力转化为客户信任与品牌资产','参与行业标准制定与监管沙盒，前瞻塑造合规环境','推进 AI 审计与算法备案的常态化、平台化管理']}
+};
+
+/* 维度 × 三阶段路线图行动 */
+const ROADMAP = {
+  strat:  {h1:'高层共识工作坊与首版 AI 战略发布', h2:'AI 目标纳入经营计划与 KPI 体系', h3:'AI 原生商业模式与生态投资布局'},
+  data:   {h1:'核心数据普查与质量底线治理',       h2:'湖仓一体平台与治理体系建设',     h3:'数据资产化运营与 AI-Ready 语料工程'},
+  tech:   {h1:'API 快速接入与端到端 POC 验证',    h2:'AI 中台与 MLOps/LLMOps 工具链',  h3:'智能体平台与行业模型深度定制'},
+  talent: {h1:'最小 AI 团队组建与全员通识培训',   h2:'AI CoE 成立与分层培养体系',      h3:'行业级雇主品牌与人才生态经营'},
+  app:    {h1:'3-5 个速赢场景落地与效果验证',     h2:'核心价值链场景组合与 ROI 度量',  h3:'业务流程 AI 原生重构与对外输出'},
+  gov:    {h1:'AI 使用规范发布与合规差距分析',    h2:'风险分级管理与模型评测体系',     h3:'自动化护栏与负责任 AI 品牌'}
+};
+
+/* 各维度的智能体引导语 */
+const DIM_INTROS = {
+  strat:'我们从顶层设计开始。战略维度决定了 AI 转型的方向与资源边界——没有战略牵引的 AI，往往沦为零散的技术实验。请根据贵企业的真实现状作答，诚实的答案才能换来有价值的诊断。',
+  data:'数据是 AI 的燃料。这一节我将为贵企业的数据资产、质量、平台与治理水平做一次体检——多数企业的 AI 瓶颈，其实是数据瓶颈。',
+  tech:'接下来看技术底座：算力、模型、工程化与系统集成能力。它们决定了 AI 能否稳定地“跑进”生产环境，而不是停留在演示阶段。',
+  talent:'技术终究由人来驱动。这一节评估专业人才密度、全员 AI 素养与组织协作机制——组织能力的厚度，决定了 AI 转型能走多远。',
+  app:'这是价值兑现的关键一节：AI 到底在多少业务场景中产生了可度量的回报？',
+  gov:'最后一节关注安全、合规与伦理——这是 AI 规模化的“刹车与护栏”。在全球监管快速趋严的背景下，它常常是被低估的维度。'
+};
+
+const GEN_STEPS = [
+  '校验作答完整性与一致性',
+  '计算六维能力得分与综合成熟度指数',
+  '匹配行业基准与同业相对位置',
+  '生成雷达图、对标图与优先级矩阵',
+  '撰写诊断分析与分阶段改进建议',
+  '排版专业评估报告'
+];
+
+/* ==================== 工具函数 ==================== */
+const $ = s => document.querySelector(s);
+const f1 = n => n.toFixed(1);
+const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+const bandOf = s => s < 1.8 ? 0 : s < 2.6 ? 1 : s < 3.4 ? 2 : s < 4.2 ? 3 : 4;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hexA = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+};
+const fmtDate = d => `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+const dimOf = id => DIMS.find(d => d.id === id);
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({ top: 0 });
+}
+
+/* ==================== 状态与持久化 ==================== */
+const LS_KEY = 'aim_state_v1';
+let profile = { company: '', industry: null, size: null, revenue: null, role: null, adoption: null };
+let answers = {};            // 题目 id -> 1..5
+let FLOW = [], flowIdx = 0;  // 引导流：维度引言 + 题目
+let LAST_R = null;
+
+function buildFlow() {
+  FLOW = [];
+  DIMS.forEach(d => {
+    FLOW.push({ t: 'intro', dim: d });
+    QUESTIONS.filter(q => q.dim === d.id).forEach(q => FLOW.push({ t: 'q', q }));
+  });
+}
+function saveState() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ profile, answers, flowIdx })); } catch (e) {}
+}
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; }
+}
+const answeredCount = () => QUESTIONS.filter(q => answers[q.id]).length;
+
+/* ==================== 神经网络粒子背景 ==================== */
+(function neuralBg() {
+  const cv = $('#neuralBg'), ctx = cv.getContext('2d');
+  let nodes = [], raf = null;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function resize() {
+    cv.width = innerWidth; cv.height = innerHeight;
+    const n = Math.min(64, Math.round(innerWidth * innerHeight / 26000));
+    nodes = Array.from({ length: n }, () => ({
+      x: Math.random() * cv.width, y: Math.random() * cv.height,
+      vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
+      r: 1.2 + Math.random() * 1.8
+    }));
+  }
+  function tick() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (const p of nodes) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > cv.width) p.vx *= -1;
+      if (p.y < 0 || p.y > cv.height) p.vy *= -1;
+    }
+    for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+      if (d2 < 150 * 150) {
+        ctx.strokeStyle = `rgba(99,102,241,${(1 - Math.sqrt(d2) / 150) * .14})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    }
+    for (const p of nodes) {
+      ctx.fillStyle = 'rgba(99,102,241,.28)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+    if (!reduced) raf = requestAnimationFrame(tick);
+  }
+  addEventListener('resize', () => { resize(); if (reduced) tick(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { cancelAnimationFrame(raf); } else if (!reduced) { tick(); }
+  });
+  resize(); tick();
+})();
+
+/* ==================== 打字机效果 ==================== */
+let typeTimer = null;
+function typeText(el, text, done) {
+  clearInterval(typeTimer);
+  let i = 0;
+  el.innerHTML = '<span class="caret"></span>';
+  const fin = () => {
+    clearInterval(typeTimer);
+    el.textContent = text;
+    if (done) done();
+  };
+  el.onclick = fin;
+  typeTimer = setInterval(() => {
+    i += 2;
+    if (i >= text.length) { fin(); return; }
+    el.innerHTML = esc(text.slice(0, i)) + '<span class="caret"></span>';
+  }, 16);
+}
+
+/* ==================== 企业画像表单 ==================== */
+function chipGroup(sel, list, key) {
+  const box = $(sel);
+  box.innerHTML = list.map((v, i) => `<button type="button" class="chip${profile[key] === v ? ' sel' : ''}" data-i="${i}">${v}</button>`).join('');
+  box.onclick = e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    box.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+    b.classList.add('sel');
+    profile[key] = list[+b.dataset.i];
+    saveState();
+  };
+}
+function renderProfileForm() {
+  const g = $('#gridIndustry');
+  g.innerHTML = INDUSTRIES.map(ind =>
+    `<button type="button" class="ind-card${profile.industry === ind.id ? ' sel' : ''}" data-id="${ind.id}"><i>${ind.icon}</i>${ind.name}</button>`).join('');
+  g.onclick = e => {
+    const b = e.target.closest('.ind-card');
+    if (!b) return;
+    g.querySelectorAll('.ind-card').forEach(c => c.classList.remove('sel'));
+    b.classList.add('sel');
+    profile.industry = b.dataset.id;
+    saveState();
+  };
+  chipGroup('#chipsSize', SIZES, 'size');
+  chipGroup('#chipsRevenue', REVENUES, 'revenue');
+  chipGroup('#chipsRole', ROLES, 'role');
+  chipGroup('#chipsAdoption', ADOPTIONS, 'adoption');
+  $('#inpCompany').value = profile.company || '';
+  $('#inpCompany').oninput = e => { profile.company = e.target.value.trim(); saveState(); };
+}
+
+/* ==================== 评估问答流程 ==================== */
+function sectionIdx(dim) { return DIMS.findIndex(d => d.id === dim.id) + 1; }
+
+function introMsg(d) {
+  const i = DIMS.findIndex(x => x.id === d.id);
+  let msg = '';
+  if (i > 0) {
+    const prev = DIMS[i - 1];
+    const vals = QUESTIONS.filter(q => q.dim === prev.id).map(q => answers[q.id]).filter(Boolean);
+    if (vals.length === 5) {
+      const a = avg(vals);
+      msg = a >= 4 ? `上一节「${prev.name}」表现出色（均值 ${f1(a)} 分），这是贵企业的显著优势。` :
+            a >= 3 ? `上一节「${prev.name}」基础良好（均值 ${f1(a)} 分），仍有提升空间。` :
+            a >= 2 ? `上一节「${prev.name}」存在一定短板（均值 ${f1(a)} 分），我已记录，报告中会给出针对性建议。` :
+                     `上一节「${prev.name}」是当前的主要瓶颈之一（均值 ${f1(a)} 分），别担心——报告会给出清晰的起步路径。`;
+      msg += '\n\n';
+    }
+  }
+  msg += DIM_INTROS[d.id];
+  if (d.id === 'app' && profile.industry) {
+    const ind = INDUSTRIES.find(x => x.id === profile.industry);
+    if (ind) msg += `\n\n在「${ind.name}」行业，常见的高价值场景包括：${ind.cases.slice(0, 3).join('、')}等——作答时可以此为参照。`;
+  }
+  return msg;
+}
+
+function renderSide(curDim) {
+  const box = $('#sideDims');
+  let html = '<div class="side-title mono">ASSESSMENT MAP · 评估地图</div>';
+  DIMS.forEach(d => {
+    const qs = QUESTIONS.filter(q => q.dim === d.id);
+    const done = qs.filter(q => answers[q.id]).length;
+    const full = done === qs.length;
+    const a = full ? avg(qs.map(q => answers[q.id])) : 0;
+    html += `<div class="side-dim${curDim === d.id ? ' cur' : ''}${full ? ' done' : ''}" data-dim="${d.id}" style="cursor:pointer">
+      <i>${d.icon}</i><span class="sd-name">${d.name}</span>
+      <span class="sd-st">${full ? '✓ ' + f1(a) : done + '/5'}</span></div>
+      <div class="side-bar"><div style="width:${done / qs.length * 100}%"></div></div>`;
+  });
+  box.innerHTML = html;
+  box.onclick = e => {
+    const r = e.target.closest('.side-dim');
+    if (!r) return;
+    flowIdx = FLOW.findIndex(it => it.t === 'intro' && it.dim.id === r.dataset.dim);
+    renderFlow();
+  };
+}
+
+function updateProg(curDim) {
+  const n = answeredCount();
+  $('#progFill').style.width = (n / QUESTIONS.length * 100) + '%';
+  $('#progText').textContent = `已完成 ${n} / ${QUESTIONS.length}`;
+  $('#dimText').textContent = curDim ? `${curDim.icon} ${curDim.name} · 第 ${sectionIdx(curDim)} / ${DIMS.length} 节` : '';
+}
+
+function renderFlow() {
+  const item = FLOW[flowIdx];
+  if (!item) { finishAssess(); return; }
+  const d = item.t === 'intro' ? item.dim : dimOf(item.q.dim);
+  renderSide(d.id);
+  updateProg(d);
+  saveState();
+  const main = $('#assessMain');
+
+  if (item.t === 'intro') {
+    main.innerHTML = `
+      <div class="agent-row">
+        <div><div class="orb orb-sm"></div><div class="agent-name">评估顾问</div></div>
+        <div class="bubble" id="agentMsg"></div>
+      </div>
+      <div class="card dim-intro">
+        <div class="dim-intro-ic">${d.icon}</div>
+        <div class="dim-intro-kicker mono">SECTION ${sectionIdx(d)} / ${DIMS.length} · 权重 ${Math.round(d.weight * 100)}%</div>
+        <h2>${d.name}</h2>
+        <p class="muted">${d.desc}</p>
+        <div class="dim-intro-meta">本节共 5 题 · 请选择最符合现状的描述（点击气泡可跳过打字动画）</div>
+        <button class="btn btn-primary" id="btnSection">开始本节 →</button>
+      </div>`;
+    typeText($('#agentMsg'), introMsg(d));
+    $('#btnSection').onclick = () => { flowIdx++; renderFlow(); };
+    return;
+  }
+
+  const q = item.q;
+  const qNo = QUESTIONS.findIndex(x => x.id === q.id) + 1;
+  const isLast = flowIdx === FLOW.length - 1;
+  main.innerHTML = `
+    <div class="agent-row compact">
+      <div><div class="orb orb-sm"></div></div>
+      <div class="bubble bubble-s">${q.detail}</div>
+    </div>
+    <div class="card qcard">
+      <div class="qmeta">
+        <span class="qdim" style="color:${d.color};background:${hexA(d.color, .08)};border-color:${hexA(d.color, .3)}">${d.icon} ${d.name}</span>
+        <span class="mono">Q ${String(qNo).padStart(2, '0')} / ${QUESTIONS.length}</span>
+      </div>
+      <h3 class="qtitle">${q.title}</h3>
+      <div class="opts">${q.opts.map((o, i) =>
+        `<button class="opt${answers[q.id] === i + 1 ? ' sel' : ''}" data-v="${i + 1}"><span class="opt-lv mono">L${i + 1}</span><span>${o}</span></button>`).join('')}
+      </div>
+      <div class="qnav">
+        <button class="btn btn-ghost btn-s" id="btnPrev" ${flowIdx <= 1 ? 'disabled' : ''}>← 上一题</button>
+        <span class="muted key-hint no-print">键盘 1-5 快速作答</span>
+        <button class="btn btn-ghost btn-s" id="btnNext" ${answers[q.id] ? '' : 'disabled'}>${isLast ? '生成报告 ✦' : '下一题 →'}</button>
+      </div>
+    </div>`;
+  main.querySelectorAll('.opt').forEach(b => b.onclick = () => selectOption(q, +b.dataset.v));
+  $('#btnPrev').onclick = () => { if (flowIdx > 0) { flowIdx--; if (FLOW[flowIdx].t === 'intro' && flowIdx > 0) flowIdx--; renderFlow(); } };
+  $('#btnNext').onclick = advance;
+}
+
+function selectOption(q, v) {
+  answers[q.id] = v;
+  saveState();
+  const main = $('#assessMain');
+  main.querySelectorAll('.opt').forEach(b => b.classList.toggle('sel', +b.dataset.v === v));
+  const nx = $('#btnNext'); if (nx) nx.disabled = false;
+  setTimeout(advance, 300);
+}
+
+function advance() {
+  if (flowIdx >= FLOW.length - 1) { finishAssess(); return; }
+  flowIdx++;
+  renderFlow();
+}
+
+function finishAssess() {
+  const missing = QUESTIONS.find(q => !answers[q.id]);
+  if (missing) {
+    flowIdx = FLOW.findIndex(it => it.t === 'q' && it.q.id === missing.id);
+    renderFlow();
+    toast('还有未作答的题目，已为您定位 ✦');
+    return;
+  }
+  runGenerating();
+}
+
+document.addEventListener('keydown', e => {
+  if (!$('#screen-assess').classList.contains('active')) return;
+  const item = FLOW[flowIdx];
+  if (!item) return;
+  if (item.t === 'q' && e.key >= '1' && e.key <= '5') selectOption(item.q, +e.key);
+  else if (item.t === 'intro' && e.key === 'Enter') { flowIdx++; renderFlow(); }
+  else if (e.key === 'ArrowLeft' && flowIdx > 0) { flowIdx--; renderFlow(); }
+  else if (e.key === 'ArrowRight' && item.t === 'q' && answers[item.q.id]) advance();
+});
+
+/* ==================== 报告生成流水线 ==================== */
+function runGenerating() {
+  showScreen('#screen-generating');
+  const box = $('#genSteps');
+  box.innerHTML = GEN_STEPS.map((s, i) => `<div class="gstep" id="gs${i}"><span class="gs-ic">✓</span>${s}</div>`).join('');
+  let i = 0;
+  (function step() {
+    if (i > 0) { const p = $('#gs' + (i - 1)); p.classList.remove('run'); p.classList.add('done'); }
+    if (i >= GEN_STEPS.length) {
+      buildReport();
+      setTimeout(() => showScreen('#screen-report'), 350);
+      return;
+    }
+    $('#gs' + i).classList.add('run');
+    i++;
+    setTimeout(step, 480);
+  })();
+}
+
+/* ==================== 评分引擎 ==================== */
+function computeResults() {
+  const ind = INDUSTRIES.find(i => i.id === profile.industry) || INDUSTRIES[INDUSTRIES.length - 1];
+  const dims = DIMS.map((d, i) => {
+    const items = QUESTIONS.filter(q => q.dim === d.id).map(q => ({ q, v: answers[q.id] || 1 }));
+    const score = avg(items.map(it => it.v));
+    const bench = ind.bench[i];
+    return Object.assign({}, d, { items, score, bench, delta: score - bench, band: bandOf(score) });
+  });
+  const overall = dims.reduce((s, d) => s + d.score * d.weight, 0);
+  const benchOverall = dims.reduce((s, d) => s + d.bench * d.weight, 0);
+  const level = LEVELS.find(l => overall < l.max) || LEVELS[LEVELS.length - 1];
+  const idx100 = Math.round(overall / 5 * 100);
+  const sorted = [...dims].sort((a, b) => a.score - b.score);
+  const priorities = dims.map(d => ({ d, p: (5 - d.score) * d.weight * (1 + Math.max(0, d.bench - d.score) * .5) }))
+                         .sort((a, b) => b.p - a.p);
+  const percentile = Math.max(5, Math.min(95, Math.round(50 + (overall - benchOverall) * 28)));
+  return { ind, dims, overall, benchOverall, level, idx100, sorted, priorities, percentile };
+}
+
+function deltaChip(delta) {
+  if (delta >= .15) return `<span class="delta up">▲ +${f1(delta)}</span>`;
+  if (delta <= -.15) return `<span class="delta down">▼ ${f1(delta)}</span>`;
+  return `<span class="delta eq">≈ 持平</span>`;
+}
+
+/* ==================== SVG 图表 ==================== */
+function svgGauge(R) {
+  const cx = 180, cy = 172, r = 126, sw = 20;
+  const pt = (ang, rr) => {
+    const a = ang * Math.PI / 180;
+    return { x: +(cx + rr * Math.cos(a)).toFixed(1), y: +(cy - rr * Math.sin(a)).toFixed(1) };
+  };
+  const arc = (a0, a1, rr) => {
+    const p0 = pt(a0, rr), p1 = pt(a1, rr);
+    return `M ${p0.x} ${p0.y} A ${rr} ${rr} 0 0 1 ${p1.x} ${p1.y}`;
+  };
+  const endA = 180 - R.overall / 5 * 180;
+  const bA = 180 - R.benchOverall / 5 * 180;
+  let ticks = '';
+  for (let v = 0; v <= 5; v++) {
+    const a = 180 - v / 5 * 180, p1 = pt(a, r + 14), p2 = pt(a, r + 20), pl = pt(a, r + 32);
+    ticks += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#c3c8e8" stroke-width="2"/>
+      <text x="${pl.x}" y="${pl.y + 4}" text-anchor="middle" font-size="10" fill="#9aa1c2">${v}</text>`;
+  }
+  const bm1 = pt(bA, r - sw + 2), bm2 = pt(bA, r + sw - 2), bml = pt(bA, r + 34);
+  return `<svg class="chart-svg" viewBox="0 0 360 215" style="width:100%;max-width:360px;height:auto">
+    <defs><linearGradient id="gGauge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5b5ce2"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient></defs>
+    <path d="${arc(180, 0, r)}" stroke="#e9ebfa" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+    <path d="${arc(180, endA, r)}" stroke="url(#gGauge)" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+    ${ticks}
+    <line x1="${bm1.x}" y1="${bm1.y}" x2="${bm2.x}" y2="${bm2.y}" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="3 2"/>
+    <text x="${bml.x}" y="${bml.y}" text-anchor="middle" font-size="9" fill="#94a3b8">行业 ${f1(R.benchOverall)}</text>
+    <text x="${cx}" y="${cy - 42}" text-anchor="middle" font-size="40" font-weight="900" fill="#1d2240">${f1(R.overall)}<tspan font-size="14" font-weight="600" fill="#9aa1c2"> / 5.0</tspan></text>
+    <text x="${cx}" y="${cy - 18}" text-anchor="middle" font-size="12" fill="#555c7e">成熟度指数 ${R.idx100} / 100</text>
+    <text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="13" font-weight="800" fill="#5b5ce2">${R.level.id} · ${R.level.name}</text>
+  </svg>`;
+}
+
+function svgRadar(R) {
+  const cx = 235, cy = 178, RD = 118;
+  const pt = (i, rr) => {
+    const a = (90 - i * 60) * Math.PI / 180;
+    return { x: +(cx + rr * Math.cos(a)).toFixed(1), y: +(cy - rr * Math.sin(a)).toFixed(1) };
+  };
+  const poly = vals => vals.map((v, i) => { const p = pt(i, RD * v / 5); return `${p.x},${p.y}`; }).join(' ');
+  let rings = '';
+  for (let lv = 1; lv <= 5; lv++) rings += `<polygon points="${poly([lv, lv, lv, lv, lv, lv])}" fill="none" stroke="${lv === 5 ? '#d4d8f0' : '#e9ebfa'}" stroke-width="1"/>`;
+  let axes = '', labels = '';
+  R.dims.forEach((d, i) => {
+    const pe = pt(i, RD), pl = pt(i, RD + 24);
+    axes += `<line x1="${cx}" y1="${cy}" x2="${pe.x}" y2="${pe.y}" stroke="#e9ebfa" stroke-width="1"/>`;
+    const cosv = Math.cos((90 - i * 60) * Math.PI / 180), sinv = Math.sin((90 - i * 60) * Math.PI / 180);
+    const anchor = Math.abs(cosv) < .35 ? 'middle' : cosv > 0 ? 'start' : 'end';
+    const dy = sinv > .5 ? -4 : sinv < -.5 ? 12 : 4;
+    labels += `<text x="${pl.x}" y="${pl.y + dy}" text-anchor="${anchor}" font-size="11" font-weight="700" fill="#555c7e">${d.name}</text>
+      <text x="${pl.x}" y="${pl.y + dy + 13}" text-anchor="${anchor}" font-size="10" fill="${d.delta >= 0 ? '#0f8a5f' : '#c43d3d'}">${f1(d.score)} <tspan fill="#9aa1c2">/ ${f1(d.bench)}</tspan></text>`;
+  });
+  const dots = R.dims.map((d, i) => { const p = pt(i, RD * d.score / 5); return `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#5b5ce2" stroke="#fff" stroke-width="1.5"/>`; }).join('');
+  return `<svg class="chart-svg" viewBox="0 0 470 356" style="width:100%;height:auto">
+    ${rings}${axes}
+    <polygon points="${poly(R.dims.map(d => d.bench))}" fill="none" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <polygon points="${poly(R.dims.map(d => d.score))}" fill="rgba(99,102,241,.20)" stroke="#5b5ce2" stroke-width="2.2"/>
+    ${dots}${labels}
+  </svg>`;
+}
+
+function svgRing(score, color) {
+  const C = 2 * Math.PI * 24, dash = (score / 5 * C).toFixed(1);
+  return `<svg width="54" height="54" viewBox="0 0 54 54">
+    <circle cx="27" cy="27" r="24" stroke="#eef0fa" stroke-width="5.5" fill="none"/>
+    <circle cx="27" cy="27" r="24" stroke="${color}" stroke-width="5.5" fill="none" stroke-linecap="round"
+      stroke-dasharray="${dash} ${C.toFixed(1)}" transform="rotate(-90 27 27)"/>
+    <text x="27" y="31.5" text-anchor="middle" font-size="13" font-weight="800" fill="#1d2240">${f1(score)}</text>
+  </svg>`;
+}
+
+function svgQuad(R) {
+  const L = 70, Rt = 514, T = 30, B = 300;
+  const xPix = w => L + (w - 10) / 12 * (Rt - L);
+  const yPix = g => B - g / 4 * (B - T);
+  const xs = xPix(16), ys = yPix(2);
+  const jit = { tech: -.45, talent: .45, data: -.2, app: .2, strat: 0, gov: 0 };
+  let pts = '';
+  R.dims.forEach(d => {
+    const x = xPix(d.weight * 100 + jit[d.id]), y = yPix(Math.min(4, Math.max(0, 5 - d.score)));
+    const rr = 9 + Math.max(0, d.bench - d.score) * 5;
+    pts += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="${hexA(d.color, .8)}" stroke="#fff" stroke-width="2"/>
+      <text x="${x.toFixed(1)}" y="${(y - rr - 5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#555c7e">${d.name}</text>`;
+  });
+  let xt = '', yt = '';
+  [12, 14, 16, 18, 20].forEach(v => { xt += `<text x="${xPix(v)}" y="${B + 16}" text-anchor="middle" font-size="9" fill="#9aa1c2">${v}%</text>`; });
+  [0, 1, 2, 3, 4].forEach(v => { yt += `<text x="${L - 10}" y="${yPix(v) + 3}" text-anchor="end" font-size="9" fill="#9aa1c2">${v}</text>`; });
+  return `<svg class="chart-svg" viewBox="0 0 540 340" style="width:100%;height:auto">
+    <rect x="${xs}" y="${T}" width="${Rt - xs}" height="${ys - T}" fill="rgba(239,68,68,.05)"/>
+    <rect x="${L}" y="${T}" width="${xs - L}" height="${ys - T}" fill="rgba(245,158,11,.05)"/>
+    <rect x="${xs}" y="${ys}" width="${Rt - xs}" height="${B - ys}" fill="rgba(16,185,129,.05)"/>
+    <text x="${Rt - 6}" y="${T + 14}" text-anchor="end" font-size="10" font-weight="800" fill="#c43d3d">重点攻坚区</text>
+    <text x="${L + 6}" y="${T + 14}" font-size="10" font-weight="800" fill="#b26a09">选择改善区</text>
+    <text x="${Rt - 6}" y="${B - 8}" text-anchor="end" font-size="10" font-weight="800" fill="#0f8a5f">巩固优势区</text>
+    <text x="${L + 6}" y="${B - 8}" font-size="10" font-weight="800" fill="#9aa1c2">保持观察区</text>
+    <line x1="${L}" y1="${B}" x2="${Rt}" y2="${B}" stroke="#c3c8e8" stroke-width="1.5"/>
+    <line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="#c3c8e8" stroke-width="1.5"/>
+    <line x1="${xs}" y1="${T}" x2="${xs}" y2="${B}" stroke="#d4d8f0" stroke-width="1" stroke-dasharray="4 3"/>
+    <line x1="${L}" y1="${ys}" x2="${Rt}" y2="${ys}" stroke="#d4d8f0" stroke-width="1" stroke-dasharray="4 3"/>
+    ${xt}${yt}${pts}
+    <text x="${(L + Rt) / 2}" y="${B + 32}" text-anchor="middle" font-size="10" fill="#555c7e">战略权重（对综合成熟度的影响）→</text>
+    <text x="20" y="${(T + B) / 2}" text-anchor="middle" font-size="10" fill="#555c7e" transform="rotate(-90 20 ${(T + B) / 2})">改进空间（5 − 当前得分）→</text>
+  </svg>`;
+}
+
+/* ==================== 报告组件 ==================== */
+function cmpRows(R) {
+  return R.dims.map(d => `
+    <div class="cmp-row">
+      <span class="cmp-name">${d.icon} ${d.name}</span>
+      <div class="cmp-track">
+        ${[1, 2, 3, 4].map(v => `<i class="cmp-mark" style="left:${v * 20}%"></i>`).join('')}
+        <div class="cmp-bar" style="width:${d.score / 5 * 100}%"></div>
+        <div class="cmp-bench" style="width:${d.bench / 5 * 100}%"></div>
+      </div>
+      <span class="cmp-vals"><b>${f1(d.score)}</b>/${f1(d.bench)}${deltaChip(d.delta)}</span>
+    </div>`).join('');
+}
+
+function ladder(level) {
+  return `<div class="ladder">${LEVELS.map(l => `
+    <div class="lv-step${l.id === level.id ? ' cur' : ''}">
+      <b>${l.id} ${l.name}</b><span class="lv-rg mono">${l.min.toFixed(1)} – ${Math.min(5, l.max).toFixed(1)}</span>
+    </div>`).join('')}</div>`;
+}
+
+function findings(R) {
+  const out = [];
+  const best = R.sorted[R.sorted.length - 1], worst = R.sorted[0];
+  const dim = id => R.dims.find(d => d.id === id);
+  out.push({ tag: 'adv', label: '优势', text: `「${best.name}」为当前最强能力域（${f1(best.score)}/5${best.delta >= .15 ? `，高于行业基准 ${f1(best.delta)} 分` : ''}），可作为带动整体转型的支点能力。` });
+  out.push({ tag: 'gap', label: '短板', text: `「${worst.name}」是当前最薄弱环节（${f1(worst.score)}/5${worst.delta <= -.15 ? `，低于行业基准 ${f1(-worst.delta)} 分` : ''}），建议列为未来 6 个月的优先攻坚方向。` });
+  const above = R.dims.filter(d => d.delta >= .15).length, below = R.dims.filter(d => d.delta <= -.15).length;
+  const og = R.overall - R.benchOverall;
+  out.push({ tag: og >= .15 ? 'opp' : og <= -.15 ? 'risk' : 'opp', label: '对标', text: `六大维度中 ${above} 项高于行业均值、${below} 项低于均值，综合水平${og >= .15 ? '领先' : og <= -.15 ? '落后于' : '基本持平于'}行业平均（估计超过约 ${R.percentile}% 的同业企业）。` });
+  if (dim('app').score - dim('gov').score >= .8)
+    out.push({ tag: 'risk', label: '风险', text: `应用推进速度明显快于治理体系建设（差距 ${f1(dim('app').score - dim('gov').score)} 分），存在合规与质量风险敞口，建议同步补强 AI 治理护栏。` });
+  if (worst.id === 'data' && worst.score < 2.6)
+    out.push({ tag: 'risk', label: '瓶颈', text: '数据基础是当前最大瓶颈，将直接制约模型效果与场景扩展，建议把数据治理作为 AI 投入的先导工程。' });
+  if (dim('strat').score >= 3.4 && dim('talent').score < 2.6)
+    out.push({ tag: 'risk', label: '落差', text: '战略雄心与人才储备存在明显落差，需加快组织能力建设，避免“战略空转”。' });
+  if (R.overall >= 3.4)
+    out.push({ tag: 'opp', label: '机会', text: '已具备规模化扩张的基础条件，建议把重心从“单点验证”转向“平台复用与价值运营”。' });
+  else if (R.overall < 2.6)
+    out.push({ tag: 'opp', label: '机会', text: '从通用速赢场景（知识助手、文档处理、智能客服）起步，可在 90 天内建立可见价值与组织信心。' });
+  return out.slice(0, 6);
+}
+
+function dimCardHtml(d) {
+  const recs = RECS[d.id][d.score < 2.6 ? 'low' : d.score < 3.8 ? 'mid' : 'high'];
+  const sIts = d.items.filter(it => it.v >= 4), gIts = d.items.filter(it => it.v <= 2);
+  return `<div class="dim-card" style="--dc:${d.color}">
+    <div class="dim-card-head">
+      <span class="dim-ic">${d.icon}</span>
+      <div class="dim-card-title"><h3>${d.name}</h3><span class="mono">${d.en} · 权重 ${Math.round(d.weight * 100)}%</span></div>
+      <div class="dim-score-wrap">
+        <div class="dim-score-txt">vs 行业基准 ${f1(d.bench)}<br>${deltaChip(d.delta)}</div>
+        ${svgRing(d.score, d.color)}
+      </div>
+    </div>
+    <p class="dim-analysis"><b>诊断：</b>${ANALYSIS[d.id][d.band]}</p>
+    <div class="dim-grid">
+      <div>${d.items.map(it => `
+        <div class="qbar-row"><span>${it.q.short}</span>
+          <div class="qbar"><div style="width:${it.v / 5 * 100}%;background:${d.color}"></div></div>
+          <span class="qbar-val">${it.v}</span></div>`).join('')}
+      </div>
+      <div>
+        ${sIts.length ? `<div class="sw-block"><span class="sw-tag ok">✓ 优势项</span><div class="sw-items">${sIts.map(it => `<span class="sw-item">${it.q.short} ${it.v} 分</span>`).join('')}</div></div>` : ''}
+        ${gIts.length ? `<div class="sw-block"><span class="sw-tag no">! 短板项</span><div class="sw-items">${gIts.map(it => `<span class="sw-item">${it.q.short} ${it.v} 分</span>`).join('')}</div></div>` : ''}
+        ${!sIts.length && !gIts.length ? '<div class="sw-block"><span class="sw-tag ok">―</span><div class="sw-items"><span class="sw-item">各指标发展较为均衡</span></div></div>' : ''}
+      </div>
+    </div>
+    <div class="dim-recs"><div class="rec-title">✦ 改进建议</div><ol>${recs.map(r => `<li>${r}</li>`).join('')}</ol></div>
+  </div>`;
+}
+
+function heatBody(R) {
+  let rows = '';
+  R.dims.forEach(d => {
+    d.items.forEach((it, i) => {
+      rows += `<tr>${i === 0 ? `<td class="ht-dim" rowspan="5">${d.icon} ${d.name}<br><span class="note">均值 ${f1(d.score)} / 基准 ${f1(d.bench)}</span></td>` : ''}
+        <td><b>${it.q.short}</b><br><span class="note">${it.q.title}</span></td>
+        <td><span class="ht-score hs${it.v}">L${it.v} · ${it.v} 分</span></td>
+        <td><div class="ht-bar"><div style="width:${it.v / 5 * 100}%"></div></div></td>
+      </tr>`;
+    });
+  });
+  return `<p class="rp-p">下表完整呈现 30 项指标的现状评级（L1 起步 → L5 卓越），颜色越偏红代表与成熟实践差距越大，可作为专项整改的工作清单。</p>
+    <table class="heat-table"><thead><tr><th style="width:130px">能力域</th><th>评估指标</th><th style="width:90px">现状评级</th><th style="width:110px">得分</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function quadBody(R) {
+  const top3 = R.priorities.slice(0, 3);
+  return `<p class="rp-p">将六大能力域按「战略权重 × 改进空间」投射至矩阵：越靠右上方的能力域，补强的边际收益越高。气泡大小代表与行业基准的差距。</p>
+    <div class="chart-block"><div class="chart-title">改进优先级矩阵<span class="legend">${R.dims.map(d => `<span><span class="lg-dot" style="background:${d.color}"></span>${d.name}</span>`).join('')}</span></div>${svgQuad(R)}</div>
+    <div class="rp-sec">优先攻坚行动 TOP 3</div>
+    <div class="prio-list">${top3.map((p, i) => `
+      <div class="prio"><div class="prio-rank">${i + 1}</div>
+        <div><h4>${p.d.icon} ${p.d.name}</h4>
+        <p>当前 ${f1(p.d.score)} 分${p.d.delta <= -.1 ? `，低于行业基准 ${f1(-p.d.delta)} 分` : ''}，战略权重 ${Math.round(p.d.weight * 100)}%。建议以「${ROADMAP[p.d.id].h1}」作为未来 90 天的关键启动动作。</p></div>
+      </div>`).join('')}</div>`;
+}
+
+function roadBody(R) {
+  const order = R.priorities.map(p => p.d);
+  const hot = new Set(R.priorities.slice(0, 2).map(p => p.d.id));
+  const col = (h, title, time, goal) => `
+    <div class="road-col">
+      <div class="road-head">${title}<small>${time}</small></div>
+      <div class="road-goal">${goal}</div>
+      <div class="road-items">${order.map(d => `
+        <div class="road-item${hot.has(d.id) ? ' hot' : ''}"><i>${d.icon}</i><span>${ROADMAP[d.id][h]}${hot.has(d.id) ? ' <span class="star">★</span>' : ''}</span></div>`).join('')}
+      </div>
+    </div>`;
+  return `<p class="rp-p">基于诊断结果，按三个时间阶段编排各能力域的关键行动（★ 标记为优先攻坚域，行动按优先级自上而下排列）。建议为每项行动指定责任人与可量化的北极星指标，并按季度滚动复盘。</p>
+    <div class="road">
+      ${col('h1', '第一阶段 · 筑基速赢', '0 – 6 个月', '🎯 阶段目标：建立基线能力，拿下速赢场景，形成组织信心')}
+      ${col('h2', '第二阶段 · 体系扩张', '6 – 18 个月', '🎯 阶段目标：平台化、体系化，实现多场景规模复制')}
+      ${col('h3', '第三阶段 · 深度引领', '18 – 36 个月', '🎯 阶段目标：AI 深度融入业务与商业模式，构建行业影响力')}
+    </div>
+    <p class="note" style="margin-top:10px">※ 行动颗粒度与节奏应结合企业资源禀赋调整；建议每季度复评一次成熟度，动态校准路线图。</p>`;
+}
+
+function industryBody(R) {
+  const ind = R.ind;
+  return `<div class="rp-sec">行业洞察 · ${ind.icon} ${ind.name}</div>
+    <p class="rp-p">${ind.insight}</p>
+    <div class="rp-sec">高价值场景参考</div>
+    <div class="case-grid">${ind.cases.map(c => `<div class="case-card"><i>✦</i>${c}</div>`).join('')}
+      <div class="case-card"><i>✦</i>企业知识库与员工 AI 助手（跨行业通用）</div></div>
+    <div class="rp-sec">与行业基准的逐维对比</div>
+    <table class="bench-table"><thead><tr><th>能力域</th><th>贵企业</th><th>行业基准</th><th>差距</th><th>相对状态</th></tr></thead>
+      <tbody>${R.dims.map(d => `<tr><td>${d.icon} ${d.name}</td><td><b>${f1(d.score)}</b></td><td>${f1(d.bench)}</td><td>${deltaChip(d.delta)}</td><td>${d.delta >= .15 ? '领先 — 保持并扩大优势' : d.delta <= -.15 ? '落后 — 列入补强计划' : '持平 — 寻找差异化机会'}</td></tr>`).join('')}</tbody></table>
+    <p class="rp-p" style="margin-top:10px">综合来看，贵企业 AI 成熟度估计超过约 <b>${R.percentile}%</b> 的同业企业。${R.overall - R.benchOverall >= .15 ? '建议把相对优势转化为先发壁垒：在数据资产与场景深度上持续拉开差距。' : R.overall - R.benchOverall <= -.15 ? '行业头部正在加速拉开差距，建议聚焦优先攻坚域，以 6 个月为周期快速缩小关键短板。' : '行业竞争处于胶着期，谁先完成「试点 → 规模化」的跨越，谁将赢得下一阶段的主动权。'}</p>
+    <p class="note">※ 行业基准为基于公开行业研究与专家经验的参考估计值，用于方向性对比，不构成精确统计结论。</p>`;
+}
+
+function methodBody(R) {
+  return `<div class="rp-sec">评估模型</div>
+    <p class="rp-p">本评估采用「6 大能力域 × 30 项核心指标」的企业 AI 成熟度模型，融合 AI 转型领域的通行框架与最佳实践。每项指标按 L1–L5 五级行为锚定描述作答，避免主观打分偏差。</p>
+    <table class="meth-table"><thead><tr><th>能力域</th><th>权重</th><th>评估内涵</th></tr></thead>
+      <tbody>${DIMS.map(d => `<tr><td><b>${d.icon} ${d.name}</b></td><td>${Math.round(d.weight * 100)}%</td><td>${d.desc}</td></tr>`).join('')}</tbody></table>
+    <div class="rp-sec">计分方法</div>
+    <p class="rp-p">维度得分 = 维度内 5 项指标的算术平均（1–5 分）；综合得分 = Σ（维度得分 × 维度权重）；成熟度指数 = 综合得分 ÷ 5 × 100。综合得分映射至五级成熟度等级：</p>
+    ${LEVELS.map(l => `<div class="lv-def"><span class="lv-pin">${l.id}</span><span><b>${l.name}（${l.min.toFixed(1)} – ${Math.min(5, l.max).toFixed(1)}）</b> ${l.desc}<br><span class="note">典型特征：${l.traits}</span></span></div>`).join('')}
+    <div class="rp-sec">声明</div>
+    <p class="note">① 本报告基于受访者自评数据生成，结论的准确性取决于作答的客观程度，建议结合多角色交叉评估与外部专家访谈校准。<br>
+    ② 行业基准为方向性参考估计，不构成投资或合规建议。<br>
+    ③ 本工具完全在浏览器本地运行，全部数据仅保存于本机，不上传任何服务器。<br>
+    ④ 报告由「企业 AI 成熟度评估智能体 · AI Maturity Navigator」自动生成。</p>`;
+}
+
+/* ==================== 报告装配 ==================== */
+function buildReport() {
+  const R = computeResults();
+  LAST_R = R;
+  const c = esc(profile.company || '未具名企业');
+  const dt = fmtDate(new Date());
+  const now = new Date();
+  const rid = `AIM-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const page = (no, t, en, body) => `<div class="rp-page"><div class="rp-head"><div><span class="rp-no">${no}</span><h2 class="rp-h2">${t}</h2><span class="rp-en mono">${en}</span></div><span class="brand-mini mono">AI MATURITY NAVIGATOR</span></div>${body}__FOOT__</div>`;
+
+  const cover = `<div class="rp-page rp-cover"><div class="cover-frame">
+    <div class="cover-topline mono"><span>◆ AI MATURITY NAVIGATOR</span><span>REPORT NO. ${rid}</span></div>
+    <div class="cover-orb"><div class="orb orb-xl"></div></div>
+    <div class="cover-kicker mono">ENTERPRISE AI MATURITY ASSESSMENT</div>
+    <h1 class="cover-title">企业 AI 成熟度<br>评估报告</h1>
+    <div class="cover-grad-bar"></div>
+    <div class="cover-company">${c}</div>
+    <div class="cover-meta">${R.ind.icon} ${R.ind.name} · ${esc(profile.size || '规模未填')} · ${dt}</div>
+    <div class="cover-score-card">
+      <div class="csc-cell"><div class="v">${f1(R.overall)}<small> / 5.0</small></div><div class="k">综合成熟度得分</div></div>
+      <div class="csc-cell"><div class="v" style="padding-top:3px"><span class="lv-badge">${R.level.id} ${R.level.name}</span></div><div class="k">成熟度等级</div></div>
+      <div class="csc-cell"><div class="v">${R.idx100}<small> / 100</small></div><div class="k">成熟度指数</div></div>
+    </div>
+    <div class="cover-foot mono">GENERATED BY AI MATURITY AGENT · 基于受访者自评 · 内部参阅<br>6 DIMENSIONS · 30 INDICATORS · INDUSTRY BENCHMARKED</div>
+  </div>__FOOT__</div>`;
+
+  const og = R.overall - R.benchOverall;
+  const summary = page('01', '执行摘要', 'EXECUTIVE SUMMARY', `
+    <div class="kpis">
+      <div class="kpi"><div class="v">${f1(R.overall)}<small> / 5.0</small></div><div class="k">综合成熟度得分</div></div>
+      <div class="kpi"><div class="v" style="font-size:17px;padding-top:5px">${R.level.id} ${R.level.name}</div><div class="k">成熟度等级</div></div>
+      <div class="kpi"><div class="v">${f1(R.benchOverall)}<small> 基准</small></div><div class="k">${R.ind.name} 行业均值</div></div>
+      <div class="kpi"><div class="v">${R.percentile}<small> %</small></div><div class="k">估计超过的同业占比</div></div>
+    </div>
+    <p class="rp-p">${c}（${R.ind.name}${profile.size ? '，' + esc(profile.size) : ''}）于 ${dt} 通过「企业 AI 成熟度评估智能体」完成了覆盖 ${DIMS.length} 大能力域、${QUESTIONS.length} 项核心指标的全面自评。综合得分 <b>${f1(R.overall)} / 5.0</b>（成熟度指数 ${R.idx100} / 100），处于 <b>${R.level.id}「${R.level.name}」</b>阶段，${og >= .15 ? '高于' : og <= -.15 ? '低于' : '基本持平'}行业平均水平（${f1(R.benchOverall)}）。${R.level.desc}</p>
+    <div class="two-col">
+      <div class="chart-block"><div class="chart-title">综合成熟度仪表盘</div>${svgGauge(R)}</div>
+      <div><div class="rp-sec" style="margin-top:2px">关键发现</div><div class="findings">${findings(R).map(f => `<div class="finding"><span class="f-tag ${f.tag}">${f.label}</span><span>${f.text}</span></div>`).join('')}</div></div>
+    </div>
+    <div class="rp-sec">成熟度等级定位</div>
+    ${ladder(R.level)}`);
+
+  const overview = page('02', '整体成熟度画像', 'OVERALL MATURITY PROFILE', `
+    <div class="two-col">
+      <div class="chart-block"><div class="chart-title">六维能力雷达
+        <span class="legend"><span><span class="lg-dot" style="background:#5b5ce2"></span>贵企业</span><span><span class="lg-dot" style="background:#94a3b8"></span>行业基准</span></span></div>
+        ${svgRadar(R)}</div>
+      <div class="chart-block"><div class="chart-title">维度得分对标</div>${cmpRows(R)}
+        <p class="note" style="margin-top:8px">粗条为贵企业得分，细灰条为「${R.ind.name}」行业基准；▲/▼ 表示与基准的差值。</p></div>
+    </div>
+    <div class="rp-sec">画像解读</div>
+    <p class="rp-p">贵企业能力分布${R.sorted[R.sorted.length - 1].score - R.sorted[0].score >= 1.2 ? '呈现明显的不均衡形态' : '相对均衡'}：最强项「${R.sorted[R.sorted.length - 1].name}」（${f1(R.sorted[R.sorted.length - 1].score)}）与最弱项「${R.sorted[0].name}」（${f1(R.sorted[0].score)}）相差 ${f1(R.sorted[R.sorted.length - 1].score - R.sorted[0].score)} 分。${R.sorted[R.sorted.length - 1].score - R.sorted[0].score >= 1.2 ? 'AI 成熟度遵循「木桶效应」——单一维度的明显短板会制约整体价值兑现，建议优先补齐洼地，而非继续强化优势项。' : '均衡的能力结构有利于体系化推进，下一步可在权重最高的战略与应用维度寻求突破，带动整体跃迁。'}后续三页将对每个能力域进行逐一深度诊断。</p>`);
+
+  const dimsP1 = page('03', '能力域深度诊断 · 一', 'DIMENSION DEEP-DIVE I', dimCardHtml(R.dims[0]) + dimCardHtml(R.dims[1]));
+  const dimsP2 = page('04', '能力域深度诊断 · 二', 'DIMENSION DEEP-DIVE II', dimCardHtml(R.dims[2]) + dimCardHtml(R.dims[3]));
+  const dimsP3 = page('05', '能力域深度诊断 · 三', 'DIMENSION DEEP-DIVE III', dimCardHtml(R.dims[4]) + dimCardHtml(R.dims[5]));
+  const heat = page('06', '指标明细总览', 'INDICATOR DETAILS', heatBody(R));
+  const quad = page('07', '改进优先级矩阵', 'PRIORITY MATRIX', quadBody(R));
+  const road = page('08', '分阶段改进路线图', 'TRANSFORMATION ROADMAP', roadBody(R));
+  const indu = page('09', '行业洞察与对标', 'INDUSTRY INSIGHTS', industryBody(R));
+  const meth = page('10', '评估方法论与附录', 'METHODOLOGY & APPENDIX', methodBody(R));
+
+  const pages = [cover, summary, overview, dimsP1, dimsP2, dimsP3, heat, quad, road, indu, meth];
+  $('#report').innerHTML = pages.map((p, i) => p.replace('__FOOT__', i === 0 ? '' :
+    `<div class="rp-foot"><span>${c} · 企业 AI 成熟度评估报告 · ${dt}</span><span class="mono">${rid} · PAGE ${String(i + 1).padStart(2, '0')} / ${String(pages.length).padStart(2, '0')}</span></div>`)).join('');
+}
+
+/* ==================== 导出与导航 ==================== */
+function exportJson() {
+  const R = LAST_R || computeResults();
+  const data = {
+    tool: 'AI Maturity Navigator', generatedAt: new Date().toISOString(),
+    profile, answers,
+    results: {
+      overall: +f1(R.overall), index: R.idx100, level: `${R.level.id} ${R.level.name}`,
+      industryBenchmark: +f1(R.benchOverall),
+      dimensions: R.dims.map(d => ({ id: d.id, name: d.name, score: +f1(d.score), benchmark: d.bench, delta: +f1(d.delta) }))
+    }
+  };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  a.download = `AI成熟度评估-${profile.company || '企业'}-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ==================== 初始化 ==================== */
+function init() {
+  buildFlow();
+  $('#heroDims').innerHTML = DIMS.map(d => `<span class="dim-chip"><i>${d.icon}</i>${d.name}</span>`).join('');
+
+  const saved = loadState();
+  if (saved && saved.answers && (Object.keys(saved.answers).length > 0 || (saved.profile && saved.profile.industry))) {
+    $('#btnResume').style.display = '';
+  }
+
+  $('#btnStart').onclick = () => { renderProfileForm(); showScreen('#screen-profile'); };
+  $('#btnResume').onclick = () => {
+    const s = loadState();
+    if (s) { profile = Object.assign(profile, s.profile || {}); answers = s.answers || {}; flowIdx = Math.min(s.flowIdx || 0, FLOW.length - 1); }
+    if (answeredCount() >= QUESTIONS.length && profile.industry) { runGenerating(); return; }
+    if (!profile.industry || !profile.size || !profile.adoption) { renderProfileForm(); showScreen('#screen-profile'); return; }
+    showScreen('#screen-assess'); renderFlow();
+    toast('已恢复上次进度 ✦');
+  };
+  $('#btnBackWelcome').onclick = () => showScreen('#screen-welcome');
+  $('#btnToAssess').onclick = () => {
+    if (!profile.industry) { toast('请选择所属行业'); return; }
+    if (!profile.size) { toast('请选择企业规模'); return; }
+    if (!profile.adoption) { toast('请选择当前 AI 应用状态'); return; }
+    showScreen('#screen-assess'); renderFlow();
+  };
+  $('#btnEdit').onclick = () => { flowIdx = 0; showScreen('#screen-assess'); renderFlow(); };
+  $('#btnRestart').onclick = () => {
+    if (!confirm('确定要清空当前作答并重新开始评估吗？')) return;
+    try { localStorage.removeItem(LS_KEY); } catch (e) {}
+    location.reload();
+  };
+  $('#btnJson').onclick = exportJson;
+  $('#btnPdf').onclick = () => window.print();
+  window.addEventListener('beforeprint', () => {
+    if (!LAST_R && answeredCount() >= QUESTIONS.length) buildReport();
+  });
+}
+init();
+</script>
+</body>
+</html>
