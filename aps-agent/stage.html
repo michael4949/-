@@ -696,6 +696,7 @@ function A(cls,html,x,y,w){
 function popA(el){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 function gone(el,delay=0){ setTimeout(()=>{ el.classList.add('fadeout'); setTimeout(()=>el.remove(),480); },delay); }
 function fly(el,x2,y2,ms=750,opt={}){
+  el.classList.remove('pop'); el.style.animation='none';
   const x1=+el.dataset.x,y1=+el.dataset.y,arc=opt.arc||0,s1=opt.s1??1,s2=opt.s2??1;
   const t0=performance.now();
   (function f(t){

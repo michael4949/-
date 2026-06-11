@@ -391,7 +391,7 @@ footer{padding:40px 0 34px;border-top:1px solid var(--line);margin-top:56px}
 
 <nav>
   <div class="nav-in">
-    <a class="back-btn" href="req2.html#board">← 返回需求二画布</a>
+    <a class="back-btn" href="req2.html#theater">← 返回需求二 · 跟单主页</a>
     <div class="brand"><div class="brand-mark">Cu</div>江铜台意 · 需求二 — 流程动画</div>
     <div class="stage-tabs" id="stageTabs"></div>
   </div>
@@ -465,7 +465,7 @@ footer{padding:40px 0 34px;border-top:1px solid var(--line);margin-top:56px}
 <footer>
   <div class="wrap foot-in">
     <div>江铜台意 · 需求二 — 流程动画（演示数据均为示意）</div>
-    <div class="foot-nav"><a href="req2.html#board">返回画布</a><a href="#" id="nextLink"></a></div>
+    <div class="foot-nav"><a href="req2.html#theater">返回跟单主页</a><a href="#" id="nextLink"></a></div>
   </div>
 </footer>
 
@@ -615,6 +615,7 @@ function A(cls,html,x,y,w){
 function popA(el){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 function gone(el,delay=0){ setTimeout(()=>{ el.classList.add('fadeout'); setTimeout(()=>el.remove(),480); },delay); }
 function fly(el,x2,y2,ms=750,opt={}){
+  el.classList.remove('pop'); el.style.animation='none';
   const x1=+el.dataset.x,y1=+el.dataset.y,arc=opt.arc||0,s1=opt.s1??1,s2=opt.s2??1;
   const t0=performance.now();
   (function f(t){
@@ -1147,7 +1148,7 @@ function renderAll(){
   const d=D[curStage];
   document.title=`${d.no} ${d.title} · 需求二流程动画 · 江铜台意`;
   document.getElementById('stageTabs').innerHTML=D.map((x,i)=>`<a class="stab ${i===curStage?'on':''}" href="#s${i+1}">${x.no} ${x.name}</a>`).join('');
-  document.getElementById('crumb').innerHTML=`<a href="req2.html#board">需求二画布</a> / AI 智能体 / ${d.no} ${d.name}`;
+  document.getElementById('crumb').innerHTML=`<a href="req2.html#theater">需求二 · 跟单主页</a> / 工程蓝图 / ${d.no} ${d.name}`;
   document.getElementById('hNo').textContent=d.no;
   document.getElementById('hEn').textContent=d.en;
   document.getElementById('hTitle').textContent=d.title;
