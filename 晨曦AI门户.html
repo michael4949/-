@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>晨曦科技 AI 智能体门户 — 晨曦 AI 矩阵</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%232563eb"/><stop offset="1" stop-color="%2306b6d4"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(%23g)"/><path d="M15 28 A9 9 0 0 1 33 28 Z" fill="white"/><rect x="10" y="28" width="28" height="2.5" rx="1.25" fill="white"/></svg>'>
+<style>
+  :root{
+    --bg:#f4f7fb; --surface:rgba(255,255,255,.82); --surface-solid:#ffffff;
+    --border:#e3e9f2; --border-strong:#d3dce8;
+    --text:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --primary:#2563eb; --primary-2:#06b6d4;
+    --grad:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
+    --grad-dawn:linear-gradient(135deg,#f59e0b,#fb923c);
+    --grad-hot:linear-gradient(135deg,#f43f5e,#fb923c);
+    --grad-violet:linear-gradient(135deg,#7c3aed,#2563eb);
+    --ok:#10b981;
+    --shadow-sm:0 1px 3px rgba(30,58,138,.06),0 4px 14px rgba(30,58,138,.05);
+    --shadow-md:0 4px 10px rgba(30,58,138,.07),0 12px 32px rgba(30,58,138,.08);
+    --shadow-lg:0 10px 24px rgba(30,58,138,.1),0 24px 60px rgba(30,58,138,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh;
+  }
+  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(95px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+  .aurora i:nth-child(1){width:600px;height:600px;background:#dbeafe;top:-200px;left:-140px}
+  .aurora i:nth-child(2){width:540px;height:540px;background:#cffafe;bottom:-220px;right:-120px;animation-delay:-6s}
+  .aurora i:nth-child(3){width:440px;height:440px;background:#fef3c7;top:26%;right:18%;opacity:.42;animation-delay:-12s}
+  .aurora i:nth-child(4){width:380px;height:380px;background:#ede9fe;top:55%;left:8%;opacity:.4;animation-delay:-9s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.12)}}
+  @keyframes breath{0%,100%{opacity:1}50%{opacity:.45}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes ringp{from{transform:scale(1);opacity:.8}to{transform:scale(1.6);opacity:0}}
+
+  .wrap{position:relative;z-index:1}
+
+  /* ===== 顶栏 ===== */
+  .topbar{
+    position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:13px 30px;
+    background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .logo{width:40px;height:40px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(37,99,235,.35))}
+  .brand .bt{line-height:1.18}
+  .brand .bt b{font-size:16.5px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  .brand .bt small{font-size:9.5px;color:var(--faint);letter-spacing:2.5px;font-weight:600}
+  .ai-chip{font-size:9px;font-weight:700;color:#fff;background:var(--grad);padding:2px 6px;border-radius:6px;letter-spacing:1px;box-shadow:0 2px 6px rgba(6,182,212,.4)}
+  .top-nav{margin-left:26px;display:flex;gap:4px}
+  .top-nav a{font-size:12.8px;color:var(--muted);text-decoration:none;padding:7px 13px;border-radius:9px;transition:.18s;font-weight:500}
+  .top-nav a:hover{color:var(--primary);background:rgba(37,99,235,.07)}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .model-pill{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.75);border:1px solid var(--border);padding:6px 11px;border-radius:99px}
+  .model-pill .led{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(16,185,129,.8);animation:breath 2s infinite}
+  .demo-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:#7c3aed;border:1px solid rgba(124,58,237,.3);background:rgba(124,58,237,.06);padding:3px 9px;border-radius:7px;letter-spacing:.5px}
+
+  /* ===== Hero ===== */
+  .hero{max-width:1080px;margin:0 auto;padding:64px 26px 30px;text-align:center;animation:fadeUp .6s ease}
+  .hero-orb{position:relative;width:84px;height:84px;margin:0 auto 20px}
+  .hero-orb .logo{width:84px;height:84px;filter:drop-shadow(0 10px 26px rgba(37,99,235,.4));position:relative;z-index:2}
+  .hero-orb .ring{position:absolute;inset:0;border-radius:23px;border:1.5px solid rgba(37,99,235,.35);animation:ringp 2.6s ease-out infinite}
+  .hero-orb .ring:nth-child(3){animation-delay:1.3s}
+  .hero h1{font-size:36px;font-weight:800;letter-spacing:1px;line-height:1.35}
+  .hero h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .sub{font-size:14px;color:var(--muted);margin-top:14px;line-height:2;max-width:760px;margin-left:auto;margin-right:auto}
+  .hero .sub b{color:#0f3a8f}
+  .hero .sub .hl-dawn{color:#b45309;font-weight:600}
+  .hero-cta{display:flex;gap:12px;justify-content:center;margin-top:24px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;padding:12px 24px;border-radius:13px;transition:.22s;text-decoration:none}
+  .btn.primary{background:var(--grad);color:#fff;box-shadow:0 8px 22px rgba(37,99,235,.32)}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(37,99,235,.4)}
+  .btn.ghost{background:rgba(255,255,255,.8);color:var(--primary);border:1px solid rgba(37,99,235,.32)}
+  .btn.ghost:hover{background:rgba(37,99,235,.07);transform:translateY(-2px)}
+
+  /* ===== 统计条 ===== */
+  .stats{max-width:1080px;margin:26px auto 0;padding:0 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:13px;animation:fadeUp .6s ease .1s both}
+  .stat{
+    position:relative;overflow:hidden;padding:16px 18px;border-radius:16px;text-align:center;
+    background:var(--surface-solid);border:1px solid var(--border);box-shadow:var(--shadow-sm);
+  }
+  .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+  .stat:nth-child(2)::before{background:var(--grad-hot)}
+  .stat:nth-child(3)::before{background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .stat:nth-child(4)::before{background:var(--grad-dawn)}
+  .stat b{font-size:24px;font-weight:800;font-family:ui-monospace,Menlo,monospace;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;display:block}
+  .stat:nth-child(2) b{background:var(--grad-hot);-webkit-background-clip:text;background-clip:text}
+  .stat:nth-child(3) b{background:linear-gradient(90deg,#10b981,#06b6d4);-webkit-background-clip:text;background-clip:text}
+  .stat:nth-child(4) b{background:var(--grad-dawn);-webkit-background-clip:text;background-clip:text}
+  .stat span{font-size:11.5px;color:var(--muted);display:block;margin-top:4px}
+  .stat em{font-style:normal;font-size:10.5px;color:var(--faint);display:block;margin-top:2px}
+
+  /* ===== 区块标题 ===== */
+  .sec{max-width:1080px;margin:0 auto;padding:48px 26px 0}
+  .sec-h{text-align:center;margin-bottom:26px}
+  .sec-h h2{font-size:23px;font-weight:800;letter-spacing:.5px}
+  .sec-h h2 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sec-h p{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.9}
+
+  /* ===== 智能体卡片 ===== */
+  .agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .agent{
+    position:relative;border-radius:20px;background:var(--surface-solid);border:1px solid var(--border);
+    box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column;
+    transition:.28s;text-decoration:none;color:var(--text);animation:fadeUp .6s ease both;
+  }
+  .agent:nth-child(1){animation-delay:.05s}
+  .agent:nth-child(2){animation-delay:.12s}
+  .agent:nth-child(3){animation-delay:.19s}
+  .agent:nth-child(4){animation-delay:.26s}
+  .agent:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:rgba(37,99,235,.38)}
+  .agent .banner{height:92px;position:relative;display:flex;align-items:center;padding:0 22px;gap:14px;overflow:hidden}
+  .agent .banner::after{content:"";position:absolute;right:-26px;top:-32px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.14)}
+  .agent .banner::before{content:"";position:absolute;right:36px;bottom:-46px;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.1)}
+  .agent.a1 .banner{background:var(--grad)}
+  .agent.a2 .banner{background:var(--grad-hot)}
+  .agent.a3 .banner{background:var(--grad-dawn)}
+  .agent.a4 .banner{background:var(--grad-violet)}
+  .agent .bic{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.2);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:1px solid rgba(255,255,255,.3)}
+  .agent .bt2{color:#fff;line-height:1.3;position:relative;z-index:1}
+  .agent .bt2 b{font-size:19px;font-weight:800;letter-spacing:1px;display:block}
+  .agent .bt2 span{font-size:11px;opacity:.9}
+  .agent .ucode{position:absolute;top:14px;right:16px;z-index:2;font-size:10px;font-weight:800;font-family:ui-monospace,Menlo,monospace;color:#fff;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);padding:3px 9px;border-radius:7px;letter-spacing:.5px}
+  .agent .body{padding:16px 20px 18px;display:flex;flex-direction:column;flex:1;gap:12px}
+  .agent .desc{font-size:12.8px;color:var(--muted);line-height:1.85}
+  .agent .desc b{color:#0f3a8f}
+  .agent .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .agent .tag{font-size:11px;color:#1d4ed8;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.22);padding:4px 10px;border-radius:99px}
+  .agent.a2 .tag{color:#be123c;background:rgba(244,63,94,.05);border-color:rgba(244,63,94,.22)}
+  .agent.a3 .tag{color:#b45309;background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.25)}
+  .agent.a4 .tag{color:#6d28d9;background:rgba(124,58,237,.05);border-color:rgba(124,58,237,.22)}
+  .agent .kpis2{display:flex;gap:8px;flex-wrap:wrap}
+  .agent .k2{flex:1;min-width:90px;text-align:center;background:#f7fafd;border:1px solid var(--border);border-radius:11px;padding:8px 6px}
+  .agent .k2 b{font-size:14.5px;font-weight:800;font-family:ui-monospace,Menlo,monospace;color:#0f3a8f;display:block}
+  .agent .k2 span{font-size:10px;color:var(--faint)}
+  .agent .foot{margin-top:auto;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);padding-top:13px}
+  .agent .live{display:flex;align-items:center;gap:6px;font-size:11px;color:#047857;font-weight:600}
+  .agent .live i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(16,185,129,.8);animation:breath 2s infinite}
+  .agent .enter{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12.8px;font-weight:700;color:var(--primary);transition:.2s}
+  .agent:hover .enter{gap:10px}
+  .agent.a2 .enter{color:#e11d48}
+  .agent.a3 .enter{color:#d97706}
+  .agent.a4 .enter{color:#7c3aed}
+
+  /* ===== 规划中 ===== */
+  .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+  .plan{
+    border:1px dashed var(--border-strong);border-radius:15px;padding:15px 16px;background:rgba(255,255,255,.66);
+    transition:.2s;cursor:pointer;animation:fadeUp .6s ease both;
+  }
+  .plan:hover{border-color:rgba(37,99,235,.4);background:#fff;transform:translateY(-2px)}
+  .plan .ph{display:flex;align-items:center;gap:9px}
+  .plan .pic{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#eef2f8;color:var(--faint)}
+  .plan b{font-size:13px;color:#334155}
+  .plan .stage{margin-left:auto;font-size:9.5px;font-weight:700;padding:2.5px 8px;border-radius:6px;flex-shrink:0}
+  .plan .stage.p1{color:#b45309;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)}
+  .plan .stage.p2{color:#6d28d9;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25)}
+  .plan p{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.7}
+
+  /* ===== 路线图 ===== */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+  .rd{
+    border:1px solid var(--border);border-radius:17px;background:var(--surface-solid);padding:17px 18px;
+    box-shadow:var(--shadow-sm);position:relative;overflow:hidden;animation:fadeUp .6s ease both;
+  }
+  .rd::before{content:"";position:absolute;top:0;left:0;right:0;height:3.5px;background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .rd:nth-child(2)::before{background:var(--grad-dawn)}
+  .rd:nth-child(3)::before{background:var(--grad-violet)}
+  .rd .rh{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .rd .rh b{font-size:14.5px}
+  .rd .rh .tm{font-size:10.5px;font-weight:700;color:var(--faint);font-family:ui-monospace,Menlo,monospace;margin-left:auto}
+  .rd .rstate{font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px}
+  .rd .rstate.done{color:#047857;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)}
+  .rd .rstate.next{color:#b45309;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35)}
+  .rd .rstate.later{color:#6d28d9;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25)}
+  .rd ul{padding-left:17px;font-size:12.2px;color:var(--muted);line-height:1.95}
+  .rd ul b{color:#0f3a8f}
+  .gate{
+    display:flex;gap:10px;border:1px dashed rgba(245,158,11,.45);background:linear-gradient(90deg,rgba(245,158,11,.06),rgba(251,146,60,.04));
+    border-radius:13px;padding:12px 15px;font-size:12.3px;color:#7c4a05;line-height:1.85;
+  }
+  .gate svg{flex-shrink:0;margin-top:2px}
+
+  /* ===== 页脚 ===== */
+  .footer{max-width:1080px;margin:0 auto;padding:40px 26px 34px;text-align:center}
+  .footer .line{height:1px;background:linear-gradient(90deg,transparent,var(--border-strong),transparent);margin-bottom:22px}
+  .footer .f1{font-size:12px;color:var(--muted);line-height:2}
+  .footer .f1 b{color:#64748b}
+  .footer .f2{font-size:10.8px;color:var(--faint);margin-top:8px;line-height:1.9}
+
+  .toast{position:fixed;left:50%;top:74px;transform:translateX(-50%) translateY(-8px);z-index:99;background:#0f172a;color:#fff;font-size:12.5px;padding:9px 18px;border-radius:99px;box-shadow:0 10px 30px rgba(15,23,42,.3);opacity:0;pointer-events:none;transition:.3s;display:flex;align-items:center;gap:7px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast svg{color:#22d3ee}
+
+  @media (max-width:920px){
+    .agent-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+    .plan-grid{grid-template-columns:1fr 1fr}
+    .road{grid-template-columns:1fr}
+    .top-nav{display:none}
+    .hero h1{font-size:27px}
+  }
+  @media (max-width:560px){
+    .plan-grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="aurora"><i></i><i></i><i></i><i></i></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lgMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <symbol id="logoCX" viewBox="0 0 48 48">
+      <rect width="48" height="48" rx="13" fill="url(#lgMain)"/>
+      <g opacity=".9">
+        <line x1="24" y1="13" x2="24" y2="17.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="14.5" y1="17.5" x2="17.6" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="33.5" y1="17.5" x2="30.4" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+      <path d="M15 29.5 A9 9 0 0 1 33 29.5 Z" fill="#fff"/>
+      <rect x="10" y="29.5" width="28" height="2.6" rx="1.3" fill="#fff"/>
+      <rect x="14" y="35" width="20" height="2" rx="1" fill="#fff" opacity=".55"/>
+      <path d="M37.5 7 C38 9.2 38.8 10 41 10.5 C38.8 11 38 11.8 37.5 14 C37 11.8 36.2 11 34 10.5 C36.2 10 37 9.2 37.5 7 Z" fill="#fde68a"/>
+    </symbol>
+    <symbol id="icoSpark" viewBox="0 0 24 24">
+      <path d="M12 3c.7 3.9 2.4 5.6 6.3 6.3v.4c-3.9.7-5.6 2.4-6.3 6.3h-.4c-.7-3.9-2.4-5.6-6.3-6.3v-.4C9.2 8.6 10.9 6.9 11.6 3h.4Z" fill="currentColor"/>
+      <path d="M18.5 14.5c.35 1.95 1.2 2.8 3.15 3.15v.2c-1.95.35-2.8 1.2-3.15 3.15h-.2c-.35-1.95-1.2-2.8-3.15-3.15v-.2c1.95-.35 2.8-1.2 3.15-3.15h.2Z" fill="currentColor" opacity=".65"/>
+    </symbol>
+    <symbol id="icoCheck" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".14"/>
+      <path d="m7.5 12.2 3 3 6-6.4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoChat" viewBox="0 0 24 24">
+      <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+      <path d="M8 10.5h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoFire" viewBox="0 0 24 24">
+      <path d="M12 22c4.4 0 7.5-2.9 7.5-7.2 0-2.5-1.2-4.6-2.6-6.3-.4 1-1 1.9-1.9 2.4.2-2.9-1.2-6.5-4.5-8.4.3 2.3-.4 4.2-1.9 5.9-1.4 1.6-4.1 3.6-4.1 6.6C4.5 19.1 7.6 22 12 22Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M12 22c2 0 3.4-1.4 3.4-3.4 0-1.7-1.1-2.6-2-3.9-.8.7-2.5 2-2.5 3.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoBid" viewBox="0 0 24 24">
+      <path d="M8 4h11a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M4 4h4v16H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M11.5 9h5M11.5 13h5M11.5 17h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoDoc" viewBox="0 0 24 24">
+      <path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M13 2v6h6M8.5 13h7M8.5 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="icoCalc" viewBox="0 0 24 24">
+      <rect x="5" y="3" width="14" height="18" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5v2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoShield" viewBox="0 0 24 24">
+      <path d="M12 2.5 20 6v6c0 5-3.4 8.3-8 9.5C7.4 20.3 4 17 4 12V6l8-3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="m8.5 11.8 2.5 2.5 4.5-4.8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoEdu" viewBox="0 0 24 24">
+      <path d="m12 4 10 5-10 5L2 9l10-5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5M22 9v5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoCad" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="1.8"/>
+      <path d="m13 17 2.5-4 2.5 4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoDb" viewBox="0 0 24 24">
+      <ellipse cx="12" cy="5.5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M4 5.5V12c0 1.66 3.58 3 8 3s8-1.34 8-3V5.5M4 12v6.5c0 1.66 3.58 3 8 3s8-1.34 8-3V12" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    </symbol>
+    <symbol id="icoFlag" viewBox="0 0 24 24">
+      <path d="M5 21V4.5M5 4.5C7 3 9 3 11 4s4 1 6.5-.3V13c-2.5 1.3-4.5 1.3-6.5.3s-4-1-6-.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+  <!-- ===== 顶栏 ===== -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo"><use href="#logoCX"/></svg>
+      <div class="bt">
+        <b>晨曦科技 <span class="ai-chip">AI</span></b>
+        <small>CHENXI TECH · AI MATRIX</small>
+      </div>
+    </div>
+    <nav class="top-nav">
+      <a href="#agents">智能体矩阵</a>
+      <a href="#plan">扩展规划</a>
+      <a href="#road">实施路线</a>
+    </nav>
+    <div class="top-right">
+      <span class="model-pill"><span class="led"></span> 国产大模型 · 主备双引擎在线</span>
+      <span class="demo-badge">✦ DEMO 演示环境</span>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="hero-orb"><span class="ring"></span><span class="ring"></span><svg class="logo"><use href="#logoCX"/></svg></div>
+    <h1>晨曦科技 <span>AI 智能体矩阵</span></h1>
+    <p class="sub">
+      以 <b>外采大模型 API × 晨曦自有知识与数据资产</b> 为底座，围绕<b>产品智能化、研发提效、经营与营销升级</b>三大工程构建的企业级 AI 应用门户。
+      <br>速赢期 4 个 P0 智能体已全部上线，<span class="hl-dawn">GB/T 50500-2024 新国标换轨窗口正面承接中</span> · 全线执行「AI 起草 · 人工签发」。
+    </p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#agents"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSpark"/></svg>进入智能体矩阵</a>
+      <a class="btn ghost" href="#road"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoFlag"/></svg>12 个月实施路线</a>
+    </div>
+  </section>
+
+  <!-- ===== 统计条 ===== -->
+  <div class="stats">
+    <div class="stat"><b>4 / 4</b><span>P0 智能体已上线</span><em>速赢期 M1—M3 · 全部达标</em></div>
+    <div class="stat"><b>412.6w</b><span>月度全网播放（智营）</span><em>获客线索 286 条 / 月</em></div>
+    <div class="stat"><b>−66%~71%</b><span>标书与报表编制工时</span><em>等效释放 3.7 人月+</em></div>
+    <div class="stat"><b>≤¥2,000</b><span>月度模型用量费用</span><em>知识与数据资产归晨曦</em></div>
+  </div>
+
+  <!-- ===== 智能体矩阵 ===== -->
+  <section class="sec" id="agents">
+    <div class="sec-h">
+      <h2>智能体<span>矩阵</span></h2>
+      <p>四个已上线智能体，分别嵌入客服、市场、商务、管理四条业务线 —— 点击卡片进入对应平台</p>
+    </div>
+    <div class="agent-grid">
+
+      <a class="agent a1" href="晨曦智询-计价知识助手.html">
+        <div class="banner">
+          <div class="bic"><svg width="24" height="24" viewBox="0 0 24 24"><use href="#icoChat"/></svg></div>
+          <div class="bt2"><b>晨曦智询</b><span>计价知识助手 · 产品内副驾 + 智能客服</span></div>
+          <span class="ucode">U1 · P0</span>
+        </div>
+        <div class="body">
+          <div class="desc">自然语言问计价依据，检索定额库、政策文件与官方问答，<b>回答附出处原文</b>；低置信度自动转人工，人工答复审核后回灌知识库。内置 <b>GB/T 50500-2024 新标准专题库</b>，正面承接全省换轨咨询洪峰。</div>
+          <div class="tags"><span class="tag">RAG 检索增强</span><span class="tag">依据溯源</span><span class="tag">转人工兜底</span><span class="tag">新国标专题</span></div>
+          <div class="kpis2">
+            <div class="k2"><b>38.6%</b><span>重复咨询分流</span></div>
+            <div class="k2"><b>93.2%</b><span>抽检准确率</span></div>
+            <div class="k2"><b>1.8s</b><span>平均首答</span></div>
+          </div>
+          <div class="foot"><span class="live"><i></i>在线 · 演示就绪</span><span class="enter">进入平台 →</span></div>
+        </div>
+      </a>
+
+      <a class="agent a2" href="晨曦智营-AI智能营销平台.html">
+        <div class="banner">
+          <div class="bic"><svg width="24" height="24" viewBox="0 0 24 24"><use href="#icoFire"/></svg></div>
+          <div class="bt2"><b>晨曦智营</b><span>AI 智能营销平台 · 一切为流量服务</span></div>
+          <span class="ucode">U3·A · P0</span>
+        </div>
+        <div class="body">
+          <div class="desc">爆款雷达监测六平台并<b>一键复刻流量基因</b>；AIGC 多模态创作（文案 / 图文 / 封面 / 数字人）；智能混剪批量产出<b>互查重变体</b>；矩阵自动分发逐平台适配；评论私信<b>自动回复与线索捕获</b>直通 CRM。</div>
+          <div class="tags"><span class="tag">爆款复刻</span><span class="tag">智能混剪</span><span class="tag">矩阵分发</span><span class="tag">自动互动</span></div>
+          <div class="kpis2">
+            <div class="k2"><b>412.6w</b><span>月全网播放</span></div>
+            <div class="k2"><b>286 条</b><span>月获客线索</span></div>
+            <div class="k2"><b>−80%</b><span>单条内容成本</span></div>
+          </div>
+          <div class="foot"><span class="live"><i></i>在线 · 演示就绪</span><span class="enter">进入平台 →</span></div>
+        </div>
+      </a>
+
+      <a class="agent a3" href="晨曦智标-智能标书生成平台.html">
+        <div class="banner">
+          <div class="bic"><svg width="24" height="24" viewBox="0 0 24 24"><use href="#icoBid"/></svg></div>
+          <div class="bt2"><b>晨曦智标</b><span>智能标书生成平台 · 投标全生命周期</span></div>
+          <span class="ucode">U3·B · P0</span>
+        </div>
+        <div class="body">
+          <div class="desc">商机雷达三维匹配研判 → 招标文件深度解析 → 高胜率段落智能装配 → <b>九条否决条款废标扫描</b> → 三名 AI 评委<b>模拟评分与提分动作</b>。把"开标才知道"变成"递交前就知道"。</div>
+          <div class="tags"><span class="tag">商机监测</span><span class="tag">资质挂接</span><span class="tag">废标风控</span><span class="tag">评分模拟</span></div>
+          <div class="kpis2">
+            <div class="k2"><b>−66%</b><span>初稿编制工时</span></div>
+            <div class="k2"><b>38.7%</b><span>近 12 月中标率</span></div>
+            <div class="k2"><b>0 次</b><span>废标记录</span></div>
+          </div>
+          <div class="foot"><span class="live"><i></i>在线 · 演示就绪</span><span class="enter">进入平台 →</span></div>
+        </div>
+      </a>
+
+      <a class="agent a4" href="晨曦智报-文书生成助手.html">
+        <div class="banner">
+          <div class="bic"><svg width="24" height="24" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>
+          <div class="bt2"><b>晨曦智报</b><span>文书生成助手 · 汇报自动成稿</span></div>
+          <span class="ucode">U4 · P0</span>
+        </div>
+        <div class="body">
+          <div class="desc">依托现有汇报系统：<b>系统数据自动拉取 + 负责人要点口述</b>，生成统一口径的周报 / 月报 / 专项汇报 / 会议纪要；口径字典校验、数据标注来源，<b>负责人修订签发</b>后回写归档，管理层从"催报表、对口径"中解放。</div>
+          <div class="tags"><span class="tag">汇报自动成稿</span><span class="tag">统一口径</span><span class="tag">签发审计</span><span class="tag">会议纪要</span></div>
+          <div class="kpis2">
+            <div class="k2"><b>−71%</b><span>报表编制工时</span></div>
+            <div class="k2"><b>1.6%</b><span>口径返工率（原 9.8%）</span></div>
+            <div class="k2"><b>36 份</b><span>本月 AI 成稿</span></div>
+          </div>
+          <div class="foot"><span class="live"><i></i>在线 · 演示就绪</span><span class="enter">进入平台 →</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ===== 扩展规划 ===== -->
+  <section class="sec" id="plan">
+    <div class="sec-h">
+      <h2>扩展<span>规划</span></h2>
+      <p>P1 / P2 候选用例 · 依据速赢期实测数据，经 Go / No-Go 评审后择优启动</p>
+    </div>
+    <div class="plan-grid">
+      <div class="plan" onclick="toast('U5 组价辅助：扩展期候选，依速赢期数据经评审点①后择优启动')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoCalc"/></svg></div><b>晨曦智组 · 智能组价辅助</b><span class="stage p1">P1 · M4—M8</span></div>
+        <p>清单语义匹配，历史组价方案推荐，AI 起草、造价师确认入价</p>
+      </div>
+      <div class="plan" onclick="toast('U6 成果审核：扩展期候选，查错漏项辅助，注册造价工程师签发')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoShield"/></svg></div><b>晨曦智审 · 计价成果审核</b><span class="stage p1">P1 · M4—M8</span></div>
+        <p>成果文件查错漏项、费率异常与逻辑校验，签章前最后一道 AI 防线</p>
+      </div>
+      <div class="plan" onclick="toast('U7 教育 AI：扩展期候选，嵌入教学云平台')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoEdu"/></svg></div><b>晨曦智学 · 教育 AI</b><span class="stage p1">P1 · M4—M8</span></div>
+        <p>AI 陪练 / 智能判卷 / 自动出题，嵌入教学云平台与实训室方案</p>
+      </div>
+      <div class="plan" onclick="toast('U8 财务审单：扩展期候选，费用与票据智能审核')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div><b>晨曦智财 · 财务智能审单</b><span class="stage p1">P1 · M4—M8</span></div>
+        <p>费用报销与合同票据智能审核，规则 + 大模型双引擎</p>
+      </div>
+      <div class="plan" onclick="toast('U9 识图辅助：扩展期候选，CAD 分图助手升级')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoCad"/></svg></div><b>晨曦智图 · CAD 识图翻模</b><span class="stage p1">P1 · M4—M8</span></div>
+        <p>CAD 识图与翻模辅助，分图助手 AI 升级版</p>
+      </div>
+      <div class="plan" onclick="toast('U10 数据资产化：固化期一期试点 800—1,500 份历史成果结构化')">
+        <div class="ph"><div class="pic"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoDb"/></svg></div><b>晨曦智库 · 数据资产化</b><span class="stage p2">P2 · M9—M12</span></div>
+        <p>二十余年历史成果文件结构化，建企业定额与造价指标库雏形</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 实施路线 ===== -->
+  <section class="sec" id="road">
+    <div class="sec-h">
+      <h2>12 个月<span>实施路线</span></h2>
+      <p>轻量启动 · 速赢验证 · 以效促投 —— 每阶段末设 Go / No-Go 评审，效果达标才进入下一阶段</p>
+    </div>
+    <div class="road">
+      <div class="rd">
+        <div class="rh"><b>速赢期</b><span class="rstate done">✓ 已交付</span><span class="tm">M1—M3</span></div>
+        <ul>
+          <li><b>4 个 P0 智能体全部上线</b>（即本门户：智询 / 智营 / 智标 / 智报）</li>
+          <li>验收：智询分流 38.6%（≥30%）· 准确率 93.2%（≥90%）· 工时 −66%~71%（≥60%~70%）</li>
+          <li><b>评审点① 通过</b>，扩展期立项依据已具备</li>
+        </ul>
+      </div>
+      <div class="rd">
+        <div class="rh"><b>扩展期</b><span class="rstate next">待启动</span><span class="tm">M4—M8</span></div>
+        <ul>
+          <li>从 U5—U9 五个 P1 用例中<b>择优启动 3—4 项</b></li>
+          <li>智询知识库扩容至省外测评地区版本</li>
+          <li>付款与验收绑定 30% / 40% / 30%，单用例锁定 KPI</li>
+        </ul>
+      </div>
+      <div class="rd">
+        <div class="rh"><b>固化期</b><span class="rstate later">规划中</span><span class="tm">M9—M12</span></div>
+        <ul>
+          <li><b>U10 数据资产化一期</b>：试点 800—1,500 份历史成果结构化</li>
+          <li>AI 使用制度与运维手册固化，移交自运维能力</li>
+          <li>全年收益复盘，形成次年投入决策依据</li>
+        </ul>
+      </div>
+    </div>
+    <div class="gate">
+      <svg width="15" height="15" viewBox="0 0 24 24" style="color:#b45309"><use href="#icoFlag"/></svg>
+      <span><strong>快速失败机制（写进合同）：</strong>任一用例核心 KPI 偏离目标 50% 以上、且两轮迭代（约 4 周）未见改善，即终止该用例，剩余预算转投候补——每一笔追加投入都建立在上一阶段实测数据之上。</span>
+    </div>
+  </section>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="footer">
+    <div class="line"></div>
+    <div class="f1"><b>「AI 起草 · 人工签发」</b>全线合规底线：可提交成果须经注册造价工程师审核签章 ｜ 知识库与业务数据私有化部署，仅脱敏片段出域 ｜ 客户数据不用于模型训练</div>
+    <div class="f2">晨曦科技 AI 整体解决方案 · 速赢期交付成果演示 ｜ 主备双模型热切换 · 全量审计日志 · 一年后可自运维 <span class="demo-badge">✦ DEMO 演示环境 · 示例数据</span></div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoCheck"/></svg><span id="toastText"></span></div>
+
+<script>
+/* ===== 背景粒子 ===== */
+(function(){
+  var cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d'),pts=[],N=60;
+  function rs(){cv.width=innerWidth;cv.height=innerHeight}
+  rs();addEventListener('resize',rs);
+  for(var i=0;i<N;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.8});
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<N;i++){
+      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(6,182,212,.22)';ctx.fill();
+      for(var j=i+1;j<N;j++){
+        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
+        if(d<150*150){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(37,99,235,'+(0.085*(1-d/22500))+')';ctx.lineWidth=1;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+function toast(t){
+  var x=document.getElementById('toast');
+  document.getElementById('toastText').textContent=t;
+  x.classList.add('show');clearTimeout(x._t);
+  x._t=setTimeout(function(){x.classList.remove('show')},2600);
+}
+</script>
+</body>
+</html>
