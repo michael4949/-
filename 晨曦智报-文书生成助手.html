@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>晨曦智报 · 文书生成助手（汇报自动成稿） — 晨曦科技</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%232563eb"/><stop offset="1" stop-color="%2306b6d4"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(%23g)"/><path d="M15 28 A9 9 0 0 1 33 28 Z" fill="white"/><rect x="10" y="28" width="28" height="2.5" rx="1.25" fill="white"/></svg>'>
+<style>
+  :root{
+    --bg:#f4f7fb; --surface:rgba(255,255,255,.82); --surface-solid:#ffffff;
+    --border:#e3e9f2; --border-strong:#d3dce8;
+    --text:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --primary:#2563eb; --primary-2:#06b6d4; --dawn:#f59e0b; --dawn-2:#fb923c;
+    --grad:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
+    --grad-dawn:linear-gradient(135deg,#f59e0b,#fb923c);
+    --grad-violet:linear-gradient(135deg,#7c3aed,#2563eb);
+    --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --shadow-sm:0 1px 3px rgba(30,58,138,.06),0 4px 14px rgba(30,58,138,.05);
+    --shadow-md:0 4px 10px rgba(30,58,138,.07),0 12px 32px rgba(30,58,138,.08);
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--text);overflow:hidden;
+  }
+  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+  .aurora i:nth-child(1){width:560px;height:560px;background:#dbeafe;top:-180px;left:-120px}
+  .aurora i:nth-child(2){width:520px;height:520px;background:#ede9fe;bottom:-200px;right:-100px;animation-delay:-6s}
+  .aurora i:nth-child(3){width:420px;height:420px;background:#fef3c7;top:30%;right:22%;opacity:.4;animation-delay:-12s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.12)}}
+  @keyframes breath{0%,100%{opacity:1}50%{opacity:.45}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes blink{50%{opacity:0}}
+
+  .app{position:relative;z-index:1;display:flex;height:100vh}
+
+  /* ===== 左侧栏 ===== */
+  .sidebar{width:268px;flex-shrink:0;display:flex;flex-direction:column;background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-right:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px 18px 14px}
+  .brand .logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(37,99,235,.35))}
+  .brand .bt{line-height:1.18}
+  .brand .bt b{font-size:17px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  .brand .bt small{font-size:10px;color:var(--faint);letter-spacing:2.5px;font-weight:600}
+  .ai-chip{font-size:9px;font-weight:700;color:#fff;background:var(--grad);padding:2px 6px;border-radius:6px;letter-spacing:1px;box-shadow:0 2px 6px rgba(6,182,212,.4)}
+  .side-sec{padding:4px 14px 10px;overflow-y:auto;flex:1}
+  .side-sec::-webkit-scrollbar{width:5px}
+  .side-sec::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+  .side-sec h5{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:1px;margin:14px 4px 8px;display:flex;align-items:center;gap:6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;margin-bottom:3px;font-size:13.5px;color:var(--muted);cursor:pointer;transition:.18s}
+  .nav-item svg{flex-shrink:0}
+  .nav-item:hover{background:rgba(37,99,235,.06);color:var(--text)}
+  .nav-item.active{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(37,99,235,.3)}
+  .nav-item .nbadge{margin-left:auto;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(245,158,11,.15);color:#b45309}
+  .nav-item.active .nbadge{background:rgba(255,255,255,.25);color:#fff}
+  .kb-item{display:flex;align-items:center;gap:9px;padding:7.5px 10px;border-radius:10px;font-size:12.5px;color:var(--text);cursor:default;transition:.15s}
+  .kb-item:hover{background:rgba(37,99,235,.06)}
+  .kb-item .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15);flex-shrink:0;animation:breath 2.6s infinite}
+  .kb-item .dot.blue{background:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  .kb-item .ki{flex:1;min-width:0}
+  .kb-item .ki em{display:block;font-style:normal;font-size:10.5px;color:var(--faint);margin-top:1px}
+  .side-foot{border-top:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;gap:10px}
+  .avatar-u{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0e7490,#2563eb);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+  .side-foot .ui{flex:1;min-width:0;line-height:1.3}
+  .side-foot .ui b{font-size:13px;display:block}
+  .side-foot .ui span{font-size:11px;color:var(--faint)}
+  .lic{font-size:9.5px;font-weight:700;color:var(--primary);border:1px solid rgba(37,99,235,.35);padding:2px 6px;border-radius:6px;background:rgba(37,99,235,.06)}
+
+  /* ===== 主区域 ===== */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{height:62px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 22px;background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+  .ptitle{display:flex;align-items:center;gap:10px}
+  .ptitle h1{font-size:16.5px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+  .ptitle .sub{font-size:12px;color:var(--muted);padding-left:10px;border-left:1px solid var(--border-strong)}
+  .kpis{display:flex;gap:8px;margin-left:8px}
+  .kpi{font-size:11px;color:var(--muted);background:rgba(255,255,255,.7);border:1px solid var(--border);padding:4px 9px;border-radius:8px;display:flex;align-items:center;gap:5px}
+  .kpi b{color:var(--primary);font-size:11.5px}
+  .kpi b.up{color:#059669}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px;position:relative}
+  .model-pill{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.75);border:1px solid var(--border);padding:6px 11px;border-radius:99px;cursor:default}
+  .model-pill .led{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(16,185,129,.8);animation:breath 2s infinite}
+  .icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:.18s}
+  .icon-btn:hover{color:var(--primary);border-color:rgba(37,99,235,.4)}
+  .suite-menu{position:absolute;top:44px;right:0;width:248px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);padding:8px;display:none;z-index:50;animation:fadeUp .2s ease}
+  .suite-menu.open{display:block}
+  .suite-it{display:flex;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:.15s;align-items:center}
+  .suite-it:hover{background:rgba(37,99,235,.06)}
+  .suite-it .si{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--grad)}
+  .suite-it .si.dawn{background:var(--grad-dawn)}
+  .suite-it .si.violet{background:var(--grad-violet)}
+  .suite-it b{font-size:12.8px;display:block}
+  .suite-it span{font-size:10.8px;color:var(--faint)}
+  .suite-it .cur{margin-left:auto;font-size:9.5px;font-weight:700;color:#059669;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);padding:2px 6px;border-radius:6px}
+
+  .views{flex:1;overflow-y:auto;padding:22px 26px 14px;scroll-behavior:smooth}
+  .views::-webkit-scrollbar{width:6px}
+  .views::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+  .view{max-width:1080px;margin:0 auto;display:none;animation:fadeUp .35s ease}
+  .view.active{display:block}
+  .card{background:var(--surface-solid);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+  .card-h{display:flex;align-items:center;gap:9px;padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700}
+  .card-h .chx{margin-left:auto;display:flex;gap:8px;font-weight:400;align-items:center}
+  .card-b{padding:16px 18px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;padding:10px 18px;border-radius:11px;transition:.2s}
+  .btn.primary{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.28)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,.36)}
+  .btn.primary:disabled{background:#dbe3ee;box-shadow:none;cursor:not-allowed;color:#9fb0c6}
+  .btn.ghost{background:rgba(37,99,235,.07);color:var(--primary);border:1px solid rgba(37,99,235,.3)}
+  .btn.ghost:hover{background:rgba(37,99,235,.13)}
+  .btn.dawn{background:var(--grad-dawn);color:#fff;box-shadow:0 6px 16px rgba(245,158,11,.3)}
+  .btn.sm{font-size:12px;padding:7px 13px;border-radius:9px}
+
+  .st-chip{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px;flex-shrink:0}
+  .st-chip.ok{color:#047857;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)}
+  .st-chip.wait{color:#b45309;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35)}
+  .st-chip.info{color:#1d4ed8;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3)}
+
+  /* —— 顶部统计条 —— */
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px}
+  .stat{position:relative;overflow:hidden;padding:13px 16px;border-radius:var(--radius);background:var(--surface-solid);border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+  .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+  .stat:nth-child(2)::before{background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .stat:nth-child(3)::before{background:var(--grad-dawn)}
+  .stat:nth-child(4)::before{background:var(--grad-violet)}
+  .stat .sl{font-size:11.5px;color:var(--muted)}
+  .stat .sv{font-size:21px;font-weight:800;margin:5px 0 2px;font-family:ui-monospace,Menlo,monospace}
+  .stat .sv small{font-size:11.5px;font-weight:600;color:var(--muted);font-family:inherit}
+  .stat .sd{font-size:10.8px;color:var(--faint)}
+  .stat .sd b{color:#059669}
+
+  /* —— 工作台双栏 —— */
+  .work-grid{display:grid;grid-template-columns:350px 1fr;gap:14px;align-items:start}
+  .f-label{font-size:11.5px;color:var(--faint);font-weight:600;margin:14px 0 7px;display:flex;align-items:center;gap:6px}
+  .f-label:first-child{margin-top:0}
+  .f-label .mic{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--primary);background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.3);border-radius:99px;padding:4px 10px;cursor:pointer;transition:.15s}
+  .f-label .mic:hover{background:rgba(37,99,235,.14)}
+  .f-label .mic.rec{color:#dc2626;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.4)}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .type-it{border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;transition:.18s;background:#fff}
+  .type-it b{font-size:12.8px;display:flex;align-items:center;gap:6px}
+  .type-it span{font-size:10.6px;color:var(--faint);display:block;margin-top:3px;line-height:1.45}
+  .type-it:hover{border-color:rgba(37,99,235,.4)}
+  .type-it.on{border-color:rgba(37,99,235,.6);background:rgba(37,99,235,.05);box-shadow:0 4px 12px rgba(37,99,235,.12)}
+  .type-it.on b{color:#0f3a8f}
+  .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+  .fg label{font-size:11px;color:var(--faint);font-weight:600}
+  .fg select,.fg input{border:1.5px solid var(--border-strong);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:12.6px;color:var(--text);outline:none;background:#fff;transition:.2s}
+  .fg select:focus,.fg input:focus{border-color:var(--primary)}
+  .data-panel{border:1px solid var(--border);border-radius:12px;background:#f8fafc;padding:10px 12px}
+  .dp-it{display:flex;align-items:center;gap:9px;padding:6px 2px;font-size:12.2px}
+  .dp-it .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.13);flex-shrink:0;animation:breath 2.4s infinite}
+  .dp-it b{font-weight:600}
+  .dp-it em{font-style:normal;margin-left:auto;font-size:10.5px;color:var(--faint)}
+  .dp-foot{font-size:10.5px;color:var(--faint);border-top:1px dashed var(--border);margin-top:6px;padding-top:7px;display:flex;align-items:center;gap:6px}
+  .f-ta{width:100%;border:1.5px solid var(--border-strong);border-radius:12px;padding:11px 13px;font-family:inherit;font-size:12.6px;line-height:1.75;color:var(--text);resize:vertical;min-height:104px;outline:none;transition:.2s;background:#fff}
+  .f-ta:focus{border-color:var(--primary)}
+  .calib{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#0e7490;background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.3);border-radius:10px;padding:8px 11px;margin-top:12px}
+
+  /* —— 输出 —— */
+  .out-empty{text-align:center;padding:70px 20px;color:var(--faint)}
+  .out-empty .oe-orb{width:64px;height:64px;margin:0 auto 16px;border-radius:20px;background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(6,182,212,.12));display:flex;align-items:center;justify-content:center;color:var(--primary)}
+  .out-empty b{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+  .out-empty span{font-size:12px;line-height:1.8}
+  .process{border:1px dashed rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(6,182,212,.05));border-radius:14px;padding:12px 15px;margin-bottom:14px;font-size:12.5px}
+  .p-step{display:flex;align-items:center;gap:9px;padding:4.5px 0;color:var(--muted);opacity:.35;transition:.3s}
+  .p-step.on{opacity:1;color:var(--text)}
+  .p-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .spinner{width:13px;height:13px;border:2px solid rgba(37,99,235,.25);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+  .p-step .chk{color:var(--ok);display:none}
+  .p-step.done .chk{display:block}
+  .p-step.done .spinner{display:none}
+  .p-step em{font-style:normal;color:var(--primary);font-weight:600}
+  .p-sum{display:none;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+  .p-sum b{color:var(--primary)}
+  .process.collapsed .p-steps{display:none}
+  .process.collapsed .p-sum{display:flex}
+  .meta-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px}
+  .ms{font-size:11px;color:var(--muted);background:#f1f5fb;border:1px solid var(--border);padding:4px 10px;border-radius:99px;display:flex;align-items:center;gap:5px}
+  .ms b{color:#0f3a8f}
+  .ms.pass{color:#047857;background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}
+  .ms.time{color:#b45309;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)}
+  .cursor{display:inline-block;width:8px;height:16px;background:var(--primary-2);border-radius:2px;vertical-align:-2px;animation:blink .8s steps(1) infinite;margin-left:1px}
+
+  /* —— 文书纸面 —— */
+  .docpaper{font-size:13.4px;line-height:1.92;border:1px solid var(--border);border-radius:14px;padding:22px 26px;background:#fff;box-shadow:inset 0 1px 4px rgba(30,58,138,.03)}
+  .docpaper.editing{outline:2px dashed rgba(37,99,235,.45);outline-offset:4px}
+  .doc-head{text-align:center;border-bottom:2px solid #10316e;padding-bottom:12px;margin-bottom:16px}
+  .doc-head h2{font-size:18.5px;color:#10316e;letter-spacing:1px;line-height:1.5}
+  .doc-head .bd{font-size:11.3px;color:var(--muted);margin-top:6px}
+  .docpaper h4{font-size:14px;margin:16px 0 9px;display:flex;align-items:center;gap:7px;color:#0f3a8f}
+  .docpaper h4::before{content:"";width:3.5px;height:14px;border-radius:2px;background:var(--grad)}
+  .docpaper p{margin:0 0 10px}
+  .docpaper ul,.docpaper ol{padding-left:20px;margin:6px 0 11px}
+  .docpaper li{margin-bottom:6px}
+  .docpaper strong{color:#0f3a8f}
+  .docpaper .num{color:#b45309;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+  .docpaper table{width:100%;border-collapse:collapse;font-size:12.4px;margin:8px 0 12px}
+  .docpaper th{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.08));color:#0f3a8f;font-weight:700;text-align:left;padding:8px 10px;border:1px solid var(--border)}
+  .docpaper td{padding:8px 10px;border:1px solid var(--border);vertical-align:top}
+  .docpaper td .src-tag,.docpaper li .src-tag{font-size:9.5px;color:#0e7490;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);border-radius:5px;padding:1px 5px;margin-left:5px;white-space:nowrap}
+  .risk-card{border:1px solid rgba(239,68,68,.35);background:linear-gradient(90deg,rgba(239,68,68,.06),rgba(251,146,60,.04));border-radius:11px;padding:11px 13px;font-size:12.6px;margin:8px 0 11px;line-height:1.8}
+  .risk-card b{color:#b91c1c}
+  .risk-card .esc{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#b45309;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);border-radius:6px;padding:1px 7px;margin-left:6px}
+  .bars{margin:10px 0 12px;display:flex;flex-direction:column;gap:7px}
+  .bar-row{display:flex;align-items:center;gap:10px;font-size:11.8px}
+  .bar-row .bl{width:118px;color:var(--muted);text-align:right;flex-shrink:0}
+  .bar-row .btrack{flex:1;height:13px;border-radius:99px;background:#eef2f8;overflow:hidden}
+  .bar-row .btrack i{display:block;height:100%;border-radius:99px;background:var(--grad)}
+  .bar-row .btrack i.dawn{background:var(--grad-dawn)}
+  .bar-row .btrack i.green{background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .bar-row .btrack i.violet{background:var(--grad-violet)}
+  .bar-row .bv{width:46px;font-weight:700;color:#0f3a8f;font-family:ui-monospace,Menlo,monospace;flex-shrink:0}
+  .src-note{font-size:11px;color:var(--faint);border-top:1px dashed var(--border);margin-top:14px;padding-top:10px;line-height:1.8}
+  .act-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .ai-note{font-size:11px;color:var(--faint);margin-top:11px;display:flex;align-items:center;gap:6px}
+  .flow-line{display:flex;align-items:center;gap:0;margin-top:14px;font-size:11.3px;color:var(--muted);flex-wrap:wrap}
+  .fl-it{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;background:#f1f5fb;border:1px solid var(--border)}
+  .fl-it.done{color:#047857;background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.3)}
+  .fl-it.now{color:#b45309;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.35);font-weight:600}
+  .fl-arrow{margin:0 7px;color:var(--faint)}
+
+  /* —— 签发中心 —— */
+  .sign-row{display:flex;align-items:center;gap:11px;padding:12px 4px;border-bottom:1px dashed var(--border);font-size:12.7px}
+  .sign-row:last-child{border-bottom:none}
+  .sign-row .sic{width:32px;height:32px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(37,99,235,.08);color:var(--primary)}
+  .sign-row .sb{flex:1;min-width:0;line-height:1.5}
+  .sign-row .sb b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sign-row .sb span{font-size:11px;color:var(--faint)}
+  .sign-row .acts{display:flex;gap:6px;flex-shrink:0}
+  .audit{font-size:11.3px;color:var(--muted);line-height:2.1;font-family:ui-monospace,Menlo,monospace}
+  .audit b{color:#0f3a8f;font-weight:600}
+
+  /* —— 模板中心 —— */
+  .tpl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+  .tpl{border:1px solid var(--border);border-radius:var(--radius);background:#fff;padding:15px;transition:.2s;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow-sm)}
+  .tpl:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:rgba(37,99,235,.35)}
+  .tpl .ti{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(6,182,212,.12));color:var(--primary)}
+  .tpl b{font-size:13.2px}
+  .tpl .tm{font-size:10.8px;color:var(--faint);line-height:1.6}
+  .tpl .tt{display:flex;gap:5px;flex-wrap:wrap}
+  .tpl .tg{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(6,182,212,.08);color:#0e7490;border:1px solid rgba(6,182,212,.3)}
+  .tpl .tg.v{background:rgba(124,58,237,.07);color:#7c3aed;border-color:rgba(124,58,237,.3)}
+  .tpl .btn{margin-top:auto}
+
+  /* —— 口径与数据源 —— */
+  .plain-table{width:100%;border-collapse:collapse;font-size:12.4px}
+  .plain-table th{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.08));color:#0f3a8f;font-weight:700;text-align:left;padding:9px 11px;border:1px solid var(--border)}
+  .plain-table td{padding:9px 11px;border:1px solid var(--border);vertical-align:top;line-height:1.7}
+  .hint-card{display:flex;gap:10px;border:1px solid rgba(6,182,212,.35);background:linear-gradient(90deg,rgba(6,182,212,.06),rgba(37,99,235,.04));border-radius:12px;padding:12px 14px;font-size:12.5px;color:#0e5b6e;line-height:1.8;margin-bottom:14px}
+  .hint-card svg{flex-shrink:0;margin-top:3px}
+
+  .legal-bar{flex-shrink:0;text-align:center;font-size:10.8px;color:var(--faint);padding:8px 20px 11px;line-height:1.7;background:linear-gradient(180deg,transparent,rgba(244,247,251,.95) 50%)}
+  .legal-bar b{color:#8a97ab;font-weight:600}
+  .demo-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:#7c3aed;border:1px solid rgba(124,58,237,.3);background:rgba(124,58,237,.06);padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:1px;letter-spacing:.5px}
+
+  .toast{position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-8px);z-index:99;background:#0f172a;color:#fff;font-size:12.5px;padding:9px 18px;border-radius:99px;box-shadow:0 10px 30px rgba(15,23,42,.3);opacity:0;pointer-events:none;transition:.3s;display:flex;align-items:center;gap:7px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast svg{color:#22d3ee}
+
+  @media (max-width:1240px){.kpis{display:none}}
+  @media (max-width:980px){
+    .sidebar{display:none}
+    .work-grid{grid-template-columns:1fr}
+    .stat-strip{grid-template-columns:1fr 1fr}
+    .tpl-grid{grid-template-columns:1fr 1fr}
+    .ptitle .sub{display:none}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="aurora"><i></i><i></i><i></i></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lgMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <symbol id="logoCX" viewBox="0 0 48 48">
+      <rect width="48" height="48" rx="13" fill="url(#lgMain)"/>
+      <g opacity=".9">
+        <line x1="24" y1="13" x2="24" y2="17.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="14.5" y1="17.5" x2="17.6" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="33.5" y1="17.5" x2="30.4" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+      <path d="M15 29.5 A9 9 0 0 1 33 29.5 Z" fill="#fff"/>
+      <rect x="10" y="29.5" width="28" height="2.6" rx="1.3" fill="#fff"/>
+      <rect x="14" y="35" width="20" height="2" rx="1" fill="#fff" opacity=".55"/>
+      <path d="M37.5 7 C38 9.2 38.8 10 41 10.5 C38.8 11 38 11.8 37.5 14 C37 11.8 36.2 11 34 10.5 C36.2 10 37 9.2 37.5 7 Z" fill="#fde68a"/>
+    </symbol>
+    <symbol id="icoSpark" viewBox="0 0 24 24">
+      <path d="M12 3c.7 3.9 2.4 5.6 6.3 6.3v.4c-3.9.7-5.6 2.4-6.3 6.3h-.4c-.7-3.9-2.4-5.6-6.3-6.3v-.4C9.2 8.6 10.9 6.9 11.6 3h.4Z" fill="currentColor"/>
+      <path d="M18.5 14.5c.35 1.95 1.2 2.8 3.15 3.15v.2c-1.95.35-2.8 1.2-3.15 3.15h-.2c-.35-1.95-1.2-2.8-3.15-3.15v-.2c1.95-.35 2.8-1.2 3.15-3.15h.2Z" fill="currentColor" opacity=".65"/>
+    </symbol>
+    <symbol id="icoCheck" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".14"/>
+      <path d="m7.5 12.2 3 3 6-6.4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoDoc" viewBox="0 0 24 24">
+      <path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M13 2v6h6M8.5 13h7M8.5 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+    </symbol>
+    <symbol id="icoGrid" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    </symbol>
+    <symbol id="icoPen" viewBox="0 0 24 24">
+      <path d="m14.5 5.5 4 4L8 20H4v-4L14.5 5.5ZM12.5 7.5l4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M19 3c.3 1.4.9 2 2.3 2.3v.2c-1.4.3-2 .9-2.3 2.3h-.2c-.3-1.4-.9-2-2.3-2.3v-.2c1.4-.3 2-.9 2.3-2.3h.2Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="icoStamp" viewBox="0 0 24 24">
+      <path d="M12 3a3.5 3.5 0 0 0-3.5 3.5c0 1.6.9 2.6 1.5 3.7.4.8.5 1.8.5 2.8h3c0-1 .1-2 .5-2.8.6-1.1 1.5-2.1 1.5-3.7A3.5 3.5 0 0 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M6 17.5A2.5 2.5 0 0 1 8.5 15h7a2.5 2.5 0 0 1 2.5 2.5V19H6v-1.5ZM5 21.5h14" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoDb" viewBox="0 0 24 24">
+      <ellipse cx="12" cy="5.5" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M4 5.5V12c0 1.66 3.58 3 8 3s8-1.34 8-3V5.5M4 12v6.5c0 1.66 3.58 3 8 3s8-1.34 8-3V12" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    </symbol>
+    <symbol id="icoMic" viewBox="0 0 24 24">
+      <rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoExport" viewBox="0 0 24 24">
+      <path d="M12 3v12m0 0 4-4m-4 4-4-4" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoHuman" viewBox="0 0 24 24">
+      <path d="M4 19.5c0-3.3 3.6-5 8-5s8 1.7 8 5" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.9" fill="none"/>
+    </symbol>
+    <symbol id="icoBolt" viewBox="0 0 24 24">
+      <path d="M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5L13 2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ============ 左侧栏 ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="logo"><use href="#logoCX"/></svg>
+      <div class="bt">
+        <b>晨曦科技 <span class="ai-chip">AI</span></b>
+        <small>CHENXI TECH</small>
+      </div>
+    </div>
+
+    <div class="side-sec">
+      <h5>文书工作台</h5>
+      <div class="nav-item active" data-view="work"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoPen"/></svg>成稿工作台</div>
+      <div class="nav-item" data-view="sign"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoStamp"/></svg>签发中心<span class="nbadge" id="signBadge">1 待签</span></div>
+      <div class="nav-item" data-view="tpl"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoGrid"/></svg>模板中心</div>
+      <div class="nav-item" data-view="dict"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoDb"/></svg>口径与数据源</div>
+
+      <h5><svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoDb"/></svg> 数据接入 · 只读引用</h5>
+      <div class="kb-item"><span class="dot blue"></span><div class="ki">汇报系统<em>读写 · 成稿自动回写</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">企业数字化管理平台<em>只读视图 · 每日同步</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">财务系统<em>只读视图 · 回款与成本口径</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">OA 审批数据<em>只读 · 待办与流程状态</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">统一口径字典<em>v2026.6 · 总裁办发布</em></div></div>
+    </div>
+
+    <div class="side-foot">
+      <div class="avatar-u">陈</div>
+      <div class="ui"><b>陈工</b><span>咨询事业部 · 项目经理</span></div>
+      <span class="lic">起草+签发</span>
+    </div>
+  </aside>
+
+  <!-- ============ 主区域 ============ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="ptitle">
+        <h1>晨曦智报</h1>
+        <span class="sub">文书生成助手 · 汇报自动成稿 × 公文纪要 · 依托现有汇报系统</span>
+      </div>
+      <div class="kpis">
+        <span class="kpi">报表编制工时 <b class="up">−71%</b></span>
+        <span class="kpi">口径返工率 <b class="up">9.8%→1.6%</b></span>
+        <span class="kpi">本月成稿 <b>36 份</b></span>
+      </div>
+      <div class="top-right">
+        <span class="model-pill" title="主备双模型热切换：备用模型 Qwen-Max 待命中">
+          <span class="led"></span> 主模型 DeepSeek-V3 · 在线
+        </span>
+        <button class="icon-btn" onclick="toggleSuite(event)" title="晨曦 AI 应用套件">
+          <svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoGrid"/></svg>
+        </button>
+        <div class="suite-menu" id="suiteMenu">
+          <div class="suite-it" onclick="toast('晨曦智询为独立演示页面，请打开对应 HTML 文件体验')">
+            <div class="si"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoSpark"/></svg></div>
+            <div><b>晨曦智询</b><span>U1 · 计价知识助手</span></div>
+          </div>
+          <div class="suite-it" onclick="toast('晨曦智作为独立演示页面，请打开对应 HTML 文件体验')">
+            <div class="si dawn"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoPen"/></svg></div>
+            <div><b>晨曦智作</b><span>U3 · 营销内容与标书工作台</span></div>
+          </div>
+          <div class="suite-it">
+            <div class="si violet"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>
+            <div><b>晨曦智报</b><span>U4 · 文书生成助手 · 汇报自动成稿</span></div>
+            <span class="cur">当前</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="views" id="views">
+
+      <!-- ================= 视图：成稿工作台 ================= -->
+      <section class="view active" id="view-work">
+        <div class="stat-strip">
+          <div class="stat"><div class="sl">本月 AI 成稿</div><div class="sv">36 <small>份</small></div><div class="sd">周报 22 · 月报 6 · 专项 4 · 纪要 4</div></div>
+          <div class="stat"><div class="sl">编制工时（管理层级报表）</div><div class="sv">−71<small>%</small></div><div class="sd">已达 KPI（−70%）· <b>等效释放 1.1 人</b></div></div>
+          <div class="stat"><div class="sl">口径返工率</div><div class="sv">1.6<small>%</small></div><div class="sd">基线 9.8% · 统一口径 v2026.6 生效后</div></div>
+          <div class="stat"><div class="sl">待签发</div><div class="sv" id="statPending">1 <small>份</small></div><div class="sd">所有文书须负责人签发后归档</div></div>
+        </div>
+
+        <div class="work-grid">
+          <!-- 左：配置 -->
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoBolt"/></svg>新建文书</div>
+            <div class="card-b">
+              <div class="f-label">文书类型</div>
+              <div class="type-grid" id="typeGrid">
+                <div class="type-it on" data-t="weekly"><b><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoDoc"/></svg>项目周报</b><span>系统数据 + 要点口述<br>自动成稿</span></div>
+                <div class="type-it" data-t="monthly"><b><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoDoc"/></svg>经营月报</b><span>经营平台 + 财务口径<br>统一模板</span></div>
+                <div class="type-it" data-t="special"><b><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoDoc"/></svg>专项汇报</b><span>跨系统取数<br>含决策建议项</span></div>
+                <div class="type-it" data-t="minutes"><b><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoMic"/></svg>会议纪要</b><span>录音转写稿<br>一键成纪要</span></div>
+              </div>
+
+              <div id="typeExtra" style="margin-top:14px"></div>
+
+              <div class="f-label" id="dataLabel">数据接入（自动拉取 · 只读）</div>
+              <div class="data-panel" id="dataPanel"></div>
+
+              <div class="f-label" id="pointsLabel">负责人要点口述
+                <span class="mic" id="micBtn" onclick="simVoice()"><svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoMic"/></svg><span id="micTxt">语音输入</span></span>
+              </div>
+              <textarea class="f-ta" id="pointsTa"></textarea>
+
+              <div class="calib">
+                <svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoCheck"/></svg>
+                统一口径 v2026.6 已锁定（总裁办 06-01 发布）· 产值 / 工时 / 回款指标将按字典口径取数
+              </div>
+
+              <button class="btn primary" id="genBtn" style="width:100%;margin-top:16px" onclick="genDoc()">
+                <svg width="14" height="14" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSpark"/></svg>
+                AI 生成初稿
+              </button>
+              <div style="font-size:10.8px;color:var(--faint);text-align:center;margin-top:8px">初稿生成后须由您修订签发，AI 不直接归档上报</div>
+            </div>
+          </div>
+
+          <!-- 右：输出 -->
+          <div class="card">
+            <div class="card-h">
+              <svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDoc"/></svg>文书预览
+              <div class="chx"><span class="st-chip info" id="outState">待生成</span></div>
+            </div>
+            <div class="card-b" id="outBox">
+              <div class="out-empty">
+                <div class="oe-orb"><svg width="28" height="28" viewBox="0 0 24 24"><use href="#icoSpark"/></svg></div>
+                <b>汇报自动成稿引擎已就绪</b>
+                <span>选择文书类型 → 系统自动拉取数据 → 口述您的要点 → AI 生成统一口径初稿<br>您只需修订与签发，从「催报表、对口径」中解放出来</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 视图：签发中心 ================= -->
+      <section class="view" id="view-sign">
+        <div class="hint-card">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color:#0e7490"><use href="#icoStamp"/></svg>
+          <span><strong>「AI 起草 · 人工签发」</strong>是本系统的强制流程：任何文书须经负责人修订并签发后，方可回写汇报系统、归档或上报；签发与退回动作全量留存审计日志，可追溯「谁、何时、依据什么数据、签发了什么」。</span>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#b45309"><use href="#icoStamp"/></svg>待签发<span class="st-chip wait" id="pendChip">1 份</span></div>
+          <div class="card-b" id="pendBox" style="padding-top:6px"></div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#059669"><use href="#icoCheck"/></svg>近期已签发</div>
+          <div class="card-b" id="signedBox" style="padding-top:6px"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDb"/></svg>审计日志（节选）</div>
+          <div class="card-b audit" id="auditBox">
+            <b>10:32:08</b> AI 起草《项目周报 · 某市政务中心二期》｜数据源 3 系统 18 个数据点｜口径 v2026.6<br>
+            <b>09:12:44</b> 王经理 提交《经营月报 · 咨询事业部 2026-05》至签发队列<br>
+            <b>08:30:00</b> 系统定时任务：本周 4 份项目周报数据预拉取完成<br>
+            <b>06-10 17:21</b> 林总 签发《专项汇报 · 新国标换轨服务（第 2 期）》→ 已回写汇报系统
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 视图：模板中心 ================= -->
+      <section class="view" id="view-tpl">
+        <div class="hint-card">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color:#0e7490"><use href="#icoGrid"/></svg>
+          <span>模板由总裁办统一维护，<strong>绑定口径字典版本</strong>：口径变更发布后全部模板自动同步，历史文书保留生成时的口径版本标注——「对口径」从人工核对变为系统保证。</span>
+        </div>
+        <div class="tpl-grid" id="tplGrid"></div>
+      </section>
+
+      <!-- ================= 视图：口径与数据源 ================= -->
+      <section class="view" id="view-dict">
+        <div class="hint-card">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color:#0e7490"><use href="#icoDb"/></svg>
+          <span>本助手<strong>不新建系统、不另起数据炉灶</strong>：全部数据来自既有系统的只读视图（汇报系统为成稿回写唯一写入点）。指标取数一律执行下方口径字典，文书脚注自动标注数据来源与口径版本。</span>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDb"/></svg>数据源对接清单</div>
+          <div class="card-b">
+            <table class="plain-table">
+              <tr><th style="width:170px">系统 / 数据源</th><th>对接方式</th><th style="width:90px">读写</th><th style="width:70px">频率</th><th style="width:90px">责任方</th></tr>
+              <tr><td><strong>汇报系统</strong></td><td>只读视图授权 + 成稿回写接口</td><td><span class="st-chip info">读写</span></td><td>每日</td><td>晨曦 IT</td></tr>
+              <tr><td><strong>企业数字化管理平台 / OA</strong></td><td>只读视图授权（项目进度、审批状态）</td><td><span class="st-chip ok">只读</span></td><td>每日</td><td>晨曦 IT</td></tr>
+              <tr><td><strong>财务系统</strong></td><td>只读视图（回款、成本口径），无接口字段以月度导出补齐</td><td><span class="st-chip ok">只读</span></td><td>每日</td><td>财务部</td></tr>
+              <tr><td><strong>经营数据汇总表</strong></td><td>结构化导入（产值、工时台账）</td><td><span class="st-chip ok">只读</span></td><td>每周</td><td>总裁办</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDoc"/></svg>统一口径字典 <span class="st-chip info">v2026.6 · 总裁办 06-01 发布</span></div>
+          <div class="card-b">
+            <table class="plain-table">
+              <tr><th style="width:120px">指标</th><th>口径定义（节选）</th><th style="width:110px">数据来源</th><th style="width:96px">维护方</th></tr>
+              <tr><td><strong>确认产值</strong></td><td>以业主书面确认 / 阶段验收单为准计入当期，未确认部分列「在途产值」单独披露</td><td>经营平台</td><td>总裁办 + 财务部</td></tr>
+              <tr><td><strong>毛利率</strong></td><td>（确认产值 − 直接人力成本 − 直接外购成本）÷ 确认产值；人力成本按工时台账分摊</td><td>财务只读视图</td><td>财务部</td></tr>
+              <tr><td><strong>工时投入</strong></td><td>按项目编码归集的审定工时，加班工时单列不并入提效统计</td><td>经营平台</td><td>人力资源部</td></tr>
+              <tr><td><strong>回款率</strong></td><td>累计实收 ÷ 累计应收（含质保金口径单列）；账龄 &gt;90 天自动标红</td><td>财务只读视图</td><td>财务部</td></tr>
+              <tr><td><strong>计划偏差</strong></td><td>实际进度 − 基线计划进度（百分点）；基线以立项评审版为准，变更须 OA 审批留痕</td><td>汇报系统</td><td>PMO</td></tr>
+            </table>
+            <div style="font-size:11px;color:var(--faint);margin-top:10px">口径变更流程：业务部门发起 → 财务/总裁办会签 → 新版本发布 → 全模板自动同步 → 当期文书起注明新版本号</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="legal-bar">
+      <b>「AI 起草 · 人工签发」</b>文书须经负责人修订签发后方可回写汇报系统、归档或上报 ｜ 数据仅作只读引用，指标以统一口径字典为准 ｜ 全量生成与签发行为留存审计日志
+      <span class="demo-badge">✦ DEMO 演示环境 · 示例数据</span>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoCheck"/></svg><span id="toastText"></span></div>
+
+<script>
+/* ===== 背景粒子 ===== */
+(function(){
+  var cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d'),pts=[],N=55;
+  function rs(){cv.width=innerWidth;cv.height=innerHeight}
+  rs();addEventListener('resize',rs);
+  for(var i=0;i<N;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.8});
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<N;i++){
+      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(6,182,212,.22)';ctx.fill();
+      for(var j=i+1;j<N;j++){
+        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
+        if(d<150*150){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(37,99,235,'+(0.085*(1-d/22500))+')';ctx.lineWidth=1;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ===== 工具 ===== */
+function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild}
+function toast(t){
+  var x=document.getElementById('toast');
+  document.getElementById('toastText').textContent=t;
+  x.classList.add('show');clearTimeout(x._t);
+  x._t=setTimeout(function(){x.classList.remove('show')},2400);
+}
+var busy=false;
+
+function switchView(v){
+  document.querySelectorAll('.view').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-item[data-view]').forEach(function(n){
+    n.classList.toggle('active',n.getAttribute('data-view')===v);
+  });
+  document.getElementById('views').scrollTop=0;
+}
+document.addEventListener('click',function(e){
+  var nv=e.target.closest('.nav-item[data-view]');
+  if(nv)switchView(nv.getAttribute('data-view'));
+  var sm=document.getElementById('suiteMenu');
+  if(sm.classList.contains('open')&&!e.target.closest('.top-right'))sm.classList.remove('open');
+});
+function toggleSuite(e){e.stopPropagation();document.getElementById('suiteMenu').classList.toggle('open')}
+
+function runProcess(slot,steps,sumHtml,cb){
+  var p=el('<div class="process"><div class="p-sum"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoSpark"/></svg><span>'+sumHtml+'</span></div><div class="p-steps"></div></div>');
+  var box=p.querySelector('.p-steps');
+  steps.forEach(function(s){
+    box.appendChild(el('<div class="p-step"><span class="p-ico"><span class="spinner"></span><svg class="chk" width="16" height="16" viewBox="0 0 24 24"><use href="#icoCheck"/></svg></span><span>'+s+'</span></div>'));
+  });
+  slot.appendChild(p);
+  var i=0,nodes=box.children;
+  (function next(){
+    if(i>0)nodes[i-1].classList.add('done');
+    if(i>=nodes.length){setTimeout(function(){p.classList.add('collapsed');cb&&cb()},300);return}
+    nodes[i].classList.add('on');i++;
+    setTimeout(next,430+Math.random()*320);
+  })();
+}
+function streamBlocks(slot,blocks,done){
+  var bi=0;
+  function nextBlock(){
+    if(bi>=blocks.length){done&&done();return}
+    var holder=document.createElement('div');
+    slot.appendChild(holder);
+    var tokens=blocks[bi].match(/<[^>]+>|[\s\S]/g)||[],buf='',ti=0;
+    var iv=setInterval(function(){
+      var step=0;
+      while(ti<tokens.length&&step<4){
+        var tk=tokens[ti++];buf+=tk;
+        if(tk.charAt(0)!=='<')step++;
+      }
+      holder.innerHTML=buf+'<span class="cursor"></span>';
+      if(ti>=tokens.length){
+        clearInterval(iv);holder.innerHTML=buf;
+        bi++;setTimeout(nextBlock,110);
+      }
+    },12);
+  }
+  nextBlock();
+}
+
+/* =========================================================
+   文书类型配置与语料
+========================================================= */
+var curType='weekly';
+var TYPES={
+  weekly:{
+    name:'项目周报',
+    extra:'<div class="fg"><label>关联项目</label><select><option>某市政务中心二期 · 全过程造价咨询（ZX-2026-018）</option><option>某产业园 EPC · 结算审核（ZX-2026-007）</option></select></div><div class="fg"><label>汇报周期</label><input value="2026 年第 24 周（06-08 至 06-12）" readonly></div>',
+    data:[['汇报系统 · 项目进度与里程碑','12 条'],['经营平台 · 产值与工时台账','已同步'],['财务只读视图 · 回款与开票','已同步'],['OA · 本项目待办与审批','3 条']],
+    pointsLabel:'负责人要点口述',
+    prefill:'本周完成概算审核初稿；业主追加装饰工程审核任务，费用范围还没定，需要公司层面协调；下周进场现场计量，需要增派一名造价员。',
+    voiceAppend:' 另外，下周三业主要来现场踏勘，请办公室协调接待。',
+    steps:[
+      '拉取系统数据：<em>汇报系统 · 经营平台 · 财务只读视图</em>（18 个数据点）',
+      '解析口述要点：识别 <em>3 项进展 · 1 项风险 · 2 项请求</em>',
+      '口径校验：产值 / 工时 / 回款按 <em>v2026.6</em> 对齐 · 异常 <em>0</em>',
+      '结构化成稿：套用 <em>项目周报模板 v3</em>（四段式）',
+      '敏感信息与涉密自检：<em>通过</em>'
+    ],
+    sum:'成稿完成 · 数据点 <b>18</b> 个 · 口径校验通过 · 用时 <b>4 分 12 秒</b>',
+    meta:['数据点 <b>18</b> 个 · 3 系统','口径 <b>v2026.6</b> 校验通过','模板 <b>周报 v3</b>'],
+    save:'人工基线约 1.5 小时 → 本次 4 分钟',
+    blocks:[
+      '<div class="doc-head"><h2>项目周报 ｜ 某市政务中心二期全过程造价咨询项目</h2><div class="bd">2026 年第 24 周（06-08 至 06-12）｜ 项目编号 ZX-2026-018 ｜ 模板 v3 · 统一口径 v2026.6 ｜ AI 起草 · 待签发</div></div>',
+      '<table><tr><th style="width:108px">项目经理</th><td>陈工</td><th style="width:108px">项目阶段</th><td>实施阶段（概算审核）</td></tr><tr><th>合同额</th><td>86.0 万元</td><th>整体进度</th><td><span class="num">72%</span>（计划 70%，提前 2 个百分点）</td></tr></table>',
+      '<h4>一、本周进展</h4><ul><li>完成土建工程<strong>概算审核初稿</strong>，送审金额 <span class="num">4,820 万元</span>，初核审减率 <span class="num">3.9%</span><span class="src-tag">汇报系统</span>；</li><li>项目整体进度由 65% 推进至 <span class="num">72%</span>，关键路径无阻塞<span class="src-tag">汇报系统</span>；</li><li>业主提出<strong>新增装饰工程审核需求</strong>，服务范围与取费尚未明确（口述要点，已转入风险项）。</li></ul>',
+      '<div class="bars"><div class="bar-row"><span class="bl">基线计划进度</span><div class="btrack"><i class="dawn" style="width:70%"></i></div><span class="bv">70%</span></div><div class="bar-row"><span class="bl">实际进度</span><div class="btrack"><i style="width:72%"></i></div><span class="bv">72%</span></div><div class="bar-row"><span class="bl">预算工时消耗</span><div class="btrack"><i class="green" style="width:58%"></i></div><span class="bv">58%</span></div></div>',
+      '<h4>二、关键数据（自动取数）</h4><table><tr><th>本周确认产值</th><th>累计确认产值</th><th>本周工时</th><th>累计回款</th></tr><tr><td><span class="num">6.8 万元</span><span class="src-tag">经营平台</span></td><td><span class="num">52.4 万元</span>（合同额 60.9%）</td><td><span class="num">86 h</span>（3 人投入）</td><td><span class="num">43.0 万元</span>（回款率 50.0%）<span class="src-tag">财务视图</span></td></tr></table>',
+      '<h4>三、风险与求助</h4><div class="risk-card"><b>⚠ 业主追加装饰工程审核任务，费用与范围未定</b><span class="esc">AI 建议升级 · 总裁办周会议题</span><br><strong>影响：</strong>若无偿投入将挤占概算定稿与现场计量工时，预计缺口约 40 h；<br><strong>建议：</strong>由公司层面与业主明确补充协议（范围 + 取费）后再行投入，本周内书面回复业主。</div>',
+      '<h4>四、下周计划</h4><ul><li>进场开展<strong>现场计量</strong>（周三配合业主现场踏勘，已请办公室协调接待）；</li><li>概算审核报告<strong>定稿并提交内审</strong>——按规定由注册造价工程师复核签章后出具；</li><li><strong>资源请求：</strong>增派造价员 1 名（AI 已同步生成《资源调配申请》草案，OA 待发起）。</li></ul>',
+      '<div class="src-note">数据来源：汇报系统（进度 / 里程碑）· 经营平台（产值 / 工时）· 财务只读视图（回款）｜ 统一口径 v2026.6 ｜ AI 生成于 2026-06-11 10:32，编制用时 4 分 12 秒（人工基线约 1.5 小时）｜ 本稿未经签发不得外发</div>'
+    ]
+  },
+  monthly:{
+    name:'经营月报',
+    extra:'<div class="fg"><label>部门</label><select><option>咨询事业部</option><option>软件事业部</option><option>教育事业部</option></select></div><div class="fg"><label>报告期</label><input value="2026 年 5 月" readonly></div>',
+    data:[['经营平台 · 产值与工时台账','已同步'],['财务只读视图 · 回款 / 成本','已同步'],['汇报系统 · 各项目月度小结','9 份'],['OA · 合同与用印记录','已同步']],
+    pointsLabel:'负责人要点口述',
+    prefill:'本月产值环比涨了百分之九左右；两个老项目回款拖了超过九十天，要重点催一下；新国标培训需求很旺，下月想再加两场。',
+    voiceAppend:' 还有，人员利用率偏高，下月招聘节奏要加快。',
+    steps:[
+      '拉取系统数据：<em>经营平台 · 财务视图 · 汇报系统</em>（31 个数据点 · 9 份项目小结归并）',
+      '解析口述要点：识别 <em>1 项亮点 · 1 项风险 · 2 项计划</em>',
+      '口径校验：确认产值 / 毛利率 / 回款率按 <em>v2026.6</em> 复算 · 修正 <em>1 处</em>在途产值误记',
+      '结构化成稿：套用 <em>经营月报模板 v5</em>',
+      '跨期一致性检查：与 4 月报表口径 <em>一致</em>'
+    ],
+    sum:'成稿完成 · 数据点 <b>31</b> 个 · 修正口径误记 <b>1</b> 处 · 用时 <b>6 分 03 秒</b>',
+    meta:['数据点 <b>31</b> 个 · 4 来源','口径 <b>v2026.6</b> · 修正 1 处','模板 <b>月报 v5</b>'],
+    save:'人工基线约 6 小时 → 本次 25 分钟',
+    blocks:[
+      '<div class="doc-head"><h2>经营月报 ｜ 咨询事业部 · 2026 年 5 月</h2><div class="bd">报告期 2026-05-01 至 05-31 ｜ 模板 v5 · 统一口径 v2026.6 ｜ AI 起草 · 待签发</div></div>',
+      '<h4>一、经营概览</h4><table><tr><th>当月确认产值</th><th>年度累计产值</th><th>毛利率</th><th>当月回款</th></tr><tr><td><span class="num">312 万元</span>（环比 <span class="num">+9.1%</span>）<span class="src-tag">经营平台</span></td><td><span class="num">1,376 万元</span>（年度计划 38.2%）</td><td><span class="num">21.3%</span>（环比 +1.1 pct）<span class="src-tag">财务视图</span></td><td><span class="num">268 万元</span>（回款率 85.9%）</td></tr></table>',
+      '<div class="bars"><div class="bar-row"><span class="bl">造价咨询</span><div class="btrack"><i style="width:46%"></i></div><span class="bv">46%</span></div><div class="bar-row"><span class="bl">软件服务联动</span><div class="btrack"><i class="green" style="width:24%"></i></div><span class="bv">24%</span></div><div class="bar-row"><span class="bl">BIM 咨询</span><div class="btrack"><i class="violet" style="width:18%"></i></div><span class="bv">18%</span></div><div class="bar-row"><span class="bl">培训与其他</span><div class="btrack"><i class="dawn" style="width:12%"></i></div><span class="bv">12%</span></div></div>',
+      '<h4>二、本月亮点</h4><ul><li>新国标换轨带动咨询需求：<strong>市场化计价相关委托环比 +37%</strong>，其中 4 单由「新标准答疑」内容线索转化<span class="src-tag">经营平台</span>；</li><li>中标<strong>某市全过程造价咨询框架采购</strong>（两年期），标书初稿由 AI 装配，编制工时 −66%；</li><li>「新国标实务班」开班 2 期满员，<strong>学员转化软件加购 11 套</strong>。</li></ul>',
+      '<h4>三、风险与关注</h4><div class="risk-card"><b>⚠ 两个项目回款滞后（合计 41 万元，账龄 &gt; 90 天）</b><span class="esc">财务视图自动标红</span><br><strong>明细：</strong>某产业园结算审核 26 万 ｜ 某学校改扩建跟踪审计 15 万；<br><strong>建议：</strong>本周由事业部牵头函催，月底前未回款移交法务发函（口述要点已纳入）。</div><p>人员利用率 <span class="num">93%</span>，已高于健康区间上限（85%）——结合下月新增 2 期培训计划，<strong>建议加快 2 名造价员招聘节奏</strong>（口述要点）。</p>',
+      '<h4>四、下月重点</h4><ol><li>「新国标实务班」增开 2 期，与市场部联动招生（关联内容工厂排期）；</li><li>框架采购首批 3 个子项目进场，资源排期已提交 PMO；</li><li>滞后回款专项清收，目标月内回收 ≥ 30 万元。</li></ol>',
+      '<div class="src-note">数据来源：经营平台 · 财务只读视图 · 汇报系统（9 份项目小结自动归并）｜ 统一口径 v2026.6（AI 复算修正在途产值误记 1 处，已标注）｜ AI 生成于 2026-06-11，编制用时 6 分 03 秒（人工基线约 6 小时）｜ 本稿未经签发不得外发</div>'
+    ]
+  },
+  special:{
+    name:'专项汇报',
+    extra:'<div class="fg"><label>专项主题</label><select><option>GB/T 50500-2024 换轨服务专项（第 3 期）</option><option>AI 工具使用效果专项</option></select></div><div class="fg"><label>呈报对象</label><input value="总裁办 · 经营分析会" readonly></div>',
+    data:[['客服系统 · 咨询量与分类','已同步'],['晨曦智询 · 分流与准确率','已同步'],['经营平台 · 培训与商机','已同步'],['汇报系统 · 前两期专项归档','2 份']],
+    pointsLabel:'负责人要点口述',
+    prefill:'重点讲三件事：新标准咨询量还在涨；AI 分流效果不错，骨干压力缓解；省外要不要开班，需要会上拍板。',
+    voiceAppend:' 补充一点：建议把换轨案例整理成白皮书，给市场部做获客素材。',
+    steps:[
+      '拉取系统数据：<em>客服系统 · 晨曦智询看板 · 经营平台</em>（22 个数据点）',
+      '调取前两期专项归档：延续 <em>同一对比基线</em>',
+      '解析口述要点：识别 <em>2 项进展 · 1 项决策请求 · 1 项建议</em>',
+      '结构化成稿：套用 <em>专项汇报模板 v2</em>（含决策建议项）',
+      '口径与敏感信息自检：<em>通过</em>'
+    ],
+    sum:'成稿完成 · 数据点 <b>22</b> 个 · 延续两期对比基线 · 用时 <b>5 分 18 秒</b>',
+    meta:['数据点 <b>22</b> 个 · 4 来源','对比基线 <b>延续前两期</b>','模板 <b>专项 v2</b>'],
+    save:'人工基线约 4 小时 → 本次 18 分钟',
+    blocks:[
+      '<div class="doc-head"><h2>专项汇报 ｜ GB/T 50500-2024 换轨服务专项（第 3 期）</h2><div class="bd">呈报：总裁办 · 经营分析会 ｜ 2026-06-11 ｜ 模板 v2 · 统一口径 v2026.6 ｜ AI 起草 · 待签发</div></div>',
+      '<h4>一、背景</h4><p>新标准实施满 <span class="num">9 个月</span>，全省客户报价依据与操作习惯仍处重构期。本专项按月跟踪「咨询压力 — 服务承接 — 商机转化」三条曲线，本期为第 3 期，对比基线与前两期一致。</p>',
+      '<h4>二、本期关键数据</h4><table><tr><th>新标准相关咨询</th><th>AI 直答分流率</th><th>培训交付</th><th>转化商机</th></tr><tr><td><span class="num">1,872 次</span> / 月（占总咨询 61%，环比 +12%）<span class="src-tag">客服系统</span></td><td><span class="num">38.6%</span>（抽检准确率 93.2%）<span class="src-tag">晨曦智询</span></td><td>6 场 / <span class="num">412 人</span>（满员率 100%）</td><td><span class="num">9 条</span>（4 条已立项跟进）<span class="src-tag">经营平台</span></td></tr></table>',
+      '<h4>三、已采取动作与效果</h4><ul><li>智询新标准专题库扩容至 <span class="num">1,860 条</span>，高频问题直答覆盖持续提升，<strong>服务骨干重复答疑工时环比下降 19%</strong>；</li><li>「新标准答疑」内容线索本月带来 <span class="num">4 单</span>咨询委托，内容获客路径已验证；</li><li>换轨实操培训标准化课件完成第 3 次迭代，可异地复制。</li></ul>',
+      '<h4>四、需会议决策事项</h4><div class="risk-card" style="border-color:rgba(245,158,11,.45);background:linear-gradient(90deg,rgba(245,158,11,.07),rgba(251,146,60,.04))"><b style="color:#92590a">◆ 是否在已通过测评的省外地区开设「新国标实务班」试点</b><span class="esc">需总裁办决策</span><br><strong>测算：</strong>单期成本约 4.2 万、保本人数 28 人，当地渠道预报名已达 41 人；<strong>建议：</strong>Q3 试点 1 期，绑定当地软件代理同步获客。</div>',
+      '<h4>五、下一步建议</h4><ul><li>将三期换轨服务数据与典型案例整理为<strong>《新国标换轨服务白皮书》</strong>，交市场部作为获客素材（口述要点）；</li><li>专项第 4 期增加「企业造价数据积累」跟踪维度，与 U10 数据资产化规划衔接。</li></ul>',
+      '<div class="src-note">数据来源：客服系统 · 晨曦智询运营看板 · 经营平台 ｜ 对比基线与第 1、2 期一致 ｜ 统一口径 v2026.6 ｜ AI 生成于 2026-06-11，编制用时 5 分 18 秒（人工基线约 4 小时）｜ 本稿未经签发不得外发</div>'
+    ]
+  },
+  minutes:{
+    name:'会议纪要',
+    extra:'<div class="fg"><label>会议名称</label><input value="数字化计价平台项目投标准备会" readonly></div><div class="fg"><label>时间 / 地点</label><input value="2026-06-11 09:30 ｜ 3F 会议室" readonly></div>',
+    data:[['会议录音 · 转写服务','42 分钟'],['OA · 参会人与议程','8 人'],['晨曦智作 · 关联标书进度','82%'],['历史纪要 · 同项目','1 份']],
+    pointsLabel:'录音转写稿（可粘贴或由会议系统自动推送）',
+    prefill:'王总监：……报价就按 B 方案走，下浮率会后我和财务再核一遍。李会计你周二前把测算复核完。偏离项 31 条完全响应，44 条出偏离说明。赵工，技术方案那两段差异化内容周四前定稿。演示环境老孙你 20 号前必须就绪，投标前留一周联调……',
+    voiceAppend:'（追加转写）王总监：补充一句，所有对外文件投标前统一由商务部核稿。',
+    steps:[
+      '转写稿解析：<em>42 分钟 · 5,210 字</em> · 说话人分离 <em>4 人</em>',
+      '议题聚类：识别 <em>3 项议定事项 · 4 项待办</em>',
+      '关联系统比对：待办与 <em>OA / 标书进度</em> 自动挂接',
+      '结构化成稿：套用 <em>会议纪要模板 v4</em>（含待办跟踪表）',
+      '口语化清洗与敏感信息自检：<em>通过</em>'
+    ],
+    sum:'成稿完成 · 待办 <b>4</b> 项已挂接 OA · 用时 <b>2 分 40 秒</b>',
+    meta:['转写 <b>42 分钟</b> · 4 说话人','待办 <b>4 项</b> 自动挂接 OA','模板 <b>纪要 v4</b>'],
+    save:'人工基线约 1.5 小时 → 本次 3 分钟',
+    blocks:[
+      '<div class="doc-head"><h2>会议纪要 ｜ 数字化计价平台项目投标准备会</h2><div class="bd">2026-06-11 09:30—10:12 ｜ 3F 会议室 ｜ 主持：王总监 ｜ 参会 8 人 ｜ 记录：AI 转写 + 陈工校核 ｜ 待签发</div></div>',
+      '<h4>一、议定事项</h4><ol><li><strong>投标报价按 B 方案执行</strong>，最终下浮率由王总监与财务部会后复核确定；</li><li>商务条款响应口径：<strong>第 31 条（付款比例）完全响应</strong>；<strong>第 44 条（驻场期）按模板出偏离说明</strong>，与标书装配台 2 条偏离项一致<span class="src-tag">晨曦智作</span>；</li><li>所有对外文件投标前统一由<strong>商务部核稿</strong>后用印（补充议定）。</li></ol>',
+      '<h4>二、待办跟踪（已自动挂接 OA）</h4><table><tr><th style="width:46%">事项</th><th>责任人</th><th>截止</th><th>状态</th></tr><tr><td>投标报价测算复核</td><td>财务部 · 李会计</td><td>06-16（周二）</td><td><span class="st-chip wait">进行中</span></td></tr><tr><td>技术方案差异化段落定稿</td><td>研发部 · 赵工</td><td>06-18（周四）</td><td><span class="st-chip wait">进行中</span></td></tr><tr><td>演示环境部署与联调就绪</td><td>IT · 孙工</td><td>06-20</td><td><span class="st-chip info">未开始</span></td></tr><tr><td>下浮率终核并回填报价函</td><td>王总监 + 财务部</td><td>06-17</td><td><span class="st-chip info">未开始</span></td></tr></table>',
+      '<h4>三、其他事项</h4><ul><li>投标文件整体进度 <span class="num">82%</span>，剩余人工节点：报价确认、偏离说明定稿<span class="src-tag">晨曦智作</span>；</li><li>下次碰头会定于 <strong>06-18（周四）16:00</strong>，重点核查待办闭环。</li></ul>',
+      '<div class="src-note">本纪要由 42 分钟会议录音 AI 转写生成，口语表述已规范化清洗；与转写稿存在歧义处已用下划线标注待校核 ｜ 待办事项已同步 OA 并设到期提醒 ｜ AI 生成于 2026-06-11 10:58，编制用时 2 分 40 秒（人工基线约 1.5 小时）｜ 本稿未经签发不得外发</div>'
+    ]
+  }
+};
+
+/* ===== 类型切换 ===== */
+function applyType(t){
+  curType=t;
+  var c=TYPES[t];
+  document.querySelectorAll('#typeGrid .type-it').forEach(function(x){
+    x.classList.toggle('on',x.getAttribute('data-t')===t);
+  });
+  document.getElementById('typeExtra').innerHTML=c.extra;
+  var dp='';
+  c.data.forEach(function(d){
+    dp+='<div class="dp-it"><span class="dot"></span><b>'+d[0]+'</b><em>'+d[1]+'</em></div>';
+  });
+  dp+='<div class="dp-foot"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#10b981"><use href="#icoCheck"/></svg>数据 30 秒前刷新 · 仅只读引用，不落库不训练</div>';
+  document.getElementById('dataPanel').innerHTML=dp;
+  document.getElementById('pointsLabel').firstChild.textContent=c.pointsLabel;
+  document.getElementById('pointsTa').value=c.prefill;
+}
+document.getElementById('typeGrid').addEventListener('click',function(e){
+  var it=e.target.closest('.type-it');
+  if(it&&!busy)applyType(it.getAttribute('data-t'));
+});
+
+/* ===== 语音口述模拟 ===== */
+var recing=false;
+function simVoice(){
+  if(recing||busy)return;
+  recing=true;
+  var btn=document.getElementById('micBtn'),txt=document.getElementById('micTxt');
+  btn.classList.add('rec');
+  var s=0;
+  txt.textContent='录音中 0:00';
+  var iv=setInterval(function(){
+    s++;txt.textContent='录音中 0:0'+s;
+    if(s>=3){
+      clearInterval(iv);
+      btn.classList.remove('rec');
+      txt.textContent='语音输入';
+      var ta=document.getElementById('pointsTa');
+      ta.value=ta.value+TYPES[curType].voiceAppend;
+      recing=false;
+      toast('语音转写完成，已追加至要点（演示）');
+    }
+  },800);
+}
+
+/* =========================================================
+   生成主流程
+========================================================= */
+var docSeq=0;
+function genDoc(){
+  if(busy)return;
+  busy=true;
+  var c=TYPES[curType];
+  var box=document.getElementById('outBox'),
+      st=document.getElementById('outState'),
+      btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  st.className='st-chip info';st.textContent='AI 成稿中…';
+  box.innerHTML='';
+
+  runProcess(box,c.steps,c.sum,function(){
+    var wrap=el('<div></div>');
+    box.appendChild(wrap);
+
+    var meta='<div class="meta-strip">';
+    c.meta.forEach(function(m){meta+='<span class="ms">'+m+'</span>'});
+    meta+='<span class="ms pass">✓ 口径校验通过</span><span class="ms time">⏱ '+c.save+'</span></div>';
+    wrap.appendChild(el(meta));
+
+    var paper=el('<div class="docpaper"></div>');
+    wrap.appendChild(paper);
+
+    streamBlocks(paper,c.blocks,function(){
+      var id=++docSeq;
+      wrap.appendChild(el(
+        '<div class="act-row" id="acts-'+id+'">'+
+          '<button class="btn primary sm" onclick="signDoc(this,'+id+')"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#fff"><use href="#icoStamp"/></svg>签发并回写汇报系统</button>'+
+          '<button class="btn ghost sm" onclick="reviseDoc(this)"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoPen"/></svg>修订正文</button>'+
+          '<button class="btn ghost sm" onclick="toast(\'已提交王总监会签，进入签发队列\');pushPending(\''+c.name+'\')"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoHuman"/></svg>提交上级会签</button>'+
+          '<button class="btn ghost sm" onclick="toast(\'演示环境：已模拟导出 Word（公文版式）\')"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoExport"/></svg>导出 Word</button>'+
+          '<button class="btn ghost sm" onclick="copyDoc(this)"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoDoc"/></svg>复制全文</button>'+
+        '</div>'+
+        '<div class="flow-line" id="flow-'+id+'">'+
+          '<span class="fl-it done"><svg width="11" height="11" viewBox="0 0 24 24"><use href="#icoCheck"/></svg>AI 起草 · 数据已标源</span><span class="fl-arrow">→</span>'+
+          '<span class="fl-it now">待负责人修订签发（当前）</span><span class="fl-arrow">→</span>'+
+          '<span class="fl-it">回写汇报系统 · 归档</span>'+
+        '</div>'+
+        '<div class="ai-note"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#94a3b8"><use href="#icoSpark"/></svg>本初稿由 AI 基于系统只读数据与您的口述要点生成 · 数字均附来源标注 · 未经签发不得外发或上报</div>'));
+      st.className='st-chip wait';st.textContent='初稿完成 · 待修订签发';
+      btn.disabled=false;busy=false;
+      box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+  });
+}
+
+function reviseDoc(btn){
+  var paper=btn.closest('.card-b').querySelector('.docpaper');
+  if(!paper)return;
+  var on=paper.classList.toggle('editing');
+  paper.contentEditable=on?'true':'false';
+  toast(on?'修订模式已开启：正文可直接编辑，修订痕迹将随签发归档':'修订模式已关闭，改动已暂存');
+}
+function copyDoc(btn){
+  var paper=btn.closest('.card-b').querySelector('.docpaper');
+  if(paper&&navigator.clipboard)navigator.clipboard.writeText(paper.innerText);
+  toast('全文已复制到剪贴板');
+}
+function signDoc(btn,id){
+  var st=document.getElementById('outState');
+  st.className='st-chip ok';st.textContent='已签发 · 已回写汇报系统';
+  var flow=document.getElementById('flow-'+id);
+  if(flow){
+    flow.innerHTML='<span class="fl-it done"><svg width="11" height="11" viewBox="0 0 24 24"><use href="#icoCheck"/></svg>AI 起草</span><span class="fl-arrow">→</span>'+
+      '<span class="fl-it done"><svg width="11" height="11" viewBox="0 0 24 24"><use href="#icoCheck"/></svg>陈工 修订签发 '+now()+'</span><span class="fl-arrow">→</span>'+
+      '<span class="fl-it done"><svg width="11" height="11" viewBox="0 0 24 24"><use href="#icoCheck"/></svg>已回写汇报系统 · 已归档</span>';
+  }
+  var acts=document.getElementById('acts-'+id);
+  if(acts)acts.querySelectorAll('button').forEach(function(b,i){if(i<3)b.disabled=true;b.style.opacity=i<3?'.45':'1'});
+  addSigned(TYPES[curType].name+'（'+now()+' 签发）','陈工');
+  addAudit(now()+':00 陈工 签发《'+TYPES[curType].name+'》→ 已回写汇报系统（口径 v2026.6）');
+  toast('已签发并回写汇报系统，审计日志已记录');
+}
+function now(){
+  var d=new Date();
+  return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+
+/* =========================================================
+   签发中心（跨视图状态）
+========================================================= */
+var pending=[
+  {t:'经营月报 ｜ 咨询事业部 · 2026 年 5 月',s:'王经理 提交 · 今日 09:12 · 数据点 31 个 · 口径 v2026.6'}
+];
+var signed=[
+  {t:'专项汇报 ｜ 新国标换轨服务（第 2 期）',s:'林总 签发 · 06-10 17:21 · 已回写汇报系统'},
+  {t:'项目周报 ｜ 某产业园 EPC 结算审核（第 23 周）',s:'陈工 签发 · 06-06 11:02 · 已回写汇报系统'},
+  {t:'会议纪要 ｜ 月度经营分析会（5 月）',s:'总裁办 签发 · 06-03 18:40 · 待办 6 项已闭环'}
+];
+function renderSign(){
+  var pb=document.getElementById('pendBox');pb.innerHTML='';
+  if(!pending.length){
+    pb.innerHTML='<div style="text-align:center;color:var(--faint);font-size:12.5px;padding:18px 0">队列已清空，没有待签发文书 ✓</div>';
+  }
+  pending.forEach(function(d,i){
+    var r=el('<div class="sign-row"><div class="sic"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>'+
+      '<div class="sb"><b>'+d.t+'</b><span>'+d.s+'</span></div>'+
+      '<div class="acts"><button class="btn ghost sm" data-a="prev">预览</button><button class="btn primary sm" data-a="sign">签发</button><button class="btn ghost sm" data-a="back" style="color:#b45309;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.07)">退回修订</button></div></div>');
+    r.querySelector('[data-a="prev"]').onclick=function(){toast('演示环境：已打开《'+d.t.slice(0,18)+'…》预览')};
+    r.querySelector('[data-a="sign"]').onclick=function(){
+      pending.splice(i,1);
+      addSigned(d.t,'陈工');
+      addAudit(now()+':00 陈工 签发《'+d.t.slice(0,16)+'…》→ 已回写汇报系统');
+      renderSign();
+      toast('已签发并回写汇报系统');
+    };
+    r.querySelector('[data-a="back"]').onclick=function(){
+      pending.splice(i,1);
+      addAudit(now()+':00 陈工 退回《'+d.t.slice(0,16)+'…》并附修订意见');
+      renderSign();
+      toast('已退回起草人修订，意见已送达');
+    };
+    pb.appendChild(r);
+  });
+  var n=pending.length;
+  document.getElementById('pendChip').textContent=n+' 份';
+  document.getElementById('signBadge').textContent=n+' 待签';
+  document.getElementById('statPending').innerHTML=n+' <small>份</small>';
+
+  var sb=document.getElementById('signedBox');sb.innerHTML='';
+  signed.slice(0,5).forEach(function(d){
+    sb.appendChild(el('<div class="sign-row"><div class="sic" style="background:rgba(16,185,129,.1);color:#059669"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoCheck"/></svg></div>'+
+      '<div class="sb"><b>'+d.t+'</b><span>'+d.s+'</span></div>'+
+      '<span class="st-chip ok">已签发</span></div>'));
+  });
+}
+function pushPending(name){
+  pending.unshift({t:name+' ｜ 陈工 起草',s:'陈工 提交 · 今日 '+now()+' · 待王总监会签'});
+  renderSign();
+}
+function addSigned(t,who){
+  signed.unshift({t:t,s:who+' 签发 · 今日 '+now()+' · 已回写汇报系统'});
+  renderSign();
+}
+function addAudit(line){
+  var a=document.getElementById('auditBox');
+  a.innerHTML='<b>'+line.split(' ')[0]+'</b> '+line.substring(line.indexOf(' ')+1)+'<br>'+a.innerHTML;
+}
+
+/* =========================================================
+   模板中心
+========================================================= */
+var TPLS=[
+  ['项目周报','v3 · 四段式','本月使用 22 次','weekly'],
+  ['经营月报','v5 · 含产值结构','本月使用 6 次','monthly'],
+  ['专项汇报','v2 · 含决策建议项','本月使用 4 次','special'],
+  ['会议纪要','v4 · 含待办跟踪表','本月使用 4 次','minutes'],
+  ['立项申请','v2 · 含投入测算表','上月使用 3 次',''],
+  ['项目复盘报告','v1 · 含偏差归因','上月使用 2 次',''],
+  ['通知公告','v3 · 公文版式','上月使用 5 次',''],
+  ['请示 / 函件','v2 · 含审批链建议','上月使用 2 次','']
+];
+(function(){
+  var g=document.getElementById('tplGrid');
+  TPLS.forEach(function(t){
+    var card=el('<div class="tpl"><div class="ti"><svg width="17" height="17" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>'+
+      '<b>'+t[0]+'</b><div class="tm">'+t[1]+'<br>'+t[2]+' · 总裁办维护</div>'+
+      '<div class="tt"><span class="tg">统一口径 v2026.6</span><span class="tg v">数据自动取数</span></div>'+
+      '<button class="btn ghost sm">使用该模板</button></div>');
+    card.querySelector('button').onclick=function(){
+      if(t[3]){switchView('work');applyType(t[3]);toast('已载入「'+t[0]+'」模板，数据已预拉取')}
+      else toast('演示环境：「'+t[0]+'」模板将在正式版开放');
+    };
+    g.appendChild(card);
+  });
+})();
+
+applyType('weekly');
+renderSign();
+</script>
+</body>
+</html>
