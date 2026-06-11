@@ -15,6 +15,7 @@
   --copper:#c4742e; --copper-d:#a85e1f; --copper2:#e09a55; --copper-soft:#fcf1e5;
   --green:#0f9d6e; --green-soft:#e3f6ee;
   --red:#df5340; --red-soft:#fdecea;
+  --amber:#e8a23a; --amber-soft:#fdf4e3;
   --shadow:0 14px 40px rgba(16,35,63,.09);
   --shadow-sm:0 6px 18px rgba(16,35,63,.07);
 }
@@ -125,9 +126,7 @@ h1{
   padding:24px 24px 16px;position:relative;
 }
 .canvas-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.mode-switch{
-  display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;
-}
+.mode-switch{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
 .mode-btn{
   border:none;cursor:pointer;font-size:13.5px;font-weight:700;font-family:inherit;border-radius:9px;
   padding:9px 20px;color:var(--ink2);background:transparent;transition:.25s;display:flex;align-items:center;gap:7px;
@@ -137,28 +136,25 @@ h1{
 body.asis .mode-btn[data-m="asis"].on .md{background:var(--red)}
 body.tobe .mode-btn[data-m="tobe"].on .md{background:var(--green);animation:pulse2 1.6s infinite}
 .kchips{display:flex;gap:9px;flex-wrap:wrap;margin-left:auto}
-.kchip{
-  font-size:11.8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;color:var(--ink2);
-}
+.kchip{font-size:11.8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 12px;color:var(--ink2)}
 .kchip b{font-weight:800;color:var(--ink)}
-.kchip .va,.kchip .vt{transition:.3s}
 body.asis .kchip .vt{display:none}
 body.tobe .kchip .va{display:none}
 body.tobe .kchip b{color:var(--green)}
 .canvas-wrap{overflow-x:auto;padding-bottom:6px}
 .canvas-wrap::-webkit-scrollbar{height:9px}
 .canvas-wrap::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
-.board{min-width:1578px;display:flex;align-items:flex-start}
-.rail{width:86px;flex:none;position:relative;height:622px}
+.board{min-width:1938px;display:flex;align-items:flex-start}
+.rail{width:86px;flex:none;position:relative;height:734px}
 .rail .rl{
   position:absolute;left:0;width:74px;border-radius:12px;display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:800;letter-spacing:2px;color:#fff;text-align:center;line-height:1.5;
   writing-mode:vertical-rl;
 }
 .rl.r-h{top:68px;height:148px;background:linear-gradient(180deg,#0f9d6e,#3dbd92)}
-.rl.r-a{top:242px;height:218px;background:linear-gradient(180deg,#c4742e,#e09a55);box-shadow:0 8px 20px rgba(196,116,46,.25)}
-.rl.r-s{top:486px;height:136px;background:linear-gradient(180deg,#33507e,#5b7bab)}
-.stage{width:212px;flex:none;display:flex;flex-direction:column}
+.rl.r-a{top:242px;height:330px;background:linear-gradient(180deg,#c4742e,#e09a55);box-shadow:0 8px 20px rgba(196,116,46,.25)}
+.rl.r-s{top:598px;height:136px;background:linear-gradient(180deg,#33507e,#5b7bab)}
+.stage{width:272px;flex:none;display:flex;flex-direction:column}
 .stage-head{
   height:58px;border-radius:13px;padding:9px 14px;color:#fff;position:relative;overflow:hidden;margin-bottom:10px;
   background:linear-gradient(125deg,#16335f,#1d5bdf);
@@ -166,32 +162,37 @@ body.tobe .kchip b{color:var(--green)}
 .stage-head .sno{position:absolute;right:9px;top:2px;font-size:28px;font-weight:800;opacity:.16;font-style:italic}
 .stage-head h3{font-size:14.5px;letter-spacing:.5px}
 .stage-head p{font-size:9.5px;opacity:.75;letter-spacing:1.8px;text-transform:uppercase}
-.cell{
-  border-radius:14px;position:relative;transition:.35s;overflow:hidden;
-}
+.cell{border-radius:14px;position:relative;transition:.35s;overflow:hidden}
 .cell.human{height:148px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-sm);padding:11px 13px}
 .cell.sys{height:136px;background:#f4f7fb;border:1px solid var(--line);padding:11px 13px;cursor:pointer}
 .cell.sys:hover{border-color:#b9c9e2;box-shadow:var(--shadow-sm)}
 .cell.ai{
-  height:218px;background:#fff;border:1.5px solid #f0dcc3;box-shadow:var(--shadow-sm);padding:12px 13px;cursor:pointer;
+  height:330px;border:1.5px solid #f0dcc3;box-shadow:var(--shadow-sm);padding:11px 12px;cursor:pointer;
   background:linear-gradient(165deg,#fffdf9,#fcf3e7);
 }
 .cell.ai:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(196,116,46,.18);border-color:var(--copper2)}
-/* AS-IS：AI 层未启用 */
 body.asis .cell.ai{filter:grayscale(.95);opacity:.42;transform:none!important;box-shadow:none}
 body.asis .cell.ai::after{
-  content:"AI 层 · 待启用";position:absolute;inset:0;display:grid;place-items:center;
-  font-size:12.5px;font-weight:800;letter-spacing:3px;color:var(--ink3);
-  background:rgba(244,246,250,.78);backdrop-filter:blur(1.5px);
+  content:"AI 层 · 待启用 — 点击右上「升级」查看实时效果";position:absolute;inset:0;display:grid;place-items:center;
+  font-size:12px;font-weight:800;letter-spacing:2px;color:var(--ink3);text-align:center;padding:0 20px;line-height:2;
+  background:rgba(244,246,250,.82);backdrop-filter:blur(2px);
 }
 body.tobe .cell.ai{opacity:0;transform:translateY(10px)}
 body.tobe .cell.ai.lit{opacity:1;transform:none}
-.cell h5{font-size:13.6px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.cell.ai h5 .aic{
-  width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;color:#fff;
+.cell h5{font-size:13.4px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.ai-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-head .aic{
+  width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;
   background:linear-gradient(120deg,var(--copper),var(--copper2));
 }
-.cell.ai h5 .aic svg{width:14px;height:14px}
+.ai-head .aic svg{width:13px;height:13px}
+.ai-head b{font-size:13.2px;letter-spacing:.2px}
+.ai-head .live{
+  margin-left:auto;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#0c7f59;
+  background:var(--green-soft);border:1px solid #c8ecdd;border-radius:5px;padding:1.5px 6px;
+  display:flex;align-items:center;gap:4px;
+}
+.ai-head .live::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse2 1.4s infinite}
 .cell p.desc{font-size:11.6px;color:var(--ink2);line-height:1.55;margin-bottom:7px}
 .tagrow{display:flex;flex-wrap:wrap;gap:4px}
 .tg{
@@ -200,40 +201,34 @@ body.tobe .cell.ai.lit{opacity:1;transform:none}
 }
 .tg.red{color:#b8402e;background:var(--red-soft);border-color:#f6d3cd}
 .tg.green{color:#0c7f59;background:var(--green-soft);border-color:#c8ecdd}
-.tg.gold{color:var(--copper-d);background:#fbe9d2;border-color:#f0dcc3}
 .tg.blue{color:var(--blue-d);background:var(--blue-soft);border-color:#d3e0fa}
-.cell .foot{position:absolute;left:13px;bottom:9px;font-size:11px;font-weight:700;color:var(--copper-d)}
-.cell.sys .foot{color:var(--blue-d)}
+.cell .foot{position:absolute;left:12px;bottom:7px;font-size:10.5px;font-weight:700;color:var(--copper-d)}
+.cell.sys .foot{color:var(--blue-d);left:13px;bottom:9px;font-size:11px}
 .cell .sys-k{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:6px}
-/* 人 cell 双态 */
 .h-asis,.h-tobe{animation:popin .4s ease}
 body.asis .h-tobe{display:none}
 body.tobe .h-asis{display:none}
 @keyframes popin{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-/* 泳道间连接 */
 .vlink{height:26px;display:flex;align-items:center;justify-content:center;position:relative}
 .vlink span{font-size:10px;color:var(--ink3);background:var(--bg);padding:0 7px;position:relative;z-index:1;letter-spacing:.5px}
 .vlink::before{content:"";position:absolute;left:50%;top:2px;bottom:2px;border-left:2px dashed var(--line2)}
 body.tobe .vlink.up::before{border-color:#dcc39f}
 body.tobe .vlink span{color:var(--copper-d);font-weight:700}
-.vlink .va2,.vlink .vt2{display:inline}
 body.asis .vlink .vt2{display:none}
 body.tobe .vlink .va2{display:none}
-/* 阶段间横向连接 */
-.hconn{width:44px;flex:none;position:relative;height:622px}
-.hconn svg{position:absolute;left:-3px;top:340px;width:50px;height:22px;overflow:visible}
+.hconn{width:44px;flex:none;position:relative;height:734px}
+.hconn svg{position:absolute;left:-3px;top:396px;width:50px;height:22px;overflow:visible}
 .dashflow{stroke:var(--copper);stroke-width:2.4;stroke-dasharray:7 6;animation:dash 1.1s linear infinite}
 body.asis .dashflow{stroke:var(--line2);animation:none}
 body.asis .hconn path{stroke:var(--line2)!important}
 @keyframes dash{to{stroke-dashoffset:-13}}
-/* 闭环 */
-.loop-lane{min-width:1578px;height:78px;position:relative;margin-top:8px;transition:.4s}
+.loop-lane{min-width:1938px;height:78px;position:relative;margin-top:8px;transition:.4s}
 body.asis .loop-lane{opacity:.15;filter:grayscale(1)}
 .loop-lane svg{position:absolute;inset:0;width:100%;height:100%}
 .loop-path{fill:none;stroke:var(--copper);stroke-width:2.4;stroke-dasharray:8 7;animation:dashRev 1.2s linear infinite;opacity:.9}
 @keyframes dashRev{to{stroke-dashoffset:15}}
 .loop-chips{
-  position:absolute;left:960px;top:42px;transform:translate(-50%,-50%);
+  position:absolute;left:1170px;top:42px;transform:translate(-50%,-50%);
   display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #f0dcc3;
   border-radius:999px;padding:7px 16px;box-shadow:var(--shadow-sm);white-space:nowrap;
 }
@@ -242,6 +237,114 @@ body.asis .loop-lane{opacity:.15;filter:grayscale(1)}
 .canvas-note{display:flex;gap:18px;flex-wrap:wrap;font-size:12.3px;color:var(--ink2);margin-top:14px;align-items:center}
 .canvas-note i{display:inline-flex;align-items:center;gap:6px;font-style:normal}
 .sw2{width:12px;height:12px;border-radius:4px;flex:none}
+
+/* ============ AI 节点内：实时效果小屏幕 ============ */
+.scr{
+  background:#fff;border:1px solid #f1ddc4;border-radius:11px;padding:9px 10px;height:252px;
+  position:relative;overflow:hidden;
+}
+.fx{opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease}
+.fx.on{opacity:1;transform:none}
+.scr-cap{font-size:9.5px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.scr-cap em{font-style:normal;margin-left:auto;font-weight:600;letter-spacing:0;color:var(--ink3)}
+/* S1 订单解析 */
+.wx-bub{
+  background:#eaf7e9;border:1px solid #cfe9cd;border-radius:3px 10px 10px 10px;
+  padding:6px 9px;font-size:11px;color:#2c5232;line-height:1.5;
+}
+.wx-bub b{color:#143d1c}
+.parse-arrow{
+  text-align:center;font-size:10px;color:var(--copper-d);font-weight:700;padding:3px 0;letter-spacing:1px;
+}
+.parse-arrow .sweep{display:inline-block;animation:sweepY 1.1s ease infinite}
+@keyframes sweepY{0%,100%{transform:translateY(-1.5px)}50%{transform:translateY(1.5px)}}
+.pr{display:flex;justify-content:space-between;align-items:center;font-size:10.8px;color:var(--ink2);padding:3.5px 2px;border-bottom:1px dashed #f3e7d6}
+.pr b{color:var(--ink);font-size:11px}
+.pr .ok{color:var(--green);font-weight:800;font-size:10px}
+.vd{
+  margin-top:7px;background:var(--green-soft);border:1px solid #c8ecdd;color:#0c7f59;
+  font-weight:700;font-size:10.8px;border-radius:8px;padding:5px 8px;line-height:1.5;
+}
+.vd.amber{background:var(--amber-soft);border-color:#f3ddb4;color:#9a6a14}
+/* S2 齐套 */
+.kit-row{margin-bottom:7px}
+.kit-l{display:flex;justify-content:space-between;font-size:10.8px;color:var(--ink2);margin-bottom:3px}
+.kit-l b{color:var(--ink);font-size:10.8px}
+.kit-l .pct{font-weight:800;font-variant-numeric:tabular-nums}
+.kb{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.kb i{display:block;height:100%;width:0;border-radius:6px;transition:width 1s cubic-bezier(.4,.1,.2,1);background:linear-gradient(90deg,#0f9d6e,#3dbd92)}
+.kb i.am{background:linear-gradient(90deg,#e8a23a,#f3c47d)}
+.alert-li{
+  display:flex;gap:6px;align-items:flex-start;font-size:10.6px;line-height:1.5;border-radius:8px;padding:5px 8px;margin-top:6px;
+  background:var(--amber-soft);border:1px solid #f3ddb4;color:#9a6a14;
+}
+/* S3 排产引擎 */
+.opt-status{font-size:10.3px;color:var(--copper-d);font-weight:700;margin-bottom:6px;min-height:16px;display:flex;align-items:center;gap:6px}
+.opt-status .spin{width:11px;height:11px;border-radius:50%;border:2px solid var(--copper2);border-top-color:transparent;animation:spin .7s linear infinite;flex:none}
+.mtk{height:17px;background:var(--bg2);border:1px solid var(--line);border-radius:5px;position:relative;margin-bottom:6px}
+.mtk small{position:absolute;left:-0px;top:-0px;font-size:8px;color:var(--ink3);transform:translateY(-1px);display:none}
+.mb{
+  position:absolute;top:3px;height:10px;border-radius:3px;
+  background:linear-gradient(120deg,#4d82ec,#7aa3f5);
+  transition:left 1s cubic-bezier(.5,.1,.2,1),width 1s cubic-bezier(.5,.1,.2,1),opacity .5s;
+}
+.mb.cu{background:linear-gradient(120deg,#df6a40,#e8915b)}
+.mb.ghost{opacity:0}
+.gap-tag{
+  position:absolute;font-size:8.5px;color:#b8402e;border:1px dashed #e8a193;border-radius:4px;padding:0 4px;top:2.5px;
+  background:rgba(253,236,234,.7);transition:opacity .5s;white-space:nowrap;
+}
+.opt-kpis{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.okpi{
+  flex:1;min-width:64px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:4px 7px;text-align:center;transition:.4s;
+}
+.okpi b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.okpi span{font-size:9px;color:var(--ink3)}
+.okpi.good{background:var(--green-soft);border-color:#c8ecdd}
+.okpi.good b{color:#0c7f59}
+.mode-pill{display:flex;gap:4px;margin-bottom:7px}
+.mode-pill i{
+  font-style:normal;flex:1;text-align:center;font-size:9.5px;font-weight:700;border-radius:6px;padding:2.5px 0;
+  background:var(--bg2);color:var(--ink3);border:1px solid var(--line);transition:.4s;
+}
+.mode-pill i.cur{background:var(--copper-soft);color:var(--copper-d);border-color:#f0dcc3}
+/* S4 守门下发 */
+.ck{display:flex;align-items:center;gap:7px;font-size:10.9px;color:var(--ink2);padding:4px 2px}
+.ck .ic{width:14px;height:14px;flex:none;border-radius:50%;border:2px solid var(--blue);border-top-color:transparent;animation:spin .7s linear infinite}
+.ck.done .ic{border:none;animation:none;background:var(--green);position:relative}
+.ck.done .ic::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:8.5px;font-weight:800}
+.ck b{color:var(--ink);font-weight:600}
+.ck .res{margin-left:auto;font-size:9.5px;color:var(--green);font-weight:700}
+.send-line{
+  margin-top:6px;border-top:1px dashed #f0e2cd;padding-top:7px;font-size:10.9px;color:var(--ink2);
+  display:flex;align-items:center;gap:7px;
+}
+.receipt{
+  margin-top:6px;background:var(--blue-soft);border:1px solid #d3e0fa;border-radius:8px;padding:5px 8px;
+  font-size:10.6px;color:var(--blue-d);line-height:1.5;
+}
+/* S5 事件流 */
+.lg{display:flex;gap:7px;font-size:10.5px;color:var(--ink2);padding:3.5px 1px;border-bottom:1px dashed #f3ead9;line-height:1.5;align-items:flex-start}
+.lg time{color:var(--ink3);font-variant-numeric:tabular-nums;flex:none;font-size:10px;padding-top:1px}
+.lg.crit{color:#b8402e}.lg.crit b{color:#b8402e}
+.lg.win{color:#0c7f59}.lg.win b{color:#0c7f59}
+.lg b{color:var(--ink)}
+.elapsed{
+  margin-top:7px;text-align:center;font-size:10.5px;font-weight:800;color:var(--copper-d);
+  background:var(--copper-soft);border:1px solid #f0dcc3;border-radius:8px;padding:4px;
+}
+/* S6 学习 */
+.learn-li{display:flex;gap:7px;font-size:10.7px;color:var(--ink2);padding:4px 1px;line-height:1.5;align-items:flex-start}
+.learn-li .who2{flex:none;font-size:9px;font-weight:800;border-radius:5px;padding:1px 5px;margin-top:1px}
+.learn-li .who2.h{color:#0c7f59;background:var(--green-soft)}
+.learn-li .who2.a{color:var(--copper-d);background:var(--copper-soft)}
+.rule-card{
+  margin-top:5px;background:linear-gradient(160deg,#fffdf9,#fcf3e7);border:1px solid #f0dcc3;border-radius:9px;
+  padding:6px 9px;font-size:10.6px;color:#7c4a13;line-height:1.55;
+}
+.rule-card b{display:block;color:#7c4a13}
+.meter-l{display:flex;justify-content:space-between;font-size:10.3px;color:var(--ink2);margin:7px 0 3px}
+.meter-l b{font-variant-numeric:tabular-nums;color:#0c7f59}
 
 /* ============ 五大策略 ============ */
 .strats{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}
@@ -333,7 +436,6 @@ body.asis .loop-lane{opacity:.15;filter:grayscale(1)}
   background:linear-gradient(120deg,var(--blue),#3f7bf0);transition:.2s;
 }
 .send-btn:hover{transform:translateY(-1px)}
-/* 甘特 */
 .gantt-body{padding:18px 20px 8px;flex:1}
 .g-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .g-leg{display:flex;gap:13px;margin-left:auto;font-size:11.3px;color:var(--ink2);flex-wrap:wrap}
@@ -382,7 +484,6 @@ tbody tr:hover{background:#f8fafd}
 td.dim{font-weight:700;color:var(--ink);white-space:nowrap}
 td .as{color:#b8402e}
 td .to{color:var(--green);font-weight:600}
-td .arr2{color:var(--ink3);padding:0 8px}
 
 /* ============ 落地路径 ============ */
 .road{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;position:relative}
@@ -515,10 +616,11 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
     江铜现有生产系统已经管住了<b>订单、库存、工艺、下发、监控、报表</b>六类业务数据——但「排产」这个决策环节，
     仍依赖排程员手动整理 Excel、逐一查库存、微信群通知产线。
     本方案<b>不推翻、不重建</b>：以 AI 智能体挂接现有系统，把人工经验决策升级为
-    <span style="color:var(--copper-d);font-weight:700">小时级智能排产 + 人审发布 + 事件闭环</span>。
+    <span style="color:var(--copper-d);font-weight:700">小时级智能排产 + 人审发布 + 事件闭环</span>
+    ——下面每个 AI 节点都是一块正在运行的小屏幕，效果直接看得见。
   </p>
   <div class="hero-actions reveal">
-    <button class="btn btn-copper" onclick="upgradeDemo()">⚡&nbsp; 一键升级：现状 → 智能排产</button>
+    <button class="btn btn-copper" onclick="upgradeDemo()">⚡&nbsp; 一键升级：看 AI 实时效果</button>
     <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView()">💬&nbsp; 体验排产智能体</button>
   </div>
   <div class="pains reveal">
@@ -534,10 +636,10 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
   <div class="sec-tag reveal">AS-IS → TO-BE · 核心画布</div>
   <h2 class="reveal">同一条生产流程，两种运转方式</h2>
   <p class="sec-sub reveal">
-    下方三泳道描绘江铜从接单到复盘的六步业务主线：<b style="color:#33507e">底层是现有生产系统（保留利旧）</b>、
+    三泳道描绘江铜从接单到复盘的六步业务主线：<b style="color:#33507e">底层是现有生产系统（保留利旧）</b>、
     <b style="color:#0c7f59">顶层是人</b>、<b style="color:var(--copper-d)">中间是新增的 AI 排产智能体</b>。
-    切换右上方模式，看 AI 如何接管「查数据、做计划、发通知」的体力活，而把审核权留给排程员。
-    点击 AI 节点或系统节点可查看优化细节与数据依赖。
+    切换到升级模式后，<b>每个 AI 节点都会实时演示它产出的结果</b>——微信订单被解析、齐套进度在跑、
+    甘特从天级压缩到小时级、产线回执到达、故障 3 分钟出方案、经验自动入库。点击节点可看优化细节。
   </p>
   <div class="canvas-card reveal">
     <div class="canvas-top">
@@ -555,13 +657,13 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
     <div class="canvas-wrap">
       <div class="board" id="board-el"></div>
       <div class="loop-lane">
-        <svg viewBox="0 0 1578 78" preserveAspectRatio="none">
+        <svg viewBox="0 0 1938 78" preserveAspectRatio="none">
           <defs>
             <marker id="arrUp" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="#c4742e"/>
             </marker>
           </defs>
-          <path class="loop-path" marker-end="url(#arrUp)" d="M1216 2 V34 a10 10 0 0 1 -10 10 H714 a10 10 0 0 1 -10 -10 V8"/>
+          <path class="loop-path" marker-end="url(#arrUp)" d="M1486 2 V34 a10 10 0 0 1 -10 10 H864 a10 10 0 0 1 -10 -10 V8"/>
         </svg>
         <div class="loop-chips">
           <b>事件闭环</b>
@@ -572,7 +674,7 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
     </div>
     <div class="canvas-note">
       <i><span class="sw2" style="background:linear-gradient(120deg,#0f9d6e,#3dbd92)"></span>人 · 排程员/业务/产线</i>
-      <i><span class="sw2" style="background:linear-gradient(120deg,#c4742e,#e09a55)"></span>AI 排产智能体（新增层）</i>
+      <i><span class="sw2" style="background:linear-gradient(120deg,#c4742e,#e09a55)"></span>AI 排产智能体（新增层 · 实时效果演示）</i>
       <i><span class="sw2" style="background:linear-gradient(120deg,#33507e,#5b7bab)"></span>现有生产系统（保留利旧 · 仅打通接口）</i>
       <i style="margin-left:auto;color:var(--ink3)">演示数据为示意 · 点击节点查看详情</i>
     </div>
@@ -724,6 +826,7 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
 <script>
 /* ==================================================================
    六步业务主线 × 三泳道（人 / AI / 现有系统）
+   AI 泳道 = 实时效果小屏幕（所见即结果，循环演示）
 ================================================================== */
 const AI_ICONS = {
   doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
@@ -739,8 +842,7 @@ const STAGES = [
   h_asis:{txt:'业务微信 / 电话接单，凭经验判断能否接、何时能交。', tags:[['交期凭感觉','red'],['易过量承诺','red']]},
   h_tobe:{txt:'业务实时拿到交期试算答复单，接单有依据、承诺可兑现。', tags:[['秒级答复','green'],['有据可依','green']]},
   vTop_a:'人工经验判断', vTop_t:'↑ 交期答复 · ↓ 接单确认',
-  ai:{icon:'doc', t:'订单智能解析 · 交期试算', d:'读懂微信/Excel 里的订单，自动结构化；调用倒排仿真，秒级回答“能不能接、何时能交”。',
-      tags:[['订单自动结构化','gold'],['交期可行性试算','gold'],['接单建议','gold']]},
+  aiTitle:'订单解析 · 交期试算', aiIcon:'doc',
   vBot_a:'↓ 人工录入订单系统', vBot_t:'↑ 订单/客户数据 · ↓ 评审结果回写',
   sys:{k:'数据源 · 保留利旧', t:'订单管理', chips:['销售订单','客户档案 / 优先级','产销平衡 / 产能预警'],
        items:[['销售订单','单号/物品/数量/交期/优先级——AI 的需求输入'],['客户档案','客户优先级与奖惩，参与排产权重'],['产销平衡 · 产能预警','产能与需求匹配评估，预警阈值机制']]}},
@@ -749,28 +851,25 @@ const STAGES = [
   h_asis:{txt:'排程员逐一查询订单系统与库存表，人工判断缺料并发起采购通知。', tags:[['手动查表','red'],['缺料后知后觉','red']]},
   h_tobe:{txt:'齐套报告自动推送，排程员只处理缺料例外，采购通知自动发起。', tags:[['零手动查询','green'],['采购自动联动','green']]},
   vTop_a:'人工逐表核对', vTop_t:'↑ 齐套报告 · ↓ 例外处理',
-  ai:{icon:'box', t:'数据感知 · 齐套与缺料预测', d:'实时接入原料/在途/模具库存，自动齐套计算；提前 N 天预测缺料并联动采购提醒。',
-      tags:[['库存实时感知','gold'],['自动齐套计算','gold'],['缺料预测→采购','gold']]},
+  aiTitle:'齐套体检 · 缺料预测', aiIcon:'box',
   vBot_a:'↓ 人工查询库存表', vBot_t:'↑ 库存/在途数据 · ↓ 锁定与占用',
-  sys:{k:'数据源 · 保留利旧', t:'库存数据 + 采购订单', chips:['原料库存及在途','模具 / 在制品库存','采购订单（到货约束）'],
+  sys:{k:'数据源 · 保留利旧', t:'库存数据 + 采购订单', chips:['原料/在途库存','模具 · 在制品','采购订单约束'],
        items:[['原料库存及在途','齐套检查与最早开工时间（EST）的硬约束'],['模具库存','拉丝模等工器具在库与占用状态'],['在制品 / 呆滞 / 盘点库存','WIP 可见、呆滞优先消耗、账实一致'],['采购订单','到货日期约束排产最早开始时间']]}},
 
  {no:'S3', name:'排产决策', en:'SCHEDULING', core:true,
   h_asis:{txt:'排程员用 Excel 手动排程，天级颗粒度；规则在老师傅脑中，外人看不懂。', tags:[['强专家经验','red'],['天级·不透明','red']]},
   h_tobe:{txt:'排程员从“做计划”变“审计划”：看甘特、拖拽微调、一键确认。', tags:[['15 分钟全厂计划','green'],['规则透明可解释','green']]},
   vTop_a:'Excel 手工编排（约 4 小时）', vTop_t:'↑ 候选方案+解释 · ↓ 审核/微调',
-  ai:{icon:'cpu', t:'智能排产引擎（小时级）', d:'绑定关系 + 换模损耗矩阵建模，多目标寻优生成小时级计划，并解释“为什么这么排”。',
-      tags:[['约束自动建模','gold'],['多目标寻优','gold'],['What-if 仿真','gold'],['可解释报告','gold']]},
+  aiTitle:'小时级排产引擎', aiIcon:'cpu',
   vBot_a:'↓ 仅作记录查询', vBot_t:'↑ 工艺/产能/算法底座 · ↓ 计划回写',
-  sys:{k:'模型底座 · 保留利旧', t:'基础数据 · 工艺 · 算法', chips:['物料×产线×模具绑定','换型时间 / 节拍 / 日历','工艺路径 / BOM','9 类排程算法'],
+  sys:{k:'模型底座 · 保留利旧', t:'基础数据 · 工艺 · 算法', chips:['物料×产线×模具绑定','换型/节拍/日历','工艺·BOM·算法库'],
        items:[['物料与生产线关系','节拍/开动率/优先级/批量——“器件×设备绑定”的载体'],['模具与物料/产线关系 · 换型时间','换模损耗矩阵的数据来源'],['生产日历 · 排班 · 产能 · 节拍','小时级排产的时间与产能底座'],['工艺路径 / BOM','顺序与并行衔接、替代方案'],['核心算法（Z/N/Z+N/顺排/倒排/跟随等）','AI 引擎调用的求解策略库']]}},
 
  {no:'S4', name:'审核与下发', en:'REVIEW & RELEASE',
   h_asis:{txt:'排程结果在微信群发给产线（订单号 + 特殊约束如精细加工），无回执、难追溯。', tags:[['微信群通知','red'],['无验收回执','red']]},
   h_tobe:{txt:'移动端一键审核发布；下发状态、产线回执全程可追。', tags:[['替代微信群','green'],['全程留痕','green']]},
   vTop_a:'微信群人工通知', vTop_t:'↑ 待审方案 · ↓ 一键发布',
-  ai:{icon:'send', t:'冲突守门 · 自动下发', d:'发布前全约束校验与版本留痕；审核通过即自动下发至产线终端，回收电子验收回执。',
-      tags:[['冲突检测','gold'],['版本/一键回滚','gold'],['自动下发+回执','gold']]},
+  aiTitle:'冲突守门 · 自动下发', aiIcon:'send',
   vBot_a:'↓ 线下传达，系统滞后', vBot_t:'↓ 工序工单下发 · ↑ 下发履历',
   sys:{k:'执行通道 · 保留利旧', t:'生产排程 · 下发', chips:['工序工单下发','下发履历','作业指导书'],
        items:[['工序工单下发','确认后执行下发——AI 复用此通道替代微信群'],['下发履历','下发时间/明细可查，配合电子回执闭环'],['作业指导书','电子 SOP 随制令单到机台，承载“精细加工”等特殊约束']]}},
@@ -779,8 +878,7 @@ const STAGES = [
   h_asis:{txt:'急单靠电话协调、可能延期；设备故障后人工重排往往要一天。', tags:[['急单可能延期','red'],['故障重排慢','red']]},
   h_tobe:{txt:'异常出现时方案已在路上，人只做确认；产线按小时计划运转。', tags:[['急单不延期','green'],['分钟级响应','green']]},
   vTop_a:'电话协调 · 拍脑袋插单', vTop_t:'↑ 应急方案 · ↓ 确认执行',
-  ai:{icon:'zap', t:'事件驱动应急重排', d:'监听急单 / 设备故障 / 实绩偏差三类事件，增量重排只动受影响工单，5 分钟内出多方案对比。',
-      tags:[['急单 <5min 方案','gold'],['故障增量重排','gold'],['滚动校准','gold'],['⟳ 回 S3 引擎','blue']]},
+  aiTitle:'事件应急重排', aiIcon:'zap',
   vBot_a:'↓ 实绩滞后录入', vBot_t:'↑ 生产反馈/实绩 · ↓ 调整指令',
   sys:{k:'实绩回流 · 保留利旧', t:'执行监控', chips:['生产反馈','领料与入库','异常预警'],
        items:[['生产反馈','执行状态/实绩起止/实绩数量——事件闭环的触发源'],['领料与入库','领料扣减需求、完工增加供应'],['生产异常预警','未及时开始/完成自动报警，AI 在此之上做预测性预警'],['产线达成统计','计划 vs 实绩差异，喂给学习环']]}},
@@ -789,11 +887,83 @@ const STAGES = [
   h_asis:{txt:'报表手工整理、复盘滞后；排产经验沉淀在个人，新人上手慢。', tags:[['经验在脑中','red'],['复盘滞后','red']]},
   h_tobe:{txt:'新人即问即会；每次人工调整都让系统更聪明。', tags:[['经验资产化','green'],['越用越准','green']]},
   vTop_a:'经验口口相传', vTop_t:'↑ KPI 周报 · ↓ 调整被学习',
-  ai:{icon:'loop', t:'经验学习闭环', d:'排程员的每次手工调整自动学习为规则；换型/节拍参数依实绩自校准；KPI 周报自然语言自动生成。',
-      tags:[['专家经验入库','gold'],['参数自校准','gold'],['KPI 自动周报','gold']]},
+  aiTitle:'经验学习闭环', aiIcon:'loop',
   vBot_a:'↓ 手工汇总报表', vBot_t:'↑ 报表/达成数据 · ↓ 优化参数回写',
   sys:{k:'展示层 · 保留利旧', t:'报表 · 计划可视化', chips:['产量效率 / 交付率','生产实时跟踪','甘特 / 负荷图'],
        items:[['每日机台产量效率 · 生产效率分析','学习环的评估指标来源'],['订单准时交付率分析','智能排产成效的核心标尺'],['生产实时跟踪 · 实时库存','实时跟单的展示出口'],['资源/订单甘特图 · 负荷图','排程透明化的可视载体']]}}
+];
+
+/* ============ AI 实时效果小屏幕（HTML 模板） ============ */
+const AI_SCREENS = [
+ /* S1 订单解析 */
+ `<div class="scr">
+    <div class="scr-cap">💬 微信 · 台意业务群 <em id="w1-t">14:02</em></div>
+    <div class="wx-bub fx" id="w1-msg">李工：<b>急单！0.25mm 镀锡线 20 吨</b>，13 号要货，能不能做？</div>
+    <div class="parse-arrow fx" id="w1-arrow"><span class="sweep">⇣</span> AI 解析中 → 结构化订单</div>
+    <div id="w1-rows">
+      <div class="pr fx"><span>物品</span><b>0.25mm 镀锡铜线</b><span class="ok">✓</span></div>
+      <div class="pr fx"><span>数量</span><b>20 t</b><span class="ok">✓</span></div>
+      <div class="pr fx"><span>交期</span><b>6/13（急单）</b><span class="ok">✓</span></div>
+      <div class="pr fx"><span>齐套 / 产能</span><b>库存 18t + 在途 2t · L3 可产</b><span class="ok">✓</span></div>
+    </div>
+    <div class="vd fx" id="w1-vd">✅ 可接单 —— 预计 6/12 22:40 完工，交期余量 25h（用时 6 秒）</div>
+  </div>`,
+ /* S2 齐套体检 */
+ `<div class="scr">
+    <div class="scr-cap">📦 齐套体检 · MO-26061008 <em>实时</em></div>
+    <div class="kit-row fx"><div class="kit-l"><b>铜杆 Φ8mm</b><span class="pct" id="w2-p1">0%</span></div><div class="kb"><i id="w2-b1"></i></div></div>
+    <div class="kit-row fx"><div class="kit-l"><b>锡锭</b><span class="pct" id="w2-p2">0%</span></div><div class="kb"><i class="am" id="w2-b2"></i></div></div>
+    <div class="kit-row fx"><div class="kit-l"><b>拉丝模 D-025</b><span class="pct" id="w2-p3">0 副</span></div><div class="kb"><i id="w2-b3"></i></div></div>
+    <div class="alert-li fx" id="w2-alert">⚠ <span>锡锭短缺 <b>0.4t</b> → 已自动生成采购提醒 <b>PR-0610</b>，在途 6/11 09:00 到货</span></div>
+    <div class="vd fx" id="w2-vd">✓ 预计齐套 6/11 09:00 —— 已作为约束写入排产</div>
+  </div>`,
+ /* S3 排产引擎 */
+ `<div class="scr">
+    <div class="scr-cap">🧠 全厂排产 · 23 张工单 <em id="w3-mode">天级 · 手动</em></div>
+    <div class="mode-pill"><i id="w3-m1" class="cur">现状 · 天级</i><i id="w3-m2">AI · 小时级</i></div>
+    <div class="opt-status" id="w3-status"><span style="color:var(--ink3)">设备间隙大量空转，待优化…</span></div>
+    <div class="mtk" id="w3-t1"></div>
+    <div class="mtk" id="w3-t2"></div>
+    <div class="mtk" id="w3-t3"></div>
+    <div class="opt-kpis">
+      <div class="okpi" id="w3-k1"><b>2 张</b><span>预计延期</span></div>
+      <div class="okpi" id="w3-k2"><b>5 次</b><span>换型</span></div>
+      <div class="okpi" id="w3-k3"><b>71%</b><span>设备利用率</span></div>
+    </div>
+  </div>`,
+ /* S4 守门下发 */
+ `<div class="scr">
+    <div class="scr-cap">🛡 发布守门 · 版本 V0610-3 <em>审核中</em></div>
+    <div id="w4-checks">
+      <div class="ck fx"><span class="ic"></span><b>模具占用校验</b><span class="res"></span></div>
+      <div class="ck fx"><span class="ic"></span><b>规格禁排校验</b><span class="res"></span></div>
+      <div class="ck fx"><span class="ic"></span><b>日历 / 班次冲突</b><span class="res"></span></div>
+    </div>
+    <div class="send-line fx" id="w4-send"><span class="ic" style="width:13px;height:13px;border-radius:50%;border:2px solid var(--copper2);border-top-color:transparent;animation:spin .7s linear infinite;flex:none"></span><b id="w4-sendtxt">排程员已确认 → 下发 L3 产线终端…</b></div>
+    <div class="receipt fx" id="w4-rc">📩 <b>产线回执</b>：L3 已接收并确认开工序列（王班长 · 14:32）<br>📄 电子作业指导书已随单送达机台</div>
+    <div class="vd fx" id="w4-vd">✓ 全程留痕 · 微信群 0 条 —— 下发到回执仅 38 秒</div>
+  </div>`,
+ /* S5 事件应急 */
+ `<div class="scr">
+    <div class="scr-cap">⚡ 事件流 · 实时监听 <em>LIVE</em></div>
+    <div class="lg crit fx"><time>14:02</time><span>🔧 <b>L2 拉丝机故障</b>，预计停机 8h（来自设备反馈）</span></div>
+    <div class="lg fx"><time>14:02</time><span>⛓ 受影响工单 <b>3 张</b> 已锁定，开始增量重排</span></div>
+    <div class="lg win fx"><time>14:05</time><span>✅ <b>重排方案生成</b>：2 张转 L4（换型 1.5h），1 张原机延后</span></div>
+    <div class="lg fx"><time>14:06</time><span>📨 方案已推送排程员，附交期影响对比</span></div>
+    <div class="lg win fx"><time>14:12</time><span>🚀 审核通过 · <b>V0610-2 已发布</b>，延期订单 0 张</span></div>
+    <div class="elapsed fx" id="w5-el">故障 → 可执行方案：3 分钟（现状：约 1 天）</div>
+  </div>`,
+ /* S6 经验学习 */
+ `<div class="scr">
+    <div class="scr-cap">📚 经验学习 · 持续进行 <em>今日 +3 条</em></div>
+    <div class="learn-li fx"><span class="who2 h">排程员</span><span>把 MO-0609-12 从 L5 拖到 <b>L3</b>（手工微调）</span></div>
+    <div class="learn-li fx"><span class="who2 a">AI 归因</span><span>0.25mm 系列在 L3 换模可省 <b>1.5h</b>，且成材率高 0.8%</span></div>
+    <div class="rule-card fx" id="w6-rule"><b>✨ 新规则 #128 已入库</b>“0.25mm 镀锡线优先排 L3，除非负荷 &gt; 90%”——下次自动应用</div>
+    <div class="meter-l fx"><span>知识库规则数</span><b id="w6-n1">127 条</b></div>
+    <div class="kb fx"><i id="w6-b1" style="background:linear-gradient(90deg,#c4742e,#e09a55)"></i></div>
+    <div class="meter-l fx"><span>AI 方案一次采纳率</span><b id="w6-n2">78%</b></div>
+    <div class="kb fx"><i id="w6-b2"></i></div>
+  </div>`
 ];
 
 /* ============ 渲染画布 ============ */
@@ -801,7 +971,7 @@ const boardEl = document.getElementById('board-el');
 (function render(){
   const rail = document.createElement('div');
   rail.className='rail';
-  rail.innerHTML = `<div class="rl r-h">人 · 排程员/产线</div><div class="rl r-a">AI 排产智能体</div><div class="rl r-s">现有生产系统</div>`;
+  rail.innerHTML = `<div class="rl r-h">人 · 排程员/产线</div><div class="rl r-a">AI 排产智能体 · 实时效果</div><div class="rl r-s">现有生产系统</div>`;
   boardEl.appendChild(rail);
   STAGES.forEach((s,i)=>{
     const col = document.createElement('div');
@@ -817,10 +987,9 @@ const boardEl = document.getElementById('board-el');
           <div class="tagrow">${s.h_tobe.tags.map(t=>`<span class="tg ${t[1]}">${t[0]}</span>`).join('')}</div></div>
       </div>
       <div class="vlink up"><span><i class="va2">${s.vTop_a}</i><i class="vt2">${s.vTop_t}</i></span></div>
-      <div class="cell ai" onclick="openAI(${i})">
-        <h5><span class="aic">${AI_ICONS[s.ai.icon]}</span>${s.ai.t}</h5>
-        <p class="desc">${s.ai.d}</p>
-        <div class="tagrow">${s.ai.tags.map(t=>`<span class="tg ${t[1]}">${t[0]}</span>`).join('')}</div>
+      <div class="cell ai" id="ai-${i}" onclick="openAI(${i})">
+        <div class="ai-head"><span class="aic">${AI_ICONS[s.aiIcon]}</span><b>${s.aiTitle}</b><span class="live">LIVE</span></div>
+        ${AI_SCREENS[i]}
         <span class="foot">优化详情 →</span>
       </div>
       <div class="vlink"><span><i class="va2">${s.vBot_a}</i><i class="vt2">${s.vBot_t}</i></span></div>
@@ -840,6 +1009,183 @@ const boardEl = document.getElementById('board-el');
   });
 })();
 
+/* ============ 小屏幕动画引擎 ============ */
+function seq(steps){ // steps: [[delay, fn], ...] 返回 {start, stop}
+  let timers=[], running=false;
+  function start(){
+    stop(); running=true;
+    let t=0;
+    steps.forEach(([d,fn])=>{ t+=d; timers.push(setTimeout(()=>{ if(running) fn(); }, t)); });
+  }
+  function stop(){ running=false; timers.forEach(clearTimeout); timers=[]; }
+  return {start, stop};
+}
+const $=id=>document.getElementById(id);
+const on=(...ids)=>ids.forEach(id=>{const e=$(id); if(e) e.classList.add('on');});
+const offAll=root=>root.querySelectorAll('.fx.on').forEach(e=>e.classList.remove('on'));
+function tick(el, from, to, suffix, dur=900){
+  const t0=performance.now();
+  (function f(t){
+    const k=Math.min((t-t0)/dur,1);
+    el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3)))+suffix;
+    if(k<1) requestAnimationFrame(f);
+  })(t0);
+}
+
+const WIDGETS=[];
+/* —— S1 订单解析 —— */
+WIDGETS.push((function(){
+  const cell=()=>$('ai-0');
+  function reset(){ offAll(cell()); }
+  const s=seq([
+    [300, ()=>on('w1-msg')],
+    [700, ()=>on('w1-arrow')],
+    [550, ()=>cell().querySelectorAll('#w1-rows .pr')[0].classList.add('on')],
+    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[1].classList.add('on')],
+    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[2].classList.add('on')],
+    [380, ()=>cell().querySelectorAll('#w1-rows .pr')[3].classList.add('on')],
+    [600, ()=>on('w1-vd')],
+    [5200, ()=>{ reset(); s.start(); }]
+  ]);
+  return {start:s.start, stop:()=>{s.stop(); reset();}};
+})());
+/* —— S2 齐套 —— */
+WIDGETS.push((function(){
+  const cell=()=>$('ai-1');
+  function reset(){
+    offAll(cell());
+    $('w2-b1').style.width='0'; $('w2-b2').style.width='0'; $('w2-b3').style.width='0';
+    $('w2-p1').textContent='0%'; $('w2-p2').textContent='0%'; $('w2-p3').textContent='0 副';
+  }
+  const s=seq([
+    [300, ()=>{ cell().querySelectorAll('.kit-row')[0].classList.add('on'); $('w2-b1').style.width='100%'; tick($('w2-p1'),0,100,'%'); }],
+    [550, ()=>{ cell().querySelectorAll('.kit-row')[1].classList.add('on'); $('w2-b2').style.width='86%'; tick($('w2-p2'),0,86,'%'); }],
+    [550, ()=>{ cell().querySelectorAll('.kit-row')[2].classList.add('on'); $('w2-b3').style.width='100%'; $('w2-p3').textContent='2 副可用'; }],
+    [700, ()=>on('w2-alert')],
+    [900, ()=>on('w2-vd')],
+    [5200, ()=>{ reset(); s.start(); }]
+  ]);
+  return {start:s.start, stop:()=>{s.stop(); reset();}};
+})());
+/* —— S3 排产引擎（天级 → 小时级压缩） —— */
+WIDGETS.push((function(){
+  const BARS=[ /* track, beforeL, beforeW, afterL, afterW, urgent? */
+    [0,  2,15, 2,15],[0, 46,13, 19,13],
+    [1, 10,16, 2,16],[1, 60,14, 20,14],
+    [2, 24,11, 2,11],[2, 70,12, 15,12]
+  ];
+  let built=false, els=[], gap1, gap2, urg;
+  function build(){
+    if(built) return; built=true;
+    const tracks=[$('w3-t1'),$('w3-t2'),$('w3-t3')];
+    BARS.forEach(b=>{
+      const d=document.createElement('div'); d.className='mb';
+      d.style.left=b[1]+'%'; d.style.width=b[2]+'%';
+      tracks[b[0]].appendChild(d); els.push(d);
+    });
+    gap1=document.createElement('div'); gap1.className='gap-tag'; gap1.textContent='空转 9h'; gap1.style.left='28%'; tracks[1].appendChild(gap1);
+    gap2=document.createElement('div'); gap2.className='gap-tag'; gap2.textContent='空闲 11h'; gap2.style.left='40%'; tracks[2].appendChild(gap2);
+    urg=document.createElement('div'); urg.className='mb cu ghost'; urg.style.left='29%'; urg.style.width='9%'; urg.title='急单'; tracks[2].appendChild(urg);
+  }
+  function toBefore(){
+    els.forEach((d,i)=>{ d.style.left=BARS[i][1]+'%'; d.style.width=BARS[i][2]+'%'; });
+    gap1.style.opacity='1'; gap2.style.opacity='1'; urg.classList.add('ghost');
+    $('w3-m1').classList.add('cur'); $('w3-m2').classList.remove('cur');
+    $('w3-mode').textContent='天级 · 手动';
+    $('w3-status').innerHTML='<span style="color:var(--ink3)">设备间隙大量空转，待优化…</span>';
+    $('w3-k1').className='okpi'; $('w3-k2').className='okpi'; $('w3-k3').className='okpi';
+    $('w3-k1').querySelector('b').textContent='2 张';
+    $('w3-k2').querySelector('b').textContent='5 次';
+    $('w3-k3').querySelector('b').textContent='71%';
+  }
+  const s=seq([
+    [200, ()=>{ build(); toBefore(); }],
+    [1400, ()=>{ $('w3-status').innerHTML='<span class="spin"></span>AI 多目标寻优中 · 已评估 3,182 个方案…'; }],
+    [1500, ()=>{
+      els.forEach((d,i)=>{ d.style.left=BARS[i][3]+'%'; d.style.width=BARS[i][4]+'%'; });
+      gap1.style.opacity='0'; gap2.style.opacity='0';
+      $('w3-m2').classList.add('cur'); $('w3-m1').classList.remove('cur');
+      $('w3-mode').textContent='小时级 · AI';
+    }],
+    [800, ()=>{ urg.classList.remove('ghost'); $('w3-status').innerHTML='✅ 最优方案锁定（含 1 张急单）— 待排程员审核'; $('w3-status').style.color='var(--green)'; }],
+    [350, ()=>{
+      $('w3-k1').classList.add('good'); tickTxt($('w3-k1'),'0 张');
+      $('w3-k2').classList.add('good'); tickTxt($('w3-k2'),'2 次');
+      $('w3-k3').classList.add('good'); tick($('w3-k3').querySelector('b'),71,89,'%');
+    }],
+    [5200, ()=>{ $('w3-status').style.color=''; s.start(); }]
+  ]);
+  function tickTxt(kpi,txt){ kpi.querySelector('b').textContent=txt; }
+  return {start:s.start, stop:()=>{ s.stop(); if(built){ toBefore(); $('w3-status').style.color=''; } }};
+})());
+/* —— S4 守门下发 —— */
+WIDGETS.push((function(){
+  const cell=()=>$('ai-3');
+  function reset(){
+    offAll(cell());
+    cell().querySelectorAll('.ck').forEach(c=>{ c.classList.remove('done'); c.querySelector('.res').textContent=''; });
+    $('w4-sendtxt').textContent='排程员已确认 → 下发 L3 产线终端…';
+    const sp=$('w4-send').querySelector('.ic'); if(sp) sp.style.display='';
+  }
+  function check(i,res){
+    const c=cell().querySelectorAll('.ck')[i];
+    c.classList.add('on');
+    setTimeout(()=>{ c.classList.add('done'); c.querySelector('.res').textContent=res; }, 620);
+  }
+  const s=seq([
+    [300, ()=>check(0,'通过')],
+    [500, ()=>check(1,'通过')],
+    [500, ()=>check(2,'通过')],
+    [900, ()=>on('w4-send')],
+    [1100, ()=>{ $('w4-sendtxt').textContent='已下发 L3 产线终端 ✓'; const sp=$('w4-send').querySelector('.ic'); if(sp) sp.style.display='none'; on('w4-rc'); }],
+    [800, ()=>on('w4-vd')],
+    [5200, ()=>{ reset(); s.start(); }]
+  ]);
+  return {start:s.start, stop:()=>{s.stop(); reset();}};
+})());
+/* —— S5 事件应急 —— */
+WIDGETS.push((function(){
+  const cell=()=>$('ai-4');
+  function reset(){ offAll(cell()); }
+  const s=seq([
+    [300, ()=>cell().querySelectorAll('.lg')[0].classList.add('on')],
+    [750, ()=>cell().querySelectorAll('.lg')[1].classList.add('on')],
+    [900, ()=>cell().querySelectorAll('.lg')[2].classList.add('on')],
+    [700, ()=>cell().querySelectorAll('.lg')[3].classList.add('on')],
+    [800, ()=>cell().querySelectorAll('.lg')[4].classList.add('on')],
+    [600, ()=>on('w5-el')],
+    [5200, ()=>{ reset(); s.start(); }]
+  ]);
+  return {start:s.start, stop:()=>{s.stop(); reset();}};
+})());
+/* —— S6 学习 —— */
+WIDGETS.push((function(){
+  const cell=()=>$('ai-5');
+  function reset(){
+    offAll(cell());
+    $('w6-b1').style.width='0'; $('w6-b2').style.width='0';
+    $('w6-n1').textContent='127 条'; $('w6-n2').textContent='78%';
+  }
+  const s=seq([
+    [300, ()=>cell().querySelectorAll('.learn-li')[0].classList.add('on')],
+    [800, ()=>cell().querySelectorAll('.learn-li')[1].classList.add('on')],
+    [900, ()=>on('w6-rule')],
+    [700, ()=>{
+      cell().querySelectorAll('.meter-l')[0].classList.add('on');
+      cell().querySelectorAll('.kb')[0].classList.add('on');
+      $('w6-b1').style.width='86%';
+      setTimeout(()=>$('w6-n1').textContent='128 条',500);
+    }],
+    [600, ()=>{
+      cell().querySelectorAll('.meter-l')[1].classList.add('on');
+      cell().querySelectorAll('.kb')[1].classList.add('on');
+      $('w6-b2').style.width='91%'; tick($('w6-n2'),78,91,'%');
+    }],
+    [5200, ()=>{ reset(); s.start(); }]
+  ]);
+  return {start:s.start, stop:()=>{s.stop(); reset();}};
+})());
+
 /* ============ 模式切换 ============ */
 function setMode(m){
   document.body.classList.remove('asis','tobe');
@@ -848,22 +1194,57 @@ function setMode(m){
   const cards=[...document.querySelectorAll('.cell.ai')];
   if(m==='tobe'){
     cards.forEach((c,i)=>{ c.classList.remove('lit'); setTimeout(()=>c.classList.add('lit'), 120+i*150); });
-    toast('AI 排产智能体已接管六个环节的体力活——决策权仍在排程员手中');
+    WIDGETS.forEach((w,i)=>setTimeout(()=>w.start(), 400+i*260));
+    toast('AI 排产智能体已上线——每个节点正在实时演示它产出的结果');
   }else{
     cards.forEach(c=>c.classList.remove('lit'));
+    WIDGETS.forEach(w=>w.stop());
   }
 }
 function upgradeDemo(){
   document.getElementById('board').scrollIntoView({behavior:'smooth'});
   setTimeout(()=>setMode('tobe'), 600);
 }
+/* 首次滚动到画布自动升级，保证客户必看到实时效果 */
+let autoUp=false;
+const boardIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting && !autoUp){
+      autoUp=true;
+      setTimeout(()=>{ if(document.body.classList.contains('asis')) setMode('tobe'); }, 1100);
+      boardIO.disconnect();
+    }
+  });
+},{threshold:.25});
+boardIO.observe(document.querySelector('.canvas-card'));
 
 /* ============ 抽屉 ============ */
 const drawer=document.getElementById('drawer'), overlay=document.getElementById('overlay');
+const AI_DETAIL=[
+ {do:[['订单智能解析','微信 / Excel / 邮件中的订单描述，LLM 自动结构化为标准订单（物品·数量·交期·特殊约束），人工只确认不誊抄'],
+      ['交期可行性试算','基于现有系统的产能与库存数据做有限能力倒排，秒级回答“能不能接、最早何时交”'],
+      ['接单建议','结合客户优先级与当期负荷给出接单 / 议期建议，避免过量承诺']]},
+ {do:[['库存实时感知','原料 / 在途 / 模具 / 在制品库存自动入流，替代排程员逐表查询'],
+      ['自动齐套计算','按交期与优先级自动分配供应，输出缺料清单与预计齐套时间'],
+      ['缺料预测与采购联动','提前 N 天预测缺口，自动生成采购提醒——把“排程员发起采购通知”自动化']]},
+ {do:[['约束自动建模','器件型号×设备型号绑定、模具适配、换模损耗矩阵、节拍与日历全部数字化为求解约束'],
+      ['小时级多目标排产','最小化延期与换型、最大化利用率、控制在制品，15 分钟生成全厂小时级计划'],
+      ['What-if 沙盘','多方案并行仿真对比（如加班 vs 转线），代价看得见再拍板'],
+      ['可解释报告','每张工单回答“为什么排这台机、这个时段”，消除排程黑盒']]},
+ {do:[['发布前冲突守门','全约束自动校验：模具占用、规格禁排、日历冲突逐项标红'],
+      ['一键发布 · 自动下发','审核通过即推送产线终端与电子作业指导书，电子回执确认接收——彻底替代微信群'],
+      ['版本管理与回滚','每版计划留痕可对比，误发布 10 秒回滚']]},
+ {do:[['事件监听','急单 / 设备故障 / 实绩偏差三类事件实时触发，无需人来发现问题'],
+      ['增量重排','只重算受影响工单，5 分钟内输出多方案对比（含交期影响），排程员确认后生效'],
+      ['滚动校准','实绩偏差超阈值自动滚动重排，计划始终贴合现场']]},
+ {do:[['专家经验入库','排程员每次手工调整的“原因与结果”被学习为规则，老师傅经验变成企业资产'],
+      ['参数自学习','换模耗时、节拍、成材率按实绩自动回归校准，越用越准'],
+      ['KPI 自动周报','交付率 / 利用率 / 换型损耗自然语言周报，复盘从月度变成实时']]}
+];
 function openAI(i){
   const s=STAGES[i];
   document.getElementById('dPhase').textContent=`${s.no} · ${s.name} — AI 优化层（新增）`;
-  document.getElementById('dTitle').textContent=s.ai.t;
+  document.getElementById('dTitle').textContent=s.aiTitle;
   document.getElementById('dMods').innerHTML=`<i>挂接：${s.sys.t}</i><i>模式：AI 建议 · 人审发布</i>`;
   document.getElementById('drawerHead').className='drawer-head';
   let html='';
@@ -892,27 +1273,6 @@ function openSys(i){
   document.getElementById('drawerBody').innerHTML=html;
   drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden';
 }
-const AI_DETAIL=[
- {do:[['订单智能解析','微信 / Excel / 邮件中的订单描述，LLM 自动结构化为标准订单（物品·数量·交期·特殊约束），人工只确认不誊抄'],
-      ['交期可行性试算','基于现有系统的产能与库存数据做有限能力倒排，秒级回答“能不能接、最早何时交”'],
-      ['接单建议','结合客户优先级与当期负荷给出接单 / 议期建议，避免过量承诺']]},
- {do:[['库存实时感知','原料 / 在途 / 模具 / 在制品库存自动入流，替代排程员逐表查询'],
-      ['自动齐套计算','按交期与优先级自动分配供应，输出缺料清单与预计齐套时间'],
-      ['缺料预测与采购联动','提前 N 天预测缺口，自动生成采购提醒——把“排程员发起采购通知”自动化']]},
- {do:[['约束自动建模','器件型号×设备型号绑定、模具适配、换模损耗矩阵、节拍与日历全部数字化为求解约束'],
-      ['小时级多目标排产','最小化延期与换型、最大化利用率、控制在制品，15 分钟生成全厂小时级计划'],
-      ['What-if 沙盘','多方案并行仿真对比（如加班 vs 转线），代价看得见再拍板'],
-      ['可解释报告','每张工单回答“为什么排这台机、这个时段”，消除排程黑盒']]},
- {do:[['发布前冲突守门','全约束自动校验：模具占用、规格禁排、日历冲突逐项标红'],
-      ['一键发布 · 自动下发','审核通过即推送产线终端与电子作业指导书，电子回执确认接收——彻底替代微信群'],
-      ['版本管理与回滚','每版计划留痕可对比，误发布 10 秒回滚']]},
- {do:[['事件监听','急单 / 设备故障 / 实绩偏差三类事件实时触发，无需人来发现问题'],
-      ['增量重排','只重算受影响工单，5 分钟内输出多方案对比（含交期影响），排程员确认后生效'],
-      ['滚动校准','实绩偏差超阈值自动滚动重排，计划始终贴合现场']]},
- {do:[['专家经验入库','排程员每次手工调整的“原因与结果”被学习为规则，老师傅经验变成企业资产'],
-      ['参数自学习','换模耗时、节拍、成材率按实绩自动回归校准，越用越准'],
-      ['KPI 自动周报','交付率 / 利用率 / 换型损耗自然语言周报，复盘从月度变成实时']]}
-];
 function closeDrawer(){
   drawer.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow='';
 }
@@ -1007,10 +1367,10 @@ function typeText(el, text, done){
   span.style.cssText='font-size:13.5px;margin-top:8px';
   el.appendChild(span);
   let i=0;
-  (function tick(){
+  (function tk(){
     span.textContent=text.slice(0,++i);
     chatBox.scrollTop=chatBox.scrollHeight;
-    if(i<text.length) setTimeout(tick, 14);
+    if(i<text.length) setTimeout(tk, 14);
     else done&&done();
   })();
 }
