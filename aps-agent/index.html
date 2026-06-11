@@ -639,7 +639,7 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
     三泳道描绘江铜从接单到复盘的六步业务主线：<b style="color:#33507e">底层是现有生产系统（保留利旧）</b>、
     <b style="color:#0c7f59">顶层是人</b>、<b style="color:var(--copper-d)">中间是新增的 AI 排产智能体</b>。
     切换到升级模式后，<b>每个 AI 节点都会实时演示它产出的结果</b>——微信订单被解析、齐套进度在跑、
-    甘特从天级压缩到小时级、产线回执到达、故障 3 分钟出方案、经验自动入库。点击节点可看优化细节。
+    甘特从天级压缩到小时级、产线回执到达、故障 3 分钟出方案、经验自动入库。点击任一 AI 节点，将进入该流程的<b>独立详情页</b>（完整步骤链 + 放大版实时演示）。
   </p>
   <div class="canvas-card reveal">
     <div class="canvas-top">
@@ -676,7 +676,7 @@ footer{padding:46px 0 38px;border-top:1px solid var(--line);margin-top:70px}
       <i><span class="sw2" style="background:linear-gradient(120deg,#0f9d6e,#3dbd92)"></span>人 · 排程员/业务/产线</i>
       <i><span class="sw2" style="background:linear-gradient(120deg,#c4742e,#e09a55)"></span>AI 排产智能体（新增层 · 实时效果演示）</i>
       <i><span class="sw2" style="background:linear-gradient(120deg,#33507e,#5b7bab)"></span>现有生产系统（保留利旧 · 仅打通接口）</i>
-      <i style="margin-left:auto;color:var(--ink3)">演示数据为示意 · 点击节点查看详情</i>
+      <i style="margin-left:auto;color:var(--ink3)">演示数据为示意 · 点击 AI 节点进入流程详情页</i>
     </div>
   </div>
 </section>
@@ -990,7 +990,7 @@ const boardEl = document.getElementById('board-el');
       <div class="cell ai" id="ai-${i}" onclick="openAI(${i})">
         <div class="ai-head"><span class="aic">${AI_ICONS[s.aiIcon]}</span><b>${s.aiTitle}</b><span class="live">LIVE</span></div>
         ${AI_SCREENS[i]}
-        <span class="foot">优化详情 →</span>
+        <span class="foot">查看完整流程 ↗</span>
       </div>
       <div class="vlink"><span><i class="va2">${s.vBot_a}</i><i class="vt2">${s.vBot_t}</i></span></div>
       <div class="cell sys" onclick="openSys(${i})">
@@ -1242,22 +1242,7 @@ const AI_DETAIL=[
       ['KPI 自动周报','交付率 / 利用率 / 换型损耗自然语言周报，复盘从月度变成实时']]}
 ];
 function openAI(i){
-  const s=STAGES[i];
-  document.getElementById('dPhase').textContent=`${s.no} · ${s.name} — AI 优化层（新增）`;
-  document.getElementById('dTitle').textContent=s.aiTitle;
-  document.getElementById('dMods').innerHTML=`<i>挂接：${s.sys.t}</i><i>模式：AI 建议 · 人审发布</i>`;
-  document.getElementById('drawerHead').className='drawer-head';
-  let html='';
-  html+=`<div class="grp"><div class="grp-t red">现状（调研结论）</div><div class="f-item redish"><b>${s.h_asis.txt}</b><p>${s.h_asis.tags.map(t=>t[0]).join(' · ')}</p></div></div>`;
-  html+=`<div class="grp"><div class="grp-t cu">AI 优化动作</div>`;
-  AI_DETAIL[i].do.forEach(d=>{ html+=`<div class="f-item gold"><b>${d[0]}</b><p>${d[1]}</p></div>`; });
-  html+=`</div>`;
-  html+=`<div class="grp"><div class="grp-t">调用的现有系统数据 / 模块</div>`;
-  s.sys.items.forEach(it=>{ html+=`<div class="f-item"><b>${it[0]}</b><p>${it[1]}</p></div>`; });
-  html+=`</div>`;
-  html+=`<div class="grp"><div class="grp-t gn">升级后（人的角色）</div><div class="f-item"><b>${s.h_tobe.txt}</b><p>${s.h_tobe.tags.map(t=>t[0]).join(' · ')}</p></div></div>`;
-  document.getElementById('drawerBody').innerHTML=html;
-  drawer.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow='hidden';
+  location.href='stage.html#s'+(i+1);
 }
 function openSys(i){
   const s=STAGES[i];
