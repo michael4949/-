@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>晨曦智营 · AI 智能营销平台 — 晨曦科技</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%232563eb"/><stop offset="1" stop-color="%2306b6d4"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(%23g)"/><path d="M15 28 A9 9 0 0 1 33 28 Z" fill="white"/><rect x="10" y="28" width="28" height="2.5" rx="1.25" fill="white"/></svg>'>
+<style>
+  :root{
+    --bg:#f4f7fb; --surface:rgba(255,255,255,.82); --surface-solid:#ffffff;
+    --border:#e3e9f2; --border-strong:#d3dce8;
+    --text:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --primary:#2563eb; --primary-2:#06b6d4; --dawn:#f59e0b; --dawn-2:#fb923c;
+    --grad:linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
+    --grad-dawn:linear-gradient(135deg,#f59e0b,#fb923c);
+    --grad-hot:linear-gradient(135deg,#f43f5e,#fb923c);
+    --grad-violet:linear-gradient(135deg,#7c3aed,#2563eb);
+    --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --shadow-sm:0 1px 3px rgba(30,58,138,.06),0 4px 14px rgba(30,58,138,.05);
+    --shadow-md:0 4px 10px rgba(30,58,138,.07),0 12px 32px rgba(30,58,138,.08);
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+  #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+  .aurora i:nth-child(1){width:560px;height:560px;background:#dbeafe;top:-180px;left:-120px}
+  .aurora i:nth-child(2){width:520px;height:520px;background:#ffe4e6;bottom:-200px;right:-100px;animation-delay:-6s;opacity:.4}
+  .aurora i:nth-child(3){width:420px;height:420px;background:#fef3c7;top:30%;right:22%;opacity:.4;animation-delay:-12s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.12)}}
+  @keyframes breath{0%,100%{opacity:1}50%{opacity:.45}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes blink{50%{opacity:0}}
+
+  .app{position:relative;z-index:1;display:flex;height:100vh}
+
+  /* ===== 左侧栏 ===== */
+  .sidebar{width:268px;flex-shrink:0;display:flex;flex-direction:column;background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-right:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px 18px 14px}
+  .brand .logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(37,99,235,.35))}
+  .brand .bt{line-height:1.18}
+  .brand .bt b{font-size:17px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  .brand .bt small{font-size:10px;color:var(--faint);letter-spacing:2.5px;font-weight:600}
+  .ai-chip{font-size:9px;font-weight:700;color:#fff;background:var(--grad);padding:2px 6px;border-radius:6px;letter-spacing:1px;box-shadow:0 2px 6px rgba(6,182,212,.4)}
+  .side-sec{padding:4px 14px 10px;overflow-y:auto;flex:1}
+  .side-sec::-webkit-scrollbar{width:5px}
+  .side-sec::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+  .side-sec h5{font-size:11px;color:var(--faint);font-weight:600;letter-spacing:1px;margin:14px 4px 8px;display:flex;align-items:center;gap:6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;margin-bottom:3px;font-size:13.5px;color:var(--muted);cursor:pointer;transition:.18s}
+  .nav-item svg{flex-shrink:0}
+  .nav-item:hover{background:rgba(37,99,235,.06);color:var(--text)}
+  .nav-item.active{background:var(--grad);color:#fff;font-weight:600;box-shadow:0 5px 14px rgba(37,99,235,.3)}
+  .nav-item .nbadge{margin-left:auto;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(245,158,11,.15);color:#b45309}
+  .nav-item.active .nbadge{background:rgba(255,255,255,.25);color:#fff}
+  .nav-item .nbadge.hot{background:rgba(244,63,94,.12);color:#e11d48}
+  .nav-item.active .nbadge.hot{background:rgba(255,255,255,.25);color:#fff}
+  .kb-item{display:flex;align-items:center;gap:9px;padding:7.5px 10px;border-radius:10px;font-size:12.5px;color:var(--text);cursor:default;transition:.15s}
+  .kb-item:hover{background:rgba(37,99,235,.06)}
+  .kb-item .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15);flex-shrink:0;animation:breath 2.6s infinite}
+  .kb-item .dot.red{background:#f43f5e;box-shadow:0 0 0 3px rgba(244,63,94,.14)}
+  .kb-item .ki{flex:1;min-width:0}
+  .kb-item .ki em{display:block;font-style:normal;font-size:10.5px;color:var(--faint);margin-top:1px}
+  .side-foot{border-top:1px solid var(--border);padding:13px 16px;display:flex;align-items:center;gap:10px}
+  .avatar-u{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f43f5e,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+  .side-foot .ui{flex:1;min-width:0;line-height:1.3}
+  .side-foot .ui b{font-size:13px;display:block}
+  .side-foot .ui span{font-size:11px;color:var(--faint)}
+  .lic{font-size:9.5px;font-weight:700;color:var(--primary);border:1px solid rgba(37,99,235,.35);padding:2px 6px;border-radius:6px;background:rgba(37,99,235,.06)}
+
+  /* ===== 主区域 ===== */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{height:62px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 22px;background:var(--surface);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+  .ptitle{display:flex;align-items:center;gap:10px}
+  .ptitle h1{font-size:16.5px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+  .ptitle .sub{font-size:12px;color:var(--muted);padding-left:10px;border-left:1px solid var(--border-strong)}
+  .kpis{display:flex;gap:8px;margin-left:8px}
+  .kpi{font-size:11px;color:var(--muted);background:rgba(255,255,255,.7);border:1px solid var(--border);padding:4px 9px;border-radius:8px;display:flex;align-items:center;gap:5px}
+  .kpi b{color:var(--primary);font-size:11.5px}
+  .kpi b.up{color:#059669}
+  .kpi b.hot{color:#e11d48}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:10px;position:relative}
+  .model-pill{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.75);border:1px solid var(--border);padding:6px 11px;border-radius:99px;cursor:default}
+  .model-pill .led{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px rgba(16,185,129,.8);animation:breath 2s infinite}
+  .icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:.18s}
+  .icon-btn:hover{color:var(--primary);border-color:rgba(37,99,235,.4)}
+  .suite-menu{position:absolute;top:44px;right:0;width:252px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);padding:8px;display:none;z-index:50;animation:fadeUp .2s ease}
+  .suite-menu.open{display:block}
+  .suite-it{display:flex;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:.15s;align-items:center}
+  .suite-it:hover{background:rgba(37,99,235,.06)}
+  .suite-it .si{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--grad)}
+  .suite-it .si.hot{background:var(--grad-hot)}
+  .suite-it .si.dawn{background:var(--grad-dawn)}
+  .suite-it .si.violet{background:var(--grad-violet)}
+  .suite-it b{font-size:12.8px;display:block}
+  .suite-it span{font-size:10.8px;color:var(--faint)}
+  .suite-it .cur{margin-left:auto;font-size:9.5px;font-weight:700;color:#059669;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);padding:2px 6px;border-radius:6px}
+
+  .views{flex:1;overflow-y:auto;padding:22px 26px 14px;scroll-behavior:smooth}
+  .views::-webkit-scrollbar{width:6px}
+  .views::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+  .view{max-width:1120px;margin:0 auto;display:none;animation:fadeUp .35s ease}
+  .view.active{display:block}
+  .card{background:var(--surface-solid);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+  .card-h{display:flex;align-items:center;gap:9px;padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700}
+  .card-h .chx{margin-left:auto;display:flex;gap:8px;font-weight:400;align-items:center}
+  .card-b{padding:16px 18px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;padding:10px 18px;border-radius:11px;transition:.2s}
+  .btn.primary{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(37,99,235,.28)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,.36)}
+  .btn.primary:disabled{background:#dbe3ee;box-shadow:none;cursor:not-allowed;color:#9fb0c6}
+  .btn.hot{background:var(--grad-hot);color:#fff;box-shadow:0 6px 16px rgba(244,63,94,.3)}
+  .btn.hot:hover{transform:translateY(-1px)}
+  .btn.ghost{background:rgba(37,99,235,.07);color:var(--primary);border:1px solid rgba(37,99,235,.3)}
+  .btn.ghost:hover{background:rgba(37,99,235,.13)}
+  .btn.sm{font-size:12px;padding:7px 13px;border-radius:9px}
+
+  .st-chip{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px;flex-shrink:0}
+  .st-chip.ok{color:#047857;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)}
+  .st-chip.wait{color:#b45309;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35)}
+  .st-chip.info{color:#1d4ed8;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.3)}
+  .st-chip.hot{color:#e11d48;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3)}
+
+  /* —— 平台徽章 —— */
+  .pf{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;color:#fff;font-size:10.5px;font-weight:700;flex-shrink:0;vertical-align:-5px}
+  .pf.dy{background:#111827}.pf.sp{background:#07c160}.pf.ks{background:#ff7e00}.pf.xhs{background:#ff2442}.pf.bz{background:#00a1d6}.pf.gz{background:#2aae67}
+
+  /* —— 看板 —— */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:16px}
+  .stat{position:relative;overflow:hidden;padding:15px 16px;border-radius:var(--radius);background:var(--surface-solid);border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+  .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+  .stat:nth-child(2)::before{background:var(--grad-hot)}
+  .stat:nth-child(3)::before{background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .stat:nth-child(4)::before{background:var(--grad-dawn)}
+  .stat .sl{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .stat .sv{font-size:23px;font-weight:800;margin:6px 0 3px;font-family:ui-monospace,Menlo,monospace}
+  .stat .sv small{font-size:12px;font-weight:600;color:var(--muted);font-family:inherit}
+  .stat .sd{font-size:11px;color:var(--faint)}
+  .stat .sd b{color:#059669}
+  .stat .sd b.hot{color:#e11d48}
+  .dash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:13px;align-items:start;margin-bottom:13px}
+  .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .pf-card{border:1px solid var(--border);border-radius:13px;padding:11px 13px;background:#f8fafc;transition:.18s}
+  .pf-card:hover{border-color:rgba(37,99,235,.35);background:#fff}
+  .pf-card .ph{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700}
+  .pf-card .pm{font-size:10.8px;color:var(--faint);margin-top:5px;line-height:1.7}
+  .pf-card .pm b{color:#0f3a8f;font-family:ui-monospace,Menlo,monospace}
+  .funnel{display:flex;flex-direction:column;gap:7px}
+  .fn-row{display:flex;align-items:center;gap:10px;font-size:11.8px}
+  .fn-row .fl{width:88px;color:var(--muted);text-align:right;flex-shrink:0}
+  .fn-row .ft{flex:1;height:17px;border-radius:99px;background:#eef2f8;overflow:hidden}
+  .fn-row .ft i{display:block;height:100%;border-radius:99px;background:var(--grad);transition:width 1s ease}
+  .fn-row:nth-child(2) .ft i{background:linear-gradient(90deg,#3b82f6,#06b6d4)}
+  .fn-row:nth-child(3) .ft i{background:linear-gradient(90deg,#10b981,#06b6d4)}
+  .fn-row:nth-child(4) .ft i{background:var(--grad-dawn)}
+  .fn-row:nth-child(5) .ft i{background:var(--grad-hot)}
+  .fn-row:nth-child(6) .ft i{background:var(--grad-violet)}
+  .fn-row .fv{width:108px;font-weight:700;color:#0f3a8f;font-family:ui-monospace,Menlo,monospace;flex-shrink:0;font-size:11.5px}
+  .sug-it{display:flex;gap:10px;padding:10px 12px;border-radius:11px;background:#fff7f4;border:1px solid rgba(244,63,94,.25);margin-bottom:8px;font-size:12.5px;line-height:1.7}
+  .sug-it:last-child{margin-bottom:0}
+  .sug-it .ic{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(244,63,94,.1);color:#e11d48}
+  .sug-it .go{margin-left:auto;align-self:center;flex-shrink:0;font-size:11.5px;color:var(--primary);font-weight:600;cursor:pointer;white-space:nowrap}
+
+  /* —— 爆款工厂 —— */
+  .viral-grid{display:grid;grid-template-columns:370px 1fr;gap:14px;align-items:start}
+  .vr-it{border:1px solid var(--border);border-radius:13px;padding:11px 13px;margin-bottom:9px;background:#fff;transition:.18s;cursor:pointer}
+  .vr-it:hover{border-color:rgba(244,63,94,.4);box-shadow:var(--shadow-sm)}
+  .vr-it.on{border-color:rgba(244,63,94,.6);background:#fff7f4;box-shadow:0 4px 14px rgba(244,63,94,.12)}
+  .vr-it .vt{font-size:12.8px;font-weight:700;line-height:1.5;display:flex;gap:7px;align-items:flex-start}
+  .vr-it .vm{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px;font-size:10.8px;color:var(--faint);align-items:center}
+  .vr-it .vm b{color:#e11d48;font-family:ui-monospace,Menlo,monospace}
+  .fit{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10.5px;color:#b45309;font-weight:700}
+  .fit .ftr{width:46px;height:5px;border-radius:99px;background:rgba(245,158,11,.18);overflow:hidden}
+  .fit .ftr i{display:block;height:100%;background:var(--grad-dawn);border-radius:99px}
+  .gene{border:1px solid rgba(244,63,94,.3);background:linear-gradient(135deg,rgba(244,63,94,.05),rgba(251,146,60,.05));border-radius:13px;padding:13px 15px;margin-bottom:13px}
+  .gene h6{font-size:12.5px;color:#be123c;display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .gene .gn{display:flex;flex-wrap:wrap;gap:7px}
+  .gtag{font-size:11px;color:#9f1239;background:#fff;border:1px solid rgba(244,63,94,.3);padding:5px 10px;border-radius:99px}
+  .gtag b{color:#e11d48}
+  .script-tb{width:100%;border-collapse:collapse;font-size:12.2px;margin:8px 0 12px}
+  .script-tb th{background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.08));color:#0f3a8f;font-weight:700;text-align:left;padding:7px 9px;border:1px solid var(--border)}
+  .script-tb td{padding:7px 9px;border:1px solid var(--border);vertical-align:top;line-height:1.65}
+  .script-tb .tc{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:#b45309;white-space:nowrap}
+  .hooktag{font-size:9.5px;color:#e11d48;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:5px;padding:1px 6px;margin-left:5px;white-space:nowrap}
+  .tcands{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+  .tcand{display:flex;align-items:center;gap:9px;font-size:12.6px;padding:9px 12px;border-radius:11px;cursor:pointer;border:1px solid var(--border);background:#f8fafc;transition:.15s}
+  .tcand:hover{border-color:rgba(37,99,235,.4)}
+  .tcand.on{border-color:rgba(37,99,235,.55);background:rgba(37,99,235,.06);font-weight:600;color:#0f3a8f}
+  .tcand .tn{font-size:10px;font-weight:700;color:var(--primary);background:rgba(37,99,235,.1);border-radius:6px;padding:2px 7px;flex-shrink:0}
+  .hashtags{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 12px}
+  .htag{font-size:11.5px;color:#1d4ed8;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25);padding:4px 10px;border-radius:99px}
+
+  /* —— AIGC 创作间 —— */
+  .seg{display:flex;background:#eef2f8;border-radius:11px;padding:3px;gap:3px;margin-bottom:14px}
+  .seg span{flex:1;text-align:center;font-size:12.3px;padding:8px 4px;border-radius:8px;cursor:pointer;color:var(--muted);transition:.18s;font-weight:500}
+  .seg span.on{background:#fff;color:var(--primary);font-weight:700;box-shadow:0 2px 6px rgba(30,58,138,.1)}
+  .gen-area{font-size:13.4px;line-height:1.9}
+  .gen-area h3{font-size:15.5px;color:#10316e;margin-bottom:10px}
+  .gen-area p{margin:0 0 10px}
+  .gen-area strong{color:#0f3a8f}
+  .gen-area .hl{color:#e11d48;font-weight:700}
+  .poster-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:10px 0}
+  .poster{aspect-ratio:3/4;border-radius:13px;position:relative;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;padding:11px;color:#fff;transition:.2s;border:2px solid transparent}
+  .poster:hover{transform:translateY(-3px);border-color:rgba(37,99,235,.5)}
+  .poster b{font-size:13px;line-height:1.45;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+  .poster span{font-size:9.5px;opacity:.85;margin-top:4px}
+  .poster .pk{position:absolute;top:8px;left:8px;font-size:9px;font-weight:700;background:rgba(255,255,255,.22);backdrop-filter:blur(4px);padding:2px 7px;border-radius:6px}
+  .poster.p1{background:linear-gradient(160deg,#1e3a8a,#2563eb 55%,#06b6d4)}
+  .poster.p2{background:linear-gradient(160deg,#7c2d12,#ea580c 55%,#facc15)}
+  .poster.p3{background:linear-gradient(160deg,#0f172a,#334155 60%,#64748b)}
+  .poster.p4{background:linear-gradient(160deg,#881337,#e11d48 55%,#fb923c)}
+  .avatar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:8px 0 12px}
+  .av-card{border:1.5px solid var(--border);border-radius:13px;padding:13px;text-align:center;cursor:pointer;transition:.18s;background:#fff}
+  .av-card:hover{border-color:rgba(37,99,235,.4)}
+  .av-card.on{border-color:rgba(37,99,235,.6);background:rgba(37,99,235,.05);box-shadow:0 4px 12px rgba(37,99,235,.12)}
+  .av-card .ava{width:52px;height:52px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff}
+  .av-card:nth-child(1) .ava{background:var(--grad)}
+  .av-card:nth-child(2) .ava{background:var(--grad-violet)}
+  .av-card:nth-child(3) .ava{background:var(--grad-hot)}
+  .av-card b{font-size:12.6px;display:block}
+  .av-card span{font-size:10.5px;color:var(--faint)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:11.8px;padding:6px 12px;border-radius:99px;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.15s;background:#fff}
+  .chip.on{border-color:rgba(37,99,235,.5);color:var(--primary);background:rgba(37,99,235,.06);font-weight:600}
+  .dh-preview{border-radius:13px;background:linear-gradient(135deg,#0f172a,#1e3a8a);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#cbd5e1;font-size:12px;margin-top:12px;position:relative;overflow:hidden}
+  .dh-preview .big{width:62px;height:62px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;box-shadow:0 0 0 8px rgba(37,99,235,.25)}
+  .wave{display:flex;gap:3px;align-items:flex-end;height:18px}
+  .wave i{width:3px;border-radius:2px;background:#22d3ee;animation:wv 1s ease-in-out infinite}
+  .wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}.wave i:nth-child(4){animation-delay:.45s}.wave i:nth-child(5){animation-delay:.6s}
+  @keyframes wv{0%,100%{height:5px}50%{height:18px}}
+
+  /* —— 混剪 —— */
+  .mix-grid{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+  .f-label{font-size:11.5px;color:var(--faint);font-weight:600;margin:14px 0 7px;display:flex;align-items:center;gap:6px}
+  .f-label:first-child{margin-top:0}
+  .fg select{width:100%;border:1.5px solid var(--border-strong);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:12.6px;color:var(--text);outline:none;background:#fff}
+  .mat-row{display:flex;align-items:center;gap:9px;padding:7px 2px;font-size:12.2px}
+  .mat-row .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0}
+  .mat-row em{font-style:normal;margin-left:auto;font-size:10.8px;color:var(--faint);font-family:ui-monospace,Menlo,monospace}
+  .vid-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:4px}
+  .vid{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;transition:.18s}
+  .vid:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:rgba(37,99,235,.35)}
+  .vid .vt{aspect-ratio:9/16;position:relative;display:flex;align-items:center;justify-content:center;color:#fff}
+  .vid:nth-child(6n+1) .vt{background:linear-gradient(160deg,#1e3a8a,#06b6d4)}
+  .vid:nth-child(6n+2) .vt{background:linear-gradient(160deg,#7c2d12,#f59e0b)}
+  .vid:nth-child(6n+3) .vt{background:linear-gradient(160deg,#14532d,#10b981)}
+  .vid:nth-child(6n+4) .vt{background:linear-gradient(160deg,#581c87,#7c3aed)}
+  .vid:nth-child(6n+5) .vt{background:linear-gradient(160deg,#881337,#f43f5e)}
+  .vid:nth-child(6n) .vt{background:linear-gradient(160deg,#0c4a6e,#0ea5e9)}
+  .vid .vt .play{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center}
+  .vid .vt .dur{position:absolute;right:6px;bottom:6px;font-size:9.5px;font-weight:700;background:rgba(0,0,0,.45);padding:1px 6px;border-radius:5px}
+  .vid .vt .vn{position:absolute;left:6px;top:6px;font-size:9.5px;font-weight:700;background:rgba(255,255,255,.22);padding:1px 6px;border-radius:5px}
+  .vid .vi{padding:8px 9px;font-size:10.3px;color:var(--muted);line-height:1.6}
+  .vid .vi b{color:#047857}
+
+  /* —— 分发 —— */
+  .dist-grid{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
+  .pf-check{display:flex;flex-wrap:wrap;gap:8px}
+  .pfc{display:flex;align-items:center;gap:7px;font-size:12px;padding:7px 12px;border-radius:99px;border:1.5px solid var(--border);cursor:pointer;transition:.15s;background:#fff;color:var(--muted)}
+  .pfc.on{border-color:rgba(37,99,235,.55);color:#0f3a8f;background:rgba(37,99,235,.05);font-weight:600}
+  .acc-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px dashed var(--border);font-size:12.5px}
+  .acc-row:last-child{border-bottom:none}
+  .acc-row .ab{flex:1;min-width:0;line-height:1.45}
+  .acc-row .ab b{display:block;font-size:12.6px}
+  .acc-row .ab span{font-size:10.8px;color:var(--faint)}
+  .queue-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--border);font-size:12.5px}
+  .queue-row:last-child{border-bottom:none}
+  .queue-row .qb{flex:1;min-width:0;line-height:1.5}
+  .queue-row .qb b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .queue-row .qb span{font-size:10.8px;color:var(--faint)}
+  .adapt-line{font-size:11.6px;color:var(--muted);padding:5px 0;display:flex;align-items:center;gap:8px}
+  .adapt-line .ok{color:#047857;font-weight:700}
+
+  /* —— 互动与线索 —— */
+  .int-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:start}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#f43f5e;box-shadow:0 0 8px rgba(244,63,94,.8);animation:breath 1.6s infinite;display:inline-block;margin-right:5px}
+  .cm{border:1px solid var(--border);border-radius:13px;padding:11px 13px;margin-bottom:10px;background:#fff;animation:fadeUp .4s ease}
+  .cm .ch{display:flex;align-items:center;gap:8px;font-size:12.3px;font-weight:700}
+  .cm .ch .tm{margin-left:auto;font-size:10.5px;color:var(--faint);font-weight:400}
+  .cm .ct{font-size:12.8px;margin:7px 0;line-height:1.7}
+  .cm .reply{display:flex;gap:9px;background:#f4f8ff;border:1px solid rgba(37,99,235,.2);border-radius:11px;padding:9px 11px;font-size:12.3px;line-height:1.7}
+  .cm .reply.warn{background:#fffaf2;border-color:rgba(245,158,11,.35)}
+  .cm .reply .rav{width:24px;height:24px;border-radius:8px;background:var(--grad);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff}
+  .cm .reply.warn .rav{background:var(--grad-dawn)}
+  .cm .rtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .rtag{font-size:9.8px;font-weight:700;padding:2px 7px;border-radius:6px;color:#1d4ed8;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.25)}
+  .rtag.g{color:#047857;background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.3)}
+  .rtag.a{color:#b45309;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.35)}
+  .rtag.h{color:#e11d48;background:rgba(244,63,94,.07);border-color:rgba(244,63,94,.3)}
+  .typing{display:inline-flex;gap:3px;align-items:center}
+  .typing i{width:5px;height:5px;border-radius:50%;background:#60a5fa;animation:wv2 1s infinite}
+  .typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+  @keyframes wv2{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+  .sw-row{display:flex;align-items:center;gap:10px;padding:9px 2px;font-size:12.6px;border-bottom:1px dashed var(--border)}
+  .sw-row:last-child{border-bottom:none}
+  .sw-row .sd2{font-size:10.8px;color:var(--faint);display:block;margin-top:1px}
+  .sw{margin-left:auto;width:36px;height:20px;border-radius:99px;background:#d6dee9;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+  .sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw.on{background:var(--ok)}
+  .sw.on::after{left:18px}
+  .lead{border:1px solid rgba(16,185,129,.3);background:linear-gradient(90deg,rgba(16,185,129,.05),rgba(6,182,212,.04));border-radius:12px;padding:11px 13px;margin-bottom:9px;font-size:12.4px;line-height:1.7}
+  .lead b{color:#065f46}
+  .lead .lm{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;align-items:center}
+  .lead .lbtns{margin-left:auto;display:flex;gap:6px}
+
+  /* 通用流程/流式 */
+  .process{border:1px dashed rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.04),rgba(6,182,212,.05));border-radius:14px;padding:12px 15px;margin-bottom:14px;font-size:12.5px}
+  .p-step{display:flex;align-items:center;gap:9px;padding:4.5px 0;color:var(--muted);opacity:.35;transition:.3s}
+  .p-step.on{opacity:1;color:var(--text)}
+  .p-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .spinner{width:13px;height:13px;border:2px solid rgba(37,99,235,.25);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
+  .p-step .chk{color:var(--ok);display:none}
+  .p-step.done .chk{display:block}
+  .p-step.done .spinner{display:none}
+  .p-step em{font-style:normal;color:var(--primary);font-weight:600}
+  .p-sum{display:none;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+  .p-sum b{color:var(--primary)}
+  .process.collapsed .p-steps{display:none}
+  .process.collapsed .p-sum{display:flex}
+  .meta-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:13px}
+  .ms{font-size:11px;color:var(--muted);background:#f1f5fb;border:1px solid var(--border);padding:4px 10px;border-radius:99px;display:flex;align-items:center;gap:5px}
+  .ms b{color:#0f3a8f}
+  .ms.pass{color:#047857;background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3)}
+  .cursor{display:inline-block;width:8px;height:16px;background:var(--primary-2);border-radius:2px;vertical-align:-2px;animation:blink .8s steps(1) infinite;margin-left:1px}
+  .out-empty{text-align:center;padding:56px 20px;color:var(--faint)}
+  .out-empty .oe-orb{width:64px;height:64px;margin:0 auto 16px;border-radius:20px;background:linear-gradient(135deg,rgba(244,63,94,.08),rgba(251,146,60,.12));display:flex;align-items:center;justify-content:center;color:#e11d48}
+  .out-empty b{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+  .out-empty span{font-size:12px;line-height:1.8}
+  .act-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px;padding-top:13px;border-top:1px solid var(--border)}
+  .ai-note{font-size:11px;color:var(--faint);margin-top:11px;display:flex;align-items:center;gap:6px}
+
+  .legal-bar{flex-shrink:0;text-align:center;font-size:10.8px;color:var(--faint);padding:8px 20px 11px;line-height:1.7;background:linear-gradient(180deg,transparent,rgba(244,247,251,.95) 50%)}
+  .legal-bar b{color:#8a97ab;font-weight:600}
+  .demo-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:#7c3aed;border:1px solid rgba(124,58,237,.3);background:rgba(124,58,237,.06);padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:1px;letter-spacing:.5px}
+  .toast{position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-8px);z-index:99;background:#0f172a;color:#fff;font-size:12.5px;padding:9px 18px;border-radius:99px;box-shadow:0 10px 30px rgba(15,23,42,.3);opacity:0;pointer-events:none;transition:.3s;display:flex;align-items:center;gap:7px}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast svg{color:#22d3ee}
+
+  @media (max-width:1240px){.kpis{display:none}}
+  @media (max-width:1000px){
+    .sidebar{display:none}
+    .viral-grid,.mix-grid,.dist-grid,.int-grid,.dash-grid{grid-template-columns:1fr}
+    .stat-grid{grid-template-columns:1fr 1fr}
+    .vid-grid{grid-template-columns:repeat(3,1fr)}
+    .poster-grid{grid-template-columns:repeat(2,1fr)}
+    .pf-grid{grid-template-columns:1fr 1fr}
+    .ptitle .sub{display:none}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="aurora"><i></i><i></i><i></i></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="lgMain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <symbol id="logoCX" viewBox="0 0 48 48">
+      <rect width="48" height="48" rx="13" fill="url(#lgMain)"/>
+      <g opacity=".9">
+        <line x1="24" y1="13" x2="24" y2="17.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="14.5" y1="17.5" x2="17.6" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="33.5" y1="17.5" x2="30.4" y2="20.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+      <path d="M15 29.5 A9 9 0 0 1 33 29.5 Z" fill="#fff"/>
+      <rect x="10" y="29.5" width="28" height="2.6" rx="1.3" fill="#fff"/>
+      <rect x="14" y="35" width="20" height="2" rx="1" fill="#fff" opacity=".55"/>
+      <path d="M37.5 7 C38 9.2 38.8 10 41 10.5 C38.8 11 38 11.8 37.5 14 C37 11.8 36.2 11 34 10.5 C36.2 10 37 9.2 37.5 7 Z" fill="#fde68a"/>
+    </symbol>
+    <symbol id="icoSpark" viewBox="0 0 24 24">
+      <path d="M12 3c.7 3.9 2.4 5.6 6.3 6.3v.4c-3.9.7-5.6 2.4-6.3 6.3h-.4c-.7-3.9-2.4-5.6-6.3-6.3v-.4C9.2 8.6 10.9 6.9 11.6 3h.4Z" fill="currentColor"/>
+      <path d="M18.5 14.5c.35 1.95 1.2 2.8 3.15 3.15v.2c-1.95.35-2.8 1.2-3.15 3.15h-.2c-.35-1.95-1.2-2.8-3.15-3.15v-.2c1.95-.35 2.8-1.2 3.15-3.15h.2Z" fill="currentColor" opacity=".65"/>
+    </symbol>
+    <symbol id="icoCheck" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".14"/>
+      <path d="m7.5 12.2 3 3 6-6.4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoFire" viewBox="0 0 24 24">
+      <path d="M12 22c4.4 0 7.5-2.9 7.5-7.2 0-2.5-1.2-4.6-2.6-6.3-.4 1-1 1.9-1.9 2.4.2-2.9-1.2-6.5-4.5-8.4.3 2.3-.4 4.2-1.9 5.9-1.4 1.6-4.1 3.6-4.1 6.6C4.5 19.1 7.6 22 12 22Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M12 22c2 0 3.4-1.4 3.4-3.4 0-1.7-1.1-2.6-2-3.9-.8.7-2.5 2-2.5 3.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="icoGrid" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="3.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="3.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="13.5" width="7" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    </symbol>
+    <symbol id="icoBrush" viewBox="0 0 24 24">
+      <path d="M14 3.5 20.5 10 9.5 21H3v-6.5L14 3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="m11.5 6 6.5 6.5" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M20 2.5c.25 1.2.8 1.75 2 2v.2c-1.2.25-1.75.8-2 2h-.2c-.25-1.2-.8-1.75-2-2v-.2c1.2-.25 1.75-.8 2-2h.2Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="icoCut" viewBox="0 0 24 24">
+      <circle cx="6.5" cy="6.5" r="2.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="6.5" cy="17.5" r="2.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M8.8 8.5 21 19M8.8 15.5 21 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoSendP" viewBox="0 0 24 24">
+      <path d="M3.5 11.2 20 4l-4.6 16.2a.7.7 0 0 1-1.3.15l-3-5.4-5.5-2.5a.7.7 0 0 1-.1-1.25Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="icoChat" viewBox="0 0 24 24">
+      <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.5 0-3-.4-4.2-1.1L3 20l1.1-5.3A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+      <path d="M8 10.5h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoDash" viewBox="0 0 24 24">
+      <path d="M4 19V10M10 19V4M16 19v-7M22 19H2" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="icoPlay" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5L8 5.5Z" fill="currentColor"/></symbol>
+    <symbol id="icoHuman" viewBox="0 0 24 24">
+      <path d="M4 19.5c0-3.3 3.6-5 8-5s8 1.7 8 5" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.9" fill="none"/>
+    </symbol>
+    <symbol id="icoDoc" viewBox="0 0 24 24">
+      <path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      <path d="M13 2v6h6M8.5 13h7M8.5 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" fill="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ============ 左侧栏 ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="logo"><use href="#logoCX"/></svg>
+      <div class="bt">
+        <b>晨曦科技 <span class="ai-chip">AI</span></b>
+        <small>CHENXI TECH</small>
+      </div>
+    </div>
+
+    <div class="side-sec">
+      <h5>流量阵地</h5>
+      <div class="nav-item active" data-view="dash"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoDash"/></svg>流量看板</div>
+      <div class="nav-item" data-view="viral"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoFire"/></svg>爆款工厂<span class="nbadge hot">4 个机会</span></div>
+      <div class="nav-item" data-view="aigc"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoBrush"/></svg>AIGC 创作间</div>
+      <div class="nav-item" data-view="mix"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoCut"/></svg>智能混剪</div>
+      <div class="nav-item" data-view="dist"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoSendP"/></svg>矩阵分发<span class="nbadge">5 待发</span></div>
+      <div class="nav-item" data-view="int"><svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoChat"/></svg>互动与线索<span class="nbadge hot">实时</span></div>
+
+      <h5><svg width="12" height="12" viewBox="0 0 24 24"><use href="#icoSpark"/></svg> 能力引擎 · 在线</h5>
+      <div class="kb-item"><span class="dot red"></span><div class="ki">爆款雷达<em>监测 6 平台 · 今日捕获 4 条</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">AIGC 多模态引擎<em>文案 / 图文 / 封面 / 数字人</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">混剪引擎<em>素材库 128 条 · 已语义标签化</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">矩阵分发通道<em>7 账号 · 6 平台已授权</em></div></div>
+      <div class="kb-item"><span class="dot"></span><div class="ki">互动话术库<em>86 条已审核 · 敏感词转人工</em></div></div>
+    </div>
+
+    <div class="side-foot">
+      <div class="avatar-u">林</div>
+      <div class="ui"><b>林经理</b><span>市场部 · 新媒体运营</span></div>
+      <span class="lic">矩阵管理员</span>
+    </div>
+  </aside>
+
+  <!-- ============ 主区域 ============ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="ptitle">
+        <h1>晨曦智营</h1>
+        <span class="sub">AI 智能营销平台 · 爆款复刻 × 混剪分发 × 自动互动，一切为流量服务</span>
+      </div>
+      <div class="kpis">
+        <span class="kpi">本月全网播放 <b class="hot">412.6w</b></span>
+        <span class="kpi">获客线索 <b class="up">286 条</b></span>
+        <span class="kpi">单条线索成本 <b class="up">−45%</b></span>
+      </div>
+      <div class="top-right">
+        <span class="model-pill" title="文案：DeepSeek-V3 ｜ 视觉：国产文生图 ｜ 数字人：云端渲染 ｜ 主备热切换">
+          <span class="led"></span> 多模态引擎 · 在线
+        </span>
+        <button class="icon-btn" onclick="toggleSuite(event)" title="晨曦 AI 应用套件">
+          <svg width="16" height="16" viewBox="0 0 24 24"><use href="#icoGrid"/></svg>
+        </button>
+        <div class="suite-menu" id="suiteMenu">
+          <div class="suite-it" onclick="toast('晨曦智询为独立演示页面，请打开对应 HTML 文件体验')">
+            <div class="si"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoSpark"/></svg></div>
+            <div><b>晨曦智询</b><span>U1 · 计价知识助手</span></div>
+          </div>
+          <div class="suite-it">
+            <div class="si hot"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoFire"/></svg></div>
+            <div><b>晨曦智营</b><span>U3·A · AI 智能营销平台</span></div>
+            <span class="cur">当前</span>
+          </div>
+          <div class="suite-it" onclick="toast('晨曦智标（标书智能装配）为独立演示页面，即将上线')">
+            <div class="si dawn"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>
+            <div><b>晨曦智标</b><span>U3·B · 标书智能装配 · 即将上线</span></div>
+          </div>
+          <div class="suite-it" onclick="toast('晨曦智报为独立演示页面，请打开对应 HTML 文件体验')">
+            <div class="si violet"><svg width="15" height="15" viewBox="0 0 24 24"><use href="#icoDoc"/></svg></div>
+            <div><b>晨曦智报</b><span>U4 · 文书生成 · 汇报自动成稿</span></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="views" id="views">
+
+      <!-- ================= 流量看板 ================= -->
+      <section class="view active" id="view-dash">
+        <div class="stat-grid">
+          <div class="stat"><div class="sl">本月全网播放</div><div class="sv">412.6<small>w</small></div><div class="sd">环比 <b>+38%</b> · 爆款复刻贡献 61%</div></div>
+          <div class="stat"><div class="sl">新增粉丝（矩阵合计）</div><div class="sv">3.8<small>w</small></div><div class="sd">抖音主号贡献 <b class="hot">2.1w</b> · 完播率 32%</div></div>
+          <div class="stat"><div class="sl">获客线索</div><div class="sv">286 <small>条</small></div><div class="sd">已转商机 <b>31</b> · 评论/私信自动捕获 74%</div></div>
+          <div class="stat"><div class="sl">内容产能</div><div class="sv">142 <small>条/月</small></div><div class="sd">混剪变体占 68% · 单条成本 <b>−80%</b></div></div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDash"/></svg>流量转化漏斗（近 30 天 · 全矩阵）</div>
+            <div class="card-b">
+              <div class="funnel">
+                <div class="fn-row"><span class="fl">曝光</span><div class="ft"><i style="width:100%"></i></div><span class="fv">2,180w</span></div>
+                <div class="fn-row"><span class="fl">播放</span><div class="ft"><i style="width:64%"></i></div><span class="fv">412.6w</span></div>
+                <div class="fn-row"><span class="fl">互动</span><div class="ft"><i style="width:38%"></i></div><span class="fv">21.4w</span></div>
+                <div class="fn-row"><span class="fl">私信咨询</span><div class="ft"><i style="width:22%"></i></div><span class="fv">4,120</span></div>
+                <div class="fn-row"><span class="fl">留资线索</span><div class="ft"><i style="width:12%"></i></div><span class="fv">286</span></div>
+                <div class="fn-row"><span class="fl">商机</span><div class="ft"><i style="width:6%"></i></div><span class="fv">31</span></div>
+              </div>
+              <div style="font-size:11px;color:var(--faint);margin-top:10px;border-top:1px dashed var(--border);padding-top:9px">线索归因：评论区钩子 41% · 私信关键词 33% · 主页组件 26% ｜ 商机同步 CRM，销售跟进时限 24h</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#e11d48"><use href="#icoFire"/></svg>AI 今日作战建议</div>
+            <div class="card-b">
+              <div class="sug-it"><div class="ic"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoFire"/></svg></div><div>「定额没了怎么算价」同款选题正在起量，适配度 <b style="color:#e11d48">96%</b>，建议今日复刻发布</div><span class="go" data-view="viral">去复刻 →</span></div>
+              <div class="sug-it"><div class="ic"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoSendP"/></svg></div><div>今晚 <b>18:30—20:00</b> 为矩阵账号黄金时段，5 条成片待排期</div><span class="go" data-view="dist">去排期 →</span></div>
+              <div class="sug-it"><div class="ic"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#icoChat"/></svg></div><div>昨日视频评论区出现 <b>12 条</b>软件询价，自动回复已引导私信，3 条高意向待分配</div><span class="go" data-view="int">去处理 →</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoGrid"/></svg>矩阵账号健康度</div>
+          <div class="card-b">
+            <div class="pf-grid">
+              <div class="pf-card"><div class="ph"><span class="pf dy">抖</span>晨曦造价学堂<span class="st-chip ok" style="margin-left:auto">健康</span></div><div class="pm">粉丝 <b>12.6w</b> ｜ 本周播放 <b>148w</b> ｜ 周更 <b>9</b> 条</div></div>
+              <div class="pf-card"><div class="ph"><span class="pf sp">视</span>晨曦科技<span class="st-chip ok" style="margin-left:auto">健康</span></div><div class="pm">粉丝 <b>8.4w</b> ｜ 本周播放 <b>96w</b> ｜ 挂接公众号导流</div></div>
+              <div class="pf-card"><div class="ph"><span class="pf dy">抖</span>晨曦软件官方<span class="st-chip ok" style="margin-left:auto">健康</span></div><div class="pm">粉丝 <b>3.2w</b> ｜ 本周播放 <b>31w</b> ｜ 挂载体验版小程序</div></div>
+              <div class="pf-card"><div class="ph"><span class="pf ks">快</span>晨曦造价<span class="st-chip wait" style="margin-left:auto">需补更</span></div><div class="pm">粉丝 <b>2.1w</b> ｜ 本周播放 <b>18w</b> ｜ AI 建议补 3 条混剪</div></div>
+              <div class="pf-card"><div class="ph"><span class="pf xhs">红</span>晨曦造价笔记<span class="st-chip ok" style="margin-left:auto">健康</span></div><div class="pm">粉丝 <b>1.8w</b> ｜ 图文笔记转化率矩阵第一</div></div>
+              <div class="pf-card"><div class="ph"><span class="pf bz">B</span>晨曦BIM学院<span class="st-chip info" style="margin-left:auto">孵化中</span></div><div class="pm">粉丝 <b>0.9w</b> ｜ 长视频教程沉淀 SEO 流量</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 爆款工厂 ================= -->
+      <section class="view" id="view-viral">
+        <div class="viral-grid">
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#e11d48"><use href="#icoFire"/></svg>爆款雷达 <span style="font-size:10.5px;color:var(--faint);font-weight:400">监测 6 平台 · 行业语义匹配</span></div>
+            <div class="card-b">
+              <div class="vr-it on" data-v="0">
+                <div class="vt"><span class="pf dy">抖</span>定额没了怎么算价？3 句话讲明白新国标</div>
+                <div class="vm"><b>182w</b> 播放 · 赞 4.3w · 增速 ⬆ 飙升<span class="fit">适配 96%<span class="ftr"><i style="width:96%"></i></span></span></div>
+              </div>
+              <div class="vr-it" data-v="1">
+                <div class="vt"><span class="pf dy">抖</span>Excel 5 秒对量小技巧，造价人都该会</div>
+                <div class="vm"><b>156w</b> 播放 · 赞 3.1w · 稳定爬升<span class="fit">适配 84%<span class="ftr"><i style="width:84%"></i></span></span></div>
+              </div>
+              <div class="vr-it" data-v="2">
+                <div class="vt"><span class="pf sp">视</span>造价人加班的一天 vlog｜结算季实录</div>
+                <div class="vm"><b>89w</b> 播放 · 情感共鸣型<span class="fit">适配 88%<span class="ftr"><i style="width:88%"></i></span></span></div>
+              </div>
+              <div class="vr-it" data-v="3">
+                <div class="vt"><span class="pf ks">快</span>老板说项目不赚钱，我用数据打了脸</div>
+                <div class="vm"><b>67w</b> 播放 · 剧情反转型<span class="fit">适配 79%<span class="ftr"><i style="width:79%"></i></span></span></div>
+              </div>
+              <button class="btn hot" style="width:100%;margin-top:10px" onclick="replicate()">
+                <svg width="14" height="14" viewBox="0 0 24 24" style="color:#fff"><use href="#icoFire"/></svg>
+                一键复刻选中爆款（拆解基因 → 迁移本行业）
+              </button>
+              <div style="font-size:10.8px;color:var(--faint);text-align:center;margin-top:8px">仅复刻结构与节奏基因，文案与画面全新生成，规避搬运判定</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoDoc"/></svg>复刻产出
+              <div class="chx"><span class="st-chip info" id="viralState">待复刻</span></div>
+            </div>
+            <div class="card-b" id="viralBox">
+              <div class="out-empty">
+                <div class="oe-orb"><svg width="28" height="28" viewBox="0 0 24 24"><use href="#icoFire"/></svg></div>
+                <b>爆款复刻引擎已就绪</b>
+                <span>左侧选择一条监测到的爆款 → AI 拆解其流量基因（钩子 / 结构 / 节奏 / 标签）<br>→ 迁移晨曦行业知识，生成可直接开拍 / 混剪的分镜脚本</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= AIGC 创作间 ================= -->
+      <section class="view" id="view-aigc">
+        <div class="card">
+          <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#7c3aed"><use href="#icoBrush"/></svg>AIGC 多模态创作
+            <div class="chx"><span style="font-size:11px;color:var(--faint)">主题示例：新国标报价 · 可在正式版自定义</span></div>
+          </div>
+          <div class="card-b">
+            <div class="seg" id="aigcSeg">
+              <span class="on" data-m="copy">口播文案</span>
+              <span data-m="note">小红书图文</span>
+              <span data-m="poster">封面 / 海报</span>
+              <span data-m="avatar">数字人口播</span>
+            </div>
+            <div id="aigcBox"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 智能混剪 ================= -->
+      <section class="view" id="view-mix">
+        <div class="mix-grid">
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoCut"/></svg>混剪任务配置</div>
+            <div class="card-b">
+              <div class="f-label">素材库（已语义标签化，可按口播脚本自动检索）</div>
+              <div class="mat-row"><span class="dot"></span>课程录屏 · 新国标实务<em>36 条</em></div>
+              <div class="mat-row"><span class="dot"></span>软件操作演示<em>42 条</em></div>
+              <div class="mat-row"><span class="dot"></span>客户访谈 / 学员证言<em>18 条</em></div>
+              <div class="mat-row"><span class="dot"></span>线下活动 / 实训现场<em>22 条</em></div>
+              <div class="mat-row"><span class="dot"></span>口播绿幕（数字人可替换）<em>10 条</em></div>
+
+              <div class="f-label">口播脚本来源</div>
+              <div class="fg"><select><option>爆款复刻 · 新国标报价 3 个真相（58s）</option><option>AIGC 创作间 · 评论区扣词口播稿</option><option>手动粘贴脚本</option></select></div>
+
+              <div class="f-label">混剪模板</div>
+              <div class="fg"><select><option>口播 + B-roll 穿插（知识类推荐）</option><option>三段式卡点（高完播）</option><option>教程录屏 + 大字标注</option></select></div>
+
+              <div class="f-label">生成变体数（同脚本多版本，互查重防限流）</div>
+              <div class="chips" id="mixN">
+                <span class="chip">6 条</span><span class="chip on">12 条</span><span class="chip">24 条</span>
+              </div>
+
+              <div class="f-label">增强项</div>
+              <div class="chips">
+                <span class="chip on">自动字幕烧录</span><span class="chip on">卡点 BGM</span><span class="chip on">数字人口播替换</span><span class="chip">片尾留资钩子</span>
+              </div>
+
+              <button class="btn primary" id="mixBtn" style="width:100%;margin-top:16px" onclick="startMix()">
+                <svg width="14" height="14" viewBox="0 0 24 24" style="color:#fff"><use href="#icoCut"/></svg>
+                开始智能混剪
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoPlay"/></svg>成片变体
+              <div class="chx"><span class="st-chip info" id="mixState">待生成</span></div>
+            </div>
+            <div class="card-b" id="mixBox">
+              <div class="out-empty">
+                <div class="oe-orb" style="background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(6,182,212,.12));color:#2563eb"><svg width="28" height="28" viewBox="0 0 24 24"><use href="#icoCut"/></svg></div>
+                <b>混剪引擎已就绪</b>
+                <span>1 条脚本 → N 条互不相似的成片变体：素材语义检索 · 智能剪辑 · 字幕烧录 · 互查重<br>变体间相似度控制在 30% 以下，规避平台查重限流</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 矩阵分发 ================= -->
+      <section class="view" id="view-dist">
+        <div class="dist-grid">
+          <div>
+            <div class="card" style="margin-bottom:13px">
+              <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoSendP"/></svg>新建分发任务</div>
+              <div class="card-b">
+                <div class="f-label">选择成片</div>
+                <div class="fg"><select id="distVid"><option>爆款复刻 · 新国标报价 3 个真相（58s · 竖版）</option><option>混剪变体 #03（54s · 竖版）</option><option>混剪变体 #07（61s · 竖版）</option></select></div>
+                <div class="f-label">目标平台（自动适配各平台规则）</div>
+                <div class="pf-check" id="pfCheck">
+                  <span class="pfc on"><span class="pf dy">抖</span>抖音 ×2 号</span>
+                  <span class="pfc on"><span class="pf sp">视</span>视频号</span>
+                  <span class="pfc on"><span class="pf ks">快</span>快手</span>
+                  <span class="pfc on"><span class="pf xhs">红</span>小红书</span>
+                  <span class="pfc"><span class="pf bz">B</span>B 站</span>
+                  <span class="pfc"><span class="pf gz">公</span>公众号</span>
+                </div>
+                <div class="f-label">发布时间</div>
+                <div class="fg"><select><option>今晚 18:30（AI 推荐 · 黄金时段）</option><option>立即发布</option><option>自定义时间</option></select></div>
+                <button class="btn primary" id="distBtn" style="width:100%;margin-top:14px" onclick="startDist()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSendP"/></svg>
+                  一键适配并加入发布队列
+                </button>
+                <div style="font-size:10.8px;color:var(--faint);text-align:center;margin-top:8px">标题改写 / 封面比例 / 话题标签 / 挂载组件，逐平台自动适配</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h" style="font-size:13px"><svg width="14" height="14" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoGrid"/></svg>矩阵账号</div>
+              <div class="card-b" style="padding-top:6px">
+                <div class="acc-row"><span class="pf dy">抖</span><div class="ab"><b>晨曦造价学堂</b><span>12.6w 粉 · 主力获客号</span></div><span class="st-chip ok">已授权</span></div>
+                <div class="acc-row"><span class="pf dy">抖</span><div class="ab"><b>晨曦软件官方</b><span>3.2w 粉 · 挂载体验版小程序</span></div><span class="st-chip ok">已授权</span></div>
+                <div class="acc-row"><span class="pf sp">视</span><div class="ab"><b>晨曦科技</b><span>8.4w 粉 · 导流公众号</span></div><span class="st-chip ok">已授权</span></div>
+                <div class="acc-row"><span class="pf ks">快</span><div class="ab"><b>晨曦造价</b><span>2.1w 粉</span></div><span class="st-chip ok">已授权</span></div>
+                <div class="acc-row"><span class="pf xhs">红</span><div class="ab"><b>晨曦造价笔记</b><span>1.8w 粉 · 自动转图文笔记</span></div><span class="st-chip ok">已授权</span></div>
+                <div class="acc-row"><span class="pf bz">B</span><div class="ab"><b>晨曦BIM学院</b><span>0.9w 粉 · 长视频</span></div><span class="st-chip ok">已授权</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><svg width="15" height="15" viewBox="0 0 24 24" style="color:#b45309"><use href="#icoSendP"/></svg>发布队列
+              <div class="chx"><span class="st-chip wait" id="queueChip">5 条待发</span></div>
+            </div>
+            <div class="card-b">
+              <div id="adaptBox"></div>
+              <div id="queueBox">
+                <div class="queue-row"><span class="pf dy">抖</span><div class="qb"><b>新国标报价 3 个真相 · 主号版</b><span>今晚 18:30 · 封面 3:4 · 挂载小程序「晨曦计价体验版」</span></div><span class="st-chip wait">已排期</span></div>
+                <div class="queue-row"><span class="pf sp">视</span><div class="qb"><b>新国标报价 3 个真相 · 视频号版</b><span>今晚 18:30 · 文末关联公众号深度解读</span></div><span class="st-chip wait">已排期</span></div>
+                <div class="queue-row"><span class="pf xhs">红</span><div class="qb"><b>造价人自查⚠️新国标报价 5 个坑（图文版）</b><span>明早 08:00 · 视频自动转 6 图笔记</span></div><span class="st-chip wait">已排期</span></div>
+                <div class="queue-row"><span class="pf ks">快</span><div class="qb"><b>混剪变体 #05 · 快手版</b><span>今晚 19:00 · 标题口语化改写</span></div><span class="st-chip wait">已排期</span></div>
+                <div class="queue-row"><span class="pf dy">抖</span><div class="qb"><b>混剪变体 #02 · 软件官方号</b><span>明日 12:30 · 评论区置顶组件已配置</span></div><span class="st-chip wait">已排期</span></div>
+              </div>
+              <div style="font-size:11px;color:var(--faint);margin-top:10px;border-top:1px dashed var(--border);padding-top:9px">发布成功后自动回采数据（播放 / 互动 / 线索），失败自动重试 3 次并告警 ｜ 外发内容均出自已审核内容池</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 互动与线索 ================= -->
+      <section class="view" id="view-int">
+        <div class="int-grid">
+          <div class="card">
+            <div class="card-h"><span class="live-dot"></span>全网评论聚合流
+              <div class="chx">
+                <span style="font-size:11px;color:var(--faint)">今日已自动回复 <b style="color:#2563eb">312</b> 条 · 转人工 <b style="color:#b45309">9</b> 条</span>
+                <button class="btn ghost sm" onclick="feedReplay()">回放实时流</button>
+              </div>
+            </div>
+            <div class="card-b" id="cmBox"></div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:13px">
+              <div class="card-h" style="font-size:13px"><svg width="14" height="14" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoChat"/></svg>自动回复策略</div>
+              <div class="card-b" style="padding-top:8px">
+                <div class="sw-row"><div>评论 AI 自动回复<span class="sd2">仅使用已审核话术库（86 条）+ 受限生成</span></div><span class="sw on" onclick="swToggle(this,'评论自动回复')"></span></div>
+                <div class="sw-row"><div>私信关键词自动回复<span class="sd2">「新国标 / 报价表 / 课程」触发资料发送与留资</span></div><span class="sw on" onclick="swToggle(this,'私信关键词回复')"></span></div>
+                <div class="sw-row"><div>敏感词 / 负面强制转人工<span class="sd2">投诉、退费、竞品对比、价格承诺一律人工处理</span></div><span class="sw on" onclick="swToggle(this,'敏感词转人工')"></span></div>
+                <div class="sw-row"><div>高意向线索自动推送销售<span class="sd2">命中询价语义 → 企微通知 + CRM 建卡</span></div><span class="sw on" onclick="swToggle(this,'线索自动推送')"></span></div>
+                <div class="sw-row"><div>夜间静默（23:00—7:00）<span class="sd2">仅收录不回复，避免异常时段操作风控</span></div><span class="sw on" onclick="swToggle(this,'夜间静默')"></span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-h" style="font-size:13px"><svg width="14" height="14" viewBox="0 0 24 24" style="color:#059669"><use href="#icoHuman"/></svg>今日高意向线索 <span class="st-chip ok">3 条待分配</span></div>
+              <div class="card-b">
+                <div class="lead"><b>张工 · 软件询价</b> ｜ 来源：视频号《新国标报价 3 个真相》评论 → 私信留资<div class="lm"><span class="rtag g">138****6721</span><span class="rtag">意向：计价软件报价</span><span class="lbtns"><button class="btn primary sm" onclick="toast('已推送给销售一组并在 CRM 建卡，跟进时限 24h')">分配销售</button></span></div></div>
+                <div class="lead"><b>李经理 · 企业内训</b> ｜ 来源：抖音主号私信关键词「企业培训」<div class="lm"><span class="rtag g">159****0834</span><span class="rtag">意向：新国标企业内训</span><span class="lbtns"><button class="btn primary sm" onclick="toast('已推送教育事业部，企微已发送名片')">分配教育部</button></span></div></div>
+                <div class="lead"><b>王同学 · 课程报名</b> ｜ 来源：小红书笔记「扣 1 领资料」评论留资<div class="lm"><span class="rtag g">177****2218</span><span class="rtag">意向：实务班报名</span><span class="lbtns"><button class="btn primary sm" onclick="toast('已推送招生顾问，资料包已自动发送')">分配顾问</button></span></div></div>
+                <div style="font-size:10.8px;color:var(--faint);margin-top:4px">手机号脱敏展示 · 线索数据仅同步内部 CRM，不用于模型训练</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="legal-bar">
+      <b>「AI 生成 · 人工把关」</b>对外发布内容均出自已审核内容池；自动回复仅用审核话术库，敏感词强制转人工；不承诺虚假效果、不使用绝对化用语 ｜ 全量操作留存审计日志
+      <span class="demo-badge">✦ DEMO 演示环境 · 示例数据</span>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoCheck"/></svg><span id="toastText"></span></div>
+
+<script>
+/* ===== 背景粒子 ===== */
+(function(){
+  var cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d'),pts=[],N=55;
+  function rs(){cv.width=innerWidth;cv.height=innerHeight}
+  rs();addEventListener('resize',rs);
+  for(var i=0;i<N;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.8});
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<N;i++){
+      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fillStyle='rgba(6,182,212,.22)';ctx.fill();
+      for(var j=i+1;j<N;j++){
+        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;
+        if(d<150*150){
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle='rgba(37,99,235,'+(0.085*(1-d/22500))+')';ctx.lineWidth=1;ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ===== 工具 ===== */
+function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild}
+function toast(t){
+  var x=document.getElementById('toast');
+  document.getElementById('toastText').textContent=t;
+  x.classList.add('show');clearTimeout(x._t);
+  x._t=setTimeout(function(){x.classList.remove('show')},2400);
+}
+var busy=false;
+function switchView(v){
+  document.querySelectorAll('.view').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-item[data-view]').forEach(function(n){
+    n.classList.toggle('active',n.getAttribute('data-view')===v);
+  });
+  document.getElementById('views').scrollTop=0;
+}
+document.addEventListener('click',function(e){
+  var nv=e.target.closest('[data-view]');
+  if(nv)switchView(nv.getAttribute('data-view'));
+  var sm=document.getElementById('suiteMenu');
+  if(sm.classList.contains('open')&&!e.target.closest('.top-right'))sm.classList.remove('open');
+});
+function toggleSuite(e){e.stopPropagation();document.getElementById('suiteMenu').classList.toggle('open')}
+function swToggle(s,name){
+  s.classList.toggle('on');
+  toast(name+(s.classList.contains('on')?' 已开启':' 已关闭（命中将转人工队列）'));
+}
+function runProcess(slot,steps,sumHtml,cb){
+  var p=el('<div class="process"><div class="p-sum"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#2563eb"><use href="#icoSpark"/></svg><span>'+sumHtml+'</span></div><div class="p-steps"></div></div>');
+  var box=p.querySelector('.p-steps');
+  steps.forEach(function(s){
+    box.appendChild(el('<div class="p-step"><span class="p-ico"><span class="spinner"></span><svg class="chk" width="16" height="16" viewBox="0 0 24 24"><use href="#icoCheck"/></svg></span><span>'+s+'</span></div>'));
+  });
+  slot.appendChild(p);
+  var i=0,nodes=box.children;
+  (function next(){
+    if(i>0)nodes[i-1].classList.add('done');
+    if(i>=nodes.length){setTimeout(function(){p.classList.add('collapsed');cb&&cb()},300);return}
+    nodes[i].classList.add('on');i++;
+    setTimeout(next,430+Math.random()*320);
+  })();
+}
+function streamBlocks(slot,blocks,done){
+  var bi=0;
+  function nextBlock(){
+    if(bi>=blocks.length){done&&done();return}
+    var holder=document.createElement('div');
+    slot.appendChild(holder);
+    var tokens=blocks[bi].match(/<[^>]+>|[\s\S]/g)||[],buf='',ti=0;
+    var iv=setInterval(function(){
+      var step=0;
+      while(ti<tokens.length&&step<4){
+        var tk=tokens[ti++];buf+=tk;
+        if(tk.charAt(0)!=='<')step++;
+      }
+      holder.innerHTML=buf+'<span class="cursor"></span>';
+      if(ti>=tokens.length){
+        clearInterval(iv);holder.innerHTML=buf;
+        bi++;setTimeout(nextBlock,110);
+      }
+    },12);
+  }
+  nextBlock();
+}
+
+/* =========================================================
+   爆款工厂
+========================================================= */
+var VIRALS=['定额没了怎么算价？3 句话讲明白新国标','Excel 5 秒对量小技巧，造价人都该会','造价人加班的一天 vlog｜结算季实录','老板说项目不赚钱，我用数据打了脸'];
+var curViral=0;
+document.querySelectorAll('.vr-it').forEach(function(it){
+  it.addEventListener('click',function(){
+    document.querySelectorAll('.vr-it').forEach(function(x){x.classList.remove('on')});
+    it.classList.add('on');curViral=+it.getAttribute('data-v');
+  });
+});
+var VIRAL_TITLES=['新国标实施 9 个月，还按老办法报价的造价人要吃亏了','定额退坡后，聪明的造价人都在这样报价','丢标三次才明白：新国标报价的 3 个真相'];
+function replicate(){
+  if(busy)return;
+  busy=true;
+  var box=document.getElementById('viralBox'),st=document.getElementById('viralState');
+  st.className='st-chip hot';st.textContent='基因拆解中…';
+  box.innerHTML='';
+  runProcess(box,[
+    '逐帧拆解对标视频：<em>《'+VIRALS[curViral]+'》</em>',
+    '提取流量基因：钩子类型 <em>悬念提问</em> · 节奏 <em>前 3 秒冲突</em> · 框架 <em>痛点-干货-行动</em>',
+    '迁移行业知识：检索 <em>GB/T 50500-2024 专题库 · 晨曦课程素材</em>',
+    '生成分镜脚本：<em>6 镜 · 58 秒</em> · 标题 / 封面 / 话题同步产出',
+    '原创度与合规自检：结构相似 · 内容全新 · <em>通过</em>'
+  ],'复刻完成 · 6 镜分镜脚本 · 预估完播率 <b>34%±</b> · 用时 <b>21s</b>',function(){
+    var wrap=el('<div></div>');box.appendChild(wrap);
+    wrap.appendChild(el('<div class="gene"><h6><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoFire"/></svg>爆款基因拆解（对标视频）</h6><div class="gn"><span class="gtag">钩子 <b>饭碗焦虑 · 悬念提问</b></span><span class="gtag">前 3 秒 <b>大字冲突</b></span><span class="gtag">节奏 <b>干货三连 · 8s/点</b></span><span class="gtag">完播钩子 <b>「第三点最关键」</b></span><span class="gtag">BGM <b>低频卡点鼓</b></span><span class="gtag">转化 <b>评论区扣词留资</b></span></div></div>'));
+    var blocks=[
+      '<div class="tcands"><div class="tcand on" data-ti="0"><span class="tn">标题 A · 推荐</span>'+VIRAL_TITLES[0]+'</div><div class="tcand" data-ti="1"><span class="tn">标题 B</span>'+VIRAL_TITLES[1]+'</div><div class="tcand" data-ti="2"><span class="tn">标题 C</span>'+VIRAL_TITLES[2]+'</div></div>',
+      '<table class="script-tb"><tr><th style="width:64px">时间</th><th style="width:30%">画面</th><th>口播 / 字幕</th></tr>'+
+      '<tr><td class="tc">0-3s</td><td>黑底大字 + 人物怼脸<span class="hooktag">悬念钩子</span></td><td>「还在等信息价？你可能已经丢标了。」</td></tr>'+
+      '<tr><td class="tc">3-10s</td><td>翻《GB/T 50500-2024》文件特写</td><td>「新国标实施 9 个月，报价依据彻底变了——定额和信息价不再是主角。」</td></tr>'+
+      '<tr><td class="tc">10-25s</td><td>录屏素材 #s-021 · 询价台账演示</td><td>「第一，市场询价要留痕，台账就是你的底气。」</td></tr>'+
+      '<tr><td class="tc">25-40s</td><td>晨材网载价录屏 · 大字标注</td><td>「第二，造价数据库不是大厂专属，晨材网当日价一键载入。」</td></tr>'+
+      '<tr><td class="tc">40-52s</td><td>企业数据曲线动画<span class="hooktag">完播钩子</span></td><td>「第三点最关键：自己的成本数据，才是别人抢不走的报价护城河。」</td></tr>'+
+      '<tr><td class="tc">52-58s</td><td>口播 + 置顶评论引导<span class="hooktag">留资钩子</span></td><td>「评论区扣【新国标】，送你一份新旧报价对照表。」</td></tr></table>',
+      '<div class="hashtags"><span class="htag">#造价</span><span class="htag">#新国标</span><span class="htag">#工程造价</span><span class="htag">#GBT50500</span><span class="htag">#造价人日常</span></div>',
+      '<div class="meta-strip"><span class="ms">发布建议 <b>今晚 18:30</b>（黄金档）</span><span class="ms">建议双发 <b>抖音 + 视频号</b></span><span class="ms pass">✓ 原创度自检通过</span><span class="ms pass">✓ 无绝对化用语</span></div>'
+    ];
+    var slot=el('<div></div>');wrap.appendChild(slot);
+    streamBlocks(slot,blocks,function(){
+      slot.querySelector('.tcands').addEventListener('click',function(e){
+        var t=e.target.closest('.tcand');if(!t)return;
+        this.querySelectorAll('.tcand').forEach(function(x){x.classList.remove('on')});
+        t.classList.add('on');toast('已选用：'+VIRAL_TITLES[+t.getAttribute('data-ti')]);
+      });
+      wrap.appendChild(el('<div class="act-row">'+
+        '<button class="btn primary sm" onclick="switchView(\'mix\');toast(\'脚本已送入混剪引擎，素材自动检索中\')"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#fff"><use href="#icoCut"/></svg>发送至智能混剪</button>'+
+        '<button class="btn ghost sm" onclick="switchView(\'aigc\')"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoBrush"/></svg>生成配套口播 / 封面</button>'+
+        '<button class="btn ghost sm" onclick="toast(\'分镜脚本已导出（含拍摄备注）\')"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoDoc"/></svg>导出脚本</button>'+
+        '</div>'+
+        '<div class="ai-note"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#94a3b8"><use href="#icoSpark"/></svg>仅复刻结构与节奏基因，文案与画面全新生成 · 发布前经内容池人工审核</div>'));
+      st.className='st-chip ok';st.textContent='脚本已产出';
+      busy=false;
+    });
+  });
+}
+
+/* =========================================================
+   AIGC 创作间
+========================================================= */
+var AIGC={
+  copy:{
+    steps:['解析主题与受众：<em>造价从业者 · 焦虑+干货</em>','检索素材：<em>新国标专题库 · 历史高互动文案</em>','生成 60 秒口播稿 · 口语化润色','合规自检：<em>通过</em>'],
+    sum:'口播稿生成完成 · 60 秒 · 用时 <b>5.8s</b>',
+    blocks:[
+      '<div class="gen-area"><h3>60 秒口播稿 ｜ 主题：评论区扣词领《新旧报价对照表》</h3>'+
+      '<p>「我说句得罪人的话——<span class="hl">现在还把定额当唯一依据报价的，2026 年会很难受。</span></p>'+
+      '<p>新国标落地都 9 个月了，最高投标限价的玩法彻底变了：市场价格信息、造价数据库、企业成本数据，<strong>三个新依据，你手里有几个？</strong></p>'+
+      '<p>别慌，我把新旧报价的差异整理成了一张对照表：哪些照旧、哪些必改、哪些要从现在开始攒数据，一张表说清楚。</p>'+
+      '<p><span class="hl">评论区扣【新国标】</span>，我挨个发你。觉得有用的，点个关注，下期讲询价台账怎么建。」</p></div>'
+    ],
+    acts:'<button class="btn primary sm" onclick="switchView(\'mix\')">送入混剪配音</button><button class="btn ghost sm" onclick="toast(\'口播稿已复制\')">复制文案</button>'
+  },
+  note:{
+    steps:['平台风格适配：<em>小红书 · emoji + 清单体</em>','检索图文模板库：<em>命中「自查清单」模板</em>','正文与标签生成 · 配图建议','合规自检：<em>通过</em>'],
+    sum:'图文笔记生成完成 · 用时 <b>4.6s</b>',
+    blocks:[
+      '<div class="gen-area"><h3>📕 小红书笔记 ｜ 造价人自查⚠️新国标报价 5 个坑</h3>'+
+      '<p>姐妹们！新国标实施 9 个月了，还有人在用老办法报价😭 自查一下你中了几条👇</p>'+
+      '<p>1️⃣ 还在死等信息价 → 现在要建<strong>市场询价台账</strong>⚠️<br>2️⃣ 报价没有数据支撑 → 造价数据库快用起来<br>3️⃣ 成本数据从来不留 → <span class="hl">企业自己的数据才是护城河</span><br>4️⃣ 询价不留痕 → 成果核查会吃亏<br>5️⃣ 新旧标准混着用 → 直接丢标预定🙅</p>'+
+      '<p>整理了一份《新旧报价对照表》📊 评论区扣【新国标】发你～</p>'+
+      '<div class="hashtags"><span class="htag">#造价</span><span class="htag">#工程人</span><span class="htag">#新国标</span><span class="htag">#职场干货</span><span class="htag">#造价小白</span></div>'+
+      '<p style="font-size:11.5px;color:#94a3b8">配图建议：封面大字清单图 + 4 张要点卡片图（可在「封面 / 海报」页签一键生成）</p></div>'
+    ],
+    acts:'<button class="btn primary sm" onclick="switchView(\'dist\');toast(\'已加入小红书发布队列（明早 08:00）\')">排期发布</button><button class="btn ghost sm" onclick="toast(\'笔记已复制\')">复制笔记</button>'
+  },
+  poster:{
+    steps:['解析文案关键词：<em>新国标 · 报价 · 警示感</em>','文生图引擎出图：<em>4 个风格方向 · 3:4 竖版</em>','大字排版与品牌色注入','商用合规检查：<em>无侵权元素</em>'],
+    sum:'封面方案生成完成 · 4 个方向 · 用时 <b>11.4s</b>',
+    blocks:[
+      '<div class="poster-grid">'+
+      '<div class="poster p1" onclick="toast(\'已选用方案 A，可一键应用到分发队列封面\')"><span class="pk">方案 A · 商务蓝</span><b>定额退坡<br>报价怎么办？</b><span>prompt：深蓝工程图纸背景 · 白色大字 · 警示三角</span></div>'+
+      '<div class="poster p2" onclick="toast(\'已选用方案 B\')"><span class="pk">方案 B · 警示橙</span><b>还在等<br>信息价？</b><span>prompt：工地暮色 · 橙黄渐变 · 悬念问句</span></div>'+
+      '<div class="poster p3" onclick="toast(\'已选用方案 C\')"><span class="pk">方案 C · 极简黑</span><b>新国标报价<br>3 个真相</b><span>prompt：极简黑灰 · 数字编号 · 知识感</span></div>'+
+      '<div class="poster p4" onclick="toast(\'已选用方案 D\')"><span class="pk">方案 D · 流量红</span><b>丢标 3 次<br>才懂这件事</b><span>prompt：红橙冲击渐变 · 故事钩子</span></div>'+
+      '</div><p style="font-size:11.5px;color:#94a3b8">点击任一方案应用 · 支持重绘 / 换字 / 导出 1080×1440（演示环境为布局示意图）</p>'
+    ],
+    acts:'<button class="btn primary sm" onclick="toast(\'4 个方案已存入素材库\')">全部存入素材库</button><button class="btn ghost sm" onclick="toast(\'已按方案 A 重新生成 4 张变体\')">换一批</button>'
+  },
+  avatar:{
+    steps:['加载数字人形象与音色','口播稿对齐：<em>60 秒 · 自动断句与重音</em>','口型驱动与表情渲染（云端）','字幕烧录 · 成片导出 <em>1080P</em>'],
+    sum:'数字人口播视频生成完成 · 60s · 用时 <b>48s</b>',
+    blocks:[
+      '<div class="avatar-grid">'+
+      '<div class="av-card on"><div class="ava">晓</div><b>晨曦小晓</b><span>知识讲解 · 沉稳专业</span></div>'+
+      '<div class="av-card"><div class="ava">陈</div><b>陈老师</b><span>权威背书 · 课程同款</span></div>'+
+      '<div class="av-card"><div class="ava">曦</div><b>小曦</b><span>活泼种草 · 年轻向</span></div>'+
+      '</div>'+
+      '<div class="chips" style="margin-bottom:4px"><span class="chip on">亲切女声</span><span class="chip">沉稳男声</span><span class="chip">活力快语速</span></div>'+
+      '<div class="dh-preview"><div class="big">晓</div><div class="wave"><i></i><i></i><i></i><i></i><i></i></div><span>数字人口播预览 · 60s · 1080P · 字幕已烧录（演示占位）</span></div>'+
+      '<p style="font-size:11.5px;color:#94a3b8;margin-top:9px">同一口播稿可批量生成 3 个数字人版本，分别投放不同账号，规避同质化判定</p>'
+    ],
+    acts:'<button class="btn primary sm" onclick="switchView(\'dist\');toast(\'数字人成片已加入分发队列\')">送入矩阵分发</button><button class="btn ghost sm" onclick="toast(\'已切换数字人重新渲染\')">换数字人重渲</button>'
+  }
+};
+var curMode='copy';
+document.getElementById('aigcSeg').addEventListener('click',function(e){
+  var s=e.target.closest('span[data-m]');if(!s||busy)return;
+  this.querySelectorAll('span').forEach(function(x){x.classList.remove('on')});
+  s.classList.add('on');curMode=s.getAttribute('data-m');
+  genAigc();
+});
+function genAigc(){
+  if(busy)return;
+  busy=true;
+  var a=AIGC[curMode],box=document.getElementById('aigcBox');
+  box.innerHTML='';
+  runProcess(box,a.steps,a.sum,function(){
+    var slot=el('<div></div>');box.appendChild(slot);
+    streamBlocks(slot,a.blocks,function(){
+      box.appendChild(el('<div class="act-row">'+a.acts+
+        '<button class="btn ghost sm" onclick="genAigc()"><svg width="13" height="13" viewBox="0 0 24 24"><use href="#icoSpark"/></svg>重新生成</button></div>'+
+        '<div class="ai-note"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#94a3b8"><use href="#icoSpark"/></svg>AIGC 内容进入已审核内容池后方可对外发布 · 生成记录留存审计日志</div>'));
+      busy=false;
+    });
+  });
+}
+
+/* =========================================================
+   智能混剪
+========================================================= */
+document.getElementById('mixN').addEventListener('click',function(e){
+  var c=e.target.closest('.chip');if(!c)return;
+  this.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')});
+  c.classList.add('on');
+});
+function startMix(){
+  if(busy)return;
+  busy=true;
+  var n=parseInt(document.querySelector('#mixN .chip.on').textContent);
+  var box=document.getElementById('mixBox'),st=document.getElementById('mixState'),btn=document.getElementById('mixBtn');
+  btn.disabled=true;
+  st.className='st-chip info';st.textContent='混剪中…';
+  box.innerHTML='';
+  runProcess(box,[
+    '脚本语义解析：<em>6 镜 · 58 秒</em>，生成镜头检索词',
+    '素材语义检索：库内命中 <em>23 段</em>可用素材（按镜头匹配）',
+    '智能剪辑：<em>'+n+' 条变体</em>并行生成（开场 / 顺序 / BGM 差异化）',
+    '字幕烧录 + 卡点 BGM 对齐 + 数字人口播替换',
+    '变体互查重：两两相似度 <em>16%—28%</em>（阈值 30%）'
+  ],'混剪完成 · '+n+' 条变体 · 互查重全部通过 · 用时 <b>2 分 36 秒</b>',function(){
+    var wrap=el('<div></div>');box.appendChild(wrap);
+    wrap.appendChild(el('<div class="meta-strip"><span class="ms">变体 <b>'+n+'</b> 条 · 竖版 9:16</span><span class="ms">时长 <b>52—64s</b></span><span class="ms pass">✓ 互查重 ≤28%</span><span class="ms pass">✓ 字幕已烧录</span><span class="ms">单条成本 <b>−80%</b> vs 人工剪辑</span></div>'));
+    var g='<div class="vid-grid">';
+    var durs=['58s','54s','61s','56s','63s','52s'],sims=['18%','22%','16%','26%','24%','28%'];
+    for(var i=0;i<6;i++){
+      g+='<div class="vid" onclick="toast(\'演示环境：变体 #0'+(i+1)+' 预览播放\')"><div class="vt"><span class="vn">#0'+(i+1)+'</span><span class="play"><svg width="14" height="14" viewBox="0 0 24 24" style="color:#fff"><use href="#icoPlay"/></svg></span><span class="dur">'+durs[i]+'</span></div><div class="vi">查重 <b>'+sims[i]+'</b> · 字幕✓ 卡点✓<br>适配 抖/视/快</div></div>';
+    }
+    g+='</div>';
+    wrap.appendChild(el(g));
+    wrap.appendChild(el('<div class="act-row">'+
+      '<button class="btn primary sm" onclick="switchView(\'dist\');toast(\''+n+' 条变体已送入矩阵分发，AI 已按账号分配\')"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSendP"/></svg>全部送入矩阵分发</button>'+
+      '<button class="btn ghost sm" onclick="toast(\'已展开全部 '+n+' 条变体\')">查看全部 '+n+' 条</button>'+
+      '<button class="btn ghost sm" onclick="toast(\'不合格变体已回炉，引擎将更换素材组合重剪\')">挑选后重剪</button>'+
+      '</div>'+
+      '<div class="ai-note"><svg width="11" height="11" viewBox="0 0 24 24" style="color:#94a3b8"><use href="#icoSpark"/></svg>变体互查重控制在平台阈值以下，分散发布规避限流 · 素材均为自有版权内容</div>'));
+    st.className='st-chip ok';st.textContent=n+' 条变体就绪';
+    btn.disabled=false;busy=false;
+  });
+}
+
+/* =========================================================
+   矩阵分发
+========================================================= */
+document.getElementById('pfCheck').addEventListener('click',function(e){
+  var c=e.target.closest('.pfc');if(!c)return;
+  c.classList.toggle('on');
+});
+var ADAPTS=[
+  ['dy','抖音 · 晨曦造价学堂','标题压缩 28 字 ✓ 封面 3:4 ✓ 话题 5 个 ✓ 挂载小程序「晨曦计价体验版」✓'],
+  ['dy','抖音 · 晨曦软件官方','差异化标题改写 ✓ 评论区置顶组件 ✓ 错峰 +30min 发布 ✓'],
+  ['sp','视频号 · 晨曦科技','关联公众号深度文《新国标报价指南》✓ 封面 1:1 裁切 ✓'],
+  ['ks','快手 · 晨曦造价','标题口语化改写 ✓ 老铁话术适配 ✓'],
+  ['xhs','小红书 · 晨曦造价笔记','自动转 6 图图文笔记 ✓ emoji 标题 ✓ 话题改写 ✓']
+];
+function startDist(){
+  if(busy)return;
+  busy=true;
+  var btn=document.getElementById('distBtn');btn.disabled=true;
+  var ab=document.getElementById('adaptBox');ab.innerHTML='';
+  var on=document.querySelectorAll('#pfCheck .pfc.on').length;
+  runProcess(ab,[
+    '读取成片与文案包：<em>'+document.getElementById('distVid').value.split('（')[0]+'</em>',
+    '逐平台规则适配：<em>'+on+' 个渠道</em>（标题 / 封面 / 标签 / 挂载）',
+    '内容池合规复检：<em>通过</em>（已审核话术与素材）',
+    '写入发布队列并锁定 <em>18:30</em> 黄金档'
+  ],'适配完成 · '+on+' 个渠道已入队 · 用时 <b>9s</b>',function(){
+    var lines='<div style="margin-bottom:12px">';
+    ADAPTS.forEach(function(a){
+      lines+='<div class="adapt-line"><span class="pf '+a[0]+'">'+(a[0]==='dy'?'抖':a[0]==='sp'?'视':a[0]==='ks'?'快':'红')+'</span><b style="font-size:11.8px">'+a[1]+'</b><span style="color:#94a3b8">·</span><span>'+a[2].replace(/✓/g,'<span class="ok">✓</span>')+'</span></div>';
+    });
+    lines+='</div>';
+    ab.appendChild(el(lines));
+    var q=document.getElementById('queueBox');
+    var row=el('<div class="queue-row" style="background:rgba(16,185,129,.05);border-radius:10px;padding-left:8px"><span class="pf dy">抖</span><div class="qb"><b>'+document.getElementById('distVid').value.split('（')[0]+' · 多平台包</b><span>今晚 18:30 · '+on+' 渠道同步 · 数据回采已开启</span></div><span class="st-chip ok">新入队</span></div>');
+    q.insertBefore(row,q.firstChild);
+    var chip=document.getElementById('queueChip');
+    chip.textContent=(5+1)+' 条待发';
+    btn.disabled=false;busy=false;
+    toast(on+' 个渠道适配完成，已加入发布队列');
+  });
+}
+
+/* =========================================================
+   互动与线索（实时流）
+========================================================= */
+var FEED=[
+  {pf:'dy',user:'@造价小白阿杰',time:'2 分钟前',text:'新国标以后还要考定额吗？求科普！',reply:'定额仍是重要参考但不再是唯一依据啦～新标准强调市场询价和企业数据。回复【新国标】领取《新旧报价对照表》，看完就懂👌',tags:['<span class="rtag">AI 自动回复 · 话术库 #12</span>','<span class="rtag g">响应 0.8s</span>']},
+  {pf:'sp',user:'@张工',time:'5 分钟前',text:'你们这个软件多少钱一套？公司想采购',reply:'感谢关注！价格按版本和站点数有所不同，已私信您详细报价单与体验版链接，也可留下联系方式由顾问一对一介绍～',tags:['<span class="rtag">AI 回复 · 询价语义</span>','<span class="rtag g">已捕获线索 → CRM</span>','<span class="rtag h">高意向</span>']},
+  {pf:'xhs',user:'@工程妹妹',time:'8 分钟前',text:'求第三点说的那个成本数据表格模板！！',reply:'模板已私信发送啦📩 顺便附了一份填写示例～觉得有用记得点赞收藏，下期更新询价台账教程！',tags:['<span class="rtag">AI 自动回复</span>','<span class="rtag g">资料包已发送 · 已留资</span>']},
+  {pf:'ks',user:'@老周说工程',time:'12 分钟前',text:'你们客服电话怎么一直打不通？什么服务态度！',reply:'检测到投诉情绪 → 已停用自动回复，转人工客服专员处理（工单 #KF-0611-21，15 分钟内回电致歉）',warn:true,tags:['<span class="rtag a">敏感词拦截 · 强制转人工</span>','<span class="rtag a">客服工单已建</span>']},
+  {pf:'bz',user:'@BIM学徒',time:'15 分钟前',text:'比某某家的软件好用吗？想听实话',reply:'竞品对比话题命中受限策略 → 草稿已生成（仅陈述自身功能，不贬损同业），待运营人工审核后发布',warn:true,tags:['<span class="rtag a">受限话题 · 待人工审核</span>']}
+];
+var LIVE=[
+  {pf:'dy',user:'@小马造价',time:'刚刚',text:'扣【新国标】！求对照表！',reply:'已私信发送《新旧报价对照表》📩 关注后回复【台账】还能领询价台账模板哦～',tags:['<span class="rtag">AI 自动回复 · 关键词命中</span>','<span class="rtag g">响应 0.6s · 已留资</span>']},
+  {pf:'sp',user:'@刘工程师',time:'刚刚',text:'企业内训能定制吗？我们 30 多个人',reply:'可以定制哒！30 人规模建议 2 天集训方案，已私信课程大纲与档期，留下电话顾问马上联系您～',tags:['<span class="rtag">AI 回复 · 培训语义</span>','<span class="rtag g">已捕获线索 → 教育部</span>','<span class="rtag h">高意向</span>']},
+  {pf:'xhs',user:'@努力的小造价',time:'刚刚',text:'码住了！第 5 条真的踩过坑😭',reply:'抱抱～现在改还来得及！整理的自查清单已私信你，转发给同事一起避坑吧💪',tags:['<span class="rtag">AI 自动回复 · 情感共鸣模板</span>']}
+];
+function cmHtml(c){
+  var pfChar={dy:'抖',sp:'视',ks:'快',xhs:'红',bz:'B',gz:'公'}[c.pf];
+  return '<div class="cm"><div class="ch"><span class="pf '+c.pf+'">'+pfChar+'</span>'+c.user+'<span class="tm">'+c.time+'</span></div>'+
+    '<div class="ct">'+c.text+'</div>'+
+    '<div class="reply'+(c.warn?' warn':'')+'"><span class="rav"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#fff"><use href="#'+(c.warn?'icoHuman':'icoSpark')+'"/></svg></span><span>'+c.reply+'</span></div>'+
+    '<div class="rtags">'+c.tags.join('')+'</div></div>';
+}
+function renderFeed(){
+  var box=document.getElementById('cmBox');
+  box.innerHTML='';
+  FEED.forEach(function(c){box.appendChild(el(cmHtml(c)))});
+}
+var liveIdx=0,liveTimer=null;
+function feedReplay(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null}
+  liveIdx=0;renderFeed();
+  toast('实时流回放开始：新评论将陆续进入并由 AI 即时回复');
+  liveTimer=setInterval(function(){
+    if(liveIdx>=LIVE.length){clearInterval(liveTimer);liveTimer=null;return}
+    var c=LIVE[liveIdx++];
+    var box=document.getElementById('cmBox');
+    var pfChar={dy:'抖',sp:'视',ks:'快',xhs:'红'}[c.pf];
+    var node=el('<div class="cm"><div class="ch"><span class="pf '+c.pf+'">'+pfChar+'</span>'+c.user+'<span class="tm">刚刚</span></div>'+
+      '<div class="ct">'+c.text+'</div>'+
+      '<div class="reply"><span class="rav"><svg width="13" height="13" viewBox="0 0 24 24" style="color:#fff"><use href="#icoSpark"/></svg></span><span class="typing"><i></i><i></i><i></i>&nbsp;AI 正在生成回复…</span></div></div>');
+    box.insertBefore(node,box.firstChild);
+    setTimeout(function(){
+      node.querySelector('.reply span:last-child').outerHTML='<span>'+c.reply+'</span>';
+      node.appendChild(el('<div class="rtags">'+c.tags.join('')+'</div>'));
+    },1400);
+  },4200);
+}
+renderFeed();
+genAigc();
+</script>
+</body>
+</html>
