@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工程蓝图 · 需求三 · 铜流账本 — 江铜线缆</title>
+<style>
+:root{
+  --bg:#f7f6f3; --bg2:#efede8;
+  --ink:#232b36; --ink2:#5c6470; --ink3:#959ca8;
+  --line:#e6e2da; --line2:#d6d1c6;
+  --blue:#2563c9; --blue-d:#1b4a99; --blue-soft:#e9effd;
+  --copper:#b3552c; --copper-d:#8f3f1d; --copper2:#d98c54; --copper-soft:#f9ece3;
+  --green:#0f9d6e; --green-soft:#e3f6ee;
+  --red:#d8503c; --red-soft:#fdecea;
+  --amber:#e3a23c; --amber-soft:#fdf4e3;
+  --shadow:0 14px 40px rgba(42,52,66,.10);
+  --shadow-sm:0 6px 18px rgba(42,52,66,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(680px 440px at 90% -6%, rgba(179,85,44,.12), transparent 60%),
+    radial-gradient(760px 500px at -8% 18%, rgba(42,52,66,.07), transparent 60%),
+    linear-gradient(180deg,#faf9f6,#f3f1ec);
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:repeating-linear-gradient(45deg, rgba(42,52,66,.04) 0 1.5px, transparent 1.5px 14px);
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent 50%);
+          mask-image:linear-gradient(180deg,#000,transparent 50%);
+}
+::selection{background:rgba(179,85,44,.25)}
+nav{
+  position:sticky; top:0; z-index:60;
+  backdrop-filter:blur(16px) saturate(1.3);
+  background:rgba(247,246,243,.85); border-bottom:1px solid rgba(42,52,66,.08);
+}
+.nav-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 28px;flex-wrap:wrap}
+.back-btn{
+  display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--copper-d);
+  background:var(--copper-soft);border:1px solid #ecd4c4;border-radius:10px;padding:8px 15px;
+  text-decoration:none;transition:.2s;white-space:nowrap;
+}
+.back-btn:hover{transform:translateX(-2px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px;white-space:nowrap}
+.brand-mark{
+  width:30px;height:30px;border-radius:7px;flex:none;transform:rotate(45deg);
+  background:linear-gradient(135deg,var(--copper),var(--copper2));
+  display:grid;place-items:center;
+}
+.brand-mark i{transform:rotate(-45deg);color:#fff;font-style:normal;font-size:10.5px;font-weight:900}
+.stage-tabs{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.stab{
+  font-size:12.5px;font-weight:700;color:var(--ink2);background:#fff;border:1.5px solid var(--line);
+  border-radius:9px;padding:6.5px 13px;text-decoration:none;transition:.2s;white-space:nowrap;
+}
+.stab:hover{border-color:#ecd4c4;color:var(--copper)}
+.stab.on{color:#fff;background:linear-gradient(120deg,var(--copper),var(--copper2));border-color:transparent;box-shadow:0 5px 14px rgba(179,85,44,.3)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+section{padding:44px 0 12px}
+.sec-tag{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:2.5px;
+  color:var(--copper-d);text-transform:uppercase;margin-bottom:10px;
+}
+.sec-tag::before{content:"";width:26px;height:8px;background:repeating-linear-gradient(45deg,var(--copper) 0 3px,transparent 3px 6px)}
+h2{font-size:25px;letter-spacing:.5px;margin-bottom:8px;font-weight:800}
+.sec-sub{color:var(--ink2);max-width:860px;margin-bottom:22px;font-size:14px}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+  padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink2);
+}
+.btn{
+  border:none;cursor:pointer;font-size:13.5px;font-weight:700;border-radius:11px;padding:10px 20px;transition:.25s;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;
+}
+.btn-copper{color:#fff;background:linear-gradient(120deg,var(--copper),var(--copper2));box-shadow:0 8px 20px rgba(179,85,44,.30)}
+.btn-copper:hover{transform:translateY(-2px)}
+.btn-ghost{color:var(--ink2);background:#fff;border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:#ecd4c4;color:var(--copper)}
+.hero{padding:42px 0 6px}
+.crumb{font-size:12px;color:var(--ink3);margin-bottom:14px}
+.crumb a{color:var(--copper);text-decoration:none}
+.hero-grid{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.hero-l{flex:1;min-width:300px}
+.stage-no{font-size:12px;font-weight:800;letter-spacing:2.5px;color:var(--copper-d);margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.stage-no .pill2{background:linear-gradient(120deg,var(--copper),var(--copper2));color:#fff;border-radius:8px;padding:3px 11px;font-size:12.5px;letter-spacing:1.5px}
+h1{
+  font-size:36px;line-height:1.25;font-weight:900;margin-bottom:10px;
+  background:linear-gradient(105deg,#232b36 22%,var(--copper) 66%,var(--copper2) 96%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:15px;color:var(--ink2);max-width:720px;margin-bottom:14px}
+.hero-badges{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.kpi-strip{display:flex;gap:12px;flex-wrap:wrap;min-width:260px}
+.kpi2{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 17px;box-shadow:var(--shadow-sm);
+  min-width:150px;position:relative;overflow:hidden;
+}
+.kpi2::after{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--copper),var(--copper2))}
+.kpi2 .lb{font-size:11px;color:var(--ink3);margin-bottom:3px}
+.kpi2 .vv{font-size:13px;font-weight:600;color:var(--ink2)}
+.kpi2 .vv s{color:#b8402e;font-weight:500;margin-right:6px}
+.kpi2 .vv b{color:var(--green);font-weight:800}
+.chain{display:flex;gap:7px;margin-top:20px;flex-wrap:wrap}
+.chain a{
+  flex:1;min-width:120px;text-decoration:none;border-radius:11px;padding:8px 12px;border:1.5px solid var(--line);
+  background:#fff;transition:.2s;display:flex;align-items:center;gap:8px;
+}
+.chain a:hover{border-color:#ecd4c4}
+.chain a.cur{border-color:var(--copper2);background:linear-gradient(160deg,#fffdf9,#f9ece3);box-shadow:0 6px 16px rgba(179,85,44,.14)}
+.chain .cno{font-size:10px;font-weight:800;color:var(--ink3);letter-spacing:1px}
+.chain a.cur .cno{color:var(--copper-d)}
+.chain .cnm{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.chain a.cur .cnm{color:var(--ink)}
+/* ===== 影院 ===== */
+.cine-card{
+  background:rgba(255,255,255,.88);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
+  padding:18px 18px 14px;
+}
+.cine-top{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:14px}
+.cine-top .hint{font-size:12px;color:var(--ink3);margin-left:auto;display:flex;align-items:center;gap:7px}
+.cine-top .hint::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse2 1.5s infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.3}}
+.cine-viewport{
+  width:100%;overflow:hidden;border-radius:16px;position:relative;
+  background:
+    radial-gradient(500px 280px at 82% 0%,rgba(179,85,44,.09),transparent 60%),
+    radial-gradient(560px 320px at 8% 100%,rgba(42,52,66,.07),transparent 60%),
+    linear-gradient(180deg,#fdfdfc,#f4f2ee);
+  border:1px solid var(--line);
+}
+.cinema{position:relative;width:1180px;height:520px;transform-origin:0 0;
+  background-image:repeating-linear-gradient(45deg, rgba(42,52,66,.035) 0 1.5px, transparent 1.5px 16px);
+}
+.cinesvg{position:absolute;inset:0;width:1180px;height:520px;pointer-events:none}
+.actor{position:absolute;left:0;top:0;will-change:transform,opacity}
+.pop{animation:popk .45s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes popk{from{opacity:0;transform:var(--tf,translate(0,0)) scale(.55)}to{opacity:1;transform:var(--tf,translate(0,0)) scale(1)}}
+.fadeout{transition:opacity .45s;opacity:0!important}
+.dim{transition:opacity .6s,filter .6s;opacity:.35;filter:grayscale(.6)}
+.flash{animation:flk .55s ease}
+@keyframes flk{0%,100%{filter:none}45%{filter:brightness(1.3) drop-shadow(0 0 14px rgba(217,140,84,.8))}}
+.cine-sub{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:50;max-width:90%;
+  background:rgba(35,43,54,.9);color:#fff;border-radius:13px;padding:10px 26px;
+  font-size:19px;font-weight:700;letter-spacing:1px;white-space:nowrap;box-shadow:0 10px 30px rgba(42,52,66,.35);
+  transition:opacity .3s,transform .3s;
+}
+.cine-sub.swap{opacity:0;transform:translateX(-50%) translateY(8px)}
+.cine-sub em{font-style:normal;color:#f3c08a}
+.core2{width:128px;text-align:center}
+.orb{
+  width:108px;height:108px;border-radius:50%;margin:0 auto;position:relative;
+  background:radial-gradient(circle at 32% 28%,#e8b079,var(--copper) 52%,#2a3442 100%);
+  box-shadow:0 14px 36px rgba(179,85,44,.4),inset 0 -8px 22px rgba(0,0,0,.25);
+  display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;letter-spacing:1px;
+}
+.orb::before,.orb::after{
+  content:"";position:absolute;inset:-12px;border-radius:50%;border:2px solid rgba(179,85,44,.5);
+  animation:ringp 2.4s ease-out infinite;
+}
+.orb::after{animation-delay:1.2s}
+@keyframes ringp{0%{transform:scale(.82);opacity:.9}100%{transform:scale(1.32);opacity:0}}
+.core2 .clb{margin-top:9px;font-size:12px;font-weight:800;color:var(--copper-d);letter-spacing:1px}
+.core2 .csub{font-size:10.5px;color:var(--ink3);margin-top:1px;min-height:15px}
+.orb.spin{animation:orbspin 1s linear infinite}
+@keyframes orbspin{to{filter:hue-rotate(22deg)}}
+.sysc{
+  background:linear-gradient(165deg,#fcfcfb,#eef0f4);border:1.5px solid #d4dae3;border-radius:14px;padding:11px 14px;
+  box-shadow:var(--shadow-sm);
+}
+.sysc .sk{font-size:9.5px;font-weight:800;letter-spacing:1.5px;color:#44526a;margin-bottom:4px}
+.sysc b{font-size:13.5px;display:block;margin-bottom:6px}
+.srow{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink2);padding:3px 0;border-bottom:1px dashed #e0e4ea;opacity:0;transform:translateY(5px);transition:.35s}
+.srow.on{opacity:1;transform:none}
+.srow .ok{color:var(--green);font-weight:800}
+.srow .warn{color:#b8402e;font-weight:800}
+.docc{
+  background:#fff;border:1.5px solid #ecd4c4;border-radius:14px;padding:11px 14px;box-shadow:0 12px 30px rgba(179,85,44,.14);
+}
+.docc .dk{font-size:9.5px;font-weight:800;letter-spacing:1.5px;color:var(--copper-d);margin-bottom:4px}
+.docc b.tt{font-size:13.5px;display:block;margin-bottom:6px}
+.drow{display:flex;justify-content:space-between;gap:8px;font-size:11.8px;color:var(--ink2);padding:3.5px 0;border-bottom:1px dashed #f0e2d6;opacity:0;transform:translateX(-7px);transition:.35s}
+.drow.on{opacity:1;transform:none}
+.drow b{color:var(--ink)}
+.drow .ok{color:var(--green);font-weight:800}
+.drow .warn{color:#b8402e;font-weight:800}
+.chipf{
+  font-size:11.5px;font-weight:700;border-radius:8px;padding:4px 10px;white-space:nowrap;box-shadow:var(--shadow-sm);
+  background:var(--copper-soft);border:1px solid #ecd4c4;color:var(--copper-d);
+}
+.chipf.green{background:var(--green-soft);border-color:#bfe9d6;color:#0b7a56}
+.chipf.red{background:var(--red-soft);border-color:#f3c4bb;color:#b8402e}
+.chipf.blue{background:var(--blue-soft);border-color:#cdd9f3;color:var(--blue-d)}
+.chipf.gr{background:#eceff4;border-color:#d4dae3;color:#44526a}
+.stampx{
+  font-size:17px;font-weight:900;letter-spacing:3px;padding:7px 16px;border:3px solid var(--green);color:var(--green);
+  border-radius:10px;background:rgba(255,255,255,.88);
+  animation:stampk .5s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 8px 22px rgba(15,157,110,.25);
+}
+@keyframes stampk{from{opacity:0;transform:var(--tf,translate(0,0)) rotate(-9deg) scale(2.1)}to{opacity:1;transform:var(--tf,translate(0,0)) rotate(-9deg) scale(1)}}
+.stampx.red{border-color:var(--red);color:var(--red);box-shadow:0 8px 22px rgba(216,80,60,.25)}
+.tipb{
+  background:#232b36;color:#fff;font-size:11.5px;border-radius:10px;padding:7px 12px;line-height:1.6;max-width:240px;
+  box-shadow:0 10px 26px rgba(35,43,54,.35);
+}
+.ringfx{
+  position:absolute;border:3px solid var(--red);border-radius:50%;width:30px;height:30px;
+  animation:rfx .9s ease-out forwards;pointer-events:none;
+}
+@keyframes rfx{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-50%) scale(3.4);opacity:0}}
+.tapfx{
+  position:absolute;width:22px;height:22px;border:3px solid var(--blue);border-radius:50%;
+  animation:rfx .7s ease-out forwards;
+}
+.ph2{width:200px;background:#232b36;border-radius:22px;padding:9px 9px 12px;box-shadow:0 18px 40px rgba(35,43,54,.35)}
+.ph2 .ph-head{color:#c9d4e6;font-size:11px;text-align:center;padding:3px 0 7px;letter-spacing:1px}
+.ph2 .ph-scr{background:#f2f3f1;border-radius:13px;min-height:150px;padding:9px 8px;display:flex;flex-direction:column;gap:7px}
+.wxb{
+  background:#fff;border:1px solid #e4e6e2;border-radius:3px 10px 10px 10px;padding:6px 9px;
+  font-size:11px;line-height:1.55;color:#2b3a52;
+}
+.wxb b{color:#16263c}
+.boardp{
+  background:#fff;border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:11px 14px;
+}
+.boardp .bk{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:6px;display:flex;justify-content:space-between}
+.btrack{height:42px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);position:relative;margin-bottom:9px;overflow:hidden}
+.cb2{
+  position:absolute;top:6px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-size:9.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);overflow:hidden;white-space:nowrap;
+  transition:left .9s cubic-bezier(.5,.1,.2,1),width .9s;box-shadow:0 4px 10px rgba(42,52,66,.2);
+}
+.cw2{
+  position:absolute;top:6px;height:30px;width:11px;border-radius:4px;
+  background:repeating-linear-gradient(135deg,#3a4452 0 4px,#5a6678 4px 8px);
+  transition:left .9s cubic-bezier(.5,.1,.2,1),opacity .5s;
+}
+.term{
+  width:236px;background:#232b36;border-radius:13px;padding:9px 12px;color:#c9d4e6;box-shadow:0 12px 26px rgba(35,43,54,.3);
+}
+.term .th{font-size:11px;font-weight:800;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.term .tscr{margin-top:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:5px 9px;font-size:10.5px;min-height:30px;line-height:1.6;color:#9fb0cd}
+.term .tok{color:#5fd3ab;font-weight:800;opacity:0;transition:.35s}
+.term .tok.on{opacity:1}
+.avat{
+  width:46px;height:46px;border-radius:50%;background:linear-gradient(120deg,#0f9d6e,#3dbd92);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:800;box-shadow:0 8px 20px rgba(15,157,110,.35);
+}
+.papercard{
+  width:150px;background:#fff;border:1px solid var(--line2);border-radius:6px;padding:9px 11px;
+  font-size:10px;color:var(--ink2);box-shadow:var(--shadow-sm);line-height:1.6;
+}
+.papercard b{display:block;font-size:11px;color:var(--ink)}
+.eqbig{
+  background:#fff;border:1.5px solid #ecd4c4;border-radius:16px;padding:14px 20px;box-shadow:var(--shadow);
+  display:flex;align-items:baseline;gap:10px;
+}
+.eqbig .t{text-align:center}
+.eqbig .t b{font-size:26px;font-weight:900;display:block;font-variant-numeric:tabular-nums}
+.eqbig .t span{font-size:9.5px;color:var(--ink2);font-weight:700}
+.eqbig .op{font-size:20px;font-weight:900;color:var(--ink3)}
+/* 章节/蓝图/检查器/依赖/对比 */
+.chapters{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.chap{
+  flex:1;min-width:110px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;
+  font-size:11px;color:var(--ink3);font-weight:700;transition:.3s;display:flex;align-items:center;gap:7px;
+}
+.chap .cdot{width:8px;height:8px;border-radius:50%;background:var(--line2);flex:none;transition:.3s}
+.chap.cur{border-color:var(--copper2);color:var(--ink);background:linear-gradient(160deg,#fffdf9,#f9ece3);box-shadow:0 6px 16px rgba(179,85,44,.16)}
+.chap.cur .cdot{background:var(--copper);box-shadow:0 0 0 4px rgba(217,140,84,.25)}
+.chap.done .cdot{background:var(--green)}
+.flow-card{
+  background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);
+  padding:20px 22px 16px;margin-top:22px;
+}
+.flow-card h5{font-size:14.5px;margin-bottom:4px}
+.flow-card .fc-sub{font-size:12px;color:var(--ink3);margin-bottom:14px}
+.flow-wrap{overflow-x:auto;padding:6px 2px 12px}
+.flow-wrap::-webkit-scrollbar{height:8px}
+.flow-wrap::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+.flow{display:flex;align-items:flex-start}
+.fstep{width:172px;flex:none;position:relative}
+.fcard{
+  border-radius:13px;border:1.5px solid var(--line);background:#fff;padding:11px 12px 9px;cursor:pointer;
+  transition:.25s;min-height:104px;position:relative;
+}
+.fstep.role-ai .fcard{border-color:#ecd4c4;background:linear-gradient(165deg,#fffdf9,#f9ece3)}
+.fstep.role-human .fcard{border-color:#bfe9d6;background:linear-gradient(165deg,#fbfffd,#eefaf4)}
+.fstep.role-sys .fcard{border-color:#d4dae3;background:linear-gradient(165deg,#fcfcfb,#eef0f4)}
+.fcard.sel{box-shadow:0 0 0 3px rgba(217,140,84,.4),0 12px 26px rgba(179,85,44,.18);transform:translateY(-3px)}
+.fno{position:absolute;top:-10px;left:11px;font-size:9.5px;font-weight:800;color:#fff;border-radius:6px;padding:1.5px 8px;letter-spacing:1px}
+.role-ai .fno{background:linear-gradient(120deg,var(--copper),var(--copper2))}
+.role-human .fno{background:linear-gradient(120deg,#0f9d6e,#3dbd92)}
+.role-sys .fno{background:linear-gradient(120deg,#2a3442,#4b5a70)}
+.frole{font-size:9px;font-weight:800;letter-spacing:1.2px;margin:3px 0 4px}
+.role-ai .frole{color:var(--copper-d)}
+.role-human .frole{color:#0b7a56}
+.role-sys .frole{color:#44526a}
+.fcard b{font-size:12.8px;display:block;margin-bottom:4px}
+.fio{font-size:10px;color:var(--ink2);line-height:1.5}
+.fio em{font-style:normal;color:var(--ink3)}
+.fconn{width:30px;flex:none;display:flex;align-items:center;justify-content:center;padding-top:46px}
+.fconn svg{width:26px;height:14px;overflow:visible}
+.fdash{stroke:var(--copper);stroke-width:2;stroke-dasharray:5 4;animation:dash 1.1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-9}}
+.fbranch{
+  margin-top:22px;position:relative;border:1.5px dashed #eba797;background:linear-gradient(165deg,#fffafa,#fdf0ee);
+  border-radius:11px;padding:7px 10px;font-size:10px;color:#9c3a2a;line-height:1.5;
+}
+.fbranch::before{content:"";position:absolute;top:-17px;left:22px;height:17px;border-left:2px dashed #eba797}
+.fbranch b{font-size:10.5px;display:block;margin-bottom:1px}
+.inspector{margin-top:4px;border-top:1px dashed var(--line2);padding-top:15px;display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.ins-col{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;min-height:92px}
+.ins-col h6{font-size:10.5px;font-weight:800;letter-spacing:1.5px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.ins-col h6::before{content:"";width:7px;height:7px;border-radius:2px;flex:none}
+.ins-col.c1 h6{color:#44526a}.ins-col.c1 h6::before{background:#4b5a70}
+.ins-col.c2 h6{color:var(--copper-d)}.ins-col.c2 h6::before{background:var(--copper)}
+.ins-col.c3 h6{color:#0b7a56}.ins-col.c3 h6::before{background:var(--green)}
+.ins-col.c4 h6{color:#b8402e}.ins-col.c4 h6::before{background:var(--red)}
+.ins-col ul{list-style:none}
+.ins-col li{font-size:11.5px;color:var(--ink2);padding:2.5px 0 2.5px 13px;position:relative;line-height:1.55}
+.ins-col li::before{content:"·";position:absolute;left:2px;font-weight:800;color:var(--ink3)}
+.ins-col .one{font-size:12px;color:var(--ink);font-weight:600;line-height:1.6}
+.duo2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.panel2{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.panel2-head{
+  padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;
+  background:linear-gradient(180deg,#fbfaf8,#f5f3ee);
+}
+.panel2-head .pic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff;flex:none;font-size:15px}
+.panel2-head h4{font-size:15px}
+.panel2-head p{font-size:11px;color:var(--ink3)}
+.mods-grid{display:grid;grid-template-columns:1fr;gap:10px;padding:16px 20px 18px}
+.mod-card{background:#faf9f6;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.mod-card b{font-size:13px;display:block;margin-bottom:2px}
+.mod-card p{font-size:11.5px;color:var(--ink2);line-height:1.55}
+.gate-list{padding:16px 20px 18px}
+.gate{
+  display:flex;gap:9px;align-items:flex-start;border:1px solid #f0ddb8;background:var(--amber-soft);
+  border-radius:11px;padding:9px 13px;margin-bottom:8px;font-size:12.3px;color:#7c5a14;line-height:1.6;
+}
+.gate.red{border-color:#f3c4bb;background:var(--red-soft);color:#9c3a2a}
+.cmp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.cmp-item{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+.cmp-item .lb{font-size:12px;color:var(--ink3);margin-bottom:7px;font-weight:700;letter-spacing:1px}
+.cmp-item .row{display:flex;align-items:center;gap:10px;font-size:14px;flex-wrap:wrap}
+.cmp-item .row s{color:#b8402e;font-weight:500}
+.cmp-item .row .arr{color:var(--ink3)}
+.cmp-item .row b{color:var(--green);font-weight:800;font-size:15px}
+footer{padding:40px 0 34px;border-top:1px solid var(--line);margin-top:56px}
+.foot-in{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--ink3);font-size:12.5px}
+.foot-nav{display:flex;gap:10px}
+.foot-nav a{color:var(--copper);text-decoration:none;font-weight:700}
+@media (max-width:1080px){
+  h1{font-size:29px}
+  .duo2{grid-template-columns:1fr}
+  .inspector{grid-template-columns:1fr 1fr}
+  .cmp-grid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .inspector{grid-template-columns:1fr}
+  .stage-tabs{display:none}
+  .cine-sub{font-size:13px;white-space:normal;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="back-btn" href="index.html#ledger">← 返回需求三 · 铜流账本</a>
+    <div class="brand"><div class="brand-mark"><i>Cu</i></div>江铜线缆 · 需求三 — 工程蓝图</div>
+    <div class="stage-tabs" id="stageTabs"></div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div class="crumb" id="crumb"></div>
+  <div class="hero-grid">
+    <div class="hero-l">
+      <div class="stage-no"><span class="pill2" id="hNo">S1</span><span id="hEn"></span></div>
+      <h1 id="hTitle"></h1>
+      <p class="hero-sub" id="hValue"></p>
+      <div class="hero-badges" id="hBadges"></div>
+    </div>
+    <div class="kpi-strip" id="hKpis"></div>
+  </div>
+  <div class="chain" id="chain"></div>
+</header>
+
+<section class="wrap" id="filmSec">
+  <div class="sec-tag">PROCESS FILM · 流程动画</div>
+  <h2>别读文字了——看它自己跑一遍</h2>
+  <p class="sec-sub">动画自动循环：纸单会飞走、色块会聚类、急单会落位、铜账会自己算平。底部字幕讲到哪一步，下方章节条与蓝图同步亮到哪一步。</p>
+  <div class="cine-card">
+    <div class="cine-top">
+      <button class="btn btn-copper" id="replayBtn" onclick="replayScene()">⟲ 重新播放</button>
+      <button class="btn btn-ghost" id="pauseBtn" onclick="togglePause()">⏸ 暂停</button>
+      <span class="hint">自动循环 · 演示数据为示意</span>
+    </div>
+    <div class="cine-viewport" id="viewport">
+      <div class="cinema" id="cine"></div>
+    </div>
+    <div class="chapters" id="chapters"></div>
+  </div>
+
+  <div class="flow-card">
+    <h5>蓝图细节（与动画同步高亮）</h5>
+    <div class="fc-sub">每一步的执行者（AI / 人 / 现有系统）、输入输出与守门规则——给实施团队的工程视图。点击任一步骤可查看详情。</div>
+    <div class="flow-wrap"><div class="flow" id="flowEl"></div></div>
+    <div class="inspector" id="inspector"></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-tag">FOUNDATION · 数据与守门</div>
+  <h2>它调用什么、守住什么</h2>
+  <div class="duo2">
+    <div class="panel2">
+      <div class="panel2-head">
+        <div class="pic" style="background:linear-gradient(120deg,#2a3442,#4b5a70)">⛁</div>
+        <div><h4>调用的现有系统数据 / 模块</h4><p>鼎捷 ERP · WMS · 机台，保留利旧</p></div>
+      </div>
+      <div class="mods-grid" id="modsGrid"></div>
+    </div>
+    <div class="panel2">
+      <div class="panel2-head">
+        <div class="pic" style="background:linear-gradient(120deg,#e3a23c,#f0c474)">🛡</div>
+        <div><h4>守门规则与异常处理</h4><p>AI 建议 · 人审发布，权责清晰</p></div>
+      </div>
+      <div class="gate-list" id="gateList"></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-tag">BEFORE → AFTER · 升级前后</div>
+  <h2>这一环节的量化变化</h2>
+  <div class="cmp-grid" id="cmpGrid"></div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>江铜线缆 · 需求三 — 工程蓝图（演示数据均为示意）</div>
+    <div class="foot-nav"><a href="index.html#ledger">返回铜流账本</a><a href="#" id="nextLink"></a></div>
+  </div>
+</footer>
+
+<script>
+/* ===================== 数据 ===================== */
+const ROLE_NAME={ai:'AI 智能体',human:'人 · 计划/车间/财务',sys:'现有系统（鼎捷/WMS/机台）'};
+const D=[
+{no:'S1',en:'PAPERLESS WO · 工单数字化',name:'工单数字化',title:'鼎捷直连 · 无纸派工',
+ value:'工单从鼎捷 ERP 自动获取、机台电子接收——纸质派工单取消；样品工单 BOM 细化至工序级、返工工单独立管理、超单生产自动扣减成品/半成品库存。',
+ badges:['需求三 · 工单管理','底座：鼎捷 ERP + 机台终端','原文：取消纸质派工单'],
+ kpis:[['派工方式','纸质单','电子工单 0 纸'],['超单库存','人工对账','自动扣减']],
+ steps:[
+  {role:'sys',t:'鼎捷工单入流',in:'鼎捷 ERP 生产工单',out:'工单池',logic:['自动获取，手工/Excel 兜底','完整性自动校验'],rules:['校验不过不进池']},
+  {role:'ai',t:'电子派工',in:'工单池 + 排产结果',out:'机台电子工单',logic:['取消纸质派工单','机台终端电子接收确认'],rules:['未确认视为未送达']},
+  {role:'ai',t:'样品工单',in:'样品需求',out:'工序级 BOM 工单',logic:['BOM 细化至工序级','减少人工录入'],branch:{t:'样品转量产 → 沿用结构',d:'样品工艺数据直接复用，不二次录入'}},
+  {role:'ai',t:'返工工单',in:'质检退回',out:'返工工单',logic:['独立单据类型','关联原工单追溯']},
+  {role:'ai',t:'变更与拆合',in:'数量/日期/优先级调整',out:'变更日志 + 重排触发',logic:['变更记录日志','按数量或工序拆分合并'],branch:{t:'变更 → 触发重排产',d:'仅增量重算受影响部分'}},
+  {role:'sys',t:'超单自动扣减',in:'完工回报',out:'库存修正',logic:['超单生产自动扣减成品/半成品库存','账实一致'],rules:['扣减留痕可查']},
+  {role:'human',t:'工单关闭',in:'完工/取消',out:'关闭状态',logic:['系统自动关闭为主','例外手工关闭'],rules:['关闭后进入成本结算']}],
+ mods:[['鼎捷 ERP · 生产工单','工单唯一来源，自动获取'],
+       ['机台终端','电子工单接收与回执'],
+       ['成品/半成品库存','超单自动扣减的对象'],
+       ['BOM（工序级）','样品工单的结构底座']],
+ gates:[['amber','<b>校验守门：</b>工单完整性校验不通过不进排产池'],
+        ['amber','<b>回执守门：</b>机台未电子确认接收，持续提醒班组长'],
+        ['red','<b>追溯兜底：</b>返工工单强制关联原工单，质量问题可回查']],
+ cmp:[['派工','纸质打印传递','机台电子工单'],['样品单录入','逐工序手敲','BOM 工序级自动'],['超单库存','月底盘点才发现','完工即自动扣减']]},
+
+{no:'S2',en:'CLUSTER APS · 聚类排产',name:'聚类排产',title:'换色/换规格 · 最小化聚类',
+ value:'AI 约束排程把同色、同规格订单自动聚类相邻生产——换色从一天 11 次降到 4 次；多目标优化、增量排产、模拟对比直接得出预计订单交期。',
+ badges:['需求三 · 智能排产','原文：最小化换色/换规格时间的自动聚类排产','负荷甘特 · 拖拽 · 冲突提示'],
+ kpis:[['换色损时','≈5.5 h/日','≈2.0 h/日'],['变更重排','全盘','仅增量']],
+ steps:[
+  {role:'sys',t:'输入装配',in:'工单池 + 设备/模具/班次',out:'排产输入包',logic:['五维规则 × 六维约束','颜色/规格作为切换成本矩阵']},
+  {role:'ai',t:'聚类建模',in:'输入包',out:'聚类约束模型',logic:['同色/同规格切换成本最小化','交期硬约束优先'],rules:['交期优先于聚类']},
+  {role:'ai',t:'多目标寻优',in:'聚类模型',out:'候选方案',logic:['延期/换色/利用率/在制品','按设备/工序/人员多粒度'],branch:{t:'求解超时 → 次优解',d:'先用当前最优，后台继续寻优'}},
+  {role:'ai',t:'排产模拟',in:'候选方案',out:'方案对比 + 预计交期',logic:['对比不同方案效果','可直接得出预计订单交期']},
+  {role:'human',t:'拖拽微调',in:'候选方案',out:'确认版计划',logic:['甘特拖拽 · 冲突实时提示','锁定/解锁/拆分/合并'],rules:['未确认不下发']},
+  {role:'sys',t:'负荷甘特发布',in:'确认版',out:'设备/订单双视角甘特',logic:['负荷绿(<70)黄(70-90)红(>90)','瓶颈自动识别归因']}],
+ mods:[['设备 / 班次','产能系数可调的班次配置'],
+       ['模具关系','库存状态/寿命/产品匹配'],
+       ['颜色 · 规格主数据','切换成本矩阵的来源'],
+       ['鼎捷工单','排产对象与交期来源']],
+ gates:[['amber','<b>交期守门：</b>聚类不得牺牲交期——先保交付，再省换色'],
+        ['amber','<b>冲突守门：</b>拖拽调整即时校验约束并提示原因'],
+        ['red','<b>人审兜底：</b>AI 只出候选方案，计划员确认后才发布']],
+ cmp:[['换色次数','≈11 次/日','≈4 次/日'],['排产方式','Excel 手排','AI 聚类 + 多目标'],['交期答复','排完才知道','模拟即得预计交期']]},
+
+{no:'S3',en:'URGENT INSERT · 紧急插单',name:'紧急插单',title:'四要素评估 · 锁定单保护',
+ value:'紧急订单进来，AI 自动评估在制工单、设备负荷、物料齐套、模具状态四要素，给出可插单方案——已锁定关键交期订单不受影响，全程保留插单日志与溯源。',
+ badges:['需求三 · 紧急插单与 AI 约束排程','原文：不影响已锁定关键交期订单','保留插单日志与溯源'],
+ kpis:[['插单评估','半天 · 拍脑袋','分钟级 · 四要素'],['关键订单','怕被挤占','锁定保护']],
+ steps:[
+  {role:'sys',t:'急单进入',in:'紧急订单',out:'插单请求',logic:['标记紧急等级','进入评估队列']},
+  {role:'ai',t:'四要素评估',in:'插单请求',out:'评估快照',logic:['在制工单 · 设备负荷','物料齐套 · 模具状态'],rules:['评估快照入日志']},
+  {role:'ai',t:'方案生成',in:'评估快照',out:'多套可插单方案',logic:['插同色组尾（换色 0 增）','插最前 / 拒单建议'],branch:{t:'无可行方案 → 拒单建议',d:'给出最早可承诺时间，不硬插'}},
+  {role:'ai',t:'锁定单保护',in:'候选方案',out:'保护校验',logic:['已锁定关键交期订单不动','受影响范围标注'],rules:['锁定单挤占 = 方案否决']},
+  {role:'human',t:'计划员拍板',in:'方案对比',out:'选定方案',logic:['分钟级确认','一键发布']},
+  {role:'sys',t:'日志与溯源',in:'全过程',out:'插单日志',logic:['评估快照/方案/操作人/时间','可追溯可复盘'],rules:['日志不可篡改']}],
+ mods:[['在制工单','影响面评估的第一要素'],
+       ['设备负荷','插入位置的产能校验'],
+       ['物料齐套','急单能否开工的硬条件'],
+       ['模具状态','线缆规格切换的可行性']],
+ gates:[['red','<b>锁定守门：</b>任何插单方案不得影响已锁定关键交期订单——这是否决项'],
+        ['amber','<b>评估守门：</b>四要素任一不达标，方案自动降级或转拒单建议'],
+        ['amber','<b>溯源守门：</b>插单日志记录评估快照与决策人，事后可复盘']],
+ cmp:[['评估速度','半天协调','分钟级出方案'],['影响范围','怕动全局','锁定单零影响'],['追责','口说无凭','日志快照可溯源']]},
+
+{no:'S4',en:'KIT · LOCK · PURCHASE',name:'齐套锁库 · 采购联动',name2:'',title:'齐套锁库 · 采购申请联动',
+ value:'BOM 展开齐套计算、按工单锁库、冲突按优先级裁决；物料预警直接关联鼎捷 ERP 采购申请——采购物料未入库，自动提醒采购员。',
+ badges:['需求三 · 物料齐套 + 库存锁定 + 异常预警','原文：关联 ERP 采购申请，采购物料未入库，提醒采购'],
+ kpis:[['缺料发现','开工才知道','开工前 N 小时预警'],['催采购','人工打电话','系统自动提醒']],
+ steps:[
+  {role:'ai',t:'BOM 展开齐套',in:'工单 + BOM',out:'齐套/缺料清单',logic:['铜杆/绝缘料/护套料需求展开','区分可用与冻结库存'],rules:['不齐套自动预警']},
+  {role:'ai',t:'按工单锁库',in:'齐套分配',out:'锁定明细',logic:['锁定策略/明细可查','完工自动/取消手动/超期自动释放']},
+  {role:'ai',t:'锁定冲突裁决',in:'多工单抢料',out:'分配结果',logic:['按优先级自动分配'],branch:{t:'低优先级 → 提示缺料',d:'附预计可用时间'}},
+  {role:'ai',t:'采购申请联动',in:'缺口清单',out:'关联的采购申请',logic:['自动关联鼎捷 ERP 采购申请','未入库自动提醒采购员'],rules:['到期未入库升级提醒']},
+  {role:'ai',t:'异常预警',in:'计划/库存/负荷状态',out:'预警推送',logic:['延期提前 N 天 / 缺料前 N 小时 / 负荷>90%','系统/邮件/短信/企微钉钉'],rules:['通知对象可配置']},
+  {role:'human',t:'例外处理',in:'预警与缺料例外',out:'替代/调拨决定',logic:['只处理例外'],rules:['替代料需人工确认']}],
+ mods:[['WMS 库存','可用/冻结实时区分'],
+       ['BOM','铜材+绝缘料+护套料展开依据'],
+       ['鼎捷 ERP · 采购申请','缺料联动与催办对象'],
+       ['通知通道','企微/钉钉/短信/邮件']],
+ gates:[['amber','<b>锁定守门：</b>已锁定物料不可挪用，冲突按优先级裁决'],
+        ['amber','<b>采购守门：</b>采购申请未入库自动提醒，到期未到升级到主管'],
+        ['red','<b>数据兜底：</b>库存数据异常时暂停齐套结论，不出错误指令']],
+ cmp:[['查料','人工翻 ERP','自动齐套+锁定'],['催采购','电话催','系统自动提醒升级'],['预警','人盯','四类预警推送到人']]},
+
+{no:'S5',en:'LOSS TRACKING · 损耗追踪',name:'损耗与边角料',title:'损耗率自动核算 · 公斤级台账',
+ value:'拉丝、绞线等工序的加工损耗率自动核算、超标当日预警；各工单各工序的边角料与废料产出量自动统计，关联含铜废料入库记录——账记到公斤。',
+ badges:['需求三 · 铜材与边角料闭环核算（上）','原文：自动核算拉丝、绞线等工序的加工损耗率'],
+ kpis:[['损耗核算','月底盘点估算','工序级自动核算'],['边角料','无台账','公斤级台账']],
+ steps:[
+  {role:'sys',t:'工序实绩回流',in:'机台投入/产出计量',out:'工序级实绩',logic:['拉丝/绞线/成缆/护套逐工序','按工单归集']},
+  {role:'ai',t:'损耗率自动核算',in:'投入 vs 产出',out:'工序损耗率',logic:['实际损耗率 vs 工艺标准','超标当日预警'],branch:{t:'损耗超标 → 当日预警',d:'定位到工单/机台/班组，不等月底'}},
+  {role:'ai',t:'边角料统计',in:'工序产出明细',out:'边角料台账',logic:['各工单、各工序线缆边角料产出量','自动统计入账']},
+  {role:'sys',t:'废料入库对接',in:'含铜废料入库单',out:'台账关联',logic:['废料入库数据对接','与工单/工序关联'],rules:['入库必关联来源']},
+  {role:'ai',t:'台账与报表',in:'台账数据',out:'废料台账 + 价值核算报表',logic:['公斤级可查','按工单/工序/期间汇总']},
+  {role:'human',t:'差异复核',in:'超标与异常项',out:'复核结论',logic:['只看例外'],rules:['差异未闭环不结案']}],
+ mods:[['机台计量','工序投入/产出数据源'],
+       ['废料入库单','含铜废料的入库记录'],
+       ['工艺标准','损耗率的对标基准'],
+       ['工单','损耗与边角料的归集维度']],
+ gates:[['amber','<b>对标守门：</b>实际损耗率超工艺标准即预警，定位到机台与班组'],
+        ['amber','<b>关联守门：</b>废料入库必须关联工单/工序来源，无来源不入账'],
+        ['red','<b>闭环兜底：</b>投入-产出-边角-废料对不平的差异项，强制复核']],
+ cmp:[['损耗','月底估算','工序级当日核算'],['边角料','去向不明','按工单公斤级台账'],['废料入库','孤立记录','关联工单可追溯']]},
+
+{no:'S6',en:'COPPER LOOP · 闭环核算',name:'铜流闭环成本',title:'理论 = 实际 + 回收 · 凭证直达鼎捷',
+ value:'变卖/回炉价值分摊扣减工单生产成本，实现「理论用量 = 实际消耗 + 废料回收」的闭环核算；成本要素归集（铜材/绝缘料/护套料/人工/制费），凭证自动推送鼎捷 ERP。',
+ badges:['需求三 · 成本核算管理','原文：理论用量 = 实际消耗 + 废料回收','凭证：鼎捷 ERP 自动生成'],
+ kpis:[['铜账','糊涂账','公斤级账平'],['凭证','人工编制','自动推送鼎捷']],
+ steps:[
+  {role:'sys',t:'成本素材归集',in:'领料/报工/能耗/台账',out:'成本归集包',logic:['直接材料：铜材/绝缘料/护套料','人工按报工 · 制费按分摊']},
+  {role:'ai',t:'闭环对账',in:'理论用量 vs 实绩',out:'闭环等式校验',logic:['理论 = 实际 + 边角 + 废料','公斤级对账'],branch:{t:'账不平 → 强制盘查',d:'差异定位到工序，闭环前不结案'}},
+  {role:'ai',t:'回收价值回冲',in:'变卖/回炉记录',out:'成本扣减分摊',logic:['回收价值分摊扣减工单成本','形成废料价值核算报表'],rules:['回冲规则透明可查']},
+  {role:'ai',t:'成本计算分析',in:'三项成本 + 回冲',out:'总成本/单位成本 + 四类分析',logic:['单位成本=总成本/完工数量','实际vs标准/偏差/构成/趋势']},
+  {role:'sys',t:'凭证推送鼎捷',in:'成本结果',out:'财务凭证',logic:['自动生成凭证','可追溯到工单'],rules:['凭证与工单一一对应']},
+  {role:'human',t:'财务例外复核',in:'偏差标红项',out:'复核入账',logic:['只看例外'],rules:['标红未复核不入账']}],
+ mods:[['鼎捷 ERP · 财务','凭证自动推送的目标系统'],
+       ['领料 / 报工记录','材料与人工成本依据'],
+       ['废料台账（S5）','回收价值回冲的来源'],
+       ['变卖 / 回炉记录','回收价值的凭据']],
+ gates:[['red','<b>账平守门：</b>理论 ≠ 实际+回收 时强制盘查，不平不结案'],
+        ['amber','<b>回冲守门：</b>回收价值分摊规则透明，按工单可查'],
+        ['amber','<b>入账守门：</b>偏差标红项未经财务复核不生成凭证']],
+ cmp:[['成本时效','月底归集','完工即知 · 当日账平'],['废料价值','流失/不入账','回冲工单成本'],['凭证','人工做账','自动推送鼎捷 ERP']]}
+];
+
+/* ===================== 动画引擎 ===================== */
+const cine=document.getElementById('cine');
+let timers=[],intervals=[],running=false,paused=false,curStage=0;
+const W=1180,H=520;
+function at(t,fn){ timers.push(setTimeout(()=>{ if(running) fn(); },t)); }
+function every(ms,fn){ const id=setInterval(()=>{ if(running) fn(); },ms); intervals.push(id); return id; }
+function stopScene(){ running=false; timers.forEach(clearTimeout); intervals.forEach(clearInterval); timers=[]; intervals=[]; }
+function clearStageDOM(){ cine.innerHTML=''; }
+function place(el,x,y){ el.dataset.x=x; el.dataset.y=y; el.style.setProperty('--tf',`translate(${x}px,${y}px)`); el.style.transform=`translate(${x}px,${y}px)`; }
+function A(cls,html,x,y,w){
+  const e=document.createElement('div'); e.className='actor '+(cls||'');
+  if(w) e.style.width=w+'px';
+  e.innerHTML=html||''; cine.appendChild(e); place(e,x,y); return e;
+}
+function popA(el){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+function gone(el,delay=0){ setTimeout(()=>{ el.classList.add('fadeout'); setTimeout(()=>el.remove(),480); },delay); }
+function fly(el,x2,y2,ms=750,opt={}){
+  el.classList.remove('pop'); el.style.animation='none';
+  const x1=+el.dataset.x,y1=+el.dataset.y,arc=opt.arc||0,s1=opt.s1??1,s2=opt.s2??1;
+  const t0=performance.now();
+  (function f(t){
+    if(!running) return;
+    const k=Math.min((t-t0)/ms,1), e=1-Math.pow(1-k,3);
+    const x=x1+(x2-x1)*e, y=y1+(y2-y1)*e-Math.sin(Math.PI*e)*arc, sc=s1+(s2-s1)*e;
+    el.style.transform=`translate(${x}px,${y}px) scale(${sc})`;
+    if(opt.fadeOut) el.style.opacity=String(1-k);
+    if(k<1) requestAnimationFrame(f);
+    else{ el.dataset.x=x2; el.dataset.y=y2; if(opt.remove) el.remove(); }
+  })(t0);
+}
+function typeIn(el,text,cps=26){
+  let i=0; el.textContent='';
+  const id=every(1000/cps,()=>{ el.textContent=text.slice(0,++i); if(i>=text.length) clearInterval(id); });
+}
+function countTo(el,from,to,suffix='',ms=1000){
+  const t0=performance.now();
+  (function f(t){ if(!running) return;
+    const k=Math.min((t-t0)/ms,1);
+    el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3))).toLocaleString()+suffix;
+    if(k<1) requestAnimationFrame(f);
+  })(t0);
+}
+let svgLayer=null;
+function svgInit(){
+  svgLayer=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svgLayer.setAttribute('class','cinesvg'); svgLayer.setAttribute('viewBox','0 0 1180 520');
+  cine.appendChild(svgLayer);
+}
+function beam(x1,y1,x2,y2,color='#b3552c',life=1100){
+  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+  l.setAttribute('stroke',color);l.setAttribute('stroke-width','3');l.setAttribute('stroke-linecap','round');
+  l.setAttribute('stroke-dasharray','9 7');l.style.animation='dash .5s linear infinite';l.style.opacity='.85';
+  svgLayer.appendChild(l);
+  setTimeout(()=>{ l.style.transition='opacity .4s'; l.style.opacity='0'; setTimeout(()=>l.remove(),450); },life);
+}
+function ringFx(x,y,color){
+  const r=document.createElement('div'); r.className='ringfx';
+  if(color) r.style.borderColor=color;
+  r.style.left=x+'px'; r.style.top=y+'px'; cine.appendChild(r);
+  setTimeout(()=>r.remove(),950);
+}
+function dotFlow(x1,y1,x2,y2,color='#b3552c',n=3,gap=200){
+  for(let i=0;i<n;i++) setTimeout(()=>{ if(!running)return;
+    const d=A('', '',x1,y1); d.style.width='10px'; d.style.height='10px'; d.style.borderRadius='50%';
+    d.style.background=color; d.style.boxShadow=`0 0 10px ${color}`;
+    fly(d,x2,y2,700,{arc:40,remove:true});
+    setTimeout(()=>d.remove(),760);
+  },i*gap);
+}
+function tapFx(x,y){
+  const t=document.createElement('div'); t.className='tapfx';
+  t.style.left=x+'px'; t.style.top=y+'px'; cine.appendChild(t);
+  setTimeout(()=>t.remove(),750);
+}
+let subEl=null;
+function setSub(html){
+  if(!subEl) return;
+  subEl.classList.add('swap');
+  setTimeout(()=>{ subEl.innerHTML=html; subEl.classList.remove('swap'); },280);
+}
+function mark(stepIdx,subHtml){
+  setSub(subHtml);
+  selectStep(stepIdx,false);
+  document.querySelectorAll('.chap').forEach((c,i)=>{
+    c.classList.toggle('cur',i===stepIdx);
+    c.classList.toggle('done',i<stepIdx);
+  });
+}
+function mkCore(x,y,label){
+  const c=A('core2',`<div class="orb">AI</div><div class="clb">${label||'铜流智能体'}</div><div class="csub"></div>`,x,y,128);
+  return {el:c,orb:c.querySelector('.orb'),sub:c.querySelector('.csub')};
+}
+function mkDoc(x,y,w,k,title,rows){
+  const html=`<div class="dk">${k}</div><b class="tt">${title}</b>`+
+    rows.map(r=>`<div class="drow"><span>${r[0]}</span><b>${r[1]}</b><span class="${r[3]||'ok'}">${r[2]||''}</span></div>`).join('');
+  const d=A('docc',html,x,y,w);
+  return {el:d,rows:[...d.querySelectorAll('.drow')]};
+}
+function mkSys(x,y,w,k,title,rows){
+  const html=`<div class="sk">${k}</div><b>${title}</b>`+
+    rows.map(r=>`<div class="srow"><span>${r[0]}</span><b>${r[1]}</b><span class="${r[3]||'ok'}">${r[2]||''}</span></div>`).join('');
+  const d=A('sysc',html,x,y,w);
+  return {el:d,rows:[...d.querySelectorAll('.srow')]};
+}
+function chipAt(text,cls,x,y){
+  const c=A('chipf '+(cls||''),text,x,y); popA(c); return c;
+}
+function stampAt(text,x,y,red){
+  const s=A('stampx'+(red?' red':''),text,x,y); return s;
+}
+const CLR={red:'#d8503c',blue:'#2563c9',yellow:'#d9a514',green:'#15945f',black:'#3a4452',white:'#9aa3ad'};
+
+/* ===================== 六幕分镜 ===================== */
+const SCENES=[
+/* ===== S1 工单数字化 ===== */
+function(){
+  const erp=mkSys(40,46,280,'鼎捷 ERP','生产工单',[
+    ['今日工单','6 张 · 自动获取','✓'],['完整性校验','通过','✓'],['手工/Excel','兜底通道','✓']]);
+  const p1=A('papercard','<b>纸质派工单 #0381</b>打印 → 车间传递 → 签字',360,60,150);
+  const p2=A('papercard','<b>纸质派工单 #0382</b>转交中…易丢失',390,150,150);
+  const core=mkCore(560,210);
+  const term=A('term',`<div class="th">机台 7# 终端<span class="tok">✓ 已接收</span></div><div class="tscr" id="t1s"></div>`,884,60,236);
+  const sample=mkDoc(884,200,250,'样品工单','SMP-0611 · BOM 工序级',[
+    ['拉丝','Φ8→1.78 ×7','✓'],['绞线','7 芯 右向','✓'],['绝缘','PVC 红 0.8mm','✓']]);
+  const stock=mkSys(884,380,250,'成品/半成品库存','超单自动扣减',[
+    ['BV2.5 红 完工','+1,120 m','✓'],['超单 +120m','库存已扣减','✓']]);
+  popA(erp.el); popA(p1); popA(p2); popA(core.el); popA(term); popA(sample.el); popA(stock.el);
+  at(200,()=>{ mark(0,'⛁ 工单从<em>鼎捷 ERP 自动入流</em>'); erp.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),300+i*280)); });
+  at(1800,()=>{
+    mark(1,'🍃 纸质派工单——<em>取消，飞走</em>');
+    fly(p1,760,-60,1400,{arc:40,fadeOut:true,remove:true});
+    setTimeout(()=>fly(p2,800,-30,1400,{arc:60,fadeOut:true,remove:true}),350);
+    setTimeout(()=>stampAt('纸质单 取消',330,110,true),900);
+  });
+  at(3600,()=>{
+    const wo=chipAt('📄 MO-0611-07 电子工单','',600,160);
+    fly(wo,920,80,800,{arc:60});
+    setTimeout(()=>{ gone(wo); document.getElementById('t1s').innerHTML='MO-0611-07 · BV2.5 红<br><span style="color:#f3c08a">序列+SOP 已到机台</span>';
+      term.querySelector('.tok').classList.add('on'); },850);
+  });
+  at(5200,()=>{ mark(2,'🧪 <em>样品工单</em>：BOM 细化至工序级，免人工录入');
+    sample.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*300)); });
+  at(7000,()=>{ mark(3,'♻ <em>返工工单</em>独立管理，关联原单可追溯'); chipAt('♻ RW-0611-02 ← MO-0609-12','gr',540,360); });
+  at(8400,()=>{ mark(4,'⚡ 变更记<em>日志</em>，触发<em>增量重排</em>');
+    chipAt('数量 3,000m → 4,200m','red',300,300);
+    setTimeout(()=>chipAt('日志已记 · 仅重算 1 张 ✓','green',330,345),700); });
+  at(10200,()=>{ mark(5,'📦 完工回报：<em>超单 +120m 自动扣减库存</em>');
+    stock.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*320));
+    setTimeout(()=>ringFx(1010,430,'#0f9d6e'),800); });
+  at(11800,()=>{ mark(6,'👤 工单<em>自动关闭</em>，例外才手工'); chipAt('MO-0611-07 已自动关闭 ✓','green',560,440); });
+  at(13600,()=>setSub('⟲ 循环播放中 · 工单全生命周期，0 张纸'));
+  at(14800,()=>startScene(curStage));
+},
+/* ===== S2 聚类排产 ===== */
+function(){
+  const left=A('boardp','<div class="bk"><span>现状 · 按交期序（颜色穿插）</span><span style="color:#b8402e" id="swA">换色 7 次</span></div><div class="btrack" id="bt1"></div>',40,60,520);
+  const right=A('boardp','<div class="bk"><span>AI · 聚类排产后</span><span style="color:#0b7a56" id="swB">—</span></div><div class="btrack" id="bt2"></div>',40,210,520);
+  const core=mkCore(640,120);
+  const SEQ=[['red',11],['blue',9],['red',8],['yellow',10],['blue',9],['red',7],['yellow',8]];
+  function fill(trackId,arr){
+    const tr=document.getElementById(trackId);
+    let x=1.5,sw=0;
+    arr.forEach((c,i)=>{
+      if(i>0&&arr[i-1][0]!==c[0]){ const w=document.createElement('div');w.className='cw2';w.style.left=x+'%';tr.appendChild(w);x+=2.6;sw++; }
+      const b=document.createElement('div'); b.className='cb2';
+      b.style.background=`linear-gradient(120deg,${CLR[c[0]]},${CLR[c[0]]}cc)`;
+      b.style.left=x+'%'; b.style.width=c[1]+'%'; b.textContent='MO';
+      tr.appendChild(b); x+=c[1]+1;
+    });
+    return sw;
+  }
+  popA(left); popA(core.el);
+  at(200,()=>{ mark(0,'🎨 这是线缆排产的现状：<em>颜色穿插，频繁清机</em>'); fill('bt1',SEQ); });
+  at(1800,()=>{ mark(1,'🧠 颜色/规格作为<em>切换成本</em>进入约束模型'); dotFlow(300,100,660,170,'#b3552c',3,200); });
+  at(3200,()=>{ mark(2,'⚙ <em>多目标寻优</em>：交期硬约束下，换色最小化');
+    core.orb.classList.add('spin');
+    const c=chipAt('已评估 0 方案','',628,300); countTo(c,0,2410,' 方案',1300); });
+  at(5000,()=>{
+    mark(3,'📐 聚类结果：<em>同色成带</em> · 换色 7 → 2 次');
+    core.orb.classList.remove('spin'); popA(right);
+    const sorted=[...SEQ].sort((a,b)=>['red','blue','yellow'].indexOf(a[0])-['red','blue','yellow'].indexOf(b[0]));
+    const sw=fill('bt2',sorted);
+    document.getElementById('swB').textContent='换色 '+sw+' 次 ✓';
+    setTimeout(()=>{ chipAt('损时 3.5h → 1.0h','green',640,330); chipAt('方案B 预计交期 6/17 ★','green',800,330); },900);
+  });
+  at(7600,()=>{ mark(4,'🖐 计划员<em>拖拽微调</em>，冲突即时提示');
+    const av=A('avat','计',840,120); popA(av);
+    setTimeout(()=>{ tapFx(862,136); chipAt('无冲突 ✓','green',900,140); },600); });
+  at(9200,()=>{ mark(5,'📊 负荷甘特发布：<em>绿黄红着色 · 瓶颈归因</em>');
+    chipAt('L1 负荷 82% 黄','',640,400); chipAt('L2 负荷 64% 绿','green',790,400); chipAt('瓶颈：护套机 · 人员不足','red',930,400);
+    stampAt('V0611-1 ✓',420,380); });
+  at(11400,()=>setSub('⟲ 循环播放中 · 换色省下的，都是纯利润'));
+  at(12600,()=>startScene(curStage));
+},
+/* ===== S3 紧急插单 ===== */
+function(){
+  const urgent=mkDoc(40,42,250,'紧急订单','URG-0611 · 黑色 YJV 3×95',[
+    ['数量','2.4 km','急'],['要求交期','6/14','急']]);
+  urgent.rows.forEach(r=>r.classList.add('on'));
+  const core=mkCore(520,90);
+  const f1=mkSys(40,210,250,'要素 1','在制工单',[['影响面','2 张可让位','✓']]);
+  const f2=mkSys(40,330,250,'要素 2','设备负荷',[['护套机 L2','78% 可容纳','✓']]);
+  const f3=mkSys(320,330,250,'要素 3','物料齐套',[['铜杆/护套料','齐套 ✓','✓']]);
+  const f4=mkSys(600,330,250,'要素 4','模具状态',[['Φ95 模具','在库可用','✓']]);
+  const track=A('boardp','<div class="bk"><span>L2 · 护套线（黑色组）</span><span>🔒 = 锁定关键交期单</span></div><div class="btrack" id="ut"></div>',780,42,360);
+  popA(urgent.el); popA(core.el); popA(track);
+  /* 轨道：黑组 + 锁定单 */
+  at(200,()=>{
+    const tr=document.getElementById('ut');
+    [['black',16,0],['black',14,0],['black',15,1],['blue',18,0]].forEach((c,i)=>{
+      const b=document.createElement('div'); b.className='cb2';
+      b.style.background=`linear-gradient(120deg,${CLR[c[0]]},${CLR[c[0]]}cc)`;
+      b.style.left=(2+i*19)+'%'; b.style.width=c[1]+'%';
+      b.textContent=c[2]?'🔒 关键':'MO';
+      tr.appendChild(b);
+    });
+    mark(0,'⚡ 紧急订单进入：<em>黑色 YJV · 6/14 要货</em>');
+  });
+  at(1600,()=>{
+    mark(1,'🔍 AI 自动评估<em>四要素</em>：在制 · 负荷 · 齐套 · 模具');
+    [f1,f2,f3,f4].forEach((f,i)=>setTimeout(()=>{ popA(f.el); beam(560,200,160+(i%2)*280+((i>1)?280:0),(i<2?260:380),'#2563c9',800);
+      setTimeout(()=>f.rows[0].classList.add('on'),400); },i*520));
+  });
+  at(4400,()=>{
+    mark(2,'📋 生成<em>可插单方案</em>（含拒单建议兜底）');
+    chipAt('方案A 插黑色组尾 · 换色 0 ★','green',460,230);
+    chipAt('方案B 插最前 · 换色 +2','',460,272);
+  });
+  at(6000,()=>{
+    mark(3,'🔒 <em>锁定单保护</em>：关键交期订单纹丝不动');
+    ringFx(980,100,'#2563c9');
+    chipAt('🔒 锁定单 0 影响 · 否决挤占类方案','blue',800,150);
+  });
+  at(7600,()=>{
+    mark(4,'👤 计划员<em>分钟级拍板</em>：方案 A');
+    const av=A('avat','计',700,240); popA(av);
+    setTimeout(()=>{ tapFx(722,256);
+      const tr=document.getElementById('ut');
+      const b=document.createElement('div'); b.className='cb2';
+      b.style.background=`linear-gradient(120deg,${CLR.black},${CLR.black}cc)`;
+      b.style.outline='3px solid rgba(216,80,60,.55)'; b.style.outlineOffset='2px';
+      b.style.left='40%'; b.style.width='0%'; b.textContent='急';
+      tr.appendChild(b);
+      requestAnimationFrame(()=>{ b.style.width='13%'; });
+      ringFx(950,115,'#d8503c');
+    },700);
+  });
+  at(9400,()=>{
+    mark(5,'📜 <em>插单日志</em>留痕：评估快照 · 方案 · 操作人 · 时间');
+    const log=mkDoc(780,200,360,'插单日志 · 可溯源','#L-0611-02',[
+      ['评估快照','四要素 · 已存档','✓'],['采用方案','A · 黑色组尾','✓'],['操作人 / 时间','计划员张工 · 10:42','✓']]);
+    log.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*300));
+  });
+  at(11600,()=>setSub('⟲ 循环播放中 · 急单敢插，因为有据可查'));
+  at(12800,()=>startScene(curStage));
+},
+/* ===== S4 齐套锁库 · 采购联动 ===== */
+function(){
+  const bom=mkSys(40,42,270,'BOM 展开 · MO-0611-07','物料需求',[
+    ['铜杆 Φ8','需 5.1 t','✓'],['绝缘料 PVC','需 380 kg','✓'],['护套料','需 420 kg','✓']]);
+  const stock=mkDoc(40,230,270,'WMS · 可用/冻结','锁定明细',[
+    ['铜杆 5.1t','锁定 → 本单','🔒'],['绝缘料 380kg','锁定 → 本单','🔒'],['护套料','缺 80 kg','⚠','warn']]);
+  const core=mkCore(470,90);
+  const pr=mkSys(760,60,330,'鼎捷 ERP · 采购申请','缺料联动',[
+    ['采购申请','PR-2206-118 已关联','✓'],['状态','未入库 · 预计 6/13','⚠','warn'],['提醒','已自动通知采购王工','✓']]);
+  const ph=A('ph2',`<div class="ph-head">采购王工 · 企微</div><div class="ph-scr" id="s4ps"></div>`,920,250,200);
+  popA(bom.el); popA(stock.el); popA(core.el); popA(ph);
+  at(200,()=>{ mark(0,'📦 <em>BOM 展开齐套</em>：铜杆 / 绝缘料 / 护套料');
+    bom.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),300+i*300)); });
+  at(2000,()=>{ mark(1,'🔒 <em>按工单锁库</em>，明细可查、到期自动释放');
+    stock.rows[0].classList.add('on'); stock.rows[1].classList.add('on');
+    setTimeout(()=>ringFx(90,280,'#b3552c'),400); });
+  at(3600,()=>{ mark(2,'⚔ 抢料冲突<em>按优先级裁决</em>');
+    const rob=chipAt('MO-0588 申请领用','red',430,300);
+    setTimeout(()=>{ fly(rob,150,300,650,{arc:40}); },300);
+    setTimeout(()=>{ gone(rob); chipAt('低优先级 · 拒绝+提示缺料','red',360,300); },1100); });
+  at(5400,()=>{
+    mark(3,'🛒 缺口 80kg → <em>关联鼎捷采购申请</em>，未入库自动提醒');
+    stock.rows[2].classList.add('on');
+    const red=chipAt('-80kg 护套料','red',250,300);
+    fly(red,540,170,750,{arc:60});
+    setTimeout(()=>{ gone(red); popA(pr.el); pr.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*320)); },800);
+  });
+  at(8000,()=>{
+    const al=chipAt('⚠ PR-2206-118 仍未入库','red',820,200);
+    fly(al,960,280,650,{arc:30});
+    setTimeout(()=>{ gone(al);
+      const card=document.createElement('div'); card.className='wxb';
+      card.innerHTML='<b>企微提醒</b><br>护套料 80kg · 6/13 必须入库<br>逾期将升级至主管';
+      document.getElementById('s4ps').appendChild(card); popA(card);
+    },700);
+  });
+  at(9800,()=>{ mark(4,'📨 <em>四类预警</em>推送：延期 / 物料 / 产能 / 通知到人');
+    chipAt('延期预警 · 提前3天','',420,420); chipAt('开工前24h缺料','red',600,420); chipAt('负荷>90%','',760,420); });
+  at(11400,()=>{ mark(5,'👤 人只处理<em>例外</em>：替代料确认 / 调拨拍板');
+    const av=A('avat','计',560,330); popA(av); setTimeout(()=>tapFx(582,346),500); });
+  at(13000,()=>setSub('⟲ 循环播放中 · 缺料不再等开工才发现'));
+  at(14200,()=>startScene(curStage));
+},
+/* ===== S5 损耗与边角料 ===== */
+function(){
+  const w1=mkSys(40,42,280,'拉丝工序 · 自动计量','投入 / 产出',[
+    ['投入','1,000 kg','✓'],['产出','985 kg','✓'],['损耗率','1.50%（标准 1.20%）','⚠','warn']]);
+  const w2=mkSys(40,250,280,'绞线工序 · 自动计量','投入 / 产出',[
+    ['投入','985 kg','✓'],['产出','973 kg','✓'],['损耗率','1.22% ✓','✓']]);
+  const core=mkCore(490,120);
+  const led=mkDoc(800,42,330,'废料台账 · 公斤级','按工单 · 按工序',[
+    ['拉丝 边角/废','10 / 5 kg','✓'],['绞线 边角/废','8 / 4 kg','✓'],['成缆+护套','8 / 3 kg','✓'],['合计','边角 26 · 废 12 kg','✓']]);
+  const inb=mkSys(800,280,330,'含铜废料入库 · 对接','入库记录',[
+    ['入库单 #IN-88','38 kg · 已关联工单','✓'],['关联','MO-0611-07 · 拉丝/绞线','✓']]);
+  popA(w1.el); popA(w2.el); popA(core.el);
+  at(200,()=>{ mark(0,'⚖ 工序<em>投入/产出自动计量</em>，按工单归集');
+    w1.rows[0].classList.add('on'); w1.rows[1].classList.add('on');
+    w2.rows[0].classList.add('on'); w2.rows[1].classList.add('on'); });
+  at(1800,()=>{
+    mark(1,'🧮 <em>损耗率自动核算</em>：拉丝 1.50%，超标当日预警');
+    w1.rows[2].classList.add('on'); w2.rows[2].classList.add('on');
+    setTimeout(()=>{ ringFx(180,150,'#d8503c'); stampAt('超标预警',330,90,true);
+      const tip=A('tipb','定位：7# 拉丝机 · 乙班 · 模具磨损疑似（原文：自动核算拉丝、绞线等工序加工损耗率）',330,150,240);
+      popA(tip); gone(tip,2400); },500);
+  });
+  at(4600,()=>{
+    mark(2,'📒 <em>边角料自动统计</em>入台账——账记到公斤');
+    popA(led.el);
+    dotFlow(300,120,840,100,'#d98c54',3,200);
+    dotFlow(300,320,860,130,'#e3a23c',3,260);
+    led.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),600+i*300));
+  });
+  at(7400,()=>{
+    mark(3,'📥 <em>含铜废料入库对接</em>：无来源，不入账');
+    popA(inb.el);
+    inb.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*320));
+    setTimeout(()=>ringFx(960,330,'#0f9d6e'),900);
+  });
+  at(9400,()=>{ mark(4,'📑 <em>废料台账 + 价值核算报表</em>自动生成');
+    chipAt('废料台账（周）','',500,400); chipAt('价值核算报表','green',650,400); chipAt('损耗趋势 ↓','green',800,400); });
+  at(10800,()=>{ mark(5,'👤 差异项<em>强制复核</em>：不平不结案');
+    const av=A('avat','财',520,300); popA(av); setTimeout(()=>tapFx(542,316),500); });
+  at(12400,()=>setSub('⟲ 循环播放中 · 每公斤铜都有去处'));
+  at(13600,()=>startScene(curStage));
+},
+/* ===== S6 铜流闭环成本 ===== */
+function(){
+  const eq=A('eqbig',`
+    <div class="t"><b id="e1">0</b><span>理论 kg</span></div><span class="op">=</span>
+    <div class="t"><b id="e2" style="color:#b3552c">0</b><span>实际 kg</span></div><span class="op">+</span>
+    <div class="t"><b id="e3" style="color:#e3a23c">0</b><span>边角 kg</span></div><span class="op">+</span>
+    <div class="t"><b id="e4" style="color:#0f9d6e">0</b><span>回收 kg</span></div>`,40,46,430);
+  const sell=mkSys(40,210,280,'变卖 / 回炉','回收价值',[
+    ['变卖单 #SC-0611','38 kg 含铜废料','✓'],['回收价值','¥1,860','✓']]);
+  const core=mkCore(500,160);
+  const cost=mkDoc(790,42,340,'工单成本 · MO-0611-07','实时归集',[
+    ['直接材料（铜/绝缘/护套）','¥<span id="c1">0</span>',''],
+    ['直接人工 + 制造费用','¥<span id="c2">0</span>',''],
+    ['废料回收回冲','-¥<span id="c3">0</span>','✓'],
+    ['单位成本','¥<span id="c4">0</span> / km','✓'],
+    ['vs 标准','偏差 -1.8% 达标','✓']]);
+  const erp=mkSys(790,300,340,'鼎捷 ERP · 财务','凭证接口',[
+    ['凭证','<span id="vch">待生成</span>',''],['追溯','凭证 ↔ 工单 一一对应','✓']]);
+  popA(eq); popA(sell.el); popA(core.el); popA(cost.el); popA(erp.el);
+  at(300,()=>{
+    mark(0,'⛁ 成本素材自动归集：领料 / 报工 / 能耗 / 台账');
+    cost.rows[0].classList.add('on'); countTo(document.getElementById('c1'),0,318600,'',1000);
+    setTimeout(()=>{ cost.rows[1].classList.add('on'); countTo(document.getElementById('c2'),0,46200,'',900); },500);
+  });
+  at(2200,()=>{
+    mark(1,'⚖ <em>闭环对账</em>：理论 = 实际 + 边角 + 回收');
+    countTo(document.getElementById('e1'),0,1000,'',900);
+    countTo(document.getElementById('e2'),0,962,'',900);
+    countTo(document.getElementById('e3'),0,26,'',900);
+    countTo(document.getElementById('e4'),0,12,'',900);
+    setTimeout(()=>{ stampAt('✓ 账平',360,130); ringFx(260,110,'#0f9d6e'); },1200);
+  });
+  at(4600,()=>{
+    mark(2,'💰 <em>回收价值回冲</em>：变卖 ¥1,860 扣减工单成本');
+    sell.rows.forEach((r,i)=>setTimeout(()=>r.classList.add('on'),i*300));
+    setTimeout(()=>{
+      const v=chipAt('-¥1,860 回冲','green',300,260);
+      fly(v,850,140,850,{arc:70});
+      setTimeout(()=>{ gone(v); cost.rows[2].classList.add('on'); countTo(document.getElementById('c3'),0,1860,'',700); },900);
+    },800);
+  });
+  at(7400,()=>{
+    mark(3,'📐 <em>成本计算与四类分析</em>：单位成本 = 总成本 / 完工数量');
+    cost.rows[3].classList.add('on'); countTo(document.getElementById('c4'),0,9530,'',900);
+    setTimeout(()=>cost.rows[4].classList.add('on'),900);
+    setTimeout(()=>{ chipAt('构成分析','',500,330); chipAt('偏差分析','',610,330); chipAt('趋势 ↓','green',720,330); },1100);
+  });
+  at(9800,()=>{
+    mark(4,'📤 凭证<em>自动推送鼎捷 ERP</em>');
+    const v=chipAt('📄 成本凭证','green',880,230);
+    fly(v,880,320,700,{arc:30});
+    setTimeout(()=>{ gone(v); erp.rows.forEach(r=>r.classList.add('on'));
+      document.getElementById('vch').textContent='VCH-2606-77 已生成'; },750);
+  });
+  at(11400,()=>{ mark(5,'👤 财务只看<em>标红例外</em>；这本铜账，天天是平的');
+    const av=A('avat','财',640,420); popA(av); setTimeout(()=>{ tapFx(662,436); stampAt('当日结账',720,410); },600); });
+  at(13400,()=>setSub('⟲ 循环播放中 · 理论 = 实际 + 回收'));
+  at(14600,()=>startScene(curStage));
+}
+];
+
+/* ===================== 调度 / 路由（同系列引擎） ===================== */
+function startScene(i){
+  stopScene(); clearStageDOM();
+  running=true; paused=false;
+  document.getElementById('pauseBtn').textContent='⏸ 暂停';
+  svgInit();
+  subEl=document.createElement('div'); subEl.className='cine-sub'; subEl.textContent='…';
+  cine.appendChild(subEl);
+  SCENES[i]();
+}
+function replayScene(){ startScene(curStage); }
+function togglePause(){
+  const b=document.getElementById('pauseBtn');
+  if(!paused){ stopScene(); paused=true; b.textContent='▶ 继续（重播本幕）'; }
+  else{ startScene(curStage); }
+}
+function fitCinema(){
+  const vp=document.getElementById('viewport');
+  const s=Math.min(vp.clientWidth/W,1.15);
+  cine.style.transform=`scale(${s})`;
+  vp.style.height=(H*s)+'px';
+}
+window.addEventListener('resize',fitCinema);
+let selStep=0;
+function renderFlow(d){
+  const el=document.getElementById('flowEl'); el.innerHTML='';
+  d.steps.forEach((st,i)=>{
+    const w=document.createElement('div');
+    w.className='fstep role-'+st.role;
+    w.innerHTML=`
+      <div class="fcard" id="fc-${i}" onclick="selectStep(${i},true)">
+        <span class="fno">STEP ${i+1}</span>
+        <div class="frole">${ROLE_NAME[st.role]}</div>
+        <b>${st.t}</b>
+        <div class="fio"><em>入</em> ${st.in||'—'}<br><em>出</em> ${st.out||'—'}</div>
+      </div>
+      ${st.branch?`<div class="fbranch"><b>▦ ${st.branch.t}</b>${st.branch.d}</div>`:''}`;
+    el.appendChild(w);
+    if(i<d.steps.length-1){
+      const c=document.createElement('div');
+      c.className='fconn';
+      c.innerHTML=`<svg viewBox="0 0 26 14"><line class="fdash" x1="1" y1="7" x2="18" y2="7"/><path d="M18 3 L24 7 L18 11" fill="none" stroke="var(--copper)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      el.appendChild(c);
+    }
+  });
+}
+function selectStep(i,scroll){
+  const d=D[curStage]; if(i>=d.steps.length) i=d.steps.length-1;
+  selStep=i;
+  const st=d.steps[i];
+  document.querySelectorAll('.fcard').forEach((c,k)=>c.classList.toggle('sel',k===i));
+  document.getElementById('inspector').innerHTML=`
+    <div class="ins-col c1"><h6>输入 INPUT</h6><div class="one">${st.in||'—'}</div></div>
+    <div class="ins-col c2"><h6>处理 · ${ROLE_NAME[st.role]}</h6><ul>${(st.logic||['—']).map(l=>`<li>${l}</li>`).join('')}</ul></div>
+    <div class="ins-col c3"><h6>输出 OUTPUT</h6><div class="one">${st.out||'—'}</div></div>
+    <div class="ins-col c4"><h6>守门 / 异常</h6><ul>${[...(st.rules||[]),...(st.branch?[st.branch.t+'：'+st.branch.d]:[])].map(r=>`<li>${r}</li>`).join('')||'<li>—</li>'}</ul></div>`;
+  if(scroll){
+    const card=document.getElementById('fc-'+i);
+    if(card) card.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }
+}
+function stageIdx(){
+  const m=(location.hash||'#s1').match(/s([1-6])/);
+  return m? +m[1]-1 : 0;
+}
+function renderAll(){
+  curStage=stageIdx();
+  const d=D[curStage];
+  document.title=`${d.no} ${d.title} · 需求三工程蓝图 · 江铜线缆`;
+  document.getElementById('stageTabs').innerHTML=D.map((x,i)=>`<a class="stab ${i===curStage?'on':''}" href="#s${i+1}">${x.no} ${x.name}</a>`).join('');
+  document.getElementById('crumb').innerHTML=`<a href="index.html#ledger">需求三 · 铜流账本</a> / 工程蓝图 / ${d.no} ${d.name}`;
+  document.getElementById('hNo').textContent=d.no;
+  document.getElementById('hEn').textContent=d.en;
+  document.getElementById('hTitle').textContent=d.title;
+  document.getElementById('hValue').textContent=d.value;
+  document.getElementById('hBadges').innerHTML=d.badges.map(b=>`<span class="badge">${b}</span>`).join('');
+  document.getElementById('hKpis').innerHTML=d.kpis.map(k=>`<div class="kpi2"><div class="lb">${k[0]}</div><div class="vv"><s>${k[1]}</s>→ <b>${k[2]}</b></div></div>`).join('');
+  document.getElementById('chain').innerHTML=D.map((x,i)=>`<a class="${i===curStage?'cur':''}" href="#s${i+1}"><span class="cno">${x.no}</span><span class="cnm">${x.name}</span></a>`).join('');
+  document.getElementById('chapters').innerHTML=d.steps.map((s,i)=>`<div class="chap" title="${s.t}"><span class="cdot"></span>${i+1}. ${s.t}</div>`).join('');
+  renderFlow(d);
+  selectStep(0,false);
+  document.getElementById('modsGrid').innerHTML=d.mods.map(m=>`<div class="mod-card"><b>${m[0]}</b><p>${m[1]}</p></div>`).join('');
+  document.getElementById('gateList').innerHTML=d.gates.map(g=>`<div class="gate ${g[0]==='red'?'red':''}"><span>${g[1]}</span></div>`).join('');
+  document.getElementById('cmpGrid').innerHTML=d.cmp.map(c=>`<div class="cmp-item"><div class="lb">${c[0]}</div><div class="row"><s>${c[1]}</s><span class="arr">→</span><b>${c[2]}</b></div></div>`).join('');
+  const nx=(curStage+1)%6;
+  document.getElementById('nextLink').textContent=`下一蓝图：${D[nx].no} ${D[nx].title} →`;
+  document.getElementById('nextLink').href='#s'+(nx+1);
+  fitCinema();
+  startScene(curStage);
+  window.scrollTo({top:0});
+}
+window.addEventListener('hashchange',renderAll);
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>需求三 · 铜流账本：每一公斤铜都要有去处 — 江铜线缆</title>
+<style>
+/* ============ 需求三专属视觉：紫铜×石墨 · 斜纹底 · 公斤数字锚点 ============ */
+:root{
+  --bg:#f7f6f3; --bg2:#efede8;
+  --ink:#232b36; --ink2:#5c6470; --ink3:#959ca8;
+  --line:#e6e2da; --line2:#d6d1c6;
+  --cu:#b3552c; --cu-d:#8f3f1d; --cu2:#d98c54; --cu-soft:#f9ece3;   /* 紫铜 */
+  --gr:#2a3442; --gr2:#4b5a70; --gr-soft:#eceff4;                   /* 石墨 */
+  --rec:#0f9d6e; --rec-d:#0b7a56; --rec-soft:#e3f6ee;               /* 回收绿 */
+  --red:#d8503c; --red-soft:#fdecea;
+  --amber:#e3a23c; --amber-soft:#fdf4e3;
+  --shadow:0 18px 48px rgba(42,52,66,.11);
+  --shadow-sm:0 7px 20px rgba(42,52,66,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.7; overflow-x:hidden;
+}
+/* 斜纹底（区别于网格/点阵） */
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(640px 420px at 90% -4%, rgba(179,85,44,.12), transparent 60%),
+    radial-gradient(700px 460px at -6% 16%, rgba(42,52,66,.08), transparent 60%),
+    radial-gradient(540px 380px at 52% 108%, rgba(15,157,110,.09), transparent 60%),
+    linear-gradient(180deg,#faf9f6,#f3f1ec);
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background-image:repeating-linear-gradient(45deg, rgba(42,52,66,.045) 0 1.5px, transparent 1.5px 14px);
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent 52%);
+          mask-image:linear-gradient(180deg,#000,transparent 52%);
+}
+::selection{background:rgba(179,85,44,.25)}
+
+/* ============ 导航 ============ */
+nav{
+  position:sticky; top:0; z-index:70;
+  backdrop-filter:blur(16px) saturate(1.3);
+  background:rgba(247,246,243,.84); border-bottom:1px solid rgba(42,52,66,.08);
+}
+.nav-in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:22px;padding:13px 28px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;white-space:nowrap}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;flex:none;transform:rotate(45deg);
+  background:linear-gradient(135deg,var(--cu),var(--cu2));
+  display:grid;place-items:center;box-shadow:0 5px 14px rgba(179,85,44,.35);
+}
+.brand-mark i{transform:rotate(-45deg);color:#fff;font-style:normal;font-size:12px;font-weight:900}
+.brand small{display:block;font-size:10.5px;font-weight:500;color:var(--ink3);letter-spacing:2px;line-height:1.2}
+.nav-links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{color:var(--ink2);text-decoration:none;font-size:13.5px;padding:7px 13px;border-radius:9px;transition:.2s}
+.nav-links a:hover{background:#fff;color:var(--cu);box-shadow:var(--shadow-sm)}
+.nav-links a.cross{color:var(--gr2);font-weight:700}
+
+/* ============ 通用 ============ */
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.sec-head{margin-bottom:30px}
+.sec-head .sk{
+  display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:900;letter-spacing:3px;color:var(--cu);
+  margin-bottom:10px;text-transform:uppercase;
+}
+.sec-head .sk::before{content:"";width:26px;height:8px;background:repeating-linear-gradient(45deg,var(--cu) 0 3px,transparent 3px 6px)}
+.sec-head h2{font-size:31px;font-weight:900;letter-spacing:.5px}
+.sec-head p{color:var(--ink2);font-size:14px;margin-top:8px;max-width:840px}
+.btn{
+  border:none;cursor:pointer;font-size:13.5px;font-weight:800;border-radius:11px;padding:11px 22px;transition:.25s;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;text-decoration:none;
+}
+.btn-cu{color:#fff;background:linear-gradient(120deg,var(--cu),var(--cu2));box-shadow:0 10px 26px rgba(179,85,44,.35)}
+.btn-cu:hover{transform:translateY(-2px)}
+.btn-gr{color:#fff;background:var(--gr);box-shadow:0 10px 26px rgba(42,52,66,.3)}
+.btn-gr:hover{transform:translateY(-2px)}
+.btn-ghost{color:var(--ink2);background:#fff;border:1.5px solid var(--line)}
+.btn-ghost:hover{color:var(--cu);border-color:#ecd4c4}
+.blu-link{
+  display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;text-decoration:none;
+  color:var(--ink2);border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 15px;transition:.2s;
+}
+.blu-link:hover{color:var(--cu);border-color:#ecd4c4;transform:translateX(2px)}
+
+/* ============ Hero ============ */
+.hero{padding:72px 0 30px}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center}
+.kicker{
+  display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:var(--ink2);
+  border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;margin-bottom:20px;
+  box-shadow:var(--shadow-sm);
+}
+.kicker i{font-style:normal;color:var(--cu)}
+h1{
+  font-size:50px;line-height:1.22;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(105deg,var(--gr) 14%,var(--cu) 62%,var(--cu2) 96%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{font-size:15.5px;color:var(--ink2);margin:18px 0 26px;max-width:560px}
+.hero-sub b{color:var(--ink)}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+/* 等式英雄牌 */
+.eq-hero{
+  background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
+  padding:26px 28px;position:relative;overflow:hidden;
+}
+.eq-hero::before{
+  content:"需求三原文";position:absolute;top:14px;right:-34px;transform:rotate(35deg);
+  font-size:10px;font-weight:900;letter-spacing:2px;color:#fff;background:var(--cu);padding:4px 42px;
+}
+.eq-hero .eq-cap{font-size:11px;font-weight:900;letter-spacing:2.5px;color:var(--ink3);margin-bottom:14px}
+.eq-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.eq-term{text-align:center}
+.eq-term b{font-size:40px;font-weight:900;display:block;line-height:1.15;font-variant-numeric:tabular-nums}
+.eq-term span{font-size:11px;color:var(--ink2);font-weight:700}
+.eq-term.t1 b{color:var(--gr)}
+.eq-term.t2 b{color:var(--cu)}
+.eq-term.t3 b{color:var(--amber)}
+.eq-term.t4 b{color:var(--rec)}
+.eq-op{font-size:30px;font-weight:900;color:var(--ink3)}
+.eq-foot{
+  margin-top:16px;border-top:1px dashed var(--line);padding-top:13px;font-size:12.5px;color:var(--ink2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.eq-ok{
+  font-size:12px;font-weight:900;color:var(--rec);border:2.5px solid var(--rec);border-radius:9px;padding:3px 12px;
+  transform:rotate(-6deg);letter-spacing:2px;background:rgba(255,255,255,.8);
+}
+/* 痛点 */
+.pains{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:42px}
+.pain{
+  background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px 17px;box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;
+}
+.pain::before{content:"";position:absolute;left:0;top:0;height:100%;width:4px;background:repeating-linear-gradient(45deg,var(--red) 0 5px,#f0a99e 5px 10px)}
+.pain .src{font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:5px}
+.pain b{font-size:14.5px;display:block;margin-bottom:4px}
+.pain p{font-size:12px;color:var(--ink2)}
+.pain .fix{
+  margin-top:9px;display:inline-flex;font-size:11.5px;font-weight:800;
+  color:var(--rec-d);background:var(--rec-soft);border-radius:7px;padding:3px 9px;
+}
+
+/* ============ A · 铜流账本（桑基） ============ */
+.ledger-card{
+  background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);
+  padding:26px 28px 20px;
+}
+.ledger-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.ledger-top .lg{display:flex;gap:16px;margin-left:auto;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.ledger-top .lg i{display:inline-flex;align-items:center;gap:6px;font-style:normal}
+.swl{width:18px;height:8px;border-radius:4px}
+.sankey-wrap{overflow-x:auto;padding-bottom:4px}
+.sankey-wrap::-webkit-scrollbar{height:8px}
+.sankey-wrap::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+#sankey{min-width:1120px;display:block}
+.snode{cursor:pointer}
+.snode rect{transition:.25s}
+.snode:hover rect{filter:brightness(1.06)}
+.snode.sel rect{stroke:var(--cu);stroke-width:3}
+.sk-label{font-size:13px;font-weight:800;fill:var(--ink)}
+.sk-sub{font-size:10.5px;fill:var(--ink3);font-weight:600}
+.sk-kg{font-size:16px;font-weight:900;fill:var(--cu-d)}
+.flow-main{fill:none;stroke:url(#cuGrad);stroke-linecap:round;opacity:.92}
+.flow-dash{fill:none;stroke:rgba(255,255,255,.65);stroke-dasharray:3 14;stroke-linecap:round;animation:fdash 1.3s linear infinite}
+@keyframes fdash{to{stroke-dashoffset:-17}}
+.flow-loss{fill:none;stroke:#d98c54;opacity:.65;stroke-linecap:round}
+.flow-scrap{fill:none;stroke:#e3a23c;opacity:.6;stroke-linecap:round}
+.flow-back{fill:none;stroke:var(--rec);opacity:.8;stroke-dasharray:7 7;animation:fdash 1.1s linear infinite reverse;stroke-linecap:round}
+.flow-main,.flow-loss,.flow-scrap{stroke-dasharray:1400;stroke-dashoffset:1400}
+.flow-dash{opacity:0;transition:opacity .6s}
+#sankey.on .flow-dash{opacity:1}
+.draw{stroke-dasharray:1400;stroke-dashoffset:1400;animation:drawin 1.4s ease forwards}
+@keyframes drawin{to{stroke-dashoffset:0}}
+/* 工序详情卡 */
+.node-info{
+  margin-top:14px;border-top:1px dashed var(--line);padding-top:16px;
+  display:grid;grid-template-columns:1.1fr .9fr 1fr;gap:14px;align-items:stretch;
+}
+.ni-box{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px 17px}
+.ni-box h6{font-size:11px;font-weight:900;letter-spacing:2px;margin-bottom:9px;color:var(--cu)}
+.ni-box h6.g{color:var(--rec-d)}
+.ni-box h6.k{color:var(--gr2)}
+.ni-row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2);padding:4px 0;border-bottom:1px dashed var(--line)}
+.ni-row:last-child{border-bottom:none}
+.ni-row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ni-row .hot{color:var(--red);font-weight:800}
+.ni-row .okk{color:var(--rec);font-weight:800}
+.ni-quote{font-size:11.5px;color:var(--ink3);line-height:1.7;border-left:3px solid var(--cu2);padding-left:10px;margin-top:4px}
+
+/* ============ B · 色谱排产台 ============ */
+.spec-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:26px 28px 22px}
+.spec-toolbar{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.spec-stats{margin-left:auto;display:flex;gap:9px;flex-wrap:wrap}
+.sstat{
+  font-size:12px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 13px;color:var(--ink2);
+}
+.sstat b{font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+.sstat.good b{color:var(--rec)}
+.spec-track-label{font-size:11.5px;font-weight:800;color:var(--ink3);letter-spacing:1px;margin:12px 0 7px;display:flex;gap:10px;align-items:center}
+.spec-track-label em{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:600}
+.spec-track{
+  position:relative;height:54px;background:var(--bg2);border:1px solid var(--line);border-radius:13px;overflow:hidden;
+  background-image:repeating-linear-gradient(90deg,transparent 0 59px,rgba(42,52,66,.06) 59px 60px);
+}
+.cblk{
+  position:absolute;top:7px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);
+  transition:left .9s cubic-bezier(.5,.1,.2,1),width .9s;box-shadow:0 5px 12px rgba(42,52,66,.18);
+  white-space:nowrap;overflow:hidden;
+}
+.cblk .lockic{position:absolute;top:2px;right:4px;font-size:9px}
+.cblk.urgent{outline:3px solid rgba(216,80,60,.5);outline-offset:2px}
+.cwedge{
+  position:absolute;top:7px;height:40px;width:12px;border-radius:4px;
+  background:repeating-linear-gradient(135deg,#3a4452 0 4px,#5a6678 4px 8px);
+  transition:left .9s cubic-bezier(.5,.1,.2,1),opacity .6s;
+}
+.spec-note{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;font-size:12.3px;color:var(--ink2);align-items:center}
+.spec-note .tagq{
+  font-size:11.5px;color:var(--ink3);border-left:3px solid var(--cu2);padding-left:10px;max-width:520px;line-height:1.65;
+}
+.log-chip{
+  font-size:11.5px;font-weight:800;color:var(--gr2);background:var(--gr-soft);border:1px solid #d9dfe8;
+  border-radius:8px;padding:4px 11px;opacity:0;transform:translateY(6px);transition:.4s;
+}
+.log-chip.show{opacity:1;transform:none}
+
+/* ============ C · 无纸化工单 ============ */
+.paper-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:26px 28px;display:grid;grid-template-columns:.95fr 1.05fr;gap:30px;align-items:center}
+.paper-stage{position:relative;height:240px;border:1px dashed var(--line2);border-radius:18px;background:var(--bg);overflow:hidden}
+.pp{
+  position:absolute;width:120px;background:#fff;border:1px solid var(--line2);border-radius:6px;padding:9px 11px;
+  font-size:10px;color:var(--ink2);box-shadow:var(--shadow-sm);line-height:1.6;
+}
+.pp b{display:block;font-size:11px;color:var(--ink)}
+.pp.fly{animation:papergo 3.6s ease-in-out infinite}
+.pp.fly2{animation:papergo 3.6s ease-in-out infinite 1.2s}
+@keyframes papergo{
+  0%,28%{transform:translate(0,0) rotate(0);opacity:1}
+  60%{transform:translate(150px,-60px) rotate(18deg);opacity:.5}
+  78%,100%{transform:translate(260px,-120px) rotate(32deg);opacity:0}
+}
+.pp-x{
+  position:absolute;left:24px;top:16px;font-size:11px;font-weight:900;color:var(--red);letter-spacing:1.5px;
+  background:var(--red-soft);border:1px solid #f3c4bb;border-radius:7px;padding:3px 10px;
+}
+.eterm{
+  position:absolute;right:18px;bottom:18px;width:210px;background:var(--gr);border-radius:14px;padding:10px 13px;color:#cfd8e6;
+  box-shadow:0 14px 30px rgba(42,52,66,.35);
+}
+.eterm .eh{font-size:10.5px;font-weight:800;letter-spacing:1px;display:flex;justify-content:space-between;color:#fff}
+.eterm .eh i{font-style:normal;color:#5fd3ab;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.eterm .erow{font-size:10px;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.12);display:flex;justify-content:space-between}
+.eterm .erow b{color:#fff}
+.paper-copy h3{font-size:24px;font-weight:900;margin-bottom:10px}
+.paper-copy p{font-size:13.5px;color:var(--ink2);margin-bottom:14px}
+.wo-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+.wo-chips i{
+  font-style:normal;font-size:11.8px;font-weight:700;border-radius:9px;padding:5px 12px;
+  background:var(--bg);border:1px solid var(--line);color:var(--ink2);
+}
+.wo-chips i.hl{background:var(--cu-soft);border-color:#ecd4c4;color:var(--cu-d)}
+
+/* ============ 覆盖账本 ============ */
+.cov-card{background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
+.cov-stats{display:flex;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfaf8,#f5f3ee)}
+.cv{flex:1;padding:18px 24px;border-right:1px solid var(--line)}
+.cv:last-child{border-right:none}
+.cv b{font-size:24px;font-weight:900;display:block}
+.cv b.c1{color:var(--cu)} .cv b.c2{color:var(--gr2)} .cv b.c3{color:var(--rec)}
+.cv span{font-size:11.8px;color:var(--ink2)}
+.cov-body{padding:10px 28px 22px;columns:2;column-gap:46px}
+.cov-sec{break-inside:avoid;padding-top:16px}
+.cov-sec h5{
+  font-size:12px;font-weight:900;letter-spacing:2px;margin-bottom:6px;display:flex;align-items:center;gap:8px;
+}
+.cov-sec.p1 h5{color:var(--cu)} .cov-sec.p2 h5{color:var(--rec-d)}
+.cov-row{
+  display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink);padding:7px 2px;cursor:pointer;
+  border-radius:8px;transition:.18s;
+}
+.cov-row:hover{background:var(--bg)}
+.cov-row .dots{flex:1;border-bottom:2px dotted var(--line2);transform:translateY(-4px)}
+.cov-row .cnt{font-weight:900;font-variant-numeric:tabular-nums;color:var(--cu-d)}
+.cov-row .where{
+  font-size:10.5px;font-weight:800;color:var(--gr2);background:var(--gr-soft);border-radius:6px;padding:1.5px 8px;white-space:nowrap;
+}
+
+/* ============ 对比 & 落地 ============ */
+.led-cmp{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.lc{
+  background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px 20px;box-shadow:var(--shadow-sm);text-align:center;
+}
+.lc .lb{font-size:11.5px;font-weight:800;letter-spacing:1.5px;color:var(--ink3);margin-bottom:9px}
+.lc s{color:var(--red);font-size:13px;display:block}
+.lc .ar{color:var(--ink3);font-size:13px;margin:2px 0}
+.lc b{font-size:17px;font-weight:900;color:var(--rec)}
+.steps3{display:flex;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.step3{flex:1;padding:24px 26px}
+.step3+.step3{border-left:1px dashed var(--line)}
+.step3 .sn{font-size:11px;font-weight:900;letter-spacing:2px;display:inline-block;border-radius:7px;padding:3px 11px;margin-bottom:9px}
+.step3:nth-child(1) .sn{color:var(--gr2);background:var(--gr-soft)}
+.step3:nth-child(2) .sn{color:var(--cu-d);background:var(--cu-soft)}
+.step3:nth-child(3) .sn{color:var(--rec-d);background:var(--rec-soft)}
+.step3 b{font-size:16px;display:block;margin-bottom:7px}
+.step3 div{font-size:12.5px;color:var(--ink2);padding:3.5px 0 3.5px 17px;position:relative}
+.step3 div::before{content:"✓";position:absolute;left:0;color:var(--rec);font-weight:900;font-size:11px}
+
+section{padding:58px 0 16px}
+footer{padding:46px 0 40px;border-top:1px solid var(--line);margin-top:66px}
+.foot-in{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--ink3);font-size:12.5px}
+.foot-in a{color:var(--cu);text-decoration:none;font-weight:700}
+
+@media (max-width:1080px){
+  h1{font-size:36px}
+  .hero-grid{grid-template-columns:1fr}
+  .pains{grid-template-columns:1fr 1fr}
+  .paper-card{grid-template-columns:1fr}
+  .cov-body{columns:1}
+  .led-cmp{grid-template-columns:1fr 1fr}
+  .steps3{flex-direction:column}
+  .step3+.step3{border-left:none;border-top:1px dashed var(--line)}
+  .node-info{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  h1{font-size:29px}
+  .pains,.led-cmp{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .eq-term b{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 导航 ================= -->
+<nav>
+  <div class="nav-in">
+    <div class="brand">
+      <div class="brand-mark"><i>Cu</i></div>
+      <div>江铜线缆 · 需求三<small>COPPER&nbsp;LEDGER&nbsp;·&nbsp;铜流账本</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="#ledger">铜流账本</a>
+      <a href="#spectrum">色谱排产台</a>
+      <a href="#paperless">无纸工单</a>
+      <a href="#coverage">需求覆盖</a>
+      <a href="#road">落地路径</a>
+      <a class="cross" href="../req1/index.html">需求一 ↗</a>
+      <a class="cross" href="../req2/index.html">需求二 ↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= Hero ================= -->
+<header class="hero wrap">
+  <div class="hero-grid">
+    <div class="reveal">
+      <div class="kicker">需求三 · 计划排产管理 + 成本核算管理 <i>—— 31 条需求 · 底座：鼎捷 ERP</i></div>
+      <h1>每一公斤铜，<br>都要有去处</h1>
+      <p class="hero-sub">
+        线缆厂的成本，就是铜的成本。需求一跟着<b>流程</b>走，需求二跟着<b>订单</b>走，
+        需求三——我们跟着<b>物料</b>走：排产时「<b>少换色、敢插单</b>」，
+        核算时「<b>理论用量 = 实际消耗 + 废料回收</b>」。
+        一本铜流账，从拉丝记到凭证。
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-cu" href="#ledger">⚖ 翻开铜流账本</a>
+        <a class="btn btn-gr" href="#spectrum">🎨 看换色聚类排产</a>
+      </div>
+    </div>
+    <div class="eq-hero reveal">
+      <div class="eq-cap">闭环核算等式 · 实时记账（示意：本周拉丝-绞线-成缆-护套线投料）</div>
+      <div class="eq-line">
+        <div class="eq-term t1"><b id="eqA">0</b><span>理论用量 kg</span></div>
+        <span class="eq-op">=</span>
+        <div class="eq-term t2"><b id="eqB">0</b><span>实际消耗 kg</span></div>
+        <span class="eq-op">+</span>
+        <div class="eq-term t3"><b id="eqC">0</b><span>边角料 kg</span></div>
+        <span class="eq-op">+</span>
+        <div class="eq-term t4"><b id="eqD">0</b><span>废料回收 kg</span></div>
+      </div>
+      <div class="eq-foot">
+        <span class="eq-ok" id="eqOK" style="opacity:0">✓ 账平</span>
+        <span>边角料与废料关联入库 / 变卖记录，价值<b style="color:var(--rec)">回冲工单成本</b>——糊涂账，从此清零。</span>
+      </div>
+    </div>
+  </div>
+  <div class="pains reveal">
+    <div class="pain"><div class="src">需求三 · 痛点 01</div><b>纸质派工单</b><p>打印、传递、丢单，超单生产库存对不上</p><span class="fix">→ 鼎捷直连 · 电子工单 · 超单自动扣减</span></div>
+    <div class="pain"><div class="src">需求三 · 痛点 02</div><b>换色换规格损时</b><p>线缆颜色/规格穿插生产，一天换色十几次</p><span class="fix">→ AI 聚类排产 · 换色时间最小化</span></div>
+    <div class="pain"><div class="src">需求三 · 痛点 03</div><b>急单不敢插</b><p>怕动全局、怕挤掉关键交期订单</p><span class="fix">→ 自动评估四要素 · 锁定单不动 · 留痕溯源</span></div>
+    <div class="pain"><div class="src">需求三 · 痛点 04</div><b>边角料糊涂账</b><p>拉丝绞线损耗、含铜废料去向无人说得清</p><span class="fix">→ 公斤级闭环核算 · 变卖价值回冲</span></div>
+  </div>
+</header>
+
+<!-- ================= A · 铜流账本 ================= -->
+<section id="ledger" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">COPPER LEDGER · 核心一</div>
+    <h2>铜流账本：1,000kg 铜杆的去向，一张图记清</h2>
+    <p>对应需求三原文「铜材与边角料闭环核算」：自动核算拉丝、绞线等工序加工损耗率，对接含铜废料入库与变卖记录，分摊扣减工单成本。点击任一工序节点，看它的损耗账。</p>
+  </div>
+  <div class="ledger-card reveal">
+    <div class="ledger-top">
+      <button class="btn btn-cu" onclick="runLedger()" id="ledgerBtn">▶ 投料 1,000kg · 开始记账</button>
+      <div class="lg">
+        <i><span class="swl" style="background:linear-gradient(90deg,#b3552c,#d98c54)"></span>主流（铜）</i>
+        <i><span class="swl" style="background:#d98c54;opacity:.65"></span>边角料</i>
+        <i><span class="swl" style="background:#e3a23c;opacity:.7"></span>废料</i>
+        <i><span class="swl" style="background:#0f9d6e"></span>价值回冲</i>
+      </div>
+    </div>
+    <div class="sankey-wrap">
+      <svg id="sankey" viewBox="0 0 1120 432" width="100%">
+        <defs>
+          <linearGradient id="cuGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8f3f1d"/><stop offset="1" stop-color="#d98c54"/>
+          </linearGradient>
+        </defs>
+        <!-- 主流分段（粗细随损耗递减） -->
+        <path class="flow-main" id="fm0" stroke-width="40" d="M128 150 H196"/>
+        <path class="flow-main" id="fm1" stroke-width="38" d="M306 150 H368"/>
+        <path class="flow-main" id="fm2" stroke-width="37" d="M478 150 H540"/>
+        <path class="flow-main" id="fm3" stroke-width="36" d="M650 150 H712"/>
+        <path class="flow-main" id="fm4" stroke-width="35" d="M822 150 H884"/>
+        <path class="flow-dash" stroke-width="40" d="M128 150 H196"/>
+        <path class="flow-dash" stroke-width="38" d="M306 150 H368"/>
+        <path class="flow-dash" stroke-width="37" d="M478 150 H540"/>
+        <path class="flow-dash" stroke-width="36" d="M650 150 H712"/>
+        <path class="flow-dash" stroke-width="35" d="M822 150 H884"/>
+        <!-- 损耗支流：工序 → 台账 -->
+        <path class="flow-loss"  id="ls0" stroke-width="9" d="M251 190 C251 260 380 300 470 308"/>
+        <path class="flow-scrap" id="sc0" stroke-width="5" d="M263 190 C263 270 392 312 470 318"/>
+        <path class="flow-loss"  id="ls1" stroke-width="7" d="M423 190 C423 252 462 290 488 300"/>
+        <path class="flow-scrap" id="sc1" stroke-width="4" d="M435 190 C435 260 474 300 492 308"/>
+        <path class="flow-loss"  id="ls2" stroke-width="6" d="M595 190 C595 250 580 282 568 296"/>
+        <path class="flow-scrap" id="sc2" stroke-width="3.5" d="M607 190 C607 256 592 290 578 302"/>
+        <path class="flow-loss"  id="ls3" stroke-width="5" d="M767 190 C767 258 690 296 646 306"/>
+        <path class="flow-scrap" id="sc3" stroke-width="3" d="M779 190 C779 266 700 306 650 314"/>
+        <!-- 台账 → 变卖 → 回冲 -->
+        <path class="flow-back" id="fb0" stroke-width="6" d="M666 330 H734" style="opacity:0"/>
+        <path class="flow-back" id="fb1" stroke-width="6" d="M898 330 C962 330 990 268 996 212" style="opacity:0"/>
+        <!-- 节点 -->
+        <g class="snode" id="nd-in" onclick="selNode('in')">
+          <rect x="18" y="112" width="110" height="76" rx="14" fill="#2a3442"/>
+          <text class="sk-label" x="73" y="142" text-anchor="middle" fill="#fff">铜杆入库</text>
+          <text class="sk-kg" x="73" y="168" text-anchor="middle" fill="#f3c9ae" id="kg-in">0 kg</text>
+        </g>
+        <g class="snode" id="nd-0" onclick="selNode(0)">
+          <rect x="196" y="108" width="110" height="84" rx="14" fill="#f9ece3" stroke="#ecd4c4" stroke-width="1.5"/>
+          <text class="sk-label" x="251" y="134" text-anchor="middle">拉丝</text>
+          <text class="sk-sub" x="251" y="151" text-anchor="middle">损耗率自动核算</text>
+          <text class="sk-kg" x="251" y="176" text-anchor="middle" id="kg-0">—</text>
+        </g>
+        <g class="snode" id="nd-1" onclick="selNode(1)">
+          <rect x="368" y="108" width="110" height="84" rx="14" fill="#f9ece3" stroke="#ecd4c4" stroke-width="1.5"/>
+          <text class="sk-label" x="423" y="134" text-anchor="middle">绞线</text>
+          <text class="sk-sub" x="423" y="151" text-anchor="middle">损耗率自动核算</text>
+          <text class="sk-kg" x="423" y="176" text-anchor="middle" id="kg-1">—</text>
+        </g>
+        <g class="snode" id="nd-2" onclick="selNode(2)">
+          <rect x="540" y="108" width="110" height="84" rx="14" fill="#f9ece3" stroke="#ecd4c4" stroke-width="1.5"/>
+          <text class="sk-label" x="595" y="134" text-anchor="middle">绝缘 · 成缆</text>
+          <text class="sk-sub" x="595" y="151" text-anchor="middle">边角料统计</text>
+          <text class="sk-kg" x="595" y="176" text-anchor="middle" id="kg-2">—</text>
+        </g>
+        <g class="snode" id="nd-3" onclick="selNode(3)">
+          <rect x="712" y="108" width="110" height="84" rx="14" fill="#f9ece3" stroke="#ecd4c4" stroke-width="1.5"/>
+          <text class="sk-label" x="767" y="134" text-anchor="middle">护套</text>
+          <text class="sk-sub" x="767" y="151" text-anchor="middle">边角料统计</text>
+          <text class="sk-kg" x="767" y="176" text-anchor="middle" id="kg-3">—</text>
+        </g>
+        <g class="snode" id="nd-out" onclick="selNode('out')">
+          <rect x="884" y="104" width="128" height="92" rx="14" fill="#0f9d6e"/>
+          <text class="sk-label" x="948" y="134" text-anchor="middle" fill="#fff">成品入库</text>
+          <text class="sk-kg" x="948" y="162" text-anchor="middle" fill="#eafff6" id="kg-out">0 kg</text>
+          <text class="sk-sub" x="948" y="182" text-anchor="middle" fill="#bdf2dd">实际消耗</text>
+        </g>
+        <g class="snode" id="nd-led" onclick="selNode('led')">
+          <rect x="470" y="296" width="196" height="86" rx="14" fill="#fff" stroke="#ecd4c4" stroke-width="2"/>
+          <text class="sk-label" x="568" y="320" text-anchor="middle">废料台账（公斤级）</text>
+          <text class="sk-sub" x="568" y="340" text-anchor="middle">边角料 <tspan id="kg-edge" font-weight="900" fill="#b3552c">0</tspan> kg · 废料 <tspan id="kg-scrap" font-weight="900" fill="#b07a14">0</tspan> kg</text>
+          <text class="sk-sub" x="568" y="360" text-anchor="middle">按工单 · 按工序 关联入库记录</text>
+        </g>
+        <g class="snode" id="nd-sell" onclick="selNode('sell')">
+          <rect x="734" y="300" width="164" height="60" rx="14" fill="#e3f6ee" stroke="#bfe9d6" stroke-width="1.5"/>
+          <text class="sk-label" x="816" y="325" text-anchor="middle">变卖 / 回炉</text>
+          <text class="sk-sub" x="816" y="344" text-anchor="middle">回收价值 ¥<tspan id="kg-val" font-weight="900" fill="#0b7a56">0</tspan></text>
+        </g>
+        <text class="sk-sub" x="1010" y="240" text-anchor="middle" fill="#0b7a56" font-weight="800" id="backLab" style="opacity:0">价值回冲工单成本 ↑</text>
+      </svg>
+    </div>
+    <div class="node-info" id="nodeInfo"></div>
+  </div>
+</section>
+
+<!-- ================= B · 色谱排产台 ================= -->
+<section id="spectrum" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">COLOR SCHEDULER · 核心二</div>
+    <h2>色谱排产台：把换色次数，排没了</h2>
+    <p>对应需求三原文「利用 AI 算法进行基于约束条件的 APS 高级排程，支持<b>最小化换色 / 换规格时间的自动聚类排产</b>；支持紧急订单临时插单……不影响已锁定关键交期订单，保留插单日志与溯源」。</p>
+  </div>
+  <div class="spec-card reveal">
+    <div class="spec-toolbar">
+      <button class="btn btn-cu" id="clusterBtn" onclick="doCluster()">🎨 AI 聚类排产</button>
+      <button class="btn btn-gr" id="urgentBtn" onclick="doUrgent()">⚡ 插入紧急订单</button>
+      <button class="btn btn-ghost" onclick="resetSpec()">↺ 复位</button>
+      <div class="spec-stats">
+        <span class="sstat">今日换色 <b id="swCnt">11 次</b></span>
+        <span class="sstat">换色损时 <b id="swLoss">5.5 h</b></span>
+        <span class="sstat" id="saveStat" style="display:none">节省 <b class="good" id="swSave">3.5 h</b></span>
+      </div>
+    </div>
+    <div class="spec-track-label">L1 · 绝缘挤出线 <em>色块 = 线缆颜色批次 · 深纹楔 = 一次换色清机</em></div>
+    <div class="spec-track" id="trk1"></div>
+    <div class="spec-track-label">L2 · 护套挤出线 <em>🔒 = 已锁定关键交期订单（插单不可挤占）</em></div>
+    <div class="spec-track" id="trk2"></div>
+    <div class="spec-note">
+      <span class="log-chip" id="logChip">📜 插单日志 #L-0611-02 已留痕：评估在制 / 负荷 / 齐套 / 模具 → 方案 B · 可溯源</span>
+      <span class="tagq">同理可按「规格」聚类（截面/芯数）；增量排产只重算受影响色段；排产模拟可直接得出预计订单交期。</span>
+      <a class="blu-link" style="margin-left:auto" href="stage.html#s2">⚙ 工程蓝图：聚类排产 →</a>
+      <a class="blu-link" href="stage.html#s3">⚙ 工程蓝图：紧急插单 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= C · 无纸化工单 ================= -->
+<section id="paperless" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">PAPERLESS · 工单数字化</div>
+    <h2>纸质派工单，今天退役</h2>
+  </div>
+  <div class="paper-card reveal">
+    <div class="paper-stage">
+      <span class="pp-x">✕ 取消纸质派工单</span>
+      <div class="pp fly" style="left:30px;top:60px"><b>派工单 #0381（纸）</b>打印 → 传递 → 签字<br>丢单 / 难追溯</div>
+      <div class="pp fly2" style="left:55px;top:130px"><b>派工单 #0382（纸）</b>车间转交中…</div>
+      <div class="eterm">
+        <div class="eh">鼎捷 ERP → 机台电子工单 <i>●在线</i></div>
+        <div class="erow"><span>MO-0611-07 · 红色 BV2.5</span><b>已接收</b></div>
+        <div class="erow"><span>MO-0611-08 · 样品单</span><b>BOM 到工序级</b></div>
+        <div class="erow"><span>成品超单 +120m</span><b>库存自动扣减 ✓</b></div>
+      </div>
+    </div>
+    <div class="paper-copy">
+      <h3>鼎捷 ERP 直连，工单全生命周期在线</h3>
+      <p>工单自动获取、完整性校验、变更记日志并触发重排产、按数量或工序拆分合并——以及线缆厂特有的三件事：<b>样品工单 BOM 细化至工序级</b>（减少人工录入）、<b>返工工单</b>独立管理、<b>超单生产自动扣减成品/半成品库存</b>。</p>
+      <div class="wo-chips">
+        <i class="hl">鼎捷 ERP 自动获取</i><i class="hl">取消纸质派工单</i><i class="hl">超单库存自动扣减</i>
+        <i>手工 / Excel 兜底</i><i>变更日志 → 触发重排</i><i>拆分 / 合并</i>
+        <i class="hl">样品工单 · BOM 工序级</i><i class="hl">返工工单</i><i>自动 / 手工关闭</i>
+      </div>
+      <a class="blu-link" href="stage.html#s1">⚙ 工程蓝图：工单数字化全流程 →</a>
+      <a class="blu-link" href="stage.html#s4">⚙ 工程蓝图：齐套锁库 · 采购联动 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 覆盖账本 ================= -->
+<section id="coverage" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">COVERAGE · 需求对账</div>
+    <h2>31 条需求，账账有着落</h2>
+    <p>需求三原文逐模块对账（点击任意行，直达对应工程蓝图）。</p>
+  </div>
+  <div class="cov-card reveal">
+    <div class="cov-stats">
+      <div class="cv"><b class="c1">22 条</b><span>计划排产管理（含换色聚类 · 紧急插单）</span></div>
+      <div class="cv"><b class="c3">9 条</b><span>成本核算管理（含铜材边角料闭环）</span></div>
+      <div class="cv"><b class="c2">31 / 31</b><span>全覆盖 · 落位 6 个工程蓝图</span></div>
+      <div class="cv"><b class="c1">鼎捷 ERP</b><span>工单来源 + 凭证出口 · 保留利旧</span></div>
+    </div>
+    <div class="cov-body" id="covBody"></div>
+  </div>
+</section>
+
+<!-- ================= 对比 ================= -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">BEFORE → AFTER</div>
+    <h2>账本翻新前后</h2>
+  </div>
+  <div class="led-cmp reveal">
+    <div class="lc"><div class="lb">换色损时 / 日</div><s>≈ 5.5 小时（11 次）</s><div class="ar">↓</div><b>≈ 2.0 小时（4 次）</b></div>
+    <div class="lc"><div class="lb">紧急插单评估</div><s>半天 · 拍脑袋 · 怕动全局</s><div class="ar">↓</div><b>分钟级 · 四要素自动评估</b></div>
+    <div class="lc"><div class="lb">派工方式</div><s>纸质单 · 丢单难追溯</s><div class="ar">↓</div><b>电子工单 · 全程留痕</b></div>
+    <div class="lc"><div class="lb">铜与边角料</div><s>糊涂账 · 损耗说不清</s><div class="ar">↓</div><b>公斤级闭环 · 价值回冲成本</b></div>
+  </div>
+</section>
+
+<!-- ================= 落地 ================= -->
+<section id="road" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sk">ROADMAP</div>
+    <h2>三步翻新这本账</h2>
+  </div>
+  <div class="steps3 reveal">
+    <div class="step3">
+      <span class="sn">P1 · 第 1–4 周</span><b>接鼎捷 · 去纸化</b>
+      <div>鼎捷 ERP 工单 / 库存 / 采购申请接口打通</div>
+      <div>取消纸质派工单，机台电子工单上线</div>
+      <div>样品 / 返工工单模板，超单自动扣减</div>
+      <div>模具 / 颜色 / 规格基础数据梳理</div>
+    </div>
+    <div class="step3">
+      <span class="sn">P2 · 第 5–10 周</span><b>聚类排产 · 敢插单</b>
+      <div>换色 / 换规格最小化的 AI 聚类排产</div>
+      <div>紧急插单四要素评估 · 锁定单保护 · 日志溯源</div>
+      <div>齐套锁库 + 采购申请未入库自动提醒</div>
+      <div>负荷甘特 · 拖拽冲突提示 · 模拟出交期</div>
+    </div>
+    <div class="step3">
+      <span class="sn">P3 · 第 11 周起</span><b>铜流闭环 · 账平</b>
+      <div>拉丝 / 绞线损耗率自动核算</div>
+      <div>边角料 / 废料台账，关联入库与变卖</div>
+      <div>回收价值分摊扣减工单成本</div>
+      <div>成本凭证自动推送鼎捷 ERP · 报表体系</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>江铜线缆 · 需求三 — 铜流账本（演示数据均为示意）</div>
+    <div><a href="../req1/index.html">需求一 →</a>　<a href="../req2/index.html">需求二 →</a>　<a href="stage.html#s1">工程蓝图 →</a></div>
+  </div>
+</footer>
+
+<script>
+/* ===================== 铜流账本 ===================== */
+const FLOW={in:1000, after:[985,973,966,962], edge:[10,8,5,3], scrap:[5,4,2,1], val:1860};
+let ledgerTimers=[];
+function lt(t,fn){ ledgerTimers.push(setTimeout(fn,t)); }
+function cnt(el,from,to,suffix='',ms=900){
+  const t0=performance.now();
+  (function f(t){ const k=Math.min((t-t0)/ms,1);
+    el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3))).toLocaleString()+suffix;
+    if(k<1) requestAnimationFrame(f);
+  })(t0);
+}
+function runLedger(){
+  ledgerTimers.forEach(clearTimeout); ledgerTimers=[];
+  document.getElementById('sankey').classList.add('on');
+  /* 重置 */
+  ['fm0','fm1','fm2','fm3','fm4','ls0','ls1','ls2','ls3','sc0','sc1','sc2','sc3'].forEach(id=>{
+    const p=document.getElementById(id); p.classList.remove('draw'); void p.getBoundingClientRect();
+  });
+  document.getElementById('fb0').style.opacity='0';
+  document.getElementById('fb1').style.opacity='0';
+  document.getElementById('backLab').style.opacity='0';
+  document.getElementById('eqOK').style.opacity='0';
+  document.getElementById('kg-in').textContent='0 kg';
+  document.getElementById('kg-out').textContent='0 kg';
+  [0,1,2,3].forEach(i=>document.getElementById('kg-'+i).textContent='—');
+  /* 投料 */
+  cnt(document.getElementById('kg-in'),0,1000,' kg',700);
+  cnt(document.getElementById('eqA'),0,1000,'',900);
+  let t=350;
+  [0,1,2,3].forEach(i=>{
+    lt(t,()=>{
+      document.getElementById('fm'+i).classList.add('draw');
+      setTimeout(()=>{ document.getElementById('ls'+i).classList.add('draw');
+                       document.getElementById('sc'+i).classList.add('draw'); },300);
+      setTimeout(()=>{ document.getElementById('kg-'+i).textContent=FLOW.after[i]+' kg ↓'; },600);
+    });
+    t+=620;
+  });
+  lt(t,()=>{
+    document.getElementById('fm4').classList.add('draw');
+    cnt(document.getElementById('kg-out'),0,962,' kg',800);
+    cnt(document.getElementById('eqB'),0,962,'',800);
+  });
+  lt(t+500,()=>{
+    cnt(document.getElementById('kg-edge'),0,26,'',700);
+    cnt(document.getElementById('kg-scrap'),0,12,'',700);
+    cnt(document.getElementById('eqC'),0,26,'',700);
+    cnt(document.getElementById('eqD'),0,12,'',700);
+  });
+  lt(t+1200,()=>{
+    document.getElementById('fb0').style.opacity='1';
+    cnt(document.getElementById('kg-val'),0,1860,'',800);
+  });
+  lt(t+1900,()=>{
+    document.getElementById('fb1').style.opacity='1';
+    document.getElementById('backLab').style.opacity='1';
+  });
+  lt(t+2500,()=>{ document.getElementById('eqOK').style.opacity='1'; });
+  document.getElementById('ledgerBtn').textContent='⟲ 重新投料记账';
+}
+/* 节点详情 */
+const NODE_DETAIL={
+ 'in':{t:'铜杆入库 · 1,000kg',rows:[['来源','鼎捷 ERP 采购入库',''],['批次绑定','工单级追溯','okk'],['理论用量','按 BOM 自动展开','okk']],
+   q:'理论用量按 BOM 与工艺定额自动计算——账本的左边由系统写，不由人估。'},
+ 0:{t:'拉丝工序 · 损耗账',rows:[['投入 → 产出','1,000 → 985 kg',''],['损耗率（自动核算）','1.50%','hot'],['工艺标准','1.20% · 超标预警','hot'],['边角料 / 废料','10 kg / 5 kg','okk']],
+   q:'原文：自动核算拉丝、绞线等工序的加工损耗率——超标当日预警，不等月底盘点。'},
+ 1:{t:'绞线工序 · 损耗账',rows:[['投入 → 产出','985 → 973 kg',''],['损耗率（自动核算）','1.22%','okk'],['边角料 / 废料','8 kg / 4 kg','okk'],['按工单归集','MO-0611-07','okk']],
+   q:'每张工单、每道工序的边角料产出量自动统计——账记到公斤。'},
+ 2:{t:'绝缘 · 成缆 · 损耗账',rows:[['投入 → 产出','973 → 966 kg',''],['线缆边角料','5 kg（线头/试机段）','okk'],['绝缘料/护套料','另行归集（直接材料）','okk']],
+   q:'铜materials之外，绝缘料、护套料按成本要素单独归集进直接材料。'},
+ 3:{t:'护套工序 · 损耗账',rows:[['投入 → 产出','966 → 962 kg',''],['边角料 / 废料','3 kg / 1 kg','okk'],['一次合格率','99.2% 自动采集','okk']],
+   q:'尾段工序损耗最小化——聚类排产减少换色清机，也直接减少这里的废料。'},
+ 'out':{t:'成品入库 · 实际消耗 962kg',rows:[['完工数量','38.2 km 成缆',''],['单位成本','总成本 / 完工数量','okk'],['推送','鼎捷 ERP 自动生成凭证','okk']],
+   q:'原文：与鼎捷 ERP 对接，成本数据自动推送生成财务凭证。'},
+ 'led':{t:'废料台账 · 公斤级',rows:[['边角料合计','26 kg · 按工单/工序',''],['含铜废料','12 kg · 关联入库单','okk'],['台账报表','废料台账 + 价值核算','okk']],
+   q:'原文：自动统计各工单、各工序线缆边角料、废料产出量，关联入库/变卖记录。'},
+ 'sell':{t:'变卖 / 回炉 · 价值回收',rows:[['变卖记录','#SC-0611 · 38 kg',''],['回收价值','¥1,860','okk'],['处理','分摊扣减工单生产成本','okk']],
+   q:'原文：关联变卖记录，分摊扣减工单生产成本——形成“理论=实际+回收”闭环。'}
+};
+function selNode(k){
+  document.querySelectorAll('.snode').forEach(n=>n.classList.remove('sel'));
+  const id = k==='in'?'nd-in':k==='out'?'nd-out':k==='led'?'nd-led':k==='sell'?'nd-sell':'nd-'+k;
+  document.getElementById(id).classList.add('sel');
+  const d=NODE_DETAIL[k];
+  document.getElementById('nodeInfo').innerHTML=`
+    <div class="ni-box"><h6>账目明细 · ${d.t}</h6>${d.rows.map(r=>`<div class="ni-row"><span>${r[0]}</span><b class="${r[2]||''}">${r[1]}</b></div>`).join('')}</div>
+    <div class="ni-box"><h6 class="g">需求原文映射</h6><div class="ni-quote">${d.q}</div></div>
+    <div class="ni-box"><h6 class="k">深入工程蓝图</h6>
+      <div class="ni-row"><span>损耗与边角料追踪</span><b><a href="stage.html#s5" style="color:var(--cu);text-decoration:none">s5 →</a></b></div>
+      <div class="ni-row"><span>铜流闭环成本核算</span><b><a href="stage.html#s6" style="color:var(--cu);text-decoration:none">s6 →</a></b></div>
+      <div class="ni-row"><span>成本要素 · 凭证接口</span><b><a href="stage.html#s6" style="color:var(--cu);text-decoration:none">s6 →</a></b></div>
+    </div>`;
+}
+selNode('led');
+
+/* ===================== 色谱排产台 ===================== */
+const COLORS={red:'#d8503c',blue:'#2563c9',yellow:'#d9a514',green:'#15945f',black:'#3a4452',white:'#9aa3ad'};
+/* 每条轨道任务：[颜色, 宽%, 锁定?] —— 初始按交期序（颜色穿插） */
+const T1_INIT=[['red',9],['blue',8],['red',7],['yellow',9],['blue',8],['red',6],['green',9],['yellow',7],['blue',8],['green',6]];
+const T2_INIT=[['black',10],['white',8,true],['black',7],['blue',9],['white',8],['black',8,true],['blue',7],['white',9]];
+let t1=[],t2=[],urgentOn=false,clustered=false;
+function layout(trackEl,arr){
+  trackEl.querySelectorAll('.cwedge').forEach(w=>w.remove());
+  let x=1.2, sw=0;
+  arr.forEach((b,i)=>{
+    if(i>0 && arr[i-1][0]!==b[0]){
+      const w=document.createElement('div'); w.className='cwedge';
+      w.style.left=x+'%'; trackEl.appendChild(w);
+      x+=1.6; sw++;
+    }
+    b.el.style.left=x+'%'; b.el.style.width=b[1]+'%';
+    x+=b[1]+0.7;
+  });
+  return sw;
+}
+function makeBlocks(trackEl,init,store){
+  init.forEach((c,i)=>{
+    const d=document.createElement('div'); d.className='cblk';
+    d.style.background=`linear-gradient(120deg,${COLORS[c[0]]},${COLORS[c[0]]}cc)`;
+    d.textContent='MO-'+(11+i);
+    if(c[2]){ d.innerHTML+='<span class="lockic">🔒</span>'; }
+    trackEl.appendChild(d);
+    store.push({0:c[0],1:c[1],lock:!!c[2],el:d});
+  });
+}
+function refreshStats(){
+  const sw=layout(document.getElementById('trk1'),t1)+layout(document.getElementById('trk2'),t2);
+  document.getElementById('swCnt').textContent=sw+' 次';
+  document.getElementById('swLoss').textContent=(sw*0.5).toFixed(1)+' h';
+  return sw;
+}
+function initSpec(){
+  t1=[];t2=[];
+  document.getElementById('trk1').innerHTML='';
+  document.getElementById('trk2').innerHTML='';
+  makeBlocks(document.getElementById('trk1'),T1_INIT,t1);
+  makeBlocks(document.getElementById('trk2'),T2_INIT,t2);
+  refreshStats();
+  document.getElementById('saveStat').style.display='none';
+  document.getElementById('logChip').classList.remove('show');
+  clustered=false; urgentOn=false;
+  document.getElementById('clusterBtn').textContent='🎨 AI 聚类排产';
+}
+function doCluster(){
+  if(clustered) return;
+  clustered=true;
+  /* 同色相邻（锁定块保持相对位置不动原则简化：按颜色稳定排序，锁定块仍在其色组内） */
+  const order=['red','blue','yellow','green','black','white'];
+  t1.sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0]));
+  t2.sort((a,b)=>order.indexOf(a[0])-order.indexOf(b[0]));
+  const before=11;
+  const sw=refreshStats();
+  document.getElementById('saveStat').style.display='';
+  document.getElementById('swSave').textContent=((before-sw)*0.5).toFixed(1)+' h';
+  document.getElementById('clusterBtn').textContent='✓ 已聚类（换色最小化）';
+}
+function doUrgent(){
+  if(urgentOn) return; urgentOn=true;
+  /* 急单（红色）插入 t1 红色组末尾：换色 0 增 */
+  const d=document.createElement('div'); d.className='cblk urgent';
+  d.style.background=`linear-gradient(120deg,${COLORS.red},${COLORS.red}cc)`;
+  d.textContent='急 MO-88';
+  document.getElementById('trk1').appendChild(d);
+  const obj={0:'red',1:8,lock:false,el:d};
+  let idx=t1.length;
+  for(let i=t1.length-1;i>=0;i--){ if(t1[i][0]==='red'){ idx=i+1; break; } }
+  t1.splice(idx,0,obj);
+  refreshStats();
+  document.getElementById('logChip').classList.add('show');
+}
+function resetSpec(){ initSpec(); }
+initSpec();
+
+/* ===================== 覆盖账本 ===================== */
+const COV=[
+ ['p1','计划排产管理',[
+   ['工单管理（鼎捷对接 · 无纸化 · 样品/返工 · 超单扣减）',1,'s1'],
+   ['排产规则（优先级/交期/换线/绑定/班次）',1,'s2'],
+   ['约束条件（设备/物料/模具/人员/工艺/时间）',1,'s2'],
+   ['智能排产（多目标 · 粒度/增量 · 拖拽 · 模拟出交期）',4,'s2'],
+   ['紧急插单与 AI 约束排程（换色/换规格聚类）',1,'s3'],
+   ['物料齐套检查（BOM/库存/齐套/预警）',1,'s4'],
+   ['库存锁定机制（策略/释放/查询/冲突）',4,'s4'],
+   ['产能负荷分析（负荷着色 · 瓶颈归因）',2,'s2'],
+   ['甘特图可视化（双视角 · 交互 · 冲突提示）',3,'s2'],
+   ['异常预警（延期/物料·关联采购申请/产能/通知）',4,'s4']]],
+ ['p2','成本核算管理',[
+   ['成本要素与归集（铜材/绝缘料/护套料 · 人工 · 制费）',4,'s6'],
+   ['成本计算 · 分析 · 追溯',3,'s6'],
+   ['成本接口（鼎捷 ERP 自动凭证）',1,'s6'],
+   ['铜材与边角料闭环核算（理论=实际+回收）',1,'s5']]]
+];
+const cb=document.getElementById('covBody');
+COV.forEach(sec=>{
+  const d=document.createElement('div');
+  d.className='cov-sec '+sec[0];
+  d.innerHTML=`<h5>${sec[1]}</h5>`+sec[2].map(r=>
+    `<div class="cov-row" onclick="location.href='stage.html#${r[2]}'">
+      <span>${r[0]}</span><span class="dots"></span><span class="cnt">${r[1]} 条</span><span class="where">${r[2]}</span>
+    </div>`).join('');
+  cb.appendChild(d);
+});
+
+/* ===================== 入场 & 英雄等式自动播 ===================== */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+setTimeout(()=>{
+  cnt(document.getElementById('eqA'),0,1000,'',1000);
+  cnt(document.getElementById('eqB'),0,962,'',1000);
+  cnt(document.getElementById('eqC'),0,26,'',1000);
+  cnt(document.getElementById('eqD'),0,12,'',1000);
+  setTimeout(()=>document.getElementById('eqOK').style.opacity='1',1200);
+},700);
+/* 铜流账本：滚动到视口自动投料一次 */
+let ledgerAuto=false;
+const lio=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting&&!ledgerAuto){ ledgerAuto=true; setTimeout(runLedger,500); lio.disconnect(); } });
+},{threshold:.35});
+lio.observe(document.querySelector('.ledger-card'));
+</script>
+</body>
+</html>
