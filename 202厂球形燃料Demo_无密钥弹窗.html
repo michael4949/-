@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>球形燃料生产工艺 · AI Copilot · 202厂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.0/marked.min.js"></script>
+<style>
+:root {
+  --bg-base: #F8F6F1;
+  --bg-paper: #FFFFFF;
+  --bg-paper-warm: #FCFAF5;
+  --bg-subtle: #F0EDE3;
+  --bg-data: #FAFBFC;
+  --navy: #1A2B4A;
+  --navy-deep: #0E1A30;
+  --navy-light: #2C4270;
+  --industrial-red: #B91C1C;
+  --industrial-red-soft: #DC2626;
+  --industrial-red-bg: #FEF2F2;
+  --industrial-green: #15803D;
+  --industrial-green-soft: #22C55E;
+  --industrial-green-bg: #F0FDF4;
+  --warning-amber: #B45309;
+  --warning-amber-soft: #D97706;
+  --warning-amber-bg: #FFFBEB;
+  --gold: #B08D3C;
+  --gold-soft: #D4AF6A;
+  --gold-bg: #F8F0DC;
+  --data-blue: #1E40AF;
+  --data-blue-soft: #3B82F6;
+  --data-blue-bg: #EFF6FF;
+  --ink: #1E293B;
+  --ink-soft: #475569;
+  --muted: #94A3B8;
+  --border: #DDD5C2;
+  --border-light: #EDE6D4;
+  --grid-line: #E8E4D8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: "Noto Sans SC", "PingFang SC", -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.serif { font-family: "Noto Serif SC", serif; }
+.mono { font-family: "IBM Plex Mono", "SF Mono", monospace; }
+.display { font-family: "Playfair Display", "Noto Serif SC", serif; }
+
+/* ============ APP SHELL ============ */
+#app { display: flex; height: 100vh; flex-direction: column; }
+
+/* ============ TOP BAR ============ */
+.topbar {
+  height: 60px;
+  background: var(--navy);
+  color: white;
+  display: flex; align-items: center;
+  padding: 0 20px;
+  border-bottom: 3px solid var(--industrial-red);
+  position: relative;
+  flex-shrink: 0;
+}
+.topbar::before {
+  content: "";
+  position: absolute;
+  bottom: -3px; left: 0; width: 100px; height: 3px;
+  background: var(--gold);
+}
+
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  margin-right: 16px;
+}
+.brand-mark {
+  width: 38px; height: 38px;
+  background: var(--industrial-red);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Noto Serif SC", serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: white;
+  position: relative;
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 10px; height: 10px;
+  background: var(--gold);
+}
+.brand-text .t1 {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+}
+.brand-text .t2 {
+  font-size: 9px;
+  opacity: 0.65;
+  letter-spacing: 1.5px;
+  margin-top: 1px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.workspace-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+}
+.workspace-title-cn {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+.workspace-title-en {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  opacity: 0.55;
+  letter-spacing: 1.5px;
+}
+
+.topbar-spacer { flex: 1; }
+
+.shift-info {
+  display: flex; gap: 16px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.5px;
+  margin-right: 16px;
+}
+.shift-info .si-item .label { opacity: 0.5; margin-right: 4px; }
+.shift-info .si-item .value { color: white; font-weight: 500; }
+
+.live-indicator {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px;
+  background: rgba(21,128,61,0.2);
+  border: 1px solid var(--industrial-green-soft);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--industrial-green-soft);
+  margin-right: 12px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--industrial-green-soft);
+  border-radius: 50%;
+  animation: live-pulse 1.5s infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--industrial-green-soft); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 4px transparent; }
+}
+
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 4px 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+}
+.user-avatar {
+  width: 26px; height: 26px;
+  background: var(--gold);
+  color: var(--navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 10px;
+  font-family: "Noto Serif SC", serif;
+}
+.user-info .uname { font-size: 11px; font-weight: 500; }
+.user-info .udept { font-size: 9px; opacity: 0.6; font-family: "IBM Plex Mono", monospace; letter-spacing: 0.5px; }
+
+/* ============ MAIN LAYOUT ============ */
+.main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  overflow: hidden;
+}
+
+/* ============ LEFT: PRODUCTION CONSOLE ============ */
+.console {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-base);
+  border-right: 1px solid var(--border);
+}
+
+.stage-tabs {
+  display: flex;
+  background: var(--bg-paper);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.stage-tab {
+  flex: 1;
+  padding: 14px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: none;
+  background: transparent;
+  border-right: 1px solid var(--border-light);
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.2s;
+  position: relative;
+}
+.stage-tab:last-child { border-right: none; }
+.stage-tab:hover { background: var(--bg-paper-warm); }
+.stage-tab.active {
+  background: var(--navy);
+  color: white;
+}
+.stage-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 3px;
+  background: var(--industrial-red);
+}
+.stage-num {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 16px;
+  background: var(--bg-subtle);
+  color: var(--navy);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.stage-tab.active .stage-num {
+  background: var(--gold);
+  color: var(--navy);
+}
+.stage-info { flex: 1; min-width: 0; }
+.stage-name {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  margin-bottom: 1px;
+}
+.stage-en {
+  font-size: 9px;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 1.2px;
+  opacity: 0.6;
+}
+.stage-tab.active .stage-en { opacity: 0.7; }
+
+.stage-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.stage-tab.active .stage-status { color: rgba(255,255,255,0.8); }
+.status-led {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--industrial-green);
+}
+.status-led.warning { background: var(--warning-amber); }
+.status-led.alarm { background: var(--industrial-red); animation: alarm-blink 0.8s infinite; }
+@keyframes alarm-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.console-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Section header */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 4px;
+}
+.section-title {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--navy);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::before {
+  content: "";
+  width: 3px; height: 14px;
+  background: var(--industrial-red);
+}
+.section-meta {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Batch traceability bar */
+.batch-bar {
+  background: var(--bg-paper);
+  border: 1px solid var(--border-light);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.batch-id {
+  display: flex;
+  flex-direction: column;
+}
+.batch-id-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.batch-id-value {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: 0.5px;
+}
+.batch-progress-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.batch-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  padding-top: 4px;
+}
+.batch-step::after {
+  content: "";
+  position: absolute;
+  top: 12px; right: -4px;
+  width: 8px;
+  height: 1px;
+  background: var(--border);
+}
+.batch-step:last-child::after { display: none; }
+.batch-step-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: white;
+}
+.batch-step.completed .batch-step-dot {
+  background: var(--industrial-green);
+  border-color: var(--industrial-green);
+}
+.batch-step.active .batch-step-dot {
+  background: var(--industrial-red);
+  border-color: var(--industrial-red);
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.2);
+  animation: step-pulse 1.5s infinite;
+}
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(185,28,28,0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(185,28,28,0.1); }
+}
+.batch-step-name {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.batch-step.completed .batch-step-name,
+.batch-step.active .batch-step-name {
+  color: var(--navy);
+  font-weight: 500;
+}
+.batch-step.active .batch-step-name { color: var(--industrial-red); font-weight: 600; }
+
+.batch-stats {
+  display: flex;
+  gap: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-light);
+}
+.batch-stat .label {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.batch-stat .value {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+/* Parameter cards grid */
+.params-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.param-card {
+  background: var(--bg-paper);
+  border: 1px solid var(--border-light);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.param-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 3px;
+  background: var(--industrial-green);
+  transition: background 0.2s;
+}
+.param-card.warning::before { background: var(--warning-amber); }
+.param-card.alarm::before { background: var(--industrial-red); }
+.param-card:hover {
+  background: var(--bg-paper-warm);
+  border-color: var(--navy);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.param-card-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 10px;
+}
+.param-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+.param-status {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 2px 5px;
+  background: var(--industrial-green-bg);
+  color: var(--industrial-green);
+  font-weight: 600;
+}
+.param-card.warning .param-status {
+  background: var(--warning-amber-bg);
+  color: var(--warning-amber);
+}
+.param-card.alarm .param-status {
+  background: var(--industrial-red-bg);
+  color: var(--industrial-red);
+}
+.param-value {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.param-value-num.changed { animation: value-flash 0.4s; }
+@keyframes value-flash {
+  0% { color: var(--data-blue-soft); }
+  100% { color: var(--navy); }
+}
+.param-unit {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+}
+.param-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.3px;
+}
+.param-meta .target { color: var(--ink-soft); }
+.param-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.trend-up { color: var(--industrial-red); }
+.trend-down { color: var(--data-blue); }
+.trend-flat { color: var(--muted); }
+
+/* SPC Chart */
+.spc-panel {
+  background: var(--bg-paper);
+  border: 1px solid var(--border-light);
+  padding: 14px 16px 12px;
+  position: relative;
+}
+.spc-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.spc-title {
+  font-family: "Noto Serif SC", serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.spc-meta {
+  display: flex; gap: 14px;
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.spc-meta .m-item .lbl { opacity: 0.6; margin-right: 3px; }
+.spc-meta .m-item .val { color: var(--ink); font-weight: 500; }
+.spc-meta .m-item .val.good { color: var(--industrial-green); }
+.spc-meta .m-item .val.warn { color: var(--warning-amber); }
+.spc-meta .m-item .val.bad { color: var(--industrial-red); }
+
+.spc-chart {
+  width: 100%;
+  height: 180px;
+  position: relative;
+}
+.spc-chart svg {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+.spc-axis-line { stroke: var(--ink-soft); stroke-width: 1; }
+.spc-grid-line { stroke: var(--grid-line); stroke-width: 1; stroke-dasharray: 2,3; }
+.spc-cl-line { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 4,3; opacity: 0.6; }
+.spc-ucl-line { stroke: var(--industrial-red); stroke-width: 1; stroke-dasharray: 5,3; opacity: 0.7; }
+.spc-lcl-line { stroke: var(--industrial-red); stroke-width: 1; stroke-dasharray: 5,3; opacity: 0.7; }
+.spc-data-line { stroke: var(--data-blue); stroke-width: 1.5; fill: none; }
+.spc-data-point {
+  fill: var(--data-blue);
+  stroke: white;
+  stroke-width: 1.5;
+  cursor: pointer;
+}
+.spc-data-point.warning { fill: var(--warning-amber); }
+.spc-data-point.alarm { fill: var(--industrial-red); }
+.spc-data-point:hover { r: 5; }
+.spc-axis-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  fill: var(--muted);
+}
+.spc-cl-label, .spc-ucl-label, .spc-lcl-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 8px;
+  font-weight: 600;
+}
+.spc-cl-label { fill: var(--ink-soft); }
+.spc-ucl-label, .spc-lcl-label { fill: var(--industrial-red); }
+
+/* Anomaly stream */
+.anomaly-stream {
+  background: var(--bg-paper);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  overflow: hidden;
+}
+.stream-head {
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--navy);
+  color: white;
+  flex-shrink: 0;
+}
+.stream-head-title {
+  font-family: "Noto Serif SC", serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stream-head-counter {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  background: var(--industrial-red);
+  padding: 2px 8px;
+  letter-spacing: 0.5px;
+}
+
+.stream-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+.stream-item {
+  padding: 8px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px dashed var(--border-light);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.stream-item:hover { background: var(--bg-paper-warm); }
+.stream-item.alarm { background: var(--industrial-red-bg); }
+.stream-item.warning { background: var(--warning-amber-bg); }
+.stream-item:last-child { border-bottom: none; }
+
+.stream-time {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 56px;
+  letter-spacing: 0.5px;
+}
+.stream-icon {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.stream-icon.info { color: var(--data-blue); }
+.stream-icon.warning { color: var(--warning-amber); }
+.stream-icon.alarm { color: var(--industrial-red); }
+.stream-icon.success { color: var(--industrial-green); }
+.stream-text {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.stream-text strong {
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+/* Equipment status bar */
+.equip-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+.equip-card {
+  background: var(--bg-paper);
+  border: 1px solid var(--border-light);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.equip-card:hover { border-color: var(--navy); }
+.equip-led {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--industrial-green);
+  box-shadow: 0 0 6px var(--industrial-green-soft);
+  flex-shrink: 0;
+}
+.equip-led.warning {
+  background: var(--warning-amber);
+  box-shadow: 0 0 6px var(--warning-amber-soft);
+}
+.equip-led.alarm {
+  background: var(--industrial-red);
+  box-shadow: 0 0 6px var(--industrial-red-soft);
+  animation: alarm-blink 1s infinite;
+}
+.equip-info { flex: 1; min-width: 0; }
+.equip-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--navy);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.3px;
+}
+.equip-state {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.5px;
+}
+
+/* ============ RIGHT: AI COPILOT ============ */
+.copilot {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-paper);
+  overflow: hidden;
+}
+
+.copilot-head {
+  padding: 14px 18px;
+  background: var(--navy);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 3px solid var(--gold);
+  flex-shrink: 0;
+}
+.copilot-icon {
+  width: 38px; height: 38px;
+  background: var(--industrial-red);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Noto Serif SC", serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  position: relative;
+  flex-shrink: 0;
+}
+.copilot-icon::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 10px; height: 10px;
+  background: var(--gold);
+}
+.copilot-meta { flex: 1; min-width: 0; }
+.copilot-title {
+  font-family: "Noto Serif SC", serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.copilot-model {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  opacity: 0.65;
+  letter-spacing: 1.2px;
+  margin-top: 2px;
+}
+.copilot-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.5px;
+}
+.copilot-status .ctx-tag {
+  padding: 2px 8px;
+  background: rgba(176,141,60,0.25);
+  color: var(--gold-soft);
+  border: 1px solid var(--gold);
+}
+
+.context-panel {
+  padding: 10px 14px;
+  background: var(--gold-bg);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.context-icon {
+  width: 22px; height: 22px;
+  background: var(--gold);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Noto Serif SC", serif;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.context-text {
+  flex: 1;
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.context-text strong { color: var(--navy); font-weight: 600; }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.welcome-msg {
+  padding: 16px;
+  background: var(--bg-paper-warm);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--gold);
+}
+.welcome-msg-title {
+  font-family: "Noto Serif SC", serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.welcome-msg-body {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.suggested-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.sa-card {
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--data-blue);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  transition: all 0.2s;
+}
+.sa-card:hover {
+  background: var(--data-blue-bg);
+  border-left-color: var(--industrial-red);
+  transform: translateX(2px);
+}
+.sa-card .sa-tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  color: var(--data-blue);
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+  display: block;
+}
+.sa-card:hover .sa-tag { color: var(--industrial-red); }
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: msg-in 0.3s;
+}
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+.msg.user .msg-meta { justify-content: flex-end; }
+.msg-role-badge {
+  padding: 1px 6px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+}
+.msg.user .msg-role-badge {
+  background: var(--gold-bg);
+  color: var(--gold);
+}
+.msg.assistant .msg-role-badge {
+  background: var(--industrial-red-bg);
+  color: var(--industrial-red);
+}
+.msg.system .msg-role-badge {
+  background: var(--data-blue-bg);
+  color: var(--data-blue);
+}
+
+.msg-content {
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.msg.user .msg-content {
+  background: var(--bg-subtle);
+  padding: 10px 14px;
+  align-self: flex-end;
+  max-width: 85%;
+  border-left: 3px solid var(--gold);
+}
+.msg.assistant .msg-content {
+  background: white;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--industrial-red);
+}
+.msg.system .msg-content {
+  background: var(--data-blue-bg);
+  border-left: 3px solid var(--data-blue);
+  padding: 10px 14px;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.msg-content p { margin-bottom: 6px; }
+.msg-content p:last-child { margin-bottom: 0; }
+.msg-content ul, .msg-content ol { margin: 6px 0 6px 18px; }
+.msg-content li { margin-bottom: 3px; }
+.msg-content strong { color: var(--navy); font-weight: 600; }
+.msg-content code {
+  font-family: "IBM Plex Mono", monospace;
+  background: var(--bg-subtle);
+  padding: 1px 5px;
+  font-size: 11px;
+  color: var(--industrial-red);
+}
+.msg-content blockquote {
+  border-left: 3px solid var(--gold);
+  padding-left: 10px;
+  margin: 6px 0;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 11.5px;
+}
+.msg-content h3, .msg-content h4 {
+  font-family: "Noto Serif SC", serif;
+  font-size: 12.5px;
+  color: var(--navy);
+  margin: 10px 0 4px;
+}
+
+/* AI follow-up actions */
+.followup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-light);
+}
+.fa-btn {
+  padding: 5px 10px;
+  font-size: 10.5px;
+  background: var(--bg-paper-warm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.fa-btn:hover {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+.fa-btn::before {
+  content: "→";
+  color: var(--industrial-red);
+  font-weight: 600;
+}
+.fa-btn:hover::before { color: var(--gold-soft); }
+
+.typing-indicator {
+  display: inline-flex;
+  gap: 3px;
+  padding: 2px 0;
+}
+.typing-indicator span {
+  width: 5px; height: 5px;
+  background: var(--muted);
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Input area */
+.copilot-input-zone {
+  padding: 12px 14px;
+  background: var(--bg-paper);
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.quick-tools {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.qt-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  background: var(--bg-paper-warm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+.qt-btn:hover { background: var(--gold-bg); border-color: var(--gold); color: var(--navy); }
+
+.copilot-input-wrap {
+  background: var(--bg-paper-warm);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+.copilot-input-wrap:focus-within {
+  border-color: var(--navy);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(26,43,74,0.08);
+}
+.copilot-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  min-height: 44px;
+  max-height: 160px;
+  line-height: 1.55;
+}
+.copilot-input::placeholder { color: var(--muted); }
+.copilot-input-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px 6px 6px;
+  border-top: 1px solid var(--border-light);
+}
+.input-info {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.5px;
+  padding-left: 6px;
+}
+.send-btn {
+  background: var(--industrial-red);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+.send-btn:hover { background: #991B1B; }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 70px; right: 20px;
+  padding: 12px 18px;
+  background: var(--navy);
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  font-size: 12px;
+  z-index: 500;
+  transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  max-width: 360px;
+  border-left: 3px solid var(--gold);
+}
+.toast.show { transform: translateX(0); }
+.toast.error { border-left-color: var(--industrial-red); }
+.toast.success { border-left-color: var(--industrial-green); }
+.toast.alarm { background: var(--industrial-red); border-left-color: white; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--bg-paper-warm); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  background: var(--navy);
+  color: white;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  border-left: 2px solid var(--gold);
+}
+.tooltip.show { display: block; }
+
+</style>
+</head>
+<body>
+
+<!-- ============ MAIN APP ============ -->
+<div id="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">202</div>
+      <div class="brand-text">
+        <div class="t1">球形燃料事业部</div>
+        <div class="t2">HTGR FUEL DIV</div>
+      </div>
+    </div>
+    <div class="workspace-title">
+      <span class="workspace-title-cn">工艺智能驾驶舱</span>
+      <span class="workspace-title-en">PROCESS COPILOT v1.0</span>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="shift-info">
+      <div class="si-item">
+        <span class="label">SHIFT</span>
+        <span class="value" id="shiftLabel">夜班·B组</span>
+      </div>
+      <div class="si-item">
+        <span class="label">TIME</span>
+        <span class="value" id="topTime">--:--:--</span>
+      </div>
+    </div>
+
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span>LIVE · 实时</span>
+    </div>
+
+    <div class="user-chip">
+      <div class="user-avatar">王</div>
+      <div class="user-info">
+        <div class="uname">王俊明</div>
+        <div class="udept">SHIFT-LEAD</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main">
+
+    <!-- LEFT: Production Console -->
+    <div class="console">
+      <!-- Stage Tabs -->
+      <div class="stage-tabs">
+        <button class="stage-tab active" data-stage="core">
+          <div class="stage-num">I</div>
+          <div class="stage-info">
+            <div class="stage-name">铀核芯制备</div>
+            <div class="stage-en">URANIUM KERNEL · GEL-PRECIPITATION</div>
+          </div>
+          <div class="stage-status">
+            <span class="status-led" id="ledCore"></span>
+            <span id="statusTextCore">运行</span>
+          </div>
+        </button>
+        <button class="stage-tab" data-stage="triso">
+          <div class="stage-num">II</div>
+          <div class="stage-info">
+            <div class="stage-name">TRISO包覆</div>
+            <div class="stage-en">TRISO COATING · FLUIDIZED-BED CVD</div>
+          </div>
+          <div class="stage-status">
+            <span class="status-led" id="ledTriso"></span>
+            <span id="statusTextTriso">运行</span>
+          </div>
+        </button>
+        <button class="stage-tab" data-stage="sphere">
+          <div class="stage-num">III</div>
+          <div class="stage-info">
+            <div class="stage-name">球形元件成型</div>
+            <div class="stage-en">SPHERE FORMING · ISOSTATIC PRESS</div>
+          </div>
+          <div class="stage-status">
+            <span class="status-led" id="ledSphere"></span>
+            <span id="statusTextSphere">运行</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Console Body -->
+      <div class="console-body" id="consoleBody">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <!-- RIGHT: AI Copilot -->
+    <div class="copilot">
+      <div class="copilot-head">
+        <div class="copilot-icon">智</div>
+        <div class="copilot-meta">
+          <div class="copilot-title">AI Copilot · 工艺助手</div>
+          <div class="copilot-model">CLAUDE OPUS 4.7 · STREAMING</div>
+        </div>
+        <div class="copilot-status">
+          <div class="ctx-tag" id="ctxTag">已加载产线上下文</div>
+          <div style="opacity: 0.6;" id="ctxParamCount">0 参数</div>
+        </div>
+      </div>
+
+      <div class="context-panel" id="contextPanel">
+        <div class="context-icon">i</div>
+        <div class="context-text" id="contextText">
+          <strong>当前关注：</strong>第 I 段铀核芯制备 · 在产批次 <strong id="ctxBatch">UCC-2026-04-22-A03</strong>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <!-- Welcome message will appear here -->
+      </div>
+
+      <div class="copilot-input-zone">
+        <div class="quick-tools" id="quickTools">
+          <button class="qt-btn" onclick="quickAsk('对当前所有工艺参数做一次全面体检')">全面体检</button>
+          <button class="qt-btn" onclick="quickAsk('近期班次的生产质量趋势如何？')">质量趋势</button>
+          <button class="qt-btn" onclick="quickAsk('当前产线是否存在隐性风险？给出排查建议')">风险排查</button>
+          <button class="qt-btn" onclick="quickAsk('请基于当前的工艺参数预测本批次成品良率')">良率预测</button>
+        </div>
+        <div class="copilot-input-wrap">
+          <textarea class="copilot-input" id="chatInput" placeholder="向 AI 提问、指令或追问。可点击产线任何参数/异常事件触发深度分析..." rows="1"></textarea>
+          <div class="copilot-input-tools">
+            <span class="input-info" id="inputInfo">CTX: 实时产线状态 · 158 参数 · 3 设备</span>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+              <span>发送</span>
+              <span>↗</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ====================================================================
+//                    GLOBAL STATE
+// ====================================================================
+const STATE = {
+  apiKey: '',
+  currentStage: 'core',
+  history: [],     // chat history
+  paramHistory: {},  // each param: array of recent values
+  anomalies: [],   // detected anomalies
+  anomalyCount: 0,
+  isAIBusy: false,
+  batchInfo: {
+    core: { id: 'UCC-2026-04-22-A03', startTime: Date.now() - 4 * 3600 * 1000, target: 50000, produced: 32400 },
+    triso: { id: 'TRC-2026-04-22-B07', startTime: Date.now() - 7 * 3600 * 1000, target: 18000, produced: 12850 },
+    sphere: { id: 'SPH-2026-04-22-C02', startTime: Date.now() - 2 * 3600 * 1000, target: 240, produced: 88 },
+  }
+};
+
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-opus-4-7';
+
+// Restore key from session
+try {
+  const saved = sessionStorage.getItem('htgr_api_key');
+  if (saved) STATE.apiKey = saved;
+} catch (e) {}
+
+// ====================================================================
+//          STAGE CONFIGURATION (real HTGR fuel process params)
+// ====================================================================
+const STAGE_CONFIG = {
+  core: {
+    title: '铀核芯制备 · 凝胶外滴法',
+    subtitle: 'STAGE I · URANIUM KERNEL FABRICATION',
+    description: 'UO2溶液经凝胶滴定塔成型为微球前驱体，经干燥、煅烧、H2还原烧结后得到直径约500μm的UO2核芯',
+    equipment: [
+      { id: 'GEL-T01', name: '凝胶滴定塔#1', state: '运行中 · 第14批' },
+      { id: 'CAL-F02', name: '煅烧炉#2', state: '保温·1100℃' },
+      { id: 'RED-F03', name: '还原烧结炉#3', state: '运行中 · 第8批' },
+      { id: 'SIEVE-S1', name: '筛分检测线', state: '在线检测' },
+    ],
+    params: [
+      { key: 'sol_conc', name: 'UO2溶液浓度', unit: 'g/L', target: 250, lcl: 240, ucl: 260, sigma: 2.5, drift: 0 },
+      { key: 'drop_rate', name: '滴定流速', unit: 'mL/min', target: 95, lcl: 88, ucl: 102, sigma: 2.0, drift: 0 },
+      { key: 'gel_temp', name: '凝胶塔温', unit: '℃', target: 60, lcl: 56, ucl: 64, sigma: 1.0, drift: 0 },
+      { key: 'nh3_conc', name: '氨水浓度', unit: 'mol/L', target: 8.5, lcl: 8.0, ucl: 9.0, sigma: 0.15, drift: 0 },
+      { key: 'cal_temp', name: '煅烧温度', unit: '℃', target: 850, lcl: 830, ucl: 870, sigma: 5.0, drift: 0 },
+      { key: 'red_temp', name: '还原烧结温度', unit: '℃', target: 1550, lcl: 1530, ucl: 1570, sigma: 5.0, drift: 0 },
+      { key: 'h2_flow', name: 'H2流量', unit: 'L/min', target: 12, lcl: 11, ucl: 13, sigma: 0.4, drift: 0 },
+      { key: 'kernel_diam', name: '核芯直径', unit: 'μm', target: 500, lcl: 480, ucl: 520, sigma: 6, drift: 0, key_quality: true },
+      { key: 'kernel_density', name: '核芯密度', unit: 'g/cm³', target: 10.65, lcl: 10.40, ucl: 10.85, sigma: 0.07, drift: 0, key_quality: true },
+      { key: 'kernel_sphere', name: '球形度', unit: '', target: 1.04, lcl: 1.0, ucl: 1.08, sigma: 0.013, drift: 0, key_quality: true },
+      { key: 'kernel_u_pct', name: '铀含量', unit: '%', target: 88.15, lcl: 87.8, ucl: 88.5, sigma: 0.12, drift: 0 },
+      { key: 'defect_rate', name: '缺陷率(连体/破碎)', unit: '‰', target: 1.5, lcl: 0, ucl: 5, sigma: 0.6, drift: 0, key_quality: true },
+    ],
+    spcKey: 'kernel_diam',
+    batchSteps: ['溶液配制', '凝胶成型', '陈化干燥', '煅烧', '还原烧结', '筛分检测'],
+    activeStep: 4,
+  },
+  triso: {
+    title: 'TRISO包覆颗粒 · 流化床CVD',
+    subtitle: 'STAGE II · TRISO COATING · FLUIDIZED-BED CVD',
+    description: '核芯经流化床CVD依次沉积缓冲层(疏松热解碳)、IPyC、SiC、OPyC共四层结构，形成直径约920μm的TRISO包覆燃料颗粒',
+    equipment: [
+      { id: 'CVD-R01', name: '流化床CVD#1', state: 'IPyC沉积中' },
+      { id: 'CVD-R02', name: '流化床CVD#2', state: 'SiC沉积中' },
+      { id: 'CVD-R03', name: '流化床CVD#3', state: '已运行52h·OPyC' },
+      { id: 'INSP-X1', name: 'X射线测厚台', state: '在线' },
+    ],
+    params: [
+      { key: 'cvd_temp_ipyc', name: 'IPyC沉积温度', unit: '℃', target: 1300, lcl: 1280, ucl: 1320, sigma: 5, drift: 0 },
+      { key: 'cvd_temp_sic', name: 'SiC沉积温度', unit: '℃', target: 1500, lcl: 1480, ucl: 1520, sigma: 4, drift: 0 },
+      { key: 'cvd_temp_opyc', name: 'OPyC沉积温度', unit: '℃', target: 1300, lcl: 1280, ucl: 1320, sigma: 5, drift: 0 },
+      { key: 'mts_flow', name: 'MTS流量', unit: 'g/min', target: 28, lcl: 25, ucl: 31, sigma: 0.9, drift: 0 },
+      { key: 'h2_carrier', name: 'H2载气流量', unit: 'L/min', target: 35, lcl: 32, ucl: 38, sigma: 1.0, drift: 0 },
+      { key: 'argon_flow', name: 'Ar流化气', unit: 'L/min', target: 18, lcl: 16, ucl: 20, sigma: 0.6, drift: 0 },
+      { key: 'c3h6_flow', name: '丙烯流量(IPyC/OPyC)', unit: 'g/min', target: 14, lcl: 12, ucl: 16, sigma: 0.6, drift: 0 },
+      { key: 'c2h2_flow', name: '乙炔流量(缓冲层)', unit: 'g/min', target: 8, lcl: 6, ucl: 10, sigma: 0.5, drift: 0 },
+      { key: 'buffer_thick', name: '缓冲层厚度', unit: 'μm', target: 95, lcl: 80, ucl: 110, sigma: 4, drift: 0, key_quality: true },
+      { key: 'ipyc_thick', name: 'IPyC层厚度', unit: 'μm', target: 40, lcl: 30, ucl: 50, sigma: 2.5, drift: 0, key_quality: true },
+      { key: 'sic_thick', name: 'SiC层厚度', unit: 'μm', target: 35, lcl: 30, ucl: 40, sigma: 1.5, drift: 0, key_quality: true },
+      { key: 'opyc_thick', name: 'OPyC层厚度', unit: 'μm', target: 40, lcl: 30, ucl: 50, sigma: 2.5, drift: 0, key_quality: true },
+      { key: 'sic_density', name: 'SiC层密度', unit: 'g/cm³', target: 3.20, lcl: 3.18, ucl: 3.22, sigma: 0.008, drift: 0, key_quality: true },
+      { key: 'failure_rate', name: 'SiC破损率', unit: 'ppm', target: 30, lcl: 0, ucl: 100, sigma: 12, drift: 0, key_quality: true },
+    ],
+    spcKey: 'sic_thick',
+    batchSteps: ['核芯装料', '缓冲层沉积', 'IPyC沉积', 'SiC沉积', 'OPyC沉积', '出料检测'],
+    activeStep: 3,
+  },
+  sphere: {
+    title: '球形元件成型 · 等静压',
+    subtitle: 'STAGE III · SPHERE FORMING · ISOSTATIC PRESSING',
+    description: 'TRISO颗粒与石墨基体粉混合后经准等静压成型为直径60mm的燃料球，再经退火、机加工、最终检测',
+    equipment: [
+      { id: 'MIX-M01', name: '混料机#1', state: '混料中·85min' },
+      { id: 'PRESS-P02', name: '等静压机#2', target: '300MPa', state: '保压中' },
+      { id: 'ANN-F03', name: '退火炉#3', state: '1900℃·保温' },
+      { id: 'NDT-X4', name: 'CT无损检测', state: '在线' },
+    ],
+    params: [
+      { key: 'mix_ratio', name: 'TRISO/石墨重量比', unit: '', target: 0.20, lcl: 0.19, ucl: 0.21, sigma: 0.003, drift: 0 },
+      { key: 'mix_time', name: '混料时间', unit: 'min', target: 90, lcl: 85, ucl: 95, sigma: 1.5, drift: 0 },
+      { key: 'press_pressure', name: '等静压压力', unit: 'MPa', target: 300, lcl: 295, ucl: 305, sigma: 1.5, drift: 0 },
+      { key: 'press_hold_time', name: '保压时间', unit: 's', target: 60, lcl: 55, ucl: 65, sigma: 1.5, drift: 0 },
+      { key: 'anneal_temp', name: '退火温度', unit: '℃', target: 1900, lcl: 1880, ucl: 1920, sigma: 6, drift: 0 },
+      { key: 'anneal_time', name: '退火时间', unit: 'h', target: 1.0, lcl: 0.9, ucl: 1.1, sigma: 0.03, drift: 0 },
+      { key: 'sphere_diam', name: '球元件直径', unit: 'mm', target: 60, lcl: 59.5, ucl: 60.5, sigma: 0.15, drift: 0, key_quality: true },
+      { key: 'sphere_density', name: '基体密度', unit: 'g/cm³', target: 1.72, lcl: 1.70, ucl: 1.74, sigma: 0.008, drift: 0, key_quality: true },
+      { key: 'triso_distrib', name: 'TRISO分布均匀度', unit: 'σ', target: 0.04, lcl: 0, ucl: 0.06, sigma: 0.008, drift: 0, key_quality: true },
+      { key: 'crush_strength', name: '压溃强度', unit: 'kN', target: 25, lcl: 20, ucl: 30, sigma: 1.5, drift: 0, key_quality: true },
+      { key: 'surf_defect', name: '表面缺陷率', unit: '%', target: 0.5, lcl: 0, ucl: 2, sigma: 0.25, drift: 0, key_quality: true },
+      { key: 'leak_rate', name: 'TRISO泄漏率', unit: 'ppm', target: 50, lcl: 0, ucl: 200, sigma: 25, drift: 0, key_quality: true },
+    ],
+    spcKey: 'sphere_density',
+    batchSteps: ['原料配比', '混料', '等静压成型', '退火处理', '机加工', 'CT检测'],
+    activeStep: 2,
+  }
+};
+
+// Initialize parameter history
+function initParamHistory() {
+  for (const stage of Object.keys(STAGE_CONFIG)) {
+    for (const p of STAGE_CONFIG[stage].params) {
+      const key = stage + '_' + p.key;
+      STATE.paramHistory[key] = [];
+      // Seed 30 historical points around target
+      for (let i = 0; i < 30; i++) {
+        STATE.paramHistory[key].push({
+          v: gaussianRandom(p.target, p.sigma),
+          t: Date.now() - (30 - i) * 60000,
+        });
+      }
+    }
+  }
+}
+
+// Gaussian random
+function gaussianRandom(mean, sigma) {
+  const u = 1 - Math.random();
+  const v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return mean + z * sigma;
+}
+
+// ====================================================================
+//                    SIMULATION ENGINE
+// ====================================================================
+// Each parameter independently evolves with normal noise + occasional drift events
+function simulateTick() {
+  const allStages = Object.keys(STAGE_CONFIG);
+  for (const stage of allStages) {
+    const cfg = STAGE_CONFIG[stage];
+    for (const p of cfg.params) {
+      const key = stage + '_' + p.key;
+      const hist = STATE.paramHistory[key];
+
+      // Inject occasional drift events (low probability)
+      if (Math.random() < 0.005) {
+        p.drift = (Math.random() - 0.5) * p.sigma * 4;  // up to ±2σ drift
+      }
+      // Drift decays
+      p.drift *= 0.95;
+
+      // Generate new value
+      const newValue = gaussianRandom(p.target + p.drift, p.sigma);
+      hist.push({ v: newValue, t: Date.now() });
+
+      // Trim history to last 60 points
+      if (hist.length > 60) hist.shift();
+    }
+  }
+
+  detectAnomalies();
+  if (STATE.currentStage) renderConsoleBody();
+}
+
+// Anomaly detection (Western Electric rules + simple range)
+function detectAnomalies() {
+  const newAnomalies = [];
+  for (const stage of Object.keys(STAGE_CONFIG)) {
+    const cfg = STAGE_CONFIG[stage];
+    for (const p of cfg.params) {
+      const key = stage + '_' + p.key;
+      const hist = STATE.paramHistory[key];
+      if (hist.length < 8) continue;
+      const recent = hist.slice(-8).map(h => h.v);
+      const last = recent[recent.length - 1];
+
+      // Out of control limit (3σ basically)
+      if (last > p.ucl || last < p.lcl) {
+        const sev = Math.abs(last - p.target) > 3 * p.sigma ? 'alarm' : 'warning';
+        newAnomalies.push({
+          stage, paramKey: p.key, paramName: p.name,
+          value: last, target: p.target, ucl: p.ucl, lcl: p.lcl, unit: p.unit,
+          severity: sev,
+          rule: '超出控制限',
+          time: Date.now(),
+          id: `${stage}_${p.key}_${Date.now()}`,
+        });
+      }
+      // Western Electric Rule 2: 8 consecutive points on the same side
+      else if (recent.length >= 8) {
+        const aboveCount = recent.filter(v => v > p.target).length;
+        const belowCount = recent.filter(v => v < p.target).length;
+        if (aboveCount >= 8 || belowCount >= 8) {
+          newAnomalies.push({
+            stage, paramKey: p.key, paramName: p.name,
+            value: last, target: p.target, ucl: p.ucl, lcl: p.lcl, unit: p.unit,
+            severity: 'warning',
+            rule: '连续8点同侧偏移',
+            time: Date.now(),
+            id: `${stage}_${p.key}_${Date.now()}`,
+          });
+        }
+      }
+    }
+  }
+
+  // Add new anomalies, dedup
+  const existingKeys = new Set(STATE.anomalies.map(a => a.stage + '_' + a.paramKey + '_' + a.rule));
+  for (const a of newAnomalies) {
+    const key = a.stage + '_' + a.paramKey + '_' + a.rule;
+    if (!existingKeys.has(key)) {
+      STATE.anomalies.unshift(a);
+      STATE.anomalyCount++;
+      // Auto-trigger AI alert for alarm-severity anomalies (rate-limited)
+      if (a.severity === 'alarm' && Math.random() < 0.5) {
+        triggerAIAnomalyAlert(a);
+      }
+    }
+  }
+  // Trim
+  if (STATE.anomalies.length > 50) {
+    STATE.anomalies = STATE.anomalies.slice(0, 50);
+  }
+}
+
+// ====================================================================
+//                    RENDERING (Console)
+// ====================================================================
+function renderConsoleBody() {
+  const stage = STATE.currentStage;
+  const cfg = STAGE_CONFIG[stage];
+  const body = document.getElementById('consoleBody');
+  const batch = STATE.batchInfo[stage];
+
+  // Build HTML for params
+  const paramsHTML = cfg.params.map(p => {
+    const key = stage + '_' + p.key;
+    const hist = STATE.paramHistory[key];
+    const last = hist[hist.length - 1];
+    const prev = hist[hist.length - 2] || last;
+    const value = last.v;
+
+    let status = 'normal';
+    let statusText = 'NORMAL';
+    if (value > p.ucl || value < p.lcl) {
+      status = 'alarm'; statusText = 'OOC';
+    } else if (Math.abs(value - p.target) > 2 * p.sigma) {
+      status = 'warning'; statusText = '2σ';
+    }
+
+    let trend = 'flat', arrow = '→';
+    if (value > prev.v + 0.3 * p.sigma) { trend = 'up'; arrow = '↑'; }
+    else if (value < prev.v - 0.3 * p.sigma) { trend = 'down'; arrow = '↓'; }
+
+    // Format value display
+    const fmt = formatValue(value, p);
+
+    // CPK approximate (very rough)
+    const recentVals = hist.slice(-30).map(h => h.v);
+    const mean = recentVals.reduce((a,b)=>a+b,0) / recentVals.length;
+    const std = Math.sqrt(recentVals.reduce((a,b)=>a+(b-mean)**2,0) / recentVals.length);
+    const cpk = std > 0 ? Math.min((p.ucl - mean) / (3*std), (mean - p.lcl) / (3*std)) : 999;
+    const cpkStr = cpk.toFixed(2);
+
+    return `
+      <div class="param-card ${status}" data-param="${stage}_${p.key}" onclick="onParamClick('${stage}', '${p.key}')">
+        <div class="param-card-head">
+          <div class="param-name">${p.name}${p.key_quality ? ' <span style="color:var(--gold);font-size:9px;">★关键</span>' : ''}</div>
+          <div class="param-status">${statusText}</div>
+        </div>
+        <div class="param-value">
+          <span class="param-value-num">${fmt}</span>
+          <span class="param-unit">${p.unit}</span>
+          <span class="param-trend trend-${trend}" style="margin-left: 4px;">${arrow}</span>
+        </div>
+        <div class="param-meta">
+          <span class="target">目标 ${formatValue(p.target, p)}±${formatValue(p.ucl - p.target, p)}</span>
+          <span>CPK <strong style="color:${cpk>=1.33?'var(--industrial-green)':cpk>=1.0?'var(--warning-amber)':'var(--industrial-red)'}">${cpkStr}</strong></span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Equipment cards
+  const equipHTML = cfg.equipment.map(e => `
+    <div class="equip-card" onclick="onEquipClick('${stage}', '${e.id}')">
+      <span class="equip-led"></span>
+      <div class="equip-info">
+        <div class="equip-name">${e.id}</div>
+        <div class="equip-state">${e.name} · ${e.state}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Batch progress
+  const totalSteps = cfg.batchSteps.length;
+  const stepHTML = cfg.batchSteps.map((s, i) => {
+    let cls = '';
+    if (i < cfg.activeStep) cls = 'completed';
+    else if (i === cfg.activeStep) cls = 'active';
+    return `<div class="batch-step ${cls}"><div class="batch-step-dot"></div><div class="batch-step-name">${s}</div></div>`;
+  }).join('');
+
+  // Compute batch progress percent
+  const elapsedH = ((Date.now() - batch.startTime) / 3600000).toFixed(1);
+  const progressPct = Math.round((batch.produced / batch.target) * 100);
+
+  // SPC chart for the key quality parameter
+  const spcKey = cfg.spcKey;
+  const spcParam = cfg.params.find(p => p.key === spcKey);
+  const spcHistKey = stage + '_' + spcKey;
+  const spcSVG = renderSPCChart(spcParam, STATE.paramHistory[spcHistKey], stage);
+
+  // Anomaly stream
+  const stageAnomalies = STATE.anomalies.filter(a => a.stage === stage).slice(0, 8);
+  const anomalyHTML = stageAnomalies.length === 0
+    ? `<div class="stream-item"><div class="stream-time">--:--</div><div class="stream-icon success">✓</div><div class="stream-text">当前段无未处置异常事件</div></div>`
+    : stageAnomalies.map(a => {
+        const tm = new Date(a.time);
+        const tmStr = String(tm.getHours()).padStart(2,'0') + ':' + String(tm.getMinutes()).padStart(2,'0') + ':' + String(tm.getSeconds()).padStart(2,'0');
+        const sevIcon = a.severity === 'alarm' ? '⚠' : '!';
+        const fmt = formatValue(a.value, { unit: a.unit, sigma: 1 });
+        return `
+          <div class="stream-item ${a.severity}" onclick="onAnomalyClick('${a.id}')">
+            <div class="stream-time">${tmStr}</div>
+            <div class="stream-icon ${a.severity}">${sevIcon}</div>
+            <div class="stream-text"><strong>${a.paramName}</strong> = ${fmt}${a.unit}（${a.rule}，目标${formatValue(a.target, {unit:a.unit, sigma:1})}±${formatValue(a.ucl-a.target, {unit:a.unit,sigma:1})}）</div>
+          </div>
+        `;
+      }).join('');
+
+  body.innerHTML = `
+    <div class="batch-bar">
+      <div class="batch-id">
+        <div class="batch-id-label">在产批次 / BATCH</div>
+        <div class="batch-id-value">${batch.id}</div>
+      </div>
+      <div class="batch-progress-bar">${stepHTML}</div>
+      <div class="batch-stats">
+        <div class="batch-stat">
+          <div class="label">ELAPSED</div>
+          <div class="value">${elapsedH}h</div>
+        </div>
+        <div class="batch-stat">
+          <div class="label">PROGRESS</div>
+          <div class="value">${progressPct}%</div>
+        </div>
+        <div class="batch-stat">
+          <div class="label">YIELD-EST</div>
+          <div class="value">${(94 + Math.random() * 3).toFixed(1)}%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-title">关键设备状态</div>
+      <div class="section-meta">EQUIPMENT · 4 UNITS · 0 ALARM</div>
+    </div>
+    <div class="equip-bar">${equipHTML}</div>
+
+    <div class="section-head">
+      <div class="section-title">关键工艺参数实时监测</div>
+      <div class="section-meta">${cfg.params.length} PARAMS · ${cfg.params.filter(p => p.key_quality).length} KEY QUALITY · UPDATE 3s</div>
+    </div>
+    <div class="params-grid">${paramsHTML}</div>
+
+    <div class="section-head">
+      <div class="section-title">SPC 控制图 · ${spcParam.name}</div>
+      <div class="section-meta">SHEWHART X-CHART · n=30 · WESTERN ELECTRIC RULES</div>
+    </div>
+    <div class="spc-panel">${spcSVG}</div>
+
+    <div class="anomaly-stream">
+      <div class="stream-head">
+        <div class="stream-head-title">📋 异常事件流 · ANOMALY STREAM</div>
+        <div class="stream-head-counter">${stageAnomalies.length}</div>
+      </div>
+      <div class="stream-body">${anomalyHTML}</div>
+    </div>
+  `;
+
+  // Update top status indicators
+  updateStatusLeds();
+  updateContextPanel();
+}
+
+function updateStatusLeds() {
+  for (const stage of Object.keys(STAGE_CONFIG)) {
+    const led = document.getElementById('led' + stage.charAt(0).toUpperCase() + stage.slice(1));
+    const txt = document.getElementById('statusText' + stage.charAt(0).toUpperCase() + stage.slice(1));
+    if (!led) continue;
+    led.classList.remove('warning', 'alarm');
+    const stageAnomalies = STATE.anomalies.filter(a => a.stage === stage);
+    const hasAlarm = stageAnomalies.some(a => a.severity === 'alarm');
+    const hasWarning = stageAnomalies.length > 0;
+    if (hasAlarm) {
+      led.classList.add('alarm');
+      if (txt) txt.textContent = '报警';
+    } else if (hasWarning) {
+      led.classList.add('warning');
+      if (txt) txt.textContent = '注意';
+    } else {
+      if (txt) txt.textContent = '运行';
+    }
+  }
+}
+
+function updateContextPanel() {
+  const stage = STATE.currentStage;
+  const cfg = STAGE_CONFIG[stage];
+  const stageNames = { core: '第I段·铀核芯制备', triso: '第II段·TRISO包覆', sphere: '第III段·球形元件成型' };
+  const batch = STATE.batchInfo[stage];
+  const stageAnomalies = STATE.anomalies.filter(a => a.stage === stage);
+
+  let txt = `<strong>当前关注：</strong>${stageNames[stage]} · 在产批次 <strong>${batch.id}</strong>`;
+  if (stageAnomalies.length > 0) {
+    txt += ` · <strong style="color:var(--industrial-red)">${stageAnomalies.length} 个未处置异常</strong>`;
+  }
+  document.getElementById('contextText').innerHTML = txt;
+
+  const ctxParamCount = document.getElementById('ctxParamCount');
+  const allParamCount = Object.values(STAGE_CONFIG).reduce((a, c) => a + c.params.length, 0);
+  if (ctxParamCount) ctxParamCount.textContent = allParamCount + ' 参数 · ' + STATE.anomalies.length + ' 异常';
+
+  const inputInfo = document.getElementById('inputInfo');
+  if (inputInfo) inputInfo.textContent = `CTX: ${stageNames[stage]} · ${cfg.params.length} 参数 · ${cfg.equipment.length} 设备`;
+}
+
+// ====================================================================
+//                    SPC CHART RENDERING (SVG)
+// ====================================================================
+function renderSPCChart(param, hist, stage) {
+  const w = 800, h = 180;
+  const padding = { top: 16, right: 60, bottom: 22, left: 50 };
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+
+  if (!hist || hist.length === 0) return '<div class="spc-chart"></div>';
+
+  const recent = hist.slice(-30);
+  const cl = param.target;
+  const ucl = param.ucl;
+  const lcl = param.lcl;
+
+  const yMin = Math.min(lcl, ...recent.map(h => h.v)) - param.sigma;
+  const yMax = Math.max(ucl, ...recent.map(h => h.v)) + param.sigma;
+
+  const xScale = (i) => padding.left + (i / (recent.length - 1)) * chartW;
+  const yScale = (v) => padding.top + (1 - (v - yMin) / (yMax - yMin)) * chartH;
+
+  // Compute mean & cpk
+  const mean = recent.reduce((a, b) => a + b.v, 0) / recent.length;
+  const std = Math.sqrt(recent.reduce((a, b) => a + (b.v - mean) ** 2, 0) / recent.length);
+  const cpk = std > 0 ? Math.min((ucl - mean) / (3 * std), (mean - lcl) / (3 * std)) : 999;
+  const cpkStatus = cpk >= 1.33 ? 'good' : cpk >= 1.0 ? 'warn' : 'bad';
+
+  // Build path
+  const linePath = recent.map((p, i) => {
+    return (i === 0 ? 'M' : 'L') + xScale(i) + ',' + yScale(p.v);
+  }).join(' ');
+
+  // Build points
+  const points = recent.map((p, i) => {
+    let cls = '';
+    if (p.v > ucl || p.v < lcl) cls = 'alarm';
+    else if (Math.abs(p.v - cl) > 2 * param.sigma) cls = 'warning';
+    return `<circle class="spc-data-point ${cls}" cx="${xScale(i)}" cy="${yScale(p.v)}" r="3" data-idx="${i}" data-value="${p.v.toFixed(3)}" data-time="${p.t}"/>`;
+  }).join('');
+
+  // X axis ticks (every 5 points)
+  const xTicks = [];
+  for (let i = 0; i < recent.length; i += 5) {
+    const t = new Date(recent[i].t);
+    const label = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+    xTicks.push(`<text class="spc-axis-label" x="${xScale(i)}" y="${h - padding.bottom + 14}" text-anchor="middle">${label}</text>`);
+  }
+
+  // Y axis ticks (5 levels)
+  const yTicks = [];
+  for (let i = 0; i <= 4; i++) {
+    const v = yMin + (yMax - yMin) * (i / 4);
+    yTicks.push(`<text class="spc-axis-label" x="${padding.left - 6}" y="${yScale(v) + 3}" text-anchor="end">${v.toFixed(2)}</text>`);
+    yTicks.push(`<line class="spc-grid-line" x1="${padding.left}" y1="${yScale(v)}" x2="${padding.left + chartW}" y2="${yScale(v)}"/>`);
+  }
+
+  return `
+    <div class="spc-head">
+      <div class="spc-title">${param.name}（${param.unit}）· n=${recent.length}</div>
+      <div class="spc-meta">
+        <span class="m-item"><span class="lbl">CL</span><span class="val">${cl.toFixed(3)}</span></span>
+        <span class="m-item"><span class="lbl">σ</span><span class="val">${std.toFixed(3)}</span></span>
+        <span class="m-item"><span class="lbl">MEAN</span><span class="val">${mean.toFixed(3)}</span></span>
+        <span class="m-item"><span class="lbl">CPK</span><span class="val ${cpkStatus}">${cpk.toFixed(2)}</span></span>
+      </div>
+    </div>
+    <div class="spc-chart">
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+        ${yTicks.join('')}
+        ${xTicks.join('')}
+        <line class="spc-axis-line" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${h - padding.bottom}"/>
+        <line class="spc-axis-line" x1="${padding.left}" y1="${h - padding.bottom}" x2="${padding.left + chartW}" y2="${h - padding.bottom}"/>
+
+        <line class="spc-ucl-line" x1="${padding.left}" y1="${yScale(ucl)}" x2="${padding.left + chartW}" y2="${yScale(ucl)}"/>
+        <text class="spc-ucl-label" x="${padding.left + chartW + 6}" y="${yScale(ucl) + 3}">UCL ${ucl.toFixed(2)}</text>
+
+        <line class="spc-cl-line" x1="${padding.left}" y1="${yScale(cl)}" x2="${padding.left + chartW}" y2="${yScale(cl)}"/>
+        <text class="spc-cl-label" x="${padding.left + chartW + 6}" y="${yScale(cl) + 3}">CL ${cl.toFixed(2)}</text>
+
+        <line class="spc-lcl-line" x1="${padding.left}" y1="${yScale(lcl)}" x2="${padding.left + chartW}" y2="${yScale(lcl)}"/>
+        <text class="spc-lcl-label" x="${padding.left + chartW + 6}" y="${yScale(lcl) + 3}">LCL ${lcl.toFixed(2)}</text>
+
+        <path class="spc-data-line" d="${linePath}"/>
+        ${points}
+      </svg>
+    </div>
+  `;
+}
+
+// ====================================================================
+//                    UTILITIES
+// ====================================================================
+function formatValue(v, p) {
+  if (typeof v !== 'number') return '-';
+  if (Math.abs(v) >= 100) return v.toFixed(1);
+  if (Math.abs(v) >= 10) return v.toFixed(2);
+  if (Math.abs(v) >= 1) return v.toFixed(3);
+  return v.toFixed(3);
+}
+
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type !== 'info' ? ' ' + type : '');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ====================================================================
+//                    CLAUDE API
+// ====================================================================
+async function callClaudeStream(messages, system, onChunk, options = {}) {
+  if (!STATE.apiKey) throw new Error('API密钥未设置');
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': STATE.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: options.maxTokens || 2048,
+      system,
+      messages,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    let msg = response.status + ': ' + err;
+    try { const j = JSON.parse(err); if (j.error?.message) msg = j.error.message; } catch(e){}
+    throw new Error(msg);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6).trim();
+      if (!data || data === '[DONE]') continue;
+      try {
+        const event = JSON.parse(data);
+        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+          onChunk(event.delta.text);
+        }
+      } catch (e) {}
+    }
+  }
+}
+
+async function callClaude(messages, system, options = {}) {
+  if (!STATE.apiKey) throw new Error('API密钥未设置');
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': STATE.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: options.maxTokens || 1024,
+      system,
+      messages,
+    }),
+  });
+  if (!response.ok) throw new Error(response.status + ': ' + await response.text());
+  const data = await response.json();
+  let text = '';
+  for (const block of data.content || []) {
+    if (block.type === 'text') text += block.text;
+  }
+  return text;
+}
+
+// ====================================================================
+//                    AI COPILOT - CONTEXT BUILDING
+// ====================================================================
+const SYS_KNOWLEDGE = `你是中核北方核燃料元件有限公司（202厂）球形燃料事业部的AI工艺Copilot，部署在生产驾驶舱中，为工艺工程师、班组长、质量工程师提供实时智能支持。
+
+## 你的工艺知识背景
+
+球形燃料元件（HTGR球床堆燃料）是高温气冷堆的核心燃料形态，202厂为石岛湾示范工程（HTR-PM）批量供货。三段式制造工艺：
+
+### 第I段·铀核芯制备（凝胶外滴法 GSP）
+UO2(NO3)2 溶液经滴定塔在氨水中成型为凝胶微球前驱体，经陈化、干燥、煅烧（约850℃）、H2还原烧结（约1550℃）后得到 UO2 核芯。
+- 核芯目标：直径 500±20μm、密度 ≥10.4 g/cm³（约理论密度97%）、铀含量 88±0.5%、球形度（长短径比）<1.08、缺陷率<5‰
+- 关键控制点：溶液浓度（影响成核）、滴定流速（影响粒径）、煅烧温度（影响相变完整度）、还原温度（影响最终密度）
+
+### 第II段·TRISO包覆（流化床CVD）
+核芯在流化床中依次沉积四层结构：
+- 缓冲层（疏松热解碳，约95μm）：吸收裂变气体压力与位移损伤，原料 C2H2
+- 内热解碳层 IPyC（致密热解碳，约40μm）：阻挡腐蚀性裂变产物，原料 C3H6 + Ar，温度1300℃
+- SiC 层（碳化硅，约35μm）：核心承压层与扩散屏障，原料 MTS（CH3SiCl3）+ H2，温度1500℃
+- 外热解碳层 OPyC（致密热解碳，约40μm）：保护SiC、与基体结合，工艺类似IPyC
+- 关键质量指标：SiC 层致密度（>3.18 g/cm³）、四层厚度均匀性、SiC 破损率（<100 ppm）
+- 典型缺陷：椭球（核芯非球形传播）、双核（粘连）、缺包覆、SiC 微孔（密度不足）
+
+### 第III段·球形元件成型
+TRISO 颗粒（每球约 12000 个）+ 石墨基体粉（重量比约 1:5）经混料、冷准等静压成型为 Φ60mm 球，再经退火（约1900℃，去挥发分+石墨化）、机加工至最终尺寸、CT 无损检测。
+- 关键质量：直径 60±0.5mm、基体密度 1.70-1.74 g/cm³、TRISO 分布均匀性、压溃强度 >25kN、SiC 完整率（CT 检出无破损TRISO）
+- 常见问题：等静压压力波动→密度不均、退火升温过快→TRISO 应力破损、混料不充分→颗粒聚集
+
+## 你的工作风格
+
+1. **基于实时数据说话**：你的回答必须紧密结合用户提供的当前产线状态（参数实时值、SPC趋势、异常事件、批次进度），不能给出与现实数据脱节的泛泛之论
+2. **像工艺工程师一样思考**：用工艺机理而非简单的统计学解释异常。比如"密度下降"应该联想到"是否还原温度不足导致U3O8未完全还原为UO2"
+3. **可执行的建议**：给出具体的工艺参数调整建议，明确调整方向、幅度、预期效果
+4. **风险意识**：核工业容错率极低，对涉及核安全、辐射防护、SiC完整性的事项必须高度敏感
+5. **简洁专业**：回答控制在300字以内，多用工艺工程师熟悉的术语，避免冗长解释。重要数据用 markdown **加粗** 突出
+
+## 你不应该做的
+
+- 不要回避用户的具体问题去做泛泛而谈
+- 不要给出"建议进一步监测"这种缺乏实质的建议
+- 不要忽视用户上下文中提供的具体参数值
+- 不要使用一般工业 AI 的话术，要体现出对核燃料工艺的深度理解`;
+
+function buildProductionContext() {
+  const stage = STATE.currentStage;
+  const cfg = STAGE_CONFIG[stage];
+  const stageName = { core: '铀核芯制备', triso: 'TRISO包覆', sphere: '球形元件成型' }[stage];
+  const batch = STATE.batchInfo[stage];
+
+  let ctx = `# 当前产线实时状态（${new Date().toLocaleTimeString('zh-CN', {hour12: false})}）\n\n`;
+  ctx += `## 当前关注段：第${{core:'I',triso:'II',sphere:'III'}[stage]}段·${stageName}\n`;
+  ctx += `## 在产批次：${batch.id}\n`;
+  ctx += `## 当前工序步骤：${cfg.batchSteps[cfg.activeStep]}（${cfg.activeStep + 1}/${cfg.batchSteps.length}）\n`;
+  ctx += `## 已运行：${((Date.now() - batch.startTime) / 3600000).toFixed(1)}小时\n\n`;
+
+  ctx += `## 关键工艺参数实时值\n`;
+  for (const p of cfg.params) {
+    const key = stage + '_' + p.key;
+    const hist = STATE.paramHistory[key];
+    const last = hist[hist.length - 1].v;
+    const recent = hist.slice(-10).map(h => h.v);
+    const mean = recent.reduce((a,b)=>a+b,0) / recent.length;
+    const trend = last > mean + 0.5 * p.sigma ? '↑' : last < mean - 0.5 * p.sigma ? '↓' : '→';
+    let status = '';
+    if (last > p.ucl || last < p.lcl) status = ' [超限!]';
+    else if (Math.abs(last - p.target) > 2 * p.sigma) status = ' [2σ预警]';
+    ctx += `- ${p.name}：**${last.toFixed(3)} ${p.unit}**（目标 ${p.target}±${(p.ucl-p.target).toFixed(2)}，趋势${trend}）${status}${p.key_quality?' ★关键':''}\n`;
+  }
+
+  ctx += `\n## 设备运行状态\n`;
+  for (const e of cfg.equipment) {
+    ctx += `- ${e.id} ${e.name}：${e.state}\n`;
+  }
+
+  // Active anomalies
+  const stageAnomalies = STATE.anomalies.filter(a => a.stage === stage).slice(0, 5);
+  if (stageAnomalies.length > 0) {
+    ctx += `\n## 当前段未处置异常事件\n`;
+    for (const a of stageAnomalies) {
+      const tm = new Date(a.time).toLocaleTimeString('zh-CN', {hour12: false});
+      ctx += `- [${tm} ${a.severity === 'alarm' ? '严重' : '注意'}] ${a.paramName} = ${a.value.toFixed(3)}${a.unit}（${a.rule}，目标 ${a.target}±${(a.ucl-a.target).toFixed(2)}）\n`;
+    }
+  }
+
+  // Cross-stage status
+  ctx += `\n## 其他工艺段状态概览\n`;
+  for (const s of ['core', 'triso', 'sphere']) {
+    if (s === stage) continue;
+    const otherCfg = STAGE_CONFIG[s];
+    const otherBatch = STATE.batchInfo[s];
+    const otherAnomalies = STATE.anomalies.filter(a => a.stage === s);
+    const stageNm = { core: '第I段铀核芯', triso: '第II段TRISO包覆', sphere: '第III段球形成型' }[s];
+    ctx += `- ${stageNm}：批次${otherBatch.id}，工序${otherCfg.batchSteps[otherCfg.activeStep]}，异常${otherAnomalies.length}个\n`;
+  }
+
+  return ctx;
+}
+
+// ====================================================================
+//                    AI COPILOT - INTERACTION
+// ====================================================================
+function appendChatMessage(role, content, options = {}) {
+  const msgs = document.getElementById('chatMessages');
+  const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+
+  const roleLabel = { user: '工艺工程师', assistant: 'AI COPILOT', system: 'SYSTEM' }[role];
+  const meta = `<div class="msg-meta">
+    <span class="msg-role-badge">${roleLabel}</span>
+    <span>${time}</span>
+  </div>`;
+
+  el.innerHTML = `${meta}<div class="msg-content">${
+    role === 'user' ? escapeHtml(content).replace(/\n/g, '<br>') :
+    role === 'system' ? content :
+    (options.placeholder ? '' : marked.parse(content))
+  }</div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (STATE.isAIBusy) return toast('AI 正在分析中，请稍候', 'error');
+  if (!ensureApiKey()) return;
+
+  // Hide welcome if present
+  const welcomeMsg = document.querySelector('.welcome-msg');
+  if (welcomeMsg) welcomeMsg.style.display = 'none';
+
+  appendChatMessage('user', text);
+  input.value = '';
+  input.style.height = 'auto';
+
+  await runAIQuery(text);
+}
+
+async function runAIQuery(userQuery, options = {}) {
+  STATE.isAIBusy = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  // Build full context
+  const productionCtx = buildProductionContext();
+  const userMsg = `${productionCtx}\n\n---\n\n## 用户提问\n\n${userQuery}`;
+
+  // Add to history
+  STATE.history.push({ role: 'user', content: userMsg });
+
+  // Placeholder for assistant
+  const asstEl = appendChatMessage('assistant', '', { placeholder: true });
+  const contentEl = asstEl.querySelector('.msg-content');
+  contentEl.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+
+  let fullText = '';
+  try {
+    await callClaudeStream(STATE.history, SYS_KNOWLEDGE, (chunk) => {
+      fullText += chunk;
+      contentEl.innerHTML = marked.parse(fullText);
+      const msgs = document.getElementById('chatMessages');
+      msgs.scrollTop = msgs.scrollHeight;
+    });
+
+    STATE.history.push({ role: 'assistant', content: fullText });
+    // Trim history (keep last 6 turns)
+    if (STATE.history.length > 12) {
+      STATE.history = STATE.history.slice(-12);
+    }
+
+    // Add follow-up actions
+    appendFollowupActions(asstEl, userQuery, fullText);
+
+  } catch (err) {
+    contentEl.innerHTML = `<span style="color: var(--industrial-red);">❌ 调用失败：${escapeHtml(err.message)}</span>`;
+    toast('AI 调用失败：' + err.message, 'error');
+  }
+
+  STATE.isAIBusy = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function appendFollowupActions(msgEl, userQuery, aiResponse) {
+  const followupHTML = `
+    <div class="followup-actions">
+      <button class="fa-btn" onclick="quickAsk('针对你刚才的分析，给出最关键的1个立即可执行操作建议')">立即可执行操作</button>
+      <button class="fa-btn" onclick="quickAsk('对比近10个批次的同类问题，看是否是共性还是个例')">跨批次对比</button>
+      <button class="fa-btn" onclick="quickAsk('如果不处置，这个问题对下游工序有什么影响？')">下游影响评估</button>
+      <button class="fa-btn" onclick="quickAsk('给我一个详细的SOP级处置流程')">详细SOP</button>
+    </div>
+  `;
+  msgEl.querySelector('.msg-content').insertAdjacentHTML('beforeend', followupHTML);
+}
+
+function quickAsk(text) {
+  const input = document.getElementById('chatInput');
+  input.value = text;
+  sendMessage();
+}
+
+// ====================================================================
+//                    INTERACTION HANDLERS
+// ====================================================================
+function onParamClick(stage, paramKey) {
+  const cfg = STAGE_CONFIG[stage];
+  const p = cfg.params.find(x => x.key === paramKey);
+  const histKey = stage + '_' + paramKey;
+  const hist = STATE.paramHistory[histKey];
+  const recent = hist.slice(-15);
+  const last = recent[recent.length - 1].v;
+  const mean = recent.reduce((a,b)=>a+b.v,0) / recent.length;
+  const std = Math.sqrt(recent.reduce((a,b)=>a+(b.v-mean)**2,0) / recent.length);
+  const cpk = std > 0 ? Math.min((p.ucl - mean) / (3*std), (mean - p.lcl) / (3*std)) : 999;
+
+  const query = `请深度分析参数【${p.name}】的当前状态：
+- 当前值：${last.toFixed(3)} ${p.unit}
+- 近15点均值：${mean.toFixed(3)}
+- 近15点σ：${std.toFixed(3)}
+- CPK：${cpk.toFixed(2)}
+- 目标：${p.target} ${p.unit}（控制限 ${p.lcl} - ${p.ucl}）
+
+请从工艺机理角度分析当前状态，识别潜在风险，并给出工艺工程师下一步的具体动作建议。`;
+  quickAsk(query);
+}
+
+function onAnomalyClick(anomalyId) {
+  const a = STATE.anomalies.find(x => x.id === anomalyId);
+  if (!a) return;
+  const stageName = { core: '第I段铀核芯', triso: '第II段TRISO包覆', sphere: '第III段球形成型' }[a.stage];
+  const query = `针对【${stageName}】中刚刚检测到的异常事件做根因分析：
+- 参数：${a.paramName}
+- 实测值：${a.value.toFixed(3)} ${a.unit}
+- 控制限：${a.lcl} - ${a.ucl}（目标 ${a.target}）
+- 触发规则：${a.rule}
+- 严重等级：${a.severity === 'alarm' ? '严重报警' : '注意'}
+
+请从工艺机理给出最可能的3个根因假设，并按优先级给出排查与处置的具体动作。`;
+  quickAsk(query);
+}
+
+function onEquipClick(stage, equipId) {
+  const e = STAGE_CONFIG[stage].equipment.find(x => x.id === equipId);
+  if (!e) return;
+  const query = `请评估设备 ${e.id}（${e.name}）的当前运行状态（${e.state}），结合本段工艺参数判断设备是否存在性能漂移、维护需求或工艺影响风险。`;
+  quickAsk(query);
+}
+
+async function triggerAIAnomalyAlert(anomaly) {
+  // 未设置密钥时不自动弹出 AI 分析（避免突兀的密钥输入提示）
+  if (!STATE.apiKey) return;
+  // Avoid spamming: only trigger when not busy and the anomaly is in the current stage
+  if (STATE.isAIBusy) return;
+  if (anomaly.stage !== STATE.currentStage) return;
+
+  const stageName = { core: '第I段铀核芯', triso: '第II段TRISO包覆', sphere: '第III段球形成型' }[anomaly.stage];
+
+  // Show system notice first
+  appendChatMessage('system',
+    `🔔 <strong>检测到严重异常</strong> · ${stageName} · ${anomaly.paramName} 超出控制限 · 已自动触发 AI 分析...`
+  );
+
+  toast(`报警：${anomaly.paramName} 超限`, 'alarm');
+
+  // Auto-query Claude
+  const autoQuery = `产线刚刚检测到一个严重异常，请立即给出快速分析：
+- 段：${stageName}
+- 参数：${anomaly.paramName}
+- 实测：${anomaly.value.toFixed(3)} ${anomaly.unit}
+- 控制限：${anomaly.lcl} - ${anomaly.ucl}（目标 ${anomaly.target}）
+
+请用 100 字以内给出：（1）是否影响核安全或SiC完整性等关键质量指标；（2）最可能的1个根因；（3）值班人员需要立即采取的最优1个动作。`;
+
+  await runAIQuery(autoQuery);
+}
+
+// ====================================================================
+//                    UI EVENT WIRING
+// ====================================================================
+document.querySelectorAll('.stage-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.stage-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    STATE.currentStage = btn.dataset.stage;
+    renderConsoleBody();
+  });
+});
+
+document.getElementById('chatInput').addEventListener('input', (e) => {
+  e.target.style.height = 'auto';
+  e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px';
+});
+document.getElementById('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// ====================================================================
+//          API KEY（按需获取，不再阻塞启动）
+// ====================================================================
+function ensureApiKey() {
+  if (STATE.apiKey) return true;
+  const val = (window.prompt('首次使用 AI Copilot 需要 Anthropic API Key（仅保存在本浏览器会话，不上传任何服务器）。\n可在 console.anthropic.com 获取：') || '').trim();
+  if (!val) {
+    toast('未设置 API Key，AI 对话暂不可用（产线监控不受影响）', 'error');
+    return false;
+  }
+  STATE.apiKey = val;
+  try { sessionStorage.setItem('htgr_api_key', val); } catch (e) {}
+  return true;
+}
+
+function showWelcome() {
+  const stageName = '第I段铀核芯制备';
+  appendChatMessage('assistant', `**驾驶舱已就绪** · 当前接管 ${stageName} · 在产批次 **${STATE.batchInfo.core.id}**
+
+我已加载本班次的实时产线状态：12 个核芯工艺参数、4 台关键设备、近 30 分钟 SPC 趋势、所有未处置异常事件。
+
+**我能做什么：**
+- 实时监测西电规则与 3σ 控制限，发现严重异常会主动推送分析
+- 你点击任何参数卡片或异常事件，我会针对该具体对象做工艺机理分析
+- 你可以自然语言提问任何工艺问题，我会基于当前实时数据回答
+- 我会同步关注另外两段（TRISO、球形成型）的状态，识别跨段联动风险
+
+试试点击下方建议或直接提问开始（首次调用 AI 时会提示输入 Anthropic API Key）。`);
+
+  // Suggested actions
+  const msgs = document.getElementById('chatMessages');
+  const sugEl = document.createElement('div');
+  sugEl.className = 'suggested-actions';
+  sugEl.innerHTML = `
+    <button class="sa-card" onclick="quickAsk('当前 I 段铀核芯所有关键质量指标的健康度评估如何？哪些参数需要重点盯着？')">
+      <span class="sa-tag">★ 启动建议</span>
+      当前所有关键质量指标的健康度评估如何？哪些参数需要重点盯着？
+    </button>
+    <button class="sa-card" onclick="quickAsk('我们这个批次已经运行4小时，预测最终核芯成品的良率范围')">
+      <span class="sa-tag">良率预测</span>
+      当前批次已运行4小时，预测最终核芯成品良率范围
+    </button>
+    <button class="sa-card" onclick="quickAsk('给我看一下还原烧结炉#3 的运行情况，过去几个班是否有性能漂移?')">
+      <span class="sa-tag">设备健康</span>
+      还原烧结炉#3 过去几个班是否有性能漂移?
+    </button>
+  `;
+  msgs.appendChild(sugEl);
+}
+
+// ====================================================================
+//                    INIT & TICK LOOP
+// ====================================================================
+function updateTopTime() {
+  const now = new Date();
+  document.getElementById('topTime').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+
+function init() {
+  initParamHistory();
+  // Configure marked
+  marked.setOptions({ breaks: true, gfm: true });
+
+  // Initial render
+  renderConsoleBody();
+
+  // Top time clock
+  updateTopTime();
+  setInterval(updateTopTime, 1000);
+
+  // Production simulation tick
+  setInterval(simulateTick, 3000);
+
+  // Copilot welcome + suggested actions
+  showWelcome();
+  toast('驾驶舱已就绪 · 演示数据已加载', 'success');
+
+  // Focus chat input
+  setTimeout(() => document.getElementById('chatInput').focus(), 300);
+}
+
+init();
+</script>
+</body>
+</html>
