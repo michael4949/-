@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智衡 · 企业AI高价值场景识别与排序智能体</title>
+<meta name="description" content="通过引导式问答，识别并排序企业AI高价值落地场景，一键生成专业图文PDF报告。覆盖全行业、全职能，纯前端本地运行。">
+<style>
+/* ============================================================
+   智衡 · AI价值罗盘  —  Enterprise AI Value Compass
+   独立单文件应用 · 浅色主题 · 无外部依赖
+   ============================================================ */
+:root{
+  --c1:#6366f1; --c2:#8b5cf6; --c3:#06b6d4; --c4:#10b981; --c5:#f59e0b; --c6:#ec4899;
+  --ink:#0f172a; --ink2:#334155; --mut:#64748b; --mut2:#94a3b8;
+  --line:#e2e8f0; --line2:#e8ebff;
+  --bg:#f6f8fe; --card:#ffffff;
+  --grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#06b6d4 100%);
+  --grad-soft:linear-gradient(135deg,#eef0ff 0%,#f5efff 55%,#e9faff 100%);
+  --shadow:0 8px 30px rgba(80,90,200,.10);
+  --shadow-lg:0 18px 50px rgba(80,90,200,.16);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:#c7d2fe;color:#1e1b4b}
+button{font-family:inherit}
+
+/* ---------- 背景装饰：光斑 + 点阵 + 神经网络线 ---------- */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;z-index:-2;pointer-events:none}
+.b1{width:520px;height:520px;left:-140px;top:-160px;background:radial-gradient(circle,#c7d2fe,transparent 65%)}
+.b2{width:620px;height:620px;right:-200px;top:30%;background:radial-gradient(circle,#cffafe,transparent 65%)}
+.b3{width:460px;height:460px;left:30%;bottom:-220px;background:radial-gradient(circle,#ede9fe,transparent 65%)}
+.grid-deco{position:fixed;inset:0;z-index:-3;pointer-events:none;
+  background-image:radial-gradient(rgba(99,102,241,.10) 1px,transparent 1px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%);
+}
+.net-deco{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:-1;pointer-events:none;opacity:.55}
+
+/* ---------- 顶栏 ---------- */
+.appbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;
+  padding:12px 26px;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(226,232,240,.8)}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .mark{width:36px;height:36px;border-radius:11px;background:var(--grad);position:relative;
+  box-shadow:0 4px 14px rgba(99,102,241,.45);display:flex;align-items:center;justify-content:center}
+.brand .mark::after{content:"✦";color:#fff;font-size:17px}
+.brand b{font-size:16.5px;letter-spacing:.5px}
+.brand .sub{font-size:11.5px;color:var(--mut);display:block;margin-top:-3px;letter-spacing:.3px}
+.ai-chip{font-size:10.5px;font-weight:700;letter-spacing:1px;color:#fff;background:var(--grad);
+  border-radius:99px;padding:2.5px 9px;margin-left:2px;box-shadow:0 2px 8px rgba(139,92,246,.4)}
+.appbar .sp{flex:1}
+.appbar .hint{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.appbar .hint .dot{width:7px;height:7px;border-radius:50%;background:var(--c4);box-shadow:0 0 0 3px rgba(16,185,129,.18);animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(16,185,129,.18)}50%{box-shadow:0 0 0 6px rgba(16,185,129,.07)}}
+
+/* ---------- 通用按钮 ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;border-radius:12px;
+  padding:11px 22px;font-size:14.5px;font-weight:600;transition:all .22s ease;white-space:nowrap}
+.btn.primary{background:var(--grad);color:#fff;box-shadow:0 6px 20px rgba(99,102,241,.38)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(99,102,241,.48)}
+.btn.primary:active{transform:translateY(0)}
+.btn.ghost{background:#fff;color:var(--ink2);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:#a5b4fc;color:var(--c1);background:#fafbff}
+.btn.subtle{background:transparent;color:var(--mut);padding:9px 14px}
+.btn.subtle:hover{color:var(--c1);background:#eef0ff}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none}
+.btn.lg{padding:14px 34px;font-size:16px;border-radius:14px}
+
+/* ---------- 向导舞台 ---------- */
+.stage{max-width:920px;margin:0 auto;padding:30px 22px 80px}
+.progress-wrap{margin:6px 0 22px}
+.progress-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);margin-bottom:8px}
+.progress-meta b{color:var(--c1)}
+.pbar{height:7px;background:#e8ebfa;border-radius:99px;overflow:hidden;position:relative}
+.pbar i{display:block;height:100%;background:var(--grad);border-radius:99px;width:0;
+  transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(99,102,241,.5)}
+
+/* 智能体对话气泡 */
+.agent-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.orb{width:52px;height:52px;border-radius:50%;flex:none;position:relative;
+  background:radial-gradient(circle at 32% 30%,#a5b4fc,#6366f1 45%,#0891b2 100%);
+  box-shadow:0 6px 18px rgba(99,102,241,.45), inset 0 -4px 10px rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;animation:float 4.5s ease-in-out infinite}
+.orb::before{content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:1.5px dashed rgba(99,102,241,.45);animation:spin 14s linear infinite}
+.orb::after{content:"✦";color:#fff;font-size:20px;text-shadow:0 0 12px rgba(255,255,255,.9)}
+.orb.lg{width:120px;height:120px}.orb.lg::after{font-size:46px}.orb.lg::before{inset:-12px;border-width:2px}
+.orb.sm{width:34px;height:34px;animation:none}.orb.sm::after{font-size:13px}.orb.sm::before{inset:-4px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bubble{background:#fff;border:1px solid var(--line2);border-radius:4px 18px 18px 18px;
+  padding:15px 20px;box-shadow:var(--shadow);flex:1;min-height:56px}
+.bubble .who{font-size:11.5px;font-weight:700;letter-spacing:1.5px;color:var(--c1);margin-bottom:3px}
+.bubble .say{font-size:15.5px;color:var(--ink);line-height:1.75}
+.bubble .why{font-size:12.5px;color:var(--mut);margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);display:flex;gap:6px}
+.bubble .why::before{content:"💡";font-size:12px}
+.tdots{display:inline-flex;gap:5px;padding:6px 2px}
+.tdots i{width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:bk 1.1s infinite}
+.tdots i:nth-child(2){animation-delay:.18s}.tdots i:nth-child(3){animation-delay:.36s}
+@keyframes bk{0%,70%,100%{opacity:.3;transform:translateY(0)}35%{opacity:1;transform:translateY(-4px)}}
+
+/* 问题卡片 */
+.qcard{background:var(--card);border:1px solid var(--line2);border-radius:20px;
+  box-shadow:var(--shadow);padding:26px 28px;animation:rise .4s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fieldlabel{font-size:13.5px;font-weight:700;color:var(--ink2);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.fieldlabel:first-child{margin-top:0}
+.fieldlabel .opt-tag{font-size:11px;color:var(--mut);font-weight:500;background:#f1f5f9;border-radius:99px;padding:1px 9px}
+.fieldlabel .req{color:var(--c6)}
+.group-cap{font-size:12px;font-weight:700;color:var(--mut);letter-spacing:1px;margin:16px 0 8px}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.opt-grid.wide{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.opt{position:relative;border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;cursor:pointer;
+  background:#fff;transition:all .18s ease;user-select:none;display:flex;align-items:center;gap:9px}
+.opt:hover{border-color:#a5b4fc;transform:translateY(-1.5px);box-shadow:0 6px 16px rgba(99,102,241,.13)}
+.opt .ic{font-size:18px;flex:none}
+.opt .t{font-size:13.8px;font-weight:600;color:var(--ink2);line-height:1.35}
+.opt .d{font-size:11.5px;color:var(--mut);line-height:1.4;margin-top:1px}
+.opt .ck{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--grad);
+  color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(99,102,241,.5)}
+.opt.sel{border-color:transparent;background:var(--grad-soft);box-shadow:0 0 0 1.6px var(--c1),0 6px 16px rgba(99,102,241,.16)}
+.opt.sel .t{color:var(--c1)}
+.opt.sel .ck{display:flex}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 15px;font-size:13px;
+  color:var(--ink2);cursor:pointer;transition:all .16s;user-select:none}
+.chip:hover{border-color:#a5b4fc;color:var(--c1)}
+.chip.sel{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(99,102,241,.35)}
+.likert{display:flex;gap:8px;align-items:stretch}
+.likert .lk{flex:1;text-align:center;border:1.5px solid var(--line);border-radius:11px;padding:9px 6px;
+  cursor:pointer;transition:all .16s;background:#fff}
+.likert .lk .n{font-weight:800;font-size:15px;color:var(--mut2)}
+.likert .lk .l{font-size:11px;color:var(--mut);line-height:1.3;margin-top:2px}
+.likert .lk:hover{border-color:#a5b4fc}
+.likert .lk.sel{border-color:transparent;background:var(--grad-soft);box-shadow:0 0 0 1.6px var(--c1)}
+.likert .lk.sel .n{color:var(--c1)}.likert .lk.sel .l{color:var(--ink2)}
+input.txt{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;font-size:15px;
+  font-family:inherit;color:var(--ink);outline:none;transition:all .2s;background:#fff}
+input.txt:focus{border-color:var(--c1);box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+input.txt::placeholder{color:#b6c0d4}
+.counterhint{font-size:12px;color:var(--mut2);margin-top:9px}
+.err-msg{color:#e11d48;font-size:13px;margin-top:10px;display:none;align-items:center;gap:6px}
+.err-msg.show{display:flex;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.btnbar{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+
+/* 欢迎页 */
+.welcome{text-align:center;padding:34px 10px 10px}
+.welcome h1{font-size:34px;line-height:1.35;letter-spacing:1px;margin:24px 0 4px}
+.welcome h1 .gt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.welcome .en{font-size:12.5px;letter-spacing:4px;color:var(--mut2);text-transform:uppercase;margin-bottom:14px}
+.welcome p.lead{max-width:640px;margin:0 auto;color:var(--mut);font-size:15.5px}
+.feat-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:26px 0 30px}
+.feat{background:rgba(255,255,255,.8);border:1px solid var(--line2);border-radius:14px;padding:12px 18px;
+  font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(99,102,241,.07)}
+.feat .fi{font-size:16px}
+.steps-mini{display:flex;justify-content:center;gap:0;margin:8px 0 30px;flex-wrap:wrap}
+.smini{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut)}
+.smini .num{width:22px;height:22px;border-radius:50%;background:#eef0ff;color:var(--c1);font-weight:700;
+  font-size:11.5px;display:flex;align-items:center;justify-content:center}
+.smini .arrow{margin:0 12px;color:#c7d2fe}
+.privacy-note{font-size:12px;color:var(--mut2);margin-top:18px}
+
+/* 摘要确认 */
+.sumgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.sumitem{background:#f8faff;border:1px solid var(--line2);border-radius:12px;padding:10px 14px}
+.sumitem .k{font-size:11.5px;color:var(--mut);letter-spacing:.5px}
+.sumitem .v{font-size:13.5px;font-weight:600;color:var(--ink);margin-top:2px;line-height:1.5}
+.ack{margin-top:16px;background:var(--grad-soft);border:1px solid #ddd9ff;border-radius:14px;padding:14px 18px;
+  font-size:13.5px;color:#41368f;line-height:1.8}
+.ack b{color:#3730a3}
+
+/* ---------- 分析动画页 ---------- */
+.ana{max-width:560px;margin:0 auto;padding:70px 22px;text-align:center}
+.ana h2{font-size:23px;margin:28px 0 6px}
+.ana .sub{color:var(--mut);font-size:13.5px;margin-bottom:30px}
+.ana-steps{list-style:none;text-align:left;background:#fff;border:1px solid var(--line2);border-radius:18px;
+  padding:20px 24px;box-shadow:var(--shadow)}
+.ana-steps li{display:flex;align-items:center;gap:12px;padding:9px 0;font-size:14px;color:var(--mut2);transition:color .3s}
+.ana-steps li .st{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all .3s}
+.ana-steps li.run{color:var(--ink)}
+.ana-steps li.run .st{border-color:var(--c1);border-top-color:transparent;animation:spin 1s linear infinite}
+.ana-steps li.done{color:var(--ink2)}
+.ana-steps li.done .st{background:var(--grad);border-color:transparent}
+.ana-steps li.done .st::after{content:"✓"}
+.ana-pct{font-size:38px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;
+  color:transparent;margin-top:26px;font-variant-numeric:tabular-nums}
+
+/* ---------- 报告视图 ---------- */
+#viewReport{padding-bottom:90px}
+.rtoolbar{position:sticky;top:61px;z-index:40;max-width:850px;margin:18px auto 8px;display:flex;gap:10px;
+  align-items:center;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
+  border:1px solid var(--line2);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow)}
+.rtoolbar .sp{flex:1}
+.wstyle{display:flex;gap:6px;align-items:center;background:#f1f4fd;border-radius:10px;padding:4px}
+.wstyle span{font-size:12px;color:var(--mut);padding:0 4px 0 8px}
+.wstyle button{border:none;background:transparent;border-radius:8px;padding:5px 12px;font-size:12.5px;
+  color:var(--mut);cursor:pointer;font-weight:600}
+.wstyle button.on{background:#fff;color:var(--c1);box-shadow:0 2px 6px rgba(99,102,241,.18)}
+.print-tip{max-width:850px;margin:0 auto 6px;font-size:12px;color:var(--mut2);text-align:center}
+
+/* —— A4 纸张 —— */
+.sheet{width:210mm;min-height:296mm;background:#fff;margin:16px auto;box-shadow:0 10px 40px rgba(60,70,160,.14);
+  border-radius:6px;padding:15mm 16mm 12mm;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.sheet .pfoot{margin-top:auto;padding-top:4mm;border-top:1px solid #eef0f8;display:flex;justify-content:space-between;
+  font-size:9.5px;color:#a3adc2;letter-spacing:.5px}
+.sheet .pfoot .pf-brand{display:flex;gap:6px;align-items:center}
+.sheet .pfoot .pf-brand::before{content:"✦";color:var(--c1)}
+
+/* 报告排版 */
+.kicker{font-size:10.5px;font-weight:800;letter-spacing:3px;color:var(--c1);margin-bottom:3mm;display:flex;align-items:center;gap:8px}
+.kicker::before{content:"";width:22px;height:2.5px;background:var(--grad);border-radius:2px;display:inline-block}
+.rh{font-size:21.5px;font-weight:800;color:var(--ink);letter-spacing:.5px;margin-bottom:4.5mm;line-height:1.3}
+.rh3{font-size:13.5px;font-weight:800;color:var(--ink);margin:5mm 0 2.5mm;display:flex;align-items:center;gap:7px}
+.rh3::before{content:"";width:8px;height:8px;border-radius:2.5px;background:var(--grad);transform:rotate(45deg);flex:none}
+.rp{font-size:11.8px;color:#3b4a63;line-height:1.95;text-align:justify;margin-bottom:2.6mm}
+.rp b{color:var(--ink)}
+.rlist{margin:0 0 2.5mm;padding-left:0;list-style:none}
+.rlist li{font-size:11.5px;color:#3b4a63;line-height:1.85;padding-left:16px;position:relative;margin-bottom:1.2mm;text-align:justify}
+.rlist li::before{content:"◆";position:absolute;left:1px;top:0;color:var(--c2);font-size:8px;line-height:2.6}
+.rlist li b{color:var(--ink)}
+.note{background:linear-gradient(135deg,#f6f7ff,#f3fbff);border:1px solid #e3e6fb;border-left:3.5px solid var(--c1);
+  border-radius:10px;padding:3.5mm 4.5mm;font-size:11px;color:#46557a;line-height:1.85;margin:3mm 0;text-align:justify}
+.note b{color:#3730a3}
+.tag{display:inline-block;font-size:9.8px;font-weight:600;color:#4f46e5;background:#eef0ff;border:1px solid #dde1ff;
+  border-radius:99px;padding:1px 9px;margin:0 4px 4px 0}
+.tag.cy{color:#0e7490;background:#ecfeff;border-color:#bae6fd}
+.tag.gn{color:#047857;background:#ecfdf5;border-color:#bbf7d0}
+.tag.am{color:#b45309;background:#fffbeb;border-color:#fde68a}
+.tag.pk{color:#be185d;background:#fdf2f8;border-color:#fbcfe8}
+.tbl{width:100%;border-collapse:collapse;font-size:10.6px;margin:2.5mm 0}
+.tbl th{background:linear-gradient(135deg,#eef0ff,#f0f9ff);color:#3b3f8f;font-weight:700;text-align:left;
+  padding:2.2mm 2.6mm;border-bottom:1.5px solid #d8ddfb;white-space:nowrap}
+.tbl td{padding:2mm 2.6mm;border-bottom:1px solid #eef1f8;color:#3b4a63;line-height:1.6;vertical-align:top}
+.tbl tr:nth-child(even) td{background:#fafbff}
+.tbl .num{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3.5mm;margin:3mm 0}
+.kpi{background:linear-gradient(160deg,#f7f8ff,#f2fbff);border:1px solid #e4e7fb;border-radius:11px;padding:3.5mm 4mm;position:relative;overflow:hidden}
+.kpi::after{content:"✦";position:absolute;right:7px;top:5px;color:#dadeff;font-size:13px}
+.kpi .kv{font-size:17px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.3}
+.kpi .kl{font-size:9.8px;color:var(--mut);margin-top:1mm;line-height:1.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5mm;align-items:start}
+.grid2.r37{grid-template-columns:1.15fr .85fr}
+.chartbox{background:#fdfdff;border:1px solid #edf0fb;border-radius:12px;padding:3.5mm;margin:2.5mm 0}
+.chartbox .ct{font-size:10.5px;font-weight:700;color:var(--ink2);margin-bottom:1.5mm;display:flex;justify-content:space-between;align-items:center}
+.chartbox .ct .cu{font-weight:500;color:var(--mut2);font-size:9.5px}
+.legend{display:flex;flex-wrap:wrap;gap:3mm;font-size:9.8px;color:var(--mut);margin-top:1.5mm}
+.legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+.meter{display:flex;align-items:center;gap:7px;font-size:10.3px;color:var(--mut);margin-bottom:1.6mm}
+.meter .ml{width:62px;flex:none;color:var(--ink2);font-weight:600}
+.meter .mtrack{flex:1;height:6.5px;border-radius:99px;background:#edf0fa;overflow:hidden}
+.meter .mfill{height:100%;border-radius:99px;background:var(--grad)}
+.meter .mv{width:34px;text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.quadchip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;border-radius:99px;padding:1.5px 10px}
+.q-win{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.q-str{background:#eef0ff;color:#4f46e5;border:1px solid #ddе1ff;border:1px solid #dde1ff}
+.q-eff{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc}
+.q-obs{background:#f8fafc;color:#64748b;border:1px solid #e2e8f0}
+.sevhi{color:#be123c;font-weight:700}.sevmd{color:#b45309;font-weight:700}.sevlo{color:#047857;font-weight:700}
+.cover-deco{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:6px}
+.toc{list-style:none;counter-reset:toc}
+.toc li{counter-increment:toc;display:flex;align-items:baseline;gap:8px;font-size:11.8px;color:#3b4a63;padding:1.7mm 0;border-bottom:1px dashed #e8ecf8}
+.toc li::before{content:counter(toc,decimal-leading-zero);font-weight:800;font-size:10px;color:var(--c1);font-variant-numeric:tabular-nums}
+.toc li .dots{flex:1;border-bottom:1px dotted #cbd5e1;transform:translateY(-3px)}
+.toc li .pg{font-size:10px;color:var(--mut2);font-variant-numeric:tabular-nums}
+.rankrow{display:flex;align-items:center;gap:3mm;margin-bottom:2.2mm}
+.rankrow .rk{width:7mm;height:7mm;border-radius:8px;background:var(--grad);color:#fff;font-weight:800;font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex:none}
+.rankrow .rk.alt{background:#e2e8f0;color:#475569}
+.phasehd{display:flex;align-items:center;gap:8px;margin:4mm 0 2mm}
+.phasehd .pn{font-size:10px;font-weight:800;color:#fff;border-radius:99px;padding:1.5px 10px}
+.phasehd .pt{font-size:12.5px;font-weight:800;color:var(--ink)}
+.phasehd .pd{font-size:10px;color:var(--mut)}
+.checkrow{display:flex;gap:8px;align-items:flex-start;font-size:11.3px;color:#3b4a63;line-height:1.8;margin-bottom:1.6mm}
+.checkrow::before{content:"☐";color:var(--c1);font-size:12px;line-height:1.7}
+
+/* ---------- 打印 ---------- */
+.noprint{}
+@media print{
+  body{background:#fff}
+  .appbar,.rtoolbar,.print-tip,.blob,.grid-deco,.net-deco,#viewWizard,#viewAnalysis,.noprint{display:none!important}
+  #viewReport{padding:0;display:block!important}
+  .sheet{width:auto;min-height:auto;margin:0;box-shadow:none;border-radius:0;padding:13mm 14mm 10mm;
+    page-break-after:always;break-after:page}
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+  .sheet.flow{min-height:auto}
+  .avoid,.chartbox,.kpi,.note,.tbl tr{break-inside:avoid;page-break-inside:avoid}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4;margin:0}
+}
+@media (max-width:900px){
+  .sheet{width:100%;min-height:auto;padding:24px 20px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .grid2,.grid2.r37{grid-template-columns:1fr}
+  .sumgrid{grid-template-columns:1fr}
+  .welcome h1{font-size:26px}
+  .rtoolbar{flex-wrap:wrap;top:58px}
+}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<div class="grid-deco"></div>
+<svg class="net-deco" width="900" height="220" viewBox="0 0 900 220" fill="none" aria-hidden="true">
+  <g stroke="#c7d2fe" stroke-width="1" opacity=".6">
+    <path d="M80 40 L240 90 L420 30 L600 100 L780 50"/><path d="M240 90 L300 180 L600 100"/>
+    <path d="M420 30 L300 180 M600 100 L700 190 L780 50"/>
+  </g>
+  <g fill="#818cf8">
+    <circle cx="80" cy="40" r="4" opacity=".7"/><circle cx="240" cy="90" r="5" opacity=".8"/>
+    <circle cx="420" cy="30" r="4" opacity=".7"/><circle cx="600" cy="100" r="5.5" opacity=".8"/>
+    <circle cx="780" cy="50" r="4" opacity=".7"/><circle cx="300" cy="180" r="4" opacity=".55"/>
+    <circle cx="700" cy="190" r="4" opacity=".55"/>
+  </g>
+</svg>
+
+<header class="appbar noprint">
+  <div class="brand">
+    <div class="mark"></div>
+    <div><b>智衡 · AI价值罗盘</b><span class="ai-chip">AI AGENT</span>
+      <span class="sub">企业AI高价值场景识别与排序智能体 · Enterprise AI Value Compass</span></div>
+  </div>
+  <div class="sp"></div>
+  <div class="hint"><span class="dot"></span>本地运行 · 数据不出浏览器</div>
+  <button class="btn subtle" id="btnRestartTop" title="清空当前作答，重新开始">⟳ 重新开始</button>
+</header>
+
+<!-- ============ 视图一：引导问答 ============ -->
+<main id="viewWizard">
+  <div class="stage">
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-meta"><span>第 <b id="pCur">1</b> / <span id="pTotal">9</span> 步 · <span id="pName"></span></span><span id="pPct">0%</span></div>
+      <div class="pbar"><i id="pFill"></i></div>
+    </div>
+    <div class="agent-row" id="agentRow" style="display:none">
+      <div class="orb"></div>
+      <div class="bubble"><div class="who">智衡 AGENT</div><div class="say" id="agentSay"></div><div class="why" id="agentWhy"></div></div>
+    </div>
+    <div id="qcard" class="qcard"></div>
+    <div class="btnbar" id="navBar" style="display:none">
+      <button class="btn ghost" id="btnPrev">← 上一步</button>
+      <span class="counterhint" id="navHint"></span>
+      <button class="btn primary" id="btnNext">下一步 →</button>
+    </div>
+  </div>
+</main>
+
+<!-- ============ 视图二：智能分析 ============ -->
+<main id="viewAnalysis" hidden>
+  <div class="ana">
+    <div class="orb lg" style="margin:0 auto"></div>
+    <h2>智衡引擎正在分析<span class="tdots"><i></i><i></i><i></i></span></h2>
+    <div class="sub">正在基于您的画像，对场景库进行匹配、评分与排序</div>
+    <ul class="ana-steps" id="anaSteps"></ul>
+    <div class="ana-pct" id="anaPct">0%</div>
+  </div>
+</main>
+
+<!-- ============ 视图三：报告 ============ -->
+<main id="viewReport" hidden>
+  <div class="rtoolbar noprint">
+    <button class="btn ghost" id="btnBackEdit">← 调整输入</button>
+    <div class="wstyle"><span>排序策略</span>
+      <button data-ws="quick">速赢优先</button><button data-ws="balance">平衡</button><button data-ws="value">价值优先</button>
+    </div>
+    <div class="sp"></div>
+    <button class="btn ghost" id="btnRestart">新评估</button>
+    <button class="btn primary" id="btnPdf">⬇ 导出 PDF 报告</button>
+  </div>
+  <div class="print-tip noprint">提示：点击「导出 PDF」后，在打印对话框中选择「另存为 PDF」、纸张 A4、边距「无」、勾选「背景图形」即可获得最佳效果。</div>
+  <div id="reportRoot"></div>
+</main>
+
+<script>
+"use strict";
+/* ================================================================
+   §0 工具函数
+================================================================ */
+const $=(s,p)=>(p||document).querySelector(s);
+const $$=(s,p)=>[...(p||document).querySelectorAll(s)];
+const h=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const r1=x=>Math.round(x*10)/10;
+let GID=0; const gid=p=>p+(++GID);
+function fmtY(yi){ /* 输入:亿元 → 中文金额 */
+  if(yi>=1) return (yi>=10? Math.round(yi): r1(yi))+" 亿元";
+  const w=yi*10000; return (w>=1000? Math.round(w/100)*100 : Math.round(w/10)*10)+" 万元";
+}
+function fmtRange(lo,hi){return fmtY(lo)+" ~ "+fmtY(hi);}
+const todayStr=()=>{const d=new Date();return d.getFullYear()+" 年 "+(d.getMonth()+1)+" 月 "+d.getDate()+" 日";};
+
+/* ================================================================
+   §1 知识库：行业 / 职能 / 目标 / 痛点
+================================================================ */
+const INDUSTRIES=[
+ {id:'mfg',  g:'工业与能源',label:'装备/离散制造',ic:'🏭',insight:'离散制造的AI价值集中在质量、设备与排产三大主线，视觉质检与预测性维护已有大量成熟标杆，是验证AI价值的优选切口。'},
+ {id:'proc', g:'工业与能源',label:'流程/原材料工业',ic:'⚗️',insight:'流程工业的工艺参数优化与能耗优化往往能带来百分位级的良率/能效提升，单点回报高，但依赖工业数据底座的完备性。'},
+ {id:'elec', g:'工业与能源',label:'能源与电力',ic:'⚡',insight:'负荷与新能源功率预测、智能巡检是电力行业AI的"压舱石"场景，监管与安全要求高，建议私有化或混合部署。'},
+ {id:'mining',g:'工业与能源',label:'矿业/冶金/材料',ic:'⛏️',insight:'矿冶行业AI价值锚点在安全监控、选矿配料优化与设备健康管理，安全合规收益常被低估，值得纳入价值测算。'},
+ {id:'auto', g:'工业与能源',label:'汽车及零部件',ic:'🚗',insight:'汽车产业链AI竞争已从制造端延伸至座舱体验与数据闭环，零部件企业宜聚焦质量与供应链韧性，主机厂可布局智能化体验。'},
+ {id:'retail',g:'消费与流通',label:'零售与电商',ic:'🛒',insight:'零售电商数据丰富、迭代快，是AI见效最快的行业之一；个性化推荐、动态定价与AIGC内容已被头部企业反复验证。'},
+ {id:'cpg',  g:'消费与流通',label:'消费品/食品饮料',ic:'🥤',insight:'消费品企业的AI高地在需求预测、渠道数字化检核与精准营销，经销链路的数据打通是先决条件。'},
+ {id:'logi', g:'消费与流通',label:'交通物流',ic:'🚚',insight:'物流行业毛利薄，运筹优化类AI（路径、调度、装载）的降本效果直接体现在利润表上，ROI测算清晰。'},
+ {id:'hotel',g:'消费与流通',label:'酒店与文旅',ic:'🏨',insight:'收益管理（动态房价）与多语智能服务是酒旅行业回报最确定的AI场景，旺季波动大的业态收益尤为显著。'},
+ {id:'agri', g:'消费与流通',label:'农业与食品供应链',ic:'🌾',insight:'农业AI正从示范走向实用，病虫害识别、精准种植与价格预测的门槛已大幅降低，可与政策补贴形成合力。'},
+ {id:'bank', g:'金融',label:'银行',ic:'🏦',insight:'银行的智能风控与反欺诈已是"必选项"，大模型则在客服、投顾助手与知识中台快速渗透；强监管下需同步建设模型风险管理。'},
+ {id:'ins',  g:'金融',label:'保险',ic:'🛡️',insight:'保险全链条（营销-核保-理赔-客服）均有成熟AI打法，理赔自动化与智能核保对成本率的改善最为直接。'},
+ {id:'sec',  g:'金融',label:'证券/基金/资管',ic:'📈',insight:'投研效率与合规监控是证券资管AI的双主线，大模型投研助手可显著放大研究产能，但需严控信息合规边界。'},
+ {id:'med',  g:'医疗健康',label:'医院与医疗服务',ic:'🏥',insight:'医疗AI需在循证与合规框架内推进；导诊、病历质控、影像辅助等"辅助型"场景接受度高、风险可控，适合先行。'},
+ {id:'pharma',g:'医疗健康',label:'医药与生物科技',ic:'💊',insight:'AI制药从靶点发现到临床运营全面提速，商业化端的合规营销审查与药物警戒自动化同样具备确定性回报。'},
+ {id:'tech', g:'科技与服务',label:'互联网/软件',ic:'💻',insight:'软件企业既是AI使用者又是供给者：对内用AI编程与智能运营提效，对外将产品"Copilot化"打开第二增长曲线。'},
+ {id:'telco',g:'科技与服务',label:'电信运营商',ic:'📡',insight:'网络智能化（故障预测/自愈）与客户经营（保有、套餐推荐）是运营商AI两大价值池，数据规模优势显著。'},
+ {id:'media',g:'科技与服务',label:'文化传媒',ic:'🎬',insight:'AIGC正在重构内容生产成本曲线，文生图/视频与智能剪辑可数倍提升产能，版权与内容安全治理需同步跟上。'},
+ {id:'pro',  g:'科技与服务',label:'专业服务(咨询/律所/会计)',ic:'💼',insight:'专业服务的核心资产是知识与人效，知识库问答、文书自动生成与智能尽调可直接放大计费人力的产出。'},
+ {id:'edu',  g:'公共与民生',label:'教育与培训',ic:'🎓',insight:'个性化学习与AI助教让"因材施教"具备规模化可能，招生与教务环节的智能化则能快速改善运营效率。'},
+ {id:'gov',  g:'公共与民生',label:'政务与公共服务',ic:'🏛️',insight:'政务AI以"高效办成一件事"为牵引，智能问答、公文辅助与城市治理事件识别成熟度高，需满足国产化与数据安全要求。'},
+ {id:'re',   g:'公共与民生',label:'房地产与建筑',ic:'🏗️',insight:'行业承压期更需精打细算：工地安全监控、成本预测与案场智能化是投入小、见效快的务实选择。'},
+ {id:'other',g:'公共与民生',label:'其他行业',ic:'🧩',insight:'即使行业场景库暂未特化，营销、服务、供应链、财务等职能型AI场景依然普适，且多数已高度产品化。'},
+];
+const SIZES=[
+ {id:'s1',label:'100 人以内',f:0.6},{id:'s2',label:'100 ~ 500 人',f:0.8},{id:'s3',label:'500 ~ 2000 人',f:1},
+ {id:'s4',label:'2000 ~ 1 万人',f:1.25},{id:'s5',label:'1 万人以上',f:1.5},
+];
+const REVENUES=[
+ {id:'r1',label:'5000 万以内',mid:0.35},{id:'r2',label:'5000 万 ~ 2 亿',mid:1.2},{id:'r3',label:'2 ~ 10 亿',mid:5},
+ {id:'r4',label:'10 ~ 50 亿',mid:25},{id:'r5',label:'50 ~ 200 亿',mid:100},{id:'r6',label:'200 亿以上',mid:380},
+];
+const ROLES=[
+ {id:'ceo',label:'董事长/CEO/总经理'},{id:'biz',label:'业务部门负责人'},{id:'cio',label:'CIO/CTO/数字化负责人'},
+ {id:'expert',label:'业务/技术骨干'},{id:'plan',label:'战略/企划人员'},
+];
+const GOALS=[
+ {id:'cost',label:'降本增效',ic:'⚙️',d:'压缩运营成本、提高人效'},
+ {id:'rev', label:'收入增长',ic:'📈',d:'获客、转化、复购与定价'},
+ {id:'exp', label:'客户体验',ic:'💎',d:'服务响应、满意度与NPS'},
+ {id:'inno',label:'产品与业务创新',ic:'🚀',d:'新产品、新模式、新服务'},
+ {id:'risk',label:'风险与合规',ic:'🛡️',d:'风控、安全、合规与质量'},
+ {id:'dec', label:'决策智能化',ic:'🧭',d:'预测、洞察与经营分析'},
+ {id:'emp', label:'员工赋能',ic:'🤝',d:'知识获取、技能与协同提效'},
+];
+const FUNCTIONS=[
+ {id:'mkt',  label:'市场营销',ic:'📣'},{id:'sales',label:'销售管理',ic:'🤝'},{id:'cs',label:'客户服务',ic:'🎧'},
+ {id:'scm',  label:'供应链与采购',ic:'📦'},{id:'ops',label:'生产/核心业务运营',ic:'🏭'},{id:'rd',label:'研发与设计',ic:'🔬'},
+ {id:'fin',  label:'财务管理',ic:'💰'},{id:'hr',label:'人力资源',ic:'👥'},{id:'legal',label:'法务与合规',ic:'⚖️'},
+ {id:'it',   label:'IT 与数据',ic:'🖥️'},{id:'admin',label:'行政与办公协同',ic:'🗂️'},{id:'strat',label:'战略与经营分析',ic:'🧭'},
+];
+const PAINS={
+ mkt:[{id:'mkt1',label:'获客成本持续走高'},{id:'mkt2',label:'内容产出慢、创意产能不足'},{id:'mkt3',label:'投放ROI不透明、归因难'},{id:'mkt4',label:'用户洞察不足、千人一面'},{id:'mkt5',label:'舆情与口碑监测滞后'}],
+ sales:[{id:'sal1',label:'线索多但转化率低'},{id:'sal2',label:'销售预测靠拍脑袋'},{id:'sal3',label:'老客户流失难预警'},{id:'sal4',label:'方案/报价/合同制作低效'},{id:'sal5',label:'销售过程难管理、经验难复制'}],
+ cs:[{id:'cs1',label:'人工客服成本高'},{id:'cs2',label:'响应慢、排队久、7×24难覆盖'},{id:'cs3',label:'服务质量参差、质检覆盖低'},{id:'cs4',label:'客户声音分散、难以转化为改进'}],
+ scm:[{id:'scm1',label:'库存积压与缺货并存'},{id:'scm2',label:'需求预测不准'},{id:'scm3',label:'采购成本高、寻源比价低效'},{id:'scm4',label:'物流履约成本高/时效差'},{id:'scm5',label:'供应商风险难掌控'}],
+ ops:[{id:'ops1',label:'设备故障导致非计划停机'},{id:'ops2',label:'质检靠人工、漏检错检'},{id:'ops3',label:'能耗高、碳排压力大'},{id:'ops4',label:'排产排程不优、交付承诺难'},{id:'ops5',label:'现场安全隐患难管控'},{id:'ops6',label:'核心业务流程人力密集、自动化程度低'}],
+ rd:[{id:'rd1',label:'研发周期长、试错成本高'},{id:'rd2',label:'研发知识沉淀差、重复造轮子'},{id:'rd3',label:'需求洞察不足、立项凭经验'},{id:'rd4',label:'仿真/实验排队，算力与工具受限'}],
+ fin:[{id:'fin1',label:'票据处理/对账/报销繁琐'},{id:'fin2',label:'资金与现金流预测难'},{id:'fin3',label:'应收/信用/欺诈风险大'},{id:'fin4',label:'经营报表分析慢、找数难'}],
+ hr:[{id:'hr1',label:'简历筛选与招聘效率低'},{id:'hr2',label:'培训成本高、效果难评估'},{id:'hr3',label:'关键人才流失'},{id:'hr4',label:'员工咨询事务占用HR大量时间'}],
+ legal:[{id:'leg1',label:'合同审查慢、风险点靠人盯'},{id:'leg2',label:'监管要求多、合规监测难'},{id:'leg3',label:'法规政策更新跟踪不及时'}],
+ it:[{id:'it1',label:'企业知识分散、检索困难'},{id:'it2',label:'开发交付慢、研发人效承压'},{id:'it3',label:'系统告警风暴、运维被动救火'},{id:'it4',label:'数据质量差、口径不一'}],
+ admin:[{id:'adm1',label:'文山会海、公文/纪要耗时'},{id:'adm2',label:'流程审批慢、跨部门协同低效'},{id:'adm3',label:'重复性事务占用人力'}],
+ strat:[{id:'str1',label:'市场与竞争情报滞后'},{id:'str2',label:'经营分析靠人工汇总'},{id:'str3',label:'预测与决策缺少量化支撑'}],
+};
+
+/* ================================================================
+   §2 知识库：AI 场景库（通用职能 + 行业特化，约 140 项）
+   字段: id,name,fn,ind('all'|[行业]),goals,v(价值1-10),f(可行性1-10),
+         cost(投入1低2中3高),ttv(见效月),data(数据要求1-3),tech,pains,desc,kpis
+================================================================ */
+const S=(id,name,fn,ind,goals,v,f,cost,ttv,data,tech,pains,desc,kpis)=>({id,name,fn,ind,goals,v,f,cost,ttv,data,tech,pains,desc,kpis});
+const SCN=[
+/* ---- 市场营销（通用） ---- */
+S('g_mkt1','营销内容 AIGC 工厂','mkt','all',['rev','cost'],7,8.5,1,2,1,['生成式AI','多模态'],['mkt2','mkt1'],
+ '以大模型+品牌知识库批量生成图文、短视频脚本、落地页与多语营销素材，建立"人审+AI产"的内容流水线。',['内容产出效率(条/人天)','单条内容成本','素材点击率/转化率']),
+S('g_mkt2','智能投放优化与归因','mkt','all',['rev','dec'],7,6,2,4,2,['机器学习','预测分析'],['mkt3','mkt1'],
+ '基于多渠道投放与转化数据构建预算分配与出价优化模型，实现跨渠道归因和ROI实时监控。',['综合获客成本(CAC)','投放ROI','预算利用率']),
+S('g_mkt3','客户分群与个性化推荐','mkt','all',['rev','exp'],8,6.5,2,5,2,['推荐系统','机器学习'],['mkt4','mkt1'],
+ '整合行为与交易数据构建客户标签体系与推荐引擎，实现千人千面的内容、商品与权益触达。',['转化率/客单价','复购率','点击率(CTR)']),
+S('g_mkt4','社媒舆情与消费者洞察','mkt','all',['dec','rev'],6,7,1,3,1,['NLP','大语言模型'],['mkt5','mkt4'],
+ '自动采集与分析社媒、电商评论与客服记录，输出口碑预警、卖点挖掘与竞品对比洞察。',['舆情响应时长','负面预警召回率','洞察报告产出周期']),
+/* ---- 销售（通用） ---- */
+S('g_sal1','线索智能评分与分配','sales','all',['rev'],7,7,1,3,2,['机器学习','预测分析'],['sal1'],
+ '对线索按成交概率自动打分、分层与路由，让销售资源聚焦高价值商机。',['线索转化率','商机跟进时效','人均产出']),
+S('g_sal2','智能销售预测','sales','all',['dec','rev'],7,6,2,4,2,['预测分析','机器学习'],['sal2'],
+ '基于漏斗、历史成交与外部信号预测季度/月度销售额，辅助产销协同与目标管理。',['预测偏差率(MAPE)','滚动预测频率','库存/产能匹配度']),
+S('g_sal3','客户流失预警与挽留','sales','all',['rev','exp'],8,6,2,4,2,['机器学习','预测分析'],['sal3'],
+ '识别流失先兆并自动触发分层挽留策略（权益、回访、专属方案），守住存量基本盘。',['客户留存率','预警准确率','挽回收入']),
+S('g_sal4','AI 销售助手(方案/话术/报价)','sales','all',['cost','emp','rev'],6.5,8,1,2,1,['大语言模型','检索增强(RAG)'],['sal4','sal5'],
+ '面向一线销售的随身Copilot：自动生成方案与标书初稿、客户问答话术、会议纪要与跟进建议。',['方案制作时长','新人上手周期','赢单率']),
+/* ---- 客服（通用） ---- */
+S('g_cs1','全渠道智能客服机器人','cs','all',['cost','exp'],8,8,2,3,1,['大语言模型','检索增强(RAG)'],['cs1','cs2'],
+ '基于企业知识库的大模型客服，覆盖网页/APP/微信/电话渠道，自动应答+人工无缝接管。',['机器人独立解决率','人工坐席成本','首次响应时长']),
+S('g_cs2','坐席助手与智能质检','cs','all',['cost','risk','exp'],7,7,2,3,2,['语音识别','NLP','大语言模型'],['cs3','cs1'],
+ '实时转写与话术推荐辅助坐席，会话100%自动质检并识别违规与服务风险。',['质检覆盖率','平均处理时长(AHT)','服务合规率']),
+S('g_cs3','客户之声(VOC)分析','cs','all',['exp','dec'],6,7,1,3,1,['NLP','大语言模型'],['cs4'],
+ '汇聚客服、评价、调研等全渠道反馈，自动聚类问题与情绪，驱动产品与流程改进闭环。',['TOP问题收敛率','NPS','改进项落地数']),
+/* ---- 供应链（通用） ---- */
+S('g_scm1','智能需求预测与补货','scm','all',['cost','dec'],9,6,2,5,3,['预测分析','机器学习'],['scm2','scm1'],
+ '融合历史销量、促销、季节与外部信号的多层级需求预测，驱动自动补货与产销协同。',['预测准确率','缺货率','库存周转天数']),
+S('g_scm2','库存优化与呆滞预警','scm','all',['cost'],8,6.5,2,4,2,['运筹优化','预测分析'],['scm1'],
+ '多级库存策略优化与呆滞库存识别，平衡服务水平与资金占用。',['库存资金占用','呆滞库存占比','订单满足率']),
+S('g_scm3','智能采购(寻源/比价/合同)','scm','all',['cost','risk'],6.5,7,1,3,1,['大语言模型','OCR','NLP'],['scm3'],
+ '供应商资料解析、自动比价、招采文件与合同条款智能审查，沉淀价格与品类知识库。',['采购降本率','寻源周期','合规偏差数']),
+S('g_scm4','物流路径与装载优化','scm','all',['cost'],7,6,2,4,2,['运筹优化'],['scm4'],
+ '车辆路径规划、装载率优化与时效仿真，降低单票履约成本。',['单票物流成本','装载率','准时交付率']),
+S('g_scm5','供应商风险监控','scm','all',['risk'],5.5,7,1,3,1,['知识图谱','NLP'],['scm5'],
+ '基于工商、舆情、履约数据构建供应商风险画像与传导预警，保障供应连续性。',['风险预警提前期','断供事件数','供应商评估覆盖率']),
+/* ---- 生产/运营（通用） ---- */
+S('g_ops1','设备预测性维护','ops',['mfg','proc','elec','mining','auto','logi','telco'],['cost','risk'],8,5.5,3,8,3,['物联网+机器学习','预测分析'],['ops1'],
+ '基于传感器与工况数据预测设备劣化与故障，由"事后维修"转向"预测维护"。',['非计划停机时长','OEE','维护成本']),
+S('g_ops2','AI 视觉质量检测','ops',['mfg','proc','auto','cpg','pharma','mining'],['cost','risk'],8,6.5,2,5,2,['计算机视觉','深度学习'],['ops2'],
+ '产线缺陷视觉检测替代/辅助人检，缺陷自动分类并反哺工艺改进。',['漏检率/误检率','质检人力','一次合格率']),
+S('g_ops3','能耗优化与碳管理','ops',['mfg','proc','elec','mining','re','hotel'],['cost','risk'],6.5,6,2,6,2,['机器学习','运筹优化'],['ops3'],
+ '对空压、制冷、锅炉等高耗能环节建模寻优，自动给出运行参数建议并核算碳排。',['单位产出能耗','能源费用','碳排放强度']),
+S('g_ops4','智能排产排程(APS)','ops',['mfg','proc','auto','cpg','pharma'],['cost','dec'],8,5.5,3,7,3,['运筹优化','仿真'],['ops4'],
+ '多约束（订单/工艺/物料/设备）下的自动排产与动态插单重排，提升交付与产能利用。',['准时交付率','换型/等待时间','产能利用率']),
+S('g_ops5','作业安全智能监控','ops',['mfg','proc','elec','mining','re','logi','agri'],['risk'],6.5,7,2,3,1,['计算机视觉'],['ops5'],
+ '识别未戴安全帽、闯入危险区、违规操作等行为并实时告警，留存合规证据链。',['违规行为检出率','安全事故数','隐患闭环时长']),
+S('g_ops6','业务流程智能自动化(IPA)','ops','all',['cost'],7,7.5,1,3,1,['RPA+AI','OCR','大语言模型'],['ops6','adm3'],
+ '将单证录入、审核、对账等高重复流程用"RPA+大模型"自动化，构建数字员工队伍。',['流程自动化率','单均处理成本','处理时效']),
+/* ---- 研发（通用） ---- */
+S('g_rd1','研发知识库与技术问答','rd','all',['emp','inno'],6.5,8,1,2,1,['检索增强(RAG)','大语言模型'],['rd2'],
+ '沉淀图纸、工艺、实验与项目文档为可问答的研发大脑，新人与跨团队快速复用经验。',['知识检索命中率','重复问题工时','新人成长周期']),
+S('g_rd2','生成式设计与仿真加速','rd',['mfg','auto','proc','re','tech','pharma'],['inno','cost'],7,4.5,3,9,3,['深度学习','仿真','生成式AI'],['rd1','rd4'],
+ 'AI代理模型加速仿真迭代，生成式设计探索更优结构/配方/参数组合。',['仿真迭代周期','试制次数','研发周期']),
+S('g_rd3','需求洞察与概念验证','rd','all',['inno','rev'],5.5,7,1,3,1,['NLP','大语言模型'],['rd3'],
+ '从评论、客诉、搜索与社媒中挖掘未被满足的需求，AI辅助概念生成与快速测试。',['立项命中率','新品成功率','洞察周期']),
+/* ---- 财务（通用） ---- */
+S('g_fin1','智能票据处理与自动对账','fin','all',['cost'],6.5,8,1,2,1,['OCR','RPA+AI'],['fin1'],
+ '发票/单据智能识别、三单匹配与自动对账，财务共享中心人效倍增。',['单据处理时效','自动对账率','财务人力成本']),
+S('g_fin2','现金流与资金预测','fin','all',['dec','risk'],6.5,6,2,4,2,['预测分析'],['fin2'],
+ '基于应收应付、订单与历史流水预测资金头寸，优化融资与理财安排。',['资金预测偏差','闲置资金收益','融资成本']),
+S('g_fin3','信用风控与反欺诈','fin','all',['risk'],7.5,6,2,5,3,['机器学习','知识图谱'],['fin3'],
+ '客户/经销商信用评分、应收风险预警与交易反欺诈识别，降低坏账与资损。',['坏账率','欺诈拦截金额','审批通过时效']),
+S('g_fin4','经营分析 Copilot (ChatBI)','fin','all',['dec','emp'],7,7,2,3,2,['大语言模型','ChatBI'],['fin4','str2'],
+ '自然语言查数与自动归因解读，"对话式"获取经营报表与异动分析。',['取数响应时长','报表自助率','分析师人效']),
+/* ---- 人力（通用） ---- */
+S('g_hr1','简历智能筛选与人岗匹配','hr','all',['cost'],5.5,8,1,2,1,['NLP','大语言模型'],['hr1'],
+ '简历结构化解析、人岗匹配打分与面试题智能生成，缩短招聘周期。',['简历筛选时效','到面率','招聘周期']),
+S('g_hr2','AI 培训与智能陪练','hr','all',['emp'],5.5,7,1,3,1,['大语言模型','语音识别'],['hr2'],
+ '大模型扮演客户/考官进行对练与陪练，个性化学习路径与自动评估。',['培训人均成本','上岗周期','考核通过率']),
+S('g_hr3','员工服务智能助手','hr','all',['emp','cost'],5.5,8.5,1,2,1,['检索增强(RAG)','大语言模型'],['hr4'],
+ '社保、假勤、报销、IT等高频咨询自动应答与工单流转，释放HR/行政人力。',['自助解决率','工单处理时效','员工满意度']),
+S('g_hr4','关键人才流失预测','hr','all',['risk','dec'],5,6,1,4,2,['机器学习'],['hr3'],
+ '基于组织与行为数据识别离职风险信号，辅助保留面谈与梯队建设。',['关键岗位流失率','预警准确率','补位周期']),
+/* ---- 法务（通用） ---- */
+S('g_leg1','合同智能审查','legal','all',['risk','cost'],7,7.5,1,3,1,['大语言模型','NLP'],['leg1'],
+ '条款抽取、风险点比对与修订建议，结合企业条款库实现合同分级快速过审。',['合同审查时长','风险条款检出率','法务人效']),
+S('g_leg2','合规智能监测与法规追踪','legal','all',['risk'],6,6,2,4,2,['NLP','知识图谱'],['leg2','leg3'],
+ '法规政策自动追踪解读、内部行为与文档合规扫描，构建合规义务清单。',['法规响应时效','合规事件数','整改闭环率']),
+/* ---- IT（通用） ---- */
+S('g_it1','企业知识库智能问答','it','all',['emp','cost'],8,8.5,1,2,1,['检索增强(RAG)','大语言模型'],['it1','adm3'],
+ '打通制度、产品、项目等文档构建企业级"知识大脑"，权限内随问随答并标注出处。',['知识检索效率','重复咨询量','知识复用率']),
+S('g_it2','AI 编程与研发提效','it','all',['cost','emp'],7,9,1,1,1,['大语言模型','代码生成'],['it2'],
+ '代码补全、单测生成、代码评审与遗留代码解读，研发全流程提效。',['人均代码产出','缺陷密度','需求交付周期']),
+S('g_it3','智能运维 (AIOps)','it','all',['cost','risk'],6,6,2,5,2,['机器学习','日志分析'],['it3'],
+ '告警收敛、异常检测与根因定位，从"救火式"转向预测式运维。',['MTTR','告警噪音压缩比','重大故障数']),
+S('g_it4','数据治理与质量智能化','it','all',['dec','risk'],5.5,5,2,6,2,['机器学习','元数据管理'],['it4'],
+ '元数据自动盘点、数据质量规则学习与异常监测，为AI规模化筑牢数据底座。',['数据质量得分','口径一致率','找数时长']),
+/* ---- 行政（通用） ---- */
+S('g_adm1','会议纪要与协同助手','admin','all',['emp','cost'],5.5,9,1,1,1,['语音识别','大语言模型'],['adm1'],
+ '会议自动转写、纪要生成与待办抽取分发，让会议成果可追踪。',['纪要产出时长','待办闭环率','会议时长']),
+S('g_adm2','公文与文档智能写作','admin','all',['emp','cost'],5.5,8.5,1,1,1,['大语言模型'],['adm1'],
+ '通知、报告、总结、PPT大纲等公文文档的AI初稿生成与润色校对。',['文档起草时长','返工率','行政人效']),
+/* ---- 战略（通用） ---- */
+S('g_str1','市场与竞争情报监测','strat','all',['dec'],6,7,1,3,1,['NLP','大语言模型'],['str1'],
+ '自动追踪竞品动态、招投标、政策与行业报告，生成结构化情报简报。',['情报时效','覆盖信源数','简报采纳率']),
+S('g_str2','经营驾驶舱与智能预测','strat','all',['dec'],7,6,2,5,2,['预测分析','ChatBI'],['str2','str3'],
+ '核心经营指标的统一监控、自动归因与滚动预测，支撑月度经营会与资源调配。',['指标覆盖率','异动发现时效','预测偏差']),
+/* ---- 行业特化：装备/离散制造 ---- */
+S('i_mfg1','工艺参数优化与良率提升','ops',['mfg','proc','auto'],['cost','risk'],9,5,3,8,3,['机器学习','运筹优化'],['ops2','ops4'],
+ '对关键工序的参数-质量关系建模，自动推荐最优工艺窗口，系统性提升良率与稳定性。',['良率/一次合格率','废品损失','工艺调试周期']),
+S('i_mfg2','数字孪生与产线仿真','ops',['mfg','auto'],['dec','inno'],7,4.5,3,10,3,['数字孪生','仿真'],['ops4','rd1'],
+ '构建产线/工厂数字孪生，对排产、改造与瓶颈进行虚拟推演，降低决策试错成本。',['产线节拍','改造验证周期','瓶颈识别准确度']),
+S('i_mfg3','售后服务智能化(备件+诊断)','cs',['mfg','auto'],['exp','rev'],6.5,6,2,5,2,['预测分析','大语言模型'],['cs2','scm2'],
+ '备件需求预测、远程故障诊断助手与维修知识库，提升服务响应并拉动备件收入。',['备件满足率','一次修复率','服务响应时长']),
+S('i_mfg4','AI 辅助工业设计/工艺设计','rd',['mfg','auto'],['inno','cost'],6.5,5,2,7,2,['生成式AI','CAD智能化'],['rd1','rd2'],
+ '基于历史图纸与设计规范的生成式设计辅助、设计校核与工艺路线推荐。',['设计周期','设计变更次数','标准化率']),
+/* ---- 流程工业 ---- */
+S('i_proc1','装置运行实时优化(RTO)','ops',['proc'],['cost'],9,4.5,3,9,3,['机器学习','运筹优化'],['ops3','ops4'],
+ '对反应、分离等核心装置建立软测量与寻优模型，实时推荐操作参数，提升收率降低单耗。',['收率','单位能耗/物耗','操作平稳率']),
+S('i_proc2','安全风险智能预警','ops',['proc','mining'],['risk'],7.5,6,2,5,2,['物联网+机器学习','计算机视觉'],['ops5','ops1'],
+ '融合DCS、报警与视频数据识别异常工况与泄漏风险，构建工艺安全预警屏障。',['异常工况预警提前期','报警泛滥压缩率','安全事件数']),
+S('i_proc3','配方/配料智能优化','rd',['proc','mining','cpg'],['cost','inno'],7.5,5.5,2,6,2,['机器学习','运筹优化'],['rd1','scm3'],
+ '在质量约束下优化原料配比与替代方案，应对原料价格与品质波动。',['原料成本','配方开发周期','质量稳定性']),
+/* ---- 能源电力 ---- */
+S('i_elec1','负荷与新能源功率预测','ops',['elec'],['dec','cost'],8.5,6,2,5,3,['深度学习','预测分析'],['scm2','str3'],
+ '短期/超短期负荷与风光功率预测，支撑调度、交易与消纳决策。',['预测准确率','偏差考核费用','消纳率']),
+S('i_elec2','电网/设备智能巡检','ops',['elec','telco'],['cost','risk'],7.5,6.5,2,4,2,['计算机视觉','无人机'],['ops1','ops5'],
+ '无人机+视觉识别输电通道隐患与设备缺陷，巡检由人巡转向机巡。',['巡检效率','缺陷检出率','人工巡检成本']),
+S('i_elec3','电力交易辅助决策','strat',['elec'],['rev','dec'],7,5,2,6,2,['预测分析','强化学习'],['str3','str1'],
+ '现货价格预测与报价策略仿真，辅助中长期与现货组合交易决策。',['交易收益','偏差率','策略胜率']),
+/* ---- 矿业冶金 ---- */
+S('i_min1','选矿/冶炼过程优化','ops',['mining'],['cost'],8.5,5,3,8,3,['机器学习','运筹优化'],['ops3','ops2'],
+ '磨矿浮选/冶炼参数智能寻优，提升回收率与品位稳定性。',['金属回收率','药剂/能耗单耗','品位波动']),
+S('i_min2','地质数据智能分析','rd',['mining'],['inno','dec'],6,4.5,3,10,3,['深度学习','多模态'],['rd1','rd4'],
+ '钻孔、物探与遥感数据融合建模，辅助靶区圈定与储量估算。',['勘探命中率','建模周期','吨矿发现成本']),
+/* ---- 汽车 ---- */
+S('i_auto1','智能座舱与车载语音助手','rd',['auto'],['inno','exp'],7.5,5,3,9,2,['大语言模型','语音识别','多模态'],['rd3','cs2'],
+ '大模型驱动的车载助手与座舱个性化体验，成为整车差异化卖点。',['语音任务完成率','座舱NPS','功能使用渗透率']),
+S('i_auto2','整车/零部件智能检测','ops',['auto'],['risk','cost'],7.5,6.5,2,5,2,['计算机视觉','声学检测'],['ops2'],
+ '外观、焊点、异响等多模态质量检测，缺陷追溯到工位与批次。',['漏检率','返修成本','质量追溯时效']),
+S('i_auto3','供应链韧性预警','scm',['auto','mfg'],['risk','dec'],7,6,2,4,2,['知识图谱','预测分析'],['scm5','scm2'],
+ '多级供应商映射与断供风险传导推演，关键物料供需预警。',['断供预警提前期','缺料停线时长','替代源覆盖率']),
+/* ---- 零售电商 ---- */
+S('i_ret1','智能选品与组货','scm',['retail','cpg'],['rev','dec'],8,6,2,5,2,['机器学习','推荐系统'],['scm2','mkt4'],
+ '基于销售、趋势与画像数据辅助选品、组货与首铺量决策，降低试错。',['新品成功率','售罄率','滞销占比']),
+S('i_ret2','动态定价与促销优化','sales',['retail','hotel','logi'],['rev'],8.5,5.5,2,5,3,['机器学习','运筹优化'],['sal2','mkt3'],
+ '价格弹性建模与促销ROI仿真，分商品分渠道动态调价。',['毛利率','促销ROI','价格竞争力指数']),
+S('i_ret3','门店客流分析与陈列优化','ops',['retail','cpg'],['rev','dec'],6,6,2,4,2,['计算机视觉'],['mkt4','ops6'],
+ '客流动线与货架热区分析，优化陈列、排班与门店运营。',['进店转化率','坪效','排班匹配度']),
+S('i_ret4','数字人直播与智能导购','mkt',['retail','media','cpg'],['rev','inno'],6.5,6.5,2,3,1,['数字人','生成式AI'],['mkt2','mkt1'],
+ '数字人直播带货与AI导购问答，低成本扩展直播时长与触达。',['直播时长成本','GMV贡献','互动转化率']),
+/* ---- 消费品 ---- */
+S('i_cpg1','渠道陈列智能检核','sales',['cpg'],['cost','rev'],7,6.5,2,4,2,['计算机视觉'],['sal5','mkt3'],
+ '业务员拍照即检核铺货、排面与价格执行，替代人工稽核。',['检核成本','铺货达标率','排面份额']),
+S('i_cpg2','经销商订单预测与窜货治理','scm',['cpg'],['cost','risk'],7,6,2,5,2,['预测分析','知识图谱'],['scm2','scm5'],
+ '渠道库存与订单预测，结合码控数据识别窜货异常。',['渠道库存周转','窜货事件数','订单满足率']),
+S('i_cpg3','新品口味/概念智能洞察','rd',['cpg','retail'],['inno','rev'],6.5,6.5,1,3,1,['NLP','大语言模型'],['rd3','mkt4'],
+ '从评论与社媒中挖掘口味、成分与概念趋势，辅助新品立项与测试。',['立项命中率','新品存活率','洞察周期']),
+/* ---- 物流 ---- */
+S('i_logi1','运力调度与智能配载','ops',['logi'],['cost'],8.5,5.5,3,6,3,['运筹优化','预测分析'],['scm4','ops4'],
+ '订单-运力智能匹配、线路与装载优化，提升车辆利用率。',['车辆利用率','单票成本','准时率']),
+S('i_logi2','仓内智能化(分拣/拣选/盘点)','ops',['logi','retail'],['cost'],7.5,5.5,3,7,2,['计算机视觉','机器人调度'],['ops6','scm1'],
+ '视觉识别+调度算法驱动分拣与拣选作业，盘点自动化。',['人效(件/人时)','错分率','盘点耗时']),
+S('i_logi3','运价预测与智能报价','sales',['logi'],['rev'],6.5,6,2,4,2,['预测分析','机器学习'],['sal4','sal2'],
+ '市场运价预测与成本测算驱动的自动报价，平衡量价与舱位利用。',['报价响应时长','中标率','毛利率']),
+S('i_logi4','单证智能处理','ops',['logi','pro'],['cost'],6.5,8,1,2,1,['OCR','RPA+AI'],['ops6','fin1'],
+ '运单、关单、提单等单证的智能识别录入与合规校验。',['单证处理时效','录入差错率','单均人力成本']),
+/* ---- 酒店文旅 ---- */
+S('i_hot1','收益管理与动态房价','sales',['hotel'],['rev'],8,5.5,2,5,2,['预测分析','运筹优化'],['sal2','mkt3'],
+ '需求预测驱动的房价与库存动态优化，最大化RevPAR。',['RevPAR','入住率','平均房价(ADR)']),
+S('i_hot2','多语智能客服与行程助手','cs',['hotel'],['exp','cost'],6.5,7.5,1,3,1,['大语言模型','多模态'],['cs2','cs1'],
+ '全渠道多语言问询、预订变更与行程推荐助手，7×24覆盖。',['咨询自助率','预订转化率','点评分']),
+S('i_hot3','客流预测与人力排班','ops',['hotel','retail'],['cost'],6,6.5,1,4,2,['预测分析','运筹优化'],['ops4','ops6'],
+ '客流/订单预测联动排班与物料准备，削峰填谷降人力浪费。',['人力成本占比','高峰服务水平','排班调整次数']),
+/* ---- 农业 ---- */
+S('i_agr1','病虫害识别与预警','ops',['agri'],['risk','cost'],7,6.5,1,3,2,['计算机视觉','深度学习'],['ops5','ops2'],
+ '图像识别病虫草害并结合气象数据预警，指导精准施药。',['病虫害损失率','农药用量','预警提前期']),
+S('i_agr2','精准种植/养殖决策','ops',['agri'],['cost','dec'],7,5,2,7,2,['物联网+机器学习','遥感'],['ops3','str3'],
+ '气象、土壤、长势/体征数据融合的灌溉、施肥、投喂决策优化。',['亩产/单产','投入品成本','损耗率']),
+S('i_agr3','农产品价格预测','strat',['agri','cpg'],['dec','rev'],6,5.5,1,4,2,['预测分析'],['str3','scm2'],
+ '主要品类价格走势预测，辅助收储、销售与套保决策。',['价格预测偏差','销售溢价','库存损失']),
+/* ---- 银行 ---- */
+S('i_bank1','智能信贷审批与风控','ops',['bank'],['risk','rev'],9,6,3,6,3,['机器学习','知识图谱'],['fin3','ops6'],
+ '多维数据驱动的信用评估、自动审批与贷后预警，平衡风险与通过率。',['不良率','审批时效','自动化审批占比']),
+S('i_bank2','实时反欺诈与反洗钱','legal',['bank','ins','sec'],['risk'],8.5,6,3,6,3,['机器学习','知识图谱'],['fin3','leg2'],
+ '交易行为实时风险识别、团伙挖掘与可疑报告辅助生成。',['欺诈资损','误报率','可疑案件处理时效']),
+S('i_bank3','智能财富助手与投顾','sales',['bank','sec'],['rev','exp'],7.5,5.5,3,7,2,['大语言模型','推荐系统'],['sal1','sal3'],
+ '客户画像驱动的产品匹配、资产配置建议与理财经理Copilot。',['AUM增长','产品转化率','客户活跃度']),
+S('i_bank4','智能催收与逾期管理','fin',['bank','ins'],['risk','cost'],7,6.5,2,4,2,['机器学习','语音机器人'],['fin3','cs1'],
+ '逾期分层策略与智能语音催收，合规前提下提升回收率。',['回收率','单户催收成本','投诉率']),
+/* ---- 保险 ---- */
+S('i_ins1','理赔自动化与反欺诈','ops',['ins'],['cost','exp','risk'],8.5,6,2,5,2,['OCR','计算机视觉','机器学习'],['ops6','fin3'],
+ '单证/影像智能定损、自动核赔与欺诈识别，小额案件分钟级结案。',['理赔时效','赔付率','欺诈拦截金额']),
+S('i_ins2','智能核保','ops',['ins'],['risk','cost'],7.5,6,2,5,2,['机器学习','NLP'],['ops6','fin3'],
+ '健康告知解析、风险评估与自动核保决策，人核聚焦疑难件。',['自动核保率','核保时效','逆选择损失']),
+S('i_ins3','客户挖掘与续期经营','mkt',['ins','bank'],['rev'],7,6,2,4,2,['机器学习','推荐系统'],['mkt4','sal3'],
+ '加保/续期倾向预测与代理人智能助手，提升人均产能。',['续期率','加保转化率','人均保费']),
+/* ---- 证券资管 ---- */
+S('i_sec1','智能投研助手','rd',['sec'],['emp','dec'],8,6.5,2,4,2,['大语言模型','检索增强(RAG)'],['rd2','str1'],
+ '研报、公告、调研纪要的智能检索摘要与观点比对，研究产能倍增。',['研报覆盖广度','信息处理时效','研究人效']),
+S('i_sec2','交易合规智能监控','legal',['sec','bank'],['risk'],7.5,6,2,5,2,['机器学习','NLP'],['leg2','fin3'],
+ '异常交易模式识别、营销话术合规质检与监管报送辅助。',['违规检出率','监管处罚次数','报送时效']),
+S('i_sec3','智能投教与客户陪伴','cs',['sec'],['exp','rev'],6,7,1,3,1,['大语言模型'],['cs1','mkt4'],
+ '行情解读、产品答疑与个性化投教内容生成，提升客户活跃与黏性。',['客户活跃度','咨询自助率','转化率']),
+/* ---- 医疗 ---- */
+S('i_med1','智能导诊与预问诊','cs',['med'],['exp','cost'],7.5,7,1,3,1,['大语言模型','NLP'],['cs2','cs1'],
+ '症状引导分诊、候诊期预问诊并生成结构化主诉，提升医患沟通效率。',['分诊准确率','门诊接诊效率','患者满意度']),
+S('i_med2','病历质控与结构化','ops',['med'],['risk','cost'],7.5,6.5,2,4,2,['NLP','大语言模型'],['ops6','leg2'],
+ '病历内涵质控、编码辅助(DRG/DIP)与科研数据结构化。',['病历甲级率','编码准确率','质控人力']),
+S('i_med3','医学影像辅助诊断','ops',['med'],['risk','exp'],8,5,3,8,3,['计算机视觉','深度学习'],['ops2'],
+ '肺结节、眼底、骨折等病灶的AI辅助识别，提升阅片效率与一致性。',['阅片效率','检出敏感度','漏诊率']),
+S('i_med4','医保控费与DRG运营分析','fin',['med'],['cost','dec'],7,6,2,5,2,['机器学习','预测分析'],['fin4','fin3'],
+ '费用异常识别、病组成本分析与临床路径优化建议。',['次均费用','医保拒付率','病组盈亏']),
+/* ---- 医药 ---- */
+S('i_pha1','AI 辅助药物发现','rd',['pharma'],['inno'],8.5,4,3,12,3,['深度学习','生成式AI'],['rd1','rd4'],
+ '分子生成、性质预测与虚拟筛选，压缩先导化合物发现周期。',['候选分子产出','筛选周期','临床前成功率']),
+S('i_pha2','临床试验智能化','rd',['pharma','med'],['cost','inno'],7.5,5,3,9,3,['NLP','预测分析'],['rd1','rd4'],
+ '方案设计辅助、中心与受试者匹配、数据核查自动化。',['入组周期','数据质疑数','试验成本']),
+S('i_pha3','药物警戒与合规自动化','legal',['pharma'],['risk','cost'],7,6.5,2,4,2,['NLP','大语言模型'],['leg2','leg1'],
+ '不良事件报告自动识别录入与信号检测，推广材料合规审查。',['个例处理时效','信号检出率','合规审查周期']),
+/* ---- 互联网/软件 ---- */
+S('i_tec1','产品 AI 化(Copilot/智能体)','rd',['tech'],['inno','rev'],9,6,3,6,2,['大语言模型','智能体(Agent)'],['rd3','rd1'],
+ '在自有产品中嵌入对话助手、自动化Agent等AI能力，打造差异化与新付费点。',['AI功能渗透率','付费转化率','留存提升']),
+S('i_tec2','增长与留存智能运营','mkt',['tech','retail'],['rev'],7.5,6.5,2,4,2,['机器学习','A/B实验'],['mkt3','sal3'],
+ '用户生命周期建模、流失预测与个性化触达策略自动化。',['留存率','LTV','激活转化率']),
+S('i_tec3','内容安全与风控审核','legal',['tech','media'],['risk','cost'],7,6.5,2,4,2,['多模态','深度学习'],['leg2','cs3'],
+ '文本/图像/视频的违规内容机审+人审协同，控制平台风险。',['机审拦截率','审核人力','漏判率']),
+/* ---- 电信 ---- */
+S('i_tel1','网络故障预测与自愈','ops',['telco'],['cost','exp'],8,5.5,3,7,3,['机器学习','日志分析'],['ops1','it3'],
+ '网元异常预测、告警根因定位与自动化处置编排。',['故障恢复时长','投诉率','网络可用率']),
+S('i_tel2','套餐推荐与客户保有','mkt',['telco'],['rev'],7.5,6.5,2,4,2,['机器学习','推荐系统'],['mkt3','sal3'],
+ '离网预测与套餐/权益精准匹配，提升ARPU与保有率。',['离网率','ARPU','营销转化率']),
+S('i_tel3','智能装维调度','ops',['telco'],['cost','exp'],6.5,6,2,4,2,['运筹优化'],['ops4','scm4'],
+ '工单智能派发与路径优化，装维一次成功率提升。',['一次装通率','单均工时','客户预约满足率']),
+/* ---- 传媒 ---- */
+S('i_med_a1','AIGC 内容生产线(文/图/视频)','ops',['media'],['cost','inno'],8.5,7,2,3,1,['生成式AI','多模态'],['ops6','mkt2'],
+ '选题策划、脚本、配图、视频粗剪到多平台分发的AI流水线。',['内容产能','单条制作成本','爆款率']),
+S('i_med_a2','智能剪辑与字幕拆条','ops',['media','edu'],['cost'],7,7.5,1,2,1,['多模态','语音识别'],['ops6'],
+ '长视频自动拆条、精彩集锦、字幕与多语配音生成。',['剪辑工时','二创产出量','发布时效']),
+S('i_med_a3','内容推荐与版权监测','strat',['media','tech'],['rev','risk'],6.5,6,2,5,2,['推荐系统','多模态'],['str1','leg2'],
+ '个性化分发提升时长，全网侵权内容指纹比对与维权取证。',['人均时长','侵权下架时效','版权收入']),
+/* ---- 专业服务 ---- */
+S('i_pro1','知识管理与案例智能检索','it',['pro'],['emp','cost'],7.5,8,1,2,1,['检索增强(RAG)','大语言模型'],['it1','rd2'],
+ '项目交付物、案例与方法论的智能检索问答，新人快速复用组织经验。',['知识复用率','提案准备时长','人均产值']),
+S('i_pro2','文书/报告自动生成','ops',['pro'],['cost','emp'],7.5,7.5,1,2,1,['大语言模型'],['ops6','adm1'],
+ '尽调报告、审计底稿、法律文书等专业文档的AI初稿与校核。',['文书起草时长','差错率','计费小时利用率']),
+S('i_pro3','智能尽调与风险核查','ops',['pro','bank'],['risk','cost'],7,6,2,4,2,['NLP','知识图谱'],['ops6','leg1'],
+ '目标企业多源信息自动采集、关联挖掘与红旗事项识别。',['尽调周期','红旗检出率','项目成本']),
+/* ---- 教育 ---- */
+S('i_edu1','个性化学习与自适应练习','ops',['edu'],['exp','inno'],8,6,2,5,2,['知识图谱','机器学习'],['ops6','rd3'],
+ '知识点图谱+掌握度诊断驱动的个性化学习路径与组卷。',['学习效率','成绩提升度','完课率']),
+S('i_edu2','AI 助教与智能答疑','cs',['edu'],['cost','exp'],7.5,7,1,3,1,['大语言模型'],['cs1','cs2'],
+ '7×24答疑、作文/代码批改反馈与学情周报生成。',['答疑响应时长','教师批改工时','续费率']),
+S('i_edu3','招生咨询智能化','mkt',['edu'],['rev'],6.5,7,1,3,1,['大语言模型','机器学习'],['mkt1','sal1'],
+ '咨询机器人+线索评分+个性化课程推荐，提升到访与转化。',['线索转化率','咨询师人效','获客成本']),
+/* ---- 政务 ---- */
+S('i_gov1','政务智能问答与办事引导','cs',['gov'],['exp','cost'],8,7,2,4,1,['大语言模型','检索增强(RAG)'],['cs2','cs1'],
+ '政策法规与办事指南的智能问答，"一网通办"入口的引导式服务。',['一次办成率','热线分流率','群众满意度']),
+S('i_gov2','公文智能辅助(写作/审核/流转)','admin',['gov'],['cost','emp'],7,7.5,1,3,1,['大语言模型'],['adm1','adm2'],
+ '公文起草、格式审查、错敏校对与智能流转分办。',['公文起草时长','差错率','流转时效']),
+S('i_gov3','12345 工单智能分派','cs',['gov'],['cost','exp'],7,7,1,3,1,['NLP','机器学习'],['cs2','adm2'],
+ '诉求自动分类、智能派单与热点议题分析，闭环督办。',['派单准确率','办结时效','重复投诉率']),
+S('i_gov4','城市治理事件智能识别','ops',['gov'],['risk','cost'],7,6,2,5,2,['计算机视觉'],['ops5'],
+ '占道经营、违建、垃圾堆放等城市事件的视频AI识别与自动立案。',['事件发现率','处置时效','网格员人效']),
+/* ---- 房建 ---- */
+S('i_re1','工地安全与进度智能监控','ops',['re'],['risk'],7,6.5,2,4,2,['计算机视觉'],['ops5','ops4'],
+ '安全帽/动火/高坠风险识别与形象进度比对，多项目远程督导。',['安全隐患检出率','事故数','督导成本']),
+S('i_re2','项目成本与现金流预测','fin',['re'],['dec','risk'],7,5.5,2,5,2,['预测分析'],['fin2','str3'],
+ '项目级成本偏差预警与销售回款预测，支撑投资与资金决策。',['成本偏差率','回款预测偏差','资金成本']),
+S('i_re3','案场智能助手与客户洞察','sales',['re'],['rev'],6,6.5,1,3,1,['大语言模型','机器学习'],['sal1','sal4'],
+ '置业顾问Copilot、来访客户意向评分与跟进策略建议。',['到访转化率','跟进及时率','成交周期']),
+S('i_re4','智慧物业服务','cs',['re'],['exp','cost'],6,7,1,3,1,['大语言模型','计算机视觉'],['cs1','ops5'],
+ '业主报事智能受理、设备巡检与社区安防事件识别。',['报事响应时长','物业费收缴率','人力成本']),
+];
+
+/* ================================================================
+   §3 知识库：技术打法 / 价值叙事（用于深度解析的生成）
+================================================================ */
+const TECHPLAY={
+ '生成式AI':{how:'选用合规的大模型底座，结合提示词工程与企业语料微调/检索增强，建立"AI生成+人工审核"的双重把关流程',data:'品牌/业务语料、历史优质样本、风格与禁用词规范'},
+ '大语言模型':{how:'优先采用成熟基础模型+检索增强(RAG)模式快速落地，再视效果评估微调；建立幻觉评测与人工抽检机制',data:'领域文档与FAQ、对话/工单历史、术语与知识规范'},
+ '检索增强(RAG)':{how:'梳理并清洗文档资产，构建向量索引与权限体系，设计带出处引用的问答链路，持续运营badcase',data:'制度/产品/项目文档、权限矩阵、高频问题清单'},
+ '智能体(Agent)':{how:'将业务SOP拆解为可编排的工具调用链，由Agent规划执行并设置人工确认关卡，灰度放量',data:'业务SOP、系统API接口、操作日志'},
+ '机器学习':{how:'从明确的预测/分类目标出发，构建特征工程与基线模型，小流量A/B验证业务增益后再迭代',data:'2年以上历史业务数据、标签定义、业务规则'},
+ '深度学习':{how:'评估预训练模型迁移可行性，准备标注数据集并建立持续训练与漂移监控管道',data:'大规模标注样本、算力资源、线上反馈回流'},
+ '计算机视觉':{how:'采集现场图像并标注典型样本，选用成熟检测/分割模型迁移训练，部署边缘推理并设人工复核',data:'现场图像/视频、缺陷或事件标注样本、点位与光照条件'},
+ 'NLP':{how:'结合预训练语言模型做信息抽取与分类，先在单一文档/语种类型验证，再扩展覆盖面',data:'历史文本语料、抽取字段定义、标注样本'},
+ '知识图谱':{how:'定义实体-关系本体，从多源数据自动抽取构建图谱，叠加图算法做风险传导与关联挖掘',data:'主数据、工商/舆情等外部数据、关系规则'},
+ '运筹优化':{how:'将业务约束数学建模，求解器+启发式算法求解，从离线建议过渡到在线自动决策',data:'订单/资源/约束主数据、历史排程方案、成本参数'},
+ '预测分析':{how:'构建多因子时序预测模型并区分可预测层级，预测结果嵌入计划/补货等业务流程闭环',data:'3年以上历史时序数据、促销/价格等因子、外部信号'},
+ 'RPA+AI':{how:'梳理高频规则化流程，用RPA串联系统操作、AI处理非结构化环节，建立数字员工运营机制',data:'流程SOP、单据样本、系统操作权限'},
+ 'OCR':{how:'采用多模态识别引擎覆盖票据/单证版式，低置信度走人工复核通道，识别结果直连业务系统',data:'各类单证票据样本、字段校验规则'},
+ '多模态':{how:'组合视觉、语音与文本模型构建端到端管道，先固化单一高频用例，再泛化',data:'图文/音视频素材库、版权与授权链路'},
+ '推荐系统':{how:'构建用户-物品特征与召回排序链路，冷启动用规则兜底，以在线A/B驱动迭代',data:'行为埋点、交易记录、商品/内容主数据'},
+ '语音识别':{how:'选用行业语音模型并做术语热词优化，转写结果接大模型做摘要与质检分析',data:'通话/会议录音、术语表、质检规则'},
+ 'ChatBI':{how:'治理核心指标口径形成语义层，大模型将自然语言转为查询并自动生成解读，重点保障准确率',data:'指标字典、数仓明细与汇总层、权限体系'},
+ '数字孪生':{how:'分级构建（先关键产线后全厂）几何+机理+数据混合模型，与实时数据联动校准',data:'设备台账、工艺机理模型、实时IoT数据'},
+ '仿真':{how:'建立业务/物理过程仿真环境，以AI代理模型加速求解，用真实数据持续校准',data:'历史运行数据、工艺/业务参数、验证案例'},
+ '物联网+机器学习':{how:'补齐关键传感与数据采集，先做异常检测积累标签，再过渡到故障预测与寿命估计',data:'传感器时序数据、维修/故障工单、设备台账'},
+ '日志分析':{how:'统一日志与指标采集，无监督异常检测+拓扑根因定位，与工单系统联动自动化处置',data:'系统日志、调用链、历史故障复盘'},
+ '强化学习':{how:'先构建高保真仿真环境离线训练策略，灰度对照上线并保留人工接管机制',data:'历史决策序列、环境状态数据、收益函数定义'},
+ '代码生成':{how:'引入AI编程助手并配套安全与合规扫描，沉淀团队提示词与最佳实践，度量提效',data:'代码仓库、研发流程数据、安全规范'},
+ 'A/B实验':{how:'搭建实验平台与指标体系，所有策略以小流量实验验证后放量',data:'埋点数据、实验分流配置、北极星指标'},
+ '无人机':{how:'规划航线与采集规范，巡检影像回传AI识别平台，缺陷自动生成工单',data:'巡检影像、缺陷样本库、台账与坐标'},
+ '机器人调度':{how:'分阶段引入AMR/机械臂，调度算法与WMS/MES集成，人机协作动线设计',data:'仓储布局、订单波次数据、设备接口'},
+ '声学检测':{how:'采集正常/异常声纹样本训练识别模型，产线端侧部署实时判异',data:'声学样本库、工况标签、检测标准'},
+ '数字人':{how:'选用数字人平台定制形象与声音，挂接产品知识库驱动话术，直播间合规审核',data:'产品知识库、话术脚本、形象授权'},
+ 'CAD智能化':{how:'打通CAD/PLM数据，训练设计推荐与校核模型，嵌入设计师工作流',data:'历史图纸、设计规范、变更记录'},
+ '遥感':{how:'卫星/无人机多光谱影像解译作物长势，与地面传感数据融合建模',data:'遥感影像、地块边界、农事记录'},
+ '语音机器人':{how:'外呼策略分层设计，语音机器人处理标准触达、复杂场景转人工，全程合规录音',data:'客户分层数据、话术库、合规规范'},
+ '元数据管理':{how:'自动扫描数据资产生成血缘与字典，AI辅助打标与质量规则推荐',data:'数据库元数据、ETL任务、质量规则'},
+};
+const GOALTXT={
+ cost:'通过自动化替代与流程提效直接压缩运营成本，释放的人力可转向更高价值工作',
+ rev:'通过更精准的获客、转化、定价与复购经营拉动收入增长',
+ exp:'通过更快响应与个性化服务改善客户体验，沉淀长期品牌与复购资产',
+ inno:'通过AI原生能力催生新产品、新服务与新商业模式，构建第二增长曲线',
+ risk:'通过实时监测与智能预警降低风险敞口与合规成本，避免重大损失',
+ dec:'通过数据驱动的预测与归因提升决策质量与速度，减少经验主义偏差',
+ emp:'通过知识平权与智能工具放大员工能力，缓解关键人才瓶颈',
+};
+
+/* ================================================================
+   §4 状态与向导流程
+================================================================ */
+const DEFAULT_A=()=>({name:'',biz:'',industry:'',emp:'s3',rev:'r3',role:'biz',goals:[],fns:[],pains:[],
+  dm:3,sys:3,aiexp:2,budget:'b2',talent:'t1',speed:'sp2',comp:'c2',deploy:'d2',style:'balance'});
+let A=DEFAULT_A();
+let step=0; // 0=welcome 1..9
+const TOTAL=9;
+const BUDGETS=[{id:'b1',label:'50 万以内',cap:1},{id:'b2',label:'50 ~ 200 万',cap:1.6},{id:'b3',label:'200 ~ 500 万',cap:2.2},{id:'b4',label:'500 ~ 2000 万',cap:3},{id:'b5',label:'2000 万以上',cap:3}];
+const TALENTS=[{id:'t0',label:'暂无专职人员',adj:-0.8},{id:'t1',label:'少量兼职/外部伙伴',adj:0},{id:'t2',label:'有数据/AI专职团队',adj:0.7}];
+const SPEEDS=[{id:'sp1',label:'3 个月内见效',m:3},{id:'sp2',label:'6 个月左右',m:6},{id:'sp3',label:'12 个月内',m:12},{id:'sp4',label:'着眼长期布局',m:24}];
+const COMPS=[{id:'c1',label:'高（强监管/涉敏数据）',adj:-0.7},{id:'c2',label:'中等',adj:0},{id:'c3',label:'较低',adj:0.2}];
+const DEPLOYS=[{id:'d1',label:'公有云/SaaS 优先'},{id:'d2',label:'混合部署'},{id:'d3',label:'私有化部署优先'}];
+const STYLES=[{id:'quick',label:'速赢优先',d:'先拿下见效快的场景建立信心'},{id:'balance',label:'平衡推进',d:'价值与可行性并重（推荐）'},{id:'value',label:'价值优先',d:'聚焦战略级高价值场景'}];
+const lk=(id)=>({s1:'很弱',s2:'较弱',s3:'中等',s4:'较好',s5:'领先'})[id];
+const find=(arr,id)=>arr.find(x=>x.id===id)||{};
+const indOf=()=>find(INDUSTRIES,A.industry);
+const fnLabel=id=>find(FUNCTIONS,id).label||id;
+const painLabel=id=>{for(const k in PAINS){const p=PAINS[k].find(x=>x.id===id);if(p)return p.label;}return id;};
+
+function saveState(){try{localStorage.setItem('zh_vc',JSON.stringify({A,step}));}catch(e){}}
+function loadState(){try{const s=JSON.parse(localStorage.getItem('zh_vc')||'null');if(s&&s.A){return s;}}catch(e){}return null;}
+function clearState(){try{localStorage.removeItem('zh_vc');}catch(e){}}
+
+/* ---- 渲染原语 ---- */
+function optHtml(it,sel,k,multi){
+  return `<div class="opt ${sel?'sel':''}" data-k="${k}" data-v="${it.id}" ${multi?'data-multi="1"':''}>
+    ${it.ic?`<span class="ic">${it.ic}</span>`:''}
+    <div><div class="t">${h(it.label)}</div>${it.d?`<div class="d">${h(it.d)}</div>`:''}</div>
+    <span class="ck">✓</span></div>`;
+}
+function gridHtml(items,k,multi,wide){
+  const cur=multi?(A[k]||[]):A[k];
+  return `<div class="opt-grid ${wide?'wide':''}">`+items.map(it=>optHtml(it,multi?cur.includes(it.id):cur===it.id,k,multi)).join('')+`</div>`;
+}
+function chipsHtml(items,k){
+  const cur=A[k]||[];
+  return `<div class="chips">`+items.map(it=>`<span class="chip ${cur.includes(it.id)?'sel':''}" data-k="${k}" data-v="${it.id}" data-multi="1" data-chip="1">${h(it.label)}</span>`).join('')+`</div>`;
+}
+function likertHtml(k,labels){
+  return `<div class="likert">`+labels.map((l,i)=>`<div class="lk ${A[k]===i+1?'sel':''}" data-k="${k}" data-v="${i+1}" data-num="1"><div class="n">${i+1}</div><div class="l">${h(l)}</div></div>`).join('')+`</div>`;
+}
+const label=(t,opt,req)=>`<div class="fieldlabel">${h(t)} ${req?'<span class="req">*</span>':''}${opt?`<span class="opt-tag">${h(opt)}</span>`:''}</div>`;
+
+/* ---- 步骤定义 ---- */
+const STEPS=[
+ {name:'欢迎', render:renderWelcome},
+ {name:'行业领域', max:1,
+  say:()=>`您好！我是 <b>智衡</b>，您的 AI 价值顾问 ✦ 我会用 9 个问题了解贵企业，然后从覆盖 <b>22 个行业、12 大职能、${SCN.length} 个场景</b> 的知识库中，为您识别并排序高价值 AI 机会。先告诉我：贵企业属于哪个行业？`,
+  why:'行业决定可用的特化场景库与价值基准——同一个AI能力在不同行业的回报差异可达数倍。',
+  render(el){
+    let html=label('企业/项目名称','选填')+`<input class="txt" data-txt="name" placeholder="例如：星辰智造（用于报告封面与称呼）" value="${h(A.name)}" maxlength="30">`;
+    const groups=[...new Set(INDUSTRIES.map(i=>i.g))];
+    for(const g of groups){
+      html+=`<div class="group-cap">▍${g}</div>`+gridHtml(INDUSTRIES.filter(i=>i.g===g),'industry',false);
+    }
+    html+=label('主营业务一句话描述','选填')+`<input class="txt" data-txt="biz" placeholder="例如：为新能源行业提供精密结构件" value="${h(A.biz)}" maxlength="60">`;
+    el.innerHTML=html;
+  },
+  validate:()=>A.industry?null:'请选择一个行业，便于我匹配行业特化场景库'},
+ {name:'企业规模',
+  say:()=>`${A.name?('好的，'+h(A.name)+'。'):''}选择了「${h(indOf().label||'')}」。接下来了解一下企业的<b>体量与您的视角</b>——这会影响价值测算的基数和报告的汇报口径。`,
+  why:'营收规模用于估算各场景的年化价值区间；您的角色决定报告侧重战略叙事还是落地细节。',
+  render(el){
+    el.innerHTML=label('员工规模','单选',1)+gridHtml(SIZES,'emp')
+      +label('年营业收入','单选 · 用于价值测算',1)+gridHtml(REVENUES,'rev')
+      +label('您的角色','单选',1)+gridHtml(ROLES,'role');
+  },
+  validate:()=>null},
+ {name:'战略目标', 
+  say:()=>`接下来是关键问题：未来 1~2 年，企业最迫切想通过 AI 实现的<b>战略目标</b>是什么？请选择 <b>1~3 项</b>并按重要程度点选（先选的权重更高）。`,
+  why:'目标对齐度是场景价值评分的核心权重——AI项目失败的首因往往不是技术，而是与战略脱节。',
+  render(el){ el.innerHTML=label('战略目标','多选 · 最多 3 项，按优先级点选',1)+gridHtml(GOALS,'goals',true,true)
+    +`<div class="counterhint" id="goalHint"></div>`; updGoalHint(); },
+  validate:()=>(A.goals.length>0)?null:'请至少选择 1 项战略目标'},
+ {name:'重点职能',
+  say:()=>`企业价值链很长，AI 不可能一次性全面开花。您希望<b>优先在哪些业务环节</b>寻找突破口？选择 <b>1~4 个</b>重点职能。`,
+  why:'聚焦重点职能可以让首批AI投入形成合力；未选中的职能场景仍会评估，但优先级降权。',
+  render(el){ el.innerHTML=label('重点职能领域','多选 · 最多 4 项',1)+gridHtml(FUNCTIONS,'fns',true); },
+  validate:()=>(A.fns.length>0)?null:'请至少选择 1 个重点职能'},
+ {name:'业务痛点',
+  say:()=>`很好。下面这些是「${A.fns.map(fnLabel).join(' / ')}」中的典型痛点，<b>哪些说中了您的现状？</b>最多选 8 项——痛点匹配度会直接拉升相关场景的价值评分。`,
+  why:'痛点是价值的镜像：被点名的痛点会让对应场景获得最强的评分加成，并出现在报告的推荐理由中。',
+  render(el){
+    A.pains=(A.pains||[]).filter(p=>A.fns.some(f=>(PAINS[f]||[]).some(x=>x.id===p)));
+    let html='';
+    for(const f of A.fns){ html+=`<div class="group-cap">▍${fnLabel(f)}</div>`+chipsHtml(PAINS[f]||[],'pains'); }
+    html+=`<div class="counterhint">已选 <b id="painCnt">${A.pains.length}</b> / 8 项</div>`;
+    el.innerHTML=html;
+  },
+  validate:()=>(A.pains.length>0)?null:'请至少选择 1 个业务痛点'},
+ {name:'数字化基础',
+  say:()=>`了解完"想做什么"，再看看"能做什么"。请客观评估企业当前的<b>数字化与数据基础</b>——这决定哪些场景可以直接上，哪些要先补课。`,
+  why:'数据与系统基础是可行性评分的最大变量：基础薄弱时，报告会自动推荐"轻数据"场景先行并给出补课建议。',
+  render(el){
+    el.innerHTML=label('数据基础：业务数据的完整性与可用性',null,1)+likertHtml('dm',['纸质/分散','部分系统化','主要业务在线','有统一数仓','数据中台完善'])
+      +label('系统化程度：核心流程的信息化覆盖',null,1)+likertHtml('sys',['基本靠人工','个别系统','核心已上系统','系统较完整','高度集成'])
+      +label('AI 实践经验',null,1)+likertHtml('aiexp',['完全没有','了解试用过','有试点项目','有场景上线','多场景规模化']);
+  },
+  validate:()=>null},
+ {name:'资源投入',
+  say:()=>`AI 落地是"一把手工程"，也是资源配置问题。请告诉我企业可投入的<b>预算、人才与期望节奏</b>，我会据此过滤掉"够不着"的场景。`,
+  why:'预算决定可启动场景的投入档位；人才与节奏影响可行性评分与路线图的排期密度。',
+  render(el){
+    el.innerHTML=label('未来 12 个月 AI 预算（含软硬件与服务）','单选',1)+gridHtml(BUDGETS,'budget')
+      +label('AI/数据人才储备','单选',1)+gridHtml(TALENTS,'talent')
+      +label('期望见效时间','单选',1)+gridHtml(SPEEDS,'speed');
+  },
+  validate:()=>null},
+ {name:'约束与偏好',
+  say:()=>`最后一组问题：<b>合规约束与推进风格</b>。这不影响"机会有多大"，但深刻影响"应该先做哪个、怎么做"。`,
+  why:'强合规企业的客户触达类生成式AI场景会被审慎降权；推进风格决定价值与可行性在排序中的权重配比。',
+  render(el){
+    el.innerHTML=label('数据安全与合规敏感度','单选',1)+gridHtml(COMPS,'comp')
+      +label('部署偏好','单选',1)+gridHtml(DEPLOYS,'deploy')
+      +label('推进风格（决定排序权重）','单选',1)+gridHtml(STYLES,'style',false,true);
+  },
+  validate:()=>null},
+ {name:'确认生成',
+  say:()=>`信息齐了！请确认以下画像。点击「开始智能分析」后，我将完成 <b>场景匹配 → 双维评分 → 优先级排序 → 价值测算 → 路线规划</b>，并生成一份可导出 PDF 的完整报告。`,
+  why:'生成后仍可返回修改任何答案，报告会即时重新计算。',
+  render(el){
+    const ind=indOf();
+    const sum=[['企业',(A.name||'未命名企业')+(A.biz?(' · '+A.biz):'')],['行业',ind.ic+' '+ind.label],
+      ['规模',find(SIZES,A.emp).label+' · 年营收 '+find(REVENUES,A.rev).label],['角色',find(ROLES,A.role).label],
+      ['战略目标',A.goals.map(g=>find(GOALS,g).label).join('、')],['重点职能',A.fns.map(fnLabel).join('、')],
+      ['核心痛点',A.pains.slice(0,8).map(painLabel).join('、')],
+      ['数字化基础','数据 '+A.dm+'/5 · 系统 '+A.sys+'/5 · AI经验 '+A.aiexp+'/5'],
+      ['资源',find(BUDGETS,A.budget).label+' · '+find(TALENTS,A.talent).label+' · '+find(SPEEDS,A.speed).label],
+      ['约束偏好','合规'+find(COMPS,A.comp).label.slice(0,1)+' · '+find(DEPLOYS,A.deploy).label+' · '+find(STYLES,A.style).label]];
+    el.innerHTML=`<div class="sumgrid">`+sum.map(s=>`<div class="sumitem"><div class="k">${s[0]}</div><div class="v">${h(s[1])}</div></div>`).join('')+`</div>
+      <div class="ack"><b>✦ 智衡观察：</b>${h(ind.insight||'')}</div>`;
+  },
+  validate:()=>null},
+];
+
+function updGoalHint(){const e=$('#goalHint');if(e){e.innerHTML=A.goals.length?('优先级：'+A.goals.map((g,i)=>(i+1)+'. '+find(GOALS,g).label).join('　')) : '尚未选择';}}
+
+function renderWelcome(el){
+  $('#progressWrap').style.display='none';$('#agentRow').style.display='none';$('#navBar').style.display='none';
+  const saved=loadState();
+  el.innerHTML=`<div class="welcome">
+    <div class="orb lg" style="margin:0 auto"></div>
+    <h1>发现贵企业的 <span class="gt">AI 高价值场景</span></h1>
+    <div class="en">Enterprise AI Value Compass · Powered by 智衡 Agent</div>
+    <p class="lead">用约 <b>3 分钟</b> 回答 9 组引导式问题，智衡将基于覆盖全行业的场景知识库与价值-可行性双维评分模型，为您生成一份<b>详尽、专业、可导出 PDF</b> 的《企业 AI 高价值场景识别与排序报告》。</p>
+    <div class="feat-row">
+      <div class="feat"><span class="fi">🧭</span>22 行业 × 12 职能 × ${SCN.length} 场景库</div>
+      <div class="feat"><span class="fi">📊</span>双维评分 · 七类专业图表</div>
+      <div class="feat"><span class="fi">🗺️</span>三阶段实施路线图与 ROI 测算</div>
+      <div class="feat"><span class="fi">🔒</span>纯本地运行 · 数据不出浏览器</div>
+    </div>
+    <div class="steps-mini">
+      <span class="smini"><span class="num">1</span>画像问答</span><span class="smini"><span class="arrow">━━▶</span></span>
+      <span class="smini"><span class="num">2</span>智能分析</span><span class="smini"><span class="arrow">━━▶</span></span>
+      <span class="smini"><span class="num">3</span>图文报告</span><span class="smini"><span class="arrow">━━▶</span></span>
+      <span class="smini"><span class="num">4</span>导出 PDF</span>
+    </div>
+    <button class="btn primary lg" id="btnStart">✦ 开始评估</button>
+    <button class="btn ghost lg" id="btnDemo" style="margin-left:10px">🎲 示例体验</button>
+    ${saved&&saved.step>0?`<div style="margin-top:14px"><button class="btn subtle" id="btnResume">↻ 继续上次填到第 ${saved.step} 步的评估</button></div>`:''}
+    <div class="privacy-note">本工具为独立单文件应用，所有计算在您的浏览器本地完成；评估结果仅供战略参考。</div>
+  </div>`;
+  $('#btnStart').onclick=()=>{step=1;renderStep();};
+  $('#btnDemo').onclick=()=>{demoFill();step=9;renderStep();};
+  const br=$('#btnResume'); if(br) br.onclick=()=>{const s=loadState();A=s.A;step=s.step;renderStep();};
+}
+
+function demoFill(){
+  const demos=[
+   {name:'星辰精密制造',biz:'为新能源汽车提供精密结构件',industry:'mfg',emp:'s4',rev:'r4',role:'ceo',goals:['cost','risk','dec'],fns:['ops','scm','it'],
+    pains:['ops1','ops2','ops4','scm1','scm2','it1'],dm:3,sys:3,aiexp:2,budget:'b4',talent:'t1',speed:'sp2',comp:'c2',deploy:'d2',style:'balance'},
+   {name:'澜悦时尚零售',biz:'全渠道服饰零售连锁',industry:'retail',emp:'s4',rev:'r4',role:'biz',goals:['rev','exp','cost'],fns:['mkt','scm','cs'],
+    pains:['mkt1','mkt2','mkt4','scm1','scm2','cs1','cs2'],dm:4,sys:4,aiexp:3,budget:'b3',talent:'t2',speed:'sp1',comp:'c3',deploy:'d1',style:'quick'},
+   {name:'城阳商业银行',biz:'区域性城市商业银行',industry:'bank',emp:'s4',rev:'r5',role:'cio',goals:['risk','exp','cost'],fns:['cs','ops','legal','it'],
+    pains:['cs1','cs2','fin3','leg2','it1','ops6'],dm:4,sys:4,aiexp:3,budget:'b4',talent:'t2',speed:'sp2',comp:'c1',deploy:'d3',style:'value'},
+  ];
+  A=Object.assign(DEFAULT_A(),demos[Math.floor(Math.random()*demos.length)]);
+  saveState();
+}
+
+function agentSpeak(text,why){
+  const say=$('#agentSay'),w=$('#agentWhy');
+  say.innerHTML='<span class="tdots"><i></i><i></i><i></i></span>'; w.style.display='none';
+  setTimeout(()=>{say.innerHTML=text; if(why){w.textContent=why;w.style.display='flex';}},420);
+}
+
+function renderStep(){
+  saveState();
+  window.scrollTo({top:0,behavior:'smooth'});
+  $('#viewWizard').hidden=false;$('#viewAnalysis').hidden=true;$('#viewReport').hidden=true;
+  const qc=$('#qcard');
+  if(step===0){STEPS[0].render(qc);return;}
+  const st=STEPS[step];
+  $('#progressWrap').style.display='';$('#agentRow').style.display='';$('#navBar').style.display='';
+  $('#pCur').textContent=step;$('#pTotal').textContent=TOTAL;$('#pName').textContent=st.name;
+  const pct=Math.round(step/TOTAL*100);$('#pPct').textContent=pct+'%';$('#pFill').style.width=pct+'%';
+  agentSpeak(st.say(),st.why);
+  qc.innerHTML='';st.render(qc);
+  const em=document.createElement('div');em.className='err-msg';em.id='errMsg';em.innerHTML='⚠ <span></span>';qc.appendChild(em);
+  $('#btnPrev').style.visibility=step>1?'visible':'hidden';
+  $('#btnNext').textContent=step===TOTAL?'✦ 开始智能分析':'下一步 →';
+  $('#navHint').textContent=step===TOTAL?'生成后仍可返回修改':'';
+}
+
+function showErr(msg){const e=$('#errMsg');if(!e)return;e.querySelector('span').textContent=msg;e.classList.remove('show');void e.offsetWidth;e.classList.add('show');}
+
+/* ---- 交互委托 ---- */
+$('#qcard').addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-k]'); if(!t)return;
+  const k=t.dataset.k,v=t.dataset.v,multi=t.dataset.multi==='1';
+  if(multi){
+    const arr=A[k]||(A[k]=[]); const i=arr.indexOf(v);
+    const max=k==='goals'?3:(k==='fns'?4:(k==='pains'?8:99));
+    if(i>=0)arr.splice(i,1); else{ if(arr.length>=max){showErr('最多选择 '+max+' 项，可先取消已选项');return;} arr.push(v);}
+    t.classList.toggle('sel',arr.includes(v));
+    if(k==='goals')updGoalHint();
+    const pc=$('#painCnt');if(pc&&k==='pains')pc.textContent=A.pains.length;
+  }else{
+    A[k]=t.dataset.num==='1'?parseInt(v,10):v;
+    $$('[data-k="'+k+'"]',$('#qcard')).forEach(n=>n.classList.toggle('sel',n===t));
+  }
+  saveState();
+});
+$('#qcard').addEventListener('input',ev=>{const t=ev.target.closest('[data-txt]');if(t){A[t.dataset.txt]=t.value.trim();saveState();}});
+$('#btnPrev').onclick=()=>{if(step>1){step--;renderStep();}};
+$('#btnNext').onclick=()=>{
+  const err=STEPS[step].validate&&STEPS[step].validate();
+  if(err){showErr(err);return;}
+  if(step<TOTAL){step++;renderStep();} else runAnalysis();
+};
+$('#btnRestartTop').onclick=()=>{if(confirm('确定要清空当前作答并重新开始吗？')){clearState();A=DEFAULT_A();step=0;renderStep();}};
+
+/* ================================================================
+   §5 智能评分引擎
+================================================================ */
+const W_STYLES={quick:{v:.42,f:.58},balance:{v:.52,f:.48},value:{v:.66,f:.34}};
+const GENAI_TAGS=['生成式AI','大语言模型','数字人','检索增强(RAG)','智能体(Agent)','代码生成'];
+
+function runEngine(){
+  const cands=SCN.filter(s=>s.ind==='all'||s.ind.includes(A.industry));
+  const w=W_STYLES[A.style]||W_STYLES.balance;
+  const revMid=find(REVENUES,A.rev).mid, sizeF=find(SIZES,A.emp).f;
+  const budgetCap=find(BUDGETS,A.budget).cap, talentAdj=find(TALENTS,A.talent).adj, compAdj=find(COMPS,A.comp).adj;
+  const speedM=find(SPEEDS,A.speed).m;
+  const E=cands.map(s=>{
+    let v=s.v,f=s.f; const why=[],flags=[];
+    /* —— 价值修正 —— */
+    let gAdd=0; s.goals.forEach(g=>{const i=A.goals.indexOf(g); if(i>=0)gAdd+=[0.9,0.6,0.4][i]||0.3;});
+    gAdd=Math.min(gAdd,1.6); v+=gAdd;
+    if(gAdd>0.8)why.push('与「'+s.goals.filter(g=>A.goals.includes(g)).map(g=>find(GOALS,g).label).join('、')+'」战略目标高度对齐');
+    if(A.fns.includes(s.fn)){v+=0.7;}else{v-=0.45;}
+    const mp=(s.pains||[]).filter(p=>A.pains.includes(p));
+    v+=Math.min(mp.length*0.8,2.0);
+    if(mp.length)why.push('直接回应痛点：'+mp.map(painLabel).join('、'));
+    if(s.ind!=='all'){v+=0.4;why.push('为'+(indOf().label||'本行业')+'特化场景，行业内已有对标实践');}
+    /* —— 可行性修正 —— */
+    f+=(A.dm-3)*0.33*s.data;
+    f+=(A.sys-3)*0.2+(A.aiexp-2)*0.22+talentAdj;
+    if(s.cost>budgetCap){f-=(s.cost-budgetCap)*1.1;flags.push('投入档位高于当前预算区间，建议分期或寻求专项预算');}
+    const isGen=s.tech.some(t=>GENAI_TAGS.includes(t));
+    f+=compAdj*(isGen||['cs','mkt'].includes(s.fn)?1:0.45);
+    if(compAdj<0&&isGen)flags.push('涉敏行业使用生成式AI需配套内容审核与数据脱敏机制');
+    if(s.ttv>speedM){f-=Math.min(1.2,(s.ttv-speedM)*0.1);flags.push('预计见效周期 '+s.ttv+' 个月，长于期望，需管理预期或拆分里程碑');}
+    if(A.dm<=2&&s.data>=3)flags.push('对数据基础要求高，建议先行开展数据补课专项');
+    if(A.talent==='t0'&&s.cost>=2)flags.push('建议引入外部交付伙伴并同步培养内部种子团队');
+    v=clamp(v,1,10);f=clamp(f,1,10);
+    if(f>=7.5)why.push('实施门槛低、技术成熟，适合快速启动');
+    const prio=v*w.v+f*w.f;
+    const quad=v>=6.5?(f>=6.5?'win':'str'):(f>=6.5?'eff':'obs');
+    /* —— 价值与投入测算（方向性） —— */
+    const base=revMid*(v/10);
+    const annualLo=Math.max(base*0.005,0.0015),annualHi=Math.max(base*0.013,0.005);
+    const INV=[[25,80],[80,300],[300,1000]][s.cost-1];
+    const invLo=INV[0]*sizeF/10000,invHi=INV[1]*sizeF/10000;
+    const payback=Math.round(((invLo+invHi)/2)/(((annualLo+annualHi)/2)/12)+s.ttv*0.5);
+    return {s,v:r1(v),f:r1(f),prio:r1(prio),quad,mp,why:why.slice(0,3),flags:flags.slice(0,3),
+      annualLo,annualHi,invLo,invHi,payback:clamp(payback,2,36)};
+  });
+  E.sort((a,b)=>b.prio-a.prio);
+  E.forEach((e,i)=>e.rank=i+1);
+  /* —— 就绪度雷达 —— */
+  const tMap={t0:1.8,t1:3,t2:4.2},cMap={c1:3.8,c2:3,c3:2.6};
+  const radar=[
+   {label:'战略牵引',me:clamp(2.3+A.goals.length*0.5+(['ceo','cio'].includes(A.role)?0.7:0),1,5),avg:3.2},
+   {label:'数据基础',me:A.dm,avg:3.0},{label:'系统与算力',me:A.sys,avg:3.1},
+   {label:'人才组织',me:clamp(tMap[A.talent]+A.aiexp*0.12,1,5),avg:2.8},
+   {label:'治理合规',me:clamp(cMap[A.comp]+(A.fns.includes('legal')?0.3:0),1,5),avg:3.0},
+   {label:'场景经验',me:clamp(A.aiexp+Math.min(A.pains.length,6)*0.08,1,5),avg:2.9},
+  ];
+  const mAvg=radar.reduce((t,d)=>t+d.me,0)/radar.length;
+  const mat=mAvg<1.9?{lv:'L1',name:'起步级'}:mAvg<2.7?{lv:'L2',name:'试点级'}:mAvg<3.5?{lv:'L3',name:'推广级'}:mAvg<4.3?{lv:'L4',name:'规模级'}:{lv:'L5',name:'引领级'};
+  /* —— 路线图 —— */
+  const top10=E.slice(0,10);
+  const p1=[],p2=[],p3=[];
+  for(const e of top10){
+    if(p1.length<3&&(e.f>=7||(e.s.cost===1&&e.s.ttv<=3)))p1.push(e);
+    else if(p2.length<4&&e.s.cost<=2)p2.push(e);
+    else if(p3.length<3)p3.push(e);
+  }
+  for(const e of top10){ if(!p1.includes(e)&&!p2.includes(e)&&!p3.includes(e)){ if(p1.length<2)p1.push(e);else if(p2.length<4)p2.push(e);else if(p3.length<3)p3.push(e);} }
+  /* —— 预算分配 —— */
+  let alloc=[
+   {label:'场景试点与应用建设',val:50,color:'#6366f1'},
+   {label:'数据与平台底座',val:A.dm<=2?30:A.dm===3?24:17,color:'#06b6d4'},
+   {label:'人才与组织能力',val:A.talent==='t0'?17:13,color:'#8b5cf6'},
+   {label:'AI治理与安全',val:A.comp==='c1'?13:8,color:'#10b981'},
+  ];
+  const tot=alloc.reduce((t,x)=>t+x.val,0);alloc.forEach(x=>x.val=Math.round(x.val/tot*100));
+  alloc[0].val+=100-alloc.reduce((t,x)=>t+x.val,0);
+  /* —— ROI 曲线（Top5 组合） —— */
+  const port=E.slice(0,5);
+  const invTotal=port.reduce((t,e)=>t+(e.invLo+e.invHi)/2,0);
+  const months=24,inv=[],val=[];let cv=0;
+  const starts=port.map((e,i)=>(i<2?1:i<4?4:9));
+  for(let m=0;m<=months;m++){
+    inv.push(invTotal*(m<=6?0.12+m*0.08:Math.min(1,0.6+(m-6)*0.045)));
+    let add=0;
+    port.forEach((e,i)=>{const st=starts[i]+e.s.ttv*0.6;const run=((e.annualLo+e.annualHi)/2)/12;
+      if(m>st)add+=run*Math.min(1,(m-st)/4);});
+    cv+=add;val.push(cv);
+  }
+  let breakeven=val.findIndex((x,i)=>x>=inv[i]&&i>2); if(breakeven<0)breakeven=null;
+  return {E,top10,top3:E.slice(0,3),radar,mAvg:r1(mAvg),mat,phases:[p1,p2,p3],alloc,roi:{inv,val,breakeven},
+    annualLoSum:port.reduce((t,e)=>t+e.annualLo,0),annualHiSum:port.reduce((t,e)=>t+e.annualHi,0),
+    invLoSum:port.reduce((t,e)=>t+e.invLo,0),invHiSum:port.reduce((t,e)=>t+e.invHi,0),w};
+}
+
+/* ================================================================
+   §6 SVG 图表生成器（无依赖，打印矢量清晰）
+================================================================ */
+const AX='#94a3b8',GRID='#e8ecf6';
+const QCOLOR={win:'#10b981',str:'#6366f1',eff:'#06b6d4',obs:'#94a3b8'};
+const QNAME={win:'速赢区',str:'战略区',eff:'效率区',obs:'储备区'};
+
+function svgRadar(dims){
+  const W=340,H=252,cx=W/2,cy=H/2+6,R=88,n=dims.length,g=gid('rd');
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-height:64mm">`;
+  s+=`<defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1" stop-opacity=".5"/><stop offset="1" stop-color="#06b6d4" stop-opacity=".35"/></linearGradient></defs>`;
+  for(let lv=1;lv<=5;lv++){const ps=dims.map((_,i)=>pt(i,R*lv/5).join(',')).join(' ');
+    s+=`<polygon points="${ps}" fill="${lv===5?'#fafbff':'none'}" stroke="${GRID}" stroke-width="1"/>`;}
+  dims.forEach((_,i)=>{const [x,y]=pt(i,R);s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${GRID}"/>`;});
+  const avgPs=dims.map((d,i)=>pt(i,R*d.avg/5).join(',')).join(' ');
+  s+=`<polygon points="${avgPs}" fill="none" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+  const mePs=dims.map((d,i)=>pt(i,R*d.me/5).join(',')).join(' ');
+  s+=`<polygon points="${mePs}" fill="url(#${g})" stroke="#6366f1" stroke-width="2"/>`;
+  dims.forEach((d,i)=>{const [x,y]=pt(i,R*d.me/5);s+=`<circle cx="${x}" cy="${y}" r="3" fill="#fff" stroke="#6366f1" stroke-width="2"/>`;});
+  dims.forEach((d,i)=>{const [x,y]=pt(i,R+17);
+    s+=`<text x="${x}" y="${y-2}" text-anchor="middle" font-size="9.5" fill="#475569" font-weight="600">${d.label}</text>`;
+    s+=`<text x="${x}" y="${y+9}" text-anchor="middle" font-size="8.5" fill="#6366f1" font-weight="700">${d.me.toFixed(1)}</text>`;});
+  return s+'</svg>';
+}
+
+function svgBubble(items){
+  const W=470,H=330,L=42,T=16,Rt=14,B=34,pw=W-L-Rt,ph=H-T-B,g=gid('bb');
+  const X=x=>L+(x-1)/9*pw, Y=y=>T+ph-(y-1)/9*ph, sx=X(6.5),sy=Y(6.5);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  s+=`<rect x="${sx}" y="${T}" width="${L+pw-sx}" height="${sy-T}" fill="#10b981" opacity=".06"/>`;
+  s+=`<rect x="${L}" y="${T}" width="${sx-L}" height="${sy-T}" fill="#6366f1" opacity=".06"/>`;
+  s+=`<rect x="${sx}" y="${sy}" width="${L+pw-sx}" height="${T+ph-sy}" fill="#06b6d4" opacity=".05"/>`;
+  for(let i=1;i<=10;i++){s+=`<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${T+ph}" stroke="${GRID}" stroke-width=".7"/>`;
+    s+=`<line x1="${L}" y1="${Y(i)}" x2="${L+pw}" y2="${Y(i)}" stroke="${GRID}" stroke-width=".7"/>`;
+    s+=`<text x="${X(i)}" y="${H-20}" text-anchor="middle" font-size="8" fill="${AX}">${i}</text>`;
+    s+=`<text x="${L-7}" y="${Y(i)+3}" text-anchor="end" font-size="8" fill="${AX}">${i}</text>`;}
+  s+=`<line x1="${sx}" y1="${T}" x2="${sx}" y2="${T+ph}" stroke="#a5b4fc" stroke-width="1.2" stroke-dasharray="5 4"/>`;
+  s+=`<line x1="${L}" y1="${sy}" x2="${L+pw}" y2="${sy}" stroke="#a5b4fc" stroke-width="1.2" stroke-dasharray="5 4"/>`;
+  const lab=(x,y,t,c)=>`<text x="${x}" y="${y}" font-size="9.5" fill="${c}" font-weight="800" opacity=".75">${t}</text>`;
+  s+=lab(L+pw-58,T+14,'◆ 速赢区','#059669')+lab(L+6,T+14,'◆ 战略区','#4f46e5')+lab(L+pw-58,T+ph-8,'◆ 效率区','#0e7490')+lab(L+6,T+ph-8,'◆ 储备区','#94a3b8');
+  s+=`<text x="${L+pw/2}" y="${H-6}" text-anchor="middle" font-size="9" fill="#64748b">实施可行性 →</text>`;
+  s+=`<text x="11" y="${T+ph/2}" text-anchor="middle" font-size="9" fill="#64748b" transform="rotate(-90 11 ${T+ph/2})">业务价值 →</text>`;
+  [...items].reverse().forEach(it=>{
+    const r=6+it.prio*0.9,cxx=X(it.f),cyy=Y(it.v),c=QCOLOR[it.quad];
+    s+=`<circle cx="${cxx}" cy="${cyy}" r="${r}" fill="${c}" opacity="${it.rank<=3?.85:.5}" stroke="#fff" stroke-width="1.5"/>`;
+    if(it.rank<=3)s+=`<circle cx="${cxx}" cy="${cyy}" r="${r+3}" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="2 2"/>`;
+    s+=`<text x="${cxx}" y="${cyy+3.2}" text-anchor="middle" font-size="${it.rank<=3?9.5:8.5}" font-weight="800" fill="#fff">${it.rank}</text>`;});
+  return s+'</svg>';
+}
+
+function svgHBar(items){
+  const W=470,rowH=24,T=8,L=128,H=T+items.length*rowH+22,pw=W-L-64,g=gid('hb');
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6366f1"/><stop offset=".55" stop-color="#8b5cf6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>`;
+  [2,4,6,8,10].forEach(x=>{const xx=L+x/10*pw;s+=`<line x1="${xx}" y1="${T}" x2="${xx}" y2="${H-18}" stroke="${GRID}"/><text x="${xx}" y="${H-6}" text-anchor="middle" font-size="8" fill="${AX}">${x}</text>`;});
+  items.forEach((it,i)=>{
+    const y=T+i*rowH,bw=Math.max(4,it.prio/10*pw);
+    const nm=it.s.name.length>11?it.s.name.slice(0,11)+'…':it.s.name;
+    s+=`<text x="${L-32}" y="${y+15}" text-anchor="end" font-size="9.3" fill="#334155" font-weight="${i<3?'700':'500'}">${h(nm)}</text>`;
+    s+=`<rect x="${L-26}" y="${y+4}" width="18" height="15" rx="4" fill="${i<3?'url(#'+g+')':'#e2e8f0'}"/><text x="${L-17}" y="${y+15}" text-anchor="middle" font-size="8.5" font-weight="800" fill="${i<3?'#fff':'#64748b'}">${it.rank}</text>`;
+    s+=`<rect x="${L}" y="${y+5}" width="${bw}" height="13" rx="6.5" fill="url(#${g})" opacity="${i<3?1:.55}"/>`;
+    s+=`<text x="${L+bw+5}" y="${y+15}" font-size="8.8" font-weight="700" fill="#1e293b">${it.prio.toFixed(1)}</text>`;
+    s+=`<text x="${W-2}" y="${y+15}" text-anchor="end" font-size="7.8" fill="#94a3b8">V${it.v} · F${it.f}</text>`;});
+  return s+'</svg>';
+}
+
+function svgDonut(segs){
+  const W=300,H=170,cx=86,cy=H/2,R=62,r=38;let a0=-Math.PI/2,s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  const tot=segs.reduce((t,x)=>t+x.val,0);
+  segs.forEach(sg=>{
+    const a1=a0+sg.val/tot*2*Math.PI,large=(a1-a0)>Math.PI?1:0;
+    const p=(a,rr)=>[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];
+    const [x0,y0]=p(a0,R),[x1,y1]=p(a1,R),[x2,y2]=p(a1,r),[x3,y3]=p(a0,r);
+    s+=`<path d="M${x0},${y0} A${R},${R} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${r},${r} 0 ${large} 0 ${x3},${y3} Z" fill="${sg.color}" opacity=".88" stroke="#fff" stroke-width="1.5"/>`;
+    const am=(a0+a1)/2,[tx,ty]=p(am,(R+r)/2);
+    if(sg.val/tot>0.07)s+=`<text x="${tx}" y="${ty+3}" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">${Math.round(sg.val/tot*100)}%</text>`;
+    a0=a1;});
+  s+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="9" fill="#64748b">建议预算</text><text x="${cx}" y="${cy+11}" text-anchor="middle" font-size="9" fill="#64748b">结构</text>`;
+  segs.forEach((sg,i)=>{const y=cy-segs.length*10+i*20+10;
+    s+=`<rect x="170" y="${y-8}" width="10" height="10" rx="3" fill="${sg.color}"/><text x="186" y="${y+1}" font-size="9" fill="#475569">${sg.label} ${sg.val}%</text>`;});
+  return s+'</svg>';
+}
+
+function svgGantt(phases){
+  const rows=[];phases.forEach((p,pi)=>p.forEach((e,i)=>rows.push({e,pi})));
+  const PH=[{c:'#10b981',s:0,d:3},{c:'#6366f1',s:3,d:6},{c:'#8b5cf6',s:9,d:9}];
+  const W=470,L=132,T=24,rowH=21,M=18,pw=W-L-14,H=T+rows.length*rowH+26;
+  const X=m=>L+m/M*pw;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  PH.forEach((p,i)=>{s+=`<rect x="${X(p.s)}" y="${T-14}" width="${X(p.s+p.d)-X(p.s)}" height="${H-T-12+14}" fill="${p.c}" opacity=".05"/>`;
+    s+=`<text x="${(X(p.s)+X(p.s+p.d))/2}" y="${T-4}" text-anchor="middle" font-size="8.5" font-weight="800" fill="${p.c}">${['第一阶段·速赢试点','第二阶段·扩展深化','第三阶段·规模化运营'][i]}</text>`;});
+  for(let m=0;m<=M;m+=3){s+=`<line x1="${X(m)}" y1="${T}" x2="${X(m)}" y2="${H-22}" stroke="${GRID}"/><text x="${X(m)}" y="${H-10}" text-anchor="middle" font-size="8" fill="${AX}">${m}月</text>`;}
+  let ri=0;
+  phases.forEach((p,pi)=>p.forEach(e=>{
+    const y=T+ri*rowH,ph=PH[pi];
+    const st=ph.s+(ri%2)*0.5,du=Math.max(2.2,Math.min(e.s.ttv,ph.d+2));
+    const nm=e.s.name.length>9?e.s.name.slice(0,9)+'…':e.s.name;
+    s+=`<text x="${L-6}" y="${y+13}" text-anchor="end" font-size="8.8" fill="#334155">${h(nm)}</text>`;
+    s+=`<rect x="${X(st)}" y="${y+3}" width="${X(st+du)-X(st)}" height="12" rx="6" fill="${ph.c}" opacity=".8"/>`;
+    s+=`<circle cx="${X(st+du)}" cy="${y+9}" r="3.4" fill="#fff" stroke="${ph.c}" stroke-width="2"/>`;ri++;}));
+  return s+'</svg>';
+}
+
+function svgLine(roi){
+  const W=470,H=240,L=58,T=14,B=30,Rt=12,pw=W-L-Rt,ph=H-T-B,g=gid('ln');
+  const mx=Math.max(...roi.val,...roi.inv)*1.12;
+  const X=m=>L+m/24*pw,Y=v=>T+ph-v/mx*ph;
+  const path=arr=>arr.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%"><defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6366f1" stop-opacity=".30"/><stop offset="1" stop-color="#06b6d4" stop-opacity=".02"/></linearGradient></defs>`;
+  for(let i=0;i<=4;i++){const y=T+ph*i/4;s+=`<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="${GRID}"/><text x="${L-6}" y="${y+3}" text-anchor="end" font-size="8" fill="${AX}">${fmtY(mx*(4-i)/4).replace(' ','')}</text>`;}
+  for(let m=0;m<=24;m+=6)s+=`<text x="${X(m)}" y="${H-12}" text-anchor="middle" font-size="8" fill="${AX}">${m}月</text>`;
+  s+=`<path d="${path(roi.val)} L${X(24)},${Y(0)} L${X(0)},${Y(0)} Z" fill="url(#${g})"/>`;
+  s+=`<path d="${path(roi.inv)}" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4"/>`;
+  s+=`<path d="${path(roi.val)}" fill="none" stroke="#6366f1" stroke-width="2.4"/>`;
+  if(roi.breakeven){const bx=X(roi.breakeven),by=Y(roi.val[roi.breakeven]);
+    s+=`<line x1="${bx}" y1="${by}" x2="${bx}" y2="${T+ph}" stroke="#10b981" stroke-width="1" stroke-dasharray="3 3"/>`;
+    s+=`<circle cx="${bx}" cy="${by}" r="4.5" fill="#10b981" stroke="#fff" stroke-width="2"/>`;
+    s+=`<text x="${bx}" y="${by-9}" text-anchor="middle" font-size="9" font-weight="800" fill="#059669">盈亏平衡 · 第${roi.breakeven}月</text>`;}
+  return s+'</svg>';
+}
+
+function svgVBar(items){
+  const W=470,H=180,L=36,T=12,B=40,pw=W-L-10,ph=H-T-B,g=gid('vb');
+  const mx=Math.max(...items.map(i=>i.count))*1.15||1,bw=Math.min(34,pw/items.length*0.55);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%"><defs><linearGradient id="${g}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>`;
+  for(let i=0;i<=3;i++){const y=T+ph*i/3;s+=`<line x1="${L}" y1="${y}" x2="${L+pw}" y2="${y}" stroke="${GRID}"/><text x="${L-5}" y="${y+3}" text-anchor="end" font-size="8" fill="${AX}">${Math.round(mx*(3-i)/3)}</text>`;}
+  items.forEach((it,i)=>{
+    const x=L+pw*(i+0.5)/items.length-bw/2,bh=it.count/mx*ph,y=T+ph-bh;
+    s+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="5" fill="url(#${g})" opacity=".85"/>`;
+    s+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="8.6" font-weight="800" fill="#4f46e5">${it.count}</text>`;
+    s+=`<text x="${x+bw/2}" y="${H-26}" text-anchor="middle" font-size="8.2" fill="#475569">${it.label.length>5?it.label.slice(0,5):it.label}</text>`;
+    s+=`<text x="${x+bw/2}" y="${H-15}" text-anchor="middle" font-size="8.2" fill="#475569">${it.label.length>5?it.label.slice(5,10):''}</text>`;});
+  return s+'</svg>';
+}
+
+/* ================================================================
+   §7 分析过场动画
+================================================================ */
+function runAnalysis(){
+  saveState();
+  $('#viewWizard').hidden=true;$('#viewReport').hidden=true;$('#viewAnalysis').hidden=false;
+  window.scrollTo(0,0);
+  const lines=['解析企业画像与行业特征','检索场景知识库（'+SCN.length+' 个候选场景）','计算业务价值与实施可行性双维评分','执行痛点匹配与目标对齐加权','测算价值区间、投入与回收期','规划三阶段实施路线图','排版生成图文报告'];
+  const ul=$('#anaSteps');ul.innerHTML=lines.map(l=>`<li><span class="st"></span>${l}</li>`).join('');
+  const lis=$$('li',ul);const pctEl=$('#anaPct');
+  let i=0;
+  const tick=()=>{
+    if(i>0)lis[i-1].className='done';
+    if(i<lis.length){lis[i].className='run';pctEl.textContent=Math.round((i+0.5)/lines.length*100)+'%';i++;setTimeout(tick,430);}
+    else{pctEl.textContent='100%';setTimeout(()=>{R=runEngine();renderReport();},350);}
+  };
+  tick();
+}
+let R=null;
+
+/* ================================================================
+   §8 报告生成器
+================================================================ */
+const cname=()=>A.name||'贵企业';
+const quadChip=q=>`<span class="quadchip q-${q}">${QNAME[q]}</span>`;
+const techTags=s=>s.tech.map(t=>`<span class="tag">${h(t)}</span>`).join('');
+const costName=c=>['低（≤80万级）','中（80~300万级）','高（300万级以上）'][c-1];
+const dataName=d=>['轻（文档/少量样本即可）','中（需历史业务数据）','重（需多源高质量数据）'][d-1];
+const GAPADVICE={'战略牵引':'建议由高管牵头明确AI愿景与年度目标，将AI议题纳入经营会固定议程，自上而下牵引资源投入。',
+ '数据基础':'优先开展核心业务数据盘点、补采与质量治理专项，为高数据依赖场景筑基，避免"模型等数据"。',
+ '系统与算力':'补齐核心流程系统化短板，算力按需采用云服务起步，控制初期固定投入。',
+ '人才组织':'组建"业务+数据+IT"混编的AI专项小组，关键能力外引内培并行，沉淀方法论。',
+ '治理合规':'建立AI使用规范、数据分级分类与模型评审机制，先划定红线再放开创新。',
+ '场景经验':'通过1~2个轻量速赢场景快速积累实战经验，让组织"先见到甜头、再扩大战果"。'};
+const TECHRISK=[
+ {match:GENAI_TAGS,r:'大模型幻觉与输出不可控',m:'采用检索增强限定知识边界，关键输出设人工审核关卡，建立幻觉率评测基线并持续运营badcase。'},
+ {match:['计算机视觉','声学检测','无人机'],r:'现场环境变化导致识别精度衰减',m:'分点位/工况采样验证后再推广，建立误检样本回流与模型迭代机制。'},
+ {match:['机器学习','预测分析','深度学习','推荐系统'],r:'数据漂移与样本偏差导致模型精度下降',m:'上线精度监控看板与定期重训机制，关键决策保留人工复核与回退通道。'},
+ {match:['运筹优化','仿真','数字孪生'],r:'模型约束与现场实际脱节，方案"算得出、跑不动"',m:'与一线共建约束清单，先"并行参考"再"自动执行"，逐步建立信任。'},
+];
+function deepRisks(e){
+  const rows=[];
+  TECHRISK.forEach(t=>{if(rows.length<2&&e.s.tech.some(x=>t.match.includes(x)))rows.push({r:t.r,m:t.m});});
+  (e.flags||[]).slice(0,2).forEach(f=>rows.push({r:f.split('，')[0],m:f}));
+  if(!rows.length)rows.push({r:'业务流程变更带来组织阻力',m:'选择意愿强的业务团队试点，配套培训与激励，让一线成为受益者。'});
+  return rows.slice(0,3);
+}
+const sheet=(inner,cls)=>`<section class="sheet ${cls||''}">${inner}<div class="pfoot"><span class="pf-brand">智衡 AI价值罗盘 · ${h(cname())} AI高价值场景评估</span><span class="pfx"></span></div></section>`;
+const head=(k,t)=>`<div class="kicker">${k}</div><div class="rh">${t}</div>`;
+
+/* ---- P1 封面 ---- */
+function secCover(){
+  const ind=indOf();
+  const no='ZH-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(Math.floor(Math.random()*900)+100);
+  return sheet(`
+  <div class="cover-deco">
+    <div style="position:absolute;left:-60px;top:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,#e0e7ff,transparent 68%)"></div>
+    <div style="position:absolute;right:-80px;bottom:120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,#cffafe,transparent 68%)"></div>
+    <svg style="position:absolute;right:10mm;top:12mm" width="180" height="120" viewBox="0 0 180 120" fill="none">
+      <g stroke="#c7d2fe" stroke-width="1"><path d="M10 30 L70 60 L130 20 L170 70"/><path d="M70 60 L60 110 L130 20"/><path d="M60 110 L170 70"/></g>
+      <g fill="#818cf8"><circle cx="10" cy="30" r="3.5"/><circle cx="70" cy="60" r="4.5"/><circle cx="130" cy="20" r="3.5"/><circle cx="170" cy="70" r="4"/><circle cx="60" cy="110" r="3.5"/></g></svg>
+  </div>
+  <div style="position:relative;display:flex;flex-direction:column;height:100%">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:26mm">
+      <div class="orb sm" style="animation:none"></div>
+      <div><b style="font-size:13px">智衡 · AI价值罗盘</b><span class="ai-chip" style="margin-left:6px">AI AGENT</span>
+      <div style="font-size:9px;color:#94a3b8;letter-spacing:2px">ENTERPRISE AI VALUE COMPASS</div></div>
+    </div>
+    <div class="kicker">AI HIGH-VALUE USE CASE ASSESSMENT</div>
+    <div style="font-size:34px;font-weight:800;line-height:1.42;letter-spacing:1px;margin:2mm 0 6mm">企业 AI 高价值场景<br>识别与优先级排序<span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">评估报告</span></div>
+    <div style="font-size:15px;color:#334155;font-weight:700">${h(cname())}${A.biz?`<span style="font-weight:400;color:#64748b"> · ${h(A.biz)}</span>`:''}</div>
+    <div style="margin-top:4mm">${ind.ic?`<span class="tag">${ind.ic} ${h(ind.label)}</span>`:''}<span class="tag cy">${h(find(SIZES,A.emp).label)}</span><span class="tag pk">年营收 ${h(find(REVENUES,A.rev).label)}</span><span class="tag gn">${h(find(STYLES,A.style).label)}策略</span></div>
+    <div style="margin-top:auto">
+      <table style="border-collapse:collapse;font-size:10.5px;color:#475569">
+        <tr><td style="padding:1.6mm 8mm 1.6mm 0;color:#94a3b8">评估日期</td><td style="font-weight:700">${todayStr()}</td></tr>
+        <tr><td style="padding:1.6mm 8mm 1.6mm 0;color:#94a3b8">评估模型</td><td>价值-可行性双维评分模型 V2.1 · 场景知识库 ${SCN.length} 项（22 行业 / 12 职能）</td></tr>
+        <tr><td style="padding:1.6mm 8mm 1.6mm 0;color:#94a3b8">生成方式</td><td>由智衡智能体基于 9 组引导式问答自动生成 · 含 7 类分析图表</td></tr>
+        <tr><td style="padding:1.6mm 8mm 1.6mm 0;color:#94a3b8">报告编号</td><td style="font-variant-numeric:tabular-nums">${no}</td></tr>
+      </table>
+      <div class="note" style="margin-top:6mm"><b>机密提示：</b>本报告基于受访者输入与行业基准模型生成，含贵企业经营画像信息，建议按内部机密文档管理。报告中的价值测算为方向性区间估计，最终决策请结合尽职调查与试点验证。</div>
+    </div>
+  </div>`);
+}
+/* ---- P2 目录与导读 ---- */
+function secToc(){
+  const items=['执行摘要','企业画像与 AI 就绪度评估','评估方法论与模型说明','AI 场景识别全景','价值-可行性优先级矩阵','高优先级场景排序（Top 10）',
+   '重点场景深度解析 ①','重点场景深度解析 ②','重点场景深度解析 ③','三阶段实施路线图','投入估算与回报分析','风险评估与 AI 治理建议','行动建议与 30/60/90 天计划','附录A：候选场景评分明细','附录B：模型说明与免责声明'];
+  const roleTip={ceo:'建议您重点阅读「执行摘要」「优先级矩阵」与「投入回报分析」，三页内即可形成决策判断；路线图可直接用于向董事会汇报。',
+   biz:'建议您重点阅读与本部门相关的「场景深度解析」与「行动计划」，痛点匹配与KPI部分可直接转化为立项材料。',
+   cio:'建议您重点关注「就绪度评估」「方法论」与各场景的数据/技术要求，统筹平台建设与场景落地的节奏。',
+   expert:'建议您从「场景深度解析」入手了解实施要点与技术路线，并参与试点团队组建。',
+   plan:'建议您将「全景识别」与「优先级排序」纳入年度规划素材，按路线图分解为季度里程碑。'};
+  return sheet(head('CONTENTS','目录与阅读指引')+
+   `<ul class="toc">${items.map((t,i)=>`<li><span>${h(t)}</span><span class="dots"></span><span class="pg">P${i+3}</span></li>`).join('')}</ul>
+    <div class="rh3">如何阅读本报告</div>
+    <p class="rp">本报告共 ${items.length+2} 页，遵循「现状评估 → 机会识别 → 优先排序 → 落地规划」的咨询逻辑展开。所有评分由智衡引擎基于您的输入实时计算：<b>业务价值（V）</b>衡量场景对战略目标与痛点的回应程度，<b>实施可行性（F）</b>衡量在当前数据、人才、预算与合规约束下的落地把握，两者加权得到优先级综合分。</p>
+    <div class="note"><b>给${h(find(ROLES,A.role).label)}的阅读建议：</b>${roleTip[A.role]||roleTip.biz}</div>`);
+}
+/* ---- P3 执行摘要 ---- */
+function secSummary(){
+  const t3=R.top3,qw=R.E.filter(e=>e.quad==='win');
+  const low=[...R.radar].sort((a,b)=>a.me-b.me)[0];
+  return sheet(head('EXECUTIVE SUMMARY','执行摘要')+
+  `<p class="rp">${h(cname())}（${h(indOf().label)}，${h(find(SIZES,A.emp).label)}，年营收${h(find(REVENUES,A.rev).label)}）当前处于 AI 就绪度 <b>${R.mat.lv} ${R.mat.name}</b>（综合 ${R.mAvg}/5.0）。围绕「${A.goals.map(g=>find(GOALS,g).label).join('、')}」的战略诉求与 ${A.pains.length} 项已确认痛点，智衡引擎从 ${R.E.length} 个候选场景中完成双维评分与排序，核心结论如下。</p>
+  <div class="kpis">
+    <div class="kpi"><div class="kv">${R.E.length} 个</div><div class="kl">匹配候选场景<br>（含 ${R.E.filter(e=>e.s.ind!=='all').length} 个行业特化场景）</div></div>
+    <div class="kpi"><div class="kv">${qw.length} 个</div><div class="kl">落入「速赢区」的<br>高价值高可行场景</div></div>
+    <div class="kpi"><div class="kv">${fmtY(R.annualLoSum)}+</div><div class="kl">Top5 组合年化价值下限<br>（上限约 ${fmtY(R.annualHiSum)}）</div></div>
+    <div class="kpi"><div class="kv">${R.roi.breakeven?('第 '+R.roi.breakeven+' 月'):'24 月+'}</div><div class="kl">组合投入预计<br>盈亏平衡时点</div></div>
+  </div>
+  <div class="rh3">核心发现</div>
+  <ul class="rlist">
+    <li><b>首选场景为「${h(t3[0].s.name)}」</b>（综合 ${t3[0].prio}/10，${QNAME[t3[0].quad]}）：${h(t3[0].why[0]||'与企业现状高度匹配')}；方向性年化价值约 ${fmtRange(t3[0].annualLo,t3[0].annualHi)}。</li>
+    <li><b>「${h(t3[1].s.name)}」与「${h(t3[2].s.name)}」</b>构成第二梯队，三者覆盖${[...new Set(t3.map(e=>fnLabel(e.s.fn)))].join('、')}等重点环节，可形成相互借力的组合拳。</li>
+    <li>就绪度方面，<b>${low.label}（${low.me.toFixed(1)}/5）是当前最大短板</b>：${GAPADVICE[low.label]}</li>
+    <li>按「${find(STYLES,A.style).label}」策略（价值权重 ${Math.round(R.w.v*100)}% / 可行性权重 ${Math.round(R.w.f*100)}%），建议首批启动 ${R.phases[0].length} 个速赢场景，${find(SPEEDS,A.speed).m<=6?'在 '+find(SPEEDS,A.speed).m+' 个月内交出可量化战果':'分阶段滚动验证、以战养战'}。</li>
+  </ul>
+  <div class="rh3">关键建议（详见行动计划）</div>
+  <ul class="rlist">
+    <li><b>立即（30天内）：</b>成立 AI 专项小组，围绕「${h(t3[0].s.name)}」完成数据盘点、供应商评估与试点方案立项。</li>
+    <li><b>近期（90天内）：</b>完成首批试点上线并建立基线 KPI 对照；同步启动${low.label}补强专项。</li>
+    <li><b>持续：</b>建立"场景准入-试点-评审-推广"治理机制，按季度复盘并滚动更新本优先级清单。</li>
+  </ul>
+  <div class="note"><b>一句话结论：</b>${h(cname())}应以「${h(t3[0].s.name)}」为首发突破口，按三阶段路线在 18 个月内构建 AI 规模化应用能力；在当前输入假设下，Top5 场景组合两年期累计净收益为正${R.roi.breakeven?('，预计第 '+R.roi.breakeven+' 个月实现盈亏平衡'):''}。</div>`);
+}
+/* ---- P4 企业画像与就绪度 ---- */
+function secProfile(){
+  const sorted=[...R.radar].sort((a,b)=>b.me-a.me);
+  const tops=sorted.slice(0,2),lows=sorted.slice(-2).reverse();
+  return sheet(head('COMPANY PROFILE & AI READINESS','企业画像与 AI 就绪度评估')+
+  `<div class="grid2 r37"><div>
+    <table class="tbl">
+      <tr><th style="width:26%">维度</th><th>画像信息</th></tr>
+      <tr><td>企业</td><td><b>${h(cname())}</b>${A.biz?(' · '+h(A.biz)):''}</td></tr>
+      <tr><td>行业</td><td>${indOf().ic} ${h(indOf().label)}</td></tr>
+      <tr><td>规模</td><td>${h(find(SIZES,A.emp).label)} · 年营收 ${h(find(REVENUES,A.rev).label)}</td></tr>
+      <tr><td>战略目标</td><td>${A.goals.map((g,i)=>(i+1)+'. '+find(GOALS,g).label).join('　')}</td></tr>
+      <tr><td>重点职能</td><td>${A.fns.map(fnLabel).join('、')}</td></tr>
+      <tr><td>核心痛点</td><td>${A.pains.map(painLabel).join('、')}</td></tr>
+      <tr><td>资源约束</td><td>预算 ${h(find(BUDGETS,A.budget).label)} · ${h(find(TALENTS,A.talent).label)} · 期望${h(find(SPEEDS,A.speed).label)}</td></tr>
+      <tr><td>合规偏好</td><td>合规敏感度${h(find(COMPS,A.comp).label)} · ${h(find(DEPLOYS,A.deploy).label)}</td></tr>
+    </table>
+    <div class="note"><b>✦ 行业洞察：</b>${h(indOf().insight)}</div>
+   </div>
+   <div class="chartbox"><div class="ct">AI 就绪度六维评估 <span class="cu">实线=本企业 · 虚线=行业均值参考</span></div>
+    ${svgRadar(R.radar)}
+    <div style="text-align:center;margin-top:1mm"><span class="tag">综合 ${R.mAvg} / 5.0</span><span class="tag gn">${R.mat.lv} ${R.mat.name}</span></div>
+   </div></div>
+  <div class="rh3">就绪度解读</div>
+  <p class="rp">${h(cname())}就绪度综合得分 <b>${R.mAvg}/5.0</b>，处于「${R.mat.lv} ${R.mat.name}」阶段${R.mAvg>=3?'，已具备规模化推进 AI 场景的基础条件':'，适合"以场景带建设"——用速赢场景的成果反哺基础能力投入'}。相对优势在 <b>${tops.map(d=>d.label+'（'+d.me.toFixed(1)+'）').join('、')}</b>；短板集中于 <b>${lows.map(d=>d.label+'（'+d.me.toFixed(1)+'）').join('、')}</b>。</p>
+  <ul class="rlist">${lows.map(d=>`<li><b>${d.label}补强：</b>${GAPADVICE[d.label]}</li>`).join('')}
+  <li><b>分级匹配原则：</b>本报告的可行性评分已将上述基础条件计入——数据/系统依赖重的场景被自动降权，确保推荐清单"踮脚够得着"。</li></ul>`);
+}
+/* ---- P5 方法论 ---- */
+function secMethod(){
+  return sheet(head('METHODOLOGY','评估方法论与模型说明')+
+  `<p class="rp">智衡采用咨询业界广泛使用的<b>「价值-可行性」双维评估框架</b>，并通过智能体问答将其参数化：候选场景先经行业过滤，再逐项计算两个维度共 10 项因子的得分，最终按您选择的「${h(find(STYLES,A.style).label)}」策略加权排序。</p>
+  <div class="grid2">
+   <div><div class="rh3">维度一：业务价值（V）</div>
+    <table class="tbl"><tr><th>评分因子</th><th style="width:30%">影响幅度</th></tr>
+     <tr><td>场景基础价值（行业基准）</td><td class="num">1 ~ 10 基准分</td></tr>
+     <tr><td>战略目标对齐（按优先级加权）</td><td class="num">最高 +1.6</td></tr>
+     <tr><td>已确认痛点匹配（每项 +0.8）</td><td class="num">最高 +2.0</td></tr>
+     <tr><td>重点职能聚焦 / 非重点降权</td><td class="num">+0.7 / −0.45</td></tr>
+     <tr><td>行业特化场景加成</td><td class="num">+0.4</td></tr></table></div>
+   <div><div class="rh3">维度二：实施可行性（F）</div>
+    <table class="tbl"><tr><th>评分因子</th><th style="width:30%">影响幅度</th></tr>
+     <tr><td>技术成熟度（行业基准）</td><td class="num">1 ~ 10 基准分</td></tr>
+     <tr><td>数据基础 × 场景数据依赖度</td><td class="num">±2.0</td></tr>
+     <tr><td>系统化程度 / AI 经验 / 人才</td><td class="num">±1.5</td></tr>
+     <tr><td>预算档位匹配</td><td class="num">最高 −2.2</td></tr>
+     <tr><td>合规敏感度 × 生成式AI暴露</td><td class="num">±0.7</td></tr>
+     <tr><td>见效周期 vs 期望节奏</td><td class="num">最高 −1.2</td></tr></table></div>
+  </div>
+  <div class="rh3">优先级合成与象限划分</div>
+  <p class="rp">综合优先级 = V × <b>${R.w.v}</b> + F × <b>${R.w.f}</b>（当前权重由「${h(find(STYLES,A.style).label)}」策略决定，可在报告工具栏切换实时重算）。以 V=6.5、F=6.5 为分界，场景被划入四个象限：<span class="quadchip q-win">速赢区</span> 高价值高可行，优先启动；<span class="quadchip q-str">战略区</span> 高价值但需补条件，分阶段培育；<span class="quadchip q-eff">效率区</span> 易落地的效率改善，可顺手拿下；<span class="quadchip q-obs">储备区</span> 暂缓观察，待条件成熟。</p>
+  <div class="rh3">场景知识库与价值测算口径</div>
+  <ul class="rlist">
+   <li><b>知识库结构：</b>共 ${SCN.length} 个场景，覆盖 22 个行业（含行业特化包）与 12 大职能（跨行业通用包），每个场景包含价值/可行性基准、投入档位、数据依赖、见效周期、技术栈与 KPI 体系等 12 项元数据，源自公开标杆案例与行业最佳实践的结构化提炼。</li>
+   <li><b>年化价值区间：</b>以营收规模为基数、按场景价值分换算的方向性估计（约为营收的 0.05%~1.3% 区间内浮动），用于场景间<b>相对比较与排序</b>，非投资承诺。</li>
+   <li><b>投入区间：</b>按场景投入档位（低/中/高）与企业规模系数估算，覆盖软件、实施与首年运营成本。</li>
+  </ul>
+  <div class="note"><b>模型边界：</b>本评估为"专家系统+规则引擎"式的结构化推理，结论质量取决于输入的真实性。正式立项前，建议对 Top 场景进行 2~4 周的可行性尽调（数据体检、供应商 PoC、基线测量）以校准本报告的方向性测算。</div>`);
+}
+/* ---- P6 全景 ---- */
+function secLandscape(){
+  const fnCnt=FUNCTIONS.map(f=>({label:f.label,count:R.E.filter(e=>e.s.fn===f.id).length})).filter(x=>x.count>0);
+  const byFn={};R.E.forEach(e=>{(byFn[e.s.fn]=byFn[e.s.fn]||[]).push(e);});
+  const rows=Object.keys(byFn).map(fn=>({fn,best:byFn[fn][0]})).sort((a,b)=>b.best.prio-a.best.prio).slice(0,10);
+  return sheet(head('USE CASE LANDSCAPE','AI 场景识别全景')+
+  `<p class="rp">基于行业过滤，智衡为${h(cname())}匹配出 <b>${R.E.length} 个候选场景</b>：其中${h(indOf().label)}特化场景 ${R.E.filter(e=>e.s.ind!=='all').length} 个、跨行业通用场景 ${R.E.filter(e=>e.s.ind==='all').length} 个，覆盖 ${fnCnt.length} 个职能领域。您圈定的重点职能（${A.fns.map(fnLabel).join('、')}）在评分中获得聚焦加权，但全部职能均完成了评估，以避免遗漏"计划外"的高性价比机会。</p>
+  <div class="chartbox"><div class="ct">候选场景职能分布 <span class="cu">单位：个</span></div>${svgVBar(fnCnt)}</div>
+  <div class="rh3">各职能领跑场景速览</div>
+  <table class="tbl"><tr><th style="width:18%">职能领域</th><th>领跑场景</th><th style="width:9%">价值 V</th><th style="width:11%">可行性 F</th><th style="width:10%">综合</th><th style="width:13%">象限</th></tr>
+  ${rows.map(r=>`<tr><td>${h(fnLabel(r.fn))}</td><td><b>${h(r.best.s.name)}</b></td><td class="num">${r.best.v}</td><td class="num">${r.best.f}</td><td class="num">${r.best.prio}</td><td>${quadChip(r.best.quad)}</td></tr>`).join('')}</table>
+  <div class="note">完整的 ${R.E.length} 项候选场景评分明细见<b>附录A</b>；下一页矩阵将展示头部场景的象限分布全貌。</div>`);
+}
+/* ---- P7 矩阵 ---- */
+function secMatrix(){
+  const items=R.E.slice(0,16);
+  const cnt=q=>R.E.filter(e=>e.quad===q).length;
+  const win=R.E.filter(e=>e.quad==='win').slice(0,5);
+  return sheet(head('PRIORITY MATRIX','价值-可行性优先级矩阵')+
+  `<p class="rp">下图将综合排名前 16 的场景投射至价值-可行性平面（气泡大小代表综合优先级，编号为总排名，前三名以高亮+虚线环标注）。全部 ${R.E.length} 个候选中：速赢区 <b>${cnt('win')}</b> 个、战略区 <b>${cnt('str')}</b> 个、效率区 <b>${cnt('eff')}</b> 个、储备区 <b>${cnt('obs')}</b> 个。</p>
+  <div class="chartbox"><div class="ct">Top 16 场景优先级矩阵 <span class="cu">横轴：可行性 F · 纵轴：价值 V · 分界线 6.5</span></div>${svgBubble(items)}
+  <div class="legend">${items.slice(0,8).map(e=>`<span><i style="background:${QCOLOR[e.quad]}"></i>${e.rank}. ${h(e.s.name)}</span>`).join('')}</div>
+  <div class="legend">${items.slice(8,16).map(e=>`<span><i style="background:${QCOLOR[e.quad]}"></i>${e.rank}. ${h(e.s.name)}</span>`).join('')}</div></div>
+  <div class="rh3">矩阵解读</div>
+  <ul class="rlist">
+   <li><b>速赢区（右上）：</b>${win.length?win.map(e=>'「'+h(e.s.name)+'」').join('、')+' 兼具高价值与高把握，应作为首批启动对象，目标是 6 个月内形成可量化、可宣传的标杆战果。':'当前无场景同时满足高价值与高可行——建议先通过效率区场景练兵，同步补强数据与人才基础，把战略区机会"拉"进速赢区。'}</li>
+   <li><b>战略区（左上）：</b>${cnt('str')?'共 '+cnt('str')+' 个高价值场景受制于数据、预算或周期约束。建议纳入 6~18 个月规划，先启动其依赖的数据/平台前置工作。':'暂无，说明高价值机会与企业当前能力匹配良好。'}</li>
+   <li><b>效率区（右下）：</b>实施门槛低的效率型改善，适合作为"组合配菜"搭车推进，快速扩大 AI 受益面、培养组织信心。</li>
+   <li><b>储备区（左下）：</b>暂不建议投入，每季度随能力基线更新复评即可。</li>
+  </ul>`);
+}
+/* ---- P8 Top10 ---- */
+function secRank(){
+  return sheet(head('TOP 10 RANKING','高优先级场景排序（Top 10）')+
+  `<p class="rp">按「${h(find(STYLES,A.style).label)}」策略（V×${R.w.v} + F×${R.w.f}）加权后的综合排序如下。前三名将在后续章节逐一深度解析。</p>
+  <div class="chartbox"><div class="ct">综合优先级得分 <span class="cu">满分 10 · V=价值 F=可行性</span></div>${svgHBar(R.top10)}</div>
+  <table class="tbl"><tr><th style="width:6%">#</th><th>场景</th><th style="width:13%">所属职能</th><th style="width:8%">综合</th><th style="width:12%">象限</th><th style="width:22%">方向性年化价值</th><th style="width:9%">见效</th></tr>
+  ${R.top10.map(e=>`<tr><td class="num">${e.rank}</td><td><b>${h(e.s.name)}</b></td><td>${h(fnLabel(e.s.fn))}</td><td class="num">${e.prio}</td><td>${quadChip(e.quad)}</td><td>${fmtRange(e.annualLo,e.annualHi)}</td><td>${e.s.ttv} 个月</td></tr>`).join('')}</table>
+  <div class="note"><b>组合视角：</b>Top 场景分属 ${[...new Set(R.top10.map(e=>e.s.fn))].length} 个职能，建议按"同职能成组、同数据共建"原则打包立项——例如共享客户数据底座或同一供应商框架，可摊薄 15%~30% 的实施成本。</div>`);
+}
+/* ---- P9-11 深度解析 ---- */
+function secDeep(e,idx){
+  const s=e.s,risks=deepRisks(e);
+  const gtxts=s.goals.filter(g=>A.goals.includes(g)).map(g=>GOALTXT[g]);
+  const plays=s.tech.slice(0,2).map(t=>TECHPLAY[t]).filter(Boolean);
+  const path=[['第 1 步 · 价值验证 PoC','第 1~'+Math.max(1,Math.round(s.ttv*0.3))+' 月','圈定单一业务切口与数据样本，验证技术可行性与价值假设，确定基线指标'],
+   ['第 2 步 · 业务试点','至第 '+s.ttv+' 月','在 1~2 个真实业务单元上线运行，对照基线度量增益，打磨流程与权责'],
+   ['第 3 步 · 推广复制','试点后 3~6 月','向同类业务单元/区域复制，固化 SOP 与运营机制，培养内部运营团队'],
+   ['第 4 步 · 规模化运营','持续','纳入日常经营体系，持续迭代模型并扩展相邻场景']];
+  return sheet(head('DEEP DIVE '+'①②③'[idx],'重点场景深度解析：'+h(s.name))+
+  `<div class="rankrow"><div class="rk">${e.rank}</div><div>综合优先级 <b>${e.prio}/10</b>　${quadChip(e.quad)}　<span class="tag cy">${h(fnLabel(s.fn))}</span>${s.ind!=='all'?'<span class="tag pk">行业特化</span>':'<span class="tag">跨行业通用</span>'}</div></div>
+  <p class="rp"><b>场景概述：</b>${h(s.desc)}</p>
+  <div class="rh3">为什么推荐给${h(cname())}</div>
+  <ul class="rlist">${e.why.map(w=>`<li>${h(w)}</li>`).join('')}${gtxts.length?`<li><b>价值逻辑：</b>${h(gtxts[0])}。</li>`:''}</ul>
+  <div class="grid2"><div>
+    <div class="rh3">实施要点与技术路线</div>
+    <div style="margin-bottom:1.5mm">${techTags(s)}</div>
+    <ul class="rlist">${plays.map(p=>`<li>${h(p.how)}。</li>`).join('')}</ul>
+    <div class="rh3">所需数据与前置条件</div>
+    <ul class="rlist">${plays.map(p=>`<li>${h(p.data)}。</li>`).join('')}<li>数据依赖度：${dataName(s.data)}。</li></ul>
+  </div><div>
+    <div class="chartbox"><div class="ct">场景画像</div>
+      <div class="meter"><span class="ml">业务价值</span><span class="mtrack"><span class="mfill" style="width:${e.v*10}%"></span></span><span class="mv">${e.v}</span></div>
+      <div class="meter"><span class="ml">可行性</span><span class="mtrack"><span class="mfill" style="width:${e.f*10}%"></span></span><span class="mv">${e.f}</span></div>
+      <div class="meter"><span class="ml">数据要求</span><span class="mtrack"><span class="mfill" style="width:${s.data/3*100}%"></span></span><span class="mv">${['轻','中','重'][s.data-1]}</span></div>
+      <div class="meter"><span class="ml">投入档位</span><span class="mtrack"><span class="mfill" style="width:${s.cost/3*100}%"></span></span><span class="mv">${['低','中','高'][s.cost-1]}</span></div>
+    </div>
+    <div class="kpis" style="grid-template-columns:1fr 1fr">
+      <div class="kpi"><div class="kv" style="font-size:13px">${fmtRange(e.annualLo,e.annualHi)}</div><div class="kl">方向性年化价值</div></div>
+      <div class="kpi"><div class="kv" style="font-size:13px">${fmtRange(e.invLo,e.invHi)}</div><div class="kl">预估总投入（首期+首年运营）</div></div>
+      <div class="kpi"><div class="kv" style="font-size:13px">${s.ttv} 个月</div><div class="kl">预计见效周期</div></div>
+      <div class="kpi"><div class="kv" style="font-size:13px">约 ${e.payback} 个月</div><div class="kl">静态投资回收期</div></div>
+    </div>
+  </div></div>
+  <div class="rh3">核心 KPI 体系</div>
+  <p class="rp">${s.kpis.map(k=>`<span class="tag gn">${h(k)}</span>`).join('')}　建议试点启动前完成上述指标的<b>基线测量</b>，作为价值核算与续投决策依据。</p>
+  <div class="grid2"><div>
+    <div class="rh3">实施路径</div>
+    <table class="tbl">${path.map(p=>`<tr><td style="width:34%"><b>${p[0]}</b><br><span style="color:#94a3b8;font-size:9.5px">${p[1]}</span></td><td>${p[2]}</td></tr>`).join('')}</table>
+  </div><div>
+    <div class="rh3">主要风险与对策</div>
+    <table class="tbl"><tr><th style="width:38%">风险</th><th>对策</th></tr>
+    ${risks.map(r=>`<tr><td>${h(r.r)}</td><td>${h(r.m)}</td></tr>`).join('')}</table>
+  </div></div>`);
+}
+/* ---- P12 路线图 ---- */
+function secRoadmap(){
+  const [p1,p2,p3]=R.phases;
+  const PH=[{c:'#10b981',t:'第一阶段 · 速赢试点（0~3 月）',d:'目标：用最小代价拿到可量化战果，建立组织信心与方法论',gate:'阶段门禁：试点 KPI 较基线改善达标、形成可复制 SOP、完成 AI 治理基本规范'},
+   {c:'#6366f1',t:'第二阶段 · 扩展深化（3~9 月）',d:'目标：扩大场景覆盖与业务深度，同步补强数据与平台底座',gate:'阶段门禁：首批场景规模化运营、数据底座支撑两个以上场景复用、内部团队可独立运营'},
+   {c:'#8b5cf6',t:'第三阶段 · 规模化运营（9~18 月）',d:'目标：攻坚战略级场景，将 AI 纳入经营管理体系形成长效机制',gate:'阶段门禁：AI 投入产出纳入预算考核、场景组合年化净收益为正、形成季度滚动复评机制'}];
+  return sheet(head('IMPLEMENTATION ROADMAP','三阶段实施路线图')+
+  `<p class="rp">综合优先级排序、场景见效周期与${h(cname())}「${h(find(SPEEDS,A.speed).label)}」的节奏期望，智衡将 Top ${p1.length+p2.length+p3.length} 场景编排为三个相互衔接的实施阶段。横道图中圆点为各场景的首个价值里程碑。</p>
+  <div class="chartbox"><div class="ct">18 个月实施横道图</div>${svgGantt(R.phases)}</div>
+  ${PH.map((ph,i)=>{const list=[p1,p2,p3][i];return `<div class="phasehd"><span class="pn" style="background:${ph.c}">${['Ⅰ','Ⅱ','Ⅲ'][i]}</span><span class="pt">${ph.t}</span><span class="pd">${list.length} 个场景</span></div>
+   <p class="rp" style="margin-bottom:1mm">${ph.d}。${list.length?'本阶段场景：'+list.map(e=>'<b>「'+h(e.s.name)+'」</b>（综合 '+e.prio+'）').join('、')+'。':'本阶段以能力建设与上一阶段深化为主。'}</p>
+   <p class="rp" style="color:#64748b;font-size:10.5px">${ph.gate}</p>`;}).join('')}
+  <div class="note"><b>节奏提示：</b>${A.talent==='t0'?'当前暂无专职 AI 团队，第一阶段建议采用"外部伙伴交付 + 内部种子学习"模式，并在第二阶段前完成 3~5 人核心团队组建。':'建议由内部团队主导第一阶段试点、外部伙伴补位攻坚项，保持知识沉淀在企业内部。'}${find(SPEEDS,A.speed).m<=3?' 您期望 3 个月内见效——请严格控制首批场景数量（≤2 个），集中资源打穿单点。':''}</div>`);
+}
+/* ---- P13 投入与回报 ---- */
+function secInvest(){
+  const roi24=Math.round((R.roi.val[24]-R.roi.inv[24])/R.roi.inv[24]*100);
+  return sheet(head('INVESTMENT & RETURN','投入估算与回报分析')+
+  `<p class="rp">以下测算针对 <b>Top 5 场景组合</b>（${R.E.slice(0,5).map(e=>'「'+h(e.s.name)+'」').join('、')}），口径为方向性区间估计，用于支撑预算申请与节奏决策。</p>
+  <div class="kpis">
+   <div class="kpi"><div class="kv" style="font-size:14px">${fmtRange(R.invLoSum,R.invHiSum)}</div><div class="kl">组合总投入区间<br>（首期建设+首年运营）</div></div>
+   <div class="kpi"><div class="kv" style="font-size:14px">${fmtRange(R.annualLoSum,R.annualHiSum)}</div><div class="kl">达产后组合年化价值</div></div>
+   <div class="kpi"><div class="kv">${R.roi.breakeven?('第 '+R.roi.breakeven+' 月'):'>24 月'}</div><div class="kl">预计盈亏平衡时点</div></div>
+   <div class="kpi"><div class="kv">${roi24>0?'+':''}${roi24}%</div><div class="kl">24 个月期组合 ROI<br>（中性情景）</div></div>
+  </div>
+  <div class="grid2"><div class="chartbox"><div class="ct">建议预算结构</div>${svgDonut(R.alloc)}</div>
+  <div><div class="rh3">预算结构说明</div><ul class="rlist">
+   <li><b>场景试点与应用建设（${R.alloc[0].val}%）：</b>软件/模型服务、实施集成与场景运营，始终是预算大头——AI 的价值在场景里，不在平台本身。</li>
+   <li><b>数据与平台底座（${R.alloc[1].val}%）：</b>${A.dm<=2?'鉴于数据基础薄弱，底座占比已上调——首批投入应优先保证试点场景的数据可用。':'数据基础较好，底座投入以复用与治理为主，避免重复建设。'}</li>
+   <li><b>人才与组织（${R.alloc[2].val}%）：</b>${A.talent==='t0'?'覆盖核心团队组建、全员AI素养培训与外部专家顾问。':'覆盖梯队培养、专项培训与激励机制。'}</li>
+   <li><b>治理与安全（${R.alloc[3].val}%）：</b>${A.comp==='c1'?'强合规行业，需充分预留模型评审、数据安全与审计投入。':'覆盖基本的AI使用规范、数据脱敏与模型监控。'}</li></ul></div></div>
+  <div class="chartbox"><div class="ct">24 个月累计价值 vs 累计投入（中性情景） <span class="cu">实线=累计价值 · 虚线=累计投入</span></div>${svgLine(R.roi)}</div>
+  <div class="note"><b>测算假设：</b>① 各场景年化价值取报告区间中值，并按见效周期设置 4 个月爬坡；② 投入按三阶段节奏分布（前 6 个月投放约 60%）；③ 未计入资金成本与人力机会成本。建议在试点立项时以实测基线替换上述假设，滚动修正。</div>`);
+}
+/* ---- P14 风险与治理 ---- */
+function secRisk(){
+  const useGen=R.E.slice(0,5).some(e=>e.s.tech.some(t=>GENAI_TAGS.includes(t)));
+  const rows=[
+   {r:'数据安全与隐私合规',lv:A.comp==='c1'?'高':'中',i:'涉敏数据外泄或违规使用引发监管处罚与信任危机',m:'数据分级分类与脱敏；'+(A.deploy==='d3'?'已选私有化部署，重点管控内部权限与审计日志':'对外服务采用合规云与数据处理协议，敏感场景私有化')},
+   useGen?{r:'生成式AI幻觉与内容风险',lv:A.comp==='c1'?'高':'中',i:'错误输出误导客户或员工，对外内容引发舆情/法律风险',m:'RAG限定知识边界+引用出处；对外内容人工审核；建立幻觉率评测与红线词库'}:null,
+   {r:'数据质量与孤岛',lv:A.dm<=2?'高':'中',i:'模型"先天不足"，价值打折甚至误导决策',m:'试点场景先做数据体检；将数据治理纳入第'+(A.dm<=2?'一':'二')+'阶段专项，明确Owner与质量指标'},
+   {r:'组织采纳与变革阻力',lv:A.talent==='t0'?'高':'中',i:'工具上线无人用，"试点即终点"',m:'业务部门作为场景Owner并背负KPI；把AI增益与一线激励挂钩；高管定期站台复盘'},
+   {r:'供应商依赖与技术锁定',lv:'中低',i:'切换成本高、议价能力下降',m:'关键场景保持双供应商策略；数据与提示词资产归属写入合同；优先选择开放架构'},
+   {r:'投资回报不达预期',lv:'中',i:'投入沉没、内部信心受挫',m:'基线先行、小步快跑；设置阶段门禁，不达标场景果断止损调整'},
+  ].filter(Boolean);
+  return sheet(head('RISK & GOVERNANCE','风险评估与 AI 治理建议')+
+  `<p class="rp">AI 规模化的风险大多不是"技术失灵"，而是<b>治理缺位</b>。下表针对${h(cname())}的画像（合规敏感度${h(find(COMPS,A.comp).label.slice(0,1))}、${h(find(TALENTS,A.talent).label)}）给出风险登记册与缓解措施。</p>
+  <table class="tbl"><tr><th style="width:19%">风险项</th><th style="width:8%">等级</th><th style="width:32%">潜在影响</th><th>缓解措施</th></tr>
+  ${rows.map(r=>`<tr><td><b>${r.r}</b></td><td class="${r.lv==='高'?'sevhi':r.lv==='中'?'sevmd':'sevlo'}">${r.lv}</td><td>${r.i}</td><td>${r.m}</td></tr>`).join('')}</table>
+  <div class="rh3">AI 治理体系四件套</div>
+  <div class="grid2"><div><ul class="rlist">
+   <li><b>① 决策机制：</b>成立由${['ceo'].includes(A.role)?'您':'一把手'}挂帅的 AI 专项委员会（业务+IT+风控），月度例会负责场景准入、资源仲裁与阶段门禁评审。</li>
+   <li><b>② 制度规范：</b>发布《AI 使用管理办法》，明确数据分级、模型选型、对外内容审核与红线场景清单。</li></ul></div>
+  <div><ul class="rlist">
+   <li><b>③ 运行监控：</b>为每个上线场景建立"KPI 增益 + 模型质量（准确率/幻觉率/漂移）"双看板，异常自动告警与回退。</li>
+   <li><b>④ 能力建设：</b>分层培训体系——高管看趋势与治理、业务骨干学场景共创、全员掌握 AI 工具基本功。</li></ul></div></div>
+  <div class="note"><b>合规提示：</b>${A.comp==='c1'?'贵企业处于强监管环境，建议在第一阶段即完成算法备案/评估要求梳理（如适用），并将模型风险管理纳入现有风控框架，而非另起炉灶。':'当前合规压力可控，但建议从第一天起保留数据来源与模型决策日志——治理欠账的补救成本远高于事前投入。'}</div>`);
+}
+/* ---- P15 行动计划 ---- */
+function secAction(){
+  const t1=R.top3[0];
+  return sheet(head('ACTION PLAN','行动建议与 30 / 60 / 90 天计划')+
+  `<p class="rp">战略的价值在执行。以下计划以首发场景「<b>${h(t1.s.name)}</b>」为主线，请将其分解到责任人与周会节奏中。</p>
+  <div class="phasehd"><span class="pn" style="background:#10b981">D30</span><span class="pt">第 1~30 天 · 立项启动</span></div>
+  <div class="checkrow">成立 AI 专项小组（建议 ${A.talent==='t0'?'3~5':'5~8'} 人：业务 Owner + IT/数据 + 外部顾问），明确决策与汇报机制</div>
+  <div class="checkrow">完成「${h(t1.s.name)}」数据体检：盘点 ${h((TECHPLAY[t1.s.tech[0]]||{}).data||'相关业务数据')}的可用性与缺口</div>
+  <div class="checkrow">测量基线 KPI（${t1.s.kpis.slice(0,2).map(h).join('、')}），定义试点成功标准与止损线</div>
+  <div class="checkrow">完成 2~3 家供应商/方案对比评估${A.deploy==='d3'?'（含私有化部署能力验证）':''}，确定 PoC 合作方</div>
+  <div class="phasehd"><span class="pn" style="background:#6366f1">D60</span><span class="pt">第 31~60 天 · PoC 验证</span></div>
+  <div class="checkrow">以真实数据完成最小可行验证（PoC），核心指标对照基线评审，决策是否进入试点</div>
+  <div class="checkrow">发布《AI 使用管理办法》初版，划定数据红线与对外内容审核流程</div>
+  <div class="checkrow">启动第二梯队场景（「${h(R.top3[1].s.name)}」）的前置数据准备，形成滚动管线</div>
+  <div class="phasehd"><span class="pn" style="background:#8b5cf6">D90</span><span class="pt">第 61~90 天 · 试点上线</span></div>
+  <div class="checkrow">首发场景在 1~2 个业务单元正式上线，建立增益/质量双看板与周度运营机制</div>
+  <div class="checkrow">向管理层汇报首期战果与 ROI 复盘，依据本报告路线图滚动修订季度计划</div>
+  <div class="checkrow">启动${[...R.radar].sort((a,b)=>a.me-b.me)[0].label}补强专项，为第二阶段扩展扫清障碍</div>
+  <div class="rh3">关键成功要素</div>
+  <ul class="rlist">
+   <li><b>业务主导，技术使能：</b>每个场景必须有背 KPI 的业务 Owner——AI 项目由 IT 单独驱动的失败率最高。</li>
+   <li><b>小切口，快闭环：</b>宁可范围小而指标硬，不要范围大而价值虚；每 2 周一次可演示的进展。</li>
+   <li><b>数据与场景双轮滚动：</b>以场景需求牵引数据治理，避免"先建三年平台再谈应用"。</li>
+   <li><b>度量文化：</b>没有基线就没有价值证明；本报告的全部测算都应被试点实测数据逐步替换。</li>
+  </ul>
+  <div class="ack" style="margin-top:4mm"><b>✦ 智衡寄语：</b>AI 转型不是一次采购，而是一种新的经营能力。${h(cname())}已经迈出了最关键的第一步——把模糊的"想用 AI"变成清晰的"先做什么、后做什么、值多少钱"。期待 90 天后，您用试点数据回来校准这份蓝图。</div>`);
+}
+/* ---- P16 附录A ---- */
+function secAppendixA(){
+  return sheet(head('APPENDIX A','附录A：候选场景评分明细（共 '+R.E.length+' 项）')+
+  `<table class="tbl"><tr><th style="width:5%">#</th><th>场景名称</th><th style="width:13%">职能</th><th style="width:7%">来源</th><th style="width:6%">V</th><th style="width:6%">F</th><th style="width:7%">综合</th><th style="width:10%">象限</th><th style="width:7%">投入</th><th style="width:8%">见效</th></tr>
+  ${R.E.map(e=>`<tr><td class="num">${e.rank}</td><td>${h(e.s.name)}</td><td>${h(fnLabel(e.s.fn))}</td><td>${e.s.ind==='all'?'通用':'行业'}</td><td class="num">${e.v}</td><td class="num">${e.f}</td><td class="num">${e.prio}</td><td>${quadChip(e.quad)}</td><td>${['低','中','高'][e.s.cost-1]}</td><td>${e.s.ttv}月</td></tr>`).join('')}</table>`,'flow');
+}
+/* ---- P17 附录B ---- */
+function secAppendixB(){
+  return sheet(head('APPENDIX B','附录B：术语、口径与免责声明')+
+  `<div class="rh3">术语与口径</div>
+  <table class="tbl"><tr><th style="width:22%">术语</th><th>说明</th></tr>
+   <tr><td>业务价值 V</td><td>1~10 分。场景对营收、成本、体验、风险、决策的综合贡献潜力，已按贵企业战略目标、痛点与职能聚焦修正。</td></tr>
+   <tr><td>实施可行性 F</td><td>1~10 分。技术成熟度与贵企业数据、系统、人才、预算、合规、节奏约束的匹配程度。</td></tr>
+   <tr><td>综合优先级</td><td>V、F 的加权合成（当前权重 ${R.w.v}/${R.w.f}），用于排序而非绝对评价。</td></tr>
+   <tr><td>方向性年化价值</td><td>以年营收规模为基数、按价值分换算的区间估计，达产后口径；用于场景间相对比较。</td></tr>
+   <tr><td>投入区间</td><td>含软件/模型服务、实施集成与首年运营的总拥有成本估计，按企业规模系数调整。</td></tr>
+   <tr><td>见效周期</td><td>从立项到产生可度量业务增益的典型时长（行业经验值）。</td></tr>
+   <tr><td>静态回收期</td><td>投入中值 ÷ 月均价值中值，叠加见效周期的简化估计，未折现。</td></tr></table>
+  <div class="rh3">本次评估的输入快照</div>
+  <p class="rp">行业：${h(indOf().label)}；规模：${h(find(SIZES,A.emp).label)}/${h(find(REVENUES,A.rev).label)}；目标：${A.goals.map(g=>find(GOALS,g).label).join('、')}；重点职能：${A.fns.map(fnLabel).join('、')}；痛点 ${A.pains.length} 项；数字化基础：数据 ${A.dm}/5、系统 ${A.sys}/5、AI 经验 ${A.aiexp}/5；预算：${h(find(BUDGETS,A.budget).label)}；人才：${h(find(TALENTS,A.talent).label)}；节奏：${h(find(SPEEDS,A.speed).label)}；合规：${h(find(COMPS,A.comp).label)}；部署：${h(find(DEPLOYS,A.deploy).label)}；策略：${h(find(STYLES,A.style).label)}。</p>
+  <div class="rh3">免责声明</div>
+  <ul class="rlist">
+   <li>本报告由「智衡 · AI价值罗盘」智能体基于受访者输入与内置行业知识库自动生成，旨在为企业 AI 规划提供<b>结构化的方向性参考</b>，不构成投资、法律或审计意见。</li>
+   <li>所有价值与投入测算为区间估计，实际结果受数据质量、组织执行、市场环境与供应商能力等因素影响，可能存在显著差异。</li>
+   <li>正式立项前，建议开展试点验证（PoC）、供应商尽调与基线测量，以实测数据校准本报告结论。</li>
+   <li>本工具在浏览器本地运行，您的作答数据未被上传至任何服务器。</li>
+  </ul>
+  <div style="margin-top:8mm;text-align:center">
+    <div class="orb sm" style="margin:0 auto 6px;animation:none"></div>
+    <div style="font-size:10.5px;color:#64748b">—— 本报告由 <b>智衡 · AI价值罗盘</b> 智能体生成 · ${todayStr()} ——</div>
+    <div style="font-size:9px;color:#a3adc2;letter-spacing:2px;margin-top:2px">ENTERPRISE AI VALUE COMPASS · IDENTIFY → SCORE → PRIORITIZE → ROADMAP</div>
+  </div>`);
+}
+
+function renderReport(){
+  $('#viewWizard').hidden=true;$('#viewAnalysis').hidden=true;$('#viewReport').hidden=false;
+  $$('.wstyle button').forEach(b=>b.classList.toggle('on',b.dataset.ws===A.style));
+  const root=$('#reportRoot');
+  root.innerHTML=[secCover(),secToc(),secSummary(),secProfile(),secMethod(),secLandscape(),secMatrix(),secRank(),
+    secDeep(R.top3[0],0),secDeep(R.top3[1],1),secDeep(R.top3[2],2),
+    secRoadmap(),secInvest(),secRisk(),secAction(),secAppendixA(),secAppendixB()].join('');
+  const sheets=$$('.sheet',root);
+  sheets.forEach((sh,i)=>{const f=sh.querySelector('.pfx');if(f)f.textContent='第 '+(i+1)+' 页 · 共 '+sheets.length+' 页 · '+todayStr();});
+  window.scrollTo(0,0);
+}
+
+/* ================================================================
+   §9 初始化
+================================================================ */
+$('#btnPdf').onclick=()=>window.print();
+$('#btnBackEdit').onclick=()=>{step=TOTAL;renderStep();};
+$('#btnRestart').onclick=()=>{if(confirm('开始一次全新评估？当前作答将被清空。')){clearState();A=DEFAULT_A();step=0;renderStep();}};
+$$('.wstyle button').forEach(b=>b.onclick=()=>{A.style=b.dataset.ws;saveState();R=runEngine();renderReport();});
+renderStep();
+</script>
+</body>
+</html>
