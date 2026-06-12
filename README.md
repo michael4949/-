@@ -77,4 +77,4 @@ npm run dev        # 打开 http://localhost:3000
 
 ---
 
-> 仓库里的 `scout/`（GitHub AI 雷达）是独立子系统，与本应用互不影响。
+> 仓库里的 `scout/`（GitHub AI 雷达）与 `aios/`（ZenFlux AIOS 浅色主题官网，纯静态、直接打开 `aios/index.html` 即可预览）是独立子系统，与本应用互不影响。
