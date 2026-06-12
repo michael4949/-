@@ -77,4 +77,4 @@ npm run dev        # 打开 http://localhost:3000
 
 ---
 
-> 仓库里的 `scout/`（GitHub AI 雷达）是独立子系统，与本应用互不影响。
+> 仓库里的 `scout/`（GitHub AI 雷达）与 `ccs-showcase/`（中国通信服务集团 · 智能体展示中心，纯静态页）是独立子系统，与本应用互不影响。

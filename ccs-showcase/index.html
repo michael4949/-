@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>中国通信服务集团 · 智能体展示中心</title>
+<meta name="description" content="中国通信服务集团专属 AI 智能体展示中心：覆盖勘察设计、工程建设、智慧运维、数智政企、客户服务与经营管理六大业务场景。" />
+<style>
+  :root {
+    --ccs-red: #e60012;        /* 通服红（主品牌色） */
+    --ccs-red-deep: #b8000e;
+    --ccs-red-bright: #ff4d2e;
+    --ccs-red-tint: #fdebec;
+    --navy: #15213b;           /* 藏蓝（辅助色） */
+    --navy-2: #1f3158;
+    --ink: #232a36;
+    --muted: #76808f;
+    --faint: #9aa3b2;
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --line: #e8ebf0;
+    --shadow: 0 1px 2px rgba(21, 33, 59, .05), 0 6px 18px rgba(21, 33, 59, .06);
+    --shadow-lg: 0 4px 10px rgba(21, 33, 59, .08), 0 16px 36px rgba(21, 33, 59, .12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { text-decoration: none; color: inherit; }
+
+  /* ===== 顶部品牌栏 ===== */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand svg { flex: none; }
+  .brand-name { line-height: 1.15; }
+  .brand-name .cn { font-size: 19px; font-weight: 700; letter-spacing: 3px; color: #25282e; }
+  .brand-name .en { font-size: 10px; letter-spacing: 1.6px; color: var(--faint); margin-top: 2px; }
+  .brand-divider { width: 1px; height: 30px; background: var(--line); margin: 0 4px; }
+  .brand-sub { font-size: 15px; font-weight: 600; color: var(--ccs-red); letter-spacing: 1px; white-space: nowrap; }
+  .topnav { display: flex; align-items: center; gap: 26px; font-size: 14px; color: #4a5160; }
+  .topnav a { padding: 4px 0; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .topnav a:hover { color: var(--ccs-red); border-color: var(--ccs-red); }
+  .topnav .slogan { color: var(--faint); font-size: 12px; letter-spacing: 1px; }
+  @media (max-width: 860px) {
+    .brand-divider, .brand-sub, .topnav .slogan { display: none; }
+    .topnav { gap: 16px; }
+  }
+
+  /* ===== Hero 横幅 ===== */
+  .hero {
+    position: relative; overflow: hidden; color: #fff;
+    background:
+      radial-gradient(900px 420px at 88% -10%, rgba(255, 120, 70, .55), transparent 60%),
+      radial-gradient(700px 420px at -8% 110%, rgba(21, 33, 59, .55), transparent 58%),
+      linear-gradient(118deg, #a3000c 0%, #d2000f 38%, #e60012 62%, #f0341f 100%);
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    max-width: 1280px; margin: 0 auto; padding: 64px 24px 56px;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 999px; padding: 6px 16px; font-size: 13px; letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+  }
+  .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #ffd34d; box-shadow: 0 0 8px #ffd34d; }
+  .hero h1 {
+    margin-top: 22px; font-size: clamp(30px, 4.6vw, 46px); font-weight: 800;
+    letter-spacing: 2px; line-height: 1.2;
+  }
+  .hero h1 .thin { font-weight: 300; opacity: .92; }
+  .hero p.sub {
+    margin-top: 16px; max-width: 720px; font-size: 15.5px; line-height: 1.9;
+    color: rgba(255, 255, 255, .88);
+  }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+  .stat {
+    background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 14px; padding: 14px 22px; min-width: 150px; backdrop-filter: blur(4px);
+  }
+  .stat .num { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+  .stat .num small { font-size: 14px; font-weight: 600; margin-left: 2px; }
+  .stat .lbl { margin-top: 3px; font-size: 12.5px; color: rgba(255, 255, 255, .82); letter-spacing: 1px; }
+  .hero-deco { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* ===== 分类筛选栏（吸顶） ===== */
+  .filterbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(21, 33, 59, .04);
+  }
+  .filterbar-inner {
+    max-width: 1280px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .chip {
+    appearance: none; border: 1px solid var(--line); background: #fff; cursor: pointer;
+    border-radius: 999px; padding: 8px 18px; font-size: 13.5px; color: #3c4452;
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: all .18s ease; font-family: inherit;
+  }
+  .chip .cnt {
+    font-size: 11.5px; background: #f0f2f5; color: var(--muted);
+    border-radius: 999px; padding: 1px 7px; transition: all .18s ease;
+  }
+  .chip:hover { border-color: var(--ccs-red); color: var(--ccs-red); }
+  .chip.active {
+    background: var(--ccs-red); border-color: var(--ccs-red); color: #fff;
+    box-shadow: 0 6px 16px rgba(230, 0, 18, .28);
+  }
+  .chip.active .cnt { background: rgba(255, 255, 255, .22); color: #fff; }
+  .searchbox { position: relative; flex: none; }
+  .searchbox input {
+    width: 230px; max-width: 56vw;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 9px 14px 9px 36px; font-size: 13.5px; color: var(--ink);
+    background: #fff; outline: none; font-family: inherit;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .searchbox input:focus { border-color: var(--ccs-red); box-shadow: 0 0 0 3px rgba(230, 0, 18, .1); }
+  .searchbox svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--faint); }
+
+  /* ===== 主体 ===== */
+  .main { max-width: 1280px; margin: 0 auto; padding: 40px 24px 72px; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .section-title { font-size: 24px; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
+  .section-title::before {
+    content: ""; width: 5px; height: 22px; border-radius: 3px;
+    background: linear-gradient(180deg, var(--ccs-red-bright), var(--ccs-red-deep));
+  }
+  .section-desc { margin-top: 8px; font-size: 13.5px; color: var(--muted); }
+  .result-count { font-size: 13px; color: var(--muted); }
+  .result-count b { color: var(--ccs-red); font-size: 15px; margin: 0 2px; }
+
+  /* ===== 卡片网格 ===== */
+  .grid {
+    margin-top: 26px;
+    display: grid; gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  }
+  .agent-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden; cursor: pointer;
+    display: flex; flex-direction: column;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .agent-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(230, 0, 18, .35); }
+  .agent-card.hide { display: none; }
+  .card-body { padding: 18px 18px 14px; display: flex; gap: 14px; flex: 1; }
+  .tile {
+    flex: none; width: 46px; height: 46px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    box-shadow: 0 6px 14px rgba(21, 33, 59, .18);
+  }
+  .tile svg { width: 24px; height: 24px; }
+  .card-info { min-width: 0; flex: 1; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .agent-name {
+    font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .agent-card:hover .agent-name { color: var(--ccs-red); }
+  .cat-tag {
+    flex: none; font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
+    letter-spacing: .5px; white-space: nowrap; margin-top: 1px;
+  }
+  .agent-desc {
+    margin-top: 8px; font-size: 12.8px; line-height: 1.75; color: var(--muted);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-foot {
+    border-top: 1px solid #f0f2f5; padding: 11px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .card-url {
+    font-size: 12px; color: var(--faint); font-family: "SF Mono", Consolas, "Courier New", monospace;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .open-link {
+    flex: none; display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12.5px; font-weight: 600; color: var(--ccs-red);
+  }
+  .open-link:hover { color: var(--ccs-red-deep); text-decoration: underline; }
+  .open-link.disabled { color: #c2c8d2; cursor: default; pointer-events: none; }
+
+  /* 空状态 */
+  .empty { display: none; text-align: center; padding: 70px 0 50px; color: var(--faint); }
+  .empty.show { display: block; }
+  .empty .icon { font-size: 40px; }
+  .empty p { margin-top: 12px; font-size: 14px; }
+
+  /* ===== 页脚 ===== */
+  .footer { background: var(--navy); color: rgba(255, 255, 255, .75); margin-top: 20px; }
+  .footer-inner { max-width: 1280px; margin: 0 auto; padding: 44px 24px 30px; }
+  .footer-top { display: flex; justify-content: space-between; gap: 30px; flex-wrap: wrap; }
+  .footer .f-brand .cn { font-size: 18px; font-weight: 700; letter-spacing: 3px; color: #fff; }
+  .footer .f-brand .en { font-size: 10.5px; letter-spacing: 1.5px; color: rgba(255, 255, 255, .45); margin-top: 4px; }
+  .footer .f-brand .pos { margin-top: 14px; font-size: 13px; line-height: 1.9; color: rgba(255, 255, 255, .68); max-width: 460px; }
+  .f-culture { text-align: right; }
+  .f-culture .motto { font-size: 17px; letter-spacing: 6px; color: #ffd9dc; font-weight: 600; }
+  .f-culture .note { margin-top: 10px; font-size: 12.5px; color: rgba(255, 255, 255, .5); letter-spacing: 1px; }
+  .footer-bottom {
+    margin-top: 32px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, .12);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    font-size: 12px; color: rgba(255, 255, 255, .42);
+  }
+  @media (max-width: 700px) { .f-culture { text-align: left; } }
+
+  /* ===== 浮动 AI 按钮 ===== */
+  .fab {
+    position: fixed; right: 26px; bottom: 30px; z-index: 80;
+    width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--ccs-red-bright), var(--ccs-red-deep));
+    color: #fff; font-size: 16px; font-weight: 800; font-family: inherit; letter-spacing: 1px;
+    box-shadow: 0 10px 26px rgba(230, 0, 18, .4);
+    transition: transform .18s ease;
+  }
+  .fab:hover { transform: scale(1.08); }
+  .fab-pop {
+    position: fixed; right: 26px; bottom: 96px; z-index: 80;
+    width: 270px; background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow-lg); padding: 16px; display: none;
+  }
+  .fab-pop.show { display: block; }
+  .fab-pop .t { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .fab-pop .t .dot { width: 8px; height: 8px; border-radius: 50%; background: #2bbf6a; }
+  .fab-pop .b { margin-top: 8px; font-size: 12.8px; line-height: 1.8; color: var(--muted); }
+</style>
+</head>
+<body id="top">
+
+  <!-- 顶部品牌栏 -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <!-- 红色飘带球体（通服红） -->
+        <svg width="42" height="42" viewBox="0 0 44 44" aria-hidden="true">
+          <defs>
+            <linearGradient id="ccsLg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ff5a3c"/><stop offset="1" stop-color="#b8000e"/>
+            </linearGradient>
+          </defs>
+          <g fill="none" stroke="url(#ccsLg)" stroke-linecap="round">
+            <path d="M7 26 A16.5 16.5 0 0 1 35 11" stroke-width="5"/>
+            <path d="M37 18 A16.5 16.5 0 0 1 9 33" stroke-width="5"/>
+            <path d="M15 39 A16.5 16.5 0 0 0 38.5 27" stroke-width="3.2" opacity=".5"/>
+          </g>
+          <circle cx="36.5" cy="9.5" r="2.6" fill="#e60012"/>
+        </svg>
+        <div class="brand-name">
+          <div class="cn">中国通信服务</div>
+          <div class="en">CHINA COMSERVICE</div>
+        </div>
+        <div class="brand-divider"></div>
+        <div class="brand-sub">智能体展示中心</div>
+      </div>
+      <nav class="topnav">
+        <span class="slogan">新一代综合智慧服务商</span>
+        <a href="#agents">智能体矩阵</a>
+        <a href="#footer">关于通服</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero 横幅 -->
+  <section class="hero">
+    <svg class="hero-deco" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1280 360" aria-hidden="true">
+      <g fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.2">
+        <path d="M-20 300 C 240 180, 520 340, 780 220 S 1240 120, 1320 200"/>
+        <path d="M-20 250 C 260 140, 540 290, 820 180 S 1260 80, 1320 150"/>
+        <path d="M-20 340 C 300 240, 560 380, 860 260 S 1260 180, 1320 250"/>
+      </g>
+      <g fill="rgba(255,255,255,.55)">
+        <circle cx="240" cy="208" r="3"/><circle cx="556" cy="296" r="2.5"/>
+        <circle cx="820" cy="180" r="3"/><circle cx="1060" cy="118" r="2.5"/>
+      </g>
+      <g fill="none" stroke="rgba(255,255,255,.22)">
+        <circle cx="1120" cy="70" r="46"/><circle cx="1120" cy="70" r="78"/><circle cx="1120" cy="70" r="112"/>
+      </g>
+    </svg>
+    <div class="hero-inner">
+      <span class="hero-badge"><span class="dot"></span>中国通信服务集团 · 专属智能体平台</span>
+      <h1>智慧通服<span class="thin"> · </span>智能体展示中心</h1>
+      <p class="sub">依托集团"规划设计 — 建设交付 — 运维保障 — 数智运营"全链条服务能力，构建覆盖核心业务场景的 AI 智能体矩阵，让人工智能成为通信全产业链的新质生产力。</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="num" id="statAgents">0<small>个</small></div><div class="lbl">智能体应用</div></div>
+        <div class="stat"><div class="num" id="statCats">0<small>大</small></div><div class="lbl">业务场景分类</div></div>
+        <div class="stat"><div class="num">7×24<small>h</small></div><div class="lbl">全天候在线服务</div></div>
+        <div class="stat"><div class="num">全链条</div><div class="lbl">通信产业覆盖</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 分类筛选（吸顶，可点击） -->
+  <div class="filterbar" id="agents">
+    <div class="filterbar-inner">
+      <div class="chips" id="chips"></div>
+      <div class="searchbox">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" type="text" placeholder="搜索智能体名称 / 关键词…" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 智能体矩阵 -->
+  <main class="main">
+    <div class="section-head">
+      <div>
+        <div class="section-title">智能体矩阵</div>
+        <div class="section-desc">点击上方分类标签筛选，点击卡片即可在新标签页打开对应智能体应用</div>
+      </div>
+      <div class="result-count">当前展示 <b id="count">0</b> 个智能体</div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">
+      <div class="icon">🔍</div>
+      <p>未找到匹配的智能体，换个关键词或分类试试</p>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer" id="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="f-brand">
+          <div class="cn">中国通信服务集团</div>
+          <div class="en">CHINA COMMUNICATIONS SERVICES</div>
+          <div class="pos">全球领先的通信支撑一体化服务提供商，为通信运营商、政企客户提供网络建设、外包服务、内容应用及数智化解决方案等一体化综合智慧服务。</div>
+        </div>
+        <div class="f-culture">
+          <div class="motto">重信赖 · 尚智慧 · 利万物</div>
+          <div class="note">创新 / 包容 / 坚韧 / 信赖 / 伙伴</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 中国通信服务集团 · 智能体展示中心</span>
+        <span>本页面为智能体能力演示环境，数据仅用于展示</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 浮动 AI 助手 -->
+  <button class="fab" id="fab" title="通服 AI 助手">AI</button>
+  <div class="fab-pop" id="fabPop">
+    <div class="t"><span class="dot"></span>通服 AI 助手</div>
+    <div class="b">您好！我是中国通信服务集团 AI 助手。请点击任意智能体卡片体验对应场景能力，统一智能入口即将上线。</div>
+  </div>
+
+<script>
+/* =====================================================================
+ * 数据配置区：新增 / 修改智能体只需维护下面两个数组
+ *  - CATEGORIES：分类（id、名称、主题色）
+ *  - AGENTS：智能体（name 名称、cat 分类id、desc 简介、url 演示地址，留空则显示"敬请期待"）
+ * ===================================================================== */
+var CATEGORIES = [
+  { id: "design",  name: "勘察设计", color: "#2563eb" },
+  { id: "build",   name: "工程建设", color: "#e8731f" },
+  { id: "ops",     name: "智慧运维", color: "#0e9488" },
+  { id: "gov",     name: "数智政企", color: "#7c5cd6" },
+  { id: "service", name: "客户服务", color: "#e60012" },
+  { id: "mgmt",    name: "经营管理", color: "#33518f" }
+];
+
+var ICONS = {
+  radio:    '<circle cx="12" cy="12" r="2"/><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>',
+  blueprint:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="11" cy="14" r="2.5"/><path d="m15.5 18.5-2.6-2.6"/>',
+  route:    '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  calc:     '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>',
+  hardhat:  '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  archive:  '<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+  pulse:    '<path d="M22 12h-2.5a2 2 0 0 0-1.9 1.5l-2.3 8.1a.25.25 0 0 1-.5 0L9.2 2.4a.25.25 0 0 0-.5 0L6.4 10.5A2 2 0 0 1 4.5 12H2"/>',
+  mappin:   '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  scan:     '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m17 17-2-2"/>',
+  workflow: '<rect x="3" y="3" width="8" height="8" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect x="13" y="13" width="8" height="8" rx="2"/>',
+  gauge:    '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+  chart:    '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  shield:   '<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+  headset:  '<path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Z"/><path d="M21 11h-3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-5Z"/><path d="M3 11v-1a9 9 0 0 1 18 0v1"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/>',
+  wrench:   '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-8 8l-6.9 6.9a2.12 2.12 0 0 1-3-3l6.9-6.9a6 6 0 0 1 8-8z"/>',
+  question: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  filepen:  '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5"/><path d="M14 2v6h6"/><path d="M18.4 12.6a2 2 0 0 1 3 3L15 22l-4 1 1-4Z"/>',
+  scale:    '<path d="m16 16 3-8 3 8c-.9.65-1.9 1-3 1s-2.1-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.9.65-1.9 1-3 1s-2.1-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  flag:     '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>'
+};
+
+var AGENTS = [
+  /* —— 勘察设计 —— */
+  { name: "无线网络规划智能体",   cat: "design", icon: "radio",    desc: "基站选址与覆盖仿真分析，自动输出无线网络规划建议方案与站址比选报告。", url: "" },
+  { name: "勘察设计图纸审查 AI",  cat: "design", icon: "blueprint",desc: "自动审查 CAD 设计图纸的规范符合性、标注遗漏与专业间设计冲突，生成审查意见单。", url: "" },
+  { name: "通信管线路由设计助手", cat: "design", icon: "route",    desc: "结合 GIS 地理信息自动推荐管道光缆路由与跨越方案，估算工程量与造价区间。", url: "" },
+  /* —— 工程建设 —— */
+  { name: "工程概预算智能体",     cat: "build",  icon: "calc",     desc: "依据通信工程定额标准自动套用定额、生成概预算表，支持一键导出与差异核对。", url: "" },
+  { name: "智慧工地安全监理 AI",  cat: "build",  icon: "hardhat",  desc: "视频智能识别未戴安全帽、高空作业违规等隐患行为，实时告警并自动留存证据链。", url: "" },
+  { name: "施工方案编制助手",     cat: "build",  icon: "clipboard",desc: "按工程类型自动生成施工组织设计与割接方案初稿，关联安全交底与应急预案模板。", url: "" },
+  { name: "竣工资料智能整编",     cat: "build",  icon: "archive",  desc: "自动归集施工过程资料，校验完整性与签章规范，一键生成竣工技术文件包。", url: "" },
+  /* —— 智慧运维 —— */
+  { name: "网络故障诊断智能体",   cat: "ops",    icon: "pulse",    desc: "海量告警关联压缩与根因定位，给出修复建议与影响面评估，缩短故障恢复时长。", url: "" },
+  { name: "光缆中断智能定位",     cat: "ops",    icon: "mappin",   desc: "解析 OTDR 测试数据，将光缆故障点定位至地图坐标并自动触发抢修派单。", url: "" },
+  { name: "机房智能巡检助手",     cat: "ops",    icon: "scan",     desc: "巡检影像智能识别设备指示灯、表计读数与环境异常，自动生成标准巡检报告。", url: "" },
+  { name: "工单智能调度引擎",     cat: "ops",    icon: "workflow", desc: "综合技能、距离与负载自动派单，时限预警与超时升级，提升装维工单流转效率。", url: "" },
+  /* —— 数智政企 —— */
+  { name: "智慧城市运营驾驶舱",   cat: "gov",    icon: "gauge",    desc: "城市运行事件多源汇聚与态势分析，生成跨部门协同处置建议，辅助领导决策。", url: "" },
+  { name: "政务热线智能分析",     cat: "gov",    icon: "chart",    desc: "12345 热线工单自动聚类与热点研判，输出民情周报并支持回访质检抽样。", url: "" },
+  { name: "应急通信保障指挥智能体",cat: "gov",   icon: "shield",   desc: "面向重大活动与灾害场景，推演通信保障方案，调度应急装备与保障队伍资源。", url: "" },
+  /* —— 客户服务 —— */
+  { name: "智能客服坐席助手",     cat: "service",icon: "headset",  desc: "通话实时转写与话术推荐，自动生成工单摘要与服务小结，降低坐席操作负担。", url: "" },
+  { name: "装维上门服务助手",     cat: "service",icon: "wrench",   desc: "智能预约与上门路线规划，现场服务规范即问即答，提升客户满意度评价。", url: "" },
+  /* —— 经营管理 —— */
+  { name: "招投标智慧问答引擎",   cat: "mgmt",   icon: "question", desc: "招标文件智能解读，资质要求自动核对与废标风险提示，辅助投标决策。", url: "" },
+  { name: "标书编制智能体",       cat: "mgmt",   icon: "filepen",  desc: "基于历史案例库生成技术方案初稿，商务标合规性自动检查与格式排版。", url: "" },
+  { name: "合同审查 AI",          cat: "mgmt",   icon: "scale",    desc: "合同条款风险智能识别，与集团范本逐条差异比对，输出法务审查意见。", url: "" },
+  { name: "党建知识智能体",       cat: "mgmt",   icon: "flag",     desc: "党务知识问答与学习材料智能生成，辅助支部主题党日活动策划与台账整理。", url: "" }
+];
+
+/* ===================== 渲染逻辑 ===================== */
+(function () {
+  var grid = document.getElementById("grid");
+  var chipsBox = document.getElementById("chips");
+  var search = document.getElementById("search");
+  var countEl = document.getElementById("count");
+  var emptyEl = document.getElementById("empty");
+  var activeCat = "all";
+
+  var catMap = {};
+  CATEGORIES.forEach(function (c) { catMap[c.id] = c; });
+
+  function hexToRgba(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function shade(hex, p) { /* p<0 变深 */
+    var n = parseInt(hex.slice(1), 16);
+    var r = Math.min(255, Math.max(0, ((n >> 16) & 255) + p));
+    var g = Math.min(255, Math.max(0, ((n >> 8) & 255) + p));
+    var b = Math.min(255, Math.max(0, (n & 255) + p));
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+
+  /* 分类筛选条 */
+  function buildChips() {
+    var html = chipHtml("all", "全部", AGENTS.length);
+    CATEGORIES.forEach(function (c) {
+      var n = AGENTS.filter(function (a) { return a.cat === c.id; }).length;
+      html += chipHtml(c.id, c.name, n);
+    });
+    chipsBox.innerHTML = html;
+    chipsBox.addEventListener("click", function (e) {
+      var btn = e.target.closest(".chip");
+      if (!btn) return;
+      activeCat = btn.getAttribute("data-cat");
+      Array.prototype.forEach.call(chipsBox.children, function (el) {
+        el.classList.toggle("active", el === btn);
+      });
+      applyFilter();
+    });
+  }
+  function chipHtml(id, name, n) {
+    return '<button class="chip' + (id === "all" ? " active" : "") + '" data-cat="' + id + '">' +
+      name + '<span class="cnt">' + n + "</span></button>";
+  }
+
+  /* 智能体卡片 */
+  function buildCards() {
+    var html = "";
+    AGENTS.forEach(function (a, i) {
+      var c = catMap[a.cat] || { name: "其他", color: "#6b7280" };
+      var hasUrl = !!a.url;
+      var urlText = hasUrl ? a.url.replace(/^https?:\/\//, "") : "演示环境部署中";
+      html +=
+        '<div class="agent-card" data-i="' + i + '" data-cat="' + a.cat + '">' +
+          '<div class="card-body">' +
+            '<div class="tile" style="background:linear-gradient(135deg,' + shade(c.color, 36) + "," + c.color + ')">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[a.icon] || ICONS.radio) + "</svg>" +
+            "</div>" +
+            '<div class="card-info">' +
+              '<div class="card-top">' +
+                '<div class="agent-name">' + a.name + "</div>" +
+                '<span class="cat-tag" style="color:' + c.color + ";background:" + hexToRgba(c.color, .1) + '">' + c.name + "</span>" +
+              "</div>" +
+              '<div class="agent-desc">' + a.desc + "</div>" +
+            "</div>" +
+          "</div>" +
+          '<div class="card-foot">' +
+            '<span class="card-url">' + urlText + "</span>" +
+            (hasUrl
+              ? '<a class="open-link" href="' + a.url + '" target="_blank" rel="noopener">新标签页打开' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>'
+              : '<span class="open-link disabled">敬请期待</span>') +
+          "</div>" +
+        "</div>";
+    });
+    grid.innerHTML = html;
+    grid.addEventListener("click", function (e) {
+      if (e.target.closest("a")) return; /* 链接自身已处理 */
+      var card = e.target.closest(".agent-card");
+      if (!card) return;
+      var a = AGENTS[+card.getAttribute("data-i")];
+      if (a && a.url) window.open(a.url, "_blank");
+    });
+  }
+
+  /* 筛选：分类 + 关键词 */
+  function applyFilter() {
+    var kw = search.value.trim().toLowerCase();
+    var shown = 0;
+    Array.prototype.forEach.call(grid.children, function (card) {
+      var a = AGENTS[+card.getAttribute("data-i")];
+      var okCat = activeCat === "all" || a.cat === activeCat;
+      var okKw = !kw || (a.name + a.desc).toLowerCase().indexOf(kw) > -1;
+      var ok = okCat && okKw;
+      card.classList.toggle("hide", !ok);
+      if (ok) shown++;
+    });
+    countEl.textContent = shown;
+    emptyEl.classList.toggle("show", shown === 0);
+  }
+
+  search.addEventListener("input", applyFilter);
+
+  /* 浮动 AI 助手 */
+  var fab = document.getElementById("fab");
+  var pop = document.getElementById("fabPop");
+  fab.addEventListener("click", function (e) { e.stopPropagation(); pop.classList.toggle("show"); });
+  document.addEventListener("click", function (e) {
+    if (!pop.contains(e.target)) pop.classList.remove("show");
+  });
+
+  /* 初始化 */
+  buildChips();
+  buildCards();
+  applyFilter();
+  document.getElementById("statAgents").innerHTML = AGENTS.length + "<small>个</small>";
+  document.getElementById("statCats").innerHTML = CATEGORIES.length + "<small>大</small>";
+})();
+</script>
+</body>
+</html>
