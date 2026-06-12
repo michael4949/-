@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROIMind · 企业AI投入ROI测算智能体</title>
+<meta name="description" content="对话式智能体引导测算企业AI投入回报，覆盖各行业各场景，一键生成含图表的专业PDF报告。全部计算在本地浏览器完成。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
+<style>
+/* ============================================================
+   ROIMind 设计系统 —— 浅色底 · AI 气息 · 精美配色
+   ============================================================ */
+:root{
+  --bg:#f6f8ff; --bg2:#eef1fd;
+  --ink:#1b2440; --ink2:#3b4668; --muted:#6b7694; --faint:#9aa3bd;
+  --p1:#5b5ce2; --p2:#8b5cf6; --p3:#0ea5e9; --p4:#06b6d4;
+  --ok:#10b981; --warn:#f59e0b; --bad:#ef4459;
+  --card:#ffffff; --line:#e4e8f6; --line2:#d7dcf0;
+  --grad:linear-gradient(120deg,#5b5ce2 0%,#8b5cf6 48%,#06b6d4 100%);
+  --grad-soft:linear-gradient(120deg,rgba(91,92,226,.10),rgba(139,92,246,.10) 48%,rgba(6,182,212,.10));
+  --shadow:0 10px 34px rgba(91,92,226,.10),0 2px 8px rgba(27,36,64,.05);
+  --shadow-sm:0 4px 16px rgba(91,92,226,.08);
+  --r:18px;
+  --sans:'Inter','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+  --serif:'Noto Serif SC','Songti SC',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--bg);
+  line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(139,92,246,.22)}
+a{color:var(--p1);text-decoration:none}
+
+/* ---------- 背景装饰：光斑 + 网格 + 漂浮星点 ---------- */
+.bgdeco{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bgdeco .grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(91,92,226,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(91,92,226,.05) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 78%);
+          mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 78%);
+}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:drift 16s ease-in-out infinite alternate}
+.blob.b1{width:560px;height:560px;left:-160px;top:-180px;background:radial-gradient(circle,#c7d2fe,transparent 65%)}
+.blob.b2{width:620px;height:620px;right:-200px;top:60px;background:radial-gradient(circle,#bae6fd,transparent 65%);animation-delay:-6s}
+.blob.b3{width:480px;height:480px;left:34%;top:46%;background:radial-gradient(circle,#e9d5ff,transparent 65%);animation-delay:-11s;opacity:.38}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,28px) scale(1.07)}}
+.spark{position:absolute;width:5px;height:5px;border-radius:50%;background:#8b5cf6;opacity:.32;animation:twinkle 5s ease-in-out infinite}
+.spark.c{background:#06b6d4}.spark.i{background:#5b5ce2}
+@keyframes twinkle{0%,100%{opacity:.12;transform:scale(.7)}50%{opacity:.55;transform:scale(1.25)}}
+
+/* ---------- 顶栏 ---------- */
+header.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(246,248,255,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(228,232,246,.9);
+}
+.topbar .in{max-width:1080px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:13px}
+.brand-orb{
+  width:38px;height:38px;border-radius:12px;flex:none;position:relative;
+  background:conic-gradient(from 210deg,#5b5ce2,#8b5cf6,#06b6d4,#5b5ce2);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;
+  box-shadow:0 6px 18px rgba(91,92,226,.35);
+}
+.brand-orb::after{content:"";position:absolute;inset:-5px;border-radius:15px;border:1.5px solid rgba(139,92,246,.30);animation:pulse 2.6s ease-out infinite}
+@keyframes pulse{0%{opacity:.9;transform:scale(.92)}70%{opacity:0;transform:scale(1.22)}100%{opacity:0}}
+.brand-name{font-weight:800;font-size:17px;letter-spacing:.2px}
+.brand-name em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-sub{font-size:11.5px;color:var(--muted);margin-top:-2px}
+.top-tags{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ttag{font-size:11.5px;color:var(--ink2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;display:flex;gap:5px;align-items:center;box-shadow:var(--shadow-sm)}
+.ttag .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+@media(max-width:640px){.top-tags{display:none}}
+
+/* ---------- 主体 ---------- */
+main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:30px 22px 70px}
+
+/* hero */
+.hero{text-align:center;padding:26px 10px 10px}
+.hero .kicker{
+  display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--p1);
+  background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;box-shadow:var(--shadow-sm);
+}
+.hero .kicker .ai-dot{width:7px;height:7px;border-radius:50%;background:var(--grad);animation:twinkle 2.4s infinite}
+.hero h1{font-size:clamp(26px,4.2vw,40px);font-weight:900;letter-spacing:.5px;margin:16px 0 10px;line-height:1.28}
+.hero h1 .gx{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{color:var(--muted);max-width:640px;margin:0 auto;font-size:14.5px}
+.hero .feat{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.hero .feat span{font-size:12px;color:var(--ink2);background:rgba(255,255,255,.8);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+
+/* ---------- 步骤进度 ---------- */
+#stepsBar{display:flex;justify-content:center;gap:0;margin:30px auto 6px;max-width:860px;flex-wrap:wrap;row-gap:10px}
+.stp{display:flex;align-items:center}
+.stp .node{
+  display:flex;align-items:center;gap:7px;font-size:12px;color:var(--faint);font-weight:600;
+  padding:6px 12px;border-radius:999px;border:1px solid transparent;transition:.3s;white-space:nowrap;
+}
+.stp .num{
+  width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:11px;background:#e8ebf8;color:var(--faint);font-weight:700;transition:.3s;flex:none;
+}
+.stp.active .node{color:var(--p1);background:#fff;border-color:var(--line);box-shadow:var(--shadow-sm)}
+.stp.active .num{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(91,92,226,.35)}
+.stp.done .node{color:var(--ink2)}
+.stp.done .num{background:#dcfce7;color:#059669}
+.stp .bar{width:22px;height:1.5px;background:var(--line2);margin:0 2px}
+@media(max-width:760px){.stp .bar{width:8px}.stp .node{padding:5px 8px}.stp .node b{display:none}}
+
+/* ---------- 对话面板 ---------- */
+#chatPanel{
+  max-width:860px;margin:18px auto 0;background:rgba(255,255,255,.66);
+  border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
+  backdrop-filter:blur(8px);overflow:hidden;
+}
+#chatHead{
+  display:flex;align-items:center;gap:11px;padding:14px 20px;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,rgba(255,255,255,.4));
+}
+.agent-orb{
+  width:34px;height:34px;border-radius:50%;flex:none;position:relative;
+  background:radial-gradient(circle at 32% 28%,#a5b4fc,#5b5ce2 55%,#06b6d4 120%);
+  box-shadow:0 5px 14px rgba(91,92,226,.4);
+}
+.agent-orb::before{content:"✦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.agent-orb.live::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid rgba(6,182,212,.45);animation:pulse 2.2s infinite}
+#chatHead .nm{font-weight:800;font-size:14px}
+#chatHead .st{font-size:11px;color:var(--ok);display:flex;align-items:center;gap:5px}
+#chatHead .st::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}
+#chatHead .hint{margin-left:auto;font-size:11.5px;color:var(--faint)}
+#chat{padding:22px 22px 28px;min-height:300px;display:flex;flex-direction:column;gap:16px}
+
+.msg{display:flex;gap:11px;max-width:100%;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg .av{margin-top:2px}
+.msg .bubble{
+  background:#fff;border:1px solid var(--line);border-radius:4px 18px 18px 18px;
+  padding:13px 17px;max-width:640px;box-shadow:var(--shadow-sm);font-size:14.5px;color:var(--ink2);
+}
+.msg .bubble b,.msg .bubble strong{color:var(--ink)}
+.msg .bubble .tip{display:block;margin-top:7px;font-size:12px;color:var(--faint)}
+.msg.user{flex-direction:row-reverse}
+.msg.user .bubble{
+  background:linear-gradient(120deg,#eef0ff,#e7f7fd);border-color:#dfe4fb;
+  border-radius:18px 4px 18px 18px;color:var(--ink);
+}
+.msg.user .edit{font-size:11.5px;color:var(--p1);cursor:pointer;margin-top:6px;display:inline-block;font-weight:600}
+.msg.user .edit:hover{text-decoration:underline}
+.typing{display:inline-flex;gap:4px;padding:4px 2px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.16s}.typing i:nth-child(3){animation-delay:.32s}
+@keyframes tp{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-4px);opacity:1}}
+
+/* ---------- 控件 ---------- */
+.widget{margin-left:45px;animation:rise .45s ease both}
+@media(max-width:640px){.widget{margin-left:0}}
+.wcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px 18px;box-shadow:var(--shadow-sm);max-width:680px}
+.wcard .wt{font-size:12.5px;font-weight:700;color:var(--ink2);margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.wcard .wt::before{content:"";width:3px;height:13px;border-radius:3px;background:var(--grad)}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{
+  border:1.5px solid var(--line2);background:#fbfcff;border-radius:13px;padding:9px 14px;cursor:pointer;
+  font-size:13.5px;color:var(--ink2);transition:.18s;display:flex;align-items:center;gap:7px;user-select:none;position:relative;
+}
+.chip:hover{border-color:#b9bdf3;transform:translateY(-1px);box-shadow:0 4px 12px rgba(91,92,226,.12)}
+.chip.on{border-color:var(--p1);background:linear-gradient(120deg,#eef0ff,#ecfbff);color:var(--p1);font-weight:700;box-shadow:0 4px 14px rgba(91,92,226,.16)}
+.chip .ic{font-size:16px}
+.chip .bdg{font-size:10px;background:var(--grad);color:#fff;border-radius:999px;padding:1px 7px;font-weight:700}
+.chip.on::after{content:"✓";position:absolute;top:-7px;right:-6px;width:17px;height:17px;border-radius:50%;background:var(--grad);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(91,92,226,.4)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.field .iwrap{display:flex;align-items:center;border:1.5px solid var(--line2);border-radius:11px;background:#fbfcff;overflow:hidden;transition:.18s}
+.field .iwrap:focus-within{border-color:var(--p1);box-shadow:0 0 0 3px rgba(91,92,226,.13);background:#fff}
+.field input[type=text],.field input[type=number]{
+  border:0;outline:0;background:transparent;padding:9px 12px;font-size:14px;width:100%;color:var(--ink);font-family:var(--sans);
+}
+.field .unit{font-size:12px;color:var(--faint);padding:0 11px;border-left:1px solid var(--line);white-space:nowrap;background:#f6f8ff;align-self:stretch;display:flex;align-items:center}
+.field .hint{font-size:11px;color:var(--faint)}
+.srow{display:flex;align-items:center;gap:12px}
+.srow input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;background:linear-gradient(90deg,var(--p1) var(--pct,50%),#e4e8f6 var(--pct,50%));outline:none}
+.srow input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;background:#fff;
+  border:2.5px solid var(--p1);box-shadow:0 2px 8px rgba(91,92,226,.35);cursor:pointer;
+}
+.srow .sval{min-width:62px;text-align:center;font-weight:800;font-size:13px;color:var(--p1);background:#eef0ff;border-radius:9px;padding:4px 8px;white-space:nowrap}
+.wact{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;align-items:center}
+.btn{
+  border:0;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:13.5px;border-radius:12px;
+  padding:10px 22px;color:#fff;background:var(--grad);box-shadow:0 6px 18px rgba(91,92,226,.30);
+  transition:.18s;display:inline-flex;align-items:center;gap:7px;
+}
+.btn:hover{transform:translateY(-1.5px);box-shadow:0 9px 24px rgba(91,92,226,.38)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.ghost{background:#fff;color:var(--p1);border:1.5px solid #c9ccf4;box-shadow:none}
+.btn.ghost:hover{background:#f4f5ff}
+.btn.soft{background:#eef0ff;color:var(--p1);box-shadow:none}
+.btn.big{font-size:15px;padding:13px 30px;border-radius:14px}
+.werr{font-size:12px;color:var(--bad);margin-top:9px;display:none}
+.werr.on{display:block}
+.sgg{font-size:11.5px;color:var(--muted);background:#f3f6ff;border:1px dashed #c9d2f3;border-radius:10px;padding:7px 11px;margin-top:11px;display:flex;gap:7px;align-items:flex-start}
+.sgg .s-ic{color:var(--p2)}
+.subsec{font-size:12px;font-weight:800;color:var(--p1);letter-spacing:.4px;margin:16px 0 9px;display:flex;align-items:center;gap:7px}
+.subsec::after{content:"";flex:1;height:1px;background:var(--line)}
+.subsec:first-child{margin-top:0}
+
+/* 确认摘要卡 */
+.sumcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:4px}
+.sumcard .row{display:flex;justify-content:space-between;gap:14px;padding:8px 14px;font-size:13px;border-bottom:1px dashed var(--line)}
+.sumcard .row:last-child{border-bottom:0}
+.sumcard .row:nth-child(odd){background:#fafbff}
+.sumcard .k{color:var(--muted);flex:none}
+.sumcard .v{font-weight:600;text-align:right;color:var(--ink)}
+
+/* ---------- 加载遮罩 ---------- */
+#overlay{
+  position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:rgba(246,248,255,.88);backdrop-filter:blur(10px);
+}
+#overlay.on{display:flex}
+.ldbox{text-align:center;max-width:380px;padding:20px}
+.ld-orb{
+  width:84px;height:84px;margin:0 auto 22px;border-radius:50%;position:relative;
+  background:radial-gradient(circle at 32% 28%,#a5b4fc,#5b5ce2 55%,#06b6d4 130%);
+  box-shadow:0 14px 40px rgba(91,92,226,.45);animation:breathe 2s ease-in-out infinite;
+}
+.ld-orb::before{content:"✦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px}
+.ld-orb .ring{position:absolute;inset:-13px;border-radius:50%;border:1.5px dashed rgba(91,92,226,.4);animation:spin 7s linear infinite}
+.ld-orb .ring.r2{inset:-24px;border-color:rgba(6,182,212,.3);animation-duration:11s;animation-direction:reverse}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+#ldTitle{font-weight:800;font-size:17px;margin-bottom:7px}
+#ldLine{font-size:13px;color:var(--muted);min-height:22px;transition:.3s}
+.ldbar{height:5px;border-radius:5px;background:#e4e8f6;margin-top:18px;overflow:hidden}
+.ldbar i{display:block;height:100%;width:0;background:var(--grad);border-radius:5px;transition:width .45s ease}
+
+/* ---------- 报告区 ---------- */
+#reportWrap{display:none;margin-top:44px}
+#reportWrap.on{display:block}
+.actionbar{
+  position:sticky;top:64px;z-index:40;max-width:880px;margin:0 auto 26px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border:1px solid var(--line);
+  border-radius:16px;box-shadow:var(--shadow);padding:11px 16px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+.actionbar .ti{font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:8px;margin-right:auto}
+.actionbar .ti .dot{width:8px;height:8px;border-radius:50%;background:var(--grad);box-shadow:0 0 0 4px rgba(91,92,226,.14)}
+@media print{header.topbar,.bgdeco,#wizard,.hero,.actionbar,footer,#overlay{display:none!important}
+  main{padding:0;max-width:none}
+  #reportWrap{display:block!important;margin:0}
+  #report{gap:0!important;transform:none!important}
+  #reportScale{height:auto!important}
+  #report .gx{background:none!important;-webkit-text-fill-color:#5b5ce2;color:#5b5ce2!important}
+  .pdf-page{box-shadow:none!important;margin:0 auto!important;page-break-after:always;border-radius:0!important}
+  .pdf-page:last-child{page-break-after:auto}
+  @page{size:A4;margin:0}
+  body{background:#fff}
+}
+
+/* PDF 导出态：去间隙去阴影，渐变字回退为实色（html2canvas 兼容） */
+#report.exporting{gap:0}
+#report.exporting .pdf-page{box-shadow:none;border-radius:0;page-break-after:always}
+#report.exporting .gx{background:none!important;-webkit-text-fill-color:#5b5ce2;color:#5b5ce2!important}
+
+/* ====== 报告页面（A4） —— 注意：仅使用 hex/rgba 颜色，保证 html2canvas 兼容 ====== */
+#report{display:flex;flex-direction:column;align-items:center;gap:30px}
+.pdf-page{
+  width:210mm;height:296mm;background:#ffffff;border-radius:6px;overflow:hidden;position:relative;
+  box-shadow:0 18px 50px rgba(27,36,64,.13);padding:15mm 14mm 13mm;flex:none;
+  font-size:10.6pt;color:#27304d;
+}
+@media(max-width:840px){
+  #report{transform-origin:top center}
+}
+.p-band{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#5b5ce2,#8b5cf6 50%,#06b6d4)}
+.p-head{position:absolute;top:8mm;left:14mm;right:14mm;display:flex;justify-content:space-between;align-items:center;font-size:8pt;color:#9aa3bd}
+.p-head .lg{display:flex;align-items:center;gap:5px;font-weight:700;color:#5b5ce2}
+.p-head .lg .sq{width:13px;height:13px;border-radius:4px;background:linear-gradient(130deg,#5b5ce2,#06b6d4);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:8px}
+.p-foot{position:absolute;bottom:7mm;left:14mm;right:14mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#9aa3bd;border-top:1px solid #edf0fa;padding-top:2.4mm}
+.p-body{padding-top:7mm}
+h2.sec{display:flex;align-items:center;gap:9px;font-size:14.5pt;font-weight:900;color:#1b2440;margin:0 0 4.5mm;font-family:var(--serif)}
+h2.sec .no{
+  width:26px;height:26px;border-radius:8px;background:linear-gradient(130deg,#5b5ce2,#8b5cf6);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:10.5pt;font-family:var(--sans);font-weight:800;flex:none;
+  box-shadow:0 3px 9px rgba(91,92,226,.3);
+}
+h3.ssc{font-size:10.8pt;font-weight:800;color:#3b4668;margin:5mm 0 2.6mm;display:flex;align-items:center;gap:6px}
+h3.ssc::before{content:"";width:3.5px;height:11px;border-radius:3px;background:linear-gradient(180deg,#5b5ce2,#06b6d4)}
+.para{font-size:9.6pt;color:#3b4668;line-height:1.78;text-align:justify;margin-bottom:2.8mm}
+.para b{color:#1b2440}
+.hl{color:#5b5ce2;font-weight:700}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:3.6mm;margin:4mm 0}
+.kcard{
+  border:1px solid #e4e8f6;border-radius:11px;padding:3.6mm 3.4mm;position:relative;overflow:hidden;background:#fbfcff;
+}
+.kcard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#5b5ce2,#06b6d4)}
+.kcard .kl{font-size:7.6pt;color:#6b7694;font-weight:600;letter-spacing:.3px}
+.kcard .kv{font-size:15.5pt;font-weight:900;color:#1b2440;margin-top:1mm;font-family:var(--sans);line-height:1.15}
+.kcard .kv small{font-size:8.5pt;font-weight:700;color:#6b7694}
+.kcard .ks{font-size:7.4pt;margin-top:1mm;color:#9aa3bd}
+.kcard.good .kv{color:#0d9b6c}.kcard.bad .kv{color:#ef4459}
+.chartbox{border:1px solid #e8ecf8;border-radius:12px;padding:3.5mm 3.5mm 2.5mm;background:#ffffff;margin:3mm 0}
+.chartbox .ct{font-size:8.6pt;font-weight:800;color:#3b4668;margin-bottom:2mm;display:flex;align-items:center;gap:5px}
+.chartbox .ct::before{content:"◆";color:#8b5cf6;font-size:7pt}
+.chartbox .cwrap{position:relative;width:100%}
+.rt{width:100%;border-collapse:collapse;font-size:8.6pt;margin:2.5mm 0}
+.rt th{
+  background:#eef0fb;color:#3b4668;font-weight:800;text-align:left;padding:2.2mm 2.6mm;
+  border-bottom:1.5px solid #d7dcf0;white-space:nowrap;
+}
+.rt td{padding:2mm 2.6mm;border-bottom:1px solid #eef1f9;color:#3b4668}
+.rt tr:nth-child(even) td{background:#fafbff}
+.rt .num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--sans)}
+.rt .tot td{background:#f0f2ff;font-weight:800;color:#1b2440;border-top:1.5px solid #c9ccf4}
+.tag{display:inline-block;font-size:7.4pt;font-weight:700;border-radius:999px;padding:.6mm 2.4mm;line-height:1.5}
+.tag.g{background:#e7f9f1;color:#0d9b6c}.tag.y{background:#fef5e7;color:#b45309}
+.tag.r{background:#fdecef;color:#dc2640}.tag.b{background:#eef0ff;color:#5b5ce2}
+.tag.c{background:#e6f9fd;color:#0e7d96}
+.note{font-size:7.8pt;color:#9aa3bd;background:#f8f9ff;border-left:3px solid #c9ccf4;padding:2mm 3mm;border-radius:0 8px 8px 0;margin:2.5mm 0}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.risklist{display:flex;flex-direction:column;gap:2.2mm;margin:2.5mm 0}
+.riskitem{display:flex;gap:2.6mm;border:1px solid #e8ecf8;border-radius:9px;padding:2.4mm 3mm;background:#fbfcff;align-items:flex-start}
+.riskitem .rl{flex:none;margin-top:.3mm}
+.riskitem .rb{font-size:8.6pt;color:#3b4668;line-height:1.55}
+.riskitem .rb b{color:#1b2440;display:block;font-size:8.8pt}
+.recitem{display:flex;gap:2.8mm;margin-bottom:2.6mm;align-items:flex-start}
+.recitem .ri{
+  flex:none;width:6mm;height:6mm;border-radius:7px;background:linear-gradient(130deg,#5b5ce2,#06b6d4);
+  color:#fff;font-size:8pt;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:.4mm;
+}
+.recitem .rc b{font-size:9.3pt;color:#1b2440;display:block;margin-bottom:.6mm}
+.recitem .rc p{font-size:8.6pt;color:#3b4668;line-height:1.6}
+.roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4mm;margin:3mm 0}
+.phase{border:1px solid #e4e8f6;border-radius:11px;padding:3.2mm;background:#fbfcff;position:relative;overflow:hidden}
+.phase::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.phase.p1::before{background:#5b5ce2}.phase.p2::before{background:#8b5cf6}.phase.p3::before{background:#06b6d4}
+.phase .ph{font-size:7.4pt;font-weight:800;color:#8b5cf6;letter-spacing:.5px}
+.phase .pt{font-size:9.6pt;font-weight:900;color:#1b2440;margin:.8mm 0 1.6mm}
+.phase ul{margin:0;padding-left:4mm}
+.phase li{font-size:7.9pt;color:#3b4668;margin-bottom:1mm;line-height:1.5}
+.formula{
+  background:#f6f8ff;border:1px solid #e4e8f6;border-radius:9px;padding:2.4mm 3.2mm;margin-bottom:2mm;
+  font-size:8.4pt;color:#3b4668;font-family:'SF Mono','Cascadia Code',Consolas,'Noto Sans SC',monospace;
+}
+.formula b{color:#5b5ce2;font-weight:700}
+
+/* 封面 */
+.coverpage{padding:0!important}
+.cover-art{position:absolute;inset:0;overflow:hidden;background:linear-gradient(165deg,#f8faff 55%,#eef1fd)}
+.cv-blob{position:absolute;border-radius:50%;filter:blur(46px);opacity:.65}
+.cv-b1{width:340px;height:340px;right:-90px;top:-110px;background:radial-gradient(circle,#c7d2fe,rgba(199,210,254,0) 68%)}
+.cv-b2{width:300px;height:300px;left:-80px;top:160px;background:radial-gradient(circle,#bae6fd,rgba(186,230,253,0) 68%)}
+.cv-b3{width:380px;height:380px;right:-60px;bottom:-130px;background:radial-gradient(circle,#e9d5ff,rgba(233,213,255,0) 68%)}
+.cover-in{position:relative;height:100%;display:flex;flex-direction:column;padding:20mm 18mm 16mm}
+.cv-brand{display:flex;align-items:center;gap:7px;font-weight:800;color:#5b5ce2;font-size:11pt}
+.cv-brand .sq{width:22px;height:22px;border-radius:7px;background:linear-gradient(130deg,#5b5ce2,#06b6d4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;box-shadow:0 3px 9px rgba(91,92,226,.35)}
+.cv-kick{margin-top:26mm;display:inline-flex;align-items:center;gap:6px;font-size:8.6pt;font-weight:700;color:#5b5ce2;background:#ffffff;border:1px solid #dfe4fb;border-radius:999px;padding:1.6mm 4mm;width:fit-content;box-shadow:0 3px 12px rgba(91,92,226,.10)}
+.cv-title{font-family:var(--serif);font-weight:900;font-size:27pt;line-height:1.32;color:#1b2440;margin:7mm 0 4mm;letter-spacing:1px}
+.cv-title .gx{background:linear-gradient(120deg,#5b5ce2,#8b5cf6 50%,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cv-sub{font-size:10.5pt;color:#6b7694;max-width:120mm}
+.cv-meta{margin-top:auto;border-top:1.5px solid #dfe4fb;padding-top:6mm;display:grid;grid-template-columns:1fr 1fr;gap:3mm 8mm}
+.cv-meta .mi .k{font-size:7.6pt;color:#9aa3bd;font-weight:600;letter-spacing:.4px}
+.cv-meta .mi .v{font-size:10.5pt;color:#1b2440;font-weight:800;margin-top:.6mm}
+.cv-seal{
+  position:absolute;right:18mm;top:96mm;width:34mm;height:34mm;border-radius:50%;transform:rotate(8deg);
+  border:2px solid #8b5cf6;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#8b5cf6;background:rgba(255,255,255,.75);
+}
+.cv-seal::before{content:"";position:absolute;inset:2mm;border-radius:50%;border:1px dashed #a78bfa}
+.cv-seal .g{font-size:17pt;font-weight:900;font-family:var(--sans);line-height:1}
+.cv-seal .t{font-size:6.6pt;font-weight:700;letter-spacing:1px;margin-top:1mm}
+.cv-line{position:absolute;left:18mm;right:18mm;top:92mm;height:1px;background:linear-gradient(90deg,rgba(91,92,226,.35),rgba(6,182,212,.08))}
+.cv-chips{display:flex;gap:2.4mm;margin-top:5mm;flex-wrap:wrap}
+.cv-chips span{font-size:8pt;color:#3b4668;background:#ffffff;border:1px solid #e4e8f6;border-radius:999px;padding:1.4mm 3.6mm;box-shadow:0 2px 8px rgba(91,92,226,.07)}
+
+/* 目录 */
+.toc{margin-top:2mm}
+.toc .ti{display:flex;align-items:baseline;gap:3mm;padding:2.8mm 1mm;border-bottom:1px dashed #e4e8f6;font-size:10pt}
+.toc .ti .n{font-family:var(--sans);font-weight:800;color:#5b5ce2;font-size:9pt;width:8mm;flex:none}
+.toc .ti .t{font-weight:700;color:#27304d}
+.toc .ti .dots{flex:1;border-bottom:1.5px dotted #c9d2f3;transform:translateY(-1mm)}
+.toc .ti .p{font-family:var(--sans);color:#6b7694;font-size:9pt}
+
+footer.site{position:relative;z-index:1;text-align:center;padding:26px 20px 38px;color:var(--faint);font-size:12px}
+footer.site .ln{margin-top:5px}
+
+/* 移动端报告缩放容器 */
+#reportScale{width:100%;display:flex;justify-content:center}
+</style>
+</head>
+<body>
+
+<div class="bgdeco" aria-hidden="true">
+  <div class="grid"></div>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <i class="spark"   style="left:12%;top:24%"></i>
+  <i class="spark c" style="left:28%;top:62%;animation-delay:-1.2s"></i>
+  <i class="spark i" style="left:64%;top:18%;animation-delay:-2.1s"></i>
+  <i class="spark"   style="left:82%;top:48%;animation-delay:-3s"></i>
+  <i class="spark c" style="left:46%;top:80%;animation-delay:-.7s"></i>
+  <i class="spark i" style="left:90%;top:76%;animation-delay:-1.8s"></i>
+  <i class="spark"   style="left:6%;top:70%;animation-delay:-2.6s"></i>
+</div>
+
+<header class="topbar">
+  <div class="in">
+    <div class="brand-orb">✦</div>
+    <div>
+      <div class="brand-name">ROI<em>Mind</em> 智算引擎</div>
+      <div class="brand-sub">企业 AI 投入回报测算智能体</div>
+    </div>
+    <div class="top-tags">
+      <span class="ttag"><span class="dot"></span>本地计算 · 数据不出浏览器</span>
+      <span class="ttag">✦ AI Financial Engine</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <span class="kicker"><i class="ai-dot"></i>AI INVESTMENT INTELLIGENCE · 智能体引导测算</span>
+    <h1>几分钟，算清企业 <span class="gx">AI 投入的真实回报</span></h1>
+    <p class="sub">由测算智能体逐步引导提问，覆盖 16 大行业、16 类 AI 应用场景，基于 NPV / IRR / 回收期 / 敏感性分析等专业财务模型，一键生成详尽的图表版 PDF 评估报告。</p>
+    <div class="feat">
+      <span>🏭 全行业适配</span><span>📊 7 类专业图表</span><span>🧮 五维财务模型</span><span>📄 一键导出 PDF</span><span>🔒 数据本地处理</span>
+    </div>
+  </section>
+
+  <section id="wizard">
+    <nav id="stepsBar" aria-label="测算步骤"></nav>
+    <div id="chatPanel">
+      <div id="chatHead">
+        <div class="agent-orb live"></div>
+        <div>
+          <div class="nm">ROIMind 测算体</div>
+          <div class="st">在线 · 财务建模就绪</div>
+        </div>
+        <div class="hint">约需 3–5 分钟 · 可随时点「修改」回退</div>
+      </div>
+      <div id="chat"></div>
+    </div>
+  </section>
+
+  <section id="reportWrap">
+    <div class="actionbar">
+      <span class="ti"><span class="dot"></span>测算报告已生成</span>
+      <button class="btn" id="btnPdf">⬇ 下载 PDF 报告</button>
+      <button class="btn ghost" id="btnPrint">🖨 打印 / 另存 PDF</button>
+      <button class="btn soft" id="btnBack">✎ 调整参数</button>
+      <button class="btn soft" id="btnRestart">↺ 重新测算</button>
+    </div>
+    <div id="reportScale"><div id="report"></div></div>
+  </section>
+</main>
+
+<div id="overlay" role="status">
+  <div class="ldbox">
+    <div class="ld-orb"><i class="ring"></i><i class="ring r2"></i></div>
+    <div id="ldTitle">ROIMind 正在生成专业报告</div>
+    <div id="ldLine">正在校验输入参数…</div>
+    <div class="ldbar"><i id="ldBarIn"></i></div>
+  </div>
+</div>
+
+<footer class="site">
+  ROIMind 智算引擎 · 企业 AI 投入 ROI 测算智能体
+  <div class="ln">所有计算均在本地浏览器完成，不上传任何数据 · 测算结果基于用户输入与行业经验参数，仅供决策参考</div>
+</footer>
+
+<script id="core">
+/* ============================================================
+   CORE：行业知识库 / 场景库 / 财务计算引擎（纯函数，无 DOM 依赖）
+   口径：金额单位为人民币万元；比率为小数（0.15 = 15%）
+   ============================================================ */
+'use strict';
+
+/* ---------- 行业知识库（16 大行业） ----------
+   eff: 典型效率提升基准  uplift: 典型收入增长基准
+   roi3: 3年期 ROI 经验区间（基于公开研究综合估计，仅供对标参考）
+   opexPct: 可优化运营成本占营收比例   hw: 硬件投入系数
+*/
+const INDUSTRIES = {
+  manufacturing:{label:'制造业',icon:'🏭',eff:.18,uplift:.015,roi3:[60,180],opexPct:.12,hw:1.7,
+    rec:['quality','maintenance','supply','docs'],
+    insight:'制造业中，<b>智能质检、预测性维护与供应链优化</b>是回报最快的场景：行业经验显示质检人力可降 30% 以上，设备非计划停机可减少 20%–40%。'},
+  retail:{label:'零售 / 电商',icon:'🛍️',eff:.16,uplift:.04,roi3:[90,250],opexPct:.10,hw:.7,
+    rec:['marketing','cs','supply','bi'],
+    insight:'零售行业的 AI 价值核心在<b>个性化推荐与智能营销</b>——行业经验显示转化率可提升 10%–30%，同时智能客服可承接 60% 以上的常规咨询。'},
+  finance:{label:'金融服务',icon:'🏦',eff:.22,uplift:.03,roi3:[120,300],opexPct:.14,hw:1.2,
+    rec:['riskctrl','cs','docs','bi'],
+    insight:'金融业是 AI 渗透率最高的行业之一，<b>智能风控反欺诈与智能客服</b>双轮驱动：反欺诈模型通常可降低 20%–50% 欺诈损失，且监管合规收益显著。'},
+  healthcare:{label:'医疗健康',icon:'🏥',eff:.15,uplift:.02,roi3:[50,160],opexPct:.11,hw:1.5,
+    rec:['docs','knowledge','bi','quality'],
+    insight:'医疗健康领域的 AI 价值集中在<b>病历质控、影像辅助与知识管理</b>，在合规框架内可显著降低文书负担——医生文书时间约占工时 30% 以上，优化空间大。'},
+  education:{label:'教育培训',icon:'🎓',eff:.18,uplift:.03,roi3:[70,200],opexPct:.10,hw:.6,
+    rec:['cs','marketing','knowledge','ops_auto'],
+    insight:'教育行业的 AI 应用以<b>个性化学习、智能答疑与教研内容生成</b>为主，教师备课与答疑效率提升空间通常在 20%–40%。'},
+  energy:{label:'能源 / 公用事业',icon:'⚡',eff:.14,uplift:.01,roi3:[60,170],opexPct:.13,hw:1.8,
+    rec:['maintenance','quality','bi','docs'],
+    insight:'能源行业以<b>负荷预测、智能巡检与预测性维护</b>见长：精准预测可降低 3%–8% 的调度成本，无人巡检大幅减少高危作业。'},
+  logistics:{label:'物流 / 供应链',icon:'🚚',eff:.17,uplift:.02,roi3:[80,220],opexPct:.15,hw:1.0,
+    rec:['supply','ops_auto','bi','cs'],
+    insight:'物流行业的<b>路径优化、仓储调度与需求预测</b>回报直接：行业经验显示运输成本可优化 5%–15%，库存周转可提升 10%–25%。'},
+  tech:{label:'互联网 / 软件',icon:'💻',eff:.28,uplift:.04,roi3:[150,350],opexPct:.09,hw:1.1,
+    rec:['code','cs','marketing','knowledge'],
+    insight:'科技企业是 AI 红利最大的群体：<b>代码助手可提升研发效率 20%–40%</b>，且团队采用门槛低、见效快，是行业内普遍的「第一投资」。'},
+  telecom:{label:'电信 / 通信',icon:'📡',eff:.18,uplift:.02,roi3:[90,230],opexPct:.13,hw:1.3,
+    rec:['cs','maintenance','bi','riskctrl'],
+    insight:'电信行业的<b>智能客服与网络智能运维</b>是双支柱：客服自动化率普遍可达 50%–70%，网络故障预测可显著降低中断损失。'},
+  government:{label:'政务 / 公共服务',icon:'🏛️',eff:.15,uplift:0,roi3:[40,120],opexPct:.10,hw:1.0,
+    rec:['docs','knowledge','cs','ops_auto'],
+    insight:'政务领域的 AI 价值以<b>效率与服务体验</b>为主（非营收导向）：智能审批、政策问答与公文辅助可压缩 30% 以上的事务性工时。'},
+  agriculture:{label:'农业 / 食品',icon:'🌾',eff:.12,uplift:.02,roi3:[40,130],opexPct:.12,hw:1.4,
+    rec:['quality','supply','bi','maintenance'],
+    insight:'农业与食品行业的 AI 应用集中在<b>品质分级、产量预测与冷链优化</b>，损耗率每降低 1 个百分点都直接转化为利润。'},
+  construction:{label:'建筑 / 房地产',icon:'🏗️',eff:.13,uplift:.015,roi3:[40,140],opexPct:.10,hw:1.2,
+    rec:['design','docs','quality','bi'],
+    insight:'建筑与地产行业的 AI 价值在<b>生成式设计、造价审核与安全监测</b>：设计周期可压缩 30%–50%，安全事故识别率显著提升。'},
+  professional:{label:'专业服务 / 咨询',icon:'💼',eff:.25,uplift:.03,roi3:[110,280],opexPct:.08,hw:.5,
+    rec:['knowledge','docs','marketing','legal'],
+    insight:'专业服务业按工时创造收入，<b>知识库与文档智能</b>带来的效率提升几乎直接折算为产能：行业经验显示交付效率可提升 25%–40%。'},
+  media:{label:'传媒 / 内容 / 娱乐',icon:'🎬',eff:.26,uplift:.04,roi3:[100,260],opexPct:.09,hw:.8,
+    rec:['marketing','design','knowledge','bi'],
+    insight:'内容行业是生成式 AI 的「主场」：<b>内容生产成本可降 40%–60%</b>，同时个性化分发可显著提升用户时长与付费转化。'},
+  hospitality:{label:'酒店 / 旅游 / 餐饮',icon:'🏨',eff:.15,uplift:.03,roi3:[60,180],opexPct:.12,hw:.7,
+    rec:['cs','marketing','supply','hr'],
+    insight:'文旅行业的 AI 应用以<b>智能预订客服、动态定价与需求预测</b>为主：收益管理优化通常可带来 3%–8% 的 RevPAR 提升。'},
+  pharma:{label:'生物医药',icon:'🧪',eff:.20,uplift:.02,roi3:[80,240],opexPct:.11,hw:1.6,
+    rec:['design','docs','knowledge','quality'],
+    insight:'医药行业的 AI 价值横跨<b>研发加速（分子筛选、文献挖掘）与注册申报文档自动化</b>，研发周期每缩短一个月都意味着巨大的机会价值。'},
+  other:{label:'其他 / 综合集团',icon:'🧩',eff:.18,uplift:.02,roi3:[60,200],opexPct:.10,hw:1.0,
+    rec:['knowledge','cs','docs','bi'],
+    insight:'综合型企业建议从<b>通用型场景（知识库、客服、文档处理）</b>切入：跨部门复用性强、数据门槛低，是验证 AI 价值的最佳起点。'}
+};
+
+/* ---------- AI 应用场景库（16 类，覆盖各业务领域） ----------
+   mix: 收益类型权重 {labor人效, rev收入, cost成本, risk风险质量}
+   eff: 对受影响人群的典型效率提升   cov: 典型受影响员工占比
+   diff: 实施难度   ttv: 见效周期
+*/
+const USECASES = {
+  cs:{label:'智能客服与对话助手',icon:'💬',mix:{labor:.5,rev:.1,cost:.3,risk:.1},eff:.30,cov:.08,diff:'低',ttv:'1–3 个月',
+    note:'自动应答、坐席辅助、工单摘要，承接 50%–80% 常规咨询'},
+  marketing:{label:'营销内容生成与个性化',icon:'🎯',mix:{labor:.3,rev:.6,cost:.1,risk:0},eff:.35,cov:.05,diff:'低',ttv:'1–3 个月',
+    note:'文案/素材生成、个性化推荐、智能投放，直接拉动转化'},
+  sales:{label:'销售智能与线索评分',icon:'📈',mix:{labor:.2,rev:.7,cost:.1,risk:0},eff:.20,cov:.08,diff:'中',ttv:'3–6 个月',
+    note:'线索打分、话术辅助、商机预测，提升赢单率与客单价'},
+  code:{label:'研发效能 / 代码助手',icon:'👨‍💻',mix:{labor:.7,rev:.1,cost:.2,risk:0},eff:.30,cov:.12,diff:'低',ttv:'1–2 个月',
+    note:'代码生成补全、单测生成、Code Review 辅助，研发提效 20%–40%'},
+  knowledge:{label:'企业知识库与智能搜索',icon:'📚',mix:{labor:.6,rev:0,cost:.2,risk:.2},eff:.15,cov:.35,diff:'中',ttv:'2–4 个月',
+    note:'企业大脑/RAG 问答，全员减少信息检索与重复答疑时间'},
+  docs:{label:'文档智能处理与审核',icon:'📄',mix:{labor:.6,rev:0,cost:.2,risk:.2},eff:.40,cov:.15,diff:'低',ttv:'1–3 个月',
+    note:'OCR+理解、合同/票据/报告抽取与审核，文书工时大幅压缩'},
+  bi:{label:'数据分析与决策支持',icon:'📊',mix:{labor:.3,rev:.3,cost:.4,risk:0},eff:.25,cov:.10,diff:'中',ttv:'3–6 个月',
+    note:'ChatBI、自动报表、经营洞察，缩短决策链路'},
+  supply:{label:'供应链预测与库存优化',icon:'🚛',mix:{labor:.2,rev:.2,cost:.6,risk:0},eff:.15,cov:.06,diff:'高',ttv:'4–8 个月',
+    note:'需求预测、补货优化、运输路径规划，降库存降运费'},
+  quality:{label:'智能质检与视觉检测',icon:'🔍',mix:{labor:.3,rev:0,cost:.4,risk:.3},eff:.35,cov:.06,diff:'中',ttv:'3–6 个月',
+    note:'视觉/语音质检替代人工抽检，漏检率与质量损失双降'},
+  maintenance:{label:'预测性维护',icon:'⚙️',mix:{labor:.1,rev:0,cost:.6,risk:.3},eff:.20,cov:.04,diff:'高',ttv:'4–8 个月',
+    note:'设备故障预测、备件优化，减少非计划停机损失'},
+  riskctrl:{label:'智能风控与反欺诈',icon:'🛡️',mix:{labor:.1,rev:0,cost:.3,risk:.6},eff:.25,cov:.04,diff:'高',ttv:'3–6 个月',
+    note:'实时反欺诈、信用评估、异常交易识别，直接止损'},
+  hr:{label:'人力资源与招聘自动化',icon:'🤝',mix:{labor:.6,rev:0,cost:.3,risk:.1},eff:.30,cov:.03,diff:'低',ttv:'1–3 个月',
+    note:'简历初筛、面试辅助、员工问答，HR 事务性工作自动化'},
+  finance_ops:{label:'财务流程自动化',icon:'🧾',mix:{labor:.6,rev:0,cost:.3,risk:.1},eff:.35,cov:.04,diff:'中',ttv:'2–4 个月',
+    note:'智能对账、发票处理、费用审核，财务共享中心提效'},
+  legal:{label:'合同审查与合规',icon:'⚖️',mix:{labor:.4,rev:0,cost:.1,risk:.5},eff:.40,cov:.02,diff:'中',ttv:'2–4 个月',
+    note:'合同条款审查、合规筛查，降低法律风险敞口'},
+  design:{label:'生成式设计与研发辅助',icon:'🧬',mix:{labor:.4,rev:.4,cost:.2,risk:0},eff:.30,cov:.08,diff:'中',ttv:'3–6 个月',
+    note:'方案生成、仿真加速、配方/结构探索，缩短研发周期'},
+  ops_auto:{label:'运营流程自动化（AI+RPA）',icon:'🤖',mix:{labor:.5,rev:0,cost:.4,risk:.1},eff:.30,cov:.12,diff:'中',ttv:'2–5 个月',
+    note:'跨系统流程编排、审批自动化、异常工单处理'}
+};
+
+/* ---------- 准备度选项 ---------- */
+const READINESS = {
+  data:{label:'数据基础',opts:[['low','较薄弱：数据分散、质量参差',0],['mid','一般：核心系统有数据但未打通',.5],['high','良好：数据集中、治理较完善',1]]},
+  exp:{label:'AI 实践经验',opts:[['none','尚未尝试',0],['pilot','做过试点 / 小范围使用',.5],['scaled','已有场景规模化运行',1]]},
+  support:{label:'高管支持度',opts:[['low','观望为主',0],['mid','支持但预算谨慎',.5],['high','一把手工程、战略投入',1]]}
+};
+
+/* ---------- 工具函数 ---------- */
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const round1=v=>Math.round(v*10)/10;
+function fmtW(v){ // 万元 → 智能格式
+  if(v==null||isNaN(v))return'—';
+  const a=Math.abs(v);
+  if(a>=10000)return (v/10000).toLocaleString('zh-CN',{maximumFractionDigits:2})+' 亿元';
+  if(a>=100)return Math.round(v).toLocaleString('zh-CN')+' 万元';
+  return v.toLocaleString('zh-CN',{maximumFractionDigits:1})+' 万元';
+}
+function fmtWn(v){ // 纯数字(万)
+  if(v==null||isNaN(v))return'—';
+  const a=Math.abs(v);
+  if(a>=10000)return(v/10000).toLocaleString('zh-CN',{maximumFractionDigits:2})+'亿';
+  return Math.round(v).toLocaleString('zh-CN');
+}
+const fmtPct=(v,d=0)=>v==null||isNaN(v)?'—':(v*100).toLocaleString('zh-CN',{maximumFractionDigits:d})+'%';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- 智能建议：投入 ---------- */
+function suggestCosts(S){
+  const ind=INDUSTRIES[S.industry]||INDUSTRIES.other;
+  const E=S.employees||300, U=Math.max(1,(S.useCases||[]).length);
+  const sf=clamp(Math.sqrt(E/400),.45,3.2);            // 规模系数
+  const soft=Math.round(clamp(25*U*sf+30,40,1500));     // 平台与软件建设
+  const hard=Math.round(clamp(18*U*sf*ind.hw,0,1200));  // 硬件与算力
+  const data=Math.round(clamp(14*U*sf,15,600));         // 数据治理与集成
+  const consult=Math.round(clamp(.3*(soft+data),10,500));
+  const subAnnual=Math.round(clamp(14*U*sf+12,20,800)); // 订阅/许可/API
+  const opsAnnual=Math.round(clamp(10*U*sf+15,15,600)); // 运维专职人力
+  const trainAnnual=Math.round(clamp(4*U*sf+5,8,200));  // 培训与变革
+  return{soft,hard,data,consult,subAnnual,opsAnnual,trainAnnual};
+}
+
+/* ---------- 智能建议：收益 ---------- */
+function suggestBenefits(S){
+  const ind=INDUSTRIES[S.industry]||INDUSTRIES.other;
+  const E=S.employees||300, R=S.revenue||20000;
+  const ucs=(S.useCases||[]).map(k=>USECASES[k]).filter(Boolean);
+  const cov=clamp(ucs.reduce((s,u)=>s+u.cov,0),.05,.62);
+  const affected=Math.round(E*cov);
+  const effMix=ucs.length?ucs.reduce((s,u)=>s+u.eff,0)/ucs.length:.2;
+  const effGain=round1(clamp((effMix*.55+ind.eff*.45)*100,5,45))/100;
+  const hasRev=ucs.some(u=>u.mix.rev>=.2);
+  const revUplift=hasRev?round1(clamp(ind.uplift*100,0,12))/100:0;
+  const hasCost=ucs.some(u=>u.mix.cost>=.3);
+  const opexBase=Math.round(R*ind.opexPct);
+  const opexCut=hasCost?.10:.05;
+  const hasRisk=ucs.some(u=>u.mix.risk>=.3);
+  const riskAnnual=hasRisk?Math.round(clamp(R*.003,5,2000)):0;
+  return{affected,laborCost:18,effGain,revUplift,grossMargin:.35,opexBase,opexCut,riskAnnual};
+}
+
+/* ---------- 智能建议：成功概率（由准备度推导） ---------- */
+function suggestProb(exec){
+  const sc=(READINESS.data.opts.find(o=>o[0]===exec.dataReady)||[0,0,.5])[2];
+  const se=(READINESS.exp.opts.find(o=>o[0]===exec.aiExp)||[0,0,.5])[2];
+  const ss=(READINESS.support.opts.find(o=>o[0]===exec.execSupport)||[0,0,.5])[2];
+  return round1(clamp(.58+sc*.14+se*.10+ss*.13,.55,.95)*100)/100;
+}
+
+/* ---------- 核心财务模型 ----------
+   mods：情景修正 {bf:收益系数, cf:成本系数, rampF:爬坡系数}
+*/
+function computeCore(S,mods){
+  const m=Object.assign({bf:1,cf:1,rampF:1},mods||{});
+  const c=S.cost,b=S.benefit,e=S.exec;
+  const H=e.horizon;
+  const oneTime=(c.soft+c.hard+c.data+c.consult)*m.cf;
+  const recurring=(c.subAnnual+c.opsAnnual+c.trainAnnual)*m.cf;
+  const labor=b.affected*b.laborCost*b.effGain;
+  const rev=(S.revenue||0)*b.revUplift*b.grossMargin;
+  const cost=b.opexBase*b.opexCut;
+  const risk=b.riskAnnual;
+  const steady=(labor+rev+cost+risk)*e.successProb*m.bf;   // 稳态年化毛收益
+  const years=[];let cum=-oneTime,cumD=-oneTime;
+  for(let y=1;y<=H;y++){
+    const ad=clamp((y===1?e.ramp1:y===2?e.ramp2:1)*m.rampF,0,1);
+    const g=steady*ad, net=g-recurring;
+    cum+=net;
+    const disc=net/Math.pow(1+e.discount,y);
+    cumD+=disc;
+    years.push({y,adoption:ad,
+      labor:labor*e.successProb*m.bf*ad,rev:rev*e.successProb*m.bf*ad,
+      cost:cost*e.successProb*m.bf*ad,risk:risk*e.successProb*m.bf*ad,
+      gross:g,recurring,net,cum,disc,cumDisc:cumD});
+  }
+  const totalCost=oneTime+recurring*H;
+  const totalGross=years.reduce((s,r)=>s+r.gross,0);
+  const npv=cumD;
+  const roiSimple=totalCost>0?(totalGross-totalCost)/totalCost:null;
+  // 折现 ROI：折现收益与折现成本之比 − 1
+  const discBen=years.reduce((s,r)=>s+r.gross/Math.pow(1+e.discount,r.y),0);
+  const discCost=oneTime+years.reduce((s,r)=>s+recurring/Math.pow(1+e.discount,r.y),0);
+  const roiDisc=discCost>0?(discBen-discCost)/discCost:null;
+  const bcr=discCost>0?discBen/discCost:null;
+  // 回收期（线性插值）
+  let payback=null,acc=-oneTime;
+  for(const r of years){
+    if(acc+r.net>=0&&r.net>0){payback=r.y-1+(-acc)/r.net;break}
+    acc+=r.net;
+  }
+  // IRR：二分法
+  const flows=[-oneTime,...years.map(r=>r.net)];
+  const npvAt=r=>flows.reduce((s,f,t)=>s+f/Math.pow(1+r,t),0);
+  let irr=null;
+  if(npvAt(0)>0!==npvAt(10)>0||npvAt(-0.95)>0!==npvAt(0)>0){
+    let lo=-0.95,hi=10;
+    if(npvAt(0)>0)lo=0;else hi=0;
+    for(let i=0;i<90;i++){const mid=(lo+hi)/2;(npvAt(mid)>0)===(npvAt(lo)>0)?lo=mid:hi=mid}
+    irr=(lo+hi)/2;
+    if(irr<=-0.949||irr>=9.99)irr=null;
+  }
+  return{oneTime,recurring,totalCost,totalGross,steady,years,
+    benefitTotals:{labor:years.reduce((s,r)=>s+r.labor,0),rev:years.reduce((s,r)=>s+r.rev,0),
+      cost:years.reduce((s,r)=>s+r.cost,0),risk:years.reduce((s,r)=>s+r.risk,0)},
+    steadyParts:{labor:labor*e.successProb*m.bf,rev:rev*e.successProb*m.bf,cost:cost*e.successProb*m.bf,risk:risk*e.successProb*m.bf},
+    npv,irr,roiSimple,roiDisc,bcr,payback,discBen,discCost};
+}
+
+/* ---------- 完整测算：基准 + 情景 + 敏感性 + 评级 ---------- */
+function computeModel(S){
+  const base=computeCore(S,null);
+  const scenarios={
+    pess:Object.assign({name:'谨慎情景',desc:'收益 ×0.75 · 成本 ×1.10 · 爬坡放缓 20%'},computeCore(S,{bf:.75,cf:1.10,rampF:.8})),
+    base:Object.assign({name:'基准情景',desc:'按当前输入参数测算'},base),
+    opt:Object.assign({name:'进取情景',desc:'收益 ×1.20 · 成本 ×0.95'},computeCore(S,{bf:1.2,cf:.95}))
+  };
+  // 敏感性：关键驱动 ±20%（折现率 ±2pp），对 NPV 的影响
+  const sens=[];
+  const tweak=(label,fn)=>{
+    const s1=JSON.parse(JSON.stringify(S)),s2=JSON.parse(JSON.stringify(S));
+    fn(s1,-1);fn(s2,1);
+    sens.push({label,low:computeCore(s1,null).npv-base.npv,high:computeCore(s2,null).npv-base.npv});
+  };
+  tweak('效率提升幅度 ±20%',(s,d)=>s.benefit.effGain*=1+.2*d);
+  if(S.benefit.revUplift>0)tweak('收入增长率 ±20%',(s,d)=>s.benefit.revUplift*=1+.2*d);
+  tweak('成本节降幅度 ±20%',(s,d)=>s.benefit.opexCut*=1+.2*d);
+  tweak('落地成功率 ±20%',(s,d)=>s.exec.successProb=clamp(s.exec.successProb*(1+.2*d),.1,1));
+  tweak('年度持续投入 ±20%',(s,d)=>{s.cost.subAnnual*=1+.2*d;s.cost.opsAnnual*=1+.2*d;s.cost.trainAnnual*=1+.2*d});
+  tweak('一次性投入 ±20%',(s,d)=>{s.cost.soft*=1+.2*d;s.cost.hard*=1+.2*d;s.cost.data*=1+.2*d;s.cost.consult*=1+.2*d});
+  tweak('折现率 ±2pp',(s,d)=>s.exec.discount=clamp(s.exec.discount+.02*d,.01,.3));
+  sens.sort((a,b)=>Math.max(Math.abs(b.low),Math.abs(b.high))-Math.max(Math.abs(a.low),Math.abs(a.high)));
+
+  // 准备度雷达（0–100）
+  const sc=k=>(READINESS[k==='data'?'data':k].opts.find(o=>o[0]===S.exec[{data:'dataReady',exp:'aiExp',support:'execSupport'}[k]])||[0,0,.5])[2];
+  const ucArr=S.useCases.map(k=>USECASES[k]);
+  const diffScore={'低':1,'中':.6,'高':.3};
+  const radar={
+    dims:['数据基础','组织准备度','场景聚焦度','财务稳健性','技术可行性'],
+    vals:[
+      Math.round(35+sc('data')*60),
+      Math.round(30+(sc('exp')*.5+sc('support')*.5)*65),
+      Math.round(clamp(100-Math.max(0,S.useCases.length-3)*14,40,95)),
+      Math.round(clamp(base.steady>0?(base.steady/(base.recurring||1))*22:10,15,95)),
+      Math.round(clamp(ucArr.reduce((s,u)=>s+diffScore[u.diff],0)/Math.max(1,ucArr.length)*95,30,95))
+    ]
+  };
+
+  // 综合评级
+  let score=0;
+  const rd=base.roiDisc??-1;
+  score+=rd>=1.5?30:rd>=.8?24:rd>=.4?18:rd>=0?10:0;
+  score+=base.payback!=null?(base.payback<=1.5?25:base.payback<=2.5?18:base.payback<=S.exec.horizon?10:0):0;
+  score+=base.npv>0?15:0;
+  score+=base.irr!=null?(base.irr>=.3?15:base.irr>=.15?10:5):0;
+  score+=S.exec.successProb>=.8?15:S.exec.successProb>=.7?10:5;
+  const rating=score>=85?{grade:'A+',color:'#0d9b6c',desc:'极具投资价值，建议优先立项并加速推进'}
+    :score>=70?{grade:'A',color:'#0d9b6c',desc:'投资价值显著，建议立项推进'}
+    :score>=55?{grade:'B+',color:'#2e7dd1',desc:'具备投资价值，建议从试点切入、分阶段投入'}
+    :score>=40?{grade:'B',color:'#b45309',desc:'回报可期但存在不确定性，建议小步快跑、严控投入节奏'}
+    :{grade:'C',color:'#dc2640',desc:'当前参数下回报有限，建议重新设计场景组合或压缩投入'};
+  rating.score=score;
+
+  return{base,scenarios,sens,radar,rating,
+    benchmark:{range:INDUSTRIES[S.industry].roi3,label:INDUSTRIES[S.industry].label}};
+}
+
+/* ---------- 规则引擎：风险清单 ---------- */
+function buildRisks(S,M){
+  const r=[],b=M.base;
+  const lv=(t)=>t==='高'?'<span class="tag r">高</span>':t==='中'?'<span class="tag y">中</span>':'<span class="tag g">低</span>';
+  if(S.exec.dataReady==='low')r.push({l:'高',t:'数据基础薄弱',d:'数据分散、质量不足将直接拉低模型效果与采用率，是 AI 项目失败的首要原因，需要在试点期并行启动数据治理专项。'});
+  if(b.recurring>b.steady*.55)r.push({l:'高',t:'持续成本占比偏高',d:`年度持续投入约为稳态年化收益的 ${Math.round(b.recurring/b.steady*100)}%，收益兑现稍有折扣即可能侵蚀利润，建议采用按量付费与模型分层策略。`});
+  if(S.exec.aiExp==='none')r.push({l:'中',t:'缺乏 AI 落地经验',d:'首次落地的组织通常低估变革管理成本，建议引入有交付经验的伙伴，并培养内部 AI Champion 梯队。'});
+  if(S.exec.execSupport==='low')r.push({l:'高',t:'高管支持不足',d:'缺少高层发起人的 AI 项目跨部门协同困难，建议先以小成本高显示度场景赢得管理层共识。'});
+  if(S.useCases.length>4)r.push({l:'中',t:'场景铺开过广',d:`同期推进 ${S.useCases.length} 个场景将稀释资源与注意力，建议按价值/可行性矩阵排序，首期聚焦 2–3 个。`});
+  if(S.benefit.revUplift>0&&M.base.steadyParts.rev>M.base.steady*.45)r.push({l:'中',t:'收益结构依赖收入增长',d:'收入类收益受市场环境影响波动较大、归因困难，建议通过 A/B 实验建立增量归因机制后再放大投入。'});
+  if(b.payback!=null&&b.payback>2.5)r.push({l:'中',t:'回收周期偏长',d:`预计 ${b.payback.toFixed(1)} 年才能收回投入，期间技术与组织环境可能变化，建议设置阶段性止损/扩展决策门。`});
+  if(b.payback==null)r.push({l:'高',t:'测算期内无法回收投入',d:'当前参数下累计净现金流在测算期内未转正，建议压缩一次性投入、重构场景组合或重谈供应商商务条款。'});
+  const hi=S.useCases.filter(k=>USECASES[k].diff==='高');
+  if(hi.length)r.push({l:'中',t:'高难度场景占比',d:`${hi.map(k=>USECASES[k].label).join('、')}属于高复杂度场景，对数据与工程能力要求高，建议安排在二期并预留 20% 进度缓冲。`});
+  if(r.length<3)r.push({l:'低',t:'模型与供应商依赖',d:'大模型 API 价格与能力快速演进，建议保持双供应商策略与抽象层设计，避免深度锁定。'});
+  return r.slice(0,6).map(x=>({...x,badge:lv(x.l)}));
+}
+
+/* ---------- 规则引擎：行动建议 ---------- */
+function buildRecs(S,M){
+  const recs=[],b=M.base;
+  const ind=INDUSTRIES[S.industry];
+  const top2=S.useCases.slice().sort((a,c)=>(ind.rec.includes(c)?1:0)-(ind.rec.includes(a)?1:0)).slice(0,2).map(k=>USECASES[k].label);
+  recs.push({t:'以试点验证开局',d:`首期 ${S.exec.implMonths<=6?S.exec.implMonths:6} 个月内聚焦「${top2.join('」与「')}」，设定可量化的基线指标（处理时长、人均产出、错误率），用数据说话再扩展。`});
+  recs.push({t:'建立 ROI 跟踪看板',d:'按月跟踪采用率、活跃度、单位任务耗时与成本四类指标，与本报告基准对比，偏差超过 20% 即触发参数复盘。'});
+  if(S.exec.dataReady==='low')recs.push({t:'数据治理先行',d:'在试点同期启动核心业务数据的清洗、打通与权限治理，优先保障试点场景所需的数据供给质量。'});
+  if(b.recurring>b.steady*.4)recs.push({t:'优化持续成本结构',d:'对高频低复杂任务使用轻量模型、低频高价值任务使用旗舰模型的分层路由策略，通常可降低 30%–60% 推理成本。'});
+  if(S.exec.aiExp!=='scaled')recs.push({t:'培养内部 AI 能力',d:'每个业务条线培养 1–2 名 AI Champion，沉淀提示词库与最佳实践，把工具采购转化为组织能力。'});
+  if(S.benefit.revUplift>0)recs.push({t:'收入类收益做增量归因',d:'对营销/销售类场景设置对照组进行 A/B 验证，确认增量后再放大预算，避免把自然增长记入 AI 收益。'});
+  recs.push({t:'设置阶段决策门（Stage-Gate）',d:`在第 ${S.exec.implMonths} 个月与第 12 个月设置 Go/No-Go 评审：达标即按路线图扩展，不达标则收缩范围并复盘假设。`});
+  return recs.slice(0,6);
+}
+
+/* ---------- 场景收益归因 ---------- */
+function attributeUseCases(S,M){
+  const parts=M.base.steadyParts; // {labor,rev,cost,risk}
+  const ucs=S.useCases.map(k=>({k,...USECASES[k]}));
+  const sum={labor:0,rev:0,cost:0,risk:0};
+  ucs.forEach(u=>{sum.labor+=u.mix.labor;sum.rev+=u.mix.rev;sum.cost+=u.mix.cost;sum.risk+=u.mix.risk});
+  return ucs.map(u=>{
+    let v=0;
+    for(const c of['labor','rev','cost','risk'])if(sum[c]>0)v+=parts[c]*(u.mix[c]/sum[c]);
+    const main=Object.entries(u.mix).sort((a,b)=>b[1]-a[1])[0][0];
+    return{...u,annual:v,main:{labor:'人效提升',rev:'收入增长',cost:'成本节降',risk:'风险与质量'}[main]};
+  }).sort((a,b)=>b.annual-a.annual);
+}
+</script>
+<script id="app">
+/* ============================================================
+   ENGINE：智能体对话引擎 —— 引导式提问向导
+   ============================================================ */
+'use strict';
+const $=s=>document.querySelector(s);
+const chatEl=$('#chat');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function node(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstElementChild}
+function scrollToEnd(el){setTimeout(()=>{(el||chatEl.lastElementChild)?.scrollIntoView({behavior:'smooth',block:'end'})},60)}
+
+/* ---------- 全局状态 ---------- */
+function freshState(){return{
+  industry:null,company:'',employees:null,revenue:null,useCases:[],
+  cost:null,benefit:null,
+  exec:{implMonths:6,horizon:3,ramp1:.5,ramp2:.8,discount:.08,dataReady:'mid',aiExp:'pilot',execSupport:'mid',successProb:.8}
+}}
+let S=freshState();
+let MODEL=null;
+
+/* ---------- 步骤进度条 ---------- */
+const STEP_META=['行业定位','企业画像','场景选择','投入测算','收益建模','执行与风险','生成报告'];
+function renderBar(active,doneAll){
+  $('#stepsBar').innerHTML=STEP_META.map((t,i)=>{
+    const cls=doneAll||i<active?'done':i===active?'active':'';
+    return`<div class="stp ${cls}"><span class="node"><span class="num">${doneAll||i<active?'✓':i+1}</span><b>${t}</b></span>${i<STEP_META.length-1?'<span class="bar"></span>':''}</div>`;
+  }).join('');
+}
+
+/* ---------- 对话原语 ---------- */
+async function agentSay(html,opt={}){
+  const t=node(`<div class="msg agent"><div class="av"><div class="agent-orb"></div></div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>`);
+  chatEl.appendChild(t);scrollToEnd(t);
+  await wait(opt.delay??clamp(380+html.length*4,420,1150));
+  t.querySelector('.bubble').innerHTML=html;
+  scrollToEnd(t);
+  return t;
+}
+function userEcho(stepIdx,html){
+  const editable=stepIdx>=0&&stepIdx<STEP_META.length;
+  const n=node(`<div class="msg user"><div class="bubble">${html}${editable?`<br><span class="edit" data-s="${stepIdx}">✎ 修改这一步</span>`:''}</div></div>`);
+  if(editable)n.querySelector('.edit').addEventListener('click',()=>restartFrom(stepIdx));
+  chatEl.appendChild(n);scrollToEnd(n);
+}
+function mountWidget(inner){
+  const w=node(`<div class="widget"></div>`);
+  w.appendChild(inner);chatEl.appendChild(w);scrollToEnd(w);
+  return w;
+}
+
+/* ---------- 流程控制 ---------- */
+const stepAnchors=[];
+let currentStep=-1;
+function runStep(i){
+  currentStep=i;renderBar(i,false);
+  const marker=document.createElement('div');
+  marker.style.cssText='height:0;overflow:hidden';
+  chatEl.appendChild(marker);
+  stepAnchors[i]=marker;
+  STEPS[i].run();
+}
+function restartFrom(i){
+  $('#reportWrap').classList.remove('on');
+  const anchor=stepAnchors[i];
+  if(anchor&&anchor.parentNode===chatEl){
+    while(chatEl.lastChild&&chatEl.lastChild!==anchor)chatEl.removeChild(chatEl.lastChild);
+    chatEl.removeChild(anchor);
+  }
+  document.getElementById('wizard').scrollIntoView({behavior:'smooth'});
+  runStep(i);
+}
+
+/* ---------- 控件构造 ---------- */
+function chipsSingle({title,options,value,onPick}){
+  const c=node(`<div class="wcard"><div class="wt">${title}</div><div class="chips"></div></div>`);
+  const box=c.querySelector('.chips');
+  options.forEach(o=>{
+    const ch=node(`<div class="chip ${o.v===value?'on':''}" data-v="${o.v}">${o.icon?`<span class="ic">${o.icon}</span>`:''}<span>${o.label}</span>${o.badge?`<span class="bdg">${o.badge}</span>`:''}</div>`);
+    if(o.note)ch.title=o.note;
+    ch.addEventListener('click',()=>onPick(o.v,o));
+    box.appendChild(ch);
+  });
+  return c;
+}
+function chipsMulti({title,options,values,min,max,btn,onSubmit}){
+  const sel=new Set(values||[]);
+  const c=node(`<div class="wcard"><div class="wt">${title}</div><div class="chips"></div>
+    <div class="werr"></div>
+    <div class="wact"><button class="btn">${btn||'确认选择'} <span class="cnt"></span></button><span style="font-size:11.5px;color:var(--faint)">已选 <b class="cnt2">0</b> 项${max?` · 最多 ${max} 项`:''}</span></div></div>`);
+  const box=c.querySelector('.chips'),err=c.querySelector('.werr'),cnt2=c.querySelector('.cnt2');
+  const sync=()=>{cnt2.textContent=sel.size};
+  options.forEach(o=>{
+    const ch=node(`<div class="chip ${sel.has(o.v)?'on':''}" data-v="${o.v}">${o.icon?`<span class="ic">${o.icon}</span>`:''}<span>${o.label}</span>${o.badge?`<span class="bdg">${o.badge}</span>`:''}</div>`);
+    if(o.note)ch.title=o.note;
+    ch.addEventListener('click',()=>{
+      if(sel.has(o.v)){sel.delete(o.v);ch.classList.remove('on')}
+      else{
+        if(max&&sel.size>=max){err.textContent=`一次最多选择 ${max} 个场景，聚焦才有好回报～`;err.classList.add('on');return}
+        sel.add(o.v);ch.classList.add('on');err.classList.remove('on');
+      }
+      sync();
+    });
+    box.appendChild(ch);
+  });
+  sync();
+  c.querySelector('.btn').addEventListener('click',()=>{
+    if(sel.size<(min||1)){err.textContent=`请至少选择 ${min||1} 个应用场景`;err.classList.add('on');return}
+    onSubmit([...sel]);
+  });
+  return c;
+}
+/* 表单：fields {key,label,type:'text'|'num'|'range',unit,min,max,step,val,hint,fmt,optional} */
+function buildForm({title,sections,suggestNote,btn,onSubmit,validate}){
+  const c=node(`<div class="wcard"><div class="wt">${title}</div><div class="fwrap"></div>
+    ${suggestNote?`<div class="sgg"><span class="s-ic">✦</span><span>${suggestNote}</span></div>`:''}
+    <div class="werr"></div><div class="wact"><button class="btn">${btn||'确认'}</button></div></div>`);
+  const wrap=c.querySelector('.fwrap'),err=c.querySelector('.werr');
+  const inputs={};
+  sections.forEach(sec=>{
+    if(sec.sub)wrap.appendChild(node(`<div class="subsec">${sec.sub}</div>`));
+    const g=node(`<div class="fgrid"></div>`);
+    sec.fields.forEach(f=>{
+      const fd=node(`<div class="field ${f.full?'full':''}"><label>${f.label}${f.optional?' <span style="color:var(--faint);font-weight:400">(选填)</span>':''}</label></div>`);
+      if(f.type==='range'){
+        const fmt=f.fmt||(v=>v);
+        const r=node(`<div class="srow"><input type="range" min="${f.min}" max="${f.max}" step="${f.step||1}" value="${f.val}"><span class="sval">${fmt(f.val)}</span></div>`);
+        const inp=r.querySelector('input'),sv=r.querySelector('.sval');
+        const paint=()=>{const p=(inp.value-f.min)/(f.max-f.min)*100;inp.style.setProperty('--pct',p+'%');sv.textContent=fmt(+inp.value)};
+        inp.addEventListener('input',paint);paint();
+        fd.appendChild(r);inputs[f.key]=inp;
+      }else{
+        const w=node(`<div class="iwrap"><input type="${f.type==='num'?'number':'text'}" ${f.type==='num'?`min="0" step="${f.step||'any'}"`:''} value="${f.val??''}" placeholder="${f.ph||''}">${f.unit?`<span class="unit">${f.unit}</span>`:''}</div>`);
+        fd.appendChild(w);inputs[f.key]=w.querySelector('input');
+      }
+      if(f.hint)fd.appendChild(node(`<span class="hint">${f.hint}</span>`));
+      g.appendChild(fd);
+    });
+    wrap.appendChild(g);
+  });
+  c.querySelector('.btn').addEventListener('click',()=>{
+    const vals={},missing=[];
+    sections.forEach(sec=>sec.fields.forEach(f=>{
+      const el=inputs[f.key];
+      if(f.type==='text'){vals[f.key]=el.value.trim();return}
+      const v=parseFloat(el.value);
+      if(isNaN(v)||v<0){if(!f.optional)missing.push(f.label);vals[f.key]=0}
+      else vals[f.key]=v;
+    }));
+    if(missing.length){err.textContent='请填写：'+missing.join('、');err.classList.add('on');scrollToEnd(c);return}
+    const msg=validate?validate(vals):null;
+    if(msg){err.textContent=msg;err.classList.add('on');return}
+    err.classList.remove('on');
+    onSubmit(vals);
+  });
+  return c;
+}
+
+/* ============================================================
+   七步引导流程
+   ============================================================ */
+const STEPS=[
+
+/* —— STEP 1 行业定位 —— */
+{id:'industry',async run(){
+  await agentSay(`第一步，请告诉我贵公司所处的<b>行业</b>。我会据此调用对应的行业基准数据（效率提升、回报区间、推荐场景）来校准模型。`);
+  const w=mountWidget(chipsSingle({
+    title:'选择所属行业（16 大行业全覆盖）',
+    options:Object.entries(INDUSTRIES).map(([v,d])=>({v,label:d.label,icon:d.icon})),
+    value:S.industry,
+    onPick:async v=>{
+      S.industry=v;w.remove();
+      const d=INDUSTRIES[v];
+      userEcho(0,`${d.icon} 我们是<b>${d.label}</b>`);
+      await agentSay(`明白了。${d.insight}<span class="tip">📌 行业经验显示，${d.label}的 3 年期 AI 投资回报率多落在 <b>${d.roi3[0]}%–${d.roi3[1]}%</b> 区间（综合公开研究估计），稍后会用于对标分析。</span>`);
+      runStep(1);
+    }
+  }));
+}},
+
+/* —— STEP 2 企业画像 —— */
+{id:'profile',async run(){
+  await agentSay(`接下来给企业画个像：<b>规模与营收</b>决定了 AI 收益的「杠杆长度」。放心，所有数据只在你的浏览器里参与计算。`);
+  const w=mountWidget(buildForm({
+    title:'企业基本画像',
+    sections:[{fields:[
+      {key:'company',label:'企业名称',type:'text',ph:'用于报告封面，可匿名',val:S.company,optional:true,full:true},
+      {key:'employees',label:'员工总数',type:'num',unit:'人',val:S.employees,hint:'全职员工口径即可',step:1},
+      {key:'revenue',label:'年营业收入',type:'num',unit:'万元',val:S.revenue,hint:'上一财年或滚动 12 个月'}
+    ]}],
+    validate:v=>v.employees<1?'员工人数至少为 1':v.revenue<=0?'请填写年营业收入（万元）':null,
+    onSubmit:async v=>{
+      S.company=v.company;S.employees=Math.round(v.employees);S.revenue=v.revenue;
+      w.remove();
+      userEcho(1,`${S.company?`<b>${esc(S.company)}</b> · `:''}${S.employees.toLocaleString()} 人 · 年营收 ${fmtW(S.revenue)}`);
+      const seg=S.employees<100?['小而美的团队','决策链短、推行快，AI 工具的人均杠杆非常可观']:
+        S.employees<500?['成长型中型企业','正处于「用 AI 换增长」的最佳窗口期，投入弹性与回报弹性都较好']:
+        S.employees<2000?['中大型企业','规模效应开始显现——10% 的人效提升就是一支隐形团队']:
+        ['大型企业 / 集团','体量越大，单点场景的绝对回报越高，但更需要分阶段治理与推广策略'];
+      await agentSay(`收到。贵司属于<b>${seg[0]}</b>：${seg[1]}。人均年营收约 <b>${fmtW(S.revenue/S.employees)}</b>，这是后续测算人效收益的重要锚点。`);
+      runStep(2);
+    }
+  }));
+}},
+
+/* —— STEP 3 场景选择 —— */
+{id:'usecases',async run(){
+  const ind=INDUSTRIES[S.industry];
+  await agentSay(`下面挑选<b>AI 应用场景</b>。我已根据${ind.label}的行业实践为你标出了「推荐」场景，建议首期聚焦 <b>2–4 个</b>——场景越聚焦，回报越扎实。`);
+  const w=mountWidget(chipsMulti({
+    title:'选择拟投入的 AI 场景（可多选，最多 6 个）',
+    options:Object.entries(USECASES).map(([v,d])=>({v,label:d.label,icon:d.icon,note:d.note,badge:ind.rec.includes(v)?'推荐':''})),
+    values:S.useCases,min:1,max:6,btn:'就这些场景',
+    onSubmit:async list=>{
+      S.useCases=list;w.remove();
+      userEcho(2,list.map(k=>`${USECASES[k].icon} ${USECASES[k].label}`).join('<br>'));
+      const mix={labor:0,rev:0,cost:0,risk:0};
+      list.forEach(k=>{const m=USECASES[k].mix;for(const c in mix)mix[c]+=m[c]});
+      const main=Object.entries(mix).sort((a,b)=>b[1]-a[1])[0][0];
+      const mainTxt={labor:'人效提升（时间与人力释放）',rev:'收入增长（转化与客单拉动）',cost:'运营成本节降',risk:'风险止损与质量收益'}[main];
+      const easy=list.filter(k=>USECASES[k].diff==='低').length;
+      await agentSay(`不错的组合。这 ${list.length} 个场景的收益将主要来自<b>${mainTxt}</b>${easy?`，其中 ${easy} 个为低实施难度场景，适合作为首批试点快速验证价值`:'，整体实施复杂度偏高，建议预留充足的数据准备期'}。`);
+      runStep(3);
+    }
+  }));
+}},
+
+/* —— STEP 4 投入测算 —— */
+{id:'costs',async run(){
+  const sug=suggestCosts(S);
+  const cur=S.cost||sug;
+  await agentSay(`现在测算<b>投入端</b>。我已结合「${INDUSTRIES[S.industry].label} · ${S.employees.toLocaleString()} 人 · ${S.useCases.length} 个场景」生成了一套<b>智能建议值</b>（行业经验参数），你可以直接采用或按实际报价调整。`);
+  const w=mountWidget(buildForm({
+    title:'AI 项目投入预算（万元）',
+    suggestNote:`建议值由 ROIMind 根据行业、规模与场景组合估算，仅供参考；若已有供应商报价请以实际为准。`,
+    sections:[
+      {sub:'一次性投入（建设期）',fields:[
+        {key:'soft',label:'软件采购 / 平台建设',type:'num',unit:'万元',val:cur.soft,hint:'License、平台开发、模型定制'},
+        {key:'hard',label:'硬件与算力',type:'num',unit:'万元',val:cur.hard,hint:'服务器/GPU/边缘设备，云方案可填 0',optional:true},
+        {key:'data',label:'数据治理与系统集成',type:'num',unit:'万元',val:cur.data,hint:'数据清洗、打通、接口开发'},
+        {key:'consult',label:'咨询与实施服务',type:'num',unit:'万元',val:cur.consult,hint:'外部实施、流程改造',optional:true}
+      ]},
+      {sub:'持续投入（每年）',fields:[
+        {key:'subAnnual',label:'订阅 / 许可 / API 用量',type:'num',unit:'万元/年',val:cur.subAnnual,hint:'SaaS 订阅费 + 大模型调用费'},
+        {key:'opsAnnual',label:'运维与专职人力',type:'num',unit:'万元/年',val:cur.opsAnnual,hint:'AI 工程师、运营人员折算'},
+        {key:'trainAnnual',label:'培训与变革管理',type:'num',unit:'万元/年',val:cur.trainAnnual,hint:'全员培训、推广运营',optional:true}
+      ]}
+    ],
+    btn:'确认投入预算',
+    validate:v=>(v.soft+v.hard+v.data+v.consult+v.subAnnual+v.opsAnnual+v.trainAnnual)<=0?'总投入不能为 0，请至少填写一项':null,
+    onSubmit:async v=>{
+      S.cost={soft:v.soft,hard:v.hard,data:v.data,consult:v.consult,subAnnual:v.subAnnual,opsAnnual:v.opsAnnual,trainAnnual:v.trainAnnual};
+      w.remove();
+      const ot=v.soft+v.hard+v.data+v.consult,re=v.subAnnual+v.opsAnnual+v.trainAnnual;
+      userEcho(3,`一次性投入 <b>${fmtW(ot)}</b> · 持续投入 <b>${fmtW(re)}/年</b>`);
+      await agentSay(`记下了。按 3 年口径，总拥有成本（TCO）约 <b>${fmtW(ot+re*3)}</b>，其中持续投入占 <b>${fmtPct(re*3/(ot+re*3))}</b>——${re*3>ot?'持续成本为主的结构更灵活，但要警惕「订阅费陷阱」，后续我会给出优化建议':'一次性投入为主的结构前期压力较大，建议争取分期付款条款'}。`);
+      runStep(4);
+    }
+  }));
+}},
+
+/* —— STEP 5 收益建模 —— */
+{id:'benefits',async run(){
+  const sug=suggestBenefits(S);
+  const cur=S.benefit?{
+    affected:S.benefit.affected,laborCost:S.benefit.laborCost,eff:S.benefit.effGain*100,margin:S.benefit.grossMargin*100,
+    uplift:S.benefit.revUplift*100,opexBase:S.benefit.opexBase,cut:S.benefit.opexCut*100,risk:S.benefit.riskAnnual
+  }:{
+    affected:sug.affected,laborCost:sug.laborCost,eff:sug.effGain*100,margin:sug.grossMargin*100,
+    uplift:sug.revUplift*100,opexBase:sug.opexBase,cut:sug.opexCut*100,risk:sug.riskAnnual
+  };
+  await agentSay(`关键一步：<b>收益建模</b>。AI 的收益来自四个引擎——<b>人效提升、收入增长、成本节降、风险与质量</b>。我已按你的场景组合预填了保守的建议参数，拖动滑杆即可调整。`);
+  const w=mountWidget(buildForm({
+    title:'收益驱动参数',
+    suggestNote:'建议值偏保守口径（收益宁低勿高），后续报告中将做 ±20% 敏感性压力测试。',
+    sections:[
+      {sub:'① 人效提升',fields:[
+        {key:'affected',label:'受 AI 赋能的员工数',type:'num',unit:'人',val:cur.affected,hint:`约占总人数 ${Math.round(cur.affected/S.employees*100)}%（按场景覆盖度估算）`},
+        {key:'laborCost',label:'人均年人力成本',type:'num',unit:'万元',val:cur.laborCost,hint:'工资+社保+管理摊销的全成本'},
+        {key:'eff',label:'综合效率提升幅度',type:'range',min:2,max:50,step:1,val:Math.round(cur.eff),fmt:v=>v+'%',full:true}
+      ]},
+      {sub:'② 收入增长（无收入类场景可设为 0）',fields:[
+        {key:'uplift',label:'预期收入增长率',type:'range',min:0,max:15,step:.5,val:cur.uplift,fmt:v=>v+'%'},
+        {key:'margin',label:'毛利率（用于折算利润贡献）',type:'range',min:5,max:90,step:1,val:Math.round(cur.margin),fmt:v=>v+'%'}
+      ]},
+      {sub:'③ 成本节降 与 ④ 风险质量',fields:[
+        {key:'opexBase',label:'可优化运营成本基数',type:'num',unit:'万元/年',val:cur.opexBase,hint:'AI 可触达的成本池：物流、库存、能耗、外包等'},
+        {key:'cut',label:'预计节降幅度',type:'range',min:0,max:40,step:1,val:Math.round(cur.cut),fmt:v=>v+'%'},
+        {key:'risk',label:'风险止损与质量收益',type:'num',unit:'万元/年',val:cur.risk,hint:'欺诈损失减少、罚款避免、质量损失下降等',optional:true,full:true}
+      ]}
+    ],
+    btn:'确认收益参数',
+    onSubmit:async v=>{
+      S.benefit={affected:Math.round(v.affected),laborCost:v.laborCost,effGain:v.eff/100,revUplift:v.uplift/100,
+        grossMargin:v.margin/100,opexBase:v.opexBase,opexCut:v.cut/100,riskAnnual:v.risk};
+      w.remove();
+      const b=S.benefit;
+      const gross=b.affected*b.laborCost*b.effGain+S.revenue*b.revUplift*b.grossMargin+b.opexBase*b.opexCut+b.riskAnnual;
+      userEcho(4,`稳态年化毛收益（未折减）约 <b>${fmtW(gross)}</b>`);
+      const re=S.cost.subAnnual+S.cost.opsAnnual+S.cost.trainAnnual;
+      const ratio=re>0?gross/re:null;
+      await agentSay(`初步测算：理想状态下年化毛收益约 <b>${fmtW(gross)}</b>，是年度持续投入的 <b>${ratio?ratio.toFixed(1):'—'} 倍</b>。${ratio>=3?'这是一个相当健康的比值（经验阈值 ≥3 为佳）':ratio>=1.8?'比值尚可，落地执行的折扣空间还够':'比值偏紧，需要严格管控落地折扣——别担心，下一步我们会把执行风险量化进去'}。`);
+      runStep(5);
+    }
+  }));
+}},
+
+/* —— STEP 6 执行与风险 —— */
+{id:'exec',async run(){
+  await agentSay(`最后校准<b>执行参数</b>。再好的模型也要打「执行折扣」——我会根据贵司的准备度自动推算<b>落地成功率</b>，并设置收益爬坡与财务折现参数。`);
+  const e=S.exec;
+  const c=node(`<div class="wcard"><div class="wt">执行节奏 · 组织准备度 · 财务参数</div>
+    <div class="subsec">实施与测算周期</div>
+    <div class="fgrid">
+      <div class="field"><label>实施上线周期</label><div class="chips" data-g="impl"></div></div>
+      <div class="field"><label>测算周期（投资评估期）</label><div class="chips" data-g="hz"></div></div>
+    </div>
+    <div class="subsec">收益爬坡（实现度）</div>
+    <div class="fgrid">
+      <div class="field"><label>第 1 年收益实现度</label><div class="srow"><input type="range" data-k="r1" min="20" max="100" step="5" value="${Math.round(e.ramp1*100)}"><span class="sval"></span></div><span class="hint">含实施期与采用爬坡的综合折扣</span></div>
+      <div class="field"><label>第 2 年收益实现度</label><div class="srow"><input type="range" data-k="r2" min="40" max="100" step="5" value="${Math.round(e.ramp2*100)}"><span class="sval"></span></div><span class="hint">第 3 年起按 100% 计</span></div>
+    </div>
+    <div class="subsec">组织准备度自评（影响成功率）</div>
+    <div class="fgrid" data-rd></div>
+    <div class="subsec">风险与财务</div>
+    <div class="fgrid">
+      <div class="field"><label>落地成功率（收益折减系数）</label><div class="srow"><input type="range" data-k="sp" min="40" max="95" step="1" value="${Math.round(e.successProb*100)}"><span class="sval"></span></div><span class="hint">✦ 已按准备度自评智能推算，可手动微调</span></div>
+      <div class="field"><label>折现率（资金成本）</label><div class="srow"><input type="range" data-k="dc" min="4" max="15" step=".5" value="${e.discount*100}"><span class="sval"></span></div><span class="hint">一般取 WACC，默认 8%</span></div>
+    </div>
+    <div class="werr"></div>
+    <div class="wact"><button class="btn">完成参数校准</button></div></div>`);
+  // 周期 chips
+  const local={impl:e.implMonths,hz:e.horizon,dataReady:e.dataReady,aiExp:e.aiExp,execSupport:e.execSupport};
+  const mkChips=(sel,items,key)=>{
+    const box=c.querySelector(`[data-g="${sel}"]`);
+    items.forEach(([v,l])=>{
+      const ch=node(`<div class="chip ${local[key]===v?'on':''}"><span>${l}</span></div>`);
+      ch.addEventListener('click',()=>{local[key]=v;box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));ch.classList.add('on')});
+      box.appendChild(ch);
+    });
+  };
+  mkChips('impl',[[3,'3 个月'],[6,'6 个月'],[9,'9 个月'],[12,'12 个月']],'impl');
+  mkChips('hz',[[3,'3 年期'],[5,'5 年期']],'hz');
+  // 准备度三组
+  const rdBox=c.querySelector('[data-rd]');
+  const rdKeyMap={data:'dataReady',exp:'aiExp',support:'execSupport'};
+  Object.entries(READINESS).forEach(([gk,g])=>{
+    const fd=node(`<div class="field full"><label>${g.label}</label><div class="chips"></div></div>`);
+    const bx=fd.querySelector('.chips');
+    g.opts.forEach(([v,l])=>{
+      const ch=node(`<div class="chip ${local[rdKeyMap[gk]]===v?'on':''}"><span>${l}</span></div>`);
+      ch.addEventListener('click',()=>{
+        local[rdKeyMap[gk]]=v;
+        bx.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));ch.classList.add('on');
+        const p=suggestProb({dataReady:local.dataReady,aiExp:local.aiExp,execSupport:local.execSupport});
+        const sp=c.querySelector('[data-k="sp"]');sp.value=Math.round(p*100);sp.dispatchEvent(new Event('input'));
+      });
+      bx.appendChild(ch);
+    });
+    rdBox.appendChild(fd);
+  });
+  // 滑杆
+  c.querySelectorAll('input[type=range]').forEach(inp=>{
+    const sv=inp.parentElement.querySelector('.sval');
+    const paint=()=>{const p=(inp.value-inp.min)/(inp.max-inp.min)*100;inp.style.setProperty('--pct',p+'%');sv.textContent=inp.value+'%'};
+    inp.addEventListener('input',paint);paint();
+  });
+  c.querySelector('.btn').addEventListener('click',async()=>{
+    const gv=k=>parseFloat(c.querySelector(`[data-k="${k}"]`).value);
+    let r1=gv('r1')/100,r2=gv('r2')/100;
+    if(r2<r1)r2=r1;
+    S.exec={implMonths:local.impl,horizon:local.hz,ramp1:r1,ramp2:r2,discount:gv('dc')/100,
+      dataReady:local.dataReady,aiExp:local.aiExp,execSupport:local.execSupport,successProb:gv('sp')/100};
+    c.parentElement.remove();
+    userEcho(5,`${local.hz} 年期 · 实施 ${local.impl} 个月 · 爬坡 ${Math.round(r1*100)}%→${Math.round(r2*100)}%→100% · 成功率 ${Math.round(S.exec.successProb*100)}% · 折现率 ${fmtPct(S.exec.discount,1)}`);
+    const sp=S.exec.successProb;
+    await agentSay(`参数校准完成。综合准备度评估，我将按 <b>${fmtPct(sp)}</b> 的成功率对全部收益打折——${sp>=.85?'贵司的准备度相当扎实，这个折扣已偏保守':sp>=.7?'这是行业典型水平，配合试点验证策略足够稳健':'折扣较深说明组织准备度有提升空间，报告中我会给出针对性的改善建议'}。`);
+    runStep(6);
+  });
+  mountWidget(c);
+}},
+
+/* —— STEP 7 确认生成 —— */
+{id:'confirm',async run(){
+  await agentSay(`所有输入已就绪 ✦ 请确认测算摘要。点击「生成专业报告」后，我将运行 <b>NPV / IRR / 回收期 / 三情景 / 敏感性 / 行业对标</b> 六组分析，并排版为可下载的 PDF 报告。`);
+  const ot=S.cost.soft+S.cost.hard+S.cost.data+S.cost.consult;
+  const re=S.cost.subAnnual+S.cost.opsAnnual+S.cost.trainAnnual;
+  const rows=[
+    ['企业',`${S.company?esc(S.company)+' · ':''}${INDUSTRIES[S.industry].label} · ${S.employees.toLocaleString()} 人 · 营收 ${fmtW(S.revenue)}`],
+    ['AI 场景',S.useCases.map(k=>USECASES[k].label).join('、')],
+    ['投入',`一次性 ${fmtW(ot)} + 持续 ${fmtW(re)}/年`],
+    ['收益驱动',`${S.benefit.affected} 人提效 ${fmtPct(S.benefit.effGain)} · 收入 +${fmtPct(S.benefit.revUplift,1)} · 成本降 ${fmtPct(S.benefit.opexCut)}${S.benefit.riskAnnual?` · 风控 ${fmtW(S.benefit.riskAnnual)}/年`:''}`],
+    ['执行参数',`${S.exec.horizon} 年期 · 成功率 ${fmtPct(S.exec.successProb)} · 折现率 ${fmtPct(S.exec.discount,1)}`]
+  ];
+  const c=node(`<div class="wcard"><div class="wt">测算摘要确认</div>
+    <div class="sumcard">${rows.map(r=>`<div class="row"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>`).join('')}</div>
+    <div class="wact"><button class="btn big">✦ 生成专业 PDF 报告</button><span style="font-size:11.5px;color:var(--faint)">生成后仍可回到任意步骤修改重算</span></div></div>`);
+  c.querySelector('.btn').addEventListener('click',()=>{c.querySelector('.btn').disabled=true;generateReport()});
+  mountWidget(c);
+}}
+];
+
+/* ---------- 欢迎与启动 ---------- */
+async function boot(){
+  renderBar(0,false);
+  await agentSay(`你好，我是 <b>ROIMind</b> ✦ 企业 AI 投入回报测算智能体。<br>接下来我会像一位投资分析师一样，通过 <b>6 组问题</b>了解贵司情况，随后为你生成一份<b>含 7 类图表的专业 ROI 评估报告</b>（PDF 可下载）。<span class="tip">🔒 所有数据仅在本地浏览器中计算，不会上传到任何服务器。</span>`,{delay:600});
+  const c=node(`<div class="wcard" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <button class="btn big">🚀 开始测算</button>
+    <span style="font-size:12px;color:var(--faint)">覆盖 16 大行业 · 16 类 AI 场景 · 全程约 3–5 分钟</span></div>`);
+  const w=mountWidget(c);
+  c.querySelector('.btn').addEventListener('click',()=>{w.remove();userEcho(-9,'开始吧 →');runStep(0)});
+}
+document.addEventListener('DOMContentLoaded',boot);
+/* ============================================================
+   REPORT：12 页 A4 专业报告生成器 + 7 类图表 + PDF 导出
+   ============================================================ */
+let CHARTS=[];
+let REPORT_META=null;
+
+const PAL={ink:'#27304d',muted:'#6b7694',grid:'#eef1f9',
+  labor:'#5b5ce2',rev:'#06b6d4',cost:'#10b981',risk:'#f59e0b',
+  seq:['#5b5ce2','#7c6cf0','#8b5cf6','#a78bfa','#06b6d4','#22c0db','#5eead4']};
+
+function paybackTxt(p,H){return p==null?`${H} 年内未回收`:`${p.toFixed(1)} 年 · 约 ${Math.round(p*12)} 个月`}
+function irrTxt(v){return v==null?'—':fmtPct(v,1)}
+function pct0(v){return v==null?'—':fmtPct(v,0)}
+
+/* ---------- 报告骨架 ---------- */
+function pageShell(body,pno,total,meta){
+  return `<section class="pdf-page">
+    <div class="p-band"></div>
+    <div class="p-head"><span class="lg"><span class="sq">✦</span>ROIMind · 企业 AI 投入 ROI 测算报告</span><span>${meta.id}</span></div>
+    <div class="p-body">${body}</div>
+    <div class="p-foot"><span>${esc(meta.companyShort)} · ${meta.date} 生成 · 仅供内部决策参考</span><span>第 ${pno} 页 / 共 ${total} 页</span></div>
+  </section>`;
+}
+
+function buildReport(M){
+  const ind=INDUSTRIES[S.industry],b=M.base,e=S.exec,H=e.horizon;
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const meta={
+    id:`RM-${dateStr.replace(/-/g,'')}-${String(Math.floor(1000+Math.random()*9000))}`,
+    date:dateStr,
+    companyShort:S.company?S.company:(ind.label+'企业')
+  };
+  REPORT_META=meta;
+  const ucAttr=attributeUseCases(S,M);
+  const risks=buildRisks(S,M);
+  const recs=buildRecs(S,M);
+  // 3 年口径 ROI（用于行业对标，确保口径一致）
+  const S3=JSON.parse(JSON.stringify(S));S3.exec.horizon=3;
+  const roi3=computeCore(S3,null).roiSimple;
+
+  const pages=[];
+
+  /* —— P1 封面 —— */
+  pages.push({raw:true,html:`<section class="pdf-page coverpage">
+    <div class="cover-art"><div class="cv-blob cv-b1"></div><div class="cv-blob cv-b2"></div><div class="cv-blob cv-b3"></div></div>
+    <div class="cv-line"></div>
+    <div class="cv-seal"><span class="g">${M.rating.grade}</span><span class="t">综合投资评级</span></div>
+    <div class="cover-in">
+      <div class="cv-brand"><span class="sq">✦</span>ROIMind 智算引擎 <span style="color:#9aa3bd;font-weight:500;font-size:8pt">AI INVESTMENT INTELLIGENCE</span></div>
+      <span class="cv-kick">◆ AI INVESTMENT ANALYSIS REPORT · 智能体自动生成</span>
+      <h1 class="cv-title">企业 AI 投入<br><span class="gx">投资回报（ROI）</span>测算评估报告</h1>
+      <p class="cv-sub">基于 ${S.useCases.length} 个 AI 应用场景组合的 ${H} 年期投资回报建模 · 含现金流、情景、敏感性与行业对标六维分析</p>
+      <div class="cv-chips">
+        <span>${ind.icon} ${ind.label}</span><span>👥 ${S.employees.toLocaleString()} 人</span>
+        <span>💰 年营收 ${fmtW(S.revenue)}</span><span>📅 ${H} 年评估期</span><span>🧮 ${S.useCases.length} 个场景</span>
+      </div>
+      <div class="cv-meta">
+        <div class="mi"><div class="k">委托企业 CLIENT</div><div class="v">${esc(meta.companyShort)}</div></div>
+        <div class="mi"><div class="k">报告编号 REPORT NO.</div><div class="v">${meta.id}</div></div>
+        <div class="mi"><div class="k">生成日期 DATE</div><div class="v">${meta.date}</div></div>
+        <div class="mi"><div class="k">测算引擎 ENGINE</div><div class="v">ROIMind · 本地化财务建模 v2.0</div></div>
+      </div>
+    </div>
+  </section>`});
+
+  /* —— P2 目录 & 导读 —— */
+  const tocItems=[['01','执行摘要 Executive Summary',3],['02','测算输入与核心假设',4],['03','投入结构分析（TCO）',5],
+    ['04','收益结构分析（四引擎模型）',6],['05','现金流与投资回收分析',7],['06','情景模拟与敏感性分析',8],
+    ['07','场景组合明细与行业对标',9],['08','落地准备度与风险评估',10],['09','行动建议与实施路线图',11],
+    ['10','测算方法论、假设与免责声明',12]];
+  pages.push({html:`
+    <h2 class="sec"><span class="no">目</span>目录 · CONTENTS</h2>
+    <div class="toc">${tocItems.map(t=>`<div class="ti"><span class="n">${t[0]}</span><span class="t">${t[1]}</span><span class="dots"></span><span class="p">${String(t[2]).padStart(2,'0')}</span></div>`).join('')}</div>
+    <h3 class="ssc">报告导读</h3>
+    <p class="para">本报告由 <b>ROIMind 测算智能体</b>基于委托方在引导式问答中提供的经营数据与投入计划自动生成，采用企业投资评估的标准方法（贴现现金流框架），从<b>投入、收益、现金流、风险</b>四个维度对 AI 项目进行 ${H} 年期量化评估。全部计算在本地浏览器内完成，原始数据未离开委托方设备。</p>
+    <p class="para">阅读建议：决策者可重点阅读 <b>01 执行摘要</b>与 <b>09 行动建议</b>；财务团队建议复核 <b>02 输入假设</b>与 <b>10 方法论</b>，并结合内部口径调整参数后重新生成。</p>
+    <h3 class="ssc">关键术语速览</h3>
+    <div class="kgrid">
+      <div class="kcard"><div class="kl">NPV 净现值</div><div class="kv" style="font-size:10.5pt">未来现金流折现和</div><div class="ks">大于 0 表示项目创造价值，是首要判据</div></div>
+      <div class="kcard"><div class="kl">IRR 内部收益率</div><div class="kv" style="font-size:10.5pt">令 NPV=0 的折现率</div><div class="ks">高于资金成本（WACC）即值得投资</div></div>
+      <div class="kcard"><div class="kl">投资回收期</div><div class="kv" style="font-size:10.5pt">累计现金流转正时点</div><div class="ks">衡量资金占用风险的直观指标</div></div>
+      <div class="kcard"><div class="kl">BCR 收益成本比</div><div class="kv" style="font-size:10.5pt">折现收益 ÷ 折现成本</div><div class="ks">每 1 元投入换回的折现收益</div></div>
+    </div>
+    <div class="note">报告口径说明：金额单位为人民币万元；所有收益均已按 ${fmtPct(e.successProb)} 落地成功率与「${fmtPct(e.ramp1)} → ${fmtPct(e.ramp2)} → 100%」收益爬坡曲线折减，体现保守审慎原则。</div>`});
+
+  /* —— P3 执行摘要 —— */
+  const netSteady=b.steady-b.recurring;
+  const findings=[
+    `测算期（${H} 年）总投入 <b>${fmtW(b.totalCost)}</b>（一次性 ${fmtW(b.oneTime)} + 持续 ${fmtW(b.recurring)}/年），累计毛收益 <b>${fmtW(b.totalGross)}</b>，静态投资回报率 <b class="hl">${pct0(b.roiSimple)}</b>。`,
+    `按 ${fmtPct(e.discount,1)} 折现后，项目净现值（NPV）为 <b style="color:${b.npv>=0?'#0d9b6c':'#dc2640'}">${fmtW(b.npv)}</b>，收益成本比 BCR = <b>${b.bcr?b.bcr.toFixed(2):'—'}</b>，${b.npv>=0?'项目在财务上成立，具备价值创造能力':'当前参数下项目尚不能创造正的折现价值，需优化投入结构或场景组合'}。`,
+    b.payback!=null?`预计在<b class="hl">第 ${b.payback.toFixed(1)} 年</b>（约 ${Math.round(b.payback*12)} 个月）收回全部投入，${b.payback<=2?'回收速度优于多数同类项目':'回收节奏处于可接受区间，建议配合阶段决策门管理'}。`:`<b style="color:#dc2640">测算期内未能收回全部投入</b>，建议优先压缩一次性投入、聚焦高确定性场景后重新测算。`,
+    `敏感性分析显示，对结果影响最大的变量是<b>${M.sens[0]?M.sens[0].label.replace(/ ±.*$/,''):'—'}</b>，应作为落地过程中的首要管控对象。`,
+    `综合评级 <b style="color:${M.rating.color}">${M.rating.grade}（${M.rating.score} 分）</b>：${M.rating.desc}。`
+  ];
+  pages.push({html:`
+    <h2 class="sec"><span class="no">01</span>执行摘要 · Executive Summary</h2>
+    <p class="para">${esc(meta.companyShort)}拟围绕「${S.useCases.map(k=>USECASES[k].label).join('、')}」共 ${S.useCases.length} 个场景开展 AI 投入。ROIMind 按 ${H} 年评估期、${fmtPct(e.discount,1)} 折现率、${fmtPct(e.successProb)} 落地成功率的口径完成建模，核心结论如下。</p>
+    <div class="kgrid">
+      <div class="kcard ${b.roiSimple>=0?'good':'bad'}"><div class="kl">测算期静态 ROI</div><div class="kv">${pct0(b.roiSimple)}</div><div class="ks">折现口径 ROI：${pct0(b.roiDisc)}</div></div>
+      <div class="kcard ${b.npv>=0?'good':'bad'}"><div class="kl">净现值 NPV @${fmtPct(e.discount,1)}</div><div class="kv">${fmtWn(b.npv)}<small> 万元</small></div><div class="ks">BCR 收益成本比 ${b.bcr?b.bcr.toFixed(2):'—'}</div></div>
+      <div class="kcard"><div class="kl">投资回收期</div><div class="kv">${b.payback!=null?b.payback.toFixed(1)+'<small> 年</small>':'未回收'}</div><div class="ks">${b.payback!=null?'约 '+Math.round(b.payback*12)+' 个月转正':'测算期 '+H+' 年内'}</div></div>
+      <div class="kcard"><div class="kl">内部收益率 IRR</div><div class="kv">${b.irr!=null?(b.irr*100).toFixed(1)+'<small> %</small>':'—'}</div><div class="ks">资金成本基准 ${fmtPct(e.discount,1)}</div></div>
+    </div>
+    <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kcard"><div class="kl">稳态年化净收益（第 3 年起）</div><div class="kv" style="font-size:12.5pt">${fmtWn(netSteady)}<small> 万元/年</small></div><div class="ks">毛收益 ${fmtWn(b.steady)} − 持续投入 ${fmtWn(b.recurring)}</div></div>
+      <div class="kcard"><div class="kl">总拥有成本 TCO（${H} 年）</div><div class="kv" style="font-size:12.5pt">${fmtWn(b.totalCost)}<small> 万元</small></div><div class="ks">约占年营收 ${fmtPct(b.totalCost/S.revenue,1)}</div></div>
+      <div class="kcard"><div class="kl">综合投资评级</div><div class="kv" style="font-size:12.5pt;color:${M.rating.color}">${M.rating.grade}<small>（${M.rating.score}/100）</small></div><div class="ks">五因子加权评分</div></div>
+    </div>
+    <h3 class="ssc">核心发现</h3>
+    ${findings.map((f,i)=>`<div class="recitem"><span class="ri">${i+1}</span><div class="rc"><p style="font-size:9pt">${f}</p></div></div>`).join('')}
+    <div class="note">结论性质说明：以上结论完全由输入参数推导，参数变化将改变结论。建议结合 06 章敏感性分析理解结果的稳健区间。</div>`});
+
+  /* —— P4 输入与假设 —— */
+  const cT=S.cost,bT=S.benefit;
+  pages.push({html:`
+    <h2 class="sec"><span class="no">02</span>测算输入与核心假设</h2>
+    <p class="para">本章完整披露测算所依据的全部输入。所有参数均由委托方在智能体引导下确认，其中标注「建议值」的项目参考了 ROIMind 行业知识库的经验参数。</p>
+    <div class="cols2">
+      <div>
+        <h3 class="ssc">企业概况</h3>
+        <table class="rt"><tbody>
+          <tr><td>企业名称</td><td class="num">${esc(meta.companyShort)}</td></tr>
+          <tr><td>所属行业</td><td class="num">${ind.icon} ${ind.label}</td></tr>
+          <tr><td>员工总数</td><td class="num">${S.employees.toLocaleString()} 人</td></tr>
+          <tr><td>年营业收入</td><td class="num">${fmtW(S.revenue)}</td></tr>
+          <tr><td>人均年营收</td><td class="num">${fmtW(S.revenue/S.employees)}</td></tr>
+        </tbody></table>
+        <h3 class="ssc">投入计划（万元）</h3>
+        <table class="rt"><tbody>
+          <tr><td>软件采购 / 平台建设</td><td class="num">${fmtWn(cT.soft)}</td></tr>
+          <tr><td>硬件与算力</td><td class="num">${fmtWn(cT.hard)}</td></tr>
+          <tr><td>数据治理与集成</td><td class="num">${fmtWn(cT.data)}</td></tr>
+          <tr><td>咨询与实施</td><td class="num">${fmtWn(cT.consult)}</td></tr>
+          <tr class="tot"><td>一次性投入小计</td><td class="num">${fmtWn(b.oneTime)}</td></tr>
+          <tr><td>订阅 / 许可 / API（年）</td><td class="num">${fmtWn(cT.subAnnual)}</td></tr>
+          <tr><td>运维与专职人力（年）</td><td class="num">${fmtWn(cT.opsAnnual)}</td></tr>
+          <tr><td>培训与变革管理（年）</td><td class="num">${fmtWn(cT.trainAnnual)}</td></tr>
+          <tr class="tot"><td>年度持续投入小计</td><td class="num">${fmtWn(b.recurring)}</td></tr>
+        </tbody></table>
+      </div>
+      <div>
+        <h3 class="ssc">收益驱动参数</h3>
+        <table class="rt"><tbody>
+          <tr><td>受 AI 赋能员工数</td><td class="num">${bT.affected.toLocaleString()} 人（${fmtPct(bT.affected/S.employees)}）</td></tr>
+          <tr><td>人均年人力成本</td><td class="num">${fmtW(bT.laborCost)}</td></tr>
+          <tr><td>综合效率提升</td><td class="num">${fmtPct(bT.effGain)}</td></tr>
+          <tr><td>预期收入增长率</td><td class="num">${fmtPct(bT.revUplift,1)}</td></tr>
+          <tr><td>毛利率（利润折算）</td><td class="num">${fmtPct(bT.grossMargin)}</td></tr>
+          <tr><td>可优化成本基数</td><td class="num">${fmtW(bT.opexBase)}/年</td></tr>
+          <tr><td>成本节降幅度</td><td class="num">${fmtPct(bT.opexCut)}</td></tr>
+          <tr><td>风险与质量收益</td><td class="num">${fmtW(bT.riskAnnual)}/年</td></tr>
+        </tbody></table>
+        <h3 class="ssc">执行与财务参数</h3>
+        <table class="rt"><tbody>
+          <tr><td>实施上线周期</td><td class="num">${e.implMonths} 个月</td></tr>
+          <tr><td>测算周期</td><td class="num">${H} 年</td></tr>
+          <tr><td>收益爬坡曲线</td><td class="num">${fmtPct(e.ramp1)} → ${fmtPct(e.ramp2)} → 100%</td></tr>
+          <tr><td>落地成功率</td><td class="num">${fmtPct(e.successProb)}</td></tr>
+          <tr><td>折现率（WACC）</td><td class="num">${fmtPct(e.discount,1)}</td></tr>
+          <tr><td>数据基础 / AI 经验 / 高管支持</td><td class="num">${{low:'较薄弱',mid:'一般',high:'良好'}[e.dataReady]} / ${{none:'尚未尝试',pilot:'有试点',scaled:'已规模化'}[e.aiExp]} / ${{low:'观望',mid:'谨慎支持',high:'战略投入'}[e.execSupport]}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="note">建模简化假设：① 收益与持续投入按年度口径计；② 未计入通货膨胀、税务影响与残值；③ 收入增长按毛利率折算为利润贡献；④ 行业基准为公开研究综合估计，仅用于对标参考。</div>`});
+
+  /* —— P5 投入结构 —— */
+  const tcoRows=[['软件采购 / 平台建设',cT.soft,'一次性'],['硬件与算力',cT.hard,'一次性'],['数据治理与集成',cT.data,'一次性'],['咨询与实施',cT.consult,'一次性'],
+    [`订阅 / 许可 / API × ${H} 年`,cT.subAnnual*H,'持续'],[`运维与专职人力 × ${H} 年`,cT.opsAnnual*H,'持续'],[`培训与变革 × ${H} 年`,cT.trainAnnual*H,'持续']];
+  pages.push({html:`
+    <h2 class="sec"><span class="no">03</span>投入结构分析（TCO）</h2>
+    <p class="para">${H} 年评估期内总拥有成本（TCO）为 <b class="hl">${fmtW(b.totalCost)}</b>，其中一次性投入 ${fmtW(b.oneTime)}（占 ${fmtPct(b.oneTime/b.totalCost)}）、持续投入累计 ${fmtW(b.recurring*H)}（占 ${fmtPct(b.recurring*H/b.totalCost)}）。人均 AI 投入约 <b>${fmtW(b.totalCost/S.employees)}</b>，占年营收比例 ${fmtPct(b.totalCost/S.revenue,1)}。</p>
+    <div class="cols2">
+      <div class="chartbox"><div class="ct">TCO 构成（${H} 年口径）</div><div class="cwrap" style="height:215px"><canvas id="chInvest"></canvas></div></div>
+      <div>
+        <table class="rt"><thead><tr><th>投入项</th><th class="num">金额</th><th class="num">占比</th></tr></thead><tbody>
+          ${tcoRows.map(r=>`<tr><td>${r[0]} <span class="tag ${r[2]==='一次性'?'b':'c'}">${r[2]}</span></td><td class="num">${fmtWn(r[1])}</td><td class="num">${fmtPct(r[1]/b.totalCost,1)}</td></tr>`).join('')}
+          <tr class="tot"><td>合计</td><td class="num">${fmtWn(b.totalCost)}</td><td class="num">100%</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <h3 class="ssc">结构解读</h3>
+    <p class="para">${b.recurring*H>b.oneTime
+      ?`本项目呈<b>「订阅式」成本结构</b>（持续投入占主导）。优点是前期资金压力小、可随价值验证灵活调整规模；风险在于成本随用量线性增长。建议：① 对高频低复杂度任务采用轻量模型分层路由；② 与供应商签订用量阶梯折扣；③ 每季度复核「单位任务推理成本」指标。`
+      :`本项目呈<b>「重建设」成本结构</b>（一次性投入占主导）。优点是边际成本低、长期摊薄效应好；风险在于前期沉没成本大、技术路线锁定。建议：① 争取里程碑式分期付款；② 平台设计保留多模型适配层；③ 硬件投入优先考虑可弹性扩容的方案。`}</p>
+    <p class="para">对照行业经验，${ind.label}企业的 AI 投入强度（TCO/营收）多在 0.5%–3% 区间，本项目为 <b>${fmtPct(b.totalCost/S.revenue/H,2)}/年</b>，${b.totalCost/S.revenue/H<.005?'投入强度偏低，若试点验证顺利可适当加大投入以放大回报':b.totalCost/S.revenue/H<=.03?'处于合理区间':'投入强度偏高，建议分阶段释放预算、用里程碑控制风险'}。</p>`});
+
+  /* —— P6 收益结构 —— */
+  const sp=M.base.steadyParts;
+  const benRows=[['人效提升收益',sp.labor,`${bT.affected} 人 × ${fmtW(bT.laborCost)} × ${fmtPct(bT.effGain)} × ${fmtPct(e.successProb)}`,'labor'],
+    ['收入增长贡献',sp.rev,`营收 ${fmtWn(S.revenue)} × ${fmtPct(bT.revUplift,1)} × 毛利率 ${fmtPct(bT.grossMargin)} × ${fmtPct(e.successProb)}`,'rev'],
+    ['运营成本节降',sp.cost,`成本基数 ${fmtWn(bT.opexBase)} × ${fmtPct(bT.opexCut)} × ${fmtPct(e.successProb)}`,'cost'],
+    ['风险与质量收益',sp.risk,`年化估计 ${fmtWn(bT.riskAnnual)} × ${fmtPct(e.successProb)}`,'risk']].filter(r=>r[1]>0.01);
+  pages.push({html:`
+    <h2 class="sec"><span class="no">04</span>收益结构分析（四引擎模型）</h2>
+    <p class="para">ROIMind 将 AI 收益解构为<b>人效提升、收入增长、成本节降、风险与质量</b>四台引擎。折减后的稳态年化毛收益为 <b class="hl">${fmtW(b.steady)}</b>，扣除年度持续投入后净贡献 <b>${fmtW(netSteady)}/年</b>。${H} 年累计毛收益 ${fmtW(b.totalGross)}。</p>
+    <div class="chartbox"><div class="ct">逐年收益构成与爬坡（万元）</div><div class="cwrap" style="height:225px"><canvas id="chBenefit"></canvas></div></div>
+    <table class="rt"><thead><tr><th>收益引擎</th><th class="num">稳态年化（万元）</th><th class="num">占比</th><th>测算口径</th></tr></thead><tbody>
+      ${benRows.map(r=>`<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:${PAL[r[3]]};margin-right:4px"></span>${r[0]}</td><td class="num">${fmtWn(r[1])}</td><td class="num">${fmtPct(r[1]/b.steady,1)}</td><td style="font-size:7.8pt;color:#6b7694">${r[2]}</td></tr>`).join('')}
+      <tr class="tot"><td>稳态年化毛收益</td><td class="num">${fmtWn(b.steady)}</td><td class="num">100%</td><td></td></tr>
+    </tbody></table>
+    <h3 class="ssc">收益质量评估</h3>
+    <p class="para">${(()=>{const dom=benRows.slice().sort((x,y)=>y[1]-x[1])[0];
+      const m={'人效提升收益':'人效类收益的确定性最高、可验证性强，但需注意「释放的时间」要通过组织手段转化为「更高的产出」，否则只是纸面收益。建议设置人均产出与单位任务时长的前后对照指标。',
+      '收入增长贡献':'收入类收益弹性最大但归因最难，受市场环境影响显著。建议通过 A/B 对照实验确认增量后再放大投入，避免把自然增长记入 AI 贡献。',
+      '运营成本节降':'成本类收益直接反映在损益表中、最易被财务确认，是 CFO 友好型收益。建议按月对照成本基数变化，并锁定可持续的流程改造而非一次性压缩。',
+      '风险与质量收益':'风险类收益本质是「避免的损失」，需要用事件率 × 单次损失的期望值口径与风控部门共同确认基线。'};
+      return `当前收益结构以<b>${dom[0]}</b>为主（占 ${fmtPct(dom[1]/b.steady)}）。${m[dom[0]]}`})()}</p>
+    <div class="note">所有收益已按 ${fmtPct(e.successProb)} 成功率折减，并在第 1、2 年分别按 ${fmtPct(e.ramp1)}、${fmtPct(e.ramp2)} 爬坡实现——这与多数企业「先试点后放量」的真实节奏一致。</div>`});
+
+  /* —— P7 现金流 —— */
+  const cfRows=[`<tr><td>第 0 年（建设期）</td><td class="num">—</td><td class="num">${fmtWn(-b.oneTime)}</td><td class="num">${fmtWn(-b.oneTime)}</td><td class="num">${fmtWn(-b.oneTime)}</td><td class="num">${fmtWn(-b.oneTime)}</td></tr>`]
+    .concat(b.years.map(r=>`<tr><td>第 ${r.y} 年 <span class="tag b">实现度 ${fmtPct(r.adoption)}</span></td><td class="num">${fmtWn(r.gross)}</td><td class="num">${fmtWn(-r.recurring)}</td><td class="num" style="color:${r.net>=0?'#0d9b6c':'#dc2640'}">${fmtWn(r.net)}</td><td class="num" style="color:${r.cum>=0?'#0d9b6c':'#dc2640'}">${fmtWn(r.cum)}</td><td class="num">${fmtWn(r.cumDisc)}</td></tr>`)).join('');
+  pages.push({html:`
+    <h2 class="sec"><span class="no">05</span>现金流与投资回收分析</h2>
+    <p class="para">下图展示项目全周期现金流轨迹：柱状为年度净现金流，折线为累计净现金流——折线穿越零轴的位置即<b>投资回收点</b>。本项目${b.payback!=null?`预计在<b class="hl">第 ${b.payback.toFixed(1)} 年（约 ${Math.round(b.payback*12)} 个月）</b>收回全部投入`:`在 ${H} 年测算期内<b style="color:#dc2640">未能收回全部投入</b>`}。</p>
+    <div class="chartbox"><div class="ct">年度净现金流 与 累计净现金流（万元）</div><div class="cwrap" style="height:235px"><canvas id="chCash"></canvas></div></div>
+    <table class="rt"><thead><tr><th>期间</th><th class="num">毛收益</th><th class="num">投入</th><th class="num">净现金流</th><th class="num">累计净现金流</th><th class="num">累计 NPV</th></tr></thead><tbody>${cfRows}</tbody></table>
+    <h3 class="ssc">财务判读</h3>
+    <p class="para">① <b>NPV ${b.npv>=0?'> 0':'< 0'}</b>：按 ${fmtPct(e.discount,1)} 资金成本折现后净现值为 ${fmtW(b.npv)}，${b.npv>=0?'项目跨过价值创造门槛':'项目未跨过价值创造门槛，需要重构参数'}；② <b>IRR ${b.irr!=null?'= '+irrTxt(b.irr):'无法求解'}</b>${b.irr!=null?(b.irr>e.discount?'，显著高于资金成本，留有安全边际':'，低于或接近资金成本，安全边际薄'):''}；③ 第 1 年净现金流为 ${fmtW(b.years[0].net)}${b.years[0].net<0?'，属于正常的「投入期负现金流」，应在预算中预留并向管理层提前沟通预期':'，首年即实现正贡献，非常难得'}。</p>`});
+
+  /* —— P8 情景与敏感性 —— */
+  const sc3=['pess','base','opt'].map(k=>M.scenarios[k]);
+  pages.push({html:`
+    <h2 class="sec"><span class="no">06</span>情景模拟与敏感性分析</h2>
+    <p class="para">单点测算容易产生「精确的错觉」。本章通过<b>三情景模拟</b>与<b>单变量敏感性压力测试</b>，给出结论的稳健区间：即使在谨慎情景下，项目 NPV 仍为 <b style="color:${M.scenarios.pess.npv>=0?'#0d9b6c':'#dc2640'}">${fmtW(M.scenarios.pess.npv)}</b>。</p>
+    <div class="cols2">
+      <div class="chartbox"><div class="ct">三情景 NPV 对比（万元）</div><div class="cwrap" style="height:190px"><canvas id="chScen"></canvas></div></div>
+      <div>
+        <table class="rt"><thead><tr><th>情景</th><th class="num">静态 ROI</th><th class="num">NPV</th><th class="num">回收期</th></tr></thead><tbody>
+        ${sc3.map(s=>`<tr><td><b>${s.name}</b><br><span style="font-size:7.4pt;color:#9aa3bd">${s.desc}</span></td><td class="num">${pct0(s.roiSimple)}</td><td class="num" style="color:${s.npv>=0?'#0d9b6c':'#dc2640'}">${fmtWn(s.npv)}</td><td class="num">${s.payback!=null?s.payback.toFixed(1)+' 年':'未回收'}</td></tr>`).join('')}
+        </tbody></table>
+        <div class="note" style="margin-top:3mm">${M.scenarios.pess.npv>=0?'三情景 NPV 全部为正，结论对参数扰动具有较强稳健性，投资决策的下行风险有限。':M.scenarios.base.npv>=0?'基准与进取情景为正、谨慎情景转负，结论存在条件性——执行质量将直接决定项目成败，建议强化阶段决策门。':'多数情景下 NPV 为负，当前方案下行风险显著，建议先以最小可行投入验证假设。'}</div>
+      </div>
+    </div>
+    <div class="chartbox"><div class="ct">敏感性龙卷风图：各变量 ±20% 对 NPV 的影响（万元）</div><div class="cwrap" style="height:215px"><canvas id="chTorn"></canvas></div></div>
+    <p class="para">解读：横条越长代表该变量对结果影响越大。<b>${M.sens[0]?M.sens[0].label.replace(/ ±.*$/,''):'—'}</b>位列第一，意味着落地管理的重心应放在保障该变量兑现上；排序靠后的变量（如折现率）即使估计有偏，对结论影响也有限。</p>`});
+
+  /* —— P9 场景明细与对标 —— */
+  pages.push({html:`
+    <h2 class="sec"><span class="no">07</span>场景组合明细与行业对标</h2>
+    <h3 class="ssc">场景收益归因（稳态年化）</h3>
+    <table class="rt"><thead><tr><th>AI 应用场景</th><th>主要收益类型</th><th class="num">年化贡献（万元）</th><th class="num">占比</th><th>难度</th><th>见效周期</th></tr></thead><tbody>
+      ${ucAttr.map(u=>`<tr><td>${u.icon} <b>${u.label}</b><br><span style="font-size:7.4pt;color:#9aa3bd">${u.note}</span></td><td><span class="tag b">${u.main}</span></td><td class="num">${fmtWn(u.annual)}</td><td class="num">${fmtPct(u.annual/Math.max(1e-9,b.steady),1)}</td><td><span class="tag ${u.diff==='低'?'g':u.diff==='中'?'y':'r'}">${u.diff}</span></td><td style="font-size:8pt">${u.ttv}</td></tr>`).join('')}
+      <tr class="tot"><td colspan="2">合计</td><td class="num">${fmtWn(b.steady)}</td><td class="num">100%</td><td colspan="2"></td></tr>
+    </tbody></table>
+    <p class="para">建议按「贡献度 × 难度」排序推进：优先落地<b>高贡献、低难度</b>的「${ucAttr.filter(u=>u.diff!=='高').slice(0,2).map(u=>u.label).join('」「')}」等场景，用早期胜利为组织建立信心，再挑战高难度场景。</p>
+    <h3 class="ssc">行业对标（3 年期静态 ROI 口径）</h3>
+    <div class="cols2">
+      <div class="chartbox"><div class="ct">本项目 vs ${ind.label}经验区间</div><div class="cwrap" style="height:185px"><canvas id="chBench"></canvas></div></div>
+      <div><p class="para" style="margin-top:2mm">${ind.label}企业 AI 投入的 3 年期 ROI 经验区间约为 <b>${ind.roi3[0]}%–${ind.roi3[1]}%</b>（综合公开研究估计）。本项目同口径测算值为 <b class="hl">${pct0(roi3)}</b>，${roi3*100<ind.roi3[0]?'低于行业区间下沿——通常意味着投入偏重或收益假设保守，建议复核场景组合与成本结构，也可能是审慎估计的体现':roi3*100<=ind.roi3[1]?'落在行业经验区间之内，测算结果与行业实践相互印证，可信度较好':'高于行业区间上沿——若参数可靠则属于优质项目，但也建议警惕收益假设过于乐观，可用谨慎情景做决策底线'}。</p>
+      <div class="note">对标口径说明：行业区间为多来源公开研究的综合估计，企业间差异大，仅供方向性参考，不构成业绩承诺。</div></div>
+    </div>`});
+
+  /* —— P10 准备度与风险 —— */
+  pages.push({html:`
+    <h2 class="sec"><span class="no">08</span>落地准备度与风险评估</h2>
+    <p class="para">AI 项目的成败「三分靠技术、七分靠落地」。基于准备度自评与模型参数，ROIMind 从五个维度评估了本项目的落地基础（蓝色实线），并以 70 分参考线（青色虚线）作为健康基准。</p>
+    <div class="cols2">
+      <div class="chartbox"><div class="ct">五维落地准备度画像</div><div class="cwrap" style="height:230px"><canvas id="chRadar"></canvas></div></div>
+      <div>
+        <table class="rt"><thead><tr><th>维度</th><th class="num">得分</th><th>评估</th></tr></thead><tbody>
+          ${M.radar.dims.map((d,i)=>{const v=M.radar.vals[i];return`<tr><td>${d}</td><td class="num">${v}</td><td><span class="tag ${v>=70?'g':v>=50?'y':'r'}">${v>=70?'健康':v>=50?'待加强':'短板'}</span></td></tr>`}).join('')}
+        </tbody></table>
+        <div class="note">短板维度并不否定项目价值，而是指明了「在哪里加固」。第 09 章的行动建议已针对短板维度生成对应措施。</div>
+      </div>
+    </div>
+    <h3 class="ssc">关键风险清单</h3>
+    <div class="risklist">
+      ${risks.map(r=>`<div class="riskitem"><span class="rl">${r.badge}</span><div class="rb"><b>${r.t}</b>${r.d}</div></div>`).join('')}
+    </div>`});
+
+  /* —— P11 建议与路线图 —— */
+  const p1End=e.implMonths,p2End=Math.min(p1End+6,H*12),pilot=ucAttr.filter(u=>u.diff!=='高').slice(0,2);
+  pages.push({html:`
+    <h2 class="sec"><span class="no">09</span>行动建议与实施路线图</h2>
+    <h3 class="ssc">六项关键行动建议</h3>
+    ${recs.map((r,i)=>`<div class="recitem"><span class="ri">${i+1}</span><div class="rc"><b>${r.t}</b><p>${r.d}</p></div></div>`).join('')}
+    <h3 class="ssc">三阶段实施路线图（${H} 年期）</h3>
+    <div class="roadmap">
+      <div class="phase p1"><div class="ph">PHASE 1 · 第 0–${p1End} 个月</div><div class="pt">试点验证</div><ul>
+        <li>聚焦「${(pilot[0]||ucAttr[0]).label}」${pilot[1]?`与「${pilot[1].label}」`:''}</li>
+        <li>建立基线指标与 ROI 看板</li><li>完成数据供给与安全合规评估</li><li>培养首批种子用户与 AI Champion</li></ul></div>
+      <div class="phase p2"><div class="ph">PHASE 2 · 第 ${p1End}–${p2End} 个月</div><div class="pt">扩展放量</div><ul>
+        <li>试点达标后向全量用户推广</li><li>启动剩余场景的分批上线</li><li>优化模型路由与单位推理成本</li><li>Go/No-Go 决策门：对照本报告基准复盘</li></ul></div>
+      <div class="phase p3"><div class="ph">PHASE 3 · 第 ${p2End} 个月起</div><div class="pt">规模化与治理</div><ul>
+        <li>沉淀企业级 AI 平台与提示词资产</li><li>建立模型评估、安全与合规治理机制</li><li>探索第二曲线场景，滚动更新 ROI 测算</li><li>将 AI 指标纳入年度经营计划</li></ul></div>
+    </div>
+    <div class="note">执行纪律提示：路线图的关键不是时间表本身，而是每个阶段出口处的<b>量化验收标准</b>——建议以本报告的年度现金流预测作为验收基准，偏差超过 ±20% 即触发参数复盘与策略调整。</div>`});
+
+  /* —— P12 方法论 —— */
+  pages.push({html:`
+    <h2 class="sec"><span class="no">10</span>测算方法论、假设与免责声明</h2>
+    <h3 class="ssc">核心公式</h3>
+    <div class="formula"><b>稳态年化毛收益</b> = ( 人效收益 + 收入增长 × 毛利率 + 成本节降 + 风险收益 ) × 落地成功率</div>
+    <div class="formula"><b>第 t 年毛收益</b> = 稳态年化毛收益 × 实现度<sub>t</sub>（Y1 = ${fmtPct(e.ramp1)}，Y2 = ${fmtPct(e.ramp2)}，Y3+ = 100%）</div>
+    <div class="formula"><b>年度净现金流</b> = 当年毛收益 − 年度持续投入；第 0 年 = − 一次性投入</div>
+    <div class="formula"><b>NPV</b> = Σ CF<sub>t</sub> ÷ (1+r)<sup>t</sup>，r = ${fmtPct(e.discount,1)}　｜　<b>IRR</b>：令 NPV = 0 的折现率（二分法数值求解）</div>
+    <div class="formula"><b>静态 ROI</b> = ( 累计毛收益 − 总投入 ) ÷ 总投入　｜　<b>折现 ROI</b> = 折现收益 ÷ 折现成本 − 1　｜　<b>BCR</b> = 折现收益 ÷ 折现成本</div>
+    <div class="formula"><b>投资回收期</b> = 累计净现金流由负转正的时点（年内线性插值）</div>
+    <h3 class="ssc">关键假设清单</h3>
+    <table class="rt"><tbody>
+      <tr><td>① 货币口径</td><td>人民币万元，未考虑通货膨胀、汇率、税务影响与设备残值</td></tr>
+      <tr><td>② 收益折减</td><td>全部收益按 ${fmtPct(e.successProb)} 成功率与收益爬坡曲线双重折减，体现审慎原则</td></tr>
+      <tr><td>③ 时间简化</td><td>现金流按年度口径，持续投入与收益视为年内均匀发生</td></tr>
+      <tr><td>④ 行业参数</td><td>行业基准与建议值来自 ROIMind 知识库（公开研究综合估计），已由用户确认或修改</td></tr>
+      <tr><td>⑤ 范围边界</td><td>未量化品牌、员工体验、数据资产沉淀等长期战略价值，实际综合回报可能更高</td></tr>
+    </tbody></table>
+    <h3 class="ssc">免责声明</h3>
+    <p class="para" style="font-size:8.4pt;color:#6b7694">本报告由 ROIMind 测算智能体根据用户提供的输入参数自动生成，全部计算在用户本地浏览器中完成。报告内容仅为基于既定假设的财务模拟，不构成投资建议、业绩承诺或审计意见。实际投资回报受市场环境、技术演进、组织执行等多重因素影响，可能与测算结果存在重大差异。重大投资决策请结合尽职调查与专业机构意见综合判断。</p>
+    <div style="margin-top:8mm;display:flex;justify-content:space-between;align-items:flex-end;border-top:1.5px solid #e4e8f6;padding-top:5mm">
+      <div>
+        <div style="font-size:8pt;color:#9aa3bd">报告生成</div>
+        <div style="font-weight:800;font-size:10pt;color:#1b2440">ROIMind 智算引擎 v2.0 · ✦ AI Generated</div>
+        <div style="font-size:8pt;color:#9aa3bd">${meta.date} · 报告编号 ${meta.id}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:8pt;color:#9aa3bd">数据隐私</div>
+        <div style="font-size:8.6pt;color:#3b4668;font-weight:700">🔒 本地计算 · 数据未离开浏览器</div>
+      </div>
+    </div>`});
+
+  /* 渲染 */
+  const total=pages.length;
+  $('#report').innerHTML=pages.map((p,i)=>p.raw?p.html:pageShell(p.html,i+1,total,meta)).join('');
+}
+
+/* ---------- 图表 ---------- */
+function mkChart(id,cfg){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(!window.Chart){el.parentElement.innerHTML='<div style="padding:20px;text-align:center;color:#9aa3bd;font-size:9pt">⚠ 图表组件未加载（离线环境）。数据请参见同页表格。</div>';return}
+  CHARTS.push(new Chart(el,cfg));
+}
+function baseOpts(extra){
+  return Object.assign({responsive:true,maintainAspectRatio:false,animation:false,devicePixelRatio:2,
+    plugins:{legend:{labels:{boxWidth:10,boxHeight:10,font:{size:9.5,family:"'Inter','Noto Sans SC',sans-serif"},color:'#3b4668',padding:10}},
+      tooltip:{enabled:true}}},extra||{});
+}
+const axMoney={ticks:{font:{size:8.5},color:'#6b7694',callback:v=>fmtWn(v)},grid:{color:'#eef1f9'}};
+const axCat={ticks:{font:{size:9},color:'#3b4668'},grid:{display:false}};
+
+function createCharts(M){
+  CHARTS.forEach(c=>{try{c.destroy()}catch(_){/* noop */}});CHARTS=[];
+  const b=M.base,e=S.exec,H=e.horizon,cT=S.cost;
+  /* 1 投入结构 doughnut */
+  mkChart('chInvest',{type:'doughnut',
+    data:{labels:['软件/平台','硬件算力','数据治理','咨询实施',`订阅API×${H}年`,`运维人力×${H}年`,`培训变革×${H}年`],
+      datasets:[{data:[cT.soft,cT.hard,cT.data,cT.consult,cT.subAnnual*H,cT.opsAnnual*H,cT.trainAnnual*H],
+        backgroundColor:PAL.seq,borderColor:'#ffffff',borderWidth:2}]},
+    options:baseOpts({cutout:'56%',plugins:{legend:{position:'right',labels:{boxWidth:9,boxHeight:9,font:{size:8.6},color:'#3b4668',padding:7}}}})});
+  /* 2 收益堆叠 */
+  const cats=[['labor','人效提升',PAL.labor],['rev','收入增长',PAL.rev],['cost','成本节降',PAL.cost],['risk','风险质量',PAL.risk]]
+    .filter(c=>M.base.steadyParts[c[0]]>0.01);
+  mkChart('chBenefit',{type:'bar',
+    data:{labels:b.years.map(r=>`第 ${r.y} 年`),
+      datasets:cats.map(c=>({label:c[1],data:b.years.map(r=>Math.round(r[c[0]])),backgroundColor:c[2],stack:'s',borderRadius:4,maxBarThickness:64}))},
+    options:baseOpts({scales:{x:Object.assign({stacked:true},axCat),y:Object.assign({stacked:true},axMoney)}})});
+  /* 3 现金流 combo */
+  const cfLabels=['第 0 年',...b.years.map(r=>`第 ${r.y} 年`)];
+  const netArr=[-b.oneTime,...b.years.map(r=>Math.round(r.net))];
+  const cumArr=[-b.oneTime,...b.years.map(r=>Math.round(r.cum))];
+  const cumDArr=[-b.oneTime,...b.years.map(r=>Math.round(r.cumDisc))];
+  mkChart('chCash',{type:'bar',
+    data:{labels:cfLabels,datasets:[
+      {type:'bar',label:'年度净现金流',data:netArr,backgroundColor:netArr.map(v=>v>=0?'#5b5ce2':'#f0698a'),borderRadius:5,maxBarThickness:54},
+      {type:'line',label:'累计净现金流',data:cumArr,borderColor:'#06b6d4',backgroundColor:'#06b6d4',borderWidth:2.5,pointRadius:3.5,pointBackgroundColor:'#ffffff',pointBorderWidth:2,tension:.32},
+      {type:'line',label:'累计 NPV（折现）',data:cumDArr,borderColor:'#8b5cf6',borderDash:[5,4],borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#ffffff',tension:.32}]},
+    options:baseOpts({scales:{x:axCat,y:axMoney}})});
+  /* 4 情景 */
+  const sc3=['pess','base','opt'].map(k=>M.scenarios[k]);
+  mkChart('chScen',{type:'bar',
+    data:{labels:sc3.map(s=>s.name),datasets:[{label:'NPV（万元）',data:sc3.map(s=>Math.round(s.npv)),
+      backgroundColor:['#f59e0b','#5b5ce2','#10b981'],borderRadius:7,maxBarThickness:62}]},
+    options:baseOpts({plugins:{legend:{display:false}},scales:{x:axCat,y:axMoney}})});
+  /* 5 敏感性龙卷风 */
+  const sens=M.sens.slice(0,7);
+  mkChart('chTorn',{type:'bar',
+    data:{labels:sens.map(s=>s.label),datasets:[{label:'NPV 变化区间',
+      data:sens.map(s=>[Math.min(s.low,s.high),Math.max(s.low,s.high)]),
+      backgroundColor:sens.map((_,i)=>i===0?'#8b5cf6':'rgba(139,92,246,.5)'),borderRadius:5,barThickness:15}]},
+    options:baseOpts({indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:Object.assign({},axMoney,{grid:{color:'#eef1f9'}}),y:{ticks:{font:{size:8.6},color:'#3b4668'},grid:{display:false}}}})});
+  /* 6 行业对标 */
+  const ind=INDUSTRIES[S.industry];
+  const S3=JSON.parse(JSON.stringify(S));S3.exec.horizon=3;
+  const roi3v=Math.round((computeCore(S3,null).roiSimple||0)*100);
+  mkChart('chBench',{type:'bar',
+    data:{labels:['行业低位','行业中位','行业高位','本项目'],datasets:[{label:'3年期 ROI（%）',
+      data:[ind.roi3[0],Math.round((ind.roi3[0]+ind.roi3[1])/2),ind.roi3[1],roi3v],
+      backgroundColor:['#c7d2fe','#a5b4fc','#818cf8','#06b6d4'],borderRadius:6,maxBarThickness:52}]},
+    options:baseOpts({plugins:{legend:{display:false}},
+      scales:{x:axCat,y:{ticks:{font:{size:8.5},color:'#6b7694',callback:v=>v+'%'},grid:{color:'#eef1f9'}}}})});
+  /* 7 准备度雷达 */
+  mkChart('chRadar',{type:'radar',
+    data:{labels:M.radar.dims,datasets:[
+      {label:'本项目',data:M.radar.vals,backgroundColor:'rgba(91,92,226,.16)',borderColor:'#5b5ce2',borderWidth:2,pointBackgroundColor:'#5b5ce2',pointRadius:3},
+      {label:'健康基准线',data:M.radar.dims.map(()=>70),borderColor:'#06b6d4',borderDash:[5,4],borderWidth:1.6,pointRadius:0,backgroundColor:'transparent'}]},
+    options:baseOpts({scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:7.5},color:'#9aa3bd',backdropColor:'transparent'},
+      grid:{color:'#e8ecf8'},angleLines:{color:'#e8ecf8'},pointLabels:{font:{size:9,family:"'Noto Sans SC',sans-serif"},color:'#3b4668'}}}})});
+}
+
+/* ---------- 生成流程 ---------- */
+const LOAD_LINES=['正在校验输入参数…','正在构建多年期现金流模型…','正在运行三情景模拟…','正在执行 ±20% 敏感性压力测试…','正在比对行业基准数据…','正在生成图表与专业建议…','报告排版中…'];
+async function generateReport(){
+  const ov=$('#overlay'),bar=$('#ldBarIn'),line=$('#ldLine');
+  $('#ldTitle').textContent='ROIMind 正在生成专业报告';
+  ov.classList.add('on');
+  MODEL=computeModel(S);
+  for(let i=0;i<LOAD_LINES.length;i++){
+    line.textContent=LOAD_LINES[i];
+    bar.style.width=Math.round((i+1)/LOAD_LINES.length*100)+'%';
+    if(i===2){buildReport(MODEL)}
+    if(i===4){createCharts(MODEL)}
+    await wait(330);
+  }
+  ov.classList.remove('on');bar.style.width='0';
+  renderBar(STEP_META.length,true);
+  userEcho(6,`报告已生成 ✓ 综合评级 <b>${MODEL.rating.grade}</b>`);
+  await agentSay(`报告已生成 ✦ 综合评级 <b style="color:${MODEL.rating.color}">${MODEL.rating.grade}</b>——${MODEL.rating.desc}。<br>你可以在下方预览全部 12 页内容，点击<b>「下载 PDF 报告」</b>保存，或随时回到任意步骤调整参数重新生成。`);
+  $('#reportWrap').classList.add('on');
+  fitReport();
+  setTimeout(()=>$('#reportWrap').scrollIntoView({behavior:'smooth',block:'start'}),250);
+}
+
+/* ---------- PDF / 打印 / 操作 ---------- */
+async function exportPdf(){
+  const btn=$('#btnPdf');
+  if(!window.html2pdf){alert('PDF 组件未加载（可能处于离线环境）。已为你打开打印对话框，请选择「另存为 PDF」。');window.print();return}
+  const ov=$('#overlay'),line=$('#ldLine');
+  $('#ldTitle').textContent='正在导出 PDF';
+  line.textContent='正在以 2 倍分辨率渲染页面，请稍候（约 10–30 秒）…';
+  $('#ldBarIn').style.width='70%';
+  ov.classList.add('on');btn.disabled=true;
+  const rep=$('#report');
+  const oldTf=rep.style.transform;rep.style.transform='';$('#reportScale').style.height='';
+  rep.classList.add('exporting');
+  try{
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    await wait(120);
+    const name=`AI投入ROI测算报告_${(REPORT_META&&REPORT_META.companyShort||'企业').replace(/[\\/:*?"<>|]/g,'')}_${REPORT_META?REPORT_META.date:''}.pdf`;
+    await html2pdf().set({
+      margin:0,filename:name,
+      image:{type:'jpeg',quality:.96},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},
+      pagebreak:{mode:['css','legacy']}
+    }).from(rep).save();
+  }catch(err){
+    console.error(err);
+    alert('直接导出遇到问题，已为你打开打印对话框，请选择「另存为 PDF」。');
+    window.print();
+  }finally{
+    rep.classList.remove('exporting');
+    rep.style.transform=oldTf;fitReport();
+    ov.classList.remove('on');$('#ldBarIn').style.width='0';btn.disabled=false;
+  }
+}
+function fitReport(){
+  const rep=$('#report');
+  if(!rep.children.length)return;
+  const page=rep.querySelector('.pdf-page');if(!page)return;
+  const avail=Math.min(document.documentElement.clientWidth-20,920);
+  const pw=page.offsetWidth;
+  if(avail<pw){
+    const k=avail/pw;
+    rep.style.transform=`scale(${k})`;rep.style.transformOrigin='top center';
+    $('#reportScale').style.height=rep.scrollHeight*k+30+'px';
+  }else{rep.style.transform='';$('#reportScale').style.height=''}
+}
+window.addEventListener('resize',fitReport);
+document.addEventListener('DOMContentLoaded',()=>{
+  $('#btnPdf').addEventListener('click',exportPdf);
+  $('#btnPrint').addEventListener('click',()=>window.print());
+  $('#btnBack').addEventListener('click',()=>document.getElementById('wizard').scrollIntoView({behavior:'smooth'}));
+  $('#btnRestart').addEventListener('click',()=>{if(confirm('确定清空当前测算并重新开始吗？'))location.reload()});
+});
+window.__ROIMIND__={get S(){return S},computeModel,computeCore};
+</script>
+</body>
+</html>
