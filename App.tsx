@@ -106,7 +106,10 @@ const App: React.FC = () => {
           </div>
           <span className="font-bold tracking-tight">AI 爆款工厂</span>
         </div>
-        <span className="text-white/30 text-xs hidden sm:block">链接 → 中文配音竖屏视频</span>
+        <div className="flex items-center gap-4">
+          <a href="./bid.html" className="text-white/40 hover:text-white/80 text-xs transition">📑 标书智能工厂</a>
+          <span className="text-white/30 text-xs hidden sm:block">链接 → 中文配音竖屏视频</span>
+        </div>
       </nav>
 
       <main className="relative z-10 py-8 md:py-12 flex flex-col items-center">

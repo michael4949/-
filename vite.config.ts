@@ -12,6 +12,15 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
+      build: {
+        rollupOptions: {
+          // 多页应用：/ 为视频工具，/bid.html 为标书智能工厂
+          input: {
+            main: path.resolve(__dirname, 'index.html'),
+            bid: path.resolve(__dirname, 'bid.html'),
+          },
+        },
+      },
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
