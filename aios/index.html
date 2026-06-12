@@ -3,14 +3,502 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ZenFlux AIOS · 新一代企业 AI 操作系统</title>
-<meta name="description" content="ZenFlux AIOS 统一接入大模型、知识库、智能体与自动化工作流，像调度进程一样调度 AI 能力，为企业装上 AI 操作系统。" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%235A5BF0'/%3E%3Cstop offset='.5' stop-color='%239A4DFF'/%3E%3Cstop offset='1' stop-color='%2300C2D8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='3' y='3' width='26' height='26' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='5' fill='none' stroke='white' stroke-width='2.2'/%3E%3Ccircle cx='16' cy='16' r='1.8' fill='white'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="assets/aios.css" />
+<title>顶呱呱AI操作系统 · 企业AI智能工作台</title>
+<meta name="description" content="顶呱呱AI操作系统 — 企业AI智能工作台：个人助手搭子、邮箱助手、知识库、工作流与数据助手，一站式 AI 工作空间。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%235A5BF0'/%3E%3Cstop offset='.5' stop-color='%239A4DFF'/%3E%3Cstop offset='1' stop-color='%2300C2D8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='3' y='3' width='26' height='26' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='11.5' cy='14' r='2' fill='white'/%3E%3Ccircle cx='20.5' cy='14' r='2' fill='white'/%3E%3Cpath d='M11 20.5c1.4 1.2 3.2 1.8 5 1.8s3.6-.6 5-1.8' stroke='white' stroke-width='1.8' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" />
+<style>
+/* ============================================================
+   顶呱呱AI操作系统 · 企业AI智能工作台
+   浅色 AI 主题：冷白底 + 靛蓝→紫罗兰→青色渐变
+   ============================================================ */
+:root {
+  --bg: #F6F8FE;
+  --surface: #FFFFFF;
+  --ink: #0E1430;
+  --ink-2: #3D4668;
+  --muted: #6B7494;
+  --line: rgba(14, 20, 48, 0.08);
+  --line-2: rgba(14, 20, 48, 0.12);
+  --brand: #5A5BF0;
+  --violet: #9A4DFF;
+  --cyan: #00C2D8;
+  --green: #18B97A;
+  --red: #E5484D;
+  --amber: #D97706;
+  --grad: linear-gradient(135deg, #5A5BF0 0%, #9A4DFF 55%, #00C2D8 120%);
+  --grad-btn: linear-gradient(120deg, #5A5BF0, #9A4DFF);
+  --sh-sm: 0 2px 10px -2px rgba(20, 30, 90, 0.07);
+  --sh-md: 0 14px 40px -14px rgba(40, 55, 150, 0.2);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg); color: var(--ink); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  display: flex; overflow: hidden;
+}
+::selection { background: rgba(90, 91, 240, 0.18); }
+button { font-family: inherit; }
+input, textarea { font-family: inherit; }
+svg { display: block; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(14, 20, 48, 0.14); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(14, 20, 48, 0.24); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- 背景氛围 ---------- */
+.bg-decor { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.aurora { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; }
+.aurora-a { width: 560px; height: 560px; left: -160px; top: -220px;
+  background: radial-gradient(circle, #CCC5FF 0%, transparent 70%); }
+.aurora-b { width: 640px; height: 640px; right: -220px; top: -120px;
+  background: radial-gradient(circle, #C2E8FF 0%, transparent 70%); }
+.aurora-c { width: 480px; height: 480px; left: 38%; bottom: -260px;
+  background: radial-gradient(circle, #C8F4E6 0%, transparent 70%); }
+.dot-grid { position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(90, 91, 240, 0.09) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 60% 0%, #000, transparent 80%);
+          mask-image: radial-gradient(ellipse 80% 60% at 60% 0%, #000, transparent 80%); }
+
+/* ============================================================
+   侧边栏
+   ============================================================ */
+.sidebar { position: relative; z-index: 5; width: 240px; flex-shrink: 0; height: 100%;
+  display: flex; flex-direction: column;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  border-right: 1px solid var(--line); }
+.sb-head { display: flex; align-items: flex-start; gap: 10px; padding: 16px 14px 12px; position: relative; }
+.logo-mark { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px;
+  background: var(--grad); display: grid; place-items: center;
+  box-shadow: 0 8px 20px -6px rgba(90, 91, 240, 0.55); }
+.logo-mark svg { width: 22px; height: 22px; }
+.logo-text { font-size: 14.5px; font-weight: 800; line-height: 1.3; letter-spacing: -0.01em; }
+.logo-sub { font-size: 10.5px; color: var(--muted); }
+.beta { position: absolute; top: 10px; right: 10px; font-size: 9.5px; font-weight: 700;
+  color: #fff; background: var(--grad-btn); padding: 2px 8px; border-radius: 999px;
+  box-shadow: 0 4px 12px -4px rgba(90, 91, 240, 0.6); }
+.sb-search { margin: 4px 12px 8px; position: relative; }
+.sb-search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; color: var(--muted); }
+.sb-search input { width: 100%; border: 1px solid var(--line); background: rgba(246, 248, 254, 0.8);
+  border-radius: 11px; padding: 8px 12px 8px 32px; font-size: 12.5px; color: var(--ink); outline: none;
+  transition: border-color .2s, box-shadow .2s; }
+.sb-search input:focus { border-color: rgba(90, 91, 240, 0.5); background: #fff;
+  box-shadow: 0 0 0 3px rgba(90, 91, 240, 0.12); }
+.sb-search input::placeholder { color: var(--muted); }
+.sb-scroll { flex: 1; overflow-y: auto; padding: 2px 12px 10px; }
+.s-label { font-size: 11px; color: var(--muted); margin: 12px 6px 6px; }
+.s-item { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 13px;
+  cursor: pointer; border: 1px solid transparent; transition: background .2s, border-color .2s, box-shadow .2s;
+  margin-bottom: 3px; }
+.s-item:hover { background: #fff; border-color: var(--line); }
+.s-item.active { background: #fff; border-color: rgba(90, 91, 240, 0.45); box-shadow: var(--sh-sm); }
+.s-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px;
+  display: grid; place-items: center; font-size: 17px; background: var(--tint, #EEF0FB); }
+.s-icon.s-grad { background: var(--grad); box-shadow: 0 6px 16px -5px rgba(90, 91, 240, 0.55); }
+.s-icon.s-grad svg { width: 21px; height: 21px; }
+.s-meta { min-width: 0; }
+.s-name { font-size: 13.5px; font-weight: 650; line-height: 1.35; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.s-desc { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  border-top: 1px solid var(--line); }
+.u-ava { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #FFB199, #FF7E5F); color: #fff;
+  display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+.u-name { font-size: 13px; font-weight: 700; }
+.u-name small { font-weight: 500; color: var(--muted); font-size: 10.5px; margin-left: 3px; }
+.u-mail { font-size: 11px; color: var(--muted); }
+
+/* ============================================================
+   主区
+   ============================================================ */
+.app-main { position: relative; z-index: 1; flex: 1; min-width: 0; height: 100%;
+  display: flex; flex-direction: column; }
+.main-header { height: 54px; flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 0 18px; border-bottom: 1px solid var(--line); }
+.mh-burger { display: none; width: 34px; height: 34px; border: 1px solid var(--line);
+  border-radius: 9px; background: #fff; cursor: pointer; place-items: center; color: var(--ink-2); }
+.mh-burger svg { width: 16px; height: 16px; }
+.mh-icon { width: 28px; height: 28px; border-radius: 9px; background: rgba(90, 91, 240, 0.1);
+  display: grid; place-items: center; color: var(--brand); flex-shrink: 0; }
+.mh-icon svg { width: 15px; height: 15px; }
+.mh-title { font-size: 13.5px; font-weight: 650; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; min-width: 0; }
+.mh-caret { color: var(--muted); flex-shrink: 0; cursor: pointer; }
+.mh-caret svg { width: 14px; height: 14px; }
+.mh-actions { margin-left: auto; display: flex; gap: 8px; }
+.hbtn { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; cursor: pointer; display: grid; place-items: center; color: var(--ink-2);
+  transition: border-color .2s, color .2s, transform .2s; }
+.hbtn:hover { border-color: rgba(90, 91, 240, 0.5); color: var(--brand); }
+.hbtn svg { width: 15px; height: 15px; }
+.main-body { flex: 1; min-height: 0; display: flex; }
+.view-zone { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.view { display: none; flex: 1; min-height: 0; }
+.view.active { display: flex; flex-direction: column; }
+
+/* ============================================================
+   对话视图（搭子）
+   ============================================================ */
+.thread { flex: 1; overflow-y: auto; padding: 22px 26px 8px; }
+.u-row { display: flex; flex-direction: column; align-items: flex-end; margin: 16px 0 4px; }
+.u-bubble { max-width: 72%; background: #EEF0FE; border: 1px solid rgba(90, 91, 240, 0.18);
+  border-radius: 14px 14px 4px 14px; padding: 10px 15px; font-size: 13.5px; line-height: 1.75; }
+.a-row { display: flex; gap: 11px; margin: 16px 0 4px; }
+.a-ava { width: 32px; height: 32px; flex-shrink: 0; border-radius: 11px; background: var(--grad);
+  display: grid; place-items: center; box-shadow: 0 6px 16px -5px rgba(90, 91, 240, 0.5); }
+.a-ava svg { width: 19px; height: 19px; }
+.a-body { min-width: 0; max-width: 78%; display: flex; flex-direction: column; gap: 9px; }
+.a-text { font-size: 13.5px; line-height: 1.8; color: var(--ink-2); }
+.a-text b { color: var(--ink); }
+.meta-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.rx-btn { width: 24px; height: 24px; border: none; background: transparent; border-radius: 7px;
+  cursor: pointer; color: var(--muted); display: grid; place-items: center; transition: .2s; }
+.rx-btn:hover { background: rgba(90, 91, 240, 0.08); color: var(--brand); }
+.rx-btn.on { color: var(--brand); }
+.rx-btn svg { width: 13px; height: 13px; }
+.meta-t { font-size: 11px; color: var(--muted); margin-left: 2px; }
+.u-row .meta-row { justify-content: flex-end; }
+
+/* 协议/追问 迷你卡 */
+.mini-card { display: flex; align-items: center; gap: 9px; border-radius: 12px;
+  padding: 9px 12px; font-size: 12.5px; color: var(--ink-2); border: 1px solid var(--line); }
+.mini-card .mc-ico { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%;
+  display: grid; place-items: center; font-size: 10.5px; font-weight: 800; color: #fff; }
+.mini-card .mc-text { flex: 1; min-width: 0; }
+.mc-btn { flex-shrink: 0; border: 1px solid var(--line-2); background: #fff; border-radius: 9px;
+  padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer;
+  transition: .2s; white-space: nowrap; }
+.mc-btn:hover { border-color: var(--brand); color: var(--brand); }
+.mc-green { background: rgba(43, 217, 168, 0.09); border-color: rgba(24, 185, 122, 0.25); }
+.mc-green .mc-ico { background: linear-gradient(135deg, #2BD9A8, #00C2D8); }
+.mc-blue { background: rgba(90, 91, 240, 0.07); border-color: rgba(90, 91, 240, 0.28); }
+.mc-blue .mc-ico { background: var(--grad-btn); }
+.mc-plain { background: #fff; }
+
+/* 智能体调度卡 */
+.dispatch { background: #fff; border: 1px solid var(--line-2); border-radius: 16px;
+  overflow: hidden; box-shadow: var(--sh-sm); }
+.dp-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px;
+  border-bottom: 1px solid var(--line); }
+.dp-ico { width: 32px; height: 32px; border-radius: 10px; background: rgba(90, 91, 240, 0.1);
+  display: grid; place-items: center; font-size: 15px; }
+.dp-title { font-size: 13.5px; font-weight: 700; }
+.dp-sub { font-size: 11px; color: var(--muted); }
+.dp-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border-bottom: 1px solid var(--line); cursor: pointer; transition: background .18s; }
+.dp-row:last-child { border-bottom: none; }
+.dp-row:hover { background: rgba(90, 91, 240, 0.05); }
+.dp-name { font-size: 13px; font-weight: 650; }
+.dp-code { margin-left: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px; color: var(--muted); }
+.dp-arrow { color: var(--muted); flex-shrink: 0; }
+.dp-arrow svg { width: 13px; height: 13px; }
+
+/* 正在输入 */
+.typing { display: inline-flex; gap: 4px; padding: 12px 14px; background: #F3F5FC;
+  border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; width: fit-content; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--brand);
+  opacity: .35; animation: tp 1.2s ease-in-out infinite; }
+.typing i:nth-child(2) { animation-delay: .18s; }
+.typing i:nth-child(3) { animation-delay: .36s; }
+@keyframes tp { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+
+/* 快捷指令 + 输入区 */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 26px 0; }
+.chip { border: 1px solid var(--line-2); background: #fff; border-radius: 999px;
+  padding: 7px 16px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); cursor: pointer;
+  transition: .2s; }
+.chip:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-1px);
+  box-shadow: 0 6px 16px -8px rgba(90, 91, 240, 0.4); }
+.composer { margin: 12px 26px 20px; background: #fff; border: 1px solid var(--line-2);
+  border-radius: 16px; box-shadow: var(--sh-sm); transition: border-color .2s, box-shadow .2s; }
+.composer:focus-within { border-color: rgba(90, 91, 240, 0.55);
+  box-shadow: 0 0 0 3px rgba(90, 91, 240, 0.12), var(--sh-sm); }
+.cmp-input { width: 100%; border: none; outline: none; resize: none; background: transparent;
+  padding: 13px 16px 4px; font-size: 13.5px; line-height: 1.6; color: var(--ink);
+  height: 52px; max-height: 120px; }
+.cmp-input::placeholder { color: var(--muted); }
+.cmp-row { display: flex; align-items: center; gap: 6px; padding: 4px 10px 10px; }
+.tbtn { width: 30px; height: 30px; border: none; background: transparent; border-radius: 9px;
+  cursor: pointer; color: var(--muted); display: grid; place-items: center; transition: .2s; }
+.tbtn:hover { background: rgba(90, 91, 240, 0.08); color: var(--brand); }
+.tbtn svg { width: 16px; height: 16px; }
+.send-btn { margin-left: auto; width: 34px; height: 34px; border: none; border-radius: 11px;
+  background: var(--grad-btn); color: #fff; cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 8px 18px -6px rgba(90, 91, 240, 0.55); transition: transform .2s, box-shadow .2s; }
+.send-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(90, 91, 240, 0.6); }
+.send-btn svg { width: 15px; height: 15px; }
+
+/* ============================================================
+   右侧面板：搭子问候 / 个人待办 / 仪表盘
+   ============================================================ */
+.right-panel { width: 416px; flex-shrink: 0; border-left: 1px solid var(--line);
+  overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+  background: rgba(255, 255, 255, 0.45); }
+.right-panel.hidden { display: none; }
+.rp-card { background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--sh-sm); }
+.greet { display: flex; align-items: center; gap: 12px; padding: 15px 16px; }
+.g-ava { width: 40px; height: 40px; flex-shrink: 0; border-radius: 13px; background: var(--grad);
+  display: grid; place-items: center; box-shadow: 0 8px 18px -6px rgba(90, 91, 240, 0.5); }
+.g-ava svg { width: 23px; height: 23px; }
+.g-name { font-size: 14.5px; font-weight: 800; }
+.g-sub { font-size: 11.5px; color: var(--muted); }
+.g-more { margin-left: auto; border: none; background: transparent; color: var(--muted);
+  cursor: pointer; font-size: 16px; letter-spacing: 1px; padding: 4px 8px; border-radius: 8px; }
+.g-more:hover { background: rgba(90, 91, 240, 0.07); color: var(--brand); }
+
+/* 待办 */
+.todo-head { display: flex; align-items: center; gap: 8px; padding: 13px 14px;
+  border-bottom: 1px solid var(--line); }
+.todo-head .bell { width: 26px; height: 26px; border-radius: 8px; background: rgba(90, 91, 240, 0.1);
+  color: var(--brand); display: grid; place-items: center; }
+.todo-head .bell svg { width: 14px; height: 14px; }
+.todo-head h3 { font-size: 13.5px; font-weight: 750; }
+.badge-n { min-width: 18px; height: 18px; border-radius: 999px; background: var(--red); color: #fff;
+  font-size: 10.5px; font-weight: 700; display: inline-grid; place-items: center; padding: 0 5px; }
+.seg { margin-left: auto; display: flex; background: #F0F2FB; border-radius: 9px; padding: 2px; }
+.seg-btn { border: none; background: transparent; border-radius: 7px; padding: 4px 10px;
+  font-size: 11.5px; font-weight: 650; color: var(--muted); cursor: pointer; transition: .2s; }
+.seg-btn.active { background: #fff; color: var(--ink); box-shadow: var(--sh-sm); }
+.add-btn { width: 26px; height: 26px; border: 1px solid var(--line-2); border-radius: 8px;
+  background: #fff; color: var(--ink-2); font-size: 15px; cursor: pointer; line-height: 1;
+  transition: .2s; }
+.add-btn:hover { border-color: var(--brand); color: var(--brand); }
+.todo-list { padding: 4px 8px 8px; }
+.todo-item { display: flex; align-items: center; gap: 8px; padding: 9px 6px;
+  border-bottom: 1px solid var(--line); }
+.todo-item:last-child { border-bottom: none; }
+.t-check { width: 17px; height: 17px; flex-shrink: 0; border: 1.6px solid var(--line-2);
+  border-radius: 50%; background: #fff; cursor: pointer; display: grid; place-items: center;
+  color: transparent; transition: .2s; padding: 0; }
+.t-check svg { width: 9px; height: 9px; }
+.t-check:hover { border-color: var(--brand); }
+.todo-item.done .t-check { background: var(--grad-btn); border-color: transparent; color: #fff; }
+.t-chip { flex-shrink: 0; font-size: 10px; font-weight: 650; border-radius: 6px; padding: 2.5px 7px;
+  white-space: nowrap; background: var(--tc-bg, #F0F2FB); color: var(--tc-fg, var(--ink-2));
+  border: 1px solid var(--tc-bd, var(--line)); }
+.t-text { flex: 1; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.todo-item.done .t-text { color: var(--muted); text-decoration: line-through; }
+.t-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+.t-del { width: 24px; height: 24px; flex-shrink: 0; border: none; background: transparent;
+  border-radius: 7px; color: var(--muted); cursor: pointer; display: grid; place-items: center;
+  opacity: 0; transition: .2s; }
+.todo-item:hover .t-del { opacity: 1; }
+.t-del:hover { background: rgba(229, 72, 77, 0.1); color: var(--red); }
+.t-del svg { width: 13px; height: 13px; }
+.todo-add-row { display: none; padding: 8px 10px 10px; }
+.todo-add-row.open { display: flex; gap: 8px; }
+.todo-add-row input { flex: 1; border: 1px solid var(--line-2); border-radius: 9px;
+  padding: 7px 11px; font-size: 12.5px; outline: none; }
+.todo-add-row input:focus { border-color: rgba(90, 91, 240, 0.55); }
+.todo-empty { padding: 22px; text-align: center; font-size: 12px; color: var(--muted); }
+
+/* 仪表盘 */
+.dash-head { display: flex; align-items: center; gap: 8px; padding: 13px 14px 10px; }
+.dash-head h3 { font-size: 13.5px; font-weight: 750; }
+.dash-body { padding: 0 14px 14px; }
+.chart-card { border: 1px solid var(--line); border-radius: 13px; padding: 12px 12px 8px;
+  background: linear-gradient(180deg, rgba(246, 248, 254, 0.6), #fff); position: relative; }
+.chart-cap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.chart-cap svg { width: 12px; height: 12px; color: var(--brand); }
+.trend-chip { position: absolute; right: 12px; top: 10px; font-size: 10.5px; font-weight: 750;
+  color: var(--green); background: rgba(24, 185, 122, 0.1); border-radius: 999px; padding: 2px 8px; }
+.trend-svg { width: 100%; height: 96px; margin-top: 6px; }
+.dash-months { display: flex; justify-content: space-between; font-size: 10px;
+  color: var(--muted); padding: 2px 6px 0; }
+.dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 11px; }
+.d-metric { border: 1px solid var(--line); border-radius: 12px; padding: 10px 11px; background: #fff; }
+.dm-label { font-size: 10.5px; color: var(--muted); }
+.dm-num { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-top: 2px;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dm-sub { font-size: 10px; margin-top: 1px; color: var(--muted); }
+.dm-sub.up { color: var(--green); font-weight: 650; }
+.dm-sub.warn { color: var(--amber); font-weight: 650; }
+.dash-note { font-size: 11px; color: var(--muted); margin-top: 11px; }
+
+/* ============================================================
+   通用子页面
+   ============================================================ */
+.page { flex: 1; overflow-y: auto; padding: 24px 28px 32px; }
+.page-head { margin-bottom: 18px; }
+.page-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 10px; }
+.page-head h2 .ph-ico { width: 34px; height: 34px; border-radius: 11px; display: grid;
+  place-items: center; font-size: 16px; background: var(--tint, #EEF0FB); }
+.page-head p { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.pgrid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: 1fr 1fr; }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.pcard { background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--sh-sm); }
+.pc-head { display: flex; align-items: center; gap: 8px; padding: 13px 16px;
+  border-bottom: 1px solid var(--line); }
+.pc-head h3 { font-size: 13.5px; font-weight: 750; }
+.pc-extra { margin-left: auto; font-size: 11.5px; color: var(--muted); }
+.pc-body { padding: 14px 16px; }
+.mini-stat { text-align: center; padding: 16px 10px; }
+.ms-num { font-size: 24px; font-weight: 800; letter-spacing: -0.02em;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ms-label { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.lrow { display: flex; align-items: center; gap: 11px; padding: 11px 16px;
+  border-bottom: 1px solid var(--line); }
+.lrow:last-child { border-bottom: none; }
+.lr-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; display: grid;
+  place-items: center; font-size: 15px; background: var(--tint, #EEF0FB); }
+.lr-main { flex: 1; min-width: 0; }
+.lr-tt { font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.lr-sub { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.lr-side { flex-shrink: 0; font-size: 11px; color: var(--muted); text-align: right; }
+.pill { display: inline-block; font-size: 10.5px; font-weight: 700; border-radius: 999px;
+  padding: 2.5px 9px; white-space: nowrap; }
+.pill-green { background: rgba(24, 185, 122, 0.1); color: var(--green); }
+.pill-red { background: rgba(229, 72, 77, 0.1); color: var(--red); }
+.pill-amber { background: rgba(217, 119, 6, 0.12); color: var(--amber); }
+.pill-blue { background: rgba(90, 91, 240, 0.1); color: var(--brand); }
+.pill-gray { background: #F0F2FB; color: var(--muted); }
+.btn-mini { border: 1px solid var(--line-2); background: #fff; border-radius: 9px;
+  padding: 6px 13px; font-size: 12px; font-weight: 650; color: var(--ink-2); cursor: pointer;
+  transition: .2s; white-space: nowrap; }
+.btn-mini:hover { border-color: var(--brand); color: var(--brand); }
+.btn-grad { border: none; background: var(--grad-btn); color: #fff; border-radius: 9px;
+  padding: 7px 15px; font-size: 12px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 8px 18px -6px rgba(90, 91, 240, 0.5); transition: transform .2s; white-space: nowrap; }
+.btn-grad:hover { transform: translateY(-1px); }
+.code-block { background: #101530; color: #C9D4F6; border-radius: 13px; padding: 14px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px;
+  line-height: 1.8; overflow-x: auto; white-space: pre; }
+.code-block .ck { color: #7DD3FC; } .code-block .cs { color: #86EFAC; } .code-block .cc { color: #64748B; }
+.upload-zone { border: 1.5px dashed rgba(90, 91, 240, 0.4); border-radius: 14px;
+  background: rgba(90, 91, 240, 0.04); padding: 26px 16px; text-align: center; cursor: pointer;
+  transition: .2s; }
+.upload-zone:hover { background: rgba(90, 91, 240, 0.08); }
+.upload-zone .uz-ico { font-size: 24px; }
+.upload-zone p { font-size: 12.5px; color: var(--ink-2); font-weight: 650; margin-top: 6px; }
+.upload-zone small { font-size: 11px; color: var(--muted); }
+.bars { display: flex; align-items: flex-end; gap: 7px; height: 110px; padding: 4px 2px 0; }
+.bar { flex: 1; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #5A5BF0, #9A4DFF);
+  opacity: .85; min-height: 6px; height: var(--h); transition: height .6s cubic-bezier(.2,.65,.25,1); }
+.bar:nth-child(even) { background: linear-gradient(180deg, #7C5CFA, #00C2D8); }
+.bar-labels { display: flex; gap: 7px; padding-top: 5px; }
+.bar-labels span { flex: 1; text-align: center; font-size: 9.5px; color: var(--muted); }
+.timeline { padding: 4px 16px 12px; }
+.tl-item { position: relative; padding: 9px 0 9px 22px; }
+.tl-item::before { content: ""; position: absolute; left: 5px; top: 16px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--grad-btn); box-shadow: 0 0 0 3px rgba(90, 91, 240, 0.15); }
+.tl-item::after { content: ""; position: absolute; left: 8.5px; top: 26px; bottom: -4px;
+  width: 1.5px; background: var(--line); }
+.tl-item:last-child::after { display: none; }
+.tl-tt { font-size: 12.5px; font-weight: 650; }
+.tl-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.kgraph-svg { width: 100%; height: 250px; }
+.kg-link { stroke: rgba(90, 91, 240, 0.3); stroke-width: 1.4; stroke-dasharray: 4 5;
+  animation: kgd 1.4s linear infinite; }
+@keyframes kgd { to { stroke-dashoffset: -9; } }
+.kg-node { fill: #fff; stroke: rgba(90, 91, 240, 0.45); stroke-width: 1.4;
+  filter: drop-shadow(0 4px 10px rgba(60, 70, 170, 0.18)); }
+.kg-core { fill: url(#kgGrad); stroke: none; }
+.kg-label { font-size: 10.5px; fill: var(--ink-2); text-anchor: middle; font-weight: 600; }
+.kg-core-label { fill: #fff; font-weight: 700; font-size: 11px; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; font-size: 11px; color: var(--muted); font-weight: 650;
+  padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.table td { font-size: 12.5px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: rgba(90, 91, 240, 0.03); }
+.search-row { display: flex; gap: 9px; }
+.search-row input { flex: 1; border: 1px solid var(--line-2); border-radius: 11px;
+  padding: 10px 14px; font-size: 13px; outline: none; transition: .2s; }
+.search-row input:focus { border-color: rgba(90, 91, 240, 0.55);
+  box-shadow: 0 0 0 3px rgba(90, 91, 240, 0.12); }
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.kpi { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px;
+  box-shadow: var(--sh-sm); }
+.kpi-label { font-size: 11.5px; color: var(--muted); }
+.kpi-num { font-size: 25px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.kpi-sub { font-size: 11px; margin-top: 3px; color: var(--muted); }
+.kpi-sub b.up { color: var(--green); } .kpi-sub b.dn { color: var(--red); }
+.mt { margin-top: 14px; }
+.sql-line { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px; color: var(--muted); background: #F4F6FF; border: 1px solid var(--line);
+  border-radius: 9px; padding: 8px 12px; margin-top: 10px; overflow-x: auto; white-space: nowrap; }
+
+/* ============================================================
+   弹窗 / 提示
+   ============================================================ */
+.modal-mask { position: fixed; inset: 0; z-index: 50; background: rgba(14, 20, 48, 0.35);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-mask.open { display: flex; }
+.modal { width: 100%; max-width: 480px; background: #fff; border-radius: 18px;
+  box-shadow: var(--sh-md); overflow: hidden; animation: pop .3s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes pop { from { transform: scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
+.m-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px;
+  border-bottom: 1px solid var(--line); }
+.m-head .mc-ico { width: 26px; height: 26px; border-radius: 9px; background: var(--grad-btn);
+  color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+.m-head h3 { font-size: 14.5px; font-weight: 750; }
+.m-close { margin-left: auto; width: 28px; height: 28px; border: none; background: #F0F2FB;
+  border-radius: 8px; cursor: pointer; color: var(--ink-2); font-size: 14px; }
+.m-close:hover { background: rgba(229, 72, 77, 0.1); color: var(--red); }
+.m-body { padding: 16px 18px 20px; font-size: 12.5px; color: var(--ink-2); line-height: 1.85; }
+.m-body ul { list-style: none; margin-top: 10px; }
+.m-body li { position: relative; padding-left: 20px; margin: 7px 0; }
+.m-body li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--grad-btn); }
+.m-body li b { color: var(--ink); }
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 80px); z-index: 60;
+  background: #101530; color: #fff; font-size: 12.5px; padding: 10px 18px; border-radius: 999px;
+  box-shadow: var(--sh-md); opacity: 0; transition: .35s cubic-bezier(.2,.9,.3,1.1);
+  pointer-events: none; max-width: 86vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (max-width: 1280px) { .right-panel { width: 360px; } }
+@media (max-width: 1080px) {
+  .right-panel { position: fixed; right: 0; top: 54px; bottom: 0; z-index: 40;
+    width: min(380px, 92vw); background: #fff; box-shadow: -20px 0 50px -20px rgba(14, 20, 48, 0.25);
+    transform: translateX(105%); transition: transform .35s ease; display: flex; }
+  .right-panel.show-float { transform: none; }
+  .right-panel.hidden { display: flex; }
+  .g3 { grid-template-columns: 1fr 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 860px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 45;
+    transform: translateX(-105%); transition: transform .35s ease;
+    background: #fff; box-shadow: 20px 0 50px -20px rgba(14, 20, 48, 0.25); }
+  .sidebar.open { transform: none; }
+  .mh-burger { display: grid; }
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr; }
+  .thread, .chips { padding-left: 16px; padding-right: 16px; }
+  .composer { margin-left: 16px; margin-right: 16px; }
+  .page { padding: 18px 16px 28px; }
+  .a-body { max-width: 92%; }
+  .u-bubble { max-width: 88%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+</style>
 </head>
 <body>
 
-<!-- ====================== 背景装饰：极光 + 点阵 ====================== -->
 <div class="bg-decor" aria-hidden="true">
   <div class="aurora aurora-a"></div>
   <div class="aurora aurora-b"></div>
@@ -18,500 +506,958 @@
   <div class="dot-grid"></div>
 </div>
 
-<!-- ====================== 导航 ====================== -->
-<header class="nav" id="nav">
-  <div class="container nav-inner">
-    <a class="brand" href="#top">
-      <span class="brand-mark">
-        <svg viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="26" height="26" rx="8" fill="url(#lg-brand)"/><circle cx="16" cy="16" r="5.2" stroke="#fff" stroke-width="2.2"/><circle cx="16" cy="16" r="1.9" fill="#fff"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".75"/><defs><linearGradient id="lg-brand" x1="3" y1="3" x2="29" y2="29"><stop stop-color="#5A5BF0"/><stop offset=".5" stop-color="#9A4DFF"/><stop offset="1" stop-color="#00C2D8"/></linearGradient></defs></svg>
-      </span>
-      <span class="brand-name">ZenFlux <em>AIOS</em></span>
-    </a>
-    <nav class="nav-links" id="navLinks">
-      <a href="#capabilities">核心能力</a>
-      <a href="#workflow">工作流</a>
-      <a href="#agents">智能体</a>
-      <a href="#arch">技术架构</a>
-      <a href="#scenarios">解决方案</a>
-      <a href="#security">安全合规</a>
-    </nav>
-    <div class="nav-cta">
-      <a class="btn btn-ghost btn-sm" href="#cta">预约演示</a>
-      <a class="btn btn-primary btn-sm" href="#cta">免费体验</a>
+<!-- ====================== 侧边栏 ====================== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </span>
+    <div>
+      <div class="logo-text">顶呱呱AI操作系统</div>
+      <div class="logo-sub">企业AI智能工作台</div>
     </div>
-    <button class="nav-burger" id="navBurger" aria-label="打开菜单"><span></span><span></span><span></span></button>
+    <span class="beta">邀测版</span>
   </div>
-</header>
 
-<!-- ====================== Hero ====================== -->
-<section class="hero" id="top">
-  <canvas id="neuralCanvas" aria-hidden="true"></canvas>
-  <div class="container hero-inner">
-    <div class="hero-copy reveal">
-      <span class="badge"><i class="spark">✦</i> 新一代企业级 AI 操作系统 <span class="badge-tag">v3.0</span></span>
-      <h1>让每一家企业<br/>都拥有自己的<span class="grad-text">AI&nbsp;操作系统</span></h1>
-      <p class="hero-sub">ZenFlux AIOS 统一接入<strong>大模型、知识库、智能体与自动化工作流</strong>，像操作系统调度进程一样调度 AI 能力，把散落的工具沉淀为企业级智能底座。</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#cta">免费体验 14 天
-          <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h11m0 0-4.5-4.5M15 10l-4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a class="btn btn-ghost btn-lg" href="#workflow">
-          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M8.2 7.2 13 10l-4.8 2.8V7.2Z" fill="currentColor"/></svg>
-          观看产品演示
-        </a>
-      </div>
-      <ul class="hero-meta">
-        <li><i>✓</i> 支持私有化部署</li>
-        <li><i>✓</i> 国产大模型深度适配</li>
-        <li><i>✓</i> 开箱即用 · 5 分钟上线</li>
-      </ul>
+  <div class="sb-search">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="9" r="5.5"/><path d="m13.5 13.5 3 3" stroke-linecap="round"/></svg>
+    <input type="text" placeholder="搜索" />
+  </div>
+
+  <nav class="sb-scroll">
+    <div class="s-label">默认</div>
+    <div class="s-item active" data-view="dazi" data-title="我有一批资料需要整理，帮我判断应该用哪个智能体">
+      <span class="s-icon s-grad">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+      <div class="s-meta"><div class="s-name">搭子</div><div class="s-desc">你的个人小助手</div></div>
+    </div>
+    <div class="s-item" data-view="mail" data-title="邮箱助手 · 未读整理与智能回复">
+      <span class="s-icon" style="--tint:#E8F1FF">📮</span>
+      <div class="s-meta"><div class="s-name">邮箱助手</div><div class="s-desc">未读整理 · 智能回复</div></div>
+    </div>
+    <div class="s-item" data-view="desktop" data-title="桌面助手 · 文件整理与应用操作">
+      <span class="s-icon" style="--tint:#EAF7FF">🗂️</span>
+      <div class="s-meta"><div class="s-name">桌面助手</div><div class="s-desc">文件整理 · 应用操作</div></div>
+    </div>
+    <div class="s-item" data-view="kspace" data-title="知识空间 · 知识图谱与决策溯源">
+      <span class="s-icon" style="--tint:#F1EBFF">🧠</span>
+      <div class="s-meta"><div class="s-name">知识空间</div><div class="s-desc">知识图谱 · 决策溯源</div></div>
+    </div>
+    <div class="s-item" data-view="kb" data-title="知识库 · 资料上下文与来源管理">
+      <span class="s-icon" style="--tint:#E8F0FF">📚</span>
+      <div class="s-meta"><div class="s-name">知识库</div><div class="s-desc">资料上下文 · 来源管理</div></div>
+    </div>
+    <div class="s-item" data-view="dev" data-title="开发者中心 · 企业能力接入与组装">
+      <span class="s-icon" style="--tint:#EAF0FF">🧑‍💻</span>
+      <div class="s-meta"><div class="s-name">开发者中心</div><div class="s-desc">企业能力接入 · 组装</div></div>
+    </div>
+    <div class="s-item" data-view="data" data-title="数据助手 · 数据上下文与指标分析">
+      <span class="s-icon" style="--tint:#E9F9F1">📊</span>
+      <div class="s-meta"><div class="s-name">数据助手</div><div class="s-desc">数据上下文 · 指标分析</div></div>
     </div>
 
-    <!-- 控制台 Mockup -->
-    <div class="hero-visual reveal" style="--d:.15s">
-      <div class="console">
-        <div class="console-bar">
-          <span class="cdot" style="--c:#FF5F57"></span>
-          <span class="cdot" style="--c:#FEBC2E"></span>
-          <span class="cdot" style="--c:#28C840"></span>
-          <span class="console-title">ZenFlux AIOS · 智能调度台</span>
-          <span class="console-status"><i class="pulse-dot"></i>系统正常</span>
-        </div>
-        <div class="console-body">
-          <aside class="console-rail">
-            <span class="rail-item active" title="智能体">🤖</span>
-            <span class="rail-item" title="工作流">⚙️</span>
-            <span class="rail-item" title="知识库">📚</span>
-            <span class="rail-item" title="数据洞察">📈</span>
-            <span class="rail-item" title="设置">🛡️</span>
-          </aside>
-          <div class="console-chat">
-            <div class="msg msg-user">帮我分析上季度华东区销售数据，生成周报并同步给团队</div>
-            <div class="agent-steps" id="agentSteps">
-              <div class="step"><i>✓</i>调度智能体「数据分析师」<em>DeepSeek-V3</em></div>
-              <div class="step"><i>✓</i>检索知识库 · 命中 <b>1,284</b> 条销售记录</div>
-              <div class="step"><i>✓</i>生成可视化图表 ×3</div>
-              <div class="step"><i>✓</i>触发工作流「周报分发」→ 邮件 · 企业微信</div>
+    <div class="s-label">自定义智能体</div>
+    <div class="s-item" data-view="eng" data-title="工程管理助手 · 制度采集与条款提取">
+      <span class="s-icon" style="--tint:#FFF4E5">🛠️</span>
+      <div class="s-meta"><div class="s-name">工程管理助手</div><div class="s-desc">制度采集 · 条款提取</div></div>
+    </div>
+    <div class="s-item" data-view="fin" data-title="财务监控和决策 · 财务监控与决策支持">
+      <span class="s-icon" style="--tint:#FFEFF2">💹</span>
+      <div class="s-meta"><div class="s-name">财务监控和决策</div><div class="s-desc">财务监控 · 决策支持</div></div>
+    </div>
+  </nav>
+
+  <div class="sb-user">
+    <span class="u-ava">飘</span>
+    <div>
+      <div class="u-name">阿飘<small>[OS打更人]</small></div>
+      <div class="u-mail">piao@dgg.ai</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ====================== 主区 ====================== -->
+<div class="app-main">
+  <header class="main-header">
+    <button class="mh-burger" id="mhBurger" aria-label="打开侧边栏">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg>
+    </button>
+    <span class="mh-icon">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M17 9.5c0 3.6-3.1 6.5-7 6.5-.9 0-1.8-.15-2.6-.45L3 17l1.2-3.2A6.1 6.1 0 0 1 3 9.5C3 5.9 6.1 3 10 3s7 2.9 7 6.5Z" stroke-linejoin="round"/></svg>
+    </span>
+    <div class="mh-title" id="mhTitle">我有一批资料需要整理，帮我判断应该用哪个智能体</div>
+    <span class="mh-caret">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg>
+    </span>
+    <div class="mh-actions">
+      <button class="hbtn" id="btnFocus" title="专注模式：折叠侧边栏">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5h4.5V8M8 16.5H3.5V12M16.5 3.5 11 9M3.5 16.5 9 11"/></svg>
+      </button>
+      <button class="hbtn" id="btnPanel" title="展开 / 收起右侧面板">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="14" height="12" rx="2.5"/><path d="M12.5 4v12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="main-body">
+    <div class="view-zone">
+
+      <!-- ============ 视图：搭子（对话） ============ -->
+      <section class="view active" id="view-dazi">
+        <div class="thread" id="thread">
+
+          <div class="a-row">
+            <span class="a-ava"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+            <div class="a-body">
+              <div class="a-text">我把今早的 <b>9 封未读邮件</b>整理成了 3 类，重要的已标红，摘要放在「邮箱助手」里了。</div>
+              <div class="mini-card mc-plain">
+                <span class="mc-text">想了解更多细节？</span>
+                <button class="mc-btn">继续追问 →</button>
+              </div>
+              <div class="mini-card mc-green">
+                <span class="mc-ico">C</span>
+                <span class="mc-text">查看该卡片的执行规则与协议信息</span>
+                <button class="mc-btn js-proto">查看说明</button>
+              </div>
+              <div class="meta-row">
+                <button class="rx-btn" aria-label="赞"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>
+                <button class="rx-btn" aria-label="踩"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>
+                <span class="meta-t">11:23</span>
+              </div>
             </div>
-            <div class="msg msg-ai"><span id="typeTarget"></span><span class="caret"></span></div>
-            <div class="console-input">
-              <svg viewBox="0 0 20 20" fill="none"><path d="M10 2.5a3 3 0 0 1 3 3v4a3 3 0 1 1-6 0v-4a3 3 0 0 1 3-3Z" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <span>向 AIOS 下达任务…</span>
-              <button class="send-btn" aria-label="发送"><svg viewBox="0 0 20 20" fill="none"><path d="M3 10 17 3l-3.5 14L9.6 11 3 10Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+          </div>
+
+          <div class="u-row">
+            <div class="u-bubble">我有一批资料需要整理，帮我判断应该用哪个智能体</div>
+            <div class="meta-row"><span class="meta-t">11:23</span></div>
+          </div>
+
+          <div class="a-row">
+            <span class="a-ava"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+            <div class="a-body">
+              <div class="a-text">根据你的需求，以下智能体可能帮到你。点击条目可直接跳转，搭子会在后台帮你衔接上下文。</div>
+              <div class="dispatch">
+                <div class="dp-head">
+                  <span class="dp-ico">🧭</span>
+                  <div>
+                    <div class="dp-title">智能体调度</div>
+                    <div class="dp-sub">问数 · 知识库 · 知识空间 · 开发者中心</div>
+                  </div>
+                </div>
+                <div class="dp-row" data-goto="data"><span class="dp-name">智能问数</span><span class="dp-code">data-agent</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+                <div class="dp-row" data-goto="mail"><span class="dp-name">邮箱助手</span><span class="dp-code">mail-assistant</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+                <div class="dp-row" data-goto="desktop"><span class="dp-name">桌面助手</span><span class="dp-code">desktop-assistant</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+                <div class="dp-row" data-goto="kb"><span class="dp-name">知识库</span><span class="dp-code">knowledge</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+                <div class="dp-row" data-goto="kspace"><span class="dp-name">知识空间</span><span class="dp-code">knowledge-space</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+                <div class="dp-row" data-goto="dev"><span class="dp-name">开发者中心</span><span class="dp-code">developer</span><span class="dp-arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg></span></div>
+              </div>
+              <div class="mini-card mc-blue">
+                <span class="mc-ico">C</span>
+                <span class="mc-text">查看该卡片的执行规则与协议信息</span>
+                <button class="mc-btn js-proto">查看说明</button>
+              </div>
+              <div class="meta-row">
+                <button class="rx-btn" aria-label="赞"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>
+                <button class="rx-btn" aria-label="踩"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>
+                <span class="meta-t">11:23</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="chips">
+          <button class="chip">回复客户邮件</button>
+          <button class="chip">整理工作周报</button>
+          <button class="chip">市场分析报告</button>
+          <button class="chip">整理未读邮件</button>
+        </div>
+
+        <div class="composer">
+          <textarea class="cmp-input" id="cmpInput" placeholder="输入消息…" rows="1"></textarea>
+          <div class="cmp-row">
+            <button class="tbtn" title="添加附件"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg></button>
+            <button class="tbtn" title="引用文档"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 3h7l3 3v11H5V3Z"/><path d="M12 3v3h3M8 10h4M8 13h4" stroke-linecap="round"/></svg></button>
+            <button class="send-btn" id="btnSend" aria-label="发送">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 10 17 3l-3.5 14L9.6 11 3 10Z"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：邮箱助手 ============ -->
+      <section class="view" id="view-mail">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E8F1FF">📮</span>邮箱助手</h2>
+            <p>未读整理 · 智能回复 — 已连接 piao@dgg.ai，每 10 分钟自动同步</p>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">24</div><div class="ms-label">未读邮件</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">9</div><div class="ms-label">今日新增</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">87%</div><div class="ms-label">自动归类率</div></div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>需要你处理的邮件</h3><span class="pc-extra">按优先级排序</span></div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#FFEFF2">王</span>
+                <div class="lr-main">
+                  <div class="lr-tt">华东客户 · 合同条款确认 <span class="pill pill-red">重要</span></div>
+                  <div class="lr-sub">AI 摘要：对第 7 条付款节点有疑问，建议今天 15:30 前回复</div>
+                </div>
+                <div class="lr-side">15:30 截止</div>
+                <button class="btn-mini js-toast" data-toast="已为你生成回复草稿，见右侧「AI 草拟回复」">智能回复</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#FFF4E5">法</span>
+                <div class="lr-main">
+                  <div class="lr-tt">法务部 · 新版合同模板发布 <span class="pill pill-amber">合同</span></div>
+                  <div class="lr-sub">AI 摘要：v3 模板新增数据安全条款，旧版 7 月起停用</div>
+                </div>
+                <div class="lr-side">10:02</div>
+                <button class="btn-mini js-toast" data-toast="已归档到知识库「合同模板」目录">归档</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#E9F9F1">银</span>
+                <div class="lr-main">
+                  <div class="lr-tt">招商银行 · 5 月对账单 <span class="pill pill-green">已自动归类</span></div>
+                  <div class="lr-sub">AI 摘要：账户流水 86 笔，与财务系统核对一致</div>
+                </div>
+                <div class="lr-side">09:14</div>
+                <button class="btn-mini js-toast" data-toast="已转发给财务监控智能体">转财务</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#EAF0FF">刊</span>
+                <div class="lr-main">
+                  <div class="lr-tt">产品周刊 #45 <span class="pill pill-gray">订阅</span></div>
+                  <div class="lr-sub">AI 摘要：竞品 X 发布工作流市场，详细对比已存知识空间</div>
+                </div>
+                <div class="lr-side">08:40</div>
+                <button class="btn-mini js-toast" data-toast="已加入今日晚间阅读清单">稍后读</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#F1EBFF">知</span>
+                <div class="lr-main">
+                  <div class="lr-tt">内部通知 · 端午值班安排 <span class="pill pill-gray">一般</span></div>
+                  <div class="lr-sub">AI 摘要：你不在值班名单中，已同步到日历备注</div>
+                </div>
+                <div class="lr-side">08:12</div>
+                <button class="btn-mini js-toast" data-toast="已标记为已读">已读</button>
+              </div>
+            </div>
+            <div>
+              <div class="pcard">
+                <div class="pc-head"><h3>AI 草拟回复</h3><span class="pill pill-blue">华东客户 · 合同条款</span></div>
+                <div class="pc-body" style="font-size:12.5px;color:var(--ink-2);line-height:1.9">
+                  王总您好：<br/>关于第 7 条付款节点，我们可调整为「到货验收后 30 天内支付 60%，项目验收后支付尾款 40%」，与贵司财务流程对齐。修订版合同今天下班前发您，如有其他疑问随时联系我。<br/><span style="color:var(--muted)">—— 阿飘</span>
+                </div>
+                <div class="pc-body" style="display:flex;gap:9px;padding-top:0">
+                  <button class="btn-grad js-toast" data-toast="草稿已发送，并在待办中标记完成 ✓">用此草稿发送</button>
+                  <button class="btn-mini js-toast" data-toast="已重新生成更正式的版本">换个语气</button>
+                </div>
+              </div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>自动化规则</h3><span class="pc-extra">3 条生效中</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">⚡</span><div class="lr-main"><div class="lr-tt">对账单 → 自动核对并转财务</div><div class="lr-sub">本月已执行 5 次</div></div><span class="pill pill-green">生效中</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">⚡</span><div class="lr-main"><div class="lr-tt">订阅邮件 → 摘要后存知识空间</div><div class="lr-sub">本月已执行 22 次</div></div><span class="pill pill-green">生效中</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚡</span><div class="lr-main"><div class="lr-tt">含「合同」关键词 → 提醒并建待办</div><div class="lr-sub">本月已执行 8 次</div></div><span class="pill pill-green">生效中</span></div>
+              </div>
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- ============ 视图：桌面助手 ============ -->
+      <section class="view" id="view-desktop">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EAF7FF">🗂️</span>桌面助手</h2>
+            <p>文件整理 · 应用操作 — 守护你的本地工作区，所有操作可一键撤销</p>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">3.2GB</div><div class="ms-label">可清理空间</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">12</div><div class="ms-label">重复文件</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">47</div><div class="ms-label">待归类截图</div></div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>一键操作</h3><span class="pc-extra">执行前生成预览</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🧹</span><div class="lr-main"><div class="lr-tt">整理下载文件夹</div><div class="lr-sub">按类型 / 项目自动归档 138 个文件</div></div><button class="btn-grad js-toast" data-toast="已生成整理预览，确认后执行 · 可随时撤销">执行</button></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFEFF2">♻️</span><div class="lr-main"><div class="lr-tt">清理重复文件</div><div class="lr-sub">12 组重复，预计释放 1.8GB</div></div><button class="btn-mini js-toast" data-toast="重复文件清单已生成，请勾选确认">预览</button></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">🖼️</span><div class="lr-main"><div class="lr-tt">归类 47 张截图</div><div class="lr-sub">按内容识别：需求 18 · 报表 14 · 聊天 15</div></div><button class="btn-mini js-toast" data-toast="已按内容归入对应项目文件夹">归类</button></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">📦</span><div class="lr-main"><div class="lr-tt">归档 Q1 项目文件</div><div class="lr-sub">42 个文件压缩后上传云端备份</div></div><button class="btn-mini js-toast" data-toast="已加入任务队列，完成后通知你">归档</button></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>最近自动化操作</h3><span class="pc-extra">全程留痕 · 可回滚</span></div>
+              <div class="timeline">
+                <div class="tl-item"><div class="tl-tt">整理了下载文件夹</div><div class="tl-sub">28 个文件按类型归档 · 今天 10:42</div></div>
+                <div class="tl-item"><div class="tl-tt">重命名 17 张截图</div><div class="tl-sub">按「日期_内容摘要」规则 · 今天 09:15</div></div>
+                <div class="tl-item"><div class="tl-tt">合同扫描件已上传云端</div><div class="tl-sub">同步至项目文件夹「华东客户」 · 昨天 18:03</div></div>
+                <div class="tl-item"><div class="tl-tt">会议录音转写完成</div><div class="tl-sub">纪要已存入知识库 · 昨天 16:30</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：知识空间 ============ -->
+      <section class="view" id="view-kspace">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#F1EBFF">🧠</span>知识空间</h2>
+            <p>知识图谱 · 决策溯源 — 让每一个结论都能追溯到它的来源</p>
+          </div>
+          <div class="pgrid g2">
+            <div class="pcard">
+              <div class="pc-head"><h3>知识图谱</h3><span class="pc-extra">围绕「Q2 经营复盘」</span></div>
+              <div class="pc-body">
+                <svg class="kgraph-svg" viewBox="0 0 480 250" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="kgGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#5A5BF0"/><stop offset="1" stop-color="#9A4DFF"/>
+                    </linearGradient>
+                  </defs>
+                  <line class="kg-link" x1="240" y1="125" x2="95" y2="55"/>
+                  <line class="kg-link" x1="240" y1="125" x2="385" y2="50"/>
+                  <line class="kg-link" x1="240" y1="125" x2="70" y2="185"/>
+                  <line class="kg-link" x1="240" y1="125" x2="400" y2="195"/>
+                  <line class="kg-link" x1="240" y1="125" x2="240" y2="28"/>
+                  <line class="kg-link" x1="95" y1="55" x2="240" y2="28"/>
+                  <line class="kg-link" x1="385" y1="50" x2="400" y2="195"/>
+                  <circle class="kg-node" cx="95" cy="55" r="26"/>
+                  <circle class="kg-node" cx="385" cy="50" r="26"/>
+                  <circle class="kg-node" cx="70" cy="185" r="26"/>
+                  <circle class="kg-node" cx="400" cy="195" r="26"/>
+                  <circle class="kg-node" cx="240" cy="28" r="22"/>
+                  <circle class="kg-core" cx="240" cy="125" r="36"/>
+                  <text class="kg-label" x="95" y="59">销售数据</text>
+                  <text class="kg-label" x="385" y="54">合同条款</text>
+                  <text class="kg-label" x="70" y="189">客服周报</text>
+                  <text class="kg-label" x="400" y="199">竞品动态</text>
+                  <text class="kg-label" x="240" y="32">路线图</text>
+                  <text class="kg-label kg-core-label" x="240" y="122">Q2 经营</text>
+                  <text class="kg-label kg-core-label" x="240" y="136">复盘</text>
+                </svg>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>决策溯源</h3><span class="pc-extra">最近 3 条</span></div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#E8F1FF">🧾</span>
+                <div class="lr-main">
+                  <div class="lr-tt">「Q3 华东区提价 3%」</div>
+                  <div class="lr-sub">引用 4 个来源：销售数据 · 竞品价格 · 客服反馈 · 毛利模型</div>
+                </div>
+                <button class="btn-mini js-toast" data-toast="已展开 4 个来源的引用片段与时间线">溯源</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#E9F9F1">🧾</span>
+                <div class="lr-main">
+                  <div class="lr-tt">「客服夜间时段改用智能体值守」</div>
+                  <div class="lr-sub">引用 3 个来源：GEO 周报 · 接通率 · 人力排班表</div>
+                </div>
+                <button class="btn-mini js-toast" data-toast="已展开 3 个来源的引用片段与时间线">溯源</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#FFF4E5">🧾</span>
+                <div class="lr-main">
+                  <div class="lr-tt">「合同模板升级至 v3」</div>
+                  <div class="lr-sub">引用 2 个来源：法务通知 · 数据安全新规</div>
+                </div>
+                <button class="btn-mini js-toast" data-toast="已展开 2 个来源的引用片段与时间线">溯源</button>
+              </div>
+              <div class="pc-body" style="border-top:1px solid var(--line)">
+                <div class="lr-sub" style="white-space:normal">💡 知识空间会把对话、文档与数据关联成图谱。当 AI 给出结论时，可一键查看「它为什么这么说」。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：知识库 ============ -->
+      <section class="view" id="view-kb">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E8F0FF">📚</span>知识库</h2>
+            <p>资料上下文 · 来源管理 — 上传或连接来源，自动向量化供所有智能体调用</p>
+          </div>
+          <div class="pcard">
+            <div class="pc-head">
+              <h3>文档与来源</h3>
+              <span class="pc-extra">共 286 篇 · 已向量化 271</span>
+              <button class="btn-grad js-toast" data-toast="选择文件后将自动解析、切片并向量化" style="margin-left:12px">上传文档</button>
+              <button class="btn-mini js-toast" data-toast="支持 OSS / Git / Notion / 数据库 等 12 种来源" style="margin-left:8px">新建来源</button>
+            </div>
+            <table class="table">
+              <thead><tr><th>名称</th><th>来源</th><th>更新时间</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>2026 价格手册.pdf</td><td>OSS 同步</td><td>今天 09:20</td><td><span class="pill pill-green">已向量化</span></td></tr>
+                <tr><td>客户合同模板 v3.docx</td><td>法务部共享</td><td>今天 10:05</td><td><span class="pill pill-green">已向量化</span></td></tr>
+                <tr><td>产品 FAQ.md</td><td>Git 仓库</td><td>昨天 17:42</td><td><span class="pill pill-green">已向量化</span></td></tr>
+                <tr><td>华东客户拜访纪要.xlsx</td><td>桌面助手归档</td><td>今天 11:02</td><td><span class="pill pill-blue">同步中</span></td></tr>
+                <tr><td>竞品对比 2026Q2.pptx</td><td>手动上传</td><td>6/10 14:30</td><td><span class="pill pill-green">已向量化</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>检索测试</h3><span class="pc-extra">验证召回质量</span></div>
+            <div class="pc-body">
+              <div class="search-row">
+                <input type="text" value="华东客户的付款节点是怎么约定的？" readonly />
+                <button class="btn-grad js-toast" data-toast="已召回 3 个片段，相似度 0.92 / 0.88 / 0.85">测试检索</button>
+              </div>
+              <div class="lrow" style="padding-left:0;padding-right:0">
+                <span class="lr-ico" style="--tint:#E9F9F1">①</span>
+                <div class="lr-main">
+                  <div class="lr-tt">客户合同模板 v3.docx · 第 7 条</div>
+                  <div class="lr-sub">"到货验收后 30 日内支付合同总价的 60%，项目终验后支付剩余 40%…"</div>
+                </div>
+                <span class="pill pill-green">0.92</span>
+              </div>
+              <div class="lrow" style="padding-left:0;padding-right:0">
+                <span class="lr-ico" style="--tint:#E8F1FF">②</span>
+                <div class="lr-main">
+                  <div class="lr-tt">华东客户拜访纪要.xlsx · 5月</div>
+                  <div class="lr-sub">"王总提出付款节奏希望与其内部预算审批季度对齐…"</div>
+                </div>
+                <span class="pill pill-green">0.88</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：开发者中心 ============ -->
+      <section class="view" id="view-dev">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EAF0FF">🧑‍💻</span>开发者中心</h2>
+            <p>企业能力接入 · 组装 — 把内部系统封装成智能体可调用的工具</p>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard">
+              <div class="pc-head"><h3>MCP 服务器</h3><span class="pill pill-green">已连接 6</span></div>
+              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">CRM · 工单 · 日历 · 网盘 · 数据仓库 · 企微，统一以 MCP 协议挂载给全部智能体。</div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>OpenAPI 能力</h3><span class="pill pill-blue">12 个</span></div>
+              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">导入 Swagger 即自动生成工具描述，权限按角色下发，调用全程审计。</div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>Webhook 订阅</h3><span class="pill pill-amber">3 条</span></div>
+              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">合同签署、工单升级、报表生成完成时，回调你的业务系统。</div>
+            </div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head">
+                <h3>API Key</h3>
+                <span class="pc-extra">权限：调度 / 问数</span>
+                <button class="btn-mini js-toast" data-toast="已复制到剪贴板（演示）" style="margin-left:12px">复制</button>
+              </div>
+              <div class="pc-body">
+                <div class="sql-line">dgg-sk-9f27••••••••••••••••7f3a</div>
+                <div class="lr-sub" style="margin-top:10px;white-space:normal">用一个接口调度任意智能体，由系统自动路由模型并衔接上下文：</div>
+                <div class="code-block mt"><span class="cc"># 调度「搭子」处理一批资料</span>
+curl https://api.dgg.ai/v1/agents/dispatch \
+  -H <span class="cs">"Authorization: Bearer $DGG_KEY"</span> \
+  -d <span class="cs">'{
+    "agent": "dazi",
+    "task": "整理这批资料并选择合适的智能体",
+    "context": ["kb://contracts", "mail://unread"]
+  }'</span></div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>组装新智能体</h3><span class="pc-extra">低代码 4 步</span></div>
+              <div class="timeline">
+                <div class="tl-item"><div class="tl-tt">① 选择基座模型</div><div class="tl-sub">支持自动路由或锁定指定模型</div></div>
+                <div class="tl-item"><div class="tl-tt">② 挂载工具与知识</div><div class="tl-sub">勾选 MCP 工具、知识库目录与数据权限</div></div>
+                <div class="tl-item"><div class="tl-tt">③ 编写角色指令</div><div class="tl-sub">内置模板：客服 / 分析 / 审查 / 工程</div></div>
+                <div class="tl-item"><div class="tl-tt">④ 发布到工作台</div><div class="tl-sub">出现在左侧「自定义智能体」，支持灰度</div></div>
+              </div>
+              <div class="pc-body" style="padding-top:4px">
+                <button class="btn-grad js-toast" data-toast="已创建草稿智能体「市场情报官」，可在左侧编辑">＋ 新建智能体</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：数据助手 ============ -->
+      <section class="view" id="view-data">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E9F9F1">📊</span>数据助手</h2>
+            <p>数据上下文 · 指标分析 — 用一句话问数，自动生成 SQL 与图表</p>
+          </div>
+          <div class="pcard">
+            <div class="pc-body">
+              <div class="search-row">
+                <input type="text" value="最近 12 周华东区每周销售额，和上季度对比" readonly />
+                <button class="btn-grad js-toast" data-toast="已重新执行查询，数据截至今天 11:00">问数</button>
+              </div>
+              <div class="sql-line">SELECT week, SUM(amount) FROM sales WHERE region='华东' AND week &gt;= now()-interval '12 week' GROUP BY 1 ORDER BY 1;</div>
+            </div>
+          </div>
+          <div class="kpi-row mt">
+            <div class="kpi"><div class="kpi-label">本季 GMV</div><div class="kpi-num">¥386万</div><div class="kpi-sub"><b class="up">↑12.4%</b> vs 上季</div></div>
+            <div class="kpi"><div class="kpi-label">转化率</div><div class="kpi-num">3.8%</div><div class="kpi-sub"><b class="up">↑0.6pp</b> 持续改善</div></div>
+            <div class="kpi"><div class="kpi-label">客单价</div><div class="kpi-num">¥420</div><div class="kpi-sub"><b class="dn">↓2.1%</b> 关注促销影响</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>华东区 · 周销售额（近 12 周）</h3><span class="pc-extra">单位：万元</span></div>
+            <div class="pc-body">
+              <div class="bars" id="dataBars">
+                <div class="bar" style="--h:38%"></div><div class="bar" style="--h:46%"></div>
+                <div class="bar" style="--h:42%"></div><div class="bar" style="--h:55%"></div>
+                <div class="bar" style="--h:50%"></div><div class="bar" style="--h:62%"></div>
+                <div class="bar" style="--h:58%"></div><div class="bar" style="--h:70%"></div>
+                <div class="bar" style="--h:66%"></div><div class="bar" style="--h:78%"></div>
+                <div class="bar" style="--h:84%"></div><div class="bar" style="--h:95%"></div>
+              </div>
+              <div class="bar-labels"><span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span><span>W6</span><span>W7</span><span>W8</span><span>W9</span><span>W10</span><span>W11</span><span>W12</span></div>
+              <div class="lr-sub" style="margin-top:10px;white-space:normal">📌 AI 解读：近 4 周加速上行，主要由「新客户首单 + 提价后客单稳定」驱动；W12 为周中口径，预计完整周再 +6%。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：工程管理助手 ============ -->
+      <section class="view" id="view-eng">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFF4E5">🛠️</span>工程管理助手</h2>
+            <p>制度采集 · 条款提取 — 自定义智能体，由开发者中心组装发布</p>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">36</div><div class="ms-label">已采集制度</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">412</div><div class="ms-label">已提取条款</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">5</div><div class="ms-label">待复核条款</div></div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>采集新制度</h3><span class="pc-extra">PDF / Word / 扫描件</span></div>
+              <div class="pc-body">
+                <div class="upload-zone js-toast" data-toast="（演示）拖入文件后自动 OCR → 条款切分 → 风险标注">
+                  <div class="uz-ico">📄</div>
+                  <p>拖入制度文件或合同</p>
+                  <small>自动 OCR 识别 · 条款切分 · 入库知识空间</small>
+                </div>
+                <div class="lr-sub" style="margin-top:12px;white-space:normal">最近采集：《施工安全管理办法（2026 修订）》 · 提取 28 条 · 今天 10:18</div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>条款提取与风险标注</h3><span class="pc-extra">待复核 5 条</span></div>
+              <table class="table">
+                <thead><tr><th>条款</th><th>风险</th><th>建议</th></tr></thead>
+                <tbody>
+                  <tr><td>分包方延期赔付上限未约定</td><td><span class="pill pill-red">高</span></td><td>补充按日 0.5‰ 上限 10%</td></tr>
+                  <tr><td>材料价格波动调差条款缺失</td><td><span class="pill pill-amber">中</span></td><td>引用 v3 模板第 12 条</td></tr>
+                  <tr><td>验收标准引用旧国标</td><td><span class="pill pill-amber">中</span></td><td>更新为 GB/T 2026 版</td></tr>
+                  <tr><td>安全责任划分清晰</td><td><span class="pill pill-green">低</span></td><td>无需修改</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图：财务监控和决策 ============ -->
+      <section class="view" id="view-fin">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFEFF2">💹</span>财务监控和决策</h2>
+            <p>财务监控 · 决策支持 — 自定义智能体，异动自动预警并给出处置建议</p>
+          </div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="kpi-label">经营现金流</div><div class="kpi-num">¥1,240万</div><div class="kpi-sub"><b class="up">健康</b> · 可覆盖 6.8 个月支出</div></div>
+            <div class="kpi"><div class="kpi-label">应收账款</div><div class="kpi-num">¥680万</div><div class="kpi-sub"><b class="dn">↑9.2%</b> · 账期拉长需关注</div></div>
+            <div class="kpi"><div class="kpi-label">预算执行率</div><div class="kpi-num">64%</div><div class="kpi-sub">时间进度 62% · 基本同步</div></div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>异动预警</h3><span class="badge-n">2</span></div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#FFEFF2">⚠️</span>
+                <div class="lr-main">
+                  <div class="lr-tt">华东项目毛利低于阈值</div>
+                  <div class="lr-sub">实际 18.4% &lt; 阈值 22% · 主因：材料涨价 + 折扣超标</div>
+                </div>
+                <span class="pill pill-red">高</span>
+                <button class="btn-mini js-toast" data-toast="已生成处置建议并抄送项目负责人">处置</button>
+              </div>
+              <div class="lrow">
+                <span class="lr-ico" style="--tint:#FFF4E5">⚠️</span>
+                <div class="lr-main">
+                  <div class="lr-tt">5 月差旅费超预算 12%</div>
+                  <div class="lr-sub">华东出差频次上升 · 与新客户拓展相关，属合理超支</div>
+                </div>
+                <span class="pill pill-amber">中</span>
+                <button class="btn-mini js-toast" data-toast="已标记为「合理超支」，并更新 6 月预算建议">标记</button>
+              </div>
+              <div class="pc-body" style="border-top:1px solid var(--line)">
+                <div class="lr-sub" style="white-space:normal">🤖 决策建议：优先催收 3 笔 90 天以上应收（合计 ¥210 万），可使现金流安全垫提升至 8 个月。</div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>现金流趋势（近 6 月）</h3><span class="pc-extra">万元</span></div>
+              <div class="pc-body">
+                <div class="bars">
+                  <div class="bar" style="--h:52%"></div><div class="bar" style="--h:48%"></div>
+                  <div class="bar" style="--h:60%"></div><div class="bar" style="--h:57%"></div>
+                  <div class="bar" style="--h:72%"></div><div class="bar" style="--h:86%"></div>
+                </div>
+                <div class="bar-labels"><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span></div>
+                <div class="lr-sub" style="margin-top:10px;white-space:normal">📌 AI 解读：回款节奏改善，6 月现金流创半年新高；建议保持当前账期策略。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ====================== 右侧面板 ====================== -->
+    <aside class="right-panel" id="rightPanel">
+      <div class="rp-card greet">
+        <span class="g-ava"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+        <div>
+          <div class="g-name">搭子</div>
+          <div class="g-sub" id="greetSub">早上好，阿飘 · 6月12日 · 周五</div>
+        </div>
+        <button class="g-more" aria-label="更多">···</button>
       </div>
-      <!-- 漂浮卡片 -->
-      <div class="float-card float-a">
-        <span class="fc-label"><i class="pulse-dot"></i>智能体在线</span>
-        <span class="fc-value">48<small> 个</small></span>
+
+      <div class="rp-card">
+        <div class="todo-head">
+          <span class="bell"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3a4.5 4.5 0 0 0-4.5 4.5c0 3.6-1.5 5-1.5 5h12s-1.5-1.4-1.5-5A4.5 4.5 0 0 0 10 3Z"/><path d="M8.5 15.5a1.6 1.6 0 0 0 3 0" stroke-linecap="round"/></svg></span>
+          <h3>个人待办</h3>
+          <span class="badge-n" id="todoBadge">8</span>
+          <div class="seg">
+            <button class="seg-btn active" data-seg="pending">待完成</button>
+            <button class="seg-btn" data-seg="done">已完成</button>
+          </div>
+          <button class="add-btn" id="todoAddBtn" title="新增待办">＋</button>
+        </div>
+        <div class="todo-add-row" id="todoAddRow">
+          <input type="text" id="todoAddInput" placeholder="输入待办内容，回车添加" />
+        </div>
+        <div class="todo-list" id="todoList"></div>
       </div>
-      <div class="float-card float-b">
-        <span class="fc-label">今日 Token</span>
-        <span class="fc-value">1.2M</span>
-        <span class="fc-sub">成本 ¥86 <b class="down">↓18%</b></span>
+
+      <div class="rp-card">
+        <div class="dash-head"><h3>我的仪表盘</h3></div>
+        <div class="dash-body">
+          <div class="chart-card">
+            <div class="chart-cap">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 11 4-4 3 3 5-6"/><path d="M11 4h3v3"/></svg>
+              收入趋势 · 实际 vs 目标基线
+            </div>
+            <span class="trend-chip">↑46.4% 环比</span>
+            <svg class="trend-svg" viewBox="0 0 560 110" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#5A5BF0" stop-opacity=".25"/>
+                  <stop offset="1" stop-color="#5A5BF0" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="trendLine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="560" y2="0">
+                  <stop offset="0" stop-color="#5A5BF0"/><stop offset=".6" stop-color="#9A4DFF"/><stop offset="1" stop-color="#00C2D8"/>
+                </linearGradient>
+              </defs>
+              <path d="M0 84 L560 58" stroke="rgba(14,20,48,.18)" stroke-width="1.4" stroke-dasharray="4 5" fill="none"/>
+              <path d="M0 78 C 50 72, 80 84, 130 78 C 180 72, 210 80, 260 74 C 310 68, 340 74, 390 66 C 440 58, 480 64, 530 52 L 560 48 L 560 110 L 0 110 Z" fill="url(#trendGrad)"/>
+              <path d="M0 78 C 50 72, 80 84, 130 78 C 180 72, 210 80, 260 74 C 310 68, 340 74, 390 66 C 440 58, 480 64, 530 52 L 560 48" stroke="url(#trendLine)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <circle cx="548" cy="50" r="4" fill="#00C2D8"/>
+              <circle cx="548" cy="50" r="8" fill="#00C2D8" opacity=".22"/>
+            </svg>
+            <div class="dash-months"><span>12月</span><span>1月</span><span>2月</span><span>3月</span><span>4月</span></div>
+          </div>
+          <div class="dash-grid">
+            <div class="d-metric"><div class="dm-label">Q2 达成率</div><div class="dm-num">73%</div><div class="dm-sub up">个人口径</div></div>
+            <div class="d-metric"><div class="dm-label">较上周</div><div class="dm-num">↑2.4%</div><div class="dm-sub up">持续向好</div></div>
+            <div class="d-metric"><div class="dm-label">待跟进商机</div><div class="dm-num">3</div><div class="dm-sub warn">建议今日触达</div></div>
+          </div>
+          <div class="dash-note">Q2 个人口径达成 73%，较上周 ↑2.4% · 与你本周行动相关的关键数字</div>
+        </div>
       </div>
-      <div class="float-chip">⚡ 模型智能路由 · 命中率 94%</div>
+    </aside>
+  </div>
+</div>
+
+<!-- ====================== 协议说明弹窗 ====================== -->
+<div class="modal-mask" id="protoModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="执行规则与协议信息">
+    <div class="m-head">
+      <span class="mc-ico">C</span>
+      <h3>执行规则与协议信息</h3>
+      <button class="m-close" id="modalClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="m-body">
+      该卡片由「搭子」按企业智能体协作协议生成，执行过程全程留痕：
+      <ul>
+        <li><b>数据范围</b>：仅访问你授权的邮箱、知识库目录与业务系统，密级外数据不可见。</li>
+        <li><b>调度协议</b>：跨智能体调用走 A2A 协议，工具调用走 MCP 协议，上下文自动衔接。</li>
+        <li><b>权限与审计</b>：每一次模型调用与数据访问均记录审计日志，管理员可追溯取证。</li>
+        <li><b>人工确认</b>：发送邮件、写入业务系统等外部动作，默认需要你点击确认后执行。</li>
+        <li><b>撤销方式</b>：卡片右上角「···」→ 撤销本次执行，或对搭子说"撤销刚才的操作"。</li>
+      </ul>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ====================== 模型跑马灯 ====================== -->
-<section class="models">
-  <div class="container">
-    <p class="models-title reveal">一个网关，统一接入全球 30+ 主流大模型</p>
-  </div>
-  <div class="marquee reveal" style="--d:.1s">
-    <div class="marquee-track">
-      <span class="model-chip"><i style="--c:#4D6BFE"></i>DeepSeek-V3</span>
-      <span class="model-chip"><i style="--c:#615CED"></i>Qwen3-Max</span>
-      <span class="model-chip"><i style="--c:#10A37F"></i>GPT-5</span>
-      <span class="model-chip"><i style="--c:#D97757"></i>Claude Opus</span>
-      <span class="model-chip"><i style="--c:#4285F4"></i>Gemini Pro</span>
-      <span class="model-chip"><i style="--c:#2C6EF2"></i>GLM-5</span>
-      <span class="model-chip"><i style="--c:#0668E1"></i>Llama 4</span>
-      <span class="model-chip"><i style="--c:#0FB6BC"></i>Kimi K2</span>
-      <span class="model-chip"><i style="--c:#2932E1"></i>文心 5.0</span>
-      <span class="model-chip"><i style="--c:#0052D9"></i>混元 Turbo</span>
-      <span class="model-chip"><i style="--c:#FF4F40"></i>MiniMax</span>
-      <span class="model-chip"><i style="--c:#325AB4"></i>豆包 Pro</span>
-      <span class="model-chip"><i style="--c:#4D6BFE"></i>DeepSeek-V3</span>
-      <span class="model-chip"><i style="--c:#615CED"></i>Qwen3-Max</span>
-      <span class="model-chip"><i style="--c:#10A37F"></i>GPT-5</span>
-      <span class="model-chip"><i style="--c:#D97757"></i>Claude Opus</span>
-      <span class="model-chip"><i style="--c:#4285F4"></i>Gemini Pro</span>
-      <span class="model-chip"><i style="--c:#2C6EF2"></i>GLM-5</span>
-      <span class="model-chip"><i style="--c:#0668E1"></i>Llama 4</span>
-      <span class="model-chip"><i style="--c:#0FB6BC"></i>Kimi K2</span>
-      <span class="model-chip"><i style="--c:#2932E1"></i>文心 5.0</span>
-      <span class="model-chip"><i style="--c:#0052D9"></i>混元 Turbo</span>
-      <span class="model-chip"><i style="--c:#FF4F40"></i>MiniMax</span>
-      <span class="model-chip"><i style="--c:#325AB4"></i>豆包 Pro</span>
-    </div>
-  </div>
-</section>
+<div class="toast" id="toast"></div>
 
-<!-- ====================== 数据指标 ====================== -->
-<section class="stats">
-  <div class="container stats-grid">
-    <div class="stat reveal"><span class="stat-num"><b class="counter" data-target="30">0</b>+</span><span class="stat-label">大模型统一接入</span></div>
-    <div class="stat reveal" style="--d:.08s"><span class="stat-num"><b class="counter" data-target="200">0</b>+</span><span class="stat-label">工作流模板开箱即用</span></div>
-    <div class="stat reveal" style="--d:.16s"><span class="stat-num"><b class="counter" data-target="50">0</b>+</span><span class="stat-label">预置行业智能体</span></div>
-    <div class="stat reveal" style="--d:.24s"><span class="stat-num"><b class="counter" data-target="99.95" data-decimals="2">0</b>%</span><span class="stat-label">服务可用性 SLA</span></div>
-  </div>
-</section>
+<style>body.focus .sidebar { display: none; }</style>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s, p) { return (p || document).querySelector(s); };
+  var $$ = function (s, p) { return Array.prototype.slice.call((p || document).querySelectorAll(s)); };
 
-<!-- ====================== 核心能力 ====================== -->
-<section class="section" id="capabilities">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> 核心能力</span>
-      <h2>六大引擎，构成企业的 <span class="grad-text">AI 内核</span></h2>
-      <p>从模型到应用的完整链路，每一层都为企业级场景而生。</p>
-    </div>
-    <div class="cards grid-3">
-      <article class="card reveal">
-        <span class="card-icon" style="--g1:#5A5BF0;--g2:#9A4DFF"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.7"/></svg></span>
-        <h3>多模型智能调度</h3>
-        <p>统一接入 GPT、Claude、DeepSeek、Qwen 等 30+ 模型，按任务类型自动路由最优模型，推理成本直降 60%。</p>
-        <span class="card-link">了解模型网关 →</span>
-      </article>
-      <article class="card reveal" style="--d:.08s">
-        <span class="card-icon" style="--g1:#00A8C6;--g2:#2BD9A8"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6.5C4 5 5 4 6.5 4H20v13.5c0 1.5-1 2.5-2.5 2.5H6.5C5 20 4 19 4 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="M8 4v16M12 9h4m-4 3.5h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-        <h3>企业知识引擎</h3>
-        <p>文档、网页、数据库一键入库，向量化 + 知识图谱双路检索，让 AI 回答有据可查、句句可溯源。</p>
-        <span class="card-link">了解知识库 →</span>
-      </article>
-      <article class="card reveal" style="--d:.16s">
-        <span class="card-icon" style="--g1:#9A4DFF;--g2:#FF5FA2"><svg viewBox="0 0 24 24" fill="none"><rect x="8.5" y="3" width="7" height="6" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="15" width="7" height="6" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="15" width="7" height="6" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M12 9v3M6.5 15v-1.5a1.5 1.5 0 0 1 1.5-1.5h8a1.5 1.5 0 0 1 1.5 1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-        <h3>多智能体编排</h3>
-        <p>拖拽即可组建多智能体协作团队，规划、执行、反思、交付全程自动，复杂任务一次交办。</p>
-        <span class="card-link">了解智能体 →</span>
-      </article>
-      <article class="card reveal">
-        <span class="card-icon" style="--g1:#F59E0B;--g2:#FF6B6B"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4.5 13.5H11L9.8 22 19 9.8h-6.5L13 2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
-        <h3>自动化工作流</h3>
-        <p>触发器 + 200 余个节点自由编排，把重复工作交给 AI 流水线，7×24 小时不间断运转。</p>
-        <span class="card-link">了解工作流 →</span>
-      </article>
-      <article class="card reveal" style="--d:.08s">
-        <span class="card-icon" style="--g1:#06B6D4;--g2:#5A5BF0"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10m5.5 10V4m5.5 16v-8m5 8V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-        <h3>数据洞察</h3>
-        <p>自然语言直接查询业务数据，自动生成图表与归因分析，让每个人都是数据分析师。</p>
-        <span class="card-link">了解数据洞察 →</span>
-      </article>
-      <article class="card reveal" style="--d:.16s">
-        <span class="card-icon" style="--g1:#2BD9A8;--g2:#06B6D4"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 5.8v5.4c0 4.3 3 8.3 7 9.8 4-1.5 7-5.5 7-9.8V5.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 11.8 2.2 2.2L15.4 9.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <h3>安全与合规</h3>
-        <p>私有化部署、传输与存储加密、细粒度权限与全链路审计，构筑企业级安全底座。</p>
-        <span class="card-link">了解安全体系 →</span>
-      </article>
-    </div>
-  </div>
-</section>
+  /* ---------- 通用：Toast ---------- */
+  var toastEl = $("#toast"), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
+  }
 
-<!-- ====================== 工作流编排 ====================== -->
-<section class="section section-tint" id="workflow">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> Workflow Studio</span>
-      <h2>像搭积木一样，<span class="grad-text">编排 AI 工作流</span></h2>
-      <p>可视化画布、条件分支、人机协同——平均 5 分钟，让一条业务流水线上线运转。</p>
-    </div>
+  /* ---------- 视图切换 ---------- */
+  var sidebar = $("#sidebar");
+  var rightPanel = $("#rightPanel");
+  var mhTitle = $("#mhTitle");
+  function switchView(name) {
+    $$(".view").forEach(function (v) { v.classList.toggle("active", v.id === "view-" + name); });
+    $$(".s-item").forEach(function (it) {
+      it.classList.toggle("active", it.dataset.view === name);
+      if (it.dataset.view === name) mhTitle.textContent = it.dataset.title;
+    });
+    rightPanel.classList.toggle("hidden", name !== "dazi");
+    rightPanel.classList.remove("show-float");
+    sidebar.classList.remove("open");
+  }
+  $$(".s-item").forEach(function (it) {
+    it.addEventListener("click", function () { switchView(it.dataset.view); });
+  });
+  document.addEventListener("click", function (e) {
+    var row = e.target.closest("[data-goto]");
+    if (row) { switchView(row.dataset.goto); }
+  });
 
-    <div class="flow-wrap reveal" style="--d:.1s">
-      <div class="flow-canvas" id="flowCanvas">
-        <svg class="flow-lines" viewBox="0 0 1100 440" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="lg-flow" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1100" y2="0">
-              <stop offset="0" stop-color="#5A5BF0"/><stop offset=".5" stop-color="#9A4DFF"/><stop offset="1" stop-color="#00C2D8"/>
-            </linearGradient>
-          </defs>
-          <path class="flow-line" id="fp1" d="M180 222 H 250"/>
-          <path class="flow-line" id="fp2" d="M410 222 C 445 222 445 102 480 102"/>
-          <path class="flow-line" id="fp3" d="M410 222 C 445 222 445 342 480 342"/>
-          <path class="flow-line" id="fp4" d="M640 102 C 675 102 675 222 710 222"/>
-          <path class="flow-line" id="fp5" d="M640 342 C 675 342 675 222 710 222"/>
-          <path class="flow-line" id="fp6" d="M870 222 H 920"/>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#fp1"/></animateMotion></circle>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" begin="0.5s" repeatCount="indefinite"><mpath href="#fp2"/></animateMotion></circle>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" begin="0.9s" repeatCount="indefinite"><mpath href="#fp3"/></animateMotion></circle>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite"><mpath href="#fp4"/></animateMotion></circle>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" begin="1.6s" repeatCount="indefinite"><mpath href="#fp5"/></animateMotion></circle>
-          <circle class="flow-pulse" r="4"><animateMotion dur="2.6s" begin="2s" repeatCount="indefinite"><mpath href="#fp6"/></animateMotion></circle>
-        </svg>
+  /* ---------- 顶栏按钮 ---------- */
+  $("#btnFocus").addEventListener("click", function () {
+    document.body.classList.toggle("focus");
+    toast(document.body.classList.contains("focus") ? "已进入专注模式" : "已退出专注模式");
+  });
+  $("#btnPanel").addEventListener("click", function () {
+    if (window.matchMedia("(max-width: 1080px)").matches) {
+      rightPanel.classList.toggle("show-float");
+    } else {
+      rightPanel.classList.toggle("hidden");
+    }
+  });
+  $("#mhBurger").addEventListener("click", function (e) {
+    e.stopPropagation();
+    sidebar.classList.toggle("open");
+  });
+  document.addEventListener("click", function (e) {
+    if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !e.target.closest("#mhBurger")) {
+      sidebar.classList.remove("open");
+    }
+  });
 
-        <div class="flow-node" style="left:20px;top:176px">
-          <span class="fn-icon" style="--g1:#F59E0B;--g2:#FF6B6B">⚡</span>
-          <span class="fn-title">触发器</span>
-          <span class="fn-sub">表单 / 定时 / Webhook</span>
-        </div>
-        <div class="flow-node fn-active" style="left:250px;top:176px">
-          <span class="fn-icon" style="--g1:#5A5BF0;--g2:#9A4DFF">🧠</span>
-          <span class="fn-title">LLM 推理</span>
-          <span class="fn-sub">DeepSeek-V3 · 自动路由</span>
-          <span class="fn-state">运行中</span>
-        </div>
-        <div class="flow-node" style="left:480px;top:56px">
-          <span class="fn-icon" style="--g1:#00A8C6;--g2:#2BD9A8">📚</span>
-          <span class="fn-title">知识检索</span>
-          <span class="fn-sub">RAG · 企业知识库</span>
-        </div>
-        <div class="flow-node" style="left:480px;top:296px">
-          <span class="fn-icon" style="--g1:#9A4DFF;--g2:#FF5FA2">🔧</span>
-          <span class="fn-title">工具调用</span>
-          <span class="fn-sub">CRM 写入 · API 集成</span>
-        </div>
-        <div class="flow-node" style="left:710px;top:176px">
-          <span class="fn-icon" style="--g1:#06B6D4;--g2:#5A5BF0">👤</span>
-          <span class="fn-title">人工审批</span>
-          <span class="fn-sub">人机协同 · 一键通过</span>
-        </div>
-        <div class="flow-node" style="left:920px;top:176px">
-          <span class="fn-icon" style="--g1:#2BD9A8;--g2:#06B6D4">📤</span>
-          <span class="fn-title">多端分发</span>
-          <span class="fn-sub">邮件 · 企微 · 钉钉</span>
-        </div>
+  /* ---------- 问候语（动态日期） ---------- */
+  (function () {
+    var d = new Date();
+    var h = d.getHours();
+    var hello = h < 6 ? "凌晨好" : h < 12 ? "早上好" : h < 14 ? "中午好" : h < 18 ? "下午好" : "晚上好";
+    var week = ["日", "一", "二", "三", "四", "五", "六"][d.getDay()];
+    $("#greetSub").textContent = hello + "，阿飘 · " + (d.getMonth() + 1) + "月" + d.getDate() + "日 · 周" + week;
+  })();
 
-        <span class="flow-chip" style="right:28px;top:24px">成功率 99.2%</span>
-        <span class="flow-chip" style="left:28px;bottom:24px">平均耗时 1.8s</span>
-      </div>
-    </div>
+  /* ---------- 个人待办 ---------- */
+  var CHIP_STYLE = {
+    time:  ["#F0F2FB", "#3D4668", "rgba(14,20,48,.08)"],
+    cal:   ["#E8F1FF", "#3B6FD4", "rgba(59,111,212,.22)"],
+    mail:  ["#E9F9F1", "#18B97A", "rgba(24,185,122,.22)"],
+    violet:["#F1EBFF", "#8B5CF6", "rgba(139,92,246,.22)"],
+    cyan:  ["#E6F8FB", "#0891B2", "rgba(8,145,178,.22)"],
+    amber: ["#FFF4E5", "#D97706", "rgba(217,119,6,.22)"],
+    gray:  ["#F0F2FB", "#6B7494", "rgba(14,20,48,.08)"]
+  };
+  var todos = [
+    { chips: [["6/12 17:00", "time"], ["日历", "cal"]], txt: "提交 Q2 工作周报", hot: true,  done: false },
+    { chips: [["6/12 15:30", "time"], ["邮件", "mail"]], txt: "回复华东客户合同条款确认邮件", hot: true, done: false },
+    { chips: [["6/12 18:00", "time"], ["GEO客户服务监控", "gray"]], txt: "整理本周 GEO 客服监控周报", hot: false, done: false },
+    { chips: [["6/12 下午5点", "time"], ["搭子", "violet"]], txt: "完成 05-01 需求评审材料", hot: true, done: false },
+    { chips: [["6/13 09:30", "time"], ["日历", "cal"]], txt: "站会同步上周核心指标摘要", hot: false, done: false },
+    { chips: [["6/13", "time"], ["云端", "cyan"]], txt: "归档云端合同扫描件至项目文件夹", hot: false, done: false },
+    { chips: [["6/13 14:00", "time"], ["日历", "cal"]], txt: "准备与主管 1:1 谈话要点", hot: false, done: false },
+    { chips: [["成长", "amber"], ["搭子", "violet"]], txt: "优先跟进 2 个高潜商机，提升 Q2 个人达成率", hot: false, done: false }
+  ];
+  var seg = "pending";
+  var todoList = $("#todoList");
+  function esc(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function chipHtml(c) {
+    var st = CHIP_STYLE[c[1]] || CHIP_STYLE.gray;
+    return '<span class="t-chip" style="--tc-bg:' + st[0] + ';--tc-fg:' + st[1] + ';--tc-bd:' + st[2] + '">' + esc(c[0]) + "</span>";
+  }
+  function renderTodos() {
+    var pending = todos.filter(function (t) { return !t.done; }).length;
+    $("#todoBadge").textContent = pending;
+    var shown = todos.filter(function (t) { return seg === "done" ? t.done : !t.done; });
+    if (!shown.length) {
+      todoList.innerHTML = '<div class="todo-empty">' + (seg === "done" ? "还没有已完成的待办" : "全部完成，干得漂亮 🎉") + "</div>";
+      return;
+    }
+    todoList.innerHTML = shown.map(function (t) {
+      var i = todos.indexOf(t);
+      return '<div class="todo-item' + (t.done ? " done" : "") + '" data-i="' + i + '">' +
+        '<button class="t-check' + (t.done ? " checked" : "") + '" aria-label="完成">' +
+          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 6.5 2.6 2.6L10 3.5"/></svg>' +
+        "</button>" +
+        t.chips.map(chipHtml).join("") +
+        '<span class="t-text">' + esc(t.txt) + "</span>" +
+        (t.hot && !t.done ? '<span class="t-dot"></span>' : "") +
+        '<button class="t-del" aria-label="删除"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5 5 13.5h6l.5-9M6.8 7v4.5M9.2 7v4.5"/></svg></button>' +
+      "</div>";
+    }).join("");
+  }
+  todoList.addEventListener("click", function (e) {
+    var item = e.target.closest(".todo-item");
+    if (!item) return;
+    var i = +item.dataset.i;
+    if (e.target.closest(".t-check")) {
+      todos[i].done = !todos[i].done;
+      renderTodos();
+      if (todos[i].done) toast("已完成：" + todos[i].txt);
+    } else if (e.target.closest(".t-del")) {
+      var txt = todos[i].txt;
+      todos.splice(i, 1);
+      renderTodos();
+      toast("已删除：" + txt);
+    }
+  });
+  $$(".seg-btn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      seg = b.dataset.seg;
+      $$(".seg-btn").forEach(function (x) { x.classList.toggle("active", x === b); });
+      renderTodos();
+    });
+  });
+  var addRow = $("#todoAddRow"), addInput = $("#todoAddInput");
+  $("#todoAddBtn").addEventListener("click", function () {
+    addRow.classList.toggle("open");
+    if (addRow.classList.contains("open")) addInput.focus();
+  });
+  addInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && addInput.value.trim()) {
+      var d = new Date();
+      todos.unshift({
+        chips: [[(d.getMonth() + 1) + "/" + d.getDate(), "time"], ["搭子", "violet"]],
+        txt: addInput.value.trim(), hot: false, done: false
+      });
+      addInput.value = "";
+      seg = "pending";
+      $$(".seg-btn").forEach(function (x) { x.classList.toggle("active", x.dataset.seg === "pending"); });
+      renderTodos();
+      toast("已添加待办，搭子会在临期时提醒你");
+    }
+  });
+  renderTodos();
 
-    <div class="flow-feats">
-      <div class="flow-feat reveal"><i>⎇</i><div><h4>条件分支与循环</h4><p>按业务规则智能分流，复杂逻辑可视化表达。</p></div></div>
-      <div class="flow-feat reveal" style="--d:.08s"><i>🤝</i><div><h4>人机协同审批</h4><p>关键节点引入人工确认，AI 提效不失控。</p></div></div>
-      <div class="flow-feat reveal" style="--d:.16s"><i>↻</i><div><h4>失败重试与回滚</h4><p>节点级容错策略，异常自动重试、整链可回滚。</p></div></div>
-      <div class="flow-feat reveal" style="--d:.24s"><i>⑂</i><div><h4>版本与灰度发布</h4><p>工作流版本化管理，灰度上线随时回退。</p></div></div>
-    </div>
-  </div>
-</section>
+  /* ---------- 对话 ---------- */
+  var thread = $("#thread");
+  var input = $("#cmpInput");
+  var AVA = '<span class="a-ava"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>';
+  var REPLIES = [
+    "收到。我先把任务拆成 3 步：① 扫描资料类型 ② 匹配最优智能体 ③ 自动衔接上下文。完成后会在「个人待办」给你留一条跟进项。",
+    "好的，已记录。这件事和「Q2 工作周报」有关联，我可以顺手把相关数据填进周报草稿——点左侧「数据助手」可以看明细。",
+    "明白！请求已转给对应智能体处理，预计 1 分钟内完成。你可以先做别的，结果出来我会第一时间提醒你。",
+    "没问题。我注意到知识库里有 2 篇相关文档，已经一并带上作为上下文，回答会标注来源，可随时溯源。"
+  ];
+  var replyIdx = 0;
+  function nowStr() {
+    var d = new Date();
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  }
+  function scrollBottom() { thread.scrollTop = thread.scrollHeight; }
+  function appendUser(text) {
+    var div = document.createElement("div");
+    div.className = "u-row";
+    div.innerHTML = '<div class="u-bubble">' + esc(text) + '</div><div class="meta-row"><span class="meta-t">' + nowStr() + "</span></div>";
+    thread.appendChild(div);
+    scrollBottom();
+  }
+  function appendAI(text) {
+    var div = document.createElement("div");
+    div.className = "a-row";
+    div.innerHTML = AVA + '<div class="a-body"><div class="a-text">' + esc(text) + "</div>" +
+      '<div class="meta-row">' +
+      '<button class="rx-btn" aria-label="赞"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>' +
+      '<button class="rx-btn" aria-label="踩"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M6 9.5 9.2 3c.9 0 1.8.8 1.8 1.9V8h4.2c1 0 1.7 1 1.5 2l-1 5.2c-.15.9-.9 1.5-1.8 1.5H6M6 9.5H3.5v7.2H6M6 9.5v7.2"/></svg></button>' +
+      '<span class="meta-t">' + nowStr() + "</span></div></div>";
+    thread.appendChild(div);
+    scrollBottom();
+  }
+  var replying = false;
+  function send(text) {
+    var msg = (text || input.value).trim();
+    if (!msg || replying) return;
+    input.value = "";
+    appendUser(msg);
+    replying = true;
+    var tp = document.createElement("div");
+    tp.className = "a-row";
+    tp.innerHTML = AVA + '<div class="a-body"><div class="typing"><i></i><i></i><i></i></div></div>';
+    thread.appendChild(tp);
+    scrollBottom();
+    setTimeout(function () {
+      tp.remove();
+      appendAI(REPLIES[replyIdx % REPLIES.length]);
+      replyIdx++;
+      replying = false;
+    }, 1100 + Math.random() * 700);
+  }
+  $("#btnSend").addEventListener("click", function () { send(); });
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  $$(".chip").forEach(function (c) {
+    c.addEventListener("click", function () { switchView("dazi"); send(c.textContent.trim()); });
+  });
+  document.addEventListener("click", function (e) {
+    if (e.target.closest(".mc-btn") && e.target.textContent.indexOf("继续追问") > -1) {
+      send("展开讲讲这 9 封邮件里最重要的 3 封");
+    }
+  });
 
-<!-- ====================== 智能体矩阵 ====================== -->
-<section class="section" id="agents">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> Agent 矩阵</span>
-      <h2>50+ 预置行业智能体，<span class="grad-text">开箱即用</span></h2>
-      <p>每一个智能体都自带专业技能、工具与知识，也可以基于模板深度定制你自己的数字员工。</p>
-    </div>
-    <div class="cards grid-3">
-      <article class="agent-card reveal">
-        <header><span class="agent-avatar" style="--g1:#5A5BF0;--g2:#00C2D8">客</span><div><h3>智能客服坐席</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>7×24 全渠道接待，自动识别意图、查询订单、办理业务，复杂问题无缝转人工。</p>
-        <footer><span class="tag">多轮对话</span><span class="tag">工单系统</span><span class="tag">情绪识别</span></footer>
-      </article>
-      <article class="agent-card reveal" style="--d:.08s">
-        <header><span class="agent-avatar" style="--g1:#FF5FA2;--g2:#9A4DFF">营</span><div><h3>营销内容官</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>一键产出小红书、公众号、短视频脚本等全渠道内容，自动匹配品牌语调与热点。</p>
-        <footer><span class="tag">文案生成</span><span class="tag">配图设计</span><span class="tag">热点追踪</span></footer>
-      </article>
-      <article class="agent-card reveal" style="--d:.16s">
-        <header><span class="agent-avatar" style="--g1:#06B6D4;--g2:#2BD9A8">数</span><div><h3>数据分析师</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>自然语言查数取数，自动生成图表、归因分析与经营周报，重要异动主动预警。</p>
-        <footer><span class="tag">NL2SQL</span><span class="tag">可视化</span><span class="tag">异动预警</span></footer>
-      </article>
-      <article class="agent-card reveal">
-        <header><span class="agent-avatar" style="--g1:#5A5BF0;--g2:#9A4DFF">码</span><div><h3>研发代码助手</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>结合内部代码库与规范，完成代码生成、评审与文档撰写，CI 失败自动定位修复。</p>
-        <footer><span class="tag">代码评审</span><span class="tag">单元测试</span><span class="tag">CI 修复</span></footer>
-      </article>
-      <article class="agent-card reveal" style="--d:.08s">
-        <header><span class="agent-avatar" style="--g1:#F59E0B;--g2:#FF6B6B">法</span><div><h3>合同审查官</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>逐条比对合同风险点，标注非标条款并给出修订建议，审查耗时从 3 天缩短到 10 分钟。</p>
-        <footer><span class="tag">风险标注</span><span class="tag">条款比对</span><span class="tag">修订建议</span></footer>
-      </article>
-      <article class="agent-card reveal" style="--d:.16s">
-        <header><span class="agent-avatar" style="--g1:#2BD9A8;--g2:#06B6D4">聘</span><div><h3>招聘助理</h3><span class="agent-online"><i class="pulse-dot"></i>在线</span></div></header>
-        <p>简历智能初筛、人岗匹配评分、面试题生成与日程协调，招聘漏斗全程提效。</p>
-        <footer><span class="tag">简历解析</span><span class="tag">人岗匹配</span><span class="tag">日程协调</span></footer>
-      </article>
-    </div>
-    <div class="center reveal"><a class="btn btn-ghost" href="#cta">浏览全部 50+ 智能体 →</a></div>
-  </div>
-</section>
-
-<!-- ====================== 技术架构 ====================== -->
-<section class="section section-tint" id="arch">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> 技术架构</span>
-      <h2>分层解耦的 <span class="grad-text">AIOS 体系</span></h2>
-      <p>每一层都可独立扩展、平滑替换，既能整体交付，也能嵌入你现有的 IT 体系。</p>
-    </div>
-    <div class="arch reveal" style="--d:.1s">
-      <div class="arch-layer">
-        <div class="arch-label"><b>L4</b>应用层</div>
-        <div class="arch-items"><span>AI 助手门户</span><span>嵌入式 Copilot</span><span>开放 API / SDK</span><span>移动端 / 企微 / 钉钉</span></div>
-      </div>
-      <div class="arch-layer arch-hot">
-        <div class="arch-label"><b>L3</b>编排层</div>
-        <div class="arch-items"><span>多智能体编排</span><span>工作流引擎</span><span>插件 / 工具中心</span><span>MCP 协议适配</span></div>
-      </div>
-      <div class="arch-layer">
-        <div class="arch-label"><b>L2</b>知识与数据层</div>
-        <div class="arch-items"><span>知识库 RAG</span><span>向量引擎</span><span>知识图谱</span><span>数据连接器 ×80</span></div>
-      </div>
-      <div class="arch-layer">
-        <div class="arch-label"><b>L1</b>模型层</div>
-        <div class="arch-items"><span>多模型网关</span><span>智能路由与降级</span><span>私有模型托管</span><span>推理加速</span></div>
-      </div>
-      <div class="arch-base">
-        <span>🛡 安全合规</span><span>🔑 权限与审计</span><span>📊 可观测性</span><span>💰 成本治理（FinOps for AI）</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================== 解决方案场景 ====================== -->
-<section class="section" id="scenarios">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> 解决方案</span>
-      <h2>深入业务现场的 <span class="grad-text">落地场景</span></h2>
-      <p>不是演示间里的 Demo，而是在真实业务里跑出来的数字。</p>
-    </div>
-
-    <div class="tabs reveal" id="scnTabs">
-      <button class="tab active" data-tab="0">💬 智能客服</button>
-      <button class="tab" data-tab="1">📣 营销增长</button>
-      <button class="tab" data-tab="2">🗂 智能办公</button>
-      <button class="tab" data-tab="3">💻 研发提效</button>
-    </div>
-
-    <div class="tab-panes reveal" style="--d:.08s" id="scnPanes">
-      <div class="tab-pane active">
-        <div class="pane-copy">
-          <h3>全渠道智能客服</h3>
-          <p>智能体接管 80% 的常规咨询，知识库保证回答口径统一，复杂问题自动转人工并附完整上下文，客户体验与人效同步提升。</p>
-          <ul><li>网页、APP、电话、企微多渠道统一接入</li><li>业务系统打通：查订单、办退换、改地址</li><li>会话质检与客户情绪实时分析</li></ul>
-        </div>
-        <div class="pane-metrics">
-          <div class="metric"><b>-45%</b><span>客服人力成本</span></div>
-          <div class="metric"><b>3s</b><span>平均首次响应</span></div>
-          <div class="metric"><b>87%</b><span>问题一次解决率</span></div>
-        </div>
-      </div>
-      <div class="tab-pane">
-        <div class="pane-copy">
-          <h3>AI 驱动的营销增长</h3>
-          <p>从市场洞察、内容生产到投放复盘，营销智能体团队流水线作业，让小团队拥有大厂级的内容产能。</p>
-          <ul><li>全渠道内容矩阵：图文、短视频脚本、落地页</li><li>A/B 文案自动生成与效果回流优化</li><li>竞品与热点监测，机会点主动推送</li></ul>
-        </div>
-        <div class="pane-metrics">
-          <div class="metric"><b>10x</b><span>内容生产效率</span></div>
-          <div class="metric"><b>+32%</b><span>投放点击率</span></div>
-          <div class="metric"><b>2 人</b><span>支撑全渠道运营</span></div>
-        </div>
-      </div>
-      <div class="tab-pane">
-        <div class="pane-copy">
-          <h3>人人可用的智能办公</h3>
-          <p>会议纪要、周报月报、制度问答、流程审批——把组织里最耗时间的事务交给 AIOS，员工专注真正创造价值的工作。</p>
-          <ul><li>会议自动纪要 + 待办事项自动分发</li><li>企业制度、IT、HR 问答秒级响应</li><li>跨系统审批流自动流转与催办</li></ul>
-        </div>
-        <div class="pane-metrics">
-          <div class="metric"><b>6h</b><span>每人每周节省</span></div>
-          <div class="metric"><b>92%</b><span>制度问答准确率</span></div>
-          <div class="metric"><b>-70%</b><span>审批平均时长</span></div>
-        </div>
-      </div>
-      <div class="tab-pane">
-        <div class="pane-copy">
-          <h3>研发全流程提效</h3>
-          <p>代码助手深度结合内部代码库与工程规范，从需求拆解、编码评审到 CI 修复与发布说明，全流程嵌入研发链路。</p>
-          <ul><li>结合私有代码库的上下文感知补全</li><li>PR 自动评审 + 安全漏洞扫描</li><li>CI 失败自动定位并提交修复</li></ul>
-        </div>
-        <div class="pane-metrics">
-          <div class="metric"><b>+40%</b><span>需求交付速度</span></div>
-          <div class="metric"><b>-35%</b><span>线上缺陷率</span></div>
-          <div class="metric"><b>15min</b><span>CI 失败平均修复</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================== 安全合规 ====================== -->
-<section class="section section-tint" id="security">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> 安全合规</span>
-      <h2>把数据主权，<span class="grad-text">牢牢留在企业手里</span></h2>
-      <p>AI 越强大，越需要可控。ZenFlux AIOS 从第一行代码起就为企业级安全而设计。</p>
-    </div>
-    <div class="cards grid-4">
-      <article class="sec-card reveal"><i>🏢</i><h3>私有化部署</h3><p>支持全栈私有化与混合云部署，模型与数据均可不出企业内网。</p></article>
-      <article class="sec-card reveal" style="--d:.08s"><i>🔐</i><h3>数据加密</h3><p>传输 TLS 1.3、存储 AES-256 全程加密，敏感字段自动脱敏。</p></article>
-      <article class="sec-card reveal" style="--d:.16s"><i>🗝</i><h3>细粒度权限</h3><p>组织、角色、数据行级权限管控，知识库按密级隔离访问。</p></article>
-      <article class="sec-card reveal" style="--d:.24s"><i>📜</i><h3>全链路审计</h3><p>每一次模型调用、知识访问与工作流执行都可追溯、可取证。</p></article>
-    </div>
-    <div class="cert-row reveal" style="--d:.1s">
-      <span class="cert">等保三级</span><span class="cert">ISO 27001</span><span class="cert">SOC 2 Type II</span><span class="cert">算法备案</span><span class="cert">信通院可信 AI</span>
-    </div>
-  </div>
-</section>
-
-<!-- ====================== 接入流程 ====================== -->
-<section class="section" id="steps">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="badge"><i class="spark">✦</i> 快速开始</span>
-      <h2>四步，给企业装上 <span class="grad-text">AI 操作系统</span></h2>
-    </div>
-    <div class="steps">
-      <div class="step-card reveal"><span class="step-no">01</span><h3>接入模型</h3><p>绑定公有云模型或托管私有模型，配置智能路由策略。</p></div>
-      <div class="step-arrow reveal" style="--d:.06s">→</div>
-      <div class="step-card reveal" style="--d:.08s"><span class="step-no">02</span><h3>导入知识</h3><p>上传文档、连接业务系统，自动构建企业知识引擎。</p></div>
-      <div class="step-arrow reveal" style="--d:.14s">→</div>
-      <div class="step-card reveal" style="--d:.16s"><span class="step-no">03</span><h3>编排能力</h3><p>挑选智能体模板、搭建工作流，按业务场景灵活组合。</p></div>
-      <div class="step-arrow reveal" style="--d:.22s">→</div>
-      <div class="step-card reveal" style="--d:.24s"><span class="step-no">04</span><h3>全员上线</h3><p>发布到门户、企微、钉钉等入口，数据看板持续度量价值。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================== CTA ====================== -->
-<section class="cta" id="cta">
-  <div class="container">
-    <div class="cta-box reveal">
-      <div class="cta-glow" aria-hidden="true"></div>
-      <h2>现在，给你的企业装上 AI 操作系统</h2>
-      <p>免费体验 14 天 · 无需信用卡 · 专属顾问 1 对 1 协助落地</p>
-      <div class="cta-actions">
-        <a class="btn btn-light btn-lg" href="javascript:void(0)">立即免费体验</a>
-        <a class="btn btn-outline btn-lg" href="javascript:void(0)">联系解决方案顾问</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================== Footer ====================== -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a class="brand" href="#top">
-          <span class="brand-mark">
-            <svg viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="26" height="26" rx="8" fill="url(#lg-foot)"/><circle cx="16" cy="16" r="5.2" stroke="#fff" stroke-width="2.2"/><circle cx="16" cy="16" r="1.9" fill="#fff"/><defs><linearGradient id="lg-foot" x1="3" y1="3" x2="29" y2="29"><stop stop-color="#5A5BF0"/><stop offset=".5" stop-color="#9A4DFF"/><stop offset="1" stop-color="#00C2D8"/></linearGradient></defs></svg>
-          </span>
-          <span class="brand-name">ZenFlux <em>AIOS</em></span>
-        </a>
-        <p>新一代企业级 AI 操作系统。统一调度大模型、知识、智能体与工作流，让 AI 真正融入业务。</p>
-      </div>
-      <div class="footer-col"><h4>产品</h4><a href="#capabilities">多模型网关</a><a href="#capabilities">企业知识引擎</a><a href="#agents">智能体编排</a><a href="#workflow">工作流自动化</a></div>
-      <div class="footer-col"><h4>解决方案</h4><a href="#scenarios">智能客服</a><a href="#scenarios">营销增长</a><a href="#scenarios">智能办公</a><a href="#scenarios">研发提效</a></div>
-      <div class="footer-col"><h4>资源</h4><a href="javascript:void(0)">产品文档</a><a href="javascript:void(0)">API 参考</a><a href="javascript:void(0)">最佳实践</a><a href="javascript:void(0)">更新日志</a></div>
-      <div class="footer-col"><h4>公司</h4><a href="javascript:void(0)">关于我们</a><a href="javascript:void(0)">联系我们</a><a href="javascript:void(0)">加入我们</a><a href="javascript:void(0)">合作伙伴</a></div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 ZenFlux AIOS · 本页面为静态演示站点</span>
-      <span>用 ♥ 与 AI 一起构建</span>
-    </div>
-  </div>
-</footer>
-
-<script src="assets/aios.js"></script>
+  /* ---------- 点赞 / 协议弹窗 / Toast 按钮 ---------- */
+  document.addEventListener("click", function (e) {
+    var rx = e.target.closest(".rx-btn");
+    if (rx) rx.classList.toggle("on");
+    if (e.target.closest(".js-proto")) $("#protoModal").classList.add("open");
+    var jt = e.target.closest(".js-toast");
+    if (jt) toast(jt.dataset.toast || "已执行（演示）");
+  });
+  $("#modalClose").addEventListener("click", function () { $("#protoModal").classList.remove("open"); });
+  $("#protoModal").addEventListener("click", function (e) {
+    if (e.target === this) this.classList.remove("open");
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      $("#protoModal").classList.remove("open");
+      sidebar.classList.remove("open");
+    }
+  });
+})();
+</script>
 </body>
 </html>
