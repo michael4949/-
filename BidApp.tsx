@@ -11,6 +11,10 @@ import BidResultView from "./components/bid/BidResultView";
 
 type View = "input" | "prepare" | "outline" | "produce" | "result";
 
+/** 独立单文件版（standalone/ 下的 html）会在加载前置入此标记，用于隐藏仓库内的互链 */
+declare global { interface Window { __BID_STANDALONE__?: boolean } }
+const isStandalone = typeof window !== "undefined" && !!window.__BID_STANDALONE__;
+
 const doneCount = (r: BidRunState): number =>
   Object.values(r.sections).filter((s) => s.status === "done").length;
 
@@ -130,9 +134,11 @@ const BidApp: React.FC = () => {
           </div>
           <span className="font-bold tracking-tight">标书智能工厂</span>
         </div>
-        <a href="./index.html" className="flex items-center gap-1.5 text-white/40 hover:text-white/80 text-xs transition">
-          <Clapperboard className="w-3.5 h-3.5" /> AI 爆款工厂（视频）
-        </a>
+        {!isStandalone && (
+          <a href="./index.html" className="flex items-center gap-1.5 text-white/40 hover:text-white/80 text-xs transition">
+            <Clapperboard className="w-3.5 h-3.5" /> AI 爆款工厂（视频）
+          </a>
+        )}
       </nav>
 
       <main className="relative z-10 py-8 md:py-10 flex flex-col items-center">
