@@ -19,10 +19,17 @@ const result = await build({
   write: false,
   legalComments: "none",
   charset: "utf8", // 中文字符串保持原样（HTML 为 UTF-8），文件更小
+  alias: {
+    // Anthropic SDK 的本机凭证链代码动态 import 这些 Node 内置模块，浏览器里不会执行
+    "node:fs": "./scripts/shims/node-empty.mjs",
+    "node:path": "./scripts/shims/node-empty.mjs",
+    "node:os": "./scripts/shims/node-empty.mjs",
+  },
 
   define: {
     "process.env.API_KEY": '""',
     "process.env.GEMINI_API_KEY": '""',
+    "process.env.ANTHROPIC_API_KEY": '""',
     "process.env.NODE_ENV": '"production"',
   },
 });
@@ -64,4 +71,4 @@ mkdirSync("standalone", { recursive: true });
 const out = "standalone/标书智能工厂.html";
 writeFileSync(out, html);
 console.log(`✅ 已生成 ${out}（${(html.length / 1024 / 1024).toFixed(2)} MB）`);
-console.log("   双击用 Chrome/Edge 打开即可使用；样式与 Gemini 调用需联网。");
+console.log("   双击用 Chrome/Edge 打开即可使用；样式与 Claude（Anthropic API）调用需联网。");

@@ -1,15 +1,15 @@
-本仓库包含两个独立的浏览器本地 AI 工具（共用一套 Vite 工程与 Gemini Key 管理）：
+本仓库包含两个独立的浏览器本地 AI 工具（共用一套 Vite 工程；视频工具用 Gemini Key，标书工具用 Anthropic Key）：
 
 | 入口 | 工具 | 干什么 |
 |---|---|---|
-| `/`（index.html） | **AI 爆款工厂** 🎬 | 网页链接 → 中文配音抖音竖屏视频 |
-| `/bid.html` | **标书智能工厂** 📑 | 招标文件 → 500-1000 页国标板式 Word 投标文件 |
+| `/`（index.html） | **AI 爆款工厂** 🎬 | 网页链接 → 中文配音抖音竖屏视频（Gemini） |
+| `/bid.html` | **标书智能工厂** 📑 | 招标文件 → 500-1000 页国标板式 Word 投标文件（**Claude Fable 5**） |
 
 ---
 
 # 标书智能工厂 📑
 
-把一份**招标文件**（.docx/.txt/粘贴文字）变成一整本**按国标板式排好版的 Word 投标文件**，目标页数 300-1200 页可调（覆盖国内常见的 500-1000 页标书体量），全程在浏览器本地用你自己的 Gemini Key 完成。
+把一份**招标文件**（.docx/.txt/粘贴文字）变成一整本**按国标板式排好版的 Word 投标文件**，目标页数 300-1200 页可调（覆盖国内常见的 500-1000 页标书体量）。大脑是 **Claude Fable 5**（Anthropic 最强的公开模型，浏览器经官方 SDK 直连），全程在浏览器本地用你自己的 Anthropic Key 完成。
 
 ## 工作流（Workflow）
 
@@ -33,11 +33,13 @@
 
 ## 用法
 
-打开 `/bid.html` → 填 Gemini Key → 上传/粘贴招标文件 → 填投标人资料（保存在本机，下次复用）→ 选目标页数与板式 → **审阅/修改 AI 生成的大纲** → 确认后开始整本撰写 → 下载 .docx（另可下载全文 Markdown 备份、解析结果+大纲 JSON）。
+打开 `/bid.html` → 填 Anthropic API Key（`sk-ant-…`，[console.anthropic.com](https://console.anthropic.com/settings/keys) 获取，仅存浏览器本地）→ 上传/粘贴招标文件 → 填投标人资料（保存在本机，下次复用）→ 选目标页数与板式 → **审阅/修改 AI 生成的大纲** → 确认后开始整本撰写 → 下载 .docx（另可下载全文 Markdown 备份、解析结果+大纲 JSON）。
 
-**独立单文件版**：`standalone/标书智能工厂.html` 是把整个智能体（React + 工作流 + docx 排版引擎）内联打包的单个 HTML——**双击用 Chrome/Edge 打开即可使用**，无需 Node、无需构建、无需服务器（仅样式 CDN 与 Gemini 调用需联网）。改代码后用 `npm run build:standalone` 重新生成。
+**独立单文件版**：`standalone/标书智能工厂.html` 是把整个智能体（React + 工作流 + Claude 直连 + docx 排版引擎）内联打包的单个 HTML——**双击用 Chrome/Edge 打开即可使用**，无需 Node、无需构建、无需服务器（仅样式 CDN 与 Anthropic API 调用需联网）。改代码后用 `npm run build:standalone` 重新生成。
 
-> ⚠️ 生成 500-1000 页约需数百次模型调用、30-60 分钟，**强烈建议用已开通付费的 Gemini Key**（免费档限流会非常慢，但断点续跑也能磨完）。
+**模型与计费**：所有阶段统一使用 `claude-fable-5`；解析/大纲/审查固定最高思考力度（effort=high），批量撰写默认均衡档（medium，已远强于上一代模型），高级设置可切「极致档」（high）。写作调用把共享上下文放入带 `cache_control` 的 system，命中提示词缓存按 0.1× 计费。粗略估算：600 页均衡档约合 $40-80（极致档更高），具体以 Anthropic 账单为准。
+
+> ⚠️ 生成 500-1000 页约需数百次模型调用、30-90 分钟（Fable 5 单次深思可达数分钟），**Key 所属账户需有足够余额与速率配额**；中断/限流后可断点续跑。
 > ⚠️ 合规提醒：产出是**编制底稿**。提交前必须人工逐章审校，替换真实证照/业绩/人员材料，按招标文件要求签字盖章；投标内容的真实性由使用者自行负责。
 
 主要文件：`services/bid/workflow.ts`（工作流编排）、`tenderService` / `outlineService` / `writerService` / `reviewService`（四个阶段）、`docxRender.ts`（板式排版）、`budget.ts`（页数↔字数预算）、`docxText.ts`（零依赖 .docx 文本抽取）、`store.ts`（断点）。离线冒烟测试：`npm run smoke:bid`。

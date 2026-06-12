@@ -11,6 +11,7 @@
     "smoke:bid": "esbuild scripts/smokeBid.ts --bundle --platform=node --format=esm --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\" --outfile=node_modules/.smoke-bid.mjs && node node_modules/.smoke-bid.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@google/genai": "^1.30.0",
     "docx": "^9.5.0",
     "lucide-react": "^0.555.0",

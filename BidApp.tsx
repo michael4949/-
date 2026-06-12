@@ -194,7 +194,7 @@ const BidApp: React.FC = () => {
       </main>
 
       <footer className="relative z-10 text-center text-white/25 text-xs py-6 px-4">
-        全程在你的浏览器本地完成 · 内容由 Gemini 生成，提交前须人工审校并对真实性负责 · 断点自动保存在本机
+        全程在你的浏览器本地完成 · 内容由 Claude Fable 5 生成，提交前须人工审校并对真实性负责 · 断点自动保存在本机
       </footer>
     </div>
   );

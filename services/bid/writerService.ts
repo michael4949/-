@@ -1,10 +1,13 @@
 import { BidRunState, CompanyProfile, OutlineNode, SectionDraft, WriteProgress } from "../../bidTypes";
-import { genText, BID_FAST_MODEL, runPool, throwIfAborted } from "./llm";
+import { genText, runPool, throwIfAborted, Effort } from "./llm";
 import { LAYOUTS, flattenLeaves, countChars, estimatePagesFromChars, headingNo } from "./budget";
 import { tenderBrief } from "./tenderService";
 
 /**
- * 工作流阶段③：分章并发撰写正文。
+ * 工作流阶段③：分章并发撰写正文（Claude Fable 5）。
+ *  - 写作规范 + 项目信息 + 投标人事实表 + 全文章节清单是所有小节共享的稳定上下文：
+ *    放进 system 并打 cache_control，几百次调用的输入大头走 0.1× 缓存计费；
+ *  - 思考力度：默认 effort=medium（已远强于上一代模型），「极致档」用 high；
  *  - 每个叶子小节一个写作任务；产出不足目标字数的 88% 时自动“续写”（最多 5 轮）；
  *  - 全部写完后若估算页数仍不足目标的 97%，挑缺口最大的小节自动“扩写”补足；
  *  - 每节完成即回调 onSectionDone（外层落盘 IndexedDB），刷新/中断后可跳过已完成小节续跑。
@@ -38,16 +41,41 @@ function companyFacts(c: CompanyProfile): string {
   ].filter(Boolean).join("\n") || "（投标人未提供详细资料）";
 }
 
-/** 大纲地图：全部章标题 + 当前章内各级小节标题，用于避免内容重复、保持衔接 */
-function outlineMap(outline: OutlineNode[], chapterIdx: number): string {
-  const chapters = outline.map((c, i) => `${headingNo(0, i + 1)}${c.title}`).join("；");
+/**
+ * 所有小节共享的稳定 system 上下文。
+ * 注意：必须对同一次任务保持字节级一致，prompt 缓存才会命中——不要往里掺入小节相关内容。
+ */
+function buildSystem(state: BidRunState): string {
+  const chapters = state.outline!.map((c, i) => `${headingNo(0, i + 1)}${c.title}`).join("；");
+  return `你是国内一流的投标文件撰写专家，正在为下述项目逐节撰写投标文件。
+
+# 项目信息
+${tenderBrief(state.tender!)}
+
+# 投标人事实表（所有表述必须与此一致；表中没有的证书编号、合同金额、人名等具体信息一律不得编造，用稳妥的通用表述代替）
+${companyFacts(state.company!)}
+
+# 投标文件全文章节
+${chapters}
+
+# 写作规范（每一节都必须遵守）
+1. 直接输出正文，**不要**输出小节标题，**不要**用 #、## 等 Markdown 标题。
+2. 小节内部层次依次用「1.」「(1)」「①」编号；要点列表可用「- 」；表格用 Markdown 表格；关键承诺可用 **加粗**。
+3. 庄重的书面语，符合国内招投标行文习惯；针对本项目具体展开（结合项目概况、地点、工期），拒绝放之四海而皆准的空话。
+4. **严禁出现任何占位符**：如“XXX”“××公司”“【】”“（待补充）”“某某”等。信息不足时用“我方”“本项目”等指代。
+5. 数字、工期、质保期、报价相关表述必须与项目信息和投标人事实表一致，不得自相矛盾。
+6. 只写当前指派的小节，严禁写入其他小节的内容。`;
+}
+
+/** 当前章内部结构（随章变化，放 user 消息，不进缓存前缀） */
+function chapterMap(outline: OutlineNode[], chapterIdx: number): string {
   const lines: string[] = [];
   const walk = (n: OutlineNode, depth: number) => {
     lines.push(`${"  ".repeat(depth)}- ${n.title}`);
     n.children.forEach((ch) => walk(ch, depth + 1));
   };
   outline[chapterIdx]?.children.forEach((n) => walk(n, 0));
-  return `全文章节：${chapters}\n当前章《${outline[chapterIdx]?.title}》结构：\n${lines.join("\n")}`;
+  return `当前章《${outline[chapterIdx]?.title}》结构（其余小节会单独撰写）：\n${lines.join("\n") || "（本章无下级小节）"}`;
 }
 
 function chapterIndexOf(id: string): number {
@@ -60,7 +88,7 @@ const KIND_RULES: Record<string, string> = {
   form: "按规范函件/表单格式撰写：称谓（致：招标人全称）、正文承诺条款、落款（投标人全称、法定代表人或授权代表签字处、日期“____年____月____日”留空待签）。",
 };
 
-function buildPrompt(state: BidRunState, leaf: OutlineNode, extra: string): string {
+function buildUserPrompt(state: BidRunState, leaf: OutlineNode, extra: string): string {
   const tender = state.tender!;
   const chIdx = chapterIndexOf(leaf.id);
   const isResponseTable = leaf.kind === "table" && /偏差|响应|对照/.test(leaf.title);
@@ -68,33 +96,22 @@ function buildPrompt(state: BidRunState, leaf: OutlineNode, extra: string): stri
     ? `\n# 招标文件实质性（★）条款（须逐条响应，响应一律为“完全响应/无偏差”并写明依据）\n${tender.mandatory.map((m, i) => `${i + 1}. ${m}`).join("\n")}\n`
     : "";
 
-  return `你是国内一流的投标文件撰写专家，正在为下述项目编写投标文件中的一个小节。
-
-# 项目信息
-${tenderBrief(tender)}
-
-# 投标人事实表（所有表述必须与此一致；表中没有的证书编号、合同金额、人名等具体信息一律不得编造，用稳妥的通用表述代替）
-${companyFacts(state.company!)}
+  return `${chapterMap(state.outline!, chIdx)}
 ${mandatoryCtx}
-# 大纲位置（其他小节会单独撰写，严禁写入它们的内容）
-${outlineMap(state.outline!, chIdx)}
-
 # 本次任务：撰写小节《${leaf.title}》
 写作要点：${leaf.brief || "围绕标题展开"}
 目标篇幅：约 ${leaf.targetChars} 个汉字（不得低于 ${Math.round(leaf.targetChars * 0.9)} 字）
 内容形态：${KIND_RULES[leaf.kind] || KIND_RULES.prose}
-
-# 写作规范（必须遵守）
-1. 直接输出正文，**不要**输出本小节标题，**不要**用 #、## 等 Markdown 标题。
-2. 小节内部层次依次用「1.」「(1)」「①」编号；要点列表可用「- 」；表格用 Markdown 表格；关键承诺可用 **加粗**。
-3. 庄重的书面语，符合国内招投标行文习惯；针对本项目具体展开（结合项目概况、地点、工期），拒绝放之四海而皆准的空话。
-4. **严禁出现任何占位符**：如“XXX”“××公司”“【】”“（待补充）”“某某”等。信息不足时用“我方”“本项目”等指代。
-5. 数字、工期、质保期、报价相关表述必须与项目信息和投标人事实表一致，不得自相矛盾。
 ${extra}`;
+}
+
+function writingEffort(state: BidRunState): Effort {
+  return state.options.smartModel ? "high" : "medium";
 }
 
 async function writeLeaf(
   state: BidRunState,
+  system: string,
   leaf: OutlineNode,
   onCall: () => void,
   signal?: AbortSignal
@@ -110,10 +127,10 @@ async function writeLeaf(
       : "";
     onCall();
     const piece = await genText({
-      model: BID_FAST_MODEL,
-      prompt: buildPrompt(state, leaf, extra),
-      temperature: 0.55,
-      maxOutputTokens: 8192,
+      system,
+      prompt: buildUserPrompt(state, leaf, extra),
+      effort: writingEffort(state),
+      maxOutputTokens: 16000, // 思考 token 也计入：约可产出 6-8 千字正文
       signal,
     });
     content = content ? `${content}\n\n${piece.trim()}` : piece.trim();
@@ -141,13 +158,14 @@ function makeProgress(state: BidRunState, leaves: OutlineNode[], active: Set<str
 
 export async function writeAllSections(state: BidRunState, events: WriteEvents, signal?: AbortSignal): Promise<number> {
   const leaves = flattenLeaves(state.outline!);
+  const system = buildSystem(state);
   const active = new Set<string>();
   let calls = state.stats?.calls || 0;
   const emit = () => events.onProgress?.(makeProgress(state, leaves, active, calls));
   const onCall = () => { calls++; };
 
   const pending = leaves.filter((l) => state.sections[l.id]?.status !== "done");
-  events.onLog?.(`共 ${leaves.length} 个小节，待写 ${pending.length} 个（并发 ${state.options.concurrency} 路）…`);
+  events.onLog?.(`共 ${leaves.length} 个小节，待写 ${pending.length} 个（Claude Fable 5 · effort=${writingEffort(state)} · 并发 ${state.options.concurrency} 路）…`);
   emit();
 
   await runPool(
@@ -158,7 +176,7 @@ export async function writeAllSections(state: BidRunState, events: WriteEvents, 
       state.sections[leaf.id] = { id: leaf.id, status: "writing", content: "", chars: 0, rounds: 0 };
       emit();
       try {
-        const content = await writeLeaf(state, leaf, onCall, signal);
+        const content = await writeLeaf(state, system, leaf, onCall, signal);
         const draft: SectionDraft = { id: leaf.id, status: "done", content, chars: countChars(content), rounds: 1 };
         state.sections[leaf.id] = draft;
         await events.onSectionDone?.(draft);
@@ -200,11 +218,11 @@ export async function writeAllSections(state: BidRunState, events: WriteEvents, 
         try {
           onCall();
           const addition = await genText({
-            model: BID_FAST_MODEL,
-            temperature: 0.6,
-            maxOutputTokens: 8192,
+            system,
+            effort: writingEffort(state),
+            maxOutputTokens: 16000,
             signal,
-            prompt: buildPrompt(
+            prompt: buildUserPrompt(
               state, l,
               `\n# 扩写说明\n该小节已有约 ${draft.chars} 字（结尾如下），请在**不重复**的前提下补充约 ${Math.min(2500, Math.max(800, l.targetChars))} 字的新内容：增加落地细节、量化指标、本项目针对性措施或必要表格。直接输出新增正文。\n"""${draft.content.slice(-600)}"""`
             ),

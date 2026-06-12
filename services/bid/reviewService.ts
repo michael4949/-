@@ -1,29 +1,30 @@
-import { Type, Schema } from "@google/genai";
 import { BidRunState, OutlineNode, ReviewIssue } from "../../bidTypes";
-import { genJson, genText, BID_FAST_MODEL, runPool } from "./llm";
+import { genJson, genText, runPool } from "./llm";
 import { flattenLeaves, countChars } from "./budget";
 
 /**
- * 工作流阶段④：合规审查。
+ * 工作流阶段④：合规审查（Claude Fable 5）。
  *  - 本地扫描：占位符（直接废标风险）、篇幅严重不足、生成失败的小节；
- *  - LLM 核对：实质性（★）条款是否都有承载小节（漏项 = 废标）；
+ *  - LLM 核对（effort=high）：实质性（★）条款是否都有承载小节（漏项 = 废标）；
  *  - 占位符问题自动改写修复；其余输出为“人工核实清单”。
  */
 
 // “年 月 日”签署留空是规范格式，不算占位符
 const PLACEHOLDER_RE = /XXX+|×××|\*\*\*+|【\s*】|［\s*］|（待[填补定]\S*）|\(待[填补定]\S*\)|待补充|待填写|某某(?:公司|单位|项目)|＿{3,}公司/;
 
-const coverageSchema: Schema = {
-  type: Type.OBJECT,
+const coverageSchema = {
+  type: "object",
+  additionalProperties: false,
   properties: {
     uncovered: {
-      type: Type.ARRAY,
+      type: "array",
       description: "在大纲中找不到承载小节的实质性条款",
       items: {
-        type: Type.OBJECT,
+        type: "object",
+        additionalProperties: false,
         properties: {
-          clause: { type: Type.STRING, description: "条款原文" },
-          reason: { type: Type.STRING, description: "为何判定未覆盖，以及建议补在哪一章" },
+          clause: { type: "string", description: "条款原文" },
+          reason: { type: "string", description: "为何判定未覆盖，以及建议补在哪一章" },
         },
         required: ["clause", "reason"],
       },
@@ -72,10 +73,9 @@ export async function reviewBid(
     const outlineDigest = leaves.map((l) => `${l.id} ${l.title}｜${l.brief}`).join("\n");
     try {
       const { uncovered } = await genJson<{ uncovered: Array<{ clause: string; reason: string }> }>({
-        model: BID_FAST_MODEL,
         signal,
-        temperature: 0.2,
-        maxOutputTokens: 8192,
+        effort: "high",
+        maxOutputTokens: 16000,
         jsonSchema: coverageSchema,
         prompt: `你是评标专家，正在做投标文件响应性检查。下面是招标文件的实质性（★）条款清单和投标文件的小节清单（编号 标题｜写作要点）。请找出**没有任何小节承载**的条款；能合理对应上的不要报。
 
@@ -120,10 +120,9 @@ export async function autofixIssues(
       const d = state.sections[issue.sectionId];
       if (!d) return;
       const fixed = await genText({
-        model: BID_FAST_MODEL,
         signal,
-        temperature: 0.3,
-        maxOutputTokens: 16384,
+        effort: "low", // 机械改写任务，低力度即可
+        maxOutputTokens: 24000, // 需输出整节内容 + 思考余量
         prompt: `下面是投标文件小节《${leafTitleOf(state.outline!, issue.sectionId)}》的内容，其中含有占位符（如 XXX、【】、待补充、某某公司等），这在评标中会被认定为重大缺陷。
 
 请输出**修改后的完整正文**：把所有占位符改为稳妥表述——投标人一律称“我方”或“我公司”，项目称“本项目”，不确定的具体数字改为符合行业惯例的合理承诺表述。除此之外不要改动其他内容，保持原有格式（编号、表格、加粗）。

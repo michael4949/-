@@ -1,43 +1,45 @@
-import { Type, Schema } from "@google/genai";
 import { TenderProfile, BidOptions } from "../../bidTypes";
-import { genJson, BID_FAST_MODEL, BID_SMART_MODEL, throwIfAborted } from "./llm";
+import { genJson, throwIfAborted } from "./llm";
 
 /**
- * 工作流阶段①：解析招标文件。
+ * 工作流阶段①：解析招标文件（Claude Fable 5，effort=high + 结构化输出）。
  * 招标文件常有上百页：按 9 万字分块抽取，再本地合并（数组拼接去重、标量择优）。
  */
 
-const profileSchema: Schema = {
-  type: Type.OBJECT,
+const scoreItemSchema = {
+  type: "object",
+  additionalProperties: false,
   properties: {
-    projectName: { type: Type.STRING, description: "项目名称（完整）" },
-    tenderNo: { type: Type.STRING, description: "招标编号/采购编号" },
-    purchaser: { type: Type.STRING, description: "招标人/采购人名称" },
-    agent: { type: Type.STRING, description: "招标代理机构名称" },
-    budget: { type: Type.STRING, description: "预算金额或最高限价（含单位）" },
-    duration: { type: Type.STRING, description: "工期/交货期/服务期要求" },
-    location: { type: Type.STRING, description: "项目实施地点" },
-    industry: { type: Type.STRING, description: "项目类型：工程/货物/服务，及所属行业" },
-    overview: { type: Type.STRING, description: "项目概况与建设（采购）内容，200-500字" },
-    techRequirements: { type: Type.ARRAY, items: { type: Type.STRING }, description: "技术需求/采购需求要点，逐条" },
-    scoring: {
-      type: Type.ARRAY,
-      description: "评分办法逐项（商务分/技术分/价格分各子项）",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          item: { type: Type.STRING, description: "评分项名称" },
-          score: { type: Type.STRING, description: "分值" },
-          requirement: { type: Type.STRING, description: "评分标准原文要点" },
-        },
-        required: ["item", "score", "requirement"],
-      },
-    },
-    mandatory: { type: Type.ARRAY, items: { type: Type.STRING }, description: "实质性（★）要求与否决（废标）条款，逐条原意保留" },
-    formatRules: { type: Type.ARRAY, items: { type: Type.STRING }, description: "投标文件编制、组成、格式、装订、签字盖章要求" },
-    docRequirements: { type: Type.ARRAY, items: { type: Type.STRING }, description: "要求随投标文件提供的证明材料清单" },
+    item: { type: "string", description: "评分项名称" },
+    score: { type: "string", description: "分值" },
+    requirement: { type: "string", description: "评分标准原文要点" },
   },
-  required: ["projectName", "overview", "scoring", "mandatory"],
+  required: ["item", "score", "requirement"],
+};
+
+const profileSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    projectName: { type: "string", description: "项目名称（完整）" },
+    tenderNo: { type: "string", description: "招标编号/采购编号" },
+    purchaser: { type: "string", description: "招标人/采购人名称" },
+    agent: { type: "string", description: "招标代理机构名称" },
+    budget: { type: "string", description: "预算金额或最高限价（含单位）" },
+    duration: { type: "string", description: "工期/交货期/服务期要求" },
+    location: { type: "string", description: "项目实施地点" },
+    industry: { type: "string", description: "项目类型：工程/货物/服务，及所属行业" },
+    overview: { type: "string", description: "项目概况与建设（采购）内容，200-500字" },
+    techRequirements: { type: "array", items: { type: "string" }, description: "技术需求/采购需求要点，逐条" },
+    scoring: { type: "array", items: scoreItemSchema, description: "评分办法逐项（商务分/技术分/价格分各子项）" },
+    mandatory: { type: "array", items: { type: "string" }, description: "实质性（★）要求与否决（废标）条款，逐条原意保留" },
+    formatRules: { type: "array", items: { type: "string" }, description: "投标文件编制、组成、格式、装订、签字盖章要求" },
+    docRequirements: { type: "array", items: { type: "string" }, description: "要求随投标文件提供的证明材料清单" },
+  },
+  required: [
+    "projectName", "tenderNo", "purchaser", "agent", "budget", "duration", "location",
+    "industry", "overview", "techRequirements", "scoring", "mandatory", "formatRules", "docRequirements",
+  ],
 };
 
 const CHUNK = 90_000;
@@ -96,27 +98,25 @@ function mergeProfiles(parts: TenderProfile[]): TenderProfile {
 
 export async function parseTender(
   tenderText: string,
-  options: BidOptions,
+  _options: BidOptions,
   onLog?: (m: string) => void,
   signal?: AbortSignal
 ): Promise<TenderProfile> {
-  const model = options.smartModel ? BID_SMART_MODEL : BID_FAST_MODEL;
   const chunks = chunkText(tenderText.trim());
-  onLog?.(`招标文件共 ${tenderText.length.toLocaleString()} 字，分 ${chunks.length} 段解析（${model}）…`);
+  onLog?.(`招标文件共 ${tenderText.length.toLocaleString()} 字，分 ${chunks.length} 段解析（Claude Fable 5 · effort=high）…`);
 
   const parts: TenderProfile[] = [];
   for (let i = 0; i < chunks.length; i++) {
     throwIfAborted(signal);
     const part = await genJson<TenderProfile>({
-      model,
       signal,
-      temperature: 0.2,
-      maxOutputTokens: 32768, // pro 的思考 token 也计入上限，留足余量
+      effort: "high",
+      maxOutputTokens: 32000,
       jsonSchema: profileSchema,
-      prompt: `你是资深招投标专家。请从下面这份招标文件${chunks.length > 1 ? `的第 ${i + 1}/${chunks.length} 段` : ""}中，严格按 JSON Schema 抽取关键信息。
+      prompt: `你是资深招投标专家。请从下面这份招标文件${chunks.length > 1 ? `的第 ${i + 1}/${chunks.length} 段` : ""}中抽取关键信息。
 
 要求：
-- 只抽取原文中确实存在的信息，绝不编造；本段没有的字段留空字符串/空数组。
+- 只抽取原文中确实存在的信息，绝不编造；本段没有的字段输出空字符串/空数组。
 - 「实质性（★）要求与否决条款」务必逐条完整收录——漏一条就可能废标。
 - 「评分办法」逐子项收录，分值照抄原文。
 

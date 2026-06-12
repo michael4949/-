@@ -8,7 +8,7 @@ export type LayoutId = "gbGov" | "general";
 export interface BidOptions {
   targetPages: number;            // 目标页数（300-1200，常规 500-1000）
   layout: LayoutId;
-  smartModel: boolean;            // 解析/大纲使用 gemini-2.5-pro（更准但更慢）
+  smartModel: boolean;            // 极致档：撰写阶段也用最高思考力度（effort=high，更强更贵）
   concurrency: number;            // 撰写并发路数（2-4）
   includeDeviationTables: boolean;// 自动编制商务/技术偏差（响应）表
 }

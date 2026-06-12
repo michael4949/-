@@ -1,27 +1,30 @@
-import { Type, Schema } from "@google/genai";
 import { BidOptions, CompanyProfile, OutlineNode, TenderProfile, NodeKind } from "../../bidTypes";
-import { genJson, BID_FAST_MODEL, BID_SMART_MODEL, runPool } from "./llm";
+import { genJson, runPool } from "./llm";
 import { LAYOUTS, allocateBudgets } from "./budget";
 import { tenderBrief } from "./tenderService";
 
 /**
- * 工作流阶段②：编制投标文件大纲。
+ * 工作流阶段②：编制投标文件大纲（Claude Fable 5 · effort=high）。
  * 两步：1) 一次调用生成章级骨架（含篇幅占比）；2) 并行把每章细化到叶子小节（≤3 级），
  * 最后按目标页数把字数预算分配到每个叶子。
  */
 
-const skeletonSchema: Schema = {
-  type: Type.OBJECT,
+const KIND = { type: "string", enum: ["prose", "table", "form"], description: "内容形态：正文/表格为主/函件表单" };
+
+const skeletonSchema = {
+  type: "object",
+  additionalProperties: false,
   properties: {
     chapters: {
-      type: Type.ARRAY,
+      type: "array",
       items: {
-        type: Type.OBJECT,
+        type: "object",
+        additionalProperties: false,
         properties: {
-          title: { type: Type.STRING, description: "章标题，不带编号，如“技术方案”" },
-          brief: { type: Type.STRING, description: "本章定位与必须覆盖的评分点/实质性要求，60-150字" },
-          sharePercent: { type: Type.NUMBER, description: "本章占全文篇幅百分比，所有章合计=100" },
-          kind: { type: Type.STRING, enum: ["prose", "table", "form"], description: "内容形态：正文/表格为主/函件表单" },
+          title: { type: "string", description: "章标题，不带编号，如“技术方案”" },
+          brief: { type: "string", description: "本章定位与必须覆盖的评分点/实质性要求，60-150字" },
+          sharePercent: { type: "number", description: "本章占全文篇幅百分比，所有章合计=100" },
+          kind: KIND,
         },
         required: ["title", "brief", "sharePercent", "kind"],
       },
@@ -32,48 +35,30 @@ const skeletonSchema: Schema = {
 
 interface RawLeaf { title: string; brief: string; weight: number; kind: NodeKind; children?: RawLeaf[] }
 
-const expandSchema: Schema = {
-  type: Type.OBJECT,
+function sectionLevelSchema(depth: number): Record<string, unknown> {
+  const base: Record<string, unknown> = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      brief: { type: "string", description: "写作要点：必须覆盖的内容/对应评分点，30-100字" },
+      weight: { type: "number", description: "篇幅权重1-5，5最长" },
+      kind: KIND,
+      ...(depth > 0 ? { children: { type: "array", items: sectionLevelSchema(depth - 1) } } : {}),
+    },
+    required: depth > 0 ? ["title", "brief", "weight", "kind", "children"] : ["title", "brief", "weight", "kind"],
+  };
+  return base;
+}
+
+const expandSchema = {
+  type: "object",
+  additionalProperties: false,
   properties: {
     sections: {
-      type: Type.ARRAY,
-      description: "本章的小节树，最多再嵌套 2 层（即 章→节→小节→目）",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          brief: { type: Type.STRING, description: "写作要点：必须覆盖的内容/对应评分点，30-100字" },
-          weight: { type: Type.NUMBER, description: "篇幅权重1-5，5最长" },
-          kind: { type: Type.STRING, enum: ["prose", "table", "form"] },
-          children: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                brief: { type: Type.STRING },
-                weight: { type: Type.NUMBER },
-                kind: { type: Type.STRING, enum: ["prose", "table", "form"] },
-                children: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      title: { type: Type.STRING },
-                      brief: { type: Type.STRING },
-                      weight: { type: Type.NUMBER },
-                      kind: { type: Type.STRING, enum: ["prose", "table", "form"] },
-                    },
-                    required: ["title", "brief", "weight"],
-                  },
-                },
-              },
-              required: ["title", "brief", "weight"],
-            },
-          },
-        },
-        required: ["title", "brief", "weight"],
-      },
+      type: "array",
+      description: "本章的小节树，最多再嵌套 2 层（即 章→节→小节→目）；无下级时 children 给空数组",
+      items: sectionLevelSchema(2),
     },
   },
   required: ["sections"],
@@ -106,7 +91,6 @@ export async function buildOutline(
   onLog?: (m: string) => void,
   signal?: AbortSignal
 ): Promise<OutlineNode[]> {
-  const model = options.smartModel ? BID_SMART_MODEL : BID_FAST_MODEL;
   const layout = LAYOUTS[options.layout];
   onLog?.(`正在编制 ${options.targetPages} 页投标文件的章级框架…`);
 
@@ -123,10 +107,9 @@ ${tender.mandatory.slice(0, 40).map((m, i) => `${i + 1}. ${m}`).join("\n")}
 ${tender.formatRules.slice(0, 25).map((f) => `- ${f}`).join("\n") || "（招标文件未特别规定，按行业惯例编排）"}`;
 
   const { chapters } = await genJson<{ chapters: Array<{ title: string; brief: string; sharePercent: number; kind: NodeKind }> }>({
-    model,
     signal,
-    temperature: 0.4,
-    maxOutputTokens: 16384,
+    effort: "high",
+    maxOutputTokens: 16000,
     jsonSchema: skeletonSchema,
     prompt: `你是国内资深投标文件（标书）编制专家。请为下述项目设计一份目标 ${options.targetPages} 页投标文件的章级框架（10-16 章）。
 
@@ -162,10 +145,9 @@ ${baseCtx}
       const chapterChars = Math.round((Math.max(1, c.sharePercent) / 100) * totalChars);
       const leafGuess = Math.min(70, Math.max(2, Math.round(chapterChars / 2200)));
       const { sections } = await genJson<{ sections: RawLeaf[] }>({
-        model,
         signal,
-        temperature: 0.4,
-        maxOutputTokens: 32768,
+        effort: "high",
+        maxOutputTokens: 32000,
         jsonSchema: expandSchema,
         prompt: `你是国内资深投标文件编制专家。请细化投标文件第 ${i + 1} 章《${c.title}》的小节结构。
 

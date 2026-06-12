@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Building2, Check, FileText, KeyRound, Loader2, Settings2, Sparkles, Upload } from "lucide-react";
 import { BidOptions, CompanyProfile, LayoutId } from "../../bidTypes";
-import { getStoredKey, setStoredKey, envKey } from "../../services/genai";
+import { getStoredKey, setStoredKey, envKey } from "../../services/bid/llm";
 import { LAYOUTS } from "../../services/bid/budget";
 import { extractFileText } from "../../services/bid/docxText";
 
@@ -42,7 +42,7 @@ const BidInputForm: React.FC<Props> = ({ onSubmit, disabled }) => {
   const [showAdv, setShowAdv] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [opt, setOpt] = useState<BidOptions>({
-    targetPages: 600, layout: "gbGov", smartModel: true, concurrency: 3, includeDeviationTables: true,
+    targetPages: 600, layout: "gbGov", smartModel: false, concurrency: 3, includeDeviationTables: true,
   });
 
   const setC = <K extends keyof CompanyProfile>(k: K, v: string) =>
@@ -78,8 +78,8 @@ const BidInputForm: React.FC<Props> = ({ onSubmit, disabled }) => {
           标书<span className="text-sky-400">智能工厂</span>
         </h1>
         <p className="text-white/60 text-base">
-          上传/粘贴招标文件，AI 按工作流解析评分办法与实质性条款、编大纲、分章并发撰写、合规审查，
-          一键导出按国标板式排好的 Word 投标文件。全程在你的浏览器本地完成。
+          上传/粘贴招标文件，Claude Fable 5（Anthropic 最强模型）按工作流解析评分办法与实质性条款、
+          编大纲、分章并发撰写、合规审查，一键导出按国标板式排好的 Word 投标文件。全程在你的浏览器本地完成。
         </p>
       </div>
 
@@ -87,18 +87,18 @@ const BidInputForm: React.FC<Props> = ({ onSubmit, disabled }) => {
         <div className="mb-4 bg-white/5 border border-white/15 rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <KeyRound className="w-4 h-4 text-sky-400" />
-            <span className="text-white/80 text-sm font-medium">先填入你的 Gemini API Key</span>
+            <span className="text-white/80 text-sm font-medium">先填入你的 Anthropic API Key（驱动 Claude Fable 5）</span>
             {apiKey && <span className="ml-auto flex items-center gap-1 text-emerald-400 text-xs"><Check className="w-3.5 h-3.5" /> 已保存到本机</span>}
           </div>
           <input
             type="password" value={apiKey}
             onChange={(e) => { setApiKey(e.target.value); setStoredKey(e.target.value); }}
-            placeholder="粘贴你的 Gemini API Key（仅保存在你浏览器本地，不会上传）"
+            placeholder="粘贴你的 Anthropic API Key（sk-ant-…，仅保存在你浏览器本地，不会上传）"
             className={`${inputCls} font-mono`}
           />
           <div className="text-white/40 text-xs mt-2">
-            获取：<a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-sky-300 underline">aistudio.google.com/apikey</a>。
-            生成整本标书需数百次调用，<b>强烈建议使用已开通付费的 Key</b>（免费档限流会很慢）。
+            获取：<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" className="text-sky-300 underline">console.anthropic.com</a>（需有余额）。
+            本工具调用 <b>Claude Fable 5</b>（Anthropic 最强模型）；整本标书需数百次调用，600 页均衡档约合数十美元，请知悉计费。
           </div>
         </div>
       )}
@@ -182,7 +182,7 @@ const BidInputForm: React.FC<Props> = ({ onSubmit, disabled }) => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-black/20 rounded-xl p-3">
             <label className="flex items-center gap-2 text-white/70 text-sm cursor-pointer">
               <input type="checkbox" checked={opt.smartModel} onChange={(e) => setO("smartModel", e.target.checked)} className="accent-sky-400 w-4 h-4" />
-              解析/大纲用 2.5 Pro（更准）
+              极致档：写作也用最高思考力度（更强、更贵更慢）
             </label>
             <label className="flex items-center gap-2 text-white/70 text-sm">
               并发
