@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江西铜业 · 智能招投标平台</title>
+<style>
+/* ============ 设计令牌 / Design Tokens（浅色主题：江铜蓝 + 紫铜金）============ */
+:root{
+  --brand:#15579e; --brand-deep:#0e3f78; --brand-soft:#e9f1fb; --brand-soft2:#f3f8ff;
+  --copper:#bf7a39; --copper-deep:#a4622a; --copper-soft:#fbf2e7;
+  --bg:#eef2f8; --surface:#ffffff; --surface-2:#f7f9fc; --surface-3:#f0f4f9;
+  --line:#e6ecf4; --line-2:#dde5ef;
+  --text:#1d2840; --text-2:#576074; --text-3:#929cb0;
+  --success:#1f9d6b; --success-soft:#e6f6ee;
+  --warning:#dd9114; --warning-soft:#fdf3e0;
+  --danger:#e0524d; --danger-soft:#fdecec;
+  --info:#2f86d6; --info-soft:#e8f3fc;
+  --purple:#6d5bd0; --purple-soft:#eeebfb;
+  --radius:12px; --radius-sm:8px; --radius-lg:18px;
+  --shadow-sm:0 1px 2px rgba(20,40,80,.05),0 1px 3px rgba(20,40,80,.04);
+  --shadow:0 4px 16px rgba(23,49,92,.07),0 1px 4px rgba(23,49,92,.05);
+  --shadow-lg:0 12px 40px rgba(23,49,92,.13);
+  --header-h:60px; --side-w:236px;
+  --font:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Source Han Sans CN",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#cdd6e3;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#b6c2d4}
+::-webkit-scrollbar-track{background:transparent}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ============ 顶栏 ============ */
+.header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:var(--surface);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;z-index:100;gap:18px}
+.logo{display:flex;align-items:center;gap:11px;min-width:var(--side-w);box-sizing:border-box}
+.logo-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#cf8b46,#a4622a 55%,#8a4f22);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;
+  box-shadow:0 4px 12px rgba(164,98,42,.35);position:relative;letter-spacing:-1px;flex-shrink:0}
+.logo-mark::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,.45),transparent 45%)}
+.logo-txt b{font-size:16.5px;font-weight:800;color:var(--text);letter-spacing:.5px;display:block;line-height:1.25}
+.logo-txt span{font-size:10.5px;color:var(--text-3);letter-spacing:1.2px;text-transform:uppercase}
+.search{flex:1;max-width:440px;position:relative}
+.search input{width:100%;height:38px;border-radius:20px;border:1px solid var(--line-2);background:var(--surface-2);
+  padding:0 16px 0 40px;font-size:13px;color:var(--text);transition:.2s;outline:none}
+.search input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3)}
+.head-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);position:relative;transition:.18s}
+.icon-btn:hover{background:var(--surface-3);color:var(--brand)}
+.icon-btn .dot{position:absolute;top:8px;right:8px;min-width:15px;height:15px;border-radius:8px;background:var(--danger);
+  color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #fff}
+.ai-btn{height:38px;padding:0 15px;border-radius:20px;background:linear-gradient(120deg,var(--brand),#2f86d6);
+  color:#fff;font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px;box-shadow:0 3px 10px rgba(21,87,158,.3);transition:.2s}
+.ai-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(21,87,158,.4)}
+.ai-btn .spark{animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.user{display:flex;align-items:center;gap:9px;padding:4px 10px 4px 4px;border-radius:22px;transition:.18s;margin-left:6px}
+.user:hover{background:var(--surface-3)}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-deep));
+  color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;font-size:13px}
+.user b{font-size:13px;font-weight:600;display:block;line-height:1.2}
+.user span{font-size:11px;color:var(--text-3)}
+
+/* ============ 侧栏 ============ */
+.sidebar{position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--side-w);background:var(--surface);
+  border-right:1px solid var(--line);padding:14px 12px 20px;overflow-y:auto;z-index:90}
+.nav-group{margin-bottom:6px}
+.nav-label{font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:1px;padding:12px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:11px;height:40px;padding:0 12px;border-radius:9px;color:var(--text-2);
+  font-size:13.5px;font-weight:500;transition:.16s;position:relative;margin-bottom:1px}
+.nav-item:hover{background:var(--surface-3);color:var(--brand)}
+.nav-item.active{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-12px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--brand)}
+.nav-item svg{flex-shrink:0;width:18px;height:18px}
+.nav-item .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:9px}
+.nav-item .badge.amber{background:var(--warning)}
+.side-foot{margin:16px 8px 0;padding:13px;border-radius:11px;background:linear-gradient(135deg,var(--copper-soft),#fff);
+  border:1px solid #f0e3d2}
+.side-foot b{font-size:12px;color:var(--copper-deep);display:flex;align-items:center;gap:6px}
+.side-foot p{font-size:11px;color:var(--text-2);margin:6px 0 9px;line-height:1.5}
+.side-foot .mini-bar{height:6px;border-radius:4px;background:#efe2d0;overflow:hidden}
+.side-foot .mini-bar i{display:block;height:100%;width:73%;border-radius:4px;background:linear-gradient(90deg,var(--copper),var(--copper-deep))}
+.side-foot small{font-size:10px;color:var(--text-3);display:block;margin-top:5px}
+
+/* ============ 主区域 ============ */
+.main{margin-left:var(--side-w);margin-top:var(--header-h);padding:22px 26px 40px;min-height:calc(100vh - var(--header-h))}
+.page{display:none;animation:fade .35s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.crumb{font-size:12px;color:var(--text-3);margin-bottom:5px}
+.crumb b{color:var(--brand)}
+.page-title{font-size:21px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+.page-title .tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--brand-soft);color:var(--brand);letter-spacing:.5px}
+.page-title .tag.copper{background:var(--copper-soft);color:var(--copper-deep)}
+.page-desc{font-size:13px;color:var(--text-2);margin-top:6px;max-width:760px}
+.head-actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn{height:36px;padding:0 16px;border-radius:9px;font-size:13px;font-weight:600;display:inline-flex;
+  align-items:center;gap:7px;transition:.18s;white-space:nowrap}
+.btn svg{width:16px;height:16px}
+.btn.primary{background:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(21,87,158,.25)}
+.btn.primary:hover{background:var(--brand-deep);box-shadow:0 4px 12px rgba(21,87,158,.35)}
+.btn.copper{background:linear-gradient(120deg,var(--copper),var(--copper-deep));color:#fff;box-shadow:0 2px 8px rgba(164,98,42,.25)}
+.btn.copper:hover{filter:brightness(1.05)}
+.btn.ghost{background:var(--surface);color:var(--text-2);border:1px solid var(--line-2)}
+.btn.ghost:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft2)}
+
+/* ============ 卡片/网格 ============ */
+.grid{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.card-pad{padding:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
+.card-head h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-head .more{font-size:12px;color:var(--text-3);cursor:pointer;display:flex;align-items:center;gap:3px}
+.card-head .more:hover{color:var(--brand)}
+.dot-i{width:8px;height:8px;border-radius:3px;background:var(--brand)}
+
+/* KPI 卡 */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:.2s}
+.kpi:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.kpi::after{content:"";position:absolute;right:-18px;top:-18px;width:70px;height:70px;border-radius:50%;opacity:.08}
+.kpi.b::after{background:var(--brand)} .kpi.c::after{background:var(--copper)} .kpi.g::after{background:var(--success)}
+.kpi.o::after{background:var(--warning)} .kpi.p::after{background:var(--purple)} .kpi.i::after{background:var(--info)}
+.kpi .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:11px}
+.kpi.b .ic{background:var(--brand-soft);color:var(--brand)} .kpi.c .ic{background:var(--copper-soft);color:var(--copper-deep)}
+.kpi.g .ic{background:var(--success-soft);color:var(--success)} .kpi.o .ic{background:var(--warning-soft);color:var(--warning)}
+.kpi.p .ic{background:var(--purple-soft);color:var(--purple)} .kpi.i .ic{background:var(--info-soft);color:var(--info)}
+.kpi .lbl{font-size:12px;color:var(--text-2);margin-bottom:3px}
+.kpi .val{font-size:25px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.kpi .val small{font-size:13px;font-weight:600;color:var(--text-3);margin-left:2px}
+.kpi .trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.trend.up{color:var(--success)} .trend.down{color:var(--danger)}
+
+/* ============ 徽标/状态 ============ */
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;line-height:1.4;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.blue{background:var(--brand-soft);color:var(--brand)}
+.pill.green{background:var(--success-soft);color:var(--success)}
+.pill.amber{background:var(--warning-soft);color:var(--warning)}
+.pill.red{background:var(--danger-soft);color:var(--danger)}
+.pill.gray{background:var(--surface-3);color:var(--text-2)}
+.pill.copper{background:var(--copper-soft);color:var(--copper-deep)}
+.pill.purple{background:var(--purple-soft);color:var(--purple)}
+.pill.no::before{display:none}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:6px;background:var(--surface-3);color:var(--text-2)}
+.chip.b{background:var(--brand-soft);color:var(--brand)} .chip.c{background:var(--copper-soft);color:var(--copper-deep)}
+.chip.g{background:var(--success-soft);color:var(--success)} .chip.o{background:var(--warning-soft);color:var(--warning)}
+.chip.p{background:var(--purple-soft);color:var(--purple)} .chip.r{background:var(--danger-soft);color:var(--danger)}
+
+/* ============ 表格 ============ */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:12px;font-weight:600;color:var(--text-3);padding:11px 14px;border-bottom:1px solid var(--line);
+  background:var(--surface-2);white-space:nowrap;position:sticky;top:0}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tbody tr{transition:.14s}
+.tbl tbody tr:hover{background:var(--brand-soft2)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl .name{font-weight:600;color:var(--text)}
+.tbl .sub{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.tbl .code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--text-2)}
+.linklike{color:var(--brand);font-weight:600;cursor:pointer}
+.linklike:hover{text-decoration:underline}
+.tbl-wrap{overflow-x:auto;border-radius:0 0 var(--radius) var(--radius)}
+
+/* 迷你条形 */
+.minibar{height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden;min-width:70px}
+.minibar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--brand),#3f9be0)}
+
+/* 进度步骤 */
+.steps{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.step{display:flex;align-items:center;font-size:12px;color:var(--text-3)}
+.step .num{width:24px;height:24px;border-radius:50%;background:var(--surface-3);color:var(--text-3);display:flex;
+  align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:7px;flex-shrink:0;border:2px solid transparent}
+.step.done .num{background:var(--success);color:#fff}
+.step.active .num{background:var(--brand);color:#fff;box-shadow:0 0 0 4px var(--brand-soft)}
+.step.done,.step.active{color:var(--text)}
+.step .line{width:34px;height:2px;background:var(--line-2);margin:0 9px}
+.step.done .line{background:var(--success)}
+
+/* 时间线 */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line-2)}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid var(--brand)}
+.tl-item.done::before{background:var(--success);border-color:var(--success)}
+.tl-item.todo::before{border-color:var(--line-2)}
+.tl-item h5{font-size:13px;font-weight:600;margin-bottom:2px}
+.tl-item p{font-size:12px;color:var(--text-2)}
+.tl-item time{font-size:11px;color:var(--text-3)}
+
+/* 待办列表 */
+.todo{display:flex;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
+.todo:last-child{border-bottom:none}
+.todo .pri{width:4px;border-radius:3px;flex-shrink:0}
+.todo .pri.h{background:var(--danger)} .todo .pri.m{background:var(--warning)} .todo .pri.l{background:var(--info)}
+.todo .body{flex:1}
+.todo h5{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.todo p{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.todo .act{align-self:center;font-size:12px;color:var(--brand);font-weight:600;white-space:nowrap}
+
+/* 段标题 */
+.sec-title{font-size:15px;font-weight:700;margin:24px 0 13px;display:flex;align-items:center;gap:9px}
+.sec-title .bar{width:4px;height:16px;border-radius:3px;background:linear-gradient(var(--copper),var(--copper-deep))}
+.sec-title .bar.b{background:linear-gradient(var(--brand),var(--brand-deep))}
+.sec-title small{font-size:12px;font-weight:400;color:var(--text-3);margin-left:4px}
+
+/* 筛选条 */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.fseg{display:inline-flex;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;padding:3px;gap:2px}
+.fseg button{padding:6px 13px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--text-2);transition:.15s}
+.fseg button.on{background:var(--brand);color:#fff}
+.fselect{height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);
+  font-size:12.5px;color:var(--text-2);font-weight:500;cursor:pointer;font-family:inherit}
+
+/* AI 抽屉 */
+.drawer-mask{position:fixed;inset:0;background:rgba(17,30,55,.4);backdrop-filter:blur(2px);z-index:200;opacity:0;pointer-events:none;transition:.3s}
+.drawer-mask.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:430px;max-width:92vw;background:var(--surface);z-index:201;
+  box-shadow:-12px 0 40px rgba(20,40,80,.16);transform:translateX(100%);transition:.32s cubic-bezier(.5,0,.2,1);display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;
+  background:linear-gradient(120deg,var(--brand),#2f86d6);color:#fff}
+.drawer-head .a-ic{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
+.drawer-head b{font-size:15px;font-weight:700;display:block}
+.drawer-head span{font-size:11.5px;opacity:.9}
+.drawer-head .x{margin-left:auto;width:32px;height:32px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;transition:.15s}
+.drawer-head .x:hover{background:rgba(255,255,255,.18)}
+.chat{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;background:var(--surface-2)}
+.msg{display:flex;gap:10px;max-width:92%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg .mav{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.msg.ai .mav{background:linear-gradient(135deg,var(--brand),#2f86d6);color:#fff}
+.msg.me .mav{background:var(--copper-soft);color:var(--copper-deep)}
+.bubble{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.6;box-shadow:var(--shadow-sm)}
+.msg.me .bubble{background:var(--brand);color:#fff;border-color:var(--brand)}
+.bubble b{font-weight:700}
+.bubble .ai-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--copper-deep);background:var(--copper-soft);padding:1px 7px;border-radius:5px;margin-bottom:6px}
+.quick-q{display:flex;flex-wrap:wrap;gap:7px;padding:0 20px 12px;background:var(--surface-2)}
+.quick-q button{font-size:12px;color:var(--brand);background:var(--brand-soft);border:1px solid #d6e6f9;padding:6px 11px;border-radius:16px;transition:.15s}
+.quick-q button:hover{background:var(--brand);color:#fff}
+.drawer-foot{padding:13px 18px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:center}
+.drawer-foot input{flex:1;height:40px;border:1px solid var(--line-2);border-radius:11px;padding:0 14px;font-size:13px;outline:none;font-family:inherit}
+.drawer-foot input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.drawer-foot .send{width:40px;height:40px;border-radius:11px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* 模态 */
+.modal-mask{position:fixed;inset:0;background:rgba(17,30,55,.45);backdrop-filter:blur(3px);z-index:210;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-mask.open{display:flex;animation:fade .2s}
+.modal{background:var(--surface);border-radius:var(--radius-lg);width:760px;max-width:100%;max-height:88vh;overflow:hidden;
+  box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.modal-head h3{font-size:16px;font-weight:700;flex:1}
+.modal-head .x{width:32px;height:32px;border-radius:8px;color:var(--text-3);display:flex;align-items:center;justify-content:center}
+.modal-head .x:hover{background:var(--surface-3);color:var(--text)}
+.modal-body{padding:22px;overflow-y:auto}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+
+/* 信息网格 */
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden}
+.info-grid .cell{background:#fff;padding:12px 15px}
+.info-grid .cell label{font-size:11.5px;color:var(--text-3);display:block;margin-bottom:3px}
+.info-grid .cell b{font-size:13.5px;font-weight:600}
+.info-grid .cell.full{grid-column:1/3}
+
+/* 评分条 */
+.score-row{display:flex;align-items:center;gap:12px;padding:9px 0}
+.score-row .nm{width:90px;font-size:12.5px;color:var(--text-2);flex-shrink:0}
+.score-row .track{flex:1;height:9px;border-radius:5px;background:var(--surface-3);overflow:hidden}
+.score-row .track i{display:block;height:100%;border-radius:5px}
+.score-row .sc{width:54px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
+
+/* 雷达/图表容器 */
+.chart-box{width:100%;display:flex;align-items:center;justify-content:center}
+svg .grid-line{stroke:var(--line);stroke-width:1}
+svg text{font-family:var(--font)}
+
+/* 工具卡 */
+.tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:.2s;cursor:pointer;position:relative;overflow:hidden}
+.tool:hover{box-shadow:var(--shadow);transform:translateY(-3px);border-color:var(--brand-soft)}
+.tool .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.tool h4{font-size:14.5px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.tool p{font-size:12px;color:var(--text-2);line-height:1.55;min-height:54px}
+.tool .stat{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--text-3);display:flex;justify-content:space-between}
+.tool .stat b{color:var(--brand);font-weight:700}
+
+/* 两列布局 */
+.cols{display:grid;gap:16px}
+.cols-2-1{grid-template-columns:2fr 1fr}
+.cols-1-1{grid-template-columns:1fr 1fr}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+
+/* 警报框 */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid;margin-bottom:14px}
+.alert.warn{background:var(--warning-soft);border-color:#f3dcae}
+.alert.danger{background:var(--danger-soft);border-color:#f5cdcb}
+.alert.info{background:var(--info-soft);border-color:#cbe5f9}
+.alert .ai{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.alert.warn .ai{background:#fff;color:var(--warning)} .alert.danger .ai{background:#fff;color:var(--danger)} .alert.info .ai{background:#fff;color:var(--info)}
+.alert h5{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.alert p{font-size:12.5px;color:var(--text-2);line-height:1.55}
+
+/* 上传/解析示意 */
+.upload{border:2px dashed var(--line-2);border-radius:var(--radius);padding:26px;text-align:center;background:var(--surface-2);transition:.2s;cursor:pointer}
+.upload:hover{border-color:var(--brand);background:var(--brand-soft2)}
+.upload .uic{width:54px;height:54px;border-radius:14px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.upload b{font-size:14px;font-weight:600;display:block}
+.upload span{font-size:12px;color:var(--text-3)}
+
+/* 偏差表生成 */
+.gen-line{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;background:var(--surface-2);margin-bottom:8px;border:1px solid var(--line);animation:fade .4s}
+.gen-line .gi{width:26px;height:26px;border-radius:7px;background:var(--success-soft);color:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gen-line .gt{flex:1;font-size:12.5px}
+.gen-line .gt b{font-weight:600}
+.gen-line .gt span{color:var(--text-3)}
+
+/* 专家抽取 */
+.expert-pool{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.exp-card{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:13px;text-align:center;transition:.25s;position:relative}
+.exp-card.picked{border-color:var(--copper);box-shadow:0 0 0 3px var(--copper-soft);transform:scale(1.04)}
+.exp-card.dim{opacity:.4}
+.exp-card .eav{width:42px;height:42px;border-radius:50%;margin:0 auto 8px;background:linear-gradient(135deg,var(--brand-soft),#cfe2f7);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.exp-card b{font-size:12.5px;display:block}
+.exp-card span{font-size:10.5px;color:var(--text-3)}
+.exp-card .pk{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:var(--copper);color:#fff;display:none;align-items:center;justify-content:center;font-size:11px}
+.exp-card.picked .pk{display:flex}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;justify-content:center}
+.legend span{font-size:11.5px;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px}
+
+.spacer{height:16px}
+@media(max-width:1300px){.kpi-row{grid-template-columns:repeat(3,1fr)}.tool-grid{grid-template-columns:repeat(2,1fr)}.cols-2-1,.cols-1-1,.cols-3{grid-template-columns:1fr}}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;
+  padding:11px 20px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);z-index:300;opacity:0;transition:.3s;display:flex;align-items:center;gap:9px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ============ 顶栏 ============ -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">JC</div>
+    <div class="logo-txt">
+      <b>江西铜业 · 智能招投标平台</b>
+      <span>JCC Intelligent Bidding Platform</span>
+    </div>
+  </div>
+  <div class="search">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input placeholder="搜索招标项目 / 投标商机 / 供应商 / 评标专家…">
+  </div>
+  <div class="head-right">
+    <button class="ai-btn" onclick="openAI()">
+      <svg class="spark" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg>
+      AI 智能助手
+    </button>
+    <button class="icon-btn" title="消息"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><i class="dot">5</i></button>
+    <button class="icon-btn" title="待办"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></button>
+    <button class="icon-btn" title="帮助"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+    <div class="user">
+      <div class="avatar">张</div>
+      <div><b>张 明</b><span>采购供应链部 · 高级主管</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ 侧栏 ============ -->
+<aside class="sidebar">
+  <div class="nav-group">
+    <div class="nav-label">总览</div>
+    <a class="nav-item active" data-page="dashboard" onclick="go('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      工作台
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">招标业务（采购方）</div>
+    <a class="nav-item" data-page="tenders" onclick="go('tenders')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+      招标项目 <span class="badge">8</span>
+    </a>
+    <a class="nav-item" data-page="prep" onclick="go('prep')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      智能编标
+    </a>
+    <a class="nav-item" data-page="eval" onclick="go('eval')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+      开标评标 <span class="badge amber">2</span>
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">投标业务（供应方）</div>
+    <a class="nav-item" data-page="radar" onclick="go('radar')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      商机雷达 <span class="badge">12</span>
+    </a>
+    <a class="nav-item" data-page="bids" onclick="go('bids')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      投标项目
+    </a>
+    <a class="nav-item" data-page="bidgen" onclick="go('bidgen')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m10 13 1.5 1.5L15 11"/></svg>
+      智能制标
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">资源中心</div>
+    <a class="nav-item" data-page="suppliers" onclick="go('suppliers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>
+      供应商库
+    </a>
+    <a class="nav-item" data-page="experts" onclick="go('experts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg>
+      评标专家库
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">智能 · 分析</div>
+    <a class="nav-item" data-page="ai" onclick="go('ai')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg>
+      AI 智能中心
+    </a>
+    <a class="nav-item" data-page="analytics" onclick="go('analytics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 3-4 4 3 5-7"/></svg>
+      数据分析
+    </a>
+  </div>
+  <div class="side-foot">
+    <b>🏆 阳光采购 · 廉洁招标</b>
+    <p>本季度全流程电子化率、围标串标AI监测覆盖率</p>
+    <div class="mini-bar"><i></i></div>
+    <small>电子化覆盖 73% · 较上季 ↑ 9%</small>
+  </div>
+</aside>
+
+<!-- ============ 主区域 ============ -->
+<main class="main">
+
+<!-- ====== 工作台 ====== -->
+<section class="page active" id="page-dashboard">
+  <div class="page-head">
+    <div>
+      <div class="crumb">首页 / <b>工作台</b></div>
+      <div class="page-title">早上好，张明 👋 <span class="tag">采购供应链部</span></div>
+      <div class="page-desc">今天是 2026年6月16日 · 您有 <b style="color:var(--brand)">5</b> 项招标待办、<b style="color:var(--copper-deep)">3</b> 项投标节点临近。智能助手已为您梳理今日重点。</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn ghost" onclick="toast('已导出本月招投标简报')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出简报</button>
+      <button class="btn primary" onclick="go('tenders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建招标立项</button>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi b"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <div class="lbl">进行中招标项目</div><div class="val num" data-count="36">0</div>
+      <div class="trend up">▲ 本月新增 8 项</div></div>
+    <div class="kpi c"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg></div>
+      <div class="lbl">进行中投标项目</div><div class="val num" data-count="14">0</div>
+      <div class="trend up">▲ 商机匹配 12 条</div></div>
+    <div class="kpi g"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="lbl">本年招标金额</div><div class="val"><span class="num" data-count="38.6" data-dec="1">0</span><small>亿元</small></div>
+      <div class="trend up">▲ 同比 +12.4%</div></div>
+    <div class="kpi o"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+      <div class="lbl">综合节资率</div><div class="val"><span class="num" data-count="9.7" data-dec="1">0</span><small>%</small></div>
+      <div class="trend up">▲ 节约 3.74 亿元</div></div>
+    <div class="kpi p"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="lbl">投标中标金额</div><div class="val"><span class="num" data-count="26.3" data-dec="1">0</span><small>亿元</small></div>
+      <div class="trend up">▲ 中标率 68%</div></div>
+    <div class="kpi i"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <div class="lbl">合格供应商</div><div class="val num" data-count="2486">0</div>
+      <div class="trend up">▲ 战略供应商 86 家</div></div>
+  </div>
+
+  <div class="cols cols-2-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i"></span>招投标金额趋势（万元）</h3>
+        <div class="fseg" style="transform:scale(.9)"><button class="on">近12月</button><button>近6月</button><button>本季</button></div></div>
+      <div class="card-pad" id="trendChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>招标采购方式占比</h3></div>
+      <div class="card-pad" id="methodChart"></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="cols cols-2-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i"></span>待办与预警</h3><span class="more" onclick="toast('查看全部 17 项待办')">全部 17 项 ›</span></div>
+      <div class="card-pad" style="padding-top:4px">
+        <div class="todo"><div class="pri h"></div><div class="body"><h5>台意电工智慧工厂项目 · 评标待签章 <span class="pill red no" style="font-size:10px;padding:2px 7px">紧急</span></h5><p>6家投标人技术/商务评分已完成，AI已生成评标报告，待评标委员会确认签章</p></div><div class="act linklike" onclick="go('eval')">去处理 ›</div></div>
+        <div class="todo"><div class="pri h"></div><div class="body"><h5>国网2026电解铜框架采购 · 投标截止临近</h5><p>距投标截止仅剩 2 天（6/18 17:00），保证金¥152万待复核，制标完成度 88%</p></div><div class="act linklike" onclick="go('bids')">去处理 ›</div></div>
+        <div class="todo"><div class="pri m"></div><div class="body"><h5>德兴铜矿大型电铲采购 · 中标公示中</h5><p>公示期 6/8–6/15，已收到1条异议待答复，请于24h内处理</p></div><div class="act linklike">去处理 ›</div></div>
+        <div class="todo"><div class="pri m"></div><div class="body"><h5>2家投标人触发围标串标AI预警</h5><p>「智慧工厂」标段：某信息技术、某系统集成 投标文件MAC/机器码雷同，相似度91%</p></div><div class="act linklike" onclick="go('eval')">去核查 ›</div></div>
+        <div class="todo"><div class="pri l"></div><div class="body"><h5>永平铜矿球磨机备件 · 资格预审待初审</h5><p>12家供应商提交资格预审文件，AI预审已完成，待人工复核2家</p></div><div class="act linklike" onclick="go('tenders')">去处理 ›</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--success)"></span>各板块招标金额</h3></div>
+      <div class="card-pad" id="segChart"></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="cols cols-3">
+    <div class="card card-pad">
+      <h3 style="font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><span class="dot-i" style="background:var(--purple)"></span>本年投标中标率</h3>
+      <div id="gaugeChart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--info)"></span>重点项目流程进度</h3></div>
+      <div class="card-pad">
+        <div class="timeline">
+          <div class="tl-item done"><time>已完成 · 05/20</time><h5>立项与采购方式核定</h5><p>台意电工智慧工厂项目 · 公开招标</p></div>
+          <div class="tl-item done"><time>已完成 · 05/26</time><h5>招标文件编制与发布</h5><p>AI辅助生成，发布于江铜电子招投标平台</p></div>
+          <div class="tl-item done"><time>已完成 · 06/12</time><h5>投标截止 · 开标</h5><p>6家投标人，全程电子开标</p></div>
+          <div class="tl-item"><h5>评标 · 定标（进行中）</h5><p>技术+商务+价格综合评审，AI辅助评分</p></div>
+          <div class="tl-item todo"><time>待启动</time><h5>中标公示与合同签订</h5><p>公示期 ≥3 个工作日</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>AI 今日洞察</h3></div>
+      <div class="card-pad" style="display:flex;flex-direction:column;gap:11px">
+        <div class="alert info" style="margin:0"><div class="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg></div><div><h5>报价洞察</h5><p>电解铜市场价近30日上行 4.2%，建议国网框架投标报价上浮 1.8%~2.3% 区间。</p></div></div>
+        <div class="alert warn" style="margin:0"><div class="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div><div><h5>合规预警</h5><p>3家供应商资质将于30天内到期，2家「信用中国」新增风险记录，请核查。</p></div></div>
+        <div class="alert info" style="margin:0"><div class="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div><div><h5>寻源建议</h5><p>「球磨机备件」品类历史3家供应商集中度偏高，建议引入 2 家备选以提升竞争性。</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 招标项目 ====== -->
+<section class="page" id="page-tenders">
+  <div class="page-head">
+    <div>
+      <div class="crumb">招标业务 / <b>招标项目</b></div>
+      <div class="page-title">招标项目管理 <span class="tag">采购方视角</span></div>
+      <div class="page-desc">覆盖集团及各矿山、冶炼、加工板块的设备、工程、服务、物资、信息化采购。立项→编标→资审→开标→评标→定标→合同 全流程电子化、阳光化。</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></svg>高级筛选</button>
+      <button class="btn copper" onclick="openModal('detailModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg>AI 智能立项</button>
+      <button class="btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建招标</button>
+    </div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi b"><div class="lbl">进行中招标</div><div class="val num">36</div><div class="trend up">设备 11 · 工程 8 · 物资 9 · 服务 5 · 信息化 3</div></div>
+    <div class="kpi o"><div class="lbl">待开标</div><div class="val num">7</div><div class="trend">本周 6/18–6/30 集中开标</div></div>
+    <div class="kpi p"><div class="lbl">评标/定标中</div><div class="val num">5</div><div class="trend">AI辅助评标覆盖 100%</div></div>
+    <div class="kpi g"><div class="lbl">本年累计节资</div><div class="val"><span class="num">3.74</span><small>亿元</small></div><div class="trend up">节资率 9.7%</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="fseg"><button class="on">全部</button><button>设备采购</button><button>工程施工</button><button>物资备件</button><button>服务采购</button><button>信息化</button></div>
+    <select class="fselect"><option>全部采购单位</option><option>德兴铜矿</option><option>贵溪冶炼厂</option><option>永平铜矿</option><option>城门山铜矿</option><option>江铜台意</option></select>
+    <select class="fselect"><option>全部状态</option><option>编制中</option><option>发标中</option><option>投标中</option><option>评标中</option><option>公示中</option></select>
+    <select class="fselect"><option>全部采购方式</option><option>公开招标</option><option>邀请招标</option><option>竞争性谈判</option><option>询比价</option></select>
+  </div>
+
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>项目编号 / 名称</th><th>采购单位</th><th>类别</th><th>预算(万)</th><th>采购方式</th><th>投标人</th><th>流程进度</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="tenderRows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 智能编标 ====== -->
+<section class="page" id="page-prep">
+  <div class="page-head">
+    <div>
+      <div class="crumb">招标业务 / <b>智能编标</b></div>
+      <div class="page-title">招标文件智能编制 <span class="tag copper">AI 驱动</span></div>
+      <div class="page-desc">基于江铜招标范本库 + 历史项目知识库，AI 一键生成招标文件框架，自动套用《评标办法》、资格条件、技术规格书，合规校验废标项与负面清单。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">范本库</button><button class="btn primary">导出招标文件（.docx）</button></div>
+  </div>
+
+  <div class="cols cols-2-1">
+    <div>
+      <div class="card card-pad" style="margin-bottom:16px">
+        <h3 style="font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px"><span class="dot-i"></span>项目配置</h3>
+        <div class="info-grid">
+          <div class="cell"><label>项目名称</label><b>城门山铜矿尾矿库四期扩容工程</b></div>
+          <div class="cell"><label>采购单位</label><b>江铜城门山铜矿</b></div>
+          <div class="cell"><label>采购类别</label><b>工程施工类</b></div>
+          <div class="cell"><label>采购方式</label><b>公开招标</b></div>
+          <div class="cell"><label>预算金额</label><b>12,000 万元</b></div>
+          <div class="cell"><label>招标代理</label><b>江西省铜咨招标咨询有限公司</b></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn copper" onclick="runGen()"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg>AI 一键生成招标文件</button>
+          <button class="btn ghost">导入需求书</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>AI 生成进度</h3><span class="pill green" id="genStatus" style="display:none">已完成</span></div>
+        <div class="card-pad" id="genArea">
+          <div style="text-align:center;color:var(--text-3);padding:30px 0">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;opacity:.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+            <p style="font-size:13px">点击「AI 一键生成」，自动编制招标文件全部章节</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--success)"></span>合规体检 · 智能校验</h3></div>
+      <div class="card-pad">
+        <div class="alert info" style="margin-bottom:14px"><div class="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/></svg></div><div><h5>合规评分 92 分</h5><p>已对照《招标投标法》《江铜采购管理办法》逐条核验，发现 2 处需关注项。</p></div></div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>资格条件</b> <span>未设置排他性条款，合规</span></div></div>
+          <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>评标办法</b> <span>综合评估法，分值结构合规</span></div></div>
+          <div class="gen-line" style="background:var(--warning-soft);border-color:#f3dcae"><div class="gi" style="background:#fff;color:var(--warning)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div><div class="gt"><b>业绩门槛</b> <span style="color:var(--warning)">「近3年≥2个同类业绩」或限制竞争，建议放宽至1个</span></div></div>
+          <div class="gen-line" style="background:var(--warning-soft);border-color:#f3dcae"><div class="gi" style="background:#fff;color:var(--warning)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></div><div class="gt"><b>品牌型号</b> <span style="color:var(--warning)">技术规格含具体品牌，建议改为「参数等同」</span></div></div>
+          <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>保证金</b> <span>投标保证金 ≤ 预算2%，合规</span></div></div>
+          <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>廉洁条款</b> <span>已含亲属关系排查、廉洁承诺函</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 开标评标 ====== -->
+<section class="page" id="page-eval">
+  <div class="page-head">
+    <div>
+      <div class="crumb">招标业务 / <b>开标评标</b></div>
+      <div class="page-title">开标评标工作台 <span class="tag copper">AI 辅助评标</span></div>
+      <div class="page-desc">项目：台意电工智慧工厂（MES+工业数据平台）项目 · JCZB-2026-0412 · 江铜台意电工 · 综合评估法</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>评标报告</button>
+      <button class="btn copper"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>提交评标结果</button>
+    </div>
+  </div>
+
+  <div class="alert danger">
+    <div class="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+    <div><h5>🚨 围标 / 串标 AI 预警（高风险）</h5><p>「某信息技术服务公司」与「某系统集成有限公司」检测到强关联：投标文件 <b>制作机器码（MAC: F4-8E-38-2A-1C-90）一致</b>、<b>电子签章证书同一CA批次</b>、<b>报价明细雷同（相似度91%、单价偏差&lt;0.3%）</b>、<b>投标保证金来自同一银行账户</b>。建议提交评标委员会认定并依法处置。</p></div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi b"><div class="lbl">投标单位</div><div class="val num">6</div><div class="trend">通过资格审查 6 家</div></div>
+    <div class="kpi g"><div class="lbl">有效投标</div><div class="val num">4</div><div class="trend">2家围标预警待认定</div></div>
+    <div class="kpi o"><div class="lbl">最高/最低报价</div><div class="val" style="font-size:18px"><span class="num">612</span>/<span class="num">545</span><small>万</small></div><div class="trend">预算 610 万</div></div>
+    <div class="kpi p"><div class="lbl">评标专家</div><div class="val num">7</div><div class="trend">系统随机抽取</div></div>
+    <div class="kpi i"><div class="lbl">AI评分进度</div><div class="val"><span class="num">100</span><small>%</small></div><div class="trend up">人工复核中</div></div>
+  </div>
+
+  <div class="cols cols-2-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i"></span>投标报价 & 综合评分（满分100）</h3><span class="pill blue">综合评估法 · 价格40/技术40/商务20</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>排名</th><th>投标单位</th><th>报价(万)</th><th>价格分(40)</th><th>技术分(40)</th><th>商务分(20)</th><th>综合得分</th><th>结论</th></tr></thead>
+          <tbody id="evalRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>推荐中标人 · 技术响应雷达</h3></div>
+      <div class="card-pad">
+        <div id="radarChart"></div>
+        <div style="text-align:center;margin-top:6px">
+          <b style="font-size:14px;color:var(--brand)">中国移动通信集团江西有限公司</b>
+          <div style="font-size:12px;color:var(--text-3);margin-top:3px">综合得分 93.1 · 排名第 1 · AI推荐中标</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="cols cols-1-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--success)"></span>资格 / 商务符合性 AI 核验</h3></div>
+      <div class="card-pad">
+        <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>营业执照 / 法人资格</b> <span>有效，经营范围匹配</span></div></div>
+        <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>类似业绩（MES≥200万）</b> <span>南昌同兴达、华翔5G+智慧工厂，达标</span></div></div>
+        <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>CMMI L3 / CS 二级资质</b> <span>证书有效，加分项达标</span></div></div>
+        <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>亲属关系排查承诺</b> <span>已签署，「信用中国」无失信记录</span></div></div>
+        <div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>投标保证金（11万）</b> <span>已到账，账户独立</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--purple)"></span>技术偏差 AI 比对（节选）</h3></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>技术条款</th><th>招标要求</th><th>投标响应</th><th>偏差</th></tr></thead>
+          <tbody>
+            <tr><td class="name">超融合节点</td><td>≥3节点高可用</td><td>3节点超聚变</td><td><span class="pill green no" style="padding:2px 8px">无偏差</span></td></tr>
+            <tr><td class="name">OT数采点位</td><td>≥10000点</td><td>15000点</td><td><span class="pill blue no" style="padding:2px 8px">正偏差</span></td></tr>
+            <tr><td class="name">数据采集准确率</td><td>≥99%</td><td>≥99%</td><td><span class="pill green no" style="padding:2px 8px">满足</span></td></tr>
+            <tr><td class="name">工业协议</td><td>Modbus/OPC UA/西门子</td><td>全支持+定制</td><td><span class="pill green no" style="padding:2px 8px">满足</span></td></tr>
+            <tr><td class="name">质保期</td><td>软件1年/硬件2年</td><td>软件2年/硬件3年</td><td><span class="pill blue no" style="padding:2px 8px">优于</span></td></tr>
+            <tr><td class="name">交付源码</td><td>需提供</td><td>全量源码+文档</td><td><span class="pill green no" style="padding:2px 8px">满足</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 商机雷达 ====== -->
+<section class="page" id="page-radar">
+  <div class="page-head">
+    <div>
+      <div class="crumb">投标业务 / <b>商机雷达</b></div>
+      <div class="page-title">商机雷达 · 智能寻标 <span class="tag copper">供应方视角</span></div>
+      <div class="page-desc">为江铜国贸、江铜工程、贵金属、研究院等经营主体，从全网招标公告中智能匹配铜产品销售、工程总包、技术服务等投标商机，按中标概率与契合度排序推荐。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">订阅设置</button><button class="btn primary">一键转立项</button></div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi c"><div class="lbl">今日新增商机</div><div class="val num">12</div><div class="trend up">高契合度 5 条</div></div>
+    <div class="kpi b"><div class="lbl">跟踪中商机</div><div class="val num">28</div><div class="trend">合计 ¥ 38.6 亿</div></div>
+    <div class="kpi g"><div class="lbl">AI 推荐参投</div><div class="val num">7</div><div class="trend up">平均中标概率 64%</div></div>
+    <div class="kpi o"><div class="lbl">即将截止</div><div class="val num">4</div><div class="trend">3日内截止</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="fseg"><button class="on">全部商机</button><button>产品销售</button><button>工程总包</button><button>技术服务</button><button>资源/矿权</button></div>
+    <select class="fselect"><option>全部经营主体</option><option>江铜国贸</option><option>江铜工程</option><option>贵金属公司</option><option>江铜研究院</option></select>
+    <select class="fselect"><option>契合度排序</option><option>中标概率</option><option>金额从高到低</option><option>截止时间</option></select>
+  </div>
+
+  <div class="grid" id="radarCards" style="grid-template-columns:repeat(2,1fr)"></div>
+</section>
+
+<!-- ====== 投标项目 ====== -->
+<section class="page" id="page-bids">
+  <div class="page-head">
+    <div>
+      <div class="crumb">投标业务 / <b>投标项目</b></div>
+      <div class="page-title">投标项目管理 <span class="tag copper">供应方视角</span></div>
+      <div class="page-desc">江铜作为投标人参与的产品销售、工程承包、技术服务等投标项目全流程管理：商机评估→投标决策→制标→投标→开标跟踪→中标履约。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">投标日历</button><button class="btn primary">新建投标项目</button></div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi c"><div class="lbl">在投项目</div><div class="val num">14</div><div class="trend">制标中 5 · 待开标 4</div></div>
+    <div class="kpi g"><div class="lbl">本年已中标</div><div class="val num">31</div><div class="trend up">中标率 68%</div></div>
+    <div class="kpi p"><div class="lbl">中标金额</div><div class="val"><span class="num">26.3</span><small>亿</small></div><div class="trend up">同比 +15%</div></div>
+    <div class="kpi b"><div class="lbl">在投金额</div><div class="val"><span class="num">23.4</span><small>亿</small></div><div class="trend">国网框架占比高</div></div>
+    <div class="kpi o"><div class="lbl">保证金占用</div><div class="val"><span class="num">3160</span><small>万</small></div><div class="trend">电子保函 76%</div></div>
+  </div>
+
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>项目编号 / 名称</th><th>招标方</th><th>投标主体</th><th>类别</th><th>金额(万)</th><th>制标进度</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="bidRows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 智能制标 ====== -->
+<section class="page" id="page-bidgen">
+  <div class="page-head">
+    <div>
+      <div class="crumb">投标业务 / <b>智能制标</b></div>
+      <div class="page-title">投标文件智能编制 <span class="tag copper">AI 制标</span></div>
+      <div class="page-desc">基于江铜投标知识库（历史标书、技术方案、业绩、资质库），AI 解析招标文件要求，一键生成投标文件全套章节，自动应答技术/商务偏差，智能测算最优报价。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">知识库</button><button class="btn copper" onclick="toast('已生成投标文件 PDF（含目录、偏差表、报价表）')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出投标文件</button></div>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:16px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+    <div style="flex:1;min-width:260px">
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:3px">当前投标项目</div>
+      <b style="font-size:16px">台意电工智慧工厂（MES+工业数据平台）项目</b>
+      <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip b">招标方：江铜台意电工</span><span class="chip c">代理：江西省铜咨</span><span class="chip">控制价：610万</span><span class="chip g">投标主体：中国移动江西</span>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:12px;color:var(--text-3)">制标完成度</div>
+      <div style="font-size:30px;font-weight:800;color:var(--brand)" class="num">88%</div>
+    </div>
+  </div>
+
+  <div class="cols cols-2-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i"></span>投标文件章节（按招标文件目录自动构建）</h3><span class="pill green">AI 已生成 9/11 章</span></div>
+      <div class="card-pad" id="bidChapters"></div>
+    </div>
+    <div>
+      <div class="card card-pad" style="margin-bottom:16px">
+        <h3 style="font-size:14px;margin-bottom:13px;display:flex;align-items:center;gap:8px"><span class="dot-i" style="background:var(--copper)"></span>AI 智能报价测算</h3>
+        <div style="text-align:center;padding:6px 0 12px">
+          <div style="font-size:12px;color:var(--text-3)">建议投标报价（含税）</div>
+          <div style="font-size:30px;font-weight:800;color:var(--copper-deep)" class="num">¥573<small style="font-size:15px">万</small></div>
+          <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">低于控制价 6.1% · 预测中标概率 76%</div>
+        </div>
+        <div class="score-row"><div class="nm">成本基线</div><div class="track"><i style="width:78%;background:var(--info)"></i></div><div class="sc">468万</div></div>
+        <div class="score-row"><div class="nm">市场行情</div><div class="track"><i style="width:62%;background:var(--copper)"></i></div><div class="sc">+4.2%</div></div>
+        <div class="score-row"><div class="nm">竞争强度</div><div class="track"><i style="width:70%;background:var(--warning)"></i></div><div class="sc">6家</div></div>
+        <div class="score-row"><div class="nm">利润空间</div><div class="track"><i style="width:55%;background:var(--success)"></i></div><div class="sc">18.3%</div></div>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--text-2);background:var(--surface-2);padding:10px;border-radius:8px;line-height:1.55">💡 AI：建议报价区间 <b>560~580万</b>。低于545万将触发低价风险评审；高于598万价格分落后第二名。</div>
+      </div>
+      <div class="card card-pad">
+        <h3 style="font-size:14px;margin-bottom:13px;display:flex;align-items:center;gap:8px"><span class="dot-i" style="background:var(--success)"></span>偏差表智能应答</h3>
+        <div style="font-size:12px;color:var(--text-2);line-height:1.7">
+          AI 已比对招标文件「第五章供货要求」全部技术/商务条款，自动生成：<br>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+            <span class="chip g">✓ 技术偏差表 · 0项负偏差</span>
+            <span class="chip g">✓ 商务偏差表 · 完全响应</span>
+            <span class="chip b">✓ 4项正偏差（质保/点位/源码/响应）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 供应商库 ====== -->
+<section class="page" id="page-suppliers">
+  <div class="page-head">
+    <div>
+      <div class="crumb">资源中心 / <b>供应商库</b></div>
+      <div class="page-title">供应商全生命周期管理 <span class="tag">2,486 家</span></div>
+      <div class="page-desc">覆盖采矿、选矿、冶炼、加工、能源、化工、信息化等全品类。准入→评价→分级→预警→退出闭环，AI 供应商画像与智能寻源。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">供应商准入</button><button class="btn primary">智能寻源</button></div>
+  </div>
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi b"><div class="lbl">合格供应商</div><div class="val num">2486</div><div class="trend">覆盖12大品类</div></div>
+    <div class="kpi c"><div class="lbl">战略供应商</div><div class="val num">86</div><div class="trend">年采购额 ≥5000万</div></div>
+    <div class="kpi g"><div class="lbl">A级评价</div><div class="val num">412</div><div class="trend up">优质履约</div></div>
+    <div class="kpi o"><div class="lbl">预警/受限</div><div class="val num">23</div><div class="trend">资质/信用风险</div></div>
+    <div class="kpi p"><div class="lbl">本月新准入</div><div class="val num">17</div><div class="trend">AI尽调通过</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="fseg"><button class="on">全部品类</button><button>采矿设备</button><button>冶炼装备</button><button>电气自动化</button><button>信息化</button><button>化工原料</button></div>
+    <select class="fselect"><option>全部分级</option><option>战略</option><option>核心</option><option>合格</option></select>
+    <select class="fselect"><option>全部评级</option><option>A级</option><option>B级</option><option>C级</option></select>
+  </div>
+
+  <div class="card">
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>供应商名称</th><th>主营品类</th><th>分级</th><th>综合评级</th><th>合作项目</th><th>累计金额(万)</th><th>履约表现</th><th>风险</th><th>操作</th></tr></thead>
+        <tbody id="supplierRows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 评标专家库 ====== -->
+<section class="page" id="page-experts">
+  <div class="page-head">
+    <div>
+      <div class="crumb">资源中心 / <b>评标专家库</b></div>
+      <div class="page-title">评标专家库 · 智能抽取 <span class="tag copper">廉洁·随机·回避</span></div>
+      <div class="page-desc">分专业建库，开标前系统按项目类别随机抽取、自动回避关联专家、短信盲通知。全程留痕，杜绝人为干预。</div>
+    </div>
+    <div class="head-actions"><button class="btn ghost">专家入库</button><button class="btn copper" onclick="drawExperts()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/></svg>智能随机抽取（7人）</button></div>
+  </div>
+
+  <div class="cols cols-2-1">
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i"></span>专家池 · 信息化/智能制造类（共 28 人）</h3><span class="pill blue" id="drawTip">点击右上「智能随机抽取」</span></div>
+      <div class="card-pad"><div class="expert-pool" id="expertPool"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>抽取规则与记录</h3></div>
+      <div class="card-pad">
+        <div class="info-grid" style="grid-template-columns:1fr">
+          <div class="cell"><label>关联项目</label><b>台意电工智慧工厂项目</b></div>
+          <div class="cell"><label>抽取数量 / 专业构成</label><b>7人（技术5 + 经济2）</b></div>
+          <div class="cell"><label>回避规则</label><b>自动剔除投标人关联、近亲属、近6月同投标人评标≥2次</b></div>
+          <div class="cell"><label>通知方式</label><b>系统盲通知 · 开标前2小时短信</b></div>
+        </div>
+        <div style="margin-top:14px;font-size:13px;font-weight:600;margin-bottom:8px">已抽取专家</div>
+        <div id="drawnList" style="font-size:12.5px;color:var(--text-3)">尚未抽取……</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== AI 智能中心 ====== -->
+<section class="page" id="page-ai">
+  <div class="page-head">
+    <div>
+      <div class="crumb">智能·分析 / <b>AI 智能中心</b></div>
+      <div class="page-title">AI 智能中心 <span class="tag copper">招投标大模型</span></div>
+      <div class="page-desc">面向招标与投标双场景，沉淀招投标专属知识与算法能力。从智能寻源、标书解析、自动评标到围标识别、报价分析，全链路 AI 赋能阳光采购与精准投标。</div>
+    </div>
+  </div>
+
+  <div class="tool-grid">
+    <div class="tool" onclick="toast('打开「智能标书解析」')"><div class="ic" style="background:var(--brand-soft);color:var(--brand)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+      <h4>智能标书解析</h4><p>秒级解析招标/投标文件，自动抽取评分办法、资格条件、技术参数、废标项，生成结构化偏差应答表。</p><div class="stat"><span>累计解析</span><b>1,842 份</b></div></div>
+    <div class="tool" onclick="go('bidgen')"><div class="ic" style="background:var(--copper-soft);color:var(--copper-deep)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div>
+      <h4>AI 智能制标</h4><p>基于知识库一键生成投标/招标文件全套章节，自动套用范本、应答偏差、组织技术方案与业绩。</p><div class="stat"><span>制标效率</span><b>↑ 80%</b></div></div>
+    <div class="tool" onclick="go('eval')"><div class="ic" style="background:var(--success-soft);color:var(--success)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+      <h4>AI 辅助评标</h4><p>技术响应度自动比对、商务符合性校验、客观分自动计算、主观分一致性分析，评标提速并降低人为偏差。</p><div class="stat"><span>评标提速</span><b>↑ 65%</b></div></div>
+    <div class="tool" onclick="go('eval')"><div class="ic" style="background:var(--danger-soft);color:var(--danger)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <h4>围标串标识别</h4><p>多维相似度引擎：报价规律、文档雷同、电子指纹（MAC/机器码/CA证书）、IP/保证金账户关联，自动预警。</p><div class="stat"><span>已预警</span><b>37 起</b></div></div>
+    <div class="tool" onclick="toast('打开「智能报价分析」')"><div class="ic" style="background:var(--warning-soft);color:var(--warning)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 14 3-4 4 3 5-7"/></svg></div>
+      <h4>智能报价分析</h4><p>融合历史中标价、LME/上期所铜价行情、成本模型，给出最优报价区间与中标概率预测，辅助投标决策。</p><div class="stat"><span>预测准确率</span><b>89%</b></div></div>
+    <div class="tool" onclick="go('suppliers')"><div class="ic" style="background:var(--purple-soft);color:var(--purple)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+      <h4>智能寻源 / 供应商画像</h4><p>按品类、资质、业绩、产能、信用智能匹配推荐供应商，360°画像，提升竞争充分性与供应链韧性。</p><div class="stat"><span>供应商库</span><b>2,486 家</b></div></div>
+    <div class="tool" onclick="go('radar')"><div class="ic" style="background:var(--info-soft);color:var(--info)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+      <h4>商机雷达</h4><p>全网招标公告智能采集，按江铜各主体能力匹配产品销售/工程/服务投标商机，中标概率排序推荐。</p><div class="stat"><span>日均匹配</span><b>120+ 条</b></div></div>
+    <div class="tool" onclick="openAI()"><div class="ic" style="background:var(--brand-soft);color:var(--brand)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg></div>
+      <h4>招投标智能问答</h4><p>内置《招标投标法》、江铜采购制度与平台操作知识，自然语言问答，合同、流程、政策即问即答。</p><div class="stat"><span>知识条目</span><b>1.2 万+</b></div></div>
+  </div>
+
+  <div class="spacer"></div>
+  <div class="card">
+    <div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>AI 能力运行看板（近30天）</h3></div>
+    <div class="card-pad cols cols-3" style="display:grid">
+      <div style="text-align:center;padding:10px"><div style="font-size:30px;font-weight:800;color:var(--brand)" class="num">5,210</div><div style="font-size:12px;color:var(--text-3)">AI 处理任务数</div></div>
+      <div style="text-align:center;padding:10px;border-left:1px solid var(--line);border-right:1px solid var(--line)"><div style="font-size:30px;font-weight:800;color:var(--success)" class="num">99.2%</div><div style="font-size:12px;color:var(--text-3)">合规校验拦截率</div></div>
+      <div style="text-align:center;padding:10px"><div style="font-size:30px;font-weight:800;color:var(--copper-deep)" class="num">1,260</div><div style="font-size:12px;color:var(--text-3)">人工工时节省（小时）</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 数据分析 ====== -->
+<section class="page" id="page-analytics">
+  <div class="page-head">
+    <div>
+      <div class="crumb">智能·分析 / <b>数据分析</b></div>
+      <div class="page-title">招投标数据驾驶舱 <span class="tag">经营决策</span></div>
+      <div class="page-desc">招标与投标双视角经营分析：采购支出、节资成效、供应商竞争格局、投标中标率与盈利能力，支撑阳光采购与市场经营决策。</div>
+    </div>
+    <div class="head-actions"><select class="fselect"><option>2026 年度</option><option>2025 年度</option></select><button class="btn primary">导出分析报告</button></div>
+  </div>
+
+  <div class="cols cols-1-1">
+    <div class="card"><div class="card-head"><h3><span class="dot-i"></span>月度招标 vs 投标金额（万元）</h3></div><div class="card-pad" id="dualChart"></div></div>
+    <div class="card"><div class="card-head"><h3><span class="dot-i" style="background:var(--copper)"></span>各板块节资率对比</h3></div><div class="card-pad" id="saveChart"></div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="cols cols-2-1">
+    <div class="card"><div class="card-head"><h3><span class="dot-i" style="background:var(--success)"></span>投标主体中标率 & 中标额</h3></div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>投标主体</th><th>参投</th><th>中标</th><th>中标率</th><th>中标额(亿)</th><th>趋势</th></tr></thead>
+        <tbody>
+          <tr><td class="name">江铜国贸（铜/贵金属销售）</td><td class="num">68</td><td class="num">49</td><td><b style="color:var(--success)">72%</b></td><td class="num">18.6</td><td><div class="minibar" style="width:90px"><i style="width:90%"></i></div></td></tr>
+          <tr><td class="name">江铜工程（工程总包）</td><td class="num">34</td><td class="num">21</td><td><b style="color:var(--success)">62%</b></td><td class="num">4.8</td><td><div class="minibar" style="width:90px"><i style="width:62%;background:linear-gradient(90deg,var(--copper),#dba968)"></i></div></td></tr>
+          <tr><td class="name">贵金属公司（金银销售）</td><td class="num">22</td><td class="num">17</td><td><b style="color:var(--success)">77%</b></td><td class="num">2.3</td><td><div class="minibar" style="width:90px"><i style="width:77%;background:linear-gradient(90deg,var(--success),#5cc89a)"></i></div></td></tr>
+          <tr><td class="name">江铜研究院（技术服务）</td><td class="num">19</td><td class="num">11</td><td><b style="color:var(--warning)">58%</b></td><td class="num">0.6</td><td><div class="minibar" style="width:90px"><i style="width:58%;background:linear-gradient(90deg,var(--warning),#e8b85a)"></i></div></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card"><div class="card-head"><h3><span class="dot-i" style="background:var(--purple)"></span>采购品类支出 TOP</h3></div>
+      <div class="card-pad">
+        <div class="score-row"><div class="nm">采矿设备</div><div class="track"><i style="width:92%;background:var(--brand)"></i></div><div class="sc">9.8亿</div></div>
+        <div class="score-row"><div class="nm">冶炼装备</div><div class="track"><i style="width:74%;background:#2f86d6"></i></div><div class="sc">7.6亿</div></div>
+        <div class="score-row"><div class="nm">化工原料</div><div class="track"><i style="width:58%;background:var(--copper)"></i></div><div class="sc">6.1亿</div></div>
+        <div class="score-row"><div class="nm">电气自动化</div><div class="track"><i style="width:45%;background:#5cc89a"></i></div><div class="sc">4.7亿</div></div>
+        <div class="score-row"><div class="nm">备品备件</div><div class="track"><i style="width:38%;background:var(--purple)"></i></div><div class="sc">3.9亿</div></div>
+        <div class="score-row"><div class="nm">信息化</div><div class="track"><i style="width:22%;background:var(--warning)"></i></div><div class="sc">2.3亿</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ AI 抽屉 ============ -->
+<div class="drawer-mask" id="aiMask" onclick="closeAI()"></div>
+<div class="drawer" id="aiDrawer">
+  <div class="drawer-head">
+    <div class="a-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/></svg></div>
+    <div><b>江铜 · 招投标 AI 助手</b><span>招标 · 投标 · 政策 · 报价 · 合规 全场景</span></div>
+    <button class="x" onclick="closeAI()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="chat" id="chat">
+    <div class="msg ai"><div class="mav">AI</div><div class="bubble"><span class="ai-tag">智能助手</span>张主管您好！我是江铜招投标 AI 助手。我可以帮您：<br>· 解析招标文件、生成偏差表<br>· 智能测算投标报价<br>· 核查围标串标风险<br>· 查询招投标政策法规<br><br>请问需要什么帮助？</div></div>
+  </div>
+  <div class="quick-q">
+    <button onclick="quickAsk(this)">智慧工厂项目谁中标？</button>
+    <button onclick="quickAsk(this)">国网电解铜报价多少合适？</button>
+    <button onclick="quickAsk(this)">有围标风险吗？</button>
+    <button onclick="quickAsk(this)">资格审查要哪些材料？</button>
+  </div>
+  <div class="drawer-foot">
+    <input id="aiInput" placeholder="输入您的问题…" onkeydown="if(event.key==='Enter')sendAI()">
+    <button class="send" onclick="sendAI()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg></button>
+  </div>
+</div>
+
+<!-- ============ 项目详情模态 ============ -->
+<div class="modal-mask" id="detailModal" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="logo-mark" style="width:34px;height:34px;font-size:13px">JC</div>
+      <h3>台意电工智慧工厂（MES+工业数据平台）项目</h3>
+      <button class="x" onclick="closeModal('detailModal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <span class="pill blue">JCZB-2026-0412</span><span class="pill copper">信息化类</span><span class="pill amber">评标中</span><span class="pill gray">公开招标</span>
+      </div>
+      <div class="info-grid" style="margin-bottom:16px">
+        <div class="cell"><label>采购单位</label><b>江西省江铜台意特种电工材料有限公司</b></div>
+        <div class="cell"><label>招标代理</label><b>江西省铜咨招标咨询有限公司</b></div>
+        <div class="cell"><label>控制价 / 预算</label><b>610 万元</b></div>
+        <div class="cell"><label>投标保证金</label><b>11 万元</b></div>
+        <div class="cell"><label>工期要求</label><b>合同签订后 365 天</b></div>
+        <div class="cell"><label>评标办法</label><b>综合评估法（价40/技40/商20）</b></div>
+        <div class="cell full"><label>采购范围</label><b style="font-weight:500;line-height:1.6">制造执行系统（MES）+ 工业数据平台软件、超融合服务器、国产交换机、UPS机房系统、LED中控大屏、工位平板/扫码枪/PDA等MES硬件、生产区Wi-Fi6无线覆盖、全厂OT数据采集（15000点）及DCS/PLC对接集成服务。</b></div>
+      </div>
+      <div class="sec-title" style="margin-top:6px"><span class="bar b"></span>核心建设内容 <small>一个核心 · 两大平台 · 七大目标</small></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:9px">
+        <span class="chip b">🏭 MES 制造执行系统</span><span class="chip b">📊 工业数据平台（万点位）</span>
+        <span class="chip c">🗓 APS 智能排程</span><span class="chip c">🔍 质量全链路双向追溯</span>
+        <span class="chip g">⚙ 设备OEE全生命周期</span><span class="chip g">⚡ 能碳精细化管理</span>
+        <span class="chip p">📦 智慧仓储 / 模具管理</span><span class="chip p">🔗 ERP/OA/称重/DCS集成</span>
+      </div>
+      <div class="sec-title"><span class="bar"></span>投标进展</div>
+      <div class="steps" style="margin-bottom:6px">
+        <div class="step done"><span class="num">✓</span>立项</div><div class="line"></div>
+        <div class="step done"><span class="num">✓</span>编标</div><div class="line"></div>
+        <div class="step done"><span class="num">✓</span>资审</div><div class="line"></div>
+        <div class="step done"><span class="num">✓</span>开标</div><div class="line"></div>
+        <div class="step active"><span class="num">5</span>评标</div><div class="line"></div>
+        <div class="step"><span class="num">6</span>定标</div><div class="line"></div>
+        <div class="step"><span class="num">7</span>合同</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal('detailModal')">关闭</button>
+      <button class="btn primary" onclick="closeModal('detailModal');go('eval')">进入评标工作台</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 数据 ===================== */
+const STATUS = {
+  '编制中':'gray','发标中':'blue','资格预审':'purple','投标中':'amber','评标中':'amber','公示中':'blue','已完成':'green','已中标':'green','制标中':'copper'
+};
+const CAT = {'设备':'b','工程':'o','物资':'p','服务':'g','信息化':'i','产品销售':'c','工程总包':'o','技术服务':'g'};
+
+const tenders = [
+  {code:'JCZB-2026-0412',name:'台意电工智慧工厂（MES+工业数据平台）项目',unit:'江铜台意电工',cat:'信息化',budget:610,method:'公开招标',bidders:6,stage:5,status:'评标中'},
+  {code:'JCZB-2026-0388',name:'德兴铜矿 WK-35 型大型电铲采购',unit:'德兴铜矿',cat:'设备',budget:8600,method:'公开招标',bidders:4,stage:7,status:'公示中'},
+  {code:'JCZB-2026-0356',name:'贵溪冶炼厂阳极板自动浇铸系统技改',unit:'贵溪冶炼厂',cat:'工程',budget:3200,method:'公开招标',bidders:9,stage:4,status:'投标中'},
+  {code:'JCZB-2026-0341',name:'永平铜矿选矿厂球磨机备件年度框架采购',unit:'永平铜矿',cat:'物资',budget:1500,method:'询比价',bidders:12,stage:3,status:'资格预审'},
+  {code:'JCZB-2026-0337',name:'城门山铜矿尾矿库四期扩容工程',unit:'城门山铜矿',cat:'工程',budget:12000,method:'公开招标',bidders:5,stage:8,status:'已完成'},
+  {code:'JCZB-2026-0402',name:'集团总部一体化数据中心机房改造',unit:'集团信息中心',cat:'信息化',budget:980,method:'邀请招标',bidders:0,stage:2,status:'编制中'},
+  {code:'JCZB-2026-0399',name:'武山铜矿井下 6kV 供电系统升级',unit:'武山铜矿',cat:'设备',budget:2400,method:'公开招标',bidders:7,stage:3,status:'发标中'},
+  {code:'JCZB-2026-0370',name:'低氧光亮铜杆生产线连铸连轧设备维保服务',unit:'铜板带公司',cat:'服务',budget:650,method:'竞争性谈判',bidders:3,stage:5,status:'评标中'},
+];
+const STAGES=['立项','编标','资审','发标','开标','评标','定标','公示','完成'];
+
+const bids = [
+  {code:'JCTB-2026-118',name:'国家电网 2026 年度电解铜（阴极铜）框架协议采购',owner:'国家电网物资有限公司',subj:'江铜国贸',cat:'产品销售',amount:152000,prog:88,status:'投标中'},
+  {code:'JCTB-2026-104',name:'南方电网 8mm 低氧光亮铜杆长期供应',owner:'南方电网供应链集团',subj:'江铜国贸',cat:'产品销售',amount:68000,prog:100,status:'已中标'},
+  {code:'JCTB-2026-126',name:'宁德某新能源高纯阴极铜（Cu≥99.99%）供应',owner:'某新能源科技股份',subj:'江铜国贸',cat:'产品销售',amount:23000,prog:62,status:'制标中'},
+  {code:'JCTB-2026-121',name:'赣东高新产业园 10kV 配电工程总承包',owner:'某产业园区管委会',subj:'江铜工程',cat:'工程总包',amount:4500,prog:75,status:'投标中'},
+  {code:'JCTB-2026-117',name:'某矿业选矿厂工艺优化技术服务外包',owner:'某矿业集团',subj:'江铜研究院',cat:'技术服务',amount:1200,prog:40,status:'资格预审'},
+  {code:'JCTB-2026-098',name:'黄金 / 白银副产品年度竞价销售',owner:'上海黄金交易所会员单位',subj:'贵金属公司',cat:'产品销售',amount:35000,prog:100,status:'已中标'},
+];
+
+const evalData = [
+  {rank:1,name:'中国移动通信集团江西有限公司',price:573.0,p:38.6,t:36.5,b:18.0,total:93.1,res:'ok'},
+  {rank:2,name:'中国电信股份江西分公司',price:598.0,p:36.9,t:34.0,b:16.5,total:87.4,res:'ok'},
+  {rank:3,name:'某智能制造科技有限公司',price:545.0,p:40.0,t:31.0,b:15.0,total:86.0,res:'ok'},
+  {rank:4,name:'某工业互联网股份有限公司',price:612.0,p:36.0,t:33.5,b:14.0,total:83.5,res:'ok'},
+  {rank:5,name:'某信息技术服务有限公司',price:560.0,p:39.3,t:28.0,b:14.5,total:81.8,res:'warn'},
+  {rank:6,name:'某系统集成有限公司',price:558.0,p:39.4,t:27.5,b:14.0,total:80.9,res:'warn'},
+];
+
+const suppliers = [
+  {name:'中国移动通信集团江西有限公司',cat:'信息化 / 通信',level:'战略',rate:'A',proj:18,amount:4200,perf:96,risk:'低'},
+  {name:'超聚变数字技术有限公司',cat:'服务器 / 算力',level:'核心',rate:'A',proj:9,amount:1850,perf:94,risk:'低'},
+  {name:'华为技术有限公司',cat:'网络 / 机房 / UPS',level:'战略',rate:'A',proj:46,amount:15600,perf:97,risk:'低'},
+  {name:'山特维克矿山工程机械',cat:'采矿设备',level:'战略',rate:'A',proj:31,amount:23400,perf:95,risk:'低'},
+  {name:'卡特彼勒（中国）投资',cat:'矿用重型设备',level:'核心',rate:'A',proj:14,amount:18900,perf:93,risk:'低'},
+  {name:'杭州海康威视数字技术',cat:'安防 / 智能终端',level:'核心',rate:'A',proj:22,amount:3100,perf:92,risk:'低'},
+  {name:'中信重工机械股份',cat:'磨机 / 冶炼装备',level:'核心',rate:'B',proj:11,amount:7600,perf:86,risk:'中'},
+  {name:'盛科网络（苏州）有限公司',cat:'国产交换芯片',level:'合格',rate:'B',proj:5,amount:430,perf:84,risk:'中'},
+  {name:'卡莱特云科技股份',cat:'LED 视频控制',level:'合格',rate:'B',proj:6,amount:280,perf:88,risk:'低'},
+];
+
+const radarOps = [
+  {name:'国家电网 2026 年电解铜框架采购（华东片区）',owner:'国家电网物资公司',subj:'江铜国贸',cat:'产品销售',amount:'15.2亿',match:96,win:78,deadline:'6/18 截止',hot:true},
+  {name:'三峡集团乌东德送电工程铜导线采购',owner:'中国长江三峡集团',subj:'江铜国贸',cat:'产品销售',amount:'3.6亿',match:91,win:71,deadline:'6/24 截止',hot:true},
+  {name:'某半导体厂高纯无氧铜（OFC）供应',owner:'某半导体材料公司',subj:'江铜国贸',cat:'产品销售',amount:'1.8亿',match:88,win:65,deadline:'6/29 截止'},
+  {name:'赣州某产业园区 110kV 变电站工程总承包',owner:'赣州城投集团',subj:'江铜工程',cat:'工程总包',amount:'8600万',match:82,win:58,deadline:'6/26 截止'},
+  {name:'江西省危固废铜污泥资源化处置服务',owner:'省生态环境厅',subj:'江铜研究院',cat:'技术服务',amount:'4200万',match:79,win:54,deadline:'7/02 截止'},
+  {name:'上期所 2026 年度黄金标准金锭交割招标',owner:'上海期货交易所',subj:'贵金属公司',cat:'产品销售',amount:'5.5亿',match:93,win:80,deadline:'6/30 截止',hot:true},
+];
+
+const chapters = [
+  {n:'一',t:'投标函',done:1,note:'投标报价 ¥573万 · 有效期90天'},
+  {n:'二',t:'法定代表人身份证明及授权委托书',done:1,note:'已套用模板'},
+  {n:'三',t:'联合体协议书',done:1,note:'本项目不适用（非联合体）'},
+  {n:'四',t:'技术偏差表',done:1,note:'0项负偏差 · AI自动应答'},
+  {n:'五',t:'商务偏差表',done:1,note:'完全响应'},
+  {n:'六',t:'报价表 / 投标一览表',done:1,note:'含硬件+软件+服务明细'},
+  {n:'七',t:'资格审查资料',done:1,note:'执照/承诺函/亲属排查/业绩'},
+  {n:'八',t:'技术文件（技术方案+实施方案）',done:0,note:'AI生成中…技术架构、APS、追溯、集成'},
+  {n:'九',t:'投标人须知前附表其他资料',done:1,note:'保证金凭证 + 业绩材料'},
+  {n:'十',t:'售后服务方案',done:1,note:'软件2年/硬件3年 · 2h现场响应'},
+  {n:'十一',t:'评分相关资料（CMMI/CS/团队）',done:0,note:'AI整理证书与项目团队中…'},
+];
+
+const experts=['王建国','李文博','陈志远','刘海涛','赵明华','孙立群','周晓峰','吴秀英','郑国强','黄伟民','徐丽娟','马俊杰','胡卫东','林志成','郭海燕','何永刚','高建华','罗振宇','梁文静','宋志强','谢敏','韩雪松','曹文涛','彭德怀','董建军','袁立','蒋海峰','邓子华'];
+const expTitles=['正高 信息化','教授级','高工 自动化','高工 网络','研究员','经济师','高工 软件','造价师'];
+
+/* ===================== 渲染 ===================== */
+function pill(s){return `<span class="pill ${STATUS[s]||'gray'}">${s}</span>`;}
+function money(n){return n>=10000?(n/10000).toFixed(2)+'亿':n.toLocaleString();}
+
+function renderTenders(){
+  document.getElementById('tenderRows').innerHTML = tenders.map(t=>`
+    <tr>
+      <td><div class="name">${t.name}</div><div class="code">${t.code}</div></td>
+      <td>${t.unit}</td>
+      <td><span class="chip ${CAT[t.cat]||''}">${t.cat}</span></td>
+      <td class="num"><b>${t.budget.toLocaleString()}</b></td>
+      <td>${t.method}</td>
+      <td class="num">${t.bidders||'—'}</td>
+      <td>${stageBar(t.stage)}</td>
+      <td>${pill(t.status)}</td>
+      <td><span class="linklike" onclick="${t.code==='JCZB-2026-0412'?"openModal('detailModal')":"toast('打开项目详情')"}">详情</span></td>
+    </tr>`).join('');
+}
+function stageBar(s){
+  const pct=Math.round(s/8*100);
+  return `<div style="display:flex;align-items:center;gap:8px"><div class="minibar" style="width:64px"><i style="width:${pct}%"></i></div><span style="font-size:11px;color:var(--text-3)">${STAGES[s-1]||''}</span></div>`;
+}
+
+function renderBids(){
+  document.getElementById('bidRows').innerHTML = bids.map(b=>`
+    <tr>
+      <td><div class="name">${b.name}</div><div class="code">${b.code}</div></td>
+      <td>${b.owner}</td>
+      <td><span class="chip c">${b.subj}</span></td>
+      <td><span class="chip ${CAT[b.cat]||''}">${b.cat}</span></td>
+      <td class="num"><b>${b.amount.toLocaleString()}</b></td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="minibar" style="width:60px"><i style="width:${b.prog}%;background:linear-gradient(90deg,var(--copper),#dba968)"></i></div><span style="font-size:11px;color:var(--text-3)">${b.prog}%</span></div></td>
+      <td>${pill(b.status)}</td>
+      <td><span class="linklike" onclick="${b.status==='制标中'||b.prog<100?"go('bidgen')":"toast('查看投标项目')"}">${b.prog<100?'去制标':'详情'}</span></td>
+    </tr>`).join('');
+}
+
+function renderEval(){
+  document.getElementById('evalRows').innerHTML = evalData.map(e=>{
+    const win = e.rank===1;
+    const flag = e.res==='warn'?`<span class="pill red" style="font-size:10px;padding:2px 7px">⚠ 围标预警</span>`:(win?`<span class="pill green" style="font-size:10px;padding:2px 7px">AI推荐中标</span>`:`<span class="pill gray no" style="font-size:10px;padding:2px 7px">有效</span>`);
+    return `<tr style="${win?'background:var(--success-soft)':''}">
+      <td><div style="width:26px;height:26px;border-radius:50%;background:${win?'var(--copper)':e.res==='warn'?'var(--danger-soft)':'var(--surface-3)'};color:${win?'#fff':e.res==='warn'?'var(--danger)':'var(--text-2)'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">${e.rank}</div></td>
+      <td class="name">${e.name}</td>
+      <td class="num">${e.price.toFixed(1)}</td>
+      <td class="num">${e.p.toFixed(1)}</td>
+      <td class="num">${e.t.toFixed(1)}</td>
+      <td class="num">${e.b.toFixed(1)}</td>
+      <td><b style="font-size:15px;color:${win?'var(--success)':'var(--text)'}">${e.total.toFixed(1)}</b></td>
+      <td>${flag}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSuppliers(){
+  const lv={'战略':'c','核心':'b','合格':'gray'};
+  document.getElementById('supplierRows').innerHTML = suppliers.map(s=>`
+    <tr>
+      <td class="name">${s.name}</td>
+      <td>${s.cat}</td>
+      <td><span class="chip ${lv[s.level]}">${s.level}</span></td>
+      <td><span class="pill ${s.rate==='A'?'green':'amber'} no" style="padding:2px 9px">${s.rate}级</span></td>
+      <td class="num">${s.proj}</td>
+      <td class="num">${s.amount.toLocaleString()}</td>
+      <td><div style="display:flex;align-items:center;gap:7px"><div class="minibar" style="width:54px"><i style="width:${s.perf}%;background:${s.perf>=90?'linear-gradient(90deg,var(--success),#5cc89a)':'linear-gradient(90deg,var(--warning),#e8b85a)'}"></i></div><span style="font-size:11px">${s.perf}</span></div></td>
+      <td>${s.risk==='低'?'<span class="pill green no" style="padding:2px 8px">低</span>':'<span class="pill amber no" style="padding:2px 8px">中</span>'}</td>
+      <td><span class="linklike" onclick="toast('查看供应商画像')">画像</span></td>
+    </tr>`).join('');
+}
+
+function renderRadar(){
+  document.getElementById('radarCards').innerHTML = radarOps.map(o=>`
+    <div class="card card-pad" style="position:relative;border-left:3px solid ${o.win>=70?'var(--success)':o.win>=58?'var(--copper)':'var(--info)'}">
+      ${o.hot?'<span class="pill red no" style="position:absolute;top:14px;right:14px;font-size:10px;padding:2px 8px">🔥 高契合</span>':''}
+      <div style="font-size:14.5px;font-weight:700;line-height:1.45;margin-bottom:8px;padding-right:60px">${o.name}</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="chip c">${o.subj}</span><span class="chip ${CAT[o.cat]||''}">${o.cat}</span><span class="chip o">${o.deadline}</span>
+      </div>
+      <div style="display:flex;gap:18px;margin-bottom:11px">
+        <div><div style="font-size:11px;color:var(--text-3)">招标方</div><div style="font-size:12.5px;font-weight:600">${o.owner}</div></div>
+        <div><div style="font-size:11px;color:var(--text-3)">预估金额</div><div style="font-size:12.5px;font-weight:700;color:var(--copper-deep)">${o.amount}</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;padding-top:11px;border-top:1px dashed var(--line)">
+        <div style="flex:1"><div style="font-size:11px;color:var(--text-3);margin-bottom:3px">能力契合度 <b style="color:var(--brand)">${o.match}%</b></div><div class="minibar"><i style="width:${o.match}%"></i></div></div>
+        <div style="flex:1"><div style="font-size:11px;color:var(--text-3);margin-bottom:3px">预测中标率 <b style="color:var(--success)">${o.win}%</b></div><div class="minibar"><i style="width:${o.win}%;background:linear-gradient(90deg,var(--success),#5cc89a)"></i></div></div>
+        <button class="btn primary" style="height:32px;padding:0 13px" onclick="toast('已加入投标跟踪：${o.subj}')">参投</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderChapters(){
+  document.getElementById('bidChapters').innerHTML = chapters.map(c=>`
+    <div class="gen-line" style="${c.done?'':'background:var(--brand-soft2);border-color:#d6e6f9'}">
+      <div class="gi" style="${c.done?'':'background:var(--brand-soft);color:var(--brand)'}">
+        ${c.done?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spark" style="animation:spin 2s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>'}
+      </div>
+      <div class="gt"><b>${c.n}、${c.t}</b> <span> · ${c.note}</span></div>
+      ${c.done?'<span class="pill green no" style="font-size:10px;padding:2px 8px">已生成</span>':'<span class="pill blue no" style="font-size:10px;padding:2px 8px">生成中</span>'}
+    </div>`).join('');
+}
+
+function renderExperts(){
+  document.getElementById('expertPool').innerHTML = experts.map((e,i)=>`
+    <div class="exp-card" data-i="${i}">
+      <div class="pk"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div class="eav">${e[0]}</div><b>${e}</b><span>${expTitles[i%expTitles.length]}</span>
+    </div>`).join('');
+}
+
+/* ===================== SVG 图表 ===================== */
+function lineChart(el,labels,series,opt={}){
+  const W=el.clientWidth||640,H=opt.h||230,pl=42,pr=14,pt=16,pb=26;
+  const iw=W-pl-pr,ih=H-pt-pb;
+  let max=0;series.forEach(s=>s.data.forEach(v=>max=Math.max(max,v)));
+  max=Math.ceil(max/ (opt.step||5000))*(opt.step||5000);
+  const x=i=>pl+iw*i/(labels.length-1);
+  const y=v=>pt+ih*(1-v/max);
+  let g='';
+  for(let i=0;i<=4;i++){const yy=pt+ih*i/4;g+=`<line class="grid-line" x1="${pl}" y1="${yy}" x2="${W-pr}" y2="${yy}"/><text x="${pl-8}" y="${yy+4}" text-anchor="end" font-size="10.5" fill="#929cb0">${Math.round(max*(1-i/4)/1000)}k</text>`;}
+  labels.forEach((l,i)=>{g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="#929cb0">${l}</text>`;});
+  let paths='';
+  series.forEach(s=>{
+    let d=s.data.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+    if(s.area){
+      const area=d+` L${x(labels.length-1)} ${pt+ih} L${pl} ${pt+ih} Z`;
+      paths+=`<path d="${area}" fill="url(#grad_${s.id})" opacity=".5"/>`;
+    }
+    paths+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.data.forEach((v,i)=>{paths+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.2" fill="#fff" stroke="${s.color}" stroke-width="2"/>`;});
+  });
+  const defs=series.filter(s=>s.area).map(s=>`<linearGradient id="grad_${s.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".28"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
+  el.innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H}"><defs>${defs}</defs>${g}${paths}</svg>`;
+}
+
+function donutChart(el,data,opt={}){
+  const size=opt.size||190,cx=size/2,cy=size/2,r=size/2-6,inner=opt.inner||r*0.62;
+  const total=data.reduce((a,b)=>a+b.v,0);let ang=-Math.PI/2,seg='';
+  data.forEach(d=>{
+    const a2=ang+d.v/total*Math.PI*2;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const xi2=cx+inner*Math.cos(a2),yi2=cy+inner*Math.sin(a2),xi1=cx+inner*Math.cos(ang),yi1=cy+inner*Math.sin(ang);
+    const large=(a2-ang)>Math.PI?1:0;
+    seg+=`<path d="M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${xi2} ${yi2} A${inner} ${inner} 0 ${large} 0 ${xi1} ${yi1} Z" fill="${d.c}"/>`;
+    ang=a2;
+  });
+  const legend=data.map(d=>`<span><i style="background:${d.c}"></i>${d.n} ${Math.round(d.v/total*100)}%</span>`).join('');
+  el.innerHTML=`<div class="chart-box"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${seg}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="13" fill="#929cb0">采购方式</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="17" font-weight="800" fill="#1d2840">${total}项</text></svg></div><div class="legend">${legend}</div>`;
+}
+
+function barChart(el,data,opt={}){
+  const W=el.clientWidth||340,H=opt.h||220,pl=8,pr=8,pt=10,pb=26;
+  const iw=W-pl-pr,ih=H-pt-pb,bw=iw/data.length*0.5;
+  const max=Math.max(...data.map(d=>d.v))*1.15;
+  let g='';
+  data.forEach((d,i)=>{
+    const cx=pl+iw*(i+0.5)/data.length,h=ih*d.v/max,y=pt+ih-h;
+    g+=`<rect x="${cx-bw/2}" y="${y}" width="${bw}" height="${h}" rx="5" fill="url(#bg_${opt.id})"/>`;
+    g+=`<text x="${cx}" y="${y-6}" text-anchor="middle" font-size="11" font-weight="700" fill="#1d2840">${d.v}</text>`;
+    g+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="#929cb0">${d.n}</text>`;
+  });
+  el.innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="bg_${opt.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${opt.c1||'#1f9d6b'}"/><stop offset="1" stop-color="${opt.c2||'#5cc89a'}"/></linearGradient></defs>${g}</svg>`;
+}
+
+function groupBar(el,labels,a,b){
+  const W=el.clientWidth||640,H=240,pl=40,pr=12,pt=14,pb=40;
+  const iw=W-pl-pr,ih=H-pt-pb;
+  const max=Math.max(...a,...b)*1.15;const slot=iw/labels.length;const bw=slot*0.3;
+  let g='';
+  for(let i=0;i<=4;i++){const yy=pt+ih*i/4;g+=`<line class="grid-line" x1="${pl}" y1="${yy}" x2="${W-pr}" y2="${yy}"/><text x="${pl-7}" y="${yy+4}" text-anchor="end" font-size="10" fill="#929cb0">${Math.round(max*(1-i/4)/1000)}k</text>`;}
+  labels.forEach((l,i)=>{
+    const cx=pl+slot*(i+0.5);
+    const h1=ih*a[i]/max,h2=ih*b[i]/max;
+    g+=`<rect x="${cx-bw-2}" y="${pt+ih-h1}" width="${bw}" height="${h1}" rx="4" fill="url(#ga)"/>`;
+    g+=`<rect x="${cx+2}" y="${pt+ih-h2}" width="${bw}" height="${h2}" rx="4" fill="url(#gb)"/>`;
+    g+=`<text x="${cx}" y="${H-22}" text-anchor="middle" font-size="10" fill="#929cb0">${l}</text>`;
+  });
+  el.innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H}"><defs>
+    <linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15579e"/><stop offset="1" stop-color="#5a9bd8"/></linearGradient>
+    <linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bf7a39"/><stop offset="1" stop-color="#e0b079"/></linearGradient>
+    </defs>${g}</svg>
+    <div class="legend"><span><i style="background:#15579e"></i>招标金额</span><span><i style="background:#bf7a39"></i>投标中标额</span></div>`;
+}
+
+function gauge(el,val){
+  const size=180,cx=size/2,cy=size/2+14,r=66;
+  const start=Math.PI,end=2*Math.PI;
+  function arc(p,col,w){const a=start+(end-start)*p;const x1=cx+r*Math.cos(start),y1=cy+r*Math.sin(start),x2=cx+r*Math.cos(a),y2=cy+r*Math.sin(a);const large=(a-start)>Math.PI?1:0;return `<path d="M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;}
+  el.innerHTML=`<div class="chart-box"><svg width="${size}" height="${size*0.72}" viewBox="0 0 ${size} ${size*0.72}">
+    ${arc(1,'#eef2f8',13)}${arc(val/100,'url(#gg)',13)}
+    <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6d5bd0"/><stop offset="1" stop-color="#9b8ce8"/></linearGradient></defs>
+    <text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="30" font-weight="800" fill="#1d2840">${val}<tspan font-size="15">%</tspan></text>
+    <text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="11.5" fill="#929cb0">本年投标中标率</text>
+  </svg></div>
+  <div style="display:flex;justify-content:space-around;margin-top:4px;font-size:11.5px;color:var(--text-2)"><span>参投 143 个</span><span>中标 97 个</span><span style="color:var(--success);font-weight:600">↑ 同比+6%</span></div>`;
+}
+
+function radar(el){
+  const dims=['技术方案','项目团队','实施能力','业绩资质','服务保障','价格优势'];
+  const A=[95,92,90,96,94,82],B=[80,72,75,70,78,88];
+  const size=240,cx=size/2,cy=size/2,R=82,n=dims.length;
+  function pt(i,v){const a=-Math.PI/2+i/n*Math.PI*2;return [cx+R*v/100*Math.cos(a),cy+R*v/100*Math.sin(a)];}
+  let grid='';
+  for(let g=1;g<=4;g++){let p=dims.map((d,i)=>{const a=-Math.PI/2+i/n*Math.PI*2;return `${cx+R*g/4*Math.cos(a)},${cy+R*g/4*Math.sin(a)}`;}).join(' ');grid+=`<polygon points="${p}" fill="none" stroke="#e6ecf4"/>`;}
+  let axis='',labels='';
+  dims.forEach((d,i)=>{const a=-Math.PI/2+i/n*Math.PI*2;const lx=cx+(R+16)*Math.cos(a),ly=cy+(R+16)*Math.sin(a);axis+=`<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(a)}" y2="${cy+R*Math.sin(a)}" stroke="#e6ecf4"/>`;labels+=`<text x="${lx}" y="${ly+3}" text-anchor="middle" font-size="10.5" fill="#576074">${d}</text>`;});
+  const polyA=A.map((v,i)=>pt(i,v).join(',')).join(' ');
+  const polyB=B.map((v,i)=>pt(i,v).join(',')).join(' ');
+  el.innerHTML=`<div class="chart-box"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${grid}${axis}
+    <polygon points="${polyB}" fill="rgba(191,122,57,.12)" stroke="#bf7a39" stroke-width="2"/>
+    <polygon points="${polyA}" fill="rgba(21,87,158,.16)" stroke="#15579e" stroke-width="2"/>
+    ${labels}</svg></div>
+    <div class="legend"><span><i style="background:#15579e"></i>中国移动江西</span><span><i style="background:#bf7a39"></i>行业基准</span></div>`;
+}
+
+/* ===================== 页面切换 ===================== */
+let charted={};
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  drawFor(id);
+}
+function drawFor(id){
+  if(charted[id])return;charted[id]=true;
+  if(id==='dashboard'){
+    lineChart(document.getElementById('trendChart'),['7月','8','9','10','11','12','1月','2','3','4','5','6'],[
+      {id:'zb',color:'#15579e',area:true,data:[28000,31000,29500,34000,38000,33000,30000,36500,39000,35000,41000,43200]},
+      {id:'tb',color:'#bf7a39',area:true,data:[18000,21000,19500,23000,26000,22000,20000,24500,27000,25000,28000,30100]}
+    ],{step:5000});
+    document.getElementById('trendChart').insertAdjacentHTML('beforeend','<div class="legend"><span><i style="background:#15579e"></i>招标金额</span><span><i style="background:#bf7a39"></i>投标中标额</span></div>');
+    donutChart(document.getElementById('methodChart'),[
+      {n:'公开招标',v:142,c:'#15579e'},{n:'邀请招标',v:48,c:'#2f86d6'},{n:'竞争性谈判',v:36,c:'#bf7a39'},{n:'询比价',v:54,c:'#1f9d6b'},{n:'单一来源',v:18,c:'#6d5bd0'}
+    ]);
+    barChart(document.getElementById('segChart'),[
+      {n:'采矿',v:98},{n:'冶炼',v:76},{n:'加工',v:54},{n:'能源',v:38},{n:'信息化',v:23},{n:'后勤',v:17}
+    ],{id:'seg',c1:'#1f9d6b',c2:'#7ad3a8',h:200});
+    gauge(document.getElementById('gaugeChart'),68);
+  }
+  if(id==='eval')radar(document.getElementById('radarChart'));
+  if(id==='analytics'){
+    groupBar(document.getElementById('dualChart'),['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+      [30000,36500,39000,35000,41000,43200,28000,31000,29500,34000,38000,33000],
+      [20000,24500,27000,25000,28000,30100,18000,21000,19500,23000,26000,22000]);
+    barChart(document.getElementById('saveChart'),[
+      {n:'采矿',v:11.2},{n:'冶炼',v:8.6},{n:'加工',v:9.4},{n:'能源',v:7.8},{n:'信息化',v:12.1},{n:'后勤',v:6.5}
+    ],{id:'save',c1:'#bf7a39',c2:'#e0b079',h:200});
+  }
+}
+
+/* ===================== 计数动画 ===================== */
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=parseFloat(el.dataset.count),dec=parseInt(el.dataset.dec||0);
+    let cur=0;const step=target/45;
+    const t=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(t);}el.textContent=dec?cur.toFixed(dec):Math.round(cur).toLocaleString();},16);
+  });
+}
+
+/* ===================== AI 抽屉 ===================== */
+function openAI(){document.getElementById('aiMask').classList.add('open');document.getElementById('aiDrawer').classList.add('open');}
+function closeAI(){document.getElementById('aiMask').classList.remove('open');document.getElementById('aiDrawer').classList.remove('open');}
+const aiAns={
+  '智慧工厂项目谁中标？':'根据评标结果，<b>台意电工智慧工厂项目</b>由 <b>中国移动通信集团江西有限公司</b> 综合得分 <b>93.1</b> 排名第一，AI 推荐中标。报价 573 万元，低于控制价 6.1%，技术方案、业绩（南昌同兴达/华翔 MES）、CMMI L3 资质均达标。另检测到2家投标人围标预警，已提请评标委员会处置。',
+  '国网电解铜报价多少合适？':'结合上期所铜价近30日 <b>上行 4.2%</b>、历史中标价与成本模型，AI 建议「国网2026电解铜框架」投标报价在基准价基础上 <b>上浮 1.8%~2.3%</b>。预测此区间中标概率约 <b>74%</b>，兼顾中标率与利润空间（毛利约 6.5%）。',
+  '有围标风险吗？':'⚠ <b>检测到高风险</b>：智慧工厂标段「某信息技术」与「某系统集成」投标文件 <b>制作机器码/MAC一致</b>、<b>报价雷同（相似度91%）</b>、<b>保证金同一账户</b>，符合围标串标特征，建议依法认定并废标处理。',
+  '资格审查要哪些材料？':'江铜招标资格审查通常包括：①营业执照（经营范围匹配）；②法定代表人身份证明/授权委托书；③类似项目业绩（如 MES≥200万）；④资质证书（CMMI/CS/高新企业等）；⑤<b>亲属关系排查承诺函</b>；⑥「信用中国」无失信记录；⑦投标保证金凭证。'
+};
+function appendMsg(txt,me){
+  const c=document.getElementById('chat');
+  c.insertAdjacentHTML('beforeend',`<div class="msg ${me?'me':'ai'}"><div class="mav">${me?'张':'AI'}</div><div class="bubble">${me?'':'<span class="ai-tag">智能助手</span>'}${txt}</div></div>`);
+  c.scrollTop=c.scrollHeight;
+}
+function reply(q){
+  appendMsg('<span style="color:var(--text-3)">正在分析…</span>');
+  const c=document.getElementById('chat');const last=c.lastElementChild;
+  setTimeout(()=>{last.querySelector('.bubble').innerHTML='<span class="ai-tag">智能助手</span>'+(aiAns[q]||'已为您检索招投标知识库与历史数据。该问题涉及多维分析，建议在「AI 智能中心」展开专项分析，或补充项目编号以便精准应答。');c.scrollTop=c.scrollHeight;},650);
+}
+function quickAsk(btn){const q=btn.textContent;appendMsg(q,true);reply(q);}
+function sendAI(){const i=document.getElementById('aiInput');const q=i.value.trim();if(!q)return;appendMsg(q,true);i.value='';reply(q);}
+
+/* ===================== 模态 ===================== */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ===================== 编标生成动画 ===================== */
+function runGen(){
+  const area=document.getElementById('genArea');area.innerHTML='';
+  document.getElementById('genStatus').style.display='none';
+  const items=[
+    ['第一章 招标公告','项目概况、资金来源、合格投标人条件'],
+    ['第二章 投标人须知','前附表、评标办法（综合评估法）、废标条款'],
+    ['第三章 评标办法','价格40 / 技术40 / 商务20，客观分自动核算规则'],
+    ['第四章 合同条款','工期、付款、质保、违约、廉洁条款'],
+    ['第五章 供货/工程要求','技术规格书、施工组织、验收标准'],
+    ['第六章 投标文件格式','投标函、偏差表、报价表、资格审查表'],
+  ];
+  let i=0;
+  const timer=setInterval(()=>{
+    if(i>=items.length){clearInterval(timer);document.getElementById('genStatus').style.display='inline-flex';toast('招标文件已生成，合规评分 92 分');return;}
+    area.insertAdjacentHTML('beforeend',`<div class="gen-line"><div class="gi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="gt"><b>${items[i][0]}</b> <span> · ${items[i][1]}</span></div></div>`);
+    i++;
+  },480);
+}
+
+/* ===================== 专家抽取动画 ===================== */
+function drawExperts(){
+  const cards=[...document.querySelectorAll('.exp-card')];
+  cards.forEach(c=>{c.classList.remove('picked','dim');});
+  document.getElementById('drawTip').textContent='正在随机抽取…';
+  let ticks=0;
+  const roll=setInterval(()=>{
+    cards.forEach(c=>c.classList.remove('picked'));
+    const rnd=[...cards].sort(()=>Math.random()-0.5).slice(0,7);
+    rnd.forEach(c=>c.classList.add('picked'));
+    ticks++;
+    if(ticks>14){
+      clearInterval(roll);
+      cards.forEach(c=>c.classList.remove('picked'));
+      const final=[...cards].sort(()=>Math.random()-0.5).slice(0,7);
+      const names=[];
+      cards.forEach(c=>c.classList.add('dim'));
+      final.forEach(c=>{c.classList.remove('dim');c.classList.add('picked');names.push(c.querySelector('b').textContent);});
+      document.getElementById('drawTip').textContent='抽取完成 · 已盲通知';
+      document.getElementById('drawnList').innerHTML=names.map(n=>`<span class="chip b" style="margin:0 6px 6px 0">${n}</span>`).join('')+'<div style="margin-top:8px;color:var(--success);font-size:12px">✓ 已自动回避关联专家，短信盲通知已发送，全程留痕</div>';
+      toast('已随机抽取 7 名评标专家并盲通知');
+    }
+  },110);
+}
+
+/* ===================== Toast ===================== */
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5cc89a" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'+msg;
+  t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ===================== 初始化 ===================== */
+renderTenders();renderBids();renderEval();renderSuppliers();renderRadar();renderChapters();renderExperts();
+animateCounters();drawFor('dashboard');
+window.addEventListener('resize',()=>{charted={};drawFor(document.querySelector('.page.active').id.replace('page-',''));});
+</script>
+</body>
+</html>
