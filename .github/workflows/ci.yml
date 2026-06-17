@@ -1,0 +1,42 @@
+name: CI
+
+# Verifies both subsystems on every PR (and on pushes to the default branch):
+#   • AI 爆款工厂 (frontend) — TypeScript typecheck + production build
+#   • scout/ (GitHub AI 雷达) — Python byte-compile (stdlib-only, no deps)
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Typecheck & build (frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  scout:
+    name: Byte-compile (scout / Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m py_compile scout/crawl.py scout/gh.py scout/generate_report.py
