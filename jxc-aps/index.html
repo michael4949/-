@@ -160,7 +160,7 @@ const tree=$('#navTree');
 MENU.forEach(m=>{const open=(m.g==='详细排产'||m.g==='需求与订单');const grp=document.createElement('div');grp.className='nav-grp'+(open?'':' collapsed');
  grp.innerHTML=`<div class="nav-grp-h"><span class="gi">${m.ic}</span><span>${m.g}</span><span class="caret">▾</span></div><div class="nav-sub">${m.items.map(it=>`<div class="nav-leaf" data-id="${it[0]}">${it[1]}${SMART[it[0]]?'<span class="smk">智能</span>':it[0]==='prob'?'<span class="nb">9</span>':''}</div>`).join('')}</div>`;
  tree.appendChild(grp);grp.querySelector('.nav-grp-h').onclick=()=>grp.classList.toggle('collapsed');});
-const top=document.createElement('div');top.className='nav-grp';top.innerHTML=`<div class="nav-leaf" data-id="dash" style="padding-left:16px;font-weight:600;color:#cdd6e6">📊 计划看板</div>`;tree.insertBefore(top,tree.firstChild);
+const dashGrp=document.createElement('div');dashGrp.className='nav-grp';dashGrp.innerHTML=`<div class="nav-leaf" data-id="dash" style="padding-left:16px;font-weight:600;color:#cdd6e6">📊 计划看板</div>`;tree.insertBefore(dashGrp,tree.firstChild);
 $$('.nav-leaf').forEach(l=>l.onclick=()=>navTo(l.dataset.id));
 $('.tb-toggle').onclick=()=>$('#app').classList.toggle('sb-collapsed');
 
