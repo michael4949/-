@@ -3,46 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>线缆 APS · 铜流 — 江铜线缆 计划排产 + 成本核算（生产环境）</title>
+<title>数智江铜 · 智能制造平台 — 线缆计划排产 + 铜流成本核算（生产环境）</title>
 <link rel="stylesheet" href="assets/aps-ui.css">
 <style>
-/* ===== req3 专属：色谱排产轨道（复用甘特动画思路，纯内联色块） ===== */
+/* ===== req3 专属：AI 色谱排产轨道（复用甘特平移动画思路，纯内联色块） ===== */
 .spec-track{position:relative;border:1px solid var(--line);border-radius:var(--r);background:#fff;overflow:hidden;margin-bottom:10px}
 .spec-track-head{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .spec-track-head b{font-size:12.5px}
 .spec-track-head small{font-size:10.5px;color:var(--ink-3)}
-.spec-lane{position:relative;height:46px;margin:0}
-.spec-block{position:absolute;top:7px;height:32px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.spec-lane{position:relative;height:48px;background-image:repeating-linear-gradient(90deg,transparent 0 calc(100%/12 - 1px),var(--line) calc(100%/12 - 1px) calc(100%/12))}
+.spec-block{position:absolute;top:8px;height:32px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   color:#fff;font-size:9.5px;font-weight:700;cursor:pointer;overflow:hidden;box-shadow:0 2px 6px rgba(29,39,56,.22);
-  text-shadow:0 1px 1px rgba(0,0,0,.25);transition:left .85s cubic-bezier(.45,.05,.2,1),width .85s,outline .2s,box-shadow .15s}
-.spec-block:hover{box-shadow:0 5px 14px rgba(29,39,56,.34);z-index:5}
-.spec-block .sb-c{font-size:9px;opacity:.92;font-weight:600}
-.spec-block.urgent{outline:2.5px solid rgba(220,75,62,.85);outline-offset:1px;z-index:4}
-.spec-block.locked{outline:2.5px solid rgba(43,127,208,.8);outline-offset:1px}
-.spec-setup{position:absolute;top:13px;height:20px;border-radius:4px;
-  background:repeating-linear-gradient(135deg,#c2cbd8 0 4px,#dfe5ee 4px 8px);box-shadow:none}
-.spec-stat{display:flex;gap:22px;flex-wrap:wrap;align-items:center;padding:10px 4px 2px}
-.spec-stat .ss{display:flex;flex-direction:column}
-.spec-stat .ss b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
-.spec-stat .ss small{font-size:10.5px;color:var(--ink-3)}
-.spec-stat .arrow{font-size:18px;color:var(--ink-3)}
-/* 成本闭环等式卡 */
-.eq-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(120deg,var(--accent-soft),#fff);
-  border:1px solid var(--line-2);border-radius:12px;padding:18px 20px}
-.eq-term{display:flex;flex-direction:column;align-items:center;min-width:118px}
-.eq-term .et-v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.3px}
+  text-shadow:0 1px 1px rgba(0,0,0,.3);transition:left .85s cubic-bezier(.45,.05,.2,1),width .85s,outline .2s,box-shadow .15s}
+.spec-block:hover{box-shadow:0 5px 14px rgba(29,39,56,.34);z-index:6}
+.spec-block .sb-c{font-size:8.5px;opacity:.92;font-weight:600}
+.spec-block.urgent{outline:2.5px solid rgba(220,75,62,.9);outline-offset:1px;z-index:5}
+.spec-block.locked::after{content:"🔒";position:absolute;top:1px;right:2px;font-size:8px;text-shadow:none}
+/* 线缆颜色色谱 */
+.c-red{background:linear-gradient(135deg,#e0584b,#c23a2d)}
+.c-blue{background:linear-gradient(135deg,#3f7fdc,#2b5fb0)}
+.c-yellow{background:linear-gradient(135deg,#e6b13a,#caa028)}
+.c-green{background:linear-gradient(135deg,#34a877,#22845c)}
+.c-black{background:linear-gradient(135deg,#4a525e,#2b313a)}
+.c-white{background:linear-gradient(135deg,#cfd6e0,#aab3c2);color:#2b313a;text-shadow:none}
+.spec-stat{display:flex;gap:18px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid var(--line);background:var(--panel-2);font-size:12px;color:var(--ink-2)}
+.spec-stat b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.spec-stat .down{color:var(--ok)}
+/* 铜流闭环等式卡 */
+.eq-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:linear-gradient(120deg,var(--accent-soft),#fff);margin-bottom:16px}
+.eq-term{display:flex;flex-direction:column;align-items:center;min-width:110px}
+.eq-term .et-v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.eq-term .et-v small{font-size:13px;font-weight:600;color:var(--ink-3)}
 .eq-term .et-l{font-size:11px;color:var(--ink-2);margin-top:3px}
-.eq-op{font-size:24px;font-weight:700;color:var(--ink-3)}
-.eq-term.theory .et-v{color:var(--brand)}
-.eq-term.actual .et-v{color:var(--ink)}
-.eq-term.scrap .et-v{color:var(--warn)}
-.eq-term.recycle .et-v{color:var(--ok)}
-/* 账平印章 */
-.seal{margin-left:auto;width:84px;height:84px;border-radius:50%;border:3px solid var(--ok);color:var(--ok);
-  display:grid;place-items:center;font-size:15px;font-weight:800;text-align:center;line-height:1.25;
-  transform:rotate(-14deg) scale(.4);opacity:0;transition:.5s cubic-bezier(.2,1.3,.4,1);letter-spacing:1px}
-.seal.show{transform:rotate(-14deg) scale(1);opacity:1}
-.seal small{display:block;font-size:8px;font-weight:600;letter-spacing:0}
+.eq-op{font-size:22px;font-weight:800;color:var(--ink-3)}
+.eq-seal{margin-left:auto;display:none;align-items:center;gap:8px;padding:9px 16px;border:2px solid var(--ok);border-radius:10px;
+  color:var(--ok);font-size:15px;font-weight:800;transform:rotate(-6deg);background:var(--ok-soft)}
+.eq-seal.show{display:inline-flex;animation:sealin .4s cubic-bezier(.3,1.5,.5,1)}
+@keyframes sealin{from{opacity:0;transform:rotate(-6deg) scale(1.6)}to{opacity:1;transform:rotate(-6deg) scale(1)}}
+@media (max-width:1180px){.eq-card{gap:10px}.eq-term{min-width:84px}.eq-term .et-v{font-size:19px}}
 </style>
 </head>
 <body data-theme="req3">
@@ -51,162 +50,148 @@
   <!-- ===================== 侧栏 ===================== -->
   <aside class="sidebar">
     <div class="sb-brand">
-      <div class="sb-logo">APS</div>
-      <div class="sb-name">线缆 APS · 铜流<small>江铜线缆 · 鼎捷ERP</small></div>
+      <div class="sb-logo">数智</div>
+      <div class="sb-name">数智江铜 · 智造平台<small>线缆 · 鼎捷互联中台</small></div>
     </div>
     <nav class="sb-nav">
-      <div class="nav-group-t">计划与排产</div>
-      <div class="nav-item active" data-page="dash" data-crumb="工作台"><span class="ni-ic">📊</span><span>工作台</span></div>
-      <div class="nav-item" data-page="orders" data-crumb="工单管理"><span class="ni-ic">🧾</span><span>工单管理</span></div>
-      <div class="nav-item" data-page="spec" data-crumb="色谱排产"><span class="ni-ic">🎨</span><span>色谱排产</span><span class="ai-dot">AI</span></div>
-      <div class="nav-item" data-page="dispatch" data-crumb="计划下发"><span class="ni-ic">📤</span><span>计划下发</span></div>
-      <div class="nav-group-t">物料与成本</div>
-      <div class="nav-item" data-page="kit" data-crumb="齐套锁库 · 采购联动"><span class="ni-ic">📦</span><span>齐套锁库 · 采购联动</span><span class="ai-dot">AI</span></div>
+      <div class="nav-group-t">计划排产</div>
+      <div class="nav-item" data-page="dash" data-crumb="生产看板"><span class="ni-ic">📊</span><span>生产看板</span></div>
+      <div class="nav-item" data-page="mps" data-crumb="主生产计划 MPS"><span class="ni-ic">🧾</span><span>主生产计划 MPS</span></div>
+      <div class="nav-item active" data-page="spec" data-crumb="高级排产 APS"><span class="ni-ic">🎨</span><span>高级排产 APS</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="load" data-crumb="产能负荷"><span class="ni-ic">📐</span><span>产能负荷</span></div>
+      <div class="nav-group-t">生产执行</div>
+      <div class="nav-item" data-page="dispatch" data-crumb="工序派工"><span class="ni-ic">📤</span><span>工序派工</span></div>
+      <div class="nav-item" data-page="wip" data-crumb="报工 · 在制品"><span class="ni-ic">📡</span><span>报工 · 在制品</span></div>
+      <div class="nav-group-t">物料齐套</div>
+      <div class="nav-item" data-page="kit" data-crumb="齐套分析 · 采购联动"><span class="ni-ic">📦</span><span>齐套 · 采购联动</span><span class="ai-dot">AI</span></div>
+      <div class="nav-group-t">质量损耗</div>
       <div class="nav-item" data-page="loss" data-crumb="损耗与边角料"><span class="ni-ic">♻️</span><span>损耗与边角料</span></div>
-      <div class="nav-item" data-page="cost" data-crumb="铜流成本"><span class="ni-ic">💰</span><span>铜流成本</span><span class="ai-dot">AI</span></div>
-      <div class="nav-group-t">分析</div>
+      <div class="nav-group-t">成本核算</div>
+      <div class="nav-item" data-page="cost" data-crumb="铜流成本核算"><span class="ni-ic">🪙</span><span>铜流成本</span><span class="ai-dot">AI</span></div>
+      <div class="nav-group-t">监控分析</div>
+      <div class="nav-item" data-page="alerts" data-crumb="异常预警"><span class="ni-ic">⚠️</span><span>异常预警</span><span class="ni-tag">3</span></div>
       <div class="nav-item" data-page="reports" data-crumb="报表中心"><span class="ni-ic">📈</span><span>报表中心</span></div>
     </nav>
-    <div class="sb-foot"><div class="sb-foot-txt">底座 <b>鼎捷 ERP + WMS + 机台终端</b> 已对接<br>同步：实时 · 11:46:02<br><a href="req1.html" style="color:#9aa6bd">需求一</a> · <a href="req2.html" style="color:#9aa6bd">需求二</a> · <a href="index.html" style="color:#9aa6bd">演示门户</a></div></div>
+    <div class="sb-foot"><div class="sb-foot-txt">底座 <b>鼎捷 ERP · sMES · 互联中台</b><br>APS 排程 · 实时 11:46</div>
+      <div style="margin-top:8px;display:flex;gap:8px"><a href="req1.html" style="color:#bda08a">需求一</a><a href="req2.html" style="color:#bda08a">需求二</a><a href="index.html" style="color:#bda08a">门户</a></div>
+    </div>
   </aside>
 
   <!-- ===================== 顶栏 ===================== -->
   <header class="topbar">
     <button class="tb-toggle" title="折叠菜单"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-    <div class="tb-crumb"><span>计划与排产</span><span class="sep">/</span><b id="crumbPage">工作台</b></div>
+    <div class="tb-crumb"><span>计划排产</span><span class="sep">/</span><b id="crumbPage">高级排产 APS</b></div>
     <div class="tb-search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input placeholder="搜索工单号 / 物料 / 颜色批次…  ( / )">
+      <input placeholder="搜索工单号 / 产品规格 / 色号 / 盘号 / 机台…">
     </div>
     <div class="tb-right">
-      <a href="index.html" class="chip" style="height:30px">演示门户</a>
       <span class="env-badge"><span class="dot"></span>生产环境</span>
       <button class="tb-icon" title="预警"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge-num">3</span></button>
       <button class="tb-icon" title="帮助"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg></button>
-      <div class="tb-user"><div class="ava">李</div><div><div class="un">李工</div><div class="ur">计划调度主管</div></div></div>
+      <div class="tb-user"><div class="ava">李</div><div><div class="un">李伟</div><div class="ur">计划调度主管 · 线缆厂</div></div></div>
     </div>
   </header>
 
   <!-- ===================== 主内容 ===================== -->
   <main class="main">
 
-    <!-- ============ 工作台 ============ -->
-    <section class="page active" id="page-dash">
-      <div class="page-head"><div><h1>计划排产工作台 · 今日概览</h1><div class="ph-sub">2026-06-18 周四 · 早班 08:00–20:00 · 挤出线 L1 绝缘 / L2 护套 · 底座鼎捷 ERP</div></div>
-        <div class="ph-actions"><button class="btn" onclick="APS.toast('已从鼎捷 ERP 同步生产工单 / 库存 / 标准成本')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>同步鼎捷</button><button class="btn ai" onclick="APS.go('spec')">🎨 进入色谱排产</button></div>
+    <!-- ============ 生产看板 ============ -->
+    <section class="page" id="page-dash">
+      <div class="page-head"><div><h1>生产看板</h1><div class="ph-sub">2026-06-18 周四 · 早班 08:00–20:00 · 线缆工艺线 6 机台在产 · 数据源 鼎捷 ERP / sMES 实时回流</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>同步 鼎捷互联中台</button><button class="btn ai" onclick="APS.go('spec')">🎨 进入色谱排产</button></div>
       </div>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">📋</span><span class="k-label">今日工单</span></div><div class="k-val" id="d-k1">32</div><div class="k-foot">含急单 <span class="k-delta down">2</span> 张 · 鼎捷 ERP 自动获取</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">🎨</span><span class="k-label">今日换色次数</span></div><div class="k-val"><span id="d-k2">11</span> <small>→</small> <span style="color:var(--ok)">4</span></div><div class="k-foot"><span class="k-delta up">▼ 64%</span> AI 聚类排产后</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">⚙</span><span class="k-label">挤出线利用率</span></div><div class="k-val">87<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 16%</span> 减少换色空转</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ai-soft);color:var(--ai)">✦</span><span class="k-label">AI 今日处理</span></div><div class="k-val" id="d-k4">19</div><div class="k-foot">次聚类排产 / 插单 / 成本对账</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">📋</span><span class="k-label">今日工单</span></div><div class="k-val" id="d-k1">9</div><div class="k-foot">含急单 <span class="k-delta down">1</span> 张 · 已排 7 / 9</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">🎨</span><span class="k-label">挤出线换色次数</span></div><div class="k-val">11<small>→</small><span style="color:var(--ok)">4</span></div><div class="k-foot"><span class="k-delta up">▼ 64%</span> AI 色谱聚类后</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">⚙</span><span class="k-label">挤出线综合利用率</span></div><div class="k-val">88<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 15%</span> 换色损时降低</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ai-soft);color:var(--ai)">✦</span><span class="k-label">AI 今日编排</span></div><div class="k-val" id="d-k4">18</div><div class="k-foot">次 色谱聚类 / 插单 / 重排</div></div>
       </div>
       <div class="split">
         <div class="card">
-          <div class="card-head"><h3>AI 待办建议</h3><span class="ai-chip">✦ Copilot</span><div class="ch-actions"><span class="ch-sub">系统主动发现，待您处置</span></div></div>
+          <div class="card-head"><h3>AI+ 场景 · 待办建议</h3><span class="ai-chip">✦ 色谱智能编排</span><div class="ch-actions"><span class="ch-sub">系统主动发现，待您处置</span></div></div>
           <div class="card-body" style="padding:6px 16px 14px">
-            <div class="ai-suggest"><div class="as-ic">🎨</div><div><b>换色聚类</b>：L2 护套线今日红/蓝/黑批次穿插，按同色聚拢可省 <b>3.5h</b> 换色损时（11 次 → 4 次）。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.go('spec');APS.toast('已定位色谱排产 · 点 AI 聚类','ai')">去聚类</button></div></div>
-            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚡</div><div><b>急单 SO-0611-77</b>（蓝色护套 8km）可楔入 L2 同色组尾，换色 +0，不影响已锁定关键交期订单。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('spec');APS.toast('已生成插单方案 B · 可溯源','ai')">查看方案</button></div></div>
-            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--warn),#f0bf6b)">📦</div><div><b>护套料 PVC-黑</b> 缺口 0.8t，已关联鼎捷 ERP 采购申请 <b>PR-2206-118</b>，未入库自动提醒采购员。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('kit')">去齐套</button></div></div>
+            <div class="ai-suggest"><div class="as-ic">🎨</div><div><b>护套挤出 HT01</b> 今日 6 个颜色批次穿插，AI 色谱聚类可将换色 <b>11→4</b> 次，省换色损时 <b>3.5h</b>。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.go('spec');APS.toast('已定位色谱排产台','ai')">查看方案</button></div></div>
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚡</div><div>急单 <b>JD-2606-118</b>（YJV 3×95 黑护套 12km）可楔入黑色批次组尾，<b>不影响已锁定关键交期单</b>。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('spec')">去插单</button></div></div>
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--warn),#f0bf6b)">📦</div><div><b>护套料 PVC</b> 将于 6/19 缺口 0.8t，已关联鼎捷 ERP 采购申请 <b>PR-2206-118</b>，未入库自动提醒采购员。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('kit')">去齐套</button></div></div>
           </div>
         </div>
         <div class="card">
           <div class="card-head"><h3>产线达成</h3><span class="ch-sub">计划 vs 实绩</span></div>
-          <div class="card-body" style="padding:14px 16px">
-            <div id="dashLines"></div>
-          </div>
+          <div class="card-body" style="padding:14px 16px"><div id="dashLines"></div></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>色谱排产（只读概览）</h3><span class="ch-sub">L1 绝缘挤出 / L2 护套挤出 · 颜色批次</span><div class="ch-actions"><button class="btn sm" onclick="APS.go('spec')">打开色谱排产编辑 →</button></div></div>
+        <div class="card-head"><h3>今日色谱排产（只读概览）</h3><div class="ch-actions"><button class="btn sm" onclick="APS.go('spec')">打开 APS 工作台 →</button></div></div>
         <div class="card-body"><div id="dashSpec"></div></div>
       </div>
     </section>
 
-    <!-- ============ 工单管理 ============ -->
-    <section class="page" id="page-orders">
-      <div class="page-head"><div><h1>工单管理</h1><div class="ph-sub">来源：鼎捷 ERP 自动获取生产工单 · 取消纸质派工单 · 全程电子工单</div></div>
-        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建</button><button class="btn" onclick="APS.toast('已从鼎捷 ERP 拉取最新生产工单')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>同步鼎捷</button><button class="btn ai" onclick="APS.go('spec')">✦ 同步至排产</button></div>
+    <!-- ============ 主生产计划 MPS ============ -->
+    <section class="page" id="page-mps">
+      <div class="page-head"><div><h1>主生产计划 MPS</h1><div class="ph-sub">工单由 <b>鼎捷 ERP 自动获取</b> · 电子工单取消纸质派工 · 超单生产自动扣减成品/半成品库存</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建工单</button><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>鼎捷 ERP 获取</button><button class="btn ai" onclick="APS.go('spec')">✦ 下达高级排产</button></div>
       </div>
-      <div class="grid-3" style="margin-bottom:16px">
-        <div class="card" style="margin:0"><div class="card-body" style="display:flex;align-items:center;gap:12px"><span class="k-ic" style="width:34px;height:34px;background:var(--brand-soft);color:var(--brand);border-radius:9px;display:grid;place-items:center">📲</span><div><b style="font-size:13px">电子工单</b><div class="muted" style="font-size:11.5px">已取消纸质派工单，工序卡随单下发机台终端</div></div></div></div>
-        <div class="card" style="margin:0"><div class="card-body" style="display:flex;align-items:center;gap:12px"><span class="k-ic" style="width:34px;height:34px;background:var(--ai-soft);color:var(--ai);border-radius:9px;display:grid;place-items:center">🧪</span><div><b style="font-size:13px">样品工单</b><div class="muted" style="font-size:11.5px">BOM 细化至工序级，单独核算试制成本</div></div></div></div>
-        <div class="card" style="margin:0"><div class="card-body" style="display:flex;align-items:center;gap:12px"><span class="k-ic" style="width:34px;height:34px;background:var(--warn-soft);color:var(--warn);border-radius:9px;display:grid;place-items:center">🔁</span><div><b style="font-size:13px">返工工单</b><div class="muted" style="font-size:11.5px">系统自动/手工关闭，超单生产自动扣减库存</div></div></div></div>
-      </div>
+      <div class="ai-suggest"><div class="as-ic">📥</div><div>本批 <b>9</b> 张工单自鼎捷 ERP 自动获取并下推为<b>电子工单</b>（无纸派工）：含样品工单 1 张（按 BOM 工序级展开）、返工工单 1 张；超单生产将自动扣减成品/半成品库存。</div><div class="as-acts"><span class="chip">同步 11:46</span></div></div>
       <div class="card">
         <div class="toolbar">
-          <div class="filter">类型 <select id="ordType" onchange="renderOrders()"><option value="">全部</option><option>生产工单</option><option>样品工单</option><option>返工工单</option></select></div>
-          <div class="filter">状态 <select id="ordStatus" onchange="renderOrders()"><option value="">全部</option><option>待排程</option><option>已排程</option><option>已下发</option><option>生产中</option><option>已完工</option><option>已关闭</option></select></div>
+          <div class="filter">类型 <select id="ordType" onchange="renderMPS()"><option value="">全部</option><option>正式工单</option><option>样品工单</option><option>返工工单</option></select></div>
+          <div class="filter">状态 <select id="ordStatus" onchange="renderMPS()"><option value="">全部</option><option>待排程</option><option>已排程</option><option>已派工</option><option>生产中</option><option>已完工</option></select></div>
+          <div class="filter">机台 <select><option>全部</option><option>绝缘挤出 JY01</option><option>护套挤出 HT01</option><option>成缆 CL01</option></select></div>
           <div class="sep"></div>
-          <div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="搜索工单/物料" oninput="renderOrders(this.value)"></div>
+          <div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="工单/规格/色号/批号" oninput="renderMPS(this.value)"></div>
           <div style="margin-left:auto" class="muted" id="ordCount"></div>
         </div>
         <div class="tbl-wrap">
           <table class="grid" id="ordTable">
             <thead><tr><th class="checkcell"><input type="checkbox" onclick="$$('#ordTable tbody input').forEach(c=>c.checked=this.checked)"></th>
-              <th class="sortable">工单号 <span class="arr">▾</span></th><th>来源</th><th>产品 / 颜色规格</th><th>类型</th><th class="num">数量</th><th>交期</th><th>库存扣减</th><th>状态</th><th>操作</th></tr></thead>
+              <th class="sortable">工单号 <span class="arr">▾</span></th><th>产品 / 规格</th><th>色号</th><th>护套料</th><th>数量</th><th>批号</th><th>客户</th><th>交期</th><th>类型</th><th>齐套</th><th>状态</th><th>操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <div class="tbl-foot"><span>共 <b id="ordTotal">96</b> 条 · 来自鼎捷 ERP · 已选 <b>0</b></span><div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button>›</button></div></div>
+        <div class="tbl-foot"><span>共 <b id="ordTotal">94</b> 条 · 已选 <b>0</b> · 来源 鼎捷 ERP</span><div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button>›</button></div></div>
       </div>
     </section>
 
-    <!-- ============ 色谱排产（旗舰核心） ============ -->
-    <section class="page" id="page-spec">
-      <div class="page-head"><div><h1>色谱排产工作台</h1><div class="ph-sub">计划版本 <b id="planVer">V0618-1（按交期序 · 基准）</b> · 挤出线 L1 绝缘 / L2 护套 · AI 最小化换色排产</div></div>
+    <!-- ============ 高级排产 APS（旗舰核心） ============ -->
+    <section class="page active" id="page-spec">
+      <div class="page-head"><div><h1>高级排产 APS<span class="ai-chip" style="margin-left:10px;vertical-align:middle">✦ 色谱智能编排</span></h1><div class="ph-sub">计划版本 <b id="planVer">V0610-1（基准）</b> · 基于约束的 APS · 最小化换色 / 换规格 · 6 工序机台 / 9 张待排</div></div>
         <div class="ph-actions">
-          <button class="btn ai" onclick="aiCluster()">🎨 AI 聚类排产</button>
-          <button class="btn" onclick="insertUrgent()" style="border-color:#f0c4be;color:var(--danger)">⚡ 插入紧急订单</button>
-          <button class="btn ghost" onclick="resetSpec()">↺ 复位</button>
-        </div>
-      </div>
-
-      <div id="specBanner"></div>
-
-      <div class="card" style="margin:0 0 16px">
-        <div class="card-head"><h3>颜色批次轨道 · 同色聚拢最小化换色</h3><span class="ch-sub" id="specSub">基准：按交期序颜色穿插，换色 11 次</span>
-          <div class="ch-actions"><span class="ai-chip">✦ 约束：颜色 / 规格 / 模具 / 齐套</span></div></div>
-        <div class="card-body">
-          <div class="spec-track">
-            <div class="spec-track-head"><span class="lg-sw" style="background:var(--brand)"></span><b>L1 绝缘挤出</b><small>护套前道 · PE/XLPE 绝缘层</small></div>
-            <div class="spec-lane" id="laneL1"></div>
-          </div>
-          <div class="spec-track">
-            <div class="spec-track-head"><span class="lg-sw" style="background:var(--accent)"></span><b>L2 护套挤出</b><small>成品外护套 · PVC 着色挤出</small></div>
-            <div class="spec-lane" id="laneL2"></div>
-          </div>
-          <div class="spec-stat">
-            <div class="ss"><b id="stChange">11</b><small>换色次数</small></div>
-            <span class="arrow">→</span>
-            <div class="ss"><b id="stLoss">5.5h</b><small>换色损时</small></div>
-            <span class="arrow">|</span>
-            <div class="ss"><b id="stLocked" style="color:var(--info)">2</b><small>已锁定关键交期订单（不动）</small></div>
-            <div style="margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink-2)">
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#dc4b3e"></span>红</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#2b7fd0"></span>蓝</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#e0b020"></span>黄</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#1a9d6b"></span>绿</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#2a3442"></span>黑</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="background:#e3e8f0;border:1px solid #c8d0dd"></span>白</i>
-              <i style="display:inline-flex;align-items:center;gap:5px"><span class="lg-sw" style="outline:2px solid rgba(43,127,208,.8);background:#9bbbe0"></span>🔒锁定</i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page-head" style="margin:18px 0 12px"><div><h1 style="font-size:16px">标准甘特 + AI 智能排程跑批</h1><div class="ph-sub">基于约束的 APS 高级排程 · 鼎捷工单入流 · 换色聚类 · 增量重排</div></div>
-        <div class="ph-actions">
+          <div class="seg" style="margin-right:4px"><button>日</button><button class="on">班次</button><button>小时</button></div>
           <button class="btn ai" id="btnAISched" onclick="openSchedParams()">⚡ AI 智能排程</button>
           <button class="btn primary" id="btnPublish" onclick="publishPlan()" disabled>审核下发</button>
         </div>
       </div>
 
+      <!-- (a) 色谱排产台 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head"><h3>色谱排产台 · 挤出线换色编排</h3><span class="ch-sub" id="specSub">基准：按交期序，红蓝黄绿黑白穿插，换色频繁</span>
+          <div class="ch-actions">
+            <button class="btn ai sm" id="btnCluster" onclick="runCluster()">🎨 AI 色谱聚类</button>
+            <button class="btn sm danger" id="btnUrgent" onclick="insertUrgent()">⚡ 插入紧急订单</button>
+            <button class="btn sm ghost" onclick="resetSpec()">↺ 复位</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="spec-track">
+            <div class="spec-track-head"><b>绝缘挤出线 JY01</b><small>PVC / XLPE 绝缘 · 按色号换色</small></div>
+            <div class="spec-lane" id="laneJY"></div>
+          </div>
+          <div class="spec-track">
+            <div class="spec-track-head"><b>护套挤出线 HT01</b><small>PVC / XLPE 护套 · 按色号换色</small></div>
+            <div class="spec-lane" id="laneHT"></div>
+          </div>
+          <div class="spec-stat" id="specStat"></div>
+          <div id="specLog" style="margin-top:10px"></div>
+        </div>
+      </div>
+
       <div id="schedBanner"></div>
 
+      <!-- (b) 标准甘特 + AI 排程跑批 -->
       <div class="split" style="grid-template-columns:1fr 280px;align-items:start">
         <div class="card" style="margin:0">
-          <div class="card-head"><h3>挤出线资源甘特 · L1 / L2 / 拉丝 / 绞线</h3><span class="ch-sub" id="ganttSub">基准计划：换色穿插，存在 1 张延期</span>
+          <div class="card-head"><h3>资源甘特 · 线缆工艺线</h3><span class="ch-sub" id="ganttSub">基准计划：换色频繁，护套挤出 1 张延期风险</span>
             <div class="ch-actions"><button class="btn sm ghost" onclick="APS.toast('已导出当前甘特 PNG')">导出</button></div></div>
           <div class="card-body flush">
             <div class="gantt" id="schedGantt"></div>
@@ -222,7 +207,7 @@
 
         <div>
           <div class="card" style="margin:0 0 14px">
-            <div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCount">8 张</span></div>
+            <div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCount">9 张</span></div>
             <div class="card-body" style="padding:8px;max-height:300px;overflow:auto" id="waitList"></div>
           </div>
           <div class="card" style="margin:0">
@@ -233,144 +218,158 @@
       </div>
     </section>
 
-    <!-- ============ 计划下发 ============ -->
+    <!-- ============ 产能负荷 ============ -->
+    <section class="page" id="page-load">
+      <div class="page-head"><div><h1>产能负荷</h1><div class="ph-sub">各工序机台负荷 / 瓶颈分析 · 数据回流 鼎捷 sMES</div></div></div>
+      <div class="card"><div class="card-head"><h3>工序机台负荷（早班）</h3><span class="ch-sub">护套挤出 HT01 为当前瓶颈</span></div>
+        <div class="card-body"><div id="loadLines"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 工序派工 ============ -->
     <section class="page" id="page-dispatch">
-      <div class="page-head"><div><h1>计划下发</h1><div class="ph-sub">审核确认后下发电子工单至机台终端 · 取消纸质派工单 · 回收产线电子回执</div></div></div>
-      <div class="card"><div class="card-head"><h3>下发履历</h3><span class="ch-sub">电子工单 + 产线回执</span></div>
-        <div class="tbl-wrap"><table class="grid"><thead><tr><th>版本</th><th>下发时间</th><th class="num">工单数</th><th>下发人</th><th>载体</th><th>产线回执</th><th>状态</th></tr></thead>
+      <div class="page-head"><div><h1>工序派工</h1><div class="ph-sub">审核后生成<b>电子派工单</b>下发机台终端（取消纸质派工单）· 工序流转 · 电子作业指导书随单下发</div></div></div>
+      <div class="card"><div class="card-head"><h3>电子派工单 / 下发履历</h3></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>计划版本</th><th>下发时间</th><th>派工单数</th><th>工序</th><th>下发人</th><th>机台回执</th><th>状态</th></tr></thead>
           <tbody>
-            <tr><td class="mono">V0618-3</td><td>06-18 09:12</td><td class="num">3</td><td>李工</td><td><span class="tag blue nodot">电子工单</span></td><td><span class="tag green">3/3 已确认</span></td><td><span class="tag green">已生效</span></td></tr>
-            <tr><td class="mono">V0618-1</td><td>06-18 08:05</td><td class="num">29</td><td>李工</td><td><span class="tag blue nodot">电子工单</span></td><td><span class="tag green">12/12 已确认</span></td><td><span class="tag green">已生效</span></td></tr>
-            <tr><td class="mono">V0617-7</td><td>06-17 19:40</td><td class="num">24</td><td>赵工</td><td><span class="tag blue nodot">电子工单</span></td><td><span class="tag green">已确认</span></td><td><span class="tag gray">已归档</span></td></tr>
-            <tr><td class="mono">V0617-2</td><td>06-17 08:10</td><td class="num">21</td><td>李工</td><td><span class="tag blue nodot">电子工单</span></td><td><span class="tag green">已确认</span></td><td><span class="tag gray">已归档</span></td></tr>
+            <tr><td class="mono">V0610-2</td><td>06-18 09:12</td><td class="num">4</td><td>绝缘挤出 / 护套挤出</td><td>李伟</td><td><span class="tag green">4/4 已接收</span></td><td><span class="tag green">已生效</span></td></tr>
+            <tr><td class="mono">V0610-1</td><td>06-18 08:05</td><td class="num">12</td><td>拉丝 / 绞线 / 成缆</td><td>李伟</td><td><span class="tag green">12/12 已接收</span></td><td><span class="tag green">已生效</span></td></tr>
+            <tr><td class="mono">V0609-7</td><td>06-17 19:40</td><td class="num">9</td><td>全工序</td><td>周敏</td><td><span class="tag green">已接收</span></td><td><span class="tag gray">已归档</span></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="card"><div class="card-head"><h3>机台回执履历</h3><span class="ch-sub">sMES 终端扫码确认</span></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>机台</th><th>派工单号</th><th>工单</th><th>工序</th><th>接收时间</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td><b>护套挤出 HT01</b></td><td class="mono">DG-0618-04</td><td class="mono">JD-2606-101</td><td>护套挤出</td><td>09:13</td><td><span class="tag green">已接收</span></td></tr>
+            <tr><td><b>绝缘挤出 JY01</b></td><td class="mono">DG-0618-03</td><td class="mono">JD-2606-088</td><td>绝缘挤出</td><td>09:13</td><td><span class="tag green">已接收</span></td></tr>
+            <tr><td><b>成缆 CL01</b></td><td class="mono">DG-0618-02</td><td class="mono">JD-2606-072</td><td>成缆</td><td>08:06</td><td><span class="tag blue">生产中</span></td></tr>
           </tbody></table></div>
       </div>
     </section>
 
-    <!-- ============ 齐套锁库 · 采购联动 ============ -->
+    <!-- ============ 报工 · 在制品 ============ -->
+    <section class="page" id="page-wip">
+      <div class="page-head"><div><h1>报工 · 在制品</h1><div class="ph-sub">机台扫码报工实时回流 鼎捷 sMES · 在制品 WIP 跟踪（卷号/盘重/当前工序）</div></div></div>
+      <div class="card"><div class="card-head"><h3>机台实时状态 · 报工</h3><span class="env-badge"><span class="dot"></span>实时采集</span></div>
+        <div class="card-body"><div id="monLines"></div></div>
+      </div>
+      <div class="card"><div class="card-head"><h3>在制品 WIP（按工序）</h3></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>工单号</th><th>产品/规格</th><th>当前工序</th><th>盘号(卷号)</th><th>盘重(kg)</th><th>米数(km)</th><th>已完工序</th><th>进度</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">JD-2606-101</td><td>YJV 3×95</td><td><span class="tag blue">护套挤出</span></td><td class="mono">P-2606-1180</td><td class="num">2,140</td><td class="num">3.2</td><td>拉丝·绞线·绝缘·成缆</td><td style="min-width:120px"><div class="bar"><i style="width:78%"></i></div></td></tr>
+            <tr><td class="mono">JD-2606-088</td><td>BV 2.5</td><td><span class="tag blue">绝缘挤出</span></td><td class="mono">P-2606-1182</td><td class="num">860</td><td class="num">8.6</td><td>拉丝·绞线</td><td style="min-width:120px"><div class="bar"><i style="width:46%"></i></div></td></tr>
+            <tr><td class="mono">JD-2606-072</td><td>RVV 3×1.5</td><td><span class="tag green">复绕</span></td><td class="mono">P-2606-1175</td><td class="num">540</td><td class="num">5.0</td><td>拉丝·绞线·绝缘·成缆·护套</td><td style="min-width:120px"><div class="bar"><i class="ok" style="width:93%"></i></div></td></tr>
+          </tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ============ 齐套 · 采购联动 ============ -->
     <section class="page" id="page-kit">
-      <div class="page-head"><div><h1>齐套锁库 · 采购联动</h1><div class="ph-sub">实时对接 WMS 库存 · 关联鼎捷 ERP 采购申请 · 自动锁库</div></div></div>
-      <div class="ai-suggest"><div class="as-ic">✦</div><div>AI 预测：<b>护套料 PVC-黑</b> 将于 6/19 缺口 <b>0.8t</b>，影响 2 张工单。已关联鼎捷 ERP 采购申请 <b>PR-2206-118</b>，物料未入库将自动提醒采购员。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.toast('已提醒采购员·逾期升级主管','ai')">提醒采购员</button></div></div>
-      <div class="grid-3" style="margin-bottom:16px">
-        <div class="kpi" style="margin:0"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">✓</span><span class="k-label">齐套工单</span></div><div class="k-val">24</div><div class="k-foot">已锁库 · 可直接排产</div></div>
-        <div class="kpi" style="margin:0"><div class="k-top"><span class="k-ic" style="background:var(--warn-soft);color:var(--warn)">◐</span><span class="k-label">部分齐套</span></div><div class="k-val">5</div><div class="k-foot">在途补齐中</div></div>
-        <div class="kpi" style="margin:0"><div class="k-top"><span class="k-ic" style="background:var(--danger-soft);color:var(--danger)">✕</span><span class="k-label">缺料工单</span></div><div class="k-val">3</div><div class="k-foot">已触发采购申请</div></div>
+      <div class="page-head"><div><h1>齐套分析 · 采购联动<span class="ai-chip" style="margin-left:10px;vertical-align:middle">✦ 齐套智能协同</span></h1><div class="ph-sub">实时对接鼎捷 ERP 库存 / 采购在途 · 库存锁定 · 缺口关联采购申请</div></div></div>
+      <div class="ai-suggest"><div class="as-ic">✦</div><div>AI 预测：<b>护套料 PVC</b> 将于 6/19 缺口 <b>0.8t</b>，影响 2 张工单。已关联鼎捷 ERP 采购申请 <b>PR-2206-118</b>，物料未入库自动提醒采购员。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.toast('已提醒采购员：PR-2206-118 催办入库','ai')">提醒采购</button></div></div>
+      <div class="card">
+        <div class="card-head"><h3>齐套体检 · 待排工单</h3><span class="ch-sub">绿=齐套 / 黄=部分锁定 / 红=缺料</span></div>
+        <div class="tbl-wrap"><table class="grid" id="kitTable"><thead><tr><th>工单</th><th>物料</th><th>需求</th><th>可用(已锁)</th><th>在途</th><th>齐套率</th><th>采购申请</th><th>预计齐套</th><th>状态</th></tr></thead><tbody></tbody></table></div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>齐套体检 · 铜杆 / 绝缘料 / 护套料</h3><span class="ch-sub">绿=齐套 / 黄=部分 / 红=缺料</span></div>
-        <div class="tbl-wrap"><table class="grid" id="kitTable"><thead><tr><th>工单</th><th>物料</th><th class="num">需求</th><th class="num">可用</th><th class="num">在途</th><th>齐套率</th><th>预计齐套</th><th>采购申请</th><th>状态</th></tr></thead><tbody></tbody></table></div>
-      </div>
-      <div class="grid-2">
-        <div class="card" style="margin:0">
-          <div class="card-head"><h3>库存锁定明细</h3><span class="ch-sub">WMS 实时锁库</span></div>
-          <div class="tbl-wrap"><table class="grid"><thead><tr><th>工单</th><th>物料</th><th class="num">锁定量</th><th>批次</th><th>状态</th></tr></thead>
-            <tbody>
-              <tr><td class="mono">MO-0618-12</td><td>铜杆 Φ8</td><td class="num">8.0 t</td><td class="mono">CU-26061</td><td><span class="tag green">已锁库</span></td></tr>
-              <tr><td class="mono">MO-0618-12</td><td>绝缘料 XLPE</td><td class="num">1.2 t</td><td class="mono">XL-2206A</td><td><span class="tag green">已锁库</span></td></tr>
-              <tr><td class="mono">MO-0618-15</td><td>护套料 PVC-蓝</td><td class="num">0.9 t</td><td class="mono">PV-B118</td><td><span class="tag green">已锁库</span></td></tr>
-              <tr><td class="mono">MO-0618-20</td><td>护套料 PVC-黑</td><td class="num">0.4 t</td><td class="mono">PV-K092</td><td><span class="tag amber">部分锁库</span></td></tr>
-            </tbody></table></div>
-        </div>
-        <div class="card" style="margin:0">
-          <div class="card-head"><h3>四类异常预警</h3></div>
-          <div class="tbl-wrap"><table class="grid"><thead><tr><th>类型</th><th>对象</th><th>说明</th><th>处置</th></tr></thead>
-            <tbody>
-              <tr class="ai-hint"><td><span class="tag red">缺料</span></td><td class="mono">PVC-黑</td><td>缺口 0.8t · PR-2206-118 未入库</td><td><button class="btn sm ai" onclick="APS.toast('已提醒采购员·逾期升级主管','ai')">提醒采购</button></td></tr>
-              <tr><td><span class="tag amber">在途延迟</span></td><td class="mono">绝缘料 PE</td><td>到货 6/19 → 6/21，影响排产</td><td><button class="btn sm" onclick="APS.toast('已通知计划员调整排产')">协调</button></td></tr>
-              <tr><td><span class="tag amber">呆滞预警</span></td><td class="mono">PVC-黄</td><td>库龄 92 天，建议优先消耗</td><td><button class="btn sm" onclick="APS.go('spec')">优先排产</button></td></tr>
-              <tr><td><span class="tag gray">超领预警</span></td><td class="mono">MO-0617-08</td><td>超单领料，已自动扣减库存</td><td><button class="btn sm" onclick="APS.toast('已生成超领台账')">查看</button></td></tr>
-            </tbody></table></div>
-        </div>
+        <div class="card-head"><h3>四类异常预警</h3><span class="ch-sub">齐套智能协同主动识别</span></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>类型</th><th>对象</th><th>说明</th><th>关联单据</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag red">缺料</span></td><td>护套料 PVC</td><td>6/19 缺口 0.8t，未入库</td><td class="mono">PR-2206-118</td><td><button class="btn sm" onclick="APS.toast('已提醒采购员催办','ai')">提醒采购</button></td></tr>
+            <tr><td><span class="tag amber">在途未达</span></td><td>无氧铜杆 TU2</td><td>到货延迟 1 天，影响成缆</td><td class="mono">PO-2206-309</td><td><button class="btn sm">跟踪</button></td></tr>
+            <tr><td><span class="tag amber">部分锁定</span></td><td>绝缘料 XLPE</td><td>可用仅满足 70%，已锁定</td><td class="mono">—</td><td><button class="btn sm">领料控制</button></td></tr>
+            <tr><td><span class="tag gray">超领预警</span></td><td>色母 红</td><td>领用累计超 BOM 用量 4%</td><td class="mono">JD-2606-101</td><td><button class="btn sm" onclick="APS.go('loss')">查损耗</button></td></tr>
+          </tbody></table></div>
       </div>
     </section>
 
     <!-- ============ 损耗与边角料 ============ -->
     <section class="page" id="page-loss">
-      <div class="page-head"><div><h1>损耗与边角料</h1><div class="ph-sub">自动核算各工序加工损耗率 · 统计边角料/废料产出 · 关联含铜废料入库记录</div></div>
-        <div class="ph-actions"><button class="btn ai" onclick="APS.toast('AI 已分析损耗异常工序，详见拉丝工序','ai')">✦ 损耗诊断</button></div></div>
-      <div class="ai-suggest" style="background:linear-gradient(120deg,var(--danger-soft),#fff);border-color:#f0c4be"><div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">!</div><div><b>拉丝工序损耗率 1.50%</b> 超标准 1.20%，超出 <b>0.30pct</b>（约多耗铜 3.0kg/工单）。AI 建议：检查拉丝模具磨损与张力设定。</div><div class="as-acts"><button class="btn sm" onclick="APS.toast('已派工：模具检修工单 MNT-0618-03')">派检修</button></div></div>
-      <div class="card">
-        <div class="card-head"><h3>各工序加工损耗率</h3><span class="ch-sub">系统自动核算 · 红色为超标预警</span></div>
-        <div class="tbl-wrap"><table class="grid"><thead><tr><th>工序</th><th class="num">投入(kg)</th><th class="num">产出(kg)</th><th class="num">损耗(kg)</th><th>实际损耗率</th><th class="num">标准损耗率</th><th>状态</th></tr></thead>
-          <tbody>
-            <tr><td>拉丝</td><td class="num">1,000.0</td><td class="num">985.0</td><td class="num">15.0</td><td><span class="tag red nodot">1.50%</span></td><td class="num">1.20%</td><td><span class="tag red">超标 +0.30pct</span></td></tr>
-            <tr><td>绞线</td><td class="num">985.0</td><td class="num">979.1</td><td class="num">5.9</td><td><span class="tag green nodot">0.60%</span></td><td class="num">0.70%</td><td><span class="tag green">正常</span></td></tr>
-            <tr><td>绝缘成缆</td><td class="num">979.1</td><td class="num">970.5</td><td class="num">8.6</td><td><span class="tag green nodot">0.88%</span></td><td class="num">0.90%</td><td><span class="tag green">正常</span></td></tr>
-            <tr><td>护套</td><td class="num">970.5</td><td class="num">962.0</td><td class="num">8.5</td><td><span class="tag amber nodot">0.88%</span></td><td class="num">0.85%</td><td><span class="tag amber">略超</span></td></tr>
-          </tbody></table></div>
-      </div>
-      <div class="grid-2">
+      <div class="page-head"><div><h1>损耗与边角料</h1><div class="ph-sub">自动核算拉丝/绞线等工序损耗率 · 统计各工单各工序边角料废料产出 · 关联含铜废料入库</div></div></div>
+      <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚠</div><div><b>拉丝工序损耗率 1.50%</b>（标准 1.20%）<b>超标</b>，AI 研判为拉丝模具磨损，建议换模并复核张力参数。</div><div class="as-acts"><button class="btn sm" onclick="APS.toast('已生成模具更换工单','ai')">生成换模工单</button></div></div>
+      <div class="grid-2" style="align-items:start">
         <div class="card" style="margin:0">
-          <div class="card-head"><h3>边角料 / 废料台账</h3><span class="ch-sub">按工单按工序 · 公斤级</span></div>
-          <div class="tbl-wrap"><table class="grid"><thead><tr><th>工单</th><th>工序</th><th>类别</th><th class="num">产出(kg)</th><th>处置</th></tr></thead>
+          <div class="card-head"><h3>各工序损耗率</h3><span class="ch-sub">实际 vs 标准</span></div>
+          <div class="tbl-wrap"><table class="grid"><thead><tr><th>工序</th><th>投入(kg)</th><th>产出(kg)</th><th>实际损耗率</th><th>标准</th><th>状态</th></tr></thead>
             <tbody>
-              <tr><td class="mono">MO-0618-12</td><td>拉丝</td><td><span class="tag amber nodot">含铜边角料</span></td><td class="num">9.0</td><td><span class="tag green">已回收入库</span></td></tr>
-              <tr><td class="mono">MO-0618-12</td><td>绞线</td><td><span class="tag amber nodot">含铜边角料</span></td><td class="num">5.9</td><td><span class="tag green">已回收入库</span></td></tr>
-              <tr><td class="mono">MO-0618-12</td><td>绝缘成缆</td><td><span class="tag gray nodot">绝缘废料</span></td><td class="num">8.6</td><td><span class="tag gray">委外处置</span></td></tr>
-              <tr><td class="mono">MO-0618-12</td><td>护套</td><td><span class="tag gray nodot">护套废料</span></td><td class="num">8.5</td><td><span class="tag gray">委外处置</span></td></tr>
+              <tr><td><b>拉丝 LS01</b></td><td class="num">1,000</td><td class="num">985.0</td><td class="num" style="color:var(--danger);font-weight:800">1.50%</td><td class="num">1.20%</td><td><span class="tag red">超标</span></td></tr>
+              <tr><td><b>绞线 JX01</b></td><td class="num">985.0</td><td class="num">978.1</td><td class="num">0.70%</td><td class="num">0.80%</td><td><span class="tag green">正常</span></td></tr>
+              <tr><td><b>绝缘挤出 JY01</b></td><td class="num">978.1</td><td class="num">971.3</td><td class="num">0.70%</td><td class="num">0.75%</td><td><span class="tag green">正常</span></td></tr>
+              <tr><td><b>成缆 CL01</b></td><td class="num">971.3</td><td class="num">967.5</td><td class="num">0.40%</td><td class="num">0.50%</td><td><span class="tag green">正常</span></td></tr>
+              <tr><td><b>护套挤出 HT01</b></td><td class="num">967.5</td><td class="num">962.0</td><td class="num">0.57%</td><td class="num">0.60%</td><td><span class="tag green">正常</span></td></tr>
             </tbody></table></div>
         </div>
         <div class="card" style="margin:0">
-          <div class="card-head"><h3>含铜废料入库记录</h3><span class="ch-sub">关联鼎捷 ERP / WMS 入库单</span></div>
-          <div class="tbl-wrap"><table class="grid"><thead><tr><th>入库单</th><th>来源工单</th><th class="num">重量(kg)</th><th class="num">估值(¥)</th><th>时间</th></tr></thead>
+          <div class="card-head"><h3>边角料 / 废料台账（公斤级）</h3><span class="ch-sub">按工单按工序 · 关联入库</span></div>
+          <div class="tbl-wrap"><table class="grid"><thead><tr><th>工单</th><th>工序</th><th>边角料(kg)</th><th>废料(kg)</th><th>含铜废料入库</th></tr></thead>
             <tbody>
-              <tr><td class="mono">RK-2206-441</td><td class="mono">MO-0618-12</td><td class="num">9.0</td><td class="num">468</td><td>06-18 10:22</td></tr>
-              <tr><td class="mono">RK-2206-442</td><td class="mono">MO-0618-12</td><td class="num">5.9</td><td class="num">307</td><td>06-18 13:40</td></tr>
-              <tr><td class="mono">RK-2206-438</td><td class="mono">MO-0617-08</td><td class="num">12.0</td><td class="num">624</td><td>06-17 16:08</td></tr>
+              <tr><td class="mono">JD-2606-101</td><td>拉丝</td><td class="num">9.0</td><td class="num">6.0</td><td><span class="tag green">RK-2206-077 已入库</span></td></tr>
+              <tr><td class="mono">JD-2606-101</td><td>绞线</td><td class="num">5.0</td><td class="num">1.9</td><td><span class="tag green">RK-2206-077 已入库</span></td></tr>
+              <tr><td class="mono">JD-2606-101</td><td>绝缘挤出</td><td class="num">6.8</td><td class="num">0</td><td><span class="tag gray">非铜·料损</span></td></tr>
+              <tr><td class="mono">JD-2606-101</td><td>成缆</td><td class="num">3.8</td><td class="num">0</td><td><span class="tag gray">非铜·料损</span></td></tr>
+              <tr><td class="mono">JD-2606-101</td><td>护套挤出</td><td class="num">5.5</td><td class="num">0</td><td><span class="tag gray">非铜·料损</span></td></tr>
+              <tr><td colspan="2"><b>合计</b></td><td class="num"><b>30.1</b></td><td class="num"><b>7.9</b></td><td><span class="tag green">含铜废料 12.0kg 已回收</span></td></tr>
             </tbody></table></div>
         </div>
       </div>
     </section>
 
-    <!-- ============ 铜流成本（核心） ============ -->
+    <!-- ============ 铜流成本核算（核心） ============ -->
     <section class="page" id="page-cost">
-      <div class="page-head"><div><h1>铜流成本核算</h1><div class="ph-sub">面向铜材及边角料的精细化成本模型 · 理论用量 = 实际消耗 + 废料回收 · 与鼎捷 ERP 对接生成凭证</div></div>
-        <div class="ph-actions"><button class="btn" onclick="startReconcile()">▶ 开始对账</button><button class="btn ai" onclick="pushERP()">推送鼎捷 ERP 生成凭证</button></div>
+      <div class="page-head"><div><h1>铜流成本核算<span class="ai-chip" style="margin-left:10px;vertical-align:middle">✦ 铜流智能核算</span></h1><div class="ph-sub">理论用量 = 实际消耗 + 边角料 + 废料回收 · 闭环账平 · 凭证推送鼎捷 ERP</div></div>
+        <div class="ph-actions"><button class="btn primary" onclick="reconcileCu()">开始对账</button><button class="btn ai" onclick="pushVoucher()">推送鼎捷 ERP 生成凭证</button></div>
+      </div>
+      <!-- 闭环等式卡 -->
+      <div class="eq-card">
+        <div class="eq-term"><div class="et-v"><span id="eqA">1,000</span><small>kg</small></div><div class="et-l">理论用量（BOM）</div></div>
+        <div class="eq-op">=</div>
+        <div class="eq-term"><div class="et-v"><span id="eqB">962</span><small>kg</small></div><div class="et-l">实际消耗</div></div>
+        <div class="eq-op">+</div>
+        <div class="eq-term"><div class="et-v"><span id="eqC">26</span><small>kg</small></div><div class="et-l">边角料</div></div>
+        <div class="eq-op">+</div>
+        <div class="eq-term"><div class="et-v"><span id="eqD">12</span><small>kg</small></div><div class="et-l">废料回收</div></div>
+        <div class="eq-seal" id="eqSeal">✓ 账平</div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>铜材闭环核算 · 工单 MO-0618-12</h3><span class="ai-chip">✦ 闭环成本核算</span><div class="ch-actions"><span class="ch-sub">理论用量 = 实际消耗 + 边角料 + 废料回收</span></div></div>
-        <div class="card-body">
-          <div class="eq-card">
-            <div class="eq-term theory"><span class="et-v" id="eqTheory">1,000 kg</span><span class="et-l">理论用量</span></div>
-            <span class="eq-op">=</span>
-            <div class="eq-term actual"><span class="et-v" id="eqActual">962 kg</span><span class="et-l">实际消耗</span></div>
-            <span class="eq-op">+</span>
-            <div class="eq-term scrap"><span class="et-v" id="eqScrap">26 kg</span><span class="et-l">边角料</span></div>
-            <span class="eq-op">+</span>
-            <div class="eq-term recycle"><span class="et-v" id="eqRecycle">12 kg</span><span class="et-l">废料回收</span></div>
-            <div class="seal" id="costSeal">✓ 账平<small>BALANCED</small></div>
-          </div>
-          <div class="muted" style="font-size:11.5px;margin-top:10px">点「开始对账」按物料平衡逐项核对，闭环成立后回写鼎捷 ERP 成本中心。差异容差 ±0.5%。</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-head"><h3>工单成本明细</h3><span class="ch-sub">直接材料 / 人工 / 制费 + 废料回收回冲 · vs 标准成本</span></div>
-        <div class="tbl-wrap"><table class="grid"><thead><tr><th>成本项</th><th class="num">数量</th><th class="num">单价(¥)</th><th class="num">金额(¥)</th><th class="num">标准(¥)</th><th>差异</th></tr></thead>
+        <div class="card-head"><h3>工单生产成本（JD-2606-101 · YJV 3×95）</h3><span class="ch-sub">废料回收回冲直接材料 · 与标准成本对比</span></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>成本项</th><th>用量</th><th>单价</th><th>金额(¥)</th><th>vs 标准</th></tr></thead>
           <tbody>
-            <tr><td>直接材料 · 铜材</td><td class="num">962 kg</td><td class="num">52.00</td><td class="num">50,024</td><td class="num">50,400</td><td><span class="tag green nodot">-0.7%</span></td></tr>
-            <tr><td>直接材料 · 绝缘料</td><td class="num">1.20 t</td><td class="num">9,800</td><td class="num">11,760</td><td class="num">11,700</td><td><span class="tag amber nodot">+0.5%</span></td></tr>
-            <tr><td>直接材料 · 护套料</td><td class="num">0.90 t</td><td class="num">7,600</td><td class="num">6,840</td><td class="num">6,900</td><td><span class="tag green nodot">-0.9%</span></td></tr>
-            <tr><td>直接人工</td><td class="num">86 h</td><td class="num">42.00</td><td class="num">3,612</td><td class="num">3,700</td><td><span class="tag green nodot">-2.4%</span></td></tr>
-            <tr><td>制造费用</td><td class="num">—</td><td class="num">—</td><td class="num">4,180</td><td class="num">4,200</td><td><span class="tag green nodot">-0.5%</span></td></tr>
-            <tr style="background:var(--ok-soft)"><td><b>废料回收回冲</b></td><td class="num">12 kg</td><td class="num">52.00</td><td class="num" style="color:var(--ok);font-weight:700">-1,860</td><td class="num">-1,800</td><td><span class="tag green nodot">回冲</span></td></tr>
-            <tr style="border-top:2px solid var(--line-2)"><td><b>工单总成本</b></td><td class="num">—</td><td class="num">—</td><td class="num"><b>74,556</b></td><td class="num">75,100</td><td><span class="tag green">-0.7%</span></td></tr>
-            <tr><td><b>单位成本</b></td><td class="num">10 km</td><td class="num">—</td><td class="num"><b>7,455.6 / km</b></td><td class="num">7,510 / km</td><td><span class="tag green nodot">-0.7%</span></td></tr>
+            <tr><td>直接材料 · 铜材（无氧铜 TU2）</td><td class="num">962 kg</td><td class="num">68.5</td><td class="num">65,897</td><td><span class="tag green nodot">-1.2%</span></td></tr>
+            <tr><td>直接材料 · 绝缘料 XLPE</td><td class="num">86 kg</td><td class="num">14.2</td><td class="num">1,221</td><td><span class="tag gray nodot">持平</span></td></tr>
+            <tr><td>直接材料 · 护套料 PVC</td><td class="num">142 kg</td><td class="num">11.8</td><td class="num">1,676</td><td><span class="tag gray nodot">持平</span></td></tr>
+            <tr><td>直接人工</td><td class="num">38 工时</td><td class="num">42.0</td><td class="num">1,596</td><td><span class="tag green nodot">-3%</span></td></tr>
+            <tr><td>制造费用（分摊）</td><td class="num">—</td><td class="num">—</td><td class="num">2,310</td><td><span class="tag gray nodot">持平</span></td></tr>
+            <tr class="ai-hint"><td><b>废料回收回冲</b> <span class="ai-chip">✦ 铜流核算</span></td><td class="num">12 kg</td><td class="num">62.0</td><td class="num" style="color:var(--ok);font-weight:800">-1,860</td><td><span class="tag green nodot">回收冲减</span></td></tr>
+            <tr style="background:var(--panel-2)"><td><b>工单总成本</b></td><td class="num">—</td><td class="num">—</td><td class="num"><b>70,840</b></td><td><span class="tag green">低于标准 2.1%</span></td></tr>
           </tbody></table></div>
+        <div class="card-body" style="border-top:1px solid var(--line);display:flex;gap:24px;flex-wrap:wrap">
+          <div><div class="muted" style="font-size:11.5px">单位成本（吨铜）</div><div class="k-val" style="font-size:22px">73,640<small> 元/t</small></div></div>
+          <div><div class="muted" style="font-size:11.5px">单位成本（公里）</div><div class="k-val" style="font-size:22px">22,138<small> 元/km</small></div></div>
+          <div><div class="muted" style="font-size:11.5px">废料回收价值</div><div class="k-val" style="font-size:22px;color:var(--ok)">¥1,860</div></div>
+        </div>
       </div>
     </section>
 
-    <!-- ============ 报表中心 ============ -->
-    <section class="page" id="page-reports">
-      <div class="page-head"><div><h1>报表中心</h1><div class="ph-sub">换色损时 / 损耗率趋势 / 准时交付率 / 铜流成本差异</div></div>
-        <div class="ph-actions"><button class="btn ai" onclick="APS.toast('AI 已生成本周排产与成本周报（自然语言）','ai')">✦ 生成周报</button></div></div>
-      <div class="grid-3">
-        <div class="card"><div class="card-head"><h3>换色损时 / 日</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">2.0<small>h</small></div><div class="muted" style="margin-top:6px">上线前 5.5h/日，<span class="hl-ai">-64%</span></div><div id="rp1" style="margin-top:10px"></div></div></div>
-        <div class="card"><div class="card-head"><h3>拉丝损耗率趋势</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">1.50<small>%</small></div><div class="muted" style="margin-top:6px">标准 1.20% · <span style="color:var(--danger)">超标待改善</span></div><div id="rp2" style="margin-top:10px"></div></div></div>
-        <div class="card"><div class="card-head"><h3>准时交付率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">95.8<small>%</small></div><div class="muted" style="margin-top:6px"><span class="hl-ai">▲ 3.6%</span> 较上线前</div><div id="rp3" style="margin-top:10px"></div></div></div>
+    <!-- ============ 异常预警 ============ -->
+    <section class="page" id="page-alerts">
+      <div class="page-head"><div><h1>异常预警中心</h1><div class="ph-sub">AI 预测性预警 + 实绩偏差告警 + 损耗超标 + 物料缺口</div></div></div>
+      <div class="card"><div class="tbl-wrap"><table class="grid"><thead><tr><th>级别</th><th>类型</th><th>对象</th><th>说明</th><th>来源</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr class="ai-hint"><td><span class="tag red">紧急</span></td><td>损耗</td><td class="mono">拉丝 LS01</td><td>损耗率 1.50% 超标（标准 1.20%）—— AI 研判模具磨损</td><td><span class="ai-chip">✦ AI</span></td><td>10:24</td><td><button class="btn sm ai" onclick="APS.go('loss')">查看损耗</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>物料</td><td class="mono">护套料 PVC</td><td>6/19 缺口 0.8t，关联 PR-2206-118 未入库</td><td><span class="ai-chip">✦ AI</span></td><td>10:18</td><td><button class="btn sm" onclick="APS.go('kit')">去齐套</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>换色</td><td class="mono">护套挤出 HT01</td><td>6 色穿插，换色 11 次损时 5.5h —— 可色谱聚类</td><td><span class="ai-chip">✦ AI</span></td><td>09:50</td><td><button class="btn sm" onclick="APS.go('spec')">去聚类</button></td></tr>
+        </tbody></table></div>
       </div>
-      <div class="grid-2">
-        <div class="card" style="margin:0"><div class="card-head"><h3>挤出线利用率趋势</h3></div><div class="card-body"><div class="k-val" style="font-size:26px">87<small>%</small></div><div id="rp4" style="margin-top:10px"></div></div></div>
-        <div class="card" style="margin:0"><div class="card-head"><h3>铜流成本差异(vs标准)</h3></div><div class="card-body"><div class="k-val" style="font-size:26px;color:var(--ok)">-0.7<small>%</small></div><div class="muted" style="margin-top:6px">闭环核算 · 废料回收回冲已计入</div><div id="rp5" style="margin-top:10px"></div></div></div>
+    </section>
+
+    <!-- ============ 报表 ============ -->
+    <section class="page" id="page-reports">
+      <div class="page-head"><div><h1>报表中心</h1><div class="ph-sub">换色次数 / 损耗率趋势 / 铜流账平率 / 准时交付率</div></div>
+        <div class="ph-actions"><button class="btn ai" onclick="APS.toast('AI 已生成本周排产成本周报（自然语言）','ai')">✦ 生成周报</button></div></div>
+      <div class="grid-3">
+        <div class="card"><div class="card-head"><h3>日换色次数</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">4.0</div><div class="muted" style="margin-top:10px">上线前 11 次/日，<span class="hl-ai">-64%</span></div><div id="rp1" style="margin-top:10px"></div></div></div>
+        <div class="card"><div class="card-head"><h3>挤出线利用率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">88<small>%</small></div><div id="rp2" style="margin-top:10px"></div></div></div>
+        <div class="card"><div class="card-head"><h3>铜流账平率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">100<small>%</small></div><div class="muted" style="margin-top:10px">理论=实际+回收，<span class="hl-ai">闭环对账</span></div></div></div>
       </div>
     </section>
 
@@ -379,41 +378,40 @@
 
 <!-- ===================== AI Copilot 坞 ===================== -->
 <aside class="copilot" id="copilot">
-  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>APS Copilot</h4><div class="cop-sub">已接入：鼎捷 ERP · WMS · 机台终端</div></div><button class="cop-x">✕</button></div>
+  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>数智江铜 Copilot</h4><div class="cop-sub">已接入：鼎捷 ERP · sMES · 互联中台</div></div><button class="cop-x">✕</button></div>
   <div class="cop-body" id="copBody"></div>
   <div class="cop-foot">
     <div class="cop-sugs">
       <button class="cop-sug">换色聚类能省多少时间？</button>
-      <button class="cop-sug">急单 SO-0611-77 能不能插？</button>
-      <button class="cop-sug">MO-0618-12 铜账明细</button>
-      <button class="cop-sug">护套料 PVC-黑 缺口怎么办？</button>
+      <button class="cop-sug">急单 JD-118 能不能插？</button>
+      <button class="cop-sug">JD-101 这单铜账明细</button>
     </div>
-    <div class="cop-input"><input placeholder="问我关于排产与成本的任何问题…"><button>➤</button></div>
+    <div class="cop-input"><input placeholder="问我关于排产/成本的任何问题…"><button>➤</button></div>
   </div>
 </aside>
 <button class="cop-fab"><span class="pulse"></span>✦ AI 助手</button>
 
 <!-- ===================== 排程参数 模态 ===================== -->
 <div class="modal" id="schedParamModal">
-  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">⚙</div><h3>AI 智能排程 · 参数</h3><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">⚙</div><h3>色谱智能编排 · 参数</h3><button class="m-x" onclick="APS.closeModal()">✕</button></div>
   <div class="modal-body">
     <div class="form-grid">
-      <div class="form-row"><label>排程范围</label><select><option>全部待排工单（8 张）</option><option>仅急单（2 张）</option><option>指定挤出线</option></select></div>
+      <div class="form-row"><label>排程范围</label><select><option>全部待排工单（9 张）</option><option>仅急单（1 张）</option><option>指定挤出线</option></select></div>
       <div class="form-row"><label>排程方向</label><select><option>正排（计划开始时间）</option><option>倒排（按交期反推）</option><option>瓶颈顺排+倒排</option></select></div>
     </div>
-    <div class="form-row"><label>选线 / 算法</label>
-      <div class="seg" style="width:100%"><button class="on">最小化换色</button><button>最早完成</button><button>均衡</button><button>启发式</button></div>
+    <div class="form-row"><label>聚类 / 算法</label>
+      <div class="seg" style="width:100%"><button class="on">色谱聚类（同色相邻）</button><button>规格聚类</button><button>最早交期</button><button>启发式</button></div>
     </div>
     <label style="font-size:12px;font-weight:600;color:var(--ink-2);display:block;margin-bottom:8px">多目标权重</label>
     <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px">
-      <div style="display:flex;align-items:center;gap:10px"><span style="width:96px;font-size:12px">最小化换色/换规格</span><div class="bar" style="flex:1"><i style="width:92%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
-      <div style="display:flex;align-items:center;gap:10px"><span style="width:96px;font-size:12px">最小化延期</span><div class="bar" style="flex:1"><i style="width:85%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
-      <div style="display:flex;align-items:center;gap:10px"><span style="width:96px;font-size:12px">挤出线利用率</span><div class="bar" style="flex:1"><i style="width:78%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
-      <div style="display:flex;align-items:center;gap:10px"><span style="width:96px;font-size:12px">在制品控制</span><div class="bar" style="flex:1"><i style="width:55%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化换色</span><div class="bar" style="flex:1"><i style="width:92%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化换规格</span><div class="bar" style="flex:1"><i style="width:78%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化延期</span><div class="bar" style="flex:1"><i style="width:85%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">设备利用率</span><div class="bar" style="flex:1"><i style="width:70%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
     </div>
     <div style="display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12.5px;color:var(--ink-2)">
-      <div class="switch on" onclick="this.classList.toggle('on')"></div> 锁定关键交期订单保护
-      <div class="switch on" onclick="this.classList.toggle('on')"></div> 计入换色损耗矩阵
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 锁定关键交期订单（不被打散）
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 计入换色损时矩阵
     </div>
   </div>
   <div class="modal-foot"><button class="btn ghost" onclick="APS.closeModal()">取消</button><button class="btn ai" onclick="startSched()">⚡ 开始求解</button></div>
@@ -421,10 +419,10 @@
 
 <!-- ===================== 排程运行 模态 ===================== -->
 <div class="modal wide" id="schedRunModal">
-  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>AI 排程引擎 · 求解中</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>色谱智能编排 · 求解中</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
   <div class="modal-body">
     <div class="run-progress"><span class="rp-pct" id="runPct">0%</span><div class="bar"><i id="runBar" style="width:0"></i></div></div>
-    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">已评估候选方案 <b id="runEval" class="hl-ai">0</b> 个 · 约束：颜色 / 规格 / 模具 / 齐套 / 生产日历</div>
+    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">已评估候选方案 <b id="runEval" class="hl-ai">0</b> 个 · 约束：换色损时 / 模具占用 / 物料齐套 / 在制工单 / 设备负荷</div>
     <div class="run-log" id="runLog"></div>
     <div class="plan-cmp" id="runPlans" style="display:none;margin-top:16px"></div>
   </div>
@@ -439,121 +437,39 @@
 <script>
 const {$,$$}=APS;
 
-/* ===================== 色谱排产数据模型 =====================
-   颜色批次块：c=颜色键，name=工单短号，w=宽%，locked=锁定关键交期，urgent=急单 */
-const COLORS={red:'#dc4b3e',blue:'#2b7fd0',yellow:'#e0b020',green:'#1a9d6b',black:'#2a3442',white:'#e3e8f0'};
-const CNAME={red:'红',blue:'蓝',yellow:'黄',green:'绿',black:'黑',white:'白'};
-// 基准：按交期序，颜色穿插（换色多）
-const SPEC_BEFORE={
- L1:[ {id:'MO-12',c:'red',w:13},{id:'MO-15',c:'blue',w:12,locked:1},{id:'MO-18',c:'red',w:11},
-      {id:'MO-21',c:'black',w:13},{id:'MO-24',c:'blue',w:12},{id:'MO-27',c:'black',w:12},{id:'MO-30',c:'yellow',w:14} ],
- L2:[ {id:'MO-40',c:'blue',w:12},{id:'MO-43',c:'black',w:13,locked:1},{id:'MO-46',c:'green',w:11},
-      {id:'MO-49',c:'blue',w:12},{id:'MO-52',c:'white',w:12},{id:'MO-55',c:'green',w:13},{id:'MO-58',c:'black',w:13} ],
-};
-// AI 聚类后：同色聚拢相邻（换色少）
-const SPEC_AFTER={
- L1:[ {id:'MO-12',c:'red',w:13},{id:'MO-18',c:'red',w:11},{id:'MO-15',c:'blue',w:12,locked:1},{id:'MO-24',c:'blue',w:12},
-      {id:'MO-21',c:'black',w:13},{id:'MO-27',c:'black',w:12},{id:'MO-30',c:'yellow',w:14} ],
- L2:[ {id:'MO-40',c:'blue',w:12},{id:'MO-49',c:'blue',w:12},{id:'MO-46',c:'green',w:11},{id:'MO-55',c:'green',w:13},
-      {id:'MO-43',c:'black',w:13,locked:1},{id:'MO-58',c:'black',w:13},{id:'MO-52',c:'white',w:12} ],
-};
-let specState='before';
-
-// 单轨渲染：累加 left%，相邻不同色之间插入换色条
-function renderLane(laneSel, blocks){
-  const lane=$(laneSel); if(!lane) return;
-  let html=''; let left=2; let prevColor=null; let changes=0;
-  blocks.forEach((b,i)=>{
-    if(prevColor!==null && prevColor!==b.c){ // 换色：插入条纹换色块
-      html+=`<div class="spec-setup" style="left:${left}%;width:1.6%" title="换色"></div>`;
-      left+=2; changes++;
-    }
-    const dark = b.c==='white';
-    const cls='spec-block'+(b.urgent?' urgent':'')+(b.locked?' locked':'');
-    const txtColor = dark?'#5a6577':'#fff';
-    html+=`<div class="${cls}" style="left:${left}%;width:${b.w}%;background:${COLORS[b.c]};color:${txtColor};text-shadow:${dark?'none':''}" title="${b.id} · ${CNAME[b.c]}色">
-        <span>${b.locked?'🔒':''}${b.urgent?'⚡':''}${b.id}</span><span class="sb-c">${CNAME[b.c]}</span></div>`;
-    left+=b.w+1; prevColor=b.c;
-  });
-  lane.innerHTML=html;
-  return changes;
-}
-function paintSpec(state){
-  const plan = state==='after' ? SPEC_AFTER : SPEC_BEFORE;
-  renderLane('#laneL1', plan.L1);
-  renderLane('#laneL2', plan.L2);
-}
-// 只读概览（工作台用，简化两轨）
-function paintDashSpec(){
-  const root=$('#dashSpec'); if(!root) return;
-  root.innerHTML=`
-   <div class="spec-track"><div class="spec-track-head"><span class="lg-sw" style="background:var(--brand)"></span><b>L1 绝缘挤出</b><small>换色 4 次</small></div><div class="spec-lane" id="dLaneL1"></div></div>
-   <div class="spec-track"><div class="spec-track-head"><span class="lg-sw" style="background:var(--accent)"></span><b>L2 护套挤出</b><small>换色 4 次</small></div><div class="spec-lane" id="dLaneL2"></div></div>`;
-  // 用聚类后的形态展示（只读）
-  const f=(sel,blocks)=>{ let html='',left=2,prev=null; blocks.forEach(b=>{ if(prev!==null&&prev!==b.c){html+=`<div class="spec-setup" style="left:${left}%;width:1.6%"></div>`;left+=2;} const dark=b.c==='white'; html+=`<div class="spec-block${b.locked?' locked':''}" style="left:${left}%;width:${b.w}%;background:${COLORS[b.c]};color:${dark?'#5a6577':'#fff'}"><span>${b.locked?'🔒':''}${b.id}</span><span class="sb-c">${CNAME[b.c]}</span></div>`; left+=b.w+1; prev=b.c; }); $(sel).innerHTML=html; };
-  f('#dLaneL1',SPEC_AFTER.L1); f('#dLaneL2',SPEC_AFTER.L2);
-}
-
-/* —— 三按钮交互 —— */
-function aiCluster(){
-  if(specState==='after'){ APS.toast('已是 AI 聚类结果，可点复位重来'); return; }
-  specState='after'; paintSpec('after');
-  $('#specSub').textContent='AI 聚类：同色聚拢相邻，换色 4 次（锁定订单保持原位）';
-  $('#stChange').textContent='4';
-  $('#stLoss').textContent='2.0h';
-  $('#planVer').textContent='V0618-2（AI 聚类 · 待审核）';
-  APS.toast('AI 聚类完成：换色最小化，省 3.5h','ai');
-}
-function insertUrgent(){
-  if(specState!=='after'){ aiCluster(); }
-  // 在 L2 蓝色组尾楔入急单（换色 0 增加），锁定订单不动
-  const plan=JSON.parse(JSON.stringify(SPEC_AFTER));
-  // 找到 L2 第二个蓝块后插入
-  plan.L2.splice(2,0,{id:'SO-77',c:'blue',w:10,urgent:1});
-  renderLane('#laneL2', plan.L2);
-  $('#specSub').textContent='急单 SO-0611-77（蓝）已楔入 L2 同色组尾 · 换色 +0 · 锁定订单不动';
-  $('#specBanner').innerHTML=`<div class="ai-suggest" style="background:linear-gradient(120deg,var(--danger-soft),#fff);border-color:#f0c4be">
-    <div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚡</div>
-    <div><b>急单 SO-0611-77 已插入</b>：系统自动评估在制工单 / 设备负荷 / 物料齐套 / 模具状态 → 同蓝色组尾插入，换色不增加。带 <span style="color:var(--info)">🔒</span> 的已锁定关键交期订单 <b>MO-43 / MO-15</b> 保持原位不动。<br><span class="muted">插单日志 #L-0611-02 已留痕：评估在制/负荷/齐套/模具 → 方案B · 可溯源。</span></div>
-    <div class="as-acts"><button class="btn sm ghost" onclick="explainSched()">查看溯源</button></div></div>`;
-  APS.toast('插单日志 #L-0611-02 已留痕 · 方案B 可溯源','ai');
-}
-function resetSpec(){
-  specState='before'; paintSpec('before');
-  $('#specSub').textContent='基准：按交期序颜色穿插，换色 11 次';
-  $('#stChange').textContent='11'; $('#stLoss').textContent='5.5h';
-  $('#planVer').textContent='V0618-1（按交期序 · 基准）';
-  $('#specBanner').innerHTML='';
-  APS.toast('已复位为基准计划（按交期序）');
-}
-
-/* ===================== 标准甘特数据模型 ===================== */
+/* ===================== 甘特数据模型（线缆工艺线） ===================== */
 const RES=[
- {id:'WD',name:'拉丝机',sub:'Φ8→线径',load:0},
- {id:'TW',name:'绞线机',sub:'多股绞合',load:0},
- {id:'L1',name:'L1 绝缘挤出',sub:'PE/XLPE',load:0},
- {id:'L2',name:'L2 护套挤出',sub:'PVC 着色',load:0},
+ {id:'LS', name:'LS01 拉丝机',   sub:'无氧铜 TU2 → 单丝'},
+ {id:'JX', name:'JX01 绞线机',   sub:'多股绞合'},
+ {id:'JY', name:'JY01 绝缘挤出', sub:'PVC/XLPE 绝缘'},
+ {id:'CL', name:'CL01 成缆机',   sub:'成缆/编织'},
+ {id:'HT', name:'HT01 护套挤出', sub:'PVC/XLPE 护套'},
+ {id:'FR', name:'FR01 复绕机',   sub:'复绕/检验/包装'},
 ];
 const TICKS=['08','09','10','11','12','13','14','15','16','17','18','19'];
 const PLAN_BEFORE={
- WD:[{id:'MO-12',l:2,w:24,cls:'blue'},{id:'MO-21',l:30,w:26,cls:'blue'}],
- TW:[{id:'MO-15',l:4,w:22,cls:'blue'},{id:'MO-24',l:32,w:24,cls:'blue'}],
- L1:[{id:'MO-12',l:14,w:20,cls:'blue'},{id:'setup',l:35,w:3,cls:'setup'},{id:'MO-18',l:39,w:20,cls:'blue'}],
- L2:[{id:'MO-43',l:8,w:22,cls:'blue'},{id:'setup',l:31,w:3,cls:'setup'},{id:'MO-58',l:36,w:30,cls:'red'}],
+ LS:[{id:'JD-2606-101',l:2,w:22,cls:'blue'},{id:'JD-2606-088',l:30,w:26,cls:'blue'}],
+ JX:[{id:'JD-2606-072',l:1,w:30,cls:'blue'},{id:'JD-2606-090',l:40,w:24,cls:'blue'}],
+ JY:[{id:'JD-2606-088',l:3,w:18,cls:'blue'},{id:'setup',l:23,w:3,cls:'setup'},{id:'JD-2606-101',l:28,w:20,cls:'blue'}],
+ CL:[{id:'JD-2606-072',l:10,w:34,cls:'blue'}],
+ HT:[{id:'JD-2606-101',l:6,w:20,cls:'amber'}],
+ FR:[{id:'JD-2606-110',l:54,w:30,cls:'red'}],
 };
-const LOAD_BEFORE={WD:62,TW:58,L1:54,L2:80};
+const LOAD_BEFORE={LS:64,JX:70,JY:52,CL:48,HT:78,FR:60};
 const PLAN_AFTER={
- WD:[{id:'MO-12',l:2,w:24,cls:'green'},{id:'MO-21',l:27,w:26,cls:'blue'},{id:'MO-30',l:54,w:16,cls:'blue'}],
- TW:[{id:'MO-15',l:4,w:22,cls:'green'},{id:'MO-24',l:28,w:24,cls:'blue'},{id:'MO-46',l:54,w:18,cls:'blue'}],
- L1:[{id:'MO-12',l:10,w:20,cls:'green'},{id:'MO-18',l:31,w:20,cls:'blue'},{id:'MO-27',l:53,w:18,cls:'blue'}],
- L2:[{id:'MO-40',l:6,w:18,cls:'green'},{id:'MO-49',l:25,w:16,cls:'green'},{id:'setup',l:42,w:3,cls:'setup'},{id:'急单 SO-77',l:46,w:18,cls:'red',urgent:1},{id:'MO-58',l:66,w:22,cls:'blue'}],
+ LS:[{id:'JD-2606-101',l:2,w:22,cls:'green'},{id:'JD-2606-088',l:25,w:26,cls:'blue'},{id:'JD-2606-122',l:52,w:18,cls:'blue'}],
+ JX:[{id:'JD-2606-072',l:1,w:30,cls:'green'},{id:'JD-2606-090',l:32,w:24,cls:'blue'},{id:'JD-2611-04',l:57,w:16,cls:'blue'}],
+ JY:[{id:'JD-2606-088',l:3,w:16,cls:'green'},{id:'JD-2606-101',l:21,w:20,cls:'blue'},{id:'JD-2606-130',l:44,w:16,cls:'blue'}],
+ CL:[{id:'JD-2606-072',l:6,w:34,cls:'green'},{id:'JD-2609-11',l:42,w:22,cls:'blue'}],
+ HT:[{id:'JD-2606-101',l:4,w:16,cls:'green'},{id:'setup',l:20,w:3,cls:'setup'},{id:'急单 JD-118',l:24,w:20,cls:'red',urgent:1,locked:1},{id:'JD-2606-088',l:46,w:16,cls:'blue'}],
+ FR:[{id:'JD-2606-110',l:3,w:30,cls:'green'},{id:'JD-2610-19',l:36,w:26,cls:'blue'}],
 };
-const LOAD_AFTER={WD:86,TW:84,L1:88,L2:90};
-let scheduled=false;
+const LOAD_AFTER={LS:88,JX:90,JY:86,CL:84,HT:88,FR:82};
 
+let scheduled=false;
 function loadColor(v){ return v>90?'var(--danger)':v>70?'var(--warn)':'var(--ok)'; }
 function renderGantt(host, plan, load, draggable){
-  const el=typeof host==='string'?$(host):host; if(!el) return;
+  const el=typeof host==='string'?$(host):host;
   let h='<div class="gantt-head"><div class="gantt-corner">机台 \\ 时间</div><div class="gantt-times">'
     + TICKS.map(t=>`<div class="gantt-tick"><b>${t}</b>:00</div>`).join('') + '</div></div><div class="gantt-body">';
   RES.forEach(r=>{
@@ -572,33 +488,29 @@ function renderGantt(host, plan, load, draggable){
   h+=`<div class="gantt-now" style="left:calc(130px + (100% - 130px)*${nowPct/100})"></div>`;
   h+='</div>';
   el.innerHTML=h;
-  if(draggable){
-    $$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b, ()=>{
-      APS.toast('已记录手工调整 · AI 重新校验：无冲突','ai');
-    }));
-  }
+  if(draggable){ $$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b,()=>APS.toast('已记录手工调整 · AI 重新校验：无冲突','ai'))); }
 }
 function renderSchedKpis(){
-  const box=$('#schedKpis'); if(!box) return;
   const data = scheduled
-   ? [['预计延期','0 张','good'],['换色次数','4 次','good'],['挤出线利用率','87%','good'],['换色损时','2.0h','good']]
-   : [['预计延期','1 张','bad'],['换色次数','11 次','bad'],['挤出线利用率','64%',''],['换色损时','5.5h','']];
-  box.innerHTML = data.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)">
+   ? [['预计延期','0 张','good'],['换色次数','4 次','good'],['挤出线利用率','88%','good'],['换色损时','2.0h','good']]
+   : [['预计延期','1 张','bad'],['换色次数','11 次','bad'],['挤出线利用率','78%',''],['换色损时','5.5h','bad']];
+  $('#schedKpis').innerHTML=data.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)">
     <span class="muted" style="font-size:12px">${d[0]}</span>
     <b style="font-size:15px;font-variant-numeric:tabular-nums;color:${d[2]==='good'?'var(--ok)':d[2]==='bad'?'var(--danger)':'var(--ink)'}">${d[1]}</b></div>`).join('');
 }
 const WAIT=[
- {id:'SO-0611-77',m:'蓝色护套电缆 YJV',q:'8km',due:'6/19',p:'急'},
- {id:'MO-0618-30',m:'黄色绝缘线 BV',q:'12km',due:'6/20',p:'高'},
- {id:'MO-0618-27',m:'黑色护套电缆',q:'6km',due:'6/21',p:'普通'},
- {id:'MO-0618-46',m:'绿色控制电缆',q:'9km',due:'6/21',p:'高'},
- {id:'MO-0618-24',m:'蓝色护套电缆',q:'7km',due:'6/22',p:'普通'},
- {id:'MO-0618-52',m:'白色绝缘线 BV',q:'5km',due:'6/22',p:'普通'},
- {id:'MO-0618-55',m:'绿色控制电缆',q:'10km',due:'6/23',p:'普通'},
- {id:'MO-0618-18',m:'红色护套电缆',q:'4km',due:'6/23',p:'普通'},
+ {id:'JD-2606-118',m:'YJV 3×95 黑护套',q:'12km',due:'6/13',p:'急'},
+ {id:'JD-2606-122',m:'BV 2.5 蓝',q:'30km',due:'6/15',p:'高'},
+ {id:'JD-2611-04',m:'RVV 3×1.5 白',q:'18km',due:'6/16',p:'普通'},
+ {id:'JD-2612-08',m:'YJV 3×95 黑',q:'15km',due:'6/16',p:'高'},
+ {id:'JD-2609-11',m:'BV 2.5 红',q:'22km',due:'6/17',p:'普通'},
+ {id:'JD-2610-19',m:'RVV 2×1.5 黄',q:'10km',due:'6/17',p:'普通'},
+ {id:'JD-2610-22',m:'BV 4 绿',q:'14km',due:'6/18',p:'普通'},
+ {id:'JD-2606-130',m:'YJV 4×35 黑',q:'9km',due:'6/18',p:'普通'},
+ {id:'JD-2606-090',m:'BV 2.5 蓝',q:'16km',due:'6/18',p:'普通'},
 ];
 function renderWait(){
-  const box=$('#waitList'); if(!box) return;
+  const box=$('#waitList');
   if(scheduled){ box.innerHTML='<div class="empty" style="padding:24px 12px">✓ 全部已排入计划<br><span class="muted" style="font-size:11px">含急单 1 张 · 待审核下发</span></div>'; $('#waitCount').textContent='0 张'; return; }
   $('#waitCount').textContent=WAIT.length+' 张';
   box.innerHTML=WAIT.map(w=>{
@@ -608,194 +520,275 @@ function renderWait(){
       <div style="font-size:11.5px;color:var(--ink-2);margin-top:3px">${w.m} · ${w.q} · 交期 ${w.due}</div></div>`;
   }).join('');
 }
-
-/* ===================== AI 排程流程 ===================== */
 function openSchedParams(){ if(scheduled){ APS.toast('已是 AI 排程结果，如需重排请先调整工单'); return; } APS.openModal('schedParamModal'); }
 function startSched(){
   APS.closeModal();
   setTimeout(()=>APS.runScheduler({
-    total:3460,
+    total:2860,
     logLines:[
-     [200,'<span class="ts">10:24:01</span> 鼎捷 ERP 工单入流：待排工序工单 <span class="em">8</span> 张（含急单 <span class="wn">SO-0611-77</span>）'],
-     [450,'<span class="ts">10:24:01</span> 装配约束：颜色 · 规格 · 模具占用 · 物料齐套 · 生产日历 · <span class="hi">换色损耗矩阵</span>'],
-     [500,'<span class="ts">10:24:02</span> 目标：min(换色 · 换规格 · 延期 · 在制) / max(利用率)'],
-     [650,'<span class="ts">10:24:02</span> <span class="hi">换色聚类</span>：按颜色亲和度聚拢同色块，锁定关键交期订单不动…'],
-     [650,'<span class="ts">10:24:03</span> 已评估 2,140 方案 · 换色 11→4，损时 5.5h→<span class="ok">2.0h</span>'],
-     [600,'<span class="ts">10:24:04</span> 急单 SO-0611-77 → 同蓝色组尾插入 L2，换色 <span class="ok">+0</span>'],
-     [550,'<span class="ts">10:24:05</span> <span class="hi">增量重排</span>：仅重算受影响段，延期 1→<span class="ok">0</span>，利用率 64%→<span class="ok">87%</span>'],
-     [400,'<span class="ts">10:24:05</span> <span class="ok">✓ 生成 3 套候选方案，插单日志已留痕</span>'],
+     [200,'<span class="ts">10:24:01</span> 自鼎捷 ERP 入流待排工单 <span class="em">9</span> 张（含急单 <span class="wn">JD-2606-118</span>）'],
+     [450,'<span class="ts">10:24:01</span> 装配约束：换色损时矩阵 · 模具占用 · 物料齐套 · 在制工单 · <span class="hi">设备负荷</span>'],
+     [500,'<span class="ts">10:24:02</span> 目标：min(换色·换规格·延期) / max(利用率) · 算法 <span class="hi">色谱聚类</span>'],
+     [650,'<span class="ts">10:24:02</span> 同色块聚拢求解中… 已评估 1,108 方案'],
+     [650,'<span class="ts">10:24:03</span> 急单 JD-118 → 楔入 <span class="hi">护套挤出 HT01</span> 黑色批次组尾，换色 +0（同色）'],
+     [600,'<span class="ts">10:24:04</span> 增量重排：仅重算受影响部分，<span class="ok">已锁定关键交期单不动</span>'],
+     [550,'<span class="ts">10:24:05</span> 收敛：换色 11→<span class="ok">4</span>，损时 5.5→<span class="ok">2.0h</span>，延期 1→<span class="ok">0</span>'],
+     [400,'<span class="ts">10:24:05</span> <span class="ok">✓ 生成 3 套候选方案，待计划员审核</span>'],
     ],
     plans:`
-      <div class="plan"><div class="p-t">方案 A · 急单排到最前</div>
-        <div class="p-m">换色<b>+2.0h</b></div><div class="p-m">受影响工单<b>2 张</b></div><div class="p-m">完成<b>6/19 16:00</b></div></div>
-      <div class="plan best"><div class="p-t">方案 B · 同色组尾插</div>
-        <div class="p-m">换色<b class="good">+0h</b></div><div class="p-m">受影响工单<b class="good">0 张</b></div><div class="p-m">完成<b class="good">6/19 20:40</b></div></div>
-      <div class="plan"><div class="p-t">方案 C · 排到最后</div>
-        <div class="p-m">换色<b>+0h</b></div><div class="p-m">交期余量<b>踩线</b></div><div class="p-m">完成<b>6/20 09:00</b></div></div>`,
+      <div class="plan"><div class="p-t">方案 A · 最早交期序</div>
+        <div class="p-m">换色次数<b>9 次</b></div><div class="p-m">换色损时<b>4.5h</b></div><div class="p-m">延期<b>1 张</b></div></div>
+      <div class="plan best"><div class="p-t">方案 B · 色谱聚类</div>
+        <div class="p-m">换色次数<b class="good">4 次</b></div><div class="p-m">换色损时<b class="good">2.0h</b></div><div class="p-m">延期<b class="good">0 张</b></div></div>
+      <div class="plan"><div class="p-t">方案 C · 规格优先</div>
+        <div class="p-m">换色次数<b>6 次</b></div><div class="p-m">换色损时<b>3.2h</b></div><div class="p-m">延期<b>0 张</b></div></div>`,
     onDone:applyScheduleResult
   }), 260);
 }
 function applyScheduleResult(){
   scheduled=true;
-  $('#planVer').textContent='V0618-3（AI · 待审核）';
-  $('#ganttSub').textContent='AI 排程结果：换色 4 次 · 延期 0 · 急单已插入 · 利用率 87%';
+  $('#planVer').textContent='V0610-3（AI · 待审核）';
+  $('#ganttSub').textContent='AI 排程结果：换色 11→4 · 急单已插入 · 延期 0';
   renderGantt('#schedGantt', PLAN_AFTER, LOAD_AFTER, true);
   renderSchedKpis(); renderWait();
   $('#btnPublish').disabled=false;
   $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:linear-gradient(120deg,var(--ai-soft),#fff)">
     <div class="as-ic">✦</div>
-    <div><b>AI 已生成排程方案 V0618-3</b>：8 张待排全部排入，换色聚类后 11→4 次（省 3.5h），急单 SO-0611-77 按"换色影响最小"插入 L2，全局延期 0 张。<span class="muted">方案需经您审核后方可下发。</span></div>
+    <div><b>色谱智能编排已生成方案 V0610-3</b>：9 张待排全部排入，同色批次聚拢，换色 11→4 次、损时 5.5→2.0h；急单 JD-118 按"同色组尾"插入护套挤出 HT01，已锁定关键交期单不动，全局延期 0。<span class="muted">方案需经您审核后方可下发。</span></div>
     <div class="as-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排？</button><button class="btn ai sm" onclick="publishPlan()">审核下发</button></div></div>`;
-  APS.toast('AI 排程完成：换色 11→4，利用率 64%→87%','ai');
+  APS.toast('色谱智能编排完成：换色 11→4，损时 5.5→2.0h','ai');
 }
-function explainSched(){
-  const fab=$('.cop-fab'); if(fab) fab.click();
-  setTimeout(()=>APS.copilot.run('cluster'), 300);
-}
+function explainSched(){ $('.cop-fab').click(); setTimeout(()=>APS.copilot.run('cluster'),300); }
 function publishPlan(){
   if(!scheduled){ APS.toast('请先运行 AI 智能排程','warn'); return; }
-  APS.toast('计划 V0618-3 已审核下发至挤出线机台终端 · 电子工单回执跟踪中','ok');
+  APS.toast('计划 V0610-3 已审核下发至 6 台机台终端 · 电子派工单回执跟踪中','ok');
   $('#btnPublish').disabled=true;
   $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:var(--ok-soft);border-color:#c4ebd7">
     <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
-    <div><b>V0618-3 已下发</b> · 电子工单已送达机台终端（取消纸质派工单），工序卡随单下发，回执跟踪中（0/8 已确认 → 实时更新）。</div>
-    <div class="as-acts"><button class="btn sm" onclick="APS.go('dispatch')">查看下发履历</button></div></div>`;
+    <div><b>V0610-3 已下发</b> · 机台电子派工单已送达（取消纸质派工），作业指导书随单下发，回执跟踪中（0/9 已接收 → 实时更新）。</div>
+    <div class="as-acts"><button class="btn sm" onclick="APS.go('dispatch')">查看派工履历</button></div></div>`;
 }
 
-/* ===================== 成本对账 ===================== */
-let reconciled=false;
-function startReconcile(){
-  if(reconciled){ APS.toast('本工单已对账平衡'); return; }
-  APS.count('#eqTheory',0,1000,{suffix:' kg',dur:700,sep:true});
-  APS.count('#eqActual',0,962,{suffix:' kg',dur:900,sep:true});
-  APS.count('#eqScrap',0,26,{suffix:' kg',dur:1000});
-  APS.count('#eqRecycle',0,12,{suffix:' kg',dur:1100});
-  setTimeout(()=>{ $('#costSeal').classList.add('show'); reconciled=true; APS.toast('物料平衡核对完成：理论 1000 = 实际 962 + 边角料 26 + 回收 12 · ✓ 账平','ai'); }, 1200);
+/* ===================== 色谱排产台（核心交互） ===================== */
+/* 色块：c=颜色class, color=色名, l=left%, w=宽% */
+const SPEC_BEFORE={
+ // 绝缘挤出 JY01：按交期序穿插
+ JY:[
+  {id:'088',c:'c-blue',color:'蓝',l:1,w:14},
+  {id:'101',c:'c-black',color:'黑',l:16,w:14},
+  {id:'118',c:'c-red',color:'红',l:31,w:13},
+  {id:'130',c:'c-blue',color:'蓝',l:45,w:14},
+  {id:'090',c:'c-yellow',color:'黄',l:60,w:13},
+  {id:'122',c:'c-black',color:'黑',l:74,w:14},
+ ],
+ // 护套挤出 HT01：6 色穿插，换色频繁
+ HT:[
+  {id:'101',c:'c-black',color:'黑',l:1,w:13},
+  {id:'088',c:'c-red',color:'红',l:15,w:13},
+  {id:'130',c:'c-green',color:'绿',l:29,w:13},
+  {id:'122',c:'c-black',color:'黑',l:43,w:13},
+  {id:'090',c:'c-white',color:'白',l:57,w:13},
+  {id:'118',c:'c-red',color:'红',l:71,w:14},
+ ],
+};
+// 聚类后：同色相邻
+const SPEC_AFTER={
+ JY:[
+  {id:'088',c:'c-blue',color:'蓝',l:1,w:14},
+  {id:'130',c:'c-blue',color:'蓝',l:15,w:14},
+  {id:'101',c:'c-black',color:'黑',l:30,w:14},
+  {id:'122',c:'c-black',color:'黑',l:44,w:14},
+  {id:'118',c:'c-red',color:'红',l:59,w:13},
+  {id:'090',c:'c-yellow',color:'黄',l:73,w:14},
+ ],
+ HT:[
+  {id:'101',c:'c-black',color:'黑',l:1,w:13},
+  {id:'122',c:'c-black',color:'黑',l:14,w:13},
+  {id:'088',c:'c-red',color:'红',l:28,w:13},
+  {id:'118',c:'c-red',color:'红',l:42,w:13},
+  {id:'130',c:'c-green',color:'绿',l:56,w:13},
+  {id:'090',c:'c-white',color:'白',l:70,w:13},
+ ],
+};
+let specMode='before', specUrgent=false;
+function renderSpec(){
+  const data = specMode==='after'?SPEC_AFTER:SPEC_BEFORE;
+  ['JY','HT'].forEach(k=>{
+    const lane=$('#lane'+k); if(!lane) return;
+    lane.innerHTML=data[k].map(b=>{
+      const urg=(specUrgent && k==='HT' && b.id==='118');
+      const cls='spec-block '+b.c+(urg?' urgent locked':'');
+      return `<div class="${cls}" style="left:${b.l}%;width:${b.w}%" title="工单 JD-2606-${b.id} · ${b.color}色">
+        <span>JD-${b.id}</span><span class="sb-c">${b.color}${urg?' 急':''}</span></div>`;
+    }).join('');
+  });
+  renderSpecStat();
 }
-function pushERP(){
-  APS.toast('成本数据已推送鼎捷 ERP，自动生成财务凭证 PZ-2206-0337','ai');
+function renderSpecStat(){
+  const after=specMode==='after';
+  $('#specStat').innerHTML=`
+    <span>挤出线换色：<b class="${after?'down':''}">${after?'4':'11'}</b> 次</span>
+    <span>换色损时：<b class="${after?'down':''}">${after?'2.0':'5.5'}</b> h</span>
+    <span>换规格：<b class="${after?'down':''}">${after?'3':'8'}</b> 次</span>
+    <span class="muted">${after?'同色批次已聚拢 · 仅同色组间换色':'按交期序，颜色穿插，换色频繁'}</span>`;
+}
+function runCluster(){
+  if(specMode==='after'){ APS.toast('已是色谱聚类结果，可点复位重排'); return; }
+  specMode='after'; renderSpec();
+  $('#specSub').textContent='AI 色谱聚类：同色批次聚拢，换色 11→4 次 / 损时 5.5→2.0h';
+  $('#specLog').innerHTML=`<div class="ai-suggest" style="background:linear-gradient(120deg,var(--ai-soft),#fff)">
+    <div class="as-ic">🎨</div><div><b>色谱智能编排完成</b>：绝缘 / 护套两线同色块平移聚拢，<b>换色 11→4 次</b>、<b>损时 5.5→2.0h</b>。最小化换色 / 换规格目标达成。</div>
+    <div class="as-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排？</button></div></div>`;
+  APS.toast('AI 色谱聚类：换色 11→4 次，省损时 3.5h','ai');
+}
+function insertUrgent(){
+  if(specMode!=='after'){ specMode='after'; renderSpec(); $('#specSub').textContent='AI 色谱聚类：同色批次聚拢，换色 11→4 次 / 损时 5.5→2.0h'; }
+  if(specUrgent){ APS.toast('急单 JD-2606-118 已插入'); return; }
+  specUrgent=true; renderSpec();
+  $('#specLog').innerHTML=`<div class="ai-suggest" style="background:var(--danger-soft);border-color:#f0c4be">
+    <div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚡</div>
+    <div><b>急单 JD-2606-118（YJV 3×95 黑护套 12km）已楔入护套挤出 HT01 黑色组尾</b>，换色 +0（同色）。系统自动评估：在制工单 / 设备负荷 / 物料齐套 / 模具状态 → 给出可插单方案，<b>不影响已锁定关键交期订单</b>🔒。<br><span class="muted">插单日志 <b>#L-0611-02</b> 已留痕：评估在制 / 负荷 / 齐套 / 模具 → 可溯源。</span></div>
+    <div class="as-acts"><button class="btn sm" onclick="APS.toast('已打开插单日志 #L-0611-02 溯源','ai')">查看溯源</button></div></div>`;
+  APS.toast('急单 JD-118 已插入黑色组尾，锁定单未受影响','ai');
+}
+function resetSpec(){
+  specMode='before'; specUrgent=false; renderSpec();
+  $('#specSub').textContent='基准：按交期序，红蓝黄绿黑白穿插，换色频繁';
+  $('#specLog').innerHTML='';
+  APS.toast('已复位为基准排序');
 }
 
-/* ===================== 其他屏渲染 ===================== */
-function renderOrders(q){
+/* ===================== 铜流成本对账 ===================== */
+let cuReconciled=false;
+function reconcileCu(){
+  if(cuReconciled){ APS.toast('本工单已对账（账平）'); return; }
+  APS.count('#eqA',0,1000,{dur:700,sep:true});
+  APS.count('#eqB',0,962,{dur:800});
+  APS.count('#eqC',0,26,{dur:800});
+  APS.count('#eqD',0,12,{dur:800});
+  setTimeout(()=>{ $('#eqSeal').classList.add('show'); cuReconciled=true; APS.toast('铜流对账完成：理论 1000 = 实际 962 + 边角料 26 + 回收 12，账平 ✓','ai'); }, 900);
+}
+function pushVoucher(){
+  APS.toast('成本数据已推送鼎捷 ERP，自动生成财务凭证 PZ-2206-0618','ok');
+}
+
+/* ===================== 其他屏 ===================== */
+function renderMPS(q){
   const ORD=[
-   ['MO-0618-12','鼎捷 ERP','蓝色护套电缆 YJV','生产工单','10 km','6/20','自动扣减','已排程','blue'],
-   ['SO-0611-77','鼎捷 ERP','蓝色护套电缆 8km','生产工单','8 km','6/19','—','待排程','gray'],
-   ['MO-0618-15','鼎捷 ERP','红色护套电缆','生产工单','12 km','6/20','自动扣减','生产中','green'],
-   ['SP-0618-02','鼎捷 ERP','试制 · 低烟无卤','样品工单','0.5 km','6/22','工序级BOM','待排程','gray'],
-   ['MO-0618-30','鼎捷 ERP','黄色绝缘线 BV','生产工单','12 km','6/20','—','待排程','gray'],
-   ['RW-0617-08','鼎捷 ERP','黑色护套返工','返工工单','3 km','6/19','自动扣减','已完工','green'],
-   ['MO-0617-08','鼎捷 ERP','白色绝缘线 BV','生产工单','6 km','6/18','超单扣减','已关闭','gray'],
-   ['MO-0618-46','鼎捷 ERP','绿色控制电缆','生产工单','9 km','6/21','—','待排程','gray'],
+   ['JD-2606-122','BV 2.5','蓝','PVC','30 km','L2606-122','华东电缆','6/15','正式工单','green','已排程','blue'],
+   ['JD-2606-118','YJV 3×95','黑','XLPE','12 km','—','江南线束','6/13','正式工单','amber','待排程','gray'],
+   ['JD-2606-101','YJV 3×95','黑','XLPE','15 km','L2606-101','华东电缆','6/15','正式工单','green','生产中','green'],
+   ['JD-2606-072','RVV 3×1.5','白','PVC','5 km','L2606-072','内部领用','6/14','正式工单','green','已派工','blue'],
+   ['JD-2611-04','RVV 3×1.5','白','PVC','18 km','—','远东股份','6/16','样品工单','amber','待排程','gray'],
+   ['JD-2606-088','BV 2.5','红','PVC','22 km','L2606-088','江南线束','6/12','返工工单','green','已完工','green'],
+   ['JD-2612-08','YJV 3×95','黑','XLPE','15 km','—','华东电缆','6/16','正式工单','red','待排程','gray'],
+   ['JD-2606-130','YJV 4×35','黑','XLPE','9 km','L2606-130','远东股份','6/15','正式工单','green','生产中','green'],
+   ['JD-2606-090','BV 2.5','蓝','PVC','16 km','—','华东电缆','6/18','正式工单','green','待排程','gray'],
   ];
   const fT=$('#ordType').value, fS=$('#ordStatus').value;
-  const rows=ORD.filter(o=>(!fT||o[3]===fT)&&(!fS||o[7]===fS)&&(!q||(o[0]+o[2]).toLowerCase().includes(q.toLowerCase())));
-  const stColor={'待排程':'gray','已排程':'blue','已下发':'blue','生产中':'green','已完工':'green','已关闭':'gray'};
-  const tyColor={'生产工单':'blue','样品工单':'purple','返工工单':'amber'};
+  const rows=ORD.filter(o=>(!fT||o[8]===fT)&&(!fS||o[10]===fS)&&(!q||(o[0]+o[1]+o[2]+o[5]).toLowerCase().includes(q.toLowerCase())));
+  const kit={green:'green',amber:'amber',red:'red'};
+  const stColor={'待排程':'gray','已排程':'blue','已派工':'blue','生产中':'green','已完工':'green'};
+  const tType={'正式工单':'gray','样品工单':'purple','返工工单':'amber'};
   $('#ordTable tbody').innerHTML=rows.map(o=>{
-    const ded = o[6]==='超单扣减'?'<span class="tag amber nodot">超单扣减</span>':o[6]==='工序级BOM'?'<span class="tag purple nodot">工序级BOM</span>':o[6]==='自动扣减'?'<span class="tag green nodot">自动扣减</span>':'<span class="muted">—</span>';
     return `<tr><td class="checkcell"><input type="checkbox"></td>
-      <td><span class="row-link">${o[0]}</span></td><td><span class="chip">${o[1]}</span></td><td>${o[2]}</td>
-      <td><span class="tag ${tyColor[o[3]]} nodot">${o[3]}</span></td>
-      <td class="num">${o[4]}</td><td>${o[5]}</td><td>${ded}</td>
-      <td><span class="tag ${stColor[o[7]]}">${o[7]}</span></td>
+      <td><span class="row-link">${o[0]}</span></td><td>${o[1]}</td><td>${o[2]}</td><td>${o[3]}</td><td class="num">${o[4]}</td><td class="mono">${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td>
+      <td><span class="tag ${tType[o[8]]} nodot">${o[8].replace('工单','')}</span></td>
+      <td><span class="tag ${kit[o[9]]} nodot">${o[9]==='green'?'齐套':o[9]==='amber'?'部分':'缺料'}</span></td>
+      <td><span class="tag ${stColor[o[10]]}">${o[10]}</span></td>
       <td><button class="btn sm ghost" onclick="APS.go('spec')">排产</button></td></tr>`;
   }).join('');
-  $('#ordCount').textContent='显示 '+rows.length+' / 96 条';
+  $('#ordCount').textContent='显示 '+rows.length+' / 94 条';
 }
 function renderKit(){
   const K=[
-   ['MO-0618-12','铜杆 Φ8','8.0t','8.0t','—','100','已齐套','—','green'],
-   ['MO-0618-15','护套料 PVC-黑','0.9t','0.1t','0.0t','11','缺料','PR-2206-118','red'],
-   ['MO-0618-20','护套料 PVC-黑','0.6t','0.4t','0.2t','67','6/19 14:00','PR-2206-118','amber'],
-   ['MO-0618-30','绝缘料 PE','1.2t','0.8t','0.4t','67','6/21 09:00','PR-2206-120','amber'],
-   ['MO-0618-46','铜杆 Φ8','6.0t','6.0t','—','100','已齐套','—','green'],
+   ['JD-2606-118','无氧铜杆 TU2','8t','8t（已锁）','—','100','—','已齐套','green'],
+   ['JD-2606-118','护套料 PVC','1.2t','0.4t','在途 0.6t','58','PR-2206-118','6/19 缺口0.8t','red'],
+   ['JD-2606-122','无氧铜杆 TU2','12t','15t','—','100','—','已齐套','green'],
+   ['JD-2612-08','色母 黑','0.2t','0.2t','—','100','—','已齐套','green'],
+   ['JD-2611-04','绝缘料 XLPE','0.3t','0.21t','在途 0.05t','70','PO-2206-309','6/20 到货','amber'],
   ];
   $('#kitTable tbody').innerHTML=K.map(k=>{
     const cls=k[8], i=cls==='green'?'ok':cls==='amber'?'warn':'red';
-    const pr = k[7]==='—' ? '<span class="muted">—</span>' : `<span class="row-link" onclick="APS.toast('已打开鼎捷 ERP 采购申请 ${k[7]}','ai')">${k[7]}</span>`;
     return `<tr><td class="mono">${k[0]}</td><td>${k[1]}</td><td class="num">${k[2]}</td><td class="num">${k[3]}</td><td class="num">${k[4]}</td>
       <td style="min-width:120px"><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i class="${i}" style="width:${k[5]}%"></i></div><b style="font-size:11px;width:32px">${k[5]}%</b></div></td>
-      <td>${k[6]}</td><td>${pr}</td><td><span class="tag ${cls}">${cls==='green'?'齐套':cls==='amber'?'部分':'缺料'}</span></td></tr>`;
+      <td class="mono">${k[6]}</td><td>${k[7]}</td><td><span class="tag ${cls}">${cls==='green'?'齐套':cls==='amber'?'部分':'缺料'}</span></td></tr>`;
   }).join('');
 }
 function renderLines(host){
-  const L=[['拉丝机',92,89],['绞线机',88,86],['L1 绝缘挤出',96,91],['L2 护套挤出',90,84]];
-  const el=$(host); if(!el) return;
-  el.innerHTML=L.map(l=>{
+  const L=[['LS01 拉丝机',92,88],['JX01 绞线机',85,84],['JY01 绝缘挤出',90,87],['CL01 成缆机',90,87],['HT01 护套挤出',96,0],['FR01 复绕机',82,79]];
+  $(host).innerHTML=L.map(l=>{
+    const stop=l[2]===0;
     return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)">
-      <b style="width:92px;font-size:12.5px">${l[0]}</b>
-      <span class="tag green" style="width:54px;justify-content:center">运行</span>
-      <div class="bar" style="flex:1"><i style="width:${l[2]}%"></i></div>
-      <span class="muted" style="width:120px;font-size:11.5px;text-align:right">达成 ${l[2]}% / 计划 ${l[1]}%</span></div>`;
+      <b style="width:108px;font-size:12.5px">${l[0]}</b>
+      <span class="tag ${stop?'amber':'green'}" style="width:64px;justify-content:center">${stop?'换色中':'运行'}</span>
+      <div class="bar" style="flex:1"><i class="${stop?'warn':''}" style="width:${stop?100:l[2]}%;background:${stop?'var(--warn)':''}"></i></div>
+      <span class="muted" style="width:150px;font-size:11.5px;text-align:right">${stop?'换色停机 · 黑→红':'达成 '+l[2]+'% / 计划 '+l[1]+'%'}</span></div>`;
   }).join('');
 }
 function renderReportBars(){
-  const mk=(host,vals,cls)=>{ const el=$(host); if(el) el.innerHTML='<div class="spark" style="height:46px;gap:4px">'+vals.map(v=>`<i style="height:${v}%;width:14px;background:${cls}"></i>`).join('')+'</div>'; };
-  mk('#rp1',[100,92,84,70,55,42,36],'var(--accent-soft)');
-  mk('#rp2',[120,118,128,140,150,148,150],'#f5c6c1');
-  mk('#rp3',[90,91,93,92,94,95,96],'var(--brand-soft)');
-  mk('#rp4',[64,68,72,78,82,85,87],'var(--ok-soft)');
-  mk('#rp5',[60,55,48,40,30,20,14],'var(--ok-soft)');
+  const mk=(host,vals,cls)=>{ $(host).innerHTML='<div class="spark" style="height:46px;gap:4px">'+vals.map(v=>`<i style="height:${v}%;width:14px;background:${cls}"></i>`).join('')+'</div>'; };
+  mk('#rp1',[100,82,70,55,40,38,36],'var(--brand-soft)');
+  mk('#rp2',[70,74,78,82,85,87,88],'var(--accent-soft)');
+}
+/* 看板只读色谱概览（复用 spec 轨道结构） */
+function renderSpecMini(){
+  const host=$('#dashSpec'); if(!host) return;
+  const data=SPEC_AFTER;
+  host.innerHTML=['JY','HT'].map(k=>{
+    const name=k==='JY'?'绝缘挤出 JY01':'护套挤出 HT01';
+    const blocks=data[k].map(b=>`<div class="spec-block ${b.c}" style="left:${b.l}%;width:${b.w}%"><span>JD-${b.id}</span><span class="sb-c">${b.color}</span></div>`).join('');
+    return `<div class="spec-track"><div class="spec-track-head"><b>${name}</b><small>AI 色谱聚类后（只读）</small></div><div class="spec-lane">${blocks}</div></div>`;
+  }).join('');
 }
 
-/* ===================== Copilot 场景 ===================== */
-APS._copWelcome='您好，我是 APS Copilot ✦ 已接入当前生产环境（底座 鼎捷 ERP + WMS + 机台终端）：在排 96 张工单、挤出线 L1/L2 负荷 80%。可以问我换色聚类省时、急单插单评估、工单铜账明细、物料缺口处置等。';
+/* ===================== Copilot ===================== */
+APS._copWelcome='您好，我是数智江铜 Copilot ✦ 已接入线缆厂鼎捷 ERP / sMES / 互联中台：在排 9 张工单、6 台工序机台，挤出线综合负荷 78%。可问我换色聚类省时、急单插单（含锁定单保护）、某工单铜账明细、护套料缺口等。';
 APS.copilot.register({
   cluster:{user:'换色聚类能省多少时间？',
-    steps:[['读取今日颜色批次','spec.load() → 14 批'],['计算颜色亲和度','affinity-matrix'],['同色聚拢求解','min(setup)'],['锁定关键交期保护','protect()']],
-    text:'AI 聚类后换色 11 次 → 4 次，换色损时 5.5h → 2.0h，净省 3.5h ✅。聚类只重排可动工单，带 🔒 的关键交期订单 MO-43 / MO-15 保持原位不动。',
-    rich:`<div class="cop-card"><div class="cc-t">🎨 换色聚类收益</div>
-      <div class="p-m" style="font-size:11.5px">换色次数<b class="good">11 → 4 次</b></div>
-      <div class="p-m" style="font-size:11.5px">换色损时<b class="good">5.5h → 2.0h</b></div>
-      <div class="p-m" style="font-size:11.5px">利用率<b class="good">64% → 87%</b></div>
-      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('spec');aiCluster()">去聚类</button></div></div>`},
-  urgent:{user:'急单 SO-0611-77 能不能插？',
-    steps:[['解析急单 SO-0611-77','copilot.parse() → 蓝护套 8km'],['评估在制/负荷/齐套/模具','engine.assess()'],['同色组尾插单仿真 ×3','simulate()'],['锁定订单保护校验','protect-check']],
-    text:'可以承接 ✅ 推荐方案 B（同蓝色组尾插入 L2，换色 +0）：完工 6/19 20:40，余量充足，全局延期 0，不影响已锁定关键交期订单。插单日志 #L-0611-02 已留痕、可溯源。',
-    rich:`<div class="cop-card"><div class="cc-t">⚡ 插单仿真（保护锁定单）</div>
-      <div class="p-m" style="font-size:11.5px">A 排到最前<b>换色 +2.0h</b></div>
-      <div class="p-m" style="font-size:11.5px">B 同色组尾<b class="good">换色 +0 ★</b></div>
-      <div class="p-m" style="font-size:11.5px">C 排到最后<b>踩线</b></div>
-      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('spec');insertUrgent()">采纳方案 B</button></div></div>`},
-  cost:{user:'MO-0618-12 铜账明细',
-    steps:[['读取工单物料平衡','cost.balance(MO-0618-12)'],['汇集实际消耗/边角料/回收','wms.scrap()'],['对照标准成本','std-cost'],['闭环校验','reconcile()']],
-    text:'工单 MO-0618-12 铜材闭环：理论用量 1,000kg = 实际消耗 962kg + 边角料 26kg + 废料回收 12kg，✓ 账平。废料回收按 ¥52/kg 回冲 -¥1,860，工单总成本 ¥74,556，单位 ¥7,455.6/km，较标准 -0.7%。',
-    rich:`<div class="cop-card"><div class="cc-t">💰 铜材闭环</div>
-      <div class="p-m" style="font-size:11.5px">理论用量<b>1,000 kg</b></div>
-      <div class="p-m" style="font-size:11.5px">实际消耗<b>962 kg</b></div>
-      <div class="p-m" style="font-size:11.5px">边角料+回收<b class="good">26 + 12 kg</b></div>
-      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('cost');startReconcile()">查看对账</button></div></div>`},
-  shortage:{user:'护套料 PVC-黑 缺口怎么办？',
-    steps:[['查 WMS 库存与在途','wms.check → 缺 0.8t'],['关联鼎捷采购申请','erp.pr → PR-2206-118'],['到货预测','eta → 6/19'],['影响工单评估','impact → 2 张']],
-    text:'护套料 PVC-黑 缺口 0.8t，影响 2 张工单。已关联鼎捷 ERP 采购申请 PR-2206-118，物料未入库系统自动提醒采购员，逾期升级至采购主管。建议先排有料的同色组，PVC-黑工单顺延到货后。',
-    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('kit');APS.toast('已提醒采购员·逾期升级主管','ai')">提醒采购员</button></div>`},
+    steps:[['读取挤出线工单序','aps.read()'],['构建换色损时矩阵','setup-matrix'],['同色块聚类求解','cluster()'],['校验交期不延期','check()']],
+    text:'可省换色损时 3.5h 🎨：绝缘 JY01 与护套 HT01 同色批次聚拢后，换色 11→4 次、损时 5.5→2.0h、换规格 8→3 次，全局延期 0。这就是"最小化换色 / 换规格"的色谱聚类排产。',
+    rich:`<div class="cop-card"><div class="cc-t">🎨 色谱聚类前后</div>
+      <div class="p-m" style="font-size:11.5px">换色次数<b class="good">11 → 4</b></div>
+      <div class="p-m" style="font-size:11.5px">换色损时<b class="good">5.5 → 2.0h</b></div>
+      <div class="p-m" style="font-size:11.5px">换规格<b class="good">8 → 3</b></div>
+      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('spec');runCluster()">应用聚类方案</button></div></div>`},
+  urgent:{user:'急单 JD-118 能不能插？',
+    steps:[['解析急单 JD-2606-118','copilot.parse()'],['自动评估','在制/负荷/齐套/模具'],['锁定关键交期单','lock()'],['插单仿真','aps.simulate()']],
+    text:'可以承接 ✅ 系统自动评估在制工单 / 设备负荷 / 物料齐套 / 模具状态后，推荐楔入护套挤出 HT01 黑色批次组尾（同色换色 +0），不影响已锁定关键交期订单🔒。插单日志 #L-0611-02 已留痕，全程可溯源。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('spec');insertUrgent()">执行插单</button><button class="cop-sug" onclick="APS.toast('已打开插单日志 #L-0611-02','ai')">查看溯源日志</button></div>`},
+  cost:{user:'JD-101 这单铜账明细',
+    steps:[['汇总实际消耗','sMES 报工回流'],['归集边角料/废料','loss.sum()'],['闭环对账','理论=实际+回收'],['生成核算报表','cost.report()']],
+    text:'JD-2606-101 铜账闭环 ✅ 理论用量 1000kg = 实际消耗 962kg + 边角料 26kg + 废料回收 12kg，账平。废料回收 12kg 按 62 元/kg 回冲直接材料 -¥1,860，工单总成本 ¥70,840，低于标准 2.1%。可推鼎捷 ERP 生成凭证。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('cost');reconcileCu()">去对账</button><button class="cop-sug" onclick="APS.go('cost');pushVoucher()">推送凭证</button></div>`},
+  pvc:{user:'护套料 PVC 缺口怎么办？',
+    steps:[['读取 BOM 需求','mrp.run()'],['对接鼎捷库存/在途','erp.stock()'],['识别缺口','6/19 -0.8t'],['关联采购申请','PR-2206-118']],
+    text:'护套料 PVC 将于 6/19 缺口 0.8t，影响 2 张工单。已关联鼎捷 ERP 采购申请 PR-2206-118，在途 0.6t；物料未入库系统将自动提醒采购员催办。建议同步把受影响工单顺延 1 班或调拨替代料。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('kit')">去齐套联动</button><button class="cop-sug" onclick="APS.toast('已提醒采购员催办 PR-2206-118','ai')">提醒采购</button></div>`},
 });
 APS.copilot.route([
-  [/聚类|换色|省.*时间|穿插/,'cluster'],
-  [/急单|插单|能接|能不能插|SO-0611|SO-77/,'urgent'],
-  [/铜账|成本|明细|理论用量|对账|MO-0618-12/,'cost'],
-  [/缺口|缺料|护套料|PVC|采购|齐套/,'shortage'],
+  [/换色|聚类|色谱|省.*时间|损时/,'cluster'],
+  [/急单|插单|能.*插|JD-118|118|锁定/,'urgent'],
+  [/成本|铜账|核算|JD-101|101|凭证|账平/,'cost'],
+  [/护套料|PVC|缺口|采购|齐套/,'pvc'],
 ]);
 
 /* ===================== 初始化 ===================== */
-APS.initShell();
-APS.initCopilot();
+APS.initShell(); APS.initCopilot();
 APS.onPage(p=>{
-  if(p==='dash'){ renderLines('#dashLines'); paintDashSpec(); }
-  if(p==='orders') renderOrders();
-  if(p==='spec'){ paintSpec(specState); renderGantt('#schedGantt', scheduled?PLAN_AFTER:PLAN_BEFORE, scheduled?LOAD_AFTER:LOAD_BEFORE, true); renderSchedKpis(); renderWait(); }
+  if(p==='dash'){ renderLines('#dashLines'); renderSpecMini(); }
+  if(p==='spec'){ renderSpec(); }
+  if(p==='mps') renderMPS();
   if(p==='kit') renderKit();
+  if(p==='load') renderLines('#loadLines');
+  if(p==='wip') renderLines('#monLines');
   if(p==='reports') renderReportBars();
 });
-// 首屏：工作台
-renderLines('#dashLines'); paintDashSpec();
-// 预渲染各屏（首次进入即就绪）
-paintSpec('before');
 renderGantt('#schedGantt', PLAN_BEFORE, LOAD_BEFORE, true);
-renderSchedKpis(); renderWait();
-renderOrders(); renderKit(); renderReportBars();
-APS.count('#d-k1',0,32,{dur:700}); APS.count('#d-k4',0,19,{dur:900});
+renderSchedKpis(); renderWait(); renderSpec();
+renderLines('#dashLines'); renderSpecMini();
+renderMPS(); renderKit(); renderLines('#loadLines'); renderLines('#monLines'); renderReportBars();
+APS.count('#d-k1',0,9,{dur:700}); APS.count('#d-k4',0,18,{dur:900});
 </script>
 </body>
 </html>
