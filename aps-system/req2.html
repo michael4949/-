@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智造协同平台 · 台意 — 江铜 AI+排产+成本（生产环境）</title>
+<link rel="stylesheet" href="assets/aps-ui.css">
+</head>
+<body data-theme="req2">
+<div class="app" id="app">
+
+  <!-- ===================== 侧栏 ===================== -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">MES</div>
+      <div class="sb-name">智造协同平台<small>台意 · 报价→排产→成本</small></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-group-t">商务</div>
+      <div class="nav-item active" data-page="dash" data-crumb="工作台"><span class="ni-ic">📊</span><span>工作台</span></div>
+      <div class="nav-item" data-page="quote" data-crumb="智能报价"><span class="ni-ic">💱</span><span>智能报价</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="review" data-crumb="订单评审"><span class="ni-ic">🧾</span><span>订单评审</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="card" data-crumb="电子工艺卡"><span class="ni-ic">📄</span><span>电子工艺卡</span></div>
+      <div class="nav-group-t">计划</div>
+      <div class="nav-item" data-page="sched" data-crumb="智能排产工作台"><span class="ni-ic">🗓️</span><span>智能排产</span><span class="ai-dot">AI</span></div>
+      <div class="nav-group-t">物料与成本</div>
+      <div class="nav-item" data-page="kit" data-crumb="齐套·锁库·防错"><span class="ni-ic">📦</span><span>齐套·锁库·防错</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="cost" data-crumb="成本核算"><span class="ni-ic">💰</span><span>成本核算</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="alerts" data-crumb="异常预警"><span class="ni-ic">⚠️</span><span>异常预警</span><span class="ni-tag">2</span></div>
+    </nav>
+    <div class="sb-foot"><div class="sb-foot-txt">底座 <b>做市商 + Oracle ERP + WMS</b> 已对接（利旧·仅打通接口）<br>
+      <a href="req1.html" style="color:#9aa6bd">需求一</a> · <a href="req3.html" style="color:#9aa6bd">需求三</a> · <a href="index.html" style="color:#9aa6bd">演示门户</a></div></div>
+  </aside>
+
+  <!-- ===================== 顶栏 ===================== -->
+  <header class="topbar">
+    <button class="tb-toggle" title="折叠菜单"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="tb-crumb"><span>商务</span><span class="sep">/</span><b id="crumbPage">工作台</b></div>
+    <div class="tb-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input placeholder="搜索报价单 / 工单 / 物料 / 凭证…  ( / )">
+    </div>
+    <div class="tb-right">
+      <span class="env-badge"><span class="dot"></span>生产环境</span>
+      <button class="tb-icon" title="预警"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge-num">2</span></button>
+      <button class="tb-icon" title="帮助"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg></button>
+      <div class="tb-user"><div class="ava">王</div><div><div class="un">王工</div><div class="ur">业务计划主管</div></div></div>
+    </div>
+  </header>
+
+  <!-- ===================== 主内容 ===================== -->
+  <main class="main">
+
+    <!-- ============ 工作台 ============ -->
+    <section class="page active" id="page-dash">
+      <div class="page-head"><div><h1>智造协同 · 今日概览</h1><div class="ph-sub">2026-06-18 周四 · 报价→评审→排产→成本 全链路 · 底座：做市商 / Oracle ERP / WMS</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>同步数据</button><button class="btn ai" onclick="APS.go('quote')">⚡ 去智能报价</button></div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">💱</span><span class="k-label">今日报价</span></div><div class="k-val" id="d-k1">0</div><div class="k-foot">单 · 含急单 <span class="k-delta down">2</span> · AI 测算 16 单</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">✓</span><span class="k-label">订单评审通过率</span></div><div class="k-val">93.2<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 6.0%</span> 规则自动评审</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">⚙</span><span class="k-label">设备综合利用率</span></div><div class="k-val">89<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 18%</span> 天级→小时级排产</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ai-soft);color:var(--ai)">✦</span><span class="k-label">AI 今日处理</span></div><div class="k-val" id="d-k4">0</div><div class="k-foot">次报价测算 / 评审 / 排程 / 归集</div></div>
+      </div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><h3>AI 待办建议</h3><span class="ai-chip">✦ Copilot</span><div class="ch-actions"><span class="ch-sub">系统主动发现，待您处置</span></div></div>
+          <div class="card-body" style="padding:6px 16px 14px">
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--warn),#f0bf6b)">📈</div><div><b>报价单 QT-0618-09</b> 加工费低于盈亏底线 4.2%，AI 已拦截，建议复核铜价基准（做市商实时行情）。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('quote')">去复核</button></div></div>
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">📦</div><div><b>辅料镀锡液</b> 缺口 120kg（评审 SO-26061008 触发），AI 已自动生成请购建议 <b>PR-0611</b>。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.go('review')">查看评审</button></div></div>
+            <div class="ai-suggest"><div class="as-ic">⚡</div><div><b>急单 SO-26061008</b> 待评估接单可行性：模具 / 主辅料 / 产能交期。AI 一键评审已就绪。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.go('review')">去评审</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>产线达成</h3><span class="ch-sub">计划 vs 实绩</span></div>
+          <div class="card-body" style="padding:14px 16px">
+            <div id="dashLines"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>今日排产甘特（只读概览）</h3><div class="ch-actions"><button class="btn sm" onclick="APS.go('sched')">打开智能排产 →</button></div></div>
+        <div class="card-body flush"><div id="dashGantt"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 智能报价（核心交互） ============ -->
+    <section class="page" id="page-quote">
+      <div class="page-head"><div><h1>智能报价</h1><div class="ph-sub">输入产品规格测算报价 · 实时行情来自 <b>做市商系统</b> · 支持 PC 端 / 移动端同步</div></div>
+        <div class="ph-actions"><div class="seg" style="margin-right:4px"><button class="on">PC 端</button><button onclick="APS.toast('已切换移动端预览 · 报价数据云端同步')">移动端</button></div>
+          <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建报价</button></div>
+      </div>
+      <div class="ai-suggest"><div class="as-ic">✦</div><div>实时行情（做市商系统 11:46 推送）：电解铜 <b>¥71,250/t</b> <span class="k-delta down">▼ 0.3%</span> · 锡锭 <b>¥215,400/t</b> · AI 将据此自动测算材料/加工/损耗并校验盈亏底线。</div></div>
+      <div class="split" style="grid-template-columns:1fr 1fr;align-items:start">
+        <!-- 左：报价表单 -->
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>报价输入</h3><span class="ch-sub">QT-0618-12 · 草稿</span></div>
+          <div class="card-body">
+            <div class="form-row"><label>产品规格 <span class="req">*</span></label>
+              <select id="qSpec"><option>0.20mm 镀锡铜线</option><option>0.25mm 镀锡铜线</option><option>0.30mm 漆包线</option><option>0.40mm 裸铜线</option></select></div>
+            <div class="form-grid">
+              <div class="form-row"><label>数量 <span class="req">*</span></label><input id="qQty" value="5" type="text"> <span class="muted" style="font-size:11px">单位：t</span></div>
+              <div class="form-row"><label>交货方式</label><select><option>送货到厂</option><option>工厂自提</option></select></div>
+            </div>
+            <div class="form-row"><label>客户 <span class="req">*</span></label>
+              <select id="qCust"><option>××线束 · A级（账期 60 天）</option><option>××电机 · B级（账期 30 天）</option><option>××新能源 · A级（现款）</option></select></div>
+            <div class="form-grid">
+              <div class="form-row"><label>要求交期</label><input value="2026-06-30" type="text"></div>
+              <div class="form-row"><label>加工损耗基准</label><select><option>历史均值 1.8%</option><option>手工指定</option></select></div>
+            </div>
+            <div class="form-row" style="margin-bottom:6px"><label>报价说明</label><textarea rows="2" placeholder="选填：付款条件 / 包装 / 特殊要求…"></textarea></div>
+            <div style="display:flex;gap:9px;margin-top:14px">
+              <button class="btn ai" style="flex:1;justify-content:center" id="btnQuote" onclick="runQuote()">✦ 按 AI 测算报价</button>
+              <button class="btn" onclick="APS.toast('草稿已保存')">存草稿</button>
+            </div>
+            <div class="muted" style="font-size:11px;margin-top:10px">材料价取做市商系统实时行情，加工费/损耗按规格历史工时自动套算，报价低于盈亏底线将被拦截。</div>
+          </div>
+        </div>
+        <!-- 右：报价测算明细 -->
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>报价测算明细</h3><span class="ai-chip">✦ AI 实时测算</span></div>
+          <div class="card-body" id="quoteDetail">
+            <div class="empty" style="padding:48px 12px">点击「按 AI 测算报价」<br><span class="muted" style="font-size:11.5px">AI 将拉取做市商实时行情，逐项测算并校验盈亏底线</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 订单评审（核心） ============ -->
+    <section class="page" id="page-review">
+      <div class="page-head"><div><h1>订单评审</h1><div class="ph-sub">关联模具 / 主材 / 辅料库存（WMS）按规则统计 · 据产能判断交期 · 业务自行确认接单</div></div>
+        <div class="ph-actions"><button class="btn ai" id="btnReview" onclick="runReview()">✦ AI 自动评审</button></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>意向订单</h3><span class="ch-sub">来源：做市商系统 / 客户意向转入</span></div>
+        <div class="tbl-wrap"><table class="grid" id="reviewTable"><thead><tr><th>意向单号</th><th>客户</th><th>规格</th><th>数量</th><th>期望交期</th><th>优先级</th><th>评审</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><span class="row-link">SO-26061008</span></td><td>××线束·A级</td><td>0.25mm 镀锡线</td><td class="num">20 t</td><td>6/13</td><td><span class="tag red nodot">急</span></td><td id="rvTag1"><span class="tag gray">待评审</span></td><td><button class="btn sm ai" onclick="runReview()">评审</button></td></tr>
+            <tr><td><span class="row-link">SO-26061011</span></td><td>××电机·B级</td><td>0.20mm 镀锡线</td><td class="num">8 t</td><td>6/22</td><td><span class="tag amber nodot">高</span></td><td><span class="tag green">建议接单</span></td><td><button class="btn sm ghost">详情</button></td></tr>
+            <tr><td><span class="row-link">SO-26061013</span></td><td>××新能源·A级</td><td>0.30mm 漆包线</td><td class="num">12 t</td><td>6/25</td><td><span class="tag gray nodot">普通</span></td><td><span class="tag green">建议接单</span></td><td><button class="btn sm ghost">详情</button></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>评审检查 · SO-26061008</h3><span class="ch-sub" id="rvSub">点「AI 自动评审」按规则逐项核验</span><div class="ch-actions"><span class="tag purple" id="rvResult" style="display:none">建议接单</span></div></div>
+        <div class="card-body" id="reviewChecks"></div>
+      </div>
+    </section>
+
+    <!-- ============ 电子工艺卡 ============ -->
+    <section class="page" id="page-card">
+      <div class="page-head"><div><h1>电子工艺卡</h1><div class="ph-sub">工艺参数智能推荐 · 生成电子工艺卡并流程审批 · 区分新规格 / 历史规格复用</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建工艺卡</button></div>
+      </div>
+      <div class="ai-suggest"><div class="as-ic">✦</div><div>AI 工艺推荐：当前规格 <b>0.25mm 镀锡铜线</b> <span class="hl-ai">命中历史规格 #A12</span>，工艺参数可直接复用（合格率 99.1%），无需新规试制。</div><div class="as-acts"><span class="tag green nodot">历史规格</span></div></div>
+      <div class="split" style="grid-template-columns:1.4fr 1fr;align-items:start">
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>工艺卡 PC-0618-07 · 0.25mm 镀锡铜线</h3><span class="ch-sub">关联工单 MO-0605-12</span></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-row"><label>退火温度</label><input value="480 ℃" type="text"></div>
+              <div class="form-row"><label>退火线速</label><input value="850 m/min" type="text"></div>
+              <div class="form-row"><label>镀层厚度</label><input value="1.2 μm" type="text"></div>
+              <div class="form-row"><label>镀锡槽温</label><input value="320 ℃" type="text"></div>
+              <div class="form-row"><label>拉丝道次</label><input value="21 道" type="text"></div>
+              <div class="form-row"><label>张力控制</label><input value="恒张力 · 18N" type="text"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:6px"><label>工艺要点</label><textarea rows="2">复用 #A12 历史参数；镀锡均匀度 ≤ 0.05μm；下线抽检每盘。</textarea></div>
+            <div style="display:flex;gap:9px;margin-top:12px">
+              <button class="btn ai" onclick="APS.toast('AI 已据历史规格 #A12 重算并填充工艺参数','ai')">✦ AI 重新推荐</button>
+              <button class="btn primary" onclick="approveCard()">提交审批</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>审批流</h3><span class="ch-sub">工艺员 → 主管 两步</span></div>
+          <div class="card-body">
+            <div class="timeline" id="cardFlow"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 智能排产工作台（复刻 req1） ============ -->
+    <section class="page" id="page-sched">
+      <div class="page-head"><div><h1>智能排产工作台</h1><div class="ph-sub">计划版本 <b id="planVer">V0610-1（基准）</b> · 小时级 · 共 6 台资源 / 8 张待排 · 工单经评审后入流</div></div>
+        <div class="ph-actions">
+          <div class="seg" style="margin-right:4px"><button>日</button><button class="on">班次</button><button>小时</button></div>
+          <button class="btn" onclick="APS.toast('已切换为倒排（按交期反推）')">↤ 倒排</button>
+          <button class="btn ai" id="btnAISched" onclick="openSchedParams()">⚡ AI 智能排程</button>
+          <button class="btn primary" id="btnPublish" onclick="publishPlan()" disabled>审核下发</button>
+        </div>
+      </div>
+
+      <div id="schedBanner"></div>
+
+      <div class="split" style="grid-template-columns:1fr 280px;align-items:start">
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>资源甘特 · L1–L6</h3><span class="ch-sub" id="ganttSub">基准计划：存在空转与 1 张延期</span>
+            <div class="ch-actions"><button class="btn sm ghost" onclick="APS.toast('已导出当前甘特 PNG')">导出</button></div></div>
+          <div class="card-body flush">
+            <div class="gantt" id="schedGantt"></div>
+            <div class="gantt-legend">
+              <i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i>
+              <i><span class="lg-sw" style="background:#1a9d6b"></span>提前/正常</i>
+              <i><span class="lg-sw" style="background:#dc4b3e"></span>延期风险</i>
+              <i><span class="lg-sw" style="background:repeating-linear-gradient(135deg,#c2cbd8 0 4px,#dfe5ee 4px 8px)"></span>换型/换模</i>
+              <i><span class="lg-sw" style="outline:2px solid rgba(220,75,62,.6);background:#ef8b7d"></span>急单插入</i>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0 0 14px">
+            <div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCount">8 张</span></div>
+            <div class="card-body" style="padding:8px;max-height:300px;overflow:auto" id="waitList"></div>
+          </div>
+          <div class="card" style="margin:0">
+            <div class="card-head"><h3>本次排程指标</h3></div>
+            <div class="card-body" style="padding:12px 16px" id="schedKpis">
+              <div class="sk-row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 齐套·锁库·防错 ============ -->
+    <section class="page" id="page-kit">
+      <div class="page-head"><div><h1>齐套 · 锁库 · 防错</h1><div class="ph-sub">实时对接 WMS · 齐套体检 / 库存锁定 / 领料扫码防错</div></div></div>
+      <div class="ai-suggest"><div class="as-ic">✦</div><div>AI 预测：<b>镀锡液</b> 将于 6/12 14:00 缺口 <b>120kg</b>，已自动生成请购建议 <b>PR-0611</b>。库存已按工单锁定，<b>领料须扫码防错</b>。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.toast('请购建议已推送采购员','ai')">推送采购</button></div></div>
+      <div class="split" style="grid-template-columns:1.5fr 1fr;align-items:start">
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>齐套体检 · 待排工单</h3><span class="ch-sub">绿=齐套 / 黄=部分 / 红=缺料</span></div>
+          <div class="tbl-wrap"><table class="grid" id="kitTable"><thead><tr><th>工单</th><th>物料</th><th>需求</th><th>可用</th><th>在途</th><th>齐套率</th><th>预计齐套</th><th>状态</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>扫码领料防错</h3><span class="ai-chip">✦ 防错校验</span></div>
+          <div class="card-body">
+            <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2)"><span>当前工单</span><b class="mono">MO-0605-12</b></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:5px"><span>应领批次</span><b class="mono" style="color:var(--ok)">铜杆 #B3 · 库位 A2</b></div>
+            </div>
+            <div class="form-row"><label>扫描领料批次条码</label>
+              <div style="display:flex;gap:8px"><input id="scanInput" placeholder="扫描或输入批次号，如 #B7 / #B3"><button class="btn primary" onclick="doScan()">校验</button></div>
+            </div>
+            <div style="display:flex;gap:8px;margin:6px 0 14px"><button class="btn sm" onclick="$('#scanInput').value='#B7';doScan()">模拟扫错批次 #B7</button><button class="btn sm" onclick="$('#scanInput').value='#B3';doScan()">模拟正确批次 #B3</button></div>
+            <div id="scanResult"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>库存锁定明细</h3><span class="ch-sub">已按工单预留 · 防止挪用与错领</span></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>工单</th><th>物料</th><th>批次</th><th>库位</th><th>锁定量</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">MO-0605-12</td><td>铜杆 Φ8</td><td class="mono">#B3</td><td class="mono">A2</td><td class="num">18 t</td><td><span class="tag green">已锁定</span></td></tr>
+            <tr><td class="mono">MO-0605-12</td><td>镀锡液</td><td class="mono">#T5</td><td class="mono">C1</td><td class="num">0.18 t</td><td><span class="tag amber">部分锁定</span></td></tr>
+            <tr><td class="mono">SO-26061008</td><td>锡锭</td><td class="mono">#S2</td><td class="mono">C3</td><td class="num">0.1 t</td><td><span class="tag red">缺料·待补</span></td></tr>
+            <tr><td class="mono">MO-0610-22</td><td>铜杆 Φ8</td><td class="mono">#B5</td><td class="mono">A1</td><td class="num">12 t</td><td><span class="tag green">已锁定</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ============ 成本核算（核心） ============ -->
+    <section class="page" id="page-cost">
+      <div class="page-head"><div><h1>成本核算</h1><div class="ph-sub">按工单实时归集 · 与 <b>Oracle ERP</b> 财务模块对接 · 成本自动推送生成财务凭证</div></div>
+        <div class="ph-actions"><button class="btn ai" id="btnCost" onclick="runCost()">✦ 按工单实时归集</button><button class="btn primary" onclick="pushERP()">推送 Oracle ERP 生成凭证</button></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>工单成本 · MO-0605-12（0.25mm 镀锡线 · 18t）</h3><span class="ch-sub">直接材料按领料 / 直接人工按报工 / 制造费用分摊</span><div class="ch-actions"><span class="ai-chip">✦ 自动归集</span></div></div>
+        <div class="tbl-wrap"><table class="grid">
+          <thead><tr><th>成本项</th><th>归集口径</th><th class="num">金额（元）</th><th class="num">单位成本（元/t）</th><th>vs 标准</th></tr></thead>
+          <tbody>
+            <tr><td>直接材料 · 铜杆</td><td>按领料 #B3 · 做市商铜价</td><td class="num"><span id="c-cu">0</span></td><td class="num">71,250</td><td><span class="tag green nodot">+0.4%</span></td></tr>
+            <tr><td>直接材料 · 锡锭</td><td>按领料 #S2 · 行情结算</td><td class="num"><span id="c-sn">0</span></td><td class="num">12,100</td><td><span class="tag green nodot">-1.1%</span></td></tr>
+            <tr><td>直接人工</td><td>按报工工时归集</td><td class="num"><span id="c-lab">0</span></td><td class="num">1,180</td><td><span class="tag amber nodot">+3.2%</span></td></tr>
+            <tr><td>制造费用 · 折旧</td><td>按工时分摊</td><td class="num"><span id="c-dep">0</span></td><td class="num">620</td><td><span class="tag green nodot">持平</span></td></tr>
+            <tr><td>制造费用 · 能耗</td><td>按电表实采分摊</td><td class="num"><span id="c-eng">0</span></td><td class="num">540</td><td><span class="tag amber nodot">+2.0%</span></td></tr>
+            <tr><td>制造费用 · 辅料</td><td>按领用归集</td><td class="num"><span id="c-aux">0</span></td><td class="num">310</td><td><span class="tag green nodot">-0.6%</span></td></tr>
+            <tr style="background:var(--panel-2);font-weight:700"><td>总成本</td><td class="muted">合计</td><td class="num"><b id="c-tot">0</b></td><td class="num"><b id="c-unit">0</b></td><td><span class="tag green nodot" id="c-dev">—</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="card-head"><h3>辅料专项</h3></div>
+          <div class="card-body" style="padding:12px 16px">
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)"><span class="muted">拉丝油</span><b class="mono">¥ 2,340</b></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line)"><span class="muted">镀锡液</span><b class="mono">¥ 1,920</b></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0"><span class="muted">镍铜中间合金</span><b class="mono">¥ 1,320</b></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h3>质量自动采集</h3></div>
+          <div class="card-body" style="padding:14px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0"><span class="muted">一次合格率</span><b style="font-size:18px;color:var(--ok)">99.1%</b></div>
+            <div class="bar" style="margin:4px 0 12px"><i class="ok" style="width:99%"></i></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0"><span class="muted">废品率</span><b style="font-size:18px;color:var(--warn)">0.9%</b></div>
+            <div class="bar"><i class="warn" style="width:9%"></i></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h3>ERP 凭证状态</h3></div>
+          <div class="card-body" style="padding:14px 16px" id="erpBox">
+            <div class="empty" style="padding:18px 8px">尚未推送<br><span class="muted" style="font-size:11px">归集完成后推送 Oracle ERP 生成财务凭证</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 异常预警 ============ -->
+    <section class="page" id="page-alerts">
+      <div class="page-head"><div><h1>异常预警中心</h1><div class="ph-sub">AI 预测性预警 + 规则告警 · 多通道触达（企微 / 钉钉 / 短信）</div></div></div>
+      <div class="card"><div class="tbl-wrap"><table class="grid"><thead><tr><th>级别</th><th>类型</th><th>对象</th><th>说明</th><th>来源</th><th>通知方式</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr class="ai-hint"><td><span class="tag red">紧急</span></td><td>成本</td><td class="mono">QT-0618-09</td><td>报价加工费低于盈亏底线 4.2%，已自动拦截</td><td><span class="ai-chip">✦ AI</span></td><td>企微 · 短信</td><td>11:32</td><td><button class="btn sm ai" onclick="APS.go('quote')">去复核</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>物料</td><td class="mono">镀锡液</td><td>6/12 14:00 缺口 120kg，已生成请购 PR-0611</td><td><span class="ai-chip">✦ AI</span></td><td>钉钉</td><td>10:50</td><td><button class="btn sm" onclick="APS.go('kit')">去齐套</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>产能/交期</td><td class="mono">SO-26061008</td><td>急单交期偏紧，按产能模拟可 6/13 前交付（余量 8h）</td><td><span class="ai-chip">✦ AI</span></td><td>企微</td><td>09:50</td><td><button class="btn sm" onclick="APS.go('review')">去评审</button></td></tr>
+        </tbody></table></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== AI Copilot 坞 ===================== -->
+<aside class="copilot" id="copilot">
+  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>智造 Copilot</h4><div class="cop-sub">已接入：报价 · 评审 · 排产 · 成本</div></div><button class="cop-x">✕</button></div>
+  <div class="cop-body" id="copBody"></div>
+  <div class="cop-foot">
+    <div class="cop-sugs">
+      <button class="cop-sug">急单 SO-1008 能不能接？</button>
+      <button class="cop-sug">最早能什么时候交？</button>
+      <button class="cop-sug">MO-0605 成本明细</button>
+    </div>
+    <div class="cop-input"><input placeholder="问我关于报价/评审/排产/成本的任何问题…"><button>➤</button></div>
+  </div>
+</aside>
+<button class="cop-fab"><span class="pulse"></span>✦ AI 助手</button>
+
+<!-- ===================== 排程参数 模态 ===================== -->
+<div class="modal" id="schedParamModal">
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">⚙</div><h3>AI 智能排程 · 参数</h3><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-row"><label>排程范围</label><select><option>全部待排工单（8 张）</option><option>仅急单（2 张）</option><option>指定机台</option></select></div>
+      <div class="form-row"><label>排程方向</label><select><option>正排（计划开始时间）</option><option>倒排（按交期反推）</option><option>瓶颈顺排+倒排</option></select></div>
+    </div>
+    <div class="form-row"><label>选线 / 算法</label>
+      <div class="seg" style="width:100%"><button class="on">Z+N（均衡）</button><button>Z（省资源）</button><button>N（最早完成）</button><button>启发式</button></div>
+    </div>
+    <label style="font-size:12px;font-weight:600;color:var(--ink-2);display:block;margin-bottom:8px">多目标权重</label>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化延期</span><div class="bar" style="flex:1"><i style="width:90%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化换型</span><div class="bar" style="flex:1"><i style="width:70%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">设备利用率</span><div class="bar" style="flex:1"><i style="width:80%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">在制品控制</span><div class="bar" style="flex:1"><i style="width:55%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12.5px;color:var(--ink-2)">
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 含已锁定关键交期订单保护
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 计入换模损耗矩阵
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn ghost" onclick="APS.closeModal()">取消</button><button class="btn ai" onclick="startSched()">⚡ 开始求解</button></div>
+</div>
+
+<!-- ===================== 排程运行 模态 ===================== -->
+<div class="modal wide" id="schedRunModal">
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>AI 排程引擎 · 求解中</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="run-progress"><span class="rp-pct" id="runPct">0%</span><div class="bar"><i id="runBar" style="width:0"></i></div></div>
+    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">已评估候选方案 <b id="runEval" class="hl-ai">0</b> 个 · 约束：齐套 / 模具 / 日历 / 器件×设备绑定</div>
+    <div class="run-log" id="runLog"></div>
+    <div class="plan-cmp" id="runPlans" style="display:none;margin-top:16px"></div>
+  </div>
+  <div class="modal-foot" id="runFoot" style="display:none">
+    <button class="btn ghost" onclick="APS.closeModal()">放弃</button>
+    <button class="btn" onclick="APS.toast('已打开 What-if 沙盘对比')">What-if 对比</button>
+    <button class="btn ai" onclick="APS.applySchedule()">采纳 AI 推荐方案 → 写入甘特</button>
+  </div>
+</div>
+
+<script src="assets/aps-ui.js"></script>
+<script>
+const {$,$$}=APS;
+
+/* ===================== 甘特数据模型（沿用 req1 风格） ===================== */
+const RES=[
+ {id:'L1',name:'L1 拉丝A',sub:'Φ8→0.25mm',load:0},
+ {id:'L2',name:'L2 拉丝B',sub:'Φ8→0.25mm',load:0},
+ {id:'L3',name:'L3 镀锡A',sub:'镀锡·复绕',load:0},
+ {id:'L4',name:'L4 镀锡B',sub:'镀锡·复绕',load:0},
+ {id:'L5',name:'L5 退火',sub:'连续退火',load:0},
+ {id:'L6',name:'L6 复绕',sub:'分条复绕',load:0},
+];
+const TICKS=['08','09','10','11','12','13','14','15','16','17','18','19'];
+const PLAN_BEFORE={
+ L1:[{id:'MO-0603-12',l:2,w:22,cls:'blue'},{id:'MO-0604-15',l:30,w:26,cls:'blue'}],
+ L2:[{id:'MO-0602-09',l:1,w:30,cls:'blue'},{id:'MO-0606-21',l:40,w:24,cls:'blue'}],
+ L3:[{id:'MO-0601-07',l:3,w:18,cls:'blue'},{id:'MO-0605-12',l:28,w:20,cls:'blue'}],
+ L4:[{id:'MO-0605-18',l:10,w:34,cls:'blue'}],
+ L5:[{id:'MO-0607-03',l:6,w:20,cls:'amber'}],
+ L6:[{id:'MO-0608-05',l:54,w:30,cls:'red'}],
+};
+const LOAD_BEFORE={L1:64,L2:70,L3:52,L4:48,L5:40,L6:78};
+const PLAN_AFTER={
+ L1:[{id:'MO-0603-12',l:2,w:22,cls:'green'},{id:'MO-0604-15',l:25,w:26,cls:'blue'},{id:'MO-0610-22',l:52,w:18,cls:'blue'}],
+ L2:[{id:'MO-0602-09',l:1,w:30,cls:'green'},{id:'MO-0606-21',l:32,w:24,cls:'blue'},{id:'MO-0611-04',l:57,w:16,cls:'blue'}],
+ L3:[{id:'MO-0601-07',l:3,w:16,cls:'green'},{id:'setup',l:19,w:3,cls:'setup'},{id:'急单 SO-1008',l:23,w:20,cls:'red',urgent:1},{id:'MO-0605-12',l:44,w:18,cls:'blue'}],
+ L4:[{id:'MO-0605-18',l:6,w:34,cls:'green'},{id:'MO-0612-08',l:42,w:22,cls:'blue'}],
+ L5:[{id:'MO-0607-03',l:4,w:20,cls:'green'},{id:'MO-0609-11',l:26,w:24,cls:'blue'}],
+ L6:[{id:'MO-0608-05',l:3,w:30,cls:'green'},{id:'MO-0610-19',l:36,w:26,cls:'blue'}],
+};
+const LOAD_AFTER={L1:88,L2:90,L3:86,L4:84,L5:82,L6:91};
+
+let scheduled=false;
+
+function loadColor(v){ return v>90?'var(--danger)':v>70?'var(--warn)':'var(--ok)'; }
+function renderGantt(host, plan, load, draggable){
+  const el=typeof host==='string'?$(host):host;
+  let h='<div class="gantt-head"><div class="gantt-corner">机台 \\ 时间</div><div class="gantt-times">'
+    + TICKS.map(t=>`<div class="gantt-tick"><b>${t}</b>:00</div>`).join('') + '</div></div><div class="gantt-body">';
+  RES.forEach(r=>{
+    const lv=load[r.id]||0;
+    h+=`<div class="gantt-row"><div class="gantt-res"><b>${r.name}</b><small>${r.sub}</small>
+        <div class="load"><i style="width:${lv}%;background:${loadColor(lv)}"></i></div></div>
+        <div class="gantt-lane" data-res="${r.id}">`;
+    (plan[r.id]||[]).forEach(t=>{
+      const cls='gbar '+t.cls+(t.urgent?' urgent':'');
+      const lab=t.cls==='setup'?'换型':t.id;
+      h+=`<div class="${cls}" style="left:${t.l}%;width:${t.w}%" title="${t.id}">${t.locked?'<span class="lk">🔒</span>':''}${lab}</div>`;
+    });
+    h+='</div></div>';
+  });
+  const nowPct = (2.3/12)*100;
+  h+=`<div class="gantt-now" style="left:calc(130px + (100% - 130px)*${nowPct/100})"></div>`;
+  h+='</div>';
+  el.innerHTML=h;
+  if(draggable){
+    $$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b, bar=>{
+      APS.toast('已记录手工调整 · AI 重新校验：无冲突','ai');
+    }));
+  }
+}
+
+function renderSchedKpis(){
+  const box=$('#schedKpis');
+  const data = scheduled
+   ? [['预计延期','0 张','good'],['换型次数','2 次','good'],['设备利用率','89%','good'],['在制品','↓ 12%','good']]
+   : [['预计延期','1 张','bad'],['换型次数','5 次',''],['设备利用率','71%',''],['在制品','—','']];
+  box.innerHTML = data.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)">
+    <span class="muted" style="font-size:12px">${d[0]}</span>
+    <b style="font-size:15px;font-variant-numeric:tabular-nums;color:${d[2]==='good'?'var(--ok)':d[2]==='bad'?'var(--danger)':'var(--ink)'}">${d[1]}</b></div>`).join('');
+}
+
+/* 待排工单列表 */
+const WAIT=[
+ {id:'SO-26061008',m:'0.25mm 镀锡线',q:'20t',due:'6/13',p:'急'},
+ {id:'MO-0610-22',m:'0.20mm 镀锡线',q:'12t',due:'6/15',p:'高'},
+ {id:'MO-0611-04',m:'0.30mm 漆包线',q:'8t',due:'6/16',p:'普通'},
+ {id:'MO-0612-08',m:'0.25mm 镀锡线',q:'15t',due:'6/16',p:'高'},
+ {id:'MO-0609-11',m:'0.18mm 镀锡线',q:'6t',due:'6/17',p:'普通'},
+ {id:'MO-0610-19',m:'0.40mm 裸铜线',q:'10t',due:'6/17',p:'普通'},
+ {id:'MO-0610-22b',m:'0.25mm 镀锡线',q:'9t',due:'6/18',p:'普通'},
+ {id:'MO-0611-30',m:'0.20mm 漆包线',q:'5t',due:'6/18',p:'普通'},
+];
+function renderWait(){
+  const box=$('#waitList');
+  if(scheduled){ box.innerHTML='<div class="empty" style="padding:24px 12px">✓ 全部已排入计划<br><span class="muted" style="font-size:11px">含急单 1 张 · 待审核下发</span></div>'; $('#waitCount').textContent='0 张'; return; }
+  $('#waitCount').textContent=WAIT.length+' 张';
+  box.innerHTML=WAIT.map(w=>{
+    const pc=w.p==='急'?'red':w.p==='高'?'amber':'gray';
+    return `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px;background:#fff">
+      <div style="display:flex;align-items:center;gap:6px"><b class="mono" style="font-size:11.5px">${w.id}</b><span class="tag ${pc} nodot" style="margin-left:auto;padding:1px 7px">${w.p}</span></div>
+      <div style="font-size:11.5px;color:var(--ink-2);margin-top:3px">${w.m} · ${w.q} · 交期 ${w.due}</div></div>`;
+  }).join('');
+}
+
+/* ===================== AI 排程流程 ===================== */
+function openSchedParams(){ if(scheduled){ APS.toast('已是 AI 排程结果，如需重排请先调整工单'); return; } APS.openModal('schedParamModal'); }
+function startSched(){
+  APS.closeModal();
+  setTimeout(()=>APS.runScheduler({
+    total:3182,
+    logLines:[
+     [200,'<span class="ts">10:24:01</span> 做市商 / ERP 已评审工单 <span class="em">8</span> 张自动入流（含急单 <span class="wn">SO-26061008</span>）'],
+     [450,'<span class="ts">10:24:01</span> 装配约束：齐套时间 · 模具占用 · 生产日历 · <span class="hi">器件×设备绑定</span> · 换模损耗矩阵'],
+     [500,'<span class="ts">10:24:02</span> 目标：min(延期·换型·在制) / max(利用率) · 算法 <span class="hi">Z+N 选线</span>'],
+     [650,'<span class="ts">10:24:02</span> 求解中… 已评估 1,206 方案'],
+     [650,'<span class="ts">10:24:03</span> 急单 SO-1008 → 同规格后插入 L3，换型 <span class="hi">5→2</span>（+2.0h 最小）'],
+     [600,'<span class="ts">10:24:04</span> MO-0608-05 由 L6 早班顺排，<span class="ok">延期风险消除</span>（增量重排，仅重算受影响部分）'],
+     [550,'<span class="ts">10:24:05</span> 收敛：换型 5→2，利用率 71%→<span class="ok">89%</span>，延期 1→<span class="ok">0</span>'],
+     [400,'<span class="ts">10:24:05</span> <span class="ok">✓ 生成 3 套候选方案，等待排程员审核</span>'],
+    ],
+    plans:`
+      <div class="plan"><div class="p-t">方案 A · 排到最前</div>
+        <div class="p-m">完成时间<b>6/12 18:00</b></div><div class="p-m">受影响工单<b>2 张</b></div><div class="p-m">换型<b>+3.5h</b></div></div>
+      <div class="plan best"><div class="p-t">方案 B · 同规格后插</div>
+        <div class="p-m">完成时间<b class="good">6/12 22:40</b></div><div class="p-m">受影响工单<b class="good">0 张</b></div><div class="p-m">换型<b class="good">+2.0h</b></div></div>
+      <div class="plan"><div class="p-t">方案 C · 排到最后</div>
+        <div class="p-m">完成时间<b>6/13 19:00</b></div><div class="p-m">交期余量<b>踩线</b></div><div class="p-m">换型<b>+0h</b></div></div>`,
+    onDone:applyScheduleResult
+  }), 260);
+}
+function applyScheduleResult(){
+  scheduled=true;
+  $('#planVer').textContent='V0610-3（AI · 待审核）';
+  $('#ganttSub').textContent='AI 排程结果：延期 0 · 急单已插入 · 利用率 89%';
+  renderGantt('#schedGantt', PLAN_AFTER, LOAD_AFTER, true);
+  renderSchedKpis(); renderWait();
+  $('#btnPublish').disabled=false;
+  $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:linear-gradient(120deg,var(--ai-soft),#fff)">
+    <div class="as-ic">✦</div>
+    <div><b>AI 已生成排程方案 V0610-3</b>：8 张待排全部排入，急单 SO-1008 已按"交期影响最小"插入 L3，全局延期 0 张。<span class="muted">方案需经您审核后方可下发。</span></div>
+    <div class="as-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排？</button><button class="btn ai sm" onclick="publishPlan()">审核下发</button></div></div>`;
+  APS.toast('AI 排程完成：延期 1→0，利用率 71%→89%','ai');
+}
+function explainSched(){
+  $('.cop-fab').click();
+  setTimeout(()=>APS.copilot.run('why'), 300);
+}
+function publishPlan(){
+  if(!scheduled){ APS.toast('请先运行 AI 智能排程','warn'); return; }
+  APS.toast('计划 V0610-3 已审核下发至 L1–L6 产线终端 · 回执跟踪中','ok');
+  $('#btnPublish').disabled=true;
+  $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:var(--ok-soft);border-color:#c4ebd7">
+    <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
+    <div><b>V0610-3 已下发</b> · 产线电子工单已送达，电子工艺卡随单下发，回执跟踪中（0/8 已确认 → 实时更新）。</div>
+    <div class="as-acts"><button class="btn sm" onclick="APS.go('cost')">去成本核算</button></div></div>`;
+}
+
+/* ===================== 智能报价 ===================== */
+function runQuote(){
+  const btn=$('#btnQuote'); btn.disabled=true; btn.textContent='✦ AI 测算中…';
+  const box=$('#quoteDetail');
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">电解铜（做市商实时）</span><b class="mono">¥ <span id="q-cu">0</span>/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">锡锭（做市商实时）</span><b class="mono">¥ <span id="q-sn">0</span>/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">材料成本（含锡耗）</span><b class="mono">¥ <span id="q-mat">0</span>/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">加工费（规格历史工时）</span><b class="mono">¥ <span id="q-proc">0</span>/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">损耗摊销（1.8%）</span><b class="mono">¥ <span id="q-loss">0</span>/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span class="muted">盈亏底线</span><b class="mono" style="color:var(--ink-3)">¥ 80,150/t</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0 4px"><span style="font-weight:700">AI 建议报价</span><b class="mono" style="font-size:20px;color:var(--brand)">¥ <span id="q-quote">0</span>/t</b></div>
+    <div id="q-conc"></div>`;
+  APS.count('#q-cu',0,71250,{dur:700,sep:true});
+  APS.count('#q-sn',0,215400,{dur:800,sep:true});
+  setTimeout(()=>APS.count('#q-mat',0,74980,{dur:700,sep:true}),350);
+  setTimeout(()=>APS.count('#q-proc',0,5980,{dur:700,sep:true}),650);
+  setTimeout(()=>APS.count('#q-loss',0,1340,{dur:700,sep:true}),900);
+  setTimeout(()=>APS.count('#q-quote',0,82600,{dur:900,sep:true}),1150);
+  setTimeout(()=>{
+    $('#q-conc').innerHTML=`<div class="ai-suggest" style="margin:14px 0 0;background:var(--ok-soft);border-color:#c4ebd7">
+      <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
+      <div><b>报价 ¥82,600/t</b> · 有效期 3 天 · 高于盈亏底线 ¥80,150/t（毛利 3.0%）。<span class="muted">低于盈亏底线将自动拦截。</span></div></div>`;
+    btn.disabled=false; btn.textContent='✦ 按 AI 测算报价';
+    APS.toast('报价单已生成 · PC/移动端同步','ai');
+  },2100);
+}
+
+/* ===================== 订单评审 ===================== */
+const RV_CHECKS=[
+ ['模具 D-020','在库可用 · 占用至 6/12','ok'],
+ ['主材 · 铜杆 Φ8','需求 18t · 在库 18t（已锁库）','ok'],
+ ['辅料 · 镀锡液','需求 0.3t · 在库缺口 120kg','warn'],
+ ['产能 / 交期','按 6 台资源模拟，可 6/13 前交付（余量 8h）','ok'],
+];
+function renderReviewIdle(){
+  $('#reviewChecks').innerHTML=RV_CHECKS.map((c,i)=>`
+    <div class="rv-item" id="rv-${i}" style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line);opacity:.45;transition:.3s">
+      <span class="rv-ic" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex:none;display:grid;place-items:center;font-size:11px;color:var(--ink-3)">${i+1}</span>
+      <div style="flex:1"><b style="font-size:12.5px">${c[0]}</b><div class="muted" style="font-size:11.5px">${c[1]}</div></div>
+      <span class="rv-tag muted" style="font-size:11px">待核验</span></div>`).join('');
+  $('#rvResult').style.display='none';
+  $('#rvSub').textContent='点「AI 自动评审」按规则逐项核验';
+}
+function runReview(){
+  APS.go('review');
+  const btn=$('#btnReview'); btn.disabled=true; btn.textContent='✦ 评审中…';
+  renderReviewIdle();
+  $('#rvSub').textContent='AI 正在关联模具/主辅料/产能数据逐项核验…';
+  RV_CHECKS.forEach((c,i)=>{
+    setTimeout(()=>{
+      const it=$('#rv-'+i); if(!it) return;
+      it.style.opacity='1';
+      const ic=$('.rv-ic',it), tag=$('.rv-tag',it);
+      if(c[2]==='ok'){ ic.style.cssText='width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12px;background:var(--ok);color:#fff;border:none'; ic.textContent='✓'; tag.outerHTML='<span class="tag green nodot">通过</span>'; }
+      else{ ic.style.cssText='width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12px;background:var(--warn);color:#fff;border:none'; ic.textContent='!'; tag.outerHTML='<span class="tag amber nodot">缺料·已请购</span>'; }
+    }, 500+i*700);
+  });
+  setTimeout(()=>{
+    $('#rvResult').style.display='';
+    $('#rvSub').textContent='评审完成：模具/主材齐备，辅料缺口已转请购，产能满足';
+    $('#rvTag1').innerHTML='<span class="tag green">建议接单</span>';
+    $('#reviewChecks').insertAdjacentHTML('beforeend',`
+      <div class="ai-suggest" style="margin:14px 0 0;background:var(--ok-soft);border-color:#c4ebd7">
+        <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
+        <div><b>建议接单</b>：模具 D-020 在库、主材铜杆 18t 齐备、产能可 6/13 前交付。辅料镀锡液缺 120kg，<b>已自动生成请购建议 PR-0611</b>。<span class="muted">最终由业务确认。</span></div>
+        <div class="as-acts"><button class="btn sm" onclick="APS.go('kit')">查看齐套</button><button class="btn ai sm" onclick="APS.toast('已确认接单 · 转排产','ok');APS.go('sched')">确认接单</button></div></div>`);
+    btn.disabled=false; btn.textContent='✦ AI 自动评审';
+    APS.toast('AI 评审完成：建议接单 · 已生成请购 PR-0611','ai');
+  }, 500+RV_CHECKS.length*700+300);
+}
+
+/* ===================== 电子工艺卡 ===================== */
+let cardStep=0;
+function renderCardFlow(){
+  const steps=[
+   ['工艺员 提交','李工 · AI 推荐参数（命中 #A12）',cardStep>=1?'ok':'cur'],
+   ['主管 审批','王工 · 工艺主管',cardStep>=2?'ok':cardStep>=1?'cur':'wait'],
+   ['生效下发','随工单下发至产线终端',cardStep>=2?'ok':'wait'],
+  ];
+  $('#cardFlow').innerHTML=steps.map(s=>{
+    const cls=s[2]==='ok'?'tl-item ok':s[2]==='cur'?'tl-item ai':'tl-item';
+    const st=s[2]==='ok'?'<span class="tag green nodot" style="margin-left:6px">已通过</span>':s[2]==='cur'?'<span class="tag purple nodot" style="margin-left:6px">待处理</span>':'<span class="tag gray nodot" style="margin-left:6px">待启动</span>';
+    return `<div class="${cls}"><div class="tl-t">${s[0]} ${st}</div><div class="tl-d">${s[1]}</div></div>`;
+  }).join('');
+}
+function approveCard(){
+  if(cardStep>=2){ APS.toast('工艺卡已全部审批通过'); return; }
+  cardStep++; renderCardFlow();
+  if(cardStep===1){ APS.toast('已提交 · 待工艺主管审批','ai'); }
+  else{ APS.toast('电子工艺卡 PC-0618-07 已生效 · 随工单下发','ok'); }
+}
+
+/* ===================== 齐套 / 防错 ===================== */
+function renderKit(){
+  const K=[
+   ['SO-26061008','铜杆 Φ8','25t','18t','2t','86','6/11 09:00','amber'],
+   ['SO-26061008','镀锡液','0.3t','0.18t','0.12t','60','6/12 14:00','red'],
+   ['MO-0605-12','铜杆 Φ8','18t','18t','—','100','已齐套','green'],
+   ['MO-0612-08','镀锡液','0.3t','0.3t','—','100','已齐套','green'],
+   ['MO-0611-04','漆包漆','0.2t','0.05t','0.1t','75','6/12 14:00','amber'],
+  ];
+  $('#kitTable tbody').innerHTML=K.map(k=>{
+    const cls=k[7], i=cls==='green'?'ok':cls==='amber'?'warn':'red';
+    return `<tr><td class="mono">${k[0]}</td><td>${k[1]}</td><td class="num">${k[2]}</td><td class="num">${k[3]}</td><td class="num">${k[4]}</td>
+      <td style="min-width:120px"><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i class="${i}" style="width:${k[5]}%"></i></div><b style="font-size:11px;width:32px">${k[5]}%</b></div></td>
+      <td>${k[6]}</td><td><span class="tag ${cls}">${cls==='green'?'齐套':cls==='amber'?'部分':'缺料'}</span></td></tr>`;
+  }).join('');
+}
+function doScan(){
+  const v=($('#scanInput').value||'').trim().toUpperCase().replace(/\s/g,'');
+  const box=$('#scanResult');
+  if(!v){ APS.toast('请先扫描或输入批次号','warn'); return; }
+  if(v==='#B3'||v==='B3'){
+    box.innerHTML=`<div class="ai-suggest" style="background:var(--ok-soft);border-color:#c4ebd7">
+      <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
+      <div><b>校验通过</b>：批次 #B3 · 库位 A2 与工单 MO-0605-12 匹配，准予出库领料。</div></div>`;
+    APS.toast('防错校验通过 · 准予领料','ok');
+  }else{
+    box.innerHTML=`<div class="ai-suggest" style="background:var(--danger-soft);border-color:#f0c4be">
+      <div class="as-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⛔</div>
+      <div><b style="color:var(--danger)">领料拦截</b>：扫描批次 <b>${v}</b> 与本工单不符。本工单应领 <b>#B3 · 库位 A2</b>，请勿错领！</div></div>`;
+    APS.toast('防错报警：批次不符，已拦截','warn');
+  }
+}
+
+/* ===================== 成本核算 ===================== */
+let costGathered=false;
+function runCost(){
+  costGathered=true;
+  const btn=$('#btnCost'); btn.disabled=true; btn.textContent='✦ 归集中…';
+  APS.count('#c-cu',0,1282500,{dur:900,sep:true});
+  APS.count('#c-sn',0,217800,{dur:900,sep:true});
+  setTimeout(()=>APS.count('#c-lab',0,21240,{dur:700,sep:true}),250);
+  setTimeout(()=>APS.count('#c-dep',0,11160,{dur:700,sep:true}),400);
+  setTimeout(()=>APS.count('#c-eng',0,9720,{dur:700,sep:true}),550);
+  setTimeout(()=>APS.count('#c-aux',0,5580,{dur:700,sep:true}),700);
+  setTimeout(()=>{ APS.count('#c-tot',0,1548000,{dur:1000,sep:true}); APS.count('#c-unit',0,86000,{dur:1000,sep:true}); },950);
+  setTimeout(()=>{ $('#c-dev').textContent='-0.8%'; btn.disabled=false; btn.textContent='✦ 按工单实时归集'; APS.toast('工单成本已实时归集 · 单位成本 ¥86,000/t','ai'); },2000);
+}
+function pushERP(){
+  if(!costGathered){ APS.toast('请先按工单实时归集成本','warn'); return; }
+  $('#erpBox').innerHTML=`<div style="text-align:center;padding:6px 0">
+    <div style="width:46px;height:46px;border-radius:12px;margin:0 auto 10px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-size:22px">✓</div>
+    <b style="font-size:13px">凭证 VCH-202606-118</b><div class="muted" style="font-size:11.5px;margin-top:3px">已推送 Oracle ERP 财务模块</div>
+    <span class="tag green" style="margin-top:8px">已生成凭证</span></div>`;
+  APS.toast('凭证 VCH-202606-118 已推送 Oracle ERP','ok');
+}
+
+/* ===================== 工作台辅助 ===================== */
+function renderLines(host){
+  const L=[['L1 拉丝A',92,88],['L2 拉丝B',85,82],['L3 镀锡A',96,91],['L4 镀锡B',90,87],['L5 退火',88,90],['L6 复绕',82,79]];
+  $(host).innerHTML=L.map(l=>{
+    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)">
+      <b style="width:78px;font-size:12.5px">${l[0]}</b>
+      <span class="tag green" style="width:64px;justify-content:center">运行</span>
+      <div class="bar" style="flex:1"><i style="width:${l[2]}%"></i></div>
+      <span class="muted" style="width:120px;font-size:11.5px;text-align:right">达成 ${l[2]}% / 计划 ${l[1]}%</span></div>`;
+  }).join('');
+}
+
+/* ===================== Copilot 场景 ===================== */
+APS._copWelcome='您好，我是智造 Copilot ✦ 已接入当前生产环境，并打通底座：做市商系统（实时行情/意向单）、Oracle ERP（成本凭证）、WMS（库存齐套）。可以问我急单能不能接、最早交期、报价/成本明细、辅料缺口等。';
+APS.copilot.register({
+  urgent:{user:'急单 SO-1008 能不能接？',
+    steps:[['解析意向单 SO-26061008','copilot.parse()'],['关联模具/主材/辅料','wms.check'],['核验产能与交期','engine.capacity()'],['汇总评审结论','rules.review()']],
+    text:'可以承接 ✅ 模具 D-020 在库、主材铜杆 18t 已锁库、产能可 6/13 前交付（余量 8h）。仅辅料镀锡液缺 120kg，已自动生成请购建议 PR-0611，不影响接单。',
+    rich:`<div class="cop-card"><div class="cc-t">✦ 规则评审结果</div>
+      <div class="p-m" style="font-size:11.5px">模具 D-020<b class="good">在库 ✓</b></div>
+      <div class="p-m" style="font-size:11.5px">主材 铜杆 18t<b class="good">齐备 ✓</b></div>
+      <div class="p-m" style="font-size:11.5px">辅料 镀锡液<b>缺 120kg · 已请购</b></div>
+      <div class="p-m" style="font-size:11.5px">产能/交期<b class="good">6/13 可交 ✓</b></div>
+      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('review');APS.toast('已定位评审详情','ai')">查看评审</button></div></div>`},
+  due:{user:'最早能什么时候交？',
+    steps:[['读取待排工单与齐套','plan.load()'],['按 6 台资源仿真','engine.simulate()'],['计入换型与日历','setup-matrix']],
+    text:'按当前产能仿真，SO-26061008（20t）同规格后插 L3，预计 6/12 22:40 完工、6/13 前可交，交期余量约 8h。若加开夜班可再提前约 4h。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('sched');APS.toast('已打开排产工作台','ai')">去排产</button></div>`},
+  cost:{user:'MO-0605 成本明细',
+    steps:[['归集领料/报工/费用','cost.gather()'],['套用做市商铜/锡价','market.price()'],['对比标准成本','std.compare()']],
+    text:'MO-0605-12（18t）总成本约 ¥1,548,000，单位成本 ¥86,000/t，较标准低 0.8%。其中直接材料铜 ¥1,282,500、锡 ¥217,800，人工 ¥21,240，制造费用合计 ¥26,460。一次合格率 99.1%。可一键推送 Oracle ERP 生成凭证。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('cost')">查看成本</button><button class="cop-sug" onclick="APS.go('cost');APS.toast('请在成本页点推送 ERP','ai')">推送 ERP</button></div>`},
+  aux:{user:'辅料缺口情况',
+    steps:[['查 WMS 辅料库存','wms.aux()'],['匹配工单需求','match.demand()'],['生成请购建议','pr.suggest()']],
+    text:'当前辅料缺口：镀锡液缺 120kg（SO-26061008 触发），预计 6/12 14:00 到货前补齐；已自动生成请购建议 PR-0611 推送采购。其余拉丝油、镍铜中间合金库存充足。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.go('kit')">去齐套</button></div>`},
+  why:{user:'急单为什么排在 L3？',
+    steps:[['读取排程决策依据','explain(SO)'],['对比候选资源','L3 vs L5'],['计算换型损耗','setup-matrix']],
+    text:'排在 L3 的原因：① L3 上一单同为 0.25mm 镀锡线，换模仅 2.0h（L5 需 3.8h）；② L3 当前负荷有空档，不挤占已锁定交期订单；③ Z+N 选线在"省资源+早完成"间取平衡。可解释、可追溯。'},
+});
+APS.copilot.route([
+  [/急单|插单|能接|能不能接|SO-1008|接单/,'urgent'],
+  [/最早|交期|什么时候|何时交|交货/,'due'],
+  [/成本|MO-0605|凭证|归集/,'cost'],
+  [/辅料|缺口|镀锡液|请购|缺料/,'aux'],
+  [/为什么|怎么排|解释|L3/,'why'],
+]);
+
+/* ===================== 初始化 ===================== */
+APS.initShell();
+APS.initCopilot();
+APS.onPage(p=>{
+  if(p==='dash'){ renderGantt('#dashGantt', scheduled?PLAN_AFTER:PLAN_BEFORE, scheduled?LOAD_AFTER:LOAD_BEFORE,false); renderLines('#dashLines'); }
+  if(p==='kit') renderKit();
+  if(p==='card') renderCardFlow();
+  if(p==='review' && !$('#reviewChecks').children.length) renderReviewIdle();
+});
+// 首屏：工作台
+renderGantt('#dashGantt', PLAN_BEFORE, LOAD_BEFORE,false); renderLines('#dashLines');
+// 预渲染各屏数据（首次进入即就绪）
+renderGantt('#schedGantt', PLAN_BEFORE, LOAD_BEFORE, true);
+renderSchedKpis(); renderWait();
+renderKit(); renderReviewIdle(); renderCardFlow();
+APS.count('#d-k1',0,18,{dur:700}); APS.count('#d-k4',0,41,{dur:900});
+</script>
+</body>
+</html>

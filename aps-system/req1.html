@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能排产系统 · 台意 — 江铜 APS+AI（生产环境）</title>
+<link rel="stylesheet" href="assets/aps-ui.css">
+</head>
+<body data-theme="req1">
+<div class="app sb-collapsed-no" id="app">
+
+  <!-- ===================== 侧栏 ===================== -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">APS</div>
+      <div class="sb-name">智能排产系统<small>台意特种电工材料</small></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-group-t">计划与排产</div>
+      <div class="nav-item" data-page="dash" data-crumb="工作台"><span class="ni-ic">📊</span><span>工作台</span></div>
+      <div class="nav-item" data-page="orders" data-crumb="制造订单"><span class="ni-ic">🧾</span><span>制造订单</span></div>
+      <div class="nav-item active" data-page="sched" data-crumb="智能排产工作台"><span class="ni-ic">🗓️</span><span>智能排产工作台</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="dispatch" data-crumb="计划下发"><span class="ni-ic">📤</span><span>计划下发</span></div>
+      <div class="nav-group-t">物料与执行</div>
+      <div class="nav-item" data-page="kitting" data-crumb="物料齐套"><span class="ni-ic">📦</span><span>物料齐套</span><span class="ai-dot">AI</span></div>
+      <div class="nav-item" data-page="monitor" data-crumb="执行监控"><span class="ni-ic">📡</span><span>执行监控</span></div>
+      <div class="nav-item" data-page="alerts" data-crumb="异常预警"><span class="ni-ic">⚠️</span><span>异常预警</span><span class="ni-tag">3</span></div>
+      <div class="nav-group-t">分析</div>
+      <div class="nav-item" data-page="reports" data-crumb="报表中心"><span class="ni-ic">📈</span><span>报表中心</span></div>
+    </nav>
+    <div class="sb-foot"><div class="sb-foot-txt">版本 <b>APS v3.2.1</b> · <b>鼎捷/做市商</b> 已对接<br>同步：实时 · 11:46:02</div></div>
+  </aside>
+
+  <!-- ===================== 顶栏 ===================== -->
+  <header class="topbar">
+    <button class="tb-toggle" title="折叠菜单"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="tb-crumb"><span>计划与排产</span><span class="sep">/</span><b id="crumbPage">智能排产工作台</b></div>
+    <div class="tb-search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input placeholder="搜索工单号 / 物料 / 设备…  ( / )">
+    </div>
+    <div class="tb-right">
+      <span class="env-badge"><span class="dot"></span>生产环境</span>
+      <button class="tb-icon" title="预警"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge-num">3</span></button>
+      <button class="tb-icon" title="帮助"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg></button>
+      <div class="tb-user"><div class="ava">张</div><div><div class="un">张工</div><div class="ur">高级排程员</div></div></div>
+    </div>
+  </header>
+
+  <!-- ===================== 主内容 ===================== -->
+  <main class="main">
+
+    <!-- ============ 工作台 ============ -->
+    <section class="page" id="page-dash">
+      <div class="page-head"><div><h1>排产工作台 · 今日概览</h1><div class="ph-sub">2026-06-18 周四 · 早班 08:00–20:00 · 在产 14 台机台</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>同步数据</button><button class="btn ai" onclick="APS.go('sched')">⚡ 进入智能排产</button></div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">📋</span><span class="k-label">今日待排工单</span></div><div class="k-val" id="d-k1">8</div><div class="k-foot">含急单 <span class="k-delta down">2</span> 张 · 已排 118 / 126</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">✓</span><span class="k-label">准时交付率（近7日）</span></div><div class="k-val">96.4<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 4.1%</span> 较上线前</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">⚙</span><span class="k-label">设备综合利用率</span></div><div class="k-val">89<small>%</small></div><div class="k-foot"><span class="k-delta up">▲ 18%</span> 天级→小时级排产</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ai-soft);color:var(--ai)">✦</span><span class="k-label">AI 今日处理</span></div><div class="k-val" id="d-k4">23</div><div class="k-foot">次自动排程 / 插单 / 重排</div></div>
+      </div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head"><h3>AI 待办建议</h3><span class="ai-chip">✦ Copilot</span><div class="ch-actions"><span class="ch-sub">系统主动发现，待您处置</span></div></div>
+          <div class="card-body" style="padding:6px 16px 14px">
+            <div class="ai-suggest"><div class="as-ic">⚡</div><div><b>急单 SO-26061008</b> 可在 L3 插入，交期影响最小（余量 25h）。<span class="muted">三模式仿真已就绪。</span></div><div class="as-acts"><button class="btn ai sm" onclick="APS.go('sched');APS.toast('已定位到 L3 插单方案','ai')">查看方案</button></div></div>
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--warn),#f0bf6b)">⏱</div><div><b>MO-0608-05</b> 预测将延期 6.2h（节拍偏差累积）。建议夜班加开 1 班即可消除。</div><div class="as-acts"><button class="btn sm" onclick="APS.toast('已模拟加开夜班：延期清零','ai')">模拟</button></div></div>
+            <div class="ai-suggest"><div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">📦</div><div><b>0.25mm 镀锡线</b> 锡锭将于 6/11 09:00 缺口 0.4t，已生成采购提醒 PR-0610。</div><div class="as-acts"><button class="btn sm" onclick="APS.go('kitting')">去齐套</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>产线达成</h3><span class="ch-sub">计划 vs 实绩</span></div>
+          <div class="card-body" style="padding:14px 16px">
+            <div id="dashLines"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>今日排产甘特（只读概览）</h3><div class="ch-actions"><button class="btn sm" onclick="APS.go('sched')">打开工作台编辑 →</button></div></div>
+        <div class="card-body flush"><div id="dashGantt"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 制造订单 ============ -->
+    <section class="page" id="page-orders">
+      <div class="page-head"><div><h1>制造订单</h1><div class="ph-sub">来源：做市商系统 / 销售订单转入 · 自动同步</div></div>
+        <div class="ph-actions"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>新建</button><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>导入</button><button class="btn ai" onclick="APS.go('sched')">✦ 同步至排产</button></div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="filter">状态 <select id="ordStatus" onchange="renderOrders()"><option value="">全部</option><option>待排程</option><option>已排程</option><option>已下发</option><option>生产中</option><option>已完工</option></select></div>
+          <div class="filter">优先级 <select id="ordPrio" onchange="renderOrders()"><option value="">全部</option><option>急</option><option>高</option><option>普通</option></select></div>
+          <div class="sep"></div>
+          <div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="搜索工单/物料" oninput="renderOrders(this.value)"></div>
+          <div style="margin-left:auto" class="muted" id="ordCount"></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="grid" id="ordTable">
+            <thead><tr><th class="checkcell"><input type="checkbox" onclick="$$('#ordTable tbody input').forEach(c=>c.checked=this.checked)"></th>
+              <th class="sortable">制造订单号 <span class="arr">▾</span></th><th>物料 / 规格</th><th class="sortable">数量</th><th>交期</th><th>优先级</th><th>齐套</th><th>状态</th><th>AI</th><th>操作</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="tbl-foot"><span>共 <b id="ordTotal">126</b> 条 · 已选 <b>0</b></span><div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button>›</button></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 智能排产工作台（核心） ============ -->
+    <section class="page active" id="page-sched">
+      <div class="page-head"><div><h1>智能排产工作台</h1><div class="ph-sub">计划版本 <b id="planVer">V0610-1（基准）</b> · 小时级 · 共 6 台资源 / 8 张待排</div></div>
+        <div class="ph-actions">
+          <div class="seg" style="margin-right:4px"><button>日</button><button class="on">班次</button><button>小时</button></div>
+          <button class="btn" onclick="APS.toast('已切换为倒排（按交期反推）')">↤ 倒排</button>
+          <button class="btn ai" id="btnAISched" onclick="openSchedParams()">⚡ AI 智能排程</button>
+          <button class="btn primary" id="btnPublish" onclick="publishPlan()" disabled>审核下发</button>
+        </div>
+      </div>
+
+      <div id="schedBanner"></div>
+
+      <div class="split" style="grid-template-columns:1fr 280px;align-items:start">
+        <div class="card" style="margin:0">
+          <div class="card-head"><h3>资源甘特 · L1–L6</h3><span class="ch-sub" id="ganttSub">基准计划：存在空转与 1 张延期</span>
+            <div class="ch-actions"><button class="btn sm ghost" onclick="APS.toast('已导出当前甘特 PNG')">导出</button></div></div>
+          <div class="card-body flush">
+            <div class="gantt" id="schedGantt"></div>
+            <div class="gantt-legend">
+              <i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i>
+              <i><span class="lg-sw" style="background:#1a9d6b"></span>提前/正常</i>
+              <i><span class="lg-sw" style="background:#dc4b3e"></span>延期风险</i>
+              <i><span class="lg-sw" style="background:repeating-linear-gradient(135deg,#c2cbd8 0 4px,#dfe5ee 4px 8px)"></span>换型/换模</i>
+              <i><span class="lg-sw" style="outline:2px solid rgba(220,75,62,.6);background:#ef8b7d"></span>急单插入</i>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin:0 0 14px">
+            <div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCount">8 张</span></div>
+            <div class="card-body" style="padding:8px;max-height:300px;overflow:auto" id="waitList"></div>
+          </div>
+          <div class="card" style="margin:0">
+            <div class="card-head"><h3>本次排程指标</h3></div>
+            <div class="card-body" style="padding:12px 16px" id="schedKpis">
+              <div class="sk-row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 物料齐套 ============ -->
+    <section class="page" id="page-kitting">
+      <div class="page-head"><div><h1>物料齐套</h1><div class="ph-sub">实时对接 WMS / 采购在途 · AI 缺料预测</div></div></div>
+      <div class="ai-suggest"><div class="as-ic">✦</div><div>AI 预测：<b>锡锭</b> 将于 6/11 09:00 缺口 <b>0.4t</b>，影响 2 张工单。已自动生成采购提醒 <b>PR-0610</b>。</div><div class="as-acts"><button class="btn ai sm" onclick="APS.toast('采购提醒已推送采购员','ai')">推送采购</button></div></div>
+      <div class="card">
+        <div class="card-head"><h3>齐套体检 · 待排工单</h3><span class="ch-sub">绿=齐套 / 黄=部分 / 红=缺料</span></div>
+        <div class="tbl-wrap"><table class="grid" id="kitTable"><thead><tr><th>工单</th><th>物料</th><th>需求</th><th>可用</th><th>在途</th><th>齐套率</th><th>预计齐套</th><th>状态</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ============ 计划下发 ============ -->
+    <section class="page" id="page-dispatch">
+      <div class="page-head"><div><h1>计划下发</h1><div class="ph-sub">排程员审核确认后下发至产线终端 · 回收电子验收回执</div></div></div>
+      <div class="card"><div class="card-head"><h3>下发履历</h3></div>
+        <div class="tbl-wrap"><table class="grid"><thead><tr><th>版本</th><th>下发时间</th><th>工单数</th><th>下发人</th><th>产线回执</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">V0610-2</td><td>06-18 09:12</td><td class="num">3</td><td>张工</td><td><span class="tag green">3/3 已确认</span></td><td><span class="tag green">已生效</span></td></tr>
+            <tr><td class="mono">V0610-1</td><td>06-18 08:05</td><td class="num">118</td><td>张工</td><td><span class="tag green">14/14 已确认</span></td><td><span class="tag green">已生效</span></td></tr>
+            <tr><td class="mono">V0609-7</td><td>06-17 19:40</td><td class="num">96</td><td>李工</td><td><span class="tag green">已确认</span></td><td><span class="tag gray">已归档</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ============ 执行监控 ============ -->
+    <section class="page" id="page-monitor">
+      <div class="page-head"><div><h1>执行监控</h1><div class="ph-sub">生产反馈实时回流 · 计划 vs 实绩</div></div></div>
+      <div class="card"><div class="card-head"><h3>机台实时状态</h3><span class="env-badge"><span class="dot"></span>实时采集</span></div>
+        <div class="card-body"><div id="monLines"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ 异常预警 ============ -->
+    <section class="page" id="page-alerts">
+      <div class="page-head"><div><h1>异常预警中心</h1><div class="ph-sub">AI 预测性预警 + 实绩偏差告警</div></div></div>
+      <div class="card"><div class="tbl-wrap"><table class="grid"><thead><tr><th>级别</th><th>类型</th><th>对象</th><th>说明</th><th>来源</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr class="ai-hint"><td><span class="tag red">紧急</span></td><td>设备</td><td class="mono">L2 拉丝机</td><td>报故障停机，预计 8h —— AI 已生成增量重排方案</td><td><span class="ai-chip">✦ AI</span></td><td>10:24</td><td><button class="btn sm ai" onclick="APS.go('sched')">查看重排</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>交期</td><td class="mono">MO-0608-05</td><td>预测延期 6.2h（节拍偏差累积）</td><td><span class="ai-chip">✦ AI</span></td><td>10:18</td><td><button class="btn sm">处置</button></td></tr>
+          <tr><td><span class="tag amber">预警</span></td><td>物料</td><td class="mono">锡锭</td><td>6/11 09:00 缺口 0.4t</td><td><span class="ai-chip">✦ AI</span></td><td>09:50</td><td><button class="btn sm" onclick="APS.go('kitting')">去齐套</button></td></tr>
+        </tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ============ 报表 ============ -->
+    <section class="page" id="page-reports">
+      <div class="page-head"><div><h1>报表中心</h1><div class="ph-sub">每日机台产量效率 / 准时交付率 / 生产效率分析</div></div>
+        <div class="ph-actions"><button class="btn ai" onclick="APS.toast('AI 已生成本周排产质量周报（自然语言）','ai')">✦ 生成周报</button></div></div>
+      <div class="grid-3">
+        <div class="card"><div class="card-head"><h3>准时交付率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">96.4<small>%</small></div><div id="rp1" style="margin-top:10px"></div></div></div>
+        <div class="card"><div class="card-head"><h3>设备利用率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">89<small>%</small></div><div id="rp2" style="margin-top:10px"></div></div></div>
+        <div class="card"><div class="card-head"><h3>换型次数 / 日</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">2.1</div><div class="muted" style="margin-top:10px">上线前 5.3 次/日，<span class="hl-ai">-60%</span></div></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== AI Copilot 坞 ===================== -->
+<aside class="copilot" id="copilot">
+  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>APS Copilot</h4><div class="cop-sub">已接入：工单 · 排产 · 库存 · 设备</div></div><button class="cop-x">✕</button></div>
+  <div class="cop-body" id="copBody"></div>
+  <div class="cop-foot">
+    <div class="cop-sugs">
+      <button class="cop-sug">急单 SO-1008 能不能接？</button>
+      <button class="cop-sug">L2 故障怎么重排？</button>
+      <button class="cop-sug">MO-0605 为什么排在 L3？</button>
+    </div>
+    <div class="cop-input"><input placeholder="问我关于排产的任何问题…"><button>➤</button></div>
+  </div>
+</aside>
+<button class="cop-fab"><span class="pulse"></span>✦ AI 助手</button>
+
+<!-- ===================== 排程参数 模态 ===================== -->
+<div class="modal" id="schedParamModal">
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">⚙</div><h3>AI 智能排程 · 参数</h3><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="form-row"><label>排程范围</label><select><option>全部待排工单（8 张）</option><option>仅急单（2 张）</option><option>指定机台</option></select></div>
+      <div class="form-row"><label>排程方向</label><select><option>正排（计划开始时间）</option><option>倒排（按交期反推）</option><option>瓶颈顺排+倒排</option></select></div>
+    </div>
+    <div class="form-row"><label>选线 / 算法</label>
+      <div class="seg" style="width:100%"><button class="on">Z+N（均衡）</button><button>Z（省资源）</button><button>N（最早完成）</button><button>启发式</button></div>
+    </div>
+    <label style="font-size:12px;font-weight:600;color:var(--ink-2);display:block;margin-bottom:8px">多目标权重</label>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化延期</span><div class="bar" style="flex:1"><i style="width:90%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">最小化换型</span><div class="bar" style="flex:1"><i style="width:70%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">设备利用率</span><div class="bar" style="flex:1"><i style="width:80%"></i></div><b style="font-size:12px;width:34px;text-align:right">高</b></div>
+      <div style="display:flex;align-items:center;gap:10px"><span style="width:84px;font-size:12px">在制品控制</span><div class="bar" style="flex:1"><i style="width:55%"></i></div><b style="font-size:12px;width:34px;text-align:right">中</b></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12.5px;color:var(--ink-2)">
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 含已锁定关键交期订单保护
+      <div class="switch on" onclick="this.classList.toggle('on')"></div> 计入换模损耗矩阵
+    </div>
+  </div>
+  <div class="modal-foot"><button class="btn ghost" onclick="APS.closeModal()">取消</button><button class="btn ai" onclick="startSched()">⚡ 开始求解</button></div>
+</div>
+
+<!-- ===================== 排程运行 模态 ===================== -->
+<div class="modal wide" id="schedRunModal">
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>AI 排程引擎 · 求解中</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-body">
+    <div class="run-progress"><span class="rp-pct" id="runPct">0%</span><div class="bar"><i id="runBar" style="width:0"></i></div></div>
+    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">已评估候选方案 <b id="runEval" class="hl-ai">0</b> 个 · 约束：齐套 / 模具 / 日历 / 器件×设备绑定</div>
+    <div class="run-log" id="runLog"></div>
+    <div class="plan-cmp" id="runPlans" style="display:none;margin-top:16px"></div>
+  </div>
+  <div class="modal-foot" id="runFoot" style="display:none">
+    <button class="btn ghost" onclick="APS.closeModal()">放弃</button>
+    <button class="btn" onclick="APS.toast('已打开 What-if 沙盘对比')">What-if 对比</button>
+    <button class="btn ai" onclick="APS.applySchedule()">采纳 AI 推荐方案 → 写入甘特</button>
+  </div>
+</div>
+
+<script src="assets/aps-ui.js"></script>
+<script>
+const {$,$$}=APS;
+
+/* ===================== 甘特数据模型 ===================== */
+const RES=[
+ {id:'L1',name:'L1 拉丝A',sub:'Φ8→0.25mm',load:0},
+ {id:'L2',name:'L2 拉丝B',sub:'Φ8→0.25mm',load:0},
+ {id:'L3',name:'L3 镀锡A',sub:'镀锡·复绕',load:0},
+ {id:'L4',name:'L4 镀锡B',sub:'镀锡·复绕',load:0},
+ {id:'L5',name:'L5 退火',sub:'连续退火',load:0},
+ {id:'L6',name:'L6 复绕',sub:'分条复绕',load:0},
+];
+const TICKS=['08','09','10','11','12','13','14','15','16','17','18','19'];
+// 基准（待排：有空转 + 1 延期）
+const PLAN_BEFORE={
+ L1:[{id:'MO-0603-12',l:2,w:22,cls:'blue'},{id:'MO-0604-15',l:30,w:26,cls:'blue'}],
+ L2:[{id:'MO-0602-09',l:1,w:30,cls:'blue'},{id:'MO-0606-21',l:40,w:24,cls:'blue'}],
+ L3:[{id:'MO-0601-07',l:3,w:18,cls:'blue'},{id:'MO-0605-12',l:28,w:20,cls:'blue'}],
+ L4:[{id:'MO-0605-18',l:10,w:34,cls:'blue'}],
+ L5:[{id:'MO-0607-03',l:6,w:20,cls:'amber'}],
+ L6:[{id:'MO-0608-05',l:54,w:30,cls:'red'}],  // 延期
+};
+const LOAD_BEFORE={L1:64,L2:70,L3:52,L4:48,L5:40,L6:78};
+// AI 排程后（紧凑 + 延期消除 + 急单插入 + 换型条）
+const PLAN_AFTER={
+ L1:[{id:'MO-0603-12',l:2,w:22,cls:'green'},{id:'MO-0604-15',l:25,w:26,cls:'blue'},{id:'MO-0610-22',l:52,w:18,cls:'blue'}],
+ L2:[{id:'MO-0602-09',l:1,w:30,cls:'green'},{id:'MO-0606-21',l:32,w:24,cls:'blue'},{id:'MO-0611-04',l:57,w:16,cls:'blue'}],
+ L3:[{id:'MO-0601-07',l:3,w:16,cls:'green'},{id:'setup',l:19,w:3,cls:'setup'},{id:'急单 SO-1008',l:23,w:20,cls:'red',urgent:1},{id:'MO-0605-12',l:44,w:18,cls:'blue'}],
+ L4:[{id:'MO-0605-18',l:6,w:34,cls:'green'},{id:'MO-0612-08',l:42,w:22,cls:'blue'}],
+ L5:[{id:'MO-0607-03',l:4,w:20,cls:'green'},{id:'MO-0609-11',l:26,w:24,cls:'blue'}],
+ L6:[{id:'MO-0608-05',l:3,w:30,cls:'green'},{id:'MO-0610-19',l:36,w:26,cls:'blue'}],
+};
+const LOAD_AFTER={L1:88,L2:90,L3:86,L4:84,L5:82,L6:91};
+
+let scheduled=false;
+
+function loadColor(v){ return v>90?'var(--danger)':v>70?'var(--warn)':'var(--ok)'; }
+function renderGantt(host, plan, load, draggable){
+  const el=typeof host==='string'?$(host):host;
+  let h='<div class="gantt-head"><div class="gantt-corner">机台 \\ 时间</div><div class="gantt-times">'
+    + TICKS.map(t=>`<div class="gantt-tick"><b>${t}</b>:00</div>`).join('') + '</div></div><div class="gantt-body">';
+  RES.forEach(r=>{
+    const lv=load[r.id]||0;
+    h+=`<div class="gantt-row"><div class="gantt-res"><b>${r.name}</b><small>${r.sub}</small>
+        <div class="load"><i style="width:${lv}%;background:${loadColor(lv)}"></i></div></div>
+        <div class="gantt-lane" data-res="${r.id}">`;
+    (plan[r.id]||[]).forEach(t=>{
+      const cls='gbar '+t.cls+(t.urgent?' urgent':'');
+      const lab=t.cls==='setup'?'换型':t.id;
+      h+=`<div class="${cls}" style="left:${t.l}%;width:${t.w}%" title="${t.id}">${t.locked?'<span class="lk">🔒</span>':''}${lab}</div>`;
+    });
+    h+='</div></div>';
+  });
+  // now line at ~ 10:20 → tick index ~2.3 → %
+  const nowPct = (2.3/12)*100;
+  h+=`<div class="gantt-now" style="left:calc(130px + (100% - 130px)*${nowPct/100})"></div>`;
+  h+='</div>';
+  el.innerHTML=h;
+  if(draggable){
+    $$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b, bar=>{
+      APS.toast('已记录手工调整 · AI 重新校验：无冲突','ai');
+    }));
+  }
+}
+
+function renderSchedKpis(){
+  const box=$('#schedKpis');
+  const data = scheduled
+   ? [['预计延期','0 张','good'],['换型次数','2 次','good'],['设备利用率','89%','good'],['在制品','↓ 12%','good']]
+   : [['预计延期','1 张','bad'],['换型次数','5 次',''],['设备利用率','71%',''],['在制品','—','']];
+  box.innerHTML = data.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)">
+    <span class="muted" style="font-size:12px">${d[0]}</span>
+    <b style="font-size:15px;font-variant-numeric:tabular-nums;color:${d[2]==='good'?'var(--ok)':d[2]==='bad'?'var(--danger)':'var(--ink)'}">${d[1]}</b></div>`).join('');
+}
+
+/* 待排工单列表 */
+const WAIT=[
+ {id:'SO-26061008',m:'0.25mm 镀锡线',q:'20t',due:'6/13',p:'急'},
+ {id:'MO-0610-22',m:'0.20mm 镀锡线',q:'12t',due:'6/15',p:'高'},
+ {id:'MO-0611-04',m:'0.30mm 漆包线',q:'8t',due:'6/16',p:'普通'},
+ {id:'MO-0612-08',m:'0.25mm 镀锡线',q:'15t',due:'6/16',p:'高'},
+ {id:'MO-0609-11',m:'0.18mm 镀锡线',q:'6t',due:'6/17',p:'普通'},
+ {id:'MO-0610-19',m:'0.40mm 裸铜线',q:'10t',due:'6/17',p:'普通'},
+ {id:'MO-0610-22b',m:'0.25mm 镀锡线',q:'9t',due:'6/18',p:'普通'},
+ {id:'MO-0611-30',m:'0.20mm 漆包线',q:'5t',due:'6/18',p:'普通'},
+];
+function renderWait(){
+  const box=$('#waitList');
+  if(scheduled){ box.innerHTML='<div class="empty" style="padding:24px 12px">✓ 全部已排入计划<br><span class="muted" style="font-size:11px">含急单 1 张 · 待审核下发</span></div>'; $('#waitCount').textContent='0 张'; return; }
+  $('#waitCount').textContent=WAIT.length+' 张';
+  box.innerHTML=WAIT.map(w=>{
+    const pc=w.p==='急'?'red':w.p==='高'?'amber':'gray';
+    return `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px;background:#fff">
+      <div style="display:flex;align-items:center;gap:6px"><b class="mono" style="font-size:11.5px">${w.id}</b><span class="tag ${pc} nodot" style="margin-left:auto;padding:1px 7px">${w.p}</span></div>
+      <div style="font-size:11.5px;color:var(--ink-2);margin-top:3px">${w.m} · ${w.q} · 交期 ${w.due}</div></div>`;
+  }).join('');
+}
+
+/* ===================== AI 排程流程 ===================== */
+function openSchedParams(){ if(scheduled){ APS.toast('已是 AI 排程结果，如需重排请先调整工单'); return; } APS.openModal('schedParamModal'); }
+function startSched(){
+  APS.closeModal();
+  setTimeout(()=>APS.runScheduler({
+    total:3182,
+    logLines:[
+     [200,'<span class="ts">10:24:01</span> 载入待排工序工单 <span class="em">8</span> 张（含急单 <span class="wn">SO-26061008</span>）'],
+     [450,'<span class="ts">10:24:01</span> 装配约束：齐套时间 · 模具占用 · 生产日历 · <span class="hi">器件×设备绑定</span> · 换模损耗矩阵'],
+     [500,'<span class="ts">10:24:02</span> 目标：min(延期·换型·在制) / max(利用率) · 算法 <span class="hi">Z+N 选线</span>'],
+     [650,'<span class="ts">10:24:02</span> 求解中… 已评估 1,206 方案'],
+     [650,'<span class="ts">10:24:03</span> 急单 SO-1008 → 同规格后插入 L3，换型 +2.0h（最小）'],
+     [600,'<span class="ts">10:24:04</span> MO-0608-05 由 L6 早班顺排，<span class="ok">延期风险消除</span>'],
+     [550,'<span class="ts">10:24:05</span> 收敛：换型 5→2，利用率 71%→<span class="ok">89%</span>，延期 1→<span class="ok">0</span>'],
+     [400,'<span class="ts">10:24:05</span> <span class="ok">✓ 生成 3 套候选方案</span>'],
+    ],
+    plans:`
+      <div class="plan"><div class="p-t">方案 A · 排到最前</div>
+        <div class="p-m">完成时间<b>6/12 18:00</b></div><div class="p-m">受影响工单<b>2 张</b></div><div class="p-m">换型<b>+3.5h</b></div></div>
+      <div class="plan best"><div class="p-t">方案 B · 同规格后插</div>
+        <div class="p-m">完成时间<b class="good">6/12 22:40</b></div><div class="p-m">受影响工单<b class="good">0 张</b></div><div class="p-m">换型<b class="good">+2.0h</b></div></div>
+      <div class="plan"><div class="p-t">方案 C · 排到最后</div>
+        <div class="p-m">完成时间<b>6/13 19:00</b></div><div class="p-m">交期余量<b>踩线</b></div><div class="p-m">换型<b>+0h</b></div></div>`,
+    onDone:applyScheduleResult
+  }), 260);
+}
+function applyScheduleResult(){
+  scheduled=true;
+  $('#planVer').textContent='V0610-3（AI · 待审核）';
+  $('#ganttSub').textContent='AI 排程结果：延期 0 · 急单已插入 · 利用率 89%';
+  renderGantt('#schedGantt', PLAN_AFTER, LOAD_AFTER, true);
+  renderSchedKpis(); renderWait();
+  $('#btnPublish').disabled=false;
+  $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:linear-gradient(120deg,var(--ai-soft),#fff)">
+    <div class="as-ic">✦</div>
+    <div><b>AI 已生成排程方案 V0610-3</b>：8 张待排全部排入，急单 SO-1008 已按"交期影响最小"插入 L3，全局延期 0 张。<span class="muted">方案需经您审核后方可下发。</span></div>
+    <div class="as-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排？</button><button class="btn ai sm" onclick="publishPlan()">审核下发</button></div></div>`;
+  APS.toast('AI 排程完成：延期 1→0，利用率 71%→89%','ai');
+}
+function explainSched(){
+  $('.cop-fab').click();
+  setTimeout(()=>APS.copilot.run('why'), 300);
+}
+function publishPlan(){
+  if(!scheduled){ APS.toast('请先运行 AI 智能排程','warn'); return; }
+  APS.toast('计划 V0610-3 已审核下发至 L1–L6 产线终端 · 回执跟踪中','ok');
+  $('#btnPublish').disabled=true;
+  $('#schedBanner').innerHTML=`<div class="ai-suggest" style="background:var(--ok-soft);border-color:#c4ebd7">
+    <div class="as-ic" style="background:linear-gradient(135deg,var(--ok),#3dbd92)">✓</div>
+    <div><b>V0610-3 已下发</b> · 产线电子工单已送达，作业指导书随单下发，回执跟踪中（0/8 已确认 → 实时更新）。</div>
+    <div class="as-acts"><button class="btn sm" onclick="APS.go('dispatch')">查看下发履历</button></div></div>`;
+}
+
+/* ===================== 其他屏渲染 ===================== */
+function renderOrders(q){
+  const ORD=[
+   ['MO-0610-22','0.20mm 镀锡线','12 t','6/15','高','green','已排程','blue'],
+   ['SO-26061008','0.25mm 镀锡线','20 t','6/13','急','amber','待排程','gray'],
+   ['MO-0605-12','0.25mm 镀锡线','18 t','6/15','普通','green','生产中','green'],
+   ['MO-0608-05','0.40mm 裸铜线','10 t','6/14','高','green','已下发','blue'],
+   ['MO-0611-04','0.30mm 漆包线','8 t','6/16','普通','amber','待排程','gray'],
+   ['MO-0601-07','0.18mm 镀锡线','6 t','6/12','普通','green','已完工','green'],
+   ['MO-0612-08','0.25mm 镀锡线','15 t','6/16','高','red','待排程','gray'],
+   ['MO-0607-03','0.30mm 漆包线','9 t','6/15','普通','green','生产中','green'],
+  ];
+  const fS=$('#ordStatus').value, fP=$('#ordPrio').value;
+  const rows=ORD.filter(o=>(!fS||o[6]===fS)&&(!fP||o[4]===fP)&&(!q||(o[0]+o[1]).toLowerCase().includes(q.toLowerCase())));
+  const kit={green:'green',amber:'amber',red:'red'};
+  const stColor={'待排程':'gray','已排程':'blue','已下发':'blue','生产中':'green','已完工':'green'};
+  $('#ordTable tbody').innerHTML=rows.map(o=>{
+    const ai = o[6]==='待排程'?'<span class="ai-chip">✦ 可排</span>':o[7]==='green'?'<span class="muted">—</span>':'<span class="muted">—</span>';
+    const pc=o[4]==='急'?'red':o[4]==='高'?'amber':'gray';
+    return `<tr><td class="checkcell"><input type="checkbox"></td>
+      <td><span class="row-link">${o[0]}</span></td><td>${o[1]}</td><td class="num">${o[2]}</td><td>${o[3]}</td>
+      <td><span class="tag ${pc} nodot">${o[4]}</span></td>
+      <td><span class="tag ${kit[o[5]]} nodot">${o[5]==='green'?'齐套':o[5]==='amber'?'部分':'缺料'}</span></td>
+      <td><span class="tag ${stColor[o[6]]}">${o[6]}</span></td><td>${ai}</td>
+      <td><button class="btn sm ghost" onclick="APS.go('sched')">排产</button></td></tr>`;
+  }).join('');
+  $('#ordCount').textContent='显示 '+rows.length+' / 126 条';
+}
+function renderKit(){
+  const K=[
+   ['SO-26061008','铜杆 Φ8','25t','18t','2t','86','6/11 09:00','amber'],
+   ['SO-26061008','锡锭','0.5t','0.1t','0.4t','42','6/11 09:00','red'],
+   ['MO-0610-22','铜杆 Φ8','12t','15t','—','100','已齐套','green'],
+   ['MO-0612-08','镀锡液','0.3t','0.3t','—','100','已齐套','green'],
+   ['MO-0611-04','漆包漆','0.2t','0.05t','0.1t','75','6/12 14:00','amber'],
+  ];
+  $('#kitTable tbody').innerHTML=K.map(k=>{
+    const cls=k[7], i=cls==='green'?'ok':cls==='amber'?'warn':'red';
+    return `<tr><td class="mono">${k[0]}</td><td>${k[1]}</td><td class="num">${k[2]}</td><td class="num">${k[3]}</td><td class="num">${k[4]}</td>
+      <td style="min-width:120px"><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i class="${i}" style="width:${k[5]}%"></i></div><b style="font-size:11px;width:32px">${k[5]}%</b></div></td>
+      <td>${k[6]}</td><td><span class="tag ${cls}">${cls==='green'?'齐套':cls==='amber'?'部分':'缺料'}</span></td></tr>`;
+  }).join('');
+}
+function renderLines(host, withPlan){
+  const L=[['L1 拉丝A',92,88],['L2 拉丝B',85,0],['L3 镀锡A',96,91],['L4 镀锡B',90,87],['L5 退火',88,90],['L6 复绕',82,79]];
+  $(host).innerHTML=L.map(l=>{
+    const stop=l[2]===0;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)">
+      <b style="width:78px;font-size:12.5px">${l[0]}</b>
+      <span class="tag ${stop?'red':'green'}" style="width:64px;justify-content:center">${stop?'停机':'运行'}</span>
+      <div class="bar" style="flex:1"><i class="${stop?'red':''}" style="width:${stop?100:l[2]}%;background:${stop?'var(--danger)':''}"></i></div>
+      <span class="muted" style="width:120px;font-size:11.5px;text-align:right">${stop?'故障 · AI 重排中':'达成 '+l[2]+'% / 计划 '+l[1]+'%'}</span></div>`;
+  }).join('');
+}
+function renderReportBars(){
+  const mk=(host,vals,cls)=>{ $(host).innerHTML='<div class="spark" style="height:46px;gap:4px">'+vals.map(v=>`<i style="height:${v}%;width:14px;background:${cls}"></i>`).join('')+'</div>'; };
+  mk('#rp1',[88,90,92,89,94,95,96],'var(--brand-soft)');
+  mk('#rp2',[71,74,78,82,85,87,89],'var(--accent-soft)');
+}
+
+/* ===================== Copilot 场景 ===================== */
+APS._copWelcome='您好，我是 APS Copilot ✦ 已接入当前生产环境：在排 126 张工单、6 台资源、设备综合负荷 78%。可以问我急单评估、设备故障重排、排程解释等。';
+APS.copilot.register({
+  urgent:{user:'急单 SO-1008 能不能接？',
+    steps:[['解析订单 SO-26061008','copilot.parse()'],['查库存：铜杆/锡/模具','wms.check → 18t+2t在途'],['候选设备匹配','L3/L5 可产 0.25mm'],['插单仿真 ×3','engine.simulate()']],
+    text:'可以承接 ✅ 推荐方案 B（同规格后插入 L3，交期影响最小）：完工 6/12 22:40，余量 25h，全局延期 0。',
+    rich:`<div class="cop-card"><div class="cc-t">✦ 三模式插单仿真</div>
+      <div class="p-m" style="font-size:11.5px">A 排到最前<b>影响 2 张</b></div>
+      <div class="p-m" style="font-size:11.5px">B 同规格后插<b class="good">影响 0 张 ★</b></div>
+      <div class="p-m" style="font-size:11.5px">C 排到最后<b>踩线</b></div>
+      <div class="cop-acts"><button class="cop-sug" onclick="APS.go('sched');APS.toast('已采纳方案 B','ai')">采纳方案 B</button></div></div>`},
+  fault:{user:'L2 故障怎么重排？',
+    steps:[['接收设备事件','iot → L2 DOWN 8h'],['锁定受影响工单','3 张'],['增量重排','只重算受影响部分'],['交期风险评估','推送审核']],
+    text:'已生成应急方案 🔧：2 张转 L4（换型 1.5h），1 张原机延后待复机。MO-0608-05 有交期风险，建议夜班加开 1 班即可消除。版本 V0610-2 待审核。',
+    rich:`<div class="cop-acts"><button class="cop-sug" onclick="APS.toast('已发布应急排程 V0610-2','ai')">审核并发布</button></div>`},
+  why:{user:'MO-0605 / 急单为什么排在 L3？',
+    steps:[['读取排程决策依据','explain(MO)'],['对比候选资源','L3 vs L5'],['计算换型损耗','setup-matrix']],
+    text:'排在 L3 的原因：① L3 上一单同为 0.25mm 镀锡线，换模仅 2.0h（L5 需 3.8h）；② L3 当前负荷有空档，不挤占已锁定交期订单；③ Z+N 选线在"省资源+早完成"间取平衡。可解释、可追溯。'},
+});
+APS.copilot.route([[/急单|插单|能接|SO-1008/,'urgent'],[/故障|停机|L2|重排/,'fault'],[/为什么|怎么排|解释|L3/,'why']]);
+
+/* ===================== 初始化 ===================== */
+APS.initShell();
+APS.initCopilot();
+APS.onPage(p=>{
+  if(p==='dash'){ renderGantt('#dashGantt', scheduled?PLAN_AFTER:PLAN_BEFORE, scheduled?LOAD_AFTER:LOAD_BEFORE,false); renderLines('#dashLines'); }
+  if(p==='orders') renderOrders();
+  if(p==='kitting') renderKit();
+  if(p==='monitor') renderLines('#monLines');
+  if(p==='reports') renderReportBars();
+});
+// 首屏：排产工作台
+renderGantt('#schedGantt', PLAN_BEFORE, LOAD_BEFORE, true);
+renderSchedKpis(); renderWait();
+// 预渲染工作台数据（首次进入即就绪）
+renderGantt('#dashGantt', PLAN_BEFORE, LOAD_BEFORE,false); renderLines('#dashLines');
+renderOrders(); renderKit(); renderLines('#monLines'); renderReportBars();
+APS.count('#d-k1',0,8,{dur:700}); APS.count('#d-k4',0,23,{dur:900});
+</script>
+</body>
+</html>

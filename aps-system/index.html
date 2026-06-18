@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江铜 智能制造门户 · APS+AI 系统中心</title>
+<link rel="stylesheet" href="assets/aps-ui.css">
+<style>
+  body{overflow:auto}
+  .portal{min-height:100vh;display:flex;flex-direction:column;
+    background:
+      radial-gradient(720px 460px at 88% -6%, rgba(123,92,214,.16), transparent 60%),
+      radial-gradient(820px 540px at -8% 14%, rgba(31,95,214,.12), transparent 60%),
+      linear-gradient(180deg,#1a2336,#212c44);}
+  .p-top{display:flex;align-items:center;gap:14px;padding:16px 40px;color:#dfe5f0}
+  .p-logo{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#1f5fd6,#c4742e);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .p-brand{font-size:17px;font-weight:800;letter-spacing:.5px;color:#fff}
+  .p-brand small{display:block;font-size:10.5px;font-weight:500;color:#8ea0c0;letter-spacing:2px}
+  .p-top .env{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#5fd39b;
+    background:rgba(26,157,107,.15);border:1px solid rgba(26,157,107,.4);border-radius:999px;padding:5px 13px}
+  .p-top .env .dot{width:6px;height:6px;border-radius:50%;background:#5fd39b;box-shadow:0 0 0 3px rgba(95,211,155,.25);animation:pulse 2s infinite}
+  .p-user{display:flex;align-items:center;gap:9px;color:#cfd8e8;font-size:12.5px}
+  .p-user .ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1f5fd6,#7b5cd6);display:grid;place-items:center;color:#fff;font-weight:700}
+  .p-hero{text-align:center;padding:48px 24px 30px;color:#fff}
+  .p-hero h1{font-size:34px;font-weight:800;letter-spacing:1px}
+  .p-hero h1 em{font-style:normal;background:linear-gradient(100deg,#6fa0ee,#c4742e 60%,#9a7ee6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .p-hero p{color:#9eabc6;font-size:14px;margin-top:10px}
+  .p-section{max-width:1180px;margin:0 auto;width:100%;padding:0 40px}
+  .p-section .st{display:flex;align-items:center;gap:10px;color:#aebad4;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:16px}
+  .p-section .st::before{content:"";width:4px;height:16px;border-radius:3px;background:linear-gradient(180deg,#6fa0ee,#c4742e)}
+  .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-bottom:30px}
+  .app-card{background:rgba(255,255,255,.97);border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.3);
+    display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s;text-decoration:none;color:var(--ink)}
+  .app-card:hover{transform:translateY(-6px);box-shadow:0 28px 64px rgba(0,0,0,.42)}
+  .ac-top{padding:20px 22px 16px;color:#fff;position:relative;overflow:hidden}
+  .ac-top::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 1px,transparent 1px 12px)}
+  .ac1 .ac-top{background:linear-gradient(135deg,#1f5fd6,#3f7bf0 60%,#c4742e)}
+  .ac2 .ac-top{background:linear-gradient(135deg,#0f9d6e,#3dbd92 55%,#1f5fd6)}
+  .ac3 .ac-top{background:linear-gradient(135deg,#b3552c,#d98c54 55%,#2a3442)}
+  .ac-no{font-size:11px;font-weight:800;letter-spacing:2px;opacity:.85;position:relative}
+  .ac-name{font-size:21px;font-weight:800;margin-top:4px;position:relative}
+  .ac-name small{display:block;font-size:11.5px;font-weight:500;opacity:.85;margin-top:2px}
+  .ac-icon{position:absolute;right:18px;top:16px;font-size:30px;opacity:.92;z-index:1}
+  .ac-body{padding:16px 22px 18px;flex:1;display:flex;flex-direction:column}
+  .ac-desc{font-size:12.5px;color:var(--ink-2);line-height:1.65;margin-bottom:14px;min-height:62px}
+  .ac-mods{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .ac-mods i{font-style:normal;font-size:11px;font-weight:600;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink-2)}
+  .ac-mods i.ai{color:var(--ai-d);background:var(--ai-soft);border-color:#ddd2f5}
+  .ac-stats{display:flex;gap:18px;padding-top:13px;border-top:1px dashed var(--line);margin-top:auto}
+  .ac-stats div b{font-size:18px;font-weight:800;display:block;font-variant-numeric:tabular-nums}
+  .ac1 .ac-stats div b{color:#1f5fd6} .ac2 .ac-stats div b{color:#0f9d6e} .ac3 .ac-stats div b{color:#b3552c}
+  .ac-stats div span{font-size:10.5px;color:var(--ink-3)}
+  .ac-foot{display:flex;align-items:center;gap:8px;padding:13px 22px;background:var(--panel-2);border-top:1px solid var(--line)}
+  .ac-online{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ok)}
+  .ac-online .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+  .ac-enter{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#fff;border-radius:8px;padding:8px 16px}
+  .ac1 .ac-enter{background:#1f5fd6} .ac2 .ac-enter{background:#0f9d6e} .ac3 .ac-enter{background:#b3552c}
+  .app-card:hover .ac-enter{filter:brightness(1.08)}
+  .p-note{max-width:1180px;margin:8px auto 0;width:100%;padding:0 40px 40px;color:#8294b4;font-size:12px;text-align:center}
+  .p-note b{color:#cfd8e8}
+  @media(max-width:980px){.apps{grid-template-columns:1fr}.p-hero h1{font-size:25px}}
+</style>
+</head>
+<body data-theme="req1">
+<div class="portal">
+  <div class="p-top">
+    <div class="p-logo">Cu</div>
+    <div class="p-brand">江铜 智能制造门户<small>JIANGTONG · SMART MANUFACTURING PORTAL</small></div>
+    <span class="env"><span class="dot"></span>生产环境 · PROD</span>
+    <div class="p-user" style="margin-left:18px"><div class="ava">管</div><div>系统管理员<br><span style="color:#8294b4;font-size:10.5px">单点登录 SSO</span></div></div>
+  </div>
+
+  <div class="p-hero">
+    <h1>APS + AI 智能制造系统中心 · <em>真实生产界面</em></h1>
+    <p>以下为三套已上线系统的操作界面演示 —— 看 APS 接入 AI 之后，工单、排产、齐套、成本在真实界面里是怎么转起来的。</p>
+  </div>
+
+  <div class="p-section">
+    <div class="st">我的应用 · 点击进入对应系统</div>
+    <div class="apps">
+
+      <a class="app-card ac1" href="req1.html">
+        <div class="ac-top"><span class="ac-icon">🗓️</span><div class="ac-no">需求一 · REQ-01</div><div class="ac-name">智能排产系统<small>台意特种电工材料</small></div></div>
+        <div class="ac-body">
+          <div class="ac-desc">面向"排程环节"的智能升级：工单进来 → AI 自动排程（小时级、多目标寻优）→ 排程员审核 → 一键下发产线，配 AI Copilot 与事件重排。</div>
+          <div class="ac-mods"><i>制造订单</i><i class="ai">智能排产工作台</i><i>物料齐套</i><i>计划下发</i><i>执行监控</i><i>异常预警</i></div>
+          <div class="ac-stats"><div><b>8</b><span>核心模块</span></div><div><b>89%</b><span>设备利用率</span></div><div><b>96.4%</b><span>准时交付</span></div></div>
+        </div>
+        <div class="ac-foot"><span class="ac-online"><span class="dot"></span>运行中 · v3.2.1</span><span class="ac-enter">进入系统 →</span></div>
+      </a>
+
+      <a class="app-card ac2" href="req2.html">
+        <div class="ac-top"><span class="ac-icon">💠</span><div class="ac-no">需求二 · REQ-02</div><div class="ac-name">智造协同平台<small>报价 → 排产 → 成本</small></div></div>
+        <div class="ac-body">
+          <div class="ac-desc">从一句报价到一张凭证的端到端价值链：AI 报价测算、订单评审、电子工艺卡、智能排产、领料防错、工单级成本并推送 Oracle ERP。</div>
+          <div class="ac-mods"><i class="ai">智能报价</i><i class="ai">订单评审</i><i>电子工艺卡</i><i class="ai">智能排产</i><i class="ai">齐套防错</i><i class="ai">成本核算</i></div>
+          <div class="ac-stats"><div><b>33</b><span>覆盖需求</span></div><div><b>5s</b><span>报价响应</span></div><div><b>T+0</b><span>成本可见</span></div></div>
+        </div>
+        <div class="ac-foot"><span class="ac-online"><span class="dot"></span>运行中 · v2.6.0</span><span class="ac-enter">进入系统 →</span></div>
+      </a>
+
+      <a class="app-card ac3" href="req3.html">
+        <div class="ac-top"><span class="ac-icon">🔶</span><div class="ac-no">需求三 · REQ-03</div><div class="ac-name">线缆 APS · 铜流<small>江铜线缆 · 鼎捷 ERP</small></div></div>
+        <div class="ac-body">
+          <div class="ac-desc">线缆厂专属：换色/换规格 AI 聚类排产、紧急插单（锁定单保护+日志溯源）、铜材边角料闭环核算（理论用量=实际消耗+废料回收）、凭证直达鼎捷。</div>
+          <div class="ac-mods"><i>无纸工单</i><i class="ai">色谱排产</i><i class="ai">齐套·采购联动</i><i>损耗边角料</i><i class="ai">铜流成本</i></div>
+          <div class="ac-stats"><div><b>31</b><span>覆盖需求</span></div><div><b>11→4</b><span>换色次数/日</span></div><div><b>账平</b><span>铜流闭环</span></div></div>
+        </div>
+        <div class="ac-foot"><span class="ac-online"><span class="dot"></span>运行中 · v1.9.3</span><span class="ac-enter">进入系统 →</span></div>
+      </a>
+
+    </div>
+  </div>
+  <div class="p-note">演示数据均为示意 · 三套系统共享同一 UI 设计体系，可分别进入独立操作 · <b>核心看点：智能排产工作台「AI 自动排程 → 审核 → 下发」全流程可点击运行</b></div>
+</div>
+</body>
+</html>
