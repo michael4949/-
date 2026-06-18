@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>江铜 · 生产排程系统 APS</title>
+<title>江铜 · 高级计划与排产系统 APS</title>
 <link rel="stylesheet" href="assets/aps-ui.css">
 <style>
   .nav-grp{border-bottom:1px solid rgba(255,255,255,.04)}
@@ -11,22 +11,26 @@
   .nav-grp-h:hover{background:rgba(255,255,255,.05);color:#fff}
   .nav-grp-h .gi{width:17px;flex:none;text-align:center;opacity:.85}
   .nav-grp-h .caret{margin-left:auto;font-size:9px;transition:.2s;opacity:.6}
-  .nav-grp.collapsed .caret{transform:rotate(-90deg)}
-  .nav-grp.collapsed .nav-sub{display:none}
+  .nav-grp.collapsed .caret{transform:rotate(-90deg)} .nav-grp.collapsed .nav-sub{display:none}
   .nav-sub{padding:2px 0 6px}
   .nav-leaf{display:flex;align-items:center;gap:8px;padding:6.5px 16px 6.5px 40px;color:#97a2b8;font-size:12.5px;cursor:pointer;position:relative;transition:.12s;white-space:nowrap}
   .nav-leaf:hover{background:rgba(255,255,255,.06);color:#fff}
   .nav-leaf.active{background:rgba(255,255,255,.1);color:#fff;font-weight:600}
   .nav-leaf.active::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,var(--brand),var(--accent))}
   .nav-leaf .smk{margin-left:auto;font-size:8.5px;font-weight:800;color:#fff;background:linear-gradient(120deg,var(--ai),#9a7ee6);border-radius:4px;padding:0 5px}
+  .nav-leaf .nb{margin-left:auto;font-size:9px;font-weight:800;background:var(--danger);color:#fff;border-radius:7px;padding:0 5px;min-width:15px;text-align:center}
   .app.sb-collapsed .nav-grp-h span,.app.sb-collapsed .nav-leaf{display:none}
+  /* 负荷热力 / 换型矩阵 */
+  .heat{border-collapse:collapse;font-size:11.5px;width:100%}
+  .heat th,.heat td{border:1px solid var(--line);padding:7px 8px;text-align:center;white-space:nowrap}
+  .heat th{background:var(--panel-2);color:var(--ink-2);font-weight:700}
+  .heat td.rh{background:var(--panel-2);text-align:left;font-weight:700}
+  .heat td.h0{background:#e3f6ee;color:#0b7a56} .heat td.h1{background:#eaf3d9;color:#5a7a1a}
+  .heat td.h2{background:#fdf3e2;color:#9a6a14} .heat td.h3{background:#fbe4d8;color:#b8502a} .heat td.h4{background:#fdded6;color:#c0392b;font-weight:800}
   .matrix{border-collapse:collapse;font-size:12px;width:100%}
   .matrix th,.matrix td{border:1px solid var(--line);padding:7px 10px;text-align:center}
-  .matrix th{background:var(--panel-2);font-weight:700;color:var(--ink-2)}
-  .matrix td.rowh{background:var(--panel-2);font-weight:700;text-align:left}
-  .matrix td.hot{background:#fdecea;color:var(--danger);font-weight:700}
-  .matrix td.mid{background:#fdf3e2;color:var(--warn)}
-  .matrix td.lo{background:#e3f6ee;color:var(--ok)}
+  .matrix th{background:var(--panel-2);font-weight:700;color:var(--ink-2)} .matrix td.rowh{background:var(--panel-2);font-weight:700;text-align:left}
+  .matrix td.hot{background:#fdecea;color:var(--danger);font-weight:700} .matrix td.mid{background:#fdf3e2;color:var(--warn)} .matrix td.lo{background:#e3f6ee;color:var(--ok)}
   .recipe{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
   .recipe .rc{border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;position:relative}
   .recipe .rc.rec{border-color:var(--ai);background:#f7f4fd}
@@ -39,544 +43,243 @@
   .recipe .rc .pk{position:absolute;top:-9px;right:9px;font-size:9px;font-weight:800;color:#fff;background:var(--ai);border-radius:6px;padding:1.5px 8px}
   .def-box{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:11px 14px;font-size:12.5px;color:var(--ink-2);line-height:1.7;margin-bottom:14px}
   .def-box b{color:var(--ink)}
-  .field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 22px}
-  .fv{padding:8px 0;border-bottom:1px dashed var(--line)}
-  .fv label{display:block;font-size:11px;color:var(--ink-3);margin-bottom:2px}
-  .fv b{font-size:13px;font-weight:600}
-  .org-tree{font-size:13px}
-  .org-tree .o1{font-weight:700;padding:8px 0}
-  .org-tree .o2{padding:5px 0 5px 24px;color:var(--ink-2)}
-  .org-tree .o3{padding:4px 0 4px 48px;color:var(--ink-3);font-size:12px}
-  .org-tree .o2::before,.org-tree .o3::before{content:"├ ";color:var(--ink-3)}
-  /* 智能建议条（自然融入，非"赋能点"） */
+  .org-tree{font-size:13px}.org-tree .o1{font-weight:700;padding:8px 0}.org-tree .o2{padding:5px 0 5px 24px;color:var(--ink-2)}.org-tree .o3{padding:4px 0 4px 48px;color:var(--ink-3);font-size:12px}.org-tree .o2::before,.org-tree .o3::before{content:"├ ";color:var(--ink-3)}
   .smart-tip{display:flex;gap:10px;align-items:center;background:linear-gradient(120deg,var(--ai-soft),#fff);border:1px solid #ddd2f5;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
   .smart-tip .st-ic{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--ai),#9a7ee6);color:#fff;display:grid;place-items:center;flex:none}
   .smart-tip b{color:var(--ai-d)} .smart-tip .st-acts{margin-left:auto;display:flex;gap:6px}
+  /* 问题清单 */
+  .prob-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:.1s}
+  .prob-row:hover{background:var(--hover)}
+  .prob-row .pt{width:64px;flex:none}
+  .prob-row .po{font-family:var(--mono);font-size:12px;width:130px;flex:none;color:var(--brand);font-weight:600}
+  .prob-row .pd{flex:1;font-size:12.5px;color:var(--ink-2)}
+  .prob-row .pv{font-weight:800;font-variant-numeric:tabular-nums}
+  .form-inline{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .form-inline .fi{display:flex;flex-direction:column;gap:5px}
+  .form-inline label{font-size:11.5px;color:var(--ink-2);font-weight:600}
+  .form-inline input,.form-inline select{height:34px;border:1px solid var(--line-2);border-radius:7px;padding:0 11px;font-size:12.5px;outline:none;min-width:150px}
+  .ctp-res{margin-top:16px;border:1px solid var(--line);border-radius:11px;overflow:hidden;display:none}
+  .ctp-res.show{display:block}
+  .ctp-res .hd{padding:11px 16px;background:var(--ai-soft);color:var(--ai-d);font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body data-theme="req1">
 <div class="app sb-collapsed-no" id="app">
 
   <aside class="sidebar">
-    <div class="sb-brand"><div class="sb-logo">JT</div><div class="sb-name">生产排程系统<small>江西铜业 · APS</small></div></div>
+    <div class="sb-brand"><div class="sb-logo">JT</div><div class="sb-name">高级计划与排产<small>江西铜业 · APS</small></div></div>
     <nav class="sb-nav" id="navTree"></nav>
-    <div class="sb-foot"><div class="sb-foot-txt">系统 <b>v2.4.7</b> · 对接 <b>用友 NC / SAP</b><br>数据同步 11:46 · 在线 38 人</div></div>
+    <div class="sb-foot"><div class="sb-foot-txt">APS <b>v3.0</b> · 对接 <b>用友 NC / SAP</b><br>计划版本 V0618-1 · 11:46 已求解</div></div>
   </aside>
 
   <header class="topbar">
-    <button class="tb-toggle" title="折叠菜单"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-    <div class="tb-crumb"><span id="crumbGrp">生产排程</span><span class="sep">/</span><b id="crumbPage">自动排程</b></div>
-    <div class="tb-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="搜索功能 / 工单号 / 物料编码…"></div>
+    <button class="tb-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="tb-crumb"><span id="crumbGrp">计划看板</span><span class="sep">/</span><b id="crumbPage">计划看板</b></div>
+    <div class="tb-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="搜索工单 / 物料 / 资源…"></div>
     <div class="tb-right">
+      <span class="chip" style="font-weight:700">计划版本 <b style="color:var(--brand)">V0618-1</b></span>
       <span class="env-badge"><span class="dot"></span>生产环境</span>
-      <button class="tb-icon" title="消息"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="badge-num">5</span></button>
-      <div class="tb-user"><div class="ava">张</div><div><div class="un">张建国</div><div class="ur">生产计划科 · 排程员</div></div></div>
+      <button class="tb-icon" title="问题"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg><span class="badge-num">9</span></button>
+      <div class="tb-user"><div class="ava">张</div><div><div class="un">张建国</div><div class="ur">计划科 · 主计划员</div></div></div>
     </div>
   </header>
 
   <main class="main" id="main">
-
-    <!-- 工作台 -->
+    <!-- 计划看板 -->
     <section class="page active" id="page-dash">
-      <div class="page-head"><div><h1>生产排程系统 · 工作台</h1><div class="ph-sub">江西铜业 台意公司 / 江铜线缆 · 2026-06-18 周四 · 排程员：张建国</div></div>
-        <div class="ph-actions"><button class="btn" onclick="APS.toast('已同步 用友NC / SAP 主数据')">同步主数据</button><button class="btn primary" onclick="navTo('sched')">进入排程</button></div></div>
+      <div class="page-head"><div><h1>计划看板</h1><div class="ph-sub">计划版本 V0618-1（有限产能）· 求解于 06-18 11:46 · 计划区间 06-18 ~ 07-18</div></div>
+        <div class="ph-actions"><button class="btn" onclick="APS.toast('已从 用友NC / SAP 同步需求与库存')">同步数据</button><button class="btn ai" onclick="navTo('sched')">✦ 生成计划</button></div></div>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">🧾</span><span class="k-label">本月制造订单</span></div><div class="k-val">1,268</div><div class="k-foot">待排 <b style="color:var(--danger)">23</b> · 在产 186 · 已完工 1,059</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">✓</span><span class="k-label">准时交付率</span></div><div class="k-val">96.2<small>%</small></div><div class="k-foot"><span class="k-delta up">▲2.4%</span> 环比上月</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">⚙</span><span class="k-label">设备综合利用率</span></div><div class="k-val">87.6<small>%</small></div><div class="k-foot">16 台机台 · 在产 14</div></div>
-        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--info-soft);color:var(--info)">📦</span><span class="k-label">电解铜库存</span></div><div class="k-val">312<small> t</small></div><div class="k-foot">锡锭 2.1t <span style="color:var(--danger)">告急</span> · 铜杆 86t</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--ok-soft);color:var(--ok)">✓</span><span class="k-label">需求满足率(按期)</span></div><div class="k-val">96.2<small>%</small></div><div class="k-foot"><span class="k-delta up">▲2.4%</span> 共 1,268 需求行</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--accent-soft);color:var(--accent)">⚙</span><span class="k-label">瓶颈资源负荷</span></div><div class="k-val">DX01 <small>112%</small></div><div class="k-foot">镀锡线 06-19 超载 · 见负荷报表</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--warn-soft);color:var(--warn)">⚠</span><span class="k-label">计划问题</span></div><div class="k-val" style="color:var(--danger)">9</div><div class="k-foot">晚交 3 · 超载 2 · 缺料 2 · 未排 2</div></div>
+        <div class="kpi"><div class="k-top"><span class="k-ic" style="background:var(--brand-soft);color:var(--brand)">📦</span><span class="k-label">在制 / 计划工单</span></div><div class="k-val">186<small> / 1,268</small></div><div class="k-foot">待排 23 · 已下发 118</div></div>
       </div>
       <div class="split">
-        <div class="card"><div class="card-head"><h3>排产助手 · 今日提醒</h3><span class="ch-sub">智能识别 · 待处置</span></div>
-          <div class="card-body" style="padding:6px 16px 12px" id="dashTips"></div></div>
-        <div class="card"><div class="card-head"><h3>车间在产概况</h3></div><div class="card-body" id="dashLines"></div></div>
+        <div class="card"><div class="card-head"><h3>计划问题清单</h3><span class="ch-sub">有限产能求解后的约束冲突 · 点击定位</span><div class="ch-actions"><button class="btn sm" onclick="navTo('prob')">全部 9 条 →</button></div></div>
+          <div class="card-body flush" id="dashProb"></div></div>
+        <div class="card"><div class="card-head"><h3>排产助手 · 建议</h3></div><div class="card-body" style="padding:6px 16px 12px" id="dashTips"></div></div>
       </div>
-      <div class="card"><div class="card-head"><h3>近 7 日生产指标</h3></div><div class="card-body"><div class="grid-3">
-        <div><div class="muted" style="font-size:12px;margin-bottom:6px">日产量(t)</div><div id="sp1"></div></div>
-        <div><div class="muted" style="font-size:12px;margin-bottom:6px">准时交付率(%)</div><div id="sp2"></div></div>
-        <div><div class="muted" style="font-size:12px;margin-bottom:6px">设备利用率(%)</div><div id="sp3"></div></div>
-      </div></div></div>
+      <div class="card"><div class="card-head"><h3>资源负荷概览（按日）</h3><span class="ch-sub">绿≤70% / 黄70–90% / 橙90–100% / 红>100%</span><div class="ch-actions"><button class="btn sm" onclick="navTo('loadrep')">负荷报表 →</button></div></div>
+        <div class="card-body"><div id="dashHeat"></div></div></div>
     </section>
-
-    <!-- 占位：动态屏宿主 -->
     <div id="screenHost"></div>
-
   </main>
 </div>
 
-<!-- 排产助手 坞（自然产品功能） -->
+<!-- 排产助手坞 -->
 <aside class="copilot" id="copilot">
-  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>排产助手</h4><div class="cop-sub">已接入：工单 · 库存 · 工艺 · 设备</div></div><button class="cop-x">✕</button></div>
+  <div class="cop-head"><div class="cop-orb">✦</div><div><h4>排产助手</h4><div class="cop-sub">已接入：需求 · 计划 · 产能 · 库存</div></div><button class="cop-x">✕</button></div>
   <div class="cop-body" id="copBody"></div>
-  <div class="cop-foot"><div class="cop-sugs">
-    <button class="cop-sug">急单 XW-26061015 能不能接？</button>
-    <button class="cop-sug">铜绞线16股怎么配最省？</button>
-    <button class="cop-sug">DX01 这批怎么排少换型？</button>
-  </div><div class="cop-input"><input placeholder="向排产助手提问…"><button>➤</button></div></div>
+  <div class="cop-foot"><div class="cop-sugs"><button class="cop-sug">急单 XW-26061015 能不能接？</button><button class="cop-sug">DX01 为什么超载？</button><button class="cop-sug">铜绞线16股怎么配最省？</button></div>
+  <div class="cop-input"><input placeholder="向排产助手提问…"><button>➤</button></div></div>
 </aside>
 <button class="cop-fab"><span class="pulse"></span>✦ 排产助手</button>
 
-<!-- 智能排产 求解 模态 -->
+<!-- 生成计划/求解 模态 -->
 <div class="modal wide" id="schedRunModal">
-  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>智能排产 · 求解</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
+  <div class="modal-head"><div class="mh-ic" style="background:var(--ai-soft);color:var(--ai)">✦</div><h3>生成计划 · 求解</h3><span class="chip" id="runState" style="margin-left:6px">正在求解…</span><button class="m-x" onclick="APS.closeModal()">✕</button></div>
   <div class="modal-body">
     <div class="run-progress"><span class="rp-pct" id="runPct">0%</span><div class="bar"><i id="runBar" style="width:0"></i></div></div>
-    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">求解器：OR-Tools 多目标规划 · 已评估方案 <b id="runEval" class="hl-ai">0</b> · 约束：齐套/模具/日历/换型/绞线配比</div>
+    <div class="muted" style="margin:4px 0 12px;font-size:11.5px">求解器 OR-Tools · 有限产能 · 已评估 <b id="runEval" class="hl-ai">0</b> 方案 · 约束：产能/齐套/模具/日历/换型矩阵</div>
     <div class="run-log" id="runLog"></div>
     <div class="plan-cmp" id="runPlans" style="display:none;margin-top:14px"></div>
   </div>
-  <div class="modal-foot" id="runFoot" style="display:none"><button class="btn ghost" onclick="APS.closeModal()">放弃</button><button class="btn" onclick="APS.toast('已打开方案模拟对比')">方案模拟</button><button class="btn ai" onclick="APS.applySchedule()">采用推荐方案 → 写入计划</button></div>
+  <div class="modal-foot" id="runFoot" style="display:none"><button class="btn ghost" onclick="APS.closeModal()">放弃</button><button class="btn" onclick="APS.toast('已切换无限产能模式重算（对比理论最优）')">无限产能对比</button><button class="btn ai" onclick="APS.applySchedule()">发布该计划版本</button></div>
 </div>
 
 <script src="assets/aps-ui.js"></script>
 <script>
 const {$,$$}=APS;
-
 /* ===================== 真实数据池 ===================== */
-const CUST=[
- ['KH-1001','立讯精密工业股份有限公司','广东东莞','A','镀锡铜线/连接器线','优',1280],
- ['KH-1002','鸿富锦精密工业(深圳)','广东深圳','A','镀锡铜线','优',960],
- ['KH-1003','比亚迪股份有限公司','广东深圳','A','镀锡线/电池连接片','优',1520],
- ['KH-1004','宁德时代新能源科技','福建宁德','A','镀锡铜线','优',1340],
- ['KH-1005','昆山沪光汽车电器','江苏昆山','B','汽车线束镀锡线','良',640],
- ['KH-1006','深圳市得润电子','广东深圳','B','连接器镀锡线','良',520],
- ['KH-1007','安费诺电子装配(常州)','江苏常州','A','连接器线','优',880],
- ['KH-1008','立讯精密(昆山)','江苏昆山','B','镀锡线','良',610],
- ['KH-1009','卧龙电气集团股份','浙江上虞','A','电机漆包线','优',1180],
- ['KH-1010','中山大洋电机股份','广东中山','B','漆包线','良',730],
- ['KH-1011','美的集团股份有限公司','广东佛山','A','漆包线','优',1420],
- ['KH-1012','珠海格力电器股份','广东珠海','A','漆包线','优',1390],
- ['KH-1013','远东电缆有限公司','江苏宜兴','A','裸铜线/低氧铜杆','优',2240],
- ['KH-1014','宝胜科技创新股份','江苏扬州','A','铜杆/铜绞线','优',1960],
- ['KH-1015','上海起帆电缆股份','上海','B','铜导体','良',880],
- ['KH-1016','金杯电工股份有限公司','湖南长沙','B','铜杆','良',760],
- ['KH-1017','无锡江南电缆有限公司','江苏宜兴','B','铜绞线','良',690],
- ['KH-1018','上上电缆集团有限公司','江苏溧阳','A','铜导体/绞线','优',1510],
-];
-const SUP=[
- ['GYS-201','江西铜业集团本部(贵溪冶炼厂)','江西贵溪','阴极铜 Cu-CATH 1#','战略','优'],
- ['GYS-202','铜陵有色金属集团','安徽铜陵','阴极铜 1#','合格','优'],
- ['GYS-203','云南铜业股份有限公司','云南昆明','阴极铜 1#','合格','良'],
- ['GYS-204','云南锡业股份(个旧)','云南个旧','锡锭 Sn99.90','合格','优'],
- ['GYS-205','汉高(中国)投资有限公司','上海','拉丝润滑油 DF-25','合格','优'],
- ['GYS-206','巴斯夫(中国)有限公司','上海','镀锡助剂/光亮剂','合格','良'],
- ['GYS-207','上海帝斯曼新材料','上海','聚酯亚胺漆包漆','合格','良'],
- ['GYS-208','宁波金田铜业(集团)','浙江宁波','低氧光亮铜杆 Φ8.0(外购补充)','合格','良'],
- ['GYS-209','江西广信新材料','江西上饶','PVC 绝缘料','合格','良'],
- ['GYS-210','金发科技股份有限公司','广东广州','护套料(线缆)','合格','优'],
-];
-const MAT=[
- ['10-CU-CATH','阴极铜(电解铜) 1#','Cu≥99.95%','原料','吨','312.0','200'],
- ['10-ROD-080','低氧光亮铜杆 Φ8.0','TU2 低氧铜','原料/半成品','吨','86.0','60'],
- ['10-ROD-O80','无氧铜杆 Φ8.0','TU0 无氧铜','原料','吨','24.0','20'],
- ['10-SN-999','锡锭','Sn 99.90%','原料','吨','2.1','5.0'],
- ['10-OIL-DF25','拉丝润滑油 DF-25','—','辅料','吨','3.2','2.0'],
- ['10-FLUX-SN','镀锡助剂/光亮剂','—','辅料','吨','0.8','0.5'],
- ['10-ENA-PEI','聚酯亚胺漆包漆','180级','辅料','吨','1.6','1.0'],
- ['20-WIRE-260','拉丝中间线 Φ2.60','TU2','半成品','吨','12.4','—'],
- ['20-WIRE-180','拉丝中间线 Φ1.80','TU2','半成品','吨','9.8','—'],
- ['20-WIRE-052','拉丝单丝 Φ0.52','TU2','半成品','吨','6.2','—'],
- ['20-ANN-025','退火软铜线 Φ0.25','TU2 软态','半成品','吨','4.1','—'],
- ['30-TXD-018','镀锡圆铜线 Φ0.18','TU2 镀锡','成品','吨','3.4','—'],
- ['30-TXD-020','镀锡圆铜线 Φ0.20','TU2 镀锡','成品','吨','5.6','—'],
- ['30-TXD-025','镀锡圆铜线 Φ0.25','TU2 镀锡','成品','吨','7.2','—'],
- ['30-TXD-030','镀锡圆铜线 Φ0.30','TU2 镀锡','成品','吨','2.8','—'],
- ['30-QZ-071','漆包圆铜线 QZ-2/130 Φ0.71','TU1','成品','吨','4.0','—'],
- ['30-JX-1652','铜绞线 16股/Φ0.52','TU2','成品','吨','6.5','—'],
- ['30-BC-040','裸铜线 Φ0.40','TU2','成品','吨','3.0','—'],
-];
-const MACH=[
- ['CCR01','连铸连轧线','上引连铸连轧','铜杆','22 t/h','运行',88],
- ['LZ01','大拉机 1#','Φ8→Φ2.6','拉丝','1.8 t/h','运行',85],
- ['LZ02','大拉机 2#','Φ8→Φ2.6','拉丝','1.8 t/h','运行',82],
- ['ZL01','中拉机 1#','Φ2.6→Φ1.2','拉丝','1.2 t/h','运行',79],
- ['ZL02','中拉机 2#','Φ2.6→Φ0.5','拉丝','1.0 t/h','停机',0],
- ['XL01','小拉机','Φ1.2→Φ0.25','拉丝','0.6 t/h','运行',74],
- ['RH01','连续退火炉 1#','在线退火','退火','1.5 t/h','运行',85],
- ['RH02','连续退火炉 2#','在线退火','退火','1.5 t/h','运行',80],
- ['DX01','镀锡线 1#','热镀锡/电镀锡','镀锡','1.0 t/h','运行',87],
- ['DX02','镀锡线 2#','电镀锡','镀锡','0.9 t/h','运行',83],
- ['QB01','漆包机 1#','聚酯亚胺','漆包','0.5 t/h','运行',76],
- ['GX01','束丝机 1#','16/19股束合','绞线','0.8 t/h','运行',81],
- ['GX02','绞线机 2#','框绞/管绞','绞线','0.7 t/h','运行',78],
- ['FR01','复绕收线机','分条/复绕','复绕','2.0 t/h','运行',79],
-];
-// 制造订单
-const MO=[
- ['MO-26061022','30-TXD-020','镀锡圆铜线 Φ0.20','TU2','12.0','立讯精密','拉丝→镀锡→复绕','06-20','高','green','已排程','DX01'],
- ['XW-26061015','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','20.0','比亚迪','拉丝→镀锡→复绕','06-13','急','amber','待排程','—'],
- ['MO-26061302','30-JX-1652','铜绞线 16股/Φ0.52','TU2','9.0','宝胜科技','拉丝→绞线','06-16','普通','green','待排程','GX01'],
- ['MO-26060512','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','18.0','宁德时代','拉丝→镀锡→复绕','06-15','普通','green','生产中','DX02'],
- ['MO-26060805','30-BC-040','裸铜线 Φ0.40','TU2','10.0','远东电缆','连铸→拉丝','06-14','高','green','已下发','LZ01'],
- ['MO-26061104','30-QZ-071','漆包圆铜线 Φ0.71','TU1','8.0','卧龙电气','拉丝→退火→漆包','06-16','普通','amber','待排程','QB01'],
- ['MO-26061208','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','15.0','安费诺','拉丝→镀锡→复绕','06-16','高','red','待排程','—'],
- ['MO-26060703','30-QZ-071','漆包圆铜线 Φ0.71','TU1','9.0','美的集团','拉丝→退火→漆包','06-15','普通','green','生产中','QB01'],
- ['MO-26061319','30-TXD-018','镀锡圆铜线 Φ0.18','TU2','6.0','得润电子','拉丝→镀锡','06-17','普通','green','待排程','—'],
- ['MO-26061030','30-TXD-020','镀锡圆铜线 Φ0.20','TU2','5.0','沪光电器','拉丝→镀锡','06-18','普通','green','待排程','—'],
- ['MO-26061045','30-JX-1652','铜绞线 16股/Φ0.52','TU2','11.0','上上电缆','拉丝→绞线','06-19','普通','green','已排程','GX02'],
- ['MO-26060920','30-BC-040','裸铜线 Φ0.40','TU2','14.0','金杯电工','连铸→拉丝','06-15','普通','green','生产中','LZ02'],
- ['MO-26061250','30-TXD-030','镀锡圆铜线 Φ0.30','TU2','7.0','格力电器','拉丝→镀锡','06-17','高','amber','待排程','—'],
- ['MO-26061188','30-QZ-071','漆包圆铜线 Φ0.71','TU1','6.5','大洋电机','拉丝→退火→漆包','06-18','普通','green','已排程','QB01'],
- ['MO-26060660','30-JX-1652','铜绞线 16股/Φ0.52','TU2','8.0','江南电缆','拉丝→绞线','06-16','普通','green','已下发','GX01'],
- ['MO-26061412','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','16.0','立讯昆山','拉丝→镀锡→复绕','06-19','普通','green','待排程','—'],
-];
-// 销售订单
-const SO=[
- ['XS-26060101','立讯精密','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','20.0','06-13','急','已转制造'],
- ['XS-26060098','安费诺','30-TXD-020','镀锡圆铜线 Φ0.20','TU2','12.0','06-15','高','已转制造'],
- ['XS-26060095','宝胜科技','30-JX-1652','铜绞线 16股/Φ0.52','TU2','9.0','06-16','普通','已确认'],
- ['XS-26060090','卧龙电气','30-QZ-071','漆包圆铜线 Φ0.71','TU1','8.0','06-16','普通','已转制造'],
- ['XS-26060088','远东电缆','30-BC-040','裸铜线 Φ0.40','TU2','10.0','06-14','高','已转制造'],
- ['XS-26060085','美的集团','30-QZ-071','漆包圆铜线 Φ0.71','TU1','9.0','06-15','普通','已转制造'],
- ['XS-26060082','比亚迪','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','18.0','06-15','普通','已转制造'],
- ['XS-26060079','宁德时代','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','15.0','06-16','高','已确认'],
- ['XS-26060075','上上电缆','30-JX-1652','铜绞线 16股/Φ0.52','TU2','11.0','06-19','普通','已转制造'],
- ['XS-26060071','格力电器','30-TXD-030','镀锡圆铜线 Φ0.30','TU2','7.0','06-17','高','已确认'],
- ['XS-26060068','得润电子','30-TXD-018','镀锡圆铜线 Φ0.18','TU2','6.0','06-17','普通','已确认'],
- ['XS-26060064','金杯电工','30-BC-040','裸铜线 Φ0.40','TU2','14.0','06-15','普通','已转制造'],
-];
+const CUST=[['KH-1001','立讯精密工业股份','广东东莞','A','镀锡铜线/连接器线','优',1280],['KH-1002','鸿富锦精密(富士康)','广东深圳','A','镀锡铜线','优',960],['KH-1003','比亚迪股份','广东深圳','A','镀锡线/电池连接','优',1520],['KH-1004','宁德时代新能源','福建宁德','A','镀锡铜线','优',1340],['KH-1005','昆山沪光汽车电器','江苏昆山','B','汽车线束镀锡线','良',640],['KH-1006','深圳得润电子','广东深圳','B','连接器镀锡线','良',520],['KH-1007','安费诺(常州)','江苏常州','A','连接器线','优',880],['KH-1008','立讯精密(昆山)','江苏昆山','B','镀锡线','良',610],['KH-1009','卧龙电气集团','浙江上虞','A','电机漆包线','优',1180],['KH-1010','中山大洋电机','广东中山','B','漆包线','良',730],['KH-1011','美的集团','广东佛山','A','漆包线','优',1420],['KH-1012','珠海格力电器','广东珠海','A','漆包线','优',1390],['KH-1013','远东电缆(远东股份)','江苏宜兴','A','裸铜线/低氧铜杆','优',2240],['KH-1014','宝胜科技创新','江苏扬州','A','铜杆/铜绞线','优',1960],['KH-1015','上海起帆电缆','上海','B','铜导体','良',880],['KH-1016','金杯电工','湖南长沙','B','铜杆','良',760],['KH-1017','无锡江南电缆','江苏宜兴','B','铜绞线','良',690],['KH-1018','上上电缆集团','江苏溧阳','A','铜导体/绞线','优',1510]];
+const SUP=[['GYS-201','江西铜业本部(贵溪冶炼厂)','江西贵溪','阴极铜 Cu-CATH 1#','战略','优'],['GYS-202','铜陵有色金属集团','安徽铜陵','阴极铜 1#','合格','优'],['GYS-203','云南铜业','云南昆明','阴极铜 1#','合格','良'],['GYS-204','云南锡业(个旧)','云南个旧','锡锭 Sn99.90','合格','优'],['GYS-205','汉高(中国)','上海','拉丝润滑油 DF-25','合格','优'],['GYS-206','巴斯夫(中国)','上海','镀锡助剂','合格','良'],['GYS-207','上海帝斯曼新材料','上海','聚酯亚胺漆包漆','合格','良'],['GYS-208','宁波金田铜业','浙江宁波','低氧铜杆(外购补充)','合格','良'],['GYS-209','江西广信新材料','江西上饶','PVC 绝缘料','合格','良'],['GYS-210','金发科技','广东广州','护套料','合格','优']];
+const MAT=[['10-CU-CATH','阴极铜(电解铜)1#','Cu≥99.95%','原料','312.0','200'],['10-ROD-080','低氧光亮铜杆 Φ8.0','TU2','原料/半成品','86.0','60'],['10-ROD-O80','无氧铜杆 Φ8.0','TU0','原料','24.0','20'],['10-SN-999','锡锭','Sn99.90','原料','2.1','5.0'],['10-OIL-DF25','拉丝润滑油 DF-25','—','辅料','3.2','2.0'],['10-FLUX-SN','镀锡助剂','—','辅料','0.8','0.5'],['10-ENA-PEI','聚酯亚胺漆包漆','180级','辅料','1.6','1.0'],['20-WIRE-260','拉丝中间线 Φ2.60','TU2','半成品','12.4','—'],['20-WIRE-052','拉丝单丝 Φ0.52','TU2','半成品','6.2','—'],['20-ANN-025','退火软铜线 Φ0.25','TU2软','半成品','4.1','—'],['30-TXD-018','镀锡圆铜线 Φ0.18','TU2镀锡','成品','3.4','—'],['30-TXD-020','镀锡圆铜线 Φ0.20','TU2镀锡','成品','5.6','—'],['30-TXD-025','镀锡圆铜线 Φ0.25','TU2镀锡','成品','7.2','—'],['30-TXD-030','镀锡圆铜线 Φ0.30','TU2镀锡','成品','2.8','—'],['30-QZ-071','漆包圆铜线 Φ0.71','TU1','成品','4.0','—'],['30-JX-1652','铜绞线 16股/Φ0.52','TU2','成品','6.5','—'],['30-BC-040','裸铜线 Φ0.40','TU2','成品','3.0','—']];
+const MACH=[['CCR01','连铸连轧线','铜杆','22 t/h','运行',64],['LZ01','大拉机1#','拉丝','1.8 t/h','运行',70],['LZ02','大拉机2#','拉丝','1.8 t/h','运行',66],['ZL01','中拉机1#','拉丝','1.2 t/h','运行',58],['ZL02','中拉机2#','拉丝','1.0 t/h','停机',0],['XL01','小拉机','拉丝','0.6 t/h','运行',62],['RH01','连续退火炉1#','退火','1.5 t/h','运行',55],['RH02','连续退火炉2#','退火','1.5 t/h','运行',60],['DX01','镀锡线1#','镀锡','1.0 t/h','运行',92],['DX02','镀锡线2#','镀锡','0.9 t/h','运行',74],['QB01','漆包机1#','漆包','0.5 t/h','运行',68],['GX01','束丝机1#','绞线','0.8 t/h','运行',61],['GX02','绞线机2#','绞线','0.7 t/h','运行',57],['FR01','复绕收线机','复绕','2.0 t/h','运行',79]];
+const MO=[['MO-26061022','30-TXD-020','镀锡圆铜线 Φ0.20','TU2','12.0','立讯精密','拉丝→镀锡→复绕','06-20','高','green','已排程','DX01'],['XW-26061015','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','20.0','比亚迪','拉丝→镀锡→复绕','06-13','急','amber','待排程','—'],['MO-26061302','30-JX-1652','铜绞线 16股/Φ0.52','TU2','9.0','宝胜科技','拉丝→绞线','06-16','普通','green','待排程','GX01'],['MO-26060512','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','18.0','宁德时代','拉丝→镀锡→复绕','06-15','普通','green','生产中','DX02'],['MO-26060805','30-BC-040','裸铜线 Φ0.40','TU2','10.0','远东电缆','连铸→拉丝','06-14','高','green','已下发','LZ01'],['MO-26061104','30-QZ-071','漆包圆铜线 Φ0.71','TU1','8.0','卧龙电气','拉丝→退火→漆包','06-16','普通','amber','待排程','QB01'],['MO-26061208','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','15.0','安费诺','拉丝→镀锡→复绕','06-16','高','red','待排程','—'],['MO-26060703','30-QZ-071','漆包圆铜线 Φ0.71','TU1','9.0','美的集团','拉丝→退火→漆包','06-15','普通','green','生产中','QB01'],['MO-26061319','30-TXD-018','镀锡圆铜线 Φ0.18','TU2','6.0','得润电子','拉丝→镀锡','06-17','普通','green','待排程','—'],['MO-26061030','30-TXD-020','镀锡圆铜线 Φ0.20','TU2','5.0','沪光电器','拉丝→镀锡','06-18','普通','green','待排程','—'],['MO-26061045','30-JX-1652','铜绞线 16股/Φ0.52','TU2','11.0','上上电缆','拉丝→绞线','06-19','普通','green','已排程','GX02'],['MO-26060920','30-BC-040','裸铜线 Φ0.40','TU2','14.0','金杯电工','连铸→拉丝','06-15','普通','green','生产中','LZ02'],['MO-26061250','30-TXD-030','镀锡圆铜线 Φ0.30','TU2','7.0','格力电器','拉丝→镀锡','06-17','高','amber','待排程','—'],['MO-26061188','30-QZ-071','漆包圆铜线 Φ0.71','TU1','6.5','大洋电机','拉丝→退火→漆包','06-18','普通','green','已排程','QB01'],['MO-26060660','30-JX-1652','铜绞线 16股/Φ0.52','TU2','8.0','江南电缆','拉丝→绞线','06-16','普通','green','已下发','GX01'],['MO-26061412','30-TXD-025','镀锡圆铜线 Φ0.25','TU2','16.0','立讯昆山','拉丝→镀锡→复绕','06-19','普通','green','待排程','—']];
+const SO=[['XS-26060101','立讯精密','30-TXD-025','镀锡圆铜线 Φ0.25','20.0','06-13','急','已转制造'],['XS-26060098','安费诺','30-TXD-020','镀锡圆铜线 Φ0.20','12.0','06-15','高','已转制造'],['XS-26060095','宝胜科技','30-JX-1652','铜绞线 16股','9.0','06-16','普通','已确认'],['XS-26060090','卧龙电气','30-QZ-071','漆包圆铜线 Φ0.71','8.0','06-16','普通','已转制造'],['XS-26060088','远东电缆','30-BC-040','裸铜线 Φ0.40','10.0','06-14','高','已转制造'],['XS-26060082','比亚迪','30-TXD-025','镀锡圆铜线 Φ0.25','18.0','06-15','普通','已转制造'],['XS-26060079','宁德时代','30-TXD-025','镀锡圆铜线 Φ0.25','15.0','06-16','高','已确认'],['XS-26060075','上上电缆','30-JX-1652','铜绞线 16股','11.0','06-19','普通','已转制造'],['XS-26060071','格力电器','30-TXD-030','镀锡圆铜线 Φ0.30','7.0','06-17','高','已确认'],['XS-26060068','得润电子','30-TXD-018','镀锡圆铜线 Φ0.18','6.0','06-17','普通','已确认']];
+const DAYS=['06-18','06-19','06-20','06-21','06-22','06-23'];
+// 资源负荷桶（按日 load%）
+const LOAD={CCR01:[64,70,66,60,58,55],LZ01:[70,76,72,68,64,60],ZL01:[58,62,60,55,52,50],RH01:[55,60,58,54,50,48],DX01:[92,112,98,88,80,72],DX02:[74,82,78,72,68,64],QB01:[68,74,70,66,62,58],GX01:[61,68,64,60,56,54],FR01:[79,84,80,76,72,68]};
+const PROB=[['red','晚交','XW-26061015','急单(比亚迪 Φ0.25 20t) 预计 06-13 22:40 完工，交期 06-13，存在 1 张延期风险','-0d'],['red','超载','DX01 镀锡线','06-19 负荷 112%，超可用产能 2.8t','+12%'],['red','缺料','锡锭','06-19 09:00 缺口 0.4t，影响 2 张镀锡工单','-0.4t'],['amber','晚交','MO-26060805','裸铜线(远东) 06-14 交期，当前排程 06-15 完工','-1d'],['amber','超载','FR01 复绕机','06-19 负荷 84%，接近上限','+0%'],['amber','缺料','聚酯亚胺漆包漆','06-21 缺口 0.10t，影响漆包工单','-0.1t'],['amber','晚交','MO-26061250','格力 Φ0.30 交期 06-17，受 DX01 超载影响顺延','-0.5d'],['gray','未排','MO-26061208','安费诺 Φ0.25 15t 缺料未齐套，暂未排入','—'],['gray','未排','MO-26061319','得润 Φ0.18 6t 待排程','—']];
 
-/* ===================== 菜单（真实菜单树） ===================== */
-const SMART={sched:1,kit:1,bom:1,setup:1,'plan-insert':1};   // 内置智能功能的模块（侧栏小标）
+/* ===================== 菜单（对标真实 APS：FrePPLe 大类 + 安达发中文） ===================== */
+const SMART={sched:1,ctp:1,kit:1,bom:1,insert:1};
 const MENU=[
- {g:'基础管理',ic:'⚙',items:[['base-org','生产组织'],['base-line','生产线'],['base-mat','物料管理'],['base-period','计划期间'],['base-mode','计划模式'],['base-ml','物料与生产线关系'],['base-mm','模具与物料关系'],['base-ml2','模具与生产线关系'],['base-loss','物料分段损耗率'],['base-unit','单位维护'],['base-cmd','计划命令参数']]},
- {g:'资源管理',ic:'🏭',items:[['res-main','主资源定义'],['res-tool','工具资源'],['res-cal','生产日历'],['res-shift','设备排班'],['res-cap','设备产能'],['res-lead','提前期'],['res-takt','节拍'],['res-safe','安全生产周期'],['res-maxadv','最大提前生产周期'],['res-tf','时间栏'],['res-spec','规格关联对象'],['res-match','规格匹配规则'],['res-allow','设备允许规则'],['res-furnace','设备组炉规则'],['setup','生产换型时间']]},
- {g:'产品工艺',ic:'🧪',items:[['craft-new','新品开发评审'],['craft-wc','工作中心'],['craft-std','标准工艺'],['craft-route','工艺路径'],['bom','物品BOM'],['craft-alt','BOM替代方案'],['craft-sop','SOP文件'],['craft-doc','工艺文件'],['craft-cand','物品候选资源'],['craft-view','工艺路径及BOM']]},
- {g:'库存数据',ic:'📦',items:[['stock','原料库存及在途'],['inv-fg','产成品实时库存'],['inv-mold','模具库存'],['inv-dead','呆滞库存'],['inv-wip','在制品库存'],['inv-count','产成品盘点库存']]},
- {g:'订单管理',ic:'🧾',items:[['ord-cust','客户档案'],['ord-sup','供应商档案'],['so','销售订单'],['ord-trial','新品试用反馈'],['ord-po','采购订单'],['ord-balance','产销平衡'],['ord-capwarn','产能预警'],['ord-transfer','成品转单'],['ord-hook','脱挂单处理'],['mo','制造订单'],['ord-expand','制造订单展开']]},
- {g:'生产排程',ic:'🗓️',items:[['wo','工序工单'],['sched','自动排程'],['plan-return','中间品及成品退库处理'],['plan-insert','快速插单'],['kit','物料齐套分配'],['plan-adjust','计划调整'],['dispatch','工序工单下发'],['plan-sop','作业指导书'],['plan-need','制造订单物料需求'],['plan-gap','制造订单物料缺口']]},
- {g:'计划可视化',ic:'📊',items:[['vis-finish','每日完工计划'],['vis-prod','每日生产计划'],['vis-shift','班次生产计划'],['vis-line','机台产线计划'],['vis-mrp','物料需求计划'],['rgantt','资源甘特图'],['vis-load','资源负荷图'],['vis-opg','工序甘特图'],['vis-ordg','订单甘特图'],['vis-invload','库存负荷图']]},
- {g:'执行监控',ic:'📡',items:[['exec-psi','供需明细查询'],['exec-io','领料与入库'],['monitor','生产反馈'],['exec-ach','产线达成统计'],['exec-warn','生产异常预警']]},
- {g:'报表',ic:'📈',items:[['rpt-eff','每日机台产量效率统计表'],['rpt-spec','漆包线机台实时规格'],['rpt-track','生产实时跟踪表'],['rpt-fg','产品实时库存'],['rpt-rm','原料实时库存'],['rpt-insp','产品巡检表'],['rpt-exec','订单执行报表'],['reports','订单准时交付率分析'],['rpt-prodeff','生产效率分析']]},
+ {g:'需求与订单',ic:'📥',items:[['cust','客户'],['so','销售订单'],['fcst','需求预测'],['mo','制造订单']]},
+ {g:'主计划',ic:'🗂',items:[['mps','主生产计划 MPS'],['ctp','可承诺交期 CTP'],['balance','产销平衡']]},
+ {g:'详细排产',ic:'🗓️',items:[['sched','排产甘特'],['gsum','工序概要甘特'],['gdet','工序明细甘特'],['insert','快速插单 / What-if'],['adjust','计划调整']]},
+ {g:'产能',ic:'🏭',items:[['wc','工作中心'],['res','设备资源'],['loadrep','资源负荷报表'],['loadgantt','资源负荷甘特'],['setup','换型矩阵'],['cal','生产日历']]},
+ {g:'物料与采购',ic:'📦',items:[['item','物料'],['buffer','库存(Buffer)'],['kit','齐套分析'],['feed','投料计划'],['po','采购计划'],['inbound','入库计划'],['sup','供应商'],['proj','动态库存展望']]},
+ {g:'工艺数据',ic:'🧪',items:[['route','工艺路线'],['bom','物料清单 BOM'],['tool','模治具需求与展望']]},
+ {g:'执行',ic:'📡',items:[['dispatch','工序派工单'],['feedback','生产反馈'],['io','领料与入库'],['ach','产线达成'],['outsource','外协计划']]},
+ {g:'报表分析',ic:'📈',items:[['prob','问题清单'],['cost','工单成本'],['otd','准时交付率'],['eff','生产效率']]},
 ];
-const GRP={},NAME={}; MENU.forEach(m=>m.items.forEach(it=>{GRP[it[0]]=m.g;NAME[it[0]]=it[1];}));
-
-/* 渲染侧栏 */
+const GRP={},NAME={};MENU.forEach(m=>m.items.forEach(it=>{GRP[it[0]]=m.g;NAME[it[0]]=it[1];}));
 const tree=$('#navTree');
-MENU.forEach(m=>{
-  const open=(m.g==='生产排程'||m.g==='订单管理');
-  const grp=document.createElement('div'); grp.className='nav-grp'+(open?'':' collapsed');
-  grp.innerHTML=`<div class="nav-grp-h"><span class="gi">${m.ic}</span><span>${m.g}</span><span class="caret">▾</span></div><div class="nav-sub">${m.items.map(it=>`<div class="nav-leaf" data-id="${it[0]}">${it[1]}${SMART[it[0]]?'<span class="smk">智能</span>':''}</div>`).join('')}</div>`;
-  tree.appendChild(grp); grp.querySelector('.nav-grp-h').onclick=()=>grp.classList.toggle('collapsed');
-});
-const top=document.createElement('div'); top.className='nav-grp'; top.innerHTML=`<div class="nav-leaf" data-id="dash" style="padding-left:16px;font-weight:600;color:#cdd6e6">🏠 工作台</div>`; tree.insertBefore(top,tree.firstChild);
+MENU.forEach(m=>{const open=(m.g==='详细排产'||m.g==='需求与订单');const grp=document.createElement('div');grp.className='nav-grp'+(open?'':' collapsed');
+ grp.innerHTML=`<div class="nav-grp-h"><span class="gi">${m.ic}</span><span>${m.g}</span><span class="caret">▾</span></div><div class="nav-sub">${m.items.map(it=>`<div class="nav-leaf" data-id="${it[0]}">${it[1]}${SMART[it[0]]?'<span class="smk">智能</span>':it[0]==='prob'?'<span class="nb">9</span>':''}</div>`).join('')}</div>`;
+ tree.appendChild(grp);grp.querySelector('.nav-grp-h').onclick=()=>grp.classList.toggle('collapsed');});
+const top=document.createElement('div');top.className='nav-grp';top.innerHTML=`<div class="nav-leaf" data-id="dash" style="padding-left:16px;font-weight:600;color:#cdd6e6">📊 计划看板</div>`;tree.insertBefore(top,tree.firstChild);
 $$('.nav-leaf').forEach(l=>l.onclick=()=>navTo(l.dataset.id));
 $('.tb-toggle').onclick=()=>$('#app').classList.toggle('sb-collapsed');
 
-/* ===================== 路由 ===================== */
-function navTo(id){
-  if(id!=='dash' && !$('#page-'+id)) buildScreen(id);
-  $$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+id));
-  $$('.nav-leaf').forEach(l=>l.classList.toggle('active',l.dataset.id===id));
-  $('#crumbGrp').textContent=id==='dash'?'首页':GRP[id]; $('#crumbPage').textContent=id==='dash'?'工作台':NAME[id];
-  $('#main').scrollTop=0; onPage(id);
-}
+function navTo(id){if(id!=='dash'&&!$('#page-'+id))buildScreen(id);$$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+id));$$('.nav-leaf').forEach(l=>l.classList.toggle('active',l.dataset.id===id));$('#crumbGrp').textContent=id==='dash'?'计划看板':GRP[id];$('#crumbPage').textContent=id==='dash'?'计划看板':NAME[id];$('#main').scrollTop=0;onPage(id);}
 
-/* ===================== 表格工具 ===================== */
-function tbl(cols,rows){ // cols:[{t,n?}], rows: array of arrays of html
-  return `<div class="card"><div class="tbl-wrap"><table class="grid"><thead><tr>${cols.map(c=>`<th${c.n?' class="num"':''}>${c.t}</th>`).join('')}</tr></thead>
-  <tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${cols[i]&&cols[i].n?' class="num"':''}>${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-  <div class="tbl-foot"><span>共 <b>${rows.length}</b> 条</span><div class="pager"><button>‹</button><button class="on">1</button><button>›</button></div></div></div>`;
-}
+/* ===================== 工具 ===================== */
+function tbl(cols,rows){return `<div class="card"><div class="tbl-wrap"><table class="grid"><thead><tr>${cols.map(c=>`<th${c.n?' class="num"':''}>${c.t}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td${cols[i]&&cols[i].n?' class="num"':''}>${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="tbl-foot"><span>共 <b>${rows.length}</b> 条</span><div class="pager"><button>‹</button><button class="on">1</button><button>›</button></div></div></div>`;}
 const tg=(c,t)=>`<span class="tag ${c} nodot">${t}</span>`;
 const prio=p=>tg(p==='急'?'red':p==='高'?'amber':'gray',p);
+const hcls=v=>v>100?'h4':v>90?'h3':v>70?'h2':v>50?'h1':'h0';
+function heat(){return `<table class="heat"><thead><tr><th style="text-align:left">资源 \\ 日期</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${Object.keys(LOAD).map(k=>{const m=MACH.find(x=>x[0]===k);return `<tr><td class="rh">${k} ${m?m[1]:''}</td>${LOAD[k].map(v=>`<td class="${hcls(v)}">${v}%</td>`).join('')}</tr>`;}).join('')}</tbody></table>`;}
+function probList(rows){return rows.map(p=>`<div class="prob-row" onclick="navTo('${p[1]==='超载'?'loadrep':p[1]==='缺料'?'kit':'sched'}')"><span class="pt">${tg(p[0]==='red'?'red':p[0]==='amber'?'amber':'gray',p[1])}</span><span class="po">${p[2]}</span><span class="pd">${p[3]}</span><span class="pv" style="color:${p[0]==='red'?'var(--danger)':p[0]==='amber'?'var(--warn)':'var(--ink-3)'}">${p[4]}</span></div>`).join('');}
 
-/* 兜底：按模块生成真实感数据（杜绝空屏/占位） */
-function FALLBACK(id){
- const g=GRP[id], nm=NAME[id];
- if(['rgantt','vis-opg','vis-ordg','vis-load'].includes(id))
-   return `<div class="card"><div class="card-body flush"><div class="gantt" id="fallGantt"></div><div class="gantt-legend"><i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i><i><span class="lg-sw" style="background:#1a9d6b"></span>正常</i><i><span class="lg-sw" style="background:#dc4b3e"></span>延期</i></div></div></div>`;
- if(g==='基础管理'||g==='资源管理'){
-   const P=['标准值已配置','按机台维护','规则已启用','参数已设定'];
-   return tbl([{t:'编码'},{t:'名称'},{t:'适用资源/对象'},{t:'参数取值'},{t:'更新'},{t:'状态'}],
-     MACH.slice(0,9).map((m,i)=>[`<span class="mono">${id.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4)}-${101+i}</span>`,nm,m[0]+' '+m[1],P[i%4],'06-'+(12+i%6),tg('green','启用')]));
- }
- if(g==='产品工艺')
-   return tbl([{t:'编码'},{t:'名称'},{t:'适用产品'},{t:'关联工艺路径'},{t:'版本'},{t:'状态'}],
-     ['镀锡圆铜线 Φ0.25','漆包圆铜线 Φ0.71','铜绞线 16股','裸铜线 Φ0.40','镀锡圆铜线 Φ0.20','镀锡圆铜线 Φ0.18'].map((p,i)=>[`<span class="mono">GY-${210+i}</span>`,nm,p,['RT-TXD','RT-QZ','RT-JX','RT-BC'][i%4],'V'+(1+i%3),tg('green','生效')]));
- if(g==='库存数据')
-   return tbl([{t:'物料编码'},{t:'物料名称'},{t:'规格/牌号'},{t:'数量(t)',n:1},{t:'库位'},{t:'状态'}],
-     MAT.slice(0,9).map((m,i)=>[`<span class="mono">${m[0]}</span>`,m[1],m[2],m[5],'库区 '+'ABC'[i%3]+'-0'+(1+i%5),tg(i%4===2?'amber':'green',i%4===2?'待检':'正常')]));
- if(g==='订单管理')
-   return tbl([{t:'单号'},{t:'客户/对象'},{t:'物料'},{t:'数量(t)',n:1},{t:'日期'},{t:'状态'}],
-     MO.slice(0,8).map(o=>[`<span class="mono">${o[0].replace('MO','DJ')}</span>`,o[5],o[2],o[4],o[7],tg('blue','已处理')]));
- if(g==='生产排程')
-   return tbl([{t:'工单号'},{t:'制造订单'},{t:'物料/规格'},{t:'机台'},{t:'数量(t)',n:1},{t:'状态'}],
-     MO.slice(0,8).map(o=>[`<span class="mono">${o[0].replace('MO-','WO-').slice(0,12)}</span>`,o[0],o[2],o[11],o[4],tg('blue','处理中')]));
- if(g==='计划可视化')
-   return tbl([{t:'日期/班次'},{t:'机台'},{t:'物料/规格'},{t:'计划产量(t)',n:1},{t:'完成率'}],
-     MACH.filter(m=>m[5]==='运行').slice(0,7).map((m,i)=>[`06-18 ${i%2?'中班':'早班'}`,m[0]+' '+m[1],MAT[11+i%6][1],(8+i).toFixed(1),`<div class="bar" style="width:90px"><i style="width:${60+i*5}%"></i></div>`]));
- if(g==='执行监控')
-   return tbl([{t:'机台/对象'},{t:'工单'},{t:'物料'},{t:'数量(t)',n:1},{t:'时间'},{t:'状态'}],
-     MO.slice(0,7).map(o=>[o[11],o[0].replace('MO-','WO-').slice(0,12),o[2],o[4],'11:'+(20+(o[0].charCodeAt(8)%39)),tg('green','正常')]));
- if(g==='报表')
-   return tbl([{t:'统计项'},{t:'本期'},{t:'环比'},{t:'范围'}],
-     [['日均产量','86.4 t','▲ 3.2%','全厂'],['一次合格率','99.1%','▲ 0.4%','镀锡'],['吨铜加工成本','¥1,240','▼ 2.1%','全厂'],['换型损时','2.0 h/日','▼ 62%','DX01'],['呆滞库存','12.6 t','▼ 8%','成品'],['吨产能耗','382 kWh','▼ 3%','全厂']].map(r=>[r[0],`<b>${r[1]}</b>`,`<span style="color:${r[2][0]==='▲'?'var(--ok)':'var(--ok)'}">${r[2]}</span>`,r[3]]));
+/* ===================== 屏构建 ===================== */
+function buildScreen(id){const s=document.createElement('section');s.className='page';s.id='page-'+id;
+ s.innerHTML=`<div class="page-head"><div><h1>${NAME[id]}</h1><div class="ph-sub">${SUB[id]||''}</div></div><div class="ph-actions">${ACT[id]||'<button class="btn">+ 新建</button><button class="btn">⭱ 导入</button><button class="btn">⭳ 导出</button>'}</div></div><div id="body-${id}">${BODY[id]?BODY[id]():FALLBACK(id)}</div>`;
+ $('#screenHost').appendChild(s);}
+const SUB={cust:'客户主数据 · 信用与价格政策',so:'客户需求行(Sales order/Demand)，计划输入',mo:'制造订单(Manufacturing order)，排产对象',sched:'有限产能求解结果 · 拖拽调整 · 计划版本 V0618-1',gsum:'按工作中心的工序概要甘特(只读)',gdet:'按制造订单的工序明细甘特',loadrep:'资源负荷报表 · 按日时间桶 · 瓶颈识别',setup:'换型时间矩阵 · 排产按规则少换模/少换规格',kit:'物料齐套(Buffer)分析 · 缺料预测',ctp:'可承诺交期 · 急单/新单交付能力测算',tool:'模治具需求与可用展望 · 按周',cost:'工单成本(直接材料+人工+制费)',prob:'有限产能求解后的约束冲突(晚交/超载/缺料/未排)',item:'物料主档 · 成品/半成品/原料/辅料',buffer:'库存与在制 · 安全库存',sup:'供应商主数据',bom:'物料清单与配比',route:'工艺路线(Operation routing)',dispatch:'计划确认后下发产线 · 派工单',insert:'急单临时插入与影响评估(What-if)',po:'MRP 生成的采购计划/采购订单',feed:'投料计划',inbound:'完工入库计划'};
+const ACT={
+ sched:`<div class="seg" style="margin-right:4px"><button class="on">有限产能</button><button>无限产能</button></div><button class="btn" id="btnRule" onclick="runRuleSched()">规则排程</button><button class="btn ai" onclick="runSmart()">✦ 生成计划(求解)</button><button class="btn primary" onclick="confirmPlan()">发布版本</button>`,
+ bom:`<button class="btn">+ 新建版本</button><button class="btn ai" onclick="aiRecipe()">✦ 配比优选</button>`,
+ ctp:`<button class="btn ghost">历史测算</button>`,
+ kit:`<button class="btn ai" onclick="APS.toast('缺料预测：未来3天1项缺口(锡锭)，已生成采购建议 CG-2606-118','ai')">✦ 缺料预测</button><button class="btn">导出齐套报告</button>`,
+ insert:`<button class="btn ai" onclick="aiInsert()">✦ 评估急单影响</button><button class="btn" onclick="whatifBreak()">⚙ 模拟设备故障</button>`,
+ prob:`<button class="btn">导出</button><button class="btn ai" onclick="APS.toast('排产助手：建议优先处理 DX01 超载(转 DX02)与锡锭缺料(加急请购)','ai')">✦ 一键建议</button>`,
+};
+const BODY={
+ cust:()=>tbl([{t:'客户编码'},{t:'客户名称'},{t:'区域'},{t:'等级'},{t:'主要产品'},{t:'信用'},{t:'年累计(万元)',n:1}],CUST.map(c=>[`<span class="mono">${c[0]}</span>`,c[1],c[2],tg(c[3]==='A'?'green':'blue',c[3]+'类'),`<span class="muted">${c[4]}</span>`,c[5],c[6].toLocaleString()])),
+ sup:()=>tbl([{t:'供应商编码'},{t:'名称'},{t:'区域'},{t:'供货物料'},{t:'类型'},{t:'评级'}],SUP.map(s=>[`<span class="mono">${s[0]}</span>`,s[1],s[2],s[3],tg(s[4]==='战略'?'purple':'gray',s[4]),s[5]])),
+ item:()=>tbl([{t:'物料编码'},{t:'物料名称'},{t:'规格/牌号'},{t:'类型'},{t:'现有库存(t)',n:1},{t:'安全库存',n:1}],MAT.map(m=>[`<span class="mono">${m[0]}</span>`,m[1],m[2],tg(m[3].includes('原料')?'blue':m[3]==='成品'?'green':m[3]==='辅料'?'amber':'gray',m[3]),m[4],m[5]])),
+ so:()=>`<div class="card"><div class="toolbar"><div class="filter">客户 <select><option>全部</option>${CUST.slice(0,6).map(c=>`<option>${c[1].slice(0,6)}</option>`).join('')}</select></div><div class="filter">状态 <select><option>全部</option><option>已确认</option><option>已转制造</option></select></div><div class="sep"></div><div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg><input placeholder="搜索" oninput="APS.filterTable('#soTbl',this.value)"></div></div><div class="tbl-wrap"><table class="grid" id="soTbl"><thead><tr><th>销售订单号</th><th>客户</th><th>物料编码</th><th>品名/规格</th><th class="num">数量(t)</th><th>交期</th><th>优先级</th><th>状态</th></tr></thead><tbody>${SO.map(o=>`<tr><td><span class="row-link">${o[0]}</span></td><td>${o[1]}</td><td class="mono">${o[2]}</td><td>${o[3]}</td><td class="num">${o[4]}</td><td>${o[5]}</td><td>${prio(o[6])}</td><td>${tg(o[7]==='已转制造'?'green':'blue',o[7])}</td></tr>`).join('')}</tbody></table></div><div class="tbl-foot"><span>共 <b>312</b> 条 · 本页 ${SO.length}</span></div></div>`,
+ mo:()=>`<div class="card"><div class="toolbar"><div class="filter">状态 <select id="moStatus" onchange="renderMO()"><option value="">全部</option><option>待排程</option><option>已排程</option><option>已下发</option><option>生产中</option></select></div><div class="filter">车间 <select><option>全部</option><option>拉丝</option><option>镀锡</option><option>绞线</option><option>漆包</option></select></div><div class="sep"></div><div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg><input placeholder="搜索工单/物料" oninput="APS.filterTable('#moTbl',this.value)"></div><div style="margin-left:auto" class="muted" id="moCnt"></div></div><div class="tbl-wrap"><table class="grid" id="moTbl"><thead><tr><th>制造订单号</th><th>物料编码</th><th>品名/规格</th><th>牌号</th><th class="num">数量(t)</th><th>客户</th><th>工艺路线</th><th>交期</th><th>优先级</th><th>齐套</th><th>状态</th></tr></thead><tbody></tbody></table></div><div class="tbl-foot"><span>共 <b>1,268</b> 条 · 本页 ${MO.length} · 待排 23</span><div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>…</button><button>106</button><button>›</button></div></div></div>`,
+ buffer:()=>tbl([{t:'物料编码'},{t:'物料名称'},{t:'规格/牌号'},{t:'可用(t)',n:1},{t:'在制(t)',n:1},{t:'安全库存',n:1},{t:'状态'}],MAT.filter(m=>m[3]!=='辅料').map(m=>{const sk=parseFloat(m[5])||0,av=parseFloat(m[4]);const st=m[5]==='—'?'green':av<sk?'red':av<sk*1.3?'amber':'green';return [`<span class="mono">${m[0]}</span>`,m[1],m[2],m[4],(Math.random()*8).toFixed(1),m[5],tg(st,st==='red'?'低于安全':st==='amber'?'偏低':'正常')];})),
+ sched:()=>`<div id="schedBanner"></div><div class="split" style="grid-template-columns:1fr 280px;align-items:start"><div class="card" style="margin:0"><div class="card-head"><h3>排产甘特 · 拉丝/镀锡/绞线车间</h3><span class="ch-sub" id="ganttSub">有限产能求解：DX01 06-19 超载、FR01 1 张延期</span><div class="ch-actions"><div class="seg" style="transform:scale(.9)"><button>日</button><button class="on">班次</button><button>时</button></div></div></div><div class="card-body flush"><div class="gantt" id="schedGantt"></div><div class="gantt-legend"><i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i><i><span class="lg-sw" style="background:#1a9d6b"></span>正常</i><i><span class="lg-sw" style="background:#dc4b3e"></span>延期/超载</i><i><span class="lg-sw" style="background:repeating-linear-gradient(135deg,#c2cbd8 0 4px,#dfe5ee 4px 8px)"></span>换型</i></div></div></div><div><div class="card" style="margin:0 0 14px"><div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCnt">8 张</span></div><div class="card-body" style="padding:8px;max-height:280px;overflow:auto" id="waitList"></div></div><div class="card" style="margin:0"><div class="card-head"><h3>计划 KPI</h3></div><div class="card-body" style="padding:12px 16px" id="schedKpi"></div></div></div></div>`,
+ loadrep:()=>`<div class="smart-tip"><div class="st-ic">✦</div><div>瓶颈识别：<b>DX01 镀锡线</b> 06-19 负荷 <b>112%</b>（超 2.8t）。建议将 MO-26061412 部分批次转 DX02，或夜班加开 1 班消除超载。</div><div class="st-acts"><button class="btn sm ai" onclick="APS.toast('已生成产能平衡建议','ai')">查看建议</button></div></div><div class="card"><div class="card-head"><h3>资源负荷报表（按日 · %）</h3><span class="ch-sub">绿≤70 / 黄70–90 / 橙90–100 / 红>100</span></div><div class="card-body" style="overflow:auto">${heat()}</div></div>`,
+ ctp:()=>`<div class="def-box">可承诺交期(CTP/ATP)：输入产品与需求量，系统基于当前计划的剩余产能与齐套情况，测算最早可承诺交付日期（含急单插入影响评估）。</div><div class="card"><div class="card-body"><div class="form-inline"><div class="fi"><label>产品</label><select id="ctpItem"><option>镀锡圆铜线 Φ0.25</option><option>镀锡圆铜线 Φ0.20</option><option>铜绞线 16股</option><option>漆包圆铜线 Φ0.71</option></select></div><div class="fi"><label>数量(t)</label><input id="ctpQty" value="20"></div><div class="fi"><label>期望交期</label><input id="ctpDue" value="2026-06-13"></div><div class="fi"><label>客户优先级</label><select><option>急</option><option>高</option><option>普通</option></select></div><button class="btn ai" onclick="runCTP()">✦ 测算可承诺交期</button></div>
+   <div class="ctp-res" id="ctpRes"><div class="hd">✦ 测算结果</div><div class="card-body" id="ctpResBody"></div></div></div></div>`,
+ tool:()=>`<div class="def-box">模治具需求与展望：按周展示各拉丝模/绞线模/挤出机头的需求与可用，提前识别模具短缺与换模冲突。</div>`+tbl([{t:'模具编码'},{t:'名称'},{t:'适用规格'},{t:'第25周需求'},{t:'可用'},{t:'第26周需求'},{t:'可用'},{t:'状态'}],[['LS-D052','拉丝模 Φ0.52','Φ0.55→0.52','6','8','7','8',tg('green','充足')],['LS-D025','拉丝模 Φ0.25','Φ0.27→0.25','5','6','7','5',tg('amber','偏紧')],['LS-D018','拉丝模 Φ0.18','Φ0.20→0.18','3','5','4','5',tg('green','充足')],['LS-D030','拉丝模 Φ0.30','Φ0.32→0.30','4','3','5','3',tg('red','短缺')],['GX-F16','绞线分线模 16股','16/Φ0.52','2','3','3','3',tg('green','充足')],['QB-FELT','漆包毛毡模','Φ0.71','2','2','2','2',tg('green','充足')]]),
+ cost:()=>`<div class="def-box">工单 <b>MO-26060512</b>（镀锡圆铜线 Φ0.25 · 宁德时代 · 18t）成本归集（直接材料 + 直接人工 + 制造费用）：</div>`+tbl([{t:'成本项'},{t:'明细'},{t:'金额(元)',n:1},{t:'单位成本(元/t)',n:1},{t:'占比'}],[['直接材料','低氧铜杆 18.3t × ¥68,500','1,253,550','69,642','92.1%'],['直接人工','拉丝+镀锡+复绕 工时','42,800','2,378','3.1%'],['制造费用','设备折旧/能源/辅料分摊','64,200','3,567','4.7%'],['<b>合计</b>','<b>—</b>','<b>1,360,550</b>','<b>75,586</b>','<b>100%</b>']])+`<div class="smart-tip"><div class="st-ic">✦</div><div>成本分析：本工单单位成本 ¥75,586/t，较标准成本 <b style="color:var(--ok)">-1.9%</b>（铜价采购时点较优）；废料回收 0.28t 已回冲 ¥1,860。</div><div class="st-acts"><button class="btn sm" onclick="APS.toast('已推送成本凭证至 用友NC 财务')">推送财务</button></div></div>`,
+ prob:()=>`<div class="card"><div class="card-head"><h3>计划问题清单</h3><span class="ch-sub">共 9 条 · 有限产能求解 V0618-1</span></div><div class="card-body flush">${probList(PROB)}</div></div>`,
+ bom:()=>`<div class="def-box">物料 <b>铜绞线 JX-1652（16 股 / Φ0.52）</b> · BOM 版本 V2 · 工艺路线「拉丝→绞线」</div><div class="grid-2"><div class="card"><div class="card-head"><h3>BOM 明细</h3></div><div class="tbl-wrap"><table class="grid"><thead><tr><th>层级</th><th>子项物料</th><th>规格</th><th class="num">单位用量</th><th>损耗率</th><th>替代料</th></tr></thead><tbody><tr><td>1</td><td>低氧光亮铜杆</td><td>Φ8.0 TU2</td><td class="num">1.018 t/t</td><td>1.8%</td><td>无氧铜杆 TU0</td></tr><tr><td>2</td><td>拉丝单丝</td><td>Φ0.52 ×16</td><td class="num">16 根/股</td><td>0.9%</td><td>Φ0.50 可替</td></tr><tr><td>3</td><td>拉丝润滑油 DF-25</td><td>—</td><td class="num">2.1 kg/t</td><td>—</td><td>—</td></tr></tbody></table></div></div><div class="card"><div class="card-head"><h3>配线配比方案（16 股）</h3><span class="ch-sub" id="recipeNote">当前选用：均匀 16 根</span></div><div class="card-body"><div class="recipe" id="recipeBox"></div></div></div></div>`,
+ setup:()=>`<div class="card"><div class="card-head"><h3>DX01 镀锡线 · 换型时间矩阵（小时）</h3><div class="ch-actions"><button class="btn sm ai" onclick="APS.toast('排产已按换型矩阵对同规格订单聚类排序，换型 5→2 次','ai')">✦ 少换型排序</button></div></div><div class="card-body"><table class="matrix"><thead><tr><th>从 \\ 到</th><th>Φ0.18</th><th>Φ0.20</th><th>Φ0.25</th><th>Φ0.30</th></tr></thead><tbody><tr><td class="rowh">Φ0.18</td><td class="lo">—</td><td class="lo">0.5</td><td class="mid">1.5</td><td class="hot">2.5</td></tr><tr><td class="rowh">Φ0.20</td><td class="lo">0.5</td><td class="lo">—</td><td class="lo">0.8</td><td class="mid">1.8</td></tr><tr><td class="rowh">Φ0.25</td><td class="mid">1.5</td><td class="lo">0.8</td><td class="lo">—</td><td class="lo">0.6</td></tr><tr><td class="rowh">Φ0.30</td><td class="hot">2.5</td><td class="mid">1.8</td><td class="lo">0.6</td><td class="lo">—</td></tr></tbody></table><p class="muted" style="margin-top:10px;font-size:11.5px">对应安达发"少换模/少换规格"优化规则：排产沿低损耗路径对同规格订单聚类相邻。</p></div></div>`,
+ kit:()=>`<div class="smart-tip"><div class="st-ic">✦</div><div>缺料预测：<b>锡锭</b> 将于 06-19 09:00 缺口 <b>0.4t</b>，影响急单 XW-26061015；已联动采购建议 <b>CG-2606-118</b>（到货 06-19）。</div><div class="st-acts"><button class="btn sm" onclick="navTo('po')">查看采购</button></div></div>`+tbl([{t:'制造订单'},{t:'物料'},{t:'需求(t)',n:1},{t:'可用(t)',n:1},{t:'在途(t)',n:1},{t:'齐套率'},{t:'预计齐套'},{t:'状态'}],[['XW-26061015','低氧铜杆 Φ8.0','25.0','18.0','2.0','86%','06-19 09:00',tg('amber','部分')],['XW-26061015','锡锭','0.50','0.10','0.40','42%','06-19 09:00',tg('red','缺料')],['MO-26061302','低氧铜杆 Φ8.0','9.0','15.0','—','100%','已齐套',tg('green','齐套')],['MO-26061208','低氧铜杆 Φ8.0','15.0','15.0','—','100%','已齐套',tg('green','齐套')],['MO-26061104','聚酯亚胺漆包漆','0.18','0.05','0.10','83%','06-21 14:00',tg('amber','部分')]]),
+ insert:()=>`<div class="def-box">快速插单 / What-if：评估急单插入或设备故障对现有计划的影响（对标 FrePPLe 的 rush-order / machine-breakdown 影响评估）。点击上方按钮运行。</div><div id="insertResult"></div>`,
+ dispatch:()=>tbl([{t:'计划版本'},{t:'下发时间'},{t:'工单数',n:1},{t:'下发人'},{t:'接收方式'},{t:'状态'}],[['V0618-1','06-18 11:50','118','张建国','车间电子终端 + 班组确认',tg('green','已下发')],['V0617-7','06-17 19:40','96','李卫东','车间电子终端',tg('gray','已归档')]]),
+ po:()=>tbl([{t:'采购订单号'},{t:'供应商'},{t:'物料'},{t:'数量(t)',n:1},{t:'需求日期'},{t:'到货日期'},{t:'状态'}],[['CG-2606-118','云南锡业(个旧)','锡锭 Sn99.90','5.0','06-19','06-19',tg('amber','加急在途')],['CG-2606-110','江西铜业本部','阴极铜 1#','120.0','06-20','06-20',tg('blue','已下单')],['CG-2606-102','汉高(中国)','拉丝润滑油 DF-25','2.0','06-22','06-22',tg('blue','已下单')],['CG-2606-095','金田铜业','低氧铜杆 Φ8.0','30.0','06-18','06-18',tg('green','已入库')]]),
+ feed:()=>tbl([{t:'投料单'},{t:'工单'},{t:'物料'},{t:'投料量(t)',n:1},{t:'机台'},{t:'计划时间'}],MO.filter(m=>m[10]!=='待排程').slice(0,6).map((m,i)=>[`<span class="mono">TL-2606-${30+i}</span>`,m[0],'低氧铜杆 Φ8.0',(parseFloat(m[4])*1.02).toFixed(1),m[11],'06-18 '+(8+i)+':00'])),
+ inbound:()=>tbl([{t:'入库计划'},{t:'工单'},{t:'成品'},{t:'数量(t)',n:1},{t:'仓库'},{t:'计划入库'}],MO.filter(m=>m[10]==='生产中'||m[10]==='已下发').slice(0,6).map((m,i)=>[`<span class="mono">RK-2606-${20+i}</span>`,m[0],m[2],m[4],'成品库 '+'ABC'[i%3],'06-'+(19+i%4)])),
+ feedback:()=>`<div class="card"><div class="card-head"><h3>机台实时状态</h3><span class="env-badge"><span class="dot"></span>实时采集</span></div><div class="card-body"><div id="monLines"></div></div></div>`,
+ route:()=>tbl([{t:'工艺路线'},{t:'适用产品'},{t:'工序序列'},{t:'衔接'},{t:'版本'}],[['RT-TXD','镀锡圆铜线','连铸连轧→大拉→中拉→退火→镀锡→复绕','顺序','V3'],['RT-QZ','漆包圆铜线','连铸连轧→大拉→中拉→退火→漆包','顺序','V2'],['RT-JX','铜绞线','连铸连轧→大拉→中拉→束丝→绞合','顺序+并行','V2'],['RT-BC','裸铜线','连铸连轧→大拉→中拉','顺序','V1']]),
+ wc:()=>tbl([{t:'工作中心'},{t:'名称'},{t:'工序'},{t:'机台数'},{t:'额定产能'},{t:'当前负荷'}],[['WC-CCR','连铸连轧','铸轧','1','22 t/h','64%'],['WC-LZ','大拉','拉丝','2','3.6 t/h','70%'],['WC-ZL','中/小拉','拉丝','3','2.8 t/h','58%'],['WC-RH','退火','退火','2','3.0 t/h','55%'],['WC-DX','镀锡','镀锡','2','1.9 t/h','92%'],['WC-QB','漆包','漆包','1','0.5 t/h','68%'],['WC-GX','绞线','绞线','2','1.5 t/h','61%']]),
+ res:()=>tbl([{t:'资源编码'},{t:'名称'},{t:'工序'},{t:'额定产能'},{t:'状态'},{t:'负荷'}],MACH.map(m=>[`<span class="mono">${m[0]}</span>`,m[1],m[2],m[3],tg(m[4]==='运行'?'green':'red',m[4]),m[5]?m[5]+'%':'—'])),
+ ach:()=>tbl([{t:'机台'},{t:'计划产量(t)',n:1},{t:'实际(t)',n:1},{t:'达成率'},{t:'差异原因'}],[['DX01 镀锡线',9.6,9.4,'97.9%','正常波动'],['ZL02 中拉机',8.0,0,'0%','设备故障停机'],['QB01 漆包机',4.0,3.8,'95.0%','换型耗时'],['LZ01 大拉机',14.4,14.2,'98.6%','正常'],['GX01 束丝机',6.4,6.5,'101.6%','—']]),
+};
+/* 兜底 */
+function FALLBACK(id){const g=GRP[id],nm=NAME[id];
+ if(['gsum','gdet','loadgantt'].includes(id))return `<div class="card"><div class="card-body flush"><div class="gantt" id="fallGantt"></div><div class="gantt-legend"><i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i><i><span class="lg-sw" style="background:#1a9d6b"></span>正常</i><i><span class="lg-sw" style="background:#dc4b3e"></span>延期/超载</i></div></div></div>`;
+ if(id==='proj')return `<div class="def-box">动态库存展望：按日滚动展示关键物料的期初/收/发/期末，预警低于安全库存。</div>`+tbl([{t:'物料'},{t:'06-18'},{t:'06-19'},{t:'06-20'},{t:'06-21'},{t:'06-22'},{t:'安全库存'}],[['阴极铜(t)','312','278','355','320','296','200'],['低氧铜杆(t)','86','62','78','58','44','60'],['锡锭(t)','2.1','<span style="color:var(--danger)">1.7</span>','2.1','1.6','1.2','5.0']].map(r=>r.map((v,i)=>i===0?`<b>${v}</b>`:v)));
+ if(id==='fcst')return tbl([{t:'物料'},{t:'客户/渠道'},{t:'第25周'},{t:'第26周'},{t:'第27周'},{t:'预测方法'}],MAT.filter(m=>m[3]==='成品').slice(0,6).map((m,i)=>[m[1],['立讯精密','比亚迪','卧龙电气','远东电缆','宝胜科技','美的集团'][i],(5+i)+'t',(6+i)+'t',(5+i)+'t','移动平均']));
+ if(id==='balance')return tbl([{t:'产品族'},{t:'本月需求(t)',n:1},{t:'可用产能(t)',n:1},{t:'缺口/余量',n:1},{t:'结论'}],[['镀锡圆铜线',420,460,'+40',tg('green','可满足')],['漆包圆铜线',180,200,'+20',tg('green','可满足')],['铜绞线',150,140,'-10',tg('amber','需外协')],['裸铜线',240,260,'+20',tg('green','可满足')]]);
+ if(id==='mps')return tbl([{t:'产品/规格'},{t:'06-18'},{t:'06-19'},{t:'06-20'},{t:'06-21'},{t:'周合计',n:1}],MAT.filter(m=>m[3]==='成品').slice(0,6).map(m=>[m[1],'4','5','4','3','16']));
+ if(id==='cal')return tbl([{t:'资源'},{t:'日期'},{t:'班次'},{t:'工作时段'},{t:'可用工时'},{t:'状态'}],[['DX01','06-18','早/中班','08:00-24:00','16h',tg('green','正常')],['DX01','06-19','早/中/夜','24h 连续','24h',tg('blue','加班')],['ZL02','06-18','—','停机检修','0h',tg('red','停机')],['QB01','06-22','—','端午节','0h',tg('amber','节假日')]]);
+ if(id==='io')return tbl([{t:'单据号'},{t:'类型'},{t:'物料'},{t:'数量(t)',n:1},{t:'工单'},{t:'时间'}],[['LL-2606-339','领料','低氧铜杆 Φ8.0',12.2,'WO-1022-10','08:12'],['RK-2606-201','完工入库','镀锡线 Φ0.25',9.4,'WO-0512-50','11:30'],['LL-2606-340','领料','锡锭',0.12,'WO-0512-50','09:05']]);
+ if(id==='outsource')return tbl([{t:'外协单'},{t:'供应商'},{t:'工序/产品'},{t:'数量(t)',n:1},{t:'交期'},{t:'状态'}],[['WX-2606-08','宝胜科技','铜绞线绞合',10.0,'06-20',tg('blue','执行中')],['WX-2606-06','江南电缆','成缆',6.0,'06-19',tg('green','已完成')]]);
+ if(id==='otd')return `<div class="grid-3"><div class="card"><div class="card-head"><h3>准时交付率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">96.2<small>%</small></div><div id="rp1" style="margin-top:10px"></div></div></div><div class="card"><div class="card-head"><h3>平均延期</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">0.4<small> 天</small></div></div></div><div class="card"><div class="card-head"><h3>急单响应</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">98<small>%</small></div></div></div></div>`+tbl([{t:'延期归因'},{t:'订单数',n:1},{t:'占比'},{t:'典型对象'}],[['物料未齐套',6,'38%','锡锭缺口'],['设备故障/检修',4,'25%','ZL02'],['换型耗时',3,'19%','规格穿插'],['上游半成品延迟',2,'12%','退火'],['其他',1,'6%','—']]);
+ if(id==='eff')return tbl([{t:'指标'},{t:'本期'},{t:'环比'},{t:'范围'}],[['设备综合效率OEE','87.6%','▲3.1%','全厂'],['一次合格率','99.1%','▲0.4%','镀锡'],['吨铜加工成本','¥1,240','▼2.1%','全厂'],['换型损时','2.0h/日','▼62%','DX01'],['日均产量','86.4t','▲3.2%','全厂']].map(r=>[r[0],`<b>${r[1]}</b>`,`<span style="color:var(--ok)">${r[2]}</span>`,r[3]]));
+ if(id==='adjust')return `<div class="def-box">计划调整：在甘特上手工拖拽工单后，系统自动校验约束冲突并可一键重算后工序。请在「排产甘特」中操作。</div>`+`<div style="text-align:center;padding:10px"><button class="btn primary" onclick="navTo('sched')">前往排产甘特 →</button></div>`;
  return `<div class="def-box">${nm} · 标准功能模块。</div>`;
 }
-
-/* ===================== 专属屏构建 ===================== */
-function buildScreen(id){
-  const s=document.createElement('section'); s.className='page'; s.id='page-'+id;
-  s.innerHTML=`<div class="page-head"><div><h1>${NAME[id]}</h1><div class="ph-sub">${SUB[id]||''}</div></div><div class="ph-actions">${ACT[id]||'<button class="btn">+ 新建</button><button class="btn">⭱ 导入</button><button class="btn">⭳ 导出</button>'}</div></div><div id="body-${id}">${BODY[id]?BODY[id]():FALLBACK(id)}</div>`;
-  $('#screenHost').appendChild(s);
-}
-const SUB={
- so:'客户订单行，计划的输入对象 · 来源：用友NC / 手工 / EDI', mo:'排程需求来源 · 由销售订单转入或 MRP 生成',
- wo:'制造订单按工艺路径展开为工序工单', sched:'计划版本 V0610-1 · 工序主导模式 · 小时级',
- kit:'按交期与优先级分配供应，作为排产前置约束', dispatch:'计划确认后下发产线，生成下发履历',
- bom:'BOM 版本与明细、替代与成套关系', setup:'资源上物品/规格/工器具切换换型时间',
- stock:'原料库存与采购在途，齐套与最早开工约束', 'ord-cust':'客户主数据、信用与价格政策',
- 'ord-sup':'供应商主数据与供货物料', 'base-line':'提供产能的人机资源',
- 'base-mat':'成品/半成品/原料主档，各属性作为排程制约', monitor:'机台实时执行状态与实绩回流',
- 'plan-insert':'急单临时插入，三种插单模式 + 智能评估',
-};
-const ACT={
- sched:`<div class="filter">选线规则 <select id="ruleSel"><option>Z+N 选线</option><option>顺排</option><option>有限能力倒排</option></select></div><button class="btn" id="btnRule" onclick="runRuleSched()">执行排程</button><button class="btn ai" id="btnSmart" onclick="runSmart()">✦ 智能排产</button><button class="btn primary" onclick="confirmPlan()">确认下发</button>`,
- bom:`<button class="btn">+ 新建版本</button><button class="btn ai" onclick="aiRecipe()">✦ 配比优选</button>`,
- 'plan-insert':`<button class="btn ai" onclick="aiInsert()">✦ 智能插单评估</button>`,
- kit:`<button class="btn ai" onclick="APS.toast('已运行缺料预测：未来3天1项缺口，已生成请购建议','ai')">✦ 缺料预测</button><button class="btn">导出齐套报告</button>`,
-};
-
-/* ---- 各屏 body ---- */
-const BODY={
- 'ord-cust':()=>tbl(
-   [{t:'客户编码'},{t:'客户名称'},{t:'区域'},{t:'等级'},{t:'主要产品'},{t:'信用'},{t:'年累计(万元)',n:1}],
-   CUST.map(c=>[`<span class="mono">${c[0]}</span>`,c[1],c[2],tg(c[3]==='A'?'green':'blue',c[3]+'类'),`<span class="muted">${c[4]}</span>`,c[5],c[6].toLocaleString()])),
- 'ord-sup':()=>tbl(
-   [{t:'供应商编码'},{t:'供应商名称'},{t:'区域'},{t:'供货物料'},{t:'类型'},{t:'评级'}],
-   SUP.map(s=>[`<span class="mono">${s[0]}</span>`,s[1],s[2],s[3],tg(s[4]==='战略'?'purple':'gray',s[4]),s[5]])),
- 'base-mat':()=>tbl(
-   [{t:'物料编码'},{t:'物料名称'},{t:'规格/牌号'},{t:'类型'},{t:'单位'},{t:'现有库存',n:1},{t:'安全库存',n:1}],
-   MAT.map(m=>[`<span class="mono">${m[0]}</span>`,m[1],m[2],tg(m[3].includes('原料')?'blue':m[3]==='成品'?'green':m[3]==='辅料'?'amber':'gray',m[3]),m[4],m[5],m[6]])),
- 'base-line':()=>tbl(
-   [{t:'机台编码'},{t:'机台名称'},{t:'规格'},{t:'工序'},{t:'额定产能'},{t:'状态'},{t:'当前负荷',n:1}],
-   MACH.map(m=>[`<span class="mono">${m[0]}</span>`,m[1],`<span class="muted">${m[2]}</span>`,m[3],m[4],tg(m[5]==='运行'?'green':'red',m[5]),m[6]?m[6]+'%':'—'])),
- 'base-org':()=>`<div class="card"><div class="card-body"><div class="org-tree">
-   <div class="o1">▣ 江西铜业股份有限公司</div>
-   <div class="o2">台意特种电工材料有限公司</div>
-   <div class="o3">拉丝车间（CCR01 / LZ01 / LZ02 / ZL01 / ZL02 / XL01）</div>
-   <div class="o3">退火车间（RH01 / RH02）</div>
-   <div class="o3">镀锡车间（DX01 / DX02）· 漆包车间（QB01）</div>
-   <div class="o3">复绕包装车间（FR01）</div>
-   <div class="o2">江西铜业电线电缆有限公司（江铜线缆）</div>
-   <div class="o3">拉丝车间 · 绞线车间（GX01 / GX02）</div>
-   <div class="o3">绝缘车间 · 成缆车间 · 护套车间</div>
- </div></div></div>`,
- 'mo':()=>`<div class="card"><div class="toolbar"><div class="filter">状态 <select id="moStatus" onchange="renderMO()"><option value="">全部</option><option>待排程</option><option>已排程</option><option>已下发</option><option>生产中</option></select></div><div class="filter">车间 <select><option>全部</option><option>拉丝</option><option>镀锡</option><option>绞线</option><option>漆包</option></select></div><div class="sep"></div><div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg><input placeholder="搜索工单/物料" oninput="APS.filterTable('#moTbl',this.value)"></div><div style="margin-left:auto" class="muted" id="moCnt"></div></div>
-   <div class="tbl-wrap"><table class="grid" id="moTbl"><thead><tr><th>制造订单号</th><th>物料编码</th><th>品名/规格</th><th>牌号</th><th class="num">数量(t)</th><th>客户</th><th>工艺路径</th><th>交期</th><th>优先级</th><th>齐套</th><th>状态</th></tr></thead><tbody></tbody></table></div>
-   <div class="tbl-foot"><span>共 <b>1,268</b> 条 · 本页 ${MO.length} · 待排 23</span><div class="pager"><button>‹</button><button class="on">1</button><button>2</button><button>…</button><button>106</button><button>›</button></div></div></div>`,
- 'so':()=>`<div class="card"><div class="toolbar"><div class="filter">客户 <select><option>全部</option>${CUST.slice(0,6).map(c=>`<option>${c[1].slice(0,6)}</option>`).join('')}</select></div><div class="filter">状态 <select><option>全部</option><option>已确认</option><option>已转制造</option></select></div><div class="sep"></div><div class="tool-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg><input placeholder="搜索" oninput="APS.filterTable('#soTbl',this.value)"></div></div>
-   <div class="tbl-wrap"><table class="grid" id="soTbl"><thead><tr><th>销售订单号</th><th>客户</th><th>物料编码</th><th>品名/规格</th><th>牌号</th><th class="num">数量(t)</th><th>交期</th><th>优先级</th><th>状态</th></tr></thead>
-   <tbody>${SO.map(o=>`<tr><td><span class="row-link">${o[0]}</span></td><td>${o[1]}</td><td class="mono">${o[2]}</td><td>${o[3]}</td><td>${o[4]}</td><td class="num">${o[5]}</td><td>${o[6]}</td><td>${prio(o[7])}</td><td>${tg(o[8]==='已转制造'?'green':'blue',o[8])}</td></tr>`).join('')}</tbody></table></div>
-   <div class="tbl-foot"><span>共 <b>312</b> 条 · 本页 ${SO.length}</span></div></div>`,
- 'wo':()=>`<div class="def-box">制造订单 <b>MO-26061022</b>（镀锡圆铜线 Φ0.20 · 立讯精密 · 12.0t）按工艺路径「拉丝→镀锡→复绕」展开为工序工单：</div>`+tbl(
-   [{t:'工序工单号'},{t:'工序'},{t:'工作中心/机台'},{t:'投入(t)',n:1},{t:'产出(t)',n:1},{t:'节拍'},{t:'前序'},{t:'状态'}],
-   [['WO-1022-10','连铸连轧','CCR01','12.24','12.10','22 t/h','—',tg('green','已完工')],
-    ['WO-1022-20','大拉','LZ01','12.10','12.00','1.8 t/h','WO-1022-10',tg('green','生产中')],
-    ['WO-1022-30','中拉','ZL01','12.00','11.92','1.2 t/h','WO-1022-20',tg('blue','已排程')],
-    ['WO-1022-40','退火','RH01','11.92','11.90','1.5 t/h','WO-1022-30',tg('gray','待排程')],
-    ['WO-1022-50','镀锡','DX01','11.90','11.78','1.0 t/h','WO-1022-40',tg('gray','待排程')],
-    ['WO-1022-60','复绕/包装','FR01','11.78','11.76','2.0 t/h','WO-1022-50',tg('gray','待排程')]]),
- 'stock':()=>tbl(
-   [{t:'物料编码'},{t:'物料名称'},{t:'规格/牌号'},{t:'可用',n:1},{t:'已锁定',n:1},{t:'在途',n:1},{t:'安全库存'},{t:'状态'}],
-   [['10-CU-CATH','阴极铜 1#','Cu≥99.95%','312.0','45.0','120.0','200',tg('green','正常')],
-    ['10-ROD-080','低氧光亮铜杆','Φ8.0 TU2','86.0','40.0','30.0','60',tg('green','正常')],
-    ['10-SN-999','锡锭','Sn99.90','2.1','1.8','0.4','5.0',tg('red','告急')],
-    ['10-OIL-DF25','拉丝润滑油 DF-25','—','3.2','—','2.0','2.0',tg('green','正常')],
-    ['10-FLUX-SN','镀锡助剂','—','0.8','0.3','—','0.5',tg('amber','偏低')],
-    ['10-ENA-PEI','聚酯亚胺漆包漆','180级','1.6','0.4','1.0','1.0',tg('green','正常')],
-    ['20-WIRE-052','拉丝单丝 Φ0.52','TU2','6.2','2.0','—','—',tg('green','正常')],
-    ['10-ROD-O80','无氧铜杆 Φ8.0','TU0','24.0','8.0','—','20',tg('green','正常')]]),
- 'inv-fg':()=>tbl([{t:'物料编码'},{t:'品名/规格'},{t:'批号'},{t:'盘号'},{t:'数量(t)',n:1},{t:'库位'},{t:'状态'}],
-   [['30-TXD-025','镀锡圆铜线 Φ0.25','L2606-072','P-0251',7.2,'成品库 A-03',tg('green','可用')],
-    ['30-TXD-020','镀锡圆铜线 Φ0.20','L2606-068','P-0203',5.6,'成品库 A-01',tg('green','可用')],
-    ['30-QZ-071','漆包圆铜线 Φ0.71','L2606-055','P-0711',4.0,'成品库 B-02',tg('green','可用')],
-    ['30-JX-1652','铜绞线 16股','L2606-061','P-1652',6.5,'成品库 C-01',tg('blue','待检')],
-    ['30-TXD-018','镀锡圆铜线 Φ0.18','L2606-070','P-0181',3.4,'成品库 A-05',tg('green','可用')]]),
- 'inv-mold':()=>tbl([{t:'模具编码'},{t:'名称'},{t:'适用规格'},{t:'材质'},{t:'状态'},{t:'累计/寿命'}],
-   [['LS-D052','拉丝模 Φ0.52','Φ0.55→0.52','聚晶金刚石',tg('green','在用'),'182万米 / 300万米'],
-    ['LS-D025','拉丝模 Φ0.25','Φ0.27→0.25','天然金刚石',tg('amber','磨损'),'276万米 / 300万米'],
-    ['LS-D018','拉丝模 Φ0.18','Φ0.20→0.18','天然金刚石',tg('green','在用'),'95万米 / 280万米'],
-    ['GX-F16','绞线分线模 16股','16/Φ0.52','合金钢',tg('green','在库'),'—'],
-    ['QB-FELT','漆包毛毡模','Φ0.71','毛毡',tg('blue','清洗中'),'—']]),
- 'inv-wip':()=>tbl([{t:'工序工单'},{t:'制造订单'},{t:'当前工序'},{t:'机台'},{t:'在制(t)',n:1},{t:'更新'}],
-   [['WO-1022-20','MO-26061022','大拉','LZ01',12.0,'11:42'],['WO-0512-50','MO-26060512','镀锡','DX02',9.4,'11:40'],['WO-0703-40','MO-26060703','退火','RH02',5.1,'11:38'],['WO-0920-20','MO-26060920','大拉','LZ02',8.6,'11:35'],['WO-0660-30','MO-26060660','绞线','GX01',4.2,'11:30']]),
- 'ord-po':()=>tbl([{t:'采购订单号'},{t:'供应商'},{t:'物料'},{t:'数量(t)',n:1},{t:'到货日期'},{t:'状态'}],
-   [['CG-2606-118','云南锡业(个旧)','锡锭 Sn99.90',5.0,'06-19',tg('amber','在途')],['CG-2606-110','江西铜业本部','阴极铜 1#',120.0,'06-20',tg('blue','已下单')],['CG-2606-102','汉高(中国)','拉丝润滑油 DF-25',2.0,'06-22',tg('blue','已下单')],['CG-2606-095','金田铜业','低氧铜杆 Φ8.0',30.0,'06-18',tg('green','已入库')]]),
- 'ord-capwarn':()=>`<div class="smart-tip"><div class="st-ic">✦</div><div>排产助手识别：<b>DX01 镀锡线</b> 6/19 负荷达 <b>112%</b>，超出可用产能；建议将 MO-26061412 部分批次转 DX02，或夜班加开 1 班。</div><div class="st-acts"><button class="btn sm ai" onclick="APS.toast('已生成产能调整建议','ai')">查看建议</button></div></div>`+tbl([{t:'机台'},{t:'日期'},{t:'计划负荷'},{t:'可用产能'},{t:'缺口'},{t:'级别'}],
-   [['DX01 镀锡线','06-19','26.8 t','24.0 t','-2.8 t',tg('red','超负荷')],['QB01 漆包机','06-18','11.5 t','12.0 t','+0.5 t',tg('green','正常')],['GX01 束丝机','06-19','18.2 t','19.2 t','+1.0 t',tg('green','正常')],['LZ01 大拉机','06-20','41.0 t','43.2 t','+2.2 t',tg('green','正常')]]),
- 'res-cap':()=>tbl([{t:'机台'},{t:'工序'},{t:'班次'},{t:'额定产能'},{t:'开动率'},{t:'有效产能/班'}],
-   MACH.filter(m=>m[5]==='运行').slice(0,8).map(m=>[`<span class="mono">${m[0]}</span>`,m[3],'两班(8+8h)',m[4],(m[6]||80)+'%',(parseFloat(m[4])*8*(m[6]||80)/100).toFixed(1)+' t'])),
- 'res-cal':()=>tbl([{t:'资源'},{t:'日期'},{t:'班次'},{t:'工作时段'},{t:'可用工时'},{t:'状态'}],
-   [['DX01','06-18','早班/中班','08:00-16:00 / 16:00-24:00','16 h',tg('green','正常')],['DX01','06-19','早班/中班','08:00-16:00 / 16:00-24:00','16 h',tg('green','正常')],['ZL02','06-18','—','停机检修','0 h',tg('red','停机')],['LZ01','06-18','三班','24 h 连续','24 h',tg('green','正常')],['QB01','06-22','—','法定节假日','0 h',tg('amber','节假日')]]),
- 'res-takt':()=>tbl([{t:'物料/规格'},{t:'机台'},{t:'标准节拍'},{t:'开动率'},{t:'处理批量'},{t:'优先级'}],
-   [['镀锡线 Φ0.25','DX01','1.0 t/h','87%','单盘 500kg','高'],['镀锡线 Φ0.20','DX01','1.1 t/h','87%','单盘 500kg','中'],['漆包线 Φ0.71','QB01','0.5 t/h','76%','单轴 300kg','中'],['铜绞线 16股','GX01','0.8 t/h','81%','单盘 800kg','中'],['裸铜线 Φ0.40','LZ01','1.8 t/h','85%','—','低']]),
- 'craft-route':()=>tbl([{t:'工艺路径编码'},{t:'适用产品'},{t:'工序序列'},{t:'衔接模式'},{t:'版本'}],
-   [['RT-TXD','镀锡圆铜线','连铸连轧→大拉→中拉→退火→镀锡→复绕','顺序','V3'],['RT-QZ','漆包圆铜线','连铸连轧→大拉→中拉→退火→漆包','顺序','V2'],['RT-JX','铜绞线','连铸连轧→大拉→中拉→束丝→绞合','顺序+并行','V2'],['RT-BC','裸铜线','连铸连轧→大拉→中拉','顺序','V1']]),
- 'craft-std':()=>tbl([{t:'工艺编码'},{t:'工艺名称'},{t:'关键参数'},{t:'适用'},{t:'版本'}],
-   [['GY-LS-025','拉丝工艺 Φ0.25','道次18 · 速度1800m/min · 润滑DF-25','镀锡/漆包','V3'],['GY-RH-S','连续退火(软态)','温度480℃ · 张力控制','软铜线','V2'],['GY-DX-H','热镀锡工艺','锡温320℃ · 镀层1.2μm','镀锡线','V4'],['GY-QB-180','漆包工艺 180级','烘炉6区 · 漆层7道','漆包线','V2'],['GY-GX-16','16股绞合工艺','节距比14 · 右向','铜绞线','V1']]),
- 'monitor':()=>`<div class="card"><div class="card-head"><h3>机台实时状态</h3><span class="env-badge"><span class="dot"></span>实时采集</span></div><div class="card-body"><div id="monLines"></div></div></div>`,
- 'exec-ach':()=>tbl([{t:'机台'},{t:'计划产量(t)',n:1},{t:'实际产量(t)',n:1},{t:'达成率'},{t:'差异原因'}],
-   [['DX01 镀锡线',9.6,9.4,'97.9%','正常波动'],['ZL02 中拉机',8.0,0,'0%','设备故障停机'],['QB01 漆包机',4.0,3.8,'95.0%','换型耗时'],['LZ01 大拉机',14.4,14.2,'98.6%','正常'],['GX01 束丝机',6.4,6.5,'101.6%','—']]),
- 'exec-io':()=>tbl([{t:'单据号'},{t:'类型'},{t:'物料'},{t:'数量(t)',n:1},{t:'工单'},{t:'批号'},{t:'时间'}],
-   [['LL-2606-339','领料','低氧铜杆 Φ8.0',12.2,'WO-1022-10','L2606-072','08:12'],['RK-2606-201','完工入库','镀锡线 Φ0.25',9.4,'WO-0512-50','L2606-068','11:30'],['LL-2606-340','领料','锡锭',0.12,'WO-0512-50','L2606-068','09:05'],['TK-2606-018','退库','拉丝单丝 Φ0.52',0.3,'WO-0660-30','L2606-061','10:20']]),
- 'reports':()=>`<div class="grid-3">
-   <div class="card"><div class="card-head"><h3>准时交付率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">96.2<small>%</small></div><div class="muted" style="margin-top:6px">近 7 日</div><div id="rp1" style="margin-top:10px"></div></div></div>
-   <div class="card"><div class="card-head"><h3>设备综合利用率</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">87.6<small>%</small></div><div id="rp2" style="margin-top:10px"></div></div></div>
-   <div class="card"><div class="card-head"><h3>换型次数 / 日</h3></div><div class="card-body"><div class="k-val" style="font-size:30px">2.3</div><div class="muted" style="margin-top:6px">智能聚类排产后</div></div></div>
- </div>`+tbl([{t:'延期归因'},{t:'订单数',n:1},{t:'占比'},{t:'典型对象'}],
-   [['物料未齐套',6,'38%','锡锭缺口'],['设备故障/检修',4,'25%','ZL02 中拉机'],['换型耗时',3,'19%','规格穿插'],['上游半成品延迟',2,'12%','退火工序'],['其他',1,'6%','—']]),
- 'rpt-track':()=>tbl([{t:'制造订单'},{t:'品名/规格'},{t:'当前工序'},{t:'进度'},{t:'计划完工'},{t:'状态'}],
-   MO.filter(m=>m[10]==='生产中').concat(MO.filter(m=>m[10]==='已下发')).slice(0,6).map(m=>[m[0],m[2],['大拉','镀锡','退火','绞线'][Math.floor(Math.random()*4)],`<div class="bar" style="width:90px"><i style="width:${50+Math.floor(Math.random()*45)}%"></i></div>`,m[7],tg(m[10]==='生产中'?'green':'blue',m[10])])),
- 'rpt-rm':()=>BODY.stock(),
- 'rpt-fg':()=>BODY['inv-fg'](),
- 'kit':()=>`<div class="smart-tip"><div class="st-ic">✦</div><div>排产助手预测：<b>锡锭</b> 将于 6/19 09:00 出现缺口 <b>0.4t</b>，影响急单 XW-26061015；已联动生成请购建议 <b>CG-2606-118</b>（到货 6/19）。</div><div class="st-acts"><button class="btn sm" onclick="navTo('ord-po')">查看请购</button></div></div>`+tbl(
-   [{t:'制造订单'},{t:'物料'},{t:'需求(t)',n:1},{t:'可用(t)',n:1},{t:'在途(t)',n:1},{t:'齐套率'},{t:'预计齐套'},{t:'状态'}],
-   [['XW-26061015','低氧铜杆 Φ8.0','25.0','18.0','2.0','86%','6/19 09:00',tg('amber','部分')],
-    ['XW-26061015','锡锭','0.50','0.10','0.40','42%','6/19 09:00',tg('red','缺料')],
-    ['MO-26061302','低氧铜杆 Φ8.0','9.0','15.0','—','100%','已齐套',tg('green','齐套')],
-    ['MO-26061208','低氧铜杆 Φ8.0','15.0','15.0','—','100%','已齐套',tg('green','齐套')],
-    ['MO-26061104','聚酯亚胺漆包漆','0.18','0.05','0.10','83%','6/21 14:00',tg('amber','部分')]]),
- 'dispatch':()=>tbl([{t:'计划版本'},{t:'下发时间'},{t:'工单数',n:1},{t:'下发人'},{t:'接收方式'},{t:'状态'}],
-   [['V0610-1','06-18 08:05','118','张建国','车间电子终端 + 班组确认',tg('green','已下发')],['V0609-7','06-17 19:40','96','李卫东','车间电子终端',tg('gray','已归档')],['V0609-3','06-17 08:10','103','张建国','车间电子终端',tg('gray','已归档')]]),
- 'plan-insert':()=>`<div class="def-box">急单插入支持三种模式：① 排到最前 ② 同规格之后插入(交期影响最小) ③ 排到最后。智能插单将自动评估在制工单、设备负荷、物料齐套、模具状态后给出建议。</div><div id="insertResult"></div>`,
- 'bom':()=>`<div class="def-box">物料 <b>铜绞线 JX-1652（16 股 / Φ0.52）</b> · BOM 版本 V2 · 关联工艺路径「拉丝→绞线」</div>
-   <div class="grid-2">
-   <div class="card"><div class="card-head"><h3>BOM 明细</h3></div><div class="tbl-wrap"><table class="grid"><thead><tr><th>层级</th><th>子项物料</th><th>规格</th><th class="num">单位用量</th><th>损耗率</th><th>替代料</th></tr></thead><tbody>
-     <tr><td>1</td><td>低氧光亮铜杆</td><td>Φ8.0 TU2</td><td class="num">1.018 t/t</td><td>1.8%</td><td>无氧铜杆 TU0</td></tr>
-     <tr><td>2</td><td>拉丝单丝</td><td>Φ0.52mm ×16</td><td class="num">16 根/股</td><td>0.9%</td><td>Φ0.50 可替</td></tr>
-     <tr><td>3</td><td>拉丝润滑油 DF-25</td><td>—</td><td class="num">2.1 kg/t</td><td>—</td><td>—</td></tr>
-   </tbody></table></div></div>
-   <div class="card"><div class="card-head"><h3>配线配比方案（16 股）</h3><span class="ch-sub" id="recipeNote">当前选用：均匀 16 根</span></div><div class="card-body"><div class="recipe" id="recipeBox"></div></div></div>
-   </div>`,
- 'setup':()=>`<div class="card"><div class="card-head"><h3>DX01 镀锡线 · 规格切换换型时间（小时）</h3><div class="ch-actions"><button class="btn sm ai" onclick="APS.toast('已按换型矩阵对同规格订单聚类排序，预计换型 5→2 次','ai')">✦ 按换型聚类</button></div></div><div class="card-body">
-   <table class="matrix"><thead><tr><th>从 \\ 到</th><th>Φ0.18</th><th>Φ0.20</th><th>Φ0.25</th><th>Φ0.30</th></tr></thead><tbody>
-     <tr><td class="rowh">Φ0.18</td><td class="lo">—</td><td class="lo">0.5</td><td class="mid">1.5</td><td class="hot">2.5</td></tr>
-     <tr><td class="rowh">Φ0.20</td><td class="lo">0.5</td><td class="lo">—</td><td class="lo">0.8</td><td class="mid">1.8</td></tr>
-     <tr><td class="rowh">Φ0.25</td><td class="mid">1.5</td><td class="lo">0.8</td><td class="lo">—</td><td class="lo">0.6</td></tr>
-     <tr><td class="rowh">Φ0.30</td><td class="hot">2.5</td><td class="mid">1.8</td><td class="lo">0.6</td><td class="lo">—</td></tr>
-   </tbody></table><p class="muted" style="margin-top:10px;font-size:11.5px">绿=快速切换 / 橙=中等 / 红=高损耗。排产将按此矩阵对同规格订单聚类相邻，最小化换型。</p></div></div>`,
- 'sched':()=>`<div id="schedBanner"></div><div class="split" style="grid-template-columns:1fr 280px;align-items:start">
-   <div class="card" style="margin:0"><div class="card-head"><h3>资源甘特 · 拉丝/镀锡车间</h3><span class="ch-sub" id="ganttSub">基准计划：FR01 存在 1 张延期，多处空转</span></div>
-   <div class="card-body flush"><div class="gantt" id="schedGantt"></div>
-   <div class="gantt-legend"><i><span class="lg-sw" style="background:#4a82e0"></span>计划工单</i><i><span class="lg-sw" style="background:#1a9d6b"></span>正常</i><i><span class="lg-sw" style="background:#dc4b3e"></span>延期</i><i><span class="lg-sw" style="background:repeating-linear-gradient(135deg,#c2cbd8 0 4px,#dfe5ee 4px 8px)"></span>换型</i></div></div></div>
-   <div><div class="card" style="margin:0 0 14px"><div class="card-head"><h3>待排工单</h3><span class="tag amber nodot" id="waitCnt">8 张</span></div><div class="card-body" style="padding:8px;max-height:300px;overflow:auto" id="waitList"></div></div>
-   <div class="card" style="margin:0"><div class="card-head"><h3>排程指标</h3></div><div class="card-body" style="padding:12px 16px" id="schedKpi"></div></div></div></div>`,
-};
 
 /* ===================== 甘特 ===================== */
 const RES=[['CCR01','连铸连轧'],['LZ01','大拉机'],['ZL01','中拉机'],['RH01','退火炉'],['DX01','镀锡线'],['FR01','复绕机']];
 const TICKS=['08','09','10','11','12','13','14','15','16','17','18','19'];
-const BEFORE={CCR01:[['MO-1022',2,22,'blue']],LZ01:[['MO-0805',1,30,'blue'],['MO-0920',40,24,'blue']],ZL01:[['MO-1022',3,18,'blue'],['MO-0512',30,20,'blue']],RH01:[['MO-0703',10,30,'blue']],DX01:[['MO-0512',6,20,'amber']],FR01:[['MO-1022',54,30,'red']]};
+const BEFORE={CCR01:[['MO-1022',2,22,'blue']],LZ01:[['MO-0805',1,30,'blue'],['MO-0920',40,24,'blue']],ZL01:[['MO-1022',3,18,'blue'],['MO-0512',30,20,'blue']],RH01:[['MO-0703',10,30,'blue']],DX01:[['MO-0512',6,20,'amber'],['MO-1208',34,30,'red']],FR01:[['MO-1022',54,30,'red']]};
 const AFTER={CCR01:[['MO-1022',2,22,'green'],['MO-0660',26,18,'blue']],LZ01:[['MO-0805',1,30,'green'],['MO-0920',32,24,'blue'],['MO-1412',57,16,'blue']],ZL01:[['MO-1022',3,16,'green'],['setup',20,3,'setup'],['急 XW-15',24,18,'red'],['MO-0512',43,18,'blue']],RH01:[['MO-0703',6,30,'green'],['MO-1104',38,22,'blue']],DX01:[['MO-0512',4,20,'green'],['MO-1319',26,24,'blue']],FR01:[['MO-1022',3,30,'green'],['MO-1045',36,26,'blue']]};
-const LOADB={CCR01:64,LZ01:70,ZL01:52,RH01:48,DX01:58,FR01:78}, LOADA={CCR01:88,LZ01:90,ZL01:86,RH01:84,DX01:82,FR01:91};
+const LOADB={CCR01:64,LZ01:70,ZL01:52,RH01:48,DX01:112,FR01:84},LOADA={CCR01:88,LZ01:90,ZL01:86,RH01:84,DX01:90,FR01:88};
 function lc(v){return v>90?'var(--danger)':v>70?'var(--warn)':'var(--ok)';}
-function gantt(host,plan,load,drag){
-  const el=$(host); if(!el)return;
-  let h='<div class="gantt-head"><div class="gantt-corner">机台 \\ 时间</div><div class="gantt-times">'+TICKS.map(t=>`<div class="gantt-tick"><b>${t}</b>:00</div>`).join('')+'</div></div><div class="gantt-body">';
-  RES.forEach(r=>{const lv=load[r[0]];h+=`<div class="gantt-row"><div class="gantt-res"><b>${r[0]}</b><small>${r[1]}</small><div class="load"><i style="width:${lv}%;background:${lc(lv)}"></i></div></div><div class="gantt-lane">`;
-    (plan[r[0]]||[]).forEach(t=>{const lab=t[3]==='setup'?'换型':t[0];h+=`<div class="gbar ${t[3]}${t[0].includes('急')?' urgent':''}" style="left:${t[1]}%;width:${t[2]}%" title="${t[0]}">${lab}</div>`;});
-    h+='</div></div>';});
-  h+=`<div class="gantt-now" style="left:calc(130px + (100% - 130px)*0.19)"></div></div>`;el.innerHTML=h;
-  if(drag)$$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b,()=>APS.toast('已记录手工调整')));
-}
+function gantt(host,plan,load,drag){const el=$(host);if(!el)return;let h='<div class="gantt-head"><div class="gantt-corner">机台 \\ 时间</div><div class="gantt-times">'+TICKS.map(t=>`<div class="gantt-tick"><b>${t}</b>:00</div>`).join('')+'</div></div><div class="gantt-body">';RES.forEach(r=>{const lv=load[r[0]];h+=`<div class="gantt-row"><div class="gantt-res"><b>${r[0]}</b><small>${r[1]}</small><div class="load"><i style="width:${Math.min(lv,100)}%;background:${lc(lv)}"></i></div></div><div class="gantt-lane">`;(plan[r[0]]||[]).forEach(t=>{const lab=t[3]==='setup'?'换型':t[0];h+=`<div class="gbar ${t[3]}${t[0].includes('急')?' urgent':''}" style="left:${t[1]}%;width:${t[2]}%" title="${t[0]}">${lab}</div>`;});h+='</div></div>';});h+=`<div class="gantt-now" style="left:calc(130px + (100% - 130px)*0.19)"></div></div>`;el.innerHTML=h;if(drag)$$('.gbar:not(.setup)',el).forEach(b=>APS.makeDraggable(b,()=>APS.toast('已记录手工调整 · 约束校验通过')));}
 let smartApplied=false;
-function schedKpi(){const d=smartApplied?[['预计延期','0 张','ok'],['换型次数','2 次','ok'],['设备利用率','89%','ok'],['在制品','↓12%','ok']]:[['预计延期','1 张','bad'],['换型次数','5 次',''],['设备利用率','71%',''],['在制品','—','']];
-  const e=$('#schedKpi'); if(e)e.innerHTML=d.map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line)"><span class="muted" style="font-size:12px">${x[0]}</span><b style="font-size:15px;color:${x[2]==='ok'?'var(--ok)':x[2]==='bad'?'var(--danger)':'var(--ink)'}">${x[1]}</b></div>`).join('');}
-const WAIT=[['XW-26061015','镀锡线 Φ0.25 · 20t · 比亚迪','急'],['MO-26061208','镀锡线 Φ0.25 · 15t · 安费诺','高'],['MO-26061250','镀锡线 Φ0.30 · 7t · 格力','高'],['MO-26061104','漆包线 Φ0.71 · 8t · 卧龙','普通'],['MO-26061319','镀锡线 Φ0.18 · 6t · 得润','普通'],['MO-26061030','镀锡线 Φ0.20 · 5t · 沪光','普通'],['MO-26061302','铜绞线 16股 · 9t · 宝胜','普通'],['MO-26061412','镀锡线 Φ0.25 · 16t · 立讯','普通']];
-function waitList(){const e=$('#waitList');if(!e)return;
-  if(smartApplied){e.innerHTML='<div class="empty" style="padding:22px">✓ 已全部排入计划<br><span class="muted" style="font-size:11px">含急单 1 张 · 待确认下发</span></div>';$('#waitCnt').textContent='0 张';return;}
-  $('#waitCnt').textContent='8 张';
-  e.innerHTML=WAIT.map(w=>{const c=w[2]==='急'?'red':w[2]==='高'?'amber':'gray';return `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px"><div style="display:flex;gap:6px"><b class="mono" style="font-size:11px">${w[0]}</b><span class="tag ${c} nodot" style="margin-left:auto">${w[2]}</span></div><div style="font-size:11px;color:var(--ink-2);margin-top:3px">${w[1]}</div></div>`;}).join('');}
-function runRuleSched(){
-  $('#planVer')&&0;$('#ganttSub').textContent='规则排程完成：利用率提升，但仍有 1 张延期、换型 5 次（需手工微调）';
-  const R=JSON.parse(JSON.stringify(AFTER));R.ZL01=[['MO-1022',3,16,'blue'],['MO-0512',22,20,'blue'],['急 XW-15',60,18,'red']];R.FR01=[['MO-1022',40,30,'red'],['MO-1045',6,26,'blue']];
-  gantt('#schedGantt',R,{CCR01:80,LZ01:84,ZL01:78,RH01:76,DX01:74,FR01:82},true);
-  const e=$('#schedKpi');e.innerHTML=[['预计延期','1 张','bad'],['换型次数','5 次',''],['设备利用率','78%','']].map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line)"><span class="muted" style="font-size:12px">${x[0]}</span><b style="font-size:15px;color:${x[2]==='bad'?'var(--danger)':'var(--ink)'}">${x[1]}</b></div>`).join('');
-  APS.toast('规则排程完成 · 仍有 1 张延期，建议执行智能排产优化','warn');
-}
-function runSmart(){
-  APS.runScheduler({total:3182,
-   logLines:[[200,'<span class="ts">10:24:01</span> 载入待排工序工单 <span class="em">8</span> 张（含急单 <span class="wn">XW-26061015</span>）'],
-    [450,'<span class="ts">10:24:01</span> 装配约束：齐套时间·模具占用·生产日历·<span class="hi">器件×设备绑定</span>·<span class="hi">换型矩阵</span>'],
-    [500,'<span class="ts">10:24:02</span> 目标 min(延期·换型·在制) / max(利用率) · 求解器 <span class="hi">OR-Tools</span>'],
-    [650,'<span class="ts">10:24:03</span> 求解中… 已评估 1,860 方案'],
-    [650,'<span class="ts">10:24:04</span> 急单 XW-26061015 → 同规格后插 ZL01，换型 +0.8h（最小）'],
-    [600,'<span class="ts">10:24:05</span> FR01 延期工单前移，<span class="ok">延期消除</span>'],
-    [400,'<span class="ts">10:24:05</span> <span class="ok">✓ 延期 1→0，换型 5→2，利用率 71%→89%</span>']],
-   plans:`<div class="plan"><div class="p-t">方案 A · 排到最前</div><div class="p-m">完成<b>6/12 18:00</b></div><div class="p-m">受影响<b>2 张</b></div><div class="p-m">换型<b>+3.5h</b></div></div>
-     <div class="plan best"><div class="p-t">方案 B · 同规格后插</div><div class="p-m">完成<b class="good">6/12 22:40</b></div><div class="p-m">受影响<b class="good">0 张</b></div><div class="p-m">换型<b class="good">+2.0h</b></div></div>
-     <div class="plan"><div class="p-t">方案 C · 排到最后</div><div class="p-m">完成<b>6/13 19:00</b></div><div class="p-m">余量<b>踩线</b></div><div class="p-m">换型<b>+0h</b></div></div>`,
-   onDone:applySmart});
-}
-function applySmart(){smartApplied=true;$('#ganttSub').textContent='智能排产结果：延期 0 · 急单已插入 · 换型 2 次 · 利用率 89%';
-  gantt('#schedGantt',AFTER,LOADA,true);schedKpi();waitList();
-  $('#schedBanner').innerHTML=`<div class="smart-tip"><div class="st-ic">✦</div><div><b>排产助手</b> 已生成计划 V0610-3：8 张待排全部排入，急单 XW-26061015 按"交期影响最小"插入 ZL01，全局延期 0。<span class="muted">方案需经排程员确认后下发。</span></div><div class="st-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排</button><button class="btn ai sm" onclick="confirmPlan()">确认下发</button></div></div>`;
-  APS.toast('智能排产完成：延期 1→0，利用率 71%→89%','ai');}
-function confirmPlan(){if(!smartApplied){APS.toast('请先执行排程','warn');return;}APS.toast('计划 V0610-3 已确认并下发至车间终端','ok');navTo('dispatch');}
+function schedKpi(){const d=smartApplied?[['按期满足','100%','ok'],['超载资源','0','ok'],['换型次数','2 次','ok'],['利用率','89%','ok']]:[['按期满足','94%','bad'],['超载资源','DX01','bad'],['换型次数','5 次',''],['利用率','71%','']];const e=$('#schedKpi');if(e)e.innerHTML=d.map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line)"><span class="muted" style="font-size:12px">${x[0]}</span><b style="font-size:15px;color:${x[2]==='ok'?'var(--ok)':x[2]==='bad'?'var(--danger)':'var(--ink)'}">${x[1]}</b></div>`).join('');}
+const WAIT=[['XW-26061015','镀锡线 Φ0.25·20t·比亚迪','急'],['MO-26061208','镀锡线 Φ0.25·15t·安费诺','高'],['MO-26061250','镀锡线 Φ0.30·7t·格力','高'],['MO-26061104','漆包线 Φ0.71·8t·卧龙','普通'],['MO-26061319','镀锡线 Φ0.18·6t·得润','普通'],['MO-26061030','镀锡线 Φ0.20·5t·沪光','普通'],['MO-26061302','铜绞线16股·9t·宝胜','普通'],['MO-26061412','镀锡线 Φ0.25·16t·立讯','普通']];
+function waitList(){const e=$('#waitList');if(!e)return;if(smartApplied){e.innerHTML='<div class="empty" style="padding:22px">✓ 已全部排入计划<br><span class="muted" style="font-size:11px">含急单 1 张 · 待发布</span></div>';$('#waitCnt').textContent='0 张';return;}$('#waitCnt').textContent='8 张';e.innerHTML=WAIT.map(w=>{const c=w[2]==='急'?'red':w[2]==='高'?'amber':'gray';return `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px"><div style="display:flex;gap:6px"><b class="mono" style="font-size:11px">${w[0]}</b><span class="tag ${c} nodot" style="margin-left:auto">${w[2]}</span></div><div style="font-size:11px;color:var(--ink-2);margin-top:3px">${w[1]}</div></div>`;}).join('');}
+function runRuleSched(){$('#ganttSub').textContent='规则排程：利用率提升，但 DX01 仍超载、FR01 1 张延期（需手工微调）';const R=JSON.parse(JSON.stringify(AFTER));R.ZL01=[['MO-1022',3,16,'blue'],['MO-0512',22,20,'blue'],['急 XW-15',60,18,'red']];R.FR01=[['MO-1022',40,30,'red'],['MO-1045',6,26,'blue']];gantt('#schedGantt',R,{CCR01:80,LZ01:84,ZL01:78,RH01:76,DX01:98,FR01:82},true);const e=$('#schedKpi');e.innerHTML=[['按期满足','94%','bad'],['超载资源','DX01','bad'],['换型次数','5 次',''],['利用率','78%','']].map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line)"><span class="muted" style="font-size:12px">${x[0]}</span><b style="font-size:15px;color:${x[2]==='bad'?'var(--danger)':'var(--ink)'}">${x[1]}</b></div>`).join('');APS.toast('规则排程完成 · DX01 仍超载，建议生成计划(求解优化)','warn');}
+function runSmart(){APS.runScheduler({total:3182,logLines:[[200,'<span class="ts">11:46:01</span> 载入需求 1,268 行 · 待排工单 8 张(含急单 <span class="wn">XW-26061015</span>)'],[450,'<span class="ts">11:46:01</span> 装配约束：有限产能·齐套·模具·生产日历·<span class="hi">换型矩阵</span>·<span class="hi">绞线配比</span>'],[500,'<span class="ts">11:46:02</span> 目标 min(晚交·换型·在制) / max(利用率) · 求解器 <span class="hi">OR-Tools</span>'],[650,'<span class="ts">11:46:03</span> 求解中… 已评估 1,860 方案'],[650,'<span class="ts">11:46:04</span> 解除 DX01 超载：MO-26061412 部分批次转 DX02'],[600,'<span class="ts">11:46:05</span> 急单 XW-26061015 同规格后插 ZL01，换型 +0.8h；FR01 延期前移 <span class="ok">消除</span>'],[400,'<span class="ts">11:46:05</span> <span class="ok">✓ 晚交 3→0，超载 2→0，换型 5→2，利用率 71%→89%</span>']],plans:`<div class="plan"><div class="p-t">方案 A · 急单优先</div><div class="p-m">按期满足<b>97%</b></div><div class="p-m">换型<b>+3.5h</b></div><div class="p-m">超载<b>0</b></div></div><div class="plan best"><div class="p-t">方案 B · 均衡(推荐)</div><div class="p-m">按期满足<b class="good">100%</b></div><div class="p-m">换型<b class="good">+2.0h</b></div><div class="p-m">超载<b class="good">0</b></div></div><div class="plan"><div class="p-t">方案 C · 最少换型</div><div class="p-m">按期满足<b>96%</b></div><div class="p-m">换型<b class="good">+0.8h</b></div><div class="p-m">超载<b>0</b></div></div>`,onDone:applySmart});}
+function applySmart(){smartApplied=true;$('#ganttSub').textContent='求解完成(V0618-2)：晚交 0 · 超载 0 · 换型 2 次 · 利用率 89%';gantt('#schedGantt',AFTER,LOADA,true);schedKpi();waitList();$('#schedBanner').innerHTML=`<div class="smart-tip"><div class="st-ic">✦</div><div><b>已生成计划版本 V0618-2</b>：8 张待排全部排入，DX01 超载消除(转 DX02)，急单 XW-26061015 按交期影响最小插入，全局晚交 0。<span class="muted">需发布后下发车间。</span></div><div class="st-acts"><button class="btn sm ghost" onclick="explainSched()">为什么这样排</button><button class="btn ai sm" onclick="confirmPlan()">发布版本</button></div></div>`;APS.toast('计划已求解：晚交3→0、超载2→0、利用率71%→89%','ai');}
+function confirmPlan(){if(!smartApplied){APS.toast('请先生成计划','warn');return;}APS.toast('计划版本 V0618-2 已发布并下发车间终端','ok');navTo('dispatch');}
 function explainSched(){$('.cop-fab').click();setTimeout(()=>APS.copilot.run('why'),300);}
-
-/* 配比 / 插单 */
-function recipe(rec){
-  const d=[{t:'方案A · 均匀16根',cls:'',pk:'当前选用',vis:Array(16).fill('a'),m:[['单丝','Φ0.52 ×16'],['外径','2.10mm','y'],['直流电阻','合格','y'],['相对成本','基准']]},
-   {t:'方案B · 7+9 粗细',cls:'',pk:'',vis:[...Array(7).fill('b'),...Array(9).fill('a')],m:[['单丝','Φ0.58×7+Φ0.48×9'],['外径','2.08mm','y'],['直流电阻','合格','y'],['相对成本','-1.8%','good']]},
-   {t:rec?'方案C · 分层 1+6+9':'方案C · 分层 1+6+9',cls:rec?'rec':'',pk:rec?'系统推荐':'',vis:[...Array(1).fill('b'),...Array(15).fill('a')],m:[['单丝','分层 1+6+9'],['外径','2.05mm','y'],['直流电阻','合格','y'],['相对成本',rec?'-4.2% ★':'-3.1%','good']]}];
-  const e=$('#recipeBox');if(!e)return;
-  e.innerHTML=d.map(r=>`<div class="rc ${r.cls}">${r.pk?`<span class="pk">${r.pk}</span>`:''}<div class="rc-t">${r.t}</div><div class="rc-vis">${r.vis.map(v=>`<span class="strand ${v==='b'?'b':''}"></span>`).join('')}</div>${r.m.map(x=>`<div class="m"><span>${x[0]}</span><b class="${x[2]==='good'?'good':''}">${x[1]}</b></div>`).join('')}</div>`).join('');
-}
-function aiRecipe(){recipe(true);$('#recipeNote').innerHTML='<span class="hl-ai">✦ 系统推荐：方案C（1+6+9 分层），满足全部质量约束且成本最低 -4.2%</span>';APS.toast('配比优选完成：推荐方案 C，成本 -4.2%','ai');}
-function aiInsert(){
-  $('#insertResult').innerHTML=`<div class="smart-tip"><div class="st-ic">✦</div><div>急单 <b>XW-26061015</b>（镀锡线 Φ0.25 · 20t · 比亚迪 · 交期 6/13）评估：库存 18t+在途2t 可齐套；推荐<b>方案B 同规格后插 ZL01/DX01</b>，换型 +0.8h，不影响已锁定关键交期订单。</div></div>`+
-  tbl([{t:'插单模式'},{t:'完成时间'},{t:'受影响工单'},{t:'换型增加'},{t:'结论'}],
-   [['① 排到最前','6/12 18:00','2 张','+3.5h',tg('amber','可行')],['② 同规格后插','6/12 22:40','0 张','+0.8h',tg('green','推荐')],['③ 排到最后','6/13 19:00','0 张','+0h',tg('amber','踩线')]]);
-  APS.toast('智能插单评估完成：推荐方案 ②','ai');
-}
-
-/* 监控/报表/MO 渲染 */
-function renderMO(){const f=($('#moStatus')||{}).value||'';const rows=MO.filter(r=>!f||r[10]===f);const sc={'待排程':'gray','已排程':'blue','已下发':'blue','生产中':'green','已完工':'green'};const kc={green:'齐套',amber:'部分',red:'缺料'};
-  $('#moTbl tbody').innerHTML=rows.map(o=>`<tr><td><span class="row-link" onclick="navTo('wo')">${o[0]}</span></td><td class="mono">${o[1]}</td><td>${o[2]}</td><td>${o[3]}</td><td class="num">${o[4]}</td><td>${o[5]}</td><td class="muted">${o[6]}</td><td>${o[7]}</td><td>${prio(o[8])}</td><td>${tg(o[9],kc[o[9]])}</td><td>${tg(sc[o[10]],o[10])}</td></tr>`).join('');
-  $('#moCnt').textContent='显示 '+rows.length+' 条';}
-function renderMon(){const L=[['CCR01 连铸连轧',92,88],['LZ01 大拉机',85,82],['ZL02 中拉机',96,0],['RH01 退火炉',88,85],['DX01 镀锡线',90,87],['QB01 漆包机',80,76],['GX01 束丝机',84,81],['FR01 复绕机',82,79]];
-  $('#monLines').innerHTML=L.map(l=>{const stop=l[2]===0;return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)"><b style="width:120px;font-size:12.5px">${l[0]}</b><span class="tag ${stop?'red':'green'}" style="width:60px;justify-content:center">${stop?'停机':'运行'}</span><div class="bar" style="flex:1"><i class="${stop?'red':''}" style="width:${stop?100:l[2]}%;background:${stop?'var(--danger)':''}"></i></div><span class="muted" style="width:150px;font-size:11.5px;text-align:right">${stop?'设备故障 · 待维修':'达成 '+l[2]+'% / 计划 '+l[1]+'%'}</span></div>`;}).join('');}
+/* 配比/插单/CTP/whatif */
+function recipe(rec){const d=[{t:'方案A · 均匀16根',cls:'',pk:'当前选用',vis:Array(16).fill('a'),m:[['单丝','Φ0.52×16'],['外径','2.10mm','y'],['直流电阻','合格','y'],['相对成本','基准']]},{t:'方案B · 7+9 粗细',cls:'',pk:'',vis:[...Array(7).fill('b'),...Array(9).fill('a')],m:[['单丝','Φ0.58×7+Φ0.48×9'],['外径','2.08mm','y'],['电阻','合格','y'],['相对成本','-1.8%','good']]},{t:'方案C · 分层1+6+9',cls:rec?'rec':'',pk:rec?'系统推荐':'',vis:[...Array(1).fill('b'),...Array(15).fill('a')],m:[['单丝','分层 1+6+9'],['外径','2.05mm','y'],['电阻','合格','y'],['相对成本',rec?'-4.2% ★':'-3.1%','good']]}];const e=$('#recipeBox');if(!e)return;e.innerHTML=d.map(r=>`<div class="rc ${r.cls}">${r.pk?`<span class="pk">${r.pk}</span>`:''}<div class="rc-t">${r.t}</div><div class="rc-vis">${r.vis.map(v=>`<span class="strand ${v==='b'?'b':''}"></span>`).join('')}</div>${r.m.map(x=>`<div class="m"><span>${x[0]}</span><b class="${x[2]==='good'?'good':''}">${x[1]}</b></div>`).join('')}</div>`).join('');}
+function aiRecipe(){recipe(true);$('#recipeNote').innerHTML='<span class="hl-ai">✦ 系统推荐：方案C(1+6+9)，满足全部质量约束且成本最低 -4.2%</span>';APS.toast('配比优选：推荐方案 C，成本 -4.2%','ai');}
+function aiInsert(){$('#insertResult').innerHTML=`<div class="smart-tip"><div class="st-ic">✦</div><div>急单 <b>XW-26061015</b>(镀锡线 Φ0.25·20t·比亚迪·交期06-13)评估：库存18t+在途2t可齐套；推荐<b>同规格后插 ZL01/DX01</b>，换型+0.8h，不影响已锁定关键交期订单。</div></div>`+tbl([{t:'插单模式'},{t:'完成时间'},{t:'受影响工单'},{t:'换型增加'},{t:'结论'}],[['① 排到最前','06-12 18:00','2 张','+3.5h',tg('amber','可行')],['② 同规格后插','06-12 22:40','0 张','+0.8h',tg('green','推荐')],['③ 排到最后','06-13 19:00','0 张','+0h',tg('amber','踩线')]]);APS.toast('急单影响评估完成：推荐方案 ②','ai');}
+function whatifBreak(){$('#insertResult').innerHTML=`<div class="smart-tip" style="background:linear-gradient(120deg,var(--danger-soft),#fff);border-color:#f0c4be"><div class="st-ic" style="background:linear-gradient(135deg,var(--danger),#ef8b7d)">⚙</div><div>模拟 <b>ZL02 中拉机故障停机 8h</b>：3 张工单受影响。重排建议：2 张转 ZL01(换型+1.5h)，1 张延后待复机；MO-26060512 有延期风险，建议夜班加开 1 班消除。</div></div>`+tbl([{t:'受影响工单'},{t:'原机台'},{t:'重排去向'},{t:'交期影响'}],[['WO-0512-30','ZL02','ZL01','无'],['WO-1302-30','ZL02','ZL01','无'],['WO-1045-30','ZL02','延后待复机','+0.3d 风险']]);APS.toast('设备故障 What-if 完成：增量重排已生成','warn');}
+function runCTP(){const q=$('#ctpQty').value||'20';$('#ctpRes').classList.add('show');$('#ctpResBody').innerHTML=`<div class="field-grid"><div class="fv"><label>最早可承诺交期</label><b style="color:var(--ok);font-size:16px">2026-06-12 22:40</b></div><div class="fv"><label>较期望交期</label><b style="color:var(--ok)">提前 0.5 天 ✓</b></div><div class="fv"><label>瓶颈工序</label><b>镀锡 DX01(负荷92%)</b></div><div class="fv"><label>齐套情况</label><b>铜杆充足 · 锡锭需补0.4t(在途6/19)</b></div><div class="fv"><label>插入方式</label><b>同规格后插 · 换型+0.8h</b></div><div class="fv"><label>对在制影响</label><b style="color:var(--ok)">不影响关键交期订单</b></div></div><div style="margin-top:12px"><button class="btn ai sm" onclick="APS.toast('已生成可承诺交期回复单并同步营销','ai')">生成交期回复单</button> <button class="btn sm" onclick="navTo('insert')">查看插单影响</button></div>`;APS.toast('可承诺交期测算完成','ai');}
+/* 渲染 */
+function renderMO(){const f=($('#moStatus')||{}).value||'';const rows=MO.filter(r=>!f||r[10]===f);const sc={'待排程':'gray','已排程':'blue','已下发':'blue','生产中':'green'};const kc={green:'齐套',amber:'部分',red:'缺料'};$('#moTbl tbody').innerHTML=rows.map(o=>`<tr><td><span class="row-link">${o[0]}</span></td><td class="mono">${o[1]}</td><td>${o[2]}</td><td>${o[3]}</td><td class="num">${o[4]}</td><td>${o[5]}</td><td class="muted">${o[6]}</td><td>${o[7]}</td><td>${prio(o[8])}</td><td>${tg(o[9],kc[o[9]])}</td><td>${tg(sc[o[10]],o[10])}</td></tr>`).join('');$('#moCnt').textContent='显示 '+rows.length+' 条';}
+function renderMon(){const L=[['CCR01 连铸连轧',92,88],['LZ01 大拉机',85,82],['ZL02 中拉机',96,0],['RH01 退火炉',88,85],['DX01 镀锡线',90,87],['QB01 漆包机',80,76],['GX01 束丝机',84,81],['FR01 复绕机',82,79]];$('#monLines').innerHTML=L.map(l=>{const stop=l[2]===0;return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)"><b style="width:120px;font-size:12.5px">${l[0]}</b><span class="tag ${stop?'red':'green'}" style="width:60px;justify-content:center">${stop?'停机':'运行'}</span><div class="bar" style="flex:1"><i class="${stop?'red':''}" style="width:${stop?100:l[2]}%;background:${stop?'var(--danger)':''}"></i></div><span class="muted" style="width:150px;font-size:11.5px;text-align:right">${stop?'设备故障·待维修':'达成 '+l[2]+'% / 计划 '+l[1]+'%'}</span></div>`;}).join('');}
 function sparks(host,vals,c){const e=$(host);if(e)e.innerHTML='<div class="spark" style="height:46px;gap:5px">'+vals.map(v=>`<i style="height:${v}%;width:16px;background:${c}"></i>`).join('')+'</div>';}
-function dashTips(){
-  $('#dashTips').innerHTML=[
-   ['⚡','急单 <b>XW-26061015</b>（比亚迪 20t · 交期6/13）待排，排产助手已备插单方案','sched','查看'],
-   ['⏱','<b>MO-26060805</b> 交期临近(6/14)，当前排程存在延期风险','sched','去排程'],
-   ['📦','<b>锡锭</b> 库存 2.1t 低于安全库存，影响镀锡工单；请购 CG-2606-118 在途','stock','查库存'],
-   ['🔧','<b>ZL02 中拉机</b> 故障停机，3 张工单受影响，建议转 ZL01','monitor','查看'],
-  ].map(t=>`<div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)"><span style="width:26px;height:26px;border-radius:7px;background:var(--ai-soft);color:var(--ai-d);display:grid;place-items:center;flex:none">${t[0]}</span><div style="flex:1;font-size:12.5px;color:var(--ink-2)">${t[1]}</div><button class="btn sm" onclick="navTo('${t[2]}')">${t[3]}</button></div>`).join('');
-}
-
-/* ===================== Copilot ===================== */
-APS._copWelcome='您好，我是排产助手 ✦ 已接入当前生产环境：本月在排 1,268 张工单、16 台机台、综合负荷 87.6%。可以问我急单评估、配比优选、排产解释等。';
-APS.copilot.register({
- urgent:{user:'急单 XW-26061015 能不能接？',steps:[['解析急单','比亚迪 · Φ0.25 · 20t · 交期6/13'],['查库存','铜杆18t+在途2t · 锡锭需补0.4t'],['候选设备','DX01/DX02 可产'],['插单仿真×3','engine.simulate()']],text:'可以承接 ✅ 推荐方案 B（同规格后插 ZL01→DX01），完工 6/12 22:40，余量约 1 天，换型仅 +0.8h，不影响已锁定关键交期订单。锡锭缺口已联动请购 CG-2606-118（6/19 到货）。',rich:`<div class="cop-card"><div class="cc-t">✦ 三模式对比</div><div class="p-m" style="font-size:11.5px">A 排到最前<b>影响 2 张</b></div><div class="p-m" style="font-size:11.5px">B 同规格后插<b class="good">影响 0 张 ★</b></div><div class="p-m" style="font-size:11.5px">C 排到最后<b>踩线</b></div></div>`},
- recipe:{user:'铜绞线16股怎么配最省？',steps:[['读取BOM/质量约束','外径/电阻/拉断力'],['枚举可行配比','均匀/7+9/1+6+9'],['成本与损耗求解','含拉丝道次/换模']],text:'在满足外径≤2.10mm、直流电阻与拉断力合格的前提下，推荐「分层 1+6+9」配比：相对均匀16根成本 -4.2%，外径更紧凑、单丝拉丝道次更优。可在「物品BOM→配比优选」一键采用。'},
- why:{user:'DX01 这批怎么排少换型？',steps:[['读取换型矩阵','规格切换损耗'],['同规格聚类','0.20→0.25→0.30'],['校验交期约束','不超期']],text:'按换型时间矩阵，将 DX01 上 0.20/0.25/0.30mm 订单聚类相邻生产（沿低损耗路径 0.20→0.25→0.30），换型由 5 次降至 2 次、节省约 3.5h，且全部满足交期。'},
-});
-APS.copilot.route([[/急单|插单|能接|XW-/,'urgent'],[/配|绞线|16股|省/,'recipe'],[/换型|少换|怎么排|DX01/,'why']]);
-
-/* ===================== onPage / 初始化 ===================== */
+function dashTips(){$('#dashTips').innerHTML=[['⚡','急单 <b>XW-26061015</b>(比亚迪 20t·交期6/13)待排，已备插单方案(同规格后插)','sched'],['🏭','<b>DX01 镀锡线</b> 06-19 超载112%，建议转 DX02 或加开夜班','loadrep'],['📦','<b>锡锭</b> 缺口0.4t(6/19)，已联动采购建议 CG-2606-118','kit'],['🔧','<b>ZL02 中拉机</b> 故障停机，3张工单受影响','feedback']].map(t=>`<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)"><span style="width:26px;height:26px;border-radius:7px;background:var(--ai-soft);color:var(--ai-d);display:grid;place-items:center;flex:none">${t[0]}</span><div style="flex:1;font-size:12.5px;color:var(--ink-2)">${t[1]}</div><button class="btn sm" onclick="navTo('${t[2]}')">查看</button></div>`).join('');}
+/* Copilot */
+APS._copWelcome='您好，我是排产助手 ✦ 当前计划版本 V0618-1：需求满足率96.2%、瓶颈 DX01 负荷112%、计划问题 9 条。可以问我急单评估、超载原因、配比优选等。';
+APS.copilot.register({urgent:{user:'急单 XW-26061015 能不能接？',steps:[['解析急单','比亚迪·Φ0.25·20t·交期6/13'],['查库存','铜杆18t+在途2t·锡锭需补0.4t'],['候选资源','DX01/DX02 可产'],['插单仿真×3','OR-Tools']],text:'可以承接 ✅ 推荐同规格后插 ZL01→DX01，完工 06-12 22:40、余量约1天、换型仅+0.8h，不影响已锁定关键交期订单。锡锭缺口已联动请购 CG-2606-118(6/19到货)。',rich:`<div class="cop-card"><div class="cc-t">✦ 三模式对比</div><div class="p-m" style="font-size:11.5px">A 排到最前<b>影响2张</b></div><div class="p-m" style="font-size:11.5px">B 同规格后插<b class="good">影响0张 ★</b></div><div class="p-m" style="font-size:11.5px">C 排到最后<b>踩线</b></div></div>`},
+ load:{user:'DX01 为什么超载？',steps:[['读取负荷报表','DX01 06-19'],['归因','镀锡需求集中'],['给方案','转产/加班']],text:'DX01 06-19 负荷 112%：当日有 MO-26061208/26061412/26061250 三张镀锡工单集中到期(共26.8t)，超可用产能(24t)。建议：将 MO-26061412 部分批次转 DX02(余量充足)，或 DX01 夜班加开1班，即可消除超载。'},
+ why:{user:'铜绞线16股怎么配最省？',steps:[['读取BOM/质量约束','外径/电阻/拉断力'],['枚举配比','均匀/7+9/1+6+9'],['成本求解','含拉丝道次']],text:'在满足外径≤2.10mm、电阻与拉断力合格前提下，推荐「分层 1+6+9」配比：相对均匀16根成本 -4.2%、外径更紧凑。可在「物料清单 BOM→配比优选」一键采用。'}});
+APS.copilot.route([[/急单|插单|能接|XW-/,'urgent'],[/超载|负荷|DX01|为什么超/,'load'],[/配|绞线|16股|省|为什么这样/,'why']]);
+/* onPage */
 function onPage(id){
-  if(id==='dash'){dashTips();renderMon&&renderMonDash();sparks('#sp1',[78,82,80,85,88,86,90],'var(--brand-soft)');sparks('#sp2',[92,93,94,95,94,96,96],'var(--ok-soft)');sparks('#sp3',[80,82,84,85,87,86,88],'var(--accent-soft)');return;}
-  if(id==='mo')renderMO();
-  if(id==='monitor')renderMon();
-  if(id==='bom')recipe(false);
-  if(id==='sched'){gantt('#schedGantt',smartApplied?AFTER:BEFORE,smartApplied?LOADA:LOADB,true);schedKpi();waitList();}
-  if(['rgantt','vis-opg','vis-ordg','vis-load'].includes(id))gantt('#fallGantt',smartApplied?AFTER:BEFORE,smartApplied?LOADA:LOADB,false);
-  if(id==='reports'){sparks('#rp1',[92,93,94,95,94,96,96],'var(--brand-soft)');sparks('#rp2',[82,84,85,86,87,87,88],'var(--accent-soft)');}
+ if(id==='dash'){$('#dashProb').innerHTML=probList(PROB.slice(0,5));dashTips();$('#dashHeat').innerHTML=heat();return;}
+ if(id==='mo')renderMO();
+ if(id==='feedback')renderMon();
+ if(id==='bom')recipe(false);
+ if(id==='sched'){gantt('#schedGantt',smartApplied?AFTER:BEFORE,smartApplied?LOADA:LOADB,true);schedKpi();waitList();}
+ if(['gsum','gdet','loadgantt'].includes(id))gantt('#fallGantt',smartApplied?AFTER:BEFORE,smartApplied?LOADA:LOADB,false);
+ if(id==='otd')sparks('#rp1',[92,93,94,95,94,96,96],'var(--brand-soft)');
 }
-function renderMonDash(){const e=$('#dashLines');if(!e)return;const L=[['拉丝车间',6,6],['退火车间',2,2],['镀锡车间',2,2],['漆包车间',1,1],['绞线车间',2,1]];
-  e.innerHTML=L.map(l=>`<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)"><b style="width:90px;font-size:12.5px">${l[0]}</b><div class="bar" style="flex:1"><i style="width:${l[2]/l[1]*100}%;background:${l[2]<l[1]?'var(--warn)':'var(--ok)'}"></i></div><span class="muted" style="width:110px;font-size:11.5px;text-align:right">在产 ${l[2]} / ${l[1]} 台</span></div>`).join('');}
-
 APS.initCopilot();
-// 首屏工作台
-dashTips(); renderMonDash(); sparks('#sp1',[78,82,80,85,88,86,90],'var(--brand-soft)'); sparks('#sp2',[92,93,94,95,94,96,96],'var(--ok-soft)'); sparks('#sp3',[80,82,84,85,87,86,88],'var(--accent-soft)');
-// Copilot fab
 $('.cop-fab').onclick=()=>{$('#copilot').classList.add('open');$('.cop-fab').style.display='none';};
 $('.cop-x').onclick=()=>{$('#copilot').classList.remove('open');$('.cop-fab').style.display='';};
+// 首屏看板渲染
+$('#dashProb').innerHTML=probList(PROB.slice(0,5));dashTips();$('#dashHeat').innerHTML=heat();
 </script>
 </body>
 </html>
