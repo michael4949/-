@@ -106,6 +106,51 @@ svg { display: block; }
   overflow: hidden; text-overflow: ellipsis; }
 .s-desc { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; }
+/* ---------- Layer 分组标签升级 ---------- */
+.s-label { display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin: 14px 6px 6px;
+  text-transform: none; }
+.s-label-tag { font-size: 9.5px; font-weight: 700; color: var(--violet);
+  background: rgba(154, 77, 255, 0.10); padding: 1.5px 7px; border-radius: 999px;
+  letter-spacing: 0; }
+.s-label-tag.tag-on { color: var(--green); background: rgba(24, 185, 122, 0.12); }
+.s-label-tag.tag-pro { color: #fff;
+  background: linear-gradient(120deg, #D97706 0%, #EAB308 100%);
+  box-shadow: 0 4px 10px -3px rgba(217, 119, 6, 0.4); }
+
+/* ---------- 智能体右侧状态徽章 ---------- */
+.s-item { position: relative; }
+.s-badge { flex-shrink: 0; font-size: 9px; font-weight: 700; padding: 2px 6px;
+  border-radius: 999px; white-space: nowrap; letter-spacing: 0;
+  display: inline-flex; align-items: center; gap: 3px; }
+.s-badge.b-on { color: var(--green); background: rgba(24, 185, 122, 0.12); }
+.s-badge.b-lock { color: var(--muted); background: rgba(14, 20, 48, 0.06); }
+.s-badge.b-pro { color: #fff;
+  background: linear-gradient(120deg, #D97706 0%, #EAB308 100%);
+  box-shadow: 0 3px 8px -2px rgba(217, 119, 6, 0.45); }
+
+/* ---------- 未开通智能体淡化 ---------- */
+.s-item.locked .s-icon { opacity: 0.55; }
+.s-item.locked .s-name { color: var(--ink-2); }
+.s-item.locked .s-desc { color: var(--muted); opacity: 0.75; }
+.s-item.locked:hover { background: rgba(255, 255, 255, 0.6); }
+.s-item.locked:hover .s-badge.b-lock { color: var(--brand);
+  background: rgba(90, 91, 240, 0.10); }
+
+/* ---------- 演示模式解锁横幅 ---------- */
+.unlock-banner { display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; padding: 14px 18px; border-radius: 16px; margin-bottom: 18px;
+  background: linear-gradient(120deg, rgba(154, 77, 255, 0.10), rgba(0, 194, 216, 0.10));
+  border: 1px solid rgba(154, 77, 255, 0.28); }
+.unlock-banner.b-pro {
+  background: linear-gradient(120deg, rgba(217, 119, 6, 0.12), rgba(234, 179, 8, 0.12));
+  border-color: rgba(217, 119, 6, 0.32); }
+.ub-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.ub-ico { font-size: 22px; flex-shrink: 0; }
+.ub-tt { font-size: 13.5px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.ub-sub { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.4; }
+.ub-right { flex-shrink: 0; }
+
 .sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 14px;
   border-top: 1px solid var(--line); }
 .u-ava { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
@@ -529,6 +574,142 @@ svg { display: block; }
   *, *::before, *::after { animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ============================================================
+   岗位智能体 · 生产交付版组件
+   ============================================================ */
+/* 智能体生产头部 */
+.agent-hero { position: relative; border-radius: 18px; padding: 17px 20px; margin-bottom: 16px;
+  background: linear-gradient(120deg, rgba(24,185,122,.10), rgba(0,194,216,.09));
+  border: 1px solid rgba(24,185,122,.28); display: flex; gap: 18px 26px; flex-wrap: wrap;
+  align-items: center; justify-content: space-between; }
+.ah-left { display: flex; gap: 14px; min-width: 0; flex: 1; }
+.ah-ico { width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px; display: grid;
+  place-items: center; font-size: 23px; background: #fff; box-shadow: var(--sh-sm); }
+.ah-name { font-size: 15.5px; font-weight: 800; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.ah-run { font-size: 10.5px; font-weight: 700; color: var(--green);
+  background: rgba(24,185,122,.14); border-radius: 999px; padding: 2px 10px;
+  display: inline-flex; align-items: center; gap: 5px; }
+.ah-run .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 0 3px rgba(24,185,122,.22); animation: ahpulse 1.8s infinite; }
+@keyframes ahpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.ah-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ah-chip { font-size: 10.5px; font-weight: 600; color: var(--ink-2); background: #fff;
+  border: 1px solid var(--line); border-radius: 7px; padding: 3px 9px; }
+.ah-chip b { color: var(--brand); }
+.ah-scope { font-size: 11.5px; color: var(--ink-2); margin-top: 9px; line-height: 1.6; }
+.ah-scope b { color: var(--ink); }
+.ah-right { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.ah-metric { text-align: center; }
+.ah-metric b { display: block; font-size: 21px; font-weight: 800; letter-spacing: -.02em;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ah-metric span { font-size: 10.5px; color: var(--muted); }
+.ah-acts { display: flex; gap: 8px; }
+
+/* 智能体内部 Tab（9 个岗位智能体通用） */
+.ag-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px;
+  border-bottom: 1px solid var(--line); }
+.ag-tab { border: none; background: transparent; padding: 9px 15px; border-radius: 9px 9px 0 0;
+  font-size: 13px; font-weight: 650; color: var(--muted); cursor: pointer; position: relative;
+  transition: color .2s, background .2s; }
+.ag-tab:hover { color: var(--ink-2); background: rgba(90,91,240,.05); }
+.ag-tab.active { color: var(--brand); }
+.ag-tab.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px;
+  height: 2.5px; border-radius: 2px; background: var(--grad-btn); }
+.ag-pane { display: none; }
+.ag-pane.active { display: block; animation: agfade .3s ease; }
+@keyframes agfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* 配置 key-value */
+.spec-row { display: flex; gap: 14px; padding: 11px 16px; border-bottom: 1px solid var(--line);
+  align-items: flex-start; }
+.spec-row:last-child { border-bottom: none; }
+.spec-k { width: 116px; flex-shrink: 0; font-size: 12px; color: var(--muted); font-weight: 600; }
+.spec-v { flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink); line-height: 1.7; }
+.spec-v code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px;
+  background: #F4F6FF; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+
+/* 护栏开关 */
+.guard-row { display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+  border-bottom: 1px solid var(--line); }
+.guard-row:last-child { border-bottom: none; }
+.guard-main { flex: 1; min-width: 0; }
+.guard-tt { font-size: 12.5px; font-weight: 600; }
+.guard-sub { font-size: 11px; color: var(--muted); margin-top: 1px; line-height: 1.5; }
+.switch { width: 38px; height: 22px; border-radius: 999px; background: #D7DBEA; border: none;
+  position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; padding: 0; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .2s; }
+.switch.on { background: var(--green); }
+.switch.on::after { left: 18px; }
+.switch.lock { opacity: .62; cursor: not-allowed; }
+
+/* 打分权重条 */
+.wfac { display: flex; align-items: center; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); }
+.wfac:last-child { border-bottom: none; }
+.wfac-name { width: 168px; flex-shrink: 0; font-size: 12.5px; font-weight: 600; }
+.wfac-bar { flex: 1; height: 8px; border-radius: 999px; background: #EEF0FB; overflow: hidden; }
+.wfac-bar i { display: block; height: 100%; border-radius: 999px; background: var(--grad-btn); width: var(--w); }
+.wfac-val { width: 38px; text-align: right; font-size: 12px; font-weight: 700; color: var(--brand); }
+
+/* 跟进序列 */
+.cad { padding: 6px 4px 2px; }
+.cad-step { display: flex; gap: 12px; padding: 0 0 16px; position: relative; }
+.cad-step:last-child { padding-bottom: 0; }
+.cad-step::before { content: ""; position: absolute; left: 17px; top: 40px; bottom: -2px; width: 2px;
+  background: linear-gradient(var(--brand), rgba(90,91,240,.15)); }
+.cad-step:last-child::before { display: none; }
+.cad-ico { width: 36px; height: 36px; flex-shrink: 0; border-radius: 11px; display: grid;
+  place-items: center; font-size: 16px; color: #fff; z-index: 1;
+  background: linear-gradient(135deg, var(--g1,#5A5BF0), var(--g2,#9A4DFF)); }
+.cad-body { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; padding: 11px 14px; }
+.cad-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cad-tt { font-size: 13px; font-weight: 700; }
+.cad-when { margin-left: auto; font-size: 11px; color: var(--muted); }
+.cad-msg { font-size: 12px; color: var(--ink-2); margin-top: 7px; line-height: 1.6;
+  background: #F8F9FE; border: 1px dashed var(--line-2); border-radius: 8px; padding: 8px 10px; }
+
+/* 交付验收清单 */
+.dl-item { display: flex; align-items: center; gap: 11px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.dl-item:last-child { border-bottom: none; }
+.dl-check { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; display: grid;
+  place-items: center; font-size: 12px; color: #fff; background: var(--green); }
+.dl-check.pend { background: #D7DBEA; color: var(--muted); }
+.dl-main { flex: 1; min-width: 0; }
+.dl-tt { font-size: 12.5px; font-weight: 600; }
+.dl-sub { font-size: 11px; color: var(--muted); margin-top: 1px; line-height: 1.5; }
+
+/* 实时通话助手 */
+.live-call { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+.lc-head { display: flex; align-items: center; gap: 9px; padding: 11px 13px; font-size: 12px; font-weight: 650;
+  background: linear-gradient(120deg, rgba(90,91,240,.09), rgba(0,194,216,.06)); border-bottom: 1px solid var(--line); }
+.lc-wave { display: inline-flex; gap: 2px; align-items: flex-end; height: 16px; }
+.lc-wave i { width: 3px; height: 5px; background: var(--brand); border-radius: 2px; animation: lcwave 1s ease-in-out infinite; }
+@keyframes lcwave { 0%,100%{height:4px} 50%{height:16px} }
+.lc-body { padding: 12px 13px; display: flex; flex-direction: column; gap: 9px; }
+.lc-cue { font-size: 12px; line-height: 1.65; padding: 9px 11px; border-radius: 9px;
+  background: #F8F9FE; border-left: 3px solid var(--brand); color: var(--ink-2); }
+.lc-cue b { color: var(--ink); }
+.lc-foot { font-size: 11px; color: var(--muted); }
+
+/* 通用说明条 */
+.ag-note { font-size: 11.5px; color: var(--ink-2); line-height: 1.7; background: #F8F9FE;
+  border: 1px solid var(--line); border-left: 3px solid var(--brand); border-radius: 8px;
+  padding: 10px 13px; }
+.ag-note b { color: var(--ink); }
+.ag-note.warn { border-left-color: var(--amber); background: #FFFBF3; }
+
+@media (max-width: 1080px) {
+  .agent-hero { flex-direction: column; align-items: flex-start; }
+  .ah-right { width: 100%; justify-content: space-between; }
+}
+@media (max-width: 860px) {
+  .spec-k { width: 96px; }
+  .wfac-name { width: 120px; }
+  .ag-tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .ag-tab { white-space: nowrap; }
+}
 </style>
 </head>
 <body>
@@ -559,13 +740,17 @@ svg { display: block; }
   </div>
 
   <nav class="sb-scroll">
-    <div class="s-label">默认</div>
+    <!-- ============ Layer 1 · 入口 ============ -->
+    <div class="s-label">入口 <span class="s-label-tag tag-on">免费</span></div>
     <div class="s-item active" data-view="dazi" data-title="我有一批资料需要整理，帮我判断应该用哪个智能体">
       <span class="s-icon s-grad">
         <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
       </span>
       <div class="s-meta"><div class="s-name">搭子</div><div class="s-desc">你的个人小助手</div></div>
     </div>
+
+    <!-- ============ Layer 2 · 平台基础 ============ -->
+    <div class="s-label">平台基础 <span class="s-label-tag">订阅必装</span></div>
     <div class="s-item" data-view="mail" data-title="邮箱助手 · 未读整理与智能回复">
       <span class="s-icon" style="--tint:#E8F1FF">📮</span>
       <div class="s-meta"><div class="s-name">邮箱助手</div><div class="s-desc">未读整理 · 智能回复</div></div>
@@ -590,15 +775,91 @@ svg { display: block; }
       <span class="s-icon" style="--tint:#E9F9F1">📊</span>
       <div class="s-meta"><div class="s-name">数据助手</div><div class="s-desc">数据上下文 · 指标分析</div></div>
     </div>
+    <div class="s-item locked" data-view="flow" data-title="工作流编排 · 多智能体串联与编排" data-toast="🔄「工作流编排」即将上线 · 联系顶呱呱顾问申请内测">
+      <span class="s-icon" style="--tint:#EDF2FB">🔄</span>
+      <div class="s-meta"><div class="s-name">工作流编排</div><div class="s-desc">多智能体串联 · 拖拽式</div></div>
+      <span class="s-badge b-lock">内测</span>
+    </div>
 
-    <div class="s-label">自定义智能体</div>
+    <!-- ============ Layer 3 · 岗位智能体 ============ -->
+    <div class="s-label">岗位智能体 <span class="s-label-tag">按需订阅</span></div>
     <div class="s-item" data-view="eng" data-title="工程管理助手 · 制度采集与条款提取">
       <span class="s-icon" style="--tint:#FFF4E5">🛠️</span>
       <div class="s-meta"><div class="s-name">工程管理助手</div><div class="s-desc">制度采集 · 条款提取</div></div>
+      <span class="s-badge b-on">已开通</span>
     </div>
     <div class="s-item" data-view="fin" data-title="财务监控和决策 · 财务监控与决策支持">
       <span class="s-icon" style="--tint:#FFEFF2">💹</span>
-      <div class="s-meta"><div class="s-name">财务监控和决策</div><div class="s-desc">财务监控 · 决策支持</div></div>
+      <div class="s-meta"><div class="s-name">财务监控决策</div><div class="s-desc">异常预警 · 决策支持</div></div>
+      <span class="s-badge b-on">已开通</span>
+    </div>
+    <div class="s-item" data-view="sales" data-title="销售 SDR 助手 · 线索打分与自动跟进">
+      <span class="s-icon" style="--tint:#EEF5FF">🎯</span>
+      <div class="s-meta"><div class="s-name">销售 SDR 助手</div><div class="s-desc">线索打分 · 自动跟进</div></div>
+      <span class="s-badge b-on">运行中</span>
+    </div>
+    <div class="s-item locked" data-view="legal" data-title="法务合同助手 · 条款审查与风险拦截" data-toast="⚖️「法务合同审查助手」未开通 · ¥3,000/月起 · 替代 50% 初级法务工作">
+      <span class="s-icon" style="--tint:#F1EBFF">⚖️</span>
+      <div class="s-meta"><div class="s-name">法务合同助手</div><div class="s-desc">条款审查 · 风险拦截</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+    <div class="s-item locked" data-view="hr" data-title="HR 招聘助手 · 简历筛选与初面安排" data-toast="👥「HR 招聘助手」未开通 · ¥2,000/月起 · 替代简历筛选与初面安排">
+      <span class="s-icon" style="--tint:#E9F9F1">👥</span>
+      <div class="s-meta"><div class="s-name">HR 招聘助手</div><div class="s-desc">简历筛选 · 初面初筛</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+    <div class="s-item locked" data-view="cs" data-title="客服 7×24 助手 · 智能分诊与夜班值守" data-toast="💬「客服 7×24 助手」未开通 · ¥3,500/月起 · 替代夜班 + 70% 重复咨询">
+      <span class="s-icon" style="--tint:#E6F8FB">💬</span>
+      <div class="s-meta"><div class="s-name">客服 7×24 助手</div><div class="s-desc">夜班值守 · 智能分诊</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+    <div class="s-item locked" data-view="pmo" data-title="项目交付管控 · 节点预警与自动复盘" data-toast="📋「项目交付管控助手」未开通 · ¥3,000/月起 · 节点预警 + 自动复盘">
+      <span class="s-icon" style="--tint:#FFF4E5">📋</span>
+      <div class="s-meta"><div class="s-name">项目交付管控</div><div class="s-desc">节点预警 · 自动复盘</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+    <div class="s-item locked" data-view="bid" data-title="投标 / 标书助手 · AI 起草与评分解析" data-toast="📝「投标 / 标书 AI 助手」未开通 · ¥4,500/月起 · 替代 50% 标书撰写工时">
+      <span class="s-icon" style="--tint:#EEF5FF">📝</span>
+      <div class="s-meta"><div class="s-name">投标 / 标书助手</div><div class="s-desc">AI 起草 · 评分解析</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+    <div class="s-item locked" data-view="rd" data-title="研发知识沉淀 · 工艺图谱与失效分析" data-toast="🔬「研发知识沉淀助手」未开通 · ¥3,000/月起 · 留住老工程师经验">
+      <span class="s-icon" style="--tint:#E9F9F1">🔬</span>
+      <div class="s-meta"><div class="s-name">研发知识沉淀</div><div class="s-desc">工艺图谱 · 失效分析</div></div>
+      <span class="s-badge b-lock">🔓 解锁</span>
+    </div>
+
+    <!-- ============ Layer 4 · 行业方案 ============ -->
+    <div class="s-label">行业方案 <span class="s-label-tag tag-pro">PRO</span></div>
+    <div class="s-item locked" data-view="ind-mfg" data-title="制造业版 · MES/ERP 对接 + 设备维护 + 生产排程" data-toast="🏭「制造业版」¥30-80 万/年 · 含 MES/ERP 对接 + 设备维护 + 生产排程">
+      <span class="s-icon" style="--tint:#FFF4E5">🏭</span>
+      <div class="s-meta"><div class="s-name">制造业版</div><div class="s-desc">设备维护 · 生产排程</div></div>
+      <span class="s-badge b-pro">PRO</span>
+    </div>
+    <div class="s-item locked" data-view="ind-retail" data-title="零售连锁版 · POS 对接 + 加盟督导 + 选址决策" data-toast="🛒「零售连锁版」¥25-60 万/年 · 含 POS 对接 + 加盟督导 + 选址决策">
+      <span class="s-icon" style="--tint:#EEF5FF">🛒</span>
+      <div class="s-meta"><div class="s-name">零售连锁版</div><div class="s-desc">加盟督导 · 选址决策</div></div>
+      <span class="s-badge b-pro">PRO</span>
+    </div>
+    <div class="s-item locked" data-view="ind-med" data-title="医美 / 医疗版 · 客户留存 + 套餐设计 + 合规话术" data-toast="💆「医美 / 医疗版」¥20-50 万/年 · 含客户留存 + 套餐设计 + 合规话术">
+      <span class="s-icon" style="--tint:#FFEFF2">💆</span>
+      <div class="s-meta"><div class="s-name">医美 / 医疗版</div><div class="s-desc">客户留存 · 套餐设计</div></div>
+      <span class="s-badge b-pro">PRO</span>
+    </div>
+    <div class="s-item locked" data-view="ind-it" data-title="IT / 软件版 · 工单分诊 + 客户成功 + SLA 监控" data-toast="💻「IT / 软件版」¥25-60 万/年 · 含工单分诊 + 客户成功 + SLA 监控">
+      <span class="s-icon" style="--tint:#F1EBFF">💻</span>
+      <div class="s-meta"><div class="s-name">IT / 软件版</div><div class="s-desc">工单分诊 · 客户成功</div></div>
+      <span class="s-badge b-pro">PRO</span>
+    </div>
+    <div class="s-item locked" data-view="ind-eng" data-title="建筑 / 工程版 · 投标雷达 + 项目集 + 进度看板" data-toast="🏗️「建筑 / 工程版」¥30-80 万/年 · 含投标雷达 + 项目集 + 进度看板">
+      <span class="s-icon" style="--tint:#FFF4E5">🏗️</span>
+      <div class="s-meta"><div class="s-name">建筑 / 工程版</div><div class="s-desc">投标雷达 · 进度看板</div></div>
+      <span class="s-badge b-pro">PRO</span>
+    </div>
+    <div class="s-item locked" data-view="ind-edu" data-title="教培版 · 课程顾问 + 招生转化 + 学员画像" data-toast="🎓「教培版」¥20-50 万/年 · 含课程顾问 + 招生转化 + 学员画像">
+      <span class="s-icon" style="--tint:#E6F8FB">🎓</span>
+      <div class="s-meta"><div class="s-name">教培版</div><div class="s-desc">课程顾问 · 招生转化</div></div>
+      <span class="s-badge b-pro">PRO</span>
     </div>
   </nav>
 
@@ -1155,6 +1416,1008 @@ curl https://api.dgg.ai/v1/agents/dispatch \
           </div>
         </div>
       </section>
+
+      <!-- ============ 视图:工作流编排 ============ -->
+      <section class="view" id="view-flow">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EDF2FB">🔄</span>工作流编排</h2>
+            <p>多智能体串联 · 拖拽式编排</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">内测申请中 · 免费内测期已开放给前 50 家企业</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">8</div><div class="ms-label">在用流程</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">3,247</div><div class="ms-label">月执行次数</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↓62%</div><div class="ms-label">人工介入率</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>典型流程:客户报价审批</h3><span class="pc-extra">5 步串联</span></div>
+            <div class="timeline">
+              <div class="tl-item"><div class="tl-tt">① 销售 SDR 助手</div><div class="tl-sub">捕获客户需求,生成初版报价</div></div>
+              <div class="tl-item"><div class="tl-tt">② 财务监控决策</div><div class="tl-sub">校验毛利率红线,标记需审批节点</div></div>
+              <div class="tl-item"><div class="tl-tt">③ 法务合同助手</div><div class="tl-sub">基于报价生成合同初稿 + 风险条款提示</div></div>
+              <div class="tl-item"><div class="tl-tt">④ 邮箱助手</div><div class="tl-sub">发送审批邮件给老板,带 30 秒摘要</div></div>
+              <div class="tl-item"><div class="tl-tt">⑤ 知识库</div><div class="tl-sub">审批通过后自动归档,可被未来检索</div></div>
+            </div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>新建流程</h3><span class="pc-extra">无代码 · 拖拽式</span></div>
+            <div class="pc-body" style="font-size:12.5px;color:var(--muted);">勾选要串联的智能体 → 配置触发条件 → 设置异常分支与人工节点 → 发布。所有流程的执行日志可在「知识空间」按决策溯源链查看。</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:销售 SDR 助手（生产交付版）============ -->
+      <section class="view" id="view-sales">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EEF5FF">🎯</span>销售 SDR 助手</h2>
+            <p>线索清洗 · 打分分级 · 多渠道自动跟进 · 邀约转化 · 转交 AE</p>
+          </div>
+
+          <!-- 生产状态头部 -->
+          <div class="agent-hero">
+            <div class="ah-left">
+              <span class="ah-ico">🎯</span>
+              <div>
+                <div class="ah-name">销售 SDR 助手 <span class="ah-run"><span class="dot"></span>生产运行中</span></div>
+                <div class="ah-chips">
+                  <span class="ah-chip">编号 <b>SDR-Agent-01</b></span>
+                  <span class="ah-chip">基座 <b>DeepSeek-V3</b> ＋ 自研意图分类小模型</span>
+                  <span class="ah-chip">版本 <b>v2.3.1</b></span>
+                  <span class="ah-chip">CRM 已对接 <b>销售易</b></span>
+                  <span class="ah-chip">最近同步 <b>2 分钟前</b></span>
+                </div>
+                <div class="ah-scope">接管范围：<b>表单 / 广告 / 官网 / 企微</b>线索清洗 → <b>BANT 打分分级</b> → 电话·企微·邮件·短信<b>自动跟进</b> → 邀约转化 → 高分线索<b>转交 AE</b>。外呼、加微、报价等关键动作默认<b>人工一键确认</b>。</div>
+              </div>
+            </div>
+            <div class="ah-right">
+              <div class="ah-metric"><b>47</b><span>本月有效商机</span></div>
+              <div class="ah-metric"><b>142h</b><span>本月节省工时</span></div>
+              <div class="ah-metric"><b>6.8×</b><span>投入产出比</span></div>
+              <div class="ah-acts">
+                <button class="btn-mini js-toast" data-toast="已打开近 30 天完整审计日志：每次外呼/写库/发消息均可追溯（演示）">审计日志</button>
+                <button class="btn-grad js-toast" data-toast="已用一条真实线索发起试运行，结果将在 1 分钟内回流并标注「试运行」（演示）">试运行</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 内部 Tab -->
+          <div class="ag-tabs">
+            <button class="ag-tab active" data-tab="cockpit">今日工作台</button>
+            <button class="ag-tab" data-tab="leads">线索 &amp; 打分</button>
+            <button class="ag-tab" data-tab="cadence">自动跟进序列</button>
+            <button class="ag-tab" data-tab="config">配置 &amp; 交付</button>
+          </div>
+
+          <!-- ===== Pane 1：今日工作台 ===== -->
+          <div class="ag-pane active" data-pane="cockpit">
+            <div class="kpi-row">
+              <div class="kpi"><div class="kpi-label">今日新进线索</div><div class="kpi-num">38</div><div class="kpi-sub">已自动清洗去重 <b class="up">12</b> 条</div></div>
+              <div class="kpi"><div class="kpi-label">待你确认动作</div><div class="kpi-num">6</div><div class="kpi-sub">外呼 3 · 加微 2 · 报价 1</div></div>
+              <div class="kpi"><div class="kpi-label">今日已邀约</div><div class="kpi-num">4</div><div class="kpi-sub"><b class="up">↑2</b> 较昨日</div></div>
+            </div>
+
+            <div class="pcard mt">
+              <div class="pc-head"><h3>待你确认的动作</h3><span class="pill pill-amber">人工确认 · 5 条</span><span class="pc-extra">按护栏要求，外呼 / 加微 / 报价需你一键确认</span></div>
+              <table class="table">
+                <thead><tr><th>动作</th><th>对象</th><th>AI 拟执行内容</th><th>分数</th><th style="text-align:right">操作</th></tr></thead>
+                <tbody>
+                  <tr><td>📞 电话首呼</td><td>陈总 · 东莞精工机械</td><td>按 R-02 研发知识 POC 话术切入，15 万 / 5 周方案</td><td><span class="pill pill-green">94</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-grad js-toast" data-toast="已确认：11:00 自动拨号并把话术推送到坐席屏">确认</button> <button class="btn-mini js-toast" data-toast="已驳回，转你自行跟进">驳回</button></td></tr>
+                  <tr><td>💬 企微加好友</td><td>周姐 · 成都赛锐医疗</td><td>附 CFO 版 ROI 测算 + 同行案例，备注线索来源</td><td><span class="pill pill-green">91</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-grad js-toast" data-toast="已确认：发送加微申请并附材料">确认</button> <button class="btn-mini js-toast" data-toast="已驳回">驳回</button></td></tr>
+                  <tr><td>💬 企微加好友</td><td>李总 · 杭州博远软件</td><td>差异化 3 点话术 + 邀约 6/20 公开课</td><td><span class="pill pill-green">88</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-grad js-toast" data-toast="已确认">确认</button> <button class="btn-mini js-toast" data-toast="已驳回">驳回</button></td></tr>
+                  <tr><td>📞 电话回访</td><td>王经理 · 广州瑞和零售</td><td>推进客服 7×24 咨询会，争取本周定时间</td><td><span class="pill pill-blue">82</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-grad js-toast" data-toast="已确认">确认</button> <button class="btn-mini js-toast" data-toast="已驳回">驳回</button></td></tr>
+                  <tr><td>💰 报价发送</td><td>赵总 · 武汉协昌建筑</td><td>投标助手标准版报价，<b>折扣需你核定</b>（护栏禁止自动给价）</td><td><span class="pill pill-blue">78</span></td><td style="text-align:right;white-space:nowrap"><button class="btn-grad js-toast" data-toast="已打开报价单，请核定折扣后再发送">去核定</button> <button class="btn-mini js-toast" data-toast="已驳回">驳回</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pgrid g2 mt">
+              <div class="pcard">
+                <div class="pc-head"><h3>今日优先跟进队列</h3><span class="pc-extra">按分数 × 紧迫度排序</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⏰</span><div class="lr-main"><div class="lr-tt">陈总 · 东莞精工机械 · 11:00 回访</div><div class="lr-sub">话术已就绪：R-02 研发知识 POC，15 万 / 5 周</div></div><span class="pill pill-green">94</span><button class="btn-mini js-toast" data-toast="话术已推送到坐席屏与企微">执行</button></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⏰</span><div class="lr-main"><div class="lr-tt">周姐 · 成都赛锐医疗 · 15:30 视频会</div><div class="lr-sub">议程已生成，含 CFO 关心的 ROI 测算</div></div><span class="pill pill-green">91</span><button class="btn-mini js-toast" data-toast="议程已同步到日历，会前 15 分钟提醒">查看议程</button></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⏰</span><div class="lr-main"><div class="lr-tt">李总 · 杭州博远软件 · 17:00 微信回复</div><div class="lr-sub">客户问「和 XX 比有何不同」，已生成 3 条差异化话术</div></div><span class="pill pill-green">88</span><button class="btn-mini js-toast" data-toast="话术已复制到剪贴板">复制话术</button></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⏰</span><div class="lr-main"><div class="lr-tt">王经理 · 广州瑞和零售 · 待回呼</div><div class="lr-sub">客户咨询报价区间，建议先做需求确认再给价</div></div><span class="pill pill-blue">82</span><button class="btn-mini js-toast" data-toast="已生成需求确认提纲">生成提纲</button></div>
+              </div>
+              <div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>实时通话助手</h3><span class="pill pill-green">通话中 02:14</span></div>
+                  <div class="pc-body">
+                    <div class="live-call">
+                      <div class="lc-head"><span class="lc-wave"><i style="animation-delay:0s"></i><i style="animation-delay:.12s"></i><i style="animation-delay:.24s"></i><i style="animation-delay:.36s"></i><i style="animation-delay:.48s"></i></span> 与「陈总 · 东莞精工机械」通话中 · AI 实时辅助</div>
+                      <div class="lc-body">
+                        <div class="lc-cue">💡 <b>识别到异议</b>：「你们和 XX 公司比有什么不同？」<br/>建议回应：突出<b>工艺图谱 + 老师傅经验结构化沉淀</b>，对方只做文档检索；可举东莞同行案例佐证。</div>
+                        <div class="lc-cue">🎯 <b>推进信号</b>：客户两次提到「交期」，建议顺势抛出 <b>5 周 POC</b> 并锁定下次会议时间。</div>
+                        <div class="lc-foot">挂断后将自动生成通话纪要、回写 CRM 阶段、创建跟进待办。</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pcard mt">
+                  <div class="pc-head"><h3>今日自动化流水</h3><span class="pc-extra">全程留痕</span></div>
+                  <div class="timeline">
+                    <div class="tl-item"><div class="tl-tt">自动清洗去重 12 条线索</div><div class="tl-sub">合并到主客户档案 · 09:02</div></div>
+                    <div class="tl-item"><div class="tl-tt">向 3 个 A 类新线索发送企微首触</div><div class="tl-sub">已读 2 · 回复 1 · 09:15</div></div>
+                    <div class="tl-item"><div class="tl-tt">1 条线索回复「想了解报价」</div><div class="tl-sub">自动升级为 A 类并提醒你 · 10:08</div></div>
+                    <div class="tl-item"><div class="tl-tt">自动改约王经理会议</div><div class="tl-sub">其临时冲突，已协商改至明日 10:00 · 10:30</div></div>
+                    <div class="tl-item"><div class="tl-tt">待执行：陈总电话首呼</div><div class="tl-sub">等你在「待确认」中确认 · 11:00</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Pane 2：线索 & 打分 ===== -->
+          <div class="ag-pane" data-pane="leads">
+            <div class="pgrid g2">
+              <div class="pcard">
+                <div class="pc-head"><h3>线索打分模型</h3><span class="pc-extra">BANT ＋ 行为意向 · 满分 100</span></div>
+                <div class="wfac"><span class="wfac-name">预算匹配 Budget</span><span class="wfac-bar"><i style="--w:25%"></i></span><span class="wfac-val">25</span></div>
+                <div class="wfac"><span class="wfac-name">决策权 Authority</span><span class="wfac-bar"><i style="--w:20%"></i></span><span class="wfac-val">20</span></div>
+                <div class="wfac"><span class="wfac-name">需求明确度 Need</span><span class="wfac-bar"><i style="--w:25%"></i></span><span class="wfac-val">25</span></div>
+                <div class="wfac"><span class="wfac-name">时间紧迫度 Timeline</span><span class="wfac-bar"><i style="--w:15%"></i></span><span class="wfac-val">15</span></div>
+                <div class="wfac"><span class="wfac-name">行为意向信号</span><span class="wfac-bar"><i style="--w:15%"></i></span><span class="wfac-val">15</span></div>
+                <div class="pc-body">
+                  <div class="ag-note"><b>分级规则：</b>≥85 分判 A 类（立即转人工/AE）、70–84 判 B 类（进高意向序列）、&lt;70 判 C 类（长期培育）。模型已用历史 <b>3,000</b> 条成交/流失线索回测，A 类命中率 <b>86%</b>。</div>
+                  <div style="margin-top:12px"><button class="btn-mini js-toast" data-toast="已打开权重编辑器，可拖动调整后一键灰度发布（演示）">编辑权重</button> <button class="btn-mini js-toast" data-toast="已用最近 30 天线索重新回测，准确率报告已生成">重新回测</button></div>
+                </div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>数据来源与补全</h3><span class="pill pill-green">5 路已接入</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🌐</span><div class="lr-main"><div class="lr-tt">官网表单 / 落地页</div><div class="lr-sub">实时 Webhook 入库</div></div><span class="pill pill-green">已接入</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">📣</span><div class="lr-main"><div class="lr-tt">巨量引擎 / 腾讯广告</div><div class="lr-sub">表单线索 API 拉取</div></div><span class="pill pill-green">已接入</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">💬</span><div class="lr-main"><div class="lr-tt">企业微信获客助手</div><div class="lr-sub">渠道活码 · 自动建档</div></div><span class="pill pill-green">已接入</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">🎪</span><div class="lr-main"><div class="lr-tt">展会 / 活动扫码</div><div class="lr-sub">名片 OCR 识别入库</div></div><span class="pill pill-green">已接入</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E6F8FB">🔎</span><div class="lr-main"><div class="lr-tt">天眼查企业信息补全</div><div class="lr-sub">规模 / 行业 / 工商风险</div></div><span class="pill pill-green">已接入</span></div>
+              </div>
+            </div>
+
+            <div class="pcard mt">
+              <div class="pc-head"><h3>线索分级池</h3><span class="pc-extra">AI 实时打分排序 · 共 312 条</span><button class="btn-mini js-toast" data-toast="已导出当前筛选结果为 Excel（演示）" style="margin-left:10px">导出</button></div>
+              <table class="table">
+                <thead><tr><th>公司 / 联系人</th><th>来源</th><th>分数</th><th>分级</th><th>意向场景</th><th>最近行为</th><th>建议动作</th></tr></thead>
+                <tbody>
+                  <tr><td>东莞精工机械 · 陈总</td><td>展会扫码</td><td><span class="pill pill-green">94</span></td><td><span class="pill pill-green">A</span></td><td>研发知识沉淀</td><td>6/12 现场拜访</td><td>本周寄正式 SOW</td></tr>
+                  <tr><td>成都赛锐医疗 · 周姐</td><td>官网表单</td><td><span class="pill pill-green">91</span></td><td><span class="pill pill-green">A</span></td><td>客户分层</td><td>6/13 下载白皮书</td><td>约见 CFO 谈预算</td></tr>
+                  <tr><td>杭州博远软件 · 李总</td><td>巨量广告</td><td><span class="pill pill-green">88</span></td><td><span class="pill pill-green">A</span></td><td>投标 AI</td><td>6/11 企微互动</td><td>发同行业案例</td></tr>
+                  <tr><td>广州瑞和零售 · 王经理</td><td>企微获客</td><td><span class="pill pill-blue">82</span></td><td><span class="pill pill-blue">B</span></td><td>客服 7×24</td><td>6/10 打开邮件 ×3</td><td>电话推进咨询会</td></tr>
+                  <tr><td>武汉协昌建筑 · 赵总</td><td>官网表单</td><td><span class="pill pill-blue">78</span></td><td><span class="pill pill-blue">B</span></td><td>投标助手</td><td>6/9 索取报价</td><td>需求确认后报价</td></tr>
+                  <tr><td>深圳明远教育 · 刘主任</td><td>展会扫码</td><td><span class="pill pill-blue">75</span></td><td><span class="pill pill-blue">B</span></td><td>招生转化</td><td>6/8 企微留言</td><td>邀约 6/20 公开课</td></tr>
+                  <tr><td>南京和达医美 · 孙总</td><td>巨量广告</td><td><span class="pill pill-amber">68</span></td><td><span class="pill pill-amber">C</span></td><td>客户留存</td><td>6/5 浏览官网</td><td>进入培育序列</td></tr>
+                  <tr><td>北京融正物流 · 吴经理</td><td>名单导入</td><td><span class="pill pill-amber">62</span></td><td><span class="pill pill-amber">C</span></td><td>项目交付</td><td>5/30 未回邮件</td><td>3 个月后复访</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ===== Pane 3：自动跟进序列 ===== -->
+          <div class="ag-pane" data-pane="cadence">
+            <div class="kpi-row">
+              <div class="kpi"><div class="kpi-label">进入 A 类序列</div><div class="kpi-num">128</div><div class="kpi-sub">本月累计</div></div>
+              <div class="kpi"><div class="kpi-label">邀约成功</div><div class="kpi-num">31</div><div class="kpi-sub"><b class="up">↑6</b> 较上月</div></div>
+              <div class="kpi"><div class="kpi-label">序列转化率</div><div class="kpi-num">24%</div><div class="kpi-sub">行业基准约 11%</div></div>
+            </div>
+
+            <div class="pcard mt">
+              <div class="pc-head"><h3>A 类高意向跟进序列</h3><span class="pill pill-green">运行中</span><span class="pc-extra">触发：新 A 类线索入库 · 5 个步骤</span></div>
+              <div class="pc-body">
+                <div class="cad">
+                  <div class="cad-step">
+                    <span class="cad-ico" style="--g1:#F59E0B;--g2:#FF6B6B">⚡</span>
+                    <div class="cad-body"><div class="cad-top"><span class="cad-tt">触发 · 新 A 类线索入库</span><span class="cad-when">即时</span></div><div class="cad-msg">打分 ≥85 自动进入；同步补全企业信息并匹配最相关行业案例。</div></div>
+                  </div>
+                  <div class="cad-step">
+                    <span class="cad-ico" style="--g1:#2BD9A8;--g2:#00C2D8">💬</span>
+                    <div class="cad-body"><div class="cad-top"><span class="cad-tt">企微首触</span><span class="pill pill-green">自动</span><span class="cad-when">5 分钟内</span></div><div class="cad-msg">「陈总您好，注意到贵司在推进研发知识沉淀。我们帮东莞 3 家精工厂把老师傅经验做成了可检索的工艺图谱，方便发份同行案例给您参考吗？」</div></div>
+                  </div>
+                  <div class="cad-step">
+                    <span class="cad-ico" style="--g1:#5A5BF0;--g2:#9A4DFF">📞</span>
+                    <div class="cad-body"><div class="cad-top"><span class="cad-tt">电话首呼</span><span class="pill pill-amber">人工确认</span><span class="cad-when">T+1 上午</span></div><div class="cad-msg">坐席屏自动弹出话术与异议库；通话中实时辅助，结束后自动回写 CRM。</div></div>
+                  </div>
+                  <div class="cad-step">
+                    <span class="cad-ico" style="--g1:#00A8C6;--g2:#2BD9A8">📧</span>
+                    <div class="cad-body"><div class="cad-top"><span class="cad-tt">价值邮件 + 案例</span><span class="pill pill-green">自动</span><span class="cad-when">T+2</span></div><div class="cad-msg">发送同行业 POC 成果 + ROI 测算；打开/点击行为回流并加分。</div></div>
+                  </div>
+                  <div class="cad-step">
+                    <span class="cad-ico" style="--g1:#9A4DFF;--g2:#FF5FA2">🤝</span>
+                    <div class="cad-body"><div class="cad-top"><span class="cad-tt">邀约与分流</span><span class="cad-when">T+4</span></div><div class="cad-msg">邀约成功 → 带完整上下文<b>转交 AE</b>；未响应 → 转入 B 类培育序列，30 天后再激活。</div></div>
+                  </div>
+                </div>
+                <div class="ag-note" style="margin-top:14px"><b>A/B 测试：</b>首触话术 V-A（案例切入）对比 V-B（痛点提问），当前 V-A 回复率 <b>34%</b> 领先 9pp，已自动放量至 70% 流量。所有外呼/加微节点遵守单线索单日触达上限与免打扰时段。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Pane 4：配置 & 交付 ===== -->
+          <div class="ag-pane" data-pane="config">
+            <div class="pgrid g2">
+              <div class="pcard">
+                <div class="pc-head"><h3>智能体身份与人设</h3><span class="pc-extra">交付时已固化</span></div>
+                <div class="spec-row"><span class="spec-k">名称 / 编号</span><span class="spec-v">销售 SDR 助手 · <code>SDR-Agent-01</code></span></div>
+                <div class="spec-row"><span class="spec-k">角色定位</span><span class="spec-v">线索开发代表（SDR）：负责线索清洗、资格判定与早期培育，不替代 AE 谈单签约。</span></div>
+                <div class="spec-row"><span class="spec-k">语气人设</span><span class="spec-v">专业、克制、以客户价值为先；可配置为贵司销售话术风格。</span></div>
+                <div class="spec-row"><span class="spec-k">基座模型</span><span class="spec-v"><code>DeepSeek-V3</code> 主推理 ＋ 自研意图分类小模型（打分/路由）</span></div>
+                <div class="spec-row"><span class="spec-k">服务时间</span><span class="spec-v">线索接待 7×24；外呼仅在 9:00–20:00 且避开午休（合规免打扰）</span></div>
+                <div class="spec-row"><span class="spec-k">数据权限</span><span class="spec-v">按销售组隔离，仅可见本组线索；写库走最小权限账号，全程审计</span></div>
+              </div>
+              <div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>系统提示词（核心片段）</h3><button class="btn-mini js-toast" data-toast="已复制完整提示词（演示）" style="margin-left:auto">复制</button></div>
+                  <div class="pc-body">
+<div class="code-block"><span class="cc"># 角色</span>
+你是企业的<span class="cs">销售 SDR 助手</span>，目标是把线索高效推进到
+<span class="cs">「邀约成功并转交 AE」</span>，而非直接成交。
+
+<span class="cc"># 必须遵守</span>
+- 报价、折扣、到货承诺<span class="ck">一律不得自动给出</span>，转人工核定
+- 外呼 / 加微前置<span class="ck">人工确认</span>，遵守免打扰时段
+- 引用产品能力须来自<span class="ck">知识库</span>，不得编造
+- 每次跟进后<span class="ck">回写 CRM</span> 并记录下一步
+
+<span class="cc"># 升级规则</span>
+线索打分 ≥85 或明确要 Demo → <span class="ck">立即转交 AE</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pgrid g2 mt">
+              <div class="pcard">
+                <div class="pc-head"><h3>挂载知识库</h3><span class="pill pill-green">5 个 · 已向量化</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E8F0FF">📕</span><div class="lr-main"><div class="lr-tt">产品手册 &amp; 能力清单</div><div class="lr-sub">v2026.06 · 用于答疑与价值主张</div></div><span class="pill pill-green">已启用</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">📗</span><div class="lr-main"><div class="lr-tt">客户案例库（分行业）</div><div class="lr-sub">42 篇 · 自动匹配同行案例</div></div><span class="pill pill-green">已启用</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">📙</span><div class="lr-main"><div class="lr-tt">异议应对话术库</div><div class="lr-sub">88 条 · 通话实时调用</div></div><span class="pill pill-green">已启用</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">📘</span><div class="lr-main"><div class="lr-tt">竞品对比说明</div><div class="lr-sub">差异化要点 · 经市场部审定</div></div><span class="pill pill-green">已启用</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFEFF2">📒</span><div class="lr-main"><div class="lr-tt">报价单（只读·脱敏）</div><div class="lr-sub">仅供判断区间，禁止对外输出</div></div><span class="pill pill-amber">受限</span></div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>已挂载工具（MCP）</h3><span class="pill pill-green">6 个</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🤝</span><div class="lr-main"><div class="lr-tt">销售易 CRM</div><div class="lr-sub">线索 / 商机 读写</div></div><span class="pill pill-blue">读写</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">💬</span><div class="lr-main"><div class="lr-tt">企业微信 SCRM</div><div class="lr-sub">加好友 / 发消息 / 打标签</div></div><span class="pill pill-amber">需确认</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">📞</span><div class="lr-main"><div class="lr-tt">智能外呼系统</div><div class="lr-sub">点击拨号 / 录音转写</div></div><span class="pill pill-amber">需确认</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E6F8FB">📅</span><div class="lr-main"><div class="lr-tt">日历 / 会议</div><div class="lr-sub">查空闲 / 约见 / 提醒</div></div><span class="pill pill-blue">读写</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">✉️</span><div class="lr-main"><div class="lr-tt">邮件 / 短信网关</div><div class="lr-sub">模板化群发 · 合规签名</div></div><span class="pill pill-blue">发送</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#EAF0FF">🔎</span><div class="lr-main"><div class="lr-tt">天眼查 API</div><div class="lr-sub">企业信息补全</div></div><span class="pill pill-gray">只读</span></div>
+              </div>
+            </div>
+
+            <div class="pcard mt">
+              <div class="pc-head"><h3>护栏与人工确认</h3><span class="pc-extra">保障可控 · 可一键全局暂停</span></div>
+              <div class="guard-row"><div class="guard-main"><div class="guard-tt">外呼前人工确认</div><div class="guard-sub">每通外呼需销售在「待确认」中点确认后拨出</div></div><button class="switch on" data-label="外呼前人工确认"></button></div>
+              <div class="guard-row"><div class="guard-main"><div class="guard-tt">加企微好友人工确认</div><div class="guard-sub">避免误加与频控风险</div></div><button class="switch on" data-label="加企微好友人工确认"></button></div>
+              <div class="guard-row"><div class="guard-main"><div class="guard-tt">禁止自动给出报价 / 折扣 / 到货承诺</div><div class="guard-sub">强制护栏，不可关闭；统一转人工核定</div></div><button class="switch on lock" data-label="禁止自动报价"></button></div>
+              <div class="guard-row"><div class="guard-main"><div class="guard-tt">单线索单日触达上限 3 次</div><div class="guard-sub">含电话 / 企微 / 短信合计，避免骚扰</div></div><button class="switch on" data-label="单日触达上限"></button></div>
+              <div class="guard-row"><div class="guard-main"><div class="guard-tt">免打扰时段（20:00–次日 9:00 / 午休）</div><div class="guard-sub">符合营销短信与个保法要求</div></div><button class="switch on" data-label="免打扰时段"></button></div>
+              <div class="pc-body"><div class="ag-note warn"><b>合规边界：</b>不承诺价格与交期、不代签合同、敏感行业线索自动过滤；所有外呼录音与消息留存可取证；管理员可在顶栏一键全局暂停本智能体。</div></div>
+            </div>
+
+            <div class="pcard mt">
+              <div class="pc-head"><h3>交付验收清单</h3><span class="pill pill-green">5 / 6 已完成</span><span class="pc-extra">客户可据此验收上线</span></div>
+              <div class="dl-item"><span class="dl-check">✓</span><div class="dl-main"><div class="dl-tt">CRM 双向同步联调通过</div><div class="dl-sub">销售易线索/商机字段映射，6/10 联调完成</div></div><span class="pill pill-green">已完成</span></div>
+              <div class="dl-item"><span class="dl-check">✓</span><div class="dl-main"><div class="dl-tt">打分模型历史回测达标</div><div class="dl-sub">3,000 条线索回测，A 类命中率 86% ≥ 验收线 80%</div></div><span class="pill pill-green">已完成</span></div>
+              <div class="dl-item"><span class="dl-check">✓</span><div class="dl-main"><div class="dl-tt">4 条跟进序列话术审定</div><div class="dl-sub">经销售总监 &amp; 市场部审核签字</div></div><span class="pill pill-green">已完成</span></div>
+              <div class="dl-item"><span class="dl-check">✓</span><div class="dl-main"><div class="dl-tt">数据权限与审计开启</div><div class="dl-sub">按销售组隔离，操作日志全量留存</div></div><span class="pill pill-green">已完成</span></div>
+              <div class="dl-item"><span class="dl-check">✓</span><div class="dl-main"><div class="dl-tt">灰度 2 周验证</div><div class="dl-sub">人工介入率 41% → 12%，无重大误触达</div></div><span class="pill pill-green">已完成</span></div>
+              <div class="dl-item"><span class="dl-check pend">…</span><div class="dl-main"><div class="dl-tt">全量上线评审会</div><div class="dl-sub">计划 6/20 · 客户业务方 + IT + 顶呱呱交付</div></div><span class="pill pill-amber">待进行</span></div>
+              <div class="pc-body" style="display:flex;gap:9px;flex-wrap:wrap;border-top:1px solid var(--line)">
+                <button class="btn-grad js-toast" data-toast="已生成交付物清单：配置文档 + 话术库 + 对接说明 + 培训录像（演示）">下载交付包</button>
+                <button class="btn-mini js-toast" data-toast="SLA：可用性 99.9% · 工单 4 小时响应 · 季度优化 1 次（演示）">查看 SLA</button>
+                <button class="btn-mini js-toast" data-toast="已预约 6/20 全量上线评审会并发出日历邀请（演示）">预约评审会</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:法务合同助手 ============ -->
+      <section class="view" id="view-legal">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#F1EBFF">⚖️</span>法务合同助手</h2>
+            <p>条款审查 · 风险拦截 · 模板生成</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥3,000/月起 · 替代 50% 初级法务工作 · 已为 200+ 企业拦截关键风险</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">187</div><div class="ms-label">本月已审合同</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">23</div><div class="ms-label">拦截风险条款</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↓50%</div><div class="ms-label">平均审查时长</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>近期高风险合同</h3><span class="pc-extra">已标注 · 待复核</span></div>
+            <table class="table">
+              <thead><tr><th>合同名称</th><th>对方</th><th>风险等级</th><th>关键风险</th><th>建议</th></tr></thead>
+              <tbody>
+                <tr><td>设备采购合同 #2026-0612</td><td>苏州 XX 自动化</td><td><span class="pill pill-amber">中</span></td><td>付款条款无质保金扣留</td><td>建议加 10% 质保金</td></tr>
+                <tr><td>SaaS 服务合同 #2026-0610</td><td>某 SaaS 厂商</td><td><span class="pill" style="background:#FEF2F2;color:#E5484D">高</span></td><td>数据所有权未明确归属</td><td>必须补充第 12.3 条</td></tr>
+                <tr><td>劳动合同 #2026-0609</td><td>新入职员工</td><td><span class="pill pill-amber">中</span></td><td>竞业限制范围过宽</td><td>限制至同类业务即可</td></tr>
+                <tr><td>租赁合同 #2026-0607</td><td>东莞物业</td><td><span class="pill pill-green">低</span></td><td>提前解约条款合理</td><td>可直接签订</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>条款风险库</h3><span class="pc-extra">本月 Top 5 高频风险</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">①</span><div class="lr-main"><div class="lr-tt">付款条件不对等</div><div class="lr-sub">出现 12 次 · 多见于设备采购</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">②</span><div class="lr-main"><div class="lr-tt">违约责任过轻</div><div class="lr-sub">出现 9 次 · 多见于服务外包</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">③</span><div class="lr-main"><div class="lr-tt">知识产权归属不清</div><div class="lr-sub">出现 7 次 · 多见于研发委托</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">④</span><div class="lr-main"><div class="lr-tt">数据出境合规缺失</div><div class="lr-sub">出现 5 次 · 多见于 SaaS</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⑤</span><div class="lr-main"><div class="lr-tt">不可抗力定义过窄</div><div class="lr-sub">出现 4 次 · 多见于工程</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>模板库</h3><span class="pc-extra">59 个 · 持续更新</span></div>
+              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">
+                按场景分类:采购 / 销售 / 服务 / 劳动 / 租赁 / 保密 / 合资 / 投资<br/>
+                每个模板内含:必备条款清单、可选条款、风险提示、谈判要点。<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已生成"汽配企业 OEM 加工合同模板",含 23 条核心条款">＋ 生成新模板</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:HR 招聘助手 ============ -->
+      <section class="view" id="view-hr">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E9F9F1">👥</span>HR 招聘助手</h2>
+            <p>简历筛选 · 初面预约 · JD 优化</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥2,000/月起 · 替代 HR 简历筛选与初面安排 · 缩短招聘周期 40%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">1,247</div><div class="ms-label">本月简历总数</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">89</div><div class="ms-label">推荐候选人</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↓40%</div><div class="ms-label">招聘周期</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>在招岗位 · 智能推荐</h3><span class="pc-extra">5 个高优岗位</span></div>
+            <table class="table">
+              <thead><tr><th>岗位</th><th>需求</th><th>简历池</th><th>推荐人选</th><th>已约面</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>AI 工程师(高级)</td><td>3 人</td><td>187</td><td>12</td><td>5</td><td><span class="pill pill-blue">面试中</span></td></tr>
+                <tr><td>销售总监(华东)</td><td>1 人</td><td>89</td><td>6</td><td>3</td><td><span class="pill pill-amber">复试</span></td></tr>
+                <tr><td>产品经理(B 端)</td><td>2 人</td><td>156</td><td>9</td><td>4</td><td><span class="pill pill-blue">面试中</span></td></tr>
+                <tr><td>财务主管</td><td>1 人</td><td>78</td><td>4</td><td>2</td><td><span class="pill pill-green">offer</span></td></tr>
+                <tr><td>市场专员</td><td>2 人</td><td>234</td><td>15</td><td>7</td><td><span class="pill pill-blue">面试中</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本周面试日历</h3><span class="pc-extra">已自动协调</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">6/16</span><div class="lr-main"><div class="lr-tt">AI 工程师初面 × 3 场</div><div class="lr-sub">10:00 / 14:30 / 16:00 · 已发送日历邀请</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">6/17</span><div class="lr-main"><div class="lr-tt">销售总监复试</div><div class="lr-sub">15:00 · 候选人简介已发给老板</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">6/18</span><div class="lr-main"><div class="lr-tt">产品经理终面 × 2 场</div><div class="lr-sub">10:30 / 14:00 · 含 CEO 1v1 环节</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">6/19</span><div class="lr-main"><div class="lr-tt">市场专员初面 × 4 场</div><div class="lr-sub">含 2 场远程</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>AI 写 JD</h3><span class="pc-extra">3 步生成</span></div>
+              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">
+                输入岗位名称 + 团队规模 + 核心职责,AI 自动生成:<br/>
+                ① 岗位描述(招聘者视角)<br/>
+                ② 任职要求(精准刷选,避免泛词)<br/>
+                ③ 候选人 5 个有效追问问题<br/>
+                ④ 同行业薪资带宽参考<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已生成"高级数据分析师"JD,薪资带宽 25-40K">＋ 生成新 JD</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:客服 7×24 助手 ============ -->
+      <section class="view" id="view-cs">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E6F8FB">💬</span>客服 7×24 助手</h2>
+            <p>智能分诊 · 夜班值守 · 知识自答</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥3,500/月起 · 替代夜班 + 70% 重复咨询 · 一年省 1-2 个客服人力</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">73%</div><div class="ms-label">自动解决率</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">0.8s</div><div class="ms-label">平均响应时长</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">4.8/5</div><div class="ms-label">客户满意度</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>实时对话流</h3><span class="pill pill-green">在线 · 已接入企微/网页/APP</span></div>
+            <div class="pc-body" style="font-size:12.5px">
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户A:订单 #20260615001 物流停了 3 天?</div><div class="lr-sub">AI:已为您查询,该订单 6/13 在杭州中转站异常,预计 6/16 恢复配送。需要我帮您催单或申请补偿吗?</div></div><span class="pill pill-green">已解决</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户B:产品如何升级到企业版?</div><div class="lr-sub">AI:已为您整理 3 种升级方案与价差,已发到您留的邮箱。如需顾问 1v1 介绍,可现在转人工</div></div><span class="pill pill-green">已解决</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🟡</span><div class="lr-main"><div class="lr-tt">客户C:能给我个 5 折优惠吗?</div><div class="lr-sub">AI:涉及价格让步,已转您的专属客户经理王磊,1 小时内回复</div></div><span class="pill pill-amber">转人工</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">🔴</span><div class="lr-main"><div class="lr-tt">客户D:产品报错了截图发您</div><div class="lr-sub">AI:截图已转工程团队,创建紧急工单 #INC-2026-7842,工程师 30 分钟内联系您</div></div><span class="pill" style="background:#FEF2F2;color:#E5484D">紧急工单</span></div>
+            </div>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>今日工单流水</h3><span class="pc-extra">截至 11:30</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                总咨询 <b>238</b> 起 · AI 自动解决 <b style="color:var(--green)">174 起</b>(73%)<br/>
+                转人工 <b style="color:var(--amber)">42 起</b>(18%)· 创建紧急工单 <b style="color:var(--red)">9 起</b>(4%)<br/>
+                <div class="lr-sub" style="white-space:normal;margin-top:8px">📌 AI 解读:今日转人工高于均值 5pp,集中在"5 折优惠""退款政策",建议本周培训销售统一口径。</div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>转人工原因 Top 5</h3><span class="pc-extra">本周</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">①</span><div class="lr-main"><div class="lr-tt">价格 / 优惠协商</div><div class="lr-sub">占 31%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">②</span><div class="lr-main"><div class="lr-tt">技术故障复杂场景</div><div class="lr-sub">占 22%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">③</span><div class="lr-main"><div class="lr-tt">合规 / 隐私问询</div><div class="lr-sub">占 17%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">④</span><div class="lr-main"><div class="lr-tt">大额退款 / 投诉</div><div class="lr-sub">占 14%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⑤</span><div class="lr-main"><div class="lr-tt">定制化需求</div><div class="lr-sub">占 9%</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:项目交付管控 ============ -->
+      <section class="view" id="view-pmo">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFF4E5">📋</span>项目交付管控</h2>
+            <p>节点预警 · 风险登记 · 自动复盘</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥3,000/月起 · 替代 PMO 周报与节点追踪 · 延期预警提前 14 天</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">28</div><div class="ms-label">在管项目</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">5</div><div class="ms-label">节点延期预警</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">84%</div><div class="ms-label">回款准确预测率</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>项目集看板</h3><span class="pc-extra">本周进度</span></div>
+            <table class="table">
+              <thead><tr><th>项目</th><th>客户</th><th>进度</th><th>下一节点</th><th>风险</th><th>预计回款</th></tr></thead>
+              <tbody>
+                <tr><td>R-02 研发知识沉淀</td><td>东莞精工机械</td><td>62%</td><td>6/20 中期验收</td><td><span class="pill pill-green">低</span></td><td>¥6 万 · 6/22</td></tr>
+                <tr><td>G-03 行业洞察</td><td>成都赛锐医疗</td><td>40%</td><td>6/25 雷达上线</td><td><span class="pill pill-amber">中</span></td><td>¥6 万 · 6/27</td></tr>
+                <tr><td>套餐 B · AI 销售落地</td><td>杭州博远软件</td><td>85%</td><td>6/18 终验收</td><td><span class="pill pill-green">低</span></td><td>¥40 万 · 6/20</td></tr>
+                <tr><td>F-02 开票回款 AI</td><td>广州瑞和零售</td><td>30%</td><td>6/22 模型训练</td><td><span class="pill" style="background:#FEF2F2;color:#E5484D">高 · 客户数据延期</span></td><td>¥5 万 · 顺延 1 周</td></tr>
+                <tr><td>D-02 经营驾驶舱</td><td>武汉协昌建筑</td><td>15%</td><td>6/30 数据接入</td><td><span class="pill pill-amber">中</span></td><td>¥7 万 · 7/2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本周风险预警</h3><span class="pill" style="background:#FEF2F2;color:#E5484D">3 项需关注</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">广州瑞和 · 客户数据延期</div><div class="lr-sub">原 6/15 应交付的 POS 数据,客户 IT 部门请假至 6/19;建议升级到 Owner</div></div><button class="btn-mini js-toast" data-toast="已生成升级邮件草稿">处理</button></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">成都赛锐 · 验收指标偏差</div><div class="lr-sub">名单可联系率 62%,低于合同 70%;需 2 周内调优</div></div><button class="btn-mini js-toast" data-toast="已通知 FDE 调整召回策略">处理</button></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">东莞精工 · 老工程师休假</div><div class="lr-sub">资深工程师张工 6/18-6/22 休假,可能影响知识库测试</div></div><button class="btn-mini js-toast" data-toast="已与客户 Owner 协调备份人选">处理</button></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>自动周报</h3><span class="pc-extra">每周一 09:00 自动生成</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                <b>本周(6/9-6/15)进度概要:</b><br/>
+                · 28 个在管项目,总进度推进 +6.8pp<br/>
+                · 完成验收 2 个(博远软件、瑞和零售)<br/>
+                · 新签约 1 个(精工机械)<br/>
+                · 预警 3 个(详见左侧)<br/>
+                · 本周回款实际 ¥52 万 / 预测 ¥48 万,准确率 92%<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已推送本周周报到 CFO 与 CEO 邮箱">发送给老板</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:投标 / 标书助手 ============ -->
+      <section class="view" id="view-bid">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EEF5FF">📝</span>投标 / 标书助手</h2>
+            <p>AI 起草 · 评分解析 · 知识库</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥4,500/月起 · 替代 50% 标书撰写工时 · 中一个 500 万标 = 100 倍 ROI</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">36</div><div class="ms-label">本月生成标书</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↓55%</div><div class="ms-label">单份撰写时长</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑12pp</div><div class="ms-label">中标率提升</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>在投项目</h3><span class="pc-extra">本周 5 个</span></div>
+            <table class="table">
+              <thead><tr><th>项目名称</th><th>采购方</th><th>预算</th><th>截标</th><th>AI 中标概率</th><th>关键评分点</th></tr></thead>
+              <tbody>
+                <tr><td>智慧园区 AI 中台</td><td>东莞某园区</td><td>¥420 万</td><td>6/22</td><td><span class="pill pill-green">78%</span></td><td>本地化部署、产业经验</td></tr>
+                <tr><td>财务数智化建设</td><td>某省属集团</td><td>¥680 万</td><td>6/25</td><td><span class="pill pill-blue">62%</span></td><td>大模型自研、安全资质</td></tr>
+                <tr><td>政务知识库平台</td><td>某市数据局</td><td>¥280 万</td><td>6/28</td><td><span class="pill pill-blue">55%</span></td><td>国产化适配、案例数</td></tr>
+                <tr><td>制造业 AI 试点</td><td>某汽配上市公司</td><td>¥520 万</td><td>7/3</td><td><span class="pill pill-amber">38%</span></td><td>设备维护场景经验</td></tr>
+                <tr><td>客服 AI 升级</td><td>某连锁零售</td><td>¥150 万</td><td>7/5</td><td><span class="pill pill-green">81%</span></td><td>多渠道接入能力</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>AI 起草示例</h3><span class="pc-extra">智慧园区项目 · 技术方案章节</span></div>
+              <div class="pc-body" style="font-size:12px;color:var(--muted);line-height:1.7">
+                <b>3.2 模型架构选型</b><br/>
+                本方案采用<b style="color:var(--ink)">"通用大模型 + 行业小模型 + 检索增强"三层架构</b>。底层使用国产化通义/智谱大模型作为基座,中层针对园区"招商-入驻-运营-数据"四大场景训练垂直小模型,上层通过 RAG 检索增强,保证回答准确性与可溯源性。<br/><br/>
+                本架构相较单一大模型方案,在园区场景下检索准确率提升 23%,推理成本降低 41%……<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已为「3.3 数据治理章节」生成 1,247 字初稿">继续生成下一节</button>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>历史中标库</h3><span class="pc-extra">52 份已入库</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2025 智慧城市 AI 平台 · ¥680 万</div><div class="lr-sub">中标关键:本地化部署 + 政务经验</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2025 制造业大模型试点 · ¥420 万</div><div class="lr-sub">中标关键:设备维护场景案例</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2026 金融客服 AI · ¥320 万</div><div class="lr-sub">中标关键:合规与隐私架构</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:研发知识沉淀 ============ -->
+      <section class="view" id="view-rd">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E9F9F1">🔬</span>研发知识沉淀</h2>
+            <p>工艺图谱 · 失效分析 · AI 问答</p>
+          </div>
+          <div class="unlock-banner">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥3,000/月起 · 老工程师走前 6 个月留住 · 比再招一个高级工程师便宜 30 倍</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">286</div><div class="ms-label">入库文档</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">1,429</div><div class="ms-label">知识图谱节点</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">82%</div><div class="ms-label">问答命中率</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>研发问答 · 实时</h3><span class="pc-extra">本周高频</span></div>
+            <table class="table">
+              <thead><tr><th>问题</th><th>提问者</th><th>命中度</th><th>引用来源</th></tr></thead>
+              <tbody>
+                <tr><td>1.5mm 不锈钢激光切割断面发黑怎么解决?</td><td>新员工小李</td><td><span class="pill pill-green">94%</span></td><td>2024-08 工艺纪要 · 张工经验</td></tr>
+                <tr><td>注塑件缩痕的根本原因分类?</td><td>工艺组小王</td><td><span class="pill pill-green">88%</span></td><td>5 篇失效分析 + 2 篇外部资料</td></tr>
+                <tr><td>客户 A 的 PCB 阻焊层为什么用 LPI 不用 Dry Film?</td><td>销售支持</td><td><span class="pill pill-blue">76%</span></td><td>2023-05 项目方案 · 李工备注</td></tr>
+                <tr><td>SMT 回流焊温度曲线对 LGA 元件的影响?</td><td>新员工小张</td><td><span class="pill pill-green">91%</span></td><td>3 篇技术手册 + IPC 标准</td></tr>
+                <tr><td>这批料的失效是不是和 6 月供应商切换有关?</td><td>品质组</td><td><span class="pill pill-amber">52%</span></td><td>需补充 6 月入料记录</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>近期失效案例</h3><span class="pc-extra">已自动归档</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 B · 输送装备轴承异响</div><div class="lr-sub">根因:润滑脂选型错误;已生成预防 SOP</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 C · 控制板高温重启</div><div class="lr-sub">根因:散热设计余量不足;已更新设计规范</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">客户 D · 涂层附着力不足</div><div class="lr-sub">根因:前处理工艺漏步;已加入 QC 检查表</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>老工程师知识沉淀进度</h3><span class="pc-extra">3 位资深工程师</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                <div style="margin:6px 0">张工(从业 25 年)· 已采集 <b style="color:var(--green)">87 篇</b> · 待采集 23 篇</div>
+                <div style="margin:6px 0">李工(从业 18 年)· 已采集 <b style="color:var(--green)">62 篇</b> · 待采集 18 篇</div>
+                <div style="margin:6px 0">王工(从业 14 年)· 已采集 <b style="color:var(--amber)">34 篇</b> · 待采集 41 篇</div>
+                <div class="lr-sub" style="white-space:normal;margin-top:8px">📌 AI 解读:王工进度偏慢,建议每周固定 2 小时录音访谈,助手转写并入库。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:制造业版 ============ -->
+      <section class="view" id="view-ind-mfg">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFF4E5">🏭</span>制造业版</h2>
+            <p>含 MES/ERP 对接 + 设备维护 + 生产排程</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥30-80 万/年 · 已服务 12 家工厂 · 减少非计划停机 45%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">12</div><div class="ms-label">接入工厂数</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↓45%</div><div class="ms-label">非计划停机时长</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑62%</div><div class="ms-label">排程效率</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">10 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 法务合同 · 财务监控 · 项目交付管控</td><td>预置制造业销售话术、合同模板、成本科目</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>研发知识沉淀 · 投标 / 标书</td><td>工艺图谱模板、设备清单模板、招标网行业关键词</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>设备维护助手</b></td><td>预测性维护 · 故障图谱 · MES/SCADA 对接</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>生产排程助手</b></td><td>多约束求解 · 订单优先级 · 排程冲突预警</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>质量预警助手</b></td><td>SPC 实时监控 · 异常根因分析</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>供应链协同助手</b></td><td>到货预测 · 库存预警 · 供应商画像</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>设备健康度看板</h3><span class="pill pill-green">实时同步</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">CNC 加工中心 #03</div><div class="lr-sub">健康度 92% · 下次保养 7 月 2 日</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">注塑机 #07</div><div class="lr-sub">健康度 64% · 主轴振动异常,建议本周停机检查</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">SMT 贴片机 #02</div><div class="lr-sub">健康度 88% · 状态良好</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">🔴</span><div class="lr-main"><div class="lr-tt">激光切割机 #01</div><div class="lr-sub">健康度 41% · 镜片污染,立即停机清洁</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>本周生产排程</h3><span class="pc-extra">AI 已优化</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                <b>83 张订单</b> 已自动分配到 12 条产线 / 28 台设备<br/>
+                · 高优先级订单(客户违约金风险)前置 7 张<br/>
+                · 设备瓶颈预警 2 处(注塑、激光切割)<br/>
+                · 物料齐套率 94%,3 张订单缺料,已通知采购<br/>
+                · 计划达成率预测 <b style="color:var(--green)">96.2%</b>(较人工排程 +14pp)<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已生成本周生产计划 PDF,发送给生产总监">下发排程</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:零售连锁版 ============ -->
+      <section class="view" id="view-ind-retail">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#EEF5FF">🛒</span>零售连锁版</h2>
+            <p>含 POS 对接 + 加盟督导 + 选址决策</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥25-60 万/年 · 已服务 8 个连锁品牌 · 涵盖 1,200+ 门店</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">86</div><div class="ms-label">接入门店</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑35%</div><div class="ms-label">选址精度</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">4.6/5</div><div class="ms-label">加盟商满意度</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">10 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置零售连锁话术、加盟合同、考勤模板</td></tr>
+                <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>加盟督导助手</b></td><td>巡店任务 · SOP 执行打分 · 整改追踪</td></tr>
+                <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>选址决策助手</b></td><td>商圈数据 · 客流预测 · 竞品分布</td></tr>
+                <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>商品调拨助手</b></td><td>SKU 预测 · 滞销预警 · 跨店调拨建议</td></tr>
+                <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>会员运营助手</b></td><td>客户分层 · 复购预测 · 自动唤回</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本周门店巡检</h3><span class="pill pill-amber">5 家待整改</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">东莞旗舰店</div><div class="lr-sub">SOP 执行打分 96 分</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">广州天河店</div><div class="lr-sub">陈列不规范、库存登记延误,82 分,已发整改清单</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">🔴</span><div class="lr-main"><div class="lr-tt">深圳福田店</div><div class="lr-sub">食安风险 · 临期食品未清,68 分,加盟商已停业整顿</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>选址决策 · 候选 5 个</h3><span class="pc-extra">广州番禺扩店</span></div>
+              <table class="table">
+                <thead><tr><th>位置</th><th>客流</th><th>租金</th><th>AI 评分</th></tr></thead>
+                <tbody>
+                  <tr><td>万达广场 1F</td><td>5.2万/日</td><td>¥85/㎡</td><td><span class="pill pill-green">92</span></td></tr>
+                  <tr><td>地铁口 B 出口</td><td>3.8万/日</td><td>¥62/㎡</td><td><span class="pill pill-green">88</span></td></tr>
+                  <tr><td>社区底商</td><td>1.4万/日</td><td>¥38/㎡</td><td><span class="pill pill-blue">71</span></td></tr>
+                  <tr><td>新建商业体</td><td>2.1万/日</td><td>¥58/㎡</td><td><span class="pill pill-amber">62</span></td></tr>
+                  <tr><td>大学城</td><td>1.8万/日</td><td>¥42/㎡</td><td><span class="pill pill-amber">55</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:医美 / 医疗版 ============ -->
+      <section class="view" id="view-ind-med">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFEFF2">💆</span>医美 / 医疗版</h2>
+            <p>含客户留存 + 套餐设计 + 合规话术</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥20-50 万/年 · 已服务 6 家头部医美机构 · 客户留存率提升 22%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">3,847</div><div class="ms-label">客户档案</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑22%</div><div class="ms-label">留存率提升</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑41%</div><div class="ms-label">套餐推荐准确率</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">9 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置医美咨询话术、合同模板</td></tr>
+                <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>客户留存助手</b></td><td>流失预警 · 复购周期预测 · 自动唤回话术</td></tr>
+                <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>项目套餐设计</b></td><td>基于客户画像 + 历史消费 · 推荐定制套餐</td></tr>
+                <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>合规话术助手</b></td><td>医美广告法红线词检测 · 安全话术替换</td></tr>
+                <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>术后跟踪助手</b></td><td>恢复期照护提醒 · 满意度回访 · 投诉预警</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本月流失预警</h3><span class="pill pill-amber">14 位高价值客户</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 W 女士(VIP)</div><div class="lr-sub">3 个月未到店 · 历史消费 8.2 万 · 已生成专属唤回方案</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 L 女士(白金)</div><div class="lr-sub">满意度回访打 7 分 · 已转店长 1v1 沟通</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">客户 H 女士(白金)</div><div class="lr-sub">本月有竞品咨询行为 · 建议立即优惠唤回</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>本周套餐推荐</h3><span class="pc-extra">AI 个性化</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                · <b>新客转化套餐</b>(238 位新客适用):光子嫩肤 + 水光针组合,转化率预测 32%<br/>
+                · <b>复购唤醒套餐</b>(186 位流失客适用):VIP 专享 7 折 + 加赠护理,挽回率预测 18%<br/>
+                · <b>升级套餐</b>(64 位高潜客适用):热玛吉 + 季度护理卡,客单提升 ¥1.2 万<br/>
+                · <b>季节性套餐</b>(全员适用):暑期防晒修复方案<br/><br/>
+                <button class="btn-grad js-toast" data-toast="已推送到 8 家门店的咨询师企微">下发套餐</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:IT / 软件版 ============ -->
+      <section class="view" id="view-ind-it">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#F1EBFF">💻</span>IT / 软件版</h2>
+            <p>含工单分诊 + 客户成功 + SLA 监控</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥25-60 万/年 · 已服务 9 家 SaaS 与软件公司 · SLA 达标率 96%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">142</div><div class="ms-label">在管工单</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">96%</div><div class="ms-label">SLA 达标率</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">4.5/5</div><div class="ms-label">客户健康度</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">9 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 法务合同 · 研发知识沉淀 · 投标 / 标书</td><td>预置 SaaS 商务模板、技术问答语料</td></tr>
+                <tr><td><span class="pill" style="background:#F1EBFF;color:#9A4DFF">行业专属</span></td><td><b>工单分诊助手</b></td><td>多渠道工单统一 · 自动分类升级 · 智能匹配工程师</td></tr>
+                <tr><td><span class="pill" style="background:#F1EBFF;color:#9A4DFF">行业专属</span></td><td><b>客户成功助手</b></td><td>客户健康度评分 · 续费预测 · 流失干预</td></tr>
+                <tr><td><span class="pill" style="background:#F1EBFF;color:#9A4DFF">行业专属</span></td><td><b>SLA 监控助手</b></td><td>响应/解决时长全程监控 · 即将超时预警</td></tr>
+                <tr><td><span class="pill" style="background:#F1EBFF;color:#9A4DFF">行业专属</span></td><td><b>Bug 分诊助手</b></td><td>自动复现 · 优先级评估 · 关联历史 Bug</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>客户健康度</h3><span class="pc-extra">Top 客户 · 实时</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户 A · ¥80 万/年</div><div class="lr-sub">健康度 92 · 高频使用,3 个月内续费意愿强</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户 B · ¥45 万/年</div><div class="lr-sub">健康度 86 · 关键功能使用率高,可增购模块</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🟡</span><div class="lr-main"><div class="lr-tt">客户 C · ¥120 万/年</div><div class="lr-sub">健康度 64 · 登录频次下降 38%,建议 CSM 主动联系</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">🔴</span><div class="lr-main"><div class="lr-tt">客户 D · ¥60 万/年</div><div class="lr-sub">健康度 38 · 工单激增、负面反馈,流失风险高</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>本周 SLA</h3><span class="pc-extra">截至 11:00</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                · P0 工单(15 分钟响应):12 个 / 100% 达标<br/>
+                · P1 工单(2 小时响应):37 个 / 97% 达标<br/>
+                · P2 工单(8 小时响应):84 个 / 96% 达标<br/>
+                · P3 工单(24 小时响应):63 个 / 92% 达标 ⚠️<br/><br/>
+                <div class="lr-sub" style="white-space:normal">📌 AI 解读:P3 偏低主因周末值班资源不足,建议下周排班加强。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:建筑 / 工程版 ============ -->
+      <section class="view" id="view-ind-eng">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#FFF4E5">🏗️</span>建筑 / 工程版</h2>
+            <p>含投标雷达 + 项目集 + 进度看板</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥30-80 万/年 · 已服务 7 家建筑工程承包企业 · 平均年中标率提升 25%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">23</div><div class="ms-label">在投项目</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">32%</div><div class="ms-label">年中标率</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">7</div><div class="ms-label">项目延期预警</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">10 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 法务合同 · 财务监控 · HR 招聘</td><td>预置工程合同、专业岗位 JD</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>投标 / 标书 · 项目交付管控</td><td>建筑工程评标规则库、施工节点模板</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>投标雷达助手</b></td><td>招标网/政府公示/项目库三源接入 · 关键词预警</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>进度甘特看板</b></td><td>多项目集协同 · 关键路径 · 资源冲突预警</td></tr>
+                <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>分包合作助手</b></td><td>分包商画像 · 履约评分 · 智能撮合</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本周新增项目预警</h3><span class="pill pill-green">8 个 · 已分发</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🔔</span><div class="lr-main"><div class="lr-tt">东莞松山湖 · 智慧园区基建</div><div class="lr-sub">预算 ¥1.2 亿 · 截标 6/28 · AI 匹配度 92%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🔔</span><div class="lr-main"><div class="lr-tt">广州南沙 · 跨海大桥维护</div><div class="lr-sub">预算 ¥4,800 万 · 截标 7/3 · AI 匹配度 78%</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🔔</span><div class="lr-main"><div class="lr-tt">深圳前海 · 写字楼装修总包</div><div class="lr-sub">预算 ¥3,200 万 · 截标 7/5 · AI 匹配度 88%</div></div></div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>在建项目进度</h3><span class="pc-extra">23 个</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                · 进度正常 <b style="color:var(--green)">15 个</b><br/>
+                · 轻微滞后 <b style="color:var(--amber)">5 个</b>(建议加强督导)<br/>
+                · 严重滞后 <b style="color:var(--red)">3 个</b>(已触发预警升级)<br/><br/>
+                <div class="lr-sub" style="white-space:normal">⚠️ 严重滞后项目:广东某市政路网(雨季延误)、苏州工业园厂房(分包商资金问题)、湖南某体育馆(设计变更频繁)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 视图:教培版 ============ -->
+      <section class="view" id="view-ind-edu">
+        <div class="page">
+          <div class="page-head">
+            <h2><span class="ph-ico" style="--tint:#E6F8FB">🎓</span>教培版</h2>
+            <p>含课程顾问 + 招生转化 + 学员画像</p>
+          </div>
+          <div class="unlock-banner b-pro">
+            <div class="ub-left">
+              <span class="ub-ico">🔓</span>
+              <div>
+                <div class="ub-tt">未开通 · 当前为演示模式</div>
+                <div class="ub-sub">¥20-50 万/年 · 已服务 10 家 K12/职教/成人教育机构 · 招生转化率提升 18%</div>
+              </div>
+            </div>
+            <div class="ub-right">
+              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
+            </div>
+          </div>
+          <div class="pgrid g3">
+            <div class="pcard mini-stat"><div class="ms-num">6,234</div><div class="ms-label">学员档案</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">18%</div><div class="ms-label">招生转化率</div></div>
+            <div class="pcard mini-stat"><div class="ms-num">↑52%</div><div class="ms-label">课程顾问产能</div></div>
+          </div>
+          <div class="pcard mt">
+            <div class="pc-head"><h3>行业版包含的智能体</h3><span class="pc-extra">9 个 + 行业专属能力</span></div>
+            <table class="table">
+              <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
+              <tbody>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销售 SDR · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置教培咨询话术、合同模板、教师评估</td></tr>
+                <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>课程顾问助手</b></td><td>学员需求识别 · 课程匹配 · 报价话术生成</td></tr>
+                <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>招生转化助手</b></td><td>线索打分 · 跟进 SOP · 试听邀约自动化</td></tr>
+                <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>学员画像助手</b></td><td>学习行为分析 · 流失预警 · 续报推荐</td></tr>
+                <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>家长沟通助手</b></td><td>学情周报自动生成 · 智能应答家长疑问</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pgrid g2 mt">
+            <div class="pcard">
+              <div class="pc-head"><h3>本周招生漏斗</h3><span class="pc-extra">6/9-6/15</span></div>
+              <div class="pc-body" style="font-size:12.5px">
+                <b>线索获取 423</b> → 联系到 318(75%) → 邀约试听 127(40%) → 完成试听 89(70%) → <b style="color:var(--green)">报名 28(31%)</b><br/>
+                · 整体转化率 6.6%,较上周 +1.2pp<br/>
+                · Top 渠道:抖音线索(转化 9.2%)、家长转介绍(转化 18.4%)<br/><br/>
+                <div class="lr-sub" style="white-space:normal">📌 AI 解读:抖音线索量较大但转化偏低,建议优化首咨话术;家长转介绍转化率最高,建议加大老带新激励。</div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pc-head"><h3>学员流失预警</h3><span class="pill pill-amber">12 位 · 需关注</span></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">三年级李同学</div><div class="lr-sub">连续 2 周缺勤 · 续费在即 · 已通知班主任沟通</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">高二张同学</div><div class="lr-sub">月考成绩下滑 · 家长群发言负面 · 建议学情会议</div></div></div>
+              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">初一王同学</div><div class="lr-sub">作业完成率 < 60% · AI 建议调整课程难度</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- ====================== 右侧面板 ====================== -->
@@ -1618,6 +2881,38 @@ curl https://api.dgg.ai/v1/agents/dispatch \
       shareModal.classList.remove("open");
       sidebar.classList.remove("open");
     }
+  });
+})();
+</script>
+<script>
+/* ---------- 岗位智能体：内部 Tab + 护栏开关（9 个通用） ---------- */
+(function () {
+  "use strict";
+  var $$ = function (s, p) { return Array.prototype.slice.call((p || document).querySelectorAll(s)); };
+  var tEl = document.getElementById("toast"), tT = null;
+  function toast(m) {
+    if (!tEl) return;
+    tEl.textContent = m; tEl.classList.add("show");
+    clearTimeout(tT); tT = setTimeout(function () { tEl.classList.remove("show"); }, 2400);
+  }
+  // 内部 Tab 切换（按所在 view 作用域）
+  $$(".ag-tabs").forEach(function (bar) {
+    bar.addEventListener("click", function (e) {
+      var t = e.target.closest(".ag-tab"); if (!t) return;
+      var view = bar.closest(".view"); if (!view) return;
+      var key = t.dataset.tab;
+      $$(".ag-tab", bar).forEach(function (x) { x.classList.toggle("active", x === t); });
+      $$(".ag-pane", view).forEach(function (p) { p.classList.toggle("active", p.dataset.pane === key); });
+      view.querySelector(".page").scrollTop = 0;
+    });
+  });
+  // 护栏开关
+  document.addEventListener("click", function (e) {
+    var sw = e.target.closest(".switch"); if (!sw) return;
+    if (sw.classList.contains("lock")) { toast("该护栏为强制项，不可关闭"); return; }
+    sw.classList.toggle("on");
+    var label = sw.dataset.label || "该护栏";
+    toast((sw.classList.contains("on") ? "已开启：" : "已关闭：") + label);
   });
 })();
 </script>
