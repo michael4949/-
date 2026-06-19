@@ -2873,7 +2873,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 (function () {
   "use strict";
   var $ = function (s, p) { return (p || document).querySelector(s); };
-  var $ = function (s, p) { return Array.prototype.slice.call((p || document).querySelectorAll(s)); };
+  var $$ = function (s, p) { return Array.prototype.slice.call((p || document).querySelectorAll(s)); };
   var convosEl = $("#scConvos"), thread = $("#scThread"), headEl = $("#scChatHead"),
       copEl = $("#scCopilot"), inEl = $("#scIn");
   if (!convosEl) return;
