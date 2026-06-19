@@ -1008,6 +1008,28 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .cons b { color: var(--ink); } .cons .warmup { color: var(--green); font-weight: 700; }
 
 @media (max-width: 1080px) { .triage { flex-direction: column; } .triage-q { width: 100%; display: flex; flex-wrap: wrap; gap: 7px; } .triage-q .lead-item { flex: 1; min-width: 200px; margin-bottom: 0; } }
+/* ---------- 财务AI管家 · 专属组件 ---------- */
+.prog { height: 8px; border-radius: 999px; background: #EEF0FB; overflow: hidden; }
+.prog i { display: block; height: 100%; border-radius: 999px; background: var(--grad-btn); }
+.prog i.over { background: linear-gradient(90deg, #E5484D, #FF7E5F); }
+.audit-result { font-size: 10.5px; font-weight: 700; }
+.fin-qrow { display: flex; gap: 9px; }
+.fin-qrow input { flex: 1; border: 1px solid var(--line-2); border-radius: 11px; padding: 10px 14px;
+  font-size: 13px; outline: none; transition: .2s; font-family: inherit; }
+.fin-qrow input:focus { border-color: rgba(90,91,240,.55); box-shadow: 0 0 0 3px rgba(90,91,240,.12); }
+.q-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.q-chip { border: 1px solid var(--line-2); background: #fff; color: var(--ink-2); border-radius: 999px;
+  padding: 6px 13px; font-size: 12px; cursor: pointer; transition: .2s; }
+.q-chip:hover { border-color: var(--brand); color: var(--brand); }
+.q-chip.chosen { border-color: var(--green); color: var(--green); }
+.ans-num { font-size: 22px; font-weight: 800; background: var(--grad);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cf-chart { width: 100%; height: 150px; }
+.warn-strip { background: linear-gradient(120deg, rgba(229,72,77,.09), rgba(217,119,6,.07));
+  border: 1px solid rgba(229,72,77,.28); }
+.voucher { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px;
+  background: #F8F9FE; border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; line-height: 1.9; }
+.voucher .cr { color: var(--brand); }
 </style>
 </head>
 <body>
@@ -1086,9 +1108,9 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
       <div class="s-meta"><div class="s-name">工程管理助手</div><div class="s-desc">制度采集 · 条款提取</div></div>
       <span class="s-badge b-on">已开通</span>
     </div>
-    <div class="s-item" data-view="fin" data-title="财务监控和决策 · 财务监控与决策支持">
-      <span class="s-icon" style="--tint:#FFEFF2">💹</span>
-      <div class="s-meta"><div class="s-name">财务监控决策</div><div class="s-desc">异常预警 · 决策支持</div></div>
+    <div class="s-item" data-view="fin" data-title="财务AI管家 · 财务全流程 AI 赋能">
+      <span class="s-icon" style="--tint:#FFEFF2">🧮</span>
+      <div class="s-meta"><div class="s-name">财务AI管家</div><div class="s-desc">记账报税 · 资金风控 · 经营分析</div></div>
       <span class="s-badge b-on">已开通</span>
     </div>
     <div class="s-item" data-view="sales" data-title="销冠AI助手 · 销售全流程 AI 赋能">
@@ -1323,7 +1345,7 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
                   <div class="lr-sub">AI 摘要：账户流水 86 笔，与财务系统核对一致</div>
                 </div>
                 <div class="lr-side">09:14</div>
-                <button class="btn-mini js-toast" data-toast="已转发给财务监控智能体">转财务</button>
+                <button class="btn-mini js-toast" data-toast="已转发给财务AI管家">转财务</button>
               </div>
               <div class="lrow">
                 <span class="lr-ico" style="--tint:#EAF0FF">刊</span>
@@ -1662,58 +1684,188 @@ curl https://api.dgg.ai/v1/agents/dispatch \
         </div>
       </section>
 
-      <!-- ============ 视图：财务监控和决策 ============ -->
+      <!-- ============ 视图:财务AI管家（财务全流程）============ -->
       <section class="view" id="view-fin">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#FFEFF2">💹</span>财务监控和决策</h2>
-            <p>财务监控 · 决策支持 — 自定义智能体，异动自动预警并给出处置建议</p>
+        <div class="sales-shell">
+          <div class="stage-nav" id="finNav">
+            <button class="stage-pill active" data-stage="book"><b>1</b>票据与记账</button>
+            <button class="stage-pill" data-stage="cash"><b>2</b>应收与现金流</button>
+            <button class="stage-pill" data-stage="tax"><b>3</b>税务</button>
+            <button class="stage-pill" data-stage="budget"><b>4</b>预算与成本</button>
+            <button class="stage-pill" data-stage="analysis"><b>5</b>经营分析</button>
+            <button class="stage-pill" data-stage="risk"><b>6</b>风险内控</button>
           </div>
-          <div class="kpi-row">
-            <div class="kpi"><div class="kpi-label">经营现金流</div><div class="kpi-num">¥1,240万</div><div class="kpi-sub"><b class="up">健康</b> · 可覆盖 6.8 个月支出</div></div>
-            <div class="kpi"><div class="kpi-label">应收账款</div><div class="kpi-num">¥680万</div><div class="kpi-sub"><b class="dn">↑9.2%</b> · 账期拉长需关注</div></div>
-            <div class="kpi"><div class="kpi-label">预算执行率</div><div class="kpi-num">64%</div><div class="kpi-sub">时间进度 62% · 基本同步</div></div>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>异动预警</h3><span class="badge-n">2</span></div>
-              <div class="lrow">
-                <span class="lr-ico" style="--tint:#FFEFF2">⚠️</span>
-                <div class="lr-main">
-                  <div class="lr-tt">华东项目毛利低于阈值</div>
-                  <div class="lr-sub">实际 18.4% &lt; 阈值 22% · 主因：材料涨价 + 折扣超标</div>
+          <div class="stage-body">
+
+            <!-- ===== 1 票据与记账 ===== -->
+            <div class="stage active" id="fin-book"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">🧾</span>
+                <div class="as-txt">AI 今天自动：识别并验真 <b>47</b> 张发票、生成 <b>23</b> 张凭证待复核。还有 <b data-counter="bookPend">6</b> 笔待你确认（已处理 <b data-counter="bookDone">0</b>）。</div>
+              </div>
+              <div class="pgrid g2">
+                <div class="pcard">
+                  <div class="pc-head"><h3>进项发票智能处理</h3><span class="pc-extra">OCR + 验真查重 + 抵扣判断</span></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#E9F9F1">🧾</span><div class="lr-main"><div class="lr-tt">宁波某材料 · ¥12,400</div><div class="lr-sub">✓ 验真通过 · 可抵扣进项 ¥1,424</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已入账" data-cp="bookPend" data-cd="bookDone" data-msg="已入账并自动认证抵扣">入账</button></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#FFEAEA">🧾</span><div class="lr-main"><div class="lr-tt">某办公用品 · ¥860</div><div class="lr-sub">⚠ 疑似与 5/28 一张重复，AI 建议排除</div></div><span class="audit-result"></span><button class="btn-mini" data-fx="audit" data-act="pass" data-done-text="✓ 已入账" data-cp="bookPend" data-cd="bookDone" data-msg="已入账">仍入账</button><button class="btn-grad" data-fx="audit" data-act="reject" data-done-text="已排除" data-cp="bookPend" data-msg="已排除重复发票">排除重复</button></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#FFF4E5">🧾</span><div class="lr-main"><div class="lr-tt">某运输 · ¥3,200</div><div class="lr-sub">⚠ 1 张将于 6/30 过认证抵扣期，建议尽快</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已入账" data-cp="bookPend" data-cd="bookDone" data-msg="已入账并认证">入账</button></div>
                 </div>
-                <span class="pill pill-red">高</span>
-                <button class="btn-mini js-toast" data-toast="已生成处置建议并抄送项目负责人">处置</button>
-              </div>
-              <div class="lrow">
-                <span class="lr-ico" style="--tint:#FFF4E5">⚠️</span>
-                <div class="lr-main">
-                  <div class="lr-tt">5 月差旅费超预算 12%</div>
-                  <div class="lr-sub">华东出差频次上升 · 与新客户拓展相关，属合理超支</div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>费用报销智能审核</h3><span class="pc-extra">验真 + 超标 + 重复 自动判</span></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">张三 · 差旅 ¥2,300</div><div class="lr-sub">发票真、未超标 · AI 建议通过</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-cp="bookPend" data-cd="bookDone" data-msg="已通过，自动生成报销凭证">通过</button><button class="btn-mini" data-fx="audit" data-act="reject" data-cp="bookPend" data-msg="已打回">打回</button></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">李四 · 业务餐费 ¥1,800</div><div class="lr-sub">超部门标准（限 ¥1,000）· AI 建议打回</div></div><span class="audit-result"></span><button class="btn-mini" data-fx="audit" data-act="pass" data-cp="bookPend" data-cd="bookDone" data-msg="已特批通过">特批</button><button class="btn-grad" data-fx="audit" data-act="reject" data-cp="bookPend" data-msg="已打回，附超标说明通知李四">打回</button></div>
+                  <div class="lrow audit-item"><span class="lr-ico" style="--tint:#FFEAEA">⚠️</span><div class="lr-main"><div class="lr-tt">王五 · 招待费 ¥1,500</div><div class="lr-sub">发票验真失败（疑似假票）· AI 强烈建议打回</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="reject" data-cp="bookPend" data-msg="已打回并标记风险，提示重新提供发票">打回</button></div>
                 </div>
-                <span class="pill pill-amber">中</span>
-                <button class="btn-mini js-toast" data-toast="已标记为「合理超支」，并更新 6 月预算建议">标记</button>
               </div>
-              <div class="pc-body" style="border-top:1px solid var(--line)">
-                <div class="lr-sub" style="white-space:normal">🤖 决策建议：优先催收 3 笔 90 天以上应收（合计 ¥210 万），可使现金流安全垫提升至 8 个月。</div>
-              </div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>现金流趋势（近 6 月）</h3><span class="pc-extra">万元</span></div>
-              <div class="pc-body">
-                <div class="bars">
-                  <div class="bar" style="--h:52%"></div><div class="bar" style="--h:48%"></div>
-                  <div class="bar" style="--h:60%"></div><div class="bar" style="--h:57%"></div>
-                  <div class="bar" style="--h:72%"></div><div class="bar" style="--h:86%"></div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>智能记账 · 凭证待复核</h3><button class="btn-grad" data-fx="reveal" data-target="voucherOk" data-done="✓ 已过账" data-msg="23 张凭证已复核过账">一键复核过账</button></div>
+                <div class="pc-body">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:8px">AI 已据银行流水/票据/合同自动生成凭证并推荐科目，例如：</div>
+                  <div class="voucher">摘要：采购钢材一批（宁波某材料）<br/>借：原材料—钢材　　　　　¥12,400.00<br/><span class="cr">贷：应付账款—宁波某材料　¥12,400.00</span></div>
+                  <div id="voucherOk" class="fx-hide"><div class="ag-note" style="margin-top:10px">✓ 23 张凭证已复核过账，本月新增凭证全部入账，可直接进入结账。</div></div>
                 </div>
-                <div class="bar-labels"><span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span></div>
-                <div class="lr-sub" style="margin-top:10px;white-space:normal">📌 AI 解读：回款节奏改善，6 月现金流创半年新高；建议保持当前账期策略。</div>
               </div>
-            </div>
+            </div></div>
+
+            <!-- ===== 2 应收与现金流 ===== -->
+            <div class="stage" id="fin-cash"><div class="page">
+              <div class="action-strip warn-strip">
+                <span class="as-ico">🚨</span>
+                <div class="as-txt"><b>资金链预警：</b>AI 预测第 <b>6</b> 周（7/21 当周）将出现约 <b>¥80 万</b>资金缺口。早发现 = 早安排。</div>
+                <button class="btn-grad" data-fx="reveal" data-target="cashPlan" data-done="✓ 已生成" data-msg="已生成补缺口方案">查看应对方案</button>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>未来 12 周现金流预测</h3><span class="pc-extra">基于应收+应付+合同+历史</span></div>
+                <div class="pc-body">
+                  <svg class="cf-chart" viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true">
+                    <defs><linearGradient id="cfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A5BF0" stop-opacity=".22"/><stop offset="1" stop-color="#5A5BF0" stop-opacity="0"/></linearGradient></defs>
+                    <line x1="0" y1="104" x2="600" y2="104" stroke="#E5484D" stroke-width="1.2" stroke-dasharray="5 5" opacity=".7"/>
+                    <text x="6" y="98" font-size="10" fill="#E5484D">安全线</text>
+                    <path d="M0 62 L55 70 L109 84 L164 96 L218 110 L273 124 L327 118 L382 100 L436 86 L491 74 L545 66 L600 58 L600 150 L0 150 Z" fill="url(#cfg)"/>
+                    <path d="M0 62 L55 70 L109 84 L164 96 L218 110 L273 124 L327 118 L382 100 L436 86 L491 74 L545 66 L600 58" fill="none" stroke="#5A5BF0" stroke-width="2.2" stroke-linejoin="round"/>
+                    <circle cx="273" cy="124" r="5" fill="#E5484D"/><circle cx="273" cy="124" r="9" fill="#E5484D" opacity=".2"/>
+                    <text x="250" y="142" font-size="10" fill="#E5484D">第6周缺口</text>
+                  </svg>
+                  <div id="cashPlan" class="fx-hide"><div class="ag-note warn" style="margin-top:8px"><b>AI 补缺口方案（执行后缺口消除）：</b><br/>① 加速催收 A 类应收 ¥120 万（宁波远东 ¥60 万可提前回款）；<br/>② 将对某供应商 ¥40 万付款延后至第 8 周（仍在账期内，不违约）；<br/>③ 备用：启用银行授信 ¥50 万。<button class="btn-grad js-toast" data-toast="已按方案创建催收/付款/授信任务并指派（演示）" style="margin-top:8px">一键执行该方案</button></div></div>
+                </div>
+              </div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>应收账款 AI 管理</h3><span class="pc-extra">账龄 + 回款概率 + 坏账预警</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">💰</span><div class="lr-main"><div class="lr-tt">宁波远东汽配 · ¥60 万</div><div class="lr-sub">逾期 15 天 · 回款概率高 · 合作良好</div></div><button class="btn-mini" data-fx="reveal" data-target="dunA" data-done="✓ 已生成">生成催收话术</button></div>
+                <div id="dunA" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">「王总，二期合作前我们这边把一期尾款 ¥60 万走个流程结一下，您看本周方便安排吗？发票和对账单我已备好。」——温和、绑定后续合作，回款概率高。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">⚠️</span><div class="lr-main"><div class="lr-tt">佛山合力机械 · ¥28 万</div><div class="lr-sub">逾期 62 天 · 回款概率中 · <b style="color:var(--red)">坏账预警</b></div></div><button class="btn-grad" data-fx="reveal" data-target="dunB" data-done="✓ 已生成">生成催收+对策</button></div>
+                <div id="dunB" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note warn">逾期超 60 天，AI 建议升级：① 书面催款函（已拟）+ 限制后续发货；② 协商分期；③ 计提坏账准备 30%。话术已生成，建议负责人本周上门当面谈。</div></div>
+              </div>
+            </div></div>
+
+            <!-- ===== 3 税务 ===== -->
+            <div class="stage" id="fin-tax"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">📑</span>
+                <div class="as-txt">本月 <b data-counter="taxPend">4</b> 个税种待申报，AI 已自动取数填表并完成报前校验，你确认即可一键申报（已申报 <b data-counter="taxDone">0</b>）。</div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>本月待申报</h3><span class="pc-extra">自动取数 · 报前校验</span></div>
+                <div class="lrow audit-item"><span class="lr-ico" style="--tint:#E9F9F1">📋</span><div class="lr-main"><div class="lr-tt">增值税及附加 · 应纳 ¥4.2 万</div><div class="lr-sub">✓ 进销项匹配、校验通过</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已申报" data-cp="taxPend" data-cd="taxDone" data-msg="已一键申报并生成完税凭证">一键申报</button></div>
+                <div class="lrow audit-item"><span class="lr-ico" style="--tint:#E9F9F1">📋</span><div class="lr-main"><div class="lr-tt">企业所得税（预缴）· ¥1.8 万</div><div class="lr-sub">✓ 校验通过</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已申报" data-cp="taxPend" data-cd="taxDone" data-msg="已申报">一键申报</button></div>
+                <div class="lrow audit-item"><span class="lr-ico" style="--tint:#FFF4E5">📋</span><div class="lr-main"><div class="lr-tt">个人所得税 · 待核对</div><div class="lr-sub">⚠ 2 人专项附加扣除变更未更新，AI 已自动补全待你确认</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已申报" data-cp="taxPend" data-cd="taxDone" data-msg="已按更新后的扣除申报">确认并申报</button></div>
+                <div class="lrow audit-item"><span class="lr-ico" style="--tint:#E9F9F1">📋</span><div class="lr-main"><div class="lr-tt">印花税 · ¥640</div><div class="lr-sub">✓ 按合同自动归集</div></div><span class="audit-result"></span><button class="btn-grad" data-fx="audit" data-act="pass" data-done-text="✓ 已申报" data-cp="taxPend" data-cd="taxDone" data-msg="已申报">一键申报</button></div>
+              </div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>税负异常与优惠预警</h3><span class="badge-n">3</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">📉</span><div class="lr-main"><div class="lr-tt">增值税税负率 1.2%，低于行业 2.5%</div><div class="lr-sub">偏低可能触发稽查关注</div></div><button class="btn-mini" data-fx="reveal" data-target="taxR1" data-done="✓ 已查看">查看处置</button></div>
+                <div id="taxR1" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note warn">AI 核查：本月有大额进项集中抵扣导致税负偏低，属正常经营（已附进项明细备查）。建议保留采购合同与入库单，若被问询可一键导出说明材料。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">💧</span><div class="lr-main"><div class="lr-tt">留抵税额 ¥18 万未抵扣</div><div class="lr-sub">可申请增量留抵退税</div></div><button class="btn-grad" data-fx="reveal" data-target="taxR2" data-done="✓ 已查看">查看处置</button></div>
+                <div id="taxR2" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">符合增量留抵退税条件，AI 测算可退 <b>¥12 万</b>，已准备好申请材料清单，建议本月申请改善现金流。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🎁</span><div class="lr-main"><div class="lr-tt">研发费用加计扣除未享受</div><div class="lr-sub">技术改造投入符合条件</div></div><button class="btn-grad" data-fx="reveal" data-target="taxR3" data-done="✓ 已查看">查看处置</button></div>
+                <div id="taxR3" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">AI 识别本年研发投入约 ¥220 万符合加计扣除（100%），预计可少缴企业所得税约 <b>¥33 万</b>，已生成归集台账模板。</div></div>
+              </div>
+            </div></div>
+
+            <!-- ===== 4 预算与成本 ===== -->
+            <div class="stage" id="fin-budget"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">📊</span>
+                <div class="as-txt">时间过半（年度进度 67%），AI 盯住各部门预算执行，挑出 <b>2 处</b>有超支风险需你提前拦。</div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>预算执行监控 + 超支预警</h3><span class="pc-extra">已用 / 预算 · 红色=超前</span></div>
+                <div class="pc-body">
+                  <div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span>市场部 <b style="color:var(--red)">已用 92%</b></span><span style="color:var(--muted)">时间进度 67%</span></div><div class="prog"><i class="over" style="width:92%"></i></div><div style="margin-top:6px"><button class="btn-mini" data-fx="reveal" data-target="budM" data-done="✓ 已查看">查看预警与建议</button></div><div id="budM" class="fx-hide"><div class="ag-note warn" style="margin-top:8px">AI 归因：90% 超支来自 2 场展会集中投放。按当前节奏，预计 9 月将耗尽全年预算。建议：① 冻结非必要投放；② 如需追加，AI 已备好 ROI 测算供审批。</div></div></div>
+                  <div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span>差旅费 <b style="color:var(--red)">超 12%</b></span><span style="color:var(--muted)">¥58 万 / 预算 ¥52 万</span></div><div class="prog"><i class="over" style="width:100%"></i></div><div style="margin-top:6px"><button class="btn-mini" data-fx="reveal" data-target="budT" data-done="✓ 已查看">查看预警与建议</button></div><div id="budT" class="fx-hide"><div class="ag-note warn" style="margin-top:8px">超支因华东新客户拓展出差增多，属合理超支（与新签订单相关）。AI 建议标记为"业务性超支"并从下月起按差旅新政管控。</div></div></div>
+                  <div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span>研发费用 已用 70%</span><span style="color:var(--green)">正常</span></div><div class="prog"><i style="width:70%"></i></div></div>
+                  <div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span>行政办公 已用 60%</span><span style="color:var(--green)">正常</span></div><div class="prog"><i style="width:60%"></i></div></div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- ===== 5 经营分析（给老板）===== -->
+            <div class="stage" id="fin-analysis"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">🧠</span>
+                <div class="as-txt">把财务变成给老板出主意的参谋：一句话问数、一键出经营分析、看清「卖得多到底赚不赚」。</div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>一句话问财务</h3><span class="pc-extra">基于实时账套 · 秒答</span></div>
+                <div class="pc-body">
+                  <div class="fin-qrow"><input id="finQInput" placeholder="例如：上月利润为什么比上上月低？" /><button class="send-btn" id="finQSend" aria-label="问"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 10 17 3l-3.5 14L9.6 11 3 10Z"/></svg></button></div>
+                  <div class="q-chips">
+                    <button class="q-chip" data-fx="ask" data-target="qa1">上月毛利率多少？为什么降了？</button>
+                    <button class="q-chip" data-fx="ask" data-target="qa2">现在能动用的现金有多少？</button>
+                    <button class="q-chip" data-fx="ask" data-target="qa3">哪个产品最赚？哪个在亏？</button>
+                  </div>
+                  <div id="qa1" class="fx-hide" style="margin-top:11px"><div class="ag-note"><span class="ans-num">28.4%</span> <span style="color:var(--red)">环比 ↓2.1pp</span><br/>主因：① 钢材涨价 8% 拉低毛利 1.4pp；② 低毛利的 A 产品占比上升拉低 0.7pp。<b>建议：</b>A 产品提价 3–5% 或控量，并锁定钢材采购价。</div></div>
+                  <div id="qa2" class="fx-hide" style="margin-top:11px"><div class="ag-note"><span class="ans-num">¥420 万</span> 可动用（活期 ¥260 万 + 未用授信 ¥160 万）。<br/><b style="color:var(--red)">注意：</b>第 6 周有 ¥80 万缺口预警，详见「应收与现金流」。</div></div>
+                  <div id="qa3" class="fx-hide" style="margin-top:11px"><div class="ag-note">最赚：<b>质检模块</b>（真实毛利率 41%）。<br/>最坑：<b>B 型产线</b>——账面毛利 18% 看着还行，但分摊售后与资金占用后，<b style="color:var(--red)">真实毛利仅 3%</b>，越卖越不赚。详见下方业财融合。</div></div>
+                  <div id="finQAns" class="fx-hide" style="margin-top:11px"><div class="ag-note">针对「<b id="finQEcho"></b>」：上月净利润 ¥86 万，环比 ↓14%。AI 归因：毛利率下降（钢材涨价）贡献 -¥9 万、销售费用上升贡献 -¥5 万；收入端持平。已生成可下钻的归因图，点经营分析报告可查看完整版。</div></div>
+                </div>
+              </div>
+              <div class="pgrid g2 mt">
+                <div class="pcard">
+                  <div class="pc-head"><h3>经营分析报告</h3><button class="btn-grad" data-fx="reveal" data-target="repRes" data-done="✓ 已生成" data-msg="本月经营分析报告已生成">一键生成本月报告</button></div>
+                  <div class="pc-body">
+                    <div style="font-size:12px;color:var(--muted)">收入/利润/现金/关键异动 + 归因 + 建议，一键成稿，可直接发老板。</div>
+                    <div id="repRes" class="fx-hide"><div class="ag-note" style="margin-top:9px"><b>2026 年 5 月经营分析（摘要）</b><br/>• 收入 ¥1,320 万（环比 +3%）；净利 ¥86 万（环比 -14%）<br/>• 现金 ¥420 万，第 6 周有缺口预警<br/>• 关键异动：毛利率 -2.1pp（钢材涨价为主因）<br/>• 建议：A 产品调价、锁价采购、加速 A 类回款<br/><button class="btn-mini js-toast" data-toast="完整报告（含图表）已导出并可一键发送给老板（演示）" style="margin-top:8px">导出 / 发老板</button></div></div>
+                  </div>
+                </div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>业财融合 · 真实盈利</h3><span class="pill pill-amber">揭穿账面假象</span></div>
+                  <table class="table"><thead><tr><th>产品 / 客户</th><th>账面毛利</th><th>真实盈利</th></tr></thead><tbody>
+                    <tr><td>质检模块</td><td>41%</td><td><span class="pill pill-green">41%</span></td></tr>
+                    <tr><td>标准产线</td><td>28%</td><td><span class="pill pill-blue">22%</span></td></tr>
+                    <tr><td>B 型产线</td><td>18%</td><td><span class="pill pill-red">3%</span></td></tr>
+                    <tr><td>大客户 X（账期 120 天）</td><td>高</td><td><span class="pill pill-amber">资金占用大，实低</span></td></tr>
+                  </tbody></table>
+                  <div class="pc-body"><div class="ag-note">真实盈利 = 账面毛利 − 分摊的售后/物流/资金占用/退换成本。<b>B 型产线"虚假繁荣"</b>，建议提价或收缩；大客户 X 应缩短账期。</div></div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- ===== 6 风险内控 ===== -->
+            <div class="stage" id="fin-risk"><div class="page">
+              <div class="action-strip warn-strip">
+                <span class="as-ico">🛡️</span>
+                <div class="as-txt">AI 多维盯防，本期挑出 <b>5</b> 个财务风险，按严重度排好，逐条给了处置建议。</div>
+              </div>
+              <div class="pcard">
+                <div class="pc-head"><h3>财务风险全景预警</h3><span class="pc-extra">资金链 / 坏账 / 税务 / 合规 / 舞弊</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">💸</span><div class="lr-main"><div class="lr-tt">资金链 · 第 6 周 ¥80 万缺口</div><div class="lr-sub">应收回款滞后 + 集中付款叠加</div></div><span class="pill pill-red">高</span><button class="btn-mini" data-fx="reveal" data-target="rk1" data-done="✓ 已查看">处置</button></div>
+                <div id="rk1" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note warn">已在「应收与现金流」生成补缺口方案（加速回款+延后付款+备用授信），一键执行即可消除。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">🧨</span><div class="lr-main"><div class="lr-tt">舞弊 · 某报销疑似拆分大额</div><div class="lr-sub">同一供应商 3 笔 ¥9,800 规避 ¥10,000 审批线</div></div><span class="pill pill-red">高</span><button class="btn-mini" data-fx="reveal" data-target="rk2" data-done="✓ 已查看">处置</button></div>
+                <div id="rk2" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note warn">AI 识别为典型"化整为零"。已暂挂这 3 笔、标记复核，并建议约谈经办人、完善拆分检测规则。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⏳</span><div class="lr-main"><div class="lr-tt">合规 · 3 张进项发票将过认证期</div><div class="lr-sub">6/30 前不认证将损失抵扣 ¥4,200</div></div><span class="pill pill-amber">中</span><button class="btn-mini" data-fx="reveal" data-target="rk3" data-done="✓ 已查看">处置</button></div>
+                <div id="rk3" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">已置顶提醒，一键勾选即可在票据板块完成认证抵扣，避免损失。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">📉</span><div class="lr-main"><div class="lr-tt">坏账 · 佛山合力逾期 62 天 ¥28 万</div><div class="lr-sub">回款概率下降</div></div><span class="pill pill-amber">中</span><button class="btn-mini" data-fx="reveal" data-target="rk4" data-done="✓ 已查看">处置</button></div>
+                <div id="rk4" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">已在应收板块生成升级催收方案，并建议计提坏账准备 30%。</div></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🧾</span><div class="lr-main"><div class="lr-tt">税务 · 增值税税负率异常偏低</div><div class="lr-sub">可能引发稽查关注</div></div><span class="pill pill-amber">中</span><button class="btn-mini" data-fx="reveal" data-target="rk5" data-done="✓ 已查看">处置</button></div>
+                <div id="rk5" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">经核为大额进项集中抵扣所致，属正常。已备好备查材料，若被问询可一键导出说明。</div></div>
+              </div>
+            </div></div>
+
           </div>
         </div>
       </section>
+
 
       <!-- ============ 视图:工作流编排 ============ -->
       <section class="view" id="view-flow">
@@ -1743,7 +1895,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <div class="pc-head"><h3>典型流程:客户报价审批</h3><span class="pc-extra">5 步串联</span></div>
             <div class="timeline">
               <div class="tl-item"><div class="tl-tt">① 销冠AI助手</div><div class="tl-sub">捕获客户需求,生成初版报价</div></div>
-              <div class="tl-item"><div class="tl-tt">② 财务监控决策</div><div class="tl-sub">校验毛利率红线,标记需审批节点</div></div>
+              <div class="tl-item"><div class="tl-tt">② 财务AI管家</div><div class="tl-sub">校验毛利率红线,标记需审批节点</div></div>
               <div class="tl-item"><div class="tl-tt">③ 法务合同助手</div><div class="tl-sub">基于报价生成合同初稿 + 风险条款提示</div></div>
               <div class="tl-item"><div class="tl-tt">④ 邮箱助手</div><div class="tl-sub">发送审批邮件给老板,带 30 秒摘要</div></div>
               <div class="tl-item"><div class="tl-tt">⑤ 知识库</div><div class="tl-sub">审批通过后自动归档,可被未来检索</div></div>
@@ -2464,7 +2616,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <table class="table">
               <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
               <tbody>
-                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 法务合同 · 财务监控 · 项目交付管控</td><td>预置制造业销售话术、合同模板、成本科目</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 法务合同 · 财务AI管家 · 项目交付管控</td><td>预置制造业销售话术、合同模板、成本科目</td></tr>
                 <tr><td><span class="pill pill-blue">通用</span></td><td>研发知识沉淀 · 投标 / 标书</td><td>工艺图谱模板、设备清单模板、招标网行业关键词</td></tr>
                 <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>设备维护助手</b></td><td>预测性维护 · 故障图谱 · MES/SCADA 对接</td></tr>
                 <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>生产排程助手</b></td><td>多约束求解 · 订单优先级 · 排程冲突预警</td></tr>
@@ -2525,7 +2677,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <table class="table">
               <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
               <tbody>
-                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置零售连锁话术、加盟合同、考勤模板</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务AI管家 · HR 招聘</td><td>预置零售连锁话术、加盟合同、考勤模板</td></tr>
                 <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>加盟督导助手</b></td><td>巡店任务 · SOP 执行打分 · 整改追踪</td></tr>
                 <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>选址决策助手</b></td><td>商圈数据 · 客流预测 · 竞品分布</td></tr>
                 <tr><td><span class="pill" style="background:#EEF5FF;color:#0052D9">行业专属</span></td><td><b>商品调拨助手</b></td><td>SKU 预测 · 滞销预警 · 跨店调拨建议</td></tr>
@@ -2586,7 +2738,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <table class="table">
               <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
               <tbody>
-                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置医美咨询话术、合同模板</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务AI管家 · HR 招聘</td><td>预置医美咨询话术、合同模板</td></tr>
                 <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>客户留存助手</b></td><td>流失预警 · 复购周期预测 · 自动唤回话术</td></tr>
                 <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>项目套餐设计</b></td><td>基于客户画像 + 历史消费 · 推荐定制套餐</td></tr>
                 <tr><td><span class="pill" style="background:#FFEFF2;color:#E5484D">行业专属</span></td><td><b>合规话术助手</b></td><td>医美广告法红线词检测 · 安全话术替换</td></tr>
@@ -2703,7 +2855,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <table class="table">
               <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
               <tbody>
-                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 法务合同 · 财务监控 · HR 招聘</td><td>预置工程合同、专业岗位 JD</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 法务合同 · 财务AI管家 · HR 招聘</td><td>预置工程合同、专业岗位 JD</td></tr>
                 <tr><td><span class="pill pill-blue">通用</span></td><td>投标 / 标书 · 项目交付管控</td><td>建筑工程评标规则库、施工节点模板</td></tr>
                 <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>投标雷达助手</b></td><td>招标网/政府公示/项目库三源接入 · 关键词预警</td></tr>
                 <tr><td><span class="pill" style="background:#FFF4E5;color:#D97706">行业专属</span></td><td><b>进度甘特看板</b></td><td>多项目集协同 · 关键路径 · 资源冲突预警</td></tr>
@@ -2760,7 +2912,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <table class="table">
               <thead><tr><th>类别</th><th>智能体</th><th>行业版特殊配置</th></tr></thead>
               <tbody>
-                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务监控 · HR 招聘</td><td>预置教培咨询话术、合同模板、教师评估</td></tr>
+                <tr><td><span class="pill pill-blue">通用</span></td><td>销冠AI · 客服 7×24 · 财务AI管家 · HR 招聘</td><td>预置教培咨询话术、合同模板、教师评估</td></tr>
                 <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>课程顾问助手</b></td><td>学员需求识别 · 课程匹配 · 报价话术生成</td></tr>
                 <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>招生转化助手</b></td><td>线索打分 · 跟进 SOP · 试听邀约自动化</td></tr>
                 <tr><td><span class="pill" style="background:#E6F8FB;color:#0891B2">行业专属</span></td><td><b>学员画像助手</b></td><td>学习行为分析 · 流失预警 · 续报推荐</td></tr>
@@ -3904,6 +4056,65 @@ curl https://api.dgg.ai/v1/agents/dispatch \
       return;
     }
   });
+})();
+</script>
+<script>
+/* ---------- 财务AI管家 · 交互逻辑 ---------- */
+(function () {
+  "use strict";
+  var byId = function (id) { return document.getElementById(id); };
+  var toArr = function (nl) { return Array.prototype.slice.call(nl); };
+  var toastEl = byId("toast"), tT = null;
+  function toast(m) { if (!toastEl) return; toastEl.textContent = m; toastEl.classList.add("show");
+    clearTimeout(tT); tT = setTimeout(function () { toastEl.classList.remove("show"); }, 2600); }
+  function show(el) { if (el) { el.classList.remove("fx-hide"); el.classList.add("fx-in"); } }
+  function bumpC(name, delta) {
+    var el = document.querySelector('[data-counter="' + name + '"]'); if (!el) return;
+    var n = (parseInt((el.textContent || "0").replace(/[^0-9]/g, ""), 10) || 0) + delta;
+    el.textContent = el.textContent.replace(/[0-9]+/, String(n));
+  }
+
+  // 板块切换
+  var finNav = byId("finNav");
+  if (finNav) {
+    var fp = toArr(finNav.querySelectorAll(".stage-pill"));
+    var fs = toArr(document.querySelectorAll("#view-fin .stage"));
+    finNav.addEventListener("click", function (e) {
+      var p = e.target.closest(".stage-pill"); if (!p) return;
+      var k = p.dataset.stage;
+      fp.forEach(function (x) { x.classList.toggle("active", x === p); });
+      fs.forEach(function (s) { s.classList.toggle("active", s.id === "fin-" + k); });
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-fx]"); if (!b) return;
+    var fx = b.dataset.fx;
+    if (fx === "audit") {
+      var row = b.closest(".audit-item"); if (!row || row.dataset.done) return;
+      row.dataset.done = "1";
+      var pass = b.dataset.act !== "reject";
+      var res = row.querySelector(".audit-result");
+      if (res) { res.textContent = b.dataset.doneText || (pass ? "✓ 已通过" : "已打回");
+        res.className = "audit-result pill " + (pass ? "pill-green" : "pill-red"); }
+      toArr(row.querySelectorAll("[data-fx=audit]")).forEach(function (x) { x.style.display = "none"; });
+      if (b.dataset.cp) bumpC(b.dataset.cp, -1);
+      if (pass && b.dataset.cd) bumpC(b.dataset.cd, 1);
+      toast(b.dataset.msg || (pass ? "已通过" : "已处理"));
+      return;
+    }
+    if (fx === "ask") { show(byId(b.dataset.target)); b.classList.add("chosen"); return; }
+  });
+
+  // 自由问数
+  var qin = byId("finQInput"), qsend = byId("finQSend"), qans = byId("finQAns"), qecho = byId("finQEcho");
+  function doAsk() {
+    if (!qin) return; var v = qin.value.trim(); if (!v) return;
+    if (qecho) qecho.textContent = v;
+    show(qans); toast("已基于实时账套数据生成回答");
+  }
+  if (qsend) qsend.addEventListener("click", doAsk);
+  if (qin) qin.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); doAsk(); } });
 })();
 </script>
 </body>
