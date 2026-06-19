@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ 基础 ============ */
+html, body, #root { height: 100%; }
+body { background: #0F1419; color: #E5E7EB; }
+::selection { background: rgba(124, 58, 237, 0.35); color: #fff; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #2A3142; border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: #3A445A; }
+
+/* ============ 组件层 ============ */
+@layer components {
+  .card-base {
+    @apply bg-card border border-line/80 rounded-xl shadow-card;
+  }
+  .kpi-card {
+    @apply card-base p-4 flex flex-col gap-1.5 transition-colors hover:border-line-soft;
+  }
+  .btn {
+    @apply inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-medium
+           border border-line-soft bg-card text-ink hover:border-brand hover:text-brand
+           transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-brand text-white border-brand hover:bg-brand-600 hover:border-brand-600 hover:text-white;
+  }
+  .btn-ai {
+    @apply text-ai bg-ai-bg border-ai/60 hover:bg-ai hover:text-white;
+  }
+  .btn-ghost { @apply bg-transparent border-transparent hover:bg-line/50 hover:text-ink; }
+  .btn-sm { @apply h-7 px-2.5 text-[11.5px]; }
+
+  /* AI 触点统一样式 */
+  .ai-chip {
+    @apply inline-flex items-center gap-1 text-[10.5px] font-semibold uppercase tracking-wider
+           text-ai bg-ai-bg border border-ai/40 rounded-md px-1.5 py-0.5;
+  }
+  .ai-insight {
+    @apply flex items-start gap-3 rounded-lg border-l-4 border-ai bg-ai-bg/80 px-4 py-3;
+  }
+
+  /* 数据表 */
+  .grid-tbl { @apply w-full border-collapse text-[12.5px]; }
+  .grid-tbl thead th {
+    @apply text-left text-[11px] font-semibold tracking-wide text-ink-dim
+           px-3 py-2 bg-line/30 border-b border-line sticky top-0 z-[1];
+  }
+  .grid-tbl tbody td { @apply px-3 py-2 border-b border-line/70; }
+  .grid-tbl tbody tr:hover { @apply bg-line/30; }
+
+  /* 标签 */
+  .tag { @apply inline-flex items-center gap-1 text-[10.5px] font-semibold rounded px-1.5 py-0.5; }
+  .tag-ok { @apply bg-emerald-500/10 text-emerald-400; }
+  .tag-warn { @apply bg-amber-500/10 text-amber-400; }
+  .tag-danger { @apply bg-red-500/10 text-red-400; }
+  .tag-info { @apply bg-sky-500/10 text-sky-400; }
+  .tag-ai { @apply bg-ai-bg text-ai; }
+  .tag-mute { @apply bg-line/60 text-ink-dim; }
+}
