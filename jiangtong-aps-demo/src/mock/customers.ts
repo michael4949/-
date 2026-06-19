@@ -1,0 +1,23 @@
+// §7.3 客户名（20 家真实命名）
+export const CUSTOMERS: { id: string; name: string; tier: 'A' | 'B' | 'C' }[] = [
+  { id: 'C001', name: '华翔电机',       tier: 'A' },
+  { id: 'C002', name: '海尔智家',       tier: 'A' },
+  { id: 'C003', name: '格力电器',       tier: 'A' },
+  { id: 'C004', name: '美的集团',       tier: 'A' },
+  { id: 'C005', name: '比亚迪',         tier: 'A' },
+  { id: 'C006', name: '宁德时代',       tier: 'A' },
+  { id: 'C007', name: '卧龙电气',       tier: 'A' },
+  { id: 'C008', name: '正泰电器',       tier: 'B' },
+  { id: 'C009', name: '德力西',         tier: 'B' },
+  { id: 'C010', name: '施耐德',         tier: 'A' },
+  { id: 'C011', name: 'ABB',           tier: 'A' },
+  { id: 'C012', name: '西门子',         tier: 'A' },
+  { id: 'C013', name: '远东电缆',       tier: 'B' },
+  { id: 'C014', name: '宝胜股份',       tier: 'B' },
+  { id: 'C015', name: '中航光电',       tier: 'A' },
+  { id: 'C016', name: '立讯精密',       tier: 'A' },
+  { id: 'C017', name: '安费诺',         tier: 'A' },
+  { id: 'C018', name: '长城电工',       tier: 'B' },
+  { id: 'C019', name: '上海电气',       tier: 'A' },
+  { id: 'C020', name: '东方电气',       tier: 'A' },
+];
