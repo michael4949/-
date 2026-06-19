@@ -3,16 +3,16 @@ import { useLocation } from 'react-router-dom';
 import TopBar from './TopBar';
 import SideMenu from './SideMenu';
 import CopilotPanel from '../ai/CopilotPanel';
+import AIExplainModal from '../ai/AIExplainModal';
 import { useCopilotStore } from '../../store/useCopilotStore';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const loc = useLocation();
   const setContext = useCopilotStore((s) => s.setContext);
 
-  // 自动绑定当前页 context（§11.1 行为）
   useEffect(() => {
-    setContext(loc.pathname);
-  }, [loc.pathname, setContext]);
+    setContext(loc.pathname + loc.hash);
+  }, [loc.pathname, loc.hash, setContext]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-bg text-ink overflow-hidden">
@@ -22,6 +22,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 min-w-0 overflow-auto">{children}</main>
       </div>
       <CopilotPanel />
+      <AIExplainModal />
     </div>
   );
 }

@@ -1,18 +1,25 @@
-// 右侧详情：选中工单后展示客户/产品/数量/交期/资源/AI 推荐区（占位）
+// 右侧详情：选中工单后展示信息 + ✨ Agent #2 解释为何这样排
 import { useScheduleStore } from '../../store/useScheduleStore';
+import { useExplainStore } from '../../store/useExplainStore';
 import { fmtDate, fmtDateTime } from '../../utils/format';
 import { PRIORITY_LABEL, STATUS_LABEL } from '../../types/workOrder';
 import { RESOURCES } from '../../mock/productLines';
 import { Sparkles } from 'lucide-react';
+import { mockAIInvoke } from '../../utils/mockApi';
+import AIButton from '../ai/AIButton';
+import type { SchemeExplanation } from '../../mock/agentResponses';
 
 export default function WorkOrderDetail() {
   const selectedId = useScheduleStore((s) => s.selectedId);
   const pending = useScheduleStore((s) => s.pending);
   const scheduled = useScheduleStore((s) => s.scheduled);
   const unschedule = useScheduleStore((s) => s.unschedule);
+  const show = useExplainStore((s) => s.show);
+  const showLoading = useExplainStore((s) => s.showLoading);
 
   const wo = scheduled.find((w) => w.id === selectedId) ?? pending.find((w) => w.id === selectedId);
   const res = wo?.scheduledResourceId ? RESOURCES.find((r) => r.id === wo.scheduledResourceId) : undefined;
+  const isScheduled = !!(wo?.scheduledStart && wo?.scheduledEnd && wo?.scheduledResourceId);
 
   if (!wo) {
     return (
@@ -22,7 +29,41 @@ export default function WorkOrderDetail() {
     );
   }
 
-  const prioColor = wo.priority === 'urgent' ? 'text-danger' : wo.priority === 'important' ? 'text-warn' : 'text-info';
+  const prioColor =
+    wo.priority === 'urgent' ? 'text-danger'
+    : wo.priority === 'important' ? 'text-warn'
+    : 'text-info';
+
+  async function onExplain() {
+    if (!wo || !res || !isScheduled) return;
+    showLoading('排产方案解释');
+    const { output } = await mockAIInvoke({
+      agentId: 'schedule.scheme-explainer',
+      input: { workOrderId: wo.id },
+      context: { wo, resourceName: res.name },
+    });
+    const r = output as SchemeExplanation;
+    show({
+      title: `${r.workOrder.id} · ${r.workOrder.product}`,
+      content: (
+        <div className="space-y-4">
+          <div className="bg-panel2 rounded-md px-4 py-2.5 text-[12px] leading-relaxed">
+            <b className="text-ink">排到：</b>{r.workOrder.resource} ·
+            <b className="text-ink"> 时段：</b>{r.workOrder.window} ·
+            <b className="text-ink"> 数量：</b>{r.workOrder.quantity}kg
+          </div>
+          <p>该工单（{r.workOrder.id}，{r.workOrder.product}）被排到 <b className="text-ink">{r.workOrder.resource} 的 {r.workOrder.window}</b> 时段，主要原因是：</p>
+          <ol className="space-y-3 pl-1 list-decimal list-inside">
+            {r.sections.map((sec, idx) => (
+              <li key={idx} className="leading-7">
+                <b className="text-ink">{sec.title}</b>：{sec.body}
+              </li>
+            ))}
+          </ol>
+        </div>
+      ),
+    });
+  }
 
   return (
     <div className="bg-card border border-line rounded-xl flex flex-col h-full overflow-hidden">
@@ -36,7 +77,7 @@ export default function WorkOrderDetail() {
         <Field label="数量" value={`${wo.quantity} kg`} />
         <Field label="交期" value={fmtDate(wo.dueDate)} />
         <Field label="优先级" value={<span className={`font-semibold ${prioColor}`}>{PRIORITY_LABEL[wo.priority]}</span>} />
-        <Field label="状态"   value={STATUS_LABEL[wo.status]} />
+        <Field label="状态" value={STATUS_LABEL[wo.status]} />
         {wo.scheduledStart && (
           <>
             <hr className="border-line" />
@@ -48,19 +89,16 @@ export default function WorkOrderDetail() {
       </div>
       <div className="border-t border-line p-3 bg-panel2 space-y-2">
         <div className="text-[10.5px] text-ink-faint tracking-wider uppercase">AI 推荐</div>
-        <button
-          disabled
-          className="btn btn-ai w-full opacity-60 cursor-not-allowed"
-          title="将在 Sprint 2 启用（schedule.scheme-explainer）"
-        >
-          <Sparkles size={12} />
-          解释为何这样排
-        </button>
-        {wo.scheduledResourceId && (
-          <button
-            onClick={() => unschedule(wo.id)}
-            className="btn w-full text-ink-dim"
-          >
+        <AIButton
+          label="解释为何这样排"
+          onClick={onExplain}
+          disabled={!isScheduled}
+        />
+        {!isScheduled && (
+          <div className="text-[11px] text-ink-faint">待排工单暂无排产解释</div>
+        )}
+        {isScheduled && (
+          <button onClick={() => unschedule(wo.id)} className="btn w-full text-ink-dim">
             ↺ 退回待排池
           </button>
         )}

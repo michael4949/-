@@ -1,4 +1,4 @@
-// §9 智能排产页状态：当前车间 / 视图 / 选中工单 / KPI / 权重 / 工单(全量+变更补丁)
+// §9 智能排产页状态
 import { create } from 'zustand';
 import type { Workshop, GanttView, ScheduleKPI, AlgorithmWeights } from '../types/schedule';
 import { DEFAULT_WEIGHTS } from '../types/schedule';
@@ -6,8 +6,8 @@ import { INITIAL_KPI, GANTT_START } from '../mock/scheduleData';
 import { WORK_ORDERS, PENDING_WOS } from '../mock/workOrders';
 import type { WorkOrder } from '../types/workOrder';
 import { PRODUCTS } from '../mock/products';
+import type { InsertScheme, AnomalyOptimization } from '../mock/agentResponses';
 
-// 一行内是否区间冲突（左闭右开）
 function overlap(a: { s: number; e: number }, b: { s: number; e: number }) {
   return !(a.e <= b.s || a.s >= b.e);
 }
@@ -18,37 +18,43 @@ interface ScheduleState {
   weights: AlgorithmWeights;
   kpi: ScheduleKPI;
   pending: WorkOrder[];
-  scheduled: WorkOrder[]; // scheduled + in-progress
+  scheduled: WorkOrder[];
   selectedId: string | null;
-  // 高亮闪烁（拖拽冲突 / 应用方案后）
   flashIds: string[];
-  // actions
+  // ===== Sprint 2 新增 =====
+  insertContext: { customer: string; product: string; quantity: number; dueDate: string; text: string } | null;
+  // ===== actions =====
   setWorkshop: (w: Workshop) => void;
   setView: (v: GanttView) => void;
   setWeights: (w: Partial<AlgorithmWeights>) => void;
-  applyWeights: () => Promise<void>; // mock 重排（1-1.5s）+ KPI 重算
+  applyWeights: () => Promise<void>;
   select: (id: string | null) => void;
   moveOrder: (id: string, newResourceId: string, newStartMs: number) => { ok: boolean; conflictWith?: string };
   schedulePending: (id: string, resourceId: string, startMs: number) => { ok: boolean; conflictWith?: string };
   unschedule: (id: string) => void;
+  flash: (ids: string[], durationMs?: number) => void;
+  // Sprint 2:
+  setInsertContext: (text: string) => void;
+  applyInsertScheme: (scheme: InsertScheme, customer: string, product: string, quantity: number) => string;
+  applyAnomalyMerge: (a: AnomalyOptimization) => void;
+  /** 拖拽冲突时让 AI 给一个可放位置（同行向后扫，留 15 分钟 buffer） */
+  aiFindBestSlot: (woId: string, preferResourceId: string) => { resourceId: string; startMs: number; resourceName: string } | null;
 }
 
 function reCalcKPI(scheduled: WorkOrder[], baseKpi: ScheduleKPI): ScheduleKPI {
-  // 简单 mock：换型损失 = 同机台相邻工单 sigKey 不同的次数 / 当日总工单 × 系数；其余微调
   const byRes = new Map<string, WorkOrder[]>();
   for (const w of scheduled) {
     if (!w.scheduledResourceId || !w.scheduledStart) continue;
     if (!byRes.has(w.scheduledResourceId)) byRes.set(w.scheduledResourceId, []);
     byRes.get(w.scheduledResourceId)!.push(w);
   }
-  let changeovers = 0;
-  let totalSlots = 0;
+  let changeovers = 0, totalSlots = 0;
   for (const arr of byRes.values()) {
     arr.sort((a, b) => a.scheduledStart!.getTime() - b.scheduledStart!.getTime());
     for (let i = 1; i < arr.length; i++) {
       totalSlots++;
       const pPrev = PRODUCTS.find((p) => p.code === arr[i - 1].productCode);
-      const pCur = PRODUCTS.find((p) => p.code === arr[i].productCode);
+      const pCur  = PRODUCTS.find((p) => p.code === arr[i].productCode);
       if (pPrev && pCur && pPrev.sigKey !== pCur.sigKey) changeovers++;
     }
   }
@@ -72,6 +78,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   scheduled: [...initScheduled],
   selectedId: null,
   flashIds: [],
+  insertContext: null,
 
   setWorkshop: (workshop) => set({ workshop }),
   setView: (view) => set({ view }),
@@ -85,26 +92,27 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
 
   select: (id) => set({ selectedId: id }),
 
+  flash: (ids, durationMs = 3000) => {
+    set({ flashIds: ids });
+    setTimeout(() => set((st) => ({ flashIds: st.flashIds.filter((x) => !ids.includes(x)) })), durationMs);
+  },
+
   moveOrder: (id, newResourceId, newStartMs) => {
     const s = get();
     const target = s.scheduled.find((w) => w.id === id);
     if (!target?.scheduledStart || !target?.scheduledEnd) return { ok: false };
     const dur = target.scheduledEnd.getTime() - target.scheduledStart.getTime();
     const newEnd = newStartMs + dur;
-    // 同行冲突检测
     const sameRow = s.scheduled.filter((w) => w.id !== id && w.scheduledResourceId === newResourceId && w.scheduledStart && w.scheduledEnd);
     for (const o of sameRow) {
-      if (overlap(
-        { s: newStartMs, e: newEnd },
-        { s: o.scheduledStart!.getTime(), e: o.scheduledEnd!.getTime() },
-      )) return { ok: false, conflictWith: o.id };
+      if (overlap({ s: newStartMs, e: newEnd }, { s: o.scheduledStart!.getTime(), e: o.scheduledEnd!.getTime() }))
+        return { ok: false, conflictWith: o.id };
     }
-    // 落位
     const updated = s.scheduled.map((w) => w.id === id
       ? { ...w, scheduledResourceId: newResourceId, scheduledStart: new Date(newStartMs), scheduledEnd: new Date(newEnd) }
       : w);
-    set({ scheduled: updated, kpi: reCalcKPI(updated, s.kpi), flashIds: [id] });
-    setTimeout(() => set((st) => ({ flashIds: st.flashIds.filter((x) => x !== id) })), 1800);
+    set({ scheduled: updated, kpi: reCalcKPI(updated, s.kpi) });
+    get().flash([id], 1800);
     return { ok: true };
   },
 
@@ -112,27 +120,24 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
     const s = get();
     const wo = s.pending.find((w) => w.id === id);
     if (!wo) return { ok: false };
-    // 估时长（按产品权重 + 速率）：简单按 3 小时
     const durMs = (2 + Math.random() * 4) * 3_600_000;
     const newEnd = startMs + durMs;
     const sameRow = s.scheduled.filter((w) => w.scheduledResourceId === resourceId && w.scheduledStart && w.scheduledEnd);
     for (const o of sameRow) {
-      if (overlap(
-        { s: startMs, e: newEnd },
-        { s: o.scheduledStart!.getTime(), e: o.scheduledEnd!.getTime() },
-      )) return { ok: false, conflictWith: o.id };
+      if (overlap({ s: startMs, e: newEnd }, { s: o.scheduledStart!.getTime(), e: o.scheduledEnd!.getTime() }))
+        return { ok: false, conflictWith: o.id };
     }
-    const scheduled = [...s.scheduled, {
-      ...wo, status: 'scheduled' as const, scheduledResourceId: resourceId,
+    const newWo: WorkOrder = {
+      ...wo, status: 'scheduled', scheduledResourceId: resourceId,
       scheduledStart: new Date(startMs), scheduledEnd: new Date(newEnd),
-    }];
+    };
+    const scheduled = [...s.scheduled, newWo];
     set({
       scheduled,
       pending: s.pending.filter((w) => w.id !== id),
-      flashIds: [id],
       kpi: reCalcKPI(scheduled, s.kpi),
     });
-    setTimeout(() => set((st) => ({ flashIds: st.flashIds.filter((x) => x !== id) })), 1800);
+    get().flash([id], 1800);
     return { ok: true };
   },
 
@@ -144,6 +149,118 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
       scheduled: s.scheduled.filter((w) => w.id !== id),
       pending: [{ ...wo, status: 'pending', scheduledResourceId: undefined, scheduledStart: undefined, scheduledEnd: undefined }, ...s.pending],
     });
+  },
+
+  /* ============ Sprint 2 ============ */
+
+  setInsertContext: (text) => {
+    // 只存原文 + 简单解析，方案数据由 Copilot 调用 mockAIInvoke 时通过 agentResponses 生成
+    set({ insertContext: { customer: '华翔电机', product: 'QA-0.08mm 红色', quantity: 500, dueDate: '下周二 2026-07-21', text } });
+  },
+
+  applyInsertScheme: (scheme, customer, product, quantity) => {
+    const s = get();
+    // 1) 创建"急单"工单（紧急优先级），按方案 schemes 数据落位
+    const id = `XW-${Date.now().toString().slice(-6)}`;
+    const startMs = scheme.start.getTime();
+    const endMs = startMs + scheme.durationMs;
+    const resourceId = scheme.resourceIds[0];                  // 简化：方案 C 取首台，演示足够
+    const dueDate = new Date('2026-07-21T18:00:00');
+    const colorCode = '#EF4444';                               // 急单显眼红
+    const newWo: WorkOrder = {
+      id, productCode: 'QA-0.08-红色', productName: product,
+      productCategory: 'enameled',
+      quantity, dueDate, customer,
+      priority: 'urgent', status: 'scheduled',
+      routeId: 'P1',
+      scheduledResourceId: resourceId,
+      scheduledStart: new Date(startMs),
+      scheduledEnd: new Date(endMs),
+      colorCode,
+    };
+    // 2) 受影响工单：方案影响的若干工单顺序后推（仅闪烁演示，不真实推移；简化）
+    const sameRow = s.scheduled
+      .filter((w) => w.scheduledResourceId === resourceId && w.scheduledStart && w.scheduledStart.getTime() >= startMs)
+      .sort((a, b) => a.scheduledStart!.getTime() - b.scheduledStart!.getTime())
+      .slice(0, scheme.impact.affectedOrders);
+    const offsetMs = scheme.durationMs;
+    const updated = s.scheduled.map((w) => {
+      if (!sameRow.includes(w)) return w;
+      return { ...w, scheduledStart: new Date(w.scheduledStart!.getTime() + offsetMs),
+                     scheduledEnd:   new Date(w.scheduledEnd!.getTime() + offsetMs) };
+    });
+    const finalScheduled = [...updated, newWo];
+    const affectedIds = [id, ...sameRow.map((w) => w.id)];
+    set({
+      scheduled: finalScheduled,
+      kpi: reCalcKPI(finalScheduled, s.kpi),
+      selectedId: id,
+    });
+    // 高亮闪烁 3 秒（§6.2.1）
+    get().flash(affectedIds, 3000);
+    return id;
+  },
+
+  applyAnomalyMerge: (a) => {
+    const s = get();
+    // 3 张 QA-0.3mm 蓝色工单 → 合并到漆包机 #3 连续排
+    // 数据池里的待排+已排都可能没刚好对应这 3 个 ID，简化：直接选 3 个 in-scheduled 同漆种工单
+    const candidates = s.scheduled
+      .filter((w) => w.productCategory === 'enameled' && w.scheduledResourceId !== a.resourceId)
+      .slice(0, 3);
+    if (candidates.length === 0) return;
+    const baseStart = new Date('2026-07-15T14:00:00').getTime();
+    let cursor = baseStart;
+    const HR = 3_600_000;
+    const updated = s.scheduled.map((w) => {
+      const idx = candidates.findIndex((c) => c.id === w.id);
+      if (idx < 0) return w;
+      const dur = Math.max(2 * HR, (candidates[idx].scheduledEnd!.getTime() - candidates[idx].scheduledStart!.getTime()));
+      const newW = {
+        ...w,
+        productName: a.affectedWorkOrders[idx]?.product ?? w.productName,
+        scheduledResourceId: a.resourceId,
+        scheduledStart: new Date(cursor),
+        scheduledEnd: new Date(cursor + dur),
+      };
+      cursor += dur;
+      return newW;
+    });
+    // 直接把 KPI 换型损失改为方案 KPI（§6.2.3 12.6→10.4）
+    set({
+      scheduled: updated,
+      kpi: { ...s.kpi, changeoverLoss: a.kpiAfter },
+      workshop: 'enameling',
+    });
+    get().flash(candidates.map((c) => c.id), 3000);
+  },
+
+  aiFindBestSlot: (woId, preferResourceId) => {
+    const s = get();
+    const wo = s.scheduled.find((w) => w.id === woId);
+    if (!wo?.scheduledStart || !wo?.scheduledEnd) return null;
+    const durMs = wo.scheduledEnd.getTime() - wo.scheduledStart.getTime();
+    // 优先在原行向后扫；不行再换同车间相邻机台
+    const resources = Array.from(new Set(s.scheduled
+      .filter((w) => w.scheduledResourceId)
+      .map((w) => w.scheduledResourceId!)))
+      .filter((id) => id.startsWith(preferResourceId.slice(0, 4))); // 同车间
+    // 先把首选机台放最前
+    const sorted = [preferResourceId, ...resources.filter((r) => r !== preferResourceId)];
+    for (const resId of sorted) {
+      const row = s.scheduled.filter((w) => w.id !== woId && w.scheduledResourceId === resId).sort((a, b) => a.scheduledStart!.getTime() - b.scheduledStart!.getTime());
+      let cursor = wo.scheduledStart.getTime();
+      for (let i = 0; i < row.length; i++) {
+        const next = row[i];
+        if (cursor + durMs <= next.scheduledStart!.getTime()) {
+          return { resourceId: resId, startMs: cursor, resourceName: resId };
+        }
+        cursor = next.scheduledEnd!.getTime() + 15 * 60 * 1000; // 15 min buffer
+      }
+      // 末尾
+      return { resourceId: resId, startMs: cursor, resourceName: resId };
+    }
+    return null;
   },
 }));
 
