@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { ClipboardList, Sparkles, FileDown, Upload, Plus, X } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import BOMSuggestionModal from '../components/ai/BOMSuggestionModal';
 import WorkOrderKPIBar from '../components/workorder/WorkOrderKPIBar';
 import WorkOrderListTable from '../components/workorder/WorkOrderListTable';
@@ -69,6 +70,14 @@ export default function WorkOrdersPage() {
           <button className="btn"><FileDown size={13} />导出</button>
         </div>
       </div>
+
+      {/* ★ v2.2.1 AI 能力 banner（不可关闭，告诉用户本页接入了哪些 Agent） */}
+      <AICapabilityBanner
+        capabilities={[
+          { num: 8, name: '样品工单 BOM 生成', touchpoint: '选中样品工单 → 右侧抽屉 ✨ AI 推荐 BOM 按钮',     type: 'modal' },
+          { num: 9, name: '异常工单识别',     touchpoint: '顶部紫色提示卡 + 表格异常行高亮 + 标记列⚠图标', type: 'observer' },
+        ]}
+      />
 
       {/* AI 提示 · #9 异常工单识别 */}
       {!insightDismissed && (

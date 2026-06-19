@@ -118,6 +118,83 @@ export const ANOMALY_OPT: AnomalyOptimization = {
   kpiBefore: 12.6, kpiAfter: 10.4,
 };
 
+// ★ v2.2.1：多机异常提示（Agent #3 在多车间识别的可优化点）
+//   GanttChart 会按当前车间显示对应行末的 Inline Hint
+export interface AnomalyHint {
+  resourceId: string;
+  message: string;
+  /** 点击后弹 Modal 复用 ANOMALY_OPT 的 explain，但展示不同的资源名与优化点 */
+  detail: {
+    title: string;
+    summary: string;
+    affected: Array<{ id: string; product: string; quantity: number }>;
+    savedHours: number;
+    metricFrom: string;
+    metricTo: string;
+  };
+}
+
+export const ANOMALY_HINTS: AnomalyHint[] = [
+  {
+    resourceId: 'R-EN-03',
+    message: '闲置 30%, 可优化',
+    detail: {
+      title: '漆包机 #3 · 排产可优化',
+      summary: '未来 3 天闲置率约 30%，建议合并 3 张同规格 QA-0.3mm 工单连续生产',
+      affected: ANOMALY_OPT.affectedWorkOrders,
+      savedHours: 2.5,
+      metricFrom: '利用率 70% / 换型损失 12.6%',
+      metricTo: '利用率 88% / 换型损失 10.4%',
+    },
+  },
+  {
+    resourceId: 'R-EN-08',
+    message: '过载 95%, 建议分流',
+    detail: {
+      title: '漆包机 #8 · 排产过载预警',
+      summary: '未来 7 天负荷 95%，待排队 28 张 / 142 吨，建议迁移 12 张同规格工单至 #9 机',
+      affected: [
+        { id: 'WO-2026-1268', product: 'QA-0.5mm 红色', quantity: 500 },
+        { id: 'WO-2026-1272', product: 'QA-0.5mm 红色', quantity: 480 },
+        { id: 'WO-2026-1289', product: 'QA-0.5mm 黄色', quantity: 620 },
+      ],
+      savedHours: 6.0,
+      metricFrom: '负荷 95% / 排队 28 张',
+      metricTo: '负荷 78% / 排队 16 张',
+    },
+  },
+  {
+    resourceId: 'R-DR-12',
+    message: '排队偏多, 可调',
+    detail: {
+      title: '中拉机 #12 · 排队偏多',
+      summary: '排队工单 12 张共 38 吨，建议分流 6 张至 #14 中拉机（空档 35%）',
+      affected: [
+        { id: 'WO-2026-1294', product: '拉丝半成品 Φ1.2mm', quantity: 1200 },
+        { id: 'WO-2026-1301', product: '拉丝半成品 Φ1.4mm', quantity: 1100 },
+      ],
+      savedHours: 4.5,
+      metricFrom: '排队 12 张 / 38 吨',
+      metricTo: '排队 6 张 / 18 吨',
+    },
+  },
+  {
+    resourceId: 'R-ST-02',
+    message: '空档 25%, 可合并',
+    detail: {
+      title: '绞线机 #2 · 空档可合并',
+      summary: '未来 5 天空档率 25%，建议合并 4 张 19 股配股工单连续生产',
+      affected: [
+        { id: 'WO-2026-STR01', product: '19 股 ×Φ0.5mm 镀锡铜绞线', quantity: 500 },
+        { id: 'WO-2026-1325',  product: '19 股 ×Φ0.4mm 铜绞线',     quantity: 480 },
+      ],
+      savedHours: 1.8,
+      metricFrom: '利用率 65% / 空档 25%',
+      metricTo: '利用率 86% / 空档 4%',
+    },
+  },
+];
+
 /* ============ Agent #4: cost.loss-diagnostic ============ */
 export function buildLossDiagnostic(input: { workOrderId: string }): LossDiagnosticOutput {
   const woId = input.workOrderId || 'WO-2024-1234';

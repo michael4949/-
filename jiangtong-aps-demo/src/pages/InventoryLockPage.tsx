@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import ConflictMediatorModal from '../components/ai/ConflictMediatorModal';
 import InventoryKPIBar from '../components/inventory/InventoryKPIBar';
 import LockRecordList from '../components/inventory/LockRecordList';
@@ -56,6 +57,13 @@ export default function InventoryLockPage() {
         </h1>
         <span className="text-[12.5px] text-ink-faint ml-2">物料类型：全部 · 状态：全部</span>
       </div>
+
+      <AICapabilityBanner
+        capabilities={[
+          { num: 12, name: '抢料冲突调解',     touchpoint: '右侧每条冲突卡 ✨ AI 调解 按钮 → 多目标分配 Modal',  type: 'modal' },
+          { num: 13, name: '锁定健康度监测',   touchpoint: '顶部紫色提示卡 + 左侧锁定记录状态列分类（超期/频繁）', type: 'observer' },
+        ]}
+      />
 
       {/* AI 提示 · #13 锁定健康度监测 */}
       {!insightDismissed && (

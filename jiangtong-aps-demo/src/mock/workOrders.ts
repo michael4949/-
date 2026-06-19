@@ -1,11 +1,12 @@
 // §7.2 工单数据规模
-//   总 3000 张：未来 7 天已排 200-400 + 待排 142 + 在制 286 + 其余完工(过去 30 天 + 未来计划)
+//   总 3000 张：未来 7 天已排 280 + 待排 142 + 在制 286 + 完工 ~2292
+//   ★ 修复（v2.2.1）：按 45/38/17 权重均衡分布 enameling/drawing/stranding，让 3 个车间都有数据
 import { mulberry32, pickOne, pickWeighted, intRange } from './seed';
 import { CUSTOMERS } from './customers';
 import { PRODUCTS, type Product } from './products';
 import { RESOURCES } from './productLines';
 import type { WorkOrder, WorkOrderStatus, Priority } from '../types/workOrder';
-import type { Resource } from '../types/schedule';
+import type { Resource, Workshop } from '../types/schedule';
 
 // 基准时间：2026-07-15 09:24（CLAUDE.md §8.1）
 export const NOW = new Date('2026-07-15T09:24:00');
@@ -13,6 +14,30 @@ export const NOW = new Date('2026-07-15T09:24:00');
 const PRIORITIES: { v: Priority; w: number }[] = [
   { v: 'urgent', w: 0.06 }, { v: 'important', w: 0.18 }, { v: 'normal', w: 0.76 },
 ];
+
+// ★ 车间权重：按 RESOURCES 数量比例近似（18:24:8 → 45:38:17）
+const WORKSHOP_WEIGHTS: { v: Workshop; w: number }[] = [
+  { v: 'enameling', w: 0.45 },
+  { v: 'drawing',   w: 0.38 },
+  { v: 'stranding', w: 0.17 },
+];
+
+const ROUTE_BY_WORKSHOP: Record<Workshop, Array<WorkOrder['routeId']>> = {
+  enameling: ['P1'],
+  drawing:   ['P2', 'P4', 'P5'],
+  stranding: ['P3'],
+};
+
+/** ★ 按车间挑产品：先选车间，再在该车间的合规产品池里挑 */
+function pickProductByWorkshop(ws: Workshop, rnd: () => number): Product {
+  const routes = ROUTE_BY_WORKSHOP[ws];
+  const pool = PRODUCTS.filter((p) => routes.includes(p.routeId));
+  return pickOne(pool, rnd) ?? PRODUCTS[0];
+}
+
+function resourcesOf(ws: Workshop): Resource[] {
+  return RESOURCES.filter((r) => r.workshop === ws);
+}
 
 function compatibleResource(p: Product, resources: Resource[]): Resource {
   // 简单工艺路径 → 车间映射
@@ -32,25 +57,19 @@ function genWorkOrders(): WorkOrder[] {
   const list: WorkOrder[] = [];
   let nextId = 1000;
 
-  // ====== 1) 未来 7 天已排产 280 张（200-400 之间，按工艺/产线分布）======
+  // ====== 1) 未来 7 天已排产 280 张（按车间权重均衡分布）======
   const scheduledCount = 280;
-  // 给每个产线在未来 7 天先填充时段
   const occupancy: Map<string, Array<{ start: number; end: number }>> = new Map();
   RESOURCES.forEach((r) => occupancy.set(r.id, []));
 
   for (let i = 0; i < scheduledCount; i++) {
-    const p = pickOne(PRODUCTS, rnd);
-    const compat = (() => {
-      const pool = p.routeId === 'P1' ? RESOURCES.filter((r) => r.workshop === 'enameling')
-                  : p.routeId === 'P3' ? RESOURCES.filter((r) => r.workshop === 'stranding')
-                  : RESOURCES.filter((r) => r.workshop === 'drawing');
-      // 随机轮转
-      return pool[(i + Math.floor(rnd() * pool.length)) % pool.length];
-    })();
-    // 在该机台找一个空段
+    // ★ 先按车间权重选车间，再选产品
+    const ws = pickWeighted(WORKSHOP_WEIGHTS, rnd);
+    const p = pickProductByWorkshop(ws, rnd);
+    const pool = resourcesOf(ws);
+    const compat = pool[(i + Math.floor(rnd() * pool.length)) % pool.length];
     const slots = occupancy.get(compat.id)!;
     const durHours = 2 + Math.floor(rnd() * 6); // 2-7 小时
-    // 最早从今天 08:00 开始（基线 = NOW 当日 08:00）
     const dayStart = new Date(NOW); dayStart.setHours(8, 0, 0, 0);
     let startMin = Math.floor(rnd() * (7 * 24 * 60 - durHours * 60));
     let attempts = 0;
@@ -66,8 +85,6 @@ function genWorkOrders(): WorkOrder[] {
 
     const start = new Date(dayStart.getTime() + startMin * 60_000);
     const end = new Date(dayStart.getTime() + endMin * 60_000);
-
-    // 部分在制（开始时间 < NOW）
     const status: WorkOrderStatus = start < NOW ? 'in-progress' : 'scheduled';
 
     const cust = pickOne(CUSTOMERS, rnd);
@@ -90,11 +107,11 @@ function genWorkOrders(): WorkOrder[] {
     });
   }
 
-  // ====== 2) 待排池 142 张（pending）======
+  // ====== 2) 待排池 142 张（同样按车间权重均衡）======
   for (let i = 0; i < 142; i++) {
-    const p = pickOne(PRODUCTS, rnd);
+    const ws = pickWeighted(WORKSHOP_WEIGHTS, rnd);
+    const p = pickProductByWorkshop(ws, rnd);
     const cust = pickOne(CUSTOMERS, rnd);
-    // 交期：未来 3-12 天
     const dueDate = new Date(NOW.getTime() + (3 + Math.floor(rnd() * 10)) * 86_400_000);
     list.push({
       id: fmtId(nextId++),
@@ -111,17 +128,12 @@ function genWorkOrders(): WorkOrder[] {
     });
   }
 
-  // ====== 3) 在制工单的剩余（in-progress 总 286 张，已生成约 100；再补 ~190 张过去几天开工的）======
-  // 简化：从已生成的 scheduled 中再补一些"刚开工"，最终 in-progress 数 ≈ 286
-  // 这里我们再生成 190 张过去 1-2 天开工、未来几小时完工的
+  // ====== 3) 在制工单补 190 张（按车间权重均衡）======
   for (let i = 0; i < 190; i++) {
-    const p = pickOne(PRODUCTS, rnd);
-    const compat = (() => {
-      const pool = p.routeId === 'P1' ? RESOURCES.filter((r) => r.workshop === 'enameling')
-                  : p.routeId === 'P3' ? RESOURCES.filter((r) => r.workshop === 'stranding')
-                  : RESOURCES.filter((r) => r.workshop === 'drawing');
-      return pickOne(pool, rnd);
-    })();
+    const ws = pickWeighted(WORKSHOP_WEIGHTS, rnd);
+    const p = pickProductByWorkshop(ws, rnd);
+    const pool = resourcesOf(ws);
+    const compat = pickOne(pool, rnd);
     const start = new Date(NOW.getTime() - (1 + Math.floor(rnd() * 36)) * 3_600_000);
     const end = new Date(start.getTime() + (2 + Math.floor(rnd() * 8)) * 3_600_000);
     const cust = pickOne(CUSTOMERS, rnd);
@@ -146,7 +158,8 @@ function genWorkOrders(): WorkOrder[] {
   // ====== 4) 已完工 ~2388 张（凑足 3000）======
   const remain = 3000 - list.length;
   for (let i = 0; i < remain; i++) {
-    const p = pickOne(PRODUCTS, rnd);
+    const ws = pickWeighted(WORKSHOP_WEIGHTS, rnd);
+    const p = pickProductByWorkshop(ws, rnd);
     const compat = compatibleResource(p, RESOURCES);
     const daysAgo = 1 + Math.floor(rnd() * 60);
     const start = new Date(NOW.getTime() - daysAgo * 86_400_000);

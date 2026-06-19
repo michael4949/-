@@ -30,23 +30,8 @@ const STRAND_COUNTS = [7, 19, 37];
 
 function build(): Product[] {
   const list: Product[] = [];
-  // 漆包：选若干典型组合，控制总量
-  for (const t of ENAMEL_TYPES) {
-    for (const d of ENAMEL_DIAMETERS) {
-      for (const c of ['红色', '蓝色', '黄色', '透明']) {
-        list.push({
-          code: `${t}-${d.toFixed(2)}-${c}`,
-          name: `${t}-${d}mm ${c}`,
-          category: 'enameled',
-          routeId: 'P1',
-          sigKey: `${t}|${d}`,
-          unitWeightKg: 300 + Math.round((d * 800)),
-          colorCode: COLOR_HEX[c] ?? '#FF6B35',
-        });
-      }
-    }
-  }
-  // 镀锡线
+  // ★ v2.2.1：先放 P2-P5 产品（少数派），再放 P1 漆包，保证 slice 时不会切掉其它工艺
+  // 镀锡线 P2
   for (const d of TIN_DIAMETERS) {
     for (const sub of ['标准镀锡', '加厚镀锡']) {
       list.push({
@@ -60,12 +45,12 @@ function build(): Product[] {
       });
     }
   }
-  // 铜绞线
+  // 铜绞线 P3
   for (const d of STRAND_DIAMS) {
     for (const n of STRAND_COUNTS) {
       list.push({
         code: `STR-${d}x${n}`,
-        name: `${d}mm×${n}`,
+        name: `${n} 股 ×Φ${d}mm 铜绞线`,
         category: 'stranded',
         routeId: 'P3',
         sigKey: `STR|${d}|${n}`,
@@ -74,7 +59,7 @@ function build(): Product[] {
       });
     }
   }
-  // 拉丝半成品
+  // 拉丝半成品 P4
   for (const d of [1.0, 1.2, 1.4, 1.6, 2.0, 2.6]) {
     list.push({
       code: `DRW-${d}`,
@@ -98,7 +83,23 @@ function build(): Product[] {
       colorCode: '#92400E',
     });
   }
-  return list.slice(0, 200);
+  // 漆包 P1 放最后（数量最多）
+  for (const t of ENAMEL_TYPES) {
+    for (const d of ENAMEL_DIAMETERS) {
+      for (const c of ['红色', '蓝色', '黄色', '透明']) {
+        list.push({
+          code: `${t}-${d.toFixed(2)}-${c}`,
+          name: `${t}-${d}mm ${c}`,
+          category: 'enameled',
+          routeId: 'P1',
+          sigKey: `${t}|${d}`,
+          unitWeightKg: 300 + Math.round((d * 800)),
+          colorCode: COLOR_HEX[c] ?? '#FF6B35',
+        });
+      }
+    }
+  }
+  return list;  // 保留全部产品（P1 + P2-P5 共 ~316 种），不再 slice
 }
 
 export const PRODUCTS: Product[] = build();

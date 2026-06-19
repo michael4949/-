@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Boxes } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import ShortageRootCauseModal from '../components/ai/ShortageRootCauseModal';
 import MaterialKPIBar from '../components/material/MaterialKPIBar';
 import ShortageList from '../components/material/ShortageList';
@@ -58,6 +59,13 @@ export default function MaterialCheckPage() {
         </h1>
         <span className="text-[12.5px] text-ink-faint ml-2">时间窗：未来 7 天 · 2026-07-15 ~ 07-21</span>
       </div>
+
+      <AICapabilityBanner
+        capabilities={[
+          { num: 10, name: '缺料根因分析',   touchpoint: '左侧每张缺料工单卡片下方 ✨ AI 根因分析 按钮 → 报告 Modal + Copilot 追问', type: 'modal' },
+          { num: 11, name: '齐套风险预测',   touchpoint: '顶部紫色提示卡 + 齐套时间轴热度颜色（红/黄/绿）',                            type: 'observer' },
+        ]}
+      />
 
       {/* AI 提示 · #11 齐套风险预测 */}
       {!insightDismissed && (

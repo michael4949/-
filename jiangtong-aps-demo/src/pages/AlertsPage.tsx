@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 import AlertKPIBar from '../components/alerts/AlertKPIBar';
 import AlertEventTable from '../components/alerts/AlertEventTable';
 import AlertCauseExplainModal from '../components/ai/AlertCauseExplainModal';
+import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
 import type { AlertCauseExplainOutput } from '../mock/agentResponses.sprint6';
@@ -44,6 +45,13 @@ export default function AlertsPage() {
         </h1>
         <span className="text-[12.5px] text-ink-faint ml-2">实时事件 · 每分钟刷新</span>
       </div>
+
+      <AICapabilityBanner
+        capabilities={[
+          { num: 19, name: '预警归因 Agent',   touchpoint: '每条预警右侧 ✨ AI 归因 按钮 → 根因报告 Modal',         type: 'modal' },
+          { num: 20, name: '预警噪声过滤',     touchpoint: '系统设置 → AI 治理 Tab → 预警优化建议子页',             type: 'observer' },
+        ]}
+      />
 
       <AlertKPIBar />
 

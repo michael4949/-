@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import MitigationGeneratorModal from '../components/ai/MitigationGeneratorModal';
 import CapacityKPIBar from '../components/capacity/CapacityKPIBar';
 import CapacityHeatmap from '../components/capacity/CapacityHeatmap';
@@ -56,6 +57,13 @@ export default function CapacityPage() {
         </h1>
         <span className="text-[12.5px] text-ink-faint ml-2">时间窗：未来 14 天 · 2026-07-15 ~ 07-28</span>
       </div>
+
+      <AICapabilityBanner
+        capabilities={[
+          { num: 14, name: '瓶颈预测',         touchpoint: '顶部紫色提示卡 + 瓶颈识别列表行（按严重度排序）',         type: 'observer' },
+          { num: 15, name: '缓解建议生成',     touchpoint: '瓶颈列表每行 ✨ 生成缓解方案 按钮 → 3 方案对比 Modal',  type: 'modal' },
+        ]}
+      />
 
       {/* AI 提示 · #14 瓶颈预测 */}
       {!insightDismissed && (

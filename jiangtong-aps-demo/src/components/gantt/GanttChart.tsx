@@ -7,7 +7,7 @@ import { getResourcesByWorkshop } from '../../mock/productLines';
 import type { WorkOrder } from '../../types/workOrder';
 import { fmtDate, fmtDateTime } from '../../utils/format';
 import { GANTT_DAYS, HOUR_WIDTH_WEEK, HOUR_WIDTH_DAY } from '../../mock/scheduleData';
-import { ANOMALY_OPT, type AnomalyOptimization } from '../../mock/agentResponses';
+import { ANOMALY_OPT, ANOMALY_HINTS, type AnomalyOptimization, type AnomalyHint } from '../../mock/agentResponses';
 import AIHintInline from '../ai/AIHintInline';
 
 const ROW_H = 44;
@@ -69,6 +69,16 @@ export default function GanttChart() {
     if (workshop !== 'enameling') return -1;
     return resources.findIndex((r) => r.id === ANOMALY_OPT.resourceId);
   }, [resources, workshop]);
+
+  // ★ v2.2.1：当前车间所有 Agent #3 异常 Hint 的资源索引表
+  const anomalyHintByRow = useMemo(() => {
+    const map = new Map<number, AnomalyHint>();
+    for (const h of ANOMALY_HINTS) {
+      const idx = resources.findIndex((r) => r.id === h.resourceId);
+      if (idx >= 0) map.set(idx, h);
+    }
+    return map;
+  }, [resources]);
 
   // 进入排产页时若 hash 带 #anomaly 标记 → 自动滚动到漆包机 #3 行
   useEffect(() => {
@@ -176,15 +186,45 @@ export default function GanttChart() {
   }
 
   // Agent #3 异常 Hint 点击：弹 Explain Modal
-  function onAnomalyHintClick() {
-    const opt = ANOMALY_OPT;
+  function onAnomalyHintClick(hint?: AnomalyHint) {
+    // 漆包机 #3 走原 ANOMALY_OPT 完整流程（含 applyAnomalyMerge）；其它机走 ANOMALY_HINTS 简要展示
+    if (!hint || hint.resourceId === ANOMALY_OPT.resourceId) {
+      const opt = ANOMALY_OPT;
+      showExplain({
+        title: `${opt.resource} · 排产可优化`,
+        content: (
+          <div className="space-y-3">
+            <p>检测到 <b className="text-ink">{opt.resource}</b> 在未来 3 天闲置率约 <b className="text-warn">{opt.idle}%</b>。建议将以下 3 张同规格工单合并到 {opt.resource} 连续生产：</p>
+            <ul className="space-y-1 pl-1">
+              {opt.affectedWorkOrders.map((w) => (
+                <li key={w.id} className="flex items-baseline gap-2 text-[12.5px]">
+                  <span className="text-ai">·</span>
+                  <span className="font-mono text-ink-dim">{w.id}</span>
+                  <span className="text-ink">{w.product}</span>
+                  <span className="text-ink-faint">{w.quantity}kg</span>
+                </li>
+              ))}
+            </ul>
+            <p>预计可节省 <b className="text-ai">{opt.savedHours} 小时</b>换型时间，{opt.resource} 利用率从 {opt.utilizationBefore}% → <b className="text-ok">{opt.utilizationAfter}%</b>，换型损失 {opt.kpiBefore}% → <b className="text-ok">{opt.kpiAfter}%</b>。</p>
+          </div>
+        ),
+        primaryAction: {
+          label: '应用建议',
+          onClick: () => {
+            applyAnomalyMerge(opt);
+            useExplainStore.getState().close();
+          },
+        },
+      });
+      return;
+    }
     showExplain({
-      title: `${opt.resource} · 排产可优化`,
+      title: hint.detail.title,
       content: (
         <div className="space-y-3">
-          <p>检测到 <b className="text-ink">{opt.resource}</b> 在未来 3 天闲置率约 <b className="text-warn">{opt.idle}%</b>。建议将以下 3 张同规格工单合并到 {opt.resource} 连续生产：</p>
+          <p className="leading-relaxed">{hint.detail.summary}</p>
           <ul className="space-y-1 pl-1">
-            {opt.affectedWorkOrders.map((w) => (
+            {hint.detail.affected.map((w) => (
               <li key={w.id} className="flex items-baseline gap-2 text-[12.5px]">
                 <span className="text-ai">·</span>
                 <span className="font-mono text-ink-dim">{w.id}</span>
@@ -193,16 +233,12 @@ export default function GanttChart() {
               </li>
             ))}
           </ul>
-          <p>预计可节省 <b className="text-ai">{opt.savedHours} 小时</b>换型时间，{opt.resource} 利用率从 {opt.utilizationBefore}% → <b className="text-ok">{opt.utilizationAfter}%</b>，换型损失 {opt.kpiBefore}% → <b className="text-ok">{opt.kpiAfter}%</b>。</p>
+          <div className="rounded-md bg-panel2 p-2.5 text-[12px] leading-relaxed">
+            <b className="text-ink">预期收益：</b>节省 <b className="text-ai">{hint.detail.savedHours} 小时</b>；
+            指标 <span className="text-ink-faint line-through">{hint.detail.metricFrom}</span> → <b className="text-ok">{hint.detail.metricTo}</b>
+          </div>
         </div>
       ),
-      primaryAction: {
-        label: '应用建议',
-        onClick: () => {
-          applyAnomalyMerge(opt);
-          useExplainStore.getState().close();
-        },
-      },
     });
   }
 
@@ -227,19 +263,22 @@ export default function GanttChart() {
           资源 / 时间
         </div>
         <div className="overflow-hidden" ref={scrollRef}>
-          {resources.map((r, idx) => (
-            <div key={r.id} className="border-b border-line flex items-center px-3 gap-1.5"
-                 style={{ height: ROW_H }}>
-              <div className="text-[12.5px] font-medium leading-tight flex-none">{r.name}</div>
-              {/* Agent #3 漆包机 #3 行末 Inline Hint */}
-              {idx === anomalyRowIdx && (
-                <AIHintInline
-                  hint={{ id: 'anomaly-1', resourceId: r.id, type: 'idle', message: '闲置 30%, 可优化' }}
-                  onClick={onAnomalyHintClick}
-                />
-              )}
-            </div>
-          ))}
+          {resources.map((r, idx) => {
+            const hint = anomalyHintByRow.get(idx);
+            return (
+              <div key={r.id} className="border-b border-line flex items-center px-3 gap-1.5"
+                   style={{ height: ROW_H }}>
+                <div className="text-[12.5px] font-medium leading-tight flex-none">{r.name}</div>
+                {/* ★ Agent #3 多机异常 Inline Hint（漆包/拉丝/绞线各车间均可有） */}
+                {hint && (
+                  <AIHintInline
+                    hint={{ id: `anomaly-${r.id}`, resourceId: r.id, type: idx === anomalyRowIdx ? 'idle' : 'optimization', message: hint.message }}
+                    onClick={() => onAnomalyHintClick(hint)}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
