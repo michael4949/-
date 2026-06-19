@@ -918,6 +918,32 @@ svg { display: block; }
 .kan-bar i { display: block; height: 100%; background: var(--grad-btn); width: var(--w); }
 
 @media (max-width: 860px) { .stage-nav { padding: 8px 10px; } }
+/* ---------- 销冠AI助手 · 交互样式 ---------- */
+.fx-hide { display: none; }
+.fx-in { animation: agfade .35s ease; }
+button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green) !important;
+  border-color: rgba(24,185,122,.3) !important; box-shadow: none !important; cursor: default; }
+.sc-toggle { border: 1px solid var(--line-2); background: #fff; color: var(--muted);
+  border-radius: 999px; padding: 6px 13px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; }
+.sc-toggle:hover { border-color: rgba(90,91,240,.4); }
+.sc-toggle.on { background: var(--grad-btn); color: #fff; border-color: transparent; }
+.match-cust { border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+  border-radius: 999px; padding: 5px 13px; font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; }
+.match-cust:hover { border-color: rgba(90,91,240,.4); }
+.match-cust.active { background: rgba(90,91,240,.1); color: var(--brand); border-color: rgba(90,91,240,.45); }
+.push-item { font-size: 11.5px; color: var(--green); padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.push-item:last-child { border-bottom: none; }
+.prac-opts { display: flex; flex-direction: column; gap: 7px; margin-top: 9px; }
+.prac-opt { text-align: left; border: 1px solid var(--line-2); background: #fff; border-radius: 10px;
+  padding: 8px 12px; font-size: 12.5px; color: var(--ink); cursor: pointer; transition: .2s; font-family: inherit; }
+.prac-opt:hover { border-color: var(--brand); }
+.prac-opt.chosen { border-color: var(--green); background: rgba(24,185,122,.06); }
+.prac-opt:disabled { opacity: .45; cursor: default; }
+.prac-bubble { font-size: 12.5px; line-height: 1.6; border-radius: 11px; padding: 9px 12px;
+  margin-top: 9px; max-width: 92%; }
+.prac-bubble.cust { background: #fff; border: 1px solid var(--line); }
+.try-score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.try-toggles { display: flex; flex-wrap: wrap; gap: 7px; }
 </style>
 </head>
 <body>
@@ -1666,7 +1692,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
         </div>
       </section>
 
-      <!-- ============ 视图:销冠AI助手（销售全流程 AI 赋能）============ -->
+      <!-- ============ 视图:销冠AI助手（销售全流程 · 可交互）============ -->
       <section class="view" id="view-sales">
         <div class="sales-shell">
           <div class="stage-nav" id="stageNav">
@@ -1683,79 +1709,85 @@ curl https://api.dgg.ai/v1/agents/dispatch \
             <!-- ===== 阶段1 线索池 ===== -->
             <div class="stage active" id="stg-leads"><div class="page">
               <div class="kpi-row">
-                <div class="kpi"><div class="kpi-label">今日新进线索</div><div class="kpi-num">38</div><div class="kpi-sub">较昨日 <b class="up">↑9</b></div></div>
+                <div class="kpi"><div class="kpi-label">今日新进线索</div><div class="kpi-num" data-counter="newLeads">38</div><div class="kpi-sub">较昨日 <b class="up">↑9</b></div></div>
                 <div class="kpi"><div class="kpi-label">自动去重合并</div><div class="kpi-num">12</div><div class="kpi-sub">同企业 / 同人识别</div></div>
                 <div class="kpi"><div class="kpi-label">无效线索过滤</div><div class="kpi-num">7</div><div class="kpi-sub">同行 / 应聘 / 空号</div></div>
-                <div class="kpi"><div class="kpi-label">官网访客识别</div><div class="kpi-num">5</div><div class="kpi-sub">主动转为线索</div></div>
+                <div class="kpi"><div class="kpi-label">官网访客识别</div><div class="kpi-num">5</div><div class="kpi-sub">可转为线索</div></div>
               </div>
               <div class="pgrid g2 mt">
                 <div class="pcard">
-                  <div class="pc-head"><h3>全渠道线索归集</h3><span class="pc-extra">实时入库 · 自动去重合并</span></div>
+                  <div class="pc-head"><h3>全渠道线索归集</h3><span class="pc-extra">实时入库 · 自动去重</span></div>
                   <table class="table"><thead><tr><th>来源</th><th>今日</th><th>占比</th><th>状态</th></tr></thead><tbody>
                     <tr><td>官网表单 / 落地页</td><td>11</td><td>29%</td><td><span class="pill pill-green">实时</span></td></tr>
                     <tr><td>巨量引擎 / 腾讯广告</td><td>9</td><td>24%</td><td><span class="pill pill-green">已接入</span></td></tr>
                     <tr><td>企微获客活码</td><td>7</td><td>18%</td><td><span class="pill pill-green">已接入</span></td></tr>
                     <tr><td>展会 / 活动扫码</td><td>5</td><td>13%</td><td><span class="pill pill-green">OCR 入库</span></td></tr>
-                    <tr><td>400 电话 / 在线咨询</td><td>3</td><td>8%</td><td><span class="pill pill-blue">转写入库</span></td></tr>
-                    <tr><td>转介绍 / 老客户</td><td>2</td><td>5%</td><td><span class="pill pill-amber">高质量</span></td></tr>
-                    <tr><td>外采名单导入</td><td>1</td><td>3%</td><td><span class="pill pill-gray">待清洗</span></td></tr>
+                    <tr><td>400 电话 / 转介绍 / 外采</td><td>6</td><td>16%</td><td><span class="pill pill-blue">已接入</span></td></tr>
                   </tbody></table>
                 </div>
                 <div class="pcard">
-                  <div class="pc-head"><h3>AI 线索清洗与补全</h3><span class="pill pill-blue">示例</span></div>
+                  <div class="pc-head"><h3>AI 线索清洗与补全</h3><button class="btn-grad" data-fx="reveal" data-target="enrichRes" data-done="✓ 已补全" data-msg="已补全企业画像与采购信号">AI 一键补全</button></div>
                   <div class="pc-body">
                     <div class="ag-note"><b>原始线索：</b>「张工 138****6621 嘉兴 想了解产线」——信息极少，难判断</div>
-                    <div style="margin:9px 0;font-size:12px;color:var(--muted)">↓ 天眼查 + 全网信息自动补全为可决策画像</div>
-                    <div class="lrow" style="padding-left:0;padding-right:0"><span class="lr-ico" style="--tint:#E9F9F1">🏢</span><div class="lr-main"><div class="lr-tt">嘉兴远东自动化设备有限公司</div><div class="lr-sub">自动化设备 · 约 500 人 · 年产值 3 亿 · 张工 = 总经理</div></div></div>
-                    <div class="lrow" style="padding-left:0;padding-right:0"><span class="lr-ico" style="--tint:#FFF4E5">📡</span><div class="lr-main"><div class="lr-tt">采购信号</div><div class="lr-sub">近期招聘「工艺工程师」×3、新闻「扩产」→ 正处改造采购期</div></div><span class="pill pill-green">高潜</span></div>
-                    <div class="ag-note warn" style="margin-top:10px"><b>已自动过滤：</b>同行套方案 3 条、应聘简历 2 条、空号 2 条，不占用销售精力。</div>
+                    <div id="enrichRes" class="fx-hide" style="margin-top:10px">
+                      <div class="lrow" style="padding-left:0;padding-right:0"><span class="lr-ico" style="--tint:#E9F9F1">🏢</span><div class="lr-main"><div class="lr-tt">嘉兴远东自动化设备有限公司</div><div class="lr-sub">自动化设备 · 约 500 人 · 年产值 3 亿 · 张工 = 总经理</div></div><span class="pill pill-green">已补全</span></div>
+                      <div class="lrow" style="padding-left:0;padding-right:0"><span class="lr-ico" style="--tint:#FFF4E5">📡</span><div class="lr-main"><div class="lr-tt">采购信号</div><div class="lr-sub">近期招「工艺工程师」×3、新闻「扩产」→ 正处改造采购期</div></div><span class="pill pill-green">高潜</span></div>
+                      <div class="ag-note warn" style="margin-top:8px"><b>同步过滤：</b>同行套方案 3 条、应聘 2 条、空号 2 条，不占用销售精力。</div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div class="pcard mt">
-                <div class="pc-head"><h3>官网 / 私域访客识别</h3><span class="pc-extra">谁在反复看你 → 主动转线索</span></div>
-                <table class="table"><thead><tr><th>企业（IP / 账号识别）</th><th>浏览行为</th><th>热度</th><th>建议动作</th></tr></thead><tbody>
-                  <tr><td>宁波某汽配（未留资）</td><td>3 天看了 5 次「产线改造」+ 报价页</td><td><span class="pill pill-green">极高</span></td><td>主动外呼挖掘</td></tr>
-                  <tr><td>台州某机械</td><td>下载白皮书 + 看案例 2 次</td><td><span class="pill pill-blue">高</span></td><td>企微触达</td></tr>
-                  <tr><td>金华某装备</td><td>反复停留「价格」页</td><td><span class="pill pill-amber">中</span></td><td>推送优惠政策</td></tr>
+                <div class="pc-head"><h3>官网 / 私域访客识别</h3><span class="pc-extra">谁在反复看你 → 一键转线索</span></div>
+                <table class="table"><thead><tr><th>企业（识别）</th><th>浏览行为</th><th>热度</th><th style="text-align:right">操作</th></tr></thead><tbody>
+                  <tr><td>宁波某汽配（未留资）</td><td>3 天看 5 次「产线改造」+ 报价页</td><td><span class="pill pill-green">极高</span></td><td style="text-align:right"><button class="btn-mini" data-fx="toLead">转线索</button></td></tr>
+                  <tr><td>台州某机械</td><td>下载白皮书 + 看案例 2 次</td><td><span class="pill pill-blue">高</span></td><td style="text-align:right"><button class="btn-mini" data-fx="toLead">转线索</button></td></tr>
+                  <tr><td>金华某装备</td><td>反复停留「价格」页</td><td><span class="pill pill-amber">中</span></td><td style="text-align:right"><button class="btn-mini" data-fx="toLead">转线索</button></td></tr>
                 </tbody></table>
               </div>
             </div></div>
 
             <!-- ===== 阶段2 评分·分配 ===== -->
             <div class="stage" id="stg-score"><div class="page">
-              <div class="pgrid g2">
-                <div class="pcard">
-                  <div class="pc-head"><h3>线索打分模型</h3><span class="pc-extra">BANT + 行为意向 · 满分 100</span></div>
-                  <div class="wfac"><span class="wfac-name">预算匹配 Budget</span><span class="wfac-bar"><i style="--w:25%"></i></span><span class="wfac-val">25</span></div>
-                  <div class="wfac"><span class="wfac-name">决策权 Authority</span><span class="wfac-bar"><i style="--w:20%"></i></span><span class="wfac-val">20</span></div>
-                  <div class="wfac"><span class="wfac-name">需求明确度 Need</span><span class="wfac-bar"><i style="--w:25%"></i></span><span class="wfac-val">25</span></div>
-                  <div class="wfac"><span class="wfac-name">时间紧迫度 Timeline</span><span class="wfac-bar"><i style="--w:15%"></i></span><span class="wfac-val">15</span></div>
-                  <div class="wfac"><span class="wfac-name">行为意向信号</span><span class="wfac-bar"><i style="--w:15%"></i></span><span class="wfac-val">15</span></div>
-                  <div class="pc-body"><div class="ag-note">≥85 判 A（立即转人工 / AE）、70–84 判 B、&lt;70 判 C。已用 3,000 条历史成交 / 流失线索回测，A 类命中率 <b>86%</b>。</div></div>
+              <div class="pcard">
+                <div class="pc-head"><h3>AI 实时打分（试算）</h3><span class="pc-extra">勾选客户特征，分数与分级实时重算</span></div>
+                <div class="pc-body">
+                  <div class="try-score">
+                    <div class="cop-ring" id="scoreTryRing" style="--deg:360deg;--rc:var(--green)"><b id="scoreTryNum">100</b></div>
+                    <div style="flex:1;min-width:200px">
+                      <div style="margin-bottom:9px"><span class="pill pill-green" id="scoreTryGrade">A 类 · 立即转人工</span></div>
+                      <div class="try-toggles">
+                        <button class="sc-toggle on" data-w="25">预算充足</button>
+                        <button class="sc-toggle on" data-w="20">见到决策人</button>
+                        <button class="sc-toggle on" data-w="25">需求明确</button>
+                        <button class="sc-toggle on" data-w="15">采购紧急</button>
+                        <button class="sc-toggle on" data-w="15">高频互动</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ag-note" style="margin-top:12px">≥85=A（立即转人工/AE）、70–84=B（高意向序列）、&lt;70=C（长期培育）。模型已用 3,000 条历史线索回测，A 类命中率 <b>86%</b>。试着取消「见到决策人」看分数怎么变。</div>
                 </div>
+              </div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>智能线索分配</h3><span class="pill pill-blue">已分配 <b data-counter="assigned">0</b></span><span class="pc-extra">按擅长行业 × 历史胜率 × 当前负荷</span></div>
+                <table class="table"><thead><tr><th>线索（分数/级）</th><th>推荐销售</th><th>匹配理由</th><th>匹配度</th><th style="text-align:right">操作</th></tr></thead><tbody>
+                  <tr><td>东莞精工机械 <span class="pill pill-green">94/A</span></td><td>小林</td><td>擅长汽配 · 该行业胜率 38%</td><td><span class="pill pill-green">95%</span></td><td style="text-align:right"><button class="btn-grad" data-fx="dispatch">派发</button></td></tr>
+                  <tr><td>嘉兴远东自动化 <span class="pill pill-green">88/A</span></td><td>小周</td><td>有自动化行业老客户资源</td><td><span class="pill pill-green">92%</span></td><td style="text-align:right"><button class="btn-grad" data-fx="dispatch">派发</button></td></tr>
+                  <tr><td>台州精密机械 <span class="pill pill-blue">76/B</span></td><td>小陈</td><td>当前负荷低 · 擅长技术型客户</td><td><span class="pill pill-blue">88%</span></td><td style="text-align:right"><button class="btn-grad" data-fx="dispatch">派发</button></td></tr>
+                </tbody></table>
+                <div class="pc-body"><div class="ag-note">替代「轮流派单」，让对的线索进对的人手里。某客户实测整体转化率提升约 <b>20%</b>。</div></div>
+              </div>
+              <div class="pgrid g2 mt">
                 <div class="pcard">
                   <div class="pc-head"><h3>成交概率预测</h3><span class="pc-extra">找「像已成交客户」的高潜</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🔮</span><div class="lr-main"><div class="lr-tt">嘉兴远东自动化</div><div class="lr-sub">与已成交「宁波远东汽配」相似度 91%（行业 / 规模 / 行为）</div></div><span class="pill pill-green">赢率高</span></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🔮</span><div class="lr-main"><div class="lr-tt">嘉兴远东自动化</div><div class="lr-sub">与已成交「宁波远东汽配」相似度 91%</div></div><span class="pill pill-green">赢率高</span></div>
                   <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🔮</span><div class="lr-main"><div class="lr-tt">东莞精工机械</div><div class="lr-sub">与已成交「佛山合力」相似度 84%</div></div><span class="pill pill-blue">赢率中高</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🔮</span><div class="lr-main"><div class="lr-tt">温州精密模具</div><div class="lr-sub">特征接近，但规模偏小</div></div><span class="pill pill-amber">赢率中</span></div>
-                  <div class="pc-body"><div class="ag-note">基于历史成交客户的行业 / 规模 / 行为建模，自动标记「高潜双胞胎」，优先投入。</div></div>
                 </div>
-              </div>
-              <div class="pcard mt">
-                <div class="pc-head"><h3>智能线索分配</h3><span class="pc-extra">按擅长行业 × 历史胜率 × 当前负荷，自动匹配最优销售</span></div>
-                <table class="table"><thead><tr><th>线索（分数 / 级）</th><th>推荐销售</th><th>匹配理由</th><th>匹配度</th><th style="text-align:right">操作</th></tr></thead><tbody>
-                  <tr><td>东莞精工机械 <span class="pill pill-green">94 / A</span></td><td>小林</td><td>擅长汽配行业 · 该行业胜率 38%</td><td><span class="pill pill-green">95%</span></td><td style="text-align:right"><button class="btn-grad js-toast" data-toast="已派发给小林，并推送线索画像与首触话术">派发</button></td></tr>
-                  <tr><td>嘉兴远东自动化 <span class="pill pill-green">88 / A</span></td><td>小周</td><td>有自动化行业老客户资源可借力</td><td><span class="pill pill-green">92%</span></td><td style="text-align:right"><button class="btn-grad js-toast" data-toast="已派发给小周">派发</button></td></tr>
-                  <tr><td>台州精密机械 <span class="pill pill-blue">76 / B</span></td><td>小陈</td><td>当前负荷低 · 擅长技术型客户</td><td><span class="pill pill-blue">88%</span></td><td style="text-align:right"><button class="btn-grad js-toast" data-toast="已派发给小陈">派发</button></td></tr>
-                </tbody></table>
-                <div class="pc-body"><div class="ag-note">替代「轮流派单」：让对的线索进对的人手里。某客户实测整体转化率提升约 <b>20%</b>。</div></div>
-              </div>
-              <div class="pcard mt">
-                <div class="pc-head"><h3>今日主动推送给销售</h3><span class="pill pill-amber">最该联系 Top 5</span><span class="pc-extra">已推送到工作台 / 企微</span></div>
-                <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">①</span><div class="lr-main"><div class="lr-tt">陈总 · 东莞精工机械</div><div class="lr-sub">A 类 · 现场拜访后 48h 黄金期，建议今天寄 SOW</div></div><span class="pill pill-green">94</span></div>
-                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">②</span><div class="lr-main"><div class="lr-tt">张总 · 嘉兴远东自动化</div><div class="lr-sub">新线索 · 总经理本人，黄金 5 分钟未触达</div></div><span class="pill pill-green">88</span></div>
-                <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">③</span><div class="lr-main"><div class="lr-tt">王经理 · 广州瑞和零售</div><div class="lr-sub">3 次打开报价邮件，购买意愿升温</div></div><span class="pill pill-blue">82</span></div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>今日主动推送给销售</h3><span class="pill pill-amber">Top 3</span></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">①</span><div class="lr-main"><div class="lr-tt">陈总 · 东莞精工机械</div><div class="lr-sub">拜访后 48h 黄金期，今天寄 SOW</div></div><span class="pill pill-green">94</span></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">②</span><div class="lr-main"><div class="lr-tt">张总 · 嘉兴远东自动化</div><div class="lr-sub">新线索 · 总经理本人，黄金 5 分钟</div></div><span class="pill pill-green">88</span></div>
+                </div>
               </div>
             </div></div>
 
@@ -1767,44 +1799,45 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 <div class="kpi"><div class="kpi-label">激活沉默线索</div><div class="kpi-num">14</div><div class="kpi-sub">本月</div></div>
                 <div class="kpi"><div class="kpi-label">行为回流加分</div><div class="kpi-num">23</div><div class="kpi-sub">自动提醒跟进</div></div>
               </div>
-              <div class="pgrid g2 mt">
-                <div class="pcard">
-                  <div class="pc-head"><h3>自动培育序列</h3><span class="pill pill-green">运行中</span></div>
-                  <div class="pc-body"><div class="cad">
-                    <div class="cad-step"><span class="cad-ico" style="--g1:#2BD9A8;--g2:#00C2D8">💬</span><div class="cad-body"><div class="cad-top"><span class="cad-tt">企微首触</span><span class="cad-when">T+0</span></div><div class="cad-msg">千人千面开场，附最贴切的同行案例。</div></div></div>
-                    <div class="cad-step"><span class="cad-ico" style="--g1:#00A8C6;--g2:#2BD9A8">📧</span><div class="cad-body"><div class="cad-top"><span class="cad-tt">价值邮件</span><span class="cad-when">T+2</span></div><div class="cad-msg">行业白皮书 + ROI 测算，打开 / 点击自动加分。</div></div></div>
-                    <div class="cad-step"><span class="cad-ico" style="--g1:#5A5BF0;--g2:#9A4DFF">📞</span><div class="cad-body"><div class="cad-top"><span class="cad-tt">电话跟进</span><span class="pill pill-amber">人工确认</span><span class="cad-when">T+4</span></div><div class="cad-msg">坐席弹出话术与异议库。</div></div></div>
-                    <div class="cad-step"><span class="cad-ico" style="--g1:#9A4DFF;--g2:#FF5FA2">🤝</span><div class="cad-body"><div class="cad-top"><span class="cad-tt">邀约 / 分流</span><span class="cad-when">T+7</span></div><div class="cad-msg">有响应转商机；无响应转长期培育，30 天后再激活。</div></div></div>
-                  </div></div>
-                </div>
-                <div class="pcard">
-                  <div class="pc-head"><h3>营销内容精准匹配 + 智能推送</h3><span class="pill pill-blue">市场 ↔ 销售闭环</span></div>
-                  <table class="table"><thead><tr><th>客户（关注点）</th><th>AI 匹配内容</th><th>推送时机</th><th>渠道</th><th>效果</th></tr></thead><tbody>
-                    <tr><td>王总 · 汽配 / 价格敏感</td><td>ROI 测算 + 同城案例</td><td>今晚 20:00</td><td>企微</td><td><span class="pill pill-green">已读</span></td></tr>
-                    <tr><td>李工 · 技术评估</td><td>技术白皮书 + 参数对比</td><td>明早 9:00</td><td>邮件</td><td><span class="pill pill-gray">待发</span></td></tr>
-                    <tr><td>张总 · 新线索 / 总经理</td><td>行业趋势报告</td><td>现在</td><td>企微</td><td><span class="pill pill-blue">发送中</span></td></tr>
-                  </tbody></table>
-                  <div class="pc-body"><div class="ag-note">AI 按客户<b>行业 / 阶段 / 关注点</b>自动选最合适的案例 / 白皮书 / 短视频，并在「最可能被打开」的时间，从最合适的渠道推送。</div></div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>营销内容精准匹配 + 智能推送</h3><span class="pill pill-blue">市场 ↔ 销售闭环</span></div>
+                <div class="pc-body">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                    <span style="font-size:12px;color:var(--muted)">选客户：</span>
+                    <button class="match-cust active" data-cust="wang">王总 · 汽配/价格敏感</button>
+                    <button class="match-cust" data-cust="li">李工 · 技术评估</button>
+                    <button class="match-cust" data-cust="zhang">张总 · 新线索/总经理</button>
+                    <button class="btn-grad" data-fx="match" style="margin-left:auto">AI 匹配最佳内容</button>
+                  </div>
+                  <div id="match-wang" class="match-res fx-hide" style="margin-top:11px">
+                    <div class="lrow" style="padding-left:0"><span class="lr-ico" style="--tint:#E9F9F1">📄</span><div class="lr-main"><div class="lr-tt">《ROI 回本测算》+《宁波同城汽配案例》</div><div class="lr-sub">价格敏感型 → 先讲回本与同行佐证 · 建议今晚 20:00 企微推送</div></div><button class="btn-mini" data-fx="push" data-content="ROI测算+同城案例" data-to="王总" data-ch="企微">智能推送</button></div>
+                  </div>
+                  <div id="match-li" class="match-res fx-hide" style="margin-top:11px">
+                    <div class="lrow" style="padding-left:0"><span class="lr-ico" style="--tint:#E8F1FF">📘</span><div class="lr-main"><div class="lr-tt">《技术白皮书》+《参数对比表》</div><div class="lr-sub">技术评估型 → 给数据与规格 · 建议明早 9:00 邮件推送</div></div><button class="btn-mini" data-fx="push" data-content="技术白皮书+参数对比" data-to="李工" data-ch="邮件">智能推送</button></div>
+                  </div>
+                  <div id="match-zhang" class="match-res fx-hide" style="margin-top:11px">
+                    <div class="lrow" style="padding-left:0"><span class="lr-ico" style="--tint:#F1EBFF">📈</span><div class="lr-main"><div class="lr-tt">《行业趋势报告》+《标杆案例》</div><div class="lr-sub">总经理/新线索 → 给视野与标杆 · 建议现在企微推送</div></div><button class="btn-mini" data-fx="push" data-content="行业趋势报告" data-to="张总" data-ch="企微">智能推送</button></div>
+                  </div>
+                  <div style="margin-top:12px"><div style="font-size:11.5px;color:var(--muted);margin-bottom:6px">推送记录</div><div id="pushFeed"></div></div>
                 </div>
               </div>
               <div class="pgrid g2 mt">
                 <div class="pcard">
-                  <div class="pc-head"><h3>客户互动行为追踪</h3><span class="pc-extra">行为即信号 · 自动提醒</span></div>
+                  <div class="pc-head"><h3>客户互动行为追踪</h3><span class="pc-extra">行为即信号</span></div>
                   <div class="timeline">
-                    <div class="tl-item"><div class="tl-tt">王总 3 次打开报价邮件</div><div class="tl-sub">购买意愿升温，已提醒小林今日跟进 · 10:20</div></div>
-                    <div class="tl-item"><div class="tl-tt">李工下载了《精密机械改造白皮书》</div><div class="tl-sub">技术决策推进中 · 09:40</div></div>
-                    <div class="tl-item"><div class="tl-tt">张总点击了「柔性产线」案例视频</div><div class="tl-sub">兴趣点已记录，话术自动调整 · 09:05</div></div>
+                    <div class="tl-item"><div class="tl-tt">王总 3 次打开报价邮件</div><div class="tl-sub">意愿升温，已提醒小林跟进 · 10:20</div></div>
+                    <div class="tl-item"><div class="tl-tt">李工下载《精密机械改造白皮书》</div><div class="tl-sub">技术决策推进中 · 09:40</div></div>
                   </div>
                 </div>
                 <div class="pcard">
                   <div class="pc-head"><h3>沉默线索智能激活</h3><span class="pill pill-amber">待激活 9</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#F0F2FB">💤</span><div class="lr-main"><div class="lr-tt">陈经理 · 绍兴金茂机械</div><div class="lr-sub">沉默 5 天 · 激活由头：本地同行投产新闻</div></div><button class="btn-mini js-toast" data-toast="已用「非报价」新由头发起激活触达">激活</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#F0F2FB">💤</span><div class="lr-main"><div class="lr-tt">刘主任 · 深圳明远</div><div class="lr-sub">沉默 12 天 · 激活由头：限时改造补贴政策</div></div><button class="btn-mini js-toast" data-toast="已发送激活触达">激活</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#F0F2FB">💤</span><div class="lr-main"><div class="lr-tt">陈经理 · 绍兴金茂机械</div><div class="lr-sub">沉默 5 天 · 由头：本地同行投产新闻</div></div><button class="btn-mini" data-fx="reveal" data-target="actChen" data-done="✓ 已生成">激活</button></div>
+                  <div id="actChen" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">AI 生成召回话术：「陈经理好久没联系！不聊报价，纯分享个好消息：绍兴本地同行上月上了同款产线，换型从 40 分钟降到 8 分钟，我录了段实拍要不发您瞅两眼？」</div></div>
                 </div>
               </div>
             </div></div>
 
-            <!-- ===== 阶段4 商机·副驾（会话副驾）===== -->
+            <!-- ===== 阶段4 商机·副驾 ===== -->
             <div class="stage" id="stg-opp"><div class="sc-wrap">
           <aside class="sc-list">
             <div class="sc-list-head">
@@ -1849,14 +1882,13 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               <div class="pcard">
                 <div class="pc-head"><h3>商机看板</h3><span class="pc-extra">按阶段 · 含赢率</span></div>
                 <div class="pc-body"><div class="kanban">
-                  <div class="kan-col"><div class="kan-head">需求确认 <span>3</span></div>
+                  <div class="kan-col"><div class="kan-head">需求确认 <span>2</span></div>
                     <div class="kan-card"><div class="kan-tt">台州精密 · 产线改造</div><div class="kan-meta"><span>¥18 万</span><span>赢率 35%</span></div><div class="kan-bar"><i style="--w:35%"></i></div></div>
-                    <div class="kan-card"><div class="kan-tt">广州瑞和 · 客服系统</div><div class="kan-meta"><span>¥12 万</span><span>赢率 30%</span></div><div class="kan-bar"><i style="--w:30%"></i></div></div>
                   </div>
-                  <div class="kan-col"><div class="kan-head">方案评估 <span>2</span></div>
-                    <div class="kan-card"><div class="kan-tt">东莞精工 · 研发知识</div><div class="kan-meta"><span>¥15 万</span><span>赢率 72%</span></div><div class="kan-bar"><i style="--w:72%"></i></div></div>
+                  <div class="kan-col"><div class="kan-head">方案评估 <span>1</span></div>
+                    <div class="kan-card"><div class="kan-tt">东莞精工 · 研发知识</div><div class="kan-meta"><span>¥15 万</span><span>赢率 <b id="wrEast">72%</b></span></div><div class="kan-bar"><i id="wrEastBar" style="--w:72%"></i></div></div>
                   </div>
-                  <div class="kan-col"><div class="kan-head">商务谈判 <span>2</span></div>
+                  <div class="kan-col"><div class="kan-head">商务谈判 <span>1</span></div>
                     <div class="kan-card"><div class="kan-tt">嘉兴远东 · 柔性产线</div><div class="kan-meta"><span>¥30 万</span><span>赢率 64%</span></div><div class="kan-bar"><i style="--w:64%"></i></div></div>
                   </div>
                   <div class="kan-col"><div class="kan-head">报价 <span>1</span></div>
@@ -1870,25 +1902,27 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               <div class="pgrid g2 mt">
                 <div class="pcard">
                   <div class="pc-head"><h3>赢率预测 + 下一步最佳动作</h3><span class="pc-extra">Next Best Action</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🎯</span><div class="lr-main"><div class="lr-tt">东莞精工 · ¥15 万 · <span class="pill pill-green">赢率 72%</span></div><div class="lr-sub">建议：本周寄正式 SOW + 约技术验证，锁定决策</div></div><button class="btn-mini js-toast" data-toast="已生成 SOW 草稿并预约技术验证">执行</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🎯</span><div class="lr-main"><div class="lr-tt">嘉兴远东 · ¥30 万 · <span class="pill pill-blue">赢率 64%</span></div><div class="lr-sub">建议：尽快见决策人 CFO 谈预算，避免决策链拖延</div></div><button class="btn-mini js-toast" data-toast="已生成约见 CFO 的议程与 ROI 测算">执行</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🎯</span><div class="lr-main"><div class="lr-tt">东莞精工 · ¥15 万 · 赢率 72%</div><div class="lr-sub">建议：本周寄 SOW + 约技术验证 → 赢率可升至 85%</div></div><button class="btn-grad" data-fx="nba" data-bar="wrEastBar" data-to="85%">执行</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">🎯</span><div class="lr-main"><div class="lr-tt">嘉兴远东 · ¥30 万 · 赢率 64%</div><div class="lr-sub">建议：尽快见决策人 CFO 谈预算</div></div><button class="btn-mini js-toast" data-toast="已生成约见 CFO 议程与 ROI 测算（演示）">执行</button></div>
                 </div>
                 <div class="pcard">
                   <div class="pc-head"><h3>成交风险预警</h3><span class="badge-n">2</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">⚠️</span><div class="lr-main"><div class="lr-tt">金华重工 · ¥50 万</div><div class="lr-sub">诊断：决策人未见到 + 疑似比价 → 差异化 + 低门槛试点</div></div><span class="pill pill-red">高</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">绍兴金茂 · ¥9 万</div><div class="lr-sub">诊断：报价后沉默 5 天 → 换由头激活，勿逼单</div></div><span class="pill pill-amber">中</span></div>
-                  <div class="pc-body"><div class="ag-note warn">大单卡住时自动诊断根因（决策人 / 预算 / 竞品 / 停滞）并给对策。</div></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">⚠️</span><div class="lr-main"><div class="lr-tt">金华重工 · ¥50 万</div><div class="lr-sub">诊断：决策人未见 + 疑似比价</div></div><button class="btn-mini" data-fx="reveal" data-target="competeRes" data-done="✓ 已生成">生成差异化话术</button></div>
+                  <div id="competeRes" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note warn">突出 <b>工艺图谱 + 老师傅经验结构化</b>（对方仅文档检索）、<b>本地化快速响应</b>、<b>4 周试点可退</b>，降低对方决策风险，不在价格上硬碰。</div></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">绍兴金茂 · ¥9 万</div><div class="lr-sub">诊断：报价后沉默 5 天</div></div><span class="pill pill-amber">中</span></div>
                 </div>
               </div>
-              <div class="pgrid g2 mt">
-                <div class="pcard">
-                  <div class="pc-head"><h3>竞争态势感知</h3><span class="pill pill-blue">检测到竞品</span></div>
-                  <div class="pc-body" style="font-size:12.5px;color:var(--ink-2);line-height:1.8">金华重工对话中两次提及竞品「XX 自动化」。<br/>AI 差异化建议：突出<b>工艺图谱 + 老师傅经验结构化</b>（对方仅文档检索）、<b>本地化快速响应</b>、<b>4 周试点可退</b>。</div>
-                </div>
-                <div class="pcard">
-                  <div class="pc-head"><h3>智能报价 + 审批护栏</h3><span class="pill pill-amber">折扣需审批</span></div>
-                  <div class="pc-body"><div class="ag-note">按需求自动配置报价；折扣 ≤10% 销售可发，&gt;10% 自动转主管审批，价格 / 到货承诺一律不自动外发——全程留痕可追溯。</div>
-                    <div style="margin-top:10px"><button class="btn-grad js-toast" data-toast="已生成报价单草稿，折扣 12% 已转主管审批">生成报价</button></div>
+              <div class="pcard mt">
+                <div class="pc-head"><h3>智能报价 + 审批护栏</h3><button class="btn-grad" data-fx="reveal" data-target="quoteRes" data-done="✓ 已生成" data-msg="折扣 12% 已自动转主管审批">生成报价</button></div>
+                <div class="pc-body">
+                  <div class="ag-note">按需求自动配置报价；折扣 ≤10% 销售可发，&gt;10% 自动转审批；价格/到货承诺一律不自动外发，全程留痕。</div>
+                  <div id="quoteRes" class="fx-hide" style="margin-top:11px">
+                    <table class="table"><thead><tr><th>项目</th><th>数量</th><th>金额</th></tr></thead><tbody>
+                      <tr><td>柔性产线改造（标准版）</td><td>1 条</td><td>¥42 万</td></tr>
+                      <tr><td>质检模块</td><td>1 套</td><td>¥6 万</td></tr>
+                      <tr><td>实施与培训</td><td>—</td><td>¥2 万</td></tr>
+                      <tr><td><b>合计（折后）</b></td><td>折扣 12%</td><td><b>¥44 万</b> <span class="pill pill-amber">待主管审批</span></td></tr>
+                    </tbody></table>
                   </div>
                 </div>
               </div>
@@ -1899,31 +1933,31 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               <div class="kpi-row">
                 <div class="kpi"><div class="kpi-label">在管客户</div><div class="kpi-num">86</div><div class="kpi-sub">已成交客户</div></div>
                 <div class="kpi"><div class="kpi-label">健康度均值</div><div class="kpi-num">82</div><div class="kpi-sub"><b class="up">↑3</b> 较上月</div></div>
-                <div class="kpi"><div class="kpi-label">续费 / 流失预警</div><div class="kpi-num">5</div><div class="kpi-sub">需重点维护</div></div>
+                <div class="kpi"><div class="kpi-label">流失预警</div><div class="kpi-num">5</div><div class="kpi-sub">需重点维护</div></div>
                 <div class="kpi"><div class="kpi-label">增购机会</div><div class="kpi-num">9</div><div class="kpi-sub">AI 识别</div></div>
               </div>
               <div class="pgrid g2 mt">
                 <div class="pcard">
-                  <div class="pc-head"><h3>客户健康度 &amp; 流失预警</h3><span class="pc-extra">用量 / 互动 / 回款 综合</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">📉</span><div class="lr-main"><div class="lr-tt">佛山合力机械</div><div class="lr-sub">健康分 48 · 近 30 天无互动 + 工单积压 → 流失高危</div></div><button class="btn-mini js-toast" data-toast="已生成挽回方案并提醒客户经理回访">挽回</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">📉</span><div class="lr-main"><div class="lr-tt">中山某模具</div><div class="lr-sub">健康分 65 · 续费期临近未启动</div></div><button class="btn-mini js-toast" data-toast="已发起续费沟通并附使用价值报告">续费</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">📈</span><div class="lr-main"><div class="lr-tt">宁波远东汽配</div><div class="lr-sub">健康分 94 · 高活跃 · 适合转介绍 / 增购</div></div><span class="pill pill-green">优质</span></div>
+                  <div class="pc-head"><h3>客户健康度 &amp; 流失预警</h3><span class="pc-extra">用量/互动/回款 综合</span></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">📉</span><div class="lr-main"><div class="lr-tt">佛山合力机械 · 健康分 48</div><div class="lr-sub">近 30 天无互动 + 工单积压 → 流失高危</div></div><button class="btn-grad" data-fx="reveal" data-target="retainRes" data-done="✓ 已生成">生成挽回方案</button></div>
+                  <div id="retainRes" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">AI 挽回方案：① 客户经理本周上门回访 + 免费做一次产线体检；② 积压工单升级优先处理；③ 赠送 2 次工艺优化服务。预计可把健康分从 48 拉回 70+。</div></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">📈</span><div class="lr-main"><div class="lr-tt">宁波远东汽配 · 健康分 94</div><div class="lr-sub">高活跃 · 适合转介绍 / 增购</div></div><span class="pill pill-green">优质</span></div>
                 </div>
                 <div class="pcard">
                   <div class="pc-head"><h3>增购 / 交叉销售机会</h3><span class="pill pill-green">AI 识别 9</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">➕</span><div class="lr-main"><div class="lr-tt">宁波远东汽配</div><div class="lr-sub">一期产线见效 → 推荐二期 + 质检模块（约 ¥40 万）</div></div><button class="btn-mini js-toast" data-toast="已生成增购方案">推进</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">➕</span><div class="lr-main"><div class="lr-tt">东莞某汽配</div><div class="lr-sub">用量接近上限 → 推荐升级套餐</div></div><button class="btn-mini js-toast" data-toast="已提醒客户经理跟进升级">推进</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E8F1FF">➕</span><div class="lr-main"><div class="lr-tt">宁波远东汽配</div><div class="lr-sub">一期见效 → 二期 + 质检模块（约 ¥40 万）</div></div><button class="btn-grad" data-fx="reveal" data-target="upsellRes" data-done="✓ 已生成">生成增购方案</button></div>
+                  <div id="upsellRes" class="fx-hide" style="padding:0 16px 12px"><div class="ag-note">AI 增购方案：基于一期 30% 产能提升数据，二期改造另两条线 + 加装在线质检，预计再提效 25%，回本 7 个月。已附 ROI 测算与老客优惠政策。</div></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#F1EBFF">➕</span><div class="lr-main"><div class="lr-tt">东莞某汽配</div><div class="lr-sub">用量接近上限 → 推荐升级套餐</div></div><span class="pill pill-blue">待跟进</span></div>
                 </div>
               </div>
               <div class="pgrid g2 mt">
                 <div class="pcard">
                   <div class="pc-head"><h3>转介绍 / 口碑触发</h3><span class="pc-extra">满意客户自动引导</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🤝</span><div class="lr-main"><div class="lr-tt">宁波远东汽配（NPS 9 分）</div><div class="lr-sub">满意度高 → 自动引导转介绍同行，附激励政策</div></div><button class="btn-mini js-toast" data-toast="已发送转介绍邀请与奖励说明">发起</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🤝</span><div class="lr-main"><div class="lr-tt">宁波远东汽配（NPS 9 分）</div><div class="lr-sub">满意度高 → 引导转介绍同行 + 激励</div></div><button class="btn-mini js-toast" data-toast="已发送转介绍邀请与奖励说明（演示）">发起</button></div>
                 </div>
                 <div class="pcard">
                   <div class="pc-head"><h3>回款与账期提醒</h3><span class="pill pill-amber">3 笔临期</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">💰</span><div class="lr-main"><div class="lr-tt">东莞精工 · 尾款 ¥6 万</div><div class="lr-sub">账期 6/25 到期 · 建议提前沟通</div></div><button class="btn-mini js-toast" data-toast="已生成催款话术并提醒">提醒</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">💰</span><div class="lr-main"><div class="lr-tt">中山模具 · 首款 ¥15 万</div><div class="lr-sub">账期 6/28 到期</div></div><button class="btn-mini js-toast" data-toast="已提醒财务与客户经理">提醒</button></div>
+                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">💰</span><div class="lr-main"><div class="lr-tt">东莞精工 · 尾款 ¥6 万</div><div class="lr-sub">账期 6/25 到期</div></div><button class="btn-mini js-toast" data-toast="已生成催款话术并提醒客户经理（演示）">提醒</button></div>
                 </div>
               </div>
             </div></div>
@@ -1938,47 +1972,52 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               </div>
               <div class="pgrid g2 mt">
                 <div class="pcard">
-                  <div class="pc-head"><h3>团队漏斗 &amp; AI 预测</h3><span class="pc-extra">真实行为预测 vs 销售承诺</span></div>
+                  <div class="pc-head"><h3>团队漏斗 &amp; AI 预测</h3><span class="pc-extra">真实行为 vs 销售承诺</span></div>
                   <div class="pc-body">
-                    <div class="bars">
-                      <div class="bar" style="--h:90%"></div><div class="bar" style="--h:62%"></div><div class="bar" style="--h:43%"></div><div class="bar" style="--h:30%"></div><div class="bar" style="--h:22%"></div>
-                    </div>
+                    <div class="bars"><div class="bar" style="--h:90%"></div><div class="bar" style="--h:62%"></div><div class="bar" style="--h:43%"></div><div class="bar" style="--h:30%"></div><div class="bar" style="--h:22%"></div></div>
                     <div class="bar-labels"><span>线索</span><span>商机</span><span>方案</span><span>报价</span><span>签约</span></div>
-                    <div class="ag-note" style="margin-top:10px">AI 预测本月达成 <b>¥386 万（94%）</b>，低于销售主观承诺 ¥410 万；差距主要来自「报价→签约」转化偏低。</div>
+                    <div class="ag-note" style="margin-top:10px">AI 预测本月达成 <b>¥386 万（94%）</b>，低于销售主观承诺 ¥410 万；差距主要在「报价→签约」环。</div>
                   </div>
                 </div>
                 <div class="pcard">
-                  <div class="pc-head"><h3>漏斗健康诊断</h3><span class="pill pill-amber">2 个异常</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFEAEA">🩺</span><div class="lr-main"><div class="lr-tt">报价 → 签约 转化仅 22%</div><div class="lr-sub">低于团队基准 33%，疑似折扣谈判能力短板</div></div><button class="btn-mini js-toast" data-toast="已定位 3 名待辅导销售并生成陪练计划">辅导</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🩺</span><div class="lr-main"><div class="lr-tt">2 个 ¥50 万+ 大单停滞 &gt;14 天</div><div class="lr-sub">建议管理者亲自介入</div></div><button class="btn-mini js-toast" data-toast="已将停滞大单加入你的介入清单">介入</button></div>
-                </div>
-              </div>
-              <div class="pgrid g2 mt">
-                <div class="pcard">
-                  <div class="pc-head"><h3>销冠经验萃取</h3><span class="pc-extra">把 Top Sales 的打法变成全员能力</span></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🏆</span><div class="lr-main"><div class="lr-tt">小林的「先算回本账」开场法</div><div class="lr-sub">价格异议场景回复率 +18pp，已结构化入话术库</div></div><button class="btn-grad js-toast" data-toast="已一键同步给全员，并设为该场景推荐话术">同步全员</button></div>
-                  <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🏆</span><div class="lr-main"><div class="lr-tt">小周的「决策链三人攻关」打法</div><div class="lr-sub">大单赢率显著高于均值</div></div><button class="btn-mini js-toast" data-toast="已收录到打法库">收录</button></div>
-                </div>
-                <div class="pcard">
-                  <div class="pc-head"><h3>智能陪练</h3><span class="pc-extra">AI 扮客户 · 新人快速上手</span></div>
-                  <div class="pc-body" style="font-size:12.5px;color:var(--ink-2);line-height:1.8">AI 模拟「难缠的比价型采购」「技术细抠型工程师」等典型客户，与销售实战对练，结束后从<b>需求挖掘 / 异议处理 / 推进力</b>三维打分并给改进建议。</div>
-                  <div class="pc-body" style="padding-top:0"><button class="btn-grad js-toast" data-toast="已为新人小赵安排「比价型采购」陪练，结束自动出评分报告">开始陪练</button></div>
+                  <div class="pc-head"><h3>智能陪练</h3><span class="pc-extra">AI 扮客户 · 实战演练</span></div>
+                  <div class="pc-body">
+                    <div style="font-size:12.5px;color:var(--ink-2);line-height:1.7">AI 模拟「难缠的比价型采购」与销售对练，结束后按需求挖掘 / 异议处理 / 推进力打分。</div>
+                    <div style="margin-top:10px"><button class="btn-grad" data-fx="reveal" data-target="prac1" data-done="陪练进行中…">开始陪练（比价型采购）</button></div>
+                    <div id="prac1" class="fx-hide">
+                      <div class="prac-bubble cust">客户：你们报价比 XX 家贵不少，凭什么？</div>
+                      <div class="prac-opts">
+                        <button class="prac-opt" data-fx="step" data-target="prac2a">A.「我们贵是有道理的，质量更好。」</button>
+                        <button class="prac-opt" data-fx="step" data-target="prac2b">B.「价格可以聊，不过想先确认下您最看重的是什么？」</button>
+                      </div>
+                    </div>
+                    <div id="prac2a" class="fx-hide">
+                      <div class="prac-bubble cust">客户：质量好是你说的，空口无凭。</div>
+                      <div class="ag-note warn">AI 点评：直接辩「质量好」容易陷入空对空。更稳的做法是先挖需求或用数据/案例佐证。</div>
+                      <div class="prac-opts"><button class="prac-opt" data-fx="step" data-target="pracScore">查看本次评分 →</button></div>
+                    </div>
+                    <div id="prac2b" class="fx-hide">
+                      <div class="prac-bubble cust">客户：我最看重稳定和售后响应速度。</div>
+                      <div class="ag-note">AI 点评：漂亮，先挖到真实诉求，再用「稳定 + 本地化售后」差异化，不在价格上硬碰。</div>
+                      <div class="prac-opts"><button class="prac-opt" data-fx="step" data-target="pracScore">查看本次评分 →</button></div>
+                    </div>
+                    <div id="pracScore" class="fx-hide" style="margin-top:10px">
+                      <div class="ag-note"><b>本次陪练评分</b>　需求挖掘 <b style="color:var(--green)">85</b> · 异议处理 <b style="color:var(--brand)">78</b> · 推进力 <b style="color:var(--amber)">66</b><br/>改进建议：异议来临时先「确认诉求」再「给方案」，推进时主动约定下一步时间点。</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="pcard mt">
-                <div class="pc-head"><h3>团队看板 &amp; 自动周报</h3><span class="pc-extra">每周一自动生成</span></div>
-                <table class="table"><thead><tr><th>销售</th><th>新增商机</th><th>推进中</th><th>本月签约</th><th>预测达成</th><th>状态</th></tr></thead><tbody>
-                  <tr><td>小林</td><td>12</td><td>5</td><td>¥132 万</td><td>108%</td><td><span class="pill pill-green">领先</span></td></tr>
-                  <tr><td>小周</td><td>9</td><td>6</td><td>¥98 万</td><td>96%</td><td><span class="pill pill-blue">正常</span></td></tr>
-                  <tr><td>小陈</td><td>7</td><td>3</td><td>¥56 万</td><td>72%</td><td><span class="pill pill-amber">需辅导</span></td></tr>
-                  <tr><td>小赵（新人）</td><td>4</td><td>2</td><td>¥18 万</td><td>60%</td><td><span class="pill pill-amber">陪练中</span></td></tr>
-                </tbody></table>
+                <div class="pc-head"><h3>销冠经验萃取</h3><span class="pc-extra">把 Top Sales 打法变成全员能力</span></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🏆</span><div class="lr-main"><div class="lr-tt">小林的「先算回本账」开场法</div><div class="lr-sub">价格异议场景回复率 +18pp，已结构化入话术库</div></div><button class="btn-grad" data-fx="sync">同步全员</button></div>
+                <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🏆</span><div class="lr-main"><div class="lr-tt">小周的「决策链三人攻关」打法</div><div class="lr-sub">大单赢率显著高于均值</div></div><button class="btn-grad" data-fx="sync">同步全员</button></div>
               </div>
             </div></div>
 
           </div>
         </div>
       </section>
+
 
 
 
@@ -3634,6 +3673,75 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var key = p.dataset.stage;
     pills.forEach(function (x) { x.classList.toggle("active", x === p); });
     stages.forEach(function (s) { s.classList.toggle("active", s.id === "stg-" + key); });
+  });
+})();
+</script>
+<script>
+/* ---------- 销冠AI助手 · 各阶段交互逻辑 ---------- */
+(function () {
+  "use strict";
+  var byId = function (id) { return document.getElementById(id); };
+  var toArr = function (nl) { return Array.prototype.slice.call(nl); };
+  var toastEl = byId("toast"), tT = null;
+  function toast(m) { if (!toastEl) return; toastEl.textContent = m; toastEl.classList.add("show");
+    clearTimeout(tT); tT = setTimeout(function () { toastEl.classList.remove("show"); }, 2400); }
+  function nowStr() { var d = new Date(); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  function show(el) { if (el) { el.classList.remove("fx-hide"); el.classList.add("fx-in"); } }
+  function bump(name, delta) {
+    var el = document.querySelector('[data-counter="' + name + '"]');
+    if (!el) return;
+    var n = (parseInt((el.textContent || "0").replace(/[^0-9]/g, ""), 10) || 0) + delta;
+    el.textContent = el.textContent.replace(/[0-9]+/, String(n));
+  }
+  function reveal(targetId, btn) {
+    var el = byId(targetId); if (!el) return;
+    if (btn) { btn.textContent = "AI 分析中…"; btn.disabled = true; }
+    setTimeout(function () {
+      show(el);
+      if (btn) { btn.textContent = btn.dataset.done || "✓ 已生成"; btn.classList.add("fx-done"); btn.disabled = false;
+        if (btn.dataset.msg) toast(btn.dataset.msg); }
+    }, 600);
+  }
+  function recomputeScore() {
+    var sum = 0;
+    toArr(document.querySelectorAll(".sc-toggle.on")).forEach(function (c) { sum += parseInt(c.dataset.w, 10) || 0; });
+    var num = byId("scoreTryNum"), ring = byId("scoreTryRing"), grade = byId("scoreTryGrade");
+    if (num) num.textContent = sum;
+    var color = sum >= 85 ? "var(--green)" : sum >= 70 ? "var(--brand)" : "var(--amber)";
+    if (ring) { ring.style.setProperty("--deg", (sum * 3.6) + "deg"); ring.style.setProperty("--rc", color); }
+    if (grade) { var g = sum >= 85 ? ["A 类 · 立即转人工", "pill-green"] : sum >= 70 ? ["B 类 · 进高意向序列", "pill-blue"] : ["C 类 · 长期培育", "pill-amber"];
+      grade.textContent = g[0]; grade.className = "pill " + g[1]; }
+  }
+  document.addEventListener("click", function (e) {
+    var tg = e.target.closest(".sc-toggle");
+    if (tg) { tg.classList.toggle("on"); recomputeScore(); return; }
+    var mc = e.target.closest(".match-cust");
+    if (mc) { toArr(mc.parentNode.querySelectorAll(".match-cust")).forEach(function (x) { x.classList.toggle("active", x === mc); }); return; }
+    var b = e.target.closest("[data-fx]"); if (!b) return;
+    var fx = b.dataset.fx;
+    if (fx === "reveal") { reveal(b.dataset.target, b); }
+    else if (fx === "step") {
+      show(byId(b.dataset.target)); b.classList.add("chosen");
+      var grp = b.closest(".prac-opts"); if (grp) toArr(grp.querySelectorAll(".prac-opt")).forEach(function (x) { if (x !== b) x.disabled = true; });
+    }
+    else if (fx === "toLead") { b.textContent = "✓ 已转线索"; b.classList.add("fx-done"); b.disabled = true; bump("newLeads", 1); toast("已转为线索，自动补全画像并推送给对应销售"); }
+    else if (fx === "dispatch") { b.textContent = "✓ 已派发"; b.classList.add("fx-done"); b.disabled = true; bump("assigned", 1); toast("已派发并推送线索画像与首触话术"); }
+    else if (fx === "match") {
+      var sel = document.querySelector(".match-cust.active"); var cust = sel ? sel.dataset.cust : "wang";
+      toArr(document.querySelectorAll(".match-res")).forEach(function (x) { x.classList.add("fx-hide"); });
+      var r = byId("match-" + cust);
+      b.textContent = "AI 匹配中…"; b.disabled = true;
+      setTimeout(function () { show(r); b.textContent = "✓ 已匹配"; b.classList.add("fx-done"); b.disabled = false; toast("已按该客户的行业/阶段/关注点匹配最佳内容"); }, 600);
+    }
+    else if (fx === "push") {
+      var feed = byId("pushFeed");
+      if (feed) { var d = document.createElement("div"); d.className = "push-item";
+        d.textContent = "✓ " + nowStr() + " 已推送《" + (b.dataset.content || "匹配内容") + "》给 " + (b.dataset.to || "客户") + " · " + (b.dataset.ch || "企微");
+        feed.insertBefore(d, feed.firstChild); }
+      toast("已在最佳时机智能推送给客户");
+    }
+    else if (fx === "nba") { var bar = byId(b.dataset.bar); if (bar) bar.style.width = b.dataset.to || "88%"; b.textContent = "✓ 已执行"; b.classList.add("fx-done"); b.disabled = true; toast("已执行下一步最佳动作，赢率已更新"); }
+    else if (fx === "sync") { b.textContent = "✓ 已同步全员"; b.classList.add("fx-done"); b.disabled = true; toast("该打法已设为对应场景推荐话术，全员可用"); }
   });
 })();
 </script>
