@@ -6,7 +6,7 @@ import { INITIAL_KPI, GANTT_START } from '../mock/scheduleData';
 import { WORK_ORDERS, PENDING_WOS } from '../mock/workOrders';
 import type { WorkOrder } from '../types/workOrder';
 import { PRODUCTS } from '../mock/products';
-import type { InsertScheme, AnomalyOptimization } from '../mock/agentResponses';
+import type { InsertScheme, AnomalyOptimization, StrandingScheme, StrandingConfigOutput } from '../mock/agentResponses';
 
 function overlap(a: { s: number; e: number }, b: { s: number; e: number }) {
   return !(a.e <= b.s || a.s >= b.e);
@@ -37,6 +37,8 @@ interface ScheduleState {
   setInsertContext: (text: string) => void;
   applyInsertScheme: (scheme: InsertScheme, customer: string, product: string, quantity: number) => string;
   applyAnomalyMerge: (a: AnomalyOptimization) => void;
+  /** ★ v2.1 Agent #6 应用配股方案 */
+  applyStrandingConfig: (workOrderId: string, scheme: StrandingScheme, output: StrandingConfigOutput) => void;
   /** 拖拽冲突时让 AI 给一个可放位置（同行向后扫，留 15 分钟 buffer） */
   aiFindBestSlot: (woId: string, preferResourceId: string) => { resourceId: string; startMs: number; resourceName: string } | null;
 }
@@ -233,6 +235,57 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
       workshop: 'enameling',
     });
     get().flash(candidates.map((c) => c.id), 3000);
+  },
+
+  applyStrandingConfig: (workOrderId, scheme, output) => {
+    const s = get();
+    // 1) 若是待排池中的工单 → 取出排到绞线机；2) 若是新建（Copilot 路径）→ 直接生成
+    const existing = s.pending.find((w) => w.id === workOrderId);
+    // 选一台绞线机：R-ST-01 ~ R-ST-08
+    const resourceId = 'R-ST-' + String(1 + Math.floor(Math.random() * 8)).padStart(2, '0');
+    // 起始时间：基线日 14:00（落在甘特周视图内）
+    const baseStart = new Date('2026-07-15T14:00:00').getTime();
+    // 时长：按数量估算（500kg ≈ 4 小时）
+    const HR = 3_600_000;
+    const durMs = Math.max(2 * HR, Math.round((output.request.quantity / 500) * 4 * HR));
+    // 找一段空档
+    const sameRow = s.scheduled
+      .filter((w) => w.scheduledResourceId === resourceId && w.scheduledStart && w.scheduledEnd)
+      .sort((a, b) => a.scheduledStart!.getTime() - b.scheduledStart!.getTime());
+    let start = baseStart;
+    for (const o of sameRow) {
+      if (start + durMs <= o.scheduledStart!.getTime()) break;
+      if (start < o.scheduledEnd!.getTime()) start = o.scheduledEnd!.getTime() + 15 * 60_000;
+    }
+    const end = start + durMs;
+    // 方案配色：A=紫推荐 / B=橙新拉 / C=青多源
+    const color = scheme.id === 'A' ? '#7C3AED' : scheme.id === 'B' ? '#FF6B35' : '#0EA5E9';
+    const newWo: WorkOrder = {
+      id: workOrderId,
+      productCode: 'STR-' + output.request.strandDiameter + 'x' + output.request.totalStrands + (output.request.plating === 'tin' ? '-TIN' : ''),
+      productName: `${output.request.totalStrands} 股 ×Φ${output.request.strandDiameter}mm ${output.request.plating === 'tin' ? '镀锡' : output.request.plating === 'enameled' ? '漆包' : ''}铜绞线`,
+      productCategory: 'stranded',
+      quantity: output.request.quantity,
+      dueDate: new Date(output.request.dueDate),
+      customer: output.request.customer,
+      priority: existing?.priority ?? 'important',
+      status: 'scheduled',
+      routeId: existing?.routeId ?? 'P3',
+      scheduledResourceId: resourceId,
+      scheduledStart: new Date(start),
+      scheduledEnd: new Date(end),
+      colorCode: color,
+    };
+    const scheduledNext = [...s.scheduled, newWo];
+    set({
+      scheduled: scheduledNext,
+      pending: s.pending.filter((w) => w.id !== workOrderId),
+      // 切到绞线车间以便用户看到刚排上去的工单
+      workshop: 'stranding',
+      selectedId: workOrderId,
+      kpi: reCalcKPI(scheduledNext, s.kpi),
+    });
+    get().flash([workOrderId], 3000);
   },
 
   aiFindBestSlot: (woId, preferResourceId) => {

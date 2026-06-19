@@ -175,6 +175,23 @@ function genWorkOrders(): WorkOrder[] {
 
 export const WORK_ORDERS: WorkOrder[] = genWorkOrders();
 
+// ====== v2.1 演示标的：铜绞线配股 ======
+// 东方电气 · 500kg 19 股 0.5mm 镀锡铜绞线 · 交期 +7 天
+const STRANDING_DEMO_WO: WorkOrder = {
+  id: 'WO-2026-STR01',
+  productCode: 'STR-0.5x19-TIN',
+  productName: '19 股 ×Φ0.5mm 镀锡铜绞线',
+  productCategory: 'stranded',
+  quantity: 500,
+  dueDate: new Date(NOW.getTime() + 7 * 86_400_000),
+  customer: '东方电气',
+  priority: 'important',
+  status: 'pending',
+  routeId: 'P3',                   // 项目内 stranded=P3（与文档 §6.2.6 "P4" 等义，见 v2.1 注脚 D2）
+  colorCode: '#A16207',
+};
+WORK_ORDERS.unshift(STRANDING_DEMO_WO);
+
 // 便捷选择器
 export const PENDING_WOS = WORK_ORDERS.filter((w) => w.status === 'pending');
 export const SCHEDULED_WOS = WORK_ORDERS.filter((w) => w.status === 'scheduled' || w.status === 'in-progress');

@@ -1,25 +1,32 @@
 // 右侧详情：选中工单后展示信息 + ✨ Agent #2 解释为何这样排
+//                                  + ★ v2.1 Agent #6 推荐配股方案（仅 stranded 工单显示）
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { useExplainStore } from '../../store/useExplainStore';
+import { useCopilotStore } from '../../store/useCopilotStore';
 import { fmtDate, fmtDateTime } from '../../utils/format';
 import { PRIORITY_LABEL, STATUS_LABEL } from '../../types/workOrder';
 import { RESOURCES } from '../../mock/productLines';
-import { Sparkles } from 'lucide-react';
 import { mockAIInvoke } from '../../utils/mockApi';
 import AIButton from '../ai/AIButton';
-import type { SchemeExplanation } from '../../mock/agentResponses';
+import StrandingSchemeCard from '../ai/StrandingSchemeCard';
+import type { SchemeExplanation, StrandingConfigOutput, StrandingScheme } from '../../mock/agentResponses';
 
 export default function WorkOrderDetail() {
   const selectedId = useScheduleStore((s) => s.selectedId);
   const pending = useScheduleStore((s) => s.pending);
   const scheduled = useScheduleStore((s) => s.scheduled);
   const unschedule = useScheduleStore((s) => s.unschedule);
+  const applyStranding = useScheduleStore((s) => s.applyStrandingConfig);
   const show = useExplainStore((s) => s.show);
   const showLoading = useExplainStore((s) => s.showLoading);
+  const pushMessage = useCopilotStore((s) => s.pushMessage);
+  const setCopOpen = useCopilotStore((s) => s.setOpen);
 
   const wo = scheduled.find((w) => w.id === selectedId) ?? pending.find((w) => w.id === selectedId);
   const res = wo?.scheduledResourceId ? RESOURCES.find((r) => r.id === wo.scheduledResourceId) : undefined;
   const isScheduled = !!(wo?.scheduledStart && wo?.scheduledEnd && wo?.scheduledResourceId);
+  // v2.1 D2 决策：以业务语义判定（productCategory === 'stranded'），不依赖 routeId 数字
+  const isStranded = wo?.productCategory === 'stranded';
 
   if (!wo) {
     return (
@@ -65,6 +72,74 @@ export default function WorkOrderDetail() {
     });
   }
 
+  // ★ v2.1 Agent #6 推荐配股方案
+  async function onStranding() {
+    if (!wo || !isStranded) return;
+    // 解析工单产品名中的股数与线径，例 "19 股 ×Φ0.5mm 镀锡铜绞线"
+    const m1 = wo.productName.match(/(\d+)\s*股/);
+    const m2 = wo.productName.match(/Φ?(\d?\.\d+)\s*mm/);
+    const totalStrands = m1 ? Number(m1[1]) : 19;
+    const strandDiameter = m2 ? Number(m2[1]) : 0.5;
+    const plating: 'tin' | 'bare' | 'enameled' =
+      /镀锡/.test(wo.productName) ? 'tin'
+      : /漆包/.test(wo.productName) ? 'enameled'
+      : 'bare';
+
+    showLoading('AI 推荐配股方案 · 多目标优化中…');
+    const { output } = await mockAIInvoke({
+      agentId: 'schedule.stranding-config-assistant',
+      input: {
+        workOrderId: wo.id,
+        customer: wo.customer,
+        totalStrands, strandDiameter, plating,
+        quantity: wo.quantity,
+      },
+    });
+    const r = output as StrandingConfigOutput;
+    // D4 决策：Modal 展示方案，同时往 Copilot 推一条系统消息（"同步展开方案对话"）
+    pushMessage({
+      id: 'sys-stranding-' + Date.now(),
+      role: 'assistant',
+      content: `**配股建议** · ${r.request.customer} · ${r.request.totalStrands} 股 × Φ${r.request.strandDiameter}mm ${r.request.plating === 'tin' ? '镀锡' : r.request.plating === 'enameled' ? '漆包' : ''}铜绞线 · ${r.request.quantity}kg。三套方案见下方对比卡；选定后可在此追问 "如果以质量为先该选哪个？"`,
+      attachments: [{ type: 'stranding-config', data: r }],
+      timestamp: new Date(),
+    });
+    show({
+      title: `${wo.id} · 配股方案推荐`,
+      content: (
+        <div className="space-y-3">
+          <div className="bg-panel2 rounded-md px-4 py-2.5 text-[12.5px] leading-relaxed">
+            <b className="text-ink">订单：</b>{r.request.customer} · {r.request.quantity}kg · {r.request.totalStrands} 股 × Φ{r.request.strandDiameter}mm{' '}
+            {r.request.plating === 'tin' ? '镀锡' : r.request.plating === 'enameled' ? '漆包' : ''}铜绞线 ·
+            <b className="text-ink"> 交期：</b>{r.request.dueDate}
+          </div>
+          <div className="text-[12.5px] text-ink-dim leading-7">{r.decisionFactors}</div>
+          <StrandingSchemeCard
+            schemes={r.schemes}
+            appliedId={null}
+            onApply={(s) => onApplyStrandingScheme(s, r)}
+          />
+          <div className="text-[11.5px] text-ink-faint pt-2 border-t border-line">
+            💡 已同步至 AI 助手 · 关闭此窗口后可点击右下角"AI 助手"继续追问
+          </div>
+        </div>
+      ),
+    });
+  }
+
+  function onApplyStrandingScheme(s: StrandingScheme, r: StrandingConfigOutput) {
+    if (!wo) return;
+    applyStranding(wo.id, s, r);
+    pushMessage({
+      id: 'sys-stranding-apply-' + Date.now(),
+      role: 'assistant',
+      content: `已应用 **${s.label}**：${s.composition.length === 1 ? `单源 ${s.composition[0].from}` : `${s.composition.length} 源（${s.composition.map((c) => c.from).join(' / ')}）`} 已生成 BOM 并锁定，该工单已写入排产甘特图并在闪烁标记中。`,
+      timestamp: new Date(),
+    });
+    useExplainStore.getState().close();
+    setCopOpen(true);
+  }
+
   return (
     <div className="bg-card border border-line rounded-xl flex flex-col h-full overflow-hidden">
       <div className="px-4 py-3 border-b border-line bg-panel2">
@@ -89,13 +164,22 @@ export default function WorkOrderDetail() {
       </div>
       <div className="border-t border-line p-3 bg-panel2 space-y-2">
         <div className="text-[10.5px] text-ink-faint tracking-wider uppercase">AI 推荐</div>
+
+        {/* ★ v2.1 仅 stranded 工单显示 */}
+        {isStranded && (
+          <AIButton label="推荐配股方案" onClick={onStranding} />
+        )}
+
         <AIButton
           label="解释为何这样排"
           onClick={onExplain}
           disabled={!isScheduled}
         />
-        {!isScheduled && (
+        {!isScheduled && !isStranded && (
           <div className="text-[11px] text-ink-faint">待排工单暂无排产解释</div>
+        )}
+        {!isScheduled && isStranded && (
+          <div className="text-[11px] text-ink-faint">配股完成后即可解释排产</div>
         )}
         {isScheduled && (
           <button onClick={() => unschedule(wo.id)} className="btn w-full text-ink-dim">

@@ -314,11 +314,168 @@ export function answerCostQuery(input: { text: string }): CostAnswerOutput {
   };
 }
 
+/* ============ Agent #6: schedule.stranding-config-assistant (v2.1) ============ */
+//   铜绞线配股助手：同总股数硬约束下，给出"用余料 / 全新拉 / 多源拼合"三种配股方案
+//   客户原话需求（铜锐陈总 6.18 会议）：把老师傅"7+12 还是 5+5+5+4"的经验做成显性多目标优化
+export interface StrandingSource {
+  /** 来源类别（用于色块可视化）：bin=完工余料 / stock=库存半成品 / new=新拉 */
+  kind: 'bin' | 'stock' | 'new';
+  /** 来源描述：例 "WO-1230 完工余料" */
+  from: string;
+  strands: number;        // 股数
+  diameter: number;       // mm
+}
+export interface StrandingScheme {
+  id: 'A' | 'B' | 'C';
+  label: string;
+  composition: StrandingSource[];
+  cost: number;             // 总成本（元）
+  costSaving?: number;      // 相对方案 B 的节省（负值=节省）
+  qualityRating: 1 | 2 | 3 | 4 | 5;
+  schedulingFit: 1 | 2 | 3 | 4 | 5;
+  recommended?: boolean;
+  reason: string;
+}
+export interface StrandingConfigOutput {
+  type: 'stranding-config';
+  request: {
+    workOrderId?: string;
+    customer: string;
+    totalStrands: number;
+    strandDiameter: number;
+    plating: 'tin' | 'bare' | 'enameled';
+    quantity: number;            // kg
+    dueDate: string;
+    rawText: string;
+  };
+  schemes: StrandingScheme[];
+  decisionFactors: string;
+}
+
+/** 简易 NLU：从自然语言中解析配股需求 */
+function parseStrandingText(text: string) {
+  // 股数：支持 "19 股" / "19股" / "x19"
+  const totalStrands = (() => {
+    const m = text.match(/(\d{1,2})\s*股/);
+    if (m) return Number(m[1]);
+    const m2 = text.match(/[x×]\s*(\d{1,2})/i);
+    return m2 ? Number(m2[1]) : 19;
+  })();
+  // 单丝直径
+  const dia = text.match(/(\d?\.\d{1,2})\s*mm/);
+  const strandDiameter = dia ? Number(dia[1]) : 0.5;
+  // 客户
+  const customer =
+    /东方电气/.test(text) ? '东方电气'
+    : /远东/.test(text) ? '远东电缆'
+    : /宝胜/.test(text) ? '宝胜股份'
+    : /上海电气/.test(text) ? '上海电气'
+    : /华翔/.test(text) ? '华翔电机'
+    : '东方电气';
+  // 数量
+  const qty = text.match(/(\d+)\s*kg/);
+  const quantity = qty ? Number(qty[1]) : 500;
+  // 镀层
+  const plating: 'tin' | 'bare' | 'enameled' =
+    /镀锡|tin/i.test(text) ? 'tin'
+    : /漆包|enamel/i.test(text) ? 'enameled'
+    : 'bare';
+  return {
+    customer, totalStrands, strandDiameter, plating, quantity,
+    dueDate: '2026-07-22',
+    rawText: text,
+  };
+}
+
+export function buildStrandingConfig(input: { text?: string; workOrderId?: string; customer?: string; totalStrands?: number; strandDiameter?: number; plating?: 'tin' | 'bare' | 'enameled'; quantity?: number }): StrandingConfigOutput {
+  // 入参兼容：来自工单详情按钮（带 workOrderId/规格直传）或来自 Copilot 自然语言
+  let req: StrandingConfigOutput['request'];
+  if (input.workOrderId) {
+    req = {
+      workOrderId: input.workOrderId,
+      customer: input.customer ?? '东方电气',
+      totalStrands: input.totalStrands ?? 19,
+      strandDiameter: input.strandDiameter ?? 0.5,
+      plating: input.plating ?? 'tin',
+      quantity: input.quantity ?? 500,
+      dueDate: '2026-07-22',
+      rawText: '',
+    };
+  } else {
+    req = parseStrandingText(input.text ?? '');
+  }
+  const N = req.totalStrands;
+  const D = req.strandDiameter;
+
+  // 三种方案：A 余料+库存（7+12 / 推荐） · B 全新拉 · C 多源拼合
+  // 拆分股数（按 N 比例近似匹配补丁文档示例）
+  const a1 = Math.max(2, Math.round(N * 0.37));      // 余料占比 ≈ 37%
+  const a2 = N - a1;
+  const c1 = Math.max(2, Math.floor(N * 0.27));
+  const c2 = Math.max(2, Math.floor(N * 0.27));
+  const c3 = Math.max(2, Math.floor(N * 0.27));
+  const c4 = N - c1 - c2 - c3;
+
+  // 单股基础成本（mock：直径 × 数量的简化估）
+  const unitStrandCost = 18000 / 19;   // 以 19 股 ¥18,000 为基准
+  const costB = Math.round(unitStrandCost * N * 1.10 * (req.quantity / 500));   // 全新拉 +10%
+  const costA = Math.round(unitStrandCost * N * 1.02 * (req.quantity / 500));   // 余料 +2%
+  const costC = Math.round(unitStrandCost * N * 1.01 * (req.quantity / 500));   // 多源拼合 +1% 但质量差
+
+  return {
+    type: 'stranding-config',
+    request: req,
+    schemes: [
+      {
+        id: 'A',
+        label: `方案 A：${a1}+${a2} 配股（库存余料优先）★ 推荐`,
+        composition: [
+          { kind: 'bin',   from: 'WO-2026-1230 完工余料', strands: a1, diameter: D },
+          { kind: 'stock', from: `库存 ${D}mm 半成品`,     strands: a2, diameter: D },
+        ],
+        cost: costA,
+        costSaving: costA - costB,                // 负值
+        qualityRating: 4,
+        schedulingFit: 5,
+        recommended: true,
+        reason: `充分利用 WO-2026-1230 完工后的 ${a1} 股余料，避免新起拉成本；库存半成品就绪可立即开绞`,
+      },
+      {
+        id: 'B',
+        label: `方案 B：${N}×${D}mm 全新拉`,
+        composition: [
+          { kind: 'new', from: `新拉 ${D}mm 单批`, strands: N, diameter: D },
+        ],
+        cost: costB,
+        qualityRating: 5,
+        schedulingFit: 3,
+        reason: '单源拉丝直径偏差最小、质量最稳，但需新起拉约 4 小时，挤占当前 #5 中拉机时段',
+      },
+      {
+        id: 'C',
+        label: `方案 C：${c1}+${c2}+${c3}+${c4} 多源拼合`,
+        composition: [
+          { kind: 'bin',   from: 'WO-2026-1230 完工余料', strands: c1, diameter: D },
+          { kind: 'bin',   from: 'WO-2026-1232 完工余料', strands: c2, diameter: D },
+          { kind: 'stock', from: `库存 ${D}mm 半成品`,     strands: c3, diameter: D },
+          { kind: 'new',   from: `新拉 ${D}mm 短批`,       strands: c4, diameter: D },
+        ],
+        cost: costC,
+        qualityRating: 3,
+        schedulingFit: 4,
+        reason: '成本最低但 4 源拼合存直径偏差风险（±5μm），需加强成品 SPC 抽检',
+      },
+    ],
+    decisionFactors: `该订单交期 ${req.dueDate}（${Math.round((new Date(req.dueDate).getTime() - new Date('2026-07-15').getTime()) / 86400000)} 天后），客户对质量要求中等。推荐方案 A 平衡成本与质量；若以质量为先选 B，若以成本为先选 C 但需加强抽检。`,
+  };
+}
+
 /* ============ 注册表 ============ */
 export const AGENT_RESPONSES: Record<string, unknown> = {
   'schedule.insert-assistant': (input: { text: string }) => buildInsertEvaluation(input),
   'schedule.scheme-explainer': null,              // 由 mockApi 直接调用 buildSchemeExplanation
   'schedule.anomaly-observer': ANOMALY_OPT,
+  'schedule.stranding-config-assistant': (input: { text?: string; workOrderId?: string; customer?: string; totalStrands?: number; strandDiameter?: number; plating?: 'tin' | 'bare' | 'enameled'; quantity?: number }) => buildStrandingConfig(input),
   'cost.loss-diagnostic':     (input: { workOrderId: string }) => buildLossDiagnostic(input),
   'cost.analysis-assistant':  (input: { text: string }) => answerCostQuery(input),
 };

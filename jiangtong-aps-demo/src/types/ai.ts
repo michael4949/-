@@ -5,6 +5,7 @@ export type AgentId =
   | 'schedule.insert-assistant'
   | 'schedule.scheme-explainer'
   | 'schedule.anomaly-observer'
+  | 'schedule.stranding-config-assistant'   // v2.1 新增 · 铜绞线配股助手
   | 'cost.loss-diagnostic'
   | 'cost.analysis-assistant';
 
@@ -22,7 +23,7 @@ export interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  attachments?: Array<{ type: 'scheme' | 'workorder' | 'kpi' | 'chart' | 'cost-answer'; data: unknown }>;
+  attachments?: Array<{ type: 'scheme' | 'workorder' | 'kpi' | 'chart' | 'cost-answer' | 'stranding-config'; data: unknown }>;
   timestamp: Date;
 }
 

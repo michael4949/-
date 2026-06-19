@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useCopilotStore } from '../../store/useCopilotStore';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { mockAIInvoke } from '../../utils/mockApi';
-import type { InsertEvalOutput, InsertScheme, CostAnswerOutput } from '../../mock/agentResponses';
+import type { InsertEvalOutput, InsertScheme, CostAnswerOutput, StrandingConfigOutput, StrandingScheme } from '../../mock/agentResponses';
 import InsertSchemeCard from './InsertSchemeCard';
 import CostAnswerCard from './CostAnswerCard';
+import StrandingSchemeCard from './StrandingSchemeCard';
 
 const QUICK_SUGGESTS_SCHEDULE = [
   '华翔电机来一张急单,500kg QA-0.08mm,下周二必须交',
+  '500kg 19 股 0.5mm 镀锡铜绞线 怎么配',                  // ★ v2.1 配股
   '海尔智家急单 800kg QZ-0.5mm 下周三交',
-  '美的集团 1200kg QA-0.21mm 紧急加单',
 ];
 const QUICK_SUGGESTS_COST = [
   '哪些客户的订单毛利最低？',
@@ -23,8 +24,10 @@ const QUICK_SUGGESTS_COST = [
 export default function CopilotPanel() {
   const { open, toggle, setOpen, contextAgent, messages, pushMessage, thinking, setThinking, consumeQuestion } = useCopilotStore();
   const apply = useScheduleStore((s) => s.applyInsertScheme);
+  const applyStranding = useScheduleStore((s) => s.applyStrandingConfig);
   const setInsertContext = useScheduleStore((s) => s.setInsertContext);
   const [appliedSchemes, setAppliedSchemes] = useState<Record<string, string>>({});
+  const [appliedStranding, setAppliedStranding] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +54,23 @@ export default function CopilotPanel() {
     pushMessage({ id: 'u-' + Date.now(), role: 'user', content: text, timestamp: new Date() });
 
     if (isSchedule) {
+      // ★ v2.1 文本嗅探：含"股/绞/配股/配线"关键词 → 路由 Agent #6（配股助手）
+      const isStranding = /股|绞|配股|配线/.test(text);
+      if (isStranding) {
+        setThinking(true);
+        const { output } = await mockAIInvoke({ agentId: 'schedule.stranding-config-assistant', input: { text } });
+        setThinking(false);
+        const r = output as StrandingConfigOutput;
+        pushMessage({
+          id: 'a-' + Date.now(),
+          role: 'assistant',
+          content: `**配股建议** · ${r.request.customer} · ${r.request.totalStrands} 股 × Φ${r.request.strandDiameter}mm ${r.request.plating === 'tin' ? '镀锡' : r.request.plating === 'enameled' ? '漆包' : ''}铜绞线 · ${r.request.quantity}kg。\n\n${r.decisionFactors}`,
+          attachments: [{ type: 'stranding-config', data: r }],
+          timestamp: new Date(),
+        });
+        return;
+      }
+      // 原 Agent #1 紧急插单
       setInsertContext(text);
       setThinking(true);
       const { output } = await mockAIInvoke({ agentId: 'schedule.insert-assistant', input: { text } });
@@ -94,6 +114,20 @@ export default function CopilotPanel() {
       id: 'a-' + Date.now(),
       role: 'assistant',
       content: `已应用 **${scheme.label}**：受影响 ${scheme.impact.affectedOrders} 张工单已自动后推；新急单已写入甘特图并在闪烁标记中。请在排产页确认后下发计划。`,
+      timestamp: new Date(),
+    });
+  }
+
+  function onApplyStranding(parentMsgId: string, scheme: StrandingScheme, output: StrandingConfigOutput) {
+    if (appliedStranding[parentMsgId]) return;
+    // 如果是 Copilot 自然语言询问得到的方案（没有具体工单 ID），创建虚拟工单 ID
+    const woId = output.request.workOrderId ?? `WO-2026-STR${Date.now().toString().slice(-3)}`;
+    applyStranding(woId, scheme, output);
+    setAppliedStranding((m) => ({ ...m, [parentMsgId]: scheme.id }));
+    pushMessage({
+      id: 'a-' + Date.now(),
+      role: 'assistant',
+      content: `已应用 **${scheme.label}**：已生成 BOM 并锁定来源（${scheme.composition.map((c) => `${c.strands} 股 · ${c.from}`).join('；')}）；绞合工单已写入甘特图并在闪烁标记中。`,
       timestamp: new Date(),
     });
   }
@@ -177,6 +211,17 @@ export default function CopilotPanel() {
                         <CostAnswerCard
                           data={att.data as CostAnswerOutput}
                           onFollowup={(q) => submit(q)}
+                        />
+                      </div>
+                    );
+                  }
+                  if (att.type === 'stranding-config') {
+                    return (
+                      <div className="mt-2" key={i}>
+                        <StrandingSchemeCard
+                          schemes={(att.data as StrandingConfigOutput).schemes}
+                          appliedId={appliedStranding[m.id]}
+                          onApply={(s) => onApplyStranding(m.id, s, att.data as StrandingConfigOutput)}
                         />
                       </div>
                     );
