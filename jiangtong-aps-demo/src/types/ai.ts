@@ -16,7 +16,14 @@ export type AgentId =
   | 'workorder.bom-generator'               // #8 样品工单 BOM
   | 'workorder.anomaly-detector'            // #9 异常工单识别
   | 'material.shortage-root-cause'          // #10 缺料根因
-  | 'material.shortage-predictor';          // #11 齐套风险预测
+  | 'material.shortage-predictor'           // #11 齐套风险预测
+  // ===== Sprint 5 新增 6 个 =====
+  | 'inventory.conflict-mediator'           // #12 抢料冲突调解
+  | 'inventory.health-monitor'              // #13 锁定健康度监测
+  | 'capacity.bottleneck-predictor'         // #14 瓶颈预测
+  | 'capacity.mitigation-generator'         // #15 缓解建议生成
+  | 'gantt.natural-search'                  // #16 甘特图智能搜索
+  | 'gantt.drag-suggestion';                // #17 拖拽建议
 
 export interface AIInsight {
   id: string;
@@ -43,7 +50,11 @@ export interface CopilotMessage {
       // Sprint 4 新增 attachment 类型
       | 'matrix-draft'
       | 'bom-draft'
-      | 'shortage-root-cause';
+      | 'shortage-root-cause'
+      // Sprint 5 新增 attachment 类型
+      | 'conflict-mediation'
+      | 'mitigation-plan'
+      | 'gantt-search';
     data: unknown;
   }>;
   timestamp: Date;

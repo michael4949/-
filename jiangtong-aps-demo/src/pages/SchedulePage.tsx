@@ -14,6 +14,7 @@ import AlgorithmPanel from '../components/schedule/AlgorithmPanel';
 import AIInsightCard from '../components/ai/AIInsightCard';
 import AIButton from '../components/ai/AIButton';
 import MatrixGeneratorModal from '../components/ai/MatrixGeneratorModal';
+import DragSuggestionTip from '../components/gantt/DragSuggestionTip';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useExplainStore } from '../store/useExplainStore';
 import { RefreshCw, Play, Send, BarChart3, Download, AlertOctagon } from 'lucide-react';
@@ -251,6 +252,9 @@ export default function SchedulePage() {
         onClose={() => setMatrixOpen(false)}
         onApply={() => setMatrixOpen(false)}
       />
+
+      {/* ★ Sprint 5 #17 拖拽建议悬浮提示（document 级监听，无侵入） */}
+      <DragSuggestionTip />
     </div>
   );
 }

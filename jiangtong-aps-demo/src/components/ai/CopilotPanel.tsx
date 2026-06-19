@@ -5,14 +5,19 @@ import { useCopilotStore } from '../../store/useCopilotStore';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { mockAIInvoke } from '../../utils/mockApi';
 import type { InsertEvalOutput, InsertScheme, CostAnswerOutput, StrandingConfigOutput, StrandingScheme } from '../../mock/agentResponses';
+import type { GanttSearchOutput } from '../../mock/agentResponses.sprint5';
+import { useGanttHighlightStore } from '../../store/useGanttHighlightStore';
 import InsertSchemeCard from './InsertSchemeCard';
 import CostAnswerCard from './CostAnswerCard';
 import StrandingSchemeCard from './StrandingSchemeCard';
+import GanttSearchCard from './GanttSearchCard';
 
 const QUICK_SUGGESTS_SCHEDULE = [
   '华翔电机来一张急单,500kg QA-0.08mm,下周二必须交',
   '500kg 19 股 0.5mm 镀锡铜绞线 怎么配',                  // ★ v2.1 配股
   '海尔智家急单 800kg QZ-0.5mm 下周三交',
+  '找出未来 3 天可能延期的高优先级工单',                    // ★ Sprint 5 #16
+  '高亮华翔电机的所有工单',                                // ★ Sprint 5 #16
 ];
 const QUICK_SUGGESTS_COST = [
   '哪些客户的订单毛利最低？',
@@ -26,6 +31,8 @@ export default function CopilotPanel() {
   const apply = useScheduleStore((s) => s.applyInsertScheme);
   const applyStranding = useScheduleStore((s) => s.applyStrandingConfig);
   const setInsertContext = useScheduleStore((s) => s.setInsertContext);
+  const setHighlightedIds = useGanttHighlightStore((s) => s.setIds);
+  const clearHighlight = useGanttHighlightStore((s) => s.clear);
   const [appliedSchemes, setAppliedSchemes] = useState<Record<string, string>>({});
   const [appliedStranding, setAppliedStranding] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
@@ -54,6 +61,27 @@ export default function CopilotPanel() {
     pushMessage({ id: 'u-' + Date.now(), role: 'user', content: text, timestamp: new Date() });
 
     if (isSchedule) {
+      // ★ Sprint 5 #16：含搜索/查找/高亮/筛选关键词 → 路由 gantt.natural-search
+      const isSearch = /找出|查找|搜索|高亮|筛选|未来.*天|哪些.*工单|定位/.test(text)
+                    && !/股|绞|配股|配线/.test(text)
+                    && !/急单|插入|插单/.test(text);
+      if (isSearch) {
+        setThinking(true);
+        const { output } = await mockAIInvoke({ agentId: 'gantt.natural-search', input: { text } });
+        setThinking(false);
+        const r = output as GanttSearchOutput;
+        // 在甘特图中高亮匹配的工单
+        if (r.matchedWorkOrderIds.length > 0) setHighlightedIds(r.matchedWorkOrderIds);
+        else clearHighlight();
+        pushMessage({
+          id: 'a-' + Date.now(),
+          role: 'assistant',
+          content: r.summary,
+          attachments: [{ type: 'gantt-search', data: r }],
+          timestamp: new Date(),
+        });
+        return;
+      }
       // ★ v2.1 文本嗅探：含"股/绞/配股/配线"关键词 → 路由 Agent #6（配股助手）
       const isStranding = /股|绞|配股|配线/.test(text);
       if (isStranding) {
@@ -223,6 +251,13 @@ export default function CopilotPanel() {
                           appliedId={appliedStranding[m.id]}
                           onApply={(s) => onApplyStranding(m.id, s, att.data as StrandingConfigOutput)}
                         />
+                      </div>
+                    );
+                  }
+                  if (att.type === 'gantt-search') {
+                    return (
+                      <div className="mt-2" key={i}>
+                        <GanttSearchCard data={att.data as GanttSearchOutput} onClearHighlight={clearHighlight} />
                       </div>
                     );
                   }

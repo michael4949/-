@@ -3,6 +3,7 @@
 //   - Agent #2 (scheme-explainer) Modal 单独 800ms（§6.2.2 原文）
 import { AGENT_RESPONSES, buildSchemeExplanation } from '../mock/agentResponses';
 import { SPRINT4_AGENT_RESPONSES } from '../mock/agentResponses.sprint4';
+import { SPRINT5_AGENT_RESPONSES } from '../mock/agentResponses.sprint5';
 import type { WorkOrder } from '../types/workOrder';
 
 export interface MockInvokeReq {
@@ -11,15 +12,18 @@ export interface MockInvokeReq {
   context?: unknown;
 }
 
-// 合并注册表：Sprint 0-3 (AGENT_RESPONSES) + Sprint 4 (SPRINT4_AGENT_RESPONSES)
+// 合并注册表：Sprint 0-3 + Sprint 4 + Sprint 5
 const ALL_AGENTS: Record<string, unknown> = {
   ...AGENT_RESPONSES,
   ...SPRINT4_AGENT_RESPONSES,
+  ...SPRINT5_AGENT_RESPONSES,
 };
 
 export async function mockAIInvoke(req: MockInvokeReq) {
   const delay =
     req.agentId === 'schedule.scheme-explainer' ? 800
+    : req.agentId === 'gantt.drag-suggestion'   ? 500        // §6.2.20 拖拽建议轻量化
+    : req.agentId === 'gantt.natural-search'    ? 900        // 搜索类响应稍快
     : 1500 + Math.random() * 500;          // 主流程 1500-2000ms
   await new Promise((r) => setTimeout(r, delay));
 

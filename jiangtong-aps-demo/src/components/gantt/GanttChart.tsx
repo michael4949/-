@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useScheduleStore, GANTT_START } from '../../store/useScheduleStore';
 import { useExplainStore } from '../../store/useExplainStore';
+import { useGanttHighlightStore } from '../../store/useGanttHighlightStore';
 import { getResourcesByWorkshop } from '../../mock/productLines';
 import type { WorkOrder } from '../../types/workOrder';
 import { fmtDate, fmtDateTime } from '../../utils/format';
@@ -23,6 +24,7 @@ export default function GanttChart() {
   const aiFindBestSlot = useScheduleStore((s) => s.aiFindBestSlot);
   const applyAnomalyMerge = useScheduleStore((s) => s.applyAnomalyMerge);
   const showExplain = useExplainStore((s) => s.show);
+  const highlightIds = useGanttHighlightStore((s) => s.ids);
 
   const resources = useMemo(() => getResourcesByWorkshop(workshop), [workshop]);
   const hourWidth = view === 'week' ? HOUR_WIDTH_WEEK : HOUR_WIDTH_DAY;
@@ -307,6 +309,7 @@ export default function GanttChart() {
               const isSel = wo.id === selectedId;
               const isFlash = flashIds.includes(wo.id);
               const isUrgent = wo.priority === 'urgent';
+              const isHighlighted = highlightIds.has(wo.id);  // Sprint 5 #16
               const dragging = drag?.woId === wo.id;
               const opacity = dragging ? 0.25 : 1;
               return (
@@ -317,7 +320,8 @@ export default function GanttChart() {
                               shadow-sm hover:shadow-md transition-shadow
                               ${isSel ? 'ring-2 ring-brand ring-offset-1 ring-offset-card' : ''}
                               ${isFlash ? 'gantt-flash' : ''}
-                              ${isUrgent ? 'ring-2 ring-danger ring-offset-1 ring-offset-card' : ''}`}
+                              ${isUrgent && !isHighlighted ? 'ring-2 ring-danger ring-offset-1 ring-offset-card' : ''}
+                              ${isHighlighted ? 'gantt-search-hit' : ''}`}
                   style={{
                     top: ri * ROW_H + 6,
                     left,
