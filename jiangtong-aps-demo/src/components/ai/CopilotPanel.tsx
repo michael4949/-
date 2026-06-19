@@ -1,61 +1,89 @@
-// §11.1 Copilot 完整化（Sprint 2：Agent #1 紧急插单助手；Sprint 3：cost Agent）
+// §11.1 Copilot 完整化（Sprint 2 #1 紧急插单 + Sprint 3 #5 成本分析助手）
 import { Sparkles, X, Send, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useCopilotStore } from '../../store/useCopilotStore';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { mockAIInvoke } from '../../utils/mockApi';
-import type { InsertEvalOutput, InsertScheme } from '../../mock/agentResponses';
+import type { InsertEvalOutput, InsertScheme, CostAnswerOutput } from '../../mock/agentResponses';
 import InsertSchemeCard from './InsertSchemeCard';
+import CostAnswerCard from './CostAnswerCard';
 
 const QUICK_SUGGESTS_SCHEDULE = [
   '华翔电机来一张急单,500kg QA-0.08mm,下周二必须交',
   '海尔智家急单 800kg QZ-0.5mm 下周三交',
   '美的集团 1200kg QA-0.21mm 紧急加单',
 ];
+const QUICK_SUGGESTS_COST = [
+  '哪些客户的订单毛利最低？',
+  '漆包车间 3 月份的铜耗为什么比 2 月份高？',
+  'WO-2024-1234 的成本构成',
+  '本月各产线的成本对比',
+];
 
 export default function CopilotPanel() {
-  const { open, toggle, setOpen, contextAgent, messages, pushMessage, thinking, setThinking } = useCopilotStore();
-  const insertCtx = useScheduleStore((s) => s.insertContext);
+  const { open, toggle, setOpen, contextAgent, messages, pushMessage, thinking, setThinking, consumeQuestion } = useCopilotStore();
   const apply = useScheduleStore((s) => s.applyInsertScheme);
   const setInsertContext = useScheduleStore((s) => s.setInsertContext);
-  const [appliedSchemes, setAppliedSchemes] = useState<Record<string, string>>({}); // msgId -> schemeId
+  const [appliedSchemes, setAppliedSchemes] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState('');
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  const agent = contextAgent;
+  const isSchedule = agent === 'schedule.insert-assistant';
+  const isCost = agent === 'cost.analysis-assistant';
 
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [messages, thinking]);
 
-  const isSchedule = contextAgent === 'schedule.insert-assistant';
+  // 打开时消费 pendingQuestion（来自 Agent #4 关联数据点击）
+  useEffect(() => {
+    if (open) {
+      const q = consumeQuestion();
+      if (q) setTimeout(() => submit(q), 200);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   async function submit(text: string) {
     if (!text.trim() || thinking) return;
     setDraft('');
-    const userMsg = { id: 'u-' + Date.now(), role: 'user' as const, content: text, timestamp: new Date() };
-    pushMessage(userMsg);
+    pushMessage({ id: 'u-' + Date.now(), role: 'user', content: text, timestamp: new Date() });
 
-    if (!isSchedule) {
-      // 非排产页：占位回复
+    if (isSchedule) {
+      setInsertContext(text);
       setThinking(true);
-      await new Promise((r) => setTimeout(r, 800));
-      pushMessage({ id: 'a-' + Date.now(), role: 'assistant', content: '此模块的 AI 能力将在后续 Sprint 启用。', timestamp: new Date() });
+      const { output } = await mockAIInvoke({ agentId: 'schedule.insert-assistant', input: { text } });
       setThinking(false);
+      const r = output as InsertEvalOutput;
+      pushMessage({
+        id: 'a-' + Date.now(),
+        role: 'assistant',
+        content: `已为您评估**3 种插单方案**（${r.request.customer} · ${r.request.product} · ${r.request.quantity}kg · 交期 ${r.request.dueDate}）：`,
+        attachments: [{ type: 'scheme', data: r }],
+        timestamp: new Date(),
+      });
       return;
     }
-
-    // Agent #1
-    setInsertContext(text);
+    if (isCost) {
+      setThinking(true);
+      const { output } = await mockAIInvoke({ agentId: 'cost.analysis-assistant', input: { text } });
+      setThinking(false);
+      const r = output as CostAnswerOutput;
+      pushMessage({
+        id: 'a-' + Date.now(),
+        role: 'assistant',
+        content: r.text,
+        attachments: [{ type: 'cost-answer', data: r }],
+        timestamp: new Date(),
+      });
+      return;
+    }
+    // 其他页：占位
     setThinking(true);
-    const { output } = await mockAIInvoke({ agentId: 'schedule.insert-assistant', input: { text } });
+    await new Promise((r) => setTimeout(r, 800));
+    pushMessage({ id: 'a-' + Date.now(), role: 'assistant', content: '此模块的 AI 能力将在后续 Sprint 启用。', timestamp: new Date() });
     setThinking(false);
-    const r = output as InsertEvalOutput;
-    pushMessage({
-      id: 'a-' + Date.now(),
-      role: 'assistant',
-      content: `已为您评估**3 种插单方案**（${r.request.customer} · ${r.request.product} · ${r.request.quantity}kg · 交期 ${r.request.dueDate}）：`,
-      attachments: [{ type: 'scheme', data: r }],
-      timestamp: new Date(),
-    });
   }
 
   function onApplyScheme(parentMsgId: string, scheme: InsertScheme, output: InsertEvalOutput) {
@@ -69,6 +97,8 @@ export default function CopilotPanel() {
       timestamp: new Date(),
     });
   }
+
+  const suggests = isSchedule ? QUICK_SUGGESTS_SCHEDULE : isCost ? QUICK_SUGGESTS_COST : [];
 
   return (
     <>
@@ -92,15 +122,16 @@ export default function CopilotPanel() {
                     transform transition-transform duration-300 flex flex-col
                     ${open ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        {/* 头部 */}
         <div className="h-14 flex-none px-4 flex items-center gap-3 border-b border-line bg-panel2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-ai to-purple-500 flex items-center justify-center text-white">
             <Sparkles size={15} />
           </div>
           <div className="leading-tight">
-            <div className="text-[14px] font-semibold">排产助手</div>
+            <div className="text-[14px] font-semibold">{isCost ? '成本分析助手' : '排产助手'}</div>
             <div className="text-[10.5px] text-ink-faint">
-              {isSchedule ? '已绑定 · 紧急插单助手' : contextAgent ? `已绑定 · ${contextAgent}` : '当前页未绑定 Agent'}
+              {isSchedule ? '已绑定 · 紧急插单助手'
+               : isCost ? '已绑定 · 成本分析助手'
+               : '当前页未绑定 Agent'}
             </div>
           </div>
           <button
@@ -112,32 +143,46 @@ export default function CopilotPanel() {
           </button>
         </div>
 
-        {/* 消息区 */}
         <div ref={bodyRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-bg">
           {messages.length === 0 && !thinking && (
             <div className="text-[12.5px] text-ink-dim leading-7 border border-dashed border-line rounded-lg px-4 py-3 bg-card">
-              您好，我是排产助手 ✨<br />
+              您好，我是 AI 助手 ✨<br />
               {isSchedule
                 ? '我可以帮您评估急单插入方案。请描述需求，例如"华翔电机来一张急单,500kg QA-0.08mm,下周二必须交"。'
-                : '请切到「智能排产」页与我对话，或在工单详情面板点 ✨ 解释为何这样排。'}
+                : isCost
+                ? '我可以分析本月成本相关问题，例如客户毛利、月度对比、工单成本构成。试试下方常见问题。'
+                : '请切到「智能排产」或「成本核算」页与我对话。'}
             </div>
           )}
           {messages.map((m) => (
             <div key={m.id} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
               <div className={`max-w-[88%] rounded-lg px-3 py-2 text-[12.5px] leading-relaxed
-                              ${m.role === 'user'
-                                ? 'bg-brand text-white'
-                                : 'bg-card border border-line text-ink'}`}>
-                <div dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') }} />
-                {m.attachments?.map((att, i) => att.type === 'scheme' ? (
-                  <div className="mt-2" key={i}>
-                    <InsertSchemeCard
-                      schemes={(att.data as InsertEvalOutput).schemes}
-                      appliedId={appliedSchemes[m.id]}
-                      onApply={(s) => onApplyScheme(m.id, s, att.data as InsertEvalOutput)}
-                    />
-                  </div>
-                ) : null)}
+                              ${m.role === 'user' ? 'bg-brand text-white' : 'bg-card border border-line text-ink'}`}>
+                <div dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br/>') }} />
+                {m.attachments?.map((att, i) => {
+                  if (att.type === 'scheme') {
+                    return (
+                      <div className="mt-2" key={i}>
+                        <InsertSchemeCard
+                          schemes={(att.data as InsertEvalOutput).schemes}
+                          appliedId={appliedSchemes[m.id]}
+                          onApply={(s) => onApplyScheme(m.id, s, att.data as InsertEvalOutput)}
+                        />
+                      </div>
+                    );
+                  }
+                  if (att.type === 'cost-answer') {
+                    return (
+                      <div className="mt-2" key={i}>
+                        <CostAnswerCard
+                          data={att.data as CostAnswerOutput}
+                          onFollowup={(q) => submit(q)}
+                        />
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               </div>
             </div>
           ))}
@@ -151,11 +196,10 @@ export default function CopilotPanel() {
           )}
         </div>
 
-        {/* 底部输入 */}
         <div className="flex-none border-t border-line p-3 bg-card">
-          {isSchedule && (
+          {suggests.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2.5">
-              {QUICK_SUGGESTS_SCHEDULE.map((s) => (
+              {suggests.map((s) => (
                 <button key={s} onClick={() => submit(s)} className="ai-chip cursor-pointer hover:bg-ai-soft">
                   {s.length > 18 ? s.slice(0, 18) + '…' : s}
                 </button>
@@ -167,14 +211,14 @@ export default function CopilotPanel() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) submit(draft); }}
-              placeholder={isSchedule ? '描述插单需求…' : '当前页未绑定 Agent'}
-              disabled={!isSchedule}
+              placeholder={isSchedule ? '描述插单需求…' : isCost ? '提问成本相关问题…' : '当前页未绑定 Agent'}
+              disabled={!isSchedule && !isCost}
               className="flex-1 h-9 px-3 rounded-lg bg-panel2 border border-line text-[12.5px]
                          placeholder:text-ink-faint outline-none focus:border-ai focus:ring-2 focus:ring-ai/20 disabled:opacity-50"
             />
             <button
               onClick={() => submit(draft)}
-              disabled={!isSchedule || !draft.trim() || thinking}
+              disabled={(!isSchedule && !isCost) || !draft.trim() || thinking}
               className="w-9 h-9 rounded-lg bg-gradient-to-br from-ai to-purple-500 text-white
                          flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
               <Send size={14} />

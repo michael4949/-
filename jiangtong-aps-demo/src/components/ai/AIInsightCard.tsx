@@ -5,9 +5,11 @@ import type { AIInsight } from '../../types/ai';
 interface Props {
   insight: AIInsight;
   onDismiss?: (id: string) => void;
+  /** 自定义点击行为（优先于默认 navigate） */
+  onAction?: (i: AIInsight) => void;
 }
 // §11.2 紫色左边框 + 浅紫背景 + emoji + 一句话 + 主操作 + 关闭
-export default function AIInsightCard({ insight, onDismiss }: Props) {
+export default function AIInsightCard({ insight, onDismiss, onAction }: Props) {
   const nav = useNavigate();
   return (
     <div className="ai-insight gap-3 group">
@@ -15,7 +17,7 @@ export default function AIInsightCard({ insight, onDismiss }: Props) {
         {insight.message}
       </div>
       <button
-        onClick={() => nav(insight.primaryAction.route)}
+        onClick={() => onAction ? onAction(insight) : nav(insight.primaryAction.route)}
         className="btn btn-ai btn-sm flex-none"
       >
         {insight.primaryAction.label}

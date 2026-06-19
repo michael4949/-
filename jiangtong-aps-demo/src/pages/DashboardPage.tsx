@@ -8,10 +8,12 @@ import AlertList from '../components/dashboard/AlertList';
 import WorkshopStatus from '../components/dashboard/WorkshopStatus';
 import { DASHBOARD_DATA } from '../mock/dashboardData';
 import { useNavigate } from 'react-router-dom';
+import { useCostStore } from '../store/useCostStore';
 
 export default function DashboardPage() {
   const d = DASHBOARD_DATA;
   const nav = useNavigate();
+  const setPendingDiag = useCostStore((s) => s.setPendingDiagnoseWoId);
   const [insights, setInsights] = useState(d.aiInsights);
 
   return (
@@ -42,6 +44,12 @@ export default function DashboardPage() {
               key={ins.id}
               insight={ins}
               onDismiss={(id) => setInsights((arr) => arr.filter((x) => x.id !== id))}
+              onAction={(i) => {
+                if (i.agentSource === 'cost.loss-diagnostic') {
+                  setPendingDiag('WO-2024-1234');
+                }
+                nav(i.primaryAction.route);
+              }}
             />
           ))}
           {insights.length === 0 && (

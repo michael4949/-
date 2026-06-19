@@ -22,7 +22,7 @@ export interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  attachments?: Array<{ type: 'scheme' | 'workorder' | 'kpi' | 'chart'; data: unknown }>;
+  attachments?: Array<{ type: 'scheme' | 'workorder' | 'kpi' | 'chart' | 'cost-answer'; data: unknown }>;
   timestamp: Date;
 }
 
