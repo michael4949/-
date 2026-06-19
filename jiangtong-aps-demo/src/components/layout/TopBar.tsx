@@ -19,7 +19,7 @@ export default function TopBar() {
     <header className="h-14 flex-none flex items-center gap-4 px-5 border-b border-line bg-card">
       {/* Logo */}
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-brand-600 flex items-center justify-center font-bold text-white text-[13px] shadow-md">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-brand-600 flex items-center justify-center font-bold text-white text-[13px] shadow-sm">
           JT
         </div>
         <div className="leading-tight">
@@ -33,8 +33,8 @@ export default function TopBar() {
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
         <input
           placeholder="搜索工单 / 物料 / 资源…"
-          className="w-full h-9 pl-9 pr-3 rounded-lg bg-bg border border-line text-[12.5px]
-                     placeholder:text-ink-faint outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="w-full h-9 pl-9 pr-3 rounded-lg bg-panel2 border border-line text-[12.5px]
+                     placeholder:text-ink-faint outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 focus:bg-card"
         />
       </div>
 
@@ -44,7 +44,7 @@ export default function TopBar() {
         <div className="relative">
           <button
             onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-bg border border-line
+            className="flex items-center gap-2 h-9 px-3 rounded-lg bg-panel2 border border-line
                        hover:border-line-soft text-[12.5px]"
           >
             <span className="text-ink-dim">角色:</span>
@@ -64,7 +64,7 @@ export default function TopBar() {
                     setRole(r as Role);
                     setOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-[12.5px] hover:bg-line/50
+                  className={`w-full text-left px-3 py-1.5 text-[12.5px] hover:bg-bg
                               ${r === role ? 'text-brand font-semibold' : 'text-ink'}`}
                 >
                   {r}
@@ -76,7 +76,7 @@ export default function TopBar() {
 
         {/* 通知 */}
         <button
-          className="relative w-9 h-9 rounded-lg hover:bg-line/40 flex items-center justify-center"
+          className="relative w-9 h-9 rounded-lg hover:bg-bg flex items-center justify-center"
           title="通知"
         >
           <Bell size={16} className="text-ink-dim" />

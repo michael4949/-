@@ -11,7 +11,6 @@ interface MenuItem {
   star?: boolean;
 }
 
-// §4.1 一级菜单(9 个业务入口 + 1 个系统设置)
 const PRIMARY: MenuItem[] = [
   { to: '/dashboard',      label: '工作台',          Icon: Home,           star: true },
   { to: '/work-orders',    label: '工单管理',        Icon: ClipboardList },
@@ -32,8 +31,8 @@ function Item({ item }: { item: MenuItem }) {
       className={({ isActive }) =>
         `flex items-center gap-3 h-10 px-4 text-[13px] relative transition-colors
          ${isActive
-           ? 'bg-line/50 text-white font-semibold'
-           : 'text-ink-dim hover:bg-line/30 hover:text-ink'}`
+           ? 'bg-brand-50 text-brand font-semibold'
+           : 'text-ink-dim hover:bg-bg hover:text-ink'}`
       }
     >
       {({ isActive }) => (
