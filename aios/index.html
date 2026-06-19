@@ -1208,6 +1208,50 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
   .deal-form { grid-template-columns: 1fr 1fr; }
   .radar-svg { width: 180px; height: 180px; }
 }
+/* ---------- 现金流富数据图 ---------- */
+.cf-chart-rich { width: 100%; height: 320px; }
+.cf-grid line { stroke: rgba(14,20,48,.08); stroke-width: 1; }
+.cf-yaxis text, .cf-xaxis text { font-size: 9.5px; fill: var(--muted); }
+.cf-section-lbl { font-size: 9.5px; fill: var(--ink-2); font-weight: 700; }
+.cf-bar-in { fill: #18B97A; opacity: .85; }
+.cf-bar-out { fill: #E5484D; opacity: .85; }
+.cf-dot { transition: cy .35s ease, fill .35s ease; }
+#cfRichLine, #cfRichArea { transition: d .4s ease; }
+#cfDotMain { transition: cx .4s ease, cy .4s ease, fill .35s ease; }
+
+.cf-kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 14px; }
+.cf-kpi { padding: 9px 11px; background: #F8F9FE; border: 1px solid var(--line); border-radius: 10px; }
+.ck-lbl { font-size: 10.5px; color: var(--muted); }
+.ck-val { font-size: 17px; font-weight: 800; margin-top: 2px; letter-spacing: -0.01em; }
+.ck-val.good { color: var(--green); } .ck-val.danger { color: var(--red); }
+
+.cf-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 10.5px; color: var(--muted); margin: 11px 0 4px; }
+.cf-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.cf-legend i { display: inline-block; width: 14px; height: 8px; border-radius: 2px; }
+.cf-legend .leg-line { height: 3px; background: #5A5BF0; }
+.cf-legend .leg-dash { background: none; border-bottom: 2px dashed #E5484D; height: 0; width: 16px; }
+.cf-legend .leg-event { border-radius: 50%; width: 9px; height: 9px; }
+
+.cf-table th { font-size: 11px; padding: 10px 12px; }
+.cf-table td { font-size: 11.5px; padding: 8px 12px; }
+.cf-table tr.under-safe td { background: rgba(229,72,77,.05); }
+.cf-table tr.trough td { background: rgba(229,72,77,.12); font-weight: 600; }
+
+.cf-source { display: flex; flex-direction: column; gap: 10px; }
+.cf-src { display: grid; grid-template-columns: 130px 1fr 70px 36px; gap: 10px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.cf-src b { font-weight: 700; color: var(--ink); }
+.cf-src > span:last-child { color: var(--muted); text-align: right; font-size: 11px; }
+.cf-src-bar { height: 9px; background: #EEF0FB; border-radius: 999px; overflow: hidden; }
+.cf-src-bar i { display: block; height: 100%; border-radius: 999px; transition: width .5s; }
+
+@media (max-width: 1280px) {
+  .cf-kpi-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 860px) {
+  .cf-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .cf-src { grid-template-columns: 100px 1fr 56px; }
+  .cf-src > span:last-child { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1944,22 +1988,119 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               <div class="pcard">
                 <div class="pc-head"><h3>未来 12 周现金流（随你的决策实时变化）</h3><span class="pc-extra">勾选措施 → 缺口与曲线即时重算</span></div>
                 <div class="pc-body">
-                  <svg class="cf-chart" viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true">
-                    <defs><linearGradient id="cfg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A5BF0" stop-opacity=".22"/><stop offset="1" stop-color="#5A5BF0" stop-opacity="0"/></linearGradient></defs>
-                    <line x1="0" y1="104" x2="600" y2="104" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="5 5" opacity=".7"/><text x="6" y="98" font-size="10" fill="#64748B">安全线</text>
-                    <path id="cfArea" d="M0 62 L55 70 L109 84 L164 96 L218 110 L273 124 L327 118 L382 100 L436 86 L491 74 L545 66 L600 58 L600 150 L0 150 Z" fill="url(#cfg1)"/>
-                    <path id="cfLine" d="M0 62 L55 70 L109 84 L164 96 L218 110 L273 124 L327 118 L382 100 L436 86 L491 74 L545 66 L600 58" fill="none" stroke="#5A5BF0" stroke-width="2.2" stroke-linejoin="round"/>
-                    <circle id="cfDot" cx="273" cy="124" r="5" fill="#E5484D"/>
+                  <div class="cf-kpi-row">
+                    <div class="cf-kpi"><div class="ck-lbl">当前可动用</div><div class="ck-val">¥420万</div></div>
+                    <div class="cf-kpi"><div class="ck-lbl">12 周入款</div><div class="ck-val good">¥910万</div></div>
+                    <div class="cf-kpi"><div class="ck-lbl">12 周出款</div><div class="ck-val danger">¥820万</div></div>
+                    <div class="cf-kpi"><div class="ck-lbl">净现金流</div><div class="ck-val good" id="ckNetVal">+¥90万</div></div>
+                    <div class="cf-kpi"><div class="ck-lbl" id="ckLowLbl">最低点 (W6)</div><div class="ck-val danger" id="ckLowVal">¥220万</div></div>
+                    <div class="cf-kpi"><div class="ck-lbl">安全线</div><div class="ck-val">¥300万</div></div>
+                  </div>
+
+                  <svg class="cf-chart-rich" viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="cfRichGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A5BF0" stop-opacity=".22"/><stop offset="1" stop-color="#5A5BF0" stop-opacity="0"/></linearGradient>
+                    </defs>
+                    <g class="cf-grid">
+                      <line x1="60" y1="20" x2="700" y2="20"/>
+                      <line x1="60" y1="50" x2="700" y2="50"/>
+                      <line x1="60" y1="80" x2="700" y2="80"/>
+                      <line x1="60" y1="110" x2="700" y2="110"/>
+                      <line x1="60" y1="140" x2="700" y2="140"/>
+                      <line x1="60" y1="170" x2="700" y2="170"/>
+                      <line x1="60" y1="200" x2="700" y2="200"/>
+                    </g>
+                    <g class="cf-yaxis">
+                      <text x="55" y="24" text-anchor="end">¥600万</text>
+                      <text x="55" y="54" text-anchor="end">¥500万</text>
+                      <text x="55" y="84" text-anchor="end">¥400万</text>
+                      <text x="55" y="114" text-anchor="end" fill="#E5484D" font-weight="700">¥300万</text>
+                      <text x="55" y="144" text-anchor="end">¥200万</text>
+                      <text x="55" y="174" text-anchor="end">¥100万</text>
+                      <text x="55" y="204" text-anchor="end">¥0</text>
+                    </g>
+                    <line x1="60" y1="110" x2="700" y2="110" stroke="#E5484D" stroke-width="1.4" stroke-dasharray="6 5" opacity=".55"/>
+                    <text x="700" y="106" font-size="9.5" fill="#E5484D" text-anchor="end" font-weight="700">安全线 ¥300万</text>
+
+                    <g id="cfBarsIn"></g>
+                    <g id="cfBarsOut"></g>
+                    <line x1="60" y1="235" x2="700" y2="235" stroke="#CBD5E1" stroke-width="1"/>
+
+                    <path id="cfRichArea" d="M 60 77 L 118 86 L 176 98 L 234 110 L 292 122 L 350 134 L 408 119 L 466 104 L 524 86 L 582 71 L 640 57.5 L 698 47 L 698 200 L 60 200 Z" fill="url(#cfRichGrad)"/>
+                    <path id="cfRichLine" d="M 60 77 L 118 86 L 176 98 L 234 110 L 292 122 L 350 134 L 408 119 L 466 104 L 524 86 L 582 71 L 640 57.5 L 698 47" fill="none" stroke="#5A5BF0" stroke-width="2.4" stroke-linejoin="round"/>
+
+                    <g id="cfDots"></g>
+
+                    <circle id="cfDotMain" cx="350" cy="134" r="6.5" fill="#E5484D" stroke="#fff" stroke-width="2"/>
+                    <text id="cfDotLbl" x="350" y="122" font-size="10.5" fill="#E5484D" text-anchor="middle" font-weight="700">缺口 ¥80万</text>
+
+                    <line x1="60" y1="20" x2="60" y2="200" stroke="#5A5BF0" stroke-width="1" stroke-dasharray="3 3" opacity=".35"/>
+
+                    <text class="cf-section-lbl" x="56" y="217" text-anchor="end">入款</text>
+                    <text class="cf-section-lbl" x="56" y="253" text-anchor="end">出款</text>
+
+                    <g class="cf-xaxis" id="cfXLabels"></g>
+                    <g id="cfEvents"></g>
                   </svg>
+
+                  <div class="cf-legend">
+                    <span><i class="leg-line"></i>余额曲线</span>
+                    <span><i class="leg-bar" style="background:#18B97A"></i>周入款</span>
+                    <span><i class="leg-bar" style="background:#E5484D"></i>周出款</span>
+                    <span><i class="leg-dash"></i>安全线 ¥300万</span>
+                    <span><i class="leg-event" style="background:#18B97A"></i>工资日</span>
+                    <span><i class="leg-event" style="background:#E5484D"></i>季度税</span>
+                    <span><i class="leg-event" style="background:#D97706"></i>贷款本息</span>
+                    <span><i class="leg-event" style="background:#5A5BF0"></i>大供应商</span>
+                  </div>
+
                   <div class="gap-box">当前预计缺口 <b id="gapNum" class="danger">¥80万</b></div>
                   <div class="sim" id="cashSim">
                     <label class="sim-tog" data-amt="120"><input type="checkbox" /><span>加速催收 A 类应收（宁波远东 ¥60 万可提前）</span><span class="sim-amt">+¥120万</span></label>
                     <label class="sim-tog" data-amt="40"><input type="checkbox" /><span>延后某供应商付款至第 8 周（账期内，不违约）</span><span class="sim-amt">+¥40万</span></label>
                     <label class="sim-tog" data-amt="50"><input type="checkbox" /><span>启用银行授信备用</span><span class="sim-amt">+¥50万</span></label>
                   </div>
-                  <div class="ag-note">AI 已按「影响最小、不违约、低成本」排序——优先①即可补上 ¥80 万缺口。<div style="margin-top:9px"><button class="btn-grad" data-fx="execcash">一键执行所选措施</button></div></div>
+                  <div class="ag-note">AI 已按「影响最小、不违约、低成本」排序——优先①即可补上 ¥80 万缺口。选好后点执行，自动建任务派人。<div style="margin-top:9px"><button class="btn-grad" data-fx="execcash">一键执行所选措施</button></div></div>
                 </div>
               </div>
+
+              <div class="pcard mt">
+                <div class="pc-head"><h3>12 周现金流明细</h3><span class="pc-extra">勾选措施后期末余额实时调整 · 低于安全线高亮</span></div>
+                <div class="pc-body" style="padding:0">
+                  <table class="table cf-table">
+                    <thead><tr><th>周次</th><th>日期</th><th>期初</th><th>入款</th><th>出款</th><th>期末余额</th><th>关键事件</th><th>状态</th></tr></thead>
+                    <tbody id="cfTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="pgrid g2 mt">
+                <div class="pcard">
+                  <div class="pc-head"><h3>12 周入款结构</h3><span class="pc-extra">合计 ¥910万</span></div>
+                  <div class="pc-body">
+                    <div class="cf-source">
+                      <div class="cf-src"><span>销售收入回款</span><div class="cf-src-bar"><i style="width:60%;background:#18B97A"></i></div><b>¥545万</b><span>60%</span></div>
+                      <div class="cf-src"><span>应收账款催收</span><div class="cf-src-bar"><i style="width:20%;background:#5A5BF0"></i></div><b>¥180万</b><span>20%</span></div>
+                      <div class="cf-src"><span>其他业务收入</span><div class="cf-src-bar"><i style="width:10%;background:#00C2D8"></i></div><b>¥95万</b><span>10%</span></div>
+                      <div class="cf-src"><span>留抵退税</span><div class="cf-src-bar"><i style="width:7%;background:#9A4DFF"></i></div><b>¥60万</b><span>7%</span></div>
+                      <div class="cf-src"><span>利息/其他</span><div class="cf-src-bar"><i style="width:3%;background:#94A3B8"></i></div><b>¥30万</b><span>3%</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pcard">
+                  <div class="pc-head"><h3>12 周出款结构</h3><span class="pc-extra">合计 ¥820万</span></div>
+                  <div class="pc-body">
+                    <div class="cf-source">
+                      <div class="cf-src"><span>供应商货款</span><div class="cf-src-bar"><i style="width:39%;background:#E5484D"></i></div><b>¥320万</b><span>39%</span></div>
+                      <div class="cf-src"><span>工资社保公积金</span><div class="cf-src-bar"><i style="width:32%;background:#9A4DFF"></i></div><b>¥260万</b><span>32%</span></div>
+                      <div class="cf-src"><span>税费缴纳</span><div class="cf-src-bar"><i style="width:12%;background:#D97706"></i></div><b>¥100万</b><span>12%</span></div>
+                      <div class="cf-src"><span>贷款本息</span><div class="cf-src-bar"><i style="width:10%;background:#5A5BF0"></i></div><b>¥80万</b><span>10%</span></div>
+                      <div class="cf-src"><span>房租水电其他</span><div class="cf-src-bar"><i style="width:7%;background:#94A3B8"></i></div><b>¥60万</b><span>7%</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="pcard mt">
                 <div class="pc-head"><h3>应收账款 AI 管理</h3><span class="pc-extra">账龄 + 回款概率 + 坏账预警</span></div>
                 <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">💰</span><div class="lr-main"><div class="lr-tt">宁波远东汽配 · ¥60 万</div><div class="lr-sub">逾期 15 天 · 回款概率高</div></div><button class="btn-mini" data-fx="reveal" data-target="dunA" data-done="✓ 已生成">生成催收话术</button></div>
@@ -4925,6 +5066,192 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     if (byId("dealForm")) recalcDeal();
     ["mkt", "travel"].forEach(function (k) { if (byId("burn-" + k)) recalcBurn(k); });
   }, 120);
+})();
+</script>
+<script>
+/* ---------- 现金流富数据图：初始化 + 模拟器联动 ---------- */
+(function () {
+  "use strict";
+  var byId = function (id) { return document.getElementById(id); };
+  var QA = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  // 12 周数据：[周次, 日期, 入款万, 出款万, 关键事件]
+  var WD = [
+    ["W1", "6/12-18",  70, 80, "工资发放"],
+    ["W2", "6/19-25",  60, 90, "应收回款 #1"],
+    ["W3", "6/26-7/2", 50, 90, "大供应商付款"],
+    ["W4", "7/3-9",    50, 90, "季度税缴纳"],
+    ["W5", "7/10-16",  45, 85, "工资发放"],
+    ["W6", "7/17-23",  40, 80, "⚠ 资金最低点"],
+    ["W7", "7/24-30", 100, 50, "大客户预付"],
+    ["W8", "7/31-8/6",100, 50, "应收回款 #2"],
+    ["W9", "8/7-13",  110, 50, "工资 + 贷款付息"],
+    ["W10","8/14-20", 100, 50, "大供应商付款"],
+    ["W11","8/21-27",  95, 50, "季末结算"],
+    ["W12","8/28-9/3", 90, 55, "–"]
+  ];
+  var START = 420, SAFE = 300;
+  var IMPACT = [0, 0.10, 0.30, 0.60, 0.85, 1.00, 0.95, 0.70, 0.40, 0.20, 0.05, 0];
+
+  var xs = WD.map(function (_, i) { return 60 + i * 58; });
+  // 计算基准期末
+  var rawEnds = [];
+  (function () {
+    var prev = START;
+    WD.forEach(function (w) { var e = prev + w[2] - w[3]; rawEnds.push(e); prev = e; });
+  })();
+
+  function balanceY(b) { return 200 - b * 0.3; }
+  function fmtMoney(n) { return "¥" + Math.round(n) + "万"; }
+
+  function getBoost() {
+    var amt = 0;
+    QA("#cashSim .sim-tog").forEach(function (t) {
+      if (t.querySelector("input").checked) amt += parseInt(t.dataset.amt, 10) || 0;
+    });
+    return amt;
+  }
+  function computeAdj(boost) {
+    return rawEnds.map(function (e, i) { return e + boost * IMPACT[i]; });
+  }
+
+  /* ---------- 一次性渲染：入/出款柱、数据点、X 轴标签、事件标记、表格 ---------- */
+  function initStaticSVG() {
+    var barsIn = byId("cfBarsIn"), barsOut = byId("cfBarsOut"),
+        dots = byId("cfDots"), labels = byId("cfXLabels"), events = byId("cfEvents");
+    if (!barsIn || !barsOut || !dots || !labels) return;
+
+    var sIn = "", sOut = "", sDot = "", sLbl = "";
+    WD.forEach(function (w, i) {
+      var x = xs[i];
+      var inH = w[2] * 0.227, outH = w[3] * 0.227;
+      sIn += '<rect class="cf-bar-in" x="' + (x - 13) + '" y="' + (235 - inH).toFixed(1) + '" width="11" height="' + inH.toFixed(1) + '"/>';
+      sOut += '<rect class="cf-bar-out" x="' + (x + 2) + '" y="235" width="11" height="' + outH.toFixed(1) + '"/>';
+      var y = balanceY(rawEnds[i]);
+      var fill = rawEnds[i] < SAFE ? "#E5484D" : "#5A5BF0";
+      sDot += '<circle class="cf-dot" data-i="' + i + '" cx="' + x + '" cy="' + y.toFixed(1) + '" r="3.8" fill="' + fill + '" stroke="#fff" stroke-width="1.4"/>';
+      sLbl += '<text x="' + x + '" y="275" text-anchor="middle"' + (i === 0 ? ' font-weight="700" fill="#5A5BF0"' : '') + '>' + w[0] + (i === 0 ? '(今)' : '') + '</text>';
+      sLbl += '<text x="' + x + '" y="287" text-anchor="middle" font-size="8.5" fill="#94A3B8">' + w[1].split('-')[0] + '</text>';
+    });
+    barsIn.innerHTML = sIn;
+    barsOut.innerHTML = sOut;
+    dots.innerHTML = sDot;
+    labels.innerHTML = sLbl;
+
+    if (events) {
+      // 事件标记：W1 工资 / W4 季度税 / W5 工资 / W9 工资+贷 / W10 供应商
+      var EV = [[0, "工", "#18B97A"], [3, "税", "#E5484D"], [4, "工", "#18B97A"], [8, "贷", "#D97706"], [9, "供", "#5A5BF0"]];
+      var ev = "";
+      EV.forEach(function (e) {
+        var x = xs[e[0]];
+        ev += '<g><circle cx="' + x + '" cy="302" r="7.5" fill="' + e[2] + '"/><text x="' + x + '" y="305.5" text-anchor="middle" font-size="9.5" fill="#fff" font-weight="700">' + e[1] + '</text></g>';
+      });
+      events.innerHTML = ev;
+    }
+  }
+
+  /* ---------- 渲染数据明细表 ---------- */
+  function renderTable() {
+    var tb = byId("cfTableBody"); if (!tb) return;
+    var boost = getBoost();
+    var ends = computeAdj(boost);
+    var trough = Math.min.apply(null, ends);
+    var troughIdx = ends.indexOf(trough);
+    var prevEnd = START;
+    var rows = "";
+    WD.forEach(function (w, i) {
+      var startBal = prevEnd;
+      var endRaw = rawEnds[i];
+      var endAdj = ends[i];
+      var underSafe = endAdj < SAFE;
+      var isTrough = i === troughIdx;
+      var status = isTrough ? '<span class="pill pill-red">最低点</span>'
+        : (underSafe ? '<span class="pill pill-amber">警示</span>'
+          : '<span class="pill pill-green">健康</span>');
+      var endCell = (boost > 0 && Math.abs(endAdj - endRaw) > 0.5)
+        ? '<s style="color:var(--muted)">' + fmtMoney(endRaw) + '</s> → <b style="color:var(--green)">' + fmtMoney(endAdj) + '</b>'
+        : fmtMoney(endAdj);
+      rows += '<tr class="' + (isTrough ? 'trough' : underSafe ? 'under-safe' : '') + '">' +
+        '<td>' + w[0] + (i === 0 ? ' <span class="pill pill-blue">本周</span>' : '') + '</td>' +
+        '<td>' + w[1] + '</td>' +
+        '<td>' + fmtMoney(startBal) + '</td>' +
+        '<td><span style="color:var(--green);font-weight:600">+' + w[2] + '万</span></td>' +
+        '<td><span style="color:var(--red);font-weight:600">-' + w[3] + '万</span></td>' +
+        '<td>' + endCell + '</td>' +
+        '<td style="color:var(--muted);font-size:11px">' + w[4] + '</td>' +
+        '<td>' + status + '</td></tr>';
+      prevEnd = endRaw;
+    });
+    tb.innerHTML = rows;
+  }
+
+  /* ---------- 更新主图（line/area/dots/trough）+ KPI ---------- */
+  function updateChart() {
+    var boost = getBoost();
+    var ends = computeAdj(boost);
+    var trough = Math.min.apply(null, ends);
+    var troughIdx = ends.indexOf(trough);
+    var gap = Math.max(0, SAFE - trough);
+
+    var coords = ends.map(function (b, i) { return [xs[i], balanceY(b)]; });
+    var d = "M " + coords.map(function (c) { return c[0] + " " + c[1].toFixed(1); }).join(" L ");
+
+    var line = byId("cfRichLine"), area = byId("cfRichArea");
+    if (line) line.setAttribute("d", d);
+    if (area) area.setAttribute("d", d + " L 698 200 L 60 200 Z");
+    if (line) line.setAttribute("stroke", gap > 0 ? "#5A5BF0" : "#18B97A");
+
+    // dots
+    QA("#cfDots .cf-dot").forEach(function (dot, i) {
+      var bal = ends[i];
+      dot.setAttribute("cy", coords[i][1].toFixed(1));
+      var fill = i === troughIdx
+        ? (gap > 0 ? "#E5484D" : "#18B97A")
+        : bal < SAFE ? "#E5484D" : "#5A5BF0";
+      dot.setAttribute("fill", fill);
+    });
+
+    // 主缺口标记
+    var md = byId("cfDotMain"), ml = byId("cfDotLbl");
+    if (md) {
+      md.setAttribute("cx", coords[troughIdx][0]);
+      md.setAttribute("cy", coords[troughIdx][1].toFixed(1));
+      md.setAttribute("fill", gap > 0 ? "#E5484D" : "#18B97A");
+    }
+    if (ml) {
+      ml.setAttribute("x", coords[troughIdx][0]);
+      ml.setAttribute("y", (coords[troughIdx][1] - 12).toFixed(1));
+      ml.textContent = gap > 0 ? "缺口 " + fmtMoney(gap) : "最低 " + fmtMoney(trough) + " ✓";
+      ml.setAttribute("fill", gap > 0 ? "#E5484D" : "#18B97A");
+    }
+
+    // KPI: 最低点
+    var lv = byId("ckLowVal"), ll = byId("ckLowLbl");
+    if (lv) {
+      lv.textContent = fmtMoney(trough);
+      lv.className = "ck-val " + (gap > 0 ? "danger" : "good");
+    }
+    if (ll) ll.textContent = "最低点 (" + WD[troughIdx][0] + ")";
+
+    // KPI: 净流量
+    var sumIn = 0, sumOut = 0;
+    WD.forEach(function (w) { sumIn += w[2]; sumOut += w[3]; });
+    var net = sumIn - sumOut + boost;
+    var nv = byId("ckNetVal");
+    if (nv) {
+      nv.textContent = (net >= 0 ? "+" : "") + fmtMoney(net);
+      nv.className = "ck-val " + (net >= 0 ? "good" : "danger");
+    }
+
+    renderTable();
+  }
+
+  // 初始化（等 DOM 渲染好）
+  setTimeout(function () { initStaticSVG(); updateChart(); }, 180);
+
+  // 监听模拟器（与现有 fin3.js rebuildCash 并存）
+  var sim = byId("cashSim");
+  if (sim) sim.addEventListener("change", updateChart);
 })();
 </script>
 </body>
