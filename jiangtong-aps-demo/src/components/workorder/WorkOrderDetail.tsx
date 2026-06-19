@@ -1,5 +1,7 @@
 // 右侧详情：选中工单后展示信息 + ✨ Agent #2 解释为何这样排
 //                                  + ★ v2.1 Agent #6 推荐配股方案（仅 stranded 工单显示）
+//                                  + ★ Sprint 6 Agent #23 预计成本（任意工单）
+import { useState } from 'react';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { useExplainStore } from '../../store/useExplainStore';
 import { useCopilotStore } from '../../store/useCopilotStore';
@@ -9,7 +11,9 @@ import { RESOURCES } from '../../mock/productLines';
 import { mockAIInvoke } from '../../utils/mockApi';
 import AIButton from '../ai/AIButton';
 import StrandingSchemeCard from '../ai/StrandingSchemeCard';
+import CostPredictorModal from '../ai/CostPredictorModal';
 import type { SchemeExplanation, StrandingConfigOutput, StrandingScheme } from '../../mock/agentResponses';
+import type { CostPredictorOutput } from '../../mock/agentResponses.sprint6';
 
 export default function WorkOrderDetail() {
   const selectedId = useScheduleStore((s) => s.selectedId);
@@ -21,6 +25,9 @@ export default function WorkOrderDetail() {
   const showLoading = useExplainStore((s) => s.showLoading);
   const pushMessage = useCopilotStore((s) => s.pushMessage);
   const setCopOpen = useCopilotStore((s) => s.setOpen);
+  const [predictOpen, setPredictOpen] = useState(false);
+  const [predictLoading, setPredictLoading] = useState(false);
+  const [predictOutput, setPredictOutput] = useState<CostPredictorOutput | null>(null);
 
   const wo = scheduled.find((w) => w.id === selectedId) ?? pending.find((w) => w.id === selectedId);
   const res = wo?.scheduledResourceId ? RESOURCES.find((r) => r.id === wo.scheduledResourceId) : undefined;
@@ -127,6 +134,20 @@ export default function WorkOrderDetail() {
     });
   }
 
+  // ★ Sprint 6 Agent #23 成本预测
+  async function onPredictCost() {
+    if (!wo) return;
+    setPredictOpen(true);
+    setPredictLoading(true);
+    setPredictOutput(null);
+    const { output } = await mockAIInvoke({
+      agentId: 'cost.cost-predictor',
+      input: { workOrderId: wo.id },
+    });
+    setPredictOutput(output as CostPredictorOutput);
+    setPredictLoading(false);
+  }
+
   function onApplyStrandingScheme(s: StrandingScheme, r: StrandingConfigOutput) {
     if (!wo) return;
     applyStranding(wo.id, s, r);
@@ -141,6 +162,7 @@ export default function WorkOrderDetail() {
   }
 
   return (
+    <>
     <div className="bg-card border border-line rounded-xl flex flex-col h-full overflow-hidden">
       <div className="px-4 py-3 border-b border-line bg-panel2">
         <div className="text-[10.5px] text-ink-faint tracking-wider uppercase">选中工单</div>
@@ -175,6 +197,10 @@ export default function WorkOrderDetail() {
           onClick={onExplain}
           disabled={!isScheduled}
         />
+
+        {/* ★ Sprint 6 #23 成本预测：所有工单均可调用 */}
+        <AIButton label="预计成本" onClick={onPredictCost} />
+
         {!isScheduled && !isStranded && (
           <div className="text-[11px] text-ink-faint">待排工单暂无排产解释</div>
         )}
@@ -188,6 +214,15 @@ export default function WorkOrderDetail() {
         )}
       </div>
     </div>
+
+    {/* ★ Sprint 6 #23 成本预测 Modal */}
+    <CostPredictorModal
+      open={predictOpen}
+      loading={predictLoading}
+      output={predictOutput}
+      onClose={() => setPredictOpen(false)}
+    />
+    </>
   );
 }
 
@@ -199,3 +234,4 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
     </div>
   );
 }
+

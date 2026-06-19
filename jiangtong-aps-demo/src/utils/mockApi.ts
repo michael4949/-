@@ -4,6 +4,7 @@
 import { AGENT_RESPONSES, buildSchemeExplanation } from '../mock/agentResponses';
 import { SPRINT4_AGENT_RESPONSES } from '../mock/agentResponses.sprint4';
 import { SPRINT5_AGENT_RESPONSES } from '../mock/agentResponses.sprint5';
+import { SPRINT6_AGENT_RESPONSES } from '../mock/agentResponses.sprint6';
 import type { WorkOrder } from '../types/workOrder';
 
 export interface MockInvokeReq {
@@ -12,11 +13,12 @@ export interface MockInvokeReq {
   context?: unknown;
 }
 
-// 合并注册表：Sprint 0-3 + Sprint 4 + Sprint 5
+// 合并注册表：Sprint 0-3 + Sprint 4 + Sprint 5 + Sprint 6
 const ALL_AGENTS: Record<string, unknown> = {
   ...AGENT_RESPONSES,
   ...SPRINT4_AGENT_RESPONSES,
   ...SPRINT5_AGENT_RESPONSES,
+  ...SPRINT6_AGENT_RESPONSES,
 };
 
 export async function mockAIInvoke(req: MockInvokeReq) {

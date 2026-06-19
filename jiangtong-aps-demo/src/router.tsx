@@ -1,6 +1,4 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AlertTriangle, Settings } from 'lucide-react';
-import PlaceholderPage from './components/layout/PlaceholderPage';
 import DashboardPage from './pages/DashboardPage';
 import SchedulePage from './pages/SchedulePage';
 import CostPage from './pages/CostPage';
@@ -8,6 +6,8 @@ import WorkOrdersPage from './pages/WorkOrdersPage';
 import MaterialCheckPage from './pages/MaterialCheckPage';
 import InventoryLockPage from './pages/InventoryLockPage';
 import CapacityPage from './pages/CapacityPage';
+import AlertsPage from './pages/AlertsPage';
+import SettingsPage from './pages/SettingsPage';
 
 export default function AppRouter() {
   return (
@@ -27,9 +27,9 @@ export default function AppRouter() {
       <Route path="/inventory-lock" element={<InventoryLockPage />} />
       <Route path="/capacity"       element={<CapacityPage />} />
 
-      {/* Sprint 6 待开发 */}
-      <Route path="/alerts"         element={<PlaceholderPage icon={AlertTriangle}  title="异常预警中心" />} />
-      <Route path="/settings"       element={<PlaceholderPage icon={Settings}       title="系统设置" />} />
+      {/* ★ Sprint 6 完成 · 9 菜单全部完整 */}
+      <Route path="/alerts"         element={<AlertsPage />} />
+      <Route path="/settings"       element={<SettingsPage />} />
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

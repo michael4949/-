@@ -1,4 +1,4 @@
-// §6 五个 Agent 的预设响应
+// §6 Agent 预设响应（Sprint 0-3 含 Agent #1-4 / #21-22；新增 17 个见 agentResponses.sprint4/5/6.ts）
 import type { WorkOrder } from '../types/workOrder';
 import type { LossDiagnosticOutput } from '../types/cost';
 

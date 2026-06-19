@@ -23,7 +23,11 @@ export type AgentId =
   | 'capacity.bottleneck-predictor'         // #14 瓶颈预测
   | 'capacity.mitigation-generator'         // #15 缓解建议生成
   | 'gantt.natural-search'                  // #16 甘特图智能搜索
-  | 'gantt.drag-suggestion';                // #17 拖拽建议
+  | 'gantt.drag-suggestion'                 // #17 拖拽建议
+  // ===== Sprint 6 新增 3 个 =====
+  | 'alert.cause-explainer'                 // #19 预警归因
+  | 'alert.noise-filter'                    // #20 预警噪声过滤
+  | 'cost.cost-predictor';                  // #23 成本预测
 
 export interface AIInsight {
   id: string;
@@ -54,7 +58,10 @@ export interface CopilotMessage {
       // Sprint 5 新增 attachment 类型
       | 'conflict-mediation'
       | 'mitigation-plan'
-      | 'gantt-search';
+      | 'gantt-search'
+      // Sprint 6 新增 attachment 类型
+      | 'alert-cause'
+      | 'cost-predict';
     data: unknown;
   }>;
   timestamp: Date;

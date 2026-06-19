@@ -1,4 +1,5 @@
 // §10 成本核算页 Sprint 3 完整实现
+//   Sprint 6 嵌入：#23 cost.cost-predictor ✨ AI 成本预测（工具栏按钮）
 import { useEffect, useState } from 'react';
 import { COST_DATA } from '../mock/costData';
 import { useCostStore } from '../store/useCostStore';
@@ -9,8 +10,11 @@ import CostKPICards from '../components/cost/CostKPICards';
 import CopperFlowDiagram from '../components/cost/CopperFlowDiagram';
 import WorkOrderLedger from '../components/cost/WorkOrderLedger';
 import LossDiagnosticReport from '../components/ai/LossDiagnosticReport';
+import AIButton from '../components/ai/AIButton';
+import CostPredictorModal from '../components/ai/CostPredictorModal';
 import { Send, Download, RefreshCw } from 'lucide-react';
 import type { LossDiagnosticOutput, WorkOrderCostRow } from '../types/cost';
+import type { CostPredictorOutput } from '../mock/agentResponses.sprint6';
 
 export default function CostPage() {
   const d = COST_DATA;
@@ -20,6 +24,22 @@ export default function CostPage() {
   const pendingDiagId = useCostStore((s) => s.pendingDiagnoseWoId);
   const setPendingDiag = useCostStore((s) => s.setPendingDiagnoseWoId);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [predictOpen, setPredictOpen] = useState(false);
+  const [predictLoading, setPredictLoading] = useState(false);
+  const [predictOutput, setPredictOutput] = useState<CostPredictorOutput | null>(null);
+
+  async function onPredictCost(woId?: string) {
+    setPredictOpen(true);
+    setPredictLoading(true);
+    setPredictOutput(null);
+    const target = woId || d.workOrderLedger[0]?.workOrderId || 'WO-2026-1234';
+    const { output } = await mockAIInvoke({
+      agentId: 'cost.cost-predictor',
+      input: { workOrderId: target },
+    });
+    setPredictOutput(output as CostPredictorOutput);
+    setPredictLoading(false);
+  }
 
   // §10.2 场景 4 起点：从工作台 Insight Card "WO-1234 损耗超均值" 跳过来 → 自动启动诊断
   useEffect(() => {
@@ -69,6 +89,7 @@ export default function CostPage() {
         <span className="text-ink-faint">·</span>
         <span className="text-[12.5px] text-ink-dim">全部车间</span>
         <div className="ml-auto flex items-center gap-2">
+          <AIButton label="AI 成本预测" onClick={() => onPredictCost()} size="sm" />
           <button className="btn"><RefreshCw size={13} />刷新</button>
           <button className="btn btn-primary"><Send size={13} />推送至鼎捷 ERP</button>
           <button className="btn"><Download size={13} />导出报表</button>
@@ -89,6 +110,14 @@ export default function CostPage() {
       <section>
         <WorkOrderLedger rows={d.workOrderLedger} onDiagnose={onDiagnose} highlightId={highlightId} />
       </section>
+
+      {/* ★ Sprint 6 #23 成本预测 Modal */}
+      <CostPredictorModal
+        open={predictOpen}
+        loading={predictLoading}
+        output={predictOutput}
+        onClose={() => setPredictOpen(false)}
+      />
     </div>
   );
 }
