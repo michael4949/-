@@ -3191,7 +3191,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var c = DATA.filter(function (x) { return x.id === id; })[0];
     if (!c) return;
     current = c;
-    $(".sc-c").forEach(function (el) { el.classList.toggle("active", el.dataset.id === id); });
+    $$(".sc-c").forEach(function (el) { el.classList.toggle("active", el.dataset.id === id); });
     renderHead(c); renderThread(c); renderCopilot(c);
   }
 
@@ -3199,9 +3199,9 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   convosEl.addEventListener("click", function (e) {
     var row = e.target.closest(".sc-c"); if (row) select(row.dataset.id);
   });
-  $(".sc-fb").forEach(function (b) {
+  $$(".sc-fb").forEach(function (b) {
     b.addEventListener("click", function () {
-      $(".sc-fb").forEach(function (x) { x.classList.toggle("active", x === b); });
+      $$(".sc-fb").forEach(function (x) { x.classList.toggle("active", x === b); });
       renderConvos(b.dataset.f);
     });
   });
@@ -3255,7 +3255,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   }
 
   // 快捷动作
-  $(".sc-qab").forEach(function (b) {
+  $$(".sc-qab").forEach(function (b) {
     b.addEventListener("click", function () {
       var c = current; if (!c) return;
       var qa = b.dataset.qa;
