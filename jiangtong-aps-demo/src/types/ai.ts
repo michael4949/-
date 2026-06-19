@@ -7,7 +7,16 @@ export type AgentId =
   | 'schedule.anomaly-observer'
   | 'schedule.stranding-config-assistant'   // v2.1 新增 · 铜绞线配股助手
   | 'cost.loss-diagnostic'
-  | 'cost.analysis-assistant';
+  | 'cost.analysis-assistant'
+  // ===== Sprint 4 新增 8 个 =====
+  | 'schedule-rule.matrix-generator'        // #5 换型矩阵生成
+  | 'schedule-rule.history-reviewer'        // #6 矩阵历史复盘
+  | 'constraint.implicit-miner'             // #7 隐性约束挖掘
+  | 'constraint.conflict-explainer'         // #18 约束冲突解释器
+  | 'workorder.bom-generator'               // #8 样品工单 BOM
+  | 'workorder.anomaly-detector'            // #9 异常工单识别
+  | 'material.shortage-root-cause'          // #10 缺料根因
+  | 'material.shortage-predictor';          // #11 齐套风险预测
 
 export interface AIInsight {
   id: string;
@@ -23,7 +32,20 @@ export interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  attachments?: Array<{ type: 'scheme' | 'workorder' | 'kpi' | 'chart' | 'cost-answer' | 'stranding-config'; data: unknown }>;
+  attachments?: Array<{
+    type:
+      | 'scheme'
+      | 'workorder'
+      | 'kpi'
+      | 'chart'
+      | 'cost-answer'
+      | 'stranding-config'
+      // Sprint 4 新增 attachment 类型
+      | 'matrix-draft'
+      | 'bom-draft'
+      | 'shortage-root-cause';
+    data: unknown;
+  }>;
   timestamp: Date;
 }
 

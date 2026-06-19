@@ -1,16 +1,20 @@
 // §8 工作台首页数据组装（KPI/Insight Card/待办/异常预警/产线状态）
+//   Sprint 4 扩展：Insight Card 从 3 张 → 6 张（追加 #6 #9 #11）
 import type { DashboardData } from '../types/dashboard';
 import type { AIInsight } from '../types/ai';
 import {
-  WORK_ORDERS, PENDING_WOS, IN_PROGRESS_WOS, todayDeliveries, NOW,
+  PENDING_WOS, IN_PROGRESS_WOS, todayDeliveries, NOW,
 } from './workOrders';
 import { RESOURCES } from './productLines';
+import { ANOMALY_STATS } from './workOrderAnomalies';
+import { SHORTAGE_PREDICTOR } from './agentResponses.sprint4';
 
 const td = todayDeliveries();
 const urgentCount = PENDING_WOS.filter((w) => w.priority === 'urgent').length;
 
-// §8.1 / §6.2.3 / §6.2.4 三张 AI Insight Card 文案严格对齐原文
+// §8.1 / §6.2 6 张 AI Insight Card（Sprint 0-3 原 3 张 + Sprint 4 新 3 张，Cap 6 张）
 const insights: AIInsight[] = [
+  // 原 Sprint 1-3 三张（保留）
   {
     id: 'ins-material',
     severity: 'warning',
@@ -35,6 +39,34 @@ const insights: AIInsight[] = [
     agentSource: 'cost.loss-diagnostic',
     message: '💰  工单 WO-2024-1234 实际损耗超 30 天均值 0.3%',
     primaryAction: { label: '启动诊断', route: '/cost' },
+    dismissible: true,
+    generatedAt: NOW,
+  },
+  // ===== Sprint 4 新增 =====
+  {
+    id: 'ins-wo-anomaly',
+    severity: 'warning',
+    agentSource: 'workorder.anomaly-detector',
+    message: `🤖  检测到 ${ANOMALY_STATS.total} 张工单状态异常（${ANOMALY_STATS.frequentChange} 张频繁变更 / ${ANOMALY_STATS.longIdle} 张长期未开工）`,
+    primaryAction: { label: '查看工单', route: '/work-orders' },
+    dismissible: true,
+    generatedAt: NOW,
+  },
+  {
+    id: 'ins-shortage-predict',
+    severity: 'warning',
+    agentSource: 'material.shortage-predictor',
+    message: `📦  ${SHORTAGE_PREDICTOR.summary}（${SHORTAGE_PREDICTOR.risks.filter((r) => r.riskLevel === 'high').length} 张高风险）`,
+    primaryAction: { label: '查看清单', route: '/material-check' },
+    dismissible: true,
+    generatedAt: NOW,
+  },
+  {
+    id: 'ins-matrix-history',
+    severity: 'info',
+    agentSource: 'schedule-rule.history-reviewer',
+    message: '🔁  本周发现 5 处换型时间偏差超 20%，AI 建议修正矩阵',
+    primaryAction: { label: '查看对比', route: '/schedule' },
     dismissible: true,
     generatedAt: NOW,
   },

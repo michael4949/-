@@ -66,6 +66,12 @@ body { background: #F5F7FA; color: #1F2937; }
 }
 .animate-modal-in { animation: modal-in 180ms cubic-bezier(.2,.8,.2,1); }
 
+@keyframes slide-in-r {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-r { animation: slide-in-r 220ms cubic-bezier(.2,.8,.2,1); }
+
 /* 高亮闪烁 3 秒（场景 1/2 应用方案后） */
 @keyframes wo-flash {
   0%,100% { box-shadow: 0 0 0 2px rgba(124,58,237,0.0); }

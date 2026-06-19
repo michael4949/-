@@ -2,6 +2,7 @@
 //   - Agent 主流程：1500-2000ms 延迟（演示真实感）
 //   - Agent #2 (scheme-explainer) Modal 单独 800ms（§6.2.2 原文）
 import { AGENT_RESPONSES, buildSchemeExplanation } from '../mock/agentResponses';
+import { SPRINT4_AGENT_RESPONSES } from '../mock/agentResponses.sprint4';
 import type { WorkOrder } from '../types/workOrder';
 
 export interface MockInvokeReq {
@@ -9,6 +10,12 @@ export interface MockInvokeReq {
   input: unknown;
   context?: unknown;
 }
+
+// 合并注册表：Sprint 0-3 (AGENT_RESPONSES) + Sprint 4 (SPRINT4_AGENT_RESPONSES)
+const ALL_AGENTS: Record<string, unknown> = {
+  ...AGENT_RESPONSES,
+  ...SPRINT4_AGENT_RESPONSES,
+};
 
 export async function mockAIInvoke(req: MockInvokeReq) {
   const delay =
@@ -22,7 +29,7 @@ export async function mockAIInvoke(req: MockInvokeReq) {
     return { output: buildSchemeExplanation(ctx), durationMs: delay };
   }
 
-  const preset = (AGENT_RESPONSES as Record<string, unknown>)[req.agentId];
+  const preset = ALL_AGENTS[req.agentId];
   if (typeof preset === 'function') {
     return { output: (preset as (i: unknown) => unknown)(req.input), durationMs: delay };
   }
