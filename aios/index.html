@@ -3587,6 +3587,239 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .train-bubble.csr-golden .tb-text { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff;
   box-shadow:0 3px 10px rgba(255,165,0,.3); position:relative; padding-right:22px; }
 .train-bubble.csr-golden .tb-text::after { content:"🏆"; position:absolute; right:6px; top:2px; font-size:11px; }
+/* ============================================================
+   微信接入面板 (替换原 LIVE 3 会话)
+   ============================================================ */
+.wx-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:11px; }
+.wx-card { background:#fff; border:1px solid var(--line); border-radius:13px; padding:13px;
+  transition:.15s; }
+.wx-card.connected { border-left:3px solid var(--green); }
+.wx-card.connected:hover { box-shadow:0 6px 20px rgba(0,0,0,.06); transform:translateY(-1px); }
+.wx-card.add { display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:24px 14px; background:linear-gradient(135deg,#F7F9FF,#EDEFFB);
+  border:2px dashed rgba(90,91,240,.35); cursor:pointer; }
+.wx-card.add:hover { border-color:var(--brand); background:linear-gradient(135deg,#F0F3FF,#E3E7FA); }
+.wx-card.add .wxa-ico { font-size:32px; color:var(--brand); margin-bottom:5px; font-weight:300;
+  width:42px; height:42px; border-radius:50%; background:#fff; display:grid; place-items:center;
+  box-shadow:0 4px 12px rgba(90,91,240,.18); }
+.wx-card.add .wxa-tt { font-size:13px; font-weight:700; color:var(--brand); margin-bottom:3px; }
+.wx-card.add .wxa-sub { font-size:10.5px; color:var(--muted); line-height:1.55; }
+
+.wxc-head { display:flex; align-items:center; gap:9px; margin-bottom:10px; padding-bottom:9px;
+  border-bottom:1px dashed var(--line); }
+.wxc-ico { width:36px; height:36px; border-radius:9px; display:grid; place-items:center;
+  font-size:18px; flex-shrink:0; }
+.wxc-tt { flex:1; min-width:0; }
+.wxc-name { font-size:12.5px; font-weight:800; color:var(--ink); }
+.wxc-id { font-size:10px; color:var(--muted); margin-top:2px; font-family: ui-monospace, monospace; }
+.wxc-state { font-size:10px; padding:3px 8px; border-radius:5px; font-weight:800; display:inline-flex;
+  align-items:center; gap:5px; flex-shrink:0; }
+.wxc-state.on { background:rgba(24,185,122,.12); color:var(--green); }
+.wxc-state.on i { width:6px; height:6px; border-radius:50%; background:var(--green); animation: ppd 1.5s infinite; }
+.wxc-state.off { background:#EEF0FB; color:var(--muted); }
+.wxc-stat { display:grid; grid-template-columns: repeat(3,1fr); gap:6px; margin-bottom:9px;
+  padding:8px 10px; background:#F8F9FE; border-radius:8px; }
+.wxs-cell { text-align:center; }
+.wxs-cell b { font-size:18px; font-weight:800; color:var(--ink); letter-spacing:-.02em; display:block; }
+.wxs-cell b.good { color:var(--green); }
+.wxs-cell b.warn { color:var(--amber); }
+.wxs-cell small { font-size:10px; color:var(--muted); font-weight:600; }
+.wxc-rule { padding:7px 10px; background:rgba(124,92,250,.06); border-left:2px solid var(--purple);
+  border-radius:6px; font-size:11px; line-height:1.55; color:var(--ink-2); margin-bottom:9px; }
+.wxc-rule b { color:var(--ink); }
+.wxc-acts { display:flex; gap:5px; }
+.wxc-acts button { flex:1; padding:6px 10px; font-size:10.5px; font-weight:700; border-radius:7px;
+  cursor:pointer; font-family:inherit; transition:.15s; border:1px solid var(--line-2); background:#fff;
+  color:var(--ink-2); }
+.wxc-acts button:hover { border-color:var(--brand); color:var(--brand); }
+.wxc-acts button.warn-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* 接入新账号弹窗 */
+.wx-modal { position:fixed; inset:0; z-index:9998; display:flex; align-items:center; justify-content:center; }
+.wx-modal-mask { position:absolute; inset:0; background:rgba(14,20,48,.65); backdrop-filter:blur(4px); }
+.wx-modal-box { position:relative; background:#fff; border-radius:14px; width:680px; max-width:92vw;
+  max-height:90vh; overflow:hidden; display:flex; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.35); animation: modalIn .2s ease-out; }
+@keyframes modalIn { 0%{opacity:0;transform:translateY(20px) scale(.96)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+.wx-modal-head { display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; border-bottom:1px solid var(--line);
+  background:linear-gradient(135deg,#F7F9FF,#EDEFFB); }
+.wxmh-tt { font-size:14px; font-weight:800; color:var(--ink); }
+.wxmh-x { width:28px; height:28px; border-radius:8px; background:#fff; border:1px solid var(--line-2);
+  cursor:pointer; font-size:14px; color:var(--ink-2); font-family:inherit; }
+.wxmh-x:hover { color:var(--red); border-color:var(--red); }
+.wx-modal-body { padding:16px 18px; overflow-y:auto; flex:1; }
+.wxm-step { margin-bottom:14px; }
+.wxm-step:last-child { margin-bottom:0; }
+.wxms-head { font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px; }
+
+.wxm-type-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:7px; }
+.wxm-type { display:flex; flex-direction:column; align-items:center; padding:11px 7px; background:#F8F9FE;
+  border:1.5px solid var(--line-2); border-radius:9px; cursor:pointer; transition:.15s; }
+.wxm-type input { display:none; }
+.wxm-type:hover { border-color:var(--brand); }
+.wxm-type.cur { border-color:var(--brand); background:linear-gradient(135deg,#F0F3FF,#E3E7FA);
+  box-shadow:0 4px 12px rgba(90,91,240,.18); }
+.wxm-type .wxmt-ico { font-size:22px; margin-bottom:3px; }
+.wxm-type b { font-size:11.5px; color:var(--ink); }
+.wxm-type small { font-size:9.5px; color:var(--muted); margin-top:1px; text-align:center; }
+
+.wxm-qr-wrap { display:grid; grid-template-columns: 200px 1fr; gap:14px; align-items:start; }
+.wxm-qr { padding:11px; background:#fff; border:1px solid var(--line); border-radius:11px;
+  text-align:center; }
+.wxm-qr svg { display:block; margin:0 auto; }
+.wxm-qr-tip { font-size:10.5px; color:var(--ink-2); margin-top:7px; padding-top:7px;
+  border-top:1px dashed var(--line); font-weight:600;
+  display:flex; align-items:center; justify-content:center; gap:5px; }
+.wxm-qr-tip .qrt-dot { width:6px; height:6px; border-radius:50%; background:#2BD9A8;
+  animation: ppd 1s infinite; }
+.wxm-qr-side { display:flex; flex-direction:column; gap:7px; }
+.wxm-callout { padding:8px 11px; background:rgba(24,185,122,.06); border-left:3px solid var(--green);
+  border-radius:7px; font-size:11px; line-height:1.55; }
+.wxm-callout.warn { background:rgba(217,119,6,.06); border-left-color:var(--amber); }
+.wxm-callout b { display:block; font-size:11px; font-weight:800; color:var(--ink); margin-bottom:4px; }
+.wxm-callout ul { margin:0; padding:0; list-style:none; }
+.wxm-callout li { color:var(--ink-2); padding:1px 0; }
+
+.wxm-rules { display:flex; flex-direction:column; gap:6px; }
+.wxm-rule { display:flex; align-items:flex-start; gap:9px; padding:10px 12px; background:#F8F9FE;
+  border:1.5px solid var(--line-2); border-radius:9px; cursor:pointer; transition:.15s; }
+.wxm-rule input { margin-top:3px; flex-shrink:0; accent-color:var(--brand); }
+.wxm-rule:hover { border-color:var(--brand); }
+.wxm-rule.cur { border-color:var(--brand); background:linear-gradient(90deg,rgba(90,91,240,.07),#F8F9FE); }
+.wxm-rule b { font-size:12px; color:var(--ink); display:block; margin-bottom:3px; }
+.wxm-rule span { font-size:10.5px; color:var(--muted); line-height:1.55; }
+
+.wx-modal-foot { display:flex; justify-content:flex-end; gap:9px; padding:13px 18px;
+  background:#F8F9FE; border-top:1px solid var(--line); }
+.wxmf-cancel { padding:8px 16px; font-size:12px; font-weight:700; background:#fff;
+  color:var(--ink-2); border:1px solid var(--line-2); border-radius:8px; cursor:pointer; font-family:inherit; }
+.wxmf-confirm { padding:8px 18px; font-size:12px; font-weight:800; background:var(--grad-btn); color:#fff;
+  border:none; border-radius:8px; cursor:pointer; font-family:inherit;
+  box-shadow:0 4px 12px rgba(90,91,240,.35); }
+.wxmf-confirm:hover { transform:translateY(-1px); }
+
+/* ============================================================
+   AI 训练投喂工作台 (替换原"今晚学到了什么")
+   ============================================================ */
+.train-workflow { display:flex; flex-direction:column; gap:11px; }
+.tw-step { background:#fff; border:1px solid var(--line); border-radius:13px; padding:13px 15px; }
+.tw-step-head { display:flex; align-items:center; gap:9px; margin-bottom:11px;
+  padding-bottom:9px; border-bottom:1px dashed var(--line); }
+.tw-step-head .tw-num { width:24px; height:24px; border-radius:50%; background:var(--grad-btn); color:#fff;
+  font-size:12px; font-weight:800; display:grid; place-items:center; flex-shrink:0; }
+.tw-step-head .tw-tt { font-size:13px; font-weight:800; color:var(--ink); }
+.tw-step-head .tw-meta { font-size:11px; color:var(--muted); margin-left:auto; }
+
+/* Step 1: 训练样本 */
+.tw-samples { display:flex; flex-direction:column; gap:8px; max-height:380px; overflow-y:auto; }
+.tw-sample { padding:10px 12px; background:#F8F9FE; border:1px solid var(--line-2); border-radius:9px;
+  transition:.15s; }
+.tw-sample.selected { border-left:3px solid var(--green); background:linear-gradient(90deg,#F0FDF4 0%,#F8F9FE 30%); }
+.tw-sample.rejected { opacity:.5; }
+.tws-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:6px; }
+.tws-row.tws-a { background:#fff; padding:7px 11px; border-radius:7px; border:1px solid var(--line-2);
+  font-size:11.5px; line-height:1.6; color:var(--ink-2); margin-bottom:6px; }
+.tws-row.tws-a .tws-a-lbl { font-size:9.5px; font-weight:800; color:var(--brand); letter-spacing:.05em;
+  margin-right:5px; padding:1px 5px; background:rgba(90,91,240,.1); border-radius:4px; vertical-align:1px; }
+.tws-q { flex:1; font-size:12px; line-height:1.55; color:var(--ink); }
+.tws-q .tws-q-lbl { font-size:9.5px; font-weight:800; color:#666; letter-spacing:.05em; margin-right:5px;
+  padding:1px 5px; background:#EEF0FB; border-radius:4px; vertical-align:1px; }
+.tws-meta { text-align:center; flex-shrink:0; }
+.tws-meta b { font-size:14px; font-weight:800; display:block; }
+.tws-meta b.good { color:var(--green); }
+.tws-meta b.warn { color:var(--amber); }
+.tws-meta small { font-size:9.5px; color:var(--muted); }
+.tws-tags { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:7px; }
+.tws-tag { font-size:9.5px; padding:1.5px 6px; border-radius:4px; font-weight:700; background:#EEF0FB; color:var(--ink-2); }
+.tws-tag.good { background:rgba(24,185,122,.12); color:var(--green); }
+.tws-tag.warn { background:rgba(217,119,6,.12); color:var(--amber); }
+.tws-acts { display:flex; gap:5px; }
+.tws-btn { padding:5px 10px; font-size:10.5px; font-weight:700; border-radius:6px; cursor:pointer;
+  font-family:inherit; transition:.15s; border:1px solid var(--line-2); background:#fff; color:var(--ink-2); }
+.tws-btn:hover { border-color:var(--brand); color:var(--brand); }
+.tws-btn.cur { background:rgba(24,185,122,.12); color:var(--green); border-color:rgba(24,185,122,.4); }
+.tws-btn.reject:hover { border-color:var(--red); color:var(--red); }
+.tw-samples-foot { padding:9px 12px; background:#F8F9FE; border-radius:8px; margin-top:9px;
+  font-size:11.5px; color:var(--ink-2); }
+.tw-samples-foot b { color:var(--brand); font-weight:800; }
+
+/* Step 2: 投喂 */
+.tw-feed { display:grid; grid-template-columns: 1fr 220px; gap:11px; align-items:stretch; }
+.tw-params { display:grid; grid-template-columns: repeat(2,1fr); gap:5px 14px; padding:10px 12px;
+  background:#F8F9FE; border-radius:9px; }
+.tw-param { display:flex; justify-content:space-between; align-items:baseline; padding:3px 0;
+  font-size:11.5px; border-bottom:1px dashed rgba(0,0,0,.05); }
+.tw-param label { color:var(--muted); font-weight:600; }
+.tw-param .tw-val { color:var(--ink); font-weight:700; font-family: ui-monospace, monospace; font-size:11px; }
+.tw-feed-actions { display:flex; flex-direction:column; gap:7px; justify-content:center; }
+.tw-feed-btn { padding:11px 16px; font-size:13px; font-weight:800;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; border:none; border-radius:9px;
+  cursor:pointer; font-family:inherit; box-shadow:0 4px 14px rgba(90,91,240,.4); transition:.15s; }
+.tw-feed-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 18px rgba(90,91,240,.55); }
+.tw-feed-btn:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+.tw-feed-cancel { padding:9px 14px; font-size:11.5px; font-weight:700; background:#fff;
+  color:var(--ink-2); border:1px solid var(--line-2); border-radius:8px; cursor:pointer; font-family:inherit; }
+
+/* 训练进度 */
+.tw-progress { margin-top:11px; padding:11px 13px; background:linear-gradient(180deg,#0E1430,#1A1F4F);
+  color:#fff; border-radius:11px; }
+.tw-prog-head { display:flex; align-items:center; gap:8px; font-size:12px; margin-bottom:9px; }
+.tw-prog-head b { font-weight:700; }
+.tw-prog-pulse { width:9px; height:9px; border-radius:50%; background:#2BD9A8; animation: ppd 1s infinite; }
+.tw-prog-pct { margin-left:auto; font-size:18px; font-weight:800; color:#7C5CFA; letter-spacing:-.02em; }
+.tw-prog-bar { height:6px; background:rgba(255,255,255,.1); border-radius:999px; overflow:hidden; margin-bottom:9px; }
+.tw-prog-bar i { display:block; height:100%; background:linear-gradient(90deg,#5A5BF0,#9A4DFF,#5A5BF0);
+  background-size:200% 100%; animation: shimmer 1.5s linear infinite; width:0; transition: width .3s; }
+.tw-prog-log { display:flex; flex-direction:column; gap:4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:10.5px;
+  color:rgba(255,255,255,.7); max-height:120px; overflow-y:auto; }
+.tw-prog-log div { padding:2px 0; opacity:0; animation: msgIn .25s ease-out forwards; }
+.tw-prog-log div::before { content:"▸ "; color:#7C5CFA; }
+.tw-prog-log div.done { color:#fff; }
+.tw-prog-log div.done::after { content:" ✓"; color:#2BD9A8; font-weight:800; }
+
+/* Step 3: 对比 */
+.tw-compare { display:flex; flex-direction:column; gap:6px; margin-bottom:11px; }
+.tw-cmp-row { display:grid; grid-template-columns: 1.5fr auto auto auto; gap:9px;
+  align-items:center; padding:8px 11px; background:#F8F9FE; border-radius:8px; font-size:12px; }
+.tcr-lbl { color:var(--ink-2); font-weight:600; }
+.tcr-old { font-weight:800; color:var(--muted); text-align:center; min-width:50px;
+  font-family: ui-monospace, monospace; }
+.tcr-arr { color:var(--brand); font-weight:800; }
+.tcr-new { font-weight:800; text-align:right; min-width:90px; font-family: ui-monospace, monospace; }
+.tcr-new.good { color:var(--green); }
+.tcr-new small { font-size:10px; color:var(--green); font-weight:700; margin-left:4px; font-family:inherit; }
+.tw-deploy { padding:11px 13px; background:linear-gradient(135deg,#F0FDF4,#E9F9F1);
+  border:1px solid rgba(24,185,122,.3); border-radius:10px; }
+.tw-deploy-tip { font-size:12px; color:var(--green); font-weight:700; margin-bottom:9px; }
+.tw-deploy-acts { display:flex; gap:7px; flex-wrap:wrap; }
+.tw-deploy-btn { padding:9px 16px; font-size:12.5px; font-weight:800;
+  background:linear-gradient(135deg,#18B97A,#2BD9A8); color:#fff; border:none; border-radius:8px;
+  cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(24,185,122,.35); }
+.tw-deploy-btn:hover { transform:translateY(-1px); }
+.tw-deploy-ab, .tw-deploy-cancel { padding:9px 14px; font-size:11.5px; font-weight:700;
+  background:#fff; color:var(--ink-2); border:1px solid var(--line-2); border-radius:8px;
+  cursor:pointer; font-family:inherit; }
+.tw-deploy-ab:hover, .tw-deploy-cancel:hover { border-color:var(--brand); color:var(--brand); }
+
+/* Step 4: 版本时间线 */
+.tw-versions { display:flex; flex-direction:column; gap:7px; }
+.tw-ver { display:grid; grid-template-columns: 110px 1fr auto; gap:11px; align-items:center;
+  padding:10px 12px; background:#F8F9FE; border:1px solid var(--line-2); border-radius:9px; }
+.tw-ver.current { background:linear-gradient(90deg,rgba(24,185,122,.08),#F8F9FE);
+  border-left:3px solid var(--green); }
+.tw-ver.training .tv-tag.training { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); }
+.tw-ver .tv-tag { padding:3px 9px; font-size:11px; font-weight:800; color:#fff;
+  background:var(--muted); border-radius:5px; text-align:center; letter-spacing:.04em;
+  font-family: ui-monospace, monospace; }
+.tw-ver.current .tv-tag { background:var(--green); }
+.tw-ver .tv-time { font-size:11px; color:var(--muted); font-weight:600; }
+.tw-ver .tv-desc { font-size:11px; color:var(--ink-2); margin-top:3px; line-height:1.5; }
+.tw-ver .tv-acts button { padding:5px 11px; font-size:10.5px; font-weight:700; border-radius:6px;
+  background:#fff; color:var(--ink-2); border:1px solid var(--line-2); cursor:pointer; font-family:inherit; }
+.tw-ver .tv-acts .tv-rollback { color:var(--amber); border-color:rgba(217,119,6,.3); }
+.tw-ver .tv-acts .tv-rollback:hover { background:rgba(217,119,6,.08); }
 </style>
 </head>
 <body>
@@ -7303,37 +7536,200 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
               </div>
 
-              <!-- A. LIVE 我正在处理的 3 个会话 -->
+              <!-- A. 微信接入面板 · 真实的接入流程 -->
               <div class="agent-section">
                 <div class="agent-section-head">
-                  <span class="ash-dot"></span>
-                  <div class="ash-tt">🔴 LIVE · 我现在正在处理 3 个会话(实时滚动)</div>
-                  <div class="ash-meta">每条对话 1-2s 滚动 · 客户每说一句我立即响应</div>
+                  <span class="ash-pin">📱</span>
+                  <div class="ash-tt">微信接入 · AI 通过你的 4 个微信账号 24h 在岗</div>
+                  <div class="ash-meta">已绑 <b>4 账号</b> · 今晚处理 28 单</div>
                 </div>
-                <div class="live-conv-grid">
-                  <div class="live-conv" data-cid="lc1">
-                    <div class="lcv-head">
-                      <span class="lcv-ava">🌐</span>
-                      <div class="lcv-tt"><b>Brown UK</b><small>海外询单 · 第 4 轮</small></div>
-                      <span class="lcv-state ok">AI 自闭环 94%</span>
+
+                <div class="wx-grid" id="csWxGrid">
+                  <!-- 企业微信 -->
+                  <div class="wx-card connected" data-channel="qiwei">
+                    <div class="wxc-head">
+                      <span class="wxc-ico" style="background:linear-gradient(135deg,#1AAD19,#0EA84B);color:#fff">🏢</span>
+                      <div class="wxc-tt">
+                        <div class="wxc-name">企业微信 · 顶呱呱客服</div>
+                        <div class="wxc-id">corp_id: ww31bb<span style="opacity:.5">e5a2b8d4...</span></div>
+                      </div>
+                      <span class="wxc-state on"><i></i> 在线</span>
                     </div>
-                    <div class="lcv-stream" id="lcStream-lc1"></div>
+                    <div class="wxc-stat">
+                      <div class="wxs-cell"><b>15</b><small>今晚处理</small></div>
+                      <div class="wxs-cell"><b class="good">14</b><small>AI 闭环</small></div>
+                      <div class="wxs-cell"><b class="warn">1</b><small>转早班</small></div>
+                    </div>
+                    <div class="wxc-rule"><b>🤖 智能接管</b> · 简单问题 AI 答 · 复杂转人工 · 钻石客户直接通知主管</div>
+                    <div class="wxc-acts">
+                      <button data-fx="wxConfig" data-channel="qiwei">⚙️ 接管规则</button>
+                      <button data-fx="wxLogs" data-channel="qiwei">📋 看对话(15)</button>
+                      <button data-fx="wxUnbind" data-channel="qiwei" class="warn-btn">解绑</button>
+                    </div>
                   </div>
-                  <div class="live-conv" data-cid="lc2">
-                    <div class="lcv-head">
-                      <span class="lcv-ava">张</span>
-                      <div class="lcv-tt"><b>张总 · 中山某机械</b><small>金牌 · 数据库故障</small></div>
-                      <span class="lcv-state urge">已升 CTO</span>
+
+                  <!-- 微信公众号 -->
+                  <div class="wx-card connected" data-channel="mp">
+                    <div class="wxc-head">
+                      <span class="wxc-ico" style="background:linear-gradient(135deg,#2BBE3D,#1AAD19);color:#fff">📢</span>
+                      <div class="wxc-tt">
+                        <div class="wxc-name">微信公众号 · 顶呱呱AI科技</div>
+                        <div class="wxc-id">AppID: wx7c<span style="opacity:.5">3f8a9b1e2d3c...</span></div>
+                      </div>
+                      <span class="wxc-state on"><i></i> 在线</span>
                     </div>
-                    <div class="lcv-stream" id="lcStream-lc2"></div>
+                    <div class="wxc-stat">
+                      <div class="wxs-cell"><b>9</b><small>今晚处理</small></div>
+                      <div class="wxs-cell"><b class="good">8</b><small>AI 闭环</small></div>
+                      <div class="wxs-cell"><b class="warn">1</b><small>转早班</small></div>
+                    </div>
+                    <div class="wxc-rule"><b>🤖 全自动接管</b> · 关注菜单 + 留言一律 AI 答 · 复杂自动建工单</div>
+                    <div class="wxc-acts">
+                      <button data-fx="wxConfig" data-channel="mp">⚙️ 接管规则</button>
+                      <button data-fx="wxLogs" data-channel="mp">📋 看对话(9)</button>
+                      <button data-fx="wxUnbind" data-channel="mp" class="warn-btn">解绑</button>
+                    </div>
                   </div>
-                  <div class="live-conv" data-cid="lc3">
-                    <div class="lcv-head">
-                      <span class="lcv-ava">试</span>
-                      <div class="lcv-tt"><b>访客 · 试用询单</b><small>30 人规模</small></div>
-                      <span class="lcv-state ok">AI 自闭环 91%</span>
+
+                  <!-- 个人微信 (备用) -->
+                  <div class="wx-card connected" data-channel="weixin">
+                    <div class="wxc-head">
+                      <span class="wxc-ico" style="background:linear-gradient(135deg,#7DD3A3,#2BD9A8);color:#fff">💬</span>
+                      <div class="wxc-tt">
+                        <div class="wxc-name">个人微信 · 客服小妹(备用号)</div>
+                        <div class="wxc-id">wx_id: csg<span style="opacity:.5">_dgg_2026</span></div>
+                      </div>
+                      <span class="wxc-state on"><i></i> 在线</span>
                     </div>
-                    <div class="lcv-stream" id="lcStream-lc3"></div>
+                    <div class="wxc-stat">
+                      <div class="wxs-cell"><b>3</b><small>今晚处理</small></div>
+                      <div class="wxs-cell"><b class="good">3</b><small>AI 闭环</small></div>
+                      <div class="wxs-cell"><b class="warn">0</b><small>转早班</small></div>
+                    </div>
+                    <div class="wxc-rule"><b>🌙 仅夜间接管</b> · 22:00-08:00 · 客户问"在不在" AI 答 · 客户问业务问题 AI 答</div>
+                    <div class="wxc-acts">
+                      <button data-fx="wxConfig" data-channel="weixin">⚙️ 接管规则</button>
+                      <button data-fx="wxLogs" data-channel="weixin">📋 看对话(3)</button>
+                      <button data-fx="wxUnbind" data-channel="weixin" class="warn-btn">解绑</button>
+                    </div>
+                  </div>
+
+                  <!-- 微信视频号 -->
+                  <div class="wx-card connected" data-channel="sph">
+                    <div class="wxc-head">
+                      <span class="wxc-ico" style="background:linear-gradient(135deg,#F76C5E,#E5484D);color:#fff">📹</span>
+                      <div class="wxc-tt">
+                        <div class="wxc-name">微信视频号 · 顶呱呱AI官号</div>
+                        <div class="wxc-id">finder_id: SPF<span style="opacity:.5">_dgg_dy</span></div>
+                      </div>
+                      <span class="wxc-state on"><i></i> 在线</span>
+                    </div>
+                    <div class="wxc-stat">
+                      <div class="wxs-cell"><b>1</b><small>今晚处理</small></div>
+                      <div class="wxs-cell"><b class="good">1</b><small>AI 闭环</small></div>
+                      <div class="wxs-cell"><b class="warn">0</b><small>转早班</small></div>
+                    </div>
+                    <div class="wxc-rule"><b>🤖 智能接管</b> · 视频评论 + 私信都接管 · 询单导流到企微</div>
+                    <div class="wxc-acts">
+                      <button data-fx="wxConfig" data-channel="sph">⚙️ 接管规则</button>
+                      <button data-fx="wxLogs" data-channel="sph">📋 看对话(1)</button>
+                      <button data-fx="wxUnbind" data-channel="sph" class="warn-btn">解绑</button>
+                    </div>
+                  </div>
+
+                  <!-- + 接入新账号 -->
+                  <div class="wx-card add" data-fx="wxAdd">
+                    <div class="wxa-ico">＋</div>
+                    <div class="wxa-tt">接入新账号</div>
+                    <div class="wxa-sub">支持企业微信 / 微信公众号 / 个人微信 / 视频号 / 小程序客服</div>
+                  </div>
+                </div>
+
+                <!-- 接入新账号弹窗 -->
+                <div class="wx-modal" id="csWxAddModal" style="display:none">
+                  <div class="wx-modal-mask" data-fx="wxModalClose"></div>
+                  <div class="wx-modal-box">
+                    <div class="wx-modal-head">
+                      <div class="wxmh-tt">接入新微信账号 · 3 步完成</div>
+                      <button class="wxmh-x" data-fx="wxModalClose">✕</button>
+                    </div>
+                    <div class="wx-modal-body">
+                      <!-- Step 1: 选类型 -->
+                      <div class="wxm-step">
+                        <div class="wxms-head">① 选要接入的账号类型</div>
+                        <div class="wxm-type-grid">
+                          <label class="wxm-type cur"><input type="radio" name="wxType" value="qiwei" checked><span class="wxmt-ico">🏢</span><b>企业微信</b><small>推荐 · 多客服 + 工单</small></label>
+                          <label class="wxm-type"><input type="radio" name="wxType" value="mp"><span class="wxmt-ico">📢</span><b>微信公众号</b><small>服务号/订阅号</small></label>
+                          <label class="wxm-type"><input type="radio" name="wxType" value="weixin"><span class="wxmt-ico">💬</span><b>个人微信</b><small>备用值守</small></label>
+                          <label class="wxm-type"><input type="radio" name="wxType" value="sph"><span class="wxmt-ico">📹</span><b>视频号</b><small>评论 + 私信</small></label>
+                        </div>
+                      </div>
+
+                      <!-- Step 2: 扫码 / 填配置 -->
+                      <div class="wxm-step">
+                        <div class="wxms-head">② 扫码授权 · 用要绑定的微信扫</div>
+                        <div class="wxm-qr-wrap">
+                          <div class="wxm-qr">
+                            <svg viewBox="0 0 200 200" width="180" height="180">
+                              <rect width="200" height="200" fill="#fff"/>
+                              <g fill="#0E1430">
+                                <rect x="10" y="10" width="50" height="50" fill="none" stroke="#0E1430" stroke-width="6"/>
+                                <rect x="22" y="22" width="26" height="26"/>
+                                <rect x="140" y="10" width="50" height="50" fill="none" stroke="#0E1430" stroke-width="6"/>
+                                <rect x="152" y="22" width="26" height="26"/>
+                                <rect x="10" y="140" width="50" height="50" fill="none" stroke="#0E1430" stroke-width="6"/>
+                                <rect x="22" y="152" width="26" height="26"/>
+                                <g><rect x="72" y="14" width="8" height="8"/><rect x="90" y="14" width="8" height="8"/><rect x="116" y="14" width="8" height="8"/><rect x="72" y="32" width="8" height="8"/><rect x="100" y="32" width="8" height="8"/><rect x="80" y="46" width="8" height="8"/><rect x="92" y="46" width="8" height="8"/><rect x="116" y="46" width="8" height="8"/><rect x="72" y="64" width="8" height="8"/><rect x="86" y="64" width="8" height="8"/><rect x="108" y="64" width="8" height="8"/><rect x="124" y="64" width="8" height="8"/><rect x="142" y="64" width="8" height="8"/><rect x="160" y="64" width="8" height="8"/><rect x="178" y="64" width="8" height="8"/></g>
+                                <g><rect x="14" y="72" width="8" height="8"/><rect x="32" y="72" width="8" height="8"/><rect x="46" y="72" width="8" height="8"/><rect x="64" y="80" width="8" height="8"/><rect x="80" y="80" width="8" height="8"/><rect x="100" y="80" width="8" height="8"/><rect x="120" y="80" width="8" height="8"/><rect x="140" y="80" width="8" height="8"/><rect x="160" y="80" width="8" height="8"/><rect x="180" y="80" width="8" height="8"/></g>
+                                <g><rect x="14" y="92" width="8" height="8"/><rect x="36" y="92" width="8" height="8"/><rect x="52" y="92" width="8" height="8"/><rect x="74" y="92" width="8" height="8"/><rect x="94" y="92" width="8" height="8"/><rect x="116" y="92" width="8" height="8"/><rect x="134" y="92" width="8" height="8"/><rect x="154" y="92" width="8" height="8"/><rect x="172" y="92" width="8" height="8"/></g>
+                                <g><rect x="22" y="108" width="8" height="8"/><rect x="42" y="108" width="8" height="8"/><rect x="60" y="108" width="8" height="8"/><rect x="82" y="108" width="8" height="8"/><rect x="100" y="108" width="8" height="8"/><rect x="120" y="108" width="8" height="8"/><rect x="138" y="108" width="8" height="8"/><rect x="158" y="108" width="8" height="8"/><rect x="180" y="108" width="8" height="8"/></g>
+                                <g><rect x="14" y="124" width="8" height="8"/><rect x="34" y="124" width="8" height="8"/><rect x="54" y="124" width="8" height="8"/><rect x="74" y="124" width="8" height="8"/><rect x="92" y="124" width="8" height="8"/><rect x="114" y="124" width="8" height="8"/><rect x="132" y="124" width="8" height="8"/><rect x="152" y="124" width="8" height="8"/><rect x="172" y="124" width="8" height="8"/></g>
+                                <g><rect x="72" y="142" width="8" height="8"/><rect x="92" y="142" width="8" height="8"/><rect x="112" y="142" width="8" height="8"/><rect x="130" y="142" width="8" height="8"/><rect x="148" y="142" width="8" height="8"/><rect x="170" y="142" width="8" height="8"/></g>
+                                <g><rect x="72" y="160" width="8" height="8"/><rect x="84" y="160" width="8" height="8"/><rect x="104" y="160" width="8" height="8"/><rect x="124" y="160" width="8" height="8"/><rect x="142" y="160" width="8" height="8"/><rect x="164" y="160" width="8" height="8"/><rect x="180" y="160" width="8" height="8"/></g>
+                                <g><rect x="72" y="178" width="8" height="8"/><rect x="92" y="178" width="8" height="8"/><rect x="110" y="178" width="8" height="8"/><rect x="130" y="178" width="8" height="8"/><rect x="152" y="178" width="8" height="8"/><rect x="172" y="178" width="8" height="8"/></g>
+                              </g>
+                              <rect x="78" y="78" width="44" height="44" fill="#fff"/>
+                              <text x="100" y="108" text-anchor="middle" font-size="20" fill="#7C5CFA" font-weight="800">AI</text>
+                            </svg>
+                            <div class="wxm-qr-tip" id="wxQrTip"><span class="qrt-dot"></span>等待扫描 · 有效期 5 分钟</div>
+                          </div>
+                          <div class="wxm-qr-side">
+                            <div class="wxm-callout">
+                              <b>扫码后 AI 会自动:</b>
+                              <ul>
+                                <li>✓ 申请客户消息读权限</li>
+                                <li>✓ 申请代发消息权限(用于回复)</li>
+                                <li>✓ 同步全部历史对话(用于学习)</li>
+                                <li>✓ 启动后台 24h 监听</li>
+                              </ul>
+                            </div>
+                            <div class="wxm-callout warn">
+                              <b>⚠ 注意:</b>
+                              <ul>
+                                <li>· 个人微信受微信限制 · 仅夜间值守</li>
+                                <li>· 你的隐私聊天 AI 不会读不会发</li>
+                                <li>· 任意时刻可一键解绑</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Step 3: 选接管规则 -->
+                      <div class="wxm-step">
+                        <div class="wxms-head">③ 选 AI 接管规则</div>
+                        <div class="wxm-rules">
+                          <label class="wxm-rule cur"><input type="radio" name="wxRule" value="smart" checked><b>🤖 智能接管(推荐)</b><span>简单问题 AI 答 · 复杂转人工 · 钻石客户立即通知主管 · 红线话术拦截</span></label>
+                          <label class="wxm-rule"><input type="radio" name="wxRule" value="auto"><b>⚡ 全自动接管</b><span>所有消息都 AI 答 · 适合标准化 FAQ 多的公众号</span></label>
+                          <label class="wxm-rule"><input type="radio" name="wxRule" value="night"><b>🌙 仅夜间接管</b><span>22:00-08:00 接管 · 白天由人工客服处理</span></label>
+                          <label class="wxm-rule"><input type="radio" name="wxRule" value="copilot"><b>👥 副驾模式</b><span>AI 不直接回 · 只给客服提示 3 条话术 · 客服点选发送</span></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="wx-modal-foot">
+                      <button class="wxmf-cancel" data-fx="wxModalClose">取消</button>
+                      <button class="wxmf-confirm" id="wxConfirmAdd">✓ 完成接入(模拟已扫码)</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -7426,39 +7822,287 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
               </div>
 
-              <!-- D. Agent 今晚的学习与成长 -->
-              <div class="agent-section learn-section">
+              <!-- D. AI 训练投喂工作台 · 真实的"投喂大模型"流程 -->
+              <div class="agent-section">
                 <div class="agent-section-head">
                   <span class="ash-pin">🧠</span>
-                  <div class="ash-tt">我今晚学到了什么 · 明天会更聪明</div>
-                  <div class="ash-meta">每一次处理都在进化</div>
+                  <div class="ash-tt">投喂大模型 · 把今晚优质对话变成模型记忆</div>
+                  <div class="ash-meta">每日凌晨 4 点自动训练 · 你可干预</div>
                 </div>
-                <div class="learn-grid">
-                  <div class="learn-cell">
-                    <div class="lc-tt">🎯 新场景沉淀</div>
-                    <div class="lc-body"><b>EU 询单标准流程</b>· 基于今晚 2 单海外询价 + 多币种 + UK office 询问 · 我建立了完整 7 步流程并入库</div>
-                    <div class="lc-tag">已沉淀</div>
+
+                <!-- 4 步工作流 -->
+                <div class="train-workflow">
+
+                  <!-- Step 1: 优选训练样本 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">1</span>
+                      <div class="tw-tt">优选训练样本</div>
+                      <div class="tw-meta">AI 自动从今晚 28 单中选 7 条高质量样本(客户满意度 + 解决率 + 多样性)</div>
+                    </div>
+                    <div class="tw-samples" id="csTwSamples">
+                      <div class="tw-sample selected" data-sid="ts1">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"我们的 CRM 跟金蝶能对接吗? 报价多少?"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "我们提供标准 API + 中间件, 15 分钟可对接。30 人规模适合金牌套餐 ¥3.2 万/年, 含金蝶对接 SKU。让我先了解您几个问题更精准: ①您主要的痛点 ②对接深度需求 ③现有 ERP 版本..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">售前询单</span><span class="tws-tag">金蝶集成</span>
+                          <span class="tws-tag good">高价值样本</span><span class="tws-tag good">客户已留微信</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts1">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts1">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts1">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="ts2">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"Hi, do you support multi-currency for invoicing?"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "Yes — 34 currencies including USD/EUR/GBP, ECB daily rates, 17 EU clients running. Want me to send 3 case studies + pricing? Also our EU sales lead Sarah can reach you within 4 hours..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">英文售前</span><span class="tws-tag">海外业务</span>
+                          <span class="tws-tag good">高价值</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts2">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts2">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts2">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="ts3">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"报表导出 Excel 看是乱码, 是不是编码问题?"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "对, UTF-8 BOM 编码问题。我把 1 步配置 + 视频发您, 设置后所有员工导出都正常。今后此问题不会再出现。"
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">售后技术</span><span class="tws-tag">高频问题</span>
+                          <span class="tws-tag good">秒解决</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts3">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts3">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts3">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="ts4">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"30 人, 你们的 CRM 大概多少? 我是退伍创业的"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "您好!30 人规模适合我们的金牌套餐 ¥3.2 万/年... 您是退伍创业 = 享 15% 优惠 · 实际 ¥2.72 万/年 · 签 2 年再让 5%..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">售前</span><span class="tws-tag">优惠政策</span>
+                          <span class="tws-tag good">已留微信</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts4">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts4">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts4">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="ts5">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户(钻石)</span>"明早老板汇报, 帮我导本月销售趋势!"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "钱厂长您好,本月销售趋势报表已生成... 既然是给老板汇报, 我让 BI 顾问王工早上 7:30 主动联系您, 看要不要加同比/环比/Top10 等深度数据..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">VIP 服务</span><span class="tws-tag">老板汇报场景</span>
+                          <span class="tws-tag good">主动加码</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts5">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts5">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts5">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="ts6">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"你们 CRM 显示数据库错误 1042"</div>
+                          <div class="tws-meta"><b class="good">5/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "张总您好, 我立即排查。错误 1042 通常是主从同步延迟。已远程接入您服务器 + 立即升级到 CTO。预计 15 分钟..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">紧急故障</span><span class="tws-tag">技术升级</span>
+                          <span class="tws-tag good">14 分钟解决</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="adopt" data-sid="ts6">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="edit" data-sid="ts6">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts6">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample" data-sid="ts7">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">客户</span>"你们对接淘宝/京东订单同步吗? 我现在 4 个店铺"</div>
+                          <div class="tws-meta"><b class="warn">3/5</b><small>客户满意度</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">AI 答</div>
+                          "您说的电商订单同步, 我们目前有部分对接(详细要看您店铺类型)。让我们专门同事明天 9:30 联系您..."
+                        </div>
+                        <div class="tws-tags">
+                          <span class="tws-tag">售前</span><span class="tws-tag warn">知识 GAP</span>
+                          <span class="tws-tag">需补充资料</span>
+                        </div>
+                        <div class="tws-acts">
+                          <button class="tws-btn" data-fx="twSampleAct" data-act="adopt" data-sid="ts7">✓ 纳入(配合 GAP 补充)</button>
+                          <button class="tws-btn cur" data-fx="twSampleAct" data-act="edit" data-sid="ts7">✏️ 修改标注</button>
+                          <button class="tws-btn reject" data-fx="twSampleAct" data-act="reject" data-sid="ts7">✗ 排除</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tw-samples-foot">
+                      已选 <b id="csTwAdoptCount">6</b>/7 条投喂 · 已排除 <b id="csTwRejCount">0</b> · 待修改 <b id="csTwEditCount">1</b>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">📚 知识库扩展</div>
-                    <div class="lc-body"><b>编码乱码诊断指引 V2</b>· 综合今晚 1 单 + 历史 47 单, 我把"操作系统/Excel 版本/编辑器"三维度交叉诊断写成了引导表</div>
-                    <div class="lc-tag">已沉淀</div>
+
+                  <!-- Step 2: 投喂训练 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">2</span>
+                      <div class="tw-tt">投喂大模型 · LoRA 增量训练</div>
+                      <div class="tw-meta">基于当前生产版 V2.4 做 fine-tune · 不影响生产</div>
+                    </div>
+                    <div class="tw-feed">
+                      <div class="tw-params">
+                        <div class="tw-param"><label>训练样本</label><span class="tw-val" id="csTwSampleN">7 条 (今晚) + 2,341 条 (历史)</span></div>
+                        <div class="tw-param"><label>基础模型</label><span class="tw-val">V2.4 (生产中)</span></div>
+                        <div class="tw-param"><label>训练方式</label><span class="tw-val">LoRA (rank=16, α=32)</span></div>
+                        <div class="tw-param"><label>学习率</label><span class="tw-val">3e-5</span></div>
+                        <div class="tw-param"><label>训练轮次</label><span class="tw-val">3 epochs</span></div>
+                        <div class="tw-param"><label>预计耗时</label><span class="tw-val">~12 分钟</span></div>
+                        <div class="tw-param"><label>训练成本</label><span class="tw-val">¥0.84 (GPU H100 占用 12 min)</span></div>
+                        <div class="tw-param"><label>目标版本</label><span class="tw-val">V2.4 → V2.5</span></div>
+                      </div>
+                      <div class="tw-feed-actions">
+                        <button class="tw-feed-btn" id="csTwFeedBtn">▶ 开始投喂训练</button>
+                        <button class="tw-feed-cancel" id="csTwFeedSchedule">⏰ 改为凌晨 4 点自动</button>
+                      </div>
+                    </div>
+                    <!-- 训练进度 (默认隐藏) -->
+                    <div class="tw-progress" id="csTwProgress" style="display:none">
+                      <div class="tw-prog-head">
+                        <span class="tw-prog-pulse"></span><b>训练进行中...</b>
+                        <span class="tw-prog-pct" id="csTwProgPct">0%</span>
+                      </div>
+                      <div class="tw-prog-bar"><i id="csTwProgBar"></i></div>
+                      <div class="tw-prog-log" id="csTwProgLog">
+                        <!-- 流式日志由 JS 追加 -->
+                      </div>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">🎭 客户画像更新</div>
-                    <div class="lc-body"><b>钱厂长(钻石)</b>新增标签 <b>"数据导出 · 老板汇报场景"</b> · 下次类似时间(月初早)询问数据,我会主动推送"老板友好版"</div>
-                    <div class="lc-tag">已沉淀</div>
+
+                  <!-- Step 3: 训练前 vs 后对比 (默认隐藏) -->
+                  <div class="tw-step" id="csTwResultStep" style="display:none">
+                    <div class="tw-step-head">
+                      <span class="tw-num">3</span>
+                      <div class="tw-tt">训练前 vs 训练后 · V2.4 → V2.5</div>
+                      <div class="tw-meta">同测试集回归 · 提升明显</div>
+                    </div>
+                    <div class="tw-compare">
+                      <div class="tw-cmp-row"><div class="tcr-lbl">同类问题准确率</div><div class="tcr-old">88%</div><div class="tcr-arr">→</div><div class="tcr-new good">92% <small>+4.0pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">售前金蝶集成答得专业度</div><div class="tcr-old">7.2</div><div class="tcr-arr">→</div><div class="tcr-new good">8.9 <small>+1.7</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">英文售前响应专业度</div><div class="tcr-old">6.8</div><div class="tcr-arr">→</div><div class="tcr-new good">8.5 <small>+1.7</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">VIP 老板汇报场景主动加码</div><div class="tcr-old">0%</div><div class="tcr-arr">→</div><div class="tcr-new good">+62% <small>(新能力)</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">紧急故障升级时机识别</div><div class="tcr-old">71%</div><div class="tcr-arr">→</div><div class="tcr-new good">94% <small>+23pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">退伍/初创/教育优惠主动提</div><div class="tcr-old">12%</div><div class="tcr-arr">→</div><div class="tcr-new good">88% <small>+76pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">夜间客户安抚话术得体度</div><div class="tcr-old">7.5</div><div class="tcr-arr">→</div><div class="tcr-new good">9.1 <small>+1.6</small></div></div>
+                    </div>
+                    <div class="tw-deploy">
+                      <div class="tw-deploy-tip">✓ 全部指标提升 · 无回退 · 红线话术拦截率维持 100%</div>
+                      <div class="tw-deploy-acts">
+                        <button class="tw-deploy-btn" id="csTwDeployBtn">🚀 部署 V2.5 到生产环境</button>
+                        <button class="tw-deploy-ab" id="csTwAbBtn">📊 改 A/B 测试(10% 流量)</button>
+                        <button class="tw-deploy-cancel" id="csTwDeployCancel">📥 留在沙箱再观察</button>
+                      </div>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">💬 话术迭代</div>
-                    <div class="lc-body"><b>"凌晨 03:00+ 紧急求助"安抚话术升级 V3</b>· 新加入"非工作时间您还在为业务操心,我立即..." 同理表达</div>
-                    <div class="lc-tag">已沉淀</div>
+
+                  <!-- Step 4: 模型版本时间线 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">4</span>
+                      <div class="tw-tt">模型版本时间线 · 可一键回滚</div>
+                      <div class="tw-meta">每天迭代 · 数据沉淀 · 可比 SaaS 厂商更懂你公司</div>
+                    </div>
+                    <div class="tw-versions" id="csTwVersions">
+                      <div class="tw-ver current">
+                        <div class="tv-tag">V2.4 · 生产</div>
+                        <div class="tv-body">
+                          <div class="tv-time">本周一 09:00 上线 · 已运行 4 天</div>
+                          <div class="tv-desc">基于上周 142 条样本训练 · 准确率 88% · 重点优化"客户成功"对话</div>
+                        </div>
+                        <div class="tv-acts">
+                          <button data-fx="tvAct" data-msg="📋 V2.4 训练详情已发你邮箱">查看详情</button>
+                        </div>
+                      </div>
+                      <div class="tw-ver" id="csTwVerTraining" style="display:none">
+                        <div class="tv-tag training">V2.5 · 训练中</div>
+                        <div class="tv-body">
+                          <div class="tv-time">今晚 04:36 启动训练 · ETA 12 分钟</div>
+                          <div class="tv-desc">基于今晚 6 条样本 + 2,341 条历史 · 重点"金蝶集成 + 英文售前 + VIP 加码"</div>
+                        </div>
+                        <div class="tv-acts">
+                          <button data-fx="tvAct" data-msg="⏸ 训练已暂停">暂停训练</button>
+                        </div>
+                      </div>
+                      <div class="tw-ver">
+                        <div class="tv-tag">V2.3</div>
+                        <div class="tv-body">
+                          <div class="tv-time">上上周三 09:00 → 本周一替换</div>
+                          <div class="tv-desc">基于 168 条样本 · 准确率 84% · 已被 V2.4 替换</div>
+                        </div>
+                        <div class="tv-acts">
+                          <button class="tv-rollback" data-fx="tvAct" data-msg="⏪ 已回滚 V2.3 到生产 (V2.4 已暂存)">⏪ 回滚到 V2.3</button>
+                        </div>
+                      </div>
+                      <div class="tw-ver">
+                        <div class="tv-tag">V2.2</div>
+                        <div class="tv-body">
+                          <div class="tv-time">5/22 → 5/29 在线</div>
+                          <div class="tv-desc">基于 95 条样本 · 准确率 80% · 重点"红线话术拦截"</div>
+                        </div>
+                        <div class="tv-acts">
+                          <button class="tv-rollback" data-fx="tvAct" data-msg="⏪ 已回滚 V2.2 到生产">⏪ 回滚</button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
               </div>
 
             </div></div>
-
 
 <!-- ===== 4 工单 Agent 调度官 (Agent 形态) ===== -->
             <div class="stage" id="cs-ticket"><div class="page">
@@ -14796,6 +15440,269 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 
   /* 初始化 */
   startScene("s1");
+})();
+</script>
+<script>
+/* ============================================================
+   微信接入 + AI 训练投喂 (Board 3 替换 Section A + D)
+   ============================================================ */
+(function () {
+  var view = document.getElementById("view-cs");
+  if (!view) return;
+  var QA = function (s, r) { return Array.prototype.slice.call((r || view).querySelectorAll(s)); };
+  var Q = function (s, r) { return (r || view).querySelector(s); };
+  function ts(msg) {
+    var el = document.createElement("div");
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0E1430;color:#fff;padding:11px 18px;border-radius:11px;font-size:12.5px;font-weight:600;z-index:10000;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:560px;line-height:1.5;text-align:center";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = "0"; el.style.transition = ".3s"; }, 2600);
+    setTimeout(function () { el.remove(); }, 3000);
+  }
+  function txt(id, v) { var e = Q("#" + id); if (e) e.textContent = v; }
+
+  /* ============ 微信接入 ============ */
+  view.addEventListener("click", function (e) {
+    /* 接入新账号 → 打开弹窗 */
+    var add = e.target.closest('[data-fx="wxAdd"]');
+    if (add) {
+      var modal = Q("#csWxAddModal");
+      if (modal) modal.style.display = "flex";
+      return;
+    }
+    /* 关闭弹窗 */
+    var close = e.target.closest('[data-fx="wxModalClose"]');
+    if (close) {
+      Q("#csWxAddModal").style.display = "none";
+      return;
+    }
+    /* 配置接管规则 */
+    var cfg = e.target.closest('[data-fx="wxConfig"]');
+    if (cfg) {
+      var ch = cfg.dataset.channel;
+      var names = { qiwei: "企业微信", mp: "微信公众号", weixin: "个人微信", sph: "微信视频号" };
+      ts("⚙️ " + names[ch] + " · 接管规则编辑面板已弹出(模拟)· 你可修改接管时间/客户分类/红线话术");
+      return;
+    }
+    /* 看对话日志 */
+    var logs = e.target.closest('[data-fx="wxLogs"]');
+    if (logs) {
+      var ch2 = logs.dataset.channel;
+      var names2 = { qiwei: "企业微信", mp: "微信公众号", weixin: "个人微信", sph: "微信视频号" };
+      ts("📋 " + names2[ch2] + " · 今晚 AI 处理的对话日志已弹出 · 含每条客户问 + AI 答 + 满意度 + 是否纳入训练");
+      return;
+    }
+    /* 解绑 */
+    var unb = e.target.closest('[data-fx="wxUnbind"]');
+    if (unb) {
+      var card = unb.closest(".wx-card");
+      if (card && confirm("确认解绑此账号? AI 将停止处理该账号的消息。")) {
+        card.style.transition = ".25s";
+        card.style.opacity = "0";
+        card.style.transform = "scale(.92)";
+        setTimeout(function () { card.remove(); }, 250);
+        ts("✓ 已解绑 · AI 已停止该账号的消息接管");
+      }
+      return;
+    }
+  });
+
+  /* 弹窗内: 选类型 / 选规则 */
+  var addModal = Q("#csWxAddModal");
+  if (addModal) {
+    addModal.addEventListener("click", function (e) {
+      var t = e.target.closest(".wxm-type");
+      if (t) {
+        QA(".wxm-type", addModal).forEach(function (x) { x.classList.toggle("cur", x === t); });
+        t.querySelector("input").checked = true;
+        return;
+      }
+      var r = e.target.closest(".wxm-rule");
+      if (r) {
+        QA(".wxm-rule", addModal).forEach(function (x) { x.classList.toggle("cur", x === r); });
+        r.querySelector("input").checked = true;
+      }
+    });
+    /* 确认接入(模拟扫码后) */
+    Q("#wxConfirmAdd").addEventListener("click", function () {
+      var type = QA(".wxm-type", addModal).find(function (x) { return x.classList.contains("cur"); });
+      var rule = QA(".wxm-rule", addModal).find(function (x) { return x.classList.contains("cur"); });
+      var typeVal = type ? type.querySelector("input").value : "qiwei";
+      var ruleVal = rule ? rule.querySelector("input").value : "smart";
+      var typeNames = { qiwei: "企业微信", mp: "微信公众号", weixin: "个人微信", sph: "微信视频号" };
+      var ruleNames = { smart: "智能接管", auto: "全自动接管", night: "仅夜间接管", copilot: "副驾模式" };
+      addModal.style.display = "none";
+      /* 在网格里追加一张新卡 */
+      var grid = Q("#csWxGrid");
+      var addBtn = grid.querySelector(".wx-card.add");
+      var newCard = document.createElement("div");
+      newCard.className = "wx-card connected";
+      newCard.dataset.channel = typeVal;
+      var iconMap = {
+        qiwei: { bg: "linear-gradient(135deg,#1AAD19,#0EA84B)", ico: "🏢" },
+        mp:    { bg: "linear-gradient(135deg,#2BBE3D,#1AAD19)", ico: "📢" },
+        weixin:{ bg: "linear-gradient(135deg,#7DD3A3,#2BD9A8)", ico: "💬" },
+        sph:   { bg: "linear-gradient(135deg,#F76C5E,#E5484D)", ico: "📹" }
+      }[typeVal];
+      newCard.innerHTML =
+        '<div class="wxc-head">' +
+          '<span class="wxc-ico" style="background:' + iconMap.bg + ';color:#fff">' + iconMap.ico + '</span>' +
+          '<div class="wxc-tt"><div class="wxc-name">' + typeNames[typeVal] + ' · 新接入</div>' +
+          '<div class="wxc-id">已绑定 · 刚才</div></div>' +
+          '<span class="wxc-state on"><i></i> 在线</span></div>' +
+        '<div class="wxc-stat"><div class="wxs-cell"><b>0</b><small>今晚处理</small></div>' +
+          '<div class="wxs-cell"><b class="good">0</b><small>AI 闭环</small></div>' +
+          '<div class="wxs-cell"><b class="warn">0</b><small>转早班</small></div></div>' +
+        '<div class="wxc-rule"><b>' + ruleNames[ruleVal] + '</b> · 已开始监听新消息</div>' +
+        '<div class="wxc-acts"><button data-fx="wxConfig" data-channel="' + typeVal + '">⚙️ 接管规则</button>' +
+          '<button data-fx="wxLogs" data-channel="' + typeVal + '">📋 看对话</button>' +
+          '<button data-fx="wxUnbind" data-channel="' + typeVal + '" class="warn-btn">解绑</button></div>';
+      grid.insertBefore(newCard, addBtn);
+      ts("✅ " + typeNames[typeVal] + " 已成功接入 · AI 已启动 24h 监听 · 接管规则:" + ruleNames[ruleVal]);
+    });
+  }
+
+  /* ============ AI 训练投喂工作台 ============ */
+  /* 样本选/排除/修改 */
+  view.addEventListener("click", function (e) {
+    var s = e.target.closest('[data-fx="twSampleAct"]');
+    if (!s) return;
+    var sample = s.closest(".tw-sample");
+    var act = s.dataset.act;
+    QA(".tws-btn", sample).forEach(function (x) { x.classList.remove("cur"); });
+    s.classList.add("cur");
+    sample.classList.remove("selected", "rejected");
+    if (act === "adopt") {
+      sample.classList.add("selected");
+      ts("✓ 已纳入训练集");
+    } else if (act === "reject") {
+      sample.classList.add("rejected");
+      ts("✗ 已排除 · 此样本不参与训练");
+    } else {
+      ts("✏️ 修改标注 · 已弹出标注面板(模拟)· 你可改正客户意图/AI 答优劣/重点关键词");
+    }
+    /* 更新统计 */
+    var adoptN = QA(".tw-sample.selected").length;
+    var rejN = QA(".tw-sample.rejected").length;
+    var editN = QA(".tw-sample:not(.selected):not(.rejected)").length;
+    var totalN = QA(".tw-sample").length;
+    txt("csTwAdoptCount", adoptN);
+    txt("csTwRejCount", rejN);
+    txt("csTwEditCount", editN);
+    txt("csTwSampleN", adoptN + " 条 (今晚) + 2,341 条 (历史)");
+    /* 训练按钮状态 */
+    var feedBtn = Q("#csTwFeedBtn");
+    if (feedBtn) {
+      if (adoptN === 0) { feedBtn.disabled = true; feedBtn.textContent = "⚠ 至少选 1 条样本"; }
+      else { feedBtn.disabled = false; feedBtn.textContent = "▶ 开始投喂训练(" + adoptN + " 条)"; }
+    }
+  });
+
+  /* 投喂训练动画 */
+  var twTimers = [];
+  function clearTw() { twTimers.forEach(clearTimeout); twTimers = []; }
+  var feedBtn = Q("#csTwFeedBtn");
+  if (feedBtn) {
+    feedBtn.addEventListener("click", function () {
+      if (this.disabled) return;
+      clearTw();
+      this.disabled = true;
+      this.textContent = "⏳ 训练中...";
+      var prog = Q("#csTwProgress");
+      var bar = Q("#csTwProgBar");
+      var pct = Q("#csTwProgPct");
+      var log = Q("#csTwProgLog");
+      prog.style.display = "block";
+      log.innerHTML = "";
+      bar.style.width = "0";
+      pct.textContent = "0%";
+      /* 训练中显示训练版本 */
+      var trainingVer = Q("#csTwVerTraining");
+      if (trainingVer) trainingVer.style.display = "grid";
+
+      var steps = [
+        { t: 400, pct: 5, log: "[INIT] 加载基础模型 V2.4 (cf-lora-7b · 13.4GB)" },
+        { t: 800, pct: 12, log: "[DATA] 加载训练样本: 6 条 (今晚) + 2,341 条 (历史)" },
+        { t: 1200, pct: 18, log: "[DATA] 数据清洗 + 去重 · 实际有效 2,343 条" },
+        { t: 1600, pct: 25, log: "[TOKEN] tokenizer · 总 token 1.2M · 平均每条 512 token" },
+        { t: 2200, pct: 35, log: "[EPOCH 1/3] 训练 · loss 2.18 → 1.42 · lr 3e-5" },
+        { t: 3000, pct: 50, log: "[EPOCH 1/3] 完成 · val_loss 1.38 · 准确率 89.1%" },
+        { t: 3800, pct: 62, log: "[EPOCH 2/3] 训练 · loss 1.42 → 0.96 · lr 2.4e-5" },
+        { t: 4600, pct: 75, log: "[EPOCH 2/3] 完成 · val_loss 0.91 · 准确率 91.3%" },
+        { t: 5400, pct: 86, log: "[EPOCH 3/3] 训练 · loss 0.96 → 0.74 · lr 1.8e-5" },
+        { t: 6100, pct: 93, log: "[EPOCH 3/3] 完成 · val_loss 0.71 · 准确率 92.4%" },
+        { t: 6500, pct: 96, log: "[EVAL] 7 项关键指标对比 V2.4 · 全部提升" },
+        { t: 6900, pct: 99, log: "[SAVE] 保存 LoRA 权重 V2.5 (180 MB) · 沙箱部署" },
+        { t: 7200, pct: 100, log: "[DONE] 训练完成 · 总耗时 11 分 47 秒 · 实际成本 ¥0.81" }
+      ];
+      steps.forEach(function (step, i) {
+        twTimers.push(setTimeout(function () {
+          bar.style.width = step.pct + "%";
+          pct.textContent = step.pct + "%";
+          var line = document.createElement("div");
+          line.textContent = step.log;
+          if (i === steps.length - 1 || step.log.indexOf("完成") >= 0 || step.log.indexOf("[DONE]") >= 0) {
+            line.classList.add("done");
+          }
+          log.appendChild(line);
+          log.scrollTop = log.scrollHeight;
+        }, step.t));
+      });
+      /* 训练完成 → 显示对比 */
+      twTimers.push(setTimeout(function () {
+        Q("#csTwResultStep").style.display = "block";
+        feedBtn.textContent = "✓ 训练完成 · 重新训练";
+        feedBtn.disabled = false;
+        ts("✅ V2.5 训练完成 · 全部 7 项指标提升 · 已存沙箱 · 待你部署");
+        Q("#csTwResultStep").scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 7600));
+    });
+  }
+
+  /* 改为凌晨自动 */
+  var scheduleBtn = Q("#csTwFeedSchedule");
+  if (scheduleBtn) scheduleBtn.addEventListener("click", function () {
+    ts("⏰ 已切换为自动模式 · 每日凌晨 4 点自动训练 · 你可在版本时间线一键回滚");
+  });
+
+  /* 部署 V2.5 */
+  var deployBtn = Q("#csTwDeployBtn");
+  if (deployBtn) deployBtn.addEventListener("click", function () {
+    /* 把 V2.4 current 标记取消, 把 V2.5 training 改为 current */
+    var versions = QA(".tw-ver", Q("#csTwVersions"));
+    versions.forEach(function (v) {
+      var tag = v.querySelector(".tv-tag");
+      if (!tag) return;
+      var t = tag.textContent;
+      if (t.indexOf("V2.4") >= 0) {
+        v.classList.remove("current");
+        tag.classList.remove("training");
+        tag.textContent = "V2.4 · 已下线";
+      }
+      if (t.indexOf("V2.5") >= 0) {
+        v.classList.add("current");
+        v.classList.remove("training");
+        tag.classList.remove("training");
+        tag.textContent = "V2.5 · 生产";
+      }
+    });
+    ts("🚀 V2.5 已部署到生产环境 · V2.4 自动归档为可回滚版本 · 客户立即感受新效果");
+    deployBtn.textContent = "✓ 已部署";
+    deployBtn.disabled = true;
+  });
+  var abBtn = Q("#csTwAbBtn");
+  if (abBtn) abBtn.addEventListener("click", function () {
+    ts("📊 A/B 测试已启动 · 10% 流量给 V2.5 · 90% 留 V2.4 · 24h 后自动对比");
+  });
+  var dcBtn = Q("#csTwDeployCancel");
+  if (dcBtn) dcBtn.addEventListener("click", function () {
+    ts("📥 V2.5 留沙箱 · 继续观察 7 天 · 数据足够再决定");
+  });
+  /* 版本回滚 */
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="tvAct"]');
+    if (b) ts(b.dataset.msg);
+  });
 })();
 </script>
 </body>
