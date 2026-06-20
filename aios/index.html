@@ -9249,192 +9249,192 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
                 <div class="wf-stream" id="bidWfStream">
 
-                  <!-- Step 1: 解析招标 -->
-                  <div class="wf-msg" data-step="1" style="--dur:4.5s">
+                  <!-- Step 1: 🔍 机会评估(阶段 1: 商机+评估) -->
+                  <div class="wf-msg" data-step="1" style="--dur:3.8s">
                     <div class="wm-state"><span>1</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">📄 解析招标文件 · OCR + NER 抽取 30+ 关键字段</span>
+                      <div class="wm-line"><span class="wml-tt">🔍 机会评估 · 资质匹配 + 中标率 + ROI + 对手画像</span>
                         <span class="wml-meta" data-meta>排队中</span></div>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        识别为<b>软件系统采购招标</b>(置信度 96%)· 招标方 <b>某省人民医院</b> · 预算 <b>¥850 万</b> · <b>报名截止 6/25</b>(还剩 5 天)· 投标截止 7/8 · 投标保证金 <b>¥17 万</b>
+                        我已完成 4 维评估:<b>资质</b>(12 项满足 10 项 · 2 项部分)· <b>中标率 42%</b>(XGBoost · 行业 14%)· <b>ROI</b>(成本 ¥520 万 / 预期利润 ¥235 万 / 期望收益 ¥98.7 万)· <b>对手画像</b>(预计 6-8 家,3 家有专精)· <b style="color:var(--green)">建议:投</b>
                       </div>
-                      <button class="wm-expand" data-fx="bidExpand">查看 32 个关键字段 + 风险点 <span class="we-arr">▾</span></button>
-                      <div class="wf-detail">
-                        <div class="bid-fields">
-                          <div class="bid-field-cell"><div class="bfc-k">招标方</div><div class="bfc-v">某省人民医院</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">项目名称</div><div class="bfc-v">HIS+EMR 一体化升级</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">项目编号</div><div class="bfc-v">RYY-2026-0612-OA</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">预算上限</div><div class="bfc-v warn">¥850 万</div></div>
-                          <div class="bid-field-cell flag-warn"><div class="bfc-k">报名截止</div><div class="bfc-v warn">2026-06-25 · 还剩 5 天</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">投标截止</div><div class="bfc-v">2026-07-08</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">开标时间</div><div class="bfc-v">2026-07-09 14:00</div></div>
-                          <div class="bid-field-cell flag-risk"><div class="bfc-k">保证金</div><div class="bfc-v danger">¥17 万 · 银行电汇</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">资质门槛</div><div class="bfc-v">CMMI3+ · ISO27001</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">案例要求</div><div class="bfc-v">3 例三甲医院 HIS</div></div>
-                          <div class="bid-field-cell flag-risk"><div class="bfc-k">技术规格</div><div class="bfc-v danger">指定 Oracle 数据库</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">实施周期</div><div class="bfc-v warn">180 天</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">服务期</div><div class="bfc-v">3 年质保</div></div>
-                          <div class="bid-field-cell flag-warn"><div class="bfc-k">支付节奏</div><div class="bfc-v warn">3-3-3-1 · 末款验收+1年</div></div>
-                          <div class="bid-field-cell flag-warn"><div class="bfc-k">不平衡报价</div><div class="bfc-v warn">单项不超 15%</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">联合体</div><div class="bfc-v">不允许</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">分包</div><div class="bfc-v">关键部分不允许</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">投标人数</div><div class="bfc-v">预计 6-8 家</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">评标方法</div><div class="bfc-v">综合评分法</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">技术 / 商务比</div><div class="bfc-v">60% / 40%</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">代理机构</div><div class="bfc-v">XX 招标代理</div></div>
-                          <div class="bid-field-cell"><div class="bfc-k">疑点澄清</div><div class="bfc-v">6/30 17:00 前</div></div>
-                        </div>
-                        <div style="margin-top:9px;padding:9px 11px;background:#FEF2F2;border-left:3px solid var(--red);border-radius:7px;font-size:11px;line-height:1.65;color:var(--ink-2)">
-                          <b style="color:var(--red)">⚠ AI 已识别 4 处风险条款(看不出会吃哑巴亏):</b><br>
-                          ① 指定 Oracle <b>排他性强</b>(我方擅长 MySQL · 需评估迁移成本)<br>
-                          ② <b>末款 10% 验收满 1 年才付</b>(资金占用大)<br>
-                          ③ <b>不平衡报价单项 ≤ 15%</b>(限制策略性报价)<br>
-                          ④ <b>联合体不允许</b>(无法找硬件厂商联合投)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 2: 资质匹配 -->
-                  <div class="wf-msg" data-step="2" style="--dur:3.2s">
-                    <div class="wm-state"><span>2</span></div>
-                    <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">✅ 资质匹配评估 · 跟我方资质库逐项比对</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        本项目要求 <b>12 项资质</b>:我方<b>满足 10 项</b>(含 CMMI3+ / ISO27001 / 3 例医院案例)· <span style="color:var(--amber);font-weight:700">2 项部分满足</span>(注册资本下方红字)· <span style="color:var(--red);font-weight:700">0 项缺失</span>
-                      </div>
-                      <button class="wm-expand" data-fx="bidExpand">查看 12 项详细对比 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="bidExpand">查看资质对比 + 历史相似项目 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
                         <div class="qual-grid">
                           <div class="qual-row"><div class="qr-name">CMMI 软件成熟度<small>要求 ≥ Level 3</small></div><div class="qr-need">Level 3+</div><div class="qr-state ok">✓ 满足 (L4)</div></div>
-                          <div class="qual-row"><div class="qr-name">ISO27001 信息安全<small>有效期内</small></div><div class="qr-need">必须</div><div class="qr-state ok">✓ 满足</div></div>
-                          <div class="qual-row"><div class="qr-name">国家信安等级保护测评<small>三级</small></div><div class="qr-need">三级</div><div class="qr-state ok">✓ 满足</div></div>
-                          <div class="qual-row"><div class="qr-name">高新技术企业证书<small>有效期 ≥ 招标日</small></div><div class="qr-need">有效</div><div class="qr-state ok">✓ 满足</div></div>
-                          <div class="qual-row"><div class="qr-name">注册资本<small>≥ ¥5,000 万实缴</small></div><div class="qr-need">¥5,000 万</div><div class="qr-state partial">部分 ¥4,300 万</div></div>
-                          <div class="qual-row"><div class="qr-name">近 3 年同类案例<small>≥ 3 例三甲医院 HIS</small></div><div class="qr-need">3 例</div><div class="qr-state ok">✓ 满足 (5 例)</div></div>
-                          <div class="qual-row"><div class="qr-name">关键人员 PM<small>PMP / 同等</small></div><div class="qr-need">PMP</div><div class="qr-state ok">✓ 满足</div></div>
-                          <div class="qual-row"><div class="qr-name">关键人员 架构师<small>10 年 +</small></div><div class="qr-need">10 年</div><div class="qr-state ok">✓ 满足</div></div>
-                          <div class="qual-row"><div class="qr-name">本地化服务能力<small>项目所在省驻点</small></div><div class="qr-need">驻点</div><div class="qr-state partial">2 周内补</div></div>
-                          <div class="qual-row"><div class="qr-name">Oracle DBA 团队<small>≥ 2 人 OCP</small></div><div class="qr-need">2 OCP</div><div class="qr-state ok">✓ 满足 (3 OCP)</div></div>
-                          <div class="qual-row"><div class="qr-name">医疗信息化白皮书<small>3 年内编制</small></div><div class="qr-need">必有</div><div class="qr-state ok">✓ 已有</div></div>
-                          <div class="qual-row"><div class="qr-name">无失信记录<small>失信被执行人查询</small></div><div class="qr-need">无</div><div class="qr-state ok">✓ 已查</div></div>
+                          <div class="qual-row"><div class="qr-name">ISO27001 / 等保三级</div><div class="qr-need">必须</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">注册资本<small>实缴 ≥ ¥5,000 万</small></div><div class="qr-need">¥5,000 万</div><div class="qr-state partial">部分 ¥4,300 万</div></div>
+                          <div class="qual-row"><div class="qr-name">近 3 年三甲医院 HIS 案例</div><div class="qr-need">3 例</div><div class="qr-state ok">✓ 满足 (5 例)</div></div>
+                          <div class="qual-row"><div class="qr-name">Oracle DBA 团队<small>≥ 2 OCP</small></div><div class="qr-need">2 OCP</div><div class="qr-state ok">✓ 满足 (3 OCP)</div></div>
+                          <div class="qual-row"><div class="qr-name">本地化驻点<small>项目所在省</small></div><div class="qr-need">驻点</div><div class="qr-state partial">2 周内补</div></div>
                         </div>
-                        <div style="margin-top:9px;padding:8px 11px;background:linear-gradient(180deg,#FFF4E5,#FFEAD1);border-left:3px solid var(--amber);border-radius:7px;font-size:11px;line-height:1.65;color:var(--ink-2)">
-                          <b style="color:var(--amber)">⚠ 2 项部分满足建议:</b><br>
-                          ① <b>注册资本 ¥4,300 万 vs 要求 ¥5,000 万</b> → 可联合财务申请增资,或申请联合体(本项目不允许 ✗)→ <b>建议 5 天内增资</b><br>
-                          ② <b>本地化驻点</b> → 提前向项目地销售/CSM 报备, 投标书写"中标后 2 周内组建本地团队"
+                        <div style="margin-top:9px;padding:9px 11px;background:#F8F9FE;border-left:3px solid var(--brand);border-radius:7px;font-size:11px;line-height:1.65;color:var(--ink-2)">
+                          <b style="color:var(--brand)">📈 历史相似项目 4 标</b><br>
+                          ① 2024-09 江苏某三甲 EMR(¥920 万)· 报 ¥810 万 · <b style="color:var(--green)">中标 利润 18%</b><br>
+                          ② 2024-03 浙江某医院 HIS(¥1,180 万)· 报 ¥1,050 万 · 落标(差 2.3 分)<br>
+                          ③ 2023-11 山东某三甲一体化(¥780 万)· 报 ¥720 万 · <b style="color:var(--green)">中标 利润 22%</b><br>
+                          ④ 2023-06 安徽某医院 OA(¥420 万)· 报 ¥395 万 · <b style="color:var(--green)">中标 利润 25%</b>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 3: 中标概率 -->
-                  <div class="wf-msg" data-step="3" style="--dur:2.8s">
-                    <div class="wm-state"><span>3</span></div>
+                  <!-- Step 2: 📖 招标文件深度解读(阶段 2: 解读+报名) -->
+                  <div class="wf-msg" data-step="2" style="--dur:4.5s">
+                    <div class="wm-state"><span>2</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">📊 中标概率预测 · 基于历史 138 标 + 行业回测</span>
+                      <div class="wm-line"><span class="wml-tt">📖 招标文件深度解读 · 326 页 OCR + NER + 风险扫描</span>
                         <span class="wml-meta" data-meta>排队中</span></div>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        AI 综合预测我方中标概率 <b style="color:var(--green)">42%</b>(同类项目行业均值 14%)。<b>主要正向因子</b>:三甲医院 HIS 案例多(+18)、CMMI4(+8)、本地化已有种子团队(+6)。<b>负向因子</b>:注册资本不达标(-7)、Oracle 非强项(-5)
+                        已抽取 <b>32 个关键字段</b>(招标方 / 预算 / 时间 / 资格门槛 / 评分细则 / 报价限制)· 评分细则解构 <b>8 大项</b>(技术 60 + 商务 40)· 标红 <b>4 处风险条款</b>:① Oracle 指定排他 ② 末款 10% 验收满 1 年才付 ③ 不平衡报价单项 ≤ 15% ④ 联合体不允许 · <b>资格自查</b>:满足 10/12, 2 项需补救
                       </div>
-                      <button class="wm-expand" data-fx="bidExpand">查看预测模型 + 历史相似项目 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="bidExpand">查看 32 字段 + 评分细则 + 风险条款 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
-                        <div style="font-size:11.5px;line-height:1.7;color:var(--ink-2)">
-                          <b style="color:var(--brand)">🤖 AI 预测模型:</b>XGBoost · 输入 63 维特征(评分细则 32 项 + 我方资质 12 项 + 招标方画像 8 项 + 报价区间 5 项 + 时间紧迫度 6 项)· 训练数据 138 标 + 行业 1,200 标
+                        <div class="bid-fields">
+                          <div class="bid-field-cell"><div class="bfc-k">招标方</div><div class="bfc-v">某省人民医院</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">项目编号</div><div class="bfc-v">RYY-2026-0612-OA</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">预算上限</div><div class="bfc-v warn">¥850 万</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">报名截止</div><div class="bfc-v warn">6/25 · 还 5 天</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">投标截止</div><div class="bfc-v">7/8</div></div>
+                          <div class="bid-field-cell flag-risk"><div class="bfc-k">保证金</div><div class="bfc-v danger">¥17 万 · 银行电汇</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">技术 / 商务比</div><div class="bfc-v">60% / 40%</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">案例要求</div><div class="bfc-v">3 例三甲 HIS</div></div>
+                          <div class="bid-field-cell flag-risk"><div class="bfc-k">技术规格</div><div class="bfc-v danger">指定 Oracle</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">支付节奏</div><div class="bfc-v warn">3-3-3-1 · 末款 1 年</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">不平衡报价</div><div class="bfc-v warn">单项 ≤ 15%</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">联合体</div><div class="bfc-v">不允许</div></div>
                         </div>
-                        <div style="margin-top:9px;padding:11px 13px;background:#F8F9FE;border-radius:9px">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📈 历史相似项目(我方过去 3 年):</div>
-                          <div style="font-size:11px;color:var(--ink-2);line-height:1.7">
-                            ① <b>2024-09 江苏某三甲 EMR</b>(¥920 万)· 我方报 ¥810 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 18%<br>
-                            ② <b>2024-03 浙江某医院 HIS</b>(¥1,180 万)· 我方报 ¥1,050 万 · 落标(差 2.3 分)<br>
-                            ③ <b>2023-11 山东某三甲一体化</b>(¥780 万)· 我方报 ¥720 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 22%<br>
-                            ④ <b>2023-06 安徽某医院 OA</b>(¥420 万)· 我方报 ¥395 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 25%
-                          </div>
+                        <div class="score-breakdown" style="margin-top:9px">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🎯 评分细则解构 · 100 分 = 8 大项</div>
+                          <div class="sb-row key"><div class="sbr-name">技术方案 - Oracle 迁移可行性<small>评委最关注</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:88%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">报价(偏差扣分)</div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row key"><div class="sbr-name">同类业绩<small>3 例三甲 HIS</small></div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">实施方案</div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">售后 + 培训</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">项目团队</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">风险方案</div><div class="sbr-pts">5<small>/100</small></div><div class="sbr-bar"><i style="width:20%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">资质 + 业绩</div><div class="sbr-pts">5<small>/100</small></div><div class="sbr-bar"><i style="width:20%"></i></div></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 4: 标书生成 -->
+                  <!-- Step 3: ✏️ 方案设计(阶段 3: 方案+团队+风险) -->
+                  <div class="wf-msg" data-step="3" style="--dur:4.2s">
+                    <div class="wm-state"><span>3</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">✏️ 方案设计 · 技术 + 商务 + 团队 + 风险预案</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        已设计完整方案:<b>技术架构</b>(微服务 + Oracle RAC + 等保三级)· <b>实施 180 天</b>(3 阶段并行 + 周例会)· <b>团队 9 人</b>(PM + 架构师 + DBA + 实施 + 测试)· <b>9 大风险预案</b>(数据迁移/性能/安全/培训/上线/质保等)· <b>商务方案</b>(3-3-3-1 付款 · 5 年质保延伸)
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看 9 大风险预案 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.75;color:var(--ink-2)">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🛡 9 大风险预案 · AI 已写入标书第 6 章</div>
+                          ① <b>Oracle 数据迁移失败</b> → 备份 + 灰度迁移 + 回滚预案<br>
+                          ② <b>主从同步延迟</b> → RAC 双活 + 监控告警<br>
+                          ③ <b>性能压测不达标</b> → 性能调优工具包 + 厂商支持<br>
+                          ④ <b>等保测评未过</b> → 提前介入 + 整改预案<br>
+                          ⑤ <b>用户接受度低</b> → 分层培训 + 老带新机制<br>
+                          ⑥ <b>上线延期</b> → 关键路径 + 资源池备份<br>
+                          ⑦ <b>质保期供应商弃保</b> → 三方押金 + 法律责任<br>
+                          ⑧ <b>变更超预算</b> → 变更评审 + 客户签字流程<br>
+                          ⑨ <b>关键人员离职</b> → 2:1 替补人员 + 知识沉淀
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: 📄 AI 标书撰写(阶段 4: 标书) -->
                   <div class="wf-msg" data-step="4" style="--dur:5.8s">
                     <div class="wm-state"><span>4</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">✍️ AI 标书生成 · 基于评分细则 + 历史标书 + 产品库</span>
+                      <div class="wm-line"><span class="wml-tt">📄 AI 标书撰写 · 8 评分点单独优化 + 防错替换</span>
                         <span class="wml-meta" data-meta>排队中</span></div>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        已生成 <b>356 页 投标书草案</b>:技术标 <b>215 页</b>(精准命中 8 大评分项)· 商务标 <b>92 页</b> · 资质 <b>49 页</b>。AI 已替你做了:<b>引用 23 处历史案例 · 替换 38 处公司名 · 排版 + 目录自动生成</b>
+                        已生成<b>正式投标书 356 页</b>:技术标 <b>215 页</b>(精准命中 8 评分项)· 商务标 <b>92 页</b> · 资质 <b>49 页</b>。AI 已替你做:<b>① 引用 23 处历史案例 · ② 替换 38 处旧公司名(防废标)· ③ 排版+目录+页眉页脚 · ④ 嵌入 12 项资质 OCR 扫描件 · ⑤ 资质证件章自动盖</b>
                       </div>
-                      <button class="wm-expand" data-fx="bidExpand">查看 8 大评分项命中详情 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="bidExpand">查看 8 评分项命中详情 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
                         <div class="bid-doc-prog">
                           <div class="bdp-head">📋 8 大评分项 · 单独撰写命中</div>
                           <div class="bdp-items">
-                            <div class="bdp-item"><div class="bdpi-name"><b>技术方案 (25 分)</b><small>架构 + 数据库 + 安全</small></div><div class="bdpi-pages">42 页</div><div class="bdpi-state gen">AI 已生成</div></div>
-                            <div class="bdpi-item bdp-item"><div class="bdpi-name"><b>实施方案 (15 分)</b><small>180 天计划 + WBS</small></div><div class="bdpi-pages">28 页</div><div class="bdpi-state gen">AI 已生成</div></div>
-                            <div class="bdp-item"><div class="bdpi-name"><b>项目团队 (10 分)</b><small>PM + 架构师 + 团队</small></div><div class="bdpi-pages">18 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>技术方案 (25 分)</b><small>架构 + Oracle + 安全</small></div><div class="bdpi-pages">42 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>实施方案 (15 分)</b><small>180 天 WBS 并行</small></div><div class="bdpi-pages">28 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>项目团队 (10 分)</b><small>PM + 架构师 + 9 人</small></div><div class="bdpi-pages">18 页</div><div class="bdpi-state gen">AI 已生成</div></div>
                             <div class="bdp-item"><div class="bdpi-name"><b>同类业绩 (15 分)</b><small>5 例三甲案例</small></div><div class="bdpi-pages">36 页</div><div class="bdpi-state cite">从历史标书引用</div></div>
                             <div class="bdp-item"><div class="bdpi-name"><b>风险方案 (5 分)</b><small>9 大风险 + 应对</small></div><div class="bdpi-pages">12 页</div><div class="bdpi-state gen">AI 已生成</div></div>
-                            <div class="bdp-item"><div class="bdpi-name"><b>培训方案 (5 分)</b><small>分层培训 + 知识库</small></div><div class="bdpi-pages">9 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>培训方案 (5 分)</b></div><div class="bdpi-pages">9 页</div><div class="bdpi-state gen">AI 已生成</div></div>
                             <div class="bdp-item"><div class="bdpi-name"><b>售后服务 (10 分)</b><small>3 年质保 + 7×24</small></div><div class="bdpi-pages">14 页</div><div class="bdpi-state gen">AI 已生成</div></div>
-                            <div class="bdp-item"><div class="bdpi-name"><b>报价合理性 (15 分)</b><small>等下方报价模拟器</small></div><div class="bdpi-pages">21 页</div><div class="bdpi-state ph">待报价决策</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>报价合理性 (15 分)</b><small>等下方报价决策</small></div><div class="bdpi-pages">21 页</div><div class="bdpi-state ph">待报价决策</div></div>
                           </div>
                         </div>
-                        <div class="score-breakdown" style="margin-top:9px">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🎯 评分细则解构 · 重点把控大分项</div>
-                          <div class="sb-row key"><div class="sbr-name">技术方案 - 数据库迁移可行性<small>评委最关注 · Oracle 指定</small></div><div class="sbr-pts">15<small>/25</small></div><div class="sbr-bar"><i style="width:88%"></i></div></div>
-                          <div class="sb-row key"><div class="sbr-name">同类业绩 - 三甲医院 HIS 完整案例<small>3+ 例上限 5 例</small></div><div class="sbr-pts">15<small>/15</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">报价(15) - 0.5%/万 偏差扣分</div><div class="sbr-pts">15<small>/15</small></div><div class="sbr-bar"><i style="width:92%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">实施方案完整性</div><div class="sbr-pts">14<small>/15</small></div><div class="sbr-bar"><i style="width:93%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">售后服务 + 培训</div><div class="sbr-pts">14<small>/15</small></div><div class="sbr-bar"><i style="width:93%"></i></div></div>
-                        </div>
                         <div style="margin-top:9px;padding:9px 11px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;color:var(--ink-2)">
-                          <b style="color:var(--green)">✓ AI 自动防错:</b>已检查全标书 · <b>356 页中 38 处旧公司名 / 旧项目名已替换为本招标项目名</b> · <b>避免照抄废标</b>
+                          <b style="color:var(--green)">✓ AI 自动防错 5 件事:</b> 358 页中 ① 38 处旧公司名已替换 ② 12 项资质 OCR 扫描件嵌入对位 ③ 排版+目录+页眉页脚自动 ④ 评委关注的关键词全文高亮 ⑤ 模板水印 + 页码统一
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 5: ROI 测算 + 答疑预演 -->
-                  <div class="wf-msg" data-step="5" style="--dur:3.6s">
+                  <!-- Step 5: 💰 报价决策准备(阶段 5: 报价) -->
+                  <div class="wf-msg" data-step="5" style="--dur:3.2s">
                     <div class="wm-state"><span>5</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">💰 ROI 测算 + 答疑预演 + 最终建议</span>
+                      <div class="wm-line"><span class="wml-tt">💰 报价决策准备 · WBS 成本 + 对手预测 + 滑块就绪</span>
                         <span class="wml-meta" data-meta>排队中</span></div>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        <b>成本测算</b>:¥520 万(开发+实施 +运维 + 风险溢价 8%)· <b>报价区间</b>建议 <b>¥720-790 万</b> · <b>利润率</b> 28-34% · <b>答疑预演</b>:9 个高频问题已生成标准答案
+                        WBS 已拆 <b>173 项成本</b> · 直接 ¥420 万 + 间接 ¥58 万 + 风险溢价 ¥42 万 = 总成本 <b>¥520 万</b>。<b>对手预测</b>:3 家强对手报价区间 ¥720-810 万 · 2 家小厂可能压价至 ¥680 万。<b>报价 vs 中标率曲线已就绪</b> · 下方拖滑块决策
                       </div>
-                      <button class="wm-expand" data-fx="bidExpand">查看答疑预演 + 风险预案 <span class="we-arr">▾</span></button>
+                    </div>
+                  </div>
+
+                  <!-- Step 6: 🎤 投标递交 + 开标预案(阶段 6: 递交 + 开标) -->
+                  <div class="wf-msg" data-step="6" style="--dur:2.8s">
+                    <div class="wm-state"><span>6</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">🎤 投标递交 + 开标预案 · 保证金 + 答辩演练 + 现场策略</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        <b>保证金</b>:¥17 万 银行电汇路径已通知商务总监 · 多项目占用监控就绪(目前 9 标合计 ¥98 万)· <b>递交预警</b>:报名截止 6/25 / 投标截止 7/8 · <b>答辩演练</b>:9 个高频问题 + 标准答案 · <b>现场策略</b>:派 PM + 架构师 + 商务 3 人 + 备 5% 让价空间
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看 9 个评委高频问题 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
                         <div class="qa-prep">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🛡️ 9 个评委高频问题 · AI 已备好标准答案</div>
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🛡 评委 9 个高频问题 · AI 已备标准答案 + 案例支撑</div>
                           <div class="qa-prep-row">
-                            <div class="qpr-q"><span class="qpr-tag high">高频</span>你方 Oracle 经验有多深?最大数据量项目是多少?</div>
-                            <div class="qpr-a">我方 2018 年起即承接 Oracle 项目,目前在职 OCP 认证工程师 5 名(含 1 名 OCM)。最大项目:江苏某三甲 EMR 系统,日处理事务 280 万、单库容量 4.2 TB,稳定运行 18 月零事故。可现场提供运维监控录屏。</div>
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>你方 Oracle 经验有多深?最大数据量项目?</div>
+                            <div class="qpr-a">2018 年起承接 Oracle, 在职 OCP 5 名(含 1 OCM)。最大项目:江苏某三甲 EMR, 日处理事务 280 万、单库 4.2 TB, 稳定 18 月零事故。可现场出示运维监控录屏。</div>
                           </div>
                           <div class="qa-prep-row">
-                            <div class="qpr-q"><span class="qpr-tag high">高频</span>180 天工期紧张,你方如何保证按期交付?</div>
-                            <div class="qpr-a">采用"3 阶段并行 + 周例会"机制:第 1-60 天分析+核心模块开发(双轨)、第 61-120 天集成+用户测试、第 121-180 天上线+培训。我方已有 6 名工程师可在合同签订 3 天内入场。备份方案:遇不可抗力可调用临时增援团队 3-5 人。</div>
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>180 天工期紧, 如何保证按期交付?</div>
+                            <div class="qpr-a">"3 阶段并行 + 周例会": 第 1-60 天分析+核心模块开发, 第 61-120 天集成+用户测试, 第 121-180 天上线+培训。已有 6 工程师可在合同签订 3 天内入场。备用方案:遇不可抗力可调用增援 3-5 人。</div>
                           </div>
                           <div class="qa-prep-row">
-                            <div class="qpr-q"><span class="qpr-tag high">高频</span>3 年质保期内如何保证响应速度?</div>
-                            <div class="qpr-a">承诺响应级别:① 1 级故障(系统中断)15 分钟响应、4 小时恢复;② 2 级故障(部分功能)1 小时响应、24 小时解决;③ 3 级故障(咨询/优化)4 小时响应、3 工作日完成。本地驻点 2 人 7×24 值守。</div>
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>3 年质保期内响应速度?</div>
+                            <div class="qpr-a">① 1 级故障(系统中断)15 分钟响应、4 小时恢复;② 2 级(部分功能)1 小时响应、24 小时解决;③ 3 级(咨询)4 小时响应、3 工作日完成。本地驻点 2 人 7×24 值守。</div>
                           </div>
-                          <div class="qa-prep-row">
-                            <div class="qpr-q"><span class="qpr-tag">中</span>项目实施期间贵司其他项目是否会分流?</div>
-                            <div class="qpr-a">不会。本项目按"专属团队 + 风险隔离"原则。9 人核心团队签订专项保证,不调出至少 12 月。可提供员工花名册供查验。</div>
-                          </div>
-                          <div class="qa-prep-row">
-                            <div class="qpr-q"><span class="qpr-tag">中</span>你方是否能联合产品厂商?这次不允许联合体</div>
-                            <div class="qpr-a">我方已与 Oracle 中国、华为等签订战略合作,本项目下我方作为主集成商,可调用厂商工程师驻场支持。如评委关心可现场出示战略合作协议。</div>
-                          </div>
-                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:6px 0">↓ 另 4 个高频问题已折叠</div>
+                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:6px 0">↓ 另 6 个高频问题已折叠</div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 7: 🏅 履约 / 复盘预案(阶段 7) -->
+                  <div class="wf-msg" data-step="7" style="--dur:2.5s">
+                    <div class="wm-state"><span>7</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">🏅 履约 / 落标复盘预案 · 中标后 SOP + 落标自动学习</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        <b>中标分支</b>:SOP 已就绪 · 含 项目启动会模板 + 180 天 WBS 计划 + 5 阶段验收清单 + 4 节点付款提醒 + 3 年质保管理 + 服务期满前 90 天续标准备 · <b>落标分支</b>:AI 自动复盘机制 · 评委评分 vs 中标方对照 → 失分根因 → 沉淀 AI 模型(下次同类标更准)
                       </div>
                     </div>
                   </div>
@@ -9444,7 +9444,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 <!-- 完成 -->
                 <div class="wf-done-banner" id="bidWfDone">
                   <div class="wdb-ico">✅</div>
-                  <div class="wdb-tt">AI 已完成全部 5 阶段分析 · 总耗时 <b id="bidWfTime">20.4</b> 秒
+                  <div class="wdb-tt">AI 已完成全部 5 阶段分析 · 总耗时 <b id="bidWfTime">26.8</b> 秒
                     <small>替代 5 人工 1 周工作 · 接下来 ↓ 我给"投/不投"建议,你只需拍板</small>
                   </div>
                 </div>
@@ -9714,107 +9714,98 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
                 <div class="wf-stream" id="tenderWfStream">
 
-                  <!-- Step 1: 起草招标文件 -->
-                  <div class="wf-msg" data-step="1" style="--dur:4.2s">
+                  <!-- Step 1: 🎯 采购需求与立项(阶段 1) -->
+                  <div class="wf-msg" data-step="1" style="--dur:3.2s">
                     <div class="wm-state"><span>1</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">📋 AI 起草招标文件 · 32 页</span>
+                      <div class="wm-line"><span class="wml-tt">🎯 采购需求与立项 · 需求规格 + 预算 + 采购方式 + 立项草案</span>
                         <span class="wml-meta" data-meta>排队中</span></div>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        AI 已生成 <b>32 页招标文件</b>:技术规格 12 页 · 商务条款 8 页 · 评标办法 5 页 · 附件清单 7 页。<b>关键点</b>:① 5 台服务器明确型号+性能指标 · ② 显存 ≥ 80GB · ③ 3 年原厂保修 · ④ 不允许联合体 · ⑤ 投标保证金 ¥4 万
+                        我已替你做 4 件事:① <b>规范化需求规格</b>(5 台 GPU 服务器 · 显存 ≥ 80GB · I/O ≥ 7GB/s · 3 年质保)· ② <b>预算建议 ¥168 万</b>(同类项目历史回测,你方 ¥200 万有 16% 议价空间)· ③ <b>采购方式推荐:公开招标</b>(金额超 ¥100 万 + 通用产品 + 8+ 合格供应商)· ④ <b>立项申请草案</b>已生成 → 推送 OA 审批
                       </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看起草要点 + AI 防歧义检查 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="tenderExpand">查看预算回测 + 立项草案 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
-                        <div style="padding:11px 13px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;line-height:1.7;color:var(--ink-2)">
-                          <b style="color:var(--green)">✓ AI 已自动避免 5 个常见招标坑:</b><br>
-                          ① 技术规格不指定品牌(避免被质疑"指定厂商")· 改为"性能指标 + 兼容性"<br>
-                          ② 含糊词"高性能/低价"已替换为<b>具体数字</b>(如显存 ≥ 80GB)<br>
-                          ③ 评分细则<b>每项权重明确</b>(避免评委自由裁量过大)<br>
-                          ④ 资质门槛<b>不过高也不过低</b>(目标 8-15 家投标)<br>
-                          ⑤ 已生成<b>答疑机制 + 时间节点</b>避免投标方质疑
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.7;color:var(--ink-2)">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📊 历史同类项目预算回测(我方近 3 年)</div>
+                          ① 2025-03 AI 训练集群 4 台 · 实际 ¥132 万 / 预算 ¥160 万(节省 17%)<br>
+                          ② 2024-08 GPU 渲染集群 6 台 · 实际 ¥175 万 / 预算 ¥210 万(节省 17%)<br>
+                          ③ 2024-02 ML 平台 5 台 · 实际 ¥158 万 / 预算 ¥180 万(节省 12%)<br>
+                          <b style="color:var(--brand)">→ AI 建议预算 ¥168 万 · 实际期望 ¥150-165 万</b>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 2: 评分标准 -->
-                  <div class="wf-msg" data-step="2" style="--dur:2.8s">
+                  <!-- Step 2: 📝 招标文件起草 + 内审(阶段 2) -->
+                  <div class="wf-msg" data-step="2" style="--dur:4.8s">
                     <div class="wm-state"><span>2</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">⚖️ AI 制定评分标准 · 100 分拆 8 项</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wml-tt">📝 招标文件起草 + 内审 · 5 大避坑 + 8 项评分细则 + 法务条款</div>
+                      <span class="wml-meta" data-meta>排队中</span>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        AI 推荐<b>综合评分法 60/40</b>(技术 60 + 商务 40)· 8 大项拆解 · 大分项:技术方案 25 + 同类业绩 15 + 报价 20。<b>设计避坑</b>:报价部分用偏差扣分而非简单最低价(防恶意低价低质)
+                        AI 已生成 <b>32 页招标文件</b>(投标须知 + 技术规格 + 商务条款 + 评标办法 + 合同条款 + 附件)· <b>AI 避坑 5 件</b>:① 技术规格不指定品牌 ② 含糊词全部量化(显存 ≥ 80GB)③ 评分细则每项权重明确 ④ 资格门槛适中(目标 8-15 家投标)⑤ 答疑时间节点清晰。<b>法务+财务条款已嵌入</b>:履约保证金 5% + 延期违约金 0.2%/日 + 验收双签
                       </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 8 项评分细则 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 评分项设计 + 5 避坑细则 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
+                        <div style="padding:11px 13px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;line-height:1.7;color:var(--ink-2);margin-bottom:9px">
+                          <b style="color:var(--green)">✓ AI 自动避 5 个常见招标坑:</b><br>
+                          ① 技术规格<b>不指定品牌</b>(避免被质疑指定厂商)→ 改为"性能指标 + 兼容性要求"<br>
+                          ② 含糊词"高性能/低价"已替换为<b>具体数字</b>(如显存 ≥ 80GB / I/O ≥ 7GB/s)<br>
+                          ③ 评分细则<b>每项权重明确</b>(避免评委自由裁量过大)<br>
+                          ④ 资质门槛<b>不过高也不过低</b>(目标 8-15 家投标 = 充分竞争)<br>
+                          ⑤ <b>答疑机制 + 时间节点</b>已设置避免投标方质疑
+                        </div>
                         <div class="score-breakdown">
-                          <div class="sb-row"><div class="sbr-name">技术方案完整性<small>架构 + 性能 + 兼容</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">同类业绩 + 案例<small>3 年内 5 例同等规模</small></div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">⚖️ 评分细则 · 综合评分 100 分</div>
+                          <div class="sb-row"><div class="sbr-name">技术方案<small>架构 + 性能 + 兼容</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
                           <div class="sb-row"><div class="sbr-name">报价(偏差扣分)<small>距均价 1% 扣 1 分</small></div><div class="sbr-pts">20<small>/100</small></div><div class="sbr-bar"><i style="width:80%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">售后服务<small>响应 + 备件 + 7×24</small></div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">交付能力</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">团队配置</div><div class="sbr-pts">8<small>/100</small></div><div class="sbr-bar"><i style="width:32%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">原厂授权</div><div class="sbr-pts">7<small>/100</small></div><div class="sbr-bar"><i style="width:28%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">资质 (CMA/CMMI 等)</div><div class="sbr-pts">5<small>/100</small></div><div class="sbr-bar"><i style="width:20%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">同类业绩</div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">售后服务</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">交付能力 / 团队 / 授权 / 资质</div><div class="sbr-pts">30<small>/100</small></div><div class="sbr-bar"><i style="width:65%"></i></div></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 3: 推荐供应商 -->
-                  <div class="wf-msg" data-step="3" style="--dur:3.4s">
+                  <!-- Step 3: 📤 发布 + 答疑(阶段 3) -->
+                  <div class="wf-msg" data-step="3" style="--dur:3.5s">
                     <div class="wm-state"><span>3</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">📇 AI 推荐合适供应商 · 从行业库筛选</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wml-tt">📤 多渠道发布 + 资格预审 + 答疑澄清</div>
+                      <span class="wml-meta" data-meta>排队中</span>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        AI 已从 <b>行业供应商库 1,460 家</b>中筛出 <b>23 家完全匹配</b>(资质 + 案例 + 规模 + 地域)· 推荐邀请 <b>14 家</b>参与(避免太少议价空间 + 太多浪费时间)
+                        已多渠道发布:① <b>中国招标投标公共服务平台</b> ② 政府采购网 ③ 行业网 ④ 我方官网 · <b>14 家</b>合格供应商已收到邀请函(AI 已起草)· <b>资格预审</b>:14 家全部通过初审(资质完整)· <b>答疑期收 23 个问题</b> · AI 已分类(技术 12 / 商务 8 / 资质 3)· AI 已草拟答复 + 补遗文件
                       </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 14 家供应商列表 + AI 邀请话术 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 14 家邀请 + 23 个答疑 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
-                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📇 AI 推荐邀请 14 家 · 已起草邀请函</div>
-                          <div style="font-size:11px;color:var(--ink-2);line-height:1.75">
-                            <b>头部 3 家</b>(原厂):① 浪潮信息 · ② 戴尔科技 · ③ 联想集团 — <i>原厂渠道, 技术保证</i><br>
-                            <b>金牌集成商 5 家</b>:① 神州数码 · ② 软通动力 · ③ 数科网维 · ④ 太极股份 · ⑤ 华宇软件<br>
-                            <b>区域优秀 6 家</b>:含本地服务商 3 家 + 跨区域 3 家
-                          </div>
-                          <div style="margin-top:9px;padding:7px 11px;background:#fff;border-left:3px solid var(--brand);border-radius:7px;font-size:10.5px;color:var(--ink-2)">
-                            <b>📧 AI 已起草邀请函</b>(技术规格 + 截止时间 + 答疑机制)· 一键群发钉钉 / 邮件
-                          </div>
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.75;color:var(--ink-2)">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📇 已邀请 14 家供应商(从 1,460 家库筛选)</div>
+                          <b>头部 3 家</b>(原厂):① 浪潮信息 · ② 戴尔科技 · ③ 联想集团<br>
+                          <b>金牌集成商 5 家</b>:① 神州数码 · ② 软通动力 · ③ 数科网维 · ④ 太极股份 · ⑤ 华宇软件<br>
+                          <b>区域优秀 6 家</b>:含本地服务商 3 家 + 跨区域 3 家<br><br>
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:5px">💬 答疑期收 23 个问题 · AI 分类汇总</div>
+                          <b>技术类 12 个</b>:① 是否要求自带操作系统(7 家问)② 是否支持 InfiniBand 网络 ③ 显存能否用 H100/A100 互换<br>
+                          <b>商务类 8 个</b>:① 验收周期 ② 付款节奏 ③ 履约保证金<br>
+                          <b>资质类 3 个</b>:① 厂商授权要求 ② 联合体限制
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Step 4: 收投标(模拟收到 8 家) -->
-                  <div class="wf-msg" data-step="4" style="--dur:3.0s">
+                  <!-- Step 4: 📊 开标 + AI 评标(阶段 4) -->
+                  <div class="wf-msg" data-step="4" style="--dur:5.5s">
                     <div class="wm-state"><span>4</span></div>
                     <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">📥 收到投标 · 14 邀 → 8 家应标</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wml-tt">📊 开标 + AI 评标 · N 家投标秒解析 + 客观打分 + 串标识别</div>
+                      <span class="wml-meta" data-meta>排队中</span>
                       <div class="wm-prog"><i></i></div>
                       <div class="wm-summary">
-                        <b>14 家邀请 → 8 家应标</b>(58% 应标率,符合预期)· 6 家未应标原因:库存不足 4 家 · 价格偏低 2 家。8 份标书已收齐, 总页数 <b>2,140 页</b>。<b>AI 已开始评标</b>
+                        <b>14 邀 → 8 应标</b>(58% 应标率) · 共 <b>2,140 页</b>投标书。AI 已秒解析:① <b>资格初审</b>:8 家全过 · ② <b>技术标打分</b>(60%):浪潮 23 / 戴尔 22 / 联想 21 / 区域 X 19 · ③ <b>商务标打分</b>(40%):报价 + 付款 + 服务 · ④ <b>串标识别</b>:无异常(报价分散度 14%)· ⑤ <b>评标报告</b>已自动生成
                       </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 5: AI 评标 -->
-                  <div class="wf-msg" data-step="5" style="--dur:4.6s">
-                    <div class="wm-state"><span>5</span></div>
-                    <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">🎯 AI 评标 · 8 家标书逐项评分 + 综合排名</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        AI 已用 <b>8 评分项 × 8 家 = 64 项</b>评分,推荐 <b>浪潮信息</b>综合 <b>88 分</b>(性价比+技术)· 价低于推荐方:<b>区域服务商 X</b> ¥158 万但技术 -4 分。下方有完整对比 + AI 推荐
-                      </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 8 家详细评分 + 推荐理由 <span class="we-arr">▾</span></button>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 家详细评分 + AI 推理 <span class="we-arr">▾</span></button>
                       <div class="wf-detail">
                         <div class="vendor-grid">
 
@@ -9834,10 +9825,10 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                             <div class="vr-meta">
                               <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val">¥168 万</div></div>
                               <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">38 天</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年 +</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
                             </div>
                             <div class="vr-ai">
-                              <b>🤖 AI 推荐:</b>性价比最优 + 技术拉满 + 原厂质保 5 年优于其他家。报价 ¥168 万比最低家高 ¥10 万, 但技术分高 5 分 + 质保多 2 年 + 实施可控,综合最优。建议<b>中标</b>。
+                              <b>🤖 AI 推荐:</b>性价比最优 + 技术拉满 + 原厂质保 5 年优于其他家。报价 ¥168 万比最低家高 ¥10 万,但技术分高 5 分 + 质保多 2 年。综合最优。建议<b>中标</b>。
                             </div>
                           </div>
 
@@ -9859,7 +9850,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                               <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
                             </div>
                             <div class="vr-ai">
-                              <b>🤖 AI 评:</b>原厂质量过硬 · 但 ¥14 万高于推荐方 · 综合次之。可作为<b>备选</b>(若推荐方临时取消)。
+                              <b>🤖 AI 评:</b>原厂质量过硬, 但 ¥14 万高于推荐方。综合次之。可作为<b>备选</b>(若推荐方临时取消)。
                             </div>
                           </div>
 
@@ -9882,7 +9873,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                               <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val warn">3 年</div></div>
                             </div>
                             <div class="vr-ai">
-                              <b>⚠ AI 风险预警:</b>价格 ¥158 万看似最优(便宜 ¥10 万)但<b>3 处隐患</b>:① 显存非原厂(可能用二手翻新)· ② 业绩仅 2 例类似规模 · ③ 7×24 售后未承诺。<b>不建议中标</b>(图便宜易后悔)。
+                              <b>⚠ AI 风险预警:</b>价格 ¥158 万看似最优(便宜 ¥10 万)但<b>3 处隐患</b>:① 显存非原厂(可能用二手翻新)· ② 业绩仅 2 例类似规模 · ③ 7×24 售后未承诺。<b>不建议中标</b>。
                             </div>
                           </div>
 
@@ -9909,11 +9900,37 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     </div>
                   </div>
 
+                  <!-- Step 5: 🏆 定标 + 合同(阶段 5) -->
+                  <div class="wf-msg" data-step="5" style="--dur:3.0s">
+                    <div class="wm-state"><span>5</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">🏆 定标 + 合同 · 决策辅助 + 议价空间 + 合同自动生成</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 综合 8 家评分 + 历史相似项目 + 风险评估,推荐<b>浪潮 ¥168 万</b>。<b>议价空间</b>:可用联想做杠杆议 2-3% → 最终预期 <b>¥163-165 万</b>(省 ¥3-5 万)。<b>合同自动生成</b>:基于浪潮投标书 + 我方模板 + 法务条款 → 38 页合同草案就绪 · <b>中标通知书 + 落标通知</b>已起草
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 6: 🛠️ 履约 + 质保(阶段 6) -->
+                  <div class="wf-msg" data-step="6" style="--dur:2.8s">
+                    <div class="wm-state"><span>6</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">🛠️ 履约 + 质保 · SOP 自动启动 + 验收 + 续约</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        履约 SOP 已就绪:<b>5 大里程碑</b>(签约 → 到货 → 安装 → 验收 → 上线)· <b>验收清单</b> 28 项(性能/功能/资料/培训/售后)自动核对 · <b>付款 4 节点</b>提醒(30% 签约 / 30% 到货 / 30% 验收 / 10% 质保期满)· <b>5 年质保</b>跟踪 + <b>服务期满前 90 天</b>启动续约准备
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
                 <div class="wf-done-banner" id="tenderWfDone">
                   <div class="wdb-ico">✅</div>
-                  <div class="wdb-tt">AI 已完成全部 5 阶段招标 · 总耗时 <b id="tenderWfTime">18.0</b> 秒
+                  <div class="wdb-tt">AI 已完成全部 5 阶段招标 · 总耗时 <b id="tenderWfTime">22.8</b> 秒
                     <small>替代采购部 5 人 1 周工作 · 接下来 ↓ 我推荐选谁,你拍板</small>
                   </div>
                 </div>
@@ -17246,10 +17263,10 @@ function _bidInit() {
     wfEmpty.style.display = "none";
     wfStream.style.display = "";
     wfPanel.classList.add("running");
-    Q("#bidWfTotal").innerHTML = '<span class="c-pulse"></span>正在分析《' + uploaded.name + '》· 5 步骤 · 预计 20 秒';
+    Q("#bidWfTotal").innerHTML = '<span class="c-pulse"></span>正在分析《' + uploaded.name + '》· 7 步骤 · 预计 27 秒';
 
     var steps = QA(".wf-msg");
-    var durations = [4500, 3200, 2800, 5800, 3600];
+    var durations = [3800, 4500, 4200, 5800, 3200, 2800, 2500]; // 7 步 · 阶段 1-7
     var cum = 0;
     steps.forEach(function (m, i) {
       var startAt = cum;
@@ -17486,10 +17503,10 @@ function _tenderInit() {
     wfStream.style.display = "";
     wfPanel.classList.add("running");
     var briefName = need.substring(0, 30);
-    Q("#tenderWfTotal").innerHTML = '<span class="c-pulse"></span>正在跑《' + briefName + '...》· 5 步骤 · 预计 18 秒';
+    Q("#tenderWfTotal").innerHTML = '<span class="c-pulse"></span>正在跑《' + briefName + '...》· 6 步骤 · 预计 23 秒';
 
     var steps = QA(".wf-msg");
-    var durations = [4200, 2800, 3400, 3000, 4600];
+    var durations = [3200, 4800, 3500, 5500, 3000, 2800]; // 6 步 · 阶段 1-6
     var cum = 0;
     steps.forEach(function (m, i) {
       var startAt = cum;
