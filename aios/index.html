@@ -2348,9 +2348,43 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .ar-recommend { padding:10px 12px; background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
   border-left:3px solid var(--green); border-radius:8px; font-size:12px; line-height:1.7;
   color:var(--ink); font-weight:500; }
-.ar-recommend::before { content:"AI 建议改为 ↓"; font-size:10px; font-weight:800;
+.ar-recommend::before { content:"AI 修订意见 · 可编辑 ↓"; font-size:10px; font-weight:800;
   color:var(--green); letter-spacing:.05em; display:block; margin-bottom:6px; }
 .ar-recommend mark { background:rgba(43,217,168,.35); padding:0 3px; border-radius:3px; font-style:normal; }
+
+/* 可编辑的 AI 修订意见 (允许客户在 AI 建议基础上自己改) */
+.ar-edit { outline:none; min-height:20px; padding:6px 8px; background:rgba(255,255,255,.55);
+  border:1px dashed transparent; border-radius:6px; transition:.15s; cursor:text; }
+.ar-edit:hover { background:rgba(255,255,255,.85); border-color:rgba(24,185,122,.4); }
+.ar-edit:focus { background:#fff; border-color:var(--green); border-style:solid;
+  box-shadow:0 0 0 3px rgba(24,185,122,.15); }
+.ar-edit.edited { background:rgba(255,251,235,.85); border-color:rgba(217,119,6,.5);
+  border-style:solid; }
+.ar-edit.edited::before { content:"✎ 你已编辑 · 接受时将使用你的版本"; display:block;
+  font-size:9.5px; color:var(--amber); font-weight:700; letter-spacing:.04em;
+  margin:-2px 0 4px; padding-bottom:3px; border-bottom:1px dashed rgba(217,119,6,.3); }
+
+/* 段标题样式 (op-title) */
+.orig-para.op-title .op-content { font-size:13.5px; }
+.orig-para .op-num { display:inline-block; padding:2px 7px; background:#EEF0FB; color:var(--brand);
+  border-radius:5px; font-size:10.5px; font-weight:800; letter-spacing:.04em; margin-bottom:5px; }
+.orig-para.has-issue .op-num { background:rgba(229,72,77,.12); color:var(--red); }
+.orig-para.has-issue.mid .op-num { background:rgba(217,119,6,.12); color:var(--amber); }
+.orig-para.modified .op-num { background:rgba(24,185,122,.15); color:var(--green); }
+.orig-para .op-content { display:block; margin-top:4px; }
+
+/* mso-card 可选状态(任务 4: ABC 三选交客户) */
+.mso-card { cursor:pointer; user-select:none; }
+.mso-card.selected { border-width:2px !important; border-color:var(--brand) !important;
+  box-shadow:0 0 0 3px rgba(90,91,240,.18), 0 4px 12px rgba(90,91,240,.18) !important;
+  transform:translateY(-2px); }
+.mso-card.selected::before { content:"✓ 已选"; position:absolute; top:-9px; left:50%;
+  transform:translateX(-50%); padding:1.5px 8px; background:var(--brand); color:#fff;
+  border-radius:999px; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
+.mso-card.best.selected::before { content:"✓ 已选 (AI 推荐)"; background:linear-gradient(90deg,var(--brand),var(--green)); }
+.mso-card.best.selected::after { display:none; }
+.dec-sel { display:inline-block; padding:1px 8px; background:rgba(255,255,255,.22);
+  border-radius:5px; margin-left:6px; font-weight:800; font-size:11px; letter-spacing:.02em; }
 
 .ar-cta { display:flex; gap:6px; margin-top:11px; flex-wrap:wrap; }
 .ar-cta button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
@@ -4664,6 +4698,8 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                   </div>
                   <div class="rh-cta">
                     <button class="accept-all" id="cRvAcceptAll">⚡ 一键接受全部</button>
+                    <button class="accept-all" id="cRvSave" title="把当前修订进度存到本地, 下次打开可恢复">💾 保存进度</button>
+                    <button class="accept-all" id="cRvExport" title="导出当前修订后的合同 (.doc 格式 · Word 可打开 · 排版/字体保持一致)">⬇ 导出修订版</button>
                     <button class="finish" id="cRvFinish" disabled>✓ 完成 · 生成 redline 终稿</button>
                   </div>
                 </div>
@@ -4673,32 +4709,88 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
                 <div class="review-grid" id="cRvGrid">
 
-                  <!-- 段 1: 主体信息 (无 issue) -->
+                  <!-- ===== 完整合同正文 1:1 还原 · 19 段 (7 段含修订意见 + 12 段无风险) ===== -->
+
+                  <!-- 段 1: 合同标题 -->
                   <div class="rv-cell left">
-                    <div class="orig-para">
-                      <span class="op-num">第 1 条 · 主体</span>
-                      甲方:东莞市顶呱呱AI科技有限公司;乙方:苏州瑞达精密机械有限公司。本合同标的为 CNC 加工中心 (Mitsubishi M70V) 2 台,总金额 ¥386,000.00(含 13% 增值税)。
+                    <div class="orig-para op-title">
+                      <span class="op-num">合同标题</span>
+                      <span class="op-content"><b style="font-size:14px">设备采购合同</b><br>合同编号:SD-2026-0612 · 签订日期:2026 年 6 月 15 日 · 签订地点:东莞市松山湖</span>
                     </div>
                   </div>
                   <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 2: 付款 · 无质保金 (高/商业) [r2] -->
+                  <!-- 段 2: 双方信息 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">双方信息</span>
+                      <span class="op-content"><b>甲方(买方):</b>东莞市顶呱呱AI科技有限公司<br>住所:东莞市松山湖高新区某某科技园 B 栋 · 法定代表人:刘明海<br><br><b>乙方(卖方):</b>苏州瑞达精密机械有限公司<br>住所:苏州市姑苏区某某工业园 12 号 · 法定代表人:陈泽华</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 3: 序言 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">序言</span>
+                      <span class="op-content">甲乙双方就 CNC 加工中心采购事宜,本着平等、自愿、诚实、信用的原则,经友好协商,达成如下协议:</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 4: 第一条 总则 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第一条 总则</span>
+                      <span class="op-content">1.1 本合同是甲乙双方就 CNC 加工中心设备采购达成的真实意思表示。<br>1.2 双方应严格按照本合同约定履行各自的权利义务。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 5: 第二条 标的与数量 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第二条 标的与数量</span>
+                      <span class="op-content">2.1 合同标的:三菱 (Mitsubishi) M70V 系列立式 CNC 加工中心。<br>2.2 数量:2 (贰) 台。<br>2.3 主要规格:主轴功率 11kW,行程 1200×500×510mm,定位精度 ±0.005mm。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 6: 第三条 交付 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第三条 交付</span>
+                      <span class="op-content">3.1 乙方应于本合同签订后 60 个日历日内(即 2026 年 8 月 14 日前)将设备交付至甲方指定地点。<br>3.2 交付地点:东莞市松山湖高新区甲方工厂。<br>3.3 运输费用由乙方承担,运输途中风险由乙方负责。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 7: 第四条 价款 -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第四条 价款</span>
+                      <span class="op-content">4.1 单价:¥193,000(壹拾玖万叁仟元整)/台,含 13% 增值税。<br>4.2 合同总金额:¥386,000.00(叁拾捌万陆仟元整)。<br>4.3 本合同价款除本合同明确约定外,不因任何原因调整。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 8: 第五条 付款 [r2 高/商业] -->
                   <div class="rv-cell left">
                     <div class="orig-para has-issue high" data-pid="r2" id="orig-r2">
-                      <span class="op-num">第 5.3 条 · 付款</span><span class="op-marker">高 · 商业</span>
-                      <span class="op-content">甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 15 日内支付 <mark>剩余 50%,合同价款全部结清</mark>。</span>
+                      <span class="op-num">第五条 付款</span><span class="op-marker">高 · 商业</span>
+                      <span class="op-content">5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>15 日内支付剩余 50%,合同价款全部结清</mark>。</span>
                       <span class="op-undo" data-undo="r2">↶ 撤销修订, 恢复原文</span>
                     </div>
                   </div>
                   <div class="rv-cell right">
                     <div class="ai-rev" data-rid="r2"
-                      data-new="甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 30 日内支付 <mark>40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。">
+                      data-new="5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。">
                       <div class="ar-head">
                         <span class="ar-num">#1</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
-                        <span class="ar-issue">缺质保金扣留 · 验收后即 100% 付清,无质量谈判筹码</span>
+                        <span class="ar-issue">缺质保金扣留 · 验收后 100% 付清,无质量谈判筹码</span>
                       </div>
-                      <div class="ar-reason">未约定质保金,验收后即 100% 付清,质保期内若出质量问题需另行起诉追索。行业惯例扣留 5-10% 作质保金。基于历史智库,贵司 2024 年与同对手方签的同型号合同<b>明确扣留 10% 质保金 12 月</b>,本次对方明显「开倒车」。</div>
-                      <div class="ar-recommend">甲方应于合同签订后 7 日内支付 50% 预付款;乙方交付并验收合格后 30 日内支付 <mark>40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。</div>
+                      <div class="ar-reason">未约定质保金,验收后即 100% 付清,质保期内若出质量问题需另行起诉追索。行业惯例扣留 5-10%。基于历史智库,贵司 2024 年与同对手方签的同型号合同<b>明确扣留 10% 质保金 12 月</b>,本次对方明显「开倒车」。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。</div></div>
                       <div class="ar-cta">
                         <button class="accept" data-fx="cRvAcc" data-rid="r2">✓ 接受修订</button>
                         <button class="reject" data-fx="cRvRej" data-rid="r2">✗ 驳回</button>
@@ -4706,10 +4798,10 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                       </div>
                       <div class="ar-detail">
                         <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 626 条 + 第 644 条:实务中应约定质保金以保障担保责任落实。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>瑞达 2024-07 同卖方设备运行 3 月主轴故障,因无质保金,买方追索耗时 11 月仅获 60% 维修费。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>瑞达 2024-07 同卖方设备运行 3 月主轴故障, 无质保金致追索耗时 11 月仅获 60% 维修费。</div>
                         <div class="ard-row"><span class="ard-k">💸 影响</span>
                           <div class="ard-impact">
-                            <div><div class="ai-lbl">质保期内故障损失</div><div class="ai-val">¥3-8 万</div></div>
+                            <div><div class="ai-lbl">质保内故障损失</div><div class="ai-val">¥3-8 万</div></div>
                             <div><div class="ai-lbl">追索成本</div><div class="ai-val">¥2-5 万</div></div>
                             <div><div class="ai-lbl">建议质保金</div><div class="ai-val">¥38,600</div></div>
                           </div>
@@ -4719,53 +4811,168 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     </div>
                   </div>
 
-                  <!-- 段 3: 验收期 (中/履行) [r4] -->
+                  <!-- 段 9: 第六条 发票 [r6 中/财税] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r6" id="orig-r6">
+                      <span class="op-num">第六条 发票</span><span class="op-marker">中 · 财税</span>
+                      <span class="op-content">6.1 乙方应在收到货款后<mark>开具发票</mark>给甲方。</span>
+                      <span class="op-undo" data-undo="r6">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r6"
+                      data-new="6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。">
+                      <div class="ar-head">
+                        <span class="ar-num">#2</span><span class="ar-tag mid">中</span><span class="ar-dim">财税</span>
+                        <span class="ar-issue">未约定 13% 专用发票 · 进项税抵扣失守</span>
+                      </div>
+                      <div class="ar-reason">仅写"开具发票",对方可能提供普通发票,导致我方<b>无法抵扣进项税 ¥44,407</b>。¥386K 含税合同, 13% 进项税被吃掉不少。需在合同明确 13% 专用发票 + 开具时限。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。</div></div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r6">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r6">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《增值税暂行条例》第 9 条 + 国税发 [2008]31 号:取得普通发票不得抵扣进项税。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 10: 第七条 验收 [r4 中/履行] -->
                   <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r4" id="orig-r4">
-                      <span class="op-num">第 7.4 条 · 验收</span><span class="op-marker">中 · 履行</span>
-                      <span class="op-content">甲方应在收货之日起 <mark>30 日内</mark>完成验收并提出书面异议,<mark>逾期未提异议的,视为验收合格</mark>。</span>
+                      <span class="op-num">第七条 验收</span><span class="op-marker">中 · 履行</span>
+                      <span class="op-content">7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>30 日内</mark>完成验收并提出书面异议,<mark>逾期未提异议的,视为验收合格</mark>。</span>
                       <span class="op-undo" data-undo="r4">↶ 撤销修订, 恢复原文</span>
                     </div>
                   </div>
                   <div class="rv-cell right">
                     <div class="ai-rev" data-rid="r4"
-                      data-new="甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但 <mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。">
+                      data-new="7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但 <mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。">
                       <div class="ar-head">
-                        <span class="ar-num">#2</span><span class="ar-tag mid">中</span><span class="ar-dim">履行</span>
+                        <span class="ar-num">#3</span><span class="ar-tag mid">中</span><span class="ar-dim">履行</span>
                         <span class="ar-issue">验收期仅 30 天 · 隐蔽瑕疵无救济</span>
                       </div>
-                      <div class="ar-reason">CNC 加工中心调试 + 试切 + 隐蔽缺陷暴露往往需 <b>2-3 个月</b>,30 天内只能发现明显缺陷。"逾期视为合格"使后续隐蔽瑕疵维权由<b>担保责任降级为质量瑕疵责任</b>,举证负担转移到我方。</div>
-                      <div class="ar-recommend">甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但<mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。</div>
+                      <div class="ar-reason">CNC 加工中心调试 + 试切 + 隐蔽缺陷暴露往往需 <b>2-3 个月</b>,30 天内只能发现明显缺陷。"逾期视为合格"使后续隐蔽瑕疵维权由<b>担保责任降级为质量瑕疵责任</b>, 举证负担转移到我方。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但<mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。</div></div>
                       <div class="ar-cta">
                         <button class="accept" data-fx="cRvAcc" data-rid="r4">✓ 接受修订</button>
                         <button class="reject" data-fx="cRvRej" data-rid="r4">✗ 驳回</button>
                         <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
                       </div>
                       <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 621 条:质量异议期约定合理,逾期视为符合约定;<b>隐蔽瑕疵的发现期可至 2 年</b>。</div>
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 621 条:质量异议期约定合理逾期视为符合约定;<b>隐蔽瑕疵的发现期可至 2 年</b>。</div>
                         <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)鄂 02 民终 1056 号:同类条款致后续质量主张被驳回。</div>
                       </div>
                       <div class="ar-status"></div>
                     </div>
                   </div>
 
-                  <!-- 段 4: 不可抗力 (中/法律) [r5] -->
+                  <!-- 段 11: 第八条 质保 (无 issue) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第八条 质保</span>
+                      <span class="op-content">8.1 本合同设备质保期为 12 个月,自验收合格之日起计算。<br>8.2 质保期内非人为故障导致的维修,由乙方免费提供。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 12: 第九条 软件 IP [r7 中/商业] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r7" id="orig-r7">
+                      <span class="op-num">第九条 软件</span><span class="op-marker">中 · 商业</span>
+                      <span class="op-content">9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套的<mark>控制软件由乙方提供,买方有使用权</mark>。</span>
+                      <span class="op-undo" data-undo="r7">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r7"
+                      data-new="9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#4</span><span class="ar-tag mid">中</span><span class="ar-dim">商业</span>
+                        <span class="ar-issue">软件 IP 与升级权未明确 · 设备生命周期受制</span>
+                      </div>
+                      <div class="ar-reason">仅说"使用权"未约定:① 升级是否免费;② 升级版本是否兼容;③ 乙方停止维护后能否自行修改。设备 8-10 年生命周期内可能被锁住,强制升级费 ¥3-5 万/次。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。</div></div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r7">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r7">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>大族激光 2024-12 同类合同:小版本免费 5 年, 大版本年费, 源码 2 年托管。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 13: 第十条 保密 (无 issue) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第十条 保密</span>
+                      <span class="op-content">10.1 双方对本合同信息及合作过程中获悉的对方商业秘密承担 3 年保密义务。<br>10.2 保密义务在合同终止后仍然有效。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 14: 第十一条 违约 [r3 高/法律] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue high" data-pid="r3" id="orig-r3">
+                      <span class="op-num">第十一条 违约</span><span class="op-marker">高 · 法律</span>
+                      <span class="op-content">11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.05%/日</mark>计算,但累计不超过合同金额 <mark>5%</mark>。</span>
+                      <span class="op-undo" data-undo="r3">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r3"
+                      data-new="11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#5</span><span class="ar-tag high">高</span><span class="ar-dim">法律</span>
+                        <span class="ar-issue">违约金率过低 + 上限太低 · 对方实际无延期压力</span>
+                      </div>
+                      <div class="ar-reason">0.05%/日 + 上限 5% 是致命点:<b>对方延期 100 天即触顶,再拖也不增加成本</b>。延期 60 天的产能损失 ¥48 万,现条款最多索赔 ¥1.93 万, 差额暴露 ¥46 万+。行业标准 0.1-0.3%/日 · 上限 20-30%。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。</div></div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r3">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r3">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 585 条:违约金可参照实际损失约定, 但举证责任在守约方。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2025)粤 19 民终 432 号:类似条款下买方主张实际损失提增违约金, 法院支持率仅 47%。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 15: 第十二条 知识产权 (无 issue) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第十二条 知识产权</span>
+                      <span class="op-content">12.1 本合同涉及的设备所搭载的发明专利、实用新型专利的知识产权归乙方所有。<br>12.2 甲方不得对设备进行反向工程或用于商业用途的复制。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 16: 第十三条 不可抗力 [r5 中/法律] -->
                   <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r5" id="orig-r5">
-                      <span class="op-num">第 13.1 条 · 不可抗力</span><span class="op-marker">中 · 法律</span>
-                      <span class="op-content">不可抗力是指<mark>战争、地震、洪水</mark>等不能预见、不能避免、不能克服的客观情况。</span>
+                      <span class="op-num">第十三条 不可抗力</span><span class="op-marker">中 · 法律</span>
+                      <span class="op-content">13.1 不可抗力是指<mark>战争、地震、洪水</mark>等不能预见、不能避免、不能克服的客观情况。<br>13.2 因不可抗力导致合同不能履行的,受影响方应及时通知另一方并提供证明。</span>
                       <span class="op-undo" data-undo="r5">↶ 撤销修订, 恢复原文</span>
                     </div>
                   </div>
                   <div class="rv-cell right">
                     <div class="ai-rev" data-rid="r5"
-                      data-new="不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。">
+                      data-new="13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。">
                       <div class="ar-head">
-                        <span class="ar-num">#3</span><span class="ar-tag mid">中</span><span class="ar-dim">法律</span>
+                        <span class="ar-num">#6</span><span class="ar-tag mid">中</span><span class="ar-dim">法律</span>
                         <span class="ar-issue">定义过窄 · 未含公共卫生 / 政府管制</span>
                       </div>
                       <div class="ar-reason">仅列战争/地震/洪水,未涵盖<b>公共卫生事件、政府限产、停电管控、供应链管制</b>等近年高发情形。一旦遭遇,对方可主张"不属于不可抗力",我方面临违约赔偿。</div>
-                      <div class="ar-recommend">不可抗力是指战争、地震、洪水、<mark>台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。</div></div>
                       <div class="ar-cta">
                         <button class="accept" data-fx="cRvAcc" data-rid="r5">✓ 接受修订</button>
                         <button class="reject" data-fx="cRvRej" data-rid="r5">✗ 驳回</button>
@@ -4779,111 +4986,23 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     </div>
                   </div>
 
-                  <!-- 段 5: 发票 (中/财税) [r6] -->
-                  <div class="rv-cell left">
-                    <div class="orig-para has-issue mid" data-pid="r6" id="orig-r6">
-                      <span class="op-num">第 6.1 条 · 发票</span><span class="op-marker">中 · 财税</span>
-                      <span class="op-content">乙方应在收到货款后<mark>开具发票</mark>给甲方。</span>
-                      <span class="op-undo" data-undo="r6">↶ 撤销修订, 恢复原文</span>
-                    </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r6"
-                      data-new="乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。">
-                      <div class="ar-head">
-                        <span class="ar-num">#4</span><span class="ar-tag mid">中</span><span class="ar-dim">财税</span>
-                        <span class="ar-issue">未约定专用发票 · 进项税抵扣失守</span>
-                      </div>
-                      <div class="ar-reason">仅写"开具发票",对方可能提供普通发票,导致我方<b>无法抵扣进项税 ¥44,407</b>。¥386K 含税合同,13% 进项税被吃掉不少。</div>
-                      <div class="ar-recommend">乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。</div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r6">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r6">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《增值税暂行条例》第 9 条 + 国税发 [2008]31 号:取得普通发票的不得抵扣进项税。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
-
-                  <!-- 段 6: 软件 IP (中/商业) [r7] -->
-                  <div class="rv-cell left">
-                    <div class="orig-para has-issue mid" data-pid="r7" id="orig-r7">
-                      <span class="op-num">第 9.2 条 · 软件</span><span class="op-marker">中 · 商业</span>
-                      <span class="op-content">设备配套的<mark>控制软件由乙方提供,买方有使用权</mark>。</span>
-                      <span class="op-undo" data-undo="r7">↶ 撤销修订, 恢复原文</span>
-                    </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r7"
-                      data-new="设备配套软件 IP 归乙方, 甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商, 价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时, 源码托管解锁给甲方仅供内部维护</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#5</span><span class="ar-tag mid">中</span><span class="ar-dim">商业</span>
-                        <span class="ar-issue">软件 IP 与升级权未明确 · 设备生命周期受制</span>
-                      </div>
-                      <div class="ar-reason">仅说"使用权"未约定:① 升级是否免费;② 升级版本是否兼容;③ 乙方停止维护后能否自行修改。设备 8-10 年生命周期内可能被锁住,强制升级费 ¥3-5 万/次。</div>
-                      <div class="ar-recommend">设备配套软件 IP 归乙方, 甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商, 价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时, 源码托管解锁给甲方仅供内部维护</mark>。</div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r7">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r7">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>大族激光 2024-12 同类合同:小版本免费 5 年, 大版本年费, 源码 2 年托管。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
-
-                  <!-- 段 7: 违约金 (高/法律) [r3] -->
-                  <div class="rv-cell left">
-                    <div class="orig-para has-issue high" data-pid="r3" id="orig-r3">
-                      <span class="op-num">第 11.1 条 · 违约</span><span class="op-marker">高 · 法律</span>
-                      <span class="op-content">任一方违约,应向守约方支付违约金,违约金按 <mark>0.05%/日</mark>计算,但累计不超过合同金额 <mark>5%</mark>。</span>
-                      <span class="op-undo" data-undo="r3">↶ 撤销修订, 恢复原文</span>
-                    </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r3"
-                      data-new="任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#6</span><span class="ar-tag high">高</span><span class="ar-dim">法律</span>
-                        <span class="ar-issue">违约金率过低 + 上限太低 · 对方实际无延期压力</span>
-                      </div>
-                      <div class="ar-reason">0.05%/日 + 上限 5% 是致命点:<b>对方延期 100 天即触顶,再拖也不增加成本</b>。延期 60 天的产能损失 ¥48 万,现条款最多索赔 ¥1.93 万,差额暴露 ¥46 万+。行业标准 0.1-0.3%/日 · 上限 20-30%。</div>
-                      <div class="ar-recommend">任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。</div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r3">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r3">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 585 条:违约金可参照实际损失约定,但举证责任在守约方。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2025)粤 19 民终 432 号:类似条款下,买方主张实际损失提增违约金,法院支持率仅 47%。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
-
-                  <!-- 段 8: 管辖 (高/商业) [r1] -->
+                  <!-- 段 17: 第十四条 争议解决 [r1 高/商业] -->
                   <div class="rv-cell left">
                     <div class="orig-para has-issue high" data-pid="r1" id="orig-r1">
-                      <span class="op-num">第 14.2 条 · 管辖</span><span class="op-marker">高 · 商业</span>
-                      <span class="op-content">因本合同发生争议的,双方应协商解决;协商不成的,由<mark>乙方所在地人民法院</mark>管辖。</span>
+                      <span class="op-num">第十四条 争议解决</span><span class="op-marker">高 · 商业</span>
+                      <span class="op-content">14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>乙方所在地人民法院</mark>管辖。</span>
                       <span class="op-undo" data-undo="r1">↶ 撤销修订, 恢复原文</span>
                     </div>
                   </div>
                   <div class="rv-cell right">
                     <div class="ai-rev" data-rid="r1"
-                      data-new="因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。">
+                      data-new="14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。">
                       <div class="ar-head">
                         <span class="ar-num">#7</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
                         <span class="ar-issue">管辖法院约定对方所在地 · 我方主场不利</span>
                       </div>
                       <div class="ar-reason">该约定将管辖法院设在<b>对方所在地(苏州)</b>,争议时我方需<b>跨省诉讼</b>,差旅 + 律师驻地 + 调证额外成本 <b>¥5-8 万/次</b>。乙方在当地法院熟悉度往往高于我方,实质影响诉讼公平。</div>
-                      <div class="ar-recommend">因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。</div>
+                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。</div></div>
                       <div class="ar-cta">
                         <button class="accept" data-fx="cRvAcc" data-rid="r1">✓ 接受修订</button>
                         <button class="reject" data-fx="cRvRej" data-rid="r1">✗ 驳回</button>
@@ -4897,11 +5016,20 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     </div>
                   </div>
 
-                  <!-- 段 9: 签字 (无 issue, 短) -->
+                  <!-- 段 18: 第十五条 生效 (无 issue) -->
                   <div class="rv-cell left">
                     <div class="orig-para">
-                      <span class="op-num">第 15 条 · 生效</span>
-                      本合同自双方签字盖章之日起生效,一式两份,双方各执一份,具有同等法律效力。
+                      <span class="op-num">第十五条 生效</span>
+                      <span class="op-content">15.1 本合同自双方签字盖章之日起生效。<br>15.2 本合同一式两份,双方各执一份,具有同等法律效力。<br>15.3 本合同未尽事宜,双方可签订补充协议,补充协议与本合同具有同等法律效力。</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 19: 签字 (无 issue) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">签字盖章</span>
+                      <span class="op-content"><b>甲方:</b>东莞市顶呱呱AI科技有限公司<br>法定代表人/授权代理人:____________________<br>日期:2026 年 6 月 15 日<br><br><b>乙方:</b>苏州瑞达精密机械有限公司<br>法定代表人/授权代理人:____________________<br>日期:2026 年 6 月 15 日</span>
                     </div>
                   </div>
                   <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
@@ -4986,17 +5114,20 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                       </div>
                     </div>
                     <div class="ms-out" id="saasOut">
-                      <div class="mso-card" data-idx="0">
+                      <div class="mso-card" data-idx="0" data-fx="cMsoPick" data-grp="saas" data-tt="A. 直接续签 ¥84K"
+                        data-msg="✅ 已选 A · 直接续签 ¥84K · AI 已通知销售按现价对接续约">
                         <div class="mso-tt">A. 直接续</div>
                         <div class="mso-val" id="saasA">¥84.0K</div>
                         <div class="mso-sub">维持现状<br>ROI 0.62x</div>
                       </div>
-                      <div class="mso-card best" data-idx="1">
+                      <div class="mso-card best selected" data-idx="1" data-fx="cMsoPick" data-grp="saas" data-tt="B. 重谈降至 ¥58.8K"
+                        data-msg="✅ 已选 B (AI 推荐) · AI 已通过销售对接对方 KAM 提续约重谈(¥58.8K) · 钉钉跟进">
                         <div class="mso-tt">B. 重谈</div>
                         <div class="mso-val good" id="saasB">¥58.8K</div>
                         <div class="mso-sub">对方接受 78%<br>ROI 1.05x</div>
                       </div>
-                      <div class="mso-card" data-idx="2">
+                      <div class="mso-card" data-idx="2" data-fx="cMsoPick" data-grp="saas" data-tt="C. 换厂商"
+                        data-msg="✅ 已选 C · 放弃续约 · AI 已启动换厂商数据迁移方案 + 培训计划">
                         <div class="mso-tt">C. 换厂商</div>
                         <div class="mso-val warn" id="saasC">¥83.0K</div>
                         <div class="mso-sub">含切换成本<br>培训空窗期</div>
@@ -5006,9 +5137,8 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
 
                 <div class="dec-acts">
-                  <button class="btn-grad" data-fx="bossDecide" data-dec="cDecSaas" data-msg="✅ 已采纳 · AI 已通过销售对接对方 KAM 提续约重谈(¥58.8K) · 钉钉跟进">✓ 同意 AI 方案,自动重谈</button>
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="cDecSaas" data-grp="saas" data-msg="✅ 已选 B (AI 推荐) · AI 已通过销售对接对方 KAM 提续约重谈(¥58.8K) · 钉钉跟进">✓ 执行选定方案 <span class="dec-sel" data-sel="saas">B. 重谈降至 ¥58.8K</span></button>
                   <button class="btn-mini" data-fx="bossDecide" data-dec="cDecSaas" data-act="defer" data-msg="续约决策已推迟到本周五">推迟到本周五</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="cDecSaas" data-act="reject" data-msg="放弃续约 · AI 已启动换厂商数据迁移方案">放弃续约 · 换厂商</button>
                 </div>
                 <div class="dec-status"></div>
               </div>
@@ -5046,17 +5176,20 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                       </div>
                     </div>
                     <div class="ms-out" id="dispOut">
-                      <div class="mso-card" data-idx="0">
+                      <div class="mso-card" data-idx="0" data-fx="cMsoPick" data-grp="disp" data-tt="A. 律师函先发"
+                        data-msg="✅ 已选 A · AI 已起草律师函(措辞升级版)+ 联合作律所发函">
                         <div class="mso-tt">A. 律师函</div>
                         <div class="mso-val good">¥2,000</div>
                         <div class="mso-sub">7-14 天<br>对方让步 <b id="dispAp">35%</b></div>
                       </div>
-                      <div class="mso-card best" data-idx="1">
+                      <div class="mso-card best selected" data-idx="1" data-fx="cMsoPick" data-grp="disp" data-tt="B. 协商和解 ¥6.25 万"
+                        data-msg="✅ 已选 B (AI 推荐) · AI 已起草和解协议(¥6.25 万)+ 钉钉发对方法务 + 附 23 封邮件证据">
                         <div class="mso-tt">B. 协商和解</div>
                         <div class="mso-val good" id="dispBv">¥6.25 万</div>
                         <div class="mso-sub">2-4 周收回<br>接受率 <b id="dispBp">72%</b></div>
                       </div>
-                      <div class="mso-card" data-idx="2">
+                      <div class="mso-card" data-idx="2" data-fx="cMsoPick" data-grp="disp" data-tt="C. 直接起诉"
+                        data-msg="✅ 已选 C · AI 已联合作律所启动诉讼准备 + 整理证据立案材料 + 财产保全申请">
                         <div class="mso-tt">C. 起诉</div>
                         <div class="mso-val warn">¥18-25K 诉</div>
                         <div class="mso-sub">8-14 月<br>胜算 88% · 可索 ¥12.5 万</div>
@@ -5066,9 +5199,8 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
 
                 <div class="dec-acts">
-                  <button class="btn-grad" data-fx="bossDecide" data-dec="cDecDispute" data-msg="✅ 已采纳 · AI 已起草和解协议(¥6.25 万) + 钉钉发对方法务并附 23 封邮件证据">✓ 同意协商和解,自动执行</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="cDecDispute" data-act="defer" data-msg="改为律师函先发 · AI 已起草措辞升级版">改律师函先发</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="cDecDispute" data-act="reject" data-msg="升级直接起诉 · AI 已联系合作律所">升级直接起诉</button>
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="cDecDispute" data-grp="disp" data-msg="✅ 已选 B (AI 推荐) · AI 已起草和解协议(¥6.25 万)+ 钉钉发对方法务 + 附 23 封邮件证据">✓ 执行选定方案 <span class="dec-sel" data-sel="disp">B. 协商和解 ¥6.25 万</span></button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="cDecDispute" data-act="defer" data-msg="维权决策已推迟一周 · AI 持续监测对方动态">推迟一周</button>
                 </div>
                 <div class="dec-status"></div>
               </div>
@@ -11127,8 +11259,9 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var orig = Q('#orig-' + rid);
     if (!card || !orig) return;
     if (card.classList.contains("accepted") || card.classList.contains("rejected")) return;
-    // 左边原文替换
-    var newHTML = card.getAttribute("data-new");
+    // 优先取「客户编辑后」的 .ar-edit innerHTML; 退化用 data-new
+    var editBox = card.querySelector(".ar-edit");
+    var newHTML = editBox ? editBox.innerHTML : card.getAttribute("data-new");
     var content = orig.querySelector(".op-content");
     if (content && newHTML) {
       content.dataset.origHTML = content.innerHTML;
@@ -11136,10 +11269,11 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     }
     orig.classList.remove("has-issue", "high", "mid", "rejected");
     orig.classList.add("modified");
-    // 右边卡片状态
     card.classList.add("accepted");
+    var wasEdited = editBox && editBox.classList.contains("edited");
     var st = card.querySelector(".ar-status");
-    if (st) st.innerHTML = '<span>已接受 AI 建议 · 左边原文已替换</span><span class="ar-undo-link" data-fx="cRvUndo" data-rid="' + rid + '">↶ 撤销</span>';
+    if (st) st.innerHTML = '<span>已接受 ' + (wasEdited ? '你编辑后的修订意见' : 'AI 修订意见') +
+      ' · 左边原文已替换</span><span class="ar-undo-link" data-fx="cRvUndo" data-rid="' + rid + '">↶ 撤销</span>';
     updateRvProgress();
   }
 
@@ -11188,6 +11322,22 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     }
   });
 
+  /* 客户编辑 AI 修订意见 → 标记 .edited */
+  QA(".ar-edit", rvShell).forEach(function (el) {
+    el.dataset.aiOrig = el.innerHTML.trim();
+    el.addEventListener("input", function () {
+      var cur = this.innerHTML.trim();
+      if (cur !== this.dataset.aiOrig) this.classList.add("edited");
+      else this.classList.remove("edited");
+    });
+    el.addEventListener("focus", function (e) {
+      // Aria-friendly: 焦点时自动滚到视野
+      if (this.getBoundingClientRect().bottom > window.innerHeight - 60) {
+        this.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  });
+
   Q("#cRvAcceptAll").addEventListener("click", function () {
     QA(".ai-rev[data-rid]", rvShell).forEach(function (card) {
       if (!card.classList.contains("accepted") && !card.classList.contains("rejected")) {
@@ -11201,6 +11351,92 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     if (this.disabled) return;
     ts("✅ 进入 AI 自动执行下游 · redline / 发对方 / 推老板 / 录履约 / 进智库");
     runExec("review");
+  });
+
+  /* === 保存进度 (localStorage) === */
+  function saveStateKey() {
+    var n = uploadedFile ? uploadedFile.name : "default";
+    return "cReview:" + n;
+  }
+  Q("#cRvSave").addEventListener("click", function () {
+    var state = {
+      file: uploadedFile ? uploadedFile.name : null,
+      ts: Date.now(),
+      items: QA(".ai-rev[data-rid]", rvShell).map(function (card) {
+        var rid = card.dataset.rid;
+        var status = card.classList.contains("accepted") ? "acc"
+                   : card.classList.contains("rejected") ? "rej" : "pending";
+        var ed = card.querySelector(".ar-edit");
+        return {
+          rid: rid,
+          status: status,
+          edited: ed && ed.innerHTML.trim(),
+          isEdited: ed && ed.classList.contains("edited")
+        };
+      })
+    };
+    try {
+      localStorage.setItem(saveStateKey(), JSON.stringify(state));
+      var accCount = state.items.filter(function (x) { return x.status === "acc"; }).length;
+      var rejCount = state.items.filter(function (x) { return x.status === "rej"; }).length;
+      var editCount = state.items.filter(function (x) { return x.isEdited; }).length;
+      ts("💾 已保存修订进度 · 接受 " + accCount + " · 驳回 " + rejCount + " · 编辑 " + editCount + " 条");
+    } catch (err) {
+      ts("⚠ 保存失败:" + err.message);
+    }
+  });
+
+  /* === 导出修订版 .doc (Word 兼容) · 排版/字体与原文一致 === */
+  Q("#cRvExport").addEventListener("click", function () {
+    if (!uploadedFile) { ts("请先上传或粘贴一份合同"); return; }
+    // 取左栏全部段落的 HTML, 但要做"打印整洁化":
+    // - 去除 has-issue / modified / rejected 等审查标记类
+    // - 去除 .op-marker, .op-undo 等审查辅助元素
+    // - 保留段号 (.op-num)、原文/已修订内容 (.op-content)
+    var leftCells = QA(".rv-cell.left", rvShell);
+    var bodyParts = leftCells.map(function (cell) {
+      var p = cell.querySelector(".orig-para");
+      if (!p) return "";
+      var num = p.querySelector(".op-num");
+      var content = p.querySelector(".op-content");
+      var numTxt = num ? num.textContent : "";
+      var html = content ? content.innerHTML : p.textContent;
+      // mark 高亮转 word 兼容(黄色背景)
+      html = html.replace(/<mark>/g, '<span style="background:#FFF2A8;padding:0 2px">').replace(/<\/mark>/g, '</span>');
+      return '<p style="margin:14px 0;line-height:1.85"><b style="color:#1a1a1a">' + numTxt + '</b><br>' + html + '</p>';
+    });
+    var accCount = QA(".ai-rev.accepted", rvShell).length;
+    var rejCount = QA(".ai-rev.rejected", rvShell).length;
+    var pendingCount = QA(".ai-rev[data-rid]", rvShell).length - accCount - rejCount;
+    var fileBase = uploadedFile.name.replace(/\.[^.]+$/, "");
+    var stamp = new Date().toISOString().slice(0, 10);
+
+    var doc = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">' +
+      '<head><meta charset="utf-8"><title>' + fileBase + ' · 修订版</title>' +
+      '<style>' +
+      '@page WordSection1 { size: A4; margin: 2.5cm 2cm; mso-header-margin:.5in; mso-footer-margin:.5in; }' +
+      'div.WordSection1 { page: WordSection1; }' +
+      'body { font-family: "微软雅黑", "Microsoft YaHei", "宋体", SimSun, serif; font-size: 11pt; line-height: 1.85; color:#222; }' +
+      'h1 { font-size: 18pt; text-align: center; margin: 20pt 0; font-weight: 800; }' +
+      '.meta { font-size: 9pt; color: #666; text-align: right; margin-bottom: 16pt; padding-bottom: 8pt; border-bottom: 1pt solid #ccc; }' +
+      '.meta b { color: #1a1a1a; }' +
+      '</style></head><body><div class="WordSection1">' +
+      '<div class="meta">合同修订版导出 · ' + stamp + '<br>原文件:<b>' + uploadedFile.name + '</b> · ' +
+      '已接受 AI 修订 <b>' + accCount + '</b> · 已驳回 <b>' + rejCount + '</b>' +
+      (pendingCount > 0 ? ' · ⚠ 未处置 <b style="color:#c00">' + pendingCount + '</b>' : '') + '</div>' +
+      '<h1>' + fileBase + '</h1>' +
+      bodyParts.join("\n") +
+      '</div></body></html>';
+
+    var blob = new Blob(["﻿", doc], { type: "application/msword;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = fileBase + "_修订版_" + stamp + ".doc";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 200);
+    ts("⬇ 已开始下载《" + fileBase + "_修订版.doc》· 排版与原文一致 · Word 可打开");
   });
 
   function resetReview() {
@@ -11219,6 +11455,12 @@ curl https://api.dgg.ai/v1/agents/dispatch \
           content.innerHTML = content.dataset.origHTML;
           delete content.dataset.origHTML;
         }
+      }
+      // 还原 .ar-edit 至 AI 原始建议(清除客户编辑)
+      var ed = card.querySelector(".ar-edit");
+      if (ed && ed.dataset.aiOrig != null) {
+        ed.innerHTML = ed.dataset.aiOrig;
+        ed.classList.remove("edited");
       }
     });
     updateRvProgress();
@@ -11348,6 +11590,23 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var e = Q("#" + id); if (e) e.addEventListener("input", dispUpd);
   });
   Q("#dispUrgent").addEventListener("change", dispUpd);
+
+  /* === ABC 三选 · 客户主动选定方案 (任务 4) === */
+  view.addEventListener("click", function (e) {
+    var card = e.target.closest('[data-fx="cMsoPick"]');
+    if (!card) return;
+    var grp = card.dataset.grp;
+    QA('[data-fx="cMsoPick"][data-grp="' + grp + '"]').forEach(function (x) {
+      x.classList.toggle("selected", x === card);
+    });
+    // 同步底部"执行选定方案"按钮的 msg + 显示文字
+    var btn = Q('button[data-grp="' + grp + '"][data-fx="bossDecide"]:not([data-act])');
+    if (btn) {
+      btn.dataset.msg = card.dataset.msg;
+      var sel = btn.querySelector(".dec-sel");
+      if (sel) sel.textContent = card.dataset.tt;
+    }
+  });
 
   /* 初始化 */
   updateRvProgress();
