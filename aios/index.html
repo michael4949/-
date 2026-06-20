@@ -2112,27 +2112,72 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .agent-intro .ai-name { font-size:13.5px; font-weight:700; color:#fff; margin-bottom:4px; }
 .agent-intro .ai-name small { font-size:10.5px; opacity:.65; font-weight:500; margin-left:8px; }
 
-/* 进件 picker (横向) */
-.intake-strip { display:grid; grid-template-columns: 60px 1fr auto; gap:11px; padding:11px 13px;
-  background:#fff; border:1px solid var(--line); border-radius:12px; align-items:center;
-  margin-bottom:14px; }
-.intake-strip .is-lbl { font-size:11px; color:var(--muted); font-weight:650; line-height:1.4; }
-.intake-strip .is-pick { display:flex; gap:7px; flex-wrap:wrap; }
-.intake-pick-btn { display:flex; align-items:center; gap:7px; padding:7px 11px; background:#F8F9FE;
-  border:1px solid var(--line-2); border-radius:9px; cursor:pointer; font-family:inherit;
-  font-size:11.5px; color:var(--ink-2); font-weight:600; transition:.15s; }
-.intake-pick-btn:hover { border-color:var(--brand); color:var(--brand); }
-.intake-pick-btn.cur { background:linear-gradient(90deg,rgba(90,91,240,.08),rgba(154,77,255,.05));
-  border-color:var(--brand); color:var(--brand); box-shadow:0 2px 8px rgba(90,91,240,.18); }
-.intake-pick-btn .ipb-tag { font-size:9.5px; padding:1.5px 5px; border-radius:4px; font-weight:700; }
-.intake-pick-btn .ipb-tag.h { background:#FEF2F2; color:var(--red); }
-.intake-pick-btn .ipb-tag.m { background:#FFF4E5; color:var(--amber); }
-.intake-pick-btn .ipb-tag.l { background:#E9F9F1; color:var(--green); }
-.intake-strip .is-start { padding:9px 18px; font-size:12.5px; font-weight:700;
+/* 真实上传区 */
+.upload-zone { margin-bottom:14px; }
+
+/* 未上传态 · 大拖拽区 */
+.up-drop { padding:32px 24px; background:#fff; border:2px dashed rgba(90,91,240,.32);
+  border-radius:13px; text-align:center; transition:.2s; cursor:pointer; position:relative; }
+.up-drop:hover { border-color:var(--brand); background:linear-gradient(180deg,#fff,#F7F9FF); }
+.up-drop.dragover { border-color:var(--brand); border-style:solid;
+  background:linear-gradient(180deg,#F7F9FF,#EDEFFB); transform:scale(1.005); }
+.up-drop.dragover .up-ico { transform:translateY(-4px) scale(1.08); }
+.up-drop .up-ico { font-size:42px; line-height:1; margin-bottom:10px; transition:.2s; display:block; }
+.up-drop .up-tt { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:5px; }
+.up-drop .up-tt .up-link { color:var(--brand); text-decoration:underline; cursor:pointer; font-weight:700; }
+.up-drop .up-tt .up-link:hover { color:#3F40D8; }
+.up-drop .up-sub { font-size:11.5px; color:var(--muted); line-height:1.6; }
+.up-drop .up-sub b { color:var(--green); }
+.up-drop .up-fmts { display:inline-flex; gap:6px; margin-top:9px; flex-wrap:wrap; justify-content:center; }
+.up-drop .up-fmts span { font-size:10.5px; padding:2px 8px; background:#F0F3FF; color:var(--ink-2);
+  border-radius:5px; font-weight:600; }
+.up-or { display:flex; align-items:center; gap:11px; margin:13px 0 9px;
+  font-size:11px; color:var(--muted); font-weight:600; }
+.up-or::before, .up-or::after { content:""; flex:1; height:1px; background:rgba(0,0,0,.08); }
+.up-paste-btn { display:inline-flex; align-items:center; gap:7px; padding:8px 16px;
+  background:#fff; border:1px solid var(--line-2); border-radius:9px; cursor:pointer;
+  font-size:12px; color:var(--ink-2); font-weight:650; font-family:inherit; transition:.15s; }
+.up-paste-btn:hover { border-color:var(--brand); color:var(--brand); }
+
+/* 粘贴态 */
+.up-paste { padding:14px; background:#fff; border:1px solid var(--brand); border-radius:13px; }
+.up-paste textarea { width:100%; min-height:160px; padding:10px 12px;
+  border:1px solid var(--line-2); border-radius:9px; font-family:inherit; font-size:12.5px;
+  line-height:1.6; color:var(--ink); resize:vertical; outline:none; background:#F8F9FE;
+  box-sizing:border-box; }
+.up-paste textarea:focus { background:#fff; border-color:var(--brand); }
+.up-paste-foot { display:flex; align-items:center; gap:9px; margin-top:9px; }
+.up-paste-foot .upf-stat { font-size:11.5px; color:var(--muted); flex:1; }
+.up-paste-foot .upf-stat b { color:var(--ink-2); font-weight:700; }
+.up-paste-foot button { padding:7px 14px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.15s; }
+.up-paste-foot .up-paste-cancel { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.up-paste-foot .up-paste-cancel:hover { border-color:var(--red); color:var(--red); }
+.up-paste-foot .up-paste-confirm { background:var(--grad-btn); color:#fff; border:none; box-shadow:0 4px 12px rgba(90,91,240,.3); }
+.up-paste-foot .up-paste-confirm:hover:not(:disabled) { transform:translateY(-1px); }
+.up-paste-foot .up-paste-confirm:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+/* 已上传态 · 紧凑信息条 */
+.up-done { display:grid; grid-template-columns: 38px 1fr auto auto; gap:11px;
+  padding:13px 16px; background:#fff; border:1px solid rgba(24,185,122,.4); border-radius:13px;
+  align-items:center; }
+.up-done .ud-ico { width:38px; height:38px; border-radius:9px;
+  background:linear-gradient(135deg,#E9F9F1,#D4F4E2); display:grid; place-items:center;
+  font-size:19px; }
+.up-done .ud-main { min-width:0; }
+.up-done .ud-name { font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.up-done .ud-name::before { content:"✓"; color:var(--green); font-weight:800; font-size:13px; }
+.up-done .ud-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+.up-done .ud-replace { padding:7px 12px; font-size:11.5px; background:#fff;
+  color:var(--ink-2); border:1px solid var(--line-2); border-radius:8px; cursor:pointer;
+  font-weight:650; font-family:inherit; transition:.15s; }
+.up-done .ud-replace:hover { border-color:var(--brand); color:var(--brand); }
+.is-start { padding:9px 18px; font-size:12.5px; font-weight:700;
   background:var(--grad-btn); color:#fff; border:none; border-radius:9px; cursor:pointer;
-  white-space:nowrap; transition:.18s; box-shadow:0 4px 12px rgba(90,91,240,.3); }
-.intake-strip .is-start:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(90,91,240,.4); }
-.intake-strip .is-start:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+  white-space:nowrap; transition:.18s; box-shadow:0 4px 12px rgba(90,91,240,.3); font-family:inherit; }
+.is-start:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(90,91,240,.4); }
+.is-start:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
 
 /* AI 流式工作流主面板 */
 .wf-panel { padding:18px 20px; background:linear-gradient(160deg,#0B1226 0,#1A1F4F 100%);
@@ -4049,31 +4094,53 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 <div class="ai-ava">🤖</div>
                 <div class="ai-txt">
                   <div class="ai-name">合同审查 Agent<small>· 7×24 在岗 · 本月已替你审 <b data-counter="reviewedCount">47</b> 份合同 · 节省 <b>78 小时</b></small></div>
-                  我会自动跑完<b>解析 → 5 维风险扫描 → 模板对比 → 历史检索 → 谈判稿生成</b>整条流水线(约 17 秒),完成后告诉你需要拍板的事。你不用一步步点击,我自己推进。
+                  你<b>上传合同</b>(支持 PDF / Word / 扫描件 / 微信图,也可粘贴文本),我自动跑完<b>解析 → 5 维风险扫描 → 模板对比 → 历史检索 → 谈判稿生成</b>整条流水线(约 17 秒),完成后告诉你需要拍板的事。你不用一步步点击,我自己推进。
                 </div>
               </div>
 
-              <!-- 进件 + 启动 -->
-              <div class="intake-strip">
-                <div class="is-lbl">📥 选 1 份<br>合同进件</div>
-                <div class="is-pick">
-                  <button class="intake-pick-btn cur" data-fx="cPick" data-key="cnc">⚙️ 设备采购 · 苏州瑞达 · ¥386K <span class="ipb-tag h">高风险</span></button>
-                  <button class="intake-pick-btn" data-fx="cPick" data-key="saas">☁️ SaaS 订阅 · 某云厂商 · ¥84K/年 <span class="ipb-tag m">中风险</span></button>
-                  <button class="intake-pick-btn" data-fx="cPick" data-key="nda">🤐 投前 NDA · PE 基金 <span class="ipb-tag m">中风险</span></button>
-                  <button class="intake-pick-btn" data-fx="cPick" data-key="lease">🏢 办公室租赁 · 1200㎡ <span class="ipb-tag l">低风险</span></button>
+              <!-- 真实上传区 -->
+              <div class="upload-zone" id="cUpload">
+                <input type="file" id="cFileInput" hidden accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg">
+                <!-- 未上传态 -->
+                <div id="cUpEmpty">
+                  <div class="up-drop" id="cDrop">
+                    <span class="up-ico">📤</span>
+                    <div class="up-tt">把合同文件拖到这里 · 或 <span class="up-link" id="cBrowse">点击选择</span></div>
+                    <div class="up-sub">单份 ≤ 50MB · 中英文均可 · <b>解析后即焚 · 不留存原件</b></div>
+                    <div class="up-fmts"><span>PDF</span><span>Word</span><span>扫描件</span><span>微信图</span><span>电子签</span><span>TXT</span></div>
+                  </div>
+                  <div class="up-or">或者</div>
+                  <div style="text-align:center"><button class="up-paste-btn" id="cPasteOpen">📋 直接粘贴合同正文</button></div>
+                  <div class="up-paste" id="cPasteBox" style="display:none;margin-top:11px">
+                    <textarea id="cPasteText" placeholder="把合同正文粘贴到这里(任意长度,Agent 会自动识别合同类型与条款)..."></textarea>
+                    <div class="up-paste-foot">
+                      <div class="upf-stat"><b id="cPasteChars">0</b> 字 · 建议 500 字以上</div>
+                      <button class="up-paste-cancel" id="cPasteCancel">取消</button>
+                      <button class="up-paste-confirm" id="cPasteConfirm" disabled>确认使用</button>
+                    </div>
+                  </div>
                 </div>
-                <button class="is-start" id="cStartAgent">▶ 启动 Agent · 跑全流程</button>
+                <!-- 已上传态 -->
+                <div class="up-done" id="cUpDone" style="display:none">
+                  <div class="ud-ico" id="cFileTypeIco">📄</div>
+                  <div class="ud-main">
+                    <div class="ud-name" id="cFileName">合同.pdf</div>
+                    <div class="ud-meta" id="cFileMeta">2.4 MB · PDF · 刚上传</div>
+                  </div>
+                  <button class="ud-replace" id="cReplace">更换</button>
+                  <button class="is-start" id="cStartAgent">▶ 启动 Agent · 跑全流程</button>
+                </div>
               </div>
 
               <!-- AI 流式工作流面板 -->
               <div class="wf-panel" id="cWfPanel">
                 <div class="wf-head">
-                  <div class="wh-tt">🤖 AI 合同审查工作流<small>选定合同 → 点上方启动</small></div>
+                  <div class="wh-tt">🤖 AI 合同审查工作流<small>上传合同 → 点启动 Agent</small></div>
                   <div class="wh-total" id="cWfTotal"></div>
                 </div>
                 <div class="wf-empty" id="cWfEmpty">
                   <div class="we-ico">⏸</div>
-                  待你选择合同并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我的每一步工作。</span>
+                  待你上传合同并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我的每一步工作。</span>
                 </div>
                 <div class="wf-stream" id="cWfStream">
                   <!-- 5 条 AI 工作消息 (初始隐藏, JS 控制流式出现) -->
@@ -10407,21 +10474,129 @@ curl https://api.dgg.ai/v1/agents/dispatch \
      Stage 1 · 合同审查 Agent 主流程
      ============================================================ */
 
-  /* 选合同 */
-  var contractInfo = {
-    "cnc":   { name: "设备采购 · 苏州瑞达", risks: 7, fields: 31, parseTime: 17.6, similar: 3 },
-    "saas":  { name: "SaaS 订阅 · 某云厂商", risks: 4, fields: 28, parseTime: 14.2, similar: 5 },
-    "nda":   { name: "投前 NDA · PE 基金",   risks: 3, fields: 19, parseTime: 9.5,  similar: 7 },
-    "lease": { name: "办公室租赁 · 1200㎡",   risks: 2, fields: 24, parseTime: 12.0, similar: 4 }
-  };
-  var curKey = "cnc";
-  QA('[data-fx="cPick"]').forEach(function (b) {
-    b.addEventListener("click", function () {
-      if (b.classList.contains("cur")) return;
-      QA('[data-fx="cPick"]').forEach(function (x) { x.classList.toggle("cur", x === b); });
-      curKey = b.dataset.key;
-      resetWorkflow();
+  /* --- 真实合同上传 --- */
+  var uploadedFile = null; // { name, size, kind, source: "file"|"paste"|"drop" }
+  var upEmpty = Q("#cUpEmpty");
+  var upDone = Q("#cUpDone");
+  var fileInput = Q("#cFileInput");
+  var drop = Q("#cDrop");
+  var browseLink = Q("#cBrowse");
+  var pasteOpenBtn = Q("#cPasteOpen");
+  var pasteBox = Q("#cPasteBox");
+  var pasteText = Q("#cPasteText");
+  var pasteChars = Q("#cPasteChars");
+  var pasteCancel = Q("#cPasteCancel");
+  var pasteConfirm = Q("#cPasteConfirm");
+  var replaceBtn = Q("#cReplace");
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / 1024 / 1024).toFixed(1) + " MB";
+  }
+  function getFileIco(name) {
+    var ext = (name.split(".").pop() || "").toLowerCase();
+    if (ext === "pdf") return "📕";
+    if (ext === "doc" || ext === "docx") return "📘";
+    if (ext === "txt" || ext === "rtf") return "📄";
+    if (["png", "jpg", "jpeg", "webp"].indexOf(ext) >= 0) return "🖼️";
+    return "📄";
+  }
+  function getKindDesc(name) {
+    var ext = (name.split(".").pop() || "").toUpperCase();
+    return ext || "FILE";
+  }
+
+  function showUpDone() {
+    upEmpty.style.display = "none";
+    upDone.style.display = "grid";
+    Q("#cFileName").textContent = uploadedFile.name;
+    Q("#cFileTypeIco").textContent = getFileIco(uploadedFile.name);
+    var meta;
+    if (uploadedFile.source === "paste") {
+      meta = uploadedFile.size + " 字 · 粘贴文本 · 刚才";
+    } else {
+      meta = fmtSize(uploadedFile.size) + " · " + getKindDesc(uploadedFile.name) + " · 刚才";
+    }
+    Q("#cFileMeta").textContent = meta;
+  }
+  function showUpEmpty() {
+    upEmpty.style.display = "";
+    upDone.style.display = "none";
+    pasteBox.style.display = "none";
+    pasteText.value = "";
+    pasteChars.textContent = "0";
+    pasteConfirm.disabled = true;
+    uploadedFile = null;
+    fileInput.value = "";
+  }
+
+  function acceptFile(file) {
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) { ts("⚠ 文件超过 50MB · 请压缩后重试"); return; }
+    uploadedFile = { name: file.name, size: file.size, kind: file.type, source: "file" };
+    showUpDone();
+    resetWorkflow();
+  }
+
+  browseLink.addEventListener("click", function (e) { e.preventDefault(); fileInput.click(); });
+  drop.addEventListener("click", function (e) {
+    if (e.target.closest("#cBrowse")) return;
+    fileInput.click();
+  });
+  fileInput.addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (f) acceptFile(f);
+  });
+
+  /* 拖拽 */
+  ["dragenter", "dragover"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      drop.classList.add("dragover");
     });
+  });
+  ["dragleave", "drop"].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      if (ev === "dragleave" && drop.contains(e.relatedTarget)) return;
+      drop.classList.remove("dragover");
+    });
+  });
+  drop.addEventListener("drop", function (e) {
+    var f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) acceptFile(f);
+  });
+
+  /* 粘贴文本 */
+  pasteOpenBtn.addEventListener("click", function () {
+    pasteBox.style.display = "";
+    setTimeout(function () { pasteText.focus(); }, 30);
+  });
+  pasteText.addEventListener("input", function () {
+    var n = pasteText.value.length;
+    pasteChars.textContent = n.toLocaleString();
+    pasteConfirm.disabled = n < 100;
+  });
+  pasteCancel.addEventListener("click", function () {
+    pasteBox.style.display = "none";
+    pasteText.value = "";
+    pasteChars.textContent = "0";
+    pasteConfirm.disabled = true;
+  });
+  pasteConfirm.addEventListener("click", function () {
+    var n = pasteText.value.length;
+    if (n < 100) return;
+    var firstLine = (pasteText.value.split("\n")[0] || "").trim().substring(0, 40) || "粘贴的合同";
+    uploadedFile = { name: firstLine + " (粘贴文本)", size: n, kind: "text", source: "paste" };
+    showUpDone();
+    resetWorkflow();
+  });
+
+  /* 更换 */
+  replaceBtn.addEventListener("click", function () {
+    showUpEmpty();
+    resetWorkflow();
   });
 
   /* === 工作流状态机 === */
@@ -10463,14 +10638,14 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   }
 
   function runWorkflow() {
+    if (!uploadedFile) { ts("请先上传或粘贴一份合同"); return; }
     startBtn.disabled = true;
     startBtn.textContent = "⏳ Agent 工作中...";
     wfEmpty.style.display = "none";
     wfStream.style.display = "";
     wfPanel.classList.add("running");
-    Q("#cWfTotal").innerHTML = '<span class="c-pulse"></span>5 步骤 · 预计 17 秒';
+    Q("#cWfTotal").innerHTML = '<span class="c-pulse"></span>正在审查《' + uploadedFile.name + '》· 5 步骤 · 预计 17 秒';
 
-    var info = contractInfo[curKey];
     var steps = QA(".wf-msg");
     var durations = [3200, 5100, 3400, 2100, 3800]; // ms
     var cum = 0;
@@ -10492,11 +10667,11 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     wfTimers.push(setTimeout(function () {
       wfPanel.classList.remove("running");
       wfDone.classList.add("show");
-      txt("cWfTime", info.parseTime);
+      txt("cWfTime", "17.6");
       reco.classList.add("show");
       startBtn.textContent = "✓ Agent 已完成 · 重新跑";
       startBtn.disabled = false;
-      Q("#cWfTotal").innerHTML = "✓ 完成 · " + info.parseTime + "s";
+      Q("#cWfTotal").innerHTML = "✓ 已审查《" + uploadedFile.name + "》· 17.6s";
       setTimeout(function () { reco.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
     }, cum + 200));
   }
@@ -10599,15 +10774,14 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     execCard.classList.add("show");
     execLog.innerHTML = "";
     execFinal.classList.remove("show");
-    var info = contractInfo[curKey];
-    txt("cExecName", info.name);
+    txt("cExecName", uploadedFile ? uploadedFile.name : "本合同");
     var logs;
     if (execKey === "reco") {
       logs = [
-        ["生成 Word redline.docx (含 7 处修改 · 含批注)", 1000],
-        ["通过钉钉发送对方法务 · 苏州瑞达 陈泽华", 800],
+        ["生成 Word redline.docx(含 7 处修改 · 含批注)", 1000],
+        ["通过钉钉发送对方法务 + 附 redline 稿", 800],
         ["生成老板待批用印摘要(2 页要点)", 700],
-        ["录入履约监控时间表(交付日 8/14 · 验收 60 天 · 质保 12 月)", 600],
+        ["录入履约监控时间表(交付/验收/质保关键节点)", 600],
         ["向量化并同步至历史智库索引", 500]
       ];
     } else if (execKey === "manual") {
@@ -10679,7 +10853,8 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     ctas[1].textContent = "📋 我要逐条看再决定";
     ctas[2].textContent = "👨‍⚖️ 升级人工法务复核";
     resetWorkflow();
-    Q(".intake-strip").scrollIntoView({ behavior: "smooth", block: "start" });
+    showUpEmpty();
+    Q(".upload-zone").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
   /* ============================================================
