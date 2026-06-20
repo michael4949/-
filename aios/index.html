@@ -2282,57 +2282,78 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .review-head .finish:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(90,91,240,.4); }
 .review-head button:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
 
-/* 列标题 */
-.review-cols-head { display:grid; grid-template-columns: 1fr 1fr; font-size:11px;
-  font-weight:700; color:var(--muted); letter-spacing:.04em; }
-.review-cols-head .rch-l, .review-cols-head .rch-r { padding:10px 16px;
-  background:#F8F9FE; border-bottom:1px solid var(--line); }
-.review-cols-head .rch-l { border-right:1px solid var(--line); }
-.review-cols-head .rch-l::before { content:"📜 "; }
-.review-cols-head .rch-r::before { content:"🤖 "; }
+/* 双栏: 左 = 完整合同正文连续呈现 · 右 = 仅 7 条 AI 修订意见列表 (无"未发现风险"占位) */
+.review-body { display:grid; grid-template-columns: 1.1fr 1fr;
+  border-top:1px solid var(--line); align-items:stretch; }
 
-/* 双栏网格 */
-.review-grid { display:grid; grid-template-columns: 1fr 1fr; }
+/* 左栏: 像 Word 文档的合同正文 */
+.review-doc { padding:30px 36px 40px; background:#FFFEFB; border-right:1px solid var(--line);
+  font-family: "宋体", "SimSun", "PingFang SC", -apple-system, serif;
+  font-size:13.5px; line-height:1.95; color:#1a1a1a;
+  max-height:78vh; overflow-y:auto; }
+.review-doc .orig-para { margin:0 0 16px 0; padding:0; background:transparent; border:none;
+  border-radius:0; position:relative; transition:.2s; }
+.review-doc .orig-para .op-num { display:inline-block; padding:1px 8px; background:#EEF0FB;
+  color:var(--brand); border-radius:4px; font-size:11.5px; font-weight:800; letter-spacing:.05em;
+  margin-bottom:4px; font-family: -apple-system, "PingFang SC", "微软雅黑", sans-serif; }
+.review-doc .orig-para .op-content { display:block; }
+.review-doc .orig-para.op-title { text-align:center; border-bottom:2px solid #333; padding-bottom:18px; margin-bottom:24px; }
+.review-doc .orig-para.op-title .op-num { display:none; }
+.review-doc .orig-para.op-sign { margin-top:30px; padding-top:20px; border-top:1px dashed #999; }
+.review-doc .orig-para.op-sign .op-num { display:none; }
+.review-doc .orig-para mark { background:rgba(255,222,135,.7); padding:0 3px; border-radius:2px;
+  font-style:normal; }
 
-.rv-cell { padding:14px 16px; border-bottom:1px dashed rgba(0,0,0,.06); }
-.rv-cell.left { border-right:1px solid var(--line); background:#FFFEFB; }
-.rv-cell.right { background:#FAFBFF; }
+/* issue 段: 在原文上做高亮标记 (像 Word 批注) */
+.review-doc .orig-para.has-issue { padding:11px 14px; background:linear-gradient(180deg,#FFF9E6,#FFF4D6);
+  border-left:3px solid var(--amber); border-radius:5px; cursor:pointer; scroll-margin-top:80px; }
+.review-doc .orig-para.has-issue.high { background:linear-gradient(180deg,#FEF2F2,#FEE7E7);
+  border-left-color:var(--red); }
+.review-doc .orig-para.has-issue:hover { box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.review-doc .orig-para.has-issue.cur { outline:3px solid var(--brand); outline-offset:2px; }
+.review-doc .orig-para.has-issue.high .op-num { background:rgba(229,72,77,.12); color:var(--red); }
+.review-doc .orig-para.has-issue.mid .op-num { background:rgba(217,119,6,.12); color:var(--amber); }
+.review-doc .orig-para .op-marker { display:inline-block; font-size:10px; padding:2px 7px;
+  border-radius:4px; color:#fff; font-weight:800; letter-spacing:.05em; margin-left:8px;
+  vertical-align:1px; font-family: -apple-system, "PingFang SC", "微软雅黑", sans-serif; }
+.review-doc .orig-para.has-issue.high .op-marker { background:var(--red); }
+.review-doc .orig-para.has-issue.mid .op-marker { background:var(--amber); }
+.review-doc .orig-para.modified { background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border-left-color:var(--green); }
+.review-doc .orig-para.modified .op-num { background:rgba(24,185,122,.15); color:var(--green); }
+.review-doc .orig-para.modified mark { background:rgba(43,217,168,.4); }
+.review-doc .orig-para.modified .op-marker { background:var(--green); }
+.review-doc .orig-para.modified .op-marker::after { content:" · 已修订"; }
+.review-doc .orig-para.rejected { background:linear-gradient(180deg,#F8F9FE,#EEF0FB); opacity:.85;
+  border-left-color:var(--muted); }
+.review-doc .orig-para.rejected .op-marker { background:var(--muted); }
+.review-doc .orig-para.rejected .op-marker::after { content:" · 已驳回 · 保持原文"; }
+.review-doc .op-undo { display:none; margin-top:8px; font-size:10.5px; color:var(--green); cursor:pointer;
+  font-weight:700; font-family: -apple-system, "PingFang SC", "微软雅黑", sans-serif; }
+.review-doc .op-undo:hover { text-decoration:underline; }
+.review-doc .orig-para.modified .op-undo, .review-doc .orig-para.rejected .op-undo { display:inline-block; }
+
+/* 右栏: AI 修订意见列表 (无 "未发现风险" 占位) */
+.review-tips { background:#FAFBFF; max-height:78vh; overflow-y:auto; padding:0; }
+.review-tips .rt-head { position:sticky; top:0; z-index:2; padding:13px 18px;
+  background:linear-gradient(180deg,#F8F9FE,#EEF0FB); border-bottom:1px solid var(--line);
+  font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.5; }
+.review-tips .rt-head b { color:var(--brand); font-size:14px; }
+.review-tips .rt-head small { font-size:11px; color:var(--muted); font-weight:500; }
+.review-tips .rt-list { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
+.review-tips .ai-rev { background:#fff; border:1px solid var(--line); border-radius:11px;
+  padding:13px 14px; cursor:pointer; transition:.2s; scroll-margin-top:80px; }
+.review-tips .ai-rev:hover { border-color:rgba(90,91,240,.4); box-shadow:0 4px 12px rgba(90,91,240,.08); }
+.review-tips .ai-rev.cur { border-color:var(--brand); box-shadow:0 0 0 3px rgba(90,91,240,.15); }
+.review-tips .ar-head { display:flex; align-items:center; gap:7px; margin-bottom:7px; flex-wrap:wrap; }
+.review-tips .ar-pos { font-size:11px; color:var(--muted); font-weight:600;
+  margin-left:auto; padding:1px 7px; background:#F8F9FE; border-radius:4px; }
+.review-tips .ar-issue { font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.45;
+  margin-bottom:8px; }
 
 /* 段落 (左原文) */
-.orig-para { font-size:12.5px; line-height:1.85; color:var(--ink); position:relative; padding:5px 0; }
-.orig-para .op-num { font-weight:700; color:var(--brand); margin-right:8px; }
-.orig-para mark { background:rgba(255,222,135,.7); padding:0 3px; border-radius:3px; font-style:normal; }
-.orig-para.has-issue { padding:11px 13px; background:linear-gradient(180deg,#FFF9E6,#FFF4D6);
-  border-left:3px solid var(--amber); border-radius:7px; }
-.orig-para.has-issue.high { background:linear-gradient(180deg,#FEF2F2,#FEE7E7);
-  border-left-color:var(--red); }
-.orig-para .op-marker { display:inline-block; font-size:9.5px; padding:2px 7px;
-  border-radius:4px; color:#fff; font-weight:800; letter-spacing:.04em; margin-left:8px;
-  vertical-align:1px; }
-.orig-para.has-issue.high .op-marker { background:var(--red); }
-.orig-para.has-issue.mid .op-marker { background:var(--amber); }
-.orig-para.modified { background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
-  border-left-color:var(--green); }
-.orig-para.modified mark { background:rgba(43,217,168,.35); }
-.orig-para.modified .op-marker { background:var(--green); }
-.orig-para.modified .op-marker::after { content:" 已修订"; }
-.orig-para.modified .op-marker { content:""; }
-.orig-para.rejected { background:linear-gradient(180deg,#F8F9FE,#EEF0FB); opacity:.85;
-  border-left-color:var(--muted); }
-.orig-para.rejected .op-marker { background:var(--muted); }
-.orig-para.rejected .op-marker::after { content:" 已驳回 · 保持原文"; }
-
-/* 撤销按钮(已修订后出现) */
-.op-undo { display:none; margin-top:8px; font-size:10.5px; color:var(--green); cursor:pointer;
-  font-weight:700; }
-.op-undo:hover { text-decoration:underline; }
-.orig-para.modified .op-undo, .orig-para.rejected .op-undo { display:inline-block; }
-
-/* AI 修订建议卡 (右) */
+/* AI 修订建议卡 (基础样式 · 详细样式在 .review-tips 内) */
 .ai-rev { position:relative; }
-.ai-rev.skip { font-size:11px; color:var(--muted); font-style:italic; padding:18px 6px;
-  text-align:center; }
-.ai-rev.skip::before { content:"✓ "; color:var(--green); font-style:normal; font-weight:800; }
 .ar-head { display:flex; align-items:center; gap:7px; margin-bottom:9px; flex-wrap:wrap; }
 .ar-tag { font-size:10px; padding:2px 7px; border-radius:5px; font-weight:700; flex-shrink:0; }
 .ar-tag.high { background:#FEF2F2; color:var(--red); }
@@ -4703,339 +4724,280 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     <button class="finish" id="cRvFinish" disabled>✓ 完成 · 生成 redline 终稿</button>
                   </div>
                 </div>
-                <div class="review-cols-head">
-                  <div class="rch-l">合同原文 · 接受后实时替换</div>
-                  <div class="rch-r">AI 修订建议 · 含法规依据与影响</div>
-                </div>
-                <div class="review-grid" id="cRvGrid">
+                <!-- 左栏: 完整合同正文 1:1 还原 (连续 · 不被切断) | 右栏: AI 修订意见列表 -->
+                <div class="review-body" id="cRvBody">
 
-                  <!-- ===== 完整合同正文 1:1 还原 · 19 段 (7 段含修订意见 + 12 段无风险) ===== -->
+                  <div class="review-doc" id="cRvDoc">
 
-                  <!-- 段 1: 合同标题 -->
-                  <div class="rv-cell left">
                     <div class="orig-para op-title">
-                      <span class="op-num">合同标题</span>
-                      <span class="op-content"><b style="font-size:14px">设备采购合同</b><br>合同编号:SD-2026-0612 · 签订日期:2026 年 6 月 15 日 · 签订地点:东莞市松山湖</span>
+                      <span class="op-content" style="display:block;text-align:center"><b style="font-size:18px;letter-spacing:.1em">设备采购合同</b></span>
+                      <span class="op-content" style="display:block;text-align:right;font-size:11.5px;color:var(--muted);margin-top:8px">合同编号:SD-2026-0612</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 2: 双方信息 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
-                      <span class="op-num">双方信息</span>
-                      <span class="op-content"><b>甲方(买方):</b>东莞市顶呱呱AI科技有限公司<br>住所:东莞市松山湖高新区某某科技园 B 栋 · 法定代表人:刘明海<br><br><b>乙方(卖方):</b>苏州瑞达精密机械有限公司<br>住所:苏州市姑苏区某某工业园 12 号 · 法定代表人:陈泽华</span>
+                      <span class="op-content"><b>甲方(买方):</b>东莞市顶呱呱AI科技有限公司<br>住所:东莞市松山湖高新区某某科技园 B 栋<br>法定代表人:刘明海 &nbsp; 联系电话:0769-XXX-XXXX</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 3: 序言 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
-                      <span class="op-num">序言</span>
+                      <span class="op-content"><b>乙方(卖方):</b>苏州瑞达精密机械有限公司<br>住所:苏州市姑苏区某某工业园 12 号<br>法定代表人:陈泽华 &nbsp; 联系电话:0512-XXX-XXXX</span>
+                    </div>
+
+                    <div class="orig-para">
                       <span class="op-content">甲乙双方就 CNC 加工中心采购事宜,本着平等、自愿、诚实、信用的原则,经友好协商,达成如下协议:</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 4: 第一条 总则 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第一条 总则</span>
-                      <span class="op-content">1.1 本合同是甲乙双方就 CNC 加工中心设备采购达成的真实意思表示。<br>1.2 双方应严格按照本合同约定履行各自的权利义务。</span>
+                      <span class="op-content">1.1 本合同是甲乙双方就 CNC 加工中心设备采购达成的真实意思表示,合法、有效、可执行。<br>1.2 双方应严格按照本合同约定履行各自的权利义务,任何一方不得擅自变更或解除本合同。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 5: 第二条 标的与数量 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第二条 标的与数量</span>
-                      <span class="op-content">2.1 合同标的:三菱 (Mitsubishi) M70V 系列立式 CNC 加工中心。<br>2.2 数量:2 (贰) 台。<br>2.3 主要规格:主轴功率 11kW,行程 1200×500×510mm,定位精度 ±0.005mm。</span>
+                      <span class="op-content">2.1 合同标的:三菱 (Mitsubishi) M70V 系列立式 CNC 加工中心。<br>2.2 数量:2 (贰) 台。<br>2.3 主要规格:主轴功率 11kW,行程 1200×500×510mm,定位精度 ±0.005mm,重复定位精度 ±0.003mm。<br>2.4 设备生产厂家:Mitsubishi Heavy Industries Machine Tool Co., Ltd.</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 6: 第三条 交付 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第三条 交付</span>
-                      <span class="op-content">3.1 乙方应于本合同签订后 60 个日历日内(即 2026 年 8 月 14 日前)将设备交付至甲方指定地点。<br>3.2 交付地点:东莞市松山湖高新区甲方工厂。<br>3.3 运输费用由乙方承担,运输途中风险由乙方负责。</span>
+                      <span class="op-content">3.1 乙方应于本合同签订后 60 个日历日内(即 2026 年 8 月 14 日前)将设备交付至甲方指定地点。<br>3.2 交付地点:东莞市松山湖高新区甲方工厂(具体地址以装运通知为准)。<br>3.3 运输费用由乙方承担,运输途中风险由乙方负责。<br>3.4 乙方应于发货前 3 个工作日书面通知甲方装运信息。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 7: 第四条 价款 -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第四条 价款</span>
-                      <span class="op-content">4.1 单价:¥193,000(壹拾玖万叁仟元整)/台,含 13% 增值税。<br>4.2 合同总金额:¥386,000.00(叁拾捌万陆仟元整)。<br>4.3 本合同价款除本合同明确约定外,不因任何原因调整。</span>
+                      <span class="op-content">4.1 单价:¥193,000(壹拾玖万叁仟元整)/台,含 13% 增值税。<br>4.2 合同总金额:¥386,000.00(叁拾捌万陆仟元整)。<br>4.3 本合同价款除本合同明确约定外,不因任何原因调整。<br>4.4 货币种类:人民币。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 8: 第五条 付款 [r2 高/商业] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue high" data-pid="r2" id="orig-r2">
                       <span class="op-num">第五条 付款</span><span class="op-marker">高 · 商业</span>
                       <span class="op-content">5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>15 日内支付剩余 50%,合同价款全部结清</mark>。</span>
                       <span class="op-undo" data-undo="r2">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r2"
-                      data-new="5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#1</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
-                        <span class="ar-issue">缺质保金扣留 · 验收后 100% 付清,无质量谈判筹码</span>
-                      </div>
-                      <div class="ar-reason">未约定质保金,验收后即 100% 付清,质保期内若出质量问题需另行起诉追索。行业惯例扣留 5-10%。基于历史智库,贵司 2024 年与同对手方签的同型号合同<b>明确扣留 10% 质保金 12 月</b>,本次对方明显「开倒车」。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r2">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r2">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 626 条 + 第 644 条:实务中应约定质保金以保障担保责任落实。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>瑞达 2024-07 同卖方设备运行 3 月主轴故障, 无质保金致追索耗时 11 月仅获 60% 维修费。</div>
-                        <div class="ard-row"><span class="ard-k">💸 影响</span>
-                          <div class="ard-impact">
-                            <div><div class="ai-lbl">质保内故障损失</div><div class="ai-val">¥3-8 万</div></div>
-                            <div><div class="ai-lbl">追索成本</div><div class="ai-val">¥2-5 万</div></div>
-                            <div><div class="ai-lbl">建议质保金</div><div class="ai-val">¥38,600</div></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 9: 第六条 发票 [r6 中/财税] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r6" id="orig-r6">
                       <span class="op-num">第六条 发票</span><span class="op-marker">中 · 财税</span>
                       <span class="op-content">6.1 乙方应在收到货款后<mark>开具发票</mark>给甲方。</span>
                       <span class="op-undo" data-undo="r6">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r6"
-                      data-new="6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。">
-                      <div class="ar-head">
-                        <span class="ar-num">#2</span><span class="ar-tag mid">中</span><span class="ar-dim">财税</span>
-                        <span class="ar-issue">未约定 13% 专用发票 · 进项税抵扣失守</span>
-                      </div>
-                      <div class="ar-reason">仅写"开具发票",对方可能提供普通发票,导致我方<b>无法抵扣进项税 ¥44,407</b>。¥386K 含税合同, 13% 进项税被吃掉不少。需在合同明确 13% 专用发票 + 开具时限。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r6">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r6">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《增值税暂行条例》第 9 条 + 国税发 [2008]31 号:取得普通发票不得抵扣进项税。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 10: 第七条 验收 [r4 中/履行] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r4" id="orig-r4">
                       <span class="op-num">第七条 验收</span><span class="op-marker">中 · 履行</span>
                       <span class="op-content">7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>30 日内</mark>完成验收并提出书面异议,<mark>逾期未提异议的,视为验收合格</mark>。</span>
                       <span class="op-undo" data-undo="r4">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r4"
-                      data-new="7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但 <mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#3</span><span class="ar-tag mid">中</span><span class="ar-dim">履行</span>
-                        <span class="ar-issue">验收期仅 30 天 · 隐蔽瑕疵无救济</span>
-                      </div>
-                      <div class="ar-reason">CNC 加工中心调试 + 试切 + 隐蔽缺陷暴露往往需 <b>2-3 个月</b>,30 天内只能发现明显缺陷。"逾期视为合格"使后续隐蔽瑕疵维权由<b>担保责任降级为质量瑕疵责任</b>, 举证负担转移到我方。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但<mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r4">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r4">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 621 条:质量异议期约定合理逾期视为符合约定;<b>隐蔽瑕疵的发现期可至 2 年</b>。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)鄂 02 民终 1056 号:同类条款致后续质量主张被驳回。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 11: 第八条 质保 (无 issue) -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第八条 质保</span>
-                      <span class="op-content">8.1 本合同设备质保期为 12 个月,自验收合格之日起计算。<br>8.2 质保期内非人为故障导致的维修,由乙方免费提供。</span>
+                      <span class="op-content">8.1 本合同设备质保期为 12 个月,自验收合格之日起计算。<br>8.2 质保期内非人为故障导致的维修,由乙方免费提供,包括人工、零件、上门服务。<br>8.3 质保期外的维护服务,可按 ¥800/次的标准付费提供。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 12: 第九条 软件 IP [r7 中/商业] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r7" id="orig-r7">
                       <span class="op-num">第九条 软件</span><span class="op-marker">中 · 商业</span>
                       <span class="op-content">9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套的<mark>控制软件由乙方提供,买方有使用权</mark>。</span>
                       <span class="op-undo" data-undo="r7">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r7"
-                      data-new="9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#4</span><span class="ar-tag mid">中</span><span class="ar-dim">商业</span>
-                        <span class="ar-issue">软件 IP 与升级权未明确 · 设备生命周期受制</span>
-                      </div>
-                      <div class="ar-reason">仅说"使用权"未约定:① 升级是否免费;② 升级版本是否兼容;③ 乙方停止维护后能否自行修改。设备 8-10 年生命周期内可能被锁住,强制升级费 ¥3-5 万/次。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r7">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r7">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>大族激光 2024-12 同类合同:小版本免费 5 年, 大版本年费, 源码 2 年托管。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 13: 第十条 保密 (无 issue) -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第十条 保密</span>
-                      <span class="op-content">10.1 双方对本合同信息及合作过程中获悉的对方商业秘密承担 3 年保密义务。<br>10.2 保密义务在合同终止后仍然有效。</span>
+                      <span class="op-content">10.1 双方对本合同信息及合作过程中获悉的对方商业秘密承担 3 年保密义务。<br>10.2 保密义务在合同终止后仍然有效。<br>10.3 违反保密义务的,违约方应赔偿守约方因此遭受的损失。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 14: 第十一条 违约 [r3 高/法律] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue high" data-pid="r3" id="orig-r3">
                       <span class="op-num">第十一条 违约</span><span class="op-marker">高 · 法律</span>
                       <span class="op-content">11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.05%/日</mark>计算,但累计不超过合同金额 <mark>5%</mark>。</span>
                       <span class="op-undo" data-undo="r3">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r3"
-                      data-new="11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。">
-                      <div class="ar-head">
-                        <span class="ar-num">#5</span><span class="ar-tag high">高</span><span class="ar-dim">法律</span>
-                        <span class="ar-issue">违约金率过低 + 上限太低 · 对方实际无延期压力</span>
-                      </div>
-                      <div class="ar-reason">0.05%/日 + 上限 5% 是致命点:<b>对方延期 100 天即触顶,再拖也不增加成本</b>。延期 60 天的产能损失 ¥48 万,现条款最多索赔 ¥1.93 万, 差额暴露 ¥46 万+。行业标准 0.1-0.3%/日 · 上限 20-30%。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r3">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r3">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 585 条:违约金可参照实际损失约定, 但举证责任在守约方。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2025)粤 19 民终 432 号:类似条款下买方主张实际损失提增违约金, 法院支持率仅 47%。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 15: 第十二条 知识产权 (无 issue) -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第十二条 知识产权</span>
-                      <span class="op-content">12.1 本合同涉及的设备所搭载的发明专利、实用新型专利的知识产权归乙方所有。<br>12.2 甲方不得对设备进行反向工程或用于商业用途的复制。</span>
+                      <span class="op-content">12.1 本合同涉及的设备所搭载的发明专利、实用新型专利的知识产权归乙方所有。<br>12.2 甲方不得对设备进行反向工程或用于商业用途的复制。<br>12.3 若设备出现第三方主张知识产权的, 由乙方负责处理并承担相关费用。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 16: 第十三条 不可抗力 [r5 中/法律] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue mid" data-pid="r5" id="orig-r5">
                       <span class="op-num">第十三条 不可抗力</span><span class="op-marker">中 · 法律</span>
                       <span class="op-content">13.1 不可抗力是指<mark>战争、地震、洪水</mark>等不能预见、不能避免、不能克服的客观情况。<br>13.2 因不可抗力导致合同不能履行的,受影响方应及时通知另一方并提供证明。</span>
                       <span class="op-undo" data-undo="r5">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r5"
-                      data-new="13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。">
-                      <div class="ar-head">
-                        <span class="ar-num">#6</span><span class="ar-tag mid">中</span><span class="ar-dim">法律</span>
-                        <span class="ar-issue">定义过窄 · 未含公共卫生 / 政府管制</span>
-                      </div>
-                      <div class="ar-reason">仅列战争/地震/洪水,未涵盖<b>公共卫生事件、政府限产、停电管控、供应链管制</b>等近年高发情形。一旦遭遇,对方可主张"不属于不可抗力",我方面临违约赔偿。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r5">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r5">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 180 条 + 全国人大常委会法工委 2020 年关于疫情防控的释义:疫情属不可抗力, 但当事人有约定的从其约定。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>2021 长三角拉闸限电 + 2024 广东限产案例均被认定属不可抗力。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 17: 第十四条 争议解决 [r1 高/商业] -->
-                  <div class="rv-cell left">
                     <div class="orig-para has-issue high" data-pid="r1" id="orig-r1">
                       <span class="op-num">第十四条 争议解决</span><span class="op-marker">高 · 商业</span>
                       <span class="op-content">14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>乙方所在地人民法院</mark>管辖。</span>
                       <span class="op-undo" data-undo="r1">↶ 撤销修订, 恢复原文</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right">
-                    <div class="ai-rev" data-rid="r1"
-                      data-new="14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。">
-                      <div class="ar-head">
-                        <span class="ar-num">#7</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
-                        <span class="ar-issue">管辖法院约定对方所在地 · 我方主场不利</span>
-                      </div>
-                      <div class="ar-reason">该约定将管辖法院设在<b>对方所在地(苏州)</b>,争议时我方需<b>跨省诉讼</b>,差旅 + 律师驻地 + 调证额外成本 <b>¥5-8 万/次</b>。乙方在当地法院熟悉度往往高于我方,实质影响诉讼公平。</div>
-                      <div class="ar-recommend"><div class="ar-edit" contenteditable="true">14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。</div></div>
-                      <div class="ar-cta">
-                        <button class="accept" data-fx="cRvAcc" data-rid="r1">✓ 接受修订</button>
-                        <button class="reject" data-fx="cRvRej" data-rid="r1">✗ 驳回</button>
-                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
-                      </div>
-                      <div class="ar-detail">
-                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民事诉讼法》第 35 条:合同纠纷可由原告所在地、被告所在地、合同履行地法院管辖。当事人有约定的从其约定。</div>
-                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)苏 0508 民初 1287 号:同类约定使外地买方诉讼成本增加 ¥4-8 万。</div>
-                      </div>
-                      <div class="ar-status"></div>
-                    </div>
-                  </div>
 
-                  <!-- 段 18: 第十五条 生效 (无 issue) -->
-                  <div class="rv-cell left">
                     <div class="orig-para">
                       <span class="op-num">第十五条 生效</span>
                       <span class="op-content">15.1 本合同自双方签字盖章之日起生效。<br>15.2 本合同一式两份,双方各执一份,具有同等法律效力。<br>15.3 本合同未尽事宜,双方可签订补充协议,补充协议与本合同具有同等法律效力。</span>
                     </div>
-                  </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
 
-                  <!-- 段 19: 签字 (无 issue) -->
-                  <div class="rv-cell left">
-                    <div class="orig-para">
-                      <span class="op-num">签字盖章</span>
-                      <span class="op-content"><b>甲方:</b>东莞市顶呱呱AI科技有限公司<br>法定代表人/授权代理人:____________________<br>日期:2026 年 6 月 15 日<br><br><b>乙方:</b>苏州瑞达精密机械有限公司<br>法定代表人/授权代理人:____________________<br>日期:2026 年 6 月 15 日</span>
+                    <div class="orig-para op-sign">
+                      <span class="op-content"><table style="width:100%;border-collapse:collapse;margin-top:10px"><tr><td style="width:50%;padding:8px 6px;vertical-align:top"><b>甲方:</b>东莞市顶呱呱AI科技有限公司<br><br>法定代表人/授权代理人:<br><br>____________________(签字)<br><br>____________________(盖章)<br><br>日期:2026 年 ___ 月 ___ 日</td><td style="width:50%;padding:8px 6px;vertical-align:top;border-left:1px dashed #ccc"><b>乙方:</b>苏州瑞达精密机械有限公司<br><br>法定代表人/授权代理人:<br><br>____________________(签字)<br><br>____________________(盖章)<br><br>日期:2026 年 ___ 月 ___ 日</td></tr></table></span>
+                    </div>
+
+                  </div>
+
+                  <div class="review-tips" id="cRvTips">
+                    <div class="rt-head">
+                      🤖 AI 已标注 <b>7 处</b>需修订条款<br>
+                      <small>点任意一条 → 左边原文自动跳到对应位置 · 接受修订后左原文实时替换</small>
+                    </div>
+                    <div class="rt-list">
+
+                      <div class="ai-rev" data-rid="r2" data-jump="orig-r2"
+                        data-new="5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。">
+                        <div class="ar-head">
+                          <span class="ar-num">#1</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
+                          <span class="ar-pos">第五条 付款</span>
+                        </div>
+                        <div class="ar-issue">缺质保金扣留 · 验收后 100% 付清,无质量谈判筹码</div>
+                        <div class="ar-reason">未约定质保金,验收后即 100% 付清,质保期内若出质量问题需另行起诉追索。行业惯例扣留 5-10%。基于历史智库,贵司 2024 年与同对手方签的同型号合同<b>明确扣留 10% 质保金 12 月</b>,本次对方明显「开倒车」。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">5.1 付款方式:银行转账。<br>5.2 付款节点:甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 <mark>30 日内支付 40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r2">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r2">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 626 条 + 第 644 条:实务中应约定质保金以保障担保责任落实。</div>
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>瑞达 2024-07 同卖方设备运行 3 月主轴故障, 无质保金致追索耗时 11 月仅获 60% 维修费。</div>
+                          <div class="ard-row"><span class="ard-k">💸 影响</span>
+                            <div class="ard-impact">
+                              <div><div class="ai-lbl">质保内故障损失</div><div class="ai-val">¥3-8 万</div></div>
+                              <div><div class="ai-lbl">追索成本</div><div class="ai-val">¥2-5 万</div></div>
+                              <div><div class="ai-lbl">建议质保金</div><div class="ai-val">¥38,600</div></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r6" data-jump="orig-r6"
+                        data-new="6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。">
+                        <div class="ar-head">
+                          <span class="ar-num">#2</span><span class="ar-tag mid">中</span><span class="ar-dim">财税</span>
+                          <span class="ar-pos">第六条 发票</span>
+                        </div>
+                        <div class="ar-issue">未约定 13% 专用发票 · 进项税抵扣失守</div>
+                        <div class="ar-reason">仅写"开具发票",对方可能提供普通发票,导致我方<b>无法抵扣进项税 ¥44,407</b>。¥386K 含税合同, 13% 进项税被吃掉不少。需在合同明确 13% 专用发票 + 开具时限。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">6.1 乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。<br>6.2 乙方逾期未开票的, 甲方有权暂缓后续付款, 期间不构成违约。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r6">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r6">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《增值税暂行条例》第 9 条 + 国税发 [2008]31 号:取得普通发票不得抵扣进项税。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r4" data-jump="orig-r4"
+                        data-new="7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但 <mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。">
+                        <div class="ar-head">
+                          <span class="ar-num">#3</span><span class="ar-tag mid">中</span><span class="ar-dim">履行</span>
+                          <span class="ar-pos">第七条 验收</span>
+                        </div>
+                        <div class="ar-issue">验收期仅 30 天 · 隐蔽瑕疵无救济</div>
+                        <div class="ar-reason">CNC 加工中心调试 + 试切 + 隐蔽缺陷暴露往往需 <b>2-3 个月</b>,30 天内只能发现明显缺陷。"逾期视为合格"使后续隐蔽瑕疵维权由<b>担保责任降级为质量瑕疵责任</b>, 举证负担转移到我方。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">7.1 设备到货后,甲方应安排技术人员到场协助开箱。<br>7.2 验收标准:符合合同约定及厂家技术规范。<br>7.3 验收方式:出具书面验收报告。<br>7.4 甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但<mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r4">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r4">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 621 条:质量异议期约定合理逾期视为符合约定;<b>隐蔽瑕疵的发现期可至 2 年</b>。</div>
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)鄂 02 民终 1056 号:同类条款致后续质量主张被驳回。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r7" data-jump="orig-r7"
+                        data-new="9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。">
+                        <div class="ar-head">
+                          <span class="ar-num">#4</span><span class="ar-tag mid">中</span><span class="ar-dim">商业</span>
+                          <span class="ar-pos">第九条 软件</span>
+                        </div>
+                        <div class="ar-issue">软件 IP 与升级权未明确 · 设备生命周期受制</div>
+                        <div class="ar-reason">仅说"使用权"未约定:① 升级是否免费;② 升级版本是否兼容;③ 乙方停止维护后能否自行修改。设备 8-10 年生命周期内可能被锁住,强制升级费 ¥3-5 万/次。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">9.1 乙方应同时提供操作手册与维修指南(纸质 + 电子版)。<br>9.2 设备配套软件 IP 归乙方,甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商,价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时,源码托管解锁给甲方仅供内部维护</mark>。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r7">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r7">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>大族激光 2024-12 同类合同:小版本免费 5 年, 大版本年费, 源码 2 年托管。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r3" data-jump="orig-r3"
+                        data-new="11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。">
+                        <div class="ar-head">
+                          <span class="ar-num">#5</span><span class="ar-tag high">高</span><span class="ar-dim">法律</span>
+                          <span class="ar-pos">第十一条 违约</span>
+                        </div>
+                        <div class="ar-issue">违约金率过低 + 上限太低 · 对方实际无延期压力</div>
+                        <div class="ar-reason">0.05%/日 + 上限 5% 是致命点:<b>对方延期 100 天即触顶,再拖也不增加成本</b>。延期 60 天的产能损失 ¥48 万,现条款最多索赔 ¥1.93 万, 差额暴露 ¥46 万+。行业标准 0.1-0.3%/日 · 上限 20-30%。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">11.1 任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r3">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r3">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 585 条:违约金可参照实际损失约定, 但举证责任在守约方。</div>
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>(2025)粤 19 民终 432 号:类似条款下买方主张实际损失提增违约金, 法院支持率仅 47%。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r5" data-jump="orig-r5"
+                        data-new="13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。">
+                        <div class="ar-head">
+                          <span class="ar-num">#6</span><span class="ar-tag mid">中</span><span class="ar-dim">法律</span>
+                          <span class="ar-pos">第十三条 不可抗力</span>
+                        </div>
+                        <div class="ar-issue">定义过窄 · 未含公共卫生 / 政府管制</div>
+                        <div class="ar-reason">仅列战争/地震/洪水,未涵盖<b>公共卫生事件、政府限产、停电管控、供应链管制</b>等近年高发情形。一旦遭遇,对方可主张"不属于不可抗力",我方面临违约赔偿。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">13.1 不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。<br>13.2 因不可抗力导致合同不能履行的,受影响方应在 <mark>7 日内</mark>通知另一方并提供证明。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r5">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r5">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 180 条 + 全国人大常委会法工委 2020 年关于疫情防控的释义:疫情属不可抗力, 但当事人有约定的从其约定。</div>
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>2021 长三角拉闸限电 + 2024 广东限产案例均被认定属不可抗力。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
+                      <div class="ai-rev" data-rid="r1" data-jump="orig-r1"
+                        data-new="14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。">
+                        <div class="ar-head">
+                          <span class="ar-num">#7</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
+                          <span class="ar-pos">第十四条 争议解决</span>
+                        </div>
+                        <div class="ar-issue">管辖法院约定对方所在地 · 我方主场不利</div>
+                        <div class="ar-reason">该约定将管辖法院设在<b>对方所在地(苏州)</b>,争议时我方需<b>跨省诉讼</b>,差旅 + 律师驻地 + 调证额外成本 <b>¥5-8 万/次</b>。乙方在当地法院熟悉度往往高于我方,实质影响诉讼公平。</div>
+                        <div class="ar-recommend"><div class="ar-edit" contenteditable="true">14.1 争议解决方式:诉讼。<br>14.2 因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。</div></div>
+                        <div class="ar-cta">
+                          <button class="accept" data-fx="cRvAcc" data-rid="r1">✓ 接受修订</button>
+                          <button class="reject" data-fx="cRvRej" data-rid="r1">✗ 驳回</button>
+                          <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                        </div>
+                        <div class="ar-detail">
+                          <div class="ard-row"><span class="ard-k">📚 法规</span>《民事诉讼法》第 35 条:合同纠纷可由原告所在地、被告所在地、合同履行地法院管辖。当事人有约定的从其约定。</div>
+                          <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)苏 0508 民初 1287 号:同类约定使外地买方诉讼成本增加 ¥4-8 万。</div>
+                        </div>
+                        <div class="ar-status"></div>
+                      </div>
+
                     </div>
                   </div>
-                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
-
                 </div>
-              </div>
+
+                            </div>
 
               <!-- AI 自动执行流(拍板后出现) -->
               <div class="ai-exec-card" id="cExec">
@@ -11319,6 +11281,34 @@ curl https://api.dgg.ai/v1/agents/dispatch \
       var card = det.closest(".ai-rev");
       card.classList.toggle("open");
       det.textContent = card.classList.contains("open") ? "▴ 收起" : "▾ 法规依据";
+      return;
+    }
+    // 点 ai-rev 卡片 → 左原文滚到对应段
+    var revCard = e.target.closest(".ai-rev[data-rid]");
+    if (revCard && !e.target.closest("button") && !e.target.closest(".ar-edit")) {
+      var jumpId = revCard.dataset.jump || ("orig-" + revCard.dataset.rid);
+      var origTarget = document.getElementById(jumpId);
+      if (origTarget) {
+        QA(".orig-para.cur", rvShell).forEach(function (x) { x.classList.remove("cur"); });
+        QA(".ai-rev.cur", rvShell).forEach(function (x) { x.classList.remove("cur"); });
+        origTarget.classList.add("cur");
+        revCard.classList.add("cur");
+        origTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(function () { origTarget.classList.remove("cur"); revCard.classList.remove("cur"); }, 2200);
+      }
+      return;
+    }
+    // 点左边有 issue 的段 → 右栏滚到对应 ai-rev
+    var origIssue = e.target.closest(".orig-para.has-issue[data-pid]");
+    if (origIssue && !e.target.closest(".op-undo")) {
+      var rid = origIssue.dataset.pid;
+      var matchCard = Q('.ai-rev[data-rid="' + rid + '"]', rvShell);
+      if (matchCard) {
+        QA(".ai-rev.cur", rvShell).forEach(function (x) { x.classList.remove("cur"); });
+        matchCard.classList.add("cur");
+        matchCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(function () { matchCard.classList.remove("cur"); }, 2200);
+      }
     }
   });
 
@@ -11386,49 +11376,73 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     }
   });
 
-  /* === 导出修订版 .doc (Word 兼容) · 排版/字体与原文一致 === */
+  /* === 导出修订版 .doc · 排版/字体/字号与原合同标准一致 (宋体 · 仿合同正文) === */
   Q("#cRvExport").addEventListener("click", function () {
     if (!uploadedFile) { ts("请先上传或粘贴一份合同"); return; }
-    // 取左栏全部段落的 HTML, 但要做"打印整洁化":
-    // - 去除 has-issue / modified / rejected 等审查标记类
-    // - 去除 .op-marker, .op-undo 等审查辅助元素
-    // - 保留段号 (.op-num)、原文/已修订内容 (.op-content)
-    var leftCells = QA(".rv-cell.left", rvShell);
-    var bodyParts = leftCells.map(function (cell) {
-      var p = cell.querySelector(".orig-para");
-      if (!p) return "";
+    var doc = Q("#cRvDoc");
+    if (!doc) { ts("⚠ 找不到合同正文"); return; }
+    // 取所有段落, 按出现顺序生成 Word 兼容 HTML
+    var bodyHTML = "";
+    QA(".orig-para", doc).forEach(function (p) {
       var num = p.querySelector(".op-num");
       var content = p.querySelector(".op-content");
-      var numTxt = num ? num.textContent : "";
-      var html = content ? content.innerHTML : p.textContent;
-      // mark 高亮转 word 兼容(黄色背景)
-      html = html.replace(/<mark>/g, '<span style="background:#FFF2A8;padding:0 2px">').replace(/<\/mark>/g, '</span>');
-      return '<p style="margin:14px 0;line-height:1.85"><b style="color:#1a1a1a">' + numTxt + '</b><br>' + html + '</p>';
+      if (!content) return;
+      var isTitle = p.classList.contains("op-title");
+      var isSign = p.classList.contains("op-sign");
+      var html = content.innerHTML;
+      // mark 高亮 → Word 用蓝色加粗(像修订标记)
+      html = html.replace(/<mark>/g, '<span style="background:#FFFFB0;color:#000">').replace(/<\/mark>/g, '</span>');
+      var numTxt = (num && num.textContent.trim() && !isTitle && !isSign) ? num.textContent.trim() : "";
+      if (isTitle) {
+        // 标题段: 居中, 18pt, 加粗, 下边框
+        bodyHTML += '<p style="font-family:\'SimHei\',黑体;font-size:18pt;text-align:center;font-weight:bold;margin:0 0 16pt 0;padding-bottom:10pt;border-bottom:1.5pt solid #000;letter-spacing:6pt">' + (content.querySelector('b') ? content.querySelector('b').textContent : html) + '</p>';
+        var subEls = content.querySelectorAll('.op-content');
+        // 简化: 直接拿合同编号那行
+        var subTxt = (content.textContent || '').split('合同编号')[1];
+        if (subTxt) bodyHTML += '<p style="font-size:10pt;text-align:right;color:#444;margin:0 0 18pt 0">合同编号' + subTxt + '</p>';
+      } else if (isSign) {
+        bodyHTML += '<p style="page-break-inside:avoid;margin:30pt 0 0 0;padding-top:14pt;border-top:.5pt dashed #888">' + html + '</p>';
+      } else if (numTxt && /第[一二三四五六七八九十]+条/.test(numTxt)) {
+        // 章节条款: 加章节标题
+        bodyHTML += '<p style="font-family:\'SimHei\',黑体;font-size:13pt;font-weight:bold;margin:16pt 0 6pt 0;color:#000">' + numTxt + '</p>';
+        bodyHTML += '<p style="margin:0 0 12pt 0;text-indent:0;line-height:1.95">' + html + '</p>';
+      } else {
+        // 其他段(双方信息/序言/总则)
+        if (numTxt) bodyHTML += '<p style="font-family:\'SimHei\',黑体;font-size:12pt;font-weight:bold;margin:12pt 0 4pt 0;color:#000">' + numTxt + '</p>';
+        bodyHTML += '<p style="margin:0 0 12pt 0;line-height:1.95">' + html + '</p>';
+      }
     });
     var accCount = QA(".ai-rev.accepted", rvShell).length;
     var rejCount = QA(".ai-rev.rejected", rvShell).length;
     var pendingCount = QA(".ai-rev[data-rid]", rvShell).length - accCount - rejCount;
     var fileBase = uploadedFile.name.replace(/\.[^.]+$/, "");
     var stamp = new Date().toISOString().slice(0, 10);
+    var stampNice = new Date().toLocaleString("zh-CN", { hour12: false });
 
-    var doc = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">' +
-      '<head><meta charset="utf-8"><title>' + fileBase + ' · 修订版</title>' +
+    var docHTML = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta charset="utf-8"><meta name="Generator" content="顶呱呱AI合同审查助手"><title>' + fileBase + ' · 修订版</title>' +
+      '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->' +
       '<style>' +
-      '@page WordSection1 { size: A4; margin: 2.5cm 2cm; mso-header-margin:.5in; mso-footer-margin:.5in; }' +
+      '@page WordSection1 { size: 210mm 297mm; margin: 2.54cm 3.18cm; mso-page-orientation: portrait; mso-header-margin: 1.25cm; mso-footer-margin: 1.25cm; mso-paper-source: 0; }' +
       'div.WordSection1 { page: WordSection1; }' +
-      'body { font-family: "微软雅黑", "Microsoft YaHei", "宋体", SimSun, serif; font-size: 11pt; line-height: 1.85; color:#222; }' +
-      'h1 { font-size: 18pt; text-align: center; margin: 20pt 0; font-weight: 800; }' +
-      '.meta { font-size: 9pt; color: #666; text-align: right; margin-bottom: 16pt; padding-bottom: 8pt; border-bottom: 1pt solid #ccc; }' +
-      '.meta b { color: #1a1a1a; }' +
+      'body, p, td, span { font-family: "宋体", SimSun, "PingFang SC", serif; font-size: 12pt; line-height: 1.95; color: #000; }' +
+      'p { margin: 12pt 0; }' +
+      'table { border-collapse: collapse; margin: 12pt 0; }' +
+      'table td { padding: 8pt 6pt; vertical-align: top; }' +
+      '.cover { padding: 8pt 14pt; background: #F4F6FF; border: .5pt solid #d4d8e8; margin: 0 0 18pt 0; font-size: 9.5pt; color: #555; }' +
+      '.cover b { color: #1a1a1a; }' +
+      '.cover .pending { color: #c00; font-weight: bold; }' +
       '</style></head><body><div class="WordSection1">' +
-      '<div class="meta">合同修订版导出 · ' + stamp + '<br>原文件:<b>' + uploadedFile.name + '</b> · ' +
-      '已接受 AI 修订 <b>' + accCount + '</b> · 已驳回 <b>' + rejCount + '</b>' +
-      (pendingCount > 0 ? ' · ⚠ 未处置 <b style="color:#c00">' + pendingCount + '</b>' : '') + '</div>' +
-      '<h1>' + fileBase + '</h1>' +
-      bodyParts.join("\n") +
+      '<div class="cover">' +
+      '<b>顶呱呱AI 合同审查助手</b> · 导出修订版 · ' + stampNice + '<br>' +
+      '原文件:<b>' + uploadedFile.name + '</b> · ' +
+      '已接受 AI 修订 <b>' + accCount + '</b> 处 · 已驳回 <b>' + rejCount + '</b> 处' +
+      (pendingCount > 0 ? ' · <span class="pending">⚠ 未处置 ' + pendingCount + ' 处</span>' : ' · 全部处置完毕') +
+      '</div>' +
+      bodyHTML +
       '</div></body></html>';
 
-    var blob = new Blob(["﻿", doc], { type: "application/msword;charset=utf-8" });
+    var blob = new Blob(["﻿", docHTML], { type: "application/msword;charset=utf-8" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
@@ -11436,7 +11450,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 200);
-    ts("⬇ 已开始下载《" + fileBase + "_修订版.doc》· 排版与原文一致 · Word 可打开");
+    ts("⬇ 已下载《" + fileBase + "_修订版.doc》· 宋体 · A4 · 合同标准排版 · Word 双击打开");
   });
 
   function resetReview() {
