@@ -8260,34 +8260,225 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 </div>
               </div>
 
-              <!-- D. Agent 不断学习的派单策略 -->
-              <div class="agent-section learn-section">
+              <!-- D. 投喂派单决策模型 · XGBoost 训练工作台 -->
+              <div class="agent-section">
                 <div class="agent-section-head">
                   <span class="ash-pin">🧠</span>
-                  <div class="ash-tt">我学到的派单策略 · 越用越聪明</div>
-                  <div class="ash-meta">从历史 1,200 单中持续优化</div>
+                  <div class="ash-tt">投喂派单决策模型 · 用本周 32 单 case 训练 V1.5</div>
+                  <div class="ash-meta">XGBoost 决策树 · 越练越准 · 比规则引擎学得快</div>
                 </div>
-                <div class="learn-grid">
-                  <div class="learn-cell">
-                    <div class="lc-tt">🎯 派单准确率提升</div>
-                    <div class="lc-body">同类故障 → "专精领域"工程师(本周 <b>92% → 96%</b>)。从故障关键词 + 客户行业 + 工程师近 7 单评分匹配</div>
-                    <div class="lc-tag">提升 4%</div>
+
+                <div class="train-workflow">
+
+                  <!-- Step 1: 收集训练样本 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">1</span>
+                      <div class="tw-tt">收集训练样本 · 本周派单 case</div>
+                      <div class="tw-meta">28 成功(正样本) + 4 失败(负样本) · 用于教模型"什么样的派单是对的"</div>
+                    </div>
+                    <div class="tw-samples" id="csDpSamples" style="max-height:340px">
+                      <div class="tw-sample selected" data-sid="dp1">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">工单 TK-0610-17</span>钻石客户 · CRM 主库故障 · 派给 王工(资深 DBA)</div>
+                          <div class="tws-meta"><b class="good">✓ 成功</b><small>SLA 3.2h / 24h</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">特征</div>
+                          故障类型=DB主从 · 客户级=钻石 · 工程师近 7 单评分=9.4 · 工程师当前工作量=2/5 · 历史同类成功率=92%
+                          <br><b style="color:var(--green)">标签: 胜任度 0.96 (高质量正样本)</b>
+                        </div>
+                        <div class="tws-tags"><span class="tws-tag good">高价值正样本</span><span class="tws-tag">钻石场景</span><span class="tws-tag">DB 类故障</span></div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="dpSampleAct" data-act="adopt" data-sid="dp1">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="dpSampleAct" data-act="edit" data-sid="dp1">✏️ 修改标签</button>
+                          <button class="tws-btn reject" data-fx="dpSampleAct" data-act="reject" data-sid="dp1">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="dp2">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">工单 TK-0611-08</span>金牌客户 · 报表导出乱码 · 派给 张工(应用层 中级)</div>
+                          <div class="tws-meta"><b class="good">✓ 成功</b><small>SLA 0.5h / 24h</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">特征</div>
+                          故障类型=编码问题 · 客户级=金牌 · 知识库已置顶 · 工程师工作量=1/5
+                          <br><b style="color:var(--green)">标签: 胜任度 0.99 (典型成功)</b>
+                        </div>
+                        <div class="tws-tags"><span class="tws-tag good">高频问题</span><span class="tws-tag">已置顶知识库</span></div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="dpSampleAct" data-act="adopt" data-sid="dp2">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="dpSampleAct" data-act="edit" data-sid="dp2">✏️ 修改标签</button>
+                          <button class="tws-btn reject" data-fx="dpSampleAct" data-act="reject" data-sid="dp2">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="dp3">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">工单 TK-0612-21</span>普通客户 · 移动端同步延迟 · 派给 李工(移动端)</div>
+                          <div class="tws-meta"><b class="good">✓ 成功</b><small>SLA 4.8h / 24h</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">特征</div>
+                          故障类型=移动同步 · 工程师专精=移动端 · 历史移动端工单胜率=89%
+                          <br><b style="color:var(--green)">标签: 胜任度 0.94</b>
+                        </div>
+                        <div class="tws-tags"><span class="tws-tag good">专精匹配</span><span class="tws-tag">移动端</span></div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="dpSampleAct" data-act="adopt" data-sid="dp3">✓ 已纳入训练</button>
+                          <button class="tws-btn" data-fx="dpSampleAct" data-act="edit" data-sid="dp3">✏️ 修改标签</button>
+                          <button class="tws-btn reject" data-fx="dpSampleAct" data-act="reject" data-sid="dp3">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="dp4" style="border-left-color:var(--red);background:linear-gradient(90deg,#FEF2F2 0%,#F8F9FE 30%)">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">工单 TK-0613-01</span>钻石王厂长 · CRM 登录失败 · 派给 李工(<b style="color:var(--red)">已派 4 单</b>)</div>
+                          <div class="tws-meta"><b class="warn">✗ 失败</b><small>超时 21h</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">特征</div>
+                          故障类型=DB 主库 · 客户级=钻石(原应走红色通道) · <b style="color:var(--red)">工程师当前工作量=4/5(已饱和)</b> · 历史 DB 类工单胜率=63%
+                          <br><b style="color:var(--red)">标签: 胜任度 0.18 (负样本 · 教模型"工作量饱和的工程师不能派")</b>
+                        </div>
+                        <div class="tws-tags"><span class="tws-tag warn">负样本</span><span class="tws-tag warn">工作量饱和</span><span class="tws-tag warn">钻石超时</span></div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="dpSampleAct" data-act="adopt" data-sid="dp4">✓ 已纳入(关键负样本)</button>
+                          <button class="tws-btn" data-fx="dpSampleAct" data-act="edit" data-sid="dp4">✏️ 修改标签</button>
+                          <button class="tws-btn reject" data-fx="dpSampleAct" data-act="reject" data-sid="dp4">✗ 排除</button>
+                        </div>
+                      </div>
+
+                      <div class="tw-sample selected" data-sid="dp5" style="border-left-color:var(--red);background:linear-gradient(90deg,#FEF2F2 0%,#F8F9FE 30%)">
+                        <div class="tws-row">
+                          <div class="tws-q"><span class="tws-q-lbl">工单 TK-0612-19</span>金牌客户 · 集成需求 · 派给 张工 · <b style="color:var(--red)">跨部门扯皮</b></div>
+                          <div class="tws-meta"><b class="warn">✗ 失败</b><small>12 天未推进</small></div>
+                        </div>
+                        <div class="tws-row tws-a">
+                          <div class="tws-a-lbl">特征</div>
+                          故障类型=集成需求 · 涉及部门=技术+商务 · 应派"集成专项小组" 而非单一工程师
+                          <br><b style="color:var(--red)">标签: 胜任度 0.05 (负样本 · 教模型"集成类必须走专项流程")</b>
+                        </div>
+                        <div class="tws-tags"><span class="tws-tag warn">负样本</span><span class="tws-tag warn">需走专项</span></div>
+                        <div class="tws-acts">
+                          <button class="tws-btn cur" data-fx="dpSampleAct" data-act="adopt" data-sid="dp5">✓ 已纳入(教训样本)</button>
+                          <button class="tws-btn" data-fx="dpSampleAct" data-act="edit" data-sid="dp5">✏️ 修改标签</button>
+                          <button class="tws-btn reject" data-fx="dpSampleAct" data-act="reject" data-sid="dp5">✗ 排除</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tw-samples-foot">
+                      共 <b>32 条样本</b>(28 正 + 4 负)· 已选 <b id="csDpAdoptCount">5</b>/5 投喂 · 已排除 <b id="csDpRejCount">0</b> · 待修改 <b id="csDpEditCount">0</b>
+                      <small style="display:block;margin-top:4px;color:var(--muted)">↑ 仅显示前 5 条代表性样本 · 完整 32 条已自动汇总</small>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">🔍 新发现</div>
-                    <div class="lc-body"><b>周五下午下单的物流单 SLA 延长 2h</b>(发现仓库周五压货高峰,误报降低 18%)</div>
-                    <div class="lc-tag">已规则化</div>
+
+                  <!-- Step 2: 训练 XGBoost 派单模型 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">2</span>
+                      <div class="tw-tt">训练派单决策模型 · XGBoost (梯度提升树)</div>
+                      <div class="tw-meta">分类模型 · 输入工单特征 → 输出每个工程师胜任度</div>
+                    </div>
+                    <div class="tw-feed">
+                      <div class="tw-params">
+                        <div class="tw-param"><label>训练样本</label><span class="tw-val" id="csDpSampleN">本周 32 + 历史 1,168 = 1,200 条</span></div>
+                        <div class="tw-param"><label>基础模型</label><span class="tw-val">V1.4 (生产中)</span></div>
+                        <div class="tw-param"><label>模型类型</label><span class="tw-val">XGBoost (n=200, depth=6)</span></div>
+                        <div class="tw-param"><label>输入特征</label><span class="tw-val">63 维 (TF-IDF + one-hot)</span></div>
+                        <div class="tw-param"><label>学习率 (eta)</label><span class="tw-val">0.05</span></div>
+                        <div class="tw-param"><label>正则化 λ</label><span class="tw-val">1.0</span></div>
+                        <div class="tw-param"><label>训练-验证比</label><span class="tw-val">80% / 20%</span></div>
+                        <div class="tw-param"><label>预计耗时</label><span class="tw-val">~3 分钟 · ¥0.12</span></div>
+                      </div>
+                      <div class="tw-feed-actions">
+                        <button class="tw-feed-btn" id="csDpFeedBtn">▶ 开始训练 V1.5</button>
+                        <button class="tw-feed-cancel" id="csDpFeedSchedule">⏰ 改为周日凌晨自动</button>
+                      </div>
+                    </div>
+                    <div class="tw-progress" id="csDpProgress" style="display:none">
+                      <div class="tw-prog-head">
+                        <span class="tw-prog-pulse"></span><b>训练进行中...</b>
+                        <span class="tw-prog-pct" id="csDpProgPct">0%</span>
+                      </div>
+                      <div class="tw-prog-bar"><i id="csDpProgBar"></i></div>
+                      <div class="tw-prog-log" id="csDpProgLog"></div>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">🚀 VIP 红色通道</div>
-                    <div class="lc-body">钻石/金牌客户工单 SLA 自动减半,直接派"金牌工程师"。 本周钻石 0 超时</div>
-                    <div class="lc-tag">已上线</div>
+
+                  <!-- Step 3: 训练前后对比 -->
+                  <div class="tw-step" id="csDpResultStep" style="display:none">
+                    <div class="tw-step-head">
+                      <span class="tw-num">3</span>
+                      <div class="tw-tt">训练前 vs 训练后 · V1.4 → V1.5</div>
+                      <div class="tw-meta">同测试集回测 + 新发现的规则</div>
+                    </div>
+                    <div class="tw-compare">
+                      <div class="tw-cmp-row"><div class="tcr-lbl">派单准确率(整体)</div><div class="tcr-old">92.0%</div><div class="tcr-arr">→</div><div class="tcr-new good">96.4% <small>+4.4pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">VIP 工单超时率</div><div class="tcr-old">0.6%</div><div class="tcr-arr">→</div><div class="tcr-new good">0.0% <small>清零</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">工程师工作量均衡度</div><div class="tcr-old">71%</div><div class="tcr-arr">→</div><div class="tcr-new good">89% <small>+18pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">跨部门扯皮率</div><div class="tcr-old">3.2%</div><div class="tcr-arr">→</div><div class="tcr-new good">0.4% <small>-2.8pp</small></div></div>
+                      <div class="tw-cmp-row"><div class="tcr-lbl">超时单平均时长</div><div class="tcr-old">7.2h</div><div class="tcr-arr">→</div><div class="tcr-new good">2.8h <small>-4.4h</small></div></div>
+                    </div>
+                    <div class="tw-deploy" style="background:linear-gradient(135deg,#F7F9FF,#EDEFFB);border-color:rgba(90,91,240,.3)">
+                      <div class="tw-deploy-tip" style="color:var(--brand)">🔍 模型自动学到 3 条新规则(无需我们手写):</div>
+                      <div style="font-size:11.5px;color:var(--ink-2);line-height:1.7;margin-bottom:9px;padding:8px 11px;background:#fff;border-radius:7px">
+                        ① <b>工程师当前工作量 ≥ 4 → 胜任度 × 0.3</b>(避免饱和派单)<br>
+                        ② <b>钻石客户 + DB 类故障 → 必派资深 DBA</b>(自动跳过中级)<br>
+                        ③ <b>故障关键词含"集成/对接" → 走专项小组, 不派单一工程师</b>
+                      </div>
+                      <div class="tw-deploy-acts">
+                        <button class="tw-deploy-btn" id="csDpDeployBtn">🚀 部署 V1.5 到派单引擎</button>
+                        <button class="tw-deploy-ab" id="csDpAbBtn">📊 A/B 测试(50% 流量)</button>
+                        <button class="tw-deploy-cancel" id="csDpDeployCancel">📥 留沙箱观察 3 天</button>
+                      </div>
+                    </div>
                   </div>
-                  <div class="learn-cell">
-                    <div class="lc-tt">💼 失败案例沉淀</div>
-                    <div class="lc-body">本周 3 个超时单 → 我提炼出"工程师超 5 单警戒线" 模式, 入派单模型</div>
-                    <div class="lc-tag">已沉淀</div>
+
+                  <!-- Step 4: 模型版本时间线 -->
+                  <div class="tw-step">
+                    <div class="tw-step-head">
+                      <span class="tw-num">4</span>
+                      <div class="tw-tt">派单模型版本时间线</div>
+                      <div class="tw-meta">每周训练 1 次 · 可一键回滚</div>
+                    </div>
+                    <div class="tw-versions" id="csDpVersions">
+                      <div class="tw-ver current">
+                        <div class="tv-tag">V1.4 · 生产</div>
+                        <div class="tv-body">
+                          <div class="tv-time">上周日 23:00 上线 · 已运行 4 天</div>
+                          <div class="tv-desc">基于历史 1,168 条样本 · 派单准确率 92% · 重点优化"专精领域匹配"</div>
+                        </div>
+                        <div class="tv-acts"><button data-fx="dpVerAct" data-msg="📋 V1.4 训练详情已发邮箱">查看详情</button></div>
+                      </div>
+                      <div class="tw-ver" id="csDpVerTraining" style="display:none">
+                        <div class="tv-tag training">V1.5 · 训练中</div>
+                        <div class="tv-body">
+                          <div class="tv-time">今晚启动训练 · ETA 3 分钟</div>
+                          <div class="tv-desc">基于本周 32 条新样本 + 1,168 历史 · 重点学"工作量饱和 + 集成扯皮 + DB 类钻石"</div>
+                        </div>
+                        <div class="tv-acts"><button data-fx="dpVerAct" data-msg="⏸ 训练已暂停">暂停训练</button></div>
+                      </div>
+                      <div class="tw-ver">
+                        <div class="tv-tag">V1.3</div>
+                        <div class="tv-body">
+                          <div class="tv-time">5/26 → 6/9 在线</div>
+                          <div class="tv-desc">基于 985 条 · 准确率 88% · 已被 V1.4 替换</div>
+                        </div>
+                        <div class="tv-acts"><button class="tv-rollback" data-fx="dpVerAct" data-msg="⏪ 已回滚到 V1.3 (V1.4 暂存)">⏪ 回滚到 V1.3</button></div>
+                      </div>
+                      <div class="tw-ver">
+                        <div class="tv-tag">V1.2</div>
+                        <div class="tv-body">
+                          <div class="tv-time">5/12 → 5/26 在线</div>
+                          <div class="tv-desc">基于 812 条 · 准确率 85% · 首次引入"客户级别"特征</div>
+                        </div>
+                        <div class="tv-acts"><button class="tv-rollback" data-fx="dpVerAct" data-msg="⏪ 已回滚 V1.2">⏪ 回滚</button></div>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
               </div>
 
@@ -15704,6 +15895,132 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   /* 版本回滚 */
   view.addEventListener("click", function (e) {
     var b = e.target.closest('[data-fx="tvAct"]');
+    if (b) ts(b.dataset.msg);
+  });
+
+  /* ============ Board 4 派单决策模型 XGBoost 训练 (类似 Board 3 投喂) ============ */
+  /* 样本选/排除/修改 */
+  view.addEventListener("click", function (e) {
+    var s = e.target.closest('[data-fx="dpSampleAct"]');
+    if (!s) return;
+    var sample = s.closest(".tw-sample");
+    var act = s.dataset.act;
+    QA(".tws-btn", sample).forEach(function (x) { x.classList.remove("cur"); });
+    s.classList.add("cur");
+    sample.classList.remove("selected", "rejected");
+    if (act === "adopt") { sample.classList.add("selected"); ts("✓ 已纳入训练集"); }
+    else if (act === "reject") { sample.classList.add("rejected"); ts("✗ 已排除 · 此样本不参与训练"); }
+    else { ts("✏️ 修改标签 · 已弹出标注面板 · 可改正胜任度 / 特征权重 / 负样本类型"); }
+    var dpSamples = QA(".tw-sample", Q("#csDpSamples"));
+    var adoptN = dpSamples.filter(function(x){return x.classList.contains("selected")}).length;
+    var rejN = dpSamples.filter(function(x){return x.classList.contains("rejected")}).length;
+    var editN = dpSamples.length - adoptN - rejN;
+    txt("csDpAdoptCount", adoptN);
+    txt("csDpRejCount", rejN);
+    txt("csDpEditCount", editN);
+    txt("csDpSampleN", "本周 " + (28 - rejN) + " + 历史 1,168 = " + (1168 + 28 - rejN) + " 条");
+    var fb = Q("#csDpFeedBtn");
+    if (fb) {
+      if (adoptN === 0) { fb.disabled = true; fb.textContent = "⚠ 至少选 1 条样本"; }
+      else { fb.disabled = false; fb.textContent = "▶ 开始训练 V1.5"; }
+    }
+  });
+
+  /* 启动 XGBoost 训练动画 */
+  var dpTimers = [];
+  var dpFeedBtn = Q("#csDpFeedBtn");
+  if (dpFeedBtn) dpFeedBtn.addEventListener("click", function () {
+    if (this.disabled) return;
+    dpTimers.forEach(clearTimeout); dpTimers = [];
+    this.disabled = true;
+    this.textContent = "⏳ 训练中...";
+    var prog = Q("#csDpProgress");
+    var bar = Q("#csDpProgBar");
+    var pct = Q("#csDpProgPct");
+    var log = Q("#csDpProgLog");
+    prog.style.display = "block";
+    log.innerHTML = "";
+    bar.style.width = "0";
+    pct.textContent = "0%";
+    var trainingVer = Q("#csDpVerTraining");
+    if (trainingVer) trainingVer.style.display = "grid";
+
+    var steps = [
+      { t: 300, pct: 4, log: "[INIT] 加载基础模型 V1.4 (XGBoost 200 trees)" },
+      { t: 600, pct: 10, log: "[DATA] 加载样本: 本周 28 正 + 4 负 + 历史 1,168 条" },
+      { t: 900, pct: 16, log: "[DATA] 特征工程: TF-IDF(50) + one-hot(13) = 63 维输入" },
+      { t: 1200, pct: 22, log: "[DATA] 训练/验证集分割 80%/20% · 类别均衡处理" },
+      { t: 1500, pct: 28, log: "[BOOST] iter 1-30 · train_auc 0.78 → 0.85 · val_auc 0.76 → 0.83" },
+      { t: 1900, pct: 36, log: "[BOOST] iter 31-60 · train_auc 0.85 → 0.89 · val_auc 0.83 → 0.86" },
+      { t: 2300, pct: 45, log: "[BOOST] iter 61-100 · train_auc 0.89 → 0.93 · val_auc 0.86 → 0.90" },
+      { t: 2700, pct: 55, log: "[BOOST] iter 101-140 · train_auc 0.93 → 0.95 · val_auc 0.90 → 0.93" },
+      { t: 3100, pct: 65, log: "[BOOST] iter 141-180 · train_auc 0.95 → 0.97 · val_auc 0.93 → 0.95" },
+      { t: 3500, pct: 75, log: "[BOOST] iter 181-200 · 早停触发 · best iter=187" },
+      { t: 3900, pct: 84, log: "[FEAT] 特征重要度 Top3: 工程师工作量 0.28 · 故障关键词 0.24 · 客户级别 0.19" },
+      { t: 4200, pct: 90, log: "[RULE] 自动挖掘新规则 3 条 (工作量饱和 / DB+钻石 / 集成走专项)" },
+      { t: 4500, pct: 95, log: "[EVAL] 同测试集回归 · 准确率 96.4% (+4.4pp) · 超时清零" },
+      { t: 4800, pct: 100, log: "[DONE] 训练完成 · 耗时 2 分 51 秒 · 实际 ¥0.11 · 模型 V1.5 已保存沙箱" }
+    ];
+    steps.forEach(function (step) {
+      dpTimers.push(setTimeout(function () {
+        bar.style.width = step.pct + "%";
+        pct.textContent = step.pct + "%";
+        var line = document.createElement("div");
+        line.textContent = step.log;
+        if (step.log.indexOf("[DONE]") >= 0 || step.log.indexOf("已保存") >= 0) line.classList.add("done");
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+      }, step.t));
+    });
+    dpTimers.push(setTimeout(function () {
+      Q("#csDpResultStep").style.display = "block";
+      dpFeedBtn.textContent = "✓ 训练完成 · 重新训练";
+      dpFeedBtn.disabled = false;
+      ts("✅ V1.5 训练完成 · 准确率 92→96% · 自动学到 3 条新规则 · 待你部署");
+      Q("#csDpResultStep").scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 5200));
+  });
+
+  /* 计划训练 */
+  var dpSchBtn = Q("#csDpFeedSchedule");
+  if (dpSchBtn) dpSchBtn.addEventListener("click", function () {
+    ts("⏰ 已设为每周日 03:00 自动训练 · 你可在版本时间线回滚");
+  });
+  /* 部署 V1.5 */
+  var dpDepBtn = Q("#csDpDeployBtn");
+  if (dpDepBtn) dpDepBtn.addEventListener("click", function () {
+    var versions = QA(".tw-ver", Q("#csDpVersions"));
+    versions.forEach(function (v) {
+      var tag = v.querySelector(".tv-tag");
+      if (!tag) return;
+      var t = tag.textContent;
+      if (t.indexOf("V1.4") >= 0) {
+        v.classList.remove("current");
+        tag.classList.remove("training");
+        tag.textContent = "V1.4 · 已下线";
+      }
+      if (t.indexOf("V1.5") >= 0) {
+        v.classList.add("current");
+        v.classList.remove("training");
+        tag.classList.remove("training");
+        tag.textContent = "V1.5 · 生产";
+      }
+    });
+    ts("🚀 V1.5 已部署到派单引擎 · V1.4 自动归档可回滚 · 后续工单立即用新策略派");
+    dpDepBtn.textContent = "✓ 已部署";
+    dpDepBtn.disabled = true;
+  });
+  var dpAbBtn = Q("#csDpAbBtn");
+  if (dpAbBtn) dpAbBtn.addEventListener("click", function () {
+    ts("📊 A/B 已启动 · 50% 流量用 V1.5 · 50% 留 V1.4 · 24h 后自动对比派单效果");
+  });
+  var dpCnBtn = Q("#csDpDeployCancel");
+  if (dpCnBtn) dpCnBtn.addEventListener("click", function () {
+    ts("📥 V1.5 留沙箱观察 3 天 · 数据足够后再决定");
+  });
+  /* 版本操作 */
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="dpVerAct"]');
     if (b) ts(b.dataset.msg);
   });
 })();
