@@ -4088,6 +4088,365 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
   cursor:pointer; font-family:inherit; border:1px solid var(--line-2); background:#fff; color:var(--ink-2); transition:.15s; }
 .retro-acts button:hover { border-color:var(--brand); color:var(--brand); }
 .retro-acts .primary { background:var(--grad-btn); color:#fff; border:none; box-shadow:0 3px 10px rgba(90,91,240,.3); }
+/* ============================================================
+   首页 Dashboard · 浅色玻璃拟态 + 多彩渐变 + 多图表
+   ============================================================ */
+.hd-wrap { flex:1; overflow-y:auto; padding:18px 22px 30px; position:relative; }
+.hd-wrap::before { content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 600px 400px at 12% 6%, rgba(110,92,255,.10), transparent 70%),
+    radial-gradient(ellipse 700px 500px at 88% 22%, rgba(0,184,217,.09), transparent 70%),
+    radial-gradient(ellipse 500px 400px at 50% 90%, rgba(255,107,157,.08), transparent 70%);
+  z-index:0; }
+.hd-wrap > * { position:relative; z-index:1; }
+
+/* ---------- 1. 顶部 Hero 欢迎条 ---------- */
+.hd-hero { position:relative; display:flex; gap:24px; align-items:stretch;
+  padding:22px 26px; border-radius:22px; overflow:hidden; margin-bottom:18px;
+  background:linear-gradient(120deg, #EFEDFF 0%, #E4F1FF 50%, #FFE9F2 100%);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 18px 50px -22px rgba(90,91,240,.32); }
+.hd-hero-orbs { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.hd-orb { position:absolute; border-radius:50%; filter:blur(60px); opacity:.55; }
+.hd-orb-a { width:360px; height:360px; left:-60px; top:-150px;
+  background:radial-gradient(circle, #A78BFA, transparent 70%); animation:hdOrb 20s ease-in-out infinite; }
+.hd-orb-b { width:300px; height:300px; right:-50px; top:-100px;
+  background:radial-gradient(circle, #5BAFFF, transparent 70%); animation:hdOrb 24s ease-in-out infinite reverse; }
+.hd-orb-c { width:280px; height:280px; right:24%; bottom:-160px;
+  background:radial-gradient(circle, #FF99B8, transparent 70%); animation:hdOrb 28s ease-in-out infinite; }
+@keyframes hdOrb { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,20px) scale(1.1)} }
+.hd-hero-l { flex:1; min-width:0; }
+.hd-greet { font-size:13px; color:var(--ink-2); font-weight:600; margin-bottom:4px; }
+.hd-greet b { color:var(--brand); }
+.hd-hero-l h1 { font-size:26px; font-weight:850; letter-spacing:-.02em; line-height:1.25; color:var(--ink); }
+.hd-shine { background:linear-gradient(90deg, #5A5BF0, #9A4DFF 35%, #00C2D8 70%, #5A5BF0 100%);
+  background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:hdShine 6s linear infinite; }
+@keyframes hdShine { to { background-position:200% 0 } }
+.hd-sub { font-size:12.5px; color:var(--ink-2); margin-top:8px; line-height:1.7; }
+.hd-sub b { color:var(--brand); font-weight:800; font-feature-settings:"tnum"; }
+.hd-hero-r { flex-shrink:0; display:flex; flex-direction:column; gap:12px; align-items:flex-end; }
+.hd-clock { text-align:right; padding:8px 14px; border-radius:14px;
+  background:rgba(255,255,255,.65); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.8); box-shadow:0 4px 16px -8px rgba(90,91,240,.25); }
+.hd-time { font-size:22px; font-weight:800; letter-spacing:.02em; font-feature-settings:"tnum";
+  background:linear-gradient(120deg, #5A5BF0, #00C2D8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hd-date { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.hd-quick-stats { display:flex; gap:8px; }
+.hd-qs { padding:9px 14px; border-radius:13px; background:rgba(255,255,255,.7); backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.8); text-align:center; min-width:74px;
+  transition:.2s; cursor:default; }
+.hd-qs:hover { transform:translateY(-2px); box-shadow:0 8px 18px -8px rgba(90,91,240,.3); }
+.hd-qs-n { font-size:20px; font-weight:850; letter-spacing:-.02em; font-feature-settings:"tnum"; color:var(--brand); }
+.hd-qs-n.hd-qs-warn { color:#D97706; }
+.hd-qs-l { font-size:10.5px; color:var(--muted); margin-top:1px; }
+
+/* ---------- 公共 Block ---------- */
+.hd-block { margin-bottom:18px; }
+.hd-block > header { display:flex; align-items:center; gap:10px; margin-bottom:11px; padding:0 2px; }
+.hd-block > header h2 { font-size:15px; font-weight:800; letter-spacing:-.01em;
+  display:flex; align-items:center; gap:9px; color:var(--ink); }
+.hd-block > header .hd-extra { margin-left:auto; font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.hd-ico { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-size:14px;
+  box-shadow:0 4px 12px -4px var(--shc, rgba(90,91,240,.5)); }
+.hd-ico-amber { --shc:rgba(255,201,60,.6); background:linear-gradient(135deg, #FFC93C, #FFA07A); color:#fff; }
+.hd-ico-violet { --shc:rgba(154,77,255,.55); background:linear-gradient(135deg, #6E5CFF, #A78BFA); color:#fff; }
+.hd-ico-cyan { --shc:rgba(0,194,216,.55); background:linear-gradient(135deg, #00B8D9, #4A9EFF); color:#fff; }
+.hd-ico-pink { --shc:rgba(255,107,157,.5); background:linear-gradient(135deg, #FF6B9D, #FFA07A); color:#fff; }
+.hd-ico-green { --shc:rgba(0,200,150,.5); background:linear-gradient(135deg, #00C896, #5FD4A8); color:#fff; }
+.hd-ico-blue { --shc:rgba(91,175,255,.5); background:linear-gradient(135deg, #5BAFFF, #87CEEB); color:#fff; }
+.hd-cnt { display:inline-grid; place-items:center; min-width:20px; height:20px; padding:0 6px;
+  border-radius:999px; background:#E5484D; color:#fff; font-size:11px; font-weight:800; margin-left:4px; }
+.hd-live { display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:999px;
+  background:rgba(0,200,150,.12); color:#00A878; font-size:10.5px; font-weight:800; letter-spacing:.04em; }
+.hd-live::before { content:""; width:6px; height:6px; border-radius:50%; background:#00C896;
+  box-shadow:0 0 8px #00C896; animation:hdPulse 1.6s ease-in-out infinite; }
+@keyframes hdPulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.45; transform:scale(.78)} }
+
+/* ---------- 2. 待拍板 ---------- */
+.hd-deci-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+.hd-deci-card { position:relative; padding:16px 18px 14px; border-radius:18px;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 8px 24px -12px rgba(90,91,240,.18);
+  transition:transform .25s, box-shadow .25s; overflow:hidden; }
+.hd-deci-card:hover { transform:translateY(-3px); box-shadow:0 18px 36px -14px rgba(90,91,240,.3); }
+.hd-deci-card::before { content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--bc1,#FFC93C), var(--bc2,#FFA07A)); }
+.hd-deci-urg { --bc1:#FF5C8A; --bc2:#FF8C42; }
+.hd-deci-mid { --bc1:#FFC93C; --bc2:#FFA07A; }
+.hd-deci-lo  { --bc1:#6E5CFF; --bc2:#5BAFFF; }
+.hd-deci-tag { display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.03em;
+  padding:3px 9px; border-radius:999px; background:linear-gradient(120deg, var(--bc1), var(--bc2)); color:#fff;
+  box-shadow:0 4px 10px -3px var(--bc1); }
+.hd-deci-card h3 { font-size:13.5px; font-weight:800; margin-top:10px; line-height:1.4; color:var(--ink); }
+.hd-deci-card p { font-size:12px; color:var(--ink-2); margin-top:6px; line-height:1.65; }
+.hd-deci-meta { display:flex; justify-content:space-between; align-items:center; margin-top:10px;
+  padding-top:10px; border-top:1px dashed var(--line-2); font-size:11px; color:var(--muted); }
+.hd-deci-impact b { color:var(--ink); font-weight:800; font-feature-settings:"tnum"; }
+.hd-deci-acts { display:flex; gap:8px; margin-top:11px; }
+.hd-btn { flex:1; padding:7px 12px; font-size:11.5px; font-weight:700; border-radius:9px;
+  border:1px solid var(--line-2); background:#fff; color:var(--ink-2); cursor:pointer; transition:.15s; }
+.hd-btn:hover { border-color:var(--brand); color:var(--brand); }
+.hd-btn-grad { background:linear-gradient(120deg, var(--bc1,#6E5CFF), var(--bc2,#A78BFA)); color:#fff;
+  border:none; box-shadow:0 6px 14px -4px var(--bc1, rgba(110,92,255,.5)); }
+.hd-btn-grad:hover { transform:translateY(-1px); color:#fff; border:none; }
+
+/* ---------- 3. Agent 矩阵 ---------- */
+.hd-agents { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+.hd-agent { position:relative; padding:14px 14px 12px; border-radius:16px;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 6px 20px -10px rgba(90,91,240,.16);
+  transition:.2s; cursor:pointer; overflow:hidden; }
+.hd-agent:hover { transform:translateY(-3px); box-shadow:0 14px 32px -12px var(--ac, rgba(90,91,240,.35));
+  border-color:var(--ac, rgba(110,92,255,.3)); }
+.hd-agent-top { display:flex; align-items:center; gap:10px; }
+.hd-agent-ico { width:36px; height:36px; border-radius:11px; display:grid; place-items:center; font-size:18px;
+  background:linear-gradient(135deg, var(--ac), var(--ac2));
+  box-shadow:0 5px 14px -4px var(--ac); color:#fff; }
+.hd-agent-info { flex:1; min-width:0; }
+.hd-agent-name { font-size:12.5px; font-weight:800; color:var(--ink); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+.hd-agent-stat { display:flex; align-items:center; gap:5px; font-size:10.5px; color:var(--muted); margin-top:2px; }
+.hd-agent-stat::before { content:""; width:6px; height:6px; border-radius:50%; background:#00C896;
+  box-shadow:0 0 6px #00C896; animation:hdPulse 1.6s ease-in-out infinite; }
+.hd-ring { position:relative; width:48px; height:48px; flex-shrink:0; }
+.hd-ring svg { transform:rotate(-90deg); }
+.hd-ring-track { stroke:#EEF0FB; }
+.hd-ring-fill { stroke:url(#hdGrad); stroke-linecap:round; transition:stroke-dashoffset 1.2s ease-out; }
+.hd-ring-pct { position:absolute; inset:0; display:grid; place-items:center; font-size:11px; font-weight:800;
+  color:var(--ink); font-feature-settings:"tnum"; }
+.hd-agent-mid { display:flex; gap:10px; align-items:center; margin-top:10px; }
+.hd-spark { flex:1; height:30px; position:relative; }
+.hd-spark svg { width:100%; height:100%; overflow:visible; }
+.hd-spark path { fill:none; stroke:var(--ac); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 1px 3px var(--ac)); }
+.hd-spark .hd-spark-area { fill:url(#hdSparkArea); stroke:none; opacity:.45; }
+.hd-agent-bot { display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;
+  padding-top:8px; border-top:1px dashed var(--line-2); }
+.hd-agent-n { font-size:18px; font-weight:850; color:var(--ac); font-feature-settings:"tnum"; letter-spacing:-.02em; }
+.hd-agent-n small { font-size:10.5px; color:var(--muted); font-weight:600; margin-left:3px; }
+.hd-agent-d { font-size:10.5px; color:var(--muted); }
+.hd-agent-d .up { color:#00A878; font-weight:700; }
+.hd-agent-d .dn { color:#E5484D; font-weight:700; }
+
+/* ---------- 4. KPI Wall (6 diverse charts) ---------- */
+.hd-kpi-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; }
+.hd-kpi { position:relative; padding:14px; border-radius:16px;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 6px 20px -10px var(--c, rgba(90,91,240,.2));
+  text-align:center; transition:.2s; overflow:hidden; min-height:180px;
+  display:flex; flex-direction:column; }
+.hd-kpi::before { content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--c), var(--c2)); }
+.hd-kpi:hover { transform:translateY(-3px); box-shadow:0 16px 34px -12px var(--c); }
+.hd-kpi-lbl { font-size:11px; color:var(--muted); font-weight:600; }
+.hd-kpi-val { font-size:22px; font-weight:850; letter-spacing:-.02em; font-feature-settings:"tnum";
+  background:linear-gradient(120deg, var(--c), var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent;
+  margin-top:6px; }
+.hd-kpi-val small { font-size:13px; }
+.hd-kpi-d { font-size:10.5px; color:var(--muted); margin-top:2px; }
+.hd-kpi-chart { flex:1; display:grid; place-items:center; padding:6px 0; }
+
+/* 4a. 仪表盘 gauge */
+.hd-gauge { width:108px; height:64px; position:relative; }
+.hd-gauge svg { width:100%; height:100%; overflow:visible; }
+.hd-gauge .g-track { fill:none; stroke:#EEF0FB; stroke-width:9; stroke-linecap:round; }
+.hd-gauge .g-fill { fill:none; stroke:url(#hdGaugeGrad); stroke-width:9; stroke-linecap:round;
+  filter:drop-shadow(0 2px 6px var(--c)); }
+
+/* 4b. donut */
+.hd-donut { width:88px; height:88px; position:relative; }
+.hd-donut svg { transform:rotate(-90deg); }
+.hd-donut .d-track { fill:none; stroke:#EEF0FB; stroke-width:10; }
+.hd-donut .d-fill { fill:none; stroke:url(#hdDonutGrad); stroke-width:10; stroke-linecap:round; }
+.hd-donut .d-fill-2 { fill:none; stroke:url(#hdDonutGrad2); stroke-width:10; stroke-linecap:round; opacity:.6; }
+
+/* 4c. bars */
+.hd-bars { display:flex; align-items:flex-end; gap:5px; height:60px; padding:0 4px; }
+.hd-bars i { flex:1; height:var(--h); border-radius:4px 4px 1px 1px;
+  background:linear-gradient(180deg, var(--c), var(--c2)); box-shadow:0 1px 4px var(--c);
+  animation:hdBarGrow .9s cubic-bezier(.16,1,.3,1) backwards; }
+.hd-bars i:nth-child(1){ animation-delay:0s } .hd-bars i:nth-child(2){ animation-delay:.08s }
+.hd-bars i:nth-child(3){ animation-delay:.16s } .hd-bars i:nth-child(4){ animation-delay:.24s }
+.hd-bars i:nth-child(5){ animation-delay:.32s } .hd-bars i:nth-child(6){ animation-delay:.4s }
+.hd-bars i:nth-child(7){ animation-delay:.48s }
+@keyframes hdBarGrow { from { height:0 } to { height:var(--h) } }
+
+/* 4d. line */
+.hd-line { width:108px; height:56px; }
+.hd-line svg { width:100%; height:100%; overflow:visible; }
+.hd-line path.area { fill:url(#hdLineArea); stroke:none; }
+.hd-line path.stroke { fill:none; stroke:var(--c); stroke-width:2; stroke-linejoin:round;
+  filter:drop-shadow(0 2px 4px var(--c)); stroke-linecap:round; }
+.hd-line circle { fill:#fff; stroke:var(--c); stroke-width:2; filter:drop-shadow(0 2px 4px var(--c)); }
+
+/* 4e. counter */
+.hd-counter { width:100%; padding:6px 0; }
+.hd-c-digit { display:block; font-size:38px; font-weight:900; letter-spacing:-.04em; font-feature-settings:"tnum";
+  background:linear-gradient(120deg, var(--c), var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent;
+  line-height:1; }
+.hd-c-sub { font-size:10.5px; color:var(--muted); margin-top:5px; display:block; }
+
+/* 4f. liquid */
+.hd-liquid { position:relative; width:74px; height:74px; border-radius:50%;
+  background:rgba(255,201,60,.08); border:2px solid var(--c); overflow:hidden; margin:0 auto; }
+.hd-liquid-wave { position:absolute; left:-50%; bottom:-50%; width:200%; height:140%;
+  background:linear-gradient(180deg, var(--c), var(--c2)); opacity:.85;
+  border-radius:40%; animation:hdWave 6s linear infinite; transform-origin:50% 48%; }
+.hd-liquid-wave::after { content:""; position:absolute; left:0; right:0; top:-5px; height:8px;
+  background:radial-gradient(circle, var(--c2), transparent 60%); }
+@keyframes hdWave { from { transform:rotate(0) } to { transform:rotate(360deg) } }
+.hd-liquid-pct { position:absolute; inset:0; display:grid; place-items:center; font-size:16px; font-weight:850;
+  color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.35); font-feature-settings:"tnum"; z-index:2; }
+
+/* ---------- 5. 跨 Agent 联动事件流 ---------- */
+.hd-flow-card { padding:16px 18px; border-radius:18px;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 6px 22px -12px rgba(90,91,240,.18); }
+.hd-timeline { position:relative; padding-left:32px; max-height:340px; overflow-y:auto; padding-right:8px; }
+.hd-timeline::before { content:""; position:absolute; left:7px; top:6px; bottom:0; width:2px;
+  background:linear-gradient(180deg, #6E5CFF, #00B8D9, #00C896, #FFC93C, #FF6B9D); border-radius:2px; opacity:.4; }
+.hd-tl-event { position:relative; padding:0 0 18px; }
+.hd-tl-event:last-child { padding-bottom:4px; }
+.hd-tl-dot { position:absolute; left:-30px; top:3px; width:16px; height:16px; border-radius:50%;
+  background:linear-gradient(135deg, var(--c, #6E5CFF), var(--c2, #A78BFA));
+  border:3px solid #fff; box-shadow:0 0 0 2px var(--c, #6E5CFF), 0 0 12px var(--c, #6E5CFF); }
+.hd-tl-event.live .hd-tl-dot { animation:hdPulse 1.5s ease-in-out infinite; }
+.hd-tl-time { font-size:10.5px; color:var(--muted); font-weight:700; letter-spacing:.03em; margin-bottom:4px; }
+.hd-tl-chain { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; margin-bottom:5px; }
+.hd-tl-from, .hd-tl-to { padding:3px 9px; border-radius:7px;
+  background:linear-gradient(120deg, rgba(110,92,255,.1), rgba(0,184,217,.08));
+  color:var(--ink); border:1px solid var(--line); }
+.hd-tl-arrow { color:var(--c, #6E5CFF); font-weight:800; }
+.hd-tl-event p { font-size:12px; color:var(--ink-2); line-height:1.6; }
+.hd-tl-event b { color:var(--ink); font-weight:800; }
+.hd-tl-tag { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700;
+  background:rgba(110,92,255,.1); color:var(--brand); margin-left:5px; }
+
+/* ---------- 6. 大模型训练 ---------- */
+.hd-train-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.hd-train-card { padding:14px 16px; border-radius:16px;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 6px 20px -10px rgba(91,175,255,.2);
+  position:relative; overflow:hidden; }
+.hd-train-card::before { content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, #5BAFFF, #4A9EFF, #6E5CFF); }
+.hd-train-head { font-size:12.5px; font-weight:800; color:var(--ink); }
+.hd-train-stat { display:flex; align-items:center; gap:8px; margin-top:7px; font-size:11px; color:var(--muted);
+  font-feature-settings:"tnum"; flex-wrap:wrap; }
+.hd-train-pill { padding:2px 8px; border-radius:999px; font-size:10px; font-weight:800; }
+.hd-train-pill.on { background:rgba(0,200,150,.12); color:#00A878; }
+.hd-train-pill.on::before { content:"● "; animation:hdPulse 1.5s ease-in-out infinite; }
+.hd-train-pill.done { background:rgba(91,175,255,.14); color:#3D7FCF; }
+
+.hd-loss-chart { height:90px; margin-top:10px; }
+.hd-loss-chart svg { width:100%; height:100%; overflow:visible; }
+.hd-loss-chart .g-grid { stroke:#EEF0FB; stroke-width:1; stroke-dasharray:3 3; }
+.hd-loss-chart .g-area { fill:url(#hdLossArea); }
+.hd-loss-chart .g-line { fill:none; stroke:url(#hdLossLine); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 2px 4px rgba(91,175,255,.5)); }
+.hd-loss-chart .g-dot { fill:#fff; stroke:#5BAFFF; stroke-width:2; filter:drop-shadow(0 2px 4px rgba(91,175,255,.6)); }
+
+.hd-epoch-bars { display:flex; align-items:flex-end; gap:4px; height:90px; margin-top:10px; padding-top:4px; }
+.hd-epoch-bars i { flex:1; border-radius:5px 5px 1px 1px;
+  background:linear-gradient(180deg, #00C896, #5FD4A8); box-shadow:0 1px 4px rgba(0,200,150,.5);
+  position:relative; transition:.2s; cursor:default; }
+.hd-epoch-bars i.cur { background:linear-gradient(180deg, #FFC93C, #FFA07A); box-shadow:0 1px 4px rgba(255,201,60,.6);
+  animation:hdBarPulse 1.6s ease-in-out infinite; }
+@keyframes hdBarPulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.18)} }
+.hd-epoch-bars i:hover { transform:scaleY(1.08); }
+
+.hd-gpu-list { margin-top:10px; }
+.hd-gpu-row { display:grid; grid-template-columns:90px 1fr 36px; gap:8px; align-items:center;
+  padding:5px 0; font-size:11px; color:var(--ink-2); font-feature-settings:"tnum"; }
+.hd-gpu-bar { height:8px; border-radius:4px; background:#EEF0FB; overflow:hidden; position:relative; }
+.hd-gpu-bar i { display:block; height:100%; width:var(--p); border-radius:4px;
+  background:linear-gradient(90deg, #5BAFFF, #6E5CFF); box-shadow:inset 0 1px 1px rgba(255,255,255,.4);
+  animation:hdBarSlide 1.4s cubic-bezier(.16,1,.3,1); }
+.hd-gpu-bar i.hot { background:linear-gradient(90deg, #FFC93C, #FF6B9D); }
+@keyframes hdBarSlide { from { width:0 } to { width:var(--p) } }
+.hd-gpu-row span:last-child { font-weight:800; color:var(--ink); text-align:right; }
+
+/* ---------- 7. 健康度雷达 ---------- */
+.hd-radar-block .hd-flow-card { display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:center; }
+.hd-radar { width:320px; height:320px; position:relative; margin:0 auto; }
+.hd-radar svg { width:100%; height:100%; }
+.hd-radar .r-grid { fill:none; stroke:#E1E5F5; stroke-width:1; }
+.hd-radar .r-axis { stroke:#D5DAEE; stroke-width:1; }
+.hd-radar .r-fill { fill:url(#hdRadarFill); opacity:.55; }
+.hd-radar .r-stroke { fill:none; stroke:url(#hdRadarStroke); stroke-width:2.2; stroke-linejoin:round;
+  filter:drop-shadow(0 0 6px rgba(110,92,255,.5)); }
+.hd-radar .r-pt { fill:#fff; stroke:#6E5CFF; stroke-width:2; filter:drop-shadow(0 0 4px #6E5CFF); }
+.hd-radar .r-lbl { font-size:11px; font-weight:700; fill:var(--ink-2); }
+.hd-radar-dims { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.hd-radar-dim { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px;
+  background:linear-gradient(120deg, rgba(255,255,255,.85), rgba(255,255,255,.5));
+  border:1px solid var(--line); transition:.2s; cursor:default; }
+.hd-radar-dim:hover { border-color:var(--c, #6E5CFF); box-shadow:0 5px 14px -6px var(--c, rgba(110,92,255,.4)); }
+.hd-radar-dim .rd-d { width:8px; height:8px; border-radius:50%; background:var(--c, #6E5CFF); box-shadow:0 0 8px var(--c); }
+.hd-radar-dim .rd-lbl { flex:1; font-size:12px; color:var(--ink-2); font-weight:600; }
+.hd-radar-dim .rd-v { font-size:16px; font-weight:850; color:var(--ink); font-feature-settings:"tnum"; letter-spacing:-.02em; }
+.hd-radar-dim .rd-t { font-size:10.5px; font-weight:700; }
+.hd-radar-dim .rd-t.up { color:#00A878; }
+.hd-radar-dim .rd-t.dn { color:#E5484D; }
+.hd-radar-dim .rd-t.eq { color:var(--muted); }
+
+/* ---------- 8. 底部:快捷+资产 ---------- */
+.hd-bottom { display:grid; grid-template-columns:1.05fr 1fr; gap:14px; }
+.hd-quick-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.hd-quick { padding:14px 12px; border-radius:14px; cursor:pointer;
+  background:rgba(255,255,255,.78); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.85); box-shadow:0 4px 14px -8px rgba(90,91,240,.2);
+  font-size:12px; font-weight:700; color:var(--ink); text-align:left;
+  display:flex; align-items:center; gap:10px; transition:.2s; font-family:inherit;
+  position:relative; overflow:hidden; }
+.hd-quick::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg, var(--c, #6E5CFF), var(--c2, #A78BFA)); }
+.hd-quick:hover { transform:translateY(-2px); box-shadow:0 12px 24px -10px var(--c, rgba(110,92,255,.4));
+  border-color:var(--c, rgba(110,92,255,.3)); }
+.hd-quick-ico { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-size:17px;
+  background:linear-gradient(135deg, var(--c), var(--c2)); color:#fff;
+  box-shadow:0 4px 10px -3px var(--c); flex-shrink:0; }
+.hd-quick-info { flex:1; min-width:0; }
+.hd-quick-t { font-size:12px; font-weight:800; color:var(--ink); }
+.hd-quick-s { font-size:10.5px; color:var(--muted); margin-top:1px; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+
+.hd-asset-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-bottom:12px; }
+.hd-asset { padding:11px 10px; border-radius:12px; text-align:center;
+  background:linear-gradient(135deg, var(--c), var(--c2)); color:#fff;
+  box-shadow:0 5px 14px -5px var(--c); transition:.2s; cursor:default; }
+.hd-asset:hover { transform:translateY(-2px); box-shadow:0 12px 20px -6px var(--c); }
+.hd-asset b { display:block; font-size:18px; font-weight:850; letter-spacing:-.02em; font-feature-settings:"tnum"; }
+.hd-asset span { display:block; font-size:10.5px; opacity:.92; margin-top:2px; }
+
+.hd-heatmap-wrap { padding:11px 12px; border-radius:12px;
+  background:linear-gradient(120deg, rgba(255,255,255,.78), rgba(255,255,255,.5));
+  border:1px solid var(--line); }
+.hd-heatmap-t { font-size:11.5px; font-weight:700; color:var(--ink-2); margin-bottom:8px;
+  display:flex; align-items:center; justify-content:space-between; }
+.hd-heatmap-legend { display:flex; gap:3px; align-items:center; font-size:10px; color:var(--muted); }
+.hd-heatmap-legend i { width:10px; height:10px; border-radius:2.5px; }
+.hd-heatmap { display:grid; grid-template-columns:repeat(14, 1fr); gap:3px; }
+.hd-heatmap i { aspect-ratio:1; border-radius:3px; transition:.15s;
+  background:var(--bg-c, #EEF0FB); }
+.hd-heatmap i:hover { transform:scale(1.25); z-index:2; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+.hd-heatmap i.lv1 { --bg-c:rgba(110,92,255,.18); }
+.hd-heatmap i.lv2 { --bg-c:rgba(110,92,255,.36); }
+.hd-heatmap i.lv3 { --bg-c:rgba(110,92,255,.6); }
+.hd-heatmap i.lv4 { --bg-c:rgba(110,92,255,.88); }
+.hd-heatmap i.lv5 { --bg-c:linear-gradient(135deg, #6E5CFF, #00C2D8); background:linear-gradient(135deg, #6E5CFF, #00C2D8); }
+
+/* 响应式 */
+@media (max-width:1280px) {
+  .hd-kpi-grid { grid-template-columns:repeat(3, 1fr); }
+  .hd-agents { grid-template-columns:repeat(3, 1fr); }
+  .hd-deci-grid { grid-template-columns:1fr 1fr; }
+  .hd-train-grid { grid-template-columns:1fr 1fr; }
+  .hd-bottom { grid-template-columns:1fr; }
+  .hd-radar-block .hd-flow-card { grid-template-columns:1fr; }
+}
+
 </style>
 </head>
 <body>
@@ -4120,7 +4479,13 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
   <nav class="sb-scroll">
     <!-- ============ Layer 1 · 入口 ============ -->
     <div class="s-label">入口 <span class="s-label-tag tag-on">免费</span></div>
-    <div class="s-item active" data-view="dazi" data-title="我有一批资料需要整理，帮我判断应该用哪个智能体">
+    <div class="s-item active" data-view="home" data-title="顶呱呱AI操作系统 · 企业 AI 智能工作台">
+      <span class="s-icon" style="background:linear-gradient(135deg,#6E5CFF,#00C2D8);box-shadow:0 6px 16px -5px rgba(110,92,255,.55)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="9" rx="1.5"/><rect x="13" y="3.5" width="7.5" height="5.5" rx="1.5"/><rect x="3.5" y="14.5" width="7.5" height="6" rx="1.5"/><rect x="13" y="11" width="7.5" height="9.5" rx="1.5"/></svg>
+      </span>
+      <div class="s-meta"><div class="s-name">首页 Dashboard</div><div class="s-desc">企业全景 · 实时洞察</div></div>
+    </div>
+    <div class="s-item" data-view="dazi" data-title="我有一批资料需要整理，帮我判断应该用哪个智能体">
       <span class="s-icon s-grad">
         <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
       </span>
@@ -4270,8 +4635,462 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
   <div class="main-body">
     <div class="view-zone">
 
+      <!-- ============ 视图：首页 Dashboard ============ -->
+      <section class="view active" id="view-home">
+        <div class="hd-wrap">
+
+          <!-- SVG 渐变定义 (全局可用) -->
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+              <linearGradient id="hdGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#6E5CFF"/><stop offset="100%" stop-color="#00C2D8"/>
+              </linearGradient>
+              <linearGradient id="hdSparkArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="currentColor" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="hdGaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#6E5CFF"/><stop offset="50%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#FF6B9D"/>
+              </linearGradient>
+              <linearGradient id="hdDonutGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00B8D9"/><stop offset="100%" stop-color="#4A9EFF"/>
+              </linearGradient>
+              <linearGradient id="hdDonutGrad2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#FF99B8"/>
+              </linearGradient>
+              <linearGradient id="hdLineArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00C896" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="#00C896" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="hdLossArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5BAFFF" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="#5BAFFF" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="hdLossLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5BAFFF"/><stop offset="100%" stop-color="#6E5CFF"/>
+              </linearGradient>
+              <radialGradient id="hdRadarFill" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#A78BFA" stop-opacity=".7"/>
+                <stop offset="100%" stop-color="#00C2D8" stop-opacity=".25"/>
+              </radialGradient>
+              <linearGradient id="hdRadarStroke" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#6E5CFF"/><stop offset="50%" stop-color="#9A4DFF"/><stop offset="100%" stop-color="#00C2D8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- ① 顶部 Hero 欢迎条 -->
+          <div class="hd-hero">
+            <div class="hd-hero-orbs">
+              <span class="hd-orb hd-orb-a"></span>
+              <span class="hd-orb hd-orb-b"></span>
+              <span class="hd-orb hd-orb-c"></span>
+            </div>
+            <div class="hd-hero-l">
+              <div class="hd-greet"><span id="hdGreet">下午好</span>, <b>管理员</b> 👋 欢迎回到工作台</div>
+              <h1>顶呱呱 · <span class="hd-shine">企业 AI 操作系统</span></h1>
+              <p class="hd-sub">今日 <b>8</b> 个 AI Agent 正在为你 7×24h 工作 · 已自动处理 <b id="hdAutoCnt">1,247</b> 项任务 · 节省 <b id="hdSaveHr">18.6</b> 小时人工 · 折合 <b>¥6,420</b></p>
+            </div>
+            <div class="hd-hero-r">
+              <div class="hd-clock">
+                <div class="hd-time" id="hdClock">14:23:08</div>
+                <div class="hd-date" id="hdDate">2026年6月20日 · 周六</div>
+              </div>
+              <div class="hd-quick-stats">
+                <div class="hd-qs"><div class="hd-qs-n" data-cnt-to="8">0</div><div class="hd-qs-l">在线 Agent</div></div>
+                <div class="hd-qs"><div class="hd-qs-n" data-cnt-to="247">0</div><div class="hd-qs-l">今日完成</div></div>
+                <div class="hd-qs"><div class="hd-qs-n hd-qs-warn" data-cnt-to="3">0</div><div class="hd-qs-l">待你拍板</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ② 老板今日待拍板 -->
+          <section class="hd-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-amber">⚠</span>老板今日待拍板事项 <span class="hd-cnt">3</span></h2>
+              <span class="hd-extra">超过 24h 未决策 · 自动汇总到周报</span>
+            </header>
+            <div class="hd-deci-grid">
+              <div class="hd-deci-card hd-deci-urg">
+                <div class="hd-deci-tag">🔥 紧迫 · 剩 6h</div>
+                <h3>合同审查 · 华东客户付款条款</h3>
+                <p>AI 识别 3 处高风险条款 · 客户要求 <b>60 天账期</b>，公司基准 30 天 · 是否接受？</p>
+                <div class="hd-deci-meta">
+                  <span>📜 合同审查助手</span>
+                  <span class="hd-deci-impact">影响金额 <b>¥328 万</b></span>
+                </div>
+                <div class="hd-deci-acts" style="--bc1:#FF5C8A;--bc2:#FF8C42">
+                  <button class="hd-btn hd-btn-grad" data-goto="contract">立即处理 →</button>
+                  <button class="hd-btn">延后</button>
+                </div>
+              </div>
+              <div class="hd-deci-card hd-deci-mid">
+                <div class="hd-deci-tag">⏰ 中等 · 剩 18h</div>
+                <h3>财务AI · 5/25 现金流缺口</h3>
+                <p>预计缺口 <b>¥120 万</b> · AI 已自动生成 3 套补足方案 (银承 / 应收提前 / 短贷)</p>
+                <div class="hd-deci-meta">
+                  <span>🧮 财务AI管家</span>
+                  <span class="hd-deci-impact">缺口 <b>¥120 万</b></span>
+                </div>
+                <div class="hd-deci-acts" style="--bc1:#FFC93C;--bc2:#FFA07A">
+                  <button class="hd-btn hd-btn-grad" data-goto="fin">查看方案</button>
+                  <button class="hd-btn">延后</button>
+                </div>
+              </div>
+              <div class="hd-deci-card hd-deci-lo">
+                <div class="hd-deci-tag">📋 常规 · 今日</div>
+                <h3>HR · 周经理流失预警</h3>
+                <p>核心销售 · 18 项信号触发 · 留任成本 <b>¥8 万</b> vs 离职损失 <b>¥87 万</b></p>
+                <div class="hd-deci-meta">
+                  <span>👥 HR智能助手</span>
+                  <span class="hd-deci-impact">留任 ROI <b>10.9x</b></span>
+                </div>
+                <div class="hd-deci-acts" style="--bc1:#6E5CFF;--bc2:#5BAFFF">
+                  <button class="hd-btn hd-btn-grad" data-goto="hr">查看建议</button>
+                  <button class="hd-btn">已沟通</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ③ Agent 实时工作矩阵 -->
+          <section class="hd-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-violet">🤖</span>AI Agent 实时工作矩阵</h2>
+              <span class="hd-extra"><span class="hd-live">LIVE</span> 8 / 8 在线</span>
+            </header>
+            <div class="hd-agents" id="hdAgents">
+              <!-- 8 cards 通过 JS 渲染保证 SVG ring + sparkline 正确 -->
+            </div>
+          </section>
+
+          <!-- ④ KPI Wall (6 种不同图表) -->
+          <section class="hd-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-cyan">📊</span>今日 AI 工作成果数据墙</h2>
+              <span class="hd-extra">6/20 累计 · 每 5 分钟刷新</span>
+            </header>
+            <div class="hd-kpi-grid">
+              <!-- a) Gauge 仪表盘 -->
+              <div class="hd-kpi" style="--c:#6E5CFF;--c2:#A78BFA">
+                <div class="hd-kpi-lbl">⚙ 自动化率</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-gauge">
+                    <svg viewBox="0 0 108 64">
+                      <path class="g-track" d="M10,58 A 44 44 0 0 1 98,58"/>
+                      <path class="g-fill" id="hdGaugeArc" d="M10,58 A 44 44 0 0 1 98,58"
+                        stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">87<small>%</small></div>
+                <div class="hd-kpi-d">↑ 4.2% 本周</div>
+              </div>
+              <!-- b) Donut 双环 -->
+              <div class="hd-kpi" style="--c:#00B8D9;--c2:#4A9EFF">
+                <div class="hd-kpi-lbl">🎯 任务自动处理</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-donut">
+                    <svg viewBox="0 0 88 88" width="88" height="88">
+                      <circle class="d-track" cx="44" cy="44" r="32"/>
+                      <circle class="d-fill" cx="44" cy="44" r="32"
+                        stroke-dasharray="201" stroke-dashoffset="38" id="hdDonutA"/>
+                      <circle class="d-fill-2" cx="44" cy="44" r="22"
+                        stroke-dasharray="138" stroke-dashoffset="45" id="hdDonutB"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">1,247</div>
+                <div class="hd-kpi-d">↑ 178 vs 昨日</div>
+              </div>
+              <!-- c) Bars 柱状 -->
+              <div class="hd-kpi" style="--c:#FF6B9D;--c2:#FFA07A">
+                <div class="hd-kpi-lbl">⏱ 7 日工时节省</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-bars">
+                    <i style="--h:30%"></i><i style="--h:48%"></i><i style="--h:42%"></i>
+                    <i style="--h:65%"></i><i style="--h:78%"></i><i style="--h:88%"></i><i style="--h:95%"></i>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">18.6<small>h</small></div>
+                <div class="hd-kpi-d">折合 ¥6,420</div>
+              </div>
+              <!-- d) Line 折线 -->
+              <div class="hd-kpi" style="--c:#00C896;--c2:#5FD4A8">
+                <div class="hd-kpi-lbl">📈 质量分趋势</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-line">
+                    <svg viewBox="0 0 108 56">
+                      <path class="area" d="M0,44 L18,38 L36,32 L54,26 L72,20 L90,15 L108,10 L108,56 L0,56 Z"/>
+                      <path class="stroke" d="M0,44 L18,38 L36,32 L54,26 L72,20 L90,15 L108,10"/>
+                      <circle cx="108" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">94.2</div>
+                <div class="hd-kpi-d">↑ 1.8 · 连续 7 天</div>
+              </div>
+              <!-- e) Counter 计数器 -->
+              <div class="hd-kpi" style="--c:#FF8C42;--c2:#FFB366">
+                <div class="hd-kpi-lbl">✅ AI 决策建议</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-counter">
+                    <span class="hd-c-digit" data-cnt-to="86">0</span>
+                    <span class="hd-c-sub">采纳 / 共 92 条</span>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">93.5<small>%</small></div>
+                <div class="hd-kpi-d">采纳率 · 老板可决策</div>
+              </div>
+              <!-- f) Liquid 液体进度 -->
+              <div class="hd-kpi" style="--c:#FFC93C;--c2:#FF8C42">
+                <div class="hd-kpi-lbl">💧 月度任务进度</div>
+                <div class="hd-kpi-chart">
+                  <div class="hd-liquid">
+                    <div class="hd-liquid-wave"></div>
+                    <span class="hd-liquid-pct">68%</span>
+                  </div>
+                </div>
+                <div class="hd-kpi-val">2,890<small> / 4,250</small></div>
+                <div class="hd-kpi-d">预计 6/28 完成</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ⑤ 跨 Agent 联动事件流 -->
+          <section class="hd-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-pink">🔄</span>跨 Agent 联动事件流</h2>
+              <span class="hd-extra"><span class="hd-live">LIVE</span> 最近 30 分钟</span>
+            </header>
+            <div class="hd-flow-card">
+              <div class="hd-timeline" id="hdTimeline">
+                <div class="hd-tl-event live" style="--c:#6E5CFF;--c2:#A78BFA">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">刚刚 · 14:21</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">📜 合同审查</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">🧮 财务AI</span>
+                  </div>
+                  <p>华东客户合同 <b>¥328 万</b> 签订 · 自动触发应收账款排程 · 现金流预测已更新<span class="hd-tl-tag">联动</span></p>
+                </div>
+                <div class="hd-tl-event live" style="--c:#FF6B9D;--c2:#FFA07A">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">3 分钟前 · 14:18</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">🏆 销冠AI</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">💬 客服AI</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">👥 HR</span>
+                  </div>
+                  <p>识别 <b>3 个高潜商机</b> · 客服 SOP 已自动同步 · HR 启动周经理留任面谈<span class="hd-tl-tag">3 段联动</span></p>
+                </div>
+                <div class="hd-tl-event" style="--c:#00C896;--c2:#5FD4A8">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">9 分钟前 · 14:12</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">💬 客服AI · 夜班</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">🧠 知识空间</span>
+                  </div>
+                  <p>夜班 87 条对话 → 沉淀 <b>14 条 SOP</b> + <b>3 条 FAQ</b> · LoRA V2.5 训练数据集已扩充<span class="hd-tl-tag">知识沉淀</span></p>
+                </div>
+                <div class="hd-tl-event" style="--c:#FFC93C;--c2:#FFA07A">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">14 分钟前 · 14:07</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">📑 招/投标</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">📜 合同审查</span>
+                  </div>
+                  <p>中标 <b>¥186 万</b> GPU 服务器项目 · 合同模板已根据 AI 评标条款自动起草<span class="hd-tl-tag">中标</span></p>
+                </div>
+                <div class="hd-tl-event" style="--c:#5BAFFF;--c2:#87CEEB">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">21 分钟前 · 14:00</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">🛠 工程管理</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">📜 合同审查</span>
+                  </div>
+                  <p>新发布《供应商付款管理办法》· 合同审查规则库已自动同步 <b>4 条新条款</b><span class="hd-tl-tag">制度联动</span></p>
+                </div>
+                <div class="hd-tl-event" style="--c:#A78BFA;--c2:#FF6B9D">
+                  <div class="hd-tl-dot"></div>
+                  <div class="hd-tl-time">28 分钟前 · 13:53</div>
+                  <div class="hd-tl-chain">
+                    <span class="hd-tl-from">🧮 财务AI</span>
+                    <span class="hd-tl-arrow">→</span>
+                    <span class="hd-tl-to">👥 HR</span>
+                  </div>
+                  <p>5 月薪资核算完成 · 27 条异常已 AI 复核 · HR 个税申报数据已就绪<span class="hd-tl-tag">月结联动</span></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ⑥ AI 大模型训练状态 -->
+          <section class="hd-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-blue">🧠</span>AI 大模型训练状态</h2>
+              <span class="hd-extra">本周 3 个企业专属模型迭代中</span>
+            </header>
+            <div class="hd-train-grid">
+              <!-- a) Loss 曲线 -->
+              <div class="hd-train-card">
+                <div class="hd-train-head">客服 LoRA · V2.4 → V2.5</div>
+                <div class="hd-train-stat">
+                  <span class="hd-train-pill on">训练中</span>
+                  <span>Epoch <b>7/10</b></span>
+                  <span>Loss <b>0.0428</b> ↓</span>
+                  <span>ETA <b>22min</b></span>
+                </div>
+                <div class="hd-loss-chart">
+                  <svg viewBox="0 0 240 90" preserveAspectRatio="none">
+                    <line class="g-grid" x1="0" y1="22" x2="240" y2="22"/>
+                    <line class="g-grid" x1="0" y1="45" x2="240" y2="45"/>
+                    <line class="g-grid" x1="0" y1="68" x2="240" y2="68"/>
+                    <path class="g-area" d="M0,12 L24,18 L48,28 L72,40 L96,52 L120,62 L144,70 L168,76 L240,80 L240,90 L0,90 Z"/>
+                    <path class="g-line" d="M0,12 L24,18 L48,28 L72,40 L96,52 L120,62 L144,70 L168,76"/>
+                    <circle class="g-dot" cx="168" cy="76" r="3.5"/>
+                  </svg>
+                </div>
+              </div>
+              <!-- b) Epoch bars -->
+              <div class="hd-train-card">
+                <div class="hd-train-head">派单 XGBoost · V1.4 → V1.5</div>
+                <div class="hd-train-stat">
+                  <span class="hd-train-pill done">已完成</span>
+                  <span>F1 <b>0.918</b></span>
+                  <span>AUC <b>0.953</b></span>
+                  <span><b style="color:#00A878">↑ +3.2%</b></span>
+                </div>
+                <div class="hd-epoch-bars">
+                  <i style="height:32%" title="Epoch 1"></i>
+                  <i style="height:42%" title="Epoch 2"></i>
+                  <i style="height:48%" title="Epoch 3"></i>
+                  <i style="height:55%" title="Epoch 4"></i>
+                  <i style="height:62%" title="Epoch 5"></i>
+                  <i style="height:68%" title="Epoch 6"></i>
+                  <i style="height:73%" title="Epoch 7"></i>
+                  <i style="height:79%" title="Epoch 8"></i>
+                  <i style="height:84%" title="Epoch 9"></i>
+                  <i style="height:88%" title="Epoch 10"></i>
+                  <i style="height:91%" title="Epoch 11"></i>
+                  <i style="height:93%" title="Epoch 12"></i>
+                  <i style="height:94%" title="Epoch 13"></i>
+                  <i style="height:95%" title="Epoch 14"></i>
+                  <i class="cur" style="height:95%" title="Epoch 15"></i>
+                </div>
+              </div>
+              <!-- c) GPU 占用 -->
+              <div class="hd-train-card">
+                <div class="hd-train-head">GPU 资源占用 · 实时</div>
+                <div class="hd-train-stat">
+                  <span class="hd-train-pill on">运行中</span>
+                  <span>3 卡 / 共 4</span>
+                  <span>显存 <b>72.3 / 96 GB</b></span>
+                </div>
+                <div class="hd-gpu-list">
+                  <div class="hd-gpu-row"><span>RTX 4090 #1</span><div class="hd-gpu-bar"><i class="hot" style="--p:82%"></i></div><span>82%</span></div>
+                  <div class="hd-gpu-row"><span>RTX 4090 #2</span><div class="hd-gpu-bar"><i style="--p:65%"></i></div><span>65%</span></div>
+                  <div class="hd-gpu-row"><span>A100 80G #1</span><div class="hd-gpu-bar"><i style="--p:34%"></i></div><span>34%</span></div>
+                  <div class="hd-gpu-row"><span>A100 80G #2</span><div class="hd-gpu-bar"><i style="--p:0%"></i></div><span>—</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ⑦ 企业健康度雷达 -->
+          <section class="hd-block hd-radar-block">
+            <header>
+              <h2><span class="hd-ico hd-ico-green">🎯</span>企业健康度雷达 · 8 维</h2>
+              <span class="hd-extra">每日 7:00 AI 自动评估 · 满分 100</span>
+            </header>
+            <div class="hd-flow-card">
+              <div class="hd-radar" id="hdRadar">
+                <!-- SVG 由 JS 渲染保证多边形坐标准确 -->
+              </div>
+              <div class="hd-radar-dims" id="hdRadarDims">
+                <!-- 8 维度 由 JS 渲染 -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ⑧ 快捷操作 + 知识资产 -->
+          <section class="hd-block hd-bottom">
+            <div>
+              <header>
+                <h2><span class="hd-ico hd-ico-violet">⚡</span>快捷操作</h2>
+                <span class="hd-extra">高频任务 · 一键直达</span>
+              </header>
+              <div class="hd-quick-grid">
+                <button class="hd-quick" style="--c:#FF6B9D;--c2:#FFA07A" data-goto="bt">
+                  <span class="hd-quick-ico">📤</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">发起招标</span><span class="hd-quick-s">AI 起草 + 邀约</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#6E5CFF;--c2:#A78BFA" data-goto="contract">
+                  <span class="hd-quick-ico">📜</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">上传合同审查</span><span class="hd-quick-s">秒解析 + 风险雷达</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#00B8D9;--c2:#4A9EFF" data-goto="bt">
+                  <span class="hd-quick-ico">🎯</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">上传招标书</span><span class="hd-quick-s">投标 Agent 启动</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#00C896;--c2:#5FD4A8" data-goto="fin">
+                  <span class="hd-quick-ico">💰</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">资金缺口排查</span><span class="hd-quick-s">3 套方案</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#FFC93C;--c2:#FF8C42" data-goto="hr">
+                  <span class="hd-quick-ico">👥</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">流失预警</span><span class="hd-quick-s">看本周 5 人</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#A78BFA;--c2:#FF6B9D" data-goto="cs">
+                  <span class="hd-quick-ico">💬</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">客服分诊台</span><span class="hd-quick-s">待处理 12 条</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#FF8C42;--c2:#FFC93C" data-goto="sales">
+                  <span class="hd-quick-ico">🏆</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">销售线索池</span><span class="hd-quick-s">8 条新线索</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#5BAFFF;--c2:#87CEEB" data-goto="dazi">
+                  <span class="hd-quick-ico">🧭</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">问搭子</span><span class="hd-quick-s">智能体调度</span></span>
+                </button>
+                <button class="hd-quick" style="--c:#6E5CFF;--c2:#00C2D8" data-goto="data">
+                  <span class="hd-quick-ico">📊</span>
+                  <span class="hd-quick-info"><span class="hd-quick-t">数据问数</span><span class="hd-quick-s">指标分析</span></span>
+                </button>
+              </div>
+            </div>
+            <div>
+              <header>
+                <h2><span class="hd-ico hd-ico-cyan">💎</span>企业知识资产</h2>
+                <span class="hd-extra">AI 沉淀 · 持续增长</span>
+              </header>
+              <div class="hd-asset-grid">
+                <div class="hd-asset" style="--c:#6E5CFF;--c2:#A78BFA"><b>2,847</b><span>知识文档</span></div>
+                <div class="hd-asset" style="--c:#00B8D9;--c2:#4A9EFF"><b>684</b><span>SOP 沉淀</span></div>
+                <div class="hd-asset" style="--c:#00C896;--c2:#5FD4A8"><b>1,392</b><span>FAQ 条目</span></div>
+                <div class="hd-asset" style="--c:#FF6B9D;--c2:#FFA07A"><b>47</b><span>专属模型</span></div>
+              </div>
+              <div class="hd-heatmap-wrap">
+                <div class="hd-heatmap-t">
+                  <span>📅 过去 14 周 · 知识资产新增热力</span>
+                  <span class="hd-heatmap-legend">少 <i></i><i class="lv1"></i><i class="lv2"></i><i class="lv3"></i><i class="lv4"></i><i class="lv5"></i> 多</span>
+                </div>
+                <div class="hd-heatmap" id="hdHeatmap"></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </section>
+
       <!-- ============ 视图：搭子（对话） ============ -->
-      <section class="view active" id="view-dazi">
+      <section class="view" id="view-dazi">
         <div class="thread" id="thread">
 
           <div class="a-row">
@@ -10356,7 +11175,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     </div>
 
     <!-- ====================== 右侧面板 ====================== -->
-    <aside class="right-panel" id="rightPanel">
+    <aside class="right-panel hidden" id="rightPanel">
       <div class="rp-card greet">
         <span class="g-ava"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6.5" width="16" height="13" rx="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="9.6" cy="12.6" r="1.5" fill="#fff"/><circle cx="14.4" cy="12.6" r="1.5" fill="#fff"/><path d="M9.6 16.4c.7.6 1.5.9 2.4.9s1.7-.3 2.4-.9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M12 6.5V4m0 0h2.3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
         <div>
@@ -17490,6 +18309,223 @@ function _tenderInit() {
 }
 
 (function () { _bidInit(); _tenderInit(); })();
+</script><script>
+/* ============================================================
+   首页 Dashboard 初始化
+   ============================================================ */
+(function _hdInit(){
+  var Q = function(s, c){ return (c||document).querySelector(s); };
+  var QA = function(s, c){ return [].slice.call((c||document).querySelectorAll(s)); };
+
+  /* ---------- 时钟 ---------- */
+  function pad(n){ return n<10? "0"+n : ""+n; }
+  function tick(){
+    var d = new Date();
+    var t = Q("#hdClock"); if (t) t.textContent = pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+    var dd = Q("#hdDate");
+    var w = ["周日","周一","周二","周三","周四","周五","周六"][d.getDay()];
+    if (dd) dd.textContent = d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日 · "+w;
+    var g = Q("#hdGreet");
+    if (g) {
+      var h = d.getHours();
+      g.textContent = h<6?"凌晨好": h<9?"早上好": h<12?"上午好": h<14?"中午好": h<18?"下午好": h<22?"晚上好":"夜深了";
+    }
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ---------- 数字 count-up ---------- */
+  function countUp(el, to, dur){
+    dur = dur || 1200;
+    var from = parseFloat(el.textContent) || 0;
+    var start = performance.now();
+    function frame(now){
+      var p = Math.min(1, (now-start)/dur);
+      p = 1 - Math.pow(1-p, 3);
+      var v = from + (to-from)*p;
+      el.textContent = (to>=100? Math.round(v).toLocaleString() : v.toFixed(to<10?0:1));
+      if (p<1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  QA("[data-cnt-to]").forEach(function(el){
+    var to = parseFloat(el.dataset.cntTo);
+    setTimeout(function(){ countUp(el, to, 1400); }, 200);
+  });
+
+  /* ---------- ③ Agent 矩阵 ---------- */
+  var agents = [
+    { ico:"📮", name:"邮箱助手",   c:"#5BAFFF", c2:"#87CEEB", pct:87, n:24,   nl:"今日处理", spark:[3,5,4,7,6,9,12,10,14,13,16,18], delta:"↑ 18%" },
+    { ico:"🧮", name:"财务AI",     c:"#FF6B9D", c2:"#FFA07A", pct:94, n:128,  nl:"凭证生成", spark:[8,11,9,14,13,17,15,21,19,24,26,28], delta:"↑ 12%" },
+    { ico:"🏆", name:"销冠AI",     c:"#FFC93C", c2:"#FF8C42", pct:82, n:47,   nl:"线索分诊", spark:[12,10,14,11,16,18,15,21,19,24,22,26], delta:"↑ 9%" },
+    { ico:"📜", name:"合同审查",   c:"#6E5CFF", c2:"#A78BFA", pct:91, n:18,   nl:"合同审查", spark:[4,6,5,8,7,10,9,12,14,13,16,15], delta:"↑ 22%" },
+    { ico:"👥", name:"HR智能助手", c:"#00C896", c2:"#5FD4A8", pct:78, n:62,   nl:"算薪/招聘", spark:[15,18,14,20,17,22,19,24,21,26,23,28], delta:"↑ 6%" },
+    { ico:"💬", name:"客服AI",     c:"#00B8D9", c2:"#4A9EFF", pct:96, n:412,  nl:"对话/工单", spark:[40,50,45,55,52,62,58,68,65,72,75,80], delta:"↑ 14%" },
+    { ico:"📑", name:"招/投标AI",  c:"#A78BFA", c2:"#FF6B9D", pct:75, n:9,    nl:"招投标项目", spark:[2,3,2,4,3,5,4,6,5,7,6,8], delta:"↑ 50%" },
+    { ico:"🛠", name:"工程管理",   c:"#FF8C42", c2:"#FFC93C", pct:88, n:31,   nl:"制度采集", spark:[6,8,7,10,9,12,11,14,12,15,14,17], delta:"↑ 8%" }
+  ];
+  function sparkPath(arr, w, h){
+    var max = Math.max.apply(null, arr), min = Math.min.apply(null, arr);
+    var dx = w / (arr.length-1);
+    var pts = arr.map(function(v, i){
+      var x = i*dx;
+      var y = h - (max===min? h/2 : (v-min)/(max-min) * (h-4) + 2);
+      return [x,y];
+    });
+    var d = "M"+pts[0][0]+","+pts[0][1];
+    for (var i=1; i<pts.length; i++){
+      var p = pts[i-1], q = pts[i];
+      var mx = (p[0]+q[0])/2;
+      d += " Q "+mx+","+p[1]+" "+mx+","+(p[1]+q[1])/2+" T "+q[0]+","+q[1];
+    }
+    var areaD = d + " L "+w+","+h+" L 0,"+h+" Z";
+    return { line:d, area:areaD };
+  }
+  var grid = Q("#hdAgents");
+  if (grid){
+    grid.innerHTML = agents.map(function(a, i){
+      var C = 2 * Math.PI * 20;
+      var off = C * (1 - a.pct/100);
+      var sp = sparkPath(a.spark, 100, 28);
+      return '<div class="hd-agent" style="--ac:'+a.c+';--ac2:'+a.c2+';color:'+a.c+'" data-i="'+i+'">'+
+        '<div class="hd-agent-top">'+
+          '<span class="hd-agent-ico">'+a.ico+'</span>'+
+          '<div class="hd-agent-info">'+
+            '<div class="hd-agent-name">'+a.name+'</div>'+
+            '<div class="hd-agent-stat">运行中</div>'+
+          '</div>'+
+          '<div class="hd-ring">'+
+            '<svg width="48" height="48" viewBox="0 0 48 48">'+
+              '<defs><linearGradient id="hdGr'+i+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="'+a.c+'"/><stop offset="100%" stop-color="'+a.c2+'"/></linearGradient></defs>'+
+              '<circle class="hd-ring-track" cx="24" cy="24" r="20" fill="none" stroke-width="4"/>'+
+              '<circle class="hd-ring-fill" cx="24" cy="24" r="20" fill="none" stroke-width="4" stroke="url(#hdGr'+i+')" stroke-linecap="round" stroke-dasharray="'+C.toFixed(2)+'" stroke-dashoffset="'+C.toFixed(2)+'" data-off="'+off.toFixed(2)+'"/>'+
+            '</svg>'+
+            '<span class="hd-ring-pct">'+a.pct+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="hd-agent-mid">'+
+          '<div class="hd-spark">'+
+            '<svg viewBox="0 0 100 28" preserveAspectRatio="none">'+
+              '<path class="hd-spark-area" d="'+sp.area+'"/>'+
+              '<path d="'+sp.line+'"/>'+
+            '</svg>'+
+          '</div>'+
+        '</div>'+
+        '<div class="hd-agent-bot">'+
+          '<div><span class="hd-agent-n">'+a.n+'</span><small>'+a.nl+'</small></div>'+
+          '<div class="hd-agent-d"><span class="up">'+a.delta+'</span> 较昨日</div>'+
+        '</div>'+
+      '</div>';
+    }).join("");
+    setTimeout(function(){
+      QA(".hd-ring-fill", grid).forEach(function(c){
+        c.style.strokeDashoffset = c.dataset.off;
+      });
+    }, 200);
+    grid.addEventListener("click", function(e){
+      var card = e.target.closest(".hd-agent"); if (!card) return;
+      var i = +card.dataset.i;
+      var map = ["mail","fin","sales","contract","hr","cs","bt","eng"];
+      if (window._aios_switch) window._aios_switch(map[i]);
+    });
+  }
+
+  /* ---------- ④ KPI Wall 动画启动 ---------- */
+  setTimeout(function(){
+    var arc = Q("#hdGaugeArc"); if (arc) arc.style.strokeDashoffset = (138.2 * (1 - 0.87)).toFixed(2);
+    var da = Q("#hdDonutA"); if (da) da.style.strokeDashoffset = "38";
+    var db = Q("#hdDonutB"); if (db) db.style.strokeDashoffset = "45";
+  }, 300);
+
+  /* ---------- ⑦ 雷达图 ---------- */
+  var dims = [
+    { lbl:"销售", v:92, t:"up",  td:"+3.2", c:"#FF8C42" },
+    { lbl:"财务", v:84, t:"up",  td:"+1.8", c:"#FF6B9D" },
+    { lbl:"客户", v:88, t:"up",  td:"+2.5", c:"#00B8D9" },
+    { lbl:"合同", v:76, t:"eq",  td:"0",    c:"#6E5CFF" },
+    { lbl:"招标", v:71, t:"up",  td:"+5.4", c:"#A78BFA" },
+    { lbl:"HR",   v:82, t:"dn",  td:"-1.2", c:"#00C896" },
+    { lbl:"知识", v:90, t:"up",  td:"+4.1", c:"#5BAFFF" },
+    { lbl:"自动", v:87, t:"up",  td:"+4.2", c:"#FFC93C" }
+  ];
+  var rdEl = Q("#hdRadar");
+  if (rdEl){
+    var size = 320, cx = size/2, cy = size/2, R = 120;
+    var n = dims.length;
+    var ringSvg = '<svg viewBox="0 0 '+size+' '+size+'">';
+    /* 4 圈 */
+    for (var ring=1; ring<=4; ring++){
+      var rr = R*ring/4;
+      var pts = [];
+      for (var k=0; k<n; k++){
+        var ang = -Math.PI/2 + k*(Math.PI*2/n);
+        pts.push((cx+rr*Math.cos(ang)).toFixed(1)+","+(cy+rr*Math.sin(ang)).toFixed(1));
+      }
+      ringSvg += '<polygon class="r-grid" points="'+pts.join(" ")+'"/>';
+    }
+    /* 轴 */
+    for (var k=0; k<n; k++){
+      var ang = -Math.PI/2 + k*(Math.PI*2/n);
+      ringSvg += '<line class="r-axis" x1="'+cx+'" y1="'+cy+'" x2="'+(cx+R*Math.cos(ang)).toFixed(1)+'" y2="'+(cy+R*Math.sin(ang)).toFixed(1)+'"/>';
+    }
+    /* 数据多边形 */
+    var dataPts = [], dotPts = [];
+    for (var k=0; k<n; k++){
+      var ang = -Math.PI/2 + k*(Math.PI*2/n);
+      var rr = R * dims[k].v/100;
+      var x = (cx+rr*Math.cos(ang)).toFixed(1), y = (cy+rr*Math.sin(ang)).toFixed(1);
+      dataPts.push(x+","+y);
+      dotPts.push([x, y, dims[k].c]);
+    }
+    ringSvg += '<polygon class="r-fill" points="'+dataPts.join(" ")+'"/>';
+    ringSvg += '<polygon class="r-stroke" points="'+dataPts.join(" ")+'"/>';
+    dotPts.forEach(function(p){
+      ringSvg += '<circle class="r-pt" cx="'+p[0]+'" cy="'+p[1]+'" r="4" style="stroke:'+p[2]+';filter:drop-shadow(0 0 5px '+p[2]+')"/>';
+    });
+    /* 标签 */
+    for (var k=0; k<n; k++){
+      var ang = -Math.PI/2 + k*(Math.PI*2/n);
+      var lx = cx + (R+24)*Math.cos(ang), ly = cy + (R+24)*Math.sin(ang);
+      ringSvg += '<text class="r-lbl" x="'+lx.toFixed(0)+'" y="'+(ly+4).toFixed(0)+'" text-anchor="middle">'+dims[k].lbl+' <tspan font-weight="800" fill="'+dims[k].c+'">'+dims[k].v+'</tspan></text>';
+    }
+    ringSvg += '</svg>';
+    rdEl.innerHTML = ringSvg;
+  }
+  var dEl = Q("#hdRadarDims");
+  if (dEl){
+    dEl.innerHTML = dims.map(function(d){
+      var tCls = d.t, tSym = d.t==="up"?"↑": d.t==="dn"?"↓":"—";
+      return '<div class="hd-radar-dim" style="--c:'+d.c+'">'+
+        '<span class="rd-d"></span>'+
+        '<span class="rd-lbl">'+d.lbl+'</span>'+
+        '<span class="rd-v">'+d.v+'</span>'+
+        '<span class="rd-t '+tCls+'">'+tSym+' '+d.td+'</span>'+
+      '</div>';
+    }).join("");
+  }
+
+  /* ---------- ⑧ 热力图 14 周 × 7 天 = 98 ---------- */
+  var hm = Q("#hdHeatmap");
+  if (hm){
+    var levels = ["", "lv1", "lv2", "lv3", "lv4", "lv5"];
+    var html = "";
+    for (var i=0; i<98; i++){
+      var seed = (Math.sin(i*1.7 + 3) + Math.cos(i*0.9 + 2)) * 0.5 + 0.5;
+      var bias = i < 30 ? 0 : i < 60 ? 1 : 2;
+      var lv = Math.min(5, Math.max(0, Math.floor(seed * 5) + bias));
+      html += '<i class="'+levels[lv]+'" title="第 '+(Math.floor(i/7)+1)+' 周 · 等级 '+lv+'"></i>';
+    }
+    hm.innerHTML = html;
+  }
+
+  /* ---------- 暴露 switchView 给 Agent 卡片 ---------- */
+  window._aios_switch = function(name){
+    var items = QA(".s-item[data-view='"+name+"']");
+    if (items.length) items[0].click();
+  };
+
+  /* ---------- 快捷操作 / 待拍板 跳转(已在全局 [data-goto] 处理) ---------- */
+})();
 </script>
+
 </body>
 </html>
