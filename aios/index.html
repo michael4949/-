@@ -3823,6 +3823,271 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
   background:#fff; color:var(--ink-2); border:1px solid var(--line-2); cursor:pointer; font-family:inherit; }
 .tw-ver .tv-acts .tv-rollback { color:var(--amber); border-color:rgba(217,119,6,.3); }
 .tw-ver .tv-acts .tv-rollback:hover { background:rgba(217,119,6,.08); }
+/* ============================================================
+   招/投标AI助手 · 专属增量样式 (复用合同审查的 agent-intro/wf-panel/decision-card)
+   ============================================================ */
+
+/* 解析后字段抽取卡片(投标 Stage 1) */
+.bid-fields { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:9px;
+  margin-top:9px; padding:11px 13px; background:#FAFBFF; border-radius:9px; border:1px solid var(--line-2); }
+.bid-field-cell { display:flex; flex-direction:column; gap:2px; padding:7px 10px;
+  background:#fff; border:1px solid var(--line-2); border-radius:7px; }
+.bid-field-cell .bfc-k { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.04em; }
+.bid-field-cell .bfc-v { font-size:12px; font-weight:700; color:var(--ink); line-height:1.4; }
+.bid-field-cell .bfc-v.danger { color:var(--red); }
+.bid-field-cell .bfc-v.warn { color:var(--amber); }
+.bid-field-cell .bfc-v.good { color:var(--green); }
+.bid-field-cell.flag-risk { border-color:rgba(229,72,77,.3); background:#FFF8F8; }
+.bid-field-cell.flag-warn { border-color:rgba(217,119,6,.3); background:#FFFCF5; }
+
+/* 资质匹配评估表 */
+.qual-grid { display:flex; flex-direction:column; gap:6px; margin-top:9px;
+  padding:11px 13px; background:#FAFBFF; border-radius:9px; }
+.qual-row { display:grid; grid-template-columns: 1fr auto auto; gap:11px; align-items:center;
+  padding:8px 11px; background:#fff; border:1px solid var(--line-2); border-radius:7px; font-size:11.5px; }
+.qual-row .qr-name { color:var(--ink); font-weight:600; }
+.qual-row .qr-name small { display:block; color:var(--muted); font-size:10.5px; margin-top:2px; }
+.qual-row .qr-need { font-size:11px; font-weight:700; color:var(--brand); padding:2px 8px;
+  background:rgba(90,91,240,.1); border-radius:5px; }
+.qual-row .qr-state { font-size:11px; font-weight:800; padding:3px 9px; border-radius:5px; min-width:80px; text-align:center; }
+.qual-row .qr-state.ok { background:rgba(24,185,122,.12); color:var(--green); }
+.qual-row .qr-state.miss { background:#FEF2F2; color:var(--red); }
+.qual-row .qr-state.partial { background:#FFF4E5; color:var(--amber); }
+
+/* 评分细则解构 */
+.score-breakdown { padding:11px 13px; background:#FAFBFF; border-radius:9px; margin-top:9px; }
+.sb-row { display:grid; grid-template-columns: 1fr 80px 100px; gap:11px; align-items:center;
+  padding:7px 11px; background:#fff; border:1px solid var(--line-2); border-radius:7px; margin-bottom:5px; font-size:11.5px; }
+.sb-row .sbr-name { color:var(--ink); font-weight:600; }
+.sb-row .sbr-name small { display:block; color:var(--muted); font-size:10.5px; margin-top:2px; font-weight:500; }
+.sb-row .sbr-pts { font-size:13px; font-weight:800; color:var(--brand); text-align:center; }
+.sb-row .sbr-pts small { font-size:10px; color:var(--muted); font-weight:600; }
+.sb-row .sbr-bar { background:#EEF0FB; height:6px; border-radius:999px; overflow:hidden; }
+.sb-row .sbr-bar i { display:block; height:100%; background:var(--grad-btn); }
+.sb-row.key { border-left:3px solid var(--red); }
+.sb-row.key .sbr-name::after { content:" ⚠ 关键失分项"; font-size:10px; color:var(--red); font-weight:700; }
+
+/* 标书生成器进度卡 */
+.bid-doc-prog { padding:11px 13px; background:linear-gradient(135deg,rgba(90,91,240,.05),rgba(154,77,255,.05));
+  border:1px solid rgba(90,91,240,.18); border-radius:9px; margin-top:9px; }
+.bdp-head { font-size:11.5px; font-weight:700; color:var(--brand); margin-bottom:7px; }
+.bdp-items { display:flex; flex-direction:column; gap:5px; }
+.bdp-item { display:grid; grid-template-columns: 1fr auto auto; gap:9px; align-items:center;
+  padding:6px 9px; background:#fff; border-radius:6px; font-size:11px; }
+.bdp-item .bdpi-name { color:var(--ink); font-weight:600; }
+.bdp-item .bdpi-name small { color:var(--muted); font-size:10px; display:block; }
+.bdp-item .bdpi-pages { font-size:10.5px; color:var(--muted); }
+.bdp-item .bdpi-state { font-size:10px; padding:2px 7px; border-radius:4px; font-weight:700; }
+.bdp-item .bdpi-state.gen { background:rgba(24,185,122,.12); color:var(--green); }
+.bdp-item .bdpi-state.cite { background:rgba(124,92,250,.12); color:var(--purple); }
+.bdp-item .bdpi-state.ph { background:#FFF4E5; color:var(--amber); }
+
+/* 投/不投决策建议(类似合同的 AI 推荐方案) */
+.bid-verdict { display:none; padding:16px 18px; background:#fff; border:1px solid var(--line); border-radius:13px;
+  margin-top:13px; box-shadow:0 6px 20px rgba(90,91,240,.08); border-left:4px solid var(--c,var(--green)); }
+.bid-verdict.show { display:block; }
+.bid-verdict.yes { --c:var(--green); }
+.bid-verdict.no { --c:var(--red); }
+.bid-verdict.maybe { --c:var(--amber); }
+.bv-head { display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+.bv-ico { width:38px; height:38px; border-radius:10px; background:var(--c,var(--green)); color:#fff;
+  display:grid; place-items:center; font-size:18px; font-weight:800; flex-shrink:0; }
+.bv-tt { flex:1; font-size:14px; font-weight:800; color:var(--ink); }
+.bv-tt small { font-size:11px; color:var(--muted); display:block; font-weight:500; margin-top:2px; }
+.bv-conf { font-size:11.5px; padding:4px 9px; background:rgba(24,185,122,.12); color:var(--green); border-radius:7px; font-weight:800; }
+.bv-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-bottom:12px; }
+.bv-cell { padding:10px 12px; background:#F8F9FE; border-radius:9px; border:1px solid var(--line-2); }
+.bv-cell .bvc-lbl { font-size:10.5px; color:var(--muted); font-weight:600; }
+.bv-cell .bvc-val { font-size:17px; font-weight:800; color:var(--ink); margin-top:2px; letter-spacing:-.01em; }
+.bv-cell .bvc-val.good { color:var(--green); }
+.bv-cell .bvc-val.warn { color:var(--amber); }
+.bv-cell .bvc-val.danger { color:var(--red); }
+.bv-cell .bvc-sub { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.bv-reason { font-size:11.5px; line-height:1.65; color:var(--ink-2); padding:10px 12px;
+  background:#F8F9FE; border-radius:9px; border-left:3px solid var(--c,var(--green)); margin-bottom:11px; }
+.bv-reason b { color:var(--ink); }
+.bv-acts { display:flex; gap:9px; flex-wrap:wrap; }
+.bv-acts button { padding:9px 16px; font-size:12.5px; font-weight:700; border-radius:9px;
+  cursor:pointer; transition:.18s; font-family:inherit; border:none; }
+.bv-acts .primary { background:var(--grad-btn); color:#fff; box-shadow:0 4px 12px rgba(90,91,240,.3); }
+.bv-acts .primary:hover:not(:disabled) { transform:translateY(-1px); }
+.bv-acts .secondary { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.bv-acts .secondary:hover:not(:disabled) { border-color:var(--brand); color:var(--brand); }
+.bv-acts button:disabled { opacity:.45; cursor:not-allowed; }
+
+/* 报价模拟器(深色 · 类似 HR boss decision-card) */
+.price-sim { padding:15px 18px; background:linear-gradient(135deg,#0E1430,#1A1F4F); color:#fff;
+  border-radius:13px; margin-top:13px; }
+.ps-head { display:flex; align-items:center; gap:8px; margin-bottom:11px;
+  padding-bottom:9px; border-bottom:1px solid rgba(255,255,255,.1); }
+.ps-head .psh-tt { flex:1; font-size:13px; font-weight:800; color:#fff; }
+.ps-head .psh-tt small { font-size:11px; opacity:.65; display:block; margin-top:2px; font-weight:500; }
+.ps-head .psh-conf { font-size:11px; padding:3px 9px; background:rgba(124,92,250,.18); color:#7C5CFA;
+  border-radius:6px; font-weight:800; }
+
+.ps-row { display:flex; align-items:center; gap:13px; margin-bottom:8px; }
+.ps-row label { font-size:11.5px; opacity:.85; flex-shrink:0; min-width:90px; }
+.ps-row input[type=range] { flex:1; accent-color:#7C5CFA; }
+.ps-row .ps-val { font-size:22px; font-weight:800; color:#7C5CFA; min-width:120px; text-align:right; letter-spacing:-.02em; }
+.ps-marks { display:flex; justify-content:space-between; font-size:10px; opacity:.55; margin-top:4px; padding:0 4px; margin-bottom:9px; }
+
+.ps-result { display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-top:11px;
+  padding-top:11px; border-top:1px solid rgba(255,255,255,.1); }
+.ps-cell { padding:9px 11px; background:rgba(255,255,255,.05); border-radius:9px; border:1px solid rgba(255,255,255,.08); }
+.ps-cell .psc-lbl { font-size:10.5px; opacity:.65; font-weight:600; }
+.ps-cell .psc-val { font-size:18px; font-weight:800; margin-top:2px; letter-spacing:-.02em; }
+.ps-cell .psc-val.good { color:#2BD9A8; }
+.ps-cell .psc-val.warn { color:#FFC766; }
+.ps-cell .psc-val.danger { color:#FF7E7E; }
+.ps-cell .psc-sub { font-size:10px; opacity:.55; margin-top:1px; }
+
+.ps-tip { margin-top:11px; padding:9px 12px; background:rgba(124,92,250,.18); color:#fff;
+  border:1px solid rgba(124,92,250,.4); border-radius:9px; font-size:11.5px; line-height:1.55; }
+.ps-tip b { color:#FFC766; }
+
+/* 答疑预演 + 风险预案(常见问题对) */
+.qa-prep { padding:11px 13px; background:#FAFBFF; border-radius:9px; margin-top:9px; }
+.qa-prep-row { padding:9px 11px; background:#fff; border:1px solid var(--line-2); border-radius:7px;
+  margin-bottom:6px; }
+.qpr-q { font-size:11.5px; color:var(--ink); font-weight:700; line-height:1.55; padding-left:18px; position:relative; }
+.qpr-q::before { content:"Q"; position:absolute; left:0; top:1px; width:14px; height:14px;
+  border-radius:50%; background:var(--red); color:#fff; font-size:9px; font-weight:800;
+  display:grid; place-items:center; }
+.qpr-a { font-size:11px; color:var(--ink-2); line-height:1.6; padding-left:18px; position:relative; margin-top:6px;
+  padding-top:6px; border-top:1px dashed var(--line-2); }
+.qpr-a::before { content:"A"; position:absolute; left:0; top:7px; width:14px; height:14px;
+  border-radius:50%; background:var(--green); color:#fff; font-size:9px; font-weight:800;
+  display:grid; place-items:center; }
+.qpr-tag { font-size:9.5px; padding:1.5px 6px; border-radius:4px; background:#EEF0FB; color:var(--ink-2);
+  font-weight:700; margin-right:4px; }
+.qpr-tag.high { background:#FEF2F2; color:var(--red); }
+
+/* ============================================================
+   招标 Agent Stage 1 · 评标 (供应商对比表)
+   ============================================================ */
+.vendor-grid { display:flex; flex-direction:column; gap:9px; margin-top:9px; }
+.vendor-row { background:#fff; border:1px solid var(--line); border-radius:11px; padding:13px 15px;
+  border-left:4px solid var(--c,var(--brand)); transition:.15s; }
+.vendor-row.recommend { border-left-color:var(--green); background:linear-gradient(90deg,#F0FDF4 0%,#fff 30%); }
+.vendor-row.lowprice { border-left-color:var(--amber); }
+.vendor-row.lowscore { border-left-color:var(--red); opacity:.85; }
+.vr-head { display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.vr-rank { width:30px; height:30px; border-radius:50%; background:#EEF0FB; color:var(--ink-2);
+  display:grid; place-items:center; font-size:14px; font-weight:800; flex-shrink:0; }
+.vendor-row.recommend .vr-rank { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff; }
+.vr-name { flex:1; font-size:13px; font-weight:800; color:var(--ink); }
+.vr-name small { display:block; font-size:11px; color:var(--muted); font-weight:500; margin-top:2px; }
+.vr-tag { font-size:10px; padding:2px 8px; border-radius:5px; font-weight:800; }
+.vr-tag.gold { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff; }
+.vr-tag.silver { background:#C0C0C0; color:#fff; }
+.vr-tag.warn { background:#FEF2F2; color:var(--red); }
+
+.vr-scores { display:grid; grid-template-columns: repeat(5,1fr); gap:6px; margin-bottom:9px; }
+.vr-score-cell { padding:6px 8px; background:#F8F9FE; border-radius:6px; text-align:center; }
+.vr-score-cell .vsc-lbl { font-size:9.5px; color:var(--muted); font-weight:700; }
+.vr-score-cell .vsc-val { font-size:14px; font-weight:800; color:var(--ink); margin-top:1px; }
+.vr-score-cell .vsc-val.good { color:var(--green); }
+.vr-score-cell .vsc-val.warn { color:var(--amber); }
+.vr-score-cell .vsc-val.danger { color:var(--red); }
+.vr-score-cell.total { background:var(--grad-btn); color:#fff; }
+.vr-score-cell.total .vsc-lbl, .vr-score-cell.total .vsc-val { color:#fff; }
+
+.vr-meta { display:grid; grid-template-columns: repeat(3,1fr); gap:9px; padding:9px 11px;
+  background:#F8F9FE; border-radius:8px; font-size:11px; margin-bottom:9px; }
+.vr-meta-cell { text-align:center; }
+.vr-meta-cell .vrm-lbl { font-size:10px; color:var(--muted); font-weight:600; }
+.vr-meta-cell .vrm-val { font-size:13px; font-weight:800; color:var(--ink); margin-top:1px; }
+.vr-meta-cell .vrm-val.good { color:var(--green); }
+.vr-meta-cell .vrm-val.warn { color:var(--amber); }
+.vr-meta-cell .vrm-val.danger { color:var(--red); }
+
+.vr-ai { padding:9px 11px; background:linear-gradient(135deg,rgba(90,91,240,.05),rgba(154,77,255,.05));
+  border-left:3px solid var(--brand); border-radius:7px; font-size:11px; line-height:1.6; }
+.vr-ai b { color:var(--brand); }
+.vendor-row.recommend .vr-ai { background:linear-gradient(135deg,#F0FDF4,#E9F9F1); border-left-color:var(--green); }
+.vendor-row.recommend .vr-ai b { color:var(--green); }
+.vendor-row.lowprice .vr-ai { background:linear-gradient(135deg,#FFF4E5,#FFEAD1); border-left-color:var(--amber); }
+.vendor-row.lowprice .vr-ai b { color:var(--amber); }
+.vendor-row.lowscore .vr-ai { background:linear-gradient(135deg,#FEF2F2,#FEE7E7); border-left-color:var(--red); }
+.vendor-row.lowscore .vr-ai b { color:var(--red); }
+
+/* 招标 Stage 1 · 选定决策 (类似合同的 review-shell 但是 vendor 选择) */
+.tender-decide { display:none; padding:16px 18px; background:#fff; border:1px solid var(--line); border-radius:13px;
+  margin-top:13px; box-shadow:0 6px 20px rgba(90,91,240,.08); }
+.tender-decide.show { display:block; }
+.td-head { display:flex; align-items:center; gap:9px; margin-bottom:12px;
+  padding-bottom:9px; border-bottom:1px dashed var(--line); }
+.td-ico { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#5A5BF0,#9A4DFF);
+  color:#fff; display:grid; place-items:center; font-size:17px; flex-shrink:0; }
+.td-tt { flex:1; font-size:14px; font-weight:800; color:var(--ink); }
+.td-tt small { display:block; font-size:11px; color:var(--muted); font-weight:500; margin-top:2px; }
+.td-acts { display:flex; gap:9px; flex-wrap:wrap; margin-top:13px; }
+.td-acts button { padding:9px 16px; font-size:12.5px; font-weight:700; border-radius:9px;
+  cursor:pointer; font-family:inherit; transition:.15s; border:none; }
+.td-acts .primary { background:var(--grad-btn); color:#fff; box-shadow:0 4px 12px rgba(90,91,240,.3); }
+.td-acts .primary:hover:not(:disabled) { transform:translateY(-1px); }
+.td-acts .secondary { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.td-acts .secondary:hover:not(:disabled) { border-color:var(--brand); color:var(--brand); }
+.td-acts button:disabled { opacity:.45; cursor:not-allowed; }
+
+/* 招标需求录入区(替代 upload) */
+.tender-intake { padding:18px 20px; background:#fff; border:2px dashed rgba(90,91,240,.32);
+  border-radius:13px; margin-bottom:14px; }
+.ti-head { display:flex; align-items:center; gap:8px; margin-bottom:11px; font-size:13px; font-weight:800; color:var(--ink); }
+.ti-row { margin-bottom:9px; }
+.ti-row label { display:block; font-size:11.5px; color:var(--ink-2); font-weight:700; margin-bottom:5px; }
+.ti-row input, .ti-row select, .ti-row textarea { width:100%; padding:9px 12px; border:1px solid var(--line-2);
+  border-radius:9px; font-size:12.5px; font-family:inherit; color:var(--ink); outline:none;
+  background:#F8F9FE; box-sizing:border-box; transition:.15s; }
+.ti-row input:focus, .ti-row select:focus, .ti-row textarea:focus { background:#fff; border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(90,91,240,.1); }
+.ti-row textarea { min-height:75px; resize:vertical; line-height:1.55; }
+.ti-row .ti-2col { display:grid; grid-template-columns: 1fr 1fr; gap:9px; }
+.ti-start { padding:10px 22px; font-size:13px; font-weight:800; background:var(--grad-btn); color:#fff;
+  border:none; border-radius:9px; cursor:pointer; box-shadow:0 4px 12px rgba(90,91,240,.3);
+  font-family:inherit; transition:.18s; margin-top:7px; }
+.ti-start:hover:not(:disabled) { transform:translateY(-1px); }
+.ti-start:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+
+/* Stage 2 · 已投/已招 简约决策卡(复用 decision-card 但是 bid/tender 上下文) */
+.mgmt-stat-strip { display:grid; grid-template-columns: repeat(4,1fr); gap:9px; padding:13px;
+  background:#fff; border:1px solid var(--line); border-radius:13px; margin-bottom:13px; }
+.mss-cell { padding:9px 11px; background:#F8F9FE; border-radius:9px; border-left:3px solid var(--c,var(--brand)); }
+.mss-cell .mssc-lbl { font-size:10.5px; color:var(--muted); font-weight:600; }
+.mss-cell .mssc-val { font-size:20px; font-weight:800; color:var(--ink); letter-spacing:-.02em; margin-top:2px; }
+.mss-cell .mssc-val.good { color:var(--green); }
+.mss-cell .mssc-val.warn { color:var(--amber); }
+.mss-cell .mssc-val.danger { color:var(--red); }
+.mss-cell .mssc-sub { font-size:10px; color:var(--muted); margin-top:1px; }
+
+/* 落标复盘(类似 retro) */
+.retro-card { padding:14px 16px; background:#fff; border:1px solid var(--line); border-radius:13px;
+  border-left:4px solid var(--red); margin-bottom:11px; }
+.retro-head { display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+.retro-head .rh-ico { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#E5484D,#F76C5E);
+  color:#fff; display:grid; place-items:center; font-size:16px; flex-shrink:0; }
+.retro-head .rh-tt { flex:1; font-size:13px; font-weight:800; color:var(--ink); }
+.retro-head .rh-tt small { display:block; font-size:11px; color:var(--muted); font-weight:500; margin-top:2px; }
+.retro-head .rh-loss { font-size:11.5px; padding:3px 9px; background:#FEF2F2; color:var(--red);
+  border-radius:6px; font-weight:800; }
+.retro-comp { display:grid; grid-template-columns: 1fr 80px 100px 80px; gap:11px; align-items:center;
+  padding:8px 11px; background:#F8F9FE; border-radius:7px; margin-bottom:4px; font-size:11.5px; }
+.retro-comp .rc-name { color:var(--ink); font-weight:600; }
+.retro-comp .rc-us { font-weight:800; color:var(--ink-2); text-align:center; }
+.retro-comp .rc-winner { font-weight:800; color:var(--green); text-align:center; }
+.retro-comp .rc-gap { font-weight:800; color:var(--red); text-align:center; }
+.retro-comp.key { background:#FEF2F2; border:1px solid rgba(229,72,77,.25); }
+
+.retro-insight { padding:11px 13px; background:linear-gradient(135deg,rgba(90,91,240,.05),rgba(154,77,255,.05));
+  border:1px solid rgba(90,91,240,.18); border-radius:9px; margin-top:9px; }
+.retro-insight .ri-lbl { font-size:10.5px; font-weight:800; color:var(--brand); letter-spacing:.04em; margin-bottom:5px; }
+.retro-insight p { margin:0; font-size:11.5px; line-height:1.65; color:var(--ink-2); }
+.retro-insight p b { color:var(--ink); }
+.retro-acts { display:flex; gap:7px; margin-top:11px; }
+.retro-acts button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; border:1px solid var(--line-2); background:#fff; color:var(--ink-2); transition:.15s; }
+.retro-acts button:hover { border-color:var(--brand); color:var(--brand); }
+.retro-acts .primary { background:var(--grad-btn); color:#fff; border:none; box-shadow:0 3px 10px rgba(90,91,240,.3); }
 </style>
 </head>
 <body>
@@ -3931,10 +4196,15 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
       <div class="s-meta"><div class="s-name">项目交付管控</div><div class="s-desc">节点预警 · 自动复盘</div></div>
       <span class="s-badge b-lock">🔓 解锁</span>
     </div>
-    <div class="s-item locked" data-view="bid" data-title="投标 / 标书助手 · AI 起草与评分解析" data-toast="📝「投标 / 标书 AI 助手」未开通 · ¥4,500/月起 · 替代 50% 标书撰写工时">
-      <span class="s-icon" style="--tint:#EEF5FF">📝</span>
-      <div class="s-meta"><div class="s-name">投标 / 标书助手</div><div class="s-desc">AI 起草 · 评分解析</div></div>
-      <span class="s-badge b-lock">🔓 解锁</span>
+    <div class="s-item" data-view="tender" data-title="招标AI助手 · 起草 + 邀约 + AI 评标">
+      <span class="s-icon" style="--tint:#FFEFF2">📤</span>
+      <div class="s-meta"><div class="s-name">招标AI助手</div><div class="s-desc">起草 · 邀约 · AI 评标 · 履约</div></div>
+      <span class="s-badge b-on">运行中</span>
+    </div>
+    <div class="s-item" data-view="bid" data-title="投标AI助手 · 解析 + 标书 + 报价 + 复盘">
+      <span class="s-icon" style="--tint:#EEF5FF">🎯</span>
+      <div class="s-meta"><div class="s-name">投标AI助手</div><div class="s-desc">解析 · 标书 · 报价 · 复盘</div></div>
+      <span class="s-badge b-on">运行中</span>
     </div>
     <div class="s-item locked" data-view="rd" data-title="研发知识沉淀 · 工艺图谱与失效分析" data-toast="🔬「研发知识沉淀助手」未开通 · ¥3,000/月起 · 留住老工程师经验">
       <span class="s-icon" style="--tint:#E9F9F1">🔬</span>
@@ -8914,62 +9184,886 @@ curl https://api.dgg.ai/v1/agents/dispatch \
         </div>
       </section>
 
-      <!-- ============ 视图:投标 / 标书助手 ============ -->
+      <!-- ============ 视图:投标AI助手 (流式 Agent · 2 板块) ============ -->
       <section class="view" id="view-bid">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#EEF5FF">📝</span>投标 / 标书助手</h2>
-            <p>AI 起草 · 评分解析 · 知识库</p>
+        <div class="sales-shell">
+          <div class="stage-nav" id="bidNav">
+            <button class="stage-pill active" data-stage="run"><b>1</b>🎯 新投标 Agent</button>
+            <button class="stage-pill" data-stage="mgmt"><b>2</b>🏆 已投标管理</button>
           </div>
-          <div class="unlock-banner">
-            <div class="ub-left">
-              <span class="ub-ico">🔓</span>
-              <div>
-                <div class="ub-tt">未开通 · 当前为演示模式</div>
-                <div class="ub-sub">¥4,500/月起 · 替代 50% 标书撰写工时 · 中一个 500 万标 = 100 倍 ROI</div>
+          <div class="stage-body">
+
+            <!-- ===== Stage 1: 新投标 Agent (流式) ===== -->
+            <div class="stage active" id="bid-run"><div class="page">
+
+              <!-- Agent 自介 -->
+              <div class="agent-intro">
+                <div class="ai-ava">🎯</div>
+                <div class="ai-txt">
+                  <div class="ai-name">投标 Agent<small>· 本月已替你投 <b data-counter="bidThisMonth">14</b> 标 · 中标 <b>5</b> · 中标率 <b>36%</b>(行业 8%)· 节省 <b>~180 工时</b></small></div>
+                  你<b>上传招标文件</b>(支持 PDF/Word/扫描件),我自动跑完 <b>解析 → 资质评估 → 中标率预测 → 标书生成 → 报价决策</b> 整条流水线(约 20 秒),完成后告诉你<b>投/不投</b>的建议 + AI 已替你做了什么,你只需拍板。
+                </div>
               </div>
-            </div>
-            <div class="ub-right">
-              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
-            </div>
-          </div>
-          <div class="pgrid g3">
-            <div class="pcard mini-stat"><div class="ms-num">36</div><div class="ms-label">本月生成标书</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">↓55%</div><div class="ms-label">单份撰写时长</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">↑12pp</div><div class="ms-label">中标率提升</div></div>
-          </div>
-          <div class="pcard mt">
-            <div class="pc-head"><h3>在投项目</h3><span class="pc-extra">本周 5 个</span></div>
-            <table class="table">
-              <thead><tr><th>项目名称</th><th>采购方</th><th>预算</th><th>截标</th><th>AI 中标概率</th><th>关键评分点</th></tr></thead>
-              <tbody>
-                <tr><td>智慧园区 AI 中台</td><td>东莞某园区</td><td>¥420 万</td><td>6/22</td><td><span class="pill pill-green">78%</span></td><td>本地化部署、产业经验</td></tr>
-                <tr><td>财务数智化建设</td><td>某省属集团</td><td>¥680 万</td><td>6/25</td><td><span class="pill pill-blue">62%</span></td><td>大模型自研、安全资质</td></tr>
-                <tr><td>政务知识库平台</td><td>某市数据局</td><td>¥280 万</td><td>6/28</td><td><span class="pill pill-blue">55%</span></td><td>国产化适配、案例数</td></tr>
-                <tr><td>制造业 AI 试点</td><td>某汽配上市公司</td><td>¥520 万</td><td>7/3</td><td><span class="pill pill-amber">38%</span></td><td>设备维护场景经验</td></tr>
-                <tr><td>客服 AI 升级</td><td>某连锁零售</td><td>¥150 万</td><td>7/5</td><td><span class="pill pill-green">81%</span></td><td>多渠道接入能力</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>AI 起草示例</h3><span class="pc-extra">智慧园区项目 · 技术方案章节</span></div>
-              <div class="pc-body" style="font-size:12px;color:var(--muted);line-height:1.7">
-                <b>3.2 模型架构选型</b><br/>
-                本方案采用<b style="color:var(--ink)">"通用大模型 + 行业小模型 + 检索增强"三层架构</b>。底层使用国产化通义/智谱大模型作为基座,中层针对园区"招商-入驻-运营-数据"四大场景训练垂直小模型,上层通过 RAG 检索增强,保证回答准确性与可溯源性。<br/><br/>
-                本架构相较单一大模型方案,在园区场景下检索准确率提升 23%,推理成本降低 41%……<br/><br/>
-                <button class="btn-grad js-toast" data-toast="已为「3.3 数据治理章节」生成 1,247 字初稿">继续生成下一节</button>
+
+              <!-- 上传招标文件 -->
+              <div class="upload-zone" id="bidUpload">
+                <input type="file" id="bidFileInput" hidden accept=".pdf,.doc,.docx,.txt,.rtf,.zip">
+                <div id="bidUpEmpty">
+                  <div class="up-drop" id="bidDrop">
+                    <span class="up-ico">📄</span>
+                    <div class="up-tt">把招标文件拖到这里 · 或 <span class="up-link" id="bidBrowse">点击选择</span></div>
+                    <div class="up-sub">几十到几百页都可以 · <b>30 秒解析完</b> · 解析后不留存</div>
+                    <div class="up-fmts"><span>PDF</span><span>Word</span><span>扫描件</span><span>招标公告 URL</span><span>ZIP 包</span></div>
+                  </div>
+                  <div class="up-or">或者</div>
+                  <div style="text-align:center"><button class="up-paste-btn" id="bidPasteOpen">🔗 粘贴招标公告网址</button></div>
+                  <div class="up-paste" id="bidPasteBox" style="display:none;margin-top:11px">
+                    <textarea id="bidPasteText" placeholder="粘贴招标公告网址(支持中国招标投标公共服务平台/政府采购网/中国招标网等)..."></textarea>
+                    <div class="up-paste-foot">
+                      <div class="upf-stat"><b id="bidPasteChars">0</b> 字</div>
+                      <button class="up-paste-cancel" id="bidPasteCancel">取消</button>
+                      <button class="up-paste-confirm" id="bidPasteConfirm" disabled>确认抓取</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="up-done" id="bidUpDone" style="display:none">
+                  <div class="ud-ico" id="bidFileTypeIco">📄</div>
+                  <div class="ud-main">
+                    <div class="ud-name" id="bidFileName">某 OA 系统招标.pdf</div>
+                    <div class="ud-meta" id="bidFileMeta">3.8 MB · PDF · 326 页</div>
+                  </div>
+                  <button class="ud-replace" id="bidReplace">更换</button>
+                  <button class="is-start" id="bidStartAgent">▶ 启动 Agent · 跑全流程</button>
+                </div>
               </div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>历史中标库</h3><span class="pc-extra">52 份已入库</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2025 智慧城市 AI 平台 · ¥680 万</div><div class="lr-sub">中标关键:本地化部署 + 政务经验</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2025 制造业大模型试点 · ¥420 万</div><div class="lr-sub">中标关键:设备维护场景案例</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">✅</span><div class="lr-main"><div class="lr-tt">2026 金融客服 AI · ¥320 万</div><div class="lr-sub">中标关键:合规与隐私架构</div></div></div>
-            </div>
+
+              <!-- AI 流式工作流 -->
+              <div class="wf-panel" id="bidWfPanel">
+                <div class="wf-head">
+                  <div class="wh-tt">🤖 AI 投标分析工作流<small>上传招标 → 点启动 Agent</small></div>
+                  <div class="wh-total" id="bidWfTotal"></div>
+                </div>
+                <div class="wf-empty" id="bidWfEmpty">
+                  <div class="we-ico">⏸</div>
+                  待你上传招标文件并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我的每一步工作。</span>
+                </div>
+                <div class="wf-stream" id="bidWfStream">
+
+                  <!-- Step 1: 解析招标 -->
+                  <div class="wf-msg" data-step="1" style="--dur:4.5s">
+                    <div class="wm-state"><span>1</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">📄 解析招标文件 · OCR + NER 抽取 30+ 关键字段</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        识别为<b>软件系统采购招标</b>(置信度 96%)· 招标方 <b>某省人民医院</b> · 预算 <b>¥850 万</b> · <b>报名截止 6/25</b>(还剩 5 天)· 投标截止 7/8 · 投标保证金 <b>¥17 万</b>
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看 32 个关键字段 + 风险点 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="bid-fields">
+                          <div class="bid-field-cell"><div class="bfc-k">招标方</div><div class="bfc-v">某省人民医院</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">项目名称</div><div class="bfc-v">HIS+EMR 一体化升级</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">项目编号</div><div class="bfc-v">RYY-2026-0612-OA</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">预算上限</div><div class="bfc-v warn">¥850 万</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">报名截止</div><div class="bfc-v warn">2026-06-25 · 还剩 5 天</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">投标截止</div><div class="bfc-v">2026-07-08</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">开标时间</div><div class="bfc-v">2026-07-09 14:00</div></div>
+                          <div class="bid-field-cell flag-risk"><div class="bfc-k">保证金</div><div class="bfc-v danger">¥17 万 · 银行电汇</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">资质门槛</div><div class="bfc-v">CMMI3+ · ISO27001</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">案例要求</div><div class="bfc-v">3 例三甲医院 HIS</div></div>
+                          <div class="bid-field-cell flag-risk"><div class="bfc-k">技术规格</div><div class="bfc-v danger">指定 Oracle 数据库</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">实施周期</div><div class="bfc-v warn">180 天</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">服务期</div><div class="bfc-v">3 年质保</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">支付节奏</div><div class="bfc-v warn">3-3-3-1 · 末款验收+1年</div></div>
+                          <div class="bid-field-cell flag-warn"><div class="bfc-k">不平衡报价</div><div class="bfc-v warn">单项不超 15%</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">联合体</div><div class="bfc-v">不允许</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">分包</div><div class="bfc-v">关键部分不允许</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">投标人数</div><div class="bfc-v">预计 6-8 家</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">评标方法</div><div class="bfc-v">综合评分法</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">技术 / 商务比</div><div class="bfc-v">60% / 40%</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">代理机构</div><div class="bfc-v">XX 招标代理</div></div>
+                          <div class="bid-field-cell"><div class="bfc-k">疑点澄清</div><div class="bfc-v">6/30 17:00 前</div></div>
+                        </div>
+                        <div style="margin-top:9px;padding:9px 11px;background:#FEF2F2;border-left:3px solid var(--red);border-radius:7px;font-size:11px;line-height:1.65;color:var(--ink-2)">
+                          <b style="color:var(--red)">⚠ AI 已识别 4 处风险条款(看不出会吃哑巴亏):</b><br>
+                          ① 指定 Oracle <b>排他性强</b>(我方擅长 MySQL · 需评估迁移成本)<br>
+                          ② <b>末款 10% 验收满 1 年才付</b>(资金占用大)<br>
+                          ③ <b>不平衡报价单项 ≤ 15%</b>(限制策略性报价)<br>
+                          ④ <b>联合体不允许</b>(无法找硬件厂商联合投)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: 资质匹配 -->
+                  <div class="wf-msg" data-step="2" style="--dur:3.2s">
+                    <div class="wm-state"><span>2</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">✅ 资质匹配评估 · 跟我方资质库逐项比对</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        本项目要求 <b>12 项资质</b>:我方<b>满足 10 项</b>(含 CMMI3+ / ISO27001 / 3 例医院案例)· <span style="color:var(--amber);font-weight:700">2 项部分满足</span>(注册资本下方红字)· <span style="color:var(--red);font-weight:700">0 项缺失</span>
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看 12 项详细对比 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="qual-grid">
+                          <div class="qual-row"><div class="qr-name">CMMI 软件成熟度<small>要求 ≥ Level 3</small></div><div class="qr-need">Level 3+</div><div class="qr-state ok">✓ 满足 (L4)</div></div>
+                          <div class="qual-row"><div class="qr-name">ISO27001 信息安全<small>有效期内</small></div><div class="qr-need">必须</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">国家信安等级保护测评<small>三级</small></div><div class="qr-need">三级</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">高新技术企业证书<small>有效期 ≥ 招标日</small></div><div class="qr-need">有效</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">注册资本<small>≥ ¥5,000 万实缴</small></div><div class="qr-need">¥5,000 万</div><div class="qr-state partial">部分 ¥4,300 万</div></div>
+                          <div class="qual-row"><div class="qr-name">近 3 年同类案例<small>≥ 3 例三甲医院 HIS</small></div><div class="qr-need">3 例</div><div class="qr-state ok">✓ 满足 (5 例)</div></div>
+                          <div class="qual-row"><div class="qr-name">关键人员 PM<small>PMP / 同等</small></div><div class="qr-need">PMP</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">关键人员 架构师<small>10 年 +</small></div><div class="qr-need">10 年</div><div class="qr-state ok">✓ 满足</div></div>
+                          <div class="qual-row"><div class="qr-name">本地化服务能力<small>项目所在省驻点</small></div><div class="qr-need">驻点</div><div class="qr-state partial">2 周内补</div></div>
+                          <div class="qual-row"><div class="qr-name">Oracle DBA 团队<small>≥ 2 人 OCP</small></div><div class="qr-need">2 OCP</div><div class="qr-state ok">✓ 满足 (3 OCP)</div></div>
+                          <div class="qual-row"><div class="qr-name">医疗信息化白皮书<small>3 年内编制</small></div><div class="qr-need">必有</div><div class="qr-state ok">✓ 已有</div></div>
+                          <div class="qual-row"><div class="qr-name">无失信记录<small>失信被执行人查询</small></div><div class="qr-need">无</div><div class="qr-state ok">✓ 已查</div></div>
+                        </div>
+                        <div style="margin-top:9px;padding:8px 11px;background:linear-gradient(180deg,#FFF4E5,#FFEAD1);border-left:3px solid var(--amber);border-radius:7px;font-size:11px;line-height:1.65;color:var(--ink-2)">
+                          <b style="color:var(--amber)">⚠ 2 项部分满足建议:</b><br>
+                          ① <b>注册资本 ¥4,300 万 vs 要求 ¥5,000 万</b> → 可联合财务申请增资,或申请联合体(本项目不允许 ✗)→ <b>建议 5 天内增资</b><br>
+                          ② <b>本地化驻点</b> → 提前向项目地销售/CSM 报备, 投标书写"中标后 2 周内组建本地团队"
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: 中标概率 -->
+                  <div class="wf-msg" data-step="3" style="--dur:2.8s">
+                    <div class="wm-state"><span>3</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">📊 中标概率预测 · 基于历史 138 标 + 行业回测</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 综合预测我方中标概率 <b style="color:var(--green)">42%</b>(同类项目行业均值 14%)。<b>主要正向因子</b>:三甲医院 HIS 案例多(+18)、CMMI4(+8)、本地化已有种子团队(+6)。<b>负向因子</b>:注册资本不达标(-7)、Oracle 非强项(-5)
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看预测模型 + 历史相似项目 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="font-size:11.5px;line-height:1.7;color:var(--ink-2)">
+                          <b style="color:var(--brand)">🤖 AI 预测模型:</b>XGBoost · 输入 63 维特征(评分细则 32 项 + 我方资质 12 项 + 招标方画像 8 项 + 报价区间 5 项 + 时间紧迫度 6 项)· 训练数据 138 标 + 行业 1,200 标
+                        </div>
+                        <div style="margin-top:9px;padding:11px 13px;background:#F8F9FE;border-radius:9px">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📈 历史相似项目(我方过去 3 年):</div>
+                          <div style="font-size:11px;color:var(--ink-2);line-height:1.7">
+                            ① <b>2024-09 江苏某三甲 EMR</b>(¥920 万)· 我方报 ¥810 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 18%<br>
+                            ② <b>2024-03 浙江某医院 HIS</b>(¥1,180 万)· 我方报 ¥1,050 万 · 落标(差 2.3 分)<br>
+                            ③ <b>2023-11 山东某三甲一体化</b>(¥780 万)· 我方报 ¥720 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 22%<br>
+                            ④ <b>2023-06 安徽某医院 OA</b>(¥420 万)· 我方报 ¥395 万 · <span style="color:var(--green);font-weight:700">中标</span> · 利润 25%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: 标书生成 -->
+                  <div class="wf-msg" data-step="4" style="--dur:5.8s">
+                    <div class="wm-state"><span>4</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">✍️ AI 标书生成 · 基于评分细则 + 历史标书 + 产品库</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        已生成 <b>356 页 投标书草案</b>:技术标 <b>215 页</b>(精准命中 8 大评分项)· 商务标 <b>92 页</b> · 资质 <b>49 页</b>。AI 已替你做了:<b>引用 23 处历史案例 · 替换 38 处公司名 · 排版 + 目录自动生成</b>
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看 8 大评分项命中详情 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="bid-doc-prog">
+                          <div class="bdp-head">📋 8 大评分项 · 单独撰写命中</div>
+                          <div class="bdp-items">
+                            <div class="bdp-item"><div class="bdpi-name"><b>技术方案 (25 分)</b><small>架构 + 数据库 + 安全</small></div><div class="bdpi-pages">42 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdpi-item bdp-item"><div class="bdpi-name"><b>实施方案 (15 分)</b><small>180 天计划 + WBS</small></div><div class="bdpi-pages">28 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>项目团队 (10 分)</b><small>PM + 架构师 + 团队</small></div><div class="bdpi-pages">18 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>同类业绩 (15 分)</b><small>5 例三甲案例</small></div><div class="bdpi-pages">36 页</div><div class="bdpi-state cite">从历史标书引用</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>风险方案 (5 分)</b><small>9 大风险 + 应对</small></div><div class="bdpi-pages">12 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>培训方案 (5 分)</b><small>分层培训 + 知识库</small></div><div class="bdpi-pages">9 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>售后服务 (10 分)</b><small>3 年质保 + 7×24</small></div><div class="bdpi-pages">14 页</div><div class="bdpi-state gen">AI 已生成</div></div>
+                            <div class="bdp-item"><div class="bdpi-name"><b>报价合理性 (15 分)</b><small>等下方报价模拟器</small></div><div class="bdpi-pages">21 页</div><div class="bdpi-state ph">待报价决策</div></div>
+                          </div>
+                        </div>
+                        <div class="score-breakdown" style="margin-top:9px">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🎯 评分细则解构 · 重点把控大分项</div>
+                          <div class="sb-row key"><div class="sbr-name">技术方案 - 数据库迁移可行性<small>评委最关注 · Oracle 指定</small></div><div class="sbr-pts">15<small>/25</small></div><div class="sbr-bar"><i style="width:88%"></i></div></div>
+                          <div class="sb-row key"><div class="sbr-name">同类业绩 - 三甲医院 HIS 完整案例<small>3+ 例上限 5 例</small></div><div class="sbr-pts">15<small>/15</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">报价(15) - 0.5%/万 偏差扣分</div><div class="sbr-pts">15<small>/15</small></div><div class="sbr-bar"><i style="width:92%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">实施方案完整性</div><div class="sbr-pts">14<small>/15</small></div><div class="sbr-bar"><i style="width:93%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">售后服务 + 培训</div><div class="sbr-pts">14<small>/15</small></div><div class="sbr-bar"><i style="width:93%"></i></div></div>
+                        </div>
+                        <div style="margin-top:9px;padding:9px 11px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;color:var(--ink-2)">
+                          <b style="color:var(--green)">✓ AI 自动防错:</b>已检查全标书 · <b>356 页中 38 处旧公司名 / 旧项目名已替换为本招标项目名</b> · <b>避免照抄废标</b>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 5: ROI 测算 + 答疑预演 -->
+                  <div class="wf-msg" data-step="5" style="--dur:3.6s">
+                    <div class="wm-state"><span>5</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">💰 ROI 测算 + 答疑预演 + 最终建议</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        <b>成本测算</b>:¥520 万(开发+实施 +运维 + 风险溢价 8%)· <b>报价区间</b>建议 <b>¥720-790 万</b> · <b>利润率</b> 28-34% · <b>答疑预演</b>:9 个高频问题已生成标准答案
+                      </div>
+                      <button class="wm-expand" data-fx="bidExpand">查看答疑预演 + 风险预案 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="qa-prep">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">🛡️ 9 个评委高频问题 · AI 已备好标准答案</div>
+                          <div class="qa-prep-row">
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>你方 Oracle 经验有多深?最大数据量项目是多少?</div>
+                            <div class="qpr-a">我方 2018 年起即承接 Oracle 项目,目前在职 OCP 认证工程师 5 名(含 1 名 OCM)。最大项目:江苏某三甲 EMR 系统,日处理事务 280 万、单库容量 4.2 TB,稳定运行 18 月零事故。可现场提供运维监控录屏。</div>
+                          </div>
+                          <div class="qa-prep-row">
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>180 天工期紧张,你方如何保证按期交付?</div>
+                            <div class="qpr-a">采用"3 阶段并行 + 周例会"机制:第 1-60 天分析+核心模块开发(双轨)、第 61-120 天集成+用户测试、第 121-180 天上线+培训。我方已有 6 名工程师可在合同签订 3 天内入场。备份方案:遇不可抗力可调用临时增援团队 3-5 人。</div>
+                          </div>
+                          <div class="qa-prep-row">
+                            <div class="qpr-q"><span class="qpr-tag high">高频</span>3 年质保期内如何保证响应速度?</div>
+                            <div class="qpr-a">承诺响应级别:① 1 级故障(系统中断)15 分钟响应、4 小时恢复;② 2 级故障(部分功能)1 小时响应、24 小时解决;③ 3 级故障(咨询/优化)4 小时响应、3 工作日完成。本地驻点 2 人 7×24 值守。</div>
+                          </div>
+                          <div class="qa-prep-row">
+                            <div class="qpr-q"><span class="qpr-tag">中</span>项目实施期间贵司其他项目是否会分流?</div>
+                            <div class="qpr-a">不会。本项目按"专属团队 + 风险隔离"原则。9 人核心团队签订专项保证,不调出至少 12 月。可提供员工花名册供查验。</div>
+                          </div>
+                          <div class="qa-prep-row">
+                            <div class="qpr-q"><span class="qpr-tag">中</span>你方是否能联合产品厂商?这次不允许联合体</div>
+                            <div class="qpr-a">我方已与 Oracle 中国、华为等签订战略合作,本项目下我方作为主集成商,可调用厂商工程师驻场支持。如评委关心可现场出示战略合作协议。</div>
+                          </div>
+                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:6px 0">↓ 另 4 个高频问题已折叠</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- 完成 -->
+                <div class="wf-done-banner" id="bidWfDone">
+                  <div class="wdb-ico">✅</div>
+                  <div class="wdb-tt">AI 已完成全部 5 阶段分析 · 总耗时 <b id="bidWfTime">20.4</b> 秒
+                    <small>替代 5 人工 1 周工作 · 接下来 ↓ 我给"投/不投"建议,你只需拍板</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 投/不投建议(类似合同的 reco) -->
+              <div class="bid-verdict yes" id="bidVerdict">
+                <div class="bv-head">
+                  <div class="bv-ico">✓</div>
+                  <div class="bv-tt">AI 推荐:<b style="color:var(--green)">值得投</b> · 综合 ROI 高 · 中标率明显高于行业
+                    <small>已综合资质匹配 · 中标概率 · ROI · 时间窗口 · 历史相似项目 · 5 维分析</small></div>
+                  <div class="bv-conf">AI 置信度 88%</div>
+                </div>
+                <div class="bv-grid">
+                  <div class="bv-cell"><div class="bvc-lbl">中标概率</div><div class="bvc-val good">42%</div><div class="bvc-sub">行业均值 14%</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">推荐报价</div><div class="bvc-val">¥755 万</div><div class="bvc-sub">见下方模拟器</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">期望利润</div><div class="bvc-val good">¥235 万</div><div class="bvc-sub">利润率 31%</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">期望收益</div><div class="bvc-val good">¥98.7 万</div><div class="bvc-sub">中标率 × 利润 加权</div></div>
+                </div>
+                <div class="bv-reason">
+                  <b>🤖 AI 推理:</b>① 我方 5 例三甲 HIS 业绩 = 行业前 5%,案例分(15 分)拉满 · ② 报价区间 ¥720-790 万 历史中标率均 38%+ · ③ 5 天报名窗口我方资源充足 · ④ 中标后 3 年质保期收益叠加 · ⑤ <b>风险点</b>:Oracle 迁移成本 + 末款 1 年滞后(可在标书中商议优化)
+                </div>
+
+                <!-- 报价模拟器 -->
+                <div class="price-sim">
+                  <div class="ps-head">
+                    <div class="psh-tt">📊 报价决策模拟器
+                      <small>拖滑块 → 实时算中标率 + 利润 + 期望收益</small></div>
+                    <div class="psh-conf">AI 推荐区 ¥720-790 万</div>
+                  </div>
+                  <div class="ps-row">
+                    <label>投标报价</label>
+                    <input type="range" id="bidPriceR" min="600" max="850" value="755" step="5">
+                    <div class="ps-val">¥<span id="bidPriceV">755</span> 万</div>
+                  </div>
+                  <div class="ps-marks"><span>极低 600</span><span>650</span><span>推荐 720-790</span><span>800</span><span>预算顶 850</span></div>
+                  <div class="ps-result">
+                    <div class="ps-cell"><div class="psc-lbl">预测中标率</div><div class="psc-val good" id="bidProb">38%</div><div class="psc-sub">非线性</div></div>
+                    <div class="ps-cell"><div class="psc-lbl">预期利润</div><div class="psc-val good" id="bidProfit">¥235 万</div><div class="psc-sub">31%</div></div>
+                    <div class="ps-cell"><div class="psc-lbl">期望收益</div><div class="psc-val good" id="bidExpect">¥89 万</div><div class="psc-sub">中标率×利润</div></div>
+                    <div class="ps-cell"><div class="psc-lbl">竞争对手</div><div class="psc-val warn" id="bidCompete">3-4 家</div><div class="psc-sub">同价区</div></div>
+                  </div>
+                  <div class="ps-tip" id="bidPriceTip"><b>📊 ¥755 万 · 平衡区</b> · 历史 4 标同区报价中 3 标中标 · 利润率 31% 健康 · 期望收益最大化</div>
+                </div>
+
+                <div class="bv-acts" style="margin-top:13px">
+                  <button class="primary" data-fx="bidDecide" data-act="accept" data-msg="✅ 已采纳 · AI 立即:① 5 天内增资 ¥700 万 · ② 钉钉@商务总监准备保证金 ¥17 万 · ③ PM 锁定 6 人团队 · ④ 标书定稿 + 排版 · ⑤ 答疑预案打印 · 6/25 前完成报名" data-exec="accept">✓ 同意 AI 建议 · 自动启动报名流程</button>
+                  <button class="secondary" data-fx="bidDecide" data-act="manual" data-msg="📋 已切换:我要再细看标书 + 自己改报价 · AI 已生成 356 页草案待你审" data-exec="manual">📋 我要逐项细看再决定</button>
+                  <button class="secondary" data-fx="bidDecide" data-act="reject" data-msg="❌ 已放弃此标 · AI 已记录「放弃原因」训练样本 · 同类项目下次更准" data-exec="reject">❌ 放弃此标</button>
+                </div>
+              </div>
+
+              <!-- AI 执行流 -->
+              <div class="ai-exec-card" id="bidExec">
+                <div class="ae-head">
+                  <div class="ai-ava" style="width:32px;height:32px;font-size:16px;background:linear-gradient(135deg,#5A5BF0,#9A4DFF);display:grid;place-items:center;border-radius:9px">🤖</div>
+                  <div class="ae-tt">AI 正在为你自动启动报名流程<small>这是真正"投标 Agent" 该做的 7 件事</small></div>
+                </div>
+                <div class="ai-exec-log" id="bidExecLog"></div>
+                <div class="ai-exec-final" id="bidExecFinal">
+                  <b>✅ 全部完成!</b>本标已进入"已报名 · 等开标"状态。<br>我会持续跟进对方答疑、开标时间、对手动作,任何变化(对手报名/答疑/澄清)立即通知你。本月已投标 <b id="bidExecMonth">15</b> 份(+1)。
+                  <br><button id="bidExecNext">▶ 准备投下一个标</button>
+                </div>
+              </div>
+
+            </div></div>
+
+            <!-- ===== Stage 2: 已投标管理 ===== -->
+            <div class="stage" id="bid-mgmt"><div class="page">
+
+              <div class="agent-status">
+                <div class="as-ava">🏆</div>
+                <div class="as-main">
+                  <div class="as-title">投标管家 Agent · 在管 <b>9 标</b><span class="as-live">● 在岗</span></div>
+                  <div class="as-meta">已替你: 跟踪开标时间 <b>9 次</b> · 自动答疑 <b>11 件</b> · 已落标复盘 <b>3 次</b> · 保证金到期提醒 <b>6 次</b></div>
+                  <div class="as-pending">⚠ <b>4 件大事</b>需要你拍板 ↓ 我已分析完, 一键决定即可</div>
+                </div>
+              </div>
+
+              <!-- 顶部统计 -->
+              <div class="mgmt-stat-strip">
+                <div class="mss-cell" style="--c:#5A5BF0"><div class="mssc-lbl">在投标</div><div class="mssc-val">9</div><div class="mssc-sub">含 3 标即将开标</div></div>
+                <div class="mss-cell" style="--c:#E5484D"><div class="mssc-lbl">⚠ 即将截止</div><div class="mssc-val danger">2</div><div class="mssc-sub">48h 内</div></div>
+                <div class="mss-cell" style="--c:#18B97A"><div class="mssc-lbl">本月中标</div><div class="mssc-val good">5</div><div class="mssc-sub">¥3,640 万合同</div></div>
+                <div class="mss-cell" style="--c:#D97706"><div class="mssc-lbl">保证金占用</div><div class="mssc-val warn">¥98 万</div><div class="mssc-sub">9 标平均 ¥10.9 万</div></div>
+              </div>
+
+              <!-- 决策卡 1: 即将开标 · 需要现场策略 -->
+              <div class="decision-card" data-dec="bidD1" data-exec-msg="自动触发: ① 已生成现场答辩 PPT 30 页(突出 Oracle 案例)· ② 钉钉@PM + 架构师 7/8 早 7:00 集合 · ③ 答辩话术已发钉钉 · ④ 备 30% 让价空间已与商务总监确认">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#5A5BF0">📅</span>
+                  <div class="dec-main">
+                    <div class="dec-title">某省人民医院 HIS 标 · 明天 7/9 14:00 开标 · <b style="color:var(--brand)">AI 推荐:派 PM + 架构师 + 商务 3 人现场, 备 5% 让价空间</b></div>
+                    <div class="dec-meta">¥755 万 · 我方报价 · 5 家竞争 · 报名顺序我方第 2 · AI 已侦察 3 家竞品报价</div>
+                  </div>
+                  <span class="pill" style="background:#EEF5FF;color:#3A6FE3">即将开标</span>
+                </div>
+                <div class="dec-analysis">
+                  <div style="font-size:11.5px;line-height:1.65;color:var(--ink-2);margin-bottom:11px">
+                    <b style="color:var(--brand)">🤖 AI 现场策略:</b>5 家投标公司,AI 已侦察出 3 家公开报价区间(¥720-810 万)。我方 ¥755 万处<b>中段偏低</b>,概率优势。<b>关键</b>:评委可能现场对"Oracle 数据迁移"提问 → AI 已准备答案+案例视频。带 5% 让价空间(可降至 ¥717 万)用于现场谈判。
+                  </div>
+                  <div class="dec-sim">
+                    <div class="range-row">
+                      <label>现场让价</label>
+                      <input type="range" class="range-input" id="bidD1Cut" min="0" max="10" step="0.5" value="5">
+                      <span class="range-val"><span id="bidD1CutV">5</span>%</span>
+                    </div>
+                    <div class="dec-result">
+                      底价 <b id="bidD1Floor">¥717 万</b>  · 利润仍 <b id="bidD1Margin" class="good">¥197 万 / 27%</b>  · 中标概率 <b id="bidD1Win" class="good">53%</b>
+                      <div style="margin-top:7px" id="bidD1Verdict"><b class="good">AI 推荐区间 3-7%</b> · 既体现诚意又不丢利润</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="bidD1" data-msg="✅ 已批准 · AI 已通知 PM 7/8 集合 + 答辩 PPT 已生成 + 让价空间 5% 已锁">✓ 同意 AI 现场策略</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD1" data-act="defer" data-msg="改派 4 人现场(加技术总监)">改派 4 人</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD1" data-act="reject" data-msg="我亲自上现场">我亲自上</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 2: 落标复盘 (retro-card 形态) -->
+              <div class="retro-card">
+                <div class="retro-head">
+                  <div class="rh-ico">📉</div>
+                  <div class="rh-tt">江苏某医院 EMR 标 · 落标复盘 · 我方 ¥920 万 vs 中标 ¥895 万
+                    <small>开标 6/15 · 我方第 2 · 差 24 分(2.7%)</small></div>
+                  <div class="rh-loss">差 24 分</div>
+                </div>
+                <div class="retro-comp"><div class="rc-name">技术方案 (25 分)</div><div class="rc-us">22</div><div class="rc-winner">23</div><div class="rc-gap">-1</div></div>
+                <div class="retro-comp key"><div class="rc-name">实施方案 (15 分)<small style="display:block;color:var(--muted);font-size:10.5px;margin-top:2px">关键失分 → 工期承诺差</small></div><div class="rc-us">11</div><div class="rc-winner">15</div><div class="rc-gap">-4</div></div>
+                <div class="retro-comp"><div class="rc-name">同类业绩 (15 分)</div><div class="rc-us">15</div><div class="rc-winner">14</div><div class="rc-gap" style="color:var(--green)">+1</div></div>
+                <div class="retro-comp key"><div class="rc-name">报价 (15 分)<small style="display:block;color:var(--muted);font-size:10.5px;margin-top:2px">关键失分 → 我方报高 2.8%</small></div><div class="rc-us">11</div><div class="rc-winner">14</div><div class="rc-gap">-3</div></div>
+                <div class="retro-comp"><div class="rc-name">服务方案 (10 分)</div><div class="rc-us">8</div><div class="rc-winner">9</div><div class="rc-gap">-1</div></div>
+                <div class="retro-insight">
+                  <div class="ri-lbl">🔍 AI 失分根因 + 改进清单</div>
+                  <p><b>核心失分 -7 分 = 实施方案(-4) + 报价(-3)</b>。① <b>实施方案</b>:我们承诺 195 天 vs 中标方承诺 180 天 → 评委认为我们工期不可控 → <b>改进</b>:下次同类标承诺 180 天 + 并行 WBS 方案 · ② <b>报价</b>:¥920 万 vs ¥895 万 → 我方 ¥25 万高出区间 → <b>改进</b>:类似项目报价"中段偏低"策略 + 模拟器调整 · ③ <b>已沉淀 2 条规则到 AI 报价模型</b></p>
+                </div>
+                <div class="retro-acts">
+                  <button class="primary" data-fx="bidRetroAct" data-msg="✅ 已沉淀 · 2 条规则已入 AI 报价模型 · 下次同类标 AI 直接用">✓ 同意沉淀 AI 模型</button>
+                  <button data-fx="bidRetroAct" data-msg="📋 详细复盘报告已发钉钉 · 标书组下周培训">看完整复盘报告</button>
+                </div>
+              </div>
+
+              <!-- 决策卡 3: 中标后履约 -->
+              <div class="decision-card" data-dec="bidD3" data-exec-msg="自动触发: ① 已通知技术总监组建团队 · ② 启动 30 天 WBS 模板 · ③ 配套 BD 同步合同细节">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#18B97A">🎉</span>
+                  <div class="dec-main">
+                    <div class="dec-title">山东某三甲一体化 中标 · ¥720 万 · 6/10 公示完成 · <b style="color:var(--brand)">AI 推荐:启动履约前 30 天 + 锁团队 + 备 Oracle 培训</b></div>
+                    <div class="dec-meta">利润 22% · 9 人团队 · 已与对方签合同时间 6/22</div>
+                  </div>
+                  <span class="pill" style="background:#E9F9F1;color:#18B97A">已中标</span>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="bidD3" data-msg="✅ 已批准 · 团队已锁 + WBS 已启动 + Oracle 培训预排 + 合同细节已发法务">✓ 启动履约方案</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD3" data-act="defer" data-msg="推迟 1 周再启">推迟 1 周</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD3" data-act="reject" data-msg="我亲自盯">我亲自盯</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 4: 续标提醒 -->
+              <div class="decision-card" data-dec="bidD4" data-exec-msg="自动触发: ① 已生成续标方案 · ② 钉钉@BD 与客户 PM 7/15 见面 · ③ 历史评分点已沉淀, AI 准备针对性优化">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#9A4DFF">🔄</span>
+                  <div class="dec-main">
+                    <div class="dec-title">浙江某医院 HIS 服务期满 · 9/30 到期 · <b style="color:var(--brand)">AI 推荐:启动续标准备 · 中标后改进点已沉淀</b></div>
+                    <div class="dec-meta">原合同 ¥1,180 万 · 3 年质保 · 客户满意度 9.2/10 · 续标对手 X 厂商已在接触</div>
+                  </div>
+                  <span class="pill" style="background:#F1EBFF;color:#9A4DFF">续标</span>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="bidD4" data-msg="✅ 已批准 · AI 已起草续标方案 + BD 已联系客户 PM">✓ 启动续标准备</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD4" data-act="defer" data-msg="推迟 2 周">推迟 2 周</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="bidD4" data-act="reject" data-msg="放弃续约,推荐其他厂商">放弃续约</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 监测条 -->
+              <div class="perform-monitor">
+                <div class="pm-ico">🛰️</div>
+                <div class="pm-list">
+                  <div><span class="pm-dot">●</span>开标雷达 · <b>3 标即将开标</b>(48h 内)</div>
+                  <div><span class="pm-dot">●</span>对手监测 · <b>X 厂商</b>近 3 天投了 2 个我方备选标</div>
+                  <div><span class="pm-dot">●</span>保证金到期 · <b>¥17 万</b> 8/15 前可退</div>
+                  <div><span class="pm-dot">●</span>新机会 · <b>2 个</b>明日待你评估(已自动推到 Stage 1)</div>
+                </div>
+              </div>
+
+            </div></div>
+
           </div>
         </div>
       </section>
+
+      <!-- ============ 视图:招标AI助手 (流式 Agent · 2 板块) ============ -->
+      <section class="view" id="view-tender">
+        <div class="sales-shell">
+          <div class="stage-nav" id="tenderNav">
+            <button class="stage-pill active" data-stage="run"><b>1</b>📤 新招标 Agent</button>
+            <button class="stage-pill" data-stage="mgmt"><b>2</b>🤝 已招标管理</button>
+          </div>
+          <div class="stage-body">
+
+            <!-- ===== Stage 1: 新招标 Agent (流式) ===== -->
+            <div class="stage active" id="tender-run"><div class="page">
+
+              <!-- Agent 自介 -->
+              <div class="agent-intro">
+                <div class="ai-ava">📤</div>
+                <div class="ai-txt">
+                  <div class="ai-name">招标 Agent<small>· 本月已替你跑 <b data-counter="tenderThisMonth">8</b> 个采购招标 · 平均节省 <b>¥38 万</b>/标 · 流程缩短 <b>60%</b></small></div>
+                  你<b>录入采购需求</b>(几句话即可),我自动跑完<b>起草招标文件 → 评分标准 → 推荐供应商 → 收投标 → AI 评标</b>整条流水线(约 18 秒),完成后告诉你<b>该选哪家</b>+AI 已替你做了什么,你只需拍板。
+                </div>
+              </div>
+
+              <!-- 需求录入区(替代上传) -->
+              <div class="tender-intake">
+                <div class="ti-head">📝 录入采购需求 · AI 帮你写招标文件</div>
+                <div class="ti-row">
+                  <label>采购什么(简单描述)</label>
+                  <textarea id="tenderNeed" placeholder="例:我要采购一套服务器集群,5 台,主要跑深度学习训练任务,显存大、I/O 强,预算 ¥200 万,3 年质保..."></textarea>
+                </div>
+                <div class="ti-2col">
+                  <div class="ti-row">
+                    <label>预算上限</label>
+                    <input type="text" id="tenderBudget" value="¥200 万" />
+                  </div>
+                  <div class="ti-row">
+                    <label>交付周期(天)</label>
+                    <input type="text" id="tenderDays" value="45 天" />
+                  </div>
+                </div>
+                <div class="ti-2col">
+                  <div class="ti-row">
+                    <label>采购类型</label>
+                    <select id="tenderType">
+                      <option value="goods" selected>货物采购</option>
+                      <option value="service">服务采购</option>
+                      <option value="project">工程项目</option>
+                      <option value="it">IT 系统</option>
+                    </select>
+                  </div>
+                  <div class="ti-row">
+                    <label>评标方法</label>
+                    <select id="tenderMethod">
+                      <option value="composite" selected>综合评分(技术 + 商务)</option>
+                      <option value="lowprice">最低评标价(纯价格)</option>
+                      <option value="reasonable">合理低价</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="ti-start" id="tenderStartAgent">▶ 启动 Agent · 一键全跑</button>
+              </div>
+
+              <!-- AI 工作流 -->
+              <div class="wf-panel" id="tenderWfPanel">
+                <div class="wf-head">
+                  <div class="wh-tt">🤖 AI 招标全流程<small>录需求 → 点启动 Agent</small></div>
+                  <div class="wh-total" id="tenderWfTotal"></div>
+                </div>
+                <div class="wf-empty" id="tenderWfEmpty">
+                  <div class="we-ico">⏸</div>
+                  待你录入需求并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我替你做的每一步。</span>
+                </div>
+                <div class="wf-stream" id="tenderWfStream">
+
+                  <!-- Step 1: 起草招标文件 -->
+                  <div class="wf-msg" data-step="1" style="--dur:4.2s">
+                    <div class="wm-state"><span>1</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">📋 AI 起草招标文件 · 32 页</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 已生成 <b>32 页招标文件</b>:技术规格 12 页 · 商务条款 8 页 · 评标办法 5 页 · 附件清单 7 页。<b>关键点</b>:① 5 台服务器明确型号+性能指标 · ② 显存 ≥ 80GB · ③ 3 年原厂保修 · ④ 不允许联合体 · ⑤ 投标保证金 ¥4 万
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看起草要点 + AI 防歧义检查 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;line-height:1.7;color:var(--ink-2)">
+                          <b style="color:var(--green)">✓ AI 已自动避免 5 个常见招标坑:</b><br>
+                          ① 技术规格不指定品牌(避免被质疑"指定厂商")· 改为"性能指标 + 兼容性"<br>
+                          ② 含糊词"高性能/低价"已替换为<b>具体数字</b>(如显存 ≥ 80GB)<br>
+                          ③ 评分细则<b>每项权重明确</b>(避免评委自由裁量过大)<br>
+                          ④ 资质门槛<b>不过高也不过低</b>(目标 8-15 家投标)<br>
+                          ⑤ 已生成<b>答疑机制 + 时间节点</b>避免投标方质疑
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: 评分标准 -->
+                  <div class="wf-msg" data-step="2" style="--dur:2.8s">
+                    <div class="wm-state"><span>2</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">⚖️ AI 制定评分标准 · 100 分拆 8 项</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 推荐<b>综合评分法 60/40</b>(技术 60 + 商务 40)· 8 大项拆解 · 大分项:技术方案 25 + 同类业绩 15 + 报价 20。<b>设计避坑</b>:报价部分用偏差扣分而非简单最低价(防恶意低价低质)
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 项评分细则 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="score-breakdown">
+                          <div class="sb-row"><div class="sbr-name">技术方案完整性<small>架构 + 性能 + 兼容</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">同类业绩 + 案例<small>3 年内 5 例同等规模</small></div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">报价(偏差扣分)<small>距均价 1% 扣 1 分</small></div><div class="sbr-pts">20<small>/100</small></div><div class="sbr-bar"><i style="width:80%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">售后服务<small>响应 + 备件 + 7×24</small></div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">交付能力</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">团队配置</div><div class="sbr-pts">8<small>/100</small></div><div class="sbr-bar"><i style="width:32%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">原厂授权</div><div class="sbr-pts">7<small>/100</small></div><div class="sbr-bar"><i style="width:28%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">资质 (CMA/CMMI 等)</div><div class="sbr-pts">5<small>/100</small></div><div class="sbr-bar"><i style="width:20%"></i></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: 推荐供应商 -->
+                  <div class="wf-msg" data-step="3" style="--dur:3.4s">
+                    <div class="wm-state"><span>3</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">📇 AI 推荐合适供应商 · 从行业库筛选</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 已从 <b>行业供应商库 1,460 家</b>中筛出 <b>23 家完全匹配</b>(资质 + 案例 + 规模 + 地域)· 推荐邀请 <b>14 家</b>参与(避免太少议价空间 + 太多浪费时间)
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 14 家供应商列表 + AI 邀请话术 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📇 AI 推荐邀请 14 家 · 已起草邀请函</div>
+                          <div style="font-size:11px;color:var(--ink-2);line-height:1.75">
+                            <b>头部 3 家</b>(原厂):① 浪潮信息 · ② 戴尔科技 · ③ 联想集团 — <i>原厂渠道, 技术保证</i><br>
+                            <b>金牌集成商 5 家</b>:① 神州数码 · ② 软通动力 · ③ 数科网维 · ④ 太极股份 · ⑤ 华宇软件<br>
+                            <b>区域优秀 6 家</b>:含本地服务商 3 家 + 跨区域 3 家
+                          </div>
+                          <div style="margin-top:9px;padding:7px 11px;background:#fff;border-left:3px solid var(--brand);border-radius:7px;font-size:10.5px;color:var(--ink-2)">
+                            <b>📧 AI 已起草邀请函</b>(技术规格 + 截止时间 + 答疑机制)· 一键群发钉钉 / 邮件
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: 收投标(模拟收到 8 家) -->
+                  <div class="wf-msg" data-step="4" style="--dur:3.0s">
+                    <div class="wm-state"><span>4</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">📥 收到投标 · 14 邀 → 8 家应标</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        <b>14 家邀请 → 8 家应标</b>(58% 应标率,符合预期)· 6 家未应标原因:库存不足 4 家 · 价格偏低 2 家。8 份标书已收齐, 总页数 <b>2,140 页</b>。<b>AI 已开始评标</b>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 5: AI 评标 -->
+                  <div class="wf-msg" data-step="5" style="--dur:4.6s">
+                    <div class="wm-state"><span>5</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">🎯 AI 评标 · 8 家标书逐项评分 + 综合排名</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 已用 <b>8 评分项 × 8 家 = 64 项</b>评分,推荐 <b>浪潮信息</b>综合 <b>88 分</b>(性价比+技术)· 价低于推荐方:<b>区域服务商 X</b> ¥158 万但技术 -4 分。下方有完整对比 + AI 推荐
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 家详细评分 + 推荐理由 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="vendor-grid">
+
+                          <div class="vendor-row recommend">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥇</div>
+                              <div class="vr-name">浪潮信息<small>原厂 · 信息化龙头</small></div>
+                              <div class="vr-tag gold">AI 推荐</div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">23</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">14</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val">17</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">88</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val">¥168 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">38 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年 +</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 推荐:</b>性价比最优 + 技术拉满 + 原厂质保 5 年优于其他家。报价 ¥168 万比最低家高 ¥10 万, 但技术分高 5 分 + 质保多 2 年 + 实施可控,综合最优。建议<b>中标</b>。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥈</div>
+                              <div class="vr-name">戴尔科技<small>原厂 · 全球品牌</small></div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">22</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">13</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">15</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">85</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val warn">¥182 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val">42 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 评:</b>原厂质量过硬 · 但 ¥14 万高于推荐方 · 综合次之。可作为<b>备选</b>(若推荐方临时取消)。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row lowprice">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥉</div>
+                              <div class="vr-name">区域服务商 X<small>本地 · 5 年中型</small></div>
+                              <div class="vr-tag warn">⚠ 价格陷阱</div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val warn">19</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val warn">9</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val good">20</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val warn">7</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">79</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val good">¥158 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">35 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val warn">3 年</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>⚠ AI 风险预警:</b>价格 ¥158 万看似最优(便宜 ¥10 万)但<b>3 处隐患</b>:① 显存非原厂(可能用二手翻新)· ② 业绩仅 2 例类似规模 · ③ 7×24 售后未承诺。<b>不建议中标</b>(图便宜易后悔)。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row lowscore">
+                            <div class="vr-head">
+                              <div class="vr-rank">4</div>
+                              <div class="vr-name">联想集团<small>原厂</small></div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val">21</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val">12</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">13</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val">9</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">76</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 评:</b>报价偏高 + 显存配置略低于规格 → 综合中段。可<b>用作议价杠杆</b>(告诉浪潮其他原厂也在投, 议价 2-3% 空间)。
+                            </div>
+                          </div>
+
+                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:5px 0">↓ 另 4 家(综合 60-72 分)已折叠</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="wf-done-banner" id="tenderWfDone">
+                  <div class="wdb-ico">✅</div>
+                  <div class="wdb-tt">AI 已完成全部 5 阶段招标 · 总耗时 <b id="tenderWfTime">18.0</b> 秒
+                    <small>替代采购部 5 人 1 周工作 · 接下来 ↓ 我推荐选谁,你拍板</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 选定决策卡 -->
+              <div class="tender-decide" id="tenderDecide">
+                <div class="td-head">
+                  <div class="td-ico">🎯</div>
+                  <div class="td-tt">决策:选哪家中标? · <b style="color:var(--brand)">AI 推荐 浪潮信息 ¥168 万</b>
+                    <small>综合最优 · 技术 + 质保 + 性价比 · 风险最低</small></div>
+                  <div class="bv-conf" style="background:rgba(124,92,250,.1);color:var(--brand);padding:4px 9px;border-radius:7px;font-size:11.5px;font-weight:800">AI 置信度 91%</div>
+                </div>
+                <div class="bv-grid">
+                  <div class="bv-cell"><div class="bvc-lbl">推荐中标方</div><div class="bvc-val">浪潮信息</div><div class="bvc-sub">综合 88 分</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">中标价</div><div class="bvc-val">¥168 万</div><div class="bvc-sub">省 ¥32 万 vs 预算</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">替代方案</div><div class="bvc-val">戴尔 ¥182</div><div class="bvc-sub">备选 (85 分)</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">议价空间</div><div class="bvc-val good">2-3%</div><div class="bvc-sub">用联想做杠杆</div></div>
+                </div>
+                <div class="td-acts">
+                  <button class="primary" data-fx="tenderDecide" data-act="accept" data-msg="✅ 已选浪潮 · AI 已 ① 起草《中标通知书》· ② 钉钉@法务起草合同 · ③ 通知其余 7 家 ·④ 议价 2.5% 已与浪潮 BD 沟通 → 最终 ¥164 万 · 节省 ¥4 万" data-exec="accept">✓ 同意 AI 推荐 · 自动通知中标 + 议价</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="lowprice" data-msg="⚠ 已选区域 X · AI 风险预警仍标记 · 已要求补充证明" data-exec="lowprice">⚠ 选低价 X(我接受风险)</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="review" data-msg="📋 已进入复核流程 · 8 家详细标书已发采购总监" data-exec="review">📋 我要细看 8 家再决定</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="reject" data-msg="❌ 已废标 · AI 记录原因后重新起草" data-exec="reject">❌ 废标重启</button>
+                </div>
+              </div>
+
+              <!-- AI 执行流 -->
+              <div class="ai-exec-card" id="tenderExec">
+                <div class="ae-head">
+                  <div class="ai-ava" style="width:32px;height:32px;font-size:16px;background:linear-gradient(135deg,#5A5BF0,#9A4DFF);display:grid;place-items:center;border-radius:9px">🤖</div>
+                  <div class="ae-tt">AI 正在为你自动执行下游<small>这才是真正"招标 Agent" 该做的</small></div>
+                </div>
+                <div class="ai-exec-log" id="tenderExecLog"></div>
+                <div class="ai-exec-final" id="tenderExecFinal">
+                  <b>✅ 全部完成!</b>本采购已进入"等供应商签合同"状态。<br>我会持续跟进供应商履约、交付节点、质保期管理。本月已招标 <b id="tenderExecMonth">9</b> 个(+1)。
+                  <br><button id="tenderExecNext">▶ 准备下一个招标</button>
+                </div>
+              </div>
+
+            </div></div>
+
+            <!-- ===== Stage 2: 已招标管理 ===== -->
+            <div class="stage" id="tender-mgmt"><div class="page">
+
+              <div class="agent-status">
+                <div class="as-ava">🤝</div>
+                <div class="as-main">
+                  <div class="as-title">采购管家 Agent · 监督在管 <b>17 个</b>已签合同<span class="as-live">● 在岗</span></div>
+                  <div class="as-meta">已替你: 跟踪供应商履约 <b>17 次</b> · 验收节点提醒 <b>8 次</b> · 质保到期提醒 <b>3 次</b> · 续约谈判预案 <b>2 份</b></div>
+                  <div class="as-pending">⚠ <b>3 件大事</b>需要你拍板 ↓</div>
+                </div>
+              </div>
+
+              <div class="mgmt-stat-strip">
+                <div class="mss-cell" style="--c:#5A5BF0"><div class="mssc-lbl">在管合同</div><div class="mssc-val">17</div><div class="mssc-sub">含 5 件交付期内</div></div>
+                <div class="mss-cell" style="--c:#E5484D"><div class="mssc-lbl">⚠ 延期风险</div><div class="mssc-val danger">2</div><div class="mssc-sub">交付期临近</div></div>
+                <div class="mss-cell" style="--c:#18B97A"><div class="mssc-lbl">本月节省</div><div class="mssc-val good">¥38 万</div><div class="mssc-sub">议价 / 替代方案</div></div>
+                <div class="mss-cell" style="--c:#D97706"><div class="mssc-lbl">质保到期</div><div class="mssc-val warn">3</div><div class="mssc-sub">90 天内</div></div>
+              </div>
+
+              <!-- 决策卡 1: 供应商延期 -->
+              <div class="decision-card" data-dec="tenderD1" data-exec-msg="自动触发: ① 已发《延期违约通知》· ② 启动备选供应商(戴尔)· ③ 钉钉@商务总监 · ④ 已扣预付款 5%">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#E5484D">⚠️</span>
+                  <div class="dec-main">
+                    <div class="dec-title">浪潮服务器 5 台 · 应交付 7/5 · 已延 10 天 · <b style="color:var(--brand)">AI 推荐:启动备选 + 索赔 5%</b></div>
+                    <div class="dec-meta">原合同 ¥168 万 · 浪潮称"芯片紧缺再延 15 天" · 我方业务依赖,影响 AI 训练项目</div>
+                  </div>
+                  <span class="pill pill-red">延期</span>
+                </div>
+                <div class="dec-analysis">
+                  <div style="font-size:11.5px;line-height:1.65;color:var(--ink-2);margin-bottom:11px">
+                    <b style="color:var(--brand)">🤖 AI 分析:</b>合同 5.3 条 <b>延期违约金 0.2%/日</b> · 已可索赔 ¥3.36 万 + 总延期上限 30 天。AI 已联系戴尔渠道,可<b>替代型号 18 天到货</b>(¥4 万差价)。综合<b>启用备选 + 与浪潮谈差额补偿</b>最优。
+                  </div>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD1" data-msg="✅ 已批准 · 启动戴尔 18 天到货 + 浪潮索赔 ¥3.36 万 + 差额由浪潮全额补偿">✓ 启动备选 + 索赔</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="defer" data-msg="再等浪潮 7 天">再等浪潮</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="reject" data-msg="我亲自找浪潮谈">我亲自谈</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 2: 续约 -->
+              <div class="decision-card" data-dec="tenderD2" data-exec-msg="自动触发: ① 已起草续约 + 议价 5% 方案 · ② 评估市场比价(节省 ¥18 万)· ③ BD 已联系供应商">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#9A4DFF">🔄</span>
+                  <div class="dec-main">
+                    <div class="dec-title">软通动力 IT 运维服务 · 8/30 到期 · <b style="color:var(--brand)">AI 推荐:续约 + 议价 5% 降至 ¥285 万</b></div>
+                    <div class="dec-meta">原合同 ¥300 万/年 · 服务满意度 9.0 · 市场同类报价均值 ¥298 万 · 我方有议价空间</div>
+                  </div>
+                  <span class="pill" style="background:#F1EBFF;color:#9A4DFF">续约</span>
+                </div>
+                <div class="dec-analysis">
+                  <div class="dec-sim">
+                    <div class="range-row">
+                      <label>续约议价</label>
+                      <input type="range" class="range-input" id="tenderD2Cut" min="0" max="15" step="1" value="5">
+                      <span class="range-val"><span id="tenderD2CutV">5</span>%</span>
+                    </div>
+                    <div class="dec-result">
+                      新合同 <b id="tenderD2Amt">¥285 万</b> · 接受概率 <b id="tenderD2Acc" class="good">88%</b> · 年省 <b id="tenderD2Save" class="good">¥15 万</b>
+                      <div style="margin-top:7px" id="tenderD2Verdict"><b class="good">AI 推荐 4-7%</b> · 体面 + 不丢服务质量</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD2" data-msg="✅ 已批准 · AI 已发续约 + 议价提案给软通 + 24h 内回复">✓ 启动续约议价</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="defer" data-msg="推迟 1 周">推迟 1 周</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="reject" data-msg="放弃续约 · 重启招标">不续约</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 3: 质保到期 -->
+              <div class="decision-card" data-dec="tenderD3" data-exec-msg="自动触发: ① 已生成 3 选 1 方案 PDF · ② 钉钉@CTO 7/22 内决策">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#D97706">⏰</span>
+                  <div class="dec-main">
+                    <div class="dec-title">华为存储 12 台 · 5 年质保 8/15 到期 · <b style="color:var(--brand)">AI 推荐:延保 1 年 ¥15 万(vs 新购 ¥120 万)</b></div>
+                    <div class="dec-meta">原 2021 年采购 ¥150 万 · 当前残值 ¥30 万 · 设备状态良好 · 3 选 1 方案就绪</div>
+                  </div>
+                  <span class="pill pill-amber">质保</span>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD3" data-msg="✅ 已批准 · 已与华为签延保 ¥15 万 / 1 年 · 同步评估明年是否替换">✓ 延保 1 年</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="defer" data-msg="自费维护(只买备件 ¥3 万)">自费维护</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="reject" data-msg="启动新一轮存储招标 ¥120 万">新购替换</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <div class="perform-monitor">
+                <div class="pm-ico">🛰️</div>
+                <div class="pm-list">
+                  <div><span class="pm-dot">●</span>履约监督 · <b>17 合同</b>持续跟踪 · 2 件交付临期</div>
+                  <div><span class="pm-dot">●</span>市场比价 · 每月对比 · <b>已发现 5 件可议价</b></div>
+                  <div><span class="pm-dot">●</span>质保提醒 · 90 天内 <b>3 件</b>到期</div>
+                  <div><span class="pm-dot">●</span>新采购需求 · <b>2 件</b>明日待你录入</div>
+                </div>
+              </div>
+
+            </div></div>
+
+          </div>
+        </div>
+      </section>
+
+
 
       <!-- ============ 视图:研发知识沉淀 ============ -->
       <section class="view" id="view-rd">
@@ -16024,6 +17118,505 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     if (b) ts(b.dataset.msg);
   });
 })();
+</script>
+<script>
+/* ============================================================
+   招/投标AI助手 · 流式 Agent 控制器(模板对齐合同审查 c2.js)
+   ============================================================ */
+
+function _bidInit() {
+  var bidView = document.getElementById("view-bid");
+  if (!bidView) return;
+  var QA = function (s, r) { return Array.prototype.slice.call((r || bidView).querySelectorAll(s)); };
+  var Q = function (s, r) { return (r || bidView).querySelector(s); };
+  function txt(id, v) { var e = Q("#" + id); if (e) e.textContent = v; }
+  function ts(msg) {
+    var el = document.createElement("div");
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0E1430;color:#fff;padding:11px 18px;border-radius:11px;font-size:12.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:560px;line-height:1.55;text-align:center";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = "0"; el.style.transition = ".3s"; }, 2600);
+    setTimeout(function () { el.remove(); }, 3000);
+  }
+
+  /* Stage 切换 */
+  var nav = Q("#bidNav");
+  nav.addEventListener("click", function (e) {
+    var p = e.target.closest(".stage-pill"); if (!p) return;
+    QA(".stage-pill", nav).forEach(function (x) { x.classList.toggle("active", x === p); });
+    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === "bid-" + p.dataset.stage); });
+    var pg = Q(".stage.active .page"); if (pg) pg.scrollTop = 0;
+  });
+
+  /* 上传文件 */
+  var uploaded = null;
+  var upEmpty = Q("#bidUpEmpty"), upDone = Q("#bidUpDone");
+  var fileInput = Q("#bidFileInput"), drop = Q("#bidDrop");
+  var pasteOpen = Q("#bidPasteOpen"), pasteBox = Q("#bidPasteBox");
+  var pasteText = Q("#bidPasteText"), pasteChars = Q("#bidPasteChars");
+  var pasteCancel = Q("#bidPasteCancel"), pasteConfirm = Q("#bidPasteConfirm");
+  var replaceBtn = Q("#bidReplace");
+
+  function fmtSize(b) { if (b < 1024) return b + " B"; if (b < 1048576) return (b/1024).toFixed(1) + " KB"; return (b/1048576).toFixed(1) + " MB"; }
+  function getIco(name) {
+    var ext = (name.split(".").pop() || "").toLowerCase();
+    if (ext === "pdf") return "📕";
+    if (ext === "doc" || ext === "docx") return "📘";
+    if (ext === "zip") return "📦";
+    return "📄";
+  }
+  function showDone() {
+    upEmpty.style.display = "none";
+    upDone.style.display = "grid";
+    Q("#bidFileName").textContent = uploaded.name;
+    Q("#bidFileTypeIco").textContent = getIco(uploaded.name);
+    if (uploaded.source === "paste") {
+      Q("#bidFileMeta").textContent = uploaded.size + " 字 · 网址抓取 · 刚才";
+    } else {
+      Q("#bidFileMeta").textContent = fmtSize(uploaded.size) + " · " + (uploaded.name.split(".").pop() || "").toUpperCase() + " · 326 页 · 刚才";
+    }
+  }
+  function showEmpty() {
+    upEmpty.style.display = "";
+    upDone.style.display = "none";
+    pasteBox.style.display = "none";
+    pasteText.value = "";
+    pasteChars.textContent = "0";
+    pasteConfirm.disabled = true;
+    uploaded = null;
+    fileInput.value = "";
+  }
+  function accept(file) {
+    if (!file) return;
+    uploaded = { name: file.name, size: file.size, source: "file" };
+    showDone();
+    resetWf();
+  }
+  Q("#bidBrowse").addEventListener("click", function (e) { e.preventDefault(); fileInput.click(); });
+  drop.addEventListener("click", function (e) { if (!e.target.closest("#bidBrowse")) fileInput.click(); });
+  fileInput.addEventListener("change", function (e) { var f = e.target.files && e.target.files[0]; if (f) accept(f); });
+  ["dragenter","dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); drop.classList.add("dragover"); }); });
+  ["dragleave","drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); if (ev==="dragleave"&&drop.contains(e.relatedTarget)) return; drop.classList.remove("dragover"); }); });
+  drop.addEventListener("drop", function (e) { var f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) accept(f); });
+  pasteOpen.addEventListener("click", function () { pasteBox.style.display = ""; setTimeout(function() { pasteText.focus(); }, 30); });
+  pasteText.addEventListener("input", function () { var n = pasteText.value.length; pasteChars.textContent = n; pasteConfirm.disabled = n < 10; });
+  pasteCancel.addEventListener("click", function () { pasteBox.style.display = "none"; pasteText.value = ""; pasteChars.textContent = "0"; pasteConfirm.disabled = true; });
+  pasteConfirm.addEventListener("click", function () {
+    var n = pasteText.value.length;
+    if (n < 10) return;
+    var firstLine = (pasteText.value.split("\n")[0] || "").trim().substring(0, 60) || "招标网址";
+    uploaded = { name: firstLine + " (网址抓取)", size: n, source: "paste" };
+    showDone();
+    resetWf();
+  });
+  replaceBtn.addEventListener("click", function () { showEmpty(); resetWf(); });
+
+  /* 工作流状态机 */
+  var wfPanel = Q("#bidWfPanel"), wfEmpty = Q("#bidWfEmpty"), wfStream = Q("#bidWfStream"), wfDone = Q("#bidWfDone");
+  var verdict = Q("#bidVerdict"), execCard = Q("#bidExec"), execLog = Q("#bidExecLog"), execFinal = Q("#bidExecFinal");
+  var startBtn = Q("#bidStartAgent");
+  var wfTimers = [];
+  function clearTimers() { wfTimers.forEach(clearTimeout); wfTimers = []; }
+  function resetWf() {
+    clearTimers();
+    wfPanel.classList.remove("running");
+    wfEmpty.style.display = "";
+    wfStream.style.display = "none";
+    wfDone.classList.remove("show");
+    verdict.classList.remove("show");
+    execCard.classList.remove("show");
+    execLog.innerHTML = "";
+    execFinal.classList.remove("show");
+    startBtn.disabled = false;
+    startBtn.textContent = "▶ 启动 Agent · 跑全流程";
+    QA(".wf-msg").forEach(function (m) {
+      m.classList.remove("appear", "running", "done", "open");
+      var meta = m.querySelector("[data-meta]");
+      if (meta) meta.textContent = "排队中";
+      var prog = m.querySelector(".wm-prog i");
+      if (prog) { prog.style.animation = "none"; prog.offsetHeight; prog.style.animation = ""; }
+    });
+    Q("#bidWfTotal").textContent = "";
+  }
+
+  function runWf() {
+    if (!uploaded) { ts("请先上传招标文件"); return; }
+    startBtn.disabled = true;
+    startBtn.textContent = "⏳ Agent 工作中...";
+    wfEmpty.style.display = "none";
+    wfStream.style.display = "";
+    wfPanel.classList.add("running");
+    Q("#bidWfTotal").innerHTML = '<span class="c-pulse"></span>正在分析《' + uploaded.name + '》· 5 步骤 · 预计 20 秒';
+
+    var steps = QA(".wf-msg");
+    var durations = [4500, 3200, 2800, 5800, 3600];
+    var cum = 0;
+    steps.forEach(function (m, i) {
+      var startAt = cum;
+      var endAt = cum + durations[i];
+      wfTimers.push(setTimeout(function () { m.classList.add("appear", "running"); var meta = m.querySelector("[data-meta]"); if (meta) meta.textContent = "进行中..."; }, startAt));
+      wfTimers.push(setTimeout(function () {
+        m.classList.remove("running");
+        m.classList.add("done");
+        var meta = m.querySelector("[data-meta]");
+        if (meta) meta.textContent = "✓ " + (durations[i] / 1000).toFixed(1) + "s";
+      }, endAt));
+      cum = endAt + 250;
+    });
+    var totalDur = durations.reduce(function (a, b) { return a + b; }, 0);
+    var totalSecStr = (totalDur / 1000).toFixed(1);
+    wfTimers.push(setTimeout(function () {
+      wfPanel.classList.remove("running");
+      wfDone.classList.add("show");
+      txt("bidWfTime", totalSecStr);
+      verdict.classList.add("show");
+      startBtn.textContent = "✓ Agent 已完成 · 重新跑";
+      startBtn.disabled = false;
+      Q("#bidWfTotal").innerHTML = "✓ 已分析《" + uploaded.name + "》· " + totalSecStr + "s · 进入下方决策";
+      setTimeout(function () { verdict.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+    }, cum + 200));
+  }
+  startBtn.addEventListener("click", function () {
+    if (this.disabled) return;
+    resetWf();
+    setTimeout(runWf, 100);
+  });
+
+  /* wf-msg 展开 */
+  bidView.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="bidExpand"]');
+    if (!b) return;
+    b.closest(".wf-msg").classList.toggle("open");
+  });
+
+  /* 报价模拟器 */
+  var priceR = Q("#bidPriceR");
+  if (priceR) {
+    priceR.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("bidPriceV", v);
+      var prob, profit, tip;
+      // 报价 vs 中标率 (非线性,U 形)
+      if (v < 680) prob = 18;
+      else if (v < 720) prob = 32;
+      else if (v < 760) prob = 42;
+      else if (v < 790) prob = 38;
+      else if (v < 820) prob = 22;
+      else prob = 9;
+      txt("bidProb", prob + "%");
+      Q("#bidProb").className = "psc-val " + (prob >= 35 ? "good" : prob >= 20 ? "warn" : "danger");
+      profit = v - 520;
+      var marginPct = (profit / v * 100).toFixed(0);
+      txt("bidProfit", "¥" + profit + " 万");
+      Q("#bidProfit").className = "psc-val " + (profit >= 200 ? "good" : profit >= 100 ? "warn" : "danger");
+      var expect = (profit * prob / 100).toFixed(1);
+      txt("bidExpect", "¥" + expect + " 万");
+      Q("#bidExpect").className = "psc-val " + (expect >= 60 ? "good" : expect >= 30 ? "warn" : "danger");
+      var compete = v < 680 ? "0-1 家" : v < 720 ? "2 家" : v < 790 ? "3-4 家" : v < 820 ? "5 家" : "6+ 家";
+      txt("bidCompete", compete);
+      if (v < 680) tip = '<b>⚠ 极低报价</b> · 即便中标也亏本(成本 ¥520 万)。不推荐。';
+      else if (v < 720) tip = '<b>偏低</b> · 利润 ' + marginPct + '% 偏薄, 中标率反不如平衡区。';
+      else if (v < 790) tip = '<b>📊 ¥' + v + ' 万 · AI 推荐区</b> · 中标率 ' + prob + '% · 利润 ' + marginPct + '% · 期望收益 ¥' + expect + ' 万';
+      else if (v < 820) tip = '<b>偏高</b> · 中标率快速下降, 期望收益缩水。';
+      else tip = '<b>❌ 接近预算顶</b> · 招标方倾向选更低价方,中标率 ' + prob + '%。';
+      Q("#bidPriceTip").innerHTML = tip;
+    });
+  }
+
+  /* 投/不投决策 */
+  function runExec(key) {
+    execCard.classList.add("show");
+    execLog.innerHTML = "";
+    execFinal.classList.remove("show");
+    var logs;
+    if (key === "accept") {
+      logs = [
+        ["生成正式投标书 PDF (356 页 · 含资质 + 答疑预案)", 900],
+        ["钉钉 @财务总监:5 天内增资 ¥700 万", 700],
+        ["钉钉 @商务总监:准备保证金 ¥17 万银行电汇", 800],
+        ["锁定 PM + 架构师 + 实施团队 6 人(8 月不调动)", 650],
+        ["生成现场答辩 PPT 30 页(突出 Oracle 案例)", 550],
+        ["上传招标平台报名 + 提交资质材料", 500],
+        ["设投标截止预警 7/8 · 答疑截止 6/30", 400]
+      ];
+    } else if (key === "manual") {
+      logs = [
+        ["切换到逐项审核模式 · 8 评分项标书已生成等你审", 600],
+        ["标记此标为「人工细审中」 · 钉钉每日提醒进度", 500],
+        ["AI 仍持续监控对手动态 + 答疑变化", 400]
+      ];
+    } else {
+      logs = [
+        ["已记录「放弃此标」决策样本", 700],
+        ["原因填表已发 你邮箱 (3 选 1: 资质不足 / ROI 低 / 时间紧)", 500],
+        ["AI 持续学习此类样本 · 下次同类机会预判更准", 400]
+      ];
+    }
+    var cum = 100;
+    logs.forEach(function (item, i) {
+      var t = item[1];
+      wfTimers.push(setTimeout(function () {
+        var line = document.createElement("div");
+        line.className = "ael";
+        line.innerHTML = '<span>正在 ' + item[0] + '</span><span class="ael-t">+' + (cum/1000).toFixed(1) + 's</span>';
+        execLog.appendChild(line);
+        setTimeout(function () { line.classList.add("appear"); }, 10);
+      }, cum));
+      wfTimers.push(setTimeout(function () {
+        var line = execLog.children[i];
+        if (line) { line.classList.add("done"); line.firstChild.textContent = item[0]; }
+      }, cum + t));
+      cum += t + 100;
+    });
+    wfTimers.push(setTimeout(function () {
+      execFinal.classList.add("show");
+      QA('[data-counter="bidThisMonth"]').forEach(function (x) {
+        var n = parseInt(x.textContent, 10);
+        x.textContent = n + 1;
+      });
+      execFinal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, cum + 200));
+  }
+  bidView.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="bidDecide"]');
+    if (!b) return;
+    QA('[data-fx="bidDecide"]').forEach(function (x) { x.disabled = true; });
+    var act = b.dataset.act;
+    if (act === "accept") b.textContent = "✓ 已采纳 · AI 执行中";
+    else if (act === "manual") b.textContent = "📋 切换 · 细审中";
+    else b.textContent = "❌ 已放弃";
+    ts(b.dataset.msg);
+    runExec(b.dataset.exec);
+  });
+
+  /* 准备投下一个标 */
+  Q("#bidExecNext").addEventListener("click", function () {
+    QA('[data-fx="bidDecide"]').forEach(function (x) { x.disabled = false; });
+    QA('[data-fx="bidDecide"]').forEach(function (b, i) {
+      var origTexts = ["✓ 同意 AI 建议 · 自动启动报名流程", "📋 我要逐项细看再决定", "❌ 放弃此标"];
+      b.textContent = origTexts[i] || b.textContent;
+    });
+    resetWf();
+    showEmpty();
+    Q(".upload-zone").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  /* Stage 2: 决策卡 模拟器(D1 让价滑块) */
+  var d1Cut = Q("#bidD1Cut");
+  if (d1Cut) {
+    d1Cut.addEventListener("input", function () {
+      var v = parseFloat(this.value);
+      txt("bidD1CutV", v);
+      var floor = Math.round(755 * (1 - v / 100));
+      txt("bidD1Floor", "¥" + floor + " 万");
+      var margin = floor - 520;
+      var marginPct = (margin / floor * 100).toFixed(0);
+      txt("bidD1Margin", "¥" + margin + " 万 / " + marginPct + "%");
+      var win = Math.min(72, 42 + v * 2.5);
+      txt("bidD1Win", Math.round(win) + "%");
+      var verdict;
+      if (v < 2) verdict = '<b class="warn">让价过低</b> · 中标率提升有限';
+      else if (v < 8) verdict = '<b class="good">AI 推荐区间 3-7%</b> · 既体现诚意又不丢利润';
+      else if (v < 12) verdict = '<b>偏激进</b> · 利润 ' + marginPct + '% 已偏薄';
+      else verdict = '<b class="danger">让太多</b> · 利润仅 ' + marginPct + '% · 风险高';
+      Q("#bidD1Verdict").innerHTML = verdict;
+    });
+  }
+  /* 复盘按钮 */
+  bidView.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="bidRetroAct"]'); if (b) ts(b.dataset.msg);
+  });
+}
+
+function _tenderInit() {
+  var tView = document.getElementById("view-tender");
+  if (!tView) return;
+  var QA = function (s, r) { return Array.prototype.slice.call((r || tView).querySelectorAll(s)); };
+  var Q = function (s, r) { return (r || tView).querySelector(s); };
+  function txt(id, v) { var e = Q("#" + id); if (e) e.textContent = v; }
+  function ts(msg) {
+    var el = document.createElement("div");
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0E1430;color:#fff;padding:11px 18px;border-radius:11px;font-size:12.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:560px;line-height:1.55;text-align:center";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = "0"; el.style.transition = ".3s"; }, 2600);
+    setTimeout(function () { el.remove(); }, 3000);
+  }
+
+  var nav = Q("#tenderNav");
+  nav.addEventListener("click", function (e) {
+    var p = e.target.closest(".stage-pill"); if (!p) return;
+    QA(".stage-pill", nav).forEach(function (x) { x.classList.toggle("active", x === p); });
+    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === "tender-" + p.dataset.stage); });
+    var pg = Q(".stage.active .page"); if (pg) pg.scrollTop = 0;
+  });
+
+  var wfPanel = Q("#tenderWfPanel"), wfEmpty = Q("#tenderWfEmpty"), wfStream = Q("#tenderWfStream"), wfDone = Q("#tenderWfDone");
+  var decide = Q("#tenderDecide"), execCard = Q("#tenderExec"), execLog = Q("#tenderExecLog"), execFinal = Q("#tenderExecFinal");
+  var startBtn = Q("#tenderStartAgent");
+  var wfTimers = [];
+
+  function reset() {
+    wfTimers.forEach(clearTimeout); wfTimers = [];
+    wfPanel.classList.remove("running");
+    wfEmpty.style.display = "";
+    wfStream.style.display = "none";
+    wfDone.classList.remove("show");
+    decide.classList.remove("show");
+    execCard.classList.remove("show");
+    execLog.innerHTML = "";
+    execFinal.classList.remove("show");
+    startBtn.disabled = false;
+    startBtn.textContent = "▶ 启动 Agent · 一键全跑";
+    QA(".wf-msg").forEach(function (m) {
+      m.classList.remove("appear", "running", "done", "open");
+      var meta = m.querySelector("[data-meta]");
+      if (meta) meta.textContent = "排队中";
+      var prog = m.querySelector(".wm-prog i");
+      if (prog) { prog.style.animation = "none"; prog.offsetHeight; prog.style.animation = ""; }
+    });
+    Q("#tenderWfTotal").textContent = "";
+  }
+  function runWf() {
+    var need = (Q("#tenderNeed").value || "").trim();
+    if (!need || need.length < 5) { ts("请录入采购需求(至少 5 字)"); return; }
+    startBtn.disabled = true;
+    startBtn.textContent = "⏳ Agent 工作中...";
+    wfEmpty.style.display = "none";
+    wfStream.style.display = "";
+    wfPanel.classList.add("running");
+    var briefName = need.substring(0, 30);
+    Q("#tenderWfTotal").innerHTML = '<span class="c-pulse"></span>正在跑《' + briefName + '...》· 5 步骤 · 预计 18 秒';
+
+    var steps = QA(".wf-msg");
+    var durations = [4200, 2800, 3400, 3000, 4600];
+    var cum = 0;
+    steps.forEach(function (m, i) {
+      var startAt = cum;
+      var endAt = cum + durations[i];
+      wfTimers.push(setTimeout(function () { m.classList.add("appear", "running"); var meta = m.querySelector("[data-meta]"); if (meta) meta.textContent = "进行中..."; }, startAt));
+      wfTimers.push(setTimeout(function () {
+        m.classList.remove("running");
+        m.classList.add("done");
+        var meta = m.querySelector("[data-meta]");
+        if (meta) meta.textContent = "✓ " + (durations[i] / 1000).toFixed(1) + "s";
+      }, endAt));
+      cum = endAt + 250;
+    });
+    var totalDur = durations.reduce(function (a, b) { return a + b; }, 0);
+    var totalSecStr = (totalDur / 1000).toFixed(1);
+    wfTimers.push(setTimeout(function () {
+      wfPanel.classList.remove("running");
+      wfDone.classList.add("show");
+      txt("tenderWfTime", totalSecStr);
+      decide.classList.add("show");
+      startBtn.textContent = "✓ Agent 已完成 · 重新跑";
+      startBtn.disabled = false;
+      Q("#tenderWfTotal").innerHTML = "✓ 已完成招标 · " + totalSecStr + "s · 进入下方决策";
+      setTimeout(function () { decide.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+    }, cum + 200));
+  }
+  startBtn.addEventListener("click", function () { if (this.disabled) return; reset(); setTimeout(runWf, 100); });
+
+  tView.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="tenderExpand"]');
+    if (!b) return;
+    b.closest(".wf-msg").classList.toggle("open");
+  });
+
+  function runExec(key) {
+    execCard.classList.add("show");
+    execLog.innerHTML = "";
+    execFinal.classList.remove("show");
+    var logs;
+    if (key === "accept") {
+      logs = [
+        ["起草《浪潮中标通知书》PDF", 800],
+        ["钉钉@法务起草采购合同(¥164 万议价后)", 700],
+        ["通知其余 7 家供应商落标(致歉 + 感谢函)", 600],
+        ["与浪潮 BD 议价 2.5% → 最终 ¥164 万 (省 ¥4 万)", 750],
+        ["设交付节点跟踪 + 验收时间表", 500],
+        ["录入资产管理系统(预计 8/15 入账)", 400]
+      ];
+    } else if (key === "lowprice") {
+      logs = [
+        ["已选区域 X · 已要求 24h 内补充资质证明", 700],
+        ["AI 风险预警入库(供应商监控加强)", 500],
+        ["合同条款增设 5% 履约保证金 + 验收双签", 600]
+      ];
+    } else if (key === "review") {
+      logs = [
+        ["8 家详细标书已打包发采购总监邮箱", 600],
+        ["AI 持续跟踪(防供应商动作 + 答疑)", 500]
+      ];
+    } else {
+      logs = [
+        ["已记录「废标」原因 (3 选 1)", 600],
+        ["AI 已起草新版招标文件(修正发现的问题)", 700],
+        ["重启邀请新一轮 14 家", 500]
+      ];
+    }
+    var cum = 100;
+    logs.forEach(function (item, i) {
+      var t = item[1];
+      wfTimers.push(setTimeout(function () {
+        var line = document.createElement("div");
+        line.className = "ael";
+        line.innerHTML = '<span>正在 ' + item[0] + '</span><span class="ael-t">+' + (cum/1000).toFixed(1) + 's</span>';
+        execLog.appendChild(line);
+        setTimeout(function () { line.classList.add("appear"); }, 10);
+      }, cum));
+      wfTimers.push(setTimeout(function () {
+        var line = execLog.children[i];
+        if (line) { line.classList.add("done"); line.firstChild.textContent = item[0]; }
+      }, cum + t));
+      cum += t + 100;
+    });
+    wfTimers.push(setTimeout(function () {
+      execFinal.classList.add("show");
+      QA('[data-counter="tenderThisMonth"]').forEach(function (x) {
+        var n = parseInt(x.textContent, 10);
+        x.textContent = n + 1;
+      });
+      execFinal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, cum + 200));
+  }
+  tView.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="tenderDecide"]');
+    if (!b) return;
+    QA('[data-fx="tenderDecide"]').forEach(function (x) { x.disabled = true; });
+    ts(b.dataset.msg);
+    runExec(b.dataset.exec);
+  });
+  Q("#tenderExecNext").addEventListener("click", function () {
+    QA('[data-fx="tenderDecide"]').forEach(function (x) { x.disabled = false; });
+    reset();
+    Q(".tender-intake").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  /* Stage 2 续约滑块 */
+  var d2Cut = Q("#tenderD2Cut");
+  if (d2Cut) {
+    d2Cut.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("tenderD2CutV", v);
+      var amt = Math.round(300 * (1 - v / 100));
+      txt("tenderD2Amt", "¥" + amt + " 万");
+      var acc = v < 4 ? 96 : v < 8 ? 88 : v < 12 ? 65 : 32;
+      txt("tenderD2Acc", acc + "%");
+      var save = 300 - amt;
+      txt("tenderD2Save", "¥" + save + " 万");
+      var verdict;
+      if (v < 4) verdict = '<b>过低议价</b> · 错失节省空间';
+      else if (v < 8) verdict = '<b class="good">AI 推荐 4-7%</b> · 体面 + 不丢服务质量';
+      else if (v < 12) verdict = '<b>偏激进</b> · 对方接受率快速下降';
+      else verdict = '<b class="danger">议价过狠</b> · 易丢供应商 · 服务质量风险';
+      Q("#tenderD2Verdict").innerHTML = verdict;
+    });
+  }
+}
+
+(function () { _bidInit(); _tenderInit(); })();
 </script>
 </body>
 </html>
