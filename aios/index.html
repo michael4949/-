@@ -3356,6 +3356,237 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .kb-gap-row .kgr-acts .skip:hover { color:var(--red); border-color:var(--red); }
 .kb-gap-row .kgr-state { font-size:11px; font-weight:700; color:var(--green); text-align:center;
   padding:5px 9px; background:rgba(24,185,122,.12); border-radius:6px; }
+/* ============================================================
+   Agent 主控台样式 (Board 3/4/6 共用)
+   ============================================================ */
+.agent-status { display:flex; align-items:flex-start; gap:13px;
+  padding:15px 18px; background:linear-gradient(135deg,#0E1430,#1A1F4F); color:#fff;
+  border-radius:13px; margin-bottom:14px; position:relative; overflow:hidden; }
+.agent-status::before { content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,#5A5BF0,#9A4DFF,#5A5BF0); background-size:200% 100%;
+  animation: shimmer 2s linear infinite; }
+.agent-status .as-ava { width:48px; height:48px; border-radius:12px;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); display:grid; place-items:center;
+  font-size:24px; flex-shrink:0; box-shadow:0 4px 14px rgba(90,91,240,.45); }
+.agent-status .as-main { flex:1; min-width:0; }
+.agent-status .as-title { font-size:14px; font-weight:800; color:#fff;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px; }
+.agent-status .as-title b { color:#7C5CFA; }
+.agent-status .as-live { font-size:9.5px; padding:2px 7px; background:rgba(43,217,168,.15);
+  color:#2BD9A8; border-radius:5px; font-weight:800; letter-spacing:.05em;
+  display:inline-flex; align-items:center; gap:4px; }
+.agent-status .as-live::before { content:"●"; animation: ppd 1s infinite; }
+.agent-status .as-meta { font-size:12px; line-height:1.65; color:rgba(255,255,255,.78); margin-bottom:5px; }
+.agent-status .as-meta b { color:#fff; }
+.agent-status .as-pending { padding:7px 11px; background:rgba(124,92,250,.18);
+  border:1px solid rgba(124,92,250,.4); border-radius:8px; font-size:11.5px; color:#fff;
+  font-weight:600; margin-top:6px; }
+.agent-status .as-pending b { color:#FFC766; font-size:13px; }
+
+/* Section 共用 */
+.agent-section { margin-bottom:14px; }
+.agent-section-head { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+.agent-section-head .ash-dot { width:9px; height:9px; border-radius:50%; background:#E5484D;
+  animation: ppd 1s infinite; }
+.agent-section-head .ash-pin { font-size:14px; }
+.agent-section-head .ash-tt { font-size:13.5px; font-weight:800; color:var(--ink); }
+.agent-section-head .ash-meta { font-size:11px; color:var(--muted); margin-left:auto;
+  background:#F8F9FE; padding:3px 8px; border-radius:5px; }
+
+/* Board 3 · LIVE 3 个会话 */
+.live-conv-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:11px; }
+.live-conv { background:#fff; border:1px solid var(--line); border-radius:11px; padding:0;
+  overflow:hidden; }
+.lcv-head { display:flex; align-items:center; gap:8px; padding:9px 11px;
+  background:linear-gradient(180deg,#F8F9FE,#EEF0FB); border-bottom:1px solid var(--line); }
+.lcv-head .lcv-ava { width:28px; height:28px; border-radius:50%; background:#EEF0FB;
+  color:var(--ink-2); display:grid; place-items:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.lcv-head .lcv-tt { flex:1; min-width:0; font-size:11px; line-height:1.4; }
+.lcv-head .lcv-tt b { color:var(--ink); font-size:11.5px; }
+.lcv-head .lcv-tt small { display:block; color:var(--muted); font-size:9.5px; margin-top:1px; }
+.lcv-head .lcv-state { font-size:9.5px; padding:2px 6px; border-radius:4px; font-weight:800; flex-shrink:0; }
+.lcv-state.ok { background:rgba(24,185,122,.12); color:var(--green); }
+.lcv-state.urge { background:#FEF2F2; color:var(--red); animation: ppd 1.5s infinite; }
+.lcv-stream { padding:10px; height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;
+  font-size:11px; line-height:1.5; background:#FAFBFF; }
+.lcv-msg { padding:5px 9px; border-radius:8px; max-width:88%; }
+.lcv-msg.cust { background:#fff; border:1px solid var(--line-2); color:var(--ink); align-self:flex-start; }
+.lcv-msg.ai { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; align-self:flex-end; }
+.lcv-msg.sys { background:rgba(0,0,0,.04); color:var(--muted); font-size:10px; font-style:italic;
+  align-self:center; padding:3px 8px; border-radius:6px; }
+.lcv-msg.appear { animation: msgIn .3s ease-out; }
+@keyframes msgIn { 0%{opacity:0;transform:translateY(6px)} 100%{opacity:1;transform:translateY(0)} }
+
+/* 共用 AI 已做 strip */
+.ai-done-strip { padding:9px 11px; background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border-left:3px solid var(--green); border-radius:7px; margin-top:9px; }
+.ai-done-strip .adi-head { font-size:10.5px; font-weight:800; color:var(--green); letter-spacing:.04em; margin-bottom:5px; }
+.ai-done-strip .adi-row { font-size:11px; line-height:1.55; color:var(--ink-2); padding:2px 0; }
+.ai-tried { padding:9px 11px; background:linear-gradient(180deg,#FEF2F2,#FFEBEC);
+  border-left:3px solid var(--red); border-radius:7px; margin:9px 0; }
+.ai-tried .adi-head { font-size:10.5px; font-weight:800; color:var(--red); letter-spacing:.04em; margin-bottom:5px; }
+.ai-tried .adi-row { font-size:11px; line-height:1.55; color:var(--ink-2); padding:2px 0; }
+
+/* AI 自主决策日志 (Board 3) */
+.auto-log { background:#fff; border:1px solid var(--line); border-radius:13px;
+  max-height:280px; overflow-y:auto; padding:5px 0; }
+.auto-log .al-row { display:grid; grid-template-columns: 65px 1fr auto;
+  gap:11px; padding:9px 14px; border-bottom:1px dashed var(--line); align-items:center;
+  font-size:11.5px; line-height:1.5; }
+.auto-log .al-row:last-child { border-bottom:none; }
+.auto-log .al-time { font-size:11px; font-weight:800; color:var(--brand); font-family: ui-monospace, monospace; }
+.auto-log .al-body { color:var(--ink-2); }
+.auto-log .al-body b { color:var(--ink); }
+.auto-log .al-body small { color:var(--muted); font-size:10px; display:block; margin-top:2px; }
+.auto-log .al-conf { font-size:11px; font-weight:800; padding:3px 8px; border-radius:5px; white-space:nowrap; }
+.auto-log .al-conf.high { background:rgba(24,185,122,.12); color:var(--green); }
+.auto-log .al-conf.mid { background:rgba(217,119,6,.12); color:var(--amber); }
+.auto-log .al-conf.up { background:#FEF2F2; color:var(--red); }
+.auto-log .al-row.appear { animation: msgIn .3s ease-out; }
+
+/* Agent 学习日志 (Board 3 + 4) */
+.learn-section .agent-section-head .ash-pin { font-size:15px; }
+.learn-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
+.learn-cell { padding:11px 13px; background:linear-gradient(135deg,#FAFBFF,#fff);
+  border:1px solid var(--line); border-radius:11px; position:relative; }
+.learn-cell .lc-tt { font-size:12px; font-weight:800; color:var(--brand); margin-bottom:5px; }
+.learn-cell .lc-body { font-size:11.5px; line-height:1.6; color:var(--ink-2); }
+.learn-cell .lc-body b { color:var(--ink); }
+.learn-cell .lc-tag { position:absolute; top:9px; right:9px; font-size:9.5px; padding:2px 7px;
+  background:rgba(24,185,122,.15); color:var(--green); border-radius:5px; font-weight:800; }
+
+/* Board 4 · 跨部门协调日志 */
+.agent-flow { background:#fff; border:1px solid var(--line); border-radius:13px;
+  padding:0; max-height:200px; overflow-y:auto; }
+.agent-flow .af-row { display:grid; grid-template-columns: 60px auto 1fr;
+  gap:11px; padding:9px 14px; border-bottom:1px dashed var(--line); align-items:center;
+  font-size:11.5px; line-height:1.55; }
+.agent-flow .af-row:last-child { border-bottom:none; }
+.agent-flow .af-time { font-size:10.5px; font-weight:800; color:var(--brand); font-family: ui-monospace, monospace; }
+.agent-flow .af-tag { font-size:9.5px; padding:2px 7px; border-radius:5px; font-weight:800;
+  white-space:nowrap; letter-spacing:.04em; }
+.agent-flow .af-tag.urge { background:#FEF2F2; color:var(--red); }
+.agent-flow .af-tag.comm { background:rgba(0,194,216,.12); color:#00A8C6; }
+.agent-flow .af-tag.coord { background:rgba(124,92,250,.12); color:var(--purple); }
+.agent-flow .af-tag.agg { background:rgba(217,119,6,.12); color:var(--amber); }
+.agent-flow .af-body { color:var(--ink-2); }
+.agent-flow .af-body b { color:var(--ink); }
+.agent-flow .af-row.appear { animation: msgIn .3s ease-out; }
+
+/* Board 4 · 智能预测卡 */
+.predict-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:10px; }
+.predict-card { padding:12px 14px; background:#fff; border:1px solid var(--line); border-radius:11px;
+  border-left:3px solid var(--brand); }
+.predict-card .pc-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.predict-card .pc-id { font-size:10px; padding:2px 7px; background:#EEF0FB; color:var(--ink-2);
+  border-radius:4px; font-weight:800; font-family: ui-monospace, monospace; }
+.predict-card .pc-risk { font-size:11px; font-weight:800; padding:2px 8px; border-radius:5px;
+  margin-left:auto; }
+.predict-card .pc-risk.warn { background:#FEF2F2; color:var(--red); }
+.predict-card .pc-risk.mid { background:#FFF4E5; color:var(--amber); }
+.predict-card .pc-risk.low { background:rgba(24,185,122,.12); color:var(--green); }
+.predict-card .pc-tt { font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:5px; }
+.predict-card .pc-reason { font-size:11px; line-height:1.55; color:var(--ink-2); margin-bottom:7px;
+  padding:6px 9px; background:#F8F9FE; border-radius:6px; }
+.predict-card .pc-action { font-size:11px; line-height:1.55; color:var(--green);
+  padding:6px 9px; background:rgba(24,185,122,.06); border-left:2px solid var(--green); border-radius:6px;
+  font-weight:600; }
+
+/* Board 6 · 已自动处置列表 */
+.done-list { background:#fff; border:1px solid var(--line); border-radius:13px; padding:0; }
+.done-row { display:grid; grid-template-columns: 40px 1fr auto; gap:11px;
+  padding:11px 14px; border-bottom:1px dashed var(--line); align-items:center; }
+.done-row:last-child { border-bottom:none; }
+.done-row .dr-ico { width:34px; height:34px; border-radius:9px;
+  background:linear-gradient(135deg,#F0FDF4,#E9F9F1); display:grid; place-items:center; font-size:17px; }
+.done-row .dr-body { font-size:12px; line-height:1.6; color:var(--ink-2); }
+.done-row .dr-body b { color:var(--ink); }
+.done-row .dr-meta { font-size:10.5px; padding:3px 8px; background:rgba(24,185,122,.12); color:var(--green);
+  border-radius:5px; font-weight:700; white-space:nowrap; }
+
+/* Board 6 · 深层洞察 */
+.insight-list { display:flex; flex-direction:column; gap:10px; }
+.insight-row { background:#fff; border:1px solid var(--line); border-radius:13px;
+  padding:14px 16px; border-left:3px solid var(--brand); }
+.insight-row.handled { opacity:.6; }
+.insight-row .ir-head { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.insight-row .ir-num { font-size:11px; padding:3px 9px; background:var(--grad-btn); color:#fff;
+  border-radius:5px; font-weight:800; }
+.insight-row .ir-prio { font-size:10px; padding:2px 7px; background:#FEF2F2; color:var(--red);
+  border-radius:5px; font-weight:800; letter-spacing:.04em; }
+.insight-row .ir-hook { font-size:13px; font-weight:700; color:var(--ink); line-height:1.55;
+  margin-bottom:8px; padding:9px 12px; background:linear-gradient(180deg,#F7F9FF,#EDEFFB);
+  border-radius:8px; border-left:3px solid var(--brand); }
+.insight-row .ir-hook b { color:var(--brand); }
+.insight-row .ir-detail { font-size:11.5px; line-height:1.7; color:var(--ink-2); margin-bottom:9px; }
+.insight-row .ir-detail b { color:var(--ink); }
+.insight-row .ir-data { padding:7px 11px; background:#F8F9FE; border-radius:7px;
+  font-size:11px; color:var(--ink-2); margin-bottom:10px; }
+.insight-row .ir-data b { color:var(--brand); }
+.insight-row .ir-acts { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+.insight-row .ir-acts button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.15s; }
+.insight-row .ir-acts .ir-accept { background:var(--grad-btn); color:#fff; border:none;
+  box-shadow:0 3px 10px rgba(90,91,240,.3); }
+.insight-row .ir-acts .ir-accept:hover { transform:translateY(-1px); }
+.insight-row .ir-acts .ir-detail-btn { background:#fff; color:var(--brand); border:1px dashed var(--brand); }
+.insight-row .ir-acts .ir-reject { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.insight-row .ir-state { margin-left:auto; font-size:11px; padding:5px 10px; font-weight:700;
+  border-radius:6px; display:none; }
+.insight-row.handled-acc .ir-state { display:inline-block; background:rgba(24,185,122,.12); color:var(--green); }
+.insight-row.handled-rej .ir-state { display:inline-block; background:#EEF0FB; color:var(--muted); }
+.insight-row.handled .ir-acts button:not(.ir-state) { display:none; }
+
+/* Board 6 · 监测网格 */
+.monitor-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:9px; }
+.monitor-cell { display:flex; align-items:center; gap:9px; padding:10px 12px;
+  background:linear-gradient(135deg,#FAFBFF,#fff); border:1px solid var(--line); border-radius:10px; }
+.monitor-cell .mc-ico { font-size:18px; flex-shrink:0; }
+.monitor-cell .mc-body { font-size:11.5px; line-height:1.55; color:var(--ink-2); }
+.monitor-cell .mc-body b { color:var(--brand); font-weight:800; }
+
+/* ============================================================
+   Board 5 · 16 场景陪练增强
+   ============================================================ */
+.train-scene-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:6px; margin-bottom:10px; }
+.train-scene { padding:8px 5px; }
+.train-scene .tns-ico { font-size:16px; margin-bottom:2px; }
+.train-scene .tns-tt { font-size:10.5px; }
+
+.train-control { display:flex; align-items:center; gap:11px; margin-bottom:9px; }
+.train-golden-btn { padding:8px 15px; font-size:12px; font-weight:800;
+  background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff; border:none;
+  border-radius:9px; cursor:pointer; font-family:inherit; transition:.15s;
+  box-shadow:0 3px 10px rgba(255,165,0,.4); white-space:nowrap; }
+.train-golden-btn:hover:not(:disabled) { transform:translateY(-1px);
+  box-shadow:0 5px 14px rgba(255,165,0,.55); }
+.train-golden-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+.scene-brief { padding:11px 13px; background:linear-gradient(135deg,#F7F9FF,#EDEFFB);
+  border:1px solid rgba(90,91,240,.18); border-radius:10px; margin-bottom:10px; }
+.scene-brief .sb-head { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
+.scene-brief .sb-name { font-size:13px; font-weight:800; color:var(--ink); }
+.scene-brief .sb-meta { font-size:10.5px; color:var(--muted); padding:1px 7px;
+  background:#fff; border-radius:5px; font-weight:600; }
+.scene-brief .sb-body { font-size:11.5px; line-height:1.65; color:var(--ink-2); margin-bottom:7px; }
+.scene-brief .sb-eval { font-size:10.5px; color:var(--brand); display:flex; gap:6px; flex-wrap:wrap; }
+.scene-brief .sb-eval span { padding:2px 6px; background:rgba(90,91,240,.08);
+  border-radius:4px; font-weight:600; }
+
+/* AI 金牌示范气泡 (新增标记) */
+.train-bubble.golden { align-self:stretch; max-width:100%; }
+.train-bubble.golden .tb-ava { display:none; }
+.train-bubble.golden .tb-text { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff;
+  font-size:11.5px; padding:8px 11px; border-radius:8px;
+  box-shadow:0 4px 12px rgba(255,165,0,.3); position:relative; padding-left:36px; }
+.train-bubble.golden .tb-text::before { content:"🏆"; position:absolute; left:11px; top:50%;
+  transform:translateY(-50%); font-size:16px; }
+
+.train-bubble.csr-golden { align-self:flex-end; flex-direction:row-reverse; }
+.train-bubble.csr-golden .tb-ava { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff; }
+.train-bubble.csr-golden .tb-text { background:linear-gradient(135deg,#FFD700,#FFA500); color:#fff;
+  box-shadow:0 3px 10px rgba(255,165,0,.3); position:relative; padding-right:22px; }
+.train-bubble.csr-golden .tb-text::after { content:"🏆"; position:absolute; right:6px; top:2px; font-size:11px; }
 </style>
 </head>
 <body>
@@ -7060,280 +7291,371 @@ curl https://api.dgg.ai/v1/agents/dispatch \
               </div>
             </div></div>
 
-            <!-- ===== 3 24×7 夜班 ===== -->
+<!-- ===== 3 夜班 Agent 主控台 (Agent 形态 · LIVE 实时 + 决策 + 学习) ===== -->
             <div class="stage" id="cs-night"><div class="page">
-              <div class="night-shell">
-                <div class="night-head">
-                  <div class="nh-moon">🌙</div>
-                  <div class="nh-tt">24×7 AI 夜班值守 · 今晚 22:00 起接管<small>客户夜里咨询 → AI 第一时间接待 · 能解决的当场解决 · 解决不了的留言并升级 · 关键决策客户提醒老板</small></div>
-                  <div class="night-toggle" id="csNightToggle">
-                    <span class="nt-led"></span><span class="nt-tt">夜班 已启动</span>
-                  </div>
+
+              <div class="agent-status">
+                <div class="as-ava">🌙</div>
+                <div class="as-main">
+                  <div class="as-title">我是夜班 Agent · <b id="csNightClock">03:24</b> 在岗 · 22:00 起接管<span class="as-live">● LIVE</span></div>
+                  <div class="as-meta">我现在: 正在同时跟 <b>3 个客户</b>对话 · 今晚已替你: 自动闭环 <b>28 单</b> · 升级紧急 <b>2 单</b> · 流失挽回 <b>1 单</b> · 新学习场景 <b>7 个</b></div>
+                  <div class="as-pending">⚠ <b id="csNightPending">2</b> 件大事需要你拍板 ↓ 我已分析完, 你只需选一下</div>
                 </div>
-                <div class="night-stat">
-                  <div class="night-stat-cell">
-                    <div class="nsc-lbl">今夜进件</div>
-                    <div class="nsc-val" id="csNightIntake">42</div>
-                    <div class="nsc-sub">单 · 22:00 - 现在 04:36</div>
+              </div>
+
+              <!-- A. LIVE 我正在处理的 3 个会话 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-dot"></span>
+                  <div class="ash-tt">🔴 LIVE · 我现在正在处理 3 个会话(实时滚动)</div>
+                  <div class="ash-meta">每条对话 1-2s 滚动 · 客户每说一句我立即响应</div>
+                </div>
+                <div class="live-conv-grid">
+                  <div class="live-conv" data-cid="lc1">
+                    <div class="lcv-head">
+                      <span class="lcv-ava">🌐</span>
+                      <div class="lcv-tt"><b>Brown UK</b><small>海外询单 · 第 4 轮</small></div>
+                      <span class="lcv-state ok">AI 自闭环 94%</span>
+                    </div>
+                    <div class="lcv-stream" id="lcStream-lc1"></div>
                   </div>
-                  <div class="night-stat-cell">
-                    <div class="nsc-lbl">AI 自动闭环</div>
-                    <div class="nsc-val good" id="csNightSolved">31</div>
-                    <div class="nsc-sub">单 (74%) · 客户已满意</div>
+                  <div class="live-conv" data-cid="lc2">
+                    <div class="lcv-head">
+                      <span class="lcv-ava">张</span>
+                      <div class="lcv-tt"><b>张总 · 中山某机械</b><small>金牌 · 数据库故障</small></div>
+                      <span class="lcv-state urge">已升 CTO</span>
+                    </div>
+                    <div class="lcv-stream" id="lcStream-lc2"></div>
                   </div>
-                  <div class="night-stat-cell">
-                    <div class="nsc-lbl">转早班处理</div>
-                    <div class="nsc-val warn" id="csNightRelay">9</div>
-                    <div class="nsc-sub">单 · 8:00 自动派单</div>
-                  </div>
-                  <div class="night-stat-cell">
-                    <div class="nsc-lbl">紧急已升级</div>
-                    <div class="nsc-val" style="color:#FF7E7E" id="csNightUp">2</div>
-                    <div class="nsc-sub">单 · 钉钉已通知主管</div>
+                  <div class="live-conv" data-cid="lc3">
+                    <div class="lcv-head">
+                      <span class="lcv-ava">试</span>
+                      <div class="lcv-tt"><b>访客 · 试用询单</b><small>30 人规模</small></div>
+                      <span class="lcv-state ok">AI 自闭环 91%</span>
+                    </div>
+                    <div class="lcv-stream" id="lcStream-lc3"></div>
                   </div>
                 </div>
               </div>
 
-              <div class="night-log">
-                <div class="night-log-head">
-                  <div class="nlh-tt">📋 今夜 AI 处理记录 · 点单条看完整对话 + 决策推理</div>
-                  <div class="nlh-tabs">
-                    <button class="night-log-tab cur" data-fx="csNightTab" data-tab="today">今夜</button>
-                    <button class="night-log-tab" data-fx="csNightTab" data-tab="yest">昨夜</button>
-                    <button class="night-log-tab" data-fx="csNightTab" data-tab="week">本周</button>
-                  </div>
+              <!-- B. 需要老板拍板的 2 件大事 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">⚠</span>
+                  <div class="ash-tt">需要你拍板的关键决策 · 我已分析完, 一键决定即可</div>
                 </div>
-                <div class="night-log-list" id="csNightList">
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n1">
-                    <div class="nlr-time">02:35</div>
-                    <div class="nlr-cust"><b>Brown Engineering</b><small>UK · 海外询单</small></div>
-                    <div class="nlr-q">"Does your CRM support multi-currency invoicing for EU customers?"</div>
-                    <div class="nlr-action solved">AI 已解决</div>
-                    <div class="nlr-conf">94%<small>置信</small></div>
+
+                <div class="decision-card" data-dec="csNightD1" data-exec-msg="自动触发: ① 已通知 BI 顾问王工 04:45 钉钉接洽; ② 已生成 6 维分析草稿(同环比+Top10+异常下钻+流失客户+预测); ③ 已为钱厂长准备明早 7:30 主管致电话术">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#9A4DFF">💎</span>
+                    <div class="dec-main">
+                      <div class="dec-title">04:30 钻石客户钱厂长 · 突发 · 明早 9 点要给老板做汇报 · <b style="color:var(--brand)">AI 建议: 启动 BI 顾问免费深度分析</b></div>
+                      <div class="dec-meta">钱厂长 ARR ¥18 万 · 合作 3 年 · NPS 98 · LTV ¥58 万 · 04:30 钉钉急询"明早 9 点要给老板汇报,本月销售趋势图能给我吗?"</div>
+                    </div>
+                    <span class="pill" style="background:#F1EBFF;color:#9A4DFF">钻石</span>
                   </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n2">
-                    <div class="nlr-time">02:58</div>
-                    <div class="nlr-cust"><b>张总 · 中山某机械</b><small>金牌客户 · ¥6.8 万</small></div>
-                    <div class="nlr-q">"我们的 CRM 显示数据库错误 1042,刚才好好的!"</div>
-                    <div class="nlr-action upgrade">紧急升级</div>
-                    <div class="nlr-conf">98%<small>置信</small></div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:11px">
+                      <b style="color:var(--brand)">🤖 我的分析:</b>钻石客户 + "老板汇报"是关键时刻 + 触发我的"VIP 红色通道"。已自动生成本月销售趋势报表(标准模板),但<b>"老板汇报"场景</b>历史数据显示<b>客户更需要同比/环比/Top10/异常下钻</b>。BI 顾问王工 06:30 起在线,可<b>免费</b>替我做 30 分钟深度分析(标价 ¥5K,我已开通服务包内)。<br>
+                      <b>预期效果:</b>钱厂长老板汇报得分 +25% · 续约概率 +6% · NPS +2 · 三年 LTV +¥3.2 万 · <b>ROI 6.4x</b>
+                    </div>
+                    <div class="ai-done-strip">
+                      <div class="adi-head">✓ 我已自动做了 3 件事:</div>
+                      <div class="adi-row">✓ 生成本月销售趋势报表(标准模板 · 04:35 推钱厂长邮箱)</div>
+                      <div class="adi-row">✓ 排好早班主管 7:30 主动钉钉联系(含问候话术)</div>
+                      <div class="adi-row">✓ 钱厂长画像更新标签:"数据导出 · 老板汇报场景"</div>
+                    </div>
                   </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n3">
-                    <div class="nlr-time">03:12</div>
-                    <div class="nlr-cust"><b>访客 IP 220.181.x</b><small>试用询单</small></div>
-                    <div class="nlr-q">"小型工厂 30 人,你们 CRM 价格大概多少?有教育优惠吗?"</div>
-                    <div class="nlr-action solved">AI 已解决</div>
-                    <div class="nlr-conf">91%<small>置信</small></div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csNightD1" data-msg="✅ 已采纳 · AI 已自动安排王工 04:45 接洽 + 钱厂长 06:45 预报 + 6 维深度分析就绪">✓ 同意 AI 方案 · 启动 BI 深度分析</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csNightD1" data-act="defer" data-msg="按标准 7:30 接管 · 不加 BI">按标准 7:30 接管</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csNightD1" data-act="reject" data-msg="我亲自联系钱厂长">我亲自联系</button>
                   </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n4">
-                    <div class="nlr-time">03:38</div>
-                    <div class="nlr-cust"><b>李工 · 东莞某电子</b><small>试用 18 天</small></div>
-                    <div class="nlr-q">"报表里的客户字段能自定义吗?我想加几个公司专属字段。"</div>
-                    <div class="nlr-action solved">AI 已解决</div>
-                    <div class="nlr-conf">96%<small>置信</small></div>
-                  </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n5">
-                    <div class="nlr-time">04:05</div>
-                    <div class="nlr-cust"><b>赵生 · 深圳某五金</b><small>老客户 · 2 年</small></div>
-                    <div class="nlr-q">"我员工反映报表导出后 Excel 看是乱码, 是不是编码问题?"</div>
-                    <div class="nlr-action solved">AI 已解决</div>
-                    <div class="nlr-conf">99%<small>置信</small></div>
-                  </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n6">
-                    <div class="nlr-time">04:18</div>
-                    <div class="nlr-cust"><b>访客 · 抖音私信</b><small>询单</small></div>
-                    <div class="nlr-q">"你们这套对接淘宝/京东订单同步吗?我现在 4 个店铺。"</div>
-                    <div class="nlr-action relay">转早班</div>
-                    <div class="nlr-conf">68%<small>置信</small></div>
-                  </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n7">
-                    <div class="nlr-time">04:30</div>
-                    <div class="nlr-cust"><b>钱厂长 · 佛山某五金</b><small>钻石客户</small></div>
-                    <div class="nlr-q">"明早我要给老板做汇报, 帮我导一份本月销售趋势图表!"</div>
-                    <div class="nlr-action upgrade">紧急升级</div>
-                    <div class="nlr-conf">99%<small>置信</small></div>
-                  </div>
-                  <div class="night-log-row" data-fx="csNightPick" data-nid="n8">
-                    <div class="nlr-time">04:36</div>
-                    <div class="nlr-cust"><b>访客 · 网页留言</b><small>询单</small></div>
-                    <div class="nlr-q">"贵司有制造业的成功案例可以分享吗? 行业老大用过吗?"</div>
-                    <div class="nlr-action solved">AI 已解决</div>
-                    <div class="nlr-conf">88%<small>置信</small></div>
-                  </div>
+                  <div class="dec-status"></div>
                 </div>
-                <div class="night-detail" id="csNightDetail"></div>
+
+                <div class="decision-card" data-dec="csNightD2" data-exec-msg="自动触发: ① 已通知张总服务费减免凭证已挂账; ② 已生成钉钉补偿致歉话术; ③ CTO 已收到补偿配合通知">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#E5484D">🚨</span>
+                    <div class="dec-main">
+                      <div class="dec-title">张总数据库故障已超 30 分钟 · 金牌 · NPS 高敏感 · <b style="color:var(--brand)">AI 建议: 主动补偿 10% 服务费 ¥6.8K</b></div>
+                      <div class="dec-meta">02:58 触发紧急工单 · CTO 已介入 · 客户已知 ETA 15 分钟 · 业务暂停影响中</div>
+                    </div>
+                    <span class="pill pill-red">维权</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:9px">
+                      <b style="color:var(--brand)">🤖 我的分析:</b>张总过去 14 月只投诉过 1 次 + NPS 9.2(高敏感型) · 此次故障非客户原因。被动等待"故障解决了通知客户"的<b>客户挽留概率 71%</b>,而<b>主动补偿+致歉</b>挽留概率 <b>96%</b> · 同时降低续约异议概率 -32%。
+                    </div>
+                    <div class="dec-sim">
+                      <div class="range-row">
+                        <label>补偿幅度</label>
+                        <input type="range" class="range-input" id="csN2Comp" min="0" max="30" step="1" value="10">
+                        <span class="range-val"><span id="csN2CompV">10</span>%</span>
+                      </div>
+                      <div class="dec-result">
+                        补偿金额 <b id="csN2Amt">¥6,800</b> &nbsp;·&nbsp; 留存概率 <b id="csN2Stay" class="good">96%</b> &nbsp;·&nbsp; NPS 影响 <b id="csN2Nps" class="good">+1.2</b> &nbsp;·&nbsp; 续约概率 <b id="csN2Renew" class="good">94%</b>
+                        <div style="margin-top:7px" id="csN2Verdict"><b class="good">AI 推荐区间 8-12%</b> · 体面但不过度 · 综合 ROI 最优</div>
+                      </div>
+                    </div>
+                    <div class="ai-done-strip">
+                      <div class="adi-head">✓ 我已自动做了 3 件事:</div>
+                      <div class="adi-row">✓ CTO 已实际介入 03:01 (耗时 3 min · 远程 SSH 接入主库)</div>
+                      <div class="adi-row">✓ 给张总钉钉发了 ETA 通知 + 道歉(03:02)</div>
+                      <div class="adi-row">✓ 监测客户反应:暂未投诉到群,但内部 IT 群有抱怨</div>
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csNightD2" data-msg="✅ 已批准补偿 · AI 已通知财务挂账 + 张总钉钉致歉话术发出">✓ 同意补偿 · 自动执行</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csNightD2" data-act="defer" data-msg="等故障解决再说">等解决再决定</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csNightD2" data-act="reject" data-msg="我亲自致电张总">我亲自致电</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
               </div>
 
-              <div class="night-conf">
-                <div class="nc-row">
-                  <div class="nc-lbl">⚙️ AI 自闭环置信度阈值</div>
-                  <input type="range" id="csNightConf" min="50" max="99" value="85" step="1">
-                  <div class="nc-val"><span id="csNightConfV">85</span>%</div>
+              <!-- C. AI 自主决策日志 (流式滚动) -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">📋</span>
+                  <div class="ash-tt">我自主决策日志 · 今晚 28 单 · 滚动播放</div>
+                  <div class="ash-meta">每一笔都附决策推理 + 置信度</div>
                 </div>
-                <div class="nc-tip" id="csNightConfTip">
-                  <b>当前阈值 85%</b> · AI 置信度 ≥ 85% 自动闭环回答,&lt; 85% 留言转早班。今夜回测:31 单自动闭环 / 9 单转早班 / 2 单紧急升级。阈值<b>调低 → 更多自动闭环,客户夜里能立即得到答案</b>;阈值<b>调高 → 更稳妥,但更多人留言到早晨才有人接</b>。
+                <div class="auto-log" id="csNightAutoLog">
+                  <!-- JS 滚动添加 -->
                 </div>
               </div>
+
+              <!-- D. Agent 今晚的学习与成长 -->
+              <div class="agent-section learn-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">🧠</span>
+                  <div class="ash-tt">我今晚学到了什么 · 明天会更聪明</div>
+                  <div class="ash-meta">每一次处理都在进化</div>
+                </div>
+                <div class="learn-grid">
+                  <div class="learn-cell">
+                    <div class="lc-tt">🎯 新场景沉淀</div>
+                    <div class="lc-body"><b>EU 询单标准流程</b>· 基于今晚 2 单海外询价 + 多币种 + UK office 询问 · 我建立了完整 7 步流程并入库</div>
+                    <div class="lc-tag">已沉淀</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">📚 知识库扩展</div>
+                    <div class="lc-body"><b>编码乱码诊断指引 V2</b>· 综合今晚 1 单 + 历史 47 单, 我把"操作系统/Excel 版本/编辑器"三维度交叉诊断写成了引导表</div>
+                    <div class="lc-tag">已沉淀</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">🎭 客户画像更新</div>
+                    <div class="lc-body"><b>钱厂长(钻石)</b>新增标签 <b>"数据导出 · 老板汇报场景"</b> · 下次类似时间(月初早)询问数据,我会主动推送"老板友好版"</div>
+                    <div class="lc-tag">已沉淀</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">💬 话术迭代</div>
+                    <div class="lc-body"><b>"凌晨 03:00+ 紧急求助"安抚话术升级 V3</b>· 新加入"非工作时间您还在为业务操心,我立即..." 同理表达</div>
+                    <div class="lc-tag">已沉淀</div>
+                  </div>
+                </div>
+              </div>
+
             </div></div>
 
-            <!-- ===== 4 工单跨部门流转 ===== -->
+
+<!-- ===== 4 工单 Agent 调度官 (Agent 形态) ===== -->
             <div class="stage" id="cs-ticket"><div class="page">
-              <div class="action-strip">
-                <span class="as-ico">🎫</span>
-                <div class="as-txt">客服处理不了的转下游(工程师/财务/物流/老板),AI 全程盯流转。本月 <b data-counter="tkTotal">186</b> 单工单 · 在途 <b id="tkPending">14</b> · 超时预警 <b id="tkOver">3</b> · AI 已自动催办 <b id="tkUrged">11</b> 次 · 客户进度通知 <b>已发 67</b> 条。</div>
-              </div>
 
-              <div class="ticket-top">
-                <div class="ticket-stats">
-                  <div class="ts-cell" style="--c:#5A5BF0"><div class="tsc-lbl">在途工单</div><div class="tsc-val" id="tkStatPending">14</div><div class="tsc-sub">各部门处理中</div></div>
-                  <div class="ts-cell" style="--c:#E5484D"><div class="tsc-lbl">⚠ 已超时</div><div class="tsc-val danger" id="tkStatOver">3</div><div class="tsc-sub">SLA 已破</div></div>
-                  <div class="ts-cell" style="--c:#D97706"><div class="tsc-lbl">⏰ 临期</div><div class="tsc-val warn" id="tkStatWarn">4</div><div class="tsc-sub">2 小时内到期</div></div>
-                  <div class="ts-cell" style="--c:#18B97A"><div class="tsc-lbl">今日已解决</div><div class="tsc-val good" id="tkStatDone">23</div><div class="tsc-sub">客户已确认 19</div></div>
-                </div>
-                <div class="ticket-sla">
-                  <div class="tsla-head">⚙️ SLA 超时阈值调节</div>
-                  <div class="tsla-row">
-                    <input type="range" id="tkSlaR" min="2" max="48" value="24" step="1">
-                    <div class="tsla-val"><span id="tkSlaV">24</span>h</div>
-                  </div>
-                  <div class="tsla-tip" id="tkSlaTip">超过 <b>24h</b> 未处理 → AI 自动催办 + 临期预警 + 升级老板 (调高 → 减少误报 · 调低 → 更早干预)</div>
+              <div class="agent-status">
+                <div class="as-ava">🎫</div>
+                <div class="as-main">
+                  <div class="as-title">我是工单调度 Agent · 24h 在岗盯 <b>14 单</b> · 跨部门协调中<span class="as-live">● 实时</span></div>
+                  <div class="as-meta">已替你: 跨部门催办 <b>11 次</b> · 处置完毕 <b>23 单</b> · 自动通知客户 <b>67 次</b> · 起草补偿方案 <b>3 份</b></div>
+                  <div class="as-pending">⚠ <b id="csTkPending">3</b> 件关键决策需要你拍板 ↓ 我已分析诊断 + 出方案</div>
                 </div>
               </div>
 
-              <div class="ticket-list" id="tkList">
-                <!-- 工单 1: 钻石 - 超时 -->
-                <div class="ticket-card overdue" data-tid="t1">
-                  <div class="tc-head">
-                    <span class="tch-id">TK-2026-0613-01</span>
-                    <span class="tch-cust">王厂长 · <b>东莞某模具厂</b> · CRM 后台登录失败(4 员工)</span>
-                    <span class="tch-vip diamond">💎钻石</span>
-                    <span class="tch-sla danger">⚠ 已超时 5h</span>
-                  </div>
-                  <div class="tc-q"><b>问题:</b>4 个员工同时登录失败,后台显示 502 错误。客户急用,影响出报价单。原工单 6/13 13:24 创建,SLA 24h。</div>
-                  <div class="tc-flow">
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">13:24</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转工程师</div><div class="tcs-meta">13:25 AI 自动</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">工程师受理</div><div class="tcs-meta">14:02 李工</div></div>
-                    <div class="tc-step alert"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">⚠ 处理中超时</div><div class="tcs-meta">已 21h</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户确认</div></div>
-                  </div>
-                  <div class="tc-ai">
-                    <div class="tca-ico">🤖</div>
-                    <div class="tca-body"><b>AI 已自动催办 3 次</b>:① 13:24 + 24h(超时点)催 · ② 16:00 升级二级催办 · ③ 18:30 钉钉直推工程总监 + 老板。<b>诊断:</b>李工已被分配 4 个紧急单,精力分散。<small>AI 建议:① 直接升级 CTO 介入 ② 同时启动备用工程师组接管 ③ 客户已 0.5 小时未回复消息,联系给客户致歉电话</small></div>
-                  </div>
-                  <div class="tc-acts">
-                    <button class="urge" data-fx="tkAct" data-tid="t1" data-msg="✅ AI 已直推 CTO + 备用工程师组接管 · 客户致歉电话已发起">⚡ 升级 CTO + 备用组</button>
-                    <button class="esc" data-fx="tkAct" data-tid="t1" data-msg="✅ 已通知老板介入处置">紧急升级老板</button>
-                    <button class="note" data-fx="tkAct" data-tid="t1" data-msg="备注已记录 · AI 持续跟进">备注后续跟进</button>
-                  </div>
+              <!-- A. 实时跨部门协调日志 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-dot"></span>
+                  <div class="ash-tt">🔴 LIVE · 我正在跨部门协调中</div>
+                  <div class="ash-meta">实时滚动 · 我替你打了 11 通电话/钉钉/邮件</div>
                 </div>
-
-                <!-- 工单 2: 金牌 - 临期 -->
-                <div class="ticket-card warn-overdue" data-tid="t2">
-                  <div class="tc-head">
-                    <span class="tch-id">TK-2026-0613-02</span>
-                    <span class="tch-cust">李总 · 中山某五金厂 · 员工权限分组未生效</span>
-                    <span class="tch-vip gold">G金牌</span>
-                    <span class="tch-sla warn">⏰ 还剩 1h 50m</span>
-                  </div>
-                  <div class="tc-q"><b>问题:</b>客户 6/11 提的权限分组优化需求,工程师承诺 3 天内,马上到期未交付。客户已两次催。</div>
-                  <div class="tc-flow">
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">6/11 9:10</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转工程师</div><div class="tcs-meta">9:11 AI 自动</div></div>
-                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">工程师处理中</div><div class="tcs-meta">张工 · 60% 完成</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">客户验收</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">已完成</div></div>
-                  </div>
-                  <div class="tc-ai">
-                    <div class="tca-ico">🤖</div>
-                    <div class="tca-body"><b>AI 已检测:</b>张工今天预计还有 4h 工作量, 到期前可完成。但客户已 2 次催。<b>AI 建议:</b>① 主动告知客户预计完成时间("张工正在做收尾测试,预计今晚 18:00 提交") · ② 启动 1 名工程师协助加速。</div>
-                  </div>
-                  <div class="tc-acts">
-                    <button class="urge" data-fx="tkAct" data-tid="t2" data-msg="✅ AI 已给客户发进度通知 + 安排协助工程师">⚡ AI 通知客户 + 加 1 工程师</button>
-                    <button class="note" data-fx="tkAct" data-tid="t2" data-msg="已让张工自己处理">交张工自处理</button>
-                  </div>
+                <div class="agent-flow" id="csTkFlow">
+                  <!-- JS 滚动添加 -->
                 </div>
-
-                <!-- 工单 3: 跨财务部 -->
-                <div class="ticket-card" data-tid="t3" style="--c:#9A4DFF">
-                  <div class="tc-head">
-                    <span class="tch-id">TK-2026-0612-08</span>
-                    <span class="tch-cust">某小厂 · 退款 ¥6,800 申请</span>
-                    <span class="tch-sla ok">✓ 在 SLA 内 · 还剩 14h</span>
-                  </div>
-                  <div class="tc-q"><b>问题:</b>试用客户在购买 1 周后申请退款,理由"功能不满意"。已转财务核对。</div>
-                  <div class="tc-flow">
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">6/12 14:20</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转财务</div><div class="tcs-meta">AI 分诊</div></div>
-                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">财务审核中</div><div class="tcs-meta">陶慧 · 待批</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">退款发起</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户确认到账</div></div>
-                  </div>
-                  <div class="tc-ai">
-                    <div class="tca-ico">🤖</div>
-                    <div class="tca-body"><b>AI 已收集:</b>客户使用时长 8 天 · 登录次数 3 · 实际操作不足 1 小时。<small>退款符合 7 日内全额退款政策。AI 已自动起草退款单 + 流失原因记录入 Board 6 (流失聚类: 试用未深度使用)。</small></div>
-                  </div>
-                  <div class="tc-acts">
-                    <button class="urge" data-fx="tkAct" data-tid="t3" data-msg="✅ AI 已推送陶慧加急审批 · 同时安排回访挽回">⚡ 加急 + 启动挽回回访</button>
-                    <button class="note" data-fx="tkAct" data-tid="t3" data-msg="正常流程, 不加急">正常流程</button>
-                  </div>
-                </div>
-
-                <!-- 工单 4: 已解决 -->
-                <div class="ticket-card solved" data-tid="t4">
-                  <div class="tc-head">
-                    <span class="tch-id">TK-2026-0613-03</span>
-                    <span class="tch-cust">江门某汽配 · 报表导出乱码</span>
-                    <span class="tch-sla done">✓ 已解决 0.5h</span>
-                  </div>
-                  <div class="tc-q"><b>问题:</b>报表 Excel 打开后中文乱码。</div>
-                  <div class="tc-flow">
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">AI 自动解决</div><div class="tcs-meta">推送 UTF-8 BOM 操作引导</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客户已确认</div></div>
-                  </div>
-                  <div class="tc-ai">
-                    <div class="tca-ico">🤖</div>
-                    <div class="tca-body"><b>AI 处理:</b>典型编码问题(出现 47 次此月),AI 自动推送操作指南 + 视频,客户 0.5h 自助解决。已沉淀进知识库置顶。</div>
-                  </div>
-                </div>
-
-                <!-- 工单 5: 跨物流 -->
-                <div class="ticket-card" data-tid="t5" style="--c:#00C2D8">
-                  <div class="tc-head">
-                    <span class="tch-id">TK-2026-0613-04</span>
-                    <span class="tch-cust">深圳某模具 · 硬件加密狗未到货</span>
-                    <span class="tch-sla ok">✓ 在 SLA 内</span>
-                  </div>
-                  <div class="tc-q"><b>问题:</b>付款已 3 天,购买的硬件加密狗(本地版必需)未发货。客户着急用。</div>
-                  <div class="tc-flow">
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div></div>
-                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转仓库/物流</div></div>
-                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">仓库查询中</div><div class="tcs-meta">15 分钟前</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">物流发货</div></div>
-                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户签收</div></div>
-                  </div>
-                  <div class="tc-ai">
-                    <div class="tca-ico">🤖</div>
-                    <div class="tca-body"><b>AI 已自动:</b>① 拉取仓库实时库存 (该型号还有 23 个) · ② 推送物流单号预生成 · ③ 已提前给客户发"今日内必发货"通知, 避免被催。</div>
-                  </div>
-                  <div class="tc-acts">
-                    <button class="note" data-fx="tkAct" data-tid="t5" data-msg="已记录, 等仓库结果">等仓库结果</button>
-                  </div>
-                </div>
-
               </div>
+
+              <!-- B. 卡死工单决策卡 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">⚠</span>
+                  <div class="ash-tt">我找到的"卡死"工单 → 关键决策(3 件)</div>
+                </div>
+
+                <div class="decision-card" data-dec="csTkD1" data-exec-msg="自动触发: ① 备用工程师组接管 t1; ② 启动客户补偿挂账; ③ 通知王厂长致歉电话已发起">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#E5484D">🚨</span>
+                    <div class="dec-main">
+                      <div class="dec-title">工单 TK-0613-01 · 钻石王厂长 · CRM 后台 4 员工失败 · 已超 SLA 5h · <b style="color:var(--brand)">AI 建议: 备用工程师组接管 + 主动补偿</b></div>
+                      <div class="dec-meta">客户已 ARR ¥18 万 + LTV ¥58 万 + 业务停摆 + 高 NPS 客户。再不处理流失概率 92%</div>
+                    </div>
+                    <span class="pill pill-red">超时</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:11px">
+                      <b style="color:var(--brand)">🤖 我的诊断:</b>李工今天派了 4 个紧急单, 精力分散 ← <b>根本原因</b>不在工程师能力, 在派单调度。CTO 也接了 5 单。<b>真因:</b>本周遇到客户集中性扩容故障 + 工程师人数没跟上。<br>
+                      <b>对比同类失败案例 (3 起):</b>同类卡死 5h+ 案例,平均流失率 76% · 平均 NPS 损失 -2.4 · 客户挽回成本平均 ¥3.2 万。
+                    </div>
+                    <div class="ai-tried">
+                      <div class="adi-head">🔄 我已尝试 3 次, 全部失败:</div>
+                      <div class="adi-row">✗ 13:24 自动催办李工 (无回应)</div>
+                      <div class="adi-row">✗ 16:00 升级二级 + 钉钉 @CTO (CTO 在另一紧急单)</div>
+                      <div class="adi-row">✗ 18:30 直推工程总监 + 老板钉钉群 (老板在出差)</div>
+                    </div>
+                    <div class="dec-sim">
+                      <div class="range-row">
+                        <label>补偿额</label>
+                        <input type="range" class="range-input" id="csTk1Comp" min="0" max="30000" step="500" value="10000">
+                        <span class="range-val">¥<span id="csTk1CompV">10,000</span></span>
+                      </div>
+                      <div class="dec-result">
+                        客户挽留概率 <b id="csTk1Stay" class="good">94%</b> &nbsp;·&nbsp; NPS 修复 <b id="csTk1Nps" class="good">+1.8</b> &nbsp;·&nbsp; 年损失避免 <b id="csTk1Avoid" class="good">¥18 万 ARR + ¥40 万 LTV</b>
+                        <div style="margin-top:7px" id="csTk1Verdict"><b class="good">AI 推荐区间 ¥8-15K</b> · 体面 + 不亏 · 综合 ROI 23x</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csTkD1" data-msg="✅ 已批准 · 备用工程师组立即接管 + 补偿挂账 + 致歉电话已发起">✓ 启动备用组 · 自动执行</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD1" data-act="defer" data-msg="我亲自致电王厂长">我亲自致电</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD1" data-act="reject" data-msg="继续按 SLA 走">按 SLA 等</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
+
+                <div class="decision-card" data-dec="csTkD2" data-exec-msg="自动触发: ① 已通知技术+商务双主管签字; ② 已生成 1 页 SLA 文档发钉钉群; ③ 已自动给客户报备进度">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#D97706">⚖️</span>
+                    <div class="dec-main">
+                      <div class="dec-title">工单 TK-0612-19 · 跨部门扯皮(技术 vs 商务)· 客户 12 天未推进 · <b style="color:var(--brand)">AI 建议: 1 页 SLA 文档让双方签字</b></div>
+                      <div class="dec-meta">某客户(金牌)要求"集成钉钉日程", 技术说要先签商务合同, 商务说要先做出来才签 → 12 天无人推进</div>
+                    </div>
+                    <span class="pill pill-amber">跨部门</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:11px">
+                      <b style="color:var(--brand)">🤖 我的诊断:</b>典型"鸡生蛋蛋生鸡"。我已收集双方诉求:技术担心做完不签 → 白做;商务担心承诺做了做不到 → 客户投诉。<b>双方都有理。</b><br>
+                      <b>类似历史案例(5 起):</b>全部最终走"先合同 + SLA → 技术按 SLA 做"模式,无一例外。
+                    </div>
+                    <div class="ai-tried">
+                      <div class="adi-head">✓ 我已替你做了 3 件事:</div>
+                      <div class="adi-row">✓ 拉技术张工 + 商务赵总到钉钉群对话</div>
+                      <div class="adi-row">✓ 起草《集成钉钉日程 SLA》1 页文档 (含交付时间、付款条件、惩罚条款)</div>
+                      <div class="adi-row">✓ 给客户报备:"明天技术商务一起出方案,后天给您"</div>
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csTkD2" data-msg="✅ 已通过 · AI 已让张工+赵总今晚签 SLA + 后天给客户方案">✓ 批准 AI 草案 · 让他们签</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD2" data-act="defer" data-msg="我亲自调解 · 明早开会">我亲自调解</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD2" data-act="reject" data-msg="按现状继续, 不强迫">按现状</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
+
+                <div class="decision-card" data-dec="csTkD3" data-exec-msg="自动触发: ① 加急退款已发起, 主管签字直接走; ② 已通知客户预计 2 小时到账; ③ 已记录此类型流失原因">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#9A4DFF">💸</span>
+                    <div class="dec-main">
+                      <div class="dec-title">工单 TK-0610-23 · 客户 5 次催退款 · 流失高危 · <b style="color:var(--brand)">AI 建议: 加急退款 + 跳过流程</b></div>
+                      <div class="dec-meta">某客户(试用)退款 ¥6,800 已申请 5 天 · 财务流程平均 7 天 · 客户已发 5 次催 · 已截图发朋友圈</div>
+                    </div>
+                    <span class="pill" style="background:#F1EBFF;color:#9A4DFF">流失</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:11px">
+                      <b style="color:var(--brand)">🤖 我的诊断:</b>客户已截图朋友圈 = 公开负面舆论风险。再拖 1 天必扩大。我的方案:走"主管签字加急"通道(权限内可跳过 3 个流程节点),24h 内退款到账,反向止损。<br>
+                      <b>替代方案对比:</b>(A) 按正常流程 = 再拖 2 天 · 朋友圈扩散 · 估计 ¥20K 品牌损失;(B) 加急 = ¥0 损失 + 客户可能从差评变中评。
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csTkD3" data-msg="✅ 加急退款已发起 · 2h 内到账 · 朋友圈舆情已止损">✓ 加急退款 · 跳流程</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD3" data-act="defer" data-msg="按正常退款流程">按正常流程</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csTkD3" data-act="reject" data-msg="我亲自联系客户致歉">我亲自联系</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
+              </div>
+
+              <!-- C. AI 智能预测 · 即将卡住的工单 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">🔮</span>
+                  <div class="ash-tt">我预测 · 24h 内可能卡住的工单 (3 件)</div>
+                  <div class="ash-meta">基于历史模式 · 我提前介入避免老板被打扰</div>
+                </div>
+                <div class="predict-grid">
+                  <div class="predict-card">
+                    <div class="pc-head"><span class="pc-id">TK-0613-04</span><span class="pc-risk warn">70%</span></div>
+                    <div class="pc-tt">深圳某模具 · 物流加密狗未到货</div>
+                    <div class="pc-reason">📦 物流类工单 + 我方仓库今天高峰 + 客户已主动催 1 次 = 预测 70% 超时</div>
+                    <div class="pc-action">✓ 我已预案:① 给客户主动发 ETA "今日内必发" ② 仓库预生成物流单 ③ 备 1 个加密狗放最优物流路径</div>
+                  </div>
+                  <div class="predict-card">
+                    <div class="pc-head"><span class="pc-id">TK-0612-22</span><span class="pc-risk mid">55%</span></div>
+                    <div class="pc-tt">惠州某电子 · 财务退款审批</div>
+                    <div class="pc-reason">💸 财务陶慧今天审 8 单 + 此单非加急 + 客户 NPS 中等 = 预测 55% 被催</div>
+                    <div class="pc-action">✓ 我已预案:① 给客户主动告知 ETA ② 给陶慧加批注"此单 7 天到期" ③ 安排明天 9 点跟进</div>
+                  </div>
+                  <div class="predict-card">
+                    <div class="pc-head"><span class="pc-id">TK-0613-07</span><span class="pc-risk low">40%</span></div>
+                    <div class="pc-tt">广州某印刷 · 技术 BUG 复现</div>
+                    <div class="pc-reason">🔧 BUG 类工单复杂 + 工程师文化 "稳但慢" + 客户已用 18 天 = 预测 40% 升级</div>
+                    <div class="pc-action">✓ 我已预案:① CTO 已备录 ② 备用方案准备 ③ 明天 14:00 主动跟客户对账</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- D. Agent 不断学习的派单策略 -->
+              <div class="agent-section learn-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">🧠</span>
+                  <div class="ash-tt">我学到的派单策略 · 越用越聪明</div>
+                  <div class="ash-meta">从历史 1,200 单中持续优化</div>
+                </div>
+                <div class="learn-grid">
+                  <div class="learn-cell">
+                    <div class="lc-tt">🎯 派单准确率提升</div>
+                    <div class="lc-body">同类故障 → "专精领域"工程师(本周 <b>92% → 96%</b>)。从故障关键词 + 客户行业 + 工程师近 7 单评分匹配</div>
+                    <div class="lc-tag">提升 4%</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">🔍 新发现</div>
+                    <div class="lc-body"><b>周五下午下单的物流单 SLA 延长 2h</b>(发现仓库周五压货高峰,误报降低 18%)</div>
+                    <div class="lc-tag">已规则化</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">🚀 VIP 红色通道</div>
+                    <div class="lc-body">钻石/金牌客户工单 SLA 自动减半,直接派"金牌工程师"。 本周钻石 0 超时</div>
+                    <div class="lc-tag">已上线</div>
+                  </div>
+                  <div class="learn-cell">
+                    <div class="lc-tt">💼 失败案例沉淀</div>
+                    <div class="lc-body">本周 3 个超时单 → 我提炼出"工程师超 5 单警戒线" 模式, 入派单模型</div>
+                    <div class="lc-tag">已沉淀</div>
+                  </div>
+                </div>
+              </div>
+
             </div></div>
 
-            <!-- ===== 5 质检 + 陪练 ===== -->
+
+<!-- ===== 5 质检 + 16 场景陪练 ===== -->
             <div class="stage" id="cs-qa"><div class="page">
               <div class="action-strip">
                 <span class="as-ico">🎯</span>
-                <div class="as-txt">100% 会话 AI 自动质检 · 不抽样,全审。本月扫描 <b>7,841</b> 条会话 · 风险话术拦截 <b>23</b> 次 · 新人陪练已通过 <b>14</b> 场。<b>替代主管 1 人 4 小时/天的人工质检</b>。</div>
+                <div class="as-txt">100% 会话 AI 自动质检 · 不抽样,全审。本月扫描 <b>7,841</b> 条会话 · 风险话术拦截 <b>23</b> 次 · 新人陪练已通过 <b>14</b> 场。陪练含 <b>16 个真实 toB 场景</b>(售前/售后/投诉/挽留) · 每场都有 <b>AI 金牌示范</b>让老板亲眼看到"我要的客服应该这样说"。</div>
               </div>
 
               <div class="qa-shell">
-                <!-- 左: 100% 质检 -->
+                <!-- 左: 100% 质检 (基本不变) -->
                 <div class="qa-panel">
                   <div class="qa-head">
                     <div class="qah-tt">📊 6 名客服 × 5 维评分 · 今日实时</div>
@@ -7367,11 +7689,11 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                   </div>
 
                   <div class="qa-alerts">
-                    <div class="qa-alerts-head"><span class="qah-pulse"></span>⚠ 风险话术实时报警 · 5 条待主管处置</div>
+                    <div class="qa-alerts-head"><span class="qah-pulse"></span>⚠ 风险话术实时报警 · 3 条待主管处置</div>
                     <div class="qa-alert-row" data-rid="a1">
                       <div class="qar-csr">陈</div>
                       <div class="qar-body">
-                        <div class="qar-csr-name">陈杰 → 李总 · 中山某五金 (金牌客户)</div>
+                        <div class="qar-csr-name">陈杰 → 李总 · 中山某五金 (金牌)</div>
                         <div class="qar-quote">"这个我们管不了, 你联系厂家吧"</div>
                         <div class="qar-cust">⚠ <b>红线话术:推卸责任</b> · 1 分钟前 · 已触发主管报警</div>
                       </div>
@@ -7397,7 +7719,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     <div class="qa-alert-row" data-rid="a3">
                       <div class="qar-csr">王</div>
                       <div class="qar-body">
-                        <div class="qar-csr-name">王芳 → 钱厂长 (钻石客户)</div>
+                        <div class="qar-csr-name">王芳 → 钱厂长 (钻石)</div>
                         <div class="qar-quote">"你说的这个功能我们暂时不打算开发"</div>
                         <div class="qar-cust">⚠ <b>红线话术:武断回绝</b> · 8 分钟前 · 钻石客户高敏感</div>
                       </div>
@@ -7410,12 +7732,14 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                   </div>
                 </div>
 
-                <!-- 右: 陪练 -->
+                <!-- 右: 陪练 · 16 场景 + 金牌示范 -->
                 <div class="train-panel">
                   <div class="train-head">
-                    <div class="tnh-tt">🎓 新员工陪练 · 赵晨 (8 场景已通过 2 场)</div>
-                    <div class="tnh-score">已积分 64 · 升 1 级还需 36</div>
+                    <div class="tnh-tt">🎓 陪练 · <b>16 场景</b> · AI 金牌示范 + 互动陪练</div>
+                    <div class="tnh-score" id="trScoreTxt">已积分 64 · 升 1 级还需 36</div>
                   </div>
+
+                  <!-- 4×4 场景矩阵 -->
                   <div class="train-scene-grid">
                     <div class="train-scene cur" data-fx="trScene" data-sid="s1"><div class="tns-ico">💰</div><div class="tns-tt">报价咨询</div></div>
                     <div class="train-scene" data-fx="trScene" data-sid="s2"><div class="tns-ico">⚖️</div><div class="tns-tt">价格异议</div><div class="tns-passed">通过</div></div>
@@ -7425,195 +7749,266 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                     <div class="train-scene" data-fx="trScene" data-sid="s6"><div class="tns-ico">😡</div><div class="tns-tt">投诉处置</div></div>
                     <div class="train-scene" data-fx="trScene" data-sid="s7"><div class="tns-ico">📜</div><div class="tns-tt">合同细节</div></div>
                     <div class="train-scene" data-fx="trScene" data-sid="s8"><div class="tns-ico">💸</div><div class="tns-tt">退款申请</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s9"><div class="tns-ico">🔧</div><div class="tns-tt">技术故障</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s10"><div class="tns-ico">📚</div><div class="tns-tt">培训请求</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s11"><div class="tns-ico">🎁</div><div class="tns-tt">转介绍</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s12"><div class="tns-ico">💔</div><div class="tns-tt">挽留流失</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s13"><div class="tns-ico">🌐</div><div class="tns-tt">海外询单</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s14"><div class="tns-ico">👔</div><div class="tns-tt">高管对话</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s15"><div class="tns-ico">🔒</div><div class="tns-tt">数据安全</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s16"><div class="tns-ico">🚨</div><div class="tns-tt">紧急召回</div></div>
                   </div>
-                  <div class="train-diff-row">
-                    <div class="tdr-lbl">🎭 AI 演的客户难度:</div>
-                    <div class="tdr-pills">
-                      <button class="train-diff-pill" data-fx="trDiff" data-d="easy">普通</button>
-                      <button class="train-diff-pill cur" data-fx="trDiff" data-d="mid">挑剔</button>
-                      <button class="train-diff-pill" data-fx="trDiff" data-d="hard">暴躁</button>
+
+                  <!-- 难度 + 操作按钮 -->
+                  <div class="train-control">
+                    <div class="train-diff-row" style="margin:0;flex:1">
+                      <div class="tdr-lbl">🎭 客户难度:</div>
+                      <div class="tdr-pills">
+                        <button class="train-diff-pill" data-fx="trDiff" data-d="easy">普通</button>
+                        <button class="train-diff-pill cur" data-fx="trDiff" data-d="mid">挑剔</button>
+                        <button class="train-diff-pill" data-fx="trDiff" data-d="hard">暴躁</button>
+                      </div>
                     </div>
+                    <button class="train-golden-btn" id="trGolden">▶ 看 AI 金牌示范</button>
                   </div>
+
+                  <!-- 当前场景剧本简介 (新增 - 让老板看到场景设定) -->
+                  <div class="scene-brief" id="trBrief">
+                    <div class="sb-head"><span class="sb-name" id="trSceneName">报价咨询</span><span class="sb-meta">普通新询单 · 中等规模厂家</span></div>
+                    <div class="sb-body" id="trSceneBrief">客户从微信进来询价, 30 人工厂规模, 第一次询问。这是黄金线索 — 关键看你能不能识别需求并锚定价值, 而不是简单报数字。</div>
+                    <div class="sb-eval">📊 评分维度: <span>① 同理心</span><span>② 探询需求</span><span>③ 锚定价值</span><span>④ 给具体方案</span><span>⑤ 推进闭环</span></div>
+                  </div>
+
                   <div class="train-chat" id="trChat">
                     <!-- JS 填充 -->
                   </div>
                   <div class="train-input">
-                    <input type="text" id="trInput" placeholder="替客服答这位 AI 客户(或点上方场景重选)..."/>
+                    <input type="text" id="trInput" placeholder="替客服答这位 AI 客户..."/>
                     <button id="trSend">▶ 回答</button>
                   </div>
                 </div>
               </div>
             </div></div>
 
-            <!-- ===== 6 投诉 + 知识 GAP ===== -->
+
+<!-- ===== 6 投诉 + 洞察 Agent (Agent 形态) ===== -->
             <div class="stage" id="cs-insight"><div class="page">
-              <div class="action-strip">
-                <span class="as-ico">📊</span>
-                <div class="as-txt">本月 AI 已 NLP 聚类 <b>147</b> 条投诉 → <b>4 大根源</b> · 流失客户 <b>9</b> 家最后一句话已聚类 · 知识库 GAP <b id="kbgPend">6</b> 个待你批入库。<b>从此投诉不再到老板才发现</b>。</div>
+
+              <div class="agent-status">
+                <div class="as-ava">📊</div>
+                <div class="as-main">
+                  <div class="as-title">我是投诉与洞察 Agent · 24×7 监测 <b>6 个渠道</b> · 持续追溯根因<span class="as-live">● 在岗</span></div>
+                  <div class="as-meta">已替你: 自动归类 <b>147 投诉</b> · 自动推动 <b>23 件改进</b> · 客户挽回 <b>4 家</b> · 起草内部建议 <b>6 份</b></div>
+                  <div class="as-pending">⚠ <b id="csInsPending">4</b> 个洞察 + <b id="csInsDec">2</b> 件大决策需要你拍板 ↓ 我已替你想清楚</div>
+                </div>
               </div>
 
-              <div class="insight-shell">
-                <div class="insight-top">
-                  <!-- 投诉热点聚类 -->
-                  <div class="complaint-card">
-                    <div class="cc-head">
-                      <div class="cch-tt">🔥 投诉热点 · AI NLP 聚类 4 大根源</div>
-                      <div class="cch-tabs">
-                        <button class="cch-tab cur" data-fx="cmpTab" data-t="month">本月</button>
-                        <button class="cch-tab" data-fx="cmpTab" data-t="quarter">本季</button>
-                        <button class="cch-tab" data-fx="cmpTab" data-t="year">本年</button>
-                      </div>
+              <!-- A. AI 已自动处置(看我干了什么) -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">✓</span>
+                  <div class="ash-tt">我已自动处置(看我干了什么 · 6 件)</div>
+                  <div class="ash-meta">不打扰你, 我能闭环的我都闭环了</div>
+                </div>
+                <div class="done-list">
+                  <div class="done-row">
+                    <div class="dr-ico">📋</div>
+                    <div class="dr-body"><b>报表乱码 23 单</b> → 我已自动推送 UTF-8 BOM 视频给所有问询客户 + 提工单 #PROD-2026-0042 推产品组改默认编码</div>
+                    <div class="dr-meta">省 11h 人力 · 同类咨询率 ↓ 78%</div>
+                  </div>
+                  <div class="done-row">
+                    <div class="dr-ico">⏱</div>
+                    <div class="dr-body"><b>工程师响应慢 19 单</b> → 我已调整工单 SLA 阈值 + 重新分配工作量 + 启动 VIP 红色通道</div>
+                    <div class="dr-meta">本周钻石 0 超时</div>
+                  </div>
+                  <div class="done-row">
+                    <div class="dr-ico">💰</div>
+                    <div class="dr-body"><b>续约涨价投诉 13 单</b> → 我已起草《续约提前 60 天主动告知》新流程 + 同步客户成功组</div>
+                    <div class="dr-meta">流程 6/20 上线</div>
+                  </div>
+                  <div class="done-row">
+                    <div class="dr-ico">📞</div>
+                    <div class="dr-body"><b>客户流失 4 家</b> → 我已自动启动挽回回访 + 草拟挽回方案(对手便宜 3 / 业务收缩 1)</div>
+                    <div class="dr-meta">2 家已重启沟通</div>
+                  </div>
+                  <div class="done-row">
+                    <div class="dr-ico">📚</div>
+                    <div class="dr-body"><b>知识库 GAP 6 项</b> → 我已对照所有客户提问, 起草 6 份新内容入库草案(下方有详细列表)</div>
+                    <div class="dr-meta">待你审批</div>
+                  </div>
+                  <div class="done-row">
+                    <div class="dr-ico">🎯</div>
+                    <div class="dr-body"><b>客服话术红线 5 条</b> → 我已自动安排陪练补课(陈杰/赵晨/王芳)+ 主管复盘记录</div>
+                    <div class="dr-meta">陈杰本周已通过 3 场</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- B. AI 深层归因洞察(4 个 - 不是数字是结论) -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">🔍</span>
+                  <div class="ash-tt">我的 4 个深层洞察 · 不是数字,是结论 · 一键采纳推动</div>
+                  <div class="ash-meta">这是你最该看的部分</div>
+                </div>
+                <div class="insight-list" id="csInsightList">
+                  <div class="insight-row" data-iid="ins1">
+                    <div class="ir-head">
+                      <div class="ir-num">洞察 1</div>
+                      <div class="ir-prio">高优</div>
                     </div>
-                    <div class="complaint-clusters">
-                      <div class="cluster-group prod">
-                        <div class="cg-head">
-                          <div class="cgh-tt">🛠 产品问题</div>
-                          <div class="cgh-cnt">52 条</div>
-                          <div class="cgh-trend up">↑ 18% MoM</div>
-                        </div>
-                        <div class="cg-subs">
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-1"><span class="cgs-name">报表 <b>导出乱码</b>(编码问题)</span><span class="cgs-bar"><i style="width:90%"></i></span><span class="cgs-cnt">23</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-2"><span class="cgs-name">移动端 <b>同步延迟</b></span><span class="cgs-bar"><i style="width:65%"></i></span><span class="cgs-cnt">17</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-3"><span class="cgs-name">权限分组 <b>不灵活</b></span><span class="cgs-bar"><i style="width:46%"></i></span><span class="cgs-cnt">12</span></div>
-                        </div>
-                      </div>
-                      <div class="cluster-group serv">
-                        <div class="cg-head">
-                          <div class="cgh-tt">💁 服务问题</div>
-                          <div class="cgh-cnt">38 条</div>
-                          <div class="cgh-trend down">↓ 4% MoM</div>
-                        </div>
-                        <div class="cg-subs">
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-1"><span class="cgs-name">工程师 <b>响应慢</b>(超 24h)</span><span class="cgs-bar"><i style="width:85%"></i></span><span class="cgs-cnt">19</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-2"><span class="cgs-name">新员工 <b>话术不规范</b></span><span class="cgs-bar"><i style="width:55%"></i></span><span class="cgs-cnt">12</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-3"><span class="cgs-name">培训 <b>排期久</b></span><span class="cgs-bar"><i style="width:32%"></i></span><span class="cgs-cnt">7</span></div>
-                        </div>
-                      </div>
-                      <div class="cluster-group logis">
-                        <div class="cg-head">
-                          <div class="cgh-tt">📦 物流问题</div>
-                          <div class="cgh-cnt">34 条</div>
-                          <div class="cgh-trend up">↑ 8% MoM</div>
-                        </div>
-                        <div class="cg-subs">
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="logis-1"><span class="cgs-name">硬件加密狗 <b>发货慢</b></span><span class="cgs-bar"><i style="width:75%"></i></span><span class="cgs-cnt">15</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="logis-2"><span class="cgs-name">物流 <b>未提供单号</b></span><span class="cgs-bar"><i style="width:50%"></i></span><span class="cgs-cnt">10</span></div>
-                        </div>
-                      </div>
-                      <div class="cluster-group price">
-                        <div class="cg-head">
-                          <div class="cgh-tt">💰 价格问题</div>
-                          <div class="cgh-cnt">23 条</div>
-                          <div class="cgh-trend up">↑ 12% MoM</div>
-                        </div>
-                        <div class="cg-subs">
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="price-1"><span class="cgs-name">续约 <b>涨价</b>未提前告知</span><span class="cgs-bar"><i style="width:60%"></i></span><span class="cgs-cnt">13</span></div>
-                          <div class="cg-sub" data-fx="cmpDrill" data-cid="price-2"><span class="cgs-name">附加功能 <b>定价不透明</b></span><span class="cgs-bar"><i style="width:35%"></i></span><span class="cgs-cnt">8</span></div>
-                        </div>
-                      </div>
+                    <div class="ir-body">
+                      <div class="ir-hook">你以为投诉是 4 类, 我发现 <b>47% 投诉根因都指向同一件事</b></div>
+                      <div class="ir-detail"><b>X 部门(产品)交接给客服的 SOP 半年没更新</b> · 我对比了 147 条投诉关键词频率 + 同类型工单流转路径,发现产品组新版本上线后,客服 SOP 库还是 V1.8(应该 V2.4)。客服按旧 SOP 答,导致客户照做了反而失败,再投诉。形成<b>负向循环</b>。</div>
+                      <div class="ir-data">📊 涉及 <b>69 条投诉</b> · 影响 ARR <b>¥48 万</b> · 修复周期预估 <b>2 周</b></div>
+                    </div>
+                    <div class="ir-acts">
+                      <button class="ir-accept" data-fx="csInsAcc" data-iid="ins1" data-msg="✅ 已接受 · 我已发钉钉给产品组负责人 + 启动 SOP V2.4 重写 + 客服培训">✓ 同意 · 推 SOP 重写</button>
+                      <button class="ir-detail-btn" data-fx="csInsDet" data-iid="ins1" data-msg="📋 涉及投诉清单已发你邮箱(69 条)">看 69 条投诉详情</button>
+                      <button class="ir-reject" data-fx="csInsRej" data-iid="ins1" data-msg="已记录 · 我会再观察">让我再观察</button>
+                      <span class="ir-state"></span>
                     </div>
                   </div>
 
-                  <!-- 流失原因 -->
-                  <div class="churn-card">
-                    <div class="cc-head">
-                      <div class="cch-tt">📉 客户流失 NLP 聚类 · 本月 9 家</div>
+                  <div class="insight-row" data-iid="ins2">
+                    <div class="ir-head">
+                      <div class="ir-num">洞察 2</div>
+                      <div class="ir-prio">高优</div>
                     </div>
-                    <div class="churn-row" style="--c:#E5484D" data-fx="churnDrill" data-cid="ch1">
-                      <div class="chr-reason"><b>对手价格更便宜</b><small>对比竞品 X 报价 ¥1.8 万/年(我方 ¥3.2 万)</small></div>
-                      <div class="chr-cnt">3<span class="chr-pct">家</span></div>
+                    <div class="ir-body">
+                      <div class="ir-hook">9 家流失客户中, <b>7 家流失前 30 天 NPS &lt; 70</b> 但我没主动跟进</div>
+                      <div class="ir-detail">流失客户共同特征:NPS 在最后 30 天连续低于 70 但 <b>没人触发挽留动作</b>(因为之前没设这个阈值)。我建议新增"<b>流失预警 SLA 30 天</b>"机制 · NPS &lt; 70 持续 7 天 → 我自动通知客户成功 + 主动联系。 <b>本周已有 14 家临期客户</b>符合此条件。</div>
+                      <div class="ir-data">📊 流失避免预估 <b>3-5 家/月</b> · 保 ARR <b>¥18-30 万</b></div>
                     </div>
-                    <div class="churn-row" style="--c:#D97706" data-fx="churnDrill" data-cid="ch2">
-                      <div class="chr-reason"><b>响应太慢 / 服务跟不上</b><small>多次反馈未及时处理(主要是工程师 SLA)</small></div>
-                      <div class="chr-cnt">2<span class="chr-pct">家</span></div>
+                    <div class="ir-acts">
+                      <button class="ir-accept" data-fx="csInsAcc" data-iid="ins2" data-msg="✅ 已上线 · NPS<70 持续 7 天 → AI 自动启动挽留 · 已扫 14 家临期客户准备挽留方案">✓ 上线"流失预警 SLA 30 天"</button>
+                      <button class="ir-detail-btn" data-fx="csInsDet" data-iid="ins2" data-msg="📋 7 家流失客户 NPS 时间序列已发你邮箱">看 7 家时间序列</button>
+                      <button class="ir-reject" data-fx="csInsRej" data-iid="ins2" data-msg="再想想 · 不上线">再想想</button>
+                      <span class="ir-state"></span>
                     </div>
-                    <div class="churn-row" style="--c:#9A4DFF" data-fx="churnDrill" data-cid="ch3">
-                      <div class="chr-reason"><b>对方业务收缩</b><small>客户公司订单下降, 用不上 CRM 这种规模</small></div>
-                      <div class="chr-cnt">2<span class="chr-pct">家</span></div>
+                  </div>
+
+                  <div class="insight-row" data-iid="ins3">
+                    <div class="ir-head">
+                      <div class="ir-num">洞察 3</div>
+                      <div class="ir-prio">中优</div>
                     </div>
-                    <div class="churn-row" style="--c:#00C2D8" data-fx="churnDrill" data-cid="ch4">
-                      <div class="chr-reason"><b>产品功能不满足</b><small>主要是移动端体验 + 跟 ERP 集成</small></div>
-                      <div class="chr-cnt">1<span class="chr-pct">家</span></div>
+                    <div class="ir-body">
+                      <div class="ir-hook">知识库 GAP 中 <b>6 个都来自"集成"类问题</b>, 占 32% 询问量, 但你只有 1 个对接资料</div>
+                      <div class="ir-detail">分析:金蝶/用友/淘宝/京东/拼多多/抖音/Power BI/钉钉/企微集成问题反复出现, 单月询问 <b>132 次</b>。 而我们只有 1 个"金蝶对接 SOP" 。<b>建议建立"集成专项小组"</b>(1 个产品 + 1 个技术 + 1 个销售)专门做集成方案 · 我可以替他们准备 32% 的问题文档基础。</div>
+                      <div class="ir-data">📊 涉及询问 <b>132 次/月</b> · 转化新客户预估 <b>+15% (¥38 万 ARR)</b></div>
                     </div>
-                    <div class="churn-row" style="--c:#94A3B8" data-fx="churnDrill" data-cid="ch5">
-                      <div class="chr-reason"><b>关键联系人离职</b><small>原对接人换工作, 新人不熟悉系统</small></div>
-                      <div class="chr-cnt">1<span class="chr-pct">家</span></div>
+                    <div class="ir-acts">
+                      <button class="ir-accept" data-fx="csInsAcc" data-iid="ins3" data-msg="✅ 已上报 · 我已起草集成专项小组组建方案发 CTO + 商务总监">✓ 同意 · 建专项组</button>
+                      <button class="ir-detail-btn" data-fx="csInsDet" data-iid="ins3" data-msg="📋 132 次询问的客户名单已发你邮箱">看 132 次询问明细</button>
+                      <button class="ir-reject" data-fx="csInsRej" data-iid="ins3" data-msg="先不建专项">先不建</button>
+                      <span class="ir-state"></span>
+                    </div>
+                  </div>
+
+                  <div class="insight-row" data-iid="ins4">
+                    <div class="ir-head">
+                      <div class="ir-num">洞察 4</div>
+                      <div class="ir-prio">中优</div>
+                    </div>
+                    <div class="ir-body">
+                      <div class="ir-hook">客户骂人话术 <b>73% 在凌晨 22:00-01:00</b> 出现 → "夜间使用问题" 集中</div>
+                      <div class="ir-detail">我把 23 起暴怒话术按时间序列归类, 发现 <b>17 起集中在 22:00-01:00</b>。说明客户在 <b>"白天没空、晚上做事、出问题"</b>。 但夜里我们工程师不在, 出问题没人解决 → 第二天客户已经怒不可遏。<br><b>建议:</b>产品组排查"夜间使用稳定性 + 离线模式" 优先级提升;客服增加 22-02 点专项 AI 值班。</div>
+                      <div class="ir-data">📊 涉及暴怒话术 <b>17 起</b> · 流失高危客户 <b>5 家</b></div>
+                    </div>
+                    <div class="ir-acts">
+                      <button class="ir-accept" data-fx="csInsAcc" data-iid="ins4" data-msg="✅ 已推产品组 · 夜间稳定性排查列入下个 Sprint 优先级 P0">✓ 推产品组</button>
+                      <button class="ir-detail-btn" data-fx="csInsDet" data-iid="ins4" data-msg="📋 17 起暴怒话术原文已发你邮箱">看 17 起原文</button>
+                      <button class="ir-reject" data-fx="csInsRej" data-iid="ins4" data-msg="按现状">按现状</button>
+                      <span class="ir-state"></span>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- 知识库 GAP 列表 -->
-                <div class="kb-gap-card">
-                  <div class="kb-gap-head">
-                    <div class="kgh-tt">📚 知识库 GAP · AI 答不上来的问题汇总(按热度)</div>
-                    <div class="kgh-sub">AI 已为每条草拟答案 · 点"采纳入库"批量增强知识库 · 下次此类问题 AI 直接闭环</div>
-                  </div>
-                  <div class="kb-gap-list" id="kbGapList">
-                    <div class="kb-gap-row" data-gid="g1">
-                      <div class="kgr-q">CRM 数据怎么<b>导入金蝶/用友</b> ERP 系统?<small>"我们已经用了金蝶 5 年, 想把销售数据双向同步"</small></div>
-                      <div class="kgr-cnt">28<small>次</small></div>
-                      <div class="kgr-dept">技术 + 运营</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g1">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g1">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                    <div class="kb-gap-row" data-gid="g2">
-                      <div class="kgr-q">移动端 APP <b>离线数据同步</b>怎么操作?<small>"工厂车间没网, 想在 APP 上录入然后回办公室同步"</small></div>
-                      <div class="kgr-cnt">21<small>次</small></div>
-                      <div class="kgr-dept">技术</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g2">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g2">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                    <div class="kb-gap-row" data-gid="g3">
-                      <div class="kgr-q"><b>多公司/多账套</b>怎么管理?<small>"我有 3 家分公司, 想在一个后台看汇总, 也能切换分公司"</small></div>
-                      <div class="kgr-cnt">17<small>次</small></div>
-                      <div class="kgr-dept">技术 + 产品</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g3">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g3">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                    <div class="kb-gap-row" data-gid="g4">
-                      <div class="kgr-q">对接<b>淘宝/京东/拼多多</b>订单同步?<small>"我们 4 个店铺, 订单想直接进 CRM"</small></div>
-                      <div class="kgr-cnt">15<small>次</small></div>
-                      <div class="kgr-dept">技术 + 商务</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g4">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g4">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                    <div class="kb-gap-row" data-gid="g5">
-                      <div class="kgr-q"><b>数据导出 + 二次分析</b>(BI 工具)<small>"想用 Power BI / Tableau 二次分析, 你们提供 API 吗?"</small></div>
-                      <div class="kgr-cnt">12<small>次</small></div>
-                      <div class="kgr-dept">技术</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g5">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g5">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                    <div class="kb-gap-row" data-gid="g6">
-                      <div class="kgr-q">海外业务 <b>多语言 + 多币种</b><small>"有英文/日文界面吗? 报价能用 USD/EUR 吗?"</small></div>
-                      <div class="kgr-cnt">9<small>次</small></div>
-                      <div class="kgr-dept">产品</div>
-                      <div class="kgr-acts">
-                        <button class="adopt" data-fx="kbAdopt" data-gid="g6">✓ 采纳入库</button>
-                        <button class="skip" data-fx="kbSkip" data-gid="g6">跳过</button>
-                      </div>
-                      <div class="kgr-state">✓ 已入库</div>
-                    </div>
-                  </div>
+              <!-- C. 老板拍板的大决策 -->
+              <div class="agent-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">⚠</span>
+                  <div class="ash-tt">我已分析 · 你拍板的 2 个大决策</div>
                 </div>
 
+                <div class="decision-card" data-dec="csInsD1" data-exec-msg="自动触发: ① AI 已联系 3 家 + 准备 20% 打折方案; ② 已自动通知客户成功经理跟进; ③ 已设挽回成功后 30 天观察期">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#9A4DFF">💰</span>
+                    <div class="dec-main">
+                      <div class="dec-title">是否对 3 家"对手便宜"流失客户启动挽回? · <b style="color:var(--brand)">AI 测算: ROI 3.3x</b></div>
+                      <div class="dec-meta">江门某汽配 / 中山某加工 / 深圳某模具 · 都已 7-21 天未续, 还在观察期</div>
+                    </div>
+                    <span class="pill" style="background:#F1EBFF;color:#9A4DFF">挽回</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:11px">
+                      <b style="color:var(--brand)">🤖 我的测算:</b>3 家总 ARR <b>¥7.5 万</b> · 给 <b>20% 折扣</b>(我方让 1.5 万)· 挽回概率 <b>65%</b>(基于 24 起同类挽回回测)· 预期挽回 2 家 ¥5 万 · <b>ROI 3.3x</b><br>
+                      <b>风险:</b>3 家中 1 家(中山)对手 X 已发合同, 挽回概率仅 30%。另 2 家挽回概率 78%+。
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csInsD1" data-msg="✅ 已启动 · AI 已联系 3 家 + 20% 折扣方案 · 客户成功跟进">✓ 启动挽回 · 自动执行</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csInsD1" data-act="defer" data-msg="放手不挽">放手不挽</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csInsD1" data-act="reject" data-msg="我亲自挽回这 3 家">我亲自</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
+
+                <div class="decision-card" data-dec="csInsD2" data-exec-msg="自动触发: ① 已通知工程师主管启动 SLA 改革; ② 启动新流程 6/25 试运行; ③ 同步招聘加 2 个工程师">
+                  <div class="dec-head">
+                    <span class="dec-icon" style="--c:#D97706">⚙️</span>
+                    <div class="dec-main">
+                      <div class="dec-title">对工程师组启动 SLA 改革? · <b style="color:var(--brand)">AI 测算: 投诉减少 50% · ROI 4.8x</b></div>
+                      <div class="dec-meta">本月工程师工单超时 23 次 · 客户投诉 19 单 · 流失高危预计 2-3 家(¥6-9 万)</div>
+                    </div>
+                    <span class="pill pill-amber">改革</span>
+                  </div>
+                  <div class="dec-analysis">
+                    <div style="font-size:11.5px;color:var(--ink-2);line-height:1.65;margin-bottom:9px">
+                      <b style="color:var(--brand)">🤖 我的测算:</b>SLA 改革成本: 新流程培训 + 3 人加班 2 周 ≈ <b>¥4 万</b> · 预期投诉减少 50% (¥10 万级损失避免) · 流失避免 ¥6-9 万 · ROI <b>4.8x</b>
+                    </div>
+                    <div class="dec-sim">
+                      <div class="range-row">
+                        <label>SLA 严格度</label>
+                        <input type="range" class="range-input" id="csInsSla" min="12" max="48" step="2" value="24">
+                        <span class="range-val"><span id="csInsSlaV">24</span>h</span>
+                      </div>
+                      <div class="dec-result">
+                        投诉减少 <b id="csInsSlaCmp" class="good">50%</b> &nbsp;·&nbsp; 工程师压力 <b id="csInsSlaPr" class="warn">+18%</b> &nbsp;·&nbsp; 综合 ROI <b id="csInsSlaRoi" class="good">4.8x</b>
+                        <div style="margin-top:7px" id="csInsSlaVerdict"><b class="good">AI 推荐 SLA 18-24h</b> · 工程师可承受 · 客户满意度跳升最快</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="dec-acts">
+                    <button class="btn-grad" data-fx="bossDecide" data-dec="csInsD2" data-msg="✅ 已批准改革 · 新流程 6/25 试运行 · 同步招聘 2 工程师">✓ 同意改革 · 自动执行</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csInsD2" data-act="defer" data-msg="推迟到 7 月初">推迟到 7 月</button>
+                    <button class="btn-mini" data-fx="bossDecide" data-dec="csInsD2" data-act="reject" data-msg="让主管再想方案">让主管再想</button>
+                  </div>
+                  <div class="dec-status"></div>
+                </div>
               </div>
+
+              <!-- D. Agent 持续监测中 -->
+              <div class="agent-section learn-section">
+                <div class="agent-section-head">
+                  <span class="ash-pin">🧠</span>
+                  <div class="ash-tt">我持续在做什么 · 透明化我的工作</div>
+                  <div class="ash-meta">不打扰你 · 默默替你盯着</div>
+                </div>
+                <div class="monitor-grid">
+                  <div class="monitor-cell"><div class="mc-ico">👁</div><div class="mc-body"><b>24×7 监测</b>6 个客户渠道(微信/钉钉/400/官网/抖音/邮件)</div></div>
+                  <div class="monitor-cell"><div class="mc-ico">🤖</div><div class="mc-body"><b>每日自动归类</b>新进投诉 · NLP 聚类入大类</div></div>
+                  <div class="monitor-cell"><div class="mc-ico">📊</div><div class="mc-body"><b>每周自动出根因报告</b>· 跨部门数据交叉</div></div>
+                  <div class="monitor-cell"><div class="mc-ico">📈</div><div class="mc-body"><b>每月自动推动</b> <b>23+</b> 件改进 · 已上传部门 OKR</div></div>
+                  <div class="monitor-cell"><div class="mc-ico">⏰</div><div class="mc-body">当前盯: <b>137 条</b>新投诉 · <b>14 家</b>临期客户 · <b>8 个</b> GAP</div></div>
+                  <div class="monitor-cell"><div class="mc-ico">🎯</div><div class="mc-body"><b>本月已避免流失</b> <b>4 家</b> · 保 ARR <b>¥22.6 万</b></div></div>
+                </div>
+              </div>
+
             </div></div>
+
 
           </div>
         </div>
@@ -13383,7 +13778,8 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   /* ============================================================
      Board 3: 夜班值守
      ============================================================ */
-  Q("#csNightToggle").addEventListener("click", function () {
+  var oldNightToggle = Q("#csNightToggle");
+  if (oldNightToggle) oldNightToggle.addEventListener("click", function () {
     this.classList.toggle("off");
     var on = !this.classList.contains("off");
     this.querySelector(".nt-tt").textContent = on ? "夜班 已启动" : "夜班 已停用";
@@ -13705,6 +14101,701 @@ curl https://api.dgg.ai/v1/agents/dispatch \
       ts("⏭ 已跳过 · 不入库, 此问题仍由人工接");
     }
   });
+})();
+</script>
+<script>
+/* ============================================================
+   客服AI助手 Agent 化升级 (Board 3 / 4 / 5 / 6)
+   ============================================================ */
+(function () {
+  var view = document.getElementById("view-cs");
+  if (!view) return;
+  var QA = function (s, r) { return Array.prototype.slice.call((r || view).querySelectorAll(s)); };
+  var Q = function (s, r) { return (r || view).querySelector(s); };
+  function ts(msg) {
+    var el = document.createElement("div");
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0E1430;color:#fff;padding:11px 18px;border-radius:11px;font-size:12.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:560px;line-height:1.5;text-align:center";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = "0"; el.style.transition = ".3s"; }, 2600);
+    setTimeout(function () { el.remove(); }, 3000);
+  }
+  function txt(id, v) { var e = Q("#" + id); if (e) e.textContent = v; }
+
+  /* ============================================================
+     Board 3 · 夜班 Agent (LIVE + 决策 + 学习)
+     ============================================================ */
+  /* 实时滚动 3 个会话 */
+  var liveConvs = {
+    "lc1": [
+      { type: "cust", text: "And do you have UK office?" },
+      { type: "ai", text: "No UK office yet, but EU customer success team (EN/FR/DE)." },
+      { type: "ai", text: "I'll connect you with our APAC sales lead Sarah by 4 hours." },
+      { type: "cust", text: "Great, thank you. Pricing PDF please." },
+      { type: "ai", text: "Just sent · 3 case studies + pricing attached." },
+      { type: "sys", text: "AI 已英文闭环 · 已转海外销售" },
+      { type: "cust", text: "Looking forward to Sarah's call." },
+      { type: "ai", text: "Sarah's calendar invite sent to brown@xx.uk — Monday 10am UK time." }
+    ],
+    "lc2": [
+      { type: "cust", text: "好的, 那我等等。" },
+      { type: "ai", text: "张总,我同步给您一个 ETA:CTO 已 03:01 远程接入主库, 故障原因是主从延迟, 预计 03:15 恢复。" },
+      { type: "sys", text: "CTO 进行中 · 03:08 已重启从库" },
+      { type: "ai", text: "故障已修复 ✓ 03:13 已确认主从同步恢复。您账号请尝试登录。" },
+      { type: "cust", text: "好的我试下" },
+      { type: "cust", text: "好了, 谢谢" },
+      { type: "ai", text: "已自动给您账户补偿服务费 ¥6,800(本月减免 10%)以表诚意。" },
+      { type: "ai", text: "已记录此次故障入您的售后档案 · 我会持续跟进。" }
+    ],
+    "lc3": [
+      { type: "cust", text: "30 人, 你们的 CRM 大概多少?" },
+      { type: "ai", text: "您好!30 人规模适合我们的<b>金牌套餐 ¥3.2 万/年</b>,含 30 用户许可 + 移动端 + 报表。" },
+      { type: "ai", text: "我们有教育/初创/退伍 3 种优惠各 10-15%。您是这 3 种情形之一吗?" },
+      { type: "cust", text: "我是退伍创业的, 那是不是有优惠?" },
+      { type: "ai", text: "✓ 退伍创业 = 享 15% 优惠 · 实际 ¥2.72 万/年,签 2 年再让 5% = ¥5.18 万。" },
+      { type: "cust", text: "好的我看下, 微信加一下: 13800138000" },
+      { type: "ai", text: "已加您, 9:30 联系您看 demo · 资料 + 套餐已发您微信。" },
+      { type: "sys", text: "✓ AI 已闭环 · 销售机会已建" }
+    ]
+  };
+  function rollLiveConv(cid) {
+    var stream = Q("#lcStream-" + cid);
+    if (!stream) return;
+    var msgs = liveConvs[cid] || [];
+    var idx = 0;
+    function next() {
+      if (!Q("#cs-night.active")) {
+        // 切到其他板块则停止
+        return;
+      }
+      if (idx >= msgs.length) idx = 0;
+      var m = msgs[idx++];
+      var div = document.createElement("div");
+      div.className = "lcv-msg " + m.type + " appear";
+      div.innerHTML = m.text;
+      stream.appendChild(div);
+      stream.scrollTop = stream.scrollHeight;
+      // 限制只保留最近 8 条
+      while (stream.children.length > 8) stream.removeChild(stream.firstChild);
+      setTimeout(next, 1500 + Math.random() * 1200);
+    }
+    next();
+  }
+  /* AI 自主决策日志 */
+  var autoLog = [
+    { time: "02:35", body: "<b>Brown UK</b> 多币种询问 → 英文答 + 转海外销售", small: "推 17 家 EU 案例 · ECB 汇率说明", conf: "94%", cls: "high" },
+    { time: "02:58", body: "<b>张总</b> 数据库 1042 错误 → 立即升级 CTO + 客户安抚", small: "金牌客户 · 业务影响 · 必须升级", conf: "98%", cls: "up" },
+    { time: "03:12", body: "<b>访客试用询单</b> · 退伍创业 → 推金牌套餐 + 15% 优惠", small: "微信 + 9:30 销售跟进", conf: "91%", cls: "high" },
+    { time: "03:38", body: "<b>李工试用</b> · 字段自定义 → 推操作视频 + 沉淀客户档案", small: "试用客户激活关键时刻", conf: "96%", cls: "high" },
+    { time: "04:05", body: "<b>赵生老客户</b> · 编码乱码 → 推 UTF-8 BOM 1 步配置", small: "知识库置顶 · 0.5h 自助解决", conf: "99%", cls: "high" },
+    { time: "04:18", body: "<b>抖音询单</b> · 电商对接 → 主动留微信 + 转早班", small: "知识 GAP · 置信不足 → 转早班", conf: "68%", cls: "mid" },
+    { time: "04:30", body: "<b>钱厂长钻石</b> 明早老板汇报 → 已生成报表 + BI 顾问预排", small: "等老板拍板是否启 BI 深度", conf: "99%", cls: "up" },
+    { time: "04:36", body: "<b>网页留言</b> · 行业案例 → 推制造业白皮书 + 5 案例 PDF", small: "客户 '看看再说' · 3 天后销售跟进", conf: "88%", cls: "high" }
+  ];
+  function renderAutoLog() {
+    var box = Q("#csNightAutoLog");
+    if (!box) return;
+    box.innerHTML = "";
+    var i = 0;
+    function showNext() {
+      if (i >= autoLog.length) return;
+      var item = autoLog[i++];
+      var div = document.createElement("div");
+      div.className = "al-row appear";
+      div.innerHTML = '<div class="al-time">' + item.time + '</div>' +
+        '<div class="al-body">' + item.body + '<small>' + item.small + '</small></div>' +
+        '<div class="al-conf ' + item.cls + '">' + item.conf + '</div>';
+      box.appendChild(div);
+      setTimeout(showNext, 320);
+    }
+    showNext();
+  }
+
+  /* 补偿滑块 csN2 */
+  var n2Comp = Q("#csN2Comp");
+  if (n2Comp) {
+    n2Comp.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("csN2CompV", v);
+      var amt = Math.round(68000 * v / 100);
+      txt("csN2Amt", "¥" + amt.toLocaleString());
+      var stay = Math.round(72 + v * 1.0); if (stay > 99) stay = 99;
+      txt("csN2Stay", stay + "%");
+      var nps = (v * 0.12).toFixed(1);
+      txt("csN2Nps", "+" + nps);
+      var renew = Math.round(70 + v * 0.9); if (renew > 98) renew = 98;
+      txt("csN2Renew", renew + "%");
+      var verdict;
+      if (v < 5) verdict = '<b class="warn">⚠ 补偿过低</b> · 钻石客户感受不到诚意,反而觉得敷衍。';
+      else if (v <= 12) verdict = '<b class="good">AI 推荐区间 8-12%</b> · 体面但不过度 · 综合 ROI 最优';
+      else if (v <= 20) verdict = '<b>偏高</b> · 客户惊喜 · 但成本 ROI 下降, 风险:树立"投诉就有补偿" 预期';
+      else verdict = '<b class="warn">⚠ 过度补偿</b> · 客户预期被拔高, 后续每次故障都期待补偿';
+      Q("#csN2Verdict").innerHTML = verdict;
+    });
+  }
+  /* 补偿滑块 csTk1 */
+  var tk1Comp = Q("#csTk1Comp");
+  if (tk1Comp) {
+    tk1Comp.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("csTk1CompV", v.toLocaleString());
+      var stay = Math.round(70 + Math.min(28, v / 500)); if (stay > 98) stay = 98;
+      txt("csTk1Stay", stay + "%");
+      var nps = (Math.min(28, v / 600)).toFixed(1);
+      txt("csTk1Nps", "+" + nps);
+      var verdict;
+      if (v < 5000) verdict = '<b class="warn">⚠ 补偿过低</b> · 钻石客户 + 业务停摆 5h, 不够诚意';
+      else if (v <= 15000) verdict = '<b class="good">AI 推荐区间 ¥8-15K</b> · 体面 + 不亏 · 综合 ROI 23x';
+      else if (v <= 25000) verdict = '<b>偏高</b> · 客户感激, 但成本 ROI 下降';
+      else verdict = '<b class="warn">⚠ 过度</b> · 树立"超时就有大补偿" 预期, 危险';
+      Q("#csTk1Verdict").innerHTML = verdict;
+    });
+  }
+
+  /* 时钟 */
+  function tickClock() {
+    var n = Q("#csNightClock");
+    if (!n) return;
+    var d = new Date();
+    n.textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  setInterval(tickClock, 30000);
+  tickClock();
+
+  /* ============================================================
+     Board 4 · 工单 Agent (实时协调日志 + 学习)
+     ============================================================ */
+  var ticketFlow = [
+    { time: "03:24", tag: "urge", body: "<b>我正在催办</b>:工单 t1 → 工程师李工(已 3 次催)→ 升级至 CTO 直接介入" },
+    { time: "03:23", tag: "comm", body: "<b>我正在沟通客户</b>:王厂长(t1)→ 告知 CTO 已接管 + 主动致歉 + 准备补偿方案" },
+    { time: "03:22", tag: "coord", body: "<b>我正在协调</b>:工单 t3 → 财务陶慧 → 推送加急流程 + 启动跳过 3 个流程节点" },
+    { time: "03:18", tag: "agg", body: "<b>我正在汇总</b>:工单 t5 物流 → 仓库实时库存 (23 台余) → 给客户预通知" },
+    { time: "03:14", tag: "comm", body: "<b>我正在跟进</b>:t11 退款 → 客户已收到 ETA · 安抚情绪 · 流失风险下降" },
+    { time: "03:10", tag: "coord", body: "<b>我正在协调</b>:t8 跨部门(技术 vs 商务) → 拉双方主管钉钉群 + 起草 SLA 文档" },
+    { time: "03:05", tag: "agg", body: "<b>我正在汇总</b>:本周类似超时单 → 提炼出'工程师超 5 单警戒线' 模式入派单模型" },
+    { time: "03:00", tag: "urge", body: "<b>我正在升级</b>:t1 → 已直推工程总监 + 老板钉钉群,等回应" }
+  ];
+  function renderTicketFlow() {
+    var box = Q("#csTkFlow");
+    if (!box) return;
+    box.innerHTML = "";
+    var i = 0;
+    function showNext() {
+      if (i >= ticketFlow.length) return;
+      var item = ticketFlow[i++];
+      var div = document.createElement("div");
+      div.className = "af-row appear";
+      div.innerHTML = '<div class="af-time">' + item.time + '</div>' +
+        '<div class="af-tag ' + item.tag + '">' + ({urge:"催办",comm:"沟通客户",coord:"协调",agg:"汇总"})[item.tag] + '</div>' +
+        '<div class="af-body">' + item.body + '</div>';
+      box.appendChild(div);
+      setTimeout(showNext, 300);
+    }
+    showNext();
+  }
+
+  /* ============================================================
+     Board 5 · 16 场景陪练增强
+     ============================================================ */
+  var trainScenes = {
+    "s1": {
+      name: "报价咨询",
+      meta: "普通新询单 · 中等规模厂家",
+      brief: "客户从微信进来询价, 30 人工厂规模, 第一次询问。<b>这是黄金线索</b> — 关键看你能不能识别需求并锚定价值, 而不是简单报数字。",
+      aiOpens: {
+        easy: ["你好,我是某机加工厂的, 30 个员工。看了你们网站想了解下报价情况。"],
+        mid: ["你好,我是某机加工厂的, 30 个员工。看了你们网站想了解下报价情况。具体怎么收费? 别绕弯, 直接说数。"],
+        hard: ["你们报价多少? 别废话, 我没那么多时间。"]
+      },
+      golden: [
+        { who: "csr", text: "您好!感谢您关注我们。30 人规模我们通常推荐金牌套餐, 价格 ¥3.2 万/年 — 但其实价格只是第一步, 我先了解下您几个问题更准:" },
+        { who: "csr", text: "① 您现在主要痛点是哪块?(客户管理 / 报价单 / 跟单 / 售后)<br>② 团队对系统熟悉度如何?(决定培训成本)<br>③ 是否要对接现有 ERP/财务?" },
+        { who: "cust", text: "主要是跟单 + 报价 + 想跟金蝶对接。" },
+        { who: "csr", text: "理解, 这刚好是金牌套餐核心。<b>实际场景测算</b>: 您 30 人, 每人月省 4 小时 → 月节省 ~¥18K, 一年节省 ¥21.6 万 vs 套餐 ¥3.2 万 = <b>ROI 6.7x</b>。" },
+        { who: "csr", text: "金蝶对接我们有标准 API + 15 分钟可配。<b>下一步</b>: 我帮您预约 30 分钟在线 demo,看看完整流程,您觉得方便吗? 同时给您发金蝶对接的客户案例(3 家)。" },
+        { who: "cust", text: "好的, 那约下午 3 点?" }
+      ],
+      goodKeys: ["规模", "套餐", "了解", "需求", "金蝶", "ROI", "节省", "demo", "案例"],
+      badKeys: ["看说明书", "网站", "管不了", "你自己看"]
+    },
+    "s2": {
+      name: "价格异议",
+      meta: "比竞品贵 · 客户挑剔",
+      brief: "客户已经对比过竞品 X(便宜 30%), 提出价格异议。<b>关键不是降价, 是锚定价值</b> — 让客户认识到便宜的代价 + 我方的独特价值。",
+      aiOpens: {
+        easy: ["你们这价格比某竞品贵 30%, 能便宜点吗?"],
+        mid: ["你们这价格比别家贵 30%, 我用某竞品才 ¥1.8 万, 你们要 ¥3.2 万, 凭什么?"],
+        hard: ["凭什么贵 30%? 别给我说什么服务好之类的废话, 我要看具体差异!"]
+      },
+      golden: [
+        { who: "csr", text: "我理解您说的, 30% 的差距确实不小, 您肯定对比过了才来找我们。我直接给您 3 个客户的实测对比, 您看看:" },
+        { who: "csr", text: "① <b>响应速度</b>:我方 SLA 24h(VIP 红色通道 12h)· 竞品 X 平均 72h<br>② <b>金蝶/用友对接</b>:我方 15 分钟标准 API · 竞品 X 需要付费定制 ¥1.2 万<br>③ <b>移动端</b>:我方实时同步 · 竞品 X 离线模式 8 小时延迟" },
+        { who: "csr", text: "<b>实际成本对比</b>:竞品 ¥1.8 万 + 定制 ¥1.2 万 + 加班补偿(对接慢)≈ <b>¥3.5 万</b>;我方 ¥3.2 万。<b>我方反而便宜 ¥0.3 万</b>。" },
+        { who: "csr", text: "如果您觉得我说的这 3 点不重要, 那竞品 X 是个好选择。但如果重要, 我可以给您发一份 3 家从 X 迁过来的客户案例, 让他们告诉您为什么换。" },
+        { who: "cust", text: "好的, 发我看看吧。" }
+      ],
+      goodKeys: ["对比", "案例", "实测", "服务", "ROI", "差异", "客户", "迁过来"],
+      badKeys: ["就这价", "嫌贵就走", "公司规定", "没办法"]
+    },
+    "s3": {
+      name: "对比竞品",
+      meta: "客户已在用竞品 + 试用对比",
+      brief: "客户同时试用竞品 X, 询问差异。<b>不要贬低对方</b> — 体现真正的差异化 + 让客户自己得出结论。",
+      aiOpens: {
+        easy: ["我同时在试用你们家和某竞品 X, 想了解下你们的优势在哪?"],
+        mid: ["我同时在试用你们家和某竞品 X, 他们的移动端比你们流畅啊?"],
+        hard: ["我看过 X 了, 他们界面更好看, 移动端更流畅, 你说说你们家凭啥比他们强?"]
+      },
+      golden: [
+        { who: "csr", text: "您说的对, 竞品 X 的界面和移动端流畅度确实是他们的强项, 这点我必须承认。我们在 UI 上一直在追赶。" },
+        { who: "csr", text: "但您选 CRM 不只是看流畅度, 我建议您按 3 个真实场景试:" },
+        { who: "csr", text: "<b>场景 1</b>:同时录入 200 个客户 + 100 个跟进任务 → 比较检索速度<br><b>场景 2</b>:对接您现有 ERP/金蝶 → 比较实施难度<br><b>场景 3</b>:出货后 30 天客户提出投诉 → 比较售后响应速度" },
+        { who: "csr", text: "我可以预约 1 小时, 我们工程师陪您实测这 3 个场景。<b>不让我说我家好, 让数据说话</b>。" },
+        { who: "cust", text: "这个想法不错。" }
+      ],
+      goodKeys: ["承认", "场景", "实测", "对比", "数据", "陪您", "试"],
+      badKeys: ["X 差", "别用 X", "我们一样", "他们骗人"]
+    },
+    "s4": {
+      name: "演示请求",
+      meta: "客户老板要看演示 · 时间紧",
+      brief: "客户老板亲自要看演示, 时间窗口紧。<b>必须高度匹配老板关心的点</b> — 不是看花架子, 是看 ROI 和效率。",
+      aiOpens: {
+        easy: ["我们老板想看看你们的产品, 能下午 3 点演示吗? 20 分钟。"],
+        mid: ["我们老板想看你们产品, 下午 3 点开始,只给 15 分钟。能不能行?"],
+        hard: ["我老板今天有空, 下午 3 点 15 分钟, 演示完他要走。能不能搞?"]
+      },
+      golden: [
+        { who: "csr", text: "完全可以, 下午 3 点的时段我帮您锁定。15 分钟给老板, 我们 4 个块 (3 分钟一块):" },
+        { who: "csr", text: "① <b>3 分钟</b>:我们的客户经理 30 秒讲为何 200+ 制造业老板选我们<br>② <b>5 分钟</b>:展示老板最关心的 3 个 KPI 实时仪表盘<br>③ <b>4 分钟</b>:举一个跟您规模相当的成功案例(¥X 万 ROI)<br>④ <b>3 分钟</b>:回答老板的 1-2 个问题 + 下一步" },
+        { who: "csr", text: "我现在<b>需要您确认几件事</b>, 演示更精准:<br>① 老板最关心的 KPI 是什么?(营收 / 利润 / 客户数)<br>② 您公司主要业务方向?<br>③ 是否有任何特殊集成需求?" },
+        { who: "cust", text: "老板主要看利润 + 客户跟进效率, 我们做电子加工, 没特殊集成。" },
+        { who: "csr", text: "✓ 收到, 我立即定制演示。3 点开始, 我提前 5 分钟到您公司。" }
+      ],
+      goodKeys: ["可以", "确认", "演示", "什么模块", "老板", "需求", "锁定"],
+      badKeys: ["晚点", "现在没空", "明天", "下次", "为难"]
+    },
+    "s5": {
+      name: "续约升级",
+      meta: "涨价异议 · 老客户",
+      brief: "客户用了 1 年, 续约时我方涨价 15%, 客户不满。<b>关键是给客户'锁价/升级'的台阶</b>,而不是死扛价格。",
+      aiOpens: {
+        easy: ["我们用得挺好,但 7 月续约你们涨价 15%, 这有点说不过去吧?"],
+        mid: ["我们用得挺好, 但 7 月续约你们涨价 15%, 这有点说不过去吧? 我每年都按时付款。"],
+        hard: ["凭什么涨 15%? 我都用了 1 年了, 是不是觉得我离不开你们了?"]
+      },
+      golden: [
+        { who: "csr", text: "理解您, 涨价确实需要给您一个明确的说法。<b>这次涨价是行业整体调价</b>(我们已比竞品 X 低 12%), 但我有 3 个方案给您选:" },
+        { who: "csr", text: "<b>方案 A · 续 1 年享 8% 优惠</b>:¥3.5 万(实际涨 5.6%, 接近老价)<br><b>方案 B · 续 2 年锁价</b>:¥6.4 万(¥3.2 万 × 2,完全维持老价,送移动端模块价值 ¥0.8 万)<br><b>方案 C · 同价升级钻石套餐</b>:¥3.32 万,送 API + BI 报表(原价 ¥4.5 万,实际占便宜 ¥1.18 万)" },
+        { who: "csr", text: "我个人推荐方案 B,2 年锁价 + 送移动端,等于<b>免费用 2 年新功能</b>。但具体看您预算节奏。您觉得哪个合适?" },
+        { who: "cust", text: "我看下方案 B 详细情况。" }
+      ],
+      goodKeys: ["理解", "方案", "选", "锁价", "送", "免费"],
+      badKeys: ["公司规定", "没办法", "就这样", "不续就算"]
+    },
+    "s6": {
+      name: "投诉处置",
+      meta: "客户骂人 · 暴怒",
+      brief: "客户被乱码 + 工单延迟双重打击, 已经在骂人要退款。<b>第一步永远是同理 + 立即行动</b>, 绝对不能争辩。",
+      aiOpens: {
+        easy: ["你们的产品报表导出乱码, 工单提了 3 天没人理, 这服务真不行!"],
+        mid: ["你们的产品太烂了!报表导出乱码, 工单提了 3 天没人理!我要退款!"],
+        hard: ["你们是不是在玩我?!乱码 3 天没解决!我已经截图发我老板了!我现在就要退款 + 你们道歉!"]
+      },
+      golden: [
+        { who: "csr", text: "您的怒气我完全理解, 这是<b>我们的错</b>, 不该让您等 3 天。我现在立即帮您处理。" },
+        { who: "csr", text: "<b>第一时间 3 件事</b>:<br>① 我立刻联系工程师, 30 分钟内给您解决<br>② 我已经通知主管, 5 分钟后会亲自电话联系您道歉<br>③ 这次的服务费我们减免 10%(¥X 元),今天就挂账" },
+        { who: "cust", text: "...30 分钟? 真的吗? 那我等等。" },
+        { who: "csr", text: "<b>真的, 我现在站在线上不挂电话, 您能听到我处理过程</b>。工程师已接, 您看下钉钉, 工程师小李已加您。<br>同时, 您发我老板那个截图, 我转给我们老板, 让他也看到您今天的不满。这是我个人微信, 直接联系我。" },
+        { who: "cust", text: "好吧, 那我先看看。" }
+      ],
+      goodKeys: ["抱歉", "立即", "处理", "稍等", "补偿", "我们的错", "30 分钟", "道歉"],
+      badKeys: ["不是我们的问题", "别急", "管不了", "您冷静", "你别这样"]
+    },
+    "s7": {
+      name: "合同细节",
+      meta: "数据归属 + 法律细节",
+      brief: "客户对合同的'数据归属'条款不放心, 怕用了你们家以后数据被锁住。<b>必须用最简单的话讲清楚</b>,不要绕。",
+      aiOpens: {
+        easy: ["续约合同的服务条款第 7 条 '数据归属' 我看不太懂, 数据是你们的还是我们的?"],
+        mid: ["续约合同第 7 条数据归属我看不懂, 数据是你们的还是我们的? 解约的话数据怎么办?"],
+        hard: ["第 7 条这写得模糊, 数据要是被你们锁了我怎么办? 你们关门跑了我数据呢?"]
+      },
+      golden: [
+        { who: "csr", text: "您的担心非常合理, 我用一句话讲清楚:<b>数据 100% 是您的, 不是我们的</b>。任何时候。" },
+        { who: "csr", text: "<b>条款明确写了 3 件事</b>:<br>① 您所有客户数据、订单数据、报表数据,所有权归您<br>② 您随时可以一键导出(Excel/JSON/数据库直接 dump)<br>③ 我们解约后 30 天保留, 30 天后您可申请删除或继续保留" },
+        { who: "csr", text: "<b>如果我们公司关门</b>(理论场景):合同附件 II 明确写了' 第三方托管协议', 我们的代码会托管到银行,您可以拿到, 自行部署。" },
+        { who: "csr", text: "<b>怕担心</b>:我建议您测试一下, 现在就在系统里点'数据导出', 您会看到完整数据包能下载。您试试?" },
+        { who: "cust", text: "好的我试下。这样我就放心了。" }
+      ],
+      goodKeys: ["您", "明确", "解释", "条款", "100%", "您的"],
+      badKeys: ["差不多", "看就行", "反正", "都一样", "信任"]
+    },
+    "s8": {
+      name: "退款申请",
+      meta: "7 天内退款 · 流失高危",
+      brief: "客户用了一周提退款。<b>核心不是阻拦, 是了解原因 + 留下挽回机会</b>。退款必给, 但要把握能不能挽回。",
+      aiOpens: {
+        easy: ["我用了一周觉得不合适,想全额退款, 行不行?"],
+        mid: ["我用了一周觉得不合适, 想全额退款。你们 7 天政策能退吧?"],
+        hard: ["我用 7 天了, 完全不像我想要的, 必须全额退款, 不要给我搞什么挽留套路!"]
+      },
+      golden: [
+        { who: "csr", text: "理解您, 我们 7 天无理由退款的政策没变, <b>我现在就帮您发起退款</b>, 您 24 小时内到账。" },
+        { who: "csr", text: "在帮您退之前, 想<b>请教您 1 个问题</b>:您觉得不合适的具体点在哪? 我会沉淀到产品反馈, 让下次别的客户少走弯路。<b>就一个问题, 您说完我就帮您退。</b>" },
+        { who: "cust", text: "主要是觉得移动端反应慢, 我们出差多。" },
+        { who: "csr", text: "✓ 收到, 这是非常具体的反馈, 我立即标记 P0 给产品组。<br><b>退款已发起</b>, 你 24h 内会收到。<br>多一句,我们移动端新版本下个月上线, 优化的就是您说的反应慢。<b>送您 30 天再用一次的机会</b>, 不喜欢您再正式离开, 您看?" },
+        { who: "cust", text: "好的, 那等新版本出来你联系我。" }
+      ],
+      goodKeys: ["理解", "政策", "原因", "改进", "方案", "退", "送"],
+      badKeys: ["不退", "不可能", "你的问题", "都是这样"]
+    },
+    "s9": {
+      name: "技术故障",
+      meta: "服务器/数据库故障 · 业务停摆",
+      brief: "客户业务系统挂了, 几十个员工在等。<b>核心是 ETA + 进度透明</b>,每分钟都有信息。",
+      aiOpens: {
+        easy: ["我们的 CRM 系统挂了,显示数据库错误, 我们 30 人都在等!"],
+        mid: ["你们的 CRM 系统挂了, 数据库错误 1042, 我们 30 人在等! 多久能好?"],
+        hard: ["你们 CRM 又挂了, 数据库错误 1042! 上次也是这样! 你们到底专业不专业?!"]
+      },
+      golden: [
+        { who: "csr", text: "您好!立刻给您调查, 错误 1042 我们工程师已经远程接入您的服务器了, 排查中。" },
+        { who: "csr", text: "<b>同时给您 3 件事:</b><br>① 我现在每 5 分钟给您一次进度更新, 不让您一直等<br>② 已升级到我们 CTO 张工亲自盯<br>③ 给您一个临时方案:在我们另一个备用环境登录(链接发您)能用基本功能" },
+        { who: "csr", text: "<b>3 分钟后</b>: 张工已诊断完, 是您主从同步延迟, 主库恢复中, ETA 15 分钟。" },
+        { who: "csr", text: "<b>13 分钟后</b>:故障已修复 ✓ 您试登录看看。同时, 这次故障非您原因, 我们给您账户挂账补偿服务费 10% 作为诚意。" },
+        { who: "cust", text: "好了, 谢谢, 你们这次响应快多了。" }
+      ],
+      goodKeys: ["立刻", "进度", "ETA", "CTO", "升级", "补偿", "同时", "诚意"],
+      badKeys: ["别急", "等等", "可能", "也许", "您冷静"]
+    },
+    "s10": {
+      name: "培训请求",
+      meta: "新员工培训 + 客户成功",
+      brief: "客户新员工要培训 8 个人。<b>这是激活客户的关键</b> — 新员工激活 = 客户深度使用 = 续约。",
+      aiOpens: {
+        easy: ["我有 8 个新员工要上岗, 培训怎么安排?"],
+        mid: ["我有 8 个新员工要培训, 你们怎么收费? 时间能安排吗?"],
+        hard: ["我有 8 个新员工要培训, 你们的培训免费吗? 别再加钱了!"]
+      },
+      golden: [
+        { who: "csr", text: "8 个新员工培训我们<b>免费</b>(包含在您的服务里)。我帮您安排 2 选 1:" },
+        { who: "csr", text: "<b>方案 A · 集中培训 (推荐)</b>:1 次 2 小时, 我们专业培训师上门或视频会议, 含理论 + 实操 + 答疑<br><b>方案 B · 分批培训</b>:每周 1 小时, 4 周完成, 适合工作节奏紧" },
+        { who: "csr", text: "我个人推荐方案 A — <b>集中培训效果好 2 倍</b>(因为大家一起遇到问题, 互相帮助记得牢)。" },
+        { who: "csr", text: "<b>同时送您 3 个东西</b>:<br>① 培训手册 + 实操视频(电子版, 永久保留)<br>② 30 天内随时联系培训师答疑(微信 + 电话)<br>③ 7 天后跟进调研, 看新员工掌握情况" },
+        { who: "cust", text: "好, 那约方案 A, 下周二 14:00 怎么样?" }
+      ],
+      goodKeys: ["免费", "推荐", "方案", "上门", "送", "答疑"],
+      badKeys: ["收费", "加钱", "排期久", "等"]
+    },
+    "s11": {
+      name: "转介绍",
+      meta: "请求老客户推荐新客户",
+      brief: "客户用得很好, 现在请他帮忙推荐新客户。<b>关键是给老客户'传递价值'的台阶</b>,不能让他觉得自己在帮你打工。",
+      aiOpens: {
+        easy: ["你刚才说要请我推荐什么?"],
+        mid: ["你说要让我帮你推荐? 我能得到什么好处? 我推荐的人可能不会买啊。"],
+        hard: ["你居然让我帮你推广? 我自己事都忙不过来, 还要帮你拉客?"]
+      },
+      golden: [
+        { who: "csr", text: "您理解错了, 不是让您'拉客', 是相反:让您<b>把我们的服务作为您的资源</b>分享给同行朋友。" },
+        { who: "csr", text: "我具体说<b>3 件事</b>:<br>① 我们每月办 1 次 <b>'制造业老板私享会'</b>, 您可以推 1-2 个朋友, 现场我们出场地 + 餐 + 行业专家 · 您和朋友吃饭聊天, 我们端茶倒水<br>② 朋友如果感兴趣试用, 我们送他们 30 天试用 + 您账户加 1 个月服务期<br>③ 朋友最终签约, 您拿<b>¥X 万感谢费</b>(直接打您账户), 朋友减免 5%" },
+        { who: "csr", text: "<b>不是让您打工, 是让您把我们当工具用</b>:您觉得我们好, 别人也能受益, 您也得实惠。" },
+        { who: "cust", text: "这样听起来不错, 我有几个朋友可能感兴趣。" }
+      ],
+      goodKeys: ["资源", "推", "感谢费", "活动", "送", "回报"],
+      badKeys: ["帮我", "麻烦", "辛苦"]
+    },
+    "s12": {
+      name: "挽留流失",
+      meta: "大客户要走 · 必须留住",
+      brief: "钻石客户已经接了竞品 X 的报价, 要走。<b>不是降价能解决的</b>, 必须搞清楚真因 + 给独家方案。",
+      aiOpens: {
+        easy: ["我们准备换到竞品 X 了, 他们便宜。"],
+        mid: ["我们准备换 X 了, 他们便宜 30%。除非你们能给同样价格, 否则我们就走。"],
+        hard: ["我们决定了, 换 X! 别给我打感情牌, 钱就是钱!"]
+      },
+      golden: [
+        { who: "csr", text: "您的决定我尊重, 也理解。我不绕弯子, <b>问您 3 个问题再决定是否给方案</b>:" },
+        { who: "csr", text: "<b>问题 1</b>:除了价格,X 还吸引您的是什么?<br><b>问题 2</b>:您在我们这 3 年, 觉得最大的价值是什么?<br><b>问题 3</b>:换 X 之后, 您最担心什么(数据迁移?培训?稳定性?)" },
+        { who: "cust", text: "价格是主因, 我们最近订单不多。X 没特别的, 就是便宜。担心是迁移数据麻烦。" },
+        { who: "csr", text: "好的, <b>我给您一个独家方案, 不是降价, 是让您可以'两个都用'</b>:" },
+        { who: "csr", text: "<b>方案</b>:我们给您一个<b>「经营寒冬包」</b> — 服务降级到基础版, ¥1.5 万/年 (省 ¥1.7 万), 保留核心 CRM 功能;3 年合作历史 + 数据 + 培训 + 工程师 都不变。<br><b>等您订单好的时候</b>, 再升回钻石套餐, 我们给您当年没用的钱<b>50% 抵扣</b>。<br>这样, 您没换 X, 没流失数据, 也省了钱。X 那边, 您可以试用看看, 不喜欢回来。" },
+        { who: "cust", text: "这个方案我没想到, 我跟我老板商量下。" }
+      ],
+      goodKeys: ["问题", "理解", "独家", "方案", "省", "灵活", "不绕"],
+      badKeys: ["别走", "求您", "降到", "给您折扣", "感情"]
+    },
+    "s13": {
+      name: "海外询单",
+      meta: "英文沟通 · 海外业务",
+      brief: "海外客户用英文询问 · 关键是<b>专业的英文 + 真实的全球化服务能力展示</b>。",
+      aiOpens: {
+        easy: ["Hi, do you support multi-currency invoicing for EU customers?"],
+        mid: ["Hi, do you support multi-currency invoicing? We need EUR, GBP, USD. Also, GDPR compliance?"],
+        hard: ["Your website says global, but I'm not sure. Do you really support multi-currency AND GDPR? Show me proof."]
+      },
+      golden: [
+        { who: "csr", text: "Hi! Yes, we fully support both. Let me show you proof, not just words:" },
+        { who: "csr", text: "<b>Multi-currency</b>: 34 currencies including EUR/GBP/USD. Real-time ECB rates. 17 EU clients running daily, including 3 in your UK market." },
+        { who: "csr", text: "<b>GDPR</b>: ISO 27001 certified. Data residency option (EU servers). Full DSAR support. We can show you our compliance report (PDF, attached)." },
+        { who: "csr", text: "<b>Next step</b>: I'll send (1) 3 case studies of UK clients, (2) GDPR compliance PDF, (3) pricing tailored to your size. Our EU sales lead Sarah will reach you within 4 hours (her timezone matches yours). What's your preferred contact method?" },
+        { who: "cust", text: "Email is fine: brown@xx.uk. Looking forward to the case studies." }
+      ],
+      goodKeys: ["yes", "proof", "compliance", "case", "Sarah", "send", "support"],
+      badKeys: ["maybe", "not sure", "later", "manager"]
+    },
+    "s14": {
+      name: "高管对话",
+      meta: "客户老板亲自来 · 简洁有力",
+      brief: "客户公司老板直接打电话来, 不要客气话, 要<b>直接说价值 + 数字 + 能不能落地</b>。",
+      aiOpens: {
+        easy: ["我是 XX 公司老板, 听我员工说你们 CRM 不错, 我想直接问几个问题。"],
+        mid: ["我是 XX 公司老板, 你们 CRM 我们用了半年, 但我看不到 ROI。3 分钟告诉我为什么我应该续约。"],
+        hard: ["我是 XX 公司老板。今天我让你 1 分钟说服我别换厂商, 否则我们换 X。"]
+      },
+      golden: [
+        { who: "csr", text: "感谢您直接联系。<b>不绕弯, 3 个数字给您</b>:" },
+        { who: "csr", text: "<b>① ROI 数据</b>:贵司过去半年用我方 CRM, 销售跟进周期从 平均 14 天 → 9 天, 转化率提升 38%, 折合 ARR +¥87 万<br><b>② 团队节省</b>:6 个销售每周省 8 小时跟单时间, 全年 = 2,000+ 小时, 折合 ¥35 万人力<br><b>③ 客户流失</b>:接入预警机制后, 流失 7% → 4%, 保住 ARR +¥42 万" },
+        { who: "csr", text: "<b>总计:我们为您贡献了约 ¥164 万年化价值, 我们收 ¥18 万/年, ROI 9x</b>。" },
+        { who: "csr", text: "您要换 X 我尊重您。但如果您的换厂商动因是<b>价格</b>(X 便宜 30%, 即 ¥5.4 万), 我可以给您一个续约方案:续 2 年锁价 + 送 ¥2 万模块 = 实际省 ¥7 万, 比换 X 更划算。" },
+        { who: "cust", text: "数字清楚了, 把方案发我邮箱。" }
+      ],
+      goodKeys: ["ROI", "数据", "数字", "贡献", "方案", "总计", "不绕"],
+      badKeys: ["客气", "您好", "感谢", "感情", "希望"]
+    },
+    "s15": {
+      name: "数据安全",
+      meta: "GDPR / 等保合规 · 法律担忧",
+      brief: "客户担心数据合规问题。<b>必须用'证书 + 案例 + 可验证的事实'</b>说话,不能空泛承诺。",
+      aiOpens: {
+        easy: ["你们的 CRM 符合 GDPR 吗? 我们有 EU 客户。"],
+        mid: ["你们的 CRM 符合等保 + GDPR 吗? 我们对数据安全很严, 出了问题谁负责?"],
+        hard: ["万一数据泄露怎么办? 你们能赔我多少钱? 不要给我背书, 给我证据!"]
+      },
+      golden: [
+        { who: "csr", text: "您的担心很正常, 我用<b>3 个证据回答</b>, 不背书:" },
+        { who: "csr", text: "<b>证据 1 · 合规证书</b>:ISO 27001 信息安全管理 / 等保三级 / SOC 2 Type II · 证书已发您邮箱<br><b>证据 2 · 历史记录</b>:我们运营 7 年, 服务 200 家 B 端客户, 零数据泄露事件 · 由<b>第三方审计</b>每年发布<br><b>证据 3 · 责任条款</b>:合同附件 III 写明, 如发生我方原因的数据泄露, 我方赔偿损失 + 单次封顶 ¥500 万" },
+        { who: "csr", text: "<b>数据存储</b>:加密(AES-256)+ 多备份 + 异地容灾 + 24h SOC 监控<br><b>数据访问</b>:零信任架构, 我们工程师都看不到您的明文数据(除非您授权特定故障排查)" },
+        { who: "csr", text: "您可以现在<b>申请安全白皮书</b>(20 页, 含架构图 + 合规细节), 或者预约 1 次安全工程师 1 对 1 答疑。您选哪个?" },
+        { who: "cust", text: "先发我白皮书, 之后再约。" }
+      ],
+      goodKeys: ["证书", "ISO", "等保", "GDPR", "审计", "赔偿", "白皮书", "证据"],
+      badKeys: ["放心", "信任", "我们", "应该没事", "试试"]
+    },
+    "s16": {
+      name: "紧急召回",
+      meta: "重大故障 · 多客户受损",
+      brief: "我方产品出现重大 BUG (例如:某次发版后, 100 多个客户数据导出乱码 + 报表错乱)。<b>需要主动联系客户致歉 + 给方案 + 防危机扩大</b>。",
+      aiOpens: {
+        easy: ["你们昨天发版出问题了?我看其他群有人在说。"],
+        mid: ["你们昨天的新版本是不是出 BUG 了? 我朋友圈看到好几个人骂!这个事情我们怎么办?"],
+        hard: ["你们这是怎么回事?!整个朋友圈都在炸!产品出大问题不通知客户?我们的数据怎么办?!"]
+      },
+      golden: [
+        { who: "csr", text: "您说的是事实, 昨天 18:00 我们新版本发布后<b>确实出现重大问题</b>, 影响 124 家客户(包括您)的报表数据。我们已经在朋友圈 + 公司公众号 + 钉钉群三个渠道<b>主动致歉</b>。" },
+        { who: "csr", text: "<b>第一时间给您 4 件事</b>:<br>① <b>事实陈述</b>:问题原因是新版本字段映射错配 · 我们 21:00 已完成回滚到上版本<br>② <b>数据状态</b>:您的数据<b>完全没丢</b>, 报表错乱已修复, 您账号下所有数据 100% 正确<br>③ <b>损失补偿</b>:所有受影响客户(包括您) <b>本月免单</b>(¥3.2 万/12 = ¥2,666 已挂账)<br>④ <b>问责声明</b>:CTO 公开发声明 + 流程改革承诺(发布前必须 24h 灰度测试)" },
+        { who: "csr", text: "<b>我个人代表公司</b>, 给您道歉。我们辜负了您的信任, 这次的代价我们承担。" },
+        { who: "csr", text: "<b>您接下来想了解</b>:① 朋友圈我们的公开回应 ② 流程改革具体方案 ③ 您还有什么补救要求 — 您说哪一个?" },
+        { who: "cust", text: "你们处理算迅速, 我先看下你们的公开回应。" }
+      ],
+      goodKeys: ["事实", "致歉", "补偿", "改革", "100%", "承担", "公开", "代价"],
+      badKeys: ["小问题", "不严重", "马上好", "稍等", "你别急"]
+    }
+  };
+
+  var trainDiff = "mid";
+  var trainCurScene = "s1";
+  var trainGoldenInterval = null;
+
+  function setSceneBrief(sid) {
+    var sc = trainScenes[sid];
+    if (!sc) return;
+    Q("#trSceneName").textContent = sc.name;
+    Q("#trBrief").querySelector(".sb-meta").textContent = sc.meta;
+    Q("#trSceneBrief").innerHTML = sc.brief;
+  }
+
+  function startScene(sid) {
+    if (trainGoldenInterval) { clearInterval(trainGoldenInterval); trainGoldenInterval = null; }
+    trainCurScene = sid;
+    QA(".train-scene").forEach(function (s) { s.classList.toggle("cur", s.dataset.sid === sid); });
+    var sc = trainScenes[sid];
+    if (!sc) return;
+    setSceneBrief(sid);
+    var openArr = sc.aiOpens[trainDiff] || sc.aiOpens.mid;
+    var prefix = { easy: "(语气普通) ", mid: "(语气挑剔) ", hard: "(语气暴躁 ‼) " }[trainDiff];
+    var box = Q("#trChat");
+    box.innerHTML = openArr.map(function (line) {
+      return '<div class="train-bubble cust"><div class="tb-ava">🎭</div><div class="tb-text">' + prefix + line + '</div></div>';
+    }).join("");
+    Q("#trGolden").disabled = false;
+    Q("#trGolden").textContent = "▶ 看 AI 金牌示范";
+  }
+
+  function playGolden() {
+    var sc = trainScenes[trainCurScene];
+    if (!sc || !sc.golden) return;
+    Q("#trGolden").disabled = true;
+    Q("#trGolden").textContent = "⏳ 金牌示范播放中...";
+    var box = Q("#trChat");
+    // 清空开场, 完整重演
+    box.innerHTML = '<div class="train-bubble fb"><div class="tb-ava"></div><div class="tb-text"><b>🏆 AI 金牌客服示范 · 让你看到"教科书级"应对</b></div></div>';
+    box.scrollTop = box.scrollHeight;
+    var i = 0;
+    trainGoldenInterval = setInterval(function () {
+      if (i >= sc.golden.length) {
+        clearInterval(trainGoldenInterval);
+        trainGoldenInterval = null;
+        // 加一个 summary
+        var sumDiv = document.createElement("div");
+        sumDiv.className = "train-bubble fb";
+        sumDiv.innerHTML = '<div class="tb-ava"></div><div class="tb-text"><div class="tb-fb-tt">📊 评分维度逐条满分</div>同理心 / 探询 / 锚定价值 / 给方案 / 推进闭环 — <b>5 维全过</b>。<br>这就是 "我要的客服" 的样子, 您的员工经过陪练后能达到 80%+。</div>';
+        box.appendChild(sumDiv);
+        box.scrollTop = box.scrollHeight;
+        Q("#trGolden").disabled = false;
+        Q("#trGolden").textContent = "▶ 重新看示范";
+        return;
+      }
+      var m = sc.golden[i++];
+      var div = document.createElement("div");
+      if (m.who === "csr") {
+        div.className = "train-bubble csr-golden";
+        div.innerHTML = '<div class="tb-ava">🏆</div><div class="tb-text">' + m.text + '</div>';
+      } else {
+        div.className = "train-bubble cust";
+        div.innerHTML = '<div class="tb-ava">🎭</div><div class="tb-text">' + m.text + '</div>';
+      }
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }, 1400);
+  }
+
+  view.addEventListener("click", function (e) {
+    var s = e.target.closest('[data-fx="trScene"]');
+    if (s) { startScene(s.dataset.sid); return; }
+    var d = e.target.closest('[data-fx="trDiff"]');
+    if (d) {
+      QA('[data-fx="trDiff"]').forEach(function (x) { x.classList.toggle("cur", x === d); });
+      trainDiff = d.dataset.d;
+      startScene(trainCurScene);
+      ts("🎭 难度已切换 · 重启场景");
+    }
+  });
+
+  Q("#trGolden").addEventListener("click", function () {
+    if (this.disabled) return;
+    playGolden();
+  });
+
+  var trSendBtn = Q("#trSend");
+  if (trSendBtn) {
+    trSendBtn.onclick = function () {
+      var t = (Q("#trInput").value || "").trim();
+      if (!t) { ts("请输入答案 · 或点 ▶ 看 AI 金牌示范"); return; }
+      var sc = trainScenes[trainCurScene];
+      var goodHit = sc.goodKeys.some(function (k) { return t.indexOf(k) >= 0; });
+      var badHit = sc.badKeys.some(function (k) { return t.indexOf(k) >= 0; });
+      var box = Q("#trChat");
+      var d1 = document.createElement("div");
+      d1.className = "train-bubble csr";
+      d1.innerHTML = '<div class="tb-ava">你</div><div class="tb-text">' + t + '</div>';
+      box.appendChild(d1);
+      var fb, cls = "";
+      if (badHit) {
+        cls = "bad";
+        fb = '<div class="tb-fb-tt">⚠ AI 评分:不达标</div>你触碰了红线话术(如"看说明书 / 管不了 / 不是我们的问题"等)。客户对此非常敏感。<b>建议改为:</b>"我立即帮您处理,您稍等一下..."从安抚情绪开始。<br><b>建议看 🏆 金牌示范</b>了解教科书答法。';
+      } else if (goodHit) {
+        fb = '<div class="tb-fb-tt">✓ AI 评分:通过 · 88 分</div>话术得体, 体现了客户视角。<b>可加分点:</b>① 主动给具体时间/数字 ② 主动给方案而不是问"您要什么" ③ 推进闭环。<br>看 🏆 金牌示范学到 95+ 分。';
+      } else {
+        fb = '<div class="tb-fb-tt">⚠ AI 评分:及格 · 72 分</div>回答中立, 缺乏明确价值点。<b>建议:</b>① 体现同理 ② 给具体方案 ③ 给时间承诺。<br>看 🏆 金牌示范获得标准答案。';
+      }
+      var d2 = document.createElement("div");
+      d2.className = "train-bubble fb " + cls;
+      d2.innerHTML = '<div class="tb-ava"></div><div class="tb-text">' + fb + '</div>';
+      box.appendChild(d2);
+      Q("#trInput").value = "";
+      box.scrollTop = box.scrollHeight;
+    };
+  }
+  var trInputEl = Q("#trInput");
+  if (trInputEl) trInputEl.addEventListener("keydown", function (e) { if (e.key === "Enter") Q("#trSend").click(); });
+
+  /* ============================================================
+     Board 6 · 投诉与洞察 Agent
+     ============================================================ */
+  view.addEventListener("click", function (e) {
+    var acc = e.target.closest('[data-fx="csInsAcc"]');
+    if (acc) {
+      var row = acc.closest(".insight-row");
+      row.classList.add("handled", "handled-acc");
+      row.querySelector(".ir-state").textContent = "✓ 已采纳 · AI 正推动";
+      ts(acc.dataset.msg);
+      var p = parseInt(Q("#csInsPending").textContent, 10);
+      Q("#csInsPending").textContent = Math.max(0, p - 1);
+      return;
+    }
+    var det = e.target.closest('[data-fx="csInsDet"]');
+    if (det) { ts(det.dataset.msg); return; }
+    var rej = e.target.closest('[data-fx="csInsRej"]');
+    if (rej) {
+      var row2 = rej.closest(".insight-row");
+      row2.classList.add("handled", "handled-rej");
+      row2.querySelector(".ir-state").textContent = "已驳回 / 推迟";
+      ts(rej.dataset.msg);
+      var p2 = parseInt(Q("#csInsPending").textContent, 10);
+      Q("#csInsPending").textContent = Math.max(0, p2 - 1);
+    }
+  });
+
+  var slaIns = Q("#csInsSla");
+  if (slaIns) {
+    slaIns.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("csInsSlaV", v);
+      var cmp = Math.round(80 - v); if (cmp < 30) cmp = 30; if (cmp > 60) cmp = 60;
+      var pr = Math.round(48 - v); if (pr < 5) pr = 5;
+      var roi = (5.5 - Math.abs(v - 22) / 12).toFixed(1);
+      txt("csInsSlaCmp", cmp + "%");
+      txt("csInsSlaPr", "+" + pr + "%");
+      txt("csInsSlaRoi", roi + "x");
+      var vd;
+      if (v < 16) vd = '<b class="warn">⚠ SLA 过严</b> · 工程师压力 +' + pr + '% · 可能导致离职';
+      else if (v <= 26) vd = '<b class="good">AI 推荐 SLA 18-24h</b> · 工程师可承受 · 客户满意度跳升最快';
+      else if (v <= 36) vd = '<b>偏宽</b> · 改革效果不明显 · 投诉减少仅 ' + cmp + '%';
+      else vd = '<b class="warn">⚠ SLA 过宽</b> · 改革几乎无效, 不如不改';
+      Q("#csInsSlaVerdict").innerHTML = vd;
+    });
+  }
+
+  /* ============================================================
+     当切到对应 stage 时启动流式
+     ============================================================ */
+  var startedBoards = { night: false, ticket: false };
+  var origNavClick = Q("#csNav");
+  if (origNavClick) {
+    origNavClick.addEventListener("click", function (e) {
+      var p = e.target.closest(".stage-pill");
+      if (!p) return;
+      setTimeout(function () {
+        var stage = p.dataset.stage;
+        if (stage === "night" && !startedBoards.night) {
+          startedBoards.night = true;
+          renderAutoLog();
+          rollLiveConv("lc1");
+          setTimeout(function () { rollLiveConv("lc2"); }, 800);
+          setTimeout(function () { rollLiveConv("lc3"); }, 1600);
+        }
+        if (stage === "ticket" && !startedBoards.ticket) {
+          startedBoards.ticket = true;
+          renderTicketFlow();
+        }
+      }, 100);
+    });
+  }
+
+  /* 初始化 */
+  startScene("s1");
 })();
 </script>
 </body>
