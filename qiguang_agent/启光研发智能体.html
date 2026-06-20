@@ -157,45 +157,66 @@
     border-color: var(--primary);
   }
 
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  .progress-list { font-size: 13px; }
-  .progress-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px dashed var(--border);
-  }
-  .progress-item:last-child { border-bottom: none; }
-  .progress-item .icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: white;
-  }
-  .progress-item.pending .icon { background: var(--text-mute); }
-  .progress-item.running .icon { background: var(--warning); animation: pulse 1s infinite; }
-  .progress-item.done .icon { background: var(--success); }
-  .progress-item.error .icon { background: var(--error); }
-  .progress-item .label { flex: 1; }
-  .progress-item .time { color: var(--text-mute); font-size: 11px; }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .empty-state {
-    color: var(--text-mute);
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .status-text {
+    color: var(--text-soft);
     font-size: 13px;
-    padding: 16px 0;
-    text-align: center;
+    margin-left: 6px;
   }
+  .status-text.running::before {
+    content: "⟳ ";
+    color: var(--warning);
+    display: inline-block;
+    animation: spin 1.5s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .behind-scenes {
+    margin: 10px 0;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .behind-scenes summary {
+    cursor: pointer;
+    color: var(--text-soft);
+    font-weight: 500;
+    user-select: none;
+  }
+  .behind-scenes .panel {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--code-bg);
+    border-radius: 5px;
+  }
+  .behind-scenes .panel h4 {
+    margin: 0 0 4px;
+    font-size: 12px;
+    color: var(--primary-dark);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .behind-scenes .panel + .panel { margin-top: 8px; }
+  .behind-scenes .panel ul { padding-left: 20px; margin: 4px 0; }
+  .behind-scenes .review-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin: 4px 0;
+  }
+  .behind-scenes .review-grid > div {
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .verdict-pass { color: var(--success); font-weight: 600; }
+  .verdict-revise { color: var(--warning); font-weight: 600; }
+  .verdict-reject { color: var(--error); font-weight: 600; }
 
   .stats {
     display: grid;
@@ -382,29 +403,20 @@
     <div class="actions">
       <button id="startBtn">▶ 开始命题</button>
       <button id="stopBtn" class="secondary" disabled>停止</button>
-    </div>
-  </section>
-
-  <!-- 工作流进度 -->
-  <section class="card full">
-    <h2><span class="num">3</span>工作流进度</h2>
-    <div id="progressList" class="progress-list">
-      <div class="empty-state">等待开始 ...</div>
+      <span id="statusText" class="status-text"></span>
     </div>
   </section>
 
   <!-- 输出 -->
   <section class="card full" id="outputSection" style="display:none">
-    <h2><span class="num">4</span>成卷输出</h2>
+    <h2><span class="num">3</span>成卷输出</h2>
     <div id="stats" class="stats"></div>
     <div class="actions" style="margin-bottom:14px">
-      <button id="downloadMdBtn" class="secondary">下载 Markdown</button>
-      <button id="downloadJsonBtn" class="secondary">下载完整 JSON</button>
       <button id="copyBtn" class="secondary">复制原文</button>
     </div>
     <div id="paperOutput" class="paper"></div>
     <details id="rawJson">
-      <summary>查看完整 JSON(含蓝图、质检报告、主审评语)</summary>
+      <summary>查看完整 JSON(含蓝图、风格指南、质检报告、主审评语)</summary>
       <pre id="rawJsonContent"></pre>
     </details>
   </section>
@@ -726,42 +738,12 @@ async function callAgent(apiKey, model, systemPrompt, userMessage, effort = "hig
 // 工作流编排
 // ============================================================
 
-const progressItems = new Map(); // key -> { status, t0, elem }
-
-function addProgress(key, label) {
-  const list = document.getElementById("progressList");
-  if (progressItems.size === 0) list.innerHTML = "";
-  const div = document.createElement("div");
-  div.className = "progress-item pending";
-  div.innerHTML = `<span class="icon">○</span><span class="label">${label}</span><span class="time"></span>`;
-  list.appendChild(div);
-  progressItems.set(key, { status: "pending", t0: 0, elem: div, label });
-  return div;
-}
-
-function startProgress(key) {
-  const item = progressItems.get(key);
-  if (!item) return;
-  item.status = "running";
-  item.t0 = performance.now();
-  item.elem.className = "progress-item running";
-  item.elem.querySelector(".icon").textContent = "⟳";
-  item.elem.scrollIntoView({ behavior: "smooth", block: "end" });
-}
-
-function finishProgress(key, status = "done", suffix = "") {
-  const item = progressItems.get(key);
-  if (!item) return;
-  const elapsed = ((performance.now() - item.t0) / 1000).toFixed(1);
-  item.status = status;
-  item.elem.className = `progress-item ${status}`;
-  item.elem.querySelector(".icon").textContent = status === "done" ? "✓" : status === "error" ? "✗" : "⟳";
-  item.elem.querySelector(".time").textContent = `${elapsed}s${suffix ? " · " + suffix : ""}`;
-}
-
-function clearProgress() {
-  progressItems.clear();
-  document.getElementById("progressList").innerHTML = '<div class="empty-state">等待开始 ...</div>';
+// 状态更新:跑流水线时给用户一个简单的当前阶段提示
+function updateStatus(text) {
+  const el = document.getElementById("statusText");
+  if (!el) return;
+  el.textContent = text || "";
+  el.className = text ? "status-text running" : "status-text";
 }
 
 // 单题命题流水线
@@ -769,15 +751,12 @@ async function produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions) {
   const num = qBp.number;
 
   // Step 1: 真题分析
-  const analystKey = `q${num}-analyst`;
-  addProgress(analystKey, `第 ${num} 题 · 真题分析师`);
-  startProgress(analystKey);
+  updateStatus(`第 ${num} 题 · 真题分析师 正在分析河北中考命题风格 ...`);
   const style = await callAgent(
     apiKey, preset.analyst, ANALYST_SYSTEM,
     `请针对以下命题任务,产出真题命题风格指南。\n\n【试卷背景】\n${JSON.stringify(paperMeta, null, 2)}\n\n【单题命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n请严格按系统提示输出纯 JSON。`,
     "medium"
   );
-  finishProgress(analystKey);
 
   // Step 2-4: 命题 → 解析 → 质检(可能多轮)
   let draft, solution, review;
@@ -787,33 +766,24 @@ async function produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions) {
   for (let attempt = 1; attempt <= maxRevisions; attempt++) {
     rounds = attempt;
 
-    const composerKey = `q${num}-composer-${attempt}`;
-    addProgress(composerKey, `第 ${num} 题 · 命题执笔(第 ${attempt} 轮)`);
-    startProgress(composerKey);
+    updateStatus(`第 ${num} 题 · 命题执笔(第 ${attempt} 轮)...`);
     let composerMsg = `请基于以下信息撰写题目原稿。\n\n【试卷背景】\n${JSON.stringify(paperMeta, null, 2)}\n\n【单题命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【真题风格指南】\n${JSON.stringify(style, null, 2)}\n\n`;
     if (revisionNotes) composerMsg += `【上一轮修订建议(本轮必须改进)】\n${revisionNotes}\n\n`;
     composerMsg += "请严格按系统提示输出纯 JSON。";
     draft = await callAgent(apiKey, preset.composer, COMPOSER_SYSTEM, composerMsg);
-    finishProgress(composerKey);
 
-    const solutionKey = `q${num}-solution-${attempt}`;
-    addProgress(solutionKey, `第 ${num} 题 · 解析撰写`);
-    startProgress(solutionKey);
+    updateStatus(`第 ${num} 题 · 解析撰写中 ...`);
     solution = await callAgent(
       apiKey, preset.solution, SOLUTION_SYSTEM,
       `请为以下题目撰写标准答案与详细解析。\n\n【命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【题目原稿】\n${JSON.stringify(draft, null, 2)}\n\n请严格按系统提示输出纯 JSON。`,
       "medium"
     );
-    finishProgress(solutionKey);
 
-    const reviewerKey = `q${num}-reviewer-${attempt}`;
-    addProgress(reviewerKey, `第 ${num} 题 · 质检审核`);
-    startProgress(reviewerKey);
+    updateStatus(`第 ${num} 题 · 质检审核中 ...`);
     review = await callAgent(
       apiKey, preset.reviewer, REVIEWER_SYSTEM,
       `请对以下题目进行全维度质检。\n\n【命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【题目原稿】\n${JSON.stringify(draft, null, 2)}\n\n【标准答案与解析】\n${JSON.stringify(solution, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
     );
-    finishProgress(reviewerKey, "done", `${review.verdict} · 难 ${review.difficulty_score.toFixed(2)} · 区 ${review.discrimination_score.toFixed(2)}`);
 
     if (review.verdict === "pass") break;
     if (review.verdict === "reject" && attempt === maxRevisions) break;
@@ -831,21 +801,18 @@ async function produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions) {
     revisionNotes = lines.join("\n");
   }
 
-  return { blueprint: qBp, draft, solution, review, revision_rounds: rounds };
+  return { blueprint: qBp, style, draft, solution, review, revision_rounds: rounds };
 }
 
 async function runWorkflow(apiKey, preset, request, maxRevisions) {
   const t0 = performance.now();
 
   // Phase 1: Planner
-  const plannerKey = "planner";
-  addProgress(plannerKey, "命题策划官 · 整卷蓝图");
-  startProgress(plannerKey);
+  updateStatus("命题策划官 · 正在制定整卷蓝图 ...");
   const blueprint = await callAgent(
     apiKey, preset.planner, PLANNER_SYSTEM,
     `请基于以下命题需求,产出整卷命题蓝图。\n\n【需求 JSON】\n${JSON.stringify(request, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
   );
-  finishProgress(plannerKey, "done", `${blueprint.questions.length} 道题 · 难度 ${blueprint.overall_difficulty}`);
 
   // 截取到用户要求的题数
   if (request.question_count && blueprint.questions.length > request.question_count) {
@@ -872,14 +839,11 @@ async function runWorkflow(apiKey, preset, request, maxRevisions) {
   if (finalized.length === 0) throw new Error("所有题目都生成失败,请检查日志");
 
   // Phase 3: ChiefEditor
-  const editorKey = "chief-editor";
-  addProgress(editorKey, "主审定稿 · 整卷平衡审查");
-  startProgress(editorKey);
+  updateStatus("主审定稿 · 整卷整体平衡审查中 ...");
   const chiefReview = await callAgent(
     apiKey, preset.chiefEditor, CHIEF_EDITOR_SYSTEM,
     `请对整卷做最终主审。\n\n【整卷蓝图】\n${JSON.stringify(blueprint, null, 2)}\n\n【整卷草稿】\n${JSON.stringify(finalized, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
   );
-  finishProgress(editorKey, "done", `${chiefReview.publishable ? "可发布" : "需重做"} · 评分 ${chiefReview.overall_quality_score.toFixed(2)}`);
 
   const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
   return {
@@ -923,6 +887,87 @@ function renderParagraphs(s) {
   }).join("");
 }
 
+function renderBehindScenes(fq) {
+  // 把单题幕后的 4 个 Agent 产出(真题分析师 / 命题执笔创新点 / 解析撰写要点 / 质检审核)
+  // 折叠在一个 details 里,默认收起,展开后教研老师可看到全部协作痕迹。
+  const out = [];
+  out.push(`<details class="behind-scenes">`);
+  out.push(`<summary>📋 命题幕后(展开看真题分析、命题逻辑、质检报告)</summary>`);
+
+  // —— 真题分析师 ——
+  const style = fq.style || {};
+  out.push(`<div class="panel"><h4>① 真题分析师 · 河北中考风格指南</h4>`);
+  if (style.expression_style) {
+    out.push(`<p><strong>表述风格:</strong>${renderInline(style.expression_style)}</p>`);
+  }
+  if (style.common_context_types?.length) {
+    out.push(`<p><strong>常用情境:</strong></p><ul>`);
+    style.common_context_types.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul>`);
+  }
+  if (style.common_traps?.length) {
+    out.push(`<p><strong>常见陷阱:</strong></p><ul>`);
+    style.common_traps.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul>`);
+  }
+  if (style.sample_real_questions?.length) {
+    out.push(`<p><strong>参考真题:</strong></p><ul>`);
+    style.sample_real_questions.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul>`);
+  }
+  if (style.notes) out.push(`<p><strong>备注:</strong>${renderInline(style.notes)}</p>`);
+  out.push(`</div>`);
+
+  // —— 命题执笔 ——
+  out.push(`<div class="panel"><h4>② 命题执笔 · 命题创新点</h4>`);
+  if (fq.draft?.creative_rationale) {
+    out.push(`<p>${renderInline(fq.draft.creative_rationale)}</p>`);
+  } else {
+    out.push(`<p><em>(未提供)</em></p>`);
+  }
+  if (fq.revision_rounds > 1) {
+    out.push(`<p style="color:var(--text-soft);font-size:12px">经历 ${fq.revision_rounds} 轮反馈迭代后定稿</p>`);
+  }
+  out.push(`</div>`);
+
+  // —— 解析撰写 ——
+  const sol = fq.solution || {};
+  if (sol.key_points?.length) {
+    out.push(`<div class="panel"><h4>③ 解析撰写 · 核心要点</h4><ul>`);
+    sol.key_points.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul></div>`);
+  }
+
+  // —— 质检审核 ——
+  const r = fq.review || {};
+  const verdictClass = `verdict-${r.verdict || "pass"}`;
+  out.push(`<div class="panel"><h4>④ 质检审核 · 6 维度评估</h4>`);
+  out.push(`<div class="review-grid">
+    <div>难度:<strong>${(r.difficulty_score ?? 0).toFixed(2)}</strong></div>
+    <div>区分度:<strong>${(r.discrimination_score ?? 0).toFixed(2)}</strong></div>
+    <div>表述质量:<strong>${(r.expression_quality ?? 0).toFixed(2)}</strong></div>
+    <div>知识点对位:<strong>${r.knowledge_coverage_match ? "✓" : "✗"}</strong></div>
+    <div>答案正确:<strong>${r.answer_correctness ? "✓" : "✗"}</strong></div>
+    <div>政治安全:<strong>${r.political_safety ? "✓" : "✗"}</strong></div>
+  </div>`);
+  out.push(`<p><strong>终审:</strong> <span class="${verdictClass}">${escapeHtml(r.verdict || "")}</span></p>`);
+  if (r.verdict_rationale) out.push(`<p><strong>理由:</strong>${renderInline(r.verdict_rationale)}</p>`);
+  if (r.issues?.length) {
+    out.push(`<p><strong>发现的问题:</strong></p><ul>`);
+    r.issues.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul>`);
+  }
+  if (r.suggestions?.length) {
+    out.push(`<p><strong>修改建议:</strong></p><ul>`);
+    r.suggestions.forEach(s => out.push(`<li>${renderInline(s)}</li>`));
+    out.push(`</ul>`);
+  }
+  out.push(`</div>`);
+
+  out.push(`</details>`);
+  return out.join("");
+}
+
 function renderPaper(paper) {
   const bp = paper.blueprint;
   const out = [];
@@ -934,13 +979,14 @@ function renderPaper(paper) {
     <strong>预期难度:</strong>${bp.overall_difficulty}
   </div>`);
 
-  out.push("<h2>命题理念</h2>");
+  // ===== 命题策划官 =====
+  out.push("<h2>命题策划官 · 整卷理念</h2>");
   out.push(renderParagraphs(bp.design_rationale));
-
-  out.push("<h2>重点考查知识点</h2><ul>");
+  out.push("<p><strong>重点考查知识点:</strong></p><ul>");
   bp.knowledge_coverage.forEach(k => out.push(`<li>${escapeHtml(k)}</li>`));
   out.push("</ul>");
 
+  // ===== 试题正文(命题执笔 + 单题幕后) =====
   out.push("<hr><h2>试题正文</h2>");
   paper.questions.forEach(fq => {
     out.push(`<h3>第 ${fq.blueprint.number} 题(${escapeHtml(fq.blueprint.question_type)}, ${fq.blueprint.score} 分)</h3>`);
@@ -953,9 +999,12 @@ function renderPaper(paper) {
     if (fq.draft.diagram_description) {
       out.push(`<p><em>📊 配图说明:${escapeHtml(fq.draft.diagram_description)}</em></p>`);
     }
+    // 单题命题幕后(真题分析师 + 命题执笔创新点 + 解析撰写要点 + 质检审核)
+    out.push(renderBehindScenes(fq));
   });
 
-  out.push("<hr><h2>参考答案与解析</h2>");
+  // ===== 解析撰写 =====
+  out.push("<hr><h2>解析撰写 · 参考答案与详解</h2>");
   paper.questions.forEach(fq => {
     out.push(`<h3>第 ${fq.blueprint.number} 题</h3>`);
     out.push(`<p><strong>答案:</strong>${renderInline(fq.solution.answer)}</p>`);
@@ -971,7 +1020,8 @@ function renderPaper(paper) {
     }
   });
 
-  out.push("<hr><h2>主审评语</h2>");
+  // ===== 主审定稿 =====
+  out.push("<hr><h2>主审定稿 · 整卷终审评语</h2>");
   out.push(`<div class="meta-box">
     <strong>整卷综合质量评分:</strong>${paper.chief_review.overall_quality_score.toFixed(2)} ·
     <strong>是否可发布:</strong>${paper.chief_review.publishable ? "✓ 是" : "✗ 否(需重做)"}
@@ -983,6 +1033,11 @@ function renderPaper(paper) {
     paper.chief_review.balance_issues.forEach(x => out.push(`<li>${renderInline(x)}</li>`));
     out.push("</ul>");
   }
+  if (paper.chief_review.style_consistency_issues && paper.chief_review.style_consistency_issues.length) {
+    out.push("<p><strong>风格一致性问题:</strong></p><ul>");
+    paper.chief_review.style_consistency_issues.forEach(x => out.push(`<li>${renderInline(x)}</li>`));
+    out.push("</ul>");
+  }
   if (paper.chief_review.final_adjustments && paper.chief_review.final_adjustments.length) {
     out.push("<p><strong>最终调整建议:</strong></p><ul>");
     paper.chief_review.final_adjustments.forEach(a => {
@@ -992,54 +1047,6 @@ function renderPaper(paper) {
   }
 
   return out.join("");
-}
-
-function renderMarkdown(paper) {
-  // 同 Python 版的 render_paper_markdown
-  const bp = paper.blueprint;
-  const out = [];
-  out.push(`# ${bp.target_audience} · ${bp.subject}模拟卷`, "");
-  out.push(`**学段**:${bp.stage} ${bp.grade}  **总分**:${bp.total_score}  **时长**:${bp.duration_minutes} 分钟  **预期难度**:${bp.overall_difficulty}`, "");
-  out.push("## 命题理念", "", bp.design_rationale, "");
-  out.push("## 重点考查知识点", "", "- " + bp.knowledge_coverage.join("\n- "), "");
-  out.push("---", "", "## 试题正文", "");
-  paper.questions.forEach(fq => {
-    out.push(`### 第 ${fq.blueprint.number} 题(${fq.blueprint.question_type}, ${fq.blueprint.score} 分)`, "");
-    out.push(fq.draft.stem, "");
-    if (fq.draft.options) {
-      fq.draft.options.forEach(o => out.push(o + "  "));
-      out.push("");
-    }
-    if (fq.draft.diagram_description) {
-      out.push(`> 配图说明:${fq.draft.diagram_description}`, "");
-    }
-  });
-  out.push("---", "", "## 参考答案与解析", "");
-  paper.questions.forEach(fq => {
-    out.push(`### 第 ${fq.blueprint.number} 题`, "");
-    out.push(`**答案**:${fq.solution.answer}`, "", "**解析**:", "", fq.solution.solution, "");
-    if (fq.solution.common_mistakes?.length) {
-      out.push("**易错点**:");
-      fq.solution.common_mistakes.forEach(m => out.push(`- ${m}`));
-      out.push("");
-    }
-    if (fq.solution.extension) out.push(`**拓展**:${fq.solution.extension}`, "");
-  });
-  out.push("---", "", "## 主审评语", "");
-  out.push(`**整卷综合质量评分**:${paper.chief_review.overall_quality_score.toFixed(2)}`, "");
-  out.push(`**是否可发布**:${paper.chief_review.publishable ? "是" : "否(需重做)"}`, "");
-  out.push(paper.chief_review.executive_summary, "");
-  return out.join("\n");
-}
-
-function downloadFile(filename, content, mime) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 // ============================================================
@@ -1107,7 +1114,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
   const preset = applyModelOverrides(presetName);
   const maxRevisions = parseInt(document.getElementById("maxRevisions").value, 10);
 
-  clearProgress();
+  updateStatus("准备开始 ...");
   totalTokens = { input: 0, output: 0 };
   document.getElementById("outputSection").style.display = "none";
 
@@ -1128,6 +1135,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
       alert("命题流水线异常:" + e.message);
     }
   } finally {
+    updateStatus("");
     startBtn.disabled = false;
     stopBtn.disabled = true;
     abortController = null;
@@ -1157,25 +1165,17 @@ function showResult(paper) {
   section.scrollIntoView({ behavior: "smooth" });
 }
 
-document.getElementById("downloadMdBtn").addEventListener("click", () => {
-  if (!currentPaper) return;
-  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  downloadFile(`paper_${ts}.md`, renderMarkdown(currentPaper), "text/markdown;charset=utf-8");
-});
-
-document.getElementById("downloadJsonBtn").addEventListener("click", () => {
-  if (!currentPaper) return;
-  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  downloadFile(`paper_${ts}.json`, JSON.stringify(currentPaper, null, 2), "application/json;charset=utf-8");
-});
-
 document.getElementById("copyBtn").addEventListener("click", async () => {
-  if (!currentPaper) return;
+  const node = document.getElementById("paperOutput");
+  if (!node || !node.textContent.trim()) return;
   try {
-    await navigator.clipboard.writeText(renderMarkdown(currentPaper));
-    alert("已复制原文到剪贴板");
+    await navigator.clipboard.writeText(node.innerText);
+    const btn = document.getElementById("copyBtn");
+    const orig = btn.textContent;
+    btn.textContent = "✓ 已复制";
+    setTimeout(() => { btn.textContent = orig; }, 1500);
   } catch {
-    alert("复制失败,请使用下载按钮");
+    alert("复制失败,请手动选中文字复制");
   }
 });
 </script>
