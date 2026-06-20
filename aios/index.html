@@ -4191,25 +4191,10 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
       <div class="s-meta"><div class="s-name">客服AI助手</div><div class="s-desc">分诊·副驾·夜班·工单·质检·投诉</div></div>
       <span class="s-badge b-on">运行中</span>
     </div>
-    <div class="s-item locked" data-view="pmo" data-title="项目交付管控 · 节点预警与自动复盘" data-toast="📋「项目交付管控助手」未开通 · ¥3,000/月起 · 节点预警 + 自动复盘">
-      <span class="s-icon" style="--tint:#FFF4E5">📋</span>
-      <div class="s-meta"><div class="s-name">项目交付管控</div><div class="s-desc">节点预警 · 自动复盘</div></div>
-      <span class="s-badge b-lock">🔓 解锁</span>
-    </div>
-    <div class="s-item" data-view="tender" data-title="招标AI助手 · 起草 + 邀约 + AI 评标">
-      <span class="s-icon" style="--tint:#FFEFF2">📤</span>
-      <div class="s-meta"><div class="s-name">招标AI助手</div><div class="s-desc">起草 · 邀约 · AI 评标 · 履约</div></div>
+    <div class="s-item" data-view="bt" data-title="招/投标AI助手 · 招标 + 投标 全流程">
+      <span class="s-icon" style="--tint:#EEF5FF">📑</span>
+      <div class="s-meta"><div class="s-name">招/投标AI助手</div><div class="s-desc">招标 · 投标 · 全流程</div></div>
       <span class="s-badge b-on">运行中</span>
-    </div>
-    <div class="s-item" data-view="bid" data-title="投标AI助手 · 解析 + 标书 + 报价 + 复盘">
-      <span class="s-icon" style="--tint:#EEF5FF">🎯</span>
-      <div class="s-meta"><div class="s-name">投标AI助手</div><div class="s-desc">解析 · 标书 · 报价 · 复盘</div></div>
-      <span class="s-badge b-on">运行中</span>
-    </div>
-    <div class="s-item locked" data-view="rd" data-title="研发知识沉淀 · 工艺图谱与失效分析" data-toast="🔬「研发知识沉淀助手」未开通 · ¥3,000/月起 · 留住老工程师经验">
-      <span class="s-icon" style="--tint:#E9F9F1">🔬</span>
-      <div class="s-meta"><div class="s-name">研发知识沉淀</div><div class="s-desc">工艺图谱 · 失效分析</div></div>
-      <span class="s-badge b-lock">🔓 解锁</span>
     </div>
 
     <!-- ============ Layer 4 · 行业方案 ============ -->
@@ -9124,77 +9109,447 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 
 
 
-      <!-- ============ 视图:项目交付管控 ============ -->
-      <section class="view" id="view-pmo">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#FFF4E5">📋</span>项目交付管控</h2>
-            <p>节点预警 · 风险登记 · 自动复盘</p>
-          </div>
-          <div class="unlock-banner">
-            <div class="ub-left">
-              <span class="ub-ico">🔓</span>
-              <div>
-                <div class="ub-tt">未开通 · 当前为演示模式</div>
-                <div class="ub-sub">¥3,000/月起 · 替代 PMO 周报与节点追踪 · 延期预警提前 14 天</div>
-              </div>
-            </div>
-            <div class="ub-right">
-              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
-            </div>
-          </div>
-          <div class="pgrid g3">
-            <div class="pcard mini-stat"><div class="ms-num">28</div><div class="ms-label">在管项目</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">5</div><div class="ms-label">节点延期预警</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">84%</div><div class="ms-label">回款准确预测率</div></div>
-          </div>
-          <div class="pcard mt">
-            <div class="pc-head"><h3>项目集看板</h3><span class="pc-extra">本周进度</span></div>
-            <table class="table">
-              <thead><tr><th>项目</th><th>客户</th><th>进度</th><th>下一节点</th><th>风险</th><th>预计回款</th></tr></thead>
-              <tbody>
-                <tr><td>R-02 研发知识沉淀</td><td>东莞精工机械</td><td>62%</td><td>6/20 中期验收</td><td><span class="pill pill-green">低</span></td><td>¥6 万 · 6/22</td></tr>
-                <tr><td>G-03 行业洞察</td><td>成都赛锐医疗</td><td>40%</td><td>6/25 雷达上线</td><td><span class="pill pill-amber">中</span></td><td>¥6 万 · 6/27</td></tr>
-                <tr><td>套餐 B · AI 销售落地</td><td>杭州博远软件</td><td>85%</td><td>6/18 终验收</td><td><span class="pill pill-green">低</span></td><td>¥40 万 · 6/20</td></tr>
-                <tr><td>F-02 开票回款 AI</td><td>广州瑞和零售</td><td>30%</td><td>6/22 模型训练</td><td><span class="pill" style="background:#FEF2F2;color:#E5484D">高 · 客户数据延期</span></td><td>¥5 万 · 顺延 1 周</td></tr>
-                <tr><td>D-02 经营驾驶舱</td><td>武汉协昌建筑</td><td>15%</td><td>6/30 数据接入</td><td><span class="pill pill-amber">中</span></td><td>¥7 万 · 7/2</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>本周风险预警</h3><span class="pill" style="background:#FEF2F2;color:#E5484D">3 项需关注</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">广州瑞和 · 客户数据延期</div><div class="lr-sub">原 6/15 应交付的 POS 数据,客户 IT 部门请假至 6/19;建议升级到 Owner</div></div><button class="btn-mini js-toast" data-toast="已生成升级邮件草稿">处理</button></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">成都赛锐 · 验收指标偏差</div><div class="lr-sub">名单可联系率 62%,低于合同 70%;需 2 周内调优</div></div><button class="btn-mini js-toast" data-toast="已通知 FDE 调整召回策略">处理</button></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">东莞精工 · 老工程师休假</div><div class="lr-sub">资深工程师张工 6/18-6/22 休假,可能影响知识库测试</div></div><button class="btn-mini js-toast" data-toast="已与客户 Owner 协调备份人选">处理</button></div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>自动周报</h3><span class="pc-extra">每周一 09:00 自动生成</span></div>
-              <div class="pc-body" style="font-size:12.5px">
-                <b>本周(6/9-6/15)进度概要:</b><br/>
-                · 28 个在管项目,总进度推进 +6.8pp<br/>
-                · 完成验收 2 个(博远软件、瑞和零售)<br/>
-                · 新签约 1 个(精工机械)<br/>
-                · 预警 3 个(详见左侧)<br/>
-                · 本周回款实际 ¥52 万 / 预测 ¥48 万,准确率 92%<br/><br/>
-                <button class="btn-grad js-toast" data-toast="已推送本周周报到 CFO 与 CEO 邮箱">发送给老板</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       <!-- ============ 视图:投标AI助手 (流式 Agent · 2 板块) ============ -->
-      <section class="view" id="view-bid">
+      <!-- ============ 视图:招/投标AI助手 (招标 + 投标 · 4 板块) ============ -->
+      <section class="view" id="view-bt">
         <div class="sales-shell">
-          <div class="stage-nav" id="bidNav">
-            <button class="stage-pill active" data-stage="run"><b>1</b>🎯 新投标 Agent</button>
-            <button class="stage-pill" data-stage="mgmt"><b>2</b>🏆 已投标管理</button>
+          <div class="stage-nav" id="btNav">
+            <button class="stage-pill active" data-stage="tender-run"><b>1</b>📤 招标 · Agent</button>
+            <button class="stage-pill" data-stage="tender-mgmt"><b>2</b>🤝 招标管理</button>
+            <button class="stage-pill" data-stage="bid-run"><b>3</b>🎯 投标 · Agent</button>
+            <button class="stage-pill" data-stage="bid-mgmt"><b>4</b>🏆 投标管理</button>
           </div>
           <div class="stage-body">
 
             <!-- ===== Stage 1: 新投标 Agent (流式) ===== -->
-            <div class="stage active" id="bid-run"><div class="page">
+            <div class="stage active" id="tender-run"><div class="page">
+
+              <!-- Agent 自介 -->
+              <div class="agent-intro">
+                <div class="ai-ava">📤</div>
+                <div class="ai-txt">
+                  <div class="ai-name">招标 Agent<small>· 本月已替你跑 <b data-counter="tenderThisMonth">8</b> 个采购招标 · 平均节省 <b>¥38 万</b>/标 · 流程缩短 <b>60%</b></small></div>
+                  你<b>录入采购需求</b>(几句话即可),我自动跑完<b>起草招标文件 → 评分标准 → 推荐供应商 → 收投标 → AI 评标</b>整条流水线(约 18 秒),完成后告诉你<b>该选哪家</b>+AI 已替你做了什么,你只需拍板。
+                </div>
+              </div>
+
+              <!-- 需求录入区(替代上传) -->
+              <div class="tender-intake">
+                <div class="ti-head">📝 录入采购需求 · AI 帮你写招标文件</div>
+                <div class="ti-row">
+                  <label>采购什么(简单描述)</label>
+                  <textarea id="tenderNeed" placeholder="例:我要采购一套服务器集群,5 台,主要跑深度学习训练任务,显存大、I/O 强,预算 ¥200 万,3 年质保..."></textarea>
+                </div>
+                <div class="ti-2col">
+                  <div class="ti-row">
+                    <label>预算上限</label>
+                    <input type="text" id="tenderBudget" value="¥200 万" />
+                  </div>
+                  <div class="ti-row">
+                    <label>交付周期(天)</label>
+                    <input type="text" id="tenderDays" value="45 天" />
+                  </div>
+                </div>
+                <div class="ti-2col">
+                  <div class="ti-row">
+                    <label>采购类型</label>
+                    <select id="tenderType">
+                      <option value="goods" selected>货物采购</option>
+                      <option value="service">服务采购</option>
+                      <option value="project">工程项目</option>
+                      <option value="it">IT 系统</option>
+                    </select>
+                  </div>
+                  <div class="ti-row">
+                    <label>评标方法</label>
+                    <select id="tenderMethod">
+                      <option value="composite" selected>综合评分(技术 + 商务)</option>
+                      <option value="lowprice">最低评标价(纯价格)</option>
+                      <option value="reasonable">合理低价</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="ti-start" id="tenderStartAgent">▶ 启动 Agent · 一键全跑</button>
+              </div>
+
+              <!-- AI 工作流 -->
+              <div class="wf-panel" id="tenderWfPanel">
+                <div class="wf-head">
+                  <div class="wh-tt">🤖 AI 招标全流程<small>录需求 → 点启动 Agent</small></div>
+                  <div class="wh-total" id="tenderWfTotal"></div>
+                </div>
+                <div class="wf-empty" id="tenderWfEmpty">
+                  <div class="we-ico">⏸</div>
+                  待你录入需求并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我替你做的每一步。</span>
+                </div>
+                <div class="wf-stream" id="tenderWfStream">
+
+                  <!-- Step 1: 🎯 采购需求与立项(阶段 1) -->
+                  <div class="wf-msg" data-step="1" style="--dur:3.2s">
+                    <div class="wm-state"><span>1</span></div>
+                    <div class="wm-body">
+                      <div class="wm-line"><span class="wml-tt">🎯 采购需求与立项 · 需求规格 + 预算 + 采购方式 + 立项草案</span>
+                        <span class="wml-meta" data-meta>排队中</span></div>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        我已替你做 4 件事:① <b>规范化需求规格</b>(5 台 GPU 服务器 · 显存 ≥ 80GB · I/O ≥ 7GB/s · 3 年质保)· ② <b>预算建议 ¥168 万</b>(同类项目历史回测,你方 ¥200 万有 16% 议价空间)· ③ <b>采购方式推荐:公开招标</b>(金额超 ¥100 万 + 通用产品 + 8+ 合格供应商)· ④ <b>立项申请草案</b>已生成 → 推送 OA 审批
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看预算回测 + 立项草案 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.7;color:var(--ink-2)">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📊 历史同类项目预算回测(我方近 3 年)</div>
+                          ① 2025-03 AI 训练集群 4 台 · 实际 ¥132 万 / 预算 ¥160 万(节省 17%)<br>
+                          ② 2024-08 GPU 渲染集群 6 台 · 实际 ¥175 万 / 预算 ¥210 万(节省 17%)<br>
+                          ③ 2024-02 ML 平台 5 台 · 实际 ¥158 万 / 预算 ¥180 万(节省 12%)<br>
+                          <b style="color:var(--brand)">→ AI 建议预算 ¥168 万 · 实际期望 ¥150-165 万</b>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: 📝 招标文件起草 + 内审(阶段 2) -->
+                  <div class="wf-msg" data-step="2" style="--dur:4.8s">
+                    <div class="wm-state"><span>2</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">📝 招标文件起草 + 内审 · 5 大避坑 + 8 项评分细则 + 法务条款</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 已生成 <b>32 页招标文件</b>(投标须知 + 技术规格 + 商务条款 + 评标办法 + 合同条款 + 附件)· <b>AI 避坑 5 件</b>:① 技术规格不指定品牌 ② 含糊词全部量化(显存 ≥ 80GB)③ 评分细则每项权重明确 ④ 资格门槛适中(目标 8-15 家投标)⑤ 答疑时间节点清晰。<b>法务+财务条款已嵌入</b>:履约保证金 5% + 延期违约金 0.2%/日 + 验收双签
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 评分项设计 + 5 避坑细则 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;line-height:1.7;color:var(--ink-2);margin-bottom:9px">
+                          <b style="color:var(--green)">✓ AI 自动避 5 个常见招标坑:</b><br>
+                          ① 技术规格<b>不指定品牌</b>(避免被质疑指定厂商)→ 改为"性能指标 + 兼容性要求"<br>
+                          ② 含糊词"高性能/低价"已替换为<b>具体数字</b>(如显存 ≥ 80GB / I/O ≥ 7GB/s)<br>
+                          ③ 评分细则<b>每项权重明确</b>(避免评委自由裁量过大)<br>
+                          ④ 资质门槛<b>不过高也不过低</b>(目标 8-15 家投标 = 充分竞争)<br>
+                          ⑤ <b>答疑机制 + 时间节点</b>已设置避免投标方质疑
+                        </div>
+                        <div class="score-breakdown">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">⚖️ 评分细则 · 综合评分 100 分</div>
+                          <div class="sb-row"><div class="sbr-name">技术方案<small>架构 + 性能 + 兼容</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">报价(偏差扣分)<small>距均价 1% 扣 1 分</small></div><div class="sbr-pts">20<small>/100</small></div><div class="sbr-bar"><i style="width:80%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">同类业绩</div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">售后服务</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
+                          <div class="sb-row"><div class="sbr-name">交付能力 / 团队 / 授权 / 资质</div><div class="sbr-pts">30<small>/100</small></div><div class="sbr-bar"><i style="width:65%"></i></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: 📤 发布 + 答疑(阶段 3) -->
+                  <div class="wf-msg" data-step="3" style="--dur:3.5s">
+                    <div class="wm-state"><span>3</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">📤 多渠道发布 + 资格预审 + 答疑澄清</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        已多渠道发布:① <b>中国招标投标公共服务平台</b> ② 政府采购网 ③ 行业网 ④ 我方官网 · <b>14 家</b>合格供应商已收到邀请函(AI 已起草)· <b>资格预审</b>:14 家全部通过初审(资质完整)· <b>答疑期收 23 个问题</b> · AI 已分类(技术 12 / 商务 8 / 资质 3)· AI 已草拟答复 + 补遗文件
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 14 家邀请 + 23 个答疑 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.75;color:var(--ink-2)">
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📇 已邀请 14 家供应商(从 1,460 家库筛选)</div>
+                          <b>头部 3 家</b>(原厂):① 浪潮信息 · ② 戴尔科技 · ③ 联想集团<br>
+                          <b>金牌集成商 5 家</b>:① 神州数码 · ② 软通动力 · ③ 数科网维 · ④ 太极股份 · ⑤ 华宇软件<br>
+                          <b>区域优秀 6 家</b>:含本地服务商 3 家 + 跨区域 3 家<br><br>
+                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:5px">💬 答疑期收 23 个问题 · AI 分类汇总</div>
+                          <b>技术类 12 个</b>:① 是否要求自带操作系统(7 家问)② 是否支持 InfiniBand 网络 ③ 显存能否用 H100/A100 互换<br>
+                          <b>商务类 8 个</b>:① 验收周期 ② 付款节奏 ③ 履约保证金<br>
+                          <b>资质类 3 个</b>:① 厂商授权要求 ② 联合体限制
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 4: 📊 开标 + AI 评标(阶段 4) -->
+                  <div class="wf-msg" data-step="4" style="--dur:5.5s">
+                    <div class="wm-state"><span>4</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">📊 开标 + AI 评标 · N 家投标秒解析 + 客观打分 + 串标识别</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        <b>14 邀 → 8 应标</b>(58% 应标率) · 共 <b>2,140 页</b>投标书。AI 已秒解析:① <b>资格初审</b>:8 家全过 · ② <b>技术标打分</b>(60%):浪潮 23 / 戴尔 22 / 联想 21 / 区域 X 19 · ③ <b>商务标打分</b>(40%):报价 + 付款 + 服务 · ④ <b>串标识别</b>:无异常(报价分散度 14%)· ⑤ <b>评标报告</b>已自动生成
+                      </div>
+                      <button class="wm-expand" data-fx="tenderExpand">查看 8 家详细评分 + AI 推理 <span class="we-arr">▾</span></button>
+                      <div class="wf-detail">
+                        <div class="vendor-grid">
+
+                          <div class="vendor-row recommend">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥇</div>
+                              <div class="vr-name">浪潮信息<small>原厂 · 信息化龙头</small></div>
+                              <div class="vr-tag gold">AI 推荐</div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">23</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">14</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val">17</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">88</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val">¥168 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">38 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 推荐:</b>性价比最优 + 技术拉满 + 原厂质保 5 年优于其他家。报价 ¥168 万比最低家高 ¥10 万,但技术分高 5 分 + 质保多 2 年。综合最优。建议<b>中标</b>。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥈</div>
+                              <div class="vr-name">戴尔科技<small>原厂 · 全球品牌</small></div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">22</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">13</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">15</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">85</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val warn">¥182 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val">42 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 评:</b>原厂质量过硬, 但 ¥14 万高于推荐方。综合次之。可作为<b>备选</b>(若推荐方临时取消)。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row lowprice">
+                            <div class="vr-head">
+                              <div class="vr-rank">🥉</div>
+                              <div class="vr-name">区域服务商 X<small>本地 · 5 年中型</small></div>
+                              <div class="vr-tag warn">⚠ 价格陷阱</div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val warn">19</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val warn">9</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val good">20</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val warn">7</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">79</div></div>
+                            </div>
+                            <div class="vr-meta">
+                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val good">¥158 万</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">35 天</div></div>
+                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val warn">3 年</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>⚠ AI 风险预警:</b>价格 ¥158 万看似最优(便宜 ¥10 万)但<b>3 处隐患</b>:① 显存非原厂(可能用二手翻新)· ② 业绩仅 2 例类似规模 · ③ 7×24 售后未承诺。<b>不建议中标</b>。
+                            </div>
+                          </div>
+
+                          <div class="vendor-row lowscore">
+                            <div class="vr-head">
+                              <div class="vr-rank">4</div>
+                              <div class="vr-name">联想集团<small>原厂</small></div>
+                            </div>
+                            <div class="vr-scores">
+                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val">21</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val">12</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">13</div></div>
+                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val">9</div></div>
+                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">76</div></div>
+                            </div>
+                            <div class="vr-ai">
+                              <b>🤖 AI 评:</b>报价偏高 + 显存配置略低于规格 → 综合中段。可<b>用作议价杠杆</b>(告诉浪潮其他原厂也在投, 议价 2-3% 空间)。
+                            </div>
+                          </div>
+
+                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:5px 0">↓ 另 4 家(综合 60-72 分)已折叠</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 5: 🏆 定标 + 合同(阶段 5) -->
+                  <div class="wf-msg" data-step="5" style="--dur:3.0s">
+                    <div class="wm-state"><span>5</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">🏆 定标 + 合同 · 决策辅助 + 议价空间 + 合同自动生成</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        AI 综合 8 家评分 + 历史相似项目 + 风险评估,推荐<b>浪潮 ¥168 万</b>。<b>议价空间</b>:可用联想做杠杆议 2-3% → 最终预期 <b>¥163-165 万</b>(省 ¥3-5 万)。<b>合同自动生成</b>:基于浪潮投标书 + 我方模板 + 法务条款 → 38 页合同草案就绪 · <b>中标通知书 + 落标通知</b>已起草
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 6: 🛠️ 履约 + 质保(阶段 6) -->
+                  <div class="wf-msg" data-step="6" style="--dur:2.8s">
+                    <div class="wm-state"><span>6</span></div>
+                    <div class="wm-body">
+                      <div class="wml-tt">🛠️ 履约 + 质保 · SOP 自动启动 + 验收 + 续约</div>
+                      <span class="wml-meta" data-meta>排队中</span>
+                      <div class="wm-prog"><i></i></div>
+                      <div class="wm-summary">
+                        履约 SOP 已就绪:<b>5 大里程碑</b>(签约 → 到货 → 安装 → 验收 → 上线)· <b>验收清单</b> 28 项(性能/功能/资料/培训/售后)自动核对 · <b>付款 4 节点</b>提醒(30% 签约 / 30% 到货 / 30% 验收 / 10% 质保期满)· <b>5 年质保</b>跟踪 + <b>服务期满前 90 天</b>启动续约准备
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="wf-done-banner" id="tenderWfDone">
+                  <div class="wdb-ico">✅</div>
+                  <div class="wdb-tt">AI 已完成全部 5 阶段招标 · 总耗时 <b id="tenderWfTime">22.8</b> 秒
+                    <small>替代采购部 5 人 1 周工作 · 接下来 ↓ 我推荐选谁,你拍板</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 选定决策卡 -->
+              <div class="tender-decide" id="tenderDecide">
+                <div class="td-head">
+                  <div class="td-ico">🎯</div>
+                  <div class="td-tt">决策:选哪家中标? · <b style="color:var(--brand)">AI 推荐 浪潮信息 ¥168 万</b>
+                    <small>综合最优 · 技术 + 质保 + 性价比 · 风险最低</small></div>
+                  <div class="bv-conf" style="background:rgba(124,92,250,.1);color:var(--brand);padding:4px 9px;border-radius:7px;font-size:11.5px;font-weight:800">AI 置信度 91%</div>
+                </div>
+                <div class="bv-grid">
+                  <div class="bv-cell"><div class="bvc-lbl">推荐中标方</div><div class="bvc-val">浪潮信息</div><div class="bvc-sub">综合 88 分</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">中标价</div><div class="bvc-val">¥168 万</div><div class="bvc-sub">省 ¥32 万 vs 预算</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">替代方案</div><div class="bvc-val">戴尔 ¥182</div><div class="bvc-sub">备选 (85 分)</div></div>
+                  <div class="bv-cell"><div class="bvc-lbl">议价空间</div><div class="bvc-val good">2-3%</div><div class="bvc-sub">用联想做杠杆</div></div>
+                </div>
+                <div class="td-acts">
+                  <button class="primary" data-fx="tenderDecide" data-act="accept" data-msg="✅ 已选浪潮 · AI 已 ① 起草《中标通知书》· ② 钉钉@法务起草合同 · ③ 通知其余 7 家 ·④ 议价 2.5% 已与浪潮 BD 沟通 → 最终 ¥164 万 · 节省 ¥4 万" data-exec="accept">✓ 同意 AI 推荐 · 自动通知中标 + 议价</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="lowprice" data-msg="⚠ 已选区域 X · AI 风险预警仍标记 · 已要求补充证明" data-exec="lowprice">⚠ 选低价 X(我接受风险)</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="review" data-msg="📋 已进入复核流程 · 8 家详细标书已发采购总监" data-exec="review">📋 我要细看 8 家再决定</button>
+                  <button class="secondary" data-fx="tenderDecide" data-act="reject" data-msg="❌ 已废标 · AI 记录原因后重新起草" data-exec="reject">❌ 废标重启</button>
+                </div>
+              </div>
+
+              <!-- AI 执行流 -->
+              <div class="ai-exec-card" id="tenderExec">
+                <div class="ae-head">
+                  <div class="ai-ava" style="width:32px;height:32px;font-size:16px;background:linear-gradient(135deg,#5A5BF0,#9A4DFF);display:grid;place-items:center;border-radius:9px">🤖</div>
+                  <div class="ae-tt">AI 正在为你自动执行下游<small>这才是真正"招标 Agent" 该做的</small></div>
+                </div>
+                <div class="ai-exec-log" id="tenderExecLog"></div>
+                <div class="ai-exec-final" id="tenderExecFinal">
+                  <b>✅ 全部完成!</b>本采购已进入"等供应商签合同"状态。<br>我会持续跟进供应商履约、交付节点、质保期管理。本月已招标 <b id="tenderExecMonth">9</b> 个(+1)。
+                  <br><button id="tenderExecNext">▶ 准备下一个招标</button>
+                </div>
+              </div>
+
+            </div></div>
+
+            <!-- ===== Stage 2: 已招标管理 ===== -->
+
+            <div class="stage" id="tender-mgmt"><div class="page">
+
+              <div class="agent-status">
+                <div class="as-ava">🤝</div>
+                <div class="as-main">
+                  <div class="as-title">采购管家 Agent · 监督在管 <b>17 个</b>已签合同<span class="as-live">● 在岗</span></div>
+                  <div class="as-meta">已替你: 跟踪供应商履约 <b>17 次</b> · 验收节点提醒 <b>8 次</b> · 质保到期提醒 <b>3 次</b> · 续约谈判预案 <b>2 份</b></div>
+                  <div class="as-pending">⚠ <b>3 件大事</b>需要你拍板 ↓</div>
+                </div>
+              </div>
+
+              <div class="mgmt-stat-strip">
+                <div class="mss-cell" style="--c:#5A5BF0"><div class="mssc-lbl">在管合同</div><div class="mssc-val">17</div><div class="mssc-sub">含 5 件交付期内</div></div>
+                <div class="mss-cell" style="--c:#E5484D"><div class="mssc-lbl">⚠ 延期风险</div><div class="mssc-val danger">2</div><div class="mssc-sub">交付期临近</div></div>
+                <div class="mss-cell" style="--c:#18B97A"><div class="mssc-lbl">本月节省</div><div class="mssc-val good">¥38 万</div><div class="mssc-sub">议价 / 替代方案</div></div>
+                <div class="mss-cell" style="--c:#D97706"><div class="mssc-lbl">质保到期</div><div class="mssc-val warn">3</div><div class="mssc-sub">90 天内</div></div>
+              </div>
+
+              <!-- 决策卡 1: 供应商延期 -->
+              <div class="decision-card" data-dec="tenderD1" data-exec-msg="自动触发: ① 已发《延期违约通知》· ② 启动备选供应商(戴尔)· ③ 钉钉@商务总监 · ④ 已扣预付款 5%">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#E5484D">⚠️</span>
+                  <div class="dec-main">
+                    <div class="dec-title">浪潮服务器 5 台 · 应交付 7/5 · 已延 10 天 · <b style="color:var(--brand)">AI 推荐:启动备选 + 索赔 5%</b></div>
+                    <div class="dec-meta">原合同 ¥168 万 · 浪潮称"芯片紧缺再延 15 天" · 我方业务依赖,影响 AI 训练项目</div>
+                  </div>
+                  <span class="pill pill-red">延期</span>
+                </div>
+                <div class="dec-analysis">
+                  <div style="font-size:11.5px;line-height:1.65;color:var(--ink-2);margin-bottom:11px">
+                    <b style="color:var(--brand)">🤖 AI 分析:</b>合同 5.3 条 <b>延期违约金 0.2%/日</b> · 已可索赔 ¥3.36 万 + 总延期上限 30 天。AI 已联系戴尔渠道,可<b>替代型号 18 天到货</b>(¥4 万差价)。综合<b>启用备选 + 与浪潮谈差额补偿</b>最优。
+                  </div>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD1" data-msg="✅ 已批准 · 启动戴尔 18 天到货 + 浪潮索赔 ¥3.36 万 + 差额由浪潮全额补偿">✓ 启动备选 + 索赔</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="defer" data-msg="再等浪潮 7 天">再等浪潮</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="reject" data-msg="我亲自找浪潮谈">我亲自谈</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 2: 续约 -->
+              <div class="decision-card" data-dec="tenderD2" data-exec-msg="自动触发: ① 已起草续约 + 议价 5% 方案 · ② 评估市场比价(节省 ¥18 万)· ③ BD 已联系供应商">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#9A4DFF">🔄</span>
+                  <div class="dec-main">
+                    <div class="dec-title">软通动力 IT 运维服务 · 8/30 到期 · <b style="color:var(--brand)">AI 推荐:续约 + 议价 5% 降至 ¥285 万</b></div>
+                    <div class="dec-meta">原合同 ¥300 万/年 · 服务满意度 9.0 · 市场同类报价均值 ¥298 万 · 我方有议价空间</div>
+                  </div>
+                  <span class="pill" style="background:#F1EBFF;color:#9A4DFF">续约</span>
+                </div>
+                <div class="dec-analysis">
+                  <div class="dec-sim">
+                    <div class="range-row">
+                      <label>续约议价</label>
+                      <input type="range" class="range-input" id="tenderD2Cut" min="0" max="15" step="1" value="5">
+                      <span class="range-val"><span id="tenderD2CutV">5</span>%</span>
+                    </div>
+                    <div class="dec-result">
+                      新合同 <b id="tenderD2Amt">¥285 万</b> · 接受概率 <b id="tenderD2Acc" class="good">88%</b> · 年省 <b id="tenderD2Save" class="good">¥15 万</b>
+                      <div style="margin-top:7px" id="tenderD2Verdict"><b class="good">AI 推荐 4-7%</b> · 体面 + 不丢服务质量</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD2" data-msg="✅ 已批准 · AI 已发续约 + 议价提案给软通 + 24h 内回复">✓ 启动续约议价</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="defer" data-msg="推迟 1 周">推迟 1 周</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="reject" data-msg="放弃续约 · 重启招标">不续约</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <!-- 决策卡 3: 质保到期 -->
+              <div class="decision-card" data-dec="tenderD3" data-exec-msg="自动触发: ① 已生成 3 选 1 方案 PDF · ② 钉钉@CTO 7/22 内决策">
+                <div class="dec-head">
+                  <span class="dec-icon" style="--c:#D97706">⏰</span>
+                  <div class="dec-main">
+                    <div class="dec-title">华为存储 12 台 · 5 年质保 8/15 到期 · <b style="color:var(--brand)">AI 推荐:延保 1 年 ¥15 万(vs 新购 ¥120 万)</b></div>
+                    <div class="dec-meta">原 2021 年采购 ¥150 万 · 当前残值 ¥30 万 · 设备状态良好 · 3 选 1 方案就绪</div>
+                  </div>
+                  <span class="pill pill-amber">质保</span>
+                </div>
+                <div class="dec-acts">
+                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD3" data-msg="✅ 已批准 · 已与华为签延保 ¥15 万 / 1 年 · 同步评估明年是否替换">✓ 延保 1 年</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="defer" data-msg="自费维护(只买备件 ¥3 万)">自费维护</button>
+                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="reject" data-msg="启动新一轮存储招标 ¥120 万">新购替换</button>
+                </div>
+                <div class="dec-status"></div>
+              </div>
+
+              <div class="perform-monitor">
+                <div class="pm-ico">🛰️</div>
+                <div class="pm-list">
+                  <div><span class="pm-dot">●</span>履约监督 · <b>17 合同</b>持续跟踪 · 2 件交付临期</div>
+                  <div><span class="pm-dot">●</span>市场比价 · 每月对比 · <b>已发现 5 件可议价</b></div>
+                  <div><span class="pm-dot">●</span>质保提醒 · 90 天内 <b>3 件</b>到期</div>
+                  <div><span class="pm-dot">●</span>新采购需求 · <b>2 件</b>明日待你录入</div>
+                </div>
+              </div>
+
+            </div></div>
+
+            <div class="stage" id="bid-run"><div class="page">
 
               <!-- Agent 自介 -->
               <div class="agent-intro">
@@ -9642,502 +9997,9 @@ curl https://api.dgg.ai/v1/agents/dispatch \
         </div>
       </section>
 
-      <!-- ============ 视图:招标AI助手 (流式 Agent · 2 板块) ============ -->
-      <section class="view" id="view-tender">
-        <div class="sales-shell">
-          <div class="stage-nav" id="tenderNav">
-            <button class="stage-pill active" data-stage="run"><b>1</b>📤 新招标 Agent</button>
-            <button class="stage-pill" data-stage="mgmt"><b>2</b>🤝 已招标管理</button>
-          </div>
-          <div class="stage-body">
-
-            <!-- ===== Stage 1: 新招标 Agent (流式) ===== -->
-            <div class="stage active" id="tender-run"><div class="page">
-
-              <!-- Agent 自介 -->
-              <div class="agent-intro">
-                <div class="ai-ava">📤</div>
-                <div class="ai-txt">
-                  <div class="ai-name">招标 Agent<small>· 本月已替你跑 <b data-counter="tenderThisMonth">8</b> 个采购招标 · 平均节省 <b>¥38 万</b>/标 · 流程缩短 <b>60%</b></small></div>
-                  你<b>录入采购需求</b>(几句话即可),我自动跑完<b>起草招标文件 → 评分标准 → 推荐供应商 → 收投标 → AI 评标</b>整条流水线(约 18 秒),完成后告诉你<b>该选哪家</b>+AI 已替你做了什么,你只需拍板。
-                </div>
-              </div>
-
-              <!-- 需求录入区(替代上传) -->
-              <div class="tender-intake">
-                <div class="ti-head">📝 录入采购需求 · AI 帮你写招标文件</div>
-                <div class="ti-row">
-                  <label>采购什么(简单描述)</label>
-                  <textarea id="tenderNeed" placeholder="例:我要采购一套服务器集群,5 台,主要跑深度学习训练任务,显存大、I/O 强,预算 ¥200 万,3 年质保..."></textarea>
-                </div>
-                <div class="ti-2col">
-                  <div class="ti-row">
-                    <label>预算上限</label>
-                    <input type="text" id="tenderBudget" value="¥200 万" />
-                  </div>
-                  <div class="ti-row">
-                    <label>交付周期(天)</label>
-                    <input type="text" id="tenderDays" value="45 天" />
-                  </div>
-                </div>
-                <div class="ti-2col">
-                  <div class="ti-row">
-                    <label>采购类型</label>
-                    <select id="tenderType">
-                      <option value="goods" selected>货物采购</option>
-                      <option value="service">服务采购</option>
-                      <option value="project">工程项目</option>
-                      <option value="it">IT 系统</option>
-                    </select>
-                  </div>
-                  <div class="ti-row">
-                    <label>评标方法</label>
-                    <select id="tenderMethod">
-                      <option value="composite" selected>综合评分(技术 + 商务)</option>
-                      <option value="lowprice">最低评标价(纯价格)</option>
-                      <option value="reasonable">合理低价</option>
-                    </select>
-                  </div>
-                </div>
-                <button class="ti-start" id="tenderStartAgent">▶ 启动 Agent · 一键全跑</button>
-              </div>
-
-              <!-- AI 工作流 -->
-              <div class="wf-panel" id="tenderWfPanel">
-                <div class="wf-head">
-                  <div class="wh-tt">🤖 AI 招标全流程<small>录需求 → 点启动 Agent</small></div>
-                  <div class="wh-total" id="tenderWfTotal"></div>
-                </div>
-                <div class="wf-empty" id="tenderWfEmpty">
-                  <div class="we-ico">⏸</div>
-                  待你录入需求并启动 Agent。<br><span style="font-size:11px;opacity:.5">启动后这里会流式展示我替你做的每一步。</span>
-                </div>
-                <div class="wf-stream" id="tenderWfStream">
-
-                  <!-- Step 1: 🎯 采购需求与立项(阶段 1) -->
-                  <div class="wf-msg" data-step="1" style="--dur:3.2s">
-                    <div class="wm-state"><span>1</span></div>
-                    <div class="wm-body">
-                      <div class="wm-line"><span class="wml-tt">🎯 采购需求与立项 · 需求规格 + 预算 + 采购方式 + 立项草案</span>
-                        <span class="wml-meta" data-meta>排队中</span></div>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        我已替你做 4 件事:① <b>规范化需求规格</b>(5 台 GPU 服务器 · 显存 ≥ 80GB · I/O ≥ 7GB/s · 3 年质保)· ② <b>预算建议 ¥168 万</b>(同类项目历史回测,你方 ¥200 万有 16% 议价空间)· ③ <b>采购方式推荐:公开招标</b>(金额超 ¥100 万 + 通用产品 + 8+ 合格供应商)· ④ <b>立项申请草案</b>已生成 → 推送 OA 审批
-                      </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看预算回测 + 立项草案 <span class="we-arr">▾</span></button>
-                      <div class="wf-detail">
-                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.7;color:var(--ink-2)">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📊 历史同类项目预算回测(我方近 3 年)</div>
-                          ① 2025-03 AI 训练集群 4 台 · 实际 ¥132 万 / 预算 ¥160 万(节省 17%)<br>
-                          ② 2024-08 GPU 渲染集群 6 台 · 实际 ¥175 万 / 预算 ¥210 万(节省 17%)<br>
-                          ③ 2024-02 ML 平台 5 台 · 实际 ¥158 万 / 预算 ¥180 万(节省 12%)<br>
-                          <b style="color:var(--brand)">→ AI 建议预算 ¥168 万 · 实际期望 ¥150-165 万</b>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 2: 📝 招标文件起草 + 内审(阶段 2) -->
-                  <div class="wf-msg" data-step="2" style="--dur:4.8s">
-                    <div class="wm-state"><span>2</span></div>
-                    <div class="wm-body">
-                      <div class="wml-tt">📝 招标文件起草 + 内审 · 5 大避坑 + 8 项评分细则 + 法务条款</div>
-                      <span class="wml-meta" data-meta>排队中</span>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        AI 已生成 <b>32 页招标文件</b>(投标须知 + 技术规格 + 商务条款 + 评标办法 + 合同条款 + 附件)· <b>AI 避坑 5 件</b>:① 技术规格不指定品牌 ② 含糊词全部量化(显存 ≥ 80GB)③ 评分细则每项权重明确 ④ 资格门槛适中(目标 8-15 家投标)⑤ 答疑时间节点清晰。<b>法务+财务条款已嵌入</b>:履约保证金 5% + 延期违约金 0.2%/日 + 验收双签
-                      </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 8 评分项设计 + 5 避坑细则 <span class="we-arr">▾</span></button>
-                      <div class="wf-detail">
-                        <div style="padding:11px 13px;background:linear-gradient(180deg,#F0FDF4,#E9F9F1);border-left:3px solid var(--green);border-radius:7px;font-size:11px;line-height:1.7;color:var(--ink-2);margin-bottom:9px">
-                          <b style="color:var(--green)">✓ AI 自动避 5 个常见招标坑:</b><br>
-                          ① 技术规格<b>不指定品牌</b>(避免被质疑指定厂商)→ 改为"性能指标 + 兼容性要求"<br>
-                          ② 含糊词"高性能/低价"已替换为<b>具体数字</b>(如显存 ≥ 80GB / I/O ≥ 7GB/s)<br>
-                          ③ 评分细则<b>每项权重明确</b>(避免评委自由裁量过大)<br>
-                          ④ 资质门槛<b>不过高也不过低</b>(目标 8-15 家投标 = 充分竞争)<br>
-                          ⑤ <b>答疑机制 + 时间节点</b>已设置避免投标方质疑
-                        </div>
-                        <div class="score-breakdown">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">⚖️ 评分细则 · 综合评分 100 分</div>
-                          <div class="sb-row"><div class="sbr-name">技术方案<small>架构 + 性能 + 兼容</small></div><div class="sbr-pts">25<small>/100</small></div><div class="sbr-bar"><i style="width:100%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">报价(偏差扣分)<small>距均价 1% 扣 1 分</small></div><div class="sbr-pts">20<small>/100</small></div><div class="sbr-bar"><i style="width:80%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">同类业绩</div><div class="sbr-pts">15<small>/100</small></div><div class="sbr-bar"><i style="width:60%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">售后服务</div><div class="sbr-pts">10<small>/100</small></div><div class="sbr-bar"><i style="width:40%"></i></div></div>
-                          <div class="sb-row"><div class="sbr-name">交付能力 / 团队 / 授权 / 资质</div><div class="sbr-pts">30<small>/100</small></div><div class="sbr-bar"><i style="width:65%"></i></div></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 3: 📤 发布 + 答疑(阶段 3) -->
-                  <div class="wf-msg" data-step="3" style="--dur:3.5s">
-                    <div class="wm-state"><span>3</span></div>
-                    <div class="wm-body">
-                      <div class="wml-tt">📤 多渠道发布 + 资格预审 + 答疑澄清</div>
-                      <span class="wml-meta" data-meta>排队中</span>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        已多渠道发布:① <b>中国招标投标公共服务平台</b> ② 政府采购网 ③ 行业网 ④ 我方官网 · <b>14 家</b>合格供应商已收到邀请函(AI 已起草)· <b>资格预审</b>:14 家全部通过初审(资质完整)· <b>答疑期收 23 个问题</b> · AI 已分类(技术 12 / 商务 8 / 资质 3)· AI 已草拟答复 + 补遗文件
-                      </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 14 家邀请 + 23 个答疑 <span class="we-arr">▾</span></button>
-                      <div class="wf-detail">
-                        <div style="padding:11px 13px;background:#F8F9FE;border-radius:9px;font-size:11px;line-height:1.75;color:var(--ink-2)">
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:7px">📇 已邀请 14 家供应商(从 1,460 家库筛选)</div>
-                          <b>头部 3 家</b>(原厂):① 浪潮信息 · ② 戴尔科技 · ③ 联想集团<br>
-                          <b>金牌集成商 5 家</b>:① 神州数码 · ② 软通动力 · ③ 数科网维 · ④ 太极股份 · ⑤ 华宇软件<br>
-                          <b>区域优秀 6 家</b>:含本地服务商 3 家 + 跨区域 3 家<br><br>
-                          <div style="font-size:11.5px;font-weight:800;color:var(--ink);margin-bottom:5px">💬 答疑期收 23 个问题 · AI 分类汇总</div>
-                          <b>技术类 12 个</b>:① 是否要求自带操作系统(7 家问)② 是否支持 InfiniBand 网络 ③ 显存能否用 H100/A100 互换<br>
-                          <b>商务类 8 个</b>:① 验收周期 ② 付款节奏 ③ 履约保证金<br>
-                          <b>资质类 3 个</b>:① 厂商授权要求 ② 联合体限制
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 4: 📊 开标 + AI 评标(阶段 4) -->
-                  <div class="wf-msg" data-step="4" style="--dur:5.5s">
-                    <div class="wm-state"><span>4</span></div>
-                    <div class="wm-body">
-                      <div class="wml-tt">📊 开标 + AI 评标 · N 家投标秒解析 + 客观打分 + 串标识别</div>
-                      <span class="wml-meta" data-meta>排队中</span>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        <b>14 邀 → 8 应标</b>(58% 应标率) · 共 <b>2,140 页</b>投标书。AI 已秒解析:① <b>资格初审</b>:8 家全过 · ② <b>技术标打分</b>(60%):浪潮 23 / 戴尔 22 / 联想 21 / 区域 X 19 · ③ <b>商务标打分</b>(40%):报价 + 付款 + 服务 · ④ <b>串标识别</b>:无异常(报价分散度 14%)· ⑤ <b>评标报告</b>已自动生成
-                      </div>
-                      <button class="wm-expand" data-fx="tenderExpand">查看 8 家详细评分 + AI 推理 <span class="we-arr">▾</span></button>
-                      <div class="wf-detail">
-                        <div class="vendor-grid">
-
-                          <div class="vendor-row recommend">
-                            <div class="vr-head">
-                              <div class="vr-rank">🥇</div>
-                              <div class="vr-name">浪潮信息<small>原厂 · 信息化龙头</small></div>
-                              <div class="vr-tag gold">AI 推荐</div>
-                            </div>
-                            <div class="vr-scores">
-                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">23</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">14</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val">17</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
-                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">88</div></div>
-                            </div>
-                            <div class="vr-meta">
-                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val">¥168 万</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">38 天</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
-                            </div>
-                            <div class="vr-ai">
-                              <b>🤖 AI 推荐:</b>性价比最优 + 技术拉满 + 原厂质保 5 年优于其他家。报价 ¥168 万比最低家高 ¥10 万,但技术分高 5 分 + 质保多 2 年。综合最优。建议<b>中标</b>。
-                            </div>
-                          </div>
-
-                          <div class="vendor-row">
-                            <div class="vr-head">
-                              <div class="vr-rank">🥈</div>
-                              <div class="vr-name">戴尔科技<small>原厂 · 全球品牌</small></div>
-                            </div>
-                            <div class="vr-scores">
-                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val good">22</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val good">13</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">15</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val good">10</div></div>
-                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">85</div></div>
-                            </div>
-                            <div class="vr-meta">
-                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val warn">¥182 万</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val">42 天</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val good">5 年</div></div>
-                            </div>
-                            <div class="vr-ai">
-                              <b>🤖 AI 评:</b>原厂质量过硬, 但 ¥14 万高于推荐方。综合次之。可作为<b>备选</b>(若推荐方临时取消)。
-                            </div>
-                          </div>
-
-                          <div class="vendor-row lowprice">
-                            <div class="vr-head">
-                              <div class="vr-rank">🥉</div>
-                              <div class="vr-name">区域服务商 X<small>本地 · 5 年中型</small></div>
-                              <div class="vr-tag warn">⚠ 价格陷阱</div>
-                            </div>
-                            <div class="vr-scores">
-                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val warn">19</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val warn">9</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val good">20</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val warn">7</div></div>
-                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">79</div></div>
-                            </div>
-                            <div class="vr-meta">
-                              <div class="vr-meta-cell"><div class="vrm-lbl">报价</div><div class="vrm-val good">¥158 万</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">交付期</div><div class="vrm-val good">35 天</div></div>
-                              <div class="vr-meta-cell"><div class="vrm-lbl">质保</div><div class="vrm-val warn">3 年</div></div>
-                            </div>
-                            <div class="vr-ai">
-                              <b>⚠ AI 风险预警:</b>价格 ¥158 万看似最优(便宜 ¥10 万)但<b>3 处隐患</b>:① 显存非原厂(可能用二手翻新)· ② 业绩仅 2 例类似规模 · ③ 7×24 售后未承诺。<b>不建议中标</b>。
-                            </div>
-                          </div>
-
-                          <div class="vendor-row lowscore">
-                            <div class="vr-head">
-                              <div class="vr-rank">4</div>
-                              <div class="vr-name">联想集团<small>原厂</small></div>
-                            </div>
-                            <div class="vr-scores">
-                              <div class="vr-score-cell"><div class="vsc-lbl">技术(25)</div><div class="vsc-val">21</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">业绩(15)</div><div class="vsc-val">12</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">报价(20)</div><div class="vsc-val warn">13</div></div>
-                              <div class="vr-score-cell"><div class="vsc-lbl">服务(10)</div><div class="vsc-val">9</div></div>
-                              <div class="vr-score-cell total"><div class="vsc-lbl">综合</div><div class="vsc-val">76</div></div>
-                            </div>
-                            <div class="vr-ai">
-                              <b>🤖 AI 评:</b>报价偏高 + 显存配置略低于规格 → 综合中段。可<b>用作议价杠杆</b>(告诉浪潮其他原厂也在投, 议价 2-3% 空间)。
-                            </div>
-                          </div>
-
-                          <div style="font-size:10.5px;color:var(--muted);text-align:center;padding:5px 0">↓ 另 4 家(综合 60-72 分)已折叠</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 5: 🏆 定标 + 合同(阶段 5) -->
-                  <div class="wf-msg" data-step="5" style="--dur:3.0s">
-                    <div class="wm-state"><span>5</span></div>
-                    <div class="wm-body">
-                      <div class="wml-tt">🏆 定标 + 合同 · 决策辅助 + 议价空间 + 合同自动生成</div>
-                      <span class="wml-meta" data-meta>排队中</span>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        AI 综合 8 家评分 + 历史相似项目 + 风险评估,推荐<b>浪潮 ¥168 万</b>。<b>议价空间</b>:可用联想做杠杆议 2-3% → 最终预期 <b>¥163-165 万</b>(省 ¥3-5 万)。<b>合同自动生成</b>:基于浪潮投标书 + 我方模板 + 法务条款 → 38 页合同草案就绪 · <b>中标通知书 + 落标通知</b>已起草
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Step 6: 🛠️ 履约 + 质保(阶段 6) -->
-                  <div class="wf-msg" data-step="6" style="--dur:2.8s">
-                    <div class="wm-state"><span>6</span></div>
-                    <div class="wm-body">
-                      <div class="wml-tt">🛠️ 履约 + 质保 · SOP 自动启动 + 验收 + 续约</div>
-                      <span class="wml-meta" data-meta>排队中</span>
-                      <div class="wm-prog"><i></i></div>
-                      <div class="wm-summary">
-                        履约 SOP 已就绪:<b>5 大里程碑</b>(签约 → 到货 → 安装 → 验收 → 上线)· <b>验收清单</b> 28 项(性能/功能/资料/培训/售后)自动核对 · <b>付款 4 节点</b>提醒(30% 签约 / 30% 到货 / 30% 验收 / 10% 质保期满)· <b>5 年质保</b>跟踪 + <b>服务期满前 90 天</b>启动续约准备
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <div class="wf-done-banner" id="tenderWfDone">
-                  <div class="wdb-ico">✅</div>
-                  <div class="wdb-tt">AI 已完成全部 5 阶段招标 · 总耗时 <b id="tenderWfTime">22.8</b> 秒
-                    <small>替代采购部 5 人 1 周工作 · 接下来 ↓ 我推荐选谁,你拍板</small>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 选定决策卡 -->
-              <div class="tender-decide" id="tenderDecide">
-                <div class="td-head">
-                  <div class="td-ico">🎯</div>
-                  <div class="td-tt">决策:选哪家中标? · <b style="color:var(--brand)">AI 推荐 浪潮信息 ¥168 万</b>
-                    <small>综合最优 · 技术 + 质保 + 性价比 · 风险最低</small></div>
-                  <div class="bv-conf" style="background:rgba(124,92,250,.1);color:var(--brand);padding:4px 9px;border-radius:7px;font-size:11.5px;font-weight:800">AI 置信度 91%</div>
-                </div>
-                <div class="bv-grid">
-                  <div class="bv-cell"><div class="bvc-lbl">推荐中标方</div><div class="bvc-val">浪潮信息</div><div class="bvc-sub">综合 88 分</div></div>
-                  <div class="bv-cell"><div class="bvc-lbl">中标价</div><div class="bvc-val">¥168 万</div><div class="bvc-sub">省 ¥32 万 vs 预算</div></div>
-                  <div class="bv-cell"><div class="bvc-lbl">替代方案</div><div class="bvc-val">戴尔 ¥182</div><div class="bvc-sub">备选 (85 分)</div></div>
-                  <div class="bv-cell"><div class="bvc-lbl">议价空间</div><div class="bvc-val good">2-3%</div><div class="bvc-sub">用联想做杠杆</div></div>
-                </div>
-                <div class="td-acts">
-                  <button class="primary" data-fx="tenderDecide" data-act="accept" data-msg="✅ 已选浪潮 · AI 已 ① 起草《中标通知书》· ② 钉钉@法务起草合同 · ③ 通知其余 7 家 ·④ 议价 2.5% 已与浪潮 BD 沟通 → 最终 ¥164 万 · 节省 ¥4 万" data-exec="accept">✓ 同意 AI 推荐 · 自动通知中标 + 议价</button>
-                  <button class="secondary" data-fx="tenderDecide" data-act="lowprice" data-msg="⚠ 已选区域 X · AI 风险预警仍标记 · 已要求补充证明" data-exec="lowprice">⚠ 选低价 X(我接受风险)</button>
-                  <button class="secondary" data-fx="tenderDecide" data-act="review" data-msg="📋 已进入复核流程 · 8 家详细标书已发采购总监" data-exec="review">📋 我要细看 8 家再决定</button>
-                  <button class="secondary" data-fx="tenderDecide" data-act="reject" data-msg="❌ 已废标 · AI 记录原因后重新起草" data-exec="reject">❌ 废标重启</button>
-                </div>
-              </div>
-
-              <!-- AI 执行流 -->
-              <div class="ai-exec-card" id="tenderExec">
-                <div class="ae-head">
-                  <div class="ai-ava" style="width:32px;height:32px;font-size:16px;background:linear-gradient(135deg,#5A5BF0,#9A4DFF);display:grid;place-items:center;border-radius:9px">🤖</div>
-                  <div class="ae-tt">AI 正在为你自动执行下游<small>这才是真正"招标 Agent" 该做的</small></div>
-                </div>
-                <div class="ai-exec-log" id="tenderExecLog"></div>
-                <div class="ai-exec-final" id="tenderExecFinal">
-                  <b>✅ 全部完成!</b>本采购已进入"等供应商签合同"状态。<br>我会持续跟进供应商履约、交付节点、质保期管理。本月已招标 <b id="tenderExecMonth">9</b> 个(+1)。
-                  <br><button id="tenderExecNext">▶ 准备下一个招标</button>
-                </div>
-              </div>
-
-            </div></div>
-
-            <!-- ===== Stage 2: 已招标管理 ===== -->
-            <div class="stage" id="tender-mgmt"><div class="page">
-
-              <div class="agent-status">
-                <div class="as-ava">🤝</div>
-                <div class="as-main">
-                  <div class="as-title">采购管家 Agent · 监督在管 <b>17 个</b>已签合同<span class="as-live">● 在岗</span></div>
-                  <div class="as-meta">已替你: 跟踪供应商履约 <b>17 次</b> · 验收节点提醒 <b>8 次</b> · 质保到期提醒 <b>3 次</b> · 续约谈判预案 <b>2 份</b></div>
-                  <div class="as-pending">⚠ <b>3 件大事</b>需要你拍板 ↓</div>
-                </div>
-              </div>
-
-              <div class="mgmt-stat-strip">
-                <div class="mss-cell" style="--c:#5A5BF0"><div class="mssc-lbl">在管合同</div><div class="mssc-val">17</div><div class="mssc-sub">含 5 件交付期内</div></div>
-                <div class="mss-cell" style="--c:#E5484D"><div class="mssc-lbl">⚠ 延期风险</div><div class="mssc-val danger">2</div><div class="mssc-sub">交付期临近</div></div>
-                <div class="mss-cell" style="--c:#18B97A"><div class="mssc-lbl">本月节省</div><div class="mssc-val good">¥38 万</div><div class="mssc-sub">议价 / 替代方案</div></div>
-                <div class="mss-cell" style="--c:#D97706"><div class="mssc-lbl">质保到期</div><div class="mssc-val warn">3</div><div class="mssc-sub">90 天内</div></div>
-              </div>
-
-              <!-- 决策卡 1: 供应商延期 -->
-              <div class="decision-card" data-dec="tenderD1" data-exec-msg="自动触发: ① 已发《延期违约通知》· ② 启动备选供应商(戴尔)· ③ 钉钉@商务总监 · ④ 已扣预付款 5%">
-                <div class="dec-head">
-                  <span class="dec-icon" style="--c:#E5484D">⚠️</span>
-                  <div class="dec-main">
-                    <div class="dec-title">浪潮服务器 5 台 · 应交付 7/5 · 已延 10 天 · <b style="color:var(--brand)">AI 推荐:启动备选 + 索赔 5%</b></div>
-                    <div class="dec-meta">原合同 ¥168 万 · 浪潮称"芯片紧缺再延 15 天" · 我方业务依赖,影响 AI 训练项目</div>
-                  </div>
-                  <span class="pill pill-red">延期</span>
-                </div>
-                <div class="dec-analysis">
-                  <div style="font-size:11.5px;line-height:1.65;color:var(--ink-2);margin-bottom:11px">
-                    <b style="color:var(--brand)">🤖 AI 分析:</b>合同 5.3 条 <b>延期违约金 0.2%/日</b> · 已可索赔 ¥3.36 万 + 总延期上限 30 天。AI 已联系戴尔渠道,可<b>替代型号 18 天到货</b>(¥4 万差价)。综合<b>启用备选 + 与浪潮谈差额补偿</b>最优。
-                  </div>
-                </div>
-                <div class="dec-acts">
-                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD1" data-msg="✅ 已批准 · 启动戴尔 18 天到货 + 浪潮索赔 ¥3.36 万 + 差额由浪潮全额补偿">✓ 启动备选 + 索赔</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="defer" data-msg="再等浪潮 7 天">再等浪潮</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD1" data-act="reject" data-msg="我亲自找浪潮谈">我亲自谈</button>
-                </div>
-                <div class="dec-status"></div>
-              </div>
-
-              <!-- 决策卡 2: 续约 -->
-              <div class="decision-card" data-dec="tenderD2" data-exec-msg="自动触发: ① 已起草续约 + 议价 5% 方案 · ② 评估市场比价(节省 ¥18 万)· ③ BD 已联系供应商">
-                <div class="dec-head">
-                  <span class="dec-icon" style="--c:#9A4DFF">🔄</span>
-                  <div class="dec-main">
-                    <div class="dec-title">软通动力 IT 运维服务 · 8/30 到期 · <b style="color:var(--brand)">AI 推荐:续约 + 议价 5% 降至 ¥285 万</b></div>
-                    <div class="dec-meta">原合同 ¥300 万/年 · 服务满意度 9.0 · 市场同类报价均值 ¥298 万 · 我方有议价空间</div>
-                  </div>
-                  <span class="pill" style="background:#F1EBFF;color:#9A4DFF">续约</span>
-                </div>
-                <div class="dec-analysis">
-                  <div class="dec-sim">
-                    <div class="range-row">
-                      <label>续约议价</label>
-                      <input type="range" class="range-input" id="tenderD2Cut" min="0" max="15" step="1" value="5">
-                      <span class="range-val"><span id="tenderD2CutV">5</span>%</span>
-                    </div>
-                    <div class="dec-result">
-                      新合同 <b id="tenderD2Amt">¥285 万</b> · 接受概率 <b id="tenderD2Acc" class="good">88%</b> · 年省 <b id="tenderD2Save" class="good">¥15 万</b>
-                      <div style="margin-top:7px" id="tenderD2Verdict"><b class="good">AI 推荐 4-7%</b> · 体面 + 不丢服务质量</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="dec-acts">
-                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD2" data-msg="✅ 已批准 · AI 已发续约 + 议价提案给软通 + 24h 内回复">✓ 启动续约议价</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="defer" data-msg="推迟 1 周">推迟 1 周</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD2" data-act="reject" data-msg="放弃续约 · 重启招标">不续约</button>
-                </div>
-                <div class="dec-status"></div>
-              </div>
-
-              <!-- 决策卡 3: 质保到期 -->
-              <div class="decision-card" data-dec="tenderD3" data-exec-msg="自动触发: ① 已生成 3 选 1 方案 PDF · ② 钉钉@CTO 7/22 内决策">
-                <div class="dec-head">
-                  <span class="dec-icon" style="--c:#D97706">⏰</span>
-                  <div class="dec-main">
-                    <div class="dec-title">华为存储 12 台 · 5 年质保 8/15 到期 · <b style="color:var(--brand)">AI 推荐:延保 1 年 ¥15 万(vs 新购 ¥120 万)</b></div>
-                    <div class="dec-meta">原 2021 年采购 ¥150 万 · 当前残值 ¥30 万 · 设备状态良好 · 3 选 1 方案就绪</div>
-                  </div>
-                  <span class="pill pill-amber">质保</span>
-                </div>
-                <div class="dec-acts">
-                  <button class="btn-grad" data-fx="bossDecide" data-dec="tenderD3" data-msg="✅ 已批准 · 已与华为签延保 ¥15 万 / 1 年 · 同步评估明年是否替换">✓ 延保 1 年</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="defer" data-msg="自费维护(只买备件 ¥3 万)">自费维护</button>
-                  <button class="btn-mini" data-fx="bossDecide" data-dec="tenderD3" data-act="reject" data-msg="启动新一轮存储招标 ¥120 万">新购替换</button>
-                </div>
-                <div class="dec-status"></div>
-              </div>
-
-              <div class="perform-monitor">
-                <div class="pm-ico">🛰️</div>
-                <div class="pm-list">
-                  <div><span class="pm-dot">●</span>履约监督 · <b>17 合同</b>持续跟踪 · 2 件交付临期</div>
-                  <div><span class="pm-dot">●</span>市场比价 · 每月对比 · <b>已发现 5 件可议价</b></div>
-                  <div><span class="pm-dot">●</span>质保提醒 · 90 天内 <b>3 件</b>到期</div>
-                  <div><span class="pm-dot">●</span>新采购需求 · <b>2 件</b>明日待你录入</div>
-                </div>
-              </div>
-
-            </div></div>
-
-          </div>
-        </div>
-      </section>
 
 
-
-      <!-- ============ 视图:研发知识沉淀 ============ -->
-      <section class="view" id="view-rd">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#E9F9F1">🔬</span>研发知识沉淀</h2>
-            <p>工艺图谱 · 失效分析 · AI 问答</p>
-          </div>
-          <div class="unlock-banner">
-            <div class="ub-left">
-              <span class="ub-ico">🔓</span>
-              <div>
-                <div class="ub-tt">未开通 · 当前为演示模式</div>
-                <div class="ub-sub">¥3,000/月起 · 老工程师走前 6 个月留住 · 比再招一个高级工程师便宜 30 倍</div>
-              </div>
-            </div>
-            <div class="ub-right">
-              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
-            </div>
-          </div>
-          <div class="pgrid g3">
-            <div class="pcard mini-stat"><div class="ms-num">286</div><div class="ms-label">入库文档</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">1,429</div><div class="ms-label">知识图谱节点</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">82%</div><div class="ms-label">问答命中率</div></div>
-          </div>
-          <div class="pcard mt">
-            <div class="pc-head"><h3>研发问答 · 实时</h3><span class="pc-extra">本周高频</span></div>
-            <table class="table">
-              <thead><tr><th>问题</th><th>提问者</th><th>命中度</th><th>引用来源</th></tr></thead>
-              <tbody>
-                <tr><td>1.5mm 不锈钢激光切割断面发黑怎么解决?</td><td>新员工小李</td><td><span class="pill pill-green">94%</span></td><td>2024-08 工艺纪要 · 张工经验</td></tr>
-                <tr><td>注塑件缩痕的根本原因分类?</td><td>工艺组小王</td><td><span class="pill pill-green">88%</span></td><td>5 篇失效分析 + 2 篇外部资料</td></tr>
-                <tr><td>客户 A 的 PCB 阻焊层为什么用 LPI 不用 Dry Film?</td><td>销售支持</td><td><span class="pill pill-blue">76%</span></td><td>2023-05 项目方案 · 李工备注</td></tr>
-                <tr><td>SMT 回流焊温度曲线对 LGA 元件的影响?</td><td>新员工小张</td><td><span class="pill pill-green">91%</span></td><td>3 篇技术手册 + IPC 标准</td></tr>
-                <tr><td>这批料的失效是不是和 6 月供应商切换有关?</td><td>品质组</td><td><span class="pill pill-amber">52%</span></td><td>需补充 6 月入料记录</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>近期失效案例</h3><span class="pc-extra">已自动归档</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 B · 输送装备轴承异响</div><div class="lr-sub">根因:润滑脂选型错误;已生成预防 SOP</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">⚠️</span><div class="lr-main"><div class="lr-tt">客户 C · 控制板高温重启</div><div class="lr-sub">根因:散热设计余量不足;已更新设计规范</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⚠️</span><div class="lr-main"><div class="lr-tt">客户 D · 涂层附着力不足</div><div class="lr-sub">根因:前处理工艺漏步;已加入 QC 检查表</div></div></div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>老工程师知识沉淀进度</h3><span class="pc-extra">3 位资深工程师</span></div>
-              <div class="pc-body" style="font-size:12.5px">
-                <div style="margin:6px 0">张工(从业 25 年)· 已采集 <b style="color:var(--green)">87 篇</b> · 待采集 23 篇</div>
-                <div style="margin:6px 0">李工(从业 18 年)· 已采集 <b style="color:var(--green)">62 篇</b> · 待采集 18 篇</div>
-                <div style="margin:6px 0">王工(从业 14 年)· 已采集 <b style="color:var(--amber)">34 篇</b> · 待采集 41 篇</div>
-                <div class="lr-sub" style="white-space:normal;margin-top:8px">📌 AI 解读:王工进度偏慢,建议每周固定 2 小时录音访谈,助手转写并入库。</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       <!-- ============ 视图:制造业版 ============ -->
       <section class="view" id="view-ind-mfg">
@@ -17142,7 +17004,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
    ============================================================ */
 
 function _bidInit() {
-  var bidView = document.getElementById("view-bid");
+  var bidView = document.getElementById("view-bt");
   if (!bidView) return;
   var QA = function (s, r) { return Array.prototype.slice.call((r || bidView).querySelectorAll(s)); };
   var Q = function (s, r) { return (r || bidView).querySelector(s); };
@@ -17156,12 +17018,12 @@ function _bidInit() {
     setTimeout(function () { el.remove(); }, 3000);
   }
 
-  /* Stage 切换 */
-  var nav = Q("#bidNav");
-  nav.addEventListener("click", function (e) {
+  /* 统一 stage 切换 (招/投标 4 板块) */
+  var nav = Q("#btNav");
+  if (nav) nav.addEventListener("click", function (e) {
     var p = e.target.closest(".stage-pill"); if (!p) return;
     QA(".stage-pill", nav).forEach(function (x) { x.classList.toggle("active", x === p); });
-    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === "bid-" + p.dataset.stage); });
+    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === p.dataset.stage); });
     var pg = Q(".stage.active .page"); if (pg) pg.scrollTop = 0;
   });
 
@@ -17446,7 +17308,7 @@ function _bidInit() {
 }
 
 function _tenderInit() {
-  var tView = document.getElementById("view-tender");
+  var tView = document.getElementById("view-bt");
   if (!tView) return;
   var QA = function (s, r) { return Array.prototype.slice.call((r || tView).querySelectorAll(s)); };
   var Q = function (s, r) { return (r || tView).querySelector(s); };
@@ -17460,13 +17322,7 @@ function _tenderInit() {
     setTimeout(function () { el.remove(); }, 3000);
   }
 
-  var nav = Q("#tenderNav");
-  nav.addEventListener("click", function (e) {
-    var p = e.target.closest(".stage-pill"); if (!p) return;
-    QA(".stage-pill", nav).forEach(function (x) { x.classList.toggle("active", x === p); });
-    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === "tender-" + p.dataset.stage); });
-    var pg = Q(".stage.active .page"); if (pg) pg.scrollTop = 0;
-  });
+  /* tender nav 切换已合并到 _bidInit · 此处跳过 */
 
   var wfPanel = Q("#tenderWfPanel"), wfEmpty = Q("#tenderWfEmpty"), wfStream = Q("#tenderWfStream"), wfDone = Q("#tenderWfDone");
   var decide = Q("#tenderDecide"), execCard = Q("#tenderExec"), execLog = Q("#tenderExecLog"), execFinal = Q("#tenderExecFinal");
