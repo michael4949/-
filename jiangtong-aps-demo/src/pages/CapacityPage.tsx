@@ -71,7 +71,7 @@ export default function CapacityPage() {
 
       <AICapabilityBanner
         capabilities={[
-          { num: 14, name: '瓶颈预测',         touchpoint: '顶部紫色提示卡 + 瓶颈识别列表行（按严重度排序）',         type: 'observer' },
+          { num: 14, name: '瓶颈预测',         touchpoint: '顶部 Insight ✨ 一键应用方案 A · 解除 N 处瓶颈（热力图自动降级）', type: 'generator' },
           { num: 15, name: '缓解建议生成',     touchpoint: '瓶颈列表每行 ✨ 生成缓解方案 按钮 → 3 方案对比 Modal',  type: 'modal' },
         ]}
       />

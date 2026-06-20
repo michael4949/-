@@ -103,7 +103,7 @@ export default function MaterialCheckPage() {
       <AICapabilityBanner
         capabilities={[
           { num: 10, name: '缺料根因分析',   touchpoint: '左侧每张缺料工单卡片下方 ✨ AI 根因分析 按钮 → 报告 Modal + Copilot 追问', type: 'modal' },
-          { num: 11, name: '齐套风险预测',   touchpoint: '顶部紫色提示卡 + 齐套时间轴热度颜色（红/黄/绿）',                            type: 'observer' },
+          { num: 11, name: '齐套风险预测',   touchpoint: '顶部 Insight ✨ AI 一键准备 N 张高风险 + 行内 ✨ AI 一键准备（齐套率实时上升）', type: 'generator' },
         ]}
       />
 

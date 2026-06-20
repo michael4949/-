@@ -95,7 +95,7 @@ export default function InventoryLockPage() {
       <AICapabilityBanner
         capabilities={[
           { num: 12, name: '抢料冲突调解',     touchpoint: '右侧每条冲突卡 ✨ AI 调解 按钮 → 多目标分配 Modal',  type: 'modal' },
-          { num: 13, name: '锁定健康度监测',   touchpoint: '顶部紫色提示卡 + 左侧锁定记录状态列分类（超期/频繁）', type: 'observer' },
+          { num: 13, name: '锁定健康度监测',   touchpoint: '顶部 Insight ✨ 批量释放/稳定 + 行末 ✨ AI 释放/稳定（超期 KPI 实时下降）', type: 'generator' },
         ]}
       />
 

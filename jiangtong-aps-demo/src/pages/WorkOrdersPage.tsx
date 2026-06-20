@@ -101,8 +101,8 @@ export default function WorkOrdersPage() {
       {/* ★ v2.2.1 AI 能力 banner（不可关闭，告诉用户本页接入了哪些 Agent） */}
       <AICapabilityBanner
         capabilities={[
-          { num: 8, name: '样品工单 BOM 生成', touchpoint: '选中样品工单 → 右侧抽屉 ✨ AI 推荐 BOM 按钮',     type: 'modal' },
-          { num: 9, name: '异常工单识别',     touchpoint: '顶部紫色提示卡 + 表格异常行高亮 + 标记列⚠图标', type: 'observer' },
+          { num: 8, name: '样品工单 BOM 生成', touchpoint: '选中样品工单 → 右侧抽屉 ✨ AI 推荐 BOM 按钮',                  type: 'modal' },
+          { num: 9, name: '异常工单识别',     touchpoint: '顶部 Insight ✨ 一键批量处置 + 行末 ✨ AI 分析（应用后变 ✓ 已处置）', type: 'generator' },
         ]}
       />
 

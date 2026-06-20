@@ -1,6 +1,7 @@
 // ★ v2.2.1 · AI 能力概览 Banner（不可关闭）
 //   解决用户反馈"另外的智能体智能在哪我没看出来"——在每个 Sprint 4-6 页面顶部
 //   持久展示本页接入的 AI Agent 列表与触点说明
+//   ★ v2.2.5：增加 generator 类型（一键批量应用），observer 类型已弃用（所有原观察式都升级了）
 import { Sparkles } from 'lucide-react';
 
 interface Capability {
@@ -8,7 +9,7 @@ interface Capability {
   name: string;
   touchpoint: string;
   /** 触点 emoji / 颜色 */
-  type: 'observer' | 'button' | 'modal' | 'copilot';
+  type: 'observer' | 'button' | 'modal' | 'copilot' | 'generator';
 }
 
 interface Props {
@@ -16,10 +17,11 @@ interface Props {
 }
 
 const TYPE_BADGE: Record<Capability['type'], { bg: string; text: string; label: string }> = {
-  observer: { bg: 'bg-info/15',  text: 'text-info',  label: '观察式' },
-  button:   { bg: 'bg-ok/15',    text: 'text-ok',    label: '✨ 按钮' },
-  modal:    { bg: 'bg-warn/15',  text: 'text-warn',  label: '解释 Modal' },
-  copilot:  { bg: 'bg-ai/15',    text: 'text-ai',    label: '对话' },
+  observer:  { bg: 'bg-info/15',  text: 'text-info',  label: '观察式' },
+  button:    { bg: 'bg-ok/15',    text: 'text-ok',    label: '✨ 按钮' },
+  modal:     { bg: 'bg-warn/15',  text: 'text-warn',  label: '解释 Modal' },
+  copilot:   { bg: 'bg-ai/15',    text: 'text-ai',    label: '对话' },
+  generator: { bg: 'bg-ai/15',    text: 'text-ai',    label: '✨ 一键应用' },
 };
 
 export default function AICapabilityBanner({ capabilities }: Props) {
