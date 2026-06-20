@@ -2250,47 +2250,160 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .wf-done-banner .wdb-tt small { display:block; font-size:11.5px; color:var(--muted); font-weight:500; margin-top:2px; }
 
 /* AI 推荐方案块 (拍板入口) */
-.ai-reco-card { display:none; padding:16px 18px; background:#fff; border:1px solid var(--line);
-  border-radius:13px; margin-top:13px; box-shadow:0 6px 20px rgba(90,91,240,.08); }
-.ai-reco-card.show { display:block; }
-.ai-reco-card .arc-head { display:flex; align-items:center; gap:9px; padding-bottom:11px;
-  border-bottom:1px dashed var(--line); margin-bottom:13px; }
-.ai-reco-card .arc-ico { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#5A5BF0,#9A4DFF);
-  display:grid; place-items:center; font-size:17px; flex-shrink:0; }
-.ai-reco-card .arc-tt { flex:1; font-size:13.5px; font-weight:700; color:var(--ink); }
-.ai-reco-card .arc-tt small { font-size:11px; color:var(--muted); display:block; font-weight:500; margin-top:2px; }
-.ai-reco-card .arc-conf { font-size:11.5px; padding:4px 9px; background:rgba(124,92,250,.1);
-  color:var(--brand); border-radius:7px; font-weight:700; flex-shrink:0; }
+/* ============================================================
+   修订界面 · 左原文 + 右 AI 建议 + 接受替换原文
+   ============================================================ */
+.review-shell { display:none; background:#fff; border:1px solid var(--line); border-radius:13px;
+  margin-top:13px; box-shadow:0 6px 20px rgba(90,91,240,.08); overflow:hidden; }
+.review-shell.show { display:block; }
 
-.reco-summary { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:14px; }
-.reco-cell { padding:10px 12px; background:#F8F9FE; border-radius:9px; border:1px solid var(--line-2); }
-.reco-cell .rcl-lbl { font-size:10.5px; color:var(--muted); font-weight:600; }
-.reco-cell .rcl-val { font-size:17px; font-weight:800; color:var(--ink); margin-top:2px; letter-spacing:-.01em; }
-.reco-cell .rcl-val.good { color:var(--green); }
-.reco-cell .rcl-val.warn { color:var(--amber); }
-.reco-cell .rcl-sub { font-size:10.5px; color:var(--muted); margin-top:1px; }
-
-/* 综合让步度滑块(在 reco 内) */
-.reco-slider { padding:12px 14px; background:linear-gradient(135deg,#F7F9FF,#EDEFFB);
-  border-radius:11px; border:1px solid rgba(90,91,240,.18); margin-bottom:13px; }
-.reco-slider .rs-row { display:flex; align-items:center; gap:13px; }
-.reco-slider .rs-lbl { font-size:12px; font-weight:700; color:var(--ink); flex-shrink:0; }
-.reco-slider input[type=range] { flex:1; accent-color:var(--brand); }
-.reco-slider .rs-val { font-size:22px; font-weight:800; color:var(--brand); min-width:55px; text-align:right; letter-spacing:-.02em; }
-.reco-slider .rs-marks { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:6px; padding:0 4px; }
-.reco-slider .rs-tip { margin-top:9px; font-size:11.5px; color:var(--ink-2); line-height:1.55; padding-top:9px; border-top:1px dashed rgba(90,91,240,.18); }
-.reco-slider .rs-tip b { color:var(--brand); }
-
-/* 决策按钮组 */
-.reco-cta { display:flex; gap:9px; flex-wrap:wrap; }
-.reco-cta button { padding:9px 16px; font-size:12.5px; font-weight:700; border-radius:9px;
-  cursor:pointer; transition:.18s; font-family:inherit; }
-.reco-cta button.primary { background:var(--grad-btn); color:#fff; border:none;
+/* 顶部状态条 */
+.review-head { display:flex; align-items:center; gap:11px; padding:13px 16px;
+  background:linear-gradient(90deg,#F7F9FF,#EDEFFB);
+  border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+.review-head .rh-ico { width:32px; height:32px; border-radius:9px;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); display:grid; place-items:center;
+  font-size:16px; flex-shrink:0; box-shadow:0 4px 10px rgba(90,91,240,.35); }
+.review-head .rh-stat { flex:1; font-size:12.5px; line-height:1.45; color:var(--ink-2); }
+.review-head .rh-stat b { color:var(--ink); font-weight:700; }
+.review-head .rh-stat .rh-tt { font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:2px; }
+.review-head .rh-prog { font-size:11.5px; }
+.review-head .rh-prog .rh-pn { font-weight:800; color:var(--brand); font-size:14px; }
+.review-head .rh-prog .rh-bar { display:inline-block; width:120px; height:5px; background:#EEF0FB;
+  border-radius:999px; vertical-align:middle; margin-left:7px; overflow:hidden; }
+.review-head .rh-prog .rh-bar i { display:block; height:100%; background:var(--grad-btn); width:0; transition:.3s; }
+.review-head .rh-cta { display:flex; gap:7px; flex-shrink:0; }
+.review-head .rh-cta button { padding:7px 13px; font-size:12px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.18s; }
+.review-head .accept-all { background:#fff; color:var(--brand); border:1px dashed var(--brand); }
+.review-head .accept-all:hover:not(:disabled) { background:rgba(90,91,240,.08); }
+.review-head .finish { background:var(--grad-btn); color:#fff; border:none;
   box-shadow:0 4px 12px rgba(90,91,240,.3); }
-.reco-cta button.primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(90,91,240,.4); }
-.reco-cta button.secondary { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
-.reco-cta button.secondary:hover:not(:disabled) { border-color:var(--brand); color:var(--brand); }
-.reco-cta button:disabled { opacity:.5; cursor:not-allowed; }
+.review-head .finish:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 16px rgba(90,91,240,.4); }
+.review-head button:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+/* 列标题 */
+.review-cols-head { display:grid; grid-template-columns: 1fr 1fr; font-size:11px;
+  font-weight:700; color:var(--muted); letter-spacing:.04em; }
+.review-cols-head .rch-l, .review-cols-head .rch-r { padding:10px 16px;
+  background:#F8F9FE; border-bottom:1px solid var(--line); }
+.review-cols-head .rch-l { border-right:1px solid var(--line); }
+.review-cols-head .rch-l::before { content:"📜 "; }
+.review-cols-head .rch-r::before { content:"🤖 "; }
+
+/* 双栏网格 */
+.review-grid { display:grid; grid-template-columns: 1fr 1fr; }
+
+.rv-cell { padding:14px 16px; border-bottom:1px dashed rgba(0,0,0,.06); }
+.rv-cell.left { border-right:1px solid var(--line); background:#FFFEFB; }
+.rv-cell.right { background:#FAFBFF; }
+
+/* 段落 (左原文) */
+.orig-para { font-size:12.5px; line-height:1.85; color:var(--ink); position:relative; padding:5px 0; }
+.orig-para .op-num { font-weight:700; color:var(--brand); margin-right:8px; }
+.orig-para mark { background:rgba(255,222,135,.7); padding:0 3px; border-radius:3px; font-style:normal; }
+.orig-para.has-issue { padding:11px 13px; background:linear-gradient(180deg,#FFF9E6,#FFF4D6);
+  border-left:3px solid var(--amber); border-radius:7px; }
+.orig-para.has-issue.high { background:linear-gradient(180deg,#FEF2F2,#FEE7E7);
+  border-left-color:var(--red); }
+.orig-para .op-marker { display:inline-block; font-size:9.5px; padding:2px 7px;
+  border-radius:4px; color:#fff; font-weight:800; letter-spacing:.04em; margin-left:8px;
+  vertical-align:1px; }
+.orig-para.has-issue.high .op-marker { background:var(--red); }
+.orig-para.has-issue.mid .op-marker { background:var(--amber); }
+.orig-para.modified { background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border-left-color:var(--green); }
+.orig-para.modified mark { background:rgba(43,217,168,.35); }
+.orig-para.modified .op-marker { background:var(--green); }
+.orig-para.modified .op-marker::after { content:" 已修订"; }
+.orig-para.modified .op-marker { content:""; }
+.orig-para.rejected { background:linear-gradient(180deg,#F8F9FE,#EEF0FB); opacity:.85;
+  border-left-color:var(--muted); }
+.orig-para.rejected .op-marker { background:var(--muted); }
+.orig-para.rejected .op-marker::after { content:" 已驳回 · 保持原文"; }
+
+/* 撤销按钮(已修订后出现) */
+.op-undo { display:none; margin-top:8px; font-size:10.5px; color:var(--green); cursor:pointer;
+  font-weight:700; }
+.op-undo:hover { text-decoration:underline; }
+.orig-para.modified .op-undo, .orig-para.rejected .op-undo { display:inline-block; }
+
+/* AI 修订建议卡 (右) */
+.ai-rev { position:relative; }
+.ai-rev.skip { font-size:11px; color:var(--muted); font-style:italic; padding:18px 6px;
+  text-align:center; }
+.ai-rev.skip::before { content:"✓ "; color:var(--green); font-style:normal; font-weight:800; }
+.ar-head { display:flex; align-items:center; gap:7px; margin-bottom:9px; flex-wrap:wrap; }
+.ar-tag { font-size:10px; padding:2px 7px; border-radius:5px; font-weight:700; flex-shrink:0; }
+.ar-tag.high { background:#FEF2F2; color:var(--red); }
+.ar-tag.mid { background:#FFF4E5; color:var(--amber); }
+.ar-tag.low { background:#E9F9F1; color:var(--green); }
+.ar-dim { font-size:10px; padding:2px 7px; background:#EEF0FB; color:var(--ink-2);
+  border-radius:5px; font-weight:600; flex-shrink:0; }
+.ar-num { font-size:10px; padding:2px 7px; background:var(--grad-btn); color:#fff;
+  border-radius:999px; font-weight:800; flex-shrink:0; }
+.ar-issue { font-size:13px; font-weight:700; color:var(--ink); line-height:1.4; }
+.ar-reason { font-size:11.5px; line-height:1.65; color:var(--ink-2); margin-bottom:10px; }
+.ar-reason b { color:var(--ink); }
+.ar-recommend { padding:10px 12px; background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border-left:3px solid var(--green); border-radius:8px; font-size:12px; line-height:1.7;
+  color:var(--ink); font-weight:500; }
+.ar-recommend::before { content:"AI 建议改为 ↓"; font-size:10px; font-weight:800;
+  color:var(--green); letter-spacing:.05em; display:block; margin-bottom:6px; }
+.ar-recommend mark { background:rgba(43,217,168,.35); padding:0 3px; border-radius:3px; font-style:normal; }
+
+.ar-cta { display:flex; gap:6px; margin-top:11px; flex-wrap:wrap; }
+.ar-cta button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.15s; }
+.ar-cta .accept { background:var(--grad-btn); color:#fff; border:none;
+  box-shadow:0 3px 10px rgba(90,91,240,.3); }
+.ar-cta .accept:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(90,91,240,.4); }
+.ar-cta .reject { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.ar-cta .reject:hover { border-color:var(--red); color:var(--red); }
+.ar-cta .detail-btn { background:#fff; color:var(--brand); border:1px dashed rgba(90,91,240,.5);
+  margin-left:auto; }
+.ar-cta .detail-btn:hover { background:rgba(90,91,240,.06); }
+
+/* 详情面板 (可展开法规依据 + 类似案例) */
+.ar-detail { display:none; margin-top:10px; padding:10px 12px; background:#fff;
+  border-radius:8px; border:1px solid var(--line-2); }
+.ai-rev.open .ar-detail { display:block; }
+.ar-detail .ard-row { font-size:11px; line-height:1.6; color:var(--ink-2); margin-bottom:7px; }
+.ar-detail .ard-row:last-child { margin-bottom:0; }
+.ar-detail .ard-row .ard-k { font-size:10px; font-weight:800; color:var(--brand);
+  letter-spacing:.04em; margin-right:6px; }
+.ar-detail .ard-row b { color:var(--ink); }
+.ar-detail .ard-impact { display:grid; grid-template-columns: repeat(3,1fr); gap:6px;
+  padding:8px 10px; background:#FEF2F2; border-radius:7px; margin-top:5px; }
+.ar-detail .ard-impact > div { text-align:center; }
+.ar-detail .ard-impact .ai-lbl { font-size:9.5px; color:var(--muted); font-weight:600; }
+.ar-detail .ard-impact .ai-val { font-size:12.5px; font-weight:800; color:var(--red); }
+
+/* 已接受/驳回的修订卡 */
+.ai-rev.accepted { opacity:.75; }
+.ai-rev.accepted .ar-recommend { background:linear-gradient(180deg,#E9F9F1,#D4F4E2);
+  border-left-color:var(--green); }
+.ai-rev.accepted .ar-cta { display:none; }
+.ai-rev.accepted .ar-status { display:flex; align-items:center; gap:7px; margin-top:10px;
+  padding:8px 11px; background:rgba(24,185,122,.1); border:1px solid rgba(24,185,122,.3);
+  border-radius:8px; font-size:11.5px; font-weight:700; color:var(--green); }
+.ai-rev.accepted .ar-status::before { content:"✓"; font-size:14px; font-weight:800; }
+.ai-rev.rejected { opacity:.55; }
+.ai-rev.rejected .ar-cta { display:none; }
+.ai-rev.rejected .ar-status { display:flex; align-items:center; gap:7px; margin-top:10px;
+  padding:8px 11px; background:rgba(127,127,127,.08); border:1px solid rgba(127,127,127,.25);
+  border-radius:8px; font-size:11.5px; font-weight:700; color:var(--muted); }
+.ai-rev.rejected .ar-status::before { content:"✗"; font-size:14px; font-weight:800; }
+.ar-status { display:none; }
+.ar-undo-link { margin-left:auto; font-size:10.5px; color:var(--brand); cursor:pointer;
+  font-weight:700; }
+.ar-undo-link:hover { text-decoration:underline; }
+
+/* OCR 标记 (在文件名旁) */
+.ocr-pill { display:inline-flex; align-items:center; gap:4px; font-size:9.5px;
+  padding:2px 7px; background:rgba(154,77,255,.12); color:var(--purple); border-radius:5px;
+  font-weight:800; letter-spacing:.05em; margin-left:6px; vertical-align:1px; }
+.ocr-pill::before { content:"📡"; font-size:10px; }
 
 /* AI 执行流(拍板后) */
 .ai-exec-card { display:none; padding:15px 17px; background:linear-gradient(160deg,#0B1226,#162045);
@@ -4094,20 +4207,20 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 <div class="ai-ava">🤖</div>
                 <div class="ai-txt">
                   <div class="ai-name">合同审查 Agent<small>· 7×24 在岗 · 本月已替你审 <b data-counter="reviewedCount">47</b> 份合同 · 节省 <b>78 小时</b></small></div>
-                  你<b>上传合同</b>(支持 PDF / Word / 扫描件 / 微信图,也可粘贴文本),我自动跑完<b>解析 → 5 维风险扫描 → 模板对比 → 历史检索 → 谈判稿生成</b>整条流水线(约 17 秒),完成后告诉你需要拍板的事。你不用一步步点击,我自己推进。
+                  你<b>上传合同</b>(支持 PDF / Word / Excel / 扫描件 / 微信图 / TXT,也可粘贴文本)。<b>PDF 与扫描件我会先做 OCR 转为可编辑文本</b>,再跑解析 → 风险扫描 → 模板对比 → 历史检索 → 修订建议整条流水线。完成后会在下方<b>左右双栏</b>给你逐条修订建议,你点接受,左边原文实时替换。
                 </div>
               </div>
 
               <!-- 真实上传区 -->
               <div class="upload-zone" id="cUpload">
-                <input type="file" id="cFileInput" hidden accept=".pdf,.doc,.docx,.txt,.rtf,.png,.jpg,.jpeg">
+                <input type="file" id="cFileInput" hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf,.png,.jpg,.jpeg,.webp">
                 <!-- 未上传态 -->
                 <div id="cUpEmpty">
                   <div class="up-drop" id="cDrop">
                     <span class="up-ico">📤</span>
                     <div class="up-tt">把合同文件拖到这里 · 或 <span class="up-link" id="cBrowse">点击选择</span></div>
                     <div class="up-sub">单份 ≤ 50MB · 中英文均可 · <b>解析后即焚 · 不留存原件</b></div>
-                    <div class="up-fmts"><span>PDF</span><span>Word</span><span>扫描件</span><span>微信图</span><span>电子签</span><span>TXT</span></div>
+                    <div class="up-fmts"><span>PDF</span><span>Word</span><span>Excel</span><span>扫描件</span><span>微信图</span><span>电子签</span><span>TXT</span></div>
                   </div>
                   <div class="up-or">或者</div>
                   <div style="text-align:center"><button class="up-paste-btn" id="cPasteOpen">📋 直接粘贴合同正文</button></div>
@@ -4536,39 +4649,263 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                 <div class="wf-done-banner" id="cWfDone">
                   <div class="wdb-ico">✅</div>
                   <div class="wdb-tt">AI 已完成全部 5 阶段分析,总耗时 <b id="cWfTime">17.6</b> 秒
-                    <small>替代 1 名初级法务 1.5 小时工作 · 接下来 ↓ 需要你拍板 3 件事</small>
+                    <small>替代 1 名初级法务 1.5 小时工作 · 接下来 ↓ 左右双栏修订 · 逐条接受或驳回</small>
                   </div>
                 </div>
               </div>
 
-              <!-- AI 推荐方案 + 等你拍板 -->
-              <div class="ai-reco-card" id="cReco">
-                <div class="arc-head">
-                  <div class="arc-ico">🎯</div>
-                  <div class="arc-tt">决策 1: 是否采用 AI 推荐的谈判方案?
-                    <small>AI 已综合 7 条风险 + 14 处差异 + 3 份历史合同 + 21 个修改方案,给出综合建议</small>
+              <!-- 修订界面 · 左原文 + 右 AI 建议 + 接受替换原文 -->
+              <div class="review-shell" id="cReview">
+                <div class="review-head">
+                  <div class="rh-ico">🤖</div>
+                  <div class="rh-stat">
+                    <span class="rh-tt">AI 标注的 7 处需修订条款 · 逐条接受或驳回 · 接受后左边原文实时替换</span>
+                    <span class="rh-prog">已修订 <span class="rh-pn"><span id="cRvDone">0</span>/<span id="cRvTotal">7</span></span><span class="rh-bar"><i id="cRvBar"></i></span></span>
                   </div>
-                  <div class="arc-conf">AI 置信度 88%</div>
-                </div>
-                <div class="reco-summary">
-                  <div class="reco-cell"><div class="rcl-lbl">推荐让步度</div><div class="rcl-val">中庸 50%</div><div class="rcl-sub">38 份历史回测最优</div></div>
-                  <div class="reco-cell"><div class="rcl-lbl">对方接受率</div><div class="rcl-val good" id="cRecoAcc">74%</div><div class="rcl-sub">2-3 轮成签</div></div>
-                  <div class="reco-cell"><div class="rcl-lbl">我方风险敞口</div><div class="rcl-val warn" id="cRecoExp">¥6.4 万</div><div class="rcl-sub">vs 原合同 ¥48 万 ↓</div></div>
-                  <div class="reco-cell"><div class="rcl-lbl">综合 ROI</div><div class="rcl-val good" id="cRecoRoi">3.2x</div><div class="rcl-sub">每 ¥1 让步换 ¥3.2</div></div>
-                </div>
-                <div class="reco-slider">
-                  <div class="rs-row">
-                    <div class="rs-lbl">📊 综合让步度</div>
-                    <input type="range" id="cRecoSlider" min="0" max="100" value="50" step="5">
-                    <div class="rs-val"><span id="cRecoVal">50</span>%</div>
+                  <div class="rh-cta">
+                    <button class="accept-all" id="cRvAcceptAll">⚡ 一键接受全部</button>
+                    <button class="finish" id="cRvFinish" disabled>✓ 完成 · 生成 redline 终稿</button>
                   </div>
-                  <div class="rs-marks"><span>强势 0</span><span>25</span><span>中庸 50</span><span>75</span><span>让步 100</span></div>
-                  <div class="rs-tip" id="cRecoTip"><b>🤖 AI 推荐区间 45-60%</b> · 此区间在 38 份历史合同回测中签约成功率 86%。低于 30% 谈判破裂率上升,高于 75% 失去主要保护。</div>
                 </div>
-                <div class="reco-cta">
-                  <button class="primary" data-fx="cDecide" data-act="accept" data-msg="✅ 已采纳 AI 推荐方案 · 进入执行" data-exec="reco">✓ 采用 AI 方案,自动执行下游</button>
-                  <button class="secondary" data-fx="cDecide" data-act="manual" data-msg="📋 已切换:你来逐条审 7 条风险" data-exec="manual">📋 我要逐条看再决定</button>
-                  <button class="secondary" data-fx="cDecide" data-act="upgrade" data-msg="👨‍⚖️ 已升级:Agent + 人工法务复核 · 顾问 1 工作日内联系" data-exec="upgrade">👨‍⚖️ 升级人工法务复核</button>
+                <div class="review-cols-head">
+                  <div class="rch-l">合同原文 · 接受后实时替换</div>
+                  <div class="rch-r">AI 修订建议 · 含法规依据与影响</div>
+                </div>
+                <div class="review-grid" id="cRvGrid">
+
+                  <!-- 段 1: 主体信息 (无 issue) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第 1 条 · 主体</span>
+                      甲方:东莞市顶呱呱AI科技有限公司;乙方:苏州瑞达精密机械有限公司。本合同标的为 CNC 加工中心 (Mitsubishi M70V) 2 台,总金额 ¥386,000.00(含 13% 增值税)。
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
+                  <!-- 段 2: 付款 · 无质保金 (高/商业) [r2] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue high" data-pid="r2" id="orig-r2">
+                      <span class="op-num">第 5.3 条 · 付款</span><span class="op-marker">高 · 商业</span>
+                      <span class="op-content">甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 15 日内支付 <mark>剩余 50%,合同价款全部结清</mark>。</span>
+                      <span class="op-undo" data-undo="r2">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r2"
+                      data-new="甲方应于合同签订后 7 日内支付 <mark>50% 预付款</mark>;乙方交付并验收合格后 30 日内支付 <mark>40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#1</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
+                        <span class="ar-issue">缺质保金扣留 · 验收后即 100% 付清,无质量谈判筹码</span>
+                      </div>
+                      <div class="ar-reason">未约定质保金,验收后即 100% 付清,质保期内若出质量问题需另行起诉追索。行业惯例扣留 5-10% 作质保金。基于历史智库,贵司 2024 年与同对手方签的同型号合同<b>明确扣留 10% 质保金 12 月</b>,本次对方明显「开倒车」。</div>
+                      <div class="ar-recommend">甲方应于合同签订后 7 日内支付 50% 预付款;乙方交付并验收合格后 30 日内支付 <mark>40% 中款</mark>;<mark>剩余 10% 作为质保金,自验收之日起扣留 12 个月,期满无质量问题付清</mark>。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r2">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r2">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 626 条 + 第 644 条:实务中应约定质保金以保障担保责任落实。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>瑞达 2024-07 同卖方设备运行 3 月主轴故障,因无质保金,买方追索耗时 11 月仅获 60% 维修费。</div>
+                        <div class="ard-row"><span class="ard-k">💸 影响</span>
+                          <div class="ard-impact">
+                            <div><div class="ai-lbl">质保期内故障损失</div><div class="ai-val">¥3-8 万</div></div>
+                            <div><div class="ai-lbl">追索成本</div><div class="ai-val">¥2-5 万</div></div>
+                            <div><div class="ai-lbl">建议质保金</div><div class="ai-val">¥38,600</div></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 3: 验收期 (中/履行) [r4] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r4" id="orig-r4">
+                      <span class="op-num">第 7.4 条 · 验收</span><span class="op-marker">中 · 履行</span>
+                      <span class="op-content">甲方应在收货之日起 <mark>30 日内</mark>完成验收并提出书面异议,<mark>逾期未提异议的,视为验收合格</mark>。</span>
+                      <span class="op-undo" data-undo="r4">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r4"
+                      data-new="甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但 <mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#2</span><span class="ar-tag mid">中</span><span class="ar-dim">履行</span>
+                        <span class="ar-issue">验收期仅 30 天 · 隐蔽瑕疵无救济</span>
+                      </div>
+                      <div class="ar-reason">CNC 加工中心调试 + 试切 + 隐蔽缺陷暴露往往需 <b>2-3 个月</b>,30 天内只能发现明显缺陷。"逾期视为合格"使后续隐蔽瑕疵维权由<b>担保责任降级为质量瑕疵责任</b>,举证负担转移到我方。</div>
+                      <div class="ar-recommend">甲方应在收货之日起 <mark>60 日内</mark>(含调试 + 试切样件检测)完成验收并提出书面异议。明显瑕疵期内未提异议视为合格,但<mark>主轴、伺服、控制系统等隐蔽瑕疵的发现期为质保期内任何时刻,甲方仍可主张</mark>。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r4">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r4">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 621 条:质量异议期约定合理,逾期视为符合约定;<b>隐蔽瑕疵的发现期可至 2 年</b>。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)鄂 02 民终 1056 号:同类条款致后续质量主张被驳回。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 4: 不可抗力 (中/法律) [r5] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r5" id="orig-r5">
+                      <span class="op-num">第 13.1 条 · 不可抗力</span><span class="op-marker">中 · 法律</span>
+                      <span class="op-content">不可抗力是指<mark>战争、地震、洪水</mark>等不能预见、不能避免、不能克服的客观情况。</span>
+                      <span class="op-undo" data-undo="r5">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r5"
+                      data-new="不可抗力是指<mark>战争、地震、洪水、台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#3</span><span class="ar-tag mid">中</span><span class="ar-dim">法律</span>
+                        <span class="ar-issue">定义过窄 · 未含公共卫生 / 政府管制</span>
+                      </div>
+                      <div class="ar-reason">仅列战争/地震/洪水,未涵盖<b>公共卫生事件、政府限产、停电管控、供应链管制</b>等近年高发情形。一旦遭遇,对方可主张"不属于不可抗力",我方面临违约赔偿。</div>
+                      <div class="ar-recommend">不可抗力是指战争、地震、洪水、<mark>台风、火灾,以及政府宣布的公共卫生事件、政府限产/限电政策、其他不能预见、不能避免、不能克服的客观情况</mark>。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r5">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r5">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 180 条 + 全国人大常委会法工委 2020 年关于疫情防控的释义:疫情属不可抗力, 但当事人有约定的从其约定。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>2021 长三角拉闸限电 + 2024 广东限产案例均被认定属不可抗力。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 5: 发票 (中/财税) [r6] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r6" id="orig-r6">
+                      <span class="op-num">第 6.1 条 · 发票</span><span class="op-marker">中 · 财税</span>
+                      <span class="op-content">乙方应在收到货款后<mark>开具发票</mark>给甲方。</span>
+                      <span class="op-undo" data-undo="r6">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r6"
+                      data-new="乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。">
+                      <div class="ar-head">
+                        <span class="ar-num">#4</span><span class="ar-tag mid">中</span><span class="ar-dim">财税</span>
+                        <span class="ar-issue">未约定专用发票 · 进项税抵扣失守</span>
+                      </div>
+                      <div class="ar-reason">仅写"开具发票",对方可能提供普通发票,导致我方<b>无法抵扣进项税 ¥44,407</b>。¥386K 含税合同,13% 进项税被吃掉不少。</div>
+                      <div class="ar-recommend">乙方应在每笔货款收到后 <mark>15 个工作日内</mark>,开具与款项等额的 <mark>13% 增值税专用发票</mark>给甲方,且发票内容应与合同标的一致。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r6">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r6">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《增值税暂行条例》第 9 条 + 国税发 [2008]31 号:取得普通发票的不得抵扣进项税。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 6: 软件 IP (中/商业) [r7] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue mid" data-pid="r7" id="orig-r7">
+                      <span class="op-num">第 9.2 条 · 软件</span><span class="op-marker">中 · 商业</span>
+                      <span class="op-content">设备配套的<mark>控制软件由乙方提供,买方有使用权</mark>。</span>
+                      <span class="op-undo" data-undo="r7">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r7"
+                      data-new="设备配套软件 IP 归乙方, 甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商, 价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时, 源码托管解锁给甲方仅供内部维护</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#5</span><span class="ar-tag mid">中</span><span class="ar-dim">商业</span>
+                        <span class="ar-issue">软件 IP 与升级权未明确 · 设备生命周期受制</span>
+                      </div>
+                      <div class="ar-reason">仅说"使用权"未约定:① 升级是否免费;② 升级版本是否兼容;③ 乙方停止维护后能否自行修改。设备 8-10 年生命周期内可能被锁住,强制升级费 ¥3-5 万/次。</div>
+                      <div class="ar-recommend">设备配套软件 IP 归乙方, 甲方享有<mark>永久使用权</mark>。<mark>小版本(bug 修复 / 安全补丁)免费升级 5 年</mark>。大版本升级双方友好协商, 价格不高于市场公允价。<mark>乙方停止该型号维护满 2 年时, 源码托管解锁给甲方仅供内部维护</mark>。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r7">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r7">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>大族激光 2024-12 同类合同:小版本免费 5 年, 大版本年费, 源码 2 年托管。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 7: 违约金 (高/法律) [r3] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue high" data-pid="r3" id="orig-r3">
+                      <span class="op-num">第 11.1 条 · 违约</span><span class="op-marker">高 · 法律</span>
+                      <span class="op-content">任一方违约,应向守约方支付违约金,违约金按 <mark>0.05%/日</mark>计算,但累计不超过合同金额 <mark>5%</mark>。</span>
+                      <span class="op-undo" data-undo="r3">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r3"
+                      data-new="任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。">
+                      <div class="ar-head">
+                        <span class="ar-num">#6</span><span class="ar-tag high">高</span><span class="ar-dim">法律</span>
+                        <span class="ar-issue">违约金率过低 + 上限太低 · 对方实际无延期压力</span>
+                      </div>
+                      <div class="ar-reason">0.05%/日 + 上限 5% 是致命点:<b>对方延期 100 天即触顶,再拖也不增加成本</b>。延期 60 天的产能损失 ¥48 万,现条款最多索赔 ¥1.93 万,差额暴露 ¥46 万+。行业标准 0.1-0.3%/日 · 上限 20-30%。</div>
+                      <div class="ar-recommend">任一方违约,应向守约方支付违约金,违约金按 <mark>0.15%/日</mark>计算,但累计不超过合同金额 <mark>20%</mark>。<mark>延期超 60 日,守约方可主张实际损失差额</mark>。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r3">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r3">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民法典》第 585 条:违约金可参照实际损失约定,但举证责任在守约方。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2025)粤 19 民终 432 号:类似条款下,买方主张实际损失提增违约金,法院支持率仅 47%。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 8: 管辖 (高/商业) [r1] -->
+                  <div class="rv-cell left">
+                    <div class="orig-para has-issue high" data-pid="r1" id="orig-r1">
+                      <span class="op-num">第 14.2 条 · 管辖</span><span class="op-marker">高 · 商业</span>
+                      <span class="op-content">因本合同发生争议的,双方应协商解决;协商不成的,由<mark>乙方所在地人民法院</mark>管辖。</span>
+                      <span class="op-undo" data-undo="r1">↶ 撤销修订, 恢复原文</span>
+                    </div>
+                  </div>
+                  <div class="rv-cell right">
+                    <div class="ai-rev" data-rid="r1"
+                      data-new="因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。">
+                      <div class="ar-head">
+                        <span class="ar-num">#7</span><span class="ar-tag high">高</span><span class="ar-dim">商业</span>
+                        <span class="ar-issue">管辖法院约定对方所在地 · 我方主场不利</span>
+                      </div>
+                      <div class="ar-reason">该约定将管辖法院设在<b>对方所在地(苏州)</b>,争议时我方需<b>跨省诉讼</b>,差旅 + 律师驻地 + 调证额外成本 <b>¥5-8 万/次</b>。乙方在当地法院熟悉度往往高于我方,实质影响诉讼公平。</div>
+                      <div class="ar-recommend">因本合同发生争议的,双方应协商解决;协商不成的,由<mark>守约方所在地人民法院</mark>管辖(即提起诉讼一方所在地法院)。</div>
+                      <div class="ar-cta">
+                        <button class="accept" data-fx="cRvAcc" data-rid="r1">✓ 接受修订</button>
+                        <button class="reject" data-fx="cRvRej" data-rid="r1">✗ 驳回</button>
+                        <button class="detail-btn" data-fx="cRvDet">▾ 法规依据</button>
+                      </div>
+                      <div class="ar-detail">
+                        <div class="ard-row"><span class="ard-k">📚 法规</span>《民事诉讼法》第 35 条:合同纠纷可由原告所在地、被告所在地、合同履行地法院管辖。当事人有约定的从其约定。</div>
+                        <div class="ard-row"><span class="ard-k">📂 案例</span>(2024)苏 0508 民初 1287 号:同类约定使外地买方诉讼成本增加 ¥4-8 万。</div>
+                      </div>
+                      <div class="ar-status"></div>
+                    </div>
+                  </div>
+
+                  <!-- 段 9: 签字 (无 issue, 短) -->
+                  <div class="rv-cell left">
+                    <div class="orig-para">
+                      <span class="op-num">第 15 条 · 生效</span>
+                      本合同自双方签字盖章之日起生效,一式两份,双方各执一份,具有同等法律效力。
+                    </div>
+                  </div>
+                  <div class="rv-cell right"><div class="ai-rev skip">本段未发现风险</div></div>
+
                 </div>
               </div>
 
@@ -10498,6 +10835,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var ext = (name.split(".").pop() || "").toLowerCase();
     if (ext === "pdf") return "📕";
     if (ext === "doc" || ext === "docx") return "📘";
+    if (ext === "xls" || ext === "xlsx") return "📗";
     if (ext === "txt" || ext === "rtf") return "📄";
     if (["png", "jpg", "jpeg", "webp"].indexOf(ext) >= 0) return "🖼️";
     return "📄";
@@ -10506,17 +10844,24 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     var ext = (name.split(".").pop() || "").toUpperCase();
     return ext || "FILE";
   }
+  function needsOcr(name) {
+    var ext = (name.split(".").pop() || "").toLowerCase();
+    return ext === "pdf" || ["png", "jpg", "jpeg", "webp"].indexOf(ext) >= 0;
+  }
 
   function showUpDone() {
     upEmpty.style.display = "none";
     upDone.style.display = "grid";
-    Q("#cFileName").textContent = uploadedFile.name;
+    var ocrTag = needsOcr(uploadedFile.name) ? '<span class="ocr-pill">待 OCR</span>' : '';
+    Q("#cFileName").innerHTML = uploadedFile.name + ocrTag;
     Q("#cFileTypeIco").textContent = getFileIco(uploadedFile.name);
     var meta;
     if (uploadedFile.source === "paste") {
       meta = uploadedFile.size + " 字 · 粘贴文本 · 刚才";
+    } else if (needsOcr(uploadedFile.name)) {
+      meta = fmtSize(uploadedFile.size) + " · " + getKindDesc(uploadedFile.name) + " · 启动后将先 OCR 转 Word";
     } else {
-      meta = fmtSize(uploadedFile.size) + " · " + getKindDesc(uploadedFile.name) + " · 刚才";
+      meta = fmtSize(uploadedFile.size) + " · " + getKindDesc(uploadedFile.name) + " · 可直接解析";
     }
     Q("#cFileMeta").textContent = meta;
   }
@@ -10604,7 +10949,6 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   var wfEmpty = Q("#cWfEmpty");
   var wfStream = Q("#cWfStream");
   var wfDone = Q("#cWfDone");
-  var reco = Q("#cReco");
   var execCard = Q("#cExec");
   var execLog = Q("#cExecLog");
   var execFinal = Q("#cExecFinal");
@@ -10619,7 +10963,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     wfEmpty.style.display = "";
     wfStream.style.display = "none";
     wfDone.classList.remove("show");
-    reco.classList.remove("show");
+    if (rvShell) rvShell.classList.remove("show");
     execCard.classList.remove("show");
     execLog.innerHTML = "";
     execFinal.classList.remove("show");
@@ -10644,10 +10988,23 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     wfEmpty.style.display = "none";
     wfStream.style.display = "";
     wfPanel.classList.add("running");
-    Q("#cWfTotal").innerHTML = '<span class="c-pulse"></span>正在审查《' + uploadedFile.name + '》· 5 步骤 · 预计 17 秒';
+    var ocr = needsOcr(uploadedFile.name);
+    var totalSec = ocr ? 19 : 14;
+    Q("#cWfTotal").innerHTML = '<span class="c-pulse"></span>正在审查《' + uploadedFile.name + '》· 5 步骤 · 预计 ' + totalSec + ' 秒';
+
+    // Step 1 文案 + 时长按文件类型变化
+    var step1 = QA(".wf-msg")[0];
+    if (step1) {
+      var lineTt = step1.querySelector(".wml-tt");
+      if (lineTt) lineTt.textContent = ocr
+        ? "📡 OCR 扫描 + 转 Word 格式(扫描件 / PDF 自动识别)"
+        : "📥 读取文件 + OCR + NER 抽取关键字段";
+    }
 
     var steps = QA(".wf-msg");
-    var durations = [3200, 5100, 3400, 2100, 3800]; // ms
+    var durations = ocr
+      ? [4500, 5100, 3400, 2100, 3800]  // PDF/图片: OCR 步耗时长
+      : [1500, 5100, 3400, 2100, 3800];  // Word/TXT: 直接读取
     var cum = 0;
     steps.forEach(function (m, i) {
       var startAt = cum;
@@ -10664,15 +11021,18 @@ curl https://api.dgg.ai/v1/agents/dispatch \
       cum = endAt + 250;
     });
     // 全部完成
+    var totalDur = durations.reduce(function (a, b) { return a + b; }, 0);
+    var totalSecStr = (totalDur / 1000).toFixed(1);
     wfTimers.push(setTimeout(function () {
       wfPanel.classList.remove("running");
       wfDone.classList.add("show");
-      txt("cWfTime", "17.6");
-      reco.classList.add("show");
+      txt("cWfTime", totalSecStr);
+      rvShell.classList.add("show");
+      updateRvProgress();
       startBtn.textContent = "✓ Agent 已完成 · 重新跑";
       startBtn.disabled = false;
-      Q("#cWfTotal").innerHTML = "✓ 已审查《" + uploadedFile.name + "》· 17.6s";
-      setTimeout(function () { reco.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+      Q("#cWfTotal").innerHTML = "✓ 已审查《" + uploadedFile.name + "》· " + totalSecStr + "s · 进入下方修订";
+      setTimeout(function () { rvShell.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
     }, cum + 200));
   }
 
@@ -10746,28 +11106,123 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   });
   Q("#cKbInput").addEventListener("keydown", function (e) { if (e.key === "Enter") Q("#cKbAsk").click(); });
 
-  /* === 让步度滑块 (Reco) === */
-  var recoSlider = Q("#cRecoSlider");
-  recoSlider.addEventListener("input", function () {
-    var v = parseInt(this.value, 10);
-    txt("cRecoVal", v);
-    var acc = Math.round(38 + (95 - 38) * Math.pow(v / 100, 0.78));
-    txt("cRecoAcc", acc + "%");
-    Q("#cRecoAcc").className = "rcl-val " + (acc > 70 ? "good" : acc > 45 ? "warn" : "");
-    var exp = Math.round((2 + (15.2 - 2) * (v / 100)) * 10) / 10;
-    txt("cRecoExp", "¥" + exp + " 万");
-    Q("#cRecoExp").className = "rcl-val " + (exp < 5 ? "good" : "warn");
-    var roi = (1.5 + 2.0 * (1 - Math.abs(v - 55) / 100)).toFixed(1);
-    txt("cRecoRoi", roi + "x");
-    Q("#cRecoRoi").className = "rcl-val " + (parseFloat(roi) > 2.5 ? "good" : "warn");
-    var tip;
-    if (v < 30) tip = '<b>⚠ 当前过于强势</b> · 谈判破裂风险 32%,可能 5-7 轮。建议提到 40-55%。';
-    else if (v < 45) tip = '<b>📊 偏强势 · 仍可谈</b> · 对方接受率 ' + acc + '%,需 3-4 轮。';
-    else if (v < 65) tip = '<b>🤖 AI 推荐区间 45-60%</b> · 38 份历史回测中签约成功率 86%,ROI 3.0-3.5x。';
-    else if (v < 80) tip = '<b>⚠ 过于让步</b> · 我方风险敞口 ¥' + exp + ' 万。';
-    else tip = '<b>❌ 极度让步</b> · 等同接受对方初稿。';
-    Q("#cRecoTip").innerHTML = tip;
+  /* === 修订界面 · 接受 / 驳回 / 撤销 / 一键全采 / 完成 === */
+  var rvShell = Q("#cReview");
+  var rvTotal = QA(".ai-rev[data-rid]", rvShell).length;
+  txt("cRvTotal", rvTotal);
+  var rvFinishBtn = Q("#cRvFinish");
+
+  function updateRvProgress() {
+    var processed = QA(".ai-rev.accepted, .ai-rev.rejected", rvShell).length;
+    txt("cRvDone", processed);
+    Q("#cRvBar").style.width = (processed / rvTotal * 100) + "%";
+    rvFinishBtn.disabled = processed < rvTotal;
+    rvFinishBtn.textContent = processed === rvTotal
+      ? "✓ 完成 · 生成 redline 终稿"
+      : "✓ 完成 · 还剩 " + (rvTotal - processed) + " 条待你处置";
+  }
+
+  function rvAccept(rid) {
+    var card = Q('.ai-rev[data-rid="' + rid + '"]', rvShell);
+    var orig = Q('#orig-' + rid);
+    if (!card || !orig) return;
+    if (card.classList.contains("accepted") || card.classList.contains("rejected")) return;
+    // 左边原文替换
+    var newHTML = card.getAttribute("data-new");
+    var content = orig.querySelector(".op-content");
+    if (content && newHTML) {
+      content.dataset.origHTML = content.innerHTML;
+      content.innerHTML = newHTML;
+    }
+    orig.classList.remove("has-issue", "high", "mid", "rejected");
+    orig.classList.add("modified");
+    // 右边卡片状态
+    card.classList.add("accepted");
+    var st = card.querySelector(".ar-status");
+    if (st) st.innerHTML = '<span>已接受 AI 建议 · 左边原文已替换</span><span class="ar-undo-link" data-fx="cRvUndo" data-rid="' + rid + '">↶ 撤销</span>';
+    updateRvProgress();
+  }
+
+  function rvReject(rid) {
+    var card = Q('.ai-rev[data-rid="' + rid + '"]', rvShell);
+    var orig = Q('#orig-' + rid);
+    if (!card || !orig) return;
+    if (card.classList.contains("accepted") || card.classList.contains("rejected")) return;
+    orig.classList.add("rejected");
+    card.classList.add("rejected");
+    var st = card.querySelector(".ar-status");
+    if (st) st.innerHTML = '<span>已驳回 · 保持合同原文</span><span class="ar-undo-link" data-fx="cRvUndo" data-rid="' + rid + '">↶ 撤销</span>';
+    updateRvProgress();
+  }
+
+  function rvUndo(rid) {
+    var card = Q('.ai-rev[data-rid="' + rid + '"]', rvShell);
+    var orig = Q('#orig-' + rid);
+    if (!card || !orig) return;
+    var wasAcc = card.classList.contains("accepted");
+    card.classList.remove("accepted", "rejected", "open");
+    orig.classList.remove("modified", "rejected");
+    var risk = card.querySelector(".ar-tag").classList.contains("high") ? "high" : "mid";
+    orig.classList.add("has-issue", risk);
+    if (wasAcc) {
+      var content = orig.querySelector(".op-content");
+      if (content && content.dataset.origHTML) {
+        content.innerHTML = content.dataset.origHTML;
+      }
+    }
+    var st = card.querySelector(".ar-status");
+    if (st) st.innerHTML = "";
+    updateRvProgress();
+  }
+
+  rvShell.addEventListener("click", function (e) {
+    var acc = e.target.closest('[data-fx="cRvAcc"]'); if (acc) { rvAccept(acc.dataset.rid); return; }
+    var rej = e.target.closest('[data-fx="cRvRej"]'); if (rej) { rvReject(rej.dataset.rid); return; }
+    var und = e.target.closest('[data-fx="cRvUndo"]'); if (und) { rvUndo(und.dataset.rid); return; }
+    var undO = e.target.closest('[data-undo]'); if (undO) { rvUndo(undO.dataset.undo); return; }
+    var det = e.target.closest('[data-fx="cRvDet"]');
+    if (det) {
+      var card = det.closest(".ai-rev");
+      card.classList.toggle("open");
+      det.textContent = card.classList.contains("open") ? "▴ 收起" : "▾ 法规依据";
+    }
   });
+
+  Q("#cRvAcceptAll").addEventListener("click", function () {
+    QA(".ai-rev[data-rid]", rvShell).forEach(function (card) {
+      if (!card.classList.contains("accepted") && !card.classList.contains("rejected")) {
+        rvAccept(card.dataset.rid);
+      }
+    });
+    ts("⚡ 已一键接受全部 AI 修订建议 · 左边原文已实时替换");
+  });
+
+  rvFinishBtn.addEventListener("click", function () {
+    if (this.disabled) return;
+    ts("✅ 进入 AI 自动执行下游 · redline / 发对方 / 推老板 / 录履约 / 进智库");
+    runExec("review");
+  });
+
+  function resetReview() {
+    rvShell.classList.remove("show");
+    QA(".ai-rev[data-rid]", rvShell).forEach(function (card) {
+      var rid = card.dataset.rid;
+      card.classList.remove("accepted", "rejected", "open");
+      var st = card.querySelector(".ar-status"); if (st) st.innerHTML = "";
+      var orig = Q("#orig-" + rid);
+      if (orig) {
+        orig.classList.remove("modified", "rejected");
+        var risk = card.querySelector(".ar-tag").classList.contains("high") ? "high" : "mid";
+        orig.classList.add("has-issue", risk);
+        var content = orig.querySelector(".op-content");
+        if (content && content.dataset.origHTML) {
+          content.innerHTML = content.dataset.origHTML;
+          delete content.dataset.origHTML;
+        }
+      }
+    });
+    updateRvProgress();
+  }
 
   /* === 决策按钮 + AI 执行流 === */
   function runExec(execKey) {
@@ -10776,12 +11231,14 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     execFinal.classList.remove("show");
     txt("cExecName", uploadedFile ? uploadedFile.name : "本合同");
     var logs;
-    if (execKey === "reco") {
+    if (execKey === "review" || execKey === "reco") {
+      var accCount = QA(".ai-rev.accepted", rvShell).length;
+      var rejCount = QA(".ai-rev.rejected", rvShell).length;
       logs = [
-        ["生成 Word redline.docx(含 7 处修改 · 含批注)", 1000],
+        ["生成修订稿 redline.docx(应用 " + accCount + " 处接受 · 标注 " + rejCount + " 处驳回 · 含批注)", 1000],
         ["通过钉钉发送对方法务 + 附 redline 稿", 800],
-        ["生成老板待批用印摘要(2 页要点)", 700],
-        ["录入履约监控时间表(交付/验收/质保关键节点)", 600],
+        ["生成老板待批用印摘要(2 页要点 · 含修订前后对比)", 700],
+        ["录入履约监控时间表(交付 / 验收 / 质保 / 续约关键节点)", 600],
         ["向量化并同步至历史智库索引", 500]
       ];
     } else if (execKey === "manual") {
@@ -10830,28 +11287,9 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     }, cum + 200));
   }
 
-  view.addEventListener("click", function (e) {
-    var b = e.target.closest('[data-fx="cDecide"]');
-    if (!b) return;
-    // 锁三个按钮
-    QA('[data-fx="cDecide"]').forEach(function (x) { x.disabled = true; });
-    var act = b.dataset.act;
-    if (act === "accept") b.textContent = "✓ 已采纳 · AI 正在执行";
-    else if (act === "manual") b.textContent = "📋 已切换 · 逐条审核中";
-    else b.textContent = "👨‍⚖️ 已升级 · 等顾问联系";
-    ts(b.dataset.msg);
-    runExec(b.dataset.exec);
-  });
-
   /* "准备审下一份" */
   Q("#cExecNext").addEventListener("click", function () {
-    QA('[data-fx="cDecide"]').forEach(function (x) {
-      x.disabled = false;
-    });
-    var ctas = QA(".reco-cta button");
-    ctas[0].textContent = "✓ 采用 AI 方案,自动执行下游";
-    ctas[1].textContent = "📋 我要逐条看再决定";
-    ctas[2].textContent = "👨‍⚖️ 升级人工法务复核";
+    resetReview();
     resetWorkflow();
     showUpEmpty();
     Q(".upload-zone").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -10912,7 +11350,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
   Q("#dispUrgent").addEventListener("change", dispUpd);
 
   /* 初始化 */
-  recoSlider.dispatchEvent(new Event("input"));
+  updateRvProgress();
   saasUpd();
   dispUpd();
 })();
