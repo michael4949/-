@@ -1,8 +1,11 @@
 // §16 物料齐套完整页
 //   顶部：AI 提示（#11 齐套风险预测）→ KPI → 左缺料 + 右批次 → 齐套时间轴
 //   AI 触点：#11 Insight Card · #10 缺料根因分析
+//   ★ v2.2.3：#11 从观察式 → 交互式
+//     · Insight Card 主操作改"AI 一键批量准备 N 张高风险" → 一键解决所有高风险
+//     · 批量准备 progress 实时刷新缺料数、齐套率
 import { useState } from 'react';
-import { Boxes } from 'lucide-react';
+import { Boxes, Wand2, Loader2 } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
 import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import ShortageRootCauseModal from '../components/ai/ShortageRootCauseModal';
@@ -16,6 +19,7 @@ import { useMaterialOpsStore } from '../store/useMaterialOpsStore';
 import type { ShortageRootCauseOutput } from '../mock/agentResponses.sprint4';
 import type { ShortageItem } from '../mock/shortageList';
 import { SHORTAGE_PREDICTOR } from '../mock/agentResponses.sprint4';
+import { SHORTAGE_LIST } from '../mock/shortageList';
 
 export default function MaterialCheckPage() {
   const [insightDismissed, setInsightDismissed] = useState(false);
@@ -25,6 +29,9 @@ export default function MaterialCheckPage() {
   const pushMessage = useCopilotStore((s) => s.pushMessage);
   const setCopOpen = useCopilotStore((s) => s.setOpen);
   const prepareItem = useMaterialOpsStore((s) => s.prepareItem);
+  const preparedIds = useMaterialOpsStore((s) => s.preparedIds);
+  /** ★ v2.2.3：批量准备状态 — 用 progress 让用户看到 AI 逐张处理 */
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
 
   function onPrepare(item: ShortageItem) {
     prepareItem(item.workOrderId);   // ★ 系统状态变：左侧卡变绿打勾 + 顶部 KPI 齐套率上升 + 缺料数下降
@@ -32,6 +39,27 @@ export default function MaterialCheckPage() {
       id: 'sys-shortage-prepared-' + Date.now(),
       role: 'assistant',
       content: `**${item.workOrderId} · ${item.customer}** 已应用 AI 一键准备：\n\n• 自动协调替代批次（${item.missingMaterials[0].spec}）\n• 触发紧急采购单 PO-2026-${Math.floor(Math.random() * 900) + 100}\n• 该工单从风险列表移除，齐套率 KPI +1pp`,
+      timestamp: new Date(),
+    });
+  }
+
+  /** ★ v2.2.3 高风险工单批量 AI 准备 — Insight Card 主操作触发 */
+  async function onBatchPrepareHighRisk() {
+    // 取所有 high 风险且未准备的工单
+    const highRiskItems = SHORTAGE_LIST.filter((s) => s.severity === 'high' && !preparedIds.has(s.workOrderId));
+    if (highRiskItems.length === 0) return;
+    setBatchProgress({ current: 0, total: highRiskItems.length });
+    // 逐张处理，每张 400ms（模拟 AI 协调）
+    for (let i = 0; i < highRiskItems.length; i++) {
+      await new Promise((r) => setTimeout(r, 400));
+      prepareItem(highRiskItems[i].workOrderId);
+      setBatchProgress({ current: i + 1, total: highRiskItems.length });
+    }
+    setTimeout(() => setBatchProgress(null), 1500);
+    pushMessage({
+      id: 'sys-batch-prepare-' + Date.now(),
+      role: 'assistant',
+      content: `**Agent #11 齐套风险预测 · 批量处置完成**\n\n已为 ${highRiskItems.length} 张高风险工单逐一应用 AI 准备方案：\n• 自动匹配替代批次 / 触发紧急采购 / 调整安全库存参数\n• 齐套率 KPI 由 87.3% 上升至 ${(87.3 + highRiskItems.length).toFixed(1)}%（实时刷新）\n• 风险工单数从 ${SHORTAGE_LIST.length} → ${SHORTAGE_LIST.length - highRiskItems.length - preparedIds.size}`,
       timestamp: new Date(),
     });
   }
@@ -79,22 +107,44 @@ export default function MaterialCheckPage() {
         ]}
       />
 
-      {/* AI 提示 · #11 齐套风险预测 */}
-      {!insightDismissed && (
-        <AIInsightCard
-          insight={{
-            id: 'mat-predict',
-            severity: 'warning',
-            agentSource: 'material.shortage-predictor',
-            message: `🤖 ${SHORTAGE_PREDICTOR.summary}（其中 ${SHORTAGE_PREDICTOR.risks.filter((r) => r.riskLevel === 'high').length} 张高风险） · ${SHORTAGE_PREDICTOR.runAt}`,
-            primaryAction: { label: '查看清单', route: '/material-check' },
-            dismissible: true,
-            generatedAt: new Date(),
-          }}
-          onDismiss={() => setInsightDismissed(true)}
-          onAction={() => { /* 滚动至缺料清单 */ document.getElementById('shortage-anchor')?.scrollIntoView({ behavior: 'smooth' }); }}
-        />
-      )}
+      {/* ★ v2.2.3 #11 齐套风险预测 改为交互式 — Insight 主操作触发批量准备 */}
+      {!insightDismissed && (() => {
+        const highCount = SHORTAGE_LIST.filter((s) => s.severity === 'high' && !preparedIds.has(s.workOrderId)).length;
+        const totalHigh = SHORTAGE_LIST.filter((s) => s.severity === 'high').length;
+        if (highCount === 0 && preparedIds.size >= totalHigh) {
+          return (
+            <AIInsightCard
+              insight={{
+                id: 'mat-predict-done',
+                severity: 'success',
+                agentSource: 'material.shortage-predictor',
+                message: `✅ ${totalHigh} 张高风险工单已全部 AI 准备完毕 · 齐套率上升 ${preparedIds.size.toFixed(1)}pp · Agent #11 进入待机`,
+                primaryAction: { label: '关闭', route: '/material-check' },
+                dismissible: true,
+                generatedAt: new Date(),
+              }}
+              onDismiss={() => setInsightDismissed(true)}
+            />
+          );
+        }
+        return (
+          <AIInsightCard
+            insight={{
+              id: 'mat-predict',
+              severity: 'warning',
+              agentSource: 'material.shortage-predictor',
+              message: batchProgress
+                ? `🤖 AI 批量准备进行中… (${batchProgress.current}/${batchProgress.total}) · 实时为高风险工单匹配替代批次 / 触发紧急采购`
+                : `🤖 ${SHORTAGE_PREDICTOR.summary}（${highCount} 张高风险待处理） · 一键交给 AI 协调批次/采购`,
+              primaryAction: { label: batchProgress ? '处理中…' : `✨ AI 一键准备 ${highCount} 张高风险`, route: '/material-check' },
+              dismissible: true,
+              generatedAt: new Date(),
+            }}
+            onDismiss={() => setInsightDismissed(true)}
+            onAction={onBatchPrepareHighRisk}
+          />
+        );
+      })()}
 
       {/* KPI */}
       <MaterialKPIBar />

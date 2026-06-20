@@ -1,6 +1,7 @@
 // 库存锁定页：左侧锁定记录表
+//   ★ v2.2.3 锁定健康度监测改交互式 — 超期/频繁解锁 行末加 ✨ AI 释放 / ✨ AI 稳定 按钮
 import { useMemo, useState } from 'react';
-import { Lock, ChevronLeft, ChevronRight, AlertTriangle, RotateCw, Check, Sparkles } from 'lucide-react';
+import { Lock, ChevronLeft, ChevronRight, AlertTriangle, RotateCw, Check, Sparkles, Unlock } from 'lucide-react';
 import { LOCK_RECORDS, LOCK_HEALTH_LABEL, type LockHealth } from '../../mock/lockRecords';
 import { MATERIAL_KIND_LABEL } from '../../mock/materialBatches';
 import { useInventoryOpsStore } from '../../store/useInventoryOpsStore';
@@ -22,6 +23,10 @@ export default function LockRecordList() {
   const [page, setPage] = useState(0);
   const [healthFilter, setHealthFilter] = useState<'all' | LockHealth>('all');
   const releasedLockIds = useInventoryOpsStore((s) => s.releasedLockIds);
+  const unlockedOverdueIds = useInventoryOpsStore((s) => s.unlockedOverdueIds);
+  const refreshedFlappingIds = useInventoryOpsStore((s) => s.refreshedFlappingIds);
+  const unlockOverdue = useInventoryOpsStore((s) => s.unlockOverdue);
+  const refreshFlapping = useInventoryOpsStore((s) => s.refreshFlapping);
 
   const filtered = useMemo(() => {
     return LOCK_RECORDS.filter((r) => healthFilter === 'all' || r.health === healthFilter)
@@ -64,13 +69,23 @@ export default function LockRecordList() {
               <th className="px-3 py-2 font-medium text-right">价值</th>
               <th className="px-3 py-2 font-medium">锁定时间</th>
               <th className="px-3 py-2 font-medium">状态</th>
+              <th className="px-3 py-2 font-medium text-right pr-3">AI 操作</th>
             </tr>
           </thead>
           <tbody>
             {items.map((r) => {
               const isReleased = releasedLockIds.has(r.workOrderId);
+              const isUnlocked = unlockedOverdueIds.has(r.id);
+              const isRefreshed = refreshedFlappingIds.has(r.id);
+              // 实际状态：原始状态 / 已调解 / AI 已释放 / AI 已稳定
+              const effectiveHealth: LockHealth =
+                (r.health === 'overdue' && isUnlocked) ? 'healthy' :
+                (r.health === 'flapping' && isRefreshed) ? 'healthy' :
+                r.health;
               return (
-              <tr key={r.id} className={`border-t border-line hover:bg-bg ${isReleased ? 'bg-ai-bg/30' : ''}`}>
+              <tr key={r.id} className={`border-t border-line hover:bg-bg
+                                          ${isReleased ? 'bg-ai-bg/30' : ''}
+                                          ${isUnlocked || isRefreshed ? 'bg-ok/5' : ''}`}>
                 <td className="px-3 py-1.5 font-mono text-[11.5px] text-ink">{r.workOrderId}</td>
                 <td className="px-3 py-1.5 text-ink-dim">{MATERIAL_KIND_LABEL[r.materialKind]}</td>
                 <td className="px-3 py-1.5 font-mono text-[11px] text-ink-dim truncate max-w-[150px]">{r.materialBatchId}</td>
@@ -82,11 +97,28 @@ export default function LockRecordList() {
                     <span className="tag inline-flex items-center gap-0.5 bg-ai/15 text-ai">
                       <Sparkles size={10} />已调解
                     </span>
+                  ) : (isUnlocked || isRefreshed) ? (
+                    <span className="tag inline-flex items-center gap-0.5 bg-ok/15 text-ok">
+                      <Check size={10} />{isUnlocked ? 'AI 已释放' : 'AI 已稳定'}
+                    </span>
                   ) : (
-                    <span className={`tag inline-flex items-center gap-0.5 ${HEALTH_TAG[r.health]}`}>
-                      {HEALTH_ICON[r.health]} {LOCK_HEALTH_LABEL[r.health]}
+                    <span className={`tag inline-flex items-center gap-0.5 ${HEALTH_TAG[effectiveHealth]}`}>
+                      {HEALTH_ICON[effectiveHealth]} {LOCK_HEALTH_LABEL[effectiveHealth]}
                       {r.health === 'flapping' && r.reLockCount && <span className="ml-0.5">x{r.reLockCount}</span>}
                     </span>
+                  )}
+                </td>
+                <td className="px-3 py-1 text-right pr-3">
+                  {/* ★ v2.2.3 行末 AI 操作（仅对超期/频繁解锁显示） */}
+                  {r.health === 'overdue' && !isUnlocked && !isReleased && (
+                    <button onClick={() => unlockOverdue(r.id)} className="btn btn-sm btn-ai" title="启动 Agent #13 释放该超期锁定">
+                      <Unlock size={10} />AI 释放
+                    </button>
+                  )}
+                  {r.health === 'flapping' && !isRefreshed && !isReleased && (
+                    <button onClick={() => refreshFlapping(r.id)} className="btn btn-sm btn-ai" title="启动 Agent #13 锁定锚定">
+                      <Sparkles size={10} />AI 稳定
+                    </button>
                   )}
                 </td>
               </tr>

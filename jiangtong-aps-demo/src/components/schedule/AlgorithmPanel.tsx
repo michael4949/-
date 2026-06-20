@@ -1,5 +1,7 @@
 // §9.1 算法决策面板：权重 4 项 + 应用+重排 + 当前 KPI
 //   ★ v2.2.1：加用途说明 + 启用「A/B/C 方案对比」（3 套预设权重的 KPI 预测对比）
+//   ★ v2.2.3：「应用+重排」与「采用此方案」都真正调用 reSchedule()
+//             → 甘特图上 20% 工单被实际重新调度（flash 闪烁）+ KPI 实时变化 + KPI 历史新增一行
 import { useState } from 'react';
 import { useScheduleStore } from '../../store/useScheduleStore';
 import { Sparkles, Loader2, Info, X, Crown, Check } from 'lucide-react';
@@ -52,27 +54,31 @@ const PRESETS: Preset[] = [
 export default function AlgorithmPanel() {
   const weights = useScheduleStore((s) => s.weights);
   const setW = useScheduleStore((s) => s.setWeights);
-  const applyW = useScheduleStore((s) => s.applyWeights);
+  const reSchedule = useScheduleStore((s) => s.reSchedule);
   const kpi = useScheduleStore((s) => s.kpi);
   const [busy, setBusy] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
   const [appliedPreset, setAppliedPreset] = useState<'A' | 'B' | 'C' | null>(null);
+  /** 重排后局部 Toast：告知用户实际系统变化 */
+  const [lastApply, setLastApply] = useState<{ moved: number; otd: number; co: number; util: number } | null>(null);
 
   const total = weights.otd + weights.minChangeover + weights.utilization + weights.minWIP;
 
+  // ★ v2.2.3 真正系统联动：调用 reSchedule() 而非仅 KPI 重算
   async function onApply() {
     setBusy(true);
-    await applyW();
+    const r = await reSchedule();
     setBusy(false);
+    setLastApply({ moved: r.moved, otd: r.newKpi.otd, co: r.newKpi.changeoverLoss, util: r.newKpi.utilization });
+    setTimeout(() => setLastApply(null), 6000);
   }
 
   function onPickPreset(p: Preset) {
     setW(p.weights);
     setAppliedPreset(p.id);
     setCompareOpen(false);
-    // 自动应用一次
-    onApply();
+    onApply();   // 真正应用 → 甘特图重排 + KPI 变化
   }
 
   return (
@@ -133,6 +139,17 @@ export default function AlgorithmPanel() {
           </span>
         )}
       </div>
+
+      {/* ★ v2.2.3 重排结果实时回显（替代之前的"无反应"） */}
+      {lastApply && (
+        <div className="mt-2 rounded-md bg-ok/10 border-l-4 border-ok px-3 py-2 text-[11.5px] text-ok flex items-center gap-2 animate-modal-in">
+          <Check size={12} className="flex-none" />
+          <span>
+            <b>✓ 已重排 {lastApply.moved} 张工单</b> · 甘特图上对应工单条紫色闪烁 · OTD {fmtPct(lastApply.otd)} · 换型 {fmtPct(lastApply.co)} · 利用率 {fmtPct(lastApply.util)}
+            <span className="ml-2 text-ink-faint">(刚才的指标已写入 KPI 对比表，点「KPI 对比」可见)</span>
+          </span>
+        </div>
+      )}
 
       {/* A/B/C 方案对比 Modal */}
       {compareOpen && (
