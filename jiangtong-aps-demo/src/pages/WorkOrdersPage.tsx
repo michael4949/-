@@ -6,12 +6,14 @@ import { ClipboardList, Sparkles, FileDown, Upload, Plus, X } from 'lucide-react
 import AIInsightCard from '../components/ai/AIInsightCard';
 import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import BOMSuggestionModal from '../components/ai/BOMSuggestionModal';
+import AnomalyAnalysisModal from '../components/ai/AnomalyAnalysisModal';
 import WorkOrderKPIBar from '../components/workorder/WorkOrderKPIBar';
 import WorkOrderListTable from '../components/workorder/WorkOrderListTable';
 import WorkOrderDrawer from '../components/workorder/WorkOrderDrawer';
 import { ANOMALY_STATS } from '../mock/workOrderAnomalies';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
+import { useWorkOrderOpsStore } from '../store/useWorkOrderOpsStore';
 import type { BOMSuggestionOutput } from '../mock/agentResponses.sprint4';
 
 export default function WorkOrdersPage() {
@@ -21,8 +23,15 @@ export default function WorkOrdersPage() {
   const [bomOpen, setBomOpen] = useState(false);
   const [bomLoading, setBomLoading] = useState(false);
   const [bomOutput, setBomOutput] = useState<BOMSuggestionOutput | null>(null);
+  const [anomalyOpen, setAnomalyOpen] = useState(false);
+  const [anomalyWoId, setAnomalyWoId] = useState<string | null>(null);
   const pushMessage = useCopilotStore((s) => s.pushMessage);
   const setCopOpen = useCopilotStore((s) => s.setOpen);
+  const markAnalyzed = useWorkOrderOpsStore((s) => s.markAnalyzed);
+  const markedAnalyzed = useWorkOrderOpsStore((s) => s.markedAnalyzed);
+  const setBOMGenerated = useWorkOrderOpsStore((s) => s.setBOMGenerated);
+  // 异常 KPI 已减去已处置数
+  const remainAnomalies = Math.max(0, ANOMALY_STATS.total - markedAnalyzed.size);
 
   async function onRequestBOM(woId: string) {
     setBomOpen(true);
@@ -38,15 +47,31 @@ export default function WorkOrdersPage() {
 
   function onSaveBOM() {
     if (!bomOutput) return;
+    setBOMGenerated(bomOutput.workOrderId);  // ★ v2.2.2：列表中该工单状态变化（标记✓BOM）
     pushMessage({
       id: 'sys-bom-' + Date.now(),
       role: 'assistant',
-      content: `**BOM 草稿已保存** · ${bomOutput.workOrderId} · ${bomOutput.productName}\n\n共 ${bomOutput.bom.length} 项物料，${bomOutput.route.length} 步工艺。建议工艺部门复核后下达正式 BOM。`,
+      content: `**BOM 草稿已保存** · ${bomOutput.workOrderId} · ${bomOutput.productName}\n\n共 ${bomOutput.bom.length} 项物料，${bomOutput.route.length} 步工艺。建议工艺部门复核后下达正式 BOM。\n\n👉 列表中该样品工单已标记「✓BOM」，"生成 BOM"按钮已隐藏。`,
       attachments: [{ type: 'bom-draft', data: bomOutput }],
       timestamp: new Date(),
     });
     setBomOpen(false);
     setCopOpen(true);
+  }
+
+  function onAnalyzeAnomaly(woId: string) {
+    setAnomalyWoId(woId);
+    setAnomalyOpen(true);
+  }
+  function onApplyAnalysis(woId: string) {
+    markAnalyzed(woId);                        // ★ v2.2.2：标记已处置 → 异常 KPI -1 + 行内标签从「异常」变成「✓已处置」
+    setAnomalyOpen(false);
+    pushMessage({
+      id: 'sys-anomaly-' + Date.now(),
+      role: 'assistant',
+      content: `**${woId} 已标记为已处置** · 异常工单 KPI 由 ${ANOMALY_STATS.total - markedAnalyzed.size} → ${ANOMALY_STATS.total - markedAnalyzed.size - 1}\n\n该工单从异常列表移除，行内标记由「⚠ 异常」变为「✓ 已处置」。`,
+      timestamp: new Date(),
+    });
   }
 
   return (
@@ -79,20 +104,34 @@ export default function WorkOrdersPage() {
         ]}
       />
 
-      {/* AI 提示 · #9 异常工单识别 */}
-      {!insightDismissed && (
+      {/* AI 提示 · #9 异常工单识别 — 实时反映已处置数 */}
+      {!insightDismissed && remainAnomalies > 0 && (
         <AIInsightCard
           insight={{
             id: 'wo-anomaly',
             severity: 'warning',
             agentSource: 'workorder.anomaly-detector',
-            message: `🤖 检测到 ${ANOMALY_STATS.total} 张工单状态异常（${ANOMALY_STATS.frequentChange} 张频繁变更超 5 次 / ${ANOMALY_STATS.longIdle} 张超 30 天未开工）`,
-            primaryAction: { label: '查看', route: '/work-orders' },
+            message: `🤖 检测到 ${remainAnomalies} 张工单状态异常（已处置 ${markedAnalyzed.size}/${ANOMALY_STATS.total}）· 点「仅看异常」筛选 → 行末点 ✨ AI 分析`,
+            primaryAction: { label: '仅看异常', route: '/work-orders' },
             dismissible: true,
             generatedAt: new Date(),
           }}
           onDismiss={() => setInsightDismissed(true)}
           onAction={() => setHighlight(true)}
+        />
+      )}
+      {!insightDismissed && remainAnomalies === 0 && (
+        <AIInsightCard
+          insight={{
+            id: 'wo-anomaly-clean',
+            severity: 'success',
+            agentSource: 'workorder.anomaly-detector',
+            message: `✅ 全部 ${ANOMALY_STATS.total} 张异常工单已处置完毕 · 异常工单识别 Agent 进入待机`,
+            primaryAction: { label: '关闭', route: '/work-orders' },
+            dismissible: true,
+            generatedAt: new Date(),
+          }}
+          onDismiss={() => setInsightDismissed(true)}
         />
       )}
 
@@ -105,6 +144,8 @@ export default function WorkOrdersPage() {
           highlightAnomalies={highlightAnomalies}
           onSelect={setSelectedId}
           selectedId={selectedId}
+          onAnalyze={onAnalyzeAnomaly}
+          onRequestBOM={onRequestBOM}
         />
       </div>
 
@@ -122,6 +163,14 @@ export default function WorkOrdersPage() {
         output={bomOutput}
         onClose={() => setBomOpen(false)}
         onSave={onSaveBOM}
+      />
+
+      {/* ★ v2.2.2 异常分析 Modal */}
+      <AnomalyAnalysisModal
+        open={anomalyOpen}
+        workOrderId={anomalyWoId}
+        onClose={() => setAnomalyOpen(false)}
+        onApply={onApplyAnalysis}
       />
     </div>
   );

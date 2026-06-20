@@ -1,8 +1,9 @@
 // 库存锁定页：左侧锁定记录表
 import { useMemo, useState } from 'react';
-import { Lock, ChevronLeft, ChevronRight, AlertTriangle, RotateCw, Check } from 'lucide-react';
+import { Lock, ChevronLeft, ChevronRight, AlertTriangle, RotateCw, Check, Sparkles } from 'lucide-react';
 import { LOCK_RECORDS, LOCK_HEALTH_LABEL, type LockHealth } from '../../mock/lockRecords';
 import { MATERIAL_KIND_LABEL } from '../../mock/materialBatches';
+import { useInventoryOpsStore } from '../../store/useInventoryOpsStore';
 import { fmtMoney, fmtDate } from '../../utils/format';
 
 const PAGE_SIZE = 14;
@@ -20,6 +21,7 @@ const HEALTH_ICON: Record<LockHealth, JSX.Element> = {
 export default function LockRecordList() {
   const [page, setPage] = useState(0);
   const [healthFilter, setHealthFilter] = useState<'all' | LockHealth>('all');
+  const releasedLockIds = useInventoryOpsStore((s) => s.releasedLockIds);
 
   const filtered = useMemo(() => {
     return LOCK_RECORDS.filter((r) => healthFilter === 'all' || r.health === healthFilter)
@@ -65,8 +67,10 @@ export default function LockRecordList() {
             </tr>
           </thead>
           <tbody>
-            {items.map((r) => (
-              <tr key={r.id} className="border-t border-line hover:bg-bg">
+            {items.map((r) => {
+              const isReleased = releasedLockIds.has(r.workOrderId);
+              return (
+              <tr key={r.id} className={`border-t border-line hover:bg-bg ${isReleased ? 'bg-ai-bg/30' : ''}`}>
                 <td className="px-3 py-1.5 font-mono text-[11.5px] text-ink">{r.workOrderId}</td>
                 <td className="px-3 py-1.5 text-ink-dim">{MATERIAL_KIND_LABEL[r.materialKind]}</td>
                 <td className="px-3 py-1.5 font-mono text-[11px] text-ink-dim truncate max-w-[150px]">{r.materialBatchId}</td>
@@ -74,13 +78,20 @@ export default function LockRecordList() {
                 <td className="px-3 py-1.5 text-right tabular-nums text-ink-dim">{fmtMoney(r.value)}</td>
                 <td className="px-3 py-1.5 text-ink-dim tabular-nums">{fmtDate(r.lockedAt)} <span className="text-ink-faint">({r.daysSinceLocked}天)</span></td>
                 <td className="px-3 py-1.5">
-                  <span className={`tag inline-flex items-center gap-0.5 ${HEALTH_TAG[r.health]}`}>
-                    {HEALTH_ICON[r.health]} {LOCK_HEALTH_LABEL[r.health]}
-                    {r.health === 'flapping' && r.reLockCount && <span className="ml-0.5">x{r.reLockCount}</span>}
-                  </span>
+                  {isReleased ? (
+                    <span className="tag inline-flex items-center gap-0.5 bg-ai/15 text-ai">
+                      <Sparkles size={10} />已调解
+                    </span>
+                  ) : (
+                    <span className={`tag inline-flex items-center gap-0.5 ${HEALTH_TAG[r.health]}`}>
+                      {HEALTH_ICON[r.health]} {LOCK_HEALTH_LABEL[r.health]}
+                      {r.health === 'flapping' && r.reLockCount && <span className="ml-0.5">x{r.reLockCount}</span>}
+                    </span>
+                  )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {items.length === 0 && (
               <tr><td colSpan={7} className="text-center text-ink-faint py-10 text-[12.5px]">无匹配记录</td></tr>
             )}

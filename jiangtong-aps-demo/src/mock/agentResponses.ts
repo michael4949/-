@@ -135,6 +135,7 @@ export interface AnomalyHint {
 }
 
 export const ANOMALY_HINTS: AnomalyHint[] = [
+  // ===== 漆包车间 6 台异常 =====
   {
     resourceId: 'R-EN-03',
     message: '闲置 30%, 可优化',
@@ -145,6 +146,22 @@ export const ANOMALY_HINTS: AnomalyHint[] = [
       savedHours: 2.5,
       metricFrom: '利用率 70% / 换型损失 12.6%',
       metricTo: '利用率 88% / 换型损失 10.4%',
+    },
+  },
+  {
+    resourceId: 'R-EN-05',
+    message: '换型偏高, 可合并',
+    detail: {
+      title: '漆包机 #5 · 换型频次偏高',
+      summary: '近 7 天换型 18 次（基线 10 次），建议合并 4 张 QZ 漆种工单减少跨色切换',
+      affected: [
+        { id: 'WO-2026-1310', product: 'QZ-0.45mm 红色', quantity: 420 },
+        { id: 'WO-2026-1314', product: 'QZ-0.45mm 蓝色', quantity: 380 },
+        { id: 'WO-2026-1318', product: 'QZ-0.45mm 黄色', quantity: 360 },
+      ],
+      savedHours: 2.0,
+      metricFrom: '换型 18 次 / 损失 14.2%',
+      metricTo: '换型 12 次 / 损失 10.8%',
     },
   },
   {
@@ -164,6 +181,51 @@ export const ANOMALY_HINTS: AnomalyHint[] = [
     },
   },
   {
+    resourceId: 'R-EN-11',
+    message: '单耗最低, 可承接',
+    detail: {
+      title: '漆包机 #11 · 单位成本最低',
+      summary: '本月单位成本 ¥30,420/吨（基线 ¥30,600），可优先承接高毛利工单',
+      affected: [
+        { id: 'WO-2026-1351', product: 'QA-0.5mm 红色', quantity: 800 },
+        { id: 'WO-2026-1356', product: 'QA-0.5mm 红色', quantity: 720 },
+      ],
+      savedHours: 0,
+      metricFrom: '单耗 ¥30,420/吨',
+      metricTo: '可承担额外 28 吨高毛利订单',
+    },
+  },
+  {
+    resourceId: 'R-EN-14',
+    message: '保养超期, 待检',
+    detail: {
+      title: '漆包机 #14 · 设备保养超期',
+      summary: '距上次保养 850 小时（标准 720 小时），建议本周三 22:00 停机保养',
+      affected: [
+        { id: 'WO-2026-1372', product: 'QY-0.31mm 红色', quantity: 320 },
+      ],
+      savedHours: 0,
+      metricFrom: '保养超期 130 小时',
+      metricTo: '建议本周三停机 6h 保养',
+    },
+  },
+  {
+    resourceId: 'R-EN-17',
+    message: '空档可填, 推荐承接',
+    detail: {
+      title: '漆包机 #17 · 空档时间充裕',
+      summary: '未来 3 天空档 18 小时，可承接待排池中 4 张 QA-0.13mm 工单',
+      affected: [
+        { id: 'WO-2026-1395', product: 'QA-0.13mm 透明', quantity: 380 },
+        { id: 'WO-2026-1402', product: 'QA-0.13mm 红色', quantity: 410 },
+      ],
+      savedHours: 1.2,
+      metricFrom: '利用率 58% / 空档 18h',
+      metricTo: '利用率 80% / 空档 4h',
+    },
+  },
+  // ===== 拉丝车间 2 台异常 =====
+  {
     resourceId: 'R-DR-12',
     message: '排队偏多, 可调',
     detail: {
@@ -179,6 +241,21 @@ export const ANOMALY_HINTS: AnomalyHint[] = [
     },
   },
   {
+    resourceId: 'R-DR-20',
+    message: '振动偏高, 建议查',
+    detail: {
+      title: '小拉机 #20 · 振动传感器报警',
+      summary: '振动值 4.2 mm/s（警戒线 3.5），建议立即停机检查轴承与拉拔模具',
+      affected: [
+        { id: 'WO-2026-1418', product: '拉丝半成品 Φ0.45mm', quantity: 280 },
+      ],
+      savedHours: 0,
+      metricFrom: '振动 4.2 mm/s（超警戒）',
+      metricTo: '需即时停机检查',
+    },
+  },
+  // ===== 绞线车间 2 台异常 =====
+  {
     resourceId: 'R-ST-02',
     message: '空档 25%, 可合并',
     detail: {
@@ -191,6 +268,21 @@ export const ANOMALY_HINTS: AnomalyHint[] = [
       savedHours: 1.8,
       metricFrom: '利用率 65% / 空档 25%',
       metricTo: '利用率 86% / 空档 4%',
+    },
+  },
+  {
+    resourceId: 'R-ST-06',
+    message: '股型变更频繁',
+    detail: {
+      title: '绞线机 #6 · 股型变更频繁',
+      summary: '近 7 天股型切换 9 次（基线 4 次），建议合并 7 股工单与 19 股工单错峰',
+      affected: [
+        { id: 'WO-2026-1441', product: '7 股 ×Φ0.3mm 铜绞线',  quantity: 360 },
+        { id: 'WO-2026-1448', product: '7 股 ×Φ0.4mm 铜绞线',  quantity: 420 },
+      ],
+      savedHours: 1.5,
+      metricFrom: '股型切换 9 次',
+      metricTo: '股型切换 5 次',
     },
   },
 ];

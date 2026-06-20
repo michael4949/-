@@ -11,6 +11,7 @@ import LockRecordList from '../components/inventory/LockRecordList';
 import ConflictBoard from '../components/inventory/ConflictBoard';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
+import { useInventoryOpsStore } from '../store/useInventoryOpsStore';
 import type { ConflictMediationOutput } from '../mock/agentResponses.sprint5';
 import type { InventoryConflict } from '../mock/inventoryConflicts';
 import { HEALTH_MONITOR } from '../mock/agentResponses.sprint5';
@@ -20,7 +21,8 @@ export default function InventoryLockPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [output, setOutput] = useState<ConflictMediationOutput | null>(null);
-  const [resolved, setResolved] = useState<string[]>([]);
+  const resolvedConflicts = useInventoryOpsStore((s) => s.resolvedConflicts);
+  const applyMediation = useInventoryOpsStore((s) => s.applyMediation);
   const pushMessage = useCopilotStore((s) => s.pushMessage);
 
   async function onMediate(c: InventoryConflict) {
@@ -37,11 +39,13 @@ export default function InventoryLockPage() {
 
   function onApply() {
     if (!output) return;
-    setResolved((arr) => arr.includes(output.conflictId) ? arr : [...arr, output.conflictId]);
+    // ★ v2.2.2：真正系统联动 — 冲突卡消失 + 锁定记录被影响行打标 + KPI "冲突待处理" -1
+    const releasedWoIds = output.allocations.filter((a) => a.altBatch).map((a) => a.workOrderId);
+    applyMediation(output.conflictId, releasedWoIds);
     pushMessage({
       id: 'sys-conflict-' + Date.now(),
       role: 'assistant',
-      content: `**抢料冲突已调解** · ${output.conflictId} · ${output.conflict.materialSpec}\n\n${output.allocations.length} 张工单已分配，${output.allocations.filter((a) => a.altBatch).length} 张切换替代批次。${output.benefit}`,
+      content: `**抢料冲突已调解** · ${output.conflictId} · ${output.conflict.materialSpec}\n\n${output.allocations.length} 张工单已分配，${output.allocations.filter((a) => a.altBatch).length} 张切换替代批次。\n\n👉 系统响应：① 冲突看板中该卡变绿打勾；② 锁定记录中相关 WO 状态改为「已调解」；③ 顶部 KPI「冲突待处理」-1`,
       attachments: [{ type: 'conflict-mediation', data: output }],
       timestamp: new Date(),
     });
@@ -85,7 +89,7 @@ export default function InventoryLockPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-3 flex-1 min-h-0">
         <LockRecordList />
-        <ConflictBoard onMediate={onMediate} resolvedIds={resolved} />
+        <ConflictBoard onMediate={onMediate} resolvedIds={[...resolvedConflicts]} />
       </div>
 
       <ConflictMediatorModal

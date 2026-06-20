@@ -25,6 +25,9 @@ export default function GanttChart() {
   const applyAnomalyMerge = useScheduleStore((s) => s.applyAnomalyMerge);
   const showExplain = useExplainStore((s) => s.show);
   const highlightIds = useGanttHighlightStore((s) => s.ids);
+  const dispatchedIds = useScheduleStore((s) => s.dispatchedIds);
+  const conflictHighlightIds = useScheduleStore((s) => s.conflictHighlightIds);
+  const simulateMode = useScheduleStore((s) => s.simulateMode);
 
   const resources = useMemo(() => getResourcesByWorkshop(workshop), [workshop]);
   const hourWidth = view === 'week' ? HOUR_WIDTH_WEEK : HOUR_WIDTH_DAY;
@@ -256,7 +259,15 @@ export default function GanttChart() {
   const nowVisible = nowPx >= 0 && nowPx <= totalWidth;
 
   return (
-    <div className="flex bg-card border border-line rounded-xl overflow-hidden h-full">
+    <div className={`flex bg-card border ${simulateMode ? 'border-ai border-2' : 'border-line'} rounded-xl overflow-hidden h-full relative`}>
+      {/* v2.2.2 模拟模式整图覆盖紫色斜纹层 */}
+      {simulateMode && (
+        <div className="absolute top-0 left-0 right-0 z-[6] pointer-events-none">
+          <div className="px-3 py-1 bg-ai text-white text-[11px] font-semibold inline-flex items-center gap-1 shadow">
+            📡 排产模拟视图（不影响正式计划）
+          </div>
+        </div>
+      )}
       {/* 资源轴 */}
       <div className="flex-none w-[200px] border-r border-line bg-panel2 overflow-hidden flex flex-col">
         <div className="h-12 border-b border-line flex items-center px-3 text-[11px] font-semibold text-ink-dim">
@@ -349,6 +360,8 @@ export default function GanttChart() {
               const isFlash = flashIds.includes(wo.id);
               const isUrgent = wo.priority === 'urgent';
               const isHighlighted = highlightIds.has(wo.id);  // Sprint 5 #16
+              const isDispatched = dispatchedIds.has(wo.id);  // v2.2.2 已下发
+              const isConflict = conflictHighlightIds.includes(wo.id);  // v2.2.2 演示冲突闪烁
               const dragging = drag?.woId === wo.id;
               const opacity = dragging ? 0.25 : 1;
               return (
@@ -359,8 +372,10 @@ export default function GanttChart() {
                               shadow-sm hover:shadow-md transition-shadow
                               ${isSel ? 'ring-2 ring-brand ring-offset-1 ring-offset-card' : ''}
                               ${isFlash ? 'gantt-flash' : ''}
-                              ${isUrgent && !isHighlighted ? 'ring-2 ring-danger ring-offset-1 ring-offset-card' : ''}
-                              ${isHighlighted ? 'gantt-search-hit' : ''}`}
+                              ${isUrgent && !isHighlighted && !isConflict ? 'ring-2 ring-danger ring-offset-1 ring-offset-card' : ''}
+                              ${isHighlighted ? 'gantt-search-hit' : ''}
+                              ${isConflict ? 'gantt-conflict-hit' : ''}
+                              ${isDispatched ? 'opacity-90' : ''}`}
                   style={{
                     top: ri * ROW_H + 6,
                     left,
@@ -371,8 +386,11 @@ export default function GanttChart() {
                   }}
                   onPointerDown={(e) => onPointerDown(e, wo)}
                   onClick={(e) => { e.stopPropagation(); select(wo.id); }}
-                  title={`${wo.id} · ${wo.productName} · ${wo.quantity}kg · ${wo.customer}`}
+                  title={`${wo.id} · ${wo.productName} · ${wo.quantity}kg · ${wo.customer}${isDispatched ? ' · 🔒 已下发 MES' : ''}`}
                 >
+                  {isDispatched && (
+                    <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-ink text-white flex items-center justify-center text-[8px] font-bold shadow" title="已下发 MES">🔒</span>
+                  )}
                   <span className="truncate">{wo.productName.split(' ')[0]} · {wo.quantity}kg</span>
                 </div>
               );

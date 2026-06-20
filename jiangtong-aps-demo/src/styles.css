@@ -84,6 +84,18 @@ body { background: #F5F7FA; color: #1F2937; }
   z-index: 5;
 }
 
+/* Sprint v2.2.2 演示冲突：红色 outline + 警告闪烁 */
+@keyframes conflict-pulse {
+  0%, 100% { outline-color: rgba(239,68,68,0.9); box-shadow: 0 0 12px rgba(239,68,68,0.7); }
+  50%      { outline-color: rgba(239,68,68,1); box-shadow: 0 0 22px rgba(239,68,68,1.0); }
+}
+.gantt-conflict-hit {
+  outline: 3px dashed rgba(239,68,68,0.95);
+  outline-offset: 2px;
+  animation: conflict-pulse 0.9s ease-in-out infinite;
+  z-index: 6;
+}
+
 /* 高亮闪烁 3 秒（场景 1/2 应用方案后） */
 @keyframes wo-flash {
   0%,100% { box-shadow: 0 0 0 2px rgba(124,58,237,0.0); }

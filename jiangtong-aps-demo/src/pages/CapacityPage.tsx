@@ -11,6 +11,7 @@ import CapacityHeatmap from '../components/capacity/CapacityHeatmap';
 import BottleneckList from '../components/capacity/BottleneckList';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
+import { useCapacityOpsStore } from '../store/useCapacityOpsStore';
 import type { MitigationGeneratorOutput, MitigationPlan } from '../mock/agentResponses.sprint5';
 import type { Bottleneck } from '../mock/capacityData';
 import { BOTTLENECK_PREDICTOR } from '../mock/agentResponses.sprint5';
@@ -20,14 +21,17 @@ export default function CapacityPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [output, setOutput] = useState<MitigationGeneratorOutput | null>(null);
-  const [appliedId, setAppliedId] = useState<string | null>(null);
+  const [currentBottleneckId, setCurrentBottleneckId] = useState<string | null>(null);
   const pushMessage = useCopilotStore((s) => s.pushMessage);
+  const applyMitigation = useCapacityOpsStore((s) => s.applyMitigation);
+  const appliedMitigations = useCapacityOpsStore((s) => s.appliedMitigations);
+  const appliedId = currentBottleneckId ? appliedMitigations.get(currentBottleneckId) ?? null : null;
 
   async function onGenerate(bn: Bottleneck) {
     setModalOpen(true);
     setModalLoading(true);
     setOutput(null);
-    setAppliedId(null);
+    setCurrentBottleneckId(bn.resourceId);
     const { output: r } = await mockAIInvoke({
       agentId: 'capacity.mitigation-generator',
       input: { resourceId: bn.resourceId },
@@ -37,15 +41,18 @@ export default function CapacityPage() {
   }
 
   function onApply(plan: MitigationPlan) {
-    if (!output) return;
-    setAppliedId(plan.id);
+    if (!output || !currentBottleneckId) return;
+    // ★ v2.2.2：真正系统联动 — 瓶颈列表中该行变绿"已解除" + 热力图相应行所有日期 utilization 降 18pp + KPI -1
+    applyMitigation(currentBottleneckId, plan.id);
     pushMessage({
       id: 'sys-mitigation-' + Date.now(),
       role: 'assistant',
-      content: `**缓解方案已应用** · ${output.resourceName} · ${plan.label}\n\n关键变化：${plan.metrics.map((m) => `${m.key} ${m.before} → ${m.after}`).join('；')}。代价：${plan.cost}`,
+      content: `**缓解方案已应用** · ${output.resourceName} · ${plan.label}\n\n关键变化：${plan.metrics.map((m) => `${m.key} ${m.before} → ${m.after}`).join('；')}。\n\n👉 系统响应：① 瓶颈列表该行变绿「✓ 方案 ${plan.id} 已应用」；② 热力图 ${output.resourceName} 行所有日期 utilization 降低 18pp；③ KPI「瓶颈数」-1`,
       attachments: [{ type: 'mitigation-plan', data: output }],
       timestamp: new Date(),
     });
+    // 自动关闭 Modal
+    setTimeout(() => setModalOpen(false), 1200);
   }
 
   return (

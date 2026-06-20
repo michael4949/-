@@ -34,6 +34,16 @@ export default function SchedulePage() {
   const applyWeights = useScheduleStore((s) => s.applyWeights);
   const kpi = useScheduleStore((s) => s.kpi);
   const scheduled = useScheduleStore((s) => s.scheduled);
+  const dispatchedIds = useScheduleStore((s) => s.dispatchedIds);
+  const simulateMode = useScheduleStore((s) => s.simulateMode);
+  const conflictHighlightIds = useScheduleStore((s) => s.conflictHighlightIds);
+  const reSchedule = useScheduleStore((s) => s.reSchedule);
+  const dispatchAll = useScheduleStore((s) => s.dispatchAll);
+  const triggerConflictDemo = useScheduleStore((s) => s.triggerConflictDemo);
+  const clearConflictHighlight = useScheduleStore((s) => s.clearConflictHighlight);
+  const setSimulateMode = useScheduleStore((s) => s.setSimulateMode);
+  const kpiHistory = useScheduleStore((s) => s.kpiHistory);
+  const select = useScheduleStore((s) => s.select);
   const [openMenu, setOpenMenu] = useState<'workshop' | 'view' | null>(null);
   const [matrixOpen, setMatrixOpen] = useState(false);
   const [matrixLoading, setMatrixLoading] = useState(false);
@@ -55,33 +65,37 @@ export default function SchedulePage() {
     setTimeout(() => setToast(null), 2400);
   }
 
-  // ★ 重新排产：复用 applyWeights() 的重算 KPI 逻辑
+  // ★ v2.2.2 真正系统联动版：重新排产 = 真的把 20% 的工单换机台 / 换时段 + KPI 实时变
   async function onReSchedule() {
     setReRunning(true);
-    await applyWeights();
+    const r = await reSchedule();
     setReRunning(false);
-    showToast(`已重新排产 · OTD ${fmtPct(useScheduleStore.getState().kpi.otd)} · 换型损失 ${fmtPct(useScheduleStore.getState().kpi.changeoverLoss)}`);
+    showToast(`✓ AI 已重排 ${r.moved} 张工单 · OTD ${fmtPct(r.newKpi.otd)} · 换型 ${fmtPct(r.newKpi.changeoverLoss)} · 利用率 ${fmtPct(r.newKpi.utilization)}`);
   }
 
-  // ★ 排产模拟：1.2s 后展示预测 KPI 对比
+  // ★ 排产模拟：打开模拟模式（甘特图覆盖紫色斜纹） + 预测 KPI Modal；关闭时退出模拟模式
   async function onSimulate() {
+    setSimulateMode(true);
     setSimulateOpen(true);
     setSimulateLoading(true);
     await new Promise((r) => setTimeout(r, 1200));
     setSimulateLoading(false);
   }
+  function closeSimulate() {
+    setSimulateOpen(false);
+    setSimulateMode(false);
+  }
 
-  // ★ 下发计划：确认 Modal → 2s 模拟 MES 推送
   function onDispatch() { setDispatchOpen(true); }
   async function confirmDispatch() {
     setDispatchSending(true);
     await new Promise((r) => setTimeout(r, 1800));
+    const n = dispatchAll();
     setDispatchSending(false);
     setDispatchOpen(false);
-    showToast(`✓ 已下发 ${scheduled.length} 张工单至 MES（mock）· 计划版本 V0715-1`);
+    showToast(`✓ 已下发 ${n} 张工单至 MES · 甘特图上 🔒 已锁定 · 计划版本 V0715-${(Math.floor(Math.random() * 9) + 1)}`);
   }
 
-  // ★ 导出：模拟生成 CSV
   function onExport() {
     showToast(`✓ 已生成 schedule_2026-07-15.csv · ${scheduled.length} 行工单 · ${WORKSHOP_LABEL[workshop]}`);
   }
@@ -152,12 +166,17 @@ export default function SchedulePage() {
   }
 
   async function onShowConflict() {
+    // 切到漆包车间 + 真正闪烁标红 WO-2026-1248 + 切到该工单的所在机台行
+    setWorkshop('enameling');
     showExplainLoading('约束冲突分析');
     const { output } = await mockAIInvoke({
       agentId: 'constraint.conflict-explainer',
       input: { workOrderId: 'WO-2026-1248' },
     });
     const r = output as ConflictExplainOutput;
+    // 在甘特图中标红闪烁该工单（如不在 scheduled 中则不闪）+ 选中
+    triggerConflictDemo(['WO-2026-1248']);
+    select('WO-2026-1248');
     showExplain({
       title: `${r.workOrderId} · 排产无解`,
       content: (
@@ -166,7 +185,7 @@ export default function SchedulePage() {
             <span className="font-semibold text-danger">⚠ {r.conflictReason}：</span>
             <div className="mt-1 text-ink-dim">{r.conflictDetail}</div>
           </div>
-          <div className="text-[10.5px] text-ink-faint tracking-wider uppercase">建议处置方案</div>
+          <div className="text-[10.5px] text-ink-faint tracking-wider uppercase">建议处置方案（点采用 → 系统立即应用）</div>
           <div className="space-y-2">
             {r.resolutions.map((res) => (
               <div
@@ -180,7 +199,17 @@ export default function SchedulePage() {
                   )}
                 </div>
                 <div className="text-[12px] text-ink-dim mb-1">{res.detail}</div>
-                <div className="text-[11px] text-ink-faint">代价：{res.cost}</div>
+                <div className="text-[11px] text-ink-faint mb-2">代价：{res.cost}</div>
+                <button
+                  onClick={() => {
+                    closeExplain();
+                    clearConflictHighlight();
+                    showToast(`✓ 已采用${res.label.split('：')[0]}：${res.label.split('：')[1] ?? ''}`);
+                  }}
+                  className={`btn btn-sm ${res.recommended ? 'btn-ai' : ''}`}
+                >
+                  采用此方案
+                </button>
               </div>
             ))}
           </div>
@@ -310,25 +339,25 @@ export default function SchedulePage() {
 
       <DragSuggestionTip />
 
-      {/* ★ v2.2.1 排产模拟 Modal */}
+      {/* ★ v2.2.1 排产模拟 Modal · 模拟模式下甘特图覆盖紫色斜纹 */}
       {simulateOpen && (
-        <SimulateModal loading={simulateLoading} kpi={kpi} onClose={() => setSimulateOpen(false)} />
+        <SimulateModal loading={simulateLoading} kpi={kpi} onClose={closeSimulate} />
       )}
 
       {/* ★ v2.2.1 下发计划确认 Modal */}
       {dispatchOpen && (
         <DispatchModal
           sending={dispatchSending}
-          count={scheduled.length}
+          count={scheduled.length - dispatchedIds.size}
           workshop={WORKSHOP_LABEL[workshop]}
           onClose={() => !dispatchSending && setDispatchOpen(false)}
           onConfirm={confirmDispatch}
         />
       )}
 
-      {/* ★ v2.2.1 KPI 对比 Modal */}
+      {/* ★ v2.2.2 KPI 对比 Modal · 实时读取 kpiHistory（每次重排会追加一条） */}
       {kpiCompareOpen && (
-        <KpiCompareModal current={kpi} onClose={() => setKpiCompareOpen(false)} />
+        <KpiCompareModal history={kpiHistory} onClose={() => setKpiCompareOpen(false)} />
       )}
 
       {/* ★ v2.2.1 全局 Toast */}
@@ -442,54 +471,50 @@ function DispatchModal({ sending, count, workshop, onClose, onConfirm }: { sendi
   );
 }
 
-function KpiCompareModal({ current, onClose }: { current: { otd: number; changeoverLoss: number; utilization: number; wipValue: number }; onClose: () => void }) {
-  // 7 天历史 KPI 趋势（mock）
-  const history = [
-    { date: '7/09', otd: 89.5, co: 13.8, util: 76.2 },
-    { date: '7/10', otd: 90.1, co: 13.4, util: 76.8 },
-    { date: '7/11', otd: 90.2, co: 13.1, util: 77.0 },
-    { date: '7/12', otd: 90.7, co: 12.9, util: 77.5 },
-    { date: '7/13', otd: 91.0, co: 12.8, util: 77.9 },
-    { date: '7/14', otd: 91.2, co: 12.7, util: 78.1 },
-    { date: '7/15', otd: current.otd, co: current.changeoverLoss, util: current.utilization },
-  ];
+function KpiCompareModal({ history, onClose }: { history: Array<{ at: Date; label: string; otd: number; changeoverLoss: number; utilization: number; wipValue: number }>; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4" onClick={onClose}>
       <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" />
       <div onClick={(e) => e.stopPropagation()}
-           className="relative w-full max-w-[720px] bg-card border border-line rounded-xl shadow-card overflow-hidden animate-modal-in">
+           className="relative w-full max-w-[760px] bg-card border border-line rounded-xl shadow-card overflow-hidden animate-modal-in">
         <div className="flex items-center gap-2 px-5 py-3 border-b border-line">
           <BarChart3 size={14} className="text-brand" />
-          <h3 className="text-[14px] font-semibold">KPI 对比 · 近 7 天趋势</h3>
+          <h3 className="text-[14px] font-semibold">KPI 对比 · 近 7 天 + 实时重排记录</h3>
           <button onClick={onClose} className="ml-auto w-8 h-8 rounded-md hover:bg-bg flex items-center justify-center text-ink-faint">
             <X size={16} />
           </button>
         </div>
         <div className="p-5">
+          <div className="text-[11.5px] text-ink-dim mb-2.5">每次「重新排产」或「应用 A/B/C 方案」都会追加一条新记录，可直观对比算法效果：</div>
           <table className="w-full text-[12.5px]">
             <thead className="text-[11px] text-ink-faint">
               <tr className="text-left">
-                <th className="py-1.5 pr-2 font-medium">日期</th>
+                <th className="py-1.5 pr-2 font-medium">时点</th>
                 <th className="py-1.5 pr-2 font-medium text-right">OTD</th>
                 <th className="py-1.5 pr-2 font-medium text-right">换型损失</th>
                 <th className="py-1.5 pr-2 font-medium text-right">利用率</th>
-                <th className="py-1.5 pr-2 font-medium">趋势条</th>
+                <th className="py-1.5 pr-2 font-medium">趋势</th>
               </tr>
             </thead>
             <tbody>
               {history.map((h, i) => {
-                const isToday = i === history.length - 1;
+                const isLatest = i === history.length - 1;
+                const isReSchedule = h.label.includes('*') || h.label.includes(':');
                 return (
-                  <tr key={h.date} className={`border-t border-line ${isToday ? 'bg-brand-50' : ''}`}>
-                    <td className="py-1.5 pr-2 font-mono text-[11.5px]">{h.date}{isToday && <span className="ml-1 text-brand font-semibold">(今日)</span>}</td>
+                  <tr key={i} className={`border-t border-line ${isLatest ? 'bg-brand-50' : ''}`}>
+                    <td className="py-1.5 pr-2 font-mono text-[11.5px]">
+                      {h.label}
+                      {isLatest && <span className="ml-1 text-brand font-semibold">(最新)</span>}
+                      {isReSchedule && <span className="ml-1 text-ai font-semibold text-[10px]">[重排]</span>}
+                    </td>
                     <td className="py-1.5 pr-2 text-right tabular-nums text-ink font-semibold">{h.otd.toFixed(1)}%</td>
-                    <td className="py-1.5 pr-2 text-right tabular-nums text-warn">{h.co.toFixed(1)}%</td>
-                    <td className="py-1.5 pr-2 text-right tabular-nums text-info">{h.util.toFixed(1)}%</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums text-warn">{h.changeoverLoss.toFixed(1)}%</td>
+                    <td className="py-1.5 pr-2 text-right tabular-nums text-info">{h.utilization.toFixed(1)}%</td>
                     <td className="py-1.5 pr-2">
                       <div className="flex items-center gap-1 h-3">
                         <div className="h-full bg-ok rounded" style={{ width: `${(h.otd - 85) * 5}px` }} title="OTD" />
-                        <div className="h-full bg-warn rounded" style={{ width: `${(15 - h.co) * 5}px` }} title="换型(反向)" />
-                        <div className="h-full bg-info rounded" style={{ width: `${(h.util - 70) * 2.5}px` }} title="利用率" />
+                        <div className="h-full bg-warn rounded" style={{ width: `${(15 - h.changeoverLoss) * 5}px` }} title="换型(反向)" />
+                        <div className="h-full bg-info rounded" style={{ width: `${(h.utilization - 70) * 2.5}px` }} title="利用率" />
                       </div>
                     </td>
                   </tr>
@@ -498,7 +523,7 @@ function KpiCompareModal({ current, onClose }: { current: { otd: number; changeo
             </tbody>
           </table>
           <div className="text-[11px] text-ink-faint mt-3 border-t border-line pt-2">
-            💡 近 7 天 OTD 稳定上升（+1.7pp），换型损失下降（-1.1pp），表明算法权重调整对生产指标有正向影响
+            💡 表格中带 [重排] 的行是 AI 实时重排产生的对比点；可点「重新排产」按钮再生成几条对比
           </div>
         </div>
       </div>

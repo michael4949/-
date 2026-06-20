@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { cellsOf, heatmapDates, type CapacityCell } from '../../mock/capacityData';
 import { RESOURCES } from '../../mock/productLines';
+import { useCapacityOpsStore } from '../../store/useCapacityOpsStore';
 
 type WorkshopFilter = 'all' | 'enameling' | 'drawing' | 'stranding';
 
@@ -28,10 +29,24 @@ const LEVEL_LABEL: Record<CapacityCell['level'], string> = {
 export default function CapacityHeatmap() {
   const [ws, setWs] = useState<WorkshopFilter>('enameling');
   const dates = useMemo(() => heatmapDates(), []);
+  // ★ v2.2.2：已解除瓶颈的资源 → 热力图相应单元格降级（red→amber, amber→green）
+  const resolved = useCapacityOpsStore((s) => s.resolvedBottlenecks);
 
   const resources = useMemo(() =>
     ws === 'all' ? RESOURCES : RESOURCES.filter((r) => r.workshop === ws),
   [ws]);
+
+  function effectiveCell(c: CapacityCell): CapacityCell {
+    if (!resolved.has(c.resourceId)) return c;
+    // 已应用缓解方案 → utilization 下降 15-25%
+    const newUtil = Math.max(40, c.utilization - 18);
+    const newLevel: CapacityCell['level'] =
+      newUtil < 40 ? 'idle' :
+      newUtil < 70 ? 'green' :
+      newUtil < 90 ? 'amber' :
+      'red';
+    return { ...c, utilization: newUtil, level: newLevel };
+  }
 
   return (
     <div className="card-base flex flex-col h-full min-h-0">
@@ -69,16 +84,18 @@ export default function CapacityHeatmap() {
             </thead>
             <tbody>
               {resources.map((r) => {
-                const cs = cellsOf(r.id);
+                const cs = cellsOf(r.id).map(effectiveCell);
+                const wasResolved = resolved.has(r.id);
                 return (
                   <tr key={r.id} className="hover:bg-bg">
                     <th className="sticky left-0 bg-card text-left px-2 py-1 text-[11px] text-ink-dim font-medium z-10 whitespace-nowrap">
                       {r.name}
+                      {wasResolved && <span className="ml-1 text-ai text-[10px] font-bold">✓</span>}
                     </th>
                     {cs.map((c) => (
                       <td
                         key={c.dayOffset}
-                        title={`${r.name} · ${c.date} · ${c.utilization}%（${LEVEL_LABEL[c.level]}）`}
+                        title={`${r.name} · ${c.date} · ${c.utilization}%（${LEVEL_LABEL[c.level]}）${wasResolved ? ' · 已应用 AI 缓解' : ''}`}
                         className={`px-1 py-1 text-center text-[10px] font-semibold text-white tabular-nums ${LEVEL_BG[c.level]} border border-card`}
                       >
                         {c.utilization}

@@ -12,6 +12,7 @@ import MaterialBatchPanel from '../components/material/MaterialBatchPanel';
 import KittingTimeline from '../components/material/KittingTimeline';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
+import { useMaterialOpsStore } from '../store/useMaterialOpsStore';
 import type { ShortageRootCauseOutput } from '../mock/agentResponses.sprint4';
 import type { ShortageItem } from '../mock/shortageList';
 import { SHORTAGE_PREDICTOR } from '../mock/agentResponses.sprint4';
@@ -23,6 +24,17 @@ export default function MaterialCheckPage() {
   const [output, setOutput] = useState<ShortageRootCauseOutput | null>(null);
   const pushMessage = useCopilotStore((s) => s.pushMessage);
   const setCopOpen = useCopilotStore((s) => s.setOpen);
+  const prepareItem = useMaterialOpsStore((s) => s.prepareItem);
+
+  function onPrepare(item: ShortageItem) {
+    prepareItem(item.workOrderId);   // ★ 系统状态变：左侧卡变绿打勾 + 顶部 KPI 齐套率上升 + 缺料数下降
+    pushMessage({
+      id: 'sys-shortage-prepared-' + Date.now(),
+      role: 'assistant',
+      content: `**${item.workOrderId} · ${item.customer}** 已应用 AI 一键准备：\n\n• 自动协调替代批次（${item.missingMaterials[0].spec}）\n• 触发紧急采购单 PO-2026-${Math.floor(Math.random() * 900) + 100}\n• 该工单从风险列表移除，齐套率 KPI +1pp`,
+      timestamp: new Date(),
+    });
+  }
 
   async function onAnalyze(item: ShortageItem) {
     setModalOpen(true);
@@ -89,7 +101,7 @@ export default function MaterialCheckPage() {
 
       {/* 左右并排 */}
       <div id="shortage-anchor" className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-3 flex-1 min-h-0">
-        <ShortageList onAnalyze={onAnalyze} />
+        <ShortageList onAnalyze={onAnalyze} onPrepare={onPrepare} />
         <MaterialBatchPanel />
       </div>
 

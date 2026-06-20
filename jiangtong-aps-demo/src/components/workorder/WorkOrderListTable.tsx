@@ -1,11 +1,12 @@
 // 工单管理页：分页表格 + 筛选 + 异常高亮
 //   仅展示用，列表数据从 WORK_ORDERS 切片取
 import { useMemo, useState } from 'react';
-import { Search, ChevronLeft, ChevronRight, Sparkles, AlertTriangle, ChevronDown } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Sparkles, AlertTriangle, ChevronDown, Check } from 'lucide-react';
 import { WORK_ORDERS } from '../../mock/workOrders';
 import { CUSTOMERS } from '../../mock/customers';
 import { WORK_ORDER_ANOMALIES, getAnomaly } from '../../mock/workOrderAnomalies';
-import { SAMPLE_WORK_ORDER_IDS, isSample } from '../../mock/sampleWorkOrders';
+import { isSample } from '../../mock/sampleWorkOrders';
+import { useWorkOrderOpsStore } from '../../store/useWorkOrderOpsStore';
 import { fmtDate } from '../../utils/format';
 import { PRIORITY_LABEL, STATUS_LABEL, type Priority, type WorkOrderStatus, type WorkOrder } from '../../types/workOrder';
 
@@ -13,6 +14,8 @@ interface Props {
   highlightAnomalies: boolean;
   onSelect: (woId: string) => void;
   selectedId: string | null;
+  onAnalyze: (woId: string) => void;
+  onRequestBOM: (woId: string) => void;
 }
 
 type StatusFilter = 'all' | WorkOrderStatus;
@@ -40,12 +43,14 @@ const STATUS_TAG: Record<WorkOrderStatus, string> = {
 
 const PAGE_SIZE = 20;
 
-export default function WorkOrderListTable({ highlightAnomalies, onSelect, selectedId }: Props) {
+export default function WorkOrderListTable({ highlightAnomalies, onSelect, selectedId, onAnalyze, onRequestBOM }: Props) {
   const [q, setQ] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [customerFilter, setCustomerFilter] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [openMenu, setOpenMenu] = useState<'status' | 'customer' | null>(null);
+  const markedAnalyzed = useWorkOrderOpsStore((s) => s.markedAnalyzed);
+  const bomGenerated = useWorkOrderOpsStore((s) => s.bomGenerated);
 
   const anomalyIds = useMemo(
     () => new Set(WORK_ORDER_ANOMALIES.map((a) => a.workOrderId)),
@@ -140,7 +145,8 @@ export default function WorkOrderListTable({ highlightAnomalies, onSelect, selec
               <th className="px-3 py-2 font-medium">交期</th>
               <th className="px-3 py-2 font-medium">优先级</th>
               <th className="px-3 py-2 font-medium">状态</th>
-              <th className="px-3 py-2 font-medium text-right pr-4">标记</th>
+              <th className="px-3 py-2 font-medium">标记</th>
+              <th className="px-3 py-2 font-medium text-right pr-4 w-32">AI 操作</th>
             </tr>
           </thead>
           <tbody>
@@ -148,13 +154,15 @@ export default function WorkOrderListTable({ highlightAnomalies, onSelect, selec
               const ano = getAnomaly(w.id);
               const sample = isSample(w.id);
               const selected = selectedId === w.id;
+              const isAnalyzed = markedAnalyzed.has(w.id);
+              const hasBOM = bomGenerated.has(w.id);
               return (
                 <tr
                   key={w.id}
                   onClick={() => onSelect(w.id)}
                   className={`border-t border-line hover:bg-bg cursor-pointer transition-colors
                               ${selected ? 'bg-brand-50' : ''}
-                              ${ano ? 'bg-warn/5' : ''}`}
+                              ${ano && !isAnalyzed ? 'bg-warn/5' : ''}`}
                 >
                   <td className="px-3 py-1.5 font-mono text-[11.5px] text-ink">{w.id}</td>
                   <td className="px-3 py-1.5 text-ink-dim truncate max-w-[120px]">{w.customer}</td>
@@ -167,11 +175,16 @@ export default function WorkOrderListTable({ highlightAnomalies, onSelect, selec
                   <td className="px-3 py-1.5">
                     <span className={`tag ${STATUS_TAG[w.status]}`}>{STATUS_LABEL[w.status]}</span>
                   </td>
-                  <td className="px-3 py-1.5 text-right pr-4">
+                  <td className="px-3 py-1.5">
                     <div className="inline-flex items-center gap-1">
-                      {ano && (
+                      {ano && !isAnalyzed && (
                         <span title={ano.detail} className="inline-flex items-center gap-0.5 text-[10.5px] text-warn font-semibold">
                           <AlertTriangle size={10} />异常
+                        </span>
+                      )}
+                      {isAnalyzed && (
+                        <span title="AI 分析已查看，已标记为已处置" className="inline-flex items-center gap-0.5 text-[10.5px] text-ok font-semibold">
+                          <Check size={10} />已处置
                         </span>
                       )}
                       {sample && (
@@ -179,13 +192,31 @@ export default function WorkOrderListTable({ highlightAnomalies, onSelect, selec
                           <Sparkles size={10} />样品
                         </span>
                       )}
+                      {hasBOM && (
+                        <span title="BOM 已生成" className="inline-flex items-center gap-0.5 text-[10.5px] text-ok font-semibold">
+                          <Check size={10} />BOM
+                        </span>
+                      )}
                     </div>
+                  </td>
+                  <td className="px-3 py-1 text-right pr-4" onClick={(e) => e.stopPropagation()}>
+                    {/* ★ v2.2.2：行内 AI 操作（不藏在抽屉里） */}
+                    {ano && !isAnalyzed && (
+                      <button onClick={() => onAnalyze(w.id)} className="btn btn-sm btn-ai" title="启动 Agent #9 异常工单识别分析">
+                        <Sparkles size={10} />AI 分析
+                      </button>
+                    )}
+                    {sample && !hasBOM && (
+                      <button onClick={() => onRequestBOM(w.id)} className="btn btn-sm btn-ai" title="启动 Agent #8 样品工单 BOM 生成">
+                        <Sparkles size={10} />生成 BOM
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
             })}
             {pageItems.length === 0 && (
-              <tr><td colSpan={8} className="text-center text-ink-faint py-10 text-[12.5px]">无匹配工单</td></tr>
+              <tr><td colSpan={9} className="text-center text-ink-faint py-10 text-[12.5px]">无匹配工单</td></tr>
             )}
           </tbody>
         </table>

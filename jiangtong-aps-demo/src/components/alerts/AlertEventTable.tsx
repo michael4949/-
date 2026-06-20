@@ -1,11 +1,12 @@
 // 异常预警中心：事件列表
 import { useMemo, useState } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, ChevronDown, ArrowDown, X as IconX, Check } from 'lucide-react';
 import {
   ALERT_EVENTS, ALERT_TYPE_COLOR, ALERT_LEVEL_LABEL, ALERT_LEVEL_COLOR,
   ALERT_STATUS_LABEL,
   type AlertType, type AlertLevel, type AlertStatus, type AlertEvent,
 } from '../../mock/alerts';
+import { useAlertOpsStore } from '../../store/useAlertOpsStore';
 import { fmtDateTime } from '../../utils/format';
 
 interface Props {
@@ -46,9 +47,25 @@ export default function AlertEventTable({ onExplain }: Props) {
   const [statusF, setStatusF] = useState<StatusFilter>('unhandled');
   const [page, setPage] = useState(0);
   const [openMenu, setOpenMenu] = useState<'type' | 'level' | 'status' | null>(null);
+  const downgradedKeys = useAlertOpsStore((s) => s.downgradedKeys);
+  const dismissedIds = useAlertOpsStore((s) => s.dismissedIds);
+  const explainedIds = useAlertOpsStore((s) => s.explainedIds);
+  const dismissAlert = useAlertOpsStore((s) => s.dismissAlert);
+
+  // 预警实时状态：根据 noise filter 应用结果，把某些 info 级降为已忽略
+  const effective = useMemo(() => {
+    return ALERT_EVENTS.map((a) => {
+      // 如果该类型 + 等级被过滤 → 视为已忽略
+      const filtered = downgradedKeys.has(`${a.type}:${a.level}`);
+      const dismissed = dismissedIds.has(a.id);
+      const status: AlertStatus = (filtered || dismissed) ? 'ignored' : a.status;
+      const level: AlertLevel = filtered && a.level !== 'info' ? 'info' : a.level;
+      return { ...a, status, level, _filtered: filtered, _dismissed: dismissed };
+    });
+  }, [downgradedKeys, dismissedIds]);
 
   const filtered = useMemo(() => {
-    return ALERT_EVENTS
+    return effective
       .filter((a) => typeF === 'all' || a.type === typeF)
       .filter((a) => levelF === 'all' || a.level === levelF)
       .filter((a) => statusF === 'all' || a.status === statusF)
@@ -57,7 +74,7 @@ export default function AlertEventTable({ onExplain }: Props) {
         if (a.level !== b.level) return lvOrder[a.level] - lvOrder[b.level];
         return b.at.getTime() - a.at.getTime();
       });
-  }, [typeF, levelF, statusF]);
+  }, [effective, typeF, levelF, statusF]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const items = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -106,8 +123,10 @@ export default function AlertEventTable({ onExplain }: Props) {
           <tbody>
             {items.map((a) => {
               const lvDot = a.level === 'urgent' ? '🔴' : a.level === 'important' ? '🟠' : '🟡';
+              const wasDowngraded = a._filtered;
+              const wasExplained = explainedIds.has(a.id);
               return (
-                <tr key={a.id} className="border-t border-line hover:bg-bg">
+                <tr key={a.id} className={`border-t border-line hover:bg-bg ${wasDowngraded ? 'bg-ai-bg/30' : ''}`}>
                   <td className="px-3 py-1.5 text-ink-dim tabular-nums whitespace-nowrap">{fmtDateTime(a.at)}</td>
                   <td className="px-3 py-1.5">
                     <span className={`tag ${ALERT_TYPE_COLOR[a.type].tag}`}>{a.type}</span>
@@ -116,18 +135,33 @@ export default function AlertEventTable({ onExplain }: Props) {
                     <span className={`text-[12px] font-semibold ${ALERT_LEVEL_COLOR[a.level]}`}>
                       {lvDot} {ALERT_LEVEL_LABEL[a.level]}
                     </span>
+                    {wasDowngraded && <span className="ml-1 text-[10px] text-ai">↓AI</span>}
                   </td>
                   <td className="px-3 py-1.5 text-ink truncate max-w-[400px]" title={a.title}>{a.title}</td>
                   <td className="px-3 py-1.5 text-ink-dim text-[11.5px] whitespace-nowrap">{a.source ?? '-'}</td>
-                  <td className="px-3 py-1.5 text-ink-dim">{ALERT_STATUS_LABEL[a.status]}</td>
+                  <td className="px-3 py-1.5 text-ink-dim">
+                    {ALERT_STATUS_LABEL[a.status]}
+                    {wasExplained && <span className="ml-1 text-ok text-[10px]">✓已分析</span>}
+                  </td>
                   <td className="px-3 py-1.5 text-right">
-                    <button
-                      onClick={() => onExplain(a)}
-                      className="btn btn-sm btn-ai"
-                      title="AI 归因分析"
-                    >
-                      <Sparkles size={11} />AI 归因
-                    </button>
+                    <div className="inline-flex items-center gap-1">
+                      <button
+                        onClick={() => onExplain(a)}
+                        className="btn btn-sm btn-ai"
+                        title="AI 归因分析"
+                      >
+                        <Sparkles size={11} />AI 归因
+                      </button>
+                      {a.status === 'unhandled' && (
+                        <button
+                          onClick={() => dismissAlert(a.id)}
+                          className="btn btn-sm"
+                          title="忽略该预警（从未处理列表移除）"
+                        >
+                          <IconX size={11} />忽略
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

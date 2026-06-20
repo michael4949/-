@@ -1,12 +1,15 @@
 // §6.2.4 损耗异常诊断报告：四段
-//   ① 总体偏差  ② 根因列表（severity 排序+色彩） ③ 建议处置  ④ 关联数据（可下钻 → Copilot）
+//   ① 总体偏差  ② 根因列表（severity 排序+色彩） ③ 建议处置（可应用） ④ 关联数据（可下钻 → Copilot）
+//   ★ v2.2.2：建议处置加「应用」按钮 — 损耗 KPI 实时下降
 import type { LossDiagnosticOutput } from '../../types/cost';
-import { ArrowRight, MessageSquare } from 'lucide-react';
+import { ArrowRight, MessageSquare, Check, Sparkles } from 'lucide-react';
 import { useExplainStore } from '../../store/useExplainStore';
+import { useCostOpsStore } from '../../store/useCostOpsStore';
 
 interface Props {
   data: LossDiagnosticOutput;
   onAskCopilot: (q: string) => void;
+  onApplied?: () => void;
 }
 
 const SEV_STYLE = {
@@ -15,11 +18,14 @@ const SEV_STYLE = {
   low:    { label: '低', clr: 'text-info',   bg: 'bg-info/10 border-info/30',     dot: 'bg-info' },
 } as const;
 
-export default function LossDiagnosticReport({ data, onAskCopilot }: Props) {
+export default function LossDiagnosticReport({ data, onAskCopilot, onApplied }: Props) {
   const causes = [...data.rootCauses].sort((a, b) => {
     const order = { high: 0, medium: 1, low: 2 };
     return order[a.severity] - order[b.severity];
   });
+  const acceptOptimization = useCostOpsStore((s) => s.acceptOptimization);
+  const adjustments = useCostOpsStore((s) => s.adjustments);
+  const isApplied = adjustments.some((a) => a.note.includes(data.workOrder));
 
   return (
     <div className="space-y-4">
@@ -63,10 +69,31 @@ export default function LossDiagnosticReport({ data, onAskCopilot }: Props) {
 
       {/* ③ 建议处置 */}
       <section>
-        <SectionTitle no="③" label="建议处置" />
+        <SectionTitle no="③" label="建议处置" subtitle="点击「应用」后系统真联动：单工单损耗 -0.20pp，铜耗损耗 KPI 实时刷新" />
         <ol className="space-y-1.5 text-[12.5px] text-ink-dim leading-7 pl-1 list-decimal list-inside">
           {data.recommendation.map((rec, i) => <li key={i}>{rec}</li>)}
         </ol>
+        <div className="mt-2.5">
+          {isApplied ? (
+            <span className="inline-flex items-center gap-1 text-[11.5px] text-ok font-semibold">
+              <Check size={11} /> 建议已应用 · 单位损耗 -0.20pp · 已写入 KPI
+            </span>
+          ) : (
+            <button
+              onClick={() => {
+                acceptOptimization({
+                  lossDelta: -0.20,
+                  unitCostDelta: -180,
+                  note: `${data.workOrder} 损耗优化（${data.customer}）`,
+                });
+                onApplied?.();
+              }}
+              className="btn btn-sm btn-ai"
+            >
+              <Sparkles size={11} />应用 AI 建议（损耗 -0.20pp / 单耗 -¥180）
+            </button>
+          )}
+        </div>
       </section>
 
       {/* ④ 关联数据（可下钻 → Copilot 追问） */}

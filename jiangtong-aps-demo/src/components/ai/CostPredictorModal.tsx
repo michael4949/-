@@ -1,9 +1,11 @@
 // Agent #23 成本预测 Modal
 //   左：成本构成饼图 + 影响因素列表
 //   右：单位成本 + 毛利 + 敏感性分析
-import { X, Sparkles, Loader2, TrendingUp, TrendingDown } from 'lucide-react';
+//   ★ v2.2.2：加「采纳为该工单预算」按钮 — 写入 useCostOpsStore，KPI 面板显示已采纳计数
+import { X, Sparkles, Loader2, TrendingUp, TrendingDown, Check } from 'lucide-react';
 import type { CostPredictorOutput } from '../../mock/agentResponses.sprint6';
 import { fmtMoney } from '../../utils/format';
+import { useCostOpsStore } from '../../store/useCostOpsStore';
 
 interface Props {
   open: boolean;
@@ -13,7 +15,10 @@ interface Props {
 }
 
 export default function CostPredictorModal({ open, loading, output, onClose }: Props) {
+  const acceptedPredictions = useCostOpsStore((s) => s.acceptedPredictions);
+  const acceptPrediction = useCostOpsStore((s) => s.acceptPrediction);
   if (!open) return null;
+  const accepted = output ? acceptedPredictions.has(output.workOrderId) : false;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4" onClick={onClose}>
@@ -114,6 +119,18 @@ export default function CostPredictorModal({ open, loading, output, onClose }: P
             </div>
           )}
         </div>
+        {!loading && output && (
+          <div className="p-3 border-t border-line bg-panel2 flex justify-end gap-2">
+            <button onClick={onClose} className="btn">关闭</button>
+            {accepted ? (
+              <span className="btn bg-ok text-white border-ok"><Check size={12} />已采纳为预算</span>
+            ) : (
+              <button onClick={() => acceptPrediction(output.workOrderId)} className="btn btn-ai">
+                <Sparkles size={12} />采纳为该工单预算
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

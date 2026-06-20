@@ -23,6 +23,15 @@ interface ScheduleState {
   flashIds: string[];
   // ===== Sprint 2 新增 =====
   insertContext: { customer: string; product: string; quantity: number; dueDate: string; text: string } | null;
+  // ===== v2.2.2 新增（真正系统联动） =====
+  /** 已下发至 MES 的工单 ID（甘特图显示 🔒 锁标） */
+  dispatchedIds: Set<string>;
+  /** 排产模拟模式：开启时甘特图覆盖紫色 hatched 模拟层 */
+  simulateMode: boolean;
+  /** 演示约束冲突时标红闪烁的工单 ID */
+  conflictHighlightIds: string[];
+  /** 历史 KPI 序列（KPI 对比按钮用到）—— 每次重排/重算追加一条 */
+  kpiHistory: Array<{ at: Date; label: string; otd: number; changeoverLoss: number; utilization: number; wipValue: number }>;
   // ===== actions =====
   setWorkshop: (w: Workshop) => void;
   setView: (v: GanttView) => void;
@@ -33,14 +42,20 @@ interface ScheduleState {
   schedulePending: (id: string, resourceId: string, startMs: number) => { ok: boolean; conflictWith?: string };
   unschedule: (id: string) => void;
   flash: (ids: string[], durationMs?: number) => void;
-  // Sprint 2:
   setInsertContext: (text: string) => void;
   applyInsertScheme: (scheme: InsertScheme, customer: string, product: string, quantity: number) => string;
   applyAnomalyMerge: (a: AnomalyOptimization) => void;
-  /** ★ v2.1 Agent #6 应用配股方案 */
   applyStrandingConfig: (workOrderId: string, scheme: StrandingScheme, output: StrandingConfigOutput) => void;
-  /** 拖拽冲突时让 AI 给一个可放位置（同行向后扫，留 15 分钟 buffer） */
   aiFindBestSlot: (woId: string, preferResourceId: string) => { resourceId: string; startMs: number; resourceName: string } | null;
+  // ===== v2.2.2 新增 actions =====
+  /** 真正重新排产：算法重排一部分（≈ 20% 的 scheduled）+ 重算 KPI + 写历史 */
+  reSchedule: () => Promise<{ moved: number; newKpi: ScheduleKPI }>;
+  /** 下发计划：把所有 scheduled 标记为 dispatched */
+  dispatchAll: () => number;
+  /** 演示约束冲突：标红 + 闪烁某些工单 */
+  triggerConflictDemo: (ids: string[]) => void;
+  clearConflictHighlight: () => void;
+  setSimulateMode: (v: boolean) => void;
 }
 
 function reCalcKPI(scheduled: WorkOrder[], baseKpi: ScheduleKPI): ScheduleKPI {
@@ -81,6 +96,19 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   selectedId: null,
   flashIds: [],
   insertContext: null,
+  // v2.2.2 新增
+  dispatchedIds: new Set<string>(),
+  simulateMode: false,
+  conflictHighlightIds: [],
+  kpiHistory: [
+    { at: new Date('2026-07-09T18:00:00'), label: '7/09', otd: 89.5, changeoverLoss: 13.8, utilization: 76.2, wipValue: 1_100_000 },
+    { at: new Date('2026-07-10T18:00:00'), label: '7/10', otd: 90.1, changeoverLoss: 13.4, utilization: 76.8, wipValue: 1_120_000 },
+    { at: new Date('2026-07-11T18:00:00'), label: '7/11', otd: 90.2, changeoverLoss: 13.1, utilization: 77.0, wipValue: 1_150_000 },
+    { at: new Date('2026-07-12T18:00:00'), label: '7/12', otd: 90.7, changeoverLoss: 12.9, utilization: 77.5, wipValue: 1_180_000 },
+    { at: new Date('2026-07-13T18:00:00'), label: '7/13', otd: 91.0, changeoverLoss: 12.8, utilization: 77.9, wipValue: 1_190_000 },
+    { at: new Date('2026-07-14T18:00:00'), label: '7/14', otd: 91.2, changeoverLoss: 12.7, utilization: 78.1, wipValue: 1_200_000 },
+    { at: new Date('2026-07-15T09:24:00'), label: '7/15', otd: INITIAL_KPI.otd, changeoverLoss: INITIAL_KPI.changeoverLoss, utilization: INITIAL_KPI.utilization, wipValue: INITIAL_KPI.wipValue },
+  ],
 
   setWorkshop: (workshop) => set({ workshop }),
   setView: (view) => set({ view }),
@@ -315,6 +343,82 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
     }
     return null;
   },
+
+  /* ============ v2.2.2 真正系统联动 actions ============ */
+
+  // 真正重排：随机重排 ≈ 20% 的 scheduled（移到同车间另一台机或换时段）+ 重算 KPI + 写历史
+  reSchedule: async () => {
+    await new Promise((r) => setTimeout(r, 1200));
+    const s = get();
+    const reorderable = s.scheduled.filter((w) =>
+      w.scheduledStart && w.scheduledStart.getTime() > Date.now() && !s.dispatchedIds.has(w.id),
+    );
+    // 选 20% 重排
+    const targetCount = Math.max(8, Math.floor(reorderable.length * 0.2));
+    const indices = new Set<number>();
+    let n = 0;
+    while (indices.size < targetCount && n < targetCount * 6) {
+      indices.add(Math.floor(Math.random() * reorderable.length));
+      n++;
+    }
+    const targets = [...indices].map((i) => reorderable[i]).filter(Boolean);
+    const targetIds = new Set(targets.map((w) => w.id));
+
+    // 同车间的资源池
+    const byWorkshop = (resId: string | undefined) => {
+      if (!resId) return [] as string[];
+      if (resId.startsWith('R-EN')) return ['R-EN-01','R-EN-02','R-EN-04','R-EN-05','R-EN-06','R-EN-09','R-EN-10','R-EN-11','R-EN-12','R-EN-13'];
+      if (resId.startsWith('R-DR')) return ['R-DR-01','R-DR-02','R-DR-03','R-DR-04','R-DR-05','R-DR-13','R-DR-14','R-DR-15','R-DR-16'];
+      return ['R-ST-01','R-ST-02','R-ST-03','R-ST-04','R-ST-05','R-ST-06'];
+    };
+    const updated = s.scheduled.map((w) => {
+      if (!targetIds.has(w.id) || !w.scheduledStart || !w.scheduledEnd) return w;
+      const pool = byWorkshop(w.scheduledResourceId);
+      const newResId = pool[Math.floor(Math.random() * pool.length)];
+      // 时间也漂移 ±2 小时（落在合法时段内）
+      const offset = Math.floor((Math.random() * 4 - 2)) * 60 * 60_000;
+      return {
+        ...w,
+        scheduledResourceId: newResId,
+        scheduledStart: new Date(w.scheduledStart.getTime() + offset),
+        scheduledEnd:   new Date(w.scheduledEnd.getTime() + offset),
+      };
+    });
+    const newKpi = reCalcKPI(updated, s.kpi);
+    // 写 KPI 历史
+    const histLast = s.kpiHistory[s.kpiHistory.length - 1];
+    const newHist = [...s.kpiHistory];
+    const at = new Date();
+    if (histLast && Math.abs(at.getTime() - histLast.at.getTime()) < 60_000) {
+      newHist[newHist.length - 1] = { at, label: histLast.label + '*', ...newKpi };
+    } else {
+      newHist.push({ at, label: `${at.getHours()}:${String(at.getMinutes()).padStart(2,'0')}`, ...newKpi });
+    }
+    set({
+      scheduled: updated,
+      kpi: newKpi,
+      kpiHistory: newHist,
+    });
+    get().flash([...targetIds], 2500);
+    return { moved: targets.length, newKpi };
+  },
+
+  dispatchAll: () => {
+    const s = get();
+    const targetIds = s.scheduled.filter((w) => !s.dispatchedIds.has(w.id)).map((w) => w.id);
+    const next = new Set(s.dispatchedIds);
+    targetIds.forEach((id) => next.add(id));
+    set({ dispatchedIds: next });
+    return targetIds.length;
+  },
+
+  triggerConflictDemo: (ids) => {
+    set({ conflictHighlightIds: ids });
+    get().flash(ids, 4500);
+  },
+  clearConflictHighlight: () => set({ conflictHighlightIds: [] }),
+
+  setSimulateMode: (v) => set({ simulateMode: v }),
 }));
 
 export { GANTT_START };
