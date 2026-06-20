@@ -1,0 +1,287 @@
+{
+  "_meta": {
+    "data_source": "ai_synthesis_from_standard_curriculum",
+    "curriculum_reference": "参照人教版 九年级上册 第22章「二次函数」的标准教学框架整理",
+    "_caveat": "本知识图谱由 AI 基于二次函数章节的通用教学大纲合成。kp_id 编号体系、prerequisites 关联、typical_questions 与 common_mistakes 为编者经验整理,未与特定教材版本逐字比对。投产前建议组织数学教研组按手头实际使用的教材版本逐条审核,重点核查:(1) 节号划分与本图对齐;(2) 关联前置 kp_id 在其他章节图谱中已存在;(3) 易错点表述与一线教学经验一致。",
+    "kp_count": 18,
+    "generated_at": "2026-06-20",
+    "reviewed_by": null,
+    "review_status": "draft"
+  },
+  "subject": "math",
+  "grade": 9,
+  "chapter_id": "math-9-quadfunc",
+  "chapter_name": "二次函数",
+  "knowledge_points": [
+    {
+      "kp_id": "math-9-quadfunc-001",
+      "name": "二次函数的定义",
+      "level": "基础",
+      "prerequisites": ["math-8-func-001"],
+      "typical_questions": [
+        "判断给定式子是否为二次函数",
+        "已知函数为二次函数,求字母系数的取值范围",
+        "指出二次项、一次项、常数项"
+      ],
+      "common_mistakes": [
+        "遗漏 a≠0 的限制条件",
+        "把含 1/x 或 √x 的式子误判为二次函数",
+        "化简前未先整理为标准形式就下结论"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-002",
+      "name": "二次函数的一般式 y = ax² + bx + c",
+      "level": "基础",
+      "prerequisites": ["math-9-quadfunc-001"],
+      "typical_questions": [
+        "写出一般式并指出 a、b、c 的值",
+        "已知三个点的坐标,用一般式求解析式"
+      ],
+      "common_mistakes": [
+        "把 b、c 的位置或符号写反",
+        "求解三元一次方程组时计算失误"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-003",
+      "name": "二次函数 y = ax² 的图象和性质",
+      "level": "基础",
+      "prerequisites": ["math-9-quadfunc-002"],
+      "typical_questions": [
+        "画 y = 2x² 的图象并描述特征",
+        "比较 y = 2x² 与 y = (1/2)x² 的开口大小",
+        "判断 a 的正负对开口方向的影响"
+      ],
+      "common_mistakes": [
+        "把开口方向(由 a 符号决定)与单调性混淆",
+        "误认为 |a| 越大开口越大(实际越小)",
+        "把顶点写成 (0, a) 而不是 (0, 0)"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-004",
+      "name": "二次函数 y = ax² + k 的图象和性质(上下平移)",
+      "level": "基础",
+      "prerequisites": ["math-9-quadfunc-003"],
+      "typical_questions": [
+        "写出 y = x² + 3 的顶点、对称轴",
+        "由 y = ax² 经上下平移得到 y = ax² + k"
+      ],
+      "common_mistakes": [
+        "上加下减记反,把 +k 当成下移",
+        "把对称轴写成 x = k"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-005",
+      "name": "二次函数 y = a(x-h)² 的图象和性质(左右平移)",
+      "level": "基础",
+      "prerequisites": ["math-9-quadfunc-003"],
+      "typical_questions": [
+        "写出 y = 2(x-3)² 的顶点和对称轴",
+        "由 y = ax² 经左右平移得到 y = a(x-h)²"
+      ],
+      "common_mistakes": [
+        "左加右减记反(把 x-3 当成左移)",
+        "把对称轴 x = h 误写成 x = -h"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-006",
+      "name": "二次函数顶点式 y = a(x-h)² + k",
+      "level": "提升",
+      "prerequisites": ["math-9-quadfunc-004", "math-9-quadfunc-005"],
+      "typical_questions": [
+        "写出 y = -2(x+1)² + 3 的顶点、对称轴和最值",
+        "已知顶点坐标和图象上另一点,求顶点式"
+      ],
+      "common_mistakes": [
+        "把顶点 (h, k) 写成 (-h, k) 或 (h, -k)",
+        "a < 0 时把最大值写成最小值",
+        "代入条件求 a 时漏负号"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-007",
+      "name": "配方法:由一般式化为顶点式",
+      "level": "提升",
+      "prerequisites": ["math-9-quadfunc-002", "math-9-quadfunc-006"],
+      "typical_questions": [
+        "将 y = x² - 4x + 3 配方为顶点式",
+        "将 y = 2x² + 8x - 1 配方为顶点式(首项系数非 1)"
+      ],
+      "common_mistakes": [
+        "首项系数非 1 时未先提 a,直接对一次项系数取一半",
+        "配方时加上的项未对应减去,等式不平衡",
+        "一次项系数取一半时漏取平方"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-008",
+      "name": "顶点坐标公式与对称轴公式",
+      "level": "提升",
+      "prerequisites": ["math-9-quadfunc-007"],
+      "typical_questions": [
+        "用公式 x = -b/(2a) 直接求对称轴",
+        "用公式求顶点坐标 (-b/(2a), (4ac-b²)/(4a))"
+      ],
+      "common_mistakes": [
+        "对称轴公式漏负号或漏 2a 分母",
+        "顶点纵坐标公式分母写成 4 而不是 4a",
+        "代入时把 b 与 c 弄混"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-009",
+      "name": "二次函数图象的平移规律",
+      "level": "综合",
+      "prerequisites": ["math-9-quadfunc-006"],
+      "typical_questions": [
+        "求 y = 2x² 向左平移 3 个单位、再向下平移 1 个单位后的解析式",
+        "由两条抛物线的解析式判断平移方向与距离"
+      ],
+      "common_mistakes": [
+        "平移与解析式加减号对应关系记反",
+        "对一般式直接平移而未先化为顶点式",
+        "x 的平移影响错记在 k 上"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-010",
+      "name": "二次函数交点式 y = a(x-x₁)(x-x₂)",
+      "level": "提升",
+      "prerequisites": ["math-9-quadfunc-002", "math-9-quadeq-001"],
+      "typical_questions": [
+        "已知抛物线与 x 轴两交点和图象上另一点,求交点式",
+        "由交点式直接判断对称轴 x = (x₁+x₂)/2"
+      ],
+      "common_mistakes": [
+        "省略系数 a,直接写 y = (x-x₁)(x-x₂)",
+        "x₁、x₂ 的符号代错(把 x = 2 的因式写成 (x+2))",
+        "抛物线与 x 轴无交点时仍套用交点式"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-011",
+      "name": "二次函数三种表达式的互化",
+      "level": "综合",
+      "prerequisites": ["math-9-quadfunc-007", "math-9-quadfunc-010"],
+      "typical_questions": [
+        "把顶点式或交点式展开为一般式",
+        "根据已知条件选择最适合的表达式形式求解析式"
+      ],
+      "common_mistakes": [
+        "展开 (x-h)² 时漏 -2hx 项",
+        "首项系数 a 与括号内系数处理顺序混乱",
+        "条件给出顶点却选用一般式,绕远路且易错"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-012",
+      "name": "抛物线开口、对称轴、顶点位置与 a、b、c 符号的关系",
+      "level": "综合",
+      "prerequisites": ["math-9-quadfunc-008"],
+      "typical_questions": [
+        "根据抛物线图象判断 a、b、c、b²-4ac 的正负",
+        "根据图象判断 a+b+c、a-b+c、2a+b 等代数式的符号"
+      ],
+      "common_mistakes": [
+        "b 的符号:对称轴在 y 轴左/右 与 a、b 同/异号关系混淆",
+        "把 x = 1 时的 y 值与 a+b+c 的对应关系记反",
+        "把 b²-4ac 的符号与抛物线开口方向混为一谈"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-013",
+      "name": "二次函数的最值",
+      "level": "提升",
+      "prerequisites": ["math-9-quadfunc-008"],
+      "typical_questions": [
+        "求 y = ax² + bx + c 在全体实数范围内的最值",
+        "求在给定区间 m ≤ x ≤ n 内的最值(分对称轴在区间内、左、右三种情形)"
+      ],
+      "common_mistakes": [
+        "a > 0 时写出最大值,a < 0 时写出最小值",
+        "求区间最值时未讨论对称轴位置",
+        "把最值点 x 坐标当作最值代入答案"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-014",
+      "name": "二次函数与一元二次方程的关系",
+      "level": "综合",
+      "prerequisites": ["math-9-quadfunc-002", "math-9-quadeq-001"],
+      "typical_questions": [
+        "由判别式 Δ = b²-4ac 的符号判断抛物线与 x 轴交点个数",
+        "已知抛物线与 x 轴交点横坐标,写出对应方程的根"
+      ],
+      "common_mistakes": [
+        "判别式公式记错(漏负号或漏 4a)",
+        "Δ < 0 时认为方程无解就误以为函数无意义",
+        "混淆方程的根与函数图象的交点(根是 x 值,不是点)"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-015",
+      "name": "用图象法解一元二次方程与不等式",
+      "level": "综合",
+      "prerequisites": ["math-9-quadfunc-014"],
+      "typical_questions": [
+        "由 y = ax² + bx + c 的图象写出方程 ax² + bx + c = 0 的近似解",
+        "由图象写出 ax² + bx + c > 0(或 < 0)的解集"
+      ],
+      "common_mistakes": [
+        "写不等式解集时端点是否取等号判断错(>与 ≥ 混淆)",
+        "把抛物线与 x 轴交点的纵坐标当作 x 值",
+        "a < 0 时解集方向写反"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-016",
+      "name": "实际问题:利润最大化",
+      "level": "综合应用",
+      "prerequisites": ["math-9-quadfunc-013"],
+      "typical_questions": [
+        "建立销售单价与销售量的函数关系,求最大利润和对应定价",
+        "在限定条件(如售价不超过某值)下求最大利润"
+      ],
+      "common_mistakes": [
+        "销售量关于单价的线性关系列错(增减方向)",
+        "未把利润 = (售价-成本) × 销量 的两个因式都关于 x 表示",
+        "求出的最值点 x 不在实际取值范围内,未做端点比较"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-017",
+      "name": "实际问题:抛物运动与拱形结构",
+      "level": "综合应用",
+      "prerequisites": ["math-9-quadfunc-006", "math-9-quadfunc-013"],
+      "typical_questions": [
+        "投篮、喷泉、跳水等抛物运动建立坐标系并求解析式",
+        "桥拱、隧道等拱形结构求跨度与最大高度"
+      ],
+      "common_mistakes": [
+        "坐标系建立位置不利于计算(建议把顶点或对称轴放在 y 轴上)",
+        "把题目中的尺寸单位混用(米/厘米)",
+        "求出落地点后未代入题目要求的实际量"
+      ]
+    },
+    {
+      "kp_id": "math-9-quadfunc-018",
+      "name": "实际问题:几何图形最值",
+      "level": "综合应用",
+      "prerequisites": ["math-9-quadfunc-013"],
+      "typical_questions": [
+        "周长固定时矩形面积最大值问题",
+        "利用墙面/围栏围成最大面积问题",
+        "水槽截面、广告牌面积优化问题"
+      ],
+      "common_mistakes": [
+        "约束条件下变量取值范围未写完整",
+        "用 x 表示长后宽的表达式列错",
+        "求得最值时未验证 x 是否在实际取值范围内"
+      ]
+    }
+  ]
+}
