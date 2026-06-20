@@ -2712,6 +2712,650 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
 .compl-row .cmr-name { flex:1; color:var(--ink); font-weight:600; }
 .compl-row .cmr-clause { font-size:10px; color:var(--muted); }
 
+/* ============================================================
+   客服 AI 助手 · 6 板块专属样式
+   ============================================================ */
+
+/* ============ Board 1: 智能分诊台 ============ */
+.triage-shell { display:grid; grid-template-columns: 320px 1fr 380px; gap:12px; }
+.triage-pool { background:#fff; border:1px solid var(--line); border-radius:13px; overflow:hidden;
+  display:flex; flex-direction:column; max-height:580px; }
+.triage-pool .tp-head { padding:11px 13px; background:linear-gradient(180deg,#F8F9FE,#EEF0FB);
+  border-bottom:1px solid var(--line); }
+.triage-pool .tp-head .tph-tt { font-size:12.5px; font-weight:700; color:var(--ink);
+  display:flex; align-items:center; gap:7px; }
+.triage-pool .tp-head .tph-tt .tph-dot { width:7px; height:7px; border-radius:50%; background:#2BD9A8;
+  animation: ppd 1.2s infinite; }
+.triage-pool .tp-head .tph-sub { font-size:10.5px; color:var(--muted); margin-top:3px; }
+.triage-pool .tp-list { flex:1; overflow-y:auto; padding:6px; }
+.tp-item { padding:9px 11px; background:#F8F9FE; border:1px solid var(--line-2); border-radius:9px;
+  margin-bottom:6px; cursor:pointer; transition:.15s; position:relative; }
+.tp-item:hover { border-color:var(--brand); background:#fff; box-shadow:0 2px 8px rgba(90,91,240,.08); }
+.tp-item.cur { border-color:var(--brand); background:linear-gradient(90deg,rgba(90,91,240,.06),#fff);
+  box-shadow:0 4px 12px rgba(90,91,240,.15); }
+.tp-item .tpi-row1 { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.tp-item .tpi-ch { font-size:9.5px; padding:1.5px 6px; border-radius:4px; background:#EEF0FB;
+  color:var(--ink-2); font-weight:700; flex-shrink:0; }
+.tp-item .tpi-ch.wx { background:rgba(24,185,122,.12); color:var(--green); }
+.tp-item .tpi-ch.wxw { background:rgba(0,194,216,.12); color:#00A8C6; }
+.tp-item .tpi-ch.tel { background:rgba(217,119,6,.12); color:var(--amber); }
+.tp-item .tpi-ch.eml { background:rgba(124,92,250,.12); color:var(--purple); }
+.tp-item .tpi-ch.web { background:rgba(90,91,240,.12); color:var(--brand); }
+.tp-item .tpi-vip { font-size:9.5px; padding:1.5px 6px; border-radius:4px; font-weight:800;
+  background:linear-gradient(90deg,#FFD700,#FFA500); color:#fff; flex-shrink:0; }
+.tp-item .tpi-vip.gold { background:linear-gradient(90deg,#9A4DFF,#5A5BF0); }
+.tp-item .tpi-time { margin-left:auto; font-size:10px; color:var(--muted); }
+.tp-item .tpi-name { font-size:12px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.tp-item .tpi-msg { font-size:11px; color:var(--ink-2); line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.tp-item .tpi-tags { display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; }
+.tp-item .tpi-tag { font-size:9.5px; padding:1px 5px; border-radius:4px; font-weight:700; }
+.tp-item .tpi-tag.urgent { background:#FEF2F2; color:var(--red); }
+.tp-item .tpi-tag.angry { background:#FEF2F2; color:var(--red); }
+.tp-item .tpi-tag.calm { background:#E9F9F1; color:var(--green); }
+.tp-item .tpi-tag.pre { background:#EEF5FF; color:#3A6FE3; }
+.tp-item .tpi-tag.post { background:#FFF4E5; color:var(--amber); }
+.tp-item .tpi-tag.cmpl { background:#FEF2F2; color:var(--red); }
+.tp-item .tpi-pred { position:absolute; right:8px; bottom:7px; font-size:9.5px;
+  padding:1px 5px; background:rgba(90,91,240,.1); color:var(--brand); border-radius:4px; font-weight:700; }
+
+/* 分诊中央雷达 + 策略 */
+.triage-center { display:flex; flex-direction:column; gap:11px; }
+.triage-dim-card { background:#fff; border:1px solid var(--line); border-radius:13px; padding:13px; }
+.triage-dim-card .tdc-head { font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:10px;
+  display:flex; align-items:center; gap:7px; }
+.triage-dim-card .tdc-head small { font-size:10.5px; color:var(--muted); font-weight:500; margin-left:auto; }
+.triage-radar-wrap { display:grid; grid-template-columns: 1.1fr 1fr; gap:13px; align-items:center; }
+.triage-radar-svg { width:100%; max-width:260px; height:auto; }
+.triage-dim-bars { display:flex; flex-direction:column; gap:7px; }
+.tdb-row { display:flex; align-items:center; gap:7px; font-size:11px; }
+.tdb-row .tdb-lbl { width:64px; color:var(--ink-2); font-weight:600; flex-shrink:0; }
+.tdb-row .tdb-bar { flex:1; height:7px; background:#EEF0FB; border-radius:999px; overflow:hidden; }
+.tdb-row .tdb-bar i { display:block; height:100%; background:var(--c,#5A5BF0); transition:.3s; }
+.tdb-row .tdb-cnt { width:36px; text-align:right; font-weight:800; font-size:12px; color:var(--ink); }
+
+/* 策略调节 */
+.triage-strat { padding:13px; background:linear-gradient(135deg,#0E1430,#1A1F4F); color:#fff;
+  border-radius:13px; }
+.triage-strat .ts-head { font-size:12.5px; font-weight:700; margin-bottom:11px; display:flex;
+  align-items:center; gap:7px; }
+.triage-strat .ts-row { display:flex; align-items:center; gap:13px; margin-bottom:9px; }
+.triage-strat .ts-row label { font-size:11.5px; flex-shrink:0; opacity:.85; }
+.triage-strat input[type=range] { flex:1; accent-color:#7C5CFA; }
+.triage-strat .ts-val { font-size:18px; font-weight:800; color:#7C5CFA; min-width:72px;
+  text-align:right; letter-spacing:-.02em; }
+.triage-strat .ts-marks { display:flex; justify-content:space-between; font-size:10px; opacity:.55;
+  padding:0 4px; }
+.triage-strat .ts-impact { display:grid; grid-template-columns: repeat(3,1fr); gap:9px; margin-top:11px;
+  padding-top:11px; border-top:1px solid rgba(255,255,255,.1); }
+.triage-strat .tsi-cell { text-align:center; }
+.triage-strat .tsi-lbl { font-size:10px; opacity:.65; font-weight:600; }
+.triage-strat .tsi-val { font-size:17px; font-weight:800; margin-top:2px; letter-spacing:-.02em; }
+.triage-strat .tsi-val.good { color:#2BD9A8; }
+.triage-strat .tsi-val.warn { color:#FFC766; }
+.triage-strat .tsi-sub { font-size:9.5px; opacity:.55; margin-top:1px; }
+.triage-strat .ts-tip { margin-top:9px; padding:8px 11px; background:rgba(124,92,250,.15);
+  border:1px solid rgba(124,92,250,.35); border-radius:9px; font-size:11px; line-height:1.55; }
+.triage-strat .ts-tip b { color:#7C5CFA; }
+
+/* 右栏: 当前进件 AI 分诊详情 */
+.triage-detail { background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px;
+  max-height:580px; overflow-y:auto; }
+.td-empty { padding:38px 14px; text-align:center; color:var(--muted); font-size:12px; }
+.td-empty .te-ico { font-size:34px; margin-bottom:9px; opacity:.5; }
+.td-cust { display:flex; align-items:center; gap:10px; padding-bottom:11px; border-bottom:1px dashed var(--line); margin-bottom:11px; }
+.td-cust .tc-ava { width:42px; height:42px; border-radius:11px;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; display:grid; place-items:center;
+  font-size:18px; font-weight:800; flex-shrink:0; }
+.td-cust .tc-name { font-size:13px; font-weight:800; color:var(--ink); }
+.td-cust .tc-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+.td-cust .tc-vip { margin-left:auto; padding:3px 9px; border-radius:6px; font-size:10px; font-weight:800;
+  letter-spacing:.04em; }
+.td-cust .tc-vip.diamond { background:linear-gradient(90deg,#9A4DFF,#5A5BF0); color:#fff; }
+.td-cust .tc-vip.gold { background:linear-gradient(90deg,#FFD700,#FFA500); color:#fff; }
+.td-cust .tc-vip.normal { background:#EEF0FB; color:var(--ink-2); }
+.td-msg { padding:9px 11px; background:#F8F9FE; border-left:3px solid var(--brand); border-radius:7px;
+  font-size:11.5px; line-height:1.6; color:var(--ink-2); font-style:italic; margin-bottom:11px; }
+.td-ai-row { display:flex; align-items:flex-start; gap:9px; margin-bottom:10px; }
+.td-ai-row .tar-ico { width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,#5A5BF0,#9A4DFF);
+  color:#fff; display:grid; place-items:center; font-size:12px; flex-shrink:0; }
+.td-ai-row .tar-body { flex:1; }
+.td-ai-row .tar-tt { font-size:10.5px; font-weight:800; color:var(--brand); letter-spacing:.04em; margin-bottom:3px; }
+.td-ai-row .tar-content { font-size:11.5px; line-height:1.6; color:var(--ink-2); }
+.td-ai-row .tar-content b { color:var(--ink); }
+.td-5d { display:grid; grid-template-columns: repeat(5,1fr); gap:5px; padding:9px;
+  background:linear-gradient(135deg,rgba(90,91,240,.05),rgba(154,77,255,.05)); border-radius:9px;
+  border:1px solid rgba(90,91,240,.15); margin-bottom:11px; }
+.td-5d-cell { text-align:center; padding:4px; }
+.td-5d-cell .td5-lbl { font-size:9px; color:var(--muted); font-weight:700; letter-spacing:.04em; }
+.td-5d-cell .td5-val { font-size:11.5px; font-weight:800; color:var(--ink); margin-top:2px;
+  padding:2px 5px; border-radius:5px; display:inline-block; }
+.td-5d-cell .td5-val.high { background:#FEF2F2; color:var(--red); }
+.td-5d-cell .td5-val.mid { background:#FFF4E5; color:var(--amber); }
+.td-5d-cell .td5-val.low { background:#E9F9F1; color:var(--green); }
+.td-5d-cell .td5-val.brand { background:rgba(90,91,240,.12); color:var(--brand); }
+.td-reco { padding:10px 12px; background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border:1px solid rgba(24,185,122,.35); border-radius:9px; margin-bottom:11px; }
+.td-reco .tr-lbl { font-size:10.5px; font-weight:800; color:var(--green); letter-spacing:.04em; margin-bottom:5px; }
+.td-reco .tr-tt { font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.45; }
+.td-reco .tr-meta { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
+.td-acts { display:flex; gap:6px; flex-wrap:wrap; }
+.td-acts button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.15s; }
+.td-acts .primary { background:var(--grad-btn); color:#fff; border:none; box-shadow:0 3px 10px rgba(90,91,240,.3); }
+.td-acts .primary:hover { transform:translateY(-1px); box-shadow:0 5px 14px rgba(90,91,240,.4); }
+.td-acts .secondary { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.td-acts .secondary:hover { border-color:var(--brand); color:var(--brand); }
+
+/* ============ Board 2: AI 副驾会话台 ============ */
+.copilot-shell { display:grid; grid-template-columns: 280px 1fr 340px; gap:12px;
+  background:#fff; border:1px solid var(--line); border-radius:13px; overflow:hidden;
+  height:600px; }
+.cs-list { border-right:1px solid var(--line); background:#FAFBFF; display:flex; flex-direction:column; }
+.cs-list-head { padding:11px 13px; border-bottom:1px solid var(--line); display:flex;
+  align-items:center; gap:7px; }
+.cs-list-head .csh-tt { font-size:12px; font-weight:700; color:var(--ink); }
+.cs-list-head .csh-cnt { margin-left:auto; font-size:11px; padding:2px 7px; border-radius:5px;
+  background:var(--grad-btn); color:#fff; font-weight:800; }
+.cs-list-body { flex:1; overflow-y:auto; padding:6px; }
+.cs-conv { padding:9px 11px; background:#fff; border:1px solid var(--line-2); border-radius:9px;
+  margin-bottom:6px; cursor:pointer; transition:.15s; position:relative; }
+.cs-conv:hover { border-color:var(--brand); }
+.cs-conv.cur { border-color:var(--brand); background:linear-gradient(90deg,rgba(90,91,240,.06),#fff);
+  box-shadow:0 2px 8px rgba(90,91,240,.15); }
+.cs-conv .csc-row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.cs-conv .csc-name { font-size:12px; font-weight:700; color:var(--ink); flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-conv .csc-time { font-size:10px; color:var(--muted); }
+.cs-conv .csc-vip { font-size:9px; padding:1px 5px; border-radius:4px; font-weight:800; }
+.cs-conv .csc-vip.diamond { background:linear-gradient(90deg,#9A4DFF,#5A5BF0); color:#fff; }
+.cs-conv .csc-vip.gold { background:linear-gradient(90deg,#FFD700,#FFA500); color:#fff; }
+.cs-conv .csc-preview { font-size:10.5px; color:var(--muted); line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.cs-conv .csc-state { display:flex; align-items:center; gap:5px; margin-top:5px; font-size:10px; }
+.cs-conv .csc-mode { padding:1px 6px; border-radius:4px; font-weight:700; }
+.cs-conv .csc-mode.ai { background:rgba(124,92,250,.12); color:var(--purple); }
+.cs-conv .csc-mode.co { background:rgba(0,194,216,.12); color:#00A8C6; }
+.cs-conv .csc-mode.man { background:rgba(217,119,6,.12); color:var(--amber); }
+.cs-conv .csc-mode.up { background:#FEF2F2; color:var(--red); }
+.cs-conv .csc-unread { position:absolute; top:8px; right:8px; min-width:18px; height:18px; padding:0 5px;
+  border-radius:9px; background:var(--red); color:#fff; font-size:10px; font-weight:800;
+  display:grid; place-items:center; }
+
+/* 中栏: 对话流 */
+.cs-conv-pane { display:flex; flex-direction:column; }
+.ccp-head { padding:11px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center;
+  gap:9px; background:#fff; }
+.ccp-head .cph-ava { width:34px; height:34px; border-radius:9px;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; display:grid; place-items:center;
+  font-size:14px; font-weight:800; flex-shrink:0; }
+.ccp-head .cph-tt { flex:1; min-width:0; }
+.ccp-head .cph-name { font-size:13px; font-weight:800; color:var(--ink); }
+.ccp-head .cph-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+.ccp-head .cph-modes { display:flex; gap:3px; padding:3px; background:#F8F9FE; border-radius:8px; }
+.ccp-head .cph-mode-btn { padding:5px 10px; font-size:11px; font-weight:700; border:none;
+  background:transparent; color:var(--ink-2); border-radius:6px; cursor:pointer; font-family:inherit;
+  transition:.15s; }
+.ccp-head .cph-mode-btn:hover { color:var(--brand); }
+.ccp-head .cph-mode-btn.cur { background:#fff; color:var(--ink); box-shadow:var(--sh-sm); }
+.ccp-stream { flex:1; overflow-y:auto; padding:14px 16px; background:#F8F9FE;
+  display:flex; flex-direction:column; gap:11px; }
+.ccp-bubble { display:flex; align-items:flex-end; gap:8px; max-width:75%; }
+.ccp-bubble .cb-ava { width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+  font-size:11.5px; font-weight:800; flex-shrink:0; }
+.ccp-bubble .cb-text { padding:8px 12px; border-radius:11px; font-size:12px; line-height:1.6;
+  word-break:break-word; }
+.ccp-bubble .cb-meta { font-size:9.5px; color:var(--muted); margin-top:3px; padding:0 4px; }
+.ccp-bubble.cust { align-self:flex-start; }
+.ccp-bubble.cust .cb-ava { background:#EEF0FB; color:var(--ink-2); }
+.ccp-bubble.cust .cb-text { background:#fff; border:1px solid var(--line-2); color:var(--ink); }
+.ccp-bubble.cust .cb-text mark { background:rgba(255,222,135,.6); padding:0 2px; border-radius:2px; }
+.ccp-bubble.csr { align-self:flex-end; flex-direction:row-reverse; text-align:right; }
+.ccp-bubble.csr .cb-ava { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; }
+.ccp-bubble.csr .cb-text { background:var(--grad-btn); color:#fff; }
+.ccp-bubble.csr.byai .cb-text { background:linear-gradient(135deg,#7C5CFA,#9A4DFF); }
+.ccp-bubble.sys { align-self:center; max-width:90%; }
+.ccp-bubble.sys .cb-text { background:rgba(0,0,0,.05); color:var(--muted); font-size:10.5px;
+  font-style:italic; padding:5px 10px; border-radius:11px; }
+.ccp-bubble.sys .cb-ava { display:none; }
+.ccp-byai { display:inline-block; font-size:9px; padding:1px 5px; background:rgba(255,255,255,.25);
+  color:#fff; border-radius:4px; margin-left:6px; font-weight:800; letter-spacing:.04em; }
+
+.ccp-input { padding:11px 14px; border-top:1px solid var(--line); background:#fff; }
+.ccp-input-row { display:flex; gap:7px; }
+.ccp-input textarea { flex:1; min-height:54px; padding:9px 12px; border:1px solid var(--line-2);
+  border-radius:9px; resize:none; font-family:inherit; font-size:12.5px; line-height:1.55;
+  color:var(--ink); outline:none; }
+.ccp-input textarea:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(90,91,240,.1); }
+.ccp-input-send { padding:9px 18px; background:var(--grad-btn); color:#fff; border:none;
+  border-radius:9px; font-weight:800; cursor:pointer; font-family:inherit; transition:.15s;
+  box-shadow:0 4px 12px rgba(90,91,240,.3); }
+.ccp-input-send:hover { transform:translateY(-1px); }
+
+/* 右栏: AI 副驾 */
+.cs-side { border-left:1px solid var(--line); display:flex; flex-direction:column; background:#fff; }
+.cs-side-tabs { display:flex; padding:8px 8px 0; gap:3px; background:#F8F9FE; border-bottom:1px solid var(--line); }
+.cs-side-tab { flex:1; padding:7px 10px; font-size:11.5px; font-weight:700; color:var(--ink-2);
+  background:transparent; border:none; border-radius:6px 6px 0 0; cursor:pointer; transition:.15s; font-family:inherit; }
+.cs-side-tab:hover { color:var(--brand); }
+.cs-side-tab.cur { background:#fff; color:var(--ink); border:1px solid var(--line); border-bottom:1px solid #fff;
+  margin-bottom:-1px; position:relative; }
+.cs-side-pane { flex:1; overflow-y:auto; padding:12px 14px; display:none; }
+.cs-side-pane.cur { display:block; }
+/* AI 建议 pane */
+.ai-sug-card { padding:11px 13px; background:linear-gradient(180deg,#F7F9FF,#EDEFFB);
+  border:1px solid rgba(90,91,240,.25); border-radius:11px; margin-bottom:8px; cursor:pointer;
+  transition:.15s; position:relative; }
+.ai-sug-card:hover { border-color:var(--brand); transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(90,91,240,.18); }
+.ai-sug-card .asc-tt { display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:800;
+  color:var(--brand); letter-spacing:.05em; margin-bottom:5px; }
+.ai-sug-card .asc-tt .asc-conf { margin-left:auto; padding:1px 6px; background:rgba(90,91,240,.1);
+  border-radius:4px; font-size:9.5px; }
+.ai-sug-card .asc-body { font-size:11.5px; line-height:1.6; color:var(--ink); }
+.ai-sug-card .asc-body mark { background:rgba(43,217,168,.3); padding:0 2px; border-radius:2px; }
+.ai-sug-card .asc-meta { font-size:10px; color:var(--muted); margin-top:5px; font-style:italic; }
+.ai-sug-card::after { content:"点 → 自动填入"; position:absolute; right:8px; bottom:7px;
+  font-size:9px; color:var(--brand); opacity:0; transition:.15s; }
+.ai-sug-card:hover::after { opacity:.9; }
+/* 客户档案 pane */
+.cust-card { padding:11px 13px; background:#F8F9FE; border-radius:9px; border:1px solid var(--line-2);
+  margin-bottom:10px; }
+.cust-card .cuc-row { display:flex; justify-content:space-between; align-items:baseline; padding:4px 0;
+  font-size:11.5px; border-bottom:1px dashed rgba(0,0,0,.05); }
+.cust-card .cuc-row:last-child { border-bottom:none; }
+.cust-card .cuc-row .cuc-k { color:var(--muted); font-weight:600; flex-shrink:0; }
+.cust-card .cuc-row .cuc-v { color:var(--ink); font-weight:700; text-align:right; }
+.cust-card .cuc-row .cuc-v.good { color:var(--green); }
+.cust-card .cuc-row .cuc-v.danger { color:var(--red); }
+.cust-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:9px; }
+.cust-tag { font-size:10px; padding:2px 7px; border-radius:5px; font-weight:700; }
+.cust-tag.vip { background:linear-gradient(90deg,#9A4DFF,#5A5BF0); color:#fff; }
+.cust-tag.risk { background:#FEF2F2; color:var(--red); }
+.cust-tag.pos { background:rgba(24,185,122,.12); color:var(--green); }
+.cust-tag.neu { background:#EEF0FB; color:var(--ink-2); }
+.cust-history { margin-top:11px; padding-top:11px; border-top:1px dashed var(--line); }
+.cust-history-tt { font-size:10.5px; font-weight:800; color:var(--ink-2); letter-spacing:.04em; margin-bottom:7px; }
+.cust-his-row { padding:6px 8px; background:#fff; border:1px solid var(--line-2); border-radius:7px;
+  margin-bottom:5px; font-size:10.5px; color:var(--ink-2); line-height:1.45; }
+.cust-his-row b { color:var(--ink); }
+.cust-his-row .ch-time { color:var(--muted); font-size:9.5px; margin-left:5px; }
+/* 知识检索 pane */
+.kb-input2 { display:flex; gap:6px; padding:8px 10px; background:#F8F9FE; border:1px solid var(--line-2);
+  border-radius:9px; margin-bottom:11px; }
+.kb-input2 input { flex:1; border:none; background:transparent; outline:none; font-family:inherit;
+  font-size:12px; }
+.kb-input2 button { padding:5px 11px; background:var(--grad-btn); color:#fff; border:none;
+  border-radius:7px; font-size:10.5px; font-weight:700; cursor:pointer; font-family:inherit; }
+.kb-result { padding:9px 11px; background:#F8F9FE; border-left:3px solid var(--brand);
+  border-radius:7px; margin-bottom:7px; font-size:11px; line-height:1.55; cursor:pointer;
+  transition:.15s; }
+.kb-result:hover { background:linear-gradient(90deg,rgba(90,91,240,.05),#F8F9FE); }
+.kb-result .kbr-tt { font-weight:700; color:var(--ink); margin-bottom:3px; }
+.kb-result .kbr-quote { color:var(--ink-2); font-style:italic; }
+.kb-result .kbr-meta { font-size:9.5px; color:var(--muted); margin-top:4px; }
+
+/* ============ Board 3: 夜班值守 ============ */
+.night-shell { background:linear-gradient(135deg,#0E1430,#1A1F4F); color:#fff; border-radius:13px;
+  padding:16px 18px; margin-bottom:13px; }
+.night-head { display:flex; align-items:center; gap:12px; margin-bottom:13px;
+  padding-bottom:11px; border-bottom:1px solid rgba(255,255,255,.1); }
+.night-head .nh-moon { width:46px; height:46px; border-radius:11px;
+  background:linear-gradient(135deg,#3A3F7B,#5A5BF0); display:grid; place-items:center;
+  font-size:22px; flex-shrink:0; box-shadow:0 4px 12px rgba(90,91,240,.4); }
+.night-head .nh-tt { flex:1; font-size:14px; font-weight:800; color:#fff; }
+.night-head .nh-tt small { display:block; font-size:11px; opacity:.65; font-weight:500; margin-top:3px; }
+.night-toggle { display:flex; align-items:center; gap:8px; padding:6px 13px; background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15); border-radius:8px; cursor:pointer; transition:.15s; }
+.night-toggle:hover { background:rgba(255,255,255,.12); }
+.night-toggle .nt-led { width:9px; height:9px; border-radius:50%; background:#2BD9A8;
+  animation: ppd 1.2s infinite; }
+.night-toggle.off .nt-led { background:#666; animation:none; }
+.night-toggle .nt-tt { font-size:11.5px; font-weight:700; color:#fff; }
+.night-stat { display:grid; grid-template-columns: repeat(4,1fr); gap:11px; }
+.night-stat-cell { padding:11px; background:rgba(255,255,255,.05); border-radius:9px;
+  border:1px solid rgba(255,255,255,.08); }
+.night-stat-cell .nsc-lbl { font-size:10.5px; opacity:.65; font-weight:600; }
+.night-stat-cell .nsc-val { font-size:22px; font-weight:800; color:#7C5CFA; margin-top:2px; letter-spacing:-.02em; }
+.night-stat-cell .nsc-val.good { color:#2BD9A8; }
+.night-stat-cell .nsc-val.warn { color:#FFC766; }
+.night-stat-cell .nsc-sub { font-size:10px; opacity:.55; margin-top:2px; }
+
+.night-log { background:#fff; border:1px solid var(--line); border-radius:13px; padding:0; overflow:hidden; }
+.night-log-head { padding:11px 14px; display:flex; align-items:center; gap:9px;
+  border-bottom:1px solid var(--line); background:#F8F9FE; }
+.night-log-head .nlh-tt { font-size:13px; font-weight:700; color:var(--ink); flex:1; }
+.night-log-head .nlh-tabs { display:flex; gap:3px; background:#fff; padding:3px; border-radius:7px;
+  border:1px solid var(--line-2); }
+.night-log-tab { padding:5px 11px; font-size:11px; font-weight:700; border:none; background:transparent;
+  color:var(--ink-2); border-radius:5px; cursor:pointer; font-family:inherit; }
+.night-log-tab.cur { background:var(--grad-btn); color:#fff; }
+.night-log-list { max-height:480px; overflow-y:auto; padding:0; }
+.night-log-row { display:grid; grid-template-columns: 60px 1fr 1fr 130px 100px; gap:11px;
+  padding:11px 14px; border-bottom:1px dashed var(--line); cursor:pointer; transition:.15s;
+  align-items:center; }
+.night-log-row:hover { background:#F8F9FE; }
+.night-log-row.cur { background:linear-gradient(90deg,rgba(90,91,240,.06),#fff); border-left:3px solid var(--brand); }
+.night-log-row .nlr-time { font-size:11px; font-weight:800; color:var(--brand); font-family: ui-monospace, monospace; }
+.night-log-row .nlr-cust { font-size:11.5px; }
+.night-log-row .nlr-cust b { color:var(--ink); }
+.night-log-row .nlr-cust small { display:block; color:var(--muted); font-size:10px; margin-top:2px; }
+.night-log-row .nlr-q { font-size:11px; color:var(--ink-2); line-height:1.45;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.night-log-row .nlr-action { font-size:10.5px; padding:3px 8px; border-radius:5px; font-weight:700;
+  text-align:center; }
+.night-log-row .nlr-action.solved { background:rgba(24,185,122,.12); color:var(--green); }
+.night-log-row .nlr-action.relay { background:rgba(217,119,6,.12); color:var(--amber); }
+.night-log-row .nlr-action.upgrade { background:#FEF2F2; color:var(--red); }
+.night-log-row .nlr-conf { font-size:11px; font-weight:800; color:var(--brand); text-align:right; }
+.night-log-row .nlr-conf small { font-size:9.5px; color:var(--muted); font-weight:500; margin-left:2px; }
+
+/* 单 case 展开详情 */
+.night-detail { display:none; padding:14px 18px; background:#F8F9FE;
+  border-bottom:1px dashed var(--line); }
+.night-detail.show { display:block; }
+.nd-head { font-size:11px; font-weight:800; color:var(--brand); margin-bottom:9px; }
+.nd-conv { display:flex; flex-direction:column; gap:7px; margin-bottom:11px; }
+.nd-bubble { display:flex; gap:8px; max-width:75%; align-items:flex-end; }
+.nd-bubble .ndb-text { padding:7px 11px; border-radius:10px; font-size:11.5px; line-height:1.55; }
+.nd-bubble.cust { align-self:flex-start; }
+.nd-bubble.cust .ndb-text { background:#fff; border:1px solid var(--line-2); color:var(--ink); }
+.nd-bubble.ai { align-self:flex-end; }
+.nd-bubble.ai .ndb-text { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; }
+.nd-bubble.ai::before { content:"AI"; width:22px; height:22px; border-radius:50%; background:#0E1430; color:#fff;
+  font-size:9.5px; font-weight:800; display:grid; place-items:center; align-self:center; order:1; margin-left:5px; }
+.nd-reason { padding:9px 12px; background:#fff; border:1px solid var(--line-2); border-radius:9px;
+  font-size:11px; line-height:1.55; color:var(--ink-2); }
+.nd-reason b { color:var(--ink); }
+.nd-reason .ndr-k { font-size:10px; font-weight:800; color:var(--brand); letter-spacing:.04em; margin-bottom:3px; display:block; }
+
+/* 夜班置信度滑块 */
+.night-conf { margin-top:11px; padding:13px 15px; background:#fff; border:1px solid var(--line); border-radius:13px; }
+.night-conf .nc-row { display:flex; align-items:center; gap:13px; }
+.night-conf .nc-lbl { font-size:12.5px; font-weight:800; color:var(--ink); flex-shrink:0; }
+.night-conf input[type=range] { flex:1; accent-color:var(--brand); }
+.night-conf .nc-val { font-size:20px; font-weight:800; color:var(--brand); min-width:60px; text-align:right; letter-spacing:-.02em; }
+.night-conf .nc-tip { margin-top:9px; font-size:11.5px; line-height:1.6; color:var(--ink-2); padding-top:9px;
+  border-top:1px dashed var(--line); }
+.night-conf .nc-tip b { color:var(--brand); }
+
+/* ============ Board 4: 工单流转 ============ */
+.ticket-shell { display:flex; flex-direction:column; gap:11px; }
+.ticket-top { display:grid; grid-template-columns: 1fr 280px; gap:11px; }
+.ticket-stats { display:grid; grid-template-columns: repeat(4,1fr); gap:9px; padding:13px;
+  background:#fff; border:1px solid var(--line); border-radius:13px; }
+.ts-cell { padding:9px 11px; background:#F8F9FE; border-radius:9px; border:1px solid var(--line-2);
+  border-left:3px solid var(--c,var(--brand)); }
+.ts-cell .tsc-lbl { font-size:10.5px; color:var(--muted); font-weight:600; }
+.ts-cell .tsc-val { font-size:21px; font-weight:800; color:var(--ink); margin-top:2px; letter-spacing:-.02em; }
+.ts-cell .tsc-val.danger { color:var(--red); }
+.ts-cell .tsc-val.warn { color:var(--amber); }
+.ts-cell .tsc-val.good { color:var(--green); }
+.ts-cell .tsc-sub { font-size:10px; color:var(--muted); margin-top:1px; }
+
+.ticket-sla { padding:13px; background:#fff; border:1px solid var(--line); border-radius:13px; }
+.ticket-sla .tsla-head { font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px; }
+.ticket-sla .tsla-row { display:flex; align-items:center; gap:11px; }
+.ticket-sla input[type=range] { flex:1; accent-color:var(--brand); }
+.ticket-sla .tsla-val { font-size:16px; font-weight:800; color:var(--brand); min-width:60px; text-align:right; }
+.ticket-sla .tsla-tip { font-size:10.5px; color:var(--muted); margin-top:6px; line-height:1.5; }
+
+.ticket-list { display:flex; flex-direction:column; gap:9px; }
+.ticket-card { background:#fff; border:1px solid var(--line); border-radius:11px; padding:13px 15px;
+  border-left:4px solid var(--c,var(--brand)); transition:.15s; }
+.ticket-card.overdue { border-left-color:var(--red);
+  background:linear-gradient(90deg,#FEF2F2 0%,#fff 25%); }
+.ticket-card.warn-overdue { border-left-color:var(--amber);
+  background:linear-gradient(90deg,#FFF4E5 0%,#fff 25%); }
+.ticket-card.solved { opacity:.7; border-left-color:var(--green); }
+.tc-head { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+.tc-head .tch-id { font-size:10.5px; padding:2px 7px; background:#EEF0FB; color:var(--ink-2);
+  border-radius:4px; font-weight:800; font-family: ui-monospace, monospace; }
+.tc-head .tch-cust { font-size:13px; font-weight:800; color:var(--ink); flex:1; min-width:0; }
+.tc-head .tch-cust b { color:var(--brand); }
+.tc-head .tch-vip { font-size:10px; padding:1px 6px; border-radius:4px; font-weight:800; }
+.tc-head .tch-vip.diamond { background:linear-gradient(90deg,#9A4DFF,#5A5BF0); color:#fff; }
+.tc-head .tch-vip.gold { background:linear-gradient(90deg,#FFD700,#FFA500); color:#fff; }
+.tc-head .tch-sla { font-size:11px; padding:3px 9px; border-radius:6px; font-weight:800; }
+.tc-head .tch-sla.ok { background:rgba(24,185,122,.12); color:var(--green); }
+.tc-head .tch-sla.warn { background:rgba(217,119,6,.15); color:var(--amber); }
+.tc-head .tch-sla.danger { background:#FEF2F2; color:var(--red); }
+.tc-head .tch-sla.done { background:#EEF0FB; color:var(--ink-2); }
+.tc-q { padding:8px 11px; background:#F8F9FE; border-radius:7px; font-size:11.5px; line-height:1.55;
+  color:var(--ink-2); margin-bottom:10px; }
+.tc-q b { color:var(--ink); }
+.tc-flow { display:flex; align-items:flex-start; gap:0; margin-bottom:10px; }
+.tc-step { flex:1; text-align:center; position:relative; }
+.tc-step::after { content:""; position:absolute; top:14px; left:50%; right:-50%; height:2px;
+  background:#EEF0FB; z-index:0; }
+.tc-step:last-child::after { display:none; }
+.tc-step.done::after { background:var(--green); }
+.tc-step .tcs-dot { width:28px; height:28px; border-radius:50%; background:#fff; border:2px solid #EEF0FB;
+  display:grid; place-items:center; font-size:11px; font-weight:800; color:var(--muted);
+  margin:0 auto; position:relative; z-index:1; }
+.tc-step.done .tcs-dot { background:var(--green); border-color:var(--green); color:#fff; }
+.tc-step.done .tcs-dot::after { content:"✓"; }
+.tc-step.done .tcs-dot span { display:none; }
+.tc-step.cur .tcs-dot { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); border-color:transparent;
+  color:#fff; box-shadow:0 0 0 4px rgba(90,91,240,.15); animation: ppd 1.5s infinite; }
+.tc-step.alert .tcs-dot { background:var(--red); border-color:var(--red); color:#fff;
+  animation: pulse-alert 1.5s infinite; }
+.tc-step .tcs-lbl { font-size:9.5px; color:var(--muted); margin-top:4px; line-height:1.3; padding:0 3px; }
+.tc-step.cur .tcs-lbl, .tc-step.alert .tcs-lbl { color:var(--ink); font-weight:700; }
+.tc-step .tcs-meta { font-size:9px; color:var(--muted); margin-top:1px; }
+
+.tc-ai { display:flex; align-items:flex-start; gap:9px; padding:9px 11px;
+  background:linear-gradient(180deg,#F7F9FF,#EDEFFB); border-radius:9px;
+  border:1px solid rgba(90,91,240,.18); margin-bottom:9px; }
+.tc-ai .tca-ico { width:24px; height:24px; border-radius:6px;
+  background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; display:grid; place-items:center;
+  font-size:12px; flex-shrink:0; }
+.tc-ai .tca-body { flex:1; font-size:11.5px; line-height:1.6; color:var(--ink-2); }
+.tc-ai .tca-body b { color:var(--ink); }
+.tc-ai .tca-body small { font-size:10px; color:var(--muted); display:block; margin-top:3px; }
+
+.tc-acts { display:flex; gap:7px; flex-wrap:wrap; }
+.tc-acts button { padding:7px 13px; font-size:11.5px; font-weight:700; border-radius:8px;
+  cursor:pointer; font-family:inherit; transition:.15s; }
+.tc-acts .urge { background:var(--grad-btn); color:#fff; border:none; box-shadow:0 3px 10px rgba(90,91,240,.3); }
+.tc-acts .urge:hover { transform:translateY(-1px); }
+.tc-acts .esc { background:#FEF2F2; color:var(--red); border:1px solid rgba(229,72,77,.3); }
+.tc-acts .esc:hover { background:rgba(229,72,77,.1); }
+.tc-acts .note { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.tc-acts .note:hover { border-color:var(--brand); color:var(--brand); }
+.tc-acts .done-state { margin-left:auto; font-size:11px; padding:5px 11px; font-weight:700; }
+
+/* ============ Board 5: 质检 + 陪练 ============ */
+.qa-shell { display:grid; grid-template-columns: 1.2fr 1fr; gap:12px; }
+
+/* 左: 质检 */
+.qa-panel { background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px; }
+.qa-panel .qa-head { display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+.qa-panel .qah-tt { font-size:13px; font-weight:800; color:var(--ink); flex:1; }
+.qa-panel .qah-stat { font-size:10.5px; padding:2px 8px; background:rgba(90,91,240,.1);
+  color:var(--brand); border-radius:5px; font-weight:800; }
+
+.qa-heat { display:grid; grid-template-columns: 100px repeat(5,1fr); gap:5px; margin-bottom:14px; }
+.qa-heat .qhh { font-size:9.5px; color:var(--muted); font-weight:700; padding:5px 3px; text-align:center;
+  background:#F8F9FE; border-radius:5px; }
+.qa-heat .qhh:first-child { background:transparent; }
+.qa-heat .qhc { font-size:11px; font-weight:700; padding:5px 7px; color:var(--ink-2); align-self:center; }
+.qa-heat .qhc small { font-size:9.5px; color:var(--muted); display:block; }
+.qa-heat .qh-cell { padding:8px 4px; border-radius:6px; text-align:center; font-size:13px;
+  font-weight:800; cursor:pointer; transition:.15s; color:#fff; }
+.qa-heat .qh-cell:hover { transform:scale(1.05); box-shadow:0 4px 10px rgba(0,0,0,.12); }
+.qa-heat .qh-cell.s-92 { background:#18B97A; }
+.qa-heat .qh-cell.s-88 { background:#2BD9A8; }
+.qa-heat .qh-cell.s-82 { background:#7DD3A3; }
+.qa-heat .qh-cell.s-75 { background:#FFC766; color:#1a1a1a; }
+.qa-heat .qh-cell.s-65 { background:#E5484D; }
+.qa-heat .qh-cell.s-58 { background:#C13030; }
+
+.qa-alerts { padding:11px 13px; background:linear-gradient(180deg,#FEF2F2,#FFEBEC);
+  border:1px solid rgba(229,72,77,.25); border-radius:11px; }
+.qa-alerts-head { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:800;
+  color:var(--red); margin-bottom:9px; }
+.qa-alerts-head .qah-pulse { width:8px; height:8px; border-radius:50%; background:var(--red);
+  animation: ppd 1s infinite; }
+.qa-alert-row { padding:8px 11px; background:#fff; border:1px solid rgba(229,72,77,.2); border-radius:8px;
+  margin-bottom:6px; display:flex; align-items:flex-start; gap:9px; }
+.qa-alert-row:last-child { margin-bottom:0; }
+.qa-alert-row .qar-csr { width:30px; height:30px; border-radius:50%; background:#EEF0FB;
+  display:grid; place-items:center; font-size:11.5px; font-weight:800; color:var(--ink-2); flex-shrink:0; }
+.qa-alert-row .qar-body { flex:1; font-size:11px; line-height:1.55; }
+.qa-alert-row .qar-csr-name { font-weight:700; color:var(--ink); }
+.qa-alert-row .qar-quote { color:var(--red); font-style:italic; margin-top:2px;
+  padding:3px 7px; background:#FEF2F2; border-radius:5px; }
+.qa-alert-row .qar-cust { font-size:10px; color:var(--muted); margin-top:3px; }
+.qa-alert-row .qar-acts { display:flex; gap:5px; flex-shrink:0; flex-direction:column; }
+.qa-alert-row .qar-acts button { padding:5px 9px; font-size:10.5px; font-weight:700; border-radius:6px;
+  cursor:pointer; font-family:inherit; border:none; white-space:nowrap; transition:.15s; }
+.qa-alert-row .qar-acts .interv { background:var(--grad-btn); color:#fff; }
+.qa-alert-row .qar-acts .interv:hover { transform:translateY(-1px); }
+.qa-alert-row .qar-acts .ignore { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.qa-alert-row.handled { opacity:.55; }
+.qa-alert-row.handled .qar-acts { display:none; }
+.qa-alert-row .qar-state { font-size:10.5px; padding:4px 9px; border-radius:5px; font-weight:700;
+  display:none; align-self:center; }
+.qa-alert-row.handled-interv .qar-state { display:inline-block; background:rgba(24,185,122,.12); color:var(--green); }
+.qa-alert-row.handled-ignore .qar-state { display:inline-block; background:#EEF0FB; color:var(--muted); }
+
+/* 右: 陪练 */
+.train-panel { background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px;
+  display:flex; flex-direction:column; }
+.train-head { display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+.train-head .tnh-tt { font-size:13px; font-weight:800; color:var(--ink); flex:1; }
+.train-head .tnh-score { font-size:11px; padding:3px 9px; background:linear-gradient(90deg,var(--brand),var(--purple));
+  color:#fff; border-radius:6px; font-weight:800; }
+
+.train-scene-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:7px; margin-bottom:11px; }
+.train-scene { padding:9px 8px; background:#F8F9FE; border:1px solid var(--line-2); border-radius:9px;
+  text-align:center; cursor:pointer; transition:.15s; }
+.train-scene:hover { border-color:var(--brand); transform:translateY(-1px); }
+.train-scene.cur { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); border-color:transparent; color:#fff; }
+.train-scene .tns-ico { font-size:18px; margin-bottom:3px; }
+.train-scene .tns-tt { font-size:10.5px; font-weight:700; color:var(--ink); }
+.train-scene.cur .tns-tt { color:#fff; }
+.train-scene .tns-passed { font-size:9px; color:var(--green); font-weight:800; margin-top:2px; }
+.train-scene .tns-passed::before { content:"✓ 通过 "; }
+.train-scene.cur .tns-passed { color:#2BD9A8; }
+
+.train-diff-row { display:flex; align-items:center; gap:9px; margin-bottom:11px; padding:8px 11px;
+  background:#F8F9FE; border-radius:9px; border:1px solid var(--line-2); }
+.train-diff-row .tdr-lbl { font-size:11px; font-weight:700; color:var(--ink-2); flex-shrink:0; }
+.train-diff-row .tdr-pills { display:flex; gap:5px; }
+.train-diff-pill { padding:4px 11px; font-size:10.5px; font-weight:700; border-radius:5px;
+  background:#fff; color:var(--ink-2); border:1px solid var(--line-2); cursor:pointer; transition:.15s;
+  font-family:inherit; }
+.train-diff-pill:hover { border-color:var(--brand); color:var(--brand); }
+.train-diff-pill.cur { background:var(--grad-btn); color:#fff; border-color:transparent; }
+
+.train-chat { flex:1; min-height:280px; background:#F8F9FE; border:1px solid var(--line-2); border-radius:9px;
+  padding:11px; overflow-y:auto; display:flex; flex-direction:column; gap:9px; margin-bottom:9px; }
+.train-bubble { display:flex; gap:7px; align-items:flex-end; max-width:80%; }
+.train-bubble .tb-ava { width:24px; height:24px; border-radius:50%; display:grid; place-items:center;
+  font-size:11px; font-weight:800; flex-shrink:0; }
+.train-bubble .tb-text { padding:7px 11px; border-radius:10px; font-size:11.5px; line-height:1.55; }
+.train-bubble.cust { align-self:flex-start; }
+.train-bubble.cust .tb-ava { background:#EEF0FB; color:var(--ink-2); }
+.train-bubble.cust .tb-text { background:#fff; border:1px solid var(--line-2); color:var(--ink); }
+.train-bubble.csr { align-self:flex-end; flex-direction:row-reverse; }
+.train-bubble.csr .tb-ava { background:linear-gradient(135deg,#5A5BF0,#9A4DFF); color:#fff; }
+.train-bubble.csr .tb-text { background:var(--grad-btn); color:#fff; }
+.train-bubble.fb { align-self:stretch; max-width:100%; }
+.train-bubble.fb .tb-ava { display:none; }
+.train-bubble.fb .tb-text { background:linear-gradient(180deg,#F0FDF4,#E9F9F1);
+  border-left:3px solid var(--green); color:var(--ink); font-size:11px; padding:7px 11px; border-radius:7px; }
+.train-bubble.fb.bad .tb-text { background:linear-gradient(180deg,#FEF2F2,#FFEBEC); border-left-color:var(--red); }
+.train-bubble.fb .tb-fb-tt { font-size:10px; font-weight:800; color:var(--green); letter-spacing:.04em; margin-bottom:3px; }
+.train-bubble.fb.bad .tb-fb-tt { color:var(--red); }
+
+.train-input { display:flex; gap:7px; }
+.train-input input { flex:1; padding:9px 12px; border:1px solid var(--line-2); border-radius:9px;
+  font-size:12px; font-family:inherit; outline:none; }
+.train-input input:focus { border-color:var(--brand); box-shadow:0 0 0 3px rgba(90,91,240,.1); }
+.train-input button { padding:9px 16px; font-size:12px; font-weight:700; background:var(--grad-btn);
+  color:#fff; border:none; border-radius:9px; cursor:pointer; font-family:inherit; }
+.train-input button:hover { transform:translateY(-1px); }
+
+/* ============ Board 6: 投诉热点 + 知识库 GAP ============ */
+.insight-shell { display:flex; flex-direction:column; gap:11px; }
+.insight-top { display:grid; grid-template-columns: 1.3fr 1fr; gap:11px; }
+.complaint-card { background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px;
+  position:relative; }
+.cc-head { display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+.cc-head .cch-tt { font-size:13px; font-weight:800; color:var(--ink); flex:1; }
+.cc-head .cch-tabs { display:flex; gap:3px; background:#F8F9FE; padding:3px; border-radius:7px; }
+.cc-head .cch-tab { padding:5px 11px; font-size:11px; font-weight:700; border:none; background:transparent;
+  color:var(--ink-2); border-radius:5px; cursor:pointer; font-family:inherit; }
+.cc-head .cch-tab.cur { background:var(--grad-btn); color:#fff; }
+
+.complaint-clusters { display:flex; flex-direction:column; gap:9px; }
+.cluster-group { padding:11px 13px; border-radius:11px; background:linear-gradient(135deg,#FAFBFF,#fff);
+  border:1px solid var(--line-2); }
+.cluster-group.prod { border-left:4px solid var(--red); }
+.cluster-group.serv { border-left:4px solid var(--amber); }
+.cluster-group.logis { border-left:4px solid #00C2D8; }
+.cluster-group.price { border-left:4px solid #9A4DFF; }
+.cg-head { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+.cg-head .cgh-tt { font-size:12.5px; font-weight:800; color:var(--ink); }
+.cg-head .cgh-cnt { font-size:12px; padding:2px 8px; border-radius:5px; font-weight:800; }
+.cluster-group.prod .cgh-cnt { background:#FEF2F2; color:var(--red); }
+.cluster-group.serv .cgh-cnt { background:#FFF4E5; color:var(--amber); }
+.cluster-group.logis .cgh-cnt { background:rgba(0,194,216,.12); color:#00A8C6; }
+.cluster-group.price .cgh-cnt { background:rgba(154,77,255,.12); color:var(--purple); }
+.cg-head .cgh-trend { font-size:11px; margin-left:auto; font-weight:700; }
+.cg-head .cgh-trend.up { color:var(--red); }
+.cg-head .cgh-trend.down { color:var(--green); }
+.cg-subs { display:flex; flex-direction:column; gap:5px; margin-top:7px; }
+.cg-sub { display:flex; align-items:center; gap:7px; padding:5px 9px; background:#fff;
+  border:1px solid rgba(0,0,0,.05); border-radius:7px; font-size:11px; cursor:pointer; transition:.15s; }
+.cg-sub:hover { background:#F8F9FE; border-color:var(--brand); }
+.cg-sub .cgs-name { color:var(--ink-2); flex:1; }
+.cg-sub .cgs-name b { color:var(--ink); }
+.cg-sub .cgs-cnt { font-size:11px; font-weight:800; color:var(--brand); }
+.cg-sub .cgs-bar { width:60px; height:5px; background:#EEF0FB; border-radius:999px; overflow:hidden; }
+.cg-sub .cgs-bar i { display:block; height:100%; background:var(--grad-btn); }
+
+/* 流失原因 */
+.churn-card { background:#fff; border:1px solid var(--line); border-radius:13px; padding:14px; }
+.churn-row { display:flex; align-items:center; gap:9px; padding:8px 10px; background:#F8F9FE;
+  border-left:3px solid var(--c,var(--red)); border-radius:8px; margin-bottom:6px;
+  font-size:11.5px; cursor:pointer; transition:.15s; }
+.churn-row:hover { background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.churn-row .chr-reason { flex:1; }
+.churn-row .chr-reason b { color:var(--ink); }
+.churn-row .chr-reason small { display:block; color:var(--muted); margin-top:2px; font-size:10px; }
+.churn-row .chr-cnt { font-size:14px; font-weight:800; color:var(--c,var(--red)); }
+.churn-row .chr-pct { font-size:11px; color:var(--muted); margin-left:3px; font-weight:600; }
+
+/* 知识库 GAP */
+.kb-gap-card { background:#fff; border:1px solid var(--line); border-radius:13px; padding:0; overflow:hidden; }
+.kb-gap-head { padding:11px 14px; border-bottom:1px solid var(--line); background:#F8F9FE; }
+.kb-gap-head .kgh-tt { font-size:13px; font-weight:800; color:var(--ink); }
+.kb-gap-head .kgh-sub { font-size:11px; color:var(--muted); margin-top:3px; }
+.kb-gap-list { padding:0; }
+.kb-gap-row { padding:13px 16px; border-bottom:1px dashed var(--line); display:grid;
+  grid-template-columns: 1fr 80px 60px 130px; gap:11px; align-items:center; transition:.15s; }
+.kb-gap-row:last-child { border-bottom:none; }
+.kb-gap-row.adopted { opacity:.55; background:#F8F9FE; }
+.kb-gap-row .kgr-q { font-size:12px; font-weight:700; color:var(--ink); line-height:1.5; }
+.kb-gap-row .kgr-q small { display:block; font-size:10.5px; color:var(--muted); font-weight:500; margin-top:3px;
+  font-style:italic; }
+.kb-gap-row .kgr-cnt { font-size:15px; font-weight:800; color:var(--brand); text-align:center; }
+.kb-gap-row .kgr-cnt small { font-size:9.5px; color:var(--muted); font-weight:500; display:block; margin-top:1px; }
+.kb-gap-row .kgr-dept { font-size:10.5px; padding:3px 8px; background:#EEF0FB; color:var(--ink-2);
+  border-radius:5px; font-weight:700; text-align:center; }
+.kb-gap-row .kgr-acts { display:flex; gap:5px; }
+.kb-gap-row .kgr-acts button { padding:6px 11px; font-size:10.5px; font-weight:700; border-radius:7px;
+  cursor:pointer; font-family:inherit; transition:.15s; white-space:nowrap; }
+.kb-gap-row .kgr-acts .adopt { background:var(--grad-btn); color:#fff; border:none;
+  box-shadow:0 3px 8px rgba(90,91,240,.25); }
+.kb-gap-row .kgr-acts .adopt:hover { transform:translateY(-1px); }
+.kb-gap-row .kgr-acts .skip { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.kb-gap-row .kgr-acts .skip:hover { color:var(--red); border-color:var(--red); }
+.kb-gap-row .kgr-state { font-size:11px; font-weight:700; color:var(--green); text-align:center;
+  padding:5px 9px; background:rgba(24,185,122,.12); border-radius:6px; }
 </style>
 </head>
 <body>
@@ -2800,11 +3444,6 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
       <div class="s-meta"><div class="s-name">销冠AI助手</div><div class="s-desc">线索到成交 · 全流程</div></div>
       <span class="s-badge b-on">运行中</span>
     </div>
-    <div class="s-item locked" data-view="legal" data-title="法务AI助手 · 风险问答与法规咨询" data-toast="⚖️「法务AI助手」未开通 · ¥2,500/月起 · 法规问答 + 内部合规咨询">
-      <span class="s-icon" style="--tint:#F1EBFF">⚖️</span>
-      <div class="s-meta"><div class="s-name">法务AI助手</div><div class="s-desc">法规问答 · 合规咨询</div></div>
-      <span class="s-badge b-lock">🔓 解锁</span>
-    </div>
     <div class="s-item" data-view="contract" data-title="合同审查助手 · 全生命周期 AI 赋能">
       <span class="s-icon" style="--tint:#FFEFF2">📜</span>
       <div class="s-meta"><div class="s-name">合同审查助手</div><div class="s-desc">秒解析 · 风险雷达 · AI 谈判 · 履行</div></div>
@@ -2815,10 +3454,10 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
       <div class="s-meta"><div class="s-name">HR智能助手</div><div class="s-desc">招聘 · 算薪 · 流失预警</div></div>
       <span class="s-badge b-on">运行中</span>
     </div>
-    <div class="s-item locked" data-view="cs" data-title="客服 7×24 助手 · 智能分诊与夜班值守" data-toast="💬「客服 7×24 助手」未开通 · ¥3,500/月起 · 替代夜班 + 70% 重复咨询">
+    <div class="s-item" data-view="cs" data-title="客服AI助手 · 全流程 AI 赋能">
       <span class="s-icon" style="--tint:#E6F8FB">💬</span>
-      <div class="s-meta"><div class="s-name">客服 7×24 助手</div><div class="s-desc">夜班值守 · 智能分诊</div></div>
-      <span class="s-badge b-lock">🔓 解锁</span>
+      <div class="s-meta"><div class="s-name">客服AI助手</div><div class="s-desc">分诊·副驾·夜班·工单·质检·投诉</div></div>
+      <span class="s-badge b-on">运行中</span>
     </div>
     <div class="s-item locked" data-view="pmo" data-title="项目交付管控 · 节点预警与自动复盘" data-toast="📋「项目交付管控助手」未开通 · ¥3,000/月起 · 节点预警 + 自动复盘">
       <span class="s-icon" style="--tint:#FFF4E5">📋</span>
@@ -4188,62 +4827,6 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 
 
 
-      <!-- ============ 视图:法务AI助手 (占位 · 后续单独开发) ============ -->
-      <section class="view" id="view-legal">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#F1EBFF">⚖️</span>法务AI助手</h2>
-            <p>法规问答 · 合规咨询 · 风险研判(独立模块,后续开发)</p>
-          </div>
-          <div class="unlock-banner">
-            <div class="ub-left">
-              <span class="ub-ico">🔓</span>
-              <div>
-                <div class="ub-tt">未开通 · 当前为演示模式</div>
-                <div class="ub-sub">¥3,000/月起 · 替代 50% 初级法务工作 · 已为 200+ 企业拦截关键风险</div>
-              </div>
-            </div>
-            <div class="ub-right">
-              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
-            </div>
-          </div>
-          <div class="pgrid g3">
-            <div class="pcard mini-stat"><div class="ms-num">187</div><div class="ms-label">本月已审合同</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">23</div><div class="ms-label">拦截风险条款</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">↓50%</div><div class="ms-label">平均审查时长</div></div>
-          </div>
-          <div class="pcard mt">
-            <div class="pc-head"><h3>近期高风险合同</h3><span class="pc-extra">已标注 · 待复核</span></div>
-            <table class="table">
-              <thead><tr><th>合同名称</th><th>对方</th><th>风险等级</th><th>关键风险</th><th>建议</th></tr></thead>
-              <tbody>
-                <tr><td>设备采购合同 #2026-0612</td><td>苏州 XX 自动化</td><td><span class="pill pill-amber">中</span></td><td>付款条款无质保金扣留</td><td>建议加 10% 质保金</td></tr>
-                <tr><td>SaaS 服务合同 #2026-0610</td><td>某 SaaS 厂商</td><td><span class="pill" style="background:#FEF2F2;color:#E5484D">高</span></td><td>数据所有权未明确归属</td><td>必须补充第 12.3 条</td></tr>
-                <tr><td>劳动合同 #2026-0609</td><td>新入职员工</td><td><span class="pill pill-amber">中</span></td><td>竞业限制范围过宽</td><td>限制至同类业务即可</td></tr>
-                <tr><td>租赁合同 #2026-0607</td><td>东莞物业</td><td><span class="pill pill-green">低</span></td><td>提前解约条款合理</td><td>可直接签订</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>条款风险库</h3><span class="pc-extra">本月 Top 5 高频风险</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">①</span><div class="lr-main"><div class="lr-tt">付款条件不对等</div><div class="lr-sub">出现 12 次 · 多见于设备采购</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">②</span><div class="lr-main"><div class="lr-tt">违约责任过轻</div><div class="lr-sub">出现 9 次 · 多见于服务外包</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">③</span><div class="lr-main"><div class="lr-tt">知识产权归属不清</div><div class="lr-sub">出现 7 次 · 多见于研发委托</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">④</span><div class="lr-main"><div class="lr-tt">数据出境合规缺失</div><div class="lr-sub">出现 5 次 · 多见于 SaaS</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⑤</span><div class="lr-main"><div class="lr-tt">不可抗力定义过窄</div><div class="lr-sub">出现 4 次 · 多见于工程</div></div></div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>模板库</h3><span class="pc-extra">59 个 · 持续更新</span></div>
-              <div class="pc-body" style="font-size:12.5px;color:var(--muted)">
-                按场景分类:采购 / 销售 / 服务 / 劳动 / 租赁 / 保密 / 合资 / 投资<br/>
-                每个模板内含:必备条款清单、可选条款、风险提示、谈判要点。<br/><br/>
-                <button class="btn-grad js-toast" data-toast="已生成"汽配企业 OEM 加工合同模板",含 23 条核心条款">＋ 生成新模板</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!-- ============ 视图:合同审查助手 (Agent 流式工作流 · 2 板块) ============ -->
       <section class="view" id="view-contract">
@@ -6224,59 +6807,819 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 
 
 
-      <!-- ============ 视图:客服 7×24 助手 ============ -->
+      <!-- ============ 视图:客服AI助手 (6 板块) ============ -->
       <section class="view" id="view-cs">
-        <div class="page">
-          <div class="page-head">
-            <h2><span class="ph-ico" style="--tint:#E6F8FB">💬</span>客服 7×24 助手</h2>
-            <p>智能分诊 · 夜班值守 · 知识自答</p>
+        <div class="sales-shell">
+          <div class="stage-nav" id="csNav">
+            <button class="stage-pill active" data-stage="triage"><b>1</b>📥 智能分诊台</button>
+            <button class="stage-pill" data-stage="copilot"><b>2</b>💬 AI 副驾会话</button>
+            <button class="stage-pill" data-stage="night"><b>3</b>🌙 24×7 夜班</button>
+            <button class="stage-pill" data-stage="ticket"><b>4</b>🎫 工单流转</button>
+            <button class="stage-pill" data-stage="qa"><b>5</b>🎯 质检 + 陪练</button>
+            <button class="stage-pill" data-stage="insight"><b>6</b>📊 投诉与知识</button>
           </div>
-          <div class="unlock-banner">
-            <div class="ub-left">
-              <span class="ub-ico">🔓</span>
-              <div>
-                <div class="ub-tt">未开通 · 当前为演示模式</div>
-                <div class="ub-sub">¥3,500/月起 · 替代夜班 + 70% 重复咨询 · 一年省 1-2 个客服人力</div>
+          <div class="stage-body">
+
+            <!-- ===== 1 智能分诊台 ===== -->
+            <div class="stage active" id="cs-triage"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">📥</span>
+                <div class="as-txt">今日 8:32 起进件 <b data-counter="todayIntake">487</b> 单 · AI 0.8s 完成<b>意图+情绪+VIP+紧急度+可解度</b>五维分诊 · AI 自动闭环 <b id="csAutoRate">64%</b> · 人工接手 <b id="csManualRate">36%</b> · 平均响应 <b>2.4 分钟</b>(行业基准 28 分)。拖下方策略滑块可<b>实时重排</b>整个进件池。</div>
               </div>
-            </div>
-            <div class="ub-right">
-              <button class="btn-grad js-toast" data-toast="✅ 已通知顶呱呱顾问与您联系开通,1 个工作日内回电">立即解锁</button>
-            </div>
-          </div>
-          <div class="pgrid g3">
-            <div class="pcard mini-stat"><div class="ms-num">73%</div><div class="ms-label">自动解决率</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">0.8s</div><div class="ms-label">平均响应时长</div></div>
-            <div class="pcard mini-stat"><div class="ms-num">4.8/5</div><div class="ms-label">客户满意度</div></div>
-          </div>
-          <div class="pcard mt">
-            <div class="pc-head"><h3>实时对话流</h3><span class="pill pill-green">在线 · 已接入企微/网页/APP</span></div>
-            <div class="pc-body" style="font-size:12.5px">
-              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户A:订单 #20260615001 物流停了 3 天?</div><div class="lr-sub">AI:已为您查询,该订单 6/13 在杭州中转站异常,预计 6/16 恢复配送。需要我帮您催单或申请补偿吗?</div></div><span class="pill pill-green">已解决</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#E9F9F1">🟢</span><div class="lr-main"><div class="lr-tt">客户B:产品如何升级到企业版?</div><div class="lr-sub">AI:已为您整理 3 种升级方案与价差,已发到您留的邮箱。如需顾问 1v1 介绍,可现在转人工</div></div><span class="pill pill-green">已解决</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">🟡</span><div class="lr-main"><div class="lr-tt">客户C:能给我个 5 折优惠吗?</div><div class="lr-sub">AI:涉及价格让步,已转您的专属客户经理王磊,1 小时内回复</div></div><span class="pill pill-amber">转人工</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FEF2F2">🔴</span><div class="lr-main"><div class="lr-tt">客户D:产品报错了截图发您</div><div class="lr-sub">AI:截图已转工程团队,创建紧急工单 #INC-2026-7842,工程师 30 分钟内联系您</div></div><span class="pill" style="background:#FEF2F2;color:#E5484D">紧急工单</span></div>
-            </div>
-          </div>
-          <div class="pgrid g2 mt">
-            <div class="pcard">
-              <div class="pc-head"><h3>今日工单流水</h3><span class="pc-extra">截至 11:30</span></div>
-              <div class="pc-body" style="font-size:12.5px">
-                总咨询 <b>238</b> 起 · AI 自动解决 <b style="color:var(--green)">174 起</b>(73%)<br/>
-                转人工 <b style="color:var(--amber)">42 起</b>(18%)· 创建紧急工单 <b style="color:var(--red)">9 起</b>(4%)<br/>
-                <div class="lr-sub" style="white-space:normal;margin-top:8px">📌 AI 解读:今日转人工高于均值 5pp,集中在"5 折优惠""退款政策",建议本周培训销售统一口径。</div>
+
+              <div class="triage-shell">
+                <!-- 左: 实时进件流 -->
+                <div class="triage-pool">
+                  <div class="tp-head">
+                    <div class="tph-tt"><span class="tph-dot"></span>实时进件流 · 最近 10 单</div>
+                    <div class="tph-sub">点任一进件 → 右栏看 AI 分诊全过程</div>
+                  </div>
+                  <div class="tp-list" id="tpList">
+                    <div class="tp-item cur" data-fx="tpPick" data-pid="p1">
+                      <div class="tpi-row1"><span class="tpi-ch wxw">企微</span><span class="tpi-vip">💎钻石</span><span class="tpi-time">刚刚 · 10:48</span></div>
+                      <div class="tpi-name">东莞某模具厂 · 王厂长 · 合作 3 年 · ¥18 万/年</div>
+                      <div class="tpi-msg">我们的 CRM 后台<mark>登录不进去</mark>了 · 4 个员工都登录不上 · 我们急着出报价单!</div>
+                      <div class="tpi-tags"><span class="tpi-tag urgent">紧急</span><span class="tpi-tag post">售后</span></div>
+                      <span class="tpi-pred">AI 推荐: 立即升级工程师</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p2">
+                      <div class="tpi-row1"><span class="tpi-ch wx">微信</span><span class="tpi-time">2 分钟前</span></div>
+                      <div class="tpi-name">新询单 · 苏州 某机加工厂 · 30 人规模</div>
+                      <div class="tpi-msg">你们的 CRM 跟<mark>金蝶能对接</mark>吗?报价多少?</div>
+                      <div class="tpi-tags"><span class="tpi-tag pre">售前</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 推荐: 转销售 + 立即报价</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p3">
+                      <div class="tpi-row1"><span class="tpi-ch tel">400电话</span><span class="tpi-vip gold">金牌</span><span class="tpi-time">5 分钟前</span></div>
+                      <div class="tpi-name">中山 某五金厂 · 李总 · ¥8.6 万/年</div>
+                      <div class="tpi-msg">我上次说的<mark>员工权限分组</mark>怎么还没改好?都过去 3 天了!</div>
+                      <div class="tpi-tags"><span class="tpi-tag cmpl">投诉</span><span class="tpi-tag angry">愤怒</span></div>
+                      <span class="tpi-pred">AI 推荐: 升级主管 + 安抚</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p4">
+                      <div class="tpi-row1"><span class="tpi-ch web">官网</span><span class="tpi-time">7 分钟前</span></div>
+                      <div class="tpi-name">新询单 · 佛山 五金贸易 · 25 人</div>
+                      <div class="tpi-msg">看了你们网站的 ERP 演示视频,想<mark>预约 demo</mark>。</div>
+                      <div class="tpi-tags"><span class="tpi-tag pre">售前</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 自动闭环: 预约 demo</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p5">
+                      <div class="tpi-row1"><span class="tpi-ch wxw">企微</span><span class="tpi-time">12 分钟前</span></div>
+                      <div class="tpi-name">江门 某汽配厂 · 已用 6 月</div>
+                      <div class="tpi-msg">我的<mark>报表导出乱码</mark>了, Excel 打开看不到中文?</div>
+                      <div class="tpi-tags"><span class="tpi-tag post">售后</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 自动闭环: 操作引导</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p6">
+                      <div class="tpi-row1"><span class="tpi-ch eml">邮件</span><span class="tpi-time">18 分钟前</span></div>
+                      <div class="tpi-name">海外询单 · UK · Brown Engineering</div>
+                      <div class="tpi-msg">Hi, do you support <mark>multi-currency</mark> for invoicing? We have customers in EU.</div>
+                      <div class="tpi-tags"><span class="tpi-tag pre">售前</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 自动: 英文回复 + 转海外销售</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p7">
+                      <div class="tpi-row1"><span class="tpi-ch wxw">企微</span><span class="tpi-vip gold">金牌</span><span class="tpi-time">22 分钟前</span></div>
+                      <div class="tpi-name">惠州 某电子厂 · 林经理 · ¥6.4 万/年</div>
+                      <div class="tpi-msg">7 月要<mark>续约</mark>了, 想跟你们谈下能不能给点折扣?</div>
+                      <div class="tpi-tags"><span class="tpi-tag pre">关系</span><span class="tpi-tag calm">询问</span></div>
+                      <span class="tpi-pred">AI 推荐: 转客户成功</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p8">
+                      <div class="tpi-row1"><span class="tpi-ch web">官网</span><span class="tpi-time">31 分钟前</span></div>
+                      <div class="tpi-name">竞品试用 · 测试中</div>
+                      <div class="tpi-msg">用了<mark>某竞品</mark>觉得不行, 你们家是怎么实现移动端同步的?</div>
+                      <div class="tpi-tags"><span class="tpi-tag pre">售前</span><span class="tpi-tag calm">询问</span></div>
+                      <span class="tpi-pred">AI 推荐: 高优转销售</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p9">
+                      <div class="tpi-row1"><span class="tpi-ch wx">微信</span><span class="tpi-time">38 分钟前</span></div>
+                      <div class="tpi-name">深圳 某模具厂 · 老客户</div>
+                      <div class="tpi-msg"><mark>发货时间</mark>多久?</div>
+                      <div class="tpi-tags"><span class="tpi-tag post">售后</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 自动闭环: 物流回复</span>
+                    </div>
+                    <div class="tp-item" data-fx="tpPick" data-pid="p10">
+                      <div class="tpi-row1"><span class="tpi-ch tel">400电话</span><span class="tpi-time">45 分钟前</span></div>
+                      <div class="tpi-name">广州 某印刷厂 · 试用 2 月</div>
+                      <div class="tpi-msg">这个系统的<mark>培训</mark>怎么安排, 我有 8 个员工要上岗。</div>
+                      <div class="tpi-tags"><span class="tpi-tag post">售后</span><span class="tpi-tag calm">平静</span></div>
+                      <span class="tpi-pred">AI 推荐: 转客户成功</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 中: 五维分诊 + 策略 -->
+                <div class="triage-center">
+                  <div class="triage-dim-card">
+                    <div class="tdc-head">🎯 五维分诊统计 · 今日累计 487 单 <small>实时聚合</small></div>
+                    <div class="triage-radar-wrap">
+                      <svg class="triage-radar-svg" viewBox="0 0 260 240">
+                        <g stroke="rgba(90,91,240,.15)" stroke-width="1" fill="none">
+                          <polygon points="130,30 230,90 200,200 60,200 30,90"></polygon>
+                          <polygon points="130,60 200,105 180,180 80,180 60,105"></polygon>
+                          <polygon points="130,90 175,120 165,160 95,160 85,120"></polygon>
+                        </g>
+                        <g stroke="rgba(90,91,240,.25)" stroke-width="1">
+                          <line x1="130" y1="120" x2="130" y2="30"/>
+                          <line x1="130" y1="120" x2="230" y2="90"/>
+                          <line x1="130" y1="120" x2="200" y2="200"/>
+                          <line x1="130" y1="120" x2="60" y2="200"/>
+                          <line x1="130" y1="120" x2="30" y2="90"/>
+                        </g>
+                        <polygon id="csTriRadar" points="130,40 220,98 195,195 80,180 50,105"
+                          fill="rgba(124,92,250,.18)" stroke="#7C5CFA" stroke-width="2"/>
+                        <g fill="#7C5CFA"><circle cx="130" cy="40" r="3.5"/><circle cx="220" cy="98" r="3.5"/>
+                          <circle cx="195" cy="195" r="3.5"/><circle cx="80" cy="180" r="3.5"/><circle cx="50" cy="105" r="3.5"/></g>
+                        <g fill="var(--ink)" font-size="11" font-weight="700">
+                          <text x="130" y="22" text-anchor="middle">紧急度</text>
+                          <text x="246" y="88" text-anchor="middle">VIP</text>
+                          <text x="216" y="222" text-anchor="middle">情绪强度</text>
+                          <text x="44" y="222" text-anchor="middle">复杂度</text>
+                          <text x="14" y="88" text-anchor="middle">投诉率</text>
+                        </g>
+                      </svg>
+                      <div class="triage-dim-bars">
+                        <div class="tdb-row"><span class="tdb-lbl">售前</span><div class="tdb-bar" style="--c:#3A6FE3"><i style="width:42%"></i></div><span class="tdb-cnt">205</span></div>
+                        <div class="tdb-row"><span class="tdb-lbl">售后</span><div class="tdb-bar" style="--c:#D97706"><i style="width:36%"></i></div><span class="tdb-cnt">175</span></div>
+                        <div class="tdb-row"><span class="tdb-lbl">投诉</span><div class="tdb-bar" style="--c:#E5484D"><i style="width:9%"></i></div><span class="tdb-cnt">44</span></div>
+                        <div class="tdb-row"><span class="tdb-lbl">关系</span><div class="tdb-bar" style="--c:#9A4DFF"><i style="width:8%"></i></div><span class="tdb-cnt">39</span></div>
+                        <div class="tdb-row"><span class="tdb-lbl">其他</span><div class="tdb-bar" style="--c:#94A3B8"><i style="width:5%"></i></div><span class="tdb-cnt">24</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="triage-strat">
+                    <div class="ts-head">⚙️ 分诊策略 · 拖滑块 → 实时重排整个进件池</div>
+                    <div class="ts-row">
+                      <label>AI 自闭环度</label>
+                      <input type="range" id="csStratR" min="0" max="100" value="64" step="1">
+                      <div class="ts-val"><span id="csStratV">64</span>%</div>
+                    </div>
+                    <div class="ts-marks"><span>极严 0</span><span>严格 25</span><span>平衡 50</span><span>宽松 75</span><span>极宽 100</span></div>
+                    <div class="ts-impact">
+                      <div class="tsi-cell"><div class="tsi-lbl">AI 自动闭环</div><div class="tsi-val good" id="csImpactAi">312</div><div class="tsi-sub">单 (64%)</div></div>
+                      <div class="tsi-cell"><div class="tsi-lbl">转人工</div><div class="tsi-val warn" id="csImpactMan">175</div><div class="tsi-sub">单 (36%)</div></div>
+                      <div class="tsi-cell"><div class="tsi-lbl">日省人力</div><div class="tsi-val good" id="csImpactSave">¥2,180</div><div class="tsi-sub">≈ 0.7 人</div></div>
+                    </div>
+                    <div class="ts-tip" id="csStratTip"><b>📊 平衡区(40-70%)</b> · 本月历史数据回测中,此区间客户满意度 92%、错单率 1.4%,综合最佳。低于 30% 浪费 AI 能力,高于 80% 错单率快速上升。</div>
+                  </div>
+                </div>
+
+                <!-- 右: 选中进件的 AI 分诊详情 -->
+                <div class="triage-detail" id="csTriDetail">
+                  <!-- 内容由 JS 填充 (依 cur tp-item) -->
+                </div>
               </div>
-            </div>
-            <div class="pcard">
-              <div class="pc-head"><h3>转人工原因 Top 5</h3><span class="pc-extra">本周</span></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">①</span><div class="lr-main"><div class="lr-tt">价格 / 优惠协商</div><div class="lr-sub">占 31%</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">②</span><div class="lr-main"><div class="lr-tt">技术故障复杂场景</div><div class="lr-sub">占 22%</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">③</span><div class="lr-main"><div class="lr-tt">合规 / 隐私问询</div><div class="lr-sub">占 17%</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">④</span><div class="lr-main"><div class="lr-tt">大额退款 / 投诉</div><div class="lr-sub">占 14%</div></div></div>
-              <div class="lrow"><span class="lr-ico" style="--tint:#FFF4E5">⑤</span><div class="lr-main"><div class="lr-tt">定制化需求</div><div class="lr-sub">占 9%</div></div></div>
-            </div>
+            </div></div>
+
+            <!-- ===== 2 AI 副驾会话台 ===== -->
+            <div class="stage" id="cs-copilot"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">💬</span>
+                <div class="as-txt">本月 AI 副驾辅助处理 <b>7,841</b> 次会话 · 客服平均响应时长从 <b>3.2 分</b> → <b>0.8 分</b> · 一线员工不用背 200 页话术库,AI 实时推 3 句给你点。还可一键切换 <b>纯 AI / 人机协同 / 纯人工</b> 模式。</div>
+              </div>
+
+              <div class="copilot-shell">
+                <!-- 左: 进行中会话列表 -->
+                <div class="cs-list">
+                  <div class="cs-list-head">
+                    <span class="csh-tt">进行中会话</span>
+                    <span class="csh-cnt">4</span>
+                  </div>
+                  <div class="cs-list-body" id="csConvList">
+                    <div class="cs-conv cur" data-fx="csPickConv" data-cid="c1">
+                      <div class="csc-row"><span class="csc-name">王厂长 · 东莞模具</span><span class="csc-vip diamond">💎</span></div>
+                      <div class="csc-preview">CRM 登录不进去了,4 个员工都登录不上!</div>
+                      <div class="csc-state"><span class="csc-mode up">已升级</span><span class="csc-time">刚刚</span></div>
+                      <span class="csc-unread">2</span>
+                    </div>
+                    <div class="cs-conv" data-fx="csPickConv" data-cid="c2">
+                      <div class="csc-row"><span class="csc-name">林经理 · 惠州电子</span><span class="csc-vip gold">G</span></div>
+                      <div class="csc-preview">7 月续约,想谈下折扣?</div>
+                      <div class="csc-state"><span class="csc-mode co">协同</span><span class="csc-time">8 分</span></div>
+                    </div>
+                    <div class="cs-conv" data-fx="csPickConv" data-cid="c3">
+                      <div class="csc-row"><span class="csc-name">陈生 · 深圳模具</span><span class="csc-time">12 分</span></div>
+                      <div class="csc-preview">发货时间多久?</div>
+                      <div class="csc-state"><span class="csc-mode ai">AI 自动</span></div>
+                    </div>
+                    <div class="cs-conv" data-fx="csPickConv" data-cid="c4">
+                      <div class="csc-row"><span class="csc-name">Brown · UK 询单</span><span class="csc-time">18 分</span></div>
+                      <div class="csc-preview">Multi-currency support?</div>
+                      <div class="csc-state"><span class="csc-mode ai">AI 自动</span><span style="font-size:9px;color:var(--brand)">🌐 EN</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 中: 对话流 -->
+                <div class="cs-conv-pane">
+                  <div class="ccp-head">
+                    <div class="cph-ava" id="cpAva">王</div>
+                    <div class="cph-tt">
+                      <div class="cph-name" id="cpName">王厂长 · 东莞某模具厂</div>
+                      <div class="cph-sub" id="cpSub">💎 钻石客户 · 合作 3 年 · ¥18 万/年 · LTV ¥58 万</div>
+                    </div>
+                    <div class="cph-modes">
+                      <button class="cph-mode-btn" data-fx="csMode" data-mode="ai">纯 AI</button>
+                      <button class="cph-mode-btn cur" data-fx="csMode" data-mode="co">人机协同</button>
+                      <button class="cph-mode-btn" data-fx="csMode" data-mode="man">纯人工</button>
+                    </div>
+                  </div>
+                  <div class="ccp-stream" id="cpStream">
+                    <!-- 由 JS 填充 -->
+                  </div>
+                  <div class="ccp-input">
+                    <div class="ccp-input-row">
+                      <textarea id="cpInput" placeholder="点右栏 AI 建议自动填入, 或自己输入..."></textarea>
+                      <button class="ccp-input-send" id="cpSend">▶ 发送</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 右: AI 副驾 (3 tab) -->
+                <div class="cs-side">
+                  <div class="cs-side-tabs">
+                    <button class="cs-side-tab cur" data-fx="csSideTab" data-pane="sug">🤖 AI 建议</button>
+                    <button class="cs-side-tab" data-fx="csSideTab" data-pane="cust">👤 客户档案</button>
+                    <button class="cs-side-tab" data-fx="csSideTab" data-pane="kb">📚 知识检索</button>
+                  </div>
+                  <div class="cs-side-pane cur" data-pane="sug" id="cpSugPane">
+                    <!-- 由 JS 填充 3 条建议 -->
+                  </div>
+                  <div class="cs-side-pane" data-pane="cust" id="cpCustPane">
+                    <!-- 由 JS 填充 -->
+                  </div>
+                  <div class="cs-side-pane" data-pane="kb" id="cpKbPane">
+                    <div class="kb-input2">
+                      <input type="text" id="cpKbInput" placeholder="比如:登录问题 / 续约折扣 / 金蝶对接...">
+                      <button id="cpKbSearch">检索</button>
+                    </div>
+                    <div id="cpKbResults"></div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- ===== 3 24×7 夜班 ===== -->
+            <div class="stage" id="cs-night"><div class="page">
+              <div class="night-shell">
+                <div class="night-head">
+                  <div class="nh-moon">🌙</div>
+                  <div class="nh-tt">24×7 AI 夜班值守 · 今晚 22:00 起接管<small>客户夜里咨询 → AI 第一时间接待 · 能解决的当场解决 · 解决不了的留言并升级 · 关键决策客户提醒老板</small></div>
+                  <div class="night-toggle" id="csNightToggle">
+                    <span class="nt-led"></span><span class="nt-tt">夜班 已启动</span>
+                  </div>
+                </div>
+                <div class="night-stat">
+                  <div class="night-stat-cell">
+                    <div class="nsc-lbl">今夜进件</div>
+                    <div class="nsc-val" id="csNightIntake">42</div>
+                    <div class="nsc-sub">单 · 22:00 - 现在 04:36</div>
+                  </div>
+                  <div class="night-stat-cell">
+                    <div class="nsc-lbl">AI 自动闭环</div>
+                    <div class="nsc-val good" id="csNightSolved">31</div>
+                    <div class="nsc-sub">单 (74%) · 客户已满意</div>
+                  </div>
+                  <div class="night-stat-cell">
+                    <div class="nsc-lbl">转早班处理</div>
+                    <div class="nsc-val warn" id="csNightRelay">9</div>
+                    <div class="nsc-sub">单 · 8:00 自动派单</div>
+                  </div>
+                  <div class="night-stat-cell">
+                    <div class="nsc-lbl">紧急已升级</div>
+                    <div class="nsc-val" style="color:#FF7E7E" id="csNightUp">2</div>
+                    <div class="nsc-sub">单 · 钉钉已通知主管</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="night-log">
+                <div class="night-log-head">
+                  <div class="nlh-tt">📋 今夜 AI 处理记录 · 点单条看完整对话 + 决策推理</div>
+                  <div class="nlh-tabs">
+                    <button class="night-log-tab cur" data-fx="csNightTab" data-tab="today">今夜</button>
+                    <button class="night-log-tab" data-fx="csNightTab" data-tab="yest">昨夜</button>
+                    <button class="night-log-tab" data-fx="csNightTab" data-tab="week">本周</button>
+                  </div>
+                </div>
+                <div class="night-log-list" id="csNightList">
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n1">
+                    <div class="nlr-time">02:35</div>
+                    <div class="nlr-cust"><b>Brown Engineering</b><small>UK · 海外询单</small></div>
+                    <div class="nlr-q">"Does your CRM support multi-currency invoicing for EU customers?"</div>
+                    <div class="nlr-action solved">AI 已解决</div>
+                    <div class="nlr-conf">94%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n2">
+                    <div class="nlr-time">02:58</div>
+                    <div class="nlr-cust"><b>张总 · 中山某机械</b><small>金牌客户 · ¥6.8 万</small></div>
+                    <div class="nlr-q">"我们的 CRM 显示数据库错误 1042,刚才好好的!"</div>
+                    <div class="nlr-action upgrade">紧急升级</div>
+                    <div class="nlr-conf">98%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n3">
+                    <div class="nlr-time">03:12</div>
+                    <div class="nlr-cust"><b>访客 IP 220.181.x</b><small>试用询单</small></div>
+                    <div class="nlr-q">"小型工厂 30 人,你们 CRM 价格大概多少?有教育优惠吗?"</div>
+                    <div class="nlr-action solved">AI 已解决</div>
+                    <div class="nlr-conf">91%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n4">
+                    <div class="nlr-time">03:38</div>
+                    <div class="nlr-cust"><b>李工 · 东莞某电子</b><small>试用 18 天</small></div>
+                    <div class="nlr-q">"报表里的客户字段能自定义吗?我想加几个公司专属字段。"</div>
+                    <div class="nlr-action solved">AI 已解决</div>
+                    <div class="nlr-conf">96%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n5">
+                    <div class="nlr-time">04:05</div>
+                    <div class="nlr-cust"><b>赵生 · 深圳某五金</b><small>老客户 · 2 年</small></div>
+                    <div class="nlr-q">"我员工反映报表导出后 Excel 看是乱码, 是不是编码问题?"</div>
+                    <div class="nlr-action solved">AI 已解决</div>
+                    <div class="nlr-conf">99%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n6">
+                    <div class="nlr-time">04:18</div>
+                    <div class="nlr-cust"><b>访客 · 抖音私信</b><small>询单</small></div>
+                    <div class="nlr-q">"你们这套对接淘宝/京东订单同步吗?我现在 4 个店铺。"</div>
+                    <div class="nlr-action relay">转早班</div>
+                    <div class="nlr-conf">68%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n7">
+                    <div class="nlr-time">04:30</div>
+                    <div class="nlr-cust"><b>钱厂长 · 佛山某五金</b><small>钻石客户</small></div>
+                    <div class="nlr-q">"明早我要给老板做汇报, 帮我导一份本月销售趋势图表!"</div>
+                    <div class="nlr-action upgrade">紧急升级</div>
+                    <div class="nlr-conf">99%<small>置信</small></div>
+                  </div>
+                  <div class="night-log-row" data-fx="csNightPick" data-nid="n8">
+                    <div class="nlr-time">04:36</div>
+                    <div class="nlr-cust"><b>访客 · 网页留言</b><small>询单</small></div>
+                    <div class="nlr-q">"贵司有制造业的成功案例可以分享吗? 行业老大用过吗?"</div>
+                    <div class="nlr-action solved">AI 已解决</div>
+                    <div class="nlr-conf">88%<small>置信</small></div>
+                  </div>
+                </div>
+                <div class="night-detail" id="csNightDetail"></div>
+              </div>
+
+              <div class="night-conf">
+                <div class="nc-row">
+                  <div class="nc-lbl">⚙️ AI 自闭环置信度阈值</div>
+                  <input type="range" id="csNightConf" min="50" max="99" value="85" step="1">
+                  <div class="nc-val"><span id="csNightConfV">85</span>%</div>
+                </div>
+                <div class="nc-tip" id="csNightConfTip">
+                  <b>当前阈值 85%</b> · AI 置信度 ≥ 85% 自动闭环回答,&lt; 85% 留言转早班。今夜回测:31 单自动闭环 / 9 单转早班 / 2 单紧急升级。阈值<b>调低 → 更多自动闭环,客户夜里能立即得到答案</b>;阈值<b>调高 → 更稳妥,但更多人留言到早晨才有人接</b>。
+                </div>
+              </div>
+            </div></div>
+
+            <!-- ===== 4 工单跨部门流转 ===== -->
+            <div class="stage" id="cs-ticket"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">🎫</span>
+                <div class="as-txt">客服处理不了的转下游(工程师/财务/物流/老板),AI 全程盯流转。本月 <b data-counter="tkTotal">186</b> 单工单 · 在途 <b id="tkPending">14</b> · 超时预警 <b id="tkOver">3</b> · AI 已自动催办 <b id="tkUrged">11</b> 次 · 客户进度通知 <b>已发 67</b> 条。</div>
+              </div>
+
+              <div class="ticket-top">
+                <div class="ticket-stats">
+                  <div class="ts-cell" style="--c:#5A5BF0"><div class="tsc-lbl">在途工单</div><div class="tsc-val" id="tkStatPending">14</div><div class="tsc-sub">各部门处理中</div></div>
+                  <div class="ts-cell" style="--c:#E5484D"><div class="tsc-lbl">⚠ 已超时</div><div class="tsc-val danger" id="tkStatOver">3</div><div class="tsc-sub">SLA 已破</div></div>
+                  <div class="ts-cell" style="--c:#D97706"><div class="tsc-lbl">⏰ 临期</div><div class="tsc-val warn" id="tkStatWarn">4</div><div class="tsc-sub">2 小时内到期</div></div>
+                  <div class="ts-cell" style="--c:#18B97A"><div class="tsc-lbl">今日已解决</div><div class="tsc-val good" id="tkStatDone">23</div><div class="tsc-sub">客户已确认 19</div></div>
+                </div>
+                <div class="ticket-sla">
+                  <div class="tsla-head">⚙️ SLA 超时阈值调节</div>
+                  <div class="tsla-row">
+                    <input type="range" id="tkSlaR" min="2" max="48" value="24" step="1">
+                    <div class="tsla-val"><span id="tkSlaV">24</span>h</div>
+                  </div>
+                  <div class="tsla-tip" id="tkSlaTip">超过 <b>24h</b> 未处理 → AI 自动催办 + 临期预警 + 升级老板 (调高 → 减少误报 · 调低 → 更早干预)</div>
+                </div>
+              </div>
+
+              <div class="ticket-list" id="tkList">
+                <!-- 工单 1: 钻石 - 超时 -->
+                <div class="ticket-card overdue" data-tid="t1">
+                  <div class="tc-head">
+                    <span class="tch-id">TK-2026-0613-01</span>
+                    <span class="tch-cust">王厂长 · <b>东莞某模具厂</b> · CRM 后台登录失败(4 员工)</span>
+                    <span class="tch-vip diamond">💎钻石</span>
+                    <span class="tch-sla danger">⚠ 已超时 5h</span>
+                  </div>
+                  <div class="tc-q"><b>问题:</b>4 个员工同时登录失败,后台显示 502 错误。客户急用,影响出报价单。原工单 6/13 13:24 创建,SLA 24h。</div>
+                  <div class="tc-flow">
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">13:24</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转工程师</div><div class="tcs-meta">13:25 AI 自动</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">工程师受理</div><div class="tcs-meta">14:02 李工</div></div>
+                    <div class="tc-step alert"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">⚠ 处理中超时</div><div class="tcs-meta">已 21h</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户确认</div></div>
+                  </div>
+                  <div class="tc-ai">
+                    <div class="tca-ico">🤖</div>
+                    <div class="tca-body"><b>AI 已自动催办 3 次</b>:① 13:24 + 24h(超时点)催 · ② 16:00 升级二级催办 · ③ 18:30 钉钉直推工程总监 + 老板。<b>诊断:</b>李工已被分配 4 个紧急单,精力分散。<small>AI 建议:① 直接升级 CTO 介入 ② 同时启动备用工程师组接管 ③ 客户已 0.5 小时未回复消息,联系给客户致歉电话</small></div>
+                  </div>
+                  <div class="tc-acts">
+                    <button class="urge" data-fx="tkAct" data-tid="t1" data-msg="✅ AI 已直推 CTO + 备用工程师组接管 · 客户致歉电话已发起">⚡ 升级 CTO + 备用组</button>
+                    <button class="esc" data-fx="tkAct" data-tid="t1" data-msg="✅ 已通知老板介入处置">紧急升级老板</button>
+                    <button class="note" data-fx="tkAct" data-tid="t1" data-msg="备注已记录 · AI 持续跟进">备注后续跟进</button>
+                  </div>
+                </div>
+
+                <!-- 工单 2: 金牌 - 临期 -->
+                <div class="ticket-card warn-overdue" data-tid="t2">
+                  <div class="tc-head">
+                    <span class="tch-id">TK-2026-0613-02</span>
+                    <span class="tch-cust">李总 · 中山某五金厂 · 员工权限分组未生效</span>
+                    <span class="tch-vip gold">G金牌</span>
+                    <span class="tch-sla warn">⏰ 还剩 1h 50m</span>
+                  </div>
+                  <div class="tc-q"><b>问题:</b>客户 6/11 提的权限分组优化需求,工程师承诺 3 天内,马上到期未交付。客户已两次催。</div>
+                  <div class="tc-flow">
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">6/11 9:10</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转工程师</div><div class="tcs-meta">9:11 AI 自动</div></div>
+                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">工程师处理中</div><div class="tcs-meta">张工 · 60% 完成</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">客户验收</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">已完成</div></div>
+                  </div>
+                  <div class="tc-ai">
+                    <div class="tca-ico">🤖</div>
+                    <div class="tca-body"><b>AI 已检测:</b>张工今天预计还有 4h 工作量, 到期前可完成。但客户已 2 次催。<b>AI 建议:</b>① 主动告知客户预计完成时间("张工正在做收尾测试,预计今晚 18:00 提交") · ② 启动 1 名工程师协助加速。</div>
+                  </div>
+                  <div class="tc-acts">
+                    <button class="urge" data-fx="tkAct" data-tid="t2" data-msg="✅ AI 已给客户发进度通知 + 安排协助工程师">⚡ AI 通知客户 + 加 1 工程师</button>
+                    <button class="note" data-fx="tkAct" data-tid="t2" data-msg="已让张工自己处理">交张工自处理</button>
+                  </div>
+                </div>
+
+                <!-- 工单 3: 跨财务部 -->
+                <div class="ticket-card" data-tid="t3" style="--c:#9A4DFF">
+                  <div class="tc-head">
+                    <span class="tch-id">TK-2026-0612-08</span>
+                    <span class="tch-cust">某小厂 · 退款 ¥6,800 申请</span>
+                    <span class="tch-sla ok">✓ 在 SLA 内 · 还剩 14h</span>
+                  </div>
+                  <div class="tc-q"><b>问题:</b>试用客户在购买 1 周后申请退款,理由"功能不满意"。已转财务核对。</div>
+                  <div class="tc-flow">
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div><div class="tcs-meta">6/12 14:20</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转财务</div><div class="tcs-meta">AI 分诊</div></div>
+                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">财务审核中</div><div class="tcs-meta">陶慧 · 待批</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">退款发起</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户确认到账</div></div>
+                  </div>
+                  <div class="tc-ai">
+                    <div class="tca-ico">🤖</div>
+                    <div class="tca-body"><b>AI 已收集:</b>客户使用时长 8 天 · 登录次数 3 · 实际操作不足 1 小时。<small>退款符合 7 日内全额退款政策。AI 已自动起草退款单 + 流失原因记录入 Board 6 (流失聚类: 试用未深度使用)。</small></div>
+                  </div>
+                  <div class="tc-acts">
+                    <button class="urge" data-fx="tkAct" data-tid="t3" data-msg="✅ AI 已推送陶慧加急审批 · 同时安排回访挽回">⚡ 加急 + 启动挽回回访</button>
+                    <button class="note" data-fx="tkAct" data-tid="t3" data-msg="正常流程, 不加急">正常流程</button>
+                  </div>
+                </div>
+
+                <!-- 工单 4: 已解决 -->
+                <div class="ticket-card solved" data-tid="t4">
+                  <div class="tc-head">
+                    <span class="tch-id">TK-2026-0613-03</span>
+                    <span class="tch-cust">江门某汽配 · 报表导出乱码</span>
+                    <span class="tch-sla done">✓ 已解决 0.5h</span>
+                  </div>
+                  <div class="tc-q"><b>问题:</b>报表 Excel 打开后中文乱码。</div>
+                  <div class="tc-flow">
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">AI 自动解决</div><div class="tcs-meta">推送 UTF-8 BOM 操作引导</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客户已确认</div></div>
+                  </div>
+                  <div class="tc-ai">
+                    <div class="tca-ico">🤖</div>
+                    <div class="tca-body"><b>AI 处理:</b>典型编码问题(出现 47 次此月),AI 自动推送操作指南 + 视频,客户 0.5h 自助解决。已沉淀进知识库置顶。</div>
+                  </div>
+                </div>
+
+                <!-- 工单 5: 跨物流 -->
+                <div class="ticket-card" data-tid="t5" style="--c:#00C2D8">
+                  <div class="tc-head">
+                    <span class="tch-id">TK-2026-0613-04</span>
+                    <span class="tch-cust">深圳某模具 · 硬件加密狗未到货</span>
+                    <span class="tch-sla ok">✓ 在 SLA 内</span>
+                  </div>
+                  <div class="tc-q"><b>问题:</b>付款已 3 天,购买的硬件加密狗(本地版必需)未发货。客户着急用。</div>
+                  <div class="tc-flow">
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">客服创建</div></div>
+                    <div class="tc-step done"><div class="tcs-dot"><span></span></div><div class="tcs-lbl">转仓库/物流</div></div>
+                    <div class="tc-step cur"><div class="tcs-dot"><span>3</span></div><div class="tcs-lbl">仓库查询中</div><div class="tcs-meta">15 分钟前</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>4</span></div><div class="tcs-lbl">物流发货</div></div>
+                    <div class="tc-step"><div class="tcs-dot"><span>5</span></div><div class="tcs-lbl">客户签收</div></div>
+                  </div>
+                  <div class="tc-ai">
+                    <div class="tca-ico">🤖</div>
+                    <div class="tca-body"><b>AI 已自动:</b>① 拉取仓库实时库存 (该型号还有 23 个) · ② 推送物流单号预生成 · ③ 已提前给客户发"今日内必发货"通知, 避免被催。</div>
+                  </div>
+                  <div class="tc-acts">
+                    <button class="note" data-fx="tkAct" data-tid="t5" data-msg="已记录, 等仓库结果">等仓库结果</button>
+                  </div>
+                </div>
+
+              </div>
+            </div></div>
+
+            <!-- ===== 5 质检 + 陪练 ===== -->
+            <div class="stage" id="cs-qa"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">🎯</span>
+                <div class="as-txt">100% 会话 AI 自动质检 · 不抽样,全审。本月扫描 <b>7,841</b> 条会话 · 风险话术拦截 <b>23</b> 次 · 新人陪练已通过 <b>14</b> 场。<b>替代主管 1 人 4 小时/天的人工质检</b>。</div>
+              </div>
+
+              <div class="qa-shell">
+                <!-- 左: 100% 质检 -->
+                <div class="qa-panel">
+                  <div class="qa-head">
+                    <div class="qah-tt">📊 6 名客服 × 5 维评分 · 今日实时</div>
+                    <span class="qah-stat">100% 全审 · 不抽样</span>
+                  </div>
+                  <div class="qa-heat">
+                    <div class="qhh"></div>
+                    <div class="qhh">响应时长</div>
+                    <div class="qhh">解决率</div>
+                    <div class="qhh">服务态度</div>
+                    <div class="qhh">合规话术</div>
+                    <div class="qhh">综合</div>
+
+                    <div class="qhc">张敏<small>17 单</small></div>
+                    <div class="qh-cell s-92">92</div><div class="qh-cell s-88">88</div><div class="qh-cell s-92">94</div><div class="qh-cell s-88">90</div><div class="qh-cell s-92">91</div>
+
+                    <div class="qhc">李娜<small>23 单</small></div>
+                    <div class="qh-cell s-88">88</div><div class="qh-cell s-92">92</div><div class="qh-cell s-92">93</div><div class="qh-cell s-88">87</div><div class="qh-cell s-88">90</div>
+
+                    <div class="qhc">王芳<small>19 单</small></div>
+                    <div class="qh-cell s-82">82</div><div class="qh-cell s-82">84</div><div class="qh-cell s-88">87</div><div class="qh-cell s-82">82</div><div class="qh-cell s-82">84</div>
+
+                    <div class="qhc">陈杰<small>11 单</small></div>
+                    <div class="qh-cell s-75">75</div><div class="qh-cell s-75">76</div><div class="qh-cell s-75">78</div><div class="qh-cell s-65">68</div><div class="qh-cell s-75">74</div>
+
+                    <div class="qhc">赵晨<small>新人 8 单</small></div>
+                    <div class="qh-cell s-65">68</div><div class="qh-cell s-65">64</div><div class="qh-cell s-75">72</div><div class="qh-cell s-58">58</div><div class="qh-cell s-65">66</div>
+
+                    <div class="qhc">刘静<small>13 单</small></div>
+                    <div class="qh-cell s-88">88</div><div class="qh-cell s-88">88</div><div class="qh-cell s-88">90</div><div class="qh-cell s-92">93</div><div class="qh-cell s-88">90</div>
+                  </div>
+
+                  <div class="qa-alerts">
+                    <div class="qa-alerts-head"><span class="qah-pulse"></span>⚠ 风险话术实时报警 · 5 条待主管处置</div>
+                    <div class="qa-alert-row" data-rid="a1">
+                      <div class="qar-csr">陈</div>
+                      <div class="qar-body">
+                        <div class="qar-csr-name">陈杰 → 李总 · 中山某五金 (金牌客户)</div>
+                        <div class="qar-quote">"这个我们管不了, 你联系厂家吧"</div>
+                        <div class="qar-cust">⚠ <b>红线话术:推卸责任</b> · 1 分钟前 · 已触发主管报警</div>
+                      </div>
+                      <div class="qar-acts">
+                        <button class="interv" data-fx="qaIntervene" data-rid="a1" data-msg="✅ 主管已介入接管 · 钉钉指导陈杰应对话术 + 客户致歉">介入接管</button>
+                        <button class="ignore" data-fx="qaIgnore" data-rid="a1">忽略</button>
+                      </div>
+                      <div class="qar-state"></div>
+                    </div>
+                    <div class="qa-alert-row" data-rid="a2">
+                      <div class="qar-csr">赵</div>
+                      <div class="qar-body">
+                        <div class="qar-csr-name">赵晨 → 张总 · 试用客户</div>
+                        <div class="qar-quote">"你自己看说明书吧, 这个很基础"</div>
+                        <div class="qar-cust">⚠ <b>红线话术:不耐烦</b> · 3 分钟前 · 新员工</div>
+                      </div>
+                      <div class="qar-acts">
+                        <button class="interv" data-fx="qaIntervene" data-rid="a2" data-msg="✅ 主管已发陪练任务 + 客户致歉">介入接管</button>
+                        <button class="ignore" data-fx="qaIgnore" data-rid="a2">忽略</button>
+                      </div>
+                      <div class="qar-state"></div>
+                    </div>
+                    <div class="qa-alert-row" data-rid="a3">
+                      <div class="qar-csr">王</div>
+                      <div class="qar-body">
+                        <div class="qar-csr-name">王芳 → 钱厂长 (钻石客户)</div>
+                        <div class="qar-quote">"你说的这个功能我们暂时不打算开发"</div>
+                        <div class="qar-cust">⚠ <b>红线话术:武断回绝</b> · 8 分钟前 · 钻石客户高敏感</div>
+                      </div>
+                      <div class="qar-acts">
+                        <button class="interv" data-fx="qaIntervene" data-rid="a3" data-msg="✅ 主管立即接管 · 启动产品需求收集流程">介入接管</button>
+                        <button class="ignore" data-fx="qaIgnore" data-rid="a3">忽略</button>
+                      </div>
+                      <div class="qar-state"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 右: 陪练 -->
+                <div class="train-panel">
+                  <div class="train-head">
+                    <div class="tnh-tt">🎓 新员工陪练 · 赵晨 (8 场景已通过 2 场)</div>
+                    <div class="tnh-score">已积分 64 · 升 1 级还需 36</div>
+                  </div>
+                  <div class="train-scene-grid">
+                    <div class="train-scene cur" data-fx="trScene" data-sid="s1"><div class="tns-ico">💰</div><div class="tns-tt">报价咨询</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s2"><div class="tns-ico">⚖️</div><div class="tns-tt">价格异议</div><div class="tns-passed">通过</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s3"><div class="tns-ico">🆚</div><div class="tns-tt">对比竞品</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s4"><div class="tns-ico">📺</div><div class="tns-tt">演示请求</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s5"><div class="tns-ico">🔄</div><div class="tns-tt">续约升级</div><div class="tns-passed">通过</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s6"><div class="tns-ico">😡</div><div class="tns-tt">投诉处置</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s7"><div class="tns-ico">📜</div><div class="tns-tt">合同细节</div></div>
+                    <div class="train-scene" data-fx="trScene" data-sid="s8"><div class="tns-ico">💸</div><div class="tns-tt">退款申请</div></div>
+                  </div>
+                  <div class="train-diff-row">
+                    <div class="tdr-lbl">🎭 AI 演的客户难度:</div>
+                    <div class="tdr-pills">
+                      <button class="train-diff-pill" data-fx="trDiff" data-d="easy">普通</button>
+                      <button class="train-diff-pill cur" data-fx="trDiff" data-d="mid">挑剔</button>
+                      <button class="train-diff-pill" data-fx="trDiff" data-d="hard">暴躁</button>
+                    </div>
+                  </div>
+                  <div class="train-chat" id="trChat">
+                    <!-- JS 填充 -->
+                  </div>
+                  <div class="train-input">
+                    <input type="text" id="trInput" placeholder="替客服答这位 AI 客户(或点上方场景重选)..."/>
+                    <button id="trSend">▶ 回答</button>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+
+            <!-- ===== 6 投诉 + 知识 GAP ===== -->
+            <div class="stage" id="cs-insight"><div class="page">
+              <div class="action-strip">
+                <span class="as-ico">📊</span>
+                <div class="as-txt">本月 AI 已 NLP 聚类 <b>147</b> 条投诉 → <b>4 大根源</b> · 流失客户 <b>9</b> 家最后一句话已聚类 · 知识库 GAP <b id="kbgPend">6</b> 个待你批入库。<b>从此投诉不再到老板才发现</b>。</div>
+              </div>
+
+              <div class="insight-shell">
+                <div class="insight-top">
+                  <!-- 投诉热点聚类 -->
+                  <div class="complaint-card">
+                    <div class="cc-head">
+                      <div class="cch-tt">🔥 投诉热点 · AI NLP 聚类 4 大根源</div>
+                      <div class="cch-tabs">
+                        <button class="cch-tab cur" data-fx="cmpTab" data-t="month">本月</button>
+                        <button class="cch-tab" data-fx="cmpTab" data-t="quarter">本季</button>
+                        <button class="cch-tab" data-fx="cmpTab" data-t="year">本年</button>
+                      </div>
+                    </div>
+                    <div class="complaint-clusters">
+                      <div class="cluster-group prod">
+                        <div class="cg-head">
+                          <div class="cgh-tt">🛠 产品问题</div>
+                          <div class="cgh-cnt">52 条</div>
+                          <div class="cgh-trend up">↑ 18% MoM</div>
+                        </div>
+                        <div class="cg-subs">
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-1"><span class="cgs-name">报表 <b>导出乱码</b>(编码问题)</span><span class="cgs-bar"><i style="width:90%"></i></span><span class="cgs-cnt">23</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-2"><span class="cgs-name">移动端 <b>同步延迟</b></span><span class="cgs-bar"><i style="width:65%"></i></span><span class="cgs-cnt">17</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="prod-3"><span class="cgs-name">权限分组 <b>不灵活</b></span><span class="cgs-bar"><i style="width:46%"></i></span><span class="cgs-cnt">12</span></div>
+                        </div>
+                      </div>
+                      <div class="cluster-group serv">
+                        <div class="cg-head">
+                          <div class="cgh-tt">💁 服务问题</div>
+                          <div class="cgh-cnt">38 条</div>
+                          <div class="cgh-trend down">↓ 4% MoM</div>
+                        </div>
+                        <div class="cg-subs">
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-1"><span class="cgs-name">工程师 <b>响应慢</b>(超 24h)</span><span class="cgs-bar"><i style="width:85%"></i></span><span class="cgs-cnt">19</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-2"><span class="cgs-name">新员工 <b>话术不规范</b></span><span class="cgs-bar"><i style="width:55%"></i></span><span class="cgs-cnt">12</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="serv-3"><span class="cgs-name">培训 <b>排期久</b></span><span class="cgs-bar"><i style="width:32%"></i></span><span class="cgs-cnt">7</span></div>
+                        </div>
+                      </div>
+                      <div class="cluster-group logis">
+                        <div class="cg-head">
+                          <div class="cgh-tt">📦 物流问题</div>
+                          <div class="cgh-cnt">34 条</div>
+                          <div class="cgh-trend up">↑ 8% MoM</div>
+                        </div>
+                        <div class="cg-subs">
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="logis-1"><span class="cgs-name">硬件加密狗 <b>发货慢</b></span><span class="cgs-bar"><i style="width:75%"></i></span><span class="cgs-cnt">15</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="logis-2"><span class="cgs-name">物流 <b>未提供单号</b></span><span class="cgs-bar"><i style="width:50%"></i></span><span class="cgs-cnt">10</span></div>
+                        </div>
+                      </div>
+                      <div class="cluster-group price">
+                        <div class="cg-head">
+                          <div class="cgh-tt">💰 价格问题</div>
+                          <div class="cgh-cnt">23 条</div>
+                          <div class="cgh-trend up">↑ 12% MoM</div>
+                        </div>
+                        <div class="cg-subs">
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="price-1"><span class="cgs-name">续约 <b>涨价</b>未提前告知</span><span class="cgs-bar"><i style="width:60%"></i></span><span class="cgs-cnt">13</span></div>
+                          <div class="cg-sub" data-fx="cmpDrill" data-cid="price-2"><span class="cgs-name">附加功能 <b>定价不透明</b></span><span class="cgs-bar"><i style="width:35%"></i></span><span class="cgs-cnt">8</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 流失原因 -->
+                  <div class="churn-card">
+                    <div class="cc-head">
+                      <div class="cch-tt">📉 客户流失 NLP 聚类 · 本月 9 家</div>
+                    </div>
+                    <div class="churn-row" style="--c:#E5484D" data-fx="churnDrill" data-cid="ch1">
+                      <div class="chr-reason"><b>对手价格更便宜</b><small>对比竞品 X 报价 ¥1.8 万/年(我方 ¥3.2 万)</small></div>
+                      <div class="chr-cnt">3<span class="chr-pct">家</span></div>
+                    </div>
+                    <div class="churn-row" style="--c:#D97706" data-fx="churnDrill" data-cid="ch2">
+                      <div class="chr-reason"><b>响应太慢 / 服务跟不上</b><small>多次反馈未及时处理(主要是工程师 SLA)</small></div>
+                      <div class="chr-cnt">2<span class="chr-pct">家</span></div>
+                    </div>
+                    <div class="churn-row" style="--c:#9A4DFF" data-fx="churnDrill" data-cid="ch3">
+                      <div class="chr-reason"><b>对方业务收缩</b><small>客户公司订单下降, 用不上 CRM 这种规模</small></div>
+                      <div class="chr-cnt">2<span class="chr-pct">家</span></div>
+                    </div>
+                    <div class="churn-row" style="--c:#00C2D8" data-fx="churnDrill" data-cid="ch4">
+                      <div class="chr-reason"><b>产品功能不满足</b><small>主要是移动端体验 + 跟 ERP 集成</small></div>
+                      <div class="chr-cnt">1<span class="chr-pct">家</span></div>
+                    </div>
+                    <div class="churn-row" style="--c:#94A3B8" data-fx="churnDrill" data-cid="ch5">
+                      <div class="chr-reason"><b>关键联系人离职</b><small>原对接人换工作, 新人不熟悉系统</small></div>
+                      <div class="chr-cnt">1<span class="chr-pct">家</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 知识库 GAP 列表 -->
+                <div class="kb-gap-card">
+                  <div class="kb-gap-head">
+                    <div class="kgh-tt">📚 知识库 GAP · AI 答不上来的问题汇总(按热度)</div>
+                    <div class="kgh-sub">AI 已为每条草拟答案 · 点"采纳入库"批量增强知识库 · 下次此类问题 AI 直接闭环</div>
+                  </div>
+                  <div class="kb-gap-list" id="kbGapList">
+                    <div class="kb-gap-row" data-gid="g1">
+                      <div class="kgr-q">CRM 数据怎么<b>导入金蝶/用友</b> ERP 系统?<small>"我们已经用了金蝶 5 年, 想把销售数据双向同步"</small></div>
+                      <div class="kgr-cnt">28<small>次</small></div>
+                      <div class="kgr-dept">技术 + 运营</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g1">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g1">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                    <div class="kb-gap-row" data-gid="g2">
+                      <div class="kgr-q">移动端 APP <b>离线数据同步</b>怎么操作?<small>"工厂车间没网, 想在 APP 上录入然后回办公室同步"</small></div>
+                      <div class="kgr-cnt">21<small>次</small></div>
+                      <div class="kgr-dept">技术</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g2">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g2">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                    <div class="kb-gap-row" data-gid="g3">
+                      <div class="kgr-q"><b>多公司/多账套</b>怎么管理?<small>"我有 3 家分公司, 想在一个后台看汇总, 也能切换分公司"</small></div>
+                      <div class="kgr-cnt">17<small>次</small></div>
+                      <div class="kgr-dept">技术 + 产品</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g3">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g3">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                    <div class="kb-gap-row" data-gid="g4">
+                      <div class="kgr-q">对接<b>淘宝/京东/拼多多</b>订单同步?<small>"我们 4 个店铺, 订单想直接进 CRM"</small></div>
+                      <div class="kgr-cnt">15<small>次</small></div>
+                      <div class="kgr-dept">技术 + 商务</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g4">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g4">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                    <div class="kb-gap-row" data-gid="g5">
+                      <div class="kgr-q"><b>数据导出 + 二次分析</b>(BI 工具)<small>"想用 Power BI / Tableau 二次分析, 你们提供 API 吗?"</small></div>
+                      <div class="kgr-cnt">12<small>次</small></div>
+                      <div class="kgr-dept">技术</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g5">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g5">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                    <div class="kb-gap-row" data-gid="g6">
+                      <div class="kgr-q">海外业务 <b>多语言 + 多币种</b><small>"有英文/日文界面吗? 报价能用 USD/EUR 吗?"</small></div>
+                      <div class="kgr-cnt">9<small>次</small></div>
+                      <div class="kgr-dept">产品</div>
+                      <div class="kgr-acts">
+                        <button class="adopt" data-fx="kbAdopt" data-gid="g6">✓ 采纳入库</button>
+                        <button class="skip" data-fx="kbSkip" data-gid="g6">跳过</button>
+                      </div>
+                      <div class="kgr-state">✓ 已入库</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div></div>
+
           </div>
         </div>
       </section>
+
+
 
       <!-- ============ 视图:项目交付管控 ============ -->
       <section class="view" id="view-pmo">
@@ -11629,6 +12972,740 @@ curl https://api.dgg.ai/v1/agents/dispatch \
 })();
 
 </script>
+</script>
+<script>
+/* ============================================================
+   客服AI助手 · 6 板块交互
+   ============================================================ */
+(function () {
+  var view = document.getElementById("view-cs");
+  if (!view) return;
+  var QA = function (s, r) { return Array.prototype.slice.call((r || view).querySelectorAll(s)); };
+  var Q = function (s, r) { return (r || view).querySelector(s); };
+  function txt(id, v) { var e = Q("#" + id); if (e) e.textContent = v; }
+  function ts(msg) {
+    var el = document.createElement("div");
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0E1430;color:#fff;padding:11px 18px;border-radius:11px;font-size:12.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:520px;line-height:1.5;text-align:center";
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = "0"; el.style.transition = ".3s"; }, 2400);
+    setTimeout(function () { el.remove(); }, 2800);
+  }
+
+  /* ===== Stage 切换 ===== */
+  Q("#csNav").addEventListener("click", function (e) {
+    var p = e.target.closest(".stage-pill"); if (!p) return;
+    QA(".stage-pill", Q("#csNav")).forEach(function (x) { x.classList.toggle("active", x === p); });
+    QA(".stage").forEach(function (s) { s.classList.toggle("active", s.id === "cs-" + p.dataset.stage); });
+    var pg = Q(".stage.active .page"); if (pg) pg.scrollTop = 0;
+  });
+
+  /* ============================================================
+     Board 1: 智能分诊台
+     ============================================================ */
+  var triageData = {
+    "p1": { ava:"王", name:"王厂长 · 东莞某模具厂", meta:"💎 钻石客户 · 合作 3 年 · ¥18 万/年 · LTV ¥58 万", vip:"diamond", vipTxt:"💎 钻石",
+      msg:"我们的 CRM 后台登录不进去了 · 4 个员工都登录不上 · 我们急着出报价单!",
+      intent:"售后 · 系统故障", emotion:"急迫 (0.85)", vipLv:"💎 钻石", urgent:"极高", solvable:"需工程师",
+      d5_int_cls:"brand", d5_emo_cls:"high", d5_vip_cls:"high", d5_urg_cls:"high", d5_sol_cls:"mid",
+      reco:"⚡ 立即升级工程师 + 钉钉 @值班 CTO + 主管致歉电话",
+      reco_meta:"AI 推理:钻石客户(¥18万/年) + 4 员工同时受影响 + 业务停摆 = 流失风险 92% · 立即响应是必须" },
+    "p2": { ava:"苏", name:"苏州某机加工 · 新询单", meta:"30 人规模 · 通过销售电话+微信沟通", vip:"normal", vipTxt:"新客户",
+      msg:"你们的 CRM 跟金蝶能对接吗? 报价多少?",
+      intent:"售前 · 集成咨询", emotion:"平静 (0.15)", vipLv:"新客户", urgent:"中", solvable:"AI 可解",
+      d5_int_cls:"brand", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"mid", d5_sol_cls:"low",
+      reco:"🤖 AI 自动答金蝶对接 SKU + 转销售跟进报价",
+      reco_meta:"AI 推理:金蝶集成是高频询问(知识库已收录)+ 30 人规模符合金牌套餐画像 · 销售机会:¥3-5 万/年" },
+    "p3": { ava:"李", name:"李总 · 中山某五金厂", meta:"金牌 · 合作 14 月 · ¥8.6 万/年", vip:"gold", vipTxt:"金牌",
+      msg:"我上次说的员工权限分组怎么还没改好? 都过去 3 天了!",
+      intent:"投诉 · SLA 违反", emotion:"愤怒 (0.78)", vipLv:"金牌", urgent:"高", solvable:"主管介入",
+      d5_int_cls:"high", d5_emo_cls:"high", d5_vip_cls:"mid", d5_urg_cls:"high", d5_sol_cls:"mid",
+      reco:"🚨 升级主管 + 安抚话术 + 工单 t2 加急(已超 SLA 临期)",
+      reco_meta:"AI 推理:工单 TK-0613-02 进度 60% 未完成 · 客户 2 次催 · 升主管 + 主动告知预计时间最稳" },
+    "p4": { ava:"佛", name:"佛山某五金贸易 · 新询单", meta:"25 人规模 · 看完演示视频", vip:"normal", vipTxt:"新询单",
+      msg:"看了你们网站的 ERP 演示视频, 想预约 demo。",
+      intent:"售前 · demo 预约", emotion:"平静 (0.08)", vipLv:"新客户", urgent:"中", solvable:"AI 自动",
+      d5_int_cls:"brand", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"mid", d5_sol_cls:"low",
+      reco:"🤖 AI 自动闭环: 询基本信息 + 推 4 个可选时段 + 同步 CRM 创建销售机会",
+      reco_meta:"AI 推理:典型售前漏斗入口 · 25 人规模 ARR 潜力 ¥3 万 · 直接 AI 闭环不打扰销售" },
+    "p5": { ava:"江", name:"江门某汽配 · 已用 6 月", meta:"普通客户 · ¥2.8 万/年", vip:"normal", vipTxt:"普通",
+      msg:"我的报表导出乱码了, Excel 打开看不到中文?",
+      intent:"售后 · 操作问题", emotion:"平静 (0.12)", vipLv:"普通", urgent:"低", solvable:"AI 自动",
+      d5_int_cls:"mid", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"low", d5_sol_cls:"low",
+      reco:"🤖 AI 自动: 推送 UTF-8 BOM 操作引导视频 + 1 步配置指南",
+      reco_meta:"AI 推理:典型编码问题 · 月内 47 次相似咨询 · 知识库已置顶 · 0.5h 客户自助解决" },
+    "p6": { ava:"UK", name:"Brown Engineering · UK", meta:"海外询单 · 英文沟通", vip:"normal", vipTxt:"海外询单",
+      msg:"Hi, do you support multi-currency for invoicing? We have customers in EU.",
+      intent:"售前 · 海外业务", emotion:"平静 (0.06)", vipLv:"海外询单", urgent:"中", solvable:"AI 英文回",
+      d5_int_cls:"brand", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"mid", d5_sol_cls:"low",
+      reco:"🤖 AI 英文自动答 + 转海外销售 + CC 商务",
+      reco_meta:"AI 推理:海外询单 · 多币种是产品标配 · 我方现有 17 家海外客户参考案例可推" },
+    "p7": { ava:"林", name:"林经理 · 惠州某电子", meta:"金牌 · ¥6.4 万/年 · 即将续约", vip:"gold", vipTxt:"金牌",
+      msg:"7 月要续约了, 想跟你们谈下能不能给点折扣?",
+      intent:"关系 · 续约谈判", emotion:"询问 (0.20)", vipLv:"金牌", urgent:"中", solvable:"客户成功",
+      d5_int_cls:"mid", d5_emo_cls:"low", d5_vip_cls:"mid", d5_urg_cls:"mid", d5_sol_cls:"mid",
+      reco:"💎 转客户成功经理 + 拉历史 ARR/使用率/工单/满意度做续约方案",
+      reco_meta:"AI 推理:使用率 78% (健康) · 工单率低 · 续约几率 88% · 让步空间 5-15% 可控" },
+    "p8": { ava:"竞", name:"竞品试用客户 · 测试中", meta:"潜在客户 · 已对比 X 厂商", vip:"normal", vipTxt:"高潜",
+      msg:"用了某竞品觉得不行, 你们家是怎么实现移动端同步的?",
+      intent:"售前 · 高意向", emotion:"询问 (0.18)", vipLv:"高潜客户", urgent:"高", solvable:"销售跟进",
+      d5_int_cls:"brand", d5_emo_cls:"low", d5_vip_cls:"mid", d5_urg_cls:"high", d5_sol_cls:"mid",
+      reco:"🎯 高优转销售 + 推差异化技术对比 PDF + 安排技术演示",
+      reco_meta:"AI 推理:从竞品流入是黄金机会 · 决策已偏向迁移 · 销售 24h 内跟进转化率 67%" },
+    "p9": { ava:"深", name:"陈生 · 深圳某模具", meta:"普通 · ¥1.8 万/年", vip:"normal", vipTxt:"普通",
+      msg:"发货时间多久?",
+      intent:"售后 · 物流", emotion:"平静 (0.05)", vipLv:"普通", urgent:"低", solvable:"AI 自动",
+      d5_int_cls:"mid", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"low", d5_sol_cls:"low",
+      reco:"🤖 AI 自动答: 查 ERP 订单状态 + 告知物流单号 + 预计签收时间",
+      reco_meta:"AI 推理:典型物流询问 · ERP API 实时拉取 · 完全自动闭环" },
+    "p10": { ava:"广", name:"广州某印刷 · 试用 2 月", meta:"试用中 · 8 员工待培训", vip:"normal", vipTxt:"试用客户",
+      msg:"这个系统的培训怎么安排, 我有 8 个员工要上岗。",
+      intent:"售后 · 培训需求", emotion:"平静 (0.10)", vipLv:"试用客户", urgent:"中", solvable:"客户成功",
+      d5_int_cls:"mid", d5_emo_cls:"low", d5_vip_cls:"low", d5_urg_cls:"mid", d5_sol_cls:"mid",
+      reco:"💁 转客户成功 + 推标准培训路径 + 8 人 2-3 小时套餐",
+      reco_meta:"AI 推理:试用期客户激活是关键 · 8 人规模建议线下/线上混合培训提升留存" }
+  };
+  function renderTriageDetail(pid) {
+    var d = triageData[pid];
+    var box = Q("#csTriDetail");
+    if (!d) { box.innerHTML = '<div class="td-empty"><div class="te-ico">👈</div>选一条进件 → 看 AI 分诊全过程</div>'; return; }
+    box.innerHTML =
+      '<div class="td-cust"><div class="tc-ava">' + d.ava + '</div>' +
+      '<div style="flex:1;min-width:0"><div class="tc-name">' + d.name + '</div>' +
+      '<div class="tc-meta">' + d.meta + '</div></div>' +
+      '<div class="tc-vip ' + d.vip + '">' + d.vipTxt + '</div></div>' +
+      '<div class="td-msg">"' + d.msg + '"</div>' +
+      '<div class="td-ai-row"><div class="tar-ico">🤖</div><div class="tar-body">' +
+        '<div class="tar-tt">AI 五维分诊 · 0.8 秒</div>' +
+        '<div class="td-5d">' +
+          '<div class="td-5d-cell"><div class="td5-lbl">意图</div><div class="td5-val ' + d.d5_int_cls + '">' + d.intent + '</div></div>' +
+          '<div class="td-5d-cell"><div class="td5-lbl">情绪</div><div class="td5-val ' + d.d5_emo_cls + '">' + d.emotion + '</div></div>' +
+          '<div class="td-5d-cell"><div class="td5-lbl">VIP</div><div class="td5-val ' + d.d5_vip_cls + '">' + d.vipLv + '</div></div>' +
+          '<div class="td-5d-cell"><div class="td5-lbl">紧急度</div><div class="td5-val ' + d.d5_urg_cls + '">' + d.urgent + '</div></div>' +
+          '<div class="td-5d-cell"><div class="td5-lbl">可解度</div><div class="td5-val ' + d.d5_sol_cls + '">' + d.solvable + '</div></div>' +
+        '</div>' +
+      '</div></div>' +
+      '<div class="td-reco"><div class="tr-lbl">🎯 AI 推荐处置</div>' +
+        '<div class="tr-tt">' + d.reco + '</div>' +
+        '<div class="tr-meta">' + d.reco_meta + '</div></div>' +
+      '<div class="td-acts">' +
+        '<button class="primary" data-fx="trgExec" data-pid="' + pid + '">✓ 采纳 · 自动执行</button>' +
+        '<button class="secondary" data-fx="trgManual" data-pid="' + pid + '">改派他人</button>' +
+        '<button class="secondary" data-fx="trgDefer" data-pid="' + pid + '">推迟 10 分</button>' +
+      '</div>';
+  }
+  view.addEventListener("click", function (e) {
+    var t = e.target.closest('[data-fx="tpPick"]'); if (!t) return;
+    QA('[data-fx="tpPick"]').forEach(function (x) { x.classList.toggle("cur", x === t); });
+    renderTriageDetail(t.dataset.pid);
+  });
+  view.addEventListener("click", function (e) {
+    var btn = e.target.closest('[data-fx="trgExec"]'); if (!btn) return;
+    ts("✅ 已采纳 AI 推荐 · 系统自动处置中");
+    var item = Q('[data-fx="tpPick"][data-pid="' + btn.dataset.pid + '"]');
+    if (item) item.style.opacity = ".55";
+    var n = parseInt(Q('[data-counter="todayIntake"]').textContent, 10);
+    QA('[data-counter="todayIntake"]').forEach(function (x) { x.textContent = n + 1; });
+  });
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="trgManual"]'); if (b) { ts("🔄 已转派人工客服 · 钉钉通知"); return; }
+    var d = e.target.closest('[data-fx="trgDefer"]'); if (d) { ts("⏰ 已推迟 10 分钟 · 重新进入分诊"); }
+  });
+
+  /* 策略滑块 → 实时影响全池 */
+  var stratR = Q("#csStratR");
+  function updateStrat() {
+    var v = parseInt(stratR.value, 10);
+    txt("csStratV", v);
+    var ai = Math.round(487 * v / 100);
+    var man = 487 - ai;
+    txt("csImpactAi", ai);
+    txt("csImpactMan", man);
+    txt("csAutoRate", v + "%");
+    txt("csManualRate", (100 - v) + "%");
+    var save = Math.round(ai * 7); // 7元/单
+    txt("csImpactSave", "¥" + save.toLocaleString());
+    var tip;
+    if (v < 30) tip = '<b>⚠ 过严:浪费 AI 能力</b> · 大量 AI 可解的也转人工,客户响应慢、人力成本高。建议提至 45-60%。';
+    else if (v < 45) tip = '<b>📊 偏严:稳但贵</b> · 客户满意度 95%,但 AI 利用率仅 ' + v + '%。';
+    else if (v < 70) tip = '<b>🤖 AI 推荐区间(45-70%)</b> · 历史回测中满意度 92% + 错单率 1.4% + 人力节省 60%。综合最佳。';
+    else if (v < 85) tip = '<b>⚠ 偏宽:省人但风险升</b> · AI 利用率高,但错单率上升至 ' + (1.4 + (v - 70) * 0.3).toFixed(1) + '%。';
+    else tip = '<b>❌ 过宽:复杂问题 AI 会答错</b> · 错单率快速上升,可能引发投诉。建议降到 70% 以下。';
+    Q("#csStratTip").innerHTML = tip;
+    // 改变第一条进件的 AI 推荐标签 (示意)
+    QA(".tp-item").forEach(function (item, i) {
+      var pred = item.querySelector(".tpi-pred");
+      if (!pred) return;
+      // 简单可视化:严格度高 → 更多转人工标签
+      if (v < 30 && i >= 3) pred.textContent = "AI 推荐: 转人工";
+      else if (v > 80 && i > 0 && i < 4) pred.textContent = "AI 自动闭环";
+    });
+  }
+  if (stratR) stratR.addEventListener("input", updateStrat);
+
+  /* 初始化 Board 1 */
+  renderTriageDetail("p1");
+
+  /* ============================================================
+     Board 2: AI 副驾会话台
+     ============================================================ */
+  var conversations = {
+    "c1": {
+      ava: "王", name: "王厂长 · 东莞某模具厂",
+      sub: "💎 钻石客户 · 合作 3 年 · ¥18 万/年 · LTV ¥58 万",
+      mode: "co",
+      stream: [
+        { type: "cust", text: "我们的 CRM 后台登录不进去了!", time: "10:48", ava: "王" },
+        { type: "cust", text: "4 个员工都登录不上, 急用!", time: "10:48", ava: "王" },
+        { type: "csr", text: "王厂长您好,非常抱歉给您造成困扰。我立即帮您排查!", time: "10:49", ava: "我", byai: false },
+        { type: "sys", text: "AI 同步:已自动创建紧急工单 TK-2026-0613-01 + 钉钉@值班 CTO 介入" },
+        { type: "cust", text: "都过 5 分钟了, 还没好啊?", time: "10:53", ava: "王" }
+      ],
+      sug: [
+        { conf: 96, type: "安抚 + 进度", text: "王厂长,我已经升级到我们 CTO 直接处理,他正在远程登录您的服务器排查,预计 <mark>10 分钟内</mark>给您结果。我先用我的账号帮您登录后台导出您急需的报价单,您发我编号。", meta: "适合钻石客户,降级 + 主动垫付" },
+        { conf: 88, type: "技术诊断", text: "可能是您公司 IP 触发了我们的安全保护机制(短时间多次登录失败)。我现在帮您解锁 IP 白名单,5 分钟内可以登录。", meta: "60% 概率属此种原因" },
+        { conf: 75, type: "补偿方案", text: "因为这次问题影响了您的业务,我可以申请给您本月 <mark>10% 服务费减免</mark>作为补偿,同时安排专属技术工程师持续跟进。", meta: "钻石客户标准补偿话术" }
+      ],
+      cust: {
+        rows: [
+          { k: "公司", v: "东莞某模具厂" },
+          { k: "联系人", v: "王厂长(王志强)" },
+          { k: "合作时长", v: "3 年 1 月" },
+          { k: "ARR", v: "¥18 万/年", cls: "good" },
+          { k: "LTV", v: "¥58 万", cls: "good" },
+          { k: "员工数", v: "65 人(4 员工受影响)" },
+          { k: "最近工单", v: "TK-0613-01 进行中" },
+          { k: "满意度", v: "98 分" }
+        ],
+        tags: [
+          { type: "vip", text: "💎 钻石" }, { type: "pos", text: "高满意度" },
+          { type: "neu", text: "决策快" }, { type: "neu", text: "技术敏感" }
+        ],
+        history: [
+          { tt: "TK-0524 报表自定义需求", time: "5/24", desc: "已解决 · 客户满意" },
+          { tt: "TK-0312 培训新员工 8 人", time: "3/12", desc: "已完成 · 续单 +3 万" },
+          { tt: "续约升级钻石套餐", time: "2026/01", desc: "ARR 从 ¥12 万 → ¥18 万" }
+        ]
+      }
+    },
+    "c2": {
+      ava: "林", name: "林经理 · 惠州某电子",
+      sub: "G 金牌客户 · 合作 14 月 · ¥6.4 万/年",
+      mode: "co",
+      stream: [
+        { type: "cust", text: "你好, 我是惠州林经理,7 月要续约了。", time: "10:42", ava: "林" },
+        { type: "csr", text: "林经理好!您是我们的金牌客户,续约这事我跟客户成功林姐对接下,她马上联系您。", time: "10:43", ava: "我", byai: false },
+        { type: "cust", text: "其实主要想问下能不能给点折扣? 现在生意不太好。", time: "10:44", ava: "林" }
+      ],
+      sug: [
+        { conf: 92, type: "锚定价值 + 软折扣", text: "林经理理解您。我看您这一年使用率 <mark>78%</mark>,真用得不错。续约我们可以做几种方案:① 续 1 年 ¥6.4 万维持现价 ② <mark>续 2 年享 8% 优惠 ¥11.78 万</mark> ③ 同价升级钻石套餐(送移动端 + API)。您看哪个合适?", meta: "AI 推荐方案 · 让步可控" },
+        { conf: 82, type: "理解 + 探询", text: "林经理我听到了。能跟我说说现在主要的成本压力在哪吗?了解一下也方便我帮您争取最合适的方案。", meta: "需求探询 · 拖延决策" },
+        { conf: 68, type: "直接让步", text: "我跟主管申请下,可以给您 <mark>10% 折扣 ¥5.76 万</mark>,这是我能给您的最大优惠了。", meta: "易丢底牌 · 不推荐先用" }
+      ],
+      cust: {
+        rows: [
+          { k: "公司", v: "惠州某电子厂" }, { k: "联系人", v: "林经理(林志成)" },
+          { k: "合作时长", v: "14 月" }, { k: "ARR", v: "¥6.4 万/年" },
+          { k: "使用率", v: "78%", cls: "good" }, { k: "续约决策日", v: "7/15", cls: "danger" },
+          { k: "工单数", v: "12(均按时解决)" }, { k: "最近活跃", v: "今日 9:30" }
+        ],
+        tags: [
+          { type: "vip", text: "G 金牌" }, { type: "pos", text: "高使用率" }, { type: "neu", text: "价格敏感" }
+        ],
+        history: [
+          { tt: "增购移动端模块", time: "11/15", desc: "+¥0.8 万/年" },
+          { tt: "首次签约 ¥5.6 万", time: "2025/05", desc: "1 年期" }
+        ]
+      }
+    },
+    "c3": {
+      ava: "陈", name: "陈生 · 深圳某模具", sub: "普通客户 · ¥1.8 万/年", mode: "ai",
+      stream: [
+        { type: "cust", text: "发货时间多久?", time: "10:36", ava: "陈" },
+        { type: "csr", text: "您好陈生,您的订单 SO-2026-0612-3478 在 6/12 下单,已发顺丰快递 SF1234567890,预计 6/14 (今日) 18:00 前签收。是否需要我帮您催件?", time: "10:36", ava: "AI", byai: true },
+        { type: "cust", text: "好的, 不用催了, 谢谢", time: "10:37", ava: "陈" },
+        { type: "sys", text: "AI 已闭环 · 客户满意 · 用时 56 秒" }
+      ],
+      sug: [
+        { conf: 99, type: "已自动闭环", text: "陈生回了'谢谢'+ 说不用催件,会话已可以关闭。AI 已自动归档,沉淀此次为'物流查询'高频闭环案例。", meta: "本会话纯 AI,无需人工干预" }
+      ],
+      cust: {
+        rows: [
+          { k: "公司", v: "深圳某模具厂" }, { k: "联系人", v: "陈生(陈伟强)" },
+          { k: "ARR", v: "¥1.8 万/年" }, { k: "活跃度", v: "中" }, { k: "工单数", v: "5(均自助解决)" }
+        ],
+        tags: [{ type: "neu", text: "普通客户" }, { type: "pos", text: "自助型" }],
+        history: [{ tt: "购买年费 ¥1.8 万", time: "2025/09", desc: "1 年期" }]
+      }
+    },
+    "c4": {
+      ava: "🌐", name: "Brown · UK Inquiry", sub: "海外询单 · 英文沟通 · GMT+0", mode: "ai",
+      stream: [
+        { type: "cust", text: "Hi, do you support multi-currency for invoicing? We have customers in EU.", time: "02:35 UK", ava: "🌐" },
+        { type: "csr", text: "Hello Brown, yes — our CRM supports <mark>34 currencies</mark> including USD/EUR/GBP. Auto-conversion uses ECB daily rates. We have 17 EU clients running similar setup. Want me to send 3 success stories + pricing?", time: "02:36 UK", ava: "AI", byai: true },
+        { type: "cust", text: "Yes please. Also, do you have a UK office?", time: "02:38 UK", ava: "🌐" },
+        { type: "sys", text: "AI 转海外销售 + CC 商务" }
+      ],
+      sug: [
+        { conf: 92, type: "英文回复 + 引导", text: "We don't have a UK office yet but have a dedicated EU customer success team (English/French/German). I'll connect you with our APAC sales lead Sarah within 4 hours. Meanwhile, <mark>here are the 3 case studies</mark> + pricing PDF (attached).", meta: "AI 自动推送 · 转销售跟进" }
+      ],
+      cust: {
+        rows: [
+          { k: "Company", v: "Brown Engineering Ltd." }, { k: "Country", v: "United Kingdom" },
+          { k: "Size", v: "~50 staff" }, { k: "Source", v: "Google Ads" }
+        ],
+        tags: [{ type: "vip", text: "海外询单" }, { type: "neu", text: "EN" }, { type: "pos", text: "高意向" }],
+        history: [{ tt: "浏览了海外案例页", time: "02:30 UK", desc: "停留 4 分钟" }]
+      }
+    }
+  };
+  var curConvId = "c1";
+
+  function renderConvStream(c) {
+    var box = Q("#cpStream");
+    box.innerHTML = "";
+    c.stream.forEach(function (m) {
+      var div = document.createElement("div");
+      if (m.type === "sys") {
+        div.className = "ccp-bubble sys";
+        div.innerHTML = '<div class="cb-text">' + m.text + '</div>';
+      } else {
+        div.className = "ccp-bubble " + m.type + (m.byai ? " byai" : "");
+        var aiTag = m.byai ? '<span class="ccp-byai">AI 代答</span>' : "";
+        div.innerHTML = '<div class="cb-ava">' + (m.ava || "?") + '</div>' +
+          '<div><div class="cb-text">' + m.text + aiTag + '</div>' +
+          (m.time ? '<div class="cb-meta">' + m.time + '</div>' : '') + '</div>';
+      }
+      box.appendChild(div);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+  function renderSugPane(c) {
+    var box = Q("#cpSugPane");
+    box.innerHTML = c.sug.map(function (s) {
+      return '<div class="ai-sug-card" data-fx="csUseSug" data-text="' + s.text.replace(/<[^>]+>/g, "").replace(/"/g, "&quot;") + '">' +
+        '<div class="asc-tt">🎯 ' + s.type + ' <span class="asc-conf">置信 ' + s.conf + '%</span></div>' +
+        '<div class="asc-body">' + s.text + '</div>' +
+        '<div class="asc-meta">' + s.meta + '</div></div>';
+    }).join("");
+  }
+  function renderCustPane(c) {
+    var box = Q("#cpCustPane");
+    var rows = c.cust.rows.map(function (r) {
+      return '<div class="cuc-row"><span class="cuc-k">' + r.k + '</span>' +
+        '<span class="cuc-v ' + (r.cls || "") + '">' + r.v + '</span></div>';
+    }).join("");
+    var tags = c.cust.tags.map(function (t) {
+      return '<span class="cust-tag ' + t.type + '">' + t.text + '</span>';
+    }).join("");
+    var hist = c.cust.history.map(function (h) {
+      return '<div class="cust-his-row"><b>' + h.tt + '</b><span class="ch-time">' + h.time + '</span><br>' + h.desc + '</div>';
+    }).join("");
+    box.innerHTML = '<div class="cust-card">' + rows + '<div class="cust-tags">' + tags + '</div></div>' +
+      '<div class="cust-history"><div class="cust-history-tt">📋 历史关键节点</div>' + hist + '</div>';
+  }
+  function renderConv(cid) {
+    curConvId = cid;
+    var c = conversations[cid];
+    if (!c) return;
+    txt("cpAva", c.ava);
+    txt("cpName", c.name);
+    txt("cpSub", c.sub);
+    QA(".cph-mode-btn").forEach(function (b) { b.classList.toggle("cur", b.dataset.mode === c.mode); });
+    renderConvStream(c);
+    renderSugPane(c);
+    renderCustPane(c);
+    // 清空输入框
+    Q("#cpInput").value = "";
+  }
+  view.addEventListener("click", function (e) {
+    var c = e.target.closest('[data-fx="csPickConv"]');
+    if (!c) return;
+    QA('[data-fx="csPickConv"]').forEach(function (x) { x.classList.toggle("cur", x === c); });
+    var un = c.querySelector(".csc-unread"); if (un) un.remove();
+    renderConv(c.dataset.cid);
+  });
+  view.addEventListener("click", function (e) {
+    var m = e.target.closest('[data-fx="csMode"]');
+    if (!m) return;
+    QA(".cph-mode-btn").forEach(function (x) { x.classList.toggle("cur", x === m); });
+    var c = conversations[curConvId]; if (c) c.mode = m.dataset.mode;
+    var modes = { ai: "🤖 已切换为纯 AI 自动 · 客服已退出会话", co: "🤝 已切换为人机协同 · AI 推荐 + 你点发送", man: "👤 已切换为纯人工 · AI 已隐藏建议" };
+    ts(modes[m.dataset.mode]);
+  });
+  view.addEventListener("click", function (e) {
+    var t = e.target.closest('[data-fx="csSideTab"]');
+    if (!t) return;
+    QA(".cs-side-tab").forEach(function (x) { x.classList.toggle("cur", x === t); });
+    QA(".cs-side-pane").forEach(function (p) { p.classList.toggle("cur", p.dataset.pane === t.dataset.pane); });
+  });
+  view.addEventListener("click", function (e) {
+    var s = e.target.closest('[data-fx="csUseSug"]');
+    if (!s) return;
+    Q("#cpInput").value = s.dataset.text;
+    Q("#cpInput").focus();
+    ts("📋 已填入输入框, 可继续编辑后发送");
+  });
+  Q("#cpSend").addEventListener("click", function () {
+    var text = Q("#cpInput").value.trim();
+    if (!text) { ts("请输入回复内容"); return; }
+    var c = conversations[curConvId];
+    c.stream.push({ type: "csr", text: text, time: "刚刚", ava: c.mode === "ai" ? "AI" : "我", byai: c.mode === "ai" });
+    setTimeout(function () {
+      c.stream.push({ type: "sys", text: "✓ 已发送 · 客户正在打字..." });
+      renderConvStream(c);
+    }, 600);
+    Q("#cpInput").value = "";
+    renderConvStream(c);
+  });
+  Q("#cpKbSearch").addEventListener("click", function () {
+    var v = (Q("#cpKbInput").value || "").trim();
+    if (!v) { ts("请输入检索词"); return; }
+    var kbDB = [
+      { tt: "金蝶/用友 ERP 对接", q: "我方提供标准 API + 中间件,15 分钟可对接", meta: "技术 SOP · 已沉淀 · 已用 23 次" },
+      { tt: "续约折扣政策", q: "金牌 5-10%,钻石 10-15%,需主管批 + 需绑定 2 年", meta: "商务 SOP · 主管必读" },
+      { tt: "登录失败排查", q: "5 步排查: 网络 → 密码 → IP白名单 → Session → 后端", meta: "技术 SOP · 工程必读" },
+      { tt: "海外多币种支持", q: "支持 34 币种, 用 ECB 日汇率, EU 客户 17 家成功案例", meta: "海外业务 · 销售必读" },
+      { tt: "报表导出乱码", q: "Excel 用 UTF-8 BOM 编码导出, 1 步配置, 视频引导", meta: "技术 SOP · 高频问题" }
+    ];
+    var hits = kbDB.filter(function (k) { return k.tt.indexOf(v) >= 0 || k.q.indexOf(v) >= 0 || v.indexOf(k.tt.split(/[\/\s]/)[0]) >= 0; });
+    if (!hits.length) hits = kbDB.slice(0, 2);
+    Q("#cpKbResults").innerHTML = hits.map(function (k) {
+      return '<div class="kb-result"><div class="kbr-tt">' + k.tt + '</div>' +
+        '<div class="kbr-quote">' + k.q + '</div>' +
+        '<div class="kbr-meta">' + k.meta + '</div></div>';
+    }).join("");
+  });
+  Q("#cpKbInput").addEventListener("keydown", function (e) { if (e.key === "Enter") Q("#cpKbSearch").click(); });
+  /* 初始化 Board 2 */
+  renderConv("c1");
+
+  /* ============================================================
+     Board 3: 夜班值守
+     ============================================================ */
+  Q("#csNightToggle").addEventListener("click", function () {
+    this.classList.toggle("off");
+    var on = !this.classList.contains("off");
+    this.querySelector(".nt-tt").textContent = on ? "夜班 已启动" : "夜班 已停用";
+    ts(on ? "🌙 夜班 AI 已启动 · 22:00 起接管所有进件" : "☀️ 夜班 AI 已停用 · 进件将转电话语音留言");
+  });
+  var nightDetails = {
+    "n1": {
+      head: "02:35 · Brown Engineering · UK 海外询单 · AI 自动闭环",
+      conv: [
+        { type: "cust", text: "Hi, does your CRM support multi-currency invoicing for EU customers?" },
+        { type: "ai", text: "Yes — we support 34 currencies including USD/EUR/GBP, with ECB daily exchange rates. We have 17 EU clients using this. Want me to send 3 case studies + pricing?" },
+        { type: "cust", text: "Yes please. Also, UK office?" },
+        { type: "ai", text: "No UK office yet, but we have an EU customer success team. I'll forward you to our APAC sales lead within 4 hours. Meanwhile, case studies + pricing attached. Reach out at sales@dgg.ai any time." },
+        { type: "cust", text: "Great, thank you!" }
+      ],
+      reason: "AI 决策推理: ① 海外询单 + 英文 → 触发英文模型 ② 多币种是产品标配 (置信 99%) ③ 17 家 EU 案例可调用 ④ UK 时区夜里, 海外销售 4h 后接管(白天)即可 ⑤ 客户结尾'Great, thank you' = 满意, 无需升级。 置信 94% > 阈值 85%, 自动闭环。"
+    },
+    "n2": {
+      head: "02:58 · 张总 · 中山某机械 (金牌) · 紧急升级",
+      conv: [
+        { type: "cust", text: "我们的 CRM 显示数据库错误 1042,刚才好好的!" },
+        { type: "ai", text: "张总您好,我立即排查。错误 1042 通常是数据库连接超时,正在远程检查您的服务器..." },
+        { type: "ai", text: "已查到, 您的私有部署数据库主从同步延迟, 主库正在恢复。预计 15 分钟。已立即升级到 CTO 介入。" },
+        { type: "cust", text: "好, 那我等等。" }
+      ],
+      reason: "AI 决策推理: ① 金牌客户(¥6.8万/年)+ 数据库错误 = 业务影响 ② 错误码 1042 在知识库标记'必须工程师介入' ③ 钉钉@值班 CTO 王工 + 同时给客户 ETA 安抚 ④ 升级置信度 98%, 触发紧急通道。 客户已确认'等等', 但 AI 同步推送了主管视角通知,5 分钟内必须有人接手。"
+    },
+    "n3": {
+      head: "03:12 · 访客 220.181.x · 试用询单 · AI 自动闭环",
+      conv: [
+        { type: "cust", text: "小型工厂 30 人,你们 CRM 价格大概多少? 有教育优惠吗?" },
+        { type: "ai", text: "您好!30 人规模适合我们的金牌套餐 ¥3.2 万/年,含 30 个用户许可 + 移动端 + 报表分析。教育/初创/退伍优惠都有,各 10-15%。我把详细套餐表发您,您留个手机号或微信吗?" },
+        { type: "cust", text: "微信 13800138000, 谢谢" },
+        { type: "ai", text: "已加您微信,稍后我们海外销售小赵会跟您对接。今晚不打扰您, 明早 9:30 联系您, 可以吗?" }
+      ],
+      reason: "AI 决策推理: ① 售前询价 = 高频闭环场景 ② 30 人规模匹配金牌套餐 (产品库置信 99%) ③ 客户主动留微信 = 高意愿信号 ④ 已将销售机会推送给值班销售 + 自动安排次日 9:30 跟进。 不打扰夜间客户的细节体现服务质量。"
+    },
+    "n4": {
+      head: "03:38 · 李工 · 东莞某电子 (试用 18 天) · AI 自动闭环",
+      conv: [
+        { type: "cust", text: "报表里的客户字段能自定义吗?我想加几个公司专属字段。" },
+        { type: "ai", text: "可以的, 报表自定义字段在'设置 - 字段管理'里, 您可以加最多 30 个自定义字段。我把操作视频(2 分钟)发您,试试看?" },
+        { type: "cust", text: "好的, 收到视频了, 我试下。" },
+        { type: "ai", text: "好的,有问题随时找我。这次操作我已沉淀到您的客户档案,下次直接搜'字段管理'就能找到。" }
+      ],
+      reason: "AI 决策推理: ① 操作类问题 = 知识库标准答案(置信 96%) ② 试用客户激活是关键, 主动推视频降低门槛 ③ 沉淀客户档案 = 个性化记忆。"
+    },
+    "n5": {
+      head: "04:05 · 赵生 · 深圳某五金 (老客户 2 年) · AI 自动闭环",
+      conv: [
+        { type: "cust", text: "我员工反映报表导出后 Excel 看是乱码, 是不是编码问题?" },
+        { type: "ai", text: "对,UTF-8 BOM 编码问题。我把 1 步配置 + 视频发您,设置后所有员工导出都正常。今后此问题不会再出现。" },
+        { type: "cust", text: "好的谢谢,问题搞定" }
+      ],
+      reason: "AI 决策推理: ① 编码问题月内 47 次, 知识库置顶 ② 客户主动诊断 = 自助意愿强 ③ 直接给方案 + 闭环。"
+    },
+    "n6": {
+      head: "04:18 · 抖音私信 · 询单 · AI 转早班",
+      conv: [
+        { type: "cust", text: "你们这套对接淘宝/京东订单同步吗?我现在 4 个店铺。" },
+        { type: "ai", text: "您好! 您说的电商订单同步, 我们目前有部分对接(详细要看您的店铺类型)。让我们专门的电商对接同事明天 9:30 联系您, 可以加您微信吗?" },
+        { type: "cust", text: "13900139000" },
+        { type: "ai", text: "收到,明早 9:30 之前会有人联系您。晚安!" }
+      ],
+      reason: "AI 决策推理: ① 电商对接是知识库 GAP(已标记入 Board 6 GAP 列表第 4 条)② 直接答会出错,转早班最稳 ③ 但要主动获取联系方式 + 确定时间 = 不丢线索。 置信仅 68% < 阈值 85%, 触发转早班。"
+    },
+    "n7": {
+      head: "04:30 · 钱厂长 · 佛山某五金 (钻石) · 紧急升级",
+      conv: [
+        { type: "cust", text: "明早我要给老板做汇报, 帮我导一份本月销售趋势图表!" },
+        { type: "ai", text: "钱厂长您好,本月销售趋势报表系统已有标准模板,我现在就帮您生成。同时,既然是给老板汇报,我让我们 BI 顾问王工早上 7:30 主动联系您,看要不要加些更深的对比数据(同比/环比/Top10 客户)?" },
+        { type: "cust", text: "好啊太好了, 早上叫我吧" }
+      ],
+      reason: "AI 决策推理: ① 钻石客户 + 明早汇报 = 极高重要性 ② AI 已自动生成报表 + 主动加码 BI 顾问 ③ 7:30 客服值班主管钉钉, 必须有人接 ④ 置信 99% 但仍触发主动升级, 因为'老板汇报'是关键时刻。"
+    },
+    "n8": {
+      head: "04:36 · 网页留言 · 询单 · AI 自动闭环",
+      conv: [
+        { type: "cust", text: "贵司有制造业的成功案例可以分享吗? 行业老大用过吗?" },
+        { type: "ai", text: "有的! 我们在制造业有 200+ 客户, 包括 5 家行业龙头(具体公司因合作协议不便公开)。这是我们的制造业行业白皮书 + 5 个匿名成功案例 PDF,您可以参考。需要安排深度交流可以预约 30 分钟在线会议。" },
+        { type: "cust", text: "PDF 收到, 看看再说" }
+      ],
+      reason: "AI 决策推理: ① 行业案例询问 = 高频闭环 ② 我方制造业案例库齐全 ③ 客户'看看再说' = 信号普通, 暂不打扰 ④ 已自动归档线索 + 设 3 天后销售主动跟进。"
+    }
+  };
+  var curNightId = null;
+  view.addEventListener("click", function (e) {
+    var r = e.target.closest('[data-fx="csNightPick"]');
+    if (!r) return;
+    var nid = r.dataset.nid;
+    if (curNightId === nid) {
+      Q("#csNightDetail").classList.remove("show");
+      r.classList.remove("cur");
+      curNightId = null;
+      return;
+    }
+    QA(".night-log-row").forEach(function (x) { x.classList.remove("cur"); });
+    r.classList.add("cur");
+    curNightId = nid;
+    var d = nightDetails[nid]; if (!d) return;
+    var conv = d.conv.map(function (m) {
+      return '<div class="nd-bubble ' + m.type + '"><div class="ndb-text">' + m.text + '</div></div>';
+    }).join("");
+    Q("#csNightDetail").innerHTML = '<div class="nd-head">' + d.head + '</div>' +
+      '<div class="nd-conv">' + conv + '</div>' +
+      '<div class="nd-reason"><span class="ndr-k">🤖 AI 决策推理</span>' + d.reason + '</div>';
+    Q("#csNightDetail").classList.add("show");
+  });
+  view.addEventListener("click", function (e) {
+    var t = e.target.closest('[data-fx="csNightTab"]');
+    if (!t) return;
+    QA('.night-log-tab').forEach(function (x) { x.classList.toggle("cur", x === t); });
+    var dayLabel = { today: "今夜", yest: "昨夜", week: "本周" }[t.dataset.tab];
+    ts("📅 已切换到 " + dayLabel + " 数据 · 演示模式仅展示今夜真实记录");
+  });
+  /* 置信度滑块 */
+  var nightConf = Q("#csNightConf");
+  if (nightConf) {
+    nightConf.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("csNightConfV", v);
+      // 模拟变化:阈值低 → 更多自闭环,反之更多转早班
+      var solved = Math.round(42 * (1 - (v - 50) / 100 * 0.4));
+      solved = Math.max(10, Math.min(40, solved));
+      var relay = Math.max(2, 42 - solved - 2);
+      txt("csNightSolved", solved);
+      txt("csNightRelay", relay);
+      var tip;
+      if (v < 70) tip = '<b>⚠ 当前阈值偏低 ' + v + '%</b> · AI 自闭环率高但可能误答复杂问题。误答率 ' + ((85 - v) * 0.25).toFixed(1) + '%。';
+      else if (v < 90) tip = '<b>📊 平衡区(70-90%)</b> · AI 在置信度 ≥ ' + v + '% 时自闭环。误答率仅 0.6%。今夜回测最优区间。';
+      else tip = '<b>⚠ 偏严 ' + v + '%</b> · AI 几乎不主动答,客户夜里多数等到早晨才有人接,体验下降。建议 75-90%。';
+      Q("#csNightConfTip").innerHTML = tip;
+    });
+  }
+
+  /* ============================================================
+     Board 4: 工单流转
+     ============================================================ */
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="tkAct"]');
+    if (!b) return;
+    ts(b.dataset.msg);
+    var card = b.closest(".ticket-card");
+    if (card) {
+      QA(".tc-acts button", card).forEach(function (x) { x.disabled = true; });
+      var st = document.createElement("span");
+      st.className = "done-state";
+      st.style.color = "var(--green)";
+      st.textContent = "✓ 已处置 · AI 正在跟进";
+      var acts = card.querySelector(".tc-acts");
+      if (acts) acts.appendChild(st);
+      var pending = parseInt(Q("#tkPending").textContent, 10);
+      Q("#tkPending").textContent = Math.max(0, pending - 1);
+      if (card.classList.contains("overdue")) {
+        var over = parseInt(Q("#tkStatOver").textContent, 10);
+        Q("#tkStatOver").textContent = Math.max(0, over - 1);
+      } else if (card.classList.contains("warn-overdue")) {
+        var warn = parseInt(Q("#tkStatWarn").textContent, 10);
+        Q("#tkStatWarn").textContent = Math.max(0, warn - 1);
+      }
+      var urged = parseInt(Q("#tkUrged").textContent, 10);
+      Q("#tkUrged").textContent = urged + 1;
+    }
+  });
+  var slaR = Q("#tkSlaR");
+  if (slaR) {
+    slaR.addEventListener("input", function () {
+      var v = parseInt(this.value, 10);
+      txt("tkSlaV", v);
+      var newOver = v <= 12 ? 8 : v <= 20 ? 5 : v <= 28 ? 3 : 1;
+      Q("#tkStatOver").textContent = newOver;
+      var tip;
+      if (v <= 8) tip = '<b>⚠ 过于敏感(≤ 8h)</b> · 大量误报, 工程师疲于响应。';
+      else if (v <= 18) tip = '<b>📊 严格(' + v + 'h)</b> · 误报少, AI 早干预 · 客户响应快。适合 VIP 优先。';
+      else if (v <= 30) tip = '<b>🤖 AI 推荐(18-30h)</b> · 平衡区。当前预计超时 ' + newOver + ' 单。';
+      else tip = '<b>⚠ 过于宽松(' + v + 'h)</b> · 可能错过及时介入, 客户体验下降。';
+      Q("#tkSlaTip").innerHTML = tip;
+    });
+  }
+
+  /* ============================================================
+     Board 5: 质检 + 陪练
+     ============================================================ */
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="qaIntervene"]');
+    if (b) {
+      var row = b.closest(".qa-alert-row");
+      row.classList.add("handled", "handled-interv");
+      row.querySelector(".qar-state").textContent = "✓ 主管已介入接管";
+      ts(b.dataset.msg);
+      return;
+    }
+    var g = e.target.closest('[data-fx="qaIgnore"]');
+    if (g) {
+      var row2 = g.closest(".qa-alert-row");
+      row2.classList.add("handled", "handled-ignore");
+      row2.querySelector(".qar-state").textContent = "已忽略";
+      ts("已忽略 · 计入新员工训练记录");
+    }
+  });
+
+  /* 陪练 */
+  var trainScenes = {
+    "s1": { name: "报价咨询", aiOpen: "你好,我是某机加工厂的, 30 个员工。看了你们网站想了解下报价情况。具体怎么收费?", goodKeys: ["规模", "套餐", "金牌", "了解", "需求"], badKeys: ["看说明书", "网站", "管不了"] },
+    "s2": { name: "价格异议", aiOpen: "你们这价格比别家贵 30%, 我用某竞品才 ¥1.8 万, 你们要 ¥3.2 万,凭什么?", goodKeys: ["价值", "案例", "服务", "ROI", "对比"], badKeys: ["就这价", "你别买", "嫌贵就走"] },
+    "s3": { name: "对比竞品", aiOpen: "我同时在试用你们家和某竞品 X,他们的移动端比你们流畅啊?", goodKeys: ["差异", "优势", "案例", "试试", "深度"], badKeys: ["他们差", "别用 X", "我们一样"] },
+    "s4": { name: "演示请求", aiOpen: "我们老板想看看你们的产品,能下午 3 点演示吗?20 分钟。", goodKeys: ["可以", "确认", "准备", "什么模块"], badKeys: ["晚点", "现在没空"] },
+    "s5": { name: "续约升级", aiOpen: "我们用得挺好,但 7 月续约你们涨价 15%, 这有点说不过去吧?", goodKeys: ["理解", "方案", "升级", "锁价"], badKeys: ["公司规定", "没办法"] },
+    "s6": { name: "投诉处置", aiOpen: "你们的产品太烂了!报表导出乱码,工单提了 3 天没人理!我要退款!", goodKeys: ["抱歉", "立即", "处理", "您稍等", "补偿"], badKeys: ["不是我们的问题", "别急", "管不了"] },
+    "s7": { name: "合同细节", aiOpen: "续约合同的服务条款第 7 条 '数据归属' 我看不太懂, 数据是你们的还是我们的?", goodKeys: ["归属", "您", "明确", "解释", "条款"], badKeys: ["反正", "差不多", "看就行"] },
+    "s8": { name: "退款申请", aiOpen: "我用了一周觉得不合适,想全额退款, 行不行?", goodKeys: ["理解", "政策", "原因", "改进", "方案"], badKeys: ["不退", "不可能", "你的问题"] }
+  };
+  var trainDiff = "mid"; // easy / mid / hard
+  var trainCurScene = "s1";
+  function renderTrainChat(scene, openMsg) {
+    var box = Q("#trChat");
+    box.innerHTML = '<div class="train-bubble cust"><div class="tb-ava">🎭</div><div class="tb-text">' + openMsg + '</div></div>';
+  }
+  function startScene(sid) {
+    trainCurScene = sid;
+    QA(".train-scene").forEach(function (s) { s.classList.toggle("cur", s.dataset.sid === sid); });
+    var sc = trainScenes[sid];
+    if (!sc) return;
+    var diffPrefix = { easy: "(语气普通) ", mid: "(语气挑剔) ", hard: "(语气暴躁 ‼) " }[trainDiff];
+    renderTrainChat(sc, diffPrefix + sc.aiOpen);
+  }
+  view.addEventListener("click", function (e) {
+    var s = e.target.closest('[data-fx="trScene"]');
+    if (s) { startScene(s.dataset.sid); return; }
+    var d = e.target.closest('[data-fx="trDiff"]');
+    if (d) {
+      QA('[data-fx="trDiff"]').forEach(function (x) { x.classList.toggle("cur", x === d); });
+      trainDiff = d.dataset.d;
+      startScene(trainCurScene);
+      ts("🎭 难度已切换 · 重启场景");
+    }
+  });
+  Q("#trSend").addEventListener("click", function () {
+    var t = (Q("#trInput").value || "").trim();
+    if (!t) { ts("请输入答案"); return; }
+    var sc = trainScenes[trainCurScene];
+    var goodHit = sc.goodKeys.some(function (k) { return t.indexOf(k) >= 0; });
+    var badHit = sc.badKeys.some(function (k) { return t.indexOf(k) >= 0; });
+    var box = Q("#trChat");
+    box.innerHTML += '<div class="train-bubble csr"><div class="tb-ava">你</div><div class="tb-text">' + t + '</div></div>';
+    var fb, cls = "";
+    if (badHit) {
+      cls = "bad";
+      fb = '<div class="tb-fb-tt">⚠ AI 评分:不达标</div>你触碰了红线话术(如"看说明书 / 管不了"等)。客户对此非常敏感。<b>建议改为:</b>"我立即帮您处理,您稍等一下..."从安抚情绪开始。';
+    } else if (goodHit) {
+      fb = '<div class="tb-fb-tt">✓ AI 评分:通过 · 88 分</div>话术得体,体现了客户视角。<b>可加分点:</b>主动给出具体时间 / 数字 / 方案,提升专业感。';
+    } else {
+      fb = '<div class="tb-fb-tt">⚠ AI 评分:及格 · 72 分</div>回答中立,缺乏明确价值点。<b>建议:</b>① 体现同理(理解 ② 给具体方案 ③ 给时间承诺。';
+    }
+    box.innerHTML += '<div class="train-bubble fb ' + cls + '"><div class="tb-ava"></div><div class="tb-text">' + fb + '</div></div>';
+    Q("#trInput").value = "";
+    box.scrollTop = box.scrollHeight;
+  });
+  Q("#trInput").addEventListener("keydown", function (e) { if (e.key === "Enter") Q("#trSend").click(); });
+  /* 初始化陪练 */
+  startScene("s1");
+
+  /* ============================================================
+     Board 6: 投诉 + 知识 GAP
+     ============================================================ */
+  view.addEventListener("click", function (e) {
+    var t = e.target.closest('[data-fx="cmpTab"]');
+    if (t) {
+      QA('[data-fx="cmpTab"]').forEach(function (x) { x.classList.toggle("cur", x === t); });
+      ts("📅 已切换 · 演示版仅展示本月数据");
+    }
+    var d = e.target.closest('[data-fx="cmpDrill"]');
+    if (d) {
+      var det = {
+        "prod-1": "📋 报表导出乱码 · 月内 23 次 · 已沉淀知识库 + 提工单 #PROD-2026-0042 给产品组(默认 UTF-8 BOM 编码)",
+        "prod-2": "📋 移动端同步延迟 · 17 次 · 已提工单给技术组, 排期 6 月底优化",
+        "prod-3": "📋 权限分组不灵活 · 12 次 · 已提产品需求 + 收集客户具体场景中",
+        "serv-1": "📋 工程师响应慢 · 19 次 · AI 已自动催办 11 次 · 已改进 SLA 阈值",
+        "serv-2": "📋 新员工话术不规范 · 12 次 · 5 人已强制陪练补课",
+        "serv-3": "📋 培训排期久 · 7 次 · 客户成功组已扩 2 人",
+        "logis-1": "📋 加密狗发货慢 · 15 次 · 已与物流议价 + 备货策略调整",
+        "logis-2": "📋 物流未提供单号 · 10 次 · 已强制系统自动同步单号",
+        "price-1": "📋 续约涨价未提前告知 · 13 次 · 已设客户成功提前 60 天主动沟通流程",
+        "price-2": "📋 附加功能定价不透明 · 8 次 · 官网价格表已重写"
+      };
+      ts(det[d.dataset.cid] || "已打开投诉详情");
+    }
+    var c = e.target.closest('[data-fx="churnDrill"]');
+    if (c) {
+      var ch = {
+        "ch1": "📋 对手价格更便宜流失 · 江门某汽配(¥1.8万,流向 X)+ 中山某加工(¥2.1万→¥1.4 万 X 报价)+ 深圳某模具(¥2.4 万→¥1.6 万 X 报价)",
+        "ch2": "📋 响应跟不上流失 · 佛山某五金(连续 3 次工单超时)+ 东莞某电子(培训排期延后 2 周)",
+        "ch3": "📋 业务收缩流失 · 江门某印刷(订单减半)+ 中山某五金(裁员 30%)",
+        "ch4": "📋 产品功能流失 · 惠州某汽配(需要移动端深度功能)",
+        "ch5": "📋 联系人离职流失 · 广州某模具(原对接人 IT 经理换工作)"
+      };
+      ts(ch[c.dataset.cid] || "已打开流失详情");
+    }
+  });
+  /* GAP 入库 */
+  view.addEventListener("click", function (e) {
+    var b = e.target.closest('[data-fx="kbAdopt"]');
+    if (b) {
+      var row = b.closest(".kb-gap-row");
+      row.classList.add("adopted");
+      QA(".kgr-acts button", row).forEach(function (x) { x.style.display = "none"; });
+      var pend = parseInt(Q("#kbgPend").textContent, 10);
+      Q("#kbgPend").textContent = Math.max(0, pend - 1);
+      ts("✅ AI 草拟答案已批入知识库 · 下次此类问题 AI 直接闭环");
+      return;
+    }
+    var s = e.target.closest('[data-fx="kbSkip"]');
+    if (s) {
+      var row2 = s.closest(".kb-gap-row");
+      row2.style.opacity = ".45";
+      QA(".kgr-acts button", row2).forEach(function (x) { x.style.display = "none"; });
+      var pend2 = parseInt(Q("#kbgPend").textContent, 10);
+      Q("#kbgPend").textContent = Math.max(0, pend2 - 1);
+      ts("⏭ 已跳过 · 不入库, 此问题仍由人工接");
+    }
+  });
+})();
 </script>
 </body>
 </html>
