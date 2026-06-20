@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import ActionableInsightCard from '../components/ai/ActionableInsightCard';
 import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import MitigationGeneratorModal from '../components/ai/MitigationGeneratorModal';
 import CapacityKPIBar from '../components/capacity/CapacityKPIBar';
@@ -15,6 +16,7 @@ import { useCapacityOpsStore } from '../store/useCapacityOpsStore';
 import type { MitigationGeneratorOutput, MitigationPlan } from '../mock/agentResponses.sprint5';
 import type { Bottleneck } from '../mock/capacityData';
 import { BOTTLENECK_PREDICTOR } from '../mock/agentResponses.sprint5';
+import { BOTTLENECKS } from '../mock/capacityData';
 
 export default function CapacityPage() {
   const [insightDismissed, setInsightDismissed] = useState(false);
@@ -25,6 +27,8 @@ export default function CapacityPage() {
   const pushMessage = useCopilotStore((s) => s.pushMessage);
   const applyMitigation = useCapacityOpsStore((s) => s.applyMitigation);
   const appliedMitigations = useCapacityOpsStore((s) => s.appliedMitigations);
+  const resolvedBottlenecks = useCapacityOpsStore((s) => s.resolvedBottlenecks);
+  const batchApplyAllBottlenecks = useCapacityOpsStore((s) => s.batchApplyAllBottlenecks);
   const appliedId = currentBottleneckId ? appliedMitigations.get(currentBottleneckId) ?? null : null;
 
   async function onGenerate(bn: Bottleneck) {
@@ -72,21 +76,44 @@ export default function CapacityPage() {
         ]}
       />
 
-      {/* AI 提示 · #14 瓶颈预测 */}
-      {!insightDismissed && (
-        <AIInsightCard
-          insight={{
-            id: 'cap-bottleneck',
-            severity: 'warning',
-            agentSource: 'capacity.bottleneck-predictor',
-            message: `🤖 ${BOTTLENECK_PREDICTOR.summary}（最严重：${BOTTLENECK_PREDICTOR.bottlenecks[0].resourceName}，连续 ${BOTTLENECK_PREDICTOR.bottlenecks[0].durationDays} 天） · ${BOTTLENECK_PREDICTOR.runAt}`,
-            primaryAction: { label: '查看瓶颈', route: '/capacity' },
-            dismissible: true,
-            generatedAt: new Date(),
-          }}
-          onDismiss={() => setInsightDismissed(true)}
-        />
-      )}
+      {/* ★ v2.2.4 #14 瓶颈预测 改交互式 — 一键应用全部 AI 推荐方案 */}
+      {!insightDismissed && (() => {
+        const remain = BOTTLENECKS.filter((b) => !resolvedBottlenecks.has(b.resourceId));
+        if (remain.length === 0) {
+          return (
+            <AIInsightCard
+              insight={{
+                id: 'cap-done',
+                severity: 'success',
+                agentSource: 'capacity.bottleneck-predictor',
+                message: `✅ 全部 ${BOTTLENECKS.length} 处瓶颈已应用 AI 缓解方案 · 热力图全面降级 · Agent #14 进入待机`,
+                primaryAction: { label: '关闭', route: '/capacity' },
+                dismissible: true,
+                generatedAt: new Date(),
+              }}
+              onDismiss={() => setInsightDismissed(true)}
+            />
+          );
+        }
+        return (
+          <ActionableInsightCard
+            id="cap-bottleneck"
+            agentNumber={14}
+            agentName="瓶颈预测"
+            message={`⚡ ${BOTTLENECK_PREDICTOR.summary}（${remain.map((b) => b.resourceName).join(' + ')}），AI 已对各瓶颈生成推荐方案 A`}
+            primaryAction={{
+              label: `一键应用方案 A · 解除 ${remain.length} 处瓶颈`,
+              apply: async () => {
+                await new Promise((r) => setTimeout(r, 1000));
+                batchApplyAllBottlenecks(remain.map((b) => b.resourceId));
+                return `✓ 已对 ${remain.length} 处瓶颈应用 AI 推荐方案 A · 热力图相应行 utilization 全部 -18pp · 影响工单数下降 67%`;
+              },
+            }}
+            secondaryAction={{ label: '查看明细', route: '/capacity' }}
+            onDismiss={() => setInsightDismissed(true)}
+          />
+        );
+      })()}
 
       <CapacityKPIBar />
 

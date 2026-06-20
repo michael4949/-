@@ -56,6 +56,10 @@ interface ScheduleState {
   triggerConflictDemo: (ids: string[]) => void;
   clearConflictHighlight: () => void;
   setSimulateMode: (v: boolean) => void;
+  // ===== v2.2.4 #6 一键应用矩阵修正 =====
+  /** 应用矩阵历史复盘建议：换型损失 -0.4pp + 触发 20% 工单微调 */
+  applyMatrixCorrection: () => Promise<{ corrected: number; coLossBefore: number; coLossAfter: number }>;
+  matrixCorrectionApplied: boolean;
 }
 
 function reCalcKPI(scheduled: WorkOrder[], baseKpi: ScheduleKPI): ScheduleKPI {
@@ -100,6 +104,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   dispatchedIds: new Set<string>(),
   simulateMode: false,
   conflictHighlightIds: [],
+  matrixCorrectionApplied: false,
   kpiHistory: [
     { at: new Date('2026-07-09T18:00:00'), label: '7/09', otd: 89.5, changeoverLoss: 13.8, utilization: 76.2, wipValue: 1_100_000 },
     { at: new Date('2026-07-10T18:00:00'), label: '7/10', otd: 90.1, changeoverLoss: 13.4, utilization: 76.8, wipValue: 1_120_000 },
@@ -419,6 +424,34 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   clearConflictHighlight: () => set({ conflictHighlightIds: [] }),
 
   setSimulateMode: (v) => set({ simulateMode: v }),
+
+  // ★ v2.2.4 #6 一键应用矩阵修正：换型损失下降 0.4pp + KPI 写历史 + 部分工单闪烁
+  applyMatrixCorrection: async () => {
+    await new Promise((r) => setTimeout(r, 1000));
+    const s = get();
+    const coBefore = s.kpi.changeoverLoss;
+    const coAfter = +Math.max(8, coBefore - 0.4).toFixed(1);
+    // 选 30 张同漆种工单闪烁（模拟矩阵修正后被重新评分）
+    const flashTargets = s.scheduled
+      .filter((w) => w.productCategory === 'enameled' && w.scheduledStart && w.scheduledStart.getTime() > Date.now())
+      .slice(0, 30)
+      .map((w) => w.id);
+    const newKpi: ScheduleKPI = {
+      ...s.kpi,
+      changeoverLoss: coAfter,
+      otd: +(s.kpi.otd + 0.4).toFixed(1),
+    };
+    const at = new Date();
+    set({
+      matrixCorrectionApplied: true,
+      kpi: newKpi,
+      kpiHistory: [...s.kpiHistory, {
+        at, label: `${at.getHours()}:${String(at.getMinutes()).padStart(2,'0')}*`, ...newKpi,
+      }],
+    });
+    get().flash(flashTargets, 3000);
+    return { corrected: flashTargets.length, coLossBefore: coBefore, coLossAfter: coAfter };
+  },
 }));
 
 export { GANTT_START };

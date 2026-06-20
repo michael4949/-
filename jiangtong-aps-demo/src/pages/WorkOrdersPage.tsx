@@ -4,13 +4,14 @@
 import { useState } from 'react';
 import { ClipboardList, Sparkles, FileDown, Upload, Plus, X } from 'lucide-react';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import ActionableInsightCard from '../components/ai/ActionableInsightCard';
 import AICapabilityBanner from '../components/ai/AICapabilityBanner';
 import BOMSuggestionModal from '../components/ai/BOMSuggestionModal';
 import AnomalyAnalysisModal from '../components/ai/AnomalyAnalysisModal';
 import WorkOrderKPIBar from '../components/workorder/WorkOrderKPIBar';
 import WorkOrderListTable from '../components/workorder/WorkOrderListTable';
 import WorkOrderDrawer from '../components/workorder/WorkOrderDrawer';
-import { ANOMALY_STATS } from '../mock/workOrderAnomalies';
+import { ANOMALY_STATS, WORK_ORDER_ANOMALIES } from '../mock/workOrderAnomalies';
 import { mockAIInvoke } from '../utils/mockApi';
 import { useCopilotStore } from '../store/useCopilotStore';
 import { useWorkOrderOpsStore } from '../store/useWorkOrderOpsStore';
@@ -30,6 +31,7 @@ export default function WorkOrdersPage() {
   const markAnalyzed = useWorkOrderOpsStore((s) => s.markAnalyzed);
   const markedAnalyzed = useWorkOrderOpsStore((s) => s.markedAnalyzed);
   const setBOMGenerated = useWorkOrderOpsStore((s) => s.setBOMGenerated);
+  const batchMarkAnalyzed = useWorkOrderOpsStore((s) => s.batchMarkAnalyzed);
   // 异常 KPI 已减去已处置数
   const remainAnomalies = Math.max(0, ANOMALY_STATS.total - markedAnalyzed.size);
 
@@ -104,20 +106,26 @@ export default function WorkOrdersPage() {
         ]}
       />
 
-      {/* AI 提示 · #9 异常工单识别 — 实时反映已处置数 */}
+      {/* ★ v2.2.4 #9 异常工单识别 改交互式 — 一键批量处置 */}
       {!insightDismissed && remainAnomalies > 0 && (
-        <AIInsightCard
-          insight={{
-            id: 'wo-anomaly',
-            severity: 'warning',
-            agentSource: 'workorder.anomaly-detector',
-            message: `🤖 检测到 ${remainAnomalies} 张工单状态异常（已处置 ${markedAnalyzed.size}/${ANOMALY_STATS.total}）· 点「仅看异常」筛选 → 行末点 ✨ AI 分析`,
-            primaryAction: { label: '仅看异常', route: '/work-orders' },
-            dismissible: true,
-            generatedAt: new Date(),
+        <ActionableInsightCard
+          id="wo-anomaly"
+          agentNumber={9}
+          agentName="异常工单识别"
+          message={`🤖 检测到 ${remainAnomalies} 张工单状态异常（已处置 ${markedAnalyzed.size}/${ANOMALY_STATS.total}），AI 可一键批量进入处置流程`}
+          primaryAction={{
+            label: `一键批量处置 ${remainAnomalies} 张`,
+            apply: async () => {
+              await new Promise((r) => setTimeout(r, 800));
+              const remainIds = WORK_ORDER_ANOMALIES
+                .filter((a) => !markedAnalyzed.has(a.workOrderId))
+                .map((a) => a.workOrderId);
+              batchMarkAnalyzed(remainIds);
+              return `✓ 已对 ${remainIds.length} 张异常工单完成 AI 批量分析 · 行内标"⚠ 异常"全部变为"✓ 已处置" · 异常 KPI 实时清零`;
+            },
           }}
+          secondaryAction={{ label: '查看明细', route: '/work-orders' }}
           onDismiss={() => setInsightDismissed(true)}
-          onAction={() => setHighlight(true)}
         />
       )}
       {!insightDismissed && remainAnomalies === 0 && (

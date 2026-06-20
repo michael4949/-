@@ -23,32 +23,33 @@ export const AGENT_REGISTRY: AgentMeta[] = [
   // Sprint 2-3 已实现
   { number: 1,  id: 'schedule.insert-assistant',           name: '紧急插单助手',     category: '对话式', touchpoint: 'Copilot',    page: '/schedule',       status: 'active', todayTriggers: 7,  adoptionRate: 0.81, sprint: 2 },
   { number: 2,  id: 'schedule.scheme-explainer',           name: '排产方案解释器',   category: '解释器', touchpoint: '✨ Modal',   page: '/schedule',       status: 'active', todayTriggers: 4,  adoptionRate: 0.92, sprint: 2 },
-  { number: 3,  id: 'schedule.anomaly-observer',           name: '异常排产识别',     category: '观察式', touchpoint: 'Insight + Inline', page: '/dashboard, /schedule', status: 'active', todayTriggers: 12, adoptionRate: 0.68, sprint: 2 },
+  // ★ v2.2.4：所有 观察式 都已升级为 生成器/解释器 — 支持一键应用
+  { number: 3,  id: 'schedule.anomaly-observer',           name: '异常排产识别',     category: '生成器', touchpoint: 'Insight + Inline + ✨ 一键合并', page: '/dashboard, /schedule', status: 'active', todayTriggers: 12, adoptionRate: 0.68, sprint: 2 },
   { number: 4,  id: 'schedule.stranding-config-assistant', name: '铜绞线配股助手',   category: '对话式', touchpoint: 'Copilot + ✨', page: '/schedule',     status: 'active', todayTriggers: 3,  adoptionRate: 0.83, sprint: 3 },
   { number: 21, id: 'cost.loss-diagnostic',                name: '损耗异常诊断',     category: '解释器', touchpoint: '✨ + Copilot', page: '/cost',         status: 'active', todayTriggers: 2,  adoptionRate: 0.85, sprint: 3 },
   { number: 22, id: 'cost.analysis-assistant',             name: '成本分析助手',     category: '对话式', touchpoint: 'Copilot',    page: '/cost',           status: 'active', todayTriggers: 6,  adoptionRate: 0.74, sprint: 3 },
 
   // Sprint 4 已实现
   { number: 5,  id: 'schedule-rule.matrix-generator',      name: '换型矩阵生成助手', category: '生成器', touchpoint: '✨ Modal',   page: '/schedule',       status: 'active', todayTriggers: 2,  adoptionRate: 0.65, sprint: 4 },
-  { number: 6,  id: 'schedule-rule.history-reviewer',      name: '矩阵历史复盘',     category: '观察式', touchpoint: 'Insight',    page: '/dashboard, /schedule', status: 'active', todayTriggers: 1, adoptionRate: 0.70, sprint: 4 },
-  { number: 7,  id: 'constraint.implicit-miner',           name: '隐性约束挖掘',     category: '观察式', touchpoint: 'AI 治理',    page: '/settings',       status: 'active', todayTriggers: 1,  adoptionRate: 0.62, sprint: 4 },
+  { number: 6,  id: 'schedule-rule.history-reviewer',      name: '矩阵历史复盘',     category: '生成器', touchpoint: 'Insight + ✨ 一键应用矩阵', page: '/dashboard, /schedule', status: 'active', todayTriggers: 1, adoptionRate: 0.70, sprint: 4 },
+  { number: 7,  id: 'constraint.implicit-miner',           name: '隐性约束挖掘',     category: '生成器', touchpoint: 'AI 治理 Tab · 接受/驳回', page: '/settings',       status: 'active', todayTriggers: 1,  adoptionRate: 0.62, sprint: 4 },
   { number: 8,  id: 'workorder.bom-generator',             name: '样品工单 BOM 生成', category: '生成器', touchpoint: '✨ Modal',   page: '/work-orders',    status: 'active', todayTriggers: 5,  adoptionRate: 0.78, sprint: 4 },
-  { number: 9,  id: 'workorder.anomaly-detector',          name: '异常工单识别',     category: '观察式', touchpoint: 'Insight',    page: '/dashboard, /work-orders', status: 'active', todayTriggers: 4, adoptionRate: 0.66, sprint: 4 },
+  { number: 9,  id: 'workorder.anomaly-detector',          name: '异常工单识别',     category: '生成器', touchpoint: 'Insight + ✨ 一键批量处置', page: '/dashboard, /work-orders', status: 'active', todayTriggers: 4, adoptionRate: 0.66, sprint: 4 },
   { number: 10, id: 'material.shortage-root-cause',        name: '缺料根因分析',     category: '解释器', touchpoint: '✨ + Copilot', page: '/material-check', status: 'active', todayTriggers: 8, adoptionRate: 0.82, sprint: 4 },
-  { number: 11, id: 'material.shortage-predictor',         name: '齐套风险预测',     category: '观察式', touchpoint: 'Insight',    page: '/dashboard, /material-check', status: 'active', todayTriggers: 1, adoptionRate: 0.71, sprint: 4 },
-  { number: 18, id: 'constraint.conflict-explainer',       name: '约束冲突解释器',   category: '解释器', touchpoint: '自动 Modal', page: '/schedule',       status: 'active', todayTriggers: 3,  adoptionRate: 0.79, sprint: 4 },
+  { number: 11, id: 'material.shortage-predictor',         name: '齐套风险预测',     category: '生成器', touchpoint: 'Insight + ✨ 一键批量准备', page: '/dashboard, /material-check', status: 'active', todayTriggers: 1, adoptionRate: 0.71, sprint: 4 },
+  { number: 18, id: 'constraint.conflict-explainer',       name: '约束冲突解释器',   category: '解释器', touchpoint: '自动 Modal · 采用方案', page: '/schedule',       status: 'active', todayTriggers: 3,  adoptionRate: 0.79, sprint: 4 },
 
   // Sprint 5 已实现
   { number: 12, id: 'inventory.conflict-mediator',         name: '抢料冲突调解',     category: '生成器', touchpoint: '✨ Modal',   page: '/inventory-lock', status: 'active', todayTriggers: 5,  adoptionRate: 0.77, sprint: 5 },
-  { number: 13, id: 'inventory.health-monitor',            name: '锁定健康度监测',   category: '观察式', touchpoint: 'Insight',    page: '/inventory-lock', status: 'active', todayTriggers: 1,  adoptionRate: 0.64, sprint: 5 },
-  { number: 14, id: 'capacity.bottleneck-predictor',       name: '瓶颈预测',         category: '观察式', touchpoint: 'Insight',    page: '/capacity',       status: 'active', todayTriggers: 1,  adoptionRate: 0.69, sprint: 5 },
+  { number: 13, id: 'inventory.health-monitor',            name: '锁定健康度监测',   category: '生成器', touchpoint: 'Insight + ✨ 批量释放/稳定', page: '/inventory-lock', status: 'active', todayTriggers: 1,  adoptionRate: 0.64, sprint: 5 },
+  { number: 14, id: 'capacity.bottleneck-predictor',       name: '瓶颈预测',         category: '生成器', touchpoint: 'Insight + ✨ 一键全部生成方案', page: '/capacity',       status: 'active', todayTriggers: 1,  adoptionRate: 0.69, sprint: 5 },
   { number: 15, id: 'capacity.mitigation-generator',       name: '缓解建议生成',     category: '生成器', touchpoint: '✨ Modal',   page: '/capacity',       status: 'active', todayTriggers: 4,  adoptionRate: 0.71, sprint: 5 },
   { number: 16, id: 'gantt.natural-search',                name: '甘特图智能搜索',   category: '对话式', touchpoint: 'Copilot',    page: '/schedule',       status: 'active', todayTriggers: 9,  adoptionRate: 0.73, sprint: 5 },
   { number: 17, id: 'gantt.drag-suggestion',               name: '拖拽建议',         category: '生成器', touchpoint: '悬浮提示',   page: '/schedule',       status: 'active', todayTriggers: 21, adoptionRate: 0.58, sprint: 5 },
 
   // Sprint 6 新增
   { number: 19, id: 'alert.cause-explainer',               name: '预警归因 Agent',   category: '解释器', touchpoint: '✨ Modal',   page: '/alerts',         status: 'active', todayTriggers: 3,  adoptionRate: 0.84, sprint: 6 },
-  { number: 20, id: 'alert.noise-filter',                  name: '预警噪声过滤',     category: '观察式', touchpoint: 'AI 治理',    page: '/settings',       status: 'active', todayTriggers: 1,  adoptionRate: 0.70, sprint: 6 },
+  { number: 20, id: 'alert.noise-filter',                  name: '预警噪声过滤',     category: '生成器', touchpoint: '/alerts ✨ AI 噪声过滤 · 批量应用', page: '/alerts',       status: 'active', todayTriggers: 1,  adoptionRate: 0.70, sprint: 6 },
   { number: 23, id: 'cost.cost-predictor',                 name: '成本预测',         category: '生成器', touchpoint: '✨ Modal',   page: '/cost, /schedule', status: 'active', todayTriggers: 6,  adoptionRate: 0.76, sprint: 6 },
 ];
 

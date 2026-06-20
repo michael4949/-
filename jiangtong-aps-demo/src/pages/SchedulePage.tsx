@@ -11,6 +11,7 @@ import PendingList from '../components/workorder/PendingList';
 import WorkOrderDetail from '../components/workorder/WorkOrderDetail';
 import AlgorithmPanel from '../components/schedule/AlgorithmPanel';
 import AIInsightCard from '../components/ai/AIInsightCard';
+import ActionableInsightCard from '../components/ai/ActionableInsightCard';
 import AIButton from '../components/ai/AIButton';
 import MatrixGeneratorModal from '../components/ai/MatrixGeneratorModal';
 import DragSuggestionTip from '../components/gantt/DragSuggestionTip';
@@ -44,6 +45,8 @@ export default function SchedulePage() {
   const setSimulateMode = useScheduleStore((s) => s.setSimulateMode);
   const kpiHistory = useScheduleStore((s) => s.kpiHistory);
   const select = useScheduleStore((s) => s.select);
+  const applyMatrixCorrection = useScheduleStore((s) => s.applyMatrixCorrection);
+  const matrixCorrectionApplied = useScheduleStore((s) => s.matrixCorrectionApplied);
   const [openMenu, setOpenMenu] = useState<'workshop' | 'view' | null>(null);
   const [matrixOpen, setMatrixOpen] = useState(false);
   const [matrixLoading, setMatrixLoading] = useState(false);
@@ -220,15 +223,32 @@ export default function SchedulePage() {
 
   return (
     <div className="flex flex-col h-full p-4 gap-3 min-h-0">
-      {/* #6 矩阵历史复盘 Insight Card */}
-      {!matrixInsightDismissed && (
+      {/* ★ v2.2.4 #6 矩阵历史复盘 改交互式 — 双按钮 Insight Card */}
+      {!matrixInsightDismissed && !matrixCorrectionApplied && (
+        <ActionableInsightCard
+          id="sched-matrix-history"
+          agentNumber={6}
+          agentName="矩阵历史复盘"
+          message="🔁 本周发现 5 处换型时间偏差超 20%（QA→QZ 90→112 分钟 / QY→QA 90→108 分钟等），AI 建议立即应用修正矩阵"
+          primaryAction={{
+            label: '一键应用建议矩阵',
+            apply: async () => {
+              const r = await applyMatrixCorrection();
+              return `✓ 矩阵已修正 5 处偏差 · 触发 ${r.corrected} 张工单微调（甘特图紫色闪烁中）· 换型损失 ${r.coLossBefore}% → ${r.coLossAfter}% · OTD +0.4pp`;
+            },
+          }}
+          secondaryAction={{ label: '查看明细', route: '/schedule' }}
+          onDismiss={() => setMatrixInsightDismissed(true)}
+        />
+      )}
+      {matrixCorrectionApplied && !matrixInsightDismissed && (
         <AIInsightCard
           insight={{
-            id: 'sched-matrix-history',
-            severity: 'info',
+            id: 'sched-matrix-applied',
+            severity: 'success',
             agentSource: 'schedule-rule.history-reviewer',
-            message: '🔁  本周发现 5 处换型时间偏差超 20%，AI 建议修正矩阵',
-            primaryAction: { label: '查看对比', route: '/schedule' },
+            message: '✅ 换型矩阵建议已应用 · 甘特图已微调 · Agent #6 进入待机',
+            primaryAction: { label: '查看历史', route: '/schedule' },
             dismissible: true,
             generatedAt: new Date(),
           }}
