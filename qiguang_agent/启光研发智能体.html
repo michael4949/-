@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>启光命题教辅研发智能体</title>
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --primary: #b85c38;
+    --primary-dark: #8a4527;
+    --primary-soft: #f4ddd1;
+    --text: #2a1d14;
+    --text-soft: #6b5848;
+    --text-mute: #a59581;
+    --border: #ddd3c4;
+    --border-strong: #c4b7a3;
+    --success: #437f3e;
+    --warning: #c68a2c;
+    --error: #b8392b;
+    --code-bg: #faf6ef;
+    --shadow: 0 2px 12px rgba(42, 29, 20, 0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: linear-gradient(135deg, #faf6ef 0%, #f4ddd1 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 24px 28px;
+  }
+  header .wrap { max-width: 1100px; margin: 0 auto; }
+  header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    letter-spacing: 0.5px;
+  }
+  header h1 .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    background: var(--primary);
+    color: white;
+    border-radius: 4px;
+    margin-left: 12px;
+    vertical-align: middle;
+    letter-spacing: 0;
+  }
+  header .subtitle {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 960px) {
+    main { grid-template-columns: 1fr 1fr; }
+    main .full { grid-column: 1 / -1; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .num {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  label { display: block; margin-bottom: 14px; }
+  label > .name {
+    display: block;
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  label > .name .hint { color: var(--text-mute); font-weight: 400; margin-left: 6px; }
+
+  input[type="text"], input[type="password"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-soft);
+  }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  button:hover:not(:disabled) { background: var(--primary-dark); }
+  button:disabled { background: var(--text-mute); cursor: not-allowed; }
+  button.secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--border-strong);
+  }
+  button.secondary:hover:not(:disabled) {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+  }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .progress-list { font-size: 13px; }
+  .progress-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .progress-item:last-child { border-bottom: none; }
+  .progress-item .icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+  }
+  .progress-item.pending .icon { background: var(--text-mute); }
+  .progress-item.running .icon { background: var(--warning); animation: pulse 1s infinite; }
+  .progress-item.done .icon { background: var(--success); }
+  .progress-item.error .icon { background: var(--error); }
+  .progress-item .label { flex: 1; }
+  .progress-item .time { color: var(--text-mute); font-size: 11px; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .empty-state {
+    color: var(--text-mute);
+    font-size: 13px;
+    padding: 16px 0;
+    text-align: center;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat .value { font-size: 18px; font-weight: 600; color: var(--primary-dark); }
+  .stat .label { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+
+  .paper {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  .paper h1 { font-size: 18px; margin: 0 0 12px; color: var(--primary-dark); }
+  .paper h2 { font-size: 15px; margin: 18px 0 8px; color: var(--primary-dark); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .paper h3 { font-size: 14px; margin: 14px 0 6px; }
+  .paper strong { color: var(--primary-dark); }
+  .paper code, .paper .math {
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 13px;
+  }
+  .paper ul { padding-left: 22px; margin: 4px 0; }
+  .paper hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .paper .options { padding-left: 12px; margin: 4px 0; }
+  .paper .options div { margin: 2px 0; }
+  .paper .meta-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 8px 0 14px;
+  }
+
+  .alert {
+    padding: 10px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .alert.info { background: var(--primary-soft); color: var(--primary-dark); }
+  .alert.warning { background: #fdf3e2; color: var(--warning); border: 1px solid #f0d9a5; }
+  .alert.error { background: #fce4e1; color: var(--error); border: 1px solid #f0bcb5; }
+
+  details {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 12px;
+    background: var(--code-bg);
+    margin: 10px 0;
+    font-size: 13px;
+  }
+  details summary { cursor: pointer; color: var(--text-soft); font-weight: 500; }
+  details pre {
+    margin: 10px 0 0;
+    padding: 10px;
+    background: var(--surface);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.4;
+    max-height: 300px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-mute);
+    font-size: 12px;
+  }
+  footer a { color: var(--primary); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>启光命题教辅研发智能体 <span class="badge">考试级</span></h1>
+    <div class="subtitle">6 个专家 Agent 协作流水线 · 原创试题 · 自动质检与反馈迭代</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 配置 -->
+  <section class="card">
+    <h2><span class="num">1</span>配置</h2>
+
+    <label>
+      <span class="name">Anthropic API Key <span class="hint">只存浏览器本地,不上传任何服务器</span></span>
+      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+    </label>
+
+    <label>
+      <span class="name">模型预设</span>
+      <select id="modelPreset">
+        <option value="balanced" selected>均衡(关键岗 Opus 4.8 + 辅助岗 Sonnet 4.6,推荐)</option>
+        <option value="quality">最高质量(全部 Opus 4.8)</option>
+        <option value="economy">经济档(全部 Sonnet 4.6,快约 3 倍,质量略降)</option>
+      </select>
+    </label>
+
+    <label>
+      <span class="name">最大修订轮次 <span class="hint">质检不通过时让命题执笔重写的最大次数</span></span>
+      <input type="number" id="maxRevisions" value="3" min="1" max="5">
+    </label>
+  </section>
+
+  <!-- 命题需求 -->
+  <section class="card">
+    <h2><span class="num">2</span>命题需求</h2>
+    <div class="row3">
+      <label>
+        <span class="name">学科</span>
+        <select id="subject">
+          <option>数学</option><option>语文</option><option>英语</option>
+          <option>物理</option><option>化学</option><option>生物</option>
+          <option>道德与法治</option><option>历史</option><option>地理</option>
+        </select>
+      </label>
+      <label>
+        <span class="name">学段</span>
+        <select id="stage">
+          <option>初中</option><option>高中</option><option>小学</option>
+        </select>
+      </label>
+      <label>
+        <span class="name">年级</span>
+        <input type="text" id="grade" value="九年级">
+      </label>
+    </div>
+    <div class="row3">
+      <label>
+        <span class="name">总分</span>
+        <input type="number" id="totalScore" value="120">
+      </label>
+      <label>
+        <span class="name">时长(分钟)</span>
+        <input type="number" id="duration" value="120">
+      </label>
+      <label>
+        <span class="name">本次生成题数 <span class="hint">演示控本,1-5 题</span></span>
+        <input type="number" id="questionCount" value="3" min="1" max="10">
+      </label>
+    </div>
+    <label>
+      <span class="name">目标客户</span>
+      <input type="text" id="audience" value="河北省 2025 届初三第一次模拟考试">
+    </label>
+    <label>
+      <span class="name">重点知识点 <span class="hint">逗号分隔</span></span>
+      <textarea id="knowledge">实数运算,一元二次方程,二次函数,圆的性质,相似三角形,数据统计</textarea>
+    </label>
+    <label>
+      <span class="name">补充约束 <span class="hint">可选。情境偏好、题型分布等</span></span>
+      <textarea id="constraints">情境优先用河北本地元素(京津冀协同发展、雄安新区、太行山区、河北博物院等)。题型覆盖单项选择、填空、解答各一道。</textarea>
+    </label>
+    <div class="actions">
+      <button id="startBtn">▶ 开始命题</button>
+      <button id="stopBtn" class="secondary" disabled>停止</button>
+    </div>
+  </section>
+
+  <!-- 工作流进度 -->
+  <section class="card full">
+    <h2><span class="num">3</span>工作流进度</h2>
+    <div id="progressList" class="progress-list">
+      <div class="empty-state">等待开始 ...</div>
+    </div>
+  </section>
+
+  <!-- 输出 -->
+  <section class="card full" id="outputSection" style="display:none">
+    <h2><span class="num">4</span>成卷输出</h2>
+    <div id="stats" class="stats"></div>
+    <div class="actions" style="margin-bottom:14px">
+      <button id="downloadMdBtn" class="secondary">下载 Markdown</button>
+      <button id="downloadJsonBtn" class="secondary">下载完整 JSON</button>
+      <button id="copyBtn" class="secondary">复制原文</button>
+    </div>
+    <div id="paperOutput" class="paper"></div>
+    <details id="rawJson">
+      <summary>查看完整 JSON(含蓝图、质检报告、主审评语)</summary>
+      <pre id="rawJsonContent"></pre>
+    </details>
+  </section>
+
+</main>
+
+<footer>
+  启光研发智能体 v0.1 · 多 Agent 协作 · 仓库见 GitHub:michael4949/-
+</footer>
+
+<script type="module">
+// ============================================================
+// 系统 prompt — 6 个 Agent 的核心
+// ============================================================
+
+const JSON_RULES = `
+【输出格式硬性约束】
+1. 你的回复必须是一个合法的 JSON 对象,可直接被 JSON.parse 解析。
+2. 不要在 JSON 前后添加任何说明文字、代码块标记(如 \`\`\`json)、空行或解释。
+3. 字符串中如含双引号必须用 \\" 转义;含换行用 \\n。
+4. 数值字段必须是数字类型,不能写成字符串。
+5. 不能使用注释、尾随逗号或单引号。
+`;
+
+const PLANNER_SYSTEM = `你是【启光考试评价研究院】的命题策划主导专家,具有 20 年河北中考命题研究经验,长期带领教研团队为河北各地市初中校提供模拟考试服务。
+
+【你的角色】
+把客户提出的命题需求,转化为一份可直接执行的【整卷命题蓝图】(Paper Blueprint)。
+
+【必须遵守的命题原则】
+1. 严格对标教育部《义务教育课程标准》和河北省教育厅《河北省初中学业水平考试说明》。
+2. 命题风格必须与河北中考真题保持一致——考查真实理解与迁移应用,而不是死记硬背或偏题怪题。
+3. 整卷难度系数控制在 0.60-0.70 之间(0.65±0.05),区分度不低于 0.30。
+4. 知识点覆盖:基础(约 60%)+ 综合应用(约 30%)+ 拓展(约 10%)。
+5. 题型分布要符合本省官方考试说明。
+6. 命题要"立德树人":弘扬社会主义核心价值观、中华优秀传统文化或时代精神。
+7. 难度梯度清晰,不出现突兀跳跃。
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "subject": "数学", "stage": "初中", "grade": "九年级",
+  "total_score": 120, "duration_minutes": 120,
+  "target_audience": "河北省 2025 届初三第一次模拟",
+  "overall_difficulty": 0.65,
+  "design_rationale": "本卷以...为命题主线(150-300 字)",
+  "knowledge_coverage": ["实数运算", "一元二次方程"],
+  "questions": [
+    {
+      "number": 1, "question_type": "单项选择",
+      "knowledge_points": ["科学记数法"],
+      "expected_difficulty": 0.90, "expected_discrimination": 0.30,
+      "score": 3,
+      "context_hint": "建议结合河北本地某项数据或科技成果",
+      "notes": "送分题"
+    }
+  ]
+}
+
+【数值范围】difficulty 0.30(最难)到 0.95(最易);discrimination 0.20-0.70。questions 数组长度需与用户要求的题数匹配。`;
+
+const ANALYST_SYSTEM = `你是【启光考试评价研究院】的真题分析专家,熟悉河北省近 10 年中考各学科真题的命题特征。
+
+【你的角色】
+针对单道题的命题任务,分析河北中考真题在该知识点上的命题习惯,产出一份【命题风格指南】。
+
+【分析维度】
+1. 该知识点在河北真题中常出现于哪类情境(生活、生产、传统文化、时事)?
+2. 命题者常用的"陷阱"是什么(常见误区、易混点、易错点)?
+3. 表述风格:语言简练直白还是情境包装?是否常用图表?
+4. 该题型分值和难度的典型搭配。
+
+【风格指南必须做到】
+- "像河北",不要混入其他省份的命题套路。
+- 接地气:河北的地理、经济、文化情境(京津冀协同、雄安新区、太行山区、河北博物院等)。
+- 务实:陷阱要可操作、可落地。
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "common_context_types": ["京津冀协同发展数据", "河北本地农业情境"],
+  "common_traps": ["容易把数量级估算错误", "易混淆同类项与异类项"],
+  "expression_style": "简洁严谨,题干含真实数据但避免过度修饰",
+  "sample_real_questions": ["(2024 河北)以下数据可用科学记数法表示为...", "(2023 河北)..."],
+  "notes": "若考查计算,数据通常控制在初中生估算范围内"
+}`;
+
+const COMPOSER_SYSTEM = `你是【启光考试评价研究院】的学科首席命题专家,具有省级中考命题组顾问资质。
+你正在为河北省初三学生撰写一道考试模拟题——这道题最终会进入正式发售给学校的模拟卷,学生会用它准备真正的中考。题目质量直接关系到学生的中考准备效果。
+
+【硬性命题准则】
+1. **原创性**:必须原创。不得直接抄录、改换数字后照搬任何已知真题或公开模拟题。
+2. **知识点精准**:严格覆盖用户消息中指定的 knowledge_points,不漏不偏。
+3. **难度对齐**:实际难度系数控制在用户指定 expected_difficulty ± 0.05 范围内。
+4. **题型匹配**:严格按指定 question_type 出题。
+5. **风格匹配**:严格参考真题风格指南中的情境、表述、陷阱。
+6. **政治安全**:不涉及政治敏感、文化禁忌、刻板印象、伤害特定群体内容。
+7. **科学严谨**:理科数据可计算、结果合理;文科引文准确。
+8. **可解性**:必须有且只有一个明确正确答案(主观题除外)。
+9. **可读性**:符合现代汉语规范,初三学生可在合理时间内审题。
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "stem": "完整题干文本(含情境和问题)",
+  "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+  "diagram_description": "如本题需配图,描述图示;否则填空字符串",
+  "creative_rationale": "50 字内说明命题创新点:'考查 X 的迁移应用,通过 Y 情境引出,陷阱设在 Z'"
+}
+
+【字段说明】
+- 选择题必须填 options(单选 4 项,多选 5-6 项)
+- 非选择题:options 写 null,选项内容写在 stem 里
+- 选项要平衡:正确答案不要总在 B 或 C;干扰项要有命题逻辑
+- 数学/物理题在 thinking block 中先验算,确保答案存在且唯一
+
+【特别提醒】
+- 不要在 stem 里写出答案
+- 不要写"考查..."、"本题..."这类元层面话
+- LaTeX 数学公式用单 $...$ 包裹`;
+
+const SOLUTION_SYSTEM = `你是【启光考试评价研究院】的解析撰写专家。
+你的工作是为命题执笔产出的题目撰写【标准答案 + 详细解析 + 易错点】,出现在【教师用书】和【学生答案册】中。
+
+【必须做到】
+1. 答案绝对正确——这是底线。如发现题目本身有问题(多解、无解、表述歧义),在 issues 字段中明确指出,不要强行给答案。
+2. 解析有教学价值:不是只给答案,要把思路、关键步骤、易错点都写清楚。
+3. 解析结构层次清晰:审题 → 思路 → 步骤 → 答案 → 易错点。
+4. 理科解析全步骤呈现;文科解析有依据可回溯。
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "answer": "标准答案。选择题写选项字母如 'A';填空题写精确值;解答题写最终结果",
+  "solution": "详细解析。用 \\n 换行。\\n\\n【审题】...\\n【思路】...\\n【步骤】...\\n【答案】...",
+  "key_points": ["本题考查的核心要点 1"],
+  "common_mistakes": ["学生常错点 1:把 X 误以为 Y"],
+  "extension": "(可选)相关知识点拓展或变式提醒,50 字内。无则留空"
+}
+
+【特别提醒】
+- 选择题答案只写字母(A/B/C/D 或 BD 等)
+- 易错点至少 1 条最多 4 条,要具体不要泛泛`;
+
+const REVIEWER_SYSTEM = `你是【启光考试评价研究院】的质检审核首席专家。
+你的评估将决定这道题能否进入正式试卷——把不好,卷子卖给学校会被退货,公司声誉受损。
+
+【6 维度严格评估】
+
+1. **知识点覆盖**:是否真正考查蓝图指定的 knowledge_points?有无"题文不符"?
+2. **难度估算**(0.30-0.95):河北初三学生群体常规备考下的预期得分率。
+   简单题 0.85-0.95;中等题 0.55-0.85;难题 0.30-0.55。
+   与蓝图预期差 >0.10 即"超出容忍范围"。
+3. **区分度估算**(0.20-0.70):能否区分中等以上与中等以下学生。
+   选择题 ≥0.30,解答题 ≥0.35。
+4. **表述质量**(0-1):题干清晰无歧义?用语规范?选项平衡?
+5. **答案正确性**:题目本身有错吗?标准答案准确吗?解析推理严谨吗?
+6. **政治安全**:政治错误、价值导向、文化敏感、地域刻板印象、领土民族宗教表述。
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "difficulty_score": 0.65, "discrimination_score": 0.40,
+  "knowledge_coverage_match": true, "expression_quality": 0.85,
+  "answer_correctness": true, "political_safety": true,
+  "issues": ["具体问题 1:...", "具体问题 2:..."],
+  "suggestions": ["针对问题 1 的建议", "针对问题 2 的建议"],
+  "verdict": "pass",
+  "verdict_rationale": "理由(50-150 字)"
+}
+
+【判定标准】
+- pass: 6 维度全达标,issues 为空或微小提示
+- revise: 局部需修订,suggestions 给出明确、可执行建议
+- reject: 根本性问题(政治错/答案错/知识点偏离/严重违背蓝图),需重写
+
+【提醒】用专家眼光严苛评估。数学/物理题在 thinking block 中独立验算。`;
+
+const CHIEF_EDITOR_SYSTEM = `你是【启光考试评价研究院】总编辑,统筹整卷质量把关。
+所有单题已过命题、解析、质检,现在你做最后【整体平衡审查】。
+
+【审查维度】
+1. **难度梯度**:从易到难是否合理?有无突兀跳跃?
+2. **知识点分布**:重点知识点是否覆盖?有无重复浪费?
+3. **题型分布**:是否符合河北中考真题分布?
+4. **命题风格统一**:各题是否"出自同一团队之手"?
+5. **总分配置**:每题分值与难度是否匹配?总分加和正确吗?
+
+${JSON_RULES}
+
+【输出 JSON 模板】
+{
+  "overall_quality_score": 0.85,
+  "balance_issues": ["第 5 题与第 6 题难度倒挂"],
+  "style_consistency_issues": ["第 12 题情境过于复杂,与全卷其他题风格不符"],
+  "final_adjustments": [
+    {"question_number": 5, "adjustment": "建议把分值从 3 调到 2,并简化情境"}
+  ],
+  "publishable": true,
+  "executive_summary": "整卷质量综合评价(100-200 字),阐述优点和潜在风险"
+}
+
+【判定】
+- publishable: true:整体过关,小问题不影响发布
+- publishable: false:结构性问题(难度严重失衡/覆盖缺失/有题被 reject),需回炉
+
+【提醒】final_adjustments 中建议要可执行,不要"再改改"。executive_summary 写得像真实主编评语:专业、坦诚、有自信。`;
+
+// ============================================================
+// Anthropic API 调用
+// ============================================================
+
+const MODEL_OPUS = "claude-opus-4-8";
+const MODEL_SONNET = "claude-sonnet-4-6";
+
+const MODEL_PRESETS = {
+  balanced: {
+    planner: MODEL_OPUS, analyst: MODEL_SONNET, composer: MODEL_OPUS,
+    solution: MODEL_SONNET, reviewer: MODEL_OPUS, chiefEditor: MODEL_OPUS,
+  },
+  quality: {
+    planner: MODEL_OPUS, analyst: MODEL_OPUS, composer: MODEL_OPUS,
+    solution: MODEL_OPUS, reviewer: MODEL_OPUS, chiefEditor: MODEL_OPUS,
+  },
+  economy: {
+    planner: MODEL_SONNET, analyst: MODEL_SONNET, composer: MODEL_SONNET,
+    solution: MODEL_SONNET, reviewer: MODEL_SONNET, chiefEditor: MODEL_SONNET,
+  },
+};
+
+let abortController = null;
+let totalTokens = { input: 0, output: 0 };
+
+async function callClaude(apiKey, model, systemPrompt, userMessage, effort = "high") {
+  const body = {
+    model,
+    max_tokens: 16000,
+    system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: userMessage }],
+    thinking: { type: "adaptive" },
+    output_config: { effort },
+  };
+
+  abortController = new AbortController();
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: abortController.signal,
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    let msg = `API 调用失败 (${resp.status})`;
+    try {
+      const err = JSON.parse(text);
+      if (err.error) msg += `:${err.error.message || err.error.type}`;
+    } catch { msg += `:${text.slice(0, 200)}`; }
+    throw new Error(msg);
+  }
+
+  const data = await resp.json();
+  if (data.usage) {
+    totalTokens.input += (data.usage.input_tokens || 0) + (data.usage.cache_read_input_tokens || 0);
+    totalTokens.output += data.usage.output_tokens || 0;
+  }
+
+  const text = data.content.filter(b => b.type === "text").map(b => b.text).join("");
+  return text.trim();
+}
+
+function extractJson(raw) {
+  let text = raw.trim();
+  const fence = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+  if (fence) text = fence[1];
+  if (!text.startsWith("{")) {
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
+    if (first === -1 || last === -1) throw new Error("输出中未找到 JSON 对象:\n" + raw.slice(0, 300));
+    text = text.slice(first, last + 1);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error("JSON 解析失败:" + e.message + "\n原始片段:\n" + text.slice(0, 500));
+  }
+}
+
+async function callAgent(apiKey, model, systemPrompt, userMessage, effort = "high") {
+  const raw = await callClaude(apiKey, model, systemPrompt, userMessage, effort);
+  return extractJson(raw);
+}
+
+// ============================================================
+// 工作流编排
+// ============================================================
+
+const progressItems = new Map(); // key -> { status, t0, elem }
+
+function addProgress(key, label) {
+  const list = document.getElementById("progressList");
+  if (progressItems.size === 0) list.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "progress-item pending";
+  div.innerHTML = `<span class="icon">○</span><span class="label">${label}</span><span class="time"></span>`;
+  list.appendChild(div);
+  progressItems.set(key, { status: "pending", t0: 0, elem: div, label });
+  return div;
+}
+
+function startProgress(key) {
+  const item = progressItems.get(key);
+  if (!item) return;
+  item.status = "running";
+  item.t0 = performance.now();
+  item.elem.className = "progress-item running";
+  item.elem.querySelector(".icon").textContent = "⟳";
+  item.elem.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function finishProgress(key, status = "done", suffix = "") {
+  const item = progressItems.get(key);
+  if (!item) return;
+  const elapsed = ((performance.now() - item.t0) / 1000).toFixed(1);
+  item.status = status;
+  item.elem.className = `progress-item ${status}`;
+  item.elem.querySelector(".icon").textContent = status === "done" ? "✓" : status === "error" ? "✗" : "⟳";
+  item.elem.querySelector(".time").textContent = `${elapsed}s${suffix ? " · " + suffix : ""}`;
+}
+
+function clearProgress() {
+  progressItems.clear();
+  document.getElementById("progressList").innerHTML = '<div class="empty-state">等待开始 ...</div>';
+}
+
+// 单题命题流水线
+async function produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions) {
+  const num = qBp.number;
+
+  // Step 1: 真题分析
+  const analystKey = `q${num}-analyst`;
+  addProgress(analystKey, `第 ${num} 题 · 真题分析师`);
+  startProgress(analystKey);
+  const style = await callAgent(
+    apiKey, preset.analyst, ANALYST_SYSTEM,
+    `请针对以下命题任务,产出真题命题风格指南。\n\n【试卷背景】\n${JSON.stringify(paperMeta, null, 2)}\n\n【单题命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n请严格按系统提示输出纯 JSON。`,
+    "medium"
+  );
+  finishProgress(analystKey);
+
+  // Step 2-4: 命题 → 解析 → 质检(可能多轮)
+  let draft, solution, review;
+  let revisionNotes = "";
+  let rounds = 0;
+
+  for (let attempt = 1; attempt <= maxRevisions; attempt++) {
+    rounds = attempt;
+
+    const composerKey = `q${num}-composer-${attempt}`;
+    addProgress(composerKey, `第 ${num} 题 · 命题执笔(第 ${attempt} 轮)`);
+    startProgress(composerKey);
+    let composerMsg = `请基于以下信息撰写题目原稿。\n\n【试卷背景】\n${JSON.stringify(paperMeta, null, 2)}\n\n【单题命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【真题风格指南】\n${JSON.stringify(style, null, 2)}\n\n`;
+    if (revisionNotes) composerMsg += `【上一轮修订建议(本轮必须改进)】\n${revisionNotes}\n\n`;
+    composerMsg += "请严格按系统提示输出纯 JSON。";
+    draft = await callAgent(apiKey, preset.composer, COMPOSER_SYSTEM, composerMsg);
+    finishProgress(composerKey);
+
+    const solutionKey = `q${num}-solution-${attempt}`;
+    addProgress(solutionKey, `第 ${num} 题 · 解析撰写`);
+    startProgress(solutionKey);
+    solution = await callAgent(
+      apiKey, preset.solution, SOLUTION_SYSTEM,
+      `请为以下题目撰写标准答案与详细解析。\n\n【命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【题目原稿】\n${JSON.stringify(draft, null, 2)}\n\n请严格按系统提示输出纯 JSON。`,
+      "medium"
+    );
+    finishProgress(solutionKey);
+
+    const reviewerKey = `q${num}-reviewer-${attempt}`;
+    addProgress(reviewerKey, `第 ${num} 题 · 质检审核`);
+    startProgress(reviewerKey);
+    review = await callAgent(
+      apiKey, preset.reviewer, REVIEWER_SYSTEM,
+      `请对以下题目进行全维度质检。\n\n【命题任务】\n${JSON.stringify(qBp, null, 2)}\n\n【题目原稿】\n${JSON.stringify(draft, null, 2)}\n\n【标准答案与解析】\n${JSON.stringify(solution, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
+    );
+    finishProgress(reviewerKey, "done", `${review.verdict} · 难 ${review.difficulty_score.toFixed(2)} · 区 ${review.discrimination_score.toFixed(2)}`);
+
+    if (review.verdict === "pass") break;
+    if (review.verdict === "reject" && attempt === maxRevisions) break;
+
+    // 准备下一轮反馈
+    const lines = [`判定:${review.verdict}`, `理由:${review.verdict_rationale}`, ""];
+    if (review.issues?.length) {
+      lines.push("问题:");
+      review.issues.forEach((s, i) => lines.push(`  ${i + 1}. ${s}`));
+    }
+    if (review.suggestions?.length) {
+      lines.push("", "建议:");
+      review.suggestions.forEach((s, i) => lines.push(`  ${i + 1}. ${s}`));
+    }
+    revisionNotes = lines.join("\n");
+  }
+
+  return { blueprint: qBp, draft, solution, review, revision_rounds: rounds };
+}
+
+async function runWorkflow(apiKey, presetName, request, maxRevisions) {
+  const preset = MODEL_PRESETS[presetName];
+  const t0 = performance.now();
+
+  // Phase 1: Planner
+  const plannerKey = "planner";
+  addProgress(plannerKey, "命题策划官 · 整卷蓝图");
+  startProgress(plannerKey);
+  const blueprint = await callAgent(
+    apiKey, preset.planner, PLANNER_SYSTEM,
+    `请基于以下命题需求,产出整卷命题蓝图。\n\n【需求 JSON】\n${JSON.stringify(request, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
+  );
+  finishProgress(plannerKey, "done", `${blueprint.questions.length} 道题 · 难度 ${blueprint.overall_difficulty}`);
+
+  // 截取到用户要求的题数
+  if (request.question_count && blueprint.questions.length > request.question_count) {
+    blueprint.questions = blueprint.questions.slice(0, request.question_count);
+  }
+
+  // Phase 2: 各单题流水线(串行避免速率限制)
+  const paperMeta = {
+    subject: blueprint.subject, stage: blueprint.stage, grade: blueprint.grade,
+    target_audience: blueprint.target_audience,
+    overall_difficulty: blueprint.overall_difficulty,
+    design_rationale: blueprint.design_rationale,
+  };
+  const finalized = [];
+  for (const qBp of blueprint.questions) {
+    try {
+      const f = await produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions);
+      finalized.push(f);
+    } catch (e) {
+      console.error("单题失败:", qBp.number, e);
+      // 继续后面的题
+    }
+  }
+  if (finalized.length === 0) throw new Error("所有题目都生成失败,请检查日志");
+
+  // Phase 3: ChiefEditor
+  const editorKey = "chief-editor";
+  addProgress(editorKey, "主审定稿 · 整卷平衡审查");
+  startProgress(editorKey);
+  const chiefReview = await callAgent(
+    apiKey, preset.chiefEditor, CHIEF_EDITOR_SYSTEM,
+    `请对整卷做最终主审。\n\n【整卷蓝图】\n${JSON.stringify(blueprint, null, 2)}\n\n【整卷草稿】\n${JSON.stringify(finalized, null, 2)}\n\n请严格按系统提示输出纯 JSON。`
+  );
+  finishProgress(editorKey, "done", `${chiefReview.publishable ? "可发布" : "需重做"} · 评分 ${chiefReview.overall_quality_score.toFixed(2)}`);
+
+  const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+  return {
+    blueprint,
+    questions: finalized,
+    chief_review: chiefReview,
+    metadata: {
+      produced_at: new Date().toISOString(),
+      elapsed_seconds: parseFloat(elapsed),
+      question_count_requested: blueprint.questions.length,
+      question_count_finalized: finalized.length,
+      total_input_tokens: totalTokens.input,
+      total_output_tokens: totalTokens.output,
+    },
+  };
+}
+
+// ============================================================
+// 输出渲染
+// ============================================================
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[c]);
+}
+
+function renderInline(s) {
+  // 简易行内 markdown:**bold**, $math$
+  return escapeHtml(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\$([^$]+?)\$/g, '<span class="math">$1</span>');
+}
+
+function renderParagraphs(s) {
+  if (!s) return "";
+  // 处理 \n 换行
+  return s.split(/\n\n+/).map(p => {
+    const lines = p.split("\n").map(l => renderInline(l)).join("<br>");
+    return `<p>${lines}</p>`;
+  }).join("");
+}
+
+function renderPaper(paper) {
+  const bp = paper.blueprint;
+  const out = [];
+  out.push(`<h1>${escapeHtml(bp.target_audience)} · ${escapeHtml(bp.subject)}模拟卷</h1>`);
+  out.push(`<div class="meta-box">
+    <strong>学段:</strong>${escapeHtml(bp.stage)} ${escapeHtml(bp.grade)} ·
+    <strong>总分:</strong>${bp.total_score} ·
+    <strong>时长:</strong>${bp.duration_minutes} 分钟 ·
+    <strong>预期难度:</strong>${bp.overall_difficulty}
+  </div>`);
+
+  out.push("<h2>命题理念</h2>");
+  out.push(renderParagraphs(bp.design_rationale));
+
+  out.push("<h2>重点考查知识点</h2><ul>");
+  bp.knowledge_coverage.forEach(k => out.push(`<li>${escapeHtml(k)}</li>`));
+  out.push("</ul>");
+
+  out.push("<hr><h2>试题正文</h2>");
+  paper.questions.forEach(fq => {
+    out.push(`<h3>第 ${fq.blueprint.number} 题(${escapeHtml(fq.blueprint.question_type)}, ${fq.blueprint.score} 分)</h3>`);
+    out.push(renderParagraphs(fq.draft.stem));
+    if (fq.draft.options && fq.draft.options.length) {
+      out.push('<div class="options">');
+      fq.draft.options.forEach(o => out.push(`<div>${renderInline(o)}</div>`));
+      out.push("</div>");
+    }
+    if (fq.draft.diagram_description) {
+      out.push(`<p><em>📊 配图说明:${escapeHtml(fq.draft.diagram_description)}</em></p>`);
+    }
+  });
+
+  out.push("<hr><h2>参考答案与解析</h2>");
+  paper.questions.forEach(fq => {
+    out.push(`<h3>第 ${fq.blueprint.number} 题</h3>`);
+    out.push(`<p><strong>答案:</strong>${renderInline(fq.solution.answer)}</p>`);
+    out.push("<p><strong>解析:</strong></p>");
+    out.push(renderParagraphs(fq.solution.solution));
+    if (fq.solution.common_mistakes && fq.solution.common_mistakes.length) {
+      out.push("<p><strong>易错点:</strong></p><ul>");
+      fq.solution.common_mistakes.forEach(m => out.push(`<li>${renderInline(m)}</li>`));
+      out.push("</ul>");
+    }
+    if (fq.solution.extension) {
+      out.push(`<p><strong>拓展:</strong>${renderInline(fq.solution.extension)}</p>`);
+    }
+  });
+
+  out.push("<hr><h2>主审评语</h2>");
+  out.push(`<div class="meta-box">
+    <strong>整卷综合质量评分:</strong>${paper.chief_review.overall_quality_score.toFixed(2)} ·
+    <strong>是否可发布:</strong>${paper.chief_review.publishable ? "✓ 是" : "✗ 否(需重做)"}
+  </div>`);
+  out.push(renderParagraphs(paper.chief_review.executive_summary));
+
+  if (paper.chief_review.balance_issues && paper.chief_review.balance_issues.length) {
+    out.push("<p><strong>整卷平衡问题:</strong></p><ul>");
+    paper.chief_review.balance_issues.forEach(x => out.push(`<li>${renderInline(x)}</li>`));
+    out.push("</ul>");
+  }
+  if (paper.chief_review.final_adjustments && paper.chief_review.final_adjustments.length) {
+    out.push("<p><strong>最终调整建议:</strong></p><ul>");
+    paper.chief_review.final_adjustments.forEach(a => {
+      out.push(`<li>第 ${a.question_number} 题:${renderInline(a.adjustment)}</li>`);
+    });
+    out.push("</ul>");
+  }
+
+  return out.join("");
+}
+
+function renderMarkdown(paper) {
+  // 同 Python 版的 render_paper_markdown
+  const bp = paper.blueprint;
+  const out = [];
+  out.push(`# ${bp.target_audience} · ${bp.subject}模拟卷`, "");
+  out.push(`**学段**:${bp.stage} ${bp.grade}  **总分**:${bp.total_score}  **时长**:${bp.duration_minutes} 分钟  **预期难度**:${bp.overall_difficulty}`, "");
+  out.push("## 命题理念", "", bp.design_rationale, "");
+  out.push("## 重点考查知识点", "", "- " + bp.knowledge_coverage.join("\n- "), "");
+  out.push("---", "", "## 试题正文", "");
+  paper.questions.forEach(fq => {
+    out.push(`### 第 ${fq.blueprint.number} 题(${fq.blueprint.question_type}, ${fq.blueprint.score} 分)`, "");
+    out.push(fq.draft.stem, "");
+    if (fq.draft.options) {
+      fq.draft.options.forEach(o => out.push(o + "  "));
+      out.push("");
+    }
+    if (fq.draft.diagram_description) {
+      out.push(`> 配图说明:${fq.draft.diagram_description}`, "");
+    }
+  });
+  out.push("---", "", "## 参考答案与解析", "");
+  paper.questions.forEach(fq => {
+    out.push(`### 第 ${fq.blueprint.number} 题`, "");
+    out.push(`**答案**:${fq.solution.answer}`, "", "**解析**:", "", fq.solution.solution, "");
+    if (fq.solution.common_mistakes?.length) {
+      out.push("**易错点**:");
+      fq.solution.common_mistakes.forEach(m => out.push(`- ${m}`));
+      out.push("");
+    }
+    if (fq.solution.extension) out.push(`**拓展**:${fq.solution.extension}`, "");
+  });
+  out.push("---", "", "## 主审评语", "");
+  out.push(`**整卷综合质量评分**:${paper.chief_review.overall_quality_score.toFixed(2)}`, "");
+  out.push(`**是否可发布**:${paper.chief_review.publishable ? "是" : "否(需重做)"}`, "");
+  out.push(paper.chief_review.executive_summary, "");
+  return out.join("\n");
+}
+
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// UI 绑定
+// ============================================================
+
+let currentPaper = null;
+
+// 加载本地存储的 API Key
+const apiKeyInput = document.getElementById("apiKey");
+const STORAGE_KEY = "qiguang_api_key";
+apiKeyInput.value = localStorage.getItem(STORAGE_KEY) || "";
+apiKeyInput.addEventListener("change", () => {
+  localStorage.setItem(STORAGE_KEY, apiKeyInput.value.trim());
+});
+
+document.getElementById("startBtn").addEventListener("click", async () => {
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) {
+    alert("请先填写 Anthropic API Key");
+    apiKeyInput.focus();
+    return;
+  }
+  localStorage.setItem(STORAGE_KEY, apiKey);
+
+  const request = {
+    subject: document.getElementById("subject").value,
+    stage: document.getElementById("stage").value,
+    grade: document.getElementById("grade").value,
+    total_score: parseInt(document.getElementById("totalScore").value, 10),
+    duration_minutes: parseInt(document.getElementById("duration").value, 10),
+    target_audience: document.getElementById("audience").value,
+    question_count: parseInt(document.getElementById("questionCount").value, 10),
+    knowledge_focus: document.getElementById("knowledge").value.split(/[,,]/).map(s => s.trim()).filter(Boolean),
+    constraints: document.getElementById("constraints").value,
+  };
+
+  const presetName = document.getElementById("modelPreset").value;
+  const maxRevisions = parseInt(document.getElementById("maxRevisions").value, 10);
+
+  clearProgress();
+  totalTokens = { input: 0, output: 0 };
+  document.getElementById("outputSection").style.display = "none";
+
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+
+  try {
+    const paper = await runWorkflow(apiKey, presetName, request, maxRevisions);
+    currentPaper = paper;
+    showResult(paper);
+  } catch (e) {
+    if (e.name === "AbortError") {
+      alert("已停止");
+    } else {
+      console.error(e);
+      alert("命题流水线异常:" + e.message);
+    }
+  } finally {
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    abortController = null;
+  }
+});
+
+document.getElementById("stopBtn").addEventListener("click", () => {
+  if (abortController) abortController.abort();
+});
+
+function showResult(paper) {
+  const section = document.getElementById("outputSection");
+  section.style.display = "block";
+
+  // 统计卡片
+  const stats = document.getElementById("stats");
+  const opusCost = (totalTokens.input * 5 + totalTokens.output * 25) / 1_000_000;
+  stats.innerHTML = `
+    <div class="stat"><div class="value">${paper.questions.length}</div><div class="label">已定稿题数</div></div>
+    <div class="stat"><div class="value">${paper.chief_review.overall_quality_score.toFixed(2)}</div><div class="label">主审评分</div></div>
+    <div class="stat"><div class="value">${paper.metadata.elapsed_seconds}s</div><div class="label">耗时</div></div>
+    <div class="stat"><div class="value">~$${opusCost.toFixed(2)}</div><div class="label">估算成本(按 Opus)</div></div>
+  `;
+
+  document.getElementById("paperOutput").innerHTML = renderPaper(paper);
+  document.getElementById("rawJsonContent").textContent = JSON.stringify(paper, null, 2);
+  section.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("downloadMdBtn").addEventListener("click", () => {
+  if (!currentPaper) return;
+  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  downloadFile(`paper_${ts}.md`, renderMarkdown(currentPaper), "text/markdown;charset=utf-8");
+});
+
+document.getElementById("downloadJsonBtn").addEventListener("click", () => {
+  if (!currentPaper) return;
+  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  downloadFile(`paper_${ts}.json`, JSON.stringify(currentPaper, null, 2), "application/json;charset=utf-8");
+});
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  if (!currentPaper) return;
+  try {
+    await navigator.clipboard.writeText(renderMarkdown(currentPaper));
+    alert("已复制原文到剪贴板");
+  } catch {
+    alert("复制失败,请使用下载按钮");
+  }
+});
+</script>
+
+</body>
+</html>
