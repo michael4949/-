@@ -300,18 +300,29 @@
     <h2><span class="num">1</span>配置</h2>
 
     <label>
-      <span class="name">Anthropic API Key <span class="hint">只存浏览器本地,不上传任何服务器</span></span>
-      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+      <span class="name">OpenAI API Key <span class="hint">只存浏览器本地,不上传任何服务器</span></span>
+      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
     </label>
 
     <label>
       <span class="name">模型预设</span>
       <select id="modelPreset">
-        <option value="balanced" selected>均衡(关键岗 Opus 4.8 + 辅助岗 Sonnet 4.6,推荐)</option>
-        <option value="quality">最高质量(全部 Opus 4.8)</option>
-        <option value="economy">经济档(全部 Sonnet 4.6,快约 3 倍,质量略降)</option>
+        <option value="balanced" selected>均衡(关键岗 gpt-4o + 辅助岗 gpt-4o-mini,推荐)</option>
+        <option value="quality">最高质量(全部 gpt-4o)</option>
+        <option value="economy">经济档(全部 gpt-4o-mini,快约 3 倍,质量略降)</option>
       </select>
     </label>
+
+    <div class="row">
+      <label>
+        <span class="name">主力模型覆写 <span class="hint">可选,如 gpt-5 / o3 / gpt-4.1</span></span>
+        <input type="text" id="primaryModelOverride" placeholder="留空即用预设">
+      </label>
+      <label>
+        <span class="name">辅助模型覆写 <span class="hint">可选,如 gpt-5-mini / gpt-4.1-mini</span></span>
+        <input type="text" id="secondaryModelOverride" placeholder="留空即用预设">
+      </label>
+    </div>
 
     <label>
       <span class="name">最大修订轮次 <span class="hint">质检不通过时让命题执笔重写的最大次数</span></span>
@@ -511,7 +522,7 @@ ${JSON_RULES}
 - 选择题必须填 options(单选 4 项,多选 5-6 项)
 - 非选择题:options 写 null,选项内容写在 stem 里
 - 选项要平衡:正确答案不要总在 B 或 C;干扰项要有命题逻辑
-- 数学/物理题在 thinking block 中先验算,确保答案存在且唯一
+- 数学/物理题在内部先逐步验算,确保答案存在且唯一,再写出 JSON
 
 【特别提醒】
 - 不要在 stem 里写出答案
@@ -575,7 +586,7 @@ ${JSON_RULES}
 - revise: 局部需修订,suggestions 给出明确、可执行建议
 - reject: 根本性问题(政治错/答案错/知识点偏离/严重违背蓝图),需重写
 
-【提醒】用专家眼光严苛评估。数学/物理题在 thinking block 中独立验算。`;
+【提醒】用专家眼光严苛评估。数学/物理题先逐步独立验算,再下判定。`;
 
 const CHIEF_EDITOR_SYSTEM = `你是【启光考试评价研究院】总编辑,统筹整卷质量把关。
 所有单题已过命题、解析、质检,现在你做最后【整体平衡审查】。
@@ -608,47 +619,61 @@ ${JSON_RULES}
 【提醒】final_adjustments 中建议要可执行,不要"再改改"。executive_summary 写得像真实主编评语:专业、坦诚、有自信。`;
 
 // ============================================================
-// Anthropic API 调用
+// OpenAI API 调用
 // ============================================================
 
-const MODEL_OPUS = "claude-opus-4-8";
-const MODEL_SONNET = "claude-sonnet-4-6";
+const MODEL_PRIMARY = "gpt-4o";       // 关键岗:命题/质检/主审
+const MODEL_SECONDARY = "gpt-4o-mini"; // 辅助岗:解析/真题分析
 
 const MODEL_PRESETS = {
   balanced: {
-    planner: MODEL_OPUS, analyst: MODEL_SONNET, composer: MODEL_OPUS,
-    solution: MODEL_SONNET, reviewer: MODEL_OPUS, chiefEditor: MODEL_OPUS,
+    planner: MODEL_PRIMARY, analyst: MODEL_SECONDARY, composer: MODEL_PRIMARY,
+    solution: MODEL_SECONDARY, reviewer: MODEL_PRIMARY, chiefEditor: MODEL_PRIMARY,
   },
   quality: {
-    planner: MODEL_OPUS, analyst: MODEL_OPUS, composer: MODEL_OPUS,
-    solution: MODEL_OPUS, reviewer: MODEL_OPUS, chiefEditor: MODEL_OPUS,
+    planner: MODEL_PRIMARY, analyst: MODEL_PRIMARY, composer: MODEL_PRIMARY,
+    solution: MODEL_PRIMARY, reviewer: MODEL_PRIMARY, chiefEditor: MODEL_PRIMARY,
   },
   economy: {
-    planner: MODEL_SONNET, analyst: MODEL_SONNET, composer: MODEL_SONNET,
-    solution: MODEL_SONNET, reviewer: MODEL_SONNET, chiefEditor: MODEL_SONNET,
+    planner: MODEL_SECONDARY, analyst: MODEL_SECONDARY, composer: MODEL_SECONDARY,
+    solution: MODEL_SECONDARY, reviewer: MODEL_SECONDARY, chiefEditor: MODEL_SECONDARY,
   },
 };
+
+// 判断是否是推理模型(o 系列 / gpt-5 系列):走 max_completion_tokens + reasoning_effort
+function isReasoningModel(model) {
+  return /^(o\d|gpt-5)/i.test(model);
+}
 
 let abortController = null;
 let totalTokens = { input: 0, output: 0 };
 
-async function callClaude(apiKey, model, systemPrompt, userMessage, effort = "high") {
+async function callOpenAI(apiKey, model, systemPrompt, userMessage, effort = "high") {
+  const reasoning = isReasoningModel(model);
+
   const body = {
     model,
-    max_tokens: 16000,
-    system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
-    messages: [{ role: "user", content: userMessage }],
-    thinking: { type: "adaptive" },
-    output_config: { effort },
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage },
+    ],
   };
 
+  if (reasoning) {
+    // 推理系列:用 max_completion_tokens + reasoning_effort,不能传 temperature
+    body.max_completion_tokens = 16000;
+    body.reasoning_effort = effort === "low" ? "low" : effort === "medium" ? "medium" : "high";
+  } else {
+    // 普通 chat 模型:用 max_tokens + 低 temperature 求稳定输出
+    body.max_tokens = 16000;
+    body.temperature = 0.3;
+  }
+
   abortController = new AbortController();
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
+      "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -660,18 +685,18 @@ async function callClaude(apiKey, model, systemPrompt, userMessage, effort = "hi
     let msg = `API 调用失败 (${resp.status})`;
     try {
       const err = JSON.parse(text);
-      if (err.error) msg += `:${err.error.message || err.error.type}`;
+      if (err.error) msg += `:${err.error.message || err.error.type || err.error.code}`;
     } catch { msg += `:${text.slice(0, 200)}`; }
     throw new Error(msg);
   }
 
   const data = await resp.json();
   if (data.usage) {
-    totalTokens.input += (data.usage.input_tokens || 0) + (data.usage.cache_read_input_tokens || 0);
-    totalTokens.output += data.usage.output_tokens || 0;
+    totalTokens.input += data.usage.prompt_tokens || 0;
+    totalTokens.output += data.usage.completion_tokens || 0;
   }
 
-  const text = data.content.filter(b => b.type === "text").map(b => b.text).join("");
+  const text = data.choices?.[0]?.message?.content || "";
   return text.trim();
 }
 
@@ -693,7 +718,7 @@ function extractJson(raw) {
 }
 
 async function callAgent(apiKey, model, systemPrompt, userMessage, effort = "high") {
-  const raw = await callClaude(apiKey, model, systemPrompt, userMessage, effort);
+  const raw = await callOpenAI(apiKey, model, systemPrompt, userMessage, effort);
   return extractJson(raw);
 }
 
@@ -809,8 +834,7 @@ async function produceQuestion(apiKey, preset, paperMeta, qBp, maxRevisions) {
   return { blueprint: qBp, draft, solution, review, revision_rounds: rounds };
 }
 
-async function runWorkflow(apiKey, presetName, request, maxRevisions) {
-  const preset = MODEL_PRESETS[presetName];
+async function runWorkflow(apiKey, preset, request, maxRevisions) {
   const t0 = performance.now();
 
   // Phase 1: Planner
@@ -1024,18 +1048,44 @@ function downloadFile(filename, content, mime) {
 
 let currentPaper = null;
 
-// 加载本地存储的 API Key
+// 加载本地存储的 API Key 与模型覆写
 const apiKeyInput = document.getElementById("apiKey");
-const STORAGE_KEY = "qiguang_api_key";
+const primaryOverrideInput = document.getElementById("primaryModelOverride");
+const secondaryOverrideInput = document.getElementById("secondaryModelOverride");
+const STORAGE_KEY = "qiguang_openai_key";
+const STORAGE_PRIMARY = "qiguang_openai_primary";
+const STORAGE_SECONDARY = "qiguang_openai_secondary";
 apiKeyInput.value = localStorage.getItem(STORAGE_KEY) || "";
+primaryOverrideInput.value = localStorage.getItem(STORAGE_PRIMARY) || "";
+secondaryOverrideInput.value = localStorage.getItem(STORAGE_SECONDARY) || "";
 apiKeyInput.addEventListener("change", () => {
   localStorage.setItem(STORAGE_KEY, apiKeyInput.value.trim());
 });
+primaryOverrideInput.addEventListener("change", () => {
+  localStorage.setItem(STORAGE_PRIMARY, primaryOverrideInput.value.trim());
+});
+secondaryOverrideInput.addEventListener("change", () => {
+  localStorage.setItem(STORAGE_SECONDARY, secondaryOverrideInput.value.trim());
+});
+
+// 用模型覆写值替换预设
+function applyModelOverrides(presetName) {
+  const preset = { ...MODEL_PRESETS[presetName] };
+  const primary = primaryOverrideInput.value.trim();
+  const secondary = secondaryOverrideInput.value.trim();
+  if (primary) {
+    preset.planner = preset.composer = preset.reviewer = preset.chiefEditor = primary;
+  }
+  if (secondary) {
+    preset.analyst = preset.solution = secondary;
+  }
+  return preset;
+}
 
 document.getElementById("startBtn").addEventListener("click", async () => {
   const apiKey = apiKeyInput.value.trim();
   if (!apiKey) {
-    alert("请先填写 Anthropic API Key");
+    alert("请先填写 OpenAI API Key");
     apiKeyInput.focus();
     return;
   }
@@ -1054,6 +1104,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
   };
 
   const presetName = document.getElementById("modelPreset").value;
+  const preset = applyModelOverrides(presetName);
   const maxRevisions = parseInt(document.getElementById("maxRevisions").value, 10);
 
   clearProgress();
@@ -1066,7 +1117,7 @@ document.getElementById("startBtn").addEventListener("click", async () => {
   stopBtn.disabled = false;
 
   try {
-    const paper = await runWorkflow(apiKey, presetName, request, maxRevisions);
+    const paper = await runWorkflow(apiKey, preset, request, maxRevisions);
     currentPaper = paper;
     showResult(paper);
   } catch (e) {
@@ -1091,14 +1142,14 @@ function showResult(paper) {
   const section = document.getElementById("outputSection");
   section.style.display = "block";
 
-  // 统计卡片
+  // 统计卡片(按 gpt-4o 单价上限估算:input $2.5/1M, output $10/1M)
   const stats = document.getElementById("stats");
-  const opusCost = (totalTokens.input * 5 + totalTokens.output * 25) / 1_000_000;
+  const estCost = (totalTokens.input * 2.5 + totalTokens.output * 10) / 1_000_000;
   stats.innerHTML = `
     <div class="stat"><div class="value">${paper.questions.length}</div><div class="label">已定稿题数</div></div>
     <div class="stat"><div class="value">${paper.chief_review.overall_quality_score.toFixed(2)}</div><div class="label">主审评分</div></div>
     <div class="stat"><div class="value">${paper.metadata.elapsed_seconds}s</div><div class="label">耗时</div></div>
-    <div class="stat"><div class="value">~$${opusCost.toFixed(2)}</div><div class="label">估算成本(按 Opus)</div></div>
+    <div class="stat"><div class="value">~$${estCost.toFixed(2)}</div><div class="label">估算成本(按 gpt-4o)</div></div>
   `;
 
   document.getElementById("paperOutput").innerHTML = renderPaper(paper);
