@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>启光命题教辅研发智能体</title>
+<!-- KaTeX:把 $...$ 真实渲染为数学公式 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <style>
   :root {
     --bg: #f5f3ee;
@@ -265,6 +269,29 @@
     font-size: 13px;
     margin: 8px 0 14px;
   }
+  .paper .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .paper .diagram svg {
+    max-width: 100%;
+    height: auto;
+    max-height: 320px;
+  }
+  .paper .diagram .caption {
+    color: var(--text-soft);
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .paper .katex { font-size: 1.05em; }
+  .paper .katex-display { margin: 0.6em 0; }
 
   .alert {
     padding: 10px 14px;
@@ -415,10 +442,6 @@
       <button id="copyBtn" class="secondary">复制原文</button>
     </div>
     <div id="paperOutput" class="paper"></div>
-    <details id="rawJson">
-      <summary>查看完整 JSON(含蓝图、风格指南、质检报告、主审评语)</summary>
-      <pre id="rawJsonContent"></pre>
-    </details>
   </section>
 
 </main>
@@ -526,7 +549,8 @@ ${JSON_RULES}
 {
   "stem": "完整题干文本(含情境和问题)",
   "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
-  "diagram_description": "如本题需配图,描述图示;否则填空字符串",
+  "diagram_description": "如本题需配图,用一句话描述图示用途;否则填空字符串",
+  "diagram_svg": "如本题需配图,产出可直接嵌入 HTML 的完整 SVG 代码,以 <svg ...> 开头、</svg> 结尾;不需要图则填空字符串",
   "creative_rationale": "50 字内说明命题创新点:'考查 X 的迁移应用,通过 Y 情境引出,陷阱设在 Z'"
 }
 
@@ -536,10 +560,38 @@ ${JSON_RULES}
 - 选项要平衡:正确答案不要总在 B 或 C;干扰项要有命题逻辑
 - 数学/物理题在内部先逐步验算,确保答案存在且唯一,再写出 JSON
 
+【关于 diagram_svg 配图】
+只有当题目本身明确需要配图时(几何题、坐标系、电路图、统计图、力学示意图、地理示意图、生物结构图等)才产出 SVG;
+语文/英语/政治/历史题大多不需配图,留空字符串。
+
+SVG 必须符合以下规范:
+1. 必须包含 viewBox 属性,推荐 viewBox="0 0 400 280" 或类似比例
+2. xmlns="http://www.w3.org/2000/svg"
+3. 黑色线条 stroke="#222",合理 stroke-width(几何图 1.5,辅助线 1,虚线用 stroke-dasharray="4,3")
+4. 文字 font-family="sans-serif" font-size="14",关键点用 text-anchor 对齐
+5. 不要使用 <script>、<foreignObject>、外链图片或任何事件属性
+6. 几何题:点用小实心圆 r="3" fill="#222" 标记,角度可用小弧加角标
+7. 坐标系/函数图:画出坐标轴 + 刻度 + 关键点
+8. 电路图:用直角连线,元件用矩形/圆框 + 文字标记
+9. 颜色克制:主线条用黑/深灰,强调元素可用单一色(如 #b85c38)
+
+SVG 输出示例(直角三角形带角标):
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 180">
+  <polygon points="40,140 180,140 180,40" fill="none" stroke="#222" stroke-width="1.5"/>
+  <path d="M 170 140 L 170 130 L 180 130" fill="none" stroke="#222" stroke-width="1"/>
+  <text x="30" y="155" font-family="sans-serif" font-size="14">A</text>
+  <text x="185" y="155" font-family="sans-serif" font-size="14">B</text>
+  <text x="185" y="35" font-family="sans-serif" font-size="14">C</text>
+  <text x="100" y="155" font-family="sans-serif" font-size="13">c</text>
+  <text x="190" y="95" font-family="sans-serif" font-size="13">a</text>
+  <text x="100" y="80" font-family="sans-serif" font-size="13">b</text>
+</svg>
+
 【特别提醒】
 - 不要在 stem 里写出答案
 - 不要写"考查..."、"本题..."这类元层面话
-- LaTeX 数学公式用单 $...$ 包裹`;
+- LaTeX 数学公式用单 $...$ 包裹(浏览器会用 KaTeX 真实渲染),公式中可用 \\frac、\\sqrt、\\leq、\\geq、^、_ 等标准 LaTeX 语法
+- JSON 中 SVG 代码内的双引号必须用 \\" 转义,换行用 \\n`;
 
 const SOLUTION_SYSTEM = `你是【启光考试评价研究院】的解析撰写专家。
 你的工作是为命题执笔产出的题目撰写【标准答案 + 详细解析 + 易错点】,出现在【教师用书】和【学生答案册】中。
@@ -872,10 +924,106 @@ function escapeHtml(s) {
 }
 
 function renderInline(s) {
-  // 简易行内 markdown:**bold**, $math$
+  // 简易行内 markdown:**bold**
+  // $...$ 保持原文不动,交给 KaTeX 在渲染完成后统一渲染
   return escapeHtml(s)
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\$([^$]+?)\$/g, '<span class="math">$1</span>');
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
+// SVG 白名单过滤,防止 LLM 输出的 SVG 含有 <script>、事件属性、外链等危险内容
+const SVG_ALLOWED_TAGS = new Set([
+  "svg", "g", "defs", "marker", "pattern", "mask", "clipPath",
+  "linearGradient", "radialGradient", "stop", "use", "symbol",
+  "path", "line", "rect", "circle", "ellipse", "polygon", "polyline",
+  "text", "tspan", "title", "desc",
+]);
+const SVG_ALLOWED_ATTRS = new Set([
+  "viewbox", "width", "height", "xmlns", "version", "preserveaspectratio",
+  "fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "stroke-linejoin",
+  "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry",
+  "d", "points", "transform",
+  "font-family", "font-size", "font-weight", "font-style",
+  "text-anchor", "dominant-baseline", "alignment-baseline",
+  "opacity", "fill-opacity", "stroke-opacity",
+  "class", "id", "offset", "stop-color", "stop-opacity",
+  "marker-start", "marker-end", "marker-mid",
+]);
+
+function sanitizeSvg(svgString) {
+  if (!svgString || typeof svgString !== "string") return "";
+  const trimmed = svgString.trim();
+  if (!trimmed.toLowerCase().startsWith("<svg")) return "";
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(trimmed, "image/svg+xml");
+    const root = doc.documentElement;
+    if (!root || root.querySelector("parsererror") || root.tagName.toLowerCase() !== "svg") {
+      return "";
+    }
+
+    function cleanNode(node) {
+      // 清属性
+      const attrs = Array.from(node.attributes || []);
+      for (const attr of attrs) {
+        const name = attr.name.toLowerCase();
+        if (name.startsWith("on") || name === "href" || name === "xlink:href") {
+          node.removeAttribute(attr.name);
+          continue;
+        }
+        if (!SVG_ALLOWED_ATTRS.has(name) && !name.startsWith("aria-") && !name.startsWith("data-")) {
+          node.removeAttribute(attr.name);
+          continue;
+        }
+        if (attr.value && /javascript:|data:text\/html/i.test(attr.value)) {
+          node.removeAttribute(attr.name);
+        }
+      }
+      // 清子元素
+      const children = Array.from(node.children);
+      for (const child of children) {
+        const tag = child.tagName.toLowerCase();
+        if (!SVG_ALLOWED_TAGS.has(tag)) {
+          node.removeChild(child);
+          continue;
+        }
+        cleanNode(child);
+      }
+    }
+
+    cleanNode(root);
+    // 强制限制最大尺寸
+    if (!root.hasAttribute("viewBox") && !root.hasAttribute("viewbox")) {
+      root.setAttribute("viewBox", "0 0 400 280");
+    }
+    root.removeAttribute("width");
+    root.removeAttribute("height");
+    return new XMLSerializer().serializeToString(root);
+  } catch {
+    return "";
+  }
+}
+
+// KaTeX 公式渲染:把 paperOutput 里的 $...$ 真实渲染为数学公式
+function renderMathIn(rootEl) {
+  if (!rootEl) return;
+  if (typeof window.renderMathInElement !== "function") {
+    // KaTeX 还没加载完,稍后重试
+    setTimeout(() => renderMathIn(rootEl), 300);
+    return;
+  }
+  try {
+    window.renderMathInElement(rootEl, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+      ],
+      throwOnError: false,
+      errorColor: "#b8392b",
+    });
+  } catch (e) {
+    console.warn("KaTeX 渲染失败:", e);
+  }
 }
 
 function renderParagraphs(s) {
@@ -996,7 +1144,15 @@ function renderPaper(paper) {
       fq.draft.options.forEach(o => out.push(`<div>${renderInline(o)}</div>`));
       out.push("</div>");
     }
-    if (fq.draft.diagram_description) {
+    const cleanSvg = sanitizeSvg(fq.draft.diagram_svg || "");
+    if (cleanSvg) {
+      out.push(`<div class="diagram">${cleanSvg}`);
+      if (fq.draft.diagram_description) {
+        out.push(`<div class="caption">图示:${escapeHtml(fq.draft.diagram_description)}</div>`);
+      }
+      out.push(`</div>`);
+    } else if (fq.draft.diagram_description) {
+      // 兜底:LLM 给了文字描述但 SVG 没生成或被过滤掉,显示文字提示
       out.push(`<p><em>📊 配图说明:${escapeHtml(fq.draft.diagram_description)}</em></p>`);
     }
     // 单题命题幕后(真题分析师 + 命题执笔创新点 + 解析撰写要点 + 质检审核)
@@ -1160,8 +1316,10 @@ function showResult(paper) {
     <div class="stat"><div class="value">~$${estCost.toFixed(2)}</div><div class="label">估算成本(按 gpt-4o)</div></div>
   `;
 
-  document.getElementById("paperOutput").innerHTML = renderPaper(paper);
-  document.getElementById("rawJsonContent").textContent = JSON.stringify(paper, null, 2);
+  const paperEl = document.getElementById("paperOutput");
+  paperEl.innerHTML = renderPaper(paper);
+  // 真实渲染所有 $...$ 数学公式
+  renderMathIn(paperEl);
   section.scrollIntoView({ behavior: "smooth" });
 }
 
