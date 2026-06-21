@@ -4600,7 +4600,7 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
     <span class="u-ava">管</span>
     <div>
       <div class="u-name">管理员<small>[超级权限]</small></div>
-      <div class="u-mail">admin@dgg.ai</div>
+      <div class="u-mail">admin@k-gold.ai</div>
     </div>
   </div>
 </aside>
@@ -5177,7 +5177,7 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
         <div class="page">
           <div class="page-head">
             <h2><span class="ph-ico" style="--tint:#E8F1FF">📮</span>邮箱助手</h2>
-            <p>未读整理 · 智能回复 — 已连接 admin@dgg.ai，每 10 分钟自动同步</p>
+            <p>未读整理 · 智能回复 — 已连接 admin@k-gold.ai，每 10 分钟自动同步</p>
           </div>
           <div class="pgrid g3">
             <div class="pcard mini-stat"><div class="ms-num">24</div><div class="ms-label">未读邮件</div></div>
@@ -5444,11 +5444,11 @@ button.fx-done { background: rgba(24,185,122,.12) !important; color: var(--green
                 <button class="btn-mini js-toast" data-toast="已复制到剪贴板（演示）" style="margin-left:12px">复制</button>
               </div>
               <div class="pc-body">
-                <div class="sql-line">dgg-sk-9f27••••••••••••••••7f3a</div>
+                <div class="sql-line">k-gold-sk-9f27••••••••••••••••7f3a</div>
                 <div class="lr-sub" style="margin-top:10px;white-space:normal">用一个接口调度任意智能体，由系统自动路由模型并衔接上下文：</div>
                 <div class="code-block mt"><span class="cc"># 调度「搭子」处理一批资料</span>
-curl https://api.dgg.ai/v1/agents/dispatch \
-  -H <span class="cs">"Authorization: Bearer $DGG_KEY"</span> \
+curl https://api.k-gold.ai/v1/agents/dispatch \
+  -H <span class="cs">"Authorization: Bearer $KGOLD_KEY"</span> \
   -d <span class="cs">'{
     "agent": "dazi",
     "task": "整理这批资料并选择合适的智能体",
@@ -8674,7 +8674,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                       <span class="wxc-ico" style="background:linear-gradient(135deg,#7DD3A3,#2BD9A8);color:#fff">💬</span>
                       <div class="wxc-tt">
                         <div class="wxc-name">个人微信 · 客服小妹(备用号)</div>
-                        <div class="wxc-id">wx_id: csg<span style="opacity:.5">_dgg_2026</span></div>
+                        <div class="wxc-id">wx_id: csg<span style="opacity:.5">_kgold_2026</span></div>
                       </div>
                       <span class="wxc-state on"><i></i> 在线</span>
                     </div>
@@ -8697,7 +8697,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
                       <span class="wxc-ico" style="background:linear-gradient(135deg,#F76C5E,#E5484D);color:#fff">📹</span>
                       <div class="wxc-tt">
                         <div class="wxc-name">微信视频号 · 凯格咨询AI官号</div>
-                        <div class="wxc-id">finder_id: SPF<span style="opacity:.5">_dgg_dy</span></div>
+                        <div class="wxc-id">finder_id: SPF<span style="opacity:.5">_kgold_dy</span></div>
                       </div>
                       <span class="wxc-state on"><i></i> 在线</span>
                     </div>
@@ -11251,7 +11251,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
     </div>
     <div class="m-body">
       <div class="share-link-row">
-        <input id="shareLink" readonly value="https://dgg.ai/s/aios-workbench-0612" />
+        <input id="shareLink" readonly value="https://k-gold.ai/s/aios-workbench-0612" />
         <button class="btn-grad" id="copyLink">复制链接</button>
       </div>
 
@@ -16422,7 +16422,7 @@ curl https://api.dgg.ai/v1/agents/dispatch \
         { type: "cust", text: "Hi, does your CRM support multi-currency invoicing for EU customers?" },
         { type: "ai", text: "Yes — we support 34 currencies including USD/EUR/GBP, with ECB daily exchange rates. We have 17 EU clients using this. Want me to send 3 case studies + pricing?" },
         { type: "cust", text: "Yes please. Also, UK office?" },
-        { type: "ai", text: "No UK office yet, but we have an EU customer success team. I'll forward you to our APAC sales lead within 4 hours. Meanwhile, case studies + pricing attached. Reach out at sales@dgg.ai any time." },
+        { type: "ai", text: "No UK office yet, but we have an EU customer success team. I'll forward you to our APAC sales lead within 4 hours. Meanwhile, case studies + pricing attached. Reach out at sales@k-gold.ai any time." },
         { type: "cust", text: "Great, thank you!" }
       ],
       reason: "AI 决策推理: ① 海外询单 + 英文 → 触发英文模型 ② 多币种是产品标配 (置信 99%) ③ 17 家 EU 案例可调用 ④ UK 时区夜里, 海外销售 4h 后接管(白天)即可 ⑤ 客户结尾'Great, thank you' = 满意, 无需升级。 置信 94% > 阈值 85%, 自动闭环。"
