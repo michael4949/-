@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlphaGym — 交易能力评估（真引擎 · 真数据）</title>
+<meta name="description" content="用条件随机化检验区分交易技能与运气。真实历史行情、真实撮合、真实统计校准，全部计算在浏览器本地完成。">
+<style>
+:root{
+  --font: system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono: "SF Mono","JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --bg:#F4F6FA; --bg2:#E9EDF4; --panel:#fff; --panel2:#F6F8FC; --panel3:#EDF1F7;
+  --border:#E0E6EF; --border2:#CED7E4; --ink:#0D1420; --ink2:#31405A; --muted:#68758A; --faint:#98A4B5;
+  --accent:#3B6BFF; --accent2:#2751DC; --accentSoft:rgba(59,107,255,.10); --accentSoft2:rgba(59,107,255,.18);
+  --cyan:#12ADBA; --up:#EE3346; --upSoft:rgba(238,51,70,.12);
+  --down:#0FA173; --downSoft:rgba(15,161,115,.12); --warn:#E28A20; --warnSoft:rgba(226,138,32,.13);
+  --gold:#CE9C36;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  --shadowLg:0 24px 60px rgba(16,24,40,.13);
+  --r:13px; --rs:9px; --maxw:1440px;
+}
+:root[data-theme="dark"]{
+  --bg:#090C12; --bg2:#0C1119; --panel:#121822; --panel2:#161D28; --panel3:#1C2532;
+  --border:#222C3A; --border2:#2B3746; --ink:#E9EEF6; --ink2:#B5C1D3; --muted:#828FA3; --faint:#5B6779;
+  --accent:#5A80FF; --accent2:#7E9CFF; --accentSoft:rgba(90,128,255,.14); --accentSoft2:rgba(90,128,255,.24);
+  --cyan:#2BCEDA; --up:#FF4A5C; --upSoft:rgba(255,74,92,.16);
+  --down:#1DBC8B; --downSoft:rgba(29,188,139,.16); --warn:#F0A63C; --warnSoft:rgba(240,166,60,.16);
+  --gold:#E4B653;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.4);
+  --shadowLg:0 30px 70px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;line-height:1.2;letter-spacing:-.02em}
+p{margin:0}
+button,input,select{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+a{color:var(--accent);text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .dn{color:var(--down)} .mut{color:var(--muted)}
+.hide{display:none!important}
+
+/* ── shell ── */
+.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:saturate(150%) blur(12px);border-bottom:1px solid var(--border)}
+.top-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;letter-spacing:-.02em;white-space:nowrap}
+.logo{width:29px;height:29px;border-radius:8px;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--accent),var(--cyan));box-shadow:0 4px 12px -4px var(--accent);font-size:15px}
+.brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted);font-weight:600;margin-top:-3px}
+.tabs{display:flex;gap:3px;background:var(--panel2);padding:3px;border-radius:10px;border:1px solid var(--border)}
+.tabs button{padding:7px 15px;border:0;border-radius:7px;background:transparent;color:var(--ink2);font-weight:600;font-size:14px;transition:.14s}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{background:var(--panel);color:var(--accent);box-shadow:var(--shadow)}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:9px}
+.badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--muted);white-space:nowrap}
+.badge b{color:var(--down);font-weight:700}
+.ibtn{width:35px;height:35px;border-radius:9px;border:1px solid var(--border);background:var(--panel);color:var(--ink2);display:grid;place-items:center;font-size:15px}
+.ibtn:hover{border-color:var(--accent);color:var(--accent)}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:20px}
+
+/* ── generic ── */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+.ph{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.ph h3{font-size:14.5px;font-weight:700}
+.ph .sub{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.pb{padding:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:9px;
+  padding:9px 16px;font-size:14px;font-weight:600;transition:.14s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{background:var(--accent2)}
+.btn-g{background:var(--panel);color:var(--ink);border-color:var(--border2)}
+.btn-g:hover{border-color:var(--accent);color:var(--accent)}
+.btn-s{background:var(--accentSoft);color:var(--accent);}
+.btn-s:hover{background:var(--accentSoft2)}
+.btn-sm{padding:6px 12px;font-size:13px;border-radius:7px}
+.btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+.seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{padding:6px 12px;border:0;background:var(--panel);color:var(--muted);font-size:13px;font-weight:600;border-right:1px solid var(--border)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accentSoft);color:var(--accent)}
+select,input[type=number],input[type=text]{background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;color:var(--ink);font-size:14px;width:100%}
+.note{display:flex;gap:9px;align-items:flex-start;background:var(--warnSoft);border:1px solid transparent;
+  border-radius:10px;padding:11px 13px;font-size:13px;color:var(--ink2);line-height:1.5}
+.note.info{background:var(--accentSoft)}
+.note b{color:var(--ink)}
+
+/* ── train layout ── */
+.grid-train{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.tile{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:12px 14px;box-shadow:var(--shadow)}
+.tile .l{font-size:11.5px;color:var(--muted);margin-bottom:5px}
+.tile .v{font-size:19px;font-weight:700;font-family:var(--mono);letter-spacing:-.02em}
+.tile .d{font-size:11.5px;font-family:var(--mono);margin-top:2px;color:var(--muted)}
+#chart{width:100%;height:430px}
+.ctrl{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--border);background:var(--panel2);flex-wrap:wrap}
+.play{width:36px;height:36px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:14px}
+.play:hover{background:var(--accent2)}
+.prog{flex:1;min-width:120px;height:5px;background:var(--panel3);border-radius:3px;overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));width:0;transition:width .12s}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.dirtabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dirtabs button{padding:10px;border-radius:9px;border:1px solid var(--border);background:var(--panel2);font-weight:700;font-size:14px;color:var(--muted)}
+.dirtabs button.on.buy{background:var(--upSoft);color:var(--up);border-color:var(--up)}
+.dirtabs button.on.sell{background:var(--downSoft);color:var(--down);border-color:var(--down)}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.field label{font-size:12px;color:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;border-bottom:1px dashed var(--border)}
+.kv:last-child{border-bottom:0}
+.kv span:first-child{color:var(--muted)}
+.kv span:last-child{font-family:var(--mono);font-weight:600}
+.fills{max-height:180px;overflow:auto;font-size:12px}
+.fill{display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border);font-family:var(--mono)}
+.tag{font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel3);color:var(--muted)}
+
+/* ── blind ── */
+.grid-blind{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+.mask{position:absolute;top:14px;left:14px;z-index:5;font-family:var(--mono);font-size:12px;
+  background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px dashed var(--border2);
+  padding:5px 11px;border-radius:7px;color:var(--muted);backdrop-filter:blur(4px)}
+.ans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.ans button{padding:13px;border-radius:10px;border:1px solid var(--border);font-weight:700;font-size:14.5px}
+.ans .b{background:var(--upSoft);color:var(--up);border-color:transparent}
+.ans .s{background:var(--downSoft);color:var(--down);border-color:transparent}
+.ans .w{background:var(--panel2);color:var(--muted)}
+.qdots{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.qdot{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:700;
+  background:var(--panel3);color:var(--faint);font-family:var(--mono)}
+.qdot.ok{background:var(--downSoft);color:var(--down)} .qdot.no{background:var(--upSoft);color:var(--up)}
+.qdot.skip{background:var(--panel3);color:var(--muted)} .qdot.cur{outline:2px solid var(--accent)}
+.reveal{border-radius:10px;padding:13px;font-size:13.5px;line-height:1.6;border:1px solid var(--border);background:var(--panel2)}
+
+/* ── report ── */
+.rep{display:grid;gap:16px}
+.verdict{border-radius:var(--r);padding:22px;border:1px solid var(--border);background:var(--panel);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.verdict::after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:var(--accentSoft);filter:blur(8px)}
+.verdict .lvl{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;font-weight:700;margin-bottom:12px;position:relative;z-index:1}
+.verdict h2{font-size:22px;font-weight:800;position:relative;z-index:1}
+.verdict p{color:var(--ink2);margin-top:10px;font-size:15px;position:relative;z-index:1;max-width:820px}
+.dist{margin-top:18px;position:relative;z-index:1}
+.distbar{height:34px;border-radius:8px;background:linear-gradient(90deg,var(--panel3),var(--panel3));position:relative;overflow:hidden;border:1px solid var(--border)}
+.distbar .band{position:absolute;top:0;bottom:0;background:var(--accentSoft2)}
+.distbar .med{position:absolute;top:0;bottom:0;width:2px;background:var(--muted)}
+.distbar .you{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--accent);box-shadow:0 0 0 3px var(--accentSoft)}
+.distlbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-family:var(--mono);margin-top:6px}
+table.dt{width:100%;border-collapse:collapse;font-size:13.5px}
+table.dt th{text-align:right;padding:9px 10px;font-size:11.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
+table.dt th:first-child,table.dt td:first-child{text-align:left}
+table.dt td{padding:10px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono)}
+table.dt td:first-child,table.dt td:last-child{font-family:var(--font)}
+table.dt tr:last-child td{border-bottom:0}
+.pill{font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--downSoft);color:var(--down)}
+.pill.bad{background:var(--upSoft);color:var(--up)}
+.pill.mid{background:var(--warnSoft);color:var(--warn)}
+.pill.na{background:var(--panel3);color:var(--muted)}
+.bench{display:flex;flex-direction:column;gap:9px}
+.brow{display:grid;grid-template-columns:150px 1fr 90px;gap:11px;align-items:center;font-size:13.5px}
+.btrack{height:22px;background:var(--panel3);border-radius:6px;position:relative;overflow:hidden}
+.btrack i{position:absolute;top:0;bottom:0;border-radius:6px}
+.blist{display:flex;flex-direction:column;gap:9px}
+.bitem{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;padding:10px 12px;border-radius:9px;background:var(--panel2)}
+.bitem .bt{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700;white-space:nowrap;flex:none}
+ol.cav{margin:0;padding-left:20px;color:var(--ink2);font-size:13.5px}
+ol.cav li{margin:7px 0;line-height:1.6}
+pre.json{background:var(--panel3);border-radius:9px;padding:14px;overflow:auto;max-height:340px;
+  font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--ink2);margin:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.empty{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty h3{font-size:19px;color:var(--ink);margin-bottom:9px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
+  background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:10px;font-size:13.5px;font-weight:600;
+  opacity:0;transition:.25s;pointer-events:none;box-shadow:var(--shadowLg)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:1100px){
+  .grid-train,.grid-blind,.g2,.g3{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .top-in{gap:10px} .badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="top-in">
+  <div class="brand"><span class="logo">◆</span><span>AlphaGym<small>COUNTERFACTUAL ENGINE</small></span></div>
+  <div class="tabs" id="tabs">
+    <button data-v="train" class="on">训练场</button>
+    <button data-v="blind">双盲测试</button>
+    <button data-v="report">评估报告</button>
+    <button data-v="about">这是什么</button>
+  </div>
+  <div class="top-r">
+    <span class="badge" id="dataBadge">真实历史行情 · <b>无模拟数据</b></span>
+    <button class="ibtn" id="themeBtn" aria-label="切换主题">◐</button>
+  </div>
+</div></div>
+
+<!-- ══════════════ 训练场 ══════════════ -->
+<div class="wrap view" id="v-train">
+  <div class="tiles">
+    <div class="tile"><div class="l">账户权益</div><div class="v num" id="tEquity">—</div><div class="d" id="tEquityD">初始 200,000</div></div>
+    <div class="tile"><div class="l">当前持仓</div><div class="v num" id="tPos">—</div><div class="d" id="tPosD">—</div></div>
+    <div class="tile"><div class="l">浮动盈亏</div><div class="v num" id="tFloat">—</div><div class="d" id="tFloatD">—</div></div>
+    <div class="tile"><div class="l">回放进度</div><div class="v num" id="tProg">—</div><div class="d" id="tProgD">—</div></div>
+  </div>
+
+  <div class="grid-train">
+    <div class="panel">
+      <div class="ph">
+        <h3 id="chartTitle">—</h3>
+        <span class="sub" id="chartSub"></span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <select id="dsSel" style="width:auto"></select>
+          <button class="btn btn-g btn-sm" id="newRound">新一轮</button>
+        </div>
+      </div>
+      <div style="padding:8px"><div id="chart"></div></div>
+      <div class="ctrl">
+        <button class="play" id="playBtn">▶</button>
+        <div class="seg" id="speedSeg">
+          <button data-s="1">1×</button><button data-s="3" class="on">3×</button>
+          <button data-s="8">8×</button><button data-s="20">20×</button>
+        </div>
+        <button class="btn btn-g btn-sm" id="stepBtn">步进 →</button>
+        <div class="prog"><i id="progBar"></i></div>
+        <button class="btn btn-s btn-sm" id="autoBtn">自动跑一轮（双均线）</button>
+        <button class="btn btn-p btn-sm" id="endBtn">结束本轮并评估</button>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="panel">
+        <div class="ph"><h3>模拟下单</h3><span class="sub" id="fillHint">下一根开盘成交</span></div>
+        <div class="pb">
+          <div class="dirtabs" style="margin-bottom:11px">
+            <button class="buy on" id="dBuy">买入 / 多</button>
+            <button class="sell" id="dSell">卖出 / 空</button>
+          </div>
+          <div class="row2">
+            <div class="field"><label>手数</label><input type="number" id="oQty" value="20" min="1" step="1"></div>
+            <div class="field"><label>类型</label>
+              <select id="oType"><option value="market">市价</option><option value="limit">限价</option><option value="stop">停损触发</option></select>
+            </div>
+          </div>
+          <div class="field hide" id="priceField"><label>委托价 / 触发价</label><input type="number" id="oPrice" step="0.01"></div>
+          <div class="row2">
+            <div class="field"><label>止损价（可空）</label><input type="number" id="oSL" step="0.01" placeholder="—"></div>
+            <div class="field"><label>止盈价（可空）</label><input type="number" id="oTP" step="0.01" placeholder="—"></div>
+          </div>
+          <button class="btn btn-p" style="width:100%" id="submitBtn">确认下单</button>
+          <div style="margin-top:12px">
+            <div class="kv"><span>可用现金</span><span class="num" id="sCash">—</span></div>
+            <div class="kv"><span>持仓均价</span><span class="num" id="sAvg">—</span></div>
+            <div class="kv"><span>最新价</span><span class="num" id="sLast">—</span></div>
+            <div class="kv"><span>挂单</span><span class="num" id="sPending">0</span></div>
+          </div>
+          <button class="btn btn-g btn-sm" style="width:100%;margin-top:10px" id="flatBtn">一键平仓</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>成交记录</h3><span class="sub" id="fillCount">0 笔</span></div>
+        <div class="pb"><div class="fills" id="fills"><div class="mut" style="font-size:13px">还没有成交</div></div></div>
+      </div>
+
+      <div class="note info">
+        <span>ℹ️</span>
+        <span><b>成交假设是保守的：</b>下单最早在下一根开盘成交；停损触发吃滑点；
+        同一根内止损与止盈都可能触发时，一律判定止损先成交。</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ 双盲 ══════════════ -->
+<div class="wrap view hide" id="v-blind">
+  <div class="grid-blind">
+    <div class="panel">
+      <div class="ph">
+        <h3 id="bMask">品种 ██████ · 日期 ████-██-██</h3>
+        <span class="sub" id="bSub">第 0 / 0 题</span>
+        <button class="btn btn-g btn-sm" id="newBlind" style="margin-left:auto">重新出题</button>
+      </div>
+      <div style="padding:8px">
+        <div id="bChart" style="width:100%;height:400px"></div>
+      </div>
+      <div class="ctrl" style="gap:9px">
+        <div class="ans" style="flex:1">
+          <button class="b" data-a="1">看多 ↑</button>
+          <button class="s" data-a="-1">看空 ↓</button>
+          <button class="w" data-a="0">观望</button>
+        </div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <div class="ph"><h3>本轮战绩</h3></div>
+        <div class="pb">
+          <div class="kv"><span>已答题</span><span class="num" id="bDone">0 / 0</span></div>
+          <div class="kv"><span>方向正确</span><span class="num" id="bRight">0</span></div>
+          <div class="kv"><span>方向命中率</span><span class="num" id="bRate">—</span></div>
+          <div class="kv"><span>累计 R</span><span class="num" id="bR">—</span></div>
+          <div class="qdots" id="bDots"></div>
+          <div class="reveal" style="margin-top:12px" id="bReveal">
+            作答后，系统会揭晓品种与日期，并用<b>真实后续行情</b>计算这一题的结果。
+          </div>
+          <button class="btn btn-p" style="width:100%;margin-top:12px" id="bEval" disabled>评估这一组答题</button>
+        </div>
+      </div>
+      <div class="note">
+        <span>⚠️</span>
+        <span><b>双盲不是把标题挡住而已。</b>价格做了<b>乘法</b>保形变换 ——
+        价格水平被改变（认不出品种），但逐根涨跌幅严格不变（练的是真行情）。
+        用加法会扭曲收益率分布，那样练出来的手感对应一段不存在的行情。</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ 报告 ══════════════ -->
+<div class="wrap view hide" id="v-report">
+  <div id="repEmpty" class="empty">
+    <h3>还没有可评估的交易记录</h3>
+    <p>去「训练场」跑一轮，或在「双盲测试」里答完一组题。<br>两者产生的交易记录都会送进同一套评估引擎。</p>
+    <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-p" onclick="location.hash='#train'">去训练场</button>
+      <button class="btn btn-g" onclick="location.hash='#blind'">去双盲测试</button>
+    </div>
+  </div>
+  <div id="repBody" class="rep hide"></div>
+</div>
+
+<!-- ══════════════ 关于 ══════════════ -->
+<div class="wrap view hide" id="v-about">
+  <div style="max-width:880px;margin:0 auto">
+    <div class="panel"><div class="pb" style="padding:26px">
+      <h2 style="font-size:24px;font-weight:800">这个 demo 里，哪些是真的</h2>
+      <p class="mut" style="margin-top:10px">一句话：<b style="color:var(--ink)">全部都是真的，唯一的妥协是数据放在了浏览器本地。</b></p>
+
+      <div style="margin-top:22px" id="aboutReal"></div>
+
+      <h3 style="margin-top:26px;font-size:17px">唯一的妥协，以及为什么它在生产环境必须改掉</h3>
+      <div class="note" style="margin-top:12px">
+        <span>⚠️</span>
+        <span>这是个<b>静态单文件</b> demo，行情数据必须随文件下发，所以打开控制台是能翻到后续 K 线的。
+        引擎本身已经用 <span class="mono">GuardedBarSource</span> 把越界读取做成<b>抛异常</b>而非返回数据，
+        但在纯前端环境里，这道闸只能挡住代码，挡不住人。<br><br>
+        <b>生产环境中 GuardedBarSource 必须部署在服务端</b>，客户端只拿已揭晓的分片，撮合也在服务端权威判定。
+        否则双盲测试、成绩、排行榜、机构选拔全部作废 —— 而且数据一旦下发就收不回来。</span>
+      </div>
+
+      <h3 style="margin-top:26px;font-size:17px">和上一版原型的差别</h3>
+      <table class="dt" style="margin-top:12px">
+        <thead><tr><th>能力</th><th style="text-align:left">上一版原型</th><th style="text-align:left">现在</th></tr></thead>
+        <tbody id="aboutDiff"></tbody>
+      </table>
+
+      <h3 style="margin-top:26px;font-size:17px">校准数据</h3>
+      <p class="mut" style="margin-top:8px;font-size:14px">
+        「你处在第 87 分位，p=0.04」这句话要有意义，唯一前提是：当用户其实毫无技能时，p 值必须服从均匀分布。
+        在真实 GOOG 日线上做了 1500 次独立复制，实测一类错误率：
+      </p>
+      <table class="dt" style="margin-top:12px">
+        <thead><tr><th>零模型</th><th>P(p≤.05)</th><th>P(p≤.10)</th><th>KS-p</th><th style="text-align:left">判定</th></tr></thead>
+        <tbody id="aboutCal"></tbody>
+      </table>
+      <p class="mut" style="margin-top:10px;font-size:13px">名义 0.05 的二项 95% 区间为 [0.039, 0.061]；名义 0.10 为 [0.085, 0.115]。</p>
+
+      <div class="note info" style="margin-top:22px">
+        <span>📐</span>
+        <span>开发过程中，校准测试抓出了三个真实缺陷 —— 其中一个让「仓位管理」整个维度在数学上不可观测。
+        三个都偏向<b>高估用户能力</b>：这类错误不会让产品变难看，只会让用户更高兴，
+        所以只可能被统计检验抓住，永远不会被「跑一下看看效果」抓住。</span>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>/*__KLINECHARTS__*/</script>
+<script>/*__DATA__*/</script>
+<script type="module">
+/*__ENGINE__*/
+
+/* ══════════════════════════════════════════════════════════════════
+   以下是 UI 胶水层。上面是原封不动的引擎源码 —— 与 Node 端跑
+   49 项测试、跑统计校准的是**同一份代码**，没有为演示改过一行。
+
+   整个胶水层包在 IIFE 里，与引擎的模块作用域隔离 —— 引擎里已经有 sgn/pct
+   这类简短名字，UI 层再定义同名常量会直接把整个脚本打挂
+   （"Identifier 'sgn' has already been declared"，冒烟测试第一轮就是栽在这里）。
+   ══════════════════════════════════════════════════════════════════ */
+(() => {
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const fmt = (v, d = 2) => Number(v).toLocaleString('zh-CN', { minimumFractionDigits: d, maximumFractionDigits: d });
+const sgn = (v, d = 2) => (v >= 0 ? '+' : '') + fmt(v, d);
+const pctS = (v) => (v * 100).toFixed(1) + '%';
+/** 引擎的文案里用 **粗体** 标记重点（Node 端终端渲染要用），到了 HTML 得转成标签。
+ *  先转义再替换，避免把引擎文案当成 HTML 注入点。 */
+const md = (t) => String(t)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+
+const INSTRUMENTS = {
+  goog:   { symbol: 'GOOG',   multiplier: 1,   tickSize: 0.01,   feeRate: 0.0003,  feePerUnit: 0, slippageTicks: 1 },
+  eurusd: { symbol: 'EURUSD', multiplier: 1000, tickSize: 0.0001, feeRate: 0.00008, feePerUnit: 0, slippageTicks: 1 },
+};
+// 片段要够长：双均线在日线上约每 35 根出一笔，420 根只有 ~10 笔，
+// 永远卡在「样本不足」这一档，看不到引擎真正下结论的样子。
+const SEG_LEN = 1000, WARMUP = 120, INITIAL_CASH = 200000;
+
+const S = {
+  ds: 'goog', session: null, ins: null, chart: null, bChart: null,
+  playing: false, speed: 3, timer: null, dir: 1,
+  segBars: null, report: null, source: null, blind: null,
+  // 报告正在计算中。没有这个标志会出一个很隐蔽的 bug：
+  // runReport 先切 hash，hashchange 触发的 route() 此时 S.report 仍为 null，
+  // 于是又把 #repBody 重新隐藏 —— 报告被渲染进一个不可见的容器，
+  // textContent 读得到、肉眼什么都看不见。是浏览器冒烟测试抓出来的。
+  pending: false,
+};
+
+let toastT;
+function toast(m) {
+  const t = $('#toast'); t.textContent = m;
+  t.style.opacity = 1; t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { t.style.opacity = 0; t.style.transform = 'translateX(-50%) translateY(20px)'; }, 2400);
+}
+
+/* ── 主题 ── */
+function theme() { return document.documentElement.getAttribute('data-theme') || 'light'; }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  try { localStorage.setItem('ag-theme', t); } catch (e) {}
+  applyChartStyles();
+}
+function cssv(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+function chartStyles() {
+  const up = cssv('--up'), down = cssv('--down'), grid = cssv('--border'),
+    text = cssv('--muted'), ink = cssv('--ink'), panel = cssv('--panel');
+  return {
+    grid: { horizontal: { color: grid }, vertical: { color: grid } },
+    candle: {
+      bar: {
+        upColor: up, downColor: down, noChangeColor: text,
+        upBorderColor: up, downBorderColor: down, noChangeBorderColor: text,
+        upWickColor: up, downWickColor: down, noChangeWickColor: text,
+      },
+      priceMark: {
+        last: { upColor: up, downColor: down, noChangeColor: text,
+                text: { color: '#fff' } },
+        high: { color: text }, low: { color: text },
+      },
+      tooltip: { text: { color: ink }, rect: { color: panel, borderColor: grid } },
+    },
+    indicator: {
+      tooltip: { text: { color: text } },
+      bars: [{ upColor: up + '99', downColor: down + '99', noChangeColor: text }],
+    },
+    xAxis: { axisLine: { color: grid }, tickLine: { color: grid }, tickText: { color: text } },
+    yAxis: { axisLine: { color: grid }, tickLine: { color: grid }, tickText: { color: text } },
+    crosshair: {
+      horizontal: { line: { color: text }, text: { backgroundColor: cssv('--accent') } },
+      vertical: { line: { color: text }, text: { backgroundColor: cssv('--accent') } },
+    },
+    separator: { color: grid },
+  };
+}
+function applyChartStyles() {
+  const st = chartStyles();
+  if (S.chart) S.chart.setStyles(st);
+  if (S.bChart) S.bChart.setStyles(st);
+}
+
+const toK = (b) => ({ timestamp: b.t, open: b.o, high: b.h, low: b.l, close: b.c, volume: b.v });
+
+/* ══════════════ 训练场 ══════════════ */
+
+function pickSegment(dsKey) {
+  const d = DATASETS[dsKey];
+  const total = d.rows.length;
+  const len = Math.min(SEG_LEN, total - 10);
+  const start = Math.floor(Math.random() * (total - len));
+  return d.rows.slice(start, start + len)
+    .map(([t, o, h, l, c, v]) => ({ t, o, h, l, c, v }));
+}
+
+function newRound() {
+  stopPlay();
+  S.ds = $('#dsSel').value;
+  S.ins = INSTRUMENTS[S.ds];
+  S.segBars = pickSegment(S.ds);
+  S.session = new ReplaySession({
+    bars: S.segBars, instrument: S.ins,
+    rules: { t1: false, allowShort: true, marginRate: 1, maintenanceRate: 0 },
+    initialCash: INITIAL_CASH, startAt: WARMUP, blind: false,
+    seed: (Math.random() * 1e9) | 0,
+  });
+
+  const d = DATASETS[S.ds];
+  $('#chartTitle').textContent = `${d.symbol} · ${d.timeframe === '1d' ? '日线' : '小时线'}`;
+  $('#chartSub').textContent = `本轮 ${S.segBars.length} 根 · 红涨绿跌`;
+
+  if (!S.chart) {
+    S.chart = klinecharts.init('chart', { styles: chartStyles() });
+    S.chart.createIndicator('MA', false, { id: 'candle_pane' });
+    S.chart.createIndicator('VOL');
+  }
+  S.chart.applyNewData(S.session.visibleBars().map(toK));
+  S.chart.setPriceVolumePrecision(S.ds === 'eurusd' ? 5 : 2, 0);
+  refreshTrain();
+  toast('新一轮已开始');
+}
+
+function refreshTrain() {
+  const s = S.session; if (!s) return;
+  const e = s.engine;
+  const vis = s.visibleBars();
+  const last = vis[vis.length - 1];
+  const px = last ? last.c : 0;
+  const eq = e.equityAt(px);
+  const float = e.position * (px - e.avgPrice) * S.ins.multiplier;
+  const dec = S.ds === 'eurusd' ? 5 : 2;
+
+  $('#tEquity').textContent = fmt(eq, 0);
+  $('#tEquity').className = 'v num ' + (eq >= INITIAL_CASH ? 'up' : 'dn');
+  $('#tEquityD').textContent = `${sgn(eq - INITIAL_CASH, 0)} · ${sgn((eq / INITIAL_CASH - 1) * 100)}%`;
+  $('#tEquityD').className = 'd ' + (eq >= INITIAL_CASH ? 'up' : 'dn');
+
+  $('#tPos').textContent = e.position === 0 ? '空仓' : `${e.position > 0 ? '多' : '空'} ${Math.abs(e.position)}`;
+  $('#tPos').className = 'v num ' + (e.position > 0 ? 'up' : e.position < 0 ? 'dn' : '');
+  $('#tPosD').textContent = e.position ? `均价 ${fmt(e.avgPrice, dec)}` : '—';
+
+  $('#tFloat').textContent = e.position ? sgn(float, 0) : '—';
+  $('#tFloat').className = 'v num ' + (float > 0 ? 'up' : float < 0 ? 'dn' : '');
+  $('#tFloatD').textContent = e.position ? `现价 ${fmt(px, dec)}` : '—';
+
+  const pr = s.progress;
+  $('#tProg').textContent = (pr * 100).toFixed(0) + '%';
+  $('#tProgD').textContent = `${s.cursor + 1} / ${s.totalBars} 根`;
+  $('#progBar').style.width = (pr * 100) + '%';
+
+  $('#sCash').textContent = fmt(e.cash, 0);
+  $('#sAvg').textContent = e.position ? fmt(e.avgPrice, dec) : '—';
+  $('#sLast').textContent = fmt(px, dec);
+  const pend = e.orders.filter(o => o.status === 'pending').length;
+  $('#sPending').textContent = pend;
+
+  const ct = e.closedTrades;
+  $('#fillCount').textContent = `${ct.length} 笔`;
+  $('#fills').innerHTML = ct.length ? ct.slice(-40).reverse().map(t => {
+    const cls = t.pnl >= 0 ? 'up' : 'dn';
+    return `<div class="fill"><span class="${t.dir > 0 ? 'up' : 'dn'}">${t.dir > 0 ? '多' : '空'}${t.size}</span>
+      <span class="mut">${fmt(t.entryPrice, dec)} → ${fmt(t.exitPrice, dec)}</span>
+      <span class="${cls}">${sgn(t.pnl, 0)}</span></div>`;
+  }).join('') : '<div class="mut" style="font-size:13px">还没有成交</div>';
+
+  $('#endBtn').disabled = ct.length === 0 && e.position === 0;
+}
+
+function stepOnce() {
+  const s = S.session; if (!s || s.finished) { stopPlay(); return false; }
+  const before = s.cursor;
+  const r = s.step();
+  if (!r) { stopPlay(); toast('本轮行情已播放完毕'); return false; }
+  const bar = s.visibleBars()[s.cursor];
+  if (bar) S.chart.updateData(toK(bar));
+  refreshTrain();
+  return true;
+}
+
+function startPlay() {
+  if (!S.session || S.session.finished) return;
+  S.playing = true; $('#playBtn').textContent = '❚❚';
+  const iv = Math.max(16, 420 / S.speed);
+  S.timer = setInterval(() => { if (!stepOnce()) stopPlay(); }, iv);
+}
+function stopPlay() {
+  S.playing = false; $('#playBtn').textContent = '▶';
+  if (S.timer) { clearInterval(S.timer); S.timer = null; }
+}
+
+/** 一个只用可见数据的双均线策略 —— 想偷看未来会直接抛 FutureDataError */
+function autoRun() {
+  stopPlay();
+  const s = S.session; if (!s) return;
+  const qty = Math.max(1, parseInt($('#oQty').value) || 20);
+  let pos = s.engine.position;
+  let guard = 0;
+  while (!s.finished && guard++ < 20000) {
+    const vis = s.visibleBars();
+    if (vis.length >= 35) {
+      const ma = (p) => { let t = 0; for (let i = vis.length - p; i < vis.length; i++) t += vis[i].c; return t / p; };
+      const want = ma(10) > ma(30) ? 1 : -1;
+      if (want !== pos) {
+        if (pos !== 0) s.submitOrder({ type: 'market', dir: -pos, qty: Math.abs(s.engine.position), reduceOnly: true });
+        s.submitOrder({ type: 'market', dir: want, qty });
+        pos = want;
+      }
+    }
+    if (!s.step()) break;
+  }
+  S.chart.applyNewData(s.visibleBars().map(toK));
+  refreshTrain();
+  toast(`自动交易完成，成交 ${s.engine.closedTrades.length} 笔`);
+}
+
+function endRound() {
+  stopPlay();
+  const s = S.session; if (!s) return;
+  const res = s.finish();
+  if (res.trades.length === 0) { toast('本轮没有完成任何一笔交易'); return; }
+  S.source = 'train';
+  runReport(res.bars, res.trades, S.ins, `训练场 · ${DATASETS[S.ds].symbol}`);
+}
+
+/* ══════════════ 双盲 ══════════════ */
+
+const BLIND_N = 10, BLIND_HISTORY = 130, BLIND_HORIZON = 20;
+
+function newBlind() {
+  const dsKey = $('#dsSel').value;
+  const d = DATASETS[dsKey];
+  const rows = d.rows;
+  const bars = rows.map(([t, o, h, l, c, v]) => ({ t, o, h, l, c, v }));
+
+  // 互不重叠地抽题：零模型要求同一时刻至多一笔持仓
+  const lo = BLIND_HISTORY + 5, hi = bars.length - BLIND_HORIZON - 5;
+  const picks = [];
+  let guard = 0;
+  while (picks.length < BLIND_N && guard++ < 4000) {
+    const i = lo + Math.floor(Math.random() * (hi - lo));
+    if (picks.every(p => Math.abs(p - i) > BLIND_HORIZON + 8)) picks.push(i);
+  }
+  picks.sort((a, b) => a - b);
+
+  S.blind = {
+    dsKey, bars, ins: INSTRUMENTS[dsKey],
+    qs: picks.map(i => ({
+      i, scale: 0.3 + Math.random() * 3,
+      // 时间戳整体平移随机天数：只打码品种名是不够的，
+      // X 轴上明晃晃的「2005-03」一眼就能反查出是哪段行情。
+      tShift: Math.floor((Math.random() - 0.5) * 7300) * 86400000,
+      ans: null, correct: null, fwd: null,
+    })),
+    idx: 0, right: 0, answered: 0,
+  };
+  renderBlind();
+  toast(`已出 ${picks.length} 题`);
+}
+
+function renderBlind() {
+  const B = S.blind; if (!B) return;
+  const q = B.qs[B.idx];
+  const seg = B.bars.slice(q.i - BLIND_HISTORY, q.i + 1)
+    .map(b => ({ t: b.t + q.tShift, o: b.o * q.scale, h: b.h * q.scale,
+                 l: b.l * q.scale, c: b.c * q.scale, v: b.v }));
+
+  if (!S.bChart) {
+    S.bChart = klinecharts.init('bChart', { styles: chartStyles() });
+    S.bChart.createIndicator('MA', false, { id: 'candle_pane' });
+  }
+  S.bChart.applyNewData(seg.map(toK));
+  S.bChart.setPriceVolumePrecision(4, 0);
+
+  $('#bSub').textContent = `第 ${B.idx + 1} / ${B.qs.length} 题`;
+  // 时间轴已整体平移，标题这里也一并打码；揭晓时才显示真实品种与日期
+  $('#bMask').textContent = q.ans === null
+    ? '品种 ██████ · 日期 ████-██-██'
+    : `${DATASETS[B.dsKey].symbol} · ${new Date(B.bars[q.i].t).toISOString().slice(0, 10)}`;
+
+  $('#bDone').textContent = `${B.answered} / ${B.qs.length}`;
+  $('#bRight').textContent = B.right;
+  const graded = B.qs.filter(x => x.correct !== null).length;
+  $('#bRate').textContent = graded ? ((B.right / graded) * 100).toFixed(0) + '%' : '—';
+
+  $('#bDots').innerHTML = B.qs.map((x, k) => {
+    const c = x.ans === null ? '' : x.correct === true ? 'ok' : x.correct === false ? 'no' : 'skip';
+    return `<span class="qdot ${c} ${k === B.idx ? 'cur' : ''}">${k + 1}</span>`;
+  }).join('');
+
+  $$('.ans button').forEach(b => b.disabled = q.ans !== null);
+  $('#bEval').disabled = B.answered < 3;
+
+  if (q.ans === null) {
+    $('#bReveal').innerHTML = '作答后，系统会揭晓品种与日期，并用<b>真实后续行情</b>计算这一题的结果。';
+  }
+}
+
+function answerBlind(a) {
+  const B = S.blind; if (!B) return;
+  const q = B.qs[B.idx];
+  if (q.ans !== null) return;
+
+  const b0 = B.bars[q.i], b1 = B.bars[q.i + BLIND_HORIZON];
+  const fwd = (b1.c - b0.c) / b0.c;
+  q.ans = a; q.fwd = fwd;
+  B.answered++;
+
+  if (a === 0) {
+    q.correct = null;
+    $('#bReveal').innerHTML = `<b>揭晓：</b>${DATASETS[B.dsKey].symbol} · ${new Date(b0.t).toISOString().slice(0, 10)}。
+      后 ${BLIND_HORIZON} 根实际 <b class="${fwd >= 0 ? 'up' : 'dn'}">${sgn(fwd * 100)}%</b>。
+      <br>你选择观望，本题不计入方向命中率，也不产生交易记录。`;
+  } else {
+    const ok = Math.sign(fwd) === a;
+    q.correct = ok;
+    if (ok) B.right++;
+    $('#bReveal').innerHTML = `<b>揭晓：</b>${DATASETS[B.dsKey].symbol} · ${new Date(b0.t).toISOString().slice(0, 10)}。
+      后 ${BLIND_HORIZON} 根实际 <b class="${fwd >= 0 ? 'up' : 'dn'}">${sgn(fwd * 100)}%</b>，
+      你的判断 <b>${a > 0 ? '看多' : '看空'}</b> —— <b class="${ok ? 'dn' : 'up'}">${ok ? '正确 ✓' : '错误 ✗'}</b>。
+      <br><span class="mut">结果由真实行情算出，不是随机数。</span>`;
+    toast(ok ? '方向正确' : '方向错误');
+  }
+
+  // 累计 R（用引擎的口径，不另起炉灶）
+  const trades = blindTrades();
+  if (trades.length) {
+    const ctx = makeContext(B.bars, B.ins, { refSize: 1 });
+    $('#bR').textContent = sgn(evalTrades(ctx, trades).totalR);
+  }
+
+  renderBlind();
+  setTimeout(() => {
+    if (B.idx < B.qs.length - 1) { B.idx++; renderBlind(); }
+    else toast('本组题已答完，可以评估了');
+  }, 1400);
+}
+
+function blindTrades() {
+  const B = S.blind; if (!B) return [];
+  return B.qs.filter(q => q.ans === 1 || q.ans === -1)
+    .map(q => ({ entry: q.i, exit: q.i + BLIND_HORIZON, dir: q.ans, size: 1 }));
+}
+
+function evalBlind() {
+  const B = S.blind; if (!B) return;
+  const trades = blindTrades();
+  if (trades.length < 3) { toast('至少要有 3 笔方向判断才能评估'); return; }
+  S.source = 'blind';
+  runReport(B.bars, trades, B.ins, `双盲测试 · ${DATASETS[B.dsKey].symbol}`);
+}
+
+/* ══════════════ 报告 ══════════════ */
+
+function runReport(bars, trades, ins, title) {
+  toast('正在跑蒙特卡洛…');
+  S.pending = true;
+  location.hash = '#report';
+  $('#repEmpty').classList.add('hide');
+  $('#repBody').classList.remove('hide');
+  $('#repBody').innerHTML = `<div class="empty"><h3><span class="spin"></span> 正在计算</h3>
+    <p>${trades.length} 笔交易 × 5 个零模型 × 2000 次蒙特卡洛</p></div>`;
+
+  setTimeout(() => {
+    const t0 = performance.now();
+    const rep = analyzeSession({
+      bars, trades, instrument: ins,
+      seed: (Math.random() * 1e9) | 0, iterations: 2000,
+    });
+    const ms = Math.round(performance.now() - t0);
+    S.report = rep;
+    S.pending = false;
+    $('#repEmpty').classList.add('hide');
+    $('#repBody').classList.remove('hide');
+    renderReport(rep, title, ms);
+  }, 60);
+}
+
+const LVL = {
+  strong: ['good', '证据充分'], moderate: ['good', '达到显著'], weak: ['mid', '方向向好'],
+  none: ['na', '与随机无异'], negative: ['bad', '未跑赢随机'],
+  insufficient: ['mid', '样本不足'], unknown: ['na', '无法判断'],
+};
+
+function renderReport(r, title, ms) {
+  const o = r.observed, h = r.headline;
+  const [lvlCls, lvlTxt] = LVL[r.verdict.level] || LVL.unknown;
+
+  // 分布条：把 5%~95% 区间映射到 0~100%
+  let distHtml = '';
+  if (h && h.available) {
+    const lo = Math.min(h.nullP05R, h.observedR), hi = Math.max(h.nullP95R, h.observedR);
+    const span = (hi - lo) || 1;
+    const pos = (v) => ((v - lo) / span * 100).toFixed(1);
+    distHtml = `<div class="dist">
+      <div class="distbar">
+        <div class="band" style="left:${pos(h.nullP05R)}%;width:${(pos(h.nullP95R) - pos(h.nullP05R)).toFixed(1)}%"></div>
+        <div class="med" style="left:${pos(h.nullMedianR)}%"></div>
+        <div class="you" style="left:${pos(h.observedR)}%"></div>
+      </div>
+      <div class="distlbl">
+        <span>对照组 5% 分位 ${sgn(h.nullP05R)}R</span>
+        <span>中位 ${sgn(h.nullMedianR)}R</span>
+        <span>95% 分位 ${sgn(h.nullP95R)}R</span>
+      </div>
+      <div style="margin-top:9px;font-size:13px;color:var(--muted)">
+        <span style="display:inline-block;width:10px;height:3px;background:var(--accent);vertical-align:middle"></span>
+        你 = <b class="mono" style="color:var(--ink)">${sgn(h.observedR)} R</b>，
+        位于第 <b class="mono" style="color:var(--accent)">${(h.percentile * 100).toFixed(0)}</b> 百分位 ·
+        p = <b class="mono" style="color:var(--ink)">${h.pValue.toFixed(4)}</b>
+        <span class="mut">± ${h.pValueStdErr.toFixed(4)}（蒙特卡洛误差）</span>
+      </div></div>`;
+  }
+
+  const dims = r.attribution;
+  const dimRows = [...dims].sort((a, b) => (a.available ? a.edgeR : 1e9) - (b.available ? b.edgeR : 1e9)).map(a => {
+    if (!a.available) {
+      return `<tr><td><b>${a.label}</b></td><td colspan="4" style="text-align:left;color:var(--muted);font-family:var(--font)">${md(a.reason)}</td>
+        <td><span class="pill na">无从评估</span></td></tr>`;
+    }
+    const pa = a.pValueAdjusted ?? a.pValue;
+    const [cls, txt] = pa <= 0.05 ? ['good', '明显优于随机']
+      : pa <= 0.2 ? ['mid', '略优，未达显著']
+        : a.percentile < 0.35 ? ['bad', '劣于随机 ← 优先训练'] : ['na', '与随机无异'];
+    return `<tr><td><b>${a.label}</b><div class="mut" style="font-size:11.5px;font-weight:400">${a.question}</div></td>
+      <td class="${a.edgeR >= 0 ? 'up' : 'dn'}">${sgn(a.edgeR)} R</td>
+      <td>${sgn(a.effectZ)}</td><td class="mut">${a.pValue.toFixed(3)}</td>
+      <td><b>${pa.toFixed(3)}</b></td><td><span class="pill ${cls}">${txt}</span></td></tr>`;
+  }).join('');
+
+  const bench = [...r.benchmarks, { label: '你', totalR: o.totalR, count: o.trades, me: true }];
+  const bmax = Math.max(...bench.map(b => Math.abs(b.totalR)), 1);
+  const benchHtml = bench.map(b => {
+    const w = Math.abs(b.totalR) / bmax * 100;
+    const col = b.me ? 'var(--accent)' : b.totalR >= 0 ? 'var(--down)' : 'var(--up)';
+    const left = b.totalR >= 0 ? '50%' : (50 - w / 2) + '%';
+    return `<div class="brow"><span style="${b.me ? 'font-weight:700;color:var(--accent)' : ''}">${b.label}</span>
+      <div class="btrack"><i style="left:${b.totalR >= 0 ? 50 : (50 - w / 2)}%;width:${w / 2}%;background:${col}"></i>
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border2)"></div></div>
+      <span class="mono" style="text-align:right;color:${col}">${sgn(b.totalR)} R</span></div>`;
+  }).join('');
+
+  const beh = r.behavior.filter(b => b.severity !== 'insufficient' &&
+    !(b.kind === 'problem' && b.severity === 'none'));
+  const behHtml = beh.length ? beh.map(b => {
+    const map = { problem: ['bad', '问题·' + ({ mild: '轻微', notable: '明显', severe: '严重' }[b.severity] || '')],
+      strength: ['good', '优势'], profile: ['na', '画像'] };
+    const [c, t] = map[b.kind || 'problem'] || map.problem;
+    return `<div class="bitem"><span class="bt pill ${c}">${t}</span>
+      <span><b>${b.label}</b><br><span class="mut">${md(b.evidence)}</span></span></div>`;
+  }).join('') : '<div class="mut" style="font-size:13.5px">样本量还不足以给出行为结论。</div>';
+
+  const payload = toLlmPayload(r);
+
+  $('#repBody').innerHTML = `
+  <div class="verdict">
+    <span class="lvl pill ${lvlCls}">${lvlTxt}</span>
+    <h2>这一轮，有多少能用运气解释？</h2>
+    <p>${md(r.verdict.text)}</p>
+    <p style="margin-top:8px;font-size:13.5px;color:var(--muted)">
+      对照组：<b style="color:var(--ink2)">${h?.label || '—'}</b> —— ${h?.question || ''}</p>
+    ${distHtml}
+  </div>
+
+  <div class="g3">
+    ${[['净收益', sgn(o.totalR) + ' R', `${sgn(o.netCurrency, 0)} 元 · 已扣 ${fmt(o.costCurrency, 0)} 成本`, o.totalR >= 0],
+      // 胜率单独看没有好坏之分：趋势策略天然低胜率高盈亏比，标成红绿会误导用户去追求胜率
+      ['胜率 / 盈亏比', pctS(o.winRate) + ' / ' + (isFinite(o.profitFactor) ? o.profitFactor.toFixed(2) : '—'), `${o.trades} 笔交易`, null],
+      ['夏普为正的概率', pctS(o.probabilisticSharpe), `每笔夏普 ${o.perTradeSharpe.toFixed(3)}`, o.probabilisticSharpe >= 0.5]]
+      .map(([l, v, d, good]) => `<div class="panel"><div class="pb">
+        <div class="mut" style="font-size:12px">${l}</div>
+        <div class="num ${good === null ? '' : good ? 'up' : 'dn'}" style="font-size:26px;font-weight:800;margin:4px 0">${v}</div>
+        <div class="mut" style="font-size:12px">${d}</div></div></div>`).join('')}
+  </div>
+
+  <div class="panel">
+    <div class="ph"><h3>四个决策维度，哪一块在拖后腿</h3>
+      <span class="sub">判读以 Holm 校正后 p 值为准</span></div>
+    <div class="pb" style="padding:0 6px">
+      <table class="dt"><thead><tr>
+        <th style="text-align:left">维度</th><th>边际贡献</th><th>效应量 Z</th><th>原始 p</th><th>校正 p</th><th style="text-align:left">判读</th>
+      </tr></thead><tbody>${dimRows}</tbody></table>
+    </div>
+    <div class="pb" style="padding-top:0"><div class="note">
+      <span>⚠️</span><span>四项<b>不可相加</b>。各维度的随机化互不正交（改变入场时机会同时改变出场时机的价值），
+      因此只能读<b>相对排序</b>，不存在「总收益 = 方向 + 时机 + 仓位」这样的分解。</span></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="ph"><h3>参照标尺</h3><span class="sub">同段行情</span></div>
+      <div class="pb"><div class="bench">${benchHtml}</div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>还需要多少样本才能下结论</h3></div>
+      <div class="pb">
+        <div class="kv"><span>当前笔数</span><span class="num">${r.power.currentTrades}</span></div>
+        <div class="kv"><span>每笔效应量</span><span class="num">${r.power.effectSizePerTrade.toFixed(3)}</span></div>
+        <div class="kv"><span>95% 置信 / 80% 检验力所需</span><span class="num">${isFinite(r.power.requiredTrades) ? r.power.requiredTrades : '∞'}</span></div>
+        <div class="kv"><span>还差</span><span class="num ${r.power.shortfall > 0 ? 'up' : 'dn'}">${isFinite(r.power.shortfall) ? r.power.shortfall : '∞'}</span></div>
+        <div style="margin-top:12px;font-size:13px;color:var(--muted)">
+          ${isFinite(r.power.requiredTrades)
+            ? '这个数字是按当前每笔收益的信噪比反推的 —— 信噪比越低，需要的样本越多。'
+            : '当前效应量约等于零，无论积累多少样本都无法证明存在优势。'}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="ph"><h3>行为特征</h3><span class="sub">确定性计算 · 无模型推测</span></div>
+      <div class="pb"><div class="blist">${behHtml}</div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>必须知道的局限</h3><span class="sub">引擎强制随报告下发</span></div>
+      <div class="pb"><ol class="cav">${r.caveats.map(c => `<li>${md(c)}</li>`).join('')}</ol></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><h3>大模型能看到的全部内容</h3>
+      <span class="sub">${title} · 引擎 v${r.meta.engineVersion} · seed ${r.meta.seed} · 耗时 ${ms} ms</span>
+      <button class="btn btn-g btn-sm" id="togglePayload" style="margin-left:auto">展开</button></div>
+    <div class="pb hide" id="payloadBox">
+      <div class="note info" style="margin-bottom:12px"><span>🔒</span>
+        <span>这就是 LLM 拿到的<b>全部</b>输入 —— 没有 K 线，没有逐笔记录，只有算好的数字。
+        <b>幻觉不是靠提示词恳求消除的，是靠信息隔离让它在物理上无从发生。</b>
+        它也因此无法预测价格或推荐买卖：它根本没有素材。</span></div>
+      <pre class="json">${JSON.stringify(payload, null, 2).replace(/</g, '&lt;')}</pre>
+      <h4 style="margin-top:16px;font-size:13px;color:var(--muted)">配套系统提示（硬约束）</h4>
+      <pre class="json" style="max-height:220px;margin-top:8px">${LLM_SYSTEM_PROMPT.replace(/</g, '&lt;')}</pre>
+    </div>
+  </div>`;
+
+  $('#togglePayload').onclick = (e) => {
+    const b = $('#payloadBox'); const open = !b.classList.contains('hide');
+    b.classList.toggle('hide'); e.target.textContent = open ? '展开' : '收起';
+  };
+  toast(`评估完成，耗时 ${ms} ms`);
+}
+
+/* ══════════════ 关于页 ══════════════ */
+const REAL_ITEMS = [
+  ['行情数据', '真实历史行情：GOOG 日线 2148 根（含 2008 金融危机）+ EURUSD 小时线。含真实跳空、波动率聚集与肥尾 —— 这些恰是最容易让随机化检验失效的地方。'],
+  ['撮合成交', '真撮合引擎：下单最早在下一根开盘成交、停损吃滑点、手续费与合约乘数、止损止盈同根时判止损先成交。'],
+  ['双盲判定', '答案由真实后续行情算出（后 20 根实际涨跌幅），不是 Math.random()。上一版原型这里写的是 <span class="mono">Math.random()>0.45</span>，且揭晓的品种日期是写死的。'],
+  ['统计评估', '与 Node 端跑 49 项测试、跑 1500 次校准复制的是同一份引擎代码，一行没改。5 个零模型 × 2000 次蒙特卡洛在浏览器本地完成。'],
+  ['多重比较', 'Holm–Bonferroni 校正。不校正的话，同时看 4 个维度，无技能用户约 19% 会拿到一张虚假的「能力认证」。'],
+  ['图表', 'KLineCharts —— 我在方案里推荐的库，这里就用它，不再手写 canvas。'],
+];
+const DIFF_ITEMS = [
+  ['K 线数据', '<span class="mono">mulberry32</span> 随机游走', '真实历史行情'],
+  ['下单', '<span class="mono">onclick="toast(\'已模拟下单\')"</span>', '真撮合引擎，持仓与权益实时变动'],
+  ['双盲判定', '<span class="mono">Math.random()>0.45</span>，与图表和你的选择都无关', '真实后续涨跌幅'],
+  ['AI 复盘', '3 条硬编码字符串', '5 个条件随机化零模型 + 2000 次蒙特卡洛'],
+  ['智能问数', '3 条硬编码结果，不匹配一律返回「股灾」', '已移除 —— 没做出来就不放'],
+  ['相似行情', '6 段不同随机种子的假 K 线，「93% 匹配度」是写死的字符串', '已移除 —— 没做出来就不放'],
+  ['用户评价', '编造的三条推荐语', '已移除'],
+  ['防未来数据', '全量数据在前端，游标只管显示', '<span class="mono">GuardedBarSource</span>，越界读取抛异常'],
+];
+const CAL_ITEMS = [
+  ['行为匹配', '0.051', '0.097', '0.648', 'good', '校准良好'],
+  ['入场时机', '0.046', '0.099', '0.808', 'good', '校准良好'],
+  ['方向判断', '0.051', '0.102', '0.515', 'good', '校准良好'],
+  ['出场时机', '0.059', '0.104', '0.612', 'mid', '贴近上界'],
+  ['仓位管理', '0.049', '0.103', '0.894', 'good', '校准良好'],
+];
+function renderAbout() {
+  $('#aboutReal').innerHTML = REAL_ITEMS.map(([k, v]) =>
+    `<div class="bitem" style="margin-bottom:9px"><span class="bt pill good">真</span>
+      <span><b>${k}</b><br><span class="mut">${v}</span></span></div>`).join('');
+  $('#aboutDiff').innerHTML = DIFF_ITEMS.map(([k, a, b]) =>
+    `<tr><td><b>${k}</b></td><td style="text-align:left;color:var(--muted);font-family:var(--font)">${a}</td>
+      <td style="text-align:left;font-family:var(--font)">${b}</td></tr>`).join('');
+  $('#aboutCal').innerHTML = CAL_ITEMS.map(([k, a, b, c, cls, t]) =>
+    `<tr><td><b>${k}</b></td><td>${a}</td><td>${b}</td><td>${c}</td>
+      <td style="text-align:left"><span class="pill ${cls}">${t}</span></td></tr>`).join('');
+}
+
+/* ══════════════ 路由与事件 ══════════════ */
+function route() {
+  const v = (location.hash.slice(1) || 'train');
+  $$('.view').forEach(el => el.classList.toggle('hide', el.id !== 'v-' + v));
+  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (v !== 'train') stopPlay();
+  if (v === 'blind') { if (!S.blind) newBlind(); else renderBlind(); }
+  if (v === 'about') renderAbout();
+  if (v === 'report') {
+    const show = S.report || S.pending;
+    $('#repEmpty').classList.toggle('hide', !!show);
+    $('#repBody').classList.toggle('hide', !show);
+  }
+  setTimeout(() => { S.chart?.resize(); S.bChart?.resize(); }, 30);
+}
+
+function init() {
+  try { setTheme(localStorage.getItem('ag-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light')); }
+  catch (e) { setTheme('light'); }
+
+  $('#dsSel').innerHTML = Object.keys(DATASETS).map(k =>
+    `<option value="${k}">${DATASETS[k].symbol} · ${DATASETS[k].timeframe === '1d' ? '日线' : '小时线'}</option>`).join('');
+
+  $('#themeBtn').onclick = () => setTheme(theme() === 'dark' ? 'light' : 'dark');
+  $$('#tabs button').forEach(b => b.onclick = () => location.hash = '#' + b.dataset.v);
+  window.addEventListener('hashchange', route);
+
+  $('#newRound').onclick = newRound;
+  $('#dsSel').onchange = () => { newRound(); S.blind = null; };
+  $('#playBtn').onclick = () => S.playing ? stopPlay() : startPlay();
+  $('#stepBtn').onclick = () => { stopPlay(); stepOnce(); };
+  $('#autoBtn').onclick = autoRun;
+  $('#endBtn').onclick = endRound;
+  $('#flatBtn').onclick = () => {
+    const e = S.session?.engine;
+    if (!e || e.position === 0) { toast('当前没有持仓'); return; }
+    S.session.submitOrder({ type: 'market', dir: -Math.sign(e.position), qty: Math.abs(e.position), reduceOnly: true });
+    toast('平仓单已提交，将在下一根开盘成交'); refreshTrain();
+  };
+  $$('#speedSeg button').forEach(b => b.onclick = () => {
+    $$('#speedSeg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); S.speed = +b.dataset.s;
+    if (S.playing) { stopPlay(); startPlay(); }
+  });
+  $('#dBuy').onclick = () => { S.dir = 1; $('#dBuy').classList.add('on'); $('#dSell').classList.remove('on'); };
+  $('#dSell').onclick = () => { S.dir = -1; $('#dSell').classList.add('on'); $('#dBuy').classList.remove('on'); };
+  $('#oType').onchange = (e) => $('#priceField').classList.toggle('hide', e.target.value === 'market');
+  $('#submitBtn').onclick = () => {
+    const s = S.session; if (!s || s.finished) { toast('本轮已结束'); return; }
+    const qty = parseInt($('#oQty').value);
+    if (!(qty > 0)) { toast('手数必须为正整数'); return; }
+    const type = $('#oType').value;
+    const order = { type, dir: S.dir, qty };
+    if (type !== 'market') {
+      const p = parseFloat($('#oPrice').value);
+      if (!isFinite(p)) { toast('请填写委托价 / 触发价'); return; }
+      order.price = p;
+    }
+    const sl = parseFloat($('#oSL').value), tp = parseFloat($('#oTP').value);
+    if (isFinite(sl)) order.stopLoss = sl;
+    if (isFinite(tp)) order.takeProfit = tp;
+    const o = s.submitOrder(order);
+    if (o.status === 'rejected') toast('已拒绝：' + o.reason);
+    else toast(`已挂单 · ${type === 'market' ? '下一根开盘成交' : '价格触及后成交'}`);
+    refreshTrain();
+  };
+
+  $('#newBlind').onclick = newBlind;
+  $$('.ans button').forEach(b => b.onclick = () => answerBlind(+b.dataset.a));
+  $('#bEval').onclick = evalBlind;
+
+  window.addEventListener('resize', () => { S.chart?.resize(); S.bChart?.resize(); });
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (location.hash.slice(1) === 'train' || !location.hash) {
+      if (e.key === ' ') { e.preventDefault(); S.playing ? stopPlay() : startPlay(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); stopPlay(); stepOnce(); }
+    }
+  });
+
+  newRound();
+  route();
+}
+
+init();
+
+})();
+</script>
+</body>
+</html>

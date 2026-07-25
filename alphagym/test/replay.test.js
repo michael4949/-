@@ -66,6 +66,26 @@ test('双盲模式：隐藏品种与日期，但严格保持全部涨跌幅', ()
   }
 });
 
+test('双盲模式：时间戳整体平移，坐标轴不泄露真实日期', () => {
+  const blind = new ReplaySession({ bars, instrument: INS, startAt: 200, blind: true, seed: 7 });
+  const b = blind.visibleBars();
+  const a = bars.slice(0, b.length);
+
+  // 只打码品种名是不够的：图表 X 轴上的真实日期一眼就能反查出是哪段行情
+  assert.notEqual(a[0].t, b[0].t, '时间戳未平移 —— 坐标轴会直接暴露年代');
+
+  const shift = b[0].t - a[0].t;
+  // 用 === 0 而不是 assert.equal(x, 0)：负向平移时余数是 -0，
+  // 而 assert.equal 走 Object.is 语义，-0 与 0 不相等。
+  assert.ok(shift % 86400000 === 0, `平移量必须是整数天（实际余数 ${shift % 86400000}），否则会打散日界（T+1 判定依赖它）`);
+  for (let i = 0; i < b.length; i++) {
+    assert.equal(b[i].t - a[i].t, shift, `第 ${i} 根的平移量不一致，K 线间隔被破坏`);
+  }
+  for (let i = 1; i < b.length; i++) {
+    assert.ok(b[i].t > b[i - 1].t, '平移后时间顺序被破坏');
+  }
+});
+
 test('提交的订单最早在下一根成交（回放层同样不允许未来函数）', () => {
   const s = new ReplaySession({ bars, instrument: INS, startAt: 100 });
   const cursorAtSubmit = s.cursor;

@@ -42,7 +42,7 @@ export class GuardedBarSource {
 
   /**
    * @param {import('./bars.js').Bar[]} bars
-   * @param {{scale:number}} [transform] 双盲模式下的价格仿射变换
+   * @param {{scale:number, tShiftDays:number}} [transform] 双盲模式下的保形变换
    */
   constructor(bars, transform = null) {
     this.#bars = bars;
@@ -60,10 +60,15 @@ export class GuardedBarSource {
   #apply(b) {
     if (!this.#transform) return b;
     const k = this.#transform.scale;
-    // 乘法变换：**严格保持所有百分比涨跌幅与形态**，只改变价格绝对水平。
+    const dt = (this.#transform.tShiftDays || 0) * 86400000;
+    // 价格用**乘法**变换：严格保持所有百分比涨跌幅与形态，只改变绝对水平。
     // 用乘法而不是加法，是因为加法会扭曲收益率分布，让双盲题目的统计性质
     // 与真实行情不同 —— 那样练出来的手感是错的。
-    return { t: b.t, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k, v: b.v };
+    //
+    // 时间戳必须**一并平移**，否则双盲是漏的：品种名打了码，
+    // 图表 X 轴却明明白白写着 2005-03，看一眼坐标轴就能反查是哪段行情。
+    // 平移取整数天，保证日界不被打散（T+1 判定依赖它），常量平移也保持时间顺序。
+    return { t: b.t + dt, o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k, v: b.v };
   }
 
   /** 已揭晓的全部 K 线 */
@@ -112,8 +117,10 @@ export class ReplaySession {
   constructor({ bars, instrument, rules = RULES_FUTURES, initialCash = 1000000,
     startAt = 60, blind = false, seed = 20260725 } = {}) {
     const rng = makeRng(seed);
-    // 双盲：价格整体缩放到一个随机水平，使用户无法凭价位认出品种
-    const transform = blind ? { scale: (0.3 + rng.next() * 3) } : null;
+    // 双盲：价格整体缩放到随机水平（认不出品种），时间整体平移随机天数（看不出年代）
+    const transform = blind
+      ? { scale: 0.3 + rng.next() * 3, tShiftDays: Math.floor((rng.next() - 0.5) * 7300) }
+      : null;
 
     this.source = new GuardedBarSource(bars, transform);
     this.blind = blind;
@@ -122,8 +129,12 @@ export class ReplaySession {
     this.totalBars = bars.length;
 
     // 撮合引擎拿到的是变换后的行情，与用户所见完全一致
+    const dt = transform ? (transform.tShiftDays || 0) * 86400000 : 0;
     this._allTransformed = transform
-      ? bars.map(b => ({ t: b.t, o: b.o * transform.scale, h: b.h * transform.scale, l: b.l * transform.scale, c: b.c * transform.scale, v: b.v }))
+      ? bars.map(b => ({
+          t: b.t + dt, o: b.o * transform.scale, h: b.h * transform.scale,
+          l: b.l * transform.scale, c: b.c * transform.scale, v: b.v,
+        }))
       : bars;
     this.engine = new MatchingEngine({ bars: this._allTransformed, instrument, rules, initialCash });
 
