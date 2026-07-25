@@ -83,6 +83,20 @@ function main() {
   const outFile = join(outDir, 'alphagym-demo.html');
   writeFileSync(outFile, html);
 
+  // Artifact 变体：宿主自带 <!doctype>/<head>/<body> 骨架，这里只交页面内容。
+  // 保留 <title>（宿主用它命名标签页），其余外层文档标签一律剥掉。
+  const fragment = html
+    .replace(/<!DOCTYPE html>\s*/i, '')
+    .replace(/<html[^>]*>\s*/i, '')
+    .replace(/<\/html>\s*$/i, '')
+    .replace(/<head>\s*/i, '')
+    .replace(/<\/head>\s*/i, '')
+    .replace(/<body>\s*/i, '')
+    .replace(/<\/body>\s*/i, '')
+    .replace(/<meta charset[^>]*>\s*/i, '')
+    .replace(/<meta name="viewport"[^>]*>\s*/i, '');
+  writeFileSync(join(outDir, 'alphagym-artifact.html'), fragment);
+
   const kb = (n) => `${(n / 1024).toFixed(0)} KB`;
   console.log(`已生成 ${outFile}`);
   console.log(`  图表库 ${kb(kc.length)} · 引擎 ${kb(engine.length)} · `

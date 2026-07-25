@@ -19,6 +19,29 @@
   --shadowLg:0 24px 60px rgba(16,24,40,.13);
   --r:13px; --rs:9px; --maxw:1440px;
 }
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#090C12; --bg2:#0C1119; --panel:#121822; --panel2:#161D28; --panel3:#1C2532;
+    --border:#222C3A; --border2:#2B3746; --ink:#E9EEF6; --ink2:#B5C1D3; --muted:#828FA3; --faint:#5B6779;
+    --accent:#5A80FF; --accent2:#7E9CFF; --accentSoft:rgba(90,128,255,.14); --accentSoft2:rgba(90,128,255,.24);
+    --cyan:#2BCEDA; --up:#FF4A5C; --upSoft:rgba(255,74,92,.16);
+    --down:#1DBC8B; --downSoft:rgba(29,188,139,.16); --warn:#F0A63C; --warnSoft:rgba(240,166,60,.16);
+    --gold:#E4B653;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.4);
+    --shadowLg:0 30px 70px rgba(0,0,0,.55);
+  }
+}
+/* 显式 data-theme 必须双向压过 media query：宿主页面的主题开关就是靠它切换的 */
+:root[data-theme="light"]{
+  --bg:#F4F6FA; --bg2:#E9EDF4; --panel:#fff; --panel2:#F6F8FC; --panel3:#EDF1F7;
+  --border:#E0E6EF; --border2:#CED7E4; --ink:#0D1420; --ink2:#31405A; --muted:#68758A; --faint:#98A4B5;
+  --accent:#3B6BFF; --accent2:#2751DC; --accentSoft:rgba(59,107,255,.10); --accentSoft2:rgba(59,107,255,.18);
+  --cyan:#12ADBA; --up:#EE3346; --upSoft:rgba(238,51,70,.12);
+  --down:#0FA173; --downSoft:rgba(15,161,115,.12); --warn:#E28A20; --warnSoft:rgba(226,138,32,.13);
+  --gold:#CE9C36;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  --shadowLg:0 24px 60px rgba(16,24,40,.13);
+}
 :root[data-theme="dark"]{
   --bg:#090C12; --bg2:#0C1119; --panel:#121822; --panel2:#161D28; --panel3:#1C2532;
   --border:#222C3A; --border2:#2B3746; --ink:#E9EEF6; --ink2:#B5C1D3; --muted:#828FA3; --faint:#5B6779;
@@ -180,6 +203,10 @@ pre.json{background:var(--panel3);border-radius:9px;padding:14px;overflow:auto;m
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
   background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:10px;font-size:13.5px;font-weight:600;
   opacity:0;transition:.25s;pointer-events:none;box-shadow:var(--shadowLg)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 .spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;
   border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -445,9 +472,9 @@ function toast(m) {
 
 /* ── 主题 ── */
 function theme() { return document.documentElement.getAttribute('data-theme') || 'light'; }
-function setTheme(t) {
+function setTheme(t, persist = true) {
   document.documentElement.setAttribute('data-theme', t);
-  try { localStorage.setItem('ag-theme', t); } catch (e) {}
+  if (persist) { try { localStorage.setItem('ag-theme', t); } catch (e) {} }
   applyChartStyles();
 }
 function cssv(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
@@ -1004,8 +1031,22 @@ function route() {
 }
 
 function init() {
-  try { setTheme(localStorage.getItem('ag-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light')); }
-  catch (e) { setTheme('light'); }
+  // 宿主页面（如 artifact 容器）可能已经在 <html> 上标好了 data-theme。
+  // 那种情况下必须沿用宿主的选择，不能被本地偏好覆盖 —— 否则页面主题
+  // 会和它所在的容器打架，用户点了宿主的主题开关却没反应。
+  const preset = document.documentElement.getAttribute('data-theme');
+  let want = preset;
+  if (!want) {
+    try { want = localStorage.getItem('ag-theme'); } catch (e) { want = null; }
+  }
+  if (!want) want = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  setTheme(want, !preset);
+
+  // 宿主随时可能改 data-theme，图表配色要跟着走
+  new MutationObserver(() => {
+    $$('#themeBtn').forEach(b => b.textContent = '◐');
+    applyChartStyles();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   $('#dsSel').innerHTML = Object.keys(DATASETS).map(k =>
     `<option value="${k}">${DATASETS[k].symbol} · ${DATASETS[k].timeframe === '1d' ? '日线' : '小时线'}</option>`).join('');
