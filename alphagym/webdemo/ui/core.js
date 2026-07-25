@@ -73,13 +73,45 @@ function restyleCharts() {
   // 展示型图表关掉了 tooltip，而 setStyles 会把它恢复成默认——重绘一次补回去
   if (typeof drawHeroChart === 'function' && $('#heroChart')) { drawHeroChart(); drawFeatCharts(); }
 }
+
+/**
+ * 获取（必要时创建）图表实例。
+ *
+ * ⚠️ 这里必须检查缓存实例挂的还是不是当前这个 DOM 节点。
+ * 营销站每次切页都用 innerHTML 重建整块 DOM，而 charts[id] 还指着**已经被移除的旧节点**。
+ * 之前的写法只判断 `if (!charts[id])`，于是离开首页再回来时，
+ * 图表把数据画进了一个脱离文档的节点里 —— 页面上就是三块白板。
+ *
+ * 这个 bug 骗过了冒烟测试，因为测试是在首次进入首页时截的图，没有导航后再回来。
+ * 现在测试里加了「离开再回来，逐像素确认画布真的有内容」。
+ */
 function getChart(id, opts = {}) {
+  const host = document.getElementById(id);
+  if (!host) return null;
+  const cached = charts[id];
+  if (cached && cached.__host !== host) {
+    try { klinecharts.dispose(cached.__host); } catch (e) {}
+    delete charts[id];
+  }
   if (!charts[id]) {
-    charts[id] = klinecharts.init(id, { styles: chartStyles() });
-    if (opts.ma !== false) charts[id].createIndicator('MA', false, { id: 'candle_pane' });
-    if (opts.vol) charts[id].createIndicator('VOL');
+    const c = klinecharts.init(host, { styles: chartStyles() });
+    if (!c) return null;
+    c.__host = host;
+    if (opts.ma !== false) c.createIndicator('MA', false, { id: 'candle_pane' });
+    if (opts.vol) c.createIndicator('VOL');
+    charts[id] = c;
   }
   return charts[id];
+}
+
+/** 容器即将被重建时，先释放里面的图表，避免实例泄漏与画到孤儿节点上 */
+function disposeChartsIn(root) {
+  for (const [id, c] of Object.entries(charts)) {
+    if (c?.__host && root.contains(c.__host)) {
+      try { klinecharts.dispose(c.__host); } catch (e) {}
+      delete charts[id];
+    }
+  }
 }
 const toK = (b) => ({ timestamp: b.t, open: b.o, high: b.h, low: b.l, close: b.c, volume: b.v });
 function resizeCharts() { for (const c of Object.values(charts)) { try { c?.resize(); } catch (e) {} } }

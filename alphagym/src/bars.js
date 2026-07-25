@@ -106,3 +106,47 @@ export function barsFromColumns({ t, o, h, l, c, v }) {
   }
   return normalizeBars(out);
 }
+
+/**
+ * 重采样到更大周期。
+ *
+ * 这是「多周期同步步进」的基础：交易者在真实盘面上不会只看一个周期，
+ * 大周期定方向、小周期找入场点。只给单周期的训练，练的是一个不存在的场景。
+ *
+ * 关键约束：**返回的每一根大周期 K 线，都必须标出它由哪些小周期 K 线合成**，
+ * 这样回放时才能做到「小周期推进到第 i 根，大周期只显示已经完成的部分」——
+ * 否则大周期图会提前泄露未来（比如周一就画出了整根周线的最高价）。
+ *
+ * @param {Bar[]} bars 小周期 K 线
+ * @param {number} factor 合成倍数（如日线→周线用 5）
+ * @returns {{bars: Bar[], srcEnd: number[]}} srcEnd[i] = 第 i 根大周期对应的小周期结束索引
+ */
+export function resample(bars, factor) {
+  if (!(factor > 1)) return { bars: bars.slice(), srcEnd: bars.map((_, i) => i) };
+  const out = [], srcEnd = [];
+  for (let i = 0; i < bars.length; i += factor) {
+    const chunk = bars.slice(i, Math.min(i + factor, bars.length));
+    if (!chunk.length) break;
+    let h = -Infinity, l = Infinity, v = 0;
+    for (const b of chunk) { h = Math.max(h, b.h); l = Math.min(l, b.l); v += b.v; }
+    out.push({ t: chunk[0].t, o: chunk[0].o, h, l, c: chunk[chunk.length - 1].c, v });
+    srcEnd.push(i + chunk.length - 1);
+  }
+  return { bars: out, srcEnd };
+}
+
+/**
+ * 在不泄露未来的前提下，取截至小周期第 cursor 根为止的大周期 K 线。
+ * 最后一根是**未完成**的（用已出现的部分合成），这正是真实盘面上看到的样子。
+ */
+export function resampledUpTo(bars, factor, cursor) {
+  if (!(factor > 1)) return bars.slice(0, cursor + 1);
+  const out = [];
+  for (let i = 0; i <= cursor; i += factor) {
+    const end = Math.min(i + factor - 1, cursor);
+    let h = -Infinity, l = Infinity, v = 0;
+    for (let k = i; k <= end; k++) { h = Math.max(h, bars[k].h); l = Math.min(l, bars[k].l); v += bars[k].v; }
+    out.push({ t: bars[i].t, o: bars[i].o, h, l, c: bars[end].c, v });
+  }
+  return out;
+}

@@ -16,13 +16,16 @@ const CORE4 = [
 ];
 
 const FEAT3 = [
-  { tag: '独创 · 去记忆偏差', h: '双盲测试', ds: 'SPX', off: 900,
+  { tag: '独创 · 去记忆偏差', h: '双盲测试', ds: 'SPX', off: 900, blind: true,
+    cap: '？？？ · 未知品种', cap2: '坐标轴已隐去',
     p: '随机品种、随机时点、隐藏全部标识。彻底去掉「我记得后面怎么走」的记忆影响，客观检验真实判断力。',
     li: ['品种与日期完全隐藏', '价格保形变换，逐根涨跌幅不变', '时间轴同步平移，坐标轴不泄露年代', '结果由真实后续行情判定'] },
-  { tag: '独创 · 多周期同步', h: '多周期同步步进', ds: 'IXIC', off: 2400,
+  { tag: '独创 · 多周期同步', h: '多周期同步步进', ds: 'IXIC', off: 2400, split: 5,
+    cap: 'IXIC 纳斯达克 · 日线', cap2: '周线同屏联动',
     p: '大小周期同屏联动，一键前进后退。大周期趋势与小周期入场时机的关系一目了然。',
     li: ['大小周期同步步进', '自定义步进粒度', '前进 / 后退 / 自动播放', '快捷键操作'] },
-  { tag: '独创 · 时光机', h: '任一时点的数据快照', ds: 'GOOG', off: 1200,
+  { tag: '独创 · 时光机', h: '任一时点的数据快照', ds: 'GOOG', off: 1200, cursor: true,
+    cap: 'GOOG 谷歌 · 日线', cap2: '游标之后无数据',
     p: '回到历史上任意一天，看到的只有那一天之前的信息。数据在架构上就不可能穿越。',
     li: ['游标之后的数据不下发', '越界读取直接抛异常', '决策与成交严格错开一根', '整场会话可逐字节复现'] },
 ];
@@ -73,6 +76,8 @@ const FAQS = [
 function renderSite(page) {
   const el = $('#site');
   const fn = SITE_PAGES[page] || SITE_PAGES.home;
+  // innerHTML 会把旧的图表容器整个换掉，先释放实例，否则它们会继续画在孤儿节点上
+  disposeChartsIn(el);
   el.innerHTML = fn() + siteFooter();
   if (page === 'home') requestAnimationFrame(() => { drawHeroChart(); drawFeatCharts(); });
 }
@@ -146,7 +151,11 @@ const SITE_PAGES = {
       <div class="feat">
         <div><span class="tag">${f.tag}</span><h3>${f.h}</h3><p>${f.p}</p>
           <ul>${f.li.map(x => `<li>${x}</li>`).join('')}</ul></div>
-        <div class="feat-media"><div class="box"><div id="featChart${i}" style="width:100%;height:230px"></div></div></div>
+        <div class="feat-media"><div class="box">
+          <div class="boxcap"><span>${f.cap}</span>${f.cap2 ? `<span>${f.cap2}</span>` : ''}</div>
+          <div id="featChart${i}" style="width:100%;height:${f.split ? 150 : 218}px"></div>
+          ${f.split ? `<div id="featChart${i}b" style="width:100%;height:96px"></div>` : ''}
+        </div></div>
       </div>`).join('')}
   </div></div>
 
@@ -358,19 +367,77 @@ function drawHeroChart() {
   c.setPriceVolumePrecision(2, 0);
   c.setStyles(SHOWCASE_STYLE);
 }
+/** 双盲展示：横轴不能出现任何年代信息，否则这张图正好在打自己文案的脸 */
+const BLIND_STYLE = {
+  ...SHOWCASE_STYLE,
+  xAxis: { tickText: { show: false }, tickLine: { show: false } },
+};
+/** 副图（周线）：省掉重复的横轴与各种价签，只留形态 */
+const SUB_STYLE = {
+  ...SHOWCASE_STYLE,
+  xAxis: { tickText: { show: false }, tickLine: { show: false } },
+  candle: {
+    ...SHOWCASE_STYLE.candle,
+    priceMark: { high: { show: false }, low: { show: false }, last: { text: { show: false } } },
+  },
+};
+
 function drawFeatCharts() {
   FEAT3.forEach((f, i) => {
     const id = `featChart${i}`;
     if (!$('#' + id)) return;
     const bars = barsOf(f.ds);
-    const c = getChart(id, { ma: true });
-    const seg = bars.slice(f.off, f.off + 170);
-    // 「双盲测试」那一张按双盲规则展示：价格保形缩放、时间轴平移
-    const shown = i === 0
-      ? seg.map(b => ({ t: b.t - 1500 * 86400000, o: b.o * 0.42, h: b.h * 0.42, l: b.l * 0.42, c: b.c * 0.42, v: b.v }))
-      : seg;
-    c.applyNewData(shown.map(toK));
+    // 多周期那张要两屏覆盖**同一段**时间，所以取的根数必须能被周期整除，
+    // 且要把主图缩到全段可见 —— 否则主图只显示最后几十根，两张图对不上，
+    // 「同屏联动」这句话就成了假的。
+    const n = f.split ? 90 : 170;
+    const seg = bars.slice(f.off, f.off + n);
+    const c = getChart(id, { ma: !f.split });
+
+    if (f.blind) {
+      // 与真实双盲一致：价格保形缩放（逐根涨跌幅不变）+ 整段时间平移，
+      // 再把横轴刻度整个关掉 —— 这才叫「坐标轴不泄露年代」。
+      c.applyNewData(seg.map(b => toK({
+        t: b.t - 1500 * 86400000,
+        o: b.o * 0.42, h: b.h * 0.42, l: b.l * 0.42, c: b.c * 0.42, v: b.v,
+      })));
+      c.setStyles(BLIND_STYLE);
+    } else {
+      c.applyNewData(seg.map(toK));
+      c.setStyles(f.split ? SUB_STYLE : SHOWCASE_STYLE);
+    }
     c.setPriceVolumePrecision(2, 0);
-    c.setStyles(SHOWCASE_STYLE);
+
+    // 「多周期同步」必须真的同屏出现两个周期，否则图片没有在演示这个功能
+    if (f.split) {
+      const wk = resample(seg, f.split).bars;
+      const px = ($('#' + id).clientWidth || 460) - 62;   // 减去右侧价格轴
+      const fit = (ch, len) => {
+        ch.setOffsetRightDistance(0);
+        ch.setBarSpace(Math.max(2, px / len));
+        ch.scrollToRealTime();      // 改了 barSpace 之后要重新贴回右端，否则整段偏在左边
+      };
+      fit(c, seg.length);
+      const w = getChart(id + 'b', { ma: false });
+      if (w) {
+        w.applyNewData(wk.map(toK));
+        w.setPriceVolumePrecision(2, 0);
+        w.setStyles(SUB_STYLE);
+        fit(w, wk.length);
+      }
+    }
+    // 「时光机」画一条游标：右侧留白 = 那一天之后的数据根本没下发
+    if (f.cursor) {
+      const cut = Math.round(seg.length * 0.68);
+      c.applyNewData(seg.slice(0, cut).map(toK));
+      // 竖线才是「游标」；横线会被读成价位线，说的不是一回事
+      c.createOverlay({
+        name: 'verticalStraightLine', lock: true,
+        points: [{ timestamp: seg[cut - 1].t, value: seg[cut - 1].c }],
+        styles: { line: { color: '#f59e0b', style: 'dashed', size: 1.5 } },
+      });
+      // 右侧留出空位，视觉上就是「后面是空的」
+      c.setOffsetRightDistance(120);
+    }
   });
 }

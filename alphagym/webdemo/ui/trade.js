@@ -1,11 +1,28 @@
 /* ══════════════════════════════════════════════════════════════════
-   行情回放 · 模拟交易 · 双盲测试 · 交易分析
-   全部走 src/replay.js + src/matching.js + src/trades.js 的真实内核。
+   决策训练台 · 双盲测试 · 交易分析
+
+   ── 这个模块要对齐的产品内核 ──
+   复盘软件真正卖的不是图表、不是数据，是「决策重复」：
+   一个交易者一年只能做几百次真实决策，在这里一个下午就能做几百次。
+   所以这一页的每一个设计取舍，都服务于同一件事 —— **把单次决策的成本压到最低**：
+
+     · 下单动作贴着图表，不藏进右侧表单（少两次视线转移、少三次点击）
+     · 全流程可纯键盘完成：空格推进、↑做多、↓做空、X 平仓
+     · 成交点、持仓成本线、止损线直接画在图上 —— 交易者是看着图做决策的
+     · 大小周期同屏同步推进 —— 真实盘面上没人只看一个周期
+     · 「跳到下一波动」跳过无事发生的横盘，别让人把时间花在空点鼠标上
+     · 顶部第一个指标是「本轮决策次数」，因为它才是这个产品的产出量纲
    ══════════════════════════════════════════════════════════════════ */
 
-const SEG_LEN = 1000, WARMUP = 120, INITIAL_CASH = 200000;
+const SEG_LEN = 900, WARMUP = 140, INITIAL_CASH = 200000;
+const QTY_PRESETS = [10, 20, 50, 100, 200];
+/** 副图周期倍数：日线→周线(5)/月线(21)，小时线→4小时(4)/日线(24) */
+const MTF_OPTIONS = {
+  '1d': [[5, '周线'], [21, '月线']],
+  '1h': [[4, '4小时'], [24, '日线']],
+};
 
-/* ── 行情回放 ───────────────────────────────────────────────────── */
+/* ── 开局 ───────────────────────────────────────────────────────── */
 function pickSegment(sym) {
   const bars = barsOf(sym);
   const len = Math.min(SEG_LEN, bars.length - 10);
@@ -18,23 +35,117 @@ function newRound() {
   S.ds = $('#dsSel').value;
   S.ins = INSTRUMENTS[S.ds];
   S.segBars = pickSegment(S.ds);
-  S.session = new ReplaySession({
-    bars: S.segBars, instrument: S.ins,
-    rules: { t1: false, allowShort: true, marginRate: 1, maintenanceRate: 0 },
-    initialCash: INITIAL_CASH, startAt: WARMUP, blind: false,
-    seed: (Math.random() * 1e9) | 0,
-  });
+  S.decisions = 0;
+  S.seed = (Math.random() * 1e9) | 0;
+  S.atrSeries = atr(S.segBars, 14);
+  buildSession();
+
   const d = DATASETS[S.ds];
   $('#rTitle').textContent = `${d.display} · ${d.symbol}`;
   $('#rSub').textContent = `${TF_LABEL[d.timeframe]} · 本轮 ${S.segBars.length} 根 · 红涨绿跌`;
 
+  const opts = MTF_OPTIONS[d.timeframe] || MTF_OPTIONS['1d'];
+  S.mtf = opts[0][0];
+  $('#mtfSeg').innerHTML = opts.map(([f, label], i) =>
+    `<button data-f="${f}" class="${i === 0 ? 'on' : ''}">${label}</button>`).join('');
+  $$('#mtfSeg button').forEach(b => b.onclick = () => {
+    $$('#mtfSeg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    S.mtf = +b.dataset.f;
+    $('#mtfLabel').textContent = b.textContent;
+    drawMtf();
+  });
+  $('#mtfLabel').textContent = opts[0][1];
+
   const c = getChart('chart', { ma: true, vol: true });
   c.applyNewData(S.session.visibleBars().map(toK));
   c.setPriceVolumePrecision(dec(S.ds), 0);
+  drawMtf();
   refreshReplay();
-  toast('新一轮已开始');
+  toast('新一轮已开始 · 空格推进，↑做多 ↓做空');
 }
 
+/** 用同一 seed 重建会话，可选地重放一段操作日志（后退功能靠它实现） */
+function buildSession(replayOps = null, upTo = Infinity) {
+  S.session = new ReplaySession({
+    bars: S.segBars, instrument: S.ins,
+    rules: { t1: false, allowShort: true, marginRate: 1, maintenanceRate: 0 },
+    initialCash: INITIAL_CASH, startAt: WARMUP, blind: false, seed: S.seed,
+  });
+  if (!replayOps) return;
+  const byBar = new Map();
+  for (const op of replayOps) {
+    if (op.at > upTo) continue;
+    if (!byBar.has(op.at)) byBar.set(op.at, []);
+    byBar.get(op.at).push(op);
+  }
+  while (S.session.cursor < upTo && !S.session.finished) {
+    for (const op of byBar.get(S.session.cursor) || []) {
+      if (op.op === 'submit') S.session.engine.submit(op.order);
+    }
+    if (!S.session.step()) break;
+  }
+}
+
+/* ── 图上的持仓可视化 ────────────────────────────────────────────
+   交易者是看着图做决策的。成交点、成本线、止损线不画在图上，
+   就等于让他一边看图一边在脑子里记「我在 3860 进的多，止损 3810」——
+   这正是原型里最伤体验的一处缺失。 */
+function redrawOverlays() {
+  const c = charts.chart; if (!c || !S.session) return;
+  try { c.removeOverlay(); } catch (e) {}
+  const e = S.session.engine, D = dec(S.ds);
+
+  for (const t of e.closedTrades.slice(-40)) {
+    addMark(c, S.segBars[t.entry], t.dir > 0 ? '多' : '空', t.dir > 0 ? cssv('--up') : cssv('--dn'));
+    addMark(c, S.segBars[t.exit], '平', cssv('--mut'));
+  }
+  if (e.position !== 0 && e.openBarIndex >= 0) {
+    addMark(c, S.segBars[e.openBarIndex], e.position > 0 ? '多' : '空',
+      e.position > 0 ? cssv('--up') : cssv('--dn'));
+    addLine(c, e.avgPrice, cssv('--brand'), `成本 ${fx(e.avgPrice, D)}`);
+    const sl = currentStopPrice();
+    if (sl) addLine(c, sl, cssv('--warn'), `止损 ${fx(sl, D)}`);
+  }
+}
+function addMark(c, bar, text, color) {
+  if (!bar) return;
+  try {
+    c.createOverlay({
+      name: 'simpleAnnotation', points: [{ timestamp: bar.t, value: bar.l }],
+      extendData: text,
+      styles: { polygon: { color }, text: { color, size: 11 } },
+    });
+  } catch (err) {}
+}
+function addLine(c, price, color, text) {
+  try {
+    c.createOverlay({
+      name: 'priceLine', points: [{ value: price }],
+      styles: { line: { color, style: 'dashed', size: 1 }, text: { color, backgroundColor: color + '22' } },
+      extendData: text,
+    });
+  } catch (err) {}
+}
+/** 当前挂着的止损价（取减仓方向的停损单） */
+function currentStopPrice() {
+  const e = S.session?.engine; if (!e || e.position === 0) return null;
+  const o = e.orders.find(x => x.status === 'pending' && x.type === 'stop' && x.reduceOnly);
+  return o ? o.price : null;
+}
+
+/** 副图：更大周期，只用已揭晓的数据合成，最后一根是未完成的 */
+function drawMtf() {
+  const s = S.session; if (!s) return;
+  const c = getChart('chartMtf', { ma: false });
+  if (!c) return;
+  const agg = resampledUpTo(S.segBars, S.mtf, s.cursor);
+  c.applyNewData(agg.slice(-90).map(toK));
+  c.setPriceVolumePrecision(dec(S.ds), 0);
+  c.setStyles({ candle: { tooltip: { showRule: 'none' } }, xAxis: { show: false } });
+}
+
+/* ── 状态刷新 ───────────────────────────────────────────────────── */
 function refreshReplay() {
   const s = S.session; if (!s) return;
   const e = s.engine, vis = s.visibleBars();
@@ -43,28 +154,42 @@ function refreshReplay() {
   const flt = e.position * (px - e.avgPrice) * S.ins.multiplier;
   const D = dec(S.ds);
 
+  $('#tDec').textContent = S.decisions;
+  $('#tDecD').textContent = S.decisions === 0 ? '每一次开仓 / 平仓算一次'
+    : `已成交 ${e.closedTrades.length} 笔 · 平均 ${(s.cursor - WARMUP + 1) / Math.max(1, S.decisions) | 0} 根一次决策`;
+
   $('#tEq').textContent = fx(eq, 0);
   $('#tEq').className = 'v num ' + (eq >= INITIAL_CASH ? 'up' : 'dn');
   $('#tEqD').textContent = `${sg(eq - INITIAL_CASH, 0)} · ${sg((eq / INITIAL_CASH - 1) * 100)}%`;
   $('#tEqD').className = 'd ' + (eq >= INITIAL_CASH ? 'up' : 'dn');
 
-  $('#tPos').textContent = e.position === 0 ? '空仓' : `${e.position > 0 ? '多' : '空'} ${Math.abs(e.position)}`;
+  const posTxt = e.position === 0 ? '空仓' : `${e.position > 0 ? '多' : '空'} ${Math.abs(e.position)}`;
+  $('#tPos').textContent = posTxt;
   $('#tPos').className = 'v num ' + (e.position > 0 ? 'up' : e.position < 0 ? 'dn' : '');
   $('#tPosD').textContent = e.position ? `均价 ${fx(e.avgPrice, D)}` : '—';
-
-  $('#tFlt').textContent = e.position ? sg(flt, 0) : '—';
-  $('#tFlt').className = 'v num ' + (flt > 0 ? 'up' : flt < 0 ? 'dn' : '');
-  $('#tFltD').textContent = e.position ? `现价 ${fx(px, D)}` : '—';
+  $('#posSub').textContent = posTxt;
 
   const pr = s.progress;
   $('#tPrg').textContent = (pr * 100).toFixed(0) + '%';
-  $('#tPrgD').textContent = `${s.cursor + 1} / ${s.totalBars} 根`;
+  $('#tPrgD').textContent = `${s.cursor + 1} / ${s.totalBars} 根 · ${ymd(S.segBars[s.cursor].t)}`;
   $('#prgBar').style.width = (pr * 100) + '%';
 
-  $('#sCash').textContent = fx(e.cash, 0);
+  $('#sFloat').textContent = e.position ? sg(flt, 0) : '—';
+  $('#sFloat').className = 'num ' + (flt > 0 ? 'up' : flt < 0 ? 'dn' : '');
   $('#sAvg').textContent = e.position ? fx(e.avgPrice, D) : '—';
+  const sl = currentStopPrice();
+  $('#sSL').textContent = sl ? fx(sl, D) : '—';
   $('#sLast').textContent = fx(px, D);
+  $('#sCash').textContent = fx(e.cash, 0);
   $('#sPend').textContent = e.orders.filter(o => o.status === 'pending').length;
+
+  $('#hud').innerHTML = [
+    `<span class="h"><b>${fx(px, D)}</b></span>`,
+    e.position ? `<span class="h ${e.position > 0 ? 'long' : 'short'}">${posTxt} @ ${fx(e.avgPrice, D)}
+      <b>${sg(flt, 0)}</b></span>` : '',
+    sl ? `<span class="h">止损 <b>${fx(sl, D)}</b></span>` : '',
+    `<span class="h">决策 <b>${S.decisions}</b></span>`,
+  ].filter(Boolean).join('');
 
   const ct = e.closedTrades;
   $('#fillCount').textContent = `${ct.length} 笔`;
@@ -75,22 +200,66 @@ function refreshReplay() {
         <span class="${t.pnl >= 0 ? 'up' : 'dn'}">${sg(t.pnl, 0)}</span></div>`).join('')
     : '<div class="mut" style="font-size:13px">还没有成交</div>';
 
+  $('#aFlat').disabled = e.position === 0;
   $('#endBtn').disabled = ct.length === 0 && e.position === 0;
+  redrawOverlays();
 }
 
+/* ── 推进 / 后退 ────────────────────────────────────────────────── */
 function stepOnce() {
   const s = S.session;
   if (!s || s.finished) { stopPlay(); return false; }
-  if (!s.step()) { stopPlay(); toast('本轮行情已播放完毕'); return false; }
+  if (!s.step()) { stopPlay(); toast('本轮行情已播放完毕，可以结束并评估了'); return false; }
   const bar = s.visibleBars()[s.cursor];
   if (bar) charts.chart?.updateData(toK(bar));
+  drawMtf();
   refreshReplay();
   return true;
 }
+
+/** 后退一根：用同 seed 重建会话并重放操作日志。
+ *  会话内核本身只能前进（这是防未来数据的一部分），后退只能靠确定性重放实现。 */
+function stepBack() {
+  const s = S.session; if (!s) return;
+  const target = s.cursor - 1;
+  if (target < WARMUP) { toast('已经在起点了'); return; }
+  stopPlay();
+  const ops = s.opLog.filter(o => o.op === 'submit' && o.at < target);
+  buildSession(ops, target);
+  charts.chart?.applyNewData(S.session.visibleBars().map(toK));
+  drawMtf();
+  refreshReplay();
+}
+
+/** 跳到下一段明显波动：别让人把时间花在横盘里空点鼠标 */
+function jumpToAction() {
+  const s = S.session; if (!s || s.finished) return;
+  stopPlay();
+  const a = S.atrSeries;
+  let moved = 0;
+  while (moved < 200 && !s.finished) {
+    if (!s.step()) break;
+    moved++;
+    const i = s.cursor, b = S.segBars[i];
+    const swing = Math.abs(b.c - S.segBars[i - 1].c) > 1.6 * a[i];
+    let breakout = false;
+    if (i > 21) {
+      let hi = -Infinity, lo = Infinity;
+      for (let k = i - 20; k < i; k++) { hi = Math.max(hi, S.segBars[k].h); lo = Math.min(lo, S.segBars[k].l); }
+      breakout = b.c > hi || b.c < lo;
+    }
+    if (moved >= 3 && (swing || breakout)) break;
+  }
+  charts.chart?.applyNewData(s.visibleBars().map(toK));
+  drawMtf();
+  refreshReplay();
+  toast(`推进 ${moved} 根，到了一处明显波动`);
+}
+
 function startPlay() {
   if (!S.session || S.session.finished) return;
   S.playing = true; $('#playBtn').textContent = '❚❚';
-  S.timer = setInterval(() => { if (!stepOnce()) stopPlay(); }, Math.max(16, 420 / S.speed));
+  S.timer = setInterval(() => { if (!stepOnce()) stopPlay(); }, Math.max(14, 420 / S.speed));
 }
 function stopPlay() {
   S.playing = false;
@@ -98,11 +267,51 @@ function stopPlay() {
   if (S.timer) { clearInterval(S.timer); S.timer = null; }
 }
 
-/** 机械策略代跑：只能读 visibleBars()，想偷看未来会抛 FutureDataError */
+/* ── 决策动作 ───────────────────────────────────────────────────── */
+function qty() { return Math.max(1, parseInt($('#oQty').value) || 20); }
+
+/**
+ * 一键开仓。自动止损按入场 ATR 的固定倍数挂出 ——
+ * 让「带止损进场」成为默认动作而不是额外操作，是这个训练台最该有的默认值。
+ */
+function act(dir) {
+  const s = S.session;
+  if (!s || s.finished) { toast('本轮已结束，按「新一轮」重开'); return; }
+  const e = s.engine;
+  if (e.position !== 0 && Math.sign(e.position) !== dir) {
+    // 反手：先平掉再反向开，两个动作都算决策
+    s.submitOrder({ type: 'market', dir: -Math.sign(e.position), qty: Math.abs(e.position), reduceOnly: true });
+    S.decisions++;
+  }
+  const order = { type: 'market', dir, qty: qty() };
+  if ($('#autoSL').checked) {
+    const i = s.cursor;
+    const mult = parseFloat($('#slRange').value) || 2;
+    const px = S.segBars[i].c;
+    order.stopLoss = dir > 0 ? px - mult * S.atrSeries[i] : px + mult * S.atrSeries[i];
+  }
+  const o = s.submitOrder(order);
+  if (o.status === 'rejected') { toast('已拒绝：' + o.reason); return; }
+  S.decisions++;
+  toast(`${dir > 0 ? '做多' : '做空'} ${qty()} 手已挂出 · 下一根开盘成交`);
+  refreshReplay();
+  if (S.autoAdvance !== false) stepOnce();
+}
+
+function flatten() {
+  const s = S.session, e = s?.engine;
+  if (!e || e.position === 0) { toast('当前没有持仓'); return; }
+  s.submitOrder({ type: 'market', dir: -Math.sign(e.position), qty: Math.abs(e.position), reduceOnly: true });
+  S.decisions++;
+  toast('平仓单已挂出 · 下一根开盘成交');
+  refreshReplay();
+  stepOnce();
+}
+
+/** 机械策略代跑：只读 visibleBars()，偷看未来会抛 FutureDataError */
 function autoRun() {
   stopPlay();
   const s = S.session; if (!s || s.finished) { toast('本轮已结束，请先开新一轮'); return; }
-  const qty = Math.max(1, parseInt($('#oQty').value) || 20);
   let pos = s.engine.position, guard = 0;
   while (!s.finished && guard++ < 20000) {
     const vis = s.visibleBars();
@@ -110,14 +319,16 @@ function autoRun() {
       const ma = (p) => { let t = 0; for (let i = vis.length - p; i < vis.length; i++) t += vis[i].c; return t / p; };
       const want = ma(10) > ma(30) ? 1 : -1;
       if (want !== pos) {
-        if (pos !== 0) s.submitOrder({ type: 'market', dir: -pos, qty: Math.abs(s.engine.position), reduceOnly: true });
-        s.submitOrder({ type: 'market', dir: want, qty });
+        if (pos !== 0) { s.submitOrder({ type: 'market', dir: -pos, qty: Math.abs(s.engine.position), reduceOnly: true }); S.decisions++; }
+        s.submitOrder({ type: 'market', dir: want, qty: qty() });
+        S.decisions++;
         pos = want;
       }
     }
     if (!s.step()) break;
   }
   charts.chart?.applyNewData(s.visibleBars().map(toK));
+  drawMtf();
   refreshReplay();
   toast(`代跑完成，成交 ${s.engine.closedTrades.length} 笔`);
 }
@@ -132,32 +343,11 @@ function endRound() {
   S.lastIns = S.ins;
   S.lastLabel = `行情回放 · ${DATASETS[S.ds].display}`;
   S.report = null;
-  toast(`本轮 ${res.trades.length} 笔交易已记录`);
+  toast(`本轮 ${res.trades.length} 笔交易 · ${S.decisions} 次决策`);
   location.hash = '#app/analysis';
 }
 
-function submitOrder() {
-  const s = S.session;
-  if (!s || s.finished) { toast('本轮已结束'); return; }
-  const qty = parseInt($('#oQty').value);
-  if (!(qty > 0)) { toast('手数必须为正整数'); return; }
-  const type = $('#oType').value;
-  const order = { type, dir: S.dir, qty };
-  if (type !== 'market') {
-    const p = parseFloat($('#oPrice').value);
-    if (!isFinite(p)) { toast('请填写委托价 / 触发价'); return; }
-    order.price = p;
-  }
-  const sl = parseFloat($('#oSL').value), tp = parseFloat($('#oTP').value);
-  if (isFinite(sl)) order.stopLoss = sl;
-  if (isFinite(tp)) order.takeProfit = tp;
-  const o = s.submitOrder(order);
-  toast(o.status === 'rejected' ? '已拒绝：' + o.reason
-    : type === 'market' ? '已挂单 · 下一根开盘成交' : '已挂单 · 价格触及后成交');
-  refreshReplay();
-}
-
-/* ── 双盲测试 ───────────────────────────────────────────────────── */
+/* ══ 双盲测试 ══ */
 const BLIND_HISTORY = 130;
 
 function newBlind() {
@@ -165,7 +355,6 @@ function newBlind() {
   const bars = barsOf(sym);
   const n = parseInt($('#bCount')?.value) || 10;
   const horizon = parseInt($('#bHorizon')?.value) || 20;
-
   const lo = BLIND_HISTORY + 5, hi = bars.length - horizon - 5;
   const picks = [];
   let guard = 0;
@@ -174,20 +363,18 @@ function newBlind() {
     if (picks.every(p => Math.abs(p - i) > horizon + 8)) picks.push(i);
   }
   picks.sort((a, b) => a - b);
-
   S.blind = {
     sym, bars, ins: INSTRUMENTS[sym], horizon,
     qs: picks.map(i => ({
-      i,
-      scale: 0.3 + Math.random() * 3,
-      // 时间戳同步平移：只遮住品种名不够，横轴上的真实年月同样会暴露是哪一段行情
+      i, scale: 0.3 + Math.random() * 3,
+      // 时间戳同步平移：只遮品种名不够，横轴上的真实年月同样会暴露是哪段行情
       tShift: Math.floor((Math.random() - 0.5) * 7300) * 86400000,
       ans: null, correct: null, fwd: null,
     })),
     idx: 0, right: 0, answered: 0,
   };
   renderBlind();
-  toast(`已出 ${picks.length} 题`);
+  toast(`已出 ${picks.length} 题 · ↑看多 ↓看空`);
 }
 
 function renderBlind() {
@@ -198,20 +385,18 @@ function renderBlind() {
     l: b.l * q.scale, c: b.c * q.scale, v: b.v,
   }));
   const c = getChart('bChart', { ma: true });
-  c.applyNewData(seg.map(toK));
-  c.setPriceVolumePrecision(4, 0);
+  if (c) { c.applyNewData(seg.map(toK)); c.setPriceVolumePrecision(4, 0); }
 
   $('#bSub').textContent = `第 ${B.idx + 1} / ${B.qs.length} 题 · 判定周期 ${B.horizon} 根`;
   $('#bMask').textContent = q.ans === null
-    ? '品种 ██████ · 日期 ████-██-██'
-    : `${DATASETS[B.sym].display} · ${ymd(B.bars[q.i].t)}`;
+    ? '品种 ██████ · 日期 ████-██-██' : `${DATASETS[B.sym].display} · ${ymd(B.bars[q.i].t)}`;
   $('#bDone').textContent = `${B.answered} / ${B.qs.length}`;
   $('#bRight').textContent = B.right;
   const graded = B.qs.filter(x => x.correct !== null).length;
   $('#bRate').textContent = graded ? ((B.right / graded) * 100).toFixed(0) + '%' : '—';
   $('#bDots').innerHTML = B.qs.map((x, k) =>
     `<span class="qdot ${x.ans === null ? '' : x.correct === true ? 'ok' : x.correct === false ? 'no' : ''} ${k === B.idx ? 'cur' : ''}">${k + 1}</span>`).join('');
-  $$('.ans button').forEach(b => b.disabled = q.ans !== null);
+  $$('#v-blind .act').forEach(b => b.disabled = q.ans !== null);
   $('#bEval').disabled = blindTrades().length < 3;
   if (q.ans === null) $('#bReveal').innerHTML = '作答后揭晓品种与日期，并用真实后续行情计算这一题的结果。';
 }
@@ -220,11 +405,9 @@ function answerBlind(a) {
   const B = S.blind; if (!B) return;
   const q = B.qs[B.idx];
   if (q.ans !== null) return;
-
   const b0 = B.bars[q.i], b1 = B.bars[q.i + B.horizon];
   const fwd = (b1.c - b0.c) / b0.c;
-  q.ans = a; q.fwd = fwd;
-  B.answered++;
+  q.ans = a; q.fwd = fwd; B.answered++;
 
   if (a === 0) {
     q.correct = null;
@@ -240,7 +423,6 @@ function answerBlind(a) {
       你的判断 <b>${a > 0 ? '看多' : '看空'}</b> —— <b class="${ok ? 'dn' : 'up'}">${ok ? '正确 ✓' : '错误 ✗'}</b>。`;
     toast(ok ? '方向正确' : '方向错误');
   }
-
   const trades = blindTrades();
   if (trades.length) {
     const ctx = makeContext(B.bars, B.ins, { refSize: 1 });
@@ -272,7 +454,7 @@ function evalBlind() {
   runReport();
 }
 
-/* ── 交易分析（复刻 TEx 的原生分析口径）──────────────────────────── */
+/* ══ 交易分析 ══ */
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 function renderAnalysis() {
@@ -291,7 +473,6 @@ function renderAnalysis() {
   const beh = detectBehaviors(ev, S.lastBars);
   const isDaily = (S.lastBars[1].t - S.lastBars[0].t) > 20 * 3600 * 1000;
 
-  // 分方向
   const byDir = [1, -1].map(d => {
     const rows = ev.rows.filter(r => r.dir === d);
     return { label: d > 0 ? '多头' : '空头', n: rows.length,
@@ -299,7 +480,6 @@ function renderAnalysis() {
       win: rows.length ? rows.filter(x => x.net > 0).length / rows.length : 0 };
   }).filter(x => x.n);
 
-  // 分时段：日线按星期几，日内按小时
   const buckets = new Map();
   for (const r of ev.rows) {
     const d = new Date(S.lastBars[r.entry].t);
@@ -311,20 +491,17 @@ function renderAnalysis() {
   const byTime = [...buckets.values()].map(b => ({ ...b, win: b.win / b.n }))
     .sort((a, b) => (isDaily ? WEEK.indexOf(a.label) - WEEK.indexOf(b.label) : a.label.localeCompare(b.label)));
 
-  // 分持仓时长
-  const durBands = [[0, 3, '≤3 根'], [3, 10, '4–10 根'], [10, 30, '11–30 根'], [30, 1e9, '>30 根']];
-  const byDur = durBands.map(([lo, hi, label]) => {
-    const rows = ev.rows.filter(r => r.holdBars > lo && r.holdBars <= hi);
-    return { label, n: rows.length, r: rows.reduce((a, x) => a + x.r, 0),
-      win: rows.length ? rows.filter(x => x.net > 0).length / rows.length : 0 };
-  }).filter(x => x.n);
+  const byDur = [[0, 3, '≤3 根'], [3, 10, '4–10 根'], [10, 30, '11–30 根'], [30, 1e9, '>30 根']]
+    .map(([lo, hi, label]) => {
+      const rows = ev.rows.filter(r => r.holdBars > lo && r.holdBars <= hi);
+      return { label, n: rows.length, r: rows.reduce((a, x) => a + x.r, 0),
+        win: rows.length ? rows.filter(x => x.net > 0).length / rows.length : 0 };
+    }).filter(x => x.n);
 
-  // R 倍数分布
   const rBands = [[-1e9, -2, '< −2R'], [-2, -1, '−2 ~ −1R'], [-1, 0, '−1 ~ 0R'],
     [0, 1, '0 ~ 1R'], [1, 2, '1 ~ 2R'], [2, 1e9, '> 2R']];
   const rHist = rBands.map(([lo, hi, label]) => ({ label, n: ev.rows.filter(r => r.r > lo && r.r <= hi).length }));
   const maxHist = Math.max(1, ...rHist.map(h => h.n));
-
   const grade = accountGrade(ev, maxDrawdownR);
 
   host.innerHTML = `
@@ -340,22 +517,19 @@ function renderAnalysis() {
     <div class="tile"><div class="l">最大回撤</div><div class="v num dn">${maxDrawdownR.toFixed(2)} R</div>
       <div class="d">账户评级 <b style="color:var(--brand)">${grade.letter}</b></div></div>
   </div>
-
   <div class="grid g2">
     <div class="panel"><div class="ph"><h3>资金权益曲线</h3><span class="sub">按笔累计 · 单位 R</span></div>
       <div class="pb">${equitySvg(equity)}</div></div>
-    <div class="panel"><div class="ph"><h3>账户评级</h3><span class="sub">${S.lastLabel}</span></div>
+    <div class="panel"><div class="ph"><h3>账户评级</h3><span class="sub">${esc(S.lastLabel)}</span></div>
       <div class="pb">${grade.rows.map(([k, v, s]) => `
         <div class="kv"><span>${k}</span><span>${v} <span class="pill ${s}">${s === 'good' ? '优' : s === 'mid' ? '中' : '弱'}</span></span></div>`).join('')}
       </div></div>
   </div>
-
   <div class="grid g3" style="margin-top:16px">
     ${breakdownPanel('多空盈亏分析', byDir)}
     ${breakdownPanel(isDaily ? '分星期盈亏分析' : '分时段盈亏分析', byTime)}
     ${breakdownPanel('持仓时长分析', byDur)}
   </div>
-
   <div class="grid g2" style="margin-top:16px">
     <div class="panel"><div class="ph"><h3>R 倍数分布</h3><span class="sub">单笔盈亏的分布形态</span></div>
       <div class="pb"><div class="histo">${rHist.map(h => `
@@ -366,7 +540,6 @@ function renderAnalysis() {
     <div class="panel"><div class="ph"><h3>行为特征</h3><span class="sub">由交易记录直接计算</span></div>
       <div class="pb"><div class="blist">${behaviorItems(beh)}</div></div></div>
   </div>
-
   <div class="panel" style="margin-top:16px"><div class="pb"
     style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div><b>想知道这个成绩里有多少是运气？</b>
@@ -403,7 +576,6 @@ function behaviorItems(beh) {
   }).join('');
 }
 
-/** 账户评级：多维打分，刻意保守 —— 样本不足一律给「中」 */
 function accountGrade(ev, maxDd) {
   const enough = ev.count >= 20;
   const score = (v, lo, hi) => !enough ? 'mid' : v >= hi ? 'good' : v <= lo ? 'bad' : 'mid';
@@ -420,7 +592,6 @@ function accountGrade(ev, maxDd) {
   return { letter, rows };
 }
 
-/** 权益曲线：内联 SVG，随主题变色，不引第二个图表库 */
 function equitySvg(eq) {
   const w = 560, h = 190, pad = { l: 6, r: 6, t: 10, b: 16 };
   const n = eq.length;
@@ -429,8 +600,7 @@ function equitySvg(eq) {
   const X = i => pad.l + i / (n - 1) * (w - pad.l - pad.r);
   const Y = v => pad.t + (hi - v) / span * (h - pad.t - pad.b);
   const pts = eq.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
-  const zeroY = Y(0);
-  const last = eq[n - 1];
+  const zeroY = Y(0), last = eq[n - 1];
   return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:190px;display:block" role="img"
       aria-label="资金权益曲线，期末 ${sg(last)} R">
     <defs><linearGradient id="eqg" x1="0" y1="0" x2="0" y2="1">

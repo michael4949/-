@@ -18,10 +18,10 @@ const ROOT = join(HERE, '..');
 const ENGINE = [
   'rng.js', 'stats.js', 'bars.js', 'trades.js', 'nulls.js', 'benchmarks.js',
   'behavior.js', 'engine.js', 'report.js', 'matching.js', 'replay.js',
-  'simulate.js', 'query.js', 'similar.js',
+  'simulate.js', 'query.js', 'similar.js', 'fileparse.js',
 ];
 /** UI 层，按加载顺序（共享同一 IIFE 作用域） */
-const UI = ['core.js', 'site.js', 'trade.js', 'ai.js', 'boot.js'];
+const UI = ['core.js', 'site.js', 'trade.js', 'ai.js', 'chat.js', 'boot.js'];
 
 /** 每个品种保留的最大 K 线数（控制单文件体积） */
 const CAPS = { EURUSD: 2500 };
