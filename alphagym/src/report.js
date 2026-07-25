@@ -82,10 +82,15 @@ export function renderText(report) {
     ? `  在 95% 置信度、80% 检验力下需要约 ${p.requiredTrades} 笔，还差 ${p.shortfall} 笔`
     : '  当前效应量约等于零，无论积累多少样本都无法证明存在优势');
 
-  const bh = report.behavior.filter(b => b.severity !== 'insufficient' && b.severity !== 'none');
-  if (bh.length) {
+  const usable = report.behavior.filter(b => b.severity !== 'insufficient');
+  const problems = usable.filter(b => b.kind === 'problem' && b.severity !== 'none');
+  const strengths = usable.filter(b => b.kind === 'strength');
+  const profile = usable.filter(b => b.kind === 'profile');
+  if (problems.length || strengths.length || profile.length) {
     L.push('\n【行为特征】（全部由交易记录直接计算，不含模型推测）');
-    for (const b of bh) L.push(`  [${SEVERITY_LABEL[b.severity]}] ${b.label}：${b.evidence}`);
+    for (const b of problems) L.push(`  [问题·${SEVERITY_LABEL[b.severity]}] ${b.label}：${b.evidence}`);
+    for (const b of strengths) L.push(`  [优势] ${b.label}：${b.evidence}`);
+    for (const b of profile) L.push(`  [画像] ${b.label}：${b.evidence}`);
   }
 
   L.push('\n【必须知道的局限】');
@@ -139,7 +144,11 @@ export function toLlmPayload(report) {
     },
     behavior: report.behavior
       .filter(b => b.severity !== 'insufficient')
-      .map(b => ({ key: b.key, label: b.label, severity: b.severity, value: round(b.value, 3), evidence: b.evidence })),
+      .map(b => ({
+        key: b.key, label: b.label,
+        kind: b.kind || 'problem',      // problem 才是要改的；strength 是优势，profile 是中性画像
+        severity: b.severity, value: round(b.value, 3), evidence: b.evidence,
+      })),
     caveats: report.caveats,
   };
 }
@@ -164,6 +173,8 @@ export const LLM_SYSTEM_PROMPT = `你是交易训练系统的复盘教练。你�
 6. caveats 数组中的内容必须在回复中体现，不得省略。
 7. p 值的含义是"在没有能力的前提下，出现这么好成绩的概率"，不是"你有能力的概率"。不得混淆这两者。
 8. 维度归因一律引用 pValueAdjusted（多重比较校正后）。不得用未校正的 pValue 宣称某维度显著。
+9. behavior 数组中 kind 为 strength 的是**优势**、profile 的是**中性画像**，只有 problem 才是需要改进的。
+   不得把优势或画像当作缺点来批评（例如「亏损持仓时间短于盈利持仓」是好习惯，不是处置效应）。
 
 任务：基于这些事实，写一段 200-400 字的复盘，回答三个问题——
   (a) 这一轮的成绩，有多少能用运气解释；

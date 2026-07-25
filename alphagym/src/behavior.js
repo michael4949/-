@@ -16,12 +16,24 @@ import { mean, quantile } from './stats.js';
 
 const MIN_N = 8; // 低于此样本量的行为结论不予输出
 
-function grade(value, thresholds) {
-  // thresholds: [mild, notable, severe]，按绝对值升序
-  const v = Math.abs(value);
-  if (v >= thresholds[2]) return 'severe';
-  if (v >= thresholds[1]) return 'notable';
-  if (v >= thresholds[0]) return 'mild';
+/**
+ * 单侧分级：只有**朝着有害方向**的偏离才计为问题。
+ *
+ * ⚠️ 这里踩过一个真实的坑，值得留着。
+ * 早期版本写的是 `Math.abs(value)`，于是处置效应比值 0.34 和 1.66 被同等对待。
+ * 但这两者含义完全相反：
+ *   比值 > 1 = 亏了扛着、赚了就跑 —— 处置效应，要改；
+ *   比值 < 1 = 亏了快砍、赚了拿住 —— 截断亏损让利润奔跑，是教科书级的好习惯。
+ * 结果是一个纪律优秀的趋势跟踪者被系统报成「处置效应：明显」。
+ *
+ * **一个把好行为标成毛病的指标，比没有这个指标更糟** —— 它会主动把用户往错误方向纠。
+ * 所以分级一律单侧，反向偏离明确表扬。
+ */
+function gradeOneSided(value, thresholds) {
+  if (value <= 0) return 'none';
+  if (value >= thresholds[2]) return 'severe';
+  if (value >= thresholds[1]) return 'notable';
+  if (value >= thresholds[0]) return 'mild';
   return 'none';
 }
 
@@ -37,13 +49,16 @@ export function dispositionEffect(rows) {
   }
   const hw = mean(wins.map(r => r.holdBars)), hl = mean(losses.map(r => r.holdBars));
   const ratio = hw > 0 ? hl / hw : NaN;
+  const favourable = ratio < 0.85;
   return {
     key: 'disposition',
-    label: '处置效应（截断盈利 / 扛住亏损）',
+    kind: favourable ? 'strength' : 'problem',
+    label: favourable ? '持仓纪律（截断亏损 / 让利润奔跑）' : '处置效应（截断盈利 / 扛住亏损）',
     value: ratio,
     n: rows.length,
-    severity: rows.length < MIN_N ? 'insufficient' : grade(ratio - 1, [0.25, 0.6, 1.2]),
-    evidence: `亏损单平均持仓 ${hl.toFixed(1)} 根，盈利单 ${hw.toFixed(1)} 根，比值 ${ratio.toFixed(2)}`,
+    severity: rows.length < MIN_N ? 'insufficient' : gradeOneSided(ratio - 1, [0.25, 0.6, 1.2]),
+    evidence: `亏损单平均持仓 ${hl.toFixed(1)} 根，盈利单 ${hw.toFixed(1)} 根，比值 ${ratio.toFixed(2)}`
+      + (favourable ? ' —— 亏损砍得比盈利快，方向正确' : ''),
   };
 }
 
@@ -61,13 +76,16 @@ export function revengeTrading(rows) {
   }
   const ml = mean(afterLoss), mw = mean(afterWin);
   const ratio = mw > 0 ? ml / mw : NaN;
+  const favourable = ratio < 0.9;
   return {
     key: 'revenge',
-    label: '报复性交易（亏损后加码）',
+    kind: favourable ? 'strength' : 'problem',
+    label: favourable ? '亏损后仓位控制' : '报复性交易（亏损后加码）',
     value: ratio,
     n: rows.length,
-    severity: rows.length < MIN_N ? 'insufficient' : grade(ratio - 1, [0.15, 0.4, 0.8]),
-    evidence: `亏损后下一笔均仓 ${ml.toFixed(2)}，盈利后 ${mw.toFixed(2)}，比值 ${ratio.toFixed(2)}`,
+    severity: rows.length < MIN_N ? 'insufficient' : gradeOneSided(ratio - 1, [0.15, 0.4, 0.8]),
+    evidence: `亏损后下一笔均仓 ${ml.toFixed(2)}，盈利后 ${mw.toFixed(2)}，比值 ${ratio.toFixed(2)}`
+      + (favourable ? ' —— 亏损后主动减码，未见报复性交易' : ''),
   };
 }
 
@@ -83,7 +101,8 @@ export function frictionDrag(summary) {
     label: '交易摩擦占毛利比',
     value: ratio,
     n: summary.count,
-    severity: summary.count < MIN_N ? 'insufficient' : grade(ratio, [0.15, 0.3, 0.5]),
+    kind: 'problem',
+    severity: summary.count < MIN_N ? 'insufficient' : gradeOneSided(ratio, [0.15, 0.3, 0.5]),
     evidence: `毛利 ${summary.gross.toFixed(0)}，成本 ${summary.cost.toFixed(0)}，占比 ${(ratio * 100).toFixed(1)}%`,
   };
 }
@@ -105,7 +124,8 @@ export function stopDiscipline(rows) {
     label: '止损纪律（亏损单浮亏离散度）',
     value: ratio,
     n: maes.length,
-    severity: grade(ratio - 1, [0.8, 1.5, 2.5]),
+    kind: 'problem',
+    severity: gradeOneSided(ratio - 1, [0.8, 1.5, 2.5]),
     evidence: `亏损单最大浮亏 中位数 ${p50.toFixed(2)}R，P90 ${p90.toFixed(2)}R，比值 ${ratio.toFixed(2)}`,
   };
 }
@@ -126,15 +146,18 @@ export function momentumChasing(rows, bars, lookback = 5) {
     if (Math.sign(mom) === r.dir) agree++;
   }
   if (valid < MIN_N) {
-    return { key: 'momentum', label: '追涨杀跌倾向', value: NaN, n: valid, severity: 'insufficient', evidence: `可判定样本仅 ${valid} 笔` };
+    return { key: 'momentum', label: '动量偏好（顺势 / 逆势）', value: NaN, n: valid, severity: 'insufficient', evidence: `可判定样本仅 ${valid} 笔` };
   }
   const rate = agree / valid;
   return {
     key: 'momentum',
-    label: '追涨杀跌倾向',
+    label: '动量偏好（顺势 / 逆势）',
     value: rate,
     n: valid,
-    severity: grade(rate - 0.5, [0.15, 0.25, 0.35]),
+    // 顺势与逆势本身都不是错，这是**画像**不是问题：一个趋势跟踪者顺动量开仓是设计如此。
+    // 强行给它打「严重」标签，等于劝一个纪律良好的趋势交易者去改掉自己的策略。
+    kind: 'profile',
+    severity: 'none',
     evidence: `${valid} 笔中 ${agree} 笔顺前 ${lookback} 根动量方向开仓（${(rate * 100).toFixed(0)}%）`,
   };
 }
@@ -155,7 +178,8 @@ export function breakevenBias(rows) {
     label: '保本平仓倾向（浮盈回吐后平推）',
     value: rate,
     n: rows.length,
-    severity: grade(rate, [0.12, 0.22, 0.35]),
+    kind: 'problem',
+    severity: gradeOneSided(rate, [0.12, 0.22, 0.35]),
     evidence: `${rows.length} 笔中 ${gaveBack} 笔曾有 ≥0.5R 浮盈却以近乎平推收场（${(rate * 100).toFixed(0)}%）`,
   };
 }
