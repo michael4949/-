@@ -1,0 +1,376 @@
+/* ══════════════════════════════════════════════════════════════════
+   营销站。信息架构对照 tradingexer.com 复刻：
+   首页 / 功能 / 数据说明 / 版本与价格 / 手机版 / 选拔赛 / 常见问题。
+   四大核心能力与三个独创功能沿用其产品结构，AI 能力作为增量叠加。
+   ══════════════════════════════════════════════════════════════════ */
+
+const CORE4 = [
+  { ic: '▶', h: '行情回放', p: '任意日期精确重现，自动 / 手动步进，可变速，多周期多品种同步联动。',
+    li: ['任选品种与时间段', '倍速回放与逐根步进', '多周期同屏联动', '数据本地缓存，翻页无等待'] },
+  { ic: '▤', h: '模拟交易', p: '完整的下单体系：市价、限价、停损触发、止损止盈与跟踪止损。',
+    li: ['多模拟账户独立记账', '条件单与止损止盈', '手续费、滑点、合约乘数', '保证金与强制平仓'] },
+  { ic: '◫', h: '交易分析', p: '权益曲线、品种 / 多空 / 时段盈亏归因、账户评级，一眼看清短板。',
+    li: ['详尽交易统计', '分品种、分方向、分时段归因', 'MAE / MFE 与 R 倍数', '交易记录导入导出'] },
+  { ic: '◎', h: '全景数据', p: '横跨二十年的真实历史行情，含互联网泡沫与金融危机两轮完整周期。',
+    li: ['1999 年至今日线数据', '指数、个股、外汇多类资产', '真实跳空与停牌处理', '不复权价回放，杜绝未来函数'] },
+];
+
+const FEAT3 = [
+  { tag: '独创 · 去记忆偏差', h: '双盲测试', ds: 'SPX', off: 900,
+    p: '随机品种、随机时点、隐藏全部标识。彻底去掉「我记得后面怎么走」的记忆影响，客观检验真实判断力。',
+    li: ['品种与日期完全隐藏', '价格保形变换，逐根涨跌幅不变', '时间轴同步平移，坐标轴不泄露年代', '结果由真实后续行情判定'] },
+  { tag: '独创 · 多周期同步', h: '多周期同步步进', ds: 'IXIC', off: 2400,
+    p: '大小周期同屏联动，一键前进后退。大周期趋势与小周期入场时机的关系一目了然。',
+    li: ['大小周期同步步进', '自定义步进粒度', '前进 / 后退 / 自动播放', '快捷键操作'] },
+  { tag: '独创 · 时光机', h: '任一时点的数据快照', ds: 'GOOG', off: 1200,
+    p: '回到历史上任意一天，看到的只有那一天之前的信息。数据在架构上就不可能穿越。',
+    li: ['游标之后的数据不下发', '越界读取直接抛异常', '决策与成交严格错开一根', '整场会话可逐字节复现'] },
+];
+
+const AI6 = [
+  { k: '01 · EVALUATE', h: '能力评估', p: '把「运气」和「技能」分开：用条件随机化检验算出你这一轮的成绩有多少能用运气解释。' },
+  { k: '02 · ATTRIBUTE', h: '四维决策归因', p: '入场时机、方向、出场时机、仓位——逐维度告诉你哪一块在拖后腿。' },
+  { k: '03 · SIMILAR', h: '相似行情检索', p: '把每段走势编码成形态向量，找出历史上长得像的片段，并给出它们之后的走势分布。' },
+  { k: '04 · ASK', h: '智能问数', p: '一句话查历史行情。机器把你的话翻译成查询条件并展示出来，取数与计算全程确定性执行。' },
+  { k: '05 · BEHAVIOR', h: '行为诊断', p: '处置效应、报复性交易、止损纪律、保本平仓——全部从交易记录直接算出，不含模型推测。' },
+  { k: '06 · POWER', h: '样本量测算', p: '告诉你还需要多少笔交易，才能在统计上判定你的优势是真的。' },
+];
+
+const PRICES = [
+  { h: '免费版', desc: '建立交易认知', cur: '¥', n: '0', per: '/ 永久', pop: false,
+    li: ['行情回放与步进', '<em>1 个</em>模拟账户', '基础交易统计', '近 <em>1 年</em>历史数据'],
+    no: ['双盲测试', '能力评估与四维归因', '智能助手'], cta: '免费下载', href: '#app/replay' },
+  { h: '专业版', desc: '完整训练闭环 + 全部 AI 能力', cur: '¥', n: '698', per: '/ 买断', pop: true,
+    li: ['全部回放与模拟交易功能', '<em>不限</em>模拟账户', '双盲测试与自适应出题', '<em>能力评估</em>与四维决策归因',
+         '相似行情检索', '智能助手（问数 · 文件 · 语音）', '赠 1 年数据更新服务'],
+    no: [], cta: '立即购买', href: '#pricing' },
+  { h: '旗舰版', desc: '面向机构与团队', cur: '¥', n: '按需', per: '/ 年', pop: false,
+    li: ['专业版全部功能', '成绩服务端权威判定', '操作日志审计与复核', '团队排行榜与横向对比',
+         '选拔赛与人才评估后台', '私有化部署与数据对接'],
+    no: [], cta: '联系我们', href: '#contest' },
+];
+
+const FAQS = [
+  ['免费版和专业版的差别在哪？',
+   '免费版保留完整的回放与模拟交易内核，差别主要在两处：一是可回放的历史数据范围，二是 AI 能力（能力评估、四维归因、相似行情、智能助手）仅在专业版开放。'],
+  ['买断之后还要交年费吗？',
+   '不需要。一次购买长期使用，软件功能不会因为不续费而失效。购买时赠送一年的数据更新服务；一年后如果希望继续获取新增行情，可以单独续订数据服务，已下载的历史数据不受影响。'],
+  ['为什么回放用的是不复权价？',
+   '复权因子是用未来的除权除息事件倒推出来的。如果把前复权价直接喂给回放，你在 2015 年的界面上看到的价格就已经隐含了 2016 年分红的信息——这是一个不报错、不崩溃、只会让训练成绩虚高的未来函数。所以回放一律使用当时盘面真实所见的不复权价，复权因子单独保存，只在做跨期收益率统计时使用。'],
+  ['双盲测试是怎么做到「盲」的？',
+   '三件事同时做：隐藏品种名称、对价格做乘法保形变换（价格水平变了，但逐根涨跌幅严格不变）、把时间轴整体平移整数天。只遮住标题是不够的——图表横轴上的真实年月同样会暴露是哪一段行情。'],
+  ['能力评估的 p 值是什么意思？',
+   'p 值回答的是：假设你其实没有任何优势，出现这么好成绩的概率有多大。它不是「你有能力的概率」。p = 0.03 意味着一个毫无判断力、但交易习惯和你完全一样的对照组，每 33 次里也能撞出一次这样的成绩。'],
+  ['为什么样本量不够时不给结论？',
+   '因为给不出。交易收益的信噪比很低，十几笔交易的成绩几乎完全由运气决定。系统会告诉你按当前的信噪比还需要多少笔样本才能判定，而不是先给一个让人高兴的评价。'],
+  ['智能助手能推荐股票吗？',
+   '不能，也不会。助手只做两件事：把你的问题翻译成查询条件，以及解释已经算出来的统计结果。它拿不到行情原始数据，也不输出对未来价格的任何判断。'],
+  ['模拟成交是怎么假设的？',
+   '一律取对用户最不利的假设。下单最早在下一根开盘成交；停损触发后按市价成交并计滑点；同一根 K 线内止损与止盈都可能触发时，判定为止损先成交。任何乐观假设都会系统性高估训练成绩。'],
+];
+
+/* ── 渲染 ──────────────────────────────────────────────────────── */
+function renderSite(page) {
+  const el = $('#site');
+  const fn = SITE_PAGES[page] || SITE_PAGES.home;
+  el.innerHTML = fn() + siteFooter();
+  if (page === 'home') requestAnimationFrame(() => { drawHeroChart(); drawFeatCharts(); });
+}
+
+function heroFacts() {
+  const total = Object.values(DATASETS).reduce((a, d) => a + d.count, 0);
+  const years = new Set();
+  for (const d of Object.values(DATASETS)) {
+    years.add(new Date(d.rows[0][0]).getUTCFullYear());
+    years.add(new Date(d.rows[d.rows.length - 1][0]).getUTCFullYear());
+  }
+  const span = Math.max(...years) - Math.min(...years);
+  return [
+    [`${span}`, '年历史行情跨度', '年'],
+    [`${(total / 1000).toFixed(1)}k`, '根真实 K 线', ''],
+    [`${Object.keys(DATASETS).length}`, '个可训练品种', ''],
+  ];
+}
+
+const SITE_PAGES = {
+  home: () => `
+  <div class="hero"><div class="wrap hero-in">
+    <div>
+      <span class="eyebrow">交易练习与能力评估</span>
+      <h1>交易能力，<em>是可以练出来的</em></h1>
+      <p class="lead">回放二十年真实历史行情，在零成本的环境里反复练习。
+      每一轮结束，系统用统计方法告诉你：这一次的成绩，有多少能用运气解释，
+      以及下一步该练哪一块。</p>
+      <div class="cta">
+        <a href="#app/replay" class="btn btn-p btn-lg">免费开始复盘</a>
+        <a href="#features" class="btn btn-g btn-lg">看看它能做什么</a>
+      </div>
+      <div class="facts">${heroFacts().map(([b, s, u]) =>
+        `<div class="fact"><b>${b}<span style="font-size:13px">${u}</span></b><span>${s}</span></div>`).join('')}</div>
+    </div>
+    <div>
+      <div class="term">
+        <div class="term-bar">
+          <div class="term-dots"><i></i><i></i><i></i></div>
+          <div class="term-t"><b>SPX</b> 标普500 · 日线</div>
+          <div class="term-live">回放中</div>
+        </div>
+        <div class="term-body"><div id="heroChart" style="width:100%;height:270px"></div></div>
+        <div class="term-foot">
+          <span class="chip on">K线</span><span class="chip">MA</span><span class="chip">成交量</span>
+          <span class="chip" style="margin-left:auto">1999–2018 真实行情</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="strip"><div class="wrap strip-in">
+    <span>覆盖 <b>指数 · 个股 · 外汇</b></span>
+    <span>数据自 <b>1999 年</b>起</span>
+    <span><b>红涨绿跌</b> · A股习惯</span>
+    <span>回放使用<b>不复权价</b></span>
+  </div></div>
+
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">核心能力</span>
+      <h2>一套完整的复盘训练闭环</h2>
+      <p>回放行情、做出决策、复盘归因、针对性纠错——每一环都由真实数据支撑。</p></div>
+    <div class="grid g4">${CORE4.map(c => `
+      <div class="card"><div class="ic">${c.ic}</div><h3>${c.h}</h3><p>${c.p}</p>
+      <ul>${c.li.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+  </div></div>
+
+  <div class="sec tight"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">特色功能</span><h2>三个别处没有的设计</h2></div>
+    ${FEAT3.map((f, i) => `
+      <div class="feat">
+        <div><span class="tag">${f.tag}</span><h3>${f.h}</h3><p>${f.p}</p>
+          <ul>${f.li.map(x => `<li>${x}</li>`).join('')}</ul></div>
+        <div class="feat-media"><div class="box"><div id="featChart${i}" style="width:100%;height:230px"></div></div></div>
+      </div>`).join('')}
+  </div></div>
+
+  <div class="aiband"><div class="sec wrap">
+    <div class="sechead"><span class="eyebrow" style="color:var(--teal)">AI 赋能</span>
+      <h2>不只是回放工具，是会评估你的教练</h2>
+      <p>传统复盘软件只给图表，看得懂看不懂全靠自己。
+      这里把「数据」翻译成「下一步该练什么」，而且每一句话都能追溯到一个算出来的数字。</p></div>
+    <div class="grid g3">${AI6.map(a => `
+      <div class="aicard"><div class="k">${a.k}</div><h3>${a.h}</h3><p>${a.p}</p></div>`).join('')}</div>
+    <div style="text-align:center;margin-top:28px">
+      <a href="#app/eval" class="btn btn-s btn-lg">看一份能力评估报告 →</a></div>
+  </div></div>
+
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">版本</span><h2>先免费练起来，需要了再升级</h2></div>
+    <div class="prices">${priceCards()}</div>
+  </div></div>
+
+  <div class="sec tight"><div class="wrap">${ctaBand()}</div></div>`,
+
+  features: () => `
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">功能全景</span><h2>复盘训练需要的，这里都有</h2>
+      <p>从行情回放到统计归因，覆盖新手建立系统、进阶者验证策略的完整链路。</p></div>
+    <div class="grid g3">
+      <div class="card"><div class="ic">▶</div><h3>随心所欲回放行情</h3>
+        <ul><li>自动 / 手动回放，自由设定起止</li><li>独创步进浏览，多周期同步</li>
+        <li>N 日行情几分钟内重现</li><li>多品种联动同步回放</li><li>数据本地缓存，翻页无等待</li></ul></div>
+      <div class="card"><div class="ic">▤</div><h3>随时随地练习交易</h3>
+        <ul><li>多模拟账户独立记账</li><li>限价单、停损触发单</li>
+        <li>自动止损、止盈与跟踪止损</li><li>手续费、滑点、合约乘数</li><li>保证金与强制平仓</li></ul></div>
+      <div class="card"><div class="ic">◫</div><h3>强大的交易分析</h3>
+        <ul><li>详尽交易统计与权益曲线</li><li>品种 / 多空 / 时段盈亏归因</li>
+        <li>MAE / MFE 与 R 倍数分布</li><li>交易记录导入导出</li></ul></div>
+      <div class="card"><div class="ic">◎</div><h3>行情数据全掌握</h3>
+        <ul><li>1999 年至今真实历史行情</li><li>指数、个股、外汇多类资产</li>
+        <li>真实跳空、停牌与涨跌停处理</li><li>不复权价回放，杜绝未来函数</li></ul></div>
+      <div class="card" style="border-color:var(--brand)">
+        <div class="ic" style="background:linear-gradient(140deg,var(--brand),var(--teal));color:#fff">✦</div>
+        <h3>AI 能力评估 <span class="pill brand">AI</span></h3>
+        <ul><li>技能与运气的统计分离</li><li>四维决策归因，定位薄弱环节</li>
+        <li>相似历史形态检索</li><li>自然语言问数</li><li>行为偏差诊断</li></ul></div>
+      <div class="card"><div class="ic">◷</div><h3>不受交易时间限制</h3>
+        <ul><li>任意时间练习，不必等开盘</li><li>一轮训练几分钟走完数月行情</li>
+        <li>训练记录云端同步</li><li>能力曲线持续追踪</li></ul></div>
+    </div>
+  </div></div>
+  <div class="sec tight"><div class="wrap">${ctaBand()}</div></div>`,
+
+  data: () => {
+    const rows = Object.values(DATASETS).map(d => `
+      <tr><td class="txt"><b>${d.display}</b> <span class="mut">${d.symbol}</span></td>
+        <td class="txt">${TF_LABEL[d.timeframe] || d.timeframe}</td>
+        <td>${d.count.toLocaleString()}</td>
+        <td class="txt">${ymd(d.rows[0][0])} — ${ymd(d.rows[d.rows.length - 1][0])}</td>
+        <td class="txt mut">${d.source}</td></tr>`).join('');
+    return `
+    <div class="sec"><div class="wrap">
+      <div class="sechead"><span class="eyebrow">数据说明</span><h2>训练用的每一根 K 线都是真的</h2>
+        <p>真实历史行情含跳空、波动率聚集与肥尾。用随机生成的数据练出来的手感，到真实市场里不成立。</p></div>
+      <div class="panel"><div class="pb scrollx">
+        <table class="dt"><thead><tr><th>品种</th><th>周期</th><th>K 线数</th><th>时间跨度</th><th>来源</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </div></div>
+
+      <div class="grid g2" style="margin-top:22px">
+        <div class="card"><h3>复权处理</h3>
+          <p>回放一律使用<b>不复权价</b>，即当时盘面真实所见的价格。复权因子单独保存，
+          只在做跨期收益率统计时使用。</p>
+          <div class="note" style="margin-top:12px"><span>⚠</span>
+          <span>复权因子由未来的除权除息事件倒推得到。把前复权价直接用于回放，
+          等于让你在 2015 年的界面上看到 2016 年分红的信息。</span></div></div>
+        <div class="card"><h3>期货主力合约拼接</h3>
+          <p>提供<b>价差平移法</b>与<b>比例法</b>两种拼接方式，并明确标注：两者会给出不同的回测结论。
+          平移法保持绝对点数变动，比例法保持百分比涨跌幅。</p>
+          <div class="note" style="margin-top:12px"><span>⚠</span>
+          <span>拼接后的连续合约不是任何一张真实合约的价格，适合形态训练与统计，
+          不适合据此宣称某一年能赚多少。</span></div></div>
+      </div>
+    </div></div>`;
+  },
+
+  pricing: () => `
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">版本与价格</span><h2>一次购买，长期使用</h2>
+      <p>核心的回放与模拟交易功能永久免费。AI 能力与全部历史数据在专业版开放。</p></div>
+    <div class="prices">${priceCards()}</div>
+    <div class="panel" style="margin-top:30px"><div class="pb">
+      <h3 style="font-size:16px;margin-bottom:12px">关于数据服务</h3>
+      <div class="grid g3">
+        <div><div class="kv"><span>软件授权</span><span>一次买断</span></div>
+          <div class="kv"><span>功能更新</span><span>免费</span></div></div>
+        <div><div class="kv"><span>数据更新服务</span><span>赠 1 年</span></div>
+          <div class="kv"><span>到期后</span><span>可单独续订</span></div></div>
+        <div><div class="kv"><span>不续订的影响</span><span>软件正常可用</span></div>
+          <div class="kv"><span>已下载数据</span><span>不受影响</span></div></div>
+      </div>
+    </div></div>
+  </div></div>`,
+
+  mobile: () => `
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">手机版</span><h2>碎片时间也能练</h2>
+      <p>手机版做「日课」，桌面版做深度回放。两端账号与训练记录互通。</p></div>
+    <div class="grid g3">
+      <div class="card"><div class="ic">◷</div><h3>每日十题</h3>
+        <p>三分钟一组双盲判断，通勤路上就能完成。系统按你的薄弱环节优先出题。</p></div>
+      <div class="card"><div class="ic">◎</div><h3>能力曲线</h3>
+        <p>各维度能力随时间演进，看得见自己在哪一块真的变强了。</p></div>
+      <div class="card"><div class="ic">✦</div><h3>随身助手</h3>
+        <p>语音提问，一句话查历史行情，随手拍下的交割单也能直接上传分析。</p></div>
+    </div>
+    <div style="text-align:center;margin-top:34px">
+      <a href="#app/blind" class="btn btn-p btn-lg">先在桌面端试试双盲测试</a></div>
+  </div></div>`,
+
+  contest: () => `
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">选拔赛</span><h2>把训练成绩变成一份可核验的能力档案</h2>
+      <p>三个阶段逐级筛选。所有成绩由服务端权威判定，操作日志完整留存、可逐字节复现。</p></div>
+    <div class="grid g3">
+      <div class="card"><div class="ic">1</div><h3>模拟初赛</h3>
+        <p>免费参加。统一题目、统一行情段，双盲出题，杜绝记忆优势。</p>
+        <ul><li>统一起点，成绩可横向对比</li><li>按统计显著性而非单期收益排名</li></ul></div>
+      <div class="card"><div class="ic">2</div><h3>复赛</h3>
+        <p>延长评估周期，累积到足够样本量后再判定优势是否真实存在。</p>
+        <ul><li>样本量达标才出结论</li><li>四维能力档案随赛程更新</li></ul></div>
+      <div class="card"><div class="ic">3</div><h3>能力档案输出</h3>
+        <p>产出一份可核验的能力报告，供机构在人才评估时参考。</p>
+        <ul><li>成绩可审计、可申诉</li><li>操作日志完整留存</li></ul></div>
+    </div>
+    <div class="note" style="margin-top:26px;max-width:760px;margin-inline:auto"><span>⚠</span>
+      <span><b>关于实盘与资金：</b>本平台只做训练与能力评估，不提供实盘账户、不代客理财、不参与盈利分成。
+      涉及实盘资金的选拔与资产管理需要相应金融牌照，由持牌机构自行开展。</span></div>
+  </div></div>`,
+
+  faq: () => `
+  <div class="sec"><div class="wrap">
+    <div class="sechead"><span class="eyebrow">常见问题</span><h2>你可能想知道的</h2></div>
+    <div class="faq">${FAQS.map(([q, a]) => `
+      <details><summary>${q}</summary><div class="ans">${a}</div></details>`).join('')}</div>
+  </div></div>`,
+};
+
+function priceCards() {
+  return PRICES.map(p => `
+    <div class="price ${p.pop ? 'pop' : ''}">
+      ${p.pop ? '<div class="badge">最受欢迎</div>' : ''}
+      <h3>${p.h}</h3><div class="desc">${p.desc}</div>
+      <div class="amt"><span class="cur">${p.cur}</span><span class="n">${p.n}</span><span class="per">${p.per}</span></div>
+      <ul>${p.li.map(x => `<li>${x}</li>`).join('')}${p.no.map(x => `<li class="no">${x}</li>`).join('')}</ul>
+      <a href="${p.href}" class="btn ${p.pop ? 'btn-p' : 'btn-g'}">${p.cta}</a>
+    </div>`).join('');
+}
+
+function ctaBand() {
+  return `<div class="ctaband">
+    <h2>今天就开始第一轮复盘</h2>
+    <p>免费版永久可用，注册即可开始。</p>
+    <div class="row">
+      <a href="#app/replay" class="btn btn-p btn-lg">进入训练场</a>
+      <a href="#pricing" class="btn btn-g btn-lg">查看专业版</a>
+    </div></div>`;
+}
+
+function siteFooter() {
+  return `<div class="foot"><div class="wrap">
+    <div class="foot-in">
+      <div>
+        <div class="brand" style="margin-bottom:10px"><span class="mark">◆</span>
+          <span>练盘 AlphaGym<small>交易练习与能力评估</small></span></div>
+        <p class="mut" style="font-size:13.5px;max-width:320px">
+          回放真实历史行情，在零成本环境中反复练习，并用统计方法客观评估交易能力。</p>
+      </div>
+      <div><h4>产品</h4><ul>
+        <li><a href="#features">功能全景</a></li><li><a href="#data">数据说明</a></li>
+        <li><a href="#pricing">版本与价格</a></li><li><a href="#mobile">手机版</a></li></ul></div>
+      <div><h4>训练</h4><ul>
+        <li><a href="#app/replay">行情回放</a></li><li><a href="#app/blind">双盲测试</a></li>
+        <li><a href="#app/eval">能力评估</a></li><li><a href="#app/assistant">智能助手</a></li></ul></div>
+      <div><h4>支持</h4><ul>
+        <li><a href="#faq">常见问题</a></li><li><a href="#contest">选拔赛</a></li>
+        <li><a href="#data">数据来源</a></li></ul></div>
+    </div>
+    <div class="legal">
+      <b>风险提示与免责声明：</b>本产品是交易训练与能力评估工具，不提供投资建议、不推荐任何具体标的、
+      不对未来价格作出预测。历史行情表现不代表未来收益。训练成绩与统计评估结果仅反映在特定历史区间上的
+      决策质量，不构成对实盘结果的任何承诺。市场有风险，决策请自行判断。<br>
+      本站行情数据来源见<a href="#data" style="color:var(--brand)">数据说明</a>页。
+    </div>
+  </div></div>`;
+}
+
+/* ── 首页图表：真实数据 ─────────────────────────────────────────── */
+/** 展示型图表：关掉默认图例与 tooltip。
+ *  KLineCharts 默认会在左上角常驻一行 OHLC + 均线数值，
+ *  在营销页里那行字直接压在 K 线上，像没做完。 */
+const SHOWCASE_STYLE = {
+  candle: { tooltip: { showRule: 'none' } },
+  indicator: { tooltip: { showRule: 'none' } },
+};
+
+function drawHeroChart() {
+  if (!$('#heroChart')) return;
+  const bars = barsOf('SPX');
+  const c = getChart('heroChart', { ma: true });
+  c.applyNewData(bars.slice(2200, 2560).map(toK));
+  c.setPriceVolumePrecision(2, 0);
+  c.setStyles(SHOWCASE_STYLE);
+}
+function drawFeatCharts() {
+  FEAT3.forEach((f, i) => {
+    const id = `featChart${i}`;
+    if (!$('#' + id)) return;
+    const bars = barsOf(f.ds);
+    const c = getChart(id, { ma: true });
+    const seg = bars.slice(f.off, f.off + 170);
+    // 「双盲测试」那一张按双盲规则展示：价格保形缩放、时间轴平移
+    const shown = i === 0
+      ? seg.map(b => ({ t: b.t - 1500 * 86400000, o: b.o * 0.42, h: b.h * 0.42, l: b.l * 0.42, c: b.c * 0.42, v: b.v }))
+      : seg;
+    c.applyNewData(shown.map(toK));
+    c.setPriceVolumePrecision(2, 0);
+    c.setStyles(SHOWCASE_STYLE);
+  });
+}

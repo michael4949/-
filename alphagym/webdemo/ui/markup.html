@@ -1,0 +1,228 @@
+<div class="top"><div class="top-in">
+  <a class="brand" href="#home">
+    <span class="mark">◆</span>
+    <span>练盘 AlphaGym<small>交易练习与能力评估</small></span>
+  </a>
+  <nav class="nav" id="nav">
+    <a href="#home">首页</a>
+    <a href="#features">功能</a>
+    <a href="#data">数据</a>
+    <a href="#pricing">版本与价格</a>
+    <a href="#mobile">手机版</a>
+    <a href="#contest">选拔赛</a>
+    <a href="#faq">常见问题</a>
+  </nav>
+  <div class="top-r">
+    <a class="btn btn-s btn-sm" href="#app/replay">进入训练场</a>
+    <button class="ibtn" id="themeBtn" aria-label="切换深浅色">◐</button>
+    <button class="ibtn navtoggle" id="navToggle" aria-label="菜单">☰</button>
+  </div>
+</div></div>
+
+<!-- ══════════════ 营销站（内容由 site.js 渲染） ══════════════ -->
+<div class="site" id="site"></div>
+
+<!-- ══════════════ 应用 ══════════════ -->
+<div class="app" id="app">
+  <aside class="rail">
+    <div class="grp">训练</div>
+    <a href="#app/replay" data-v="replay"><span class="ic">▶</span>行情回放</a>
+    <a href="#app/blind" data-v="blind"><span class="ic">◫</span>双盲测试</a>
+    <div class="grp">分析</div>
+    <a href="#app/analysis" data-v="analysis"><span class="ic">▤</span>交易分析</a>
+    <a href="#app/eval" data-v="eval"><span class="ic">◎</span>能力评估<span class="tagx">AI</span></a>
+    <div class="grp">智能工具</div>
+    <a href="#app/similar" data-v="similar"><span class="ic">≈</span>相似行情<span class="tagx">AI</span></a>
+    <a href="#app/assistant" data-v="assistant"><span class="ic">✦</span>智能助手<span class="tagx">AI</span></a>
+    <div class="grp">账户</div>
+    <a href="#home"><span class="ic">←</span>返回官网</a>
+  </aside>
+
+  <main class="main">
+    <div class="mainhead">
+      <h1 id="vTitle">行情回放</h1>
+      <span class="crumb" id="vCrumb">/ 训练 / 行情回放</span>
+    </div>
+
+    <!-- ── 行情回放 ── -->
+    <section class="view" id="v-replay">
+      <div class="tiles">
+        <div class="tile"><div class="l">账户权益</div><div class="v num" id="tEq">—</div><div class="d" id="tEqD">—</div></div>
+        <div class="tile"><div class="l">当前持仓</div><div class="v num" id="tPos">—</div><div class="d" id="tPosD">—</div></div>
+        <div class="tile"><div class="l">浮动盈亏</div><div class="v num" id="tFlt">—</div><div class="d" id="tFltD">—</div></div>
+        <div class="tile"><div class="l">回放进度</div><div class="v num" id="tPrg">—</div><div class="d" id="tPrgD">—</div></div>
+      </div>
+      <div class="row2">
+        <div class="panel">
+          <div class="ph">
+            <h3 id="rTitle">—</h3><span class="sub" id="rSub"></span>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <select id="dsSel" style="width:auto"></select>
+              <div class="seg" id="tfSeg"></div>
+              <button class="btn btn-g btn-sm" id="newRound">新一轮</button>
+            </div>
+          </div>
+          <div style="padding:8px"><div id="chart" style="width:100%;height:412px"></div></div>
+          <div class="ctrl">
+            <button class="play" id="playBtn">▶</button>
+            <div class="seg" id="spdSeg">
+              <button data-s="1">1×</button><button data-s="3" class="on">3×</button>
+              <button data-s="8">8×</button><button data-s="20">20×</button>
+            </div>
+            <button class="btn btn-g btn-sm" id="stepBtn">步进 →</button>
+            <div class="prog"><i id="prgBar"></i></div>
+            <button class="btn btn-s btn-sm" id="autoBtn">机械策略代跑</button>
+            <button class="btn btn-p btn-sm" id="endBtn">结束本轮并评估</button>
+          </div>
+        </div>
+        <div class="side">
+          <div class="panel">
+            <div class="ph"><h3>模拟下单</h3><span class="sub">下一根开盘成交</span></div>
+            <div class="pb">
+              <div class="dirtabs" style="margin-bottom:11px">
+                <button class="buy on" id="dBuy">买入 / 多</button>
+                <button class="sell" id="dSell">卖出 / 空</button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+                <div class="field"><label>手数</label><input type="number" id="oQty" value="20" min="1" step="1"></div>
+                <div class="field"><label>类型</label>
+                  <select id="oType"><option value="market">市价</option><option value="limit">限价</option><option value="stop">停损触发</option></select>
+                </div>
+              </div>
+              <div class="field hide" id="priceField" style="margin-top:9px"><label>委托价 / 触发价</label><input type="number" id="oPrice" step="0.01"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px">
+                <div class="field"><label>止损价</label><input type="number" id="oSL" step="0.01" placeholder="可空"></div>
+                <div class="field"><label>止盈价</label><input type="number" id="oTP" step="0.01" placeholder="可空"></div>
+              </div>
+              <button class="btn btn-p" style="width:100%;margin-top:12px" id="submitBtn">确认下单</button>
+              <div style="margin-top:12px">
+                <div class="kv"><span>可用现金</span><span class="num" id="sCash">—</span></div>
+                <div class="kv"><span>持仓均价</span><span class="num" id="sAvg">—</span></div>
+                <div class="kv"><span>最新价</span><span class="num" id="sLast">—</span></div>
+                <div class="kv"><span>挂单</span><span class="num" id="sPend">0</span></div>
+              </div>
+              <button class="btn btn-g btn-sm" style="width:100%;margin-top:10px" id="flatBtn">一键平仓</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><h3>成交记录</h3><span class="sub" id="fillCount">0 笔</span></div>
+            <div class="pb"><div class="fills" id="fills"><div class="mut" style="font-size:13px">还没有成交</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 双盲测试 ── -->
+    <section class="view hide" id="v-blind">
+      <div class="row2">
+        <div class="panel">
+          <div class="ph">
+            <h3 id="bMask">品种 ██████ · 日期 ████-██-██</h3>
+            <span class="sub" id="bSub">第 0 / 0 题</span>
+            <button class="btn btn-g btn-sm" id="newBlind" style="margin-left:auto">重新出题</button>
+          </div>
+          <div style="padding:8px"><div id="bChart" style="width:100%;height:400px"></div></div>
+          <div class="ctrl">
+            <div class="ans">
+              <button class="b" data-a="1">看多 ↑</button>
+              <button class="s" data-a="-1">看空 ↓</button>
+              <button class="w" data-a="0">观望</button>
+            </div>
+          </div>
+        </div>
+        <div class="side">
+          <div class="panel">
+            <div class="ph"><h3>本轮战绩</h3></div>
+            <div class="pb">
+              <div class="kv"><span>已答题</span><span class="num" id="bDone">0 / 0</span></div>
+              <div class="kv"><span>方向正确</span><span class="num" id="bRight">0</span></div>
+              <div class="kv"><span>方向命中率</span><span class="num" id="bRate">—</span></div>
+              <div class="kv"><span>累计 R</span><span class="num" id="bR">—</span></div>
+              <div class="qdots" id="bDots"></div>
+              <div class="reveal" style="margin-top:12px" id="bReveal">
+                作答后揭晓品种与日期，并用真实后续行情计算这一题的结果。
+              </div>
+              <button class="btn btn-p" style="width:100%;margin-top:12px" id="bEval" disabled>评估这一组答题</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><h3>难度设置</h3></div>
+            <div class="pb">
+              <div class="field"><label>题目数量</label>
+                <select id="bCount"><option>10</option><option>20</option><option>30</option></select></div>
+              <div class="field" style="margin-top:9px"><label>判定周期（后 N 根）</label>
+                <select id="bHorizon"><option>10</option><option selected>20</option><option>40</option></select></div>
+              <div class="note info" style="margin-top:11px">
+                <span>◫</span><span>题目随机抽取品种与时点，价格做保形变换后隐藏绝对水平，
+                时间轴同步平移。<b>逐根涨跌幅严格不变</b>，练的是真行情。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 交易分析 ── -->
+    <section class="view hide" id="v-analysis"></section>
+
+    <!-- ── 能力评估 ── -->
+    <section class="view hide" id="v-eval">
+      <div id="evalEmpty" class="empty">
+        <h3>还没有可评估的交易记录</h3>
+        <p>去「行情回放」跑一轮，或在「双盲测试」里答完一组题。<br>也可以在「智能助手」里上传你自己的交易记录 CSV。</p>
+        <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-p" onclick="location.hash='#app/replay'">去行情回放</button>
+          <button class="btn btn-g" onclick="location.hash='#app/blind'">去双盲测试</button>
+          <button class="btn btn-g" onclick="location.hash='#app/assistant'">上传我的交易记录</button>
+        </div>
+      </div>
+      <div id="evalBody" class="hide" style="display:grid;gap:16px"></div>
+    </section>
+
+    <!-- ── 相似行情 ── -->
+    <section class="view hide" id="v-similar">
+      <div class="row2" style="grid-template-columns:1fr 300px">
+        <div class="panel">
+          <div class="ph"><h3>当前形态</h3><span class="sub" id="simQLabel"></span>
+            <button class="btn btn-g btn-sm" id="simRefresh" style="margin-left:auto">换一段</button></div>
+          <div style="padding:8px"><div id="simChart" style="width:100%;height:250px"></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h3>检索设置</h3></div>
+          <div class="pb">
+            <div class="field"><label>品种</label><select id="simDs"></select></div>
+            <div class="field" style="margin-top:9px"><label>形态窗口（根）</label>
+              <select id="simWin"><option>40</option><option selected>60</option><option>90</option></select></div>
+            <div class="field" style="margin-top:9px"><label>返回条数</label>
+              <select id="simK"><option>8</option><option selected>16</option><option>32</option></select></div>
+            <button class="btn btn-p" style="width:100%;margin-top:12px" id="simGo">检索相似片段</button>
+          </div>
+        </div>
+      </div>
+      <div id="simOut" style="margin-top:16px"></div>
+    </section>
+
+    <!-- ── 智能助手 ── -->
+    <section class="view hide" id="v-assistant">
+      <div class="chatwrap">
+        <div class="chatbody" id="chatBody"></div>
+        <div>
+          <div class="chatin" id="chatIn">
+            <div class="atts hide" id="atts"></div>
+            <textarea id="chatText" rows="1" placeholder="问点什么——例如「标普500 2008年跌幅超过5%的交易日」。也可以拖入文件或点麦克风说话。"></textarea>
+            <div class="chatrow">
+              <button class="ibtn" id="fileBtn" title="上传文件">📎</button>
+              <button class="ibtn mic" id="micBtn" title="语音输入">🎙</button>
+              <span class="grow mut" style="font-size:12px" id="chatHint"></span>
+              <button class="btn btn-p btn-sm" id="sendBtn">发送</button>
+            </div>
+          </div>
+          <input type="file" id="fileInput" multiple class="hide"
+                 accept="image/*,.csv,.tsv,.json,.txt,.md,.pdf,.xlsx,.docx">
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>

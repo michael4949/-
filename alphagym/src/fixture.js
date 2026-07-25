@@ -14,3 +14,15 @@ export function loadFixture(name) {
 
 export const GOOG = () => loadFixture('goog_daily.json');
 export const EURUSD = () => loadFixture('eurusd_h1.json');
+export const SP500 = () => loadFixture('sp500_daily.json');
+export const NASDAQ = () => loadFixture('nasdaq_daily.json');
+
+/** 全部品种，键为 symbol —— 供 query.js / similar.js 使用 */
+export function allDatasets() {
+  const out = {};
+  for (const f of ['sp500_daily.json', 'nasdaq_daily.json', 'goog_daily.json', 'eurusd_h1.json']) {
+    const d = loadFixture(f);
+    out[d.symbol] = d;
+  }
+  return out;
+}
