@@ -1,0 +1,23 @@
+{
+  "name": "@alphagym/counterfactual",
+  "version": "0.1.0",
+  "description": "交易训练的反事实基准引擎：用条件随机化检验把「技能」和「运气」分开，并把决策归因到入场时机/方向/出场时机/仓位四个维度。",
+  "type": "module",
+  "main": "src/engine.js",
+  "exports": {
+    ".": "./src/engine.js",
+    "./stats": "./src/stats.js",
+    "./nulls": "./src/nulls.js",
+    "./simulate": "./src/simulate.js",
+    "./report": "./src/report.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo": "node demo/cli.js",
+    "calibrate": "node --test test/calibration.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {},
+  "license": "UNLICENSED",
+  "private": true
+}
