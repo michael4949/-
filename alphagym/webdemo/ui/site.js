@@ -166,7 +166,8 @@ function setupContest() {
   const sel = $('#ctDs'); if (!sel) return;
   sel.innerHTML = Object.entries(DATASETS)
     .map(([k, d]) => `<option value="${k}">${d.display}</option>`).join('');
-  sel.value = 'SPX';
+  // 默认赛题跟随用户最近练过的品种，否则「你的成绩」永远进不了这张榜
+  sel.value = (S.ds && S.ds in DATASETS) ? S.ds : Object.keys(DATASETS)[0];
   $('#ctGo').onclick = () => runContestBoard(true);
   sel.onchange = () => runContestBoard(true);
   runContestBoard(false);

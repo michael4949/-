@@ -117,14 +117,36 @@ const toK = (b) => ({ timestamp: b.t, open: b.o, high: b.h, low: b.l, close: b.c
 function resizeCharts() { for (const c of Object.values(charts)) { try { c?.resize(); } catch (e) {} } }
 
 /* ── 数据目录 ───────────────────────────────────────────────────── */
-const INSTRUMENTS = {
+/**
+ * 交易品种参数。境外四个写死；A 股与国内期货从数据里带的合约信息推出来。
+ *
+ * A 股成本按实盘口径：佣金万 2.5 双边、印花税千 1 卖出单边、过户费万 0.1，
+ * 合并成双边各万 3.5 的近似 —— 引擎的成本模型是双边对称的。
+ * 期货用数据里自带的合约乘数与最小变动价位，不同品种差别很大
+ * （沪铜一手 5 吨、铁矿一手 100 吨），写死一个值会把盈亏算错好几倍。
+ */
+const BASE_INSTRUMENTS = {
   SPX:    { symbol: 'SPX',    multiplier: 10,   tickSize: 0.05,   feeRate: 0.00005, feePerUnit: 0, slippageTicks: 1 },
   IXIC:   { symbol: 'IXIC',   multiplier: 10,   tickSize: 0.05,   feeRate: 0.00005, feePerUnit: 0, slippageTicks: 1 },
   GOOG:   { symbol: 'GOOG',   multiplier: 1,    tickSize: 0.01,   feeRate: 0.0003,  feePerUnit: 0, slippageTicks: 1 },
   EURUSD: { symbol: 'EURUSD', multiplier: 1000, tickSize: 0.0001, feeRate: 0.00008, feePerUnit: 0, slippageTicks: 1 },
 };
+
+const INSTRUMENTS = (() => {
+  const out = { ...BASE_INSTRUMENTS };
+  for (const [k, d] of Object.entries(DATASETS)) {
+    if (out[k]) continue;
+    out[k] = d.kind === 'future'
+      ? { symbol: k, multiplier: d.multiplier || 10, tickSize: d.tickSize || 1,
+          feeRate: 0.00005, feePerUnit: 0, slippageTicks: 1 }
+      : { symbol: k, multiplier: 1, tickSize: 0.01,
+          feeRate: 0.00035, feePerUnit: 0, slippageTicks: 1 };
+  }
+  return out;
+})();
 const TF_LABEL = { '1d': '日线', '1h': '小时线' };
 const DECIMALS = { EURUSD: 5 };
+/** 国内品种一律两位小数，与盘口一致 */
 const dec = (sym) => DECIMALS[sym] ?? 2;
 
 /** 把打包进来的原始行数组转成引擎用的 bar 对象，并缓存 */
@@ -170,6 +192,7 @@ const APP_META = {
   drills: ['专项训练', '/ 训练 / 专项训练'],
   screen: ['条件筛选', '/ AI 能力 / 条件筛选'],
   formula: ['指标公式', '/ AI 能力 / 自定义指标公式'],
+  fund: ['财务选股', '/ AI 能力 / 财务选股 · 财报时光机'],
   battle: ['K 线对战', '/ 训练 / K 线对战'],
   class: ['交易课堂', '/ 训练 / 交易课堂'],
 };

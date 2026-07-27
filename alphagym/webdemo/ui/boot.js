@@ -10,6 +10,7 @@ function onEnterView(key) {
   if (key === 'drills') renderDrill();
   if (key === 'screen') renderScreener();
   if (key === 'formula') renderFormula();
+  if (key === 'fund') renderFundamental();
   if (key === 'battle') renderBattle();
   if (key === 'class') renderClassroom();
   if (key === 'analysis') renderAnalysis();
@@ -53,11 +54,20 @@ function init() {
   new MutationObserver(restyleCharts)
     .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-  const opts = Object.entries(DATASETS)
-    .map(([k, d]) => `<option value="${k}">${d.display} · ${TF_LABEL[d.timeframe] || d.timeframe}</option>`).join('');
+  // 国内品种排在前面（这个产品主打国内市场），并逐条标出哪些是演示数据。
+  // 真实与合成混在一个下拉里，不标出来就等于骗人。
+  const entries = Object.entries(DATASETS).sort((a, b) => {
+    const rank = (d) => d[1].market === 'cn' ? (d[1].kind === 'stock' ? 0 : 1) : 2;
+    return rank(a) - rank(b);
+  });
+  const opts = entries.map(([k, d]) =>
+    `<option value="${k}">${d.synthetic ? '［演示］' : '［真实］'}${d.display} · ${TF_LABEL[d.timeframe] || d.timeframe}</option>`
+  ).join('');
   $('#dsSel').innerHTML = opts;
   $('#simDs').innerHTML = opts;
-  $('#dsSel').value = 'SPX';
+  // 默认落在 A 股演示数据上，符合「主打国内市场」的定位
+  const firstCn = entries.find(([, d]) => d.market === 'cn' && d.kind === 'stock');
+  $('#dsSel').value = firstCn ? firstCn[0] : 'SPX';
 
   $('#themeBtn').onclick = () => setTheme(themeNow() === 'dark' ? 'light' : 'dark');
   $('#navToggle').onclick = () => $('#nav').classList.toggle('open');

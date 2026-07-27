@@ -284,7 +284,7 @@ const run = async () => {
     (await page.locator('#cHints').textContent()) === '1');
 
   /* ── 高级委托 ── */
-  console.log('\n▌高级委托（复刻 tradingexer 的完整委托类型）');
+  console.log('\n▌高级委托');
   await page.click('#advWrap summary');
   await page.waitForTimeout(200);
   const num = async (sel) => parseFloat((await page.locator(sel).textContent()).replace(/,/g, ''));
@@ -515,10 +515,14 @@ const run = async () => {
 
   /* ── 文件上传：真解析 ── */
   console.log('\n▌文件上传（真解析）');
+  // 日期必须落在演示数据的区间里（A 股 / 期货截到最近 800 根，约 2020-03 起），
+  // 否则会被对齐到第 0 根，开平仓撞到同一根上而整行作废。
+  // 这里从 2020-06-01 起每 30 天一笔，末笔 2022-05 平仓，整段都在区间内。
+  const CSV_ROWS = 24;
   const csvPath = join(TMP, 'trades.csv');
   writeFileSync(csvPath, ['开仓日期,平仓日期,方向,手数',
-    ...Array.from({ length: 24 }, (_, i) => {
-      const d1 = new Date(Date.UTC(2005 + (i % 10), (i * 3) % 12, 5 + (i % 20)));
+    ...Array.from({ length: CSV_ROWS }, (_, i) => {
+      const d1 = new Date(Date.UTC(2020, 5, 1) + i * 30 * 86400000);
       const d2 = new Date(d1.getTime() + 20 * 86400000);
       return `${d1.toISOString().slice(0, 10)},${d2.toISOString().slice(0, 10)},${i % 3 ? '做多' : '做空'},${1 + (i % 3)}`;
     })].join('\n'));
@@ -530,17 +534,23 @@ const run = async () => {
   await page.click('#sendBtn');
   await page.waitForTimeout(6500);
   let chatAll = (await page.locator('#chatBody').textContent()).replace(/\s+/g, ' ');
-  check('CSV 交易记录真的进了评估引擎', /解析出 24 笔交易/.test(chatAll),
+  check(`CSV 交易记录真的进了评估引擎（${CSV_ROWS} 行一笔不少）`,
+    new RegExp(`解析出 ${CSV_ROWS} 笔交易`).test(chatAll),
     /解析出[^，。]*/.exec(chatAll)?.[0] || '未匹配');
   check('随后给出了统计结论', /运气解释|分位|样本/.test(chatAll));
   await shot(page, '10-chat-csv');
 
+  // entry/exit 这两列写的是**K 线序号**（fileparse 对纯数字就是这么解释的）。
+  // 序号必须落在默认品种的 K 线条数以内，否则那一行会被判成越界而跳过。
+  // A 股 / 期货演示数据每个品种截到 800 根（build.js 的 CN_BARS），
+  // 老写法 200+40i 最大到 1058，后半截全被丢掉 —— 22 笔只剩 14 笔。
+  const XLSX_ROWS = 22;
   const xlsxPath = join(TMP, 'trades.xlsx');
   writeFileSync(xlsxPath, await makeZip({
     'xl/sharedStrings.xml': `<?xml version="1.0"?><sst><si><t>entry</t></si><si><t>exit</t></si><si><t>dir</t></si><si><t>size</t></si></sst>`,
     'xl/worksheets/sheet1.xml': `<?xml version="1.0"?><worksheet><sheetData>
       <row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c><c r="C1" t="s"><v>2</v></c><c r="D1" t="s"><v>3</v></c></row>
-      ${Array.from({ length: 22 }, (_, i) => `<row r="${i + 2}"><c r="A${i + 2}"><v>${200 + i * 40}</v></c><c r="B${i + 2}"><v>${218 + i * 40}</v></c><c r="C${i + 2}"><v>${i % 3 ? 1 : -1}</v></c><c r="D${i + 2}"><v>${1 + i % 3}</v></c></row>`).join('')}
+      ${Array.from({ length: XLSX_ROWS }, (_, i) => `<row r="${i + 2}"><c r="A${i + 2}"><v>${12 + i * 30}</v></c><c r="B${i + 2}"><v>${30 + i * 30}</v></c><c r="C${i + 2}"><v>${i % 3 ? 1 : -1}</v></c><c r="D${i + 2}"><v>${1 + i % 3}</v></c></row>`).join('')}
       </sheetData></worksheet>`,
   }));
   await page.setInputFiles('#fileInput', xlsxPath);
@@ -551,8 +561,15 @@ const run = async () => {
   await page.click('#sendBtn');
   await page.waitForTimeout(6500);
   chatAll = (await page.locator('#chatBody').textContent()).replace(/\s+/g, ' ');
-  check('XLSX 记录进入评估引擎', /解析出 22 笔交易/.test(chatAll),
-    /解析出 \d+ 笔交易/.exec(chatAll)?.[0] || '未匹配');
+  // 严格对数：只要有一行被悄悄丢掉，这里就必须红。
+  check(`XLSX 记录进入评估引擎（${XLSX_ROWS} 行一笔不少）`,
+    new RegExp(`解析出 ${XLSX_ROWS} 笔交易`).test(chatAll),
+    // 会话里此时已经有 CSV 那一条，取最后一条才是 XLSX 的
+    (chatAll.match(/解析出 \d+ 笔交易/g) || ['未匹配']).pop());
+  // 上面那条如果因为 K 线条数变了而失败，会很难看出原因，这里直接把条数摆出来
+  const barCount = await page.evaluate(() => Math.min(...Object.values(DATASETS).map(d => d.rows.length)));
+  check('导入用的 K 线序号没有越界', 30 + (XLSX_ROWS - 1) * 30 < barCount,
+    `最大序号 ${30 + (XLSX_ROWS - 1) * 30}，可用 K 线 ${barCount} 根`);
 
   const pdfPath = join(TMP, 'note.pdf');
   writeFileSync(pdfPath, await makePdf('AlphaGym trade journal 2008 review'));
@@ -668,7 +685,7 @@ const run = async () => {
   await page.click('#scGo');
   await page.waitForTimeout(3000);
   const scSub = await page.locator('#scSub').textContent();
-  check('筛选真的逐根扫描了全部内置历史', /扫描\s*1[0-9,]+\s*根/.test(scSub), scSub);
+  check('筛选真的逐根扫描了全部内置历史', /扫描\s*[\d,]{5,}\s*根/.test(scSub), scSub);
   const scRows = await page.locator('#scOut tbody tr').count();
   check('筛出了命中时点并列成表', scRows > 5, `${scRows} 行`);
   const firstRow = await page.locator('#scOut tbody tr').first().innerText();
@@ -716,7 +733,7 @@ const run = async () => {
   await page.click('#fmlScreen');
   await page.waitForTimeout(5000);
   const fs = await page.locator('#fmlScreenOut').innerText();
-  check('公式能直接拿去筛全部历史', /命中时点/.test(fs) && /扫描\s*1[0-9,]+\s*根/.test(fs),
+  check('公式能直接拿去筛全部历史', /命中时点/.test(fs) && /扫描\s*[\d,]{5,}\s*根/.test(fs),
     fs.replace(/\n/g, ' ').slice(0, 70));
   check('筛选结果说明这是条件分布而非「能赚钱」', fs.includes('条件分布'));
   await shot(page, '19-formula');
@@ -758,6 +775,46 @@ const run = async () => {
   /* ── 左侧栏 ── */
   check('左侧栏已无「智能问数」（统一到右下角）',
     !(await page.locator('.rail').innerText()).includes('智能问数'));
+
+  /* ── 财务选股 · 财报时光机 ── */
+  console.log('\n▌财务选股 · 财报时光机');
+  await page.goto(FILE + '#app/fund');
+  await page.waitForTimeout(1400);
+  check('演示数据横幅在财务页也挂着', (await page.locator('#v-fund .demobar').count()) >= 1);
+  await page.click('#fdGo');
+  await page.waitForTimeout(4500);
+  const fdText = (await page.locator('#fdOut').textContent()).replace(/\s+/g, ' ');
+  check('选股真的筛出了公司', (await page.locator('#fdOut table.dt tbody tr').count()) > 0,
+    (await page.locator('#fdSub').textContent()));
+
+  // 这是整个模块唯一致命的正确性问题：选股用到的报表，披露日必须早于选股时点。
+  const asOfTxt = await page.locator('#fdAsOfTxt').textContent();
+  const disclDates = await page.locator('#fdOut table.dt tbody tr td:nth-child(4)').allTextContents();
+  check('每一行的披露日都早于选股时点（没有未来函数）',
+    disclDates.length > 0 && disclDates.every(d => d.trim() <= asOfTxt.trim()),
+    `时点 ${asOfTxt} · 最晚披露日 ${disclDates.map(d => d.trim()).sort().pop()}`);
+
+  // 单时点的超额可以是任何数（包括恰好 0.00%），所以稳健性散布必须先出现
+  const rbCols = await page.locator('.rbcol').count();
+  check('跨时点稳健性散布已渲染', rbCols >= 6, `${rbCols} 个时点`);
+  check('稳健性散布排在单时点成绩之前', await page.evaluate(() => {
+    const s = document.querySelector('.rbstrip'), t = document.querySelector('#fdOut .tile');
+    return !!(s && t) && (s.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+  }));
+  check('明说单时点结果不能当结论', /别当结论|纯属偶然/.test(fdText));
+
+  // 用 data-ft 精确点标签页 —— 面包屑里也有「财报时光机」四个字，
+  // getByText().first() 会点到那上面去，页面根本不切换。
+  await page.click('#v-fund [data-ft="time"]');
+  await page.waitForTimeout(1600);
+  const tmText = (await page.locator('#v-fund').textContent()).replace(/\s+/g, ' ');
+  check('时光机只列出当时看得见的报表', /这一天，你能看到的报表/.test(tmText));
+  // 未披露的下一期只能给日期，绝不能提前给数字
+  // 拿不到面板就算失败 —— 上一版这里 catch 成空串，标签页没切过去也照样绿。
+  const pending = await page.locator('#tmNext').textContent().catch(() => null);
+  check('未披露期不含任何财务数字', pending != null && !/亿|万元|%/.test(pending),
+    pending == null ? '找不到 #tmNext' : pending.replace(/\s+/g, ' ').slice(0, 80));
+  await shot(page, '21-fundamental');
 
   /* ── 选拔赛榜单 ── */
   console.log('\n▌选拔赛榜单');

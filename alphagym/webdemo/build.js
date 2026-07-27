@@ -19,12 +19,15 @@ const ENGINE = [
   'rng.js', 'stats.js', 'bars.js', 'trades.js', 'nulls.js', 'benchmarks.js',
   'behavior.js', 'engine.js', 'report.js', 'matching.js', 'replay.js',
   'simulate.js', 'query.js', 'similar.js', 'fileparse.js', 'contest.js', 'formula.js',
+  'fundamentals.js',
 ];
 /** UI 层，按加载顺序（共享同一 IIFE 作用域） */
-const UI = ['core.js', 'accounts.js', 'site.js', 'trade.js', 'drills.js', 'screener.js', 'formula.js', 'battle.js', 'classroom.js', 'coach.js', 'ai.js', 'chat.js', 'boot.js'];
+const UI = ['core.js', 'accounts.js', 'site.js', 'trade.js', 'drills.js', 'screener.js', 'formula.js', 'fundamental.js', 'battle.js', 'classroom.js', 'coach.js', 'ai.js', 'chat.js', 'boot.js'];
 
 /** 每个品种保留的最大 K 线数（控制单文件体积） */
 const CAPS = { EURUSD: 2500 };
+/** A 股 / 期货演示数据在单文件里保留的 K 线数（控制体积） */
+const CN_BARS = 800;
 
 /** 去掉 import 语句与 export 关键字，让各模块能在同一作用域里拼接 */
 function stripModule(src, name) {
@@ -46,18 +49,47 @@ function stripModule(src, name) {
 }
 
 function loadData() {
-  const files = ['sp500_daily.json', 'nasdaq_daily.json', 'goog_daily.json', 'eurusd_h1.json'];
+  // 境外四个品种是**真实历史行情**，A 股与国内期货是 gen_demo_data.py 合成的
+  // **演示数据**。两者在这里就分好类并各自打上标记，前端据此在界面上显示，
+  // 绝不允许混在一起让人分不清哪份是真的。
+  const real = ['sp500_daily.json', 'nasdaq_daily.json', 'goog_daily.json', 'eurusd_h1.json'];
   const out = {};
-  for (const f of files) {
+  for (const f of real) {
     const raw = JSON.parse(readFileSync(join(ROOT, 'data', f), 'utf8'));
     const cap = CAPS[raw.symbol];
     const rows = cap ? raw.rows.slice(-cap) : raw.rows;
     out[raw.symbol] = {
       symbol: raw.symbol, display: raw.display || raw.symbol,
       timeframe: raw.timeframe, source: raw.source, count: rows.length, rows,
+      market: 'overseas', synthetic: false,
     };
   }
-  return out;
+
+  let meta = null;
+  for (const [file, kind] of [['cn_stocks.json', 'stock'], ['cn_futures.json', 'future']]) {
+    const path = join(ROOT, 'data', file);
+    if (!existsSync(path)) continue;
+    const raw = JSON.parse(readFileSync(path, 'utf8'));
+    meta = { synthetic: raw.synthetic, disclaimer: raw.disclaimer, from: raw.from, to: raw.to };
+    for (const it of raw.items) {
+      const rows = it.rows.slice(-CN_BARS);
+      out[it.symbol] = {
+        symbol: it.symbol, display: it.display,
+        timeframe: it.timeframe, source: '演示数据（合成）',
+        count: rows.length, rows,
+        market: 'cn', kind, synthetic: true,
+        sector: it.sector, board: it.board, limitPct: it.limitPct,
+        exchange: it.exchange, multiplier: it.multiplier,
+        tickSize: it.tickSize, marginRate: it.marginRate,
+      };
+    }
+  }
+  return { datasets: out, cnMeta: meta };
+}
+
+function loadFundamentals() {
+  const p = join(ROOT, 'data', 'cn_fundamentals.json');
+  return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null;
 }
 
 function findKlineCharts() {
@@ -77,7 +109,8 @@ function main() {
   const engine = ENGINE.map(m => stripModule(readFileSync(join(ROOT, 'src', m), 'utf8'), 'src/' + m)).join('\n');
   const ui = UI.map(m => readFileSync(join(HERE, 'ui', m), 'utf8')).join('\n');
   const kc = findKlineCharts();
-  const data = loadData();
+  const { datasets: data, cnMeta } = loadData();
+  const fundamentals = loadFundamentals();
 
   const head = `<title>练盘 AlphaGym — 交易练习与能力评估</title>
 <meta name="description" content="回放二十年真实历史行情反复练习，并用统计方法客观评估交易能力：技能与运气的分离、四维决策归因、相似形态检索与智能问数。">
@@ -85,7 +118,9 @@ function main() {
 
   const scripts = `
 <script>${kc}</script>
-<script>const DATASETS = ${JSON.stringify(data)};</script>
+<script>const DATASETS = ${JSON.stringify(data)};
+const CN_META = ${JSON.stringify(cnMeta)};
+const FUNDAMENTALS = ${fundamentals ? JSON.stringify(fundamentals) : 'null'};</script>
 <script type="module">
 ${engine}
 
