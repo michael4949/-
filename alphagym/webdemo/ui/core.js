@@ -169,6 +169,9 @@ const APP_META = {
   similar:   ['相似行情', '/ 智能工具 / 相似行情'],
   drills: ['专项训练', '/ 训练 / 专项训练'],
   screen: ['条件筛选', '/ AI 能力 / 条件筛选'],
+  formula: ['指标公式', '/ AI 能力 / 自定义指标公式'],
+  battle: ['K 线对战', '/ 训练 / K 线对战'],
+  class: ['交易课堂', '/ 训练 / 交易课堂'],
 };
 
 function route() {

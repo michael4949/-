@@ -25,7 +25,15 @@ export const ROSTER = [
   { id: 'bot-coin', name: '掷币先生', tag: '纯随机', strategy: 'random', params: { p: 0.04 } },
 ];
 
-/** 单根 K 线上的决策：返回 -1 / 0 / +1 表示希望持有的方向 */
+/**
+ * 单根 K 线上的决策：返回 -1 / 0 / +1 表示希望持有的方向，null 表示维持现状。
+ * 导出是为了「K 线对战」能让陪练**逐根即时决策** —— 先跑完全程再回放的话，
+ * 它就带着「已经知道结局」的优势，那局比不公平。
+ */
+export function botDecide(bot, bars, i, rng) {
+  return decide(bot.strategy, bot.params, bars, i, rng);
+}
+
 function decide(strategy, params, bars, i, rng) {
   const c = (k) => bars[k].c;
   if (strategy === 'ma') {

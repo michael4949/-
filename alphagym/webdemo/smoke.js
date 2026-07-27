@@ -682,6 +682,79 @@ const run = async () => {
     await page.locator('#scSub').textContent());
   await shot(page, '18-screen');
 
+  /* ── 自定义指标公式 ── */
+  console.log('\n▌自定义指标公式');
+  await page.goto(FILE + '#app/formula');
+  await page.waitForTimeout(2600);
+  check('默认公式通过语法校验', (await page.locator('#fmlStatus').textContent()).includes('语法正确'));
+  check('曲线画出来了（NaN 处断开，不补 0）',
+    (await page.locator('#fmlMain .fmlsvg path, #fmlSub svg path').count()) >= 1);
+
+  await page.fill('#fmlSrc', 'MA(CLOSE,');
+  await page.waitForTimeout(400);
+  check('语法错误当场给出可读提示',
+    (await page.locator('#fmlErr').innerText()).includes('✕'),
+    (await page.locator('#fmlErr').innerText()).replace(/\n/g, ' ').slice(0, 40));
+
+  // 自己写解析器而不是用 eval 的全部理由：这些都必须被挡在解析阶段
+  const evil = ['fetch(1)', 'constructor', 'eval(1)', 'window', 'process'];
+  const evilResults = [];
+  for (const src of evil) {
+    await page.fill('#fmlSrc', src);
+    await page.waitForTimeout(220);
+    const t = await page.locator('#fmlErr').innerText();
+    evilResults.push({ src, blocked: t.includes('✕') });
+  }
+  const leaked = evilResults.filter(x => !x.blocked).map(x => x.src);
+  check('拒绝执行任意 JavaScript（解析阶段就挡掉）', leaked.length === 0,
+    leaked.length ? '漏过：' + leaked.join(', ') : `${evil.length} 种注入全部被拒`);
+
+  await page.fill('#fmlSrc', 'CROSS(MA(CLOSE,5),MA(CLOSE,20))');
+  await page.waitForTimeout(300);
+  await page.click('#fmlRun');
+  await page.waitForTimeout(1200);
+  await page.click('#fmlScreen');
+  await page.waitForTimeout(5000);
+  const fs = await page.locator('#fmlScreenOut').innerText();
+  check('公式能直接拿去筛全部历史', /命中时点/.test(fs) && /扫描\s*1[0-9,]+\s*根/.test(fs),
+    fs.replace(/\n/g, ' ').slice(0, 70));
+  check('筛选结果说明这是条件分布而非「能赚钱」', fs.includes('条件分布'));
+  await shot(page, '19-formula');
+
+  /* ── K 线对战 ── */
+  console.log('\n▌K 线对战');
+  await page.goto(FILE + '#app/battle');
+  await page.waitForTimeout(1400);
+  check('可选对手齐全', (await page.locator('[data-battle]').count()) === 6);
+  await page.locator('[data-battle]').first().click();
+  await page.waitForTimeout(1800);
+  check('对战主图已渲染', (await inkOf(page, '#btlChart'))[0].ink > 100);
+  const eq0 = await page.locator('#v-battle .tiles').innerText();
+  for (let i = 0; i < 24; i++) { await page.keyboard.press(i === 4 ? 'ArrowUp' : ' '); await page.waitForTimeout(35); }
+  const eq1 = await page.locator('#v-battle .tiles').innerText();
+  check('逐根推进后双方权益都在变', eq0 !== eq1,
+    eq1.replace(/\n/g, ' ').slice(0, 60));
+  check('权益对比画了两条曲线（你 + 对手）',
+    (await page.locator('#btlEquity svg path').count()) === 2);
+  check('对战页明说一局说明不了什么',
+    (await page.locator('#v-battle').innerText()).includes('对手只看得到和你一样的区间'));
+  await shot(page, '20-battle');
+
+  /* ── 交易课堂 ── */
+  console.log('\n▌交易课堂');
+  await page.goto(FILE + '#app/class');
+  await page.waitForTimeout(1200);
+  if (await page.locator('#lsBack').count()) { await page.click('#lsBack'); await page.waitForTimeout(400); }
+  const lessons = await page.locator('[data-lesson]').count();
+  check('课程齐全', lessons === 6, `${lessons} 节`);
+  await page.locator('[data-lesson="l1"]').click();
+  await page.waitForTimeout(3200);
+  check('每课都有真实数据画出来的配图',
+    (await page.locator('#lsDemo svg, #lsDemo canvas').count()) >= 1);
+  check('每课都给一个能立刻去练的出口',
+    (await page.locator('.lesson-cta a').getAttribute('href')).startsWith('#app/'),
+    await page.locator('.lesson-cta a').getAttribute('href'));
+
   /* ── 左侧栏 ── */
   check('左侧栏已无「智能问数」（统一到右下角）',
     !(await page.locator('.rail').innerText()).includes('智能问数'));

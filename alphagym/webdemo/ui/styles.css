@@ -758,3 +758,42 @@ ol.cav li{margin:7px 0;line-height:1.65}
 .preset:hover{border-color:var(--brand);background:var(--brandSoft)}
 .preset b{display:block;font-size:13px;font-weight:600}
 .preset span{font-size:11.5px;color:var(--mut)}
+
+/* ═══════════════ 指标公式 ═══════════════ */
+.fmlbox{width:100%;min-height:132px;font-family:var(--f-mono);font-size:13px;line-height:1.7;
+  resize:vertical;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
+.fmlbox:focus{border-color:var(--brand);outline:none}
+.fmlerr{margin-top:10px;background:var(--upSoft);border-radius:9px;padding:10px 12px;font-size:12.5px}
+.fmlerr b{color:var(--up);display:block}
+.fmlerr span{color:var(--mut);font-family:var(--f-mono);font-size:11px}
+#fmlMain,#fmlSub{position:relative}
+.funcs{display:flex;flex-direction:column;gap:6px;max-height:400px;overflow:auto}
+.fn{display:grid;grid-template-columns:78px 1fr;gap:8px;font-size:11.5px;align-items:baseline}
+.fn code{font-family:var(--f-mono);color:var(--brand);font-size:11.5px}
+.fn span{color:var(--mut);line-height:1.5}
+.myfml{display:flex;gap:6px;margin-bottom:6px}
+.myfml .ld{flex:1;text-align:left;padding:8px 11px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel2);font-size:12.5px;transition:.14s}
+.myfml .ld:hover{border-color:var(--brand);color:var(--brand)}
+.myfml .rm{width:30px;border-radius:8px;color:var(--faint);font-size:15px}
+.myfml .rm:hover{background:var(--upSoft);color:var(--up)}
+code{font-family:var(--f-mono);font-size:.92em;background:var(--panel3);padding:1px 5px;border-radius:4px}
+
+/* ═══════════════ 交易课堂 ═══════════════ */
+.chapblock{margin-top:28px}
+.chaptitle{font-size:14px;font-weight:700;color:var(--brand);margin-bottom:13px;
+  padding-bottom:8px;border-bottom:1px solid var(--line)}
+.lesscard{cursor:pointer}
+.lesson{max-width:760px}
+.lesson-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.lesson-head .chapter{font-size:12px;color:var(--mut);font-family:var(--f-mono)}
+.lesson h2{font-size:clamp(22px,3vw,30px);font-weight:800;margin-bottom:16px}
+.point{display:flex;gap:12px;background:var(--brandSoft);border-radius:11px;padding:14px 16px;margin-bottom:18px}
+.point span{font-size:11px;font-weight:700;color:var(--brand);white-space:nowrap;padding-top:2px;
+  font-family:var(--f-mono);letter-spacing:.06em}
+.point p{font-size:15px;font-weight:600;line-height:1.65}
+.lbody{color:var(--ink2);line-height:1.85;margin-bottom:13px}
+.lbody b{color:var(--ink)}
+.lesson-cta{margin-top:22px;text-align:center}
+.lesson-nav{display:flex;justify-content:space-between;gap:12px;margin-top:26px;
+  padding-top:18px;border-top:1px solid var(--line)}

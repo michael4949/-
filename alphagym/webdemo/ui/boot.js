@@ -9,6 +9,9 @@ function onEnterView(key) {
   if (key === 'blind') { if (!S.blind) newBlind(); else renderBlind(); }
   if (key === 'drills') renderDrill();
   if (key === 'screen') renderScreener();
+  if (key === 'formula') renderFormula();
+  if (key === 'battle') renderBattle();
+  if (key === 'class') renderClassroom();
   if (key === 'analysis') renderAnalysis();
   if (key === 'eval') {
     // 本轮还没结束但已经有成交时，直接拿当前会话的记录来评估 ——
@@ -164,6 +167,7 @@ function init() {
       else if (/^[1-5]$/.test(e.key)) { setQty(QTY_PRESETS[+e.key - 1]); toast(`手数 ${QTY_PRESETS[+e.key - 1]}`); }
     }
     if (S.view === 'drills' && drillKey(e)) return;
+    if (S.view === 'battle' && battleKey(e)) return;
     if (S.view === 'blind' && S.blind) {
       if (e.key === 'ArrowUp') { e.preventDefault(); answerBlind(1); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); answerBlind(-1); }

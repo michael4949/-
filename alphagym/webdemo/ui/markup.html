@@ -26,6 +26,8 @@
     <a href="#app/replay" data-v="replay"><span class="ic">▶</span>行情回放</a>
     <a href="#app/drills" data-v="drills"><span class="ic">◈</span>专项训练<span class="tagx">四维</span></a>
     <a href="#app/blind" data-v="blind"><span class="ic">◫</span>双盲测试</a>
+    <a href="#app/battle" data-v="battle"><span class="ic">⚔</span>K 线对战</a>
+    <a href="#app/class" data-v="class"><span class="ic">✎</span>交易课堂</a>
 
     <!-- AI 是这个产品最大的差异点，不能埋在「智能工具」这种二级分组里。
          它排在训练之后、紧挨着，并且整组做了视觉强调。 -->
@@ -33,6 +35,7 @@
     <a href="#app/eval" data-v="eval" class="ai"><span class="ic">◎</span>能力评估<span class="tagx">技能 vs 运气</span></a>
     <a href="#app/similar" data-v="similar" class="ai"><span class="ic">≈</span>相似行情<span class="tagx">条件分布</span></a>
     <a href="#app/screen" data-v="screen" class="ai"><span class="ic">⚲</span>条件筛选<span class="tagx">选股引擎</span></a>
+    <a href="#app/formula" data-v="formula" class="ai"><span class="ic">ƒ</span>指标公式<span class="tagx">自定义</span></a>
 
     <div class="grp">分析</div>
     <a href="#app/analysis" data-v="analysis"><span class="ic">▤</span>交易分析</a>
@@ -254,6 +257,11 @@
 
     <!-- ══ 专项训练（内容由 drills.js 渲染） ══ -->
     <section class="view hide" id="v-drills"></section>
+
+    <!-- ══ K 线对战 / 交易课堂 / 指标公式（各自模块渲染） ══ -->
+    <section class="view hide" id="v-battle"></section>
+    <section class="view hide" id="v-class"></section>
+    <section class="view hide" id="v-formula"></section>
 
     <!-- ══ 条件筛选（内容由 screener.js 渲染） ══ -->
     <section class="view hide" id="v-screen"></section>
