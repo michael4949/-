@@ -7,15 +7,28 @@ function onEnterView(key) {
   if (key === 'replay' && !S.session) newRound();
   else if (key === 'replay') { refreshReplay(); drawMtf(); }
   if (key === 'blind') { if (!S.blind) newBlind(); else renderBlind(); }
+  if (key === 'drills') renderDrill();
+  if (key === 'screen') renderScreener();
   if (key === 'analysis') renderAnalysis();
   if (key === 'eval') {
-    const show = S.report || S.reportPending;
-    $('#evalEmpty').classList.toggle('hide', !!show || !S.lastTrades?.length);
-    $('#evalBody').classList.toggle('hide', !show);
-    // 报告可能是教练栏算出来的，那次只渲染进了教练栏。
-    // 不补这一句，从教练栏跑完再点「能力评估」会看到一片空白。
+    // 本轮还没结束但已经有成交时，直接拿当前会话的记录来评估 ——
+    // 逼用户先点「结束本轮」才肯出报告，是没有道理的门槛。
+    if (!S.lastTrades?.length && S.session?.engine.closedTrades.length) {
+      const ct = S.session.engine.closedTrades;
+      S.lastTrades = ct.map(t => ({ entry: t.entry, exit: t.exit, dir: t.dir, size: t.size }));
+      S.lastBars = S.segBars;
+      S.lastIns = S.ins;
+      S.lastLabel = `行情回放 · ${DATASETS[S.ds].display}（本轮进行中）`;
+    }
+    const has = !!S.lastTrades?.length;
+    const show = !!(S.report || S.reportPending);
+    // 这个条件曾经写反成 `!!show || !S.lastTrades?.length`：
+    // 没有交易记录时把空状态也一起藏了，整页一片全白，什么都不显示。
+    $('#evalEmpty').classList.toggle('hide', show || has);
+    $('#evalBody').classList.toggle('hide', !(show || has));
+    // 报告可能是教练栏算出来的，那次只渲染进了教练栏，整页从没渲染过
     if (S.report && !$('#evalBody').children.length) renderEval(S.report, 0);
-    else if (!S.report && !S.reportPending && S.lastTrades?.length) runReport();
+    else if (!S.report && !S.reportPending && has) runReport();
   }
   if (key === 'similar') {
     if (!S.simQuery) { $('#simDs').value = S.ds in DATASETS ? S.ds : 'SPX'; simRandomQuery(); }
@@ -53,8 +66,6 @@ function init() {
   acctRender();
   $('#acctSel').onchange = (e) => acctSwitch(e.target.value);
   $('#expCsv').onclick = exportTradesCsv;
-
-  $('#railAsk').onclick = () => { openChat(); };
 
   /* ── AI 教练 ── */
   $('#hintBtn').onclick = coachHint;
@@ -152,6 +163,7 @@ function init() {
       else if (e.key.toLowerCase() === 'p') { e.preventDefault(); S.playing ? stopPlay() : startPlay(); }
       else if (/^[1-5]$/.test(e.key)) { setQty(QTY_PRESETS[+e.key - 1]); toast(`手数 ${QTY_PRESETS[+e.key - 1]}`); }
     }
+    if (S.view === 'drills' && drillKey(e)) return;
     if (S.view === 'blind' && S.blind) {
       if (e.key === 'ArrowUp') { e.preventDefault(); answerBlind(1); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); answerBlind(-1); }

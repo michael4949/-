@@ -649,6 +649,7 @@ function renderAnalysis() {
       <div class="pb"><div class="blist">${behaviorItems(beh)}</div></div></div>
   </div>
   ${maeMfePanel(ev.rows)}
+  ${bySymbolPanel()}
   <div class="panel" style="margin-top:16px"><div class="pb"
     style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div><b>想知道这个成绩里有多少是运气？</b>
@@ -720,6 +721,93 @@ function maeMfePanel(rows) {
             : '止损与持有的配合没有明显失衡；继续积累样本再看。'}
         </span></div>
       </div></div>
+  </div>`;
+}
+
+/**
+ * 跨品种分析：品种盈利曲线 + 品种盈亏。
+ *
+ * 单轮回放只有一个品种，所以这两张图不可能从「本轮」里长出来 ——
+ * 它们的数据源是**账户历史**：你在这个模拟账户下跑过的每一轮，
+ * 按品种分组累积。这也是多账户存在的意义之一。
+ */
+function bySymbolPanel() {
+  const rounds = (typeof ACCT !== 'undefined' ? acctCurrent()?.rounds : null) || [];
+  if (rounds.length < 2) {
+    return `<div class="panel" style="margin-top:16px">
+      <div class="ph"><h3>品种盈利曲线 · 品种盈亏分析</h3><span class="sub">跨轮次 · 跨品种</span></div>
+      <div class="pb"><div class="note info"><span>◎</span><span>
+        这两张图看的是<b>账户历史</b>而不是本轮 —— 一轮回放只有一个品种，
+        分不出品种差异。当前账户「${typeof ACCT !== 'undefined' ? acctCurrent()?.name : '—'}」
+        只有 <b>${rounds.length}</b> 轮记录，再跑几轮（换几个品种）就会出现。
+      </span></div></div></div>`;
+  }
+
+  // 按品种累积权益曲线：横轴是「这个品种的第几轮」，纵轴是累计 R
+  const bySym = new Map();
+  for (const r of rounds) {
+    if (!bySym.has(r.symbol)) bySym.set(r.symbol, []);
+    bySym.get(r.symbol).push(r);
+  }
+  const series = [...bySym.entries()].map(([sym, rs]) => {
+    let cum = 0;
+    const pts = rs.map(r => (cum += r.totalR));
+    return {
+      sym, display: DATASETS[sym]?.display || sym, pts,
+      total: cum, rounds: rs.length,
+      trades: rs.reduce((a, r) => a + r.trades, 0),
+      win: rs.reduce((a, r) => a + r.winRate * r.trades, 0) / Math.max(1, rs.reduce((a, r) => a + r.trades, 0)),
+    };
+  }).sort((a, b) => b.total - a.total);
+
+  const maxLen = Math.max(...series.map(s => s.pts.length));
+  const all = series.flatMap(s => s.pts).concat([0]);
+  const lo = Math.min(...all), hi = Math.max(...all);
+  const span = (hi - lo) || 1;
+  const W = 620, H = 190, PAD = 8;
+  const X = (i) => PAD + (maxLen <= 1 ? W / 2 : (i / (maxLen - 1)) * (W - PAD * 2));
+  const Y = (v) => H - PAD - ((v - lo) / span) * (H - PAD * 2);
+  const COLORS = [cssv('--brand'), cssv('--teal'), cssv('--warn'), cssv('--gold'), cssv('--mut')];
+
+  const lines = series.map((s, k) => {
+    const pts = [`${X(0)},${Y(0)}`, ...s.pts.map((v, i) => `${X(i + 1 > maxLen - 1 ? maxLen - 1 : i)},${Y(v)}`)];
+    return `<polyline fill="none" stroke="${COLORS[k % COLORS.length]}" stroke-width="2"
+      stroke-linejoin="round" points="${pts.join(' ')}"></polyline>`;
+  }).join('');
+
+  const maxAbs = Math.max(...series.map(s => Math.abs(s.total)), 0.001);
+
+  return `
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel"><div class="ph"><h3>品种盈利曲线</h3>
+      <span class="sub">账户历史 · 累计 R</span></div>
+      <div class="pb">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;overflow:visible">
+          <line x1="${PAD}" y1="${Y(0)}" x2="${W - PAD}" y2="${Y(0)}"
+            stroke="${cssv('--line2')}" stroke-dasharray="3 3"></line>
+          ${lines}
+        </svg>
+        <div class="slegend" style="margin-top:9px">
+          ${series.map((s, k) => `<span><i style="background:${COLORS[k % COLORS.length]}"></i>${s.display}</span>`).join('')}
+        </div>
+        <div class="mut" style="font-size:11.5px;margin-top:7px">
+          横轴是该品种的第几轮，从 0 起算；纵轴是累计 R。</div>
+      </div></div>
+
+    <div class="panel"><div class="ph"><h3>品种盈亏分析</h3>
+      <span class="sub">${rounds.length} 轮 · ${bySym.size} 个品种</span></div>
+      <div class="pb"><div class="bench">
+        ${series.map(s => {
+          const w = Math.abs(s.total) / maxAbs * 50;
+          const col = s.total >= 0 ? 'var(--up)' : 'var(--dn)';
+          return `<div class="brow" style="grid-template-columns:96px 1fr 76px">
+            <span>${s.display}<div class="mut" style="font-size:11px">
+              ${s.rounds} 轮 · ${s.trades} 笔 · ${pc1(s.win)}</div></span>
+            <div class="btrack"><i style="left:${s.total >= 0 ? 50 : 50 - w}%;width:${w}%;background:${col}"></i>
+              <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line2)"></div></div>
+            <span class="mono" style="text-align:right;color:${col}">${sg(s.total)} R</span></div>`;
+        }).join('')}
+      </div></div></div>
   </div>`;
 }
 

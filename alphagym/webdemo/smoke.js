@@ -157,13 +157,24 @@ const run = async () => {
   await shot(page, '01-home');
 
   for (const [hash, sel, label] of [
-    ['features', '#site .card', '功能全景'], ['data', '#site table.dt tbody tr', '数据说明'],
-    ['pricing', '#site .price', '版本与价格'], ['mobile', '#site .card', '手机版'],
+    ['features', '#site table.capmap tbody tr', '能力对照'], ['data', '#site table.dt tbody tr', '数据说明'],
+    ['pricing', '#site .price', '版本与价格'],
     ['contest', '#site .card', '选拔赛'], ['faq', '#site .faq details', '常见问题'],
   ]) {
     await page.goto(FILE + '#' + hash); await page.waitForTimeout(420);
     check(`${label}页有内容`, (await page.locator(sel).count()) > 0, `${await page.locator(sel).count()} 项`);
   }
+
+  await page.goto(FILE + '#features'); await page.waitForTimeout(500);
+  const capTxt = await page.locator('#site table.capmap').innerText();
+  check('能力对照表把「财报分析」如实标为未实现',
+    capTxt.includes('财报分析') && capTxt.includes('未实现'),
+    (capTxt.match(/财报分析[^\n]*/) || ['缺失'])[0].slice(0, 50));
+  check('对照表覆盖原软件交易分析的八项', ['详尽的交易统计', '资金权益走势图', '品种盈利曲线图',
+    '品种盈亏分析图', '多空盈亏分析图', '时间盈亏分析图', '账户评级', '导出 / 导入交易记录']
+    .every(x => capTxt.includes(x)));
+  check('导航里已无「手机版」这种空壳页',
+    !(await page.locator('#nav').innerText()).includes('手机版'));
 
   // 这条是那三块白板的回归防线
   await page.goto(FILE + '#home'); await page.waitForTimeout(1600);
@@ -571,6 +582,96 @@ const run = async () => {
   await page.waitForTimeout(400);
   check('再点一次停止录音', !(await page.locator('#micBtn').evaluate(e => e.classList.contains('rec'))));
 
+  /* ── 能力评估：整页空白的回归防线 ── */
+  console.log('\n▌能力评估页的三种状态');
+  await page.goto(FILE + '#app/eval');
+  await page.reload();     // 刷新即可让 S.lastTrades 归零；不要清 localStorage，
+                           // 那里存着账户轮次，后面选拔赛还要用
+  await page.waitForTimeout(2200);
+  const st1 = await page.evaluate(() => ({
+    empty: !document.querySelector('#evalEmpty').classList.contains('hide'),
+    body: !document.querySelector('#evalBody').classList.contains('hide'),
+    text: document.querySelector('#v-eval').innerText.trim().length,
+  }));
+  check('没有交易记录时显示空状态，而不是整页全白',
+    st1.empty && !st1.body && st1.text > 20, `文字长度 ${st1.text}`);
+
+  await page.goto(FILE + '#app/replay');
+  await page.waitForTimeout(1600);
+  await page.click('#autoBtn');
+  await page.waitForTimeout(3200);
+  await page.click('.rail a[data-v="eval"]');
+  await page.waitForTimeout(8000);
+  const st2 = await page.locator('#v-eval').innerText();
+  check('本轮未结束但已有成交时，直接出报告（不再逼你先点结束）',
+    /p\s*=\s*0\.\d+/.test(st2) && st2.length > 200, st2.replace(/\n/g, ' ').slice(0, 60));
+
+  /* ── 专项训练 ── */
+  console.log('\n▌专项训练（四维各一项）');
+  await page.goto(FILE + '#app/drills');
+  await page.waitForTimeout(1200);
+  check('四个维度各有一个训练', (await page.locator('.drillcard').count()) === 4,
+    (await page.locator('.drillcard .dc-dim').allTextContents()).join(' / '));
+  check('有报告时会标出 AI 建议优先练的那一维',
+    (await page.locator('.drillcard.weak').count()) === 1,
+    (await page.locator('.drillcard.weak h3').textContent().catch(() => '无')) || '无');
+
+  await page.click('[data-drill="entry"]');
+  await page.waitForTimeout(1500);
+  check('入场时机训练的图已渲染', (await inkOf(page, '#drillChart'))[0].ink > 100);
+  check('训练页遮住了题目日期', await page.evaluate(() => {
+    const t = document.querySelector('#v-drills').innerText;
+    return !/\d{4}-\d{2}-\d{2}/.test(t);
+  }));
+  for (let i = 0; i < 6; i++) { await page.keyboard.press(' '); await page.waitForTimeout(70); }
+  await page.keyboard.press('ArrowUp');
+  await page.waitForTimeout(1200);
+  const rev = await page.locator('#drillReveal').innerText();
+  check('单题给出真实结算与同窗口排名', /R/.test(rev) && /排名/.test(rev),
+    rev.replace(/\n/g, ' ').slice(0, 70));
+  check('单题反馈明说不要据此调整打法', rev.includes('噪声'));
+  await shot(page, '17-drill');
+
+  // 把整组做完，看维度级结论
+  for (let round = 0; round < 10; round++) {
+    await page.keyboard.press(' ');
+    await page.waitForTimeout(320);
+    if (await page.locator('#drillResultPanel').isVisible()) break;
+    for (let i = 0; i < 8; i++) { await page.keyboard.press(' '); await page.waitForTimeout(45); }
+    await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(500);
+  }
+  await page.waitForTimeout(7000);
+  const dres = await page.locator('#drillResult').innerText();
+  check('整组结算给出该维度的 p 值', /p\s*值/.test(dres) && /\d\.\d{3}/.test(dres),
+    dres.replace(/\n/g, ' ').slice(0, 80));
+  check('结算同时给出还需要多少样本', /还需要/.test(dres));
+
+  /* ── 条件筛选（对应条件选股） ── */
+  console.log('\n▌条件筛选');
+  await page.goto(FILE + '#app/screen');
+  await page.waitForTimeout(1500);
+  await page.click('#scGo');
+  await page.waitForTimeout(3000);
+  const scSub = await page.locator('#scSub').textContent();
+  check('筛选真的逐根扫描了全部内置历史', /扫描\s*1[0-9,]+\s*根/.test(scSub), scSub);
+  const scRows = await page.locator('#scOut tbody tr').count();
+  check('筛出了命中时点并列成表', scRows > 5, `${scRows} 行`);
+  const firstRow = await page.locator('#scOut tbody tr').first().innerText();
+  check('命中行是真实日期与真实数值', /\d{4}-\d{2}-\d{2}/.test(firstRow) && /%/.test(firstRow),
+    firstRow.replace(/\t/g, ' | ').slice(0, 70));
+  check('点命中就能看到那一天的图', (await inkOf(page, '#scChart'))[0].ink > 100);
+  await page.locator('.preset').nth(1).click();
+  await page.waitForTimeout(3000);
+  check('换一组预设条件，命中数随之改变',
+    (await page.locator('#scSub').textContent()) !== scSub,
+    await page.locator('#scSub').textContent());
+  await shot(page, '18-screen');
+
+  /* ── 左侧栏 ── */
+  check('左侧栏已无「智能问数」（统一到右下角）',
+    !(await page.locator('.rail').innerText()).includes('智能问数'));
+
   /* ── 选拔赛榜单 ── */
   console.log('\n▌选拔赛榜单');
   await page.goto(FILE + '#contest');
@@ -589,7 +690,10 @@ const run = async () => {
 
   /* ── 主题与响应式 ── */
   console.log('\n▌主题与响应式');
-  await page.click('#dClose');
+  if (await page.locator('#drawer').evaluate(e => e.classList.contains('on'))) {
+    await page.click('#dClose');
+    await page.waitForTimeout(200);
+  }
   await page.click('#themeBtn');
   await page.waitForTimeout(600);
   check('深色主题生效', (await page.locator('html').getAttribute('data-theme')) === 'dark');

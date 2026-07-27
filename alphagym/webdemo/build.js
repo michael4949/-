@@ -21,7 +21,7 @@ const ENGINE = [
   'simulate.js', 'query.js', 'similar.js', 'fileparse.js', 'contest.js',
 ];
 /** UI 层，按加载顺序（共享同一 IIFE 作用域） */
-const UI = ['core.js', 'accounts.js', 'site.js', 'trade.js', 'coach.js', 'ai.js', 'chat.js', 'boot.js'];
+const UI = ['core.js', 'accounts.js', 'site.js', 'trade.js', 'drills.js', 'screener.js', 'coach.js', 'ai.js', 'chat.js', 'boot.js'];
 
 /** 每个品种保留的最大 K 线数（控制单文件体积） */
 const CAPS = { EURUSD: 2500 };

@@ -8,7 +8,6 @@
     <a href="#features">功能</a>
     <a href="#data">数据</a>
     <a href="#pricing">版本与价格</a>
-    <a href="#mobile">手机版</a>
     <a href="#contest">选拔赛</a>
     <a href="#faq">常见问题</a>
   </nav>
@@ -27,6 +26,7 @@
   <aside class="rail">
     <div class="grp">训练</div>
     <a href="#app/replay" data-v="replay"><span class="ic">▶</span>行情回放</a>
+    <a href="#app/drills" data-v="drills"><span class="ic">◈</span>专项训练<span class="tagx">四维</span></a>
     <a href="#app/blind" data-v="blind"><span class="ic">◫</span>双盲测试</a>
 
     <!-- AI 是这个产品最大的差异点，不能埋在「智能工具」这种二级分组里。
@@ -34,7 +34,7 @@
     <div class="grp ai">AI 能力</div>
     <a href="#app/eval" data-v="eval" class="ai"><span class="ic">◎</span>能力评估<span class="tagx">技能 vs 运气</span></a>
     <a href="#app/similar" data-v="similar" class="ai"><span class="ic">≈</span>相似行情<span class="tagx">条件分布</span></a>
-    <button class="raillink ai" id="railAsk"><span class="ic">✦</span>智能问数<span class="tagx">Ctrl K</span></button>
+    <a href="#app/screen" data-v="screen" class="ai"><span class="ic">⚲</span>条件筛选<span class="tagx">选股引擎</span></a>
 
     <div class="grp">分析</div>
     <a href="#app/analysis" data-v="analysis"><span class="ic">▤</span>交易分析</a>
@@ -253,6 +253,12 @@
         </div>
       </div>
     </section>
+
+    <!-- ══ 专项训练（内容由 drills.js 渲染） ══ -->
+    <section class="view hide" id="v-drills"></section>
+
+    <!-- ══ 条件筛选（内容由 screener.js 渲染） ══ -->
+    <section class="view hide" id="v-screen"></section>
 
     <!-- ══ 交易分析 ══ -->
     <section class="view hide" id="v-analysis"></section>
