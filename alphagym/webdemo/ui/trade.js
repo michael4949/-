@@ -45,7 +45,7 @@ function newRound() {
   $('#rSub').textContent = `${TF_LABEL[d.timeframe]} · 本轮 ${S.segBars.length} 根 · 红涨绿跌`;
 
   // 副图有两种用法：换更大周期，或者联动另一个品种。
-  // 后者是 tradingexer 的「多品种联动同步回放」——同一时点同步推进，
+  // 后者是多品种联动回放：同一时点同步推进，
   // 用来练跨市场相关性判断（标普砸下去的时候纳指在做什么）。
   const tfOpts = (MTF_OPTIONS[d.timeframe] || MTF_OPTIONS['1d'])
     .map(([f, label]) => ({ kind: 'tf', key: 'tf' + f, factor: f, label }));

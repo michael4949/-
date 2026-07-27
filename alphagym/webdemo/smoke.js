@@ -157,7 +157,6 @@ const run = async () => {
   await shot(page, '01-home');
 
   for (const [hash, sel, label] of [
-    ['features', '#site table.capmap tbody tr', '能力对照'], ['data', '#site table.dt tbody tr', '数据说明'],
     ['pricing', '#site .price', '版本与价格'],
     ['contest', '#site .card', '选拔赛'], ['faq', '#site .faq details', '常见问题'],
   ]) {
@@ -165,16 +164,31 @@ const run = async () => {
     check(`${label}页有内容`, (await page.locator(sel).count()) > 0, `${await page.locator(sel).count()} 项`);
   }
 
-  await page.goto(FILE + '#features'); await page.waitForTimeout(500);
-  const capTxt = await page.locator('#site table.capmap').innerText();
-  check('能力对照表把「财报分析」如实标为未实现',
-    capTxt.includes('财报分析') && capTxt.includes('未实现'),
-    (capTxt.match(/财报分析[^\n]*/) || ['缺失'])[0].slice(0, 50));
-  check('对照表覆盖原软件交易分析的八项', ['详尽的交易统计', '资金权益走势图', '品种盈利曲线图',
-    '品种盈亏分析图', '多空盈亏分析图', '时间盈亏分析图', '账户评级', '导出 / 导入交易记录']
-    .every(x => capTxt.includes(x)));
-  check('导航里已无「手机版」这种空壳页',
-    !(await page.locator('#nav').innerText()).includes('手机版'));
+  // 官网只留能点到真东西的页面；空壳页一律不做
+  const navTxt = await page.locator('#nav').innerText();
+  check('导航只剩四项，没有空壳页',
+    !/功能|数据|手机版/.test(navTxt), navTxt.replace(/\n/g, ' / '));
+
+  /**
+   * 这条是被一次严重事故倒逼出来的：曾经有一版把竞品官网的宣传语
+   * 逐条抄进产品自己的公开页面做「能力对照表」，而 build.js 会把
+   * 源码注释一起内联进 HTML —— 也就是说竞品名连同「复刻」字样
+   * 会随成品一起发出去，右键查看源代码就能看到。
+   * 现在逐字节扫描整个产物，一个字都不许留。
+   */
+  const bundle = readFileSync(join(HERE, 'dist', 'alphagym-demo.html'), 'utf8');
+  const leaks = ['tradingexer', '交易练习者', '原软件', '能力对照'].filter(w => bundle.includes(w));
+  check('成品 HTML 里不含任何竞品名或对照表痕迹（含源码注释）',
+    leaks.length === 0, leaks.length ? '仍然出现：' + leaks.join('、') : '已扫描全文，干净');
+
+  // 页面上不该有指向已删页面的死链
+  const dead = await page.evaluate(() => {
+    const ok = new Set(['home', 'pricing', 'contest', 'faq']);
+    return [...document.querySelectorAll('#site a[href^="#"], #nav a[href^="#"]')]
+      .map(a => a.getAttribute('href').slice(1))
+      .filter(h => h && !h.startsWith('app/') && !ok.has(h));
+  });
+  check('官网没有指向已删页面的死链', dead.length === 0, dead.join(', ') || '无');
 
   // 这条是那三块白板的回归防线
   await page.goto(FILE + '#home'); await page.waitForTimeout(1600);

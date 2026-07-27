@@ -1,11 +1,10 @@
 /* ══════════════════════════════════════════════════════════════════
-   营销站。信息架构对照 tradingexer.com 复刻，但把纯填充的页面砍掉了：
-   首页 / 能力对照 / 数据说明 / 版本与价格 / 选拔赛 / 常见问题。
+   官网。四页：首页 / 版本与价格 / 选拔赛 / 常见问题。
 
-   「手机版」原本是一整页形容词，背后没有任何可点的东西，已删。
-   「功能」原本也是六张形容词卡片，改成了**能力对照表** ——
-   左边写原软件的说法，中间写它在这里的具体落点，右边写怎么验证，
-   做不到的（财报分析）直接标未实现。
+   页面数量是刻意压到这么少的。凡是打开之后只有一堆形容词、
+   点不到任何真东西的页面，一律不做 —— 那种页面对学员没有价值，
+   只会稀释首页想说的那件事。产品能力全部在训练场里，
+   官网负责把人送进去。
    ══════════════════════════════════════════════════════════════════ */
 
 const CORE4 = [
@@ -44,59 +43,6 @@ const AI6 = [
 ];
 
 
-/**
- * 能力对照表。
- * 每一行都必须能点进去看到实物 —— 「在这里的落点」写的是具体页面和控件，
- * 不是形容词。状态只有三档：已实现 / 部分 / 未实现，不含糊。
- */
-const CAP_MAP = [
-  { group: '历史行情回放', items: [
-    ['自动 / 手动回放，自由设定起止', '训练场 → 行情回放：播放键、2×/5×/12×/30× 变速、「新一轮」重抽区间', '进去按空格就是逐根步进', '已实现'],
-    ['独创步进浏览，多周期同步', '回放页副图：周线 / 月线与主图同步推进，只用已揭晓的数据合成', '冒烟测试断言副图有像素且不含未来根', '已实现'],
-    ['多品种联动同步回放', '回放页副图切成另一品种，按当前回放时间戳截断', '副图标题写着「同步至 YYYY-MM-DD」', '已实现'],
-    ['N 日行情几分钟内重现', '「跳到下一波动」跳过横盘；30× 变速；机械策略代跑', '一轮 900 根，代跑几秒走完', '已实现'],
-    ['数据本地缓存，翻页无等待', '全部行情内联在单文件里，零网络请求', '断网打开照样跑', '已实现'],
-  ] },
-  { group: '模拟交易', items: [
-    ['多模拟账户独立记账', '回放页左上角账户下拉，可新建；存 localStorage', '切账户后轮次记录互不干扰', '已实现'],
-    ['限价单、停损触发单', '回放页「高级委托」折叠区', '冒烟断言：远离市价的限价单不会被当成市价打掉', '已实现'],
-    ['自动止损、止盈与跟踪止损', '决策条上的「自动止损 N×ATR」+ 高级委托里的止盈 / 跟踪止损', '冒烟断言：跟踪止损只上移绝不下移', '已实现'],
-    ['手续费、滑点、合约乘数', 'src/matching.js 的成本模型，每笔都扣', '报告里「已扣 X 元成本」是实算的', '已实现'],
-    ['保证金与强制平仓', '撮合引擎内置维持保证金与强平检查', 'test/matching.test.js 覆盖', '已实现'],
-  ] },
-  { group: '交易分析', items: [
-    ['详尽的交易统计', '交易分析页顶部指标 + 明细', '每个数字都由 evalTrades 算出', '已实现'],
-    ['资金权益走势图', '交易分析页「权益曲线」', '按 R 累积，逐笔可对', '已实现'],
-    ['品种盈利曲线图', '交易分析页「品种盈利曲线」—— 数据源是账户历史，跑满 2 轮后出现', '换品种再跑一轮就会多一条线', '已实现'],
-    ['品种盈亏分析图', '交易分析页「品种盈亏分析」，同上', '按品种分组累计 R', '已实现'],
-    ['多空盈亏分析图', '交易分析页「多空盈亏分析」', '按 dir 分组', '已实现'],
-    ['时间盈亏分析图', '交易分析页「分星期 / 分时段盈亏分析」', '按入场日的星期或小时分组', '已实现'],
-    ['账户评级', '交易分析页顶部评级标签', '由收益、回撤、胜率联合定档', '已实现'],
-    ['MAE / MFE', '交易分析页「MAE / MFE 散点」+ 右侧解读', '每个点对应一笔真实交易', '已实现'],
-    ['导出 / 导入交易记录', '导出：成交记录面板「导出 CSV」；导入：右下角助手拖入 CSV / XLSX / PDF', '导出的文件能原样拖回来重新评估', '已实现'],
-  ] },
-  { group: '行情数据', items: [
-    ['真实历史行情', '数据页列出四个品种的来源、跨度与根数', '每根 K 线可在数据页核对', '已实现'],
-    ['指数、个股、外汇多类资产', '标普500、纳斯达克、谷歌、欧元美元', '数据页表格', '部分'],
-    ['真实跳空、停牌与涨跌停处理', 'tools/akshare_pipeline.py 的停牌标记与涨跌停判定', 'python3 tools/akshare_pipeline.py --selftest 共 9 项', '已实现'],
-    ['不复权价回放，杜绝未来函数', '回放一律用不复权价；GuardedBarSource 越界读取直接抛异常', 'test/replay.test.js 断言抛 FutureDataError', '已实现'],
-  ] },
-  { group: '条件选股 / 财报分析', items: [
-    ['条件选股', 'AI 能力 → 条件筛选：多条件组合，扫描全部内置历史', '与智能问数共用同一个执行器，口径一致', '部分'],
-    ['财报分析', '未实现 —— 没有财务报表数据源', '不用假数据充数', '未实现'],
-    ['图表分析', '回放页与筛选页均可用十字光标读数、均线与成交量指标', '划过图表即出数值', '部分'],
-  ] },
-  { group: '本产品增量（原软件没有）', items: [
-    ['技能与运气的统计分离', 'AI 能力 → 能力评估；或回放页右侧教练栏结束本轮后原地展开', '条件随机化检验，2000 次蒙特卡洛，给精确 p 值', '已实现'],
-    ['四维决策归因', '同上，报告中的四维表格（Holm 校正）', 'test/attribution.test.js 验证归因矩阵命中对角线', '已实现'],
-    ['按维度专项训练', '训练 → 专项训练：入场时机 / 出场时机 / 仓位 / 方向各一项', '每项只放开一个维度，其余三维固定', '已实现'],
-    ['相似历史形态检索', 'AI 能力 → 相似行情；回放页教练栏「看历史上的相似形态」', '只用当前回放日期之前的片段，界面写明截止日', '已实现'],
-    ['自然语言问数', '右下角助手，任意页面 Ctrl+K', 'NL → AST → 确定性执行，解析不了就拒答', '已实现'],
-    ['行为偏差诊断', '评估报告「行为特征」', '处置效应 / 报复性交易 / 止损纪律，全部由交易记录直接算出', '已实现'],
-    ['样本量测算', '评估报告「还需要多少样本」', '由每笔信噪比反推所需笔数', '已实现'],
-    ['文档上传与语音输入', '右下角助手：CSV / XLSX / PDF 真解析，语音走 Web Speech API', '冒烟断言解析出的笔数与提取出的文字', '已实现'],
-  ] },
-];
 
 const PRICES = [
   { h: '免费版', desc: '建立交易认知', cur: '¥', n: '0', per: '/ 永久', pop: false,
@@ -296,7 +242,7 @@ const SITE_PAGES = {
       以及下一步该练哪一块。</p>
       <div class="cta">
         <a href="#app/replay" class="btn btn-p btn-lg">免费开始复盘</a>
-        <a href="#features" class="btn btn-g btn-lg">看看它能做什么</a>
+        <a href="#app/drills" class="btn btn-g btn-lg">看看它能做什么</a>
       </div>
       <div class="facts">${heroFacts().map(([b, s, u]) =>
         `<div class="fact"><b>${b}<span style="font-size:13px">${u}</span></b><span>${s}</span></div>`).join('')}</div>
@@ -371,68 +317,6 @@ const SITE_PAGES = {
   </div></div>
 
   <div class="sec tight"><div class="wrap">${ctaBand()}</div></div>`,
-
-  features: () => `
-  <div class="sec"><div class="wrap">
-    <div class="sechead"><span class="eyebrow">能力对照</span><h2>原软件说的每一条，在这里落在哪</h2>
-      <p>这不是一张功能清单，是一张<b>对照表</b>：左边是「交易练习者」官网写明的能力，
-        中间是它在本产品里的具体落点（点得进去），右边是它能不能被验证。
-        没做到的也如实写在这里。</p></div>
-    <div class="panel"><div class="pb scrollx">
-      <table class="dt capmap"><thead><tr>
-        <th style="min-width:190px">原软件的说法</th><th style="min-width:230px">在这里的落点</th>
-        <th style="min-width:150px">怎么验证</th><th>状态</th></tr></thead>
-      <tbody>${CAP_MAP.map(g => `
-        <tr class="grp"><td colspan="4">${g.group}</td></tr>
-        ${g.items.map(([claim, where, how, st]) => `
-          <tr><td class="txt">${claim}</td>
-            <td class="txt">${where}</td>
-            <td class="txt mut" style="font-size:12.5px">${how}</td>
-            <td class="txt"><span class="pill ${st === '已实现' ? 'good' : st === '部分' ? 'mid' : 'na'}">${st}</span></td></tr>`).join('')}
-      `).join('')}</tbody></table>
-    </div></div>
-
-    <div class="note" style="margin-top:20px;max-width:820px"><span>⚠</span>
-      <span><b>没做到的两件事，直说：</b>
-      一是<b>财报分析</b> —— 本产品只内置价量数据，没有财务报表数据源，所以这一块没有实现，
-      也不打算用假数据糊上去；
-      二是<b>全市场条件选股</b> —— 条件筛选的引擎是完整的，但标的池只有内置的四个品种，
-      所以筛的是「历史上哪些天满足条件」而不是「哪些股票满足条件」。逻辑同构，规模不同。</span></div>
-  </div></div>
-  <div class="sec tight"><div class="wrap">${ctaBand()}</div></div>`,
-
-  data: () => {
-    const rows = Object.values(DATASETS).map(d => `
-      <tr><td class="txt"><b>${d.display}</b> <span class="mut">${d.symbol}</span></td>
-        <td class="txt">${TF_LABEL[d.timeframe] || d.timeframe}</td>
-        <td>${d.count.toLocaleString()}</td>
-        <td class="txt">${ymd(d.rows[0][0])} — ${ymd(d.rows[d.rows.length - 1][0])}</td>
-        <td class="txt mut">${d.source}</td></tr>`).join('');
-    return `
-    <div class="sec"><div class="wrap">
-      <div class="sechead"><span class="eyebrow">数据说明</span><h2>训练用的每一根 K 线都是真的</h2>
-        <p>真实历史行情含跳空、波动率聚集与肥尾。用随机生成的数据练出来的手感，到真实市场里不成立。</p></div>
-      <div class="panel"><div class="pb scrollx">
-        <table class="dt"><thead><tr><th>品种</th><th>周期</th><th>K 线数</th><th>时间跨度</th><th>来源</th></tr></thead>
-        <tbody>${rows}</tbody></table>
-      </div></div>
-
-      <div class="grid g2" style="margin-top:22px">
-        <div class="card"><h3>复权处理</h3>
-          <p>回放一律使用<b>不复权价</b>，即当时盘面真实所见的价格。复权因子单独保存，
-          只在做跨期收益率统计时使用。</p>
-          <div class="note" style="margin-top:12px"><span>⚠</span>
-          <span>复权因子由未来的除权除息事件倒推得到。把前复权价直接用于回放，
-          等于让你在 2015 年的界面上看到 2016 年分红的信息。</span></div></div>
-        <div class="card"><h3>期货主力合约拼接</h3>
-          <p>提供<b>价差平移法</b>与<b>比例法</b>两种拼接方式，并明确标注：两者会给出不同的回测结论。
-          平移法保持绝对点数变动，比例法保持百分比涨跌幅。</p>
-          <div class="note" style="margin-top:12px"><span>⚠</span>
-          <span>拼接后的连续合约不是任何一张真实合约的价格，适合形态训练与统计，
-          不适合据此宣称某一年能赚多少。</span></div></div>
-      </div>
-    </div></div>`;
-  },
 
   pricing: () => `
   <div class="sec"><div class="wrap">
@@ -525,21 +409,20 @@ function siteFooter() {
         <p class="mut" style="font-size:13.5px;max-width:320px">
           回放真实历史行情，在零成本环境中反复练习，并用统计方法客观评估交易能力。</p>
       </div>
-      <div><h4>产品</h4><ul>
-        <li><a href="#features">功能全景</a></li><li><a href="#data">数据说明</a></li>
-        <li><a href="#pricing">版本与价格</a></li><li><a href="#app/screen">条件筛选</a></li></ul></div>
       <div><h4>训练</h4><ul>
-        <li><a href="#app/replay">行情回放</a></li><li><a href="#app/blind">双盲测试</a></li>
-        <li><a href="#app/eval">能力评估</a></li><li><a href="#app/assistant">智能助手</a></li></ul></div>
-      <div><h4>支持</h4><ul>
-        <li><a href="#faq">常见问题</a></li><li><a href="#contest">选拔赛</a></li>
-        <li><a href="#data">数据来源</a></li></ul></div>
+        <li><a href="#app/replay">行情回放</a></li><li><a href="#app/drills">专项训练</a></li>
+        <li><a href="#app/blind">双盲测试</a></li></ul></div>
+      <div><h4>AI 能力</h4><ul>
+        <li><a href="#app/eval">能力评估</a></li><li><a href="#app/similar">相似行情</a></li>
+        <li><a href="#app/screen">条件筛选</a></li></ul></div>
+      <div><h4>其他</h4><ul>
+        <li><a href="#pricing">版本与价格</a></li><li><a href="#contest">选拔赛</a></li>
+        <li><a href="#faq">常见问题</a></li></ul></div>
     </div>
     <div class="legal">
       <b>风险提示与免责声明：</b>本产品是交易训练与能力评估工具，不提供投资建议、不推荐任何具体标的、
       不对未来价格作出预测。历史行情表现不代表未来收益。训练成绩与统计评估结果仅反映在特定历史区间上的
       决策质量，不构成对实盘结果的任何承诺。市场有风险，决策请自行判断。<br>
-      本站行情数据来源见<a href="#data" style="color:var(--brand)">数据说明</a>页。
     </div>
   </div></div>`;
 }
