@@ -143,6 +143,17 @@ const run = async () => {
   // 5 张：主视觉 + 三个特色卡（多周期那张是日线 + 周线两屏）
   check('首页每一张图都真的画了内容', ink1.length === 5 && ink1.every(x => x.ink > 100),
     ink1.map(x => `${x.id}:${x.ink}`).join(' '));
+  /* AI 是最大卖点，它必须排在核心能力之前，而且里面的数字要是现算的 */
+  await page.waitForSelector('#aiDemo .aidemo-v', { timeout: 20000 });
+  const order = await page.evaluate(() => {
+    const y = (sel) => document.querySelector(sel)?.getBoundingClientRect().top ?? 1e9;
+    return { ai: y('.aiband'), core: y('#site .g4'), feat: y('#site .feat') };
+  });
+  check('AI 区块排在核心能力之前（不再是第三屏）', order.ai < order.core && order.ai < order.feat,
+    `AI@${order.ai.toFixed(0)} 核心能力@${order.core.toFixed(0)}`);
+  const demo1 = await page.locator('#aiDemo').innerText();
+  check('首页 AI 演示是现场算出来的真结论', /p=0\.\d+/.test(demo1) && /分位/.test(demo1),
+    demo1.replace(/\n/g, ' ').slice(0, 60));
   await shot(page, '01-home');
 
   for (const [hash, sel, label] of [
@@ -156,6 +167,10 @@ const run = async () => {
 
   // 这条是那三块白板的回归防线
   await page.goto(FILE + '#home'); await page.waitForTimeout(1600);
+  await page.waitForSelector('#aiDemo .aidemo-v', { timeout: 20000 });
+  const demo2 = await page.locator('#aiDemo').innerText();
+  check('换一次加载就换一组数字（证明不是写死的配图）', demo2 !== demo1,
+    demo2.replace(/\n/g, ' ').slice(0, 60));
   const ink2 = await inkOf(page, '#site [id^=featChart], #site #heroChart');
   check('离开再回到首页，图表依然有内容（白板 bug 回归防线）',
     ink2.length === 5 && ink2.every(x => x.ink > 100), ink2.map(x => `${x.id}:${x.ink}`).join(' '));
@@ -168,6 +183,18 @@ const run = async () => {
   check('主图已渲染', (await inkOf(page, '#chart'))[0].ink > 100);
   check('副图（多周期同屏）已渲染', (await inkOf(page, '#chartMtf'))[0].ink > 50);
   check('决策按钮在图表正下方', await page.locator('#v-replay .deckbar .act.buy').isVisible());
+  // 「AI 入口藏太深」的回归防线：AI 组必须排在「分析」之前
+  const railOrder = await page.evaluate(() => {
+    const items = [...document.querySelectorAll('.rail .grp')].map(e => e.textContent.trim());
+    return { items, aiCount: document.querySelectorAll('.rail .ai').length };
+  });
+  check('左侧栏「AI 能力」组排在「分析」之前',
+    railOrder.items.indexOf('AI 能力') >= 0
+    && railOrder.items.indexOf('AI 能力') < railOrder.items.indexOf('分析'),
+    railOrder.items.join(' / '));
+  check('左侧栏有独立的 AI 入口', railOrder.aiCount >= 4, `${railOrder.aiCount} 个`);
+  check('左侧栏没有「智能助手」菜单项（已统一到右下角）',
+    !(await page.locator('.rail').innerText()).includes('智能助手'));
 
   // 纯键盘完成一轮决策
   await page.locator('#chart').click({ position: { x: 40, y: 40 } });
@@ -206,6 +233,118 @@ const run = async () => {
   await page.waitForTimeout(700);
   check('跳到下一波动会真的推进', (await page.locator('#tPrgD').textContent()) !== before);
 
+  /* ── AI 教练栏：入口不能藏 ── */
+  console.log('\n▌AI 教练栏（回放页内）');
+  const coachBox = await page.locator('#coach').boundingBox();
+  check('AI 教练栏在回放页首屏可见，不用翻菜单',
+    !!coachBox && coachBox.y < 900 && await page.locator('#coach').isVisible(),
+    coachBox ? `y=${coachBox.y.toFixed(0)} w=${coachBox.width.toFixed(0)}` : '不存在');
+
+  // 练习中必须静默：出现 p 值、分位这类评价就说明它在边练边点评
+  const liveTxt = await page.locator('.coach-live').innerText();
+  check('练习中教练不评价（无 p 值 / 分位 / 优于随机）',
+    !/p\s*=|分位|优于随机|劣于随机/.test(liveTxt), liveTxt.split('\n').slice(0, 3).join(' · '));
+
+  const nowDate = (await page.locator('#tPrgD').textContent()).match(/\d{4}-\d{2}-\d{2}/)?.[0];
+  await page.click('#hintBtn');
+  await page.waitForTimeout(4000);
+  const hintTxt = await page.locator('#coachHintBox').innerText();
+  check('形态提示返回真实条件分布', /中位/.test(hintTxt) && /上涨占比/.test(hintTxt),
+    hintTxt.replace(/\n/g, ' ').slice(0, 80));
+  // 地基条款：提示样本必须全部早于当前回放日期
+  check('提示只用当前回放日期之前的历史（不穿越）',
+    !!nowDate && hintTxt.includes(nowDate) && hintTxt.includes('之前'),
+    `回放日期 ${nowDate}`);
+  check('提示次数被记账（报告要据此标注）',
+    (await page.locator('#cHints').textContent()) === '1');
+
+  /* ── 高级委托 ── */
+  console.log('\n▌高级委托（复刻 tradingexer 的完整委托类型）');
+  await page.click('#advWrap summary');
+  await page.waitForTimeout(200);
+  const num = async (sel) => parseFloat((await page.locator(sel).textContent()).replace(/,/g, ''));
+
+  // 干净起点：前面的键盘流程可能留下持仓或未成交挂单，
+  // 不清掉的话下面的断言测的是上一段的残留，而不是限价单本身。
+  if (!(await page.locator('#tPos').textContent()).includes('空仓')) {
+    await page.keyboard.press('KeyX');
+    await page.waitForTimeout(300);
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(300);
+  }
+  await page.click('#advCancel');
+  await page.waitForTimeout(250);
+  check('进入高级委托测试前已清空持仓与挂单',
+    (await page.locator('#tPos').textContent()).includes('空仓')
+    && parseInt(await page.locator('#sPend').textContent()) === 0,
+    `持仓=${await page.locator('#tPos').textContent()} 挂单=${await page.locator('#sPend').textContent()}`);
+
+  const px0 = await num('#sLast');
+
+  // (1) 限价单必须真的「限价」：挂在远离市价处，推进几根也不该成交。
+  //     早先这里挂在市价下方 1.5% 再等 120 根，能不能成交取决于那段行情
+  //     恰好跌不跌 —— 测试就成了掷骰子。现在两条都做成确定性的。
+  await page.selectOption('#oType', 'limit');
+  await page.fill('#oPrice', (px0 * 0.80).toFixed(2));
+  await page.click('#advBuy');
+  await page.waitForTimeout(300);
+  check('限价单真的进了挂单簿', parseInt(await page.locator('#sPend').textContent()) === 1,
+    `挂单 ${await page.locator('#sPend').textContent()} 张`);
+  for (let i = 0; i < 5; i++) { await page.keyboard.press('Space'); await page.waitForTimeout(40); }
+  check('远离市价的限价单不会被当成市价单打掉',
+    (await page.locator('#tPos').textContent()).includes('空仓'),
+    `持仓=${await page.locator('#tPos').textContent()}`);
+  await page.click('#advCancel');
+  await page.waitForTimeout(250);
+
+  // (2) 挂在市价上方的买限价，下一根必定成交，且成交价不劣于委托价
+  const px1 = await num('#sLast');
+  await page.selectOption('#oType', 'limit');
+  await page.fill('#oPrice', (px1 * 1.20).toFixed(2));
+  await page.fill('#oTrail', '2');
+  await page.click('#advBuy');
+  await page.waitForTimeout(250);
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(500);
+  const posNow = await page.locator('#tPos').textContent();
+  check('限价单在下一根按不劣于委托价成交', posNow.includes('多'), `持仓=${posNow}`);
+
+  // (3) 跟踪止损的**不变量**是「只上移、绝不下移」。
+  //     「一定会上移」不是不变量 —— 入场后没创新高时它本就该纹丝不动。
+  if (posNow.includes('多')) {
+    let prev = await num('#sSL');
+    let moved = false, dropped = false, peak = await num('#sLast'), rose = false;
+    for (let i = 0; i < 120; i++) {
+      await page.keyboard.press('Space');
+      await page.waitForTimeout(16);
+      if (!(await page.locator('#tPos').textContent()).includes('多')) break;
+      const v = await num('#sSL'), last = await num('#sLast');
+      if (last > peak) { peak = last; rose = true; }
+      if (isFinite(v) && isFinite(prev)) {
+        if (v > prev + 1e-9) moved = true;
+        if (v < prev - 1e-9) dropped = true;
+        prev = v;
+      }
+    }
+    check('跟踪止损只上移、绝不下移（多头不变量）', !dropped);
+    check(rose ? '价格创新高后跟踪止损确实跟了上去' : '本段未创新高，跟踪止损按预期保持不动',
+      rose ? moved : !moved, `创新高=${rose} 上移过=${moved}`);
+  }
+  await page.click('#advCancel');
+  await page.waitForTimeout(200);
+
+  /* ── 多品种联动 ── */
+  const symBtn = page.locator('#mtfSeg button').last();
+  const symName = await symBtn.textContent();
+  await symBtn.click();
+  await page.waitForTimeout(700);
+  check('副图可切到另一品种联动回放', (await inkOf(page, '#chartMtf'))[0].ink > 50, symName);
+  const mtfLbl = await page.locator('#mtfLabel').textContent();
+  check('联动副图按当前回放时点截断（不含未来）', /同步至\s*\d{4}-\d{2}-\d{2}/.test(mtfLbl), mtfLbl);
+
+  /* ── 多账户 ── */
+  check('存在多模拟账户选择器', (await page.locator('#acctSel option').count()) >= 2);
+
   // grid 的 1fr 默认 min-width:auto，操作条一宽就会把右侧持仓面板整个推出屏幕，
   // 数字全被裁掉、看上去就是「一片空白」。这里逐项确认它们真的在视口内。
   const sideOk = await page.evaluate(() => {
@@ -223,18 +362,56 @@ const run = async () => {
     await page.locator('#fillCount').textContent());
   await shot(page, '04-replay-auto');
 
+  /* ── 结束本轮：报告在教练栏原地展开，不跳页 ── */
+  console.log('\n▌结束本轮 · 报告原地展开');
+  await page.click('#endBtn');
+  await page.waitForTimeout(7000);
+  check('结束后停留在回放页，不跳走', page.url().includes('app/replay'), page.url().split('#')[1]);
+  check('教练栏原地展开成完整报告',
+    await page.locator('#coach').evaluate(e => e.classList.contains('expanded')));
+  const repTxt = await page.locator('#coachReport').innerText();
+  check('报告含技能/运气结论与 p 值', /p\s*=\s*0\.\d+/.test(repTxt) && /分位/.test(repTxt),
+    repTxt.replace(/\n/g, ' ').slice(0, 70));
+  check('用过提示的轮次被明确标注', repTxt.includes('形态提示'),
+    (repTxt.match(/本轮开启了形态提示（共查看 \d+ 次）/) || ['未标注'])[0]);
+  check('报告与图表同屏（结论旁边就是刚做过决策的那张图）',
+    await page.locator('#chart canvas').first().isVisible());
+  // 展开态同样不许把内容挤出视口
+  const repOver = await page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  check('展开报告后仍无横向溢出', repOver <= 0, `溢出 ${repOver}px`);
+  await shot(page, '05-coach-report');
+
+  await page.click('#coachBack');
+  await page.waitForTimeout(600);
+  check('可以收起报告回到练习态',
+    !(await page.locator('#coach').evaluate(e => e.classList.contains('expanded'))));
+
   /* ── 交易分析 / 能力评估 ── */
   console.log('\n▌交易分析与能力评估');
-  await page.click('#endBtn');
-  await page.waitForTimeout(900);
-  check('结束本轮进入交易分析', page.url().includes('app/analysis'));
+  await page.goto(FILE + '#app/analysis');
+  await page.waitForTimeout(1200);
   check('权益曲线已渲染', await page.locator('#v-analysis svg polyline').first().isVisible());
   check('多空/时段/持仓时长归因都有输出', (await page.locator('#v-analysis .brow').count()) >= 5);
+
+  // MAE / MFE：判断止损设置是否合理的标准工具，之前完全没有
+  const dots = await page.locator('#v-analysis .scatter i').count();
+  check('MAE / MFE 散点画出了每一笔交易', dots >= 10, `${dots} 个点`);
+  const inBounds = await page.evaluate(() => {
+    const box = document.querySelector('.scatter')?.getBoundingClientRect();
+    if (!box) return false;
+    return [...document.querySelectorAll('.scatter i')].every(d => {
+      const r = d.getBoundingClientRect();
+      return r.left >= box.left - 6 && r.right <= box.right + 6
+          && r.top >= box.top - 6 && r.bottom <= box.bottom + 6;
+    });
+  });
+  check('散点全部落在坐标区内（没有溢出成一团）', inBounds);
   await shot(page, '05-analysis');
 
   await page.click('.rail a[data-v="eval"]');
   await page.waitForTimeout(5200);
-  const verdict = await page.locator('.verdict p').first().textContent();
+  const verdict = await page.locator('#evalBody .verdict p').first().textContent();
   const pv = /p=([0-9.]+)/.exec(verdict);
   check('生成了结论', verdict.length > 10, verdict.slice(0, 50) + '…');
   check('p 值在合法区间', pv && +pv[1] > 0 && +pv[1] <= 1, pv ? `p=${pv[1]}` : '未找到');
@@ -393,6 +570,22 @@ const run = async () => {
   await page.click('#micBtn');
   await page.waitForTimeout(400);
   check('再点一次停止录音', !(await page.locator('#micBtn').evaluate(e => e.classList.contains('rec'))));
+
+  /* ── 选拔赛榜单 ── */
+  console.log('\n▌选拔赛榜单');
+  await page.goto(FILE + '#contest');
+  await page.waitForTimeout(4000);
+  const lbN = await page.locator('.lbrow').count();
+  check('榜单真的跑出了成绩', lbN >= 7, `${lbN} 行`);
+  const lbTxt = await page.locator('#ctBoard').innerText();
+  check('用户自己的成绩也进了榜', /你\s*·\s*第\s*\d+\s*轮/.test(lbTxt),
+    (lbTxt.match(/你\s*·\s*第\s*\d+\s*轮[^\n]*/) || ['未上榜'])[0]);
+  const rs = await page.locator('.lbrow .rv').allTextContents();
+  const nums = rs.map(x => parseFloat(x.replace(/[^\d.+-]/g, '')));
+  check('榜单按 R 严格倒序', nums.every((v, i) => i === 0 || nums[i - 1] >= v), nums.join(' ≥ '));
+  check('陪练成绩各不相同（不是同一个模板数字）', new Set(nums).size >= nums.length - 1);
+  check('明示陪练是化名但数字为真', (await page.locator('#site').innerText()).includes('一个数字都不是编的'));
+  await shot(page, '16-contest');
 
   /* ── 主题与响应式 ── */
   console.log('\n▌主题与响应式');

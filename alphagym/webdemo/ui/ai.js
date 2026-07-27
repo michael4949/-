@@ -32,9 +32,21 @@ function runReport() {
   }, 50);
 }
 
-function renderEval(r, ms) {
+/**
+ * 渲染评估报告。
+ * host 让同一份报告能落在两个地方：能力评估整页，或回放页右侧教练栏。
+ * compact 时收掉几块横向宽表，因为教练栏只有 316px 宽。
+ */
+function renderEval(r, ms, host = null, opt = {}) {
+  const el = host || $('#evalBody');
   const o = r.observed, h = r.headline;
   const [cls, txt] = LVL[r.verdict.level] || LVL.unknown;
+  const compact = !!opt.compact;
+
+  // 用过形态提示的轮次要标出来 —— 不标注，这个 p 值就会被当成裸考成绩读
+  const hintBanner = opt.hints > 0 ? `<div class="note" style="margin-bottom:13px"><span>⚠</span>
+    <span><b>本轮开启了形态提示</b>（共查看 ${opt.hints} 次）。成绩仍照常计算，
+    但与无提示的轮次<b>不可直接比较</b> —— 提示会把一部分判断外包给统计量。</span></div>` : '';
 
   let dist = '';
   if (h?.available) {
@@ -81,7 +93,8 @@ function renderEval(r, ms) {
       <span class="mono" style="text-align:right;color:${col}">${sg(b.totalR)} R</span></div>`;
   }).join('');
 
-  $('#evalBody').innerHTML = `
+  el.innerHTML = `
+  ${hintBanner}
   <div class="verdict">
     <span class="pill ${cls}" style="margin-bottom:11px;display:inline-block">${txt}</span>
     <h2>这一轮，有多少能用运气解释？</h2>
@@ -90,7 +103,7 @@ function renderEval(r, ms) {
       对照组：<b style="color:var(--ink2)">${h?.label || '—'}</b> —— ${h?.question || ''}</p>
     ${dist}</div>
 
-  <div class="grid g3">
+  <div class="grid ${compact ? 'g1' : 'g3'}">
     ${[['净收益', sg(o.totalR) + ' R', `${sg(o.netCurrency, 0)} 元 · 已扣 ${fx(o.costCurrency, 0)} 成本`, o.totalR >= 0],
        ['胜率 / 盈亏比', pc1(o.winRate) + ' / ' + (isFinite(o.profitFactor) ? o.profitFactor.toFixed(2) : '—'), `${o.trades} 笔交易`, null],
        ['夏普为正的概率', pc1(o.probabilisticSharpe), `每笔夏普 ${o.perTradeSharpe.toFixed(3)}`, o.probabilisticSharpe >= 0.5]]
@@ -108,7 +121,7 @@ function renderEval(r, ms) {
       <span>四项<b>不可相加</b>。各维度的随机化互不正交，只能读<b>相对排序</b>，
       不存在「总收益 = 方向 + 时机 + 仓位」这样的分解。</span></div></div></div>
 
-  <div class="grid g2">
+  <div class="grid ${compact ? 'g1' : 'g2'}">
     <div class="panel"><div class="ph"><h3>参照标尺</h3><span class="sub">同段行情</span></div>
       <div class="pb"><div class="bench">${benchHtml}</div></div></div>
     <div class="panel"><div class="ph"><h3>还需要多少样本才能下结论</h3></div><div class="pb">
@@ -120,7 +133,7 @@ function renderEval(r, ms) {
         ? '这个数字由当前每笔收益的信噪比反推——信噪比越低，需要的样本越多。'
         : '当前效应量约等于零，无论积累多少样本都无法证明存在优势。'}</div></div></div></div>
 
-  <div class="grid g2">
+  <div class="grid ${compact ? 'g1' : 'g2'}">
     <div class="panel"><div class="ph"><h3>行为特征</h3><span class="sub">确定性计算 · 无模型推测</span></div>
       <div class="pb"><div class="blist">${behaviorItems(r.behavior)}</div></div></div>
     <div class="panel"><div class="ph"><h3>必须知道的局限</h3><span class="sub">随报告强制下发</span></div>
@@ -128,15 +141,22 @@ function renderEval(r, ms) {
 
   <div class="panel"><div class="ph"><h3>数据来源与复现</h3>
     <span class="sub">${S.lastLabel} · 引擎 v${r.meta.engineVersion} · seed ${r.meta.seed} · ${ms} ms</span>
-    <button class="btn btn-g btn-sm" id="askAboutReport" style="margin-left:auto">让助手解读这份报告</button></div>
+    <button class="btn btn-g btn-sm askReport" style="margin-left:auto">让助手解读这份报告</button></div>
     <div class="pb"><div class="kv"><span>随机种子</span><span class="num">${r.meta.seed}</span></div>
       <div class="kv"><span>蒙特卡洛次数</span><span class="num">${r.meta.iterations} × 5 个零模型</span></div>
-      <div class="kv"><span>结果可复现</span><span>同一份记录 + 同一 seed，任何机器上逐字节一致</span></div></div></div>`;
+      <div class="kv"><span>结果可复现</span><span>同一份记录 + 同一 seed，任何机器上逐字节一致</span></div></div></div>
 
-  $('#askAboutReport').onclick = () => {
+  ${compact ? `<div class="coachcta">
+    <button class="btn btn-g btn-sm" onclick="location.hash='#app/analysis'">完整交易分析 →</button>
+    <button class="btn btn-p btn-sm" id="coachNext">再来一轮</button></div>` : ''}`;
+
+  // id 会重复（整页 + 教练栏可能同时存在两份报告），所以按容器取
+  el.querySelectorAll('.askReport').forEach(b => b.onclick = () => {
     openChat();
     setTimeout(() => handleUserMessage('解读一下我这份能力评估报告'), 160);
-  };
+  });
+  const nx = el.querySelector('#coachNext');
+  if (nx) nx.onclick = () => { coachCollapse(); newRound(); };
 }
 
 /* ── 相似行情 ───────────────────────────────────────────────────── */

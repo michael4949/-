@@ -28,11 +28,16 @@
     <div class="grp">训练</div>
     <a href="#app/replay" data-v="replay"><span class="ic">▶</span>行情回放</a>
     <a href="#app/blind" data-v="blind"><span class="ic">◫</span>双盲测试</a>
+
+    <!-- AI 是这个产品最大的差异点，不能埋在「智能工具」这种二级分组里。
+         它排在训练之后、紧挨着，并且整组做了视觉强调。 -->
+    <div class="grp ai">AI 能力</div>
+    <a href="#app/eval" data-v="eval" class="ai"><span class="ic">◎</span>能力评估<span class="tagx">技能 vs 运气</span></a>
+    <a href="#app/similar" data-v="similar" class="ai"><span class="ic">≈</span>相似行情<span class="tagx">条件分布</span></a>
+    <button class="raillink ai" id="railAsk"><span class="ic">✦</span>智能问数<span class="tagx">Ctrl K</span></button>
+
     <div class="grp">分析</div>
     <a href="#app/analysis" data-v="analysis"><span class="ic">▤</span>交易分析</a>
-    <a href="#app/eval" data-v="eval"><span class="ic">◎</span>能力评估<span class="tagx">AI</span></a>
-    <div class="grp">智能工具</div>
-    <a href="#app/similar" data-v="similar"><span class="ic">≈</span>相似行情<span class="tagx">AI</span></a>
     <div class="grp">账户</div>
     <a href="#home"><span class="ic">←</span>返回官网</a>
   </aside>
@@ -59,8 +64,9 @@
             <div class="ph">
               <h3 id="rTitle">—</h3><span class="sub" id="rSub"></span>
               <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <select id="acctSel" style="width:auto" title="模拟账户"></select>
                 <select id="dsSel" style="width:auto"></select>
-                <div class="seg" id="mtfSeg" title="副图周期"></div>
+                <div class="seg" id="mtfSeg" title="副图内容"></div>
                 <button class="btn btn-g btn-sm" id="newRound">新一轮</button>
               </div>
             </div>
@@ -102,6 +108,33 @@
                 </div>
               </div>
             </div>
+            <!-- 高级委托：快速按钮盖住 90% 的决策，剩下 10% 在这里。
+                 折叠起来是为了不让它挡住主路径，但 tradingexer 有的一样不少。 -->
+            <details class="adv" id="advWrap">
+              <summary>高级委托 · 限价 / 停损触发 / 止盈 / 跟踪止损</summary>
+              <div class="advbody">
+                <div class="field"><label>类型</label>
+                  <select id="oType">
+                    <option value="market">市价</option>
+                    <option value="limit">限价单</option>
+                    <option value="stop">停损触发单</option>
+                  </select></div>
+                <div class="field"><label>委托价 / 触发价</label>
+                  <input type="number" id="oPrice" step="0.01" placeholder="留空＝市价"></div>
+                <div class="field"><label>止损价</label>
+                  <input type="number" id="oSL" step="0.01" placeholder="留空＝按自动止损"></div>
+                <div class="field"><label>止盈价</label>
+                  <input type="number" id="oTP" step="0.01" placeholder="可空"></div>
+                <div class="field"><label>跟踪止损（×ATR）</label>
+                  <input type="number" id="oTrail" step="0.5" min="0" placeholder="0＝不跟踪"></div>
+                <div class="advacts">
+                  <button class="btn btn-g btn-sm" id="advBuy">买入 / 多</button>
+                  <button class="btn btn-g btn-sm" id="advSell">卖出 / 空</button>
+                  <button class="btn btn-g btn-sm" id="advCancel">撤销全部挂单</button>
+                </div>
+              </div>
+            </details>
+
             <div class="deckfoot">
               <div class="prog"><i id="prgBar"></i></div>
               <button class="btn btn-g btn-sm" id="jumpBtn" title="跳到下一段明显波动">跳到下一波动 ⇥</button>
@@ -112,7 +145,40 @@
         </div>
 
         <div class="side">
-          <div class="panel">
+          <!-- ══ AI 教练栏 ══
+               练习中只计数不评价；结束本轮时在**原地**展开成完整评估报告，
+               不跳页 —— AI 是这一页的一部分，不是另一个菜单项。 -->
+          <div class="panel coach" id="coach">
+            <div class="ph">
+              <span class="aidot">✦</span><h3>AI 教练</h3>
+              <span class="sub" id="coachMode">练习中 · 静默记录</span>
+              <button class="btn btn-g btn-sm hide" id="coachBack" style="margin-left:auto">← 继续练习</button>
+            </div>
+
+            <div class="pb coach-live">
+              <div class="cstats">
+                <div><span>决策次数</span><b class="num" id="cDecisions">0</b></div>
+                <div><span>已成交</span><b class="num" id="cTrades">0</b></div>
+                <div><span>累计 R</span><b class="num" id="cR">—</b></div>
+              </div>
+              <div class="cprog"><i id="cProgBar"></i></div>
+              <div class="cprogtxt" id="cProgress">再完成 20 笔可出统计结论</div>
+              <div class="kv hide" id="cHintRow"><span>本轮查看提示</span><span class="num" id="cHints">0</span></div>
+
+              <button class="btn btn-s" style="width:100%;margin-top:11px" id="hintBtn">
+                ✦ 看历史上的相似形态
+              </button>
+              <div id="coachHintBox"></div>
+
+              <p class="cfoot">练习过程中教练<b>不评价</b>你的每一笔 ——
+                一边做决策一边被点评，练出来的是迎合点评。
+                完整归因在本轮结束后一次给足。</p>
+            </div>
+
+            <div class="coach-report" id="coachReport"></div>
+          </div>
+
+          <div class="panel side-collapse">
             <div class="ph"><h3>持仓</h3><span class="sub" id="posSub">空仓</span></div>
             <div class="pb">
               <div class="kv"><span>浮动盈亏</span><span class="num" id="sFloat">—</span></div>
@@ -123,24 +189,18 @@
               <div class="kv"><span>挂单</span><span class="num" id="sPend">0</span></div>
             </div>
           </div>
-          <div class="panel">
-            <div class="ph"><h3>成交记录</h3><span class="sub" id="fillCount">0 笔</span></div>
+          <div class="panel side-collapse">
+            <div class="ph"><h3>成交记录</h3><span class="sub" id="fillCount">0 笔</span>
+              <button class="btn btn-g btn-sm" id="expCsv" style="margin-left:auto">导出 CSV</button></div>
             <div class="pb"><div class="fills" id="fills"><div class="mut" style="font-size:13px">还没有成交</div></div></div>
           </div>
-          <div class="panel">
-            <div class="ph"><h3>快捷键</h3></div>
-            <div class="pb keys">
-              <div><kbd>空格</kbd><span>推进一根</span></div>
-              <div><kbd>↑</kbd><span>做多</span></div>
-              <div><kbd>↓</kbd><span>做空</span></div>
-              <div><kbd>X</kbd><span>平仓</span></div>
-              <div><kbd>←</kbd><span>后退一根</span></div>
-              <div><kbd>Tab</kbd><span>跳到下一波动</span></div>
-              <div><kbd>1</kbd>–<kbd>5</kbd><span>手数 10/20/50/100/200</span></div>
-              <div><kbd>P</kbd><span>播放 / 暂停</span></div>
-            </div>
-          </div>
         </div>
+      </div>
+
+      <div class="keybar">
+        <kbd>空格</kbd>推进 <kbd>↑</kbd>做多 <kbd>↓</kbd>做空 <kbd>X</kbd>平仓
+        <kbd>←</kbd>后退 <kbd>Tab</kbd>跳到下一波动 <kbd>1</kbd>–<kbd>5</kbd>手数 <kbd>P</kbd>播放
+        <kbd>Ctrl</kbd>+<kbd>K</kbd>呼出助手
       </div>
     </section>
 

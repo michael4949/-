@@ -44,23 +44,36 @@ function newRound() {
   $('#rTitle').textContent = `${d.display} · ${d.symbol}`;
   $('#rSub').textContent = `${TF_LABEL[d.timeframe]} · 本轮 ${S.segBars.length} 根 · 红涨绿跌`;
 
-  const opts = MTF_OPTIONS[d.timeframe] || MTF_OPTIONS['1d'];
-  S.mtf = opts[0][0];
-  $('#mtfSeg').innerHTML = opts.map(([f, label], i) =>
-    `<button data-f="${f}" class="${i === 0 ? 'on' : ''}">${label}</button>`).join('');
+  // 副图有两种用法：换更大周期，或者联动另一个品种。
+  // 后者是 tradingexer 的「多品种联动同步回放」——同一时点同步推进，
+  // 用来练跨市场相关性判断（标普砸下去的时候纳指在做什么）。
+  const tfOpts = (MTF_OPTIONS[d.timeframe] || MTF_OPTIONS['1d'])
+    .map(([f, label]) => ({ kind: 'tf', key: 'tf' + f, factor: f, label }));
+  const symOpts = Object.keys(DATASETS)
+    .filter(k => k !== S.ds && DATASETS[k].timeframe === d.timeframe)
+    .map(k => ({ kind: 'sym', key: 'sym' + k, sym: k, label: DATASETS[k].display }));
+  S.mtfOpts = [...tfOpts, ...symOpts];
+  S.mtfSel = S.mtfOpts[0];
+  $('#mtfSeg').innerHTML = S.mtfOpts.map((o, i) =>
+    `<button data-k="${o.key}" class="${i === 0 ? 'on' : ''}">${o.label}</button>`).join('');
   $$('#mtfSeg button').forEach(b => b.onclick = () => {
     $$('#mtfSeg button').forEach(x => x.classList.remove('on'));
     b.classList.add('on');
-    S.mtf = +b.dataset.f;
-    $('#mtfLabel').textContent = b.textContent;
+    S.mtfSel = S.mtfOpts.find(o => o.key === b.dataset.k);
     drawMtf();
   });
-  $('#mtfLabel').textContent = opts[0][1];
 
   const c = getChart('chart', { ma: true, vol: true });
   c.applyNewData(S.session.visibleBars().map(toK));
   c.setPriceVolumePrecision(dec(S.ds), 0);
+  // 常驻图例（OHLC + 各条均线数值）会直接压在左上角的持仓 HUD 上，
+  // 两行字叠成一团。改成只在十字光标出现时显示 —— 想看数值就划过去。
+  c.setStyles({
+    candle: { tooltip: { showRule: 'follow_cross' } },
+    indicator: { tooltip: { showRule: 'follow_cross' } },
+  });
   drawMtf();
+  if (typeof coachReset === 'function') coachReset();
   refreshReplay();
   toast('新一轮已开始 · 空格推进，↑做多 ↓做空');
 }
@@ -82,6 +95,7 @@ function buildSession(replayOps = null, upTo = Infinity) {
   while (S.session.cursor < upTo && !S.session.finished) {
     for (const op of byBar.get(S.session.cursor) || []) {
       if (op.op === 'submit') S.session.engine.submit(op.order);
+      else if (op.op === 'cancel') S.session.engine.cancel(op.id);
     }
     if (!S.session.step()) break;
   }
@@ -127,21 +141,51 @@ function addLine(c, price, color, text) {
     });
   } catch (err) {}
 }
-/** 当前挂着的止损价（取减仓方向的停损单） */
+/**
+ * 当前真正生效的止损价。
+ *
+ * 同时挂着多张减仓停损单是常态：开仓时的自动止损、加仓时补的那张、
+ * 跟踪止损重挂的那张，可能并存。此时 `find()` 返回的是数组里碰巧排第一的那张，
+ * 而不是真正约束你的那张 —— 界面上的止损价会随着挂单增删无缘无故地跳。
+ *
+ * 真正生效的永远是**最保护你**的那一张：多头取最高价，空头取最低价。
+ */
 function currentStopPrice() {
   const e = S.session?.engine; if (!e || e.position === 0) return null;
-  const o = e.orders.find(x => x.status === 'pending' && x.type === 'stop' && x.reduceOnly);
-  return o ? o.price : null;
+  const stops = e.orders
+    .filter(x => x.status === 'pending' && x.type === 'stop' && x.reduceOnly && x.price > 0)
+    .map(x => x.price);
+  if (!stops.length) return null;
+  return e.position > 0 ? Math.max(...stops) : Math.min(...stops);
 }
 
-/** 副图：更大周期，只用已揭晓的数据合成，最后一根是未完成的 */
+/** 副图：更大周期，或另一个品种的同步回放。
+ *  两种情况都必须只用「已揭晓」的数据 —— 换品种时按时间戳截断，
+ *  拿另一个品种的未来同样是穿越。 */
 function drawMtf() {
   const s = S.session; if (!s) return;
   const c = getChart('chartMtf', { ma: false });
   if (!c) return;
-  const agg = resampledUpTo(S.segBars, S.mtf, s.cursor);
-  c.applyNewData(agg.slice(-90).map(toK));
-  c.setPriceVolumePrecision(dec(S.ds), 0);
+  const sel = S.mtfSel || { kind: 'tf', factor: 5, label: '周线' };
+  let rows, d;
+
+  if (sel.kind === 'sym') {
+    const nowT = S.segBars[s.cursor].t;
+    const other = barsOf(sel.sym);
+    // 同步截断：只给出时间戳 ≤ 当前回放时点的 K 线
+    let hi = other.length - 1;
+    while (hi >= 0 && other[hi].t > nowT) hi--;
+    rows = other.slice(Math.max(0, hi - 89), hi + 1);
+    d = dec(sel.sym);
+    $('#mtfLabel').textContent = `${sel.label} · 同步至 ${ymd(nowT)}`;
+  } else {
+    rows = resampledUpTo(S.segBars, sel.factor, s.cursor).slice(-90);
+    d = dec(S.ds);
+    $('#mtfLabel').textContent = sel.label;
+  }
+  if (!rows.length) return;
+  c.applyNewData(rows.map(toK));
+  c.setPriceVolumePrecision(d, 0);
   c.setStyles({ candle: { tooltip: { showRule: 'none' } }, xAxis: { show: false } });
 }
 
@@ -203,6 +247,7 @@ function refreshReplay() {
   $('#aFlat').disabled = e.position === 0;
   $('#endBtn').disabled = ct.length === 0 && e.position === 0;
   redrawOverlays();
+  if (typeof coachRefresh === 'function') coachRefresh();
 }
 
 /* ── 推进 / 后退 ────────────────────────────────────────────────── */
@@ -210,6 +255,7 @@ function stepOnce() {
   const s = S.session;
   if (!s || s.finished) { stopPlay(); return false; }
   if (!s.step()) { stopPlay(); toast('本轮行情已播放完毕，可以结束并评估了'); return false; }
+  updateTrailing();
   const bar = s.visibleBars()[s.cursor];
   if (bar) charts.chart?.updateData(toK(bar));
   drawMtf();
@@ -333,6 +379,11 @@ function autoRun() {
   toast(`代跑完成，成交 ${s.engine.closedTrades.length} 笔`);
 }
 
+/**
+ * 结束本轮 —— 不跳页。
+ * 报告在右侧教练栏**原地展开**：练的时候和看结果的时候是同一块屏幕，
+ * 视线不用离开刚刚做过决策的那张图。这是「AI 入口藏太深」的正面修法。
+ */
 function endRound() {
   stopPlay();
   const s = S.session; if (!s) return;
@@ -343,8 +394,65 @@ function endRound() {
   S.lastIns = S.ins;
   S.lastLabel = `行情回放 · ${DATASETS[S.ds].display}`;
   S.report = null;
+  saveRoundToAccount(res.trades);
   toast(`本轮 ${res.trades.length} 笔交易 · ${S.decisions} 次决策`);
-  location.hash = '#app/analysis';
+  coachExpand();
+}
+
+/* ── 高级委托 ───────────────────────────────────────────────────── */
+function advSubmit(dir) {
+  const s = S.session;
+  if (!s || s.finished) { toast('本轮已结束'); return; }
+  const type = $('#oType').value;
+  const price = parseFloat($('#oPrice').value);
+  const order = { type, dir, qty: qty() };
+  if (type !== 'market') {
+    if (!(price > 0)) { toast('限价单 / 停损单必须填委托价'); return; }
+    order.price = price;
+  }
+  const sl = parseFloat($('#oSL').value), tp = parseFloat($('#oTP').value);
+  const i = s.cursor, px = S.segBars[i].c;
+  if (sl > 0) order.stopLoss = sl;
+  else if ($('#autoSL').checked) {
+    const m = parseFloat($('#slRange').value) || 2;
+    order.stopLoss = dir > 0 ? px - m * S.atrSeries[i] : px + m * S.atrSeries[i];
+  }
+  if (tp > 0) order.takeProfit = tp;
+
+  const o = s.submitOrder(order);
+  if (o.status === 'rejected') { toast('已拒绝：' + o.reason); return; }
+  S.decisions++;
+
+  // 跟踪止损：撮合引擎只认静态停损单，所以由这一层在每根推进后重挂。
+  const trail = parseFloat($('#oTrail').value);
+  S.trail = trail > 0 ? { mult: trail, dir, best: px } : null;
+
+  toast(`${type === 'market' ? '市价' : type === 'limit' ? '限价' : '停损触发'}${dir > 0 ? '买入' : '卖出'} ${qty()} 手已提交`);
+  refreshReplay();
+}
+
+function advCancel() {
+  const e = S.session?.engine; if (!e) return;
+  let n = 0;
+  for (const o of [...e.orders]) if (o.status === 'pending' && !o.reduceOnly) { S.session.cancelOrder(o.id); n++; }
+  S.trail = null;
+  toast(n ? `已撤销 ${n} 张挂单` : '没有可撤销的挂单');
+  refreshReplay();
+}
+
+/** 跟踪止损：价格每创新高（多）/新低（空），就把停损单上移 / 下移 */
+function updateTrailing() {
+  const t = S.trail, s = S.session, e = s?.engine;
+  if (!t || !e || e.position === 0) return;
+  const i = s.cursor, b = S.segBars[i];
+  const better = t.dir > 0 ? b.h > t.best : b.l < t.best;
+  if (!better) return;
+  t.best = t.dir > 0 ? b.h : b.l;
+  const want = t.dir > 0 ? t.best - t.mult * S.atrSeries[i] : t.best + t.mult * S.atrSeries[i];
+  const cur = e.orders.find(o => o.status === 'pending' && o.type === 'stop' && o.reduceOnly);
+  if (cur && ((t.dir > 0 && want <= cur.price) || (t.dir < 0 && want >= cur.price))) return;
+  if (cur) s.cancelOrder(cur.id);
+  s.submitOrder({ type: 'stop', dir: -t.dir, qty: Math.abs(e.position), price: want, reduceOnly: true });
 }
 
 /* ══ 双盲测试 ══ */
@@ -540,12 +648,79 @@ function renderAnalysis() {
     <div class="panel"><div class="ph"><h3>行为特征</h3><span class="sub">由交易记录直接计算</span></div>
       <div class="pb"><div class="blist">${behaviorItems(beh)}</div></div></div>
   </div>
+  ${maeMfePanel(ev.rows)}
   <div class="panel" style="margin-top:16px"><div class="pb"
     style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div><b>想知道这个成绩里有多少是运气？</b>
       <div class="mut" style="font-size:13.5px">交易分析告诉你「发生了什么」，能力评估回答「这能不能用运气解释」。</div></div>
     <button class="btn btn-p" style="margin-left:auto" onclick="location.hash='#app/eval'">去做能力评估 →</button>
   </div></div>`;
+}
+
+/**
+ * MAE / MFE 散点 —— 判断止损与止盈设得合不合理的标准工具。
+ *
+ * 横轴 MAE：这笔交易最难受的时候浮亏了多少个 R。
+ * 纵轴 MFE：最舒服的时候浮盈了多少个 R。
+ *
+ * 怎么读：
+ *   · 赢单普遍聚在左上（几乎没回撤就跑出去了）→ 入场时机好
+ *   · 输单的 MAE 拖得很长 → 止损放太远，或者根本没止损
+ *   · 一堆点 MFE 很高但最终亏损 → 拿不住，利润回吐
+ */
+function maeMfePanel(rows) {
+  if (rows.length < 3) return '';
+  const maeMax = Math.max(1, ...rows.map(r => Math.abs(r.mae)));
+  const mfeMax = Math.max(1, ...rows.map(r => r.mfe));
+  const lim = Math.max(maeMax, mfeMax);
+
+  const pts = rows.map(r => {
+    const x = (Math.abs(r.mae) / lim * 100);
+    const y = (r.mfe / lim * 100);
+    const win = r.net > 0;
+    return `<i class="${win ? 'w' : 'l'}" style="left:${x.toFixed(2)}%;bottom:${y.toFixed(2)}%"
+      title="MAE ${sg(r.mae)}R · MFE ${sg(r.mfe)}R · 结果 ${sg(r.r)}R"></i>`;
+  }).join('');
+
+  const giveBack = rows.filter(r => r.mfe >= 1 && r.net <= 0).length;
+  const deepPain = rows.filter(r => Math.abs(r.mae) >= 2).length;
+  const clean = rows.filter(r => r.net > 0 && Math.abs(r.mae) <= 0.5).length;
+
+  return `
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel"><div class="ph"><h3>MAE / MFE 散点</h3>
+      <span class="sub">单位：R · 对角线 = 一分钱没赚到就出场</span></div>
+      <div class="pb">
+        <div class="scatter">
+          <div class="diag"></div>
+          ${pts}
+          <span class="ax ay">MFE（最大浮盈 R）</span>
+          <span class="ax axx">MAE（最大浮亏 R）</span>
+        </div>
+        <div class="slegend">
+          <span><i class="w"></i>盈利平仓</span><span><i class="l"></i>亏损平仓</span>
+          <span class="mut">坐标轴上限 ${lim.toFixed(1)}R</span>
+        </div>
+      </div></div>
+    <div class="panel"><div class="ph"><h3>这张图在说什么</h3></div>
+      <div class="pb">
+        <div class="kv"><span>浮盈过 1R 最终却亏损</span>
+          <span class="num ${giveBack ? 'up' : ''}">${giveBack} 笔</span></div>
+        <div class="kv"><span>浮亏一度超过 2R</span>
+          <span class="num ${deepPain ? 'up' : ''}">${deepPain} 笔</span></div>
+        <div class="kv"><span>几乎没回撤就赚到的</span>
+          <span class="num ${clean ? 'dn' : ''}">${clean} 笔</span></div>
+        <div class="kv"><span>平均 MAE / MFE</span>
+          <span class="num">${sg(rows.reduce((a, r) => a + r.mae, 0) / rows.length)} / ${sg(rows.reduce((a, r) => a + r.mfe, 0) / rows.length)} R</span></div>
+        <div class="note info" style="margin-top:13px"><span>◎</span><span>
+          ${giveBack >= Math.max(2, rows.length * 0.2)
+            ? `有 <b>${giveBack} 笔</b>曾经浮盈超过 1R 最后却亏着走 —— 利润回吐是这一轮最贵的一项，考虑加跟踪止损。`
+            : deepPain >= Math.max(2, rows.length * 0.2)
+            ? `有 <b>${deepPain} 笔</b>浮亏一度超过 2R —— 止损放得偏远，单笔风险敞口比你以为的大。`
+            : '止损与持有的配合没有明显失衡；继续积累样本再看。'}
+        </span></div>
+      </div></div>
+  </div>`;
 }
 
 function breakdownPanel(title, rows) {

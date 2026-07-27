@@ -79,7 +79,136 @@ function renderSite(page) {
   // innerHTML 会把旧的图表容器整个换掉，先释放实例，否则它们会继续画在孤儿节点上
   disposeChartsIn(el);
   el.innerHTML = fn() + siteFooter();
-  if (page === 'home') requestAnimationFrame(() => { drawHeroChart(); drawFeatCharts(); });
+  if (page === 'home') requestAnimationFrame(() => { drawHeroChart(); drawFeatCharts(); runAiDemo(); });
+  if (page === 'contest') requestAnimationFrame(setupContest);
+}
+
+/* ── 首页的 AI 演示：不是配图，是当场算出来的 ──────────────────
+   做法：让「趋势跟随」这条真实策略在一段真实行情上跑完，
+   把它的成交记录喂进与产品内部完全相同的评估引擎，
+   把出来的判语、p 值、四维归因原样显示。
+   页面上的每个数字都是这一次加载现算的，刷新会换一段行情、换一组数。 */
+function runAiDemo() {
+  const host = $('#aiDemo'); if (!host) return;
+  setTimeout(() => {
+    try {
+      // 随机段落有时交易数不够（横盘段趋势策略几乎不动手），
+      // 换一段再试，别让首页最重要的一块时有时无。
+      const syms = Object.keys(DATASETS);
+      const bot = ROSTER.find(b => b.id === 'bot-trend');
+      const seed = (Math.random() * 1e9) | 0;
+      let sym, seg, trades = [];
+      for (let attempt = 0; attempt < 8; attempt++) {
+        sym = syms[Math.floor(Math.random() * syms.length)];
+        const bars = barsOf(sym);
+        const len = Math.min(700, bars.length - 10);
+        const off = Math.floor(Math.random() * (bars.length - len));
+        seg = bars.slice(off, off + len);
+        trades = runBot(bot, seg, INSTRUMENTS[sym], { qty: 20, warmup: 140, seed });
+        if (trades.length >= MIN_TRADES_FOR_VERDICT) break;
+      }
+      if (trades.length < MIN_TRADES_FOR_VERDICT) {
+        console.warn('AI 演示：连续 8 段都没凑够样本', trades.length); host.remove(); return;
+      }
+
+      const t0 = performance.now();
+      const r = analyzeSession({ bars: seg, trades, instrument: INSTRUMENTS[sym], seed, iterations: 800 });
+      const ms = Math.round(performance.now() - t0);
+      const h = r.headline;
+      const worst = [...r.attribution].filter(a => a.available)
+        .sort((a, b) => a.edgeR - b.edgeR)[0];
+      const lo = Math.min(h.nullP05R, h.observedR), hi = Math.max(h.nullP95R, h.observedR);
+      const P = v => ((v - lo) / ((hi - lo) || 1) * 100).toFixed(1);
+
+      host.innerHTML = `
+        <div class="aidemo-h">
+          <span class="live">现场计算</span>
+          一条<b>趋势跟随</b>策略刚在 <b>${DATASETS[sym].display}</b>
+          ${ymd(seg[140].t)} → ${ymd(seg[seg.length - 1].t)} 上跑了 <b>${trades.length}</b> 笔。
+          <b>换成你的成绩，AI 会这么说：</b>
+        </div>
+        <div class="aidemo-v">${md(r.verdict.text)}</div>
+        <div class="aidemo-bar">
+          <i class="band" style="left:${P(h.nullP05R)}%;width:${(P(h.nullP95R) - P(h.nullP05R)).toFixed(1)}%"></i>
+          <i class="med" style="left:${P(h.nullMedianR)}%"></i>
+          <i class="you" style="left:${P(h.observedR)}%"></i>
+        </div>
+        <div class="aidemo-lbl">
+          <span>随机对照组 5% 分位 ${sg(h.nullP05R)}R</span>
+          <span>中位 ${sg(h.nullMedianR)}R</span>
+          <span>95% 分位 ${sg(h.nullP95R)}R</span>
+        </div>
+        <div class="aidemo-g">
+          <div><span>这一轮成绩</span><b class="num">${sg(h.observedR)} R</b></div>
+          <div><span>百分位</span><b class="num">${(h.percentile * 100).toFixed(0)}%</b></div>
+          <div><span>p 值</span><b class="num">${h.pValue.toFixed(3)}</b></div>
+          <div><span>最拖后腿的维度</span><b>${worst ? worst.label : '—'}</b></div>
+        </div>
+        <div class="aidemo-f">
+          800 次蒙特卡洛 × 5 个零模型，在你的浏览器里跑了 ${ms} ms。
+          刷新这一页会换一段行情、换一组数字 —— 因为它是真算的。
+        </div>`;
+    } catch (e) {
+      // 演示块失败不能拖垮首页，但要留下线索，别让它静悄悄消失
+      console.warn('AI 演示未能生成：', e && e.message || e);
+      host.remove();
+    }
+  }, 260);
+}
+
+/* ── 选拔赛榜单：名字是化名，成绩是真跑出来的 ─────────────────── */
+function setupContest() {
+  const sel = $('#ctDs'); if (!sel) return;
+  sel.innerHTML = Object.entries(DATASETS)
+    .map(([k, d]) => `<option value="${k}">${d.display}</option>`).join('');
+  sel.value = 'SPX';
+  $('#ctGo').onclick = () => runContestBoard(true);
+  sel.onchange = () => runContestBoard(true);
+  runContestBoard(false);
+}
+
+function runContestBoard(reroll) {
+  const sym = $('#ctDs').value;
+  const bars = barsOf(sym);
+  if (reroll || S.ctSeg == null || S.ctSym !== sym) {
+    const len = Math.min(900, bars.length - 10);
+    S.ctSeg = Math.floor(Math.random() * (bars.length - len));
+    S.ctLen = len;
+    S.ctSym = sym;
+    S.ctSeed = (Math.random() * 1e9) | 0;
+  }
+  const seg = bars.slice(S.ctSeg, S.ctSeg + S.ctLen);
+  $('#ctSub').textContent = `${DATASETS[sym].display} · ${ymd(seg[0].t)} → ${ymd(seg[seg.length - 1].t)} · ${seg.length} 根`;
+  const board = $('#ctBoard');
+  board.innerHTML = `<div class="empty" style="padding:30px"><span class="spin"></span> 正在让 6 位陪练把这段行情跑完…</div>`;
+
+  setTimeout(() => {
+    const rows = runContest(seg, INSTRUMENTS[sym], { qty: 20, warmup: 140, seed: S.ctSeed });
+    // 把用户在这个品种上的历史成绩并进榜单
+    const mine = (typeof ACCT !== 'undefined' ? acctCurrent()?.rounds || [] : [])
+      .filter(r => r.symbol === sym)
+      .map((r, i) => ({ id: 'me' + i, name: `你 · 第 ${i + 1} 轮`, tag: acctCurrent().name, kind: 'me',
+        trades: r.trades, totalR: r.totalR, net: r.net, winRate: r.winRate }));
+    const all = [...rows, ...mine].sort((a, b) => b.totalR - a.totalR);
+    const max = Math.max(1, ...all.map(x => Math.abs(x.totalR)));
+
+    board.innerHTML = `<div class="lb">${all.map((x, i) => {
+      const w = (Math.abs(x.totalR) / max * 46).toFixed(1);
+      const col = x.kind === 'me' ? 'var(--brand)' : x.totalR >= 0 ? 'var(--up)' : 'var(--dn)';
+      return `<div class="lbrow ${x.kind}">
+        <span class="rk">${i + 1}</span>
+        <span class="nm"><b>${x.name}</b><i>${x.tag}</i></span>
+        <span class="tr"><i style="left:${x.totalR >= 0 ? 50 : 50 - w}%;width:${w}%;background:${col}"></i>
+          <u style="left:50%"></u></span>
+        <span class="num rv" style="color:${col}">${sg(x.totalR)} R</span>
+        <span class="num mut nq">${x.trades} 笔 · 胜率 ${(x.winRate * 100).toFixed(0)}%</span>
+      </div>`;
+    }).join('')}</div>
+    ${mine.length ? '' : `<div class="note info" style="margin-top:14px"><span>◎</span>
+      <span>你还没有在 ${DATASETS[sym].display} 上跑过。去
+      <a href="#app/replay" style="color:var(--brand);font-weight:600">训练场</a>
+      跑一轮，成绩会自动出现在这张榜上。</span></div>`}`;
+  }, 30);
 }
 
 function heroFacts() {
@@ -136,6 +265,24 @@ const SITE_PAGES = {
     <span>回放使用<b>不复权价</b></span>
   </div></div>
 
+  <div class="aiband"><div class="sec wrap">
+    <div class="sechead"><span class="eyebrow" style="color:var(--teal)">AI 赋能 · 这是最大的不同</span>
+      <h2>回放工具满大街，会告诉你「这是运气还是本事」的只有这里</h2>
+      <p>别家给你一条盈利曲线，剩下的自己悟。这里把它翻译成一句能验证的话，
+      而且每一个字都能追到一个算出来的数字。</p></div>
+
+    <!-- 下面这块不是配图，是页面加载时真的算出来的 -->
+    <div class="aidemo" id="aiDemo">
+      <div class="aidemo-h"><span class="spin"></span> 正在现场跑一遍给你看…</div>
+    </div>
+
+    <div class="grid g3" style="margin-top:26px">${AI6.map(a => `
+      <div class="aicard"><div class="k">${a.k}</div><h3>${a.h}</h3><p>${a.p}</p></div>`).join('')}</div>
+    <div style="text-align:center;margin-top:28px">
+      <a href="#app/replay" class="btn btn-p btn-lg">自己跑一轮试试 →</a>
+      <a href="#app/similar" class="btn btn-g btn-lg" style="margin-left:9px">看相似形态检索</a></div>
+  </div></div>
+
   <div class="sec"><div class="wrap">
     <div class="sechead"><span class="eyebrow">核心能力</span>
       <h2>一套完整的复盘训练闭环</h2>
@@ -157,17 +304,6 @@ const SITE_PAGES = {
           ${f.split ? `<div id="featChart${i}b" style="width:100%;height:96px"></div>` : ''}
         </div></div>
       </div>`).join('')}
-  </div></div>
-
-  <div class="aiband"><div class="sec wrap">
-    <div class="sechead"><span class="eyebrow" style="color:var(--teal)">AI 赋能</span>
-      <h2>不只是回放工具，是会评估你的教练</h2>
-      <p>传统复盘软件只给图表，看得懂看不懂全靠自己。
-      这里把「数据」翻译成「下一步该练什么」，而且每一句话都能追溯到一个算出来的数字。</p></div>
-    <div class="grid g3">${AI6.map(a => `
-      <div class="aicard"><div class="k">${a.k}</div><h3>${a.h}</h3><p>${a.p}</p></div>`).join('')}</div>
-    <div style="text-align:center;margin-top:28px">
-      <a href="#app/eval" class="btn btn-s btn-lg">看一份能力评估报告 →</a></div>
   </div></div>
 
   <div class="sec"><div class="wrap">
@@ -288,7 +424,22 @@ const SITE_PAGES = {
         <p>产出一份可核验的能力报告，供机构在人才评估时参考。</p>
         <ul><li>成绩可审计、可申诉</li><li>操作日志完整留存</li></ul></div>
     </div>
-    <div class="note" style="margin-top:26px;max-width:760px;margin-inline:auto"><span>⚠</span>
+    <div class="panel" style="margin-top:30px">
+      <div class="ph"><h3>本期赛题 · 实时榜单</h3>
+        <span class="sub" id="ctSub">—</span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <select id="ctDs" style="width:auto"></select>
+          <button class="btn btn-g btn-sm" id="ctGo">换一期赛题</button></div></div>
+      <div class="pb"><div id="ctBoard"><div class="empty" style="padding:30px">
+        <span class="spin"></span> 正在开赛…</div></div></div>
+    </div>
+
+    <div class="note info" style="margin-top:16px;max-width:820px;margin-inline:auto"><span>ℹ</span>
+      <span><b>关于榜上的陪练：</b>这是单机 demo，还没有真实对手，所以榜上的名字是<b>化名</b>。
+      但每个陪练都是一条真实可执行的策略，和你跑<b>同一段行情、同一套手续费滑点、同一个撮合引擎</b>——
+      成绩一个数字都不是编的。你在训练场里跑完一轮，成绩会自动进榜。</span></div>
+
+    <div class="note" style="margin-top:16px;max-width:820px;margin-inline:auto"><span>⚠</span>
       <span><b>关于实盘与资金：</b>本平台只做训练与能力评估，不提供实盘账户、不代客理财、不参与盈利分成。
       涉及实盘资金的选拔与资产管理需要相应金融牌照，由持牌机构自行开展。</span></div>
   </div></div>`,

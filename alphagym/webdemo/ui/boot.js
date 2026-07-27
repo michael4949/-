@@ -12,7 +12,10 @@ function onEnterView(key) {
     const show = S.report || S.reportPending;
     $('#evalEmpty').classList.toggle('hide', !!show || !S.lastTrades?.length);
     $('#evalBody').classList.toggle('hide', !show);
-    if (!S.report && !S.reportPending && S.lastTrades?.length) runReport();
+    // 报告可能是教练栏算出来的，那次只渲染进了教练栏。
+    // 不补这一句，从教练栏跑完再点「能力评估」会看到一片空白。
+    if (S.report && !$('#evalBody').children.length) renderEval(S.report, 0);
+    else if (!S.report && !S.reportPending && S.lastTrades?.length) runReport();
   }
   if (key === 'similar') {
     if (!S.simQuery) { $('#simDs').value = S.ds in DATASETS ? S.ds : 'SPX'; simRandomQuery(); }
@@ -44,6 +47,27 @@ function init() {
   $('#navToggle').onclick = () => $('#nav').classList.toggle('open');
   window.addEventListener('hashchange', route);
   window.addEventListener('resize', resizeCharts);
+
+  /* ── 模拟账户 ── */
+  acctLoad();
+  acctRender();
+  $('#acctSel').onchange = (e) => acctSwitch(e.target.value);
+  $('#expCsv').onclick = exportTradesCsv;
+
+  $('#railAsk').onclick = () => { openChat(); };
+
+  /* ── AI 教练 ── */
+  $('#hintBtn').onclick = coachHint;
+  $('#coachBack').onclick = coachCollapse;
+
+  /* ── 高级委托 ── */
+  $('#advBuy').onclick = () => advSubmit(1);
+  $('#advSell').onclick = () => advSubmit(-1);
+  $('#advCancel').onclick = advCancel;
+  $('#oType').onchange = (e) => {
+    const need = e.target.value !== 'market';
+    $('#oPrice').placeholder = need ? '必填' : '留空＝市价';
+  };
 
   /* ── 决策训练台 ── */
   $('#newRound').onclick = newRound;
