@@ -36,7 +36,7 @@ xiaowatt/
 ├── banzu/                  项目二工作区（空，README.md 是完整规格）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
-├── assets/coaches/         教练形象图（<id>.png，构建时自动内联到教练卡；提示词见 docs/教练形象_生成提示词.md）
+├── assets/coaches/         教练形象图（<id>.jpg 256px，已配齐 18 位，构建时自动内联到教练卡）
 └── docgen/                 四份正式文档的生成脚本（Node docx），改文档时用
 ```
 
