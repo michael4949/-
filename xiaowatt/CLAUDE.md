@@ -71,7 +71,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 ## 设计体系
 
-- **双主题**（甲方 9/1 口径）：底座各页（工作台/教练中心/评分复盘/成长档案/知识课堂）为**浅色「白+金+绿」**主题（白底 #f5f6f1、金 #c9a227、绿 #0e8f5a，样式集中在 style.css 尾部浅色段，弹层用 .mask.lite）；**陪练舱保持深色现场风**（沉浸式作业环境），令牌在 `peilian/style.css` 顶部 `:root`。同页内复用既有组件类，不要另起炉灶。
+- **全站统一浅色「白+金+绿」**（甲方 9/1 二次口径：每一个页面都浅色底）：白底 #f5f6f1、金 #c9a227、绿 #0e8f5a；陪练舱经全量色板映射完成浅色化（语义色保留：带电红 #e23b2e / 停电绿 #23b26a / 接地黄 #e8b22a / 挂牌牌面）。令牌在 `peilian/style.css` 顶部 `:root`（已是浅色值），复用既有组件类，不要另起炉灶。
 - 左上角永远是客户双行 logo（`__LOGO__` 占位符，build.py 内联）。
 - 正式文档（docx）配色：南网深蓝 `#00367A` 标题与表头，每页左上角客户 logo。
 - 工作台 Dashboard 的硬性口径（甲方原话，逐条对照验收）：**图表类型不重复、每个图表支持下钻或跳转到具体数据点/源、页面背景有动效、图表可交互、配色含南方电网元素、含 AI 元素、左上角客户 logo、整体高端大气时尚、背景插入南方电网图片及科技风图片**。南网实景照片素材甲方尚未提供——先用程序化变电站剪影+粒子层占位，留好图片插槽。
@@ -84,7 +84,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | know.js | 生成物：9 主题知识地图 KNOW、逐项知识点卡 STEPKP、阶段预习 PREVIEW（源头 gen_know.py） |
 | avatar.js | 内置 SVG 骨骼数字人：拼音视位口型（503 字表）、8 姿态、三角色 |
 | player.js | 数字人播放层三档：clips（HeyGen 预渲染 WebM，主用）/ stream（实时）/ builtin；HEYGEN_MANIFEST 内联点在此 |
-| guide.js | 教学引导层：三模式 MODES、当前指令 instrNow（动作图标+做什么+怎么做）、指令卡任务条（含「我该做什么」大按钮与「前往」按钮）、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、宽容判定 lenient() |
+| guide.js | 教学引导层：三模式 MODES、当前指令 instrNow（准备/五防/执行三阶段逐项指引，含目标选择器 sel）、GPIC 动作示意图（SMIL 动画演示按住/点选/复诵等）、applyGuideTarget 目标金色脉冲、指令卡任务条（渲染签名守卫防闪烁；「我该做什么」+「前往」）、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、宽容判定 lenient() |
 | layout.js | 页面骨架 LAYOUT 模板字符串 |
 | app1.js | 全局状态 S、常量、工具函数 |
 | sld.js | 一次接线图 SVG（1M/2M 双母七间隔，随设备状态变色） |

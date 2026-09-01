@@ -20,14 +20,14 @@ function renderPrep() {
       <div class="pc"><h5>二、着装互检</h5><div class="sub2">监护人与操作人互相检查</div>
         <div class="chkrow">${DRESS.map((t, i) => `<div class="chk ${S.prep.dress[i] ? 'on' : ''}" data-p="dress" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
       <div class="pc"><h5>三、操作任务与人员状态确认</h5><div class="sub2">监护人问询，操作人应答</div>
-        <div style="background:#0a1626;border:1px solid #1c3350;border-radius:6px;padding:10px;font-size:11.5px;line-height:1.75;color:#93a9c4">
+        <div style="background:#f6f7ee;border:1px solid #e2dfd0;border-radius:6px;padding:10px;font-size:11.5px;line-height:1.75;color:#5c6b5f">
           今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。你的精神状态是否良好？</div>
         <div class="chk ${S.prep.mind ? 'on' : ''}" data-p="mind" data-i="0" style="margin-top:10px"><div class="bx">✓</div><div class="lb">操作人应答：精神状态良好</div></div>
-        <div style="margin-top:10px;font-size:10.5px;color:#5f7794;line-height:1.6">精神不集中、疲劳或身体不适会降低识别设备、复诵和执行操作票的准确性，容易引发误操作。</div>
+        <div style="margin-top:10px;font-size:10.5px;color:#98a69c;line-height:1.6">精神不集中、疲劳或身体不适会降低识别设备、复诵和执行操作票的准确性，容易引发误操作。</div>
       </div>
     </div>
-    <div class="risks"><h5 style="margin:0 0 4px;font-size:13px;color:#cfe4fb">四、风险分析及管控措施（12 项）</h5>
-      <div class="sub2" style="font-size:10.5px;color:#5f7794;margin-bottom:11px">监护人逐条宣读，操作人逐条确认。点击条目展开管控措施与后果。已确认 <b id="rkn" style="color:#2fd08a">${S.prep.risks.filter(Boolean).length}</b>/12</div>
+    <div class="risks"><h5 style="margin:0 0 4px;font-size:13px;color:#2f4438">四、风险分析及管控措施（12 项）</h5>
+      <div class="sub2" style="font-size:10.5px;color:#98a69c;margin-bottom:11px">监护人逐条宣读，操作人逐条确认。点击条目展开管控措施与后果。已确认 <b id="rkn" style="color:#0e8f5a">${S.prep.risks.filter(Boolean).length}</b>/12</div>
       ${RISKS.map((r, i) => `<div class="rk ${S.prep.risks[i] ? 'on' : ''}" data-r="${i}">
         <div class="rh"><div class="n">${i + 1}</div><div class="t">${r[0]}</div><div class="s">${S.prep.risks[i] ? '已确认 ✓' : '待确认'}</div></div>
         <div class="rb"><b>管控措施：</b>${r[1]}<br><b>原因及后果：</b>${r[2]}</div></div>`).join('')}
@@ -55,6 +55,7 @@ function renderPrep() {
     S.prep.risks = S.prep.risks.map(() => true); renderPrep();
   };
   $('#p_go').onclick = () => enterWufang();
+  renderTaskbar();
 }
 
 async function enterPrep() {
@@ -107,7 +108,7 @@ function openRule() {
     <div class="dh"><b>第 ${st.no} 项 · 规程依据</b><span class="cls">×</span></div>
     <div class="db">
       <div class="sec"><div class="st">票面文字</div><div class="sc quote">${st.ticket}</div></div>
-      <div class="sec"><div class="st">依据条款</div><div class="sc" style="font-size:12.5px;color:#93a9c4">${st.rule}</div></div>
+      <div class="sec"><div class="st">依据条款</div><div class="sc" style="font-size:12.5px;color:#5c6b5f">${st.rule}</div></div>
       <div class="sec"><div class="st">为什么这样做</div><div class="sc">${st.why}</div></div>
     </div></div>`;
   document.body.appendChild(m);
@@ -145,45 +146,45 @@ function openReport() {
   });
   const grid = [1, .75, .5, .25].map(k => {
     const p = dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 3; return `${cx + Math.cos(a) * R * k},${cy + Math.sin(a) * R * k}`; }).join(' ');
-    return `<polygon points="${p}" fill="none" stroke="#1c3350"/>`;
+    return `<polygon points="${p}" fill="none" stroke="#e2dfd0"/>`;
   }).join('');
   const m = el('div', 'mask');
   m.innerHTML = `<div class="dlg" style="width:min(920px,96vw)">
     <div class="dh"><b>本次陪练评估 · 摘要</b>
-      <span style="font-size:11px;color:#93a9c4;font-family:var(--mono)">完整评分与复盘在「评分复盘」页</span><span class="cls">×</span></div>
+      <span style="font-size:11px;color:#5c6b5f;font-family:var(--mono)">完整评分与复盘在「评分复盘」页</span><span class="cls">×</span></div>
     <div class="db">
       <div style="display:grid;grid-template-columns:308px 1fr;gap:20px">
         <div style="text-align:center">
           <svg width="300" height="238" viewBox="0 0 304 232">
             ${grid}
-            ${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 3; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#1c3350"/>`; }).join('')}
-            <polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="rgba(77,151,232,.28)" stroke="#4d97e8" stroke-width="2"/>
-            ${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#9ecbff"/>`).join('')}
-            ${dims.map(([k, n], i) => { const a = -Math.PI / 2 + i * Math.PI / 3, r = R + 24; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; return `<text x="${x}" y="${y}" text-anchor="middle" font-size="10" fill="#93a9c4">${n}</text><text x="${x}" y="${y + 12}" text-anchor="middle" font-size="11" font-family="monospace" fill="#9ecbff">${Math.round(vals[i])}</text>`; }).join('')}
+            ${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 3; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#e2dfd0"/>`; }).join('')}
+            <polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="rgba(14,143,90,.28)" stroke="#1fa06b" stroke-width="2"/>
+            ${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#0a6b44"/>`).join('')}
+            ${dims.map(([k, n], i) => { const a = -Math.PI / 2 + i * Math.PI / 3, r = R + 24; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; return `<text x="${x}" y="${y}" text-anchor="middle" font-size="10" fill="#5c6b5f">${n}</text><text x="${x}" y="${y + 12}" text-anchor="middle" font-size="11" font-family="monospace" fill="#0a6b44">${Math.round(vals[i])}</text>`; }).join('')}
           </svg>
-          <div style="margin-top:6px"><div style="font-family:var(--mono);font-size:38px;color:${red ? '#ff9aa8' : '#8fe8c0'};line-height:1">${total}</div>
-          <div style="font-size:11px;color:#93a9c4">综合得分　${red ? '触发一票否决' : '本次评价'}</div></div>
+          <div style="margin-top:6px"><div style="font-family:var(--mono);font-size:38px;color:${red ? '#b3372c' : '#0e8f5a'};line-height:1">${total}</div>
+          <div style="font-size:11px;color:#5c6b5f">综合得分　${red ? '触发一票否决' : '本次评价'}</div></div>
         </div>
         <div>
-          <div class="sec"><div class="st">AI 复盘</div><div class="sc" style="font-size:12.5px;background:#0b1f19;border-left:3px solid #2fd08a;padding:10px 13px;border-radius:0 5px 5px 0">${genReview()}</div></div>
+          <div class="sec"><div class="st">AI 复盘</div><div class="sc" style="font-size:12.5px;background:#eaf5ee;border-left:3px solid #0e8f5a;padding:10px 13px;border-radius:0 5px 5px 0">${genReview()}</div></div>
           <div class="sec"><div class="st">本次过程</div><div class="sc" style="font-size:12.5px">
             用时 ${$('#ktime').textContent}　·　操作项 ${STEPS.filter(s => s._done).length}/${S.plan ? S.plan.steps.length : STEPS.length} 项完成　·　违规 ${S.vio.length} 项　·　主动中止上报 ${S.abn.handled ? 1 : 0} 次
           </div></div>
           <div class="sec"><div class="st">扣分与否决项</div><div class="sc" style="font-size:12px">
-            ${S.vio.length ? S.vio.map(v => `<div style="padding:6px 0;border-bottom:1px dashed #17293f">
+            ${S.vio.length ? S.vio.map(v => `<div style="padding:6px 0;border-bottom:1px dashed #e9e6d8">
               <span class="tag ${v.level === 'red' ? 'rl' : 'wn'}">${v.level === 'red' ? '一票否决' : v.level === 'major' ? '严重' : '不规范'}</span>
-              <b style="color:#e6edf6">第${v.step}项 ${v.title}</b>
-              <div style="color:#93a9c4;margin-top:3px;line-height:1.6">${v.detail}</div></div>`).join('') : '<span style="color:#8fe8c0">本次未触发扣分项。</span>'}
+              <b style="color:#243329">第${v.step}项 ${v.title}</b>
+              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">${v.detail}</div></div>`).join('') : '<span style="color:#0e8f5a">本次未触发扣分项。</span>'}
           </div></div>
           ${S.praise.length ? `<div class="sec"><div class="st">加分项</div><div class="sc" style="font-size:12px">
-            ${S.praise.map(p => `<div style="padding:5px 0"><span class="tag ok">加分</span><b style="color:#e6edf6">${p.title}</b>
-            <div style="color:#93a9c4;margin-top:3px">${p.detail}</div></div>`).join('')}</div></div>` : ''}
+            ${S.praise.map(p => `<div style="padding:5px 0"><span class="tag ok">加分</span><b style="color:#243329">${p.title}</b>
+            <div style="color:#5c6b5f;margin-top:3px">${p.detail}</div></div>`).join('')}</div></div>` : ''}
           <div class="sec"><div class="st">能力标签</div><div class="sc">
             ${['规程记忆', '唱票复诵', '设备状态核对', '异常处置', '调度术语', '风险辨识'].map((t, i) =>
     `<span style="display:inline-block;margin:3px 6px 3px 0;padding:3px 10px;border-radius:12px;font-size:11px;
-              background:${vals[i] > 80 ? '#0b2018' : vals[i] > 55 ? '#2a1f08' : '#25101a'};
-              border:1px solid ${vals[i] > 80 ? '#1c4a35' : vals[i] > 55 ? '#5a4415' : '#5a2131'};
-              color:${vals[i] > 80 ? '#8fe8c0' : vals[i] > 55 ? '#ffcf7a' : '#ff9aa8'}">${t} ${vals[i] > 80 ? '达标' : vals[i] > 55 ? '待提升' : '短板'}</span>`).join('')}
+              background:${vals[i] > 80 ? '#ecf6ee' : vals[i] > 55 ? '#faf3dc' : '#fbe9e7'};
+              border:1px solid ${vals[i] > 80 ? '#b5d9c0' : vals[i] > 55 ? '#e3d49e' : '#eac1bb'};
+              color:${vals[i] > 80 ? '#0e8f5a' : vals[i] > 55 ? '#a8821b' : '#b3372c'}">${t} ${vals[i] > 80 ? '达标' : vals[i] > 55 ? '待提升' : '短板'}</span>`).join('')}
           </div></div>
         </div>
       </div>
@@ -269,7 +270,8 @@ function boot() {
   S.lastAct = Date.now();
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { S.lastAct = Date.now(); }, true));
   setInterval(() => {
-    if (S.stage !== 'run' || S.ended || S.mode === 'exam') return;
+    if (!['prep', 'wufang', 'run'].includes(S.stage) || S.ended) return;
+    if (S.stage === 'run' && S.mode === 'exam') return;
     if (location.hash !== '#arena') return;
     if ((window.__DH_SPEED || 1) < 1) return;
     if (DH && DH.speaking) return;

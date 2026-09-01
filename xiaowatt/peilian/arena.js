@@ -59,7 +59,7 @@ function openEntry(pre) {
   let plan = (pre && PLANS.some(p => p.id === pre)) ? pre : 'full', role = 'op';
   const hasWrong = wrongSteps().length > 0;
   m.innerHTML = `<div class="dlg" style="width:min(820px,96vw)">
-    <div class="dh"><b>开始陪练 · 选择练习方式</b><span style="font-size:11px;color:#93a9c4">110kV培训三线1163线路由运行转检修</span></div>
+    <div class="dh"><b>开始陪练 · 选择练习方式</b><span style="font-size:11px;color:#5c6b5f">110kV培训三线1163线路由运行转检修</span></div>
     <div class="db">
       <div class="sec"><div class="st">你扮演</div>
         <div style="display:flex;gap:10px">
@@ -75,7 +75,7 @@ function openEntry(pre) {
       <div class="sec"><div class="st">教学模式</div>
         <div class="modesw" style="display:inline-flex">${Object.keys(MODES).map(k =>
     `<button data-m="${k}" class="${S.mode === k ? 'on' : ''}">${MODES[k].n}</button>`).join('')}</div>
-        <span style="font-size:11px;color:#5f7794;margin-left:10px" id="modedesc">${MODES[S.mode].d}</span></div>
+        <span style="font-size:11px;color:#98a69c;margin-left:10px" id="modedesc">${MODES[S.mode].d}</span></div>
     </div>
     <div class="df"><button class="btn" id="en_back">返回工作台</button><button class="btn pri" id="en_go">进入陪练舱</button></div></div>`;
   document.body.appendChild(m);
@@ -109,12 +109,12 @@ function askCoach() {
   const rel = (st && STEPKP[st.no] && STEPKP[st.no].k) || [];
   const sugg = rel.length ? KNOW.filter(k => rel.includes(k.id)).flatMap(k => k.body.slice(0, 2).map(b => b[0])) : ['为什么要先验电再接地', 'GIS 刀闸要核对哪四项', '票令不一致怎么办'];
   m.innerHTML = `<div class="dlg" style="width:min(680px,96vw)">
-    <div class="dh"><b>问教练</b><span style="font-size:11px;color:#93a9c4">基于安规与操作票管理细则知识库</span><span class="cls">×</span></div>
+    <div class="dh"><b>问教练</b><span style="font-size:11px;color:#5c6b5f">基于安规与操作票管理细则知识库</span><span class="cls">×</span></div>
     <div class="db">
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <input class="rin" id="ask_in" placeholder="例如：为什么要先拉线路侧刀闸？" style="flex:1">
         <button class="btn pri" id="ask_go">提问</button></div>
-      <div style="font-size:11px;color:#5f7794;margin-bottom:8px">可以直接点：${sugg.map(q => `<a class="klink" data-q="${q}">${q}</a>`).join('　')}</div>
+      <div style="font-size:11px;color:#98a69c;margin-bottom:8px">可以直接点：${sugg.map(q => `<a class="klink" data-q="${q}">${q}</a>`).join('　')}</div>
       <div id="ask_out"></div>
     </div></div>`;
   document.body.appendChild(m);
@@ -129,7 +129,7 @@ function askCoach() {
     await new Promise(r => setTimeout(r, 380));
     const ans = m.querySelector('#ask_ans');
     if (!ans) return;
-    ans.innerHTML = `${r.text.replace(/\n/g, '<br>')}<div style="margin-top:8px;font-size:10.5px;color:#5f7794">依据：${r.src}${r.topic ? `　·　<a class="klink" data-k="${r.topic}">查看主题</a>` : ''}</div>`;
+    ans.innerHTML = `${r.text.replace(/\n/g, '<br>')}<div style="margin-top:8px;font-size:10.5px;color:#98a69c">依据：${r.src}${r.topic ? `　·　<a class="klink" data-k="${r.topic}">查看主题</a>` : ''}</div>`;
     ans.querySelectorAll('.klink').forEach(a => a.onclick = () => openKnow(a.dataset.k));
     speak(r.text.slice(0, 120), { pose: 'explain' });
   };
@@ -187,13 +187,13 @@ function genReview() {
 function updateActbar() {
   const a = $('#actbar');
   if (S.stage === 'prep') {
-    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#93a9c4">
+    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
       上岗前准备：在作业面板完成三审与资格核对、着装互检、人员状态确认与 12 项风险分析后，进入五防模拟。</div>
       <button class="btn askbtn" id="a_ask">问教练</button></div>`;
     $('#a_ask').onclick = askCoach; Sheet.sync(); return;
   }
   if (S.stage === 'wufang') {
-    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#93a9c4">
+    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
       五防模拟：按操作票顺序点击模拟项，监护人唱票、你复诵后执行。顺序错误将被防误逻辑拒绝。</div>
       <button class="btn askbtn" id="a_ask">问教练</button></div>`;
     $('#a_ask').onclick = askCoach; Sheet.sync(); return;
@@ -217,9 +217,9 @@ function updateActbar() {
       <button class="btn" id="a_rule">规程依据</button>
     </div>
     <div class="hintrow"><span class="k">当前节拍</span>${BEATS[S.beat] ? BEATS[S.beat][0] : '—'}
-      <span style="color:#33475e">|</span><span class="k">操作对象</span>${st && st.target ? devName(st.target) : '本项为调度联系'}
-      <span style="color:#33475e">|</span><span class="k">所在位置</span>${LOC[S.loc].name}
-      ${S.beat === 1 && st && st.loc !== S.loc ? `<span style="color:#ffcf7a">→ 需前往 ${LOC[st.loc].name}</span>` : ''}
+      <span style="color:#b9bfae">|</span><span class="k">操作对象</span>${st && st.target ? devName(st.target) : '本项为调度联系'}
+      <span style="color:#b9bfae">|</span><span class="k">所在位置</span>${LOC[S.loc].name}
+      ${S.beat === 1 && st && st.loc !== S.loc ? `<span style="color:#a8821b">→ 需前往 ${LOC[st.loc].name}</span>` : ''}
     </div>`;
   $('#a_send').onclick = submitInput;
   $('#a_stop').onclick = clickStop;

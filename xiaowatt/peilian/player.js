@@ -151,7 +151,7 @@ function openAvatarCfg() {
         <div class="cfgin"><label>值班负责人</label><input id="cf_a3" value="${HEYGEN_CFG.avatar.zhiban}" placeholder="avatar_id"></div>
       </div>
       <div class="sec"><div class="st">说明</div>
-        <div class="sc" style="font-size:11.5px;color:#93a9c4;line-height:1.8">
+        <div class="sc" style="font-size:11.5px;color:#5c6b5f;line-height:1.8">
           预渲染片段随系统打包，离线播放；三种方式自动降级。
         </div>
       </div>

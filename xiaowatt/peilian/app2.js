@@ -230,7 +230,7 @@ function panelPhone(w) {
   w.innerHTML = pnl('调度电话 · 受令席', '110kV仿真站', `
     <div class="phone">
       <div class="handset ${ringing ? 'ringing' : ''}">
-        <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#9ecbff" stroke-width="1.8">
+        <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0a6b44" stroke-width="1.8">
           <path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></div>
         <div class="nm">${ringing ? '地调值班调度员 来电' : '地调值班调度员'}</div>
         <div class="de">${ringing ? '等待接令' : '通话空闲'}</div>
@@ -241,7 +241,7 @@ function panelPhone(w) {
         <div class="row"><div class="k">受令人</div><div class="v">${S.ord.to}</div></div>
         <div class="row"><div class="k">受令时间</div><div class="v" id="o_time">${S.ord.time || '—'}</div></div>
         <div class="row"><div class="k">操作任务</div><div class="v">将110kV培训三线1163线路由运行转检修</div></div>
-        <div class="row"><div class="k">当前下令</div><div class="v" style="color:#ffd88a">${S.ord.cur || '—'}</div></div>
+        <div class="row"><div class="k">当前下令</div><div class="v" style="color:#a8821b">${S.ord.cur || '—'}</div></div>
       </div>
     </div>`);
   const u = $('#o_unit'), f = $('#o_from');
@@ -251,13 +251,13 @@ function panelPhone(w) {
 function panelWufang(w) {
   w.innerHTML = pnl('五防主机 · 模拟预演', `模拟 ${S.wf}/4`, `
     <div class="wf">
-      <div style="font-size:11.5px;color:#93a9c4;line-height:1.7">
+      <div style="font-size:11.5px;color:#5c6b5f;line-height:1.7">
         五防主机、电脑钥匙状态正常，五防系统与后台监控设备状态一致。<br>
-        操作任务已输入：<b style="color:#cfe4fb">将110kV培训三线1163线路由运行转检修</b>
+        操作任务已输入：<b style="color:#2f4438">将110kV培训三线1163线路由运行转检修</b>
       </div>
       <div class="wfsteps">${WUFANG.map((x, i) =>
       `<div class="wfs ${i < S.wf ? 'done' : ''} ${i === S.wf ? 'tgt' : ''}" data-wf="${i}">${i + 1}. ${x[1]}</div>`).join('')}</div>
-      ${S.wf >= 4 ? `<div style="margin-top:12px;font-size:12px;color:#8fe8c0">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}
+      ${S.wf >= 4 ? `<div style="margin-top:12px;font-size:12px;color:#0e8f5a">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}
     </div>`) + pnl('五防模拟接线图', '', `<div class="sld">${sld()}</div>`);
   $$('.wfs').forEach(b => b.onclick = () => wfClick(+b.dataset.wf));
 }
@@ -307,7 +307,7 @@ function gisPanel() {
         <div class="val ${c[2].indexOf('不一致') >= 0 ? 'a' : (id === 'ES116340' ? 'g' : 'b')}">${c[2]}</div>
         <div class="tick">${S.gis[c[0]] ? '已核对 ✓' : ''}</div></div>`).join('')}
     </div>
-    ${anomaly ? `<div style="margin-top:12px;background:#25101a;border:1px solid #5a2131;border-radius:6px;padding:11px;font-size:12px;color:#ffb0bb;line-height:1.7">
+    ${anomaly ? `<div style="margin-top:12px;background:#fbe9e7;border:1px solid #eac1bb;border-radius:6px;padding:11px;font-size:12px;color:#b3372c;line-height:1.7">
       现场机构箱机械指示与监控后台位置显示不一致。<br>
       细则第十四条：一旦发现设备运动方向异常、位置指示不一致等问题，应落实"凡变化必上报"，立即中止操作并上报，严禁盲目重试。</div>` : ''}`);
 }
@@ -316,7 +316,7 @@ function panelP8(w) {
     <div class="cab c2">
       ${knobHTML('K1QK', '1QK', '培训三线1163开关控制选择把手', ['远控', '就地'])}
       <div class="mcb tagslot ${S.dev._t === 'TCLOSE' ? 'tgt' : ''}" data-dev="TCLOSE">
-        <div class="body" style="background:#3a1518;border-color:#6b2a2e">
+        <div class="body" style="background:#fbe9e7;border-color:#e0a89f">
           <div style="position:absolute;left:4px;top:12px;width:18px;height:18px;border-radius:50%;background:#e23b2e"></div>
         </div>
         <div class="i"><div class="nm">1163 合闸按钮</div><div class="de">CLOSE · 就地合闸</div>
@@ -340,13 +340,13 @@ function panelCab(w) {
       <div class="knob ${S.dev._t === 'ES116340' ? 'tgt' : ''} dev" data-dev="ES116340">
         <div class="nm">116340</div><div class="de">培训三线线路侧接地刀闸<br>就地电动操作</div>
         <svg width="96" height="56" viewBox="0 0 96 56">
-          <rect x="6" y="8" width="84" height="40" rx="5" fill="#0e1f33" stroke="#27466b"/>
+          <rect x="6" y="8" width="84" height="40" rx="5" fill="#eef0e4" stroke="#d3d0bd"/>
           <circle cx="30" cy="28" r="12" fill="none" stroke="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#23b26a'}" stroke-width="2.4"/>
           <line x1="30" y1="28" x2="${S.dev.ES116340 === 'close' ? 30 : 22}" y2="${S.dev.ES116340 === 'close' ? 17 : 20}" stroke="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#23b26a'}" stroke-width="3.4" stroke-linecap="round"/>
-          <text x="62" y="24" font-size="9" fill="#7f9cbb" font-family="monospace">合闸</text>
-          <text x="62" y="40" font-size="9" fill="#7f9cbb" font-family="monospace">分闸</text>
-          <circle cx="54" cy="21" r="3" fill="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#1d3350'}"/>
-          <circle cx="54" cy="37" r="3" fill="${S.dev.ES116340 === 'close' ? '#1d3350' : '#23b26a'}"/>
+          <text x="62" y="24" font-size="9" fill="#8b988c" font-family="monospace">合闸</text>
+          <text x="62" y="40" font-size="9" fill="#8b988c" font-family="monospace">分闸</text>
+          <circle cx="54" cy="21" r="3" fill="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#dcd9c8'}"/>
+          <circle cx="54" cy="37" r="3" fill="${S.dev.ES116340 === 'close' ? '#dcd9c8' : '#23b26a'}"/>
         </svg>
         <div class="st ${S.dev.ES116340 === 'close' ? 'a' : 'b'}">${S.dev.ES116340 === 'close' ? '合上位置' : '拉开位置'}</div>
       </div>
@@ -376,13 +376,13 @@ function knobHTML(id, nm, de, opts) {
   return `<div class="knob dev ${S.dev._t === id ? 'tgt' : ''}" data-dev="${id}">
     <div class="nm">${nm}</div><div class="de">${de}</div>
     <svg width="96" height="60" viewBox="0 0 96 60">
-      <circle cx="48" cy="30" r="21" fill="#0e1f33" stroke="#27466b" stroke-width="2"/>
+      <circle cx="48" cy="30" r="21" fill="#eef0e4" stroke="#d3d0bd" stroke-width="2"/>
       <g transform="rotate(${on ? 42 : -42},48,30)">
-        <rect x="45" y="11" width="6" height="21" rx="3" fill="${on ? '#e8b22a' : '#4d97e8'}"/>
-        <circle cx="48" cy="30" r="6" fill="#1b3350"/>
+        <rect x="45" y="11" width="6" height="21" rx="3" fill="${on ? '#e8b22a' : '#1fa06b'}"/>
+        <circle cx="48" cy="30" r="6" fill="#dcd9c8"/>
       </g>
-      <text x="14" y="16" font-size="9" fill="#7f9cbb" font-family="monospace">${opts[0]}</text>
-      <text x="66" y="16" font-size="9" fill="#7f9cbb" font-family="monospace">${opts[1]}</text>
+      <text x="14" y="16" font-size="9" fill="#8b988c" font-family="monospace">${opts[0]}</text>
+      <text x="66" y="16" font-size="9" fill="#8b988c" font-family="monospace">${opts[1]}</text>
     </svg>
     <div class="st ${on ? 'a' : 'b'}">${v}</div></div>`;
 }

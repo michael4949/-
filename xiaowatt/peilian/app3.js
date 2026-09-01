@@ -298,8 +298,8 @@ function redlineGround(skipped) {
     title: '红线触发 · 未验电即合接地刀闸',
     where: `第 ${STEP().no} 项：${STEP().ticket}${skipped && skipped.length ? `<br>并跳过了第 ${skipped.join('、')} 项` : ''}`,
     why: [
-      '第17项「检查后台机显示培训三线1163线路二次确无电压」' + (S.verify.v1 ? '已执行' : '<b style="color:#ff9aa8">未执行</b>'),
-      '第18项「检查培训三线1163间隔高压带电显示装置显示确无电压」' + (S.verify.v2 ? '已执行' : '<b style="color:#ff9aa8">未执行</b>')
+      '第17项「检查后台机显示培训三线1163线路二次确无电压」' + (S.verify.v1 ? '已执行' : '<b style="color:#b3372c">未执行</b>'),
+      '第18项「检查培训三线1163间隔高压带电显示装置显示确无电压」' + (S.verify.v2 ? '已执行' : '<b style="color:#b3372c">未执行</b>')
     ],
     rule: '《变电现场电气操作票管理细则》第十三条（四）：所有接地操作前均应规范验电，确保接地刀闸静触头得到安全有效的"先验电再接地"。<br>附录G-23：严格落实"凡触碰必验电、接地后才许可"原则，对于不能直接验电的，按《安规》要求应有两个及以上非同样原理或非同源的指示且均已同时发生变化，才能确认该设备已无电。<br>风险第10条管控措施：GIS设备不具备直接验电条件时，按操作票分别核对后台二次电压和高压带电显示装置，确认两种不同原理或非同源指示均已发生应有变化且同时显示无电压后，方可合上116340地刀。',
     right: '先执行第17项核对后台二次电压确无电压，再执行第18项逐相核对高压带电显示装置确无电压；两项交叉核对一致且变化逻辑正确后，方可将ZK切至就地并合上116340地刀。任一指示异常或两种结果不一致，立即中止操作并按变化管理要求上报。',
@@ -340,10 +340,10 @@ function redlineAbnormal() {
 function openRedline(o) {
   const m = el('div', 'mask');
   m.innerHTML = `<div class="dlg red">
-    <div class="dh"><b>${o.title}</b><span style="font-size:11px;color:#93a9c4;font-family:var(--mono)">RED LINE · 一票否决</span><span class="cls">×</span></div>
+    <div class="dh"><b>${o.title}</b><span style="font-size:11px;color:#5c6b5f;font-family:var(--mono)">RED LINE · 一票否决</span><span class="cls">×</span></div>
     <div class="db">
       <div class="sec"><div class="st">错在哪</div><div class="sc quote">${o.where}<br>${o.why.map(x => '· ' + x).join('<br>')}</div></div>
-      <div class="sec"><div class="st">依据哪一条</div><div class="sc" style="font-size:12px;color:#93a9c4">${o.rule}</div></div>
+      <div class="sec"><div class="st">依据哪一条</div><div class="sc" style="font-size:12px;color:#5c6b5f">${o.rule}</div></div>
       <div class="sec"><div class="st">正确做法</div><div class="sc">${o.right}</div></div>
       <div class="sec"><div class="st">事故后果推演</div>
         <canvas id="arc" width="820" height="230"></canvas>
@@ -368,13 +368,13 @@ function arcAnim() {
     if (!document.body.contains(c)) return;
     t += 1 / 60;
     g.clearRect(0, 0, W, H);
-    g.fillStyle = '#05090f'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
     // 设备示意
-    g.strokeStyle = '#20344c'; g.lineWidth = 2;
+    g.strokeStyle = '#d5d9c6'; g.lineWidth = 2;
     g.beginPath(); g.moveTo(60, 40); g.lineTo(760, 40); g.stroke();
-    g.fillStyle = '#7f9cbb'; g.font = '12px monospace';
+    g.fillStyle = '#8b988c'; g.font = '12px monospace';
     g.fillText('110kV 培训三线（线路侧仍带电）', 60, 30);
-    g.strokeStyle = t > 1.1 ? '#e23b2e' : '#2b4767'; g.lineWidth = 3;
+    g.strokeStyle = t > 1.1 ? '#e23b2e' : '#c8cfb9'; g.lineWidth = 3;
     g.beginPath(); g.moveTo(410, 40); g.lineTo(410, 120); g.stroke();
     // 地刀
     const close = Math.min(1, Math.max(0, (t - 0.35) / 0.8));
@@ -382,11 +382,11 @@ function arcAnim() {
     g.strokeStyle = close >= 1 ? '#e8b22a' : '#23b26a'; g.lineWidth = 5; g.lineCap = 'round';
     g.rotate((1 - close) * -0.9);
     g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 62); g.stroke(); g.restore();
-    g.strokeStyle = '#4a637f'; g.lineWidth = 3;
+    g.strokeStyle = '#a5b0a1'; g.lineWidth = 3;
     g.beginPath(); g.moveTo(386, 186); g.lineTo(434, 186); g.stroke();
     g.beginPath(); g.moveTo(394, 194); g.lineTo(426, 194); g.stroke();
     g.beginPath(); g.moveTo(402, 202); g.lineTo(418, 202); g.stroke();
-    g.fillStyle = '#5f7794'; g.font = '11px monospace';
+    g.fillStyle = '#98a69c'; g.font = '11px monospace';
     g.fillText('116340 接地刀闸', 448, 158);
     // 弧光
     if (t > 1.1 && t < 3.4) {
@@ -409,14 +409,14 @@ function arcAnim() {
       g.fillStyle = 'rgba(255,255,255,' + (.10 * flick) + ')'; g.fillRect(0, 0, W, H);
     }
     if (t > 1.35) {
-      g.fillStyle = '#ff9aa8'; g.font = 'bold 15px sans-serif';
+      g.fillStyle = '#b3372c'; g.font = 'bold 15px sans-serif';
       g.fillText('带电合接地刀闸 → 金属性短路', 520, 60);
-      g.fillStyle = '#ffcf7a'; g.font = '12px monospace';
+      g.fillStyle = '#a8821b'; g.font = '12px monospace';
       g.fillText('短路电流 ≈ 21.4 kA', 520, 84);
       g.fillText('电弧温度 > 6000 ℃', 520, 104);
     }
     if (t > 2.1) {
-      g.fillStyle = '#ff9aa8'; g.font = '12px monospace';
+      g.fillStyle = '#b3372c'; g.font = '12px monospace';
       g.fillText('T+0.08s  线路保护动作', 60, 100);
       g.fillText('T+0.12s  母差保护动作', 60, 120);
       g.fillText('T+0.20s  110kV 2M 失压', 60, 140);
@@ -451,15 +451,15 @@ function openAbnormal() {
   const m = el('div', 'mask');
   const paint = () => {
     m.innerHTML = `<div class="dlg" style="width:min(680px,96vw)">
-      <div class="dh"><b>异常处置流程</b><span style="font-size:11px;color:#93a9c4;font-family:var(--mono)">凡变化必上报 · 细则第十四条</span></div>
+      <div class="dh"><b>异常处置流程</b><span style="font-size:11px;color:#5c6b5f;font-family:var(--mono)">凡变化必上报 · 细则第十四条</span></div>
       <div class="db">
         <div class="sec"><div class="st">触发条件</div><div class="sc quote">培训三线线路侧11634刀闸：现场机构箱机械指示与监控后台位置显示不一致</div></div>
         ${steps.map((s, i) => `<div style="display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border-radius:6px;margin-bottom:7px;
-          background:${i < cur ? '#0b2018' : i === cur ? '#12233a' : '#0a1524'};border:1px solid ${i < cur ? '#1c4a35' : i === cur ? '#2a6fbe' : '#1c3350'}">
+          background:${i < cur ? '#ecf6ee' : i === cur ? '#f1f3e8' : '#f0f1e9'};border:1px solid ${i < cur ? '#b5d9c0' : i === cur ? '#0e8f5a' : '#e2dfd0'}">
           <div style="width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
-            font-size:11px;font-family:monospace;background:${i < cur ? '#2fd08a' : i === cur ? '#2a6fbe' : '#1d3350'};color:${i <= cur ? '#061018' : '#5f7794'}">${i < cur ? '✓' : i + 1}</div>
-          <div style="flex:1"><div style="font-size:12.5px;color:${i <= cur ? '#e6edf6' : '#5f7794'};font-weight:${i === cur ? 700 : 400}">${s[0]}</div>
-          <div style="font-size:11px;color:#93a9c4;margin-top:3px;line-height:1.6">${s[1]}</div></div>
+            font-size:11px;font-family:monospace;background:${i < cur ? '#0e8f5a' : i === cur ? '#0e8f5a' : '#dcd9c8'};color:${i <= cur ? '#ffffff' : '#98a69c'}">${i < cur ? '✓' : i + 1}</div>
+          <div style="flex:1"><div style="font-size:12.5px;color:${i <= cur ? '#243329' : '#98a69c'};font-weight:${i === cur ? 700 : 400}">${s[0]}</div>
+          <div style="font-size:11px;color:#5c6b5f;margin-top:3px;line-height:1.6">${s[1]}</div></div>
         </div>`).join('')}
       </div>
       <div class="df">${cur < steps.length ? `<button class="btn pri" id="ab_next">${steps[cur][0]}</button>` : `<button class="btn pri" id="ab_done">返回被中止的操作项目</button>`}</div>
@@ -499,7 +499,7 @@ async function clickStop() {
     <div class="dh"><b>中止操作并上报</b><span class="cls">×</span></div>
     <div class="db"><div class="sec"><div class="st">当前判断</div>
     <div class="sc">当前未检出设备运动方向异常、五防锁具异常、后台与现场指示不一致等触发条件。</div></div>
-    <div class="sec"><div class="st">说明</div><div class="sc" style="font-size:12px;color:#93a9c4">
+    <div class="sec"><div class="st">说明</div><div class="sc" style="font-size:12px;color:#5c6b5f">
     细则第十四条要求"凡变化必上报"；但无依据地中止操作会打断作业连续性。中止判断本身也是被评价的能力项。</div></div></div>
     <div class="df"><button class="btn" id="sp_c">取消</button><button class="btn dan" id="sp_y">仍然中止并上报</button></div></div>`;
   document.body.appendChild(m);
@@ -514,7 +514,7 @@ async function clickStop() {
 
 /* ---------------- 五防模拟 ---------------- */
 async function wfClick(i) {
-  if (i !== S.wf) { toast('五防模拟须按操作票顺序逐项进行', 'bad'); return; }
+  if (i !== S.wf) { toast(`须按顺序模拟：请先点第 ${S.wf + 1} 步「${WUFANG[S.wf][1]}」`, 'bad'); renderTaskbar(); return; }
   const x = WUFANG[i];
   say('j', x[1] + '（监护人根据操作票操作步骤完整念出）');
   await speak(x[1] + '。', { pose: 'call' });
