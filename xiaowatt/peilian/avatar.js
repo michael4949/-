@@ -335,28 +335,12 @@ class DigitalHuman {
     this.stopSpeak(true);
     this.seq = this.buildSeq(text);
     this.speaking = true;
-    this.perChar = (opt.rate || 0.155) * (window.__DH_SPEED || 1);
+    this.perChar = (opt.rate || 0.115) * (window.__DH_SPEED || 1);
     this.seqStart = performance.now() / 1000;
     this.onSpeakEnd = opt.onEnd || null;
     this.ttsProgress = -1;
     if (opt.pose) this.setPose(opt.pose);
-    // 路线A：真实语音，boundary 事件对齐字序
-    if (window.speechSynthesis && !window.__DH_MUTE) {
-      try {
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'zh-CN'; u.rate = 1.0; u.pitch = this.char.sex === 'f' ? 1.12 : 0.9;
-        const vs = speechSynthesis.getVoices().filter(v => /zh|Chinese/i.test(v.lang + v.name));
-        if (vs.length) {
-          if (this.char.sex === 'f') u.voice = vs.find(v => /Female|女|Xiaoxiao|Huihui/i.test(v.name)) || vs[0];
-          else u.voice = vs.find(v => /Male|男|Yunxi|Kangkang/i.test(v.name)) || vs[0];
-        }
-        u.onboundary = e => { if (typeof e.charIndex === 'number') this.ttsProgress = e.charIndex; };
-        u.onend = () => { if (this.speaking) this.finishSpeak(); };
-        u.onerror = () => { };
-        this.utter = u;
-        speechSynthesis.speak(u);
-      } catch (e) { }
-    }
+    // 内置渲染不播语音：口型与节奏按逐字时钟推进，声音由 HeyGen 预渲染片段承担
     return this;
   }
 
@@ -368,7 +352,6 @@ class DigitalHuman {
   }
 
   stopSpeak(silent) {
-    if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) { } }
     this.speaking = false; this.seq = null;
     this.mouthTarget = Object.assign({}, VISEME.X);
     if (!silent) { this.onSpeakEnd = null; }

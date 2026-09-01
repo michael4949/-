@@ -36,6 +36,7 @@ xiaowatt/
 ├── banzu/                  项目二工作区（空，README.md 是完整规格）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
+├── assets/coaches/         教练形象图（<id>.png，构建时自动内联到教练卡；提示词见 docs/教练形象_生成提示词.md）
 └── docgen/                 四份正式文档的生成脚本（Node docx），改文档时用
 ```
 
@@ -70,7 +71,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 ## 设计体系
 
-- 陪练舱与底座各页统一**深色科技风**：设计令牌全部在 `peilian/style.css` 顶部 `:root`（--bg/--bg2/--line/--csg 南网蓝系/--ok/--warn/--bad/--mono/--ui）。新页面直接复用这套令牌与既有组件类（.btn/.dlg/.mask/.tag/.kpi 等），不要另起炉灶。
+- **双主题**（甲方 9/1 口径）：底座各页（工作台/教练中心/评分复盘/成长档案/知识课堂）为**浅色「白+金+绿」**主题（白底 #f5f6f1、金 #c9a227、绿 #0e8f5a，样式集中在 style.css 尾部浅色段，弹层用 .mask.lite）；**陪练舱保持深色现场风**（沉浸式作业环境），令牌在 `peilian/style.css` 顶部 `:root`。同页内复用既有组件类，不要另起炉灶。
 - 左上角永远是客户双行 logo（`__LOGO__` 占位符，build.py 内联）。
 - 正式文档（docx）配色：南网深蓝 `#00367A` 标题与表头，每页左上角客户 logo。
 - 工作台 Dashboard 的硬性口径（甲方原话，逐条对照验收）：**图表类型不重复、每个图表支持下钻或跳转到具体数据点/源、页面背景有动效、图表可交互、配色含南方电网元素、含 AI 元素、左上角客户 logo、整体高端大气时尚、背景插入南方电网图片及科技风图片**。南网实景照片素材甲方尚未提供——先用程序化变电站剪影+粒子层占位，留好图片插槽。
@@ -83,13 +84,13 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | know.js | 生成物：9 主题知识地图 KNOW、逐项知识点卡 STEPKP、阶段预习 PREVIEW（源头 gen_know.py） |
 | avatar.js | 内置 SVG 骨骼数字人：拼音视位口型（503 字表）、8 姿态、三角色 |
 | player.js | 数字人播放层三档：clips（HeyGen 预渲染 WebM，主用）/ stream（实时）/ builtin；HEYGEN_MANIFEST 内联点在此 |
-| guide.js | 教学引导层：三模式 MODES、任务指令条、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、教学模式宽容判定 lenient() |
+| guide.js | 教学引导层：三模式 MODES、当前指令 instrNow（动作图标+做什么+怎么做）、指令卡任务条（含「我该做什么」大按钮与「前往」按钮）、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、宽容判定 lenient() |
 | layout.js | 页面骨架 LAYOUT 模板字符串 |
 | app1.js | 全局状态 S、常量、工具函数 |
 | sld.js | 一次接线图 SVG（1M/2M 双母七间隔，随设备状态变色） |
-| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI |
+| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI、设备长按 bindDevHold（演练/考核模式手指口述与执行需按住，教学模式点按）、目标设备通用高亮 |
 | app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep/tickStep、submitInput（带并发锁） |
-| app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot |
+| app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot（含卡住 24s 监护人主动提醒，__DH_SPEED<1 时停用） |
 | arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry(pre 可预选练法)、问教练 askCoach+retrieve、底部操作条 |
 | charts.js | 手绘 SVG 图表库：雷达/双轴柱线/环形/面积/热力矩阵/仪表盘 + miniBars，交互经 data-* 委托 |
 | homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、SESSIONS 近30天场次（唯一数据源）、COACHES 18 教练、homeAgg 聚合 |
@@ -98,6 +99,8 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍）、`S.toured / S.previewed`（跳过导览/预习）。
 
 ## 数字人（HeyGen）现状
+
+- **浏览器 TTS 已移除**（甲方 9/1：语音播报太生硬）：内置渲染只有字幕 + 口型（逐字时钟驱动），真人声由 HeyGen 预渲染片段承担；「关闭数字人语音」按钮已从讲师演示台移除。
 
 - 用户自行在 HeyGen 渲染中：三个角色形象（AI 生图，提示词已交付）+ 117 条台词（heygen/lines.json）批量渲染为**透明通道 WebM**（heygen/heygen-kit.js，v3 优先自动回退 v2）。
 - **clips 到货后的接入步骤**：① 把 `clips/` 目录放到 dist/ 同级；② 把 manifest.json 内容内联进 player.js 的 `HEYGEN_MANIFEST` 常量（build.py 里加一步自动内联更好）；③ `HEYGEN_CFG.mode` 默认值改 `'clips'`；④ 重新构建，file:// 双击验证视频可播、缺片段时降级 builtin 不报错。

@@ -210,11 +210,6 @@ function bindDemo() {
     pushMsg('110kV仿真站 培训三线11634刀闸 位置指示不一致 告警', 'alm');
     renderPanel(); toast('已注入异常：11634刀闸机构箱机械指示与后台不一致', 'bad');
   };
-  $('#dm_mute').onclick = () => {
-    S.muted = !S.muted; window.__DH_MUTE = S.muted;
-    if (S.muted && window.speechSynthesis) speechSynthesis.cancel();
-    $('#dm_mute').textContent = S.muted ? '开启数字人语音' : '关闭数字人语音';
-  };
   $('#dm_skip').onclick = () => {
     if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
     else if (S.stage === 'wufang') { S.wf = 4; renderPanel(); startRun(); }
@@ -264,13 +259,27 @@ function boot() {
   $('#rcrole').textContent = 'AI数字人陪练教练 · 监护人';
   renderBeats(); renderTop(); renderTicket(); renderLocbar();
   bindDemo();
-  if (window.speechSynthesis) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => { }; }
   syncLoop();
   pushMsg('110kV仿真站 监控后台 登录成功 用户:任玲玲', '');
   pushMsg('110kV仿真站 1M、2M 并列运行 方式正常', '');
   pushMsg('110kV仿真站 培训三线1163开关 合闸位置', '');
   Sheet.bind();
   $('#tohome').onclick = () => goPage('home');
+  /* 卡住时监护人主动开口：一段时间无操作，陈志远按当前指令提醒 */
+  S.lastAct = Date.now();
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { S.lastAct = Date.now(); }, true));
+  setInterval(() => {
+    if (S.stage !== 'run' || S.ended || S.mode === 'exam') return;
+    if (location.hash !== '#arena') return;
+    if ((window.__DH_SPEED || 1) < 1) return;
+    if (DH && DH.speaking) return;
+    if (document.querySelector('.mask')) return;
+    if (Date.now() - S.lastAct < 24000) return;
+    S.lastAct = Date.now();
+    const g = instrNow(); if (!g || !g.n) return;
+    const txt = `任玲玲，${g.n}。`;
+    say('j', txt); speak(txt, { pose: 'point' });
+  }, 5000);
   homeBoot();
   route();
   window.addEventListener('hashchange', route);

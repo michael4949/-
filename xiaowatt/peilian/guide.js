@@ -34,6 +34,39 @@ function guideSteps() {
   return g;
 }
 
+/* ---------- 当前指令：任意时刻回答「做什么 + 怎么做」 ---------- */
+const AICON = {
+  listen: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 12v-2a7 7 0 0 1 14 0v2"/><rect x="2" y="11.5" width="4" height="6" rx="1.6"/><rect x="14" y="11.5" width="4" height="6" rx="1.6"/></svg>',
+  speak: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="7" y="2.5" width="6" height="10" rx="3"/><path d="M4.5 10a5.5 5.5 0 0 0 11 0M10 15.5v2.4"/></svg>',
+  point: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9V3.6a1.4 1.4 0 0 1 2.8 0V9m0-1.2a1.3 1.3 0 0 1 2.6 0V9m0 .3a1.25 1.25 0 0 1 2.5 0V12a5.4 5.4 0 0 1-5.4 5.4H9.7A5 5 0 0 1 5.6 15L3.8 12.4a1.3 1.3 0 0 1 2-1.6L8 12.4"/></svg>',
+  walk: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="3.4" r="1.6"/><path d="M8.2 18l1.6-4.6L8 11.2l.9-4.4 2.6-.8 2 2.3 2.3.9M8.9 6.8 6.4 8.5 5.6 11m6.1 1.7 1 1.8 1.9 3.5"/></svg>',
+  act: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M11.5 2 4.5 11.5h4L8 18l7.5-9.5h-4z"/></svg>',
+  check: '<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 8 15 16.5 5.5"/></svg>'
+};
+function instrNow() {
+  const st = STEP();
+  if (S.stage === 'prep') return { i: 'check', t: '完成上岗前准备：三审、着装互检、风险逐条确认', h: '' };
+  if (S.stage === 'wufang') return { i: 'act', t: '五防模拟：按操作票顺序逐项模拟', h: '' };
+  if (S.stage !== 'run' || !st || S.ended) return null;
+  const teach = S.mode === 'teach';
+  const away = st.loc !== S.loc;
+  if (S.beat === 0) return { i: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
+  if (S.beat === 1) {
+    if (st.act === 'recv') return { i: 'speak', t: '填写发令单位与发令人，复诵调度下令', h: '复诵后点「复诵」或回车', n: '先填发令单位与发令人，再复诵调度下令，核对票令是否一致' };
+    if (st.act === 'report') return { i: 'speak', t: '向调度汇报本段完成情况', h: '回报后点「回报」', n: '向调度汇报本段完成情况' };
+    if (away) return { i: 'walk', t: `前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `先到${LOC[st.loc].name}去` };
+    if (!S.sel) return { i: 'point', t: `手指「${devName(st.target)}」并口述`, h: teach ? '点击设备完成手指口述' : '长按设备完成手指口述', n: `手指${devName(st.target)}，核对设备双重名称` };
+    return { i: 'speak', t: '完整复诵票面内容', h: '复诵后点「复诵」或回车', n: '完整复诵票面内容' };
+  }
+  if (S.beat === 2) return { i: 'listen', t: '等待监护人核对发令', h: '听到「对，执行」后再操作', n: '等我核对发令后再操作' };
+  if (S.beat === 3) {
+    if (st.act === 'gis') return { i: 'act', t: '执行操作并核对四项位置指示', h: teach ? '点击执行，逐项核对' : '长按执行，逐项核对', n: '执行后把四项位置指示逐项核对到位' };
+    return { i: 'act', t: st.target ? `执行操作：${devName(st.target)}` : '按监护人发令执行操作', h: teach ? '点击设备执行' : '长按设备执行', n: '执行操作' };
+  }
+  if (S.beat === 4) return { i: 'speak', t: '检查设备状态并回报', h: '回报后点「回报」', n: '检查设备状态，向我回报' };
+  return { i: 'check', t: '本项完成，监护人标"√"', h: '' };
+}
+
 function renderTaskbar() {
   const st = STEP();
   const bar = $('#taskbar');
@@ -47,20 +80,28 @@ function renderTaskbar() {
   }
   const g = guideSteps();
   const cur = g.findIndex(x => !x.ok);
+  const ins = instrNow();
+  const lv = S.hintLv[st.no] || 0;
   bar.innerHTML = `
     <div class="tb1">
       <span class="tbno">第 ${st.no} 项</span>
       <span class="tbtx">${st.ticket}</span>
       ${modeBtn()}
     </div>
+    ${ins ? `<div class="tbfoc">
+      <span class="tbic">${AICON[ins.i] || ''}</span>
+      <div class="tbnow"><b>${ins.t}</b>${ins.h ? `<span>${ins.h}</span>` : ''}</div>
+      ${ins.go ? `<button class="tbgo" id="tb_go">前往 ${LOC[ins.go].name} →</button>` : ''}
+      <button class="tbhint" id="btn_hint">我该做什么<i>提示 ${lv}/3</i></button>
+    </div>` : ''}
     <div class="tb2">
       ${g.map((x, i) => `<span class="gs ${x.ok ? 'ok' : (i === cur ? 'now' : '')}">
         <i>${x.ok ? '✓' : i + 1}</i>${x.t}</span>`).join('<b class="ar">›</b>')}
       <span class="tbsp"></span>
-      <button class="hintbtn" id="btn_hint">提示 ${S.hintLv[st.no] || 0}/3</button>
       <button class="hintbtn" id="btn_know">知识地图</button>
     </div>`;
   bindMode();
+  const tg = $('#tb_go'); if (tg) tg.onclick = () => goLoc(ins.go);
   $('#btn_hint').onclick = useHint;
   $('#btn_know').onclick = () => openKnow();
 }

@@ -163,11 +163,47 @@ function goLoc(k) {
   }
 }
 
+/* ---------------- 设备长按（手指口述/执行需按住，教学模式点按） ---------------- */
+function bindDevHold(n) {
+  const fire = () => devClick(n.dataset.dev);
+  const needHold = () => S.stage === 'run' && (S.beat === 1 || S.beat === 3) && S.mode !== 'teach';
+  n.onclick = e => { e.stopPropagation(); if (!needHold()) fire(); };
+  let t = null, ring = null, raf = 0, t0 = 0;
+  const clean = () => {
+    if (t) { clearTimeout(t); t = null; }
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (ring) { ring.remove(); ring = null; }
+  };
+  n.addEventListener('pointerdown', e => {
+    if (!needHold()) return;
+    e.stopPropagation();
+    const ms = S.beat === 3 ? 700 : 500;
+    t0 = performance.now();
+    ring = el('div', 'holdring');
+    ring.style.left = (e.clientX - 23) + 'px'; ring.style.top = (e.clientY - 23) + 'px';
+    document.body.appendChild(ring);
+    const paint = () => {
+      if (!ring) return;
+      const f = Math.min(1, (performance.now() - t0) / ms);
+      ring.style.setProperty('--p', (f * 360) + 'deg');
+      if (f < 1) raf = requestAnimationFrame(paint);
+    };
+    raf = requestAnimationFrame(paint);
+    t = setTimeout(() => { clean(); fire(); }, ms);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => n.addEventListener(ev, () => {
+    if (!t) return;
+    const held = performance.now() - t0;
+    clean();
+    if (held > 140) toast(S.beat === 3 ? '长按设备完成执行' : '长按设备完成手指口述');
+  }));
+}
+
 /* ---------------- 设备面板 ---------------- */
 function renderPanel() {
   const w = $('#panelwrap'); w.innerHTML = '';
   const st = STEP();
-  S.dev._t = (st && S.stage === 'run' && st.loc === S.loc && S.beat === 1) ? st.target : null;
+  S.dev._t = (st && S.stage === 'run' && st.loc === S.loc && (S.beat === 1 || S.beat === 3)) ? st.target : null;
   const P = {
     phone: panelPhone, wufang: panelWufang, hmi: panelHmi,
     bay: panelBay, p8: panelP8, p20: panelP20, cab: panelCab
@@ -361,7 +397,8 @@ function mcbHTML(id, nm, de, tagId) {
 }
 
 function bindDevs() {
-  $$('#panelwrap [data-dev]').forEach(n => n.onclick = e => { e.stopPropagation(); devClick(n.dataset.dev); });
+  $$('#panelwrap [data-dev]').forEach(n => bindDevHold(n));
+  if (S.dev._t) { const tn = $(`#panelwrap [data-dev="${S.dev._t}"]`); if (tn) tn.classList.add('tgt'); }
   $$('#panelwrap [data-bay]').forEach(n => n.onclick = () => {
     const b = n.dataset.bay;
     if (b !== '1163' && S.stage === 'run') {

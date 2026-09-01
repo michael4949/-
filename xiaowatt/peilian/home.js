@@ -1,6 +1,7 @@
 /* ===== 系统首页（工作台）· 路由 · AI 教练中心 · 背景动效 ===== */
 
 let __arenaEntered = false, __planPre = null, __xwTyped = false;
+const COACH_IMGS = __COACH_IMGS__;   // 构建时由 assets/coaches/<id>.png 内联
 function goPage(h) { location.hash = '#' + h; }
 
 /* ---------------- 路由 ---------------- */
@@ -178,7 +179,7 @@ function pagePlaza() {
         const g = COACH_GRAD[c.fam];
         return `<div class="ccard ${c.open ? 'openc' : 'lockc'}" data-coach="${c.id}">
         <div class="crow1">
-          <div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>
+          ${COACH_IMGS[c.id] ? `<img class="cav" src="${COACH_IMGS[c.id]}" alt="${c.n}">` : `<div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>`}
           <div class="cmeta"><b>${c.n}</b><span>${c.fam} · ${c.dom}</span></div>
           ${c.open ? '<span class="copen">已开通</span>' : '<span class="clock">未开通</span>'}
         </div>
@@ -226,7 +227,7 @@ function recoAct(id) {
 
 /* ---------------- 下钻弹层 ---------------- */
 function openDrill(title, sub, html, foot) {
-  const m = el('div', 'mask');
+  const m = el('div', 'mask lite');
   m.innerHTML = `<div class="dlg" style="width:min(720px,95vw)">
     <div class="dh"><b>${title}</b><span style="font-size:11px;color:#93a9c4">${sub || ''}</span><span class="cls">×</span></div>
     <div class="db" style="max-height:64vh;overflow:auto">${html}</div>
@@ -415,13 +416,13 @@ const HomeFX = (() => {
     N.forEach(p => {
       p.x = (p.x + p.vx + 1) % 1; p.y = (p.y + p.vy + 1) % 1;
       ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.r * dp, 0, 7);
-      ctx.fillStyle = 'rgba(77,151,232,.42)'; ctx.fill();
+      ctx.fillStyle = 'rgba(14,143,90,.38)'; ctx.fill();
     });
     for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
       const dx = (N[i].x - N[j].x) * W, dy = (N[i].y - N[j].y) * H, d2 = dx * dx + dy * dy, lim = (130 * dp) ** 2;
       if (d2 < lim) {
         ctx.beginPath(); ctx.moveTo(N[i].x * W, N[i].y * H); ctx.lineTo(N[j].x * W, N[j].y * H);
-        ctx.strokeStyle = `rgba(30,99,184,${(.30 * (1 - d2 / lim)).toFixed(3)})`; ctx.lineWidth = dp * .7; ctx.stroke();
+        ctx.strokeStyle = `rgba(178,142,32,${(.26 * (1 - d2 / lim)).toFixed(3)})`; ctx.lineWidth = dp * .7; ctx.stroke();
       }
     }
     raf = requestAnimationFrame(tick);
