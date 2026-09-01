@@ -6,7 +6,7 @@ const st=p=>p.evaluate(()=>({stage:S.stage,no:STEPS[S.idx]&&STEPS[S.idx].no,beat
 (async()=>{
   const b=await chromium.launch();
   const p=await b.newPage({viewportSize:{width:1680,height:950}});
-  await p.goto(F); await w(p,1000);
+  await p.goto(F+'#arena'); await w(p,1000);
   await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;});
   await p.click('input[name=plan][value=p2]'); await p.click('#en_go'); await w(p,400);
   await p.evaluate(()=>{S.trap.armed=false;S.abn.armed=false;});

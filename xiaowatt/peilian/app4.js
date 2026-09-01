@@ -192,7 +192,7 @@ function openReport() {
   </div>`;
   document.body.appendChild(m);
   m.querySelector('.cls').onclick = m.querySelector('#rp_c').onclick = () => m.remove();
-  m.querySelector('#rp_n').onclick = () => { m.remove(); toast('本场记录已保存至成长档案'); };
+  m.querySelector('#rp_n').onclick = () => { m.remove(); goPage('review'); };
 }
 
 /* ---------------- 讲师台 ---------------- */
@@ -256,7 +256,7 @@ function syncLoop() {
 
 /* ---------------- 初始化 ---------------- */
 function boot() {
-  document.body.innerHTML = LAYOUT;
+  document.body.innerHTML = `<div id="pg_arena">${LAYOUT}</div><div id="pg_home"></div>`;
   DH = new DigitalHuman('dh', 'jianhu');
   Avatar.init();
   $('#dhcfg').onclick = openAvatarCfg;
@@ -270,5 +270,8 @@ function boot() {
   pushMsg('110kV仿真站 1M、2M 并列运行 方式正常', '');
   pushMsg('110kV仿真站 培训三线1163开关 合闸位置', '');
   Sheet.bind();
-  openEntry();
+  $('#tohome').onclick = () => goPage('home');
+  homeBoot();
+  route();
+  window.addEventListener('hashchange', route);
 }

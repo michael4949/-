@@ -4,7 +4,7 @@ const POSES=['idle','call','confirm','point','explain','stop','correct','listen'
 (async()=>{
   const b=await chromium.launch();
   const p=await b.newPage({viewportSize:{width:400,height:820}});
-  await p.goto(F); await p.waitForTimeout(900);
+  await p.goto(F+'#arena'); await p.waitForTimeout(900);
   await p.evaluate(()=>{window.__DH_MUTE=true;DH.stopSpeak();
     document.querySelector('#sync').style.display='none';
     document.querySelector('.rolecard').style.display='none';

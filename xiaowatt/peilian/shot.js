@@ -7,7 +7,7 @@ const st = p => p.evaluate(()=>({stage:S.stage,idx:S.idx,no:STEPS[S.idx]&&STEPS[
   const errs=[];
   p.on('pageerror',e=>errs.push('PAGEERR '+e.message));
   p.on('console',m=>{if(m.type()==='error')errs.push('CONSOLE '+m.text().slice(0,180));});
-  await p.goto(F); await p.waitForTimeout(1200);
+  await p.goto(F+'#arena'); await p.waitForTimeout(1200);
   await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.08;S.trap.armed=false;S.abn.armed=false;S.toured=true;S.mode='drill';S.previewed={1:1,2:1,3:1};});
   await p.screenshot({path:'./shots/s1.png'});
   await p.click('#p_all'); await p.waitForTimeout(300);

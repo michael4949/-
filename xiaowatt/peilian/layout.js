@@ -4,6 +4,7 @@ const LAYOUT = `
     <div class="brand">
       <img src="__LOGO__" alt="中国南方电网 深圳供电局有限公司">
       <div class="pill">小瓦特·练　AI智能陪练底座</div>
+      <button class="homebtn" id="tohome">工作台</button>
     </div>
     <div class="task">
       <div class="t1">110kV培训三线1163线路由运行转检修</div>

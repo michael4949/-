@@ -7,7 +7,7 @@ const st=p=>p.evaluate(()=>({stage:S.stage,no:STEPS[S.idx]&&STEPS[S.idx].no,beat
   const b=await chromium.launch();
   const p=await b.newPage({viewportSize:{width:1680,height:950}});
   const errs=[]; p.on('pageerror',e=>errs.push(e.message));
-  await p.goto(F); await w(p,1000);
+  await p.goto(F+'#arena'); await w(p,1000);
   await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;});
   // 选择"分段·冷备用→检修"，教学模式
   await p.click('input[name=plan][value=p3]');

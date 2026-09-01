@@ -54,9 +54,9 @@ function applyPreset(ph) {
   S.ord.unit = '深圳地调'; S.ord.from = '值班调度员';
 }
 
-function openEntry() {
-  const m = el('div', 'mask');
-  let plan = 'full', role = 'op';
+function openEntry(pre) {
+  const m = el('div', 'mask'); m.id = 'en_mask';
+  let plan = (pre && PLANS.some(p => p.id === pre)) ? pre : 'full', role = 'op';
   const hasWrong = wrongSteps().length > 0;
   m.innerHTML = `<div class="dlg" style="width:min(820px,96vw)">
     <div class="dh"><b>开始陪练 · 选择练习方式</b><span style="font-size:11px;color:#93a9c4">110kV培训三线1163线路由运行转检修</span></div>
@@ -69,16 +69,17 @@ function openEntry() {
             <div><b>监护人</b><span>由你唱票与核对，AI 扮演操作人。进阶视角。</span></div></label>
         </div></div>
       <div class="sec"><div class="st">练习方式</div>
-        <div class="plans">${PLANS.map(p => `<label class="cfgopt ${p.id === 'full' ? 'on' : ''} ${p.id === 'wrong' && !hasWrong ? 'dis' : ''}">
-          <input type="radio" name="plan" value="${p.id}" ${p.id === 'full' ? 'checked' : ''} ${p.id === 'wrong' && !hasWrong ? 'disabled' : ''}>
+        <div class="plans">${PLANS.map(p => `<label class="cfgopt ${p.id === plan ? 'on' : ''} ${p.id === 'wrong' && !hasWrong ? 'dis' : ''}">
+          <input type="radio" name="plan" value="${p.id}" ${p.id === plan ? 'checked' : ''} ${p.id === 'wrong' && !hasWrong ? 'disabled' : ''}>
           <div><b>${p.n}</b><span>${p.id === 'wrong' && !hasWrong ? '暂无历史错题' : p.d}</span></div></label>`).join('')}</div></div>
       <div class="sec"><div class="st">教学模式</div>
         <div class="modesw" style="display:inline-flex">${Object.keys(MODES).map(k =>
     `<button data-m="${k}" class="${S.mode === k ? 'on' : ''}">${MODES[k].n}</button>`).join('')}</div>
         <span style="font-size:11px;color:#5f7794;margin-left:10px" id="modedesc">${MODES[S.mode].d}</span></div>
     </div>
-    <div class="df"><button class="btn pri" id="en_go">进入陪练舱</button></div></div>`;
+    <div class="df"><button class="btn" id="en_back">返回工作台</button><button class="btn pri" id="en_go">进入陪练舱</button></div></div>`;
   document.body.appendChild(m);
+  m.querySelector('#en_back').onclick = () => { m.remove(); __arenaEntered = false; goPage('home'); };
   m.querySelectorAll('input[name=plan]').forEach(r => r.onchange = () => {
     plan = r.value; m.querySelectorAll('.plans .cfgopt').forEach(o => o.classList.toggle('on', o.querySelector('input').checked));
   });

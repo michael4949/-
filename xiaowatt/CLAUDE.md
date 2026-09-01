@@ -48,6 +48,7 @@ cd peilian && python3 build.py        # → dist/小瓦特练_倒闸操作陪练
 # 回归测试（需要 playwright）
 npm i playwright && npx playwright install chromium
 cd peilian
+# 首页为默认落点（hash 路由）；测试脚本经 F+'#arena' 直达陪练舱入口
 node v2full.js     # 完整票全流程（关埋点），期望：ENDED / vio 0 / ERR none
 node v2trap.js     # 完整票（开埋点），期望：停在第11项异常，vio 2，ERR none
 node v2test.js     # 分段票（冷备用→检修）+ 问教练 + 报告，期望 end / ERR none
@@ -89,7 +90,10 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI |
 | app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep/tickStep、submitInput（带并发锁） |
 | app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot |
-| arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry、问教练 askCoach+retrieve、底部操作条 |
+| arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry(pre 可预选练法)、问教练 askCoach+retrieve、底部操作条 |
+| charts.js | 手绘 SVG 图表库：雷达/双轴柱线/环形/面积/热力矩阵/仪表盘 + miniBars，交互经 data-* 委托 |
+| homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、SESSIONS 近30天场次（唯一数据源）、COACHES 18 教练、homeAgg 聚合 |
+| home.js | 系统首页：hash 路由（home/plaza/arena/review/growth/classroom）、Dashboard 六图+下钻、AI 教练中心三级筛选、评分复盘/成长档案/知识课堂薄页、粒子+变电站剪影背景动效 |
 
 关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍）、`S.toured / S.previewed`（跳过导览/预习）。
 

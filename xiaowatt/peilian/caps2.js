@@ -6,7 +6,7 @@ const idle=p=>p.waitForFunction(()=>!DH.speaking,{timeout:20000});
   const b=await chromium.launch();
   const p=await b.newPage({viewportSize:{width:1680,height:950}});
   p.on('pageerror',e=>console.log('ERR',e.message));
-  await p.goto(F); await w(p,900);
+  await p.goto(F+'#arena'); await w(p,900);
   await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.trap.armed=false;S.abn.armed=false;});
   await idle(p); await p.screenshot({path:'./shots/e1.png'});
   await p.click('#p_all'); await p.click('#p_go'); await idle(p);
