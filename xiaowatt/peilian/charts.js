@@ -27,7 +27,7 @@ function chRadar(dims, now, prev, opt) {
 
 /* ② 近30天 双轴柱线：柱=时长(min) 线=次数，某日可点击下钻 */
 function chCombo(byDay, opt) {
-  const W = 340, H = 240, pl = 34, pr = 30, pt2 = 18, pb = 26, iw = W - pl - pr, ih = H - pt2 - pb;
+  const W = (opt && opt.w) || 340, H = (opt && opt.h) || 240, pl = 34, pr = 30, pt2 = 18, pb = 26, iw = W - pl - pr, ih = H - pt2 - pb;
   const days = []; for (let d = 29; d >= 0; d--) days.push({ d, m: (byDay[d] || {}).min || 0, c: (byDay[d] || {}).cnt || 0 });
   const mMax = Math.max(60, ...days.map(x => x.m)), cMax = Math.max(2, ...days.map(x => x.c));
   const bw = iw / 30 * .58;
@@ -135,4 +135,38 @@ function miniBars(vals) {
   return `<div class="mbars">${DIMS6.map((n, i) => `<div class="mbar"><span>${n}</span>
     <div class="mtrk"><div class="mfill" style="width:${vals[i]}%;background:${vals[i] < 70 ? '#c9a227' : '#0e8f5a'}"></div></div>
     <b>${vals[i]}</b></div>`).join('')}</div>`;
+}
+
+/* ⑦ 学员成长地图（驾驶舱中心件）：流向边 + 流动粒子 + 状态节点，全节点可下钻 */
+function chGrowthMap(nodes, edges) {
+  const NC = { done: '#0e8f5a', cur: '#c9a227', next: '#c9a227', ahead: '#0e8f5a', future: '#b9c4b9', feed: '#57bd8b' };
+  const EC = { done: 'gedge gdone', act: 'gedge gact', feed: 'gedge gfeed', future: 'gedge gfut' };
+  return `<svg viewBox="0 0 880 600" class="chsvg gmap">
+    <path d="M85,505 C230,430 340,360 465,285 C540,320 620,300 695,250 C760,205 812,142 818,88"
+      fill="none" stroke="#eef1e2" stroke-width="54" stroke-linecap="round"/>
+    <path d="M555,88 C640,98 725,125 795,158 M425,135 C550,143 675,150 793,162"
+      fill="none" stroke="#f2f4e9" stroke-width="30" stroke-linecap="round"/>
+    <g stroke="#dfe3d0" stroke-dasharray="3 8"><line x1="315" y1="30" x2="315" y2="562"/><line x1="640" y1="30" x2="640" y2="562"/></g>
+    <g font-size="12.5" fill="#b3bfaa" letter-spacing="6" text-anchor="middle">
+      <text x="165" y="582">入职适应期</text><text x="478" y="582">岗位强化期</text><text x="762" y="582">胜任晋升期</text></g>
+    ${edges.map(e => `<path d="${e.d}" class="${EC[e.s]}" fill="none"/>`).join('')}
+    ${edges.filter(e => e.p).map(e => `
+      <circle r="3.4" fill="${e.s === 'act' ? '#c9a227' : '#0e8f5a'}" opacity=".9"><animateMotion dur="${e.s === 'act' ? '2.2s' : '3.6s'}" repeatCount="indefinite" path="${e.d}"/></circle>`).join('')}
+    ${nodes.map(n => {
+      const c = NC[n.s], r = n.s === 'cur' ? 17 : n.s === 'next' ? 15 : n.s === 'future' ? 12 : 13;
+      return `<g class="hitv gnode" data-node="${n.id}" data-tip="${n.t}${n.v ? ' · ' + n.v : ''}">
+      ${n.s === 'cur' ? `<circle cx="${n.x}" cy="${n.y}" r="26" fill="rgba(201,162,39,.2)"><animate attributeName="r" values="21;31;21" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;.1;.55" dur="2s" repeatCount="indefinite"/></circle>` : ''}
+      <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${n.s === 'done' || n.s === 'cur' ? c : '#fff'}" stroke="${c}" stroke-width="${n.s === 'next' ? 2.6 : 2}" ${n.s === 'next' ? 'stroke-dasharray="5 4"' : ''}/>
+      ${n.s === 'done' ? `<path d="M ${n.x - 6} ${n.y} l 4.2 5 l 8 -9.4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>` : ''}
+      ${n.s === 'cur' ? `<circle cx="${n.x}" cy="${n.y}" r="6" fill="#fff"/>` : ''}
+      ${n.s === 'next' ? `<text x="${n.x}" y="${n.y + 4.5}" text-anchor="middle" font-size="14" fill="#a8821b" font-weight="700">!</text>` : ''}
+      <text x="${n.x}" y="${n.y + r + 19}" text-anchor="middle" font-size="13" fill="#2c3c31" font-weight="600">${n.t}</text>
+      ${n.v ? `<text x="${n.x}" y="${n.y + r + 35}" text-anchor="middle" font-size="11.5" font-family="var(--mono)" fill="${n.s === 'cur' ? '#a8821b' : n.s === 'future' ? '#98a69c' : '#0e8f5a'}">${n.v}</text>` : ''}</g>`;
+    }).join('')}
+    <g font-size="11" fill="#98a69c" transform="translate(26,26)">
+      <circle cx="5" cy="0" r="5" fill="#0e8f5a"/><text x="15" y="3">已完成</text>
+      <circle cx="66" cy="0" r="5" fill="#c9a227"/><text x="76" y="3">进行中</text>
+      <circle cx="128" cy="0" r="5" fill="#fff" stroke="#c9a227" stroke-dasharray="3 3"/><text x="138" y="3">待完成</text>
+      <circle cx="190" cy="0" r="5" fill="#fff" stroke="#b9c4b9"/><text x="200" y="3">规划中</text></g>
+  </svg>`;
 }

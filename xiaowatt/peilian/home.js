@@ -112,13 +112,15 @@ function pageHome() {
     </div>
   </section>
 
-  <section class="grid6">
-    ${hcard('能力六维', '本月 vs 上月 · 顶点可查明细', chRadar(DIMS6, RADAR_NOW, RADAR_PREV))}
-    ${hcard('练习时长与次数', '近30天 · 按日', chCombo(A.byDay))}
-    ${hcard('练习方式分布', '近30天 · 按场次', chDonut(A.planCnt))}
-    ${hcard('扣分与红线趋势', '近5周 · 周合计', chArea(A.weeks, A.reds))}
-    ${hcard('能力对标', '我 vs 班组均值（组织级口径）', chHeat(DIMS6, RADAR_NOW, TEAM_AVG))}
-    ${hcard('岗位胜任度', FITNESS.post + ' · 点击查看构成', chGauge(FITNESS))}
+  <section class="cockpit">
+    <div class="hcard ck tl"><div class="hch"><b>能力六维</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV, { w: 330, h: 236 })}</div></div>
+    <div class="hcard ckc"><div class="hch"><b>学员成长地图</b><span>${HOME_USER.name} · ${HOME_USER.post} · 同步于 今日 07:30</span></div>
+      <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: dateAfter(HOME_TASK.dueDays) + '截止' } : n), GROWTH_EDGES)}</div></div>
+    <div class="hcard ck tr"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
+    <div class="hcard ck bl"><div class="hch"><b>扣分与红线趋势</b><span>近5周 · 周合计</span></div><div class="hcb">${chArea(A.weeks, A.reds)}</div></div>
+    <div class="hcard ck br"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS6, RADAR_NOW, TEAM_AVG)}</div></div>
+    <div class="hcard ck w"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
+    <div class="hcard ck g"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
 
   <section class="reco">
@@ -214,6 +216,7 @@ function bindHPage() {
     if (n = q('[data-plan]')) return drillPlan(n.dataset.plan);
     if (n = q('[data-week]')) return drillWeek(+n.dataset.week);
     if (n = q('[data-gauge]')) return drillFit();
+    if (n = q('[data-node]')) return nodeClick(n.dataset.node);
     if (n = q('[data-row]')) { const d = $('#rx' + n.dataset.row); if (d) d.hidden = !d.hidden; return; }
   };
 }
@@ -303,6 +306,33 @@ function drillFit() {
       ${FITNESS.parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
     <div class="tk3" style="margin-top:10px">胜任度为系统测算参考，任职资格评定以人工审核结果为准。</div>`,
     `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-train="full">去完成演练场次</button>`);
+}
+
+/* ---------------- 成长地图节点下钻 ---------------- */
+function nodeClick(id) {
+  if (id === 'g5') return drillDim(2);
+  if (id === 'g6') return enterCoach('daozha', 'full');
+  if (id === 'g7') return drillFit();
+  if (id === 'b1') return goPage('classroom');
+  if (id === 'g1') return openDrill('岗前培训', '入职培训记录', `
+    <table class="htbl"><tr><th>项目</th><th>结果</th><th>日期</th></tr>
+    <tr><td>入职集中培训</td><td><span class="tag ok">结业</span></td><td class="mono">2024-08-30</td></tr>
+    <tr><td>导师带教期</td><td><span class="tag ok">通过</span></td><td class="mono">2025-02-28</td></tr></table>`,
+    `<button class="btn" data-go="growth">查看成长档案</button>`);
+  if (id === 'g2') return openDrill('安规考试 · 变电部分', '年度考试与复训', `
+    <table class="htbl"><tr><th>项目</th><th>成绩/状态</th><th>日期</th></tr>
+    <tr><td>年度安规笔试</td><td class="mono gv">92 分</td><td class="mono">${dayLabel(80)}</td></tr>
+    <tr><td>安规修编后复训</td><td><span class="tag wn">待安排</span></td><td class="mono">—</td></tr></table>`,
+    `<button class="btn" data-go="classroom">查看知识课堂</button>`);
+  if (id === 'g3') { const l = SESSIONS.filter(s => s.mode === '教学模式' && s.plan.startsWith('完整')); return openDrill('完整票 · 教学模式', `${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
+  if (id === 'g4') { const l = SESSIONS.filter(s => s.plan.startsWith('分段') || s.plan.startsWith('专项')); return openDrill('分段与专项强化', `近30天 ${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
+  if (id === 'g8') return openDrill('晋升通道 · 主值', '当前差距项', `
+    <table class="htbl"><tr><th>差距项</th><th>当前</th><th>要求</th></tr>
+    ${FITNESS.parts.filter(p => !p.ok).map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td></tr>`).join('')}</table>
+    <div class="tk3" style="margin-top:10px">晋升资格以人工审核结果为准。</div>`,
+    `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-train="full">去完成演练场次</button>`);
+  if (id === 'b2') return openDrill('实操场次', `12 / 15 场（胜任度要求）`, sessTable(SESSIONS),
+    `<button class="btn pri" data-train="full">去完成任务</button>`);
 }
 
 /* ---------------- 评分复盘（记录列表） ---------------- */

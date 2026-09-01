@@ -742,6 +742,24 @@ img.cav{object-fit:cover;border:1px solid #e0ddcc;background:#f4f3ea}
 #hpage section,#plaza{scroll-margin-top:78px}
 @media (max-width:1180px){.grid6{grid-template-columns:1fr 1fr}.reco{grid-template-columns:1fr 1fr}.pzgrid{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.gtwo{grid-template-columns:1fr}}
 
+/* ---- 驾驶舱布局 ---- */
+.cockpit{display:grid;grid-template-columns:330px 1fr 330px;gap:14px;
+  grid-template-areas:"tl c tr" "bl c br" "w w g"}
+.ck.tl{grid-area:tl}.ck.tr{grid-area:tr}.ck.bl{grid-area:bl}.ck.br{grid-area:br}.ck.w{grid-area:w}.ck.g{grid-area:g}
+.ckc{grid-area:c;display:flex;flex-direction:column;border:1px solid #d9d2ac;
+  background:linear-gradient(160deg,#fffdf6,#f7f9f2);box-shadow:0 12px 38px rgba(120,110,60,.14)}
+.ckc .hcb{flex:1;display:flex;align-items:center}
+.ckc .chsvg{height:100%;max-height:560px}
+.ck .hcb .chsvg{max-height:238px}
+.gmap .gedge{stroke-width:2}
+.gdone{stroke:#0e8f5a;opacity:.5;stroke-dasharray:7 9;animation:gflow 1.8s linear infinite}
+.gact{stroke:#c9a227;stroke-width:2.8;stroke-dasharray:8 8;animation:gflow 1s linear infinite}
+.gfeed{stroke:#57bd8b;opacity:.6;stroke-dasharray:6 10;animation:gflow 1.5s linear infinite}
+.gfut{stroke:#b9c4b9;stroke-dasharray:3 7}
+@keyframes gflow{to{stroke-dashoffset:-16}}
+.gnode:hover circle{filter:brightness(1.08) saturate(1.3)}
+@media (max-width:1180px){.cockpit{grid-template-columns:1fr;grid-template-areas:"c" "tl" "tr" "bl" "br" "w" "g"}}
+
 </style>
 </head>
 <body></body>
@@ -3640,7 +3658,7 @@ function chRadar(dims, now, prev, opt) {
 
 /* ② 近30天 双轴柱线：柱=时长(min) 线=次数，某日可点击下钻 */
 function chCombo(byDay, opt) {
-  const W = 340, H = 240, pl = 34, pr = 30, pt2 = 18, pb = 26, iw = W - pl - pr, ih = H - pt2 - pb;
+  const W = (opt && opt.w) || 340, H = (opt && opt.h) || 240, pl = 34, pr = 30, pt2 = 18, pb = 26, iw = W - pl - pr, ih = H - pt2 - pb;
   const days = []; for (let d = 29; d >= 0; d--) days.push({ d, m: (byDay[d] || {}).min || 0, c: (byDay[d] || {}).cnt || 0 });
   const mMax = Math.max(60, ...days.map(x => x.m)), cMax = Math.max(2, ...days.map(x => x.c));
   const bw = iw / 30 * .58;
@@ -3748,6 +3766,40 @@ function miniBars(vals) {
   return `<div class="mbars">${DIMS6.map((n, i) => `<div class="mbar"><span>${n}</span>
     <div class="mtrk"><div class="mfill" style="width:${vals[i]}%;background:${vals[i] < 70 ? '#c9a227' : '#0e8f5a'}"></div></div>
     <b>${vals[i]}</b></div>`).join('')}</div>`;
+}
+
+/* ⑦ 学员成长地图（驾驶舱中心件）：流向边 + 流动粒子 + 状态节点，全节点可下钻 */
+function chGrowthMap(nodes, edges) {
+  const NC = { done: '#0e8f5a', cur: '#c9a227', next: '#c9a227', ahead: '#0e8f5a', future: '#b9c4b9', feed: '#57bd8b' };
+  const EC = { done: 'gedge gdone', act: 'gedge gact', feed: 'gedge gfeed', future: 'gedge gfut' };
+  return `<svg viewBox="0 0 880 600" class="chsvg gmap">
+    <path d="M85,505 C230,430 340,360 465,285 C540,320 620,300 695,250 C760,205 812,142 818,88"
+      fill="none" stroke="#eef1e2" stroke-width="54" stroke-linecap="round"/>
+    <path d="M555,88 C640,98 725,125 795,158 M425,135 C550,143 675,150 793,162"
+      fill="none" stroke="#f2f4e9" stroke-width="30" stroke-linecap="round"/>
+    <g stroke="#dfe3d0" stroke-dasharray="3 8"><line x1="315" y1="30" x2="315" y2="562"/><line x1="640" y1="30" x2="640" y2="562"/></g>
+    <g font-size="12.5" fill="#b3bfaa" letter-spacing="6" text-anchor="middle">
+      <text x="165" y="582">入职适应期</text><text x="478" y="582">岗位强化期</text><text x="762" y="582">胜任晋升期</text></g>
+    ${edges.map(e => `<path d="${e.d}" class="${EC[e.s]}" fill="none"/>`).join('')}
+    ${edges.filter(e => e.p).map(e => `
+      <circle r="3.4" fill="${e.s === 'act' ? '#c9a227' : '#0e8f5a'}" opacity=".9"><animateMotion dur="${e.s === 'act' ? '2.2s' : '3.6s'}" repeatCount="indefinite" path="${e.d}"/></circle>`).join('')}
+    ${nodes.map(n => {
+      const c = NC[n.s], r = n.s === 'cur' ? 17 : n.s === 'next' ? 15 : n.s === 'future' ? 12 : 13;
+      return `<g class="hitv gnode" data-node="${n.id}" data-tip="${n.t}${n.v ? ' · ' + n.v : ''}">
+      ${n.s === 'cur' ? `<circle cx="${n.x}" cy="${n.y}" r="26" fill="rgba(201,162,39,.2)"><animate attributeName="r" values="21;31;21" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;.1;.55" dur="2s" repeatCount="indefinite"/></circle>` : ''}
+      <circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${n.s === 'done' || n.s === 'cur' ? c : '#fff'}" stroke="${c}" stroke-width="${n.s === 'next' ? 2.6 : 2}" ${n.s === 'next' ? 'stroke-dasharray="5 4"' : ''}/>
+      ${n.s === 'done' ? `<path d="M ${n.x - 6} ${n.y} l 4.2 5 l 8 -9.4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>` : ''}
+      ${n.s === 'cur' ? `<circle cx="${n.x}" cy="${n.y}" r="6" fill="#fff"/>` : ''}
+      ${n.s === 'next' ? `<text x="${n.x}" y="${n.y + 4.5}" text-anchor="middle" font-size="14" fill="#a8821b" font-weight="700">!</text>` : ''}
+      <text x="${n.x}" y="${n.y + r + 19}" text-anchor="middle" font-size="13" fill="#2c3c31" font-weight="600">${n.t}</text>
+      ${n.v ? `<text x="${n.x}" y="${n.y + r + 35}" text-anchor="middle" font-size="11.5" font-family="var(--mono)" fill="${n.s === 'cur' ? '#a8821b' : n.s === 'future' ? '#98a69c' : '#0e8f5a'}">${n.v}</text>` : ''}</g>`;
+    }).join('')}
+    <g font-size="11" fill="#98a69c" transform="translate(26,26)">
+      <circle cx="5" cy="0" r="5" fill="#0e8f5a"/><text x="15" y="3">已完成</text>
+      <circle cx="66" cy="0" r="5" fill="#c9a227"/><text x="76" y="3">进行中</text>
+      <circle cx="128" cy="0" r="5" fill="#fff" stroke="#c9a227" stroke-dasharray="3 3"/><text x="138" y="3">待完成</text>
+      <circle cx="190" cy="0" r="5" fill="#fff" stroke="#b9c4b9"/><text x="200" y="3">规划中</text></g>
+  </svg>`;
 }
 
 
@@ -3869,6 +3921,31 @@ function dateAfter(days) {
   return `${t.getMonth() + 1}月${t.getDate()}日`;
 }
 
+/* ===== 学员成长地图（驾驶舱中心件）：节点与流向边，全部由既有数据推导 ===== */
+const GROWTH_NODES = [
+  { id: 'g1', x: 85,  y: 505, s: 'done',   t: '岗前培训',          v: '已完成' },
+  { id: 'g2', x: 215, y: 435, s: 'done',   t: '安规考试',          v: '92 分' },
+  { id: 'g3', x: 345, y: 365, s: 'done',   t: '完整票·教学模式',   v: '已完成' },
+  { id: 'g4', x: 465, y: 285, s: 'done',   t: '分段与专项强化',    v: '8 场' },
+  { id: 'g5', x: 585, y: 340, s: 'cur',    t: 'GIS 四项核对·专项', v: '补强中 62 分' },
+  { id: 'g6', x: 695, y: 250, s: 'next',   t: '完整票·考核模式',   v: '' },
+  { id: 'g7', x: 800, y: 165, s: 'ahead',  t: '胜任度测算',        v: '82%' },
+  { id: 'g8', x: 818, y: 88,  s: 'future', t: '晋升通道·主值',     v: '差距 2 项' },
+  { id: 'b1', x: 555, y: 88,  s: 'feed',   t: '年度学时',          v: '68/90' },
+  { id: 'b2', x: 425, y: 135, s: 'feed',   t: '实操场次',          v: '12/15' }
+];
+const GROWTH_EDGES = [
+  { d: 'M85,505 C130,478 168,458 215,435',   s: 'done' },
+  { d: 'M215,435 C258,412 300,388 345,365',  s: 'done' },
+  { d: 'M345,365 C385,338 425,310 465,285',  s: 'done' },
+  { d: 'M465,285 C505,303 545,322 585,340',  s: 'done', p: 1 },
+  { d: 'M585,340 C620,310 658,278 695,250',  s: 'act',  p: 1 },
+  { d: 'M695,250 C730,222 765,192 800,165',  s: 'future' },
+  { d: 'M800,165 C812,138 816,112 818,88',   s: 'future' },
+  { d: 'M555,88 C640,98 725,125 795,158',    s: 'feed', p: 1 },
+  { d: 'M425,135 C550,143 675,150 793,162',  s: 'feed', p: 1 }
+];
+
 
 /* ===== 系统首页（工作台）· 路由 · AI 教练中心 · 背景动效 ===== */
 
@@ -3984,13 +4061,15 @@ function pageHome() {
     </div>
   </section>
 
-  <section class="grid6">
-    ${hcard('能力六维', '本月 vs 上月 · 顶点可查明细', chRadar(DIMS6, RADAR_NOW, RADAR_PREV))}
-    ${hcard('练习时长与次数', '近30天 · 按日', chCombo(A.byDay))}
-    ${hcard('练习方式分布', '近30天 · 按场次', chDonut(A.planCnt))}
-    ${hcard('扣分与红线趋势', '近5周 · 周合计', chArea(A.weeks, A.reds))}
-    ${hcard('能力对标', '我 vs 班组均值（组织级口径）', chHeat(DIMS6, RADAR_NOW, TEAM_AVG))}
-    ${hcard('岗位胜任度', FITNESS.post + ' · 点击查看构成', chGauge(FITNESS))}
+  <section class="cockpit">
+    <div class="hcard ck tl"><div class="hch"><b>能力六维</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV, { w: 330, h: 236 })}</div></div>
+    <div class="hcard ckc"><div class="hch"><b>学员成长地图</b><span>${HOME_USER.name} · ${HOME_USER.post} · 同步于 今日 07:30</span></div>
+      <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: dateAfter(HOME_TASK.dueDays) + '截止' } : n), GROWTH_EDGES)}</div></div>
+    <div class="hcard ck tr"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
+    <div class="hcard ck bl"><div class="hch"><b>扣分与红线趋势</b><span>近5周 · 周合计</span></div><div class="hcb">${chArea(A.weeks, A.reds)}</div></div>
+    <div class="hcard ck br"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS6, RADAR_NOW, TEAM_AVG)}</div></div>
+    <div class="hcard ck w"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
+    <div class="hcard ck g"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
 
   <section class="reco">
@@ -4086,6 +4165,7 @@ function bindHPage() {
     if (n = q('[data-plan]')) return drillPlan(n.dataset.plan);
     if (n = q('[data-week]')) return drillWeek(+n.dataset.week);
     if (n = q('[data-gauge]')) return drillFit();
+    if (n = q('[data-node]')) return nodeClick(n.dataset.node);
     if (n = q('[data-row]')) { const d = $('#rx' + n.dataset.row); if (d) d.hidden = !d.hidden; return; }
   };
 }
@@ -4175,6 +4255,33 @@ function drillFit() {
       ${FITNESS.parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
     <div class="tk3" style="margin-top:10px">胜任度为系统测算参考，任职资格评定以人工审核结果为准。</div>`,
     `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-train="full">去完成演练场次</button>`);
+}
+
+/* ---------------- 成长地图节点下钻 ---------------- */
+function nodeClick(id) {
+  if (id === 'g5') return drillDim(2);
+  if (id === 'g6') return enterCoach('daozha', 'full');
+  if (id === 'g7') return drillFit();
+  if (id === 'b1') return goPage('classroom');
+  if (id === 'g1') return openDrill('岗前培训', '入职培训记录', `
+    <table class="htbl"><tr><th>项目</th><th>结果</th><th>日期</th></tr>
+    <tr><td>入职集中培训</td><td><span class="tag ok">结业</span></td><td class="mono">2024-08-30</td></tr>
+    <tr><td>导师带教期</td><td><span class="tag ok">通过</span></td><td class="mono">2025-02-28</td></tr></table>`,
+    `<button class="btn" data-go="growth">查看成长档案</button>`);
+  if (id === 'g2') return openDrill('安规考试 · 变电部分', '年度考试与复训', `
+    <table class="htbl"><tr><th>项目</th><th>成绩/状态</th><th>日期</th></tr>
+    <tr><td>年度安规笔试</td><td class="mono gv">92 分</td><td class="mono">${dayLabel(80)}</td></tr>
+    <tr><td>安规修编后复训</td><td><span class="tag wn">待安排</span></td><td class="mono">—</td></tr></table>`,
+    `<button class="btn" data-go="classroom">查看知识课堂</button>`);
+  if (id === 'g3') { const l = SESSIONS.filter(s => s.mode === '教学模式' && s.plan.startsWith('完整')); return openDrill('完整票 · 教学模式', `${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
+  if (id === 'g4') { const l = SESSIONS.filter(s => s.plan.startsWith('分段') || s.plan.startsWith('专项')); return openDrill('分段与专项强化', `近30天 ${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
+  if (id === 'g8') return openDrill('晋升通道 · 主值', '当前差距项', `
+    <table class="htbl"><tr><th>差距项</th><th>当前</th><th>要求</th></tr>
+    ${FITNESS.parts.filter(p => !p.ok).map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td></tr>`).join('')}</table>
+    <div class="tk3" style="margin-top:10px">晋升资格以人工审核结果为准。</div>`,
+    `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-train="full">去完成演练场次</button>`);
+  if (id === 'b2') return openDrill('实操场次', `12 / 15 场（胜任度要求）`, sessTable(SESSIONS),
+    `<button class="btn pri" data-train="full">去完成任务</button>`);
 }
 
 /* ---------------- 评分复盘（记录列表） ---------------- */
