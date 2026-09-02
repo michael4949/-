@@ -17,7 +17,7 @@ const LAYOUT = `
       <div class="kpi"><b id="kdone">0/29</b><span>操作项</span></div>
       <div class="kpi good"><b id="kvio">0</b><span>违规</span></div>
       <div class="kpi"><b id="kstop">0</b><span>中止上报</span></div>
-      <div class="kpi est" title="按当前扣分与加分实时测算，最终以评估报告为准"><b id="kest">100</b><span>预估得分</span></div>
+      <div class="kpi est hg" title="按当前扣分与加分实时测算，最终以评估报告为准"><b id="kest">100</b><span>预估得分</span></div>
     </div>
   </div>
 
@@ -45,7 +45,7 @@ const LAYOUT = `
           <span class="g" id="sy_g">站姿待命</span>
         </div>
       </div>
-      <div class="arena-r">
+      <div class="arena-r hg">
         <div class="chathead">现场对练<span id="chatmode">教学模式</span></div>
         <div class="cb" id="chat"></div>
       </div>
@@ -66,9 +66,9 @@ const LAYOUT = `
 
     <!-- 右栏 -->
     <div class="side">
-      <div class="taskbar" id="taskbar"></div>
-      <div id="kpbox"></div>
-      <div class="ticket">
+      <div class="taskbar hg" id="taskbar"></div>
+      <div id="kpbox" class="ho"></div>
+      <div class="ticket ho">
         <div class="thead">
           <div class="ttl">110kV仿真站 现场电气操作票</div>
           <div class="meta">

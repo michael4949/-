@@ -36,6 +36,7 @@ function homeBoot() {
   hm.innerHTML = `
   <canvas id="fxp"></canvas>
   <div class="hsil">${silhouetteSVG()}</div>
+  <div class="hpeople">${peopleSVG()}</div>
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
@@ -77,6 +78,7 @@ function renderHPage(h) {
   pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (typeof pageAfter === 'function') pageAfter(h);
+  countUp(pg);
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
 
@@ -94,20 +96,21 @@ function pageHome() {
     <div class="hgreet">
       <h1>${greet()}，${HOME_USER.name}</h1>
       <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 今天 ${todayStr()}</div>
-      <div class="hkpis">
+      <div class="hkpis hg">
         <div class="kpi"><b>${A.cnt}</b><span>近30天场次</span></div>
         <div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div>
         <div class="kpi"><b>${A.avg}</b><span>平均得分</span></div>
         <div class="kpi ${okDims < 6 ? 'warn' : 'good'}"><b>${okDims}/6</b><span>达标维度</span></div>
       </div>
+      <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx" data-go="team">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
     </div>
-    <div class="taskcard">
+    <div class="taskcard ho">
       <div class="tk1">今日待练任务</div>
       <div class="tk2">${HOME_TASK.name}</div>
       <div class="tk3">${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · 未完成</div>
       <button class="btn pri" data-train="${HOME_TASK.plan}">去完成</button>
     </div>
-    <div class="hourcard">
+    <div class="hourcard ho">
       <div class="tk1">年度培训学时</div>
       <div class="hbar"><div class="hfill" style="width:${Math.round(HOME_USER.hours.done / HOME_USER.hours.need * 100)}%"></div></div>
       <div class="tk3"><b class="mono">${HOME_USER.hours.done}</b> / ${HOME_USER.hours.need} 学时 · 知识课堂回写</div>
@@ -116,25 +119,25 @@ function pageHome() {
   </section>
 
   <section class="cockpit">
-    <div class="hcard ck tl"><div class="hch"><b>能力六维</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV, { w: 330, h: 236 })}</div></div>
-    <div class="hcard ckc"><div class="hch"><b>学员成长地图</b><span>${HOME_USER.name} · ${HOME_USER.post} · 同步于 今日 07:30</span></div>
+    <div class="hcard ck tl hg"><div class="hch"><b>能力六维</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV, { w: 330, h: 236 })}</div></div>
+    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 同步于 今日 07:30</span></div>
       <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: dateAfter(HOME_TASK.dueDays) + '截止' } : n), GROWTH_EDGES)}</div></div>
-    <div class="hcard ck tr"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
-    <div class="hcard ck bl"><div class="hch"><b>扣分与红线趋势</b><span>近5周 · 周合计</span></div><div class="hcb">${chArea(A.weeks, A.reds)}</div></div>
-    <div class="hcard ck br"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS6, RADAR_NOW, TEAM_AVG)}</div></div>
-    <div class="hcard ck w"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
-    <div class="hcard ck g"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
+    <div class="hcard ck tr ho"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>扣分与红线趋势</b><span>近5周 · 周合计</span></div><div class="hcb">${chArea(A.weeks, A.reds)}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS6, RADAR_NOW, TEAM_AVG)}</div></div>
+    <div class="hcard ck w hg"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
+    <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
 
   <section class="reco">
     ${RECO.map(r => { const c = COACHES.find(x => x.id === r.coach); return `
-      <div class="rcard">
-        <div class="rwhy"><i>AI 推荐</i>${r.why}</div>
+      <div class="rcard hg">
+        <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
         <b>${c.n}</b>
         <div class="tk3">${c.fam} · ${c.min} 分钟 · 已练 ${c.users} 人 · 平均提分 +${c.gain}</div>
         <button class="btn ${c.open ? 'pri' : ''}" data-reco="${r.coach}">${r.act}</button>
       </div>`; }).join('')}
-    <div class="rcard lastr">
+    <div class="rcard lastr ho">
       <div class="rwhy"><i>最近复盘</i>${dayLabel(last.d)}</div>
       <b>${last.plan} · ${last.score} 分</b>
       <div class="tk3">${last.mode} · 用时 ${last.dur} 分钟 · 扣分 ${last.vio.length} 项</div>
@@ -143,7 +146,7 @@ function pageHome() {
     </div>
   </section>
 
-  <section class="xwbar">
+  <section class="xwbar hg">
     <div class="xwavt"><i></i>小瓦特</div>
     <div class="xwtxt" id="xwtxt" data-full="${xwFull}">${__xwTyped ? xwFull : ''}</div>
     <div class="xwbtns">
@@ -183,7 +186,7 @@ function pagePlaza() {
     <div class="pzgrid">
       ${list.map(c => {
         const g = COACH_GRAD[c.fam];
-        return `<div class="ccard ${c.open ? 'openc' : 'lockc'}" data-coach="${c.id}">
+        return `<div class="ccard hg ${c.open ? 'openc' : 'lockc'}" data-coach="${c.id}">
         <div class="crow1">
           ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>`}
           <div class="cmeta"><b>${c.n}</b><span>${c.fam} · ${c.dom}</span></div>
@@ -363,6 +366,23 @@ function bindTip() {
   hm.addEventListener('mouseleave', () => { tip.hidden = true; });
 }
 
+/* ---------------- KPI 数字滚动（页面首次渲染时） ---------------- */
+function countUp(root) {
+  (root || document).querySelectorAll('.kpi b, .rvbig').forEach(b => {
+    if (b.__cu) return; b.__cu = true;
+    const raw = b.textContent.trim(), m = /^(\d+(?:\.\d+)?)(.*)$/.exec(raw); if (!m) return;
+    const end = parseFloat(m[1]), dec = (m[1].split('.')[1] || '').length, suf = m[2], t0 = performance.now(), dur = 700 + Math.min(500, end);
+    const tick = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); b.textContent = (end * e).toFixed(dec) + suf; if (k < 1) requestAnimationFrame(tick); else b.textContent = raw; };
+    requestAnimationFrame(tick);
+  });
+}
+/* 背景人力资源元素：缓缓上升的人形（班组成员），随机位置与时长 */
+function peopleSVG() {
+  const P = '<path d="M17 4a5 5 0 1 1 0 10a5 5 0 0 1 0-10z M6 30c0-6.6 4.9-11 11-11s11 4.4 11 11z"/>';
+  const cols = ['var(--gr)', 'var(--or)', 'var(--gold)', 'var(--gr)', 'var(--or)', 'var(--gr)', 'var(--gold)', 'var(--or)', 'var(--gr)', 'var(--or)'];
+  return cols.map((c, i) => `<svg viewBox="0 0 34 34" fill="${c}" style="left:${(i * 9.7 + 3) % 96}%;animation-duration:${26 + (i * 7) % 19}s;animation-delay:-${(i * 5.3) % 24}s">${P}</svg>`).join('');
+}
+
 /* ---------------- 打字机 ---------------- */
 function typeInto(node, text) {
   if (!node) return; let i = 0; node.textContent = '';
@@ -390,7 +410,7 @@ const HomeFX = (() => {
     N.forEach(p => {
       p.x = (p.x + p.vx + 1) % 1; p.y = (p.y + p.vy + 1) % 1;
       ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.r * dp, 0, 7);
-      ctx.fillStyle = 'rgba(14,143,90,.38)'; ctx.fill();
+      ctx.fillStyle = 'color-mix(in srgb,var(--ac) 38%,transparent)'; ctx.fill();
     });
     for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
       const dx = (N[i].x - N[j].x) * W, dy = (N[i].y - N[j].y) * H, d2 = dx * dx + dy * dy, lim = (130 * dp) ** 2;

@@ -13,18 +13,18 @@ function chRadar(dims, now, prev, opt) {
     ${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#e9e6d8"/>`; }).join('')}
     <polygon points="${P0.map(p => p.join(',')).join(' ')}" fill="none" stroke="${opt.c2 || '#b3bfb2'}" stroke-width="1.4" stroke-dasharray="4 4"/>
     ${opt.target ? `<polygon points="${pt(opt.target).map(p => p.join(',')).join(' ')}" fill="rgba(201,162,39,.08)" stroke="#c9a227" stroke-width="1.6" stroke-dasharray="2 5" stroke-linecap="round"/>` : ''}
-    <polygon class="anim-poly" points="${P1.map(p => p.join(',')).join(' ')}" fill="rgba(14,143,90,.16)" stroke="#0e8f5a" stroke-width="2"/>
+    <polygon class="anim-poly" points="${P1.map(p => p.join(',')).join(' ')}" fill="color-mix(in srgb,var(--ac) 16%,transparent)" stroke="var(--ac)" stroke-width="2"/>
     ${dims.map((n, i) => {
       const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length, lr = R + 26;
       const lx = cx + Math.cos(a) * lr, ly = cy + Math.sin(a) * lr;
       const diff = now[i] - prev[i];
       return `<g class="hitv" data-${key}="${i}" data-tip="${n} ${now[i]} 分 · 较${opt.l2 || '上月'}${diff >= 0 ? '+' : ''}${diff}${opt.target ? ' · 目标 ' + opt.target[i] : ''}">
         <circle cx="${P1[i][0]}" cy="${P1[i][1]}" r="9" fill="transparent"/>
-        <circle cx="${P1[i][0]}" cy="${P1[i][1]}" r="3.2" fill="#0e8f5a"/>
+        <circle cx="${P1[i][0]}" cy="${P1[i][1]}" r="3.2" fill="var(--ac)"/>
         <text x="${lx}" y="${ly}" text-anchor="middle" font-size="${fs}" fill="#6b7a70">${n}</text>
-        <text x="${lx}" y="${ly + 12}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="${now[i] < 70 ? '#a8821b' : '#0e8f5a'}">${now[i]}</text></g>`;
+        <text x="${lx}" y="${ly + 12}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="${now[i] < 70 ? '#a8821b' : 'var(--ac)'}">${now[i]}</text></g>`;
     }).join('')}
-    <g font-size="10" fill="#98a69c"><rect x="${W - 104}" y="8" width="10" height="3" fill="#0e8f5a"/><text x="${W - 90}" y="13">${opt.l1 || '本月'}</text>
+    <g font-size="10" fill="#98a69c"><rect x="${W - 104}" y="8" width="10" height="3" fill="var(--ac)"/><text x="${W - 90}" y="13">${opt.l1 || '本月'}</text>
     <rect x="${W - 52}" y="8" width="10" height="3" fill="${opt.c2 || '#b3bfb2'}"/><text x="${W - 38}" y="13">${opt.l2 || '上月'}</text>
     ${opt.target ? `<rect x="8" y="8" width="10" height="3" fill="#c9a227"/><text x="22" y="13">目标</text>` : ''}</g></svg>`;
 }
@@ -42,18 +42,18 @@ function chCombo(byDay, opt) {
       <text x="${pl - 5}" y="${pt2 + ih * k + 3}" text-anchor="end" font-size="9" fill="#98a69c">${Math.round(mMax * (1 - k))}</text>
       <text x="${W - pr + 5}" y="${pt2 + ih * k + 3}" font-size="9" fill="#98a69c">${(cMax * (1 - k)).toFixed(0)}</text>`).join('')}
     ${days.map((x, i) => x.m ? `<rect class="hitv anim-bar" data-day="${x.d}" data-tip="${dayLabel(x.d)} · ${x.m} 分钟 · ${x.c} 场" x="${X(i) - bw / 2}" y="${pt2 + ih - ih * x.m / mMax}" width="${bw}" height="${ih * x.m / mMax}" rx="1.5" fill="url(#gbar)" style="animation-delay:${i * 14}ms"/>` : '').join('')}
-    <polyline class="anim-line" points="${line}" fill="none" stroke="#0e8f5a" stroke-width="1.6"/>
-    ${days.map((x, i) => x.c ? `<circle class="hitv" data-day="${x.d}" data-tip="${dayLabel(x.d)} · ${x.c} 场" cx="${X(i)}" cy="${pt2 + ih - ih * x.c / cMax}" r="2.6" fill="#0e8f5a"/>` : '').join('')}
+    <polyline class="anim-line" points="${line}" fill="none" stroke="var(--ac)" stroke-width="1.6"/>
+    ${days.map((x, i) => x.c ? `<circle class="hitv" data-day="${x.d}" data-tip="${dayLabel(x.d)} · ${x.c} 场" cx="${X(i)}" cy="${pt2 + ih - ih * x.c / cMax}" r="2.6" fill="var(--ac)"/>` : '').join('')}
     ${days.map((x, i) => i % 6 === 0 ? `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="9" fill="#98a69c">${dayLabel(x.d)}</text>` : '').join('')}
     <defs><linearGradient id="gbar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3c05a"/><stop offset="1" stop-color="#c9a227"/></linearGradient></defs>
     <g font-size="10" fill="#98a69c"><rect x="${pl}" y="4" width="10" height="5" fill="#c9a227"/><text x="${pl + 14}" y="9">时长(分钟)</text>
-    <circle cx="${pl + 84}" cy="6.5" r="3" fill="#0e8f5a"/><text x="${pl + 91}" y="9">次数</text></g></svg>`;
+    <circle cx="${pl + 84}" cy="6.5" r="3" fill="var(--ac)"/><text x="${pl + 91}" y="9">次数</text></g></svg>`;
 }
 
 /* ③ 练习方式分布 环形：分段可点击 */
 function chDonut(cnt) {
   const W = 330, H = 240, cx = W / 2 - 44, cy = H / 2, R = 74, sw = 26;
-  const CLR = { '完整操作票': '#0e8f5a', '分段练习': '#57bd8b', '专项练习': '#c9a227', '错题重练': '#8fa08b' };
+  const CLR = { '完整操作票': 'var(--ac)', '分段练习': 'var(--acl)', '专项练习': '#c9a227', '错题重练': '#8fa08b' };
   const keys = Object.keys(cnt), total = keys.reduce((a, k) => a + cnt[k], 0);
   const C = 2 * Math.PI * R; let acc = 0;
   const segs = keys.map(k => {
@@ -64,7 +64,7 @@ function chDonut(cnt) {
       stroke-dashoffset="${(-off * C).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
   }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" class="chsvg">${segs}
-    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="26" font-family="var(--mono)" fill="#22352a">${total}</text>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="26" font-family="var(--mono)" fill="#1f2d24">${total}</text>
     <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="#98a69c">近30天场次</text>
     ${keys.map((k, i) => `<g class="hitv" data-plan="${k}" data-tip="点击查看${k}场次明细">
       <rect x="${W - 108}" y="${62 + i * 30}" width="9" height="9" rx="2" fill="${CLR[k]}"/>
@@ -97,8 +97,8 @@ function chArea(weeks, reds) {
 function chHeat(dims, mine, team) {
   const cell = (v, extra) => {
     const t = Math.max(0, Math.min(1, (v - 40) / 60));
-    const bg = `rgba(14,143,90,${(.08 + t * .70).toFixed(2)})`;
-    const fg = t > .55 ? '#fff' : '#2d5c40';
+    const bg = `color-mix(in srgb,var(--ac) ${Math.round((.08 + t * .70) * 100)}%,transparent)`;
+    const fg = t > .55 ? '#fff' : 'var(--acd)';
     return `<div class="heatc hitv" data-tip="${extra}" style="background:${bg};color:${fg}">${v}</div>`;
   };
   return `<div class="heatg">
@@ -126,12 +126,12 @@ function chGauge(f) {
     ${arc(R, 0, 1, '#ece9db', 15)}
     ${arc(R, 0, f.pct / 100, 'url(#ggau)', 15, 'anim-line')}
     ${[0, 25, 50, 75, 100].map(v => { const a = a0 + (a1 - a0) * v / 100; return `<text x="${cx + Math.cos(a) * (R + 20)}" y="${cy - Math.sin(a) * (R + 20) + 3}" text-anchor="middle" font-size="9" fill="#98a69c">${v}</text>`; }).join('')}
-    <line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(na) * (R - 24)}" y2="${cy - Math.sin(na) * (R - 24)}" stroke="#22352a" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="5" fill="#22352a"/>
-    <text x="${cx}" y="${cy + 34}" text-anchor="middle" font-size="34" font-family="var(--mono)" fill="#0e8f5a">${f.pct}<tspan font-size="15" fill="#98a69c">%</tspan></text>
+    <line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(na) * (R - 24)}" y2="${cy - Math.sin(na) * (R - 24)}" stroke="#1f2d24" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="#1f2d24"/>
+    <text x="${cx}" y="${cy + 34}" text-anchor="middle" font-size="34" font-family="var(--mono)" fill="var(--ac)">${f.pct}<tspan font-size="15" fill="#98a69c">%</tspan></text>
     <text x="${cx}" y="${cy + 52}" text-anchor="middle" font-size="10.5" fill="#6b7a70">${f.post} · 胜任度测算</text>
     <text x="${cx}" y="${cy + 68}" text-anchor="middle" font-size="9" fill="#98a69c">测算供参考，任职评定以人工审核为准</text>
-    <defs><linearGradient id="ggau" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227"/><stop offset="1" stop-color="#0e8f5a"/></linearGradient></defs></svg>`;
+    <defs><linearGradient id="ggau" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227"/><stop offset="1" stop-color="var(--ac)"/></linearGradient></defs></svg>`;
 }
 
 /* ⑧ 场次成长曲线（多序列可切换）：得分折线 / 用时柱 / 扣分项 / 提示次数 / 7 日均线 / 及格线 */
@@ -148,20 +148,20 @@ function chSessionCurve(pts, show, opt) {
   return `<svg viewBox="0 0 ${W} ${H}" class="chsvg curve">
     ${[50, 60, 70, 80, 90, 100].map(v => `<line x1="${pl}" y1="${Y(v)}" x2="${W - pr}" y2="${Y(v)}" stroke="${v === 80 || v === 90 ? '#eee9d0' : '#eeece2'}"/><text x="${pl - 6}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="#98a69c">${v}</text>`).join('')}
     ${show.pass !== false ? `<line x1="${pl}" y1="${Y(80)}" x2="${W - pr}" y2="${Y(80)}" stroke="#c9a227" stroke-dasharray="6 5" stroke-width="1.2"/><text x="${W - pr + 4}" y="${Y(80) + 3}" font-size="9" fill="#a8821b">及格 80</text>
-    <line x1="${pl}" y1="${Y(90)}" x2="${W - pr}" y2="${Y(90)}" stroke="#0e8f5a" stroke-dasharray="6 5" stroke-width="1.2"/><text x="${W - pr + 4}" y="${Y(90) + 3}" font-size="9" fill="#0a6b44">考核 90</text>` : ''}
+    <line x1="${pl}" y1="${Y(90)}" x2="${W - pr}" y2="${Y(90)}" stroke="var(--ac)" stroke-dasharray="6 5" stroke-width="1.2"/><text x="${W - pr + 4}" y="${Y(90) + 3}" font-size="9" fill="var(--acd)">考核 90</text>` : ''}
     ${show.dur ? pts.map((s, i) => `<rect class="hitv anim-bar" data-sess="${s.id || ''}" data-tip="${dayLabel(s.d)} · 用时 ${s.dur} 分钟" x="${X(i) - 7}" y="${YD(s.dur)}" width="14" height="${ih - (YD(s.dur) - pt)}" rx="2" fill="rgba(201,162,39,.32)"/>`).join('') : ''}
-    ${show.vio ? `<polyline points="${pts.map((s, i) => `${X(i)},${YC(s.vio.length)}`).join(' ')}" fill="none" stroke="#c9772e" stroke-width="1.4" stroke-dasharray="3 3"/>${pts.map((s, i) => `<rect x="${X(i) - 3}" y="${YC(s.vio.length) - 3}" width="6" height="6" fill="#c9772e" transform="rotate(45 ${X(i)} ${YC(s.vio.length)})"/>`).join('')}` : ''}
+    ${show.vio ? `<polyline points="${pts.map((s, i) => `${X(i)},${YC(s.vio.length)}`).join(' ')}" fill="none" stroke="#b3372c" stroke-width="1.4" stroke-dasharray="3 3"/>${pts.map((s, i) => `<rect x="${X(i) - 3}" y="${YC(s.vio.length) - 3}" width="6" height="6" fill="#b3372c" transform="rotate(45 ${X(i)} ${YC(s.vio.length)})"/>`).join('')}` : ''}
     ${show.hint ? `<polyline points="${pts.map((s, i) => `${X(i)},${YC((s.hints || []).length)}`).join(' ')}" fill="none" stroke="#6b4fa0" stroke-width="1.4" stroke-dasharray="1 4" stroke-linecap="round"/>${pts.map((s, i) => `<circle cx="${X(i)}" cy="${YC((s.hints || []).length)}" r="2.6" fill="none" stroke="#6b4fa0" stroke-width="1.4"/>`).join('')}` : ''}
-    ${show.avg ? `<polyline points="${pts.map((s, i) => `${X(i)},${Y(avg7[i])}`).join(' ')}" fill="none" stroke="#57bd8b" stroke-width="2" stroke-dasharray="8 5" opacity=".9"/>` : ''}
-    ${show.score !== false ? `<polygon points="${pl},${Y(50)} ${line} ${X(n - 1)},${Y(50)}" fill="rgba(14,143,90,.08)"/><polyline class="anim-line" points="${line}" fill="none" stroke="#0e8f5a" stroke-width="2.2"/>` : ''}
+    ${show.avg ? `<polyline points="${pts.map((s, i) => `${X(i)},${Y(avg7[i])}`).join(' ')}" fill="none" stroke="var(--acl)" stroke-width="2" stroke-dasharray="8 5" opacity=".9"/>` : ''}
+    ${show.score !== false ? `<polygon points="${pl},${Y(50)} ${line} ${X(n - 1)},${Y(50)}" fill="color-mix(in srgb,var(--ac) 8%,transparent)"/><polyline class="anim-line" points="${line}" fill="none" stroke="var(--ac)" stroke-width="2.2"/>` : ''}
     ${pts.map((s, i) => { const red = s.vio.some(v => v.lv === 'red'); return `<g class="hitv" data-sess="${s.id || ''}" data-tip="${dayLabel(s.d)} · ${s.plan} · ${s.mode} · ${s.score} 分 · ${s.dur} 分钟 · 扣分 ${s.vio.length} · 提示 ${(s.hints || []).length}${red ? ' · 红线' : ''}">
       <circle cx="${X(i)}" cy="${Y(s.score)}" r="10" fill="transparent"/>
       ${red ? `<circle cx="${X(i)}" cy="${Y(s.score)}" r="8" fill="none" stroke="#d43a2f" stroke-width="1.5"><animate attributeName="r" values="6;10;6" dur="1.8s" repeatCount="indefinite"/></circle>` : ''}
-      <circle cx="${X(i)}" cy="${Y(s.score)}" r="4" fill="${red ? '#d43a2f' : s.mode === '考核模式' ? '#0a6b44' : '#c9a227'}" stroke="#fff" stroke-width="1.5"/>
-      <text x="${X(i)}" y="${Y(s.score) - 9}" text-anchor="middle" font-size="9.5" font-family="var(--mono)" fill="${s.score < 75 ? '#a8821b' : '#0e8f5a'}">${s.score}</text>
+      <circle cx="${X(i)}" cy="${Y(s.score)}" r="4" fill="${red ? '#d43a2f' : s.mode === '考核模式' ? 'var(--acd)' : '#c9a227'}" stroke="#fff" stroke-width="1.5"/>
+      <text x="${X(i)}" y="${Y(s.score) - 9}" text-anchor="middle" font-size="9.5" font-family="var(--mono)" fill="${s.score < 75 ? '#a8821b' : 'var(--ac)'}">${s.score}</text>
       <text x="${X(i)}" y="${H - 28}" text-anchor="middle" font-size="9" fill="#98a69c">${dayLabel(s.d)}</text>
       <text x="${X(i)}" y="${H - 16}" text-anchor="middle" font-size="8.5" fill="#b3bfb2">${short(s)}</text>
-      <text x="${X(i)}" y="${H - 5}" text-anchor="middle" font-size="8.5" fill="${s.mode === '考核模式' ? '#0a6b44' : '#b3bfb2'}">${s.mode.slice(0, 2)}</text></g>`; }).join('')}
+      <text x="${X(i)}" y="${H - 5}" text-anchor="middle" font-size="8.5" fill="${s.mode === '考核模式' ? 'var(--acd)' : '#b3bfb2'}">${s.mode.slice(0, 2)}</text></g>`; }).join('')}
     ${show.dur ? `<text x="${W - pr + 4}" y="${pt + 4}" font-size="9" fill="#a8821b">${durMax}′</text>` : ''}
   </svg>`;
 }
@@ -169,13 +169,13 @@ function chSessionCurve(pts, show, opt) {
 /* 小型六维条（复盘页展开行用） */
 function miniBars(vals) {
   return `<div class="mbars">${DIMS6.map((n, i) => `<div class="mbar"><span>${n}</span>
-    <div class="mtrk"><div class="mfill" style="width:${vals[i]}%;background:${vals[i] < 70 ? '#c9a227' : '#0e8f5a'}"></div></div>
+    <div class="mtrk"><div class="mfill" style="width:${vals[i]}%;background:${vals[i] < 70 ? '#c9a227' : 'var(--ac)'}"></div></div>
     <b>${vals[i]}</b></div>`).join('')}</div>`;
 }
 
 /* ⑦ 学员成长地图（驾驶舱中心件）：流向边 + 流动粒子 + 状态节点，全节点可下钻 */
 function chGrowthMap(nodes, edges) {
-  const NC = { done: '#0e8f5a', cur: '#c9a227', next: '#c9a227', ahead: '#0e8f5a', future: '#b9c4b9', feed: '#57bd8b' };
+  const NC = { done: 'var(--ac)', cur: '#c9a227', next: '#c9a227', ahead: 'var(--ac)', future: '#b9c4b9', feed: 'var(--acl)' };
   const EC = { done: 'gedge gdone', act: 'gedge gact', feed: 'gedge gfeed', future: 'gedge gfut' };
   return `<svg viewBox="0 0 880 600" class="chsvg gmap">
     <path d="M85,505 C230,430 340,360 465,285 C540,320 620,300 695,250 C760,205 812,142 818,88"
@@ -187,7 +187,7 @@ function chGrowthMap(nodes, edges) {
       <text x="165" y="582">入职适应期</text><text x="478" y="582">岗位强化期</text><text x="762" y="582">胜任晋升期</text></g>
     ${edges.map(e => `<path d="${e.d}" class="${EC[e.s]}" fill="none"/>`).join('')}
     ${edges.filter(e => e.p).map(e => `
-      <circle r="3.4" fill="${e.s === 'act' ? '#c9a227' : '#0e8f5a'}" opacity=".9"><animateMotion dur="${e.s === 'act' ? '2.2s' : '3.6s'}" repeatCount="indefinite" path="${e.d}"/></circle>`).join('')}
+      <circle r="3.4" fill="${e.s === 'act' ? '#c9a227' : 'var(--ac)'}" opacity=".9"><animateMotion dur="${e.s === 'act' ? '2.2s' : '3.6s'}" repeatCount="indefinite" path="${e.d}"/></circle>`).join('')}
     ${nodes.map(n => {
       const c = NC[n.s], r = n.s === 'cur' ? 17 : n.s === 'next' ? 15 : n.s === 'future' ? 12 : 13;
       return `<g class="hitv gnode" data-node="${n.id}" data-tip="${n.t}${n.v ? ' · ' + n.v : ''}">
@@ -197,10 +197,10 @@ function chGrowthMap(nodes, edges) {
       ${n.s === 'cur' ? `<circle cx="${n.x}" cy="${n.y}" r="6" fill="#fff"/>` : ''}
       ${n.s === 'next' ? `<text x="${n.x}" y="${n.y + 4.5}" text-anchor="middle" font-size="14" fill="#a8821b" font-weight="700">!</text>` : ''}
       <text x="${n.x}" y="${n.y + r + 19}" text-anchor="middle" font-size="13" fill="#2c3c31" font-weight="600">${n.t}</text>
-      ${n.v ? `<text x="${n.x}" y="${n.y + r + 35}" text-anchor="middle" font-size="11.5" font-family="var(--mono)" fill="${n.s === 'cur' ? '#a8821b' : n.s === 'future' ? '#98a69c' : '#0e8f5a'}">${n.v}</text>` : ''}</g>`;
+      ${n.v ? `<text x="${n.x}" y="${n.y + r + 35}" text-anchor="middle" font-size="11.5" font-family="var(--mono)" fill="${n.s === 'cur' ? '#a8821b' : n.s === 'future' ? '#98a69c' : 'var(--ac)'}">${n.v}</text>` : ''}</g>`;
     }).join('')}
     <g font-size="11" fill="#98a69c" transform="translate(26,26)">
-      <circle cx="5" cy="0" r="5" fill="#0e8f5a"/><text x="15" y="3">已完成</text>
+      <circle cx="5" cy="0" r="5" fill="var(--ac)"/><text x="15" y="3">已完成</text>
       <circle cx="66" cy="0" r="5" fill="#c9a227"/><text x="76" y="3">进行中</text>
       <circle cx="128" cy="0" r="5" fill="#fff" stroke="#c9a227" stroke-dasharray="3 3"/><text x="138" y="3">待完成</text>
       <circle cx="190" cy="0" r="5" fill="#fff" stroke="#b9c4b9"/><text x="200" y="3">规划中</text></g>

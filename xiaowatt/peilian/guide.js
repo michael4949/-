@@ -46,51 +46,51 @@ const AICON = {
 /* ---------- 动作示意图：每一步示范"该做的动作" ---------- */
 const GPIC = {
   tick: `<svg viewBox="0 0 96 72"><rect x="14" y="14" width="52" height="44" rx="6" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/>
-    <rect x="22" y="24" width="14" height="14" rx="3" fill="#ecf6ee" stroke="#0e8f5a" stroke-width="2"/>
-    <path d="M25 31 l4 4.5 6-8" fill="none" stroke="#0e8f5a" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="18" stroke-dashoffset="18">
+    <rect x="22" y="24" width="14" height="14" rx="3" fill="var(--acbg)" stroke="var(--ac)" stroke-width="2"/>
+    <path d="M25 31 l4 4.5 6-8" fill="none" stroke="var(--ac)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="18" stroke-dashoffset="18">
       <animate attributeName="stroke-dashoffset" values="18;0;0;18" keyTimes="0;.3;.8;1" dur="2.2s" repeatCount="indefinite"/></path>
     <line x1="42" y1="28" x2="60" y2="28" stroke="#d5d9c6" stroke-width="3" stroke-linecap="round"/><line x1="42" y1="36" x2="56" y2="36" stroke="#e2e5d6" stroke-width="3" stroke-linecap="round"/>
     <circle cx="30" cy="32" r="9" fill="none" stroke="#c9a227" stroke-width="2" opacity="0"><animate attributeName="opacity" values="0;.8;0" dur="2.2s" repeatCount="indefinite"/><animate attributeName="r" values="6;13" dur="2.2s" repeatCount="indefinite"/></circle>
     <path d="M64 46 l-9 -9 v12 l3 -2 2 5 3 -1 -2 -5 z" fill="#33443a"><animateTransform attributeName="transform" type="translate" values="8 8;0 0;0 0;8 8" keyTimes="0;.25;.8;1" dur="2.2s" repeatCount="indefinite"/></path></svg>`,
   press: `<svg viewBox="0 0 96 72"><rect x="16" y="22" width="34" height="30" rx="5" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/>
-    <circle cx="33" cy="37" r="7" fill="#ecf6ee" stroke="#0e8f5a" stroke-width="2"/>
+    <circle cx="33" cy="37" r="7" fill="var(--acbg)" stroke="var(--ac)" stroke-width="2"/>
     <circle cx="33" cy="37" r="13" fill="none" stroke="#c9a227" stroke-width="3" stroke-linecap="round" stroke-dasharray="62" stroke-dashoffset="62" transform="rotate(-90 33 37)">
       <animate attributeName="stroke-dashoffset" values="62;0;0;62" keyTimes="0;.55;.85;1" dur="2s" repeatCount="indefinite"/></circle>
     <path d="M62 52 c-3 -6 -4 -12 -1 -14 2.4 -1.6 5 0 6 4 l2 6 c4 -1.4 12 -1 13 4 1 6 -3 12 -10 13 -6 1 -9 -3 -10 -13 z" fill="#e8c8a8" stroke="#b98d5e" stroke-width="1.6">
       <animateTransform attributeName="transform" type="translate" values="0 6;0 0;0 0;0 6" keyTimes="0;.2;.85;1" dur="2s" repeatCount="indefinite"/></path>
     <text x="48" y="66" text-anchor="middle" font-size="9.5" fill="#a8821b">按住不放</text></svg>`,
   point: `<svg viewBox="0 0 96 72"><rect x="14" y="20" width="34" height="32" rx="5" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/>
-    <circle cx="31" cy="36" r="7" fill="#ecf6ee" stroke="#0e8f5a" stroke-width="2"/>
+    <circle cx="31" cy="36" r="7" fill="var(--acbg)" stroke="var(--ac)" stroke-width="2"/>
     <path d="M60 50 c-3 -6 -4 -12 -1 -14 2.4 -1.6 5 0 6 4 l2 6 c4 -1.4 12 -1 13 4 1 6 -3 12 -10 13 -6 1 -9 -3 -10 -13 z" fill="#e8c8a8" stroke="#b98d5e" stroke-width="1.6">
       <animateTransform attributeName="transform" type="translate" values="6 6;0 0;6 6" dur="1.6s" repeatCount="indefinite"/></path>
-    <g stroke="#0e8f5a" stroke-width="2" fill="none" stroke-linecap="round">
+    <g stroke="var(--ac)" stroke-width="2" fill="none" stroke-linecap="round">
       <path d="M44 26 a10 10 0 0 1 6 -5"><animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite"/></path>
       <path d="M48 32 a16 16 0 0 1 9 -8"><animate attributeName="opacity" values="0;1;0" begin=".3s" dur="1.6s" repeatCount="indefinite"/></path></g></svg>`,
-  speak: `<svg viewBox="0 0 96 72"><rect x="40" y="14" width="16" height="26" rx="8" fill="#ffffff" stroke="#0e8f5a" stroke-width="2.4"/>
+  speak: `<svg viewBox="0 0 96 72"><rect x="40" y="14" width="16" height="26" rx="8" fill="#ffffff" stroke="var(--ac)" stroke-width="2.4"/>
     <path d="M32 36 a16 16 0 0 0 32 0 M48 52 v8 M40 60 h16" fill="none" stroke="#33443a" stroke-width="2.4" stroke-linecap="round"/>
     <g stroke="#c9a227" stroke-width="2.4" fill="none" stroke-linecap="round">
       <path d="M66 22 a8 8 0 0 1 0 12"><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></path>
       <path d="M72 18 a14 14 0 0 1 0 20"><animate attributeName="opacity" values="0;1;0" begin=".25s" dur="1.5s" repeatCount="indefinite"/></path>
       <path d="M30 22 a8 8 0 0 0 0 12"><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></path></g></svg>`,
   listen: `<svg viewBox="0 0 96 72"><path d="M30 44 v-6 a18 18 0 0 1 36 0 v6" fill="none" stroke="#33443a" stroke-width="2.6" stroke-linecap="round"/>
-    <rect x="24" y="42" width="10" height="16" rx="4" fill="#0e8f5a"/><rect x="62" y="42" width="10" height="16" rx="4" fill="#0e8f5a"/>
+    <rect x="24" y="42" width="10" height="16" rx="4" fill="var(--ac)"/><rect x="62" y="42" width="10" height="16" rx="4" fill="var(--ac)"/>
     <g stroke="#c9a227" stroke-width="2.2" fill="none" stroke-linecap="round">
       <path d="M44 30 a6 6 0 0 1 8 0"><animate attributeName="opacity" values="0;1;0" dur="1.4s" repeatCount="indefinite"/></path>
       <path d="M41 25 a11 11 0 0 1 14 0"><animate attributeName="opacity" values="0;1;0" begin=".25s" dur="1.4s" repeatCount="indefinite"/></path></g></svg>`,
-  walk: `<svg viewBox="0 0 96 72"><rect x="64" y="18" width="20" height="36" rx="3" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/><rect x="70" y="24" width="8" height="18" rx="2" fill="#e4f2e9" stroke="#0e8f5a" stroke-width="1.6"/>
-    <path d="M14 40 h38" stroke="#0e8f5a" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 7"><animate attributeName="stroke-dashoffset" values="0;-12" dur=".9s" repeatCount="indefinite"/></path>
-    <path d="M52 40 l-7 -5 v10 z" fill="#0e8f5a"/>
+  walk: `<svg viewBox="0 0 96 72"><rect x="64" y="18" width="20" height="36" rx="3" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/><rect x="70" y="24" width="8" height="18" rx="2" fill="#e4f2e9" stroke="var(--ac)" stroke-width="1.6"/>
+    <path d="M14 40 h38" stroke="var(--ac)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 7"><animate attributeName="stroke-dashoffset" values="0;-12" dur=".9s" repeatCount="indefinite"/></path>
+    <path d="M52 40 l-7 -5 v10 z" fill="var(--ac)"/>
     <g fill="#c9a227"><ellipse cx="24" cy="52" rx="4" ry="2.4"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/></ellipse>
     <ellipse cx="36" cy="58" rx="4" ry="2.4"><animate attributeName="opacity" values=".2;1;.2" dur="1.2s" repeatCount="indefinite"/></ellipse></g></svg>`,
   act: `<svg viewBox="0 0 96 72"><rect x="26" y="16" width="44" height="40" rx="6" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/>
     <circle cx="48" cy="36" r="12" fill="#f4f5ec" stroke="#98a69c" stroke-width="2"/>
-    <line x1="48" y1="36" x2="48" y2="25" stroke="#0e8f5a" stroke-width="3.4" stroke-linecap="round">
+    <line x1="48" y1="36" x2="48" y2="25" stroke="var(--ac)" stroke-width="3.4" stroke-linecap="round">
       <animateTransform attributeName="transform" type="rotate" values="0 48 36;90 48 36;90 48 36;0 48 36" keyTimes="0;.4;.8;1" dur="2.4s" repeatCount="indefinite"/></line>
     <circle cx="48" cy="36" r="3" fill="#33443a"/>
-    <text x="48" y="66" text-anchor="middle" font-size="9.5" fill="#0a6b44">分 → 合</text></svg>`,
+    <text x="48" y="66" text-anchor="middle" font-size="9.5" fill="var(--acd)">分 → 合</text></svg>`,
   report: `<svg viewBox="0 0 96 72"><rect x="14" y="18" width="36" height="30" rx="4" fill="#ffffff" stroke="#c6cdb9" stroke-width="2"/>
     <line x1="20" y1="27" x2="44" y2="27" stroke="#d5d9c6" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="35" x2="38" y2="35" stroke="#e2e5d6" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="46" cy="42" r="9" fill="none" stroke="#0e8f5a" stroke-width="2.6"/><line x1="53" y1="49" x2="60" y2="56" stroke="#0e8f5a" stroke-width="2.6" stroke-linecap="round">
+    <circle cx="46" cy="42" r="9" fill="none" stroke="var(--ac)" stroke-width="2.6"/><line x1="53" y1="49" x2="60" y2="56" stroke="var(--ac)" stroke-width="2.6" stroke-linecap="round">
       <animateTransform attributeName="transform" type="translate" values="0 0;3 3;0 0" dur="1.6s" repeatCount="indefinite"/></line>
     <g stroke="#c9a227" stroke-width="2.2" fill="none" stroke-linecap="round">
       <path d="M70 30 a8 8 0 0 1 0 12"><animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/></path></g></svg>`
@@ -314,7 +314,7 @@ function openPreview(phase, done) {
     <div class="dh"><b>开始前 · ${P.t}</b><span style="font-size:11px;color:#5c6b5f">本段必须掌握的三个知识点</span></div>
     <div class="db">
       ${P.pts.map((p, i) => `<div style="display:flex;gap:12px;padding:12px;border-radius:7px;margin-bottom:9px;background:#f7f8f1;border:1px solid #e2dfd0">
-        <div style="width:22px;height:22px;border-radius:50%;flex:none;background:#dcede0;color:#0a6b44;
+        <div style="width:22px;height:22px;border-radius:50%;flex:none;background:var(--acbg);color:var(--acd);
           display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono)">${i + 1}</div>
         <div><div style="font-size:13px;color:#243329;font-weight:600;margin-bottom:4px">${p[0]}</div>
         <div style="font-size:12px;color:#5c6b5f;line-height:1.75">${p[1]}</div></div>
@@ -350,10 +350,10 @@ function startTour() {
     if (!n) { i++; return i < TOUR.length ? paint() : fin(); }
     const r = n.getBoundingClientRect();
     ring.style.cssText = `position:fixed;z-index:90;pointer-events:none;border:2px solid #1fa06b;border-radius:8px;
-      box-shadow:0 0 0 9999px rgba(44,52,42,.74),0 0 24px rgba(14,143,90,.7);transition:.28s;
+      box-shadow:0 0 0 9999px rgba(44,52,42,.74),0 0 24px color-mix(in srgb,var(--ac) 70%,transparent);transition:.28s;
       left:${r.left - 4}px;top:${r.top - 4}px;width:${r.width + 8}px;height:${r.height + 8}px`;
     const tall = r.height > innerHeight * 0.5;
-    box.style.cssText = `position:fixed;z-index:92;width:330px;background:#ffffff;border:1px solid #0e8f5a;
+    box.style.cssText = `position:fixed;z-index:92;width:330px;background:#ffffff;border:1px solid var(--ac);
       border-radius:9px;padding:14px 16px;box-shadow:0 24px 60px rgba(100,108,88,.7);transition:.28s;
       left:0px;top:0px`;
     box.innerHTML = `<div style="font-size:10.5px;color:#1fa06b;font-family:var(--mono);letter-spacing:1px">

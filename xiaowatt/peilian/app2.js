@@ -280,7 +280,7 @@ function panelPhone(w) {
   w.innerHTML = pnl('调度电话 · 受令席', '110kV仿真站', `
     <div class="phone">
       <div class="handset ${ringing ? 'ringing' : ''}">
-        <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0a6b44" stroke-width="1.8">
+        <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--acd)" stroke-width="1.8">
           <path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></div>
         <div class="nm">${ringing ? '地调值班调度员 来电' : '地调值班调度员'}</div>
         <div class="de">${ringing ? '等待接令' : '通话空闲'}</div>
@@ -307,7 +307,7 @@ function panelWufang(w) {
       </div>
       <div class="wfsteps">${WUFANG.map((x, i) =>
       `<div class="wfs ${i < S.wf ? 'done' : ''} ${i === S.wf ? 'tgt' : ''}" data-wf="${i}">${i + 1}. ${x[1]}</div>`).join('')}</div>
-      ${S.wf >= 4 ? `<div style="margin-top:12px;font-size:12px;color:#0e8f5a">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}
+      ${S.wf >= 4 ? `<div style="margin-top:12px;font-size:12px;color:var(--ac)">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}
     </div>`) + pnl('五防模拟接线图', '', `<div class="sld">${sld()}</div>`);
   $$('.wfs').forEach(b => b.onclick = () => wfClick(+b.dataset.wf));
 }

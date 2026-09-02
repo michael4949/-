@@ -155,7 +155,7 @@ function pageReview() {
     <div class="ph"><b>评分复盘</b><span>近30天 ${A.cnt + all.filter(x => x.real).length} 场 · 平均 ${A.avg} 分 · 记录由陪练舱自动留痕</span>
       <span class="phr"><button class="btn sm" data-rvsum="1">生成复盘摘要</button></span></div>
     <div class="rvwrap">
-      <aside class="rvlist hcard">
+      <aside class="rvlist hcard hg">
         <div class="hch"><b>场次记录</b><span>${list.length} 场</span></div>
         <div class="chips">${[['all', '全部'], ['local', '本机'], ['exam', '考核'], ['red', '红线'], ['low', '<80']].map(([k, n]) => `<span class="chip ${RV.filter === k ? 'on' : ''}" data-rvf="${k}">${n}</span>`).join('')}</div>
         ${list.map(x => `<div class="rvit ${x.id === RV.sel ? 'on' : ''}" data-sess="${x.id}">
@@ -163,7 +163,7 @@ function pageReview() {
           <div class="rv2">${x.plan}</div><div class="rv3">${x.mode} · ${x.dur} 分钟 · 扣分 ${x.vio.length}</div></div>`).join('') || '<div class="tk3" style="padding:14px">没有符合条件的场次。</div>'}
       </aside>
       <main class="rvmain">
-        <section class="hcard rvhead">
+        <section class="hcard rvhead hg">
           <div class="rvscore"><div class="rvbig ${red ? 'wv' : ''}">${s.score}</div><div class="tk3">综合得分 · ${red ? '触发一票否决' : s.mode}</div>
             <div class="rvkpis"><span><b>${s.dur}</b>分钟</span><span><b>${s.vio.length}</b>扣分项</span><span><b>${(s.hints || []).length}</b>提示</span><span><b>${s.vio.filter(v => v.lv === 'red').length}</b>红线</span>${prev ? `<span><b class="${s.score >= prev.score ? 'gv' : 'wv'}">${s.score - prev.score >= 0 ? '+' : ''}${s.score - prev.score}</b>较上一场</span>` : ''}</div>
             <div class="rvtags">${DIMS6.map((t, i) => `<i class="${s.dims[i] > 80 ? 'ok' : s.dims[i] > 55 ? 'wn' : 'bad'}" data-hdim="${i}" title="查看「${t}」明细">${t} ${s.dims[i] > 80 ? '达标' : s.dims[i] > 55 ? '待提升' : '短板'}</i>`).join('')}</div>
@@ -172,17 +172,17 @@ function pageReview() {
             <div class="chips" style="justify-content:center">${[['prev', '上一场'], ['best', '最佳场'], ['avg', '30天均值']].map(([k, n]) => `<span class="chip ${RV.cmp === k ? 'on' : ''}" data-rvcmp="${k}">${n}</span>`).join('')}</div>
             ${chRadar(DIMS6, s.dims, cmpVals, { w: 330, h: 240, l1: '本场', l2: cmpLabel })}<div class="tk3" style="text-align:center">本场 vs ${cmpLabel} · 顶点可查明细</div></div>
         </section>
-        <section class="hcard"><div class="hch"><b>AI 复盘</b><span>由本场留痕数据生成</span></div>
+        <section class="hcard hg"><div class="hch"><b>AI 复盘</b><em class="ai">AI</em><span>由本场留痕数据生成</span></div>
           <div class="hcb"><div class="airv">${aiReview(s, prev)}</div></div></section>
-        <section class="hcard"><div class="hch"><b>场次回放</b><span>逐项时间轴 · 绿=完成 金=不规范 橙=严重 红=一票否决 · 小点=用了提示</span>
+        <section class="hcard ho"><div class="hch"><b>场次回放</b><span>逐项时间轴 · 绿=完成 金=不规范 橙=严重 红=一票否决 · 小点=用了提示</span>
             <span class="phr"><button class="btn sm" data-rvplay="1">${RV.play ? '■ 停止回放' : '▶ 回放本场'}</button></span></div>
           <div class="hcb">${rvTimeline(s)}</div></section>
-        <section class="hcard"><div class="hch"><b>逐句回放</b><span>我的复诵/回报 vs 票面标准话术 · <i class="dm">漏说</i> <i class="dx">说错/多说</i> · 点「跟读」当场再练一遍</span></div>
+        <section class="hcard hg"><div class="hch"><b>逐句回放</b><span>我的复诵/回报 vs 票面标准话术 · <i class="dm">漏说</i> <i class="dx">说错/多说</i> · 点「跟读」当场再练一遍</span></div>
           <div class="hcb">${lines.length ? `<div class="tl">${lines.map((l, i) => `<div class="tlrow ${RV.follow[i] === 'pass' ? 'pass' : ''}">
               <div class="tlk"><b class="mono">第${l.step}项</b><span>${l.beat === 1 ? '复诵' : '回报'}</span><em class="mono ${simPct(l.mine, l.std) < 86 ? 'wv' : 'gv'}">${simPct(l.mine, l.std)}%</em><button class="btn sm" data-follow="${i}">${RV.follow[i] ? '收起' : '跟读'}</button></div>
               <div class="tlb"><div class="tlt">${l.t || ''}</div><div class="tlme">我说：${diffHtml(l.mine, l.std)}</div><div class="tlstd">标准：${l.std}</div>
               ${RV.follow[i] ? `<div class="tlfollow"><input class="tlin" data-followin="${i}" placeholder="照标准话术念一遍（可点麦克风口述）…" autocomplete="off"><span class="tlmeter" id="fm_${i}">${RV.follow[i] === 'pass' ? '<b class="gv">已通过 ✓</b>' : '吻合度 —'}</span></div>` : ''}</div></div>`).join('')}</div>` : '<div class="tk3">本场无逐句记录。</div>'}</div></section>
-        <section class="hcard"><div class="hch"><b>错误卡</b><span>错在哪 · 依据 · 正确做法</span></div>
+        <section class="hcard ho"><div class="hch"><b>错误卡</b><span>错在哪 · 依据 · 正确做法</span></div>
           <div class="hcb">${s.vio.length ? `<div class="errgrid">${s.vio.map(v => { const st = stepOf(v.step); return `<div class="errc ${v.lv}">
               <div class="err1">${tagOf(v)}<b>第${v.step}项</b><span>${st ? st.ticket : ''}</span></div>
               <div class="err2"><label>错在哪</label>${v.t}</div>
@@ -192,9 +192,9 @@ function pageReview() {
             <div class="rvact"><button class="btn pri" data-retry="${s.id}">错题重练（${s.vio.length} 项）</button><button class="btn" data-train="${planId(s.plan)}">重练该方式</button></div>`
             : '<div class="tk3">本场未触发扣分项。</div>'}</div></section>
         <div class="gtwo">
-          <section class="hcard"><div class="hch"><b>下次练习要做到</b><span>由本场留痕生成 · 已完成 ${actDone}/${acts.length}</span></div><div class="hcb">
+          <section class="hcard ho"><div class="hch"><b>下次练习要做到</b><em class="ai">AI</em><span>由本场留痕生成 · 已完成 ${actDone}/${acts.length}</span></div><div class="hcb">
             ${acts.map((a, i) => `<label class="actit ${actSt['a' + i] ? 'done' : ''}"><input type="checkbox" data-rvact="${i}" ${actSt['a' + i] ? 'checked' : ''}><span>${a.t}${a.cite ? `<i class="cite">${a.cite}</i>` : ''}</span>${a.plan ? `<button class="btn sm" data-train="${a.plan}">去练</button>` : ''}</label>`).join('')}</div></section>
-          <section class="hcard"><div class="hch"><b>下一步建议</b><span>专项 + 课程（知识课堂供给）</span></div><div class="hcb">
+          <section class="hcard hg"><div class="hch"><b>下一步建议</b><span>专项 + 课程（知识课堂供给）</span></div><div class="hcb">
             ${(s.hints || []).map(h => `<div class="hrow hint">提示 · ${h[0]} · ${h[1]}</div>`).join('')}
             ${(s.praise || []).map(p => `<div class="hrow"><span class="tag ok">加分</span> ${p.title || p}</div>`).join('')}
             ${weakDims.map(d => DIM_PLAN[d] ? `<div class="hrow"><button class="btn sm" data-train="${DIM_PLAN[d][0]}">练「${DIM_PLAN[d][1]}」专项</button> <span class="tk3">针对「${d}」</span></div>` : '').join('')}
@@ -229,38 +229,38 @@ function pageGrowth() {
   const up = DIMS10.filter((_, i) => RADAR10_NOW[i] > RADAR10_PREV[i]).length;
   return `<div class="ppage">
     <div class="ph"><b>成长档案</b><span>${HOME_USER.name} · ${HOME_USER.post} · ${HOME_USER.team}</span><span class="phr"><button class="btn sm" data-print="1">打印 / 导出档案</button></span></div>
-    <section class="hcard gcard"><div class="gav">${HOME_USER.name.slice(0, 1)}</div>
+    <section class="hcard gcard ho"><div class="gav">${HOME_USER.name.slice(0, 1)}</div>
       <div class="gmeta"><b>${HOME_USER.name}</b><span>${HOME_USER.post} · ${HOME_USER.team} · 2024-08 入职 · 带教师傅 陈志远</span></div>
       <div class="gkpis"><div class="kpi"><b>${A.cnt}</b><span>近30天场次</span></div><div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div><div class="kpi"><b>${A.avg}</b><span>平均得分</span></div><div class="kpi"><b>${HOME_USER.hours.done}/${HOME_USER.hours.need}</b><span>年度学时</span></div><div class="kpi good"><b>${up}/10</b><span>维度上升</span></div><div class="kpi good"><b>${lit}/${badges.length}</b><span>能力徽章</span></div><div class="kpi good"><b>${done}</b><span>里程碑</span></div></div></section>
     <div class="gtwo g21">
-      <section class="hcard"><div class="hch"><b>能力全景</b><span>十维 · 本月 vs 对照 · 顶点可查明细</span>
+      <section class="hcard hg"><div class="hch"><b>能力全景</b><span>十维 · 本月 vs 对照 · 顶点可查明细</span>
           <span class="phr chips">${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
         <div class="hcb" id="gradar">${growthRadar()}</div></section>
-      <section class="hcard"><div class="hch"><b>三期对照与目标</b><span>前月 / 上月 / 本月 · 预测为测算参考 · 目标可直接填写</span></div><div class="hcb"><table class="htbl gtbl"><tr><th>维度</th><th>前月</th><th>上月</th><th>本月</th><th>变化</th><th>预测下月</th><th>本月目标</th><th>差距</th></tr>
+      <section class="hcard hg"><div class="hch"><b>三期对照与目标</b><em class="ai">AI 预测</em><span>前月 / 上月 / 本月 · 预测为测算参考 · 目标可直接填写</span></div><div class="hcb"><table class="htbl gtbl"><tr><th>维度</th><th>前月</th><th>上月</th><th>本月</th><th>变化</th><th>预测下月</th><th>本月目标</th><th>差距</th></tr>
         ${DIMS10.map((n, i) => { const d = RADAR10_NOW[i] - RADAR10_PREV[i], g = goals[i]; return `<tr><td class="hitv" data-gdim="${i}" style="cursor:pointer">${n}</td><td class="mono">${RADAR10_OLD[i]}</td><td class="mono">${RADAR10_PREV[i]}</td><td class="mono">${RADAR10_NOW[i]}</td><td class="mono ${d >= 0 ? 'gv' : 'wv'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${growthPredict(i)}</td><td><input class="gin" type="number" min="0" max="100" data-goal="${i}" value="${g != null ? g : ''}" placeholder="—"></td><td class="mono ${g != null ? (RADAR10_NOW[i] >= g ? 'gv' : 'wv') : ''}" id="ggap${i}">${g != null ? (RADAR10_NOW[i] >= g ? '已达成' : (RADAR10_NOW[i] - g)) : '—'}</td></tr>`; }).join('')}</table>
         <div class="tk3" style="margin-top:6px">预测按近三期趋势线性外推；目标由本人设定，达成情况以人工审核为准。</div></div></section>
     </div>
-    <section class="hcard"><div class="hch"><b>成长曲线</b><span>近30天各场 · 点击图例切换序列 · 点击数据点打开该场复盘</span>
+    <section class="hcard hg"><div class="hch"><b>成长曲线</b><span>近30天各场 · 点击图例切换序列 · 点击数据点打开该场复盘</span>
         <span class="phr chips">${[['score', '得分'], ['avg', '7日均线'], ['dur', '用时'], ['vio', '扣分项'], ['hint', '提示次数'], ['pass', '及格/考核线']].map(([k, n]) => `<span class="chip ${GR.show[k] ? 'on' : ''}" data-gshow="${k}">${n}</span>`).join('')}</span></div>
       <div class="hcb" id="gcurve">${chSessionCurve(pts, GR.show, { w: 980, h: 250 })}</div></section>
-    <section class="hcard"><div class="hch"><b>能力徽章</b><span>${lit} 枚已点亮 · 由近30天留痕自动判定 · 点击查看条件</span></div><div class="hcb">
-      <div class="bgrid">${badges.map(b => `<div class="badge ${b.lit ? 'lit' : ''}" data-badge="${b.id}" data-tip="${b.d}"><svg viewBox="0 0 48 48"><polygon points="24,3 42,13 42,35 24,45 6,35 6,13" fill="${b.lit ? 'url(#gbadge)' : '#f1efe2'}" stroke="${b.lit ? '#c9a227' : '#d9d6c5'}" stroke-width="1.6"/><path d="M15 25 l6 6 12 -13" fill="none" stroke="${b.lit ? '#fff' : '#c8cfb9'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="gbadge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3c05a"/><stop offset="1" stop-color="#0e8f5a"/></linearGradient></defs></svg><b>${b.n}</b><span>${b.lit ? '已点亮' : '未点亮'}</span></div>`).join('')}</div></div></section>
-    <section class="hcard"><div class="hch"><b>学习地图</b><span>九大知识主题掌握度 · 点亮 = 掌握度 ≥ 75</span></div><div class="hcb">
+    <section class="hcard ho"><div class="hch"><b>能力徽章</b><span>${lit} 枚已点亮 · 由近30天留痕自动判定 · 点击查看条件</span></div><div class="hcb">
+      <div class="bgrid">${badges.map(b => `<div class="badge ${b.lit ? 'lit' : ''}" data-badge="${b.id}" data-tip="${b.d}"><svg viewBox="0 0 48 48"><polygon points="24,3 42,13 42,35 24,45 6,35 6,13" fill="${b.lit ? 'url(#gbadge)' : '#f1efe2'}" stroke="${b.lit ? '#c9a227' : '#d9d6c5'}" stroke-width="1.6"/><path d="M15 25 l6 6 12 -13" fill="none" stroke="${b.lit ? '#fff' : '#c8cfb9'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="gbadge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3c05a"/><stop offset="1" stop-color="var(--ac)"/></linearGradient></defs></svg><b>${b.n}</b><span>${b.lit ? '已点亮' : '未点亮'}</span></div>`).join('')}</div></div></section>
+    <section class="hcard hg"><div class="hch"><b>学习地图</b><span>九大知识主题掌握度 · 点亮 = 掌握度 ≥ 75</span></div><div class="hcb">
       <div class="lmap">${KNOW.map(k => { const m = LMAP_MASTERY[k.id] || 0, lit = m >= 75; return `<div class="lmt ${lit ? 'lit' : ''}" data-lmap="${k.id}" data-tip="${k.t} · 掌握度 ${m}">
-        <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="#e9e6d8" stroke-width="4"/><circle cx="22" cy="22" r="18" fill="none" stroke="${lit ? '#0e8f5a' : '#c9a227'}" stroke-width="4" stroke-dasharray="${(113 * m / 100).toFixed(1)} 113" transform="rotate(-90 22 22)" stroke-linecap="round"/><text x="22" y="26" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="${lit ? '#0e8f5a' : '#a8821b'}">${m}</text></svg>
+        <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="#e9e6d8" stroke-width="4"/><circle cx="22" cy="22" r="18" fill="none" stroke="${lit ? 'var(--ac)' : '#c9a227'}" stroke-width="4" stroke-dasharray="${(113 * m / 100).toFixed(1)} 113" transform="rotate(-90 22 22)" stroke-linecap="round"/><text x="22" y="26" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="${lit ? 'var(--ac)' : '#a8821b'}">${m}</text></svg>
         <div><b>${k.t}</b><span>${k.sub}</span></div></div>`; }).join('')}</div></div></section>
     <div class="gtwo">
-      <section class="hcard"><div class="hch"><b>晋升通道</b><span>当前 · 变电运行值班员</span></div><div class="hcb"><div class="ladder">
+      <section class="hcard ho"><div class="hch"><b>晋升通道</b><span>当前 · 变电运行值班员</span></div><div class="hcb"><div class="ladder">
         ${LADDER.map((r, i) => `<div class="rung ${r.cur ? 'cur' : ''}"><div class="rh"><b>${r.post}</b>${r.cur ? '<i>当前</i>' : ''}<span class="mono">${r.met.filter(Boolean).length}/${r.req.length}</span></div>
           <div class="rq">${r.req.map((q, j) => `<span class="${r.met[j] ? 'ok' : ''}">${r.met[j] ? '✓' : '○'} ${q}</span>`).join('')}</div></div>`).join('')}</div>
         <div class="tk3" style="margin-top:8px">晋升资格以人工审核结果为准。</div></div></section>
-      <section class="hcard"><div class="hch"><b>成长里程碑</b><span>${done} 项已达成</span></div><div class="hcb"><div class="ms">
+      <section class="hcard ho"><div class="hch"><b>成长里程碑</b><span>${done} 项已达成</span></div><div class="hcb"><div class="ms">
         ${MILESTONES.map(m => `<div class="msi ${m.k}"><i></i><span class="mono">${m.d || (m.ago >= 0 ? dayLabel(m.ago) : dateAfter(-m.ago))}</span><b>${m.t}</b></div>`).join('')}</div></div></section>
     </div>
     <div class="gtwo">
-      <section class="hcard"><div class="hch"><b>学时记录</b><span>年度 ${HOME_USER.hours.done}/${HOME_USER.hours.need} 学时 · 知识课堂回写</span></div><div class="hcb"><table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
+      <section class="hcard ho"><div class="hch"><b>学时记录</b><span>年度 ${HOME_USER.hours.done}/${HOME_USER.hours.need} 学时 · 知识课堂回写</span></div><div class="hcb"><table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
         ${hourLog().map(x => `<tr><td class="mono">${x.d === 0 ? '今天' : dayLabel(x.d)}</td><td>${x.n}</td><td class="mono">${x.h}</td><td>${x.src}</td></tr>`).join('')}</table></div></section>
-      <section class="hcard"><div class="hch"><b>资质证书</b><span>${HOME_USER.certs.length} 项有效</span></div><div class="hcb"><table class="htbl"><tr><th>证书</th><th>取得</th><th>复审期限</th><th>状态</th></tr>
+      <section class="hcard ho"><div class="hch"><b>资质证书</b><span>${HOME_USER.certs.length} 项有效</span></div><div class="hcb"><table class="htbl"><tr><th>证书</th><th>取得</th><th>复审期限</th><th>状态</th></tr>
         ${HOME_USER.certs.map(c => `<tr><td>${c.n}</td><td class="mono">${c.got}</td><td class="mono">${c.review}</td><td><span class="tag ok">有效</span></td></tr>`).join('')}</table></div></section>
     </div>
     <div class="tk3" style="margin:6px 4px 14px">能力与胜任度数据为系统测算参考，任职资格评定以人工审核结果为准。</div></div>`;
@@ -295,14 +295,14 @@ function archSVG() {
   return `<svg viewBox="0 0 900 300" class="chsvg arch">
     <rect x="20" y="30" width="250" height="240" rx="12" fill="#f4f5ec" stroke="#d9d6c5"/>
     <text x="145" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#33443a">南网人工智能知识课堂</text><text x="145" y="74" text-anchor="middle" font-size="10" fill="#98a69c">供给层</text>
-    ${CLASSROOM.supply.map((s, i) => `<g class="hitv" data-arch="${s.k}" data-tip="点击查看「${s.n}」接口字段与同步频率"><rect x="40" y="${88 + i * 44}" width="210" height="34" rx="6" fill="#fff" stroke="#e2dfd0"/><text x="52" y="${109 + i * 44}" font-size="12" fill="#33443a">${s.n}</text><text x="238" y="${109 + i * 44}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="#0e8f5a">${s.v}</text></g>`).join('')}
-    <rect x="480" y="30" width="400" height="240" rx="12" fill="#eef6f0" stroke="#0e8f5a" stroke-width="1.6"/>
-    <text x="680" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="#0a5c3c">小瓦特·练 AI 智能陪练底座</text><text x="680" y="74" text-anchor="middle" font-size="10" fill="#0e8f5a">主体 · 调用供给数据并回写学时</text>
-    ${[['AI 教练中心', 500, 92, 'plaza'], ['陪练舱', 700, 92, 'arena'], ['评分复盘', 500, 150, 'review'], ['成长档案', 700, 150, 'growth'], ['班组看板', 500, 208, 'team'], ['教练编辑器', 700, 208, 'editor']].map(([n, x, y, go]) => `<g class="hitv" data-go="${go}" data-tip="打开${n}"><rect x="${x}" y="${y}" width="180" height="40" rx="6" fill="#fff" stroke="#b5d9c0"/><text x="${x + 90}" y="${y + 25}" text-anchor="middle" font-size="12" fill="#17301f">${n}</text></g>`).join('')}
+    ${CLASSROOM.supply.map((s, i) => `<g class="hitv" data-arch="${s.k}" data-tip="点击查看「${s.n}」接口字段与同步频率"><rect x="40" y="${88 + i * 44}" width="210" height="34" rx="6" fill="#fff" stroke="#e2dfd0"/><text x="52" y="${109 + i * 44}" font-size="12" fill="#33443a">${s.n}</text><text x="238" y="${109 + i * 44}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--ac)">${s.v}</text></g>`).join('')}
+    <rect x="480" y="30" width="400" height="240" rx="12" fill="var(--acbg)" stroke="var(--ac)" stroke-width="1.6"/>
+    <text x="680" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="var(--acd)">小瓦特·练 AI 智能陪练底座</text><text x="680" y="74" text-anchor="middle" font-size="10" fill="var(--ac)">主体 · 调用供给数据并回写学时</text>
+    ${[['AI 教练中心', 500, 92, 'plaza'], ['陪练舱', 700, 92, 'arena'], ['评分复盘', 500, 150, 'review'], ['成长档案', 700, 150, 'growth'], ['班组看板', 500, 208, 'team'], ['教练编辑器', 700, 208, 'editor']].map(([n, x, y, go]) => `<g class="hitv" data-go="${go}" data-tip="打开${n}"><rect x="${x}" y="${y}" width="180" height="40" rx="6" fill="#fff" stroke="var(--acln)"/><text x="${x + 90}" y="${y + 25}" text-anchor="middle" font-size="12" fill="#17301f">${n}</text></g>`).join('')}
     ${CLASSROOM.supply.map((s, i) => { const y = 105 + i * 44; return s.dir === 'in'
-      ? `<path d="M250,${y} C360,${y} 380,${140} 480,${140}" class="gedge gfeed" fill="none"/><circle r="3.4" fill="#0e8f5a"><animateMotion dur="${2.6 + i * .4}s" repeatCount="indefinite" path="M250,${y} C360,${y} 380,${140} 480,${140}"/></circle>`
+      ? `<path d="M250,${y} C360,${y} 380,${140} 480,${140}" class="gedge gfeed" fill="none"/><circle r="3.4" fill="var(--ac)"><animateMotion dur="${2.6 + i * .4}s" repeatCount="indefinite" path="M250,${y} C360,${y} 380,${140} 480,${140}"/></circle>`
       : `<path d="M480,${160} C380,${160} 360,${y} 250,${y}" class="gedge gact" fill="none"/><circle r="3.4" fill="#c9a227"><animateMotion dur="2.4s" repeatCount="indefinite" path="M480,${160} C380,${160} 360,${y} 250,${y}"/></circle>`; }).join('')}
-    <text x="365" y="122" text-anchor="middle" font-size="10.5" fill="#0e8f5a">供给 →</text><text x="365" y="188" text-anchor="middle" font-size="10.5" fill="#a8821b">← 学时回写</text>
+    <text x="365" y="122" text-anchor="middle" font-size="10.5" fill="var(--ac)">供给 →</text><text x="365" y="188" text-anchor="middle" font-size="10.5" fill="#a8821b">← 学时回写</text>
   </svg>`;
 }
 function quizHtml() {
@@ -342,27 +342,27 @@ function pageClassroom() {
   const plan = CL.plan || lsGet(LS_PLAN, null);
   return `<div class="ppage">
     <div class="ph"><b>知识课堂</b><span>南网人工智能知识课堂 · 上次同步 ${CLASSROOM.syncAt}</span><span class="phr"><button class="btn sm ${CL.syncing ? 'busy' : ''}" data-sync="1">${CL.syncing ? '同步中…' : '立即同步'}</button></span></div>
-    <section class="hcard"><div class="hch"><b>接入关系</b><span>课程 / 题库 / 学员画像 供给 → 底座；陪练学时 → 课堂回写 · 点击节点查看接口</span></div><div class="hcb">${archSVG()}</div></section>
+    <section class="hcard hg"><div class="hch"><b>接入关系</b><span>课程 / 题库 / 学员画像 供给 → 底座；陪练学时 → 课堂回写 · 点击节点查看接口</span></div><div class="hcb">${archSVG()}</div></section>
     <div class="syncline">${CLASSROOM.supply.map(s => `<span class="sy ok ${CL.syncing ? 'busy' : ''}" data-arch="${s.k}">${s.n} ${s.dir === 'in' ? '已同步' : '已回写'} · ${s.v}</span>`).join('')}</div>
     <div class="gtwo g32">
-      <section class="hcard"><div class="hch"><b>课程库</b><span>${list.length}/${cs.length} 门 · 点击课程查看章节并继续学习</span></div><div class="hcb">
+      <section class="hcard ho"><div class="hch"><b>课程库</b><span>${list.length}/${cs.length} 门 · 点击课程查看章节并继续学习</span></div><div class="hcb">
         <div class="clsearch"><input id="cl_q" data-clq="1" placeholder="搜索课程或章节…" value="${CL.q}"><div class="chips">${tags.map(t => `<span class="chip ${CL.tag === t ? 'on' : ''}" data-ctag="${t}">${t}</span>`).join('')}</div></div>
         <div class="clist">${list.map(c => `<div class="crs hitv" data-course="${c.id}"><div class="crs1"><b>${c.n}</b><i class="ctag">${c.tag}</i><span class="tk3">${c.lvl} · ${c.h} 学时</span></div><div class="hbar"><div class="hfill" style="width:${Math.round(c.done / c.ch.length * 100)}%"></div></div><div class="tk3">${c.done}/${c.ch.length} 章${c.done >= c.ch.length ? ' · 已完成，学时已回写' : c.done ? ' · 学习中' : ''}</div></div>`).join('') || '<div class="tk3">没有匹配的课程。</div>'}</div></div></section>
-      <section class="hcard"><div class="hch"><b>随堂测验</b><span>题库联动 · 答错即出依据条款 · 完成回写 0.5 学时</span></div><div class="hcb" id="quizbox">
+      <section class="hcard hg"><div class="hch"><b>随堂测验</b><em class="ai">AI 出题</em><span>题库联动 · 答错即出依据条款 · 完成回写 0.5 学时</span></div><div class="hcb" id="quizbox">
         ${CL.quiz ? quizHtml() : `<div class="chips">${['全部'].concat(KNOW.map(k => k.t)).map(t => `<span class="chip" data-quiz="${t}">${t}</span>`).join('')}</div>
         <div class="tk3" style="margin-top:8px">按主题抽 6 题（题库 ${QUIZ.length} 题）。${hist.length ? `本机测验 ${hist.length} 次，最近 ${hist[0].right}/${hist[0].n}（${hist[0].topic}）` : ''}</div>`}</div></section>
     </div>
     <div class="gtwo">
-      <section class="hcard"><div class="hch"><b>错题 → 题库联动</b><span>陪练扣分项自动匹配练习题</span></div><div class="hcb"><table class="htbl"><tr><th>陪练扣分项</th><th>匹配题目</th><th>掌握度</th></tr>
-        ${CLASSROOM.quizLink.map(q => `<tr><td>${q.vio}</td><td>${q.q}<div class="tk3">练习 ${q.tries} 次</div></td><td style="width:110px"><div class="hbar"><div class="hfill" style="width:${q.mastery}%;background:${q.mastery >= 80 ? '#0e8f5a' : '#c9a227'}"></div></div><span class="mono tk3">${q.mastery}%</span></td></tr>`).join('')}</table></div></section>
-      <section class="hcard"><div class="hch"><b>本周学习计划</b><span>按能力短板 + 课程进度生成 · 由本人确认后生效</span><span class="phr"><button class="btn sm" data-lplan="1">${plan ? '重新生成' : '生成本周计划'}</button></span></div><div class="hcb">
+      <section class="hcard ho"><div class="hch"><b>错题 → 题库联动</b><span>陪练扣分项自动匹配练习题</span></div><div class="hcb"><table class="htbl"><tr><th>陪练扣分项</th><th>匹配题目</th><th>掌握度</th></tr>
+        ${CLASSROOM.quizLink.map(q => `<tr><td>${q.vio}</td><td>${q.q}<div class="tk3">练习 ${q.tries} 次</div></td><td style="width:110px"><div class="hbar"><div class="hfill" style="width:${q.mastery}%;background:${q.mastery >= 80 ? 'var(--ac)' : '#c9a227'}"></div></div><span class="mono tk3">${q.mastery}%</span></td></tr>`).join('')}</table></div></section>
+      <section class="hcard ho"><div class="hch"><b>本周学习计划</b><em class="ai">AI</em><span>按能力短板 + 课程进度生成 · 由本人确认后生效</span><span class="phr"><button class="btn sm" data-lplan="1">${plan ? '重新生成' : '生成本周计划'}</button></span></div><div class="hcb">
         ${plan ? `<table class="htbl plantbl" id="plantbl"><tr><th>日</th><th>类型</th><th>内容</th><th>时长</th><th>针对</th></tr>${plan.rows.map(r => `<tr class="erow"><td class="mono">${r.day}</td><td><i class="ctag">${r.k}</i></td><td>${r.t}${r.plan ? ` <button class="btn sm" data-train="${r.plan}">去练</button>` : ''}</td><td class="mono">${r.min} 分钟</td><td class="tk3">${r.dim}</td></tr>`).join('')}</table>
           <div class="rvact">${plan.saved ? '<span class="tag ok">已加入日程</span>' : '<button class="btn pri" data-lplansave="1">确认并加入日程</button>'}<span class="tk3">合计 ${plan.rows.reduce((a, r) => a + r.min, 0)} 分钟 · 计划由系统生成，经本人确认后生效</span></div>` : '<div class="edempty">点「生成本周计划」，系统按当前短板（' + DIMS6.map((d, i) => [d, RADAR_NOW[i]]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(x => x[0]).join('、') + '）与课程进度排出 7 天安排。</div>'}</div></section>
     </div>
     <div class="gtwo">
-      <section class="hcard"><div class="hch"><b>学员画像同步</b><span>课堂 ⇄ 底座</span></div><div class="hcb"><table class="htbl"><tr><th>字段</th><th>当前值</th><th>状态</th></tr>
+      <section class="hcard hg"><div class="hch"><b>学员画像同步</b><span>课堂 ⇄ 底座</span></div><div class="hcb"><table class="htbl"><tr><th>字段</th><th>当前值</th><th>状态</th></tr>
         ${CLASSROOM.profileSync.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td><span class="tag ok">${r[2]}</span></td></tr>`).join('')}</table></div></section>
-      <section class="hcard"><div class="hch"><b>学时回写记录</b><span>近30天</span></div><div class="hcb"><table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
+      <section class="hcard ho"><div class="hch"><b>学时回写记录</b><span>近30天</span></div><div class="hcb"><table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
         ${hourLog().map(x => `<tr><td class="mono">${x.d === 0 ? '今天' : dayLabel(x.d)}</td><td>${x.n}</td><td class="mono">${x.h}</td><td>${x.src}</td></tr>`).join('')}</table></div></section>
     </div></div>`;
 }
@@ -433,12 +433,12 @@ function pageTeam() {
   const avgAll = Math.round(active.reduce((a, m) => a + m.avg, 0) / active.length);
   const redTotal = REDLINES.reduce((a, r) => a + r[1], 0);
   const idle = TEAM.filter(m => m.sess === 0 || m.last > 6);
-  const heat = v => { if (!v) return '<div class="heatc" style="background:#f4f3ea;color:#b3bfb2">—</div>'; const t = Math.max(0, Math.min(1, (v - 40) / 60)); return `<div class="heatc" style="background:rgba(14,143,90,${(.08 + t * .7).toFixed(2)});color:${t > .55 ? '#fff' : '#2d5c40'}">${v}</div>`; };
+  const heat = v => { if (!v) return '<div class="heatc" style="background:#f4f3ea;color:#b3bfb2">—</div>'; const t = Math.max(0, Math.min(1, (v - 40) / 60)); return `<div class="heatc" style="background:color-mix(in srgb,var(--ac) ${Math.round((.08 + t * .7) * 100)}%,transparent);color:${t > .55 ? '#fff' : 'var(--acd)'}">${v}</div>`; };
   const maxR = Math.max(...REDLINES.map(r => r[1]));
   const tasks = teamTasks();
   return `<div class="ppage">
     <div class="ph"><b>班组看板</b><span>${LEAD_USER.team} · 班组长 ${LEAD_USER.name} · ${TEAM.length} 人</span></div>
-    <div class="hkpis" style="margin-top:-4px">
+    <div class="hkpis ho" style="margin-top:-4px">
       <div class="kpi ${cover >= 90 ? 'good' : 'warn'}"><b>${cover}%</b><span>陪练覆盖率 ${active.length}/${TEAM.length}</span></div>
       <div class="kpi"><b>${(TEAM.reduce((a, m) => a + m.sess, 0) / TEAM.length).toFixed(1)}</b><span>人均场次 · 30天</span></div>
       <div class="kpi"><b>${avgAll}</b><span>班组平均分</span></div>
@@ -446,21 +446,21 @@ function pageTeam() {
       <div class="kpi"><b>${TEAM.filter(m => m.task === 'todo').length}</b><span>任务未完成</span></div>
     </div>
     <div class="tmwrap">
-      <section class="hcard"><div class="hch"><b>成员总览</b><span>点击成员查看能力明细</span></div><div class="hcb"><table class="htbl big2">
+      <section class="hcard ho"><div class="hch"><b>成员总览</b><span>点击成员查看能力明细</span></div><div class="hcb"><table class="htbl big2">
         <tr><th>成员</th><th>岗位</th><th>场次</th><th>平均分</th><th>短板</th><th>最近练习</th><th>本月任务</th></tr>
         ${TEAM.map((m, i) => { const w = m.sess ? DIMS6[m.dims.indexOf(Math.min(...m.dims))] : '—'; return `<tr class="rrow" data-member="${i}"><td><b>${m.n}</b></td><td>${m.post}</td><td class="mono">${m.sess || '—'}</td><td class="mono ${m.avg && m.avg < 75 ? 'wv' : 'gv'}">${m.avg || '—'}</td><td>${w}</td><td class="mono">${m.last < 0 ? '未练' : m.last === 0 ? '今天' : m.last + ' 天前'}</td><td>${m.task === 'done' ? '<span class="tag ok">已完成</span>' : '<span class="tag wn">未完成</span>'}</td></tr>`; }).join('')}</table>
         <div class="tk3" style="margin-top:8px">评价数据为陪练系统自动记录，用于培训安排参考；正式考评以人工审核为准。</div></div></section>
-      <section class="hcard"><div class="hch"><b>班组短板热力</b><span>成员 × 能力项</span></div><div class="hcb"><div class="theat" style="grid-template-columns:70px repeat(6,1fr)">
+      <section class="hcard hg"><div class="hch"><b>班组短板热力</b><span>成员 × 能力项</span></div><div class="hcb"><div class="theat" style="grid-template-columns:70px repeat(6,1fr)">
         <div class="heath"></div>${DIMS6.map(d => `<div class="heath">${d}</div>`).join('')}
         ${TEAM.map(m => `<div class="heatn">${m.n}</div>${m.dims.map(v => heat(v)).join('')}`).join('')}</div></div></section>
     </div>
     <div class="tmwrap2">
-      <section class="hcard"><div class="hch"><b>红线触发统计</b><span>本月 · 按类型</span></div><div class="hcb">
+      <section class="hcard hg"><div class="hch"><b>红线触发统计</b><span>本月 · 按类型</span></div><div class="hcb">
         ${REDLINES.map(r => `<div class="bar"><span>${r[0]}</span><div class="btrk"><div class="bfill" style="width:${Math.round(r[1] / maxR * 100)}%"></div></div><b class="mono">${r[1]}</b></div>`).join('')}</div></section>
-      <section class="hcard"><div class="hch"><b>未练与待提醒</b><span>${idle.length} 人</span></div><div class="hcb">
+      <section class="hcard ho"><div class="hch"><b>未练与待提醒</b><em class="ai">AI 草稿</em><span>${idle.length} 人</span></div><div class="hcb">
         ${idle.map(m => `<div class="hrow"><b>${m.n}</b> <span class="tk3">${m.sess === 0 ? '本月未练' : m.last + ' 天未练'} · ${m.task === 'todo' ? '任务未完成' : '任务已完成'}</span></div>`).join('')}
         <button class="btn" data-remind="1" style="margin-top:8px">生成提醒草稿</button></div></section>
-      <section class="hcard"><div class="hch"><b>任务下发</b><span>选教练 · 截止 · 及格线</span></div><div class="hcb frm">
+      <section class="hcard ho"><div class="hch"><b>任务下发</b><span>选教练 · 截止 · 及格线</span></div><div class="hcb frm">
         <label>教练<select id="tk_coach">${COACHES.map(c => `<option value="${c.id}" ${c.open ? '' : 'disabled'}>${c.n}${c.open ? '' : '（未开通）'}</option>`).join('')}</select></label>
         <label>练习方式<select id="tk_plan">${PLANS.filter(p => p.id !== 'wrong').map(p => `<option value="${p.id}">${p.n}</option>`).join('')}</select></label>
         <label>模式<select id="tk_mode"><option>考核模式</option><option>演练模式</option><option>教学模式</option></select></label>
@@ -468,7 +468,7 @@ function pageTeam() {
         <label>对象<select id="tk_who"><option>全班</option><option>未练人员</option>${TEAM.map(m => `<option>${m.n}</option>`).join('')}</select></label>
         <button class="btn pri" data-tasksend="1">下发任务</button></div></section>
     </div>
-    <section class="hcard"><div class="hch"><b>本月任务</b><span>${tasks.length} 项</span></div><div class="hcb"><table class="htbl"><tr><th>教练</th><th>练习方式</th><th>模式</th><th>截止</th><th>及格线</th><th>对象</th><th>完成</th></tr>
+    <section class="hcard hg"><div class="hch"><b>本月任务</b><span>${tasks.length} 项</span></div><div class="hcb"><table class="htbl"><tr><th>教练</th><th>练习方式</th><th>模式</th><th>截止</th><th>及格线</th><th>对象</th><th>完成</th></tr>
       ${tasks.map(t => `<tr><td>${t.coach}</td><td>${t.plan}</td><td>${t.mode}</td><td class="mono">${t.due}</td><td class="mono">${t.pass}</td><td>${t.who}</td><td class="mono">${t.done}/${t.total}</td></tr>`).join('')}</table></div></section>
   </div>`;
 }
@@ -571,7 +571,7 @@ function pageEditor() {
       <div class="edsrc"><div class="hch" style="padding:0 0 6px"><b>操作票原文</b><span>粘贴票面文本，每行一项</span></div>
         <textarea id="ed_text" rows="17">${ED.text}</textarea>
         <div class="rvact"><button class="btn pri" data-ed="gen">生成剧本</button><button class="btn" data-ed="sample">载入样例票</button><span class="tk3" id="ed_prog"></span></div></div>
-      <div class="edout"><div class="hch" style="padding:0 0 6px"><b>剧本草稿</b><span>${ED.steps ? `${ED.steps.length} 项 · 判定点 ${ED.steps.reduce((a, s) => a + s.judge.length, 0)} · 红线 ${ED.steps.filter(s => s.red).length} · 已校核 ${ED.steps.filter(s => s.ok).length}` : '待生成'}</span></div>
+      <div class="edout"><div class="hch" style="padding:0 0 6px"><b>剧本草稿</b><em class="ai">AI 解析</em><span>${ED.steps ? `${ED.steps.length} 项 · 判定点 ${ED.steps.reduce((a, s) => a + s.judge.length, 0)} · 红线 ${ED.steps.filter(s => s.red).length} · 已校核 ${ED.steps.filter(s => s.ok).length}` : '待生成'}</span></div>
         ${ED.steps ? `<table class="htbl edtbl"><tr><th>序</th><th>票面</th><th>动作</th><th>作业位置</th><th>判定点</th><th>依据</th><th>校核</th><th></th></tr>
           ${ED.steps.map((s, i) => `<tr class="erow ${s.red ? 'red' : ''}" data-erow="${i}"><td class="mono">${s.no}</td><td>${s.t}</td><td><i class="ctag">${s.an}</i></td><td contenteditable="true" class="edcell" data-edloc="${i}">${s.loc}</td><td>${s.judge.map(j => `<span class="jchip ${/红线/.test(j) ? 'rl' : ''}">${j}</span>`).join('')}</td><td class="mono tk3">${s.cite}</td><td><input type="checkbox" data-edok="${i}" ${s.ok ? 'checked' : ''}></td>
             <td class="edtools"><button data-edmv="${i},-1" title="上移">↑</button><button data-edmv="${i},1" title="下移">↓</button><button data-edred="${i}" class="${s.red ? 'on' : ''}" title="设为红线项">红线</button><button data-eddel="${i}" title="删除">✕</button></td></tr>`).join('')}</table>
@@ -601,7 +601,7 @@ function pageEditor() {
   return `<div class="ppage">
     <div class="ph"><b>教练编辑器</b><span>从一张操作票生成一个新教练 · 已发布 ${custom.length} 个</span></div>
     <div class="tabs">${tabs.map(([k, n]) => `<span class="${ED.tab === k ? 'on' : ''}" data-tab="${k}">${n}</span>`).join('')}</div>
-    <section class="hcard"><div class="hcb edbody">${body}</div></section>
+    <section class="hcard hg"><div class="hcb edbody">${body}</div></section>
   </div>`;
 }
 function kbAnswer(q) {
