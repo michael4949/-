@@ -21,8 +21,8 @@ function chRadar(dims, now, prev, opt) {
         <text x="${lx}" y="${ly}" text-anchor="middle" font-size="10" fill="#6b7a70">${n}</text>
         <text x="${lx}" y="${ly + 12}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="${now[i] < 70 ? '#a8821b' : '#0e8f5a'}">${now[i]}</text></g>`;
     }).join('')}
-    <g font-size="10" fill="#98a69c"><rect x="${W - 92}" y="8" width="10" height="3" fill="#0e8f5a"/><text x="${W - 78}" y="13">本月</text>
-    <rect x="${W - 46}" y="8" width="10" height="3" fill="#b3bfb2"/><text x="${W - 32}" y="13">上月</text></g></svg>`;
+    <g font-size="10" fill="#98a69c"><rect x="${W - 104}" y="8" width="10" height="3" fill="#0e8f5a"/><text x="${W - 90}" y="13">${(opt && opt.l1) || '本月'}</text>
+    <rect x="${W - 52}" y="8" width="10" height="3" fill="#b3bfb2"/><text x="${W - 38}" y="13">${(opt && opt.l2) || '上月'}</text></g></svg>`;
 }
 
 /* ② 近30天 双轴柱线：柱=时长(min) 线=次数，某日可点击下钻 */

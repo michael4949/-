@@ -8,7 +8,7 @@ function goPage(h) { location.hash = '#' + h; }
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
   const toPlaza = h === 'plaza'; if (toPlaza) h = 'home';
-  if (!['home', 'arena', 'review', 'growth', 'classroom'].includes(h)) h = 'home';
+  if (!['home', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
   $('#pg_arena').style.display = h === 'arena' ? '' : 'none';
   $('#pg_home').style.display = h === 'arena' ? 'none' : '';
   if (h === 'arena') {
@@ -47,8 +47,8 @@ function homeBoot() {
         <span class="hnavi" data-h="review">评分复盘</span>
         <span class="hnavi" data-h="growth">成长档案</span>
         <span class="hnavi" data-h="classroom">知识课堂</span>
-        <span class="hnavi lk" data-lk="1">班组看板<i>管理</i></span>
-        <span class="hnavi lk" data-lk="1">教练编辑器<i>管理</i></span>
+        <span class="hnavi lk" data-lk="1" data-h="team">班组看板<i>管理</i></span>
+        <span class="hnavi lk" data-lk="1" data-h="editor">教练编辑器<i>管理</i></span>
       </nav>
       <div class="huser"><span id="hclock" class="hclk"></span>
         <span class="uchip"><i>${HOME_USER.name.slice(0, 1)}</i>${HOME_USER.name} · ${HOME_USER.team}</span></div>
@@ -59,9 +59,11 @@ function homeBoot() {
   /* 南网实景照片到位后：为 #bgph1/#bgph2 填入 src 即自动显示（插槽） */
   $('#hnav').onclick = e => {
     const n = e.target.closest('.hnavi'); if (!n) return;
-    if (n.dataset.lk) return toast('该模块需要班组长及以上权限（当前账号：学员）');
+    if (n.dataset.lk && ROLE.cur !== 'lead') return toast('该模块需要班组长及以上权限（当前账号：学员）。点击右上角账号可切换为班组长。');
     goPage(n.dataset.h);
   };
+  $('.uchip').onclick = toggleRole;
+  renderRole();
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
   bindTip(); bindHPage();
@@ -71,9 +73,9 @@ function homeBoot() {
 /* ---------------- 页面渲染 ---------------- */
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
-  if (pg.dataset.cur === h && h !== 'home') return;      // 首页允许重渲染（提醒打字机守卫在内部）
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : pageClassroom();
+  pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
 
@@ -163,16 +165,17 @@ const COACH_GLYPH = { '变电运行': '运', '变电检修': '检', '配网': '�
 const COACH_GRAD = { '变电运行': ['#1e63b8', '#4d97e8'], '变电检修': ['#0e7a5f', '#2fd08a'], '配网': ['#8a5a14', '#e8b22a'], '调度': ['#5b3a9e', '#c3a8e8'], '营销服务': ['#9e3a5b', '#e88aa8'], '安全监督': ['#9e4a1e', '#ff8a3d'], '班组管理': ['#14648a', '#4dc3e8'] };
 
 function pagePlaza() {
-  const doms = ['全部', ...new Set(COACHES.filter(c => PF.fam === '全部' || c.fam === PF.fam).map(c => c.dom))];
-  const tags = ['全部', ...new Set(COACHES.flatMap(c => c.tags))];
-  const list = COACHES.filter(c =>
+  const ALLC = COACHES.concat(customCoaches());
+  const doms = ['全部', ...new Set(ALLC.filter(c => PF.fam === '全部' || c.fam === PF.fam).map(c => c.dom))];
+  const tags = ['全部', ...new Set(ALLC.flatMap(c => c.tags))];
+  const list = ALLC.filter(c =>
     (PF.fam === '全部' || c.fam === PF.fam) &&
     (PF.dom === '全部' || c.dom === PF.dom) &&
     (PF.tag === '全部' || c.tags.includes(PF.tag)));
   const chip = (f, v, cur) => `<span class="fchip ${v === cur ? 'on' : ''}" data-fchip="${f}" data-v="${v}">${v}</span>`;
   return `
   <section id="plaza" class="plaza">
-    <div class="pzh"><b>AI 教练中心</b><span>${COACHES.length} 位预设教练 · 覆盖 ${COACH_FAMS.length} 个岗位族 · 本单位已开通 ${COACHES.filter(c => c.open).length} 位</span></div>
+    <div class="pzh"><b>AI 教练中心</b><span>${COACHES.length} 位预设教练${ALLC.length > COACHES.length ? ` + ${ALLC.length - COACHES.length} 位自建` : ''} · 覆盖 ${COACH_FAMS.length} 个岗位族 · 本单位已开通 ${ALLC.filter(c => c.open).length} 位</span></div>
     <div class="pzf"><label>岗位族</label>${['全部', ...COACH_FAMS].map(v => chip('fam', v, PF.fam)).join('')}</div>
     <div class="pzf"><label>业务域</label>${doms.map(v => chip('dom', v, PF.dom)).join('')}</div>
     <div class="pzf"><label>能力项</label>${tags.map(v => chip('tag', v, PF.tag)).join('')}</div>
@@ -181,9 +184,9 @@ function pagePlaza() {
         const g = COACH_GRAD[c.fam];
         return `<div class="ccard ${c.open ? 'openc' : 'lockc'}" data-coach="${c.id}">
         <div class="crow1">
-          ${COACH_IMGS[c.id] ? `<img class="cav" src="${COACH_IMGS[c.id]}" alt="${c.n}">` : `<div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>`}
+          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>`}
           <div class="cmeta"><b>${c.n}</b><span>${c.fam} · ${c.dom}</span></div>
-          ${c.open ? '<span class="copen">已开通</span>' : '<span class="clock">未开通</span>'}
+          ${c.open ? '<span class="copen">已开通</span>' : c.custom ? '<span class="copen" style="color:#8a6d15;background:#faf3dc;border-color:#e3d49e">自建 · 待审核</span>' : '<span class="clock">未开通</span>'}
         </div>
         <div class="cdesc">${c.desc}</div>
         <div class="ctags">${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
@@ -202,11 +205,13 @@ function refreshPlaza() {
 
 /* ---------------- 事件委托（首页与各薄页共用） ---------------- */
 function bindHPage() {
+  $('#hpage').oninput = pagesInput;
   $('#hpage').onclick = e => {
+    if (pagesClick(e)) return;
     const q = s => e.target.closest(s); let n;
     if (n = q('[data-fchip]')) { PF[n.dataset.fchip] = n.dataset.v; if (n.dataset.fchip === 'fam') { PF.dom = '全部'; } refreshPlaza(); return; }
     if (n = q('.cgo')) return enterCoach(n.dataset.coach, null);
-    if (n = q('[data-coach]')) { const c = COACHES.find(x => x.id === n.dataset.coach); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通'); }
+    if (n = q('[data-coach]')) { const c = COACHES.concat(customCoaches()).find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通'); }
     if (n = q('[data-reco]')) return recoAct(n.dataset.reco);
     if (n = q('[data-train]')) return enterCoach('daozha', n.dataset.train === 'full' ? null : n.dataset.train);
     if (n = q('[data-go]')) return goPage(n.dataset.go);
@@ -342,69 +347,6 @@ function estDims(s) {
 }
 const PLAN2ID = [['完整', 'full'], ['分段 · 运行', 'p1'], ['分段 · 热备用', 'p2'], ['分段 · 冷备用', 'p3'], ['专项 · GIS', 'sp_gis'], ['专项 · 验电', 'sp_vd'], ['专项 · 接令', 'sp_ord'], ['错题', 'wrong']];
 function planId(name) { const hit = PLAN2ID.find(([p]) => name.startsWith(p)); return hit ? hit[1] : 'full'; }
-
-function pageReview() {
-  const A = homeAgg();
-  return `<div class="ppage">
-    <div class="ph"><b>评分复盘</b><span>近30天 ${A.cnt} 场 · 平均 ${A.avg} 分 · 记录由陪练舱自动留痕</span></div>
-    <table class="htbl big">
-      <tr><th>日期</th><th>练习方式</th><th>模式</th><th>用时</th><th>得分</th><th>扣分</th><th>红线</th><th></th></tr>
-      ${SESSIONS.map((s, i) => `
-      <tr class="rrow" data-row="${i}"><td class="mono">${dayLabel(s.d)}</td><td>${s.plan}</td><td>${s.mode}</td>
-        <td class="mono">${s.dur} 分钟</td><td class="mono ${s.score < 75 ? 'wv' : 'gv'}">${s.score}</td>
-        <td class="mono">${s.vio.length || '—'}</td><td>${s.vio.some(v => v.lv === 'red') ? '<span class="tag rl">1</span>' : '—'}</td><td class="exp">▾</td></tr>
-      <tr hidden id="rx${i}"><td colspan="8" class="rxcell">
-        <div class="rxwrap">
-          <div>${miniBars(estDims(s))}</div>
-          <div>
-            <div class="st">扣分与提示</div>
-            ${s.vio.map(v => `<div class="hrow"><span class="tag ${v.lv === 'red' ? 'rl' : v.lv === 'major' ? 'wn' : ''}">${v.lv === 'red' ? '一票否决' : v.lv === 'major' ? '严重' : '不规范'}</span> 第${v.step}项 ${v.t}<span class="mono cite">${v.cite}</span></div>`).join('') || '<div class="hrow">本场无扣分。</div>'}
-            ${s.hints.map(h => `<div class="hrow hint">提示 · ${h[0]} · ${h[1]}</div>`).join('')}
-            <button class="btn" data-train="${planId(s.plan)}" style="margin-top:10px">重练该方式</button>
-          </div>
-        </div></td></tr>`).join('')}
-    </table></div>`;
-}
-
-/* ---------------- 成长档案 ---------------- */
-function pageGrowth() {
-  return `<div class="ppage">
-    <div class="ph"><b>成长档案</b><span>${HOME_USER.name} · ${HOME_USER.post}</span></div>
-    <div class="gtwo">
-      <div class="hcard"><div class="hch"><b>能力演进</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV)}</div></div>
-      <div class="hcard"><div class="hch"><b>三期对照</b><span>逐维度</span></div><div class="hcb">
-        <table class="htbl"><tr><th>维度</th><th>前月</th><th>上月</th><th>本月</th><th>变化</th></tr>
-        ${DIMS6.map((n, i) => `<tr><td>${n}</td><td class="mono">${RADAR_OLD[i]}</td><td class="mono">${RADAR_PREV[i]}</td>
-          <td class="mono">${RADAR_NOW[i]}</td><td class="mono ${RADAR_NOW[i] >= RADAR_PREV[i] ? 'gv' : 'wv'}">${RADAR_NOW[i] - RADAR_PREV[i] >= 0 ? '+' : ''}${RADAR_NOW[i] - RADAR_PREV[i]}</td></tr>`).join('')}</table>
-      </div></div>
-    </div>
-    <div class="hcard"><div class="hch"><b>学时记录</b><span>年度 ${HOME_USER.hours.done}/${HOME_USER.hours.need} 学时</span></div><div class="hcb">
-      <table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
-      ${HOUR_LOG.map(x => `<tr><td class="mono">${dayLabel(x.d)}</td><td>${x.n}</td><td class="mono">${x.h}</td><td>${x.src}</td></tr>`).join('')}</table></div></div>
-    <div class="hcard"><div class="hch"><b>资质证书</b><span>${HOME_USER.certs.length} 项</span></div><div class="hcb">
-      <table class="htbl"><tr><th>证书</th><th>取得日期</th><th>复审期限</th><th>状态</th></tr>
-      ${HOME_USER.certs.map(c => `<tr><td>${c.n}</td><td class="mono">${c.got}</td><td class="mono">${c.review}</td>
-        <td><span class="tag ok">有效</span></td></tr>`).join('')}</table></div></div>
-    <div class="tk3" style="margin:14px 4px">能力与胜任度数据为系统测算参考，任职资格评定以人工审核结果为准。</div>
-  </div>`;
-}
-
-/* ---------------- 知识课堂 ---------------- */
-function pageClassroom() {
-  return `<div class="ppage">
-    <div class="ph"><b>知识课堂</b><span>南网人工智能知识课堂 · 数据同步正常</span></div>
-    <div class="syncline">
-      <span class="sy ok">课程库 已同步</span><span class="sy ok">题库 已同步</span>
-      <span class="sy ok">学时回写 已同步</span><span class="sy ok">学员画像 已同步</span>
-      <span class="mono" style="color:#5f7794">上次同步 今日 07:30</span></div>
-    <div class="hcard"><div class="hch"><b>推荐课程</b><span>按能力短板匹配</span></div><div class="hcb">
-      <table class="htbl"><tr><th>课程</th><th>学时</th><th>关联能力项</th></tr>
-      ${COURSES.map(c => `<tr><td>${c.n}</td><td class="mono">${c.h}</td><td><i class="ctag">${c.tag}</i></td></tr>`).join('')}</table></div></div>
-    <div class="hcard"><div class="hch"><b>学时回写记录</b><span>近30天</span></div><div class="hcb">
-      <table class="htbl"><tr><th>日期</th><th>内容</th><th>学时</th><th>来源</th></tr>
-      ${HOUR_LOG.map(x => `<tr><td class="mono">${dayLabel(x.d)}</td><td>${x.n}</td><td class="mono">${x.h}</td><td>${x.src}</td></tr>`).join('')}</table></div></div>
-  </div>`;
-}
 
 /* ---------------- 悬浮提示 ---------------- */
 function bindTip() {

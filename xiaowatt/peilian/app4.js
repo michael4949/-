@@ -139,6 +139,13 @@ function openReport() {
   const red = S.vio.some(v => v.level === 'red');
   const vals = dims.map(([k]) => Math.max(4, Math.min(100, base[k] + Math.min(0, S.score[k] * 1.2) + (S.praise.some(p => p.dim === k) ? 6 : 0))));
   const total = red ? 0 : Math.round(vals.reduce((a, b) => a + b, 0) / 6);
+  try {
+    saveSession({ ts: Date.now(), plan: S.plan ? S.plan.name : '完整操作票', mode: MODES[S.mode].n,
+      dur: Math.max(1, Math.round((Date.now() - (S.t0 || Date.now())) / 60000)), score: total,
+      dims: [0, 2, 3, 1, 5, 4].map(i => Math.round(vals[i])),
+      vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
+      hints: S.hints.map(hh => ['提示', `第${hh.step}项 第${hh.lv}级`]), lines: S.lines || [], praise: S.praise.map(p => ({ title: p.title })) });
+  } catch (e) { }
   const R = 74, cx = 152, cy = 112;
   const pts = vals.map((v, i) => {
     const a = -Math.PI / 2 + i * Math.PI / 3, r = R * v / 100;

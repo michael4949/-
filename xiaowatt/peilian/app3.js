@@ -160,6 +160,7 @@ async function _submitInput() {
   if (!v) return;
   const st = STEP();
   $('#rin').value = '';
+  if (S.beat === 1 || S.beat === 4) (S.lines = S.lines || []).push({ step: st.no, beat: S.beat, t: st.ticket, mine: v, std: S.beat === 1 ? st.recite : st.report });
   if (S.beat === 1) {
     // 复诵
     if (st.act !== 'recv' && st.act !== 'report' && !S.sel) {
