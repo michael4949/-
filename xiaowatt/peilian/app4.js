@@ -247,13 +247,13 @@ async function autoStep() {
 
 /* ---------------- 唇形·动作同步指示 ---------------- */
 const VNAME = { X: '静止', M: '闭唇 m/b/p', F: '唇齿 f', A: '开口 a', E: '半开 e', I: '扁唇 i', O: '圆唇 o', U: '撮唇 u', V: '圆扁 ü', N: '微闭 n/ng' };
-const PNAME = { idle: '站姿待命', call: '唱票·抬手指票', confirm: '发令·掌心前推', point: '指向设备', explain: '讲解·双手摊开', stop: '制止·前倾', correct: '纠错·摆指', listen: '倾听' };
+const PNAME = { idle: '待命', call: '唱票', confirm: '发令·点头确认', point: '指向作业面板', explain: '讲解', stop: '制止·前倾', correct: '纠错·摇头', listen: '倾听·侧头', nod: '确认' };
 function syncLoop() {
-  const v = DH.curV || 'X';
-  $('#sy_v').textContent = '口型 ' + (VNAME[v] || v);
-  $('#sy_c').textContent = DH.curCh || '—';
+  const sp = !!DH.speaking;
+  $('#sy_v').textContent = sp ? '正在说话' : '待命';
+  $('#sy_c').textContent = sp ? (DH.curCh || '—') : '—';
   $('#sy_g').textContent = PNAME[DH.pose] || DH.pose;
-  $('#sy_b').style.width = Math.min(100, DH.mouth.h * 5) + '%';
+  $('#sy_b').style.width = Math.round((sp ? DH.progress || 0 : 0) * 100) + '%';
   requestAnimationFrame(syncLoop);
 }
 

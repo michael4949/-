@@ -16,6 +16,17 @@ const RADAR_PREV = [80, 84, 55, 60, 66, 79];
 const RADAR_OLD  = [72, 78, 48, 52, 60, 74];   // 前月，成长档案用
 const TEAM_AVG   = [82, 85, 74, 70, 78, 80];   // 班组均值（组织级口径）
 
+/* 十维能力全景（成长档案）：前六维与 DIMS6 同序同值，后四维为操作过程细分项 */
+const DIMS10 = DIMS6.concat(['操作顺序', '验电接地', '二次隔离', '记录规范']);
+const RADAR10_NOW  = RADAR_NOW.concat([88, 76, 80, 84]);
+const RADAR10_PREV = RADAR_PREV.concat([82, 64, 72, 78]);
+const RADAR10_OLD  = RADAR_OLD.concat([74, 55, 60, 70]);
+const TEAM_AVG10   = TEAM_AVG.concat([84, 79, 77, 82]);
+const DIM10_DESC = {
+  '操作顺序': '按票面顺序逐项执行，不跳项、不漏项、不回退', '验电接地': '两种非同源验电确认无电压后再合接地刀闸',
+  '二次隔离': '压板、空气开关、把手操作前核对屏柜名称，操作后核对指示', '记录规范': '接令记录、操作票填写、标注"√"的时机与完整性'
+};
+
 /* 近30天练习场次（d=距今天数，倒序＝最近在前） */
 const SESSIONS = [
   { d: 1,  plan: '分段 · 冷备用 → 检修',   mode: '演练模式', dur: 23, score: 86, hints: [['设备状态核对', 'GIS 四项核对第二级提示']], vio: [{ lv: 'minor', step: '13', t: '四项位置指示核对顺序不完整', cite: '附录G-5' }] },

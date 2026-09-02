@@ -76,6 +76,9 @@ function renderTop() {
   $('#kvio').textContent = S.vio.length;
   $('#kvio').parentNode.className = 'kpi ' + (S.vio.length ? 'bad' : 'good');
   $('#kstop').textContent = S.abn.handled ? 1 : 0;
+  const est = estScore();
+  const ke = $('#kest');
+  if (ke) { ke.textContent = est; ke.parentNode.className = 'kpi est ' + (est >= 85 ? 'good' : est >= 70 ? 'warn' : 'bad'); }
   const ph = STEP() ? STEP().phase : 3;
   const st = ['运行', '热备用', '冷备用', '检修'];
   let curIdx = 0;
@@ -88,6 +91,53 @@ function tick() {
   if (!S.t0) return;
   const s = Math.floor((Date.now() - S.t0) / 1000);
   $('#ktime').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  const st = $('#stept');
+  if (st && S.stepT0 && S.stage === 'run') {
+    const e = Math.floor((Date.now() - S.stepT0) / 1000), ref = stepRef(STEP());
+    st.textContent = Math.floor(e / 60) + ':' + String(e % 60).padStart(2, '0');
+    st.className = e > ref * 1.5 ? 'wv' : e > ref ? 'mv' : 'gv';
+  }
+}
+/* 每项参考用时（秒）：按动作类型 */
+function stepRef(st) {
+  if (!st) return 45;
+  return ({ recv: 60, report: 40, gis: 90, verify: 60, closeE: 70, tag: 40 })[st.act] || 45;
+}
+/* 实时预估得分：与评估报告同一算法 */
+function estScore() {
+  const keys = ['rule', 'order', 'dual', 'state', 'risk', 'term'];
+  if (S.vio.some(v => v.level === 'red')) return 0;
+  const vals = keys.map(k => Math.max(4, Math.min(100, 100 + Math.min(0, (S.score[k] || 0) * 1.2) + (S.praise.some(p => p.dim === k) ? 6 : 0))));
+  return Math.round(vals.reduce((a, b) => a + b, 0) / 6);
+}
+/* 复诵实时评估：吻合度 + 票面漏说片段（≥2 字） */
+function missingSegs(mine, std) {
+  const a = Array.from(mine || ''), b = Array.from(std || '');
+  const n = a.length, m = b.length;
+  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  let i = 0, j = 0, cur = '', out = [];
+  const flush = () => { if (cur.length >= 2) out.push(cur); cur = ''; };
+  while (i < n && j < m) {
+    if (a[i] === b[j]) { flush(); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { i++; }
+    else { cur += b[j]; j++; }
+  }
+  while (j < m) cur += b[j++];
+  flush();
+  return out;
+}
+function liveMeter() {
+  const box = $('#livem'), r = $('#rin'); if (!box || !r) return;
+  const st = STEP(); if (!st || S.stage !== 'run' || !(S.beat === 1 || S.beat === 4)) { box.innerHTML = ''; return; }
+  const v = r.value.trim();
+  if (!v) { box.innerHTML = ''; return; }
+  const std = S.beat === 1 ? st.recite : st.report;
+  const sc = Math.round(sim(v, std) * 100);
+  const miss = S.mode === 'exam' ? [] : missingSegs(v, std).slice(0, 4);
+  const lv = sc >= 86 ? 'ok' : sc >= 62 ? 'wn' : 'bad';
+  box.innerHTML = `<span class="k">实时吻合度</span><span class="lmbar"><i class="${lv}" style="width:${sc}%"></i></span><b class="${lv}">${sc}%</b>
+    ${S.mode === 'teach' && miss.length ? `<span class="lmmiss">还缺：${miss.map(x => `<em>${x}</em>`).join('')}</span>` : S.mode === 'drill' && miss.length ? `<span class="lmmiss">尚有 ${miss.length} 处要素未念到</span>` : sc >= 86 ? '<span class="lmok">要素完整，可以提交</span>' : ''}`;
 }
 
 /* ---------------- 操作票 ---------------- */
@@ -398,7 +448,31 @@ function mcbHTML(id, nm, de, tagId) {
 
 function bindDevs() {
   $$('#panelwrap [data-dev]').forEach(n => bindDevHold(n));
-  if (S.dev._t) { const tn = $(`#panelwrap [data-dev="${S.dev._t}"]`); if (tn) tn.classList.add('tgt'); }
+  if (S.dev._t) {
+    const tn = $(`#panelwrap [data-dev="${S.dev._t}"]`);
+    if (tn) {
+      tn.classList.add('tgt');
+      const st = STEP();
+      if (st) {
+        const verb = S.beat === 1 ? '手指口述' : (st.ticket.match(/^(拉开|合上|断开|检查|核对|悬挂|切换|将|取下|投入|退出)/) || ['执行'])[0];
+        const label = S.beat === 1 ? '手指口述' : verb === '将' ? '切换' : verb;
+        if (tn.namespaceURI && tn.namespaceURI.indexOf('svg') >= 0) {
+          const svg = tn.ownerSVGElement;
+          if (svg && !svg.querySelector('.arlabg')) {
+            try {
+              const bb = tn.getBBox(), NS = 'http://www.w3.org/2000/svg';
+              const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'arlabg'); g.setAttribute('pointer-events', 'none');
+              const tx = `第${st.no}项 · ${label}`, w = tx.length * 11 + 18, x = Math.max(4, bb.x + bb.width / 2 - w / 2), y = bb.y - 30;
+              g.innerHTML = `<rect x="${x}" y="${y}" width="${w}" height="22" rx="11" fill="#17301f"/><path d="M ${x + w / 2 - 5} ${y + 22} l 5 6 5 -6 z" fill="#17301f"/><text x="${x + w / 2}" y="${y + 15}" text-anchor="middle" font-size="11.5" fill="#fff" font-family="inherit">${tx}</text>`;
+              svg.appendChild(g);
+            } catch (e) { }
+          }
+        } else if (!tn.querySelector('.arlab')) {
+          tn.insertAdjacentHTML('beforeend', `<span class="arlab"><i>第${st.no}项</i>${label}</span>`);
+        }
+      }
+    }
+  }
   $$('#panelwrap [data-bay]').forEach(n => n.onclick = () => {
     const b = n.dataset.bay;
     if (b !== '1163' && S.stage === 'run') {

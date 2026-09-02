@@ -36,7 +36,7 @@ xiaowatt/
 ├── banzu/                  项目二工作区（空，README.md 是完整规格）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
-├── assets/coaches/         教练形象图（<id>.jpg 256px，已配齐 18 位，构建时自动内联到教练卡）
+├── assets/coaches/         教练形象图（<id>.jpg 256px 18 位 + 三个陪练舱角色的 <id>_hd.jpg 512px，构建时自动内联）
 └── docgen/                 四份正式文档的生成脚本（Node docx），改文档时用
 ```
 
@@ -82,23 +82,25 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 |---|---|
 | data.js | 生成物：29 项操作票 STEPS、12 风险 RISKS、五防 WUFANG、位置 LOC、设备 DEV（源头是 gen_data.py，改剧本改它） |
 | know.js | 生成物：9 主题知识地图 KNOW、逐项知识点卡 STEPKP、阶段预习 PREVIEW（源头 gen_know.py） |
-| avatar.js | 内置 SVG 骨骼数字人：拼音视位口型（503 字表）、8 姿态、三角色 |
+| avatar.js | 数字人引擎（形象版，9/2 甲方口径：骨骼数字人不可接受）：以教练形象图为本体（陈志远=daozha、林岚=term、周建国=angui，`_hd` 为 512px 版本），逐字视位时钟驱动呼吸/说话节奏/声波/光环，视线跟随鼠标，8 姿态映射为前倾/转头/点头/摇头；接口 speak/setPose/nod/shake/speaking 不变；构造函数可传形象对象（编辑器预览、剧本试演复用），destroy() 停循环 |
 | player.js | 数字人播放层三档：clips（HeyGen 预渲染 WebM，主用）/ stream（实时）/ builtin；HEYGEN_MANIFEST 内联点在此 |
 | guide.js | 教学引导层：三模式 MODES、当前指令 instrNow（准备/五防/执行三阶段逐项指引，含目标选择器 sel）、GPIC 动作示意图（SMIL 动画演示按住/点选/复诵等）、applyGuideTarget 目标金色脉冲、指令卡任务条（渲染签名守卫防闪烁；「我该做什么」+「前往」）、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、宽容判定 lenient() |
 | layout.js | 页面骨架 LAYOUT 模板字符串 |
 | app1.js | 全局状态 S、常量、工具函数 |
 | sld.js | 一次接线图 SVG（1M/2M 双母七间隔，随设备状态变色） |
-| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI、设备长按 bindDevHold（演练/考核模式手指口述与执行需按住，教学模式点按）、目标设备通用高亮 |
+| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI（含预估得分 estScore）、本项计时 stepRef、复诵实时评估 liveMeter/missingSegs、设备长按 bindDevHold、目标设备通用高亮 + AR 标注 |
 | app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep/tickStep、submitInput（带并发锁） |
 | app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot（含卡住 24s 监护人主动提醒，__DH_SPEED<1 时停用） |
 | arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry(pre 可预选练法)、问教练 askCoach+retrieve、底部操作条 |
-| charts.js | 手绘 SVG 图表库：雷达/双轴柱线/环形/面积/热力矩阵/仪表盘 + miniBars，交互经 data-* 委托 |
-| homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、SESSIONS 近30天场次（唯一数据源）、COACHES 18 教练、homeAgg 聚合 |
+| charts.js | 手绘 SVG 图表库：雷达（opt.key 自定义下钻属性、opt.target 目标虚线多边形、任意维数）/双轴柱线/环形/面积/热力矩阵/仪表盘/场次成长曲线 chSessionCurve（得分·7日均线·用时·扣分·提示·及格线多序列可切）+ miniBars，交互经 data-* 委托 |
+| homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、DIMS6 六维（陪练舱/首页/班组口径）与 DIMS10 十维（成长档案口径，前六维同值）、SESSIONS 近30天场次（唯一数据源）、COACHES 18 教练、homeAgg 聚合 |
 | home.js | 系统首页：hash 路由（home/plaza/arena/review/growth/classroom/team/editor）、导航按角色放行管理模块、**驾驶舱布局**（中央学员成长地图 chGrowthMap：流向边+流动粒子+阶段分区，节点经 nodeClick 下钻；六图环绕）、AI 教练中心三级筛选、粒子+变电站剪影背景动效 |
-| pagedata.js | 底座各页数据：ROLE 角色、TEAM 班组 12 人、REDLINES、MILESTONES、LADDER 晋升通道、CLASSROOM 接入指标、SAMPLE_TICKET 样例票、localStorage 键与读写 |
-| pages.js | 评分复盘（本机场次 + 模拟场次统一、逐句 LCS diff、错误卡、AI 复盘生成）/ 成长档案（学习地图九主题、晋升通道、里程碑、成长曲线）/ 知识课堂（接入关系图供给→底座→学时回写）/ 班组看板（成员表、短板热力、红线统计、提醒草稿、任务下发）/ 教练编辑器（操作票规则解析 parseTicket → 逐条动效 → 校核 → 发布为自建教练）/ 角色切换 toggleRole / 页面事件 pagesClick |
+| pagedata.js | 底座各页数据：ROLE 角色、TEAM 班组 12 人、REDLINES、MILESTONES、LADDER 晋升通道、CLASSROOM 接入指标、SAMPLE_TICKET 样例票、QUIZ 随堂测验 14 题（依据只引用既有条款）、COURSE_LIB 课程库 12 门、ARCH_IF 接口说明、BADGES 能力徽章 12 枚（条件函数）、localStorage 键与读写 |
+| pages.js | 评分复盘（场次筛选、对照切换 上一场/最佳场/均值、场次回放时间轴 rvPlay、逐句 LCS diff + 跟读实时吻合度、错误卡、行动清单本机勾选、复盘摘要生成、AI 复盘）/ 成长档案（十维能力全景 + 上月/前月/班组对照 + 目标多边形、三期对照与预测、目标填写、多序列成长曲线点击进复盘、能力徽章、学习地图、晋升通道、里程碑、打印导出）/ 知识课堂（接入关系图节点可下钻、立即同步、课程库搜索/标签/章节学习回写学时、随堂测验、本周学习计划生成与加入日程）/ 班组看板 / 教练编辑器（角色设定含 18 形象 + 数字人预览试听 + 开场白生成；剧本步骤 上移下移/红线/删除/一致性检查 lintSteps/剧本试演；评分规则模板与示例试算；知识库检索测试与文本上传；已发布列表下架/载入）/ 角色切换 / pagesClick·pagesInput·pageAfter |
 
-本机落盘：陪练舱 openReport 时 saveSession 写入 localStorage `xwt_sessions`（含 S.lines 逐句记录），复盘页置顶显示并标「本机」；班组任务 `xwt_tasks`；自建教练 `xwt_custom_coaches`。
+本机落盘：陪练舱 openReport 时 saveSession 写入 localStorage `xwt_sessions`（含 S.lines 逐句记录），复盘页置顶显示并标「本机」；班组任务 `xwt_tasks`；自建教练 `xwt_custom_coaches`；成长目标 `xwt_goals`；课程进度 `xwt_course_prog`、学时回写 `xwt_hours`、测验记录 `xwt_quiz`、学习计划 `xwt_plan`、复盘行动清单 `xwt_actions`。
+
+陪练舱本轮新增（9/2）：顶栏「预估得分」KPI（estScore 与评估报告同算法实时测算）、底部「本项用时 / 参考」计时（stepRef 按动作类型）、复诵输入框实时吻合度条 + 教学模式漏说要素芯片（missingSegs，演练模式只给数量，考核模式不显示）、目标设备 AR 标注（DOM 与 SVG 两种，含项号与动作）、每项完成后监护人一句点评 coachComment（考核模式不点评，只进聊天不发声以免影响回归时序）。
 
 关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍）、`S.toured / S.previewed`（跳过导览/预习）。
 

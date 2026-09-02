@@ -2,27 +2,31 @@
 
 /* ① 六维雷达：本月实线 vs 上月虚线，顶点可点击下钻 */
 function chRadar(dims, now, prev, opt) {
-  const W = (opt && opt.w) || 330, H = (opt && opt.h) || 250, cx = W / 2, cy = H / 2 + 6, R = Math.min(W, H) / 2 - 44;
+  opt = opt || {};
+  const W = opt.w || 330, H = opt.h || 250, cx = W / 2, cy = H / 2 + 6, R = Math.min(W, H) / 2 - 44;
+  const key = opt.key || 'dim', fs = dims.length > 8 ? 9.5 : 10;
   const pt = (vals, k) => dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length, r = R * vals[i] / 100 * (k || 1); return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; });
   const ring = k => `<polygon points="${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length; return `${cx + Math.cos(a) * R * k},${cy + Math.sin(a) * R * k}`; }).join(' ')}" fill="none" stroke="#e9e6d8"/>`;
   const P1 = pt(now), P0 = pt(prev);
   return `<svg viewBox="0 0 ${W} ${H}" class="chsvg">
     ${[.33, .66, 1].map(ring).join('')}
     ${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#e9e6d8"/>`; }).join('')}
-    <polygon points="${P0.map(p => p.join(',')).join(' ')}" fill="none" stroke="#b3bfb2" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <polygon points="${P0.map(p => p.join(',')).join(' ')}" fill="none" stroke="${opt.c2 || '#b3bfb2'}" stroke-width="1.4" stroke-dasharray="4 4"/>
+    ${opt.target ? `<polygon points="${pt(opt.target).map(p => p.join(',')).join(' ')}" fill="rgba(201,162,39,.08)" stroke="#c9a227" stroke-width="1.6" stroke-dasharray="2 5" stroke-linecap="round"/>` : ''}
     <polygon class="anim-poly" points="${P1.map(p => p.join(',')).join(' ')}" fill="rgba(14,143,90,.16)" stroke="#0e8f5a" stroke-width="2"/>
     ${dims.map((n, i) => {
       const a = -Math.PI / 2 + i * Math.PI * 2 / dims.length, lr = R + 26;
       const lx = cx + Math.cos(a) * lr, ly = cy + Math.sin(a) * lr;
       const diff = now[i] - prev[i];
-      return `<g class="hitv" data-dim="${i}" data-tip="${n} ${now[i]} 分 · 较上月${diff >= 0 ? '+' : ''}${diff}">
+      return `<g class="hitv" data-${key}="${i}" data-tip="${n} ${now[i]} 分 · 较${opt.l2 || '上月'}${diff >= 0 ? '+' : ''}${diff}${opt.target ? ' · 目标 ' + opt.target[i] : ''}">
         <circle cx="${P1[i][0]}" cy="${P1[i][1]}" r="9" fill="transparent"/>
         <circle cx="${P1[i][0]}" cy="${P1[i][1]}" r="3.2" fill="#0e8f5a"/>
-        <text x="${lx}" y="${ly}" text-anchor="middle" font-size="10" fill="#6b7a70">${n}</text>
+        <text x="${lx}" y="${ly}" text-anchor="middle" font-size="${fs}" fill="#6b7a70">${n}</text>
         <text x="${lx}" y="${ly + 12}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="${now[i] < 70 ? '#a8821b' : '#0e8f5a'}">${now[i]}</text></g>`;
     }).join('')}
-    <g font-size="10" fill="#98a69c"><rect x="${W - 104}" y="8" width="10" height="3" fill="#0e8f5a"/><text x="${W - 90}" y="13">${(opt && opt.l1) || '本月'}</text>
-    <rect x="${W - 52}" y="8" width="10" height="3" fill="#b3bfb2"/><text x="${W - 38}" y="13">${(opt && opt.l2) || '上月'}</text></g></svg>`;
+    <g font-size="10" fill="#98a69c"><rect x="${W - 104}" y="8" width="10" height="3" fill="#0e8f5a"/><text x="${W - 90}" y="13">${opt.l1 || '本月'}</text>
+    <rect x="${W - 52}" y="8" width="10" height="3" fill="${opt.c2 || '#b3bfb2'}"/><text x="${W - 38}" y="13">${opt.l2 || '上月'}</text>
+    ${opt.target ? `<rect x="8" y="8" width="10" height="3" fill="#c9a227"/><text x="22" y="13">目标</text>` : ''}</g></svg>`;
 }
 
 /* ② 近30天 双轴柱线：柱=时长(min) 线=次数，某日可点击下钻 */
@@ -128,6 +132,38 @@ function chGauge(f) {
     <text x="${cx}" y="${cy + 52}" text-anchor="middle" font-size="10.5" fill="#6b7a70">${f.post} · 胜任度测算</text>
     <text x="${cx}" y="${cy + 68}" text-anchor="middle" font-size="9" fill="#98a69c">测算供参考，任职评定以人工审核为准</text>
     <defs><linearGradient id="ggau" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227"/><stop offset="1" stop-color="#0e8f5a"/></linearGradient></defs></svg>`;
+}
+
+/* ⑧ 场次成长曲线（多序列可切换）：得分折线 / 用时柱 / 扣分项 / 提示次数 / 7 日均线 / 及格线 */
+function chSessionCurve(pts, show, opt) {
+  opt = opt || {}; show = show || {};
+  const W = opt.w || 900, H = opt.h || 250, pl = 36, pr = 40, pt = 22, pb = 44, iw = W - pl - pr, ih = H - pt - pb;
+  const n = pts.length;
+  const X = i => pl + iw * (n > 1 ? i / (n - 1) : .5), Y = v => pt + ih - ih * (v - 50) / 50;
+  const durMax = Math.max(30, ...pts.map(s => s.dur)); const YD = v => pt + ih - ih * v / durMax;
+  const cntMax = 4; const YC = v => pt + ih - ih * Math.min(cntMax, v) / cntMax;
+  const line = pts.map((s, i) => `${X(i)},${Y(s.score)}`).join(' ');
+  const avg7 = pts.map((s, i) => { const w = pts.filter((x, j) => j <= i && s.d - x.d >= -7 && Math.abs(s.d - x.d) <= 7); return Math.round(w.reduce((a, x) => a + x.score, 0) / w.length); });
+  const short = s => s.plan.replace('专项 · ', '').replace('分段 · ', '').replace('完整操作票', '完整票').replace(' → ', '→');
+  return `<svg viewBox="0 0 ${W} ${H}" class="chsvg curve">
+    ${[50, 60, 70, 80, 90, 100].map(v => `<line x1="${pl}" y1="${Y(v)}" x2="${W - pr}" y2="${Y(v)}" stroke="${v === 80 || v === 90 ? '#eee9d0' : '#eeece2'}"/><text x="${pl - 6}" y="${Y(v) + 3}" text-anchor="end" font-size="9" fill="#98a69c">${v}</text>`).join('')}
+    ${show.pass !== false ? `<line x1="${pl}" y1="${Y(80)}" x2="${W - pr}" y2="${Y(80)}" stroke="#c9a227" stroke-dasharray="6 5" stroke-width="1.2"/><text x="${W - pr + 4}" y="${Y(80) + 3}" font-size="9" fill="#a8821b">及格 80</text>
+    <line x1="${pl}" y1="${Y(90)}" x2="${W - pr}" y2="${Y(90)}" stroke="#0e8f5a" stroke-dasharray="6 5" stroke-width="1.2"/><text x="${W - pr + 4}" y="${Y(90) + 3}" font-size="9" fill="#0a6b44">考核 90</text>` : ''}
+    ${show.dur ? pts.map((s, i) => `<rect class="hitv anim-bar" data-sess="${s.id || ''}" data-tip="${dayLabel(s.d)} · 用时 ${s.dur} 分钟" x="${X(i) - 7}" y="${YD(s.dur)}" width="14" height="${ih - (YD(s.dur) - pt)}" rx="2" fill="rgba(201,162,39,.32)"/>`).join('') : ''}
+    ${show.vio ? `<polyline points="${pts.map((s, i) => `${X(i)},${YC(s.vio.length)}`).join(' ')}" fill="none" stroke="#c9772e" stroke-width="1.4" stroke-dasharray="3 3"/>${pts.map((s, i) => `<rect x="${X(i) - 3}" y="${YC(s.vio.length) - 3}" width="6" height="6" fill="#c9772e" transform="rotate(45 ${X(i)} ${YC(s.vio.length)})"/>`).join('')}` : ''}
+    ${show.hint ? `<polyline points="${pts.map((s, i) => `${X(i)},${YC((s.hints || []).length)}`).join(' ')}" fill="none" stroke="#6b4fa0" stroke-width="1.4" stroke-dasharray="1 4" stroke-linecap="round"/>${pts.map((s, i) => `<circle cx="${X(i)}" cy="${YC((s.hints || []).length)}" r="2.6" fill="none" stroke="#6b4fa0" stroke-width="1.4"/>`).join('')}` : ''}
+    ${show.avg ? `<polyline points="${pts.map((s, i) => `${X(i)},${Y(avg7[i])}`).join(' ')}" fill="none" stroke="#57bd8b" stroke-width="2" stroke-dasharray="8 5" opacity=".9"/>` : ''}
+    ${show.score !== false ? `<polygon points="${pl},${Y(50)} ${line} ${X(n - 1)},${Y(50)}" fill="rgba(14,143,90,.08)"/><polyline class="anim-line" points="${line}" fill="none" stroke="#0e8f5a" stroke-width="2.2"/>` : ''}
+    ${pts.map((s, i) => { const red = s.vio.some(v => v.lv === 'red'); return `<g class="hitv" data-sess="${s.id || ''}" data-tip="${dayLabel(s.d)} · ${s.plan} · ${s.mode} · ${s.score} 分 · ${s.dur} 分钟 · 扣分 ${s.vio.length} · 提示 ${(s.hints || []).length}${red ? ' · 红线' : ''}">
+      <circle cx="${X(i)}" cy="${Y(s.score)}" r="10" fill="transparent"/>
+      ${red ? `<circle cx="${X(i)}" cy="${Y(s.score)}" r="8" fill="none" stroke="#d43a2f" stroke-width="1.5"><animate attributeName="r" values="6;10;6" dur="1.8s" repeatCount="indefinite"/></circle>` : ''}
+      <circle cx="${X(i)}" cy="${Y(s.score)}" r="4" fill="${red ? '#d43a2f' : s.mode === '考核模式' ? '#0a6b44' : '#c9a227'}" stroke="#fff" stroke-width="1.5"/>
+      <text x="${X(i)}" y="${Y(s.score) - 9}" text-anchor="middle" font-size="9.5" font-family="var(--mono)" fill="${s.score < 75 ? '#a8821b' : '#0e8f5a'}">${s.score}</text>
+      <text x="${X(i)}" y="${H - 28}" text-anchor="middle" font-size="9" fill="#98a69c">${dayLabel(s.d)}</text>
+      <text x="${X(i)}" y="${H - 16}" text-anchor="middle" font-size="8.5" fill="#b3bfb2">${short(s)}</text>
+      <text x="${X(i)}" y="${H - 5}" text-anchor="middle" font-size="8.5" fill="${s.mode === '考核模式' ? '#0a6b44' : '#b3bfb2'}">${s.mode.slice(0, 2)}</text></g>`; }).join('')}
+    ${show.dur ? `<text x="${W - pr + 4}" y="${pt + 4}" font-size="9" fill="#a8821b">${durMax}′</text>` : ''}
+  </svg>`;
 }
 
 /* 小型六维条（复盘页展开行用） */

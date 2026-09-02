@@ -76,6 +76,7 @@ function renderHPage(h) {
   pg.dataset.cur = h;
   pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
+  if (typeof pageAfter === 'function') pageAfter(h);
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
 
@@ -247,6 +248,7 @@ function openDrill(title, sub, html, foot) {
     const q = s => e.target.closest(s); let n;
     if (n = q('[data-train]')) { m.remove(); return enterCoach('daozha', n.dataset.train === 'full' ? null : n.dataset.train); }
     if (n = q('[data-go]')) { m.remove(); return goPage(n.dataset.go); }
+    if (typeof pagesClick === 'function' && pagesClick(e)) return;
   };
   return m;
 }

@@ -117,7 +117,7 @@ async function enterStep(i) {
     S.previewed[nst.phase] = true;
     if (nst.phase > 1) { return openPreview(nst.phase, () => enterStep(i)); }
   }
-  S.idx = i; S.sel = null; S.gis = {}; S.beat = 0;
+  S.idx = i; S.sel = null; S.gis = {}; S.beat = 0; S.stepT0 = Date.now();
   const st = STEP();
   renderTicket(); renderTop(); renderLocbar(); renderBeats(); renderPanel(); updateActbar();
   if (st.act === 'recv' || st.act === 'report') useChar(st.act === 'recv' ? 'diaodu' : 'jianhu');
@@ -249,10 +249,27 @@ async function tickStep() {
   await speak('收到。本项完成，我已经在操作票上标注对勾。', { pose: 'confirm', nod: 1 });
   S.score.rule += 4; S.score.order += 3; S.score.dual += 3; S.score.state += 3; S.score.term += 3;
   renderTicket(); renderTop();
+  coachComment(st);
   const order = S.plan ? S.plan.steps : STEPS.map((_, i) => i);
   const nx = order.find(k => !STEPS[k]._done);
   if (nx === undefined) { finish(); return; }
   setTimeout(() => enterStep(nx), 400);
+}
+
+/* 监护人逐项点评：本项完成后按留痕数据给一句针对性提示（考核模式不点评） */
+function coachComment(st) {
+  if (S.mode === 'exam') return;
+  const used = Math.round((Date.now() - (S.stepT0 || Date.now())) / 1000), ref = stepRef(st);
+  const vioHere = S.vio.filter(v => v.step === st.no);
+  const line = (S.lines || []).filter(l => l.step === st.no && l.beat === 1).pop();
+  const sc = line ? sim(line.mine, line.std) : 1;
+  S.cleanRun = vioHere.length ? 0 : (S.cleanRun || 0) + 1;
+  let txt = '';
+  if (vioHere.length) txt = `本项记了 ${vioHere.length} 处：${vioHere.map(v => v.title).join('、')}。下一项先看指令卡再动手。`;
+  else if (sc < 0.86 && line) { const miss = missingSegs(line.mine, line.std); txt = `复诵吻合度 ${Math.round(sc * 100)}%${miss.length ? `，漏了「${miss.slice(0, 2).join('」「')}」` : ''}。设备双重名称与位置要念全。`; }
+  else if (used > ref * 1.5) txt = `本项用时 ${used} 秒，超出参考 ${ref} 秒较多。到位后先核对间隔名称，再找操作对象。`;
+  else if (S.cleanRun === 3 || S.cleanRun === 6 || S.cleanRun === 10) txt = `<span class="tag ok">连续 ${S.cleanRun} 项零失误</span>节奏很稳，保持这个唱票复诵的完整度。`;
+  if (txt) say('s', `<span class="tag2">教练点评</span>${txt}`);
 }
 
 /* 调度类项目 */

@@ -216,12 +216,15 @@ function updateActbar() {
       <button class="btn dan" id="a_stop">中止操作并上报</button>
       <button class="btn" id="a_rule">规程依据</button>
     </div>
+    <div class="hintrow livem" id="livem"></div>
     <div class="hintrow"><span class="k">当前节拍</span>${BEATS[S.beat] ? BEATS[S.beat][0] : '—'}
       <span style="color:#b9bfae">|</span><span class="k">操作对象</span>${st && st.target ? devName(st.target) : '本项为调度联系'}
       <span style="color:#b9bfae">|</span><span class="k">所在位置</span>${LOC[S.loc].name}
       ${S.beat === 1 && st && st.loc !== S.loc ? `<span style="color:#a8821b">→ 需前往 ${LOC[st.loc].name}</span>` : ''}
+      <span style="color:#b9bfae">|</span><span class="k">本项用时</span><span id="stept" class="mono gv">0:00</span><span class="tk3">参考 ${Math.floor(stepRef(st) / 60)}:${String(stepRef(st) % 60).padStart(2, '0')}</span>
     </div>`;
   $('#a_send').onclick = submitInput;
+  $('#rin').oninput = liveMeter;
   $('#a_stop').onclick = clickStop;
   $('#a_rule').onclick = openRule;
   $('#a_mic').onclick = micClick;

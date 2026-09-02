@@ -17,6 +17,7 @@ const LAYOUT = `
       <div class="kpi"><b id="kdone">0/29</b><span>操作项</span></div>
       <div class="kpi good"><b id="kvio">0</b><span>违规</span></div>
       <div class="kpi"><b id="kstop">0</b><span>中止上报</span></div>
+      <div class="kpi est" title="按当前扣分与加分实时测算，最终以评估报告为准"><b id="kest">100</b><span>预估得分</span></div>
     </div>
   </div>
 
