@@ -1,0 +1,41 @@
+/* ===== 文稿中心：八类文稿逐段生成、取数停顿、局部重写、口径记忆、版本、导出 ===== */
+const DOCS = {
+  host: null, kind: null, ver: {},
+  TYPES: [{ k: 'premeet', n: '班前会材料' }, { k: 'log', n: '工作日志' }, { k: 'weekly', n: '周报' }, { k: 'monthly', n: '月度总结' }, { k: 'report', n: '汇报材料' }, { k: 'notice', n: '通知' }, { k: 'plan', n: '培训计划' }, { k: 'minutes', n: '会议纪要' }],
+  me() { return XW.mem.get('口径', '本班'); },
+  paras(k) { const me = this.me(); const disp = LS.get('dispatch', {})['j5']; const crew = disp ? disp.lead + '、' + disp.crew.join('、') : '韩雪、郭子扬、赵敏'; const lag = PEOPLE.filter(p => p.hours.m < 3).map(p => p.n).join('、'); const due = certsDueWithin(90);
+    const M = {
+      premeet: ['一、今日安排：塘尾线巡视（吴倩、王安、刘一鸣，09:00）；光明变 10kV 出线柜检查（陈浩、周明，14:00）；志远站 F14 蓄电池消缺并入明日巡视。明日凤凰线更换 #12 杆刀闸，负责人 ' + (disp ? disp.lead : '韩雪') + '。', '二、风险提示：[取一下今日天气……] 台风蓝色预警，最高 34℃。台风影响期间停止登杆，风停后先巡后登；高温连续作业三小时轮换；田寮线 #7 杆拉线锈断已列紧急隐患，经过时保持距离。', '三、学习内容：拉线与杆根检查要点（上月两起拉线锈蚀）；停电作业安措顺序：停电、验电、装设接地线、悬挂标示牌。'],
+      log: ['2026-09-03 工作日志。到岗 ' + PEOPLE.filter(p => p.status !== '休假').length + ' 人，林芷若休假。', '完成：塘尾线巡视 #1 至 #30 杆；志远站 F14 复查；光明变出线柜检查。发现隐患 1 处（田寮线 #7 杆拉线锈断，紧急，已登记）。', '派工：明日凤凰线更换 #12 杆刀闸，' + crew + '，刘一鸣随队。催办：志远站 F14 缺陷，吴倩明日处理。', '明日计划：凤凰线换刀闸；塘尾线剩余段巡视；周五安全日材料定稿。'],
+      weekly: ['本周（9-1 至 9-3）' + me + '完成作业 [取一下本周任务……] 11 项，其中巡视 5、消缺 3、检查 2、拉线更换 1。工作票 3 张，全部合格。', '安全：无违章，发现隐患 2 处（凤凰线 #15 树障、田寮线 #7 拉线锈断），均已登记；志远站 F14 缺陷超期 3 天，已催办。', '人员：黄伟强本周 26 小时、李文博 24 小时，均已提示；下周值班表已按约束排出。', '下周重点：凤凰线换刀闸；台风季拉线专项巡视；安全日活动（周五）。'],
+      monthly: ['一、总体情况：8 月' + me + '共安排作业 [取一下本月任务……] ' + MONTH.jobs + ' 项，完成 ' + MONTH.jobsDone + ' 项，完成率 ' + Math.round(MONTH.jobsDone / MONTH.jobs * 100) + '%；工作票 ' + MONTH.tickets + ' 张，合格 ' + MONTH.ticketsOK + ' 张，合格率 [取一下两票合格率……] ' + Math.round(MONTH.ticketsOK / MONTH.tickets * 100) + '%。', '二、安全管理：开展安全日活动 ' + MONTH.safetyDays + ' 次、事故通报学习 ' + MONTH.incidentStudy + ' 次；发现缺陷 ' + MONTH.defectsFound + ' 处，闭环 ' + MONTH.defectsClosed + ' 处，1 处超期正在处理。', '三、人员与培训：全班 ' + PEOPLE.length + ' 人，年度学时平均完成 [取一下学时台账……] ' + Math.round(PEOPLE.reduce((s, p) => s + p.hours.done / p.hours.req, 0) / PEOPLE.length * 100) + '%；本月学时未完成 ' + PEOPLE.filter(p => p.hours.m < 3).length + ' 人（' + lag + '）；证书 90 天内到期 ' + due.length + ' 人（' + due.map(c => c.who).join('、') + '），已安排复审。', '四、荣誉：' + MONTH.honors.join('；') + '。', '五、存在问题：黄伟强连续三周工作量最高，任务分配需均衡；初级作业员理论测试通过率偏低。', '六、下月计划：台风季拉线专项巡视；继保专才课程排给陈浩、周明、刘一鸣；完成三张到期证书复审。'],
+      report: ['凤凰供电所配电运维一班 9 月工作汇报要点：', '1. 任务：本月 ' + MONTH.jobs + ' 项作业完成 ' + MONTH.jobsDone + ' 项，两票合格率 100%。', '2. 安全：隐患 ' + MONTH.defectsFound + ' 处、闭环 ' + MONTH.defectsClosed + ' 处；台风季已启动拉线专项巡视。', '3. 人员：证书到期 ' + due.length + ' 人已安排复审；学时落后 ' + PEOPLE.filter(p => p.hours.m < 3).length + ' 人已排课。', '4. 需要所里支持：增加一名高级作业员，缓解黄伟强、李文博工时集中的问题。'],
+      notice: ['通知：本周五（9-11）15:00 在所会议室开展安全日活动，主题"台风季线路巡视与登杆作业"，全班参加，外勤人员提前安排。', '请各位提前看一遍作业指导书"停电作业安措"一节，会上考问。—— 赵立群'],
+      plan: ['9 月培训计划（' + me + '）：', '1. 继保专才《10kV 光纤电流差动保护》：刘一鸣（补考下周五）、陈浩、周明，9-15 前完成理论测试。', '2. 《配网 10kV 电力电缆试验》：王安、吴倩，配合 9 月电缆试验旁站。', '3. 实操：中压倒闸操作评分表考核，郭子扬、赵敏，9-20。', '4. 师带徒：刘一鸣跟黄伟强两次继保旁站。' + (LS.get('plan', []).length ? '\n5. 新增：' + LS.get('plan', []).map(p => p.who + '《' + p.t + '》' + p.when).join('；') : '')],
+      minutes: ['班前会纪要 · 2026-09-03 07:50 · 主持 赵立群 · 到会 11 人，林芷若休假。', '1. 通报田寮线 #7 杆拉线锈断隐患，王安今日现场确认断口。', '2. 明日凤凰线换刀闸派工：' + crew + '，刘一鸣随队；台风期间停止登杆。', '3. 志远站 F14 缺陷超期，吴倩明日处理。', '4. 周五安全日，主题台风季登杆作业。']
+    }; return M[k] || M.premeet; },
+  chips(k) { const c = [{ k: 'short', n: '口气再简短些' }, { k: 'me', n: '"本班"改成"我班"' }]; if (k === 'premeet' || k === 'monthly' || k === 'weekly') c.unshift({ k: 'typhoon', n: '安全那段加上台风应对' }); if (k === 'monthly' || k === 'report') c.push({ k: 'data', n: '补上缺陷闭环明细' }); if (k === 'monthly') c.push({ k: 'formal', n: '口径改成所里例会版' }); c.push({ k: 'undo', n: '回退上一步' }); return c; },
+  gen(k) { this.kind = k; const host = $('#dochost'); this.host = host; $$('.doclist a').forEach(a => a.classList.toggle('on', a.dataset.k === k)); const t = this.TYPES.find(x => x.k === k); $('#doctitle').textContent = t.n; const ver = (this.ver[k] || 0); const memo = XW.mem.get('口径') === '我班' && /本班|我班/.test(this.paras(k).join('')); if (memo) XW.answer('按你上次的习惯，这次直接写"我班"。', null, { confirm: false, speak: false });
+    DOCGEN.stream(host, this.paras(k), { title: t.n + ' · ' + TODAY, chips: this.chips(k), ver, done: () => { this.ver[k] = ver + 1; const docs = LS.get('docs', {}); docs[k] = { t: t.n, body: DOCGEN.text(host), ts: Date.now(), ver: ver + 1 }; LS.set('docs', docs); $('#docbt').innerHTML = '<button data-act="doc-export">导出 / 打印</button><button class="g" data-act="doc-regen">重新生成</button>'; XW.answer(t.n + '写好了，哪段不合适点那段下面的芯片，我只改那一段。', null, { speak: false, confirm: false }); } });
+    XW.type($('#xwsub'), t.n + '我写一版，写到数字的地方我要取一下数。', 45); },
+  chip(k) { const host = this.host || $('#dochost') || $('#sddoc'); if (!host) return; const ps = $$('p', host).filter(p => !p.classList.contains('old'));
+    if (k === 'typhoon') { const idx = ps.findIndex(p => /安全|风险/.test(p.textContent)); const i = idx < 0 ? Math.min(2, ps.length - 1) : idx; const old = ps[i].textContent; const add = old.includes('台风') ? old.replace(/。$/, '') + '；台风影响期间停止登杆作业，风停后先巡后登。' : old.replace(/^(.*?[:：])/, '$1台风影响期间停止登杆作业，风停后先巡后登；'); DOCGEN.rewrite(host, +ps[i].dataset.i, add, '安全这段我加了台风期间的登杆管控，旧的那段划掉了，你看这样行不行。'); }
+    else if (k === 'short') DOCGEN.shorten(host, '每段都缩短了，念下来大概两分钟。');
+    else if (k === 'me') { XW.mem.set('口径', '我班'); ps.forEach(p => { if (/本班/.test(p.textContent)) DOCGEN.rewrite(host, +p.dataset.i, p.textContent.replace(/本班/g, '我班')); }); XW.answer('改成"我班"了。这个说法我记下了，以后周报、月度总结都这么写。', null, { confirm: false, speak: false }); }
+    else if (k === 'data') { const i = ps.findIndex(p => /缺陷/.test(p.textContent)); const p = ps[i < 0 ? ps.length - 1 : i]; DOCGEN.rewrite(host, +p.dataset.i, p.textContent.replace(/。$/, '') + '。闭环明细：凤凰线 #9 杆拉线锈蚀（9-1 消缺）、塘家公用柜锁具（处理中）、凤凰线 #15 树障（处理中）、田寮线 #7 拉线锈断（已登记）、志远站 F14 蓄电池（超期，已催办）。', '缺陷闭环明细补上了，五条都是从隐患台账取的。'); }
+    else if (k === 'formal') { ps.forEach(p => { if (/^一、|^二、/.test(p.textContent)) DOCGEN.rewrite(host, +p.dataset.i, p.textContent.replace(/共安排/, '按所月度计划安排').replace(/开展/, '按所安全生产例会要求开展')); }); XW.answer('口径改成所里例会版了，只动了前两段的说法，数字没变。', null, { confirm: false, speak: false }); }
+    else if (k === 'undo') { const news = $$('p.new', host); if (!news.length) { XW.answer('没有可回退的改动。', null, { confirm: false, speak: false }); return; } const last = news[news.length - 1]; const oldp = last.previousElementSibling; if (oldp && oldp.classList.contains('old')) oldp.classList.remove('old'); last.remove(); XW.answer('回退了上一步，恢复成原来的那段。', null, { confirm: false, speak: false }); } }
+};
+PAGES.docs = {
+  render() { const docs = LS.get('docs', {}); return cmdHTML(['写今天的班前会材料', '生成本月的月度总结', '安全那段加上台风应对', '按上次口径写周报']) + pageHead('文稿中心', '八类文稿 · 逐段生成 · 每个数字可追溯到台账') +
+    '<div class="grid2" style="grid-template-columns:230px 1fr;flex:1;align-items:start"><div class="card"><div class="h"><b>文稿类型</b></div><div class="doclist">' + DOCS.TYPES.map(t => '<a data-act="doc-gen" data-k="' + t.k + '"><b>' + h(t.n) + '</b><span>' + (docs[t.k] ? 'v' + (docs[t.k].ver || 1) : '') + '</span></a>').join('') + '</div><div class="h" style="margin-top:10px"><b>已保存</b></div><div class="doclist">' + (Object.keys(docs).filter(k => !DOCS.TYPES.some(t => t.k === k)).map(k => '<a data-act="doc-open" data-k="' + h(k) + '"><b>' + h(docs[k].t) + '</b></a>').join('') || '<div class="note">暂无</div>') + '</div></div>' +
+    '<div class="card"><div class="h"><b id="doctitle">文稿</b><span>由班组长确认后使用</span><div class="r" id="docbt"></div></div><div class="doc" id="dochost"><div class="empty">点左边的类型，她当着你的面写</div></div></div></div>'; },
+  after() { if (S.sub && DOCS.TYPES.some(t => t.k === S.sub)) XW.at(200, () => DOCS.gen(S.sub)); }
+};
+Object.assign(ACT, {
+  'doc-gen'(el) { DOCS.gen(el.dataset.k); },
+  'doc-open'(el) { const d = LS.get('docs', {})[el.dataset.k]; if (!d) return; $('#doctitle').textContent = d.t; $('#dochost').innerHTML = d.body.split('\n').map(p => '<p>' + h(p) + '</p>').join('') + '<div class="foot">以上内容为初稿与参考，由班组长确认后使用</div>'; $('#docbt').innerHTML = '<button data-act="doc-export">导出 / 打印</button>'; },
+  'doc-chip'(el) { DOCS.chip(el.dataset.chip); },
+  'doc-export'() { window.print(); },
+  'doc-regen'() { if (DOCS.kind) DOCS.gen(DOCS.kind); }
+});

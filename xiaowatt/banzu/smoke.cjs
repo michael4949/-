@@ -1,0 +1,167 @@
+/* 冒烟：打开 → 晨间简报 → 换人/点人/点数字/办 → 核对照片 → 催办 → 七页每页主流程 → 无 pageerror
+   用法：node smoke.cjs  （需要 /home/user/-/node_modules/playwright 与 /opt/pw-browsers） */
+const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
+const path = require('path');
+const file = 'file://' + path.join(__dirname, 'dist', '小瓦特班_班组长AI助手_高保真原型.html');
+const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recursive: true });
+(async () => {
+  const br = await chromium.launch(); const ctx = await br.newContext({ viewport: { width: 1440, height: 900 } }); const pg = await ctx.newPage();
+  const errs = []; pg.on('pageerror', e => errs.push('pageerror ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errs.push('console ' + m.text()); });
+  await pg.addInitScript(() => { window.__XW_SPEED = 0.03; });
+  let fails = 0; const t = async (name, cond) => { let ok = false; try { ok = await cond(); } catch (e) { ok = false; errs.push('test ' + name + ': ' + e.message); } console.log((ok ? 'PASS ' : 'FAIL ') + name); if (!ok) fails++; };
+  const w = ms => pg.waitForTimeout(ms); const ws = async (sel, ms) => { try { await pg.waitForSelector(sel, { timeout: ms || 8000 }); } catch (e) { errs.push('wait ' + sel); } };
+  await pg.goto(file); await w(1500);
+  await t('shell', async () => (await pg.locator('#sb a').count()) >= 10 && (await pg.locator('#xw').count()) === 1);
+  await t('brief cards', async () => (await pg.locator('#dec .dc.in').count()) === 3);
+  await t('brief sub', async () => (await pg.locator('#sub').textContent()).length > 4);
+  await pg.screenshot({ path: SHOT + '/01_home.png' });
+  // 核对照片
+  await pg.click('#k2bt [data-act="photo"]'); await ws('.msg.a [data-act="hz-confirm"]');
+  await t('photo answer', async () => (await pg.locator('.msg.a [data-act="hz-confirm"]').count()) >= 1);
+  await pg.click('[data-act="hz-confirm"]'); await w(200);
+  await t('hazard confirmed', async () => (await pg.locator('#k2s').textContent()).includes('已入隐患台账'));
+  // 换人 → 点李文博 → 点 24 小时 → 仍然换
+  await pg.click('[data-act="home-swap"]'); await w(800);
+  await t('chips 12', async () => (await pg.locator('#ppl .chip').count()) === 12);
+  await t('chips dim/lead/bad', async () => (await pg.locator('#ppl .chip.dim').count()) === 6 && (await pg.locator('#ppl .chip.lead').count()) === 1 && (await pg.locator('#ppl .chip.bad').count()) === 1);
+  await pg.click('#ppl .chip[data-who="李文博"]'); await ws('.msg.a u.num[data-act="hours"]');
+  await t('libowen warn', async () => (await pg.locator('.msg.a u.num[data-act="hours"]').count()) >= 1);
+  await pg.screenshot({ path: SHOT + '/02_swap.png' });
+  await pg.click('.msg.a u.num[data-act="hours"]'); await w(500);
+  await t('spot on', async () => (await pg.locator('#spot.on.lit').count()) === 1 && (await pg.locator('#spot tr.me.hl').count()) === 4);
+  await t('spot sum 24', async () => (await pg.locator('#spotsum').textContent()).includes('24'));
+  await pg.screenshot({ path: SHOT + '/03_spot.png' });
+  await pg.click('[data-act="unspot"]');
+  await pg.click('.msg.a [data-act="dispatch-go"][data-who="李文博"]'); await ws('#d1.ok'); await w(200);
+  await t('form filled', async () => (await pg.locator('#f4').textContent()).includes('李文博'));
+  await t('d1 ok', async () => (await pg.locator('#d1.ok').count()) === 1);
+  await t('dispatch saved', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_dispatch')).j5.crew.includes('李文博'))));
+  await t('memory', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_mem'))['凤凰线备选'] === '李文博')));
+  await pg.screenshot({ path: SHOT + '/04_form.png' });
+  // 催办
+  await pg.click('[data-act="urge"]'); await ws('[data-act="urge-send"]');
+  await pg.click('[data-act="urge-send"]'); await w(200);
+  await t('urged', async () => (await pg.locator('#d2.ok').count()) === 1 && (await pg.locator('#n1').textContent()) === '1');
+  // 语音（辅助）：在首页已派工 → 转写为工时问题
+  await pg.click('#mic1'); await ws('[data-act="mic-yes"]');
+  await t('mic restate', async () => (await pg.locator('[data-act="mic-yes"]').count()) === 1);
+  await pg.click('[data-act="mic-yes"]'); await w(500);
+  await t('mic yes → spot', async () => (await pg.locator('#spot.on').count()) === 1);
+  await pg.click('[data-act="unspot"]');
+  // 命令栏
+  await pg.fill('#cmdin', '三个月内证书到期的有谁'); await pg.press('#cmdin', 'Enter'); await w(500);
+  await t('cert spot', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 3);
+  await pg.click('[data-act="unspot"]');
+  // 班组画像
+  await pg.click('#sb a[data-to="people"]'); await w(300);
+  await t('people grid', async () => (await pg.locator('.pc').count()) === 12 && (await pg.locator('.six div').count()) === 6);
+  await pg.click('.pc[data-who="刘一鸣"]'); await ws('#pbt button');
+  await t('obs + mods', async () => (await pg.locator('#pmods .mod.in').count()) === 8 && (await pg.locator('#pbt button').count()) === 3);
+  await pg.click('#pmods .mod[data-i="3"]'); await w(500);
+  await t('evidence', async () => (await pg.locator('#pev div.in').count()) >= 2 && (await pg.locator('[data-act="lv-confirm"]').count()) >= 1);
+  await pg.click('[data-act="lv-confirm"]'); await w(200);
+  await t('level saved', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_levels'))['刘一鸣'].relay === 1)));
+  await pg.click('[data-act="p-plan"]'); await w(200);
+  await t('plan saved', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_plan')).length >= 1)));
+  await pg.screenshot({ path: SHOT + '/05_people.png' });
+  await pg.click('.six div[data-k="hours"]'); await w(400);
+  await t('six spot', async () => (await pg.locator('#spot.on').count()) === 1);
+  await pg.click('[data-act="unspot"]');
+  // 班务日程：任务池派工（记忆）→ 值班表 → 审票 → 进度
+  await pg.click('#sb a[data-to="sched"]'); await w(300);
+  await pg.click('[data-act="pool-dispatch"][data-id="j7"]'); await w(800);
+  await t('pool strip + memory line', async () => (await pg.locator('#ppl .chip').count()) === 12 && (await pg.locator('#ppl .tk span:last-child').textContent()).includes('上次你把凤凰线'));
+  await pg.click('#ppl .chip[data-who="吴倩"]'); await ws('.msg.a [data-act="dispatch-go"][data-who="吴倩"]');
+  await pg.click('.msg.a [data-act="dispatch-go"][data-who="吴倩"]'); await w(1600);
+  await t('pool dispatched', async () => (await pg.evaluate(() => !!JSON.parse(localStorage.getItem('xwb_dispatch')).j7)));
+  await pg.click('.tabs button[data-sub="duty"]'); await w(300);
+  await pg.click('[data-act="duty-run"]'); await ws('.msg.a [data-act="duty-save"]');
+  await t('duty filled', async () => (await pg.locator('#dutyg .cell.fill').count()) === 21 && (await pg.locator('#dutyg .cell.conf').count()) === 1);
+  await pg.click('.msg.a [data-act="duty-save"]'); await w(200);
+  await t('duty saved', async () => (await pg.evaluate(() => !!localStorage.getItem('xwb_duty'))));
+  await pg.click('.tabs button[data-sub="ticket"]'); await w(300);
+  await pg.click('[data-act="ticket-review"]'); await ws('[data-act="ticket-fix"]');
+  await t('ticket miss', async () => (await pg.locator('#tk .it.miss').count()) === 2 && (await pg.locator('[data-act="ticket-fix"]').count()) >= 1);
+  await pg.screenshot({ path: SHOT + '/06_ticket.png' });
+  await pg.click('[data-act="ticket-fix"]'); await w(200);
+  await t('ticket fixed', async () => (await pg.locator('#tkbt .tag.ok').count()) === 1);
+  await pg.click('.tabs button[data-sub="prog"]'); await w(300);
+  await pg.click('[data-act="prog-check"]'); await ws('[data-act="prog-rotate"]');
+  await t('prog rotate offer', async () => (await pg.locator('[data-act="prog-rotate"]').count()) === 1);
+  // 安全管理
+  await pg.click('#sb a[data-to="safety"]'); await w(300);
+  await t('photo wall', async () => (await pg.locator('.wall .card').count()) === 3);
+  await pg.click('#ph-tree'); await w(700);
+  await t('tree recog', async () => (await pg.locator('#ph-tree .box.on').count()) === 3);
+  await pg.click('.tabs button[data-sub="risk"]'); await w(300);
+  await pg.click('[data-act="risk-grade"][data-id="r1"]'); await ws('[data-act="risk-ok"][data-lv="高"]');
+  await pg.click('[data-act="risk-ok"][data-lv="高"]'); await w(300);
+  await t('risk saved', async () => (await pg.locator('.risk .tag.bad').count()) === 1);
+  await pg.click('.tabs button[data-sub="day"]'); await w(300);
+  await pg.click('[data-act="sd-draft"]'); await ws('#sddoc .chips b');
+  await t('sd doc', async () => (await pg.locator('#sddoc p').count()) === 4 && (await pg.locator('#sddoc .chips b').count()) === 3);
+  await pg.click('[data-chip="typhoon"]'); await w(600);
+  await t('sd rewrite', async () => (await pg.locator('#sddoc p.new').count()) === 1 && (await pg.locator('#sddoc p.new').textContent()).includes('台风'));
+  await pg.click('[data-act="sd-adopt"]'); await w(200);
+  await t('sd adopted', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_docs')).safetyday.adopted === true)));
+  await pg.screenshot({ path: SHOT + '/07_safety.png' });
+  await pg.click('.tabs button[data-sub="quiz"]'); await w(300);
+  await pg.click('.quiz .opt >> nth=0'); await w(300);
+  await t('quiz answered', async () => (await pg.locator('.quiz .opt.ok').count()) >= 1);
+  // 培训考评
+  await pg.click('#sb a[data-to="train"]'); await w(300);
+  await pg.click('.crs a[data-id="c5"]'); await ws('[data-act="q-send"]');
+  await t('questions 5', async () => (await pg.locator('#qs .q').count()) === 5 && (await pg.locator('[data-act="q-send"]').count()) === 1);
+  await pg.click('.tabs button[data-sub="grade"]'); await w(300);
+  await pg.click('[data-act="grade-run"]'); await ws('#gbt .tag.ok');
+  await t('graded', async () => (await pg.locator('#gqs .mark.bad').count()) === 3 && (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_grades'))['刘一鸣'].score === 40)));
+  await pg.click('.tabs button[data-sub="sheet"]'); await w(300);
+  await pg.click('.crs a[data-id="s1"]'); await w(300);
+  await t('sheet rows', async () => (await pg.locator('input[data-act="sh-in"]').count()) === 10 && (await pg.locator('#shtot').textContent()) === '100');
+  await pg.fill('input[data-act="sh-in"][data-i="4"]', '15'); await w(100);
+  await pg.fill('input[data-act="sh-in"][data-i="0"]', '99'); await w(100);
+  await t('sheet total + cap', async () => (await pg.locator('#shtot').textContent()) === '95' && (await pg.locator('input.bad').count()) === 1);
+  await pg.fill('input[data-act="sh-in"][data-i="0"]', '8'); await w(100);
+  await pg.click('[data-act="sh-save"]'); await w(300);
+  await t('score saved', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_scores'))['郭子扬'].total === 93)));
+  await pg.check('[data-act="sh-veto"]'); await w(200);
+  await t('veto zero', async () => (await pg.locator('#shtot').textContent()) === '0');
+  await pg.click('.tabs button[data-sub="write"]'); await w(300);
+  await t('write suggestions', async () => (await pg.locator('[data-act="lvw-confirm"]').count()) >= 2);
+  await pg.click('[data-act="lvw-confirm"] >> nth=0'); await w(200);
+  await pg.screenshot({ path: SHOT + '/08_train.png' });
+  // 文稿中心
+  await pg.click('#sb a[data-to="docs"]'); await w(300);
+  await pg.click('[data-act="doc-gen"][data-k="monthly"]'); await ws('#dochost .chips b');
+  await t('monthly 6 paras', async () => (await pg.locator('#dochost p').count()) === 6 && (await pg.locator('#dochost .chips b').count()) >= 4);
+  await pg.click('[data-chip="me"]'); await w(500);
+  await t('me rewrite + mem', async () => (await pg.locator('#dochost p.new').count()) >= 1 && (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_mem'))['口径'] === '我班')));
+  await pg.click('[data-chip="undo"]'); await w(200);
+  await pg.click('[data-act="doc-gen"][data-k="weekly"]'); await ws('#dochost .chips b');
+  await t('weekly uses 我班', async () => (await pg.locator('#dochost').textContent()).includes('我班'));
+  await pg.screenshot({ path: SHOT + '/09_docs.png' });
+  // 知识库
+  await pg.click('#sb a[data-to="know"]'); await w(300);
+  await pg.click('.kbq b >> nth=0'); await ws('#kba .src'); await w(600);
+  await t('kb answer', async () => (await pg.locator('#kbtext').textContent()).includes('2200A'));
+  await pg.click('[data-act="kb-src"]'); await w(100);
+  await t('kb orig', async () => (await pg.locator('#kba .orig.on').count()) === 1);
+  await pg.click('[data-act="case-new"]'); await ws('[data-act="case-save"]');
+  await pg.click('[data-act="case-save"]'); await w(200);
+  await t('case saved', async () => (await pg.locator('#cases .casec').count()) === 3);
+  // 台账 / 所级 / 问小瓦特
+  await pg.click('#sb a[data-to="ledger"]'); await w(300);
+  await t('ledger table', async () => (await pg.locator('#ledbody table tr').count()) > 10);
+  await pg.click('.tabs button[data-sub="cert"]'); await w(200);
+  await t('ledger cert', async () => (await pg.locator('#ledbody .tag.bad').count()) === 3);
+  await pg.click('#sb a[data-to="office"]'); await w(300);
+  await t('office teams', async () => (await pg.locator('.teams .tc').count()) === 3);
+  await pg.click('#sb a[data-to="ask"]'); await w(300);
+  await t('ask tiles', async () => (await pg.locator('.kbq b').count()) >= 20);
+  // 回首页：状态保持
+  await pg.click('#sb a[data-to="home"]'); await w(500);
+  await t('home persisted', async () => (await pg.locator('#d1.ok').count()) === 1 && (await pg.locator('#d2.ok').count()) === 1 && (await pg.locator('#d3.ok').count()) === 1);
+  await pg.screenshot({ path: SHOT + '/10_home_done.png' });
+  console.log('FAILS', fails, 'ERR', errs.length ? errs.join(' | ') : 'none');
+  await br.close(); process.exit(fails || errs.length ? 1 : 0);
+})();
