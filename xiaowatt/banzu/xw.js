@@ -22,7 +22,7 @@ const XW = {
   },
   /* 形象与状态 */
   avatarHTML() {
-    if (XW_IMGS && XW_IMGS.main) return '<img id="xwimg" src="' + XW_IMGS.main + '" alt="">';
+    if (XW_IMGS && XW_IMGS.main) return '<img id="xwimg" class="full" src="' + XW_IMGS.main + '" alt="">';
     return '<svg viewBox="0 0 120 120"><defs><linearGradient id="gxw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5bf0"/><stop offset="1" stop-color="#9a4dff"/></linearGradient></defs><circle cx="60" cy="60" r="50" fill="url(#gxw)"/><circle cx="60" cy="62" r="38" fill="#fff" opacity=".95"/><path class="brow" d="M40 44 q8 -6 16 0 M64 44 q8 -6 16 0" stroke="#5a5bf0" stroke-width="3" fill="none" stroke-linecap="round"/><g class="eye"><circle cx="46" cy="56" r="5" fill="#2a2f6b"/><circle cx="74" cy="56" r="5" fill="#2a2f6b"/><circle cx="48" cy="54" r="1.8" fill="#fff"/><circle cx="76" cy="54" r="1.8" fill="#fff"/></g><path class="mouth" d="M48 76 q12 10 24 0" stroke="#5a5bf0" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M60 8 l-7 16 h9 l-7 16" stroke="#ffd166" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   },
   LABEL: { '': '待命', talk: '正在说', think: '正在想', look: '正在看', work: '正在操作', listen: '正在听', write: '正在写' },
@@ -75,7 +75,7 @@ const XW = {
   },
   /* 右栏结构 */
   sideHTML() {
-    return '<div class="sh"><div class="xw breath" id="xw"><div class="ring"></div>' + this.avatarHTML() + '</div><div class="nm"><b>小瓦特</b><span id="xwst"><i>待命</i> · 由班组长确认后使用</span><span>' + h(TEAM.name) + '</span></div></div>' +
+    return '<div class="sh' + (XW_IMGS && XW_IMGS.main ? ' full' : '') + '"><div class="xw breath" id="xw"><div class="ring"></div>' + this.avatarHTML() + '</div><div class="nm"><b>小瓦特</b><span id="xwst"><i>待命</i> · 由班组长确认后使用</span><span>' + h(TEAM.name) + '</span></div></div>' +
       '<div class="sub" id="xwsub"></div><div class="chat" id="chat"></div>' +
       '<div class="inp"><input id="chatin" placeholder="问她，或点页面上的按钮"><em id="mic2" data-act="mic2">🎙</em><button data-act="send2">发送</button></div>';
   },

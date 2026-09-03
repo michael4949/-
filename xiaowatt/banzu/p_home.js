@@ -2,6 +2,22 @@
 const HOMEPG = {
   st() { return { disp: LS.get('dispatch', {})['j5'], urged: LS.get('defects', {})['d1'], hz: LS.get('hazards', {})['p7'], sd: LS.get('docs', {})['safetyday'] }; },
   pending() { const s = this.st(); return (s.disp ? 0 : 1) + (s.urged ? 0 : 1) + (s.sd && s.sd.adopted ? 0 : 1); },
+  chartsHTML() {
+    const card = (t, sub, body) => '<div class="card chart"><div class="h"><b>' + h(t) + '</b><span>' + h(sub) + '</span></div>' + body + '</div>';
+    const legend = items => '<div class="legend">' + items.map(([c, n]) => '<span><i style="background:' + c + '"></i>' + h(n) + '</span>').join('') + '</div>';
+    const types = [['巡视', 14], ['消缺', 9], ['检查', 9], ['检修', 6]].map(([k, v]) => ({ k, v, done: TASKS_M.filter(t => t.t === k && t.st === '已完成').length }));
+    const bars = PEOPLE.filter(p => p.post !== '班长').map(p => ({ n: p.n, v: p.week })).sort((a, b) => b.v - a.v);
+    const avg = MODS.map((m, i) => PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length);
+    const hoursPct = PEOPLE.reduce((s, p) => s + p.hours.done / p.hours.req, 0) / PEOPLE.length;
+    const meters = [{ k: 'tickets', n: '两票合格率', v: MONTH.ticketsOK / MONTH.tickets, txt: MONTH.ticketsOK + '/' + MONTH.tickets, tip: '本月工作票 ' + MONTH.tickets + ' 张全部合格 · 点开看两票台账' }, { k: 'hours', n: '年度学时完成', v: hoursPct, txt: Math.round(hoursPct * 100) + '%', tip: '12 人年度学时平均完成 ' + Math.round(hoursPct * 100) + '% · 点开看学时台账' }, { k: 'defects', n: '缺陷闭环', v: MONTH.defectsClosed / MONTH.defectsFound, txt: MONTH.defectsClosed + '/' + MONTH.defectsFound, tip: '本月发现 ' + MONTH.defectsFound + ' 处、闭环 ' + MONTH.defectsClosed + ' 处 · 点开看缺陷台账' }, { k: 'safety', n: '安全日活动', v: MONTH.safetyDays / MONTH.safetyDaysPlan, txt: MONTH.safetyDays + '/' + MONTH.safetyDaysPlan, tip: '本月计划 ' + MONTH.safetyDaysPlan + ' 次，已开展 ' + MONTH.safetyDays + ' 次 · 点开看安全活动台账' }];
+    return '<div class="grid3 charts">' +
+      card('本月任务 · 按类型', '点一段看明细', CH.donut(types, String(MONTH.jobsDone), '完成 / ' + MONTH.jobs)) +
+      card('本周工时', '约定 ' + WEEK_LIMIT + 'h · 点一条照亮台账', CH.bars(bars, WEEK_LIMIT)) +
+      card('近 30 天缺陷', '点一天看当天', CH.area(DEF30.days, DEF30.found, DEF30.closed) + legend([[CPAL[0], '发现累计'], [CPAL[2], '闭环累计']])) +
+      card('班组能力 · 8 模块', '点一角看短板', CH.radar(MODS.map(m => m.n), avg, 3) + legend([[CPAL[0], '班组均值'], ['#7b849c', '目标 L3'], ['#e8791d', '低于目标']])) +
+      card('证书复审 · 未来一年', '点一个看证书台账', CH.certline(CERTS)) +
+      card('本月指标', '点一条看台账', CH.meters(meters)) + '</div>';
+  },
   jobsHTML() { const disp = LS.get('dispatch', {}); return '<div class="jobs">' + JOBS.map(j => { const d = disp[j.id]; return '<div><span style="color:var(--ink);font-size:11.5px">' + h(j.t) + (j.who ? ' · ' + j.who.join(' ') : d ? ' · ' + d.lead + ' ' + d.crew.join(' ') : '') + '</span>' + (d ? '<span class="tag ok">已派</span>' : j.lv ? '<em>' + h(j.lv) + ' · ' + h(j.st) + '</em>' : '<span>' + h(j.when) + ' · ' + h(j.st) + '</span>') + '</div>'; }).join('') + '</div>'; }
 };
 PAGES.home = {
@@ -9,7 +25,7 @@ PAGES.home = {
     const s = HOMEPG.st(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length;
     const dispDef = DISPATCH.defaults();
     return cmdHTML(['安排明天凤凰线换刀闸', '李文博这周工时怎么算的', '三个月内证书到期的有谁', '写本周安全日讲稿']) +
-      '<div class="hero"><div><div class="g">' + TODAY_CN + ' · ' + WEATHER + ' · <span id="clock">' + new Date().toTimeString().slice(0, 5) + '</span></div><h4>早上好，' + h(TEAM.leader) + ' · <em>小瓦特</em></h4><p class="sub" id="sub"></p></div>' +
+      '<div class="hero' + (XW_IMGS && XW_IMGS.main ? ' hasxw' : '') + '">' + (XW_IMGS && XW_IMGS.main ? '<img class="heroxw" src="' + XW_IMGS.main + '" alt="">' : '') + '<div><div class="g">' + TODAY_CN + ' · ' + WEATHER + ' · <span id="clock">' + new Date().toTimeString().slice(0, 5) + '</span></div><h4>早上好，' + h(TEAM.leader) + ' · <em>小瓦特</em></h4><p class="sub" id="sub"></p></div>' +
       '<div class="nums"><div data-act="nav" data-to="home"><b id="n1">' + HOMEPG.pending() + '</b><span>待拍板</span></div><div data-act="nav" data-to="sched"><b>' + JOBS.length + '</b><span>今日作业</span></div><div data-act="nav" data-to="people"><b>' + onsite + '/' + out + '</b><span>在岗/外勤</span></div></div></div>' +
       '<div class="sec"><i></i><b>今日待拍板</b><em id="badge2">' + HOMEPG.pending() + '</em><span>决定由班组长作出</span></div>' +
       '<div class="grid3" id="dec">' +
@@ -22,10 +38,11 @@ PAGES.home = {
       '</div>' +
       '<div class="grid2"><div class="card" id="k1"><div class="h"><b id="k1h">今日作业</b><span id="k1s">' + JOBS.length + ' 项</span></div><div id="k1b">' + HOMEPG.jobsHTML() + '</div></div>' +
       '<div class="card" id="k2"><div class="h"><b>隐患 · 田寮线 #7 杆 拉线锈断</b><span id="k2s">' + (s.hz ? h(s.hz) : '她从群里照片认出来的') + '</span></div><div class="photo">' + PHOTO.html('p7') + PHOTO.rowsHTML('p7') + '</div><div class="bt" id="k2bt" style="margin-top:8px">' + (s.hz ? '<button class="g" data-act="nav" data-to="safety">去安全管理</button>' : '<button data-act="photo" data-key="p7">核对</button><button class="g" data-act="hz-no" data-key="p7">不是隐患</button>') + '</div></div></div>' +
+      '<div class="sec"><i class="v"></i><b>班组一览</b><span>图表可点，点进去她照亮台账</span></div>' + HOMEPG.chartsHTML() +
       '<div class="card"><div class="h"><b>人员去向</b><span>' + onsite + ' 在岗 · ' + out + ' 外勤 · ' + PEOPLE.filter(p => p.status === '休假').length + ' 休假</span></div><div class="ppl on" style="margin:0;border:0;padding:0"><div class="row">' + PEOPLE.map(p => '<div class="chip" data-act="person" data-who="' + p.n + '" style="width:auto;flex-direction:row;align-items:center;gap:6px"><b>' + h(p.n) + '</b><span class="tag ' + (p.status === '在岗' ? 'ok' : p.status === '外勤' ? 'w' : '') + '" style="margin:0">' + h(p.status) + '</span></div>').join('') + '</div></div></div>';
   },
   after() {
-    const s = HOMEPG.st();
+    const s = HOMEPG.st(); CH.mount($('#main')); const ar = $('#charea'); if (ar) CH.areaHover(ar, DEF30.days, DEF30.found, DEF30.closed);
     if (s.hz) { $('#ph-p7').classList.add('done'); $('#rd-p7').classList.add('done'); }
     if (S.briefed) { $$('#dec .dc').forEach(d => d.classList.add('in')); if (!s.hz) { $('#ph-p7').classList.add('done'); $('#rd-p7').classList.add('done'); } return; }
     S.briefed = true; XW.clearChat();
@@ -58,5 +75,18 @@ Object.assign(ACT, {
   later() { XW.answer('改到哪天？在班务日程里点那一天，我把催办改成那天并重新算时限。', null, { confirm: false }); },
   draft() { ensure('safety', () => SAFETYPG.draft(), 'day'); },
   topic() { XW.answer('上月的隐患是拉线锈蚀和树障，本周有台风。换成"树障与台风季线路巡视"？', '上月的隐患是拉线锈蚀和树障，本周有台风。换成"树障与台风季线路巡视"？<div class="bt"><button data-act="draft">就这个，看讲稿</button><button class="g">再想想</button></div>', { confirm: false }); },
-  person(el) { ensure('people', () => PEOPLEPG.show(el.dataset.who)); }
+  person(el) { ensure('people', () => PEOPLEPG.show(el.dataset.who)); },
+  /* 图表下钻 */
+  'ch-task'(el) { const k = el.dataset.k; const rows = TASKS_M.map(t => [t.d, t.t, t.line, t.who, t.st]); const me = []; TASKS_M.forEach((t, i) => { if (t.t === k) me.push(i); }); const n = me.length, done = TASKS_M.filter(t => t.t === k && t.st === '已完成').length; const cnt = {}; TASKS_M.filter(t => t.t === k).forEach(t => t.who.split('、').forEach(w => cnt[w] = (cnt[w] || 0) + 1)); const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+    XW.spot({ title: '任务台账 · 本月 · ' + k, cols: ['日期', '类型', '线路 / 站', '人员', '状态'], rows, me, text: '本月' + k + ' ' + n + ' 项，完成 ' + done + ' 项' + (n - done ? '，没完成的是' + TASKS_M.filter(t => t.t === k && t.st !== '已完成').map(t => t.line + '（' + t.st + '）').join('、') : '') + '。' + k + '做得最多的是' + top + '，' + cnt[top] + ' 次。' }); },
+  'ch-hours'(el) { DISPATCH.hours(el.dataset.who); },
+  'ch-day'(el) { const i = +el.dataset.i; const d = DEF30.days[i]; const df = DEF30.found[i] - (i ? DEF30.found[i - 1] : 0), dc = DEF30.closed[i] - (i ? DEF30.closed[i - 1] : 0); const last = i === DEF30.days.length - 1;
+    XW.answer(d + ' 这天' + (df ? '发现 ' + df + ' 处缺陷' : '没有新发现') + (dc ? '，闭环 ' + dc + ' 处' : '') + '，到这天累计发现 ' + DEF30.found[i] + '、闭环 ' + DEF30.closed[i] + '。' + (last ? '还有 ' + (DEF30.found[i] - DEF30.closed[i]) + ' 处没闭环，志远站那条已经超期。' : ''), null, { confirm: false, done() { XW.card('<div class="bt" style="margin-top:0"><button data-act="nav" data-to="safety" data-sub="photo">去隐患台账</button></div>'); } }); },
+  'ch-mod'(el) { const i = +el.dataset.i; const m = MODS[i]; const avg = PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length; const weak = PEOPLE.map(p => ({ p, v: PEOPLEPG.lv(p)[i] })).sort((a, b) => a.v - b.v).slice(0, 3); const c = COURSES.find(c => c.mod === m.k);
+    XW.answer('"' + m.n + '"班组均值 L' + avg.toFixed(1) + (avg < 3 ? '，低于目标 L3' : '，达到目标') + '。最弱的三个是' + weak.map(w => w.p.n + ' ' + LV[w.v].slice(0, 2)).join('、') + '。' + (c ? '对应的课是《' + c.n + '》，要我排给这三个人吗？' : '这一块没有现成课件，可以安排一次班内带教。'), null, { confirm: false, done() { XW.card('<div class="bt" style="margin-top:0">' + (c ? '<button data-act="ch-mod-plan" data-i="' + i + '">排进培训计划</button>' : '') + '<button class="g" data-act="nav" data-to="people">去班组画像</button></div>'); } }); },
+  'ch-mod-plan'(el) { const i = +el.dataset.i; const m = MODS[i]; const c = COURSES.find(c => c.mod === m.k); const weak = PEOPLE.map(p => ({ p, v: PEOPLEPG.lv(p)[i] })).sort((a, b) => a.v - b.v).slice(0, 3); const plan = LS.get('plan', []); weak.forEach(w => plan.push({ who: w.p.n, t: c.n, when: '下周', ts: Date.now() })); LS.set('plan', plan); XW.fly('已加入下周培训计划 · ' + weak.map(w => w.p.n).join(' · ')); XW.answer('排进去了：下周' + weak.map(w => w.p.n).join('、') + '学《' + c.n + '》，学完考一次，成绩回到图谱。', null, { confirm: false }); },
+  'ch-cert'() { PEOPLEPG.sixAsk('cert'); },
+  'ch-meter'(el) { const k = el.dataset.k; if (k === 'hours') PEOPLEPG.sixAsk('hours'); else if (k === 'safety') PEOPLEPG.sixAsk('safety');
+    else if (k === 'defects') XW.spot({ title: '缺陷台账 · 本月', cols: ['缺陷', '等级', '登记', '时限', '状态'], rows: DEFECTS.map(d => [d.t, d.lv, d.reg, d.limit + ' 天', (LS.get('defects', {})[d.id] || {}).st || d.st]), me: [0, 1, 2, 3, 4], text: '本月发现 ' + MONTH.defectsFound + ' 处、闭环 ' + MONTH.defectsClosed + ' 处。台账里这五条是还没关或刚登记的：志远站 F14 超期 3 天，田寮线 #7 是昨晚新发现的，凤凰线 #15 树障和塘家公用柜锁具在处理中，凤凰线 #9 杆拉线 9-1 已消缺。' });
+    else XW.spot({ title: '两票台账 · 本月', cols: ['票号', '类型', '任务', '负责人', '状态'], rows: [[TICKET.no, TICKET.kind, TICKET.task, TICKET.lead, LS.get('ticket') ? '已审核' : '待审'], ['配一 2026-0901-02', '第一种工作票', '凤凰线 #9 杆拉线更换', '黄伟强', '合格'], ['配一 2026-0902-01', '第二种工作票', '志远站 F14 消缺', '黄伟强', '合格'], ['配一 2026-0902-03', '第二种工作票', '光明变出线柜检查', '韩雪', '合格']], me: [0, 1, 2, 3], text: '本月 ' + MONTH.tickets + ' 张票 ' + MONTH.ticketsOK + ' 张合格。明天凤凰线那张第一种工作票' + (LS.get('ticket') ? '已经审过，补了验电和接地线档位。' : '还在待审，我对过一遍，缺验电和接地线档位两处，在班务日程里能补。') }); }
 });

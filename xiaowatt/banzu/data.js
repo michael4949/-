@@ -103,6 +103,14 @@ const TICKET = {
   rules: ['停电作业应在验明无电后装设接地线', '接地线装设位置应在工作票上写明', '作业点应装设围栏与标示牌', '登杆前应检查杆根、拉线及登杆工具']
 };
 
+/* 本月任务明细（38 项，按类型；图表下钻用） */
+const TASKS_M = (() => { const lines = ['凤凰线', '塘尾线', '田寮线', '志远站', '光明变', '塘家公用柜', '凤凰线 #9 杆', '田寮 F13']; const types = [['巡视', 14], ['消缺', 9], ['检查', 9], ['检修', 6]]; const who = ['韩雪', '黄伟强', '李文博', '吴倩', '郭子扬', '赵敏', '王安', '陈浩', '周明']; const out = []; let k = 0;
+  types.forEach(([t, n]) => { for (let i = 0; i < n; i++) { const d = 1 + ((k * 7) % 28); out.push({ d: '08-' + String(d).padStart(2, '0'), t, line: lines[(k * 3) % lines.length], who: who[k % who.length] + '、' + who[(k + 4) % who.length], st: '已完成' }); k++; } });
+  out[3].st = '待处理'; out[16].st = '超期'; out[30].st = '待处理'; return out.sort((a, b) => a.d < b.d ? -1 : 1); })();
+/* 近 30 天缺陷：发现累计 / 闭环累计 */
+const DEF30 = (() => { const days = [], f = [], c = []; const d0 = new Date('2026-08-05'); const found = { 2: 1, 5: 1, 9: 1, 13: 1, 20: 1, 25: 1, 26: 1, 27: 1, 29: 1 }, closed = { 4: 1, 8: 1, 12: 1, 18: 1, 23: 1, 27: 1 }; let sf = 0, sc = 0;
+  for (let i = 0; i < 30; i++) { const d = new Date(d0.getTime() + i * 86400000); days.push((d.getMonth() + 1) + '-' + d.getDate()); sf += found[i] || 0; sc += closed[i] || 0; f.push(sf); c.push(sc); } return { days, found: f, closed: c }; })();
+
 /* 本月台账汇总（月度总结取数） */
 const MONTH = { tickets: 12, ticketsOK: 12, jobs: 38, jobsDone: 35, defectsFound: 6, defectsClosed: 4, safetyDays: 1, safetyDaysPlan: 2, incidentStudy: 1, hoursTeam: 46, honors: ['韩雪 · 2025 年局级技术能手（8 月授予）'] };
 const SAFETY_ACT = [

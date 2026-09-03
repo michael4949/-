@@ -360,5 +360,83 @@ table.t tr.dim td{opacity:.3}
 .stage button{font-size:11px;border-radius:8px;padding:3px 9px;background:var(--tint);color:var(--pri);border:0}
 .stage button.on{background:var(--pri);color:#fff}
 
+/* ---------- 左栏：毛玻璃 + 立体图标 ---------- */
+.sb{background:linear-gradient(180deg,#f2f3ff 0%,#eef0fb 45%,#f6f2ff 100%);position:relative;border-right:1px solid rgba(90,91,240,.12)}
+.sb::before{content:'';position:absolute;inset:0;background:radial-gradient(360px 240px at 15% -5%,rgba(154,77,255,.18),transparent 60%),radial-gradient(320px 220px at 95% 105%,rgba(0,168,198,.16),transparent 60%);pointer-events:none}
+.sb>*{position:relative}
+.sb .brand{background:rgba(255,255,255,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.8);border-radius:14px;padding:10px 10px 8px;box-shadow:0 2px 6px rgba(20,30,80,.06),inset 0 1px 0 #fff;margin-bottom:2px}
+.sb .grp{padding:12px 10px 4px}
+.sb a{background:rgba(255,255,255,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.75);box-shadow:0 1px 2px rgba(20,30,80,.05),inset 0 1px 0 rgba(255,255,255,.9);margin:2px 0;border-radius:12px;transition:transform .18s,box-shadow .18s,background .18s}
+.sb a:hover{background:rgba(255,255,255,.72);transform:translateY(-1px);box-shadow:0 6px 14px rgba(90,91,240,.14),inset 0 1px 0 #fff}
+.sb a.on{background:rgba(255,255,255,.9);color:var(--pri);font-weight:600;border-color:rgba(90,91,240,.35);box-shadow:0 8px 18px rgba(90,91,240,.2),inset 0 1px 0 #fff;transform:translateY(-1px)}
+.sb a i{width:28px;height:28px;border-radius:9px;background:linear-gradient(145deg,#8b8cf7 0%,#5a5bf0 55%,#4344c9 100%);box-shadow:0 3px 6px rgba(90,91,240,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14);position:relative;overflow:hidden;transition:transform .18s}
+.sb a i::after{content:'';position:absolute;left:0;right:0;top:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,0));pointer-events:none}
+.sb a i svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 1px rgba(0,0,0,.28));position:relative}
+.sb a i.v{background:linear-gradient(145deg,#c08bff,#9a4dff 55%,#6f2fd8);box-shadow:0 3px 6px rgba(154,77,255,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14)}
+.sb a i.g{background:linear-gradient(145deg,#5fe0ad,#18b97a 55%,#0f8a5a);box-shadow:0 3px 6px rgba(24,185,122,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14)}
+.sb a i.o{background:linear-gradient(145deg,#ffc266,#f59e0b 55%,#c67a05);box-shadow:0 3px 6px rgba(245,158,11,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14)}
+.sb a i.c{background:linear-gradient(145deg,#5fdcea,#00a8c6 55%,#00849c);box-shadow:0 3px 6px rgba(0,168,198,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14)}
+.sb a i.r{background:linear-gradient(145deg,#ff8f93,#e5484d 55%,#b8323a);box-shadow:0 3px 6px rgba(229,72,77,.35),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.14)}
+.sb a.on i,.sb a:hover i{transform:scale(1.08) translateY(-1px)}
+.sb a em{box-shadow:0 2px 4px rgba(229,72,77,.35)}
+.sb .me{background:rgba(255,255,255,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.8);border-radius:12px;padding:8px;box-shadow:0 2px 6px rgba(20,30,80,.06),inset 0 1px 0 #fff}
+/* ---------- 小瓦特全身形象 ---------- */
+.side .sh.full{align-items:flex-end;gap:6px;padding:8px 10px 6px}
+.side .sh.full .xw{width:122px;height:150px;border-radius:0;align-items:flex-end}
+.side .sh.full .xw .ring{inset:12% 6% 4% 6%;border-radius:50%;border:0;box-shadow:none;background:radial-gradient(ellipse at 50% 45%,rgba(90,91,240,.22),rgba(154,77,255,.10) 55%,transparent 72%);filter:blur(3px);animation:none}
+.side .sh.full .xw.talk .ring{background:radial-gradient(ellipse at 50% 45%,rgba(90,91,240,.4),rgba(154,77,255,.16) 55%,transparent 74%);animation:halo 1.2s ease-in-out infinite}
+.side .sh.full .xw.think .ring{background:radial-gradient(ellipse at 50% 45%,rgba(154,77,255,.36),rgba(154,77,255,.12) 55%,transparent 74%);animation:halo 2.4s ease-in-out infinite}
+.side .sh.full .xw.look .ring{background:radial-gradient(ellipse at 50% 45%,rgba(0,168,198,.36),rgba(0,168,198,.12) 55%,transparent 74%)}
+.side .sh.full .xw.work .ring{background:radial-gradient(ellipse at 50% 45%,rgba(24,185,122,.36),rgba(24,185,122,.12) 55%,transparent 74%);animation:halo .9s ease-in-out infinite}
+.side .sh.full .xw.listen .ring{background:radial-gradient(ellipse at 50% 45%,rgba(229,72,77,.34),rgba(229,72,77,.12) 55%,transparent 74%);animation:halo 1s ease-in-out infinite}
+@keyframes halo{50%{transform:scale(1.08);opacity:.7}}
+.xw img.full{width:100%;height:100%;object-fit:contain;object-position:center bottom;border-radius:0;filter:drop-shadow(0 10px 14px rgba(90,91,240,.28));position:relative;transform-origin:50% 90%}
+.xw.breath img.full{animation:breath 3.6s ease-in-out infinite}
+.xw.talk img.full{animation:xtalk .55s ease-in-out infinite alternate}
+@keyframes xtalk{from{transform:translateY(0) rotate(-1.5deg)}to{transform:translateY(-3px) rotate(1.5deg)}}
+.xw.think img.full{animation:xthink 2.4s ease-in-out infinite}
+@keyframes xthink{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-2px)}}
+.xw.look img.full{animation:xlook 1.6s ease-in-out infinite}
+@keyframes xlook{0%,100%{transform:scale(1)}50%{transform:scale(1.05) translateY(-2px)}}
+.xw.work img.full{animation:xwork .7s ease-in-out infinite alternate}
+@keyframes xwork{from{transform:translateX(-2px)}to{transform:translateX(2px) translateY(-1px)}}
+.xw.listen img.full{animation:xlook 1s ease-in-out infinite}
+.hero.hasxw{grid-template-columns:auto 1fr auto}
+.heroxw{height:96px;width:auto;display:block;filter:drop-shadow(0 8px 12px rgba(90,91,240,.25));animation:breath 3.6s ease-in-out infinite;transform-origin:50% 90%}
+/* ---------- 图表 ---------- */
+.charts .card.chart{padding:10px 12px 8px;display:flex;flex-direction:column}
+.ch{width:100%;height:auto;display:block;overflow:visible;font-family:var(--sans)}
+.ch .lb{font-size:9.5px;fill:var(--ink2)}
+.ch .lb.mute{fill:var(--ink3)}
+.ch .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.ch .hero{font-size:22px;font-weight:800;fill:var(--ink);font-family:var(--mono)}
+.ch .grid{stroke:#e9ebf5;stroke-width:1;fill:none}
+.ch .thr{stroke:#c9cbf5;stroke-width:1}
+.ch .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.2s ease}
+.chart.in .ch .ln{stroke-dashoffset:0}
+.ch .seg{opacity:0;transform:scale(.7);transform-origin:78px 88px;transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1);cursor:pointer}
+.chart.in .ch .seg{opacity:1;transform:none}
+.ch .seg:hover{filter:brightness(1.12)}
+.ch .bar{transform:scaleX(0);transition:transform .8s cubic-bezier(.2,.8,.2,1);cursor:pointer}
+.chart.in .ch .bar{transform:scaleX(1)}
+.ch g[data-act]{cursor:pointer}.ch g[data-act]:hover .bar{filter:brightness(1.12)}.ch g[data-act]:hover .lb{fill:var(--pri)}
+.ch .dot{stroke:#fff;stroke-width:2;cursor:pointer}
+.ch .dot.vt:hover{r:6}
+.ch .poly{transform-origin:150px 92px;transform:scale(.4);opacity:0;transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .6s}
+.chart.in .ch .poly{transform:none;opacity:1}
+.ch .lg{cursor:pointer}.ch .lg:hover text{fill:var(--pri)}
+.ch text[data-act]{cursor:pointer}.ch text[data-act]:hover{fill:var(--pri)}
+.ch .xh{opacity:0;transition:.15s;pointer-events:none}.ch .xh.on{opacity:1}
+.ch .xhl{stroke:#9aa1b8;stroke-width:1}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--ink2);margin-top:4px}
+.legend span{display:flex;align-items:center;gap:5px}.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.meters{display:flex;flex-direction:column;gap:11px;padding:6px 0 2px}
+.mt{cursor:pointer}.mt .ml{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink2);margin-bottom:4px}.mt .ml b{color:var(--ink)}
+.mt .tr{height:8px;border-radius:4px;background:var(--tint);overflow:hidden}
+.mt .tr i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#8b8cf7,#5a5bf0);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.mt .tr i.full{background:linear-gradient(90deg,#3ad29a,#18b97a)}.mt .tr i.low{background:linear-gradient(90deg,#ffb347,#e8791d)}
+.mt:hover .ml span{color:var(--pri)}
+.tip{position:fixed;z-index:60;background:#0e1430;color:#fff;font-size:11px;line-height:1.5;padding:5px 9px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;max-width:240px;box-shadow:0 8px 20px rgba(20,30,80,.25)}
+.tip.on{opacity:1}
 .empty{color:var(--ink3);font-size:12px;padding:20px;text-align:center}
 @media print{#app>.sb,#app>.side,.cmd,.stagebtn,.stage,.flys,.spot,.cursor{display:none !important}#app{display:block}#main{overflow:visible;padding:0}.card{box-shadow:none;border:0}.noprint{display:none !important}}

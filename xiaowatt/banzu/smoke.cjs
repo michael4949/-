@@ -15,6 +15,27 @@ const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recu
   await t('brief cards', async () => (await pg.locator('#dec .dc.in').count()) === 3);
   await t('brief sub', async () => (await pg.locator('#sub').textContent()).length > 4);
   await pg.screenshot({ path: SHOT + '/01_home.png' });
+  await t('mascot + icons', async () => (await pg.locator('#xwimg.full').count()) === 1 && (await pg.locator('.sb a i svg').count()) === 10 && (await pg.locator('.heroxw').count()) === 1);
+  await t('charts 6', async () => (await pg.locator('.charts .card.chart.in').count()) === 6 && (await pg.locator('.ch .seg').count()) === 4 && (await pg.locator('.ch .bar').count()) === 11);
+  await pg.locator('.ch .seg').first().dispatchEvent('click'); await w(400);
+  await t('donut drill', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 14);
+  await pg.click('[data-act="unspot"]');
+  await pg.click('.ch g[data-act="ch-hours"][data-who="黄伟强"]'); await w(400);
+  await t('bar drill', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 3);
+  await pg.click('[data-act="unspot"]');
+  await pg.locator('.ch circle.vt').nth(3).dispatchEvent('click'); await ws('[data-act="ch-mod-plan"]');
+  await t('radar drill', async () => (await pg.locator('[data-act="ch-mod-plan"]').count()) === 1);
+  await pg.click('.mt[data-k="tickets"]'); await w(400);
+  await t('meter drill', async () => (await pg.locator('#spot.on').count()) === 1);
+  await pg.click('[data-act="unspot"]');
+  await pg.locator('.ch g[data-act="ch-cert"]').first().dispatchEvent('click'); await w(400);
+  await t('cert drill', async () => (await pg.locator('#spot.on').count()) === 1);
+  await pg.click('[data-act="unspot"]');
+  await pg.hover('#charea'); await w(150);
+  await t('area crosshair', async () => (await pg.locator('#xh.on').count()) === 1);
+  await pg.locator('#charea rect[data-act="ch-day"]').last().dispatchEvent('click'); await w(400);
+  await t('day drill', async () => (await pg.locator('.msg.a', { hasText: '累计' }).count()) >= 1);
+  await pg.screenshot({ path: SHOT + '/01b_charts.png' });
   // 核对照片
   await pg.click('#k2bt [data-act="photo"]'); await ws('.msg.a [data-act="hz-confirm"]');
   await t('photo answer', async () => (await pg.locator('.msg.a [data-act="hz-confirm"]').count()) >= 1);
