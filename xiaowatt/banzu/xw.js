@@ -41,10 +41,11 @@ const XW = {
   think(text, done) { this.state('think'); const d = this.msg('t', '<span class="lbl">小瓦特在想</span><span></span>'); this.type(d.querySelector('span:last-child'), text, 34, () => { this.state(''); done && done(); }); return d; },
   /* answer(text, html, opt)：先逐字出 text，完成后若给 html 则替换为 html（含按钮）；opt.speak=false 不上字幕 */
   answer(text, html, opt) { opt = opt || {}; this.state('talk'); const d = this.msg('a', '');
-    this.type(d, text, 40, () => { if (html) d.innerHTML = html; if (opt.confirm !== false && /建议|人选|等级|评价|安排/.test(text) && !/由班组长|由你/.test(text)) d.insertAdjacentHTML('beforeend', '<div class="cf">由班组长确认后使用</div>'); this.state(''); this.scrollChat(); opt.done && opt.done(); });
+    this.type(d, text, 40, () => { if (html) d.innerHTML = html; if (opt.chart) { const c = document.createElement('div'); c.className = 'mchart'; c.innerHTML = opt.chart; const bt = d.querySelector('.bt'); if (bt) d.insertBefore(c, bt); else d.appendChild(c); } if (opt.confirm !== false && /建议|人选|等级|评价|安排/.test(text) && !/由班组长|由你/.test(text)) d.insertAdjacentHTML('beforeend', '<div class="cf">由班组长确认后使用</div>'); this.state(''); this.scrollChat(); opt.done && opt.done(); });
     if (opt.speak !== false) this.type($('#xwsub'), text.length > 64 ? text.slice(0, 64) + '…' : text, 45);
     return d; },
   card(html) { return this.msg('a', html); },
+  chart(svg, caption) { return this.msg('a', (caption ? '<div class="note" style="margin-bottom:4px">' + h(caption) + '</div>' : '') + '<div class="mchart">' + svg + '</div>'); },
   /* 光标（她的手） */
   cursorTo(sel, dx, dy) { const el = typeof sel === 'string' ? $(sel) : sel; if (!el) return; const c = $('#cur'), m = $('#main'); el.scrollIntoView({ block: 'nearest' }); const r = el.getBoundingClientRect(), mr = m.getBoundingClientRect(); c.style.left = (r.left - mr.left + m.scrollLeft + (dx == null ? 10 : dx)) + 'px'; c.style.top = (r.top - mr.top + m.scrollTop + (dy == null ? 10 : dy)) + 'px'; c.classList.add('on'); },
   cursorOff() { const c = $('#cur'); if (c) c.classList.remove('on'); },

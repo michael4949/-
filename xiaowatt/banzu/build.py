@@ -5,7 +5,7 @@ import base64, os, re, json
 B = os.path.dirname(os.path.abspath(__file__)) + os.sep
 logo = base64.b64encode(open(os.path.join(B, '..', 'assets', 'logo.png'), 'rb').read()).decode()
 css = open(B + 'style.css', encoding='utf-8').read()
-parts = ['data.js', 'xw.js', 'comp.js', 'charts.js', 'app.js', 'p_home.js', 'p_people.js', 'p_sched.js', 'p_safety.js', 'p_train.js', 'p_doc.js', 'p_know.js', 'p_ledger.js', 'intent.js']
+parts = ['data.js', 'data2.js', 'scenes.js', 'xw.js', 'comp.js', 'charts.js', 'charts2.js', 'app.js', 'p_home.js', 'p_people.js', 'p_sched.js', 'p_safety.js', 'p_train.js', 'p_doc.js', 'p_know.js', 'p_ledger.js', 'intent.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
 imgs = {}
@@ -17,6 +17,15 @@ if os.path.isdir(xdir):
             mime = {'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp'}[m.group(2).lower()]
             imgs[m.group(1).lower()] = 'data:%s;base64,%s' % (mime, base64.b64encode(open(os.path.join(xdir, f), 'rb').read()).decode())
 js = js.replace('__XW_IMGS__', json.dumps(imgs, ensure_ascii=False) if imgs else 'null')
+photos = {}
+pdir = os.path.join(B, '..', 'assets', 'photos')
+if os.path.isdir(pdir):
+    for f in sorted(os.listdir(pdir)):
+        m = re.match(r'([a-z0-9_]+)\.(png|jpe?g|webp)$', f, re.I)
+        if m:
+            mime = {'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp'}[m.group(2).lower()]
+            photos[m.group(1).lower()] = 'data:%s;base64,%s' % (mime, base64.b64encode(open(os.path.join(pdir, f), 'rb').read()).decode())
+js = js.replace('__PHOTOS__', json.dumps(photos, ensure_ascii=False) if photos else '{}')
 html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -36,4 +45,4 @@ try{{ boot(); }}catch(e){{ document.body.innerHTML='<pre style="color:#e5484d;pa
 out = os.path.join(B, 'dist', '小瓦特班_班组长AI助手_高保真原型.html')
 os.makedirs(os.path.join(B, 'dist'), exist_ok=True)
 open(out, 'w', encoding='utf-8').write(html)
-print('OK', len(html), out, 'xw imgs:', list(imgs.keys()) or 'builtin svg')
+print('OK', len(html), out, 'xw imgs:', list(imgs.keys()) or 'builtin svg', 'photos:', list(photos.keys()) or 'vector scenes')

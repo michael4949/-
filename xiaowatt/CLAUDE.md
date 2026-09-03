@@ -33,7 +33,8 @@ xiaowatt/
 │   ├── data.js …           见下方「代码地图」
 │   ├── dist/               构建产物（已含当前版本，双击可开）
 │   └── shots/              测试截图输出目录
-├── banzu/                  项目二工作区（扁平结构：data.js/xw.js/comp.js/charts.js/app.js/p_*.js/intent.js + build.py + smoke.cjs + dist/）
+├── banzu/                  项目二工作区（扁平结构：data.js/data2.js/scenes.js/xw.js/comp.js/charts.js/charts2.js/app.js/p_*.js/intent.js + build.py + smoke.cjs + dist/）
+├── assets/photos/          隐患现场真实照片插槽（p7/tree/lock/ins/trench/nest.jpg，到货即替换矢量插画）
 ├── assets/xiaowatt/        小瓦特形象（main.png 甲方 3D 全身像已到，透明底；talk/think/look/work/listen.png 到货即按状态换图；提示词 docs/小瓦特形象_生成提示词.md）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
