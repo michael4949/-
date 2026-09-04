@@ -70,20 +70,20 @@ function certsDueWithin(days) { return CERTS.filter(c => !c.renewed && daysTo(c.
 
 /* 本周工时台账（9-1 至 9-3） */
 const HOURS = [
-  { d: '9-1', who: '韩雪', job: '塘尾线巡视', h: 6 }, { d: '9-1', who: '李文博', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '黄伟强', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '郭子扬', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '王安', job: '塘尾线巡视', h: 6 }, { d: '9-1', who: '陈浩', job: '塘尾线巡视', h: 6 },
+  { d: '9-1', who: '韩雪', job: '塘尾线巡视', h: 6 }, { d: '9-1', who: '李文博', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '黄伟强', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '郭子扬', job: '凤凰线 #9 杆拉线更换', h: 6 }, { d: '9-1', who: '王安', job: '塘尾线巡视', h: 6 }, { d: '9-1', who: '陈浩', job: '塘尾线巡视', h: 6 }, { d: '9-1', who: '黄伟强', job: '塘尾线 #22 杆复查', h: 4 },
   { d: '9-2', who: '李文博', job: '志远站 F14 消缺', h: 8 }, { d: '9-2', who: '黄伟强', job: '志远站 F14 消缺', h: 8 }, { d: '9-2', who: '吴倩', job: '田寮线巡视', h: 4 }, { d: '9-2', who: '赵敏', job: '田寮线巡视', h: 4 }, { d: '9-2', who: '王安', job: '田寮线巡视', h: 6 }, { d: '9-2', who: '周明', job: '光明变出线柜检查', h: 8 }, { d: '9-2', who: '郭子扬', job: '光明变出线柜检查', h: 4 },
   { d: '9-3', who: '李文博', job: '塘尾线巡视', h: 6 }, { d: '9-3', who: '黄伟强', job: '光明变出线柜检查', h: 8 }, { d: '9-3', who: '李文博', job: '光明变出线柜检查', h: 4 }, { d: '9-3', who: '郭子扬', job: '光明变出线柜检查', h: 4 }, { d: '9-3', who: '韩雪', job: '班前会 · 材料准备', h: 6 }, { d: '9-3', who: '吴倩', job: '塘尾线巡视', h: 6 }, { d: '9-3', who: '赵敏', job: '塘尾线巡视', h: 4 }, { d: '9-3', who: '王安', job: '志远站 F14 复查', h: 4 }, { d: '9-3', who: '陈浩', job: '志远站 F14 复查', h: 6 }, { d: '9-3', who: '周明', job: '资料整理', h: 4 }, { d: '9-3', who: '刘一鸣', job: '塘尾线巡视（随队）', h: 6 }
 ];
 
 /* 今日作业与任务池 */
 const JOBS = [
-  { id: 'j1', t: '田寮线 #7 杆 拉线抢修', when: '今日', st: '待派', lv: '紧急', need: ['登高作业证'], lead: true },
-  { id: 'j2', t: '塘尾线巡视', when: '09:00', st: '进行中', who: ['吴倩', '王安', '刘一鸣'] },
-  { id: 'j3', t: '光明变 10kV 出线柜检查', when: '14:00', st: '待开工', who: ['陈浩', '周明'] },
-  { id: 'j4', t: '志远站 F14 志甲线 终端蓄电池消缺', when: '超期 3 天', st: '待处理', lv: '超期' },
-  { id: 'j5', t: '10kV 凤凰线更换 #12 杆刀闸（第一种工作票）', when: '明日 09:00', st: '待派', need: ['登高作业证'], lead: true },
+  { id: 'j1', t: '田寮线 #7 杆 拉线抢修', when: '今日', st: '待派', lv: '紧急', need: ['登高作业证'], lead: true, type: '消缺', line: '田寮线', defectId: 'd2', h: 5 },
+  { id: 'j2', t: '塘尾线巡视', when: '09:00', st: '进行中', who: ['吴倩', '王安', '刘一鸣'], type: '巡视', line: '塘尾线', h: 6 },
+  { id: 'j3', t: '光明变 10kV 出线柜检查', when: '14:00', st: '待开工', who: ['陈浩', '周明'], type: '检查', line: '光明变', h: 4 },
+  { id: 'j4', t: '志远站 F14 志甲线 终端蓄电池消缺', when: '超期 3 天', st: '待派', lv: '超期', need: [], type: '消缺', line: '志远站', defectId: 'd1', h: 4 },
+  { id: 'j5', t: '10kV 凤凰线更换 #12 杆刀闸（第一种工作票）', when: '明日 09:00', st: '待派', need: ['登高作业证'], lead: true, ticketNo: '配一 2026-0903-01', type: '检修', line: '凤凰线', h: 6 },
   { id: 'j6', t: '安全日活动', when: '周五 15:00', st: '待安排' },
-  { id: 'j7', t: '凤凰线 #20 杆 绝缘子更换', when: '下周二 09:00', st: '待派', need: ['登高作业证'], lead: true }
+  { id: 'j7', t: '凤凰线 #20 杆 绝缘子更换', when: '下周二 09:00', st: '待派', need: ['登高作业证'], lead: true, type: '检修', line: '凤凰线', h: 6, dateIso: '2026-09-08' }
 ];
 
 /* 缺陷 / 隐患台账 */
@@ -112,7 +112,7 @@ const DEF30 = (() => { const days = [], f = [], c = []; const d0 = new Date('202
   for (let i = 0; i < 30; i++) { const d = new Date(d0.getTime() + i * 86400000); days.push((d.getMonth() + 1) + '-' + d.getDate()); sf += found[i] || 0; sc += closed[i] || 0; f.push(sf); c.push(sc); } return { days, found: f, closed: c }; })();
 
 /* 本月台账汇总（月度总结取数） */
-const MONTH = { tickets: 12, ticketsOK: 12, jobs: 38, jobsDone: 35, defectsFound: 6, defectsClosed: 4, safetyDays: 1, safetyDaysPlan: 2, incidentStudy: 1, hoursTeam: 46, honors: ['韩雪 · 2025 年局级技术能手（8 月授予）'] };
+const MONTH_BASE = { tickets: 12, ticketsOK: 12, jobs: 38, jobsDone: 35, defectsFound: 6, defectsClosed: 4, safetyDays: 1, safetyDaysPlan: 2, incidentStudy: 1, hoursTeam: 46, honors: ['韩雪 · 2025 年局级技术能手（8 月授予）'] };
 const SAFETY_ACT = [
   { d: '2026-08-07', t: '安全日 · 高温作业防暑与轮换', who: 11 }, { d: '2026-08-21', t: '事故通报学习 · 某局登杆坠落事故', who: 12 }, { d: '2026-08-21', t: '安全日 · 拉线与杆根检查要点', who: 12 }
 ];

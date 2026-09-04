@@ -11,7 +11,7 @@ const XW = {
   /* 逐字：同一元素上新的 type 会取消旧的 */
   type(el, text, ms, done) {
     if (el._t) clearInterval(el._t);
-    const setT = v => { if ('value' in el && el.tagName === 'INPUT') el.value = v; else el.textContent = v; };
+    const setT = v => { if ('value' in el && /^(INPUT|TEXTAREA)$/.test(el.tagName)) el.value = v; else el.textContent = v; };
     setT(''); el.classList && el.classList.add('cur');
     let i = 0; const sp = Math.max(1, (ms || 40) * this.speed); const inChat = !!(el.closest && el.closest('#chat'));
     const t = setInterval(() => {

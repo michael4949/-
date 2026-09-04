@@ -490,3 +490,45 @@ table.t tr.dim td{opacity:.3}
 .qs .q u.num{cursor:default}
 .empty{color:var(--ink3);font-size:12px;padding:20px;text-align:center}
 @media print{#app>.sb,#app>.side,.cmd,.stagebtn,.stage,.flys,.spot,.cursor{display:none !important}#app{display:block}#main{overflow:visible;padding:0}.card{box-shadow:none;border:0}.noprint{display:none !important}}
+/* ---- 任务流转：任务池每行的状态与按钮 ---- */
+.jobs div.job span.ops{display:flex;gap:4px;align-items:center;white-space:nowrap;justify-content:flex-end;flex-wrap:wrap;max-width:220px}
+.jobs div.job span.ops .tag{margin:0 2px 0 0}
+.jobs div.job span.ops button{font-size:10.5px;border-radius:7px;padding:3px 8px;background:linear-gradient(90deg,var(--pri),#7c5cfa);color:#fff;border:0;font-weight:600;cursor:pointer}
+.jobs div.job span.ops button.g{background:#fff;border:1px solid var(--line2);color:var(--ink2);font-weight:400}
+.jobs div.job.add{background:linear-gradient(90deg,rgba(90,91,240,.05),transparent)}
+.jobs div.job .note .tag{display:inline;margin:0}
+.tag.v{background:#efe6ff;color:#7a3ff2}
+/* ---- 添加任务表单 ---- */
+.jf{display:grid;grid-template-columns:72px 1fr 72px 1fr;gap:6px 8px;font-size:11.5px;align-items:center}
+.jf label{color:var(--ink3);text-align:right}
+.jf input,.jf select,.jf textarea{border:1px solid #e0e3f0;border-radius:6px;padding:4px 8px;font:inherit;font-size:11.5px;background:#fbfbfe;color:var(--ink);outline:0;width:100%;box-sizing:border-box;transition:.2s;min-width:0}
+.jf input:focus,.jf select:focus,.jf textarea:focus{border-color:var(--pri);background:#fff}
+.jf .fill{border-color:var(--pri) !important;background:#f3f4ff !important}
+.jf .bad{border-color:var(--bad) !important;background:var(--badbg) !important}
+.jf .wide{grid-column:2/-1}
+.jf .chk{display:flex;gap:10px;flex-wrap:wrap;font-size:11px}
+.jf .chk label{display:flex;gap:4px;align-items:center;color:var(--ink2);text-align:left;border-radius:6px;padding:1px 4px}
+.jf .chk label.fill{background:#f3f4ff}
+.jf .chk input{width:auto}
+.jf .err{grid-column:1/-1;color:var(--bad);font-size:11px;min-height:0}
+.jf .btnrow{grid-column:1/-1}
+/* ---- 上传两票 ---- */
+.drop{display:flex;flex-direction:column;align-items:center;gap:3px;border:1.5px dashed #c9cbf5;border-radius:12px;padding:16px 10px;background:var(--tint);cursor:pointer;text-align:center;transition:.2s}
+.drop:hover,.drop.over{border-color:var(--pri);background:#eef0ff}
+.drop b{font-size:12px;color:var(--pri)}
+.drop span{font-size:11px;color:var(--ink3)}
+.tkpre img{max-width:100%;border-radius:10px;border:1px solid var(--line)}
+.ticket .pane .fr{display:flex;gap:6px;padding:2px 6px;font-size:11.5px;border-radius:6px;border:2px solid transparent}
+.ticket .pane .fr i{font-style:normal;color:var(--ink3);width:74px;flex:none}
+.ticket .pane .fr em.none{font-style:normal;color:var(--ink3)}
+.ticket .pane .fr.miss{border-color:var(--bad);color:var(--bad);background:var(--badbg)}
+.ticket .pane .fr.miss em.none{color:var(--bad)}
+.ticket .pane div.it .n{color:var(--ink3);margin-right:4px}
+.ticket .pane div.it .ex{position:absolute;right:6px;top:3px;font-size:10px;color:var(--ok)}
+.ticket .pane div.it.add{background:var(--okbg);border:1px solid #bfe8d3}
+.ticket .pane div.it.add::after{content:'已补';position:absolute;right:6px;top:2px;font-size:10px;background:var(--ok);color:#fff;border-radius:6px;padding:0 5px}
+.ticket .pane div.it.bad{border:2px solid var(--bad);color:var(--bad);background:var(--badbg)}
+.ticket .pane div.it.bad::before{content:'错';position:absolute;right:6px;top:2px;font-size:10px;background:var(--bad);color:#fff;border-radius:6px;padding:0 5px}
+.ticket .pane div.it.tip{border:1.5px dashed var(--warn);color:var(--warn)}
+.ticket .pane div.it.tip::before{content:'提示';position:absolute;right:6px;top:2px;font-size:10px;background:var(--warn);color:#fff;border-radius:6px;padding:0 5px}
+.ticket .pane div.it.ok{background:var(--okbg)}

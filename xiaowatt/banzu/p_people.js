@@ -3,13 +3,13 @@ const PEOPLEPG = {
   cur: null,
   lv(p) { const conf = LS.get('levels', {})[p.n] || {}; return p.lv.map((v, i) => conf[MODS[i].k] != null ? conf[MODS[i].k] : v); },
   obs(p) {
-    const lv = this.lv(p); const rows = HOURS.filter(r => r.who === p.n); const outs = rows.length; const wk = MODS.map((m, i) => ({ m, v: lv[i] })).sort((a, b) => a.v - b.v);
+    const lv = this.lv(p); const rows = DB.hours().filter(r => r.who === p.n); const outs = rows.length; const wk = MODS.map((m, i) => ({ m, v: lv[i] })).sort((a, b) => a.v - b.v);
     const weak = wk[0], strong = wk[wk.length - 1]; const due = certsDueWithin(90).filter(c => c.who === p.n);
     if (p.n === '刘一鸣') return ['刘一鸣这两周跟了四次外勤，态度很好，负责人都说他肯问。', '但光差保护那门课的题他答对了两道，二次回路也弱，图谱上"二次及保护能力"还在 L1。', '我建议下周让他跟黄伟强做两次继保旁站，再考一次。要我排进计划吗？'];
     if (p.n === '黄伟强') return ['黄伟强这周已经 26 小时，是全班最多的，连续三周都排第一。', '他是带电作业和负责人资格都有的两个人之一，活自然往他身上堆；"故障分析与处理"L4 是班里最强的。', '我建议下周给他排两天室内，把凤凰线的活分一部分给李文博。要我在值班表里这么排吗？'];
     return [p.n + '是' + p.post + '，这周 ' + p.week + ' 小时，本月学时 ' + p.hours.m + '/5，年度 ' + p.hours.done + '/' + p.hours.req + '。', '图谱上最强是"' + strong.m.n + '"' + LV[strong.v].slice(0, 2) + '，最弱是"' + weak.m.n + '"' + LV[weak.v].slice(0, 2) + (due.length ? '；' + due[0].name + ' ' + due[0].due + ' 到期，还有 ' + daysTo(due[0].due) + ' 天' : '') + '。', (p.hours.m < 3 ? '这个月学时落后了，我建议把"' + weak.m.n + '"相关的一门课排给他。要我排进计划吗？' : outs >= 3 ? '外勤不少，短板那一格适合安排一次带教。要我排进计划吗？' : '状态平稳，短板那格可以安排一次旁站。要我排进计划吗？')];
   },
-  evidence(p, mi) { const m = MODS[mi]; const lv = this.lv(p)[mi]; const rows = HOURS.filter(r => r.who === p.n).slice(0, 2); const ev = [];
+  evidence(p, mi) { const m = MODS[mi]; const lv = this.lv(p)[mi]; const rows = DB.hours().filter(r => r.who === p.n).slice(0, 2); const ev = [];
     rows.forEach(r => ev.push({ t: r.d + ' ' + r.job + ' ' + r.h + 'h', s: '工时台账' }));
     const c = COURSES.find(c => c.mod === m.k); if (c) ev.push({ t: (p.n === '刘一鸣' && c.id === 'c5' ? '光差保护理论测试 40 分（2/5）' : (TRAIN_DONE[p.n] || []).includes(c.id) ? c.n + ' 理论测试 ' + (60 + lv * 8) + ' 分' : c.n + ' 未学'), s: '培训考评' });
     const sc = LS.get('scores', {})[p.n]; if (sc) ev.push({ t: sc.sheet + ' 实操 ' + sc.total + ' 分', s: '实操评分表' });

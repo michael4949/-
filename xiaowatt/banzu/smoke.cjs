@@ -3,7 +3,8 @@
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const path = require('path');
 const file = 'file://' + path.join(__dirname, 'dist', '小瓦特班_班组长AI助手_高保真原型.html');
-const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recursive: true });
+const fs = require('fs'); const SHOT = path.join(__dirname, 'shots'); fs.mkdirSync(SHOT, { recursive: true });
+const sample = n => ({ name: n, mimeType: 'application/octet-stream', buffer: fs.readFileSync(path.join(__dirname, 'samples', n)) });
 (async () => {
   const br = await chromium.launch(); const ctx = await br.newContext({ viewport: { width: 1440, height: 900 } }); const pg = await ctx.newPage();
   const errs = []; pg.on('pageerror', e => errs.push('pageerror ' + e.message)); pg.on('console', m => { if (m.type() === 'error') errs.push('console ' + m.text()); });
@@ -21,7 +22,7 @@ const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recu
   await t('donut drill', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 14);
   await pg.click('[data-act="unspot"]');
   await pg.click('.ch g[data-act="ch-hours"][data-who="黄伟强"]'); await w(400);
-  await t('bar drill', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 3);
+  await t('bar drill', async () => (await pg.locator('#spot.on').count()) === 1 && (await pg.locator('#spot tr.me').count()) === 4);
   await pg.click('[data-act="unspot"]');
   await pg.locator('.ch circle.vt').nth(3).dispatchEvent('click'); await ws('[data-act="ch-mod-plan"]');
   await t('radar drill', async () => (await pg.locator('[data-act="ch-mod-plan"]').count()) === 1);
@@ -122,6 +123,52 @@ const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recu
   await pg.click('.tabs button[data-sub="prog"]'); await w(300);
   await pg.click('[data-act="prog-check"]'); await ws('[data-act="prog-rotate"]');
   await t('prog rotate offer', async () => (await pg.locator('[data-act="prog-rotate"]').count()) === 1);
+  // 任务流转：添加任务（校验 → 她帮填 → 保存 → 进周计划）→ 保存并派工（自动起草票）→ 开工被票拦 → 审票 → 开工 → 回传 → 完工写工时 → 上传两票逐条审核
+  await pg.click('.tabs button[data-sub="pool"]'); await w(300);
+  await t('pool status from state', async () => (await pg.locator('#joblist .job').count()) === 7 && (await pg.locator('#joblist .job[data-id="j7"] .ops .tag', { hasText: '已派' }).count()) === 1 && (await pg.locator('#joblist .job[data-id="j7"] .note .tag', { hasText: '待审' }).count()) === 1 && (await pg.locator('#joblist .job[data-id="j5"] [data-act="job-start"]').count()) === 1);
+  await pg.click('[data-act="job-new"]'); await w(200);
+  await pg.click('[data-act="job-save"]:not([data-go])'); await w(200);
+  await t('add task validation', async () => (await pg.locator('#jf .bad').count()) >= 2 && (await pg.locator('#jf-err').textContent()).includes('任务名称'));
+  await pg.click('[data-act="job-assist"]'); await ws('#jf-desc.fill', 15000); await w(800);
+  await t('assist filled', async () => (await pg.inputValue('#jf-t')).includes('鸟巢') && (await pg.inputValue('#jf-date')) === '2026-09-08' && (await pg.locator('.jf-need:checked').count()) === 1 && (await pg.inputValue('#jf-def')) === 'd6');
+  await pg.click('[data-act="job-save"]:not([data-go])'); await w(400);
+  await t('task saved', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_jobs_add')).length)) === 1 && (await pg.locator('#joblist .job.add').count()) === 1 && (await pg.locator('#joblist .job.add [data-act="pool-dispatch"]').count()) === 1);
+  await pg.screenshot({ path: SHOT + '/06d_addtask.png' });
+  await pg.click('.tabs button[data-sub="week"]'); await w(300);
+  await t('week gantt +1', async () => (await pg.locator('.ch.mini g[data-act="wk-item"]').count()) === 11);
+  await pg.click('.tabs button[data-sub="pool"]'); await w(300);
+  await pg.click('[data-act="job-new"]'); await w(200);
+  await pg.fill('#jf-t', '田寮线 #7 杆 拉线更换后复查'); await pg.fill('#jf-date', '2026-09-04'); await pg.fill('#jf-h', '2'); await pg.selectOption('#jf-type', '检查');
+  await pg.click('[data-act="job-save"][data-go="1"]'); await ws('#ppl.on .chip', 8000); await w(300);
+  await t('save+dispatch opens strip', async () => (await pg.locator('#ppl .chip').count()) === 12 && (await pg.locator('#dtitle').textContent()).includes('复查'));
+  await pg.click('#dform [data-act="dispatch-go"]'); await ws('#joblist .job.add .ops .tag:has-text("已派")', 20000); await w(600);
+  await t('added task dispatched + ticket drafted', async () => (await pg.evaluate(() => { const st = JSON.parse(localStorage.getItem('xwb_jobst')); const add = JSON.parse(localStorage.getItem('xwb_jobs_add')); const id = add[1].id; const tk = JSON.parse(localStorage.getItem('xwb_tickets_add')); return st[id] && st[id].st === '已派' && !!st[id].ticketNo && tk.some(t => t.no === st[id].ticketNo && t.drafted); })));
+  await pg.click('[data-act="job-start"][data-id^="u"]'); await ws('#chat .msg:last-child [data-act="job-ticket"]');
+  await t('start blocked by ticket', async () => (await pg.locator('#chat .msg:last-child [data-act="job-ticket"]').count()) >= 1);
+  await pg.click('#chat .msg:last-child [data-act="job-ticket"]'); await w(400);
+  await t('ticket tab opened on drafted', async () => (await pg.locator('.crs a.on .note', { hasText: '派工起草' }).count()) === 1);
+  await pg.click('[data-act="ticket-review"]'); await ws('#chat .msg:last-child [data-act="ticket-fix"]');
+  await pg.click('#chat .msg:last-child [data-act="ticket-fix"]'); await ws('#chat .msg:last-child [data-act="job-start"]');
+  await pg.click('#chat .msg:last-child [data-act="job-start"]'); await w(500);
+  await t('started after review', async () => (await pg.evaluate(() => { const st = JSON.parse(localStorage.getItem('xwb_jobst')); const add = JSON.parse(localStorage.getItem('xwb_jobs_add')); return st[add[1].id].st === '进行中' && JSON.parse(localStorage.getItem('xwb_pstatus'))['韩雪'] === '外勤'; })));
+  await pg.click('.tabs button[data-sub="pool"]'); await w(300);
+  await pg.click('[data-act="job-report"][data-id^="u"]'); await w(500);
+  await t('report event', async () => (await pg.locator('.msg.a', { hasText: '回传' }).count()) >= 1 && (await pg.locator('#joblist .job.add .ops .tag', { hasText: '进行中' }).count()) === 1);
+  await pg.click('[data-act="job-finish"][data-id^="u"]'); await ws('#chat .msg:last-child [data-act="hours"]'); await w(300);
+  await t('finished → hours + status', async () => (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_hours_add')).length >= 2 && JSON.parse(localStorage.getItem('xwb_pstatus'))['韩雪'] === '在岗')) && (await pg.locator('#joblist .job.add .ops .tag', { hasText: '已完成' }).count()) === 1);
+  await pg.screenshot({ path: SHOT + '/06e_pipeline.png' });
+  await pg.click('.tabs button[data-sub="prog"]'); await w(300);
+  await t('progress group added', async () => (await pg.locator('.prog > div').count()) === 5);
+  await pg.click('.tabs button[data-sub="ticket"]'); await w(300);
+  await pg.setInputFiles('#tkfile', sample('操作票_10kV凤凰线F03开关由运行转检修_待审.docx')); await ws('#chat .msg:last-child [data-act="tku-fix"]', 20000);
+  await t('upload parsed + audited', async () => (await pg.locator('#tk .pane:first-child .it.miss').count()) >= 1 && (await pg.locator('#tk .pane:first-child .it.bad').count()) === 1 && (await pg.locator('#tf-guard.miss').count()) === 1 && (await pg.locator('#tk .pane:nth-child(2) .it.bad').count()) >= 3 && (await pg.locator('#tk .pane:nth-child(2) .it.ok').count()) >= 3 && (await pg.locator('.msg.a', { hasText: '顺序反了' }).count()) >= 1);
+  await pg.screenshot({ path: SHOT + '/06c_upload.png' });
+  await pg.click('#chat .msg:last-child [data-act="tku-fix"]'); await w(600);
+  await t('upload fixed + reviewed', async () => (await pg.locator('#tk .it.add').count()) === 2 && (await pg.locator('#tkbt .tag.ok').count()) === 1 && (await pg.evaluate(() => JSON.parse(localStorage.getItem('xwb_tickets'))['配一 2026-0904-01'].st === '已审核')));
+  await pg.setInputFiles('#tkfile', sample('操作票_10kV凤凰线F03开关由运行转检修_规范.docx')); await ws('#chat .msg:last-child [data-act="tku-pass"]', 20000);
+  await t('good ticket passes', async () => (await pg.locator('#tk .pane:first-child .it.miss, #tk .pane:first-child .it.bad, #tk .fr.miss').count()) === 0 && (await pg.locator('.msg.a', { hasText: '可以通过' }).count()) >= 1);
+  await pg.click('#chat .msg:last-child [data-act="tku-pass"]'); await w(300);
+  await t('ticket ledger grew', async () => (await pg.locator('.crs a').count()) === 7 && (await pg.locator('.crs a .tag.ok').count()) === 4);
   // 安全管理
   await pg.click('#sb a[data-to="safety"]'); await w(300);
   await pg.screenshot({ path: SHOT + '/07a_photos.png' });
@@ -235,7 +282,13 @@ const SHOT = path.join(__dirname, 'shots'); require('fs').mkdirSync(SHOT, { recu
   // 回首页：状态保持
   await pg.click('#sb a[data-to="home"]'); await w(500);
   await t('home persisted', async () => (await pg.locator('#d1.ok').count()) === 1 && (await pg.locator('#d2.ok').count()) === 1 && (await pg.locator('#d3.ok').count()) === 1);
+  await t('home reflects flow', async () => (await pg.locator('#k1b .jobs div').count()) === 8 && (await pg.locator('#k1b .tag', { hasText: '已完成' }).count()) === 1 && (await pg.locator('.charts .ch .bar').count()) === 11);
   await pg.screenshot({ path: SHOT + '/10_home_done.png' });
+  await pg.click('#sb a[data-to="ledger"]'); await w(300); await pg.click('.tabs button[data-sub="log"]'); await w(300);
+  await t('ledger log', async () => (await pg.locator('#ledtable tr').count()) > 10);
+  await pg.screenshot({ path: SHOT + '/10c_log.png' });
+  await pg.fill('#cmdin', '加一个任务：凤凰线 #15 杆 树障清理'); await pg.press('#cmdin', 'Enter'); await ws('#jf-desc.fill', 15000); await w(300);
+  await t('cmd add task prefill + assist', async () => (await pg.inputValue('#jf-t')).includes('树障') && (await pg.inputValue('#jf-type')) === '消缺' && (await pg.locator('.jf-need:checked').count()) >= 1);
   console.log('FAILS', fails, 'ERR', errs.length ? errs.join(' | ') : 'none');
   await br.close(); process.exit(fails || errs.length ? 1 : 0);
 })();

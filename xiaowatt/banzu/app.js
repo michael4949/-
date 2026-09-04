@@ -15,7 +15,7 @@ const ICO = {
 };
 const NAV = [
   { g: '入口' }, { k: 'home', n: '今日工作台', i: '', ic: 'sun', badge: () => HOMEPG.pending() }, { k: 'ask', n: '问小瓦特', i: 'v', ic: 'spark' },
-  { g: '班务' }, { k: 'sched', n: '班务日程', i: 'o', ic: 'cal' }, { k: 'safety', n: '安全管理', i: 'r', ic: 'shield', badge: () => DEFECTS.filter(d => /超期|待确认/.test(d.st)).length }, { k: 'docs', n: '文稿中心', i: 'c', ic: 'pen' },
+  { g: '班务' }, { k: 'sched', n: '班务日程', i: 'o', ic: 'cal' }, { k: 'safety', n: '安全管理', i: 'r', ic: 'shield', badge: () => DB.defects().filter(d => /超期|待确认/.test(d.st)).length }, { k: 'docs', n: '文稿中心', i: 'c', ic: 'pen' },
   { g: '人员' }, { k: 'people', n: '班组画像', i: 'g', ic: 'people' }, { k: 'train', n: '培训考评', i: 'v', ic: 'check' },
   { g: '知识' }, { k: 'know', n: '班组知识库', i: 'c', ic: 'book' }, { k: 'ledger', n: '台账中心', i: '', ic: 'grid' },
   { g: '管理' }, { k: 'office', n: '所级视图', i: 'o', ic: 'bldg' }
@@ -55,11 +55,11 @@ Object.assign(ACT, {
   unspot() { XW.unspot(); },
   hours(el) { DISPATCH.hours(el.dataset.who || '李文博'); },
   'up-photo'() { XW.answer('把照片拖进来或者从相册选，我认完给你看。今天群里那张田寮线的照片我已经认过了，在安全管理里。', null, { confirm: false }); },
-  'up-file'() { XW.answer('把 OMS 导出的表拖进来就行，表头我自己对。上一次导入是昨晚 23:10 的缺陷表。', null, { confirm: false }); },
+  'up-file'() { XW.answer('台账表拖进来我自己对表头；两票在班务日程的审票里上传，Word、Excel、文本都能读。上一次导入是昨晚 23:10 的缺陷表。', '台账表拖进来我自己对表头；两票在班务日程的审票里上传。<div class="bt"><button data-act="nav" data-to="sched" data-sub="ticket">去上传两票</button></div>', { confirm: false }); },
   stage() { $('#stage').classList.toggle('on'); },
   'stage-speed'(el) { XW.speed = +el.dataset.v; $$('#stage [data-act="stage-speed"]').forEach(b => b.classList.toggle('on', b === el)); },
   'stage-brief'() { S.briefed = false; XW.clearChat(); ensure('home', () => {}); if (S.page === 'home') render(); },
-  'stage-reset'() { ['dispatch', 'hazards', 'defects', 'docs', 'mem', 'levels', 'scores', 'cases', 'duty', 'ticket', 'risk', 'exp', 'quiz', 'plan', 'grades'].forEach(k => LS.del(k)); location.reload(); }
+  'stage-reset'() { DB.reset(); location.reload(); }
 });
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act; if (ACT[a]) { if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) e.preventDefault(); ACT[a](el, e); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.target.id === 'cmdin' || e.target.id === 'chatin')) { const v = e.target.value.trim(); e.target.value = ''; if (v) XW.ask(v, false); } });

@@ -33,7 +33,7 @@ xiaowatt/
 │   ├── data.js …           见下方「代码地图」
 │   ├── dist/               构建产物（已含当前版本，双击可开）
 │   └── shots/              测试截图输出目录
-├── banzu/                  项目二工作区（扁平结构：data.js/data2.js/scenes.js/xw.js/comp.js/charts.js/charts2.js/app.js/p_*.js/intent.js + build.py + smoke.cjs + dist/）
+├── banzu/                  项目二工作区（扁平结构：data.js/data2.js/state.js(状态层)/scenes.js/xw.js/comp.js/upload.js(两票读取审核)/charts.js/charts2.js/app.js/p_*.js(p_task.js=任务流转/添加任务/上传两票)/intent.js + build.py + smoke.cjs + gen_samples.py + samples/(两票样例) + dist/）
 ├── assets/photos/          隐患现场真实照片插槽（p7/tree/lock/ins/trench/nest.jpg，到货即替换矢量插画）
 ├── assets/xiaowatt/        小瓦特形象（main.png 甲方 3D 全身像已到，透明底；talk/think/look/work/listen.png 到货即按状态换图；提示词 docs/小瓦特形象_生成提示词.md）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）
@@ -117,7 +117,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 ## 项目二（banzu/）
 
-高保真原型已搭起（9/3，甲方确认设计方案 v0.5 后开工），规格与页面清单在 `banzu/README.md`。**与项目一不同的设计口径（甲方 9/3 定）**：浅色底 + 靛蓝 AI 体系（不用金色描边、不用绿橙分卡），客户 logo 原样置于浅色底不反白；布局＝左栏分组导航 / 顶部命令栏 / 晨间横幅 / 三张决策卡 / 双卡区 / 右栏小瓦特常驻。核心一句话：**页面是舞台，班长点按钮，小瓦特当场看、想、写、办；结果是过程的尾声；鼠标为主、语音为辅；涉及人的结论一律"由班组长确认后使用"。**
+高保真原型已搭起（9/3，甲方确认设计方案 v0.5 后开工），规格与页面清单在 `banzu/README.md`。**与项目一不同的设计口径（甲方 9/3 定）**：浅色底 + 靛蓝 AI 体系（不用金色描边、不用绿橙分卡），客户 logo 原样置于浅色底不反白；布局＝左栏分组导航 / 顶部命令栏 / 晨间横幅 / 三张决策卡 / 双卡区 / 右栏小瓦特常驻。核心一句话：**页面是舞台，班长点按钮，小瓦特当场看、想、写、办；结果是过程的尾声；鼠标为主、语音为辅；涉及人的结论一律"由班组长确认后使用"。** 甲方 9/4 强调：**流程不得预设**——所有页面只读状态层 `DB`（state.js），所有按钮只写 `DB`，派工 / 审票 / 开工 / 回传 / 完工 / 验收 / 添加任务 / 上传两票每一步都改变后面每一页的数字；新增页面或按钮一律走 `DB`，不得再直接读 JOBS / HOURS / TICKETS / DEFECTS 常量或在内存里改它们。
 
 ```bash
 cd banzu && python3 build.py && node smoke.cjs     # 期望 FAILS 0 ERR none；截图在 banzu/shots/
