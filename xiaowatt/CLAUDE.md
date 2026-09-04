@@ -112,7 +112,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 - **浏览器 TTS 已移除**（甲方 9/1：语音播报太生硬）：内置渲染只有字幕 + 口型（逐字时钟驱动），真人声由 HeyGen 预渲染片段承担；「关闭数字人语音」按钮已从讲师演示台移除。
 
-- 用户自行在 HeyGen 渲染中：三个角色形象（AI 生图，提示词已交付）+ 117 条台词（heygen/lines.json）批量渲染为**透明通道 WebM**（heygen/heygen-kit.js，v3 优先自动回退 v2）。
+- 用户自行在 HeyGen 渲染中：三个角色形象（AI 生图，提示词已交付）+ 126 条台词（heygen/lines.json，9/4 新增 9 条调度电话与遥控台词，需补渲染）批量渲染为**透明通道 WebM**（heygen/heygen-kit.js，v3 优先自动回退 v2）。
 - **clips 到货后的接入步骤**：① 把 `clips/` 目录放到 dist/ 同级；② 把 manifest.json 内容内联进 player.js 的 `HEYGEN_MANIFEST` 常量（build.py 里加一步自动内联更好）；③ `HEYGEN_CFG.mode` 默认值改 `'clips'`；④ 重新构建，file:// 双击验证视频可播、缺片段时降级 builtin 不报错。
 - 台词文本是匹配键（Avatar.clipOf 按 text.trim() 精确匹配）——**改任何台词文案都会导致对应片段失配**，改前先查 lines.json，改后要重新渲染该条或接受降级。
 
