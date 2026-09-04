@@ -14,11 +14,14 @@ function guideSteps() {
   const g = [];
   if (st.act === 'recv') {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
-    g.push({ t: '填写发令单位与发令人', ok: !!(S.ord.unit && S.ord.from) });
-    g.push({ t: '复诵调度下令并核对票令一致', ok: S.beat > 1 });
+    g.push({ t: '接听调度电话，报单位与姓名', ok: !S.ph.ring && S.beat >= 1 });
+    g.push({ t: '记录发令单位与发令人', ok: !!(S.ord.unit && S.ord.from) && S.beat >= 1 });
+    g.push({ t: '复诵调度下令', ok: S.beat > 1 });
+    g.push({ t: '核对票令一致', ok: S.beat > 2 });
   } else if (st.act === 'report') {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
-    g.push({ t: '向调度汇报本段完成情况', ok: S.beat > 1 });
+    g.push({ t: '拨通调度电话', ok: S.ph.conn || S.beat > 1 });
+    g.push({ t: '按票面向调度汇报', ok: S.beat > 1 });
   } else {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
     g.push({ t: `手指「${devName(st.target)}」`, ok: !!S.sel });
@@ -114,26 +117,38 @@ function instrNow() {
     return { i: 'act', pic: 'tick', t: '点击「准备完毕，进入五防模拟」', h: '准备项已全部确认', sel: '#p_go', n: '准备项都确认了，点「准备完毕，进入五防模拟」' };
   }
   if (S.stage === 'wufang') {
-    if (S.wf < 4) return { i: 'act', pic: 'tick', t: `五防模拟第 ${S.wf + 1}/4 步：点击「${WUFANG[S.wf][1]}」`, h: '按操作票顺序逐项模拟', sel: `.wfs[data-wf="${S.wf}"]`, n: `五防模拟按顺序来，现在点第 ${S.wf + 1} 步「${WUFANG[S.wf][1]}」` };
+    if (S.wf < 4) return { i: 'point', pic: 'point', t: `五防模拟第 ${S.wf + 1}/4 步：在模拟接线图上点击「${devName(WUFANG[S.wf][0])}」`, h: WUFANG[S.wf][1] + ' · 顺序错会被闭锁', sel: `#panelwrap [data-dev="${WUFANG[S.wf][0]}"]`, n: `五防模拟按顺序来，现在在接线图上点${devName(WUFANG[S.wf][0])}` };
     return { i: 'listen', pic: 'listen', t: '五防模拟完毕，听监护人核对', h: '' };
   }
   if (S.stage !== 'run' || !st || S.ended) return null;
   const teach = S.mode === 'teach';
   const away = st.loc !== S.loc;
-  if (S.beat === 0) return { i: 'listen', pic: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
+  if (S.beat === 0) {
+    if (st.act === 'recv' && S.ph.ring) return away ? { i: 'walk', pic: 'walk', t: `调度来电：前往${LOC[st.loc].name}接听`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `调度电话响了，先到${LOC[st.loc].name}` } : { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="answer"]', t: '调度来电：拿起听筒接听，报出单位与姓名', h: '点受令席上的「接听」', n: '调度电话响了，接听' };
+    return { i: 'listen', pic: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
+  }
   if (S.beat === 1) {
-    if (st.act === 'recv') return { i: 'speak', pic: 'speak', sel: '#rin', t: '填写发令单位与发令人，复诵调度下令', h: '复诵后点「复诵」或回车', n: '先填发令单位与发令人，再复诵调度下令，核对票令是否一致' };
-    if (st.act === 'report') return { i: 'speak', pic: 'speak', sel: '#rin', t: '向调度汇报本段完成情况', h: '回报后点「回报」', n: '向调度汇报本段完成情况' };
+    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '来电是深圳地调值班调度员李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '复诵后点「复诵」或回车', n: '复诵调度下令' }; }
+    if (st.act === 'report') { if (!S.ph.conn) return { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="dial"]', t: '拨打调度电话', h: '点受令席上的「拨打调度电话」', n: '先拨通调度电话' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '按票面内容向调度汇报', h: '汇报后点「回报」', n: '向调度汇报本段完成情况' }; }
     if (away) return { i: 'walk', pic: 'walk', t: `前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `先到${LOC[st.loc].name}去` };
     if (!S.sel) return { i: 'point', pic: teach ? 'point' : 'press', sel: `#panelwrap [data-dev="${st.target}"]`, t: `手指「${devName(st.target)}」并口述`, h: teach ? '点击设备完成手指口述' : '长按设备完成手指口述', n: `手指${devName(st.target)}，核对设备双重名称` };
     return { i: 'speak', pic: 'speak', sel: '#rin', t: '完整复诵票面内容', h: '复诵后点「复诵」或回车', n: '完整复诵票面内容' };
   }
-  if (S.beat === 2) return { i: 'listen', pic: 'listen', t: '等待监护人核对发令', h: '听到「对，执行」后再操作', n: '等我核对发令后再操作' };
-  if (S.beat === 3) {
-    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel: st.target ? `#panelwrap [data-dev="${st.target}"]` : null, t: '执行操作并核对四项位置指示', h: teach ? '点击执行，逐项核对' : '长按执行，逐项核对', n: '执行后把四项位置指示逐项核对到位' };
-    return { i: 'act', pic: teach ? 'act' : 'press', sel: st.target ? `#panelwrap [data-dev="${st.target}"]` : null, t: st.target ? `执行操作：${devName(st.target)}` : '按监护人发令执行操作', h: teach ? '点击设备执行' : '长按设备执行', n: '执行操作' };
+  if (S.beat === 2) {
+    if (st.act === 'recv' && S.ph.cmp === 'wait') return { i: 'check', pic: 'tick', sel: '#panelwrap [data-ph="cmp"]', t: '核对操作票任务与调度下令是否一致', h: '一致点「票令一致，接令」；不一致点「中止汇报」', n: '核对票令是不是一致' };
+    return { i: 'listen', pic: 'listen', t: '等待监护人核对发令', h: '听到「对，执行」后再操作', n: '等我核对发令后再操作' };
   }
-  if (S.beat === 4) return { i: 'speak', pic: 'report', sel: '#rin', t: '检查设备状态并回报', h: '回报后点「回报」', n: '检查设备状态，向我回报' };
+  if (S.beat === 3) {
+    const sel = st.target ? `#panelwrap [data-dev="${st.target}"]` : null;
+    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上点击「${devName(st.target)}」，遥控预置、返校后执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) };
+    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `点击「${devName(st.target)}」查看后台位置，再到现场核对四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，再去现场核对四项指示' };
+    if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `点击「${devName(st.target)}」，逐项核对后确认`, h: teach ? '点击弹出核对内容' : '长按弹出核对内容', n: '点开' + devName(st.target) + '逐项核对' };
+    return { i: 'act', pic: teach ? 'act' : 'press', sel, t: st.target ? `在设备图上执行：${devName(st.target)}` : '按监护人发令执行操作', h: teach ? '点击设备执行' : '长按设备执行', n: '执行操作' };
+  }
+  if (S.beat === 4) {
+    if (st.act === 'gis') { const need = [['hui', '汇控柜电气指示'], ['mech', '机构箱机械指示'], ['arm', '刀闸拐臂指示'], ['line', '转轴划线标识']]; const nx = need.find(k => !S.gis[k[0]]); if (nx) return { i: 'point', pic: 'point', sel: `#panelwrap [data-dev="gis_${nx[0]}"]`, t: `逐项核对：${nx[1]}（${need.filter(k => S.gis[k[0]]).length}/4）`, h: '点该指示放大查看，自动打钩', n: '核对' + nx[1] }; }
+    return { i: 'speak', pic: 'report', sel: '#rin', t: '检查设备状态并回报', h: '回报后点「回报」', n: '检查设备状态，向我回报' };
+  }
   return { i: 'check', t: '本项完成，监护人标"√"', h: '' };
 }
 

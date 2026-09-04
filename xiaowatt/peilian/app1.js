@@ -20,7 +20,8 @@ const S = {
   vio: [],                // 违规记录
   praise: [],
   score: { rule: 0, order: 0, dual: 0, state: 0, risk: 0, term: 0 },
-  ord: { unit: '', from: '', to: '任玲玲', time: '' },
+  ord: { unit: '', from: '', to: '任玲玲', time: '', issued: '' },
+  ph: { ring: false, conn: false, cmp: null, pending: '', log: [] }, wfdev: null, lastChg: null,
   abn: { armed: true, fired: false, handled: false },
   trap: { armed: true, fired: false, passed: null },
   t0: 0, timer: null, muted: false, ended: false,

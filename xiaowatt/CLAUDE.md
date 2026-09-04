@@ -90,9 +90,10 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | guide.js | 教学引导层：三模式 MODES、当前指令 instrNow（准备/五防/执行三阶段逐项指引，含目标选择器 sel）、GPIC 动作示意图（SMIL 动画演示按住/点选/复诵等）、applyGuideTarget 目标金色脉冲、指令卡任务条（渲染签名守卫防闪烁；「我该做什么」+「前往」）、知识点卡、三级提示、知识地图抽屉、预习卡、七步导览、宽容判定 lenient() |
 | layout.js | 页面骨架 LAYOUT 模板字符串 |
 | app1.js | 全局状态 S、常量、工具函数 |
-| sld.js | 一次接线图 SVG（1M/2M 双母七间隔，随设备状态变色） |
-| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、各作业面板、顶栏 KPI（含预估得分 estScore）、本项计时 stepRef、复诵实时评估 liveMeter/missingSegs、设备长按 bindDevHold、目标设备通用高亮 + AR 标注 |
-| app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep/tickStep、submitInput（带并发锁） |
+| sld.js | 一次接线图 SVG `sld(o)`（1M/2M 双母七间隔，随设备状态变色；`o.dev` 可传五防模拟态副本、`o.sim` 模拟样式、`o.scada` 光字牌与遥测、`o.chg` 变位闪动） |
+| app2.js | 渲染层：speak/say/字幕、操作票、位置栏、renderPanel 调度、顶栏 KPI（含预估得分 estScore）、本项计时 stepRef、复诵实时评估 liveMeter/missingSegs、设备长按 bindDevHold、目标设备通用高亮 + AR 标注（SVG 目标经 svgOffset 定位、手指后出现手形标记、目标自动滚入视野） |
+| panels.js | **作业面板 v3（9/4 甲方口径：学员在设备图上动手，不点文字框）**：SVX 元件库（灯 / 把手 / 空开 / 按钮 / 挂牌钩与标志牌 / 机构指示窗 / 拐臂 / 转轴划线 / 屏面）；调度电话受令席（来电铃响 → 接听报名 → 调度报姓名下令 → 记录簿填发令单位与发令人 → 复诵 → 调度"复诵正确"记发令时间 → 票令核对卡（一致接令 / 不一致中止，票令陷阱在此判定）→ 汇报项拨号接通后汇报，调度操作指令记录簿逐条累积）；五防模拟在模拟接线图上按票序点设备（S.wfdev 模拟态、五防闭锁弹层 WF_LOCK 给出防误规则）；监控后台一次接线图点设备 → 遥控操作弹层（操作性质 / 预置 / 返校 / 执行，选错性质判违规）→ 图上变位、光字牌与报文刷新，核对类项目弹出光字 / 遥测 / 设备详情逐项打钩（openInspect）；间隔现场 / 8P 测控屏 / 20P 保护屏 / 就地控制柜为 SVG 设备图：三个间隔可走错、名称牌 / 标签 / 汇控柜模拟图 / 带电显示装置 / 机构箱指示窗 / 拐臂 / 转轴划线（gisInspect 放大提示并打钩，异常项给出中止上报）、1QK/ZK 把手会转、空开会掉、地刀合分按钮、挂牌钩挂上标志牌 |
+| app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep（接令项先响铃等接听）/tickStep、submitInput（带并发锁；接令项复诵后进入票令核对，汇报项须先拨通）、devClick 分流（五防 → wfDev、后台遥控 → openRemoteCtl、核对类 → openInspect、四项指示 → gisInspect）、doPhone（记录簿校验：发令单位含"地调"、发令人为来电人"李明"） |
 | app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot（含卡住 24s 监护人主动提醒，__DH_SPEED<1 时停用） |
 | arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry(pre 可预选练法)、问教练 askCoach+retrieve、底部操作条 |
 | charts.js | 手绘 SVG 图表库：雷达（opt.key 自定义下钻属性、opt.target 目标虚线多边形、任意维数）/双轴柱线/环形/面积/热力矩阵/仪表盘/场次成长曲线 chSessionCurve（得分·7日均线·用时·扣分·提示·及格线多序列可切）+ miniBars，交互经 data-* 委托 |
@@ -105,7 +106,7 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 陪练舱本轮新增（9/2）：顶栏「预估得分」KPI（estScore 与评估报告同算法实时测算）、底部「本项用时 / 参考」计时（stepRef 按动作类型）、复诵输入框实时吻合度条 + 教学模式漏说要素芯片（missingSegs，演练模式只给数量，考核模式不显示）、目标设备 AR 标注（DOM 与 SVG 两种，含项号与动作）、每项完成后监护人一句点评 coachComment（考核模式不点评，只进聊天不发声以免影响回归时序）。
 
-关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍）、`S.toured / S.previewed`（跳过导览/预习）。
+关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06；弹层里的预置 / 执行等待也按它缩放）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍：会接电话、拨号、点"票令一致"、把遥控 / 核对弹层按正确路径点完 autoDialog）、`S.toured / S.previewed`（跳过导览/预习）、`S.ph`（电话状态：ring / conn / cmp / log）、`S.wfdev`（五防模拟态）。新增数字人台词已加入 gen_lines.py 并重生成 lines.json（126 条）。
 
 ## 数字人（HeyGen）现状
 

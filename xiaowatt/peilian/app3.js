@@ -1,13 +1,13 @@
 /* ---------------- 设备点击 ---------------- */
 function devClick(id) {
   if (!id) return;
-  if (S.stage === 'wufang') return;
+  if (S.stage === 'wufang') { wfDev(id); return; }
   if (S.stage !== 'run' || S.ended) return;
   const st = STEP();
 
   // 现场四指示 / 核对类热区
-  if (id.startsWith('gis_')) { S.gis[id.slice(4)] = true; renderPanel(); return; }
-  if (id.startsWith('cab_hvdisp_')) { S.gis['hv' + id.slice(11)] = true; renderPanel(); return; }
+  if (id.startsWith('gis_')) { if (S.beat >= 3) gisInspect(id.slice(4)); else toast('先手指本项设备并复诵，执行后再逐项核对指示', ''); return; }
+  if (id.startsWith('cab_hvdisp_')) { if (S.beat === 4) { S.gis['hv' + id.slice(11)] = true; renderPanel(); return; } id = 'cab_hvdisp'; }
   if (id === 'bay_draw' || id === 'bay_label') { S.gis[id === 'bay_draw' ? 'draw' : 'label'] = true; renderPanel(); return; }
 
   // 第4拍：执行
@@ -18,6 +18,8 @@ function devClick(id) {
       speak('你操作的不是本项设备。请核对双重名称后重新确认。', { pose: 'stop', shake: true });
       return;
     }
+    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) { openRemoteCtl(st); return; }
+    if (st.act === 'check' || st.act === 'verify' || st.act === 'gis') { openInspect(st); return; }
     doExecute(st); return;
   }
   // 第2拍：手指口述——先手指
@@ -64,14 +66,17 @@ function devName(id) {
     M1DK: '1DK空气开关', M2DK: '2DK空气开关', M4DK: '4DK空气开关', M1K2: '1K2空气开关',
     M1K1: '1K1空气开关', M1ZKK: '1ZKK空气开关',
     T4DK: '4DK空气开关（挂牌位）', T11634: '11634刀闸操作把手（挂牌位）', TCLOSE: '1163开关合闸按钮（挂牌位）',
-    hmi_mode: '运行方式', hmi_current: '三相电流遥测', hmi_volt: '线路二次电压',
-    bay_plate: '间隔名称牌', bay_hvdisp: '高压带电显示装置', cab_hvdisp: '高压带电显示装置'
+    hmi_mode: '运行方式光字牌', hmi_current: '三相电流遥测', hmi_volt: '线路二次电压',
+    bay_plate: '间隔名称牌', bay_hvdisp: '高压带电显示装置', cab_hvdisp: '高压带电显示装置', bay_draw: '汇控柜模拟接线图', bay_label: '设备标签',
+    p8_open: '1163开关分闸按钮', p8_close: '1163开关合闸按钮', ES116340_open: '116340地刀分闸按钮', cab_handle: '11634刀闸操作把手',
+    gis_hui: '汇控柜电气指示', gis_mech: '机构箱机械指示', gis_arm: '刀闸拐臂指示', gis_line: '转轴划线标识'
   })[id] || id;
 }
 
 /* ---------------- 执行动作 ---------------- */
 function doExecute(st) {
   const d = S.dev;
+  S.lastChg = st.target; setTimeout(() => { if (S.lastChg === st.target) S.lastChg = null; }, 1800);
   switch (st.act) {
     case 'open': d[st.target] = 'open';
       pushMsg('110kV仿真站 培训三线1163开关 分闸 变位', 'new');
@@ -134,19 +139,18 @@ async function enterStep(i) {
     S.trap.fired = true;
     call = '现在调度下令：将110kV培训三线1163线路由运行转冷备用。';
   }
+  S.ph.ring = false; S.ph.conn = false; S.ph.cmp = null;
   if (st.act === 'recv') {
-    S.ord.cur = call.replace(/^现在调度下令：/, '').replace(/。$/, '');
-    S.ord.time = stamp();
-    renderPanel();
+    S.ph.ring = true; S.ph.pending = call; S.ord.issued = '';
+    renderBeats(); renderPanel(); updateActbar(); Sheet.sync(); renderTaskbar();
+    say('s', '调度电话来电。接听后先报出单位和姓名，再听令。');
+    return;
   }
-  say(st.act === 'recv' ? 'd' : 'j', call);
-  await speak(call, { pose: st.act === 'recv' ? 'explain' : 'call', who: st.act === 'recv' ? '值班调度员' : '监护人 陈志远' });
+  say('j', call);
+  await speak(call, { pose: 'call', who: '监护人 陈志远' });
   setBeat(1);
-  if (st.act === 'recv') {
-    say('s', '请复诵调度下令内容，并核对操作票任务与下令是否一致。');
-  } else {
-    say('s', `请到 ${LOC[st.loc].name}，手指操作对象「${devName(st.target)}」并完整复诵票面内容。`);
-  }
+  if (st.act === 'report') say('s', '拨打调度电话，接通后按票面内容汇报。');
+  else say('s', `请到 ${LOC[st.loc].name}，手指操作对象「${devName(st.target)}」并完整复诵票面内容。`);
 }
 
 /* ---------------- 复诵 / 回报 ---------------- */
@@ -162,6 +166,7 @@ async function _submitInput() {
   $('#rin').value = '';
   if (S.beat === 1 || S.beat === 4) (S.lines = S.lines || []).push({ step: st.no, beat: S.beat, t: st.ticket, mine: v, std: S.beat === 1 ? st.recite : st.report });
   if (S.beat === 1) {
+    if (st.act === 'report' && !S.ph.conn) { $('#rin').value = v; toast('先拨通调度电话再汇报', 'bad'); return; }
     // 复诵
     if (st.act !== 'recv' && st.act !== 'report' && !S.sel) {
       say('o', v);
@@ -189,23 +194,21 @@ async function _submitInput() {
         '附录F 2.10：必须注明设备的电压等级，操作项目中设备名称须填写双重称号。');
       await speak('基本正确，但不够完整。设备双重名称要念全。本项先继续，记一次不规范。', { pose: 'correct' });
     }
-    // 票令陷阱判定
-    if (st.trap === 'order' && S.trap.fired && S.trap.passed === null) {
-      S.trap.passed = false;
-      violation('major', 'rule', '票令不一致未发现',
-        '调度下令为"由运行转冷备用"，操作票任务为"由热备用转冷备用"，复诵后仍继续执行',
-        '细则第十八条：接到调度正式指令后，应再次"三审"，核实操作票内容是否与调度正式指令一致。');
+    if (st.act === 'recv') {
+      useChar('diaodu');
+      say('d', '复诵正确。');
+      await speak('复诵正确。', { pose: 'explain', nod: 1, who: '值班调度员 李明' });
+      S.ord.issued = now().slice(0, 5); const lg = S.ph.log[S.ph.log.length - 1]; if (lg) lg.issued = S.ord.issued;
+      S.ph.cmp = 'wait'; setBeat(2);
       useChar('jianhu');
-      await speak('等一下。刚才调度下的令是"由运行转冷备用"，我们的操作票这一段是"由热备用转冷备用"。票令不一致，必须中止并汇报值班长。这一项你没有核出来。',
-        { pose: 'stop', shake: true, who: '监护人 陈志远' });
-      await reissueOrder();
+      say('s', '请核对操作票任务与调度下令是否一致，在受令席上确认。');
       return;
     }
+    if (st.act === 'report') { await doPhone(st); return; }
     useChar('jianhu');
     say('j', '对，执行。');
     await speak('对，执行。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
     setBeat(3);
-    if (st.act === 'recv' || st.act === 'report') { doPhone(st); return; }
     say('s', '已发出执行令。请在设备上执行本项操作。');
     return;
   }
@@ -274,28 +277,36 @@ function coachComment(st) {
 
 /* 调度类项目 */
 async function doPhone(st) {
+  const lg = S.ph.log[S.ph.log.length - 1];
   if (st.act === 'recv') {
-    if (!S.ord.unit || !S.ord.from) {
+    const u = (S.ord.unit || '').trim(), f = (S.ord.from || '').trim();
+    if (!u || !f) {
       violation('minor', 'term', '调度记录不完整', '发令单位或发令人未填写',
         '附录F 2.4／2.5／2.7：发令单位、发令人、受令时间应完整记录在调度操作指令记录簿及操作票相应栏。');
+    } else if (!/地调/.test(u) || !/李明/.test(f)) {
+      violation('minor', 'term', '调度记录有误', `记录簿发令单位"${u}"、发令人"${f}"与来电不符（深圳地调 · 李明）`,
+        '附录F 2.4／2.5：发令单位、发令人应按调度实际下令人如实记录。');
     }
-    setBeat(4);
-    $('#rin').value = st.report;
-    setTimeout(() => submitInput(), 250);
+    if (lg) { lg.unit = u; lg.from = f; }
+    say('o', '调度令已记录：' + (u || '—') + ' ' + (f || '—') + '，受令时间 ' + (S.ord.time || '').slice(11) + '。');
+    setBeat(4); renderPanel();
+    await tickStep();
   } else {
-    say('o', st.recite);
-    setBeat(4);
     useChar('diaodu');
-    await speak('收到。', { pose: 'explain', who: '值班调度员', nod: 1 });
+    say('d', st.report);
+    await speak('收到。', { pose: 'explain', who: '值班调度员 李明', nod: 1 });
+    if (lg) lg.reported = now().slice(0, 5);
+    S.ph.conn = false;
     useChar('jianhu');
-    $('#rin').value = st.report;
-    setTimeout(() => submitInput(), 250);
+    setBeat(4); renderPanel();
+    await tickStep();
   }
 }
 
 async function reissueOrder() {
   useChar('diaodu');
-  S.ord.cur = '将110kV培训三线1163线路由热备用转冷备用';
+  S.ord.cur = '将110kV培训三线1163线路由热备用转冷备用'; S.ph.cmp = null; S.ord.issued = '';
+  const lg = S.ph.log[S.ph.log.length - 1]; if (lg) { lg.order = S.ord.cur + '（更正）'; lg.issued = ''; }
   renderPanel();
   say('d', '更正：现在调度下令，将110kV培训三线1163线路由热备用转冷备用。');
   await speak('更正：现在调度下令，将110kV培训三线1163线路由热备用转冷备用。', { pose: 'explain', who: '值班调度员' });
@@ -532,13 +543,15 @@ async function clickStop() {
 
 /* ---------------- 五防模拟 ---------------- */
 async function wfClick(i) {
-  if (i !== S.wf) { toast(`须按顺序模拟：请先点第 ${S.wf + 1} 步「${WUFANG[S.wf][1]}」`, 'bad'); renderTaskbar(); return; }
+  if (i !== S.wf) { toast(`须按顺序模拟：请先在接线图上点「${devName(WUFANG[S.wf][0])}」`, 'bad'); renderTaskbar(); return; }
   const x = WUFANG[i];
   say('j', x[1] + '（监护人根据操作票操作步骤完整念出）');
   await speak(x[1] + '。', { pose: 'call' });
   say('o', `（移动鼠标至五防电脑屏幕${x[1].replace(/^(断开|拉开|合上)/, '')}处并手指）${x[1]}。`);
   await speak('对，执行。', { pose: 'confirm', nod: 1 });
-  S.wf = i + 1; renderPanel();
+  if (!S.wfdev) S.wfdev = Object.assign({}, S.dev);
+  S.wfdev[x[0]] = x[0] === 'ES116340' ? 'close' : 'open'; S.lastChg = x[0]; setTimeout(() => { if (S.lastChg === x[0]) S.lastChg = null; }, 1800);
+  S.wf = i + 1; renderPanel(); renderTaskbar();
   if (S.wf >= 4) {
     say('j', '模拟完毕，检查模拟步骤。');
     await speak('模拟完毕，检查模拟步骤。', { pose: 'explain' });

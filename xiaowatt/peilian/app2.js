@@ -268,190 +268,19 @@ function pnl(title, right, body) {
   return `<div class="pnl"><h4>${title}${right ? `<span class="r">${right}</span>` : ''}</h4>${body}</div>`;
 }
 
-function panelHmi(w) {
-  w.innerHTML =
-    pnl('监控后台 · 一次接线图', '双击设备可查看双重名称', `<div class="sld">${sld()}</div>`) +
-    pnl('操作报文与告警', 'SOE', `<div class="msgs" id="msgs"></div>`);
-  renderMsgs();
+/* SVG 元素到根 svg 的平移量（生成器只用 translate 定位） */
+function svgOffset(el) {
+  let x = 0, y = 0, n = el;
+  while (n && n.tagName !== 'svg') { const m = (n.getAttribute('transform') || '').match(/translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/); if (m) { x += +m[1]; y += +m[2]; } n = n.parentNode; }
+  return { x, y };
 }
-function panelPhone(w) {
-  const st = STEP();
-  const ringing = S.stage === 'run' && st && st.act === 'recv' && S.beat <= 1;
-  w.innerHTML = pnl('调度电话 · 受令席', '110kV仿真站', `
-    <div class="phone">
-      <div class="handset ${ringing ? 'ringing' : ''}">
-        <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--acd)" stroke-width="1.8">
-          <path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></div>
-        <div class="nm">${ringing ? '地调值班调度员 来电' : '地调值班调度员'}</div>
-        <div class="de">${ringing ? '等待接令' : '通话空闲'}</div>
-      </div>
-      <div class="reclog">
-        <div class="row"><div class="k">发令单位</div><div class="v"><input id="o_unit" value="${S.ord.unit}" placeholder="填写发令单位"></div></div>
-        <div class="row"><div class="k">发令人</div><div class="v"><input id="o_from" value="${S.ord.from}" placeholder="填写发令人"></div></div>
-        <div class="row"><div class="k">受令人</div><div class="v">${S.ord.to}</div></div>
-        <div class="row"><div class="k">受令时间</div><div class="v" id="o_time">${S.ord.time || '—'}</div></div>
-        <div class="row"><div class="k">操作任务</div><div class="v">将110kV培训三线1163线路由运行转检修</div></div>
-        <div class="row"><div class="k">当前下令</div><div class="v" style="color:#a8821b">${S.ord.cur || '—'}</div></div>
-      </div>
-    </div>`);
-  const u = $('#o_unit'), f = $('#o_from');
-  if (u) u.oninput = e => S.ord.unit = e.target.value;
-  if (f) f.oninput = e => S.ord.from = e.target.value;
-}
-function panelWufang(w) {
-  w.innerHTML = pnl('五防主机 · 模拟预演', `模拟 ${S.wf}/4`, `
-    <div class="wf">
-      <div style="font-size:11.5px;color:#5c6b5f;line-height:1.7">
-        五防主机、电脑钥匙状态正常，五防系统与后台监控设备状态一致。<br>
-        操作任务已输入：<b style="color:#2f4438">将110kV培训三线1163线路由运行转检修</b>
-      </div>
-      <div class="wfsteps">${WUFANG.map((x, i) =>
-      `<div class="wfs ${i < S.wf ? 'done' : ''} ${i === S.wf ? 'tgt' : ''}" data-wf="${i}">${i + 1}. ${x[1]}</div>`).join('')}</div>
-      ${S.wf >= 4 ? `<div style="margin-top:12px;font-size:12px;color:var(--ac)">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}
-    </div>`) + pnl('五防模拟接线图', '', `<div class="sld">${sld()}</div>`);
-  $$('.wfs').forEach(b => b.onclick = () => wfClick(+b.dataset.wf));
-}
-function panelBay(w) {
-  const st = STEP();
-  w.innerHTML = pnl('110kV GIS 间隔现场 · 选择间隔', '核对间隔名称与设备双重名称', `
-    <div class="bays">
-      ${['1161', '1162', '1163'].map(n => `<div class="bayc ${S.bay === n ? 'cur' : ''}" data-bay="${n}">
-        <div class="n">培训${n === '1161' ? '一' : n === '1162' ? '二' : '三'}线 ${n}</div>
-        <div class="d">110kV ${n === '1161' ? '1M' : '2M'} 侧</div>
-        <div class="s" style="color:${n === '1163' ? (S.dev.CB1163 === 'open' ? '#23b26a' : '#e23b2e') : '#e23b2e'}">${n === '1163' ? (S.dev.CB1163 === 'open' ? '停电' : '运行中') : '运行中'}</div>
-      </div>`).join('')}
-    </div>`) +
-    pnl(`培训三线1163间隔 · 现场核对`, S.bay === '1163' ? '当前站位正确' : '当前站位：培训' + (S.bay === '1161' ? '一' : '二') + '线间隔', `
-    <div class="ind">
-      <div class="indc ${S.gis.plate ? 'chk' : ''} ${S.dev._t === 'bay_plate' ? 'tgt' : ''}" data-dev="bay_plate">
-        <div class="nm">间隔名称牌<br>双重名称</div>
-        <div class="val b">110kV培训三线1163</div><div class="tick">${S.gis.plate ? '已核对 ✓' : ''}</div></div>
-      <div class="indc ${S.gis.draw ? 'chk' : ''}" data-dev="bay_draw">
-        <div class="nm">接线图 vs 现场实物<br>图实一致性</div>
-        <div class="val b">一致</div><div class="tick">${S.gis.draw ? '已核对 ✓' : ''}</div></div>
-      <div class="indc ${S.gis.label ? 'chk' : ''}" data-dev="bay_label">
-        <div class="nm">设备标签<br>标实一致性</div>
-        <div class="val b">清晰准确</div><div class="tick">${S.gis.label ? '已核对 ✓' : ''}</div></div>
-      <div class="indc ${S.gis.hv ? 'chk' : ''} ${S.dev._t === 'bay_hvdisp' ? 'tgt' : ''}" data-dev="bay_hvdisp">
-        <div class="nm">高压带电显示装置<br>A/B/C 三相</div>
-        <div class="val ${S.dev.DS11634 === 'open' ? 'b' : 'a'}">${S.dev.DS11634 === 'open' ? '无电压' : '确有电压'}</div>
-        <div class="tick">${S.gis.hv ? '已核对 ✓' : ''}</div></div>
-    </div>`) + gisPanel();
-}
-function gisPanel() {
-  const st = STEP(); if (!st || st.act !== 'gis') return '';
-  const id = st.target;
-  const nm = { DS11634: '11634刀闸', DS11632: '11632刀闸', ES116340: '116340地刀' }[id];
-  const target = id === 'ES116340' ? '合上位置' : '拉开位置';
-  const anomaly = (S.abn.fired && !S.abn.handled && id === 'DS11634');
-  const cells = [
-    ['hui', '汇控柜<br>电气指示', target],
-    ['mech', '机构箱<br>机械指示', anomaly ? '与后台不一致' : target],
-    ['arm', '刀闸拐臂<br>指示', target],
-    ['line', '转轴划线<br>标识', target]
-  ];
-  return pnl(`${nm} · 现场位置四项指示`, anomaly ? '⚠ 指示异常' : '附录G-5 要求逐项核对', `
-    <div class="ind">${cells.map(c => `
-      <div class="indc ${S.gis[c[0]] ? 'chk' : ''}" data-dev="gis_${c[0]}">
-        <div class="nm">${c[1]}</div>
-        <div class="val ${c[2].indexOf('不一致') >= 0 ? 'a' : (id === 'ES116340' ? 'g' : 'b')}">${c[2]}</div>
-        <div class="tick">${S.gis[c[0]] ? '已核对 ✓' : ''}</div></div>`).join('')}
-    </div>
-    ${anomaly ? `<div style="margin-top:12px;background:#fbe9e7;border:1px solid #eac1bb;border-radius:6px;padding:11px;font-size:12px;color:#b3372c;line-height:1.7">
-      现场机构箱机械指示与监控后台位置显示不一致。<br>
-      细则第十四条：一旦发现设备运动方向异常、位置指示不一致等问题，应落实"凡变化必上报"，立即中止操作并上报，严禁盲目重试。</div>` : ''}`);
-}
-function panelP8(w) {
-  w.innerHTML = pnl('8P 110kV培训三线1163线路测控屏', '屏柜名称已核对', `
-    <div class="cab c2">
-      ${knobHTML('K1QK', '1QK', '培训三线1163开关控制选择把手', ['远控', '就地'])}
-      <div class="mcb tagslot ${S.dev._t === 'TCLOSE' ? 'tgt' : ''}" data-dev="TCLOSE">
-        <div class="body" style="background:#fbe9e7;border-color:#e0a89f">
-          <div style="position:absolute;left:4px;top:12px;width:18px;height:18px;border-radius:50%;background:#e23b2e"></div>
-        </div>
-        <div class="i"><div class="nm">1163 合闸按钮</div><div class="de">CLOSE · 就地合闸</div>
-        <div class="st">${S.tags.TCLOSE ? '已悬挂标志牌' : '未悬挂标志牌'}</div></div>
-        ${S.tags.TCLOSE ? `<div class="tagcard">禁止合闸<br>线路有人工作！</div>` : ''}
-      </div>
-    </div>`);
-}
-function panelP20(w) {
-  w.innerHTML = pnl('20P 110kV培训三线1163线路保护屏', 'RCS-943', `
-    <div class="cab c3">
-      ${mcbHTML('M1K2', '1K2', '控制电源')}
-      ${mcbHTML('M1K1', '1K1', '保护装置电源')}
-      ${mcbHTML('M1ZKK', '1ZKK', '保护电压')}
-    </div>`);
-}
-function panelCab(w) {
-  w.innerHTML = pnl('110kV培训三线1163间隔就地控制柜', '设备双重名称已核对', `
-    <div class="cab c2" style="margin-bottom:10px">
-      ${knobHTML('KZK', 'ZK', '远控／就地切换把手', ['远控', '就地'])}
-      <div class="knob ${S.dev._t === 'ES116340' ? 'tgt' : ''} dev" data-dev="ES116340">
-        <div class="nm">116340</div><div class="de">培训三线线路侧接地刀闸<br>就地电动操作</div>
-        <svg width="96" height="56" viewBox="0 0 96 56">
-          <rect x="6" y="8" width="84" height="40" rx="5" fill="#eef0e4" stroke="#d3d0bd"/>
-          <circle cx="30" cy="28" r="12" fill="none" stroke="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#23b26a'}" stroke-width="2.4"/>
-          <line x1="30" y1="28" x2="${S.dev.ES116340 === 'close' ? 30 : 22}" y2="${S.dev.ES116340 === 'close' ? 17 : 20}" stroke="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#23b26a'}" stroke-width="3.4" stroke-linecap="round"/>
-          <text x="62" y="24" font-size="9" fill="#8b988c" font-family="monospace">合闸</text>
-          <text x="62" y="40" font-size="9" fill="#8b988c" font-family="monospace">分闸</text>
-          <circle cx="54" cy="21" r="3" fill="${S.dev.ES116340 === 'close' ? '#e8b22a' : '#dcd9c8'}"/>
-          <circle cx="54" cy="37" r="3" fill="${S.dev.ES116340 === 'close' ? '#dcd9c8' : '#23b26a'}"/>
-        </svg>
-        <div class="st ${S.dev.ES116340 === 'close' ? 'a' : 'b'}">${S.dev.ES116340 === 'close' ? '合上位置' : '拉开位置'}</div>
-      </div>
-    </div>
-    <div class="cab c3">
-      ${mcbHTML('M4DK', '4DK', '线路抽取电压（去保护）', 'T4DK')}
-      ${mcbHTML('M1DK', '1DK', '刀闸／地刀控制电源')}
-      ${mcbHTML('M2DK', '2DK', '刀闸／地刀电机电源')}
-    </div>`) +
-    pnl('间隔高压带电显示装置', '间接验电 · 第二种原理', `
-    <div class="ind" style="grid-template-columns:repeat(3,1fr)">
-      ${['A', 'B', 'C'].map(p => `<div class="indc ${S.dev._t === 'cab_hvdisp' ? 'tgt' : ''} ${S.gis['hv' + p] ? 'chk' : ''}" data-dev="cab_hvdisp_${p}">
-        <div class="nm">${p} 相带电指示</div>
-        <div class="val ${S.dev.DS11634 === 'open' ? 'b' : 'a'}">${S.dev.DS11634 === 'open' ? '确无电压' : '确有电压'}</div>
-        <div class="tick">${S.gis['hv' + p] ? '已核对 ✓' : ''}</div></div>`).join('')}
-    </div>`) +
-    (S.tags.T11634 || STEP() && STEP().target === 'T11634' ? pnl('11634刀闸操作把手', '', `
-    <div class="mcb tagslot ${S.dev._t === 'T11634' ? 'tgt' : ''}" data-dev="T11634">
-      <div class="body"><div class="lev" style="top:24px;background:#23b26a"></div></div>
-      <div class="i"><div class="nm">11634 操作把手</div><div class="de">培训三线线路侧刀闸</div>
-      <div class="st">${S.tags.T11634 ? '已悬挂标志牌' : '未悬挂标志牌'}</div></div>
-      ${S.tags.T11634 ? `<div class="tagcard">禁止合闸<br>线路有人工作！</div>` : ''}
-    </div>`) : '');
-}
-function knobHTML(id, nm, de, opts) {
-  const v = S.dev[id], on = v === opts[1];
-  return `<div class="knob dev ${S.dev._t === id ? 'tgt' : ''}" data-dev="${id}">
-    <div class="nm">${nm}</div><div class="de">${de}</div>
-    <svg width="96" height="60" viewBox="0 0 96 60">
-      <circle cx="48" cy="30" r="21" fill="#eef0e4" stroke="#d3d0bd" stroke-width="2"/>
-      <g transform="rotate(${on ? 42 : -42},48,30)">
-        <rect x="45" y="11" width="6" height="21" rx="3" fill="${on ? '#e8b22a' : '#1fa06b'}"/>
-        <circle cx="48" cy="30" r="6" fill="#dcd9c8"/>
-      </g>
-      <text x="14" y="16" font-size="9" fill="#8b988c" font-family="monospace">${opts[0]}</text>
-      <text x="66" y="16" font-size="9" fill="#8b988c" font-family="monospace">${opts[1]}</text>
-    </svg>
-    <div class="st ${on ? 'a' : 'b'}">${v}</div></div>`;
-}
-function mcbHTML(id, nm, de, tagId) {
-  const off = S.dev[id] === 'off';
-  const tg = tagId && S.tags[tagId];
-  return `<div class="mcb dev ${off ? 'off' : ''} ${S.dev._t === id || S.dev._t === tagId ? 'tgt' : ''} ${tagId ? 'tagslot' : ''}" data-dev="${tagId && STEP() && STEP().target === tagId ? tagId : id}">
-    <div class="body"><div class="lev"></div></div>
-    <div class="i"><div class="nm">${nm}</div><div class="de">${de}</div>
-    <div class="st">${off ? '断开' : '合闸'}</div></div>
-    ${tg ? `<div class="tagcard">禁止合闸<br>线路有人工作！</div>` : ''}</div>`;
-}
-
 function bindDevs() {
   $$('#panelwrap [data-dev]').forEach(n => bindDevHold(n));
   if (S.dev._t) {
     const tn = $(`#panelwrap [data-dev="${S.dev._t}"]`);
     if (tn) {
       tn.classList.add('tgt');
+      try { tn.scrollIntoView({ block: 'center' }); } catch (e) { }
       const st = STEP();
       if (st) {
         const verb = S.beat === 1 ? '手指口述' : (st.ticket.match(/^(拉开|合上|断开|检查|核对|悬挂|切换|将|取下|投入|退出)/) || ['执行'])[0];
@@ -460,9 +289,10 @@ function bindDevs() {
           const svg = tn.ownerSVGElement;
           if (svg && !svg.querySelector('.arlabg')) {
             try {
-              const bb = tn.getBBox(), NS = 'http://www.w3.org/2000/svg';
+              const bb0 = tn.getBBox(), off = svgOffset(tn), bb = { x: bb0.x + off.x, y: bb0.y + off.y, width: bb0.width, height: bb0.height }, NS = 'http://www.w3.org/2000/svg';
               const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'arlabg'); g.setAttribute('pointer-events', 'none');
-              const tx = `第${st.no}项 · ${label}`, w = tx.length * 11 + 18, x = Math.max(4, bb.x + bb.width / 2 - w / 2), y = bb.y - 30;
+              const vb = (svg.getAttribute('viewBox') || '0 0 760 400').split(/\s+/).map(Number);
+              const tx = `第${st.no}项 · ${label}`, w = tx.length * 11 + 18, x = Math.min(vb[0] + vb[2] - w - 4, Math.max(vb[0] + 4, bb.x + bb.width / 2 - w / 2)), y = Math.max(vb[1] + 2, bb.y - 30);
               g.innerHTML = `<rect x="${x}" y="${y}" width="${w}" height="22" rx="11" fill="#17301f"/><path d="M ${x + w / 2 - 5} ${y + 22} l 5 6 5 -6 z" fill="#17301f"/><text x="${x + w / 2}" y="${y + 15}" text-anchor="middle" font-size="11.5" fill="#fff" font-family="inherit">${tx}</text>`;
               svg.appendChild(g);
             } catch (e) { }
@@ -470,6 +300,15 @@ function bindDevs() {
         } else if (!tn.querySelector('.arlab')) {
           tn.insertAdjacentHTML('beforeend', `<span class="arlab"><i>第${st.no}项</i>${label}</span>`);
         }
+      }
+      if (S.sel === S.dev._t && S.beat === 1 && tn.namespaceURI && tn.namespaceURI.indexOf('svg') >= 0) {
+        try {
+          const bb0 = tn.getBBox(), off = svgOffset(tn), bb = { x: bb0.x + off.x, y: bb0.y + off.y, width: bb0.width, height: bb0.height }, NS = 'http://www.w3.org/2000/svg';
+          const f = document.createElementNS(NS, 'g'); f.setAttribute('class', 'finger'); f.setAttribute('pointer-events', 'none');
+          f.setAttribute('transform', `translate(${bb.x + bb.width - 10},${bb.y + bb.height - 6})`);
+          f.innerHTML = '<path d="M0 0 c-3 -6 -4 -12 -1 -14 2.4 -1.6 5 0 6 4 l2 6 c4 -1.4 12 -1 13 4 1 6 -3 12 -10 13 -6 1 -9 -3 -10 -13 z" fill="#e8c8a8" stroke="#b98d5e" stroke-width="1.4"/><text x="22" y="4" style="font-size:9px;fill:#a8821b;font-weight:700">已手指</text>';
+          tn.ownerSVGElement.appendChild(f);
+        } catch (e) { }
       }
     }
   }

@@ -10,7 +10,7 @@ const Sheet = {
     if (S.stage === 'prep' || S.stage === 'wufang') return true;
     if (S.stage !== 'run') return false;
     const st = STEP(); if (!st) return false;
-    if (st.act === 'recv' || st.act === 'report') return S.beat >= 1 && S.beat <= 4;
+    if (st.act === 'recv' || st.act === 'report') return S.beat <= 4;
     return S.beat === 1 || S.beat === 3 || S.beat === 4;
   },
   sync() {
@@ -51,7 +51,9 @@ function applyPreset(ph) {
   if (ph >= 2) { d.CB1163 = 'open'; S.ord.cur = '将110kV仿真站110kV培训三线1163线路由运行转热备用'; }
   if (ph >= 3) { d.DS11634 = 'open'; d.DS11632 = 'open'; d.K1QK = '就地'; S.ord.cur = '将110kV培训三线1163线路由热备用转冷备用'; }
   STEPS.forEach((s, i) => { if (!S.plan.steps.includes(i)) s._skip = true; });
-  S.ord.unit = '深圳地调'; S.ord.from = '值班调度员';
+  S.ord.unit = '深圳地调'; S.ord.from = '李明'; S.ph.log = [];
+  if (ph >= 2) S.ph.log.push({ no: '1', phase: 1, recv: '—', unit: '深圳地调', from: '李明', order: '将110kV仿真站110kV培训三线1163线路由运行转热备用', issued: '—', reported: '—' });
+  if (ph >= 3) S.ph.log.push({ no: '9', phase: 2, recv: '—', unit: '深圳地调', from: '李明', order: '将110kV培训三线1163线路由热备用转冷备用', issued: '—', reported: '—' });
 }
 
 function openEntry(pre) {
@@ -194,7 +196,7 @@ function updateActbar() {
   }
   if (S.stage === 'wufang') {
     a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
-      五防模拟：按操作票顺序点击模拟项，监护人唱票、你复诵后执行。顺序错误将被防误逻辑拒绝。</div>
+      五防模拟：在模拟接线图上按操作票顺序点击设备，监护人唱票、你复诵后五防主机逐项记录。顺序错误会被防误逻辑闭锁。</div>
       <button class="btn askbtn" id="a_ask">问教练</button></div>`;
     $('#a_ask').onclick = askCoach; Sheet.sync(); return;
   }
@@ -205,7 +207,7 @@ function updateActbar() {
     Sheet.sync(); return;
   }
   const st = STEP();
-  const ph = ['等待监护人唱票…', '手指操作对象后，复诵票面内容', '等待监护人发出执行令…', '已发令，请在作业面板上执行', '检查设备状态并回报', ''][S.beat];
+  const ph = [S.ph.ring ? '调度来电，先在受令席接听' : '等待监护人唱票…', st && st.act === 'recv' ? '记录发令单位与发令人后，复诵调度下令' : st && st.act === 'report' ? (S.ph.conn ? '按票面内容向调度汇报' : '先拨通调度电话') : '手指操作对象后，复诵票面内容', st && st.act === 'recv' ? '在受令席核对票令是否一致' : '等待监护人发出执行令…', '已发令，请在设备图上执行', '检查设备状态并回报', ''][S.beat];
   const canInput = S.beat === 1 || S.beat === 4;
   a.innerHTML = `<div class="actrow">
       <button class="mic" id="a_mic" title="语音复诵"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">

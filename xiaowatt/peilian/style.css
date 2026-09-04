@@ -530,7 +530,7 @@ button{font-family:inherit}
 
 .arena.sheetopen .rolecard,.arena.sheetopen .sync,.arena.sheetopen .stage-tag .live{display:none}
 .arena.sheetopen .arena-l #dh{top:6px}
-.sheet{height:50%}
+.sheet{height:60%}
 
 /* ---------- 当前指令卡（陪练舱引导） ---------- */
 .tbfoc{display:flex;align-items:center;gap:12px;margin-top:9px;padding:10px 13px;
@@ -1016,3 +1016,60 @@ img.cav{object-fit:cover;border:1px solid #e0ddcc;background:#f4f3ea}
 /* 陪练舱：右栏知识点卡与操作票走橙系，指令卡与对练走绿系 */
 .side .ticket .thead{border-top:1px solid var(--goldln)}
 .kp{border-top:1px solid var(--goldln)}
+
+/* ---- 作业面板 v3：设备图（学员在图上动手，图上看到变化） ---- */
+.scene{background:#f2f3ea;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.scene svg{display:block;width:100%;max-height:430px;margin:0 auto}
+.sld svg{max-height:400px;margin:0 auto}
+.svl{font-size:9px;fill:#8b988c;font-family:monospace}
+.svn{font-size:10.5px;fill:#243329;font-weight:700}
+.svd{font-size:9px;fill:#5c6b5f}
+.svs{font-size:10px;font-family:monospace}.svs.a{fill:var(--on)}.svs.b{fill:var(--off)}.svs.g{fill:var(--gnd)}
+.dev.chg .hit{animation:devchg 1.4s ease-out}
+@keyframes devchg{0%{fill:rgba(201,162,39,.6);stroke:#c9a227;stroke-width:3}100%{fill:transparent}}
+.bayg .bayhit{transition:.2s}.bayg:hover .bayhit{stroke:var(--ac)}
+.peek{position:absolute;right:18px;top:14px;z-index:7;background:#fff;border:1px solid var(--goldln);border-radius:8px;padding:10px 12px;box-shadow:0 10px 28px rgba(60,70,50,.18);display:flex;flex-direction:column;gap:5px;min-width:210px;font-size:12px}
+.peek.ok{border-color:#b5d9c0}.peek.bad{border-color:#e0a89f;background:#fff6f4}
+.peek b{font-size:12.5px;color:#243329}.peek span{color:#5c6b5f}.peek em{font-style:normal;color:#b3372c;font-weight:700}
+.peek .btn{padding:6px 10px;font-size:11.5px;margin-top:4px}
+/* 调度电话 · 受令席 */
+.ph2{display:grid;grid-template-columns:186px 1fr 1fr;gap:12px;align-items:stretch}
+.handset.conn .ring{background:var(--csg)}
+.phact{margin-top:10px}.phbtn{width:100%;padding:8px 10px;font-size:12px}
+.phtalk{background:#f6f7ee;border:1px solid var(--line);border-radius:6px;padding:10px;height:100%;box-sizing:border-box}
+.pht{font-size:10.5px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px}
+.ptl{display:flex;gap:7px;font-size:11.5px;line-height:1.55;padding:4px 0;border-bottom:1px dashed #e9e6d8}
+.ptl i{flex:none;width:18px;height:18px;border-radius:50%;background:#dfe2d2;color:#3c5245;font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center}
+.ptl.d i{background:#dcede0;color:#0a6b44}
+.cmpcard{background:#fffbea;border:1.5px solid #e3d49e;border-radius:8px;padding:10px 12px}
+.cmph{font-size:11px;letter-spacing:1px;color:#a8821b;margin-bottom:8px}
+.cmprow{display:grid;grid-template-columns:70px 1fr;gap:8px;font-size:12px;padding:5px 0;border-bottom:1px dashed #ecdfb0}
+.cmprow span{color:var(--txt3);font-size:11px}.cmprow b{color:#243329;line-height:1.5}
+.cmpbt{display:flex;gap:8px;margin-top:10px}.cmpbt .btn{flex:1;padding:8px 6px;font-size:12px}
+.logtb{width:100%;border-collapse:collapse;font-size:11px}
+.logtb th{text-align:left;font-weight:400;color:var(--txt3);padding:4px 6px;border-bottom:1px solid var(--line)}
+.logtb td{padding:5px 6px;border-bottom:1px dashed #e9e6d8;color:#3c5245;font-family:var(--mono)}
+.logtb tr.cur td{background:#fbf7e6}
+/* 五防模拟 */
+.wfhead{display:flex;gap:10px;align-items:center;font-size:11.5px;color:#5c6b5f;margin-bottom:8px}.wfhead b{color:#2f4438}.wfhead .r{margin-left:auto;color:#a8821b}
+.wfok{margin-top:10px;font-size:12px;color:var(--ac);background:var(--acbg);border:1px solid var(--acln);border-radius:6px;padding:9px 12px}
+svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,162,39,.06) 14px 16px)}
+/* 遥控 / 核对弹层 */
+.rcrow{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed #e9e6d8;font-size:13px;align-items:center}
+.rcrow span:first-child{color:var(--txt3);font-size:11.5px}.rcrow b.on{color:var(--on)}.rcrow b.off{color:var(--off)}.rcrow b.gnd{color:var(--gnd)}
+.rcops{display:flex;gap:18px}.rcops label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.rcst{margin-top:12px;font-size:12px;color:#5c6b5f;background:#f6f7ee;border-radius:6px;padding:9px 12px;font-family:var(--mono)}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:7px 0;border-bottom:1px dashed #e9e6d8;font-size:12.5px}
+.kv span{color:var(--txt3);font-size:11.5px}.kv b{color:#243329;font-weight:600}.kv b.on{color:var(--on)}.kv b.off{color:var(--off)}.kv b.gnd{color:var(--gnd)}
+.kv.big b{font-family:var(--mono);font-size:18px}
+.lamprow{display:flex;gap:18px;justify-content:center;padding:10px 0 6px}
+.lp{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#5c6b5f}
+.lp i{width:26px;height:26px;border-radius:50%;background:#e6e8dc;border:2px solid #c8cfb9}
+.lp.on i{background:var(--c);border-color:var(--c);box-shadow:0 0 14px var(--c)}
+.plate{font-size:22px;font-weight:700;color:#243329;text-align:center;border:2px solid #7a8478;border-radius:4px;padding:10px;margin-bottom:10px;background:#fff}
+.plate small{display:block;font-size:11px;color:var(--txt3);font-weight:400;margin-top:4px}
+.chkl{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chkl span{display:flex;gap:6px;align-items:center;border:1px solid var(--line2);border-radius:16px;padding:5px 12px;font-size:12px;cursor:pointer;color:#3c5245;background:#fff;user-select:none}
+.chkl span i{width:14px;height:14px;border-radius:50%;border:1.5px solid #b9c3b2}
+.chkl span.on{border-color:var(--ac);background:var(--acbg);color:var(--acd)}
+.chkl span.on i{background:var(--ac);border-color:var(--ac)}

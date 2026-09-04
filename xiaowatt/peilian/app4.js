@@ -67,7 +67,7 @@ async function enterPrep() {
 }
 
 async function enterWufang() {
-  S.stage = 'wufang'; S.t0 = Date.now();
+  S.stage = 'wufang'; S.t0 = Date.now(); S.wfdev = Object.assign({}, S.dev);
   if (!S.timer) S.timer = setInterval(tick, 1000);
   goLoc('wufang'); updateActbar(); renderTaskbar();
   say('j', '我们进行五防模拟，检查五防主机、电脑钥匙状态正常，并确认五防系统与后台监控设备状态一致。');
@@ -228,20 +228,53 @@ function bindDemo() {
 async function autoStep() {
   if (S.stage !== 'run' || S.ended) return toast('请先进入操作票执行阶段', 'bad');
   const st = STEP();
+  const zz = ms => new Promise(r => setTimeout(r, ms));
+  if (S.beat === 0) {
+    if (st.act === 'recv' && S.ph.ring) { if (st.loc !== S.loc) goLoc(st.loc); await answerPhone(); }
+    return;
+  }
   if (S.beat === 1) {
     if (st.loc !== S.loc) goLoc(st.loc);
+    if (st.act === 'report' && !S.ph.conn) { await dialPhone(); }
     if (st.act !== 'recv' && st.act !== 'report' && st.target) {
-      await new Promise(r => setTimeout(r, 250));
+      await zz(250);
       devClick(st.target);
     }
-    if (st.act === 'recv' && !S.ord.unit) { S.ord.unit = '深圳地调'; S.ord.from = '值班调度员'; renderPanel(); }
-    $('#rin').value = st.recite; await new Promise(r => setTimeout(r, 150)); submitInput();
+    if (st.act === 'recv' && !S.ord.unit) { S.ord.unit = '深圳地调'; S.ord.from = '李明'; renderPanel(); }
+    $('#rin').value = st.recite; await zz(150); submitInput();
+  } else if (S.beat === 2) {
+    if (st.act === 'recv' && S.ph.cmp === 'wait') cmpResult(true);
   } else if (S.beat === 3) {
-    if (st.target) devClick(st.target);
+    if (st.target) { devClick(st.target); await autoDialog(st); }
   } else if (S.beat === 4) {
     if (st.act === 'gis') { ['hui', 'mech', 'arm', 'line'].forEach(k => S.gis[k] = true); renderPanel(); }
     if (st.act === 'verify' || st.act === 'check') { }
     $('#rin').value = st.report; await new Promise(r => setTimeout(r, 150)); submitInput();
+  }
+}
+
+/* 自动执行：把遥控 / 核对弹层按正确路径点完 */
+async function autoDialog(st) {
+  const zz = ms => new Promise(r => setTimeout(r, ms));
+  for (let k = 0; k < 12; k++) {
+    await zz(90);
+    const rc = document.querySelector('.dlg.rc');
+    if (rc) {
+      const want = st.act === 'closeE' ? 'close' : 'open';
+      const r = rc.querySelector(`input[name=rcop][value="${want}"]`);
+      if (r && !r.checked) { r.checked = true; r.onchange(); continue; }
+      const pre = rc.querySelector('#rc_pre'), ex = rc.querySelector('#rc_exec');
+      if (pre && !pre.disabled) { pre.click(); continue; }
+      if (ex && !ex.disabled) { ex.click(); continue; }
+      await zz(120); continue;
+    }
+    const ins = document.querySelector('.dlg.insp');
+    if (ins) {
+      ins.querySelectorAll('[data-chk]:not(.on)').forEach(c => c.click());
+      const ok = ins.querySelector('#ins_ok'); if (ok && !ok.disabled) { ok.click(); }
+      continue;
+    }
+    break;
   }
 }
 
