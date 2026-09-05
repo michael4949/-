@@ -12,7 +12,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const loc = useLocation();
   const me = PERSONAS[1];
   const pid = loc.pathname.startsWith('/p/') ? loc.pathname.split('/')[2] : undefined;
-  const crumb = pid ? productById(pid)?.name : loc.pathname === '/' ? '首页驾驶舱' : loc.pathname.startsWith('/scene') ? '示范场景' : loc.pathname.replace('/', '');
+  const NAMES: Record<string, string> = { '/': '首页驾驶舱', '/scenes': '一天的故事线', '/map': '能力地图', '/deploy': '部署 · 数据 · 合规', '/pathways': '合作路径与 POC', '/scene/postloan': '早会晨报 · 贷后风险哨兵', '/scene/visit': '尽调拜访准备', '/scene/fin': '财务智能诊断', '/scene/credit': '授信智能工作台', '/scene/group': '集团客户作战室', '/scene/sparring': '智能陪练底座', '/scene/profile': '能力画像与成长' };
+  const crumb = pid ? productById(pid)?.name : NAMES[loc.pathname] ?? '示范场景';
   return (
     <div className="shell">
       <aside className="side">

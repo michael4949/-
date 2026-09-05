@@ -19,8 +19,22 @@ export const PAL = {
 } as const;
 
 export interface District {
-  id: string; name: string; seed: Pt; polygon: Pt[]; path: string;
+  id: string; name: string; seed: Pt; label: Pt; polygon: Pt[]; path: string;
   exposure: number; deposit: number; customers: number; heat: number; // heat 0..1
+}
+
+/** 客户标记半径（按年结算量） */
+export const markerR = (c: { settlement: number }) => 7 + Math.sqrt(c.settlement) / 22;
+
+type Box = { x1: number; y1: number; x2: number; y2: number };
+const overlap = (a: Box, b: Box) => Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1)) * Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
+function inPoly([px, py]: Pt, poly: Pt[]): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 export interface Cluster { id: string; name: string; cx: number; cy: number; r: number; color: string; note: string }
 export interface Road { id: string; name: string; path: string; major: boolean }
@@ -126,11 +140,34 @@ function build(): CityMap {
   }
   const maxExposure = Math.max(...agg.map((x) => x.exposure));
 
+  const clusters = CLUSTERS.map((cl) => { const [cx, cy] = toPx(cl.cx, cl.cy); return { ...cl, cx, cy }; });
+
+  // 行政区名标签避让：避开客户标记（含名称）与集群标签，并保持在本区多边形与城市轮廓内
+  const obstacles: Box[] = [
+    ...COMPANIES.map((co) => { const [x, y] = toPx(co.x, co.y); const rr = markerR(co); return { x1: x - rr - 4, y1: y - 13, x2: x + rr + 8 + co.name.length * 11.5, y2: y + 13 }; }),
+    ...clusters.map((cl) => ({ x1: cl.cx - cl.name.length * 6.5, y1: cl.cy + cl.r + 2, x2: cl.cx + cl.name.length * 6.5, y2: cl.cy + cl.r + 17 })),
+  ];
+  const OFFS: Pt[] = [[0, 0], [0, -46], [0, 46], [-66, 0], [66, 0], [-54, -42], [54, -42], [-54, 42], [54, 42], [0, -86], [0, 86], [-100, 0], [100, 0]];
+  const placed: Box[] = [];
+
   const districts: District[] = DISTRICT_SEEDS.map((d, i) => {
     const poly = (voronoi.cellPolygon(i) ?? []) as Pt[];
     const path = poly.length ? `M${poly.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L')} Z` : '';
+    const w = d.name.length * 13.5 + 14;
+    let best: { p: Pt; box: Box; score: number } | null = null;
+    for (const [ox, oy] of OFFS) {
+      const p: Pt = [seeds[i][0] + ox, seeds[i][1] + oy];
+      const box: Box = { x1: p[0] - w / 2, y1: p[1] - 14, x2: p[0] + w / 2, y2: p[1] + 18 };
+      const corners: Pt[] = [[box.x1, box.y1], [box.x2, box.y1], [box.x1, box.y2], [box.x2, box.y2]];
+      if (!inPoly(p, poly) || !corners.every((c) => inPoly(c, outlinePts))) continue;
+      const ov = [...obstacles, ...placed].reduce((s, o) => s + overlap(box, o), 0);
+      const score = ov + Math.hypot(ox, oy) * 0.6;
+      if (!best || score < best.score) best = { p, box, score };
+    }
+    const label = best?.p ?? seeds[i];
+    placed.push(best?.box ?? { x1: label[0] - w / 2, y1: label[1] - 14, x2: label[0] + w / 2, y2: label[1] + 18 });
     return {
-      id: `d${i}`, name: d.name, seed: seeds[i], polygon: poly, path,
+      id: `d${i}`, name: d.name, seed: seeds[i], label, polygon: poly, path,
       exposure: agg[i].exposure, deposit: agg[i].deposit, customers: agg[i].customers,
       heat: Math.pow(agg[i].exposure / maxExposure, 0.7),
     };
@@ -152,8 +189,6 @@ function build(): CityMap {
     id: rd.id, name: rd.name, major: rd.major,
     path: catmullRom(rel(rd.pts).map(([x, y], i, arr) => (i === 0 || i === arr.length - 1 ? [x, y] : [x + (r() - 0.5) * 8, y + (r() - 0.5) * 8])), false),
   }));
-
-  const clusters = CLUSTERS.map((cl) => { const [cx, cy] = toPx(cl.cx, cl.cy); return { ...cl, cx, cy }; });
 
   return { outline, outlinePts, districts, river, roads, clusters, maxExposure };
 }

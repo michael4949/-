@@ -1,9 +1,9 @@
-import { useRef, useState, type MouseEvent } from 'react';
+import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { X, ShieldAlert, UserRoundSearch } from 'lucide-react';
-import { COMPANIES, type Company, type Risk } from '../data/companies';
+import { COMPANIES, type Risk } from '../data/companies';
 import { PERSONAS } from '../data/personas';
-import { CITY, MAP_W, MAP_H, toPx, heatStops, RISK_GRAD, RISK_LABEL, PAL } from '../lib/cityMap';
+import { CITY, MAP_W, MAP_H, toPx, heatStops, markerR, RISK_GRAD, RISK_LABEL, PAL } from '../lib/cityMap';
 import { fmtWan, fmtYi } from '../lib/rng';
 
 type Hover = { kind: 'company'; id: string } | { kind: 'district'; id: string } | { kind: 'cluster'; id: string } | null;
@@ -12,7 +12,6 @@ interface Props { selected: string | null; onSelect: (id: string | null) => void
 
 const RISK_CHIP: Record<Risk, string> = { red: 'red', orange: 'orange', yellow: '', green: 'green' };
 const ownerName = (id: string) => PERSONAS.find((p) => p.id === id)?.name ?? id;
-const markerR = (c: Company) => 7 + Math.sqrt(c.settlement) / 22;
 
 export default function CityMap({ selected, onSelect }: Props) {
   const box = useRef<HTMLDivElement>(null);
@@ -31,7 +30,7 @@ export default function CityMap({ selected, onSelect }: Props) {
   const totalDep = COMPANIES.reduce((s, c) => s + c.deposit, 0);
 
   // tooltip 内容
-  let tip: React.ReactNode = null;
+  let tip: ReactNode = null;
   if (hover?.kind === 'company') {
     const c = COMPANIES.find((x) => x.id === hover.id);
     if (c) tip = (
@@ -154,8 +153,8 @@ export default function CityMap({ selected, onSelect }: Props) {
           {/* 行政区名 */}
           {CITY.districts.map((d) => (
             <g key={d.id} className="cm-dlabel" pointerEvents="none">
-              <text x={d.seed[0]} y={d.seed[1] - 2} textAnchor="middle" className="cm-dname">{d.name}</text>
-              <text x={d.seed[0]} y={d.seed[1] + 13} textAnchor="middle" className="cm-dval">敞口 {fmtYi(d.exposure)}</text>
+              <text x={d.label[0]} y={d.label[1] - 2} textAnchor="middle" className="cm-dname">{d.name}</text>
+              <text x={d.label[0]} y={d.label[1] + 13} textAnchor="middle" className="cm-dval">敞口 {fmtYi(d.exposure)}</text>
             </g>
           ))}
           {/* 河流 / 道路名 */}
