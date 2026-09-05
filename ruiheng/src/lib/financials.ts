@@ -363,27 +363,34 @@ const lagged = (series: number[], lag: number, opening: number) => series.map((_
 
 /**
  * 简化的月度直接法预测：以 2025 年报为基期，叠加定点项目 SOP 排产（Q2 备货）、专用模具投入与他行压降。
- * 所有系数确定性给定，随报表编辑实时重算。
+ * 系数确定性给定，随报表编辑实时重算（应收 / 应付天数、成本率、费用率、利息、期初现金均取自三表）。
  */
 export function forecastCash(c: Computed, growth = 0.15): Forecast {
   const y: Year = 2025;
-  const rev = c.is.revenue[y] * (1 + growth) / 12;
-  const season = [0.80, 0.78, 0.92, 1.02, 1.08, 1.16, 1.06, 1.02, 1.06, 1.06, 1.04, 1.00];
-  const build = [1.00, 1.00, 1.10, 1.24, 1.26, 1.14, 1.00, 1.00, 1.00, 1.00, 0.95, 0.95];
+  // 非付现成本：折旧摊销约 75% 计入成本、25% 计入费用
+  const da = c.bs.fixedAssets[y] * 0.09 + c.bs.intangible[y] * 0.05;
+  const cashCogs = safeDiv(c.is.cogs[y] - 0.75 * da, c.is.revenue[y]) ?? 0.82;
+  const opex = (c.is.selling[y] + c.is.admin[y] + c.is.rd[y] + c.is.taxSurcharge[y] + c.is.tax[y] - 0.25 * da) / 12;
+  const interest = (c.is.interest[y] / 12) * ((c.bs.stLoans[y] + c.bs.ltLoans[y]) / Math.max(1, c.bs.stLoans[2024] + c.bs.ltLoans[2024]));
+  const base = c.is.revenue[y] / 12;
+  const inc = c.is.revenue[y] * growth;                       // 增量收入全部来自定点项目，6 月 SOP 后释放
+  const season = [0.85, 0.80, 0.95, 1.05, 1.05, 1.05, 1.00, 0.95, 1.05, 1.10, 1.10, 1.05];
+  const sop = [0, 0, 0, 0, 0, 0.07, 0.12, 0.15, 0.16, 0.16, 0.17, 0.17];
+  const build = [1.00, 1.00, 1.08, 1.20, 1.20, 1.00, 0.88, 0.88, 0.90, 0.92, 0.94, 0.96];
   const capex = [0, 0, 300, 600, 600, 300, 0, 0, 0, 0, 0, 0];
   const debtDue = [0, 0, 0, 0, 2000, 0, 0, 0, 0, 0, 0, 0];
-  const events: Record<number, string> = { 2: '定点项目模具投入启动', 3: 'SOP 备货高峰', 4: '他行 2,000 万流贷到期不续', 5: 'SOP 首批交付', 8: '首批定点应收回款' };
+  const events: Record<number, string> = { 2: '定点项目模具投入启动', 3: 'SOP 备货高峰', 4: '他行 2,000 万流贷到期不续', 5: 'SOP 首批交付', 6: '定点项目首笔回款' };
   const arDays = ratioValue(c, 'arDays', y) ?? 90;
   const apDays = ratioValue(c, 'apDays', y) ?? 60;
-  const arLag = clamp(Math.round(arDays / 30), 1, 4);
-  const apLag = clamp(Math.round(apDays / 30), 1, 3);
-  const cogsRatio = safeDiv(c.is.cogs[y], c.is.revenue[y]) ?? 0.85;
-  const sales = season.map((s) => rev * s);
-  const collections = lagged(sales, arLag, c.bs.ar[y] * 0.92);
-  const purchases = sales.map((s, i) => s * cogsRatio * build[i]);
-  const payments = lagged(purchases, apLag, c.bs.ap[y]);
-  const opex = (c.is.selling[y] + c.is.admin[y] + c.is.rd[y] + c.is.taxSurcharge[y] + c.is.tax[y]) / 12 * (1 + growth * 0.6);
-  const interest = (c.is.interest[y] / 12) * ((c.bs.stLoans[y] + c.bs.ltLoans[y]) / Math.max(1, c.bs.stLoans[2024] + c.bs.ltLoans[2024]));
+  const arLag = clamp(Math.round(arDays / 40), 1, 4);
+  const apLag = clamp(Math.round(apDays / 40), 1, 3);
+  const sopLag = 1;                                            // 定点项目按月结 30 天回款（访谈口径）
+  const runoff = 0.90;                                         // 期初应收 90% 在滞后期内收回，其余视为长账龄
+  const baseSales = season.map((s) => base * s);
+  const sopSales = sop.map((w) => inc * w);
+  const sales = baseSales.map((s, i) => s + sopSales[i]);
+  const collections = lagged(baseSales, arLag, c.bs.ar[y] * runoff).map((v, i) => v + (i >= sopLag ? sopSales[i - sopLag] : 0));
+  const payments = lagged(sales.map((s, i) => s * cashCogs * build[i]), apLag, c.bs.ap[y]);
   const safety = 600;
   let cash = c.bs.cash[y];
   let minCash = cash; let minIdx = 0;
@@ -399,10 +406,10 @@ export function forecastCash(c: Computed, growth = 0.15): Forecast {
     months, minCash: Math.round(minCash), minMonth: months[minIdx].m, gapQuarter: months[minIdx].q, safety,
     gap: Math.max(0, Math.round(safety - minCash)), growth, arLag, apLag,
     assumptions: [
-      `销售：2025 年营业收入 × (1 + ${(growth * 100).toFixed(0)}%) 按 SOP 排产季节分布`,
-      `回款：按应收周转天数 ${arDays.toFixed(0)} 天 ≈ 滞后 ${arLag} 个月；期初应收按 92% 分期收回`,
-      `付款：采购 = 销售 × 成本率 ${(cogsRatio * 100).toFixed(1)}% × Q2 备货系数；按应付周转 ${apDays.toFixed(0)} 天 ≈ 滞后 ${apLag} 个月`,
-      `刚性支出：模具 1,800 万（3–6 月）；他行 2,000 万流贷 5 月到期拟不续；最低安全现金 ${safety} 万`,
+      `销售：基础销售 = 2025 年营业收入 ÷ 12 × 季节系数；增量 ${(growth * 100).toFixed(0)}% 全部来自定点项目，6 月 SOP 后逐月释放`,
+      `回款：存量按应收周转 ${arDays.toFixed(0)} 天 ≈ 滞后 ${arLag} 个月，期初应收 ${(runoff * 100).toFixed(0)}% 收回；定点项目月结 30 天`,
+      `付款：付现成本率 ${(cashCogs * 100).toFixed(1)}%（剔除折旧摊销）× Q2 备货系数；按应付周转 ${apDays.toFixed(0)} 天 ≈ 滞后 ${apLag} 个月`,
+      `刚性支出：模具 1,800 万（3–6 月）；他行 2,000 万流贷 5 月到期拟不续；付现费用 ${fmtMoney(opex)} 万/月、利息 ${fmtMoney(interest)} 万/月；最低安全现金 ${safety} 万`,
     ],
   };
 }
