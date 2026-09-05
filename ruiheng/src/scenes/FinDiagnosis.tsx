@@ -321,7 +321,7 @@ export default function FinDiagnosis() {
           <div className="card gold">
             <div className="card-h"><div className="card-t"><span className="dot" />经营质量评分</div><span className="chip"><i />{score.grade}</span></div>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div className="score-ring" style={{ '--p': score.total, '--g-c': score.total >= 65 ? '#1f8a5a' : score.total >= 50 ? '#c9a24d' : '#c3272b' } as React.CSSProperties}><b className="num">{score.total}</b><span>/100</span></div>
+              <div className="score-ring" style={{ '--p': score.total, '--g-c': score.total >= 60 ? '#1f8a5a' : score.total >= 40 ? '#c9a24d' : '#c3272b' } as React.CSSProperties}><b className="num">{score.total}</b><span>/100</span></div>
               <div style={{ flex: 1 }}>
                 {score.dims.map((d) => (
                   <div key={d.name} className="dim" title={d.note}>

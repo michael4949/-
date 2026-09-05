@@ -375,7 +375,7 @@ export function forecastCash(c: Computed, growth = 0.15): Forecast {
   const base = c.is.revenue[y] / 12;
   const inc = c.is.revenue[y] * growth;                       // 增量收入全部来自定点项目，6 月 SOP 后释放
   const season = [0.85, 0.80, 0.95, 1.05, 1.05, 1.05, 1.00, 0.95, 1.05, 1.10, 1.10, 1.05];
-  const sop = [0, 0, 0, 0, 0, 0.07, 0.12, 0.15, 0.16, 0.16, 0.17, 0.17];
+  const sop = [0, 0, 0, 0, 0, 0.09, 0.12, 0.15, 0.16, 0.16, 0.17, 0.15];
   const build = [1.00, 1.00, 1.08, 1.20, 1.20, 1.00, 0.88, 0.88, 0.90, 0.92, 0.94, 0.96];
   const capex = [0, 0, 300, 600, 600, 300, 0, 0, 0, 0, 0, 0];
   const debtDue = [0, 0, 0, 0, 2000, 0, 0, 0, 0, 0, 0, 0];
@@ -385,7 +385,7 @@ export function forecastCash(c: Computed, growth = 0.15): Forecast {
   const arLag = clamp(Math.round(arDays / 40), 1, 4);
   const apLag = clamp(Math.round(apDays / 40), 1, 3);
   const sopLag = 1;                                            // 定点项目按月结 30 天回款（访谈口径）
-  const runoff = 0.90;                                         // 期初应收 90% 在滞后期内收回，其余视为长账龄
+  const runoff = 0.89;                                         // 期初应收 90% 在滞后期内收回，其余视为长账龄
   const baseSales = season.map((s) => base * s);
   const sopSales = sop.map((w) => inc * w);
   const sales = baseSales.map((s, i) => s + sopSales[i]);
@@ -427,16 +427,16 @@ export function qualityScore(c: Computed): QualityScore {
   const v = (id: string) => ratioValue(c, id, y);
   const an = detectAnomalies(c).filter((a) => a.triggered).length;
   const dims: ScoreDim[] = [
-    { name: '盈利能力', score: Math.round((scoreVs(v('grossMargin'), 0.22, 'high', 0.08) + scoreVs(v('netMargin'), 0.06, 'high', 0.05)) / 2), note: '毛利率、净利率 vs 行业中位数' },
-    { name: '营运效率', score: Math.round((scoreVs(v('arDays'), 75, 'low', 40) + scoreVs(v('invDays'), 70, 'low', 30)) / 2), note: '应收、存货周转天数' },
-    { name: '偿债能力', score: Math.round((scoreVs(v('debtRatio'), 0.52, 'low', 0.15) + scoreVs(v('currentRatio'), 1.5, 'high', 0.5) + scoreVs(v('interestCover'), 4, 'high', 3)) / 3), note: '资产负债率、流动比率、利息保障' },
-    { name: '现金质量', score: Math.round((scoreVs(v('cfoToNi'), 1, 'high', 2) + scoreVs(v('cashCollect'), 1.1, 'high', 0.1)) / 2), note: '经营现金流/净利润、销售收现率' },
+    { name: '盈利能力', score: Math.round((scoreVs(v('grossMargin'), 0.22, 'high', 0.12) + scoreVs(v('netMargin'), 0.06, 'high', 0.08)) / 2), note: '毛利率、净利率 vs 行业中位数' },
+    { name: '营运效率', score: Math.round((scoreVs(v('arDays'), 75, 'low', 60) + scoreVs(v('invDays'), 70, 'low', 40)) / 2), note: '应收、存货周转天数' },
+    { name: '偿债能力', score: Math.round((scoreVs(v('debtRatio'), 0.52, 'low', 0.2) + scoreVs(v('currentRatio'), 1.5, 'high', 0.6) + scoreVs(v('interestCover'), 4, 'high', 4)) / 3), note: '资产负债率、流动比率、利息保障' },
+    { name: '现金质量', score: Math.round((scoreVs(v('cfoToNi'), 1, 'high', 3) + scoreVs(v('cashCollect'), 1.1, 'high', 0.15)) / 2), note: '经营现金流/净利润、销售收现率' },
     { name: '成长性', score: scoreVs(v('revGrowth'), 0.1, 'high', 0.15), note: '营业收入增速' },
-    { name: '报表可信度', score: clamp(100 - an * 25, 0, 100), note: `${an} 条红字异常待核实` },
+    { name: '报表可信度', score: clamp(100 - an * 15, 0, 100), note: `${an} 条红字异常待核实` },
   ];
-  const weights = [0.2, 0.2, 0.2, 0.2, 0.1, 0.1];
+  const weights = [0.2, 0.15, 0.2, 0.15, 0.15, 0.15];
   const total = Math.round(dims.reduce((s, d, i) => s + d.score * weights[i], 0));
-  const grade = total >= 80 ? 'A · 优良' : total >= 65 ? 'B · 稳健' : total >= 50 ? 'C · 关注' : 'D · 预警';
+  const grade = total >= 75 ? 'A · 优良' : total >= 60 ? 'B · 稳健' : total >= 40 ? 'C · 关注' : 'D · 预警';
   return { total, grade, dims };
 }
 
