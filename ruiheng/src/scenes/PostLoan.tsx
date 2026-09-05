@@ -35,7 +35,7 @@ const OPTS: Opt[] = [
 
 const STEP_TITLES = ['信号来源', '规则叠加', '传导路径', '建议动作'];
 
-function useSteps(total: number, running: boolean, gap = 800) {
+function useSteps(total: number, running: boolean, token: number, gap = 800) {
   const [n, setN] = useState(0);
   useEffect(() => {
     setN(0);
@@ -43,7 +43,7 @@ function useSteps(total: number, running: boolean, gap = 800) {
     const timers: number[] = [];
     for (let i = 1; i <= total + 1; i++) timers.push(window.setTimeout(() => setN(i), gap * i));
     return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [running, total, gap]);
+  }, [running, token, total, gap]);
   return n;
 }
 
@@ -94,7 +94,7 @@ export default function PostLoan() {
   const [toast, setToast] = useState<string | null>(null);
 
   const running = sel === 'caisheng' && run > 0;
-  const n = useSteps(STEP_TITLES.length, running);
+  const n = useSteps(STEP_TITLES.length, running, run);
   const finished = running && n > STEP_TITLES.length;
   const me = PERSONAS.find((p) => p.id === view)!;
   const cs = companyById('caisheng');

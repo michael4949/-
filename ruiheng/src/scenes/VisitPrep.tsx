@@ -29,7 +29,7 @@ const CLUES = [
 
 const MATERIALS = { wang: ['征信授权书副本与尽调提纲', '上次访谈纪要（含 X 行报价记录）', '固定资产贷款与设备租赁方案要点', '远期结汇产品说明'], lin: ['现场核查表（开工率、电费、库存）', '设备与订单核对表', '拍照与记录清单', '产品折页与名片'] };
 
-function useSteps(total: number, running: boolean, gap = 850) {
+function useSteps(total: number, running: boolean, token: number, gap = 850) {
   const [n, setN] = useState(0);
   useEffect(() => {
     setN(0);
@@ -37,14 +37,14 @@ function useSteps(total: number, running: boolean, gap = 850) {
     const timers: number[] = [];
     for (let i = 1; i <= total + 1; i++) timers.push(window.setTimeout(() => setN(i), gap * i));
     return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [running, total, gap]);
+  }, [running, token, total, gap]);
   return n;
 }
 
 export default function VisitPrep() {
   const [q, setQ] = useState('帮我准备宁桂精密的尽调拜访');
   const [run, setRun] = useState(0);
-  const n = useSteps(STEPS.length, run > 0);
+  const n = useSteps(STEPS.length, run > 0, run);
   const finished = run > 0 && n > STEPS.length;
   const co = companyById('ninggui');
   const wang = PERSONAS.find((p) => p.id === 'wang')!;
