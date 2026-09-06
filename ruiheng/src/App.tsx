@@ -1,22 +1,12 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
-import Shell, { fnById, fnsOf } from './components/Shell';
+import Shell, { fnsOf } from './components/Shell';
 import Dashboard from './pages/Dashboard';
 import { REGISTRY } from './functions/registry';
-
-function Fallback() {
-  const { fid } = useParams();
-  const fn = fid ? fnById(fid) : undefined;
-  return (
-    <div>
-      <div className="page-h"><div><h1>{fn?.name ?? '功能'}</h1><p>{fn?.summary}</p></div></div>
-      <div className="card"><div className="card-t"><span className="dot" />工作页加载中</div></div>
-    </div>
-  );
-}
+import FunctionPage from './pages/FunctionPage';
 
 function FunctionDispatch() {
   const { fid } = useParams();
-  const C = (fid && REGISTRY[fid]) || Fallback;
+  const C = (fid && REGISTRY[fid]) || FunctionPage;
   return <C key={fid} />;
 }
 
