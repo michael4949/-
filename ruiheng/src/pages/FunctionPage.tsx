@@ -8,9 +8,25 @@ import catalogJson from '../data/capabilities.json';
 import type { Catalog, ProductFunction } from '../data/types';
 import { productById } from '../data/products';
 import { COMPANIES, type Company } from '../data/companies';
+import { specOf, type FnSpec } from '../data/fnspec';
 import { rng } from '../lib/rng';
 import { Icon } from '../components/Shell';
+import UploadDocs, { type UDoc } from '../components/UploadDocs';
+import DocActions from '../components/DocActions';
+import AiConclusion from '../components/AiConclusion';
+import { hashStr, seedOf, clean, sanitizeFn, splitSentences, clauses, trimTo, localize, defaultCompany, sampleCompany, ymd, ym, hm, md, ymdDot, round1, uniq, fmtInt } from './analysis/text';
+import { buildConclusion, panelLink, adviceActions, buildTasks, uploadPresets, baseSentence, CURRENT_USER, type PanelLink } from './analysis/content';
+import { ActionBtns, LinkBtn, ForwardModal, systemToast } from './analysis/ActionBtns';
+import ActionPlan from './analysis/ActionPlan';
+import HybridExtras from './analysis/HybridExtras';
 import './function.css';
+
+/**
+ * 通用功能工作页引擎（/f/:fid）
+ *  - analysis 分析预测类：任务输入（含多模态上传）→ AI 处理 → 放大醒目的 AI 结论 + 联动动作 → 结果面板（每面板带联动）→ 结论与建议（每条带动作）
+ *  - hybrid   分析 + 动作混合类：在 analysis 之上增加专属结果块（价值卡 / 组合对比 / 情景沙盘）与「行动计划」区
+ * 所有数字与文字由 rng(功能 id + 客户 id) 种子确定性生成，客户切换即全部变化；历史记录可回填参数并直接显示上次结果。
+ */
 
 /* ====================================================================== 常量 */
 const CATALOG = catalogJson as unknown as Catalog;
@@ -31,7 +47,7 @@ const ROLE_BY_PRODUCT: Record<string, string> = {
   P08: '集团客户团队负责人', P11: '合规经理', P13: '方案复核人', P14: '团队负责人',
 };
 const STEP_PAD = ['读取数据源（只读旁路 · 脱敏视图）', '合规边界校验：不替代行内内评、分类与审批', '组装结果面板并标注 AI 生成'];
-const FILE_POOL = ['2024 年度审计报告.pdf', '2025 年 1–6 月财务报表.pdf', '营业执照与公司章程.pdf', '银行流水（近 12 个月）.pdf', '购销合同扫描件.pdf', '征信查询授权书.pdf', '增值税纳税申报表.pdf', '固定资产清单.xlsx'];
+const FILE_POOL = ['2024 年度审计报告.pdf', '2025 年 1–6 月财务报表.pdf', '营业执照与公司章程.pdf', '银行流水（近 12 个月）.xlsx', '购销合同扫描件.pdf', '征信查询授权书.pdf', '增值税纳税申报表.pdf', '固定资产清单.xlsx'];
 const SIGNAL_POOL = ['新增被执行记录', '结算量环比骤降', '商业承兑汇票逾期', '股权被冻结', '负面舆情增加', '关联方出险', '对手方集中度上升', '税务申报异常', '用电量持续下降', '高管频繁变更'];
 const SIGNAL_POOL_COMPL = ['单据要素缺失', '流程节点超时未办结', '权限越级操作', '制度版本过期引用', '双录材料不完整', '客户身份信息未更新'];
 const SIGNAL_POOL_NEWS = ['监管处罚公告', '诉讼公告新增', '负面媒体报道', '高管负面信息', '产品质量投诉', '环保督察通报'];
@@ -51,41 +67,7 @@ const KIND_META: Record<Kind, { label: string; icon: string; tone: string }> = {
   kv: { label: '指标', icon: 'Table2', tone: '' },
 };
 
-/* ====================================================================== 工具 */
-const pad2 = (n: number) => String(n).padStart(2, '0');
-const ymd = (d: Date) => `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`;
-const ym = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
-const hm = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-const md = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日`;
-const ymdDot = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-const round1 = (n: number) => Math.round(n * 10) / 10;
-const uniq = <T,>(a: T[]) => Array.from(new Set(a));
-
-function hashStr(s: string): number {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
-  return h >>> 0;
-}
-/* 展示文本净化：目录文本中的个别措辞统一为工作用语，且不携带来源信息 */
-const CLEAN_RULES: Array<[RegExp, string]> = [
-  [/\u793a\u8303/g, '标准'], [/\u6f14\u793a/g, '展示'], [/demo/gi, '展示'], [/\u539f\u578b/g, '平台'], [/\u865a\u6784/g, '参考'],
-  [/\u521d\u7ea7/g, '基础'], [/\u4e2d\u7ea7/g, '进阶'], [/\u8d44\u6df1/g, '骨干'], [/\u8bfe\u65f6/g, '时长'], [/\u8bfe\u7a0b/g, '内容'],
-];
-const clean = (s: string) => CLEAN_RULES.reduce((t, [re, rep]) => t.replace(re, rep), s || '');
-function sanitizeFn(fn: ProductFunction): ProductFunction {
-  return {
-    ...fn, name: clean(fn.name), summary: clean(fn.summary), input: clean(fn.input), process: clean(fn.process),
-    panels: fn.panels.map(clean), output: clean(fn.output), dataSources: (fn.dataSources ?? []).map(clean),
-    compliance: clean(fn.compliance), demoSample: clean(fn.demoSample), sources: [],
-  };
-}
-const splitSentences = (t: string) => (t || '').split(/(?<=[。；;！!？?])|\n+/).map((s) => s.trim()).filter((s) => s.length > 1);
-const clauses = (t: string) => (t || '')
-  .split(/[，；;。：:（）()【】—\n]/)
-  .map((s) => s.trim().replace(/^[①②③④⑤⑥⑦⑧⑨⑩]+\s*/, '').replace(/^[\d\-–/.:\s]+(?=[一-龥「])/, '').trim())
-  .filter((s) => s.length >= 4);
-
-/* 步骤：按 process 文本拆分为 3~6 步，每步轮询分配一个数据源 */
+/* ====================================================================== 步骤 */
 interface Step { title: string; detail: string; src: string }
 function stepTitle(p: string) {
   const head = p.replace(/^[（(）)\s]+/, '').split(/[，,：:（(]/)[0].trim().replace(/[）)]+$/, '');
@@ -105,7 +87,7 @@ function buildSteps(fn: ProductFunction): Step[] {
   return parts.map((p, i) => ({ title: stepTitle(p), detail: p, src: ds[i % ds.length] }));
 }
 
-/* 面板类型 */
+/* 面板类型：按标题关键词选图表 */
 function panelKind(title: string): Kind {
   if (/预测|趋势|周期|流量|监测|监控|追踪|变化|测算/.test(title)) return 'trend';
   if (/分布|结构|对比|对标|占比|图谱|架构|集中度|排序|优先级/.test(title)) return 'dist';
@@ -115,7 +97,7 @@ function panelKind(title: string): Kind {
   return 'kv';
 }
 
-/* 把 demoSample 按句分配到 n 个面板；不足时用 summary / output / 规则句补足 */
+/* 把样例按句分配到 n 个面板；不足时用 summary / output / 规则句补足 */
 function distributeText(fn: ProductFunction, panels: string[], co: Company): string[] {
   const n = panels.length;
   const parts = splitSentences(fn.demoSample);
@@ -194,12 +176,12 @@ const GRADES: Array<{ k: string; name: string; range: string; lv: Lv }> = [
 function buildViz(kind: Kind, title: string, text: string, fn: ProductFunction, co: Company, seed: number, idx: number): Viz {
   const r = rng(seed);
   const ri = (a: number, b: number) => a + Math.floor(r() * (b - a + 1));
-  const pick = <T,>(arr: T[]) => arr[Math.floor(r() * arr.length)];
   switch (kind) {
     case 'trend': {
       const now = new Date();
       const pts: TrendPt[] = [];
-      let v = 60 + r() * 60; let b = v * (0.85 + r() * 0.25);
+      const scale = co.settlement > 8000 ? 4 : co.settlement > 2500 ? 2 : 1;
+      let v = (60 + r() * 60) * scale; let b = v * (0.85 + r() * 0.25);
       for (let i = -5; i <= 2; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         v = Math.max(8, v * (0.9 + r() * 0.22)); b = Math.max(8, b * (0.95 + r() * 0.1));
@@ -224,7 +206,8 @@ function buildViz(kind: Kind, title: string, text: string, fn: ProductFunction, 
     }
     case 'score': {
       const axes = radarAxes(fn, title);
-      const radar = axes.map((k) => ({ k, a: ri(45, 95), b: ri(50, 80) }));
+      const bias = co.risk === 'green' ? 8 : co.risk === 'yellow' ? 0 : co.risk === 'orange' ? -8 : -16;
+      const radar = axes.map((k) => ({ k, a: Math.max(20, Math.min(98, ri(45, 95) + bias)), b: ri(50, 80) }));
       const score = Math.round(radar.reduce((s, p) => s + p.a, 0) / radar.length);
       const mode: 'radar' | 'gauge' = /画像|多维|维度/.test(title) ? 'radar' : /评分|等级|核验|校验/.test(title) ? 'gauge' : idx % 2 === 0 ? 'gauge' : 'radar';
       return { kind, mode, radar, score, grade: gradeOf(score), axes };
@@ -252,18 +235,58 @@ function buildViz(kind: Kind, title: string, text: string, fn: ProductFunction, 
       const rows = extractPairs(text);
       const now = new Date();
       const pad: Array<[string, string]> = [
+        ['本行敞口', `${fmtInt(co.exposure)} 万元`], ['日均存款', `${fmtInt(co.deposit)} 万元`], ['年结算量', `${fmtInt(co.settlement)} 万元`],
         ['数据截至', ymdDot(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1))],
-        ['命中规则', `${ri(1, 6)} 条`], ['覆盖数据源', `${(fn.dataSources?.length ?? 1)} 个`], ['处理耗时', `${(1.2 + r() * 3).toFixed(1)} 秒`],
+        ['命中规则', `${ri(1, 6)} 条`], ['覆盖数据源', `${(fn.dataSources?.length ?? 1)} 个`],
       ];
       for (const p of pad) { if (rows.length >= 5) break; if (!rows.some((x) => x[0] === p[0])) rows.push(p); }
-      void pick;
       return { kind: 'kv', rows };
     }
   }
 }
 
+/* 面板专业文字：基础事实句（样例本地化）+ 图表数字句 + 数据源 / 复核句 → 2~3 句 */
+function panelNarrative(title: string, base: string, v: Viz, co: Company, seed: number, ds: string, bind: boolean): string {
+  const r = rng((seed ^ 0x9a7) >>> 0);
+  const core = title.replace(/智能|自动|AI|深度学习|实时|精准|一键|化|预测|分析|识别|评估|判断|诊断|研判|监测|监控|测算|推荐|规划|标注|捕捉|划分|校验|核验|评价|追踪/g, '').replace(/^[与和及]+|[与和及]+$/g, '') || title;
+  const s1 = baseSentence(base, co, bind);
+  let s2 = '';
+  switch (v.kind) {
+    case 'trend': {
+      const f = v.pts[7].f ?? v.pts[5].a ?? 0; const up = v.delta >= 0;
+      s2 = `近 6 个月${core}${up ? '整体上行' : '有所走弱'}，最近一期环比${up ? '增加' : '减少'} ${(Math.abs(v.delta) * 100).toFixed(1)}%，按线性外推 2 个月后约 ${fmtInt(f)} ${v.unit}（外推假设已标注）。`;
+      break;
+    }
+    case 'dist': {
+      const [a, b] = v.pts; const pctMode = v.mode === 'donut';
+      s2 = `结构上「${a.name}」${pctMode ? `占比 ${a.v}%` : `指数 ${a.v}`}居首${b ? `，「${b.name}」${pctMode ? `${b.v}%` : b.v}次之` : ''}，${(pctMode ? a.v > 45 : a.v > 80) ? '集中度偏高，需关注结构变动带来的波动' : '集中度适中，结构相对均衡'}。`;
+      break;
+    }
+    case 'score': {
+      const max = v.radar.reduce((m, p) => (p.a > m.a ? p : m)); const min = v.radar.reduce((m, p) => (p.a < m.a ? p : m));
+      s2 = `${co.name} 综合评分 ${v.score}/100（${v.grade} 级），最强项「${max.k}」${max.a} 分，短板「${min.k}」${min.a} 分；评分由规则计算，不替代行内内评。`;
+      break;
+    }
+    case 'alert': {
+      const hot = v.counts.red + v.counts.orange;
+      s2 = `当前命中红色 ${v.counts.red} 条、橙色 ${v.counts.orange} 条，最新信号为「${v.signals[0]?.text ?? '—'}」，${hot > 0 ? `建议 ${1 + Math.floor(r() * 3)} 个工作日内现场核实并留痕` : '暂无需升级处置的信号，保持常规监测'}。`;
+      break;
+    }
+    case 'list': {
+      s2 = `已整理 ${v.items.length} 项可执行事项（${v.items.filter((i) => i.done).length} 项已完成），建议本周优先推进「${trimTo(v.items[0]?.text ?? '', 18)}」并同步至工作计划。`;
+      break;
+    }
+    default: {
+      const [k1, k2] = v.rows;
+      s2 = `关键指标：${k1[0]} ${k1[1]}${k2 ? `、${k2[0]} ${k2[1]}` : ''}，口径以行内参数为准，数据截至昨日。`;
+    }
+  }
+  const s3 = r() < 0.55 ? `依据${ds}${r() < 0.5 ? '，结果已进入复核队列' : '，异常项已高亮供人工确认'}。` : '';
+  return `${s1}${s2}${s3}`;
+}
+
 /* ====================================================================== 其他派生数据 */
-interface HistRec { id: string; co: Company; when: string; status: string; tone: string }
+interface HistRec { id: string; co: Company; when: string; date: Date; status: string; tone: string; docs: string[] }
 function buildHistory(fn: ProductFunction): HistRec[] {
   const r = rng(hashStr(fn.id) ^ 0x51ed27);
   const statuses: Array<[string, string]> = [['已复核', 'green'], ['已推送 OA', 'blue'], ['待复核', 'orange'], ['已导出', 'gold'], ['已复核', 'green']];
@@ -274,7 +297,9 @@ function buildHistory(fn: ProductFunction): HistRec[] {
     const d = new Date(now); d.setDate(now.getDate() - day); d.setHours(9 + Math.floor(r() * 9), Math.floor(r() * 60));
     const co = COMPANIES[Math.floor(r() * COMPANIES.length)];
     const [status, tone] = statuses[Math.floor(r() * statuses.length)];
-    return { id: `T${ymd(d)}-${String(100 + Math.floor(r() * 900))}`, co, when: `${md(d)} ${hm(d)}`, status, tone };
+    const start = Math.floor(r() * FILE_POOL.length);
+    const docs = Array.from({ length: 1 + Math.floor(r() * 2) }, (_, i) => `${co.name}_${FILE_POOL[(start + i) % FILE_POOL.length]}`);
+    return { id: `T${ymd(d)}-${String(100 + Math.floor(r() * 900))}`, co, when: `${md(d)} ${hm(d)}`, date: d, status, tone, docs };
   });
 }
 function buildFiles(fn: ProductFunction): Array<{ name: string; size: string; status: string }> {
@@ -283,18 +308,18 @@ function buildFiles(fn: ProductFunction): Array<{ name: string; size: string; st
   const start = Math.floor(r() * FILE_POOL.length);
   return Array.from({ length: n }, (_, i) => ({ name: FILE_POOL[(start + i) % FILE_POOL.length], size: `${(0.4 + r() * 6).toFixed(1)} MB`, status: '已归档' }));
 }
-function buildAdvice(fn: ProductFunction, co: Company, spec: FormSpec): string[] {
+function buildAdvice(fn: ProductFunction, co: Company, form: FormSpec, seed: number): string[] {
   const fromSample = splitSentences(fn.demoSample)
     .filter((s) => /建议|应当|需要|可在|应在/.test(s)).slice(0, 1)
-    .map((s) => s.replace(/^.*?建议(动作|措施|方案)?[:：]?\s*/, '').replace(/^[，,]/, '')).filter((s) => s.length > 6);
+    .map((s) => localize(s, fn, co, seed).replace(/^.*?建议(动作|措施|方案)?[:：]?\s*/, '').replace(/^[，,]/, '')).filter((s) => s.length > 6);
   const role = ROLE_BY_PRODUCT[fn.product] ?? '主办客户经理';
   const focus = (co.note || '').split(/[；;，,]/)[0];
   return [
     ...fromSample,
     `3 个工作日内与 ${co.name} 联系人核实本次结果涉及的关键事实（${focus}），并将核实记录留痕至 CRM。`,
     `本次「${fn.name}」输出仅作辅助，请提交${role}复核后再用于对客沟通、授信决策或考核。`,
-    `${spec.period ? '按选定期间' : '按月'}复跑本功能并比对结果变化，异常变动同步至贷后 / 风险台账。`,
-  ].slice(0, 3);
+    `${form.period ? '按选定期间' : '按月'}复跑本功能并比对结果变化，异常变动同步至贷后 / 风险台账。`,
+  ].slice(0, 4);
 }
 
 interface FormSpec { upload: boolean; period: boolean; industry: boolean; region: boolean; amount: boolean }
@@ -305,11 +330,6 @@ const detectForm = (input: string): FormSpec => ({
   region: /区域/.test(input),
   amount: /金额|额度/.test(input),
 });
-function defaultCompany(fn: ProductFunction): Company {
-  let best: Company | null = null; let pos = Infinity;
-  for (const c of COMPANIES) { const i = fn.demoSample.indexOf(c.name); if (i >= 0 && i < pos) { pos = i; best = c; } }
-  return best ?? COMPANIES[0];
-}
 const fmtSize = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 /* ====================================================================== 图表小组件 */
@@ -553,20 +573,21 @@ function VizSwitch({ v, gid, co }: { v: Viz; gid: string; co: Company }) {
 }
 
 /* ====================================================================== 结果面板卡 */
-function PanelCard({ title, text, kind, viz, gid, co, ds }: { title: string; text: string; kind: Kind; viz: Viz; gid: string; co: Company; ds: string }) {
+interface PanelData { title: string; text: string; kind: Kind; viz: Viz; ds: string; link: PanelLink }
+function PanelCard({ p, gid, co }: { p: PanelData; gid: string; co: Company }) {
   const [open, setOpen] = useState(false);
-  const meta = KIND_META[kind];
-  const long = text.length > 110;
+  const meta = KIND_META[p.kind];
+  const long = p.text.length > 120;
   return (
     <div className={`card fp-panel fade-in ${meta.tone}`}>
       <div className="fp-panel-h">
-        <div className="t"><span className={`ico ${kind}`}><Icon name={meta.icon} size={13} /></span><span title={title}>{title}</span></div>
-        <span className="chip iris">{meta.label}</span>
+        <div className="t"><span className={`ico ${p.kind}`}><Icon name={meta.icon} size={13} /></span><span title={p.title}>{p.title}</span></div>
+        <div className="fp-panel-r"><span className="chip iris">{meta.label}</span><LinkBtn to={p.link.to} label={p.link.label} /></div>
       </div>
-      <p className={`fp-panel-p${long && !open ? ' clamp' : ''}`}>{text}</p>
+      <p className={`fp-panel-p${long && !open ? ' clamp' : ''}`}>{p.text}</p>
       {long && <button className="fp-more" onClick={() => setOpen((o) => !o)}>{open ? '收起' : '展开全文'}</button>}
-      <VizSwitch v={viz} gid={gid} co={co} />
-      <div className="fp-foot"><span>数据源：{ds}</span><span className="ai-tag">AI 生成 · 需复核</span></div>
+      <VizSwitch v={p.viz} gid={gid} co={co} />
+      <div className="fp-foot"><span>数据源：{p.ds}</span><span className="ai-tag">AI 生成 · 需复核</span></div>
     </div>
   );
 }
@@ -588,12 +609,14 @@ export default function FunctionPage() {
       </div>
     );
   }
-  return <FunctionWork key={fn.id} fn={fn} />;
+  return <FunctionWork key={fn.id} fn={fn} spec={specOf(fn.id)} />;
 }
 
-function FunctionWork({ fn }: { fn: ProductFunction }) {
+function FunctionWork({ fn, spec }: { fn: ProductFunction; spec: FnSpec }) {
   const product = productById(fn.product);
-  const spec = useMemo(() => detectForm(fn.input), [fn.input]);
+  const hybrid = spec.kind === 'hybrid';
+  const hasUpload = Boolean(spec.uploads?.length);
+  const form = useMemo(() => detectForm(fn.input), [fn.input]);
   const steps = useMemo(() => buildSteps(fn), [fn]);
   const panels = useMemo(() => fn.panels.slice(0, MAX_PANELS), [fn]);
   const history = useMemo(() => buildHistory(fn), [fn]);
@@ -617,11 +640,24 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
   const [files, setFiles] = useState(() => buildFiles(fn));
   const [over, setOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [docs, setDocs] = useState<UDoc[]>([]);
+  const docNames = useMemo(() => docs.filter((d) => d.status === 'done').map((d) => d.name), [docs]);
+  const uploadReady = !spec.uploadRequired || docNames.length > 0;
+  const presets = useMemo(() => uploadPresets(spec.uploads, co), [spec.uploads, co]);
 
-  const selectCompany = (id: string) => {
+  const selectCompany = (id: string, live = true) => {
     setCompanyId(id);
     const c = COMPANIES.find((x) => x.id === id);
-    if (c) { setIndustry(c.industry); setDistrict(c.district); setAmount(String(c.exposure > 0 ? c.exposure : 500)); }
+    if (!c) return;
+    setIndustry(c.industry); setDistrict(c.district); setAmount(String(c.exposure > 0 ? c.exposure : 500));
+    if (live && phase === 'done' && c.id !== runCo.id) {
+      // 已有结果时切换客户：所有数字与文字即时按 rng(功能 + 客户) 重算，无需重新走处理流程
+      const at = new Date();
+      setRunCo(c); setRunAt(at); setRunDocs(docNames); setReviewed(false);
+      setTaskId(`T${ymd(at)}-${String(100 + ((hashStr(fn.id + c.id) + runKey * 7) % 900))}`);
+      setRunKey((k) => k + 1);
+      toast(`已切换至 ${c.name}，结论、面板与建议已按该客户重算`);
+    }
   };
   const addFiles = (list: FileList | null) => {
     if (!list?.length) return;
@@ -636,9 +672,13 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
   const [lit, setLit] = useState(0);
   const [shown, setShown] = useState(0);
   const [runId, setRunId] = useState(0);
+  const [runKey, setRunKey] = useState(0);
   const [runAt, setRunAt] = useState<Date | null>(null);
   const [runCo, setRunCo] = useState<Company>(initCo);
+  const [runDocs, setRunDocs] = useState<string[]>([]);
+  const [taskId, setTaskId] = useState('');
   const [reviewed, setReviewed] = useState(false);
+  const [fwd, setFwd] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number | null>(null);
   const histRef = useRef<HTMLDivElement>(null);
@@ -663,10 +703,16 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId]);
 
-  const start = () => { setRunAt(new Date()); setRunCo(co); setRunId((n) => n + 1); };
+  const start = () => {
+    if (!uploadReady) { toast('请先上传来源文件，识别完成后再开始分析'); return; }
+    const at = new Date();
+    setRunAt(at); setRunCo(co); setRunDocs(docNames);
+    setTaskId(`T${ymd(at)}-${String(100 + ((hashStr(fn.id + co.id) + runKey * 7) % 900))}`);
+    setRunKey((k) => k + 1); setRunId((n) => n + 1);
+  };
   const reset = () => {
-    setPhase('idle'); setLit(0); setShown(0); setReviewed(false); setNote('');
-    selectCompany(initCo.id); setFiles(buildFiles(fn));
+    setRunId(0); setPhase('idle'); setLit(0); setShown(0); setReviewed(false); setNote('');
+    selectCompany(initCo.id, false); setFiles(buildFiles(fn));
     window.scrollTo({ top: 0, behavior: 'smooth' });
     toast('已新建任务，请填写任务输入');
   };
@@ -674,26 +720,46 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
     histRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setFlash(true); window.setTimeout(() => setFlash(false), 1400);
   };
+  /** 历史记录：回填参数并直接显示上次结果 */
+  const loadHistory = (h: HistRec) => {
+    setRunId(0);
+    selectCompany(h.co.id, false);
+    setRunCo(h.co); setRunAt(h.date); setTaskId(h.id); setRunDocs(h.docs);
+    setPhase('done'); setLit(steps.length); setShown(panels.length);
+    setReviewed(h.status !== '待复核');
+    setRunKey((k) => k + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast(`已载入任务 ${h.id}：${h.co.name} · ${h.when} 的参数与结果`);
+  };
   const exportReport = () => {
     if (phase !== 'done') { toast('请先运行分析，生成结果后再导出'); return; }
     toast(`报告已导出：${fn.name}_${runCo.name}_${ymd(runAt ?? new Date())}.pdf（已存入个人工作台）`);
   };
-  const pushOA = () => toast('已推送到行内 OA 待办');
+  const pushOA = () => toast(`已推送到行内 OA 待办：${fn.name} · ${runCo.name}`);
+  /** 系统动作：推送 OA / 写回 CRM / 转呈弹窗 */
+  const sys = (id: string, label: string) => { if (id === 'forward') setFwd(true); else toast(systemToast(id, label)); };
 
-  /* ---- 结果数据 ---- */
-  const results = useMemo(() => {
-    const texts = distributeText(fn, panels, runCo);
-    const coIdx = Math.max(0, COMPANIES.findIndex((c) => c.id === runCo.id));
+  /* ---- 结果数据（种子 = 功能 id + 客户 id） ---- */
+  const seed0 = seedOf(fn.id, runCo.id);
+  const coBound = useMemo(() => sampleCompany(fn) !== null, [fn]);
+  const results = useMemo<PanelData[]>(() => {
+    const texts = distributeText(fn, panels, runCo).map((t) => localize(t, fn, runCo, seed0));
     return panels.map((title, i) => {
       const kind = panelKind(title);
-      const seed = hashStr(fn.id) + i * 7919 + coIdx * 131;
-      return { title, text: texts[i], kind, viz: buildViz(kind, title, texts[i], fn, runCo, seed, i), ds: dsList[i % dsList.length] };
+      const seed = (seed0 + i * 7919) >>> 0;
+      const viz = buildViz(kind, title, texts[i], fn, runCo, seed, i);
+      const ds = dsList[i % dsList.length];
+      return { title, kind, viz, ds, text: panelNarrative(title, texts[i], viz, runCo, seed, ds, coBound), link: panelLink(title, kind, fn.id, spec) };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fn, panels, runCo, runId]);
-  const advice = useMemo(() => buildAdvice(fn, runCo, spec), [fn, runCo, spec]);
-  const taskId = `T${ymd(runAt ?? now)}-${String(100 + ((hashStr(fn.id) + runId * 7) % 900))}`;
+  }, [fn, panels, runCo, seed0, spec]);
+  const conclusion = useMemo(() => buildConclusion(fn, spec, runCo, runDocs, seed0), [fn, spec, runCo, runDocs, seed0]);
+  const advice = useMemo(() => buildAdvice(fn, runCo, form, seed0), [fn, runCo, form, seed0]);
+  const tasks = useMemo(() => (hybrid ? buildTasks(fn, spec, runCo, seed0) : []), [hybrid, fn, spec, runCo, seed0]);
   const progress = phase === 'done' ? 100 : Math.round((lit / steps.length) * 100);
+  const allShown = phase === 'done' && shown >= panels.length;
+  const docTitle = `${fn.name}_${runCo.name}`;
+  const getHtml = () => `<h1>${fn.name} · ${runCo.name}</h1><p>任务 ${taskId} · ${runAt ? ymdDot(runAt) : ''}</p><h2>AI 结论</h2><p><b>${conclusion.headline}</b></p><ul>${conclusion.points.map((p) => `<li>${p}</li>`).join('')}</ul><p>依据：${conclusion.evidence.join('、')}</p>${results.map((p) => `<h3>${p.title}</h3><p>${p.text}</p>`).join('')}<h2>建议</h2><ol>${advice.map((a) => `<li>${a}</li>`).join('')}</ol>${hybrid ? `<h2>行动计划</h2><ol>${tasks.map((t) => `<li>${t.title}（${t.owner} · ${t.due} · ${t.pri}）</li>`).join('')}</ol>` : ''}<p>AI 生成 · 辅助建议 · 需人工复核 · 复核人：${CURRENT_USER}</p>`;
 
   return (
     <div className="fp">
@@ -705,7 +771,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
       </div>
       <div className="fp-head">
         <div>
-          <h1>{fn.name}<span className="fid">{fn.id}</span></h1>
+          <h1>{fn.name}<span className="fid">{fn.id}</span><span className={`chip ${hybrid ? 'purple' : 'blue'}`}><i />{hybrid ? '分析 + 行动' : '分析预测'}</span></h1>
           <p>{fn.summary}</p>
         </div>
         <div className="fp-actions">
@@ -734,7 +800,15 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               <div className="fp-co-note">{co.note}</div>
             </div>
 
-            {spec.upload && (
+            {hasUpload && (
+              <div className="fp-field fp-upload">
+                <label className="fp-lbl">来源文件{spec.uploadRequired && <span className="req">*</span>}<span className="hint">{spec.uploads!.length} 类 · 多模态识别</span></label>
+                <UploadDocs label="来源文件" types={spec.uploads} presets={presets} required={spec.uploadRequired} onChange={setDocs}
+                  hint="支持 Word、Excel、PDF、图片（扫描件 / 拍照）、录音；识别结果脱敏后进入本次任务上下文" />
+              </div>
+            )}
+
+            {!hasUpload && form.upload && (
               <div className="fp-field">
                 <label className="fp-lbl">材料上传<span className="hint">PDF / 影像 / 报表</span></label>
                 <div className={`fp-drop${over ? ' over' : ''}`} onClick={() => fileRef.current?.click()}
@@ -757,7 +831,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               </div>
             )}
 
-            {spec.period && (
+            {form.period && (
               <div className="fp-field">
                 <label className="fp-lbl">分析期间</label>
                 <div className="fp-range">
@@ -768,7 +842,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               </div>
             )}
 
-            {spec.industry && (
+            {form.industry && (
               <div className="fp-field">
                 <label className="fp-lbl" htmlFor="fp-ind">行业</label>
                 <select id="fp-ind" className="fp-inp" value={industry} onChange={(e) => setIndustry(e.target.value)}>
@@ -777,7 +851,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               </div>
             )}
 
-            {spec.region && (
+            {form.region && (
               <div className="fp-field">
                 <label className="fp-lbl" htmlFor="fp-dist">区域</label>
                 <select id="fp-dist" className="fp-inp" value={district} onChange={(e) => setDistrict(e.target.value)}>
@@ -786,7 +860,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               </div>
             )}
 
-            {spec.amount && (
+            {form.amount && (
               <div className="fp-field">
                 <label className="fp-lbl" htmlFor="fp-amt">金额 / 额度</label>
                 <div className="fp-amount">
@@ -801,15 +875,16 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               <textarea id="fp-note" className="fp-inp" value={note} onChange={(e) => setNote(e.target.value)} placeholder={`例如：访谈中发现的线索、需要重点核实的事项……`} />
             </div>
 
-            <button className="btn fp-go" onClick={start} disabled={phase === 'run'}>
+            <button className={`btn fp-go${!uploadReady ? ' locked' : ''}`} onClick={start} disabled={phase === 'run' || !uploadReady}>
               <Icon name={phase === 'idle' ? 'Play' : phase === 'run' ? 'Bot' : 'RotateCcw'} size={15} />
               {phase === 'idle' ? '开始分析' : phase === 'run' ? '处理中…' : '重新分析'}
             </button>
+            {!uploadReady && <div className="fp-req"><Icon name="TriangleAlert" size={12} /> 请先上传来源文件（识别完成后即可开始分析）</div>}
             <div className="fp-form-foot">本机模型 · 无外联 · 数据只读旁路</div>
           </div>
         </div>
 
-        {/* ---------- 中栏：AI 处理 + 结果面板 ---------- */}
+        {/* ---------- 中栏：AI 处理 + 结论 + 结果面板 ---------- */}
         <div className="fp-col">
           <div className="card">
             <div className="card-h">
@@ -821,7 +896,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
             {phase === 'idle' ? (
               <div className="fp-empty">
                 <div className="ico"><Icon name="Sparkles" size={24} /></div>
-                <b>在左侧选择客户并点击「开始分析」</b>
+                <b>在左侧选择客户{hasUpload ? '、上传来源文件' : ''}并点击「开始分析」</b>
                 将按以下步骤处理，并把每一步引用的数据源标注在右侧
                 <ul className="ul">{steps.map((s, i) => <li key={i}>{s.title}</li>)}</ul>
               </div>
@@ -830,9 +905,10 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
                 <div className="fp-run-meta">
                   <span>任务 <b className="num">{taskId}</b></span>
                   <span>客户 <b>{runCo.name}</b></span>
-                  {spec.period && <span>期间 <b className="num">{from} ~ {to}</b></span>}
-                  {spec.amount && <span>金额 <b className="num">{Number(amount || 0).toLocaleString('zh-CN')} 万元</b></span>}
-                  <span>发起 <b className="num">{runAt ? hm(runAt) : '--:--'}</b></span>
+                  {form.period && <span>期间 <b className="num">{from} ~ {to}</b></span>}
+                  {form.amount && <span>金额 <b className="num">{Number(amount || 0).toLocaleString('zh-CN')} 万元</b></span>}
+                  {runDocs.length > 0 && <span>来源文件 <b>{runDocs.length} 份</b></span>}
+                  <span>发起 <b className="num">{runAt ? `${md(runAt)} ${hm(runAt)}` : '--:--'}</b></span>
                 </div>
                 <div className="fp-progress"><div className="bar"><i style={{ width: `${progress}%` }} /></div><span className="num">{progress}%</span></div>
                 <div className="think fp-think">
@@ -855,7 +931,14 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
           </div>
 
           {phase === 'done' && (
-            <div>
+            <div className="fp-results-wrap fade-in">
+              {/* 放大醒目的 AI 结论 + 联动动作 */}
+              <AiConclusion headline={conclusion.headline} points={conclusion.points} evidence={conclusion.evidence} confidence={conclusion.confidence}
+                actions={spec.actions} onSystem={sys} tone={conclusion.tone} />
+
+              {/* 混合类：专属结果块（价值卡 / 组合对比 / 情景沙盘） */}
+              {hybrid && <HybridExtras key={`hx-${runCo.id}-${runKey}`} fid={fn.id} co={runCo} seed={seed0} onSystem={sys} onToast={toast} />}
+
               <div className="fp-results-h">
                 <h2><Icon name="Layers" size={16} /> 结果面板</h2>
                 <div className="meta">
@@ -865,9 +948,9 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
               </div>
               <div className="fp-results">
                 {results.slice(0, shown).map((p, i) => (
-                  <PanelCard key={`${p.title}-${i}`} title={p.title} text={p.text} kind={p.kind} viz={p.viz} gid={`${gidBase}-${i}`} co={runCo} ds={p.ds} />
+                  <PanelCard key={`${runCo.id}-${i}`} p={p} gid={`${gidBase}-${i}`} co={runCo} />
                 ))}
-                {shown >= panels.length && (
+                {allShown && (
                   <div className="card dark fp-panel wide fp-concl fade-in">
                     <div className="fp-panel-h">
                       <div className="t"><span className="ico"><Icon name="ClipboardCheck" size={13} /></span><span>结论与建议</span></div>
@@ -878,19 +961,30 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
                       <div>
                         <h3><Icon name="FileOutput" size={12} /> 输出</h3>
                         <p>{fn.output}</p>
+                        <ActionBtns ids={spec.actions.slice(0, 3)} onSystem={sys} ghost className="dark" />
                         <h3 style={{ marginTop: 12 }}><Icon name="Database" size={12} /> 引用数据源</h3>
-                        <div className="row" style={{ gap: 6 }}>{dsList.map((d) => <span className="chip" key={d}><i />{d}</span>)}</div>
+                        <div className="fp-chips">{[...runDocs, ...dsList].map((d) => <span className="chip" key={d}><i />{d}</span>)}</div>
                       </div>
                       <div>
                         <h3><Icon name="Sparkles" size={12} /> AI 建议</h3>
                         <div className="fp-advice">
-                          {advice.map((a, i) => <div className="a" key={i}><span className="n">{i + 1}</span><span>{a}</span></div>)}
+                          {advice.map((a, i) => (
+                            <div className="a" key={i}>
+                              <span className="n">{i + 1}</span>
+                              <div className="body"><span>{a}</span><ActionBtns ids={adviceActions(spec, i)} onSystem={sys} ghost className="dark inline" /></div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
+
+              {/* 混合类：行动计划 */}
+              {hybrid && allShown && (
+                <ActionPlan key={`ap-${runCo.id}-${runKey}`} initial={tasks} co={runCo} fnName={fn.name} onToast={toast} onSystem={sys} />
+              )}
             </div>
           )}
         </div>
@@ -913,7 +1007,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
           <div className={`card fp-hist${flash ? ' fp-flash' : ''}`} ref={histRef}>
             <div className="card-h"><div className="card-t"><span className="dot" />历史记录</div><span className="card-s">近 {history.length} 次</span></div>
             {history.map((h) => (
-              <div className="li" key={h.id} onClick={() => { selectCompany(h.co.id); toast(`已载入任务 ${h.id} 的参数（${h.co.name}）`); }} title="点击载入该任务的参数">
+              <div className={`li${taskId === h.id ? ' on' : ''}`} key={h.id} onClick={() => loadHistory(h)} title="点击回填该任务的参数并查看上次结果">
                 <div className="av">{h.co.name.slice(0, 1)}</div>
                 <div className="grow"><div className="t">{h.co.name}</div><div className="s num">{h.when} · {h.id}</div></div>
                 <span className={`chip ${h.tone}`}>{h.status}</span>
@@ -938,10 +1032,11 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
 
       {/* ---------- 底部固定操作条 ---------- */}
       <div className="fp-bar">
-        <span className="ai-tag"><Icon name="Bot" size={12} /> AI 生成 · 辅助建议 · 需人工复核</span>
+        <span className="ai-tag"><Icon name="Bot" size={12} /> AI 生成 · 需人工复核</span>
         <span className="status">
-          {phase === 'done' ? <><Icon name="CircleCheck" size={13} /> 结果已生成，复核后可导出或推送</> : phase === 'run' ? <><span className="pulse" /> 处理中</> : '尚未运行分析'}
+          {phase === 'done' ? <><Icon name="CircleCheck" size={13} /> 结果已生成</> : phase === 'run' ? <><span className="pulse" /> 处理中</> : '尚未运行分析'}
         </span>
+        <DocActions compact title={docTitle} getHtml={getHtml} onToast={toast} />
         <span className="spacer" />
         <label className={reviewed ? 'on' : phase !== 'done' ? 'off' : ''}>
           <input type="checkbox" checked={reviewed} disabled={phase !== 'done'} onChange={(e) => setReviewed(e.target.checked)} />
@@ -951,6 +1046,7 @@ function FunctionWork({ fn }: { fn: ProductFunction }) {
         <button className="btn green" disabled={!reviewed} onClick={pushOA}><Icon name="Send" size={14} /> 推送至系统</button>
       </div>
 
+      {fwd && <ForwardModal title={docTitle} onClose={() => setFwd(false)} onToast={toast} />}
       {toastMsg && <div className="fp-toast"><span className="ico"><Icon name="CircleCheck" size={15} /></span>{toastMsg}</div>}
     </div>
   );
