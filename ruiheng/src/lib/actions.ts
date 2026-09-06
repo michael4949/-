@@ -1,0 +1,31 @@
+/** 联动动作目录：AI 结论旁的"下一步"按钮，跳到相应工作页或触发系统动作（推送 OA / 写回 CRM / 转呈）。 */
+export interface LinkedAction { id: string; label: string; icon: string; to?: string; tone?: 'red' | 'gold' | 'green' | 'blue' | 'purple'; system?: 'oa' | 'crm' | 'forward' }
+export const ACTIONS: Record<string, LinkedAction> = {
+  visit: { id: 'visit', label: '加入拜访计划', icon: 'CalendarPlus', to: '/f/F-KH-002', tone: 'red' },
+  prospect: { id: 'prospect', label: '圈定目标客群', icon: 'Radar', to: '/f/F-KH-001', tone: 'red' },
+  marketing: { id: 'marketing', label: '生成营销方案', icon: 'Megaphone', to: '/f/F-KH-004', tone: 'gold' },
+  scenario: { id: 'scenario', label: '生成场景化方案', icon: 'Sparkles', to: '/f/F-YX-002', tone: 'gold' },
+  combo: { id: 'combo', label: '产品组合顾问', icon: 'Layers', to: '/f/F-YX-003', tone: 'gold' },
+  finance: { id: 'finance', label: '融资方案沙盘', icon: 'Landmark', to: '/f/F-YX-004', tone: 'gold' },
+  pricing: { id: 'pricing', label: '综合定价测算', icon: 'Percent', to: '/f/F-YX-008', tone: 'gold' },
+  scf: { id: 'scf', label: '供应链金融方案', icon: 'Link2', to: '/f/F-YX-005', tone: 'green' },
+  fx: { id: 'fx', label: '跨境金融方案', icon: 'Globe2', to: '/f/F-YX-006', tone: 'green' },
+  invest: { id: 'invest', label: '投贷联动顾问', icon: 'TrendingUp', to: '/f/F-YX-012', tone: 'green' },
+  credit: { id: 'credit', label: '发起授信方案', icon: 'FileCheck2', to: '/f/F-FX-004', tone: 'red' },
+  dd: { id: 'dd', label: '进入尽调工作台', icon: 'ClipboardList', to: '/f/F-FX-005', tone: 'red' },
+  contract: { id: 'contract', label: '合同审核', icon: 'FileSignature', to: '/f/F-ZY-016', tone: 'blue' },
+  report: { id: 'report', label: '生成财务诊断报告', icon: 'FileText', to: '/f/F-ZY-010', tone: 'blue' },
+  alert: { id: 'alert', label: '推送风险预警', icon: 'ShieldAlert', to: '/f/F-FX-001', tone: 'red' },
+  risk: { id: 'risk', label: '制定处置方案', icon: 'LifeBuoy', to: '/f/F-FX-008', tone: 'red' },
+  group: { id: 'group', label: '打开集团图谱', icon: 'Network', to: '/f/F-KH-021', tone: 'purple' },
+  followup: { id: 'followup', label: '加入跟进提醒', icon: 'BellPlus', to: '/f/F-KH-010', tone: 'green' },
+  talk: { id: 'talk', label: '生成沟通话术', icon: 'MessageSquareText', to: '/f/F-SY-015', tone: 'purple' },
+  sparring: { id: 'sparring', label: '去陪练一次', icon: 'MessagesSquare', to: '/f/F-SY-007', tone: 'green' },
+  negotiation: { id: 'negotiation', label: '谈判预演', icon: 'Handshake', to: '/f/F-KH-028', tone: 'green' },
+  minutes: { id: 'minutes', label: '生成会谈纪要', icon: 'NotebookPen', to: '/f/F-SY-002', tone: 'blue' },
+  plan: { id: 'plan', label: '加入工作计划', icon: 'ListTodo', to: '/f/F-SY-004', tone: 'blue' },
+  oa: { id: 'oa', label: '推送行内 OA 待办', icon: 'Send', system: 'oa', tone: 'blue' },
+  crm: { id: 'crm', label: '写回 CRM', icon: 'DatabaseZap', system: 'crm', tone: 'blue' },
+  forward: { id: 'forward', label: '转呈相关部门', icon: 'Forward', system: 'forward', tone: 'purple' },
+};
+export const actionsOf = (ids: string[]) => ids.map((i) => ACTIONS[i]).filter(Boolean);
