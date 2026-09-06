@@ -6,7 +6,7 @@ export interface UDoc { id: string; name: string; ext: string; size: number; sta
 export const EXT_ICON: Record<string, { icon: string; cls: string; kind: string }> = {
   pdf: { icon: 'FileText', cls: 'red', kind: 'PDF 文档' }, doc: { icon: 'FileType', cls: 'blue', kind: 'Word 文档' }, docx: { icon: 'FileType', cls: 'blue', kind: 'Word 文档' },
   xls: { icon: 'FileSpreadsheet', cls: 'green', kind: 'Excel 表格' }, xlsx: { icon: 'FileSpreadsheet', cls: 'green', kind: 'Excel 表格' }, csv: { icon: 'FileSpreadsheet', cls: 'green', kind: 'CSV 数据' },
-  ppt: { icon: 'Presentation', cls: 'orange', kind: 'PPT 演示' }, pptx: { icon: 'Presentation', cls: 'orange', kind: 'PPT 演示' },
+  ppt: { icon: 'Presentation', cls: 'orange', kind: 'PPT 文稿' }, pptx: { icon: 'Presentation', cls: 'orange', kind: 'PPT 文稿' },
   jpg: { icon: 'FileImage', cls: 'purple', kind: '图片影像' }, jpeg: { icon: 'FileImage', cls: 'purple', kind: '图片影像' }, png: { icon: 'FileImage', cls: 'purple', kind: '图片影像' }, bmp: { icon: 'FileImage', cls: 'purple', kind: '图片影像' }, tif: { icon: 'FileImage', cls: 'purple', kind: '扫描影像' },
   mp3: { icon: 'FileAudio', cls: 'gold', kind: '录音' }, m4a: { icon: 'FileAudio', cls: 'gold', kind: '录音' }, wav: { icon: 'FileAudio', cls: 'gold', kind: '录音' }, txt: { icon: 'FileText', cls: 'gold', kind: '文本' },
 };

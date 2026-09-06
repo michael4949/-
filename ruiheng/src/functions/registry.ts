@@ -11,6 +11,7 @@ import MarketingPlan from './p01/MarketingPlan';
 import HighEndDevelopment from './p01/HighEndDevelopment';
 import ResourceMatching from './p01/ResourceMatching';
 import ScenarioMarketing from './p01/ScenarioMarketing';
+import BidWriter from './p05/BidWriter';
 
 /** 功能 id → 专属工作页。未登记的功能走通用功能工作页。 */
 export const REGISTRY: Record<string, ComponentType> = {
@@ -23,6 +24,7 @@ export const REGISTRY: Record<string, ComponentType> = {
   'F-KH-005': HighEndDevelopment, // 高端客户开发策略
   'F-KH-006': ResourceMatching,   // 客户资源整合与撮合
   'F-YX-002': ScenarioMarketing,  // 场景化营销方案
+  'F-YX-007': BidWriter,          // 投标书生成与优化
   'F-ZY-005': FinDiagnosis,   // 财报解读与深度分析
   'F-FX-005': CreditReport,   // 尽职调查工作台
   'F-FX-004': CreditReport,   // 授信方案与额度测算

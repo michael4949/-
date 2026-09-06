@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AiConclusion from '../../components/AiConclusion';
+import DocActions from '../../components/DocActions';
+import ProposalDoc, { type ProposalDocHandle, type ProposalSections } from '../../components/ProposalDoc';
+import { PERSONAS } from '../../data/personas';
 import {
   ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, LabelList, Legend,
 } from 'recharts';
 import {
-  Megaphone, Sparkles, Check, RotateCcw, Users, Building2, Layers, Send, Download, Save, FileCheck2, ShieldCheck, History,
-  Target, MessageSquare, Wallet, Gauge, BarChart3, ClipboardCheck, ArrowRight, Phone, MapPin, MessageCircle, Mail, Presentation, CalendarRange, Lightbulb,
+  Megaphone, Sparkles, Check, RotateCcw, Users, Building2, Download, Save, FileCheck2, ShieldCheck, History, FileText,
+  Gauge, BarChart3, ClipboardCheck, ArrowRight, Phone, MapPin, MessageCircle, Mail, Presentation, Lightbulb,
 } from 'lucide-react';
 import { COMPANIES } from '../../data/companies';
 import { rng } from '../../lib/rng';
@@ -109,6 +113,9 @@ const CSS = `
 .mp-toast { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); z-index: 60; padding: 10px 18px; border-radius: 999px; background: var(--g-green); color: #fff; font-weight: 700; font-size: 13px; box-shadow: 0 12px 30px rgba(31,138,90,.3); display: inline-flex; align-items: center; gap: 8px; }
 .mp-kv .row span:first-child { color: var(--ink-3); }
 .mp-budget td:last-child, .mp-budget th:last-child { text-align: right; }
+.mp-dockbar { position: sticky; top: 64px; z-index: 15; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 12px; border-radius: 12px; background: var(--g-holo); box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(201,162,77,.28); }
+.mp-dockbar .lab { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: var(--gold-3); letter-spacing: .06em; }
+@media print { .mp-left, .mp-crumb, .page-h, .mp-dockbar, .aic, .mp-toast, .mp-noprint { display: none !important; } .mp-layout { display: block; } }
 `;
 
 /* ============================================================ 数据 */
@@ -196,6 +203,59 @@ const GEN_STEPS = [
   { t: '触达节奏生成', p: '按渠道、频次、时间偏好与周期编排触达节奏，遵守客户联系偏好与行内营销合规要求。' },
   { t: '效果测算与 ROI', p: '按历史转化率、客单贡献与成本确定性计算触达、响应、转化、收益与 ROI，参数可调实时重算。' },
 ];
+/* 正式方案书：需求分析（按场景）与产品要素（按产品） */
+const NEEDS: Record<ScnKey, { t: string; p: string }[]> = {
+  first: [
+    { t: '核心资金需求', p: '定点 / 中标订单落地后，模具设备投入与首批备货形成阶段性资金缺口，需要在 SOP 前到位、与订单排产周期匹配的流动资金安排。' },
+    { t: '结算与沉淀需求', p: '订单回款与向上游付款将形成稳定的结算流，需配套供应链票据与代发工资，使结算路径与资金沉淀落在本行。' },
+    { t: '服务与效率需求', p: '客户为首次融资，最关注审批时效与资金到位节奏；需明确材料清单与审批时限，减少往返。' },
+  ],
+  deposit: [
+    { t: '核心资金需求', p: '门店 / 渠道收款分散、对账工作量大，结算量近 3 个月环比明显上升，需要一体化收单与结算安排，把回款归集到本行。' },
+    { t: '结算与沉淀需求', p: '收单资金到账后形成日均沉淀，配套代发工资与结算套餐可进一步提高本行结算份额。' },
+    { t: '服务与效率需求', p: '客户关注到账时效、费率透明与对账便利，需以综合方案替代单点比价。' },
+  ],
+  renew: [
+    { t: '核心资金需求', p: '授信 90 天内到期，客户需要无缝续作以避免临时资金缺口；应收账期拉长带来的周转压力可由应收账款保理补充。' },
+    { t: '结算与沉淀需求', p: '续贷同时提升结算集中度，以结算贡献换取综合定价空间，并叠加代发形成沉淀。' },
+    { t: '服务与效率需求', p: '客户最关注续贷时效与条件稳定，需提前 60 天启动并一次性明确材料清单。' },
+  ],
+  fx: [
+    { t: '核心资金需求', p: '出口收汇账期 60–90 天，发货后至收汇前存在资金占用，需要出口押汇解决账期内周转。' },
+    { t: '避险与结算需求', p: '美元结算占比高，汇率波动直接影响利润，需以远期结汇分批锁定成本，并将收汇路径迁至本行。' },
+    { t: '服务与效率需求', p: '客户关注结汇价格与融资额度联动、单据处理效率与外汇政策辅导。' },
+  ],
+  tech: [
+    { t: '核心资金需求', p: '研发投入大、抵押物不足，需要以信用方式解决研发与订单资金，审批依据为研发能力与订单而非抵押。' },
+    { t: '结算与沉淀需求', p: '放款后配套代发工资与结算，形成存款沉淀；知识产权质押作为后续增额路径。' },
+    { t: '服务与效率需求', p: '客户关注审批口径与政府贴息政策的对接，需一并给出申报辅导。' },
+  ],
+  sub: [
+    { t: '核心资金需求', p: '新设子公司注册资本实缴与开户为首要事项，初期运营资金可由母公司担保或信用方式解决。' },
+    { t: '结算与沉淀需求', p: '母子公司资金往来频繁，需以集团现金管理实现归集与可视化，减少来回划转。' },
+    { t: '服务与效率需求', p: '客户关注开户时效与线上服务，代发与结算套餐作为后续沉淀动作。' },
+  ],
+};
+const PRODUCT_META: Record<string, { amount: string; term: string; pricing: string; access: string; dept: string }> = {
+  流动资金贷款: { amount: '单户 500–3,000 万元', term: '1 年（可循环）', pricing: 'LPR(1Y) + 30–80BP', access: '定点通知 / 中标合同、近 12 个月流水、无重大涉诉', dept: '支行公司业务 · 授信审批部' },
+  供应链票据贴现: { amount: '按票面，单户 ≤ 2,000 万元', term: '≤ 6 个月', pricing: '贴现率按当日报价', access: '核心企业为白名单客户，贸易背景真实', dept: '支行公司业务 · 票据中心' },
+  代发工资: { amount: '按员工人数', term: '持续', pricing: '免收手续费', access: '开立基本户或一般户', dept: '支行 · 运营管理部' },
+  远期结汇: { amount: '名义金额 ≤ 年收汇 60%', term: '3–12 个月', pricing: '按当日远期报价', access: '出口收汇真实，外汇账户在行', dept: '国际业务部' },
+  出口押汇: { amount: '单笔 ≤ 发票金额 90%', term: '≤ 90 天', pricing: 'LPR(1Y) + 50–100BP', access: '出口单据齐全，买方信用可查', dept: '国际业务部 · 授信审批部' },
+  结算套餐: { amount: '按结算量', term: '1 年', pricing: '结算费率按套餐价目', access: '基本户或一般户开立', dept: '支行 · 运营管理部' },
+  收单聚合支付: { amount: '按门店数', term: '持续', pricing: '收单费率按行内价目', access: '经营场所真实，营业执照有效', dept: '支行 · 产品创新部' },
+  固定资产贷款: { amount: '≤ 项目总投 70%', term: '3–5 年', pricing: 'LPR(5Y) + 20–60BP', access: '项目立项 / 设备合同，自筹资金到位', dept: '支行公司业务 · 授信审批部' },
+  供应链保理: { amount: '≤ 应收账款 80%', term: '≤ 1 年', pricing: 'LPR(1Y) + 40–90BP', access: '买方为核心企业或政府平台，应收账款确权', dept: '支行公司业务 · 产品创新部' },
+  科创信用贷: { amount: '单户 ≤ 1,000 万元', term: '1–3 年', pricing: 'LPR(1Y) + 30–60BP（可对接贴息）', access: '专精特新 / 高新认定，研发投入占比达标', dept: '支行公司业务 · 授信审批部' },
+  知识产权质押: { amount: '≤ 评估值 50%', term: '1–3 年', pricing: 'LPR(1Y) + 40–80BP', access: '专利权属清晰，评估机构在册', dept: '支行公司业务 · 授信审批部' },
+  票据池: { amount: '按入池票据面额', term: '1 年', pricing: '质押率与费率按行内价目', access: '票据真实，背书连续', dept: '票据中心' },
+  基本户开立: { amount: '—', term: '即时', pricing: '免收账户管理费', access: '营业执照、法定代表人身份核验', dept: '支行 · 运营管理部' },
+  集团现金管理: { amount: '按成员单位数', term: '1 年（自动续期）', pricing: '按现金管理服务协议', access: '母子公司账户在行，授权书齐全', dept: '产品创新部 · 运营管理部' },
+  续贷: { amount: '不高于原授信额度', term: '1 年', pricing: '不高于原合同定价', access: '到期前 60 天启动，贷后检查无异常', dept: '支行公司业务 · 授信审批部' },
+};
+const ME = PERSONAS[1];
+const ME_ORG = ME.org.replace(/\s*·\s*/, ' · ');
+const DATE_STR = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const fmtW = (n: number) => (n >= 10000 ? `${(n / 10000).toFixed(2)} 亿` : `${Math.round(n).toLocaleString('zh-CN')} 万`);
 const PAL = ['#e63946', '#f4b942', '#2dc48d', '#3a86ff', '#9b5de5', '#ff8c42', '#00b4d8', '#ff5da2'];
@@ -248,7 +308,9 @@ export default function MarketingPlan() {
   const [cycle, setCycle] = useState(8);
   const [budget, setBudget] = useState(38);
   const [run, setRun] = useState(0);
-  const [tab, setTab] = useState<'doc' | 'eff' | 'retro'>('doc');
+  const [tab, setTab] = useState<'eff' | 'retro'>('eff');
+  const [editing, setEditing] = useState(false);
+  const docRef = useRef<ProposalDocHandle>(null);
   const [campId, setCampId] = useState('cp1');
   const [toast, setToast] = useState<string | null>(null);
   // 效果预测参数
@@ -289,7 +351,7 @@ export default function MarketingPlan() {
     return { reach: targetN, resp: clamp(src.resp + bump, 10, 95), appt: src.appt, land: clamp(src.land + bump, 10, 95), loan: src.loan, dep: src.dep, cost: budget };
   }, [mode, coh, scn, targetN, singleId, budget]);
   const applyBaseline = () => { setPReach(baseline.reach); setPResp(baseline.resp); setPAppt(baseline.appt); setPLand(baseline.land); setPLoan(baseline.loan); setPDep(baseline.dep); setPYield(2.0); setPCost(baseline.cost); };
-  const generate = () => { applyBaseline(); setTab('doc'); setRun((r) => r + 1); };
+  const generate = () => { applyBaseline(); setTab('eff'); setEditing(false); setRun((r) => r + 1); };
 
   const eff = useMemo(() => {
     const resp = Math.round(pReach * pResp / 100);
@@ -318,6 +380,92 @@ export default function MarketingPlan() {
   }, [chans, budget]);
   const camp = CAMPS.find((c) => c.id === campId)!;
   const cmpData = METRICS.map((m, i) => ({ name: m, 预测: camp.pred[i], 实际: camp.act[i] }));
+
+  /* ---------- 正式方案书：由左侧配置与效果测算生成 ---------- */
+  const coRec = mode === 'single' ? COMPANIES.find((c) => c.id === singleId) : undefined;
+  const mainProd = prods.find((p) => roleOf(p) === '主打') ?? prods[0] ?? '综合金融服务';
+  const docTitle = mode === 'cohort' ? `「${coh.name}」客群营销方案` : `${single.name}营销方案`;
+  const docNo = `YSYH-YX-2026-${String(100 + (targetName.split('').reduce((s, c) => s + c.charCodeAt(0), 0) % 900)).padStart(4, '0')}`;
+  const docCustomer = mode === 'cohort' ? `${coh.name}（${coh.n} 户）` : `${single.name} · ${single.industry}`;
+  const proposal = useMemo<ProposalSections>(() => {
+    const phaseOf = (w: number) => (w === 1 ? '预热' : w <= 3 ? '首触' : w <= cycle - 2 ? '深化' : '收口');
+    const weeksAll = Array.from({ length: cycle }, (_, i) => i + 1);
+    const phases = (['预热', '首触', '深化', '收口'] as const).map((ph) => {
+      const weeks = weeksAll.filter((w) => phaseOf(w) === ph);
+      const chs = timeline.cells.filter((c) => c.weeks.some((w) => weeks.includes(w))).map((c) => c.c.t);
+      return { ph, weeks, chs };
+    }).filter((x) => x.weeks.length > 0);
+    const PH_TARGET: Record<string, string> = { 预热: '客群全量 · 财务负责人', 首触: '响应客户 · 财务负责人 / 实际控制人', 深化: '预约客户 · 决策人（财务总监 / 总经理）', 收口: '意向客户 · 决策人，分行产品经理协访' };
+    const PH_ACTION: Record<string, string> = { 预热: `${time}推送产品要点与政策解读，核对客户联系偏好`, 首触: TALKS[scn][0], 深化: TALKS[scn][1] ?? TALKS[scn][0], 收口: '出具正式方案，收集申请材料，进入审批流程并约定放款节奏' };
+    const overview: { k: string; v: string }[] = mode === 'cohort'
+      ? [
+        { k: '目标客群', v: `${coh.name}（${coh.n} 户）` },
+        { k: '筛选条件', v: coh.s },
+        { k: '行业与区域', v: coh.tags.join('、') },
+        { k: '经营事件', v: `${scenario.t}：${scenario.s}` },
+        { k: '合作基础', v: scn === 'renew' ? '存量贷款客户，授信 90 天内到期，贷后检查无异常' : scn === 'sub' ? '母公司为本行客户，新设主体尚未开户' : '存量结算户为主，尚无授信或授信未在本行' },
+        { k: '数据来源', v: 'CRM 客群标签、历史营销活动数据、本行结算 / 存款数据（只读），不使用征信数据' },
+      ]
+      : [
+        { k: '企业名称', v: single.name },
+        { k: '行业 / 区域', v: `${single.industry}${coRec ? ` · ${coRec.district}` : ''}` },
+        { k: '与我行关系', v: coRec ? coRec.relation : '存量结算户' },
+        ...(coRec ? [{ k: '存款 / 结算 / 敞口', v: `日均存款 ${fmtW(coRec.deposit)} · 年结算量 ${fmtW(coRec.settlement)} · 授信敞口 ${coRec.exposure ? fmtW(coRec.exposure) : '无'}` }] : []),
+        { k: '经营事件', v: `${scenario.t}：${scenario.s}${coRec ? `；${coRec.note}` : ''}` },
+        { k: '客户标签', v: coRec ? coRec.tags.join('、') : `${single.exporter ? '出口收汇 · ' : ''}${single.industry}` },
+      ];
+    const goals = [
+      { k: '触达户数', v: `${pReach} 户`, note: mode === 'cohort' ? '客群全量触达' : '单户 · 决策链全覆盖' },
+      { k: '响应 / 预约拜访', v: `${eff.resp} / ${eff.appt} 户`, note: `响应率 ${pResp}%，预约转化 ${pAppt}%` },
+      { k: '方案落地', v: `${eff.land} 户`, note: `落地转化 ${pLand}%（${scenario.goal}）` },
+      { k: '新增贷款', v: fmtW(eff.loan), note: `户均 ${fmtW(pLoan)}` },
+      { k: '新增日均存款', v: fmtW(eff.dep), note: `户均 ${fmtW(pDep)}` },
+      { k: '年综合收益 / ROI', v: `${eff.income.toFixed(0)} 万 / ${eff.roi.toFixed(1)}`, note: `营销成本 ${pCost} 万，周期 ${cycle} 周` },
+    ];
+    const products = prods.map((p) => { const m = PRODUCT_META[p]; return { name: p, role: roleOf(p) ?? '补充', amount: m?.amount ?? '按客户需求', term: m?.term ?? '按产品规定', pricing: m?.pricing ?? '按行内价目', access: m?.access ?? '按产品准入要求', dept: m?.dept ?? '支行公司业务' }; });
+    const touch = phases.map((x) => ({ when: `第 ${x.weeks[0]}${x.weeks.length > 1 ? `–${x.weeks[x.weeks.length - 1]}` : ''} 周 · ${x.ph}`, channel: x.chs.length ? x.chs.join(' / ') : '—', target: PH_TARGET[x.ph], action: PH_ACTION[x.ph], owner: x.ph === '收口' ? `${ME.name} · 支行负责人` : ME.name }));
+    const effect = {
+      rows: [
+        { k: '触达 → 响应 → 预约 → 落地', v: `${pReach} → ${eff.resp} → ${eff.appt} → ${eff.land} 户`, note: '按历史转化率逐级测算' },
+        { k: '新增贷款', v: fmtW(eff.loan), note: `落地 ${eff.land} 户 × 户均 ${fmtW(pLoan)}` },
+        { k: '新增日均存款', v: fmtW(eff.dep), note: `落地 ${eff.land} 户 × 户均 ${fmtW(pDep)}` },
+        { k: '贷款利差收益', v: `${(eff.loan * pYield / 100).toFixed(0)} 万`, note: `净利差 ${pYield}%` },
+        { k: '存款利差收益', v: `${(eff.dep * 1.8 / 100).toFixed(0)} 万`, note: '存款 FTP 利差 1.8%' },
+        { k: '中间业务收入', v: `${(eff.land * 1.5).toFixed(0)} 万`, note: '户均 1.5 万' },
+        { k: '年综合收益', v: `${eff.income.toFixed(0)} 万`, note: '三项合计' },
+        { k: '营销成本 / 净收益', v: `${pCost} 万 / ${eff.net.toFixed(0)} 万`, note: `ROI ${eff.roi.toFixed(1)}` },
+      ],
+      chart: eff.funnel.map((f) => ({ name: f.name, v: f.v, label: `${f.v} 户` })),
+      chartTitle: '转化漏斗（户）',
+      note: `敏感性：响应率下降 10 个百分点时，预计落地约 ${Math.round(Math.round(pReach * Math.max(0, pResp - 10) / 100) * pAppt / 100 * pLand / 100)} 户。历史转化率来自本行历史营销活动数据，客单贡献按客群均值估算，测算结果不构成收益承诺。`,
+    };
+    const risks = [
+      '营销触达遵守客户联系偏好与行内营销合规要求，不使用征信数据进行营销，不向客户泄露他行信息。',
+      '话术不评价同业、不承诺利率与审批结果；产品额度、期限与定价以行内授信审批与产品准入为准。',
+      `${scn === 'first' || scn === 'tech' ? '首次融资客户' : '目标客户'}信息以客户提供材料与公开信息为准，方案落地前须完成尽职调查、反洗钱与关联关系核查。`,
+      ...TALKS[scn].slice(2).map((t) => `话术口径：${t}`),
+      ...(coRec && (coRec.risk === 'orange' || coRec.risk === 'yellow') ? [`${coRec.name} 当前存在风险提示（${coRec.tags.join('、')}），营销推进前须核实风险信号并取得支行负责人意见。`] : []),
+      'AI 生成内容为辅助建议，本方案须经人工复核并按权限审批后执行。',
+    ];
+    const resources = [
+      ...budgetRows.map((r) => ({ item: `${r.k}：${r.v.toFixed(1)} 万（${r.s}）`, dept: '支行', owner: ME.name, due: `${cycle} 周内按进度使用` })),
+      { item: `${mainProd}产品经理支持与方案出具`, dept: '分行产品创新部 / 公司业务部', owner: '产品经理', due: '首触后 3 个工作日' },
+      { item: '授信审批时效承诺（材料齐全后 10 个工作日）', dept: '授信审批部', owner: '审批经理', due: '收口阶段' },
+      ...(chans.includes('salon') || chans.includes('brief') ? [{ item: '沙龙 / 说明会场地、讲师与物料', dept: '支行 · 分行公司业务部', owner: '支行负责人', due: '第 2–4 周' }] : []),
+    ];
+    return {
+      overview, needs: NEEDS[scn], goals, products, touch, effect, risks, resources,
+      needsNote: `综合以上需求，本方案以「${mainProd}」为首触卖点，配套${products.filter((p) => p.role !== '主打').map((p) => p.name).join('、') || '结算类产品'}，形成融资、结算与沉淀的闭环。`,
+      touchNote: `触达频次 ${FREQS.find((f) => f.k === freq)?.t ?? ''}，时间偏好 ${time}，合计 ${timeline.touches} 次触达；每次触达后 24 小时内在 CRM 记录反馈并更新客户反应度。`,
+      attachments: [`目标客群清单（${targetN} 户，含联系偏好）`, '产品说明书与准入要点', '话术要点与异议应对', '效果测算明细表', '预算明细表', '历史同类活动回评报告'],
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, coh, single, coRec, scn, scenario, prods, cycle, time, freq, timeline, eff, pReach, pResp, pAppt, pLand, pLoan, pDep, pYield, pCost, budgetRows, chans, targetN, mainProd]);
+  const conclusion = {
+    headline: `建议对「${targetName}」以「${mainProd}」为首触卖点，${cycle} 周内完成 ${eff.appt} 户预约拜访、${eff.land} 户方案落地，预计新增贷款 ${fmtW(eff.loan)}、年综合收益 ${eff.income.toFixed(0)} 万，ROI ${eff.roi.toFixed(1)}。`,
+    points: [`场景「${scenario.t}」与客群标签匹配：${scenario.s}`, `产品组合 ${prods.length} 项：${prods.slice(0, 3).join(' + ')}${prods.length > 3 ? ' 等' : ''}`, `${chans.length} 个渠道、${timeline.touches} 次触达，遵守客户联系偏好`, `营销成本 ${pCost} 万，净收益 ${eff.net.toFixed(0)} 万`],
+    evidence: ['CRM 客群标签', '历史营销活动数据', '产品目录与定价参数', '本行结算 / 存款数据'],
+  };
 
   return (
     <div>
@@ -393,7 +541,7 @@ export default function MarketingPlan() {
 
         {/* ---------------- 右：思考流 + 方案 / 预测 / 回评 ---------------- */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
-          <div className="card fade-in" style={{ animationDelay: '80ms' }}>
+          <div className="card fade-in mp-noprint" style={{ animationDelay: '80ms' }}>
             <div className="card-h"><div className="card-t"><span className="dot" />方案生成{run > 0 && !finished && <span className="pulse" />}</div><span className="card-s">场景匹配 → 产品组合 → 触达节奏 → 效果测算</span></div>
             {run === 0 && <div className="mp-empty" style={{ minHeight: 130 }}><div><div className="ring"><Megaphone size={22} /></div>完成左侧三步配置后点击「生成方案」。</div></div>}
             {run > 0 && (
@@ -414,81 +562,18 @@ export default function MarketingPlan() {
           </div>
 
           {finished && (
-            <div className="card fade-in">
+            <>
+              <AiConclusion headline={conclusion.headline} points={conclusion.points} evidence={conclusion.evidence} confidence={0.86} actions={['visit', 'talk', 'forward']} onSystem={(_id, label) => setToast(`${label}：已连同方案书推送行内 OA，待接收部门处理`)} />
+              <div className="mp-dockbar">
+                <span className="lab"><FileText size={13} />正式营销方案书 · {docNo} · {editing ? '编辑中' : '待复核'}</span>
+                <DocActions title={docTitle} editing={editing} onEdit={() => setEditing((v) => !v)} getHtml={() => docRef.current?.getHtml() ?? ''} onToast={setToast} compact />
+              </div>
+              <ProposalDoc ref={docRef} title={docTitle} no={docNo} customer={docCustomer} org={ME_ORG} author={ME.name} date={DATE_STR} sections={proposal} editing={editing} />
+            <div className="card fade-in mp-noprint">
               <div className="mp-tabs">
-                <button className={tab === 'doc' ? 'on' : ''} onClick={() => setTab('doc')}><Layers size={13} />方案文档</button>
                 <button className={tab === 'eff' ? 'on' : ''} onClick={() => setTab('eff')}><Gauge size={13} />效果预测</button>
                 <button className={tab === 'retro' ? 'on' : ''} onClick={() => setTab('retro')}><ClipboardCheck size={13} />执行后回评</button>
               </div>
-
-              {/* ---------- 方案文档 ---------- */}
-              {tab === 'doc' && (
-                <div className="fade-in" style={{ marginTop: 14 }}>
-                  <div className="mp-hero">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                      <div><h3>「{targetName}」营销方案</h3><p>场景：{scenario.t} · 目标：{scenario.goal} · 周期 {cycle} 周 · 预算 {budget} 万</p></div>
-                      <span className="ai-tag"><Sparkles size={11} /> AI 生成 · 辅助建议 · 需人工复核</span>
-                    </div>
-                  </div>
-                  <div className="mp-sec"><Target size={12} />目标客群</div>
-                  <div className="kv mp-kv">
-                    <div className="row"><span>对象</span><span>{mode === 'cohort' ? `${coh.name} · ${coh.n} 户` : `${single.name} · ${single.industry}`}</span></div>
-                    <div className="row"><span>特征</span><span>{mode === 'cohort' ? coh.s : `${single.exporter ? '出口收汇 · ' : ''}${SCENARIOS.find((s) => s.k === single.event)?.s}`}</span></div>
-                    <div className="row"><span>场景触发</span><span>{scenario.s}</span></div>
-                    <div className="row"><span>营销目标</span><span>{scenario.goal} · 预计落地 {eff.land} 户</span></div>
-                  </div>
-                  <div className="mp-sec"><Layers size={12} />产品组合</div>
-                  <div className="mp-pc">
-                    {prods.map((p) => { const r = roleOf(p); return <div key={p} className={`p ${r === '主打' ? 'main' : r === '搭配' ? 'pair' : r === '沉淀' ? 'dep' : ''}`}><span className="r">{r ?? '补充'}</span><b>{p}</b><span style={{ color: 'var(--ink-2)' }}>{r === '主打' ? '解决核心资金需求，首触卖点' : r === '搭配' ? '与主打产品打包，提升综合收益' : r === '沉淀' ? '形成结算与存款沉淀' : '按客户需求选配'}</span></div>; })}
-                  </div>
-                  <div className="mp-sec"><CalendarRange size={12} />触达节奏时间线 · {FREQS.find((f) => f.k === freq)?.t} · {time}</div>
-                  <div className="mp-svgwrap">
-                    {(() => {
-                      const left = 110, top = 34, cw = Math.max(52, 560 / cycle), rh = 30;
-                      const W = left + cw * cycle + 16, H = top + rh * Math.max(1, timeline.cells.length) + 14;
-                      const phase = (w: number) => (w === 1 ? '预热' : w <= 3 ? '首触' : w <= cycle - 2 ? '深化' : '收口');
-                      const phaseColor: Record<string, string> = { 预热: '#3a86ff', 首触: '#e63946', 深化: '#f4b942', 收口: '#2dc48d' };
-                      return (
-                        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="触达节奏时间线">
-                          <defs>
-                            {PAL.map((c, i) => <linearGradient key={i} id={`mp-tl${i}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={c} /><stop offset="1" stopColor={PAL2[i]} /></linearGradient>)}
-                            <linearGradient id="mp-row" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="rgba(201,162,77,.14)" /><stop offset="1" stopColor="rgba(61,187,134,.10)" /></linearGradient>
-                          </defs>
-                          {Array.from({ length: cycle }, (_, i) => i + 1).map((w) => (
-                            <g key={w}>
-                              <rect x={left + (w - 1) * cw + 2} y={6} width={cw - 4} height={18} rx={6} fill={phaseColor[phase(w)]} opacity={.16} />
-                              <text x={left + (w - 1) * cw + cw / 2} y={19} textAnchor="middle" fontSize="10" fontWeight="800" fill="#4a3f2e">W{w} · {phase(w)}</text>
-                            </g>
-                          ))}
-                          {timeline.cells.map((cell, ri) => {
-                            const ci = CHANNELS.findIndex((c) => c.k === cell.c.k);
-                            return (
-                              <g key={cell.c.k}>
-                                <rect x={4} y={top + ri * rh} width={W - 8} height={rh - 4} rx={8} fill="url(#mp-row)" />
-                                <text x={12} y={top + ri * rh + 17} fontSize="11" fontWeight="800" fill="#1e1b16">{cell.c.t}</text>
-                                {cell.weeks.map((w) => <circle key={w} cx={left + (w - 1) * cw + cw / 2} cy={top + ri * rh + 13} r={7} fill={`url(#mp-tl${ci % PAL.length})`} stroke="#fff" strokeWidth="2" />)}
-                                {cell.weeks.length > 1 && <line x1={left + (cell.weeks[0] - 1) * cw + cw / 2} y1={top + ri * rh + 13} x2={left + (cell.weeks[cell.weeks.length - 1] - 1) * cw + cw / 2} y2={top + ri * rh + 13} stroke={PAL[ci % PAL.length]} strokeWidth="2" strokeDasharray="3 4" opacity=".6" />}
-                              </g>
-                            );
-                          })}
-                          {timeline.cells.length === 0 && <text x={W / 2} y={top + 18} textAnchor="middle" fontSize="12" fill="#8c8478">请至少选择一个渠道</text>}
-                        </svg>
-                      );
-                    })()}
-                  </div>
-                  <div className="mp-sec"><MessageSquare size={12} />话术要点</div>
-                  {TALKS[scn].map((t, i) => <div key={t} className="mp-talk"><span className="n">{i + 1}</span><span>{t}</span></div>)}
-                  <div className="mp-sec"><Wallet size={12} />预算明细 · 合计 {budget} 万</div>
-                  <table className="tbl mp-budget">
-                    <thead><tr><th>项目</th><th>说明</th><th>金额（万）</th></tr></thead>
-                    <tbody>{budgetRows.map((r) => <tr key={r.k}><td style={{ fontWeight: 700 }}>{r.k}</td><td style={{ color: 'var(--ink-2)' }}>{r.s}</td><td className="num" style={{ fontWeight: 800 }}>{r.v.toFixed(1)}</td></tr>)}</tbody>
-                  </table>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div className="mp-note" style={{ marginTop: 0 }}><ShieldCheck size={12} /> 触达遵守客户联系偏好；话术不评价同业、不承诺利率与审批结果。</div>
-                    <div style={{ display: 'flex', gap: 8 }}><button className="btn sm gold" onClick={() => setTab('eff')}><Gauge size={12} />查看效果预测</button><button className="btn sm" onClick={() => setToast('方案已推送给团队成员并加入执行清单')}><Send size={12} />下发执行</button></div>
-                  </div>
-                </div>
-              )}
 
               {/* ---------- 效果预测 ---------- */}
               {tab === 'eff' && (
@@ -595,16 +680,17 @@ export default function MarketingPlan() {
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
                         <span className="ai-tag"><Sparkles size={11} /> AI 生成 · 辅助建议 · 需人工复核</span>
                         <button className="btn sm ghost" onClick={() => setToast('回评报告已导出并归档')}><Download size={12} />导出回评报告</button>
-                        <button className="btn sm gold" onClick={() => { const s = SCENARIOS.find((x) => x.k === camp.scn)!; pickScn(s.k); setTab('doc'); setToast('已将优化建议应用到新方案的场景与产品组合'); }}><ArrowRight size={12} />应用到新方案</button>
+                        <button className="btn sm gold" onClick={() => { const s = SCENARIOS.find((x) => x.k === camp.scn)!; pickScn(s.k); setTab('eff'); setToast('已将优化建议应用到新方案的场景与产品组合'); }}><ArrowRight size={12} />应用到新方案</button>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
+            </>
           )}
 
-          <div className="card fade-in" style={{ animationDelay: '160ms' }}>
+          <div className="card fade-in mp-noprint" style={{ animationDelay: '160ms' }}>
             <div className="card-h"><div className="card-t"><History size={14} />历史记录</div><span className="card-s">最近方案与回评</span></div>
             <div className="mp-hist">
               {HISTORY.map((h) => <div key={h.d + h.t} className="h" onClick={() => setToast(`已打开「${h.t}」`)}><span className="d">{h.d}</span><span className="t">{h.t}</span><span className={`chip ${h.s === '已归档' ? '' : h.s === '执行中' ? 'blue' : h.s === '已复核' ? 'green' : 'orange'}`} style={{ padding: '1px 8px', fontSize: 11 }}><i />{h.s}</span><ArrowRight size={12} color="var(--ink-3)" /></div>)}

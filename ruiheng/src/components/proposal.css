@@ -1,0 +1,80 @@
+/* ==========================================================================
+   正式营销方案书（ProposalDoc）— 银行正式文书排版
+   规则：纸面 / 表头 / 签字框 / 标黄均为渐变；正文宋体；打印时去阴影。
+   ========================================================================== */
+.pd-wrap { display: flex; flex-direction: column; gap: 10px; }
+.pd-hint { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; color: #7a5a06; background: linear-gradient(135deg, #fff8e6, #ffeeb8 60%, #fff5d6); box-shadow: inset 0 0 0 1px rgba(201,162,77,.45); }
+.pd-hint i { width: 14px; height: 14px; border-radius: 3px; background: linear-gradient(180deg, #fff6b8, #ffe98a); box-shadow: inset 0 0 0 1px rgba(201,162,77,.6); display: inline-block; }
+
+.pd { position: relative; max-width: 880px; width: 100%; margin: 0 auto; padding: 44px 56px 36px; color: #1a1712; border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #fffdf8 50%, #fbfaf5 100%);
+  box-shadow: 0 18px 50px rgba(92,64,20,.12), 0 2px 6px rgba(92,64,20,.06), inset 0 0 0 1px rgba(201,162,77,.2);
+  font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", Georgia, serif; font-size: 13.5px; line-height: 1.85; }
+.pd::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; border-radius: 6px 6px 0 0; background: var(--g-iris); }
+.pd::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.5), rgba(255,255,255,0) 60%); }
+.pd > * { position: relative; z-index: 1; }
+
+/* 文头 */
+.pd-org { text-align: center; font-size: 13px; letter-spacing: .32em; font-weight: 800; color: #8e1b1b; }
+.pd-title { text-align: center; font-size: 27px; font-weight: 900; letter-spacing: .12em; line-height: 1.4; margin: 6px 0 2px; background: linear-gradient(120deg, #8e1b1b, #c3272b 50%, #8e1b1b); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.pd-kind { text-align: center; font-size: 13px; letter-spacing: .5em; color: #5f5850; margin-bottom: 8px; }
+.pd-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: #5f5850; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.pd-meta b { color: #1a1712; }
+.pd-rule { height: 3px; margin: 8px 0 16px; border-radius: 2px; background: linear-gradient(90deg, #8e1b1b, #c3272b 40%, #e3a93c 72%, rgba(227,169,60,0)); }
+
+/* 章节标题 */
+.pd h3 { font-size: 15.5px; font-weight: 900; letter-spacing: .04em; margin: 22px 0 8px; display: flex; align-items: center; gap: 8px; page-break-after: avoid; }
+.pd h3::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--g-red); flex-shrink: 0; }
+.pd h3 small { font-weight: 600; font-size: 11.5px; color: #8c8478; letter-spacing: 0; margin-left: auto; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.pd p { margin: 0 0 8px; text-indent: 2em; text-align: justify; }
+.pd p.pd-noindent { text-indent: 0; }
+.pd ol.pd-list { margin: 0 0 8px 2em; padding: 0; }
+.pd ol.pd-list li { margin-bottom: 4px; text-align: justify; padding-left: 4px; }
+
+/* 表格 */
+.pd table.pd-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 6px 0 10px; line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; page-break-inside: auto; }
+.pd-tbl th { border: 1px solid rgba(120,100,60,.38); padding: 6px 8px; text-align: left; font-weight: 800; color: #3a2a08; background: linear-gradient(180deg, #fff6df, #f5e5b3); white-space: nowrap; }
+.pd-tbl td { border: 1px solid rgba(120,100,60,.32); padding: 6px 8px; vertical-align: top; background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.7)); }
+.pd-tbl tr:nth-child(even) td { background: linear-gradient(180deg, rgba(253,250,243,.95), rgba(250,246,236,.85)); }
+.pd-tbl td.num, .pd-tbl th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pd-kv td:first-child, .pd-kv td.pd-k { width: 128px; font-weight: 800; color: #3a2a08; background: linear-gradient(180deg, #fbf6ea, #f4ecd8) !important; white-space: nowrap; }
+.pd-headtbl { margin-bottom: 4px; }
+.pd-headtbl td.pd-k { width: 96px; }
+.pd-role { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 0 6px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; color: #8e1b1b; background: linear-gradient(135deg, #fff1ef, #ffd9d6); box-shadow: inset 0 0 0 1px rgba(195,39,43,.25); }
+.pd-role.pair { color: #9c7a2e; background: linear-gradient(135deg, #fff8e6, #f7e7b8); box-shadow: inset 0 0 0 1px rgba(201,162,77,.35); }
+.pd-role.dep { color: #155e3e; background: linear-gradient(135deg, #eafaf1, #c9efdc); box-shadow: inset 0 0 0 1px rgba(31,138,90,.3); }
+
+/* 效果测算：表 + 小图 */
+.pd-eff { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 760px) { .pd-eff { grid-template-columns: 1fr; } }
+.pd-chart-box { padding: 10px 10px 6px; border-radius: 8px; background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(250,246,236,.8)); box-shadow: inset 0 0 0 1px rgba(120,100,60,.22); }
+.pd-chart-box b { display: block; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; color: #5f5850; margin-bottom: 4px; }
+.pd-chart { width: 100%; height: auto; display: block; }
+
+/* 审批意见栏 */
+.pd-sign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 6px; page-break-inside: avoid; }
+@media (max-width: 760px) { .pd-sign { grid-template-columns: 1fr; } }
+.pd-sign .box { min-height: 150px; padding: 10px 12px; border: 1px solid rgba(120,100,60,.38); border-radius: 4px; display: flex; flex-direction: column; background: linear-gradient(180deg, #fffdf7, #f9f4e8); }
+.pd-sign .box > b { font-size: 13px; font-weight: 900; color: #3a2a08; padding-bottom: 6px; margin-bottom: 8px; border-bottom: 1px solid rgba(120,100,60,.25); }
+.pd-sign .box .hint { font-size: 11.5px; color: #8c8478; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.pd-sign .box .opinion { flex: 1; font-size: 12px; color: #8c8478; margin-top: 6px; }
+.pd-sign .box .opinion span { display: block; border-bottom: 1px dashed rgba(120,100,60,.4); height: 22px; }
+.pd-sign .box .line { margin-top: 10px; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #3a2a08; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.pd-sign .box .line em { font-style: normal; color: #1a1712; font-weight: 700; }
+
+/* 编辑态与修改标黄 */
+.pd[data-editing="true"] [contenteditable="true"] { outline: 1px dashed rgba(201,162,77,.6); outline-offset: 2px; cursor: text; border-radius: 2px; }
+.pd[data-editing="true"] [contenteditable="true"]:focus { outline: 2px solid rgba(195,39,43,.55); background: linear-gradient(180deg, rgba(255,251,235,.9), rgba(255,247,220,.9)); }
+.pd .pd-mod { background: linear-gradient(180deg, #fff6b8, #ffe98a) !important; box-shadow: inset 0 0 0 1px rgba(201,162,77,.55); }
+
+.pd-foot { margin-top: 24px; padding-top: 10px; border-top: 1px dashed rgba(120,100,60,.4); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 11.5px; color: #8c8478; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+
+@media print {
+  .pd-hint { display: none !important; }
+  .pd { max-width: none; padding: 0; border-radius: 0; box-shadow: none; background: linear-gradient(180deg, #fff, #fff); }
+  .pd::before, .pd::after { display: none; }
+  .pd .pd-mod { background: linear-gradient(180deg, #fff, #fff) !important; box-shadow: none; }
+  .pd [contenteditable="true"] { outline: none !important; }
+  .pd-tbl th, .pd-tbl td, .pd-kv td:first-child, .pd-sign .box, .pd-chart-box { background: linear-gradient(180deg, #fff, #fff) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pd h3 { page-break-after: avoid; }
+}

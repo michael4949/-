@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Radar, Sparkles, Check, RotateCcw, Search, ShieldCheck, ChevronRight, Download, History, CalendarDays, CalendarClock, Zap, Layers,
-  MessageSquareText, Clock, TrendingUp, Building2, Workflow, AlertTriangle, ArrowRight, BadgeCheck, Coins, Send, Bell, Target,
+  MessageSquareText, Clock, TrendingUp, Building2, Workflow, AlertTriangle, ArrowRight, BadgeCheck, Coins, Send, Bell, Target, FileText, Gauge,
 } from 'lucide-react';
+import AiConclusion from '../../components/AiConclusion';
+import DocActions from '../../components/DocActions';
+import ProposalDoc, { type ProposalDocHandle, type ProposalSections } from '../../components/ProposalDoc';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, LabelList } from 'recharts';
 import { COMPANIES, companyById } from '../../data/companies';
 import { PERSONAS } from '../../data/personas';
@@ -85,6 +88,17 @@ const CSS = `
 .sm-hero{display:flex;align-items:center;gap:14px}
 .sm-hero .big{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;flex-shrink:0;box-shadow:0 8px 18px rgba(0,0,0,.12)}
 .sm-hero h2{font-size:18px;font-weight:900}
+.sm-dockbar{position:sticky;top:64px;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:var(--g-holo);box-shadow:var(--shadow-sm),inset 0 0 0 1px rgba(201,162,77,.28);margin-bottom:14px}
+.sm-dockbar .lab{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--gold-3);letter-spacing:.06em}
+.sm-tabs{display:flex;gap:4px;padding:3px;border-radius:12px;background:var(--g-holo-2);box-shadow:inset 0 0 0 1px var(--line);margin-bottom:14px}
+.sm-tabs button{flex:1;border:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:800;padding:8px 12px;border-radius:9px;color:var(--ink-2);background:linear-gradient(135deg,rgba(255,255,255,.6),rgba(255,255,255,.2));display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sm-tabs button.on{background:var(--g-red);color:#fff;box-shadow:0 6px 14px rgba(195,39,43,.22)}
+.sm-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:900px){.sm-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sm-tiles .tile.gold::before{background:var(--g-gold)} .sm-tiles .tile.green::before{background:var(--g-green)} .sm-tiles .tile.red::before{background:var(--g-red)} .sm-tiles .tile.blue::before{background:linear-gradient(135deg,#8cc0ff,#1d4ed8)}
+.sm-sens td:not(:first-child),.sm-sens th:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.sm-sens tr.cur td{font-weight:800;background:var(--g-gold-soft)}
+@media print{.sm-top,.sm-crumb,.sm-note,.sm-noprint,.sm-dockbar,.aic,.sm-toast{display:none!important}}
 `;
 
 /* ------------------------------------------------------------------ 数据 */
@@ -199,6 +213,7 @@ const HIST0 = [
   { time: '09-02 10:05', text: '宁桂精密机械 · 获定点 · 场景识别完成，方案待生成', tone: 'purple' },
 ];
 const PUSHED0: Record<string, string> = { e02: '09-08 拜访' };
+const DATE_STR = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
 
 function useSteps(total: number, running: boolean, token: number, gap = 780) {
   const [n, setN] = useState(0);
@@ -285,6 +300,9 @@ export default function ScenarioMarketing() {
   const [pushed, setPushed] = useState<Record<string, string>>(PUSHED0);
   const [toast, setToast] = useState('');
   const [hist, setHist] = useState(HIST0);
+  const [editing, setEditing] = useState(false);
+  const [tab, setTab] = useState<'eff' | 'talk'>('eff');
+  const docRef = useRef<ProposalDocHandle>(null);
 
   const ev = EVENTS.find((x) => x.id === sel) ?? EVENTS[0];
   const co = companyById(ev.co);
@@ -300,7 +318,7 @@ export default function ScenarioMarketing() {
   const flash = (m: string) => { setToast(m); window.setTimeout(() => setToast(''), 2600); };
   const now = () => '09-06 ' + new Date().toTimeString().slice(0, 5);
   const pick = (id: string) => { setSel(id); setRun(0); };
-  const generate = () => { setRun((r) => r + 1); setHist((h) => [{ time: now(), text: `${co.name} · ${ev.type} · 一键生成方案`, tone: 'purple' }, ...h]); };
+  const generate = () => { setRun((r) => r + 1); setEditing(false); setTab('eff'); setHist((h) => [{ time: now(), text: `${co.name} · ${ev.type} · 一键生成方案`, tone: 'purple' }, ...h]); };
   const push = () => {
     const d = ev.expected ? Math.max(TODAY + 2, ev.day - 10) : TODAY + 2 + (rng(ev.day * 7)() > 0.5 ? 1 : 0);
     const label = `09-${String(d).padStart(2, '0')} 拜访`;
@@ -312,6 +330,96 @@ export default function ScenarioMarketing() {
   const chartData = plan.products.filter((x) => x.amt > 0).map((x) => ({ name: x.name.length > 9 ? x.name.slice(0, 9) + '…' : x.name, amt: Math.round(x.amt), term: x.term, kind: x.kind }));
   const KIND_G: Record<Prod['kind'], string> = { 融资: 'sm-b-fin', 结算: 'sm-b-set', 避险: 'sm-b-fx', 服务: 'sm-b-svc' };
   const highConf = EVENTS.filter((e) => e.conf === '高').length;
+
+  /* ---------- 正式方案书：由事件、场景识别与效果预估生成 ---------- */
+  const owner = P(co.owner);
+  const ownerOrg = owner.org.replace(/\s*·\s*/, ' · ');
+  const docTitle = `${co.name}「${ev.type}」场景化营销方案`;
+  const docNo = `YSYH-CJ-2026-${String(100 + (ev.id.charCodeAt(1) * 31 + ev.day * 7) % 900).padStart(4, '0')}`;
+  const relF = co.relation.includes('贷款') ? 1.05 : 0.95;
+  const riskF = co.risk === 'red' ? 0.6 : co.risk === 'orange' ? 0.85 : 1;
+  const sens = [
+    { t: `当前（置信 ${ev.conf}）`, c: confFactor[ev.conf], rel: relF, risk: riskF, cur: true },
+    { t: '置信升至「高」（两源交叉验证后）', c: 1, rel: relF, risk: riskF, cur: false },
+    { t: '置信降至「低」（单一来源未核实）', c: 0.62, rel: relF, risk: riskF, cur: false },
+    { t: '关系升级为贷款客户', c: confFactor[ev.conf], rel: 1.05, risk: riskF, cur: false },
+    { t: '风险分类转为关注类', c: confFactor[ev.conf], rel: relF, risk: 0.85, cur: false },
+  ].map((s) => { const prob = Math.round(Math.min(0.9, plan.base * s.c * s.rel * s.risk) * 100); return { ...s, prob, exp: eff.income * prob / 100 }; });
+  const proposal = useMemo<ProposalSections>(() => {
+    const RISK_TXT: Record<string, string> = { red: '风险类（红）', orange: '关注类（橙）', yellow: '提示类（黄）', green: '正常类（绿）' };
+    const KIND_DEPT: Record<Prod['kind'], string> = { 融资: '支行公司业务 · 授信审批部', 结算: '支行 · 运营管理部', 避险: '国际业务部', 服务: '投资银行部 / 产品创新部' };
+    const KIND_PRICE: Record<Prod['kind'], string> = { 融资: 'LPR 加点，以授信审批为准', 结算: '按行内结算价目', 避险: '按当日远期 / 期权报价', 服务: '按服务协议约定' };
+    const timing0 = plan.timing.split('；')[0];
+    const overview = [
+      { k: '企业名称', v: co.name },
+      { k: '行业 / 区域', v: `${co.industry} · ${co.district}` },
+      { k: '与我行关系', v: co.relation },
+      { k: '存款 / 结算 / 敞口', v: `日均存款 ${fmtWan(co.deposit)} · 年结算量 ${fmtWan(co.settlement)} · 授信敞口 ${co.exposure ? fmtWan(co.exposure) : '无'}` },
+      { k: '风险分类', v: `${RISK_TXT[co.risk]}；${co.note}` },
+      { k: '经营事件', v: `${ev.type}：${ev.title}（${ev.detail}）` },
+      { k: '事件来源与置信', v: `${ev.src} · ${ev.rule} · 置信 ${ev.conf}${ev.expected ? ' · 预计发生' : ''}` },
+      { k: '客户标签', v: co.tags.join('、') },
+    ];
+    const needs = plan.chain.map((c) => ({ t: c.need, p: `资金规模约 ${fmtWan(c.amt)}，时点 ${c.when}。` }));
+    const goals = [
+      { k: '新增授信 / 融资', v: fmtWan(eff.credit), note: '融资类产品额度参考合计' },
+      { k: '结算归集', v: fmtWan(eff.settle), note: '结算类产品覆盖规模' },
+      ...(eff.fx ? [{ k: '避险名义金额', v: fmtWan(eff.fx), note: '远期 / 期权组合，分批叙做' }] : []),
+      { k: '预计中间业务收入', v: fmtWan(eff.income), note: '融资 1.2% + 结算 0.15% + 避险 0.4%' },
+      { k: '转化概率', v: `${eff.prob}%`, note: `场景基准 ${Math.round(plan.base * 100)}% × 置信 ${confFactor[ev.conf]} × 关系 / 风险系数` },
+      { k: '目标完成时点', v: timing0, note: plan.timing.split('；')[1] ?? '—' },
+    ];
+    const products = plan.products.map((x) => ({ name: x.name, amount: x.amt > 0 ? fmtWan(x.amt) : '—', term: x.term, pricing: KIND_PRICE[x.kind], access: x.note, dept: KIND_DEPT[x.kind], role: x.kind }));
+    const touch = [
+      { when: 'D+1 至 D+2', channel: '电话 / 引荐', target: `${co.name} 财务负责人`, action: `${plan.entry}；预约首访时间，核对客户联系偏好`, owner: owner.name },
+      { when: timing0, channel: '上门拜访', target: '业务负责人 + 财务负责人', action: plan.talk[0], owner: `${owner.name}${co.owner !== 'zhou' ? `，集团类由 ${P('zhou').name} 支持` : ''}` },
+      { when: '首访后 5 个工作日内', channel: '上门 / 企业微信', target: '财务负责人', action: `${plan.talk[1] ?? ''}收集申请材料并出具一页纸方案。`, owner: owner.name },
+      { when: '材料齐全后 10 个工作日', channel: '正式方案 / 审批', target: '决策人（总经理 / 董事长）', action: `提交产品部出具正式方案；${plan.talk[2] ?? '明确审批时效与放款节奏。'}`, owner: `${owner.name} · 产品经理 · 支行负责人` },
+    ];
+    const effect = {
+      rows: [
+        { k: '融资类额度参考', v: fmtWan(eff.credit), note: plan.products.filter((x) => x.kind === '融资').map((x) => x.name).join(' / ') || '—' },
+        { k: '结算归集规模', v: fmtWan(eff.settle), note: plan.products.filter((x) => x.kind === '结算').map((x) => x.name).join(' / ') || '按需求链 50% 估算' },
+        ...(eff.fx ? [{ k: '避险名义金额', v: fmtWan(eff.fx), note: '分批锁定' }] : []),
+        { k: '融资收益', v: fmtWan(eff.credit * 0.012), note: '额度 × 1.2%' },
+        { k: '结算收益', v: fmtWan(eff.settle * 0.0015), note: '规模 × 0.15%' },
+        ...(eff.fx ? [{ k: '避险收益', v: fmtWan(eff.fx * 0.004), note: '名义金额 × 0.4%' }] : []),
+        { k: '预计中收合计', v: fmtWan(eff.income), note: '不构成收益承诺' },
+        { k: '转化概率', v: `${eff.prob}%`, note: `置信高 / 中 / 低情形下分别为 ${sens[1].prob}% / ${Math.round(Math.min(0.9, plan.base * 0.82 * relF * riskF) * 100)}% / ${sens[2].prob}%` },
+      ],
+      chart: plan.products.filter((x) => x.amt > 0).map((x) => ({ name: x.name.length > 8 ? x.name.slice(0, 8) + '…' : x.name, v: Math.round(x.amt), label: fmtWan(Math.round(x.amt)) })),
+      chartTitle: '分产品额度参考（万元）',
+    };
+    const risks = [
+      ...(ev.caution ? [`准入提示：${ev.caution}`] : []),
+      `事件信息来源于${ev.src}（${ev.rule}），置信 ${ev.conf}；营销推进前须与客户核实并留存依据。`,
+      '方案仅为营销建议，准入与额度以行内审批为准；不承诺审批结果、利率与收益；不评价同业。',
+      co.risk === 'red' || co.risk === 'orange' ? `客户当前为${RISK_TXT[co.risk]}，涉及授信类产品须先完成风险核查并取得支行负责人意见。` : '客户当前风险分类正常，仍须在授信前完成尽职调查与反洗钱核查。',
+      '触达遵守客户联系偏好与行内营销合规要求，不使用征信数据进行营销。',
+      'AI 生成内容为辅助建议，本方案须经人工复核并按权限审批后执行。',
+    ];
+    const kinds = new Set(plan.products.map((x) => x.kind));
+    const resources = [
+      { item: '客户经理牵头拜访、材料收集与 CRM 记录', dept: ownerOrg.split(' · ')[1] ?? '支行', owner: owner.name, due: timing0 },
+      ...(kinds.has('融资') ? [{ item: '授信方案编制与审批时效（材料齐全后 10 个工作日）', dept: '授信审批部 · 分行公司业务部', owner: '审批经理', due: '首访后 15 个工作日' }] : []),
+      ...(kinds.has('结算') ? [{ item: '账户开立、现金管理与银企直联对接', dept: '运营管理部 · 产品创新部', owner: '产品经理', due: '首访后 10 个工作日' }] : []),
+      ...(kinds.has('避险') ? [{ item: '远期结汇 / 期权报价与外汇政策辅导', dept: '国际业务部', owner: '外汇产品经理', due: '首访后 3 个工作日' }] : []),
+      ...(kinds.has('服务') ? [{ item: '并购顾问与资金监管方案', dept: '投资银行部', owner: '投行产品经理', due: '首访后 10 个工作日' }] : []),
+      { item: '一页纸拜访材料与正式方案排版', dept: '分行公司业务部', owner: '方案支持岗', due: '首访前 1 个工作日' },
+    ];
+    return {
+      overview, needs, goals, products, touch, effect, risks, resources,
+      needsNote: `识别场景：${plan.scene}。${ev.detail}。`,
+      touchNote: `配套服务：${plan.services.join('、')}。行动清单：① 电话预约 ② 携一页纸方案拜访 ③ 收集申请材料 ④ 提交产品部出具正式方案。`,
+      attachments: [`事件依据材料（${ev.src}）`, '产品说明书与准入要点', '话术要点', '一页纸拜访材料', '额度测算明细', '客户联系偏好核对表'],
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ev, co, plan, eff, owner, ownerOrg]);
+  const conclusion = {
+    headline: `${co.name}「${ev.type}」场景成立（置信 ${ev.conf}），建议${plan.entry}，${plan.timing.split('；')[0]}；预计新增授信 ${fmtWan(eff.credit)}、中收 ${fmtWan(eff.income)}，转化概率 ${eff.prob}%。`,
+    points: [...plan.chain.map((c) => `${c.need}：${fmtWan(c.amt)} · ${c.when}`), `产品组合：${plan.products.map((x) => x.name).join(' / ')}`],
+    evidence: [ev.src, ev.rule.split('：')[0], '行内场景产品包与案例库', 'CRM / 客户 360（只读）'],
+  };
 
   return (
     <div className="sm">
@@ -332,7 +440,7 @@ export default function ScenarioMarketing() {
         <span className="chip green"><ShieldCheck size={12} />事件仅来自公开公告、登记公示与客户告知 · 不使用征信营销 · 方案为营销建议，准入与额度以行内审批为准</span>
       </div>
 
-      <div className="grid g4">
+      <div className="grid g4 sm-noprint">
         <div className="tile"><b className="num">{EVENTS.length}</b><span>本月识别事件 · 其中预计发生 {EVENTS.filter((e) => e.expected).length} 条</span></div>
         <div className="tile"><b className="num">{highConf}</b><span>高置信事件 · 两源交叉验证</span></div>
         <div className="tile"><b className="num">{Object.keys(pushed).length + 3}</b><span>已生成方案 · 推送拜访 {Object.keys(pushed).length}</span></div>
@@ -492,16 +600,7 @@ export default function ScenarioMarketing() {
           <div className="sm-svc">{plan.services.map((s) => <span key={s} className="chip"><i />{s}</span>)}</div>
           {finished ? (
             <div className="fade-in">
-              <div className="sm-sec"><MessageSquareText size={12} />话术要点</div>
-              {plan.talk.map((t, i) => <div className="sm-talk" key={i}><span className="q">{i + 1}</span><span>{t}</span></div>)}
-              <div className="sm-sec"><Clock size={12} />最佳触达时点与策略</div>
-              <div className="sm-time"><CalendarClock size={16} /><span>{plan.timing}</span></div>
-              <ul className="sm-ul" style={{ marginTop: 8 }}>
-                <li>触达顺序：{plan.entry}；先业务负责人后财务负责人，行领导按需协访。</li>
-                <li>关键人：{co.name} 财务负责人、业务负责人；本行客户经理 {P(co.owner).name}{co.owner !== 'zhou' ? `，集团类由 ${P('zhou').name} 支持` : ''}。</li>
-                <li>准入要点：{ev.caution ? ev.caution : '以公开信息与客户提供材料为依据，方案不承诺审批结果与收益；额度与定价以行内审批为准。'}</li>
-                <li>行动清单：① 电话预约 ② 携一页纸方案拜访 ③ 收集申请材料 ④ 提交产品部出具正式方案。</li>
-              </ul>
+              <div className="sm-time" style={{ marginTop: 12 }}><FileText size={16} /><span>正式营销方案书（编号 {docNo}）已生成，见下方；话术要点、触达时点与行动清单见方案书之后的「话术与行动清单」页签。</span></div>
               <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                 <button className="btn sm gold" onClick={push}><Send size={12} />推送到拜访计划</button>
                 <button className="btn sm ghost" onClick={() => flash('一页纸拜访材料已导出（PDF）')}><Download size={12} />导出一页纸</button>
@@ -509,10 +608,59 @@ export default function ScenarioMarketing() {
               </div>
             </div>
           ) : (
-            <div className="sm-muted" style={{ marginTop: 12 }}>话术要点、触达时点与行动清单将在「一键生成方案」完成后显示。</div>
+            <div className="sm-muted" style={{ marginTop: 12 }}>正式方案书、话术要点、触达时点与行动清单将在「一键生成方案」完成后显示。</div>
           )}
         </div>
       </div>
+
+      {finished && (
+        <div className="sm-mt fade-in">
+          <AiConclusion headline={conclusion.headline} points={conclusion.points} evidence={conclusion.evidence} confidence={ev.conf === '高' ? 0.88 : ev.conf === '中' ? 0.78 : 0.64} actions={['visit', 'talk', 'forward']} onSystem={(_id, label) => flash(`${label}：已连同方案书推送行内 OA，待接收部门处理`)} />
+          <div className="sm-dockbar">
+            <span className="lab"><FileText size={13} />正式营销方案书 · {docNo} · {editing ? '编辑中' : '待复核'}</span>
+            <DocActions title={docTitle} editing={editing} onEdit={() => setEditing((v) => !v)} getHtml={() => docRef.current?.getHtml() ?? ''} onToast={flash} compact />
+          </div>
+          <ProposalDoc ref={docRef} title={docTitle} no={docNo} customer={`${co.name} · ${co.industry}`} org={ownerOrg} author={owner.name} date={DATE_STR} sections={proposal} editing={editing} />
+          <div className="card sm-mt sm-noprint">
+            <div className="sm-tabs">
+              <button className={tab === 'eff' ? 'on' : ''} onClick={() => setTab('eff')}><Gauge size={13} />效果预测</button>
+              <button className={tab === 'talk' ? 'on' : ''} onClick={() => setTab('talk')}><MessageSquareText size={13} />话术与行动清单</button>
+            </div>
+            {tab === 'eff' && (
+              <div className="fade-in">
+                <div className="sm-tiles">
+                  <div className="tile green"><b className="num">{fmtWan(eff.credit)}</b><span>预计新增授信 / 融资</span></div>
+                  <div className="tile blue"><b className="num">{fmtWan(eff.settle)}</b><span>预计结算归集</span></div>
+                  <div className="tile gold"><b className="num">{fmtWan(eff.income)}</b><span>预计中间业务收入</span></div>
+                  <div className="tile red"><b className="num">{eff.prob}%</b><span>转化概率 · 场景基准 {Math.round(plan.base * 100)}%</span></div>
+                </div>
+                <div className="sm-sec"><TrendingUp size={12} />敏感性测算 · 置信与关系 / 风险系数</div>
+                <div className="sm-tw">
+                  <table className="tbl sm-sens">
+                    <thead><tr><th>情形</th><th>置信系数</th><th>关系系数</th><th>风险系数</th><th>转化概率</th><th>期望中收</th></tr></thead>
+                    <tbody>{sens.map((s) => <tr key={s.t} className={s.cur ? 'cur' : ''}><td>{s.t}</td><td>{s.c.toFixed(2)}</td><td>{s.rel.toFixed(2)}</td><td>{s.risk.toFixed(2)}</td><td>{s.prob}%</td><td>{fmtWan(s.exp)}</td></tr>)}</tbody>
+                  </table>
+                </div>
+                <div className="sm-muted" style={{ marginTop: 8 }}>转化概率 = 场景基准 × 置信系数 × 关系系数 × 风险系数（上限 90%）；期望中收 = 预计中收 × 转化概率。前端确定性计算，不构成承诺。</div>
+              </div>
+            )}
+            {tab === 'talk' && (
+              <div className="fade-in">
+                <div className="sm-sec"><MessageSquareText size={12} />话术要点</div>
+                {plan.talk.map((t, i) => <div className="sm-talk" key={i}><span className="q">{i + 1}</span><span>{t}</span></div>)}
+                <div className="sm-sec"><Clock size={12} />最佳触达时点与策略</div>
+                <div className="sm-time"><CalendarClock size={16} /><span>{plan.timing}</span></div>
+                <ul className="sm-ul" style={{ marginTop: 8 }}>
+                  <li>触达顺序：{plan.entry}；先业务负责人后财务负责人，行领导按需协访。</li>
+                  <li>关键人：{co.name} 财务负责人、业务负责人；本行客户经理 {owner.name}{co.owner !== 'zhou' ? `，集团类由 ${P('zhou').name} 支持` : ''}。</li>
+                  <li>准入要点：{ev.caution ? ev.caution : '以公开信息与客户提供材料为依据，方案不承诺审批结果与收益；额度与定价以行内审批为准。'}</li>
+                  <li>行动清单：① 电话预约 ② 携一页纸方案拜访 ③ 收集申请材料 ④ 提交产品部出具正式方案。</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {toast && <div className="sm-toast fade-in"><Check size={14} />{toast}</div>}
     </div>
