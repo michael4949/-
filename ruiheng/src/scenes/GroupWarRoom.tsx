@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { companyById } from '../data/companies';
 import { PERSONAS } from '../data/personas';
+import AiConclusion from '../components/AiConclusion';
 import { factoringPlan, packageIncome, raroc, DEFAULT_RAROC, concentration, fmtWan, fmtYi, LPR_1Y, clamp } from '../lib/pricing';
 import type { RarocInput } from '../lib/pricing';
 import './group.css';
@@ -200,6 +201,8 @@ export default function GroupWarRoom() {
 
   const cycle = 62;
   const expoTotal = EXPOSURE.reduce((a, b) => a + b.v, 0);
+  const [toast, setToast] = useState<string | null>(null);
+  useEffect(() => { if (!toast) return; const t = window.setTimeout(() => setToast(null), 2600); return () => window.clearTimeout(t); }, [toast]);
 
   return (
     <div className="fade-in">
@@ -221,6 +224,17 @@ export default function GroupWarRoom() {
         <div className="tile"><b className="green-text">1.2 亿</b><span>联动存款潜力（3 家未开户子公司）</span></div>
         <div className="tile"><b className="red-text">3.0 亿</b><span>拟集团统一授信 · 集中度占用 {conc.pct}%</span></div>
       </div>
+
+      <AiConclusion tone="gold" confidence={0.85} actions={['scf', 'fx', 'forward']}
+        headline="晟禾集团建议以 3.0 亿统一授信为抓手：先落地反向保理与 3 家未开户子公司开户，再推进冷链仓固定资产贷款与越南付汇锁汇；彩晟商贸 500 万经销商融资暂缓"
+        points={[
+          '联动存款潜力约 1.2 亿（预制菜 / 农业发展 / 越南贸易 3 家未开户子公司）',
+          `反向保理确权 ${Math.round(ratio * 100)}% → 可用额度 ${fmtYi(plan.limit)}，方案综合收益 ≈ ${fmtWan(total)}/年`,
+          `RAROC ${ro.raroc}%（门槛 ${ri.hurdle}%）· ${ro.pass ? '达标' : '未达标，需调整加点或派生存款'}`,
+          `集团集中度占用 ${conc.pct}%，余量 ${fmtYi(conc.headroom)}；彩晟担保 500 万已计入敞口`,
+        ]}
+        evidence={['股权穿透 + 关联交易披露', '本行账户资金流', `行业周期指数 ${cycle} · 复苏中后期`, '今晨彩晟预警联动']}
+        onSystem={(_, label) => setToast(`已执行：${label}（发起人 ${me.name}）`)} />
 
       {/* 行 1：图谱 + 联动机会 */}
       <div className="gw-grid">
@@ -427,6 +441,7 @@ export default function GroupWarRoom() {
           </div>
         </div>
       </div>
+      {toast && <div className="toast fade-in"><Icons.CheckCircle2 size={14} />{toast}</div>}
     </div>
   );
 }

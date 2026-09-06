@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import * as Icons from 'lucide-react';
 import { PERSONAS } from '../data/personas';
 import { companyById } from '../data/companies';
+import AiConclusion from '../components/AiConclusion';
+import DocActions from '../components/DocActions';
 import { BASE_INPUTS, compute, fmtMoney, forecastCash, rowName, stmtById } from '../lib/financials';
 import {
   APPROVER_QUESTIONS, CONTRACT_REVIEW, CREDIT_PLAN, MATERIALS, THINK_STEPS, VERIFY_NOTES, WC_PARAM_META, buildChapters, calcWcLoan, countHunks, defaultWcParams, segDiff,
@@ -38,6 +40,7 @@ export default function CreditReport() {
   const [signW, setSignW] = useState(false);
   const [signL, setSignL] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (phase !== 'thinking') return;
@@ -113,6 +116,27 @@ export default function CreditReport() {
         </div>
       </div>
 
+      {phase === 'done' && (
+        <>
+          <AiConclusion tone="gold" confidence={0.84} actions={['pricing', 'contract', 'forward']}
+            headline={`建议有条件同意：${CREDIT_PLAN.product} ${fmtMoney(CREDIT_PLAN.proposed)} 万 / ${CREDIT_PLAN.term} / ${CREDIT_PLAN.price}，申请 ${fmtMoney(CREDIT_PLAN.applied)} 万压降至测算值附近，以其他应收款收回与回款账户归行为放款前提`}
+            points={[
+              `额度：公式测算新增流贷 ${fmtMoney(wcRes.newLoan)} 万，与 12 个月预测 ${forecast.gapQuarter} 缺口 ${fmtMoney(forecast.gap)} 万交叉印证`,
+              `担保：${CREDIT_PLAN.guarantees.map((g) => g.name).join(' + ')}；抵押评估报告已超 6 个月，放款前重估`,
+              `前置条件 ${CREDIT_PLAN.conditions.length} 条；分两次提用，受托支付 100%`,
+              `内评 ${CREDIT_PLAN.rating.grade}（${CREDIT_PLAN.rating.source}）有 ${CREDIT_PLAN.rating.mismatches.length} 处与实际不一致，建议评级复核`,
+            ]}
+            evidence={['三表复算 · 12 个月现金流预测', '《流动资金贷款管理办法》测算法', `核实标注 ${VERIFY_NOTES.length} 处`, `制度与准入校验 ${CREDIT_PLAN.checks.length + 1} 项`]}
+            onSystem={(_, label) => setToast(`已发起「${label}」：请在文书操作条中选择接收部门`)} />
+          <div className="card docbar">
+            <div className="card-t"><span className="dot" />{co.name} 授信报告</div>
+            <span className="card-s">七章 · AI 起草 · 人工修改 {hunks} 处 · {editMode ? '编辑中' : '阅读模式'}</span>
+            <div className="sp" />
+            <DocActions title={`${co.name}授信报告`} editing={editMode} onEdit={() => setEditMode((v) => !v)} getHtml={() => `<h1>${co.name} 授信报告</h1>` + chapters.map((ch) => `<h2>第${ch.no}章 · ${ch.title}</h2><p>${ch.text}</p>`).join('')} onToast={setToast} />
+          </div>
+        </>
+      )}
+
       <div className="credit-layout">
         {/* 左：报告 / 合同 */}
         <div className="col">
@@ -139,7 +163,9 @@ export default function CreditReport() {
                         {d && d.hunks > 0 ? <span className="chip green"><i />人工修改 {d.hunks} 处</span> : <span className="ai-tag"><Icons.Sparkles size={11} />AI 起草</span>}
                       </div>
                     </div>
-                    <textarea className={d && d.hunks > 0 ? 'edited' : ''} value={ch.text} onChange={(e) => updateChapter(ch.id, e.target.value)} />
+                    {editMode
+                      ? <textarea className={d && d.hunks > 0 ? 'edited' : ''} value={ch.text} onChange={(e) => updateChapter(ch.id, e.target.value)} />
+                      : <div className="chapter-text">{ch.text}</div>}
                     {notes.map((n) => (
                       <div key={n.id} className="verify-note">
                         <div className="vn">{n.no}</div>

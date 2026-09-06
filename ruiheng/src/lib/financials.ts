@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 /**
  * 宁桂精密机械 2023–2025 三年三表（单位：万元）
- * 全部数据为虚构、手工编制且自洽：
+ * 全部数据为手工编制且自洽：
  *   资产 = 负债 + 所有者权益；期末现金 = 期初 + 经营 + 投资 + 筹资；净利润由利润表逐行推导；
  *   现金流量表期末现金 = 资产负债表货币资金；未分配利润(t) = 未分配利润(t-1) + 净利润(t)。
  * 所有比率、异常与预测均由前端确定性计算，AI 仅生成解释文字。
@@ -291,9 +291,9 @@ export const RATIOS: RatioDef[] = [
     calc: (c, y) => { const d = safeDiv(c.bs.ap[y], c.is.cogs[y]); return d === null ? null : d * 360; } },
   { id: 'cfoToNi', name: '经营现金流 / 净利润', unit: 'x', better: 'high', group: '现金', bench: 1.0,
     formula: '经营活动现金流量净额 ÷ 净利润',
-    caliber: '当年发生额；净利润为正且经营现金流为负时倍数为负，表示"账面盈利、现金失血"',
+    caliber: '当年发生额；净利润为正且经营现金流为负时倍数为负，表示"账面盈利、现金失血"；净利润 ≤ 0 时不适用（显示 —）',
     refs: (y) => [R('cf', 'cfo', y), R('is', 'netProfit', y)],
-    calc: (c, y) => safeDiv(c.cf.cfo[y], c.is.netProfit[y]) },
+    calc: (c, y) => (c.is.netProfit[y] <= 0 ? null : safeDiv(c.cf.cfo[y], c.is.netProfit[y])) },
   { id: 'cashCollect', name: '销售收现率', unit: 'pct', better: 'high', group: '现金', bench: 1.1,
     formula: '销售商品、提供劳务收到的现金 ÷ 营业收入',
     caliber: '分子含税、分母不含税；制造业正常区间约 105%–115%，低于 105% 通常意味着账期在拉长',
@@ -323,31 +323,66 @@ export const fmtMoney = (n: number, digits = 0) => n.toLocaleString('zh-CN', { m
 
 /* ------------------------------------------------------------------ 红字异常 */
 export interface Anomaly { id: string; title: string; detail: string; triggered: boolean; refs: Ref[]; ask: string }
+/** 红字规则总数（前端判定；解释文字由 AI 生成） */
+export const ANOMALY_RULES = 7;
 export function detectAnomalies(c: Computed): Anomaly[] {
   const rg = growth(c, 'is', 'revenue', 2025) ?? 0;
   const ag = growth(c, 'bs', 'ar', 2025) ?? 0;
   const arDays = YEARS.map((y) => ratioValue(c, 'arDays', y) ?? 0);
   const orG = growth(c, 'bs', 'otherRecv', 2025);
   const orShare = safeDiv(c.bs.otherRecv[2025], c.bs.totalAssets[2025]) ?? 0;
+  const gm = YEARS.map((y) => ratioValue(c, 'grossMargin', y) ?? 0);
+  const invDays = YEARS.map((y) => ratioValue(c, 'invDays', y) ?? 0);
+  const invG = growth(c, 'bs', 'inventory', 2025) ?? 0;
+  const cr = ratioValue(c, 'currentRatio', 2025);
+  const ncaUp = c.bs.nonCurrentAssets[2025] - c.bs.nonCurrentAssets[2023];
+  const ltSrc = (c.bs.ltLoans[2025] - c.bs.ltLoans[2023]) + (c.bs.equity[2025] - c.bs.equity[2023]);
+  const stUp = c.bs.stLoans[2023] > 0 ? c.bs.stLoans[2025] / c.bs.stLoans[2023] - 1 : (c.bs.stLoans[2025] > 0 ? 1 : 0);
+  const collect = YEARS.map((y) => ratioValue(c, 'cashCollect', y));
   const p = (v: number) => `${(v * 100).toFixed(1)}%`;
+  const sgn = (v: number) => (v >= 0 ? '+' : '');
   return [
     {
-      id: 'ar-vs-rev', title: '应收账款增速远超收入增速', triggered: ag - rg > 0.15,
-      detail: `2025 年应收账款同比 ${ag >= 0 ? '+' : ''}${p(ag)}，营业收入同比 ${rg >= 0 ? '+' : ''}${p(rg)}，差 ${((ag - rg) * 100).toFixed(1)} 个百分点；应收周转天数 ${arDays.map((d) => d.toFixed(0)).join(' → ')} 天。收入增长是用账期换来的。`,
+      id: 'ar-vs-rev', title: '应收账款增速远超收入增速', triggered: ag - rg > 0.15 && arDays[2] >= 15,
+      detail: `2025 年应收账款同比 ${sgn(ag)}${p(ag)}，营业收入同比 ${sgn(rg)}${p(rg)}，差 ${((ag - rg) * 100).toFixed(1)} 个百分点；应收周转天数 ${arDays.map((d) => d.toFixed(0)).join(' → ')} 天。收入增长是用账期换来的，或存在已发货未验收 / 争议货款。`,
       refs: [R('bs', 'ar', 2025), R('bs', 'ar', 2024), R('is', 'revenue', 2025), R('is', 'revenue', 2024)],
       ask: '前五大应收对象的账龄与合同账期条款',
     },
     {
       id: 'cfo-neg', title: '经营活动现金流连续两年为负', triggered: c.cf.cfo[2024] < 0 && c.cf.cfo[2025] < 0,
-      detail: `经营活动现金流量净额 2024 年 ${fmtMoney(c.cf.cfo[2024])} 万、2025 年 ${fmtMoney(c.cf.cfo[2025])} 万，同期净利润为正（${fmtMoney(c.is.netProfit[2024])} / ${fmtMoney(c.is.netProfit[2025])} 万）；靠新增借款 ${fmtMoney(c.cf.borrow[2024] - c.cf.repay[2024])} / ${fmtMoney(c.cf.borrow[2025] - c.cf.repay[2025])} 万维持运转。`,
+      detail: `经营活动现金流量净额 2024 年 ${fmtMoney(c.cf.cfo[2024])} 万、2025 年 ${fmtMoney(c.cf.cfo[2025])} 万，同期净利润 ${fmtMoney(c.is.netProfit[2024])} / ${fmtMoney(c.is.netProfit[2025])} 万；新增借款净额 ${fmtMoney(c.cf.borrow[2024] - c.cf.repay[2024])} / ${fmtMoney(c.cf.borrow[2025] - c.cf.repay[2025])} 万维持运转。`,
       refs: [R('cf', 'cfo', 2024), R('cf', 'cfo', 2025), R('is', 'netProfit', 2025)],
       ask: '若他行压降授信，日常周转靠什么',
     },
     {
       id: 'other-recv', title: '其他应收款突增，疑似关联方资金占用', triggered: (orG ?? 0) > 1 && orShare > 0.03,
-      detail: `其他应收款 2024 年 ${fmtMoney(c.bs.otherRecv[2024])} 万 → 2025 年 ${fmtMoney(c.bs.otherRecv[2025])} 万（${orG === null ? '—' : `+${p(orG)}`}），占总资产 ${p(orShare)}；同期"支付其他与经营活动有关的现金" ${fmtMoney(c.cf.payOther[2025])} 万。需取得往来明细，核实是否为实控人或关联企业占用。`,
+      detail: `其他应收款 2024 年 ${fmtMoney(c.bs.otherRecv[2024])} 万 → 2025 年 ${fmtMoney(c.bs.otherRecv[2025])} 万（${orG === null ? '—' : `${sgn(orG)}${p(orG)}`}），占总资产 ${p(orShare)}；同期"支付其他与经营活动有关的现金" ${fmtMoney(c.cf.payOther[2025])} 万。需取得往来明细，核实是否为实控人或关联企业占用。`,
       refs: [R('bs', 'otherRecv', 2025), R('bs', 'otherRecv', 2024), R('cf', 'payOther', 2025)],
-      ask: '其他应收款 1,900 万的对手方、用途与归还安排',
+      ask: `其他应收款 ${fmtMoney(c.bs.otherRecv[2025])} 万的对手方、用途与归还安排`,
+    },
+    {
+      id: 'gm-slide', title: '毛利率连续两年下滑', triggered: gm[0] > gm[1] && gm[1] > gm[2] && gm[0] - gm[2] > 0.025,
+      detail: `毛利率 ${gm.map((g) => p(g)).join(' → ')}，两年累计下降 ${((gm[0] - gm[2]) * 100).toFixed(1)} 个百分点；营业成本增速（${p(growth(c, 'is', 'cogs', 2025) ?? 0)}）高于收入增速（${p(rg)}）。需判断是原材料 / 运价上涨、客户年降还是产品结构变化，以及是否可逆。`,
+      refs: [R('is', 'cogs', 2025), R('is', 'revenue', 2025), R('is', 'cogs', 2023), R('is', 'revenue', 2023)],
+      ask: '成本上升的来源与价格传导机制',
+    },
+    {
+      id: 'st-long', title: '短贷长用：流动比率低于 1，长期资产靠短期借款支撑', triggered: cr !== null && cr < 1 && ncaUp > ltSrc && stUp > 0.3,
+      detail: `2025 年流动比率 ${cr === null ? '—' : cr.toFixed(2)}×；两年间非流动资产增加 ${fmtMoney(ncaUp)} 万，而长期借款 + 所有者权益仅增加 ${fmtMoney(ltSrc)} 万，短期借款由 ${fmtMoney(c.bs.stLoans[2023])} 万增至 ${fmtMoney(c.bs.stLoans[2025])} 万。到期续贷一旦不畅，直接冲击在建项目与日常周转。`,
+      refs: [R('bs', 'stLoans', 2025), R('bs', 'stLoans', 2023), R('bs', 'nonCurrentAssets', 2025), R('bs', 'ltLoans', 2025)],
+      ask: '在建 / 扩产项目的资金来源安排与中长期融资计划',
+    },
+    {
+      id: 'inv-pile', title: '存货周转天数明显拉长，疑似积压或跌价', triggered: invDays[2] > invDays[0] * 1.35 && invG - rg > 0.2,
+      detail: `存货周转天数 ${invDays.map((d) => d.toFixed(0)).join(' → ')} 天；2025 年存货同比 ${sgn(invG)}${p(invG)}，收入同比 ${sgn(rg)}${p(rg)}。存货占流动资产 ${p(safeDiv(c.bs.inventory[2025], c.bs.currentAssets[2025]) ?? 0)}，需核实库龄结构与跌价准备计提是否充分。`,
+      refs: [R('bs', 'inventory', 2025), R('bs', 'inventory', 2023), R('is', 'cogs', 2025)],
+      ask: '库龄超过 6 个月的存货金额与去化安排',
+    },
+    {
+      id: 'collect-low', title: '销售收现率偏低，收入与收款背离', triggered: collect[2] !== null && collect[2] < 0.9,
+      detail: `销售收现率 ${collect.map((v) => fmtRatio(v, 'pct', 0)).join(' → ')}；2025 年销售收到的现金 ${fmtMoney(c.cf.recvSales[2025])} 万，营业收入 ${fmtMoney(c.is.revenue[2025])} 万（含税口径应高于收入）。需核对开票与回款明细，排除提前确认收入的可能。`,
+      refs: [R('cf', 'recvSales', 2025), R('is', 'revenue', 2025), R('bs', 'ar', 2025)],
+      ask: '收入确认时点与回款政策',
     },
   ];
 }
@@ -358,14 +393,32 @@ export interface Forecast {
   months: ForecastMonth[]; minCash: number; minMonth: string; gapQuarter: string; safety: number; gap: number;
   growth: number; arLag: number; apLag: number; assumptions: string[];
 }
+/** 预测情景：季节系数、增量释放节奏、备货系数、刚性支出与事件；默认情景为宁桂精密（定点项目 SOP） */
+export interface ForecastScenario {
+  season: number[]; inc: number[]; incLag: number; build: number[]; capex: number[]; debtDue: number[];
+  events: Record<number, string>; safety: number; runoff: number;
+  incLabel: string; rigidLabel: string;
+}
+export const NINGGUI_SCENARIO: ForecastScenario = {
+  season: [0.85, 0.80, 0.95, 1.05, 1.05, 1.05, 1.00, 0.95, 1.05, 1.10, 1.10, 1.05],
+  inc: [0, 0, 0, 0, 0, 0.09, 0.12, 0.15, 0.16, 0.16, 0.17, 0.15],
+  incLag: 1,
+  build: [1.00, 1.00, 1.08, 1.20, 1.20, 1.00, 0.88, 0.88, 0.90, 0.92, 0.94, 0.96],
+  capex: [0, 0, 300, 600, 600, 300, 0, 0, 0, 0, 0, 0],
+  debtDue: [0, 0, 0, 0, 2000, 0, 0, 0, 0, 0, 0, 0],
+  events: { 2: '定点项目模具投入启动', 3: 'SOP 备货高峰', 4: '他行 2,000 万流贷到期不续', 5: 'SOP 首批交付', 6: '定点项目首笔回款' },
+  safety: 600, runoff: 0.89,
+  incLabel: '全部来自定点项目，6 月 SOP 后逐月释放；定点项目月结 30 天',
+  rigidLabel: '模具 1,800 万（3–6 月）；他行 2,000 万流贷 5 月到期拟不续',
+};
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const lagged = (series: number[], lag: number, opening: number) => series.map((_, i) => (i < lag ? opening / lag : series[i - lag]));
 
 /**
- * 简化的月度直接法预测：以 2025 年报为基期，叠加定点项目 SOP 排产（Q2 备货）、专用模具投入与他行压降。
+ * 简化的月度直接法预测：以 2025 年报为基期，叠加情景中的增量释放、备货、资本开支与到期债务。
  * 系数确定性给定，随报表编辑实时重算（应收 / 应付天数、成本率、费用率、利息、期初现金均取自三表）。
  */
-export function forecastCash(c: Computed, growth = 0.15): Forecast {
+export function forecastCash(c: Computed, growth = 0.15, sc: ForecastScenario = NINGGUI_SCENARIO): Forecast {
   const y: Year = 2025;
   // 非付现成本：折旧摊销约 75% 计入成本、25% 计入费用
   const da = c.bs.fixedAssets[y] * 0.09 + c.bs.intangible[y] * 0.05;
@@ -373,25 +426,18 @@ export function forecastCash(c: Computed, growth = 0.15): Forecast {
   const opex = (c.is.selling[y] + c.is.admin[y] + c.is.rd[y] + c.is.taxSurcharge[y] + c.is.tax[y] - 0.25 * da) / 12;
   const interest = (c.is.interest[y] / 12) * ((c.bs.stLoans[y] + c.bs.ltLoans[y]) / Math.max(1, c.bs.stLoans[2024] + c.bs.ltLoans[2024]));
   const base = c.is.revenue[y] / 12;
-  const inc = c.is.revenue[y] * growth;                       // 增量收入全部来自定点项目，6 月 SOP 后释放
-  const season = [0.85, 0.80, 0.95, 1.05, 1.05, 1.05, 1.00, 0.95, 1.05, 1.10, 1.10, 1.05];
-  const sop = [0, 0, 0, 0, 0, 0.09, 0.12, 0.15, 0.16, 0.16, 0.17, 0.15];
-  const build = [1.00, 1.00, 1.08, 1.20, 1.20, 1.00, 0.88, 0.88, 0.90, 0.92, 0.94, 0.96];
-  const capex = [0, 0, 300, 600, 600, 300, 0, 0, 0, 0, 0, 0];
-  const debtDue = [0, 0, 0, 0, 2000, 0, 0, 0, 0, 0, 0, 0];
-  const events: Record<number, string> = { 2: '定点项目模具投入启动', 3: 'SOP 备货高峰', 4: '他行 2,000 万流贷到期不续', 5: 'SOP 首批交付', 6: '定点项目首笔回款' };
+  const inc = c.is.revenue[y] * growth;                       // 增量收入按情景节奏释放
+  const { season, inc: incW, build, capex, debtDue, events, safety, runoff } = sc;
   const arDays = ratioValue(c, 'arDays', y) ?? 90;
   const apDays = ratioValue(c, 'apDays', y) ?? 60;
   const arLag = clamp(Math.round(arDays / 40), 1, 4);
   const apLag = clamp(Math.round(apDays / 40), 1, 3);
-  const sopLag = 1;                                            // 定点项目按月结 30 天回款（访谈口径）
-  const runoff = 0.89;                                         // 期初应收 90% 在滞后期内收回，其余视为长账龄
+  const sopLag = sc.incLag;
   const baseSales = season.map((s) => base * s);
-  const sopSales = sop.map((w) => inc * w);
+  const sopSales = incW.map((w) => inc * w);
   const sales = baseSales.map((s, i) => s + sopSales[i]);
   const collections = lagged(baseSales, arLag, c.bs.ar[y] * runoff).map((v, i) => v + (i >= sopLag ? sopSales[i - sopLag] : 0));
   const payments = lagged(sales.map((s, i) => s * cashCogs * build[i]), apLag, c.bs.ap[y]);
-  const safety = 600;
   let cash = c.bs.cash[y];
   let minCash = cash; let minIdx = 0;
   const months: ForecastMonth[] = season.map((_, i) => {
@@ -406,10 +452,10 @@ export function forecastCash(c: Computed, growth = 0.15): Forecast {
     months, minCash: Math.round(minCash), minMonth: months[minIdx].m, gapQuarter: months[minIdx].q, safety,
     gap: Math.max(0, Math.round(safety - minCash)), growth, arLag, apLag,
     assumptions: [
-      `销售：基础销售 = 2025 年营业收入 ÷ 12 × 季节系数；增量 ${(growth * 100).toFixed(0)}% 全部来自定点项目，6 月 SOP 后逐月释放`,
-      `回款：存量按应收周转 ${arDays.toFixed(0)} 天 ≈ 滞后 ${arLag} 个月，期初应收 ${(runoff * 100).toFixed(0)}% 收回；定点项目月结 30 天`,
-      `付款：付现成本率 ${(cashCogs * 100).toFixed(1)}%（剔除折旧摊销）× Q2 备货系数；按应付周转 ${apDays.toFixed(0)} 天 ≈ 滞后 ${apLag} 个月`,
-      `刚性支出：模具 1,800 万（3–6 月）；他行 2,000 万流贷 5 月到期拟不续；付现费用 ${fmtMoney(opex)} 万/月、利息 ${fmtMoney(interest)} 万/月；最低安全现金 ${safety} 万`,
+      `销售：基础销售 = 2025 年营业收入 ÷ 12 × 季节系数；增量 ${(growth * 100).toFixed(0)}% ${sc.incLabel}`,
+      `回款：存量按应收周转 ${arDays.toFixed(0)} 天 ≈ 滞后 ${arLag} 个月，期初应收 ${(runoff * 100).toFixed(0)}% 收回`,
+      `付款：付现成本率 ${(cashCogs * 100).toFixed(1)}%（剔除折旧摊销）× 备货系数；按应付周转 ${apDays.toFixed(0)} 天 ≈ 滞后 ${apLag} 个月`,
+      `刚性支出：${sc.rigidLabel}；付现费用 ${fmtMoney(opex)} 万/月、利息 ${fmtMoney(interest)} 万/月；最低安全现金 ${safety} 万`,
     ],
   };
 }
@@ -422,16 +468,20 @@ const scoreVs = (v: number | null, bench: number, better: 'high' | 'low', span: 
   const d = better === 'high' ? (v - bench) / span : (bench - v) / span;
   return Math.round(clamp(60 + d * 40, 0, 100));
 };
-export function qualityScore(c: Computed): QualityScore {
+/** 行业中位数表：默认取 RATIOS 内置的精密制造中位数；其他行业由调用方传入 */
+export type BenchMap = Record<string, number>;
+export const DEFAULT_BENCH: BenchMap = Object.fromEntries(RATIOS.filter((r) => r.bench !== null).map((r) => [r.id, r.bench as number]));
+export function qualityScore(c: Computed, bench: BenchMap = DEFAULT_BENCH): QualityScore {
   const y: Year = 2025;
   const v = (id: string) => ratioValue(c, id, y);
+  const b = (id: string) => bench[id] ?? DEFAULT_BENCH[id];
   const an = detectAnomalies(c).filter((a) => a.triggered).length;
   const dims: ScoreDim[] = [
-    { name: '盈利能力', score: Math.round((scoreVs(v('grossMargin'), 0.22, 'high', 0.12) + scoreVs(v('netMargin'), 0.06, 'high', 0.08)) / 2), note: '毛利率、净利率 vs 行业中位数' },
-    { name: '营运效率', score: Math.round((scoreVs(v('arDays'), 75, 'low', 60) + scoreVs(v('invDays'), 70, 'low', 40)) / 2), note: '应收、存货周转天数' },
-    { name: '偿债能力', score: Math.round((scoreVs(v('debtRatio'), 0.52, 'low', 0.2) + scoreVs(v('currentRatio'), 1.5, 'high', 0.6) + scoreVs(v('interestCover'), 4, 'high', 4)) / 3), note: '资产负债率、流动比率、利息保障' },
-    { name: '现金质量', score: Math.round((scoreVs(v('cfoToNi'), 1, 'high', 3) + scoreVs(v('cashCollect'), 1.1, 'high', 0.15)) / 2), note: '经营现金流/净利润、销售收现率' },
-    { name: '成长性', score: scoreVs(v('revGrowth'), 0.1, 'high', 0.15), note: '营业收入增速' },
+    { name: '盈利能力', score: Math.round((scoreVs(v('grossMargin'), b('grossMargin'), 'high', Math.max(0.06, b('grossMargin') * 0.55)) + scoreVs(v('netMargin'), b('netMargin'), 'high', Math.max(0.03, b('netMargin') * 1.3))) / 2), note: '毛利率、净利率 vs 行业中位数' },
+    { name: '营运效率', score: Math.round((scoreVs(v('arDays'), b('arDays'), 'low', Math.max(20, b('arDays') * 0.8)) + scoreVs(v('invDays'), b('invDays'), 'low', Math.max(15, b('invDays') * 0.6))) / 2), note: '应收、存货周转天数' },
+    { name: '偿债能力', score: Math.round((scoreVs(v('debtRatio'), b('debtRatio'), 'low', 0.2) + scoreVs(v('currentRatio'), b('currentRatio'), 'high', 0.6) + scoreVs(v('interestCover'), b('interestCover'), 'high', b('interestCover'))) / 3), note: '资产负债率、流动比率、利息保障' },
+    { name: '现金质量', score: Math.round((scoreVs(v('cfoToNi'), b('cfoToNi'), 'high', 3) + scoreVs(v('cashCollect'), b('cashCollect'), 'high', 0.15)) / 2), note: '经营现金流/净利润、销售收现率' },
+    { name: '成长性', score: scoreVs(v('revGrowth'), b('revGrowth'), 'high', 0.15), note: '营业收入增速' },
     { name: '报表可信度', score: clamp(100 - an * 15, 0, 100), note: `${an} 条红字异常待核实` },
   ];
   const weights = [0.2, 0.15, 0.2, 0.15, 0.15, 0.15];
@@ -442,12 +492,14 @@ export function qualityScore(c: Computed): QualityScore {
 
 /* ------------------------------------------------------------------ 企业价值区间 */
 export interface Valuation { ebitda: number; evLow: number; evHigh: number; evSalesLow: number; evSalesHigh: number; netDebt: number; equityLow: number; equityHigh: number }
-export function valuation(c: Computed): Valuation {
+export interface ValMultiples { ebitdaLow: number; ebitdaHigh: number; salesLow: number; salesHigh: number }
+export const DEFAULT_MULTIPLES: ValMultiples = { ebitdaLow: 5, ebitdaHigh: 7, salesLow: 0.35, salesHigh: 0.5 };
+export function valuation(c: Computed, m: ValMultiples = DEFAULT_MULTIPLES): Valuation {
   const y: Year = 2025;
   const da = c.bs.fixedAssets[y] * 0.09 + c.bs.intangible[y] * 0.05;
-  const ebitda = c.is.ebt[y] + c.is.interest[y] + da;
-  const evLow = ebitda * 5, evHigh = ebitda * 7;
-  const evSalesLow = c.is.revenue[y] * 0.35, evSalesHigh = c.is.revenue[y] * 0.5;
+  const ebitda = Math.max(0, c.is.ebt[y] + c.is.interest[y] + da);
+  const evLow = ebitda * m.ebitdaLow, evHigh = ebitda * m.ebitdaHigh;
+  const evSalesLow = c.is.revenue[y] * m.salesLow, evSalesHigh = c.is.revenue[y] * m.salesHigh;
   const netDebt = c.bs.stLoans[y] + c.bs.ltLoans[y] - c.bs.cash[y];
   const lo = Math.min(evLow, evSalesLow), hi = Math.max(evHigh, evSalesHigh);
   return { ebitda, evLow, evHigh, evSalesLow, evSalesHigh, netDebt, equityLow: Math.max(0, lo - netDebt), equityHigh: Math.max(0, hi - netDebt) };

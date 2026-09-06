@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShieldAlert, Gavel, Landmark, Newspaper, Wallet, Check, X, Send, RotateCcw, Sparkles, Camera, Zap, BookOpen, Factory, ArrowRight, Sun } from 'lucide-react';
 import { PERSONAS } from '../data/personas';
 import { companyById } from '../data/companies';
+import AiConclusion from '../components/AiConclusion';
 import './scenes.css';
 
 type Sev = 'red' | 'orange' | 'gold' | 'green' | 'blue';
@@ -228,6 +229,11 @@ export default function PostLoan() {
 
           {finished && (
             <>
+              <AiConclusion tone="red" confidence={0.88} actions={['risk', 'followup', 'forward']}
+                headline="彩晟商贸红色预警已沿「应收 1,800 万 → 担保 500 万」传导至晟禾食品集团：建议晟禾本户拟下调至关注类，处置以追加押品为首选、压降续贷为备选，暂停对彩晟新增授信"
+                points={['命中 3 / 5 条升级规则：被执行 860 万 · 结算量 −62% · 应收 / 担保传导', '晟禾敞口 2,000 万，覆盖率 83%，追加押品后可升至 100% 以上', '全额减值 + 代偿后流动比率 1.35 → 1.21，第一还款来源仍覆盖但边际收窄', '今日现场检查四项：开工率 · 电费 · 库存 · 应收台账']}
+                evidence={['法院公示', '税务申报', '本行结算流水', '担保合同']}
+                onSystem={(_, label) => setToast(`已执行：${label}（发起人 ${me.name}）`)} />
               <div className="card gold fade-in">
                 <div className="card-h"><div className="card-t"><Camera size={14} />现场检查清单</div><span className="card-s">{done.filter(Boolean).length}/{CHECKS.length} 已勾选</span></div>
                 {CHECKS.map((c, i) => (
