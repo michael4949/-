@@ -406,7 +406,7 @@ export default function Dashboard() {
 
 
         {/* 12. 本周 AI 动态 */}
-        <Card title="本周 AI 赋能" icon={<Bot size={15} />} sub="睿衡为你完成" cls="dark">
+        <Card title="本周 AI 赋能" icon={<Bot size={15} />} sub="企金智脑为你完成" cls="dark">
           <div className="kv grow">
             {AI_WEEK.map((a) => (
               <div key={a.k}>
