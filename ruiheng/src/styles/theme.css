@@ -176,7 +176,7 @@ button { font-family: inherit; }
 .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--g-red); box-shadow: 0 0 0 0 rgba(195,39,43,.5); animation: pulse 1.6s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(195,39,43,.45);} 70% { box-shadow: 0 0 0 10px rgba(195,39,43,0);} 100% { box-shadow: 0 0 0 0 rgba(195,39,43,0);} }
 .fade-in { animation: fadeIn .3s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+@keyframes fadeIn { from { transform: translateY(6px);} to { transform: none;} }
 
 /* ---------- 列表项（幻彩） ---------- */
 .li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: linear-gradient(90deg, rgba(255,255,255,.7), rgba(255,247,236,.55) 60%, rgba(236,248,243,.5)); box-shadow: inset 0 0 0 1px rgba(201,162,77,.14); margin-bottom: 8px; }
