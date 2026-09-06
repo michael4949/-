@@ -3,10 +3,14 @@ import Shell, { fnsOf } from './components/Shell';
 import Dashboard from './pages/Dashboard';
 import { REGISTRY } from './functions/registry';
 import FunctionPage from './pages/FunctionPage';
+import ActionFlowPage from './pages/ActionFlowPage';
+import ReportPage from './pages/ReportPage';
+import { specOf } from './data/fnspec';
 
 function FunctionDispatch() {
   const { fid } = useParams();
-  const C = (fid && REGISTRY[fid]) || FunctionPage;
+  const kind = fid ? specOf(fid).kind : 'analysis';
+  const C = (fid && REGISTRY[fid]) || (kind === 'action' ? ActionFlowPage : kind === 'report' ? ReportPage : FunctionPage);
   return <C key={fid} />;
 }
 
