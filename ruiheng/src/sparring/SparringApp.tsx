@@ -75,7 +75,7 @@ export default function SparringApp({ coachId }: { coachId?: string }) {
   const me = STUDENTS[student];
 
   return (
-    <div className="spa fade-in">
+    <div className="spa">
       <div className="spa-top">
         <div className="spa-brand"><div className="mk">练</div><div><b>AI 智能陪练底座</b><span>企金客户经理 · 数字人教练</span></div></div>
         <div className="spa-tabs">
