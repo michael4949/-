@@ -6,7 +6,8 @@
 cd ruiheng
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # 产物在 dist/，base 为相对路径，可放任何静态目录或 file:// 打开
+npm run build      # 产物在 dist/，base 为相对路径，可放任何静态目录
+npm run build:single   # 单文件：dist-single/index.html，JS/CSS/数据全部内联，可用 file:// 或 U 盘离线打开
 npm run data -- <catalog-dir>   # 把功能目录 JSON 合并为 src/data/capabilities.json 并校验 688 个能力点全覆盖
 ```
 
