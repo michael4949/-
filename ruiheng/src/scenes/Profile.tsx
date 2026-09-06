@@ -19,10 +19,6 @@ const LAST_YEAR = [70, 62, 58, 70, 80, 64, 52, 70, 62, 68];
 const TEAM_AVG = RADAR_DIMS.map((_, i) => Math.round(TEAM.reduce((s, m) => s + m.radar[i], 0) / TEAM.length));
 const COLORS = ['#e63946', '#f4b942', '#2dc48d', '#3a86ff', '#9b5de5', '#ff8c42', '#00b4d8', '#ff5da2', '#1f8a5a', '#c9a24d'];
 
-/** 资深档位阈值（演示用；是否与行内序列挂钩由行方配置） */
-const SENIOR_GATE: { dim: string; gate: number }[] = [
-  { dim: '行业洞察', gate: 75 }, { dim: '方案设计', gate: 78 }, { dim: '风险识别', gate: 80 }, { dim: '客户经营', gate: 80 }, { dim: '沟通谈判', gate: 80 },
-];
 
 const TAG_GROUPS: { name: string; tone: string; tags: string[] }[] = [
   { name: '擅长行业', tone: 'red', tags: ['精密制造', '医药流通', '软件'] },
@@ -88,7 +84,7 @@ export default function Profile() {
       <div className="hero">
         <div className="hero-grid">
           <div>
-            <div className="row"><span className="chip iris">P14 · 能力画像与成长</span><span className="chip gold"><i />示范场景</span><span className="ai-tag">画像仅用于成长建议 · 是否用于考核由行方配置</span></div>
+            <div className="row"><span className="chip iris">P14 · 能力画像与成长</span><span className="chip gold"><i />本季度</span><span className="ai-tag">画像仅用于成长建议 · 是否用于考核由行方配置</span></div>
             <h1 style={{ marginTop: 6 }}><span className="serif iris-text">{ME.name}</span> <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink-2)' }}>{ME.title} · {ME.years} · 管户 {ME.customers} 户</span></h1>
             <div className="tag">{ME.org} · 重点：{ME.focus}</div>
             <div className="row" style={{ marginTop: 12 }}>
@@ -194,19 +190,6 @@ export default function Profile() {
       </div>
 
       <div className="grid g2 sec">
-        <div className="card purple">
-          <div className="card-h"><div className="card-t"><span className="dot" />晋档建议：中级 → 资深</div><span className="chip purple">差距 {SENIOR_GATE.filter((g) => MY[RADAR_DIMS.indexOf(g.dim)] < g.gate).length} 项</span></div>
-          {SENIOR_GATE.map((g) => {
-            const v = MY[RADAR_DIMS.indexOf(g.dim)]; const gap = Math.max(0, g.gate - v);
-            return (
-              <div className="gap" key={g.dim}>
-                <div className="gh"><span><b>{g.dim}</b> 当前 {v}</span><span>{gap > 0 ? <span className="red-text">差 {gap} 分</span> : <span className="green-text">已达标</span>} · 阈值 {g.gate}</span></div>
-                <div className="bar"><i style={{ width: `${v}%` }} /><em style={{ left: `${g.gate}%` }} /></div>
-              </div>
-            );
-          })}
-          <div className="note" style={{ marginTop: 10 }}>系统按能力阈值提示差距，并给出对应的学习与实战路径；<b>是否与行内职级序列挂钩、阈值取值，均由行方配置</b>，本系统不直接产生人事结论。</div>
-        </div>
         <div className="namecard">
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <div className="row"><span className="chip">专业名片</span><span className="chip">系统生成 · 可编辑</span></div>

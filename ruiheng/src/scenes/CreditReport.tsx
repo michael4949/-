@@ -72,7 +72,7 @@ export default function CreditReport() {
           <span className="chip red"><i />主办 {wang.name}</span>
           <span className="chip"><i />协办 {lin.name}</span>
           <span className="chip blue"><i />行内评级 {CREDIT_PLAN.rating.grade}（{CREDIT_PLAN.rating.source}）</span>
-          <span className="chip purple"><i />演示回放</span>
+          <span className="chip purple"><i />AI 引擎 · 行内私有化</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function CreditReport() {
             <div className="card-t"><span className="dot" />材料归档 <span className="card-s">{MATERIALS.length} 项 · 1 项需更新</span></div>
             {phase === 'idle' ? <button className="btn" onClick={startDraft}><Icons.Sparkles size={14} />生成初稿</button>
               : phase === 'thinking' ? <span className="chip orange"><span className="pulse" />起草中…</span>
-              : <button className="btn ghost sm" onClick={startDraft}><Icons.RotateCcw size={13} />重新生成（演示回放）</button>}
+              : <button className="btn ghost sm" onClick={startDraft}><Icons.RotateCcw size={13} />重新生成</button>}
           </div>
           {MATERIALS.map((m) => (
             <div key={m.name} className={`mat${m.status === 'warn' ? ' warn' : ''}`}>

@@ -1,36 +1,46 @@
-import { Routes, Route } from 'react-router-dom';
-import Shell from './components/Shell';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import Shell, { fnById, fnsOf } from './components/Shell';
 import Dashboard from './pages/Dashboard';
-import ProductPage from './pages/ProductPage';
-import CapabilityMap from './pages/CapabilityMap';
-import Scenes from './pages/Scenes';
-import Deploy from './pages/Deploy';
-import Pathways from './pages/Pathways';
-import FinDiagnosis from './scenes/FinDiagnosis';
-import PostLoan from './scenes/PostLoan';
-import CreditReport from './scenes/CreditReport';
-import GroupWarRoom from './scenes/GroupWarRoom';
-import Sparring from './scenes/Sparring';
-import Profile from './scenes/Profile';
-import VisitPrep from './scenes/VisitPrep';
+import { REGISTRY } from './functions/registry';
+
+function Fallback() {
+  const { fid } = useParams();
+  const fn = fid ? fnById(fid) : undefined;
+  return (
+    <div>
+      <div className="page-h"><div><h1>{fn?.name ?? '功能'}</h1><p>{fn?.summary}</p></div></div>
+      <div className="card"><div className="card-t"><span className="dot" />工作页加载中</div></div>
+    </div>
+  );
+}
+
+function FunctionDispatch() {
+  const { fid } = useParams();
+  const C = (fid && REGISTRY[fid]) || Fallback;
+  return <C key={fid} />;
+}
+
+function ProductRedirect() {
+  const { id } = useParams();
+  const first = id ? fnsOf(id)[0] : undefined;
+  return <Navigate to={first ? `/f/${first.id}` : '/'} replace />;
+}
 
 export default function App() {
   return (
     <Shell>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/scenes" element={<Scenes />} />
-        <Route path="/map" element={<CapabilityMap />} />
-        <Route path="/p/:id" element={<ProductPage />} />
-        <Route path="/scene/postloan" element={<PostLoan />} />
-        <Route path="/scene/visit" element={<VisitPrep />} />
-        <Route path="/scene/fin" element={<FinDiagnosis />} />
-        <Route path="/scene/credit" element={<CreditReport />} />
-        <Route path="/scene/group" element={<GroupWarRoom />} />
-        <Route path="/scene/sparring" element={<Sparring />} />
-        <Route path="/scene/profile" element={<Profile />} />
-        <Route path="/deploy" element={<Deploy />} />
-        <Route path="/pathways" element={<Pathways />} />
+        <Route path="/f/:fid" element={<FunctionDispatch />} />
+        <Route path="/p/:id" element={<ProductRedirect />} />
+        <Route path="/scene/postloan" element={<Navigate to="/f/F-FX-001" replace />} />
+        <Route path="/scene/visit" element={<Navigate to="/f/F-KH-002" replace />} />
+        <Route path="/scene/fin" element={<Navigate to="/f/F-ZY-005" replace />} />
+        <Route path="/scene/credit" element={<Navigate to="/f/F-FX-005" replace />} />
+        <Route path="/scene/group" element={<Navigate to="/f/F-KH-021" replace />} />
+        <Route path="/scene/sparring" element={<Navigate to="/f/F-SY-007" replace />} />
+        <Route path="/scene/profile" element={<Navigate to="/f/F-SY-018" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Shell>
   );

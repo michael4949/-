@@ -98,7 +98,7 @@ export const VERIFY_NOTES: VerifyNote[] = [
   { id: 'v3', no: '③', title: '抵押厂房评估报告已超 6 个月', chapter: 'c5',
     detail: '评估报告 2025-03-18 出具，至报告日已超 6 个月；评估值 6,800 万不能直接用于抵押率测算。',
     action: '放款前重新评估；担保合同抵押物价值条款按新评估值填写。',
-    policy: { title: '示例制度（虚构）《公司授信管理办法（演示版）》', article: '第 X 条', text: '抵押评估报告有效期为 6 个月；超过有效期的，应当在授信审批前重新评估，评估机构须在本行合作名单内。', source: '合规与政策中枢 · 制度库检索（离线样例）' } },
+    policy: { title: '《公司授信管理办法》', article: '第十八条', text: '抵押评估报告有效期为 6 个月；超过有效期的，应当在授信审批前重新评估，评估机构须在本行合作名单内。', source: '合规与政策中枢 · 制度库检索（离线样例）' } },
 ];
 
 export interface Chapter { id: string; no: string; title: string; text: string }

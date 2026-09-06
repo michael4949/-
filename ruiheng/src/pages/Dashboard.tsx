@@ -97,12 +97,7 @@ const SB_SERIES = [
   { key: 'relation', name: '客户关系', grad: 'g-sb3', sw: 'linear-gradient(180deg,#6ee3ad,#1f8a5a)' },
 ];
 
-const PROMOTE = TEAM.filter((m) => m.level !== '资深')
-  .map((m) => {
-    const avg = m.radar.reduce((s, v) => s + v, 0) / m.radar.length;
-    return { ...m, score: Math.min(98, Math.round(avg * 0.6 + m.aiUse * 0.25 + m.sparring * 1.5)) };
-  })
-  .sort((a, b) => b.score - a.score).slice(0, 4);
+
 
 const AI_WEEK = [
   { k: '生成授信 / 贷后报告', v: 12, unit: '份', pct: 80 },
@@ -134,7 +129,7 @@ function ScatterTip({ active, payload }: { active?: boolean; payload?: ReadonlyA
   if (!active || !d) return null;
   return (
     <div className="rc-tip">
-      <div className="rc-tip-l">{d.name} · {d.branch} · {d.level}</div>
+      <div className="rc-tip-l">{d.name} · {d.branch}</div>
       <div className="rc-tip-r"><span>AI 使用率</span><b className="num">{d.aiUse}%</b></div>
       <div className="rc-tip-r"><span>存款</span><b className="num">{fmtWan(d.deposits)}</b></div>
       <div className="rc-tip-r"><span>管户</span><b className="num">{d.customers} 户</b></div>
@@ -200,13 +195,13 @@ export default function Dashboard() {
         <div className="mark serif">{ME.avatar}</div>
         <div>
           <h1>{greet}，{ME.name}</h1>
-          <div className="brief">今天 <b className="r">3 条预警</b>、<b className="g">2 个商机</b>、<b className="b">1 条政策</b> 需要处理；睿衡已为你生成 <b>彩晟商贸</b> 处置沙盘与 <b>衡瑞医药</b> 续贷资料清单。</div>
+          <div className="brief">今天 <b className="r">3 条预警</b>、<b className="g">2 个商机</b>、<b className="b">1 条政策</b> 需要处理；企金智脑已为你生成 <b>彩晟商贸</b> 处置沙盘与 <b>衡瑞医药</b> 续贷资料清单。</div>
         </div>
         <div className="chips">
           <span className="chip"><i />{ME.org.split('·')[1].trim()} · {ME.title}</span>
           <span className="chip gold"><CalendarDays size={12} />{dateStr}</span>
           <span className="chip red"><i />1 条红色预警待处置</span>
-          <span className="chip green"><i />本机模型 · 无外联</span>
+          <span className="chip green"><i />AI 引擎 · 行内私有化</span>
           <Link to="/scene/postloan" className="btn sm">开始今日巡检 <ChevronRight size={13} /></Link>
         </div>
       </div>
@@ -409,23 +404,6 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* 11. 晋档建议 */}
-        <Card title="晋档建议名单" icon={<Award size={15} />} sub="主管视角 · 支行" cls="gold">
-          <div className="pl-list grow">
-            {PROMOTE.map((m, i) => (
-              <div key={m.id} className="li">
-                <div className={`av ${i === 0 ? 'red' : i === 1 ? 'gold' : 'green'}`}>{m.name[0]}</div>
-                <div className="grow">
-                  <div className="t">{m.name} <span className="card-s">{m.branch} · {m.level} → {m.level === '初级' ? '中级' : '资深'}</span></div>
-                  <div className="s">能力均值 {Math.round(m.radar.reduce((s, v) => s + v, 0) / 10)} · AI {m.aiUse}% · 陪练 {m.sparring} 场</div>
-                  <div className="bar"><i style={{ width: `${m.score}%` }} /></div>
-                </div>
-                <div className="pct num gold-text">{m.score}</div>
-              </div>
-            ))}
-          </div>
-          <div className="chart-foot">就绪度 = 能力均值 60% + AI 使用 25% + 陪练 15%。</div>
-        </Card>
 
         {/* 12. 本周 AI 动态 */}
         <Card title="本周 AI 赋能" icon={<Bot size={15} />} sub="睿衡为你完成" cls="dark">

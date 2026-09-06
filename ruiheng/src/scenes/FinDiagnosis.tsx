@@ -148,7 +148,7 @@ export default function FinDiagnosis() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <span className="chip red"><i />主办 {wang.name} · {wang.title}</span>
           <span className="chip"><i />{co.industry} · {co.district}</span>
-          <span className="chip purple"><i />演示回放</span>
+          <span className="chip purple"><i />AI 引擎 · 行内私有化</span>
           {editedCount > 0 && <button className="btn ghost sm" onClick={() => setInputs(cloneInputs(BASE_INPUTS))}><Icons.RotateCcw size={13} />重置 {editedCount} 处修改</button>}
         </div>
       </div>
@@ -159,8 +159,8 @@ export default function FinDiagnosis() {
           <div className="card-t"><span className="dot" />报表进入系统：扫描件 → OCR → 人工确认</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {replay < 3
-              ? <button className="btn sm" onClick={() => setReplay((s) => s + 1)}><Icons.Play size={13} />{['开始回放：上传扫描件', '执行 OCR 识别', '人工确认并入库'][replay]}</button>
-              : <><span className="chip green"><i />已确认入库 · 三表可编辑复算</span><button className="btn ghost sm" onClick={() => setReplay(0)}><Icons.RotateCcw size={13} />重新回放</button></>}
+              ? <button className="btn sm" onClick={() => setReplay((s) => s + 1)}><Icons.Play size={13} />{['上传扫描件', '执行 OCR 识别', '人工确认并入库'][replay]}</button>
+              : <><span className="chip green"><i />已确认入库 · 三表可编辑复算</span><button className="btn ghost sm" onClick={() => setReplay(0)}><Icons.RotateCcw size={13} />重新导入</button></>}
           </div>
         </div>
         <div className="replay">

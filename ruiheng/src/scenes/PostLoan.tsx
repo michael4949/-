@@ -117,15 +117,9 @@ export default function PostLoan() {
       <div className="page-h">
         <div>
           <h1><Sun size={20} style={{ verticalAlign: -3, marginRight: 6 }} />早会晨报 · 贷后风险哨兵</h1>
-          <p>08:30 · 城东支行早会 · 预警只报规则命中，不报概率；每条建议均需人工复核。</p>
+          <p>城东支行 · 预警只报规则命中，不报概率；每条建议均需人工复核。</p>
         </div>
-        <div className="vsw">
-          <span className="lab">切换视角</span>
-          {(['lin', 'wang', 'zhou'] as const).map((id) => {
-            const p = PERSONAS.find((x) => x.id === id)!;
-            return <button key={id} className={`btn sm${view === id ? '' : ' ghost'}`} onClick={() => setView(id)}><span className="pav sm" style={{ boxShadow: 'none' }}>{p.avatar}</span>{p.name}</button>;
-          })}
-        </div>
+        <div className="vsw"><span className="chip green"><i />AI 引擎 · 行内私有化</span></div>
       </div>
 
       <div className="pl-cols">
@@ -160,7 +154,7 @@ export default function PostLoan() {
             <div className="think-empty">
               <div>
                 <div className="ring"><ShieldAlert size={22} /></div>
-                {sel && sel !== 'caisheng' ? <>该条目在本演示中不展开推理。<br />点击左栏「彩晟商贸」查看完整传导分析。</> : <>等待选择预警……<br />哨兵将按「信号 → 规则 → 传导 → 动作」四步给出依据。</>}
+                {sel && sel !== 'caisheng' ? <>该条目暂无新的推理更新。<br />点击左栏「彩晟商贸」查看完整传导分析。</> : <>等待选择预警……<br />哨兵将按「信号 → 规则 → 传导 → 动作」四步给出依据。</>}
               </div>
             </div>
           )}
@@ -270,7 +264,7 @@ export default function PostLoan() {
                 </div>
               </div>
 
-              {view === 'wang' && (
+              {true && (
                 <div className="card blue fade-in">
                   <div className="card-h"><div className="card-t"><Factory size={14} />应收与担保代偿传导分析</div><span className="card-s">王志远视角</span></div>
                   <div className="kv">
@@ -283,7 +277,7 @@ export default function PostLoan() {
                   <p className="small mt8" style={{ color: 'var(--ink-2)' }}>关联提示：北岭铝材（宁桂上游）票据逾期与本事件无直接关联，但同日出现两条供应链信号，建议在宁桂授信报告的前置条件中一并说明。</p>
                 </div>
               )}
-              {view === 'zhou' && (
+              {true && (
                 <div className="card purple fade-in">
                   <div className="card-h"><div className="card-t"><Factory size={14} />对晟禾集团授信的影响评估与处置预案</div><span className="card-s">周慧敏视角</span></div>
                   <div className="kv">
