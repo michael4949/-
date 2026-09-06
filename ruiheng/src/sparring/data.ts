@@ -59,7 +59,7 @@ export const redById = (id: string) => RED_RULES.find((r) => r.id === id)!;
 export function checkRed(text: string, ctx: { authDone: boolean; enabled: string[] }): RedRule[] {
   return RED_RULES.filter((r) => ctx.enabled.includes(r.id)).filter((r) => {
     if (!r.pattern.test(text)) {
-      if (r.contextual === 'credit-auth' && !ctx.authDone && /(查|拉|调).{0,3}(征信|信用报告)/.test(text)) return true;
+      if (r.contextual === 'credit-auth' && !ctx.authDone && !/授权/.test(text) && /(查|拉|调).{0,3}(征信|信用报告)/.test(text)) return true;
       return false;
     }
     if (r.contextual === 'credit-auth') return !ctx.authDone;
@@ -160,11 +160,11 @@ export const STUDENTS: Record<StudentId, Student> = {
     certs: [{ name: '对公客户经理上岗证', org: '总行公司业务部', date: '2026-02', status: '有效' }, { name: '信贷从业资格', org: '总行授信审批部', date: '2026-03', status: '有效' }, { name: '反洗钱合规培训', org: '总行合规部', date: '2026-01', status: '有效' }, { name: '消费者权益保护培训', org: '总行消保办', date: '2025-12', status: '待复训' }],
     tags: ['尽调访谈进步快', '合规意识强', '需求挖掘待加强', '成交推进偏弱', '共情表达自然'],
     history: [
-      { d: '08/06', s: 58, coach: 'first-visit', mode: 'teach', red: 1 }, { d: '08/09', s: 62, coach: 'dd-interview', mode: 'teach', red: 1 }, { d: '08/13', s: 64, coach: 'objection', mode: 'drill', red: 0 },
-      { d: '08/16', s: 67, coach: 'dd-interview', mode: 'drill', red: 0 }, { d: '08/20', s: 66, coach: 'renewal', mode: 'drill', red: 1 }, { d: '08/23', s: 71, coach: 'complaint', mode: 'drill', red: 0 },
-      { d: '08/27', s: 73, coach: 'dd-interview', mode: 'drill', red: 0 }, { d: '08/30', s: 74, coach: 'collection', mode: 'drill', red: 0 }, { d: '09/02', s: 77, coach: 'objection', mode: 'exam', red: 0 }, { d: '09/04', s: 79, coach: 'dd-interview', mode: 'drill', red: 0 },
+      { d: '08/06', s: 58, coach: 'first-visit', mode: 'teach', red: 1 }, { d: '08/09', s: 62, coach: 'dd-interview', mode: 'teach', red: 1 }, { d: '08/13', s: 64, coach: 'renewal', mode: 'drill', red: 0 },
+      { d: '08/16', s: 67, coach: 'dd-interview', mode: 'drill', red: 0 }, { d: '08/20', s: 66, coach: 'renewal', mode: 'drill', red: 1 }, { d: '08/23', s: 71, coach: 'crisis', mode: 'drill', red: 0 },
+      { d: '08/27', s: 73, coach: 'dd-interview', mode: 'drill', red: 0 }, { d: '08/30', s: 74, coach: 'collection', mode: 'drill', red: 0 }, { d: '09/02', s: 77, coach: 'renewal', mode: 'exam', red: 0 }, { d: '09/04', s: 79, coach: 'dd-interview', mode: 'drill', red: 0 },
     ],
-    bestByCoach: { 'first-visit': 74, 'dd-interview': 79, objection: 77, renewal: 66, complaint: 71, collection: 74, 'cross-dept': 63, etiquette: 70, speech: 72 },
+    bestByCoach: { 'first-visit': 74, 'dd-interview': 79, renewal: 77, crisis: 71, collection: 74, 'cross-dept': 63, etiquette: 70, speech: 72 },
     achievements: ['zero-red-5', 'no-hint-3'],
     writebacks: [{ at: '09/04 17:42', method: '完整流程 · 演练', score: 79, taskDone: true }, { at: '09/02 11:20', method: '专项 · 异议处理 · 考核', score: 77, taskDone: true }, { at: '08/30 16:05', method: '分段 · 催收沟通 · 演练', score: 74, taskDone: false }, { at: '08/27 10:12', method: '完整流程 · 演练', score: 73, taskDone: true }],
   },
@@ -184,7 +184,7 @@ export const STUDENTS: Record<StudentId, Student> = {
       { d: '08/19', s: 84, coach: 'renewal', mode: 'exam', red: 0 }, { d: '08/22', s: 85, coach: 'cross-dept', mode: 'drill', red: 0 }, { d: '08/27', s: 86, coach: 'crisis', mode: 'exam', red: 0 },
       { d: '08/29', s: 83, coach: 'postloan', mode: 'drill', red: 0 }, { d: '09/03', s: 88, coach: 'negotiation', mode: 'exam', red: 0 },
     ],
-    bestByCoach: { negotiation: 88, exec: 82, committee: 78, renewal: 84, 'cross-dept': 85, crisis: 86, postloan: 83, 'dd-interview': 86, 'first-visit': 81, scf: 80, fx: 79, speech: 84, etiquette: 83, objection: 85, complaint: 80, collection: 82 },
+    bestByCoach: { negotiation: 88, exec: 82, committee: 78, renewal: 84, 'cross-dept': 85, crisis: 86, postloan: 83, 'dd-interview': 86, 'first-visit': 81, scf: 80, fx: 79, speech: 84, etiquette: 83, collection: 82 },
     achievements: ['score-90', 'zero-red-5', 'full-85', 'no-hint-3', 'fraud-detect'],
     writebacks: [{ at: '09/03 15:30', method: '完整流程 · 考核', score: 88, taskDone: true }, { at: '08/29 09:48', method: '专项 · 贷后风险沟通 · 演练', score: 83, taskDone: true }, { at: '08/27 14:16', method: '专项 · 舆情应对 · 考核', score: 86, taskDone: true }],
   },
@@ -211,7 +211,7 @@ export interface Assignment { id: string; title: string; coachId: string; mode: 
 export const ASSIGNMENTS: Record<StudentId, Assignment[]> = {
   lin: [
     { id: 'a1', title: '完整尽调访谈流程（考核模式）', coachId: 'dd-interview', mode: 'exam', from: '周慧敏 · 团队长下发', due: '2026-09-08', done: false, target: 75 },
-    { id: 'a2', title: '异议处理 · 专项 3 场（≥ 70 分）', coachId: 'objection', mode: 'drill', from: '黄建国 · 支行行长', due: '2026-09-12', done: false, target: 70 },
+    { id: 'a2', title: '异议处理 · 专项 3 场（≥ 70 分）', coachId: 'renewal', mode: 'drill', from: '黄建国 · 支行行长', due: '2026-09-12', done: false, target: 70 },
     { id: 'a3', title: '催收沟通 · 合规话术复训', coachId: 'collection', mode: 'drill', from: '合规部', due: '2026-09-05', done: true },
   ],
   wang: [

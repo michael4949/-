@@ -29,3 +29,12 @@ export const REGISTRY: Record<string, ComponentType> = {
   'F-KH-021': GroupWarRoom,   // 集团关系图谱
   'F-SY-018': Profile,        // 领导力画像与提升路径（能力画像）
 };
+
+// ---- 智能陪练底座：P09 的 10 个功能都进入陪练子应用，按功能预选教练 ----
+import SparringApp from '../sparring/SparringApp';
+import { coachByFid, P09_FIDS } from '../sparring/coaches';
+import { createElement } from 'react';
+for (const fid of P09_FIDS) {
+  const coach = coachByFid(fid);
+  REGISTRY[fid] = () => createElement(SparringApp, { coachId: coach?.id });
+}
