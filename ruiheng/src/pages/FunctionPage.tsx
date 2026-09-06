@@ -88,11 +88,12 @@ const clauses = (t: string) => (t || '')
 /* 步骤：按 process 文本拆分为 3~6 步，每步轮询分配一个数据源 */
 interface Step { title: string; detail: string; src: string }
 function stepTitle(p: string) {
-  const head = p.split(/[，,：:（(]/)[0].trim();
+  const head = p.replace(/^[（(）)\s]+/, '').split(/[，,：:（(]/)[0].trim().replace(/[）)]+$/, '');
   return head.length > 14 ? head.slice(0, 13) + '…' : head || '处理步骤';
 }
 function buildSteps(fn: ProductFunction): Step[] {
-  let parts = fn.process.split(/[；。→;]/).map((s) => s.trim()).filter((s) => s.length > 3);
+  const protect = fn.process.replace(/（[^）]*）|\([^)]*\)/g, (m) => m.replace(/[；。→;，,：:]/g, '‖'));
+  let parts = protect.split(/[；。→;]/).map((s) => s.replace(/‖/g, '，').trim()).filter((s) => s.length > 3);
   let k = 0;
   while (parts.length < 3) parts.push(STEP_PAD[k++ % STEP_PAD.length]);
   if (parts.length > 6) {
