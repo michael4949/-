@@ -342,7 +342,7 @@ function PathMap({ t, roles }: { t: Target; roles: Record<RoleKey, string> }) {
   const bankY: Record<BankKey, number> = { huang: 70, zhou: 170, wang: 270, lin: 370 };
   const cliY: Record<RoleKey, number> = { chairman: 60, cfo: 160, fd: 260, sec: 360 };
   const BX = 150, MX = 480, CX = 810, W = 250, H = 46;
-  const mids = t.bridges.map((b, i) => ({ ...b, y: 90 + i * (300 / Math.max(1, t.bridges.length - 1 || 1)) }));
+  const mids = t.bridges.map((b, i) => ({ ...b, y: t.bridges.length === 1 ? 215 : 100 + i * (240 / (t.bridges.length - 1)) }));
   const curve = (x0: number, y0: number, x1: number, y1: number) => `M ${x0} ${y0} C ${(x0 + x1) / 2} ${y0}, ${(x0 + x1) / 2} ${y1}, ${x1} ${y1}`;
   const direct = t.relation !== '无往来';
   const bankOrder: BankKey[] = ['huang', 'zhou', 'wang', 'lin'];
@@ -424,7 +424,7 @@ export default function HighEndDevelopment() {
   const [rel, setRel] = useState<'全部' | Rel>('全部');
   const [chain, setChain] = useState<(typeof CHAIN_OPTS)[number]>('全部');
   const [selId, setSelId] = useState<string>('shenghe');
-  const [phase, setPhase] = useState(1);
+  const [phase, setPhase] = useState(2);
   const [run, setRun] = useState(0);
   const [applyOpen, setApplyOpen] = useState(false);
   const [applied, setApplied] = useState<Record<string, string>>({ dongling: '08-27 已协访', zhongtai: '09-03 已协访' });
@@ -469,7 +469,7 @@ export default function HighEndDevelopment() {
     flash(`协访申请已提交：${leader.name} · ${form.date} · 待确认`);
   };
   const generate = () => { setRun((r) => r + 1); setHist((h) => [{ time: '09-06 ' + new Date().toTimeString().slice(0, 5), target: t.name, action: '生成开发策略', result: `成功率 ${rate}% · ${PHASE_NAMES[t.stage]}阶段`, tone: 'green' }, ...h]); };
-  const share = (name: string) => { const b = t.banks.find((x) => x.name === '本行'); return name === '本行' ? b?.share ?? 0 : 0; };
+  const myShare = t.banks.find((x) => x.name === '本行')?.share ?? 0;
   const stateOf = (i: number) => (i < n - 1 ? 'done' : i === n - 1 && n <= steps.length ? 'active' : 'pending');
   const SHARE_COLORS = ['linear-gradient(90deg,#3a86ff,#1d4ed8)', 'linear-gradient(90deg,#9b5de5,#6d28d9)', 'linear-gradient(90deg,#e63946,#8e1b1b)', 'linear-gradient(90deg,#00b4d8,#0077b6)'];
 
@@ -552,7 +552,7 @@ export default function HighEndDevelopment() {
               <div className="hd-kv">
                 <div className="k">营收规模<b>{t.revenue} 亿</b></div>
                 <div className="k">主办行<b>{t.banks[0].name}</b></div>
-                <div className="k">本行份额<b>{share('本行')}%</b></div>
+                <div className="k">本行份额<b>{myShare}%</b></div>
                 <div className="k">需求匹配度<b>{t.need}%</b></div>
                 <div className="k">竞争强度<b>{t.comp}%</b></div>
                 <div className="k">时机窗口<b style={{ fontSize: 12.5 }}>{t.window}</b></div>
@@ -665,7 +665,7 @@ export default function HighEndDevelopment() {
           {finished && (
             <div className="fade-in">
               <h4><Building2 size={13} />一、目标画像</h4>
-              <p>{t.name}，{t.type}，{t.industry}，营收 {t.revenue} 亿，{t.boardText}，总部{t.district}。{t.facts.join('；')}。当前与本行关系：{t.relation}，本行份额 {share('本行')}%。</p>
+              <p>{t.name}，{t.type}，{t.industry}，营收 {t.revenue} 亿，{t.boardText}，总部{t.district}。{t.facts.join('；')}。当前与本行关系：{t.relation}，本行份额 {myShare}%。</p>
               <h4><Users size={13} />二、触点地图</h4>
               <ul className="hd-ul">{t.bridges.map((b) => <li key={b.who}>{P(b.from).name}（{BANK_LABEL[b.from]}）→ {b.who}（{b.kind === 'have' ? '已有关系' : '可借力'}：{b.desc}）→ {roles[b.to]}（{ROLE_LABEL[b.to]}）</li>)}</ul>
               <h4><Milestone size={13} />三、分阶段策略</h4>

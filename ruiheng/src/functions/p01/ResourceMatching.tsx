@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Network, Sparkles, Check, RotateCcw, Search, Handshake, ShieldCheck, ChevronRight, Download, History, Link2, Coins, Receipt,
-  Banknote, Layers, PhoneCall, ClipboardList, ArrowRight, X, TrendingUp, Building2, Users, Workflow, BadgeCheck, AlertTriangle,
+  Banknote, Layers, PhoneCall, ClipboardList, ArrowRight, TrendingUp, Building2, Users, Workflow, BadgeCheck, AlertTriangle,
 } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { COMPANIES } from '../../data/companies';
@@ -267,7 +267,7 @@ const STEPS = [
   { t: '匹配产业链关系', p: '按产业链上下游、区域与规模匹配候选对象：装备制造链（铝材 → 模具 → 精密制造）、食品消费链（原料 → 加工 → 经销 / 商超 / 餐饮）、新能源链（辅材 → 组件 → 物流）。' },
   { t: '校验产能与资金互补', p: '识别闲置产能（鑫泰铝业 30%、极冷冷链 38%、云锐机械外协）与资金缺口（锂源材料 2,000 万、恒达包装账期 60 天），并与核心企业信用匹配。' },
   { t: '计算协同效益', p: '前端确定性计算：撮合交易额、可归集结算量、潜在融资额；剔除未授权客户的非公开信息。' },
-  { id: 5, t: '映射本行产品', p: '按互补类型映射：采购销售 → 结算 + 票据；资金互补 → 反向保理 / 供应商融资；产能互补 → 结算 + 流动资金。' },
+  { t: '映射本行产品', p: '按互补类型映射：采购销售 → 结算 + 票据；资金互补 → 反向保理 / 供应商融资；产能互补 → 结算 + 流动资金。' },
   { t: '排序与资源配置', p: `按撮合成功率排序，生成 ${OPPS.length} 条机会；建议联合拜访分工与产品部支持。` },
 ];
 
@@ -472,7 +472,7 @@ export default function ResourceMatching() {
           </ul>
         </div>
         <div className="card gold fade-in" style={{ animationDelay: '80ms' }}>
-          <div className="card-h"><div className="card-t"><Handshake size={14} />撮合机会列表</div>{finished ? AI_TAG : <span className="card-s">{run > 0 ? '生成中……' : `上次发现：08-28 · ${OPPS.length} 条`}</span>}</div>
+          <div className="card-h"><div className="card-t"><Handshake size={14} />撮合机会列表</div><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><span className="card-s">{run > 0 && !finished ? '生成中……' : finished ? '本次发现' : `上次发现：08-28 · ${OPPS.length} 条`}</span>{AI_TAG}</div></div>
           {run > 0 && !finished && <div className="rm-empty" style={{ minHeight: 160 }}><div>正在匹配产业链关系并计算协同效益……</div></div>}
           {(run === 0 || finished) && OPPS.map((o) => {
             const a = nodeOf(o.a), b = nodeOf(o.b); const t = tickets.find((x) => x.opp === o.id);
