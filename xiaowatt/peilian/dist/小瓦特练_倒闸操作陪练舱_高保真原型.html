@@ -1140,6 +1140,57 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .pzcnt{font-size:11.5px;color:#7b6a52;margin:2px 0 8px}
 .capply{margin-top:8px;padding:6px 9px;border-radius:6px;background:#faf3dc;border:1px solid #e3d49e;color:#8a6d15;font-size:11px;text-align:center}
 
+/* ---- 填写操作票（拟票练习） ---- */
+.tfill{padding:26px 16px;color:#7b6a52;font-size:12px;line-height:1.9;text-align:center;border:1px dashed var(--goldsoft);border-radius:8px;margin:8px}
+.fflow{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ffs{flex:1 0 118px;position:relative;padding:9px 10px 10px;border:1px solid var(--goldsoft);border-radius:8px;background:#fffdf7}
+.ffs.cur{border-color:var(--acln);background:var(--acbg);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 16%,transparent)}
+.ffs.done{opacity:.62}
+.ffs i{display:inline-flex;width:17px;height:17px;border-radius:50%;background:#e6e2d2;color:#5c6b5f;align-items:center;justify-content:center;font-size:10px;font-style:normal;font-family:var(--mono)}
+.ffs.cur i{background:var(--ac);color:#fff}
+.ffs b{display:block;margin:5px 0 3px;font-size:12.5px;color:#243329}
+.ffs span{display:block;font-size:10.5px;color:#7b6a52;line-height:1.55}
+.fhead{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.fhr{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed #edeade}
+.fhr .k{flex:0 0 84px;font-size:11.5px;color:#5c6b5f}
+.fhr .v{flex:1}
+.fhr .v.ro{font-size:11.5px;color:#98a69c}
+.fhr select{width:100%;padding:5px 7px;border:1px solid var(--goldsoft);border-radius:5px;background:#fff;font-size:12px;color:#243329;font-family:inherit}
+.fbody{display:grid;grid-template-columns:1fr 1.15fr;gap:12px}
+.fpt{font-size:11px;color:#7b6a52;margin-bottom:6px;font-family:var(--mono)}
+.fpool,.fsheet{border:1px solid var(--goldsoft);border-radius:8px;padding:9px 10px;background:#fffdf7;min-height:150px}
+.fsheet{background:#fff}
+.fpi{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;margin-bottom:5px;border:1px solid #e9e6d8;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;line-height:1.55;color:#243329}
+.fpi:hover{border-color:var(--acln);background:var(--acbg)}
+.fpi b{color:var(--acd);font-family:var(--mono);flex:0 0 auto}
+.fpe{padding:22px 8px;text-align:center;font-size:11.5px;color:#98a69c;line-height:1.8}
+.fsi{display:flex;gap:8px;align-items:center;padding:6px 8px;margin-bottom:5px;border:1px solid var(--acln);border-radius:6px;background:var(--acbg)}
+.fsn{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ac);color:#fff;font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+.fst{flex:1;font-size:12px;line-height:1.55;color:#243329}
+.fsb{display:flex;gap:3px}
+.fbtn{width:22px;height:22px;border:1px solid var(--goldsoft);border-radius:4px;background:#fff;color:#5c6b5f;cursor:pointer;font-size:12px;line-height:1}
+.fbtn:hover{border-color:var(--acln);color:var(--acd)}
+.fbtn.del:hover{border-color:#e0a99f;color:#b3372c}
+.ffoot{display:flex;align-items:center;gap:12px;margin-top:10px}
+.ffh{flex:1;font-size:11px;color:#7b6a52;line-height:1.7}
+.fsc{display:flex;gap:18px;align-items:center;padding:12px 14px;border:1px solid var(--goldsoft);border-radius:9px;background:#fffdf7;margin-bottom:12px}
+.fscn{font-family:var(--mono);font-size:40px;line-height:1;color:var(--ac);flex:0 0 auto}
+.fscn.warn{color:#a8821b}.fscn.bad{color:#b3372c}
+.fscd{flex:1}
+.fscd>div{display:flex;align-items:baseline;gap:8px;padding:2px 0;font-size:11.5px}
+.fscd>div>b{flex:0 0 78px;color:#243329}
+.fscd>div>i{font-family:var(--mono);font-style:normal;font-size:14px;color:var(--acd)}
+.fscd>div>span{color:#7b6a52}
+.ferr{padding:8px 0;border-bottom:1px dashed #e9e6d8}
+.fet b{color:#243329;font-size:12.5px;margin-left:4px}
+.fex{margin-top:4px;font-size:11.5px;color:#5c6b5f;line-height:1.65;padding-left:2px}
+.fex i{display:inline-block;min-width:34px;font-style:normal;color:#a8821b;font-family:var(--mono);margin-right:5px}
+.fex.rule{color:#7b6a52;border-left:2px solid #e3d49e;padding-left:8px;margin-top:5px}
+.fok{margin:0;padding-left:20px;font-size:12px;color:#243329;line-height:1.7}
+.fok li{margin-bottom:5px}
+.fok em{display:block;font-style:normal;font-size:11px;color:#7b6a52;line-height:1.6}
+.beat.idle{opacity:.4}
+
 </style>
 </head>
 <body></body>
@@ -1695,6 +1746,12 @@ function applyGuideTarget(sel) {
 
 function instrNow() {
   const st = STEP();
+  if (S.stage === 'fill') {
+    const miss = FHEAD.find(f => !S.fill.head[f.k]);
+    if (miss) return { i: 'act', pic: 'tick', t: `票头：选择「${miss.n}」`, h: '票头四项要素都要填全', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在选${miss.n}` };
+    if (!S.fill.rows.length) return { i: 'act', pic: 'tick', t: '从备选项目里点「＋」写入第一项', h: '只写本次调度令范围内的项目', sel: '#panelwrap [data-fadd]', n: '票面还是空的，从左边把本段项目写进来' };
+    return { i: 'act', pic: 'tick', t: '排好顺序后点「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_go', n: '顺序排好了就点「提交审核」' };
+  }
   if (S.stage === 'prep') {
     const ai = S.prep.audit.findIndex(x => !x);
     if (ai >= 0) return { i: 'check', pic: 'tick', t: `三审：点击勾选「${AUDIT[ai]}」`, h: `三审第 ${ai + 1}/3 项`, sel: `.chk[data-p="audit"][data-i="${ai}"]`, n: `先做操作票三审，点「${AUDIT[ai]}」打勾` };
@@ -1749,8 +1806,9 @@ function renderTaskbar() {
   if (!bar) return;
   if (S.stage !== 'run' || !st) {
     const ins0 = instrNow();
-    const html0 = `<div class="tb1"><span class="tbno">${S.stage === 'prep' ? '准备' : S.stage === 'wufang' ? '五防' : '—'}</span>
-      <span class="tbtx">${S.stage === 'prep' ? '上岗前准备 · 三审 / 着装互检 / 风险分析' :
+    const html0 = `<div class="tb1"><span class="tbno">${S.stage === 'fill' ? '拟票' : S.stage === 'prep' ? '准备' : S.stage === 'wufang' ? '五防' : '—'}</span>
+      <span class="tbtx">${S.stage === 'fill' ? '填写操作票 · 票头要素 / 本段项目 / 执行顺序' :
+        S.stage === 'prep' ? '上岗前准备 · 三审 / 着装互检 / 风险分析' :
         S.stage === 'wufang' ? '五防模拟预演 · 按操作票顺序逐项模拟' : '本次陪练已结束'}</span>
       ${modeBtn()}</div>
       ${ins0 ? `<div class="tbfoc">
@@ -2080,7 +2138,7 @@ const LAYOUT = `
         <div class="thead">
           <div class="ttl">110kV仿真站 现场电气操作票</div>
           <div class="meta">
-            <div>票号 <b>2600137</b></div><div>类型 <b>根据调度令进行的操作</b></div>
+            <div>票号 <b id="tno">待签发</b></div><div>类型 <b>根据调度令进行的操作</b></div>
             <div>操作人 <b>任玲玲</b></div><div>监护人 <b>陈志远</b></div>
           </div>
         </div>
@@ -2131,6 +2189,9 @@ const S = {
   vio: [],                // 违规记录
   praise: [],
   score: { rule: 0, order: 0, dual: 0, state: 0, risk: 0, term: 0 },
+  fill: { rows: [], head: {}, tries: 0, done: false, score: null, last: null, no: '' },
+  fillErr: [],
+  filled: false, fillOn: true,
   ord: { unit: '', from: '', to: '任玲玲', time: '', issued: '' },
   ph: { ring: false, conn: false, cmp: null, pending: '', log: [] }, wfdev: null, lastChg: null,
   abn: { armed: true, fired: false, handled: false },
@@ -2474,8 +2535,9 @@ function speak(text, opt) {
 /* ---------------- 五拍 ---------------- */
 const BEATS = [['唱票', 'CALL'], ['手指口述', 'POINT+RECITE'], ['对，执行', 'ORDER'], ['执行', 'ACT'], ['检查回报', 'REPORT'], ['标√', 'TICK']];
 function renderBeats() {
+  const pre = S.stage === 'fill' || S.stage === 'prep' || S.stage === 'wufang';
   $('#beats').innerHTML = BEATS.map((b, i) =>
-    `<div class="beat ${S.beat === i ? 'on' : ''} ${S.beat > i ? 'done' : ''}"><b>${b[0]}</b><i>${b[1]}</i></div>`).join('');
+    `<div class="beat ${!pre && S.beat === i ? 'on' : ''} ${!pre && S.beat > i ? 'done' : ''} ${pre ? 'idle' : ''}"><b>${b[0]}</b><i>${b[1]}</i></div>`).join('');
 }
 
 /* ---------------- KPI ---------------- */
@@ -2552,6 +2614,11 @@ function liveMeter() {
 /* ---------------- 操作票 ---------------- */
 function renderTicket() {
   const b = $('#trows'); b.innerHTML = '';
+  const tn = $('#tno'); if (tn) tn.textContent = S.stage === 'fill' ? '待签发' : ticketNo();
+  if (S.stage === 'fill') {
+    b.appendChild(el('div', 'tfill', '操作票尚未拟写。<br>在右侧作业面板按调度预令写第一段，提交审核后签发。'));
+    return;
+  }
   const segs = { 1: '接调度令：运行 → 热备用', 2: '再经调度令：热备用 → 冷备用', 3: '再经调度令：冷备用 → 检修' };
   let lastPhase = 0;
   STEPS.forEach((s, i) => {
@@ -2618,6 +2685,7 @@ function renderLocbar() {
   $$('#locbar .locbtn').forEach(b => b.onclick = () => goLoc(b.dataset.loc));
 }
 function goLoc(k) {
+  if (S.stage === 'fill') return toast('拟票阶段先把操作票写完并提交审核，签发后再到现场', '');
   if (S.loc === k) return;
   if (k === 'bay') S.bay = null;   // 每次进现场都要自己认间隔，系统不预选
   S.loc = k; S.sel = null;
@@ -3326,6 +3394,197 @@ function panelCab(w) {
       ${SVX.arm('gis_arm', 616, 374, !esC, '拐臂指示')}
       ${SVX.shaft('gis_line', 704, 374, !esC, '转轴划线')}
     </svg></div>`);
+}
+
+
+/* ===================== 填写操作票（拟票练习）=====================
+   位置：进入陪练舱后的第一步，在上岗前准备之前。
+   学员按调度预令拟写第一段操作项目，提交后由系统按审票口径逐条判分，
+   给出漏项、多项、顺序错误的详解与原理，再按正确票面进入准备阶段。 */
+
+/* 倒闸操作作业全过程（票的一生），当前处在「拟票」 */
+const FLOW = [
+  ['接受任务', '值班负责人接调度预令，明确操作任务与时间'],
+  ['拟票', '按调度预令和现场设备状态逐项拟写操作票'],
+  ['审核', '拟票人自审、监护人复审、值班负责人审核'],
+  ['签发', '值班负责人签发，注明操作票编号与拟票时间'],
+  ['五防模拟', '在五防主机上按票序模拟，通过后下传电脑钥匙'],
+  ['现场操作', '监护人唱票、操作人手指口述复诵、执行后检查回报'],
+  ['汇报终结', '逐段汇报调度，操作完毕记录结束时间并归档']
+];
+
+/* 票头待填项（正确答案取自本次调度预令） */
+const FHEAD = [
+  { k: 'unit', n: '发令单位', ok: '深圳中调', opt: ['深圳中调', '深圳地调', '本站值班负责人'],
+    why: '本次操作任务由深圳中调下令，发令单位应按实际下令单位填写，不得写成本站或其他调度机构。' },
+  { k: 'from', n: '发令人', ok: '李明', opt: ['李明', '陈志远', '任玲玲'],
+    why: '发令人是调度侧实际下令的值班调度员，陈志远是本站监护人、任玲玲是操作人，都不能填在发令人栏。' },
+  { k: 'to', n: '受令人', ok: '陈志远', opt: ['陈志远', '任玲玲', '李明'],
+    why: '受令人须是当值值班负责人或经授权的具备接令资格人员，本次由监护人陈志远接令，操作人不得代为接令。' },
+  { k: 'task', n: '操作任务', ok: '将110kV仿真站110kV培训三线1163线路由运行转检修',
+    opt: ['将110kV仿真站110kV培训三线1163线路由运行转检修', '将110kV仿真站110kV培训三线1163线路由运行转冷备用', '将培训三线1163开关由运行转检修'],
+    why: '操作任务须写全变电站名称、电压等级与设备双重名称，操作对象是线路不是开关；本票最终状态是检修，不是冷备用。' }
+];
+
+/* 本段应写入的项目＝第一段（运行 → 热备用）；干扰项取自后两段 */
+function fillRight() { return STEPS.filter(s => s.phase === 1); }
+function fillWrong() { return ['12', '20', '25', '22.1'].map(no => STEPS.find(s => s.no === no)).filter(Boolean); }
+const SEGNAME = { 1: '运行 → 热备用', 2: '热备用 → 冷备用', 3: '冷备用 → 检修' };
+function wrongWhy(s) {
+  const base = `本项属于「${SEGNAME[s.phase]}」段，调度采用逐项令，须再经调度令后才能执行，不应写入本段操作票。`;
+  if (s.no === '20') return base + '并且接地操作必须在两种原理验电合格之后进行，写在本段等于把接地提到验电之前。';
+  if (s.no === '25' || s.no === '22.1') return base + '安全措施（挂牌、断二次电源）属于转检修阶段，本段线路尚未隔离到位。';
+  return base;
+}
+
+function ticketNo() {
+  if (!S.fill.no) { const d = new Date(); S.fill.no = `${d.getFullYear()}-变电运行-0217`; }
+  return S.fill.no;
+}
+
+/* ---------- 渲染 ---------- */
+function renderFill() {
+  const w = $('#panelwrap'); if (!w) return;
+  const pool = fillRight().concat(fillWrong());
+  const chosen = S.fill.rows;
+  const rest = pool.filter(s => !chosen.includes(s.no));
+  w.innerHTML =
+    pnl('倒闸操作作业全过程', '当前环节：拟票', `
+      <div class="fflow">${FLOW.map((f, i) => `<div class="ffs ${i === 1 ? 'cur' : i < 1 ? 'done' : ''}"><i>${i + 1}</i><b>${f[0]}</b><span>${f[1]}</span></div>`).join('')}</div>`) +
+    pnl('110kV仿真站 · 变电站倒闸操作票', `编号 ${ticketNo()} · 拟票人 任玲玲`, `
+      <div class="fhead">
+        ${FHEAD.map(f => `<div class="fhr"><div class="k">${f.n}</div><div class="v">
+          <select data-fh="${f.k}"><option value="">请选择</option>${f.opt.map(o => `<option${S.fill.head[f.k] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></div></div>`).join('')}
+        <div class="fhr"><div class="k">操作开始时间</div><div class="v ro">执行第一项时填写</div></div>
+        <div class="fhr"><div class="k">操作结束时间</div><div class="v ro">完成最后一项时填写</div></div>
+      </div>`) +
+    pnl('操作项目 · 第一段（本次调度令范围：运行 → 热备用）', `已写入 ${chosen.length} 项`, `
+      <div class="fbody">
+        <div class="fpool">
+          <div class="fpt">备选项目　${rest.length} 项未写入</div>
+          ${rest.length ? rest.map(s => `<div class="fpi" data-fadd="${s.no}"><b>＋</b><span>${s.ticket}</span></div>`).join('')
+            : '<div class="fpe">备选项目已全部写入票面。多写的项目要移出去。</div>'}
+        </div>
+        <div class="fsheet">
+          <div class="fpt">操作票第一段　按执行顺序排列</div>
+          ${chosen.length ? chosen.map((no, i) => { const s = STEPS.find(x => x.no === no); return `
+            <div class="fsi"><div class="fsn">${i + 1}</div><div class="fst">${s.ticket}</div>
+              <div class="fsb"><button class="fbtn" data-fup="${i}" title="上移">↑</button><button class="fbtn" data-fdn="${i}" title="下移">↓</button><button class="fbtn del" data-fdel="${i}" title="移出票面">×</button></div></div>`; }).join('')
+            : '<div class="fpe">票面还是空的。从左边把本段应执行的项目按顺序写进来。</div>'}
+        </div>
+      </div>
+      <div class="ffoot">
+        <div class="ffh">拟票要求：只写本次调度令范围内的项目；每一项一个动作；执行项与检查项分列；顺序按先断开关、后拉刀闸、先线路侧后母线侧的逻辑排列。</div>
+        <button class="btn pri" id="f_go">提交审核</button>
+      </div>`);
+  $$('#panelwrap [data-fh]').forEach(n => n.onchange = e => { S.fill.head[n.dataset.fh] = e.target.value; renderTaskbar(); });
+  $$('#panelwrap [data-fadd]').forEach(n => n.onclick = () => { S.fill.rows.push(n.dataset.fadd); renderFill(); });
+  $$('#panelwrap [data-fup]').forEach(n => n.onclick = () => { const i = +n.dataset.fup; if (i > 0) { const r = S.fill.rows; [r[i - 1], r[i]] = [r[i], r[i - 1]]; renderFill(); } });
+  $$('#panelwrap [data-fdn]').forEach(n => n.onclick = () => { const i = +n.dataset.fdn, r = S.fill.rows; if (i < r.length - 1) { [r[i + 1], r[i]] = [r[i], r[i + 1]]; renderFill(); } });
+  $$('#panelwrap [data-fdel]').forEach(n => n.onclick = () => { S.fill.rows.splice(+n.dataset.fdel, 1); renderFill(); });
+  $('#f_go').onclick = auditFill;
+  renderTaskbar();
+  const tt = $('#sheettitle'); if (tt) tt.textContent = '作业面板 · 填写操作票';
+}
+
+/* ---------- 判分与详解 ---------- */
+function fillScore() {
+  const right = fillRight().map(s => s.no);
+  const rows = S.fill.rows.slice();
+  const errs = [];
+  // 票头
+  let hs = 20;
+  FHEAD.forEach(f => {
+    const v = S.fill.head[f.k];
+    if (v !== f.ok) {
+      hs -= 5;
+      errs.push({ g: '票头', t: `${f.n}${v ? `填「${v}」` : '未填写'}`, right: f.ok, why: f.why,
+        rule: '附录F 2.4／2.5／2.7：发令单位、发令人、受令人、受令时间应完整、如实记录在调度操作指令记录簿及操作票相应栏。' });
+    }
+  });
+  // 漏项 / 多项
+  let ps = 50;
+  right.filter(no => !rows.includes(no)).forEach(no => {
+    const s = STEPS.find(x => x.no === no); ps -= 7;
+    errs.push({ g: '漏项', t: `漏写「${s.ticket}」`, right: `应写在本段第 ${right.indexOf(no) + 1} 项`, why: s.why, rule: s.rule });
+  });
+  rows.filter(no => !right.includes(no)).forEach(no => {
+    const s = STEPS.find(x => x.no === no); ps -= 7;
+    errs.push({ g: '多项', t: `多写「${s.ticket}」`, right: '本段不应写入，移出票面', why: wrongWhy(s), rule: s.rule });
+  });
+  ps = Math.max(0, ps);
+  // 顺序（只看正确项之间的相对次序，逐个逆序对判）
+  let os = 30;
+  const seq = rows.filter(no => right.includes(no));
+  for (let i = 0; i < seq.length; i++) for (let j = i + 1; j < seq.length; j++) {
+    if (right.indexOf(seq[i]) > right.indexOf(seq[j])) {
+      os -= 6;
+      const a = STEPS.find(x => x.no === seq[i]), b = STEPS.find(x => x.no === seq[j]);
+      errs.push({ g: '顺序', t: `「${b.ticket}」被排在「${a.ticket}」之后`, right: `应先「${b.ticket}」，再「${a.ticket}」`,
+        why: b.why, rule: b.rule });
+    }
+  }
+  os = Math.max(0, os);
+  return { total: Math.max(0, hs) + ps + os, hs: Math.max(0, hs), ps, os, errs };
+}
+
+function auditFill() {
+  if (!S.fill.rows.length) return toast('票面还是空的，先写入本段操作项目', 'bad');
+  if (FHEAD.some(f => !S.fill.head[f.k])) return toast('票头还有未填项，先把发令单位、发令人、受令人、操作任务填完', 'bad');
+  S.fill.tries = (S.fill.tries || 0) + 1;
+  const r = fillScore();
+  S.fill.last = r;
+  const grp = ['票头', '漏项', '多项', '顺序'];
+  const m = el('div', 'mask');
+  m.innerHTML = `<div class="dlg" style="width:min(880px,96vw)">
+    <div class="dh"><b>拟票审核结果 · 第 ${S.fill.tries} 次提交</b><span class="cls">×</span></div>
+    <div class="db">
+      <div class="fsc">
+        <div class="fscn ${r.total >= 85 ? 'good' : r.total >= 60 ? 'warn' : 'bad'}">${r.total}</div>
+        <div class="fscd">
+          <div><b>票头要素</b><i>${r.hs}</i><span>/ 20 分 · 发令单位、发令人、受令人、操作任务各 5 分</span></div>
+          <div><b>项目完整性</b><i>${r.ps}</i><span>/ 50 分 · 漏一项或多一项各扣 7 分</span></div>
+          <div><b>执行顺序</b><i>${r.os}</i><span>/ 30 分 · 每处前后颠倒扣 6 分</span></div>
+        </div>
+      </div>
+      ${r.errs.length ? grp.map(g => {
+        const es = r.errs.filter(e => e.g === g); if (!es.length) return '';
+        return `<div class="sec"><div class="st">${g} · ${es.length} 处</div><div class="sc">
+          ${es.map(e => `<div class="ferr">
+            <div class="fet"><span class="tag wn">${g}</span><b>${e.t}</b></div>
+            <div class="fex"><i>应为</i>${e.right}</div>
+            <div class="fex"><i>为什么</i>${e.why}</div>
+            <div class="fex rule"><i>依据</i>${e.rule}</div>
+          </div>`).join('')}</div></div>`; }).join('')
+        : '<div class="sec"><div class="st">审核意见</div><div class="sc" style="color:var(--ac)">票头要素完整，本段项目无漏项无多项，执行顺序正确。监护人复审通过。</div></div>'}
+      <div class="sec"><div class="st">正确票面 · 第一段</div><div class="sc"><ol class="fok">
+        ${fillRight().map(s => `<li>${s.ticket}<em>${s.rule}</em></li>`).join('')}</ol></div></div>
+    </div>
+    <div class="df">${r.errs.length ? '<button class="btn" id="f_re">改一遍再交</button>' : ''}
+      <button class="btn pri" id="f_next">按正确票面签发，进入上岗前准备</button></div>`;
+  document.body.appendChild(m);
+  m.querySelector('.cls').onclick = () => m.remove();
+  const re = m.querySelector('#f_re'); if (re) re.onclick = () => m.remove();
+  m.querySelector('#f_next').onclick = () => { m.remove(); finishFill(r); };
+}
+
+function finishFill(r) {
+  S.fill.done = true; S.fill.score = r.total;
+  S.ord.unit = ''; S.ord.from = '';
+  if (r.errs.length) {
+    r.errs.slice(0, 3).forEach(e => S.fillErr.push({ g: e.g, t: e.t, right: e.right, rule: e.rule }));
+  }
+  enterPrep();
+}
+
+async function enterFill() {
+  S.stage = 'fill'; S.loc = 'phone';
+  $('#scene').innerHTML = sceneSVG('phone');
+  $('#loctag').textContent = LOC.phone.name;
+  renderLocbar(); renderTicket(); renderFill(); updateActbar(); Sheet.sync();
+  say('j', '任玲玲，深圳中调预令：将110kV仿真站110kV培训三线1163线路由运行转检修。调度采用逐项令，先拟写第一段——由运行转热备用。');
+  await speak('任玲玲，深圳中调预令：将110kV仿真站110kV培训三线1163线路由运行转检修。调度采用逐项令，你先拟写第一段，由运行转热备用。票头要素填全，项目按执行顺序排，不属于本段的不要写进来。',
+    { pose: 'explain', who: '监护人 陈志远' });
 }
 
 
@@ -4193,7 +4452,8 @@ function bindDemo() {
     renderPanel(); toast('已注入异常：11634刀闸机构箱机械指示与后台不一致', 'bad');
   };
   $('#dm_skip').onclick = () => {
-    if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
+    if (S.stage === 'fill') { S.fill.head = { unit: '深圳中调', from: '李明', to: '陈志远', task: '将110kV仿真站110kV培训三线1163线路由运行转检修' }; S.fill.rows = fillRight().map(x => x.no); renderFill(); auditFill(); }
+    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
     else if (S.stage === 'wufang') { S.wf = 4; renderPanel(); startRun(); }
     else if (S.stage === 'run') toast('已在执行阶段', '');
   };
@@ -4285,7 +4545,7 @@ function boot() {
   S.lastAct = Date.now();
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { S.lastAct = Date.now(); }, true));
   setInterval(() => {
-    if (!['prep', 'wufang', 'run'].includes(S.stage) || S.ended) return;
+    if (!['fill', 'prep', 'wufang', 'run'].includes(S.stage) || S.ended) return;
     if (S.stage === 'run' && S.mode === 'exam') return;
     if (location.hash !== '#arena') return;
     if ((window.__DH_SPEED || 1) < 1) return;
@@ -4313,7 +4573,7 @@ const Sheet = {
   close() { const s = $('#sheet'); if (!s) return; s.classList.add('closed'); $('#sheetpeek').classList.add('show'); $('.arena').classList.remove('sheetopen'); },
   want() {
     // 自动规则：准备/五防阶段常开；执行阶段在需要手指、执行、回报时打开
-    if (S.stage === 'prep' || S.stage === 'wufang') return true;
+    if (S.stage === 'fill' || S.stage === 'prep' || S.stage === 'wufang') return true;
     if (S.stage !== 'run') return false;
     const st = STEP(); if (!st) return false;
     if (st.act === 'recv' || st.act === 'report') return S.beat <= 4;
@@ -4380,6 +4640,10 @@ function openEntry(pre) {
         <div class="plans">${PLANS.map(p => `<label class="cfgopt ${p.id === plan ? 'on' : ''} ${p.id === 'wrong' && !hasWrong ? 'dis' : ''}">
           <input type="radio" name="plan" value="${p.id}" ${p.id === plan ? 'checked' : ''} ${p.id === 'wrong' && !hasWrong ? 'disabled' : ''}>
           <div><b>${p.n}</b><span>${p.id === 'wrong' && !hasWrong ? '暂无历史错题' : p.d}</span></div></label>`).join('')}</div></div>
+      <div class="sec"><div class="st">拟票练习</div>
+        <label class="cfgopt on" id="en_fillw" style="display:block"><input type="checkbox" id="en_fill" checked>
+          <div><b>先练填写操作票</b><span>按调度预令拟写第一段操作项目并填全票头，提交后逐条给出漏项、多项、顺序错误的详解与依据；完成后按正确票面进入上岗前准备。</span></div></label>
+      </div>
       <div class="sec"><div class="st">教学模式</div>
         <div class="modesw" style="display:inline-flex">${Object.keys(MODES).map(k =>
     `<button data-m="${k}" class="${S.mode === k ? 'on' : ''}">${MODES[k].n}</button>`).join('')}</div>
@@ -4395,7 +4659,10 @@ function openEntry(pre) {
     S.mode = b.dataset.m; m.querySelectorAll('.modesw button').forEach(x => x.classList.toggle('on', x === b));
     m.querySelector('#modedesc').textContent = MODES[S.mode].d;
   });
+  const fc = m.querySelector('#en_fill');
+  fc.onchange = () => m.querySelector('#en_fillw').classList.toggle('on', fc.checked);
   m.querySelector('#en_go').onclick = () => {
+    S.fillOn = fc.checked;
     const P = PLANS.find(p => p.id === plan);
     S.plan = { id: P.id, name: P.n, steps: P.steps() };
     if (P.trap) { S.trap.armed = true; }
@@ -4405,7 +4672,7 @@ function openEntry(pre) {
     $('#chatmode').textContent = MODES[S.mode].n;
     m.remove();
     renderTicket();
-    if (P.prep) enterPrep();
+    if (P.prep) { if (S.filled || !S.fillOn) enterPrep(); else enterFill(); }
     else { S.stage = 'run'; S.t0 = Date.now(); if (!S.timer) S.timer = setInterval(tick, 1000); S.previewed[STEPS[S.plan.steps[0]].phase] = false; enterStep(S.plan.steps[0]); if (!S.toured) setTimeout(startTour, 900); }
   };
 }
@@ -4494,6 +4761,12 @@ function genReview() {
 /* ---------- 底部操作条（v2） ---------- */
 function updateActbar() {
   const a = $('#actbar');
+  if (S.stage === 'fill') {
+    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
+      拟票：把本次调度令范围内的项目按执行顺序写进票面，填全票头要素，提交后由系统按审票口径逐条判分。</div>
+      <button class="btn askbtn" id="a_ask">问教练</button></div>`;
+    $('#a_ask').onclick = askCoach; Sheet.sync(); return;
+  }
   if (S.stage === 'prep') {
     a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
       上岗前准备：在作业面板完成三审与资格核对、着装互检、人员状态确认与 12 项风险分析后，进入五防模拟。</div>

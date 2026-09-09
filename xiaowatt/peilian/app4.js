@@ -244,7 +244,8 @@ function bindDemo() {
     renderPanel(); toast('已注入异常：11634刀闸机构箱机械指示与后台不一致', 'bad');
   };
   $('#dm_skip').onclick = () => {
-    if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
+    if (S.stage === 'fill') { S.fill.head = { unit: '深圳中调', from: '李明', to: '陈志远', task: '将110kV仿真站110kV培训三线1163线路由运行转检修' }; S.fill.rows = fillRight().map(x => x.no); renderFill(); auditFill(); }
+    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
     else if (S.stage === 'wufang') { S.wf = 4; renderPanel(); startRun(); }
     else if (S.stage === 'run') toast('已在执行阶段', '');
   };
@@ -336,7 +337,7 @@ function boot() {
   S.lastAct = Date.now();
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { S.lastAct = Date.now(); }, true));
   setInterval(() => {
-    if (!['prep', 'wufang', 'run'].includes(S.stage) || S.ended) return;
+    if (!['fill', 'prep', 'wufang', 'run'].includes(S.stage) || S.ended) return;
     if (S.stage === 'run' && S.mode === 'exam') return;
     if (location.hash !== '#arena') return;
     if ((window.__DH_SPEED || 1) < 1) return;

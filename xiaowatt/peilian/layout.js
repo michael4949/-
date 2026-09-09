@@ -72,7 +72,7 @@ const LAYOUT = `
         <div class="thead">
           <div class="ttl">110kV仿真站 现场电气操作票</div>
           <div class="meta">
-            <div>票号 <b>2600137</b></div><div>类型 <b>根据调度令进行的操作</b></div>
+            <div>票号 <b id="tno">待签发</b></div><div>类型 <b>根据调度令进行的操作</b></div>
             <div>操作人 <b>任玲玲</b></div><div>监护人 <b>陈志远</b></div>
           </div>
         </div>

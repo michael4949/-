@@ -1132,3 +1132,54 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .pzhot b{color:#243329}
 .pzcnt{font-size:11.5px;color:#7b6a52;margin:2px 0 8px}
 .capply{margin-top:8px;padding:6px 9px;border-radius:6px;background:#faf3dc;border:1px solid #e3d49e;color:#8a6d15;font-size:11px;text-align:center}
+
+/* ---- 填写操作票（拟票练习） ---- */
+.tfill{padding:26px 16px;color:#7b6a52;font-size:12px;line-height:1.9;text-align:center;border:1px dashed var(--goldsoft);border-radius:8px;margin:8px}
+.fflow{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ffs{flex:1 0 118px;position:relative;padding:9px 10px 10px;border:1px solid var(--goldsoft);border-radius:8px;background:#fffdf7}
+.ffs.cur{border-color:var(--acln);background:var(--acbg);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 16%,transparent)}
+.ffs.done{opacity:.62}
+.ffs i{display:inline-flex;width:17px;height:17px;border-radius:50%;background:#e6e2d2;color:#5c6b5f;align-items:center;justify-content:center;font-size:10px;font-style:normal;font-family:var(--mono)}
+.ffs.cur i{background:var(--ac);color:#fff}
+.ffs b{display:block;margin:5px 0 3px;font-size:12.5px;color:#243329}
+.ffs span{display:block;font-size:10.5px;color:#7b6a52;line-height:1.55}
+.fhead{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.fhr{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed #edeade}
+.fhr .k{flex:0 0 84px;font-size:11.5px;color:#5c6b5f}
+.fhr .v{flex:1}
+.fhr .v.ro{font-size:11.5px;color:#98a69c}
+.fhr select{width:100%;padding:5px 7px;border:1px solid var(--goldsoft);border-radius:5px;background:#fff;font-size:12px;color:#243329;font-family:inherit}
+.fbody{display:grid;grid-template-columns:1fr 1.15fr;gap:12px}
+.fpt{font-size:11px;color:#7b6a52;margin-bottom:6px;font-family:var(--mono)}
+.fpool,.fsheet{border:1px solid var(--goldsoft);border-radius:8px;padding:9px 10px;background:#fffdf7;min-height:150px}
+.fsheet{background:#fff}
+.fpi{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;margin-bottom:5px;border:1px solid #e9e6d8;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;line-height:1.55;color:#243329}
+.fpi:hover{border-color:var(--acln);background:var(--acbg)}
+.fpi b{color:var(--acd);font-family:var(--mono);flex:0 0 auto}
+.fpe{padding:22px 8px;text-align:center;font-size:11.5px;color:#98a69c;line-height:1.8}
+.fsi{display:flex;gap:8px;align-items:center;padding:6px 8px;margin-bottom:5px;border:1px solid var(--acln);border-radius:6px;background:var(--acbg)}
+.fsn{flex:0 0 20px;height:20px;border-radius:50%;background:var(--ac);color:#fff;font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+.fst{flex:1;font-size:12px;line-height:1.55;color:#243329}
+.fsb{display:flex;gap:3px}
+.fbtn{width:22px;height:22px;border:1px solid var(--goldsoft);border-radius:4px;background:#fff;color:#5c6b5f;cursor:pointer;font-size:12px;line-height:1}
+.fbtn:hover{border-color:var(--acln);color:var(--acd)}
+.fbtn.del:hover{border-color:#e0a99f;color:#b3372c}
+.ffoot{display:flex;align-items:center;gap:12px;margin-top:10px}
+.ffh{flex:1;font-size:11px;color:#7b6a52;line-height:1.7}
+.fsc{display:flex;gap:18px;align-items:center;padding:12px 14px;border:1px solid var(--goldsoft);border-radius:9px;background:#fffdf7;margin-bottom:12px}
+.fscn{font-family:var(--mono);font-size:40px;line-height:1;color:var(--ac);flex:0 0 auto}
+.fscn.warn{color:#a8821b}.fscn.bad{color:#b3372c}
+.fscd{flex:1}
+.fscd>div{display:flex;align-items:baseline;gap:8px;padding:2px 0;font-size:11.5px}
+.fscd>div>b{flex:0 0 78px;color:#243329}
+.fscd>div>i{font-family:var(--mono);font-style:normal;font-size:14px;color:var(--acd)}
+.fscd>div>span{color:#7b6a52}
+.ferr{padding:8px 0;border-bottom:1px dashed #e9e6d8}
+.fet b{color:#243329;font-size:12.5px;margin-left:4px}
+.fex{margin-top:4px;font-size:11.5px;color:#5c6b5f;line-height:1.65;padding-left:2px}
+.fex i{display:inline-block;min-width:34px;font-style:normal;color:#a8821b;font-family:var(--mono);margin-right:5px}
+.fex.rule{color:#7b6a52;border-left:2px solid #e3d49e;padding-left:8px;margin-top:5px}
+.fok{margin:0;padding-left:20px;font-size:12px;color:#243329;line-height:1.7}
+.fok li{margin-bottom:5px}
+.fok em{display:block;font-style:normal;font-size:11px;color:#7b6a52;line-height:1.6}
+.beat.idle{opacity:.4}

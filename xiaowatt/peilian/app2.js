@@ -65,8 +65,9 @@ function speak(text, opt) {
 /* ---------------- 五拍 ---------------- */
 const BEATS = [['唱票', 'CALL'], ['手指口述', 'POINT+RECITE'], ['对，执行', 'ORDER'], ['执行', 'ACT'], ['检查回报', 'REPORT'], ['标√', 'TICK']];
 function renderBeats() {
+  const pre = S.stage === 'fill' || S.stage === 'prep' || S.stage === 'wufang';
   $('#beats').innerHTML = BEATS.map((b, i) =>
-    `<div class="beat ${S.beat === i ? 'on' : ''} ${S.beat > i ? 'done' : ''}"><b>${b[0]}</b><i>${b[1]}</i></div>`).join('');
+    `<div class="beat ${!pre && S.beat === i ? 'on' : ''} ${!pre && S.beat > i ? 'done' : ''} ${pre ? 'idle' : ''}"><b>${b[0]}</b><i>${b[1]}</i></div>`).join('');
 }
 
 /* ---------------- KPI ---------------- */
@@ -143,6 +144,11 @@ function liveMeter() {
 /* ---------------- 操作票 ---------------- */
 function renderTicket() {
   const b = $('#trows'); b.innerHTML = '';
+  const tn = $('#tno'); if (tn) tn.textContent = S.stage === 'fill' ? '待签发' : ticketNo();
+  if (S.stage === 'fill') {
+    b.appendChild(el('div', 'tfill', '操作票尚未拟写。<br>在右侧作业面板按调度预令写第一段，提交审核后签发。'));
+    return;
+  }
   const segs = { 1: '接调度令：运行 → 热备用', 2: '再经调度令：热备用 → 冷备用', 3: '再经调度令：冷备用 → 检修' };
   let lastPhase = 0;
   STEPS.forEach((s, i) => {
@@ -209,6 +215,7 @@ function renderLocbar() {
   $$('#locbar .locbtn').forEach(b => b.onclick = () => goLoc(b.dataset.loc));
 }
 function goLoc(k) {
+  if (S.stage === 'fill') return toast('拟票阶段先把操作票写完并提交审核，签发后再到现场', '');
   if (S.loc === k) return;
   if (k === 'bay') S.bay = null;   // 每次进现场都要自己认间隔，系统不预选
   S.loc = k; S.sel = null;

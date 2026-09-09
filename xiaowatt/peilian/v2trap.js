@@ -8,7 +8,7 @@ const st=p=>p.evaluate(()=>({stage:S.stage,no:STEPS[S.idx]&&STEPS[S.idx].no,beat
   const p=await b.newPage({viewportSize:{width:1680,height:950}});
   const errs=[]; p.on('pageerror',e=>errs.push(e.message));
   await p.goto(F+'#arena'); await w(p,1000);
-  await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;});
+  await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;S.filled=true;});
   await p.click('#en_go'); await w(p,400);            // 完整票，教学模式
   await p.evaluate(()=>{});
   await idle(p);

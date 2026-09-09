@@ -106,6 +106,12 @@ function applyGuideTarget(sel) {
 
 function instrNow() {
   const st = STEP();
+  if (S.stage === 'fill') {
+    const miss = FHEAD.find(f => !S.fill.head[f.k]);
+    if (miss) return { i: 'act', pic: 'tick', t: `票头：选择「${miss.n}」`, h: '票头四项要素都要填全', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在选${miss.n}` };
+    if (!S.fill.rows.length) return { i: 'act', pic: 'tick', t: '从备选项目里点「＋」写入第一项', h: '只写本次调度令范围内的项目', sel: '#panelwrap [data-fadd]', n: '票面还是空的，从左边把本段项目写进来' };
+    return { i: 'act', pic: 'tick', t: '排好顺序后点「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_go', n: '顺序排好了就点「提交审核」' };
+  }
   if (S.stage === 'prep') {
     const ai = S.prep.audit.findIndex(x => !x);
     if (ai >= 0) return { i: 'check', pic: 'tick', t: `三审：点击勾选「${AUDIT[ai]}」`, h: `三审第 ${ai + 1}/3 项`, sel: `.chk[data-p="audit"][data-i="${ai}"]`, n: `先做操作票三审，点「${AUDIT[ai]}」打勾` };
@@ -160,8 +166,9 @@ function renderTaskbar() {
   if (!bar) return;
   if (S.stage !== 'run' || !st) {
     const ins0 = instrNow();
-    const html0 = `<div class="tb1"><span class="tbno">${S.stage === 'prep' ? '准备' : S.stage === 'wufang' ? '五防' : '—'}</span>
-      <span class="tbtx">${S.stage === 'prep' ? '上岗前准备 · 三审 / 着装互检 / 风险分析' :
+    const html0 = `<div class="tb1"><span class="tbno">${S.stage === 'fill' ? '拟票' : S.stage === 'prep' ? '准备' : S.stage === 'wufang' ? '五防' : '—'}</span>
+      <span class="tbtx">${S.stage === 'fill' ? '填写操作票 · 票头要素 / 本段项目 / 执行顺序' :
+        S.stage === 'prep' ? '上岗前准备 · 三审 / 着装互检 / 风险分析' :
         S.stage === 'wufang' ? '五防模拟预演 · 按操作票顺序逐项模拟' : '本次陪练已结束'}</span>
       ${modeBtn()}</div>
       ${ins0 ? `<div class="tbfoc">

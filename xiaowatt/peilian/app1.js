@@ -21,6 +21,9 @@ const S = {
   vio: [],                // 违规记录
   praise: [],
   score: { rule: 0, order: 0, dual: 0, state: 0, risk: 0, term: 0 },
+  fill: { rows: [], head: {}, tries: 0, done: false, score: null, last: null, no: '' },
+  fillErr: [],
+  filled: false, fillOn: true,
   ord: { unit: '', from: '', to: '任玲玲', time: '', issued: '' },
   ph: { ring: false, conn: false, cmp: null, pending: '', log: [] }, wfdev: null, lastChg: null,
   abn: { armed: true, fired: false, handled: false },

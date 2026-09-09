@@ -7,7 +7,7 @@ const Sheet = {
   close() { const s = $('#sheet'); if (!s) return; s.classList.add('closed'); $('#sheetpeek').classList.add('show'); $('.arena').classList.remove('sheetopen'); },
   want() {
     // 自动规则：准备/五防阶段常开；执行阶段在需要手指、执行、回报时打开
-    if (S.stage === 'prep' || S.stage === 'wufang') return true;
+    if (S.stage === 'fill' || S.stage === 'prep' || S.stage === 'wufang') return true;
     if (S.stage !== 'run') return false;
     const st = STEP(); if (!st) return false;
     if (st.act === 'recv' || st.act === 'report') return S.beat <= 4;
@@ -74,6 +74,10 @@ function openEntry(pre) {
         <div class="plans">${PLANS.map(p => `<label class="cfgopt ${p.id === plan ? 'on' : ''} ${p.id === 'wrong' && !hasWrong ? 'dis' : ''}">
           <input type="radio" name="plan" value="${p.id}" ${p.id === plan ? 'checked' : ''} ${p.id === 'wrong' && !hasWrong ? 'disabled' : ''}>
           <div><b>${p.n}</b><span>${p.id === 'wrong' && !hasWrong ? '暂无历史错题' : p.d}</span></div></label>`).join('')}</div></div>
+      <div class="sec"><div class="st">拟票练习</div>
+        <label class="cfgopt on" id="en_fillw" style="display:block"><input type="checkbox" id="en_fill" checked>
+          <div><b>先练填写操作票</b><span>按调度预令拟写第一段操作项目并填全票头，提交后逐条给出漏项、多项、顺序错误的详解与依据；完成后按正确票面进入上岗前准备。</span></div></label>
+      </div>
       <div class="sec"><div class="st">教学模式</div>
         <div class="modesw" style="display:inline-flex">${Object.keys(MODES).map(k =>
     `<button data-m="${k}" class="${S.mode === k ? 'on' : ''}">${MODES[k].n}</button>`).join('')}</div>
@@ -89,7 +93,10 @@ function openEntry(pre) {
     S.mode = b.dataset.m; m.querySelectorAll('.modesw button').forEach(x => x.classList.toggle('on', x === b));
     m.querySelector('#modedesc').textContent = MODES[S.mode].d;
   });
+  const fc = m.querySelector('#en_fill');
+  fc.onchange = () => m.querySelector('#en_fillw').classList.toggle('on', fc.checked);
   m.querySelector('#en_go').onclick = () => {
+    S.fillOn = fc.checked;
     const P = PLANS.find(p => p.id === plan);
     S.plan = { id: P.id, name: P.n, steps: P.steps() };
     if (P.trap) { S.trap.armed = true; }
@@ -99,7 +106,7 @@ function openEntry(pre) {
     $('#chatmode').textContent = MODES[S.mode].n;
     m.remove();
     renderTicket();
-    if (P.prep) enterPrep();
+    if (P.prep) { if (S.filled || !S.fillOn) enterPrep(); else enterFill(); }
     else { S.stage = 'run'; S.t0 = Date.now(); if (!S.timer) S.timer = setInterval(tick, 1000); S.previewed[STEPS[S.plan.steps[0]].phase] = false; enterStep(S.plan.steps[0]); if (!S.toured) setTimeout(startTour, 900); }
   };
 }
@@ -188,6 +195,12 @@ function genReview() {
 /* ---------- 底部操作条（v2） ---------- */
 function updateActbar() {
   const a = $('#actbar');
+  if (S.stage === 'fill') {
+    a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
+      拟票：把本次调度令范围内的项目按执行顺序写进票面，填全票头要素，提交后由系统按审票口径逐条判分。</div>
+      <button class="btn askbtn" id="a_ask">问教练</button></div>`;
+    $('#a_ask').onclick = askCoach; Sheet.sync(); return;
+  }
   if (S.stage === 'prep') {
     a.innerHTML = `<div class="actrow"><div style="flex:1;font-size:12px;color:#5c6b5f">
       上岗前准备：在作业面板完成三审与资格核对、着装互检、人员状态确认与 12 项风险分析后，进入五防模拟。</div>
