@@ -102,6 +102,16 @@ const RECO = [
   { coach: 'angui',  pre: null,     why: '安规修编后尚未复训', act: '查看教练' }
 ];
 
+/* 我在练的教练（工作台窄条，只列本人已开练的；全量目录在教练中心） */
+const MYCOACH = [
+  { id: 'daozha', last: '今天 09:12', cnt: 14, score: 86, prog: 72 }
+];
+/* 本人已提交、等待本单位开通的教练（教练中心里申请，工作台看进度） */
+const COACH_APPLY = [
+  { id: 'term',  at: '9月5日 提交', st: '培训专责审核中' },
+  { id: 'angui', at: '9月1日 提交', st: '已通过 · 待配置账号' }
+];
+
 /* ---- 由 SESSIONS 推导的聚合（保证各图表数字一致） ---- */
 function homeAgg() {
   const byDay = {};                      // 天 → {min, cnt}

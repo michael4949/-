@@ -150,7 +150,7 @@ function panelPhone(w) {
         <div class="nm">${ring ? '深圳中调 来电' : conn ? '深圳中调 · 李明' : '深圳中调'}</div>
         <div class="de">${stateTxt}</div>
         <div class="phact">${btn}</div>
-        <div class="phrule">接令规范：先互报单位和姓名。调度报「深圳中调 李明」，本站报「110kV仿真站 陈志远」。</div>
+        <div class="phrule">接令规范：先互报单位和姓名。调度报「深圳中调 李明」，本站报「110kV仿真站 陈志远」。设备编号按位报读：1163 读「一一六三」。</div>
       </div>
       <div class="reclog">
         <div class="row"><div class="k">发令单位</div><div class="v"><select id="o_unit" ${ring ? 'disabled' : ''}><option value="">听令时记录</option>${['深圳中调', '深圳地调', '本站值班负责人'].map(x => `<option${S.ord.unit === x ? ' selected' : ''}>${x}</option>`).join('')}</select></div></div>

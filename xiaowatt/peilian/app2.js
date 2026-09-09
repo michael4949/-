@@ -182,17 +182,22 @@ function jumpTo(i) {
 }
 
 /* ---------------- 违规 ---------------- */
+/* 评分维度与扣分标准：与评估报告、评分复盘页同一套口径 */
+const DIMN = { rule: '规程符合性', order: '操作顺序与逻辑', dual: '双人核对执行', state: '设备状态核对', risk: '风险辨识与异常处置', term: '调度术语与记录规范' };
+const CUT = { red: 100, major: 12, minor: 5 };
 function violation(level, dim, title, detail, rule) {
-  S.vio.push({ level, dim, title, detail, rule, step: STEP() ? STEP().no : '-', t: now() });
-  S.score[dim] = (S.score[dim] || 0) - (level === 'red' ? 100 : level === 'major' ? 12 : 5);
-  say('s', `<span class="tag ${level === 'red' ? 'rl' : 'wn'}">${level === 'red' ? '红线' : level === 'major' ? '严重' : '扣分'}</span>${title}：${detail}`, 'err');
+  const cut = CUT[level] || 5;
+  S.vio.push({ level, dim, title, detail, rule, cut, dimn: DIMN[dim] || dim, step: STEP() ? STEP().no : '-', t: now() });
+  S.score[dim] = (S.score[dim] || 0) - cut;
+  const cutTxt = level === 'red' ? `${DIMN[dim]}　一票否决，综合得分记 0` : `${DIMN[dim]} −${cut} 分`;
+  say('s', `<span class="tag ${level === 'red' ? 'rl' : 'wn'}">${level === 'red' ? '红线' : level === 'major' ? '严重' : '扣分'}</span>${title}：${detail}<div class="cutln"><b>${cutTxt}</b>${rule ? `<span>依据　${rule}</span>` : ''}</div>`, 'err');
   renderTop();
-  toast(title, 'bad');
+  toast(`${title}　${level === 'red' ? '一票否决' : DIMN[dim] + ' −' + cut}`, 'bad');
 }
 function praise(dim, title, detail) {
-  S.praise.push({ dim, title, detail, t: now() });
+  S.praise.push({ dim, title, detail, cut: 8, dimn: DIMN[dim] || dim, t: now() });
   S.score[dim] = (S.score[dim] || 0) + 8;
-  say('s', `<span class="tag ok">加分</span>${title}：${detail}`, 'ok');
+  say('s', `<span class="tag ok">加分</span>${title}：${detail}<div class="cutln ok"><b>${DIMN[dim] || dim} +8 分</b></div>`, 'ok');
 }
 
 /* ---------------- 位置 ---------------- */

@@ -1084,3 +1084,51 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 @keyframes tickck{0%{transform:scale(2.2);color:#c9a227}45%{transform:scale(1.25)}100%{transform:scale(1)}}
 .reclog select{background:#f2f3ea;border:1px solid var(--line2);color:#3c5245;border-radius:4px;padding:3px 6px;font:inherit;font-size:11.5px;outline:0}
 .reclog select:focus{border-color:var(--ac);background:#fff}
+
+/* ---- 扣分依据（聊天流内 + 评估报告） ---- */
+.cutln{margin-top:5px;padding:4px 8px;border-radius:5px;background:#fbecea;border-left:3px solid #d97b6d;font-size:11.5px;line-height:1.65}
+.cutln b{color:#b3372c;font-family:var(--mono)}
+.cutln span{display:block;color:#7b6a52;margin-top:2px}
+.cutln.ok{background:var(--acbg);border-left-color:var(--ac)}
+.cutln.ok b{color:var(--ac)}
+.viorow{padding:7px 0;border-bottom:1px dashed #e9e6d8}
+.viocut{float:right;font-family:var(--mono);font-size:11.5px;color:#b3372c;background:#fbecea;border:1px solid #eac1bb;border-radius:10px;padding:1px 9px}
+.viocut.red{background:#b3372c;border-color:#b3372c;color:#fff}
+.viorule{margin-top:4px;padding-left:9px;border-left:2px solid #e3d49e;color:#7b6a52;font-size:11.5px;line-height:1.6}
+.cutstd{font-size:12px}
+.cutstd>div{display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed #edeade;align-items:baseline}
+.cutstd>div>b{flex:0 0 132px;font-family:var(--mono);font-size:11.5px;color:#243329}
+.cutstd>div>span{color:#5c6b5f;line-height:1.6}
+.cutstd .cutmath{display:block;border:0;margin-top:6px;padding:7px 10px;background:#faf8f0;border-radius:5px;color:#7b6a52;line-height:1.7}
+
+/* ---- 工作台：我在练的教练（教练中心全量目录在 #plaza 独立页） ---- */
+.mycoach{margin:16px 0 0;padding:14px 16px 16px;border-radius:12px}
+.mch{display:flex;align-items:baseline;gap:12px;margin-bottom:11px}
+.mch b{font-size:15px;color:#243329}
+.mch span{font-size:11.5px;color:#5c6b5f;flex:1}
+.mcrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(292px,1fr));gap:11px}
+.mcc{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--goldsoft);border-radius:9px;background:#fffdf7}
+.mcc.apply{background:#faf8f0;border-style:dashed}
+.mcc .cav{width:46px;height:46px;border-radius:8px;object-fit:cover;flex:0 0 46px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e63b8,#4d97e8);color:#fff;font-size:16px}
+.mcm{flex:1;min-width:0}
+.mcm b{display:block;font-size:13px;color:#243329}
+.mcm span{display:block;font-size:11px;color:#5c6b5f;margin-top:2px}
+.mcbar{height:5px;border-radius:3px;background:#eae7d8;margin:6px 0 3px;overflow:hidden}
+.mcbar i{display:block;height:100%;background:var(--ac);border-radius:3px}
+.mcp{font-size:10.5px;color:#7b6a52}
+
+/* ---- 教练中心：独立页头 ---- */
+.pzhero{position:relative;padding:18px 20px 15px;border-radius:14px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto auto;grid-template-areas:'t k a' 'h h h';gap:12px 18px;align-items:center}
+.pzt{grid-area:t}
+.pzt h1{margin:0;font-size:22px;color:#243329;letter-spacing:.5px}
+.pzk{grid-area:k;display:flex;gap:16px}
+.pzk .kpi{text-align:center}
+.pzk .kpi b{display:block;font-family:var(--mono);font-size:21px;color:var(--acd);line-height:1.1}
+.pzk .kpi.good b{color:#23b26a}
+.pzk .kpi.warn b{color:#a8821b}
+.pzk .kpi span{font-size:10.5px;color:#5c6b5f}
+.pzact{grid-area:a;display:flex;gap:8px}
+.pzhot{grid-area:h;font-size:11.5px;color:#5c6b5f;border-top:1px dashed var(--goldsoft);padding-top:9px}
+.pzhot b{color:#243329}
+.pzcnt{font-size:11.5px;color:#7b6a52;margin:2px 0 8px}
+.capply{margin-top:8px;padding:6px 9px;border-radius:6px;background:#faf3dc;border:1px solid #e3d49e;color:#8a6d15;font-size:11px;text-align:center}

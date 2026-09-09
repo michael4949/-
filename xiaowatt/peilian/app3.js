@@ -163,6 +163,21 @@ async function enterStep(i) {
   else say('s', `请到 ${LOC[st.loc].name}，手指操作对象「${devName(st.target)}」并完整复诵票面内容。`);
 }
 
+/* 设备编号读法：调度术语要求按位报读，不按数值报读（1163 读"一一六三"） */
+const NUMREAD = [
+  ['一十一万六千三百四十', '116340', '一一六三四零'],
+  ['十一万六千三百四十', '116340', '一一六三四零'],
+  ['一万一千六百三十四', '11634', '一一六三四'],
+  ['一万一千六百三十二', '11632', '一一六三二'],
+  ['一千一百六十三', '1163', '一一六三']
+];
+function numReadErr(v) { for (const r of NUMREAD) if (v.indexOf(r[0]) >= 0) return r; return null; }
+function checkNumRead(v) {
+  const r = numReadErr(v); if (!r) return;
+  violation('minor', 'term', '设备编号读法错误', `把 ${r[1]} 读成"${r[0]}"，设备编号应按位报读为"${r[2]}"`,
+    '调度术语：设备编号按位报读，不按数值报读，便于与图纸、标签、五防票逐位核对，也避免与相邻间隔编号听混。');
+}
+
 /* ---------------- 复诵 / 回报 ---------------- */
 async function submitInput() {
   if (S.lock) return;
@@ -185,6 +200,7 @@ async function _submitInput() {
       return;
     }
     say('o', v);
+    checkNumRead(v);
     const sc = sim(v, st.recite);
     if (sc < 0.62 && lenient('recite')) {
       say('s', `<span class="tag wn">提醒</span>复诵与票面不一致（吻合度 ${(sc * 100).toFixed(0)}%）。票面原文：${st.recite}。教学模式下这一次不计违规，请再念一遍。`);
@@ -230,6 +246,7 @@ async function _submitInput() {
   }
   if (S.beat === 4) {
     say('o', v);
+    checkNumRead(v);
     // GIS 四项指示
     if (st.act === 'gis') {
       const need = ['hui', 'mech', 'arm', 'line'];

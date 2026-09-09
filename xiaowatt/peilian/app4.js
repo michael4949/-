@@ -155,7 +155,7 @@ function openReport() {
     saveSession({ ts: Date.now(), plan: S.plan ? S.plan.name : '完整操作票', mode: MODES[S.mode].n,
       dur: Math.max(1, Math.round((Date.now() - (S.t0 || Date.now())) / 60000)), score: total,
       dims: [0, 2, 3, 1, 5, 4].map(i => Math.round(vals[i])),
-      vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
+      vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cut: v.cut || CUT[v.level] || 5, dimn: v.dimn || DIMN[v.dim] || '', detail: v.detail, rule: v.rule, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
       hints: S.hints.map(hh => ['提示', `第${hh.step}项 第${hh.lv}级`]), lines: S.lines || [], praise: S.praise.map(p => ({ title: p.title })) });
   } catch (e) { }
   const R = 74, cx = 152, cy = 112;
@@ -189,11 +189,24 @@ function openReport() {
           <div class="sec"><div class="st">本次过程</div><div class="sc" style="font-size:12.5px">
             用时 ${$('#ktime').textContent}　·　操作项 ${STEPS.filter(s => s._done).length}/${S.plan ? S.plan.steps.length : STEPS.length} 项完成　·　违规 ${S.vio.length} 项　·　主动中止上报 ${S.abn.handled ? 1 : 0} 次
           </div></div>
-          <div class="sec"><div class="st">扣分与否决项</div><div class="sc" style="font-size:12px">
-            ${S.vio.length ? S.vio.map(v => `<div style="padding:6px 0;border-bottom:1px dashed #e9e6d8">
+          <div class="sec"><div class="st">扣分与否决项 · 逐条扣分依据</div><div class="sc" style="font-size:12px">
+            ${S.vio.length ? S.vio.map(v => `<div class="viorow">
               <span class="tag ${v.level === 'red' ? 'rl' : 'wn'}">${v.level === 'red' ? '一票否决' : v.level === 'major' ? '严重' : '不规范'}</span>
               <b style="color:#243329">第${v.step}项 ${v.title}</b>
-              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">${v.detail}</div></div>`).join('') : '<span style="color:var(--ac)">本次未触发扣分项。</span>'}
+              <b class="viocut ${v.level === 'red' ? 'red' : ''}">${v.level === 'red' ? '综合得分记 0' : (v.dimn || DIMN[v.dim] || '') + ' −' + (v.cut || CUT[v.level] || 5) + ' 分'}</b>
+              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">${v.detail}</div>
+              ${v.rule ? `<div class="viorule">依据　${v.rule}</div>` : ''}</div>`).join('') : '<span style="color:var(--ac)">本次未触发扣分项。</span>'}
+            ${S.hintCut ? `<div class="viorow"><span class="tag wn">提示</span><b style="color:#243329">使用教练提示 ${S.hints.length} 次</b>
+              <b class="viocut">规程符合性 −${S.hintCut} 分</b>
+              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">一级提示每次 −1 分、二级 −2 分、三级（直接给答案）−4 分。</div></div>` : ''}
+          </div></div>
+          <div class="sec"><div class="st">扣分标准</div><div class="sc cutstd">
+            <div><b>一票否决</b><span>触及红线（未验电即接地、带负荷拉合刀闸等），综合得分记 0，本次不计成绩</span></div>
+            <div><b>严重 −12 分</b><span>顺序错、状态判断错、越权操作等可能造成后果的违规</span></div>
+            <div><b>不规范 −5 分</b><span>复诵不完整、记录漏填、未手指口述等过程不规范</span></div>
+            <div><b>教练提示 −1／−2／−4 分</b><span>按一级、二级、三级提示逐级递增，均计入规程符合性</span></div>
+            <div><b>主动识别 +8 分</b><span>自己核出票令不一致、异常中止上报等正确处置</span></div>
+            <div class="cutmath">维度得分 ＝ 100 ＋ 该维度扣分合计 × 1.2（下限 4 分，有加分项再 +6）；综合得分 ＝ 六个维度算术平均，触发一票否决时直接记 0。</div>
           </div></div>
           ${S.praise.length ? `<div class="sec"><div class="st">加分项</div><div class="sc" style="font-size:12px">
             ${S.praise.map(p => `<div style="padding:5px 0"><span class="tag ok">加分</span><b style="color:#243329">${p.title}</b>
@@ -335,6 +348,7 @@ function boot() {
     const txt = `任玲玲，${g.n}。`;
     say('j', txt); speak(txt, { pose: 'point' });
   }, 5000);
+  loadCoachApply();
   homeBoot();
   route();
   window.addEventListener('hashchange', route);

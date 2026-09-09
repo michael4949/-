@@ -1092,6 +1092,54 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .reclog select{background:#f2f3ea;border:1px solid var(--line2);color:#3c5245;border-radius:4px;padding:3px 6px;font:inherit;font-size:11.5px;outline:0}
 .reclog select:focus{border-color:var(--ac);background:#fff}
 
+/* ---- 扣分依据（聊天流内 + 评估报告） ---- */
+.cutln{margin-top:5px;padding:4px 8px;border-radius:5px;background:#fbecea;border-left:3px solid #d97b6d;font-size:11.5px;line-height:1.65}
+.cutln b{color:#b3372c;font-family:var(--mono)}
+.cutln span{display:block;color:#7b6a52;margin-top:2px}
+.cutln.ok{background:var(--acbg);border-left-color:var(--ac)}
+.cutln.ok b{color:var(--ac)}
+.viorow{padding:7px 0;border-bottom:1px dashed #e9e6d8}
+.viocut{float:right;font-family:var(--mono);font-size:11.5px;color:#b3372c;background:#fbecea;border:1px solid #eac1bb;border-radius:10px;padding:1px 9px}
+.viocut.red{background:#b3372c;border-color:#b3372c;color:#fff}
+.viorule{margin-top:4px;padding-left:9px;border-left:2px solid #e3d49e;color:#7b6a52;font-size:11.5px;line-height:1.6}
+.cutstd{font-size:12px}
+.cutstd>div{display:flex;gap:10px;padding:4px 0;border-bottom:1px dashed #edeade;align-items:baseline}
+.cutstd>div>b{flex:0 0 132px;font-family:var(--mono);font-size:11.5px;color:#243329}
+.cutstd>div>span{color:#5c6b5f;line-height:1.6}
+.cutstd .cutmath{display:block;border:0;margin-top:6px;padding:7px 10px;background:#faf8f0;border-radius:5px;color:#7b6a52;line-height:1.7}
+
+/* ---- 工作台：我在练的教练（教练中心全量目录在 #plaza 独立页） ---- */
+.mycoach{margin:16px 0 0;padding:14px 16px 16px;border-radius:12px}
+.mch{display:flex;align-items:baseline;gap:12px;margin-bottom:11px}
+.mch b{font-size:15px;color:#243329}
+.mch span{font-size:11.5px;color:#5c6b5f;flex:1}
+.mcrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(292px,1fr));gap:11px}
+.mcc{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid var(--goldsoft);border-radius:9px;background:#fffdf7}
+.mcc.apply{background:#faf8f0;border-style:dashed}
+.mcc .cav{width:46px;height:46px;border-radius:8px;object-fit:cover;flex:0 0 46px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e63b8,#4d97e8);color:#fff;font-size:16px}
+.mcm{flex:1;min-width:0}
+.mcm b{display:block;font-size:13px;color:#243329}
+.mcm span{display:block;font-size:11px;color:#5c6b5f;margin-top:2px}
+.mcbar{height:5px;border-radius:3px;background:#eae7d8;margin:6px 0 3px;overflow:hidden}
+.mcbar i{display:block;height:100%;background:var(--ac);border-radius:3px}
+.mcp{font-size:10.5px;color:#7b6a52}
+
+/* ---- 教练中心：独立页头 ---- */
+.pzhero{position:relative;padding:18px 20px 15px;border-radius:14px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto auto;grid-template-areas:'t k a' 'h h h';gap:12px 18px;align-items:center}
+.pzt{grid-area:t}
+.pzt h1{margin:0;font-size:22px;color:#243329;letter-spacing:.5px}
+.pzk{grid-area:k;display:flex;gap:16px}
+.pzk .kpi{text-align:center}
+.pzk .kpi b{display:block;font-family:var(--mono);font-size:21px;color:var(--acd);line-height:1.1}
+.pzk .kpi.good b{color:#23b26a}
+.pzk .kpi.warn b{color:#a8821b}
+.pzk .kpi span{font-size:10.5px;color:#5c6b5f}
+.pzact{grid-area:a;display:flex;gap:8px}
+.pzhot{grid-area:h;font-size:11.5px;color:#5c6b5f;border-top:1px dashed var(--goldsoft);padding-top:9px}
+.pzhot b{color:#243329}
+.pzcnt{font-size:11.5px;color:#7b6a52;margin:2px 0 8px}
+.capply{margin-top:8px;padding:6px 9px;border-radius:6px;background:#faf3dc;border:1px solid #e3d49e;color:#8a6d15;font-size:11px;text-align:center}
+
 </style>
 </head>
 <body></body>
@@ -1669,7 +1717,7 @@ function instrNow() {
     return { i: 'listen', pic: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
   }
   if (S.beat === 1) {
-    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '这次下令的是深圳中调 李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '复诵后点「复诵」或回车', n: '复诵调度下令' }; }
+    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '这次下令的是深圳中调 李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '设备编号按位念：1163 读"一一六三"，不读"一千一百六十三"', n: '复诵调度下令' }; }
     if (st.act === 'report') return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵本段向调度汇报的内容', h: '复诵后点「复诵」，再由监护人拨号', n: '先复诵汇报内容，我来跟中调联系' };
     if (away) return { i: 'walk', pic: 'walk', t: `前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `先到${LOC[st.loc].name}去` };
     if (!S.sel) return { i: 'point', pic: teach ? 'point' : 'press', sel: `#panelwrap [data-dev="${st.target}"]`, t: `手指「${devName(st.target)}」并口述`, h: teach ? '点击设备完成手指口述' : '长按设备完成手指口述', n: `手指${devName(st.target)}，核对设备双重名称` };
@@ -1830,7 +1878,9 @@ async function useHint() {
   const label = ['方向提示', '要点提示', '标准答案'][lv - 1];
   say('s', `<span class="tag wn">${label}</span>${txt}`);
   if (lv === 3 && S.beat === 1) { $('#rin').value = st.recite; }
-  S.score.rule -= (lv === 3 ? 4 : lv === 2 ? 2 : 1);
+  const hc = (lv === 3 ? 4 : lv === 2 ? 2 : 1);
+  S.score.rule -= hc;
+  S.hintCut = (S.hintCut || 0) + hc;
   renderTaskbar();
   await speak(txt, { pose: lv === 3 ? 'correct' : 'explain' });
 }
@@ -2541,17 +2591,22 @@ function jumpTo(i) {
 }
 
 /* ---------------- 违规 ---------------- */
+/* 评分维度与扣分标准：与评估报告、评分复盘页同一套口径 */
+const DIMN = { rule: '规程符合性', order: '操作顺序与逻辑', dual: '双人核对执行', state: '设备状态核对', risk: '风险辨识与异常处置', term: '调度术语与记录规范' };
+const CUT = { red: 100, major: 12, minor: 5 };
 function violation(level, dim, title, detail, rule) {
-  S.vio.push({ level, dim, title, detail, rule, step: STEP() ? STEP().no : '-', t: now() });
-  S.score[dim] = (S.score[dim] || 0) - (level === 'red' ? 100 : level === 'major' ? 12 : 5);
-  say('s', `<span class="tag ${level === 'red' ? 'rl' : 'wn'}">${level === 'red' ? '红线' : level === 'major' ? '严重' : '扣分'}</span>${title}：${detail}`, 'err');
+  const cut = CUT[level] || 5;
+  S.vio.push({ level, dim, title, detail, rule, cut, dimn: DIMN[dim] || dim, step: STEP() ? STEP().no : '-', t: now() });
+  S.score[dim] = (S.score[dim] || 0) - cut;
+  const cutTxt = level === 'red' ? `${DIMN[dim]}　一票否决，综合得分记 0` : `${DIMN[dim]} −${cut} 分`;
+  say('s', `<span class="tag ${level === 'red' ? 'rl' : 'wn'}">${level === 'red' ? '红线' : level === 'major' ? '严重' : '扣分'}</span>${title}：${detail}<div class="cutln"><b>${cutTxt}</b>${rule ? `<span>依据　${rule}</span>` : ''}</div>`, 'err');
   renderTop();
-  toast(title, 'bad');
+  toast(`${title}　${level === 'red' ? '一票否决' : DIMN[dim] + ' −' + cut}`, 'bad');
 }
 function praise(dim, title, detail) {
-  S.praise.push({ dim, title, detail, t: now() });
+  S.praise.push({ dim, title, detail, cut: 8, dimn: DIMN[dim] || dim, t: now() });
   S.score[dim] = (S.score[dim] || 0) + 8;
-  say('s', `<span class="tag ok">加分</span>${title}：${detail}`, 'ok');
+  say('s', `<span class="tag ok">加分</span>${title}：${detail}<div class="cutln ok"><b>${DIMN[dim] || dim} +8 分</b></div>`, 'ok');
 }
 
 /* ---------------- 位置 ---------------- */
@@ -2841,7 +2896,7 @@ function panelPhone(w) {
         <div class="nm">${ring ? '深圳中调 来电' : conn ? '深圳中调 · 李明' : '深圳中调'}</div>
         <div class="de">${stateTxt}</div>
         <div class="phact">${btn}</div>
-        <div class="phrule">接令规范：先互报单位和姓名。调度报「深圳中调 李明」，本站报「110kV仿真站 陈志远」。</div>
+        <div class="phrule">接令规范：先互报单位和姓名。调度报「深圳中调 李明」，本站报「110kV仿真站 陈志远」。设备编号按位报读：1163 读「一一六三」。</div>
       </div>
       <div class="reclog">
         <div class="row"><div class="k">发令单位</div><div class="v"><select id="o_unit" ${ring ? 'disabled' : ''}><option value="">听令时记录</option>${['深圳中调', '深圳地调', '本站值班负责人'].map(x => `<option${S.ord.unit === x ? ' selected' : ''}>${x}</option>`).join('')}</select></div></div>
@@ -3439,6 +3494,21 @@ async function enterStep(i) {
   else say('s', `请到 ${LOC[st.loc].name}，手指操作对象「${devName(st.target)}」并完整复诵票面内容。`);
 }
 
+/* 设备编号读法：调度术语要求按位报读，不按数值报读（1163 读"一一六三"） */
+const NUMREAD = [
+  ['一十一万六千三百四十', '116340', '一一六三四零'],
+  ['十一万六千三百四十', '116340', '一一六三四零'],
+  ['一万一千六百三十四', '11634', '一一六三四'],
+  ['一万一千六百三十二', '11632', '一一六三二'],
+  ['一千一百六十三', '1163', '一一六三']
+];
+function numReadErr(v) { for (const r of NUMREAD) if (v.indexOf(r[0]) >= 0) return r; return null; }
+function checkNumRead(v) {
+  const r = numReadErr(v); if (!r) return;
+  violation('minor', 'term', '设备编号读法错误', `把 ${r[1]} 读成"${r[0]}"，设备编号应按位报读为"${r[2]}"`,
+    '调度术语：设备编号按位报读，不按数值报读，便于与图纸、标签、五防票逐位核对，也避免与相邻间隔编号听混。');
+}
+
 /* ---------------- 复诵 / 回报 ---------------- */
 async function submitInput() {
   if (S.lock) return;
@@ -3461,6 +3531,7 @@ async function _submitInput() {
       return;
     }
     say('o', v);
+    checkNumRead(v);
     const sc = sim(v, st.recite);
     if (sc < 0.62 && lenient('recite')) {
       say('s', `<span class="tag wn">提醒</span>复诵与票面不一致（吻合度 ${(sc * 100).toFixed(0)}%）。票面原文：${st.recite}。教学模式下这一次不计违规，请再念一遍。`);
@@ -3506,6 +3577,7 @@ async function _submitInput() {
   }
   if (S.beat === 4) {
     say('o', v);
+    checkNumRead(v);
     // GIS 四项指示
     if (st.act === 'gis') {
       const need = ['hui', 'mech', 'arm', 'line'];
@@ -4032,7 +4104,7 @@ function openReport() {
     saveSession({ ts: Date.now(), plan: S.plan ? S.plan.name : '完整操作票', mode: MODES[S.mode].n,
       dur: Math.max(1, Math.round((Date.now() - (S.t0 || Date.now())) / 60000)), score: total,
       dims: [0, 2, 3, 1, 5, 4].map(i => Math.round(vals[i])),
-      vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
+      vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cut: v.cut || CUT[v.level] || 5, dimn: v.dimn || DIMN[v.dim] || '', detail: v.detail, rule: v.rule, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
       hints: S.hints.map(hh => ['提示', `第${hh.step}项 第${hh.lv}级`]), lines: S.lines || [], praise: S.praise.map(p => ({ title: p.title })) });
   } catch (e) { }
   const R = 74, cx = 152, cy = 112;
@@ -4066,11 +4138,24 @@ function openReport() {
           <div class="sec"><div class="st">本次过程</div><div class="sc" style="font-size:12.5px">
             用时 ${$('#ktime').textContent}　·　操作项 ${STEPS.filter(s => s._done).length}/${S.plan ? S.plan.steps.length : STEPS.length} 项完成　·　违规 ${S.vio.length} 项　·　主动中止上报 ${S.abn.handled ? 1 : 0} 次
           </div></div>
-          <div class="sec"><div class="st">扣分与否决项</div><div class="sc" style="font-size:12px">
-            ${S.vio.length ? S.vio.map(v => `<div style="padding:6px 0;border-bottom:1px dashed #e9e6d8">
+          <div class="sec"><div class="st">扣分与否决项 · 逐条扣分依据</div><div class="sc" style="font-size:12px">
+            ${S.vio.length ? S.vio.map(v => `<div class="viorow">
               <span class="tag ${v.level === 'red' ? 'rl' : 'wn'}">${v.level === 'red' ? '一票否决' : v.level === 'major' ? '严重' : '不规范'}</span>
               <b style="color:#243329">第${v.step}项 ${v.title}</b>
-              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">${v.detail}</div></div>`).join('') : '<span style="color:var(--ac)">本次未触发扣分项。</span>'}
+              <b class="viocut ${v.level === 'red' ? 'red' : ''}">${v.level === 'red' ? '综合得分记 0' : (v.dimn || DIMN[v.dim] || '') + ' −' + (v.cut || CUT[v.level] || 5) + ' 分'}</b>
+              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">${v.detail}</div>
+              ${v.rule ? `<div class="viorule">依据　${v.rule}</div>` : ''}</div>`).join('') : '<span style="color:var(--ac)">本次未触发扣分项。</span>'}
+            ${S.hintCut ? `<div class="viorow"><span class="tag wn">提示</span><b style="color:#243329">使用教练提示 ${S.hints.length} 次</b>
+              <b class="viocut">规程符合性 −${S.hintCut} 分</b>
+              <div style="color:#5c6b5f;margin-top:3px;line-height:1.6">一级提示每次 −1 分、二级 −2 分、三级（直接给答案）−4 分。</div></div>` : ''}
+          </div></div>
+          <div class="sec"><div class="st">扣分标准</div><div class="sc cutstd">
+            <div><b>一票否决</b><span>触及红线（未验电即接地、带负荷拉合刀闸等），综合得分记 0，本次不计成绩</span></div>
+            <div><b>严重 −12 分</b><span>顺序错、状态判断错、越权操作等可能造成后果的违规</span></div>
+            <div><b>不规范 −5 分</b><span>复诵不完整、记录漏填、未手指口述等过程不规范</span></div>
+            <div><b>教练提示 −1／−2／−4 分</b><span>按一级、二级、三级提示逐级递增，均计入规程符合性</span></div>
+            <div><b>主动识别 +8 分</b><span>自己核出票令不一致、异常中止上报等正确处置</span></div>
+            <div class="cutmath">维度得分 ＝ 100 ＋ 该维度扣分合计 × 1.2（下限 4 分，有加分项再 +6）；综合得分 ＝ 六个维度算术平均，触发一票否决时直接记 0。</div>
           </div></div>
           ${S.praise.length ? `<div class="sec"><div class="st">加分项</div><div class="sc" style="font-size:12px">
             ${S.praise.map(p => `<div style="padding:5px 0"><span class="tag ok">加分</span><b style="color:#243329">${p.title}</b>
@@ -4212,6 +4297,7 @@ function boot() {
     const txt = `任玲玲，${g.n}。`;
     say('j', txt); speak(txt, { pose: 'point' });
   }, 5000);
+  loadCoachApply();
   homeBoot();
   route();
   window.addEventListener('hashchange', route);
@@ -4772,6 +4858,16 @@ const RECO = [
   { coach: 'angui',  pre: null,     why: '安规修编后尚未复训', act: '查看教练' }
 ];
 
+/* 我在练的教练（工作台窄条，只列本人已开练的；全量目录在教练中心） */
+const MYCOACH = [
+  { id: 'daozha', last: '今天 09:12', cnt: 14, score: 86, prog: 72 }
+];
+/* 本人已提交、等待本单位开通的教练（教练中心里申请，工作台看进度） */
+const COACH_APPLY = [
+  { id: 'term',  at: '9月5日 提交', st: '培训专责审核中' },
+  { id: 'angui', at: '9月1日 提交', st: '已通过 · 待配置账号' }
+];
+
 /* ---- 由 SESSIONS 推导的聚合（保证各图表数字一致） ---- */
 function homeAgg() {
   const byDay = {};                      // 天 → {min, cnt}
@@ -4832,8 +4928,7 @@ function goPage(h) { location.hash = '#' + h; }
 /* ---------------- 路由 ---------------- */
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
-  const toPlaza = h === 'plaza'; if (toPlaza) h = 'home';
-  if (!['home', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
+  if (!['home', 'plaza', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
   $('#pg_arena').style.display = h === 'arena' ? '' : 'none';
   $('#pg_home').style.display = h === 'arena' ? 'none' : '';
   if (h === 'arena') {
@@ -4842,9 +4937,8 @@ function route() {
   } else {
     const em = $('#en_mask'); if (em) { em.remove(); __arenaEntered = false; }
     renderHPage(h); HomeFX.on();
-    if (toPlaza) setTimeout(() => { const p = $('#plaza'); if (p) p.scrollIntoView({ behavior: 'smooth' }); }, 80);
   }
-  $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === (toPlaza ? 'plaza' : h)));
+  $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
 }
 
 function enterCoach(id, pre) {
@@ -4900,7 +4994,7 @@ function homeBoot() {
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.innerHTML = h === 'home' ? pageHome() : h === 'plaza' ? pagePlaza() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (typeof pageAfter === 'function') pageAfter(h);
   countUp(pg);
@@ -4981,8 +5075,28 @@ function pageHome() {
     <div class="xwsrc">由近30天练习数据生成</div>
   </section>
 
-  ${pagePlaza()}`;
+  <section class="mycoach hg">
+    <div class="mch"><b>我在练的教练</b><span>本单位已为我开通 ${ALL_COACHES().filter(c => c.open).length} 位 · 开通申请 ${COACH_APPLY.length} 条</span>
+      <button class="btn" data-go="plaza">去教练中心</button></div>
+    <div class="mcrow">
+      ${MYCOACH.map(mc => { const c = ALL_COACHES().find(x => x.id === mc.id); if (!c) return '';
+        return `<div class="mcc">
+          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
+          <div class="mcm"><b>${c.n}</b><span>最近一次 ${mc.last} · 已练 ${mc.cnt} 场 · 最近得分 ${mc.score}</span>
+            <div class="mcbar"><i style="width:${mc.prog}%"></i></div><span class="mcp">本教练剧本已练 ${mc.prog}%</span></div>
+          <button class="btn pri" data-coach="${c.id}">继续练</button>
+        </div>`; }).join('')}
+      ${COACH_APPLY.map(a => { const c = ALL_COACHES().find(x => x.id === a.id); if (!c) return '';
+        return `<div class="mcc apply">
+          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
+          <div class="mcm"><b>${c.n}</b><span>${a.at} · ${a.st}</span>
+            <span class="mcp">开通后出现在本条，可直接开练</span></div>
+          <button class="btn" data-go="plaza">查看</button>
+        </div>`; }).join('')}
+    </div>
+  </section>`;
 }
+function ALL_COACHES() { return COACHES.concat(typeof customCoaches === 'function' ? customCoaches() : []); }
 
 function hcard(t, sub, body) {
   return `<div class="hcard"><div class="hch"><b>${t}</b><span>${sub}</span></div><div class="hcb">${body}</div></div>`;
@@ -5002,12 +5116,30 @@ function pagePlaza() {
     (PF.dom === '全部' || c.dom === PF.dom) &&
     (PF.tag === '全部' || c.tags.includes(PF.tag)));
   const chip = (f, v, cur) => `<span class="fchip ${v === cur ? 'on' : ''}" data-fchip="${f}" data-v="${v}">${v}</span>`;
+  const openN = ALLC.filter(c => c.open).length, cusN = ALLC.length - COACHES.length;
+  const hot = ALLC.slice().sort((a, b) => b.users - a.users)[0];
   return `
   <section id="plaza" class="plaza">
-    <div class="pzh"><b>AI 教练中心</b><span>${COACHES.length} 位预设教练${ALLC.length > COACHES.length ? ` + ${ALLC.length - COACHES.length} 位自建` : ''} · 覆盖 ${COACH_FAMS.length} 个岗位族 · 本单位已开通 ${ALLC.filter(c => c.open).length} 位</span></div>
+    <div class="pzhero ho">
+      <div class="pzt"><h1>AI 教练中心</h1>
+        <div class="hsub">本单位教练目录 · 开通与自建入口 · 由 ${HOME_USER.team} 培训专责统一管理</div></div>
+      <div class="pzk">
+        <div class="kpi"><b>${ALLC.length}</b><span>教练总数</span></div>
+        <div class="kpi"><b>${COACH_FAMS.length}</b><span>覆盖岗位族</span></div>
+        <div class="kpi good"><b>${openN}</b><span>已开通</span></div>
+        <div class="kpi warn"><b>${ALLC.length - openN}</b><span>未开通</span></div>
+        <div class="kpi"><b>${cusN}</b><span>本单位自建</span></div>
+      </div>
+      <div class="pzact">
+        <button class="btn pri" data-go="editor">新建教练</button>
+        <button class="btn" data-go="home">回工作台</button>
+      </div>
+      <div class="pzhot">本月最多人练：<b>${hot.n}</b> · ${hot.users} 人 · 平均提分 +${hot.gain}　｜　未开通的教练可提交开通申请，审核通过后出现在工作台「我在练的教练」。</div>
+    </div>
     <div class="pzf"><label>岗位族</label>${['全部', ...COACH_FAMS].map(v => chip('fam', v, PF.fam)).join('')}</div>
     <div class="pzf"><label>业务域</label>${doms.map(v => chip('dom', v, PF.dom)).join('')}</div>
     <div class="pzf"><label>能力项</label>${tags.map(v => chip('tag', v, PF.tag)).join('')}</div>
+    <div class="pzcnt">筛选出 ${list.length} 位教练</div>
     <div class="pzgrid">
       ${list.map(c => {
         const g = COACH_GRAD[c.fam];
@@ -5020,11 +5152,28 @@ function pagePlaza() {
         <div class="cdesc">${c.desc}</div>
         <div class="ctags">${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
         <div class="cstat"><span>难度 ${'●'.repeat(c.lvl)}${'○'.repeat(3 - c.lvl)}</span><span>${c.min} 分钟</span><span>已练 ${c.users} 人</span><span>平均提分 +${c.gain}</span></div>
-        ${c.open ? `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>` : ''}
+        ${c.open ? `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>`
+          : c.custom ? `<button class="btn cgo" data-go="editor">在教练编辑器中继续完善</button>`
+          : COACH_APPLY.some(a => a.id === c.id) ? `<div class="capply">开通申请 ${COACH_APPLY.find(a => a.id === c.id).at} · ${COACH_APPLY.find(a => a.id === c.id).st}</div>`
+          : `<button class="btn cgo" data-apply="${c.id}">申请开通</button>`}
       </div>`; }).join('')}
       ${list.length ? '' : '<div class="pzempty">当前筛选条件下暂无教练</div>'}
     </div>
   </section>`;
+}
+
+/* 申请开通：写入本机开通申请，教练中心与工作台同步显示进度 */
+function applyCoach(id) {
+  const c = ALL_COACHES().find(x => x.id === id); if (!c) return;
+  if (COACH_APPLY.some(a => a.id === id)) return toast('该教练的开通申请已提交');
+  const d = new Date();
+  COACH_APPLY.push({ id, at: `${d.getMonth() + 1}月${d.getDate()}日 提交`, st: '培训专责审核中' });
+  try { localStorage.setItem('xwt_coach_apply', JSON.stringify(COACH_APPLY)); } catch (e) { }
+  toast(`已向培训专责提交「${c.n}」开通申请`);
+  refreshPlaza();
+}
+function loadCoachApply() {
+  try { const a = JSON.parse(localStorage.getItem('xwt_coach_apply') || 'null'); if (Array.isArray(a) && a.length) { COACH_APPLY.length = 0; a.forEach(x => COACH_APPLY.push(x)); } } catch (e) { }
 }
 
 function refreshPlaza() {
@@ -5039,8 +5188,9 @@ function bindHPage() {
     if (pagesClick(e)) return;
     const q = s => e.target.closest(s); let n;
     if (n = q('[data-fchip]')) { PF[n.dataset.fchip] = n.dataset.v; if (n.dataset.fchip === 'fam') { PF.dom = '全部'; } refreshPlaza(); return; }
-    if (n = q('.cgo')) return enterCoach(n.dataset.coach, null);
-    if (n = q('[data-coach]')) { const c = COACHES.concat(customCoaches()).find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通'); }
+    if (n = q('[data-apply]')) { return applyCoach(n.dataset.apply); }
+    if (n = q('.cgo[data-coach]')) return enterCoach(n.dataset.coach, null);
+    if (n = q('[data-coach]')) { const c = ALL_COACHES().find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通，可在教练中心提交开通申请'); }
     if (n = q('[data-reco]')) return recoAct(n.dataset.reco);
     if (n = q('[data-train]')) return enterCoach('daozha', n.dataset.train === 'full' ? null : n.dataset.train);
     if (n = q('[data-go]')) return goPage(n.dataset.go);

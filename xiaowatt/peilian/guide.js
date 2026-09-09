@@ -128,7 +128,7 @@ function instrNow() {
     return { i: 'listen', pic: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
   }
   if (S.beat === 1) {
-    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '这次下令的是深圳中调 李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '复诵后点「复诵」或回车', n: '复诵调度下令' }; }
+    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '这次下令的是深圳中调 李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '设备编号按位念：1163 读"一一六三"，不读"一千一百六十三"', n: '复诵调度下令' }; }
     if (st.act === 'report') return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵本段向调度汇报的内容', h: '复诵后点「复诵」，再由监护人拨号', n: '先复诵汇报内容，我来跟中调联系' };
     if (away) return { i: 'walk', pic: 'walk', t: `前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `先到${LOC[st.loc].name}去` };
     if (!S.sel) return { i: 'point', pic: teach ? 'point' : 'press', sel: `#panelwrap [data-dev="${st.target}"]`, t: `手指「${devName(st.target)}」并口述`, h: teach ? '点击设备完成手指口述' : '长按设备完成手指口述', n: `手指${devName(st.target)}，核对设备双重名称` };
@@ -289,7 +289,9 @@ async function useHint() {
   const label = ['方向提示', '要点提示', '标准答案'][lv - 1];
   say('s', `<span class="tag wn">${label}</span>${txt}`);
   if (lv === 3 && S.beat === 1) { $('#rin').value = st.recite; }
-  S.score.rule -= (lv === 3 ? 4 : lv === 2 ? 2 : 1);
+  const hc = (lv === 3 ? 4 : lv === 2 ? 2 : 1);
+  S.score.rule -= hc;
+  S.hintCut = (S.hintCut || 0) + hc;
   renderTaskbar();
   await speak(txt, { pose: lv === 3 ? 'correct' : 'explain' });
 }

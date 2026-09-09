@@ -7,8 +7,7 @@ function goPage(h) { location.hash = '#' + h; }
 /* ---------------- 路由 ---------------- */
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
-  const toPlaza = h === 'plaza'; if (toPlaza) h = 'home';
-  if (!['home', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
+  if (!['home', 'plaza', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
   $('#pg_arena').style.display = h === 'arena' ? '' : 'none';
   $('#pg_home').style.display = h === 'arena' ? 'none' : '';
   if (h === 'arena') {
@@ -17,9 +16,8 @@ function route() {
   } else {
     const em = $('#en_mask'); if (em) { em.remove(); __arenaEntered = false; }
     renderHPage(h); HomeFX.on();
-    if (toPlaza) setTimeout(() => { const p = $('#plaza'); if (p) p.scrollIntoView({ behavior: 'smooth' }); }, 80);
   }
-  $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === (toPlaza ? 'plaza' : h)));
+  $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
 }
 
 function enterCoach(id, pre) {
@@ -75,7 +73,7 @@ function homeBoot() {
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.innerHTML = h === 'home' ? pageHome() : h === 'plaza' ? pagePlaza() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (typeof pageAfter === 'function') pageAfter(h);
   countUp(pg);
@@ -156,8 +154,28 @@ function pageHome() {
     <div class="xwsrc">由近30天练习数据生成</div>
   </section>
 
-  ${pagePlaza()}`;
+  <section class="mycoach hg">
+    <div class="mch"><b>我在练的教练</b><span>本单位已为我开通 ${ALL_COACHES().filter(c => c.open).length} 位 · 开通申请 ${COACH_APPLY.length} 条</span>
+      <button class="btn" data-go="plaza">去教练中心</button></div>
+    <div class="mcrow">
+      ${MYCOACH.map(mc => { const c = ALL_COACHES().find(x => x.id === mc.id); if (!c) return '';
+        return `<div class="mcc">
+          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
+          <div class="mcm"><b>${c.n}</b><span>最近一次 ${mc.last} · 已练 ${mc.cnt} 场 · 最近得分 ${mc.score}</span>
+            <div class="mcbar"><i style="width:${mc.prog}%"></i></div><span class="mcp">本教练剧本已练 ${mc.prog}%</span></div>
+          <button class="btn pri" data-coach="${c.id}">继续练</button>
+        </div>`; }).join('')}
+      ${COACH_APPLY.map(a => { const c = ALL_COACHES().find(x => x.id === a.id); if (!c) return '';
+        return `<div class="mcc apply">
+          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
+          <div class="mcm"><b>${c.n}</b><span>${a.at} · ${a.st}</span>
+            <span class="mcp">开通后出现在本条，可直接开练</span></div>
+          <button class="btn" data-go="plaza">查看</button>
+        </div>`; }).join('')}
+    </div>
+  </section>`;
 }
+function ALL_COACHES() { return COACHES.concat(typeof customCoaches === 'function' ? customCoaches() : []); }
 
 function hcard(t, sub, body) {
   return `<div class="hcard"><div class="hch"><b>${t}</b><span>${sub}</span></div><div class="hcb">${body}</div></div>`;
@@ -177,12 +195,30 @@ function pagePlaza() {
     (PF.dom === '全部' || c.dom === PF.dom) &&
     (PF.tag === '全部' || c.tags.includes(PF.tag)));
   const chip = (f, v, cur) => `<span class="fchip ${v === cur ? 'on' : ''}" data-fchip="${f}" data-v="${v}">${v}</span>`;
+  const openN = ALLC.filter(c => c.open).length, cusN = ALLC.length - COACHES.length;
+  const hot = ALLC.slice().sort((a, b) => b.users - a.users)[0];
   return `
   <section id="plaza" class="plaza">
-    <div class="pzh"><b>AI 教练中心</b><span>${COACHES.length} 位预设教练${ALLC.length > COACHES.length ? ` + ${ALLC.length - COACHES.length} 位自建` : ''} · 覆盖 ${COACH_FAMS.length} 个岗位族 · 本单位已开通 ${ALLC.filter(c => c.open).length} 位</span></div>
+    <div class="pzhero ho">
+      <div class="pzt"><h1>AI 教练中心</h1>
+        <div class="hsub">本单位教练目录 · 开通与自建入口 · 由 ${HOME_USER.team} 培训专责统一管理</div></div>
+      <div class="pzk">
+        <div class="kpi"><b>${ALLC.length}</b><span>教练总数</span></div>
+        <div class="kpi"><b>${COACH_FAMS.length}</b><span>覆盖岗位族</span></div>
+        <div class="kpi good"><b>${openN}</b><span>已开通</span></div>
+        <div class="kpi warn"><b>${ALLC.length - openN}</b><span>未开通</span></div>
+        <div class="kpi"><b>${cusN}</b><span>本单位自建</span></div>
+      </div>
+      <div class="pzact">
+        <button class="btn pri" data-go="editor">新建教练</button>
+        <button class="btn" data-go="home">回工作台</button>
+      </div>
+      <div class="pzhot">本月最多人练：<b>${hot.n}</b> · ${hot.users} 人 · 平均提分 +${hot.gain}　｜　未开通的教练可提交开通申请，审核通过后出现在工作台「我在练的教练」。</div>
+    </div>
     <div class="pzf"><label>岗位族</label>${['全部', ...COACH_FAMS].map(v => chip('fam', v, PF.fam)).join('')}</div>
     <div class="pzf"><label>业务域</label>${doms.map(v => chip('dom', v, PF.dom)).join('')}</div>
     <div class="pzf"><label>能力项</label>${tags.map(v => chip('tag', v, PF.tag)).join('')}</div>
+    <div class="pzcnt">筛选出 ${list.length} 位教练</div>
     <div class="pzgrid">
       ${list.map(c => {
         const g = COACH_GRAD[c.fam];
@@ -195,11 +231,28 @@ function pagePlaza() {
         <div class="cdesc">${c.desc}</div>
         <div class="ctags">${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
         <div class="cstat"><span>难度 ${'●'.repeat(c.lvl)}${'○'.repeat(3 - c.lvl)}</span><span>${c.min} 分钟</span><span>已练 ${c.users} 人</span><span>平均提分 +${c.gain}</span></div>
-        ${c.open ? `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>` : ''}
+        ${c.open ? `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>`
+          : c.custom ? `<button class="btn cgo" data-go="editor">在教练编辑器中继续完善</button>`
+          : COACH_APPLY.some(a => a.id === c.id) ? `<div class="capply">开通申请 ${COACH_APPLY.find(a => a.id === c.id).at} · ${COACH_APPLY.find(a => a.id === c.id).st}</div>`
+          : `<button class="btn cgo" data-apply="${c.id}">申请开通</button>`}
       </div>`; }).join('')}
       ${list.length ? '' : '<div class="pzempty">当前筛选条件下暂无教练</div>'}
     </div>
   </section>`;
+}
+
+/* 申请开通：写入本机开通申请，教练中心与工作台同步显示进度 */
+function applyCoach(id) {
+  const c = ALL_COACHES().find(x => x.id === id); if (!c) return;
+  if (COACH_APPLY.some(a => a.id === id)) return toast('该教练的开通申请已提交');
+  const d = new Date();
+  COACH_APPLY.push({ id, at: `${d.getMonth() + 1}月${d.getDate()}日 提交`, st: '培训专责审核中' });
+  try { localStorage.setItem('xwt_coach_apply', JSON.stringify(COACH_APPLY)); } catch (e) { }
+  toast(`已向培训专责提交「${c.n}」开通申请`);
+  refreshPlaza();
+}
+function loadCoachApply() {
+  try { const a = JSON.parse(localStorage.getItem('xwt_coach_apply') || 'null'); if (Array.isArray(a) && a.length) { COACH_APPLY.length = 0; a.forEach(x => COACH_APPLY.push(x)); } } catch (e) { }
 }
 
 function refreshPlaza() {
@@ -214,8 +267,9 @@ function bindHPage() {
     if (pagesClick(e)) return;
     const q = s => e.target.closest(s); let n;
     if (n = q('[data-fchip]')) { PF[n.dataset.fchip] = n.dataset.v; if (n.dataset.fchip === 'fam') { PF.dom = '全部'; } refreshPlaza(); return; }
-    if (n = q('.cgo')) return enterCoach(n.dataset.coach, null);
-    if (n = q('[data-coach]')) { const c = COACHES.concat(customCoaches()).find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通'); }
+    if (n = q('[data-apply]')) { return applyCoach(n.dataset.apply); }
+    if (n = q('.cgo[data-coach]')) return enterCoach(n.dataset.coach, null);
+    if (n = q('[data-coach]')) { const c = ALL_COACHES().find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通，可在教练中心提交开通申请'); }
     if (n = q('[data-reco]')) return recoAct(n.dataset.reco);
     if (n = q('[data-train]')) return enterCoach('daozha', n.dataset.train === 'full' ? null : n.dataset.train);
     if (n = q('[data-go]')) return goPage(n.dataset.go);
