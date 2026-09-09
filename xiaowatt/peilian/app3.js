@@ -176,6 +176,8 @@ function checkNumRead(v) {
   const r = numReadErr(v); if (!r) return;
   violation('minor', 'term', '设备编号读法错误', `把 ${r[1]} 读成"${r[0]}"，设备编号应按位报读为"${r[2]}"`,
     '调度术语：设备编号按位报读，不按数值报读，便于与图纸、标签、五防票逐位核对，也避免与相邻间隔编号听混。');
+  useChar('jianhu');
+  speak('设备编号要按位报读。1163 念"一一六三"，不念"一千一百六十三"。再念一遍。', { pose: 'correct', shake: true, who: '监护人 陈志远' });
 }
 
 /* ---------------- 复诵 / 回报 ---------------- */

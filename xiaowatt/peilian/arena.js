@@ -228,6 +228,7 @@ function updateActbar() {
       <input class="rin" id="rin" placeholder="${S.beat === 1 ? '复诵票面内容…（点麦克风可语音复诵）' : S.beat === 4 ? '回报检查结果…' : ph}" ${canInput ? '' : 'disabled'}>
       <button class="btn pri" id="a_send" ${canInput ? '' : 'disabled'}>${S.beat === 1 ? '复诵' : '回报'}</button>
       <button class="btn askbtn" id="a_ask">问教练</button>
+      <button class="btn" id="a_demo">看现场示范</button>
       <button class="btn dan" id="a_stop">中止操作并上报</button>
       <button class="btn" id="a_rule">规程依据</button>
     </div>
@@ -244,6 +245,7 @@ function updateActbar() {
   $('#a_rule').onclick = openRule;
   $('#a_mic').onclick = micClick;
   $('#a_ask').onclick = askCoach;
+  $('#a_demo').onclick = openDemo;
   const r = $('#rin');
   r.onkeydown = e => { if (e.key === 'Enter') submitInput(); };
   if (canInput) setTimeout(() => r.focus(), 30);

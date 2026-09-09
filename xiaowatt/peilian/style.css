@@ -1183,3 +1183,22 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .fok li{margin-bottom:5px}
 .fok em{display:block;font-style:normal;font-size:11px;color:#7b6a52;line-height:1.6}
 .beat.idle{opacity:.4}
+
+/* ---- 现场动作示范 ---- */
+.demomask{background:rgba(36,51,41,.28)}
+.demodlg{width:min(700px,94vw);margin-left:auto;margin-right:4vw}
+.dhs{font-size:11px;color:#7b6a52;font-family:var(--mono);margin-left:10px;flex:1}
+.dmsteps{display:flex;gap:6px;margin-bottom:10px}
+.dms{flex:1;display:flex;align-items:center;gap:5px;justify-content:center;padding:6px 4px;border:1px solid var(--goldsoft);border-radius:7px;background:#fffdf7;font-size:11.5px;color:#5c6b5f;cursor:pointer}
+.dms i{width:16px;height:16px;border-radius:50%;background:#e6e2d2;color:#5c6b5f;font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.dms.on{border-color:var(--acln);background:var(--acbg);color:var(--acd);font-weight:600}
+.dms.on i{background:var(--ac);color:#fff}
+.dmstage{border:1px solid var(--goldsoft);border-radius:9px;background:linear-gradient(180deg,#fbfbf5,#f2f4ea);padding:6px;display:flex;justify-content:center}
+.dmstage svg{max-width:100%;height:auto}
+.dmstage .fig{transition:transform .5s}
+.dmstage .dar{animation:darin .35s ease-out}
+@keyframes darin{from{opacity:0;transform:translateY(-4px)}to{opacity:1}}
+.dmcap{margin-top:10px;padding:10px 13px;border-radius:0 7px 7px 0;background:var(--acbg);border-left:3px solid var(--ac);font-size:12.5px;line-height:1.75}
+.dmcap b{color:#243329;display:block;margin-bottom:3px}
+.dmcap span{color:#40513f}
+.dmtip{margin-top:8px;font-size:11px;color:#7b6a52}

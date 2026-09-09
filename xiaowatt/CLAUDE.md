@@ -52,15 +52,18 @@ cd peilian && python3 build.py        # → dist/小瓦特练_倒闸操作陪练
 npm i playwright && npx playwright install chromium
 cd peilian
 # 首页为默认落点（hash 路由）；测试脚本经 F+'#arena' 直达陪练舱入口
+# 三条主回归都以 S.filled=true 跳过拟票练习，直接从上岗前准备开始
 node v2full.js     # 完整票全流程（关埋点），期望：ENDED / vio 0 / ERR none
 node v2trap.js     # 完整票（开埋点），期望：停在第11项异常，vio 2，ERR none
-node v2test.js     # 分段票（冷备用→检修）+ 问教练 + 报告，期望 end / ERR none
+node v2test.js     # 分段票（冷备用→检修）+ 问教练 + 报告，期望 end / vio 0 / ERR none
+node v2fill.js     # 拟票练习：错票期望 75 分且票头/漏项/多项/顺序四类错误全中，满分路径 100 分 0 错误
+node v2demo.js     # 现场动作示范：12 类动作逐项开一次示范并走完四步，期望 stage end / vio 0 / ERR none
 
 # 重新生成数据（只有改剧本/知识库时才需要；gen_data.py 需 pip install pypinyin）
 python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 build.py
 ```
 
-**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改交互逻辑后必须跑 v2full + v2trap 两条回归**，通过标准如上。
+**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改交互逻辑后必须跑 v2full + v2trap 两条回归**，通过标准如上；动到拟票或示范再补跑 v2fill / v2demo。
 
 ## 铁律（甲方多次强调，违反即打回）
 
@@ -92,13 +95,15 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | app1.js | 全局状态 S、常量、工具函数 |
 | sld.js | 一次接线图 SVG `sld(o)`（1M/2M 双母七间隔，随设备状态变色；`o.dev` 可传五防模拟态副本、`o.sim` 模拟样式、`o.scada` 光字牌与遥测、`o.chg` 变位闪动） |
 | app2.js | 渲染层：speak/say/字幕、操作票、位置栏、renderPanel 调度、顶栏 KPI（含预估得分 estScore）、本项计时 stepRef、复诵实时评估 liveMeter/missingSegs、设备长按 bindDevHold、目标设备通用高亮 + AR 标注（SVG 目标经 svgOffset 定位、手指后出现手形标记、目标自动滚入视野） |
+| fill.js | **填写操作票（拟票练习，9/9 甲方口径：第一步前先练拟票）**：倒闸操作作业全过程条（接受任务→拟票→审核→签发→五防模拟→现场操作→汇报终结）、票头四要素选填（发令单位/发令人/受令人/操作任务，选项含真实易错项）、12 张备选项目卡（本段 8 项 + 后两段 4 项干扰）点选写入票面并上移下移移出、提交审核判分 100 分（票头 20 / 项目完整性 50 / 执行顺序 30）、错题详解按票头·漏项·多项·顺序分组逐条给「应为—为什么—依据」（依据取自该项 rule/why，不另编条款）、附正确票面，可改一遍再交或按正确票面签发进入准备阶段 |
+| demo.js | **现场动作示范（9/9 甲方口径：不能只是点击，要看到人怎么做）**：作业人员 SVG（工装+安全帽，四姿态 站位/手指/执行/观察）、九类动作场景（把手 knob / 空开 mcb / 挂牌 tag / 地刀合闸 closeE / GIS 四项指示 gis / 后台遥控 remote / 核对 check / 调度电话 phone / 五防钥匙 key），每类四步分解（站位与核对 → 手指口述 → 执行动作 → 检查回报），设备图随步骤变位、要点气泡跟着指、监护人数字人逐步开口讲；底部操作条「看现场示范」进入，可逐步/重放/直接关掉自己做 |
 | panels.js | **作业面板 v3（9/4 甲方口径：学员在设备图上动手，不点文字框）**：SVX 元件库（灯 / 把手 / 空开 / 按钮 / 挂牌钩与标志牌 / 机构指示窗 / 拐臂 / 转轴划线 / 屏面）；调度电话受令席（来电铃响 → 接听报名 → 调度报姓名下令 → 记录簿填发令单位与发令人 → 复诵 → 调度"复诵正确"记发令时间 → 票令核对卡（一致接令 / 不一致中止，票令陷阱在此判定）→ 汇报项拨号接通后汇报，调度操作指令记录簿逐条累积）；五防模拟在模拟接线图上按票序点设备（S.wfdev 模拟态、五防闭锁弹层 WF_LOCK 给出防误规则）；监控后台一次接线图点设备 → 遥控操作弹层（操作性质 / 预置 / 返校 / 执行，选错性质判违规）→ 图上变位、光字牌与报文刷新，核对类项目弹出光字 / 遥测 / 设备详情逐项打钩（openInspect）；间隔现场 / 8P 测控屏 / 20P 保护屏 / 就地控制柜为 SVG 设备图：三个间隔可走错、名称牌 / 标签 / 汇控柜模拟图 / 带电显示装置 / 机构箱指示窗 / 拐臂 / 转轴划线（gisInspect 放大提示并打钩，异常项给出中止上报）、1QK/ZK 把手会转、空开会掉、地刀合分按钮、挂牌钩挂上标志牌 |
-| app3.js | 交互引擎：五拍闭环、判定与违规、红线、异常支线、enterStep（接令项先响铃等接听）/tickStep、submitInput（带并发锁；接令项复诵后进入票令核对，汇报项须先拨通）、devClick 分流（五防 → wfDev、后台遥控 → openRemoteCtl、核对类 → openInspect、四项指示 → gisInspect）、doPhone（记录簿校验：发令单位含"地调"、发令人为来电人"李明"） |
+| app3.js | 交互引擎：五拍闭环、判定与违规（每条违规带扣分维度、扣分值与依据原文）、设备编号读法判定（1163 读"一一六三"）、红线、异常支线、enterStep（接令项先响铃等接听）/tickStep、submitInput（带并发锁；接令项复诵后进入票令核对，汇报项须先拨通）、devClick 分流（五防 → wfDev、后台遥控 → openRemoteCtl、核对类 → openInspect、四项指示 → gisInspect）、doPhone（记录簿校验：发令单位含"中调"、发令人为来电人"李明"） |
 | app4.js | 准备/五防/收尾、评分与报告（含 genReview 生成式复盘）、讲师演示台、boot（含卡住 24s 监护人主动提醒，__DH_SPEED<1 时停用） |
 | arena.js | 陪练舱 v2：道具层 Sheet、八种练习方式 PLANS、入口弹层 openEntry(pre 可预选练法)、问教练 askCoach+retrieve、底部操作条 |
 | charts.js | 手绘 SVG 图表库：雷达（opt.key 自定义下钻属性、opt.target 目标虚线多边形、任意维数）/双轴柱线/环形/面积/热力矩阵/仪表盘/场次成长曲线 chSessionCurve（得分·7日均线·用时·扣分·提示·及格线多序列可切）+ miniBars，交互经 data-* 委托 |
 | homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、DIMS6 六维（陪练舱/首页/班组口径）与 DIMS10 十维（成长档案口径，前六维同值）、SESSIONS 近30天场次（唯一数据源）、COACHES 18 教练、homeAgg 聚合 |
-| home.js | 系统首页：hash 路由（home/plaza/arena/review/growth/classroom/team/editor）、导航按角色放行管理模块、**驾驶舱布局**（中央学员成长地图 chGrowthMap：流向边+流动粒子+阶段分区，节点经 nodeClick 下钻；六图环绕）、AI 教练中心三级筛选、粒子+变电站剪影背景动效 |
+| home.js | 系统首页与教练中心（两页分开，9/9）：hash 路由（home/plaza/arena/review/growth/classroom/team/editor）、导航按角色放行管理模块、**工作台＝驾驶舱布局**（我的任务/我的能力/我的复盘/班组对比/小瓦特建议 + 底部「我在练的教练」窄条与开通申请进度）、**教练中心＝独立目录页**（页头统计：教练总数/覆盖岗位族/已开通/未开通/自建，三级筛选与结果计数，新建教练入口，未开通教练可提交开通申请并在两页同步状态）；工作台中央为学员成长地图 chGrowthMap（流向边+流动粒子+阶段分区，节点经 nodeClick 下钻）、六图环绕、粒子+变电站剪影背景动效 |
 | pagedata.js | 底座各页数据：ROLE 角色、TEAM 班组 12 人、REDLINES、MILESTONES、LADDER 晋升通道、CLASSROOM 接入指标、SAMPLE_TICKET 样例票、QUIZ 随堂测验 14 题（依据只引用既有条款）、COURSE_LIB 课程库 12 门、ARCH_IF 接口说明、BADGES 能力徽章 12 枚（条件函数）、localStorage 键与读写 |
 | pages.js | 评分复盘（场次筛选、对照切换 上一场/最佳场/均值、场次回放时间轴 rvPlay、逐句 LCS diff + 跟读实时吻合度、错误卡、行动清单本机勾选、复盘摘要生成、AI 复盘）/ 成长档案（十维能力全景 + 上月/前月/班组对照 + 目标多边形、三期对照与预测、目标填写、多序列成长曲线点击进复盘、能力徽章、学习地图、晋升通道、里程碑、打印导出）/ 知识课堂（接入关系图节点可下钻、立即同步、课程库搜索/标签/章节学习回写学时、随堂测验、本周学习计划生成与加入日程）/ 班组看板 / 教练编辑器（角色设定含 18 形象 + 数字人预览试听 + 开场白生成；剧本步骤 上移下移/红线/删除/一致性检查 lintSteps/剧本试演；评分规则模板与示例试算；知识库检索测试与文本上传；已发布列表下架/载入）/ 角色切换 / pagesClick·pagesInput·pageAfter |
 
@@ -106,13 +111,13 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 
 陪练舱本轮新增（9/2）：顶栏「预估得分」KPI（estScore 与评估报告同算法实时测算）、底部「本项用时 / 参考」计时（stepRef 按动作类型）、复诵输入框实时吻合度条 + 教学模式漏说要素芯片（missingSegs，演练模式只给数量，考核模式不显示）、目标设备 AR 标注（DOM 与 SVG 两种，含项号与动作）、每项完成后监护人一句点评 coachComment（考核模式不点评，只进聊天不发声以免影响回归时序）。
 
-关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06；弹层里的预置 / 执行等待也按它缩放）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍：会接电话、拨号、点"票令一致"、把遥控 / 核对弹层按正确路径点完 autoDialog）、`S.toured / S.previewed`（跳过导览/预习）、`S.ph`（电话状态：ring / conn / cmp / log）、`S.wfdev`（五防模拟态）。新增数字人台词已加入 gen_lines.py 并重生成 lines.json（126 条）。
+关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音）、`window.__DH_SPEED`（语速倍率，测试用 0.06；弹层里的预置 / 执行等待也按它缩放）、`S.trap.armed / S.abn.armed`（第9项票令陷阱 / 第11项异常注入开关）、`autoStep()`（自动执行当前节拍：会接电话、拨号、点"票令一致"、把遥控 / 核对弹层按正确路径点完 autoDialog）、`S.toured / S.previewed / S.filled`（跳过导览/预习/拟票练习）、`S.fillOn`（入口是否勾选拟票练习）、`openDemo()`（打开当前项的现场动作示范）、`S.ph`（电话状态：ring / conn / cmp / log）、`S.wfdev`（五防模拟态）。新增数字人台词已加入 gen_lines.py 并重生成 lines.json（169 条，9/9 增补接令改口径、汇报、拟票开场与现场示范讲解，已同步 heygen/lines.json，clips 需补渲染）。
 
 ## 数字人（HeyGen）现状
 
 - **浏览器 TTS 已移除**（甲方 9/1：语音播报太生硬）：内置渲染只有字幕 + 口型（逐字时钟驱动），真人声由 HeyGen 预渲染片段承担；「关闭数字人语音」按钮已从讲师演示台移除。
 
-- 用户自行在 HeyGen 渲染中：三个角色形象（AI 生图，提示词已交付）+ 126 条台词（heygen/lines.json，9/4 新增 9 条调度电话与遥控台词，需补渲染）批量渲染为**透明通道 WebM**（heygen/heygen-kit.js，v3 优先自动回退 v2）。
+- 用户自行在 HeyGen 渲染中：三个角色形象（AI 生图，提示词已交付）+ 169 条台词（heygen/lines.json，9/9 补至 169 条，需补渲染）批量渲染为**透明通道 WebM**（heygen/heygen-kit.js，v3 优先自动回退 v2）。
 - **clips 到货后的接入步骤**：① 把 `clips/` 目录放到 dist/ 同级；② 把 manifest.json 内容内联进 player.js 的 `HEYGEN_MANIFEST` 常量（build.py 里加一步自动内联更好）；③ `HEYGEN_CFG.mode` 默认值改 `'clips'`；④ 重新构建，file:// 双击验证视频可播、缺片段时降级 builtin 不报错。
 - 台词文本是匹配键（Avatar.clipOf 按 text.trim() 精确匹配）——**改任何台词文案都会导致对应片段失配**，改前先查 lines.json，改后要重新渲染该条或接受降级。
 
