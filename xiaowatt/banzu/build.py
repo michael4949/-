@@ -5,7 +5,7 @@ import base64, os, re, json
 B = os.path.dirname(os.path.abspath(__file__)) + os.sep
 logo = base64.b64encode(open(os.path.join(B, '..', 'assets', 'logo.png'), 'rb').read()).decode()
 css = open(B + 'style.css', encoding='utf-8').read()
-parts = ['data.js', 'data2.js', 'state.js', 'scenes.js', 'xw.js', 'comp.js', 'upload.js', 'charts.js', 'charts2.js', 'app.js', 'p_home.js', 'p_people.js', 'p_sched.js', 'p_task.js', 'p_safety.js', 'p_train.js', 'p_doc.js', 'p_know.js', 'p_ledger.js', 'intent.js']
+parts = ['data.js', 'data2.js', 'data3.js', 'state.js', 'scenes.js', 'xw.js', 'comp.js', 'upload.js', 'charts.js', 'charts2.js', 'app.js', 'p_home.js', 'p_people.js', 'p_sched.js', 'p_task.js', 'p_safety.js', 'p_train.js', 'p_doc.js', 'p_know.js', 'p_ledger.js', 'intent.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
 imgs = {}

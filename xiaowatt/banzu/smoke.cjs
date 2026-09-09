@@ -92,6 +92,41 @@ const sample = n => ({ name: n, mimeType: 'application/octet-stream', buffer: fs
   await pg.click('.six div[data-k="hours"]'); await w(400);
   await t('six spot', async () => (await pg.locator('#spot.on').count()) === 1);
   await pg.click('[data-act="unspot"]');
+  // 班组画像：资质盘点 / 下次培训重点 / 年龄梯队 / 三类评级 / 指标对照
+  await t('cert panel', async () => (await pg.locator('[data-act="cert-gap"]').count()) >= 5 && (await pg.locator('.card', { hasText: '班组资质盘点' }).locator('.tag.bad').count()) === 3);
+  await t('train focus', async () => (await pg.locator('.focus > div').count()) === 5 && (await pg.locator('.focus .tag', { hasText: '取证' }).count()) === 3 && (await pg.locator('.focus').innerText()).includes('缺 2 人'));
+  await t('age panel', async () => (await pg.locator('[data-act="age-risk"]').count()) === 4 && (await pg.locator('.card', { hasText: '梯队与断层' }).locator('.tag.bad').count()) === 2 && (await pg.locator('.card', { hasText: '年龄结构' }).innerText()).includes('平均 31.9 岁'));
+  await t('metric panel 8', async () => (await pg.locator('.mets > div').count()) === 8 && (await pg.locator('.mets').innerText()).includes('证书 90 天内到期'));
+  await t('metric matches ledger', async () => (await pg.locator('.mets > div', { hasText: '证书 90 天内到期' }).locator('b').innerText()).trim() === '3 人');
+  await pg.click('[data-act="cert-gap"][data-k="带电作业资格"]'); await ws('#spot.on'); await w(2600);
+  await t('cert gap spot', async () => (await pg.locator('#spot tr.me').count()) === 2 && (await pg.locator('#chat .msg', { hasText: '断层风险高' }).count()) >= 1);
+  await pg.click('[data-act="unspot"]');
+  const plan0 = await pg.evaluate(() => (JSON.parse(localStorage.getItem('xwb_plan') || '[]')).length);
+  await pg.click('[data-act="cert-plan"]'); await w(900);
+  await t('cert plan written', async () => (await pg.evaluate(() => (JSON.parse(localStorage.getItem('xwb_plan') || '[]')).length)) > plan0);
+  await pg.click('[data-act="age-risk"][data-i="0"]'); await ws('#chat [data-act="age-fix"]');
+  await pg.click('#chat [data-act="age-fix"]'); await w(800);
+  await t('age fix speaks', async () => (await pg.locator('#chat .msg').last().innerText()).includes('排好了'));
+  // 三类评级：绩效 / 岗评 / 技能，逐条依据
+  await pg.click('.pc[data-who="郭子扬"]'); await ws('.rate3 .rt'); await w(1400);
+  await t('rate 3 cards', async () => (await pg.locator('.rate3 .rt').count()) === 3 && (await pg.locator('.rate3').innerText()).includes('岗位说明书'));
+  await pg.click('.rt[data-k="perf"]'); await w(700);
+  await t('perf detail', async () => (await pg.locator('#prate table tr').count()) === 7 && (await pg.locator('#prate .evl div').count()) >= 10 && (await pg.locator('#prate').innerText()).includes('违章记录'));
+  await pg.screenshot({ path: SHOT + '/11_perf.png' });
+  await pg.click('[data-act="perf-ok"]'); await w(500);
+  await t('perf saved', async () => (await pg.evaluate(() => !!(JSON.parse(localStorage.getItem('xwb_perf') || '{}'))['郭子扬'])));
+  await pg.click('.rt[data-k="post"]'); await w(700);
+  await t('post detail', async () => (await pg.locator('#prate table tr').count()) === 6 && (await pg.locator('#prate .tag.bad').count()) === 1 && (await pg.locator('#prate').innerText()).includes('安全履职'));
+  await pg.click('[data-act="post-ok"]'); await w(500);
+  await t('post saved', async () => (await pg.evaluate(() => (JSON.parse(localStorage.getItem('xwb_posteval') || '{}'))['郭子扬'].concl === '基本胜任')));
+  await pg.click('.rt[data-k="skill"]'); await w(700);
+  await t('skill detail', async () => (await pg.locator('#prate .ladd div').count()) === 5 && (await pg.locator('#prate .ladd div.on').count()) === 1 && (await pg.locator('#prate').innerText()).includes('申报条件'));
+  await pg.screenshot({ path: SHOT + '/12_skill.png' });
+  // 死按钮：负向选择也要有回应
+  await pg.click('.focus > div'); await ws('#chat [data-act="focus-one"]');
+  const m0 = await pg.locator('#chat .msg').count();
+  await pg.click('#chat [data-act="no"]'); await w(600);
+  await t('dismiss replies', async () => (await pg.locator('#chat .msg').count()) > m0 && (await pg.locator('#chat .msg').last().innerText()).length > 2);
   // 班务日程：任务池派工（记忆）→ 值班表 → 审票 → 进度
   await pg.click('#sb a[data-to="sched"]'); await w(300);
   await pg.click('[data-act="pool-dispatch"][data-id="j7"]'); await w(800);
@@ -228,7 +263,9 @@ const sample = n => ({ name: n, mimeType: 'application/octet-stream', buffer: fs
   await t('record chart', async () => (await pg.locator('.msg.a', { hasText: '郭子扬本年考了' }).count()) >= 1);
   await pg.click('.tabs button[data-sub="write"]'); await w(300);
   await t('write suggestions', async () => (await pg.locator('[data-act="lvw-confirm"]').count()) + (await pg.locator('#trbody .tag.ok').count()) >= 2);
-  await pg.click('[data-act="lvw-confirm"] >> nth=0'); await w(200);
+  await t('write tab renamed', async () => (await pg.locator('.tabs button', { hasText: '考评定级' }).count()) === 1 && (await pg.locator('.wexp').count()) === 1 && (await pg.locator('.wexp').innerText()).includes('这一步在做什么'));
+  await pg.click('[data-act="lvw-confirm"] >> nth=0'); await ws('#chat [data-act="person"]'); await w(200);
+  await t('lvw jumps to people', async () => (await pg.locator('#chat [data-act="person"]').count()) >= 1);
   await pg.screenshot({ path: SHOT + '/08_train.png' });
   // 文稿中心
   await pg.click('#sb a[data-to="docs"]'); await w(300);

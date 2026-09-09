@@ -43,7 +43,7 @@ const DISPATCH = {
     XW.answer('好，我来办。', null, { confirm: false });
     const isPh = /凤凰线/.test(job.t);
     XW.at(900, () => { XW.state('work'); formHost.scrollIntoView({ block: 'nearest' }); const hh = $('.h b', formHost.closest('.card') || formHost); if (hh) hh.textContent = '派工单 · ' + job.t;
-      formHost.innerHTML = '<div class="form"><label>作业日期</label><div class="f" id="f1"></div><label>工作票</label><div class="f" id="f2"></div><label>工作负责人</label><div class="f" id="f3"></div><label>班员</label><div class="f" id="f4"></div><label>随队学习</label><div class="f" id="f5"></div><label>安措要点</label><div class="f" id="f6"></div><div class="btnrow bt"><button id="fsave">保存并通知</button><button class="g">再改改</button></div></div>'; });
+      formHost.innerHTML = '<div class="form"><label>作业日期</label><div class="f" id="f1"></div><label>工作票</label><div class="f" id="f2"></div><label>工作负责人</label><div class="f" id="f3"></div><label>班员</label><div class="f" id="f4"></div><label>随队学习</label><div class="f" id="f5"></div><label>安措要点</label><div class="f" id="f6"></div><div class="btnrow bt"><button id="fsave" data-act="disp-save">保存并通知</button><button class="g" data-act="no" data-t="再改改">再改改</button></div></div>'; });
     XW.at(1500, () => XW.cursorTo('#f1', 30, 8)); XW.at(2100, () => XW.fill('#f1', DB.whenOf(job)));
     XW.at(3200, () => { XW.cursorTo('#f2', 30, 8); XW.fill('#f2', job.ticket === '' && !job.lead ? '不需要' : (job.ticket || (job.lead ? '第一种工作票' : '第二种工作票')) + ' · ' + tkNo + (job.ticketNo ? '' : '（新起草）')); });
     XW.at(5200, () => { XW.cursorTo('#f3', 30, 8); XW.fill('#f3', def.lead.n + '（' + def.lead.post.replace('副班长 · ', '') + ' · 工作负责人资格）'); });
