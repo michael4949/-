@@ -13,7 +13,8 @@ const S = {
   },
   tags: {},               // 已挂标志牌
   verify: { v1: false, v2: false },
-  bay: '1163',
+  bay: null,
+  key: { down: false, held: false },
   prep: { audit: [false, false, false], dress: [false, false, false], mind: false, risks: [] },
   wf: 0,
   msgs: [], chat: [],
@@ -30,6 +31,7 @@ const S = {
 for (let i = 0; i < 12; i++) S.prep.risks.push(false);
 
 let DH, DHkey = 'jianhu';
+function h(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };

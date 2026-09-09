@@ -152,6 +152,7 @@ function renderTicket() {
     }
     const r = el('div', 'trow ' + (i === S.idx && S.stage === 'run' ? 'cur ' : '') + (s._done ? 'done ' : '') + (s._bad ? 'bad ' : '') + (s._skip ? 'skip' : ''),
       `<div class="no">${s.no}</div><div class="tx">${s.ticket}</div><div class="ck">${s._done ? '√' : (s._bad ? '×' : '')}</div>`);
+    r.dataset.no = s.no;
     r.onclick = () => jumpTo(i);
     b.appendChild(r);
   });
@@ -204,11 +205,13 @@ function renderLocbar() {
 }
 function goLoc(k) {
   if (S.loc === k) return;
+  if (k === 'bay') S.bay = null;   // 每次进现场都要自己认间隔，系统不预选
   S.loc = k; S.sel = null;
   $('#scene').innerHTML = sceneSVG(k);
   $('#loctag').textContent = LOC[k].name;
   renderLocbar(); renderPanel(); Sheet.sync();
-  if (S.stage === 'run' && STEP() && STEP().loc === k && S.beat === 1) {
+  if (k === 'bay' && S.stage === 'run') say('s', 'GIS 现场三个间隔外观一样，先看间隔名称牌，确认是培训三线1163间隔再进去。');
+  else if (S.stage === 'run' && STEP() && STEP().loc === k && S.beat === 1) {
     say('s', `已到达${LOC[k].name}。请核对间隔名称与设备双重名称后，手指操作对象并复诵。`);
   }
 }
@@ -321,6 +324,7 @@ function bindDevs() {
       speak('停。你站错间隔了。这里是培训' + (b === '1161' ? '一' : '二') + '线' + b + '间隔，仍在运行中。到每一个操作地点，先核对间隔名称和设备双重名称。',
         { pose: 'stop', shake: true });
     }
+    else if (b === '1163' && S.stage === 'run') { praise('state', '间隔核对正确', '进入 GIS 现场后先核对间隔名称牌，正确选择培训三线1163间隔'); speak('对，是这个间隔。进去先核对设备双重名称。', { pose: 'confirm', nod: 1 }); }
     S.bay = b; renderPanel();
   });
 }

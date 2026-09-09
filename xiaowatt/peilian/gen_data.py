@@ -225,6 +225,14 @@ st(no='17', phase=3, loc='hmi', act='check', target='hmi_volt',
    why='间接验电第一种原理：后台二次电压。',
    vd=1)
 
+st(no='17.5', phase=3, loc='wufang', act='key', target='WFKEY',
+   ticket='将五防模拟下传至电脑钥匙',
+   call='下传五防钥匙。',
+   recite='下传五防钥匙',
+   report='已下传五防钥匙。',
+   rule='附录G-2：就地操作汇控柜、机构箱内设备时，应使用与五防模拟一致的电脑钥匙解锁，严禁未经审批私自解锁。',
+   why='汇控柜与机构箱的操作需要电脑钥匙解锁。把已模拟通过的操作票下传到钥匙，钥匙才只能按模拟顺序开锁，接地操作才受防误约束。')
+
 st(no='18', phase=3, loc='cab', act='check', target='cab_hvdisp',
    ticket='检查培训三线1163间隔高压带电显示装置显示确无电压',
    call='在培训三线1163间隔，检查高压带电显示装置显示确无电压。',
@@ -412,5 +420,5 @@ out.append('const STEPS=' + json.dumps(S, ensure_ascii=False) + ';')
 out.append('const RISKS=' + json.dumps(RISKS, ensure_ascii=False) + ';')
 out.append('const WUFANG=' + json.dumps(WUFANG, ensure_ascii=False) + ';')
 out.append('const CH2V=' + json.dumps(CH2V, ensure_ascii=False) + ';')
-open('/home/claude/build/data.js', 'w', encoding='utf-8').write('\n'.join(out))
+open('data.js', 'w', encoding='utf-8').write('\n'.join(out))
 print('chars=', len(CH2V), 'steps=', len(S))

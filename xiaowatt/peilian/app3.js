@@ -18,6 +18,12 @@ function devClick(id) {
       speak('你操作的不是本项设备。请核对双重名称后重新确认。', { pose: 'stop', shake: true });
       return;
     }
+    if (st.act === 'closeE' && !S.key.down) {
+      violation('major', 'rule', '未下传电脑钥匙即就地操作', '汇控柜与机构箱的锁具需用电脑钥匙解锁，本次尚未把模拟票下传至电脑钥匙',
+        '附录G-2：就地操作应使用与五防模拟一致的电脑钥匙解锁，严禁未经审批私自解锁。');
+      speak('钥匙还没下传，这把锁开不了。回五防电脑把模拟票下传到电脑钥匙，再回来操作。', { pose: 'stop', shake: true });
+      return;
+    }
     if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) { openRemoteCtl(st); return; }
     if (st.act === 'check' || st.act === 'verify' || st.act === 'gis') { openInspect(st); return; }
     doExecute(st); return;
@@ -69,7 +75,8 @@ function devName(id) {
     hmi_mode: '运行方式光字牌', hmi_current: '三相电流遥测', hmi_volt: '线路二次电压',
     bay_plate: '间隔名称牌', bay_hvdisp: '高压带电显示装置', cab_hvdisp: '高压带电显示装置', bay_draw: '汇控柜模拟接线图', bay_label: '设备标签',
     p8_open: '1163开关分闸按钮', p8_close: '1163开关合闸按钮', ES116340_open: '116340地刀分闸按钮', cab_handle: '11634刀闸操作把手',
-    gis_hui: '汇控柜电气指示', gis_mech: '机构箱机械指示', gis_arm: '刀闸拐臂指示', gis_line: '转轴划线标识'
+    gis_hui: '汇控柜电气指示', gis_mech: '机构箱机械指示', gis_arm: '刀闸拐臂指示', gis_line: '转轴划线标识',
+    WFKEY: '电脑钥匙'
   })[id] || id;
 }
 
@@ -86,12 +93,15 @@ function doExecute(st) {
     case 'closeE':
       if (!(S.verify.v1 && S.verify.v2)) { redlineGround([]); return; }
       d[st.target] = 'close';
+      S.moving = 'ES116340'; setTimeout(() => { S.moving = null; if (S.loc === 'cab') renderPanel(); }, 2200);
       pushMsg('110kV仿真站 培训三线线路侧116340地刀 合闸 变位', 'new'); break;
     case 'knob': d[st.target] = (d[st.target] === '远控' ? '就地' : '远控');
       pushMsg(`110kV仿真站 ${devName(st.target)} 切至${d[st.target]}`, ''); break;
     case 'mcb': d[st.target] = 'off';
       pushMsg(`110kV仿真站 ${devName(st.target)} 断开`, ''); break;
     case 'tag': S.tags[st.target] = true; break;
+    case 'key': S.key.down = true; S.key.held = true;
+      pushMsg('110kV仿真站 五防主机 模拟操作票下传至电脑钥匙', ''); break;
     case 'check': case 'verify': case 'gis':
       if (st.vd === 1) S.verify.v1 = true;
       if (st.vd === 2) S.verify.v2 = true;
@@ -149,7 +159,7 @@ async function enterStep(i) {
   say('j', call);
   await speak(call, { pose: 'call', who: '监护人 陈志远' });
   setBeat(1);
-  if (st.act === 'report') say('s', '拨打调度电话，接通后按票面内容汇报。');
+  if (st.act === 'report') say('s', '先向监护人复诵本项汇报内容，监护人核对无误后由监护人向深圳中调汇报。');
   else say('s', `请到 ${LOC[st.loc].name}，手指操作对象「${devName(st.target)}」并完整复诵票面内容。`);
 }
 
@@ -166,7 +176,6 @@ async function _submitInput() {
   $('#rin').value = '';
   if (S.beat === 1 || S.beat === 4) (S.lines = S.lines || []).push({ step: st.no, beat: S.beat, t: st.ticket, mine: v, std: S.beat === 1 ? st.recite : st.report });
   if (S.beat === 1) {
-    if (st.act === 'report' && !S.ph.conn) { $('#rin').value = v; toast('先拨通调度电话再汇报', 'bad'); return; }
     // 复诵
     if (st.act !== 'recv' && st.act !== 'report' && !S.sel) {
       say('o', v);
@@ -204,7 +213,14 @@ async function _submitInput() {
       say('s', '请核对操作票任务与调度下令是否一致，在受令席上确认。');
       return;
     }
-    if (st.act === 'report') { await doPhone(st); return; }
+    if (st.act === 'report') {
+      useChar('jianhu');
+      say('j', '收到。');
+      await speak('收到。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
+      setBeat(3);
+      say('s', '汇报内容核对无误。请监护人拨通深圳中调汇报。');
+      return;
+    }
     useChar('jianhu');
     say('j', '对，执行。');
     await speak('对，执行。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
@@ -248,8 +264,9 @@ async function tickStep() {
   const st = STEP();
   if (st._done) return;
   st._done = true;
-  say('j', '收到。（在本项"操作√"栏标注 √）');
-  await speak('收到。本项完成，我已经在操作票上标注对勾。', { pose: 'confirm', nod: 1 });
+  say('j', '收到。');
+  await speak('收到。', { pose: 'confirm', nod: 1 });
+  tickMark(st);
   S.score.rule += 4; S.score.order += 3; S.score.dual += 3; S.score.state += 3; S.score.term += 3;
   renderTicket(); renderTop();
   coachComment(st);
@@ -257,6 +274,12 @@ async function tickStep() {
   const nx = order.find(k => !STEPS[k]._done);
   if (nx === undefined) { finish(); return; }
   setTimeout(() => enterStep(nx), 400);
+}
+
+/* 打勾是动作不是台词：在票面对应行上做一个可见的标记 */
+function tickMark(st) {
+  const row = $(`#trows [data-no="${st.no}"]`);
+  if (row) { row.classList.add('ticking'); setTimeout(() => row.classList.remove('ticking'), 1400); }
 }
 
 /* 监护人逐项点评：本项完成后按留痕数据给一句针对性提示（考核模式不点评） */
@@ -283,8 +306,8 @@ async function doPhone(st) {
     if (!u || !f) {
       violation('minor', 'term', '调度记录不完整', '发令单位或发令人未填写',
         '附录F 2.4／2.5／2.7：发令单位、发令人、受令时间应完整记录在调度操作指令记录簿及操作票相应栏。');
-    } else if (!/地调/.test(u) || !/李明/.test(f)) {
-      violation('minor', 'term', '调度记录有误', `记录簿发令单位"${u}"、发令人"${f}"与来电不符（深圳地调 · 李明）`,
+    } else if (!/中调/.test(u) || !/李明/.test(f)) {
+      violation('minor', 'term', '调度记录有误', `记录簿发令单位"${u}"、发令人"${f}"与来电不符（深圳中调 · 李明）`,
         '附录F 2.4／2.5：发令单位、发令人应按调度实际下令人如实记录。');
     }
     if (lg) { lg.unit = u; lg.from = f; }
@@ -304,15 +327,29 @@ async function doPhone(st) {
 }
 
 async function reissueOrder() {
-  useChar('diaodu');
-  S.ord.cur = '将110kV培训三线1163线路由热备用转冷备用'; S.ph.cmp = null; S.ord.issued = '';
-  const lg = S.ph.log[S.ph.log.length - 1]; if (lg) { lg.order = S.ord.cur + '（更正）'; lg.issued = ''; }
+  /* 调度更正后重新走一遍接令：调度下令 → 监护人复诵 → 调度确认 → 监护人转述 → 操作人复诵。不与监护人同时开口。 */
+  S.ord.cur = ''; S.ph.cmp = null; S.ord.issued = ''; S.ph.conn = true;
+  const lg = S.ph.log[S.ph.log.length - 1]; if (lg) { lg.order = '（作废）' + lg.order; lg.issued = ''; }
   renderPanel();
-  say('d', '更正：现在调度下令，将110kV培训三线1163线路由热备用转冷备用。');
-  await speak('更正：现在调度下令，将110kV培训三线1163线路由热备用转冷备用。', { pose: 'explain', who: '值班调度员' });
+  const fixed = '将110kV培训三线1163线路由热备用转冷备用';
+  useChar('diaodu');
+  say('d', '深圳中调，李明。更正：现在调度下令，' + fixed + '。');
+  await speak('深圳中调，李明。更正：现在调度下令，' + fixed + '。', { pose: 'explain', who: '值班调度员 李明' });
+  S.ord.cur = fixed; S.ph.log.push({ no: STEP().no, phase: STEP().phase, recv: now().slice(0, 5), unit: '深圳中调', from: '李明', order: fixed + '（更正）', issued: '', reported: '' });
+  renderPanel();
   useChar('jianhu');
+  say('j', fixed + '。');
+  await speak(fixed + '。', { pose: 'call', who: '监护人 陈志远' });
+  useChar('diaodu');
+  say('d', '复诵正确。');
+  await speak('复诵正确。', { pose: 'explain', nod: 1, who: '值班调度员 李明' });
+  S.ord.issued = now().slice(0, 5); const lg2 = S.ph.log[S.ph.log.length - 1]; if (lg2) lg2.issued = S.ord.issued;
+  S.ph.conn = false; renderPanel();
+  useChar('jianhu');
+  say('j', '任玲玲，现在调度下令：' + fixed + '。');
+  await speak('任玲玲，现在调度下令：' + fixed + '。', { pose: 'call', who: '监护人 陈志远' });
   setBeat(1);
-  say('s', '请重新复诵调度下令内容。');
+  say('s', '记录簿改成更正后的下令，然后重新复诵。');
 }
 
 /* ---------------- 红线：带电合地刀 ---------------- */

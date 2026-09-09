@@ -14,14 +14,14 @@ function guideSteps() {
   const g = [];
   if (st.act === 'recv') {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
-    g.push({ t: '接听调度电话，报单位与姓名', ok: !S.ph.ring && S.beat >= 1 });
+    g.push({ t: '监护人接令并与中调互报单位姓名', ok: !S.ph.ring && S.beat >= 1 });
     g.push({ t: '记录发令单位与发令人', ok: !!(S.ord.unit && S.ord.from) && S.beat >= 1 });
     g.push({ t: '复诵调度下令', ok: S.beat > 1 });
     g.push({ t: '核对票令一致', ok: S.beat > 2 });
   } else if (st.act === 'report') {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
-    g.push({ t: '拨通调度电话', ok: S.ph.conn || S.beat > 1 });
-    g.push({ t: '按票面向调度汇报', ok: S.beat > 1 });
+    g.push({ t: '复诵向调度汇报的内容', ok: S.beat > 1 });
+    g.push({ t: '监护人拨通中调汇报', ok: S.beat > 3 });
   } else {
     g.push({ t: `前往 ${LOC[st.loc].name}`, ok: atLoc });
     g.push({ t: `手指「${devName(st.target)}」`, ok: !!S.sel });
@@ -124,22 +124,24 @@ function instrNow() {
   const teach = S.mode === 'teach';
   const away = st.loc !== S.loc;
   if (S.beat === 0) {
-    if (st.act === 'recv' && S.ph.ring) return away ? { i: 'walk', pic: 'walk', t: `调度来电：前往${LOC[st.loc].name}接听`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `调度电话响了，先到${LOC[st.loc].name}` } : { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="answer"]', t: '调度来电：拿起听筒接听，报出单位与姓名', h: '点受令席上的「接听」', n: '调度电话响了，接听' };
+    if (st.act === 'recv' && S.ph.ring) return away ? { i: 'walk', pic: 'walk', t: `调度来电：前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `中调来电，先到${LOC[st.loc].name}` } : { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="answer"]', t: '深圳中调来电：由监护人接令', h: '点「监护人接听」，接令与复诵由监护人完成', n: '中调来电，我来接令，你记录并复诵' };
     return { i: 'listen', pic: 'listen', t: '听监护人唱票', h: '唱票完成后进入手指口述', n: '注意听我唱票，准备手指口述' };
   }
   if (S.beat === 1) {
-    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '来电是深圳地调值班调度员李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '复诵后点「复诵」或回车', n: '复诵调度下令' }; }
-    if (st.act === 'report') { if (!S.ph.conn) return { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="dial"]', t: '拨打调度电话', h: '点受令席上的「拨打调度电话」', n: '先拨通调度电话' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '按票面内容向调度汇报', h: '汇报后点「回报」', n: '向调度汇报本段完成情况' }; }
+    if (st.act === 'recv') { if (!(S.ord.unit && S.ord.from)) return { i: 'act', pic: 'tick', sel: '#o_unit', t: '在记录簿填写发令单位与发令人', h: '这次下令的是深圳中调 李明', n: '把发令单位、发令人记进记录簿' }; return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵调度下令', h: '复诵后点「复诵」或回车', n: '复诵调度下令' }; }
+    if (st.act === 'report') return { i: 'speak', pic: 'speak', sel: '#rin', t: '复诵本段向调度汇报的内容', h: '复诵后点「复诵」，再由监护人拨号', n: '先复诵汇报内容，我来跟中调联系' };
     if (away) return { i: 'walk', pic: 'walk', t: `前往${LOC[st.loc].name}`, h: '点「前往」或位置栏闪烁按钮', go: st.loc, n: `先到${LOC[st.loc].name}去` };
     if (!S.sel) return { i: 'point', pic: teach ? 'point' : 'press', sel: `#panelwrap [data-dev="${st.target}"]`, t: `手指「${devName(st.target)}」并口述`, h: teach ? '点击设备完成手指口述' : '长按设备完成手指口述', n: `手指${devName(st.target)}，核对设备双重名称` };
     return { i: 'speak', pic: 'speak', sel: '#rin', t: '完整复诵票面内容', h: '复诵后点「复诵」或回车', n: '完整复诵票面内容' };
   }
+  if (S.beat === 3 && st.act === 'report') return { i: 'act', pic: 'press', sel: '#panelwrap [data-ph="dial"]', t: '请监护人拨通深圳中调汇报', h: '点受令席上的「请监护人向调度汇报」', n: '点一下，我来向中调汇报' };
   if (S.beat === 2) {
     if (st.act === 'recv' && S.ph.cmp === 'wait') return { i: 'check', pic: 'tick', sel: '#panelwrap [data-ph="cmp"]', t: '核对操作票任务与调度下令是否一致', h: '一致点「票令一致，接令」；不一致点「中止汇报」', n: '核对票令是不是一致' };
     return { i: 'listen', pic: 'listen', t: '等待监护人核对发令', h: '听到「对，执行」后再操作', n: '等我核对发令后再操作' };
   }
   if (S.beat === 3) {
     const sel = st.target ? `#panelwrap [data-dev="${st.target}"]` : null;
+    if (st.act === 'key') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: '把模拟通过的操作票下传到电脑钥匙', h: '点五防主机右边的电脑钥匙', n: '下传五防钥匙，汇控柜的锁才开得了' };
     if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上点击「${devName(st.target)}」，遥控预置、返校后执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) };
     if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `点击「${devName(st.target)}」查看后台位置，再到现场核对四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，再去现场核对四项指示' };
     if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `点击「${devName(st.target)}」，逐项核对后确认`, h: teach ? '点击弹出核对内容' : '长按弹出核对内容', n: '点开' + devName(st.target) + '逐项核对' };

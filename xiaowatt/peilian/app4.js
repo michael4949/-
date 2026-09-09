@@ -41,18 +41,30 @@ function renderPrep() {
   $$('.chk[data-p]').forEach(n => n.onclick = () => {
     const p = n.dataset.p, i = +n.dataset.i;
     if (p === 'mind') S.prep.mind = !S.prep.mind; else S.prep[p][i] = !S.prep[p][i];
-    renderPrep();
+    n.classList.toggle('on', p === 'mind' ? S.prep.mind : S.prep[p][i]);
+    const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
+    const go = $('#p_go'); if (go) go.disabled = !ok;
+    renderTaskbar();
   });
   $$('.rk').forEach(n => {
     const i = +n.dataset.r;
     n.querySelector('.rh').onclick = () => {
-      if (!S.prep.risks[i]) { S.prep.risks[i] = true; n.classList.add('open'); renderPrep(); setTimeout(() => { const x = $(`.rk[data-r="${i}"]`); if (x) x.classList.add('open'); }, 0); }
-      else n.classList.toggle('open');
+      if (!S.prep.risks[i]) {
+        /* 确认后就地更新这一条，不整页重绘，页面不跳位 */
+        S.prep.risks[i] = true; n.classList.add('on', 'open');
+        const s = n.querySelector('.rh .s'); if (s) s.textContent = '已确认 ✓';
+        const cnt = $('#rkn'); if (cnt) cnt.textContent = S.prep.risks.filter(Boolean).length;
+        const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
+        const go = $('#p_go'); if (go) go.disabled = !ok;
+        renderTaskbar();
+      } else n.classList.toggle('open');
     };
   });
   $('#p_all').onclick = () => {
+    const sc = $('#panelwrap').scrollTop;
     S.prep.audit = [true, true, true]; S.prep.dress = [true, true, true]; S.prep.mind = true;
     S.prep.risks = S.prep.risks.map(() => true); renderPrep();
+    const w = $('#panelwrap'); if (w) w.scrollTop = sc;
   };
   $('#p_go').onclick = () => enterWufang();
   renderTaskbar();
@@ -235,16 +247,17 @@ async function autoStep() {
   }
   if (S.beat === 1) {
     if (st.loc !== S.loc) goLoc(st.loc);
-    if (st.act === 'report' && !S.ph.conn) { await dialPhone(); }
+    if (st.loc === 'bay' && S.bay !== '1163') { const b = $('#panelwrap [data-bay="1163"]'); if (b) b.onclick(); await zz(200); }
     if (st.act !== 'recv' && st.act !== 'report' && st.target) {
       await zz(250);
       devClick(st.target);
     }
-    if (st.act === 'recv' && !S.ord.unit) { S.ord.unit = '深圳地调'; S.ord.from = '李明'; renderPanel(); }
+    if (st.act === 'recv' && !S.ord.unit) { S.ord.unit = '深圳中调'; S.ord.from = '李明'; renderPanel(); }
     $('#rin').value = st.recite; await zz(150); submitInput();
   } else if (S.beat === 2) {
     if (st.act === 'recv' && S.ph.cmp === 'wait') cmpResult(true);
   } else if (S.beat === 3) {
+    if (st.act === 'report') { await dialPhone(); return; }
     if (st.target) { devClick(st.target); await autoDialog(st); }
   } else if (S.beat === 4) {
     if (st.act === 'gis') { ['hui', 'mech', 'arm', 'line'].forEach(k => S.gis[k] = true); renderPanel(); }

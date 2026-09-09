@@ -21,15 +21,20 @@ const SVX = {
   },
   knob(id, x, y, opts, val, name, desc) {
     const on = val === opts[1];
+    /* 转换把手只有两个刻字档位，当前位置由指针指出并把该档位刻字点亮，不再另写一行状态字 */
+    const mark = (i, txt) => { const act = (i === 1) === on; const dx = i ? 40 : -40;
+      return `<text x="${dx}" y="-30" text-anchor="${i ? 'start' : 'end'}" style="font-size:${act ? 11.5 : 10}px;font-weight:${act ? 700 : 400};fill:${act ? '#a8821b' : '#98a69c'}">${txt}</text>` +
+        (act ? `<rect x="${i ? 36 : -40 - txt.length * 12}" y="-42" width="${txt.length * 12 + 8}" height="16" rx="4" fill="none" stroke="#c9a227" stroke-width="1.4"/>` : '');
+    };
     return `<g class="dev ${this.T(id)}" data-dev="${id}" transform="translate(${x},${y})">
-      ${this.hit(-58, -54, 116, 118)}
+      ${this.hit(-58, -50, 116, 114)}
       <rect x="-38" y="-38" width="76" height="76" rx="8" fill="#eceee3" stroke="#c8cfb9"/>
       <circle r="24" fill="#f7f8f1" stroke="#b9c3b2" stroke-width="2"/>
+      <path d="M -17 -17 A 24 24 0 0 1 17 -17" fill="none" stroke="#c8cfb9" stroke-width="1.2" stroke-dasharray="2 3"/>
       <g class="ptr" transform="rotate(${on ? 40 : -40})"><rect x="-4" y="-25" width="8" height="26" rx="3" fill="${on ? '#e8b22a' : '#1fa06b'}"/><circle r="6" fill="#dcd9c8"/></g>
-      <text x="-40" y="-30" class="svl" text-anchor="end">${opts[0]}</text><text x="40" y="-30" class="svl">${opts[1]}</text>
+      ${mark(0, opts[0])}${mark(1, opts[1])}
       <text y="52" text-anchor="middle" class="svn">${name}</text>
-      ${desc ? `<text y="64" text-anchor="middle" class="svd">${desc}</text>` : ''}
-      <text y="-46" text-anchor="middle" class="svs ${on ? 'a' : 'b'}">${val}</text></g>`;
+      ${desc ? `<text y="64" text-anchor="middle" class="svd">${desc}</text>` : ''}</g>`;
   },
   mcb(id, x, y, name, desc, off) {
     return `<g class="dev ${this.T(id)}" data-dev="${id}" transform="translate(${x},${y})">
@@ -77,23 +82,39 @@ const SVX = {
       ${S.gis[id.replace('gis_', '')] ? `<circle cx="28" cy="-22" r="7" fill="#0e8f5a"/><path d="M 24.5 -22 l 2.4 2.6 4 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>` : ''}</g>`;
   },
   arm(id, x, y, open, lbl) {
+    /* 实物：机构箱输出轴上装一根扁平拐臂，末端带连杆销；拐臂转到"分"或"合"限位块处停住 */
+    const a = open ? -52 : 14;
     return `<g class="dev ${this.T(id)}" data-dev="${id}" transform="translate(${x},${y})">
-      ${this.hit(-40, -34, 80, 80)}
-      <circle r="10" fill="#c8cfb9" stroke="#8b988c" stroke-width="2"/>
-      <g transform="rotate(${open ? -55 : 10})"><rect x="-4" y="-34" width="8" height="34" rx="3" fill="#5c6b5f"/><circle cy="-34" r="4" fill="#e8b22a"/></g>
-      <text x="-30" y="-22" class="svl">分</text><text x="18" y="8" class="svl">合</text>
-      <text y="40" text-anchor="middle" class="svd">${lbl}</text>
-      ${S.gis[id.replace('gis_', '')] ? `<circle cx="28" cy="-26" r="7" fill="#0e8f5a"/><path d="M 24.5 -26 l 2.4 2.6 4 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>` : ''}</g>`;
+      ${this.hit(-44, -40, 88, 84)}
+      <rect x="-30" y="-30" width="60" height="60" rx="5" fill="#e4e6d8" stroke="#b9c3b2"/>
+      <path d="M -20 -20 A 28 28 0 0 1 20 -8" fill="none" stroke="#c8cfb9" stroke-width="7" stroke-linecap="round"/>
+      <rect x="-24" y="-25" width="7" height="7" rx="1.5" fill="#8b988c"/><text x="-27" y="-27" text-anchor="end" class="svl">分</text>
+      <rect x="17" y="-12" width="7" height="7" rx="1.5" fill="#8b988c"/><text x="27" y="-6" class="svl">合</text>
+      <g transform="rotate(${a})">
+        <rect x="-5.5" y="-25" width="11" height="27" rx="3" fill="#7f8a80" stroke="#5c6b5f" stroke-width="1.2"/>
+        <circle cy="-25" r="4.6" fill="#c9a227" stroke="#8a6f18" stroke-width="1.2"/>
+        <circle cy="-25" r="1.6" fill="#5c4a10"/>
+      </g>
+      <circle r="8.5" fill="#b9c3b2" stroke="#7a8478" stroke-width="1.6"/><circle r="3" fill="#8b988c"/>
+      <text y="42" text-anchor="middle" class="svd">${lbl}</text>
+      ${S.gis[id.replace('gis_', '')] ? `<circle cx="30" cy="-28" r="7" fill="#0e8f5a"/><path d="M 26.5 -28 l 2.4 2.6 4 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>` : ''}</g>`;
   },
   shaft(id, x, y, open, lbl) {
+    /* 实物：转轴外露段上刷一道白漆线，壳体上刻"分""合"两个基准线；漆线与哪个基准线对齐即为该位置 */
+    const a = open ? -34 : 34;
     return `<g class="dev ${this.T(id)}" data-dev="${id}" transform="translate(${x},${y})">
-      ${this.hit(-40, -30, 80, 76)}
-      <rect x="-30" y="-8" width="60" height="16" rx="8" fill="#b9c3b2" stroke="#7a8478"/>
-      <g transform="rotate(${open ? 0 : 60})"><line x1="0" y1="-14" x2="0" y2="14" stroke="#e23b2e" stroke-width="3"/></g>
-      <line x1="0" y1="-16" x2="0" y2="-11" stroke="#1f2d24" stroke-width="2"/><line x1="0" y1="11" x2="0" y2="16" stroke="#1f2d24" stroke-width="2"/>
-      <text x="0" y="-20" text-anchor="middle" class="svl">分位划线</text>
-      <text y="38" text-anchor="middle" class="svd">${lbl}</text>
-      ${S.gis[id.replace('gis_', '')] ? `<circle cx="28" cy="-22" r="7" fill="#0e8f5a"/><path d="M 24.5 -22 l 2.4 2.6 4 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>` : ''}</g>`;
+      ${this.hit(-46, -34, 92, 80)}
+      <rect x="-34" y="-7" width="20" height="14" rx="2" fill="#b9c3b2" stroke="#7a8478"/>
+      <rect x="14" y="-7" width="20" height="14" rx="2" fill="#b9c3b2" stroke="#7a8478"/>
+      <circle r="17" fill="#cfd6c8" stroke="#7a8478" stroke-width="1.6"/>
+      <circle r="12" fill="#dfe2d2"/>
+      <line x1="-13" y1="-13" x2="-8" y2="-8" stroke="#5c6b5f" stroke-width="2"/><text x="-17" y="-16" text-anchor="end" class="svl">分</text>
+      <line x1="13" y1="-13" x2="8" y2="-8" stroke="#5c6b5f" stroke-width="2"/><text x="17" y="-16" class="svl">合</text>
+      <g transform="rotate(${a})"><rect x="-2" y="-17" width="4" height="17" rx="1" fill="#f4f6ef" stroke="#8b988c" stroke-width=".8"/></g>
+      <circle r="3.4" fill="#8b988c"/>
+      <text y="40" text-anchor="middle" class="svd">${lbl}</text>
+      <text y="30" text-anchor="middle" class="svl">漆线对准「${open ? '分' : '合'}」</text>
+      ${S.gis[id.replace('gis_', '')] ? `<circle cx="32" cy="-24" r="7" fill="#0e8f5a"/><path d="M 28.5 -24 l 2.4 2.6 4 -5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>` : ''}</g>`;
   },
   face(w, h, title, sub) {
     return `<rect x="8" y="8" width="${w - 16}" height="${h - 16}" rx="6" fill="#e9ebdf" stroke="#c8cfb9" stroke-width="2"/>
@@ -103,81 +124,103 @@ const SVX = {
   }
 };
 
-/* ---------- 调度电话 · 受令席 ---------- */
+/* ---------- 调度电话 · 受令席 ----------
+   与深圳中调的通话由监护人负责：监护人接令、复诵、记录；操作人在记录簿上记录并复诵监护人转述的下令，再核对票令一致。 */
 function panelPhone(w) {
   const st = STEP(); const run = S.stage === 'run' && st && !S.ended;
-  const isRecv = run && st.act === 'recv', isRep = run && st.act === 'report';
+  const isRep = run && st.act === 'report';
   const ring = !!S.ph.ring, conn = !!S.ph.conn;
-  const stateTxt = ring ? '来电 · 深圳地调值班调度员' : conn ? '通话中 · 深圳地调 李明' : '通话空闲';
-  const btn = ring ? `<button class="btn pri phbtn" data-ph="answer">接听</button>`
-    : (isRep && !conn && S.beat === 1) ? `<button class="btn pri phbtn" data-ph="dial">拨打调度电话</button>`
+  const stateTxt = ring ? '来电 · 深圳中调' : conn ? '通话中 · 深圳中调 李明' : '通话空闲';
+  const btn = ring ? `<button class="btn pri phbtn" data-ph="answer">监护人接听</button>`
+    : (isRep && !conn && S.beat >= 3) ? `<button class="btn pri phbtn" data-ph="dial">请监护人向调度汇报</button>`
       : conn ? `<button class="btn phbtn" disabled>通话中</button>` : `<button class="btn phbtn" disabled>听筒空闲</button>`;
-  const taskTxt = st && isRecv ? st.recite : '将110kV培训三线1163线路由运行转检修';
+  const taskTxt = '将110kV培训三线1163线路由运行转检修';
   const cmp = S.ph.cmp === 'wait' ? `<div class="cmpcard" data-ph="cmp"><div class="cmph">票令核对 · 第 ${st.no} 项</div>
-      <div class="cmprow"><span>操作票任务</span><b>${taskTxt}</b></div>
-      <div class="cmprow"><span>调度下令</span><b style="color:#a8821b">${S.ord.cur || '—'}</b></div>
+      <div class="cmprow"><span>操作票任务</span><b>${h(st.recite || taskTxt)}</b></div>
+      <div class="cmprow"><span>调度下令</span><b style="color:#a8821b">${h(S.ord.cur || '—')}</b></div>
       <div class="cmpbt"><button class="btn pri" data-ph="cmpok">票令一致，接令</button><button class="btn dan" data-ph="cmpno">不一致，中止汇报</button></div></div>` : '';
   const talk = (S.chat || []).filter(c => c.who === 'd' || (c.who === 'o' && /仿真站|复诵|汇报|已由|已断开|已转/.test(c.text))).slice(-4);
-  const talkHTML = `<div class="phtalk"><div class="pht">通话记录</div>${talk.length ? talk.map(c => `<div class="ptl ${c.who}"><i>${c.who === 'd' ? '调' : '我'}</i><span>${c.text}</span></div>`).join('') : '<div class="ptl"><span style="color:#98a69c">—</span></div>'}</div>`;
+  const talkHTML = `<div class="phtalk"><div class="pht">通话记录 · 与深圳中调</div>${talk.length ? talk.map(c => `<div class="ptl ${c.who}"><i>${c.who === 'd' ? '调' : '站'}</i><span>${h(c.text)}</span></div>`).join('') : '<div class="ptl"><span style="color:#98a69c">—</span></div>'}</div>`;
   const log = S.ph.log || [];
-  w.innerHTML = pnl('调度电话 · 受令席', '110kV仿真站 · 受令人 任玲玲', `
+  w.innerHTML = pnl('调度电话 · 受令席', '110kV仿真站 · 与深圳中调的联系由监护人负责', `
     <div class="ph2">
       <div class="handset ${ring ? 'ringing' : ''} ${conn ? 'conn' : ''}">
         <div class="ring"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="${conn ? '#fff' : 'var(--acd)'}" stroke-width="1.8">
           <path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.6 3.6a1 1 0 0 1-.25 1z"/></svg></div>
-        <div class="nm">${ring ? '地调值班调度员 来电' : conn ? '深圳地调 · 李明' : '地调值班调度员'}</div>
+        <div class="nm">${ring ? '深圳中调 来电' : conn ? '深圳中调 · 李明' : '深圳中调'}</div>
         <div class="de">${stateTxt}</div>
         <div class="phact">${btn}</div>
+        <div class="phrule">接令规范：先互报单位和姓名。调度报「深圳中调 李明」，本站报「110kV仿真站 陈志远」。</div>
       </div>
       <div class="reclog">
-        <div class="row"><div class="k">发令单位</div><div class="v"><input id="o_unit" value="${S.ord.unit}" placeholder="听令时记录" list="unitlist" ${ring ? 'disabled' : ''}><datalist id="unitlist"><option value="深圳地调"><option value="深圳中调"><option value="本站值班负责人"></datalist></div></div>
-        <div class="row"><div class="k">发令人</div><div class="v"><input id="o_from" value="${S.ord.from}" placeholder="调度员姓名" ${ring ? 'disabled' : ''}></div></div>
-        <div class="row"><div class="k">受令人</div><div class="v">${S.ord.to}</div></div>
+        <div class="row"><div class="k">发令单位</div><div class="v"><select id="o_unit" ${ring ? 'disabled' : ''}><option value="">听令时记录</option>${['深圳中调', '深圳地调', '本站值班负责人'].map(x => `<option${S.ord.unit === x ? ' selected' : ''}>${x}</option>`).join('')}</select></div></div>
+        <div class="row"><div class="k">发令人</div><div class="v"><input id="o_from" value="${h(S.ord.from)}" placeholder="调度员姓名" ${ring ? 'disabled' : ''}></div></div>
+        <div class="row"><div class="k">受令人</div><div class="v">${h(S.ord.to)}</div></div>
         <div class="row"><div class="k">受令时间</div><div class="v" id="o_time">${S.ord.time || '—'}</div></div>
         <div class="row"><div class="k">发令时间</div><div class="v">${S.ord.issued || '—'}</div></div>
-        <div class="row"><div class="k">操作任务</div><div class="v">将110kV培训三线1163线路由运行转检修</div></div>
-        <div class="row"><div class="k">当前下令</div><div class="v" style="color:#a8821b">${S.ord.cur || '—'}</div></div>
+        <div class="row"><div class="k">操作任务</div><div class="v">${taskTxt}</div></div>
+        <div class="row"><div class="k">当前下令</div><div class="v" style="color:#a8821b">${h(S.ord.cur || '—')}</div></div>
       </div>
       <div class="phr">${cmp || talkHTML}</div>
     </div>`) +
     pnl('调度操作指令记录簿', `${log.length} 条 · 每次接令、汇报都记在这里`, `
     <table class="logtb"><tr><th>序号</th><th>受令时间</th><th>发令单位 · 发令人</th><th>指令内容</th><th>发令时间</th><th>汇报时间</th></tr>
-    ${log.length ? log.map((r, i) => `<tr class="${i === log.length - 1 ? 'cur' : ''}"><td>${i + 1}</td><td>${r.recv || '—'}</td><td>${r.unit || '—'} · ${r.from || '—'}</td><td>${r.order}</td><td>${r.issued || '—'}</td><td>${r.reported || '—'}</td></tr>`).join('') : '<tr><td colspan="6" style="color:#98a69c;text-align:center">尚无记录 · 接到第一次调度令后自动登记</td></tr>'}
+    ${log.length ? log.map((r, i) => `<tr class="${i === log.length - 1 ? 'cur' : ''}"><td>${i + 1}</td><td>${r.recv || '—'}</td><td>${h(r.unit || '—')} · ${h(r.from || '—')}</td><td>${h(r.order)}</td><td>${r.issued || '—'}</td><td>${r.reported || '—'}</td></tr>`).join('') : '<tr><td colspan="6" style="color:#98a69c;text-align:center">尚无记录 · 接到第一次调度令后自动登记</td></tr>'}
     </table>`);
   const u = $('#o_unit'), f = $('#o_from');
-  if (u) u.oninput = e => { S.ord.unit = e.target.value; renderTaskbar(); };
+  if (u) u.onchange = e => { S.ord.unit = e.target.value; renderTaskbar(); };
   if (f) f.oninput = e => { S.ord.from = e.target.value; renderTaskbar(); };
   $$('#panelwrap [data-ph]').forEach(n => { if (n.tagName === 'BUTTON') n.onclick = e => { e.stopPropagation(); phoneAct(n.dataset.ph); }; });
 }
 function phoneAct(k) {
   if (k === 'answer') answerPhone(); else if (k === 'dial') dialPhone(); else if (k === 'cmpok') cmpResult(true); else if (k === 'cmpno') cmpResult(false);
 }
+/* 监护人接令：互报单位姓名 → 调度下令 → 监护人向调度复诵 → 调度确认 → 监护人转述给操作人 */
 async function answerPhone() {
-  if (!S.ph.ring) return;
+  if (S.ph.ring) return _answerPhone();
+}
+async function _answerPhone() {
   const st = STEP(); const call = S.ph.pending;
   S.ph.ring = false; S.ph.conn = true; S.ord.time = stamp(); S.ord.issued = '';
   const order = call.replace(/^现在调度下令：/, '').replace(/。$/, '');
   S.ph.log.push({ no: st.no, phase: st.phase, recv: S.ord.time.slice(11), unit: '', from: '', order, issued: '', reported: '' });
-  say('o', '110kV仿真站，值班员任玲玲。');
   renderPanel();
+  useChar('jianhu');
+  say('j', '110kV仿真站，陈志远。');
+  await speak('110kV仿真站，陈志远。', { pose: 'explain', who: '监护人 陈志远' });
   useChar('diaodu');
-  await speak('110kV仿真站，我是深圳地调值班调度员李明。', { pose: 'explain', who: '值班调度员 李明' });
+  say('d', '深圳中调，李明。' + call);
+  await speak('深圳中调，李明。' + call, { pose: 'explain', who: '值班调度员 李明' });
   S.ord.cur = order; renderPanel();
-  say('d', call);
-  await speak(call, { pose: 'explain', who: '值班调度员 李明' });
+  useChar('jianhu');
+  say('j', order + '。');
+  await speak(order + '。', { pose: 'call', who: '监护人 陈志远' });
+  useChar('diaodu');
+  say('d', '复诵正确。');
+  await speak('复诵正确。', { pose: 'explain', nod: 1, who: '值班调度员 李明' });
+  S.ord.issued = now().slice(0, 5); const lg = S.ph.log[S.ph.log.length - 1]; if (lg) lg.issued = S.ord.issued;
+  S.ph.conn = false; renderPanel();
+  useChar('jianhu');
+  say('j', '任玲玲，' + call);
+  await speak('任玲玲，' + call, { pose: 'call', who: '监护人 陈志远' });
   setBeat(1);
   say('s', '把发令单位、发令人记进记录簿，然后复诵调度下令。');
 }
+/* 汇报：由监护人向调度汇报本段完成情况 */
 async function dialPhone() {
   if (S.ph.conn) return;
-  S.ph.conn = true;
-  say('o', '（拨打深圳地调调度电话）');
-  renderPanel();
+  const st = STEP();
+  S.ph.conn = true; renderPanel();
+  useChar('jianhu');
+  say('j', '深圳中调，110kV仿真站陈志远。');
+  await speak('深圳中调，110kV仿真站陈志远。', { pose: 'call', who: '监护人 陈志远' });
   useChar('diaodu');
-  await speak('深圳地调，李明。', { pose: 'explain', who: '值班调度员 李明' });
-  say('s', '已接通。按票面内容向调度汇报。');
-  const r = $('#rin'); if (r) r.focus();
-  renderTaskbar();
+  say('d', '深圳中调，李明。');
+  await speak('深圳中调，李明。', { pose: 'explain', who: '值班调度员 李明' });
+  useChar('jianhu');
+  say('j', st.recite + '。');
+  await speak(st.recite + '。', { pose: 'call', who: '监护人 陈志远' });
+  await doPhone(st);
 }
 async function cmpResult(ok) {
   if (S.ph.cmp !== 'wait' || S.lock) return;
@@ -186,7 +229,7 @@ async function cmpResult(ok) {
   if (st.trap === 'order' && S.trap.fired && S.trap.passed === null) {
     if (!ok) {
       S.trap.passed = true;
-      praise('rule', '票令不一致识别正确', '调度下令"由运行转冷备用"与操作票任务"由热备用转冷备用"不一致，接令时核出并中止汇报');
+      praise('rule', '票令不一致识别正确', '调度下令为"由运行转冷备用"，操作票任务为"由热备用转冷备用"，接令时核出并中止汇报');
       say('o', '票令不一致：调度令是"由运行转冷备用"，操作票本段是"由热备用转冷备用"。中止，汇报值班长。');
       useChar('jianhu');
       await speak('对，票令不一致，不能执行。中止并汇报值班长，请调度核实后重新下令。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
@@ -212,19 +255,21 @@ async function cmpResult(ok) {
   }
   say('o', '操作票操作任务与调度下令内容一致。');
   useChar('jianhu');
-  say('j', '对，执行。');
-  await speak('对，执行。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
+  /* 这一步只是核对票令是否一致，监护人回"收到"，不是发执行令 */
+  say('j', '收到。');
+  await speak('收到。', { pose: 'confirm', nod: 1, who: '监护人 陈志远' });
   setBeat(3);
   doPhone(st);
 }
 
 /* ---------- 五防电脑 · 模拟预演 ---------- */
 const WF_LOCK = {
-  DS11634: d => d.CB1163 !== 'open' ? ['培训三线1163开关在合闸位置，拉开11634刀闸将带负荷拉闸', '防止带负荷拉合隔离开关'] : null,
-  DS11632: d => d.CB1163 !== 'open' ? ['培训三线1163开关在合闸位置，拉开11632刀闸将带负荷拉闸', '防止带负荷拉合隔离开关'] : d.DS11634 !== 'open' ? ['线路侧11634刀闸尚未拉开，应先拉线路侧、再拉母线侧刀闸', '操作票顺序：先隔离线路侧，后隔离母线侧'] : null,
+  DS11634: d => d.CB1163 !== 'open' ? ['培训三线1163开关在合闸位置，此时拉开11634刀闸属于带负荷拉刀闸', '刀闸没有灭弧能力，必须先断开开关切断负荷电流，再拉刀闸'] : null,
+  DS11632: d => d.CB1163 !== 'open' ? ['培训三线1163开关在合闸位置，此时拉开11632刀闸属于带负荷拉刀闸', '刀闸没有灭弧能力，必须先断开开关切断负荷电流，再拉刀闸'] : d.DS11634 !== 'open' ? ['线路侧11634刀闸尚未拉开，先拉开母线侧刀闸，顺序错误', '停电应先拉开线路侧刀闸、再拉开母线侧刀闸，使检修段两侧依次形成明显断开点'] : null,
   ES116340: d => (d.DS11634 !== 'open' || d.DS11632 !== 'open' || d.CB1163 !== 'open') ? ['11634、11632刀闸未全部拉开，线路可能带电，禁止合上116340地刀', '防止带电合接地刀闸'] : null
 };
 function panelWufang(w) {
+  if (S.stage === 'run') return panelWfKey(w);
   if (!S.wfdev) S.wfdev = Object.assign({}, S.dev);
   const done = WUFANG.slice(0, S.wf).map(x => x[0]);
   const target = S.wf < 4 ? WUFANG[S.wf][0] : null;
@@ -233,6 +278,33 @@ function panelWufang(w) {
       <span class="r">${S.wf >= 4 ? '<b style="color:var(--ac)">模拟顺序正确 · 操作票已生成</b>' : `第 ${S.wf + 1} 步：在模拟接线图上点击「${devName(target)}」`}</span></div>
     <div class="sld">${sld({ dev: S.wfdev, sim: true, target, done, scada: false, chg: S.lastChg })}</div>
     ${S.wf >= 4 ? `<div class="wfok">模拟顺序正确：先断开1163开关，再依次拉开11634、11632刀闸；后合上116340地刀。前几项操作均在后台执行，暂不下传电脑钥匙。</div>` : ''}`);
+}
+/* 执行阶段的五防电脑：把已模拟通过的操作票下传到电脑钥匙，汇控柜、机构箱才解得开锁 */
+function panelWfKey(w) {
+  const st = STEP(); const tgt = st && st.act === 'key';
+  const down = S.key.down;
+  w.innerHTML = pnl('五防主机 · 电脑钥匙', down ? '已下传 · 钥匙在监护人手上' : '模拟已通过 · 未下传', `
+    <div class="scene"><svg viewBox="0 0 760 250">
+      ${SVX.face(760, 250, '五防主机 · 微机防误装置', 'PPS-2000')}
+      <g transform="translate(40,58)"><rect x="0" y="0" width="330" height="164" rx="5" fill="#2b3a31" stroke="#1f2d24"/>
+        <text x="16" y="24" style="font-size:11px;fill:#8fe0b4;font-family:monospace">模拟操作票 · 已通过</text>
+        ${(WUFANG || []).map((x, i) => `<text x="16" y="${46 + i * 22}" style="font-size:10.5px;fill:#7ecfa4;font-family:monospace">√ ${i + 1}. ${x[1]}</text>`).join('')}
+        <text x="16" y="146" style="font-size:10.5px;fill:${down ? '#8fe0b4' : '#e8b22a'};font-family:monospace">${down ? '● 已下传至电脑钥匙，钥匙按此顺序解锁' : '○ 尚未下传，汇控柜与机构箱无法解锁'}</text>
+      </g>
+      <g class="dev ${tgt ? 'tgt ' : ''}" data-dev="WFKEY" transform="translate(500,120)">
+        ${SVX.hit(-90, -66, 250, 132)}
+        <rect x="-70" y="-40" width="120" height="80" rx="6" fill="#dfe2d2" stroke="#b9c3b2" stroke-width="1.6"/>
+        <text x="-10" y="-22" text-anchor="middle" class="svn">电脑钥匙</text>
+        <rect x="-52" y="-12" width="84" height="30" rx="4" fill="${down ? '#0f1a14' : '#eceee3'}" stroke="#b9c3b2"/>
+        <text x="-10" y="8" text-anchor="middle" style="font-size:11px;font-family:monospace;fill:${down ? '#8fe0b4' : '#98a69c'}">${down ? '票已下传' : '空 票'}</text>
+        ${SVX.lamp(-10, 30, down, '#23b26a', '', 5)}
+        <path d="M 58 0 h 26" stroke="#8b988c" stroke-width="2" stroke-dasharray="${down ? '0' : '4 3'}"/>
+        <rect x="86" y="-16" width="20" height="32" rx="3" fill="#c8cfb9" stroke="#7a8478"/><rect x="100" y="-6" width="18" height="12" rx="2" fill="#c8cfb9" stroke="#7a8478"/>
+        <text x="100" y="34" text-anchor="middle" class="svd">钥匙口</text>
+        <text x="-10" y="58" text-anchor="middle" class="svs ${down ? 'b' : 'a'}">${down ? '已下传 · 监护人保管' : '待下传'}</text>
+      </g>
+    </svg></div>
+    <div class="baytip">汇控柜与机构箱的锁具由电脑钥匙解锁。钥匙里只有下传过的这份票，按模拟顺序逐把开锁，顺序不对开不了，这是防误的最后一道关口。</div>`);
 }
 function wfDev(id) {
   const idx = WUFANG.findIndex(x => x[0] === id);
@@ -277,14 +349,14 @@ function openRemoteCtl(st) {
       <div class="rcrow"><span>设备双重名称</span><b>${devName(id)}</b></div>
       <div class="rcrow"><span>当前位置</span><b class="${cur === 'close' ? 'on' : 'off'}">${cur === 'close' ? '合闸' : '分闸'}</b></div>
       <div class="rcrow"><span>操作性质</span><span class="rcops"><label><input type="radio" name="rcop" value="open"> 分闸</label><label><input type="radio" name="rcop" value="close"> 合闸</label></span></div>
-      <div class="rcst" id="rc_st">选择操作性质，先预置、返校正确后再执行</div>
+      <div class="rcst" id="rc_st">核对设备双重名称与操作性质，选定后系统自动预置</div>
     </div>
-    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn" id="rc_pre" disabled>预置</button><button class="btn pri" id="rc_exec" disabled>执行</button></div></div>`;
+    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn pri" id="rc_exec" disabled>执行</button></div></div>`;
   document.body.appendChild(m);
-  const stx = m.querySelector('#rc_st'), pre = m.querySelector('#rc_pre'), ex = m.querySelector('#rc_exec');
+  const stx = m.querySelector('#rc_st'), ex = m.querySelector('#rc_exec');
   const close = () => m.remove();
   m.querySelector('.cls').onclick = close; m.querySelector('#rc_cancel').onclick = close;
-  m.querySelectorAll('input[name=rcop]').forEach(r => r.onchange = () => {
+  m.querySelectorAll('input[name=rcop]').forEach(r => r.onchange = async () => {
     if (r.value !== want) {
       r.checked = false;
       violation('major', 'order', '遥控操作性质错误', `本项应${want === 'open' ? '分闸' : '合闸'}${devName(id)}，选择了${r.value === 'open' ? '分闸' : '合闸'}`, '附录F 2.11.3：按操作票项目的操作性质执行，遥控操作前核对设备双重名称与操作性质。');
@@ -292,18 +364,14 @@ function openRemoteCtl(st) {
       speak('操作性质选错了。再核对一遍票面。', { pose: 'correct', shake: true });
       return;
     }
-    stx.textContent = '操作性质已选：' + (want === 'open' ? '分闸' : '合闸') + '，可以预置';
-    pre.disabled = false;
-  });
-  pre.onclick = async () => {
-    pre.disabled = true; stx.textContent = '预置中…';
+    /* 预置由系统自动完成，不需要人再点一次 */
+    m.querySelectorAll('input[name=rcop]').forEach(x => x.disabled = true);
+    stx.textContent = '已选择' + (want === 'open' ? '分闸' : '合闸') + '，正在预置…';
     await sleepMs(700);
     if (!document.body.contains(m)) return;
-    stx.innerHTML = '<span style="color:var(--ac)">预置成功，返校正确</span>';
+    stx.innerHTML = '<span style="color:var(--ac)">预置完成，可以执行</span>';
     ex.disabled = false;
-    say('j', '返校正确，执行。');
-    speak('返校正确，执行。', { pose: 'confirm', nod: 1 });
-  };
+  });
   ex.onclick = async () => {
     ex.disabled = true; stx.textContent = '执行中…';
     await sleepMs(500);
@@ -362,6 +430,7 @@ function panelBay(w) {
   const open = gisId === 'ES116340' ? d.ES116340 === 'close' : d[gisId] === 'open';
   const anomaly = (S.abn.fired && !S.abn.handled && gisId === 'DS11634');
   const es = gisId === 'ES116340';
+  const picked = !!S.bay, right = S.bay === '1163';
   const bays = ['1161', '1162', '1163'].map((n, i) => {
     const x = 28 + i * 246, cur = S.bay === n, live = n !== '1163' || d.CB1163 !== 'open';
     return `<g data-bay="${n}" class="bayg ${cur ? 'cur' : ''}" style="cursor:pointer" transform="translate(${x},4)">
@@ -374,12 +443,18 @@ function panelBay(w) {
       <rect x="150" y="60" width="46" height="54" rx="4" fill="#e4e6d8" stroke="#c3c9b6"/>
       <text x="173" y="76" text-anchor="middle" style="font-size:8.5px;fill:#5c6b5f;font-family:monospace">汇控柜</text>
       ${SVX.lamp(163, 94, live, live ? '#e23b2e' : '#23b26a', '', 4)}${SVX.lamp(183, 94, !live, '#23b26a', '', 4)}
-      <text x="109" y="12" text-anchor="middle" style="font-size:9.5px;fill:${cur ? '#0a6b44' : '#98a69c'}">${cur ? '当前站位' : '点此走到该间隔'}</text>
+      <text x="109" y="12" text-anchor="middle" style="font-size:9.5px;fill:${cur ? (n === '1163' ? '#0a6b44' : '#b3372c') : '#98a69c'}">${cur ? (n === '1163' ? '当前站位' : '当前站位 · 走错间隔') : '点此走到该间隔'}</text>
       ${SVX.plate(31, 116, 160, `110kV培训${n === '1161' ? '一' : n === '1162' ? '二' : '三'}线 ${n}`, `110kV ${n === '1161' ? '1M' : '2M'} 侧 · ${live ? '运行中' : '停电'}`)}
     </g>`;
   }).join('');
   const Y = 172;
-  w.innerHTML = pnl('110kV GIS 间隔现场 · 培训三线1163间隔', S.bay === '1163' ? '当前站位正确 · 先核对间隔名称与设备双重名称，再找操作对象' : `当前站位：培训${S.bay === '1161' ? '一' : '二'}线间隔 · 走错间隔`, `
+  if (!right) {
+    w.innerHTML = pnl('110kV GIS 间隔现场', picked ? `当前站位：培训${S.bay === '1161' ? '一' : '二'}线${S.bay}间隔 · 走错间隔` : '三个间隔外观一样 · 先看间隔名称牌，自己选要进的间隔', `
+      <div class="scene"><svg viewBox="0 0 760 172">${bays}</svg></div>
+      <div class="baytip ${picked ? 'bad' : ''}">${picked ? '这里是培训' + (S.bay === '1161' ? '一' : '二') + '线' + S.bay + '间隔，仍在运行中。本项的操作对象在培训三线1163间隔，请重新核对间隔名称牌。' : '到达每一个操作地点，先核对间隔名称，再核对设备双重名称。选错间隔会被记为走错间隔。'}</div>`);
+    return;
+  }
+  w.innerHTML = pnl('110kV GIS 间隔现场 · 培训三线1163间隔', '当前站位正确 · 先核对间隔名称与设备双重名称，再找操作对象', `
     <div class="scene"><svg viewBox="0 0 760 412">${bays}
       <line x1="20" y1="${Y - 6}" x2="740" y2="${Y - 6}" stroke="#d7dccb" stroke-dasharray="4 4"/>
       <text x="20" y="${Y + 10}" style="font-size:10px;fill:#5c6b5f;letter-spacing:1px">1163 间隔 · 现场核对</text>
@@ -475,12 +550,20 @@ function panelCab(w) {
         ${['A', 'B', 'C'].map((p, i) => `<g class="dev ${SVX.T('cab_hvdisp_' + p)}" data-dev="cab_hvdisp_${p}" transform="translate(${34 + i * 48},44)">${SVX.hit(-18, -14, 36, 40)}${SVX.lamp(0, 0, d.DS11634 !== 'open', '#e23b2e', p + ' 相', 9)}${S.gis['hv' + p] ? `<circle cx="14" cy="-12" r="6" fill="#0e8f5a"/><path d="M 11 -12 l 2 2.2 3.5 -4.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>` : ''}</g>`).join('')}
         <text x="82" y="78" text-anchor="middle" class="svs ${d.DS11634 !== 'open' ? 'a' : 'b'}">${d.DS11634 !== 'open' ? '确有电压' : '确无电压'}</text></g>
       ${SVX.knob('KZK', 90, 226, ['远控', '就地'], d.KZK, 'ZK', '远控／就地切换把手')}
-      <g transform="translate(180,160)"><rect x="0" y="0" width="230" height="124" rx="5" fill="#eceee3" stroke="#b9c3b2"/>
+      <g transform="translate(180,152)"><rect x="0" y="0" width="230" height="150" rx="5" fill="#eceee3" stroke="#b9c3b2"/>
         <text x="115" y="16" text-anchor="middle" style="font-size:9.5px;fill:#243329">116340 培训三线线路侧接地刀闸 · 就地电动操作</text>
-        ${SVX.pushbtn('ES116340', 60, 66, '#e8b22a', '合闸', esC)}
-        ${SVX.pushbtn('ES116340_open', 150, 66, '#23b26a', '分闸', !esC)}
-        ${SVX.lamp(210, 40, loc, '#e8b22a', '就地允许', 5)}
-        <text x="115" y="118" text-anchor="middle" class="svs ${esC ? 'g' : 'b'}">${esC ? '合上位置' : '拉开位置'}</text></g>
+        <text x="115" y="30" text-anchor="middle" class="svs ${esC ? 'g' : 'b'}">${esC ? '合上位置' : '拉开位置'}</text>
+        ${SVX.pushbtn('ES116340', 60, 76, '#e8b22a', '合闸', esC)}
+        ${SVX.pushbtn('ES116340_open', 150, 76, '#23b26a', '分闸', !esC)}
+        ${SVX.lamp(210, 52, loc, '#e8b22a', '就地允许', 5)}
+        <g transform="translate(115,124)">
+          <text y="-4" text-anchor="middle" class="svl">地刀运动方向</text>
+          <line x1="-46" y1="6" x2="38" y2="6" stroke="#c8cfb9" stroke-width="6" stroke-linecap="round"/>
+          <path d="M -46 6 h 84" stroke="${esC ? '#e8b22a' : '#dfe2d2'}" stroke-width="6" stroke-linecap="round"/>
+          <polygon points="38,0 48,6 38,12" fill="${esC ? '#e8b22a' : '#c8cfb9'}"/>
+          <text x="-52" y="10" text-anchor="end" class="svl">分</text><text x="52" y="10" class="svl">合</text>
+          ${S.moving === 'ES116340' ? '<circle cx="-46" cy="6" r="4.5" fill="#e8b22a"><animate attributeName="cx" values="-46;38" dur="1.4s" repeatCount="indefinite"/></circle>' : ''}
+        </g></g>
       ${SVX.hook('T11634', 520, 168, !!S.tags.T11634, '操作把手挂牌位')}
       <g class="dev ${SVX.T('cab_handle')}" data-dev="cab_handle" transform="translate(520,250)">${SVX.hit(-60, -30, 120, 70)}
         <rect x="-50" y="-14" width="100" height="28" rx="4" fill="#dfe2d2" stroke="#b9c3b2"/>
@@ -492,6 +575,7 @@ function panelCab(w) {
       ${SVX.mcb('M1DK', 300, 364, '1DK', '刀闸／地刀控制电源', d.M1DK === 'off')}
       ${SVX.mcb('M2DK', 400, 364, '2DK', '刀闸／地刀电机电源', d.M2DK === 'off')}
       <text x="470" y="318" style="font-size:10.5px;fill:#243329;font-weight:700">116340 地刀机构 · 位置指示</text>
+      <text x="470" y="332" style="font-size:9.5px;fill:#98a69c">合闸方向：拐臂由「分」向「合」转到限位块，转轴漆线随之对准「合」</text>
       ${SVX.win('gis_mech', 520, 374, esC ? '合' : '分', esC ? '#e8b22a' : '#23b26a', '机构箱机械指示')}
       ${SVX.arm('gis_arm', 616, 374, !esC, '拐臂指示')}
       ${SVX.shaft('gis_line', 704, 374, !esC, '转轴划线')}
