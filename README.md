@@ -77,4 +77,7 @@ npm run dev        # 打开 http://localhost:3000
 
 ---
 
-> 仓库里的 `scout/`（GitHub AI 雷达）是独立子系统，与本应用互不影响。
+> 仓库里另有两个**独立子系统**，与本应用互不影响：
+>
+> - `scout/` —— **GitHub AI 雷达**：每日爬取 GitHub 上最新 + 高 star 的 AI 项目，生成自包含 HTML 报告。
+> - `aiconf/` —— **AI 会期雷达**：全国 AI 会议 / 展会 / 峰会的档期总览，单文件 HTML + 每 6 小时自动刷新。
