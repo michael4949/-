@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # 浅克隆无法向另一分支推送
 
       - uses: actions/setup-python@v5
         with:
@@ -62,3 +64,44 @@ jobs:
             echo "推送失败，${i} 次重试…"
             git pull --rebase && sleep $((2 ** i))
           done
+
+      # 网站发布在另一个分支的 docs/ 目录下（GitHub Pages 经典模式），
+      # 所以刷新完数据还要同步过去，页面上才看得到新档期。
+      - name: 同步到 GitHub Pages 分支
+        env:
+          PAGES_BRANCH: claude/jolly-volta-Qzl1D
+        run: |
+          set -e
+          sync_once() {
+            rm -rf /tmp/pages
+            git fetch origin "$PAGES_BRANCH"
+            git worktree prune
+            git worktree add --detach /tmp/pages "origin/$PAGES_BRANCH"
+            mkdir -p /tmp/pages/docs/aiconf/data
+            cp "$GITHUB_WORKSPACE/aiconf/index.html"       /tmp/pages/docs/aiconf/index.html
+            cp "$GITHUB_WORKSPACE/aiconf/data/events.json" /tmp/pages/docs/aiconf/data/events.json
+          }
+
+          sync_once
+          cd /tmp/pages
+          if git diff --quiet -- docs/aiconf; then
+            echo "网站内容无变化，跳过"
+            exit 0
+          fi
+
+          COUNT=$(python3 -c "import json;print(json.load(open('docs/aiconf/data/events.json'))['totalEvents'])")
+          for i in 1 2 3 4; do
+            cd /tmp/pages
+            git add docs/aiconf
+            git commit -q -m "deploy(aiconf): 刷新会议数据（共 ${COUNT} 场）" || true
+            if git push origin "HEAD:$PAGES_BRANCH"; then
+              echo "已同步到 $PAGES_BRANCH，Pages 会自动重新发布"
+              exit 0
+            fi
+            echo "推送失败（可能有并发提交），第 ${i} 次重试…"
+            sleep $((2 ** i))
+            cd "$GITHUB_WORKSPACE"
+            sync_once     # 基于最新的远端状态重做一遍，而不是硬塞
+          done
+          echo "同步失败：已重试 4 次" >&2
+          exit 1
