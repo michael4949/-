@@ -1,0 +1,64 @@
+name: 刷新 AI 会议数据
+
+# 浏览器有 CORS，抓取只能在服务端做 —— 由 Actions runner 定时跑爬虫，
+# 把结果写回 aiconf/data/events.json 并内联进 index.html。
+on:
+  schedule:
+    - cron: "17 */6 * * *"      # 每 6 小时一次（UTC）；错开整点避开高峰
+  workflow_dispatch:            # 也可在 Actions 页面手动触发
+    inputs:
+      skip_gemini:
+        description: "跳过 Gemini 联网检索（只跑站点适配器）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-events-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 爬虫只用标准库，无需 pip install
+
+      - name: 抓取并归一化
+        env:
+          # 可选：在仓库 Settings → Secrets 里加 GEMINI_API_KEY 即可启用联网检索。
+          # 未配置时该源自动跳过，其余站点适配器照常工作。
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ "${{ inputs.skip_gemini }}" = "true" ]; then
+            python3 aiconf/crawl.py --skip gemini
+          else
+            python3 aiconf/crawl.py
+          fi
+
+      - name: 把数据内联进 index.html
+        run: python3 aiconf/build.py
+
+      - name: 有变化才提交
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- aiconf/data/events.json aiconf/index.html; then
+            echo "数据无变化，跳过提交"
+            exit 0
+          fi
+          COUNT=$(python3 -c "import json;print(json.load(open('aiconf/data/events.json'))['totalEvents'])")
+          git add aiconf/data/events.json aiconf/index.html
+          git commit -m "chore(aiconf): 自动刷新会议数据（共 ${COUNT} 场）"
+          for i in 1 2 3 4; do
+            git push && break
+            echo "推送失败，${i} 次重试…"
+            git pull --rebase && sleep $((2 ** i))
+          done
