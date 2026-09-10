@@ -1028,18 +1028,53 @@ function buildCSV(events) {
   return "\ufeff" + [cols.map(q).join(","), ...rows].join("\r\n");   // BOM 让 Excel 正确识别 UTF-8
 }
 
-function offerFile(filename, text, mime, title, sub) {
-  if (SANDBOXED) { showText(title, sub + "（当前预览环境禁止直接下载，请复制后自行保存）", text, filename, mime); return; }
-  try {
-    const url = URL.createObjectURL(new Blob([text], { type: mime }));
-    const a = document.createElement("a");
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast(`已导出 ${filename}`);
-  } catch {
-    showText(title, sub + "（浏览器拦截了下载，请复制后自行保存）", text, filename, mime);
+/* claude.ai 的 Artifact 观看端不给页面直接下载权，改由平台的 downloads 能力代为保存；
+   但它只接受固定扩展名白名单 —— .csv 在内，.ics 不在。 */
+const SAVABLE_EXT = new Set(["gif","png","jpg","jpeg","webp","mp4","webm","txt","json","md",
+                             "docx","pptx","epub","csv","ttf","html","svg","pdf","xlsx","zip"]);
+const extOf = f => (String(f).split(".").pop() || "").toLowerCase();
+
+let _dl, _dlProbed = false;
+async function getDownloads() {
+  if (_dlProbed) return _dl;
+  _dlProbed = true;
+  // 本地 / 自有部署下没有 window.claude，这里会立刻得到 null，不会空等
+  try { _dl = (await window.claude?.use?.("downloads")) ?? null; } catch { _dl = null; }
+  return _dl;
+}
+
+function blobSave(filename, text, mime) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+async function offerFile(filename, text, mime, title, sub) {
+  const dl = await getDownloads();
+
+  if (dl) {                                   // 在 claude.ai 观看端
+    if (!SAVABLE_EXT.has(extOf(filename))) {
+      showText(title, sub + "。本环境不允许保存 .ics，请复制下方内容存成 .ics 文件后导入日历",
+               text, filename, mime);
+      return;
+    }
+    try { await dl.save({ filename, data: text }); toast(`已保存 ${filename}`); }
+    catch (err) {
+      if (err?.code === "declined") { toast("已取消保存"); return; }
+      showText(title, sub + "。保存未能完成，请改用复制", text, filename, mime);
+    }
+    return;
   }
+
+  if (SANDBOXED) {                            // 其他 iframe 预览环境，下载会被静默拦截
+    showText(title, sub + "。当前预览环境禁止直接下载，请复制后自行保存", text, filename, mime);
+    return;
+  }
+
+  try { blobSave(filename, text, mime); toast(`已导出 ${filename}`); }
+  catch { showText(title, sub + "。浏览器拦截了下载，请复制后自行保存", text, filename, mime); }
 }
 
 let pendingFile = null;
@@ -1048,6 +1083,8 @@ function showText(title, sub, text, filename, mime) {
   $("#dt-sub").textContent = sub;
   $("#dt-body").value = text;
   pendingFile = { filename, text, mime };
+  // 在受限环境里 blob 下载必然无效，藏掉按钮而不是留个点了没反应的死控件
+  $("#dt-save").hidden = SANDBOXED;
   $("#dlg-text").showModal();
 }
 
@@ -1238,14 +1275,8 @@ function bind() {
   $("#dt-close").addEventListener("click", () => $("#dlg-text").close());
   $("#dt-save").addEventListener("click", () => {
     if (!pendingFile) return;
-    try {
-      const url = URL.createObjectURL(new Blob([pendingFile.text], { type: pendingFile.mime }));
-      const a = document.createElement("a");
-      a.href = url; a.download = pendingFile.filename;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-      toast("若浏览器未拦截，文件已开始下载");
-    } catch { toast("下载被环境阻止，请改用复制"); }
+    try { blobSave(pendingFile.filename, pendingFile.text, pendingFile.mime); toast("文件已开始下载"); }
+    catch { toast("下载被环境阻止，请改用复制"); }
   });
   $("#dt-copy").addEventListener("click", async () => {
     const ta = $("#dt-body");
