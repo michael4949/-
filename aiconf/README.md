@@ -24,12 +24,19 @@ L1  内置快照      种子库 + 上次抓取结果，内联在 HTML 里
                   → 秒开、离线可用、file:// 双击也能跑
 L2  定时抓取      GitHub Actions 每 6 小时跑 crawl.py，刷新 data/events.json
                   → 页面后台静默拉取，同源、无跨域问题
-L3  AI 实时检索   页内填自己的 Gemini Key，用 Google Search grounding 联网搜
-                  → 真·实时；抓取发生在 Google 服务端，绕开 CORS
+L3  AI 实时检索   访客点一下就联网搜，结果并入列表
+                  → 真·实时；抓取发生在服务端，绕开 CORS
 ```
 
-L3 的思路和仓库根目录的应用一致 —— README 里那句「服务端抓取，没有浏览器跨域问题」，
-说的就是这件事。
+L3 有两种运行模式，页面打开时自动探测，无需配置：
+
+| 模式 | 触发条件 | 谁能用 | 密钥在哪 |
+|---|---|---|---|
+| **服务端代理** | 站点部署了 `api/ai-search` 函数且配了密钥 | **所有访客，无需登录** | 服务器环境变量，浏览器永远拿不到 |
+| **自带密钥** | 没有后端（本地打开、纯静态托管） | 只有填了自己 Key 的人 | 访客自己的浏览器 localStorage |
+
+**密钥绝不能写进前端。** HTML 是明文的，写进去等于公开送人，几小时内额度就会被刷干。
+这就是为什么公开站点必须有后端代理这一层。
 
 ---
 
@@ -43,6 +50,11 @@ L3 的思路和仓库根目录的应用一致 —— README 里那句「服务�
 | `config.json` | 关键词、主题映射、城市表、各数据源开关，**都可调** |
 | `crawl.py` | 聚合爬虫：多源适配器 → 归一化 → 去重合并 |
 | `build.py` | 把 `events.json` 内联回 `index.html`，让它成为真正的单文件 |
+| `api/_core.js` | **后端检索代理的核心逻辑**，两个平台共用 |
+| `api/ai-search.js` | Vercel 适配器（Edge Runtime） |
+| `functions/api/ai-search.js` | Cloudflare Pages 适配器 |
+| `vercel.json` | Vercel 部署配置 |
+| `devserver.mjs` | 本地开发服务器，部署前完整验一遍 |
 
 ---
 
@@ -73,13 +85,80 @@ python3 aiconf/crawl.py --seed-only      # 不联网，仅用种子库重建
 **可选**：在仓库 `Settings → Secrets and variables → Actions` 里加 `GEMINI_API_KEY`，
 即可启用联网检索源。不配也能跑，只是少一个数据源。
 
-### 发布成公开网址
-纯静态，扔哪都行：
-- **Vercel** —— 导入仓库，Root Directory 填 `aiconf`，无需任何环境变量
-- **GitHub Pages** —— 把 `aiconf/` 作为发布目录
-- **任意静态托管** —— 上传 `index.html` + `data/` 即可
+### 发布成公开网址（让所有人都能访问 + 大模型随时可用）
 
-部署后 L2 的同源拉取才会生效（`file://` 下会被 CORS 拦，此时自动回退到内联快照）。
+要满足「所有访客都能用实时检索」，必须选**带 Serverless 函数的托管平台**。
+纯静态托管（GitHub Pages、OSS 静态网站）只能跑到 L2，L3 会退回「自带密钥」模式。
+
+#### 方案 A · Vercel（最省事）
+
+1. 用 GitHub 登录 <https://vercel.com> → **Add New → Project** → 导入本仓库
+2. **Root Directory 填 `aiconf`**（关键，否则会去构建根目录的 React 应用）
+3. **Settings → Environment Variables** 添加：
+
+   | 变量名 | 值 | 说明 |
+   |---|---|---|
+   | `GEMINI_API_KEY` | 你的密钥 | 必填。<https://aistudio.google.com/apikey> 免费申请 |
+   | `AICONF_MODEL` | `gemini-2.5-flash` | 可选，默认就是它 |
+   | `AICONF_ALLOW_FREEFORM` | `true` | 可选，开放自由检索词。**公开站点建议先别开**，见下方成本一节 |
+
+4. **Settings → Git → Production Branch** 改成 `claude/ai-conference-aggregator-ac1nlf`（或先合并到 `main`）
+5. Deploy → 得到 `https://xxx.vercel.app`
+
+#### 方案 B · Cloudflare Pages
+
+1. <https://dash.cloudflare.com> → **Workers & Pages → Create → Pages** → 连接仓库
+2. 构建设置：**Framework 选 None**，Build command 留空，**Build output directory 填 `aiconf`**
+3. **Settings → Environment variables** 加上同样的 `GEMINI_API_KEY`
+4. Deploy → 得到 `https://xxx.pages.dev`
+
+`aiconf/functions/api/ai-search.js` 会被自动识别为 Pages Function，路由到 `/api/ai-search`。
+
+#### 部署前先在本地验一遍
+
+```bash
+GEMINI_API_KEY=你的密钥 node aiconf/devserver.mjs
+# 打开 http://localhost:8787，点「AI 实时检索」
+```
+不带密钥启动也行 —— 页面会显示「自带密钥」模式，正好把两条路径都看一遍。
+
+---
+
+### ⚠️ 国内访问与模型可达性
+
+这是给中文用户做站点绕不开的一件事，说清楚：
+
+| 事项 | 现状 |
+|---|---|
+| `*.vercel.app` / `*.pages.dev` | 国内访问**不稳定**，时通时不通 |
+| 绑自有域名 + 海外托管 | 稳定性改善有限，仍受链路影响 |
+| 国内托管（腾讯云 CloudBase、阿里云 FC + OSS） | 访问快，但自有域名**需要 ICP 备案** |
+| Gemini 接口 | 国内**直连不通** —— 所以「自带密钥」模式在国内基本用不了 |
+
+**后端代理恰好解决了最后一条**：函数跑在海外节点，访客只跟你的站点通信，
+不需要自己能连上 Google。这是代理方案在国内场景下的额外价值。
+
+**如果你要用国内托管**，Gemini 就调不通了，得换成国产模型的联网检索
+（通义千问、豆包、DeepSeek 等都有联网搜索能力）。改动集中在 `api/_core.js`
+里那一次 `fetch` 调用和响应解析，其余逻辑（预设白名单、缓存、字段校验、
+错误脱敏）都能原样复用。需要的话我可以补一个适配器。
+
+---
+
+### 💰 成本与防滥用（公开站点必看）
+
+站点一旦公开，**每次检索都花你的钱**。三道防线已经内置：
+
+1. **CDN 边缘缓存** —— 响应带 `s-maxage=21600`，同一检索方向 6 小时内只真正
+   调用一次模型，其余访客全部命中缓存。这是最有效的一道。
+2. **预设白名单** —— 默认只接受 6 个固定检索项。否则别人可以用无限变化的
+   查询串绕开缓存，每次都真实打到模型上。想开放自由输入再设
+   `AICONF_ALLOW_FREEFORM=true`（自由检索缓存 1 小时，且限长 60 字）。
+3. **错误脱敏** —— 上游报错原文可能带密钥片段，一律不透传给浏览器，
+   只返回归类后的提示。
+
+如果流量很大还想再稳一层，可以加平台自带的限流：Cloudflare 的 Rate Limiting
+规则，或 Vercel 的 Firewall / Upstash Redis 按 IP 计数。
 
 ---
 

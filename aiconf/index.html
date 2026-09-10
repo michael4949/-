@@ -346,6 +346,9 @@ dialog::backdrop { background: rgba(15,19,26,.52); }
 .dlg-head p { color: var(--ink-2); font-size: 13px; margin: 6px 0 0; }
 .dlg-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 11px; }
 .dlg-body label { font-size: 12px; color: var(--ink-2); font-weight: 500; }
+.dlg-body select { width: 100%; border: 1px solid var(--line-2); background: var(--surface-2);
+  color: var(--ink); border-radius: var(--r-md); padding: 8px 10px; font-size: 13px; }
+.dlg-body > div[hidden] { display: none !important; }
 .dlg-body input[type=password], .dlg-body input[type=text], .dlg-body textarea {
   width: 100%; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink);
   border-radius: var(--r-md); padding: 8px 10px; font-size: 13px; font-family: var(--f-mono);
@@ -448,7 +451,7 @@ dialog::backdrop { background: rgba(15,19,26,.52); }
       <ul>
         <li><b>内置快照</b> —— 人工整理的种子库，打开即可用，断网也能看。</li>
         <li><b>定时抓取</b> —— GitHub Actions 每 6 小时跑一次爬虫，刷新 <code>data/events.json</code>。</li>
-        <li><b>AI 实时检索</b> —— 点右上角「AI 实时检索」，用你自己的 Gemini Key 联网补最新档期。</li>
+        <li><b>AI 实时检索</b> —— 点右上角按钮联网补最新档期。本站已接入时对所有访客直接可用；未接入时可自带 Gemini Key 使用。</li>
       </ul>
     </div>
     <div>
@@ -467,15 +470,22 @@ dialog::backdrop { background: rgba(15,19,26,.52); }
 <dialog id="dlg-ai">
   <div class="dlg-head">
     <h3>AI 实时检索</h3>
-    <p>用 Gemini 的联网检索能力，实时搜一遍最新的 AI 会议档期，结果并入当前列表。密钥只存在你自己的浏览器里，不会发往任何第三方。</p>
+    <p>用联网检索实时搜一遍最新的 AI 会议档期，结果并入当前列表。</p>
   </div>
   <div class="dlg-body">
+    <div id="ai-mode"></div>
     <div id="ai-notice"></div>
-    <label for="ai-key">Gemini API Key</label>
-    <input type="password" id="ai-key" placeholder="AIza…" autocomplete="off" spellcheck="false">
-    <p class="hint">免费申请：<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>。存于浏览器 <code>localStorage</code>，仅用于直连 Google 官方接口。</p>
-    <label for="ai-scope">检索范围</label>
-    <input type="text" id="ai-scope" value="未来三个月中国大陆的人工智能会议、展会、峰会">
+    <label for="ai-preset">检索方向</label>
+    <select id="ai-preset"></select>
+    <div id="ai-free-wrap" hidden>
+      <label for="ai-scope">或自定义检索词</label>
+      <input type="text" id="ai-scope" placeholder="例如：11 月 上海 具身智能" maxlength="60" autocomplete="off">
+    </div>
+    <div id="ai-key-wrap" hidden>
+      <label for="ai-key">Gemini API Key</label>
+      <input type="password" id="ai-key" placeholder="AIza…" autocomplete="off" spellcheck="false">
+      <p class="hint">免费申请：<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>。只存在你自己浏览器的 <code>localStorage</code> 里，直连 Google 官方接口，不经过任何第三方。</p>
+    </div>
   </div>
   <div class="dlg-foot">
     <button class="btn" id="ai-cancel">取消</button>
@@ -1090,6 +1100,20 @@ function showText(title, sub, text, filename, mime) {
 
 /* ═══════════════ AI 实时检索（Gemini + Google 搜索） ═══════════════ */
 
+/* 两条检索路径：
+     proxy —— 本站已部署服务端代理（密钥在服务器上），所有访客直接可用
+     byok  —— 没有后端时的退路，访客自带 Gemini Key 直连
+   刻意不用 Artifact 的 sample 能力：它没有联网搜索，拿训练记忆猜会议档期只会编日期。*/
+
+const AI_PRESETS = [
+  { id:"upcoming",  label:"未来三个月 · 全部",        text:"未来三个月中国大陆举办的人工智能会议、展会、峰会" },
+  { id:"llm-agent", label:"大模型与智能体",           text:"中国近期的大模型、智能体 Agent 开发者大会与技术峰会" },
+  { id:"infra",     label:"AI Infra · Token 成本",   text:"中国近期的 AI Infra、推理优化、Token 成本、算力芯片主题峰会" },
+  { id:"embodied",  label:"具身智能与机器人",         text:"中国近期的具身智能、人形机器人大会与展会" },
+  { id:"fde",       label:"企业落地与 FDE 交付",      text:"中国近期的企业 AI 落地、交付实践、FDE 前向部署工程师、行业解决方案沙龙与闭门会" },
+  { id:"academic",  label:"学术会议",                 text:"中国近期的人工智能学术会议，例如 CCF、CAAI 主办的论坛与年会" },
+];
+
 const AI_SCHEMA = `严格只输出一个 JSON 数组，不要任何解释文字。数组每个元素形如：
 {"name":"会议全称","org":"主办方","city":"举办城市（线上填「线上」，未定填「待定」）","venue":"场馆（未知填空字符串）","start":"YYYY-MM-DD","end":"YYYY-MM-DD","url":"官网链接（没有填空字符串）","topics":["主题标签"],"fee":"free|paid|invite|mixed","desc":"一句话说明值不值得去","confirmed":true}
 要求：只收录中国大陆举办（含线上中文场）的人工智能相关会议/展会/峰会/开发者大会/沙龙；confirmed 表示官方已正式公布确切日期；日期必须是具体的 YYYY-MM-DD；至多 20 条；没有可靠结果就输出 []。`;
@@ -1111,71 +1135,134 @@ function extractArray(text) {
     if (c === '"') inStr = true;
     else if (c === "[") depth++;
     else if (c === "]" && --depth === 0) {
-      try { const v = JSON.parse(src.slice(i, j+1)); return Array.isArray(v) ? v : []; }
+      try { const v = JSON.parse(src.slice(i, j + 1)); return Array.isArray(v) ? v : []; }
       catch { return []; }
     }
   }
   return [];
 }
 
-async function runAISearch() {
+let aiMode = null, aiPresets = AI_PRESETS, aiAllowFree = true;
+
+/** 探测本站有没有服务端检索代理。本地打开时探测立即失败，自动退回自带密钥模式。 */
+async function detectAIMode() {
+  if (aiMode) return aiMode;
+  try {
+    const r = await fetch("api/ai-search?probe=1", { cache: "no-store" });
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.ok && d.ready) {
+        const ps = (d.presets || []).map(x => ({ id: x.id, label: x.label, text: null }));
+        aiPresets = ps.length ? ps : AI_PRESETS;
+        aiAllowFree = Boolean(d.allowFreeform);
+        return (aiMode = "proxy");
+      }
+    }
+  } catch { /* 没有后端：静默退回 */ }
+  aiPresets = AI_PRESETS;
+  aiAllowFree = true;
+  return (aiMode = "byok");
+}
+
+async function openAIDialog() {
+  $("#ai-notice").innerHTML = "";
+  $("#ai-mode").innerHTML = `<div class="notice notice-ok">正在检测本站检索能力…</div>`;
+  $("#dlg-ai").showModal();
+
+  const mode = await detectAIMode();
+  $("#ai-preset").innerHTML = aiPresets
+    .map(x => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join("");
+  $("#ai-free-wrap").hidden = !aiAllowFree;
+  $("#ai-key-wrap").hidden = mode === "proxy";
+
+  if (mode === "proxy") {
+    $("#ai-mode").innerHTML =
+      `<div class="notice notice-ok">本站已接入实时检索，选个方向直接开始即可，不需要任何密钥。</div>`;
+  } else {
+    const saved = store("aiconf.key");
+    if (saved) $("#ai-key").value = saved;
+    $("#ai-mode").innerHTML =
+      `<div class="notice notice-err">本站没有服务端检索。你可以自带 Gemini Key 直连使用；
+       若想让所有访客都能用，需把站点部署到带后端的托管平台（见 README 的部署一节）。</div>`;
+  }
+}
+
+/** 走本站代理：密钥在服务器上，浏览器拿不到，也不存在跨域问题。 */
+async function searchViaProxy(presetId, freeform) {
+  const qs = freeform ? `q=${encodeURIComponent(freeform)}` : `scope=${encodeURIComponent(presetId)}`;
+  const r = await fetch(`api/ai-search?${qs}`);
+  let d = {};
+  try { d = await r.json(); } catch { /* 交给下面统一报错 */ }
+  if (!r.ok || !d.ok) throw new Error(d.error || `检索失败（HTTP ${r.status}）`);
+  return (d.events || []).map(e => normalize(e, "ai")).filter(Boolean);
+}
+
+/** 没有后端时的退路：访客自带密钥直连 Google 官方接口。 */
+async function searchViaOwnKey(presetId, freeform) {
   const key = $("#ai-key").value.trim();
-  const scope = $("#ai-scope").value.trim() || "未来三个月中国大陆的人工智能会议";
-  const notice = $("#ai-notice");
-  if (!key) { notice.innerHTML = `<div class="notice notice-err">请先填入 Gemini API Key。</div>`; return; }
+  if (!key) throw new Error("请先填入 Gemini API Key，或把站点部署到带后端的平台。");
   store("aiconf.key", key);
 
-  const btn = $("#ai-run");
-  btn.disabled = true; btn.textContent = "检索中…";
-  notice.innerHTML = `<div class="notice notice-ok">正在联网检索，通常需要 15–40 秒…</div>`;
-
+  const preset = AI_PRESETS.find(x => x.id === presetId);
+  const scope = freeform
+    ? `中国大陆的人工智能相关会议，检索方向：${freeform}`
+    : (preset ? preset.text : AI_PRESETS[0].text);
   const prompt = `今天是 ${iso(TODAY)}。请用 Google 搜索查找：${scope}\n\n${AI_SCHEMA}`;
+
+  let r;
   try {
-    const r = await fetch(
+    r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-      { method:"POST", headers:{ "Content-Type":"application/json" },
+      { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ role:"user", parts:[{ text: prompt }] }],
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
           tools: [{ google_search: {} }],
           generationConfig: { temperature: 0.2 },
         }) });
+  } catch {
+    throw new Error("无法连接 Google 接口。若你正在预览环境（如 Artifact 沙箱）中打开本页，外部 API 会被安全策略阻断 —— 请部署到自己的站点，或在本地直接打开 index.html 后再试。");
+  }
+  if (!r.ok) {
+    throw new Error(r.status === 400 ? "密钥无效或请求被拒绝"
+      : r.status === 429 ? "配额已用尽，请稍后再试" : `接口返回 ${r.status}`);
+  }
+  const data = await r.json();
+  const text = (data.candidates?.[0]?.content?.parts || []).map(x => x.text || "").join("");
+  return extractArray(text).map(x => normalize({
+    id: `ai-${String(x.name || "").slice(0, 24).replace(/\s+/g, "-")}-${x.start}`,
+    name: x.name, org: x.org, city: x.city, venue: x.venue,
+    start: x.start, end: x.end || x.start,
+    dateStatus: x.confirmed ? "confirmed" : "estimated",
+    topics: Array.isArray(x.topics) ? x.topics : [],
+    fee: x.fee, url: /^https?:\/\//.test(String(x.url || "")) ? x.url : null,
+    desc: x.desc, sourceNote: `AI 实时检索于 ${iso(TODAY)}`, source: "ai",
+  }, "ai")).filter(Boolean);
+}
 
-    if (!r.ok) {
-      const detail = await r.text().catch(() => "");
-      throw new Error(r.status === 400 ? "密钥无效或请求被拒绝"
-        : r.status === 429 ? "配额已用尽，请稍后再试"
-        : `接口返回 ${r.status}${detail ? "：" + detail.slice(0, 120) : ""}`);
-    }
-    const data = await r.json();
-    const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
-    const rows = extractArray(text);
+async function runAISearch() {
+  const mode = await detectAIMode();
+  const presetId = $("#ai-preset").value;
+  const freeform = aiAllowFree ? $("#ai-scope").value.trim() : "";
+  const notice = $("#ai-notice"), btn = $("#ai-run");
 
-    const incoming = rows.map(x => normalize({
-      id: `ai-${String(x.name || "").slice(0,24).replace(/\s+/g,"-")}-${x.start}`,
-      name: x.name, org: x.org, city: x.city, venue: x.venue,
-      start: x.start, end: x.end || x.start,
-      dateStatus: x.confirmed ? "confirmed" : "estimated",
-      topics: Array.isArray(x.topics) ? x.topics : [],
-      fee: x.fee, url: x.url || null, desc: x.desc,
-      sourceNote: `AI 实时检索于 ${iso(TODAY)}`, source: "ai",
-    }, "ai")).filter(Boolean);
+  btn.disabled = true; btn.textContent = "检索中…";
+  notice.innerHTML = `<div class="notice notice-ok">正在联网检索，通常需要 15–40 秒…</div>`;
+  try {
+    const incoming = mode === "proxy"
+      ? await searchViaProxy(presetId, freeform)
+      : await searchViaOwnKey(presetId, freeform);
 
     if (!incoming.length) {
-      notice.innerHTML = `<div class="notice notice-err">没搜到可用结果。换个更具体的检索范围试试，比如「2026 年 11 月 上海 大模型 大会」。</div>`;
-    } else {
-      const { events, added, upgraded } = mergeEvents(S.events, incoming);
-      S.events = events;
-      renderAll();
-      notice.innerHTML = `<div class="notice notice-ok">检索完成：新增 ${added} 场，档期升级 ${upgraded} 场。结果已并入列表。</div>`;
-      toast(`AI 实时检索：新增 ${added} 场`);
+      notice.innerHTML = `<div class="notice notice-err">没搜到可用结果。换个检索方向试试。</div>`;
+      return;
     }
+    const { events, added, upgraded } = mergeEvents(S.events, incoming);
+    S.events = events;
+    renderAll();
+    notice.innerHTML = `<div class="notice notice-ok">检索完成：新增 ${added} 场，档期升级 ${upgraded} 场，已并入列表。</div>`;
+    toast(`AI 实时检索：新增 ${added} 场`);
   } catch (err) {
-    const offline = err instanceof TypeError;   // fetch 本身失败 = 网络层被拦
-    notice.innerHTML = `<div class="notice notice-err">${
-      offline
-        ? "无法连接 Google 接口。若你正在预览环境（Artifact 沙箱）中打开本页，外部 API 会被安全策略阻断 —— 请把页面部署到自己的服务器，或在本地直接打开 index.html 后再试。"
-        : esc(err.message)
-    }</div>`;
+    notice.innerHTML = `<div class="notice notice-err">${esc(err.message)}</div>`;
   } finally {
     btn.disabled = false; btn.textContent = "开始检索";
   }
@@ -1263,12 +1350,7 @@ function bind() {
       "导出 CSV", `已打包当前筛选出的 ${list.length} 场会议`);
   });
 
-  $("#btn-ai").addEventListener("click", () => {
-    const saved = store("aiconf.key");
-    if (saved) $("#ai-key").value = saved;
-    $("#ai-notice").innerHTML = "";
-    $("#dlg-ai").showModal();
-  });
+  $("#btn-ai").addEventListener("click", openAIDialog);
   $("#ai-cancel").addEventListener("click", () => $("#dlg-ai").close());
   $("#ai-run").addEventListener("click", runAISearch);
 
