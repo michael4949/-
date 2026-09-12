@@ -27,7 +27,7 @@ XW.ask = function (text, voice) {
     if (/人力缺口|缺口/.test(t)) { go(() => ensure('risk', () => XW.answer('未来八周人力最紧的是配电自动化班第 35 周（田寮站验收加永磁终端排查，缺 5 人）和试验班第 36 周（交接试验高峰，缺 5 人）。缺口从跨班组调配补，我在风险与统筹里给了人选。', null, { confirm: false }))); return; }
     if (/风险|态势|哪个班/.test(t)) { go(() => ensure('super', () => XW.answer('这周三个班组的风险：配电自动化班 华发民公用柜缺陷超期、黄伟强工时超约定；试验班 张伟 28 小时、刘畅借出后电缆证只剩 2 人；配电运维一班 证书到期 2 人。分层不排名，点热力格看明细。', null, { confirm: false }))); return; }
     if (/在线率|周报|遥控|自愈|全市/.test(t)) { go(() => XW.wkAnswer(t)); return; }
-    if (/关键节点|清了多少/.test(t)) { go(() => XW.answer('配电自动化班本周关键节点已清 ' + DB.nodeRate() + '%，未清的：' + (NODES.filter(n => /周|限时|日日清/.test(n.cyc) && !DB.nodesDone().includes(n.id)).map(n => n.t).join('、') || '无') + '。', null, { confirm: false })); return; }
+    if (/关键节点|清了多少/.test(t)) { go(() => XW.answer('配电自动化班本周关键节点已清 ' + DB.nodeRate().pct + '%，未清的：' + (NODES.filter(n => /周|限时|日日清/.test(n.cyc) && !DB.nodesDone().includes(n.id)).map(n => n.t).join('、') || '无') + '。', null, { confirm: false })); return; }
     if (who && /怎么样|最近|情况/.test(t)) { go(() => ensure('people', () => PEOPLEPG.show(who.n))); return; }
     go(() => XW.answer('这件事我还不会办。管理者这里能办的：看三个班组态势和风险、发起跨班组调配、看班长履职和人才梯队、算星级对标差距、写周汇报和复盘。', null, { confirm: false })); return;
   }
@@ -38,7 +38,7 @@ XW.ask = function (text, voice) {
   if (/完工|干完了/.test(t)) { go(() => { const j = DB.jobs().find(x => x.st === '进行中' && (!who || DB.crewOf(x).includes(who.n))); if (j) ACT['job-finish']({ dataset: { id: j.id } }); else XW.answer('现在没有在现场的任务。', null, { confirm: false }); }); return; }
   if (/下周谁的活最多|工作量.*均衡|均衡/.test(t)) { go(() => ensure('sched', () => ACT['wk-balance'](), 'week')); return; }
   if (/下周计划/.test(t)) { go(() => ensure('docs', () => DOCS.gen('weekplan'))); return; }
-  if (/关键节点|周周清|日日清|清了多少/.test(t)) { go(() => ensure('sched', () => { const undone = NODES.filter(n => /周|限时|日日清/.test(n.cyc) && !DB.nodesDone().includes(n.id)); XW.answer('本周关键节点已清 ' + DB.nodeRate() + '%。' + (undone.length ? '还没清的 ' + undone.length + ' 项：' + undone.map(n => n.t + '（' + n.a + '）').join('、') + '。周报里排名靠后的那几项对应的节点，我在表里加了标记。' : '周周清和日日清的都清完了。'), null, { confirm: false }); }, 'nodes')); return; }
+  if (/关键节点|周周清|日日清|清了多少/.test(t)) { go(() => ensure('sched', () => { const undone = NODES.filter(n => /周|限时|日日清/.test(n.cyc) && !DB.nodesDone().includes(n.id)); XW.answer('本周关键节点已清 ' + DB.nodeRate().pct + '%。' + (undone.length ? '还没清的 ' + undone.length + ' 项：' + undone.map(n => n.t + '（' + n.a + '）').join('、') + '。周报里排名靠后的那几项对应的节点，我在表里加了标记。' : '周周清和日日清的都清完了。'), null, { confirm: false }); }, 'nodes')); return; }
   if (/周报|在线率|遥控成功率|自愈|全市第|排名/.test(t) && !/写|生成/.test(t)) { go(() => XW.wkAnswer(t)); return; }
   if (/组一套卷|组卷|短板/.test(t) && who) { go(() => ACT['bank-target']({ dataset: { who: who.n } })); return; }
   if (/谁去合适|谁合适|谁去/.test(t)) { go(() => { const job = DB.job(MAINLINE); const def = DISPATCH.defaults(job); const e = def.explain; XW.answer(job.t.split(' · ')[0] + '要' + job.need.join('和') + '，有电缆证的是' + certHold('电力电缆作业证').map(p => p.n).join('、') + '。我建议负责人' + (def.lead ? def.lead.n + '（' + (e.lead.why || []).slice(0, 2).join('，') + '）' : '待定') + '，班员' + def.crew.map(p => p.n + '（本周 ' + p.week + ' 小时）').join('、') + (def.learn ? '，' + def.learn.n + '随队学习' : '') + '。排除的人和理由在工作台的派工卡里逐条写着，安排由你定。', null, { done() { XW.card('<div class="bt" style="margin-top:0"><button data-act="ask-go">按这个办</button><button class="g" data-act="ask-swap">换人</button></div>'); } }); }); return; }
