@@ -681,7 +681,7 @@ function pagesClick(e) {
   if (n = q('[data-cnext]')) { courseNext(n.dataset.cnext); return true; }
   if (n = q('[data-quiz]')) { quizStart(n.dataset.quiz); return true; }
   if (n = q('[data-qsay]')) { const i = $('#qz_in'); quizSay(i ? i.value : ''); return true; }
-  if (n = q('#qz_mic')) { micStart(n, $('#qz_in'), null); return true; }
+  if (n = q('#qz_mic')) { const Q = CL.quiz; const qq = Q ? QUIZ.find(x => x.id === Q.ids[Q.i]) : null; micStart(n, $('#qz_in'), qq ? 'ABCD'[qq.a] + '，' + qq.opts[qq.a] : ''); return true; }
   if (n = q('[data-qnext]')) { quizNext(); return true; }
   if (n = q('[data-qretry]')) { const t = CL.quiz ? CL.quiz.topic : '全部'; quizStart(t); return true; }
   if (n = q('[data-lplan]')) { planGen(); return true; }

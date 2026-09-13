@@ -136,7 +136,7 @@ class DigitalHuman {
     if (this.n && this.n.pav) { this.n.pav.dataset.pose = p; this._paintState(); }
   }
 
-  destroy() { this.dead = true; this.speaking = false; this.seq = null; if (this.tts) { this.tts = null; TTS.cancel(); } }
+  destroy() { this.dead = true; this.stopSpeak(); }
   nod(times) { this._nod = { n: times || 1, t: 0 }; }
   shake() { this._shake = { t: 0 }; }
 
@@ -161,7 +161,7 @@ class DigitalHuman {
 
   speak(text, opt) {
     opt = opt || {};
-    this.stopSpeak(true);
+    this.stopSpeak();
     this.seq = this.buildSeq(text);
     this.speaking = true; this.progress = 0;
     this.perChar = (opt.rate || 0.115) * (window.__DH_SPEED || 1);
@@ -207,12 +207,14 @@ class DigitalHuman {
     if (cb) cb();
   }
 
-  stopSpeak(silent) {
+  /* 停止 / 打断：一律把这句当作说完，触发 onEnd（等这句话的流程——下一题、下一情境、下一条风险——才不会永远等下去） */
+  stopSpeak() {
     if (this.tts) { this.tts = null; TTS.cancel(); }
     this.speaking = false; this.seq = null;
     this.mouthTarget = Object.assign({}, VISEME.X);
-    if (!silent) { this.onSpeakEnd = null; }
     this._paintState();
+    const cb = this.onSpeakEnd; this.onSpeakEnd = null;
+    if (cb) cb();
   }
 
   /* ---------- 主循环 ---------- */

@@ -49,6 +49,7 @@ function useChar(k) {
 }
 
 /* ---------------- 语音 ---------------- */
+let speakSeq = 0;
 function speak(text, opt) {
   opt = opt || {};
   const who = opt.who || CHARACTERS[DHkey].role;
@@ -56,7 +57,9 @@ function speak(text, opt) {
   if (opt.pose) DH.setPose(opt.pose);
   if (opt.nod) setTimeout(() => DH.nod(opt.nod), 120);
   if (opt.shake) setTimeout(() => DH.shake(), 120);
+  const my = ++speakSeq;
   return Avatar.speak(text, opt).then(() => {
+    if (my !== speakSeq) return;                 // 这句被后一句打断：字幕与姿态交给后一句
     subtitleDone(opt.show || text);
     if (opt.pose && opt.rest !== false) DH.setPose('idle');
   });

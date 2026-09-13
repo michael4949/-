@@ -79,12 +79,19 @@ function renderFill() {
   $$('#panelwrap [data-fdel]').forEach(n => n.onclick = () => { S.fill.rows.splice(+n.dataset.fdel, 1); renderFill(); });
   $('#f_say').onclick = () => { const i = $('#f_in'); const v = i.value; i.value = ''; fillSay(v); };
   $('#f_in').onkeydown = e => { if (e.key === 'Enter') $('#f_say').onclick(); };
-  $('#f_mic').onclick = () => micStart($('#f_mic'), $('#f_in'), null);
+  $('#f_mic').onclick = () => micStart($('#f_mic'), $('#f_in'), fillMicText());
   const fh = $('#f_hint'); if (fh) fh.onclick = fillHint;
   $('#f_go').onclick = auditFill;
   renderTaskbar();
   const tt = $('#sheettitle'); if (tt) tt.textContent = '作业面板 · 填写操作票';
   setTimeout(() => { const i = $('#f_in'); if (i) i.focus(); }, 30);
+}
+/* 演示识别的兜底文本：票头没填全就报票头，否则报本段下一项 */
+function fillMicText() {
+  const miss = FHEAD.filter(f => !S.fill.head[f.k]);
+  if (miss.length) return miss.map(f => f.n + f.ok).join('，');
+  const nx = fillRight().find(s => !S.fill.rows.includes(s.no));
+  return nx ? nx.ticket : '';
 }
 /* 票头取值：口述 / 手填内容归一到最接近的规范写法（判分仍按 FHEAD.ok） */
 function fillHeadVal(k, v) {

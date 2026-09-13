@@ -119,6 +119,7 @@ async function prepSay(text) {
 /* 监护人宣读下一条风险（数字人开口），操作人口头确认后再读下一条 */
 async function prepReadRisk() {
   if (S.stage !== 'prep') return;
+  if (S.prep.ri >= 0 && !S.prep.risks[S.prep.ri]) return;      // 这一条正在宣读，等操作人确认
   const i = S.prep.risks.findIndex(x => !x); if (i < 0) return prepDone();
   S.prep.ri = i; prepPaint();
   const r = RISKS[i];
@@ -165,19 +166,21 @@ function micStart(btn, inp, fallback) {
   if (!btn || !inp) return;
   if (recNow) { try { recNow.stop(); } catch (e) { } recNow = null; btn.classList.remove('rec'); return; }
   if (recTimer) return;
+  /* 浏览器识别只在联网且经 http(s) 打开时可用（本地文件打开拿不到麦克风权限，内网没有识别服务）；其余情况走演示识别 */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SR && navigator.onLine && !window.__DH_MUTE) {
+  const canSR = SR && navigator.onLine && location.protocol !== 'file:' && !window.__DH_MUTE;
+  if (canSR) {
     try {
       const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = false;
-      r.onresult = e => { inp.value = Array.from(e.results).map(x => x[0].transcript).join(''); if (inp.oninput) inp.oninput(); };
-      r.onend = () => { btn.classList.remove('rec'); recNow = null; };
-      r.onerror = () => { btn.classList.remove('rec'); recNow = null; if (fallback) micType(btn, inp, fallback); else toast('语音识别未能启动，请改用文字输入', 'bad'); };
+      let got = false;
+      r.onresult = e => { got = true; inp.value = Array.from(e.results).map(x => x[0].transcript).join(''); if (inp.oninput) inp.oninput(); };
+      r.onend = () => { btn.classList.remove('rec'); recNow = null; if (!got && fallback) micType(btn, inp, fallback); };
+      r.onerror = () => { got = true; btn.classList.remove('rec'); recNow = null; if (fallback) micType(btn, inp, fallback); else { toast('语音识别未能启动，请在文字框中输入', 'bad'); inp.focus(); } };
       btn.classList.add('rec'); r.start(); recNow = r; return;
     } catch (e) { }
   }
   if (fallback) return micType(btn, inp, fallback);
-  btn.classList.add('rec'); toast('当前离线，语音识别不可用，请在文字框中输入', '');
-  setTimeout(() => btn.classList.remove('rec'), 1400); inp.focus();
+  toast('当前环境不支持语音识别，请在文字框中输入', ''); inp.focus();
 }
 function micType(btn, inp, text) {
   btn.classList.add('rec'); inp.value = ''; inp.placeholder = '正在识别…';

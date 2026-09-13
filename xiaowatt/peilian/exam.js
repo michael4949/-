@@ -32,8 +32,9 @@ function coachSay(text, opt) {
   if (opt.nod) setTimeout(() => dh.nod(opt.nod), 100);
   if (opt.shake) setTimeout(() => dh.shake(), 100);
   const plain = text.replace(/<[^>]+>/g, '');
+  const my = (EX.speakSeq = (EX.speakSeq || 0) + 1);
   const p = new Promise(res => { dh.speak(plain, { onEnd: res }); });
-  EX.speakQ = p.then(() => { if (opt.pose && opt.rest !== false) dh.setPose('idle'); });
+  EX.speakQ = p.then(() => { if (my === EX.speakSeq && opt.pose && opt.rest !== false) dh.setPose('idle'); });
   return p;
 }
 function meSay(text, k) { EX.log.push({ who: 'me', t: text, k: k || '', at: now() }); renderLog(); }
@@ -96,12 +97,14 @@ function quizFreezeOpts(it, pick) {
   m.t = m.t.replace(/<div class="exopts chat">[\s\S]*?<\/div>/, `<div class="exopts chat done">${it.opts.map((o, i) => `<span class="exopt ${i === it.a ? 'right' : i === pick ? 'wrong' : 'dim'}"><b>${'ABCD'[i]}</b>${o}</span>`).join('')}</div>`);
   renderLog();
 }
-function examPick(i) { const it = quizItem(); if (!it || it.kind !== 'choice' || EX.qAsked !== it.id) return; touch(); examAnswer('ABCD'[i], i); }
+function examPick(i) { const it = quizItem(); if (!it || it.kind !== 'choice') return; touch(); examAnswer('ABCD'[i], i); }
 function examAnswer(text, pick) {
   const s = examStation(), it = quizItem(); if (!s || !it || EX.stDone) return;
-  if (EX.qAsked !== it.id) return;
   text = (text || '').trim(); if (!text) return;
-  touch(); meSay(text);
+  touch();
+  /* 题还没问出来（教练上一句被打断等）：先把题问出来，学员说的话不能没有回应 */
+  if (EX.qAsked !== it.id) { meSay(text); examAskItem(); return; }
+  meSay(text);
   const t = text.replace(/\s+/g, '');
   if (/^(提示|给我提示|不会|不知道|怎么答)/.test(t)) return exHintQ(it);
   let ok = false, part = 0, missing = [];
@@ -271,7 +274,7 @@ function stationDone() {
 /* ---------------- 学员动作 ①：看（走到设备前，放大观察，用自己的话说出读数 / 状态） ---------------- */
 function examLook(dev) {
   const s = examStation(); if (!s || EX.stDone) return; touch();
-  if (s.type === 'quiz') { coachSay('先把这道题答了，再看设备。', { pose: 'listen' }); return; }
+  if (s.type === 'quiz') { if (!EX.qAsked) { examAskItem(); return; } const it = quizItem(); coachSay(it && it.kind === 'choice' ? '先把这道题答了：点对话里的选项，或在下面「回答」框里说 A、B、C、D。' : '先把这道题答了：在下面「回答」框里输入，说完点「回答」。', { pose: 'listen' }); return; }
   const sp = s.spots && s.spots[dev]; if (!sp) return;
   if (sp.walk) { sp.walk(EX.st); }
   if (sp.zoom) { EX.zoom = dev; renderZoom(); }
@@ -444,19 +447,18 @@ function examSay(text, fromZoom) {
 /* ---------------- 语音：联网时浏览器识别（结果可改再说）；离线降级文字 ---------------- */
 function examMic(btn, inputSel) {
   const inp = $(inputSel); if (!inp) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (EX.rec) { try { EX.rec.stop(); } catch (e) { } EX.rec = null; btn.classList.remove('rec'); return; }
-  if (SR && navigator.onLine) {
-    try {
-      const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = false;
-      r.onresult = e => { inp.value = Array.from(e.results).map(x => x[0].transcript).join(''); };
-      r.onend = () => { btn.classList.remove('rec'); EX.rec = null; };
-      r.onerror = () => { btn.classList.remove('rec'); EX.rec = null; toast('语音识别未能启动，请改用文字输入', 'bad'); };
-      btn.classList.add('rec'); r.start(); EX.rec = r; return;
-    } catch (e) { }
-  }
-  btn.classList.add('rec'); toast('当前离线，语音识别不可用，请在文字框中输入', '');
-  setTimeout(() => btn.classList.remove('rec'), 1400); inp.focus();
+  micStart(btn, inp, examMicText(inputSel === '#ex_zsay'));
+}
+/* 演示识别的兜底文本：当前该说的话（做题＝本题答案；操作关＝当前目标的口述样例） */
+function examMicText(fromZoom) {
+  const s = examStation(); if (!s) return '';
+  if (s.type === 'quiz') { const it = quizItem(); if (!it) return ''; return it.kind === 'choice' ? 'ABCD'[it.a] : ((typeof it.sample === 'function' ? it.sample(EX.st) : it.sample) || ''); }
+  let g = null;
+  if (fromZoom && EX.zoom) g = (s.goals || []).find(x => !gState(x.id).done && (x.dev || []).includes(EX.zoom));
+  if (!g) g = nextGoal();
+  if (!g) return '';
+  const smp = typeof g.sample === 'function' ? g.sample(EX.st) : g.sample;
+  return smp || g.n || '';
 }
 
 /* ---------------- 结束：评分 · 8 维 · 落盘 · 建议 ---------------- */
@@ -548,7 +550,7 @@ function examAfter() {
   if (!EX.timer) EX.timer = setInterval(() => {
     const t = $('#ex_time'); if (!t) return; const d = Math.round((Date.now() - EX.t0) / 1000); t.textContent = `${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`;
     /* 卡住：教练主动开口（训练 / 演练；测试提速时停用） */
-    if (EX.exam && !EX.stDone && EX.mode !== 'exam' && (window.__DH_SPEED || 1) >= 1 && Date.now() - EX.lastAct > 26000 && !(EX.dh && EX.dh.speaking) && !document.querySelector('.mask')) { EX.lastAct = Date.now(); const s = examStation(); if (s.type === 'quiz') { if (quizItem()) coachSay('想好了就答；不会可以说「提示」。', { pose: 'point' }); } else { const g = nextGoal(); if (g) { coachSay(g.nudge || `${HOME_USER.name}，想一想下一步。`, { pose: 'point' }); } } }
+    if (EX.exam && !EX.stDone && EX.mode !== 'exam' && (window.__DH_SPEED || 1) >= 1 && Date.now() - EX.lastAct > 26000 && !(EX.dh && EX.dh.speaking) && !document.querySelector('.mask')) { EX.lastAct = Date.now(); const s = examStation(); if (s.type === 'quiz') { if (!EX.qAsked && quizItem()) examAskItem(); else if (quizItem()) coachSay(quizItem().kind === 'choice' ? '想好了就答：点对话里的选项，或在下面「回答」框里说 A、B、C、D；不会可以点「给我提示」。' : '想好了就在下面「回答」框里答；不会可以点「给我提示」。', { pose: 'point' }); } else { const g = nextGoal(); if (g) { coachSay(g.nudge || `${HOME_USER.name}，想一想下一步。`, { pose: 'point' }); } } }
   }, 1000);
   const i = $('#ex_say'); if (i) i.focus();
 }
