@@ -20,7 +20,7 @@ function teamTasks() {
   const base = [{ id: 't0', coach: '倒闸操作 · 陈志远', plan: '完整操作票', mode: '考核模式', due: dateAfter(HOME_TASK.dueDays), pass: 80, who: '全班', done: 7, total: 12 }];
   return base.concat(lsGet(LS_TASKS, []));
 }
-const TRAIN_CONTENTS = [['e1163', '题库考试 · 1163 开关与地刀检查'], ['rain', '题库考试 · 雨淋阀机械手动启动'], ['full', '陪练舱 · 完整操作票'], ['sp_gis', '陪练舱 · 专项 GIS 四项核对'], ['sp_vd', '陪练舱 · 专项 验电接地']];
+const TRAIN_CONTENTS = [['e1163', '陪练关卡 · 1163 开关与地刀检查'], ['rain', '陪练关卡 · 雨淋阀机械手动启动'], ['full', '陪练舱 · 完整操作票'], ['sp_gis', '陪练舱 · 专项 GIS 四项核对'], ['sp_vd', '陪练舱 · 专项 验电接地']];
 const LD = { dims: [], who: '短板人员' };
 
 function pageTeam() {
@@ -53,7 +53,7 @@ function pageTeam() {
         ${TEAM.map(m => `<div class="heatn">${m.n}</div>${teamAbility(m).map(v => heat(v)).join('')}`).join('')}
         <div class="heatn"><b>均值</b></div>${avg.map(v => heat(v)).join('')}</div>
         <div class="tk3" style="margin-top:6px">评价数据由陪练舱与题库考试自动记录，用于培训安排参考；正式考评与授权以人工确认为准。</div></div></section>
-      <section class="hcard ho"><div class="hch"><b>题库考试结果与系统建议</b><em class="ai">AI</em><span>${recs.length} 条 · 组员考完即时同步 · 复核后进入成长记录</span></div><div class="hcb"><table class="htbl ldtbl">
+      <section class="hcard ho"><div class="hch"><b>陪练关卡结果与系统建议</b><em class="ai">AI</em><span>${recs.length} 条 · 组员考完即时同步 · 复核后进入成长记录</span></div><div class="hcb"><table class="htbl ldtbl">
         <tr><th>成员</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>针对性训练建议</th><th>复核</th></tr>
         ${recs.slice(0, 8).map(r => `<tr><td><b>${r.who}</b><div class="tk3 mono">${stampOf(r.ts)}</div></td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0 否决' : r.score}/${r.max}</td><td>${r.errs.length ? r.errs.map(e => `<i class="tag ${e.kind === 'red' || e.kind === 'crit' ? 'rl' : 'wn'}">${ERR_KIND[e.kind]}</i>`).join('') : '<span class="tag ok">无</span>'}</td><td class="ldsug">${(r.sugg || []).slice(0, 2).map(s => `<div>${s.dim ? `<b>${abilityOf(s.dim).n}</b>` : ''}${s.t.replace(/^「[^」]*」/, '')}</div>`).join('')}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : `<button class="btn sm" data-ldrev="${r.id}">复核</button>`}${r.id.startsWith('E') ? `<button class="btn sm" data-exreview="${r.id}">复盘</button>` : ''}</td></tr>`).join('')}</table></div></section>
     </div>
@@ -104,7 +104,7 @@ function certDrill(i) {
     <table class="htbl certtbl"><tr><th>技能单元</th><th>专业项目</th><th>对应能力</th><th>建议</th><th>依据</th></tr>
     ${sug.map(x => `<tr class="${x.ok ? '' : 'dim'}"><td class="tk3">${x.it.unit}</td><td>${x.it.star ? '<b class="star">★</b>' : ''}${x.it.code} ${x.it.n}</td><td class="tk3">${x.dims.join('、')}</td><td>${x.ok ? '<span class="tag ok">建议授权 √</span>' : '<span class="tag wn">待训练</span>'}</td><td class="tk3">${x.why}</td></tr>`).join('')}</table>
     <div class="certfoot"><div><label>姓名</label>${m.n}</div><div><label>班组授权人</label>${c ? c.by : LEAD_USER.name}</div><div><label>授权时间</label>${c ? c.date : '—'}</div><div><label>负责人签名 / 单位盖章</label>${c ? '待人力资源部备案' : '待授权后办理'}</div></div>
-    <div class="tk3" style="margin-top:8px">草稿由能力雷达与题库考试记录生成，授权结论由班组授权人确认；正式认证以人力资源部备案为准。</div>`,
+    <div class="tk3" style="margin-top:8px">草稿由能力雷达与陪练关卡记录生成，授权结论由班组授权人确认；正式认证以人力资源部备案为准。</div>`,
     `<button class="btn" data-print="1">打印</button>${c ? '' : `<button class="btn pri" data-ldcertok="${i}">由班组授权人确认</button>`}`);
 }
 function memberDrill(i) {
@@ -112,7 +112,7 @@ function memberDrill(i) {
   openDrill(`成员 · ${m.n}`, `${m.post} · 近30天陪练 ${m.sess} 场 · 题库考试 ${recs.length} 次`, m.sess ? `
     <div class="gtwo"><div>${chRadar(DIMS, d, teamAvgDims(), { w: 320, h: 240, l1: '本人', l2: '班组均值', key: 'x' })}<div class="tk3" style="text-align:center">本人 vs 班组均值</div></div>
     <div>${miniBars(d)}<div class="hrow" style="margin-top:8px">红线触发 ${m.red} 次 · 最近练习 ${m.last === 0 ? '今天' : m.last + ' 天前'} · 本月任务${m.task === 'done' ? '已完成' : '未完成'}</div></div></div>
-    ${recs.length ? `<div class="sec" style="margin-top:10px"><div class="st">题库考试记录</div>${recs.map(r => `<div class="hrow"><span class="mono">${stampOf(r.ts)}</span> ${r.short} · ${r.modeName} · <b class="${r.red ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b>${r.sugg && r.sugg[0] ? ` <span class="tk3">${r.sugg[0].t}</span>` : ''}</div>`).join('')}</div>` : ''}
+    ${recs.length ? `<div class="sec" style="margin-top:10px"><div class="st">陪练关卡记录</div>${recs.map(r => `<div class="hrow"><span class="mono">${stampOf(r.ts)}</span> ${r.short} · ${r.modeName} · <b class="${r.red ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b>${r.sugg && r.sugg[0] ? ` <span class="tk3">${r.sugg[0].t}</span>` : ''}</div>`).join('')}</div>` : ''}
     <div class="tk3">正式考评以人工审核为准。</div>` : '<div class="hrow">本月尚无陪练与考试记录。</div>',
     `<button class="btn" data-ldcert="${i}">认证表草稿</button><button class="btn pri" data-ldplanfor="${m.n}">给 ${m.n} 制定培训计划</button>`);
 }
@@ -127,7 +127,7 @@ function ldSend() {
   const who = g('#ld_who') || LD.who;
   const weakPeople = TEAM.filter(m => m.sess && LD.dims.some(d => teamAbility(m)[DIMS.indexOf(d)] < 70)).map(m => m.n);
   const total = who === '全班' ? TEAM.length : who === '短板人员' ? weakPeople.length : 1;
-  const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: ex ? ex.id : null, examName: ex ? ex.n : null, coach: ex ? '题库考试' : '倒闸操作 · 陈志远', plan: pl ? pl.n : (ex ? ex.short : plan), mode: g('#ld_mode') || '考核模式', due: (g('#ld_due') || '').replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1月$2日') || dateAfter(5), pass: +(g('#ld_pass') || 6), who: who === '短板人员' ? `短板人员（${weakPeople.join('、') || '无'}）` : who, dims: LD.dims.slice(), done: 0, total, results: [] };
+  const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: ex ? ex.id : null, examName: ex ? ex.n : null, coach: ex ? '陪练关卡' : '倒闸操作 · 陈志远', plan: pl ? pl.n : (ex ? ex.short : plan), mode: g('#ld_mode') || '考核模式', due: (g('#ld_due') || '').replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1月$2日') || dateAfter(5), pass: +(g('#ld_pass') || 6), who: who === '短板人员' ? `短板人员（${weakPeople.join('、') || '无'}）` : who, dims: LD.dims.slice(), done: 0, total, results: [] };
   const list = lsGet(LS_TASKS, []); list.unshift(t); lsSet(LS_TASKS, list.slice(0, 12));
   toast(`已下发：${t.examName || t.plan} · ${t.mode} · ${t.due}截止 · 对象 ${t.who}`, 'ok');
   $$('.mask').forEach(m => m.remove()); rerender('team');

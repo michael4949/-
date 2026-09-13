@@ -1282,3 +1282,31 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .demo2.open .bd{display:block}.demo2 .bd .t{font-size:10.5px;color:var(--txt3);letter-spacing:1px;margin-bottom:8px}
 .demo2 .bd button{display:block;width:100%;text-align:left;margin-bottom:6px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--txt2);cursor:pointer;font-family:inherit}.demo2 .bd button:hover{background:#eaf0e4}
 @media print{.demo2{display:none !important}}
+
+/* ===== 陪练关卡 · 教练在侧 ===== */
+.exmain.coach{grid-template-columns:1fr 360px}
+.exlocbar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}.exlocbar:empty{display:none}
+.exloc{font-size:11.5px;color:#5c6b5f;background:#f1f1e6;border:1px solid #e2dfd0;border-radius:14px;padding:4px 12px;cursor:pointer}
+.exloc:hover{border-color:#c9a227;color:#8a6d15}.exloc.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.exsay{display:flex;gap:8px;align-items:center;margin-top:10px;background:#f7f8f1;border:1px solid #e2dfd0;border-radius:10px;padding:8px 10px}
+.exsayl{font-size:11px;color:#8b988c;white-space:nowrap;letter-spacing:.5px}
+.exin.wide{flex:1;width:auto}
+.exzv .exin.wide{min-width:240px}
+.excoach{display:flex;flex-direction:column;gap:12px}
+.excoachcard{padding:10px 12px 12px;display:flex;flex-direction:column;align-items:center}
+.exdhwrap{width:100%;height:230px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+#exdh{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center}
+.excoachnm{text-align:center;margin-top:4px}.excoachnm b{display:block;font-size:14px;color:#1f2d24}.excoachnm span{font-size:11px;color:#8b988c}
+.exlogcard .hcb{padding:6px 8px}
+.exlog{max-height:340px;min-height:180px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px 4px}
+.exlog .msg{display:flex;gap:8px;align-items:flex-start}.exlog .msg .av{width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.exlog .msg.o{flex-direction:row-reverse}.exlog .msg.o .av{background:#c9a227}
+.exlog .msg .bd{background:#fff;border:1px solid #e2dfd0;border-radius:10px;padding:7px 10px;font-size:12.5px;color:#3c5245;line-height:1.65;max-width:86%}
+.exlog .msg.o .bd{background:#fbf7e6;border-color:#e3d49e}
+.exlog .msg.bad .bd{border-color:#e3d49e;background:#fdf9ec}.exlog .msg.red .bd{border-color:#e0a89f;background:#fbe9e7;color:#7a1414}.exlog .msg.hint .bd{border-left:3px solid #c9a227}
+.exlog.rv{max-height:300px}
+.exhl{font-style:normal;font-size:10px;color:#8a6d15;background:#faf3dc;border:1px solid #e3d49e;border-radius:3px;padding:0 5px;margin-right:6px}
+.exlogbtns{display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 4px;border-top:1px dashed #efecdf}
+.opring{fill:none;stroke:var(--ac);stroke-width:4;pointer-events:none;stroke-linecap:round}
+.op{cursor:pointer}.op:hover circle:first-of-type{filter:brightness(1.06)}
+.exscene.exam .exsay .exsayl{color:#5c6b5f}

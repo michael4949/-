@@ -1290,6 +1290,34 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .demo2 .bd button{display:block;width:100%;text-align:left;margin-bottom:6px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px;color:var(--txt2);cursor:pointer;font-family:inherit}.demo2 .bd button:hover{background:#eaf0e4}
 @media print{.demo2{display:none !important}}
 
+/* ===== 陪练关卡 · 教练在侧 ===== */
+.exmain.coach{grid-template-columns:1fr 360px}
+.exlocbar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}.exlocbar:empty{display:none}
+.exloc{font-size:11.5px;color:#5c6b5f;background:#f1f1e6;border:1px solid #e2dfd0;border-radius:14px;padding:4px 12px;cursor:pointer}
+.exloc:hover{border-color:#c9a227;color:#8a6d15}.exloc.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.exsay{display:flex;gap:8px;align-items:center;margin-top:10px;background:#f7f8f1;border:1px solid #e2dfd0;border-radius:10px;padding:8px 10px}
+.exsayl{font-size:11px;color:#8b988c;white-space:nowrap;letter-spacing:.5px}
+.exin.wide{flex:1;width:auto}
+.exzv .exin.wide{min-width:240px}
+.excoach{display:flex;flex-direction:column;gap:12px}
+.excoachcard{padding:10px 12px 12px;display:flex;flex-direction:column;align-items:center}
+.exdhwrap{width:100%;height:230px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+#exdh{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center}
+.excoachnm{text-align:center;margin-top:4px}.excoachnm b{display:block;font-size:14px;color:#1f2d24}.excoachnm span{font-size:11px;color:#8b988c}
+.exlogcard .hcb{padding:6px 8px}
+.exlog{max-height:340px;min-height:180px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px 4px}
+.exlog .msg{display:flex;gap:8px;align-items:flex-start}.exlog .msg .av{width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.exlog .msg.o{flex-direction:row-reverse}.exlog .msg.o .av{background:#c9a227}
+.exlog .msg .bd{background:#fff;border:1px solid #e2dfd0;border-radius:10px;padding:7px 10px;font-size:12.5px;color:#3c5245;line-height:1.65;max-width:86%}
+.exlog .msg.o .bd{background:#fbf7e6;border-color:#e3d49e}
+.exlog .msg.bad .bd{border-color:#e3d49e;background:#fdf9ec}.exlog .msg.red .bd{border-color:#e0a89f;background:#fbe9e7;color:#7a1414}.exlog .msg.hint .bd{border-left:3px solid #c9a227}
+.exlog.rv{max-height:300px}
+.exhl{font-style:normal;font-size:10px;color:#8a6d15;background:#faf3dc;border:1px solid #e3d49e;border-radius:3px;padding:0 5px;margin-right:6px}
+.exlogbtns{display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 4px;border-top:1px dashed #efecdf}
+.opring{fill:none;stroke:var(--ac);stroke-width:4;pointer-events:none;stroke-linecap:round}
+.op{cursor:pointer}.op:hover circle:first-of-type{filter:brightness(1.06)}
+.exscene.exam .exsay .exsayl{color:#5c6b5f}
+
 </style>
 </head>
 <body></body>
@@ -5684,7 +5712,7 @@ function homeBoot() {
       <nav class="hnav" id="hnav">
         <span class="hnavi" data-h="home">工作台</span>
         <span class="hnavi" data-h="plaza">教练中心</span>
-        <span class="hnavi" data-h="exam">题库考试</span>
+        <span class="hnavi" data-h="exam">陪练关卡</span>
         <span class="hnavi" data-h="arena">陪练舱</span>
         <span class="hnavi" data-h="review">评分复盘</span>
         <span class="hnavi" data-h="growth">成长档案</span>
@@ -5752,7 +5780,7 @@ function pageHome() {
   const order = DIMS.map((n, i) => [n, now8[i], i]).sort((x, y) => x[1] - y[1]);
   const w1 = order[0], w2 = order[1];
   const last = SESSIONS[0], lastEx = recs[0];
-  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，成绩会直接落到能力雷达并反馈给班组长。`;
+  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，教练全程在侧，成绩会直接落到能力雷达并反馈给班组长。`;
   return `
   <section class="hero">
     <div class="hgreet">
@@ -5761,7 +5789,7 @@ function pageHome() {
       <div class="hkpis hg">
         <div class="kpi ${certOk >= 16 ? 'good' : 'warn'}"><b>${certOk}/20</b><span>专业项目 建议授权</span></div>
         <div class="kpi ${okDims < DIMS.length ? 'warn' : 'good'}"><b>${okDims}/${DIMS.length}</b><span>能力维度 达标</span></div>
-        <div class="kpi"><b>${recs.length}</b><span>题库考试 次数</span></div>
+        <div class="kpi"><b>${recs.length}</b><span>陪练关卡 次数</span></div>
         <div class="kpi"><b>${A.cnt}</b><span>近30天陪练场次</span></div>
       </div>
       <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
@@ -5785,7 +5813,7 @@ function pageHome() {
     <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
       <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
     <div class="hcard ck tr ho"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>题库考试成绩</b><span>${recs.length ? '最近 ' + Math.min(5, recs.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${recs.length ? recs.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去题库考试</button>`}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>陪练关卡成绩</b><span>${recs.length ? '最近 ' + Math.min(5, recs.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${recs.length ? recs.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去陪练关卡</button>`}</div></div>
     <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
     <div class="hcard ck w hg"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
     <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
@@ -5796,7 +5824,7 @@ function pageHome() {
       <div class="rcard hg">
         <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
         <b>${e.n}</b>
-        <div class="tk3">题库考试 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
+        <div class="tk3">陪练关卡 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
         <button class="btn pri" data-exstart="${e.id}">${r.act}</button>
       </div>`; } const c = COACHES.find(x => x.id === r.coach); return `
       <div class="rcard hg">
@@ -6188,7 +6216,7 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台（底座页面） ---------------- */
 const IMPL_STATUS = [
-  ['题库考试判定：热区、顺序、阀位、地刀三位置一致性、填空、问答要点召回', '规则 · 真实运行'],
+  ['陪练关卡判定：口述读数 / 状态解析、操作前置与红线、地刀三位置一致性、汇报要素、逐级提示', '规则 · 真实运行'],
   ['知识库召回：问教练、口述汇报追问', '本机检索 · 真实运行（非在线大模型）'],
   ['语音识别：口述汇报、问答', '联网时浏览器识别（真实）；离线自动降级为文字输入'],
   ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
@@ -6535,7 +6563,7 @@ function pageReview() {
             <div class="chips" style="justify-content:center">${[['prev', '上一场'], ['best', '最佳场'], ['avg', '30天均值']].map(([k, n]) => `<span class="chip ${RV.cmp === k ? 'on' : ''}" data-rvcmp="${k}">${n}</span>`).join('')}</div>
             ${chRadar(DIMS6, s.dims, cmpVals, { w: 330, h: 240, l1: '本场', l2: cmpLabel })}<div class="tk3" style="text-align:center">本场 vs ${cmpLabel} · 顶点可查明细</div></div>
         </section>
-        ${examRecords().filter(r => r.who === HOME_USER.name).length ? `<section class="hcard ho"><div class="hch"><b>题库考试记录</b><span>${examRecords().filter(r => r.who === HOME_USER.name).length} 条 · 本机保存 · 已同步组长工作台</span></div><div class="hcb"><table class="htbl"><tr><th>时间</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>复核</th><th></th></tr>${examRecords().filter(r => r.who === HOME_USER.name).slice(0, 5).map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">复盘</button></td></tr>`).join('')}</table></div></section>` : ''}
+        ${examRecords().filter(r => r.who === HOME_USER.name).length ? `<section class="hcard ho"><div class="hch"><b>陪练关卡记录</b><span>${examRecords().filter(r => r.who === HOME_USER.name).length} 条 · 本机保存 · 已同步组长工作台</span></div><div class="hcb"><table class="htbl"><tr><th>时间</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>复核</th><th></th></tr>${examRecords().filter(r => r.who === HOME_USER.name).slice(0, 5).map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">复盘</button></td></tr>`).join('')}</table></div></section>` : ''}
         <section class="hcard hg"><div class="hch"><b>AI 复盘</b><em class="ai">AI</em><span>由本场留痕数据生成</span></div>
           <div class="hcb"><div class="airv">${aiReview(s, prev)}</div></div></section>
         <section class="hcard ho"><div class="hch"><b>场次回放</b><span>逐项时间轴 · 绿=完成 金=不规范 橙=严重 红=一票否决 · 小点=用了提示</span>
@@ -7100,6 +7128,7 @@ const SC = {
   t(x, y, s, o) { o = o || {}; return `<text x="${x}" y="${y}" text-anchor="${o.a || 'middle'}" font-size="${o.fs || 10}" fill="${o.c || '#3c4a40'}" ${o.b ? 'font-weight="700"' : ''} ${o.m ? 'font-family="monospace"' : ''}>${s}</text>`; },
   plate(x, y, w, h, s, fs) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#fff" stroke="#7a1f16" stroke-width="2"/>${this.t(x + w / 2, y + h / 2 + (fs || 12) * .36, s, { fs: fs || 12, c: '#b3271b', b: 1 })}`; },
   knob(x, y, left, right, pos) { const on = pos === right; return `<rect x="${x - 26}" y="${y - 26}" width="52" height="52" rx="6" fill="#eef0e6" stroke="#b9bfae"/><circle cx="${x}" cy="${y}" r="16" fill="#f8f9f3" stroke="#9aa392" stroke-width="2"/><g transform="rotate(${on ? 35 : -35} ${x} ${y})"><rect x="${x - 3}" y="${y - 18}" width="6" height="20" rx="2" fill="#2c3a31"/></g>${this.t(x - 30, y - 30, left, { fs: 8, a: 'end', c: on ? '#98a69c' : '#a8821b', b: !on })}${this.t(x + 30, y - 30, right, { fs: 8, a: 'start', c: on ? '#a8821b' : '#98a69c', b: on })}`; },
+  opBtn(op, x, y, c, s) { return `<g class="op" data-op="${op}" style="cursor:pointer">${this.btn(x, y, c, s)}</g>`; },
   btn(x, y, c, s) { return `<circle cx="${x}" cy="${y}" r="15" fill="#e9ebe0" stroke="#b9bfae" stroke-width="2"/><circle cx="${x}" cy="${y}" r="10" fill="${c}"/><circle cx="${x - 3}" cy="${y - 3}" r="3" fill="#fff" opacity=".45"/>${s ? this.t(x, y + 28, s, { fs: 8.5 }) : ''}`; },
   mcbRow(x, y, n, labels) { return labels.slice(0, n).map((l, i) => `<rect x="${x + i * 22}" y="${y}" width="18" height="34" rx="2" fill="#f3f4ee" stroke="#b9bfae"/><rect x="${x + i * 22 + 5}" y="${y + 4}" width="8" height="12" rx="1.5" fill="#2f6fd6"/><text x="${x + i * 22 + 9}" y="${y + 46}" text-anchor="middle" font-size="6" fill="#5c6b5f">${l}</text>`).join(''); },
   check(x, y) { return `<g class="hsdone" transform="translate(${x},${y})"><circle r="10" fill="#0e8f5a"/><path d="M -4.5 0 l 3 3.4 6 -6.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></g>`; },
@@ -7162,9 +7191,14 @@ function svgHmi1163(st, o) {
 /* 后台放大：开关位置遥信 */
 function zoomHmiCb(st) {
   const cb = st.cb === 'open';
-  return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#0f1512"/>${SC.t(210, 26, '培训三线1163开关 · 位置遥信', { fs: 12, c: '#e9f1ec', b: 1 })}
-    <rect x="150" y="60" width="120" height="120" rx="6" fill="#141b17" stroke="#2f3b34"/><rect x="190" y="100" width="40" height="40" fill="${cb ? '#0f1512' : '#e23b2e'}" stroke="${cb ? '#23b26a' : '#e23b2e'}" stroke-width="4"/>
-    ${SC.t(210, 200, cb ? '分闸位置 · 报文：1163 开关 分闸 变位' : '合闸位置 · 报文：无', { fs: 11, c: cb ? '#7ee0a8' : '#ff9a90', m: 1 })}</svg>`;
+  return `<svg viewBox="0 0 420 260" class="zsvg"><rect width="420" height="260" fill="#0f1512"/>${SC.t(210, 24, '培训三线1163开关 · 位置遥信与遥控操作', { fs: 12, c: '#e9f1ec', b: 1 })}
+    <rect x="30" y="44" width="150" height="150" rx="6" fill="#141b17" stroke="#2f3b34"/><rect x="85" y="99" width="40" height="40" fill="${cb ? '#0f1512' : '#e23b2e'}" stroke="${cb ? '#23b26a' : '#e23b2e'}" stroke-width="4"/>
+    ${SC.t(105, 214, cb ? '分闸位置 · 报文：1163 开关 分闸 变位' : '合闸位置 · 报文：无', { fs: 10, c: cb ? '#7ee0a8' : '#ff9a90', m: 1 })}
+    <rect x="210" y="44" width="180" height="150" rx="6" fill="#141b17" stroke="#2f3b34"/>${SC.t(300, 64, '遥控操作 · 按住执行', { fs: 10, c: '#9fb2a6' })}
+    <g>${SC.opBtn('cb:open', 260, 118, '#23b26a')}<text x="260" y="152" text-anchor="middle" font-size="10" fill="#c9d3cc">分闸</text></g>
+    <g>${SC.opBtn('cb:close', 340, 118, '#e23b2e')}<text x="340" y="152" text-anchor="middle" font-size="10" fill="#c9d3cc">合闸</text></g>
+    ${SC.t(300, 184, '预置 → 返校 → 执行', { fs: 8.5, c: '#5c6b5f', m: 1 })}
+    ${SC.t(210, 246, '看清位置后，把你看到的说出来', { fs: 9, c: '#5c6b5f' })}</svg>`;
 }
 function zoomHmiRows(st, kind) {
   const cb = st.cb === 'open', d4 = st.d4 === 'open';
@@ -7251,14 +7285,14 @@ function svgGroundPanel(st) {
     <!-- 五防锁 -->
     <g transform="translate(330,190)"><rect x="-26" y="-36" width="52" height="72" rx="6" fill="#2b2f2c"/><rect x="-14" y="-20" width="28" height="40" rx="3" fill="#1a1d1b" stroke="#5c6b5f"/><circle cy="0" r="7" fill="${st.unlocked ? '#e8b22a' : '#9aa392'}"/><rect x="-1.5" y="-9" width="3" height="10" fill="#1a1d1b"/>${SC.t(0, 54, '电气五防锁', { fs: 9 })}${SC.t(0, 66, st.unlocked ? '已解锁' : '闭锁', { fs: 8.5, c: st.unlocked ? '#a8821b' : '#7a8478', m: 1 })}</g>
     <!-- 按钮 -->
-    <g transform="translate(480,160)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15HA 116340 地刀 合闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.btn(0, 22, '#23b26a')}</g>
-    <g transform="translate(480,250)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15FA 116340 地刀 分闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.btn(0, 22, '#e23b2e')}</g>
+    <g transform="translate(480,160)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15HA 116340 地刀 合闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.opBtn('gnd:close', 0, 22, '#23b26a')}${SC.t(0, 48, '按住执行', { fs: 7, c: '#7a8478' })}</g>
+    <g transform="translate(480,250)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15FA 116340 地刀 分闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.opBtn('gnd:open', 0, 22, '#e23b2e')}</g>
     <g transform="translate(330,320)"><rect x="-60" y="-56" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -44, '15KS 控制方式切换', { fs: 7.5, c: '#5c4a10' })}${SC.knob(0, 0, '远方', '就地', st.loc || '远方')}</g>
     <g transform="translate(480,340)"><rect x="-60" y="-20" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15TA 急停按钮', { fs: 7.5, c: '#5c4a10' })}<circle cy="26" r="22" fill="#fbe98a" stroke="#a8821b" stroke-width="2"/><circle cy="26" r="15" fill="#e23b2e"/></g>
     <!-- 一次模拟 -->
     <g transform="translate(620,120)"><line x1="0" y1="0" x2="0" y2="300" stroke="#c8372d" stroke-width="4"/><line x1="0" y1="200" x2="-28" y2="200" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/><line x1="-28" y1="200" x2="${es ? -48 : -44}" y2="${es ? 200 : 182}" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="4" stroke-linecap="round"/><line x1="-52" y1="190" x2="-52" y2="210" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/><line x1="-58" y1="195" x2="-58" y2="205" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/>${SC.t(-30, 236, '116340', { fs: 9, m: 1, c: '#8a2a20' })}${SC.t(0, 320, '线路侧', { fs: 9, c: '#8a2a20' })}</g>
     <rect x="256" y="420" width="448" height="70" rx="4" fill="#eef0e6" stroke="#b9bfae"/>${SC.t(480, 444, `116340 地刀当前位置：${es ? '合闸' : '分闸'}`, { fs: 11, b: 1, c: es ? '#a8821b' : '#0e8f5a' })}${SC.t(480, 466, st.moving ? '地刀正在合闸 · 电机运行中' : '操作前：确认后台二次电压与高压带电显示装置均已确无电压', { fs: 8.5, c: '#7a8478' })}
-    ${SC.hs('lock', 296, 146, 68, 130)}${SC.hs('close', 404, 136, 152, 74)}${SC.hs('open', 404, 226, 152, 74)}${SC.hs('knob', 296, 284, 68, 80)}${SC.hs('stop', 414, 314, 132, 80)}`;
+    ${SC.hs('lock', 296, 146, 68, 130)}${SC.hs('knob', 296, 284, 68, 80)}${SC.hs('stop', 414, 314, 132, 80)}`;
 }
 
 /* ---------- 1163：现场全景（GIS 间隔 · 就地控制柜 · 地刀机构箱 · 连杆 三个检查点） ---------- */
@@ -7367,6 +7401,20 @@ function zoomValve(st, k) {
   return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#eef0ea"/><rect x="180" y="20" width="60" height="180" rx="30" fill="#c8372d"/><g transform="translate(210,110)"><rect x="-50" y="-44" width="100" height="88" rx="10" fill="#2b2f2c"/><circle r="30" fill="#c8372d" stroke="#8f1f16" stroke-width="4"/><g transform="rotate(${open ? 0 : 90})"><rect x="-40" y="-6" width="80" height="12" rx="6" fill="#2b2f2c"/><circle r="8" fill="#4a4f4a"/></g></g><rect x="290" y="80" width="100" height="60" rx="6" fill="#fff" stroke="#7a8478"/>${SC.t(340, 104, '阀位指示', { fs: 9, c: '#7a8478' })}${SC.t(340, 126, open ? '开 OPEN' : '关 SHUT', { fs: 14, b: 1, c: open ? '#0e8f5a' : '#b3372c' })}${SC.t(100, 110, '手柄与管道平行 = 开', { fs: 9, c: '#7a8478' })}${SC.t(100, 124, '手柄与管道垂直 = 关', { fs: 9, c: '#7a8478' })}${SC.t(210, 212, k === 'vOut' ? '最上方出水蝶阀' : '进水蝶阀', { fs: 11 })}</svg>`;
 }
 
+/* 紧急启动阀盒：关闭时按住盒盖打开 */
+function zoomBox(st) {
+  return `<svg viewBox="0 0 420 240" class="zsvg"><rect width="420" height="240" fill="#eef0ea"/><line x1="40" y1="120" x2="120" y2="120" stroke="#8f1f16" stroke-width="8"/>
+    <rect x="120" y="50" width="180" height="150" rx="10" fill="#cfd3c9" stroke="#5c6b5f" stroke-width="3"/>
+    ${st.boxOpen ? `<rect x="134" y="64" width="152" height="122" rx="6" fill="#3a3f3a"/><g transform="translate(210,130)"><circle r="26" fill="#c8372d" stroke="#8f1f16" stroke-width="3"/><rect x="-6" y="-70" width="12" height="70" rx="5" fill="#e8b22a" stroke="#8a6f18" stroke-width="2"/></g>${SC.t(210, 222, '盒盖已打开 · 可见手动阀手柄', { fs: 10, c: '#0e8f5a' })}` : `<g class="op" data-op="box:open" style="cursor:pointer"><rect x="134" y="64" width="152" height="122" rx="6" fill="#e6e9e0" stroke="#9aa392"/><rect x="200" y="112" width="20" height="26" rx="3" fill="#5c6b5f"/><rect x="150" y="76" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(210, 87, '手动应急启动', { fs: 8, c: '#5c4a10' })}${SC.t(210, 162, '按住盒盖打开', { fs: 9, c: '#5c6b5f' })}</g>${SC.t(210, 222, '紧急启动阀盒 · 盒盖关闭', { fs: 10, c: '#5c6b5f' })}`}
+    <rect x="310" y="90" width="70" height="60" rx="4" fill="#dfe3d8" stroke="#b9bfae"/>${SC.t(345, 124, '铰链', { fs: 8, c: '#7a8478' })}</svg>`;
+}
+/* 阀组编号牌（走到某套阀组前看到的） */
+function zoomPlate(st, n) {
+  return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#f3e9de"/><rect x="180" y="40" width="60" height="150" rx="30" fill="#c8372d"/><ellipse cx="210" cy="130" rx="46" ry="34" fill="#e8635a" stroke="#8f1f16"/>
+    ${SC.plate(100, 56, 220, 40, `#${n}主变雨淋阀`, 18)}${n === 3 ? `<circle cx="360" cy="70" r="14" fill="#e23b2e"><animate attributeName="opacity" values="1;.3;1" dur=".8s" repeatCount="indefinite"/></circle>` : ''}
+    ${SC.t(210, 208, '读一下编号牌，告诉我这是几号', { fs: 10, c: '#7a8478' })}</svg>`;
+}
+
 /* ---------- 雨淋阀：主变雨淋阀区域全景（#1–#4 四套阀组） ---------- */
 function svgRainPanorama(st) {
   const one = (x, n, fire) => `<g transform="translate(${x},0)"><rect x="-70" y="120" width="140" height="300" rx="6" fill="#e6e9e0" stroke="#b9bfae"/><rect x="-16" y="150" width="32" height="250" rx="16" fill="url(#pipeg)" stroke="#8f1f16"/><ellipse cy="270" rx="40" ry="32" fill="url(#pipeg)" stroke="#8f1f16" stroke-width="1.5"/><circle cx="-40" cy="230" r="14" fill="#fbfbf6" stroke="#5c6b5f" stroke-width="2"/><circle cx="-40" cy="330" r="14" fill="#fbfbf6" stroke="#5c6b5f" stroke-width="2"/><rect x="24" y="250" width="30" height="30" rx="4" fill="#cfd3c9" stroke="#5c6b5f"/><g transform="translate(0,178)"><rect x="-20" y="-16" width="40" height="32" rx="6" fill="#2b2f2c"/><rect x="-14" y="-3" width="28" height="6" rx="3" fill="#6b746b"/></g><g transform="translate(0,372)"><rect x="-20" y="-16" width="40" height="32" rx="6" fill="#2b2f2c"/><rect x="-14" y="-3" width="28" height="6" rx="3" fill="#6b746b"/></g>${SC.plate(-56, 86, 112, 24, `#${n}主变雨淋阀`, 11)}${fire ? `<g transform="translate(60,100)"><circle r="14" fill="#e23b2e"><animate attributeName="opacity" values="1;.3;1" dur=".8s" repeatCount="indefinite"/></circle></g>` : ''}</g>`;
@@ -7429,67 +7477,95 @@ function svgCtrlRoom() {
 }
 
 
-/* ===== 题库考试引擎：图片选择（大场景点击放大）/ 文字选择 / 填空 / 问答（知识库要点召回）/ 对话式口述汇报（语音或文字）/ 拖动操作
-   训练 / 演练 / 考核三种模式；错误记录不退出；关键错误立即弹原因并回到当前步；三类错误（错序 / 漏项 / 红线）反馈含 步骤 · 风险 · 依据 · 纠正动作；
-   复盘页给完整轨迹与错误的实际点击位置 / 正确位置 / 原因 / 正确处置；分数落到 8 维能力雷达；记录写本机存储，刷新可回看，组长工作台同步可见。 ===== */
+/* ===== 陪练关卡引擎（教练在侧 · 学员先动）=====
+   原则：教练只交代情境，不列步骤、不给勾选；学员自己决定看什么、做什么、说什么——
+   看：点设备走过去看，放大后用自己的话说出读数 / 状态；做：按住按钮、拖动手柄、转动把手才算操作；说：手指口述、汇报、提问、下结论（语音或文字）。
+   教练每一步即时回应：做对 → 肯定并推进；做错 / 漏了 → 逐级提示（方向 → 要点 → 答案），不代替学员做；触及红线 → 训练时当场制止，考核时记一票否决并引用依据。
+   记录写本机存储（xwt_exams），成绩落到 8 维能力雷达，组长工作台同步。 */
 
 const LS_EXAMS = 'xwt_exams';
 function examRecords() { return lsGet(LS_EXAMS, []); }
 function examSaveRec(r) { const l = examRecords(); l.unshift(r); lsSet(LS_EXAMS, l.slice(0, 40)); }
 function examTasks() { return lsGet(LS_TASKS, []).filter(t => t.exam); }
 const EXAM_MODES = {
-  teach: { n: '训练模式', d: '鼠标移到设备上出现轮廓高亮；点错显示部件名称；可查看提示；完成后显示标准名称' },
-  drill: { n: '演练模式', d: '不高亮；点错显示部件名称；提示计入记录并扣分' },
-  exam: { n: '考核模式', d: '无热区高亮、无设备名称提示、无按钮闪烁；只保留任务文字、操作反馈与最终评分' }
+  teach: { n: '训练模式', d: '教练全程在侧：做对肯定，做错逐级提示（方向 → 要点 → 答案），红线当场制止；提示不扣分' },
+  drill: { n: '演练模式', d: '教练在侧但少说：做错才提示，每级提示计入记录并扣分；红线当场制止' },
+  exam: { n: '考核模式', d: '教练只交代情境、不提示；错误与红线全部记录，一票否决引用依据，结束后统一复盘' }
 };
 const ERR_KIND = { red: '红线', order: '错序', miss: '漏项', id: '识别错误', judge: '判断错误', crit: '关键错误', read: '读数错误', ans: '回答不完整' };
 const EX_T = ms => Math.max(30, ms * Math.min(1, window.__DH_SPEED || 1));
+const HINT_F = [1, .7, .4, 0];
+const PRAISE = ['对。', '很好，就是这样。', '这一步做得规范。', '对，继续。', '好，判断正确。', '没错。'];
 
-const EX = { exam: null, mode: 'teach', si: 0, st: {}, done: {}, pend: 0, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: 0, fb: [], zoom: null, sel: [], talk: [], finished: null, task: null, arm: {}, stDone: false, timer: null, rec: null, weak: false, hintOn: false };
+const EX = { exam: null, mode: 'teach', si: 0, st: {}, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: 0, log: [], zoom: null, finished: null, task: null, arm: {}, stDone: false, timer: null, dh: null, loc: null, idleT: null, lastAct: 0, praiseI: 0, speakQ: Promise.resolve(), asked: 0 };
 
-/* ---------------- 开始 / 进入步骤 ---------------- */
+/* ---------------- 教练说话 / 对话记录 ---------------- */
+function coachSay(text, opt) {
+  opt = opt || {};
+  EX.log.push({ who: 'coach', t: text, k: opt.k || '', at: now() });
+  renderLog();
+  const dh = EX.dh;
+  if (!dh) { EX.pending = { plain: text.replace(/<[^>]+>/g, ''), opt }; return Promise.resolve(); }
+  if (opt.pose) dh.setPose(opt.pose);
+  if (opt.nod) setTimeout(() => dh.nod(opt.nod), 100);
+  if (opt.shake) setTimeout(() => dh.shake(), 100);
+  const plain = text.replace(/<[^>]+>/g, '');
+  const p = new Promise(res => { dh.speak(plain, { onEnd: res }); });
+  EX.speakQ = p.then(() => { if (opt.pose && opt.rest !== false) dh.setPose('idle'); });
+  return p;
+}
+function meSay(text, k) { EX.log.push({ who: 'me', t: text, k: k || '', at: now() }); renderLog(); }
+function praise() { const p = PRAISE[EX.praiseI++ % PRAISE.length]; return p; }
+function renderLog() {
+  const box = $('#ex_log'); if (!box) return;
+  const c = EX.exam ? EX.exam.coach : { short: '教' };
+  box.innerHTML = EX.log.slice(-40).map(m => `<div class="msg ${m.who === 'me' ? 'o' : 'j'} ${m.k}"><div class="av">${m.who === 'me' ? '我' : c.short}</div><div class="bd">${m.t}</div></div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---------------- 开始 / 进入情境 ---------------- */
 function examStart(id, mode, opt) {
   const ex = EXAMS.find(e => e.id === id); if (!ex) return;
-  Object.assign(EX, { exam: ex, mode: mode || 'teach', si: 0, done: {}, pend: 0, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: Date.now(), fb: [], zoom: null, sel: [], talk: [], finished: null, task: (opt && opt.task) || null, stDone: false, rec: null, weak: false, hintOn: false });
+  if (EX.dh) { EX.dh.destroy(); EX.dh = null; }
+  Object.assign(EX, { exam: ex, mode: mode || 'teach', si: 0, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: Date.now(), log: [], zoom: null, finished: null, task: (opt && opt.task) || null, stDone: false, loc: null, lastAct: Date.now(), praiseI: 0, asked: 0 });
   EX.st = ex.init(EX.arm || {});
-  examEnter();
   if (location.hash !== '#exam') goPage('exam'); else rerenderExam();
+  examEnter();
 }
 function examStation() { return EX.exam ? EX.exam.stations[EX.si] : null; }
+function goalOf(id) { const s = examStation(); return s && s.goals ? s.goals.find(g => g.id === id) : null; }
+function gState(id) { return EX.goals[id] || (EX.goals[id] = { done: false, hint: 0, wrong: 0, got: 0 }); }
 function examEnter() {
   const s = examStation(); if (!s) return;
-  EX.done = {}; EX.pend = 0; EX.wrongs = 0; EX.zoom = null; EX.sel = []; EX.talk = []; EX.stDone = false; EX.weak = false; EX.hintOn = false; EX.fb = [];
+  EX.goals = {}; EX.zoom = null; EX.stDone = false; EX.lastAct = Date.now();
   if (s.enter) s.enter(EX.st);
-  if (s.type === 'talk') EX.talk.push({ who: 'sys', t: s.open });
-  if (s.type === 'auto') { rerenderExam(); examAutoRun(s); return; }
+  EX.loc = s.locs ? (s.start || Object.keys(s.locs)[0]) : null;
+  rerenderExam();
+  const brief = typeof s.brief === 'function' ? s.brief(EX.st, EX.mode) : s.brief;
+  if (s.type === 'auto') { coachSay(brief, { pose: 'explain' }); examAutoRun(s); return; }
+  coachSay(brief, { pose: s.pose || 'explain' });
 }
 async function examAutoRun(s) {
-  for (let i = 0; i < s.items.length; i++) { await new Promise(r => setTimeout(r, EX_T(420))); EX.done['a' + i] = true; if (s.apply) s.apply(EX.st, i); const li = $(`#ex_auto li[data-i="${i}"]`); if (li) li.classList.add('on'); }
-  await new Promise(r => setTimeout(r, EX_T(600)));
+  for (let i = 0; i < s.items.length; i++) { await new Promise(r => setTimeout(r, EX_T(420))); EX.goals['a' + i] = { done: true }; if (s.apply) s.apply(EX.st, i); const li = $(`#ex_auto li[data-i="${i}"]`); if (li) li.classList.add('on'); }
+  await new Promise(r => setTimeout(r, EX_T(500)));
   EX.track.push({ sid: s.id, title: s.title, auto: true, items: s.items.map(t => ({ n: t, ok: true, got: 0, pts: 0 })) });
   examNext();
 }
 function examNext() {
   if (!EX.exam) return;
   if (EX.si >= EX.exam.stations.length - 1) return examFinish();
-  EX.si += 1; examEnter(); rerenderExam();
+  EX.si += 1; examEnter();
 }
-function examQuit() { if (EX.timer) { clearInterval(EX.timer); EX.timer = null; } EX.exam = null; EX.finished = null; rerenderExam(); }
+function examQuit() { if (EX.timer) { clearInterval(EX.timer); EX.timer = null; } if (EX.dh) { EX.dh.destroy(); EX.dh = null; } EX.exam = null; EX.finished = null; rerenderExam(); }
+function touch() { EX.lastAct = Date.now(); }
 
-/* ---------------- 反馈 / 记错 / 完成 ---------------- */
-function exFb(t, k) { EX.fb.unshift({ t, k: k || '', at: now() }); const el = $('#ex_fb'); if (el) el.innerHTML = exFbHtml(); }
-function exFbHtml() { return EX.fb.slice(0, 8).map(f => `<div class="exfbi ${f.k}"><span class="mono">${f.at}</span>${f.t}</div>`).join('') || '<div class="tk3">按任务提示在画面上操作。</div>'; }
-function exNameOf(s, id) { const sp = s.spots && s.spots[id]; return sp ? sp.n : id; }
-function exWrong(kind, o) {
+/* ---------------- 记错 / 提示 / 完成目标 ---------------- */
+function exErr(kind, o) {
   const s = examStation();
-  EX.wrongs += 1; EX.pend += 1;
-  const e = { sid: s.id, part: s.part || '', title: s.title, kind, text: o.text || '', click: o.click || '', right: o.right || (s.need ? s.need.map(id => exNameOf(s, id)).join('、') : ''), why: o.why || s.why || '', fix: o.fix || s.fix || '', rule: o.rule || s.rule || '', risk: o.risk || s.risk || '', crit: !!o.crit, at: now() };
+  EX.wrongs += 1;
+  const e = { sid: s.id, part: s.part || '', title: s.title, kind, text: o.text || '', click: o.click || '', right: o.right || '', why: o.why || '', fix: o.fix || '', rule: o.rule || s.rule || '', risk: o.risk || s.risk || '', crit: !!o.crit, goal: o.goal || '', at: now() };
   EX.errs.push(e);
-  const showName = EX.mode !== 'exam' && o.click;
-  exFb(`${o.text || ''}${showName ? `<i class="exnm">${o.click}</i>` : ''}`, kind === 'red' ? 'red' : e.crit ? 'crit' : 'bad');
-  if (e.crit || kind === 'red') exCritDialog(e);
-  if (EX.wrongs >= 3 && EX.mode !== 'exam' && !EX.weak) { EX.weak = true; exFb('已连续多次操作错误，画面上给出弱提示。', ''); }
-  rerenderScene();
+  return e;
 }
 function exCritDialog(e) {
   const m = el('div', 'mask'); m.innerHTML = `<div class="dlg red" style="width:min(640px,96vw)">
@@ -7499,153 +7575,217 @@ function exCritDialog(e) {
       <div><label>风险</label>${e.risk || '—'}</div>
       <div><label>依据</label>${e.rule || '—'}</div>
       <div><label>纠正动作</label>${e.fix || '—'}</div>
-      ${e.kind === 'red' ? '<div class="tk3">本次成绩按一票否决记 0 分；纠正后可继续完成，过程全部进入复盘。</div>' : '<div class="tk3">关键错误已进入考核记录；回到当前步骤重新操作。</div>'}
+      ${e.kind === 'red' ? '<div class="tk3">本次成绩按一票否决记 0 分；纠正后继续完成，过程全部进入复盘。</div>' : '<div class="tk3">关键错误已进入记录；回到当前步骤重新操作。</div>'}
     </div></div>
     <div class="df"><button class="btn pri" id="exc_ok">回到当前步骤</button></div></div>`;
   document.body.appendChild(m); m.querySelector('.cls').onclick = m.querySelector('#exc_ok').onclick = () => m.remove();
 }
-function exSpotDone(id, sp, fbText) {
-  const s = examStation();
-  EX.done[id] = true;
-  const f = EX.pend === 0 ? 1 : EX.pend <= 1 ? .5 : 0; EX.pend = 0;
-  const pts = s.spotPts ? (s.spotPts[id] || 0) : (s.need && s.need.length ? +(s.pts / s.need.length).toFixed(2) : s.pts);
-  EX.done['_' + id] = { got: +(pts * f).toFixed(2), pts };
-  exFb(`${fbText || (sp && (sp.okfb || (sp.fb && sp.fb.ok))) || '已完成。'}${EX.mode === 'teach' && sp ? `<i class="exnm">${sp.n}</i>` : ''}`, 'ok');
-  const need = s.need || [];
-  if (need.every(k => EX.done[k])) { if (s.confirmBtn && !EX.done['_confirm']) { EX.confirmReady = true; } else if (s.judge) { EX.judgeReady = true; } else exStationDone(); }
-  rerenderScene(); const l = $('#ex_list'); if (l) l.innerHTML = exListHtml(); const q = $('#ex_q'); if (q) q.innerHTML = exQuestionHtml();
+/* 逐级提示：方向 → 要点 → 答案（训练免费；演练计入并扣分；考核不给） */
+function exHint(g, auto) {
+  if (!g || EX.mode === 'exam') { if (EX.mode === 'exam' && !auto) coachSay('考核模式下我不提示，按你的判断做。', { pose: 'listen' }); return; }
+  const gs = gState(g.id); const lv = Math.min(gs.hint, 2);
+  gs.hint = Math.min(3, gs.hint + 1); EX.hints += 1;
+  const txt = (g.hints || [])[lv] || g.n;
+  coachSay(`<i class="exhl">提示 ${lv + 1}</i>${txt}`, { pose: 'point', k: 'hint' });
+  if (EX.mode === 'teach' && lv >= 1) { rerenderScene(); }
 }
-function exStationDone(extra) {
+function nextGoal() {
+  const s = examStation(); if (!s || !s.goals) return null;
+  return s.goals.find(g => !gState(g.id).done && (g.after || []).every(a => gState(a).done)) || s.goals.find(g => !gState(g.id).done);
+}
+function goalDone(g, txt, o) {
+  o = o || {};
+  const gs = gState(g.id); gs.done = true;
+  const f = HINT_F[Math.min(3, gs.hint + (EX.mode === 'exam' ? Math.min(2, gs.wrong) : 0))];
+  gs.got = +((g.pts || 0) * f).toFixed(2);
+  const line = `${o.noPraise ? '' : praise()}${txt || g.praise || ''}`;
+  coachSay(line, { pose: 'nod', nod: 1 });
+  const s = examStation();
+  rerenderScene();
+  if (s.goals.every(x => gState(x.id).done)) stationDone();
+  else if (g.next) { const nx = typeof g.next === 'function' ? g.next(EX.st, EX.mode) : g.next; if (nx) EX.speakQ.then(() => coachSay(nx, { pose: 'explain' })); }
+}
+function stationDone() {
   const s = examStation(); if (EX.stDone) return;
-  EX.stDone = true; EX.confirmReady = false; EX.judgeReady = false;
-  const items = (s.need || []).map(id => ({ id, n: exNameOf(s, id), ok: true, got: (EX.done['_' + id] || {}).got || 0, pts: (EX.done['_' + id] || {}).pts || 0 }));
-  if (extra) items.push(...extra);
+  EX.stDone = true;
+  const items = s.goals.map(g => { const gs = gState(g.id); return { id: g.id, n: g.n, ok: gs.wrong === 0 && gs.hint === 0, hint: gs.hint, wrong: gs.wrong, got: gs.got, pts: g.pts || 0 }; });
   const got = +items.reduce((a, i) => a + i.got, 0).toFixed(2), pts = +items.reduce((a, i) => a + i.pts, 0).toFixed(2);
-  EX.track.push({ sid: s.id, part: s.part || '', title: s.title, items, got, pts: s.pts != null ? s.pts : pts, ratio: pts ? got / pts : (extra && extra[0] && extra[0].ratio != null ? extra[0].ratio : 1) });
-  if (s.onDone) exFb(s.onDone, 'ok');
-  if (EX.mode === 'teach' && s.spots && s.need) exFb('标准名称：' + s.need.map(id => exNameOf(s, id)).join('、'), '');
+  const ratio = pts ? got / pts : (items.every(i => i.ok) ? 1 : items.some(i => i.hint < 3 && i.wrong < 2) ? .6 : 0);
+  EX.track.push({ sid: s.id, part: s.part || '', title: s.title, items, got, pts, ratio });
   if (s.after) s.after(EX.st);
-  rerenderScene(); const q = $('#ex_q'); if (q) q.innerHTML = exQuestionHtml(); const l = $('#ex_list'); if (l) l.innerHTML = exListHtml();
+  const outro = typeof s.outro === 'function' ? s.outro(EX.st, EX.mode) : s.outro;
+  const go = () => { if (EX.exam && EX.stDone) examNext(); };
+  if (outro) EX.speakQ.then(() => coachSay(outro, { pose: 'confirm' }).then(() => setTimeout(go, EX_T(700))));
+  else EX.speakQ.then(() => setTimeout(go, EX_T(700)));
+  rerenderScene();
 }
 
-/* ---------------- 图片选择：热区点击 → 放大 → 判断 ---------------- */
-function examSpot(id) {
-  const s = examStation(); if (!s || EX.stDone) return;
-  const sp = s.spots && s.spots[id]; if (!sp) return;
-  if (EX.done[id]) return toast('该项已检查', '');
-  if (sp.zoom) { EX.zoom = id; renderZoom(); return; }
-  examJudgeSpot(id, null);
-}
-function examJudgeSpot(id, verdict) {
-  const s = examStation(), sp = s.spots[id];
-  const target = (s.need || []).includes(id);
-  if (target && s.order && s.order[id]) {
-    const missing = s.order[id].filter(r => !EX.done[r]);
-    if (missing.length) {
-      exCloseZoom();
-      if (s.red && s.red[id]) { const r = s.red[id]; EX.red = true; return exWrong('red', { text: r.text, click: sp.n, right: missing.map(x => exNameOf(s, x)).join('、'), why: r.why, fix: r.fix, rule: r.rule, risk: r.risk, crit: true }); }
-      return exWrong('order', { text: s.orderText || '顺序错误：应先完成 ' + missing.map(x => exNameOf(s, x)).join('、'), click: sp.n, right: missing.map(x => exNameOf(s, x)).join('、'), fix: '先完成前置检查，再进行本项操作' });
-    }
+/* ---------------- 学员动作 ①：看（走到设备前，放大观察，用自己的话说出读数 / 状态） ---------------- */
+function examLook(dev) {
+  const s = examStation(); if (!s || EX.stDone) return; touch();
+  const sp = s.spots && s.spots[dev]; if (!sp) return;
+  if (sp.walk) { sp.walk(EX.st); }
+  if (sp.zoom) { EX.zoom = dev; renderZoom(); }
+  const g = s.goals.find(x => (x.kind === 'look' || x.kind === 'op') && (x.dev || []).includes(dev) && !gState(x.id).done);
+  if (g && g.kind === 'op' && !sp.zoom) return;
+  if (!g) {
+    if (sp.crit && (sp.critOn ? sp.critOn(EX.st) : true)) { const e = exErr('crit', { text: sp.bad || `${sp.n}不是现在要操作的设备。`, click: sp.n, right: (nextGoal() || {}).n || '', fix: sp.fix || '', risk: sp.risk || '', rule: sp.rule || '', crit: true }); coachSay(sp.bad || '停，这不是你现在要动的设备。', { pose: 'stop', shake: true, k: 'bad' }); exCritDialog(e); return; }
+    if (EX.mode !== 'exam') coachSay(sp.bad || `${sp.n}。这不是你现在要看的。`, { pose: 'correct', k: 'bad' });
+    else if (sp.bad && sp.always) coachSay(sp.bad, { pose: 'correct', k: 'bad' });
+    return;
   }
-  if (!target) { exCloseZoom(); return exWrong(sp.crit ? 'crit' : 'id', { text: sp.bad || (s.badText || '该部件不是本项的检查对象。'), click: sp.n, why: sp.why || '', fix: sp.fix || s.fix || '', rule: sp.rule || s.rule || '', risk: sp.risk || s.risk || '', crit: !!sp.crit }); }
-  if (sp.verdicts) {
-    const truth = sp.truth(EX.st), txt = sp.fb[truth];
-    exCloseZoom();
-    if (verdict !== truth) return exWrong('judge', { text: txt, click: `${sp.n} · 判断为「${(sp.verdicts.find(v => v.k === verdict) || {}).t}」`, right: `${sp.n} · ${(sp.verdicts.find(v => v.k === truth) || {}).t}`, why: sp.why || '', fix: sp.fix || '', rule: sp.rule || '', risk: sp.risk || '', crit: !!(sp.critOnMiss && truth !== 'ok') });
-    if (sp.onTruth) sp.onTruth(EX.st, truth);
-    return exSpotDone(id, sp, txt);
-  }
-  exCloseZoom();
-  if (sp.act) sp.act(EX.st);
-  exSpotDone(id, sp, sp.okfb);
+  if (g.kind === 'op') return;                    // 操作类：在放大画面里按住 / 拖动
+  gState(g.id).seen = true;
+  if (!sp.zoom) { coachSay(g.ask || '看到什么，说出来。', { pose: 'listen' }); }
 }
 function renderZoom() {
-  const s = examStation(), id = EX.zoom, sp = s.spots[id]; const z = $('#ex_zoom'); if (!z) return;
-  const title = EX.mode === 'exam' ? '放大查看' : sp.n;
+  const s = examStation(), dev = EX.zoom, sp = s.spots[dev]; const z = $('#ex_zoom'); if (!z) return;
+  const g = s.goals.find(x => (x.dev || []).includes(dev) && !gState(x.id).done);
+  const title = EX.mode === 'exam' && !sp.plain ? '观察' : sp.n;
   z.hidden = false;
-  z.innerHTML = `<div class="exzb"><div class="exzh"><b>${title}</b><span class="cls" data-zclose="1">×</span></div>${sp.zoom(EX.st)}
-    <div class="exzv">${sp.verdicts ? sp.verdicts.map(v => `<button class="btn ${v.pri ? 'pri' : ''}" data-verdict="${v.k}">${v.t}</button>`).join('') : sp.actBtn ? `<button class="btn pri" data-verdict="act">${sp.actBtn}</button>` : `<button class="btn pri" data-verdict="ok">${sp.okBtn || '确认'}</button>`}</div></div>`;
+  z.innerHTML = `<div class="exzb"><div class="exzh"><b>${title}</b><span class="tk3">${g && g.kind === 'op' ? (g.opHint || '按住操作') : '看清楚后，用自己的话说出来'}</span><span class="cls" data-zclose="1">×</span></div>${sp.zoom(EX.st, EX.mode)}
+    ${g && g.kind === 'op' ? '' : `<div class="exzv"><input id="ex_zsay" class="exin wide" autocomplete="off" placeholder="${g && g.ask ? g.ask : '你看到的读数 / 状态是…'}"><button class="exmic" data-exmic="#ex_zsay" title="语音">●</button><button class="btn pri" data-zsay="1">说</button></div>`}</div>`;
+  exBindOps(z);
+  const i = $('#ex_zsay'); if (i) setTimeout(() => i.focus(), 30);
 }
 function exCloseZoom() { EX.zoom = null; const z = $('#ex_zoom'); if (z) { z.hidden = true; z.innerHTML = ''; } }
-function examVerdict(k) {
-  const id = EX.zoom; if (!id) return; const s = examStation(), sp = s.spots[id];
-  if (k === 'act' || (k === 'ok' && !sp.verdicts)) return examJudgeSpot(id, null);
-  examJudgeSpot(id, k);
+
+/* ---------------- 学员动作 ②：做（按住 / 拖动 / 转动才算操作） ---------------- */
+function exBindOps(root) {
+  root.querySelectorAll('[data-op]').forEach(h => {
+    if (h._bound) return; h._bound = true;
+    let t0 = 0, raf = 0, ring = null;
+    const dur = EX_T(900);
+    const start = e => {
+      const s = examStation(); if (!s || EX.stDone) return;
+      e.preventDefault(); try { h.setPointerCapture(e.pointerId); } catch (x) { }
+      t0 = performance.now();
+      const bb = h.getBBox(); const cx = bb.x + bb.width / 2, cy = bb.y + bb.height / 2, r = Math.max(bb.width, bb.height) / 2 + 8;
+      ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', r); ring.setAttribute('class', 'opring');
+      ring.setAttribute('stroke-dasharray', `${2 * Math.PI * r}`); ring.setAttribute('stroke-dashoffset', `${2 * Math.PI * r}`);
+      h.appendChild(ring);
+      const step = () => { const p = Math.min(1, (performance.now() - t0) / dur); ring.setAttribute('stroke-dashoffset', `${2 * Math.PI * r * (1 - p)}`); if (p >= 1) { cancel(); exOp(h.dataset.op); return; } raf = requestAnimationFrame(step); };
+      raf = requestAnimationFrame(step);
+    };
+    const cancel = () => { if (raf) cancelAnimationFrame(raf); raf = 0; if (ring && ring.parentNode) ring.remove(); ring = null; };
+    h.addEventListener('pointerdown', start);
+    h.addEventListener('pointerup', cancel); h.addEventListener('pointercancel', cancel); h.addEventListener('pointerleave', cancel);
+  });
 }
-function examConfirm() { const s = examStation(); if (!EX.confirmReady) return; EX.done['_confirm'] = true; exStationDone(); }
-function examJudge(i) {
-  const s = examStation(); if (!s.judge || EX.stDone) return;
-  const need = s.need || [], checked = need.filter(id => EX.done[id]).length, truth = s.judge.truth(EX.st);
-  if (checked < need.length) return exWrong('miss', { text: s.judge.incomplete, click: `只检查了 ${checked}/${need.length} 项即判定`, right: need.map(id => exNameOf(s, id)).join('、'), fix: s.judge.fix, rule: s.rule, risk: s.risk, why: s.why });
-  if (i !== truth) return exWrong('judge', { text: s.judge.fb[truth], click: `判定为「${s.judge.opts[i]}」`, right: s.judge.opts[truth], fix: s.judge.fix, rule: s.rule, risk: s.risk, why: s.why });
-  exFb(s.judge.fb[truth], 'ok');
-  if (s.judge.after) s.judge.after(EX.st, truth);
-  exStationDone();
+/* 执行一次操作：op = 'dev:action'。先查前置：训练 / 演练当场制止，考核记红线并复位 */
+function exOp(op) {
+  const s = examStation(); if (!s || EX.stDone) return; touch();
+  const [dev, action] = op.split(':');
+  const g = s.goals.find(x => x.kind === 'op' && x.op === op && !gState(x.id).done);
+  if (!g) {
+    const bad = s.goals.find(x => x.kind === 'op' && x.op === op);
+    const sp = s.spots && s.spots[dev];
+    if (bad && gState(bad.id).done) return coachSay('这个操作已经做过了。', { pose: 'listen' });
+    const text = (s.badOps && s.badOps[op]) || (sp && sp.bad) || '这不是现在该做的操作。';
+    const crit = !!(s.critOps && s.critOps[op]);
+    const e = exErr(crit ? 'crit' : 'order', { text, click: sp ? sp.n + '·' + action : op, right: (nextGoal() || {}).n || '', fix: s.fix || '', crit });
+    exCloseZoom(); coachSay(text, { pose: 'stop', shake: true, k: 'bad' }); if (crit) exCritDialog(e); return;
+  }
+  const missing = (g.after || []).filter(a => !gState(a).done);
+  if (missing.length) {
+    exCloseZoom();
+    const names = missing.map(a => (goalOf(a) || {}).n).join('、');
+    if (g.red) {
+      if (EX.mode === 'exam') {
+        EX.red = true; if (g.act) g.act(EX.st);
+        const e = exErr('red', { text: g.red.text, click: g.n, right: names, why: g.red.why, fix: g.red.fix, rule: g.red.rule, risk: g.red.risk, crit: true, goal: g.id });
+        gState(g.id).wrong += 1;
+        coachSay(`<b>停。</b>${g.red.text}依据：${g.red.rule}。${g.red.reset || '现在复位，按正确顺序重新来。'}`, { pose: 'stop', shake: true, k: 'red' });
+        if (g.red.undo) g.red.undo(EX.st);
+        exCritDialog(e); rerenderScene(); return;
+      }
+      gState(g.id).wrong += 1; gState(g.id).hint = Math.max(gState(g.id).hint, 1);
+      exErr('order', { text: g.red.text, click: g.n, right: names, why: g.red.why, fix: g.red.fix, rule: g.red.rule, risk: g.red.risk, goal: g.id });
+      coachSay(`<b>停！</b>${g.red.stop || g.red.text}${EX.mode === 'teach' ? ' 先把' + names + '做完。' : ''}`, { pose: 'stop', shake: true, k: 'red' });
+      return;
+    }
+    gState(g.id).wrong += 1;
+    exErr('order', { text: `顺序不对：${g.n}之前还有 ${names} 没做。`, click: g.n, right: names, goal: g.id });
+    coachSay(EX.mode === 'exam' ? '先想想顺序。' : `先别急。${g.n}之前，${names}还没做。`, { pose: 'correct', shake: true, k: 'bad' });
+    return;
+  }
+  if (g.act) g.act(EX.st);
+  exCloseZoom();
+  goalDone(g, g.praise);
+}
+function exBindDrag(svg) {
+  const h = svg.querySelector('[data-handle]'); if (!h) return;
+  const pt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
+  let on = false; h.style.cursor = 'grab';
+  h.onpointerdown = e => { on = true; try { h.setPointerCapture(e.pointerId); } catch (x) { } e.preventDefault(); touch(); };
+  h.onpointermove = e => { if (!on) return; const p = pt(e); const ang = Math.atan2(p.x - 440, -(p.y - 300)) * 180 / Math.PI; const pct = Math.max(0, Math.min(100, ang / 90 * 100)); EX.st.handle = pct; h.setAttribute('transform', `rotate(${-90 * pct / 100})`); const f = svg.querySelector('#exbar_fill'), t = svg.querySelector('#exbar_txt'); if (f) { f.setAttribute('width', 272 * pct / 100); f.setAttribute('fill', pct >= 90 ? '#23b26a' : '#e8b22a'); } if (t) t.textContent = pct >= 90 ? '全开位置' : pct > 8 ? `开度 ${Math.round(pct)}%` : '关闭位置'; };
+  h.onpointerup = h.onpointercancel = () => { if (!on) return; on = false; examDragEnd(); };
+}
+function examDragEnd() {
+  const s = examStation(); if (!s || EX.stDone) return;
+  const g = s.goals.find(x => x.kind === 'drag' && !gState(x.id).done); if (!g) return;
+  const h = EX.st.handle || 0;
+  if (h >= g.min) { if (g.act) g.act(EX.st); return goalDone(g, g.praise); }
+  if (h > 5) { const gs = gState(g.id); if (!gs.wrong) { gs.wrong = 1; exErr('miss', { text: g.part_text || '手动阀未完全开启。', click: `手柄停在 ${Math.round(h)}%`, right: `全开位置（≥ ${g.min}%）`, fix: g.fix || '继续拖到全开', goal: g.id }); } coachSay(g.part_say || '还没到全开，继续。', { pose: 'point', k: 'bad' }); }
 }
 
-/* ---------------- 文字选择 / 填空 / 问答 / 口述汇报 / 拖动 ---------------- */
-function exNorm(t) { return String(t || '').trim().toLowerCase().replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)).replace(/\s+/g, ''); }
-function examSubmit() {
-  const s = examStation(); if (!s || EX.stDone) return;
-  if (s.type === 'choice') {
-    const sel = EX.sel.slice().sort(), ans = s.ans.slice().sort();
-    if (!sel.length) return toast('请先选择', '');
-    const ok = sel.length === ans.length && sel.every((v, i) => v === ans[i]);
-    if (!ok) { exWrong('judge', { text: s.fb.bad, click: sel.map(i => s.opts[i]).join('；'), right: ans.map(i => s.opts[i]).join('；'), fix: s.fix, rule: s.rule, risk: s.risk, why: s.why }); EX.answered = true; return exStationDone([{ n: s.title, ok: false, got: 0, pts: s.pts, ratio: 0 }]); }
-    exFb(s.fb.ok, 'ok'); return exStationDone([{ n: s.title, ok: true, got: s.pts, pts: s.pts, ratio: 1 }]);
+/* ---------------- 学员动作 ③：说（口述、汇报、提问、下结论） ---------------- */
+function examSay(text, fromZoom) {
+  const s = examStation(); if (!s || EX.stDone) return; touch();
+  text = (text || '').trim(); if (!text) return;
+  meSay(text);
+  const t = text.replace(/\s+/g, '');
+  /* 提问 → 知识库召回 */
+  if (/[?？]|为什么|为何|怎么|什么是|是否|能不能|可以吗|要不要/.test(t) && !/^(我|现在|已|确认|检查)/.test(t) && !s.goals.some(g => g.kind === 'qa' && !gState(g.id).done)) {
+    const r = typeof retrieve === 'function' ? retrieve(text) : null; EX.asked += 1;
+    coachSay(`${r && r.text ? r.text : '这个问题我一时说不准，先按规程做。'}<div class="exkb">依据 ${r && r.src ? r.src : '知识库'}</div>`, { pose: 'explain' });
+    return;
   }
-  if (s.type === 'fill') {
-    const vals = s.blanks.map((_, i) => ($('#ex_fill_' + i) || {}).value || '');
-    const oks = s.blanks.map((b, i) => b.accept.map(exNorm).includes(exNorm(vals[i])));
-    const k = oks.filter(Boolean).length, n = s.blanks.length;
-    const got = +(s.pts * k / n).toFixed(2);
-    if (k < n) exWrong('read', { text: s.fb.bad, click: s.blanks.map((b, i) => `${b.label}=${vals[i] || '空'}`).join('，'), right: s.blanks.map(b => `${b.label}=${b.accept[0]}${b.unit || ''}`).join('，'), fix: s.fix, rule: s.rule, why: s.why });
-    else exFb(s.fb.ok, 'ok');
-    return exStationDone([{ n: s.title, ok: k === n, got, pts: s.pts, ratio: k / n }]);
+  if (/^(提示|给我提示|提示一下|怎么做|下一步|不知道)/.test(t)) { return exHint(nextGoal()); }
+  /* 按目标匹配 */
+  const zoomDev = fromZoom ? EX.zoom : null;
+  const cands = s.goals.filter(g => !gState(g.id).done && (g.kind === 'look' || g.kind === 'say' || g.kind === 'qa'));
+  let hit = null, verdict = null;
+  for (const g of cands) {
+    if (g.kind === 'look' && zoomDev && !(g.dev || []).includes(zoomDev)) continue;
+    if (g.kind === 'look' && !zoomDev && !gState(g.id).seen && !(g.re && g.re.test(t))) continue;
+    const v = g.val ? g.val(t, EX.st) : (g.re && g.re.test(t) ? 'ok' : null);
+    if (v) { hit = g; verdict = v; break; }
   }
-  if (s.type === 'qa') {
-    const txt = ($('#ex_qa') || {}).value || ''; if (exNorm(txt).length < 4) return toast('请先作答', '');
-    const hits = s.keys.filter(k => k.re.test(txt)); const ratio = hits.length / s.keys.length, ok = hits.length >= s.min;
-    EX.qaResult = { hits: hits.map(h => h.t), miss: s.keys.filter(k => !k.re.test(txt)).map(k => k.t), txt, ok };
-    if (!ok) exWrong('ans', { text: `回答要点不完整：命中 ${hits.length}/${s.keys.length} 项要点。`, click: txt.slice(0, 40), right: s.keys.map(k => k.t).join('、'), fix: s.fix || '按参考答案补齐要点', why: s.why, rule: s.rule });
-    else exFb(`回答通过：命中 ${hits.length}/${s.keys.length} 项要点。判分结果由教练确认。`, 'ok');
-    return exStationDone([{ n: s.title, ok, got: +(s.pts * ratio).toFixed(2), pts: s.pts, ratio }]);
+  if (!hit) {
+    /* 想做的操作先说出来：口述目标 → 教练回应 */
+    const opG = s.goals.find(g => g.kind === 'op' && !gState(g.id).done && g.re && g.re.test(t));
+    if (opG) { const missing = (opG.after || []).filter(a => !gState(a).done); if (missing.length) { gState(opG.id).wrong += 0; coachSay(EX.mode === 'exam' ? '你确定顺序对了？' : `先别急，${missing.map(a => (goalOf(a) || {}).n).join('、')}还没做。`, { pose: 'correct', k: 'bad' }); } else coachSay(`可以，动手做。`, { pose: 'confirm' }); return; }
+    if (fromZoom) { const g = s.goals.find(x => (x.dev || []).includes(zoomDev)); if (g && gState(g.id).done) return coachSay('这一处你已经确认过了。', { pose: 'listen' }); }
+    /* 说出想看的设备：走过去（切换地点），看到什么再说 */
+    const intent = cands.find(g => g.kind === 'look' && g.re && g.re.test(t));
+    if (intent) { if (intent.loc && EX.loc !== intent.loc && s.locs && s.locs[intent.loc]) { EX.loc = intent.loc; exCloseZoom(); rerenderScene(); } coachSay(intent.go || '去看。看到什么，说出来。', { pose: 'point' }); return; }
+    coachSay(EX.mode === 'exam' ? '我没听清，说清楚你看的是哪个设备、什么状态。' : `我没听清。说清楚你看的是哪个设备、什么状态${fromZoom ? '' : '，或者先走到设备前看'}。`, { pose: 'listen' });
+    return;
   }
-  if (s.type === 'talk') return examTalkSend();
-}
-function examTalkSend() {
-  const s = examStation(); const inp = $('#ex_talk'); const txt = (inp ? inp.value : '').trim(); if (!txt) return toast('请说出或输入汇报内容', '');
-  EX.talk.push({ who: 'me', t: txt }); inp.value = '';
-  const keys = typeof s.keys === 'function' ? s.keys(EX.st) : s.keys;
-  const miss = keys.filter(k => !k.re.test(txt)); const hits = keys.length - miss.length; const rounds = EX.talk.filter(x => x.who === 'me').length;
-  if (!miss.length || rounds >= 3) {
-    const ratio = hits / keys.length, ok = !miss.length;
-    const reply = ok ? (typeof s.replyOk === 'function' ? s.replyOk(EX.st) : s.replyOk) : `收到，本次汇报仍缺 ${miss.map(m => m.t).join('、')}，先按此记录。`;
-    EX.talk.push({ who: 'sys', t: reply });
-    if (!ok) exWrong('ans', { text: `汇报要素不完整：缺 ${miss.map(m => m.t).join('、')}。`, click: txt.slice(0, 40), right: keys.map(k => k.t).join('、'), fix: s.fix || '按要素完整汇报', rule: s.rule, why: s.why });
-    else exFb('汇报要素完整。', 'ok');
-    rerenderTalk();
-    return exStationDone([{ n: s.title, ok, got: +(s.pts * ratio).toFixed(2), pts: s.pts, ratio }]);
+  const gs = gState(hit.id);
+  if (verdict === 'ok') {
+    exCloseZoom();
+    if (hit.kind === 'say' && hit.needAll) {
+      const missing = (hit.after || []).filter(a => !gState(a).done);
+      if (missing.length) { gs.wrong += 1; const names = missing.map(a => (goalOf(a) || {}).n).join('、'); exErr('miss', { text: hit.missText || `下结论前还有 ${names} 没有检查。`, click: text.slice(0, 40), right: names, fix: hit.fix || '', goal: hit.id, rule: s.rule, risk: s.risk }); coachSay(EX.mode === 'exam' ? (hit.missSay || '你确定都看全了？') : `${hit.missSay || '还不能下结论。'}${names}还没看。`, { pose: 'correct', shake: true, k: 'bad' }); return; }
+    }
+    if (hit.onOk) hit.onOk(EX.st);
+    goalDone(hit, typeof hit.praise === 'function' ? hit.praise(EX.st) : hit.praise);
+    return;
   }
-  /* 类客服知识库召回：先按学员的话检索知识库给一句依据，再追问缺少的要素 */
-  const r = typeof retrieve === 'function' ? retrieve(s.kb || txt) : null;
-  const ask = EX.mode === 'exam' ? '汇报要素不完整，请补充后再报一遍。' : `还需要说明：${miss.map(m => m.t).join('、')}。请补充后再报一遍。`;
-  EX.talk.push({ who: 'sys', t: `${ask}${r && r.text ? `<div class="exkb">知识库：${r.text.slice(0, 90)}${r.text.length > 90 ? '…' : ''}<span>依据 ${r.src}</span></div>` : ''}` });
-  rerenderTalk();
+  /* 说错了：读数 / 判断错误 → 教练纠正 + 自动提示 */
+  gs.wrong += 1;
+  const crit = !!(hit.critOnBad && (typeof hit.critOnBad === 'function' ? hit.critOnBad(EX.st) : true));
+  const e = exErr(hit.kind === 'qa' ? 'ans' : crit ? 'crit' : (hit.badKind || 'judge'), { text: typeof hit.badText === 'function' ? hit.badText(EX.st) : (hit.badText || '判断与实际状态不符。'), click: text.slice(0, 40), right: typeof hit.right === 'function' ? hit.right(EX.st) : (hit.right || hit.n), fix: hit.fix || '', why: hit.why || '', goal: hit.id, crit, rule: hit.rule || s.rule, risk: hit.risk || s.risk });
+  const say = typeof hit.badSay === 'function' ? hit.badSay(EX.st) : (hit.badSay || '再看一眼。');
+  coachSay(say, { pose: 'correct', shake: true, k: 'bad' });
+  if (crit) exCritDialog(e);
+  if (EX.mode !== 'exam' && gs.wrong >= 1 && gs.hint < 3) EX.speakQ.then(() => exHint(hit, true));
 }
-function rerenderTalk() { const q = $('#ex_q'); if (q) q.innerHTML = exQuestionHtml(); const log = $('#ex_tlog'); if (log) log.scrollTop = log.scrollHeight; const i = $('#ex_talk'); if (i) i.focus(); }
-function examDragEnd() {
-  const s = examStation(); if (s.type !== 'drag' || EX.stDone) return;
-  const h = EX.st.handle || 0;
-  if (h >= s.min) { exFb(s.fb.ok, 'ok'); if (s.after) s.after(EX.st); return exStationDone([{ n: s.title, ok: true, got: EX.pend ? s.pts / 2 : s.pts, pts: s.pts, ratio: 1 }]); }
-  if (h > 5) { exFb(s.fb.part, 'bad'); if (!EX.dragWarned) { EX.dragWarned = true; EX.errs.push({ sid: s.id, part: s.part || '', title: s.title, kind: 'miss', text: s.fb.part, click: `手柄停在 ${Math.round(h)}%`, right: '全开位置（≥ ' + s.min + '%）', fix: s.fix, rule: s.rule, risk: s.risk, why: s.why, at: now() }); EX.pend = 1; } }
-}
-function examHint() {
-  const s = examStation(); if (EX.mode === 'exam' || !s.hint) return;
-  EX.hints += 1; EX.hintOn = true; if (EX.mode === 'drill') EX.pend += .5;
-  exFb(`提示：${s.hint}`, 'hint'); rerenderScene();
-}
-/* 语音输入：联网且浏览器支持时用浏览器语音识别（识别结果可修改后提交）；离线自动降级为文字输入 */
+
+/* ---------------- 语音：联网时浏览器识别（结果可改再说）；离线降级文字 ---------------- */
 function examMic(btn, inputSel) {
   const inp = $(inputSel); if (!inp) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -7668,73 +7808,53 @@ function examFinish() {
   const ex = EX.exam;
   const raw = +EX.track.reduce((a, t) => a + (t.got || 0), 0).toFixed(1);
   const acc = {}; DIMK.forEach(k => acc[k] = { w: 0, v: 0 });
-  EX.track.forEach(t => { const s = ex.stations.find(x => x.id === t.sid); if (!s || !s.dims) return; const r = t.ratio != null ? t.ratio : (t.pts ? t.got / t.pts : 1); Object.keys(s.dims).forEach(k => { acc[k].w += s.dims[k]; acc[k].v += s.dims[k] * r; }); });
+  EX.track.forEach(t => { const s = ex.stations.find(x => x.id === t.sid); if (!s || !s.dims) return; const r = t.ratio != null ? t.ratio : 1; Object.keys(s.dims).forEach(k => { acc[k].w += s.dims[k]; acc[k].v += s.dims[k] * r; }); });
   const dims = {}; DIMK.forEach(k => { dims[k] = acc[k].w ? Math.round(100 * acc[k].v / acc[k].w) : null; });
   const dur = Math.max(1, Math.round((Date.now() - EX.t0) / 60000));
-  const rec = { id: 'E' + Date.now(), ts: Date.now(), who: HOME_USER.name, exam: ex.id, examName: ex.n, short: ex.short, mode: EX.mode, modeName: EXAM_MODES[EX.mode].n, dur, raw, score: EX.red ? 0 : raw, max: ex.max, pass: ex.pass, red: EX.red, track: EX.track, errs: EX.errs, hints: EX.hints, dims, ver: versionStamp(ex.id), task: EX.task, reviewer: '', qa: EX.qaResult || null };
+  const rec = { id: 'E' + Date.now(), ts: Date.now(), who: HOME_USER.name, exam: ex.id, examName: ex.n, short: ex.short, mode: EX.mode, modeName: EXAM_MODES[EX.mode].n, dur, raw, score: EX.red ? 0 : raw, max: ex.max, pass: ex.pass, red: EX.red, track: EX.track, errs: EX.errs, hints: EX.hints, asked: EX.asked, dims, ver: versionStamp(ex.id), task: EX.task, reviewer: '', log: EX.log.slice(-80) };
   rec.sugg = examSugg(rec);
   examSaveRec(rec);
   if (EX.task) { const l = lsGet(LS_TASKS, []); const t = l.find(x => x.id === EX.task); if (t) { t.done = (t.done || 0) + 1; t.results = (t.results || []).concat([{ who: rec.who, score: rec.score, red: rec.red, id: rec.id }]); lsSet(LS_TASKS, l); } }
-  if (typeof hoursAdd === 'function') hoursAdd(`${ex.short}（题库考试学时）`, 1);
-  EX.finished = rec; EX.exam = null; if (EX.timer) { clearInterval(EX.timer); EX.timer = null; }
+  if (typeof hoursAdd === 'function') hoursAdd(`${ex.short}（陪练关卡学时）`, 1);
+  EX.finished = rec; EX.exam = null; if (EX.timer) { clearInterval(EX.timer); EX.timer = null; } if (EX.dh) { EX.dh.destroy(); EX.dh = null; }
   rerenderExam();
 }
 function examSugg(rec) {
-  const out = [];
-  const byDim = {};
+  const out = []; const byDim = {};
   rec.errs.forEach(e => { const s = (EXAMS.find(x => x.id === rec.exam) || { stations: [] }).stations.find(x => x.id === e.sid); const k = s && s.dims ? Object.keys(s.dims).sort((a, b) => s.dims[b] - s.dims[a])[0] : null; if (!k) return; (byDim[k] = byDim[k] || []).push(e); });
   Object.keys(byDim).forEach(k => { const a = abilityOf(k); const kinds = Array.from(new Set(byDim[k].map(e => ERR_KIND[e.kind]))); out.push({ dim: k, t: `「${a.n}」出现${kinds.join('、')} ${byDim[k].length} 次：${byDim[k][0].text.replace(/<[^>]+>/g, '').slice(0, 40)}`, exam: rec.exam, act: `复练「${rec.short}」相关步骤` }); });
+  const hinted = rec.track.flatMap(t => (t.items || []).filter(i => i.hint >= 2).map(i => i.n));
+  if (hinted.length) out.push({ dim: null, t: `以下步骤靠提示才完成：${hinted.slice(0, 3).join('、')}`, exam: rec.exam, act: '不看提示再练一遍' });
   DIMK.forEach(k => { if (rec.dims[k] != null && rec.dims[k] < 70 && !byDim[k]) out.push({ dim: k, t: `「${abilityOf(k).n}」本次 ${rec.dims[k]} 分，低于 70`, exam: DIM_EXAM[abilityOf(k).n] || rec.exam, act: `安排「${(EXAMS.find(x => x.id === (DIM_EXAM[abilityOf(k).n] || rec.exam)) || {}).short}」专项` }); });
-  if (!out.length) out.push({ dim: null, t: '各步骤均一次通过，建议转入考核模式或下一考试内容。', exam: rec.exam === 'rain' ? 'e1163' : 'rain', act: '进入下一考试内容' });
+  if (!out.length) out.push({ dim: null, t: '各步骤均一次做对、未用提示，建议转入考核模式或下一关卡。', exam: rec.exam === 'rain' ? 'e1163' : 'rain', act: '进入下一关卡' });
   return out;
 }
 
 /* ---------------- 渲染 ---------------- */
 function rerenderExam() { const pg = $('#hpage'); if (!pg || location.hash !== '#exam') return; pg.innerHTML = pageExam(); examAfter(); }
-function rerenderScene() {
-  const s = examStation(); const box = $('#ex_svg'); if (!s || !box) return;
-  box.innerHTML = exSceneSvg(s); exMarkScene();
+function curScene(s) {
+  if (s.locs && EX.loc) return s.locs[EX.loc];
+  if (s.scene) return s.scene;
+  const prev = EX.exam.stations.slice(0, EX.si).reverse().find(x => x.scene || x.locs);
+  if (!prev) return null;
+  return prev.locs ? prev.locs[EX.loc && prev.locs[EX.loc] ? EX.loc : Object.keys(prev.locs)[0]] : prev.scene;
 }
 function exSceneSvg(s) {
-  let sc = s;
-  if (!sc.scene) sc = EX.exam.stations.slice(0, EX.si).reverse().find(x => x.scene) || s;
-  const inner = sc.scene ? sc.scene(EX.st, sc.sceneOpt ? sc.sceneOpt(EX.st) : undefined) : '';
+  const sc = curScene(s);
+  const inner = sc ? sc(EX.st, s.sceneOpt ? s.sceneOpt(EX.st) : undefined) : '';
   return `<svg viewBox="0 0 960 540" class="exsvg" id="ex_svgroot">${inner}</svg>`;
+}
+function rerenderScene() { const s = examStation(); const box = $('#ex_svg'); if (!s || !box) return; box.innerHTML = exSceneSvg(s); const lb = $('#ex_locbar'); if (lb) lb.innerHTML = exLocBar(s); exMarkScene(); }
+function exLocBar(s) {
+  if (!s.locs) return '';
+  return Object.keys(s.locs).map(k => `<span class="exloc ${EX.loc === k ? 'on' : ''}" data-exloc="${k}">${s.locNames[k]}</span>`).join('');
 }
 function exMarkScene() {
   const s = examStation(); const svg = $('#ex_svgroot'); if (!svg || !s) return;
-  Object.keys(EX.done).filter(k => !k.startsWith('_') && !k.startsWith('a')).forEach(id => { const g = svg.querySelector(`[data-hs="${id}"]`); if (!g) return; g.classList.add('done'); const r = g.querySelector('.hsr'); if (r) g.insertAdjacentHTML('beforeend', SC.check(+r.getAttribute('x') + +r.getAttribute('width') - 8, +r.getAttribute('y') + 8)); });
-  if (EX.mode !== 'exam' && (EX.weak || (EX.hintOn && EX.mode === 'teach'))) (s.need || []).forEach(id => { if (EX.done[id]) return; const g = svg.querySelector(`[data-hs="${id}"]`); if (g) g.classList.add(EX.hintOn && EX.mode === 'teach' ? 'tgt' : 'weak'); });
-  if (s.type === 'drag') exBindDrag(svg);
-}
-function exBindDrag(svg) {
-  const h = svg.querySelector('[data-handle]'); if (!h) return;
-  const pt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
-  let on = false;
-  h.style.cursor = 'grab';
-  h.onpointerdown = e => { on = true; h.setPointerCapture(e.pointerId); e.preventDefault(); };
-  h.onpointermove = e => { if (!on) return; const p = pt(e); const ang = Math.atan2(p.x - 440, -(p.y - 300)) * 180 / Math.PI; const pct = Math.max(0, Math.min(100, ang / 90 * 100)); EX.st.handle = pct; h.setAttribute('transform', `rotate(${-90 * pct / 100})`); const f = svg.querySelector('#exbar_fill'), t = svg.querySelector('#exbar_txt'); if (f) { f.setAttribute('width', 272 * pct / 100); f.setAttribute('fill', pct >= 90 ? '#23b26a' : '#e8b22a'); } if (t) t.textContent = pct >= 90 ? '全开位置' : pct > 8 ? `开度 ${Math.round(pct)}%` : '关闭位置'; };
-  h.onpointerup = h.onpointercancel = e => { if (!on) return; on = false; examDragEnd(); };
-}
-function exListHtml() {
-  const s = examStation(); if (!s) return '';
-  if (s.type === 'auto') return `<ol class="exauto" id="ex_auto">${s.items.map((t, i) => `<li data-i="${i}" class="${EX.done['a' + i] ? 'on' : ''}">${t}</li>`).join('')}</ol>`;
-  const need = s.need || [];
-  if (!need.length) return `<div class="exck"><span class="${EX.stDone ? 'on' : ''}"><i></i>${s.title}</span></div>`;
-  const hide = EX.mode === 'exam' && s.hideList;
-  return `<div class="exck">${need.map(id => `<span class="${EX.done[id] ? 'on' : ''}"><i></i>${hide ? '检查项' : (s.listNames ? s.listNames[id] : exNameOf(s, id))}</span>`).join('')}</div>`;
-}
-function exQuestionHtml() {
-  const s = examStation(); if (!s) return '';
-  const nextBtn = EX.stDone ? `<div class="exq-next"><button class="btn pri" data-exnext="1">${EX.si >= EX.exam.stations.length - 1 ? '完成并查看复盘' : '继续'}</button></div>` : '';
-  if (s.type === 'pick') return `${EX.confirmReady && !EX.stDone ? `<div class="exq-next"><button class="btn pri" data-exconfirm="1">${s.confirmBtn}</button></div>` : ''}${s.judge && !EX.stDone ? `<div class="exjudge"><b>判定</b>${s.judge.opts.map((o, i) => `<button class="btn" data-exjudge="${i}">${o}</button>`).join('')}</div>` : ''}${nextBtn}`;
-  if (s.type === 'drag') return nextBtn;
-  if (s.type === 'auto') return '';
-  if (s.type === 'choice') return `<div class="exqa"><div class="exqt">${s.q}<span class="tk3">${s.ans.length > 1 ? '多选' : '单选'}</span></div><div class="exopts">${s.opts.map((o, i) => `<label class="exopt ${EX.sel.includes(i) ? 'on' : ''} ${EX.stDone ? (s.ans.includes(i) ? 'ans' : '') : ''}"><input type="${s.ans.length > 1 ? 'checkbox' : 'radio'}" data-opt="${i}" ${EX.sel.includes(i) ? 'checked' : ''} ${EX.stDone ? 'disabled' : ''}><span>${o}</span></label>`).join('')}</div>${EX.stDone ? '' : '<button class="btn pri" data-exsubmit="1">提交</button>'}${nextBtn}</div>`;
-  if (s.type === 'fill') return `<div class="exqa"><div class="exqt">${s.q}</div><div class="exfills">${s.blanks.map((b, i) => `<label>${b.label}<input id="ex_fill_${i}" class="exin" autocomplete="off" placeholder="${b.ph || ''}" ${EX.stDone ? 'disabled' : ''}>${b.unit ? `<em>${b.unit}</em>` : ''}</label>`).join('')}</div>${EX.stDone ? (EX.mode !== 'exam' ? `<div class="tk3">正确值：${s.blanks.map(b => `${b.label} ${b.accept[0]}${b.unit || ''}`).join('　')}</div>` : '') : '<button class="btn pri" data-exsubmit="1">提交</button>'}${nextBtn}</div>`;
-  if (s.type === 'qa') return `<div class="exqa"><div class="exqt">${s.q}<span class="tk3">问答题 · 按要点判分，结果由教练确认</span></div>${EX.stDone ? `<div class="exqres">${EX.qaResult ? `<div>命中要点：${EX.qaResult.hits.map(h => `<i class="ok">${h}</i>`).join('') || '—'}　缺少：${EX.qaResult.miss.map(h => `<i class="bad">${h}</i>`).join('') || '—'}</div>` : ''}${EX.mode !== 'exam' ? `<div class="tk3">参考答案：${s.model}</div>` : ''}</div>` : `<div class="exta"><textarea id="ex_qa" rows="3" placeholder="可点麦克风口述，识别结果可修改后提交"></textarea><button class="exmic" data-exmic="#ex_qa" title="语音输入">●</button></div><button class="btn pri" data-exsubmit="1">提交</button>`}${nextBtn}</div>`;
-  if (s.type === 'talk') return `<div class="exqa extalk"><div class="exqt">${s.q || '口述汇报'}<span class="tk3">对话式 · 语音或文字 · 按知识库召回作答</span></div><div class="extlog" id="ex_tlog">${EX.talk.map(m => `<div class="msg ${m.who === 'me' ? 'o' : 'j'}"><div class="av">${m.who === 'me' ? '我' : (s.role || '监')}</div><div class="bd">${m.t}</div></div>`).join('')}</div>${EX.stDone ? '' : `<div class="exta"><input id="ex_talk" class="exin" autocomplete="off" placeholder="说出你的汇报（可点麦克风口述）…"><button class="exmic" data-exmic="#ex_talk" title="语音输入">●</button><button class="btn pri" data-exsubmit="1">汇报</button></div>`}${nextBtn}</div>`;
-  return nextBtn;
+  s.goals.forEach(g => { if (!gState(g.id).done) return; (g.dev || []).forEach(dev => { const el = svg.querySelector(`[data-hs="${dev}"]`); if (!el) return; el.classList.add('done'); const r = el.querySelector('.hsr'); if (r) el.insertAdjacentHTML('beforeend', SC.check(+r.getAttribute('x') + +r.getAttribute('width') - 8, +r.getAttribute('y') + 8)); }); });
+  if (EX.mode === 'teach') s.goals.forEach(g => { const gs = gState(g.id); if (gs.done || gs.hint < 2) return; (g.dev || []).forEach(dev => { const el = svg.querySelector(`[data-hs="${dev}"]`); if (el) el.classList.add('tgt'); }); });
+  exBindOps(svg);
+  if (s.goals.some(g => g.kind === 'drag')) exBindDrag(svg);
 }
 function pageExam() {
   if (EX.finished) return examReviewHtml(EX.finished, true);
@@ -7743,139 +7863,152 @@ function pageExam() {
   const got = +EX.track.reduce((a, t) => a + (t.got || 0), 0).toFixed(1);
   return `<div class="exwrap">
     <div class="exhead hg">
-      <div class="exh1"><b>${ex.n}</b><span>${s.part ? s.part + ' · ' : ''}第 ${EX.si + 1}/${N} 步 · ${s.title} · ${EXAM_MODES[EX.mode].n}</span></div>
-      <div class="exkpis"><div class="kpi"><b id="ex_time">00:00</b><span>用时</span></div>${EX.mode !== 'exam' ? `<div class="kpi ${EX.red ? 'bad' : ''}"><b>${EX.red ? 0 : got}/${ex.max}</b><span>得分</span></div>` : ''}<div class="kpi ${EX.errs.length ? 'warn' : ''}"><b>${EX.errs.length}</b><span>错误</span></div>${EX.red ? '<div class="kpi bad"><b>否决</b><span>红线</span></div>' : ''}</div>
-      <div class="exprog">${ex.stations.map((x, i) => `<i class="${i < EX.si ? 'done' : i === EX.si ? 'cur' : ''}" title="${x.title}"></i>`).join('')}</div>
-      <button class="btn sm" data-exquit="1">退出考试</button>
+      <div class="exh1"><b>${ex.n}</b><span>${s.part ? s.part + ' · ' : ''}第 ${EX.si + 1}/${N} 步 · ${EXAM_MODES[EX.mode].n}</span></div>
+      <div class="exkpis"><div class="kpi"><b id="ex_time">00:00</b><span>用时</span></div>${EX.mode !== 'exam' ? `<div class="kpi ${EX.red ? 'bad' : ''}"><b>${EX.red ? 0 : got}/${ex.max}</b><span>得分</span></div><div class="kpi"><b>${EX.hints}</b><span>提示</span></div>` : ''}<div class="kpi ${EX.errs.length ? 'warn' : ''}"><b>${EX.errs.length}</b><span>错误</span></div>${EX.red ? '<div class="kpi bad"><b>否决</b><span>红线</span></div>' : ''}</div>
+      <div class="exprog">${ex.stations.map((x, i) => `<i class="${i < EX.si ? 'done' : i === EX.si ? 'cur' : ''}"></i>`).join('')}</div>
+      <button class="btn sm" data-exquit="1">退出</button>
     </div>
-    <div class="exmain">
-      <div class="exscene hg ${EX.mode}"><div class="exsvgbox" id="ex_svg">${exSceneSvg(s)}</div><div class="exzoom" id="ex_zoom" hidden></div><div class="exq" id="ex_q">${exQuestionHtml()}</div></div>
-      <aside class="exside">
-        <div class="hcard ho"><div class="hch"><b>任务</b><span>${s.part || ''}</span></div><div class="hcb extask">${s.task}</div></div>
-        <div class="hcard hg"><div class="hch"><b>检查清单</b><span>${s.type === 'auto' ? '系统完成' : (s.need || []).length ? `${(s.need || []).filter(id => EX.done[id]).length}/${(s.need || []).length}` : ''}</span></div><div class="hcb" id="ex_list">${exListHtml()}</div></div>
-        <div class="hcard hg exfbc"><div class="hch"><b>操作反馈</b><span>错误不退出，全部进入复盘</span></div><div class="hcb exfb" id="ex_fb">${exFbHtml()}</div></div>
-        ${EX.mode !== 'exam' && s.hint ? `<button class="btn" data-exhint="1">查看提示${EX.mode === 'drill' ? '（计入记录）' : ''}</button>` : ''}
+    <div class="exmain coach">
+      <div class="exscene hg ${EX.mode}">
+        <div class="exlocbar" id="ex_locbar">${exLocBar(s)}</div>
+        <div class="exsvgbox" id="ex_svg">${exSceneSvg(s)}</div><div class="exzoom" id="ex_zoom" hidden></div>
+        ${s.type === 'auto' ? `<ol class="exauto" id="ex_auto">${s.items.map((t, i) => `<li data-i="${i}" class="${EX.goals['a' + i] ? 'on' : ''}">${t}</li>`).join('')}</ol>` : `
+        <div class="exsay"><span class="exsayl">手指口述 · 汇报</span><input id="ex_say" class="exin wide" autocomplete="off" placeholder="说出你现在要做什么、看到什么、下什么结论（可点麦克风口述）"><button class="exmic" data-exmic="#ex_say" title="语音">●</button><button class="btn pri" data-exsay="1">说</button></div>`}
+      </div>
+      <aside class="excoach">
+        <div class="hcard hg excoachcard"><div class="exdhwrap"><div id="exdh"></div></div><div class="excoachnm"><b>${ex.coach.name}</b><span>${ex.coach.role} · 陪练教练</span></div></div>
+        <div class="hcard hg exlogcard"><div class="hch"><b>教练在侧</b><span>做对推进 · 做错提示</span></div><div class="hcb exlog" id="ex_log"></div>
+          <div class="exlogbtns">${EX.mode !== 'exam' ? `<button class="btn sm" data-exhint="1">给我提示${EX.mode === 'drill' ? '（计入）' : ''}</button>` : ''}${EX.mode === 'teach' ? `<button class="btn sm" data-exanswer="1">我该做什么</button>` : ''}<button class="btn sm" data-exask="1">问教练</button></div></div>
       </aside>
     </div></div>`;
 }
 function examAfter() {
-  if (!EX.exam) { if (EX.timer) { clearInterval(EX.timer); EX.timer = null; } return; }
+  if (!EX.exam) { if (EX.timer) { clearInterval(EX.timer); EX.timer = null; } if (EX.dh) { EX.dh.destroy(); EX.dh = null; } return; }
   exMarkScene();
-  if (!EX.timer) EX.timer = setInterval(() => { const t = $('#ex_time'); if (!t) return; const d = Math.round((Date.now() - EX.t0) / 1000); t.textContent = `${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`; }, 1000);
-  const i = $('#ex_talk') || $('#ex_qa'); if (i) i.focus();
+  const mount = $('#exdh');
+  if (mount && (!EX.dh || EX.dh.dead || !mount.contains(EX.dh.n && EX.dh.n.pav))) { if (EX.dh) EX.dh.destroy(); EX.dh = new DigitalHuman('exdh', EX.exam.coach.key); if (EX.pending) { const pd = EX.pending; EX.pending = null; if (pd.opt.pose) EX.dh.setPose(pd.opt.pose); EX.speakQ = new Promise(res => EX.dh.speak(pd.plain, { onEnd: res })).then(() => EX.dh && EX.dh.setPose('idle')); } }
+  renderLog();
+  if (!EX.timer) EX.timer = setInterval(() => {
+    const t = $('#ex_time'); if (!t) return; const d = Math.round((Date.now() - EX.t0) / 1000); t.textContent = `${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`;
+    /* 卡住：教练主动开口（训练 / 演练；测试提速时停用） */
+    if (EX.exam && !EX.stDone && EX.mode !== 'exam' && (window.__DH_SPEED || 1) >= 1 && Date.now() - EX.lastAct > 26000 && !(EX.dh && EX.dh.speaking) && !document.querySelector('.mask')) { EX.lastAct = Date.now(); const g = nextGoal(); if (g) { coachSay(g.nudge || `${HOME_USER.name}，想一想下一步。`, { pose: 'point' }); } }
+  }, 1000);
+  const i = $('#ex_say'); if (i) i.focus();
 }
 
-/* ---------------- 入口页：考试内容 · 模式 · 待考任务 · 我的记录 ---------------- */
+/* ---------------- 入口页 ---------------- */
 function examEntryHtml() {
   const recs = examRecords().filter(r => r.who === HOME_USER.name);
   const tasks = examTasks().filter(t => !t.results || !t.results.some(r => r.who === HOME_USER.name));
   const cl = confirmLog();
   return `<div class="ppage">
-    <div class="ph"><b>题库考试</b><span>考试内容由本单位实操培训方案与陪练关卡方案生成 · 图片选择 / 文字选择 / 填空 / 问答 / 口述汇报 / 拖动操作 · 成绩落到能力雷达并同步组长工作台</span></div>
-    ${tasks.length ? `<section class="hcard ho"><div class="hch"><b>待考任务</b><span>班组长下发</span></div><div class="hcb">${tasks.map(t => `<div class="hrow"><b>${t.examName || t.plan}</b> <span class="tk3">${t.from} 下发 · ${t.due}截止 · ${t.mode} · 及格 ${t.pass}${t.dims && t.dims.length ? ' · 针对 ' + t.dims.join('、') : ''}</span> <button class="btn sm pri" data-exstart="${t.exam}" data-exmode="${t.mode === '考核模式' ? 'exam' : t.mode === '演练模式' ? 'drill' : 'teach'}" data-extask="${t.id}">开始</button></div>`).join('')}</div></section>` : ''}
+    <div class="ph"><b>陪练关卡</b><span>教练全程在侧：你先动手、先开口，做对推进，做错提示 · 语音或文字口述 · 按住 / 拖动才算操作 · 成绩落到能力雷达并同步组长工作台</span></div>
+    ${tasks.length ? `<section class="hcard ho"><div class="hch"><b>待练任务</b><span>班组长下发</span></div><div class="hcb">${tasks.map(t => `<div class="hrow"><b>${t.examName || t.plan}</b> <span class="tk3">${t.from} 下发 · ${t.due}截止 · ${t.mode} · 及格 ${t.pass}${t.dims && t.dims.length ? ' · 针对 ' + t.dims.join('、') : ''}</span> <button class="btn sm pri" data-exstart="${t.exam}" data-exmode="${t.mode === '考核模式' ? 'exam' : t.mode === '演练模式' ? 'drill' : 'teach'}" data-extask="${t.id}">开始</button></div>`).join('')}</div></section>` : ''}
     <div class="exgrid">
       ${EXAMS.map(ex => { const c = cl.find(x => x.id === ex.id); const my = recs.filter(r => r.exam === ex.id); const best = my.length ? Math.max(...my.map(r => r.score)) : null; return `
       <section class="hcard hg excard"><div class="hch"><b>${ex.n}</b><span>${ex.src}</span></div><div class="hcb">
         <div class="exbg">${ex.bg}</div>
-        <div class="exmeta"><span>${ex.stations.filter(s => s.type !== 'auto').length} 个考核步骤</span><span>${ex.max} 分制 · 及格 ${ex.pass}</span><span>${ex.crit} 条关键错误</span><span>${my.length ? `已考 ${my.length} 次 · 最高 ${best}` : '未考'}</span></div>
+        <div class="exmeta"><span>教练：${ex.coach.name} · ${ex.coach.role}</span><span>${ex.stations.filter(s => s.type !== 'auto').length} 个情境</span><span>${ex.max} 分制 · 及格 ${ex.pass}</span><span>${my.length ? `已练 ${my.length} 次 · 最高 ${best}` : '未练'}</span></div>
         <div class="exdims">${ex.cover.map(k => `<i>${abilityOf(k).n}</i>`).join('')}</div>
         <div class="tk3">评分表 ${c.ver} · ${c.st === 'ok' ? `已审定：${c.who} ${c.date}` : c.st === 'sent' ? '已提交审定，待安全专家确认' : '待安全专家审定'}</div>
         <div class="exmodes">${Object.keys(EXAM_MODES).map(k => `<label class="exmode"><input type="radio" name="exm_${ex.id}" value="${k}" ${k === 'teach' ? 'checked' : ''}><b>${EXAM_MODES[k].n}</b><span>${EXAM_MODES[k].d}</span></label>`).join('')}</div>
-        <button class="btn pri" data-exstart="${ex.id}">开始考试</button>
+        <button class="btn pri" data-exstart="${ex.id}">开始</button>
       </div></section>`; }).join('')}
     </div>
-    <section class="hcard ho"><div class="hch"><b>我的考试记录</b><span>${recs.length} 条 · 本机保存，刷新后可回看 · 已同步到组长工作台</span></div><div class="hcb">
-      ${recs.length ? `<table class="htbl"><tr><th>时间</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>复核</th><th></th></tr>${recs.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待班组长复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">查看复盘</button></td></tr>`).join('')}</table>` : '<div class="tk3">还没有考试记录。</div>'}</div></section>
+    <section class="hcard ho"><div class="hch"><b>我的陪练记录</b><span>${recs.length} 条 · 本机保存，刷新后可回看 · 已同步到组长工作台</span></div><div class="hcb">
+      ${recs.length ? `<table class="htbl"><tr><th>时间</th><th>关卡</th><th>模式</th><th>得分</th><th>提示</th><th>错误</th><th>复核</th><th></th></tr>${recs.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.hints || 0}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待班组长复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">查看复盘</button></td></tr>`).join('')}</table>` : '<div class="tk3">还没有陪练记录。</div>'}</div></section>
   </div>`;
 }
 function stampOf(ts) { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
 
 /* ---------------- 复盘页 ---------------- */
 function examReviewHtml(r, fresh) {
-  const ex = EXAMS.find(x => x.id === r.exam);
   const dimsArr = DIMK.map(k => r.dims[k] == null ? 0 : r.dims[k]);
-  const base = RADAR_PREV;
+  const ex = EXAMS.find(x => x.id === r.exam) || { coach: { short: '教' } };
   return `<div class="ppage">
-    <div class="ph"><b>${fresh ? '本次考试复盘' : '考试复盘'}</b><span>${r.examName} · ${r.modeName} · ${stampOf(r.ts)} · ${r.who}</span>
-      <span class="phr">${fresh ? `<button class="btn" data-exstart="${r.exam}" data-exmode="${r.mode}">再考一次</button>` : ''}<button class="btn" data-exquit="1">回题库</button>${ROLE.cur === 'lead' ? '<button class="btn" data-go="team">回组长工作台</button>' : '<button class="btn" data-go="home">回工作台</button>'}</span></div>
+    <div class="ph"><b>${fresh ? '本次陪练复盘' : '陪练复盘'}</b><span>${r.examName} · ${r.modeName} · ${stampOf(r.ts)} · ${r.who}</span>
+      <span class="phr">${fresh ? `<button class="btn" data-exstart="${r.exam}" data-exmode="${r.mode}">再练一次</button>` : ''}<button class="btn" data-exquit="1">回关卡列表</button>${ROLE.cur === 'lead' ? '<button class="btn" data-go="team">回组长工作台</button>' : '<button class="btn" data-go="home">回工作台</button>'}</span></div>
     <section class="hcard rvhead hg"><div class="rvscore"><div class="rvbig ${r.red || r.score < r.pass ? 'wv' : ''}">${r.red ? 0 : r.score}<small>/${r.max}</small></div><div class="tk3">${r.red ? '触发一票否决，成绩记 0' : r.score >= r.pass ? '及格' : '未及格'} · 及格线 ${r.pass}</div>
-        <div class="rvkpis"><span><b>${r.dur}</b>分钟</span><span><b>${r.errs.length}</b>错误</span><span><b>${r.errs.filter(e => e.crit).length}</b>关键错误</span><span><b>${r.hints}</b>提示</span></div>
+        <div class="rvkpis"><span><b>${r.dur}</b>分钟</span><span><b>${r.hints || 0}</b>提示</span><span><b>${r.errs.length}</b>错误</span><span><b>${r.errs.filter(e => e.crit).length}</b>关键错误</span><span><b>${r.asked || 0}</b>提问</span></div>
         <div class="exver"><div><label>操作票版本</label>${r.ver.ticket}</div><div><label>规则版本</label>${r.ver.rule}</div><div><label>知识依据版本</label>${r.ver.kb}</div><div><label>训练时间</label>${r.ver.time}</div><div><label>复核人</label>${r.reviewer || '待班组长复核'}</div></div></div>
-      <div class="rvradar">${chRadar(DIMS, dimsArr, base, { w: 330, h: 240, l1: '本次', l2: '上月', key: 'x' })}<div class="tk3" style="text-align:center">本次考试落到 8 维能力 · 未覆盖维度记 0 不计入现值</div></div></section>
+      <div class="rvradar">${chRadar(DIMS, dimsArr, RADAR_PREV, { w: 330, h: 240, l1: '本次', l2: '上月', key: 'x' })}<div class="tk3" style="text-align:center">本次落到 8 维能力 · 未覆盖维度记 0 不计入现值</div></div></section>
     <div class="gtwo">
-      <section class="hcard hg"><div class="hch"><b>完整操作轨迹</b><span>${r.track.filter(t => !t.auto).length} 步</span></div><div class="hcb"><table class="htbl extrack">
-        ${r.track.map(t => t.auto ? `<tr class="auto"><td colspan="3">系统完成：${t.items.map(i => i.n).join('、')}</td></tr>` : `<tr><td><b>${t.part ? t.part + ' · ' : ''}${t.title}</b><div class="tk3">${t.items.map(i => `<i class="${i.ok ? 'ok' : 'bad'}">${i.ok ? '√' : '×'} ${i.n}</i>`).join(' ')}</div></td><td class="mono">${t.pts ? `${t.got}/${t.pts}` : (t.ratio != null ? Math.round(t.ratio * 100) + '%' : '—')}</td><td>${t.items.every(i => i.ok) ? '<span class="tag ok">通过</span>' : '<span class="tag wn">有错误</span>'}</td></tr>`).join('')}</table></div></section>
-      <section class="hcard ho"><div class="hch"><b>错误步骤</b><span>实际点击位置 · 正确位置 · 错误原因 · 正确处置</span></div><div class="hcb">
-        ${r.errs.length ? r.errs.map(e => `<div class="exerr ${e.kind}"><div class="err1"><span class="tag ${e.kind === 'red' ? 'rl' : e.crit ? 'rl' : 'wn'}">${ERR_KIND[e.kind] || e.kind}${e.crit && e.kind !== 'red' ? ' · 关键' : ''}</span><b>${e.part ? e.part + ' · ' : ''}${e.title}</b></div>
-          <div class="err2"><label>实际操作</label>${e.click || '—'}</div><div class="err2"><label>正确位置</label>${e.right || '—'}</div>
-          <div class="err2"><label>错误原因</label>${e.text.replace(/<[^>]+>/g, '')}${e.why ? '　' + e.why : ''}</div>${e.risk ? `<div class="err2"><label>风险</label>${e.risk}</div>` : ''}${e.rule ? `<div class="err2"><label>依据</label><span class="errq">${e.rule}</span></div>` : ''}<div class="err2"><label>正确处置</label>${e.fix || '—'}</div></div>`).join('') : '<div class="tk3">全部步骤一次通过，未记录错误。</div>'}</div></section>
+      <section class="hcard hg"><div class="hch"><b>完整操作轨迹</b><span>一次做对 / 提示后完成 / 出错</span></div><div class="hcb"><table class="htbl extrack">
+        ${r.track.map(t => t.auto ? `<tr class="auto"><td colspan="3">系统完成：${t.items.map(i => i.n).join('、')}</td></tr>` : `<tr><td><b>${t.part ? t.part + ' · ' : ''}${t.title}</b><div class="tk3">${t.items.map(i => `<i class="${i.ok ? 'ok' : i.hint >= 3 || i.wrong >= 2 ? 'bad' : 'wn'}">${i.ok ? '√' : i.hint >= 3 || i.wrong >= 2 ? '×' : '△'} ${i.n}${i.hint ? `（提示 ${i.hint} 级）` : ''}${i.wrong ? `（错 ${i.wrong} 次）` : ''}</i>`).join(' ')}</div></td><td class="mono">${t.pts ? `${t.got}/${t.pts}` : (t.ratio != null ? Math.round(t.ratio * 100) + '%' : '—')}</td><td>${t.items.every(i => i.ok) ? '<span class="tag ok">一次做对</span>' : t.items.some(i => i.wrong >= 2 || i.hint >= 3) ? '<span class="tag rl">靠答案完成</span>' : '<span class="tag wn">提示后完成</span>'}</td></tr>`).join('')}</table></div></section>
+      <section class="hcard ho"><div class="hch"><b>错误步骤</b><span>实际操作 · 正确做法 · 原因 · 处置</span></div><div class="hcb">
+        ${r.errs.length ? r.errs.map(e => `<div class="exerr ${e.kind}"><div class="err1"><span class="tag ${e.kind === 'red' || e.crit ? 'rl' : 'wn'}">${ERR_KIND[e.kind] || e.kind}${e.crit && e.kind !== 'red' ? ' · 关键' : ''}</span><b>${e.part ? e.part + ' · ' : ''}${e.title}</b></div>
+          <div class="err2"><label>实际操作</label>${e.click || '—'}</div><div class="err2"><label>正确做法</label>${e.right || '—'}</div>
+          <div class="err2"><label>错误原因</label>${e.text.replace(/<[^>]+>/g, '')}${e.why ? '　' + e.why : ''}</div>${e.risk ? `<div class="err2"><label>风险</label>${e.risk}</div>` : ''}${e.rule ? `<div class="err2"><label>依据</label><span class="errq">${e.rule}</span></div>` : ''}<div class="err2"><label>正确处置</label>${e.fix || '—'}</div></div>`).join('') : '<div class="tk3">全部步骤一次做对，未记录错误。</div>'}</div></section>
     </div>
-    <section class="hcard hg"><div class="hch"><b>针对性训练建议</b><em class="ai">AI</em><span>由本次错误与维度得分生成 · 已反馈到组长工作台</span></div><div class="hcb">${r.sugg.map(s => `<div class="hrow">${s.dim ? `<i class="tag wn">${abilityOf(s.dim).n}</i>` : ''}${s.t} <button class="btn sm" data-exstart="${s.exam}">${s.act}</button></div>`).join('')}</div></section>
+    <div class="gtwo">
+      <section class="hcard hg"><div class="hch"><b>针对性训练建议</b><em class="ai">AI</em><span>由本次错误、提示与维度得分生成 · 已反馈到组长工作台</span></div><div class="hcb">${r.sugg.map(s => `<div class="hrow">${s.dim ? `<i class="tag wn">${abilityOf(s.dim).n}</i>` : ''}${s.t} <button class="btn sm" data-exstart="${s.exam}">${s.act}</button></div>`).join('')}</div></section>
+      <section class="hcard ho"><div class="hch"><b>教练对话回放</b><span>${(r.log || []).length} 条</span></div><div class="hcb exlog rv">${(r.log || []).map(m => `<div class="msg ${m.who === 'me' ? 'o' : 'j'} ${m.k || ''}"><div class="av">${m.who === 'me' ? '我' : ex.coach.short}</div><div class="bd"><span class="mono tk3">${m.at}</span> ${m.t}</div></div>`).join('') || '<div class="tk3">无对话记录。</div>'}</div></section>
+    </div>
   </div>`;
 }
 
-/* ---------------- 页面点击 ---------------- */
+/* ---------------- 页面点击 / 键盘 ---------------- */
 function examClick(e) {
   const q = s => e.target.closest(s); let n;
   if (n = q('[data-exstart]')) { const modeEl = $(`input[name="exm_${n.dataset.exstart}"]:checked`); examStart(n.dataset.exstart, n.dataset.exmode || (modeEl ? modeEl.value : 'teach'), { task: n.dataset.extask || null }); return true; }
   if (n = q('[data-exreview]')) { const r = examRecords().find(x => x.id === n.dataset.exreview); if (r) { EX.finished = r; EX.exam = null; if (location.hash !== '#exam') goPage('exam'); else rerenderExam(); } return true; }
   if (n = q('[data-exquit]')) { examQuit(); return true; }
-  if (n = q('.hs[data-hs]')) { examSpot(n.dataset.hs); return true; }
-  if (n = q('[data-verdict]')) { examVerdict(n.dataset.verdict); return true; }
+  if (n = q('[data-exloc]')) { touch(); EX.loc = n.dataset.exloc; exCloseZoom(); rerenderScene(); const s = examStation(); if (s.locSay && s.locSay[EX.loc] && EX.mode !== 'exam') coachSay(s.locSay[EX.loc], { pose: 'listen' }); return true; }
+  if (n = q('.hs[data-hs]')) { examLook(n.dataset.hs); return true; }
   if (n = q('[data-zclose]')) { exCloseZoom(); return true; }
-  if (n = q('[data-opt]')) { const i = +n.dataset.opt; const s = examStation(); if (s.ans.length > 1) { EX.sel = EX.sel.includes(i) ? EX.sel.filter(x => x !== i) : EX.sel.concat(i); } else EX.sel = [i]; $$('.exopt').forEach(l => l.classList.toggle('on', EX.sel.includes(+l.querySelector('[data-opt]').dataset.opt))); return true; }
-  if (n = q('[data-exsubmit]')) { examSubmit(); return true; }
-  if (n = q('[data-exconfirm]')) { examConfirm(); return true; }
-  if (n = q('[data-exjudge]')) { examJudge(+n.dataset.exjudge); return true; }
-  if (n = q('[data-exhint]')) { examHint(); return true; }
+  if (n = q('[data-zsay]')) { const i = $('#ex_zsay'); examSay(i ? i.value : '', true); return true; }
+  if (n = q('[data-exsay]')) { const i = $('#ex_say'); const v = i ? i.value : ''; if (i) i.value = ''; examSay(v, false); return true; }
+  if (n = q('[data-exhint]')) { touch(); exHint(nextGoal()); return true; }
+  if (n = q('[data-exanswer]')) { touch(); const g = nextGoal(); if (g) { gState(g.id).hint = 2; exHint(g); } return true; }
+  if (n = q('[data-exask]')) { touch(); const i = $('#ex_say'); if (i) { i.placeholder = '把问题说出来，例如：为什么要先验电再接地？'; i.focus(); } return true; }
   if (n = q('[data-exnext]')) { examNext(); return true; }
   if (n = q('[data-exmic]')) { examMic(n, n.dataset.exmic); return true; }
   return false;
 }
-function examKey(e) { if (e.key !== 'Enter') return; if (e.target.id === 'ex_talk') { e.preventDefault(); examTalkSend(); } else if (e.target.id && e.target.id.startsWith('ex_fill_')) { e.preventDefault(); examSubmit(); } }
+function examKey(e) {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'ex_say') { e.preventDefault(); const v = e.target.value; e.target.value = ''; examSay(v, false); }
+  else if (e.target.id === 'ex_zsay') { e.preventDefault(); examSay(e.target.value, true); }
+}
 
-/* ---------------- 自动驾驶（讲师演示台 / 回归）：ok 正确完成当前步 · wrong 点一次错误部件 · red 触发红线 ---------------- */
+/* ---------------- 自动驾驶（讲师演示台 / 回归）：ok 正确完成当前情境 · wrong 说错一次 · red 跳过验电直接合地刀 ---------------- */
 async function examAuto(kind) {
   const s = examStation(); if (!s) return;
   const zz = ms => new Promise(r => setTimeout(r, EX_T(ms)));
-  if (EX.stDone) { examNext(); return; }
+  if (EX.stDone) return;
   kind = kind || 'ok';
   if (s.type === 'auto') return;
-  if (s.type === 'pick') {
-    if (kind === 'red' && s.red) { const id = Object.keys(s.red)[0]; examSpot(id); await zz(60); if (EX.zoom) examVerdict('act'); return; }
-    if (kind === 'wrong') { const id = Object.keys(s.spots).find(k => !(s.need || []).includes(k)); if (id) { examSpot(id); await zz(60); if (EX.zoom) examVerdict(s.spots[id].verdicts ? s.spots[id].verdicts[0].k : 'ok'); } return; }
-    for (const id of (s.need || [])) { if (EX.done[id]) continue; examSpot(id); await zz(60); if (EX.zoom) { const sp = s.spots[id]; examVerdict(sp.verdicts ? sp.truth(EX.st) : 'act'); } await zz(60); }
-    if (s.confirmBtn && EX.confirmReady) examConfirm();
-    if (s.judge && !EX.stDone) examJudge(s.judge.truth(EX.st));
-    return;
+  if (kind === 'red') { const g = s.goals.find(x => x.red); if (g) { if (g.loc) { EX.loc = g.loc; rerenderScene(); } exOp(g.op); } return; }
+  if (kind === 'wrong') { const g = nextGoal(); if (!g) return; if (g.kind === 'look') { if (g.loc) { EX.loc = g.loc; rerenderScene(); } examLook(g.wrongDev || g.dev[0]); await zz(40); examSay(g.sampleBad || '看不清', true); } else if (g.kind === 'say' || g.kind === 'qa') examSay(g.sampleBad || '不知道', false); else if (g.kind === 'op') { const sp = Object.keys(s.spots || {}).find(k => !(g.dev || []).includes(k) && s.spots[k].bad && !s.spots[k].crit); if (sp) examLook(sp); } else if (g.kind === 'drag') { EX.st.handle = 40; rerenderScene(); examDragEnd(); } return; }
+  let guard = 0;
+  while (EX.exam && examStation() === s && !EX.stDone && guard++ < 20) {
+    const g = nextGoal(); if (!g) break;
+    if (g.loc && EX.loc !== g.loc) { EX.loc = g.loc; rerenderScene(); }
+    if (g.kind === 'look') { examLook(g.target || g.dev[0]); await zz(40); examSay(typeof g.sample === 'function' ? g.sample(EX.st) : g.sample, true); }
+    else if (g.kind === 'say' || g.kind === 'qa') examSay(typeof g.sample === 'function' ? g.sample(EX.st) : g.sample, false);
+    else if (g.kind === 'op') { if (g.dev && s.spots && s.spots[g.dev[0]] && s.spots[g.dev[0]].zoom) { examLook(g.dev[0]); await zz(40); } exOp(g.op); }
+    else if (g.kind === 'drag') { EX.st.handle = 100; rerenderScene(); examDragEnd(); }
+    await zz(60);
   }
-  if (s.type === 'choice') { EX.sel = kind === 'wrong' ? [s.opts.findIndex((_, i) => !s.ans.includes(i))] : s.ans.slice(); examSubmit(); return; }
-  if (s.type === 'fill') { s.blanks.forEach((b, i) => { const el = $('#ex_fill_' + i); if (el) el.value = kind === 'wrong' ? '999' : b.accept[0]; }); examSubmit(); return; }
-  if (s.type === 'qa') { const el = $('#ex_qa'); if (el) el.value = kind === 'wrong' ? '不知道，直接下一步。' : s.model; examSubmit(); return; }
-  if (s.type === 'talk') { const el = $('#ex_talk'); if (el) el.value = kind === 'wrong' ? '已经操作完了。' : (typeof s.sample === 'function' ? s.sample(EX.st) : s.sample); examTalkSend(); return; }
-  if (s.type === 'drag') { EX.st.handle = kind === 'wrong' ? 40 : 100; rerenderScene(); examDragEnd(); return; }
 }
-/* 一键跑完（回归用）：按 plan 数组逐步执行，如 ['ok','ok','red','ok'…]，未指定的步骤按 ok */
 async function examRun(plan) {
   const zz = ms => new Promise(r => setTimeout(r, EX_T(ms)));
   let guard = 0;
-  while (EX.exam && guard++ < 80) {
+  while (EX.exam && guard++ < 60) {
     const s = examStation();
     if (s.type === 'auto') { while (EX.exam && examStation() === s) await zz(120); continue; }
     const k = (plan && plan[s.id]) || 'ok';
-    if (k === 'red') { await examAuto('red'); await zz(80); $$('.mask').forEach(m => m.remove()); await examAuto('ok'); }
-    else if (k === 'wrong') { await examAuto('wrong'); await zz(80); $$('.mask').forEach(m => m.remove()); await examAuto('ok'); }
-    else await examAuto('ok');
-    await zz(80);
-    if (EX.exam && EX.stDone) examNext();
-    await zz(80);
+    if (k !== 'ok') { await examAuto(k); await zz(80); $$('.mask').forEach(m => m.remove()); }
+    await examAuto('ok');
+    let g2 = 0; while (EX.exam && examStation() === s && g2++ < 80) await zz(100);
   }
 }
 
 
-/* ===== 考试内容定义（两份，文案照客户方案原文） =====
-   ① 110kV 培训三线 1163 线路陪练关卡方案（开关检查 + 地刀检查修订版）
-   ② #3主变雨淋阀水喷雾系统机械手动启动实操培训方案（雨淋阀检查版） */
+/* ===== 陪练关卡定义（两份，反馈与判定文案照客户方案原文；教练台词为监护人 / 值班负责人口吻） =====
+   ① 110kV 培训三线 1163 线路陪练关卡方案（开关检查 + 地刀检查修订版）—— 教练：监护人 陈志远
+   ② #3主变雨淋阀水喷雾系统机械手动启动实操培训方案（雨淋阀检查版）—— 教练：值班负责人 周建国
+   情境（station）只交代任务，不列步骤；goals 是学员要自己做到的事：look 走到设备前看并说出状态 · op 按住 / 拖动才算操作 · say 口述结论或汇报 · qa 口述考问 · drag 拖动手柄 */
 
 const RULE_VD = STEPS.find(s => s.no === '20').rule;             // 细则第十三条（四）先验电再接地
 const RULE_VD2 = STEPS.find(s => s.no === '18').rule;            // 附录 G-23 两种非同源指示
@@ -7883,112 +8016,140 @@ const RULE_GIS = STEPS.find(s => s.no === '21').rule;            // 附录 G-5 �
 const RULE_CHK = STEPS.find(s => s.no === '6').rule;             // 附录 F 2.11.3 d）检查断路器位置
 const RULE_CUR = STEPS.find(s => s.no === '7').rule;             // 附录 F 2.11.3 e）三相无电流
 const RISK_VD = RISKS[9][2], RISK_GIS = RISKS[8][2], RISK_ID = RISKS[6][2];
+const T = (re, t) => re.test(t);
+/* 读「分 / 合」：显示分 / 指示分 / 为分 / 分闸 / 分位 → open；否则含 合 → close */
+function readOC(t) { if (/(显示|指示|为|是|在|读)\s*分|分闸|分位|分开|已分/.test(t)) return 'open'; if (/合闸|合位|在合|显示合|指示合|已合|是合/.test(t)) return 'close'; return null; }
+function readVolt(t) { t = t.replace(/带电显示/g, ''); if (/有电压|带电|还有电|灯亮|亮着/.test(t)) return 'live'; if (/无电压|没有电压|没电|确无|为零|都是0|0\.0|灯灭|都灭|不亮|没亮/.test(t)) return 'none'; return null; }
+function readPress(t) { if (/异常|偏低|太低|过低|红区|不正常|不足|没有压力|无压/.test(t)) return 'low'; if (/正常|绿区|够|有压力|\d/.test(t)) return 'ok'; return null; }
+function readValve(t) { if (/关闭|未开|没开|未全开|关着|关位|没打开/.test(t)) return 'closed'; if (/开启|打开|全开|开着|开位|是开|为开/.test(t)) return 'open'; return null; }
+const SP1163 = {
+  hmi: { cb: { n: '培训三线1163开关', zoom: zoomHmiCb, bad: '这是 1163 开关本身。' }, es: { n: '116340 地刀', zoom: st => zoomHmiRows(st, 'volt').replace('遥测 · 培训三线 1163 线路二次电压', '116340 地刀 · 后台位置'), bad: '这是 116340 地刀的后台位置，不是你现在要看的。' }, cur: { n: '三相电流遥测', zoom: st => zoomHmiRows(st, 'cur'), bad: '这是三相电流。' }, volt: { n: '线路二次电压遥测', zoom: st => zoomHmiRows(st, 'volt'), bad: '这是线路二次电压。' }, sp: { n: '软压板', bad: '这是保护软压板，这关不动它。' }, sig: { n: '信号列表', bad: '信号列表可以看，但结论要从位置和遥测来。' } },
+  mech: { ind: { n: '分、合闸指示窗', zoom: zoomMech }, spring: { n: '储能指示', bad: '这是储能指示，不是分合闸指示。' }, cnt: { n: '动作计数器', bad: '这是动作计数器。' }, manual: { n: '手动分合闸按钮', bad: '停，机构箱里的手动按钮不能碰，这一项只看不动。', crit: true, fix: '检查项只看不动，不得触碰机构箱内操作按钮', risk: RISK_ID, rule: RULE_CHK } },
+  cab: { esInd: { n: '就地控制柜 116340 位置指示', zoom: zoomEsInd }, hv: { n: '高压带电显示装置', zoom: zoomHv }, cbInd: { n: '1163 开关位置指示', bad: '这是 1163 开关的指示，不是地刀。' }, knob: { n: 'ZK 远方/就地把手', bad: '把手已经在就地位置，这一项不动它。' }, ops: { n: '刀闸 / 地刀就地操作按钮', bad: '就地操作按钮在柜面上，但 116340 的操作在地刀操作面板做。' }, alarm: { n: '光字牌', bad: '光字牌没有告警。' } },
+  gnd: { lock: { n: '电气五防锁', bad: '五防钥匙已经下传，锁已解。' }, knob: { n: '15KS 控制方式切换', bad: '控制方式已在就地。' }, stop: { n: '急停按钮', bad: '急停不是这时候按的。', crit: true, fix: '急停只在异常时使用', risk: RISK_ID } },
+  pano: { cab: { n: '就地控制柜', zoom: zoomEsInd }, mech: { n: '刀闸机构箱', zoom: zoomMechEs }, rod: { n: '刀闸连杆', zoom: zoomRod }, cb: { n: '1163 断路器筒体', bad: '这是 1163 断路器，你现在要看的是 116340 地刀的位置。' } }
+};
 
 const EXAM_1163 = {
   id: 'e1163', n: '110kV 培训三线 1163 线路由运行转检修 · 开关检查与地刀检查', short: '1163 开关与地刀检查', src: '陪练关卡方案 · 地刀状态检查修订版',
-  bg: '基于「将 110kV 培训三线 1163 线路由运行转检修」操作票简化，只保留两个关键能力：断开开关后的状态检查；验电、接地及接地后的状态检查。中间非重点步骤由系统完成。',
+  coach: { key: 'jianhu', name: '陈志远', role: '监护人', short: '监' },
+  bg: '基于「将 110kV 培训三线 1163 线路由运行转检修」操作票简化，只保留两个关键能力：断开开关后的状态检查；验电、接地及接地后的状态检查。监护人在侧，你先动手：走到设备前看、说出你看到的、按住才算操作。中间非重点步骤由系统完成。',
   max: 10, pass: 6, crit: 3, cover: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
   init(arm) { const cases = ['ok', 'ok', 'mech', 'rod']; return { cb: 'close', d4: 'close', d2: 'close', es: 'open', loc: '远方', unlocked: false, esCase: arm.esCase || cases[Math.floor(Math.random() * cases.length)] }; },
   stations: [
-    { id: 'k1_open', part: '关卡一 · 断开开关后的状态检查', title: '断开培训三线 1163 开关', type: 'pick', pts: 0, dims: { C: 1, H: .5 }, scene: svgHmi1163,
-      task: '在监控后台的培训三线 1163 分图上，断开培训三线 1163 开关。', hint: '一次接线小图上的方块就是 1163 开关，点开后选择「分闸」执行。',
-      spots: { cb: { n: '培训三线1163开关', zoom: st => zoomHmiCb(st) + '<div class="tk3" style="text-align:center;margin-top:6px">遥控操作：分闸 · 预置 → 返校 → 执行</div>', actBtn: '执行分闸', act: st => { st.cb = 'open'; }, okfb: '后台显示 1163 开关由合闸位置变为分闸位置。' }, es: { n: '116340 地刀', bad: '该设备不是培训三线 1163 开关。' }, cur: { n: '三相电流遥测', bad: '这是遥测数据，本项要操作的是 1163 开关。' }, volt: { n: '线路二次电压遥测', bad: '这是遥测数据，本项要操作的是 1163 开关。' }, sp: { n: '软压板', bad: '这是保护软压板，本项要操作的是 1163 开关。' }, sig: { n: '信号列表', bad: '这是信号列表，本项要操作的是 1163 开关。' } },
-      need: ['cb'], fix: '在后台分图的一次接线上找到 1163 开关方块，执行分闸', rule: STEPS.find(s => s.no === '5').rule, risk: RISK_ID },
-    { id: 'k1_hmi', part: '关卡一 · 断开开关后的状态检查', title: '检查后台显示 1163 开关在分闸位置', type: 'pick', pts: 1, dims: { B: 1, H: 1 }, scene: svgHmi1163,
-      task: '执行了分闸操作，不等于已经确认分闸成功。请在后台检查培训三线 1163 开关在分闸位置。', hint: '点开一次接线小图上的 1163 开关，看位置遥信与变位报文。',
-      spots: { cb: { n: '培训三线1163开关 位置遥信', zoom: zoomHmiCb, verdicts: [{ k: 'open', t: '分闸位置', pri: 1 }, { k: 'close', t: '合闸位置' }], truth: st => st.cb, fb: { open: '后台显示 1163 开关在分闸位置，变位报文正确。', close: '后台显示 1163 开关仍在合闸位置。' }, why: '后台位置遥信与报文是第一处独立指示', fix: '看清方块颜色与报文再判断' }, es: { n: '116340 地刀', bad: '该设备不是培训三线 1163 开关。' }, cur: { n: '三相电流遥测', bad: '本项检查的是开关位置，三相电流在下一项检查。' }, volt: { n: '线路二次电压遥测', bad: '本项检查的是开关位置。' }, sp: { n: '软压板', bad: '本项检查的是开关位置。' }, sig: { n: '信号列表', bad: '信号列表可辅助判断，本项要点开 1163 开关看位置遥信。' } },
-      need: ['cb'], rule: RULE_CHK, risk: RISK_GIS, fix: '点开 1163 开关，确认位置遥信为分闸、报文为分闸变位' },
-    { id: 'k1_mech', part: '关卡一 · 断开开关后的状态检查', title: '现场检查机构箱内部的分、合闸指示', type: 'pick', pts: 1.5, dims: { B: 1, A: .5 }, scene: svgMechBox,
-      task: '到现场检查 1163 开关机构箱内部的分、合闸指示显示为分闸。', hint: '机构箱内左侧黑色指示窗显示「分」或「合」。',
-      spots: { ind: { n: '分、合闸指示窗', zoom: zoomMech, verdicts: [{ k: 'open', t: '分闸', pri: 1 }, { k: 'close', t: '合闸' }], truth: st => st.cb, fb: { open: '现场机构箱内部分、合闸指示显示分闸。', close: '现场机构箱内部指示显示合闸，与后台不一致。' }, why: '机构箱机械指示反映开关实际位置', fix: '看指示窗内的「分」「合」字样' }, spring: { n: '储能指示', bad: '这是储能指示，本项要看的是分、合闸指示。' }, cnt: { n: '动作计数器', bad: '这是动作计数器，本项要看的是分、合闸指示。' }, manual: { n: '手动分合闸按钮', bad: '这是手动操作按钮，本项只检查、不操作。', crit: true, rule: RULE_CHK, risk: RISK_ID, fix: '检查项只看不动，不得触碰机构箱内操作按钮' } },
-      need: ['ind'], rule: RULE_CHK, risk: RISK_GIS, fix: '看机构箱内分、合闸指示窗，确认显示为分' },
-    { id: 'k1_cur', part: '关卡一 · 断开开关后的状态检查', title: '检查 1163 开关三相无电流', type: 'fill', pts: 1, dims: { F: 1, H: .5 }, scene: svgHmi1163, sceneOpt: () => ({ hiI: true }),
-      task: '回到监控后台，读取培训三线 1163 开关的三相电流并填写。', q: '读取后台遥测，填写 1163 开关 A/B/C 三相电流', blanks: [{ label: 'Ia', accept: ['0', '0.0', '0.00'], unit: 'A', ph: '读数' }, { label: 'Ib', accept: ['0', '0.0', '0.00'], unit: 'A', ph: '读数' }, { label: 'Ic', accept: ['0', '0.0', '0.00'], unit: 'A', ph: '读数' }],
-      fb: { ok: '培训三线 1163 开关 A、B、C 三相电流均为零，三相无电流。', bad: '读数与后台遥测不一致。' }, rule: RULE_CUR, fix: '按遥测信息栏 Ia/Ib/Ic 行如实填写', why: '开关分位与三相无电流共同确认线路已停止传输负荷' },
-    { id: 'k1_sum', part: '关卡一 · 断开开关后的状态检查', title: '综合确认 1163 开关可靠分闸', type: 'choice', pts: 0.5, dims: { B: 1, C: .5 },
-      task: '三处检查已完成，请给出判定依据。', q: '判定培训三线 1163 开关已可靠分闸，依据是哪些？', opts: ['后台显示 1163 开关在分闸位置', '现场机构箱内部分、合闸指示显示分闸', 'A/B/C 三相无电流', '分闸操作命令已经执行'], ans: [0, 1, 2],
-      fb: { ok: '已综合确认 1163 开关可靠分闸。', bad: '执行了分闸操作，不等于已经确认分闸成功。' }, rule: RULE_CHK, fix: '以后台位置、机构箱指示、三相电流三处独立指示为准，不以命令已执行为准', why: '操作完成后，必须确认设备实际状态' },
-    { id: 'k1_qa', part: '关卡一 · 口述考问', title: '为什么执行了分闸操作不等于已确认分闸成功', type: 'qa', pts: 0, dims: { B: 1, C: 1 },
-      task: '监护人考问，请口述或输入回答。', q: '为什么"执行了分闸操作"不等于"已经确认分闸成功"？',
-      keys: [{ t: '后台位置遥信', re: /后台|监控|遥信|画面/ }, { t: '机构箱分合闸指示', re: /机构箱|机械|指示/ }, { t: '三相无电流', re: /电流/ }, { t: '确认实际状态', re: /实际|状态|确认|到位|拒动|可靠/ }], min: 3,
-      model: '分闸命令发出后，开关可能拒动或未到位。必须通过后台分闸位置、现场机构箱分合闸指示和三相无电流三处独立指示综合确认，才能判定开关实际已可靠分闸。', rule: RULE_CHK, fix: '回答要说到三处指示和"实际状态"' },
-    { id: 'mid', title: '系统完成中间非重点步骤', type: 'auto', task: '中间非重点步骤由系统按操作票完成，请等待。',
+    { id: 'k1_open', part: '关卡一 · 断开开关后的状态检查', title: '断开培训三线 1163 开关', dims: { C: 1, H: .5 }, locs: { hmi: svgHmi1163 }, locNames: { hmi: '监控后台' }, spots: SP1163.hmi,
+      brief: '任玲玲，调度令已经下了：将 110kV 培训三线 1163 线路由运行转检修。第一项，断开培训三线 1163 开关。你来做，做的时候手指口述。',
+      goals: [{ id: 'open', kind: 'op', n: '断开培训三线 1163 开关', dev: ['cb'], loc: 'hmi', op: 'cb:open', re: /断开|分闸|拉开/, pts: 0, act: st => { st.cb = 'open'; }, praise: '分闸命令发出，后台报文：1163 开关 分闸 变位。', hints: ['开关在后台分图的一次接线上。', '点开 1163 开关，用遥控操作分闸。', '点一次接线上的 1163 方块，按住「分闸」直到执行完成。'], nudge: '任玲玲，第一项还没做。' }],
+      badOps: { 'cb:close': '开关本来就在合位，这一项是断开。' },
+      outro: (st, mode) => mode === 'exam' ? '命令发出去了。接下来你来。' : '命令是发出去了。但是记住——执行了分闸操作，不等于已经确认分闸成功。现在你来确认，1163 开关是不是真的分开了。' },
+    { id: 'k1_check', part: '关卡一 · 断开开关后的状态检查', title: '确认 1163 开关可靠分闸', dims: { B: 1.5, H: .5, F: 1, A: .5 }, locs: { hmi: svgHmi1163, mech: svgMechBox }, locNames: { hmi: '监控后台', mech: '1163 开关机构箱（现场）' }, start: 'hmi', spots: Object.assign({}, SP1163.hmi, SP1163.mech), rule: RULE_CHK, risk: RISK_GIS,
+      locSay: { mech: '到现场了。机构箱门已经打开。' },
+      brief: (st, mode) => mode === 'exam' ? '分闸命令已经执行。接下来你来。' : '开关分没分开，不能靠命令，要靠你自己去确认。想到哪里就去哪里看，看到什么就说出来。',
+      goals: [
+        { id: 'hmiPos', kind: 'look', re: /后台|监控|遥信|开关位置/,  n: '后台显示 1163 开关在分闸位置', dev: ['cb'], loc: 'hmi', pts: 1, val: t => { const r = readOC(t); return r ? (r === 'open' ? 'ok' : 'bad') : null; }, sample: '后台显示 1163 开关在分闸位置，分闸变位报文正确', sampleBad: '1163 开关在合闸位置', praise: '后台位置遥信是分闸，变位报文也对。这是第一处。', badText: '后台显示分闸，却判断为合闸。', badSay: '再看方块的颜色和信号栏的报文。', right: '后台显示 1163 开关在分闸位置', hints: ['开关分没分开，后台画面本身就能告诉你。', '看一次接线上 1163 方块的颜色，再看信号栏的变位报文。', '点开 1163 开关看位置遥信：绿色空心方块就是分闸。'], ask: '开关在什么位置？' },
+        { id: 'mech', kind: 'look', n: '现场机构箱内部分、合闸指示显示分闸', re: /机构箱|机械指示/,  dev: ['ind'], loc: 'mech', pts: 1.5, val: t => { const r = readOC(t); return r ? (r === 'open' ? 'ok' : 'bad') : null; }, sample: '机构箱内分合闸指示窗显示分', sampleBad: '机构箱指示合闸', praise: '机械指示也是分。这是与后台不同原理的第二处确认。', badText: '机构箱指示显示分，却判断为合。', badSay: '指示窗里到底是哪个字？再看。', right: '机构箱分、合闸指示显示分', hints: ['后台是电气信号，现场机构上还有一处机械的指示。', '到现场，1163 开关机构箱里有分、合闸指示窗。', '切到「1163 开关机构箱」，点左侧黑色指示窗，读出是分还是合。'], ask: '指示窗显示什么？' },
+        { id: 'cur', kind: 'look', re: /电流/,  n: '1163 开关三相无电流', dev: ['cur'], loc: 'hmi', pts: 1, val: t => { if (/有电流|带负荷/.test(t)) return 'bad'; const nums = (t.match(/\d+(\.\d+)?/g) || []).map(Number); if (/无电流|为零|都是零|都是0|零/.test(t) || (nums.length && nums.every(n => n === 0))) return 'ok'; if (nums.some(n => n > 0)) return 'bad'; return null; }, sample: '三相电流 Ia 0.00、Ib 0.00、Ic 0.00 A，三相无电流', sampleBad: '三相电流 312 安', praise: 'A、B、C 三相电流都是零。第三处。', badText: '三相电流读数与后台遥测不一致。', badSay: '遥测栏 Ia、Ib、Ic 三行现在是多少？', right: 'Ia/Ib/Ic 均为 0.00 A', badKind: 'read', hints: ['开关真分开了，负荷电流应该是多少？', '去后台遥测信息里看 Ia、Ib、Ic。', '点后台遥测信息栏的 Ia/Ib/Ic 三行，把读数说出来。'], ask: '三相电流各是多少？' },
+        { id: 'concl', kind: 'say', n: '综合确认 1163 开关可靠分闸', pts: .5, needAll: true, after: ['hmiPos', 'mech', 'cur'], re: /可靠分闸|分闸成功|确认.{0,6}分闸|已分闸|开关已分|分闸到位/, val: t => /可靠分闸|分闸成功|确认.{0,8}分闸|已分闸|开关已分|分闸到位/.test(t) ? 'ok' : null, sample: '后台分闸位置、机构箱分闸指示、三相无电流三处一致，确认培训三线 1163 开关已可靠分闸', sampleBad: '分闸命令已经执行，1163 开关分闸成功', praise: '三处独立指示一致，这才叫确认分闸成功。', missSay: '还不能下结论。', missText: '只凭部分检查就判定开关可靠分闸。', fix: '后台位置、机构箱指示、三相电流三处都确认后再下结论', hints: ['三处都看完了，可以下结论了。', '把三处一起说：后台位置、机构箱指示、三相电流。', '说：三处一致，确认 1163 开关已可靠分闸。'], nudge: '三处都看过了，你的结论是什么？' }
+      ],
+      outro: (st, mode) => mode === 'exam' ? '好。' : '好。执行了分闸操作，不等于已经确认分闸成功——这句话记牢。' },
+    { id: 'k1_qa', part: '关卡一 · 口述考问', title: '口述考问', dims: { B: 1, C: 1 }, locs: { hmi: svgHmi1163 }, locNames: { hmi: '监控后台' }, spots: SP1163.hmi,
+      brief: '我问你一个问题：为什么执行了分闸操作，不等于已经确认分闸成功？用你自己的话说。',
+      goals: [{ id: 'qa', kind: 'qa', n: '口述：为什么执行了分闸操作不等于已确认分闸成功', pts: 0, keys: [{ t: '后台位置遥信', re: /后台|监控|遥信|画面/ }, { t: '机构箱分合闸指示', re: /机构箱|机械|指示/ }, { t: '三相无电流', re: /电流/ }, { t: '开关可能拒动或未到位，要确认实际状态', re: /实际|状态|拒动|没到位|未到位|可靠|真的/ }], val(t) { const h = this.keys.filter(k => k.re.test(t)).length; return h >= 3 ? 'ok' : 'bad'; }, sample: '分闸命令发出后，开关可能拒动或没到位，所以要看后台位置、现场机构箱的机械指示和三相电流，三处都确认了，才能说开关实际已经可靠分闸。', sampleBad: '因为规程要求。', praise: '说到点子上了。', badText: '回答要点不全。', badSay(st) { return EX.mode === 'exam' ? '再想想。' : '再想想，刚才你确认了哪三处？为什么要确认？'; }, right: '后台位置、机构箱机械指示、三相电流三处独立确认，因为开关可能拒动或未到位', hints: ['想想刚才你确认了哪三处。', '开关可能拒动、可能没到位——所以不能只信命令。', '答：后台位置、机构箱机械指示、三相电流三处独立确认，才能判定实际已分闸。'] }],
+      outro: '好，往下走。' },
+    { id: 'mid', title: '系统完成中间非重点步骤', type: 'auto', locs: { hmi: svgHmi1163 }, locNames: { hmi: '监控后台' }, spots: SP1163.hmi, goals: [],
+      brief: '中间这几项不是这一关的重点，我替你走完：汇报调度、再经调度令、拉开两把刀闸并检查四项指示、1QK 切就地、再经调度令、五防钥匙下传。',
       items: ['汇报调度：培训三线 1163 开关已断开', '再经调度令：热备用转冷备用', '拉开培训三线线路侧 11634 刀闸并检查四项指示', '拉开培训三线 2M 侧 11632 刀闸并检查四项指示', '1QK 切至就地并汇报调度', '再经调度令：冷备用转检修', '五防模拟下传至电脑钥匙'],
       apply: (st, i) => { if (i === 2) st.d4 = 'open'; if (i === 3) st.d2 = 'open'; if (i === 4) st.loc = '就地'; if (i === 6) st.unlocked = true; } },
-    { id: 'k2_hub', part: '关卡二 · 验电、接地及接地后的状态检查', title: '验电与接地', type: 'pick', pts: 3, spotPts: { volt: 1, hv: 1, gnd: 1 }, dims: { D: 1.5, F: 1, H: .5, B: .5 }, scene: svgK2Hub,
-      task: '验明无电后才能接地。先确认培训三线 1163 线路二次确无电压、1163 间隔高压带电显示装置显示确无电压，再合上培训三线线路侧 116340 地刀。', hint: '两项验电都完成后，地刀操作面板上的合闸按钮才允许操作。',
-      spots: {
-        volt: { n: '后台线路二次电压', zoom: st => zoomHmiRows(st, 'volt'), verdicts: [{ k: 'none', t: '确无电压', pri: 1 }, { k: 'live', t: '有电压' }], truth: st => st.d4 === 'open' ? 'none' : 'live', fb: { none: '培训三线 1163 线路二次确无电压。', live: '后台显示线路二次仍有电压。' }, why: '间接验电第一种原理', fix: '看 Uab/Ubc/Uca 三行读数' },
-        hv: { n: '高压带电显示装置', zoom: zoomHv, verdicts: [{ k: 'none', t: '确无电压', pri: 1 }, { k: 'live', t: '有电压' }], truth: st => st.d4 === 'open' ? 'none' : 'live', fb: { none: '1163 间隔高压带电显示装置显示确无电压。', live: '高压带电显示装置仍显示有电压。' }, why: '间接验电第二种原理', fix: '看三相指示灯是否全灭' },
-        gnd: { n: '116340 地刀操作面板 · 合闸按钮', zoom: st => `<svg viewBox="0 0 960 540" class="zsvg">${svgGroundPanel(st)}</svg>`, actBtn: '按下合闸按钮', act: st => { st.es = 'close'; }, okfb: '已合上培训三线线路侧 116340 地刀。操作过程中持续观察地刀运动方向、声音和指示变化。' }
-      },
-      need: ['volt', 'hv', 'gnd'], order: { gnd: ['volt', 'hv'] },
-      red: { gnd: { text: '未完成两项验电即合上 116340 地刀：一票否决。', why: '线路可能仍带电', fix: '返回完成后台二次电压与高压带电显示装置两项验电，两种非同源指示均已变化后再合地刀', rule: `${RULE_VD}　${RULE_VD2}`, risk: RISK_VD } },
-      rule: RULE_VD, risk: RISK_VD, fix: '先验电再接地' },
-    { id: 'k2_chk', part: '关卡二 · 验电、接地及接地后的状态检查', title: '116340 地刀合上后的状态检查', type: 'pick', pts: 3, spotPts: { cab: 1, mech: 1, rod: 1 }, dims: { B: 1.5, A: .5, G: 1, E: .5 }, scene: svgBayPanorama,
-      task: '地刀操作完成后，不能仅以"操作命令已执行"作为完成依据。请检查：就地控制柜位置指示、刀闸机构箱分、合闸指示、刀闸连杆位置。三项一致后再判定。', hint: '三个检查点：左侧就地控制柜、右下机构箱、机构箱旁的连杆。', listNames: { cab: '就地控制柜显示合闸', mech: '刀闸机构箱分、合闸指示显示合闸', rod: '刀闸连杆位置符合合闸状态' },
-      spots: {
-        cab: { n: '就地控制柜 · 116340 位置指示', zoom: zoomEsInd, verdicts: [{ k: 'close', t: '显示合闸', pri: 1 }, { k: 'open', t: '显示分闸' }], truth: () => 'close', fb: { close: '就地控制柜上 116340 地刀位置指示为合闸状态。', open: '就地控制柜显示分闸。' }, why: '电气位置指示', fix: '看 116340 的红灯（合）是否点亮' },
-        mech: { n: '刀闸机构箱 · 分、合闸指示', zoom: zoomMechEs, verdicts: [{ k: 'close', t: '显示合闸', pri: 1 }, { k: 'open', t: '显示分闸' }], truth: st => st.esCase === 'mech' ? 'open' : 'close', fb: { close: '机构箱上的分、合闸指示显示 116340 地刀已合闸。', open: '机构箱机械指示显示分闸，与就地控制柜电气指示不一致。' }, why: '机械位置不能只依赖控制柜上的电气状态指示', fix: '看指示窗内的「分」「合」字样' },
-        rod: { n: '刀闸连杆位置', zoom: zoomRod, verdicts: [{ k: 'ok', t: '符合合闸状态', pri: 1 }, { k: 'bad', t: '未到位 / 异常' }], truth: st => st.esCase === 'rod' ? 'bad' : 'ok', fb: { ok: '刀闸连杆位置与 116340 地刀合闸状态相符。', bad: '刀闸连杆停在中途，未到合闸限位。' }, why: '确认机械传动机构已经实际到位', fix: '看连杆是否转到合闸限位、销钉是否入槽' },
-        cb: { n: '1163 断路器筒体', bad: '这是 1163 断路器，本项检查的是 116340 地刀的三处位置指示。' }
-      },
-      need: ['cab', 'mech', 'rod'],
-      judge: { opts: ['116340 地刀已可靠合闸', '状态不一致，当前不能确认地刀已经可靠合闸', '机械状态确认异常'], truth: st => st.esCase === 'mech' ? 1 : st.esCase === 'rod' ? 2 : 0,
-        incomplete: '检查不完整。就地控制柜已显示合闸，还需要检查机构箱分、合闸指示和刀闸连杆位置。',
-        fb: ['116340 地刀状态检查完成，已确认地刀合闸到位。', '状态不一致。就地控制柜指示与现场机构箱机械位置不一致，当前不能确认地刀已经可靠合闸。', '机械状态确认异常。请检查刀闸连杆位置，确认机械传动机构是否已经实际到位。'],
-        fix: '三个位置全部检查、三项一致后再判定；不一致时不得判定为已合闸，应中止并汇报' },
-      rule: RULE_GIS, risk: RISK_GIS, why: '验明无电后才能接地，接地后仍要检查地刀是否真正合闸到位' },
-    { id: 'k2_talk', part: '关卡二 · 口述汇报', title: '向监护人汇报 116340 地刀检查结果', type: 'talk', pts: 0, dims: { C: 1, B: .5, E: .5 }, role: '监', kb: '地刀合闸后要核对哪些位置',
-      task: '监护人陈志远要求汇报 116340 地刀的检查情况。设备编号按位报读，说清三个位置与结论。', q: '口述汇报',
-      open: '任玲玲，116340 地刀的检查情况，向我汇报。',
-      keys: st => [{ t: '设备双重名称（培训三线线路侧 116340 地刀）', re: /116340|一一六三四零/ }, { t: '就地控制柜指示', re: /控制柜|汇控/ }, { t: '机构箱指示', re: /机构箱|机械/ }, { t: '连杆位置', re: /连杆/ }, st.esCase === 'ok' ? { t: '结论：已合闸到位', re: /到位|可靠合闸|已合闸|合上位置/ } : { t: '结论：状态不一致，中止并上报', re: /不一致|异常|中止|上报|汇报值班/ }],
-      replyOk: st => st.esCase === 'ok' ? '收到。培训三线线路侧 116340 地刀已可靠合闸，继续执行。' : '收到。凡变化必上报，立即中止操作，我向值班负责人汇报。',
-      sample: st => st.esCase === 'ok' ? '报告，培训三线线路侧一一六三四零地刀已合上：就地控制柜位置指示合闸，机构箱分合闸指示合闸，连杆位置符合合闸状态，三项一致，地刀已合闸到位。' : '报告，培训三线线路侧一一六三四零地刀操作后：就地控制柜指示合闸，但机构箱指示与连杆位置不一致，不能确认已可靠合闸，请求中止操作并上报。',
-      rule: RULE_GIS, fix: '按设备双重名称、三个位置、结论的顺序汇报' }
+    { id: 'k2_hub', part: '关卡二 · 验电、接地及接地后的状态检查', title: '验电与接地', dims: { D: 1.5, F: 1, H: .5, B: .5 }, locs: { hmi: svgHmi1163, cab: svgCabFace, gnd: svgGroundPanel }, locNames: { hmi: '监控后台', cab: '就地控制柜', gnd: '地刀操作面板' }, start: 'hmi', spots: Object.assign({}, SP1163.hmi, SP1163.cab, SP1163.gnd), rule: RULE_VD, risk: RISK_VD, fix: '先验电再接地',
+      brief: (st, mode) => mode === 'exam' ? '线路已转冷备用，五防钥匙已下传。下一项：合上培训三线线路侧 116340 地刀。你来。' : '线路已经转到冷备用，五防钥匙也下传了。下一项是合上培训三线线路侧 116340 地刀。接地之前该做什么、怎么做，你自己来，我看着。',
+      goals: [
+        { id: 'volt', kind: 'look', re: /二次电压|后台.{0,4}电压|遥测/,  n: '后台线路二次确无电压', dev: ['volt'], loc: 'hmi', pts: 1, val: (t, st) => { const r = readVolt(t); if (!r) return null; return r === (st.d4 === 'open' ? 'none' : 'live') ? 'ok' : 'bad'; }, sample: '后台 Uab、Ubc、Uca 都是 0.00 kV，培训三线 1163 线路二次确无电压', sampleBad: '后台线路还有电压', praise: '第一种原理：后台二次电压确无电压。', badText: '后台二次电压判断与实际不符。', badSay: 'Uab、Ubc、Uca 三行现在是多少？', right: '培训三线 1163 线路二次确无电压', hints: ['接地之前，第一件事是什么？', '验电。GIS 不能直接验电，要用两种不同原理的间接指示，先看后台。', '点后台遥测信息栏的 Uab/Ubc/Uca，读数说出来。'], ask: '线路二次电压多少？' },
+        { id: 'hv', kind: 'look', re: /带电显示|显示装置/,  n: '1163 间隔高压带电显示装置显示确无电压', dev: ['hv'], loc: 'cab', pts: 1, val: (t, st) => { const r = readVolt(t); if (!r) return null; return r === (st.d4 === 'open' ? 'none' : 'live') ? 'ok' : 'bad'; }, sample: '就地控制柜高压带电显示装置三相灯都灭，显示确无电压', sampleBad: '带电显示装置灯亮着，有电压', praise: '第二种原理：带电显示装置也确无电压。两种非同源指示都变了，可以接地了。', badText: '带电显示装置判断与实际不符。', badSay: '三相指示灯亮没亮？再看。', right: '高压带电显示装置显示确无电压', hints: ['一种指示还不够，规程要两种不同原理。', '就地控制柜上有高压带电显示装置。', '切到「就地控制柜」，点带电显示装置，看三相灯灭没灭。'], ask: '带电显示装置显示什么？' },
+        { id: 'gnd', kind: 'op', n: '合上培训三线线路侧 116340 地刀', loc: 'gnd', op: 'gnd:close', re: /合上|合闸|接地|合地刀|116340/, pts: 1, after: ['volt', 'hv'], act: st => { st.es = 'close'; }, praise: '地刀合上了。操作时盯住运动方向、声音和指示的变化。',
+          red: { text: '未完成两项验电即合上 116340 地刀，一票否决。', stop: '地刀不能合！你还没验电。', why: '线路可能仍带电', fix: '先完成后台二次电压与高压带电显示装置两项验电，两种非同源指示均已变化后再合地刀', rule: `${RULE_VD}　${RULE_VD2}`, risk: RISK_VD, reset: '地刀已复位到分闸，把验电做完再来。', undo: st => { st.es = 'open'; } },
+          hints: ['两项验电都做完了？做完就可以接地了。', '116340 地刀的合闸按钮在地刀操作面板上。', '切到「地刀操作面板」，按住 116340 合闸按钮直到执行完成。'], nudge: '验完电了吗？接下来呢？' }
+      ],
+      badOps: { 'gnd:open': '地刀本来就在分位，现在要合。' },
+      outro: (st, mode) => mode === 'exam' ? '地刀已合上。接下来你来。' : '地刀合上了。但操作完成，不等于地刀合闸到位——现在你去确认它真的合到位了。' },
+    { id: 'k2_chk', part: '关卡二 · 验电、接地及接地后的状态检查', title: '116340 地刀合上后的状态检查', dims: { B: 1.5, A: .5, G: 1, E: .5 }, locs: { pano: svgBayPanorama, cab: svgCabFace }, locNames: { pano: '现场全景', cab: '就地控制柜柜面' }, start: 'pano', spots: Object.assign({}, SP1163.pano, SP1163.cab), rule: RULE_GIS, risk: RISK_GIS,
+      brief: (st, mode) => mode === 'exam' ? '116340 地刀操作已完成。接下来你来。' : '地刀操作完成了，不能只凭"命令已执行"就算数。到底合没合到位，你自己去看，看完再给我结论。',
+      goals: [
+        { id: 'cab', kind: 'look', re: /控制柜|汇控/,  n: '就地控制柜显示合闸', dev: ['cab', 'esInd'], loc: 'pano', pts: 1, val: t => { const r = readOC(t); return r ? (r === 'close' ? 'ok' : 'bad') : null; }, sample: '就地控制柜上 116340 地刀位置指示为合闸', sampleBad: '就地控制柜显示分闸', praise: '电气位置指示是合闸。这是第一处。', badText: '就地控制柜显示合闸，却判断为分闸。', badSay: '116340 的红灯亮没亮？', right: '就地控制柜 116340 位置指示为合闸', hints: ['地刀到没到位，先从哪里看起？', '就地控制柜上有 116340 的位置指示灯。', '点全景左侧的就地控制柜，看 116340 红灯亮没亮。'], ask: '116340 位置指示是什么？' },
+        { id: 'mech', kind: 'look', n: '刀闸机构箱分、合闸指示显示合闸', re: /机构箱|机械指示/,  dev: ['mech'], loc: 'pano', pts: 1, val: (t, st) => { const r = readOC(t); if (!r) return null; return r === (st.esCase === 'mech' ? 'open' : 'close') ? 'ok' : 'bad'; }, sample: st => st.esCase === 'mech' ? '机构箱分合闸指示显示分' : '机构箱分合闸指示显示合', sampleBad: '机构箱显示合', praise: st => st.esCase === 'mech' ? '你看得对，机构箱显示的是分。控制柜说合、机构箱说分，这就不一致了。' : '机械指示也是合。第二处。', badText: '机构箱机械指示判断与实际不符。', badSay: '指示窗里到底是哪个字？再看。', right: st => st.esCase === 'mech' ? '机构箱显示分（与控制柜不一致）' : '机构箱显示合', hints: ['电气指示只是一处，机构箱上还有机械指示。', '机构箱在 GIS 出线侧下方，指示窗显示分或合。', '点全景右下的刀闸机构箱，读指示窗。'], ask: '机构箱指示显示什么？' },
+        { id: 'rod', kind: 'look', re: /连杆/,  n: '刀闸连杆位置符合合闸状态', dev: ['rod'], loc: 'pano', pts: 1, val: (t, st) => { let r = null; if (/未到位|没到|中途|异常|不符|没到位|停在/.test(t)) r = 'bad'; else if (/到位|符合|限位|合位|正常|入槽/.test(t)) r = 'ok'; if (!r) return null; return r === (st.esCase === 'rod' ? 'bad' : 'ok') ? 'ok' : 'bad'; }, sample: st => st.esCase === 'rod' ? '连杆停在中途，没有到合闸限位，位置异常' : '连杆转到了合闸限位，销钉入槽，符合合闸状态', sampleBad: '连杆到位了', praise: st => st.esCase === 'rod' ? '对，连杆停在中途，没到合闸限位。' : '连杆到了合闸限位，销钉入槽。第三处。', badText: '连杆位置判断与实际不符。', badSay: '连杆和合闸限位线重合了吗？再看。', right: st => st.esCase === 'rod' ? '连杆未到合闸限位（异常）' : '连杆位置符合合闸状态', hints: ['机械传动到底到位没有，看什么最直接？', '看地刀操作机构的连杆是不是转到了合闸限位。', '点机构箱旁边的连杆，看它和合闸限位线是否重合。'], ask: '连杆位置怎么样？' },
+        { id: 'concl', kind: 'say', n: '判定 116340 地刀状态', pts: 0, needAll: true, after: ['cab', 'mech', 'rod'], re: /可靠合闸|合闸到位|已到位|检查完成|已合上|不一致|不能确认|异常|未到位/,
+          val: (t, st) => { const A = /可靠合闸|合闸到位|已到位|检查完成|已合上|合好了|到位了/.test(t) && !/不能|未|没/.test(t), B = /不一致|不能确认|不能判定/.test(t), C = /机械.{0,4}异常|连杆.{0,6}(异常|未到位|没到位)|传动/.test(t); const truth = st.esCase === 'mech' ? 'B' : st.esCase === 'rod' ? 'C' : 'A'; const got = C ? 'C' : B ? 'B' : A ? 'A' : null; if (!got) return null; return got === truth ? 'ok' : 'bad'; },
+          sample: st => st.esCase === 'mech' ? '控制柜指示合闸，但机构箱指示分闸，状态不一致，不能确认地刀已可靠合闸，请求中止上报' : st.esCase === 'rod' ? '机构箱显示合闸，但连杆没到合闸限位，机械状态确认异常，请求中止上报' : '就地控制柜、机构箱指示、连杆位置三处一致，116340 地刀已可靠合闸',
+          sampleBad: '116340 地刀已可靠合闸',
+          praise: st => st.esCase === 'mech' ? '状态不一致。就地控制柜指示与现场机构箱机械位置不一致，当前不能确认地刀已经可靠合闸。判断正确，凡变化必上报。' : st.esCase === 'rod' ? '机械状态确认异常。请检查刀闸连杆位置，确认机械传动机构是否已经实际到位。判断正确，立即中止上报。' : '116340 地刀状态检查完成，已确认地刀合闸到位。',
+          missSay: '检查不完整。', missText: '检查不完整。就地控制柜已显示合闸，还需要检查机构箱分、合闸指示和刀闸连杆位置。', fix: '三个位置全部检查、三项一致后再判定；不一致时不得判定为已合闸，应中止并汇报',
+          badText: st => st.esCase === 'mech' ? '状态不一致。就地控制柜指示与现场机构箱机械位置不一致，当前不能确认地刀已经可靠合闸。' : st.esCase === 'rod' ? '机械状态确认异常。请检查刀闸连杆位置，确认机械传动机构是否已经实际到位。' : '三项一致却未判定为已合闸到位。',
+          badSay: st => st.esCase === 'mech' ? '三处一致吗？控制柜说合、机构箱说分——这能算合闸到位？' : st.esCase === 'rod' ? '连杆停在中途，你还判它到位？' : '三处都一致，你的结论呢？',
+          right: st => st.esCase === 'mech' ? '状态不一致，不能确认地刀已可靠合闸' : st.esCase === 'rod' ? '机械状态确认异常' : '116340 地刀已可靠合闸',
+          hints: ['三处都看了，一致吗？', '三处一致才能判到位；任何一处对不上，都不能确认。', st => st.esCase === 'mech' ? '答：状态不一致，不能确认地刀已可靠合闸。' : st.esCase === 'rod' ? '答：机械状态确认异常。' : '答：三处一致，116340 地刀已可靠合闸。'], nudge: '看完了吗？给我结论。' }
+      ],
+      outro: '好。现在向我正式汇报一遍。' },
+    { id: 'k2_talk', part: '关卡二 · 口述汇报', title: '向监护人汇报 116340 地刀检查结果', dims: { C: 1, B: .5, E: .5 }, locs: { pano: svgBayPanorama }, locNames: { pano: '现场全景' }, spots: SP1163.pano, rule: RULE_GIS,
+      brief: '任玲玲，116340 地刀的检查情况，向我汇报。设备编号按位报读。',
+      goals: [{ id: 'rep', kind: 'say', n: '向监护人汇报 116340 地刀检查结果', pts: 0, re: /./,
+        keys: st => [{ t: '设备双重名称（培训三线线路侧 116340 地刀）', re: /116340|一一六三四零/ }, { t: '就地控制柜指示', re: /控制柜|汇控/ }, { t: '机构箱指示', re: /机构箱|机械/ }, { t: '连杆位置', re: /连杆/ }, st.esCase === 'ok' ? { t: '结论：已合闸到位', re: /到位|可靠合闸|已合闸|合上位置/ } : { t: '结论：状态不一致，中止并上报', re: /不一致|异常|中止|上报/ }],
+        val(t, st) { const ks = this.keys(st); return ks.every(k => k.re.test(t)) ? 'ok' : 'bad'; },
+        sample: st => st.esCase === 'ok' ? '报告，培训三线线路侧一一六三四零地刀已合上：就地控制柜位置指示合闸，机构箱分合闸指示合闸，连杆位置符合合闸状态，三项一致，地刀已合闸到位。' : '报告，培训三线线路侧一一六三四零地刀操作后：就地控制柜指示合闸，但机构箱指示与连杆位置不一致，不能确认已可靠合闸，请求中止操作并上报。',
+        sampleBad: '地刀已经合好了。',
+        praise: st => st.esCase === 'ok' ? '收到。培训三线线路侧 116340 地刀已可靠合闸，继续执行。' : '收到。凡变化必上报，立即中止操作，我向值班负责人汇报。',
+        badText: '汇报要素不完整。', badSay(st) { const miss = this.keys(st).filter(k => !k.re.test(EX.log.filter(m => m.who === 'me').slice(-1)[0].t)).map(k => k.t); return EX.mode === 'exam' ? '汇报要素不完整，再报一遍。' : `还缺：${miss.join('、')}。再报一遍。`; }, right: '设备双重名称 + 三个位置 + 结论',
+        hints: ['汇报要说清设备双重名称、三个位置各是什么、结论。', '按顺序：培训三线线路侧一一六三四零地刀，控制柜、机构箱、连杆，然后结论。', st => st.esCase === 'ok' ? '照这样报：培训三线线路侧一一六三四零地刀已合上，控制柜指示合闸、机构箱指示合闸、连杆到位，三项一致，已合闸到位。' : '照这样报：培训三线线路侧一一六三四零地刀操作后，控制柜指示合闸，但机构箱或连杆不一致，不能确认已可靠合闸，请求中止上报。'] }],
+      outro: '这一关到这里。' }
   ]
 };
 
+/* ---------------- 雨淋阀 ---------------- */
+const SPRAIN = {
+  vg: { pg1: { n: '管网/供水侧压力表', zoom: st => zoomGauge(st, 'pg1') }, pg2: { n: '隔膜/控制腔压力表', zoom: st => zoomGauge(st, 'pg2') }, vOut: { n: '最上方出水阀门', zoom: st => zoomValve(st, 'vOut') }, vIn: { n: '进水阀门', zoom: st => zoomValve(st, 'vIn') }, body: { n: '雨淋阀本体', bad: '这是雨淋阀本体。' }, box: { n: '紧急启动阀盒', zoom: zoomBox }, sol: { n: '电磁阀', bad: '这是电磁阀。' }, test: { n: '试验阀', bad: '这是试验阀。' }, drain: { n: '主排水阀', bad: '停，主排水阀不能动，一动管网压力就泄掉了。', crit: true, fix: '不得操作主排水阀', risk: '误开主排水阀会泄放管网压力，雨淋阀无法正常投入' }, small: { n: '泄压小阀', bad: '这是泄压小阀。' } },
+  pano: { v1: { n: '#1主变雨淋阀', zoom: st => zoomPlate(st, 1), plain: true }, v2: { n: '#2主变雨淋阀', zoom: st => zoomPlate(st, 2), plain: true }, v3: { n: '#3主变雨淋阀', zoom: st => zoomPlate(st, 3), plain: true }, v4: { n: '#4主变雨淋阀', zoom: st => zoomPlate(st, 4), plain: true } },
+  tr: { spray: { n: '#3主变水喷雾区域', zoom: st => `<svg viewBox="0 0 960 540" class="zsvg">${svgTransformerSpray(st)}</svg>` }, body: { n: '#3主变本体', bad: '看主变周围的喷头和水雾。' } }
+};
 const EXAM_RAIN = {
   id: 'rain', n: '#3主变雨淋阀水喷雾系统机械手动启动', short: '雨淋阀机械手动启动', src: '实操培训方案 · 雨淋阀检查版',
-  bg: '#3主变防护区发生火灾，且消防报警主机故障、无法通过主机远程启动。两阶段：雨淋阀正常状态检查 → 火情发生后的机械应急启动。不设消防水泵房检查，不安排水泵控制柜操作。',
+  coach: { key: 'zhiban', name: '周建国', role: '值班负责人', short: '值' },
+  bg: '#3主变防护区发生火灾，且消防报警主机故障、无法通过主机远程启动。两阶段：雨淋阀正常状态检查 → 火情发生后的机械应急启动。值班负责人在侧，你自己看、自己判断、自己动手；不设消防水泵房检查，不安排水泵控制柜操作。',
   max: 10, pass: 6, crit: 7, cover: ['A', 'B', 'D', 'E', 'F', 'G'],
   init(arm) { return { pg1: 'ok', pg2: arm.rainAbn ? 'low' : 'ok', vIn: 'open', vOut: 'open', boxOpen: false, handle: 0, spray: false }; },
   stations: [
-    { id: 's0', part: '场景0 · 正常状态检查', title: '#3主变雨淋阀组正常状态检查', type: 'pick', pts: 5, spotPts: { pg1: 1.5, pg2: 1.5, vOut: 1, vIn: 1 }, dims: { F: 1, B: 1, G: .5 }, scene: svgValveGroup,
-      task: '日常巡视：判断 #3主变雨淋阀组是否处于正常备用状态。依次检查：管网/供水侧压力、隔膜/控制腔压力、最上方出水阀门、进水阀门。', hint: '两只压力表在阀组左侧，出水阀门在最上方，进水阀门在阀体下方。',
-      spots: {
-        pg1: { n: '管网/供水侧压力表', zoom: st => zoomGauge(st, 'pg1'), verdicts: [{ k: 'ok', t: '压力正常', pri: 1 }, { k: 'low', t: '压力异常' }], truth: st => st.pg1 === 'low' ? 'low' : 'ok', fb: { ok: '压力正常。', low: '压力异常，请确认雨淋阀组是否具备正常投入条件。' }, critOnMiss: true, why: '未发现雨淋阀压力异常属关键错误', fix: '指针在绿区为正常，在红区为异常' },
-        pg2: { n: '隔膜/控制腔压力表', zoom: st => zoomGauge(st, 'pg2'), verdicts: [{ k: 'ok', t: '压力正常', pri: 1 }, { k: 'low', t: '压力异常' }], truth: st => st.pg2 === 'low' ? 'low' : 'ok', fb: { ok: '压力正常。', low: '压力异常，请确认雨淋阀组是否具备正常投入条件。' }, critOnMiss: true, onTruth: (st, t) => { if (t === 'low') st.pg2 = 'ok'; }, why: '未发现雨淋阀压力异常属关键错误', fix: '指针在绿区为正常，在红区为异常' },
-        vOut: { n: '最上方出水阀门', zoom: st => zoomValve(st, 'vOut'), verdicts: [{ k: 'open', t: '处于开启位置', pri: 1 }, { k: 'closed', t: '关闭 / 未全开' }], truth: st => st.vOut === 'closed' ? 'closed' : 'open', fb: { open: '出水阀门处于正常开启位置。', closed: '出水阀门状态异常。' }, critOnMiss: true, why: '未发现最上方出水阀门未开启属关键错误', fix: '手柄与管道平行为开' },
-        vIn: { n: '进水阀门', zoom: st => zoomValve(st, 'vIn'), verdicts: [{ k: 'open', t: '处于开启位置', pri: 1 }, { k: 'closed', t: '关闭 / 未全开' }], truth: st => st.vIn === 'closed' ? 'closed' : 'open', fb: { open: '进水阀门处于正常开启位置。', closed: '进水阀门状态异常。' }, critOnMiss: true, why: '未发现进水阀门未开启属关键错误', fix: '手柄与管道平行为开' },
-        body: { n: '雨淋阀本体', bad: '这是雨淋阀本体，检查项目是压力表与进、出水阀门。' }, box: { n: '紧急启动阀盒', bad: '这是紧急启动阀盒，状态检查阶段不操作。' }, sol: { n: '电磁阀', bad: '这是电磁阀，不在本次检查项目内。' }, test: { n: '试验阀', bad: '这是试验阀，不在本次检查项目内。' }, drain: { n: '主排水阀', bad: '这是主排水阀，状态检查阶段不得操作。', crit: true, risk: '误开主排水阀会泄放管网压力，雨淋阀无法正常投入', fix: '检查项只看不动，不触碰排水阀' }, small: { n: '泄压小阀', bad: '这是泄压小阀，不在本次检查项目内。' }
-      },
-      need: ['pg1', 'pg2', 'vOut', 'vIn'], onDone: '#3主变雨淋阀组处于正常备用状态。', badText: '该部件不是本项的检查对象。', fix: '按四个检查项逐项点击部件并判断状态', risk: '阀组未处于正常备用状态时，火情发生后雨淋阀无法投入或无法喷水' },
-    { id: 's0q', part: '场景0 · 口述考问', title: '进、出水阀门为什么必须处于开启位置', type: 'qa', pts: 0, dims: { F: 1, D: .5 },
-      task: '值班负责人考问，请口述或输入回答。', q: '雨淋阀组处于正常备用状态时，进水蝶阀和最上方出水蝶阀为什么必须处于开启位置？',
-      keys: [{ t: '进水侧供水通路', re: /供水|进水|水源|管网|压力/ }, { t: '出水侧喷雾通路', re: /喷|出水|喷雾|喷头|主变/ }, { t: '启动后才能出水', re: /启动|投入|动作|打开|开启/ }], min: 2,
-      model: '进水蝶阀开启才能保证阀组前有压力水源，出水蝶阀开启才能在雨淋阀启动后把水送到 #3主变水喷雾管网；任一阀门关闭，雨淋阀即使启动也无法喷水。', fix: '回答要说到进水侧和出水侧两条通路' },
-    { id: 'sA', part: '场景A · 火情发生后正确找到 #3主变雨淋阀', title: '找到 #3主变雨淋阀', type: 'pick', pts: 1, dims: { A: 1, E: .5 }, scene: svgRainPanorama,
-      task: '#3主变防护区发生火灾，消防报警主机故障。到阀室后，请点击 #3主变雨淋阀。', hint: '看每套阀组上方的现场编号牌。',
-      spots: { v1: { n: '#1主变雨淋阀', bad: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', crit: true }, v2: { n: '#2主变雨淋阀', bad: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', crit: true }, v3: { n: '#3主变雨淋阀', okfb: '已确认 #3主变雨淋阀，请检查阀组状态。' }, v4: { n: '#4主变雨淋阀', bad: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', crit: true } },
-      need: ['v3'], risk: '火情发生后选择错误主变对应的雨淋阀，会向无火主变喷水而着火主变得不到保护', fix: '按现场编号牌确认设备对象不选错', why: '紧急情况下首先做到设备对象不选错' },
-    { id: 'sC1', part: '场景C · 机械手动启动 #3雨淋阀', title: '找到紧急启动阀盒', type: 'pick', pts: 1, dims: { A: 1, E: 1 }, scene: svgValveGroup, sceneOpt: () => ({ fire: true, title: '#3主变雨淋阀组 · 火情处置' }),
-      task: '消防报警主机故障，请在 #3雨淋阀本体处实施机械手动启动。设备编号无误、外观无明显异常，前置状态检查已确认阀组处于正常备用状态，立即找到紧急启动阀盒。', hint: '阀体右侧带铰链盖、贴黄色标签的小盒。',
-      spots: { box: { n: '紧急启动阀盒', act: st => { st.boxOpen = true; }, okfb: '已找到 #3主变雨淋阀紧急启动阀盒，盒盖打开，可见内部手动阀手柄。' }, sol: { n: '电磁阀', bad: '该阀门不是雨淋阀紧急启动阀。' }, test: { n: '试验阀', bad: '该阀门不是雨淋阀紧急启动阀。' }, drain: { n: '主排水阀', bad: '该阀门不是雨淋阀紧急启动阀。', crit: true, risk: '操作主排水阀会泄放管网压力，影响系统正常工作', fix: '不得操作主排水阀' }, small: { n: '泄压小阀', bad: '该阀门不是雨淋阀紧急启动阀。' }, body: { n: '雨淋阀本体', bad: '这是雨淋阀本体，紧急启动阀盒在阀体右侧。' }, pg1: { n: '管网/供水侧压力表', bad: '火情发生后不再重复完整检查，直接找紧急启动阀盒。' }, pg2: { n: '隔膜/控制腔压力表', bad: '火情发生后不再重复完整检查，直接找紧急启动阀盒。' }, vOut: { n: '最上方出水阀门', bad: '该阀门不是雨淋阀紧急启动阀。', crit: true, risk: '误操作出水蝶阀会切断喷雾通路', fix: '不得操作与紧急启动无关的主要控制阀' }, vIn: { n: '进水阀门', bad: '该阀门不是雨淋阀紧急启动阀。', crit: true, risk: '误操作进水蝶阀会切断供水', fix: '不得操作与紧急启动无关的主要控制阀' } },
-      need: ['box'], risk: '错把其他阀门当作紧急启动阀，机械启动失败或影响系统正常工作', fix: '找到贴有"手动应急启动"标签的阀盒' },
-    { id: 'sC2', part: '场景C · 机械手动启动 #3雨淋阀', title: '将盒内手动阀操作至全开', type: 'drag', pts: 2, dims: { E: 1, D: .5 }, scene: svgBoxOpen, min: 90,
-      task: '按住手柄拖动：关闭位置 → 中间位置 → 全开位置。只有到达全开区域才判定成功。', hint: '手柄顺时针拖到"全开"刻度处松开。',
-      fb: { ok: '#3雨淋阀手动应急阀已全开，雨淋阀系统启动。', part: '手动阀未完全开启，请继续操作至全开位置。' }, after: st => { st.spray = false; }, risk: '未将紧急启动手动阀操作至全开，雨淋阀不能可靠启动', fix: '继续拖动手柄直到全开区域' },
-    { id: 'sD', part: '场景D · 确认 #3主变水喷雾正常喷水', title: '确认 #3主变水喷雾正常', type: 'pick', pts: 1, dims: { B: 1, E: .5 }, scene: svgTransformerSpray, enter: st => { st.spray = true; },
-      task: '手动阀已全开，切换至 #3主变场景。先点击水喷雾区域检查，再确认。', hint: '主变周围红色管网与喷头之间的喷雾区域。',
-      spots: { spray: { n: '#3主变水喷雾区域', okfb: '#3主变水喷雾系统喷水正常。' }, body: { n: '#3主变本体', bad: '请检查主变周围的水喷雾覆盖情况。' } },
-      need: ['spray'], confirmBtn: '确认水喷雾正常', onDone: '#3主变雨淋阀水喷雾系统机械手动启动处置完成。', risk: '未确认 #3主变水喷雾状态，无法判断处置是否有效', fix: '先看喷雾区域再确认' },
-    { id: 'sTalk', part: '汇报', title: '向值班负责人汇报处置情况', type: 'talk', pts: 0, dims: { C: 1, E: .5 }, role: '值', kb: '主变火灾 雨淋阀 机械手动启动',
-      task: '值班负责人周建国要求汇报 #3主变火情处置情况。', q: '口述汇报',
-      open: '任玲玲，#3主变那边处置情况怎么样，向我汇报。',
-      keys: [{ t: '设备对象（#3主变雨淋阀）', re: /3.?主变|三号主变|#3/ }, { t: '机械手动启动（手动阀全开）', re: /手动|全开|机械/ }, { t: '水喷雾正常', re: /喷雾|喷水|喷淋/ }],
-      replyOk: '收到。#3主变雨淋阀已机械手动启动、水喷雾正常，我通知消防专业到水泵房检查大泵运行。', sample: '报告，#3主变雨淋阀已在本体处机械手动启动，紧急启动手动阀已全开，#3主变水喷雾系统喷水正常，处置完成。', fix: '按设备对象、启动方式、喷雾结果的顺序汇报' }
+    { id: 's0', part: '场景0 · 正常状态检查', title: '#3主变雨淋阀组正常状态检查', dims: { F: 1, B: 1, G: .5 }, locs: { vg: svgValveGroup }, locNames: { vg: '#3主变雨淋阀组' }, spots: SPRAIN.vg, risk: '阀组未处于正常备用状态时，火情发生后雨淋阀无法投入或无法喷水',
+      brief: (st, mode) => mode === 'exam' ? '巡视到 #3 主变雨淋阀。阀组是否处于正常备用状态，你来判断。' : '任玲玲，今天巡视到 #3 主变雨淋阀。阀组是不是处于正常备用状态，你自己看，看到什么就说什么，我在旁边。',
+      goals: [
+        { id: 'pg1', kind: 'look', re: /供水|管网/,  n: '管网/供水侧压力正常', dev: ['pg1'], pts: 1.5, val: (t, st) => { const r = readPress(t); if (!r) return null; return r === (st.pg1 === 'low' ? 'low' : 'ok') ? 'ok' : 'bad'; }, sample: st => st.pg1 === 'low' ? '供水侧压力表指针在红区，压力异常' : '管网供水侧压力 0.6 MPa，指针在绿区，压力正常', sampleBad: '供水侧压力异常', praise: st => st.pg1 === 'low' ? '压力异常，请确认雨淋阀组是否具备正常投入条件。发现得对。' : '压力正常。', badText: st => st.pg1 === 'low' ? '未发现雨淋阀压力异常。' : '压力正常却判断为异常。', badSay: '指针在绿区还是红区？再看。', critOnBad: st => st.pg1 === 'low', right: st => st.pg1 === 'low' ? '压力异常' : '压力正常', fix: '指针在绿区为正常，在红区为异常', hints: ['正常备用状态，先看什么？压力。', '阀组左下角是管网/供水侧压力表。', '点供水侧压力表，看指针在绿区还是红区，读数说出来。'], ask: '供水侧压力多少？' },
+        { id: 'pg2', kind: 'look', re: /控制腔|隔膜/,  n: '隔膜/控制腔压力正常', dev: ['pg2'], pts: 1.5, val: (t, st) => { const r = readPress(t); if (!r) return null; return r === (st.pg2 === 'low' ? 'low' : 'ok') ? 'ok' : 'bad'; }, sample: st => st.pg2 === 'low' ? '控制腔压力表指针在红区，压力异常' : '隔膜控制腔压力 0.55 MPa，指针在绿区，压力正常', sampleBad: '控制腔压力正常', praise: st => st.pg2 === 'low' ? '压力异常，请确认雨淋阀组是否具备正常投入条件。发现得对，已通知消防专业处理；阀组恢复备用后我们继续。' : '压力正常。', onOk: st => { if (st.pg2 === 'low') st.pg2 = 'ok'; }, badText: st => st.pg2 === 'low' ? '未发现雨淋阀压力异常。' : '压力正常却判断为异常。', badSay: '指针在哪个区？再看清楚。', critOnBad: st => st.pg2 === 'low', right: st => st.pg2 === 'low' ? '压力异常' : '压力正常', fix: '指针在绿区为正常，在红区为异常', hints: ['隔膜式雨淋阀还有一只表，看的是什么？', '控制腔压力表在阀体左上。', '点隔膜/控制腔压力表，看指针在哪个区。'], ask: '控制腔压力多少？' },
+        { id: 'vOut', kind: 'look', re: /出水/,  n: '最上方出水阀门处于开启位置', dev: ['vOut'], pts: 1, val: (t, st) => { const r = readValve(t); if (!r) return null; return r === (st.vOut === 'closed' ? 'closed' : 'open') ? 'ok' : 'bad'; }, sample: '最上方出水蝶阀手柄与管道平行，处于开启位置', sampleBad: '出水阀门是关闭的', praise: '出水阀门处于正常开启位置。', badText: st => st.vOut === 'closed' ? '未发现最上方出水阀门未开启。' : '出水阀门开启却判断为关闭。', badSay: '手柄和管道是平行还是垂直？', critOnBad: st => st.vOut === 'closed', right: '出水阀门开启', fix: '手柄与管道平行为开', hints: ['压力之外，还要看什么？阀门位置。', '最上方的出水蝶阀，看阀位指示。', '点最上方出水阀门，看手柄方向和阀位牌。'], ask: '出水阀门什么位置？' },
+        { id: 'vIn', kind: 'look', re: /进水/,  n: '进水阀门处于开启位置', dev: ['vIn'], pts: 1, val: (t, st) => { const r = readValve(t); if (!r) return null; return r === (st.vIn === 'closed' ? 'closed' : 'open') ? 'ok' : 'bad'; }, sample: '进水蝶阀处于开启位置', sampleBad: '进水阀门没开', praise: '进水阀门处于正常开启位置。', badText: st => st.vIn === 'closed' ? '未发现进水阀门未开启。' : '进水阀门开启却判断为关闭。', badSay: '手柄和管道是平行还是垂直？', critOnBad: st => st.vIn === 'closed', right: '进水阀门开启', fix: '手柄与管道平行为开', hints: ['出水阀看了，进水呢？', '进水蝶阀在阀体下方。', '点阀体下方的进水阀门，看阀位。'], ask: '进水阀门什么位置？' },
+        { id: 'concl', kind: 'say', n: '判定阀组处于正常备用状态', pts: 0, needAll: true, after: ['pg1', 'pg2', 'vOut', 'vIn'], re: /正常备用|备用状态|可以投入|具备.{0,4}条件|状态正常|都正常/, val: t => /正常备用|备用状态|可以投入|具备.{0,4}条件|状态正常|都正常/.test(t) ? 'ok' : null, sample: '两只压力表正常、进出水阀门都开启，#3 主变雨淋阀组处于正常备用状态', sampleBad: '阀组处于正常备用状态', praise: '#3主变雨淋阀组处于正常备用状态。', missSay: '还没看全。', missText: '未完成四项检查即判定阀组处于正常备用状态。', fix: '四项检查全部完成后再下结论', hints: ['四处都看了，结论呢？', '两只压力表加两个阀门，一起说。', '说：压力正常、阀门开启，阀组处于正常备用状态。'], nudge: '四处都看过了，你的结论？' }
+      ],
+      outro: '好。这就是正常备用状态的四个检查点。' },
+    { id: 's0q', part: '场景0 · 口述考问', title: '口述考问', dims: { F: 1, D: .5 }, locs: { vg: svgValveGroup }, locNames: { vg: '#3主变雨淋阀组' }, spots: SPRAIN.vg,
+      brief: '问你一个问题：进水蝶阀和最上方出水蝶阀，为什么必须处于开启位置？',
+      goals: [{ id: 'qa', kind: 'qa', n: '口述：进、出水阀门为什么必须开启', pts: 0, keys: [{ t: '进水侧供水通路', re: /供水|进水|水源|管网|压力/ }, { t: '出水侧喷雾通路', re: /喷|出水|喷雾|喷头|主变/ }, { t: '启动后才能出水', re: /启动|投入|动作|打开|开启/ }], val(t) { return this.keys.filter(k => k.re.test(t)).length >= 2 ? 'ok' : 'bad'; }, sample: '进水蝶阀开着才有压力水源，出水蝶阀开着雨淋阀启动后水才能送到主变水喷雾管网；任何一个关着，启动了也喷不出水。', sampleBad: '规程要求。', praise: '对，两条通路都得通。', badText: '回答要点不全。', badSay: '想想水从哪里来、往哪里去。', right: '进水侧供水通路和出水侧喷雾通路都要通', hints: ['水从哪里来？往哪里去？', '进水阀管水源，出水阀管喷雾管网。', '答：进水阀开才有压力水，出水阀开雨淋阀启动后才能喷到主变。'] }],
+      outro: '好。' },
+    { id: 'sA', part: '场景A · 火情发生后正确找到 #3主变雨淋阀', title: '找到 #3主变雨淋阀', dims: { A: 1, E: .5 }, locs: { pano: svgRainPanorama }, locNames: { pano: '主变雨淋阀区域' }, spots: SPRAIN.pano, risk: '火情发生后选择错误主变对应的雨淋阀，会向无火主变喷水而着火主变得不到保护',
+      brief: (st, mode) => mode === 'exam' ? '#3 主变防护区火灾，消防报警主机故障。到阀室，找到 #3 主变雨淋阀。' : '火警：#3 主变防护区火灾，消防报警主机故障，远程启动不了。你马上到阀室，找到 #3 主变雨淋阀，找到了告诉我编号。',
+      goals: [{ id: 'find', kind: 'look', re: /雨淋阀|编号/,  n: '找到 #3主变雨淋阀', dev: ['v1', 'v2', 'v3', 'v4'], target: 'v3', wrongDev: 'v1', pts: 1, val: t => { const z = EX.zoom; if (!z) return null; const n = (t.match(/[#＃]?\s*([1-4一二三四])/) || [])[1]; const num = { '一': 1, '二': 2, '三': 3, '四': 4 }[n] || +n; if (!num) return null; if (z === 'v3' && num === 3) return 'ok'; if (z !== 'v3' && num === 3) return 'bad'; if (z !== 'v3' && num === +z.slice(1)) return 'note'; return 'bad'; }, noteSay: '看清了，这不是 #3。', sample: '编号牌 #3主变雨淋阀，确认是 #3', sampleBad: '#3主变雨淋阀', praise: '已确认 #3主变雨淋阀，请检查阀组状态。', badText: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', badSay: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', critOnBad: true, right: '#3主变雨淋阀（第三套，编号牌 #3）', fix: '按现场编号牌确认设备对象不选错', hints: ['每套阀组上方都有现场编号牌。', '火警是 #3 主变，找编号牌写着 #3 的那套。', '第三套，编号牌 #3主变雨淋阀。'], ask: '编号牌上写的是几号？' }],
+      outro: '就是这套。设备对象不能选错，这是应急处置的第一步。' },
+    { id: 'sC1', part: '场景C · 机械手动启动 #3雨淋阀', title: '找到紧急启动阀盒', dims: { A: 1, E: 1 }, locs: { vg: svgValveGroup }, locNames: { vg: '#3主变雨淋阀组' }, sceneOpt: () => ({ fire: true, title: '#3主变雨淋阀组 · 火情处置' }), spots: Object.assign({}, SPRAIN.vg, { vOut: { n: '最上方出水阀门', bad: '停，出水蝶阀不能动，一关喷雾通路就断了。', crit: true, fix: '不得操作与紧急启动无关的主要控制阀', risk: '误操作出水蝶阀会切断喷雾通路' }, vIn: { n: '进水阀门', bad: '停，进水蝶阀不能动。', crit: true, fix: '不得操作与紧急启动无关的主要控制阀', risk: '误操作进水蝶阀会切断供水' }, pg1: { n: '管网/供水侧压力表', bad: '火情发生后不再重复完整检查，直接机械启动。' }, pg2: { n: '隔膜/控制腔压力表', bad: '火情发生后不再重复完整检查，直接机械启动。' }, sol: { n: '电磁阀', bad: '该阀门不是雨淋阀紧急启动阀。' }, test: { n: '试验阀', bad: '该阀门不是雨淋阀紧急启动阀。' }, small: { n: '泄压小阀', bad: '该阀门不是雨淋阀紧急启动阀。' } }), risk: '错把其他阀门当作紧急启动阀，机械启动失败或影响系统正常工作',
+      brief: (st, mode) => mode === 'exam' ? '消防报警主机故障，在 #3 雨淋阀本体处实施机械手动启动。你来。' : '编号无误，外观也没异常，刚才的状态检查已经确认阀组备用正常，不用再查一遍。报警主机坏了，得在阀本体上机械手动启动。怎么启动，你来。',
+      goals: [{ id: 'box', kind: 'op', n: '找到并打开紧急启动阀盒', dev: ['box'], op: 'box:open', re: /阀盒|启动盒|打开.{0,4}盒|紧急启动/, pts: 1, act: st => { st.boxOpen = true; }, praise: '找对了。盒盖打开，里面就是手动阀手柄。', hints: ['机械手动启动的部件在阀本体上，不是电磁阀。', '找贴着"手动应急启动"标签的小盒。', '阀体右侧那个带盖的小盒，点开它，按住盒盖打开。'], nudge: '在阀体上找，哪个是紧急启动阀盒？' }],
+      outro: '' },
+    { id: 'sC2', part: '场景C · 机械手动启动 #3雨淋阀', title: '将盒内手动阀操作至全开', dims: { E: 1, D: .5 }, locs: { box: svgBoxOpen }, locNames: { box: '紧急启动阀盒' }, spots: {}, risk: '未将紧急启动手动阀操作至全开，雨淋阀不能可靠启动',
+      brief: (st, mode) => mode === 'exam' ? '手柄在里面。你来。' : '手柄就在里面。把手动阀操作到位——不是点一下就算，要动手。',
+      goals: [{ id: 'drag', kind: 'drag', n: '将盒内手动阀操作至全开', pts: 2, min: 90, praise: '#3雨淋阀手动应急阀已全开，雨淋阀系统启动。', part_say: '手动阀未完全开启，请继续操作至全开位置。', part_text: '手动阀未完全开启。', fix: '继续拖动手柄直到全开区域', hints: ['不是点一下，要把手柄拖到底。', '顺时针拖到"全开"刻度。', '按住黄色手柄，拖到右侧"全开"位置再松手。'], nudge: '手柄还没动呢。' }],
+      after: st => { st.spray = true; }, outro: '' },
+    { id: 'sD', part: '场景D · 确认 #3主变水喷雾正常喷水', title: '确认 #3主变水喷雾正常', dims: { B: 1, E: .5 }, locs: { tr: svgTransformerSpray }, locNames: { tr: '#3主变本体' }, spots: SPRAIN.tr, enter: st => { st.spray = true; }, risk: '未确认 #3主变水喷雾状态，无法判断处置是否有效',
+      brief: (st, mode) => mode === 'exam' ? '雨淋阀已启动。#3 主变那边，你去看。' : '雨淋阀启动了。启动不等于喷了水，#3 主变那边喷没喷，你去看，看到了就说。',
+      goals: [{ id: 'spray', kind: 'look', re: /喷/,  n: '确认 #3主变水喷雾正常', dev: ['spray'], pts: 1, val: (t, st) => { if (/没喷|无水|不喷|没水|没有水|喷不出/.test(t)) return 'bad'; if (/喷水|喷雾|在喷|正常|覆盖|出水了/.test(t)) return 'ok'; return null; }, sample: '#3 主变周围喷头都在喷水，水雾覆盖本体，水喷雾正常', sampleBad: '没有喷水', praise: '#3主变水喷雾系统喷水正常。', badText: '未正确确认 #3主变水喷雾状态。', badSay: '你再看主变四周的喷头。', right: '#3主变水喷雾正常', fix: '先看喷雾区域再确认', hints: ['启动了不算完，要看结果。', '看主变四周红色管网上的喷头。', '点主变周围的喷雾区域，看到喷水就说出来。'], ask: '喷没喷？' }],
+      outro: '#3主变雨淋阀水喷雾系统机械手动启动处置完成。' },
+    { id: 'sTalk', part: '汇报', title: '向值班负责人汇报处置情况', dims: { C: 1, E: .5 }, locs: { tr: svgTransformerSpray }, locNames: { tr: '#3主变本体' }, spots: SPRAIN.tr,
+      brief: '任玲玲，#3 主变那边处置情况怎么样，向我汇报。',
+      goals: [{ id: 'rep', kind: 'say', n: '向值班负责人汇报处置情况', pts: 0, re: /./, keys: () => [{ t: '设备对象（#3主变雨淋阀）', re: /3.?主变|三号主变|#3|＃3/ }, { t: '机械手动启动（手动阀全开）', re: /手动|全开|机械/ }, { t: '水喷雾正常', re: /喷雾|喷水|喷淋/ }], val(t, st) { return this.keys(st).every(k => k.re.test(t)) ? 'ok' : 'bad'; }, sample: '报告，#3主变雨淋阀已在本体处机械手动启动，紧急启动手动阀已全开，#3主变水喷雾系统喷水正常，处置完成。', sampleBad: '已经处理好了。', praise: '收到。#3主变雨淋阀已机械手动启动、水喷雾正常，我通知消防专业到水泵房检查大泵运行。', badText: '汇报要素不完整。', badSay(st) { const miss = this.keys(st).filter(k => !k.re.test(EX.log.filter(m => m.who === 'me').slice(-1)[0].t)).map(k => k.t); return EX.mode === 'exam' ? '汇报要素不完整，再报一遍。' : `还缺：${miss.join('、')}。再报一遍。`; }, right: '设备对象 + 启动方式 + 喷雾结果', hints: ['汇报要说清：哪台主变的雨淋阀、怎么启动的、喷雾结果。', '设备对象、启动方式、结果，三句话。', '照这样报：#3主变雨淋阀已机械手动启动，手动阀全开，水喷雾正常。'] }],
+      outro: '这一关到这里。' }
   ]
 };
 
@@ -8017,7 +8178,7 @@ function teamTasks() {
   const base = [{ id: 't0', coach: '倒闸操作 · 陈志远', plan: '完整操作票', mode: '考核模式', due: dateAfter(HOME_TASK.dueDays), pass: 80, who: '全班', done: 7, total: 12 }];
   return base.concat(lsGet(LS_TASKS, []));
 }
-const TRAIN_CONTENTS = [['e1163', '题库考试 · 1163 开关与地刀检查'], ['rain', '题库考试 · 雨淋阀机械手动启动'], ['full', '陪练舱 · 完整操作票'], ['sp_gis', '陪练舱 · 专项 GIS 四项核对'], ['sp_vd', '陪练舱 · 专项 验电接地']];
+const TRAIN_CONTENTS = [['e1163', '陪练关卡 · 1163 开关与地刀检查'], ['rain', '陪练关卡 · 雨淋阀机械手动启动'], ['full', '陪练舱 · 完整操作票'], ['sp_gis', '陪练舱 · 专项 GIS 四项核对'], ['sp_vd', '陪练舱 · 专项 验电接地']];
 const LD = { dims: [], who: '短板人员' };
 
 function pageTeam() {
@@ -8050,7 +8211,7 @@ function pageTeam() {
         ${TEAM.map(m => `<div class="heatn">${m.n}</div>${teamAbility(m).map(v => heat(v)).join('')}`).join('')}
         <div class="heatn"><b>均值</b></div>${avg.map(v => heat(v)).join('')}</div>
         <div class="tk3" style="margin-top:6px">评价数据由陪练舱与题库考试自动记录，用于培训安排参考；正式考评与授权以人工确认为准。</div></div></section>
-      <section class="hcard ho"><div class="hch"><b>题库考试结果与系统建议</b><em class="ai">AI</em><span>${recs.length} 条 · 组员考完即时同步 · 复核后进入成长记录</span></div><div class="hcb"><table class="htbl ldtbl">
+      <section class="hcard ho"><div class="hch"><b>陪练关卡结果与系统建议</b><em class="ai">AI</em><span>${recs.length} 条 · 组员考完即时同步 · 复核后进入成长记录</span></div><div class="hcb"><table class="htbl ldtbl">
         <tr><th>成员</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>针对性训练建议</th><th>复核</th></tr>
         ${recs.slice(0, 8).map(r => `<tr><td><b>${r.who}</b><div class="tk3 mono">${stampOf(r.ts)}</div></td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0 否决' : r.score}/${r.max}</td><td>${r.errs.length ? r.errs.map(e => `<i class="tag ${e.kind === 'red' || e.kind === 'crit' ? 'rl' : 'wn'}">${ERR_KIND[e.kind]}</i>`).join('') : '<span class="tag ok">无</span>'}</td><td class="ldsug">${(r.sugg || []).slice(0, 2).map(s => `<div>${s.dim ? `<b>${abilityOf(s.dim).n}</b>` : ''}${s.t.replace(/^「[^」]*」/, '')}</div>`).join('')}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : `<button class="btn sm" data-ldrev="${r.id}">复核</button>`}${r.id.startsWith('E') ? `<button class="btn sm" data-exreview="${r.id}">复盘</button>` : ''}</td></tr>`).join('')}</table></div></section>
     </div>
@@ -8101,7 +8262,7 @@ function certDrill(i) {
     <table class="htbl certtbl"><tr><th>技能单元</th><th>专业项目</th><th>对应能力</th><th>建议</th><th>依据</th></tr>
     ${sug.map(x => `<tr class="${x.ok ? '' : 'dim'}"><td class="tk3">${x.it.unit}</td><td>${x.it.star ? '<b class="star">★</b>' : ''}${x.it.code} ${x.it.n}</td><td class="tk3">${x.dims.join('、')}</td><td>${x.ok ? '<span class="tag ok">建议授权 √</span>' : '<span class="tag wn">待训练</span>'}</td><td class="tk3">${x.why}</td></tr>`).join('')}</table>
     <div class="certfoot"><div><label>姓名</label>${m.n}</div><div><label>班组授权人</label>${c ? c.by : LEAD_USER.name}</div><div><label>授权时间</label>${c ? c.date : '—'}</div><div><label>负责人签名 / 单位盖章</label>${c ? '待人力资源部备案' : '待授权后办理'}</div></div>
-    <div class="tk3" style="margin-top:8px">草稿由能力雷达与题库考试记录生成，授权结论由班组授权人确认；正式认证以人力资源部备案为准。</div>`,
+    <div class="tk3" style="margin-top:8px">草稿由能力雷达与陪练关卡记录生成，授权结论由班组授权人确认；正式认证以人力资源部备案为准。</div>`,
     `<button class="btn" data-print="1">打印</button>${c ? '' : `<button class="btn pri" data-ldcertok="${i}">由班组授权人确认</button>`}`);
 }
 function memberDrill(i) {
@@ -8109,7 +8270,7 @@ function memberDrill(i) {
   openDrill(`成员 · ${m.n}`, `${m.post} · 近30天陪练 ${m.sess} 场 · 题库考试 ${recs.length} 次`, m.sess ? `
     <div class="gtwo"><div>${chRadar(DIMS, d, teamAvgDims(), { w: 320, h: 240, l1: '本人', l2: '班组均值', key: 'x' })}<div class="tk3" style="text-align:center">本人 vs 班组均值</div></div>
     <div>${miniBars(d)}<div class="hrow" style="margin-top:8px">红线触发 ${m.red} 次 · 最近练习 ${m.last === 0 ? '今天' : m.last + ' 天前'} · 本月任务${m.task === 'done' ? '已完成' : '未完成'}</div></div></div>
-    ${recs.length ? `<div class="sec" style="margin-top:10px"><div class="st">题库考试记录</div>${recs.map(r => `<div class="hrow"><span class="mono">${stampOf(r.ts)}</span> ${r.short} · ${r.modeName} · <b class="${r.red ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b>${r.sugg && r.sugg[0] ? ` <span class="tk3">${r.sugg[0].t}</span>` : ''}</div>`).join('')}</div>` : ''}
+    ${recs.length ? `<div class="sec" style="margin-top:10px"><div class="st">陪练关卡记录</div>${recs.map(r => `<div class="hrow"><span class="mono">${stampOf(r.ts)}</span> ${r.short} · ${r.modeName} · <b class="${r.red ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b>${r.sugg && r.sugg[0] ? ` <span class="tk3">${r.sugg[0].t}</span>` : ''}</div>`).join('')}</div>` : ''}
     <div class="tk3">正式考评以人工审核为准。</div>` : '<div class="hrow">本月尚无陪练与考试记录。</div>',
     `<button class="btn" data-ldcert="${i}">认证表草稿</button><button class="btn pri" data-ldplanfor="${m.n}">给 ${m.n} 制定培训计划</button>`);
 }
@@ -8124,7 +8285,7 @@ function ldSend() {
   const who = g('#ld_who') || LD.who;
   const weakPeople = TEAM.filter(m => m.sess && LD.dims.some(d => teamAbility(m)[DIMS.indexOf(d)] < 70)).map(m => m.n);
   const total = who === '全班' ? TEAM.length : who === '短板人员' ? weakPeople.length : 1;
-  const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: ex ? ex.id : null, examName: ex ? ex.n : null, coach: ex ? '题库考试' : '倒闸操作 · 陈志远', plan: pl ? pl.n : (ex ? ex.short : plan), mode: g('#ld_mode') || '考核模式', due: (g('#ld_due') || '').replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1月$2日') || dateAfter(5), pass: +(g('#ld_pass') || 6), who: who === '短板人员' ? `短板人员（${weakPeople.join('、') || '无'}）` : who, dims: LD.dims.slice(), done: 0, total, results: [] };
+  const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: ex ? ex.id : null, examName: ex ? ex.n : null, coach: ex ? '陪练关卡' : '倒闸操作 · 陈志远', plan: pl ? pl.n : (ex ? ex.short : plan), mode: g('#ld_mode') || '考核模式', due: (g('#ld_due') || '').replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1月$2日') || dateAfter(5), pass: +(g('#ld_pass') || 6), who: who === '短板人员' ? `短板人员（${weakPeople.join('、') || '无'}）` : who, dims: LD.dims.slice(), done: 0, total, results: [] };
   const list = lsGet(LS_TASKS, []); list.unshift(t); lsSet(LS_TASKS, list.slice(0, 12));
   toast(`已下发：${t.examName || t.plan} · ${t.mode} · ${t.due}截止 · 对象 ${t.who}`, 'ok');
   $$('.mask').forEach(m => m.remove()); rerender('team');

@@ -8,6 +8,7 @@ const SC = {
   t(x, y, s, o) { o = o || {}; return `<text x="${x}" y="${y}" text-anchor="${o.a || 'middle'}" font-size="${o.fs || 10}" fill="${o.c || '#3c4a40'}" ${o.b ? 'font-weight="700"' : ''} ${o.m ? 'font-family="monospace"' : ''}>${s}</text>`; },
   plate(x, y, w, h, s, fs) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#fff" stroke="#7a1f16" stroke-width="2"/>${this.t(x + w / 2, y + h / 2 + (fs || 12) * .36, s, { fs: fs || 12, c: '#b3271b', b: 1 })}`; },
   knob(x, y, left, right, pos) { const on = pos === right; return `<rect x="${x - 26}" y="${y - 26}" width="52" height="52" rx="6" fill="#eef0e6" stroke="#b9bfae"/><circle cx="${x}" cy="${y}" r="16" fill="#f8f9f3" stroke="#9aa392" stroke-width="2"/><g transform="rotate(${on ? 35 : -35} ${x} ${y})"><rect x="${x - 3}" y="${y - 18}" width="6" height="20" rx="2" fill="#2c3a31"/></g>${this.t(x - 30, y - 30, left, { fs: 8, a: 'end', c: on ? '#98a69c' : '#a8821b', b: !on })}${this.t(x + 30, y - 30, right, { fs: 8, a: 'start', c: on ? '#a8821b' : '#98a69c', b: on })}`; },
+  opBtn(op, x, y, c, s) { return `<g class="op" data-op="${op}" style="cursor:pointer">${this.btn(x, y, c, s)}</g>`; },
   btn(x, y, c, s) { return `<circle cx="${x}" cy="${y}" r="15" fill="#e9ebe0" stroke="#b9bfae" stroke-width="2"/><circle cx="${x}" cy="${y}" r="10" fill="${c}"/><circle cx="${x - 3}" cy="${y - 3}" r="3" fill="#fff" opacity=".45"/>${s ? this.t(x, y + 28, s, { fs: 8.5 }) : ''}`; },
   mcbRow(x, y, n, labels) { return labels.slice(0, n).map((l, i) => `<rect x="${x + i * 22}" y="${y}" width="18" height="34" rx="2" fill="#f3f4ee" stroke="#b9bfae"/><rect x="${x + i * 22 + 5}" y="${y + 4}" width="8" height="12" rx="1.5" fill="#2f6fd6"/><text x="${x + i * 22 + 9}" y="${y + 46}" text-anchor="middle" font-size="6" fill="#5c6b5f">${l}</text>`).join(''); },
   check(x, y) { return `<g class="hsdone" transform="translate(${x},${y})"><circle r="10" fill="#0e8f5a"/><path d="M -4.5 0 l 3 3.4 6 -6.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></g>`; },
@@ -70,9 +71,14 @@ function svgHmi1163(st, o) {
 /* 后台放大：开关位置遥信 */
 function zoomHmiCb(st) {
   const cb = st.cb === 'open';
-  return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#0f1512"/>${SC.t(210, 26, '培训三线1163开关 · 位置遥信', { fs: 12, c: '#e9f1ec', b: 1 })}
-    <rect x="150" y="60" width="120" height="120" rx="6" fill="#141b17" stroke="#2f3b34"/><rect x="190" y="100" width="40" height="40" fill="${cb ? '#0f1512' : '#e23b2e'}" stroke="${cb ? '#23b26a' : '#e23b2e'}" stroke-width="4"/>
-    ${SC.t(210, 200, cb ? '分闸位置 · 报文：1163 开关 分闸 变位' : '合闸位置 · 报文：无', { fs: 11, c: cb ? '#7ee0a8' : '#ff9a90', m: 1 })}</svg>`;
+  return `<svg viewBox="0 0 420 260" class="zsvg"><rect width="420" height="260" fill="#0f1512"/>${SC.t(210, 24, '培训三线1163开关 · 位置遥信与遥控操作', { fs: 12, c: '#e9f1ec', b: 1 })}
+    <rect x="30" y="44" width="150" height="150" rx="6" fill="#141b17" stroke="#2f3b34"/><rect x="85" y="99" width="40" height="40" fill="${cb ? '#0f1512' : '#e23b2e'}" stroke="${cb ? '#23b26a' : '#e23b2e'}" stroke-width="4"/>
+    ${SC.t(105, 214, cb ? '分闸位置 · 报文：1163 开关 分闸 变位' : '合闸位置 · 报文：无', { fs: 10, c: cb ? '#7ee0a8' : '#ff9a90', m: 1 })}
+    <rect x="210" y="44" width="180" height="150" rx="6" fill="#141b17" stroke="#2f3b34"/>${SC.t(300, 64, '遥控操作 · 按住执行', { fs: 10, c: '#9fb2a6' })}
+    <g>${SC.opBtn('cb:open', 260, 118, '#23b26a')}<text x="260" y="152" text-anchor="middle" font-size="10" fill="#c9d3cc">分闸</text></g>
+    <g>${SC.opBtn('cb:close', 340, 118, '#e23b2e')}<text x="340" y="152" text-anchor="middle" font-size="10" fill="#c9d3cc">合闸</text></g>
+    ${SC.t(300, 184, '预置 → 返校 → 执行', { fs: 8.5, c: '#5c6b5f', m: 1 })}
+    ${SC.t(210, 246, '看清位置后，把你看到的说出来', { fs: 9, c: '#5c6b5f' })}</svg>`;
 }
 function zoomHmiRows(st, kind) {
   const cb = st.cb === 'open', d4 = st.d4 === 'open';
@@ -159,14 +165,14 @@ function svgGroundPanel(st) {
     <!-- 五防锁 -->
     <g transform="translate(330,190)"><rect x="-26" y="-36" width="52" height="72" rx="6" fill="#2b2f2c"/><rect x="-14" y="-20" width="28" height="40" rx="3" fill="#1a1d1b" stroke="#5c6b5f"/><circle cy="0" r="7" fill="${st.unlocked ? '#e8b22a' : '#9aa392'}"/><rect x="-1.5" y="-9" width="3" height="10" fill="#1a1d1b"/>${SC.t(0, 54, '电气五防锁', { fs: 9 })}${SC.t(0, 66, st.unlocked ? '已解锁' : '闭锁', { fs: 8.5, c: st.unlocked ? '#a8821b' : '#7a8478', m: 1 })}</g>
     <!-- 按钮 -->
-    <g transform="translate(480,160)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15HA 116340 地刀 合闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.btn(0, 22, '#23b26a')}</g>
-    <g transform="translate(480,250)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15FA 116340 地刀 分闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.btn(0, 22, '#e23b2e')}</g>
+    <g transform="translate(480,160)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15HA 116340 地刀 合闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.opBtn('gnd:close', 0, 22, '#23b26a')}${SC.t(0, 48, '按住执行', { fs: 7, c: '#7a8478' })}</g>
+    <g transform="translate(480,250)"><rect x="-70" y="-20" width="140" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15FA 116340 地刀 分闸按钮', { fs: 7.5, c: '#5c4a10' })}${SC.opBtn('gnd:open', 0, 22, '#e23b2e')}</g>
     <g transform="translate(330,320)"><rect x="-60" y="-56" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -44, '15KS 控制方式切换', { fs: 7.5, c: '#5c4a10' })}${SC.knob(0, 0, '远方', '就地', st.loc || '远方')}</g>
     <g transform="translate(480,340)"><rect x="-60" y="-20" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(0, -8, '15TA 急停按钮', { fs: 7.5, c: '#5c4a10' })}<circle cy="26" r="22" fill="#fbe98a" stroke="#a8821b" stroke-width="2"/><circle cy="26" r="15" fill="#e23b2e"/></g>
     <!-- 一次模拟 -->
     <g transform="translate(620,120)"><line x1="0" y1="0" x2="0" y2="300" stroke="#c8372d" stroke-width="4"/><line x1="0" y1="200" x2="-28" y2="200" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/><line x1="-28" y1="200" x2="${es ? -48 : -44}" y2="${es ? 200 : 182}" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="4" stroke-linecap="round"/><line x1="-52" y1="190" x2="-52" y2="210" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/><line x1="-58" y1="195" x2="-58" y2="205" stroke="${es ? '#e8b22a' : '#c8372d'}" stroke-width="3"/>${SC.t(-30, 236, '116340', { fs: 9, m: 1, c: '#8a2a20' })}${SC.t(0, 320, '线路侧', { fs: 9, c: '#8a2a20' })}</g>
     <rect x="256" y="420" width="448" height="70" rx="4" fill="#eef0e6" stroke="#b9bfae"/>${SC.t(480, 444, `116340 地刀当前位置：${es ? '合闸' : '分闸'}`, { fs: 11, b: 1, c: es ? '#a8821b' : '#0e8f5a' })}${SC.t(480, 466, st.moving ? '地刀正在合闸 · 电机运行中' : '操作前：确认后台二次电压与高压带电显示装置均已确无电压', { fs: 8.5, c: '#7a8478' })}
-    ${SC.hs('lock', 296, 146, 68, 130)}${SC.hs('close', 404, 136, 152, 74)}${SC.hs('open', 404, 226, 152, 74)}${SC.hs('knob', 296, 284, 68, 80)}${SC.hs('stop', 414, 314, 132, 80)}`;
+    ${SC.hs('lock', 296, 146, 68, 130)}${SC.hs('knob', 296, 284, 68, 80)}${SC.hs('stop', 414, 314, 132, 80)}`;
 }
 
 /* ---------- 1163：现场全景（GIS 间隔 · 就地控制柜 · 地刀机构箱 · 连杆 三个检查点） ---------- */
@@ -273,6 +279,20 @@ function zoomGauge(st, k) {
 function zoomValve(st, k) {
   const open = st[k] !== 'closed';
   return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#eef0ea"/><rect x="180" y="20" width="60" height="180" rx="30" fill="#c8372d"/><g transform="translate(210,110)"><rect x="-50" y="-44" width="100" height="88" rx="10" fill="#2b2f2c"/><circle r="30" fill="#c8372d" stroke="#8f1f16" stroke-width="4"/><g transform="rotate(${open ? 0 : 90})"><rect x="-40" y="-6" width="80" height="12" rx="6" fill="#2b2f2c"/><circle r="8" fill="#4a4f4a"/></g></g><rect x="290" y="80" width="100" height="60" rx="6" fill="#fff" stroke="#7a8478"/>${SC.t(340, 104, '阀位指示', { fs: 9, c: '#7a8478' })}${SC.t(340, 126, open ? '开 OPEN' : '关 SHUT', { fs: 14, b: 1, c: open ? '#0e8f5a' : '#b3372c' })}${SC.t(100, 110, '手柄与管道平行 = 开', { fs: 9, c: '#7a8478' })}${SC.t(100, 124, '手柄与管道垂直 = 关', { fs: 9, c: '#7a8478' })}${SC.t(210, 212, k === 'vOut' ? '最上方出水蝶阀' : '进水蝶阀', { fs: 11 })}</svg>`;
+}
+
+/* 紧急启动阀盒：关闭时按住盒盖打开 */
+function zoomBox(st) {
+  return `<svg viewBox="0 0 420 240" class="zsvg"><rect width="420" height="240" fill="#eef0ea"/><line x1="40" y1="120" x2="120" y2="120" stroke="#8f1f16" stroke-width="8"/>
+    <rect x="120" y="50" width="180" height="150" rx="10" fill="#cfd3c9" stroke="#5c6b5f" stroke-width="3"/>
+    ${st.boxOpen ? `<rect x="134" y="64" width="152" height="122" rx="6" fill="#3a3f3a"/><g transform="translate(210,130)"><circle r="26" fill="#c8372d" stroke="#8f1f16" stroke-width="3"/><rect x="-6" y="-70" width="12" height="70" rx="5" fill="#e8b22a" stroke="#8a6f18" stroke-width="2"/></g>${SC.t(210, 222, '盒盖已打开 · 可见手动阀手柄', { fs: 10, c: '#0e8f5a' })}` : `<g class="op" data-op="box:open" style="cursor:pointer"><rect x="134" y="64" width="152" height="122" rx="6" fill="#e6e9e0" stroke="#9aa392"/><rect x="200" y="112" width="20" height="26" rx="3" fill="#5c6b5f"/><rect x="150" y="76" width="120" height="16" rx="2" fill="#fbe98a" stroke="#a8821b"/>${SC.t(210, 87, '手动应急启动', { fs: 8, c: '#5c4a10' })}${SC.t(210, 162, '按住盒盖打开', { fs: 9, c: '#5c6b5f' })}</g>${SC.t(210, 222, '紧急启动阀盒 · 盒盖关闭', { fs: 10, c: '#5c6b5f' })}`}
+    <rect x="310" y="90" width="70" height="60" rx="4" fill="#dfe3d8" stroke="#b9bfae"/>${SC.t(345, 124, '铰链', { fs: 8, c: '#7a8478' })}</svg>`;
+}
+/* 阀组编号牌（走到某套阀组前看到的） */
+function zoomPlate(st, n) {
+  return `<svg viewBox="0 0 420 220" class="zsvg"><rect width="420" height="220" fill="#f3e9de"/><rect x="180" y="40" width="60" height="150" rx="30" fill="#c8372d"/><ellipse cx="210" cy="130" rx="46" ry="34" fill="#e8635a" stroke="#8f1f16"/>
+    ${SC.plate(100, 56, 220, 40, `#${n}主变雨淋阀`, 18)}${n === 3 ? `<circle cx="360" cy="70" r="14" fill="#e23b2e"><animate attributeName="opacity" values="1;.3;1" dur=".8s" repeatCount="indefinite"/></circle>` : ''}
+    ${SC.t(210, 208, '读一下编号牌，告诉我这是几号', { fs: 10, c: '#7a8478' })}</svg>`;
 }
 
 /* ---------- 雨淋阀：主变雨淋阀区域全景（#1–#4 四套阀组） ---------- */

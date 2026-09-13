@@ -44,7 +44,7 @@ function homeBoot() {
       <nav class="hnav" id="hnav">
         <span class="hnavi" data-h="home">工作台</span>
         <span class="hnavi" data-h="plaza">教练中心</span>
-        <span class="hnavi" data-h="exam">题库考试</span>
+        <span class="hnavi" data-h="exam">陪练关卡</span>
         <span class="hnavi" data-h="arena">陪练舱</span>
         <span class="hnavi" data-h="review">评分复盘</span>
         <span class="hnavi" data-h="growth">成长档案</span>
@@ -112,7 +112,7 @@ function pageHome() {
   const order = DIMS.map((n, i) => [n, now8[i], i]).sort((x, y) => x[1] - y[1]);
   const w1 = order[0], w2 = order[1];
   const last = SESSIONS[0], lastEx = recs[0];
-  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，成绩会直接落到能力雷达并反馈给班组长。`;
+  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，教练全程在侧，成绩会直接落到能力雷达并反馈给班组长。`;
   return `
   <section class="hero">
     <div class="hgreet">
@@ -121,7 +121,7 @@ function pageHome() {
       <div class="hkpis hg">
         <div class="kpi ${certOk >= 16 ? 'good' : 'warn'}"><b>${certOk}/20</b><span>专业项目 建议授权</span></div>
         <div class="kpi ${okDims < DIMS.length ? 'warn' : 'good'}"><b>${okDims}/${DIMS.length}</b><span>能力维度 达标</span></div>
-        <div class="kpi"><b>${recs.length}</b><span>题库考试 次数</span></div>
+        <div class="kpi"><b>${recs.length}</b><span>陪练关卡 次数</span></div>
         <div class="kpi"><b>${A.cnt}</b><span>近30天陪练场次</span></div>
       </div>
       <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
@@ -145,7 +145,7 @@ function pageHome() {
     <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
       <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
     <div class="hcard ck tr ho"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>题库考试成绩</b><span>${recs.length ? '最近 ' + Math.min(5, recs.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${recs.length ? recs.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去题库考试</button>`}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>陪练关卡成绩</b><span>${recs.length ? '最近 ' + Math.min(5, recs.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${recs.length ? recs.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去陪练关卡</button>`}</div></div>
     <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
     <div class="hcard ck w hg"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
     <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
@@ -156,7 +156,7 @@ function pageHome() {
       <div class="rcard hg">
         <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
         <b>${e.n}</b>
-        <div class="tk3">题库考试 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
+        <div class="tk3">陪练关卡 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
         <button class="btn pri" data-exstart="${e.id}">${r.act}</button>
       </div>`; } const c = COACHES.find(x => x.id === r.coach); return `
       <div class="rcard hg">
@@ -548,7 +548,7 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台（底座页面） ---------------- */
 const IMPL_STATUS = [
-  ['题库考试判定：热区、顺序、阀位、地刀三位置一致性、填空、问答要点召回', '规则 · 真实运行'],
+  ['陪练关卡判定：口述读数 / 状态解析、操作前置与红线、地刀三位置一致性、汇报要素、逐级提示', '规则 · 真实运行'],
   ['知识库召回：问教练、口述汇报追问', '本机检索 · 真实运行（非在线大模型）'],
   ['语音识别：口述汇报、问答', '联网时浏览器识别（真实）；离线自动降级为文字输入'],
   ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
