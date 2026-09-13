@@ -1310,3 +1310,23 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .opring{fill:none;stroke:var(--ac);stroke-width:4;pointer-events:none;stroke-linecap:round}
 .op{cursor:pointer}.op:hover circle:first-of-type{filter:brightness(1.06)}
 .exscene.exam .exsay .exsayl{color:#5c6b5f}
+
+/* ===== 口述与按住（9/13 用户口径：少点选，多说话、多操作） ===== */
+.chk.ro{cursor:default}.chk.ro:hover{background:transparent}
+.rk.cur{border-color:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 22%,transparent)}
+.rk.cur .rh{background:var(--acbg)}.rk.cur .rh .s{color:var(--acd);animation:pulse 1.2s infinite}
+.prepsay{margin:0 0 14px;position:sticky;top:0;z-index:3;background:#f7f8f1;box-shadow:0 6px 16px rgba(60,70,50,.08)}
+.prepsay .rin,.dlgsay .rin,.fsay .rin,.qzsay .rin{flex:1;min-width:0}
+.prepsay .tk3{white-space:nowrap}
+.dlgsay{margin-top:12px}
+.fsay{margin:0 0 12px}
+.rcnat{color:var(--acd)}
+.fin{width:100%;padding:5px 7px;border:1px solid var(--goldsoft);border-radius:5px;background:#fff;font-size:12px;color:#243329;font-family:inherit}
+.fin:focus{outline:none;border-color:var(--ac)}
+.chkl.ro span{cursor:default}
+.btn.hold{position:relative;overflow:hidden;user-select:none;touch-action:none;min-width:120px}
+.btn.hold .hb{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.35);pointer-events:none}
+.btn.hold span{position:relative}
+.btn.hold.holding{filter:brightness(1.06)}
+.qzo.ro{cursor:default}.qzo.ro:hover{border-color:var(--goldsoft);background:#fbfbf6}
+.qzsay{margin-top:10px}

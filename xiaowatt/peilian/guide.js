@@ -108,19 +108,19 @@ function instrNow() {
   const st = STEP();
   if (S.stage === 'fill') {
     const miss = FHEAD.find(f => !S.fill.head[f.k]);
-    if (miss) return { i: 'act', pic: 'tick', t: `票头：选择「${miss.n}」`, h: '票头四项要素都要填全', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在选${miss.n}` };
-    if (!S.fill.rows.length) return { i: 'act', pic: 'tick', t: '从备选项目里点「＋」写入第一项', h: '只写本次调度令范围内的项目', sel: '#panelwrap [data-fadd]', n: '票面还是空的，从左边把本段项目写进来' };
-    return { i: 'act', pic: 'tick', t: '排好顺序后点「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_go', n: '顺序排好了就点「提交审核」' };
+    if (miss) return { i: 'speak', pic: 'speak', t: `票头：口述或填写「${miss.n}」`, h: '票头四项要素都要填全，可以一句话报全：发令单位…，发令人…，受令人…，操作任务…', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在报${miss.n}` };
+    if (!S.fill.rows.length) return { i: 'speak', pic: 'speak', t: '口述第一项：动作 + 设备双重名称', h: '只写本次调度令范围内的项目，说一项写一项', sel: '#f_in', n: '票面还是空的，把本段第一项说出来，我记' };
+    return { i: 'speak', pic: 'speak', t: '继续口述下一项；排好顺序后「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_in', n: '继续说下一项，本段说全了就提交审核' };
   }
   if (S.stage === 'prep') {
     const ai = S.prep.audit.findIndex(x => !x);
-    if (ai >= 0) return { i: 'check', pic: 'tick', t: `三审：点击勾选「${AUDIT[ai]}」`, h: `三审第 ${ai + 1}/3 项`, sel: `.chk[data-p="audit"][data-i="${ai}"]`, n: `先做操作票三审，点「${AUDIT[ai]}」打勾` };
+    if (ai >= 0) return { i: 'speak', pic: 'speak', t: `三审：口头报告「${PREP_KW.auditShort[ai]}」`, h: `三审第 ${ai + 1}/3 项 · ${AUDIT[ai]}`, sel: '#p_in', n: `先报操作票三审：${PREP_KW.auditShort[ai]}` };
     const di = S.prep.dress.findIndex(x => !x);
-    if (di >= 0) return { i: 'check', pic: 'tick', t: `着装互检：点击勾选「${DRESS[di]}」`, h: `互检第 ${di + 1}/3 项`, sel: `.chk[data-p="dress"][data-i="${di}"]`, n: `着装互检，点「${DRESS[di]}」打勾` };
-    if (!S.prep.mind) return { i: 'speak', pic: 'speak', t: '点击「操作人应答：精神状态良好」', h: '监护人问询，操作人应答', sel: '.chk[data-p="mind"]', n: '回应我的问询，点「精神状态良好」' };
+    if (di >= 0) return { i: 'speak', pic: 'speak', t: `着装互检：口头报告「${PREP_KW.dressShort[di]}」`, h: `互检第 ${di + 1}/3 项 · ${DRESS[di]}`, sel: '#p_in', n: `着装互检，报${PREP_KW.dressShort[di]}` };
+    if (!S.prep.mind) return { i: 'speak', pic: 'speak', t: '回答监护人问询：精神状态是否良好', h: '监护人问询，操作人口头应答', sel: '#p_in', n: '回答我的问询：精神状态怎么样' };
     const ri = S.prep.risks.findIndex(x => !x);
-    if (ri >= 0) return { i: 'check', pic: 'tick', t: `风险分析：点击第 ${ri + 1} 条「${RISKS[ri][0]}」展开确认`, h: `已确认 ${S.prep.risks.filter(Boolean).length}/12 条`, sel: `.rk[data-r="${ri}"]`, n: `风险要逐条确认，现在点第 ${ri + 1} 条` };
-    return { i: 'act', pic: 'tick', t: '点击「准备完毕，进入五防模拟」', h: '准备项已全部确认', sel: '#p_go', n: '准备项都确认了，点「准备完毕，进入五防模拟」' };
+    if (ri >= 0) return { i: 'speak', pic: 'speak', t: `风险分析第 ${ri + 1} 条「${RISKS[ri][0]}」：听清后口头确认`, h: `已确认 ${S.prep.risks.filter(Boolean).length}/12 条 · 管控措施在条目里`, sel: '#p_in', n: `第 ${ri + 1} 条风险听清了就确认` };
+    return { i: 'listen', pic: 'listen', t: '准备完毕，听监护人宣布进入五防模拟', h: '准备项已全部口头确认', n: '准备完毕，去五防电脑' };
   }
   if (S.stage === 'wufang') {
     if (S.wf < 4) return { i: 'point', pic: 'point', t: `五防模拟第 ${S.wf + 1}/4 步：在模拟接线图上点击「${devName(WUFANG[S.wf][0])}」`, h: WUFANG[S.wf][1] + ' · 顺序错会被闭锁', sel: `#panelwrap [data-dev="${WUFANG[S.wf][0]}"]`, n: `五防模拟按顺序来，现在在接线图上点${devName(WUFANG[S.wf][0])}` };
@@ -148,13 +148,13 @@ function instrNow() {
   if (S.beat === 3) {
     const sel = st.target ? `#panelwrap [data-dev="${st.target}"]` : null;
     if (st.act === 'key') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: '把模拟通过的操作票下传到电脑钥匙', h: '点五防主机右边的电脑钥匙', n: '下传五防钥匙，汇控柜的锁才开得了' };
-    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上点击「${devName(st.target)}」，遥控预置、返校后执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) };
-    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `点击「${devName(st.target)}」查看后台位置，再到现场核对四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，再去现场核对四项指示' };
-    if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `点击「${devName(st.target)}」，逐项核对后确认`, h: teach ? '点击弹出核对内容' : '长按弹出核对内容', n: '点开' + devName(st.target) + '逐项核对' };
+    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上打开「${devName(st.target)}」遥控框：口述操作性质，返校后按住执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) + '，口述操作性质' };
+    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `打开「${devName(st.target)}」，口述后台位置与报文，再到现场看四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，说出来，再去现场看四项指示' };
+    if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `打开「${devName(st.target)}」，把看到的内容说出来`, h: teach ? '点击弹出核对内容，口述要素' : '长按弹出核对内容，口述要素', n: '打开' + devName(st.target) + '，看到什么说什么' };
     return { i: 'act', pic: teach ? 'act' : 'press', sel, t: st.target ? `在设备图上执行：${devName(st.target)}` : '按监护人发令执行操作', h: teach ? '点击设备执行' : '长按设备执行', n: '执行操作' };
   }
   if (S.beat === 4) {
-    if (st.act === 'gis') { const need = [['hui', '汇控柜电气指示'], ['mech', '机构箱机械指示'], ['arm', '刀闸拐臂指示'], ['line', '转轴划线标识']]; const nx = need.find(k => !S.gis[k[0]]); if (nx) return { i: 'point', pic: 'point', sel: `#panelwrap [data-dev="gis_${nx[0]}"]`, t: `逐项核对：${nx[1]}（${need.filter(k => S.gis[k[0]]).length}/4）`, h: '点该指示放大查看，自动打钩', n: '核对' + nx[1] }; }
+    if (st.act === 'gis') { const need = [['hui', '汇控柜电气指示'], ['mech', '机构箱机械指示'], ['arm', '刀闸拐臂指示'], ['line', '转轴划线标识']]; const nx = need.find(k => !S.gis[k[0]]); if (nx) return { i: 'speak', pic: 'report', sel: `#panelwrap [data-dev="gis_${nx[0]}"]`, t: `看${nx[1]}，回报时四项都要说到（已说到 ${need.filter(k => S.gis[k[0]]).length}/4）`, h: '点该指示可放大看；说到哪一项，哪一项才算核对', n: '看' + nx[1] + '，回报里说出来' }; }
     return { i: 'speak', pic: 'report', sel: '#rin', t: '检查设备状态并回报', h: '回报后点「回报」', n: '检查设备状态，向我回报' };
   }
   return { i: 'check', t: '本项完成，监护人标"√"', h: '' };

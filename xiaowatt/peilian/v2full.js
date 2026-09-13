@@ -12,7 +12,7 @@ const st=p=>p.evaluate(()=>({stage:S.stage,no:STEPS[S.idx]&&STEPS[S.idx].no,beat
   await p.click('#en_go'); await w(p,400);            // 完整票，教学模式
   await p.evaluate(()=>{S.trap.armed=false;S.abn.armed=false;});
   await idle(p);
-  await p.click('#p_all'); await p.click('#p_go'); await idle(p);
+  await p.evaluate(()=>prepAuto()); await p.waitForFunction(()=>S.stage==='wufang',null,{timeout:30000}); await idle(p);   // 上岗前准备：口述三审 / 着装 / 精神状态，十二条风险逐条口头确认
   for(let i=0;i<4;i++){await p.evaluate(i=>wfClick(i),i);await p.waitForFunction(i=>S.wf>i,i,{timeout:20000});await idle(p);}
   await w(p,500);
   await p.evaluate(()=>{const g=document.querySelector('#pv_go'); if(g) g.click();}); await idle(p);

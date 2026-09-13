@@ -6,7 +6,7 @@ function devClick(id) {
   const st = STEP();
 
   // 现场四指示 / 核对类热区
-  if (id.startsWith('gis_')) { if (S.beat >= 3) gisInspect(id.slice(4)); else toast('先手指本项设备并复诵，执行后再逐项核对指示', ''); return; }
+  if (id.startsWith('gis_')) { if (S.beat >= 3) gisInspect(id.slice(4)); else toast('先手指本项设备并复诵，执行后再逐项查看指示', ''); return; }
   if (id.startsWith('cab_hvdisp_')) { if (S.beat === 4) { S.gis['hv' + id.slice(11)] = true; renderPanel(); return; } id = 'cab_hvdisp'; }
   if (id === 'bay_draw' || id === 'bay_label') { S.gis[id === 'bay_draw' ? 'draw' : 'label'] = true; renderPanel(); return; }
 
@@ -116,7 +116,7 @@ function doExecute(st) {
   renderPanel(); renderTop();
   say('o', st.act === 'check' || st.act === 'gis' ? `（核对${devName(st.target)}）` : `（执行：${st.ticket}）`);
   if (st.act === 'gis') {
-    speak('到现场按设备结构逐项核对四项位置指示，四项一致后再回报。', { pose: 'point' });
+    speak('到现场按设备结构逐项看四项位置指示，看到什么说什么，四项都要报到。', { pose: 'point' });
     if (st.target !== 'ES116340') goLoc('bay');
   } else {
     speak('执行到位。请检查设备状态并回报。', { pose: 'explain' });
@@ -251,10 +251,15 @@ async function _submitInput() {
     checkNumRead(v);
     // GIS 四项指示
     if (st.act === 'gis') {
+      /* 四项指示是否核对到，看回报里有没有说到（说到才算看到） */
+      const GIS_KW = { hui: /汇控柜|电气指示/, mech: /机构箱|机械指示/, arm: /拐臂/, line: /转轴|划线/ };
+      Object.keys(GIS_KW).forEach(k => { if (GIS_KW[k].test(v) || /四项/.test(v)) S.gis[k] = true; });
+      renderPanel();
       const need = ['hui', 'mech', 'arm', 'line'];
       const got = need.filter(k => S.gis[k]).length;
       if (S.abn.fired && !S.abn.handled && st.target === 'DS11634') {
         if (S.gis.mech) {
+          if (/不一致|不符|异常|中止|上报/.test(v)) { clickStop(); return; }
           redlineAbnormal(); return;
         }
       }

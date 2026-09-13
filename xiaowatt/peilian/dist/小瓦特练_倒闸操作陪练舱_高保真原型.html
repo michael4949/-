@@ -1318,6 +1318,26 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .op{cursor:pointer}.op:hover circle:first-of-type{filter:brightness(1.06)}
 .exscene.exam .exsay .exsayl{color:#5c6b5f}
 
+/* ===== 口述与按住（9/13 用户口径：少点选，多说话、多操作） ===== */
+.chk.ro{cursor:default}.chk.ro:hover{background:transparent}
+.rk.cur{border-color:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 22%,transparent)}
+.rk.cur .rh{background:var(--acbg)}.rk.cur .rh .s{color:var(--acd);animation:pulse 1.2s infinite}
+.prepsay{margin:0 0 14px;position:sticky;top:0;z-index:3;background:#f7f8f1;box-shadow:0 6px 16px rgba(60,70,50,.08)}
+.prepsay .rin,.dlgsay .rin,.fsay .rin,.qzsay .rin{flex:1;min-width:0}
+.prepsay .tk3{white-space:nowrap}
+.dlgsay{margin-top:12px}
+.fsay{margin:0 0 12px}
+.rcnat{color:var(--acd)}
+.fin{width:100%;padding:5px 7px;border:1px solid var(--goldsoft);border-radius:5px;background:#fff;font-size:12px;color:#243329;font-family:inherit}
+.fin:focus{outline:none;border-color:var(--ac)}
+.chkl.ro span{cursor:default}
+.btn.hold{position:relative;overflow:hidden;user-select:none;touch-action:none;min-width:120px}
+.btn.hold .hb{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.35);pointer-events:none}
+.btn.hold span{position:relative}
+.btn.hold.holding{filter:brightness(1.06)}
+.qzo.ro{cursor:default}.qzo.ro:hover{border-color:var(--goldsoft);background:#fbfbf6}
+.qzsay{margin-top:10px}
+
 </style>
 </head>
 <body></body>
@@ -1336,7 +1356,8 @@ const STEPKP={"1": {"k": ["sanshen", "diaodu"], "pts": ["使用专用术语接�
 
 /* ================= 数字人引擎（形象版） =================
    以教练形象图为本体的数字人：呼吸 / 说话节奏 / 视线跟随 / 点头摇头 / 姿态前倾 / 光环与声波
-   说话由逐字时钟驱动（口型幅度 VISEME → 面部微动与声波），声音由 HeyGen 预渲染片段承担
+   说话由逐字时钟驱动（口型幅度 VISEME → 面部微动与声波）；声音：HeyGen 预渲染片段优先，
+   无片段时用浏览器合成语音朗读（9/13 用户口径：教练在侧就要能开口说话），口型跟随朗读进度（onboundary）
    对外接口保持不变：speak / setPose / nod / shake / stopSpeak / speaking / mouth / curV / curCh / pose
 ================================================= */
 
@@ -1365,6 +1386,27 @@ function coachImg(key, hd) {
   const M = (typeof COACH_IMGS !== 'undefined' && COACH_IMGS) || {};
   return (hd && M[key + '_hd']) || M[key] || '';
 }
+
+/* ---------- 朗读语音：浏览器合成语音（讲师演示台可开关，本机记忆；静音 / 提速测试时不出声） ---------- */
+const TTS = {
+  on: (() => { try { return localStorage.getItem('xwt_voice') !== 'off'; } catch (e) { return true; } })(),
+  voices: [],
+  load() { try { this.voices = speechSynthesis.getVoices() || []; } catch (e) { this.voices = []; } return this.voices; },
+  zh() { const vs = this.voices.length ? this.voices : this.load(); return vs.filter(v => /zh|cmn|Chinese|中文|普通话/i.test(v.lang + ' ' + v.name)); },
+  ok() { return this.on && !window.__DH_MUTE && (window.__DH_SPEED || 1) >= 1 && ('speechSynthesis' in window) && this.zh().length > 0; },
+  pick(sex) {
+    const zh = this.zh(); if (!zh.length) return null;
+    const cn = zh.filter(v => /zh[-_]CN|cmn[-_]Hans|zh$|中国|普通话/i.test(v.lang + ' ' + v.name));
+    const pool = cn.length ? cn : zh;
+    const pref = sex === 'f' ? /Female|女|Xiaoxiao|Huihui|Yaoyao|Xiaoyi|Tingting|Ting-Ting|Meijia/i : /Male|男|Yunxi|Kangkang|Yunyang|Yunjian|Yunxia/i;
+    return pool.find(v => pref.test(v.name)) || pool.find(v => /Microsoft|Google|Apple|Ting|Mei/i.test(v.name)) || pool[0];
+  },
+  set(v) { this.on = !!v; try { localStorage.setItem('xwt_voice', v ? 'on' : 'off'); } catch (e) { } if (!v) this.cancel(); voiceLabel(); },
+  cancel() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { } }
+};
+if ('speechSynthesis' in window) { TTS.load(); try { speechSynthesis.onvoiceschanged = () => TTS.load(); } catch (e) { } }
+function voiceToggle() { TTS.set(!TTS.on); }
+function voiceLabel() { document.querySelectorAll('[data-voicelbl]').forEach(n => n.textContent = TTS.on ? '开' : '关'); }
 
 class DigitalHuman {
   constructor(mountId, charKey) {
@@ -1450,23 +1492,24 @@ class DigitalHuman {
     if (this.n && this.n.pav) { this.n.pav.dataset.pose = p; this._paintState(); }
   }
 
-  destroy() { this.dead = true; this.speaking = false; this.seq = null; }
+  destroy() { this.dead = true; this.speaking = false; this.seq = null; if (this.tts) { this.tts = null; TTS.cancel(); } }
   nod(times) { this._nod = { n: times || 1, t: 0 }; }
   shake() { this._shake = { t: 0 }; }
 
   /* ---------- 说话：逐字序列（口型幅度驱动面部微动与声波） ---------- */
   buildSeq(text) {
     const seq = [];
-    for (const ch of text) {
+    for (let ti = 0; ti < text.length; ti++) {
+      const ch = text[ti];
       if (ch >= '\u4e00' && ch <= '\u9fff') {
         const v = (typeof CH2V !== 'undefined' && CH2V[ch]) || '-E';
-        seq.push({ o: v[0], n: v[1], ch });
+        seq.push({ o: v[0], n: v[1], ch, ti });
       } else if (/[0-9]/.test(ch)) {
-        seq.push({ o: '-', n: 'E', ch });
+        seq.push({ o: '-', n: 'E', ch, ti });
       } else if (/[a-zA-Z]/.test(ch)) {
-        seq.push({ o: '-', n: 'I', ch });
+        seq.push({ o: '-', n: 'I', ch, ti });
       } else if (/[，。、；：？！,.;:?!（）()"'"']/.test(ch)) {
-        seq.push({ o: 'X', n: 'X', ch, pause: true });
+        seq.push({ o: 'X', n: 'X', ch, ti, pause: true });
       }
     }
     return seq;
@@ -1483,8 +1526,33 @@ class DigitalHuman {
     this.ttsProgress = -1;
     if (opt.pose) this.setPose(opt.pose);
     this._paintState();
-    if (!this.seq.length) { this.finishSpeak(); }
+    if (!this.seq.length) { this.finishSpeak(); return this; }
+    this._tts(text);
     return this;
+  }
+
+  /* 朗读：合成语音开口，口型按朗读进度（onboundary）走；合成失败或无中文语音时退回逐字时钟，字幕与口型照常 */
+  _tts(text) {
+    this.tts = null;
+    if (!TTS.ok()) return;
+    try {
+      TTS.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = TTS.pick(this.char.sex);
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'zh-CN';
+      u.rate = 1.0; u.pitch = this.char.sex === 'f' ? 1.12 : 0.92; u.volume = 1;
+      const seq = this.seq, me = this;
+      u.onstart = () => { if (me.tts === u) { me.seqStart = performance.now() / 1000; } };
+      u.onboundary = e => {
+        if (me.tts !== u || !me.seq) return;
+        let k = 0; for (let i = 0; i < seq.length; i++) { if (seq[i].ti <= e.charIndex) k = i; else break; }
+        me.ttsProgress = k; me.ttsBoundary = true;
+      };
+      u.onend = () => { if (me.tts === u) { me.tts = null; me.finishSpeak(); } };
+      u.onerror = () => { if (me.tts === u) { me.tts = null; me.ttsProgress = -1; me.ttsBoundary = false; me.seqStart = performance.now() / 1000; } };
+      this.tts = u; this.ttsBoundary = false;
+      speechSynthesis.speak(u);
+    } catch (e) { this.tts = null; }
   }
 
   finishSpeak() {
@@ -1496,6 +1564,7 @@ class DigitalHuman {
   }
 
   stopSpeak(silent) {
+    if (this.tts) { this.tts = null; TTS.cancel(); }
     this.speaking = false; this.seq = null;
     this.mouthTarget = Object.assign({}, VISEME.X);
     if (!silent) { this.onSpeakEnd = null; }
@@ -1512,7 +1581,12 @@ class DigitalHuman {
     if (this.speaking && this.seq) {
       const elapsed = performance.now() / 1000 - this.seqStart;
       let idx;
-      if (this.ttsProgress >= 0) idx = Math.min(this.seq.length - 1, this.ttsProgress);
+      if (this.tts) {
+        /* 朗读中：有边界事件按朗读进度，没有则按时钟走到最后一个字停住等 onend；朗读卡死则超时收尾 */
+        idx = this.ttsBoundary ? Math.min(this.seq.length - 1, this.ttsProgress) : Math.min(this.seq.length - 1, Math.floor(elapsed / this.perChar));
+        if (elapsed > this.seq.length * this.perChar * 2.2 + 4) { this.tts = null; TTS.cancel(); idx = this.seq.length; }
+      }
+      else if (this.ttsProgress >= 0) idx = Math.min(this.seq.length - 1, this.ttsProgress);
       else idx = Math.floor(elapsed / this.perChar);
       if (idx >= this.seq.length) { this.finishSpeak(); }
       else {
@@ -1875,19 +1949,19 @@ function instrNow() {
   const st = STEP();
   if (S.stage === 'fill') {
     const miss = FHEAD.find(f => !S.fill.head[f.k]);
-    if (miss) return { i: 'act', pic: 'tick', t: `票头：选择「${miss.n}」`, h: '票头四项要素都要填全', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在选${miss.n}` };
-    if (!S.fill.rows.length) return { i: 'act', pic: 'tick', t: '从备选项目里点「＋」写入第一项', h: '只写本次调度令范围内的项目', sel: '#panelwrap [data-fadd]', n: '票面还是空的，从左边把本段项目写进来' };
-    return { i: 'act', pic: 'tick', t: '排好顺序后点「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_go', n: '顺序排好了就点「提交审核」' };
+    if (miss) return { i: 'speak', pic: 'speak', t: `票头：口述或填写「${miss.n}」`, h: '票头四项要素都要填全，可以一句话报全：发令单位…，发令人…，受令人…，操作任务…', sel: `#panelwrap [data-fh="${miss.k}"]`, n: `先把票头填全，现在报${miss.n}` };
+    if (!S.fill.rows.length) return { i: 'speak', pic: 'speak', t: '口述第一项：动作 + 设备双重名称', h: '只写本次调度令范围内的项目，说一项写一项', sel: '#f_in', n: '票面还是空的，把本段第一项说出来，我记' };
+    return { i: 'speak', pic: 'speak', t: '继续口述下一项；排好顺序后「提交审核」', h: `已写入 ${S.fill.rows.length} 项`, sel: '#f_in', n: '继续说下一项，本段说全了就提交审核' };
   }
   if (S.stage === 'prep') {
     const ai = S.prep.audit.findIndex(x => !x);
-    if (ai >= 0) return { i: 'check', pic: 'tick', t: `三审：点击勾选「${AUDIT[ai]}」`, h: `三审第 ${ai + 1}/3 项`, sel: `.chk[data-p="audit"][data-i="${ai}"]`, n: `先做操作票三审，点「${AUDIT[ai]}」打勾` };
+    if (ai >= 0) return { i: 'speak', pic: 'speak', t: `三审：口头报告「${PREP_KW.auditShort[ai]}」`, h: `三审第 ${ai + 1}/3 项 · ${AUDIT[ai]}`, sel: '#p_in', n: `先报操作票三审：${PREP_KW.auditShort[ai]}` };
     const di = S.prep.dress.findIndex(x => !x);
-    if (di >= 0) return { i: 'check', pic: 'tick', t: `着装互检：点击勾选「${DRESS[di]}」`, h: `互检第 ${di + 1}/3 项`, sel: `.chk[data-p="dress"][data-i="${di}"]`, n: `着装互检，点「${DRESS[di]}」打勾` };
-    if (!S.prep.mind) return { i: 'speak', pic: 'speak', t: '点击「操作人应答：精神状态良好」', h: '监护人问询，操作人应答', sel: '.chk[data-p="mind"]', n: '回应我的问询，点「精神状态良好」' };
+    if (di >= 0) return { i: 'speak', pic: 'speak', t: `着装互检：口头报告「${PREP_KW.dressShort[di]}」`, h: `互检第 ${di + 1}/3 项 · ${DRESS[di]}`, sel: '#p_in', n: `着装互检，报${PREP_KW.dressShort[di]}` };
+    if (!S.prep.mind) return { i: 'speak', pic: 'speak', t: '回答监护人问询：精神状态是否良好', h: '监护人问询，操作人口头应答', sel: '#p_in', n: '回答我的问询：精神状态怎么样' };
     const ri = S.prep.risks.findIndex(x => !x);
-    if (ri >= 0) return { i: 'check', pic: 'tick', t: `风险分析：点击第 ${ri + 1} 条「${RISKS[ri][0]}」展开确认`, h: `已确认 ${S.prep.risks.filter(Boolean).length}/12 条`, sel: `.rk[data-r="${ri}"]`, n: `风险要逐条确认，现在点第 ${ri + 1} 条` };
-    return { i: 'act', pic: 'tick', t: '点击「准备完毕，进入五防模拟」', h: '准备项已全部确认', sel: '#p_go', n: '准备项都确认了，点「准备完毕，进入五防模拟」' };
+    if (ri >= 0) return { i: 'speak', pic: 'speak', t: `风险分析第 ${ri + 1} 条「${RISKS[ri][0]}」：听清后口头确认`, h: `已确认 ${S.prep.risks.filter(Boolean).length}/12 条 · 管控措施在条目里`, sel: '#p_in', n: `第 ${ri + 1} 条风险听清了就确认` };
+    return { i: 'listen', pic: 'listen', t: '准备完毕，听监护人宣布进入五防模拟', h: '准备项已全部口头确认', n: '准备完毕，去五防电脑' };
   }
   if (S.stage === 'wufang') {
     if (S.wf < 4) return { i: 'point', pic: 'point', t: `五防模拟第 ${S.wf + 1}/4 步：在模拟接线图上点击「${devName(WUFANG[S.wf][0])}」`, h: WUFANG[S.wf][1] + ' · 顺序错会被闭锁', sel: `#panelwrap [data-dev="${WUFANG[S.wf][0]}"]`, n: `五防模拟按顺序来，现在在接线图上点${devName(WUFANG[S.wf][0])}` };
@@ -1915,13 +1989,13 @@ function instrNow() {
   if (S.beat === 3) {
     const sel = st.target ? `#panelwrap [data-dev="${st.target}"]` : null;
     if (st.act === 'key') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: '把模拟通过的操作票下传到电脑钥匙', h: '点五防主机右边的电脑钥匙', n: '下传五防钥匙，汇控柜的锁才开得了' };
-    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上点击「${devName(st.target)}」，遥控预置、返校后执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) };
-    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `点击「${devName(st.target)}」查看后台位置，再到现场核对四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，再去现场核对四项指示' };
-    if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `点击「${devName(st.target)}」，逐项核对后确认`, h: teach ? '点击弹出核对内容' : '长按弹出核对内容', n: '点开' + devName(st.target) + '逐项核对' };
+    if (S.loc === 'hmi' && (st.act === 'open' || st.act === 'pull')) return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `在一次接线图上打开「${devName(st.target)}」遥控框：口述操作性质，返校后按住执行`, h: teach ? '点击设备弹出遥控操作' : '长按设备弹出遥控操作', n: '在接线图上遥控' + devName(st.target) + '，口述操作性质' };
+    if (st.act === 'gis') return { i: 'act', pic: teach ? 'act' : 'press', sel, t: `打开「${devName(st.target)}」，口述后台位置与报文，再到现场看四项指示`, h: teach ? '点击设备查看' : '长按设备查看', n: '先看后台位置，说出来，再去现场看四项指示' };
+    if (st.act === 'check' || st.act === 'verify') return { i: 'act', pic: teach ? 'point' : 'press', sel, t: `打开「${devName(st.target)}」，把看到的内容说出来`, h: teach ? '点击弹出核对内容，口述要素' : '长按弹出核对内容，口述要素', n: '打开' + devName(st.target) + '，看到什么说什么' };
     return { i: 'act', pic: teach ? 'act' : 'press', sel, t: st.target ? `在设备图上执行：${devName(st.target)}` : '按监护人发令执行操作', h: teach ? '点击设备执行' : '长按设备执行', n: '执行操作' };
   }
   if (S.beat === 4) {
-    if (st.act === 'gis') { const need = [['hui', '汇控柜电气指示'], ['mech', '机构箱机械指示'], ['arm', '刀闸拐臂指示'], ['line', '转轴划线标识']]; const nx = need.find(k => !S.gis[k[0]]); if (nx) return { i: 'point', pic: 'point', sel: `#panelwrap [data-dev="gis_${nx[0]}"]`, t: `逐项核对：${nx[1]}（${need.filter(k => S.gis[k[0]]).length}/4）`, h: '点该指示放大查看，自动打钩', n: '核对' + nx[1] }; }
+    if (st.act === 'gis') { const need = [['hui', '汇控柜电气指示'], ['mech', '机构箱机械指示'], ['arm', '刀闸拐臂指示'], ['line', '转轴划线标识']]; const nx = need.find(k => !S.gis[k[0]]); if (nx) return { i: 'speak', pic: 'report', sel: `#panelwrap [data-dev="gis_${nx[0]}"]`, t: `看${nx[1]}，回报时四项都要说到（已说到 ${need.filter(k => S.gis[k[0]]).length}/4）`, h: '点该指示可放大看；说到哪一项，哪一项才算核对', n: '看' + nx[1] + '，回报里说出来' }; }
     return { i: 'speak', pic: 'report', sel: '#rin', t: '检查设备状态并回报', h: '回报后点「回报」', n: '检查设备状态，向我回报' };
   }
   return { i: 'check', t: '本项完成，监护人标"√"', h: '' };
@@ -2287,6 +2361,7 @@ const LAYOUT = `
     <button id="dm_skip">跳过当前准备阶段</button>
     <button id="dm_red">触发红线：未验电合地刀</button>
     <button id="dm_abn">注入异常：刀闸位置指示不一致</button>
+    <button id="dm_voice">数字人朗读语音：<b data-voicelbl>开</b></button>
   </div>
   <button class="tg" id="demotg">讲师演示台</button>
 </div>
@@ -2310,7 +2385,8 @@ const S = {
   verify: { v1: false, v2: false },
   bay: null,
   key: { down: false, held: false },
-  prep: { audit: [false, false, false], dress: [false, false, false], mind: false, risks: [] },
+  prep: { audit: [false, false, false], dress: [false, false, false], mind: false, risks: [], ri: -1 },
+  rc: null, ins: null,          // 遥控 / 核对弹层的口述上下文
   wf: 0,
   msgs: [], chat: [],
   vio: [],                // 违规记录
@@ -2943,7 +3019,7 @@ function bindDevs() {
 /* ================= 作业面板（v3）：每个作业位置都是一张可操作的设备图，学员在图上动手，图上看到变化 =================
    调度电话：来电 → 接听报名 → 听令 → 记录簿填写 → 复诵 → 调度确认 → 票令核对 → 汇报拨号
    五防电脑：在五防模拟接线图上按票序点击设备，五防主机逐项记录，顺序错误弹出闭锁
-   监控后台：一次接线图上点击设备 → 遥控预置/返校/执行 → 图上变位、报文刷新；核对类项目弹出光字/遥测详情
+   监控后台：一次接线图上点击设备 → 遥控弹层口述操作性质 → 自动预置/返校 → 按住执行 → 图上变位、报文刷新；核对类项目弹出光字/遥测详情，学员口述看到的内容
    间隔现场 / 测控屏 / 保护屏 / 就地控制柜：SVG 设备图，把手会转、空开会掉、按钮会亮、标志牌会挂上去 */
 
 const tms = ms => Math.max(20, ms * Math.min(1, window.__DH_SPEED || 1));
@@ -3285,81 +3361,163 @@ function openRemoteCtl(st) {
   if ($('.dlg.rc')) return;
   const id = st.target, want = st.act === 'closeE' ? 'close' : 'open', cur = S.dev[id];
   const m = el('div', 'mask lite');
-  m.innerHTML = `<div class="dlg rc" style="width:min(540px,96vw)">
+  m.innerHTML = `<div class="dlg rc" style="width:min(580px,96vw)">
     <div class="dh"><b>遥控操作</b><span class="mono">110kV仿真站 · 监控后台</span><span class="cls">×</span></div>
     <div class="db">
       <div class="rcrow"><span>设备双重名称</span><b>${devName(id)}</b></div>
       <div class="rcrow"><span>当前位置</span><b class="${cur === 'close' ? 'on' : 'off'}">${cur === 'close' ? '合闸' : '分闸'}</b></div>
-      <div class="rcrow"><span>操作性质</span><span class="rcops"><label><input type="radio" name="rcop" value="open"> 分闸</label><label><input type="radio" name="rcop" value="close"> 合闸</label></span></div>
-      <div class="rcst" id="rc_st">核对设备双重名称与操作性质，选定后系统自动预置</div>
+      <div class="rcrow"><span>操作性质</span><b id="rc_nat" class="rcnat">口述后填入</b></div>
+      <div class="exsay dlgsay"><span class="exsayl">口述</span>
+        <button class="mic" id="rc_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <input class="rin" id="rc_in" placeholder="核对双重名称后口述操作性质，例如「${devName(id)}，${want === 'open' ? '分闸' : '合闸'}」">
+        <button class="btn pri" id="rc_say">口述</button></div>
+      <div class="rcst" id="rc_st">核对设备双重名称与操作性质，口述后系统自动预置、返校</div>
     </div>
-    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn pri" id="rc_exec" disabled>执行</button></div></div>`;
+    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn pri hold" id="rc_exec" disabled><i class="hb"></i><span>按住执行</span></button></div></div>`;
   document.body.appendChild(m);
-  const stx = m.querySelector('#rc_st'), ex = m.querySelector('#rc_exec');
-  const close = () => m.remove();
+  S.rc = { m, st, id, want, nat: '', ready: false };
+  const close = () => { m.remove(); S.rc = null; };
   m.querySelector('.cls').onclick = close; m.querySelector('#rc_cancel').onclick = close;
-  m.querySelectorAll('input[name=rcop]').forEach(r => r.onchange = async () => {
-    if (r.value !== want) {
-      r.checked = false;
-      violation('major', 'order', '遥控操作性质错误', `本项应${want === 'open' ? '分闸' : '合闸'}${devName(id)}，选择了${r.value === 'open' ? '分闸' : '合闸'}`, '附录F 2.11.3：按操作票项目的操作性质执行，遥控操作前核对设备双重名称与操作性质。');
-      stx.innerHTML = '<span style="color:#b3372c">操作性质与票面不符，已拒绝</span>';
-      speak('操作性质选错了。再核对一遍票面。', { pose: 'correct', shake: true });
-      return;
-    }
-    /* 预置由系统自动完成，不需要人再点一次 */
-    m.querySelectorAll('input[name=rcop]').forEach(x => x.disabled = true);
-    stx.textContent = '已选择' + (want === 'open' ? '分闸' : '合闸') + '，正在预置…';
-    await sleepMs(700);
-    if (!document.body.contains(m)) return;
-    stx.innerHTML = '<span style="color:var(--ac)">预置完成，可以执行</span>';
-    ex.disabled = false;
-  });
-  ex.onclick = async () => {
-    ex.disabled = true; stx.textContent = '执行中…';
-    await sleepMs(500);
-    m.remove();
-    doExecute(st);
-  };
+  m.querySelector('#rc_say').onclick = () => { const i = m.querySelector('#rc_in'); const v = i.value; i.value = ''; rcSay(v); };
+  m.querySelector('#rc_in').onkeydown = e => { if (e.key === 'Enter') m.querySelector('#rc_say').onclick(); };
+  m.querySelector('#rc_mic').onclick = () => micStart(m.querySelector('#rc_mic'), m.querySelector('#rc_in'), `${devName(id)}，${want === 'open' ? '分闸' : '合闸'}`);
+  bindHold(m.querySelector('#rc_exec'), () => rcExecNow());
+  setTimeout(() => { const i = m.querySelector('#rc_in'); if (i) i.focus(); }, 30);
 }
-/* 核对类项目：把要看的东西放大给学员看，逐项勾选后确认 */
+/* 口述操作性质：设备编号与票面不符、性质选错都判违规；对了系统自动预置 */
+async function rcSay(text) {
+  const rc = S.rc; if (!rc || !document.body.contains(rc.m)) return;
+  text = (text || '').trim(); if (!text) return;
+  say('o', text); checkNumRead(text);
+  const t = text.replace(/\s+/g, '');
+  const stx = rc.m.querySelector('#rc_st');
+  const myNo = rc.id.replace(/^[A-Z]+/, '');
+  const nums = (t.match(/\d{4,6}/g) || []).filter(n => n !== myNo);
+  if (nums.length) {
+    violation('major', 'dual', '遥控对象与票面不符', `票面对象为 ${devName(rc.id)}，口述的是 ${nums.join('、')}`, '附录F 2.11.3：遥控操作前核对设备双重名称与操作性质。');
+    stx.innerHTML = '<span style="color:#b3372c">设备双重名称与票面不符，已拒绝</span>';
+    speak('你说的不是本项设备。再核对一遍双重名称。', { pose: 'correct', shake: true }); return;
+  }
+  const close = /合闸|合上/.test(t), open = /分闸|分开|断开|拉开/.test(t);
+  if (close === open) { stx.textContent = '只说操作性质：分闸还是合闸'; speak('操作性质说清楚：分闸，还是合闸。', { pose: 'listen' }); return; }
+  const nat = close ? 'close' : 'open';
+  if (nat !== rc.want) {
+    violation('major', 'order', '遥控操作性质错误', `本项应${rc.want === 'open' ? '分闸' : '合闸'}${devName(rc.id)}，口述的是${nat === 'open' ? '分闸' : '合闸'}`, '附录F 2.11.3：按操作票项目的操作性质执行，遥控操作前核对设备双重名称与操作性质。');
+    stx.innerHTML = '<span style="color:#b3372c">操作性质与票面不符，已拒绝</span>';
+    speak('操作性质说错了。再核对一遍票面。', { pose: 'correct', shake: true }); return;
+  }
+  rc.nat = nat; rc.m.querySelector('#rc_nat').textContent = nat === 'open' ? '分闸' : '合闸';
+  stx.textContent = '操作性质与票面一致，正在预置…';
+  await sleepMs(700);
+  if (!S.rc || S.rc !== rc || !document.body.contains(rc.m)) return;
+  stx.innerHTML = '<span style="color:var(--ac)">预置完成，返校正确。按住「执行」直到进度走满</span>';
+  rc.ready = true; rc.m.querySelector('#rc_exec').disabled = false;
+}
+async function rcExecNow() {
+  const rc = S.rc; if (!rc || !rc.ready) return;
+  const ex = rc.m.querySelector('#rc_exec'), stx = rc.m.querySelector('#rc_st');
+  ex.disabled = true; stx.textContent = '执行中…';
+  await sleepMs(500);
+  rc.m.remove(); S.rc = null;
+  doExecute(rc.st);
+}
+/* 按住式按钮：按住到进度走满才触发，中途松手作废（执行类动作不允许一点就发） */
+function bindHold(btn, done, ms) {
+  if (!btn) return;
+  let t = null;
+  const bar = btn.querySelector('.hb');
+  const stop = () => { if (t) { clearTimeout(t); t = null; } btn.classList.remove('holding'); if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; } };
+  btn.onpointerdown = e => {
+    if (btn.disabled) return; e.preventDefault();
+    btn.classList.add('holding');
+    const dur = tms(ms || 900);
+    if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = `width ${dur}ms linear`; bar.style.width = '100%'; }
+    t = setTimeout(() => { t = null; btn.classList.remove('holding'); done(); }, dur);
+  };
+  btn.onpointerup = btn.onpointerleave = btn.onpointercancel = stop;
+}
+/* 核对类项目：把要看的东西放大给学员看，学员口述看到的内容，要素说全才算核对完成 */
+const INS_KW = {
+  hmi_mode: { items: [['母线运行方式', /母线|并列|1M|2M|运行方式|方式/i], ['1163 间隔设备位置', /1163|开关|刀闸|11632|11634|位置|合闸|合上/], ['光字与告警', /光字|告警|报文|信号|异常/]], okSay: '母线1M、2M并列运行，1163开关合闸，11632、11634刀闸合上，无影响本次操作的光字、告警和报文。' },
+  CB1163: { items: [['位置遥信', /位置|遥信|分闸|分开/], ['变位报文', /报文|变位/]], bad: /合闸位置|在合闸|仍合|未分/, okSay: '后台1163开关位置遥信显示分闸，分闸变位报文正确。' },
+  hmi_current: { items: [['三相电流', /三相|A相|B相|C相|Ia|Ib|Ic|电流/i], ['数值为零', /零|0|无电流|没有电流/]], bad: /有电流|不为零|不是零|还有/, okSay: '1163开关A、B、C三相电流均为零，三相无电流。' },
+  hmi_volt: { items: [['线路二次电压', /Uab|线电压|二次电压|电压/i], ['数值为零', /无电压|零|0|确无|没有电压/]], bad: /有电压|不为零|带电/, okSay: '培训三线1163线路二次电压Uab为零，确无电压。' },
+  bay_plate: { items: [['间隔名称牌双重名称', /名称牌|双重名称|培训三线|1163/], ['图实一致', /图实|模拟图|接线图|一致/], ['标实一致', /标实|标签|标识/]], okSay: '间隔名称牌为110kV培训三线1163，汇控柜模拟图与现场设备图实一致，设备标签标实一致。' },
+  bay_hvdisp: { items: [['三相指示', /三相|A相|B相|C相|三个|指示灯|灯/i], ['确有电压', /有电|带电|亮|确有/]], bad: /无电|不亮|熄灭|确无|没有电/, okSay: '高压带电显示装置A、B、C三相指示灯亮，三相确有电压。' },
+  cab_hvdisp: { items: [['三相指示', /三相|A相|B相|C相|三个|指示灯|灯/i], ['确无电压', /无电|不亮|熄灭|确无|没有电/]], bad: /有电|带电|灯亮|确有/, okSay: '高压带电显示装置A、B、C三相指示灯均不亮，三相确无电压。' },
+  gis: { items: [['后台位置', /后台|位置|拉开|分闸|合上|合闸/], ['报文', /报文|变位/]], okSay: '后台位置显示已变位，变位报文正确。下去现场核对四项指示。' }
+};
 function openInspect(st) {
   if ($('.dlg.insp')) return;
   const id = st.target, d = S.dev;
   const lampRow = (vals, on, color) => `<div class="lamprow">${vals.map(p => `<span class="lp ${on ? 'on' : ''}" style="--c:${color}"><i></i>${p}</span>`).join('')}</div>`;
-  let title = '', body = '', chks = [], okTxt = '核对无误', after = null;
-  if (id === 'hmi_mode') { title = '光字牌 · 运行方式'; body = `<div class="kv"><span>母线方式</span><b>110kV 1M、2M 并列运行</b></div><div class="kv"><span>培训三线1163</span><b>开关${d.CB1163 === 'open' ? '分闸' : '合闸'}，11632、11634刀闸${d.DS11634 === 'open' ? '拉开' : '合上'}</b></div><div class="kv"><span>告警</span><b>无影响本次操作的光字、告警与报文</b></div>`; chks = ['母线运行方式', '1163间隔设备位置', '光字与告警']; }
-  else if (id === 'CB1163') { title = '设备详情 · 培训三线1163开关'; body = `<div class="kv"><span>位置遥信</span><b class="${d.CB1163 === 'open' ? 'off' : 'on'}">${d.CB1163 === 'open' ? '分闸' : '合闸'}</b></div><div class="kv"><span>最近报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>三相电流</span><b>${d.CB1163 === 'open' ? 'Ia 0.0 Ib 0.0 Ic 0.0 A' : 'Ia 312 Ib 308 Ic 315 A'}</b></div>`; chks = ['位置遥信', '变位报文']; }
-  else if (id === 'hmi_current') { title = '遥测 · 1163开关三相电流'; body = `<div class="kv big"><span>Ia</span><b>${d.CB1163 === 'open' ? '0.0' : '312'} A</b></div><div class="kv big"><span>Ib</span><b>${d.CB1163 === 'open' ? '0.0' : '308'} A</b></div><div class="kv big"><span>Ic</span><b>${d.CB1163 === 'open' ? '0.0' : '315'} A</b></div>`; chks = ['A 相', 'B 相', 'C 相']; }
-  else if (id === 'hmi_volt') { title = '遥测 · 培训三线线路二次电压'; body = `<div class="kv big"><span>Uab</span><b>${d.DS11634 === 'open' ? '0.0' : '99.6'} V</b></div><div class="kv big"><span>Uo</span><b>${d.DS11634 === 'open' ? '0.0' : '0.1'} V</b></div><div class="kv"><span>结论</span><b>${d.DS11634 === 'open' ? '二次确无电压（第一种原理）' : '二次有电压'}</b></div>`; chks = ['Uab', 'Uo']; }
-  else if (id === 'bay_plate') { title = '间隔名称牌 · 图实、标实核对'; body = `<div class="plate">110kV培训三线1163<small>双重名称：培训三线 · 1163</small></div><div class="kv"><span>接线图 ↔ 现场实物</span><b>汇控柜模拟图与现场设备布置一致</b></div><div class="kv"><span>设备标签</span><b>11632 · 1163 · 11634 · 116340 标签清晰准确</b></div>`; chks = ['间隔名称牌双重名称', '图实一致', '标实一致']; okTxt = '核对完毕'; after = () => { S.gis.plate = S.gis.draw = S.gis.label = true; }; }
-  else if (id === 'bay_hvdisp') { title = '高压带电显示装置 · 培训三线1163间隔'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 !== 'open' ? '三相确有电压' : '三相无电压'}</b></div>`; chks = ['A 相', 'B 相', 'C 相']; okTxt = '核对完毕：三相确有电压'; after = () => { S.gis.hv = true; }; }
-  else if (id === 'cab_hvdisp') { title = '高压带电显示装置 · 间接验电（第二种原理）'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 === 'open' ? '三相确无电压' : '三相有电压'}</b></div><div class="kv"><span>与后台二次电压</span><b>${S.verify.v1 ? '已核对：两种原理指示均已变化' : '<span style="color:#b3372c">后台二次电压尚未核对</span>'}</b></div>`; chks = ['A 相', 'B 相', 'C 相']; okTxt = '核对完毕：三相确无电压'; after = () => { S.gis.hvA = S.gis.hvB = S.gis.hvC = true; }; }
-  else if (st.act === 'gis') { title = `${devName(id)} · 后台位置`; body = `<div class="kv"><span>后台位置</span><b class="${id === 'ES116340' ? 'gnd' : 'off'}">${id === 'ES116340' ? '合上' : '拉开'}</b></div><div class="kv"><span>报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>下一步</span><b>到现场按设备结构核对汇控柜电气指示、机构箱机械指示、拐臂指示、转轴划线标识</b></div>`; chks = ['后台位置', '报文']; okTxt = '后台已核对，去现场核对四项指示'; }
-  else { title = devName(id); body = `<div class="kv"><span>状态</span><b>${d[id] || '—'}</b></div>`; chks = ['状态']; }
+  let title = '', body = '', after = null, kw = INS_KW[id];
+  if (id === 'hmi_mode') { title = '光字牌 · 运行方式'; body = `<div class="kv"><span>母线方式</span><b>110kV 1M、2M 并列运行</b></div><div class="kv"><span>培训三线1163</span><b>开关${d.CB1163 === 'open' ? '分闸' : '合闸'}，11632、11634刀闸${d.DS11634 === 'open' ? '拉开' : '合上'}</b></div><div class="kv"><span>告警</span><b>无影响本次操作的光字、告警与报文</b></div>`; }
+  else if (id === 'CB1163') { title = '设备详情 · 培训三线1163开关'; body = `<div class="kv"><span>位置遥信</span><b class="${d.CB1163 === 'open' ? 'off' : 'on'}">${d.CB1163 === 'open' ? '分闸' : '合闸'}</b></div><div class="kv"><span>最近报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>三相电流</span><b>${d.CB1163 === 'open' ? 'Ia 0.0 Ib 0.0 Ic 0.0 A' : 'Ia 312 Ib 308 Ic 315 A'}</b></div>`; }
+  else if (id === 'hmi_current') { title = '遥测 · 1163开关三相电流'; body = `<div class="kv big"><span>Ia</span><b>${d.CB1163 === 'open' ? '0.0' : '312'} A</b></div><div class="kv big"><span>Ib</span><b>${d.CB1163 === 'open' ? '0.0' : '308'} A</b></div><div class="kv big"><span>Ic</span><b>${d.CB1163 === 'open' ? '0.0' : '315'} A</b></div>`; }
+  else if (id === 'hmi_volt') { title = '遥测 · 培训三线线路二次电压'; body = `<div class="kv big"><span>Uab</span><b>${d.DS11634 === 'open' ? '0.0' : '99.6'} V</b></div><div class="kv big"><span>Uo</span><b>${d.DS11634 === 'open' ? '0.0' : '0.1'} V</b></div><div class="kv"><span>结论</span><b>${d.DS11634 === 'open' ? '二次确无电压（第一种原理）' : '二次有电压'}</b></div>`; }
+  else if (id === 'bay_plate') { title = '间隔名称牌 · 图实、标实核对'; body = `<div class="plate">110kV培训三线1163<small>双重名称：培训三线 · 1163</small></div><div class="kv"><span>接线图 ↔ 现场实物</span><b>汇控柜模拟图与现场设备布置一致</b></div><div class="kv"><span>设备标签</span><b>11632 · 1163 · 11634 · 116340 标签清晰准确</b></div>`; after = () => { S.gis.plate = S.gis.draw = S.gis.label = true; }; }
+  else if (id === 'bay_hvdisp') { title = '高压带电显示装置 · 培训三线1163间隔'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 !== 'open' ? '三相确有电压' : '三相无电压'}</b></div>`; after = () => { S.gis.hv = true; }; }
+  else if (id === 'cab_hvdisp') { title = '高压带电显示装置 · 间接验电（第二种原理）'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 === 'open' ? '三相确无电压' : '三相有电压'}</b></div><div class="kv"><span>与后台二次电压</span><b>${S.verify.v1 ? '已核对：两种原理指示均已变化' : '<span style="color:#b3372c">后台二次电压尚未核对</span>'}</b></div>`; after = () => { S.gis.hvA = S.gis.hvB = S.gis.hvC = true; }; }
+  else if (st.act === 'gis') { title = `${devName(id)} · 后台位置`; body = `<div class="kv"><span>后台位置</span><b class="${id === 'ES116340' ? 'gnd' : 'off'}">${id === 'ES116340' ? '合上' : '拉开'}</b></div><div class="kv"><span>报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>下一步</span><b>到现场按设备结构核对汇控柜电气指示、机构箱机械指示、拐臂指示、转轴划线标识</b></div>`; kw = INS_KW.gis; }
+  else { title = devName(id); body = `<div class="kv"><span>状态</span><b>${d[id] || '—'}</b></div>`; kw = { items: [['状态', /./]], okSay: '状态正常。' }; }
   const m = el('div', 'mask lite');
-  m.innerHTML = `<div class="dlg insp" style="width:min(560px,96vw)">
+  m.innerHTML = `<div class="dlg insp" style="width:min(600px,96vw)">
     <div class="dh"><b>${title}</b><span class="mono">第 ${st.no} 项 · 核对</span><span class="cls">×</span></div>
-    <div class="db">${body}<div class="chkl">${chks.map((c, i) => `<span data-chk="${i}"><i></i>${c}</span>`).join('')}</div></div>
-    <div class="df"><button class="btn" id="ins_cancel">取消</button><button class="btn pri" id="ins_ok" disabled>${okTxt}</button></div></div>`;
+    <div class="db">${body}
+      <div class="chkl ro" id="ins_kw">${kw.items.map((c, i) => `<span data-kw="${i}"><i></i>${c[0]}</span>`).join('')}</div>
+      <div class="exsay dlgsay"><span class="exsayl">口述核对</span>
+        <button class="mic" id="ins_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <input class="rin" id="ins_in" placeholder="看清楚后说出来：看的是什么、显示什么、结论是什么">
+        <button class="btn pri" id="ins_say">口述</button></div>
+      <div class="rcst" id="ins_st">要素说全后自动记录核对结果</div>
+    </div>
+    <div class="df"><button class="btn" id="ins_cancel">取消</button></div></div>`;
   document.body.appendChild(m);
-  const close = () => m.remove();
+  S.ins = { m, st, id, kw, after, cov: {}, said: false, okSay: kw.okSay };
+  const close = () => { m.remove(); S.ins = null; };
   m.querySelector('.cls').onclick = close; m.querySelector('#ins_cancel').onclick = close;
-  const ok = m.querySelector('#ins_ok');
-  m.querySelectorAll('[data-chk]').forEach(c => c.onclick = () => { c.classList.toggle('on'); ok.disabled = m.querySelectorAll('[data-chk].on').length < chks.length; });
-  ok.onclick = () => { m.remove(); if (after) after(); doExecute(st); };
+  m.querySelector('#ins_say').onclick = () => { const i = m.querySelector('#ins_in'); const v = i.value; i.value = ''; insSay(v); };
+  m.querySelector('#ins_in').onkeydown = e => { if (e.key === 'Enter') m.querySelector('#ins_say').onclick(); };
+  m.querySelector('#ins_mic').onclick = () => micStart(m.querySelector('#ins_mic'), m.querySelector('#ins_in'), kw.okSay);
+  setTimeout(() => { const i = m.querySelector('#ins_in'); if (i) i.focus(); }, 30);
 }
-/* GIS 四项指示：点一项，放大看一眼，打钩 */
+async function insSay(text) {
+  const ins = S.ins; if (!ins || !document.body.contains(ins.m)) return;
+  text = (text || '').trim(); if (!text) return;
+  say('o', text); checkNumRead(text);
+  const t = text.replace(/\s+/g, '');
+  const stx = ins.m.querySelector('#ins_st');
+  /* 「带电显示装置」是设备名，不算"带电"结论 */
+  if (ins.kw.bad && ins.kw.bad.test(t.replace(/带电显示(装置)?/g, ''))) {
+    violation('major', 'state', '核对结论与实际状态不符', `${devName(ins.id)}：口述「${text.slice(0, 30)}」与画面显示不符`, '附录G-21.2：操作后应在监控后台核对运行方式与操作结果相符，核对报文与操作过程相符。');
+    stx.innerHTML = '<span style="color:#b3372c">结论与画面显示不符</span>';
+    speak('你再看一眼。说的和显示的不一样。', { pose: 'correct', shake: true }); return;
+  }
+  ins.kw.items.forEach((c, i) => { if (c[1].test(t)) ins.cov[i] = true; });
+  ins.m.querySelectorAll('[data-kw]').forEach(n => n.classList.toggle('on', !!ins.cov[+n.dataset.kw]));
+  const miss = ins.kw.items.filter((c, i) => !ins.cov[i]).map(c => c[0]);
+  if (miss.length) {
+    stx.textContent = S.mode === 'exam' ? '要素还没说全' : `还没说到：${miss.join('、')}`;
+    speak(S.mode === 'exam' ? '说全了再报。' : `还没说到${miss.join('、')}。`, { pose: 'listen' }); return;
+  }
+  stx.innerHTML = '<span style="color:var(--ac)">要素齐全，核对结果已记录</span>';
+  await sleepMs(350);
+  if (!S.ins || S.ins !== ins) return;
+  ins.m.remove(); S.ins = null;
+  if (ins.after) ins.after();
+  doExecute(ins.st);
+}
+/* GIS 四项指示：点一项放大看一眼（看是动作，不打钩）；四项是否核对到，由回报内容判定 */
 function gisInspect(k) {
   const st = STEP(); const id = (st && st.act === 'gis') ? st.target : 'DS11634';
-  S.gis[k] = true;
   const anomaly = (S.abn.fired && !S.abn.handled && id === 'DS11634' && k === 'mech');
   const want = id === 'ES116340' ? '合上位置' : '拉开位置';
   const nm = { hui: '汇控柜电气指示', mech: '机构箱机械指示', arm: '刀闸拐臂指示', line: '转轴划线标识' }[k];
-  renderPanel();
   const old = $('#peek'); if (old) old.remove();
   const p = el('div', 'peek ' + (anomaly ? 'bad' : 'ok'));
   p.id = 'peek';
-  p.innerHTML = `<b>${nm}</b><span>${anomaly ? `指示为「合上」，与后台「拉开」<em>不一致</em>` : `${want} · 与后台一致`}</span>` + (anomaly ? `<button class="btn dan" id="pk_stop">中止操作并上报</button>` : '');
+  p.innerHTML = `<b>${nm}</b><span>${anomaly ? `指示为「合上」，与后台「拉开」<em>不一致</em>` : `${want} · 与后台一致`}</span><span class="tk3">看到什么，在回报里说出来</span>` + (anomaly ? `<button class="btn dan" id="pk_stop">中止操作并上报</button>` : '');
   $('#panelwrap').appendChild(p);
   const b = $('#pk_stop'); if (b) b.onclick = () => { p.remove(); clickStop(); };
   if (!anomaly) setTimeout(() => { if (p.parentNode) p.remove(); }, tms(2600));
@@ -3528,7 +3686,7 @@ function panelCab(w) {
 
 /* ===================== 填写操作票（拟票练习）=====================
    位置：进入陪练舱后的第一步，在上岗前准备之前。
-   学员按调度预令拟写第一段操作项目，提交后由系统按审票口径逐条判分，
+   学员按调度预令口述拟写第一段操作项目（票头与项目都是说一项写一项，不从卡片里点选），提交后由系统按审票口径逐条判分，
    给出漏项、多项、顺序错误的详解与原理，再按正确票面进入准备阶段。 */
 
 /* 倒闸操作作业全过程（票的一生），当前处在「拟票」 */
@@ -3571,49 +3729,109 @@ function ticketNo() {
   return S.fill.no;
 }
 
-/* ---------- 渲染 ---------- */
+/* ---------- 渲染：口述拟票（说一项写一项，票头也口述），不从备选卡片里点选 ---------- */
 function renderFill() {
   const w = $('#panelwrap'); if (!w) return;
-  const pool = fillRight().concat(fillWrong());
   const chosen = S.fill.rows;
-  const rest = pool.filter(s => !chosen.includes(s.no));
   w.innerHTML =
     pnl('倒闸操作作业全过程', '当前环节：拟票', `
       <div class="fflow">${FLOW.map((f, i) => `<div class="ffs ${i === 1 ? 'cur' : i < 1 ? 'done' : ''}"><i>${i + 1}</i><b>${f[0]}</b><span>${f[1]}</span></div>`).join('')}</div>`) +
     pnl('110kV仿真站 · 变电站倒闸操作票', `编号 ${ticketNo()} · 拟票人 任玲玲`, `
+      <div class="exsay fsay"><span class="exsayl">口述拟票</span>
+        <button class="mic" id="f_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <input class="rin" id="f_in" placeholder="票头：「发令单位深圳中调，发令人…」；项目：动作 + 设备双重名称，说一项写一项">
+        <button class="btn pri" id="f_say">写入</button>
+        ${S.mode !== 'exam' ? '<button class="btn" id="f_hint">提示</button>' : ''}</div>
       <div class="fhead">
-        ${FHEAD.map(f => `<div class="fhr"><div class="k">${f.n}</div><div class="v">
-          <select data-fh="${f.k}"><option value="">请选择</option>${f.opt.map(o => `<option${S.fill.head[f.k] === o ? ' selected' : ''}>${o}</option>`).join('')}</select></div></div>`).join('')}
+        ${FHEAD.map(f => `<div class="fhr"><div class="k">${f.n}</div><div class="v"><input class="fin" data-fh="${f.k}" value="${S.fill.head[f.k] || ''}" placeholder="口述或填写"></div></div>`).join('')}
         <div class="fhr"><div class="k">操作开始时间</div><div class="v ro">执行第一项时填写</div></div>
         <div class="fhr"><div class="k">操作结束时间</div><div class="v ro">完成最后一项时填写</div></div>
       </div>`) +
     pnl('操作项目 · 第一段（本次调度令范围：运行 → 热备用）', `已写入 ${chosen.length} 项`, `
-      <div class="fbody">
-        <div class="fpool">
-          <div class="fpt">备选项目　${rest.length} 项未写入</div>
-          ${rest.length ? rest.map(s => `<div class="fpi" data-fadd="${s.no}"><b>＋</b><span>${s.ticket}</span></div>`).join('')
-            : '<div class="fpe">备选项目已全部写入票面。多写的项目要移出去。</div>'}
-        </div>
-        <div class="fsheet">
-          <div class="fpt">操作票第一段　按执行顺序排列</div>
-          ${chosen.length ? chosen.map((no, i) => { const s = STEPS.find(x => x.no === no); return `
-            <div class="fsi"><div class="fsn">${i + 1}</div><div class="fst">${s.ticket}</div>
-              <div class="fsb"><button class="fbtn" data-fup="${i}" title="上移">↑</button><button class="fbtn" data-fdn="${i}" title="下移">↓</button><button class="fbtn del" data-fdel="${i}" title="移出票面">×</button></div></div>`; }).join('')
-            : '<div class="fpe">票面还是空的。从左边把本段应执行的项目按顺序写进来。</div>'}
-        </div>
+      <div class="fsheet">
+        <div class="fpt">操作票第一段　按执行顺序排列（说错的可以移出，顺序可上移下移）</div>
+        ${chosen.length ? chosen.map((no, i) => { const s = STEPS.find(x => x.no === no); return `
+          <div class="fsi"><div class="fsn">${i + 1}</div><div class="fst">${s.ticket}</div>
+            <div class="fsb"><button class="fbtn" data-fup="${i}" title="上移">↑</button><button class="fbtn" data-fdn="${i}" title="下移">↓</button><button class="fbtn del" data-fdel="${i}" title="移出票面">×</button></div></div>`; }).join('')
+          : '<div class="fpe">票面还是空的。按执行顺序把本段的操作项目一项一项说出来，系统逐项写入票面。</div>'}
       </div>
       <div class="ffoot">
         <div class="ffh">拟票要求：只写本次调度令范围内的项目；每一项一个动作；执行项与检查项分列；顺序按先断开关、后拉刀闸、先线路侧后母线侧的逻辑排列。</div>
         <button class="btn pri" id="f_go">提交审核</button>
       </div>`);
-  $$('#panelwrap [data-fh]').forEach(n => n.onchange = e => { S.fill.head[n.dataset.fh] = e.target.value; renderTaskbar(); });
-  $$('#panelwrap [data-fadd]').forEach(n => n.onclick = () => { S.fill.rows.push(n.dataset.fadd); renderFill(); });
+  $$('#panelwrap [data-fh]').forEach(n => n.onchange = e => { S.fill.head[n.dataset.fh] = fillHeadVal(n.dataset.fh, e.target.value); e.target.value = S.fill.head[n.dataset.fh]; renderTaskbar(); });
   $$('#panelwrap [data-fup]').forEach(n => n.onclick = () => { const i = +n.dataset.fup; if (i > 0) { const r = S.fill.rows; [r[i - 1], r[i]] = [r[i], r[i - 1]]; renderFill(); } });
   $$('#panelwrap [data-fdn]').forEach(n => n.onclick = () => { const i = +n.dataset.fdn, r = S.fill.rows; if (i < r.length - 1) { [r[i + 1], r[i]] = [r[i], r[i + 1]]; renderFill(); } });
   $$('#panelwrap [data-fdel]').forEach(n => n.onclick = () => { S.fill.rows.splice(+n.dataset.fdel, 1); renderFill(); });
+  $('#f_say').onclick = () => { const i = $('#f_in'); const v = i.value; i.value = ''; fillSay(v); };
+  $('#f_in').onkeydown = e => { if (e.key === 'Enter') $('#f_say').onclick(); };
+  $('#f_mic').onclick = () => micStart($('#f_mic'), $('#f_in'), null);
+  const fh = $('#f_hint'); if (fh) fh.onclick = fillHint;
   $('#f_go').onclick = auditFill;
   renderTaskbar();
   const tt = $('#sheettitle'); if (tt) tt.textContent = '作业面板 · 填写操作票';
+  setTimeout(() => { const i = $('#f_in'); if (i) i.focus(); }, 30);
+}
+/* 票头取值：口述 / 手填内容归一到最接近的规范写法（判分仍按 FHEAD.ok） */
+function fillHeadVal(k, v) {
+  v = (v || '').trim(); if (!v) return '';
+  const f = FHEAD.find(x => x.k === k); if (!f) return v;
+  let best = '', bs = 0; f.opt.forEach(o => { const sc = sim(v, o); if (sc > bs) { bs = sc; best = o; } });
+  return bs >= 0.6 ? best : v;
+}
+/* 口述拟票：票头按要素名拆句；项目按票面文字匹配（全票 29 项都可匹配，段外项目写入后审核时判「多项」） */
+function fillSay(text) {
+  text = (text || '').trim(); if (!text || S.stage !== 'fill') return;
+  say('o', text);
+  const t = text.replace(/\s+/g, '');
+  const HEADRE = { unit: /发令单位[是为：:]?([^，,。；;]+)/, from: /发令人[是为：:]?([^，,。；;]+)/, to: /受令人[是为：:]?([^，,。；;]+)/, task: /操作任务[是为：:]?(.+?)(?=[，,。；;]?(发令单位|发令人|受令人)|$)/ };
+  const got = [];
+  Object.keys(HEADRE).forEach(k => { const m = t.match(HEADRE[k]); if (m && m[1]) { S.fill.head[k] = fillHeadVal(k, m[1]); got.push(FHEAD.find(f => f.k === k).n); } });
+  if (got.length) {
+    $$('#panelwrap [data-fh]').forEach(n => n.value = S.fill.head[n.dataset.fh] || '');
+    const miss = FHEAD.filter(f => !S.fill.head[f.k]).map(f => f.n);
+    say('j', `票头已记：${got.join('、')}。${miss.length ? miss.join('、') + '还没填。' : '票头齐了，开始说操作项目。'}`);
+    speak(miss.length ? `票头记了${got.join('、')}，${miss.join('、')}还没填。` : '票头齐了。第一项，说。', { pose: 'confirm', nod: 1 });
+    renderTaskbar(); return;
+  }
+  const [best, bs] = fillMatch(text);
+  if (!best || bs < 0.6) {
+    say('j', '没有对应的操作项目。说清楚动作和设备双重名称，例如「断开培训三线1163开关」。');
+    speak('没听清是哪一项。动作加设备双重名称，例如：断开培训三线1163开关。', { pose: 'listen' }); return;
+  }
+  if (S.fill.rows.includes(best.no)) { say('j', `「${best.ticket}」已经写在第 ${S.fill.rows.indexOf(best.no) + 1} 项了。`); speak('这一项已经写过了。下一项。', { pose: 'listen' }); return; }
+  S.fill.rows.push(best.no);
+  renderFill();
+  say('j', `第 ${S.fill.rows.length} 项已写入：${best.ticket}`);
+  speak(`第${S.fill.rows.length}项，${best.ticket}，记下了。`, { pose: 'confirm', nod: 1, show: `第 ${S.fill.rows.length} 项已写入：${best.ticket}` });
+}
+/* 口述与票面的匹配：以说出的话被票面覆盖的比例为主（口语可以比票面短），兼顾整句相近度；说到的设备编号必须在票面里 */
+function fillMatch(text) {
+  const a = norm(text); if (!a) return [null, 0];
+  const nums = a.match(/\d{4,6}/g) || [];
+  let best = null, bs = 0;
+  STEPS.forEach(st => {
+    const b = norm(st.ticket);
+    if (nums.some(n => b.indexOf(n) < 0)) return;
+    const l = lcs(a, b);
+    const sc = l / a.length * 0.6 + l / b.length * 0.4;
+    if (sc > bs) { bs = sc; best = st; }
+  });
+  return [best, bs];
+}
+/* 提示：逐级（方向 → 设备 → 票面原文），只在教学 / 演练模式 */
+function fillHint() {
+  const right = fillRight();
+  const nx = right.find(s => !S.fill.rows.includes(s.no));
+  if (!nx) { speak('本段项目已经说全了。看看顺序，再提交审核。', { pose: 'explain' }); return; }
+  S.fill.hint = (S.fill.hint || 0) + 1;
+  const lv = Math.min(3, ((S.fill.hintOf = S.fill.hintOf || {})[nx.no] = ((S.fill.hintOf[nx.no] || 0) + 1)));
+  const idx = right.indexOf(nx) + 1;
+  const txt = lv === 1 ? `第 ${idx} 项想一想：${nx.why.split(/[。；]/)[0]}。`
+    : lv === 2 ? `第 ${idx} 项要动的是「${devName(nx.target) || nx.target || '本项设备'}」，动作是${nx.act === 'check' || nx.act === 'verify' ? '核对' : nx.act === 'open' ? '断开' : nx.act === 'pull' ? '拉开' : '执行'}。`
+      : `第 ${idx} 项票面原文：${nx.ticket}。`;
+  say('s', `<span class="tag wn">提示 ${lv}</span>${txt}`);
+  speak(txt, { pose: 'point' });
 }
 
 /* ---------- 判分与详解 ---------- */
@@ -3625,7 +3843,7 @@ function fillScore() {
   let hs = 20;
   FHEAD.forEach(f => {
     const v = S.fill.head[f.k];
-    if (v !== f.ok) {
+    if (norm(v || '') !== norm(f.ok)) {
       hs -= 5;
       errs.push({ g: '票头', t: `${f.n}${v ? `填「${v}」` : '未填写'}`, right: f.ok, why: f.why,
         rule: '附录F 2.4／2.5／2.7：发令单位、发令人、受令人、受令时间应完整、如实记录在调度操作指令记录簿及操作票相应栏。' });
@@ -3712,7 +3930,7 @@ async function enterFill() {
   $('#loctag').textContent = LOC.phone.name;
   renderLocbar(); renderTicket(); renderFill(); updateActbar(); Sheet.sync();
   say('j', '任玲玲，深圳中调预令：将110kV仿真站110kV培训三线1163线路由运行转检修。调度采用逐项令，先拟写第一段——由运行转热备用。');
-  await speak('任玲玲，深圳中调预令：将110kV仿真站110kV培训三线1163线路由运行转检修。调度采用逐项令，你先拟写第一段，由运行转热备用。票头要素填全，项目按执行顺序排，不属于本段的不要写进来。',
+  await speak('任玲玲，深圳中调预令：将110kV仿真站110kV培训三线1163线路由运行转检修。调度采用逐项令，你先拟写第一段，由运行转热备用。票头要素先报全，项目按执行顺序一项一项说，我逐项记，不属于本段的不要写进来。',
     { pose: 'explain', who: '监护人 陈志远' });
 }
 
@@ -3846,7 +4064,7 @@ const DEMO = {
     steps: [
       { pose: 'stand', t: '站位与核对', say: '先在一次接线图上找到本间隔，核对设备双重名称和当前状态，确认是要操作的那一台。' },
       { pose: 'point', t: '手指口述', say: `手指后台画面上的设备，念出票面：${st.recite}。` },
-      { pose: 'act', t: '执行动作', say: '在遥控操作框里先选操作性质，系统自动预置并返校，返校通过后再点执行。选错性质会被判违规。' },
+      { pose: 'act', t: '执行动作', say: '在遥控操作框里口述操作性质，系统自动预置并返校，返校通过后按住执行到进度走满。性质说错、设备说错都会被判违规。' },
       { pose: 'look', t: '检查回报', say: '看图上变位、光字牌和操作报文三处都刷新，确认与本次操作相符，再回报。' }
     ],
     scene: (i, st) => `${panelBack(300, 210, '监控后台工作站')}
@@ -3864,7 +4082,7 @@ const DEMO = {
     steps: [
       { pose: 'stand', t: '站位与核对', say: `到${LOC[st.loc].name}，先核对间隔名称和设备双重名称，确认站位没错。` },
       { pose: 'point', t: '手指口述', say: `手指要核对的对象，念出票面：${st.recite}。` },
-      { pose: 'act', t: '执行动作', say: '逐项看清楚：数值、位置、信号、报文，一项一项对，不要扫一眼就过。' },
+      { pose: 'act', t: '执行动作', say: '逐项看清楚：数值、位置、信号、报文，一项一项对，看到什么说什么，要素说全才算核对。' },
       { pose: 'look', t: '检查回报', say: `按看到的实际情况回报，不照抄票面。核对项的价值就在于说出你真正看到了什么。` }
     ],
     scene: (i, st) => `${panelBack(300, 210, LOC[st.loc].name)}
@@ -3984,7 +4202,7 @@ function devClick(id) {
   const st = STEP();
 
   // 现场四指示 / 核对类热区
-  if (id.startsWith('gis_')) { if (S.beat >= 3) gisInspect(id.slice(4)); else toast('先手指本项设备并复诵，执行后再逐项核对指示', ''); return; }
+  if (id.startsWith('gis_')) { if (S.beat >= 3) gisInspect(id.slice(4)); else toast('先手指本项设备并复诵，执行后再逐项查看指示', ''); return; }
   if (id.startsWith('cab_hvdisp_')) { if (S.beat === 4) { S.gis['hv' + id.slice(11)] = true; renderPanel(); return; } id = 'cab_hvdisp'; }
   if (id === 'bay_draw' || id === 'bay_label') { S.gis[id === 'bay_draw' ? 'draw' : 'label'] = true; renderPanel(); return; }
 
@@ -4094,7 +4312,7 @@ function doExecute(st) {
   renderPanel(); renderTop();
   say('o', st.act === 'check' || st.act === 'gis' ? `（核对${devName(st.target)}）` : `（执行：${st.ticket}）`);
   if (st.act === 'gis') {
-    speak('到现场按设备结构逐项核对四项位置指示，四项一致后再回报。', { pose: 'point' });
+    speak('到现场按设备结构逐项看四项位置指示，看到什么说什么，四项都要报到。', { pose: 'point' });
     if (st.target !== 'ES116340') goLoc('bay');
   } else {
     speak('执行到位。请检查设备状态并回报。', { pose: 'explain' });
@@ -4229,10 +4447,15 @@ async function _submitInput() {
     checkNumRead(v);
     // GIS 四项指示
     if (st.act === 'gis') {
+      /* 四项指示是否核对到，看回报里有没有说到（说到才算看到） */
+      const GIS_KW = { hui: /汇控柜|电气指示/, mech: /机构箱|机械指示/, arm: /拐臂/, line: /转轴|划线/ };
+      Object.keys(GIS_KW).forEach(k => { if (GIS_KW[k].test(v) || /四项/.test(v)) S.gis[k] = true; });
+      renderPanel();
       const need = ['hui', 'mech', 'arm', 'line'];
       const got = need.filter(k => S.gis[k]).length;
       if (S.abn.fired && !S.abn.handled && st.target === 'DS11634') {
         if (S.gis.mech) {
+          if (/不一致|不符|异常|中止|上报/.test(v)) { clickStop(); return; }
           redlineAbnormal(); return;
         }
       }
@@ -4608,71 +4831,134 @@ const DRESS = [
   '安全帽外观正常且在有效期内，双手持帽檐从前至后扣于头顶，调整后箍并系好下颌带'
 ];
 
+/* 口述确认的关键词（监护人问，操作人答；不点选、不打钩） */
+const PREP_KW = {
+  audit: [/三审|自审|审核|审批|签字|签完|签好/, /资格|有效|授权/, /只执行|本份|一份|本票|一张|这份/],
+  dress: [/工作服|着装|扣子|袖口|裤脚|整洁/, /袖章/, /安全帽|帽|下颌带|后箍/],
+  auditShort: ['三审签字', '人员资格', '只执行本份票'], dressShort: ['工作服着装', '袖章', '安全帽'],
+  mind: /精神|状态良好|良好|饱满|正常|没问题|可以|很好/, mindBad: /不好|不太好|疲劳|不舒服|没休息|困/,
+  ack: /明白|清楚|确认|收到|知道|了解|好的|记住|是的|^是|^嗯|^对/
+};
+function prepPhase() {
+  if (!S.prep.audit.every(Boolean)) return 'audit';
+  if (!S.prep.dress.every(Boolean)) return 'dress';
+  if (!S.prep.mind) return 'mind';
+  if (!S.prep.risks.every(Boolean)) return 'risk';
+  return 'done';
+}
+function prepPlaceholder() {
+  return ({ audit: '口头报告三审与资格核对情况…', dress: '口头报告着装互检情况…', mind: '回答监护人问询…', risk: '听清一条，口头确认一条（明白 / 清楚 / 确认）…', done: '准备完毕' })[prepPhase()];
+}
 function renderPrep() {
   const w = $('#panelwrap');
-  const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
+  const ph = prepPhase();
   w.innerHTML = `<div class="prep">
+    <div class="exsay prepsay"><span class="exsayl">口述应答</span>
+      <button class="mic" id="p_mic" title="语音应答"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+      <input class="rin" id="p_in" placeholder="${prepPlaceholder()}" ${ph === 'done' ? 'disabled' : ''}>
+      <button class="btn pri" id="p_send" ${ph === 'done' ? 'disabled' : ''}>应答</button>
+      <span class="tk3" id="p_st">${ph === 'risk' ? `风险交底 ${S.prep.risks.filter(Boolean).length}/12` : ph === 'done' ? '准备完毕' : '监护人问询 · 操作人口头报告'}</span></div>
     <div class="prepgrid">
-      <div class="pc"><h5>一、操作票三审与资格核对</h5><div class="sub2">接令前执行操作票三审程序</div>
-        <div class="chkrow">${AUDIT.map((t, i) => `<div class="chk ${S.prep.audit[i] ? 'on' : ''}" data-p="audit" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
-      <div class="pc"><h5>二、着装互检</h5><div class="sub2">监护人与操作人互相检查</div>
-        <div class="chkrow">${DRESS.map((t, i) => `<div class="chk ${S.prep.dress[i] ? 'on' : ''}" data-p="dress" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
+      <div class="pc"><h5>一、操作票三审与资格核对</h5><div class="sub2">监护人问询，操作人口头报告；说到一项记一项</div>
+        <div class="chkrow">${AUDIT.map((t, i) => `<div class="chk ro ${S.prep.audit[i] ? 'on' : ''}" data-p="audit" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
+      <div class="pc"><h5>二、着装互检</h5><div class="sub2">监护人与操作人互相检查后口头报告</div>
+        <div class="chkrow">${DRESS.map((t, i) => `<div class="chk ro ${S.prep.dress[i] ? 'on' : ''}" data-p="dress" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
       <div class="pc"><h5>三、操作任务与人员状态确认</h5><div class="sub2">监护人问询，操作人应答</div>
         <div style="background:#f6f7ee;border:1px solid #e2dfd0;border-radius:6px;padding:10px;font-size:11.5px;line-height:1.75;color:#5c6b5f">
           今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。你的精神状态是否良好？</div>
-        <div class="chk ${S.prep.mind ? 'on' : ''}" data-p="mind" data-i="0" style="margin-top:10px"><div class="bx">✓</div><div class="lb">操作人应答：精神状态良好</div></div>
+        <div class="chk ro ${S.prep.mind ? 'on' : ''}" data-p="mind" data-i="0" style="margin-top:10px"><div class="bx">✓</div><div class="lb">操作人应答：${S.prep.mind ? '精神状态良好' : '待应答'}</div></div>
         <div style="margin-top:10px;font-size:10.5px;color:#98a69c;line-height:1.6">精神不集中、疲劳或身体不适会降低识别设备、复诵和执行操作票的准确性，容易引发误操作。</div>
       </div>
     </div>
     <div class="risks"><h5 style="margin:0 0 4px;font-size:13px;color:#2f4438">四、风险分析及管控措施（12 项）</h5>
-      <div class="sub2" style="font-size:10.5px;color:#98a69c;margin-bottom:11px">监护人逐条宣读，操作人逐条确认。点击条目展开管控措施与后果。已确认 <b id="rkn" style="color:var(--ac)">${S.prep.risks.filter(Boolean).length}</b>/12</div>
-      ${RISKS.map((r, i) => `<div class="rk ${S.prep.risks[i] ? 'on' : ''}" data-r="${i}">
-        <div class="rh"><div class="n">${i + 1}</div><div class="t">${r[0]}</div><div class="s">${S.prep.risks[i] ? '已确认 ✓' : '待确认'}</div></div>
+      <div class="sub2" style="font-size:10.5px;color:#98a69c;margin-bottom:11px">监护人逐条宣读，操作人听清一条口头确认一条。已确认 <b id="rkn" style="color:var(--ac)">${S.prep.risks.filter(Boolean).length}</b>/12</div>
+      ${RISKS.map((r, i) => `<div class="rk ${S.prep.risks[i] ? 'on' : ''} ${S.prep.ri === i ? 'cur open' : ''}" data-r="${i}">
+        <div class="rh"><div class="n">${i + 1}</div><div class="t">${r[0]}</div><div class="s">${S.prep.risks[i] ? '已确认 ✓' : S.prep.ri === i ? '宣读中' : '待宣读'}</div></div>
         <div class="rb"><b>管控措施：</b>${r[1]}<br><b>原因及后果：</b>${r[2]}</div></div>`).join('')}
     </div>
-    <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
-      <button class="btn" id="p_all">全部确认</button>
-      <div style="flex:1"></div>
-      <button class="btn pri" id="p_go" ${ok ? '' : 'disabled'}>准备完毕，进入五防模拟</button>
-    </div>
   </div>`;
-  $$('.chk[data-p]').forEach(n => n.onclick = () => {
-    const p = n.dataset.p, i = +n.dataset.i;
-    if (p === 'mind') S.prep.mind = !S.prep.mind; else S.prep[p][i] = !S.prep[p][i];
-    n.classList.toggle('on', p === 'mind' ? S.prep.mind : S.prep[p][i]);
-    const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
-    const go = $('#p_go'); if (go) go.disabled = !ok;
-    renderTaskbar();
-  });
-  $$('.rk').forEach(n => {
-    const i = +n.dataset.r;
-    n.querySelector('.rh').onclick = () => {
-      if (!S.prep.risks[i]) {
-        /* 确认后就地更新这一条，不整页重绘，页面不跳位 */
-        S.prep.risks[i] = true; n.classList.add('on', 'open');
-        const s = n.querySelector('.rh .s'); if (s) s.textContent = '已确认 ✓';
-        const cnt = $('#rkn'); if (cnt) cnt.textContent = S.prep.risks.filter(Boolean).length;
-        const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
-        const go = $('#p_go'); if (go) go.disabled = !ok;
-        renderTaskbar();
-      } else n.classList.toggle('open');
-    };
-  });
-  $('#p_all').onclick = () => {
-    const sc = $('#panelwrap').scrollTop;
-    S.prep.audit = [true, true, true]; S.prep.dress = [true, true, true]; S.prep.mind = true;
-    S.prep.risks = S.prep.risks.map(() => true); renderPrep();
-    const w = $('#panelwrap'); if (w) w.scrollTop = sc;
-  };
-  $('#p_go').onclick = () => enterWufang();
+  $$('.rk').forEach(n => { n.querySelector('.rh').onclick = () => n.classList.toggle('open'); });
+  $('#p_send').onclick = () => { const i = $('#p_in'); const v = i.value; i.value = ''; prepSay(v); };
+  $('#p_in').onkeydown = e => { if (e.key === 'Enter') $('#p_send').onclick(); };
+  $('#p_mic').onclick = () => micStart($('#p_mic'), $('#p_in'), prepMicText());
   renderTaskbar();
+  if (ph !== 'done') setTimeout(() => { const i = $('#p_in'); if (i) i.focus(); }, 30);
+}
+/* 语音应答的离线兜底文本：按当前该答的内容 */
+function prepMicText() {
+  const ph = prepPhase();
+  if (ph === 'audit') return '操作票已三审签字完毕，操作人、监护人资格在有效范围内，本时段只执行本份操作票。';
+  if (ph === 'dress') return '工作服整洁扣子扣全，操作人、监护人袖章已佩戴，安全帽在有效期内、下颌带已系好。';
+  if (ph === 'mind') return '精神状态良好。';
+  return '明白。';
+}
+/* 就地更新：不整页重绘，页面不跳位 */
+function prepPaint() {
+  const ph = prepPhase();
+  $$('.chk[data-p]').forEach(n => { const p = n.dataset.p, i = +n.dataset.i; const on = p === 'mind' ? S.prep.mind : S.prep[p][i]; n.classList.toggle('on', !!on); if (p === 'mind') n.querySelector('.lb').textContent = '操作人应答：' + (on ? '精神状态良好' : '待应答'); });
+  $$('.rk').forEach(n => { const i = +n.dataset.r; n.classList.toggle('on', !!S.prep.risks[i]); n.classList.toggle('cur', S.prep.ri === i); if (S.prep.ri === i) n.classList.add('open'); const s = n.querySelector('.rh .s'); if (s) s.textContent = S.prep.risks[i] ? '已确认 ✓' : S.prep.ri === i ? '宣读中' : '待宣读'; if (S.prep.ri === i) n.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+  const cnt = $('#rkn'); if (cnt) cnt.textContent = S.prep.risks.filter(Boolean).length;
+  const st = $('#p_st'); if (st) st.textContent = ph === 'risk' ? `风险交底 ${S.prep.risks.filter(Boolean).length}/12` : ph === 'done' ? '准备完毕' : '监护人问询 · 操作人口头报告';
+  const inp = $('#p_in'); if (inp) { inp.placeholder = prepPlaceholder(); inp.disabled = ph === 'done'; }
+  const sd = $('#p_send'); if (sd) sd.disabled = ph === 'done';
+  renderTaskbar();
+}
+/* 操作人开口：按当前环节判定，说对推进、说漏追问 */
+async function prepSay(text) {
+  text = (text || '').trim(); if (!text || S.stage !== 'prep') return;
+  const ph = prepPhase(); if (ph === 'done') return;
+  say('o', text);
+  const t = text.replace(/\s+/g, '');
+  if (ph === 'audit' || ph === 'dress') {
+    let hit = 0;
+    PREP_KW[ph].forEach((re, i) => { if (!S.prep[ph][i] && re.test(t)) { S.prep[ph][i] = true; hit++; } });
+    prepPaint();
+    const miss = PREP_KW[ph + 'Short'].filter((_, i) => !S.prep[ph][i]);
+    if (!hit) { await speak(`说具体。${ph === 'audit' ? '三审签字了没有，人员资格在不在有效期，本时段是不是只执行这一份票' : '工作服、袖章、安全帽，一项一项报'}。`, { pose: 'listen' }); return; }
+    if (miss.length) { await speak(`记下了。${miss.join('、')}还没报。`, { pose: 'listen', nod: 1 }); return; }
+    if (ph === 'audit') { await speak('三审和资格核对无误。下面着装互检，互相看一遍，报给我。', { pose: 'confirm', nod: 1 }); }
+    else { await speak('着装合格。今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。你的精神状态是否良好？', { pose: 'explain' }); }
+    return;
+  }
+  if (ph === 'mind') {
+    if (PREP_KW.mindBad.test(t) && !/良好|正常|没问题/.test(t)) { await speak('状态不好就不能上岗操作。今天先休息，换人。', { pose: 'stop', shake: true }); return; }
+    if (!PREP_KW.mind.test(t)) { await speak('我问的是你的精神状态，直接回答。', { pose: 'listen' }); return; }
+    S.prep.mind = true; prepPaint();
+    await speak('好。下面做风险分析，十二条我逐条宣读，你听清一条确认一条。', { pose: 'explain', nod: 1 });
+    return prepReadRisk();
+  }
+  if (ph === 'risk') {
+    const i = S.prep.ri;
+    if (i == null || i < 0) return prepReadRisk();
+    if (/全部|一并|都明白|都清楚|都确认/.test(t) && !/^明白|^清楚|^确认/.test(t)) { await speak('一条一条来。这一条听清了没有？', { pose: 'correct' }); return; }
+    if (!(PREP_KW.ack.test(t) || sim(t, RISKS[i][0]) > 0.4)) { await speak(`第${i + 1}条，${RISKS[i][0]}。听清了就确认。`, { pose: 'point' }); return; }
+    S.prep.risks[i] = true; S.prep.ri = -1; prepPaint();
+    if (S.prep.risks.every(Boolean)) return prepDone();
+    return prepReadRisk();
+  }
+}
+/* 监护人宣读下一条风险（数字人开口），操作人口头确认后再读下一条 */
+async function prepReadRisk() {
+  if (S.stage !== 'prep') return;
+  const i = S.prep.risks.findIndex(x => !x); if (i < 0) return prepDone();
+  S.prep.ri = i; prepPaint();
+  const r = RISKS[i];
+  say('j', `风险${i + 1}：${r[0]}。管控措施：${r[1]}`);
+  await speak(`第${i + 1}条，${r[0]}。${i === 0 ? '管控措施在屏幕上，看清楚。' : ''}`, { pose: 'call', show: `风险${i + 1}：${r[0]}` });
+}
+async function prepDone() {
+  if (S.stage !== 'prep') return;
+  S.prep.ri = -1; prepPaint();
+  say('j', '风险交底完毕，准备工作完成。去五防电脑做模拟。');
+  await speak('十二条风险交底完毕，准备工作完成。去五防电脑做模拟。', { pose: 'confirm', nod: 1 });
+  if (S.stage === 'prep') enterWufang();
 }
 
 async function enterPrep() {
-  S.stage = 'prep'; goLoc('phone');
+  S.stage = 'prep'; S.prep.ri = -1; goLoc('phone');
   renderPrep(); updateActbar(); renderTaskbar();
-  say('j', '任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先完成三审、着装互检和风险分析。');
-  await speak('任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先完成三审、着装互检和风险分析，逐条确认。',
+  say('j', '任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先做三审、着装互检和风险分析。先报：操作票三审签字了没有，人员资格在不在有效期？');
+  await speak('任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先做三审、着装互检和风险分析。先报：操作票三审签字了没有，人员资格在不在有效期？',
     { pose: 'explain' });
 }
 
@@ -4694,21 +4980,37 @@ function startRun() {
   openPreview(1, go);
 }
 
-let recTimer = null;
-function micClick() {
-  const st = STEP(); if (!st) return;
-  const m = $('#a_mic'), r = $('#rin');
+let recTimer = null, recNow = null;
+/* 语音输入：联网时用浏览器识别（结果可改再发）；离线按当前该说的内容逐字打入（复诵 / 回报的内容本来就在票面上） */
+function micStart(btn, inp, fallback) {
+  if (!btn || !inp) return;
+  if (recNow) { try { recNow.stop(); } catch (e) { } recNow = null; btn.classList.remove('rec'); return; }
   if (recTimer) return;
-  m.classList.add('rec'); r.value = ''; r.placeholder = '正在识别…';
-  const text = S.beat === 1 ? st.recite : st.report;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR && navigator.onLine && !window.__DH_MUTE) {
+    try {
+      const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = false;
+      r.onresult = e => { inp.value = Array.from(e.results).map(x => x[0].transcript).join(''); if (inp.oninput) inp.oninput(); };
+      r.onend = () => { btn.classList.remove('rec'); recNow = null; };
+      r.onerror = () => { btn.classList.remove('rec'); recNow = null; if (fallback) micType(btn, inp, fallback); else toast('语音识别未能启动，请改用文字输入', 'bad'); };
+      btn.classList.add('rec'); r.start(); recNow = r; return;
+    } catch (e) { }
+  }
+  if (fallback) return micType(btn, inp, fallback);
+  btn.classList.add('rec'); toast('当前离线，语音识别不可用，请在文字框中输入', '');
+  setTimeout(() => btn.classList.remove('rec'), 1400); inp.focus();
+}
+function micType(btn, inp, text) {
+  btn.classList.add('rec'); inp.value = ''; inp.placeholder = '正在识别…';
   let i = 0;
   recTimer = setInterval(() => {
-    i += 2; r.value = text.slice(0, i);
-    if (i >= text.length) {
-      clearInterval(recTimer); recTimer = null; m.classList.remove('rec');
-      r.placeholder = '';
-    }
+    i += 2; inp.value = text.slice(0, i); if (inp.oninput) inp.oninput();
+    if (i >= text.length) { clearInterval(recTimer); recTimer = null; btn.classList.remove('rec'); inp.placeholder = ''; }
   }, 34);
+}
+function micClick() {
+  const st = STEP(); if (!st) return;
+  micStart($('#a_mic'), $('#rin'), S.beat === 1 ? st.recite : st.report);
 }
 
 function openRule() {
@@ -4833,6 +5135,8 @@ function bindDemo() {
   const d = $('#demo');
   $('#demotg').onclick = () => d.classList.toggle('open');
   $('#dm_auto').onclick = () => autoStep();
+  $('#dm_voice').onclick = () => { voiceToggle(); toast(TTS.on ? '数字人朗读语音已打开' : '数字人朗读语音已关闭（只保留字幕与口型）'); };
+  voiceLabel();
   $('#dm_red').onclick = () => {
     if (S.stage !== 'run') return toast('请先进入操作票执行阶段', 'bad');
     const i = STEPS.findIndex(s => s.no === '20');
@@ -4845,7 +5149,7 @@ function bindDemo() {
   };
   $('#dm_skip').onclick = () => {
     if (S.stage === 'fill') { S.fill.head = { unit: '深圳中调', from: '李明', to: '陈志远', task: '将110kV仿真站110kV培训三线1163线路由运行转检修' }; S.fill.rows = fillRight().map(x => x.no); renderFill(); auditFill(); }
-    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
+    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); S.prep.ri = -1; renderPrep(); enterWufang(); }
     else if (S.stage === 'wufang') { S.wf = 4; renderPanel(); startRun(); }
     else if (S.stage === 'run') toast('已在执行阶段', '');
   };
@@ -4874,35 +5178,34 @@ async function autoStep() {
     if (st.act === 'report') { await dialPhone(); return; }
     if (st.target) { devClick(st.target); await autoDialog(st); }
   } else if (S.beat === 4) {
-    if (st.act === 'gis') { ['hui', 'mech', 'arm', 'line'].forEach(k => S.gis[k] = true); renderPanel(); }
-    if (st.act === 'verify' || st.act === 'check') { }
+    /* 四项指示由回报内容判定：标准回报里四项都说到 */
     $('#rin').value = st.report; await new Promise(r => setTimeout(r, 150)); submitInput();
   }
 }
 
-/* 自动执行：把遥控 / 核对弹层按正确路径点完 */
+/* 自动执行：遥控弹层口述操作性质并按住执行；核对弹层口述核对结果 */
 async function autoDialog(st) {
   const zz = ms => new Promise(r => setTimeout(r, ms));
-  for (let k = 0; k < 12; k++) {
+  for (let k = 0; k < 40; k++) {
     await zz(90);
     const rc = document.querySelector('.dlg.rc');
     if (rc) {
-      const want = st.act === 'closeE' ? 'close' : 'open';
-      const r = rc.querySelector(`input[name=rcop][value="${want}"]`);
-      if (r && !r.checked) { r.checked = true; r.onchange(); continue; }
-      const pre = rc.querySelector('#rc_pre'), ex = rc.querySelector('#rc_exec');
-      if (pre && !pre.disabled) { pre.click(); continue; }
-      if (ex && !ex.disabled) { ex.click(); continue; }
+      if (!S.rc) { await zz(60); continue; }
+      if (!S.rc.nat) { rcSay(S.rc.want === 'open' ? `${devName(S.rc.id)}，分闸` : `${devName(S.rc.id)}，合闸`); continue; }
+      if (S.rc.ready) { rcExecNow(); continue; }
       await zz(120); continue;
     }
     const ins = document.querySelector('.dlg.insp');
-    if (ins) {
-      ins.querySelectorAll('[data-chk]:not(.on)').forEach(c => c.click());
-      const ok = ins.querySelector('#ins_ok'); if (ok && !ok.disabled) { ok.click(); }
-      continue;
-    }
+    if (ins) { if (S.ins && !S.ins.said) { S.ins.said = true; insSay(S.ins.okSay); } await zz(120); continue; }
     break;
   }
+}
+
+/* 上岗前准备：按口述路径自动走完（讲师演示台 / 回归用） */
+async function prepAuto() {
+  const zz = ms => new Promise(r => setTimeout(r, ms));
+  await prepSay(prepMicText()); await prepSay(prepMicText()); await prepSay(prepMicText());
+  let g = 0; while (S.stage === 'prep' && g++ < 20) { await zz(60); await prepSay('明白'); }
 }
 
 /* ---------------- 唇形·动作同步指示 ---------------- */
@@ -5732,6 +6035,7 @@ function homeBoot() {
     <button data-dm="run">一键跑完当前考试（正确路径）</button>
     <button data-dm="es">地刀两态：<b id="dm_es">随机</b></button>
     <button data-dm="rain">雨淋阀压力异常注入：<b id="dm_rain">关</b></button>
+    <button data-dm="voice">数字人朗读语音：<b data-voicelbl>开</b></button>
     <button data-dm="status">功能实现状态清单</button>
     <button data-dm="bound">系统边界表</button>
     <button data-dm="clear">清空本机记录</button></div>
@@ -5745,6 +6049,7 @@ function homeBoot() {
   $('.uchip').onclick = toggleRole;
   $('#demo2tg').onclick = () => $('#demo2').classList.toggle('open');
   $('#demo2 .bd').onclick = e => { const b = e.target.closest('[data-dm]'); if (b) demoAct(b.dataset.dm); };
+  voiceLabel();
   renderRole();
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
@@ -6221,7 +6526,7 @@ const IMPL_STATUS = [
   ['语音识别：口述汇报、问答', '联网时浏览器识别（真实）；离线自动降级为文字输入'],
   ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
   ['AI 复盘、针对性训练建议、提醒草稿', '规则模板生成（非在线大模型）'],
-  ['数字人语音', '预渲染片段 / 内置字幕口型（非实时）'],
+  ['数字人语音', '预渲染片段优先；无片段时浏览器合成语音朗读 + 字幕口型（讲师演示台可关）'],
   ['训练与考试记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
   ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接'],
   ['教练目录中 16 位未开通教练', '目录（非可训练功能）'],
@@ -6238,6 +6543,7 @@ function demoAct(k) {
   if (k === 'red') { if (!EX.exam) return toast('请先进入 1163 考试', 'bad'); const s = examStation(); if (s.id !== 'k2_hub') return toast('当前不在关卡二「验电与接地」', 'bad'); examAuto('red'); return; }
   if (k === 'run') { if (!EX.exam) return toast('请先开始一场考试', 'bad'); examRun(); return; }
   if (k === 'es') { const seq = [null, 'ok', 'mech', 'rod']; const i = (seq.indexOf(EX.arm.esCase || null) + 1) % seq.length; EX.arm.esCase = seq[i]; $('#dm_es').textContent = { null: '随机', ok: '正常到位', mech: '机构箱不一致', rod: '连杆未到位' }[String(seq[i])]; return; }
+  if (k === 'voice') { voiceToggle(); toast(TTS.on ? '数字人朗读语音已打开' : '数字人朗读语音已关闭（只保留字幕与口型）'); return; }
   if (k === 'rain') { EX.arm.rainAbn = !EX.arm.rainAbn; $('#dm_rain').textContent = EX.arm.rainAbn ? '开（下次开始生效）' : '关'; return; }
   if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则模拟 / 预置 / 待对接', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
   if (k === 'bound') return openDrill('系统边界表', '现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写', boundaryHtml());
@@ -6710,8 +7016,9 @@ function quizHtml() {
   const q = QUIZ.find(x => x.id === Q.ids[Q.i]), a = Q.ans[Q.i];
   return `<div class="qz"><div class="qzh"><span class="tbno">第 ${Q.i + 1}/${Q.ids.length} 题</span><i class="ctag">${q.dim}</i><span class="tk3">${KNOW.find(k => k.id === q.k).t}</span></div>
     <div class="qzq">${q.q}</div>
-    <div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ${a != null ? (i === q.a ? 'right' : i === a ? 'wrong' : 'dim') : ''}" data-qopt="${i}"><b>${'ABCD'[i]}</b>${o}</div>`).join('')}</div>
-    ${a != null ? `<div class="qzx ${a === q.a ? 'ok' : 'bad'}"><b>${a === q.a ? '回答正确' : '回答错误'}</b> ${q.why} <span class="cite">依据 ${q.cite}</span></div><div class="rvact"><button class="btn pri" data-qnext="1">${Q.i + 1 >= Q.ids.length ? '查看结果' : '下一题'}</button></div>` : '<div class="tk3">选择一个答案，系统立即给出判定与依据。</div>'}</div>`;
+    <div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ro ${a != null ? (i === q.a ? 'right' : i === a ? 'wrong' : 'dim') : ''}"><b>${'ABCD'[i]}</b>${o}</div>`).join('')}</div>
+    ${a != null ? `<div class="qzx ${a === q.a ? 'ok' : 'bad'}"><b>${a === q.a ? '回答正确' : '回答错误'}</b> ${q.why} <span class="cite">依据 ${q.cite}</span></div><div class="rvact"><button class="btn pri" data-qnext="1">${Q.i + 1 >= Q.ids.length ? '查看结果' : '下一题'}</button></div>`
+      : `<div class="exsay qzsay"><span class="exsayl">口答</span><button class="mic" id="qz_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button><input class="rin" id="qz_in" placeholder="说出你的判断，或直接说 A / B / C / D"><button class="btn pri" data-qsay="1">回答</button></div>${Q.note ? `<div class="tk3" style="color:#a8821b;margin-top:6px">${Q.note}</div>` : '<div class="tk3">口头回答后系统立即给出判定与依据。</div>'}`}</div>`;
 }
 function planRows() {
   const weak = DIMS6.map((d, i) => [d, RADAR_NOW[i]]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(x => x[0]);
@@ -6793,7 +7100,20 @@ function quizStart(topic) {
 }
 function quizAnswer(i) {
   const Q = CL.quiz; if (!Q || Q.ans[Q.i] != null) return;
-  Q.ans[Q.i] = i; const b = $('#quizbox'); if (b) b.innerHTML = quizHtml();
+  Q.ans[Q.i] = i; Q.note = ''; const b = $('#quizbox'); if (b) b.innerHTML = quizHtml();
+}
+/* 口答：说字母 / 第几个 / 用自己的话说判断，按文字相近度对到选项 */
+function quizSay(text) {
+  const Q = CL.quiz; if (!Q || Q.ans[Q.i] != null) return;
+  text = (text || '').trim(); if (!text) return;
+  const q = QUIZ.find(x => x.id === Q.ids[Q.i]);
+  const t = text.replace(/\s+/g, '');
+  let pick = -1;
+  const m = t.match(/^(?:选|答案是|答案|是|我选|选择)?([ABCDabcd])(?:[项。.，]|$)/) || t.match(/第([一二三四1234])(?:个|项|条)/);
+  if (m) { const c = m[1].toUpperCase(); pick = 'ABCD'.indexOf(c); if (pick < 0) pick = '一二三四'.indexOf(c); if (pick < 0) pick = '1234'.indexOf(c); }
+  if (pick < 0) { let best = -1, bs = 0; q.opts.forEach((o, i) => { const sc = sim(text, o); if (sc > bs) { bs = sc; best = i; } }); if (bs >= 0.3) pick = best; }
+  if (pick < 0) { Q.note = `没有对应到答案：「${text.slice(0, 24)}」。说具体一点，或直接说 A / B / C / D。`; const b = $('#quizbox'); if (b) { b.innerHTML = quizHtml(); const i = $('#qz_in'); if (i) i.focus(); } return; }
+  quizAnswer(pick);
 }
 function quizNext() {
   const Q = CL.quiz; if (!Q) return;
@@ -7057,7 +7377,8 @@ function pagesClick(e) {
   if (n = q('[data-course]')) { courseDrill(n.dataset.course); return true; }
   if (n = q('[data-cnext]')) { courseNext(n.dataset.cnext); return true; }
   if (n = q('[data-quiz]')) { quizStart(n.dataset.quiz); return true; }
-  if (n = q('[data-qopt]')) { quizAnswer(+n.dataset.qopt); return true; }
+  if (n = q('[data-qsay]')) { const i = $('#qz_in'); quizSay(i ? i.value : ''); return true; }
+  if (n = q('#qz_mic')) { micStart(n, $('#qz_in'), null); return true; }
   if (n = q('[data-qnext]')) { quizNext(); return true; }
   if (n = q('[data-qretry]')) { const t = CL.quiz ? CL.quiz.topic : '全部'; quizStart(t); return true; }
   if (n = q('[data-lplan]')) { planGen(); return true; }
@@ -7515,7 +7836,7 @@ function coachSay(text, opt) {
   return p;
 }
 function meSay(text, k) { EX.log.push({ who: 'me', t: text, k: k || '', at: now() }); renderLog(); }
-function praise() { const p = PRAISE[EX.praiseI++ % PRAISE.length]; return p; }
+function exPraise() { const p = PRAISE[EX.praiseI++ % PRAISE.length]; return p; }
 function renderLog() {
   const box = $('#ex_log'); if (!box) return;
   const c = EX.exam ? EX.exam.coach : { short: '教' };
@@ -7598,7 +7919,7 @@ function goalDone(g, txt, o) {
   const gs = gState(g.id); gs.done = true;
   const f = HINT_F[Math.min(3, gs.hint + (EX.mode === 'exam' ? Math.min(2, gs.wrong) : 0))];
   gs.got = +((g.pts || 0) * f).toFixed(2);
-  const line = `${o.noPraise ? '' : praise()}${txt || g.praise || ''}`;
+  const line = `${o.noPraise ? '' : exPraise()}${txt || g.praise || ''}`;
   coachSay(line, { pose: 'nod', nod: 1 });
   const s = examStation();
   rerenderScene();
@@ -7760,7 +8081,13 @@ function examSay(text, fromZoom) {
     if (fromZoom) { const g = s.goals.find(x => (x.dev || []).includes(zoomDev)); if (g && gState(g.id).done) return coachSay('这一处你已经确认过了。', { pose: 'listen' }); }
     /* 说出想看的设备：走过去（切换地点），看到什么再说 */
     const intent = cands.find(g => g.kind === 'look' && g.re && g.re.test(t));
-    if (intent) { if (intent.loc && EX.loc !== intent.loc && s.locs && s.locs[intent.loc]) { EX.loc = intent.loc; exCloseZoom(); rerenderScene(); } coachSay(intent.go || '去看。看到什么，说出来。', { pose: 'point' }); return; }
+    if (intent) {
+      if (intent.loc && EX.loc !== intent.loc && s.locs && s.locs[intent.loc]) { EX.loc = intent.loc; exCloseZoom(); rerenderScene(); }
+      /* 说了要看哪个设备，就走到它跟前放大：嘴上说的和眼睛看的落到同一处 */
+      const dv = (intent.dev || []).find(d => s.spots && s.spots[d] && s.spots[d].zoom);
+      if (dv && EX.zoom !== dv) { gState(intent.id).seen = true; EX.zoom = dv; if (s.spots[dv].walk) s.spots[dv].walk(EX.st); renderZoom(); }
+      coachSay(intent.go || '去看。看到什么，说出来。', { pose: 'point' }); return;
+    }
     coachSay(EX.mode === 'exam' ? '我没听清，说清楚你看的是哪个设备、什么状态。' : `我没听清。说清楚你看的是哪个设备、什么状态${fromZoom ? '' : '，或者先走到设备前看'}。`, { pose: 'listen' });
     return;
   }
@@ -7969,6 +8296,7 @@ function examKey(e) {
   if (e.key !== 'Enter') return;
   if (e.target.id === 'ex_say') { e.preventDefault(); const v = e.target.value; e.target.value = ''; examSay(v, false); }
   else if (e.target.id === 'ex_zsay') { e.preventDefault(); examSay(e.target.value, true); }
+  else if (e.target.id === 'qz_in') { e.preventDefault(); quizSay(e.target.value); }
 }
 
 /* ---------------- 自动驾驶（讲师演示台 / 回归）：ok 正确完成当前情境 · wrong 说错一次 · red 跳过验电直接合地刀 ---------------- */

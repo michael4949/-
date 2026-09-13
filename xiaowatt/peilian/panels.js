@@ -1,7 +1,7 @@
 /* ================= 作业面板（v3）：每个作业位置都是一张可操作的设备图，学员在图上动手，图上看到变化 =================
    调度电话：来电 → 接听报名 → 听令 → 记录簿填写 → 复诵 → 调度确认 → 票令核对 → 汇报拨号
    五防电脑：在五防模拟接线图上按票序点击设备，五防主机逐项记录，顺序错误弹出闭锁
-   监控后台：一次接线图上点击设备 → 遥控预置/返校/执行 → 图上变位、报文刷新；核对类项目弹出光字/遥测详情
+   监控后台：一次接线图上点击设备 → 遥控弹层口述操作性质 → 自动预置/返校 → 按住执行 → 图上变位、报文刷新；核对类项目弹出光字/遥测详情，学员口述看到的内容
    间隔现场 / 测控屏 / 保护屏 / 就地控制柜：SVG 设备图，把手会转、空开会掉、按钮会亮、标志牌会挂上去 */
 
 const tms = ms => Math.max(20, ms * Math.min(1, window.__DH_SPEED || 1));
@@ -343,81 +343,163 @@ function openRemoteCtl(st) {
   if ($('.dlg.rc')) return;
   const id = st.target, want = st.act === 'closeE' ? 'close' : 'open', cur = S.dev[id];
   const m = el('div', 'mask lite');
-  m.innerHTML = `<div class="dlg rc" style="width:min(540px,96vw)">
+  m.innerHTML = `<div class="dlg rc" style="width:min(580px,96vw)">
     <div class="dh"><b>遥控操作</b><span class="mono">110kV仿真站 · 监控后台</span><span class="cls">×</span></div>
     <div class="db">
       <div class="rcrow"><span>设备双重名称</span><b>${devName(id)}</b></div>
       <div class="rcrow"><span>当前位置</span><b class="${cur === 'close' ? 'on' : 'off'}">${cur === 'close' ? '合闸' : '分闸'}</b></div>
-      <div class="rcrow"><span>操作性质</span><span class="rcops"><label><input type="radio" name="rcop" value="open"> 分闸</label><label><input type="radio" name="rcop" value="close"> 合闸</label></span></div>
-      <div class="rcst" id="rc_st">核对设备双重名称与操作性质，选定后系统自动预置</div>
+      <div class="rcrow"><span>操作性质</span><b id="rc_nat" class="rcnat">口述后填入</b></div>
+      <div class="exsay dlgsay"><span class="exsayl">口述</span>
+        <button class="mic" id="rc_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <input class="rin" id="rc_in" placeholder="核对双重名称后口述操作性质，例如「${devName(id)}，${want === 'open' ? '分闸' : '合闸'}」">
+        <button class="btn pri" id="rc_say">口述</button></div>
+      <div class="rcst" id="rc_st">核对设备双重名称与操作性质，口述后系统自动预置、返校</div>
     </div>
-    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn pri" id="rc_exec" disabled>执行</button></div></div>`;
+    <div class="df"><button class="btn" id="rc_cancel">取消</button><button class="btn pri hold" id="rc_exec" disabled><i class="hb"></i><span>按住执行</span></button></div></div>`;
   document.body.appendChild(m);
-  const stx = m.querySelector('#rc_st'), ex = m.querySelector('#rc_exec');
-  const close = () => m.remove();
+  S.rc = { m, st, id, want, nat: '', ready: false };
+  const close = () => { m.remove(); S.rc = null; };
   m.querySelector('.cls').onclick = close; m.querySelector('#rc_cancel').onclick = close;
-  m.querySelectorAll('input[name=rcop]').forEach(r => r.onchange = async () => {
-    if (r.value !== want) {
-      r.checked = false;
-      violation('major', 'order', '遥控操作性质错误', `本项应${want === 'open' ? '分闸' : '合闸'}${devName(id)}，选择了${r.value === 'open' ? '分闸' : '合闸'}`, '附录F 2.11.3：按操作票项目的操作性质执行，遥控操作前核对设备双重名称与操作性质。');
-      stx.innerHTML = '<span style="color:#b3372c">操作性质与票面不符，已拒绝</span>';
-      speak('操作性质选错了。再核对一遍票面。', { pose: 'correct', shake: true });
-      return;
-    }
-    /* 预置由系统自动完成，不需要人再点一次 */
-    m.querySelectorAll('input[name=rcop]').forEach(x => x.disabled = true);
-    stx.textContent = '已选择' + (want === 'open' ? '分闸' : '合闸') + '，正在预置…';
-    await sleepMs(700);
-    if (!document.body.contains(m)) return;
-    stx.innerHTML = '<span style="color:var(--ac)">预置完成，可以执行</span>';
-    ex.disabled = false;
-  });
-  ex.onclick = async () => {
-    ex.disabled = true; stx.textContent = '执行中…';
-    await sleepMs(500);
-    m.remove();
-    doExecute(st);
-  };
+  m.querySelector('#rc_say').onclick = () => { const i = m.querySelector('#rc_in'); const v = i.value; i.value = ''; rcSay(v); };
+  m.querySelector('#rc_in').onkeydown = e => { if (e.key === 'Enter') m.querySelector('#rc_say').onclick(); };
+  m.querySelector('#rc_mic').onclick = () => micStart(m.querySelector('#rc_mic'), m.querySelector('#rc_in'), `${devName(id)}，${want === 'open' ? '分闸' : '合闸'}`);
+  bindHold(m.querySelector('#rc_exec'), () => rcExecNow());
+  setTimeout(() => { const i = m.querySelector('#rc_in'); if (i) i.focus(); }, 30);
 }
-/* 核对类项目：把要看的东西放大给学员看，逐项勾选后确认 */
+/* 口述操作性质：设备编号与票面不符、性质选错都判违规；对了系统自动预置 */
+async function rcSay(text) {
+  const rc = S.rc; if (!rc || !document.body.contains(rc.m)) return;
+  text = (text || '').trim(); if (!text) return;
+  say('o', text); checkNumRead(text);
+  const t = text.replace(/\s+/g, '');
+  const stx = rc.m.querySelector('#rc_st');
+  const myNo = rc.id.replace(/^[A-Z]+/, '');
+  const nums = (t.match(/\d{4,6}/g) || []).filter(n => n !== myNo);
+  if (nums.length) {
+    violation('major', 'dual', '遥控对象与票面不符', `票面对象为 ${devName(rc.id)}，口述的是 ${nums.join('、')}`, '附录F 2.11.3：遥控操作前核对设备双重名称与操作性质。');
+    stx.innerHTML = '<span style="color:#b3372c">设备双重名称与票面不符，已拒绝</span>';
+    speak('你说的不是本项设备。再核对一遍双重名称。', { pose: 'correct', shake: true }); return;
+  }
+  const close = /合闸|合上/.test(t), open = /分闸|分开|断开|拉开/.test(t);
+  if (close === open) { stx.textContent = '只说操作性质：分闸还是合闸'; speak('操作性质说清楚：分闸，还是合闸。', { pose: 'listen' }); return; }
+  const nat = close ? 'close' : 'open';
+  if (nat !== rc.want) {
+    violation('major', 'order', '遥控操作性质错误', `本项应${rc.want === 'open' ? '分闸' : '合闸'}${devName(rc.id)}，口述的是${nat === 'open' ? '分闸' : '合闸'}`, '附录F 2.11.3：按操作票项目的操作性质执行，遥控操作前核对设备双重名称与操作性质。');
+    stx.innerHTML = '<span style="color:#b3372c">操作性质与票面不符，已拒绝</span>';
+    speak('操作性质说错了。再核对一遍票面。', { pose: 'correct', shake: true }); return;
+  }
+  rc.nat = nat; rc.m.querySelector('#rc_nat').textContent = nat === 'open' ? '分闸' : '合闸';
+  stx.textContent = '操作性质与票面一致，正在预置…';
+  await sleepMs(700);
+  if (!S.rc || S.rc !== rc || !document.body.contains(rc.m)) return;
+  stx.innerHTML = '<span style="color:var(--ac)">预置完成，返校正确。按住「执行」直到进度走满</span>';
+  rc.ready = true; rc.m.querySelector('#rc_exec').disabled = false;
+}
+async function rcExecNow() {
+  const rc = S.rc; if (!rc || !rc.ready) return;
+  const ex = rc.m.querySelector('#rc_exec'), stx = rc.m.querySelector('#rc_st');
+  ex.disabled = true; stx.textContent = '执行中…';
+  await sleepMs(500);
+  rc.m.remove(); S.rc = null;
+  doExecute(rc.st);
+}
+/* 按住式按钮：按住到进度走满才触发，中途松手作废（执行类动作不允许一点就发） */
+function bindHold(btn, done, ms) {
+  if (!btn) return;
+  let t = null;
+  const bar = btn.querySelector('.hb');
+  const stop = () => { if (t) { clearTimeout(t); t = null; } btn.classList.remove('holding'); if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; } };
+  btn.onpointerdown = e => {
+    if (btn.disabled) return; e.preventDefault();
+    btn.classList.add('holding');
+    const dur = tms(ms || 900);
+    if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = `width ${dur}ms linear`; bar.style.width = '100%'; }
+    t = setTimeout(() => { t = null; btn.classList.remove('holding'); done(); }, dur);
+  };
+  btn.onpointerup = btn.onpointerleave = btn.onpointercancel = stop;
+}
+/* 核对类项目：把要看的东西放大给学员看，学员口述看到的内容，要素说全才算核对完成 */
+const INS_KW = {
+  hmi_mode: { items: [['母线运行方式', /母线|并列|1M|2M|运行方式|方式/i], ['1163 间隔设备位置', /1163|开关|刀闸|11632|11634|位置|合闸|合上/], ['光字与告警', /光字|告警|报文|信号|异常/]], okSay: '母线1M、2M并列运行，1163开关合闸，11632、11634刀闸合上，无影响本次操作的光字、告警和报文。' },
+  CB1163: { items: [['位置遥信', /位置|遥信|分闸|分开/], ['变位报文', /报文|变位/]], bad: /合闸位置|在合闸|仍合|未分/, okSay: '后台1163开关位置遥信显示分闸，分闸变位报文正确。' },
+  hmi_current: { items: [['三相电流', /三相|A相|B相|C相|Ia|Ib|Ic|电流/i], ['数值为零', /零|0|无电流|没有电流/]], bad: /有电流|不为零|不是零|还有/, okSay: '1163开关A、B、C三相电流均为零，三相无电流。' },
+  hmi_volt: { items: [['线路二次电压', /Uab|线电压|二次电压|电压/i], ['数值为零', /无电压|零|0|确无|没有电压/]], bad: /有电压|不为零|带电/, okSay: '培训三线1163线路二次电压Uab为零，确无电压。' },
+  bay_plate: { items: [['间隔名称牌双重名称', /名称牌|双重名称|培训三线|1163/], ['图实一致', /图实|模拟图|接线图|一致/], ['标实一致', /标实|标签|标识/]], okSay: '间隔名称牌为110kV培训三线1163，汇控柜模拟图与现场设备图实一致，设备标签标实一致。' },
+  bay_hvdisp: { items: [['三相指示', /三相|A相|B相|C相|三个|指示灯|灯/i], ['确有电压', /有电|带电|亮|确有/]], bad: /无电|不亮|熄灭|确无|没有电/, okSay: '高压带电显示装置A、B、C三相指示灯亮，三相确有电压。' },
+  cab_hvdisp: { items: [['三相指示', /三相|A相|B相|C相|三个|指示灯|灯/i], ['确无电压', /无电|不亮|熄灭|确无|没有电/]], bad: /有电|带电|灯亮|确有/, okSay: '高压带电显示装置A、B、C三相指示灯均不亮，三相确无电压。' },
+  gis: { items: [['后台位置', /后台|位置|拉开|分闸|合上|合闸/], ['报文', /报文|变位/]], okSay: '后台位置显示已变位，变位报文正确。下去现场核对四项指示。' }
+};
 function openInspect(st) {
   if ($('.dlg.insp')) return;
   const id = st.target, d = S.dev;
   const lampRow = (vals, on, color) => `<div class="lamprow">${vals.map(p => `<span class="lp ${on ? 'on' : ''}" style="--c:${color}"><i></i>${p}</span>`).join('')}</div>`;
-  let title = '', body = '', chks = [], okTxt = '核对无误', after = null;
-  if (id === 'hmi_mode') { title = '光字牌 · 运行方式'; body = `<div class="kv"><span>母线方式</span><b>110kV 1M、2M 并列运行</b></div><div class="kv"><span>培训三线1163</span><b>开关${d.CB1163 === 'open' ? '分闸' : '合闸'}，11632、11634刀闸${d.DS11634 === 'open' ? '拉开' : '合上'}</b></div><div class="kv"><span>告警</span><b>无影响本次操作的光字、告警与报文</b></div>`; chks = ['母线运行方式', '1163间隔设备位置', '光字与告警']; }
-  else if (id === 'CB1163') { title = '设备详情 · 培训三线1163开关'; body = `<div class="kv"><span>位置遥信</span><b class="${d.CB1163 === 'open' ? 'off' : 'on'}">${d.CB1163 === 'open' ? '分闸' : '合闸'}</b></div><div class="kv"><span>最近报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>三相电流</span><b>${d.CB1163 === 'open' ? 'Ia 0.0 Ib 0.0 Ic 0.0 A' : 'Ia 312 Ib 308 Ic 315 A'}</b></div>`; chks = ['位置遥信', '变位报文']; }
-  else if (id === 'hmi_current') { title = '遥测 · 1163开关三相电流'; body = `<div class="kv big"><span>Ia</span><b>${d.CB1163 === 'open' ? '0.0' : '312'} A</b></div><div class="kv big"><span>Ib</span><b>${d.CB1163 === 'open' ? '0.0' : '308'} A</b></div><div class="kv big"><span>Ic</span><b>${d.CB1163 === 'open' ? '0.0' : '315'} A</b></div>`; chks = ['A 相', 'B 相', 'C 相']; }
-  else if (id === 'hmi_volt') { title = '遥测 · 培训三线线路二次电压'; body = `<div class="kv big"><span>Uab</span><b>${d.DS11634 === 'open' ? '0.0' : '99.6'} V</b></div><div class="kv big"><span>Uo</span><b>${d.DS11634 === 'open' ? '0.0' : '0.1'} V</b></div><div class="kv"><span>结论</span><b>${d.DS11634 === 'open' ? '二次确无电压（第一种原理）' : '二次有电压'}</b></div>`; chks = ['Uab', 'Uo']; }
-  else if (id === 'bay_plate') { title = '间隔名称牌 · 图实、标实核对'; body = `<div class="plate">110kV培训三线1163<small>双重名称：培训三线 · 1163</small></div><div class="kv"><span>接线图 ↔ 现场实物</span><b>汇控柜模拟图与现场设备布置一致</b></div><div class="kv"><span>设备标签</span><b>11632 · 1163 · 11634 · 116340 标签清晰准确</b></div>`; chks = ['间隔名称牌双重名称', '图实一致', '标实一致']; okTxt = '核对完毕'; after = () => { S.gis.plate = S.gis.draw = S.gis.label = true; }; }
-  else if (id === 'bay_hvdisp') { title = '高压带电显示装置 · 培训三线1163间隔'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 !== 'open' ? '三相确有电压' : '三相无电压'}</b></div>`; chks = ['A 相', 'B 相', 'C 相']; okTxt = '核对完毕：三相确有电压'; after = () => { S.gis.hv = true; }; }
-  else if (id === 'cab_hvdisp') { title = '高压带电显示装置 · 间接验电（第二种原理）'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 === 'open' ? '三相确无电压' : '三相有电压'}</b></div><div class="kv"><span>与后台二次电压</span><b>${S.verify.v1 ? '已核对：两种原理指示均已变化' : '<span style="color:#b3372c">后台二次电压尚未核对</span>'}</b></div>`; chks = ['A 相', 'B 相', 'C 相']; okTxt = '核对完毕：三相确无电压'; after = () => { S.gis.hvA = S.gis.hvB = S.gis.hvC = true; }; }
-  else if (st.act === 'gis') { title = `${devName(id)} · 后台位置`; body = `<div class="kv"><span>后台位置</span><b class="${id === 'ES116340' ? 'gnd' : 'off'}">${id === 'ES116340' ? '合上' : '拉开'}</b></div><div class="kv"><span>报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>下一步</span><b>到现场按设备结构核对汇控柜电气指示、机构箱机械指示、拐臂指示、转轴划线标识</b></div>`; chks = ['后台位置', '报文']; okTxt = '后台已核对，去现场核对四项指示'; }
-  else { title = devName(id); body = `<div class="kv"><span>状态</span><b>${d[id] || '—'}</b></div>`; chks = ['状态']; }
+  let title = '', body = '', after = null, kw = INS_KW[id];
+  if (id === 'hmi_mode') { title = '光字牌 · 运行方式'; body = `<div class="kv"><span>母线方式</span><b>110kV 1M、2M 并列运行</b></div><div class="kv"><span>培训三线1163</span><b>开关${d.CB1163 === 'open' ? '分闸' : '合闸'}，11632、11634刀闸${d.DS11634 === 'open' ? '拉开' : '合上'}</b></div><div class="kv"><span>告警</span><b>无影响本次操作的光字、告警与报文</b></div>`; }
+  else if (id === 'CB1163') { title = '设备详情 · 培训三线1163开关'; body = `<div class="kv"><span>位置遥信</span><b class="${d.CB1163 === 'open' ? 'off' : 'on'}">${d.CB1163 === 'open' ? '分闸' : '合闸'}</b></div><div class="kv"><span>最近报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>三相电流</span><b>${d.CB1163 === 'open' ? 'Ia 0.0 Ib 0.0 Ic 0.0 A' : 'Ia 312 Ib 308 Ic 315 A'}</b></div>`; }
+  else if (id === 'hmi_current') { title = '遥测 · 1163开关三相电流'; body = `<div class="kv big"><span>Ia</span><b>${d.CB1163 === 'open' ? '0.0' : '312'} A</b></div><div class="kv big"><span>Ib</span><b>${d.CB1163 === 'open' ? '0.0' : '308'} A</b></div><div class="kv big"><span>Ic</span><b>${d.CB1163 === 'open' ? '0.0' : '315'} A</b></div>`; }
+  else if (id === 'hmi_volt') { title = '遥测 · 培训三线线路二次电压'; body = `<div class="kv big"><span>Uab</span><b>${d.DS11634 === 'open' ? '0.0' : '99.6'} V</b></div><div class="kv big"><span>Uo</span><b>${d.DS11634 === 'open' ? '0.0' : '0.1'} V</b></div><div class="kv"><span>结论</span><b>${d.DS11634 === 'open' ? '二次确无电压（第一种原理）' : '二次有电压'}</b></div>`; }
+  else if (id === 'bay_plate') { title = '间隔名称牌 · 图实、标实核对'; body = `<div class="plate">110kV培训三线1163<small>双重名称：培训三线 · 1163</small></div><div class="kv"><span>接线图 ↔ 现场实物</span><b>汇控柜模拟图与现场设备布置一致</b></div><div class="kv"><span>设备标签</span><b>11632 · 1163 · 11634 · 116340 标签清晰准确</b></div>`; after = () => { S.gis.plate = S.gis.draw = S.gis.label = true; }; }
+  else if (id === 'bay_hvdisp') { title = '高压带电显示装置 · 培训三线1163间隔'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 !== 'open' ? '三相确有电压' : '三相无电压'}</b></div>`; after = () => { S.gis.hv = true; }; }
+  else if (id === 'cab_hvdisp') { title = '高压带电显示装置 · 间接验电（第二种原理）'; body = lampRow(['A 相', 'B 相', 'C 相'], d.DS11634 !== 'open', '#e23b2e') + `<div class="kv"><span>显示</span><b>${d.DS11634 === 'open' ? '三相确无电压' : '三相有电压'}</b></div><div class="kv"><span>与后台二次电压</span><b>${S.verify.v1 ? '已核对：两种原理指示均已变化' : '<span style="color:#b3372c">后台二次电压尚未核对</span>'}</b></div>`; after = () => { S.gis.hvA = S.gis.hvB = S.gis.hvC = true; }; }
+  else if (st.act === 'gis') { title = `${devName(id)} · 后台位置`; body = `<div class="kv"><span>后台位置</span><b class="${id === 'ES116340' ? 'gnd' : 'off'}">${id === 'ES116340' ? '合上' : '拉开'}</b></div><div class="kv"><span>报文</span><b>${(S.msgs[0] || {}).x || '—'}</b></div><div class="kv"><span>下一步</span><b>到现场按设备结构核对汇控柜电气指示、机构箱机械指示、拐臂指示、转轴划线标识</b></div>`; kw = INS_KW.gis; }
+  else { title = devName(id); body = `<div class="kv"><span>状态</span><b>${d[id] || '—'}</b></div>`; kw = { items: [['状态', /./]], okSay: '状态正常。' }; }
   const m = el('div', 'mask lite');
-  m.innerHTML = `<div class="dlg insp" style="width:min(560px,96vw)">
+  m.innerHTML = `<div class="dlg insp" style="width:min(600px,96vw)">
     <div class="dh"><b>${title}</b><span class="mono">第 ${st.no} 项 · 核对</span><span class="cls">×</span></div>
-    <div class="db">${body}<div class="chkl">${chks.map((c, i) => `<span data-chk="${i}"><i></i>${c}</span>`).join('')}</div></div>
-    <div class="df"><button class="btn" id="ins_cancel">取消</button><button class="btn pri" id="ins_ok" disabled>${okTxt}</button></div></div>`;
+    <div class="db">${body}
+      <div class="chkl ro" id="ins_kw">${kw.items.map((c, i) => `<span data-kw="${i}"><i></i>${c[0]}</span>`).join('')}</div>
+      <div class="exsay dlgsay"><span class="exsayl">口述核对</span>
+        <button class="mic" id="ins_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+        <input class="rin" id="ins_in" placeholder="看清楚后说出来：看的是什么、显示什么、结论是什么">
+        <button class="btn pri" id="ins_say">口述</button></div>
+      <div class="rcst" id="ins_st">要素说全后自动记录核对结果</div>
+    </div>
+    <div class="df"><button class="btn" id="ins_cancel">取消</button></div></div>`;
   document.body.appendChild(m);
-  const close = () => m.remove();
+  S.ins = { m, st, id, kw, after, cov: {}, said: false, okSay: kw.okSay };
+  const close = () => { m.remove(); S.ins = null; };
   m.querySelector('.cls').onclick = close; m.querySelector('#ins_cancel').onclick = close;
-  const ok = m.querySelector('#ins_ok');
-  m.querySelectorAll('[data-chk]').forEach(c => c.onclick = () => { c.classList.toggle('on'); ok.disabled = m.querySelectorAll('[data-chk].on').length < chks.length; });
-  ok.onclick = () => { m.remove(); if (after) after(); doExecute(st); };
+  m.querySelector('#ins_say').onclick = () => { const i = m.querySelector('#ins_in'); const v = i.value; i.value = ''; insSay(v); };
+  m.querySelector('#ins_in').onkeydown = e => { if (e.key === 'Enter') m.querySelector('#ins_say').onclick(); };
+  m.querySelector('#ins_mic').onclick = () => micStart(m.querySelector('#ins_mic'), m.querySelector('#ins_in'), kw.okSay);
+  setTimeout(() => { const i = m.querySelector('#ins_in'); if (i) i.focus(); }, 30);
 }
-/* GIS 四项指示：点一项，放大看一眼，打钩 */
+async function insSay(text) {
+  const ins = S.ins; if (!ins || !document.body.contains(ins.m)) return;
+  text = (text || '').trim(); if (!text) return;
+  say('o', text); checkNumRead(text);
+  const t = text.replace(/\s+/g, '');
+  const stx = ins.m.querySelector('#ins_st');
+  /* 「带电显示装置」是设备名，不算"带电"结论 */
+  if (ins.kw.bad && ins.kw.bad.test(t.replace(/带电显示(装置)?/g, ''))) {
+    violation('major', 'state', '核对结论与实际状态不符', `${devName(ins.id)}：口述「${text.slice(0, 30)}」与画面显示不符`, '附录G-21.2：操作后应在监控后台核对运行方式与操作结果相符，核对报文与操作过程相符。');
+    stx.innerHTML = '<span style="color:#b3372c">结论与画面显示不符</span>';
+    speak('你再看一眼。说的和显示的不一样。', { pose: 'correct', shake: true }); return;
+  }
+  ins.kw.items.forEach((c, i) => { if (c[1].test(t)) ins.cov[i] = true; });
+  ins.m.querySelectorAll('[data-kw]').forEach(n => n.classList.toggle('on', !!ins.cov[+n.dataset.kw]));
+  const miss = ins.kw.items.filter((c, i) => !ins.cov[i]).map(c => c[0]);
+  if (miss.length) {
+    stx.textContent = S.mode === 'exam' ? '要素还没说全' : `还没说到：${miss.join('、')}`;
+    speak(S.mode === 'exam' ? '说全了再报。' : `还没说到${miss.join('、')}。`, { pose: 'listen' }); return;
+  }
+  stx.innerHTML = '<span style="color:var(--ac)">要素齐全，核对结果已记录</span>';
+  await sleepMs(350);
+  if (!S.ins || S.ins !== ins) return;
+  ins.m.remove(); S.ins = null;
+  if (ins.after) ins.after();
+  doExecute(ins.st);
+}
+/* GIS 四项指示：点一项放大看一眼（看是动作，不打钩）；四项是否核对到，由回报内容判定 */
 function gisInspect(k) {
   const st = STEP(); const id = (st && st.act === 'gis') ? st.target : 'DS11634';
-  S.gis[k] = true;
   const anomaly = (S.abn.fired && !S.abn.handled && id === 'DS11634' && k === 'mech');
   const want = id === 'ES116340' ? '合上位置' : '拉开位置';
   const nm = { hui: '汇控柜电气指示', mech: '机构箱机械指示', arm: '刀闸拐臂指示', line: '转轴划线标识' }[k];
-  renderPanel();
   const old = $('#peek'); if (old) old.remove();
   const p = el('div', 'peek ' + (anomaly ? 'bad' : 'ok'));
   p.id = 'peek';
-  p.innerHTML = `<b>${nm}</b><span>${anomaly ? `指示为「合上」，与后台「拉开」<em>不一致</em>` : `${want} · 与后台一致`}</span>` + (anomaly ? `<button class="btn dan" id="pk_stop">中止操作并上报</button>` : '');
+  p.innerHTML = `<b>${nm}</b><span>${anomaly ? `指示为「合上」，与后台「拉开」<em>不一致</em>` : `${want} · 与后台一致`}</span><span class="tk3">看到什么，在回报里说出来</span>` + (anomaly ? `<button class="btn dan" id="pk_stop">中止操作并上报</button>` : '');
   $('#panelwrap').appendChild(p);
   const b = $('#pk_stop'); if (b) b.onclick = () => { p.remove(); clickStop(); };
   if (!anomaly) setTimeout(() => { if (p.parentNode) p.remove(); }, tms(2600));

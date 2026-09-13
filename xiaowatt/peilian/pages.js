@@ -319,8 +319,9 @@ function quizHtml() {
   const q = QUIZ.find(x => x.id === Q.ids[Q.i]), a = Q.ans[Q.i];
   return `<div class="qz"><div class="qzh"><span class="tbno">第 ${Q.i + 1}/${Q.ids.length} 题</span><i class="ctag">${q.dim}</i><span class="tk3">${KNOW.find(k => k.id === q.k).t}</span></div>
     <div class="qzq">${q.q}</div>
-    <div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ${a != null ? (i === q.a ? 'right' : i === a ? 'wrong' : 'dim') : ''}" data-qopt="${i}"><b>${'ABCD'[i]}</b>${o}</div>`).join('')}</div>
-    ${a != null ? `<div class="qzx ${a === q.a ? 'ok' : 'bad'}"><b>${a === q.a ? '回答正确' : '回答错误'}</b> ${q.why} <span class="cite">依据 ${q.cite}</span></div><div class="rvact"><button class="btn pri" data-qnext="1">${Q.i + 1 >= Q.ids.length ? '查看结果' : '下一题'}</button></div>` : '<div class="tk3">选择一个答案，系统立即给出判定与依据。</div>'}</div>`;
+    <div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ro ${a != null ? (i === q.a ? 'right' : i === a ? 'wrong' : 'dim') : ''}"><b>${'ABCD'[i]}</b>${o}</div>`).join('')}</div>
+    ${a != null ? `<div class="qzx ${a === q.a ? 'ok' : 'bad'}"><b>${a === q.a ? '回答正确' : '回答错误'}</b> ${q.why} <span class="cite">依据 ${q.cite}</span></div><div class="rvact"><button class="btn pri" data-qnext="1">${Q.i + 1 >= Q.ids.length ? '查看结果' : '下一题'}</button></div>`
+      : `<div class="exsay qzsay"><span class="exsayl">口答</span><button class="mic" id="qz_mic" title="语音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button><input class="rin" id="qz_in" placeholder="说出你的判断，或直接说 A / B / C / D"><button class="btn pri" data-qsay="1">回答</button></div>${Q.note ? `<div class="tk3" style="color:#a8821b;margin-top:6px">${Q.note}</div>` : '<div class="tk3">口头回答后系统立即给出判定与依据。</div>'}`}</div>`;
 }
 function planRows() {
   const weak = DIMS6.map((d, i) => [d, RADAR_NOW[i]]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(x => x[0]);
@@ -402,7 +403,20 @@ function quizStart(topic) {
 }
 function quizAnswer(i) {
   const Q = CL.quiz; if (!Q || Q.ans[Q.i] != null) return;
-  Q.ans[Q.i] = i; const b = $('#quizbox'); if (b) b.innerHTML = quizHtml();
+  Q.ans[Q.i] = i; Q.note = ''; const b = $('#quizbox'); if (b) b.innerHTML = quizHtml();
+}
+/* 口答：说字母 / 第几个 / 用自己的话说判断，按文字相近度对到选项 */
+function quizSay(text) {
+  const Q = CL.quiz; if (!Q || Q.ans[Q.i] != null) return;
+  text = (text || '').trim(); if (!text) return;
+  const q = QUIZ.find(x => x.id === Q.ids[Q.i]);
+  const t = text.replace(/\s+/g, '');
+  let pick = -1;
+  const m = t.match(/^(?:选|答案是|答案|是|我选|选择)?([ABCDabcd])(?:[项。.，]|$)/) || t.match(/第([一二三四1234])(?:个|项|条)/);
+  if (m) { const c = m[1].toUpperCase(); pick = 'ABCD'.indexOf(c); if (pick < 0) pick = '一二三四'.indexOf(c); if (pick < 0) pick = '1234'.indexOf(c); }
+  if (pick < 0) { let best = -1, bs = 0; q.opts.forEach((o, i) => { const sc = sim(text, o); if (sc > bs) { bs = sc; best = i; } }); if (bs >= 0.3) pick = best; }
+  if (pick < 0) { Q.note = `没有对应到答案：「${text.slice(0, 24)}」。说具体一点，或直接说 A / B / C / D。`; const b = $('#quizbox'); if (b) { b.innerHTML = quizHtml(); const i = $('#qz_in'); if (i) i.focus(); } return; }
+  quizAnswer(pick);
 }
 function quizNext() {
   const Q = CL.quiz; if (!Q) return;
@@ -666,7 +680,8 @@ function pagesClick(e) {
   if (n = q('[data-course]')) { courseDrill(n.dataset.course); return true; }
   if (n = q('[data-cnext]')) { courseNext(n.dataset.cnext); return true; }
   if (n = q('[data-quiz]')) { quizStart(n.dataset.quiz); return true; }
-  if (n = q('[data-qopt]')) { quizAnswer(+n.dataset.qopt); return true; }
+  if (n = q('[data-qsay]')) { const i = $('#qz_in'); quizSay(i ? i.value : ''); return true; }
+  if (n = q('#qz_mic')) { micStart(n, $('#qz_in'), null); return true; }
   if (n = q('[data-qnext]')) { quizNext(); return true; }
   if (n = q('[data-qretry]')) { const t = CL.quiz ? CL.quiz.topic : '全部'; quizStart(t); return true; }
   if (n = q('[data-lplan]')) { planGen(); return true; }

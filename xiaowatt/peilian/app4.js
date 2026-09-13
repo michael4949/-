@@ -10,71 +10,134 @@ const DRESS = [
   '安全帽外观正常且在有效期内，双手持帽檐从前至后扣于头顶，调整后箍并系好下颌带'
 ];
 
+/* 口述确认的关键词（监护人问，操作人答；不点选、不打钩） */
+const PREP_KW = {
+  audit: [/三审|自审|审核|审批|签字|签完|签好/, /资格|有效|授权/, /只执行|本份|一份|本票|一张|这份/],
+  dress: [/工作服|着装|扣子|袖口|裤脚|整洁/, /袖章/, /安全帽|帽|下颌带|后箍/],
+  auditShort: ['三审签字', '人员资格', '只执行本份票'], dressShort: ['工作服着装', '袖章', '安全帽'],
+  mind: /精神|状态良好|良好|饱满|正常|没问题|可以|很好/, mindBad: /不好|不太好|疲劳|不舒服|没休息|困/,
+  ack: /明白|清楚|确认|收到|知道|了解|好的|记住|是的|^是|^嗯|^对/
+};
+function prepPhase() {
+  if (!S.prep.audit.every(Boolean)) return 'audit';
+  if (!S.prep.dress.every(Boolean)) return 'dress';
+  if (!S.prep.mind) return 'mind';
+  if (!S.prep.risks.every(Boolean)) return 'risk';
+  return 'done';
+}
+function prepPlaceholder() {
+  return ({ audit: '口头报告三审与资格核对情况…', dress: '口头报告着装互检情况…', mind: '回答监护人问询…', risk: '听清一条，口头确认一条（明白 / 清楚 / 确认）…', done: '准备完毕' })[prepPhase()];
+}
 function renderPrep() {
   const w = $('#panelwrap');
-  const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
+  const ph = prepPhase();
   w.innerHTML = `<div class="prep">
+    <div class="exsay prepsay"><span class="exsayl">口述应答</span>
+      <button class="mic" id="p_mic" title="语音应答"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>
+      <input class="rin" id="p_in" placeholder="${prepPlaceholder()}" ${ph === 'done' ? 'disabled' : ''}>
+      <button class="btn pri" id="p_send" ${ph === 'done' ? 'disabled' : ''}>应答</button>
+      <span class="tk3" id="p_st">${ph === 'risk' ? `风险交底 ${S.prep.risks.filter(Boolean).length}/12` : ph === 'done' ? '准备完毕' : '监护人问询 · 操作人口头报告'}</span></div>
     <div class="prepgrid">
-      <div class="pc"><h5>一、操作票三审与资格核对</h5><div class="sub2">接令前执行操作票三审程序</div>
-        <div class="chkrow">${AUDIT.map((t, i) => `<div class="chk ${S.prep.audit[i] ? 'on' : ''}" data-p="audit" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
-      <div class="pc"><h5>二、着装互检</h5><div class="sub2">监护人与操作人互相检查</div>
-        <div class="chkrow">${DRESS.map((t, i) => `<div class="chk ${S.prep.dress[i] ? 'on' : ''}" data-p="dress" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
+      <div class="pc"><h5>一、操作票三审与资格核对</h5><div class="sub2">监护人问询，操作人口头报告；说到一项记一项</div>
+        <div class="chkrow">${AUDIT.map((t, i) => `<div class="chk ro ${S.prep.audit[i] ? 'on' : ''}" data-p="audit" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
+      <div class="pc"><h5>二、着装互检</h5><div class="sub2">监护人与操作人互相检查后口头报告</div>
+        <div class="chkrow">${DRESS.map((t, i) => `<div class="chk ro ${S.prep.dress[i] ? 'on' : ''}" data-p="dress" data-i="${i}"><div class="bx">✓</div><div class="lb">${t}</div></div>`).join('')}</div></div>
       <div class="pc"><h5>三、操作任务与人员状态确认</h5><div class="sub2">监护人问询，操作人应答</div>
         <div style="background:#f6f7ee;border:1px solid #e2dfd0;border-radius:6px;padding:10px;font-size:11.5px;line-height:1.75;color:#5c6b5f">
           今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。你的精神状态是否良好？</div>
-        <div class="chk ${S.prep.mind ? 'on' : ''}" data-p="mind" data-i="0" style="margin-top:10px"><div class="bx">✓</div><div class="lb">操作人应答：精神状态良好</div></div>
+        <div class="chk ro ${S.prep.mind ? 'on' : ''}" data-p="mind" data-i="0" style="margin-top:10px"><div class="bx">✓</div><div class="lb">操作人应答：${S.prep.mind ? '精神状态良好' : '待应答'}</div></div>
         <div style="margin-top:10px;font-size:10.5px;color:#98a69c;line-height:1.6">精神不集中、疲劳或身体不适会降低识别设备、复诵和执行操作票的准确性，容易引发误操作。</div>
       </div>
     </div>
     <div class="risks"><h5 style="margin:0 0 4px;font-size:13px;color:#2f4438">四、风险分析及管控措施（12 项）</h5>
-      <div class="sub2" style="font-size:10.5px;color:#98a69c;margin-bottom:11px">监护人逐条宣读，操作人逐条确认。点击条目展开管控措施与后果。已确认 <b id="rkn" style="color:var(--ac)">${S.prep.risks.filter(Boolean).length}</b>/12</div>
-      ${RISKS.map((r, i) => `<div class="rk ${S.prep.risks[i] ? 'on' : ''}" data-r="${i}">
-        <div class="rh"><div class="n">${i + 1}</div><div class="t">${r[0]}</div><div class="s">${S.prep.risks[i] ? '已确认 ✓' : '待确认'}</div></div>
+      <div class="sub2" style="font-size:10.5px;color:#98a69c;margin-bottom:11px">监护人逐条宣读，操作人听清一条口头确认一条。已确认 <b id="rkn" style="color:var(--ac)">${S.prep.risks.filter(Boolean).length}</b>/12</div>
+      ${RISKS.map((r, i) => `<div class="rk ${S.prep.risks[i] ? 'on' : ''} ${S.prep.ri === i ? 'cur open' : ''}" data-r="${i}">
+        <div class="rh"><div class="n">${i + 1}</div><div class="t">${r[0]}</div><div class="s">${S.prep.risks[i] ? '已确认 ✓' : S.prep.ri === i ? '宣读中' : '待宣读'}</div></div>
         <div class="rb"><b>管控措施：</b>${r[1]}<br><b>原因及后果：</b>${r[2]}</div></div>`).join('')}
     </div>
-    <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
-      <button class="btn" id="p_all">全部确认</button>
-      <div style="flex:1"></div>
-      <button class="btn pri" id="p_go" ${ok ? '' : 'disabled'}>准备完毕，进入五防模拟</button>
-    </div>
   </div>`;
-  $$('.chk[data-p]').forEach(n => n.onclick = () => {
-    const p = n.dataset.p, i = +n.dataset.i;
-    if (p === 'mind') S.prep.mind = !S.prep.mind; else S.prep[p][i] = !S.prep[p][i];
-    n.classList.toggle('on', p === 'mind' ? S.prep.mind : S.prep[p][i]);
-    const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
-    const go = $('#p_go'); if (go) go.disabled = !ok;
-    renderTaskbar();
-  });
-  $$('.rk').forEach(n => {
-    const i = +n.dataset.r;
-    n.querySelector('.rh').onclick = () => {
-      if (!S.prep.risks[i]) {
-        /* 确认后就地更新这一条，不整页重绘，页面不跳位 */
-        S.prep.risks[i] = true; n.classList.add('on', 'open');
-        const s = n.querySelector('.rh .s'); if (s) s.textContent = '已确认 ✓';
-        const cnt = $('#rkn'); if (cnt) cnt.textContent = S.prep.risks.filter(Boolean).length;
-        const ok = S.prep.audit.every(Boolean) && S.prep.dress.every(Boolean) && S.prep.mind && S.prep.risks.every(Boolean);
-        const go = $('#p_go'); if (go) go.disabled = !ok;
-        renderTaskbar();
-      } else n.classList.toggle('open');
-    };
-  });
-  $('#p_all').onclick = () => {
-    const sc = $('#panelwrap').scrollTop;
-    S.prep.audit = [true, true, true]; S.prep.dress = [true, true, true]; S.prep.mind = true;
-    S.prep.risks = S.prep.risks.map(() => true); renderPrep();
-    const w = $('#panelwrap'); if (w) w.scrollTop = sc;
-  };
-  $('#p_go').onclick = () => enterWufang();
+  $$('.rk').forEach(n => { n.querySelector('.rh').onclick = () => n.classList.toggle('open'); });
+  $('#p_send').onclick = () => { const i = $('#p_in'); const v = i.value; i.value = ''; prepSay(v); };
+  $('#p_in').onkeydown = e => { if (e.key === 'Enter') $('#p_send').onclick(); };
+  $('#p_mic').onclick = () => micStart($('#p_mic'), $('#p_in'), prepMicText());
   renderTaskbar();
+  if (ph !== 'done') setTimeout(() => { const i = $('#p_in'); if (i) i.focus(); }, 30);
+}
+/* 语音应答的离线兜底文本：按当前该答的内容 */
+function prepMicText() {
+  const ph = prepPhase();
+  if (ph === 'audit') return '操作票已三审签字完毕，操作人、监护人资格在有效范围内，本时段只执行本份操作票。';
+  if (ph === 'dress') return '工作服整洁扣子扣全，操作人、监护人袖章已佩戴，安全帽在有效期内、下颌带已系好。';
+  if (ph === 'mind') return '精神状态良好。';
+  return '明白。';
+}
+/* 就地更新：不整页重绘，页面不跳位 */
+function prepPaint() {
+  const ph = prepPhase();
+  $$('.chk[data-p]').forEach(n => { const p = n.dataset.p, i = +n.dataset.i; const on = p === 'mind' ? S.prep.mind : S.prep[p][i]; n.classList.toggle('on', !!on); if (p === 'mind') n.querySelector('.lb').textContent = '操作人应答：' + (on ? '精神状态良好' : '待应答'); });
+  $$('.rk').forEach(n => { const i = +n.dataset.r; n.classList.toggle('on', !!S.prep.risks[i]); n.classList.toggle('cur', S.prep.ri === i); if (S.prep.ri === i) n.classList.add('open'); const s = n.querySelector('.rh .s'); if (s) s.textContent = S.prep.risks[i] ? '已确认 ✓' : S.prep.ri === i ? '宣读中' : '待宣读'; if (S.prep.ri === i) n.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+  const cnt = $('#rkn'); if (cnt) cnt.textContent = S.prep.risks.filter(Boolean).length;
+  const st = $('#p_st'); if (st) st.textContent = ph === 'risk' ? `风险交底 ${S.prep.risks.filter(Boolean).length}/12` : ph === 'done' ? '准备完毕' : '监护人问询 · 操作人口头报告';
+  const inp = $('#p_in'); if (inp) { inp.placeholder = prepPlaceholder(); inp.disabled = ph === 'done'; }
+  const sd = $('#p_send'); if (sd) sd.disabled = ph === 'done';
+  renderTaskbar();
+}
+/* 操作人开口：按当前环节判定，说对推进、说漏追问 */
+async function prepSay(text) {
+  text = (text || '').trim(); if (!text || S.stage !== 'prep') return;
+  const ph = prepPhase(); if (ph === 'done') return;
+  say('o', text);
+  const t = text.replace(/\s+/g, '');
+  if (ph === 'audit' || ph === 'dress') {
+    let hit = 0;
+    PREP_KW[ph].forEach((re, i) => { if (!S.prep[ph][i] && re.test(t)) { S.prep[ph][i] = true; hit++; } });
+    prepPaint();
+    const miss = PREP_KW[ph + 'Short'].filter((_, i) => !S.prep[ph][i]);
+    if (!hit) { await speak(`说具体。${ph === 'audit' ? '三审签字了没有，人员资格在不在有效期，本时段是不是只执行这一份票' : '工作服、袖章、安全帽，一项一项报'}。`, { pose: 'listen' }); return; }
+    if (miss.length) { await speak(`记下了。${miss.join('、')}还没报。`, { pose: 'listen', nod: 1 }); return; }
+    if (ph === 'audit') { await speak('三审和资格核对无误。下面着装互检，互相看一遍，报给我。', { pose: 'confirm', nod: 1 }); }
+    else { await speak('着装合格。今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。你的精神状态是否良好？', { pose: 'explain' }); }
+    return;
+  }
+  if (ph === 'mind') {
+    if (PREP_KW.mindBad.test(t) && !/良好|正常|没问题/.test(t)) { await speak('状态不好就不能上岗操作。今天先休息，换人。', { pose: 'stop', shake: true }); return; }
+    if (!PREP_KW.mind.test(t)) { await speak('我问的是你的精神状态，直接回答。', { pose: 'listen' }); return; }
+    S.prep.mind = true; prepPaint();
+    await speak('好。下面做风险分析，十二条我逐条宣读，你听清一条确认一条。', { pose: 'explain', nod: 1 });
+    return prepReadRisk();
+  }
+  if (ph === 'risk') {
+    const i = S.prep.ri;
+    if (i == null || i < 0) return prepReadRisk();
+    if (/全部|一并|都明白|都清楚|都确认/.test(t) && !/^明白|^清楚|^确认/.test(t)) { await speak('一条一条来。这一条听清了没有？', { pose: 'correct' }); return; }
+    if (!(PREP_KW.ack.test(t) || sim(t, RISKS[i][0]) > 0.4)) { await speak(`第${i + 1}条，${RISKS[i][0]}。听清了就确认。`, { pose: 'point' }); return; }
+    S.prep.risks[i] = true; S.prep.ri = -1; prepPaint();
+    if (S.prep.risks.every(Boolean)) return prepDone();
+    return prepReadRisk();
+  }
+}
+/* 监护人宣读下一条风险（数字人开口），操作人口头确认后再读下一条 */
+async function prepReadRisk() {
+  if (S.stage !== 'prep') return;
+  const i = S.prep.risks.findIndex(x => !x); if (i < 0) return prepDone();
+  S.prep.ri = i; prepPaint();
+  const r = RISKS[i];
+  say('j', `风险${i + 1}：${r[0]}。管控措施：${r[1]}`);
+  await speak(`第${i + 1}条，${r[0]}。${i === 0 ? '管控措施在屏幕上，看清楚。' : ''}`, { pose: 'call', show: `风险${i + 1}：${r[0]}` });
+}
+async function prepDone() {
+  if (S.stage !== 'prep') return;
+  S.prep.ri = -1; prepPaint();
+  say('j', '风险交底完毕，准备工作完成。去五防电脑做模拟。');
+  await speak('十二条风险交底完毕，准备工作完成。去五防电脑做模拟。', { pose: 'confirm', nod: 1 });
+  if (S.stage === 'prep') enterWufang();
 }
 
 async function enterPrep() {
-  S.stage = 'prep'; goLoc('phone');
+  S.stage = 'prep'; S.prep.ri = -1; goLoc('phone');
   renderPrep(); updateActbar(); renderTaskbar();
-  say('j', '任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先完成三审、着装互检和风险分析。');
-  await speak('任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先完成三审、着装互检和风险分析，逐条确认。',
+  say('j', '任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先做三审、着装互检和风险分析。先报：操作票三审签字了没有，人员资格在不在有效期？');
+  await speak('任玲玲，今天我们有一项操作任务：将110kV仿真站110kV培训三线1163线路由运行转检修。开始前先做三审、着装互检和风险分析。先报：操作票三审签字了没有，人员资格在不在有效期？',
     { pose: 'explain' });
 }
 
@@ -96,21 +159,37 @@ function startRun() {
   openPreview(1, go);
 }
 
-let recTimer = null;
-function micClick() {
-  const st = STEP(); if (!st) return;
-  const m = $('#a_mic'), r = $('#rin');
+let recTimer = null, recNow = null;
+/* 语音输入：联网时用浏览器识别（结果可改再发）；离线按当前该说的内容逐字打入（复诵 / 回报的内容本来就在票面上） */
+function micStart(btn, inp, fallback) {
+  if (!btn || !inp) return;
+  if (recNow) { try { recNow.stop(); } catch (e) { } recNow = null; btn.classList.remove('rec'); return; }
   if (recTimer) return;
-  m.classList.add('rec'); r.value = ''; r.placeholder = '正在识别…';
-  const text = S.beat === 1 ? st.recite : st.report;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR && navigator.onLine && !window.__DH_MUTE) {
+    try {
+      const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = false;
+      r.onresult = e => { inp.value = Array.from(e.results).map(x => x[0].transcript).join(''); if (inp.oninput) inp.oninput(); };
+      r.onend = () => { btn.classList.remove('rec'); recNow = null; };
+      r.onerror = () => { btn.classList.remove('rec'); recNow = null; if (fallback) micType(btn, inp, fallback); else toast('语音识别未能启动，请改用文字输入', 'bad'); };
+      btn.classList.add('rec'); r.start(); recNow = r; return;
+    } catch (e) { }
+  }
+  if (fallback) return micType(btn, inp, fallback);
+  btn.classList.add('rec'); toast('当前离线，语音识别不可用，请在文字框中输入', '');
+  setTimeout(() => btn.classList.remove('rec'), 1400); inp.focus();
+}
+function micType(btn, inp, text) {
+  btn.classList.add('rec'); inp.value = ''; inp.placeholder = '正在识别…';
   let i = 0;
   recTimer = setInterval(() => {
-    i += 2; r.value = text.slice(0, i);
-    if (i >= text.length) {
-      clearInterval(recTimer); recTimer = null; m.classList.remove('rec');
-      r.placeholder = '';
-    }
+    i += 2; inp.value = text.slice(0, i); if (inp.oninput) inp.oninput();
+    if (i >= text.length) { clearInterval(recTimer); recTimer = null; btn.classList.remove('rec'); inp.placeholder = ''; }
   }, 34);
+}
+function micClick() {
+  const st = STEP(); if (!st) return;
+  micStart($('#a_mic'), $('#rin'), S.beat === 1 ? st.recite : st.report);
 }
 
 function openRule() {
@@ -235,6 +314,8 @@ function bindDemo() {
   const d = $('#demo');
   $('#demotg').onclick = () => d.classList.toggle('open');
   $('#dm_auto').onclick = () => autoStep();
+  $('#dm_voice').onclick = () => { voiceToggle(); toast(TTS.on ? '数字人朗读语音已打开' : '数字人朗读语音已关闭（只保留字幕与口型）'); };
+  voiceLabel();
   $('#dm_red').onclick = () => {
     if (S.stage !== 'run') return toast('请先进入操作票执行阶段', 'bad');
     const i = STEPS.findIndex(s => s.no === '20');
@@ -247,7 +328,7 @@ function bindDemo() {
   };
   $('#dm_skip').onclick = () => {
     if (S.stage === 'fill') { S.fill.head = { unit: '深圳中调', from: '李明', to: '陈志远', task: '将110kV仿真站110kV培训三线1163线路由运行转检修' }; S.fill.rows = fillRight().map(x => x.no); renderFill(); auditFill(); }
-    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); renderPrep(); enterWufang(); }
+    else if (S.stage === 'prep') { S.prep.audit = [1, 1, 1]; S.prep.dress = [1, 1, 1]; S.prep.mind = 1; S.prep.risks = S.prep.risks.map(() => true); S.prep.ri = -1; renderPrep(); enterWufang(); }
     else if (S.stage === 'wufang') { S.wf = 4; renderPanel(); startRun(); }
     else if (S.stage === 'run') toast('已在执行阶段', '');
   };
@@ -276,35 +357,34 @@ async function autoStep() {
     if (st.act === 'report') { await dialPhone(); return; }
     if (st.target) { devClick(st.target); await autoDialog(st); }
   } else if (S.beat === 4) {
-    if (st.act === 'gis') { ['hui', 'mech', 'arm', 'line'].forEach(k => S.gis[k] = true); renderPanel(); }
-    if (st.act === 'verify' || st.act === 'check') { }
+    /* 四项指示由回报内容判定：标准回报里四项都说到 */
     $('#rin').value = st.report; await new Promise(r => setTimeout(r, 150)); submitInput();
   }
 }
 
-/* 自动执行：把遥控 / 核对弹层按正确路径点完 */
+/* 自动执行：遥控弹层口述操作性质并按住执行；核对弹层口述核对结果 */
 async function autoDialog(st) {
   const zz = ms => new Promise(r => setTimeout(r, ms));
-  for (let k = 0; k < 12; k++) {
+  for (let k = 0; k < 40; k++) {
     await zz(90);
     const rc = document.querySelector('.dlg.rc');
     if (rc) {
-      const want = st.act === 'closeE' ? 'close' : 'open';
-      const r = rc.querySelector(`input[name=rcop][value="${want}"]`);
-      if (r && !r.checked) { r.checked = true; r.onchange(); continue; }
-      const pre = rc.querySelector('#rc_pre'), ex = rc.querySelector('#rc_exec');
-      if (pre && !pre.disabled) { pre.click(); continue; }
-      if (ex && !ex.disabled) { ex.click(); continue; }
+      if (!S.rc) { await zz(60); continue; }
+      if (!S.rc.nat) { rcSay(S.rc.want === 'open' ? `${devName(S.rc.id)}，分闸` : `${devName(S.rc.id)}，合闸`); continue; }
+      if (S.rc.ready) { rcExecNow(); continue; }
       await zz(120); continue;
     }
     const ins = document.querySelector('.dlg.insp');
-    if (ins) {
-      ins.querySelectorAll('[data-chk]:not(.on)').forEach(c => c.click());
-      const ok = ins.querySelector('#ins_ok'); if (ok && !ok.disabled) { ok.click(); }
-      continue;
-    }
+    if (ins) { if (S.ins && !S.ins.said) { S.ins.said = true; insSay(S.ins.okSay); } await zz(120); continue; }
     break;
   }
+}
+
+/* 上岗前准备：按口述路径自动走完（讲师演示台 / 回归用） */
+async function prepAuto() {
+  const zz = ms => new Promise(r => setTimeout(r, ms));
+  await prepSay(prepMicText()); await prepSay(prepMicText()); await prepSay(prepMicText());
+  let g = 0; while (S.stage === 'prep' && g++ < 20) { await zz(60); await prepSay('明白'); }
 }
 
 /* ---------------- 唇形·动作同步指示 ---------------- */

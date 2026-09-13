@@ -9,7 +9,7 @@ const idle=p=>p.waitForFunction(()=>!DH.speaking,{timeout:20000});
   await p.goto(F+'#arena'); await w(p,900);
   await p.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;});
   await p.click('#en_go'); await idle(p); await w(p,500);
-  console.log('stage', await p.evaluate(()=>S.stage), '| pool', await p.evaluate(()=>document.querySelectorAll('[data-fadd]').length));
+  console.log('stage', await p.evaluate(()=>S.stage), '| say bar', await p.evaluate(()=>!!document.querySelector('#f_in')), '| pick cards', await p.evaluate(()=>document.querySelectorAll('[data-fadd]').length));
   await p.screenshot({path:'./shots/fill_empty.png'});
   // 故意写错：漏一项、多一项、顺序颠倒、票头填错
   await p.evaluate(()=>{
@@ -33,11 +33,14 @@ const idle=p=>p.waitForFunction(()=>!DH.speaking,{timeout:20000});
   await p2.goto(F+'#arena'); await w(p2,1000);
   await p2.evaluate(()=>{window.__DH_MUTE=true;window.__DH_SPEED=0.06;S.toured=true;});
   await p2.click('#en_go'); await idle(p2); await w(p2,400);
-  await p2.evaluate(()=>{
-    S.fill.head={unit:'深圳中调',from:'李明',to:'陈志远',task:'将110kV仿真站110kV培训三线1163线路由运行转检修'};
-    S.fill.rows=fillRight().map(x=>x.no); renderFill(); auditFill();
+  // 满分路径全程口述：票头一句话报全，项目说一项写一项（口语化说法也要对得上票面）
+  const said=await p2.evaluate(()=>{
+    fillSay('发令单位深圳中调，发令人李明，受令人陈志远，操作任务将110kV仿真站110kV培训三线1163线路由运行转检修');
+    ['接调度令','核对相关设备的运行方式','核对相关设备图实一致、标实一致','检查培训三线1163间隔高压带电显示装置确有电压','断开培训三线1163开关','检查培训三线1163开关在分闸位置','检查1163开关三相无电流','汇报调度'].forEach(t=>fillSay(t));
+    return {head:S.fill.head, rows:S.fill.rows.slice()};
   });
-  await w(p2,400);
+  console.log('dictated head', JSON.stringify(said.head), '| rows', JSON.stringify(said.rows));
+  await p2.evaluate(()=>auditFill()); await w(p2,400);
   console.log('perfect', await p2.evaluate(()=>S.fill.last.total), '| errs', await p2.evaluate(()=>S.fill.last.errs.length));
   await p2.screenshot({path:'./shots/fill_ok.png',fullPage:true});
   console.log('ERR', errs.length?errs.join('\n'):'none');

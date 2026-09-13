@@ -1,6 +1,7 @@
 /* ================= 数字人引擎（形象版） =================
    以教练形象图为本体的数字人：呼吸 / 说话节奏 / 视线跟随 / 点头摇头 / 姿态前倾 / 光环与声波
-   说话由逐字时钟驱动（口型幅度 VISEME → 面部微动与声波），声音由 HeyGen 预渲染片段承担
+   说话由逐字时钟驱动（口型幅度 VISEME → 面部微动与声波）；声音：HeyGen 预渲染片段优先，
+   无片段时用浏览器合成语音朗读（9/13 用户口径：教练在侧就要能开口说话），口型跟随朗读进度（onboundary）
    对外接口保持不变：speak / setPose / nod / shake / stopSpeak / speaking / mouth / curV / curCh / pose
 ================================================= */
 
@@ -29,6 +30,27 @@ function coachImg(key, hd) {
   const M = (typeof COACH_IMGS !== 'undefined' && COACH_IMGS) || {};
   return (hd && M[key + '_hd']) || M[key] || '';
 }
+
+/* ---------- 朗读语音：浏览器合成语音（讲师演示台可开关，本机记忆；静音 / 提速测试时不出声） ---------- */
+const TTS = {
+  on: (() => { try { return localStorage.getItem('xwt_voice') !== 'off'; } catch (e) { return true; } })(),
+  voices: [],
+  load() { try { this.voices = speechSynthesis.getVoices() || []; } catch (e) { this.voices = []; } return this.voices; },
+  zh() { const vs = this.voices.length ? this.voices : this.load(); return vs.filter(v => /zh|cmn|Chinese|中文|普通话/i.test(v.lang + ' ' + v.name)); },
+  ok() { return this.on && !window.__DH_MUTE && (window.__DH_SPEED || 1) >= 1 && ('speechSynthesis' in window) && this.zh().length > 0; },
+  pick(sex) {
+    const zh = this.zh(); if (!zh.length) return null;
+    const cn = zh.filter(v => /zh[-_]CN|cmn[-_]Hans|zh$|中国|普通话/i.test(v.lang + ' ' + v.name));
+    const pool = cn.length ? cn : zh;
+    const pref = sex === 'f' ? /Female|女|Xiaoxiao|Huihui|Yaoyao|Xiaoyi|Tingting|Ting-Ting|Meijia/i : /Male|男|Yunxi|Kangkang|Yunyang|Yunjian|Yunxia/i;
+    return pool.find(v => pref.test(v.name)) || pool.find(v => /Microsoft|Google|Apple|Ting|Mei/i.test(v.name)) || pool[0];
+  },
+  set(v) { this.on = !!v; try { localStorage.setItem('xwt_voice', v ? 'on' : 'off'); } catch (e) { } if (!v) this.cancel(); voiceLabel(); },
+  cancel() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { } }
+};
+if ('speechSynthesis' in window) { TTS.load(); try { speechSynthesis.onvoiceschanged = () => TTS.load(); } catch (e) { } }
+function voiceToggle() { TTS.set(!TTS.on); }
+function voiceLabel() { document.querySelectorAll('[data-voicelbl]').forEach(n => n.textContent = TTS.on ? '开' : '关'); }
 
 class DigitalHuman {
   constructor(mountId, charKey) {
@@ -114,23 +136,24 @@ class DigitalHuman {
     if (this.n && this.n.pav) { this.n.pav.dataset.pose = p; this._paintState(); }
   }
 
-  destroy() { this.dead = true; this.speaking = false; this.seq = null; }
+  destroy() { this.dead = true; this.speaking = false; this.seq = null; if (this.tts) { this.tts = null; TTS.cancel(); } }
   nod(times) { this._nod = { n: times || 1, t: 0 }; }
   shake() { this._shake = { t: 0 }; }
 
   /* ---------- 说话：逐字序列（口型幅度驱动面部微动与声波） ---------- */
   buildSeq(text) {
     const seq = [];
-    for (const ch of text) {
+    for (let ti = 0; ti < text.length; ti++) {
+      const ch = text[ti];
       if (ch >= '\u4e00' && ch <= '\u9fff') {
         const v = (typeof CH2V !== 'undefined' && CH2V[ch]) || '-E';
-        seq.push({ o: v[0], n: v[1], ch });
+        seq.push({ o: v[0], n: v[1], ch, ti });
       } else if (/[0-9]/.test(ch)) {
-        seq.push({ o: '-', n: 'E', ch });
+        seq.push({ o: '-', n: 'E', ch, ti });
       } else if (/[a-zA-Z]/.test(ch)) {
-        seq.push({ o: '-', n: 'I', ch });
+        seq.push({ o: '-', n: 'I', ch, ti });
       } else if (/[，。、；：？！,.;:?!（）()"'"']/.test(ch)) {
-        seq.push({ o: 'X', n: 'X', ch, pause: true });
+        seq.push({ o: 'X', n: 'X', ch, ti, pause: true });
       }
     }
     return seq;
@@ -147,8 +170,33 @@ class DigitalHuman {
     this.ttsProgress = -1;
     if (opt.pose) this.setPose(opt.pose);
     this._paintState();
-    if (!this.seq.length) { this.finishSpeak(); }
+    if (!this.seq.length) { this.finishSpeak(); return this; }
+    this._tts(text);
     return this;
+  }
+
+  /* 朗读：合成语音开口，口型按朗读进度（onboundary）走；合成失败或无中文语音时退回逐字时钟，字幕与口型照常 */
+  _tts(text) {
+    this.tts = null;
+    if (!TTS.ok()) return;
+    try {
+      TTS.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = TTS.pick(this.char.sex);
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'zh-CN';
+      u.rate = 1.0; u.pitch = this.char.sex === 'f' ? 1.12 : 0.92; u.volume = 1;
+      const seq = this.seq, me = this;
+      u.onstart = () => { if (me.tts === u) { me.seqStart = performance.now() / 1000; } };
+      u.onboundary = e => {
+        if (me.tts !== u || !me.seq) return;
+        let k = 0; for (let i = 0; i < seq.length; i++) { if (seq[i].ti <= e.charIndex) k = i; else break; }
+        me.ttsProgress = k; me.ttsBoundary = true;
+      };
+      u.onend = () => { if (me.tts === u) { me.tts = null; me.finishSpeak(); } };
+      u.onerror = () => { if (me.tts === u) { me.tts = null; me.ttsProgress = -1; me.ttsBoundary = false; me.seqStart = performance.now() / 1000; } };
+      this.tts = u; this.ttsBoundary = false;
+      speechSynthesis.speak(u);
+    } catch (e) { this.tts = null; }
   }
 
   finishSpeak() {
@@ -160,6 +208,7 @@ class DigitalHuman {
   }
 
   stopSpeak(silent) {
+    if (this.tts) { this.tts = null; TTS.cancel(); }
     this.speaking = false; this.seq = null;
     this.mouthTarget = Object.assign({}, VISEME.X);
     if (!silent) { this.onSpeakEnd = null; }
@@ -176,7 +225,12 @@ class DigitalHuman {
     if (this.speaking && this.seq) {
       const elapsed = performance.now() / 1000 - this.seqStart;
       let idx;
-      if (this.ttsProgress >= 0) idx = Math.min(this.seq.length - 1, this.ttsProgress);
+      if (this.tts) {
+        /* 朗读中：有边界事件按朗读进度，没有则按时钟走到最后一个字停住等 onend；朗读卡死则超时收尾 */
+        idx = this.ttsBoundary ? Math.min(this.seq.length - 1, this.ttsProgress) : Math.min(this.seq.length - 1, Math.floor(elapsed / this.perChar));
+        if (elapsed > this.seq.length * this.perChar * 2.2 + 4) { this.tts = null; TTS.cancel(); idx = this.seq.length; }
+      }
+      else if (this.ttsProgress >= 0) idx = Math.min(this.seq.length - 1, this.ttsProgress);
       else idx = Math.floor(elapsed / this.perChar);
       if (idx >= this.seq.length) { this.finishSpeak(); }
       else {

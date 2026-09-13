@@ -64,6 +64,7 @@ function homeBoot() {
     <button data-dm="run">一键跑完当前考试（正确路径）</button>
     <button data-dm="es">地刀两态：<b id="dm_es">随机</b></button>
     <button data-dm="rain">雨淋阀压力异常注入：<b id="dm_rain">关</b></button>
+    <button data-dm="voice">数字人朗读语音：<b data-voicelbl>开</b></button>
     <button data-dm="status">功能实现状态清单</button>
     <button data-dm="bound">系统边界表</button>
     <button data-dm="clear">清空本机记录</button></div>
@@ -77,6 +78,7 @@ function homeBoot() {
   $('.uchip').onclick = toggleRole;
   $('#demo2tg').onclick = () => $('#demo2').classList.toggle('open');
   $('#demo2 .bd').onclick = e => { const b = e.target.closest('[data-dm]'); if (b) demoAct(b.dataset.dm); };
+  voiceLabel();
   renderRole();
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
@@ -553,7 +555,7 @@ const IMPL_STATUS = [
   ['语音识别：口述汇报、问答', '联网时浏览器识别（真实）；离线自动降级为文字输入'],
   ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
   ['AI 复盘、针对性训练建议、提醒草稿', '规则模板生成（非在线大模型）'],
-  ['数字人语音', '预渲染片段 / 内置字幕口型（非实时）'],
+  ['数字人语音', '预渲染片段优先；无片段时浏览器合成语音朗读 + 字幕口型（讲师演示台可关）'],
   ['训练与考试记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
   ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接'],
   ['教练目录中 16 位未开通教练', '目录（非可训练功能）'],
@@ -570,6 +572,7 @@ function demoAct(k) {
   if (k === 'red') { if (!EX.exam) return toast('请先进入 1163 考试', 'bad'); const s = examStation(); if (s.id !== 'k2_hub') return toast('当前不在关卡二「验电与接地」', 'bad'); examAuto('red'); return; }
   if (k === 'run') { if (!EX.exam) return toast('请先开始一场考试', 'bad'); examRun(); return; }
   if (k === 'es') { const seq = [null, 'ok', 'mech', 'rod']; const i = (seq.indexOf(EX.arm.esCase || null) + 1) % seq.length; EX.arm.esCase = seq[i]; $('#dm_es').textContent = { null: '随机', ok: '正常到位', mech: '机构箱不一致', rod: '连杆未到位' }[String(seq[i])]; return; }
+  if (k === 'voice') { voiceToggle(); toast(TTS.on ? '数字人朗读语音已打开' : '数字人朗读语音已关闭（只保留字幕与口型）'); return; }
   if (k === 'rain') { EX.arm.rainAbn = !EX.arm.rainAbn; $('#dm_rain').textContent = EX.arm.rainAbn ? '开（下次开始生效）' : '关'; return; }
   if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则模拟 / 预置 / 待对接', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
   if (k === 'bound') return openDrill('系统边界表', '现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写', boundaryHtml());

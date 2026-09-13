@@ -15,7 +15,8 @@ const S = {
   verify: { v1: false, v2: false },
   bay: null,
   key: { down: false, held: false },
-  prep: { audit: [false, false, false], dress: [false, false, false], mind: false, risks: [] },
+  prep: { audit: [false, false, false], dress: [false, false, false], mind: false, risks: [], ri: -1 },
+  rc: null, ins: null,          // 遥控 / 核对弹层的口述上下文
   wf: 0,
   msgs: [], chat: [],
   vio: [],                // 违规记录

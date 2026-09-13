@@ -36,7 +36,7 @@ function coachSay(text, opt) {
   return p;
 }
 function meSay(text, k) { EX.log.push({ who: 'me', t: text, k: k || '', at: now() }); renderLog(); }
-function praise() { const p = PRAISE[EX.praiseI++ % PRAISE.length]; return p; }
+function exPraise() { const p = PRAISE[EX.praiseI++ % PRAISE.length]; return p; }
 function renderLog() {
   const box = $('#ex_log'); if (!box) return;
   const c = EX.exam ? EX.exam.coach : { short: '教' };
@@ -119,7 +119,7 @@ function goalDone(g, txt, o) {
   const gs = gState(g.id); gs.done = true;
   const f = HINT_F[Math.min(3, gs.hint + (EX.mode === 'exam' ? Math.min(2, gs.wrong) : 0))];
   gs.got = +((g.pts || 0) * f).toFixed(2);
-  const line = `${o.noPraise ? '' : praise()}${txt || g.praise || ''}`;
+  const line = `${o.noPraise ? '' : exPraise()}${txt || g.praise || ''}`;
   coachSay(line, { pose: 'nod', nod: 1 });
   const s = examStation();
   rerenderScene();
@@ -281,7 +281,13 @@ function examSay(text, fromZoom) {
     if (fromZoom) { const g = s.goals.find(x => (x.dev || []).includes(zoomDev)); if (g && gState(g.id).done) return coachSay('这一处你已经确认过了。', { pose: 'listen' }); }
     /* 说出想看的设备：走过去（切换地点），看到什么再说 */
     const intent = cands.find(g => g.kind === 'look' && g.re && g.re.test(t));
-    if (intent) { if (intent.loc && EX.loc !== intent.loc && s.locs && s.locs[intent.loc]) { EX.loc = intent.loc; exCloseZoom(); rerenderScene(); } coachSay(intent.go || '去看。看到什么，说出来。', { pose: 'point' }); return; }
+    if (intent) {
+      if (intent.loc && EX.loc !== intent.loc && s.locs && s.locs[intent.loc]) { EX.loc = intent.loc; exCloseZoom(); rerenderScene(); }
+      /* 说了要看哪个设备，就走到它跟前放大：嘴上说的和眼睛看的落到同一处 */
+      const dv = (intent.dev || []).find(d => s.spots && s.spots[d] && s.spots[d].zoom);
+      if (dv && EX.zoom !== dv) { gState(intent.id).seen = true; EX.zoom = dv; if (s.spots[dv].walk) s.spots[dv].walk(EX.st); renderZoom(); }
+      coachSay(intent.go || '去看。看到什么，说出来。', { pose: 'point' }); return;
+    }
     coachSay(EX.mode === 'exam' ? '我没听清，说清楚你看的是哪个设备、什么状态。' : `我没听清。说清楚你看的是哪个设备、什么状态${fromZoom ? '' : '，或者先走到设备前看'}。`, { pose: 'listen' });
     return;
   }
@@ -490,6 +496,7 @@ function examKey(e) {
   if (e.key !== 'Enter') return;
   if (e.target.id === 'ex_say') { e.preventDefault(); const v = e.target.value; e.target.value = ''; examSay(v, false); }
   else if (e.target.id === 'ex_zsay') { e.preventDefault(); examSay(e.target.value, true); }
+  else if (e.target.id === 'qz_in') { e.preventDefault(); quizSay(e.target.value); }
 }
 
 /* ---------------- 自动驾驶（讲师演示台 / 回归）：ok 正确完成当前情境 · wrong 说错一次 · red 跳过验电直接合地刀 ---------------- */
