@@ -1330,3 +1330,20 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .btn.hold.holding{filter:brightness(1.06)}
 .qzo.ro{cursor:default}.qzo.ro:hover{border-color:var(--goldsoft);background:#fbfbf6}
 .qzsay{margin-top:10px}
+
+/* ===== 陪练关卡 · 做题 + 操作 ===== */
+.exguide{border:1px solid var(--goldsoft);border-radius:10px;padding:10px 14px;margin-bottom:8px;background:linear-gradient(180deg,#fdfbf3,#fff)}
+.exguide.quiz{background:linear-gradient(180deg,#f3f8f4,#fff)}
+.exgh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.exgh b{font-size:12.5px;color:#1f2d24}.exgh span{font-size:12px;color:#5c6b5f}
+.exscore{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:12.5px;color:var(--acd);background:var(--acbg);border:1px solid var(--acln);border-radius:12px;padding:2px 10px}
+.exsteps{margin:8px 0 0;padding-left:20px;display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+.exsteps li{font-size:12px;color:#3c5245;line-height:1.55;padding:2px 0}.exsteps li b{font-weight:600;color:#1f2d24}.exsteps li span{display:block;font-size:11px;color:#8b988c}
+.exsteps li.on b{color:var(--ac)}.exsteps li.on::marker{color:var(--ac)}.exsteps li.on b::after{content:' ✓'}
+.exgq{font-size:14px;color:#1f2d24;line-height:1.65;margin-top:6px}
+.exgopts{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:6px}.exgopts span{font-size:12px;color:#3c5245;line-height:1.5}.exgopts span b{font-family:var(--mono);color:#8b988c;margin-right:6px}
+.exopts.chat{grid-template-columns:1fr;gap:6px;margin:8px 0 0}
+.exopts.chat .exopt{font-family:inherit;text-align:left;padding:7px 10px;font-size:12.5px}.exopts.chat .exopt b{font-family:var(--mono);color:#8b988c;flex:none}
+.exopts.chat .exopt:hover{border-color:var(--ac);background:var(--acbg)}
+.exopts.chat.done .exopt{cursor:default}.exopts.chat.done .exopt.right{border-color:var(--ac);background:var(--acbg)}.exopts.chat.done .exopt.wrong{border-color:#d43a2f;background:#fbe9e7}.exopts.chat.done .exopt.dim{opacity:.55}
+.exlog .msg.q .bd{max-width:96%}.exlog .msg.score .bd{border-color:var(--acln);background:var(--acbg)}
+.exprog i.q{border-radius:2px}

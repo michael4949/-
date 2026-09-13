@@ -1,4 +1,4 @@
-/* 陪练关卡回归 · 雨淋阀：① 训练模式正确路径满 10 分 ② 考核模式关键错误路径（压力异常未发现 / 走到 #1 却报 #3 / 手动阀未全开）③ 按住盒盖打开 + 拖动手柄的 DOM 交互 */
+/* 陪练关卡回归 · 雨淋阀（做题 + 操作，13.5 分制）：① 训练模式正确路径满 13.5 分、轨迹 8 步 ② 考核模式关键错误路径（压力异常未发现 / 走到 #1 却报 #3 / 手动阀未全开）→ 12.2 ③ 按住盒盖打开 + 拖动手柄的 DOM 交互 */
 const { chromium } = require('playwright');
 const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_倒闸操作陪练舱_高保真原型.html')).href;
 const w = (p, ms) => p.waitForTimeout(ms);

@@ -33,7 +33,7 @@ function coachImg(key, hd) {
 
 /* ---------- 朗读语音：浏览器合成语音（讲师演示台可开关，本机记忆；静音 / 提速测试时不出声） ---------- */
 const TTS = {
-  on: (() => { try { return localStorage.getItem('xwt_voice') !== 'off'; } catch (e) { return true; } })(),
+  on: (() => { try { return localStorage.getItem('xwt_voice') === 'on'; } catch (e) { return false; } })(),   // 默认关（9/13 用户：口型对不上内容时配音作用不大），讲师演示台可开
   voices: [],
   load() { try { this.voices = speechSynthesis.getVoices() || []; } catch (e) { this.voices = []; } return this.voices; },
   zh() { const vs = this.voices.length ? this.voices : this.load(); return vs.filter(v => /zh|cmn|Chinese|中文|普通话/i.test(v.lang + ' ' + v.name)); },

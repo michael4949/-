@@ -1,24 +1,25 @@
-/* ===== 陪练关卡引擎（教练在侧 · 学员先动）=====
-   原则：教练只交代情境，不列步骤、不给勾选；学员自己决定看什么、做什么、说什么——
-   看：点设备走过去看，放大后用自己的话说出读数 / 状态；做：按住按钮、拖动手柄、转动把手才算操作；说：手指口述、汇报、提问、下结论（语音或文字）。
-   教练每一步即时回应：做对 → 肯定并推进；做错 / 漏了 → 逐级提示（方向 → 要点 → 答案），不代替学员做；触及红线 → 训练时当场制止，考核时记一票否决并引用依据。
-   记录写本机存储（xwt_exams），成绩落到 8 维能力雷达，组长工作台同步。 */
+/* ===== 陪练关卡引擎（做题 + 操作两种方式，教练在侧）=====
+   9/13 三次口径：不是每一步都让学员操作——很多步骤要和现场结合，不适合在屏幕上做。两种方式交替：
+   ① 做题：选择 / 填空 / 问答，像客服问答一样在对话里一问一答，教练对每次回答即时回应（对：肯定 + 为什么；错：训练 / 演练可再答一次，第二次给答案与依据；考核一次作答）；
+   ② 操作：教练先在屏幕上给出这一关怎么做（训练给每一步的做法，演练只给要点，考核只给任务），学员照着做（看 / 按住 / 拖动 / 口述），做完当场打分并说明扣在哪。
+   红线仍当场制止（训练 / 演练）或记一票否决（考核）。记录写本机存储（xwt_exams），成绩落到 8 维能力雷达，组长工作台同步。 */
 
 const LS_EXAMS = 'xwt_exams';
 function examRecords() { return lsGet(LS_EXAMS, []); }
 function examSaveRec(r) { const l = examRecords(); l.unshift(r); lsSet(LS_EXAMS, l.slice(0, 40)); }
 function examTasks() { return lsGet(LS_TASKS, []).filter(t => t.exam); }
 const EXAM_MODES = {
-  teach: { n: '训练模式', d: '教练全程在侧：做对肯定，做错逐级提示（方向 → 要点 → 答案），红线当场制止；提示不扣分' },
-  drill: { n: '演练模式', d: '教练在侧但少说：做错才提示，每级提示计入记录并扣分；红线当场制止' },
-  exam: { n: '考核模式', d: '教练只交代情境、不提示；错误与红线全部记录，一票否决引用依据，结束后统一复盘' }
+  teach: { n: '训练模式', d: '操作关屏幕上给出每一步怎么做；答题答错可再答一次（记半分）；红线当场制止' },
+  drill: { n: '演练模式', d: '操作关只给步骤要点、不给位置；答题答错可再答一次；提示计入记录并扣分' },
+  exam: { n: '考核模式', d: '操作关只交代任务、不给步骤；答题一次作答；错误与红线全部记录，一票否决引用依据' }
 };
-const ERR_KIND = { red: '红线', order: '错序', miss: '漏项', id: '识别错误', judge: '判断错误', crit: '关键错误', read: '读数错误', ans: '回答不完整' };
+const ERR_KIND = { red: '红线', order: '错序', miss: '漏项', id: '识别错误', judge: '判断错误', crit: '关键错误', read: '读数错误', ans: '回答不完整', choice: '选择题答错', fill: '填空题答错' };
+const QKIND = { choice: '选择题', fill: '填空题', qa: '问答题' };
 const EX_T = ms => Math.max(30, ms * Math.min(1, window.__DH_SPEED || 1));
 const HINT_F = [1, .7, .4, 0];
 const PRAISE = ['对。', '很好，就是这样。', '这一步做得规范。', '对，继续。', '好，判断正确。', '没错。'];
 
-const EX = { exam: null, mode: 'teach', si: 0, st: {}, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: 0, log: [], zoom: null, finished: null, task: null, arm: {}, stDone: false, timer: null, dh: null, loc: null, idleT: null, lastAct: 0, praiseI: 0, speakQ: Promise.resolve(), asked: 0 };
+const EX = { exam: null, mode: 'teach', si: 0, st: {}, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: 0, log: [], zoom: null, finished: null, task: null, arm: {}, stDone: false, timer: null, dh: null, loc: null, idleT: null, lastAct: 0, praiseI: 0, speakQ: Promise.resolve(), asked: 0, qi: 0, qtry: 0, qAsked: null, qlog: -1, qhint: {}, qres: [] };
 
 /* ---------------- 教练说话 / 对话记录 ---------------- */
 function coachSay(text, opt) {
@@ -47,8 +48,9 @@ function renderLog() {
 /* ---------------- 开始 / 进入情境 ---------------- */
 function examStart(id, mode, opt) {
   const ex = EXAMS.find(e => e.id === id); if (!ex) return;
+  ex.stations.forEach(st => { if (!st.goals) st.goals = []; });
   if (EX.dh) { EX.dh.destroy(); EX.dh = null; }
-  Object.assign(EX, { exam: ex, mode: mode || 'teach', si: 0, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: Date.now(), log: [], zoom: null, finished: null, task: (opt && opt.task) || null, stDone: false, loc: null, lastAct: Date.now(), praiseI: 0, asked: 0 });
+  Object.assign(EX, { exam: ex, mode: mode || 'teach', si: 0, goals: {}, wrongs: 0, hints: 0, track: [], errs: [], red: false, t0: Date.now(), log: [], zoom: null, finished: null, task: (opt && opt.task) || null, stDone: false, loc: null, lastAct: Date.now(), praiseI: 0, asked: 0, qi: 0, qtry: 0, qAsked: null, qlog: -1, qhint: {}, qres: [] });
   EX.st = ex.init(EX.arm || {});
   if (location.hash !== '#exam') goPage('exam'); else rerenderExam();
   examEnter();
@@ -64,8 +66,131 @@ function examEnter() {
   rerenderExam();
   const brief = typeof s.brief === 'function' ? s.brief(EX.st, EX.mode) : s.brief;
   if (s.type === 'auto') { coachSay(brief, { pose: 'explain' }); examAutoRun(s); return; }
+  if (s.type === 'quiz') { EX.qi = 0; EX.qtry = 0; EX.qAsked = null; EX.qhint = {}; EX.qres = []; coachSay(brief, { pose: 'explain' }); EX.speakQ.then(() => examAskItem()); return; }
   coachSay(brief, { pose: s.pose || 'explain' });
 }
+
+/* ---------------- 做题：选择 / 填空 / 问答，对话里一问一答，教练即时回应 ---------------- */
+function quizItem() { const s = examStation(); return s && s.type === 'quiz' ? s.items[EX.qi] : null; }
+function qText(v, it) { return typeof v === 'function' ? v(EX.st, it) : v; }
+function qRight(it) {
+  if (it.kind === 'choice') return 'ABCD'[it.a] + '．' + it.opts[it.a];
+  if (it.kind === 'fill') return it.sample;
+  return it.right || (it.keys || []).map(k => k.t).join('、');
+}
+function examAskItem() {
+  const s = examStation(), it = quizItem(); if (!s || !it || EX.stDone) return;
+  EX.qtry = 0; EX.qAsked = it.id;
+  const head = `<i class="exhl">第 ${EX.qi + 1}/${s.items.length} 题 · ${QKIND[it.kind]}</i>`;
+  let body = qText(it.q, it);
+  if (it.kind === 'choice') body += `<div class="exopts chat">${it.opts.map((o, i) => `<button class="exopt" data-exopt="${i}"><b>${'ABCD'[i]}</b>${o}</button>`).join('')}</div>`;
+  else if (it.kind === 'fill') body += '<div class="tk3">按顺序说出每个空的答案，用逗号隔开。</div>';
+  else body += '<div class="tk3">用自己的话回答，要点说全。</div>';
+  EX.qlog = EX.log.length;
+  coachSay(head + body, { pose: 'listen', k: 'q' });
+  rerenderGuide(); const i = $('#ex_say'); if (i) { i.placeholder = it.kind === 'choice' ? '点上面的选项作答，或直接说 A / B / C / D' : it.kind === 'fill' ? '填空：按顺序说出答案，用逗号隔开' : '用自己的话回答'; i.focus(); }
+}
+/* 把对话里的选项按钮定格：选中的 / 正确的标出来，不能再点 */
+function quizFreezeOpts(it, pick) {
+  const m = EX.log[EX.qlog]; if (!m) return;
+  m.t = m.t.replace(/<div class="exopts chat">[\s\S]*?<\/div>/, `<div class="exopts chat done">${it.opts.map((o, i) => `<span class="exopt ${i === it.a ? 'right' : i === pick ? 'wrong' : 'dim'}"><b>${'ABCD'[i]}</b>${o}</span>`).join('')}</div>`);
+  renderLog();
+}
+function examPick(i) { const it = quizItem(); if (!it || it.kind !== 'choice' || EX.qAsked !== it.id) return; touch(); examAnswer('ABCD'[i], i); }
+function examAnswer(text, pick) {
+  const s = examStation(), it = quizItem(); if (!s || !it || EX.stDone) return;
+  if (EX.qAsked !== it.id) return;
+  text = (text || '').trim(); if (!text) return;
+  touch(); meSay(text);
+  const t = text.replace(/\s+/g, '');
+  if (/^(提示|给我提示|不会|不知道|怎么答)/.test(t)) return exHintQ(it);
+  let ok = false, part = 0, missing = [];
+  if (it.kind === 'choice') {
+    if (pick == null) { const m = t.match(/^(?:选|答案是|答案|是|我选|选择)?([ABCDabcd])(?:[项。.，、]|$)/) || t.match(/第([一二三四1234])(?:个|项|条)/); if (m) { const c = m[1].toUpperCase(); pick = 'ABCD'.indexOf(c); if (pick < 0) pick = '一二三四'.indexOf(c); if (pick < 0) pick = '1234'.indexOf(c); } }
+    if (pick == null || pick < 0) { let best = -1, bs = 0; it.opts.forEach((o, i) => { const sc = sim(text, o); if (sc > bs) { bs = sc; best = i; } }); if (bs >= 0.3) pick = best; }
+    if (pick == null || pick < 0) { coachSay('没听清你选哪个。直接说 A、B、C、D，或点选项。', { pose: 'listen' }); return; }
+    ok = pick === it.a; part = ok ? 1 : 0;
+  } else if (it.kind === 'fill') {
+    const hit = it.blanks.map(alts => alts.some(re => re.test(t)));
+    part = hit.filter(Boolean).length / it.blanks.length; ok = part === 1;
+    missing = it.blanks.map((_, i) => `第 ${i + 1} 空`).filter((_, i) => !hit[i]);
+  } else {
+    const keys = typeof it.keys === 'function' ? it.keys(EX.st) : it.keys;
+    const hits = keys.filter(k => k.re.test(t));
+    part = hits.length / keys.length; ok = hits.length >= (it.need || keys.length);
+    missing = keys.filter(k => !k.re.test(t)).map(k => k.t);
+  }
+  const hl = EX.qhint[it.id] || 0;
+  const factor = HINT_F[Math.min(3, hl)];
+  if (ok) {
+    const got = +((it.pts || 0) * factor * (EX.qtry ? .5 : 1)).toFixed(2);
+    if (it.kind === 'choice') quizFreezeOpts(it, pick);
+    coachSay(`${exPraise()}${qText(it.why, it) || ''}${EX.qtry ? '<div class="tk3">第二次答对，记半分。</div>' : ''}`, { pose: 'nod', nod: 1 });
+    return quizItemDone(it, got, true, text, EX.qtry);
+  }
+  /* 答错：训练 / 演练可再答一次；考核一次作答 */
+  if (EX.mode !== 'exam' && EX.qtry === 0) {
+    EX.qtry = 1;
+    const tip = qText(it.hint, it) || '再想想。';
+    let line = '';
+    if (it.kind === 'choice') line = `不对。${tip}再答一次。`;
+    else if (it.kind === 'fill') line = `${part ? `对了 ${Math.round(part * it.blanks.length)} 个空，` : ''}${missing.join('、')}还不对。${tip}再答一次。`;
+    else line = `还差：${missing.join('、')}。${tip}再补充一次。`;
+    coachSay(line, { pose: 'correct', shake: true, k: 'bad' });
+    return;
+  }
+  const got = it.kind === 'choice' ? 0 : +((it.pts || 0) * part * factor * (EX.qtry ? .5 : 1)).toFixed(2);
+  if (it.kind === 'choice') quizFreezeOpts(it, pick);
+  exErr(it.kind === 'qa' ? 'ans' : it.kind, { text: it.kind === 'qa' ? `回答要点不全：缺 ${missing.join('、')}。` : `答「${text.slice(0, 30)}」，正确答案是 ${qRight(it)}。`, click: text.slice(0, 40), right: qRight(it), why: qText(it.why, it) || '', rule: it.rule || s.rule || '', fix: it.fix || '', goal: it.id });
+  coachSay(`${EX.mode === 'exam' ? '记录了。' : '不对。'}正确答案：${qRight(it)}。${qText(it.why, it) || ''}${it.rule ? `<div class="exkb">依据 ${it.rule}</div>` : ''}`, { pose: 'explain', k: 'bad' });
+  quizItemDone(it, got, false, text, EX.qtry);
+}
+function exHintQ(it) {
+  if (EX.mode === 'exam') { coachSay('考核模式下我不提示，按你的判断答。', { pose: 'listen' }); return; }
+  const lv = EX.qhint[it.id] || 0;
+  EX.qhint[it.id] = Math.min(2, lv + 1); EX.hints += 1;
+  const txt = lv === 0 ? (qText(it.hint, it) || '想想这一关刚做过什么。') : `答案是：${qRight(it)}。${qText(it.why, it) || ''}`;
+  coachSay(`<i class="exhl">提示 ${lv + 1}</i>${txt}`, { pose: 'point', k: 'hint' });
+}
+function quizItemDone(it, got, ok, ans, tries) {
+  EX.qres.push({ id: it.id, kind: it.kind, n: qText(it.q, it).replace(/<[^>]+>/g, '').replace(/_+/g, '__'), ok: ok && !tries && !(EX.qhint[it.id]), got, pts: it.pts || 0, wrong: ok ? tries : tries + 1, hint: EX.qhint[it.id] || 0, ans: (ans || '').slice(0, 40) });
+  EX.qAsked = null; EX.qi += 1;
+  const s = examStation();
+  if (EX.qi >= s.items.length) return quizStationDone();
+  EX.speakQ.then(() => examAskItem());
+}
+function quizStationDone() {
+  const s = examStation(); if (EX.stDone) return;
+  EX.stDone = true;
+  const items = EX.qres.slice();
+  const got = +items.reduce((a, i) => a + i.got, 0).toFixed(2), pts = +items.reduce((a, i) => a + i.pts, 0).toFixed(2);
+  EX.track.push({ sid: s.id, part: s.part || '', title: s.title, quiz: true, items, got, pts, ratio: pts ? got / pts : 1 });
+  const bad = items.filter(i => !i.ok);
+  const line = `这组题 ${items.length} 道，得 ${got}/${pts} 分。${bad.length ? bad.map(i => `第 ${items.indexOf(i) + 1} 题${i.wrong ? `错 ${i.wrong} 次` : '用了提示'}`).join('、') + '。' : '全部一次答对。'}`;
+  rerenderGuide();
+  const outro = typeof s.outro === 'function' ? s.outro(EX.st, EX.mode) : s.outro;
+  const go = () => { if (EX.exam && EX.stDone) examNext(); };
+  EX.speakQ.then(() => coachSay(line, { pose: 'confirm', k: 'score' })).then(() => outro ? coachSay(outro, { pose: 'explain' }).then(() => setTimeout(go, EX_T(700))) : setTimeout(go, EX_T(700)));
+}
+
+/* ---------------- 操作关：屏幕上先给出怎么做（按模式分级），做完当场打分 ---------------- */
+function exGuideHtml(s) {
+  if (!s) return '';
+  if (s.type === 'auto') return `<div class="exgh"><b>系统完成</b><span>中间非重点步骤</span></div>`;
+  if (s.type === 'quiz') {
+    const it = quizItem();
+    if (EX.stDone || !it) { const t = EX.track.find(x => x.sid === s.id); return `<div class="exgh"><b>答题</b><span>${s.items.length} 道</span>${t ? `<em class="exscore">本组 ${t.got}/${t.pts}</em>` : ''}</div>`; }
+    return `<div class="exgh"><b>答题</b><span>第 ${EX.qi + 1}/${s.items.length} 题 · ${QKIND[it.kind]}</span></div><div class="exgq">${qText(it.q, it)}</div>${it.kind === 'choice' ? `<div class="exgopts">${it.opts.map((o, i) => `<span><b>${'ABCD'[i]}</b>${o}</span>`).join('')}</div>` : ''}`;
+  }
+  const t = EX.track.find(x => x.sid === s.id);
+  const score = EX.stDone && t && t.pts ? `<em class="exscore">本关 ${t.got}/${t.pts}</em>` : '';
+  const task = s.task || s.title;
+  if (EX.mode === 'exam') return `<div class="exgh"><b>本关任务</b><span>${task}</span>${score}</div><div class="tk3">考核模式：不给步骤提示，做完统一打分。</div>`;
+  const steps = s.guide || (s.goals || []).map(g => ({ g: g.id, t: g.n }));
+  return `<div class="exgh"><b>教练提示 · 这一关怎么做</b><span>${task}</span>${score}</div>
+    <ol class="exsteps">${steps.map(st => { const done = st.g && gState(st.g).done; return `<li class="${done ? 'on' : ''}"><b>${st.t}</b>${EX.mode === 'teach' && st.how ? `<span>${st.how}</span>` : ''}</li>`; }).join('')}</ol>`;
+}
+function rerenderGuide() { const g = $('#ex_guide'); const s = examStation(); if (g && s) g.innerHTML = exGuideHtml(s); }
 async function examAutoRun(s) {
   for (let i = 0; i < s.items.length; i++) { await new Promise(r => setTimeout(r, EX_T(420))); EX.goals['a' + i] = { done: true }; if (s.apply) s.apply(EX.st, i); const li = $(`#ex_auto li[data-i="${i}"]`); if (li) li.classList.add('on'); }
   await new Promise(r => setTimeout(r, EX_T(500)));
@@ -122,7 +247,7 @@ function goalDone(g, txt, o) {
   const line = `${o.noPraise ? '' : exPraise()}${txt || g.praise || ''}`;
   coachSay(line, { pose: 'nod', nod: 1 });
   const s = examStation();
-  rerenderScene();
+  rerenderScene(); rerenderGuide();
   if (s.goals.every(x => gState(x.id).done)) stationDone();
   else if (g.next) { const nx = typeof g.next === 'function' ? g.next(EX.st, EX.mode) : g.next; if (nx) EX.speakQ.then(() => coachSay(nx, { pose: 'explain' })); }
 }
@@ -136,14 +261,17 @@ function stationDone() {
   if (s.after) s.after(EX.st);
   const outro = typeof s.outro === 'function' ? s.outro(EX.st, EX.mode) : s.outro;
   const go = () => { if (EX.exam && EX.stDone) examNext(); };
-  if (outro) EX.speakQ.then(() => coachSay(outro, { pose: 'confirm' }).then(() => setTimeout(go, EX_T(700))));
-  else EX.speakQ.then(() => setTimeout(go, EX_T(700)));
-  rerenderScene();
+  /* 做完当场打分：得了多少、扣在哪 */
+  const bad = items.filter(i => !i.ok);
+  const scoreLine = pts ? `本关得分 ${got}/${pts}。${bad.length ? '扣在：' + bad.map(i => `${i.n}${i.wrong ? `（错 ${i.wrong} 次）` : i.hint ? `（提示 ${i.hint} 级）` : ''}`).join('、') + '。' : '每一步都一次做对。'}` : (bad.length ? `这一关记了 ${bad.length} 处：${bad.map(i => i.n).join('、')}。` : '这一关每一步都一次做对。');
+  EX.speakQ.then(() => coachSay(scoreLine, { pose: 'confirm', k: 'score' })).then(() => outro ? coachSay(outro, { pose: 'explain' }).then(() => setTimeout(go, EX_T(700))) : setTimeout(go, EX_T(700)));
+  rerenderScene(); rerenderGuide();
 }
 
 /* ---------------- 学员动作 ①：看（走到设备前，放大观察，用自己的话说出读数 / 状态） ---------------- */
 function examLook(dev) {
   const s = examStation(); if (!s || EX.stDone) return; touch();
+  if (s.type === 'quiz') { coachSay('先把这道题答了，再看设备。', { pose: 'listen' }); return; }
   const sp = s.spots && s.spots[dev]; if (!sp) return;
   if (sp.walk) { sp.walk(EX.st); }
   if (sp.zoom) { EX.zoom = dev; renderZoom(); }
@@ -255,6 +383,7 @@ function examDragEnd() {
 function examSay(text, fromZoom) {
   const s = examStation(); if (!s || EX.stDone) return; touch();
   text = (text || '').trim(); if (!text) return;
+  if (s.type === 'quiz') return examAnswer(text);
   meSay(text);
   const t = text.replace(/\s+/g, '');
   /* 提问 → 知识库召回 */
@@ -390,21 +519,22 @@ function pageExam() {
   const got = +EX.track.reduce((a, t) => a + (t.got || 0), 0).toFixed(1);
   return `<div class="exwrap">
     <div class="exhead hg">
-      <div class="exh1"><b>${ex.n}</b><span>${s.part ? s.part + ' · ' : ''}第 ${EX.si + 1}/${N} 步 · ${EXAM_MODES[EX.mode].n}</span></div>
-      <div class="exkpis"><div class="kpi"><b id="ex_time">00:00</b><span>用时</span></div>${EX.mode !== 'exam' ? `<div class="kpi ${EX.red ? 'bad' : ''}"><b>${EX.red ? 0 : got}/${ex.max}</b><span>得分</span></div><div class="kpi"><b>${EX.hints}</b><span>提示</span></div>` : ''}<div class="kpi ${EX.errs.length ? 'warn' : ''}"><b>${EX.errs.length}</b><span>错误</span></div>${EX.red ? '<div class="kpi bad"><b>否决</b><span>红线</span></div>' : ''}</div>
-      <div class="exprog">${ex.stations.map((x, i) => `<i class="${i < EX.si ? 'done' : i === EX.si ? 'cur' : ''}"></i>`).join('')}</div>
+      <div class="exh1"><b>${ex.n}</b><span>${s.part ? s.part + ' · ' : ''}第 ${EX.si + 1}/${N} 步 · ${s.type === 'quiz' ? '做题' : s.type === 'auto' ? '系统完成' : '操作'} · ${EXAM_MODES[EX.mode].n}</span></div>
+      <div class="exkpis"><div class="kpi"><b id="ex_time">00:00</b><span>用时</span></div><div class="kpi ${EX.red ? 'bad' : ''}"><b>${EX.red ? 0 : got}/${ex.max}</b><span>得分</span></div>${EX.mode !== 'exam' ? `<div class="kpi"><b>${EX.hints}</b><span>提示</span></div>` : ''}<div class="kpi ${EX.errs.length ? 'warn' : ''}"><b>${EX.errs.length}</b><span>错误</span></div>${EX.red ? '<div class="kpi bad"><b>否决</b><span>红线</span></div>' : ''}</div>
+      <div class="exprog">${ex.stations.map((x, i) => `<i class="${i < EX.si ? 'done' : i === EX.si ? 'cur' : ''} ${x.type === 'quiz' ? 'q' : ''}" title="${x.title}"></i>`).join('')}</div>
       <button class="btn sm" data-exquit="1">退出</button>
     </div>
     <div class="exmain coach">
       <div class="exscene hg ${EX.mode}">
+        <div class="exguide ${s.type === 'quiz' ? 'quiz' : ''}" id="ex_guide">${exGuideHtml(s)}</div>
         <div class="exlocbar" id="ex_locbar">${exLocBar(s)}</div>
         <div class="exsvgbox" id="ex_svg">${exSceneSvg(s)}</div><div class="exzoom" id="ex_zoom" hidden></div>
         ${s.type === 'auto' ? `<ol class="exauto" id="ex_auto">${s.items.map((t, i) => `<li data-i="${i}" class="${EX.goals['a' + i] ? 'on' : ''}">${t}</li>`).join('')}</ol>` : `
-        <div class="exsay"><span class="exsayl">手指口述 · 汇报</span><input id="ex_say" class="exin wide" autocomplete="off" placeholder="说出你现在要做什么、看到什么、下什么结论（可点麦克风口述）"><button class="exmic" data-exmic="#ex_say" title="语音">●</button><button class="btn pri" data-exsay="1">说</button></div>`}
+        <div class="exsay"><span class="exsayl">${s.type === 'quiz' ? '回答' : '手指口述 · 汇报'}</span><input id="ex_say" class="exin wide" autocomplete="off" placeholder="${s.type === 'quiz' ? '在这里回答（选择题也可以点对话里的选项）' : '说出你现在要做什么、看到什么、下什么结论（可点麦克风口述）'}"><button class="exmic" data-exmic="#ex_say" title="语音">●</button><button class="btn pri" data-exsay="1">${s.type === 'quiz' ? '回答' : '说'}</button></div>`}
       </div>
       <aside class="excoach">
         <div class="hcard hg excoachcard"><div class="exdhwrap"><div id="exdh"></div></div><div class="excoachnm"><b>${ex.coach.name}</b><span>${ex.coach.role} · 陪练教练</span></div></div>
-        <div class="hcard hg exlogcard"><div class="hch"><b>教练在侧</b><span>做对推进 · 做错提示</span></div><div class="hcb exlog" id="ex_log"></div>
+        <div class="hcard hg exlogcard"><div class="hch"><b>教练在侧</b><span>${s.type === 'quiz' ? '一问一答 · 即时回应' : '照提示做 · 做完打分'}</span></div><div class="hcb exlog" id="ex_log"></div>
           <div class="exlogbtns">${EX.mode !== 'exam' ? `<button class="btn sm" data-exhint="1">给我提示${EX.mode === 'drill' ? '（计入）' : ''}</button>` : ''}${EX.mode === 'teach' ? `<button class="btn sm" data-exanswer="1">我该做什么</button>` : ''}<button class="btn sm" data-exask="1">问教练</button></div></div>
       </aside>
     </div></div>`;
@@ -418,7 +548,7 @@ function examAfter() {
   if (!EX.timer) EX.timer = setInterval(() => {
     const t = $('#ex_time'); if (!t) return; const d = Math.round((Date.now() - EX.t0) / 1000); t.textContent = `${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`;
     /* 卡住：教练主动开口（训练 / 演练；测试提速时停用） */
-    if (EX.exam && !EX.stDone && EX.mode !== 'exam' && (window.__DH_SPEED || 1) >= 1 && Date.now() - EX.lastAct > 26000 && !(EX.dh && EX.dh.speaking) && !document.querySelector('.mask')) { EX.lastAct = Date.now(); const g = nextGoal(); if (g) { coachSay(g.nudge || `${HOME_USER.name}，想一想下一步。`, { pose: 'point' }); } }
+    if (EX.exam && !EX.stDone && EX.mode !== 'exam' && (window.__DH_SPEED || 1) >= 1 && Date.now() - EX.lastAct > 26000 && !(EX.dh && EX.dh.speaking) && !document.querySelector('.mask')) { EX.lastAct = Date.now(); const s = examStation(); if (s.type === 'quiz') { if (quizItem()) coachSay('想好了就答；不会可以说「提示」。', { pose: 'point' }); } else { const g = nextGoal(); if (g) { coachSay(g.nudge || `${HOME_USER.name}，想一想下一步。`, { pose: 'point' }); } } }
   }, 1000);
   const i = $('#ex_say'); if (i) i.focus();
 }
@@ -429,13 +559,13 @@ function examEntryHtml() {
   const tasks = examTasks().filter(t => !t.results || !t.results.some(r => r.who === HOME_USER.name));
   const cl = confirmLog();
   return `<div class="ppage">
-    <div class="ph"><b>陪练关卡</b><span>教练全程在侧：你先动手、先开口，做对推进，做错提示 · 语音或文字口述 · 按住 / 拖动才算操作 · 成绩落到能力雷达并同步组长工作台</span></div>
+    <div class="ph"><b>陪练关卡</b><span>做题 + 操作两种方式：选择 / 填空 / 问答在对话里一问一答，教练即时回应；操作关教练先在屏幕上给出怎么做，做完当场打分 · 成绩落到能力雷达并同步组长工作台</span></div>
     ${tasks.length ? `<section class="hcard ho"><div class="hch"><b>待练任务</b><span>班组长下发</span></div><div class="hcb">${tasks.map(t => `<div class="hrow"><b>${t.examName || t.plan}</b> <span class="tk3">${t.from} 下发 · ${t.due}截止 · ${t.mode} · 及格 ${t.pass}${t.dims && t.dims.length ? ' · 针对 ' + t.dims.join('、') : ''}</span> <button class="btn sm pri" data-exstart="${t.exam}" data-exmode="${t.mode === '考核模式' ? 'exam' : t.mode === '演练模式' ? 'drill' : 'teach'}" data-extask="${t.id}">开始</button></div>`).join('')}</div></section>` : ''}
     <div class="exgrid">
       ${EXAMS.map(ex => { const c = cl.find(x => x.id === ex.id); const my = recs.filter(r => r.exam === ex.id); const best = my.length ? Math.max(...my.map(r => r.score)) : null; return `
       <section class="hcard hg excard"><div class="hch"><b>${ex.n}</b><span>${ex.src}</span></div><div class="hcb">
         <div class="exbg">${ex.bg}</div>
-        <div class="exmeta"><span>教练：${ex.coach.name} · ${ex.coach.role}</span><span>${ex.stations.filter(s => s.type !== 'auto').length} 个情境</span><span>${ex.max} 分制 · 及格 ${ex.pass}</span><span>${my.length ? `已练 ${my.length} 次 · 最高 ${best}` : '未练'}</span></div>
+        <div class="exmeta"><span>教练：${ex.coach.name} · ${ex.coach.role}</span><span>${ex.stations.filter(s => s.type === 'quiz').reduce((a, s) => a + s.items.length, 0)} 道题 · ${ex.stations.filter(s => !s.type).length} 关操作</span><span>${ex.max} 分制 · 及格 ${ex.pass}</span><span>${my.length ? `已练 ${my.length} 次 · 最高 ${best}` : '未练'}</span></div>
         <div class="exdims">${ex.cover.map(k => `<i>${abilityOf(k).n}</i>`).join('')}</div>
         <div class="tk3">评分表 ${c.ver} · ${c.st === 'ok' ? `已审定：${c.who} ${c.date}` : c.st === 'sent' ? '已提交审定，待安全专家确认' : '待安全专家审定'}</div>
         <div class="exmodes">${Object.keys(EXAM_MODES).map(k => `<label class="exmode"><input type="radio" name="exm_${ex.id}" value="${k}" ${k === 'teach' ? 'checked' : ''}><b>${EXAM_MODES[k].n}</b><span>${EXAM_MODES[k].d}</span></label>`).join('')}</div>
@@ -461,7 +591,7 @@ function examReviewHtml(r, fresh) {
       <div class="rvradar">${chRadar(DIMS, dimsArr, RADAR_PREV, { w: 330, h: 240, l1: '本次', l2: '上月', key: 'x' })}<div class="tk3" style="text-align:center">本次落到 8 维能力 · 未覆盖维度记 0 不计入现值</div></div></section>
     <div class="gtwo">
       <section class="hcard hg"><div class="hch"><b>完整操作轨迹</b><span>一次做对 / 提示后完成 / 出错</span></div><div class="hcb"><table class="htbl extrack">
-        ${r.track.map(t => t.auto ? `<tr class="auto"><td colspan="3">系统完成：${t.items.map(i => i.n).join('、')}</td></tr>` : `<tr><td><b>${t.part ? t.part + ' · ' : ''}${t.title}</b><div class="tk3">${t.items.map(i => `<i class="${i.ok ? 'ok' : i.hint >= 3 || i.wrong >= 2 ? 'bad' : 'wn'}">${i.ok ? '√' : i.hint >= 3 || i.wrong >= 2 ? '×' : '△'} ${i.n}${i.hint ? `（提示 ${i.hint} 级）` : ''}${i.wrong ? `（错 ${i.wrong} 次）` : ''}</i>`).join(' ')}</div></td><td class="mono">${t.pts ? `${t.got}/${t.pts}` : (t.ratio != null ? Math.round(t.ratio * 100) + '%' : '—')}</td><td>${t.items.every(i => i.ok) ? '<span class="tag ok">一次做对</span>' : t.items.some(i => i.wrong >= 2 || i.hint >= 3) ? '<span class="tag rl">靠答案完成</span>' : '<span class="tag wn">提示后完成</span>'}</td></tr>`).join('')}</table></div></section>
+        ${r.track.map(t => t.auto ? `<tr class="auto"><td colspan="3">系统完成：${t.items.map(i => i.n).join('、')}</td></tr>` : `<tr><td><b>${t.quiz ? '<i class="exhl">做题</i>' : ''}${t.part ? t.part + ' · ' : ''}${t.title}</b><div class="tk3">${t.items.map(i => `<i class="${i.ok ? 'ok' : i.hint >= 3 || i.wrong >= 2 ? 'bad' : 'wn'}">${i.ok ? '√' : i.hint >= 3 || i.wrong >= 2 ? '×' : '△'} ${i.n}${i.ans ? `「${i.ans}」` : ''}${i.hint ? `（提示 ${i.hint} 级）` : ''}${i.wrong ? `（错 ${i.wrong} 次）` : ''}</i>`).join(' ')}</div></td><td class="mono">${t.pts ? `${t.got}/${t.pts}` : (t.ratio != null ? Math.round(t.ratio * 100) + '%' : '—')}</td><td>${t.items.every(i => i.ok) ? '<span class="tag ok">一次做对</span>' : t.items.some(i => i.wrong >= 2 || i.hint >= 3) ? '<span class="tag rl">靠答案完成</span>' : '<span class="tag wn">提示后完成</span>'}</td></tr>`).join('')}</table></div></section>
       <section class="hcard ho"><div class="hch"><b>错误步骤</b><span>实际操作 · 正确做法 · 原因 · 处置</span></div><div class="hcb">
         ${r.errs.length ? r.errs.map(e => `<div class="exerr ${e.kind}"><div class="err1"><span class="tag ${e.kind === 'red' || e.crit ? 'rl' : 'wn'}">${ERR_KIND[e.kind] || e.kind}${e.crit && e.kind !== 'red' ? ' · 关键' : ''}</span><b>${e.part ? e.part + ' · ' : ''}${e.title}</b></div>
           <div class="err2"><label>实际操作</label>${e.click || '—'}</div><div class="err2"><label>正确做法</label>${e.right || '—'}</div>
@@ -485,8 +615,9 @@ function examClick(e) {
   if (n = q('[data-zclose]')) { exCloseZoom(); return true; }
   if (n = q('[data-zsay]')) { const i = $('#ex_zsay'); examSay(i ? i.value : '', true); return true; }
   if (n = q('[data-exsay]')) { const i = $('#ex_say'); const v = i ? i.value : ''; if (i) i.value = ''; examSay(v, false); return true; }
-  if (n = q('[data-exhint]')) { touch(); exHint(nextGoal()); return true; }
-  if (n = q('[data-exanswer]')) { touch(); const g = nextGoal(); if (g) { gState(g.id).hint = 2; exHint(g); } return true; }
+  if (n = q('[data-exopt]')) { examPick(+n.dataset.exopt); return true; }
+  if (n = q('[data-exhint]')) { touch(); const it = quizItem(); if (it) exHintQ(it); else exHint(nextGoal()); return true; }
+  if (n = q('[data-exanswer]')) { touch(); const it = quizItem(); if (it) { EX.qhint[it.id] = Math.max(1, EX.qhint[it.id] || 0); exHintQ(it); return true; } const g = nextGoal(); if (g) { gState(g.id).hint = 2; exHint(g); } return true; }
   if (n = q('[data-exask]')) { touch(); const i = $('#ex_say'); if (i) { i.placeholder = '把问题说出来，例如：为什么要先验电再接地？'; i.focus(); } return true; }
   if (n = q('[data-exnext]')) { examNext(); return true; }
   if (n = q('[data-exmic]')) { examMic(n, n.dataset.exmic); return true; }
@@ -506,6 +637,19 @@ async function examAuto(kind) {
   if (EX.stDone) return;
   kind = kind || 'ok';
   if (s.type === 'auto') return;
+  if (s.type === 'quiz') {
+    const ansOf = (it, bad) => it.kind === 'choice' ? 'ABCD'[bad ? (it.a + 1) % it.opts.length : it.a] : (bad ? (it.sampleBad || '不知道') : (typeof it.sample === 'function' ? it.sample(EX.st) : it.sample));
+    let guard = 0;
+    while (EX.exam && examStation() === s && !EX.stDone && guard++ < 30) {
+      const it = quizItem(); if (!it) break;
+      if (EX.qAsked !== it.id) { await zz(60); continue; }
+      const qi = EX.qi;
+      if (kind === 'wrong' && qi === 0 && EX.qtry === 0) { examAnswer(ansOf(it, true)); await zz(60); if (EX.mode === 'exam') continue; }
+      examAnswer(ansOf(it, false));
+      let k = 0; while (EX.exam && EX.qi === qi && !EX.stDone && k++ < 40) await zz(50);
+    }
+    return;
+  }
   if (kind === 'red') { const g = s.goals.find(x => x.red); if (g) { if (g.loc) { EX.loc = g.loc; rerenderScene(); } exOp(g.op); } return; }
   if (kind === 'wrong') { const g = nextGoal(); if (!g) return; if (g.kind === 'look') { if (g.loc) { EX.loc = g.loc; rerenderScene(); } examLook(g.wrongDev || g.dev[0]); await zz(40); examSay(g.sampleBad || '看不清', true); } else if (g.kind === 'say' || g.kind === 'qa') examSay(g.sampleBad || '不知道', false); else if (g.kind === 'op') { const sp = Object.keys(s.spots || {}).find(k => !(g.dev || []).includes(k) && s.spots[k].bad && !s.spots[k].crit); if (sp) examLook(sp); } else if (g.kind === 'drag') { EX.st.handle = 40; rerenderScene(); examDragEnd(); } return; }
   let guard = 0;

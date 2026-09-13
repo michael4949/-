@@ -94,7 +94,7 @@ const LAYOUT = `
     <button id="dm_skip">跳过当前准备阶段</button>
     <button id="dm_red">触发红线：未验电合地刀</button>
     <button id="dm_abn">注入异常：刀闸位置指示不一致</button>
-    <button id="dm_voice">数字人朗读语音：<b data-voicelbl>开</b></button>
+    <button id="dm_voice">数字人朗读语音：<b data-voicelbl>关</b></button>
   </div>
   <button class="tg" id="demotg">讲师演示台</button>
 </div>
