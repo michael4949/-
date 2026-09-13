@@ -1,214 +1,47 @@
-/* ===== 底座各页：评分复盘 / 成长档案 / 知识课堂 / 班组看板 / 教练编辑器 + 角色切换 ===== */
+/* ===== 底座各页：评分复盘 / 成长档案 / 知识课堂 / 教练编辑器 + 角色切换 ===== */
 
-/* ---------------- 本机场次落盘（陪练舱报告时写入，复盘页读取） ---------------- */
-function saveSession(o) {
-  const list = lsGet(LS_SESSIONS, []);
-  list.unshift(o); lsSet(LS_SESSIONS, list.slice(0, 20));
-  RV.sel = 'L0';
-}
-function unifySessions() {
-  const local = lsGet(LS_SESSIONS, []).map((s, i) => Object.assign({}, s, { id: 'L' + i, real: true, d: Math.max(0, Math.round((Date.now() - s.ts) / 864e5)) }));
-  const mock = SESSIONS.map((s, i) => Object.assign({}, s, { id: 'M' + i, real: false, dims: estDims(s), lines: mockLines(s), praise: s.praise || [] }));
-  return local.concat(mock);
-}
-/* 模拟场次的逐句记录：按练习方式取前 7 项票面，依据该场扣分制造真实感的偏差 */
-function mockLines(s) {
-  const P = PLANS.find(p => p.id === planId(s.plan)); if (!P) return [];
-  const idx = P.steps().slice(0, 7);
-  const out = [];
-  idx.forEach((i, k) => {
-    const st = STEPS[i]; if (!st || !st.recite) return;
-    let mine = st.recite;
-    const v = s.vio.find(x => x.step === st.no);
-    if (v && /双重名称|复诵/.test(v.t)) mine = mine.replace('培训三线', '').replace('线路侧', '');
-    else if (v && /唱读|核对/.test(v.t)) mine = mine.replace(/在(分|合)闸位置$/, '');
-    else if (k === 2 && s.mode === '教学模式') mine = mine.replace('110kV仿真站', '');
-    out.push({ step: st.no, beat: 1, t: st.ticket, mine, std: st.recite });
-    if (st.report && k % 3 === 1) out.push({ step: st.no, beat: 4, t: st.ticket, mine: st.report, std: st.report });
-  });
-  return out;
-}
-function planStepsOf(s) {
-  const P = PLANS.find(p => p.id === planId(s.plan));
-  let idx = P ? P.steps() : [];
-  if (!idx.length) idx = STEPS.map((_, i) => i).slice(0, 8);
-  return idx.map(i => STEPS[i]);
-}
 function rerender(h) { const pg = $('#hpage'); if (!pg) return; pg.innerHTML = PAGE_FN[h](); if (typeof pageAfter === 'function') pageAfter(h); }
 const PAGE_FN = { review: () => pageReview(), growth: () => pageGrowth(), classroom: () => pageClassroom(), team: () => pageTeam(), editor: () => pageEditor() };
 
-/* ---------------- 逐句 diff（字符级 LCS）：漏说标黄下划线，说错/多说标红删除线 ---------------- */
-function diffHtml(mine, std) {
-  const a = Array.from(mine || ''), b = Array.from(std || '');
-  const n = a.length, m = b.length;
-  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
-  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
-  let i = 0, j = 0, out = '';
-  const esc = c => c.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  while (i < n && j < m) {
-    if (a[i] === b[j]) { out += esc(a[i]); i++; j++; }
-    else if (dp[i + 1][j] >= dp[i][j + 1]) { out += `<span class="dx">${esc(a[i])}</span>`; i++; }
-    else { out += `<span class="dm">${esc(b[j])}</span>`; j++; }
-  }
-  while (i < n) { out += `<span class="dx">${esc(a[i++])}</span>`; }
-  while (j < m) { out += `<span class="dm">${esc(b[j++])}</span>`; }
-  return out;
-}
-function simPct(a, b) { const x = Array.from(a || ''), y = Array.from(b || ''); if (!y.length) return 100; let c = 0; const ys = new Set(y); x.forEach(ch => { if (ys.has(ch)) c++; }); return Math.round(100 * Math.min(1, c / y.length)); }
-
-/* ---------------- AI 复盘段：由本场数据生成 ---------------- */
-function aiReview(s, prev) {
-  const red = s.vio.find(v => v.lv === 'red');
-  const majors = s.vio.filter(v => v.lv === 'major'), minors = s.vio.filter(v => v.lv === 'minor');
-  const dimCnt = {}; s.vio.forEach(v => { const d = vioDim(v); dimCnt[d] = (dimCnt[d] || 0) + 1; });
-  const worstDim = Object.keys(dimCnt).sort((x, y) => dimCnt[y] - dimCnt[x])[0];
-  const best = s.dims.indexOf(Math.max(...s.dims)), weakI = s.dims.indexOf(Math.min(...s.dims));
-  const out = [];
-  out.push(`本场「${s.plan}」${s.mode}，用时 ${s.dur} 分钟，综合 ${s.score} 分${prev ? `，较上一场${s.score - prev.score >= 0 ? '提升' : '下降'} ${Math.abs(s.score - prev.score)} 分` : ''}。`);
-  if (red) out.push(`触发一票否决：${red.t}（第${red.step}项）。这是本场首要纠正项，其余节拍的完成度不作为本场评价依据。`);
-  if (majors.length) out.push(`严重扣分 ${majors.length} 项：${majors.map(v => v.t).join('、')}。`);
-  if (minors.length) out.push(`不规范 ${minors.length} 项，集中在「${worstDim}」环节（${minors.map(v => '第' + v.step + '项').join('、')}）。`);
-  if (!s.vio.length) out.push('全程未触发扣分项，各节拍闭环完整。');
-  if (s.hints && s.hints.length) out.push(`使用提示 ${s.hints.length} 次，主要在「${s.hints[0][0]}」，该环节尚未形成不看提示也能完成的稳定性。`);
-  out.push(`「${DIMS6[best]}」${s.dims[best]} 分为本场最强项；「${DIMS6[weakI]}」${s.dims[weakI]} 分最弱。`);
-  const sp = DIM_PLAN[DIMS6[weakI]];
-  out.push(sp ? `建议先安排一轮「${sp[1]}」专项，再回到完整票考核模式验证。` : `建议以错题重练巩固本场扣分项后，进入考核模式验证。`);
-  return out.join('');
-}
-
-/* ================= 评分复盘 ================= */
-const RV = { sel: null, filter: 'all', cmp: 'prev', play: null, follow: {}, tlCur: null };
+/* ================= 评分复盘（陪练关卡记录：本机 + 近30天） ================= */
+const RV = { sel: null, filter: 'all' };
 function rvFiltered(all) {
-  if (RV.filter === 'red') return all.filter(s => s.vio.some(v => v.lv === 'red'));
-  if (RV.filter === 'exam') return all.filter(s => s.mode === '考核模式');
-  if (RV.filter === 'local') return all.filter(s => s.real);
-  if (RV.filter === 'low') return all.filter(s => s.score < 80);
+  if (RV.filter === 'red') return all.filter(r => r.red);
+  if (RV.filter === 'exam') return all.filter(r => r.mode === 'exam');
+  if (RV.filter === 'local') return all.filter(r => !r.mock);
+  if (RV.filter === 'low') return all.filter(r => r.red || r.score < r.pass);
   return all;
 }
-/* 场次回放时间轴：按练习方式的票面项目铺开，扣分/红线/提示落在对应项上 */
-function rvTimeline(s) {
-  const steps = planStepsOf(s);
-  const hintSteps = (s.hints || []).map(h => { const m = /第(\d+)项/.exec(h[1] || ''); return m ? m[1] : null; }).filter(Boolean);
-  return `<div class="rvtl" id="rvtl">
-    ${steps.map(st => { const v = s.vio.filter(x => String(x.step) === st.no); const lv = v.some(x => x.lv === 'red') ? 'red' : v.some(x => x.lv === 'major') ? 'major' : v.length ? 'minor' : 'ok';
-      return `<span class="tlx ${lv} ${RV.tlCur === st.no ? 'cur' : ''}" data-tlstep="${st.no}" data-tip="第${st.no}项 · ${st.ticket}${v.length ? ' · ' + v.map(x => x.t).join('；') : ' · 完成'}">${st.no}${hintSteps.includes(st.no) ? '<i></i>' : ''}</span>`; }).join('')}
-  </div>
-  <div class="rvtlinfo" id="rvtl_txt">${rvStepInfo(s, RV.tlCur || steps[0].no)}</div>`;
-}
-function rvStepInfo(s, no) {
-  const st = STEPS.find(x => x.no === String(no)); if (!st) return '';
-  const v = s.vio.filter(x => String(x.step) === st.no);
-  const line = (s.lines || []).find(l => String(l.step) === st.no && l.beat === 1);
-  return `<b class="mono">第${st.no}项</b> ${st.ticket}<br>
-    ${v.length ? v.map(x => `<span class="tag ${x.lv === 'red' ? 'rl' : 'wn'}">${x.lv === 'red' ? '一票否决' : x.lv === 'major' ? '严重' : '不规范'}</span> ${x.t} <span class="cite">${x.cite || ''}</span>`).join('<br>') : '<span class="tag ok">完成</span> 五拍闭环完整，监护人标"√"'}
-    ${line ? `<div class="tk3" style="margin-top:4px">复诵：${diffHtml(line.mine, line.std)}</div>` : ''}`;
-}
-function rvPlay() {
-  const all = unifySessions(), s = all.find(x => x.id === RV.sel); if (!s) return;
-  const steps = planStepsOf(s);
-  if (RV.play) { clearInterval(RV.play); RV.play = null; const b = $('[data-rvplay]'); if (b) b.textContent = '▶ 回放本场'; return; }
-  let i = 0;
-  const b = $('[data-rvplay]'); if (b) b.textContent = '■ 停止回放';
-  const step = () => {
-    if (i >= steps.length) { clearInterval(RV.play); RV.play = null; if (b) b.textContent = '▶ 回放本场'; return; }
-    const no = steps[i].no; RV.tlCur = no;
-    $$('#rvtl .tlx').forEach(x => x.classList.toggle('cur', x.dataset.tlstep === no));
-    const t = $('#rvtl_txt'); if (t) t.innerHTML = rvStepInfo(s, no);
-    i++;
-  };
-  step(); RV.play = setInterval(step, 520);
-}
-/* 行动清单：由本场扣分 / 提示 / 短板生成，勾选状态本机保存 */
-function rvActions(s) {
-  const items = [];
-  s.vio.forEach(v => { const st = STEPS.find(x => x.no === String(v.step)); items.push({ t: `第${v.step}项 ${v.t} → ${st && st.recite ? '按票面完整复诵：' + st.recite : '按票面顺序执行并核对'}`, cite: v.cite }); });
-  (s.hints || []).forEach(h => items.push({ t: `「${h[0]}」不看提示独立完成一次`, cite: h[1] }));
-  DIMS6.forEach((d, i) => { if (s.dims[i] < 75 && DIM_PLAN[d]) items.push({ t: `安排一轮「${DIM_PLAN[d][1]}」专项，把「${d}」练到 75 分以上`, plan: DIM_PLAN[d][0] }); });
-  if (!items.length) items.push({ t: '本场无扣分，下一场进入考核模式验证稳定性', plan: 'full' });
-  return items.slice(0, 8);
-}
-function rvSummary(s, prev) {
-  const acts = rvActions(s);
-  return `${HOME_USER.name} · 陪练复盘摘要（${s.real ? '今天' : dayLabel(s.d)}）\n练习方式：${s.plan} · ${s.mode} · 用时 ${s.dur} 分钟\n综合得分：${s.score}${prev ? `（上一场 ${prev.score}）` : ''}\n扣分项：${s.vio.length ? s.vio.map(v => `第${v.step}项 ${v.t}（${v.cite || ''}）`).join('；') : '无'}\n提示使用：${(s.hints || []).length} 次\n六维：${DIMS6.map((d, i) => `${d} ${s.dims[i]}`).join(' / ')}\n下次练习要做到：\n${acts.map((a, i) => `${i + 1}. ${a.t}`).join('\n')}\n\n以上内容由陪练系统按本场留痕数据生成，经本人确认后提交带教师傅。`;
+function rvSummary(r) {
+  const errs = r.errs || [];
+  return `${HOME_USER.name} · 陪练关卡复盘摘要（${stampOf(r.ts)}）\n关卡：${r.examName} · ${r.modeName} · 用时 ${r.dur} 分钟\n得分：${r.red ? '0（一票否决）' : r.score}/${r.max}（及格 ${r.pass}）\n错误：${errs.length ? errs.map(e => `${ERR_KIND[e.kind] || e.kind} · ${e.title || ''}：${(e.text || '').replace(/<[^>]+>/g, '')}`).join('；') : '无'}\n提示：${r.hints || 0} 次\n建议：${(r.sugg || []).map(x => x.t).join('；') || '—'}\n复核：${r.reviewer || '待班组长复核'}`;
 }
 function pageReview() {
-  const all = unifySessions();
+  const all = examHist();
   const list = rvFiltered(all);
+  if (!all.length) return `<div class="ppage"><div class="ph"><b>评分复盘</b><span>还没有陪练关卡记录</span></div><section class="hcard hg"><div class="hcb"><button class="btn pri" data-go="exam">去陪练关卡</button></div></section></div>`;
   if (!RV.sel || !all.find(x => x.id === RV.sel)) RV.sel = (list[0] || all[0]).id;
   if (list.length && !list.find(x => x.id === RV.sel)) RV.sel = list[0].id;
-  const idx = all.findIndex(x => x.id === RV.sel), s = all[idx], prev = all[idx + 1];
+  const r = all.find(x => x.id === RV.sel);
   const A = homeAgg();
-  const red = s.vio.some(v => v.lv === 'red');
-  const tagOf = v => `<span class="tag ${v.lv === 'red' ? 'rl' : v.lv === 'major' ? 'wn' : ''}">${v.lv === 'red' ? '一票否决' : v.lv === 'major' ? '严重' : '不规范'}</span>`;
-  const stepOf = no => STEPS.find(x => x.no === String(no));
-  const weakDims = DIMS6.map((n, i) => [n, s.dims[i]]).filter(x => x[1] < 75).map(x => x[0]);
-  const courses = COURSES.filter(c => weakDims.includes(c.tag));
-  const lines = s.lines || [];
-  const others = all.filter(x => x.id !== s.id);
-  const best = others.slice().sort((a, b) => b.score - a.score)[0];
-  const cmpVals = RV.cmp === 'best' && best ? best.dims : RV.cmp === 'avg' ? RADAR_NOW : (prev ? prev.dims : RADAR_PREV);
-  const cmpLabel = RV.cmp === 'best' ? '最佳场' : RV.cmp === 'avg' ? '30天均值' : '上一场';
-  const acts = rvActions(s), actSt = (lsGet(LS_ACTS, {})[s.id]) || {};
-  const actDone = acts.filter((_, i) => actSt['a' + i]).length;
-  const better = prev ? DIMS6.map((d, i) => [d, s.dims[i] - prev.dims[i]]).filter(x => x[1] > 0) : [];
   return `<div class="ppage">
-    <div class="ph"><b>评分复盘</b><span>近30天 ${A.cnt + all.filter(x => x.real).length} 场 · 平均 ${A.avg} 分 · 记录由陪练舱自动留痕</span>
-      <span class="phr"><button class="btn sm" data-rvsum="1">生成复盘摘要</button></span></div>
+    <div class="ph"><b>评分复盘</b><span>近30天 ${A.cnt} 次 · 平均得分率 ${A.avg}% · 及格率 ${A.passRate}% · 记录由陪练关卡自动留痕</span>
+      <span class="phr"><button class="btn sm" data-rvsum="1">生成复盘摘要</button><button class="btn sm" data-exstart="${r.exam}" data-exmode="${r.mode}">再练一次</button></span></div>
     <div class="rvwrap">
       <aside class="rvlist hcard hg">
-        <div class="hch"><b>场次记录</b><span>${list.length} 场</span></div>
-        <div class="chips">${[['all', '全部'], ['local', '本机'], ['exam', '考核'], ['red', '红线'], ['low', '<80']].map(([k, n]) => `<span class="chip ${RV.filter === k ? 'on' : ''}" data-rvf="${k}">${n}</span>`).join('')}</div>
+        <div class="hch"><b>关卡记录</b><span>${list.length} 次</span></div>
+        <div class="chips">${[['all', '全部'], ['local', '本机'], ['exam', '考核'], ['red', '否决'], ['low', '未及格']].map(([k, n]) => `<span class="chip ${RV.filter === k ? 'on' : ''}" data-rvf="${k}">${n}</span>`).join('')}</div>
         ${list.map(x => `<div class="rvit ${x.id === RV.sel ? 'on' : ''}" data-sess="${x.id}">
-          <div class="rv1"><span class="mono">${x.real ? '今天' : dayLabel(x.d)}</span>${x.real ? '<i class="rvloc">本机</i>' : ''}<b class="mono ${x.score < 75 ? 'wv' : 'gv'}">${x.score}</b></div>
-          <div class="rv2">${x.plan}</div><div class="rv3">${x.mode} · ${x.dur} 分钟 · 扣分 ${x.vio.length}</div></div>`).join('') || '<div class="tk3" style="padding:14px">没有符合条件的场次。</div>'}
+          <div class="rv1"><span class="mono">${stampOf(x.ts)}</span>${x.mock ? '' : '<i class="rvloc">本机</i>'}<b class="mono ${x.red || x.score < x.pass ? 'wv' : 'gv'}">${x.red ? '否决' : x.score}</b></div>
+          <div class="rv2">${x.short}</div><div class="rv3">${x.modeName} · ${x.dur} 分钟 · 错误 ${(x.errs || []).length}${x.reviewer ? ' · ' + x.reviewer + ' 已复核' : ''}</div></div>`).join('') || '<div class="tk3" style="padding:14px">没有符合条件的记录。</div>'}
       </aside>
-      <main class="rvmain">
-        <section class="hcard rvhead hg">
-          <div class="rvscore"><div class="rvbig ${red ? 'wv' : ''}">${s.score}</div><div class="tk3">综合得分 · ${red ? '触发一票否决' : s.mode}</div>
-            <div class="rvkpis"><span><b>${s.dur}</b>分钟</span><span><b>${s.vio.length}</b>扣分项</span><span><b>${(s.hints || []).length}</b>提示</span><span><b>${s.vio.filter(v => v.lv === 'red').length}</b>红线</span>${prev ? `<span><b class="${s.score >= prev.score ? 'gv' : 'wv'}">${s.score - prev.score >= 0 ? '+' : ''}${s.score - prev.score}</b>较上一场</span>` : ''}</div>
-            <div class="rvtags">${DIMS6.map((t, i) => `<i class="${s.dims[i] > 80 ? 'ok' : s.dims[i] > 55 ? 'wn' : 'bad'}" data-hdim="${i}" title="查看「${t}」明细">${t} ${s.dims[i] > 80 ? '达标' : s.dims[i] > 55 ? '待提升' : '短板'}</i>`).join('')}</div>
-            ${better.length ? `<div class="tk3" style="margin-top:8px">较上一场进步：${better.map(x => `${x[0]} +${x[1]}`).join('、')}</div>` : ''}</div>
-          <div class="rvradar">
-            <div class="chips" style="justify-content:center">${[['prev', '上一场'], ['best', '最佳场'], ['avg', '30天均值']].map(([k, n]) => `<span class="chip ${RV.cmp === k ? 'on' : ''}" data-rvcmp="${k}">${n}</span>`).join('')}</div>
-            ${chRadar(DIMS6, s.dims, cmpVals, { w: 330, h: 240, l1: '本场', l2: cmpLabel })}<div class="tk3" style="text-align:center">本场 vs ${cmpLabel} · 顶点可查明细</div></div>
-        </section>
-        ${examRecords().filter(r => r.who === HOME_USER.name).length ? `<section class="hcard ho"><div class="hch"><b>陪练关卡记录</b><span>${examRecords().filter(r => r.who === HOME_USER.name).length} 条 · 本机保存 · 已同步组长工作台</span></div><div class="hcb"><table class="htbl"><tr><th>时间</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>复核</th><th></th></tr>${examRecords().filter(r => r.who === HOME_USER.name).slice(0, 5).map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">复盘</button></td></tr>`).join('')}</table></div></section>` : ''}
-        <section class="hcard hg"><div class="hch"><b>AI 复盘</b><em class="ai">AI</em><span>由本场留痕数据生成</span></div>
-          <div class="hcb"><div class="airv">${aiReview(s, prev)}</div></div></section>
-        <section class="hcard ho"><div class="hch"><b>场次回放</b><span>逐项时间轴 · 绿=完成 金=不规范 橙=严重 红=一票否决 · 小点=用了提示</span>
-            <span class="phr"><button class="btn sm" data-rvplay="1">${RV.play ? '■ 停止回放' : '▶ 回放本场'}</button></span></div>
-          <div class="hcb">${rvTimeline(s)}</div></section>
-        <section class="hcard hg"><div class="hch"><b>逐句回放</b><span>我的复诵/回报 vs 票面标准话术 · <i class="dm">漏说</i> <i class="dx">说错/多说</i> · 点「跟读」当场再练一遍</span></div>
-          <div class="hcb">${lines.length ? `<div class="tl">${lines.map((l, i) => `<div class="tlrow ${RV.follow[i] === 'pass' ? 'pass' : ''}">
-              <div class="tlk"><b class="mono">第${l.step}项</b><span>${l.beat === 1 ? '复诵' : '回报'}</span><em class="mono ${simPct(l.mine, l.std) < 86 ? 'wv' : 'gv'}">${simPct(l.mine, l.std)}%</em><button class="btn sm" data-follow="${i}">${RV.follow[i] ? '收起' : '跟读'}</button></div>
-              <div class="tlb"><div class="tlt">${l.t || ''}</div><div class="tlme">我说：${diffHtml(l.mine, l.std)}</div><div class="tlstd">标准：${l.std}</div>
-              ${RV.follow[i] ? `<div class="tlfollow"><input class="tlin" data-followin="${i}" placeholder="照标准话术念一遍（可点麦克风口述）…" autocomplete="off"><span class="tlmeter" id="fm_${i}">${RV.follow[i] === 'pass' ? '<b class="gv">已通过 ✓</b>' : '吻合度 —'}</span></div>` : ''}</div></div>`).join('')}</div>` : '<div class="tk3">本场无逐句记录。</div>'}</div></section>
-        <section class="hcard ho"><div class="hch"><b>错误卡</b><span>错在哪 · 依据 · 正确做法</span></div>
-          <div class="hcb">${s.vio.length ? `<div class="errgrid">${s.vio.map(v => { const st = stepOf(v.step); return `<div class="errc ${v.lv}">
-              <div class="err1">${tagOf(v)}<b>第${v.step}项</b><span>${st ? st.ticket : ''}</span></div>
-              <div class="err2"><label>错在哪</label>${v.t}</div>
-              <div class="err2"><label>依据</label><span class="mono">${v.cite || ''}</span>${st && st.rule ? `<div class="errq">${st.rule}</div>` : ''}</div>
-              <div class="err2"><label>正确做法</label>${st ? (st.recite || st.report || '按票面执行') : '按票面执行'}</div>
-            </div>`; }).join('')}</div>
-            <div class="rvact"><button class="btn pri" data-retry="${s.id}">错题重练（${s.vio.length} 项）</button><button class="btn" data-train="${planId(s.plan)}">重练该方式</button></div>`
-            : '<div class="tk3">本场未触发扣分项。</div>'}</div></section>
-        <div class="gtwo">
-          <section class="hcard ho"><div class="hch"><b>下次练习要做到</b><em class="ai">AI</em><span>由本场留痕生成 · 已完成 ${actDone}/${acts.length}</span></div><div class="hcb">
-            ${acts.map((a, i) => `<label class="actit ${actSt['a' + i] ? 'done' : ''}"><input type="checkbox" data-rvact="${i}" ${actSt['a' + i] ? 'checked' : ''}><span>${a.t}${a.cite ? `<i class="cite">${a.cite}</i>` : ''}</span>${a.plan ? `<button class="btn sm" data-train="${a.plan}">去练</button>` : ''}</label>`).join('')}</div></section>
-          <section class="hcard hg"><div class="hch"><b>下一步建议</b><span>专项 + 课程（知识课堂供给）</span></div><div class="hcb">
-            ${(s.hints || []).map(h => `<div class="hrow hint">提示 · ${h[0]} · ${h[1]}</div>`).join('')}
-            ${(s.praise || []).map(p => `<div class="hrow"><span class="tag ok">加分</span> ${p.title || p}</div>`).join('')}
-            ${weakDims.map(d => DIM_PLAN[d] ? `<div class="hrow"><button class="btn sm" data-train="${DIM_PLAN[d][0]}">练「${DIM_PLAN[d][1]}」专项</button> <span class="tk3">针对「${d}」</span></div>` : '').join('')}
-            ${courses.map(c => `<div class="hrow">课程 · ${c.n} <span class="tk3">${c.h} 学时 · ${c.tag}</span> <button class="btn sm" data-go="classroom">去学</button></div>`).join('') || '<div class="hrow">各维度均达标，建议进入考核模式。</div>'}
-            <div class="hrow"><button class="btn sm" data-go="growth">查看成长档案</button></div></div></section>
-        </div>
-      </main>
+      <main class="rvmain">${examReviewBody(r)}</main>
     </div></div>`;
 }
 
 /* ================= 成长档案 ================= */
 const LMAP_MASTERY = { state: 92, sanshen: 88, wufang: 85, changpiao: 90, yandian: 74, gis: 58, erci: 80, yichang: 70, diaodu: 76 };
-const LMAP_PLAN = { gis: 'sp_gis', yandian: 'sp_vd', diaodu: 'sp_ord', sanshen: 'sp_ord', changpiao: 'p1', yichang: 'full', erci: 'p3', wufang: 'full', state: 'p1' };
+const LMAP_EXAM = { gis: 'e1163', yandian: 'e1163', diaodu: 'e1163', sanshen: 'e1163', changpiao: 'e1163', yichang: 'rain', erci: 'e1163', wufang: 'e1163', state: 'e1163' };
 const GR = { cmp: 'prev', show: { score: true, dur: false, vio: false, hint: false, avg: true, pass: true } };
 function goalsGet() { return lsGet(LS_GOALS, {}); }
 function goalArr() { const g = goalsGet(); return DIMS10.map((_, i) => g[i] != null ? +g[i] : null); }
@@ -220,19 +53,19 @@ function growthRadar() {
   const lb = GR.cmp === 'old' ? '前月' : GR.cmp === 'team' ? '班组均值' : '上月';
   return chRadar(DIMS10, RADAR10_NOW, cmp, { w: 440, h: 320, l1: '本月', l2: lb, key: 'gdim', target, c2: GR.cmp === 'team' ? '#7aa0c8' : '#b3bfb2' });
 }
-function badgeList() { const L = unifySessions(); return BADGES.map(b => Object.assign({}, b, { lit: !!b.test(L) })); }
+function badgeList() { const L = examHist(); return BADGES.map(b => Object.assign({}, b, { lit: !!b.test(L) })); }
 function pageGrowth() {
   const A = homeAgg();
   const done = MILESTONES.filter(m => m.k === 'done').length;
   const goals = goalArr();
-  const pts = unifySessions().slice().sort((a, b) => b.d - a.d);
+  const pts = histPoints().slice().sort((a, b) => b.d - a.d);
   const badges = badgeList(), lit = badges.filter(b => b.lit).length;
   const up = DIMS10.filter((_, i) => RADAR10_NOW[i] > RADAR10_PREV[i]).length;
   return `<div class="ppage">
     <div class="ph"><b>成长档案</b><span>${HOME_USER.name} · ${HOME_USER.post} · ${HOME_USER.team}</span><span class="phr"><button class="btn sm" data-print="1">打印 / 导出档案</button></span></div>
     <section class="hcard gcard ho"><div class="gav">${HOME_USER.name.slice(0, 1)}</div>
       <div class="gmeta"><b>${HOME_USER.name}</b><span>${HOME_USER.post} · ${HOME_USER.team} · 2024-08 入职 · 带教师傅 陈志远</span></div>
-      <div class="gkpis"><div class="kpi"><b>${A.cnt}</b><span>近30天场次</span></div><div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div><div class="kpi"><b>${A.avg}</b><span>平均得分</span></div><div class="kpi"><b>${HOME_USER.hours.done}/${HOME_USER.hours.need}</b><span>年度学时</span></div><div class="kpi good"><b>${up}/10</b><span>维度上升</span></div><div class="kpi good"><b>${lit}/${badges.length}</b><span>能力徽章</span></div><div class="kpi good"><b>${done}</b><span>里程碑</span></div></div></section>
+      <div class="gkpis"><div class="kpi"><b>${A.cnt}</b><span>近30天关卡次数</span></div><div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div><div class="kpi"><b>${A.avg}%</b><span>平均得分率</span></div><div class="kpi"><b>${HOME_USER.hours.done}/${HOME_USER.hours.need}</b><span>年度学时</span></div><div class="kpi good"><b>${up}/10</b><span>维度上升</span></div><div class="kpi good"><b>${lit}/${badges.length}</b><span>能力徽章</span></div><div class="kpi good"><b>${done}</b><span>里程碑</span></div></div></section>
     <div class="gtwo g21">
       <section class="hcard hg"><div class="hch"><b>能力全景</b><span>十维 · 本月 vs 对照 · 顶点可查明细</span>
           <span class="phr chips">${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
@@ -241,10 +74,10 @@ function pageGrowth() {
         ${DIMS10.map((n, i) => { const d = RADAR10_NOW[i] - RADAR10_PREV[i], g = goals[i]; return `<tr><td class="hitv" data-gdim="${i}" style="cursor:pointer">${n}</td><td class="mono">${RADAR10_OLD[i]}</td><td class="mono">${RADAR10_PREV[i]}</td><td class="mono">${RADAR10_NOW[i]}</td><td class="mono ${d >= 0 ? 'gv' : 'wv'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${growthPredict(i)}</td><td><input class="gin" type="number" min="0" max="100" data-goal="${i}" value="${g != null ? g : ''}" placeholder="—"></td><td class="mono ${g != null ? (RADAR10_NOW[i] >= g ? 'gv' : 'wv') : ''}" id="ggap${i}">${g != null ? (RADAR10_NOW[i] >= g ? '已达成' : (RADAR10_NOW[i] - g)) : '—'}</td></tr>`; }).join('')}</table>
         <div class="tk3" style="margin-top:6px">预测按近三期趋势线性外推；目标由本人设定，达成情况以人工审核为准。</div></div></section>
     </div>
-    <section class="hcard hg"><div class="hch"><b>成长曲线</b><span>近30天各场 · 点击图例切换序列 · 点击数据点打开该场复盘</span>
+    <section class="hcard hg"><div class="hch"><b>成长曲线</b><span>近30天各次关卡 · 得分率 · 点击图例切换序列 · 点击数据点打开该次复盘</span>
         <span class="phr chips">${[['score', '得分'], ['avg', '7日均线'], ['dur', '用时'], ['vio', '扣分项'], ['hint', '提示次数'], ['pass', '及格/考核线']].map(([k, n]) => `<span class="chip ${GR.show[k] ? 'on' : ''}" data-gshow="${k}">${n}</span>`).join('')}</span></div>
       <div class="hcb" id="gcurve">${chSessionCurve(pts, GR.show, { w: 980, h: 250 })}</div></section>
-    <section class="hcard ho"><div class="hch"><b>能力徽章</b><span>${lit} 枚已点亮 · 由近30天留痕自动判定 · 点击查看条件</span></div><div class="hcb">
+    <section class="hcard ho"><div class="hch"><b>能力徽章</b><span>${lit} 枚已点亮 · 由近30天关卡记录自动判定 · 点击查看条件</span></div><div class="hcb">
       <div class="bgrid">${badges.map(b => `<div class="badge ${b.lit ? 'lit' : ''}" data-badge="${b.id}" data-tip="${b.d}"><svg viewBox="0 0 48 48"><polygon points="24,3 42,13 42,35 24,45 6,35 6,13" fill="${b.lit ? 'url(#gbadge)' : '#f1efe2'}" stroke="${b.lit ? '#c9a227' : '#d9d6c5'}" stroke-width="1.6"/><path d="M15 25 l6 6 12 -13" fill="none" stroke="${b.lit ? '#fff' : '#c8cfb9'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="gbadge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3c05a"/><stop offset="1" stop-color="var(--ac)"/></linearGradient></defs></svg><b>${b.n}</b><span>${b.lit ? '已点亮' : '未点亮'}</span></div>`).join('')}</div></div></section>
     <section class="hcard hg"><div class="hch"><b>学习地图</b><span>九大知识主题掌握度 · 点亮 = 掌握度 ≥ 75</span></div><div class="hcb">
       <div class="lmap">${KNOW.map(k => { const m = LMAP_MASTERY[k.id] || 0, lit = m >= 75; return `<div class="lmt ${lit ? 'lit' : ''}" data-lmap="${k.id}" data-tip="${k.t} · 掌握度 ${m}">
@@ -267,8 +100,8 @@ function pageGrowth() {
     <div class="tk3" style="margin:6px 4px 14px">能力与胜任度数据为系统测算参考，任职资格评定以人工审核结果为准。</div></div>`;
 }
 function growthDim(i) {
-  const n = DIMS10[i], all = unifySessions();
-  const rel = i < 6 ? all.filter(s => s.vio.some(v => vioDim(v) === n)).slice(0, 6) : [];
+  const n = DIMS10[i], k = DIMK[i];
+  const rel = examHist().filter(r => (r.errs || []).some(e => errDimKey(r, e) === k) || (r.dims && r.dims[k] != null && r.dims[k] < 70)).slice(0, 6);
   const g = goalArr()[i];
   const desc = DIM10_DESC[n] || '';
   openDrill(`能力明细 · ${n}`, `前月 ${RADAR10_OLD[i]} · 上月 ${RADAR10_PREV[i]} · 本月 ${RADAR10_NOW[i]} · 班组均值 ${TEAM_AVG10[i]}`, `
@@ -277,14 +110,14 @@ function growthDim(i) {
     <div><div class="hrow">三期走势：${RADAR10_OLD[i]} → ${RADAR10_PREV[i]} → <b>${RADAR10_NOW[i]}</b>，预测下月 ${growthPredict(i)}</div>
     <div class="hrow">较班组均值 ${RADAR10_NOW[i] - TEAM_AVG10[i] >= 0 ? '+' : ''}${RADAR10_NOW[i] - TEAM_AVG10[i]}</div>
     <div class="hrow">本月目标：${g != null ? `${g}（${RADAR10_NOW[i] >= g ? '已达成' : '差 ' + (g - RADAR10_NOW[i])}）` : '未设定，可在三期对照表中填写'}</div></div></div>
-    ${rel.length ? `<div class="sec"><div class="st">相关扣分场次</div>${sessTable(rel)}</div>` : ''}
+    ${rel.length ? `<div class="sec"><div class="st">相关关卡记录</div>${examTable(rel)}</div>` : ''}
     <div class="tk3">测算供参考，能力评价以人工审核为准。</div>`,
-    DIM_PLAN[n] ? `<button class="btn pri" data-train="${DIM_PLAN[n][0]}">练「${DIM_PLAN[n][1]}」专项</button>` : `<button class="btn pri" data-train="full">去练完整票</button>`);
+    `<button class="btn pri" data-exstart="${DIM_EXAM[n] || 'e1163'}">练「${(EXAMS.find(e => e.id === (DIM_EXAM[n] || 'e1163')) || {}).short}」</button>`);
 }
 function badgeDrill(id) {
   const b = badgeList().find(x => x.id === id); if (!b) return;
-  openDrill(`能力徽章 · ${b.n}`, b.lit ? '已点亮' : '未点亮', `<div class="hrow">点亮条件：${b.d}</div><div class="hrow">判定依据：近30天陪练留痕（含本机场次），系统自动判定。</div>${b.lit ? '<div class="hrow"><span class="tag ok">已点亮</span> 保持即可。</div>' : '<div class="hrow"><span class="tag wn">未点亮</span> 完成条件后自动点亮。</div>'}`,
-    b.plan ? `<button class="btn pri" data-train="${b.plan}">去练相关内容</button>` : '');
+  openDrill(`能力徽章 · ${b.n}`, b.lit ? '已点亮' : '未点亮', `<div class="hrow">点亮条件：${b.d}</div><div class="hrow">判定依据：近30天陪练关卡记录（含本机记录），系统自动判定。</div>${b.lit ? '<div class="hrow"><span class="tag ok">已点亮</span> 保持即可。</div>' : '<div class="hrow"><span class="tag wn">未点亮</span> 完成条件后自动点亮。</div>'}`,
+    b.exam ? `<button class="btn pri" data-exstart="${b.exam}">去练相关关卡</button>` : '');
 }
 
 /* ================= 知识课堂（供给层接入 + 课程库 + 随堂测验 + 学习计划） ================= */
@@ -299,7 +132,7 @@ function archSVG() {
     ${CLASSROOM.supply.map((s, i) => `<g class="hitv" data-arch="${s.k}" data-tip="点击查看「${s.n}」接口字段与同步频率"><rect x="40" y="${88 + i * 44}" width="210" height="34" rx="6" fill="#fff" stroke="#e2dfd0"/><text x="52" y="${109 + i * 44}" font-size="12" fill="#33443a">${s.n}</text><text x="238" y="${109 + i * 44}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--ac)">${s.v}</text></g>`).join('')}
     <rect x="480" y="30" width="400" height="240" rx="12" fill="var(--acbg)" stroke="var(--ac)" stroke-width="1.6"/>
     <text x="680" y="58" text-anchor="middle" font-size="14" font-weight="700" fill="var(--acd)">小瓦特·练 AI 智能陪练底座</text><text x="680" y="74" text-anchor="middle" font-size="10" fill="var(--ac)">主体 · 调用供给数据并回写学时</text>
-    ${[['AI 教练中心', 500, 92, 'plaza'], ['陪练舱', 700, 92, 'arena'], ['评分复盘', 500, 150, 'review'], ['成长档案', 700, 150, 'growth'], ['班组看板', 500, 208, 'team'], ['教练编辑器', 700, 208, 'editor']].map(([n, x, y, go]) => `<g class="hitv" data-go="${go}" data-tip="打开${n}"><rect x="${x}" y="${y}" width="180" height="40" rx="6" fill="#fff" stroke="var(--acln)"/><text x="${x + 90}" y="${y + 25}" text-anchor="middle" font-size="12" fill="#17301f">${n}</text></g>`).join('')}
+    ${[['AI 教练中心', 500, 92, 'plaza'], ['陪练关卡', 700, 92, 'exam'], ['评分复盘', 500, 150, 'review'], ['成长档案', 700, 150, 'growth'], ['组长工作台', 500, 208, 'team'], ['教练编辑器', 700, 208, 'editor']].map(([n, x, y, go]) => `<g class="hitv" data-go="${go}" data-tip="打开${n}"><rect x="${x}" y="${y}" width="180" height="40" rx="6" fill="#fff" stroke="var(--acln)"/><text x="${x + 90}" y="${y + 25}" text-anchor="middle" font-size="12" fill="#17301f">${n}</text></g>`).join('')}
     ${CLASSROOM.supply.map((s, i) => { const y = 105 + i * 44; return s.dir === 'in'
       ? `<path d="M250,${y} C360,${y} 380,${140} 480,${140}" class="gedge gfeed" fill="none"/><circle r="3.4" fill="var(--ac)"><animateMotion dur="${2.6 + i * .4}s" repeatCount="indefinite" path="M250,${y} C360,${y} 380,${140} 480,${140}"/></circle>`
       : `<path d="M480,${160} C380,${160} 360,${y} 250,${y}" class="gedge gact" fill="none"/><circle r="3.4" fill="#c9a227"><animateMotion dur="2.4s" repeatCount="indefinite" path="M480,${160} C380,${160} 360,${y} 250,${y}"/></circle>`; }).join('')}
@@ -314,7 +147,7 @@ function quizHtml() {
     return `<div class="qzdone"><div class="rvbig ${right / Q.ids.length >= .8 ? '' : 'wv'}" style="font-size:44px">${right}<span style="font-size:16px;color:#98a69c">/${Q.ids.length}</span></div>
       <div class="tk3">${Q.topic === '全部' ? '综合测验' : Q.topic} · 学时已回写 0.5 · 记录已写入成长档案</div>
       ${wrong.length ? `<div class="sec"><div class="st">错题</div>${wrong.map(([q]) => `<div class="hrow"><b>${q.q}</b><div class="tk3">正确：${q.opts[q.a]} · ${q.cite}</div></div>`).join('')}</div>` : '<div class="hrow"><span class="tag ok">全部答对</span></div>'}
-      <div class="rvact"><button class="btn pri" data-qretry="1">再测一组</button>${wrong.length ? `<button class="btn" data-train="${LMAP_PLAN[wrong[0][0].k] || 'full'}">去练「${KNOW.find(k => k.id === wrong[0][0].k).t}」相关项</button>` : ''}</div></div>`;
+      <div class="rvact"><button class="btn pri" data-qretry="1">再测一组</button>${wrong.length ? `<button class="btn" data-exstart="${LMAP_EXAM[wrong[0][0].k] || 'e1163'}">去练「${KNOW.find(k => k.id === wrong[0][0].k).t}」相关关卡</button>` : ''}</div></div>`;
   }
   const q = QUIZ.find(x => x.id === Q.ids[Q.i]), a = Q.ans[Q.i];
   return `<div class="qz"><div class="qzh"><span class="tbno">第 ${Q.i + 1}/${Q.ids.length} 题</span><i class="ctag">${q.dim}</i><span class="tk3">${KNOW.find(k => k.id === q.k).t}</span></div>
@@ -331,7 +164,7 @@ function planRows() {
   for (let d = 0; d < 7; d++) {
     const dim = weak[d % weak.length];
     if (d % 3 === 0) { const c = cs.find(x => x.tag === dim) || cs[ci++ % cs.length]; if (c) rows.push({ day: days[d], k: '课程', t: `${c.n} · 第 ${c.done + 1} 章「${c.ch[c.done]}」`, min: 30, dim: c.tag }); }
-    else if (d % 3 === 1) { const p = DIM_PLAN[dim]; rows.push({ day: days[d], k: '陪练', t: p ? `专项 · ${p[1]}` : '完整操作票 · 演练模式', min: 15, dim, plan: p ? p[0] : 'full' }); }
+    else if (d % 3 === 1) { const ex = EXAMS.find(e => e.id === (DIM_EXAM[dim] || 'e1163')); rows.push({ day: days[d], k: '关卡', t: `陪练关卡 · ${ex.short} · 训练模式`, min: 15, dim, exam: ex.id }); }
     else rows.push({ day: days[d], k: '测验', t: `随堂测验 · ${dim} 相关 6 题`, min: 10, dim });
   }
   return rows;
@@ -367,7 +200,7 @@ function pageClassroom() {
       <section class="hcard ho"><div class="hch"><b>错题 → 题库联动</b><span>陪练扣分项自动匹配练习题</span></div><div class="hcb"><table class="htbl"><tr><th>陪练扣分项</th><th>匹配题目</th><th>掌握度</th></tr>
         ${CLASSROOM.quizLink.map(q => `<tr><td>${q.vio}</td><td>${q.q}<div class="tk3">练习 ${q.tries} 次</div></td><td style="width:110px"><div class="hbar"><div class="hfill" style="width:${q.mastery}%;background:${q.mastery >= 80 ? 'var(--ac)' : '#c9a227'}"></div></div><span class="mono tk3">${q.mastery}%</span></td></tr>`).join('')}</table></div></section>
       <section class="hcard ho"><div class="hch"><b>本周学习计划</b><em class="ai">AI</em><span>按能力短板 + 课程进度生成 · 由本人确认后生效</span><span class="phr"><button class="btn sm" data-lplan="1">${plan ? '重新生成' : '生成本周计划'}</button></span></div><div class="hcb">
-        ${plan ? `<table class="htbl plantbl" id="plantbl"><tr><th>日</th><th>类型</th><th>内容</th><th>时长</th><th>针对</th></tr>${plan.rows.map(r => `<tr class="erow"><td class="mono">${r.day}</td><td><i class="ctag">${r.k}</i></td><td>${r.t}${r.plan ? ` <button class="btn sm" data-train="${r.plan}">去练</button>` : ''}</td><td class="mono">${r.min} 分钟</td><td class="tk3">${r.dim}</td></tr>`).join('')}</table>
+        ${plan ? `<table class="htbl plantbl" id="plantbl"><tr><th>日</th><th>类型</th><th>内容</th><th>时长</th><th>针对</th></tr>${plan.rows.map(r => `<tr class="erow"><td class="mono">${r.day}</td><td><i class="ctag">${r.k}</i></td><td>${r.t}${r.exam ? ` <button class="btn sm" data-exstart="${r.exam}">去练</button>` : ''}</td><td class="mono">${r.min} 分钟</td><td class="tk3">${r.dim}</td></tr>`).join('')}</table>
           <div class="rvact">${plan.saved ? '<span class="tag ok">已加入日程</span>' : '<button class="btn pri" data-lplansave="1">确认并加入日程</button>'}<span class="tk3">合计 ${plan.rows.reduce((a, r) => a + r.min, 0)} 分钟 · 计划由系统生成，经本人确认后生效</span></div>` : '<div class="edempty">点「生成本周计划」，系统按当前短板（' + DIMS6.map((d, i) => [d, RADAR_NOW[i]]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(x => x[0]).join('、') + '）与课程进度排出 7 天安排。</div>'}</div></section>
     </div>
     <div class="gtwo">
@@ -384,7 +217,7 @@ function courseDrill(id) {
     <div class="hbar" style="margin-bottom:10px"><div class="hfill" style="width:${Math.round(c.done / c.ch.length * 100)}%"></div></div>
     ${c.ch.map((n, i) => `<div class="chap ${i < c.done ? 'done' : i === c.done ? 'cur' : ''}"><i>${i < c.done ? '✓' : i + 1}</i><b>${n}</b><span>${i < c.done ? '已完成' : i === c.done ? '当前章节' : '待学'}</span></div>`).join('')}
     <div class="tk3" style="margin-top:8px">章节完成后学时按课堂口径回写至成长档案。</div>`,
-    c.done < c.ch.length ? `<button class="btn pri" data-cnext="${c.id}">学完本章「${c.ch[c.done]}」</button>` : `<button class="btn" data-train="${LMAP_PLAN[c.k] || 'full'}">去练相关内容</button>`);
+    c.done < c.ch.length ? `<button class="btn pri" data-cnext="${c.id}">学完本章「${c.ch[c.done]}」</button>` : `<button class="btn" data-exstart="${LMAP_EXAM[c.k] || 'e1163'}">去练相关关卡</button>`);
 }
 function courseNext(id) {
   const p = lsGet(LS_COURSE, {}); const c = courseProg().find(x => x.id === id); if (!c) return;
@@ -542,7 +375,7 @@ function pageEditor() {
   else if (ED.tab === 'kb') body = `<div class="frm edfrm">
       <div class="hch" style="padding:0 0 6px"><b>知识主题</b><span>${ED.kb.length}/${KNOW.length} 已挂载</span></div>
       <div class="kblist">${KNOW.map(k => `<label class="tog ${ED.kb.includes(k.id) ? 'on' : ''}" data-kb="${k.id}"><i></i>${k.t}<span>${k.sub}</span></label>`).join('')}</div>
-      <div class="hch" style="padding:12px 0 6px"><b>检索测试</b><span>按挂载的知识库回答，与陪练舱「问教练」同一检索</span></div>
+      <div class="hch" style="padding:12px 0 6px"><b>检索测试</b><span>按挂载的知识库回答，与陪练关卡「问教练」同一检索</span></div>
       <div class="kbq"><input id="ed_q" data-kbq="1" placeholder="例如：GIS 刀闸要核对哪四项" value="${ED.kbq}"><div id="ed_kbr" class="kbr">${ED.kbq ? kbAnswer(ED.kbq) : '<span class="tk3">输入问题即时检索。</span>'}</div></div>
       <div class="hch" style="padding:12px 0 6px"><b>规程与素材</b><span>${KB_FILES.length + ED.files.length} 份</span><span class="phr"><label class="btn sm" style="cursor:pointer">上传规程文本<input type="file" id="ed_file" accept=".txt,.md,.csv" hidden></label></span></div>
       <table class="htbl"><tr><th>文件</th><th>解析状态</th></tr>${ED.files.map(f => `<tr><td>${f[0]}</td><td class="tk3">${f[1]}</td></tr>`).join('')}${KB_FILES.map(f => `<tr><td>${f[0]}</td><td class="tk3">${f[1]}</td></tr>`).join('')}</table></div>`;
@@ -657,21 +490,15 @@ function pagesClick(e) {
   /* 复盘 */
   if (n = q('[data-sess]')) { RV.sel = n.dataset.sess; if (location.hash === '#review') rerender('review'); else goPage('review'); return true; }
   if (n = q('[data-rvf]')) { RV.filter = n.dataset.rvf; rerender('review'); return true; }
-  if (n = q('[data-rvcmp]')) { RV.cmp = n.dataset.rvcmp; rerender('review'); return true; }
-  if (n = q('[data-rvplay]')) { rvPlay(); return true; }
-  if (n = q('[data-tlstep]')) { const all = unifySessions(), s = all.find(x => x.id === RV.sel); RV.tlCur = n.dataset.tlstep; $$('#rvtl .tlx').forEach(x => x.classList.toggle('cur', x === n)); const t = $('#rvtl_txt'); if (t && s) t.innerHTML = rvStepInfo(s, RV.tlCur); return true; }
-  if (n = q('[data-follow]')) { const i = n.dataset.follow; RV.follow[i] = RV.follow[i] ? null : 'open'; rerender('review'); const inp = $(`[data-followin="${i}"]`); if (inp) inp.focus(); return true; }
-  if (n = q('[data-rvact]')) { const st = lsGet(LS_ACTS, {}); st[RV.sel] = st[RV.sel] || {}; st[RV.sel]['a' + n.dataset.rvact] = n.checked; lsSet(LS_ACTS, st); const lab = n.closest('.actit'); if (lab) lab.classList.toggle('done', n.checked); const h = n.closest('.hcard').querySelector('.hch span'); if (h) h.textContent = `由本场留痕生成 · 已完成 ${Object.values(st[RV.sel]).filter(Boolean).length}/${n.closest('.hcb').querySelectorAll('.actit').length}`; return true; }
-  if (n = q('[data-rvsum]')) { const all = unifySessions(), i = all.findIndex(x => x.id === RV.sel); openDrill('复盘摘要', '提交带教师傅前由本人确认', `<div class="draft" id="rvsum_txt" style="white-space:pre-line">${rvSummary(all[i], all[i + 1])}</div>`, '<button class="btn" data-copy="rvsum_txt">复制摘要</button>'); return true; }
+  if (n = q('[data-rvsum]')) { const r = examHist().find(x => x.id === RV.sel); if (!r) return true; openDrill('复盘摘要', '提交班组长前由本人确认', `<div class="draft" id="rvsum_txt" style="white-space:pre-line">${rvSummary(r)}</div>`, '<button class="btn" data-copy="rvsum_txt">复制摘要</button>'); return true; }
   if (n = q('[data-copy]')) { const t = $('#' + n.dataset.copy); const txt = t ? t.innerText : ''; try { navigator.clipboard.writeText(txt); } catch (err) { } n.textContent = '已复制'; return true; }
-  if (n = q('[data-retry]')) { const all = unifySessions(), s = all.find(x => x.id === n.dataset.retry); if (s) { lsSet('xwt_lastvio', s.vio.map(v => ({ step: v.step, title: v.t }))); enterCoach('daozha', 'wrong'); } return true; }
   /* 档案 */
   if (n = q('[data-gcmp]')) { GR.cmp = n.dataset.gcmp; $$('[data-gcmp]').forEach(x => x.classList.toggle('on', x === n)); const g = $('#gradar'); if (g) g.innerHTML = growthRadar(); return true; }
-  if (n = q('[data-gshow]')) { const k = n.dataset.gshow; GR.show[k] = !GR.show[k]; n.classList.toggle('on', GR.show[k]); const c = $('#gcurve'); if (c) c.innerHTML = chSessionCurve(unifySessions().slice().sort((a, b) => b.d - a.d), GR.show, { w: 980, h: 250 }); return true; }
+  if (n = q('[data-gshow]')) { const k = n.dataset.gshow; GR.show[k] = !GR.show[k]; n.classList.toggle('on', GR.show[k]); const c = $('#gcurve'); if (c) c.innerHTML = chSessionCurve(histPoints().slice().sort((a, b) => b.d - a.d), GR.show, { w: 980, h: 250 }); return true; }
   if (n = q('[data-gdim]')) { growthDim(+n.dataset.gdim); return true; }
   if (n = q('[data-badge]')) { badgeDrill(n.dataset.badge); return true; }
   if (n = q('[data-print]')) { window.print(); return true; }
-  if (n = q('[data-lmap]')) { const k = KNOW.find(x => x.id === n.dataset.lmap); const m = LMAP_MASTERY[k.id]; openDrill(`知识主题 · ${k.t}`, `${k.sub} · 掌握度 ${m}`, `<div class="sec"><div class="st">知识点</div><div class="sc">${k.body.map(b => `<div class="hrow"><b>${b[0]}</b><div class="tk3" style="white-space:pre-line">${b[1]}</div></div>`).join('')}</div></div>`, `<button class="btn" data-quizk="${k.t}">测 6 题</button><button class="btn pri" data-train="${LMAP_PLAN[k.id] || 'full'}">去练相关内容</button>`); return true; }
+  if (n = q('[data-lmap]')) { const k = KNOW.find(x => x.id === n.dataset.lmap); const m = LMAP_MASTERY[k.id]; openDrill(`知识主题 · ${k.t}`, `${k.sub} · 掌握度 ${m}`, `<div class="sec"><div class="st">知识点</div><div class="sc">${k.body.map(b => `<div class="hrow"><b>${b[0]}</b><div class="tk3" style="white-space:pre-line">${b[1]}</div></div>`).join('')}</div></div>`, `<button class="btn" data-quizk="${k.t}">测 6 题</button><button class="btn pri" data-exstart="${LMAP_EXAM[k.id] || 'e1163'}">去练相关关卡</button>`); return true; }
   if (n = q('[data-quizk]')) { $$('.mask').forEach(m => m.remove()); CL.quiz = null; goPage('classroom'); setTimeout(() => { quizStart(n.dataset.quizk); const b = $('#quizbox'); if (b) b.scrollIntoView({ block: 'center' }); }, 120); return true; }
   /* 课堂 */
   if (n = q('[data-arch]')) { archDrill(n.dataset.arch); return true; }
@@ -727,14 +554,6 @@ function pagesInput(e) {
     const i = +n.dataset.goal, g = goalsGet(); if (n.value === '') delete g[i]; else g[i] = Math.max(0, Math.min(100, +n.value)); lsSet(LS_GOALS, g);
     const gap = $('#ggap' + i); if (gap) { const v = g[i]; gap.textContent = v != null ? (RADAR10_NOW[i] >= v ? '已达成' : RADAR10_NOW[i] - v) : '—'; gap.className = 'mono ' + (v != null ? (RADAR10_NOW[i] >= v ? 'gv' : 'wv') : ''); }
     const r = $('#gradar'); if (r) r.innerHTML = growthRadar();
-    return;
-  }
-  if (n = e.target.closest('[data-followin]')) {
-    const i = n.dataset.followin, all = unifySessions(), s = all.find(x => x.id === RV.sel); const l = s && (s.lines || [])[+i]; if (!l) return;
-    const pct = Math.round(sim(n.value, l.std) * 100), miss = missingSegs(n.value, l.std).slice(0, 3);
-    const m = $('#fm_' + i); if (!m) return;
-    if (pct >= 86) { RV.follow[i] = 'pass'; n.closest('.tlrow').classList.add('pass'); m.innerHTML = `<b class="gv">吻合度 ${pct}% · 通过 ✓</b>`; }
-    else m.innerHTML = `吻合度 <b class="${pct >= 62 ? 'wv' : 'bad'}">${pct}%</b>${miss.length ? ' · 还缺 ' + miss.map(x => `<em>${x}</em>`).join('') : ''}`;
     return;
   }
   if (n = e.target.closest('[data-clq]')) { CL.q = n.value.trim(); const pos = n.selectionStart; rerender('classroom'); const q2 = $('#cl_q'); if (q2) { q2.focus(); q2.setSelectionRange(pos, pos); } return; }

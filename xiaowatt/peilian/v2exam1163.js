@@ -1,6 +1,6 @@
-/* 陪练关卡回归 · 1163（做题 + 操作，15 分制）：① 考核模式正确路径满分 15、轨迹 9 步 ② 训练模式：说错一次（教练纠正+提示）、跳过验电合地刀被教练当场制止（不记红线）、机构箱不一致两态 → 14.7、说错后自动一级提示 hints 1 ③ 考核模式跳过验电合地刀 → 一票否决 ④ 漏项：只看控制柜就下结论 ⑤ 刷新可回看 ⑥ 组长工作台 / 任务下发 / 学员待练 */
+/* 陪练关卡回归 · 1163（做题 + 操作，15 分制）：① 考核模式正确路径满分 15、轨迹 9 步 ② 训练模式：说错一次（教练纠正+提示）、跳过验电合地刀被教练当场制止（不记红线）、机构箱不一致两态 → 14.7、说错后自动一级提示 hints 1 ③ 考核模式跳过验电合地刀 → 一票否决 ④ 漏项：只看控制柜就下结论 ⑤ 刷新可回看（本机 4 + 近30天模拟 7 = 11 条） ⑥ 组长工作台 / 任务下发 / 学员待练 */
 const { chromium } = require('playwright');
-const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_倒闸操作陪练舱_高保真原型.html')).href;
+const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_AI智能陪练底座_高保真原型.html')).href;
 const w = (p, ms) => p.waitForTimeout(ms);
 (async () => {
   const b = await chromium.launch();
@@ -41,7 +41,7 @@ const w = (p, ms) => p.waitForTimeout(ms);
   console.log('miss-path', JSON.stringify(miss));
   await p.evaluate(() => examRun());
   await p.waitForFunction(() => EX.finished, null, { timeout: 90000 });
-  /* ⑤ 刷新可回看 */
+  /* ⑤ 刷新可回看（本机 4 + 近30天模拟 7 = 11 条） */
   await p.reload(); await w(p, 800);
   const n = await p.evaluate(() => examRecords().length);
   const listed = await p.evaluate(() => document.querySelectorAll('[data-exreview]').length);

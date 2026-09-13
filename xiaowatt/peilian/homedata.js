@@ -11,7 +11,7 @@ const HOME_USER = {
 
 /* 8 维能力（ability.js：认证表 20 个专业项目 + 两项考试内容抽取，全站同名同序） */
 const DIMS6 = DIMS;                              // 兼容旧引用：现为 8 维
-const RADAR_BASE = [86, 64, 88, 80, 72, 78, 68, 84];   // 本月基线（陪练舱与课堂口径），题库考试结果按 abilityNow() 合入
+const RADAR_BASE = [86, 64, 88, 80, 72, 78, 68, 84];   // 本月基线（课堂与历史记录口径），陪练关卡结果按 abilityNow() 合入
 const RADAR_PREV = [80, 56, 84, 74, 62, 72, 60, 78];
 const RADAR_OLD  = [74, 50, 78, 66, 54, 66, 52, 70];   // 前月，成长档案用
 const TEAM_AVG   = [83, 76, 85, 82, 74, 80, 72, 81];   // 班组均值（组织级口径）
@@ -23,36 +23,61 @@ function abilityNow() {
 }
 Object.defineProperty(window, 'RADAR_NOW', { get: abilityNow });   // 全局读取即为现值（随本机考试记录变化）
 
-/* 成长档案与陪练舱、首页、组长工作台同用 8 维（旧十维口径并入） */
+/* 成长档案、首页、组长工作台同用 8 维（旧十维口径并入） */
 const DIMS10 = DIMS, RADAR10_PREV = RADAR_PREV, RADAR10_OLD = RADAR_OLD, TEAM_AVG10 = TEAM_AVG;
 Object.defineProperty(window, 'RADAR10_NOW', { get: abilityNow });
 const DIM10_DESC = Object.fromEntries(ABILITY8.map(a => [a.n, a.d + '。对应专业项目：' + a.items.map(c => c + ' ' + certItem(c).n).join('、')]));
 
-/* 近30天练习场次（d=距今天数，倒序＝最近在前） */
-const SESSIONS = [
-  { d: 1,  plan: '分段 · 冷备用 → 检修',   mode: '演练模式', dur: 23, score: 86, hints: [['状态核对与确认', 'GIS 四项核对第二级提示']], vio: [{ lv: 'minor', step: '13', t: '四项位置指示核对顺序不完整', cite: '附录G-5' }] },
-  { d: 3,  plan: '专项 · GIS 四项核对',    mode: '演练模式', dur: 11, score: 78, hints: [['状态核对与确认', 'GIS 四项核对第一级提示']], vio: [{ lv: 'minor', step: '11', t: '汇控柜电气指示未逐项唱读', cite: '附录G-5' }] },
-  { d: 5,  plan: '完整操作票',             mode: '演练模式', dur: 47, score: 88, hints: [], vio: [{ lv: 'minor', step: '9', t: '接令记录漏填发令时间', cite: '细则第十八条' }] },
-  { d: 8,  plan: '专项 · 接令与票令核对',  mode: '考核模式', dur: 9,  score: 92, hints: [], vio: [] },
-  { d: 11, plan: '分段 · 热备用 → 冷备用', mode: '演练模式', dur: 19, score: 83, hints: [['操作程序与票务规范', '复诵话术第一级提示']], vio: [{ lv: 'minor', step: '10', t: '复诵缺设备双重名称', cite: '附录J' }] },
-  { d: 13, plan: '错题重练',               mode: '演练模式', dur: 14, score: 90, hints: [], vio: [] },
-  { d: 16, plan: '专项 · 验电接地',        mode: '教学模式', dur: 12, score: 75, hints: [['安全措施与风险控制', '验电顺序第一级提示']], vio: [{ lv: 'major', t: '验电顺序不完整', step: '18', cite: '附录G-23' }] },
-  { d: 18, plan: '分段 · 运行 → 热备用',   mode: '教学模式', dur: 17, score: 81, hints: [], vio: [{ lv: 'minor', step: '4', t: '检查回报口径不完整', cite: '附录J' }] },
-  { d: 22, plan: '完整操作票',             mode: '演练模式', dur: 52, score: 74, hints: [['异常与应急处置', '异常上报流程第二级提示']], vio: [{ lv: 'major', step: '11', t: '发现异常未立即中止操作', cite: '细则第十三条（四）' }, { lv: 'minor', step: '12', t: '汇报值班负责人用语不规范', cite: '附录J' }] },
-  { d: 25, plan: '专项 · GIS 四项核对',    mode: '教学模式', dur: 13, score: 70, hints: [['状态核对与确认', 'GIS 四项核对第三级提示']], vio: [{ lv: 'minor', step: '11', t: '只核对后台未核对就地指示', cite: '附录G-5' }] },
-  { d: 27, plan: '分段 · 冷备用 → 检修',   mode: '教学模式', dur: 26, score: 68, hints: [['状态核对与确认', 'GIS 四项核对第二级提示'], ['安全措施与风险控制', '接地前验电第一级提示']], vio: [{ lv: 'red', step: '20', t: '未完成两种验电即准备合接地刀闸', cite: '细则第十三条（四）' }] },
-  { d: 29, plan: '完整操作票',             mode: '教学模式', dur: 58, score: 66, hints: [['操作程序与票务规范', '唱票节拍第一级提示']], vio: [{ lv: 'minor', step: '2', t: '唱票未等监护人"对，执行"即操作', cite: '附录J' }, { lv: 'minor', step: '6', t: '走错间隔经提醒返回', cite: '附录J' }] }
+/* 近30天陪练关卡记录（脱敏模拟；本机新记录排在前面）——每条只给情境错误，其余字段按关卡定义推导，保证与复盘页口径一致 */
+const HIST_SEED = [
+  { d: 1,  exam: 'e1163', mode: 'drill', dur: 14, hints: 1, errs: [{ sid: 'k2_chk', kind: 'miss', text: '检查不完整。就地控制柜已显示合闸，还需要检查机构箱分、合闸指示和刀闸连杆位置。', click: '只看了就地控制柜就下结论', right: '就地控制柜、机构箱、连杆三处一致后再下结论', fix: '三处都看完再判定' }] },
+  { d: 4,  exam: 'rain',  mode: 'exam',  dur: 9,  hints: 0, abn: true, errs: [{ sid: 'sC2', kind: 'miss', text: '手动阀未完全开启。', click: '手柄停在 60%', right: '全开位置（≥ 90%）', fix: '继续拖动手柄直到全开' }] },
+  { d: 7,  exam: 'e1163', mode: 'teach', dur: 18, hints: 2, errs: [{ sid: 'q1', kind: 'ans', text: '回答要点不全：缺 三相无电流。', click: '因为要看后台和机构箱', right: '后台位置、机构箱机械指示、三相电流三处独立确认，因为开关可能拒动或未到位', fix: '' }] },
+  { d: 11, exam: 'rain',  mode: 'drill', dur: 11, hints: 1, errs: [{ sid: 'sA', kind: 'crit', crit: true, text: '该设备不是 #3主变雨淋阀，请重新确认设备编号。', click: '#1主变雨淋阀', right: '#3主变雨淋阀（第三套，编号牌 #3）', fix: '按现场编号牌确认设备对象不选错' }, { sid: 'q0', kind: 'fill', text: '答「控制腔，红」，正确答案是 控制腔，绿。', click: '控制腔，红', right: '控制腔，绿' }] },
+  { d: 16, exam: 'e1163', mode: 'teach', dur: 21, hints: 3, red: true, errs: [{ sid: 'k2_hub', kind: 'red', crit: true, text: '未完成两项验电即合上 116340 地刀：一票否决。', click: '直接按住 116340 合闸', right: '后台二次电压、高压带电显示装置两项验电确无电压后再合地刀', fix: '先验电再接地' }] },
+  { d: 22, exam: 'e1163', mode: 'teach', dur: 24, hints: 4, errs: [{ sid: 'k1_check', kind: 'read', text: '三相电流读数与后台遥测不一致。', click: '三相电流 312 安', right: 'Ia/Ib/Ic 均为 0.00 A', fix: '' }, { sid: 'q2', kind: 'choice', text: '答「B」，正确答案是 A．两个及以上非同样原理或非同源的指示且均已同时发生变化。', click: 'B', right: 'A' }] },
+  { d: 27, exam: 'rain',  mode: 'teach', dur: 15, hints: 3, abn: true, errs: [{ sid: 's0', kind: 'crit', crit: true, text: '未发现雨淋阀压力异常。', click: '控制腔压力正常', right: '压力异常', fix: '指针在绿区为正常，在红区为异常' }] }
 ];
+let __hist = null;
+function EXAM_HIST() {
+  if (__hist) return __hist;
+  __hist = HIST_SEED.map((sd, i) => {
+    const ex = EXAMS.find(e => e.id === sd.exam);
+    const errs = sd.errs.map(e => { const st = ex.stations.find(x => x.id === e.sid) || {}; return Object.assign({ part: st.part || '', title: st.title || '', rule: st.rule || '', risk: st.risk || '', why: '', fix: '', click: '' }, e); });
+    /* 轨迹：出错的情境第一项记错，其余一次做对 */
+    const track = ex.stations.filter(st => st.type !== 'auto').map(st => {
+      const bad = errs.filter(e => e.sid === st.id);
+      const base = st.type === 'quiz' ? st.items.map(it => ({ n: (typeof it.q === 'function' ? it.q({}, it) : it.q).replace(/_+/g, '__'), pts: it.pts || 0 })) : (st.goals || []).map(g => ({ n: g.n, pts: g.pts || 0 }));
+      const items = base.map((it, j) => { const w = bad.length && j === 0; const redHere = bad.some(e => e.kind === 'red'); return Object.assign({}, it, { ok: !w, wrong: w ? 1 : 0, hint: 0, got: w ? (redHere ? 0 : +(it.pts * .4).toFixed(2)) : it.pts }); });
+      const got = +items.reduce((a, x) => a + x.got, 0).toFixed(2), pts = +items.reduce((a, x) => a + x.pts, 0).toFixed(2);
+      return { sid: st.id, part: st.part || '', title: st.title, quiz: st.type === 'quiz', items, got, pts, ratio: pts ? got / pts : (bad.length ? .6 : 1) };
+    });
+    const raw = +track.reduce((a, t) => a + t.got, 0).toFixed(1);
+    const acc = {}; DIMK.forEach(k => acc[k] = { w: 0, v: 0 });
+    track.forEach(t => { const st = ex.stations.find(x => x.id === t.sid); if (!st || !st.dims) return; Object.keys(st.dims).forEach(k => { acc[k].w += st.dims[k]; acc[k].v += st.dims[k] * t.ratio; }); });
+    const dims = {}; DIMK.forEach(k => { dims[k] = acc[k].w ? Math.round(100 * acc[k].v / acc[k].w) : null; });
+    const rec = { id: 'H' + i, ts: Date.now() - sd.d * 864e5 - (i * 37 + 11) * 6e4, who: HOME_USER.name, exam: ex.id, examName: ex.n, short: ex.short, mode: sd.mode, modeName: EXAM_MODES[sd.mode].n, dur: sd.dur, raw, score: sd.red ? 0 : raw, max: ex.max, pass: ex.pass, red: !!sd.red, track, errs, hints: sd.hints || 0, asked: 0, dims, ver: Object.assign(versionStamp(ex.id), { time: stampOf(Date.now() - sd.d * 864e5) }), task: null, reviewer: sd.d > 10 ? '周建国' : '', log: [], mock: true, abn: !!sd.abn };
+    rec.sugg = examSugg(rec);
+    return rec;
+  });
+  return __hist;
+}
+/* 本人全部记录：本机 + 模拟，最近在前 */
+function examHist() { return examRecords().filter(r => r.who === HOME_USER.name).concat(EXAM_HIST()).sort((a, b) => b.ts - a.ts); }
+function dayOf(r) { return Math.max(0, Math.round((Date.now() - r.ts) / 864e5)); }
+function histPct(r) { return r.red ? 0 : Math.round(r.score / r.max * 100); }
+/* 成长曲线用的点：得分按百分制，否决记 50 位并标红 */
+function histPoints() { return examHist().map(r => ({ id: r.id, d: dayOf(r), score: Math.max(50, histPct(r)), pct: histPct(r), dur: r.dur, vio: (r.errs || []).map(e => ({ lv: e.kind === 'red' ? 'red' : e.crit ? 'major' : 'minor', t: e.text })), hints: Array.from({ length: r.hints || 0 }, () => ['提示', '']), mode: r.modeName, plan: r.short })); }
 
 /* 今日待练任务（班组长下发） */
-const HOME_TASK = { plan: 'full', name: '完整操作票（考核模式）', from: '班组长 周建国', dueDays: 2 };
+const HOME_TASK = { exam: 'e1163', mode: 'exam', name: '1163 开关与地刀检查（考核模式）', from: '班组长 周建国', dueDays: 2 };
 
 /* 岗位胜任度构成 */
 const FITNESS = {
   pct: 82, post: '变电运行值班员',
   parts: [
     { n: '规程理论考试', v: '92 分', need: '≥ 80 分', ok: true },
-    { n: '实操演练场次', v: '12 场', need: '≥ 15 场', ok: false, gap: '再完成 3 场演练/考核模式练习' },
+    { n: '陪练关卡考核', v: '1 / 2 项及格', need: '2 项考核模式及格', ok: false, gap: '「雨淋阀机械手动启动」考核模式及格' },
     { n: '年度培训学时', v: '68 学时', need: '≥ 90 学时', ok: false, gap: '知识课堂待修 22 学时' },
     { n: '有效资质证书', v: '2 / 2', need: '2 项齐全', ok: true }
   ]
@@ -67,10 +92,10 @@ const COURSES = [
 ];
 const HOUR_LOG = [
   { d: 2,  n: '变电站防误操作专题', h: 2, src: '知识课堂' },
-  { d: 6,  n: '完整操作票练习（陪练学时）', h: 1, src: '陪练底座回写' },
+  { d: 6,  n: '1163 开关与地刀检查（陪练关卡学时）', h: 1, src: '陪练底座回写' },
   { d: 9,  n: '安规（变电部分）年度复训', h: 4, src: '知识课堂' },
   { d: 15, n: '两票管理细则修编解读', h: 2, src: '知识课堂' },
-  { d: 23, n: '完整操作票练习（陪练学时）', h: 1, src: '陪练底座回写' }
+  { d: 23, n: '雨淋阀机械手动启动（陪练关卡学时）', h: 1, src: '陪练底座回写' }
 ];
 
 /* ===== AI 教练中心：预设教练目录 ===== */
@@ -103,14 +128,14 @@ function recoList() {
   return [
     { exam: DIM_EXAM[w1[0]] || 'e1163', why: `「${w1[0]}」${w1[1]} 分，低于班组均值 ${w1[2] - w1[1]} 分`, act: '开始考试' },
     { exam: DIM_EXAM[w2[0]] || 'rain', why: `「${w2[0]}」${w2[1]} 分，为第二短板`, act: '开始考试' },
-    { coach: 'daozha', pre: 'sp_gis', why: '近两场「状态核对与确认」使用了提示', act: '陪练舱练习' }
+    { exam: 'e1163', mode: 'teach', why: '最近一次 1163 关卡「状态核对与确认」用了提示', act: '训练模式复练' }
   ];
 }
 
 /* 我在练的教练（工作台窄条，只列本人已开练的；全量目录在教练中心） */
 const MYCOACH = [
-  { id: 'daozha', last: '今天 09:12', cnt: 14, score: 86, prog: 72 },
-  { id: 'fire', last: '3 天前', cnt: 2, score: 7, prog: 40 }
+  { id: 'daozha', last: '昨天', cnt: 4, score: '12.5/15', prog: 72 },
+  { id: 'fire', last: '4 天前', cnt: 3, score: '12.2/13.5', prog: 60 }
 ];
 /* 本人已提交、等待本单位开通的教练（教练中心里申请，工作台看进度） */
 const COACH_APPLY = [
@@ -118,20 +143,19 @@ const COACH_APPLY = [
   { id: 'angui', at: '9月1日 提交', st: '已通过 · 待配置账号' }
 ];
 
-/* ---- 由 SESSIONS 推导的聚合（保证各图表数字一致） ---- */
+/* ---- 由陪练关卡记录推导的聚合（保证各图表数字一致） ---- */
 function homeAgg() {
+  const L = examHist();
   const byDay = {};                      // 天 → {min, cnt}
-  SESSIONS.forEach(s => { (byDay[s.d] = byDay[s.d] || { min: 0, cnt: 0 }); byDay[s.d].min += s.dur; byDay[s.d].cnt += 1; });
-  const planCnt = {};                    // 练习方式 → 场次
-  SESSIONS.forEach(s => { const k = s.plan.startsWith('专项') ? '专项练习' : s.plan.startsWith('分段') ? '分段练习' : s.plan.startsWith('完整') ? '完整操作票' : '错题重练'; planCnt[k] = (planCnt[k] || 0) + 1; });
-  const weeks = [0, 0, 0, 0, 0], reds = [0, 0, 0, 0, 0];   // 近5周扣分/红线（w0=最近一周）
-  SESSIONS.forEach(s => {
-    const w = Math.min(4, Math.floor(s.d / 7));
-    s.vio.forEach(v => { weeks[w] += v.lv === 'red' ? 10 : v.lv === 'major' ? 5 : 2; if (v.lv === 'red') reds[w] += 1; });
-  });
-  const totalMin = SESSIONS.reduce((a, s) => a + s.dur, 0);
-  const avg = Math.round(SESSIONS.reduce((a, s) => a + s.score, 0) / SESSIONS.length);
-  return { byDay, planCnt, weeks, reds, totalMin, avg, cnt: SESSIONS.length };
+  L.forEach(r => { const d = dayOf(r); (byDay[d] = byDay[d] || { min: 0, cnt: 0 }); byDay[d].min += r.dur; byDay[d].cnt += 1; });
+  const kindCnt = {};                    // 关卡 · 模式 → 次数
+  L.forEach(r => { const k = `${r.short} · ${r.modeName.slice(0, 2)}`; kindCnt[k] = (kindCnt[k] || 0) + 1; });
+  const weeks = [0, 0, 0, 0, 0], reds = [0, 0, 0, 0, 0];   // 近5周错误权重 / 红线（w0=最近一周）
+  L.forEach(r => { const w = Math.min(4, Math.floor(dayOf(r) / 7)); (r.errs || []).forEach(e => { weeks[w] += e.kind === 'red' ? 10 : e.crit ? 5 : 2; if (e.kind === 'red') reds[w] += 1; }); });
+  const totalMin = L.reduce((a, r) => a + r.dur, 0);
+  const avg = L.length ? Math.round(L.reduce((a, r) => a + histPct(r), 0) / L.length) : 0;
+  const passRate = L.length ? Math.round(100 * L.filter(r => !r.red && r.score >= r.pass).length / L.length) : 0;
+  return { byDay, kindCnt, weeks, reds, totalMin, avg, cnt: L.length, passRate };
 }
 
 function dayLabel(d) {                   // 距今 d 天 → M/D
@@ -147,8 +171,8 @@ function dateAfter(days) {
 const GROWTH_NODES = [
   { id: 'g1', x: 85,  y: 505, s: 'done',   t: '岗前培训',          v: '已完成' },
   { id: 'g2', x: 215, y: 435, s: 'done',   t: '安规考试',          v: '92 分' },
-  { id: 'g3', x: 345, y: 365, s: 'done',   t: '完整票·教学模式',   v: '已完成' },
-  { id: 'g4', x: 465, y: 285, s: 'done',   t: '分段与专项强化',    v: '8 场' },
+  { id: 'g3', x: 345, y: 365, s: 'done',   t: '1163 关卡·训练模式',   v: '已通过' },
+  { id: 'g4', x: 465, y: 285, s: 'done',   t: '雨淋阀关卡·演练模式',   v: '2 次' },
   { id: 'g5', x: 585, y: 340, s: 'cur',    t: '状态核对与确认·1163 关卡', v: '补强中' },
   { id: 'g6', x: 695, y: 250, s: 'next',   t: '题库考试·考核模式',   v: '' },
   { id: 'g7', x: 800, y: 165, s: 'ahead',  t: '作业授权认证表草稿',  v: '' },

@@ -3,7 +3,7 @@ import base64, os, io, re, sys
 B = os.path.dirname(os.path.abspath(__file__)) + os.sep
 logo = base64.b64encode(open(os.path.join(B, '..', 'assets', 'logo.png'), 'rb').read()).decode()
 css = open(B + 'style.css', encoding='utf-8').read()
-parts = ['data.js', 'know.js', 'avatar.js', 'player.js', 'guide.js', 'layout.js', 'app1.js', 'sld.js', 'app2.js', 'panels.js', 'fill.js', 'demo.js', 'app3.js', 'app4.js', 'arena.js', 'charts.js', 'ability.js', 'homedata.js', 'home.js', 'pagedata.js', 'pages.js', 'scenes.js', 'exam.js', 'exam_defs.js', 'leader.js']
+parts = ['data.js', 'know.js', 'avatar.js', 'core.js', 'charts.js', 'ability.js', 'homedata.js', 'home.js', 'pagedata.js', 'pages.js', 'scenes.js', 'exam.js', 'exam_defs.js', 'leader.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
 import json
@@ -33,7 +33,7 @@ html = f"""<!DOCTYPE html>
 try{{ boot(); }}catch(e){{ document.body.innerHTML='<pre style="color:#ff9aa8;padding:24px;white-space:pre-wrap">'+e.stack+'</pre>'; }}
 </script>
 </html>"""
-out = os.path.join(B, 'dist', '小瓦特练_倒闸操作陪练舱_高保真原型.html')
+out = os.path.join(B, 'dist', '小瓦特练_AI智能陪练底座_高保真原型.html')
 os.makedirs(os.path.join(B, 'dist'), exist_ok=True)
 open(out, 'w', encoding='utf-8').write(html)
 print('OK', len(html), out)

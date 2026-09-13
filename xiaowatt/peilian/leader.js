@@ -12,7 +12,7 @@ const TEAM_EXAM_MOCK = [
 const LS_TEAMREV = 'xwt_team_review', LS_CERT = 'xwt_cert_confirm';
 function teamExamRecs() {
   const rev = lsGet(LS_TEAMREV, {});
-  return examRecords().concat(TEAM_EXAM_MOCK).map(r => Object.assign({}, r, rev[r.id] ? { reviewer: rev[r.id] } : {})).sort((a, b) => b.ts - a.ts);
+  return examRecords().concat(EXAM_HIST()).concat(TEAM_EXAM_MOCK).map(r => Object.assign({}, r, rev[r.id] ? { reviewer: rev[r.id] } : {})).sort((a, b) => b.ts - a.ts);
 }
 function teamAbility(m) { return m.n === HOME_USER.name ? abilityNow() : m.dims; }
 function teamAvgDims() { const act = TEAM.filter(m => m.sess); return DIMS.map((_, i) => Math.round(act.reduce((a, m) => a + teamAbility(m)[i], 0) / act.length)); }
@@ -52,7 +52,7 @@ function pageTeam() {
         <div class="heath"></div>${DIMS.map(d => `<div class="heath">${d.replace(/与.*$/, '')}</div>`).join('')}
         ${TEAM.map(m => `<div class="heatn">${m.n}</div>${teamAbility(m).map(v => heat(v)).join('')}`).join('')}
         <div class="heatn"><b>均值</b></div>${avg.map(v => heat(v)).join('')}</div>
-        <div class="tk3" style="margin-top:6px">评价数据由陪练舱与题库考试自动记录，用于培训安排参考；正式考评与授权以人工确认为准。</div></div></section>
+        <div class="tk3" style="margin-top:6px">评价数据由陪练关卡自动记录，用于培训安排参考；正式考评与授权以人工确认为准。</div></div></section>
       <section class="hcard ho"><div class="hch"><b>陪练关卡结果与系统建议</b><em class="ai">AI</em><span>${recs.length} 条 · 组员考完即时同步 · 复核后进入成长记录</span></div><div class="hcb"><table class="htbl ldtbl">
         <tr><th>成员</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>针对性训练建议</th><th>复核</th></tr>
         ${recs.slice(0, 8).map(r => `<tr><td><b>${r.who}</b><div class="tk3 mono">${stampOf(r.ts)}</div></td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0 否决' : r.score}/${r.max}</td><td>${r.errs.length ? r.errs.map(e => `<i class="tag ${e.kind === 'red' || e.kind === 'crit' ? 'rl' : 'wn'}">${ERR_KIND[e.kind]}</i>`).join('') : '<span class="tag ok">无</span>'}</td><td class="ldsug">${(r.sugg || []).slice(0, 2).map(s => `<div>${s.dim ? `<b>${abilityOf(s.dim).n}</b>` : ''}${s.t.replace(/^「[^」]*」/, '')}</div>`).join('')}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : `<button class="btn sm" data-ldrev="${r.id}">复核</button>`}${r.id.startsWith('E') ? `<button class="btn sm" data-exreview="${r.id}">复盘</button>` : ''}</td></tr>`).join('')}</table></div></section>
@@ -123,7 +123,7 @@ function remindDraft() {
 }
 function ldSend() {
   const g = id => $(id) ? $(id).value : '';
-  const plan = g('#ld_plan') || 'e1163'; const ex = EXAMS.find(e => e.id === plan); const pl = PLANS.find(p => p.id === plan);
+  const plan = g('#ld_plan') || 'e1163'; const ex = EXAMS.find(e => e.id === plan) || EXAMS[0]; const pl = null;
   const who = g('#ld_who') || LD.who;
   const weakPeople = TEAM.filter(m => m.sess && LD.dims.some(d => teamAbility(m)[DIMS.indexOf(d)] < 70)).map(m => m.n);
   const total = who === '全班' ? TEAM.length : who === '短板人员' ? weakPeople.length : 1;

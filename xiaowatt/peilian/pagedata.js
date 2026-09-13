@@ -120,23 +120,23 @@ const ARCH_IF = {
   hours: { n: '学时回写', dir: '底座 → 课堂', freq: '每场陪练结束即时回写', fields: ['学员工号', '场次编号', '练习方式', '学时', '得分', '完成时间'], last: '本月已回写 3 条' },
   profile: { n: '学员画像', dir: '课堂 ⇄ 底座', freq: '每日 07:30 双向同步', fields: ['岗位与序列', '资质证书', '年度学时', '能力六维', '陪练场次', '任务完成'], last: '36 字段 · 全部一致' }
 };
-/* 能力徽章（条件由近 30 天场次数据判定） */
+/* 能力徽章（条件由近 30 天陪练关卡记录判定，L＝examHist()） */
 const BADGES = [
-  { id: 'b1', n: '首场满 90', d: '任一场次得分 ≥ 90', test: L => L.some(s => s.score >= 90) },
-  { id: 'b2', n: '零红线 · 连续 5 场', d: '最近 5 场未触发红线', test: L => L.slice(0, 5).length >= 5 && L.slice(0, 5).every(s => !s.vio.some(v => v.lv === 'red')) },
-  { id: 'b3', n: '完整票通关', d: '完整操作票得分 ≥ 85', test: L => L.some(s => s.plan.startsWith('完整') && s.score >= 85) },
-  { id: 'b4', n: '考核达标', d: '考核模式得分 ≥ 90', test: L => L.some(s => s.mode === '考核模式' && s.score >= 90) },
-  { id: 'b5', n: '月练 12 场', d: '近 30 天场次 ≥ 12', test: L => L.length >= 12 },
-  { id: 'b6', n: '错题清零', d: '错题重练得分 ≥ 90', test: L => L.some(s => s.plan.startsWith('错题') && s.score >= 90) },
-  { id: 'b7', n: '不用提示 · 3 场', d: '3 场未使用任何提示', test: L => L.filter(s => !(s.hints || []).length).length >= 3 },
-  { id: 'b8', n: '票务规范 90+', d: '操作程序与票务规范维度 ≥ 90', test: () => RADAR_NOW[2] >= 90 },
-  { id: 'b9', n: 'GIS 四项核对达标', d: '状态核对与确认维度 ≥ 80', test: () => RADAR_NOW[1] >= 80, plan: 'sp_gis' },
-  { id: 'b10', n: '异常识别', d: '陪练中发现异常并正确中止上报', test: L => L.some(s => (s.praise || []).some(p => /异常|中止/.test(p.title || p))), plan: 'full' },
+  { id: 'b1', n: '首次及格', d: '任一次陪练关卡得分及格', test: L => L.some(r => !r.red && r.score >= r.pass) },
+  { id: 'b2', n: '零红线 · 连续 5 次', d: '最近 5 次未触发一票否决', test: L => L.slice(0, 5).length >= 5 && L.slice(0, 5).every(r => !r.red) },
+  { id: 'b3', n: '1163 通关', d: '1163 开关与地刀检查得分 ≥ 12/15', test: L => L.some(r => r.exam === 'e1163' && !r.red && r.score >= 12), exam: 'e1163' },
+  { id: 'b4', n: '考核达标', d: '考核模式得分 ≥ 90%', test: L => L.some(r => r.mode === 'exam' && !r.red && r.score / r.max >= .9) },
+  { id: 'b5', n: '月练 6 次', d: '近 30 天陪练关卡 ≥ 6 次', test: L => L.length >= 6 },
+  { id: 'b6', n: '雨淋阀满分', d: '雨淋阀机械手动启动满分', test: L => L.some(r => r.exam === 'rain' && !r.red && r.score >= r.max), exam: 'rain' },
+  { id: 'b7', n: '不用提示 · 3 次', d: '3 次未使用任何提示', test: L => L.filter(r => !(r.hints || 0)).length >= 3 },
+  { id: 'b8', n: '票务规范 90+', d: '操作程序与票务规范维度 ≥ 90', test: () => RADAR_NOW[2] >= 90, exam: 'e1163' },
+  { id: 'b9', n: '状态核对达标', d: '状态核对与确认维度 ≥ 80', test: () => RADAR_NOW[1] >= 80, exam: 'e1163' },
+  { id: 'b10', n: '异常识别', d: '地刀不一致 / 压力异常情境下无关键错误', test: L => L.some(r => r.abn && !r.red && !(r.errs || []).some(e => e.crit)), exam: 'rain' },
   { id: 'b11', n: '学时达标', d: '年度学时 ≥ 90', test: () => HOME_USER.hours.done >= 90 },
-  { id: 'b12', n: '票令核对', d: '专项 · 接令与票令核对 ≥ 90', test: L => L.some(s => /接令/.test(s.plan) && s.score >= 90) }
+  { id: 'b12', n: '汇报要素齐全', d: '汇报情境一次通过', test: L => L.some(r => (r.track || []).some(t => /汇报/.test(t.title) && (t.items || []).length && t.items.every(i => i.ok))), exam: 'e1163' }
 ];
 
 /* 本机存储键 */
-const LS_SESSIONS = 'xwt_sessions', LS_TASKS = 'xwt_tasks', LS_COACHES = 'xwt_custom_coaches', LS_GOALS = 'xwt_goals', LS_HOURS = 'xwt_hours', LS_COURSE = 'xwt_course_prog', LS_QUIZ = 'xwt_quiz', LS_PLAN = 'xwt_plan', LS_ACTS = 'xwt_actions';
+const LS_TASKS = 'xwt_tasks', LS_COACHES = 'xwt_custom_coaches', LS_GOALS = 'xwt_goals', LS_HOURS = 'xwt_hours', LS_COURSE = 'xwt_course_prog', LS_QUIZ = 'xwt_quiz', LS_PLAN = 'xwt_plan', LS_ACTS = 'xwt_actions';
 function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k) || 'null') || d; } catch (e) { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }

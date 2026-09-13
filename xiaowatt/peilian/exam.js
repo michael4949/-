@@ -469,7 +469,7 @@ function examFinish() {
   EX.track.forEach(t => { const s = ex.stations.find(x => x.id === t.sid); if (!s || !s.dims) return; const r = t.ratio != null ? t.ratio : 1; Object.keys(s.dims).forEach(k => { acc[k].w += s.dims[k]; acc[k].v += s.dims[k] * r; }); });
   const dims = {}; DIMK.forEach(k => { dims[k] = acc[k].w ? Math.round(100 * acc[k].v / acc[k].w) : null; });
   const dur = Math.max(1, Math.round((Date.now() - EX.t0) / 60000));
-  const rec = { id: 'E' + Date.now(), ts: Date.now(), who: HOME_USER.name, exam: ex.id, examName: ex.n, short: ex.short, mode: EX.mode, modeName: EXAM_MODES[EX.mode].n, dur, raw, score: EX.red ? 0 : raw, max: ex.max, pass: ex.pass, red: EX.red, track: EX.track, errs: EX.errs, hints: EX.hints, asked: EX.asked, dims, ver: versionStamp(ex.id), task: EX.task, reviewer: '', log: EX.log.slice(-80) };
+  const rec = { id: 'E' + Date.now(), ts: Date.now(), who: HOME_USER.name, exam: ex.id, examName: ex.n, short: ex.short, mode: EX.mode, modeName: EXAM_MODES[EX.mode].n, dur, raw, score: EX.red ? 0 : raw, max: ex.max, pass: ex.pass, red: EX.red, track: EX.track, errs: EX.errs, hints: EX.hints, asked: EX.asked, dims, ver: versionStamp(ex.id), task: EX.task, reviewer: '', log: EX.log.slice(-80), abn: !!((EX.arm && EX.arm.rainAbn && ex.id === 'rain') || (EX.st && EX.st.esCase && EX.st.esCase !== 'ok')) };
   rec.sugg = examSugg(rec);
   examSaveRec(rec);
   if (EX.task) { const l = lsGet(LS_TASKS, []); const t = l.find(x => x.id === EX.task); if (t) { t.done = (t.done || 0) + 1; t.results = (t.results || []).concat([{ who: rec.who, score: rec.score, red: rec.red, id: rec.id }]); lsSet(LS_TASKS, l); } }
@@ -557,7 +557,7 @@ function examAfter() {
 
 /* ---------------- 入口页 ---------------- */
 function examEntryHtml() {
-  const recs = examRecords().filter(r => r.who === HOME_USER.name);
+  const recs = examHist();
   const tasks = examTasks().filter(t => !t.results || !t.results.some(r => r.who === HOME_USER.name));
   const cl = confirmLog();
   return `<div class="ppage">
@@ -574,20 +574,30 @@ function examEntryHtml() {
         <button class="btn pri" data-exstart="${ex.id}">开始</button>
       </div></section>`; }).join('')}
     </div>
-    <section class="hcard ho"><div class="hch"><b>我的陪练记录</b><span>${recs.length} 条 · 本机保存，刷新后可回看 · 已同步到组长工作台</span></div><div class="hcb">
-      ${recs.length ? `<table class="htbl"><tr><th>时间</th><th>关卡</th><th>模式</th><th>得分</th><th>提示</th><th>错误</th><th>复核</th><th></th></tr>${recs.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.hints || 0}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待班组长复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">查看复盘</button></td></tr>`).join('')}</table>` : '<div class="tk3">还没有陪练记录。</div>'}</div></section>
+    <section class="hcard ho"><div class="hch"><b>我的陪练记录</b><span>${recs.length} 条 · 近30天 · 本机新记录刷新后可回看 · 已同步到组长工作台</span></div><div class="hcb">
+      ${recs.length ? `<table class="htbl"><tr><th>时间</th><th>关卡</th><th>模式</th><th>得分</th><th>提示</th><th>错误</th><th>复核</th><th></th></tr>${recs.map(r => `<tr><td class="mono">${stampOf(r.ts)}${r.mock ? '' : ' <i class="rvloc">本机</i>'}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red ? 'wv' : r.score >= r.pass ? 'gv' : 'wv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.hints || 0}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待班组长复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">查看复盘</button></td></tr>`).join('')}</table>` : '<div class="tk3">还没有陪练记录。</div>'}</div></section>
   </div>`;
 }
 function stampOf(ts) { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
 
 /* ---------------- 复盘页 ---------------- */
+function examReviewOpen(id) {
+  const r = (typeof examHist === 'function' ? examHist() : examRecords()).find(x => x.id === id) || (typeof teamExamRecs === 'function' ? teamExamRecs().find(x => x.id === id) : null);
+  if (!r) return toast('记录不存在', 'bad');
+  EX.finished = r; EX.exam = null; if (location.hash !== '#exam') goPage('exam'); else rerenderExam();
+}
 function examReviewHtml(r, fresh) {
-  const dimsArr = DIMK.map(k => r.dims[k] == null ? 0 : r.dims[k]);
-  const ex = EXAMS.find(x => x.id === r.exam) || { coach: { short: '教' } };
   return `<div class="ppage">
     <div class="ph"><b>${fresh ? '本次陪练复盘' : '陪练复盘'}</b><span>${r.examName} · ${r.modeName} · ${stampOf(r.ts)} · ${r.who}</span>
       <span class="phr">${fresh ? `<button class="btn" data-exstart="${r.exam}" data-exmode="${r.mode}">再练一次</button>` : ''}<button class="btn" data-exquit="1">回关卡列表</button>${ROLE.cur === 'lead' ? '<button class="btn" data-go="team">回组长工作台</button>' : '<button class="btn" data-go="home">回工作台</button>'}</span></div>
-    <section class="hcard rvhead hg"><div class="rvscore"><div class="rvbig ${r.red || r.score < r.pass ? 'wv' : ''}">${r.red ? 0 : r.score}<small>/${r.max}</small></div><div class="tk3">${r.red ? '触发一票否决，成绩记 0' : r.score >= r.pass ? '及格' : '未及格'} · 及格线 ${r.pass}</div>
+    ${examReviewBody(r)}
+  </div>`;
+}
+/* 复盘正文（评分复盘页也用它） */
+function examReviewBody(r) {
+  const dimsArr = DIMK.map(k => r.dims[k] == null ? 0 : r.dims[k]);
+  const ex = EXAMS.find(x => x.id === r.exam) || { coach: { short: '教' } };
+  return `<section class="hcard rvhead hg"><div class="rvscore"><div class="rvbig ${r.red || r.score < r.pass ? 'wv' : ''}">${r.red ? 0 : r.score}<small>/${r.max}</small></div><div class="tk3">${r.red ? '触发一票否决，成绩记 0' : r.score >= r.pass ? '及格' : '未及格'} · 及格线 ${r.pass}</div>
         <div class="rvkpis"><span><b>${r.dur}</b>分钟</span><span><b>${r.hints || 0}</b>提示</span><span><b>${r.errs.length}</b>错误</span><span><b>${r.errs.filter(e => e.crit).length}</b>关键错误</span><span><b>${r.asked || 0}</b>提问</span></div>
         <div class="exver"><div><label>操作票版本</label>${r.ver.ticket}</div><div><label>规则版本</label>${r.ver.rule}</div><div><label>知识依据版本</label>${r.ver.kb}</div><div><label>训练时间</label>${r.ver.time}</div><div><label>复核人</label>${r.reviewer || '待班组长复核'}</div></div></div>
       <div class="rvradar">${chRadar(DIMS, dimsArr, RADAR_PREV, { w: 330, h: 240, l1: '本次', l2: '上月', key: 'x' })}<div class="tk3" style="text-align:center">本次落到 8 维能力 · 未覆盖维度记 0 不计入现值</div></div></section>
@@ -602,15 +612,14 @@ function examReviewHtml(r, fresh) {
     <div class="gtwo">
       <section class="hcard hg"><div class="hch"><b>针对性训练建议</b><em class="ai">AI</em><span>由本次错误、提示与维度得分生成 · 已反馈到组长工作台</span></div><div class="hcb">${r.sugg.map(s => `<div class="hrow">${s.dim ? `<i class="tag wn">${abilityOf(s.dim).n}</i>` : ''}${s.t} <button class="btn sm" data-exstart="${s.exam}">${s.act}</button></div>`).join('')}</div></section>
       <section class="hcard ho"><div class="hch"><b>教练对话回放</b><span>${(r.log || []).length} 条</span></div><div class="hcb exlog rv">${(r.log || []).map(m => `<div class="msg ${m.who === 'me' ? 'o' : 'j'} ${m.k || ''}"><div class="av">${m.who === 'me' ? '我' : ex.coach.short}</div><div class="bd"><span class="mono tk3">${m.at}</span> ${m.t}</div></div>`).join('') || '<div class="tk3">无对话记录。</div>'}</div></section>
-    </div>
-  </div>`;
+    </div>`;
 }
 
 /* ---------------- 页面点击 / 键盘 ---------------- */
 function examClick(e) {
   const q = s => e.target.closest(s); let n;
   if (n = q('[data-exstart]')) { const modeEl = $(`input[name="exm_${n.dataset.exstart}"]:checked`); examStart(n.dataset.exstart, n.dataset.exmode || (modeEl ? modeEl.value : 'teach'), { task: n.dataset.extask || null }); return true; }
-  if (n = q('[data-exreview]')) { const r = examRecords().find(x => x.id === n.dataset.exreview); if (r) { EX.finished = r; EX.exam = null; if (location.hash !== '#exam') goPage('exam'); else rerenderExam(); } return true; }
+  if (n = q('[data-exreview]')) { examReviewOpen(n.dataset.exreview); return true; }
   if (n = q('[data-exquit]')) { examQuit(); return true; }
   if (n = q('[data-exloc]')) { touch(); EX.loc = n.dataset.exloc; exCloseZoom(); rerenderScene(); const s = examStation(); if (s.locSay && s.locSay[EX.loc] && EX.mode !== 'exam') coachSay(s.locSay[EX.loc], { pose: 'listen' }); return true; }
   if (n = q('.hs[data-hs]')) { examLook(n.dataset.hs); return true; }

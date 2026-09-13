@@ -41,11 +41,7 @@ const EXAM_COVER = {
   e1163: { n: '110kV 培训三线 1163 开关检查与地刀检查', dims: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] }
 };
 
-/* 陪练舱六个内部计分维度 → 8 维折算（取均值） */
-const ABILITY_FROM_ARENA = { A: ['dual', 'state'], B: ['state'], C: ['order', 'rule'], D: ['risk', 'rule'], E: ['risk'], F: ['state', 'dual'], G: ['state', 'risk'], H: ['term', 'state'] };
-function arenaTo8(v6) {                        // v6: {rule,order,dual,state,risk,term} 各 0–100
-  return ABILITY8.map(a => { const ks = ABILITY_FROM_ARENA[a.k]; return Math.round(ks.reduce((s, k) => s + (v6[k] == null ? 100 : v6[k]), 0) / ks.length); });
-}
+
 
 /* 专业规则确认记录：版本 · 审定人 · 日期（人物为虚拟）。待确认项由班组长提交审定后状态变更 */
 const CONFIRM_LOG = [
