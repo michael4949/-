@@ -1,4 +1,4 @@
-/* ===== 小瓦特·练 · 陪练舱 ===== */
+/* ===== 小瓦特·练 · 基础样式（变量 / 按钮 / 弹层 / 标签） ===== */
 :root{
   --bg:#f5f6f1; --bg2:#f0f1e9; --panel:#ffffff; --panel2:#f7f8f1; --line:#e2dfd0;
   --line2:#c9c6b0; --txt:#243329; --txt2:#5c6b5f; --txt3:#98a69c;
@@ -457,7 +457,7 @@ button{font-family:inherit}
 .cfgin input{flex:1;background:#f2f3ea;border:1px solid var(--line2);color:#3c5245;border-radius:4px;
   padding:6px 9px;font-family:var(--mono);font-size:11.5px}
 
-/* ================= 陪练舱 v2：对练居中 ================= */
+/* ================= 对练区通用（输入条 / 麦克风 / 提示行） ================= */
 .main2{flex:1;display:grid;grid-template-columns:1fr 412px;gap:1px;background:var(--line);min-height:0}
 .arena{position:relative;background:#f4f5ec;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .arena-top{flex:1;min-height:0;display:grid;grid-template-columns:44% 56%;position:relative;z-index:2}
@@ -532,7 +532,7 @@ button{font-family:inherit}
 .arena.sheetopen .arena-l #dh{top:6px}
 .sheet{height:60%}
 
-/* ---------- 当前指令卡（陪练舱引导） ---------- */
+/* ---------- 指令卡（通用） ---------- */
 .tbfoc{display:flex;align-items:center;gap:12px;margin-top:9px;padding:10px 13px;
   background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 24%,transparent),color-mix(in srgb,var(--ac) 5%,transparent));
   border:1px solid var(--ac);border-radius:8px}
@@ -881,7 +881,7 @@ img.cav{object-fit:cover;border:1px solid #e0ddcc;background:#f4f3ea}
 .pav[data-pose="stop"] .pav-state{color:#b3372c;border-color:#eac1bb}
 .pav[data-pose="stop"] .pav-state em{background:#e23b2e}
 
-/* ===== 陪练舱：实时评估 / AR 标注 / 预估得分 ===== */
+/* ===== 实时评估 / 标注（通用） ===== */
 .kpi.est{border-color:#d8c078;background:#fdf9ec}
 .kpi.est b{color:var(--ac)}.kpi.est.warn b{color:#a8821b}.kpi.est.bad b{color:#b3372c}
 .hintrow.livem:empty{display:none}
@@ -1013,7 +1013,7 @@ img.cav{object-fit:cover;border:1px solid #e0ddcc;background:#f4f3ea}
 @keyframes rise{0%{transform:translateY(0) scale(.9);opacity:0}8%{opacity:.16}60%{opacity:.14}100%{transform:translateY(-110vh) scale(1.15);opacity:0}}
 /* KPI 数字滚动 */
 .kpi b.cu{transition:none}
-/* 陪练舱：右栏知识点卡与操作票走橙系，指令卡与对练走绿系 */
+/* 知识点卡与操作票走橙系，指令卡与对练走绿系 */
 .side .ticket .thead{border-top:1px solid var(--goldln)}
 .kp{border-top:1px solid var(--goldln)}
 
@@ -1347,3 +1347,8 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .exopts.chat.done .exopt{cursor:default}.exopts.chat.done .exopt.right{border-color:var(--ac);background:var(--acbg)}.exopts.chat.done .exopt.wrong{border-color:#d43a2f;background:#fbe9e7}.exopts.chat.done .exopt.dim{opacity:.55}
 .exlog .msg.q .bd{max-width:96%}.exlog .msg.score .bd{border-color:var(--acln);background:var(--acbg)}
 .exprog i.q{border-radius:2px}
+
+/* 做题情境：不显示场景图，只留题卡与对话 */
+.exguide.quiz{min-height:220px;padding:20px 24px;display:flex;flex-direction:column;justify-content:center}
+.exguide.quiz .exgq{font-size:17px;line-height:1.7;margin-top:10px}
+.exguide.quiz .exgopts{grid-template-columns:1fr;gap:6px;margin-top:12px}.exguide.quiz .exgopts span{font-size:13.5px}

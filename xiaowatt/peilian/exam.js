@@ -449,7 +449,7 @@ function examMic(btn, inputSel) {
   const inp = $(inputSel); if (!inp) return;
   micStart(btn, inp, examMicText(inputSel === '#ex_zsay'));
 }
-/* 演示识别的兜底文本：当前该说的话（做题＝本题答案；操作关＝当前目标的口述样例） */
+/* 兜底识别的兜底文本：当前该说的话（做题＝本题答案；操作关＝当前目标的口述样例） */
 function examMicText(fromZoom) {
   const s = examStation(); if (!s) return '';
   if (s.type === 'quiz') { const it = quizItem(); if (!it) return ''; return it.kind === 'choice' ? 'ABCD'[it.a] : ((typeof it.sample === 'function' ? it.sample(EX.st) : it.sample) || ''); }
@@ -529,8 +529,8 @@ function pageExam() {
     <div class="exmain coach">
       <div class="exscene hg ${EX.mode}">
         <div class="exguide ${s.type === 'quiz' ? 'quiz' : ''}" id="ex_guide">${exGuideHtml(s)}</div>
-        <div class="exlocbar" id="ex_locbar">${exLocBar(s)}</div>
-        <div class="exsvgbox" id="ex_svg">${exSceneSvg(s)}</div><div class="exzoom" id="ex_zoom" hidden></div>
+        ${s.type === 'quiz' ? '' : `<div class="exlocbar" id="ex_locbar">${exLocBar(s)}</div>
+        <div class="exsvgbox" id="ex_svg">${exSceneSvg(s)}</div><div class="exzoom" id="ex_zoom" hidden></div>`}
         ${s.type === 'auto' ? `<ol class="exauto" id="ex_auto">${s.items.map((t, i) => `<li data-i="${i}" class="${EX.goals['a' + i] ? 'on' : ''}">${t}</li>`).join('')}</ol>` : `
         <div class="exsay"><span class="exsayl">${s.type === 'quiz' ? '回答' : '手指口述 · 汇报'}</span><input id="ex_say" class="exin wide" autocomplete="off" placeholder="${s.type === 'quiz' ? '在这里回答（选择题也可以点对话里的选项）' : '说出你现在要做什么、看到什么、下什么结论（可点麦克风口述）'}"><button class="exmic" data-exmic="#ex_say" title="语音">●</button><button class="btn pri" data-exsay="1">${s.type === 'quiz' ? '回答' : '说'}</button></div>`}
       </div>

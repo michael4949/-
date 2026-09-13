@@ -24,14 +24,14 @@ function toast(t, k) {
   setTimeout(() => { e.style.transition = '.3s'; e.style.opacity = 0; setTimeout(() => e.remove(), 320); }, 2100);
 }
 
-/* 语音输入：联网且经 http(s) 打开时浏览器识别（结果可改再发）；本地文件 / 离线 / 失败时演示识别＝逐字打入当前该说的内容 */
+/* 语音输入：联网且经 http(s) 打开时浏览器识别（结果可改再发）；本地文件 / 离线 / 失败时兜底识别＝逐字打入当前该说的内容 */
 let recTimer = null, recNow = null;
 /* 语音输入：联网时用浏览器识别（结果可改再发）；离线按当前该说的内容逐字打入（复诵 / 回报的内容本来就在票面上） */
 function micStart(btn, inp, fallback) {
   if (!btn || !inp) return;
   if (recNow) { try { recNow.stop(); } catch (e) { } recNow = null; btn.classList.remove('rec'); return; }
   if (recTimer) return;
-  /* 浏览器识别只在联网且经 http(s) 打开时可用（本地文件打开拿不到麦克风权限，内网没有识别服务）；其余情况走演示识别 */
+  /* 浏览器识别只在联网且经 http(s) 打开时可用（本地文件打开拿不到麦克风权限，内网没有识别服务）；其余情况走兜底识别 */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const canSR = SR && navigator.onLine && location.protocol !== 'file:' && !window.__DH_MUTE;
   if (canSR) {

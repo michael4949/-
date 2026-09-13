@@ -20,7 +20,7 @@ function teamTasks() {
   const base = [{ id: 't0', coach: '倒闸操作 · 陈志远', plan: '完整操作票', mode: '考核模式', due: dateAfter(HOME_TASK.dueDays), pass: 80, who: '全班', done: 7, total: 12 }];
   return base.concat(lsGet(LS_TASKS, []));
 }
-const TRAIN_CONTENTS = [['e1163', '陪练关卡 · 1163 开关与地刀检查'], ['rain', '陪练关卡 · 雨淋阀机械手动启动'], ['full', '陪练舱 · 完整操作票'], ['sp_gis', '陪练舱 · 专项 GIS 四项核对'], ['sp_vd', '陪练舱 · 专项 验电接地']];
+const TRAIN_CONTENTS = [['e1163', '陪练关卡 · 1163 开关与地刀检查'], ['rain', '陪练关卡 · 雨淋阀机械手动启动']];
 const LD = { dims: [], who: '短板人员' };
 
 function pageTeam() {
