@@ -444,14 +444,15 @@ function panelBay(w) {
       <text x="173" y="76" text-anchor="middle" style="font-size:8.5px;fill:#5c6b5f;font-family:monospace">汇控柜</text>
       ${SVX.lamp(163, 94, live, live ? '#e23b2e' : '#23b26a', '', 4)}${SVX.lamp(183, 94, !live, '#23b26a', '', 4)}
       <text x="109" y="12" text-anchor="middle" style="font-size:9.5px;fill:${cur ? (n === '1163' ? '#0a6b44' : '#b3372c') : '#98a69c'}">${cur ? (n === '1163' ? '当前站位' : '当前站位 · 走错间隔') : '点此走到该间隔'}</text>
-      ${SVX.plate(31, 116, 160, `110kV培训${n === '1161' ? '一' : n === '1162' ? '二' : '三'}线 ${n}`, `110kV ${n === '1161' ? '1M' : '2M'} 侧 · ${live ? '运行中' : '停电'}`)}
+      ${SVX.plate(31, 116, 160, n === '1161' ? '110kV鲘元Ⅰ线 1891' : n === '1162' ? '110kV鲘元Ⅱ线 1892' : '110kV培训三线 1163', `110kV ${n === '1161' ? '1M' : '2M'} 侧 · ${live ? '运行中' : '停电'}`)}
     </g>`;
   }).join('');
   const Y = 172;
   if (!right) {
-    w.innerHTML = pnl('110kV GIS 间隔现场', picked ? `当前站位：培训${S.bay === '1161' ? '一' : '二'}线${S.bay}间隔 · 走错间隔` : '三个间隔外观一样 · 先看间隔名称牌，自己选要进的间隔', `
+    const bn = S.bay === '1161' ? '鲘元Ⅰ线1891' : '鲘元Ⅱ线1892';
+    w.innerHTML = pnl('110kV GIS 间隔现场', picked ? `当前站位：${bn}间隔 · 走错间隔` : '三个间隔外观一样 · 先看间隔名称牌，自己选要进的间隔', `
       <div class="scene"><svg viewBox="0 0 760 172">${bays}</svg></div>
-      <div class="baytip ${picked ? 'bad' : ''}">${picked ? '这里是培训' + (S.bay === '1161' ? '一' : '二') + '线' + S.bay + '间隔，仍在运行中。本项的操作对象在培训三线1163间隔，请重新核对间隔名称牌。' : '到达每一个操作地点，先核对间隔名称，再核对设备双重名称。选错间隔会被记为走错间隔。'}</div>`);
+      <div class="baytip ${picked ? 'bad' : ''}">${picked ? '这里是' + bn + '间隔，仍在运行中。本项的操作对象在培训三线1163间隔，请重新核对间隔名称牌。' : '到达每一个操作地点，先核对间隔名称，再核对设备双重名称。选错间隔会被记为走错间隔。'}</div>`);
     return;
   }
   w.innerHTML = pnl('110kV GIS 间隔现场 · 培训三线1163间隔', '当前站位正确 · 先核对间隔名称与设备双重名称，再找操作对象', `

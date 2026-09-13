@@ -154,17 +154,18 @@ function openReport() {
   try {
     saveSession({ ts: Date.now(), plan: S.plan ? S.plan.name : '完整操作票', mode: MODES[S.mode].n,
       dur: Math.max(1, Math.round((Date.now() - (S.t0 || Date.now())) / 60000)), score: total,
-      dims: [0, 2, 3, 1, 5, 4].map(i => Math.round(vals[i])),
+      dims: arenaTo8(Object.fromEntries(dims.map(([k], i) => [k, vals[i]]))), ver: versionStamp(null),
       vio: S.vio.map(v => ({ lv: v.level === 'red' ? 'red' : v.level === 'major' ? 'major' : 'minor', step: v.step, t: v.title, cut: v.cut || CUT[v.level] || 5, dimn: v.dimn || DIMN[v.dim] || '', detail: v.detail, rule: v.rule, cite: (v.rule || v.detail || '').split('：')[0].slice(0, 24) })),
       hints: S.hints.map(hh => ['提示', `第${hh.step}项 第${hh.lv}级`]), lines: S.lines || [], praise: S.praise.map(p => ({ title: p.title })) });
   } catch (e) { }
-  const R = 74, cx = 152, cy = 112;
-  const pts = vals.map((v, i) => {
-    const a = -Math.PI / 2 + i * Math.PI / 3, r = R * v / 100;
+  const v8 = arenaTo8(Object.fromEntries(dims.map(([k], i) => [k, vals[i]])));
+  const N = DIMS.length, R = 74, cx = 152, cy = 112;
+  const pts = v8.map((v, i) => {
+    const a = -Math.PI / 2 + i * Math.PI * 2 / N, r = R * v / 100;
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
   });
   const grid = [1, .75, .5, .25].map(k => {
-    const p = dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 3; return `${cx + Math.cos(a) * R * k},${cy + Math.sin(a) * R * k}`; }).join(' ');
+    const p = DIMS.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / N; return `${cx + Math.cos(a) * R * k},${cy + Math.sin(a) * R * k}`; }).join(' ');
     return `<polygon points="${p}" fill="none" stroke="#e2dfd0"/>`;
   }).join('');
   const m = el('div', 'mask');
@@ -174,12 +175,12 @@ function openReport() {
     <div class="db">
       <div style="display:grid;grid-template-columns:308px 1fr;gap:20px">
         <div style="text-align:center">
-          <svg width="300" height="238" viewBox="0 0 304 232">
+          <svg width="300" height="238" viewBox="-6 -8 316 244">
             ${grid}
-            ${dims.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI / 3; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#e2dfd0"/>`; }).join('')}
+            ${DIMS.map((_, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / N; return `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a) * R}" y2="${cy + Math.sin(a) * R}" stroke="#e2dfd0"/>`; }).join('')}
             <polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="color-mix(in srgb,var(--ac) 28%,transparent)" stroke="#1fa06b" stroke-width="2"/>
             ${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--acd)"/>`).join('')}
-            ${dims.map(([k, n], i) => { const a = -Math.PI / 2 + i * Math.PI / 3, r = R + 24; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; return `<text x="${x}" y="${y}" text-anchor="middle" font-size="10" fill="#5c6b5f">${n}</text><text x="${x}" y="${y + 12}" text-anchor="middle" font-size="11" font-family="monospace" fill="var(--acd)">${Math.round(vals[i])}</text>`; }).join('')}
+            ${DIMS.map((n, i) => { const a = -Math.PI / 2 + i * Math.PI * 2 / N, r = R + 26; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r; return `<text x="${x}" y="${y}" text-anchor="middle" font-size="9" fill="#5c6b5f">${n}</text><text x="${x}" y="${y + 12}" text-anchor="middle" font-size="11" font-family="monospace" fill="var(--acd)">${v8[i]}</text>`; }).join('')}
           </svg>
           <div style="margin-top:6px"><div style="font-family:var(--mono);font-size:38px;color:${red ? '#b3372c' : 'var(--ac)'};line-height:1">${total}</div>
           <div style="font-size:11px;color:#5c6b5f">综合得分　${red ? '触发一票否决' : '本次评价'}</div></div>
@@ -212,11 +213,12 @@ function openReport() {
             ${S.praise.map(p => `<div style="padding:5px 0"><span class="tag ok">加分</span><b style="color:#243329">${p.title}</b>
             <div style="color:#5c6b5f;margin-top:3px">${p.detail}</div></div>`).join('')}</div></div>` : ''}
           <div class="sec"><div class="st">能力标签</div><div class="sc">
-            ${['规程记忆', '唱票复诵', '设备状态核对', '异常处置', '调度术语', '风险辨识'].map((t, i) =>
+            ${DIMS.map((t, i) =>
     `<span style="display:inline-block;margin:3px 6px 3px 0;padding:3px 10px;border-radius:12px;font-size:11px;
-              background:${vals[i] > 80 ? 'var(--acbg)' : vals[i] > 55 ? '#faf3dc' : '#fbe9e7'};
-              border:1px solid ${vals[i] > 80 ? 'var(--acln)' : vals[i] > 55 ? '#e3d49e' : '#eac1bb'};
-              color:${vals[i] > 80 ? 'var(--ac)' : vals[i] > 55 ? '#a8821b' : '#b3372c'}">${t} ${vals[i] > 80 ? '达标' : vals[i] > 55 ? '待提升' : '短板'}</span>`).join('')}
+              background:${v8[i] > 80 ? 'var(--acbg)' : v8[i] > 55 ? '#faf3dc' : '#fbe9e7'};
+              border:1px solid ${v8[i] > 80 ? 'var(--acln)' : v8[i] > 55 ? '#e3d49e' : '#eac1bb'};
+              color:${v8[i] > 80 ? 'var(--ac)' : v8[i] > 55 ? '#a8821b' : '#b3372c'}">${t} ${v8[i] > 80 ? '达标' : v8[i] > 55 ? '待提升' : '短板'}</span>`).join('')}
+            <div style="font-size:10.5px;color:#98a69c;margin-top:6px">维度按作业授权认证表 20 个专业项目与两项实操考试抽取（v1.0，已审定）；维度得分由本场六项计分折算。</div>
           </div></div>
         </div>
       </div>

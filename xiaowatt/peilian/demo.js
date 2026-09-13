@@ -223,7 +223,7 @@ function openDemo() {
       <div class="dmsteps">${D.steps.map((s, i) => `<span class="dms" data-dstep="${i}"><i>${i + 1}</i>${s.t}</span>`).join('')}</div>
       <div class="dmstage"><svg id="dmsvg" width="520" height="230" viewBox="0 0 520 230"></svg></div>
       <div class="dmcap" id="dmcap"></div>
-      <div class="dmtip">示范只演示动作要领，不代替你自己做。看完关掉，按票面自己走一遍五拍。</div>
+      <div class="dmtip">示范只做动作要领，不代替你自己做。看完关掉，按票面自己走一遍五拍。</div>
     </div>
     <div class="df"><button class="btn" id="dm_prev">上一步</button><button class="btn" id="dm_next">下一步</button>
       <button class="btn" id="dm_replay">重放</button><button class="btn pri" id="dm_close">我来做一遍</button></div>`;

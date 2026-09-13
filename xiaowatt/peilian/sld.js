@@ -98,8 +98,9 @@ function sld(o) {
     <text x="476" y="58" class="devlbl" style="fill:#c25549">110kV 1M</text>
     <line x1="20" y1="100" x2="470" y2="100" stroke="${BUS}" stroke-width="5"/>
     <text x="476" y="104" class="devlbl" style="fill:#c25549">110kV 2M</text>
-    ${stubUp(70, '培训一线', '1161')}${stubUp(160, '#1主变变高', '1101')}${stubUp(250, '110kV 1M PT', '111PT')}
-    ${stubDn(70, '培训二线', '1162')}${stubDn(160, '#2主变变高', '1102')}${stubDn(250, '#3主变变高', '1103')}
+    <line x1="20" y1="54" x2="20" y2="100" stroke="${BUS}" stroke-width="2.4"/><rect x="13" y="70" width="14" height="14" fill="${BUS}"/><text x="30" y="81" class="devlbl">1012 分段</text>
+    ${stubUp(70, '鲘元Ⅰ线', '1891')}${stubUp(160, '#1主变变高', '1101')}${stubUp(250, '110kV 1M PT', '111PT')}${stubUp(340, '备用间隔(1)', '')}
+    ${stubDn(70, '鲘元Ⅱ线', '1892')}${stubDn(160, '#2主变变高', '1102')}${stubDn(250, '#3主变变高', '1103')}
     ${stubDn(312, '110kV 2M PT', '112PT')}
 
     <!-- 培训三线1163间隔 -->

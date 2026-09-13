@@ -172,6 +172,7 @@ function pageReview() {
             <div class="chips" style="justify-content:center">${[['prev', '上一场'], ['best', '最佳场'], ['avg', '30天均值']].map(([k, n]) => `<span class="chip ${RV.cmp === k ? 'on' : ''}" data-rvcmp="${k}">${n}</span>`).join('')}</div>
             ${chRadar(DIMS6, s.dims, cmpVals, { w: 330, h: 240, l1: '本场', l2: cmpLabel })}<div class="tk3" style="text-align:center">本场 vs ${cmpLabel} · 顶点可查明细</div></div>
         </section>
+        ${examRecords().filter(r => r.who === HOME_USER.name).length ? `<section class="hcard ho"><div class="hch"><b>题库考试记录</b><span>${examRecords().filter(r => r.who === HOME_USER.name).length} 条 · 本机保存 · 已同步组长工作台</span></div><div class="hcb"><table class="htbl"><tr><th>时间</th><th>考试内容</th><th>模式</th><th>得分</th><th>错误</th><th>复核</th><th></th></tr>${examRecords().filter(r => r.who === HOME_USER.name).slice(0, 5).map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td class="mono">${r.errs.length}</td><td>${r.reviewer ? `<span class="tag ok">${r.reviewer}</span>` : '<span class="tag wn">待复核</span>'}</td><td><button class="btn sm" data-exreview="${r.id}">复盘</button></td></tr>`).join('')}</table></div></section>` : ''}
         <section class="hcard hg"><div class="hch"><b>AI 复盘</b><em class="ai">AI</em><span>由本场留痕数据生成</span></div>
           <div class="hcb"><div class="airv">${aiReview(s, prev)}</div></div></section>
         <section class="hcard ho"><div class="hch"><b>场次回放</b><span>逐项时间轴 · 绿=完成 金=不规范 橙=严重 红=一票否决 · 小点=用了提示</span>
@@ -334,6 +335,14 @@ function planRows() {
   }
   return rows;
 }
+const BOUNDARY = [
+  ['课程与学时', '提供课程、章节与学时规则', '学习后学时回写', '课程清单、学时规则', '陪练学时记录'],
+  ['题库', '题目与标准答案由现有平台与安全专家供给', '情境化执行、过程纠错、复训', '实操培训方案、关卡方案、操作票', '逐步轨迹、错误四要素、针对性训练建议'],
+  ['考试', '正式考试与成绩管理', '实操考核记录（班组长复核后回写）', '考核任务（内容、模式、及格线、截止）', '成绩、错误、能力维度得分'],
+  ['人员主数据', '人员、岗位、资质、班组', '只读引用，不维护', '姓名、岗位、班组', '—'],
+  ['能力评价', '岗位胜任能力评价体系与作业授权认证', '8 维雷达、认证表草稿（由班组授权人确认）', '认证表 20 个专业项目', '维度得分、授权建议、确认记录']
+];
+function boundaryHtml() { return `<table class="htbl bndtbl"><tr><th>事项</th><th>现有平台（南网自学 / 人资域）负责</th><th>本产品负责</th><th>输入</th><th>输出</th></tr>${BOUNDARY.map(r => `<tr>${r.map((c, i) => `<td${i === 0 ? ' style="font-weight:700"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</table>`; }
 function pageClassroom() {
   const cs = courseProg();
   const tags = ['全部'].concat(Array.from(new Set(COURSE_LIB.map(c => c.tag))));
@@ -341,6 +350,7 @@ function pageClassroom() {
   const hist = lsGet(LS_QUIZ, []);
   const plan = CL.plan || lsGet(LS_PLAN, null);
   return `<div class="ppage">
+    <section class="hcard ho"><div class="hch"><b>系统边界</b><span>现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写</span></div><div class="hcb">${boundaryHtml()}</div></section>
     <div class="ph"><b>知识课堂</b><span>南网人工智能知识课堂 · 上次同步 ${CLASSROOM.syncAt}</span><span class="phr"><button class="btn sm ${CL.syncing ? 'busy' : ''}" data-sync="1">${CL.syncing ? '同步中…' : '立即同步'}</button></span></div>
     <section class="hcard hg"><div class="hch"><b>接入关系</b><span>课程 / 题库 / 学员画像 供给 → 底座；陪练学时 → 课堂回写 · 点击节点查看接口</span></div><div class="hcb">${archSVG()}</div></section>
     <div class="syncline">${CLASSROOM.supply.map(s => `<span class="sy ok ${CL.syncing ? 'busy' : ''}" data-arch="${s.k}">${s.n} ${s.dir === 'in' ? '已同步' : '已回写'} · ${s.v}</span>`).join('')}</div>
@@ -423,84 +433,11 @@ function archDrill(k) {
 }
 
 /* ================= 班组看板（管理端） ================= */
-function teamTasks() {
-  const base = [{ id: 't0', coach: '倒闸操作 · 陈志远', plan: '完整操作票', mode: '考核模式', due: dateAfter(HOME_TASK.dueDays), pass: 80, who: '全班', done: 7, total: 12 }];
-  return base.concat(lsGet(LS_TASKS, []));
-}
-function pageTeam() {
-  const active = TEAM.filter(m => m.sess > 0);
-  const cover = Math.round(active.length / TEAM.length * 100);
-  const avgAll = Math.round(active.reduce((a, m) => a + m.avg, 0) / active.length);
-  const redTotal = REDLINES.reduce((a, r) => a + r[1], 0);
-  const idle = TEAM.filter(m => m.sess === 0 || m.last > 6);
-  const heat = v => { if (!v) return '<div class="heatc" style="background:#f4f3ea;color:#b3bfb2">—</div>'; const t = Math.max(0, Math.min(1, (v - 40) / 60)); return `<div class="heatc" style="background:color-mix(in srgb,var(--ac) ${Math.round((.08 + t * .7) * 100)}%,transparent);color:${t > .55 ? '#fff' : 'var(--acd)'}">${v}</div>`; };
-  const maxR = Math.max(...REDLINES.map(r => r[1]));
-  const tasks = teamTasks();
-  return `<div class="ppage">
-    <div class="ph"><b>班组看板</b><span>${LEAD_USER.team} · 班组长 ${LEAD_USER.name} · ${TEAM.length} 人</span></div>
-    <div class="hkpis ho" style="margin-top:-4px">
-      <div class="kpi ${cover >= 90 ? 'good' : 'warn'}"><b>${cover}%</b><span>陪练覆盖率 ${active.length}/${TEAM.length}</span></div>
-      <div class="kpi"><b>${(TEAM.reduce((a, m) => a + m.sess, 0) / TEAM.length).toFixed(1)}</b><span>人均场次 · 30天</span></div>
-      <div class="kpi"><b>${avgAll}</b><span>班组平均分</span></div>
-      <div class="kpi warn"><b>${redTotal}</b><span>红线触发 · 本月</span></div>
-      <div class="kpi"><b>${TEAM.filter(m => m.task === 'todo').length}</b><span>任务未完成</span></div>
-    </div>
-    <div class="tmwrap">
-      <section class="hcard ho"><div class="hch"><b>成员总览</b><span>点击成员查看能力明细</span></div><div class="hcb"><table class="htbl big2">
-        <tr><th>成员</th><th>岗位</th><th>场次</th><th>平均分</th><th>短板</th><th>最近练习</th><th>本月任务</th></tr>
-        ${TEAM.map((m, i) => { const w = m.sess ? DIMS6[m.dims.indexOf(Math.min(...m.dims))] : '—'; return `<tr class="rrow" data-member="${i}"><td><b>${m.n}</b></td><td>${m.post}</td><td class="mono">${m.sess || '—'}</td><td class="mono ${m.avg && m.avg < 75 ? 'wv' : 'gv'}">${m.avg || '—'}</td><td>${w}</td><td class="mono">${m.last < 0 ? '未练' : m.last === 0 ? '今天' : m.last + ' 天前'}</td><td>${m.task === 'done' ? '<span class="tag ok">已完成</span>' : '<span class="tag wn">未完成</span>'}</td></tr>`; }).join('')}</table>
-        <div class="tk3" style="margin-top:8px">评价数据为陪练系统自动记录，用于培训安排参考；正式考评以人工审核为准。</div></div></section>
-      <section class="hcard hg"><div class="hch"><b>班组短板热力</b><span>成员 × 能力项</span></div><div class="hcb"><div class="theat" style="grid-template-columns:70px repeat(6,1fr)">
-        <div class="heath"></div>${DIMS6.map(d => `<div class="heath">${d}</div>`).join('')}
-        ${TEAM.map(m => `<div class="heatn">${m.n}</div>${m.dims.map(v => heat(v)).join('')}`).join('')}</div></div></section>
-    </div>
-    <div class="tmwrap2">
-      <section class="hcard hg"><div class="hch"><b>红线触发统计</b><span>本月 · 按类型</span></div><div class="hcb">
-        ${REDLINES.map(r => `<div class="bar"><span>${r[0]}</span><div class="btrk"><div class="bfill" style="width:${Math.round(r[1] / maxR * 100)}%"></div></div><b class="mono">${r[1]}</b></div>`).join('')}</div></section>
-      <section class="hcard ho"><div class="hch"><b>未练与待提醒</b><em class="ai">AI 草稿</em><span>${idle.length} 人</span></div><div class="hcb">
-        ${idle.map(m => `<div class="hrow"><b>${m.n}</b> <span class="tk3">${m.sess === 0 ? '本月未练' : m.last + ' 天未练'} · ${m.task === 'todo' ? '任务未完成' : '任务已完成'}</span></div>`).join('')}
-        <button class="btn" data-remind="1" style="margin-top:8px">生成提醒草稿</button></div></section>
-      <section class="hcard ho"><div class="hch"><b>任务下发</b><span>选教练 · 截止 · 及格线</span></div><div class="hcb frm">
-        <label>教练<select id="tk_coach">${COACHES.map(c => `<option value="${c.id}" ${c.open ? '' : 'disabled'}>${c.n}${c.open ? '' : '（未开通）'}</option>`).join('')}</select></label>
-        <label>练习方式<select id="tk_plan">${PLANS.filter(p => p.id !== 'wrong').map(p => `<option value="${p.id}">${p.n}</option>`).join('')}</select></label>
-        <label>模式<select id="tk_mode"><option>考核模式</option><option>演练模式</option><option>教学模式</option></select></label>
-        <div class="frm2"><label>截止<input id="tk_due" type="date" value="${new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10)}"></label><label>及格线<input id="tk_pass" type="number" value="80" min="60" max="100"></label></div>
-        <label>对象<select id="tk_who"><option>全班</option><option>未练人员</option>${TEAM.map(m => `<option>${m.n}</option>`).join('')}</select></label>
-        <button class="btn pri" data-tasksend="1">下发任务</button></div></section>
-    </div>
-    <section class="hcard hg"><div class="hch"><b>本月任务</b><span>${tasks.length} 项</span></div><div class="hcb"><table class="htbl"><tr><th>教练</th><th>练习方式</th><th>模式</th><th>截止</th><th>及格线</th><th>对象</th><th>完成</th></tr>
-      ${tasks.map(t => `<tr><td>${t.coach}</td><td>${t.plan}</td><td>${t.mode}</td><td class="mono">${t.due}</td><td class="mono">${t.pass}</td><td>${t.who}</td><td class="mono">${t.done}/${t.total}</td></tr>`).join('')}</table></div></section>
-  </div>`;
-}
-function memberDrill(i) {
-  const m = TEAM[i];
-  openDrill(`成员 · ${m.n}`, `${m.post} · 近30天 ${m.sess} 场 · 平均 ${m.avg || '—'} 分`, m.sess ? `
-    <div class="gtwo"><div>${chRadar(DIMS6, m.dims, TEAM_AVG, { w: 320, h: 240, l1: '本人', l2: '班组均值', key: 'x' })}<div class="tk3" style="text-align:center">本人 vs 班组均值</div></div>
-    <div>${miniBars(m.dims)}<div class="hrow" style="margin-top:8px">红线触发 ${m.red} 次 · 最近练习 ${m.last === 0 ? '今天' : m.last + ' 天前'} · 本月任务${m.task === 'done' ? '已完成' : '未完成'}</div>
-    <div class="tk3">正式考评以人工审核为准。</div></div></div>` : '<div class="hrow">本月尚无陪练记录。</div>',
-    `<button class="btn pri" data-tasksend="${m.n}">给 ${m.n} 下发专项任务</button>`);
-}
-function remindDraft() {
-  const idle = TEAM.filter(m => m.sess === 0 || m.last > 6);
-  openDrill('提醒草稿', `${idle.length} 人 · 复制后经企业微信发送`, `<div class="draft" id="draft_txt">${idle.map(m => `${m.n}：${m.sess === 0 ? '本月尚未进行陪练' : '已 ' + m.last + ' 天未练习'}，请于${dateAfter(HOME_TASK.dueDays)}前完成班组下发的「${HOME_TASK.name}」。`).join('<br>')}<br><br>—— ${LEAD_USER.team} ${LEAD_USER.name}</div>
-    <div class="tk3" style="margin-top:8px">草稿由看板数据生成，发送前由班组长确认。</div>`, '<button class="btn" data-copy="draft_txt">复制草稿</button>');
-}
-function taskSend(who) {
-  const g = id => $(id) ? $(id).value : '';
-  const coach = COACHES.find(c => c.id === g('#tk_coach')) || COACHES[0];
-  const plan = PLANS.find(p => p.id === g('#tk_plan')) || PLANS[0];
-  const t = { id: 't' + Date.now(), coach: coach.n, plan: plan.n, mode: g('#tk_mode') || '考核模式', due: (g('#tk_due') || '').replace(/^\d{4}-0?(\d+)-0?(\d+)$/, '$1月$2日') || dateAfter(3), pass: +(g('#tk_pass') || 80), who: who === '1' ? (g('#tk_who') || '全班') : who, done: 0, total: who === '1' && (g('#tk_who') === '全班') ? TEAM.length : who === '1' && g('#tk_who') === '未练人员' ? TEAM.filter(m => m.sess === 0 || m.last > 6).length : 1 };
-  const list = lsGet(LS_TASKS, []); list.unshift(t); lsSet(LS_TASKS, list.slice(0, 10));
-  toast(`已下发：${t.plan} · ${t.mode} · ${t.due}截止 · 对象 ${t.who}`, 'ok');
-  $$('.mask').forEach(m => m.remove());
-  $('#hpage').innerHTML = pageTeam();
-}
-
 /* ================= 教练编辑器（底座技术证据：一张操作票 → 一个新教练） ================= */
-const ED = { tab: 'steps', text: SAMPLE_TICKET, steps: null, name: '培训二线 1162 检修转运行 · 陈志远', role: '监护人', avatar: 'daozha', tone: '沉稳', opening: '任玲玲，今天的操作任务是将培训二线1162线路由检修转运行。开始前先完成三审、着装互检和风险分析。', weights: [20, 20, 20, 15, 15, 10], reds: [true, true, true, true, true, true], hintCost: [1, 2, 4], kb: KNOW.map(k => k.id), files: [], lint: null, pv: null, kbq: '' };
+const ED = { tab: 'steps', text: SAMPLE_TICKET, steps: null, name: '培训二线 1162 检修转运行 · 陈志远', role: '监护人', avatar: 'daozha', tone: '沉稳', opening: '任玲玲，今天的操作任务是将培训二线1162线路由检修转运行。开始前先完成三审、着装互检和风险分析。', weights: [14, 14, 14, 14, 12, 12, 10, 10], reds: [true, true, true, true, true, true], hintCost: [1, 2, 4], kb: KNOW.map(k => k.id), files: [], lint: null, pv: null, kbq: '' };
 const RED_NAMES = ['未验电即合接地刀闸', '发现异常未中止', '跳项操作', '走错间隔', 'GIS 只看后台未核对就地', '票令不一致未识别'];
 const KB_FILES = [['110kV培训三线1163线路由运行转检修操作细则及流程图', '已解析 · 27 项 / 5 页流程图'], ['模拟操作脚本 V7', '已解析 · 117 条台词'], ['操作票试卷 2（含答案）', '已解析 · 27 项 + 三段调度令'], ['变电现场电气操作票管理细则（脱敏版）', '已解析 · 附录 G/J 判据 38 条']];
-const ED_TPL = { exam: { n: '考核', w: [20, 20, 20, 15, 15, 10], reds: [1, 1, 1, 1, 1, 1], hint: [2, 4, 8] }, teach: { n: '教学', w: [15, 25, 20, 10, 15, 15], reds: [1, 1, 0, 1, 1, 0], hint: [0, 1, 2] }, special: { n: '专项 · 设备核对', w: [10, 15, 35, 10, 10, 20], reds: [1, 1, 1, 1, 1, 1], hint: [1, 2, 4] } };
+const ED_TPL = { exam: { n: '考核', w: [14, 14, 14, 14, 12, 12, 10, 10], reds: [1, 1, 1, 1, 1, 1], hint: [2, 4, 8] }, teach: { n: '教学', w: [12, 16, 16, 12, 10, 12, 10, 12], reds: [1, 1, 0, 1, 1, 0], hint: [0, 1, 2] }, special: { n: '专项 · 设备核对', w: [16, 28, 8, 10, 8, 14, 10, 6], reds: [1, 1, 1, 1, 1, 1], hint: [1, 2, 4] } };
 const ED_SAMPLE_VIO = [[2, 12, 'GIS 位置确认不充分'], [1, 5, '复诵不完整'], [4, 5, '接令记录不完整']];
 function parseTicket(text) {
   const lines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
@@ -539,7 +476,7 @@ function lintSteps(S0) {
 }
 function edSample() {
   const W = ED.weights, sum = W.reduce((a, b) => a + b, 0) || 1;
-  const pen = [0, 0, 0, 0, 0, 0]; ED_SAMPLE_VIO.forEach(([d, p]) => pen[d] -= p * 1.2);
+  const pen = DIMS.map(() => 0); ED_SAMPLE_VIO.forEach(([d, p]) => pen[d] -= p * 1.2);
   const vals = pen.map(p => Math.max(4, Math.min(100, 100 + p)));
   const score = Math.round(vals.reduce((a, v, i) => a + v * W[i] / sum, 0));
   return { score, vals };
@@ -579,7 +516,7 @@ function pageEditor() {
           <div class="rvact"><button class="btn" data-ed="lint">一致性检查</button><button class="btn" data-ed="rehearse">剧本试演</button><button class="btn" data-ed="okall">全部校核通过</button><button class="btn pri" data-ed="publish" ${ED.steps.every(s => s.ok) ? '' : 'disabled'}>发布为新教练</button></div>`
           : '<div class="edempty">粘贴操作票后点「生成剧本」，系统按票面逐项解析动作类型、作业位置、判定点与依据条款；随后可逐项校核、调整顺序、标记红线，并做一致性检查与试演。</div>'}</div></div>`;
   else if (ED.tab === 'score') { const sm = edSample(); body = `<div class="edscore"><div class="frm edfrm">
-      <div class="hch" style="padding:0 0 6px"><b>六维权重</b><span>合计 <b id="ed_wsum">${ED.weights.reduce((a, b) => a + b, 0)}</b></span><span class="phr chips">${Object.keys(ED_TPL).map(k => `<span class="chip" data-edtpl="${k}">${ED_TPL[k].n}模板</span>`).join('')}<span class="chip" data-ed="norm">归一到 100</span></span></div>
+      <div class="hch" style="padding:0 0 6px"><b>八维权重</b><span>合计 <b id="ed_wsum">${ED.weights.reduce((a, b) => a + b, 0)}</b></span><span class="phr chips">${Object.keys(ED_TPL).map(k => `<span class="chip" data-edtpl="${k}">${ED_TPL[k].n}模板</span>`).join('')}<span class="chip" data-ed="norm">归一到 100</span></span></div>
       ${DIMS6.map((d, i) => `<label class="wrow">${d}<input type="range" min="0" max="40" value="${ED.weights[i]}" data-w="${i}"><b class="mono">${ED.weights[i]}</b></label>`).join('')}
       <div class="hch" style="padding:10px 0 6px"><b>红线（一票否决）</b><span>${ED.reds.filter(Boolean).length}/6 启用</span></div>
       <div class="redlist">${RED_NAMES.map((r, i) => `<label class="tog ${ED.reds[i] ? 'on' : ''}" data-red="${i}"><i></i>${r}</label>`).join('')}</div>
@@ -735,9 +672,6 @@ function pagesClick(e) {
   if (n = q('[data-lplan]')) { planGen(); return true; }
   if (n = q('[data-lplansave]')) { const p = CL.plan || lsGet(LS_PLAN, null); if (p) { p.saved = true; CL.plan = p; lsSet(LS_PLAN, p); } toast('本周计划已加入日程，每日待练任务将按计划提醒', 'ok'); rerender('classroom'); return true; }
   /* 班组 */
-  if (n = q('[data-member]')) { memberDrill(+n.dataset.member); return true; }
-  if (n = q('[data-remind]')) { remindDraft(); return true; }
-  if (n = q('[data-tasksend]')) { taskSend(n.dataset.tasksend); return true; }
   /* 编辑器 */
   if (n = q('[data-tab]')) { edSyncForm(); ED.tab = n.dataset.tab; rerender('editor'); return true; }
   if (n = q('[data-ed]')) {

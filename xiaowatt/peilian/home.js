@@ -7,7 +7,7 @@ function goPage(h) { location.hash = '#' + h; }
 /* ---------------- 路由 ---------------- */
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
-  if (!['home', 'plaza', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
+  if (!['home', 'plaza', 'exam', 'arena', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
   $('#pg_arena').style.display = h === 'arena' ? '' : 'none';
   $('#pg_home').style.display = h === 'arena' ? 'none' : '';
   if (h === 'arena') {
@@ -23,6 +23,8 @@ function route() {
 function enterCoach(id, pre) {
   const c = COACHES.find(x => x.id === id);
   if (!c || !c.open) return toast('该教练在本单位尚未开通');
+  if (pre && String(pre).startsWith('exam:')) return examStart(pre.slice(5), 'teach');
+  if (c.exam && !pre && c.id !== 'daozha') return examStart(c.exam, 'teach');
   __planPre = pre || null;
   if (location.hash === '#arena') { if (!__arenaEntered) { __arenaEntered = true; openEntry(__planPre); __planPre = null; } }
   else goPage('arena');
@@ -42,11 +44,12 @@ function homeBoot() {
       <nav class="hnav" id="hnav">
         <span class="hnavi" data-h="home">工作台</span>
         <span class="hnavi" data-h="plaza">教练中心</span>
+        <span class="hnavi" data-h="exam">题库考试</span>
         <span class="hnavi" data-h="arena">陪练舱</span>
         <span class="hnavi" data-h="review">评分复盘</span>
         <span class="hnavi" data-h="growth">成长档案</span>
         <span class="hnavi" data-h="classroom">知识课堂</span>
-        <span class="hnavi lk" data-lk="1" data-h="team">班组看板<i>管理</i></span>
+        <span class="hnavi lk" data-lk="1" data-h="team">组长工作台<i>管理</i></span>
         <span class="hnavi lk" data-lk="1" data-h="editor">教练编辑器<i>管理</i></span>
       </nav>
       <div class="huser"><span id="hclock" class="hclk"></span>
@@ -54,7 +57,17 @@ function homeBoot() {
     </header>
     <main id="hpage"></main>
   </div>
-  <div id="htip" hidden></div>`;
+  <div id="htip" hidden></div>
+  <div class="demo2" id="demo2"><div class="bd"><div class="t">讲师演示台</div>
+    <button data-dm="main">演示主线：组长下发 1163 考核 → 学员进入</button>
+    <button data-dm="red">触发红线：跳过验电直接合地刀</button>
+    <button data-dm="run">一键跑完当前考试（正确路径）</button>
+    <button data-dm="es">地刀两态：<b id="dm_es">随机</b></button>
+    <button data-dm="rain">雨淋阀压力异常注入：<b id="dm_rain">关</b></button>
+    <button data-dm="status">功能实现状态清单</button>
+    <button data-dm="bound">系统边界表</button>
+    <button data-dm="clear">清空本机记录</button></div>
+    <button class="tg" id="demo2tg">讲师演示台</button></div>`;
   /* 南网实景照片到位后：为 #bgph1/#bgph2 填入 src 即自动显示（插槽） */
   $('#hnav').onclick = e => {
     const n = e.target.closest('.hnavi'); if (!n) return;
@@ -62,6 +75,8 @@ function homeBoot() {
     goPage(n.dataset.h);
   };
   $('.uchip').onclick = toggleRole;
+  $('#demo2tg').onclick = () => $('#demo2').classList.toggle('open');
+  $('#demo2 .bd').onclick = e => { const b = e.target.closest('[data-dm]'); if (b) demoAct(b.dataset.dm); };
   renderRole();
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
@@ -73,9 +88,10 @@ function homeBoot() {
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'plaza' ? pagePlaza() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.innerHTML = h === 'home' ? pageHome() : h === 'plaza' ? pagePlaza() : h === 'exam' ? pageExam() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (typeof pageAfter === 'function') pageAfter(h);
+  if (h === 'exam') examAfter(); else if (EX.timer) { clearInterval(EX.timer); EX.timer = null; }
   countUp(pg);
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
@@ -86,49 +102,63 @@ function todayStr() { const d = new Date(); return `${d.getMonth() + 1}月${d.ge
 /* ---------------- 首页 ---------------- */
 function pageHome() {
   const A = homeAgg();
-  const okDims = RADAR_NOW.filter(v => v >= 70).length;
-  const xwFull = `近两场「设备状态核对」都使用了提示，短板集中在 GIS 四项位置指示；班组长下发的${HOME_TASK.name}${dateAfter(HOME_TASK.dueDays)}截止，建议先完成任务，再加练一轮「GIS 四项核对」专项。`;
-  const last = SESSIONS[0];
+  const now8 = abilityNow();
+  const okDims = now8.filter(v => v >= 70).length;
+  const recs = examRecords().filter(r => r.who === HOME_USER.name);
+  const cert = certSuggest(TEAM[0]); const certOk = cert.filter(x => x.ok).length;
+  const certC = lsGet(LS_CERT, {})[HOME_USER.name];
+  const todo = examTasks().filter(t => !t.results || !t.results.some(r => r.who === HOME_USER.name));
+  const task = todo[0];
+  const order = DIMS.map((n, i) => [n, now8[i], i]).sort((x, y) => x[1] - y[1]);
+  const w1 = order[0], w2 = order[1];
+  const last = SESSIONS[0], lastEx = recs[0];
+  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，成绩会直接落到能力雷达并反馈给班组长。`;
   return `
   <section class="hero">
     <div class="hgreet">
       <h1>${greet()}，${HOME_USER.name}</h1>
-      <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 今天 ${todayStr()}</div>
+      <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 岗位胜任能力评价：${CERT_POST} · 今天 ${todayStr()}</div>
       <div class="hkpis hg">
-        <div class="kpi"><b>${A.cnt}</b><span>近30天场次</span></div>
-        <div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div>
-        <div class="kpi"><b>${A.avg}</b><span>平均得分</span></div>
-        <div class="kpi ${okDims < 6 ? 'warn' : 'good'}"><b>${okDims}/6</b><span>达标维度</span></div>
+        <div class="kpi ${certOk >= 16 ? 'good' : 'warn'}"><b>${certOk}/20</b><span>专业项目 建议授权</span></div>
+        <div class="kpi ${okDims < DIMS.length ? 'warn' : 'good'}"><b>${okDims}/${DIMS.length}</b><span>能力维度 达标</span></div>
+        <div class="kpi"><b>${recs.length}</b><span>题库考试 次数</span></div>
+        <div class="kpi"><b>${A.cnt}</b><span>近30天陪练场次</span></div>
       </div>
-      <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx" data-go="team">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
+      <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
     </div>
     <div class="taskcard ho">
-      <div class="tk1">今日待练任务</div>
-      <div class="tk2">${HOME_TASK.name}</div>
-      <div class="tk3">${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · 未完成</div>
-      <button class="btn pri" data-train="${HOME_TASK.plan}">去完成</button>
+      <div class="tk1">${task ? '待考任务' : '今日待练任务'}</div>
+      <div class="tk2">${task ? (task.examName || task.plan) : HOME_TASK.name}</div>
+      <div class="tk3">${task ? `${task.from} 下发 · ${task.due}截止 · ${task.mode} · 及格 ${task.pass}${task.dims && task.dims.length ? '<br>针对 ' + task.dims.join('、') : ''}` : `${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · 未完成`}</div>
+      ${task ? `<button class="btn pri" data-exstart="${task.exam}" data-exmode="${task.mode === '考核模式' ? 'exam' : task.mode === '演练模式' ? 'drill' : 'teach'}" data-extask="${task.id}">开始考试</button>` : `<button class="btn pri" data-train="${HOME_TASK.plan}">去完成</button>`}
     </div>
     <div class="hourcard ho">
-      <div class="tk1">年度培训学时</div>
-      <div class="hbar"><div class="hfill" style="width:${Math.round(HOME_USER.hours.done / HOME_USER.hours.need * 100)}%"></div></div>
-      <div class="tk3"><b class="mono">${HOME_USER.hours.done}</b> / ${HOME_USER.hours.need} 学时 · 知识课堂回写</div>
-      <button class="btn" data-go="classroom">学时明细</button>
+      <div class="tk1">作业授权认证进度</div>
+      <div class="certprog">${cert.map(x => `<i class="${x.ok ? 'ok' : ''} ${x.it.star ? 'star' : ''}" data-tip="${x.it.code} ${x.it.n} · ${x.ok ? '建议授权' : '待训练'} · ${x.why}">${x.it.code}</i>`).join('')}</div>
+      <div class="tk3"><b class="mono">${certOk}</b> / 20 个专业项目建议授权 · ★ 岗位必备 · ${certC ? `已由班组授权人 ${certC.by} 确认` : '待班组授权人确认'}</div>
+      <button class="btn" data-cert="0">查看认证表草稿</button>
     </div>
   </section>
 
   <section class="cockpit">
-    <div class="hcard ck tl hg"><div class="hch"><b>能力六维</b><span>本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS6, RADAR_NOW, RADAR_PREV, { w: 330, h: 236 })}</div></div>
-    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 同步于 今日 07:30</span></div>
-      <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: dateAfter(HOME_TASK.dueDays) + '截止' } : n), GROWTH_EDGES)}</div></div>
+    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>8 维 · 本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS, now8, RADAR_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度按作业授权认证表 20 个专业项目与两项实操考试抽取 · v1.0 已审定</div></div></div>
+    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
+      <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
     <div class="hcard ck tr ho"><div class="hch"><b>练习方式分布</b><span>近30天 · 按场次</span></div><div class="hcb">${chDonut(A.planCnt)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>扣分与红线趋势</b><span>近5周 · 周合计</span></div><div class="hcb">${chArea(A.weeks, A.reds)}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS6, RADAR_NOW, TEAM_AVG)}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>题库考试成绩</b><span>${recs.length ? '最近 ' + Math.min(5, recs.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${recs.length ? recs.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去题库考试</button>`}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
     <div class="hcard ck w hg"><div class="hch"><b>练习时长与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
     <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
 
   <section class="reco">
-    ${RECO.map(r => { const c = COACHES.find(x => x.id === r.coach); return `
+    ${recoList().map(r => { if (r.exam) { const e = EXAMS.find(x => x.id === r.exam); return `
+      <div class="rcard hg">
+        <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
+        <b>${e.n}</b>
+        <div class="tk3">题库考试 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
+        <button class="btn pri" data-exstart="${e.id}">${r.act}</button>
+      </div>`; } const c = COACHES.find(x => x.id === r.coach); return `
       <div class="rcard hg">
         <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
         <b>${c.n}</b>
@@ -136,11 +166,11 @@ function pageHome() {
         <button class="btn ${c.open ? 'pri' : ''}" data-reco="${r.coach}">${r.act}</button>
       </div>`; }).join('')}
     <div class="rcard lastr ho">
-      <div class="rwhy"><i>最近复盘</i>${dayLabel(last.d)}</div>
-      <b>${last.plan} · ${last.score} 分</b>
-      <div class="tk3">${last.mode} · 用时 ${last.dur} 分钟 · 扣分 ${last.vio.length} 项</div>
-      <div class="tk3">GIS 四项核对仍依赖提示，其余节拍完整。</div>
-      <button class="btn" data-go="review">查看复盘</button>
+      <div class="rwhy"><i>最近复盘</i>${lastEx ? stampOf(lastEx.ts) : dayLabel(last.d)}</div>
+      <b>${lastEx ? `${lastEx.short} · ${lastEx.red ? '否决' : lastEx.score + '/' + lastEx.max}` : `${last.plan} · ${last.score} 分`}</b>
+      <div class="tk3">${lastEx ? `${lastEx.modeName} · 用时 ${lastEx.dur} 分钟 · 错误 ${lastEx.errs.length} 项` : `${last.mode} · 用时 ${last.dur} 分钟 · 扣分 ${last.vio.length} 项`}</div>
+      <div class="tk3">${lastEx ? (lastEx.sugg[0] ? lastEx.sugg[0].t : '') : 'GIS 四项核对仍依赖提示，其余节拍完整。'}</div>
+      ${lastEx ? `<button class="btn" data-exreview="${lastEx.id}">查看复盘</button>` : '<button class="btn" data-go="review">查看复盘</button>'}
     </div>
   </section>
 
@@ -148,10 +178,10 @@ function pageHome() {
     <div class="xwavt"><i></i>小瓦特</div>
     <div class="xwtxt" id="xwtxt" data-full="${xwFull}">${__xwTyped ? xwFull : ''}</div>
     <div class="xwbtns">
-      <button class="btn pri" data-train="full">去完成任务</button>
-      <button class="btn" data-train="sp_gis">练 GIS 专项</button>
+      ${task ? `<button class="btn pri" data-exstart="${task.exam}" data-exmode="${task.mode === '考核模式' ? 'exam' : 'teach'}" data-extask="${task.id}">去完成考试</button>` : `<button class="btn pri" data-exstart="${DIM_EXAM[w1[0]] || 'e1163'}">考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」</button>`}
+      <button class="btn" data-train="${(DIM_PLAN[w1[0]] || ['sp_gis'])[0]}">陪练舱专项</button>
     </div>
-    <div class="xwsrc">由近30天练习数据生成</div>
+    <div class="xwsrc">由能力雷达与考试记录生成</div>
   </section>
 
   <section class="mycoach hg">
@@ -162,8 +192,8 @@ function pageHome() {
         return `<div class="mcc">
           ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
           <div class="mcm"><b>${c.n}</b><span>最近一次 ${mc.last} · 已练 ${mc.cnt} 场 · 最近得分 ${mc.score}</span>
-            <div class="mcbar"><i style="width:${mc.prog}%"></i></div><span class="mcp">本教练剧本已练 ${mc.prog}%</span></div>
-          <button class="btn pri" data-coach="${c.id}">继续练</button>
+            <div class="mcbar"><i style="width:${mc.prog}%"></i></div><span class="mcp">本教练内容已练 ${mc.prog}%</span></div>
+          ${c.exam && c.id !== 'daozha' ? `<button class="btn pri" data-exstart="${c.exam}">继续考</button>` : `<button class="btn pri" data-coach="${c.id}">继续练</button>`}
         </div>`; }).join('')}
       ${COACH_APPLY.map(a => { const c = ALL_COACHES().find(x => x.id === a.id); if (!c) return '';
         return `<div class="mcc apply">
@@ -183,6 +213,7 @@ function hcard(t, sub, body) {
 
 /* ---------------- AI 教练中心 ---------------- */
 const PF = { fam: '全部', dom: '全部', tag: '全部' };
+const COACH_TYPE = { daozha: 'rule', abn: 'rule', patrol: 'rule', test: 'rule', anco: 'rule', relay: 'rule', dnet: 'rule', live: 'rule', term: 'lang', order: 'lang', cust: 'lang', comp: 'doc', biz: 'lang', angui: 'lang', fire: 'rule', space: 'rule', meet: 'lang', mentor: 'lang' };
 const COACH_GLYPH = { '变电运行': '运', '变电检修': '检', '配网': '配', '调度': '调', '营销服务': '营', '安全监督': '安', '班组管理': '班' };
 const COACH_GRAD = { '变电运行': ['#1e63b8', '#4d97e8'], '变电检修': ['#0e7a5f', '#2fd08a'], '配网': ['#8a5a14', '#e8b22a'], '调度': ['#5b3a9e', '#c3a8e8'], '营销服务': ['#9e3a5b', '#e88aa8'], '安全监督': ['#9e4a1e', '#ff8a3d'], '班组管理': ['#14648a', '#4dc3e8'] };
 
@@ -215,6 +246,7 @@ function pagePlaza() {
       </div>
       <div class="pzhot">本月最多人练：<b>${hot.n}</b> · ${hot.users} 人 · 平均提分 +${hot.gain}　｜　未开通的教练可提交开通申请，审核通过后出现在工作台「我在练的教练」。</div>
     </div>
+    <section class="hcard hg"><div class="hch"><b>陪练类型地图</b><span>四类陪练与当前成熟度 · 本轮集中做深程序规则类样板</span></div><div class="hcb"><div class="typemap">${COACH_TYPES.map(t => `<div class="typec"><b>${t.n}</b><div class="lv">${[1, 2, 3].map(i => `<i class="${i <= t.lv ? 'on' : ''}"></i>`).join('')}<em>${t.lvn}</em></div><span>${t.d}</span><em>${t.ex.join(' · ')}</em></div>`).join('')}</div></div></section>
     <div class="pzf"><label>岗位族</label>${['全部', ...COACH_FAMS].map(v => chip('fam', v, PF.fam)).join('')}</div>
     <div class="pzf"><label>业务域</label>${doms.map(v => chip('dom', v, PF.dom)).join('')}</div>
     <div class="pzf"><label>能力项</label>${tags.map(v => chip('tag', v, PF.tag)).join('')}</div>
@@ -229,9 +261,9 @@ function pagePlaza() {
           ${c.open ? '<span class="copen">已开通</span>' : c.custom ? '<span class="copen" style="color:#8a6d15;background:#faf3dc;border-color:#e3d49e">自建 · 待审核</span>' : '<span class="clock">未开通</span>'}
         </div>
         <div class="cdesc">${c.desc}</div>
-        <div class="ctags">${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
+        <div class="ctags"><i class="ctype">${(COACH_TYPES.find(t => t.k === (COACH_TYPE[c.id] || 'rule')) || {}).n}</i>${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
         <div class="cstat"><span>难度 ${'●'.repeat(c.lvl)}${'○'.repeat(3 - c.lvl)}</span><span>${c.min} 分钟</span><span>已练 ${c.users} 人</span><span>平均提分 +${c.gain}</span></div>
-        ${c.open ? `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>`
+        ${c.open ? (c.exam && c.id !== 'daozha' ? `<button class="btn pri" data-exstart="${c.exam}">开始考试</button>` : c.exam ? `<span class="cgo2"><button class="btn pri" data-exstart="${c.exam}">1163 关卡考试</button><button class="btn cgo" data-coach="${c.id}">完整票练习</button></span>` : `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>`)
           : c.custom ? `<button class="btn cgo" data-go="editor">在教练编辑器中继续完善</button>`
           : COACH_APPLY.some(a => a.id === c.id) ? `<div class="capply">开通申请 ${COACH_APPLY.find(a => a.id === c.id).at} · ${COACH_APPLY.find(a => a.id === c.id).st}</div>`
           : `<button class="btn cgo" data-apply="${c.id}">申请开通</button>`}
@@ -263,7 +295,10 @@ function refreshPlaza() {
 /* ---------------- 事件委托（首页与各薄页共用） ---------------- */
 function bindHPage() {
   $('#hpage').oninput = pagesInput;
+  $('#hpage').onkeydown = examKey;
   $('#hpage').onclick = e => {
+    if (examClick(e)) return;
+    if (leaderClick(e)) return;
     if (pagesClick(e)) return;
     const q = s => e.target.closest(s); let n;
     if (n = q('[data-fchip]')) { PF[n.dataset.fchip] = n.dataset.v; if (n.dataset.fchip === 'fam') { PF.dom = '全部'; } refreshPlaza(); return; }
@@ -271,6 +306,7 @@ function bindHPage() {
     if (n = q('.cgo[data-coach]')) return enterCoach(n.dataset.coach, null);
     if (n = q('[data-coach]')) { const c = ALL_COACHES().find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通，可在教练中心提交开通申请'); }
     if (n = q('[data-reco]')) return recoAct(n.dataset.reco);
+    if (n = q('[data-cert]')) return certDrill(+n.dataset.cert);
     if (n = q('[data-train]')) return enterCoach('daozha', n.dataset.train === 'full' ? null : n.dataset.train);
     if (n = q('[data-go]')) return goPage(n.dataset.go);
     if (n = q('[data-dim]')) return drillDim(+n.dataset.dim);
@@ -285,7 +321,7 @@ function bindHPage() {
 }
 
 function recoAct(id) {
-  const r = RECO.find(x => x.coach === id), c = COACHES.find(x => x.id === id);
+  const r = recoList().find(x => x.coach === id), c = COACHES.find(x => x.id === id);
   if (c.open) return enterCoach(id, r.pre);
   PF.fam = c.fam; PF.dom = '全部'; PF.tag = '全部'; refreshPlaza();
   const p = $('#plaza'); if (p) p.scrollIntoView({ behavior: 'smooth' });
@@ -316,14 +352,18 @@ function sessTable(list) {
 }
 function vioDim(v) {
   const t = v.t;
-  if (/核对|指示/.test(t)) return '设备状态核对';
-  if (/复诵|唱票|双重名称/.test(t)) return '唱票复诵';
-  if (/接令|术语|用语|汇报/.test(t)) return '调度术语';
-  if (/验电|接地|规程|记录/.test(t)) return '规程记忆';
-  if (/异常|中止/.test(t)) return '异常处置';
-  return '风险辨识';
+  if (/走错间隔|编号/.test(t)) return '设备辨识与定位';
+  if (/核对|指示/.test(t)) return '状态核对与确认';
+  if (/复诵|唱票|双重名称|接令|术语|用语|汇报|记录|跳项/.test(t)) return '操作程序与票务规范';
+  if (/验电|接地|五防|工器具/.test(t)) return '安全措施与风险控制';
+  if (/异常|中止/.test(t)) return '异常与应急处置';
+  if (/电流|电压|压力|读数/.test(t)) return '仪表读数与工器具使用';
+  if (/后台|遥测|报文/.test(t)) return '后台系统与信息应用';
+  return '缺陷发现与设备评价';
 }
-const DIM_PLAN = { '设备状态核对': ['sp_gis', 'GIS 四项核对'], '调度术语': ['sp_ord', '接令与票令核对'], '规程记忆': ['sp_vd', '验电接地'], '唱票复诵': ['sp_vd', '验电接地'] };
+/* 维度 → 陪练舱练法；DIM_EXAM：维度 → 题库考试内容 */
+const DIM_PLAN = { '状态核对与确认': ['sp_gis', 'GIS 四项核对'], '操作程序与票务规范': ['sp_ord', '接令与票令核对'], '安全措施与风险控制': ['sp_vd', '验电接地'], '设备辨识与定位': ['p1', '分段 · 运行 → 热备用'], '异常与应急处置': ['full', '完整操作票'], '仪表读数与工器具使用': ['sp_vd', '验电接地'], '缺陷发现与设备评价': ['sp_gis', 'GIS 四项核对'], '后台系统与信息应用': ['p1', '分段 · 运行 → 热备用'] };
+const DIM_EXAM = { '设备辨识与定位': 'rain', '状态核对与确认': 'e1163', '操作程序与票务规范': 'e1163', '安全措施与风险控制': 'e1163', '异常与应急处置': 'rain', '仪表读数与工器具使用': 'rain', '缺陷发现与设备评价': 'rain', '后台系统与信息应用': 'e1163' };
 
 function drillDim(i) {
   const n = DIMS6[i];
@@ -374,9 +414,9 @@ function drillFit() {
 
 /* ---------------- 成长地图节点下钻 ---------------- */
 function nodeClick(id) {
-  if (id === 'g5') return drillDim(2);
-  if (id === 'g6') return enterCoach('daozha', 'full');
-  if (id === 'g7') return drillFit();
+  if (id === 'g5') return drillDim(1);
+  if (id === 'g6') return examStart('e1163', 'exam');
+  if (id === 'g7') return certDrill(0);
   if (id === 'b1') return goPage('classroom');
   if (id === 'g1') return openDrill('岗前培训', '入职培训记录', `
     <table class="htbl"><tr><th>项目</th><th>结果</th><th>日期</th></tr>
@@ -390,13 +430,12 @@ function nodeClick(id) {
     `<button class="btn" data-go="classroom">查看知识课堂</button>`);
   if (id === 'g3') { const l = SESSIONS.filter(s => s.mode === '教学模式' && s.plan.startsWith('完整')); return openDrill('完整票 · 教学模式', `${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
   if (id === 'g4') { const l = SESSIONS.filter(s => s.plan.startsWith('分段') || s.plan.startsWith('专项')); return openDrill('分段与专项强化', `近30天 ${l.length} 场`, sessTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
-  if (id === 'g8') return openDrill('晋升通道 · 主值', '当前差距项', `
+  if (id === 'g8') return openDrill('作业授权 · 变电运行高级作业员', '当前差距项', `
     <table class="htbl"><tr><th>差距项</th><th>当前</th><th>要求</th></tr>
     ${FITNESS.parts.filter(p => !p.ok).map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td></tr>`).join('')}</table>
     <div class="tk3" style="margin-top:10px">晋升资格以人工审核结果为准。</div>`,
     `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-train="full">去完成演练场次</button>`);
-  if (id === 'b2') return openDrill('实操场次', `12 / 15 场（胜任度要求）`, sessTable(SESSIONS),
-    `<button class="btn pri" data-train="full">去完成任务</button>`);
+  if (id === 'b2') return goPage('exam');
 }
 
 /* ---------------- 评分复盘（记录列表） ---------------- */
@@ -504,4 +543,35 @@ function silhouetteSVG() {
     </g>
     <line x1="0" y1="120.8" x2="1200" y2="120.8" stroke="currentColor" stroke-width="1.2" opacity=".55"/>
   </svg>`;
+}
+
+
+/* ---------------- 讲师演示台（底座页面） ---------------- */
+const IMPL_STATUS = [
+  ['题库考试判定：热区、顺序、阀位、地刀三位置一致性、填空、问答要点召回', '规则 · 真实运行'],
+  ['知识库召回：问教练、口述汇报追问', '本机检索 · 真实运行（非在线大模型）'],
+  ['语音识别：口述汇报、问答', '联网时浏览器识别（真实）；离线自动降级为文字输入'],
+  ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
+  ['AI 复盘、针对性训练建议、提醒草稿', '规则模板生成（非在线大模型）'],
+  ['数字人语音', '预渲染片段 / 内置字幕口型（非实时）'],
+  ['训练与考试记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
+  ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接'],
+  ['教练目录中 16 位未开通教练', '目录（非可训练功能）'],
+  ['图片 / 视频动作识别', '不在本轮范围']
+];
+function demoAct(k) {
+  if (k === 'main') {
+    const ex = EXAMS.find(e => e.id === 'e1163');
+    const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: 'e1163', examName: ex.n, coach: '题库考试', plan: ex.short, mode: '考核模式', due: dateAfter(3), pass: 6, who: HOME_USER.name, dims: ['状态核对与确认', '安全措施与风险控制'], done: 0, total: 1, results: [] };
+    const list = lsGet(LS_TASKS, []); list.unshift(t); lsSet(LS_TASKS, list.slice(0, 12));
+    ROLE.cur = 'student'; renderRole(); EX.arm.esCase = EX.arm.esCase || 'ok';
+    examStart('e1163', 'exam', { task: t.id }); toast('已按演示主线下发考核任务并进入考试', 'ok'); return;
+  }
+  if (k === 'red') { if (!EX.exam) return toast('请先进入 1163 考试', 'bad'); const s = examStation(); if (s.id !== 'k2_hub') return toast('当前不在关卡二「验电与接地」', 'bad'); examAuto('red'); return; }
+  if (k === 'run') { if (!EX.exam) return toast('请先开始一场考试', 'bad'); examRun(); return; }
+  if (k === 'es') { const seq = [null, 'ok', 'mech', 'rod']; const i = (seq.indexOf(EX.arm.esCase || null) + 1) % seq.length; EX.arm.esCase = seq[i]; $('#dm_es').textContent = { null: '随机', ok: '正常到位', mech: '机构箱不一致', rod: '连杆未到位' }[String(seq[i])]; return; }
+  if (k === 'rain') { EX.arm.rainAbn = !EX.arm.rainAbn; $('#dm_rain').textContent = EX.arm.rainAbn ? '开（下次开始生效）' : '关'; return; }
+  if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则模拟 / 预置 / 待对接', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
+  if (k === 'bound') return openDrill('系统边界表', '现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写', boundaryHtml());
+  if (k === 'clear') { Object.keys(localStorage).filter(x => x.startsWith('xwt_')).forEach(x => localStorage.removeItem(x)); toast('本机记录已清空'); route(); return; }
 }
