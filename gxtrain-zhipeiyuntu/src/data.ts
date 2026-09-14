@@ -59,9 +59,14 @@ export const NODES: NodeDef[] = [
     x: 620, y: 380, w: 480, h: 280, accent: 'indigo', seq: '学',
     stats: [{ k: '累计成课', v: '1,286 门' }, { k: '题库题量', v: '28,450' }, { k: '平均周期', v: '2.4 天' }],
     features: [
-      { id: 'gen', name: '课件生成工作台', desc: '三步生成成套课件' },
-      { id: 'lib', name: '课程库', desc: '已生成课程与审核状态' },
-      { id: 'bank', name: '题库工作台', desc: '分岗位分等级题目管理' },
+      { id: 'board', name: '工厂驾驶舱', desc: '产线状态、趋势与 AI 洞察' },
+      { id: 'gen', name: '生成工作台', desc: '选原料、定岗位，一次生成成套' },
+      { id: 'lib', name: '课程库', desc: '28 个单位的课程与章节' },
+      { id: 'bank', name: '题库工作台', desc: '逐题挂锚点，智能组卷' },
+      { id: 'review', name: '审核工作流', desc: 'AI 自检 + 两级审核' },
+      { id: 'media', name: '微课工作室', desc: '数字人讲师、分镜与口播' },
+      { id: 'trainer', name: '内训师工作台', desc: '认证、产出与协作任务' },
+      { id: 'analytics', name: '效果分析', desc: '学习数据与修订闭环' },
     ],
   },
   {

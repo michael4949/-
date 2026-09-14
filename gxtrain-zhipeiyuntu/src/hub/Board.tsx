@@ -17,7 +17,7 @@ export default function Board() {
         <Kpi k="知识资产条目" v={<CountUp to={TOTAL_ASSETS} />} d="规程 · 步骤 · 案例 · 诀窍 · 题目" onClick={() => push({ v: 'catalog' })} spark={TREND.map(t => t.in)} />
         <Kpi k="覆盖一级单位" v={<><CountUp to={28} /><span className="text-[12px] font-normal text-slate-500 ml-1">个</span></>} d="含人力资源部自身 · 176 个岗位" onClick={() => push({ v: 'catalog', dim: 'org' })} />
         <Kpi k="本月入库" v={<CountUp to={1203} />} d="自动通过 71.4% · 人工审核 28.6%" gold onClick={() => push({ v: 'ingest' })} spark={TREND.map(t => t.review)} />
-        <Kpi k="本周被引用" v={<CountUp to={TREND[11].ref} />} d="课件 · 题目 · 陪练 · 助手" onClick={() => push({ v: 'graph' })} spark={TREND.map(t => t.ref)} />
+        <Kpi k="本周被引用" v={<CountUp to={TREND[25].ref} />} d="课件 · 题目 · 陪练 · 助手" onClick={() => push({ v: 'graph' })} spark={TREND.map(t => t.ref)} />
         <Kpi k="资产健康度" v={<><CountUp to={91.6} dec={1} /><span className="text-[12px] font-normal text-slate-500 ml-1">分</span></>} d="超期未复核 1,284 · 冲突 96" onClick={() => push({ v: 'quality' })} />
         <Kpi k="在采专家" v={<><CountUp to={EXPERTS_ALL.length} /><span className="text-[12px] font-normal text-slate-500 ml-1">位</span></>} d="覆盖生产、职能与直属单位" gold onClick={() => push({ v: 'expert' })} />
       </div>
@@ -63,7 +63,7 @@ export default function Board() {
           </Panel>
         </div>
         <div className="flex flex-col gap-3 min-h-0">
-          <Panel title="入库、复核与引用趋势　近 12 周">
+          <Panel title="入库、复核与引用趋势　近 26 周">
             <div className="px-3 pt-2 pb-1"><AreaChart data={[TREND.map(t => t.in), TREND.map(t => t.review), TREND.map(t => t.ref / 8)]} keys={['新入库', '复核更新', '被引用（÷8）']} colors={['#1e3a6e', '#a8823a', '#6a86b8']} labels={TREND.map(t => t.w)} h={170} /></div>
           </Panel>
           <Panel title="按一级单位分布　条目数" className="flex-1" bodyClass="overflow-auto scroll" extra={<button className="btn btn-sm" onClick={() => push({ v: 'catalog', dim: 'org' })}>全部 28 个单位</button>}>

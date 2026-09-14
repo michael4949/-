@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { OVERVIEW, PHOTO, PHOTO_ALT, NODES } from './data'
 import { UNIT_GROUPS, unitsOf, UNIT_TOTAL_PEOPLE } from './units'
-import { AIBrain, GuangxiMap, TalentLadder, Tower, BrocadeStrip, GridMark } from './deco'
+import { AIBrain, GuangxiMap, TalentLadder, Tower, GridMark } from './deco'
 import { PowerCorridor, CultureBlock, NeuralBlock } from './scenes'
+import { Ambient } from './Ambient'
 
 function useCountUp(target: number, dur = 1500, dec = 0) {
   const [v, setV] = useState(0)
@@ -24,10 +25,10 @@ function Metric({ o, i }: { o: typeof OVERVIEW[number]; i: number }) {
   const raw = parseFloat(o.v.replace(/,/g, ''))
   const v = useCountUp(raw, 1400 + i * 120, o.v.includes('.') ? 1 : 0)
   return (
-    <div className="flex-1 px-5 py-3 an-rise" style={{ animationDelay: `${0.55 + i * 0.08}s`, borderLeft: i ? '1px solid rgba(30,58,110,.10)' : undefined }}>
+    <div className="flex-1 px-5 py-3 an-rise relative" style={{ animationDelay: `${0.55 + i * 0.08}s`, borderLeft: i ? '1px solid rgba(30,58,110,.10)' : undefined }}>
       <div className="text-[11.5px] text-slate-600">{o.k}</div>
       <div className="flex items-baseline gap-1 mt-1">
-        <span className="num text-[26px] leading-none font-semibold" style={{ color: i % 2 ? 'var(--gold)' : 'var(--indigo)' }}>{v}</span>
+        <span className={`num text-[27px] leading-none font-semibold ${i % 2 ? 'gold-grad' : 'num-grad'}`}>{v}</span>
         <span className="text-[11px] text-slate-500">{o.u}</span>
       </div>
       <div className="text-[10.5px] text-slate-500 mt-1">{o.d}</div>
@@ -82,6 +83,9 @@ export default function Hero({ onOpen }: { onOpen: (node: string, tab: string) =
         <NeuralBlock w={330} h={112} />
       </div>
 
+      {/* 漂浮微粒与光晕 */}
+      <div className="absolute inset-0 z-[3]"><Ambient density={.7} orbs={false} /></div>
+
       {/* 缓慢掠过的光带 */}
       <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
         <div style={{
@@ -104,21 +108,21 @@ export default function Hero({ onOpen }: { onOpen: (node: string, tab: string) =
         {/* 标题 */}
         <div className="shrink-0 text-center pt-6">
           <div className="an-rise" style={{ animationDelay: '.05s' }}>
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5"
-              style={{ background: 'rgba(255,255,255,.8)', border: '1px solid rgba(30,58,110,.18)' }}>
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full"
+              style={{ background: 'rgba(255,255,255,.72)', border: '1px solid rgba(255,255,255,.9)', backdropFilter: 'blur(12px)', boxShadow: '0 8px 24px -12px rgba(30,58,110,.35), inset 0 0 0 1px rgba(30,58,110,.08)' }}>
               <GridMark size={19} />
               <span className="text-[12px] tracking-[.24em]" style={{ color: 'var(--indigo)' }}>南方电网广西电网有限责任公司</span>
             </div>
           </div>
           <h1 className="serif font-semibold hero-title-glow an-rise mt-3"
             style={{ fontSize: 68, lineHeight: 1.05, letterSpacing: '.16em', color: '#0c2950', animationDelay: '.15s' }}>智培云图</h1>
-          <div className="an-rise mx-auto mt-2.5" style={{ animationDelay: '.25s', width: 480, height: 3, background: 'linear-gradient(90deg,transparent,var(--gold),transparent)' }} />
+          <div className="an-rise mx-auto mt-2.5" style={{ animationDelay: '.25s', width: 480, height: 3, borderRadius: 3, background: 'linear-gradient(90deg,transparent,var(--gold-2) 30%,var(--ai-2) 70%,transparent)' }} />
           <div className="an-rise hero-title-glow mt-2.5" style={{ animationDelay: '.3s', fontSize: 23, letterSpacing: '.24em', color: '#153560', fontWeight: 600 }}>
             人才培养数智平台
           </div>
           <div className="an-rise mt-3.5 flex justify-center" style={{ animationDelay: '.4s' }}>
-            <div className="sheen inline-flex items-center gap-3 px-7 py-2 text-white text-[15px] tracking-[.08em]"
-              style={{ background: 'linear-gradient(90deg,#16345e 0%,#1a6fa8 52%,#00a651 100%)', boxShadow: '0 10px 26px rgba(20,60,110,.28)' }}>
+            <div className="sheen inline-flex items-center gap-3 px-7 py-2 text-white text-[15px] tracking-[.08em] rounded-full"
+              style={{ background: 'linear-gradient(90deg,#16345e 0%,#2f6df6 45%,#19b8d8 75%,#00a651 100%)', boxShadow: '0 14px 30px -10px rgba(47,109,246,.6)' }}>
               <span>人才可视</span><Dot /><span>经验可传承</span><Dot /><span>能力可度量</span>
             </div>
           </div>
@@ -149,15 +153,16 @@ export default function Hero({ onOpen }: { onOpen: (node: string, tab: string) =
             <div className="grid grid-cols-2 gap-2.5">
               {NODES.map((nd, i) => (
                 <button key={nd.id} onClick={() => onOpen(nd.id, nd.features[0].id)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 text-left transition-all hover:-translate-y-[2px] hover:shadow-lg"
+                  className="group flex items-center gap-2.5 px-3 py-2.5 text-left transition-all hover:-translate-y-[2px] rounded-2xl relative overflow-hidden"
                   style={{
-                    background: 'rgba(255,255,255,.9)', border: '1px solid rgba(30,58,110,.18)',
-                    boxShadow: '0 6px 18px rgba(20,33,61,.12)', gridColumn: i === 6 ? 'span 2' : undefined,
+                    background: 'rgba(255,255,255,.78)', border: '1px solid rgba(255,255,255,.9)', backdropFilter: 'blur(14px)',
+                    boxShadow: '0 12px 30px -14px rgba(30,58,110,.35), inset 0 0 0 1px rgba(30,58,110,.07)', gridColumn: i === 6 ? 'span 2' : undefined,
                   }}>
-                  <span className="shrink-0 w-[26px] h-[26px] flex items-center justify-center text-[12px] text-white serif"
-                    style={{ background: nd.accent === 'gold' ? 'var(--gold)' : 'var(--indigo)' }}>{nd.seq}</span>
-                  <span className="text-[13px] font-semibold" style={{ color: '#14325c' }}>{nd.title}</span>
-                  <span className="ml-auto text-[14px]" style={{ color: 'var(--gold)' }}>›</span>
+                  <span className="absolute -right-6 -top-6 w-20 h-20 rounded-full opacity-60 group-hover:opacity-100 transition-opacity" style={{ background: nd.accent === 'gold' ? 'radial-gradient(circle, rgba(216,181,101,.35), transparent 70%)' : 'radial-gradient(circle, rgba(47,109,246,.28), transparent 70%)' }} />
+                  <span className="shrink-0 w-[28px] h-[28px] rounded-[9px] flex items-center justify-center text-[12px] text-white serif"
+                    style={{ background: nd.accent === 'gold' ? 'linear-gradient(135deg,var(--gold),var(--gold-2))' : 'linear-gradient(135deg,var(--indigo),var(--ai))', boxShadow: '0 6px 14px -6px rgba(30,58,110,.6)' }}>{nd.seq}</span>
+                  <span className="min-w-0 flex-1"><span className="block text-[13px] font-semibold leading-tight truncate" style={{ color: '#14325c' }}>{nd.title}</span><span className="block text-[10px] text-slate-400 group-hover:text-[var(--ai)] transition-colors mt-0.5">{nd.features.length} 项功能 · {nd.features[0].name}</span></span>
+                  <span className="text-[14px]" style={{ color: 'var(--gold)' }}>›</span>
                 </button>
               ))}
             </div>
@@ -169,19 +174,19 @@ export default function Hero({ onOpen }: { onOpen: (node: string, tab: string) =
               <div className="flex items-center gap-1.5 mt-1 px-1">
                 <span className="tag tag-gold">高级技师 1,204 人</span>
                 <span className="tag">技师 6,880 人</span>
+                <span className="ai-badge ml-auto">AI 画像</span>
               </div>
             </Card>
           </div>
         </div>
 
         {/* 指标条 */}
-        <div className="shrink-0">
-          <div className="mx-6 flowband" />
-          <div className="mx-6" style={{ background: 'rgba(255,255,255,.94)', border: '1px solid rgba(30,58,110,.16)', borderBottom: 'none', backdropFilter: 'blur(6px)' }}>
+        <div className="shrink-0 px-6 pb-4">
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,.8)', border: '1px solid rgba(255,255,255,.9)', backdropFilter: 'blur(16px)', boxShadow: '0 24px 50px -22px rgba(20,33,61,.45), inset 0 0 0 1px rgba(30,58,110,.07)' }}>
+            <div className="flowband" />
             <div className="flex">{OVERVIEW.map((o, i) => <Metric key={o.k} o={o} i={i} />)}</div>
+            <div className="brocade" style={{ height: 5, opacity: .7 }} />
           </div>
-          <div className="brocade" style={{ height: 7, opacity: .85 }} />
-          <div style={{ height: 9 }}><BrocadeStrip h={9} /></div>
         </div>
       </div>
     </div>
@@ -192,9 +197,9 @@ function Dot() { return <span className="w-1.5 h-1.5 rounded-full bg-white/70" /
 
 function Card({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,.9)', border: '1px solid rgba(30,58,110,.18)', boxShadow: '0 14px 34px rgba(20,33,61,.14)', backdropFilter: 'blur(4px)' }}>
-      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(30,58,110,.10)' }}>
-        <span className="w-[3px] h-[12px]" style={{ background: 'var(--gold)' }} />
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,.76)', border: '1px solid rgba(255,255,255,.9)', boxShadow: '0 20px 44px -18px rgba(20,33,61,.35), inset 0 0 0 1px rgba(30,58,110,.07)', backdropFilter: 'blur(16px)' }}>
+      <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: '1px solid rgba(30,58,110,.08)', background: 'linear-gradient(180deg,rgba(255,255,255,.5),transparent)' }}>
+        <span className="w-[3px] h-[12px] rounded-full" style={{ background: 'linear-gradient(180deg,var(--gold-2),var(--gold))' }} />
         <span className="text-[12.5px] font-semibold">{title}</span>
         <span className="ml-auto text-[10.5px] text-slate-500">{sub}</span>
       </div>

@@ -34,6 +34,6 @@ function render(r: Route) {
   }
 }
 
-export default function Hub({ tab }: { tab: string }) {
-  return <HubShell tab={tab}>{r => render(r)}</HubShell>
+export default function Hub({ tab, init, nonce }: { tab: string; init?: Route; nonce?: number }) {
+  return <HubShell tab={tab} init={init} nonce={nonce}>{r => render(r)}</HubShell>
 }

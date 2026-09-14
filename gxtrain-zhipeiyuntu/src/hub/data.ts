@@ -516,7 +516,7 @@ export function answerFor(hits: { asset: Asset }[]): string {
 }
 
 /* ============ 驾驶舱 ============ */
-export const TREND = Array.from({ length: 12 }).map((_, i) => ({ w: `第 ${26 + i} 周`, in: 640 + ((i * 173) % 420) + i * 18, review: 380 + ((i * 97) % 260) + i * 9, ref: 5200 + ((i * 311) % 1800) + i * 60 }))
+export const TREND = Array.from({ length: 26 }).map((_, i) => ({ w: `第 ${12 + i} 周`, in: 520 + ((i * 173) % 420) + i * 14 + Math.round(Math.sin(i / 2.3) * 90), review: 300 + ((i * 97) % 260) + i * 8 + Math.round(Math.cos(i / 3.1) * 60), ref: 4200 + ((i * 311) % 1800) + i * 70 + Math.round(Math.sin(i / 1.7) * 380) }))
 export const HOT_ASSETS = [...ASSETS].sort((a, b) => b.use - a.use).slice(0, 8)
 export const INSIGHTS = [
   { k: '提问未命中', v: '266 条 / 周', d: '借调人员学时归属、外包人员技能认定两类问题连续三周未命中，责任单位为人力资源部与培训评价中心。', go: { v: 'ingest' as const }, tag: 'warn' },

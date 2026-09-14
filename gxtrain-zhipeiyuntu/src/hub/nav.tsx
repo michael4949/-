@@ -1,6 +1,7 @@
 /* 中枢的分级导航：路由栈、面包屑、页面过渡、提示与跨模块跳转 */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { DrillShell, useDrill, Typewriter, useWidth } from '../drill'
+export { Typewriter, useWidth }
 import type { AssetKind, RefKind, Sens, AssetStatus } from './data'
 import { assetById, docById, batchById, EXPERTS_ALL, KIND_COLOR, Q_CATS } from './data'
 
@@ -56,49 +57,9 @@ export function labelOf(r: Route): string {
   }
 }
 
-type Nav = { stack: Route[]; push: (r: Route) => void; back: () => void; goIndex: (i: number) => void; replace: (r: Route) => void; toast: (m: string) => void; jump: (node: string, tab: string) => void }
-const NavCtx = createContext<Nav>(null!)
-export const useNav = () => useContext(NavCtx)
-
-export function HubShell({ tab, children }: { tab: string; children: (r: Route, level: number) => ReactNode }) {
-  const [stack, setStack] = useState<Route[]>([ROOT_OF[tab] ?? { v: 'board' }])
-  const [dir, setDir] = useState<'in' | 'back'>('in')
-  const [toasts, setToasts] = useState<{ id: number; m: string }[]>([])
-  const seq = useRef(0)
-  useEffect(() => { setDir('in'); setStack([ROOT_OF[tab] ?? { v: 'board' }]) }, [tab])
-  const push = useCallback((r: Route) => { setDir('in'); setStack(s => [...s, r]) }, [])
-  const back = useCallback(() => { setDir('back'); setStack(s => s.length > 1 ? s.slice(0, -1) : s) }, [])
-  const goIndex = useCallback((i: number) => { setDir('back'); setStack(s => s.slice(0, i + 1)) }, [])
-  const replace = useCallback((r: Route) => { setDir('in'); setStack(s => [...s.slice(0, -1), r]) }, [])
-  const toast = useCallback((m: string) => { const id = ++seq.current; setToasts(t => [...t, { id, m }]); setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 2600) }, [])
-  const jump = useCallback((node: string, tab: string) => { window.dispatchEvent(new CustomEvent('app:go', { detail: { node, tab } })) }, [])
-  const nav = useMemo(() => ({ stack, push, back, goIndex, replace, toast, jump }), [stack, push, back, goIndex, replace, toast, jump])
-  const cur = stack[stack.length - 1]
-  const level = stack.length
-  return (
-    <NavCtx.Provider value={nav}>
-      <div className="hub-root">
-        <div className="hub-crumb">
-          {level > 1 && <button className="btn btn-sm mr-1" onClick={back}>‹ 返回</button>}
-          <span className="text-slate-400">中枢</span>
-          {stack.map((r, i) => (
-            <span key={i} className="flex items-center gap-1.5">
-              <span className="sep">›</span>
-              <button className={`c ${i === stack.length - 1 ? 'cur' : ''}`} onClick={() => i < stack.length - 1 && goIndex(i)} title={labelOf(r)}>{labelOf(r)}</button>
-            </span>
-          ))}
-          <span className="lvl">
-            <span className="text-[10.5px] text-slate-400">{['一级', '二级', '三级', '四级'][Math.min(3, level - 1)]}页面</span>
-            {[0, 1, 2].map(i => <i key={i} className={i < level ? (i === level - 1 ? 'on gold' : 'on') : ''} />)}
-          </span>
-        </div>
-        <div className="hub-body">
-          <div key={stack.map(labelOf).join('/')} className={`hub-page ${dir === 'back' ? 'back' : ''}`}>{children(cur, level)}</div>
-          {toasts.length > 0 && <div className="hub-toast">{toasts.map(t => <div key={t.id}>{t.m}</div>)}</div>}
-        </div>
-      </div>
-    </NavCtx.Provider>
-  )
+export const useNav = () => useDrill<Route>()
+export function HubShell({ tab, init, nonce, children }: { tab: string; init?: Route; nonce?: number; children: (r: Route, level: number) => ReactNode }) {
+  return <DrillShell<Route> tab={tab} init={init} nonce={nonce} roots={ROOT_OF} labelOf={labelOf} home="中枢">{children}</DrillShell>
 }
 
 /* ---------- 共用小件 ---------- */
@@ -114,7 +75,7 @@ export function StatusTag({ s }: { s: AssetStatus | string }) {
 }
 export function Kpi({ k, v, d, gold, onClick, spark }: { k: string; v: ReactNode; d?: string; gold?: boolean; onClick?: () => void; spark?: number[] }) {
   return (
-    <div className={`kpi ${gold ? 'gold' : ''}`} onClick={onClick}>
+    <div className={`hkpi ${gold ? 'gold' : ''}`} onClick={onClick}>
       <div className="k">{k}</div>
       <div className="v num">{v}</div>
       {d && <div className="d">{d}</div>}
@@ -126,31 +87,30 @@ export function Kpi({ k, v, d, gold, onClick, spark }: { k: string; v: ReactNode
 export function Field({ k, v }: { k: string; v: ReactNode }) {
   return <div className="mb-2.5"><div className="text-[11px] text-slate-500 mb-0.5">{k}</div><div className="text-[12.5px] leading-relaxed">{v}</div></div>
 }
-/* 逐字输出：用于 AI 生成内容的呈现 */
-export function Typewriter({ text, speed = 14, onDone }: { text: string; speed?: number; onDone?: () => void }) {
-  const [n, setN] = useState(0)
-  useEffect(() => { setN(0); let i = 0; const t = setInterval(() => { i += 2; setN(i); if (i >= text.length) { clearInterval(t); onDone?.() } }, speed); return () => clearInterval(t) }, [text, speed, onDone])
-  return <span>{text.slice(0, n)}{n < text.length && <span className="typing" />}</span>
-}
 export function AreaChart({ data, keys, colors, h = 150, labels }: { data: number[][]; keys: string[]; colors: string[]; h?: number; labels: string[] }) {
-  const w = 560, pad = 28
+  const [ref, w0] = useWidth<HTMLDivElement>()
+  const w = Math.max(320, w0), pad = 30
   const max = Math.max(...data.flat()) * 1.12
-  const x = (i: number) => pad + (i / (data[0].length - 1)) * (w - pad * 2)
+  const n = data[0].length
+  const x = (i: number) => pad + (i / (n - 1)) * (w - pad * 2)
   const y = (v: number) => h - 18 - (v / max) * (h - 30)
+  const every = Math.max(1, Math.ceil(n / Math.max(4, Math.floor((w - pad * 2) / 64))))
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
-      {[0, .25, .5, .75, 1].map(g => <line key={g} x1={pad} x2={w - pad} y1={y(max * g)} y2={y(max * g)} stroke="#eef1f6" />)}
-      {data.map((row, k) => {
-        const pts = row.map((v, i) => `${x(i)},${y(v)}`).join(' ')
-        return <g key={k}>
-          <polygon points={`${x(0)},${y(0)} ${pts} ${x(row.length - 1)},${y(0)}`} fill={colors[k]} opacity=".08" />
-          <polyline points={pts} fill="none" stroke={colors[k]} strokeWidth="1.8" strokeDasharray="1200" strokeDashoffset="1200" style={{ animation: 'dash-draw 1.4s ease-out forwards', animationDelay: `${k * .2}s` }} />
-          {row.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r="2.2" fill={colors[k]} />)}
-        </g>
-      })}
-      {labels.map((l, i) => (i % 2 === 0 || i === labels.length - 1) && <text key={l} x={x(i)} y={h - 4} fontSize="9.5" fill="#94a3b8" textAnchor="middle">{l}</text>)}
-      {keys.map((k, i) => <g key={k}><rect x={pad + i * 92} y={4} width="10" height="3" fill={colors[i]} /><text x={pad + i * 92 + 14} y={8} fontSize="10" fill="#64748b">{k}</text></g>)}
-      <style>{`@keyframes dash-draw { to { stroke-dashoffset: 0 } }`}</style>
-    </svg>
+    <div ref={ref} className="w-full">
+      {w0 > 0 && <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+        {[0, .25, .5, .75, 1].map(g => <line key={g} x1={pad} x2={w - pad} y1={y(max * g)} y2={y(max * g)} stroke="#e8edf5" />)}
+        {data.map((row, k) => {
+          const pts = row.map((v, i) => `${x(i)},${y(v)}`).join(' ')
+          return <g key={k}>
+            <polygon points={`${x(0)},${y(0)} ${pts} ${x(row.length - 1)},${y(0)}`} fill={colors[k]} opacity=".07" />
+            <polyline points={pts} fill="none" stroke={colors[k]} strokeWidth="1.8" strokeLinejoin="round" strokeDasharray="2400" strokeDashoffset="2400" style={{ animation: 'dash-draw 1.6s ease-out forwards', animationDelay: `${k * .2}s` }} />
+            {row.map((v, i) => <circle key={i} cx={x(i)} cy={y(v)} r="2" fill={colors[k]} />)}
+          </g>
+        })}
+        {labels.map((l, i) => (i % every === 0 || i === labels.length - 1) && <text key={l + i} x={x(i)} y={h - 4} fontSize="10" fill="#8a94a6" textAnchor="middle">{l}</text>)}
+        {keys.map((k, i) => <g key={k}><rect x={pad + i * 96} y={4} width="10" height="3" rx="1.5" fill={colors[i]} /><text x={pad + i * 96 + 14} y={8} fontSize="10" fill="#64748b">{k}</text></g>)}
+        <style>{`@keyframes dash-draw { to { stroke-dashoffset: 0 } }`}</style>
+      </svg>}
+    </div>
   )
 }

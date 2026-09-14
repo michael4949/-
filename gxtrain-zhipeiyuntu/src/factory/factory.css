@@ -1,0 +1,29 @@
+/* 课程工厂专用：课件页、分镜、审核批注、试卷 */
+.slide { aspect-ratio: 16 / 9; border-radius: 12px; position: relative; overflow: hidden; container-type: inline-size; background: linear-gradient(135deg, #f7f9fd 0%, #eef3fb 60%, #f9f6ee 100%); border: 1px solid rgba(30,58,110,.12); box-shadow: var(--shadow); }
+.slide .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(180deg, var(--indigo), var(--ai)); }
+.slide .bd { position: absolute; inset: 0; padding: 7% 8% 6% 10%; display: flex; flex-direction: column; }
+.slide h3 { margin: 0; font-size: 5.2cqw; line-height: 1.25; font-weight: 700; color: var(--indigo); font-family: "Songti SC", "Noto Serif SC", serif; }
+.slide ul { margin: 3% 0 0; padding: 0; list-style: none; }
+.slide li { font-size: 2.9cqw; line-height: 1.7; color: #24344f; padding-left: 3.2cqw; position: relative; }
+.slide li::before { content: ''; position: absolute; left: 0; top: .72em; width: 1.4cqw; height: 1.4cqw; border-radius: 20%; background: var(--gold-2); }
+.slide .ft { margin-top: auto; display: flex; justify-content: space-between; font-size: 1.9cqw; color: #8a94a6; }
+.slide .bar { width: 2cqw; }
+.slide .wm { position: absolute; right: 6%; bottom: 8%; width: 22%; opacity: .12; }
+.slide.mini { border-radius: 8px; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.slide.mini:hover, .slide.mini.on { transform: translateY(-2px); box-shadow: 0 12px 26px -12px rgba(47,109,246,.5); outline: 2px solid var(--ai); }
+.slide .mark { position: absolute; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,.2); animation: pop-in .4s both; }
+.note-card { border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,.7); padding: 10px 12px; transition: all .15s; cursor: pointer; }
+.note-card:hover, .note-card.on { border-color: rgba(47,109,246,.5); box-shadow: 0 10px 22px -12px rgba(47,109,246,.4); }
+.scene-row { display: grid; grid-template-columns: 34px 90px 1fr 200px 60px; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,.7); cursor: pointer; transition: all .15s; }
+.scene-row:hover { border-color: rgba(47,109,246,.5); transform: translateY(-1px); box-shadow: 0 10px 22px -12px rgba(47,109,246,.4); }
+.scene-row .shot { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--indigo-soft); color: var(--indigo); display: inline-block; }
+.opt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(255,255,255,.7); font-size: 12.5px; }
+.opt.ok { border-color: rgba(23,138,84,.45); background: #eef8f2; } .opt.wrong { border-color: rgba(194,64,47,.35); background: #fdf1ef; }
+.opt .k { width: 22px; height: 22px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; background: var(--indigo-soft); color: var(--indigo); flex: 0 0 auto; }
+.opt.ok .k { background: var(--ok); color: #fff; }
+.stage-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; background: #cbd3de; }
+.stage-dot.done { background: linear-gradient(135deg, #178a54, #34c27a); } .stage-dot.cur { background: linear-gradient(135deg, var(--indigo), var(--ai)); box-shadow: 0 0 0 5px rgba(47,109,246,.16); }
+.mat { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(255,255,255,.7); cursor: pointer; transition: all .15s; }
+.mat:hover { border-color: rgba(47,109,246,.5); } .mat.on { border-color: rgba(47,109,246,.6); background: #f4f8ff; box-shadow: inset 3px 0 0 var(--ai); }
+.presenter { width: 64px; height: 64px; border-radius: 18px; object-fit: cover; box-shadow: 0 10px 22px -10px rgba(30,58,110,.5); }
+.funnel .fr { height: 26px; border-radius: 6px; display: flex; align-items: center; padding: 0 10px; color: #fff; font-size: 11.5px; margin-bottom: 4px; animation: barx .8s both; transform-origin: left; white-space: nowrap; overflow: hidden; }

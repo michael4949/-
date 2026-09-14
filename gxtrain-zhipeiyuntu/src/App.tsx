@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NODES } from './data'
 import { GridMark } from './deco'
-import { SceneRibbon } from './scenes'
+import { Ambient } from './Ambient'
 import Hero from './Hero'
 import Hub from './modules/Hub'
 import Factory from './modules/Factory'
@@ -18,7 +18,7 @@ const SHORT: Record<string, string> = {
 const byId = (id: string) => NODES.find(n => n.id === id)!
 
 export default function App() {
-  const [page, setPage] = useState<{ node: string; tab: string } | null>(null)
+  const [page, setPage] = useState<{ node: string; tab: string; route?: { v: string }; nonce?: number } | null>(null)
   const [now, setNow] = useState('')
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function App() {
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setPage(null) }
-    const go = (e: Event) => { const d = (e as CustomEvent<{ node: string; tab: string }>).detail; if (d?.node) setPage({ node: d.node, tab: d.tab }) }
+    const go = (e: Event) => { const d = (e as CustomEvent<{ node: string; tab: string; route?: { v: string } }>).detail; if (d?.node) setPage({ node: d.node, tab: d.tab, route: d.route }) }
     window.addEventListener('keydown', k); window.addEventListener('app:go', go)
     return () => { window.removeEventListener('keydown', k); window.removeEventListener('app:go', go) }
   }, [])
@@ -42,8 +42,8 @@ export default function App() {
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden">
       {/* 第一行：标识栏 */}
-      <div className="shrink-0 flex items-center px-6 h-[54px] relative"
-        style={{ background: 'linear-gradient(90deg,#ffffff 0%,#f6f9fc 60%,#eef5fb 100%)', borderBottom: '1px solid var(--line)' }}>
+      <div className="shrink-0 flex items-center px-6 h-[56px] relative z-[60]"
+        style={{ background: 'rgba(255,255,255,.72)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(30,58,110,.08)' }}>
         <button onClick={() => setPage(null)} className="flex items-center gap-3">
           <GridMark size={30} />
           <span className="serif text-[22px] font-semibold tracking-[.12em]" style={{ color: 'var(--indigo)' }}>智培云图</span>
@@ -52,23 +52,24 @@ export default function App() {
           </span>
         </button>
         <div className="ml-auto flex items-center gap-4">
-          <div className="flex items-center gap-2 px-2.5 py-1" style={{ border: '1px solid var(--line)', background: '#fff' }}>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ border: '1px solid rgba(30,58,110,.12)', background: 'rgba(255,255,255,.85)', boxShadow: 'inset 0 1px 2px rgba(20,33,61,.04)' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa6b8" strokeWidth="2">
               <circle cx="11" cy="11" r="7" /><path d="M16 16l5 5" /></svg>
             <input placeholder="搜课程、题库、规程条款、学员…" className="text-[12px] outline-none w-[200px] bg-transparent" />
           </div>
           <span className="num text-[11.5px] text-slate-500">{now}</span>
           <div className="flex items-center gap-2">
-            <div className="w-[27px] h-[27px] flex items-center justify-center text-[11px] text-white" style={{ background: 'var(--indigo)' }}>陈</div>
+            <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center text-[11px] text-white" style={{ background: 'linear-gradient(135deg,#1e3a6e,#2f6df6)', boxShadow: '0 6px 14px -6px rgba(47,109,246,.8)' }}>陈</div>
             <span className="text-[12px]">陈科长<span className="text-slate-500"> · 人力资源部培训科</span></span>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 h-[2px] w-[220px]" style={{ background: 'linear-gradient(90deg,var(--gold),transparent)' }} />
+        <div className="absolute bottom-0 left-0 h-[2px] w-[260px]" style={{ background: 'linear-gradient(90deg,var(--gold-2),var(--ai-2),transparent)' }} />
       </div>
 
       {/* 第二行：横版菜单 */}
-      <div className="shrink-0 flex items-stretch px-6 h-[44px] relative z-50"
-        style={{ background: 'linear-gradient(90deg,#16345e 0%,#1e3a6e 45%,#14508a 100%)' }}>
+      <div className="shrink-0 flex items-stretch px-5 h-[44px] relative z-50"
+        style={{ background: 'linear-gradient(90deg,#0f2a57 0%,#1e3a6e 42%,#0b4f8f 100%)', boxShadow: '0 10px 30px -14px rgba(15,42,87,.6)' }}>
+        <div className="absolute inset-x-0 top-0 h-[1px]" style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)' }} />
         <MenuItem active={!page} onClick={() => setPage(null)} label="云图首页" />
         {NODES.map(nd => (
           <div key={nd.id} className="nav-item flex">
@@ -80,7 +81,7 @@ export default function App() {
                 <div className="text-[10.5px] text-slate-500 mt-0.5 leading-snug">{nd.tagline}</div>
               </div>
               {nd.features.map(f => (
-                <button key={f.id} onClick={() => setPage({ node: nd.id, tab: f.id })}
+                <button key={f.id} onClick={() => setPage({ node: nd.id, tab: f.id, nonce: Date.now() })}
                   className="w-full text-left px-3 py-2.5 hover:bg-slate-50 flex items-start gap-2"
                   style={{ borderBottom: '1px solid var(--line-2)' }}>
                   <span className="w-1 h-1 mt-[7px] shrink-0" style={{ background: 'var(--gold)' }} />
@@ -93,9 +94,9 @@ export default function App() {
             </div>
           </div>
         ))}
-        <div className="ml-auto flex items-center gap-3 text-white/70 text-[11.5px]">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: '#4ade80' }} />管理信息大区 · 运行正常
+        <div className="ml-auto flex items-center gap-3 text-white/75 text-[11.5px]">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.14)' }}>
+            <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />管理信息大区 · 运行正常
           </span>
         </div>
       </div>
@@ -103,39 +104,33 @@ export default function App() {
       {/* 内容区 */}
       <div className="flex-1 min-h-0 relative">
         {!page || !n ? <Hero onOpen={(node, tab) => setPage({ node, tab })} /> : (
-          <div className="h-full flex flex-col">
-            <div className="shrink-0 flex items-center px-5 h-[44px]" style={{ background: '#fff', borderBottom: '1px solid var(--line)' }}>
-              <div className="w-[5px] h-[17px] mr-3" style={{ background: n.accent === 'gold' ? 'var(--gold)' : 'var(--indigo)' }} />
-              <span className="text-[14.5px] font-semibold">{n.title}</span>
+          <div className="h-full flex flex-col relative">
+            <Ambient />
+            <div className="shrink-0 flex items-center px-5 h-[48px] relative z-[5]" style={{ background: 'rgba(255,255,255,.55)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(30,58,110,.08)' }}>
+              <div className="w-[4px] h-[18px] mr-3 rounded-full" style={{ background: n.accent === 'gold' ? 'linear-gradient(180deg,var(--gold-2),var(--gold))' : 'linear-gradient(180deg,var(--ai),var(--indigo))' }} />
+              <span className="text-[15px] font-semibold tracking-wide">{n.title}</span>
               <span className="num text-[10px] text-slate-400 ml-2.5 tracking-[.16em]">{n.sub}</span>
-              <div className="flex gap-1 ml-6">
+              <div className="seg ml-6">
                 {n.features.map(f => (
-                  <button key={f.id} onClick={() => setPage({ node: n.id, tab: f.id })}
-                    className="px-3.5 py-1.5 text-[12.5px] border transition-colors"
-                    style={page.tab === f.id
-                      ? { background: 'var(--indigo)', borderColor: 'var(--indigo)', color: '#fff' }
-                      : { borderColor: 'var(--line)', background: '#fff' }}>{f.name}</button>
+                  <button key={f.id} onClick={() => setPage({ node: n.id, tab: f.id, nonce: Date.now() })} className={page.tab === f.id ? 'on' : ''}>{f.name}</button>
                 ))}
               </div>
               <div className="ml-auto flex items-center gap-2 text-[11.5px] text-slate-500">
-                <span>云图首页</span><span className="text-slate-300">/</span>
-                <span>{n.title}</span><span className="text-slate-300">/</span>
+                <span className="hidden 2xl:inline">云图首页</span><span className="text-slate-300 hidden 2xl:inline">/</span>
+                <span className="hidden 2xl:inline">{n.title}</span><span className="text-slate-300 hidden 2xl:inline">/</span>
                 <span style={{ color: 'var(--gold)' }}>{n.features.find(f => f.id === page.tab)?.name}</span>
                 <button className="btn btn-sm ml-2" onClick={() => setPage(null)}>返回首页</button>
               </div>
             </div>
-            <div className="flowband shrink-0" />
-            <div className="flex-1 min-h-0 flex flex-col" style={{ background: 'var(--paper)' }}>
-              <div className="flex-1 min-h-0">
-              {n.id === 'hub' && <Hub tab={page.tab} />}
-              {n.id === 'factory' && <Factory tab={page.tab} />}
+            <div className="flowband shrink-0 relative z-[5]" />
+            <div className="flex-1 min-h-0 relative z-[1]">
+              {n.id === 'hub' && <Hub tab={page.tab} init={page.route as never} nonce={page.nonce} />}
+              {n.id === 'factory' && <Factory tab={page.tab} init={page.route as never} nonce={page.nonce} />}
               {n.id === 'coach' && <Coach tab={page.tab} goTab={t => setPage({ node: 'coach', tab: t })} />}
               {n.id === 'ask' && <Ask tab={page.tab} />}
               {n.id === 'map' && <Atlas tab={page.tab} />}
               {n.id === 'plan' && <Plan tab={page.tab} />}
               {n.id === 'course' && <Curriculum tab={page.tab} />}
-              </div>
-              <SceneRibbon id={n.id} />
             </div>
           </div>
         )}
@@ -146,12 +141,9 @@ export default function App() {
 
 function MenuItem({ label, active, onClick, caret }: { label: string; active?: boolean; onClick: () => void; caret?: boolean }) {
   return (
-    <button onClick={onClick}
-      className="px-4 flex items-center gap-1.5 text-[13.5px] transition-colors relative"
-      style={{ color: active ? '#fff' : 'rgba(255,255,255,.82)', background: active ? 'rgba(255,255,255,.14)' : 'transparent' }}>
+    <button onClick={onClick} className={`menu-btn ${active ? 'on' : ''}`}>
       {label}
-      {caret && <span className="text-[9px] opacity-70">▼</span>}
-      {active && <span className="absolute bottom-0 left-3 right-3 h-[2.5px]" style={{ background: 'var(--gold)' }} />}
+      {caret && <span className="text-[8px] opacity-60">▼</span>}
     </button>
   )
 }

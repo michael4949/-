@@ -5,6 +5,7 @@ import { UNITS, UNIT_GROUPS } from '../units'
 import { ASSETS, ASSET_TREE, KINDS, KIND_CODE, REF_KINDS, assetById, unitTotal, DOCS, TOTAL_ASSETS } from './data'
 import type { Asset, AssetKind, RefKind } from './data'
 import { useNav, KindTag, SensTag, StatusTag, Field, Typewriter } from './nav'
+import { COURSES } from '../factory/data'
 import type { Route } from './nav'
 
 type Dim = 'org' | 'pro' | 'kind' | 'post'
@@ -299,7 +300,7 @@ export function RefsView({ id, kind }: { id: string; kind: RefKind }) {
               <td className="num text-slate-500">{x.id}</td><td className="font-medium">{x.name}</td><td className="text-slate-600">{x.where}</td>
               <td className="num text-slate-400 text-[11px]">{x.when}</td>
               <td><StatusTag s={x.when >= a.updated ? '已同步' : '待复核'} /></td>
-              <td><button className="btn btn-sm" onClick={() => { toast(`打开 ${x.name}`); jump(target[0], target[1]) }}>打开</button></td>
+              <td><button className="btn btn-sm" onClick={() => { toast(`打开 ${x.name}`); if (kind === '课件') { const cc = COURSES.find(k => k.src.includes(a.id)) ?? COURSES.find(k => k.unit === a.unit); cc ? jump('factory', 'lib', { v: 'course', id: cc.id }) : jump('factory', 'lib') } else jump(target[0], target[1]) }}>打开</button></td>
             </tr>
           ))}</tbody>
         </table>
