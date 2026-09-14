@@ -10,6 +10,7 @@ import { ReviewView, ReviewDetail, NoteView } from '../factory/Review'
 import { MediaView, MicroView, SceneView } from '../factory/Media'
 import { TrainerView, TrainerDetail } from '../factory/Trainer'
 import { AnalyticsView, CourseStats, RevisionView } from '../factory/Analytics'
+import { SystemView, ProgramView, ProgramBatch, TopicView, ClassDetail } from '../factory/System'
 
 function render(r: Route) {
   switch (r.v) {
@@ -36,6 +37,11 @@ function render(r: Route) {
     case 'analytics': return <AnalyticsView />
     case 'courseStats': return <CourseStats id={r.id} />
     case 'revision': return <RevisionView id={r.id} />
+    case 'system': return <SystemView />
+    case 'program': return <ProgramView id={r.id} />
+    case 'programBatch': return <ProgramBatch id={r.id} no={r.no} />
+    case 'topic': return <TopicView i={r.i} />
+    case 'classDetail': return <ClassDetail i={r.i} />
   }
 }
 export default function Factory({ tab, init, nonce }: { tab: string; init?: Route; nonce?: number }) {

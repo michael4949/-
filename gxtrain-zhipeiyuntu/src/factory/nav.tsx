@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { DrillShell, useDrill } from '../drill'
 import type { CourseKind, OutputKind } from './data'
 import { findCourse, questionById, microById, trainerById, PAPERS, DRAFTS } from './store'
+import { MAIN_PROGRAMS, TOPIC_COURSES, CLASS_CAL } from '../data'
 export { Typewriter, useWidth } from '../drill'
 export { Kpi, Field, StatusTag, AreaChart } from '../hub/nav'
 
@@ -15,8 +16,9 @@ export type Route =
   | { v: 'media' } | { v: 'micro'; id: string } | { v: 'scene'; micro: string; no: number }
   | { v: 'trainer' } | { v: 'trainerDetail'; id: string }
   | { v: 'analytics' } | { v: 'courseStats'; id: string } | { v: 'revision'; id: string }
+  | { v: 'system' } | { v: 'program'; id: string } | { v: 'programBatch'; id: string; no: number } | { v: 'topic'; i: number } | { v: 'classDetail'; i: number }
 
-export const ROOT_OF: Record<string, Route> = { board: { v: 'board' }, gen: { v: 'gen' }, lib: { v: 'lib' }, bank: { v: 'bank' }, review: { v: 'review' }, media: { v: 'media' }, trainer: { v: 'trainer' }, analytics: { v: 'analytics' } }
+export const ROOT_OF: Record<string, Route> = { board: { v: 'board' }, gen: { v: 'gen' }, lib: { v: 'lib' }, system: { v: 'system' }, bank: { v: 'bank' }, review: { v: 'review' }, media: { v: 'media' }, trainer: { v: 'trainer' }, analytics: { v: 'analytics' } }
 export function labelOf(r: Route): string {
   switch (r.v) {
     case 'board': return '工厂驾驶舱'
@@ -42,6 +44,11 @@ export function labelOf(r: Route): string {
     case 'analytics': return '课程效果分析'
     case 'courseStats': return `效果 · ${findCourse(r.id)?.name ?? r.id}`
     case 'revision': return '修订任务'
+    case 'system': return '课程体系'
+    case 'program': return MAIN_PROGRAMS.find(p => p.id === r.id)?.name ?? '主干项目'
+    case 'programBatch': return `第 ${r.no} 期`
+    case 'topic': return TOPIC_COURSES[r.i]?.name ?? '专题课'
+    case 'classDetail': return CLASS_CAL[r.i]?.n ?? '班次'
   }
 }
 export const useNav = () => useDrill<Route>()

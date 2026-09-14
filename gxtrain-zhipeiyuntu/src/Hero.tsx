@@ -151,12 +151,12 @@ export default function Hero({ onOpen }: { onOpen: (node: string, tab: string) =
 
           <div className="an-rise" style={{ animationDelay: '.5s', width: 452 }}>
             <div className="grid grid-cols-2 gap-2.5">
-              {NODES.map((nd, i) => (
+              {NODES.map(nd => (
                 <button key={nd.id} onClick={() => onOpen(nd.id, nd.features[0].id)}
                   className="group flex items-center gap-2.5 px-3 py-2.5 text-left transition-all hover:-translate-y-[2px] rounded-2xl relative overflow-hidden"
                   style={{
                     background: 'rgba(255,255,255,.78)', border: '1px solid rgba(255,255,255,.9)', backdropFilter: 'blur(14px)',
-                    boxShadow: '0 12px 30px -14px rgba(30,58,110,.35), inset 0 0 0 1px rgba(30,58,110,.07)', gridColumn: i === 6 ? 'span 2' : undefined,
+                    boxShadow: '0 12px 30px -14px rgba(30,58,110,.35), inset 0 0 0 1px rgba(30,58,110,.07)',
                   }}>
                   <span className="absolute -right-6 -top-6 w-20 h-20 rounded-full opacity-60 group-hover:opacity-100 transition-opacity" style={{ background: nd.accent === 'gold' ? 'radial-gradient(circle, rgba(216,181,101,.35), transparent 70%)' : 'radial-gradient(circle, rgba(47,109,246,.28), transparent 70%)' }} />
                   <span className="shrink-0 w-[28px] h-[28px] rounded-[9px] flex items-center justify-center text-[12px] text-white serif"

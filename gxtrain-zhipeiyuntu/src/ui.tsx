@@ -95,7 +95,7 @@ export function Radar({ data, size = 250 }: { data: { k: string; v: number; need
   )
 }
 
-export function Donut({ data, size = 160 }: { data: { k: string; n: number; c: string }[]; size?: number }) {
+export function Donut({ data, size = 160, label = '资产总量', center }: { data: { k: string; n: number; c: string }[]; size?: number; label?: string; center?: string }) {
   const total = data.reduce((a, b) => a + b.n, 0)
   const R = size / 2, r0 = R - 26
   let acc = 0
@@ -114,8 +114,8 @@ export function Donut({ data, size = 160 }: { data: { k: string; n: number; c: s
       {arcs.map((a, i) => <path key={a.k} d={a.d} fill={a.c} className="pop-in"
         style={{ animationDelay: `${i * 0.09}s`, transformOrigin: `${R}px ${R}px` }} />)}
       <text x={R} y={R - 6} textAnchor="middle" fontSize={19} className="num" fill="var(--ink)" fontWeight={600}>
-        {(total / 1000).toFixed(1)}k</text>
-      <text x={R} y={R + 12} textAnchor="middle" fontSize={10} fill="#7b8798">资产总量</text>
+        {center ?? `${(total / 1000).toFixed(1)}k`}</text>
+      <text x={R} y={R + 12} textAnchor="middle" fontSize={10} fill="#7b8798">{label}</text>
     </svg>
   )
 }

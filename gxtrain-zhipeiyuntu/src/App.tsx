@@ -9,11 +9,10 @@ import Coach from './modules/Coach'
 import Ask from './modules/Ask'
 import Atlas from './modules/Atlas'
 import Plan from './modules/Plan'
-import Curriculum from './modules/Curriculum'
 
 const SHORT: Record<string, string> = {
   hub: '知识资产中枢', factory: 'AI 课程工厂', coach: 'AI 智能陪练', ask: '智能问数助手',
-  map: '学习成长地图', plan: '千人千面计划', course: 'AI 课程体系',
+  map: '学习成长地图', plan: '千人千面计划',
 }
 const byId = (id: string) => NODES.find(n => n.id === id)!
 
@@ -129,9 +128,8 @@ export default function App() {
               {n.id === 'factory' && <Factory tab={page.tab} init={page.route as never} nonce={page.nonce} />}
               {n.id === 'coach' && <Coach tab={page.tab} goTab={t => setPage({ node: 'coach', tab: t })} />}
               {n.id === 'ask' && <Ask tab={page.tab} init={page.route as never} nonce={page.nonce} />}
-              {n.id === 'map' && <Atlas tab={page.tab} />}
-              {n.id === 'plan' && <Plan tab={page.tab} />}
-              {n.id === 'course' && <Curriculum tab={page.tab} />}
+              {n.id === 'map' && <Atlas tab={page.tab} init={page.route as never} nonce={page.nonce} />}
+              {n.id === 'plan' && <Plan tab={page.tab} init={page.route as never} nonce={page.nonce} />}
             </div>
           </div>
         )}
