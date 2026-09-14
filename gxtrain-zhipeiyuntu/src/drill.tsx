@@ -18,15 +18,16 @@ export function jumpTo(node: string, tab: string, route?: AnyRoute) {
 export function DrillShell<R extends AnyRoute>({ tab, init, nonce, roots, labelOf, home, children }:
   { tab: string; init?: R; nonce?: number; roots: Record<string, R>; labelOf: (r: R) => string; home: string; children: (r: R, level: number) => ReactNode }) {
   const rootOf = useCallback((t: string) => roots[t] ?? Object.values(roots)[0], [roots])
-  const [stack, setStack] = useState<R[]>(() => init ? [rootOf(tab), init] : [rootOf(tab)])
+  const initial = useCallback((t: string, i?: R) => i ? (i.v === rootOf(t).v ? [i] : [rootOf(t), i]) : [rootOf(t)], [rootOf])
+  const [stack, setStack] = useState<R[]>(() => initial(tab, init))
   const [dir, setDir] = useState<'in' | 'back'>('in')
   const [toasts, setToasts] = useState<{ id: number; m: string }[]>([])
   const seq = useRef(0)
   const first = useRef(true)
   useEffect(() => {
     if (first.current) { first.current = false; return }
-    setDir('in'); setStack(init ? [rootOf(tab), init] : [rootOf(tab)])
-  }, [tab, init, nonce, rootOf])
+    setDir('in'); setStack(initial(tab, init))
+  }, [tab, init, nonce, initial])
   const push = useCallback((r: R) => { setDir('in'); setStack(s => [...s, r]) }, [])
   const back = useCallback(() => { setDir('back'); setStack(s => s.length > 1 ? s.slice(0, -1) : s) }, [])
   const goIndex = useCallback((i: number) => { setDir('back'); setStack(s => s.slice(0, i + 1)) }, [])

@@ -20,6 +20,7 @@ const byId = (id: string) => NODES.find(n => n.id === id)!
 export default function App() {
   const [page, setPage] = useState<{ node: string; tab: string; route?: { v: string }; nonce?: number } | null>(null)
   const [now, setNow] = useState('')
+  const [gq, setGq] = useState('')
 
   useEffect(() => {
     const f = () => {
@@ -55,7 +56,7 @@ export default function App() {
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ border: '1px solid rgba(30,58,110,.12)', background: 'rgba(255,255,255,.85)', boxShadow: 'inset 0 1px 2px rgba(20,33,61,.04)' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa6b8" strokeWidth="2">
               <circle cx="11" cy="11" r="7" /><path d="M16 16l5 5" /></svg>
-            <input placeholder="搜课程、题库、规程条款、学员…" className="text-[12px] outline-none w-[200px] bg-transparent" />
+            <input value={gq} onChange={e => setGq(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && gq.trim()) { setPage({ node: 'ask', tab: 'chat', route: { v: 'chat', q: gq.trim() } as never, nonce: Date.now() }); setGq('') } }} placeholder="问助手：规程、数据、开班…" className="text-[12px] outline-none w-[210px] bg-transparent" style={{ boxShadow: 'none', border: 'none' }} />
           </div>
           <span className="num text-[11.5px] text-slate-500">{now}</span>
           <div className="flex items-center gap-2">
@@ -127,7 +128,7 @@ export default function App() {
               {n.id === 'hub' && <Hub tab={page.tab} init={page.route as never} nonce={page.nonce} />}
               {n.id === 'factory' && <Factory tab={page.tab} init={page.route as never} nonce={page.nonce} />}
               {n.id === 'coach' && <Coach tab={page.tab} goTab={t => setPage({ node: 'coach', tab: t })} />}
-              {n.id === 'ask' && <Ask tab={page.tab} />}
+              {n.id === 'ask' && <Ask tab={page.tab} init={page.route as never} nonce={page.nonce} />}
               {n.id === 'map' && <Atlas tab={page.tab} />}
               {n.id === 'plan' && <Plan tab={page.tab} />}
               {n.id === 'course' && <Curriculum tab={page.tab} />}
