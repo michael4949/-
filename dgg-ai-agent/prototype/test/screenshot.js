@@ -25,8 +25,8 @@ async function runFlow(page, tag) {
   await page.screenshot({ path: `${out}/${tag.name}-4-report-top.png` });
   const info = await page.evaluate(() => ({
     pages: document.querySelectorAll('.report .page').length,
-    level: document.querySelector('.cover .badge .code').textContent + ' ' + document.querySelector('.cover .badge .lname').textContent,
-    pct: document.querySelector('.cover .lv .big').firstChild.textContent,
+    level: document.querySelector('.cover .low .badge .code').textContent + ' ' + document.querySelector('.cover .low .badge .lname').textContent,
+    pct: document.querySelector('.cover .low .big').firstChild.textContent,
     top3: [...document.querySelectorAll('.acts-mini .act-card .t')].map((t) => t.textContent.trim()),
     spent: document.getElementById('cr-spent').textContent, left: document.getElementById('cr-left').textContent,
     tocCount: document.querySelectorAll('#toc-list li').length
@@ -46,7 +46,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
   const browser = await chromium.launch();
   let page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const land = await runFlow(page, { name: 'land', station: '3' });
-  await shootPages(page, [1, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 25, 26, 27, 28, 31], 'land');
+  await shootPages(page, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 24, 25, 26, 28, 29, 30, 32, 33], 'land');
   await page.emulateMedia({ media: 'print' });
   await page.pdf({ path: `${out}/land-print-full.pdf`, format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' } });
   await page.evaluate(() => document.body.classList.add('print-brief'));
@@ -56,7 +56,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
   await page.close();
   page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   const port = await runFlow(page, { name: 'port', station: '1' });
-  await shootPages(page, [3, 22], 'port');
+  await shootPages(page, [3, 6], 'port');
   await page.close();
   await browser.close();
 

@@ -1,4 +1,117 @@
 {
+  "quickView": [
+    {
+      "n": 1,
+      "q": "处在什么阶段？",
+      "a": "L2 场景 级",
+      "text": "至少一个业务场景由 AI 稳定承担。综合得分 45.4%，距 L3 流程 级还差 24 分。",
+      "tone": "cyan"
+    },
+    {
+      "n": 2,
+      "q": "同行里在哪？",
+      "a": "超过 43% 同行",
+      "text": "2 个维度高于参考带，1 个在带内，3 个低于参考带。",
+      "tone": "purple"
+    },
+    {
+      "n": 3,
+      "q": "最强在哪？",
+      "a": "战略维度 61.1%",
+      "text": "「立项与牵头」已建立：AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。",
+      "tone": "orange"
+    },
+    {
+      "n": 4,
+      "q": "短板在哪？",
+      "a": "合规维度 27.8%",
+      "text": "「外部模型边界」待加强：不清楚哪些数据可以交给外部模型，员工使用外部 AI 没有限制。",
+      "tone": "blue"
+    },
+    {
+      "n": 5,
+      "q": "先做什么？",
+      "a": "把口头约定变成书面制度并落实",
+      "text": "有约定没制度，或有制度不执行。 负责人：行政或人事负责人，3 周，零投入。",
+      "tone": "green"
+    },
+    {
+      "n": 6,
+      "q": "投多少？",
+      "a": "流程级应用 · 5–20 万元",
+      "text": "高级版或旗舰版 + 系统数据打通 + 智能体承接一条跨部门流程。",
+      "tone": "navy"
+    }
+  ],
+  "verdict": {
+    "label": "总体判断",
+    "headline": "处于 L2 场景 级，先补合规与人员，以「流程级应用」起步，12 个月内具备进入 L3 级的条件",
+    "text": "至少有一个业务环节已由 AI 稳定承担，有人负责、有数据支撑、有初步效果。这个阶段的关键是把单点场景的收益写进经营指标，并把成功做法复制到第二、第三个场景，同时补齐合规与人员短板。",
+    "score": 45.4,
+    "scoreLabel": "成熟度综合得分"
+  },
+  "directions": [
+    {
+      "dimension": "compliance",
+      "name": "合规维度",
+      "pct": 27.8,
+      "position": "below",
+      "tag": "优先",
+      "order": 1,
+      "color": "#0E9F6E",
+      "reason": "低于同行参考带（27.8%）；「外部模型边界」待加强，不清楚哪些数据可以交给外部模型，员工使用外部 AI 没有限制。"
+    },
+    {
+      "dimension": "people",
+      "name": "人员维度",
+      "pct": 22.2,
+      "position": "below",
+      "tag": "优先",
+      "order": 1,
+      "color": "#E0635C",
+      "reason": "低于同行参考带（22.2%）；「学习与沉淀」待加强，从未组织过 AI 或数字化培训，内部没有经验沉淀。"
+    },
+    {
+      "dimension": "process",
+      "name": "流程维度",
+      "pct": 44.4,
+      "position": "below",
+      "tag": "次批",
+      "order": 2,
+      "color": "#8A54DC",
+      "reason": "低于同行参考带（44.4%）；「执行一致性」待加强，同一件事不同人做结果差异很大，新人上手要三个月以上全靠带教。"
+    },
+    {
+      "dimension": "data",
+      "name": "数据维度",
+      "pct": 55.6,
+      "position": "within",
+      "tag": "次批",
+      "order": 2,
+      "color": "#0FA3C7",
+      "reason": "处于同行参考带内（55.6%）；「质量与标准」待加强，客户、产品等主数据在不同系统与部门间经常不一致，数据出错靠事后发现。"
+    },
+    {
+      "dimension": "budget",
+      "name": "预算维度",
+      "pct": 61.1,
+      "position": "above",
+      "tag": "保持",
+      "order": 3,
+      "color": "#C9A227",
+      "reason": "高于同行参考带（61.1%）；「历史投入与效果」基本具备，投入占营收 0.5%–2%，部分用起来效果一般。"
+    },
+    {
+      "dimension": "strategy",
+      "name": "战略维度",
+      "pct": 61.1,
+      "position": "above",
+      "tag": "保持",
+      "order": 3,
+      "color": "#1157B5",
+      "reason": "高于同行参考带（61.1%）；「立项与牵头」基本具备，AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。"
+    }
+  ],
   "ok": true,
   "meta": {
     "module": "企业AI成熟度评估",
@@ -760,7 +873,7 @@
     {
       "key": "strategy",
       "name": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "desc": "决策层是否把 AI 当作经营事项来立项、定指标、亲自推动。战略维度决定了后面五个维度的投入能否持续。",
       "score": 11,
       "max": 18,
@@ -872,7 +985,7 @@
     {
       "key": "data",
       "name": "数据",
-      "color": "#1BA5B8",
+      "color": "#0FA3C7",
       "desc": "业务数据是否系统化存放、能否被及时取用、口径是否一致。数据维度决定了 AI 场景能跑多快、结果可信到什么程度。",
       "score": 10,
       "max": 18,
@@ -984,7 +1097,7 @@
     {
       "key": "process",
       "name": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "desc": "业务流程是否有规范、执行是否一致、有多少环节已数字化。流程维度决定了 AI 能否嵌入日常作业而非停留在个人工具。",
       "score": 8,
       "max": 18,
@@ -1208,7 +1321,7 @@
     {
       "key": "budget",
       "name": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "desc": "过去投了多少、效果如何、愿意投多少、怎么评估。预算维度决定了 AI 场景的投入节奏与可持续性。",
       "score": 11,
       "max": 18,
@@ -1320,7 +1433,7 @@
     {
       "key": "compliance",
       "name": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "desc": "数据权限、留存、外部模型边界与安全责任是否有制度并执行。合规维度决定了 AI 应用的风险底线，也是客户与监管的共同要求。",
       "score": 5,
       "max": 18,
@@ -1525,7 +1638,7 @@
       "phaseTitle": "打基础",
       "dimension": "compliance",
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "id": "C-L1-1",
       "title": "把口头约定变成书面制度并落实",
       "why": "有约定没制度，或有制度不执行。",
@@ -1575,7 +1688,7 @@
       "phaseTitle": "打基础",
       "dimension": "process",
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "id": "P-L2-1",
       "title": "把执行差异最大的环节做成模板与清单",
       "why": "执行差异大，AI 学到的会是混乱的做法。",
@@ -1600,7 +1713,7 @@
       "phaseTitle": "见成效",
       "dimension": "compliance",
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "id": "C-L1-2",
       "title": "发布员工使用外部 AI 的输入限制",
       "why": "没有限制的外部 AI 使用是商业秘密外泄最常见的途径。",
@@ -1650,7 +1763,7 @@
       "phaseTitle": "见成效",
       "dimension": "process",
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "id": "P-L2-2",
       "title": "把核心流程的线下环节搬进系统",
       "why": "只有在系统里完成的环节才有数据留痕，AI 才能接入。",
@@ -1675,7 +1788,7 @@
       "phaseTitle": "扩规模",
       "dimension": "data",
       "dimensionName": "数据",
-      "color": "#1BA5B8",
+      "color": "#0FA3C7",
       "id": "D-L2-1",
       "title": "打通订单、财务、客户三类系统的数据流",
       "why": "系统孤岛让每个 AI 场景都要额外搬数据。",
@@ -1700,7 +1813,7 @@
       "phaseTitle": "扩规模",
       "dimension": "budget",
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "id": "B-L2-1",
       "title": "在年度预算中单列 AI 与数字化科目",
       "why": "场景已见效，投入需要从临时审批变成固定科目。",
@@ -1725,7 +1838,7 @@
       "phaseTitle": "扩规模",
       "dimension": "strategy",
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "id": "S-L2-1",
       "title": "把场景收益写进月度经营报表",
       "why": "单点场景已见效，收益不进报表就无法争取下一步资源。",
@@ -1797,7 +1910,7 @@
       "weekIndex": 0,
       "action": 1,
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "item": "把现有口头约定写成制度文件",
       "owner": "行政或人事负责人"
     },
@@ -1815,7 +1928,7 @@
       "weekIndex": 0,
       "action": 3,
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "item": "找出结果差异最大的 3 个环节",
       "owner": "业务部门负责人"
     },
@@ -1824,7 +1937,7 @@
       "weekIndex": 1,
       "action": 1,
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "item": "明确责任人与违规处理方式",
       "owner": "行政或人事负责人"
     },
@@ -1842,7 +1955,7 @@
       "weekIndex": 1,
       "action": 3,
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "item": "为每个环节做模板与检查清单",
       "owner": "业务部门负责人"
     },
@@ -1851,7 +1964,7 @@
       "weekIndex": 2,
       "action": 1,
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "item": "季度抽查一次执行情况",
       "owner": "行政或人事负责人"
     },
@@ -1869,7 +1982,7 @@
       "weekIndex": 2,
       "action": 3,
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "item": "推行一个月后对比差异",
       "owner": "业务部门负责人"
     }

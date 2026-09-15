@@ -1,4 +1,117 @@
 {
+  "quickView": [
+    {
+      "n": 1,
+      "q": "处在什么阶段？",
+      "a": "L3 流程 级",
+      "text": "AI 已嵌入跨部门流程，有数据回流。综合得分 72.2%，距 L4 经营 级还差 15 分。",
+      "tone": "cyan"
+    },
+    {
+      "n": 2,
+      "q": "同行里在哪？",
+      "a": "超过 99% 同行",
+      "text": "6 个维度高于参考带，0 个在带内，0 个低于参考带。",
+      "tone": "purple"
+    },
+    {
+      "n": 3,
+      "q": "最强在哪？",
+      "a": "流程维度 72.2%",
+      "text": "「数字化与自动化」已建立：大部分环节在系统里完成，多数重复工作已自动化。",
+      "tone": "orange"
+    },
+    {
+      "n": 4,
+      "q": "短板在哪？",
+      "a": "预算维度 66.7%",
+      "text": "「历史投入与效果」待加强：投入占营收 0.5%–2%，部分用起来效果一般。",
+      "tone": "blue"
+    },
+    {
+      "n": 5,
+      "q": "先做什么？",
+      "a": "按场景回收期分配下一期预算",
+      "text": "多场景并行，预算需要向回收期短的场景倾斜。 负责人：财务负责人，3 周，零投入。",
+      "tone": "green"
+    },
+    {
+      "n": 6,
+      "q": "投多少？",
+      "a": "流程级应用 · 5–20 万元",
+      "text": "高级版或旗舰版 + 系统数据打通 + 智能体承接一条跨部门流程。",
+      "tone": "navy"
+    }
+  ],
+  "verdict": {
+    "label": "总体判断",
+    "headline": "处于 L3 流程 级，先补预算与人员，以「流程级应用」起步，12 个月内具备进入 L4 级的条件",
+    "text": "AI 已嵌入跨部门流程，结果数据回流到系统，人工只处理例外与审批。这个阶段的关键是把 AI 指标分解到部门、建立数据回流与质量校验，并让内部团队具备独立主导新场景的能力。",
+    "score": 72.2,
+    "scoreLabel": "成熟度综合得分"
+  },
+  "directions": [
+    {
+      "dimension": "budget",
+      "name": "预算维度",
+      "pct": 66.7,
+      "position": "above",
+      "tag": "优先",
+      "order": 1,
+      "color": "#C9A227",
+      "reason": "高于同行参考带（66.7%）；「历史投入与效果」基本具备，投入占营收 0.5%–2%，部分用起来效果一般。"
+    },
+    {
+      "dimension": "people",
+      "name": "人员维度",
+      "pct": 72.2,
+      "position": "above",
+      "tag": "优先",
+      "order": 1,
+      "color": "#E0635C",
+      "reason": "高于同行参考带（72.2%）；「业务技术转译」基本具备，有一人能翻译需求，有专人对接供应商但验收靠感觉。"
+    },
+    {
+      "dimension": "strategy",
+      "name": "战略维度",
+      "pct": 72.2,
+      "position": "above",
+      "tag": "次批",
+      "order": 2,
+      "color": "#1157B5",
+      "reason": "高于同行参考带（72.2%）；「立项与牵头」基本具备，AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。"
+    },
+    {
+      "dimension": "compliance",
+      "name": "合规维度",
+      "pct": 66.7,
+      "position": "above",
+      "tag": "次批",
+      "order": 2,
+      "color": "#0E9F6E",
+      "reason": "高于同行参考带（66.7%）；「权限与留存」基本具备，有口头约定或有制度未落实，离职有交接清单。"
+    },
+    {
+      "dimension": "data",
+      "name": "数据维度",
+      "pct": 83.3,
+      "position": "above",
+      "tag": "保持",
+      "order": 3,
+      "color": "#0FA3C7",
+      "reason": "高于同行参考带（83.3%）；「可得与共享」已建立，数据随时自取，管理层有按日或实时更新的看板。"
+    },
+    {
+      "dimension": "process",
+      "name": "流程维度",
+      "pct": 72.2,
+      "position": "above",
+      "tag": "保持",
+      "order": 3,
+      "color": "#8A54DC",
+      "reason": "高于同行参考带（72.2%）；「数字化与自动化」已建立，大部分环节在系统里完成，多数重复工作已自动化。"
+    }
+  ],
   "ok": true,
   "meta": {
     "module": "企业AI成熟度评估",
@@ -763,7 +876,7 @@
     {
       "key": "strategy",
       "name": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "desc": "决策层是否把 AI 当作经营事项来立项、定指标、亲自推动。战略维度决定了后面五个维度的投入能否持续。",
       "score": 13,
       "max": 18,
@@ -875,7 +988,7 @@
     {
       "key": "data",
       "name": "数据",
-      "color": "#1BA5B8",
+      "color": "#0FA3C7",
       "desc": "业务数据是否系统化存放、能否被及时取用、口径是否一致。数据维度决定了 AI 场景能跑多快、结果可信到什么程度。",
       "score": 15,
       "max": 18,
@@ -987,7 +1100,7 @@
     {
       "key": "process",
       "name": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "desc": "业务流程是否有规范、执行是否一致、有多少环节已数字化。流程维度决定了 AI 能否嵌入日常作业而非停留在个人工具。",
       "score": 13,
       "max": 18,
@@ -1211,7 +1324,7 @@
     {
       "key": "budget",
       "name": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "desc": "过去投了多少、效果如何、愿意投多少、怎么评估。预算维度决定了 AI 场景的投入节奏与可持续性。",
       "score": 12,
       "max": 18,
@@ -1323,7 +1436,7 @@
     {
       "key": "compliance",
       "name": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "desc": "数据权限、留存、外部模型边界与安全责任是否有制度并执行。合规维度决定了 AI 应用的风险底线，也是客户与监管的共同要求。",
       "score": 12,
       "max": 18,
@@ -1528,7 +1641,7 @@
       "phaseTitle": "打基础",
       "dimension": "budget",
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "id": "B-L3-1",
       "title": "按场景回收期分配下一期预算",
       "why": "多场景并行，预算需要向回收期短的场景倾斜。",
@@ -1578,7 +1691,7 @@
       "phaseTitle": "打基础",
       "dimension": "strategy",
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "id": "S-L3-1",
       "title": "把 AI 指标分解到部门考核",
       "why": "AI 已嵌入跨部门流程，指标停在公司层面会让部门失去动力。",
@@ -1603,7 +1716,7 @@
       "phaseTitle": "见成效",
       "dimension": "budget",
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "id": "B-L3-2",
       "title": "设立 AI 滚动投入计划",
       "why": "按项目审批追加已跟不上多场景节奏。",
@@ -1653,7 +1766,7 @@
       "phaseTitle": "见成效",
       "dimension": "strategy",
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "id": "S-L3-2",
       "title": "建立跨部门 AI 推进小组",
       "why": "多场景协同靠人推，需要固定的跨部门机制。",
@@ -1678,7 +1791,7 @@
       "phaseTitle": "扩规模",
       "dimension": "compliance",
       "dimensionName": "合规",
-      "color": "#22A06B",
+      "color": "#0E9F6E",
       "id": "C-L3-1",
       "title": "制定安全事件预案并演练",
       "why": "多场景运行后，安全事件的影响面扩大，需要预案。",
@@ -1703,7 +1816,7 @@
       "phaseTitle": "扩规模",
       "dimension": "data",
       "dimensionName": "数据",
-      "color": "#1BA5B8",
+      "color": "#0FA3C7",
       "id": "D-L3-1",
       "title": "建立 AI 场景数据回流与质量闭环",
       "why": "AI 产出的数据需要回写系统并可追溯可修正。",
@@ -1728,7 +1841,7 @@
       "phaseTitle": "扩规模",
       "dimension": "process",
       "dimensionName": "流程",
-      "color": "#7C5CD6",
+      "color": "#8A54DC",
       "id": "P-L3-1",
       "title": "让智能体承接一条跨部门流程",
       "why": "流程已规范且数字化，可以把重复节点交给智能体。",
@@ -1800,7 +1913,7 @@
       "weekIndex": 0,
       "action": 1,
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "item": "核算各场景实测回收期",
       "owner": "财务负责人"
     },
@@ -1818,7 +1931,7 @@
       "weekIndex": 0,
       "action": 3,
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "item": "把公司级 AI 指标拆到各相关部门负责人",
       "owner": "企业负责人 + 人事负责人"
     },
@@ -1827,7 +1940,7 @@
       "weekIndex": 1,
       "action": 1,
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "item": "回收期最短的场景优先扩展",
       "owner": "财务负责人"
     },
@@ -1845,7 +1958,7 @@
       "weekIndex": 1,
       "action": 3,
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "item": "纳入季度考核，权重不低于 10%",
       "owner": "企业负责人 + 人事负责人"
     },
@@ -1854,7 +1967,7 @@
       "weekIndex": 2,
       "action": 1,
       "dimensionName": "预算",
-      "color": "#E8A33D",
+      "color": "#C9A227",
       "item": "形成预算分配规则",
       "owner": "财务负责人"
     },
@@ -1872,7 +1985,7 @@
       "weekIndex": 2,
       "action": 3,
       "dimensionName": "战略",
-      "color": "#4974F6",
+      "color": "#1157B5",
       "item": "明确各部门的数据回流责任与时限",
       "owner": "企业负责人 + 人事负责人"
     }

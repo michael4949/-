@@ -283,7 +283,34 @@
     };
     var summaryText = summary.position + summary.dims + summary.subs + summary.next;
 
+    // 结论速览：六个问题，六句回答（报告首图）
+    var strongest = dimRank[dimRank.length - 1];
+    var subMap2 = {}; subdims.forEach(function (s) { subMap2[s.key] = s; });
+    var firstSentence = function (t) { return String(t || '').split('。')[0] + '。'; };
+    var quickView = [
+      { n: 1, q: '处在什么阶段？', a: level.code + ' ' + level.name + ' 级', text: level.verdict + '。综合得分 ' + tp + '%，' + (next ? '距 ' + next.code + ' ' + next.name + ' 级还差 ' + gapPts + ' 分。' : '已处于最高等级。'), tone: 'cyan' },
+      { n: 2, q: '同行里在哪？', a: percentile != null ? '超过 ' + percentile + '% 同行' : '参考带待补', text: positions.above + ' 个维度高于参考带，' + positions.within + ' 个在带内，' + positions.below + ' 个低于参考带。', tone: 'purple' },
+      { n: 3, q: '最强在哪？', a: strongest.name + '维度 ' + strongest.pct + '%', text: '「' + subMap2[strongest.strongest].name + '」已建立：' + firstSentence(subMap2[strongest.strongest].diagnosis), tone: 'orange' },
+      { n: 4, q: '短板在哪？', a: weakDims[0].name + '维度 ' + weakDims[0].pct + '%', text: '「' + subMap2[weakDims[0].weakest].name + '」待加强：' + firstSentence(subMap2[weakDims[0].weakest].diagnosis), tone: 'blue' },
+      { n: 5, q: '先做什么？', a: top3[0].title, text: top3[0].why + ' 负责人：' + top3[0].owner + '，' + top3[0].weeks + ' 周，' + top3[0].cost + '投入。', tone: 'green' },
+      { n: 6, q: '投多少？', a: tier.name + ' · ' + tier.range, text: tier.desc, tone: 'navy' }
+    ];
+    var verdict = {
+      label: '总体判断',
+      headline: '处于 ' + level.code + ' ' + level.name + ' 级，先补' + weakDims[0].name + '与' + weakDims[1].name + '，以「' + tier.name + '」起步' + (next ? '，12 个月内具备进入 ' + next.code + ' 级的条件' : '，持续巩固经营级能力'),
+      text: level.desc,
+      score: tp, scoreLabel: '成熟度综合得分'
+    };
+    // 优先方向：六维按短板顺序标 优先 / 次批 / 保持
+    var directions = dimRank.map(function (d, i) {
+      var w = subMap2[d.weakest], s = subMap2[d.strongest];
+      var tag = i < 2 ? '优先' : (i < 4 ? '次批' : '保持');
+      return { dimension: d.key, name: d.name + '维度', pct: d.pct, position: d.position, tag: tag, order: i < 2 ? 1 : (i < 4 ? 2 : 3), color: d.color,
+        reason: (d.positionName ? d.positionName + '（' + d.pct + '%）；' : d.pct + '%；') + (tag === '保持' ? '「' + s.name + '」' + s.bandName + '，' + firstSentence(s.diagnosis) : '「' + w.name + '」' + w.bandName + '，' + firstSentence(w.diagnosis)) };
+    });
+
     return {
+      quickView: quickView, verdict: verdict, directions: directions,
       ok: true,
       meta: { module: MODULE_NAME, credits: CREDITS, version: VERSION, questionCount: data.questions.length },
       profile: profile,
