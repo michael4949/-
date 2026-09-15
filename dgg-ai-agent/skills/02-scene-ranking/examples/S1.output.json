@@ -1,0 +1,2628 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI高价值场景排序",
+    "credits": 20,
+    "version": "1.0.0",
+    "sceneCount": 13,
+    "painCount": 16
+  },
+  "profile": {
+    "name": "杭州锐合精密五金有限公司",
+    "industry": "mfg-machinery",
+    "industryName": "机械与五金",
+    "sector": "mfg",
+    "sectorName": "制造业",
+    "size": "101_300",
+    "sizeName": "101–300 人",
+    "revenue": "20m_100m",
+    "revenueName": "2000 万–1 亿",
+    "province": "浙江",
+    "years": "10_plus",
+    "yearsName": "10 年以上",
+    "ownership": "private",
+    "ownershipName": "民营企业",
+    "customers": "b2b",
+    "customersName": "企业客户",
+    "systems": [
+      "erp",
+      "finance"
+    ],
+    "systemsName": [
+      "ERP",
+      "财务软件"
+    ],
+    "itStaff": "1_2",
+    "itStaffName": "1–2 人",
+    "branches": "single",
+    "branchesName": "单一经营地",
+    "overseas": "no",
+    "overseasName": "无",
+    "role": "owner",
+    "roleName": "企业负责人",
+    "tags": [
+      "制造业 · 机械与五金",
+      "101–300 人",
+      "2000 万–1 亿",
+      "民营企业",
+      "企业客户",
+      "已有 ERP / 财务软件",
+      "数字化专职 1–2 人"
+    ],
+    "portrait": "杭州锐合精密五金有限公司是一家位于浙江的机械与五金企业，民营企业，成立 10 年以上，101–300 人，上年营收 2000 万–1 亿，主要面向企业客户。现有系统：ERP、财务软件，数字化专职人员 1–2 人。"
+  },
+  "pains": [
+    {
+      "id": "mfg-p05",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "交期",
+      "text": "交期常被客户催，能不能按时交货说不准",
+      "hint": "交期承诺缺少数据支撑",
+      "severity": 5,
+      "severityName": "当前头等问题"
+    },
+    {
+      "id": "mfg-p06",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "插单排产",
+      "text": "插单一来整个排产就乱，靠车间主任凭经验调",
+      "hint": "排产依赖个人经验，难以复算",
+      "severity": 4,
+      "severityName": "每周都在处理"
+    },
+    {
+      "id": "mfg-p09",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "成本不清",
+      "text": "单件成本算不准，报价靠毛估，做完才知道赚多少",
+      "hint": "料工费未归集到订单与产品",
+      "severity": 4,
+      "severityName": "每周都在处理"
+    },
+    {
+      "id": "mfg-p01",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "报价慢",
+      "text": "客户询价后报价要等两三天，单子被同行先接走",
+      "hint": "报价依赖技术与成本两头确认",
+      "severity": 3,
+      "severityName": "明显影响经营"
+    },
+    {
+      "id": "mfg-p13",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "加班",
+      "text": "关键岗位天天加班，人一休假事情就停",
+      "hint": "工作集中在少数人身上",
+      "severity": 3,
+      "severityName": "明显影响经营"
+    }
+  ],
+  "painProfile": {
+    "count": 5,
+    "severityTotal": 19,
+    "severityAvg": 3.8,
+    "groups": [
+      {
+        "key": "sales",
+        "name": "获客与销售",
+        "color": "#8A54DC",
+        "desc": "线索、报价、成交与客户维护",
+        "count": 1,
+        "severity": 3,
+        "pct": 16,
+        "tags": [
+          "报价慢"
+        ]
+      },
+      {
+        "key": "deliver",
+        "name": "交付与生产",
+        "color": "#0FA3C7",
+        "desc": "订单、生产、项目与服务交付",
+        "count": 2,
+        "severity": 9,
+        "pct": 47,
+        "tags": [
+          "交期",
+          "插单排产"
+        ]
+      },
+      {
+        "key": "cost",
+        "name": "成本与财务",
+        "color": "#C4457E",
+        "desc": "成本、库存、回款与费用",
+        "count": 1,
+        "severity": 4,
+        "pct": 21,
+        "tags": [
+          "成本不清"
+        ]
+      },
+      {
+        "key": "org",
+        "name": "组织与管理",
+        "color": "#FF8A3D",
+        "desc": "人员、经验、报表与协同",
+        "count": 1,
+        "severity": 3,
+        "pct": 16,
+        "tags": [
+          "加班"
+        ]
+      }
+    ],
+    "top": [
+      {
+        "tag": "交期",
+        "text": "交期常被客户催，能不能按时交货说不准",
+        "severity": 5,
+        "groupName": "交付与生产",
+        "color": "#0FA3C7"
+      },
+      {
+        "tag": "插单排产",
+        "text": "插单一来整个排产就乱，靠车间主任凭经验调",
+        "severity": 4,
+        "groupName": "交付与生产",
+        "color": "#0FA3C7"
+      },
+      {
+        "tag": "成本不清",
+        "text": "单件成本算不准，报价靠毛估，做完才知道赚多少",
+        "severity": 4,
+        "groupName": "成本与财务",
+        "color": "#C4457E"
+      }
+    ],
+    "focus": "deliver",
+    "focusText": "所选 5 项痛点集中在「交付与生产」（2 项，严重度合计 9），其次是「成本与财务」（1 项）。严重度最高的是「交期常被客户催，能不能按时交货说不准」。"
+  },
+  "conditions": {
+    "dataState": "system",
+    "dataStateName": "大部分在业务系统里",
+    "dataStateNote": "数据条件较好，可直接进入系统内取数",
+    "objective": "efficiency",
+    "objectiveName": "提效率",
+    "window": "m6",
+    "windowName": "6 个月内",
+    "windowNote": "按标准节奏推进",
+    "capacity": "part",
+    "capacityName": "现有人员兼职推进",
+    "capacityNote": "以单点场景起步，避免同时铺开"
+  },
+  "weights": {
+    "pain": 0.35,
+    "data": 0.3,
+    "cycle": 0.2,
+    "barrier": 0.15,
+    "preset": "dm",
+    "presetName": "标准权重"
+  },
+  "axes": [
+    {
+      "key": "pain",
+      "name": "痛点强度",
+      "weight": 0.35,
+      "color": "#E0635C",
+      "invert": false,
+      "desc": "这个场景解决的是否正是您勾选的痛点",
+      "how": "场景的痛点标签与您勾选的痛点求交集，按您给出的严重度加权，映射到 1–5 分",
+      "scale": [
+        "未命中所选痛点",
+        "轻微相关",
+        "命中一项",
+        "命中且严重度较高",
+        "正面命中所选重点痛点"
+      ]
+    },
+    {
+      "key": "data",
+      "name": "数据可得",
+      "weight": 0.3,
+      "color": "#1157B5",
+      "invert": false,
+      "desc": "落地这个场景所需的数据，现在拿不拿得到",
+      "how": "场景的数据依赖与您现有的业务系统比对，再按数据存放现状调整；关键系统缺失时计 1 分",
+      "scale": [
+        "关键数据源缺失",
+        "数据分散需要整理",
+        "部分数据可得",
+        "主要数据可得",
+        "所需数据均已具备"
+      ]
+    },
+    {
+      "key": "cycle",
+      "name": "见效周期",
+      "weight": 0.2,
+      "color": "#0E9F6E",
+      "invert": false,
+      "desc": "从开始做到看见结果需要多久",
+      "how": "取场景预设的见效速度，再按您期望的见效窗口调整",
+      "scale": [
+        "一年以上",
+        "半年以上",
+        "三到六个月",
+        "一到三个月",
+        "一个月内可见"
+      ]
+    },
+    {
+      "key": "barrier",
+      "name": "实施门槛",
+      "weight": 0.15,
+      "color": "#C9A227",
+      "invert": true,
+      "desc": "落地要动多少流程、系统与人",
+      "how": "取场景预设的实施门槛，再按您可投入的人力调整；计分时用（6 − 门槛），门槛越低得分越高",
+      "scale": [
+        "当天可起步",
+        "一周内可起步",
+        "需要跨部门配合",
+        "需要改造流程或系统",
+        "需要系统改造与外部配合"
+      ]
+    }
+  ],
+  "formula": "总分 = 痛点强度 × 0.35 + 数据可得 × 0.30 + 见效周期 × 0.20 + (6 − 实施门槛) × 0.15",
+  "scenes": [
+    {
+      "id": "mfg-s03",
+      "name": "报价自动生成",
+      "stage": "销售前端",
+      "user": "销售内勤与报价工程师",
+      "replaces": "逐单查历史价、问成本、做报价单的重复劳动",
+      "painTags": [
+        "报价慢",
+        "成本不清"
+      ],
+      "hitTags": [
+        "报价慢",
+        "成本不清"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "历史报价与成交记录",
+        "材料价格表",
+        "工时与费率标准"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI获客",
+      "metric": "报价响应从 2 天缩短到 4 小时内",
+      "firstStep": "整理近两年成交报价单，按产品族归类出可复用的报价模板",
+      "precondition": "材料价格表需要有人定期维护",
+      "roiBasis": "按报价响应提速带来的成单率提升折算",
+      "axis": {
+        "pain": 4,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "命中所选痛点「报价慢」「成本不清」，严重度合计 7 / 10",
+        "data": "所需数据源均已具备：ERP",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 28,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 10.5
+      },
+      "total": 4.4,
+      "score": 88.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 1,
+      "reason": "排在前列：正面命中「报价慢」「成本不清」，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s01",
+      "name": "订单交付预警",
+      "stage": "生产计划",
+      "user": "生产计划员与业务经理",
+      "replaces": "每天上午手工核对交期的两小时",
+      "painTags": [
+        "交期",
+        "加班"
+      ],
+      "hitTags": [
+        "交期",
+        "加班"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "近 6 个月订单与实际交付日期",
+        "在制品工序进度",
+        "物料到货计划"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI ERP",
+      "metric": "交期达成率提升 8–12 个百分点",
+      "firstStep": "导出近 6 个月订单与实际交付日期，做一次准点率基线",
+      "precondition": "工序进度需要每日回填，纸质流转卡先做电子化",
+      "roiBasis": "按延期订单减少与催单沟通工时折算",
+      "axis": {
+        "pain": 4,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 3.5
+      },
+      "why": {
+        "pain": "命中所选痛点「交期」「加班」，严重度合计 8 / 10",
+        "data": "所需数据源均已具备：ERP",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 28,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 7.5
+      },
+      "total": 4.1,
+      "score": 81.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 2,
+      "reason": "排在前列：正面命中「交期」「加班」，数据可得 5 / 5，见效 4 / 5，门槛 3.5 / 5。"
+    },
+    {
+      "id": "mfg-s13",
+      "name": "经营日报与指标归因",
+      "stage": "经营管理",
+      "user": "总经理与各部门负责人",
+      "replaces": "经营会前各部门先对数的半天",
+      "painTags": [
+        "报表口径",
+        "加班"
+      ],
+      "hitTags": [
+        "加班"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "产量与交付数据",
+        "收入成本与毛利数据",
+        "在手订单与产能负荷"
+      ],
+      "presentSystems": [
+        "ERP",
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI决策",
+      "metric": "经营数据从月度口径变为每日可查",
+      "firstStep": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+      "precondition": "指标口径需要各部门确认一次，存在分歧的先统一定义",
+      "roiBasis": "按管理层决策提前与对数工时下降折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 3.5
+      },
+      "why": {
+        "pain": "命中所选痛点「加班」，严重度合计 3 / 10",
+        "data": "所需数据源均已具备：ERP、财务软件",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 7.5
+      },
+      "total": 3.7,
+      "score": 74.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 3,
+      "reason": "排在前列：正面命中「加班」，数据可得 5 / 5，见效 4 / 5，门槛 3.5 / 5。"
+    },
+    {
+      "id": "mfg-s02",
+      "name": "智能排产与插单模拟",
+      "stage": "生产计划",
+      "user": "车间主任与计划员",
+      "replaces": "插单后重排计划的半天返工",
+      "painTags": [
+        "插单排产",
+        "交期"
+      ],
+      "hitTags": [
+        "插单排产",
+        "交期"
+      ],
+      "dataDeps": [
+        "erp",
+        "mes"
+      ],
+      "dataList": [
+        "工艺路线与标准工时",
+        "设备与人员可用产能",
+        "在手订单与优先级规则"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [
+        "mes"
+      ],
+      "missingSystemsName": [
+        "MES / 生产系统"
+      ],
+      "value": 5,
+      "cost": "重",
+      "weeks": 16,
+      "module": "AI ERP",
+      "metric": "插单响应从半天缩短到 1 小时内",
+      "firstStep": "整理主力产品的工艺路线与标准工时，先覆盖产值前 20% 的品类",
+      "precondition": "标准工时需要重新测定，缺失工时的工序先按经验值补齐",
+      "roiBasis": "按设备利用率提升与加班工时下降折算",
+      "axis": {
+        "pain": 5,
+        "data": 4,
+        "cycle": 3,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "命中所选痛点「插单排产」「交期」，严重度合计 9 / 10",
+        "data": "已有 ERP，仍需补齐 MES / 生产系统",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 16 周",
+        "barrier": "场景库预设门槛 5 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 24,
+        "cycle": 12,
+        "barrier": 3
+      },
+      "total": 3.7,
+      "score": 74,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 4,
+      "reason": "进入候选：正面命中「插单排产」「交期」，数据可得 4 / 5，见效 3 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "mfg-s07",
+      "name": "售后与技术支持知识库",
+      "stage": "售后服务",
+      "user": "售后工程师与客服",
+      "replaces": "翻图纸、问老师傅的往返确认",
+      "painTags": [
+        "售后响应",
+        "经验流失"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "产品图纸与技术参数表",
+        "历史故障与解决记录",
+        "常见问题问答整理"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "零",
+      "weeks": 2,
+      "module": "AI流程提效",
+      "metric": "常见技术问题的答复时间缩短到 10 分钟内",
+      "firstStep": "收集近一年售后问答记录，整理出高频问题前 50 条",
+      "precondition": "图纸与参数表需要统一版本，过期资料先做清理",
+      "roiBasis": "按售后响应工时下降与客户满意度折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 1.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「售后响应」「经验流失」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 2 周",
+        "barrier": "场景库预设门槛 1 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 13.5
+      },
+      "total": 3.5,
+      "score": 70.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 5,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 1.5 / 5。"
+    },
+    {
+      "id": "mfg-s08",
+      "name": "单件成本还原与毛利看板",
+      "stage": "成本核算",
+      "user": "财务经理与总经理",
+      "replaces": "月末手工归集料工费的三天",
+      "painTags": [
+        "成本不清",
+        "报表口径"
+      ],
+      "hitTags": [
+        "成本不清"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "订单用料与领料记录",
+        "工时与人工费率",
+        "制造费用分摊口径"
+      ],
+      "presentSystems": [
+        "ERP",
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "单件成本核算周期从月度缩短到周度",
+      "firstStep": "选一个主力产品族，把一个月的料工费完整归集一遍",
+      "precondition": "领料需要对应到订单，混领的部分先定分摊规则",
+      "roiBasis": "按低毛利订单识别与报价修正带来的毛利提升折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 3,
+        "barrier": 4.5
+      },
+      "why": {
+        "pain": "命中所选痛点「成本不清」，严重度合计 4 / 10",
+        "data": "所需数据源均已具备：ERP、财务软件",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周",
+        "barrier": "场景库预设门槛 4 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 12,
+        "barrier": 4.5
+      },
+      "total": 3.4,
+      "score": 67.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 6,
+      "reason": "进入候选：正面命中「成本不清」，数据可得 5 / 5，见效 3 / 5，门槛 4.5 / 5。"
+    },
+    {
+      "id": "mfg-s10",
+      "name": "应收账款预警与催收提醒",
+      "stage": "财务管理",
+      "user": "财务与业务经理",
+      "replaces": "业务员想起来才打催款电话",
+      "painTags": [
+        "应收拖期"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance"
+      ],
+      "dataList": [
+        "应收明细与账期",
+        "历史回款记录",
+        "客户信用与合作年限"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI CFO",
+      "metric": "逾期应收占比下降 20% 以上",
+      "firstStep": "按账龄把当前应收分成四档，标出逾期 90 天以上的客户",
+      "precondition": "账期需要在合同中明确，口头约定的部分先补书面确认",
+      "roiBasis": "按回款提前天数与资金成本折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「应收拖期」",
+        "data": "所需数据源均已具备：财务软件",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 10.5
+      },
+      "total": 3.4,
+      "score": 67.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 7,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s12",
+      "name": "工艺经验沉淀与新人带教",
+      "stage": "人员培养",
+      "user": "工艺工程师与班组长",
+      "replaces": "师徒口头带教、三个月才能独立上手",
+      "painTags": [
+        "经验流失",
+        "新人上手"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "作业指导书与工艺卡",
+        "常见异常处理经验记录",
+        "岗位技能矩阵"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 3,
+      "cost": "轻",
+      "weeks": 5,
+      "module": "AI人力官",
+      "metric": "新人独立上岗周期缩短三分之一",
+      "firstStep": "选一个人员流动最频繁的岗位，把作业要点整理成一份图文指导书",
+      "precondition": "老师傅的经验需要有人访谈整理，安排固定时间",
+      "roiBasis": "按培训工时下降与新人产出提前折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「经验流失」「新人上手」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 5 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 10.5
+      },
+      "total": 3.2,
+      "score": 63.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 8,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 4 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s09",
+      "name": "库存与安全库存预警",
+      "stage": "仓储物料",
+      "user": "仓管与采购主管",
+      "replaces": "凭经验定采购量、月底盘点才发现积压",
+      "painTags": [
+        "库存积压"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "物料收发存明细",
+        "采购提前期与最小起订量",
+        "近一年用量波动"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 6,
+      "module": "AI ERP",
+      "metric": "呆滞库存金额下降 15–25%",
+      "firstStep": "导出近一年物料收发存，按周转天数排出呆滞前 50 项",
+      "precondition": "账实需要先盘点对齐，差异较大的物料单独处理",
+      "roiBasis": "按库存资金占用下降与呆滞处理收益折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 3.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「库存积压」",
+        "data": "所需数据源均已具备：ERP",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 6 周",
+        "barrier": "场景库预设门槛 3 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 7.5
+      },
+      "total": 3,
+      "score": 60.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 9,
+      "reason": "本轮暂不启动：与所选痛点关联较弱，数据可得 5 / 5，见效 4 / 5，门槛 3.5 / 5。"
+    },
+    {
+      "id": "mfg-s11",
+      "name": "能耗与班次消耗分析",
+      "stage": "成本管理",
+      "user": "生产副总与成本会计",
+      "replaces": "只看月度总表、分不清谁在多用",
+      "painTags": [
+        "能耗不明"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "分表计量数据或抄表记录",
+        "班次与产量记录",
+        "设备开机时长"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 3,
+      "cost": "中",
+      "weeks": 12,
+      "module": "AI决策",
+      "metric": "单位产值能耗下降 5–10%",
+      "firstStep": "把三个月的能耗总表与产量对齐，算出单位产值能耗基线",
+      "precondition": "分线分表计量需要补装，暂无条件的按班次抄表起步",
+      "roiBasis": "按单位产值能耗下降与产量规模折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 3,
+        "barrier": 4.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「能耗不明」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 12 周",
+        "barrier": "场景库预设门槛 4 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 12,
+        "barrier": 4.5
+      },
+      "total": 2.7,
+      "score": 53.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 10,
+      "reason": "本轮暂不启动：与所选痛点关联较弱，数据可得 5 / 5，见效 3 / 5，门槛 4.5 / 5。"
+    },
+    {
+      "id": "mfg-s04",
+      "name": "询盘分级与跟进提醒",
+      "stage": "销售前端",
+      "user": "业务经理与销售团队",
+      "replaces": "靠记性与便签管理跟进节奏",
+      "painTags": [
+        "询盘流失",
+        "客户集中"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "crm"
+      ],
+      "dataList": [
+        "近一年询盘明细与来源",
+        "成交与流失记录",
+        "客户所属行业与规模"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "crm"
+      ],
+      "missingSystemsName": [
+        "CRM"
+      ],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 3,
+      "module": "AI获客",
+      "metric": "询盘首次响应时间缩短一半",
+      "firstStep": "把三个月内的询盘集中到一张表，标注来源、金额与当前状态",
+      "precondition": "询盘需要有统一入口，微信与邮箱来源先做汇总",
+      "roiBasis": "按询盘转化率提升与销售人均跟进量折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 5,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「询盘流失」「客户集中」",
+        "data": "关键数据源缺失：CRM",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 3 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 20,
+        "barrier": 10.5
+      },
+      "total": 2.2,
+      "score": 43.5,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 11,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（CRM），见效 5 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s05",
+      "name": "来料与过程质检辅助",
+      "stage": "质量管理",
+      "user": "质检员与质量主管",
+      "replaces": "全靠人眼复检与手工填写质检单",
+      "painTags": [
+        "质量追溯"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "mes"
+      ],
+      "dataList": [
+        "质检标准与判定规则",
+        "近一年不良记录与批次",
+        "供应商来料批次台账"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "mes"
+      ],
+      "missingSystemsName": [
+        "MES / 生产系统"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 12,
+      "module": "AI流程提效",
+      "metric": "批量不良的发现时点提前到当班次内",
+      "firstStep": "把近一年的不良记录按品类与供应商做一次分布统计",
+      "precondition": "质检单先电子化，图像类检测需要补拍照留存",
+      "roiBasis": "按不良品损失与返工工时下降折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 3,
+        "barrier": 4.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「质量追溯」",
+        "data": "关键数据源缺失：MES / 生产系统",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 12 周",
+        "barrier": "场景库预设门槛 4 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 12,
+        "barrier": 4.5
+      },
+      "total": 1.5,
+      "score": 29.5,
+      "blocked": true,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 12,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（MES / 生产系统），见效 3 / 5，门槛 4.5 / 5。"
+    },
+    {
+      "id": "mfg-s06",
+      "name": "设备预测性维护",
+      "stage": "设备管理",
+      "user": "设备主管与维修班组",
+      "replaces": "按固定周期做保养、坏了再抢修的被动模式",
+      "painTags": [
+        "设备停机"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "mes"
+      ],
+      "dataList": [
+        "设备台账与保养记录",
+        "近两年故障与停机时长",
+        "关键设备运行参数"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "mes"
+      ],
+      "missingSystemsName": [
+        "MES / 生产系统"
+      ],
+      "value": 4,
+      "cost": "重",
+      "weeks": 20,
+      "module": "AI ERP",
+      "metric": "非计划停机时长下降 20–30%",
+      "firstStep": "统计近两年停机原因与时长，找出停机损失前三的设备",
+      "precondition": "运行参数需要采集装置，无采集条件的设备先做保养记录电子化",
+      "roiBasis": "按非计划停机减少的产值损失折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「设备停机」",
+        "data": "关键数据源缺失：MES / 生产系统",
+        "cycle": "场景库预设见效速度 2 / 5，上线约 20 周",
+        "barrier": "场景库预设门槛 5 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 1.2,
+      "score": 24,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 13,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（MES / 生产系统），见效 2 / 5，门槛 5 / 5。"
+    }
+  ],
+  "ranked": [
+    {
+      "id": "mfg-s03",
+      "name": "报价自动生成",
+      "stage": "销售前端",
+      "user": "销售内勤与报价工程师",
+      "replaces": "逐单查历史价、问成本、做报价单的重复劳动",
+      "painTags": [
+        "报价慢",
+        "成本不清"
+      ],
+      "hitTags": [
+        "报价慢",
+        "成本不清"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "历史报价与成交记录",
+        "材料价格表",
+        "工时与费率标准"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI获客",
+      "metric": "报价响应从 2 天缩短到 4 小时内",
+      "firstStep": "整理近两年成交报价单，按产品族归类出可复用的报价模板",
+      "precondition": "材料价格表需要有人定期维护",
+      "roiBasis": "按报价响应提速带来的成单率提升折算",
+      "axis": {
+        "pain": 4,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "命中所选痛点「报价慢」「成本不清」，严重度合计 7 / 10",
+        "data": "所需数据源均已具备：ERP",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 28,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 10.5
+      },
+      "total": 4.4,
+      "score": 88.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 1,
+      "reason": "排在前列：正面命中「报价慢」「成本不清」，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s01",
+      "name": "订单交付预警",
+      "stage": "生产计划",
+      "user": "生产计划员与业务经理",
+      "replaces": "每天上午手工核对交期的两小时",
+      "painTags": [
+        "交期",
+        "加班"
+      ],
+      "hitTags": [
+        "交期",
+        "加班"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "近 6 个月订单与实际交付日期",
+        "在制品工序进度",
+        "物料到货计划"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI ERP",
+      "metric": "交期达成率提升 8–12 个百分点",
+      "firstStep": "导出近 6 个月订单与实际交付日期，做一次准点率基线",
+      "precondition": "工序进度需要每日回填，纸质流转卡先做电子化",
+      "roiBasis": "按延期订单减少与催单沟通工时折算",
+      "axis": {
+        "pain": 4,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 3.5
+      },
+      "why": {
+        "pain": "命中所选痛点「交期」「加班」，严重度合计 8 / 10",
+        "data": "所需数据源均已具备：ERP",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 28,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 7.5
+      },
+      "total": 4.1,
+      "score": 81.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 2,
+      "reason": "排在前列：正面命中「交期」「加班」，数据可得 5 / 5，见效 4 / 5，门槛 3.5 / 5。"
+    },
+    {
+      "id": "mfg-s13",
+      "name": "经营日报与指标归因",
+      "stage": "经营管理",
+      "user": "总经理与各部门负责人",
+      "replaces": "经营会前各部门先对数的半天",
+      "painTags": [
+        "报表口径",
+        "加班"
+      ],
+      "hitTags": [
+        "加班"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "产量与交付数据",
+        "收入成本与毛利数据",
+        "在手订单与产能负荷"
+      ],
+      "presentSystems": [
+        "ERP",
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI决策",
+      "metric": "经营数据从月度口径变为每日可查",
+      "firstStep": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+      "precondition": "指标口径需要各部门确认一次，存在分歧的先统一定义",
+      "roiBasis": "按管理层决策提前与对数工时下降折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 3.5
+      },
+      "why": {
+        "pain": "命中所选痛点「加班」，严重度合计 3 / 10",
+        "data": "所需数据源均已具备：ERP、财务软件",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 7.5
+      },
+      "total": 3.7,
+      "score": 74.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 3,
+      "reason": "排在前列：正面命中「加班」，数据可得 5 / 5，见效 4 / 5，门槛 3.5 / 5。"
+    },
+    {
+      "id": "mfg-s02",
+      "name": "智能排产与插单模拟",
+      "stage": "生产计划",
+      "user": "车间主任与计划员",
+      "replaces": "插单后重排计划的半天返工",
+      "painTags": [
+        "插单排产",
+        "交期"
+      ],
+      "hitTags": [
+        "插单排产",
+        "交期"
+      ],
+      "dataDeps": [
+        "erp",
+        "mes"
+      ],
+      "dataList": [
+        "工艺路线与标准工时",
+        "设备与人员可用产能",
+        "在手订单与优先级规则"
+      ],
+      "presentSystems": [
+        "ERP"
+      ],
+      "missingSystems": [
+        "mes"
+      ],
+      "missingSystemsName": [
+        "MES / 生产系统"
+      ],
+      "value": 5,
+      "cost": "重",
+      "weeks": 16,
+      "module": "AI ERP",
+      "metric": "插单响应从半天缩短到 1 小时内",
+      "firstStep": "整理主力产品的工艺路线与标准工时，先覆盖产值前 20% 的品类",
+      "precondition": "标准工时需要重新测定，缺失工时的工序先按经验值补齐",
+      "roiBasis": "按设备利用率提升与加班工时下降折算",
+      "axis": {
+        "pain": 5,
+        "data": 4,
+        "cycle": 3,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "命中所选痛点「插单排产」「交期」，严重度合计 9 / 10",
+        "data": "已有 ERP，仍需补齐 MES / 生产系统",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 16 周",
+        "barrier": "场景库预设门槛 5 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 24,
+        "cycle": 12,
+        "barrier": 3
+      },
+      "total": 3.7,
+      "score": 74,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 4,
+      "reason": "进入候选：正面命中「插单排产」「交期」，数据可得 4 / 5，见效 3 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "mfg-s07",
+      "name": "售后与技术支持知识库",
+      "stage": "售后服务",
+      "user": "售后工程师与客服",
+      "replaces": "翻图纸、问老师傅的往返确认",
+      "painTags": [
+        "售后响应",
+        "经验流失"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "产品图纸与技术参数表",
+        "历史故障与解决记录",
+        "常见问题问答整理"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "零",
+      "weeks": 2,
+      "module": "AI流程提效",
+      "metric": "常见技术问题的答复时间缩短到 10 分钟内",
+      "firstStep": "收集近一年售后问答记录，整理出高频问题前 50 条",
+      "precondition": "图纸与参数表需要统一版本，过期资料先做清理",
+      "roiBasis": "按售后响应工时下降与客户满意度折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 1.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「售后响应」「经验流失」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 2 周",
+        "barrier": "场景库预设门槛 1 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 13.5
+      },
+      "total": 3.5,
+      "score": 70.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 5,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 1.5 / 5。"
+    },
+    {
+      "id": "mfg-s08",
+      "name": "单件成本还原与毛利看板",
+      "stage": "成本核算",
+      "user": "财务经理与总经理",
+      "replaces": "月末手工归集料工费的三天",
+      "painTags": [
+        "成本不清",
+        "报表口径"
+      ],
+      "hitTags": [
+        "成本不清"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "订单用料与领料记录",
+        "工时与人工费率",
+        "制造费用分摊口径"
+      ],
+      "presentSystems": [
+        "ERP",
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 5,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "单件成本核算周期从月度缩短到周度",
+      "firstStep": "选一个主力产品族，把一个月的料工费完整归集一遍",
+      "precondition": "领料需要对应到订单，混领的部分先定分摊规则",
+      "roiBasis": "按低毛利订单识别与报价修正带来的毛利提升折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 3,
+        "barrier": 4.5
+      },
+      "why": {
+        "pain": "命中所选痛点「成本不清」，严重度合计 4 / 10",
+        "data": "所需数据源均已具备：ERP、财务软件",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周",
+        "barrier": "场景库预设门槛 4 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 12,
+        "barrier": 4.5
+      },
+      "total": 3.4,
+      "score": 67.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 6,
+      "reason": "进入候选：正面命中「成本不清」，数据可得 5 / 5，见效 3 / 5，门槛 4.5 / 5。"
+    },
+    {
+      "id": "mfg-s10",
+      "name": "应收账款预警与催收提醒",
+      "stage": "财务管理",
+      "user": "财务与业务经理",
+      "replaces": "业务员想起来才打催款电话",
+      "painTags": [
+        "应收拖期"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance"
+      ],
+      "dataList": [
+        "应收明细与账期",
+        "历史回款记录",
+        "客户信用与合作年限"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI CFO",
+      "metric": "逾期应收占比下降 20% 以上",
+      "firstStep": "按账龄把当前应收分成四档，标出逾期 90 天以上的客户",
+      "precondition": "账期需要在合同中明确，口头约定的部分先补书面确认",
+      "roiBasis": "按回款提前天数与资金成本折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「应收拖期」",
+        "data": "所需数据源均已具备：财务软件",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 10.5
+      },
+      "total": 3.4,
+      "score": 67.5,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 7,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。"
+    },
+    {
+      "id": "mfg-s12",
+      "name": "工艺经验沉淀与新人带教",
+      "stage": "人员培养",
+      "user": "工艺工程师与班组长",
+      "replaces": "师徒口头带教、三个月才能独立上手",
+      "painTags": [
+        "经验流失",
+        "新人上手"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "作业指导书与工艺卡",
+        "常见异常处理经验记录",
+        "岗位技能矩阵"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 3,
+      "cost": "轻",
+      "weeks": 5,
+      "module": "AI人力官",
+      "metric": "新人独立上岗周期缩短三分之一",
+      "firstStep": "选一个人员流动最频繁的岗位，把作业要点整理成一份图文指导书",
+      "precondition": "老师傅的经验需要有人访谈整理，安排固定时间",
+      "roiBasis": "按培训工时下降与新人产出提前折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 4,
+        "barrier": 2.5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「经验流失」「新人上手」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 5 周",
+        "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 16,
+        "barrier": 10.5
+      },
+      "total": 3.2,
+      "score": 63.5,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 8,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 4 / 5，门槛 2.5 / 5。"
+    }
+  ],
+  "blocked": [
+    {
+      "id": "mfg-s04",
+      "name": "询盘分级与跟进提醒",
+      "rank": 11,
+      "value": 4,
+      "missing": [
+        "CRM"
+      ],
+      "module": "AI获客"
+    },
+    {
+      "id": "mfg-s05",
+      "name": "来料与过程质检辅助",
+      "rank": 12,
+      "value": 4,
+      "missing": [
+        "MES / 生产系统"
+      ],
+      "module": "AI流程提效"
+    },
+    {
+      "id": "mfg-s06",
+      "name": "设备预测性维护",
+      "rank": 13,
+      "value": 4,
+      "missing": [
+        "MES / 生产系统"
+      ],
+      "module": "AI ERP"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "mfg-s09",
+      "name": "库存与安全库存预警",
+      "rank": 9,
+      "score": 60.5,
+      "module": "AI ERP",
+      "reason": "与本次勾选的痛点关联较弱，痛点强度 1 / 5"
+    },
+    {
+      "id": "mfg-s11",
+      "name": "能耗与班次消耗分析",
+      "rank": 10,
+      "score": 53.5,
+      "module": "AI决策",
+      "reason": "与本次勾选的痛点关联较弱，痛点强度 1 / 5"
+    },
+    {
+      "id": "mfg-s04",
+      "name": "询盘分级与跟进提醒",
+      "rank": 11,
+      "score": 43.5,
+      "module": "AI获客",
+      "reason": "关键数据源缺失：CRM，补齐后重新评估"
+    },
+    {
+      "id": "mfg-s05",
+      "name": "来料与过程质检辅助",
+      "rank": 12,
+      "score": 29.5,
+      "module": "AI流程提效",
+      "reason": "关键数据源缺失：MES / 生产系统，补齐后重新评估"
+    },
+    {
+      "id": "mfg-s06",
+      "name": "设备预测性维护",
+      "rank": 13,
+      "score": 24,
+      "module": "AI ERP",
+      "reason": "关键数据源缺失：MES / 生产系统，补齐后重新评估"
+    }
+  ],
+  "top1": {
+    "id": "mfg-s03",
+    "name": "报价自动生成",
+    "stage": "销售前端",
+    "user": "销售内勤与报价工程师",
+    "replaces": "逐单查历史价、问成本、做报价单的重复劳动",
+    "score": 88.5,
+    "rank": 1,
+    "axis": {
+      "pain": 4,
+      "data": 5,
+      "cycle": 5,
+      "barrier": 2.5
+    },
+    "why": {
+      "pain": "命中所选痛点「报价慢」「成本不清」，严重度合计 7 / 10",
+      "data": "所需数据源均已具备：ERP",
+      "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+      "barrier": "场景库预设门槛 2 / 5；现有人员兼职推进，调整 +0.5 分"
+    },
+    "contrib": {
+      "pain": 28,
+      "data": 30,
+      "cycle": 20,
+      "barrier": 10.5
+    },
+    "metric": "报价响应从 2 天缩短到 4 小时内",
+    "firstStep": "整理近两年成交报价单，按产品族归类出可复用的报价模板",
+    "precondition": "材料价格表需要有人定期维护",
+    "dataList": [
+      "历史报价与成交记录",
+      "材料价格表",
+      "工时与费率标准"
+    ],
+    "dataDeps": [
+      "erp"
+    ],
+    "missingSystemsName": [],
+    "module": "AI获客",
+    "cost": "轻",
+    "weeks": 4,
+    "roiBasis": "按报价响应提速带来的成单率提升折算",
+    "painTags": [
+      "报价慢",
+      "成本不清"
+    ],
+    "hitTags": [
+      "报价慢",
+      "成本不清"
+    ],
+    "reason": "排在前列：正面命中「报价慢」「成本不清」，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。"
+  },
+  "combo": [
+    {
+      "key": "p1",
+      "name": "先做",
+      "title": "第 1–3 个月",
+      "desc": "一个场景跑通，把做法与数据口径固定下来",
+      "months": [
+        1,
+        3
+      ],
+      "scenes": [
+        {
+          "id": "mfg-s03",
+          "rank": 1,
+          "name": "报价自动生成",
+          "score": 88.5,
+          "module": "AI获客",
+          "cost": "轻",
+          "weeks": 4,
+          "metric": "报价响应从 2 天缩短到 4 小时内",
+          "firstStep": "整理近两年成交报价单，按产品族归类出可复用的报价模板",
+          "blocked": false
+        }
+      ],
+      "cost": "轻",
+      "weeks": 4,
+      "milestone": "第一个场景稳定运行，做法与数据口径固定下来"
+    },
+    {
+      "key": "p2",
+      "name": "再做",
+      "title": "第 4–8 个月",
+      "desc": "两个场景并行，让改善出现在经营报表上",
+      "months": [
+        4,
+        8
+      ],
+      "scenes": [
+        {
+          "id": "mfg-s01",
+          "rank": 2,
+          "name": "订单交付预警",
+          "score": 81.5,
+          "module": "AI ERP",
+          "cost": "中",
+          "weeks": 8,
+          "metric": "交期达成率提升 8–12 个百分点",
+          "firstStep": "导出近 6 个月订单与实际交付日期，做一次准点率基线",
+          "blocked": false
+        },
+        {
+          "id": "mfg-s13",
+          "rank": 3,
+          "name": "经营日报与指标归因",
+          "score": 74.5,
+          "module": "AI决策",
+          "cost": "中",
+          "weeks": 8,
+          "metric": "经营数据从月度口径变为每日可查",
+          "firstStep": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+          "blocked": false
+        }
+      ],
+      "cost": "中",
+      "weeks": 8,
+      "milestone": "两个场景的改善出现在经营报表上，形成可复制的推进方式"
+    },
+    {
+      "key": "p3",
+      "name": "储备",
+      "title": "第 9–12 个月",
+      "desc": "条件补齐后启动，或等前两批沉淀出数据后再评估",
+      "months": [
+        9,
+        12
+      ],
+      "scenes": [
+        {
+          "id": "mfg-s04",
+          "rank": 11,
+          "name": "询盘分级与跟进提醒",
+          "score": 43.5,
+          "module": "AI获客",
+          "cost": "轻",
+          "weeks": 3,
+          "metric": "询盘首次响应时间缩短一半",
+          "firstStep": "把三个月内的询盘集中到一张表，标注来源、金额与当前状态",
+          "blocked": true
+        },
+        {
+          "id": "mfg-s05",
+          "rank": 12,
+          "name": "来料与过程质检辅助",
+          "score": 29.5,
+          "module": "AI流程提效",
+          "cost": "中",
+          "weeks": 12,
+          "metric": "批量不良的发现时点提前到当班次内",
+          "firstStep": "把近一年的不良记录按品类与供应商做一次分布统计",
+          "blocked": true
+        }
+      ],
+      "cost": "中",
+      "weeks": 12,
+      "milestone": "条件补齐的场景进入评估，AI 覆盖到第二条业务线"
+    }
+  ],
+  "roadmap": [
+    {
+      "key": "p1",
+      "name": "先做",
+      "title": "第 1–3 个月",
+      "months": [
+        1,
+        3
+      ],
+      "milestone": "第一个场景稳定运行，做法与数据口径固定下来",
+      "bars": [
+        {
+          "name": "报价自动生成",
+          "weeks": 4,
+          "cost": "轻",
+          "module": "AI获客",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "key": "p2",
+      "name": "再做",
+      "title": "第 4–8 个月",
+      "months": [
+        4,
+        8
+      ],
+      "milestone": "两个场景的改善出现在经营报表上，形成可复制的推进方式",
+      "bars": [
+        {
+          "name": "订单交付预警",
+          "weeks": 8,
+          "cost": "中",
+          "module": "AI ERP",
+          "blocked": false
+        },
+        {
+          "name": "经营日报与指标归因",
+          "weeks": 8,
+          "cost": "中",
+          "module": "AI决策",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "key": "p3",
+      "name": "储备",
+      "title": "第 9–12 个月",
+      "months": [
+        9,
+        12
+      ],
+      "milestone": "条件补齐的场景进入评估，AI 覆盖到第二条业务线",
+      "bars": [
+        {
+          "name": "询盘分级与跟进提醒",
+          "weeks": 3,
+          "cost": "轻",
+          "module": "AI获客",
+          "blocked": true
+        },
+        {
+          "name": "来料与过程质检辅助",
+          "weeks": 12,
+          "cost": "中",
+          "module": "AI流程提效",
+          "blocked": true
+        }
+      ]
+    }
+  ],
+  "readiness": {
+    "systems": [
+      {
+        "key": "erp",
+        "name": "ERP",
+        "has": true,
+        "need": 6
+      },
+      {
+        "key": "finance",
+        "name": "财务软件",
+        "has": true,
+        "need": 3
+      },
+      {
+        "key": "crm",
+        "name": "CRM",
+        "has": false,
+        "need": 1
+      },
+      {
+        "key": "oa",
+        "name": "OA / 协同办公",
+        "has": false,
+        "need": 0
+      },
+      {
+        "key": "mes",
+        "name": "MES / 生产系统",
+        "has": false,
+        "need": 3
+      },
+      {
+        "key": "shop",
+        "name": "电商 / 门店系统",
+        "has": false,
+        "need": 0
+      },
+      {
+        "key": "hr",
+        "name": "人事系统",
+        "has": false,
+        "need": 0
+      }
+    ],
+    "matrix": [
+      {
+        "id": "mfg-s03",
+        "name": "报价自动生成",
+        "rank": 1,
+        "cells": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s01",
+        "name": "订单交付预警",
+        "rank": 2,
+        "cells": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s13",
+        "name": "经营日报与指标归因",
+        "rank": 3,
+        "cells": [
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s02",
+        "name": "智能排产与插单模拟",
+        "rank": 4,
+        "cells": [
+          2,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s07",
+        "name": "售后与技术支持知识库",
+        "rank": 5,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s08",
+        "name": "单件成本还原与毛利看板",
+        "rank": 6,
+        "cells": [
+          2,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s10",
+        "name": "应收账款预警与催收提醒",
+        "rank": 7,
+        "cells": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s12",
+        "name": "工艺经验沉淀与新人带教",
+        "rank": 8,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s09",
+        "name": "库存与安全库存预警",
+        "rank": 9,
+        "cells": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s11",
+        "name": "能耗与班次消耗分析",
+        "rank": 10,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s04",
+        "name": "询盘分级与跟进提醒",
+        "rank": 11,
+        "cells": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s05",
+        "name": "来料与过程质检辅助",
+        "rank": 12,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "mfg-s06",
+        "name": "设备预测性维护",
+        "rank": 13,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "missing": [
+      {
+        "system": "mes",
+        "name": "MES / 生产系统",
+        "unlock": 3,
+        "scenes": [
+          "智能排产与插单模拟",
+          "来料与过程质检辅助",
+          "设备预测性维护"
+        ],
+        "bestRank": 4,
+        "note": "补齐后 3 个场景的数据可得分从 1 分回到可评估区间"
+      },
+      {
+        "system": "crm",
+        "name": "CRM",
+        "unlock": 1,
+        "scenes": [
+          "询盘分级与跟进提醒"
+        ],
+        "bestRank": 11,
+        "note": "补齐后 1 个场景的数据可得分从 1 分回到可评估区间"
+      }
+    ],
+    "pct": 69,
+    "level": "数据条件部分具备",
+    "zeroDep": 3,
+    "text": "本行业 13 个场景共提出 13 项数据源需求，当前已具备 9 项（69%）。补齐「MES / 生产系统」可解锁 3 个场景。另有 3 个场景无需接入业务系统，整理现有资料即可起步。"
+  },
+  "funnel": [
+    {
+      "key": "lib",
+      "label": "场景库全量",
+      "count": 182,
+      "note": "按行业大类整理的候选场景"
+    },
+    {
+      "key": "sector",
+      "label": "制造业",
+      "count": 13,
+      "note": "匹配到贵司所属行业大类"
+    },
+    {
+      "key": "pain",
+      "label": "命中所选痛点",
+      "count": 5,
+      "note": "与本次勾选的 5 项痛点有交集"
+    },
+    {
+      "key": "data",
+      "label": "数据条件具备",
+      "count": 10,
+      "note": "关键数据源现在就能拿到"
+    },
+    {
+      "key": "rank",
+      "label": "进入排序表",
+      "count": 8,
+      "note": "按四维总分取前 8 个"
+    },
+    {
+      "key": "start",
+      "label": "首批启动",
+      "count": 1,
+      "note": "第 1–3 个月先做这一个"
+    }
+  ],
+  "sankey": {
+    "groups": [
+      {
+        "key": "sales",
+        "name": "获客与销售",
+        "color": "#8A54DC",
+        "desc": "线索、报价、成交与客户维护",
+        "count": 1,
+        "severity": 3,
+        "pct": 16,
+        "tags": [
+          "报价慢"
+        ]
+      },
+      {
+        "key": "deliver",
+        "name": "交付与生产",
+        "color": "#0FA3C7",
+        "desc": "订单、生产、项目与服务交付",
+        "count": 2,
+        "severity": 9,
+        "pct": 47,
+        "tags": [
+          "交期",
+          "插单排产"
+        ]
+      },
+      {
+        "key": "cost",
+        "name": "成本与财务",
+        "color": "#C4457E",
+        "desc": "成本、库存、回款与费用",
+        "count": 1,
+        "severity": 4,
+        "pct": 21,
+        "tags": [
+          "成本不清"
+        ]
+      },
+      {
+        "key": "org",
+        "name": "组织与管理",
+        "color": "#FF8A3D",
+        "desc": "人员、经验、报表与协同",
+        "count": 1,
+        "severity": 3,
+        "pct": 16,
+        "tags": [
+          "加班"
+        ]
+      }
+    ],
+    "scenes": [
+      {
+        "id": "mfg-s03",
+        "name": "报价自动生成",
+        "rank": 1,
+        "score": 88.5,
+        "module": "AI获客"
+      },
+      {
+        "id": "mfg-s01",
+        "name": "订单交付预警",
+        "rank": 2,
+        "score": 81.5,
+        "module": "AI ERP"
+      },
+      {
+        "id": "mfg-s13",
+        "name": "经营日报与指标归因",
+        "rank": 3,
+        "score": 74.5,
+        "module": "AI决策"
+      },
+      {
+        "id": "mfg-s02",
+        "name": "智能排产与插单模拟",
+        "rank": 4,
+        "score": 74,
+        "module": "AI ERP"
+      },
+      {
+        "id": "mfg-s07",
+        "name": "售后与技术支持知识库",
+        "rank": 5,
+        "score": 70.5,
+        "module": "AI流程提效"
+      },
+      {
+        "id": "mfg-s08",
+        "name": "单件成本还原与毛利看板",
+        "rank": 6,
+        "score": 67.5,
+        "module": "AI CFO"
+      }
+    ],
+    "modules": [
+      {
+        "name": "AI获客",
+        "count": 1
+      },
+      {
+        "name": "AI ERP",
+        "count": 2
+      },
+      {
+        "name": "AI决策",
+        "count": 1
+      },
+      {
+        "name": "AI流程提效",
+        "count": 1
+      },
+      {
+        "name": "AI CFO",
+        "count": 1
+      }
+    ],
+    "links": [
+      {
+        "scene": "mfg-s03",
+        "groups": [
+          "sales",
+          "cost"
+        ],
+        "module": "AI获客",
+        "weight": 88.5
+      },
+      {
+        "scene": "mfg-s01",
+        "groups": [
+          "deliver",
+          "org"
+        ],
+        "module": "AI ERP",
+        "weight": 81.5
+      },
+      {
+        "scene": "mfg-s13",
+        "groups": [
+          "org"
+        ],
+        "module": "AI决策",
+        "weight": 74.5
+      },
+      {
+        "scene": "mfg-s02",
+        "groups": [
+          "deliver"
+        ],
+        "module": "AI ERP",
+        "weight": 74
+      },
+      {
+        "scene": "mfg-s07",
+        "groups": [
+          "deliver"
+        ],
+        "module": "AI流程提效",
+        "weight": 70.5
+      },
+      {
+        "scene": "mfg-s08",
+        "groups": [
+          "cost"
+        ],
+        "module": "AI CFO",
+        "weight": 67.5
+      }
+    ]
+  },
+  "investment": {
+    "tier": "中",
+    "name": "流程级应用",
+    "range": "5–20 万元",
+    "desc": "场景嵌入日常作业流程，打通一到两个业务系统的取数。",
+    "fit": "有系统基础、准备把 AI 变成日常工具的企业",
+    "tiers": [
+      {
+        "key": "零",
+        "name": "零投入起步",
+        "range": "0 元",
+        "desc": "用轻享版与内部整理动作起步，两周使用记录即可验证价值。",
+        "fit": "先要看到效果再谈投入的企业"
+      },
+      {
+        "key": "轻",
+        "name": "轻量场景",
+        "range": "1–5 万元",
+        "desc": "单个场景配置上线，配套一次数据整理与一轮培训。",
+        "fit": "数据基本可得、希望快速见效的企业"
+      },
+      {
+        "key": "中",
+        "name": "流程级应用",
+        "range": "5–20 万元",
+        "desc": "场景嵌入日常作业流程，打通一到两个业务系统的取数。",
+        "fit": "有系统基础、准备把 AI 变成日常工具的企业"
+      },
+      {
+        "key": "重",
+        "name": "平台与私域",
+        "range": "20 万元以上",
+        "desc": "多场景平台化推进，含系统对接、私域部署与陪跑。",
+        "fit": "多地多组织、数据不出域要求明确的企业"
+      }
+    ],
+    "note": "投入区间为同类企业落地的常见范围，实际以方案确认后的报价为准。全部付费金额可抵后续正式服务费用。",
+    "roiNote": "收益口径写明「按什么折算」，具体金额在「企业AI投入ROI测算器」中按贵司人员工资与业务量测算。",
+    "rationale": "前两批共 3 个场景中，投入档最高的一档为「流程级应用」（5–20 万元）。按 现有人员兼职推进、期望 6 个月内见效的条件，建议以这一档规划第一年预算。",
+    "byScene": [
+      {
+        "name": "报价自动生成",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 4,
+        "roiBasis": "按报价响应提速带来的成单率提升折算"
+      },
+      {
+        "name": "订单交付预警",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 8,
+        "roiBasis": "按延期订单减少与催单沟通工时折算"
+      },
+      {
+        "name": "经营日报与指标归因",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 8,
+        "roiBasis": "按管理层决策提前与对数工时下降折算"
+      },
+      {
+        "name": "智能排产与插单模拟",
+        "cost": "重",
+        "range": "20 万元以上",
+        "weeks": 16,
+        "roiBasis": "按设备利用率提升与加班工时下降折算"
+      },
+      {
+        "name": "售后与技术支持知识库",
+        "cost": "零",
+        "range": "0 元",
+        "weeks": 2,
+        "roiBasis": "按售后响应工时下降与客户满意度折算"
+      },
+      {
+        "name": "单件成本还原与毛利看板",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 10,
+        "roiBasis": "按低毛利订单识别与报价修正带来的毛利提升折算"
+      },
+      {
+        "name": "应收账款预警与催收提醒",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 4,
+        "roiBasis": "按回款提前天数与资金成本折算"
+      },
+      {
+        "name": "工艺经验沉淀与新人带教",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 5,
+        "roiBasis": "按培训工时下降与新人产出提前折算"
+      }
+    ]
+  },
+  "checklist": [
+    {
+      "week": "第 1–2 周",
+      "item": "整理近两年成交报价单，按产品族归类出可复用的报价模板",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "起步",
+      "no": 1
+    },
+    {
+      "week": "第 1–2 周",
+      "item": "把所需数据清单交给对应岗位：历史报价与成交记录",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "数据",
+      "no": 2
+    },
+    {
+      "week": "第 3–4 周",
+      "item": "材料价格表需要有人定期维护",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "前置",
+      "no": 3
+    },
+    {
+      "week": "第 3–4 周",
+      "item": "整理材料价格表与工时与费率标准，确认口径一致",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "数据",
+      "no": 4
+    },
+    {
+      "week": "第 5–8 周",
+      "item": "在「AI获客」里配置该场景并试运行两周",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "上线",
+      "no": 5
+    },
+    {
+      "week": "第 5–8 周",
+      "item": "记录使用前后的对比：报价响应从 2 天缩短到 4 小时内",
+      "owner": "销售内勤与报价工程师",
+      "scene": "报价自动生成",
+      "kind": "验收",
+      "no": 6
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "导出近 6 个月订单与实际交付日期，做一次准点率基线",
+      "owner": "生产计划员与业务经理",
+      "scene": "订单交付预警",
+      "kind": "准备",
+      "no": 7
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+      "owner": "总经理与各部门负责人",
+      "scene": "经营日报与指标归因",
+      "kind": "准备",
+      "no": 8
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "评估补齐「MES / 生产系统」，它关系到 3 个场景",
+      "owner": "数字化负责人",
+      "scene": "数据补齐",
+      "kind": "数据",
+      "no": 9
+    }
+  ],
+  "risks": [
+    {
+      "level": "中",
+      "title": "关键数据源缺失 2 项",
+      "text": "缺少MES / 生产系统、CRM，影响 3 个场景。补齐顺序建议按解锁场景数排：MES / 生产系统（3 个）、CRM（1 个）。"
+    }
+  ],
+  "sectorInsight": {
+    "name": "制造业",
+    "insight": "制造企业的 AI 价值集中在交付、质量与成本三条线：订单交期预警、排产优化、来料与过程质检、设备预测性维护、报价自动化。多数中小制造企业已有 ERP 但缺 MES，车间数据靠人工回填，这是 AI 落地前最常见的数据断点。",
+    "aiFocus": [
+      "订单交付预警与智能排产",
+      "质检与设备预测维护",
+      "报价与售后知识库"
+    ]
+  },
+  "keyNumbers": [
+    {
+      "k": "候选场景",
+      "v": "13",
+      "sub": "制造业场景库"
+    },
+    {
+      "k": "进入排序",
+      "v": "8",
+      "sub": "按四维总分排序"
+    },
+    {
+      "k": "首选场景",
+      "v": "报价自动生成",
+      "sub": "88.5 分 · 排名第 1",
+      "wide": true
+    },
+    {
+      "k": "数据就绪",
+      "v": "69%",
+      "sub": "数据条件部分具备"
+    },
+    {
+      "k": "起步投入",
+      "v": "5–20 万元",
+      "sub": "流程级应用"
+    },
+    {
+      "k": "首批见效",
+      "v": "4 周",
+      "sub": "上线周期"
+    }
+  ],
+  "quickView": [
+    {
+      "n": 1,
+      "q": "先做哪一个？",
+      "a": "报价自动生成",
+      "text": "销售前端环节，给销售内勤与报价工程师用，替代逐单查历史价、问成本、做报价单的重复劳动。",
+      "tone": "cyan"
+    },
+    {
+      "n": 2,
+      "q": "为什么是它？",
+      "a": "88.5 分 · 四维均衡",
+      "text": "痛点强度 4、数据可得 5、见效周期 5、实施门槛 2.5（计分取反）。命中所选痛点「报价慢」「成本不清」，严重度合计 7 / 10。",
+      "tone": "purple"
+    },
+    {
+      "n": 3,
+      "q": "数据够不够？",
+      "a": "数据条件部分具备 69%",
+      "text": "补齐「MES / 生产系统」可解锁 3 个场景；首选场景所需数据现在就能拿到。",
+      "tone": "blue"
+    },
+    {
+      "n": 4,
+      "q": "多久见效？",
+      "a": "4 周上线",
+      "text": "报价响应从 2 天缩短到 4 小时内。第一步：整理近两年成交报价单，按产品族归类出可复用的报价模板。",
+      "tone": "green"
+    },
+    {
+      "n": 5,
+      "q": "投多少？",
+      "a": "流程级应用 · 5–20 万元",
+      "text": "场景嵌入日常作业流程，打通一到两个业务系统的取数。",
+      "tone": "navy"
+    },
+    {
+      "n": 6,
+      "q": "接下来做什么？",
+      "a": "订单交付预警 · 经营日报与指标归因",
+      "text": "第 4–8 个月并行推进，两个场景的改善出现在经营报表上，形成可复制的推进方式。",
+      "tone": "orange"
+    }
+  ],
+  "verdict": {
+    "label": "排序结论",
+    "headline": "先做「报价自动生成」，4 周上线，投入 1–5 万元，对应AI获客模块",
+    "text": "排在前列：正面命中「报价慢」「成本不清」，数据可得 5 / 5，见效 5 / 5，门槛 2.5 / 5。",
+    "score": 88.5,
+    "scoreLabel": "综合得分"
+  },
+  "summary": {
+    "position": "杭州锐合精密五金有限公司所属制造业，本次从 13 个候选场景中排出优先级。所选 5 项痛点集中在「交付与生产」，数据就绪度 69%（数据条件部分具备）。",
+    "top": "排在第一的是「报价自动生成」，综合得分 88.5 分：销售前端环节，给销售内勤与报价工程师用，替代逐单查历史价、问成本、做报价单的重复劳动，预期报价响应从 2 天缩短到 4 小时内。",
+    "combo": "三步走：第 1–3 个月先做「报价自动生成」；第 4–8 个月并行「订单交付预警」「经营日报与指标归因」；第 9–12 个月储备「询盘分级与跟进提醒」「来料与过程质检辅助」。",
+    "next": "第一步：整理近两年成交报价单，按产品族归类出可复用的报价模板。同时评估补齐「MES / 生产系统」，它关系到 3 个场景。"
+  },
+  "summaryText": "杭州锐合精密五金有限公司所属制造业，本次从 13 个候选场景中排出优先级。所选 5 项痛点集中在「交付与生产」，数据就绪度 69%（数据条件部分具备）。排在第一的是「报价自动生成」，综合得分 88.5 分：销售前端环节，给销售内勤与报价工程师用，替代逐单查历史价、问成本、做报价单的重复劳动，预期报价响应从 2 天缩短到 4 小时内。三步走：第 1–3 个月先做「报价自动生成」；第 4–8 个月并行「订单交付预警」「经营日报与指标归因」；第 9–12 个月储备「询盘分级与跟进提醒」「来料与过程质检辅助」。第一步：整理近两年成交报价单，按产品族归类出可复用的报价模板。同时评估补齐「MES / 生产系统」，它关系到 3 个场景。",
+  "render": [
+    {
+      "type": "summary",
+      "source": "summary"
+    },
+    {
+      "type": "rank-table",
+      "source": "ranked"
+    },
+    {
+      "type": "bubble-matrix",
+      "source": "scenes"
+    },
+    {
+      "type": "axis-bars",
+      "source": "axes"
+    },
+    {
+      "type": "funnel",
+      "source": "funnel"
+    },
+    {
+      "type": "sankey",
+      "source": "sankey"
+    },
+    {
+      "type": "scene-card",
+      "source": "top1"
+    },
+    {
+      "type": "heatmap",
+      "source": "readiness"
+    },
+    {
+      "type": "gantt",
+      "source": "roadmap"
+    },
+    {
+      "type": "invest-tiers",
+      "source": "investment"
+    },
+    {
+      "type": "risk-list",
+      "source": "risks"
+    },
+    {
+      "type": "checklist",
+      "source": "checklist"
+    }
+  ]
+}

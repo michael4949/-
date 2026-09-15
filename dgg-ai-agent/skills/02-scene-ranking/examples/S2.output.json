@@ -1,0 +1,2683 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI高价值场景排序",
+    "credits": 20,
+    "version": "1.0.0",
+    "sceneCount": 13,
+    "painCount": 16
+  },
+  "profile": {
+    "name": "义乌恒益日用品商行",
+    "industry": "trade-wholesale",
+    "industryName": "贸易与批发",
+    "sector": "trade",
+    "sectorName": "商贸流通",
+    "size": "21_50",
+    "sizeName": "21–50 人",
+    "revenue": "5m_20m",
+    "revenueName": "500–2000 万",
+    "province": "浙江",
+    "years": "5_10",
+    "yearsName": "5–10 年",
+    "ownership": "individual",
+    "ownershipName": "个体工商户",
+    "customers": "b2b",
+    "customersName": "企业客户",
+    "systems": [
+      "finance"
+    ],
+    "systemsName": [
+      "财务软件"
+    ],
+    "itStaff": "none",
+    "itStaffName": "无专职",
+    "branches": "single",
+    "branchesName": "单一经营地",
+    "overseas": "yes",
+    "overseasName": "有",
+    "role": "owner",
+    "roleName": "企业负责人",
+    "tags": [
+      "商贸流通 · 贸易与批发",
+      "21–50 人",
+      "500–2000 万",
+      "个体工商户",
+      "企业客户",
+      "已有 财务软件",
+      "无数字化专职",
+      "有海外业务"
+    ],
+    "portrait": "义乌恒益日用品商行是一家位于浙江的贸易与批发企业，个体工商户，成立 5–10 年，21–50 人，上年营收 500–2000 万，主要面向企业客户。现有系统：财务软件，数字化专职人员 无专职。"
+  },
+  "pains": [
+    {
+      "id": "trade-p01",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "报价慢",
+      "text": "客户问价要业务员翻价格表和库存，常常隔天才回",
+      "hint": "价格与库存分散在几张表里",
+      "severity": 5,
+      "severityName": "当前头等问题"
+    },
+    {
+      "id": "trade-p09",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "毛利不清",
+      "text": "单个商品到底赚多少算不清，促销做完才发现越卖越薄",
+      "hint": "费用与折扣没有分摊到单品",
+      "severity": 5,
+      "severityName": "当前头等问题"
+    },
+    {
+      "id": "trade-p05",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "断货",
+      "text": "爆款总是断货，滞销品压仓，补货全靠店长感觉",
+      "hint": "补货缺少销量预测支撑",
+      "severity": 4,
+      "severityName": "每周都在处理"
+    },
+    {
+      "id": "trade-p13",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "跑店督导",
+      "text": "门店多了以后，陈列价格执行全靠督导轮流跑店看",
+      "hint": "门店标准执行缺少日常反馈",
+      "severity": 3,
+      "severityName": "明显影响经营"
+    }
+  ],
+  "painProfile": {
+    "count": 4,
+    "severityTotal": 17,
+    "severityAvg": 4.3,
+    "groups": [
+      {
+        "key": "sales",
+        "name": "获客与销售",
+        "color": "#8A54DC",
+        "desc": "线索、报价、成交与客户维护",
+        "count": 1,
+        "severity": 5,
+        "pct": 29,
+        "tags": [
+          "报价慢"
+        ]
+      },
+      {
+        "key": "deliver",
+        "name": "交付与生产",
+        "color": "#0FA3C7",
+        "desc": "订单、生产、项目与服务交付",
+        "count": 1,
+        "severity": 4,
+        "pct": 24,
+        "tags": [
+          "断货"
+        ]
+      },
+      {
+        "key": "cost",
+        "name": "成本与财务",
+        "color": "#C4457E",
+        "desc": "成本、库存、回款与费用",
+        "count": 1,
+        "severity": 5,
+        "pct": 29,
+        "tags": [
+          "毛利不清"
+        ]
+      },
+      {
+        "key": "org",
+        "name": "组织与管理",
+        "color": "#FF8A3D",
+        "desc": "人员、经验、报表与协同",
+        "count": 1,
+        "severity": 3,
+        "pct": 18,
+        "tags": [
+          "跑店督导"
+        ]
+      }
+    ],
+    "top": [
+      {
+        "tag": "报价慢",
+        "text": "客户问价要业务员翻价格表和库存，常常隔天才回",
+        "severity": 5,
+        "groupName": "获客与销售",
+        "color": "#8A54DC"
+      },
+      {
+        "tag": "毛利不清",
+        "text": "单个商品到底赚多少算不清，促销做完才发现越卖越薄",
+        "severity": 5,
+        "groupName": "成本与财务",
+        "color": "#C4457E"
+      },
+      {
+        "tag": "断货",
+        "text": "爆款总是断货，滞销品压仓，补货全靠店长感觉",
+        "severity": 4,
+        "groupName": "交付与生产",
+        "color": "#0FA3C7"
+      }
+    ],
+    "focus": "sales",
+    "focusText": "所选 4 项痛点集中在「获客与销售」（1 项，严重度合计 5），其次是「成本与财务」（1 项）。严重度最高的是「客户问价要业务员翻价格表和库存，常常隔天才回」。"
+  },
+  "conditions": {
+    "dataState": "excel",
+    "dataStateName": "主要在 Excel 表里",
+    "dataStateNote": "表格口径需要先统一，整理一次即可支撑轻量场景",
+    "objective": "revenue",
+    "objectiveName": "增收入",
+    "window": "m3",
+    "windowName": "3 个月内",
+    "windowNote": "以见效快的轻量场景起步",
+    "capacity": "none",
+    "capacityName": "暂时没有专人",
+    "capacityNote": "由业务骨干兼顾，优先选当天可起步的场景"
+  },
+  "weights": {
+    "pain": 0.35,
+    "data": 0.3,
+    "cycle": 0.2,
+    "barrier": 0.15,
+    "preset": "dm",
+    "presetName": "标准权重"
+  },
+  "axes": [
+    {
+      "key": "pain",
+      "name": "痛点强度",
+      "weight": 0.35,
+      "color": "#E0635C",
+      "invert": false,
+      "desc": "这个场景解决的是否正是您勾选的痛点",
+      "how": "场景的痛点标签与您勾选的痛点求交集，按您给出的严重度加权，映射到 1–5 分",
+      "scale": [
+        "未命中所选痛点",
+        "轻微相关",
+        "命中一项",
+        "命中且严重度较高",
+        "正面命中所选重点痛点"
+      ]
+    },
+    {
+      "key": "data",
+      "name": "数据可得",
+      "weight": 0.3,
+      "color": "#1157B5",
+      "invert": false,
+      "desc": "落地这个场景所需的数据，现在拿不拿得到",
+      "how": "场景的数据依赖与您现有的业务系统比对，再按数据存放现状调整；关键系统缺失时计 1 分",
+      "scale": [
+        "关键数据源缺失",
+        "数据分散需要整理",
+        "部分数据可得",
+        "主要数据可得",
+        "所需数据均已具备"
+      ]
+    },
+    {
+      "key": "cycle",
+      "name": "见效周期",
+      "weight": 0.2,
+      "color": "#0E9F6E",
+      "invert": false,
+      "desc": "从开始做到看见结果需要多久",
+      "how": "取场景预设的见效速度，再按您期望的见效窗口调整",
+      "scale": [
+        "一年以上",
+        "半年以上",
+        "三到六个月",
+        "一到三个月",
+        "一个月内可见"
+      ]
+    },
+    {
+      "key": "barrier",
+      "name": "实施门槛",
+      "weight": 0.15,
+      "color": "#C9A227",
+      "invert": true,
+      "desc": "落地要动多少流程、系统与人",
+      "how": "取场景预设的实施门槛，再按您可投入的人力调整；计分时用（6 − 门槛），门槛越低得分越高",
+      "scale": [
+        "当天可起步",
+        "一周内可起步",
+        "需要跨部门配合",
+        "需要改造流程或系统",
+        "需要系统改造与外部配合"
+      ]
+    }
+  ],
+  "formula": "总分 = 痛点强度 × 0.35 + 数据可得 × 0.30 + 见效周期 × 0.20 + (6 − 实施门槛) × 0.15",
+  "scenes": [
+    {
+      "id": "trade-s12",
+      "name": "门店巡检与店员带教",
+      "stage": "门店运营",
+      "user": "督导与店长",
+      "replaces": "督导轮流跑店看陈列、口头讲一遍标准的做法",
+      "painTags": [
+        "跑店督导",
+        "新人上手"
+      ],
+      "hitTags": [
+        "跑店督导"
+      ],
+      "dataDeps": [],
+      "dataList": [
+        "陈列与服务标准清单",
+        "门店巡检照片与整改记录",
+        "高频问题与应答话术整理"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 3,
+      "cost": "零",
+      "weeks": 3,
+      "module": "AI人力官",
+      "metric": "新店员独立上岗周期缩短三分之一",
+      "firstStep": "把陈列与服务标准整理成一份带图清单，先在三家门店试用",
+      "precondition": "标准需要有人牵头统一，各店自行发挥的部分先做收口",
+      "roiBasis": "按督导差旅工时与新人培训周期下降折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2
+      },
+      "why": {
+        "pain": "命中所选痛点「跑店督导」，严重度合计 3 / 10",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 3 周",
+        "barrier": "场景库预设门槛 1 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 12
+      },
+      "total": 4.2,
+      "score": 83,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 1,
+      "reason": "排在前列：正面命中「跑店督导」，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。"
+    },
+    {
+      "id": "trade-s01",
+      "name": "智能报价与库存查价",
+      "stage": "销售前端",
+      "user": "业务员与销售内勤",
+      "replaces": "逐单翻价格表与库存再回价的每天两小时",
+      "painTags": [
+        "报价慢",
+        "毛利不清"
+      ],
+      "hitTags": [
+        "报价慢",
+        "毛利不清"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "商品价格表与客户等级折扣",
+        "实时可用库存与在途量",
+        "近一年成交价格记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 5,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI获客",
+      "metric": "询价回复时间从隔天缩短到 30 分钟内",
+      "firstStep": "整理主力商品的价格表与客户折扣档，先覆盖出货量前 30% 的单品",
+      "precondition": "价格表需要有人定期维护，临时特价先做书面记录",
+      "roiBasis": "按报价提速带来的成单率提升折算",
+      "axis": {
+        "pain": 5,
+        "data": 1,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "命中所选痛点「报价慢」「毛利不清」，严重度合计 10 / 10",
+        "data": "关键数据源缺失：ERP",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 6,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.5,
+      "score": 70,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 2,
+      "reason": "条件补齐后可进入候选：正面命中「报价慢」「毛利不清」，关键数据源缺失（ERP），见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s03",
+      "name": "跨境询盘分级与多语回复",
+      "stage": "海外获客",
+      "user": "外贸业务员与平台运营",
+      "replaces": "逐封邮件翻译再手写回复的每天三小时",
+      "painTags": [
+        "询盘散"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "近一年询盘邮件与平台站内信",
+        "成交与流失询盘标注",
+        "主推产品的多语资料"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "零",
+      "weeks": 2,
+      "module": "AI获客",
+      "metric": "询盘首次回复时间缩短到 2 小时内",
+      "firstStep": "把近三个月询盘汇总成一张表，标注来源、国家与当前状态",
+      "precondition": "询盘需要统一入口，邮箱与平台后台先做每日导出",
+      "roiBasis": "按询盘回复提速带来的转化率提升折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「询盘散」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 2 周",
+        "barrier": "场景库预设门槛 1 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 12
+      },
+      "total": 3.5,
+      "score": 69,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 3,
+      "reason": "排在前列：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。"
+    },
+    {
+      "id": "trade-s09",
+      "name": "进口到岸成本测算",
+      "stage": "采购成本",
+      "user": "采购经理与财务",
+      "replaces": "用表格逐票摊关税运费的两天",
+      "painTags": [
+        "毛利不清"
+      ],
+      "hitTags": [
+        "毛利不清"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "历史进口报关与税费明细",
+        "海运陆运与仓储费用记录",
+        "汇率与结算方式记录"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 5,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "到岸成本测算从 2 天缩短到 2 小时内",
+      "firstStep": "选一条主力进口线路，把近半年的费用逐项归集一遍",
+      "precondition": "费用需要对应到批次，共用费用先定分摊规则",
+      "roiBasis": "按报价修正与低毛利商品调整带来的毛利提升折算",
+      "axis": {
+        "pain": 5,
+        "data": 3.5,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "命中所选痛点「毛利不清」，严重度合计 5 / 5",
+        "data": "已有 财务软件，仍需补齐 ERP；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周；期望 3 个月内见效，长周期场景下调 1 分",
+        "barrier": "场景库预设门槛 4 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 21,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 3.4,
+      "score": 67,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 4,
+      "reason": "进入候选：正面命中「毛利不清」，数据可得 3.5 / 5，见效 2 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "trade-s07",
+      "name": "报关单证预审",
+      "stage": "通关单证",
+      "user": "单证员与关务主管",
+      "replaces": "逐份核对发票箱单与申报要素的半天",
+      "painTags": [
+        "单证返工"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "历史报关单与随附单证",
+        "商品归类与申报要素表",
+        "近一年退单与修改记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI流程提效",
+      "metric": "单证退单返工次数下降 50% 以上",
+      "firstStep": "收集近一年退单记录，整理出高频出错的申报要素清单",
+      "precondition": "申报要素表需要按商品维护，新品先补齐归类信息",
+      "roiBasis": "按单证返工工时与滞港费用下降折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「单证返工」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.3,
+      "score": 66,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 5,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s11",
+      "name": "账期与回款预警",
+      "stage": "应收管理",
+      "user": "财务与业务经理",
+      "replaces": "业务员想起来才打催款电话的被动跟进",
+      "painTags": [
+        "账期垫资"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance"
+      ],
+      "dataList": [
+        "应收明细与合同账期",
+        "历史回款与逾期记录",
+        "客户信用与合作年限"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI CFO",
+      "metric": "逾期应收占比下降 20% 以上",
+      "firstStep": "按账龄把当前应收分成四档，标出逾期 60 天以上的客户",
+      "precondition": "账期需要在合同里写明，口头约定的先补书面确认",
+      "roiBasis": "按回款提前天数与资金成本折算",
+      "axis": {
+        "pain": 1,
+        "data": 4.5,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「账期垫资」",
+        "data": "所需数据源均已具备：财务软件；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 27,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.2,
+      "score": 63,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 6,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 4.5 / 5，见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s13",
+      "name": "多店多平台经营日报",
+      "stage": "经营管理",
+      "user": "总经理与运营负责人",
+      "replaces": "各店各平台报数到群里、次日才汇总的流程",
+      "painTags": [
+        "报表口径",
+        "平台对账"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "分店分平台的销售与毛利数据",
+        "库存与周转数据",
+        "费用与推广投入数据"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI决策",
+      "metric": "经营数据从次日汇总变为当日可查",
+      "firstStep": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+      "precondition": "指标口径需要各部门确认一次，存在分歧的先统一定义",
+      "roiBasis": "按对数工时下降与决策提前折算",
+      "axis": {
+        "pain": 1,
+        "data": 3.5,
+        "cycle": 4,
+        "barrier": 4
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「报表口径」「平台对账」",
+        "data": "已有 财务软件，仍需补齐 ERP；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 21,
+        "cycle": 16,
+        "barrier": 6
+      },
+      "total": 2.5,
+      "score": 50,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 7,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 3.5 / 5，见效 4 / 5，门槛 4 / 5。"
+    },
+    {
+      "id": "trade-s10",
+      "name": "多平台账单与费用核对",
+      "stage": "财务核算",
+      "user": "电商财务与运营主管",
+      "replaces": "月底逐个平台下载账单再手工比对的一周",
+      "painTags": [
+        "平台对账"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance",
+        "shop"
+      ],
+      "dataList": [
+        "各平台结算账单与费用明细",
+        "店铺订单与退款记录",
+        "推广费用投放台账"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "shop"
+      ],
+      "missingSystemsName": [
+        "电商 / 门店系统"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "对账周期从一周缩短到 1 天内",
+      "firstStep": "把一个月的平台账单与订单记录做一次逐笔比对，找出差异类型",
+      "precondition": "各平台账单需要固定导出口径，字段缺失的先补人工标注",
+      "roiBasis": "按对账工时下降与差错追回金额折算",
+      "axis": {
+        "pain": 1,
+        "data": 3.5,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「平台对账」",
+        "data": "已有 财务软件，仍需补齐 电商 / 门店系统；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周；期望 3 个月内见效，长周期场景下调 1 分",
+        "barrier": "场景库预设门槛 4 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 21,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 2,
+      "score": 39,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 8,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 3.5 / 5，见效 2 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "trade-s02",
+      "name": "沉睡客户识别与复购提醒",
+      "stage": "客户经营",
+      "user": "销售主管与业务员",
+      "replaces": "凭印象判断哪个客户该跟进的每周梳理",
+      "painTags": [
+        "客户流失",
+        "客户在人"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "crm",
+        "erp"
+      ],
+      "dataList": [
+        "近两年客户下单频次与金额",
+        "客户联系人与拜访记录",
+        "品类购买结构"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "crm",
+        "erp"
+      ],
+      "missingSystemsName": [
+        "CRM",
+        "ERP"
+      ],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI获客",
+      "metric": "沉睡客户唤醒率提升 10–15 个百分点",
+      "firstStep": "导出近两年下单记录，按 90 天未下单筛出沉睡客户名单",
+      "precondition": "客户联系人需要归集到公司档案，个人微信好友先做登记",
+      "roiBasis": "按唤醒客户带来的复购金额折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 4,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「客户流失」「客户在人」",
+        "data": "关键数据源缺失：CRM、ERP",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 16,
+        "barrier": 9
+      },
+      "total": 1.9,
+      "score": 38,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 9,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（CRM、ERP），见效 4 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s05",
+      "name": "门店补货与跨店调拨建议",
+      "stage": "商品库存",
+      "user": "商品部与店长",
+      "replaces": "店长凭感觉报货、总部逐店核对的每周一天",
+      "painTags": [
+        "断货",
+        "呆滞库存"
+      ],
+      "hitTags": [
+        "断货"
+      ],
+      "dataDeps": [
+        "erp",
+        "shop"
+      ],
+      "dataList": [
+        "分店分商品的日销与库存",
+        "补货提前期与配送频次",
+        "促销与季节因素记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "erp",
+        "shop"
+      ],
+      "missingSystemsName": [
+        "ERP",
+        "电商 / 门店系统"
+      ],
+      "value": 5,
+      "cost": "重",
+      "weeks": 16,
+      "module": "AI ERP",
+      "metric": "缺货率下降 25–35%，库存周转天数缩短 5–8 天",
+      "firstStep": "选三家门店做试点，把近一年日销与库存数据拉齐",
+      "precondition": "门店库存需要账实一致，差异大的门店先补一次盘点",
+      "roiBasis": "按缺货损失减少与库存资金占用下降折算",
+      "axis": {
+        "pain": 3,
+        "data": 1,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "命中所选痛点「断货」，严重度合计 4 / 10",
+        "data": "关键数据源缺失：ERP、电商 / 门店系统",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 16 周；期望 3 个月内见效，长周期场景下调 1 分",
+        "barrier": "场景库预设门槛 5 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 6,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 1.9,
+      "score": 38,
+      "blocked": true,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 10,
+      "reason": "条件补齐后可进入候选：正面命中「断货」，关键数据源缺失（ERP、电商 / 门店系统），见效 2 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "trade-s04",
+      "name": "会员分层与到店唤醒",
+      "stage": "会员运营",
+      "user": "会员运营与店长",
+      "replaces": "给全部会员群发同一条消息的粗放触达",
+      "painTags": [
+        "会员沉睡"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "crm",
+        "shop"
+      ],
+      "dataList": [
+        "会员消费频次与客单价",
+        "券的发放与核销记录",
+        "门店与品类偏好"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "crm",
+        "shop"
+      ],
+      "missingSystemsName": [
+        "CRM",
+        "电商 / 门店系统"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI获客",
+      "metric": "会员月度复购率提升 5–8 个百分点",
+      "firstStep": "按近一年消费次数与金额把会员分成四层，各挑一个触达动作试跑",
+      "precondition": "会员消费需要与手机号打通，线下散客先引导注册",
+      "roiBasis": "按会员复购金额提升与券核销成本折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 4,
+        "barrier": 4
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「会员沉睡」",
+        "data": "关键数据源缺失：CRM、电商 / 门店系统",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 16,
+        "barrier": 6
+      },
+      "total": 1.8,
+      "score": 35,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 11,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（CRM、电商 / 门店系统），见效 4 / 5，门槛 4 / 5。"
+    },
+    {
+      "id": "trade-s08",
+      "name": "外贸订单跟单播报",
+      "stage": "订单执行",
+      "user": "跟单员与业务经理",
+      "replaces": "挨个问工厂与货代再手写进度邮件的每天一小时",
+      "painTags": [
+        "跟单进度"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "erp",
+        "oa"
+      ],
+      "dataList": [
+        "订单节点与约定船期",
+        "生产与备货进度回填",
+        "订舱与报关状态记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "erp",
+        "oa"
+      ],
+      "missingSystemsName": [
+        "ERP",
+        "OA / 协同办公"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI ERP",
+      "metric": "客户进度问询量下降 30–40%",
+      "firstStep": "定下每个订单的 6 个关键节点，先在一张表里每日回填",
+      "precondition": "工厂与货代的节点信息需要按时回传，先约定回填时点",
+      "roiBasis": "按跟单沟通工时与延误索赔下降折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 4,
+        "barrier": 4
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「跟单进度」",
+        "data": "关键数据源缺失：ERP、OA / 协同办公",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 16,
+        "barrier": 6
+      },
+      "total": 1.8,
+      "score": 35,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 12,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（ERP、OA / 协同办公），见效 4 / 5，门槛 4 / 5。"
+    },
+    {
+      "id": "trade-s06",
+      "name": "拣货复核与错发拦截",
+      "stage": "仓储发货",
+      "user": "仓库主管与打包员",
+      "replaces": "出库前人工二次核对商品与数量的重复动作",
+      "painTags": [
+        "错发漏发"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "订单商品明细与库位",
+        "近一年错发漏发工单",
+        "商品图片与条码对照表"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI流程提效",
+      "metric": "错发漏发率下降 40–60%",
+      "firstStep": "统计近一年错发工单，按商品与时段找出高发环节",
+      "precondition": "商品需要条码与图片齐备，无码商品先补打标签",
+      "roiBasis": "按赔付与二次运费下降折算",
+      "axis": {
+        "pain": 1,
+        "data": 1,
+        "cycle": 4,
+        "barrier": 4
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「错发漏发」",
+        "data": "关键数据源缺失：ERP",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 6,
+        "cycle": 16,
+        "barrier": 6
+      },
+      "total": 1.8,
+      "score": 35,
+      "blocked": true,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 13,
+      "reason": "条件补齐后可进入候选：与所选痛点关联较弱，关键数据源缺失（ERP），见效 4 / 5，门槛 4 / 5。"
+    }
+  ],
+  "ranked": [
+    {
+      "id": "trade-s12",
+      "name": "门店巡检与店员带教",
+      "stage": "门店运营",
+      "user": "督导与店长",
+      "replaces": "督导轮流跑店看陈列、口头讲一遍标准的做法",
+      "painTags": [
+        "跑店督导",
+        "新人上手"
+      ],
+      "hitTags": [
+        "跑店督导"
+      ],
+      "dataDeps": [],
+      "dataList": [
+        "陈列与服务标准清单",
+        "门店巡检照片与整改记录",
+        "高频问题与应答话术整理"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 3,
+      "cost": "零",
+      "weeks": 3,
+      "module": "AI人力官",
+      "metric": "新店员独立上岗周期缩短三分之一",
+      "firstStep": "把陈列与服务标准整理成一份带图清单，先在三家门店试用",
+      "precondition": "标准需要有人牵头统一，各店自行发挥的部分先做收口",
+      "roiBasis": "按督导差旅工时与新人培训周期下降折算",
+      "axis": {
+        "pain": 3,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2
+      },
+      "why": {
+        "pain": "命中所选痛点「跑店督导」，严重度合计 3 / 10",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 3 周",
+        "barrier": "场景库预设门槛 1 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 21,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 12
+      },
+      "total": 4.2,
+      "score": 83,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 1,
+      "reason": "排在前列：正面命中「跑店督导」，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。"
+    },
+    {
+      "id": "trade-s01",
+      "name": "智能报价与库存查价",
+      "stage": "销售前端",
+      "user": "业务员与销售内勤",
+      "replaces": "逐单翻价格表与库存再回价的每天两小时",
+      "painTags": [
+        "报价慢",
+        "毛利不清"
+      ],
+      "hitTags": [
+        "报价慢",
+        "毛利不清"
+      ],
+      "dataDeps": [
+        "erp"
+      ],
+      "dataList": [
+        "商品价格表与客户等级折扣",
+        "实时可用库存与在途量",
+        "近一年成交价格记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 5,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI获客",
+      "metric": "询价回复时间从隔天缩短到 30 分钟内",
+      "firstStep": "整理主力商品的价格表与客户折扣档，先覆盖出货量前 30% 的单品",
+      "precondition": "价格表需要有人定期维护，临时特价先做书面记录",
+      "roiBasis": "按报价提速带来的成单率提升折算",
+      "axis": {
+        "pain": 5,
+        "data": 1,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "命中所选痛点「报价慢」「毛利不清」，严重度合计 10 / 10",
+        "data": "关键数据源缺失：ERP",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 6,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.5,
+      "score": 70,
+      "blocked": true,
+      "fitObjective": true,
+      "startable": false,
+      "rank": 2,
+      "reason": "条件补齐后可进入候选：正面命中「报价慢」「毛利不清」，关键数据源缺失（ERP），见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s03",
+      "name": "跨境询盘分级与多语回复",
+      "stage": "海外获客",
+      "user": "外贸业务员与平台运营",
+      "replaces": "逐封邮件翻译再手写回复的每天三小时",
+      "painTags": [
+        "询盘散"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "近一年询盘邮件与平台站内信",
+        "成交与流失询盘标注",
+        "主推产品的多语资料"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "零",
+      "weeks": 2,
+      "module": "AI获客",
+      "metric": "询盘首次回复时间缩短到 2 小时内",
+      "firstStep": "把近三个月询盘汇总成一张表，标注来源、国家与当前状态",
+      "precondition": "询盘需要统一入口，邮箱与平台后台先做每日导出",
+      "roiBasis": "按询盘回复提速带来的转化率提升折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 2
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「询盘散」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 2 周",
+        "barrier": "场景库预设门槛 1 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 12
+      },
+      "total": 3.5,
+      "score": 69,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 3,
+      "reason": "排在前列：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。"
+    },
+    {
+      "id": "trade-s09",
+      "name": "进口到岸成本测算",
+      "stage": "采购成本",
+      "user": "采购经理与财务",
+      "replaces": "用表格逐票摊关税运费的两天",
+      "painTags": [
+        "毛利不清"
+      ],
+      "hitTags": [
+        "毛利不清"
+      ],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "历史进口报关与税费明细",
+        "海运陆运与仓储费用记录",
+        "汇率与结算方式记录"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 5,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "到岸成本测算从 2 天缩短到 2 小时内",
+      "firstStep": "选一条主力进口线路，把近半年的费用逐项归集一遍",
+      "precondition": "费用需要对应到批次，共用费用先定分摊规则",
+      "roiBasis": "按报价修正与低毛利商品调整带来的毛利提升折算",
+      "axis": {
+        "pain": 5,
+        "data": 3.5,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "命中所选痛点「毛利不清」，严重度合计 5 / 5",
+        "data": "已有 财务软件，仍需补齐 ERP；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周；期望 3 个月内见效，长周期场景下调 1 分",
+        "barrier": "场景库预设门槛 4 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 35,
+        "data": 21,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 3.4,
+      "score": 67,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 4,
+      "reason": "进入候选：正面命中「毛利不清」，数据可得 3.5 / 5，见效 2 / 5，门槛 5 / 5。"
+    },
+    {
+      "id": "trade-s07",
+      "name": "报关单证预审",
+      "stage": "通关单证",
+      "user": "单证员与关务主管",
+      "replaces": "逐份核对发票箱单与申报要素的半天",
+      "painTags": [
+        "单证返工"
+      ],
+      "hitTags": [],
+      "dataDeps": [],
+      "dataList": [
+        "历史报关单与随附单证",
+        "商品归类与申报要素表",
+        "近一年退单与修改记录"
+      ],
+      "presentSystems": [],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI流程提效",
+      "metric": "单证退单返工次数下降 50% 以上",
+      "firstStep": "收集近一年退单记录，整理出高频出错的申报要素清单",
+      "precondition": "申报要素表需要按商品维护，新品先补齐归类信息",
+      "roiBasis": "按单证返工工时与滞港费用下降折算",
+      "axis": {
+        "pain": 1,
+        "data": 5,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「单证返工」",
+        "data": "无需接入业务系统，整理现有资料即可起步",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 30,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.3,
+      "score": 66,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 5,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 5 / 5，见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s11",
+      "name": "账期与回款预警",
+      "stage": "应收管理",
+      "user": "财务与业务经理",
+      "replaces": "业务员想起来才打催款电话的被动跟进",
+      "painTags": [
+        "账期垫资"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance"
+      ],
+      "dataList": [
+        "应收明细与合同账期",
+        "历史回款与逾期记录",
+        "客户信用与合作年限"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [],
+      "missingSystemsName": [],
+      "value": 4,
+      "cost": "轻",
+      "weeks": 4,
+      "module": "AI CFO",
+      "metric": "逾期应收占比下降 20% 以上",
+      "firstStep": "按账龄把当前应收分成四档，标出逾期 60 天以上的客户",
+      "precondition": "账期需要在合同里写明，口头约定的先补书面确认",
+      "roiBasis": "按回款提前天数与资金成本折算",
+      "axis": {
+        "pain": 1,
+        "data": 4.5,
+        "cycle": 5,
+        "barrier": 3
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「账期垫资」",
+        "data": "所需数据源均已具备：财务软件；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 5 / 5，上线约 4 周",
+        "barrier": "场景库预设门槛 2 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 27,
+        "cycle": 20,
+        "barrier": 9
+      },
+      "total": 3.2,
+      "score": 63,
+      "blocked": false,
+      "fitObjective": true,
+      "startable": true,
+      "rank": 6,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 4.5 / 5，见效 5 / 5，门槛 3 / 5。"
+    },
+    {
+      "id": "trade-s13",
+      "name": "多店多平台经营日报",
+      "stage": "经营管理",
+      "user": "总经理与运营负责人",
+      "replaces": "各店各平台报数到群里、次日才汇总的流程",
+      "painTags": [
+        "报表口径",
+        "平台对账"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "erp",
+        "finance"
+      ],
+      "dataList": [
+        "分店分平台的销售与毛利数据",
+        "库存与周转数据",
+        "费用与推广投入数据"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "erp"
+      ],
+      "missingSystemsName": [
+        "ERP"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 8,
+      "module": "AI决策",
+      "metric": "经营数据从次日汇总变为当日可查",
+      "firstStep": "定下 8 个经营指标的口径与取数位置，先做成一页日报",
+      "precondition": "指标口径需要各部门确认一次，存在分歧的先统一定义",
+      "roiBasis": "按对数工时下降与决策提前折算",
+      "axis": {
+        "pain": 1,
+        "data": 3.5,
+        "cycle": 4,
+        "barrier": 4
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「报表口径」「平台对账」",
+        "data": "已有 财务软件，仍需补齐 ERP；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 4 / 5，上线约 8 周",
+        "barrier": "场景库预设门槛 3 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 21,
+        "cycle": 16,
+        "barrier": 6
+      },
+      "total": 2.5,
+      "score": 50,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": true,
+      "rank": 7,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 3.5 / 5，见效 4 / 5，门槛 4 / 5。"
+    },
+    {
+      "id": "trade-s10",
+      "name": "多平台账单与费用核对",
+      "stage": "财务核算",
+      "user": "电商财务与运营主管",
+      "replaces": "月底逐个平台下载账单再手工比对的一周",
+      "painTags": [
+        "平台对账"
+      ],
+      "hitTags": [],
+      "dataDeps": [
+        "finance",
+        "shop"
+      ],
+      "dataList": [
+        "各平台结算账单与费用明细",
+        "店铺订单与退款记录",
+        "推广费用投放台账"
+      ],
+      "presentSystems": [
+        "财务软件"
+      ],
+      "missingSystems": [
+        "shop"
+      ],
+      "missingSystemsName": [
+        "电商 / 门店系统"
+      ],
+      "value": 4,
+      "cost": "中",
+      "weeks": 10,
+      "module": "AI CFO",
+      "metric": "对账周期从一周缩短到 1 天内",
+      "firstStep": "把一个月的平台账单与订单记录做一次逐笔比对，找出差异类型",
+      "precondition": "各平台账单需要固定导出口径，字段缺失的先补人工标注",
+      "roiBasis": "按对账工时下降与差错追回金额折算",
+      "axis": {
+        "pain": 1,
+        "data": 3.5,
+        "cycle": 2,
+        "barrier": 5
+      },
+      "why": {
+        "pain": "未命中本次勾选的痛点，该场景对应「平台对账」",
+        "data": "已有 财务软件，仍需补齐 电商 / 门店系统；主要在 Excel 表里，按数据存放现状调整 -0.5 分",
+        "cycle": "场景库预设见效速度 3 / 5，上线约 10 周；期望 3 个月内见效，长周期场景下调 1 分",
+        "barrier": "场景库预设门槛 4 / 5；暂时没有专人，调整 +1 分"
+      },
+      "contrib": {
+        "pain": 7,
+        "data": 21,
+        "cycle": 8,
+        "barrier": 3
+      },
+      "total": 2,
+      "score": 39,
+      "blocked": false,
+      "fitObjective": false,
+      "startable": false,
+      "rank": 8,
+      "reason": "进入候选：与所选痛点关联较弱，数据可得 3.5 / 5，见效 2 / 5，门槛 5 / 5。"
+    }
+  ],
+  "blocked": [
+    {
+      "id": "trade-s01",
+      "name": "智能报价与库存查价",
+      "rank": 2,
+      "value": 5,
+      "missing": [
+        "ERP"
+      ],
+      "module": "AI获客"
+    },
+    {
+      "id": "trade-s02",
+      "name": "沉睡客户识别与复购提醒",
+      "rank": 9,
+      "value": 4,
+      "missing": [
+        "CRM",
+        "ERP"
+      ],
+      "module": "AI获客"
+    },
+    {
+      "id": "trade-s05",
+      "name": "门店补货与跨店调拨建议",
+      "rank": 10,
+      "value": 5,
+      "missing": [
+        "ERP",
+        "电商 / 门店系统"
+      ],
+      "module": "AI ERP"
+    },
+    {
+      "id": "trade-s04",
+      "name": "会员分层与到店唤醒",
+      "rank": 11,
+      "value": 4,
+      "missing": [
+        "CRM",
+        "电商 / 门店系统"
+      ],
+      "module": "AI获客"
+    },
+    {
+      "id": "trade-s08",
+      "name": "外贸订单跟单播报",
+      "rank": 12,
+      "value": 4,
+      "missing": [
+        "ERP",
+        "OA / 协同办公"
+      ],
+      "module": "AI ERP"
+    },
+    {
+      "id": "trade-s06",
+      "name": "拣货复核与错发拦截",
+      "rank": 13,
+      "value": 4,
+      "missing": [
+        "ERP"
+      ],
+      "module": "AI流程提效"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "trade-s02",
+      "name": "沉睡客户识别与复购提醒",
+      "rank": 9,
+      "score": 38,
+      "module": "AI获客",
+      "reason": "关键数据源缺失：CRM、ERP，补齐后重新评估"
+    },
+    {
+      "id": "trade-s05",
+      "name": "门店补货与跨店调拨建议",
+      "rank": 10,
+      "score": 38,
+      "module": "AI ERP",
+      "reason": "关键数据源缺失：ERP、电商 / 门店系统，补齐后重新评估"
+    },
+    {
+      "id": "trade-s04",
+      "name": "会员分层与到店唤醒",
+      "rank": 11,
+      "score": 35,
+      "module": "AI获客",
+      "reason": "关键数据源缺失：CRM、电商 / 门店系统，补齐后重新评估"
+    },
+    {
+      "id": "trade-s08",
+      "name": "外贸订单跟单播报",
+      "rank": 12,
+      "score": 35,
+      "module": "AI ERP",
+      "reason": "关键数据源缺失：ERP、OA / 协同办公，补齐后重新评估"
+    },
+    {
+      "id": "trade-s06",
+      "name": "拣货复核与错发拦截",
+      "rank": 13,
+      "score": 35,
+      "module": "AI流程提效",
+      "reason": "关键数据源缺失：ERP，补齐后重新评估"
+    }
+  ],
+  "top1": {
+    "id": "trade-s12",
+    "name": "门店巡检与店员带教",
+    "stage": "门店运营",
+    "user": "督导与店长",
+    "replaces": "督导轮流跑店看陈列、口头讲一遍标准的做法",
+    "score": 83,
+    "rank": 1,
+    "axis": {
+      "pain": 3,
+      "data": 5,
+      "cycle": 5,
+      "barrier": 2
+    },
+    "why": {
+      "pain": "命中所选痛点「跑店督导」，严重度合计 3 / 10",
+      "data": "无需接入业务系统，整理现有资料即可起步",
+      "cycle": "场景库预设见效速度 5 / 5，上线约 3 周",
+      "barrier": "场景库预设门槛 1 / 5；暂时没有专人，调整 +1 分"
+    },
+    "contrib": {
+      "pain": 21,
+      "data": 30,
+      "cycle": 20,
+      "barrier": 12
+    },
+    "metric": "新店员独立上岗周期缩短三分之一",
+    "firstStep": "把陈列与服务标准整理成一份带图清单，先在三家门店试用",
+    "precondition": "标准需要有人牵头统一，各店自行发挥的部分先做收口",
+    "dataList": [
+      "陈列与服务标准清单",
+      "门店巡检照片与整改记录",
+      "高频问题与应答话术整理"
+    ],
+    "dataDeps": [],
+    "missingSystemsName": [],
+    "module": "AI人力官",
+    "cost": "零",
+    "weeks": 3,
+    "roiBasis": "按督导差旅工时与新人培训周期下降折算",
+    "painTags": [
+      "跑店督导",
+      "新人上手"
+    ],
+    "hitTags": [
+      "跑店督导"
+    ],
+    "reason": "排在前列：正面命中「跑店督导」，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。"
+  },
+  "combo": [
+    {
+      "key": "p1",
+      "name": "先做",
+      "title": "第 1–3 个月",
+      "desc": "一个场景跑通，把做法与数据口径固定下来",
+      "months": [
+        1,
+        3
+      ],
+      "scenes": [
+        {
+          "id": "trade-s12",
+          "rank": 1,
+          "name": "门店巡检与店员带教",
+          "score": 83,
+          "module": "AI人力官",
+          "cost": "零",
+          "weeks": 3,
+          "metric": "新店员独立上岗周期缩短三分之一",
+          "firstStep": "把陈列与服务标准整理成一份带图清单，先在三家门店试用",
+          "blocked": false
+        }
+      ],
+      "cost": "零",
+      "weeks": 3,
+      "milestone": "第一个场景稳定运行，做法与数据口径固定下来"
+    },
+    {
+      "key": "p2",
+      "name": "再做",
+      "title": "第 4–8 个月",
+      "desc": "两个场景并行，让改善出现在经营报表上",
+      "months": [
+        4,
+        8
+      ],
+      "scenes": [
+        {
+          "id": "trade-s03",
+          "rank": 3,
+          "name": "跨境询盘分级与多语回复",
+          "score": 69,
+          "module": "AI获客",
+          "cost": "零",
+          "weeks": 2,
+          "metric": "询盘首次回复时间缩短到 2 小时内",
+          "firstStep": "把近三个月询盘汇总成一张表，标注来源、国家与当前状态",
+          "blocked": false
+        },
+        {
+          "id": "trade-s07",
+          "rank": 5,
+          "name": "报关单证预审",
+          "score": 66,
+          "module": "AI流程提效",
+          "cost": "轻",
+          "weeks": 4,
+          "metric": "单证退单返工次数下降 50% 以上",
+          "firstStep": "收集近一年退单记录，整理出高频出错的申报要素清单",
+          "blocked": false
+        }
+      ],
+      "cost": "轻",
+      "weeks": 4,
+      "milestone": "两个场景的改善出现在经营报表上，形成可复制的推进方式"
+    },
+    {
+      "key": "p3",
+      "name": "储备",
+      "title": "第 9–12 个月",
+      "desc": "条件补齐后启动，或等前两批沉淀出数据后再评估",
+      "months": [
+        9,
+        12
+      ],
+      "scenes": [
+        {
+          "id": "trade-s01",
+          "rank": 2,
+          "name": "智能报价与库存查价",
+          "score": 70,
+          "module": "AI获客",
+          "cost": "轻",
+          "weeks": 4,
+          "metric": "询价回复时间从隔天缩短到 30 分钟内",
+          "firstStep": "整理主力商品的价格表与客户折扣档，先覆盖出货量前 30% 的单品",
+          "blocked": true
+        },
+        {
+          "id": "trade-s02",
+          "rank": 9,
+          "name": "沉睡客户识别与复购提醒",
+          "score": 38,
+          "module": "AI获客",
+          "cost": "轻",
+          "weeks": 4,
+          "metric": "沉睡客户唤醒率提升 10–15 个百分点",
+          "firstStep": "导出近两年下单记录，按 90 天未下单筛出沉睡客户名单",
+          "blocked": true
+        }
+      ],
+      "cost": "轻",
+      "weeks": 4,
+      "milestone": "条件补齐的场景进入评估，AI 覆盖到第二条业务线"
+    }
+  ],
+  "roadmap": [
+    {
+      "key": "p1",
+      "name": "先做",
+      "title": "第 1–3 个月",
+      "months": [
+        1,
+        3
+      ],
+      "milestone": "第一个场景稳定运行，做法与数据口径固定下来",
+      "bars": [
+        {
+          "name": "门店巡检与店员带教",
+          "weeks": 3,
+          "cost": "零",
+          "module": "AI人力官",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "key": "p2",
+      "name": "再做",
+      "title": "第 4–8 个月",
+      "months": [
+        4,
+        8
+      ],
+      "milestone": "两个场景的改善出现在经营报表上，形成可复制的推进方式",
+      "bars": [
+        {
+          "name": "跨境询盘分级与多语回复",
+          "weeks": 2,
+          "cost": "零",
+          "module": "AI获客",
+          "blocked": false
+        },
+        {
+          "name": "报关单证预审",
+          "weeks": 4,
+          "cost": "轻",
+          "module": "AI流程提效",
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "key": "p3",
+      "name": "储备",
+      "title": "第 9–12 个月",
+      "months": [
+        9,
+        12
+      ],
+      "milestone": "条件补齐的场景进入评估，AI 覆盖到第二条业务线",
+      "bars": [
+        {
+          "name": "智能报价与库存查价",
+          "weeks": 4,
+          "cost": "轻",
+          "module": "AI获客",
+          "blocked": true
+        },
+        {
+          "name": "沉睡客户识别与复购提醒",
+          "weeks": 4,
+          "cost": "轻",
+          "module": "AI获客",
+          "blocked": true
+        }
+      ]
+    }
+  ],
+  "readiness": {
+    "systems": [
+      {
+        "key": "erp",
+        "name": "ERP",
+        "has": false,
+        "need": 7
+      },
+      {
+        "key": "finance",
+        "name": "财务软件",
+        "has": true,
+        "need": 4
+      },
+      {
+        "key": "crm",
+        "name": "CRM",
+        "has": false,
+        "need": 2
+      },
+      {
+        "key": "oa",
+        "name": "OA / 协同办公",
+        "has": false,
+        "need": 1
+      },
+      {
+        "key": "mes",
+        "name": "MES / 生产系统",
+        "has": false,
+        "need": 0
+      },
+      {
+        "key": "shop",
+        "name": "电商 / 门店系统",
+        "has": false,
+        "need": 3
+      },
+      {
+        "key": "hr",
+        "name": "人事系统",
+        "has": false,
+        "need": 0
+      }
+    ],
+    "matrix": [
+      {
+        "id": "trade-s12",
+        "name": "门店巡检与店员带教",
+        "rank": 1,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s01",
+        "name": "智能报价与库存查价",
+        "rank": 2,
+        "cells": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s03",
+        "name": "跨境询盘分级与多语回复",
+        "rank": 3,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s09",
+        "name": "进口到岸成本测算",
+        "rank": 4,
+        "cells": [
+          1,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s07",
+        "name": "报关单证预审",
+        "rank": 5,
+        "cells": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s11",
+        "name": "账期与回款预警",
+        "rank": 6,
+        "cells": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s13",
+        "name": "多店多平台经营日报",
+        "rank": 7,
+        "cells": [
+          1,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s10",
+        "name": "多平台账单与费用核对",
+        "rank": 8,
+        "cells": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "trade-s02",
+        "name": "沉睡客户识别与复购提醒",
+        "rank": 9,
+        "cells": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s05",
+        "name": "门店补货与跨店调拨建议",
+        "rank": 10,
+        "cells": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "trade-s04",
+        "name": "会员分层与到店唤醒",
+        "rank": 11,
+        "cells": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "trade-s08",
+        "name": "外贸订单跟单播报",
+        "rank": 12,
+        "cells": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "trade-s06",
+        "name": "拣货复核与错发拦截",
+        "rank": 13,
+        "cells": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "missing": [
+      {
+        "system": "erp",
+        "name": "ERP",
+        "unlock": 7,
+        "scenes": [
+          "智能报价与库存查价",
+          "进口到岸成本测算",
+          "多店多平台经营日报",
+          "沉睡客户识别与复购提醒",
+          "门店补货与跨店调拨建议",
+          "外贸订单跟单播报",
+          "拣货复核与错发拦截"
+        ],
+        "bestRank": 2,
+        "note": "补齐后 7 个场景的数据可得分从 1 分回到可评估区间"
+      },
+      {
+        "system": "shop",
+        "name": "电商 / 门店系统",
+        "unlock": 3,
+        "scenes": [
+          "多平台账单与费用核对",
+          "门店补货与跨店调拨建议",
+          "会员分层与到店唤醒"
+        ],
+        "bestRank": 8,
+        "note": "补齐后 3 个场景的数据可得分从 1 分回到可评估区间"
+      },
+      {
+        "system": "crm",
+        "name": "CRM",
+        "unlock": 2,
+        "scenes": [
+          "沉睡客户识别与复购提醒",
+          "会员分层与到店唤醒"
+        ],
+        "bestRank": 9,
+        "note": "补齐后 2 个场景的数据可得分从 1 分回到可评估区间"
+      },
+      {
+        "system": "oa",
+        "name": "OA / 协同办公",
+        "unlock": 1,
+        "scenes": [
+          "外贸订单跟单播报"
+        ],
+        "bestRank": 12,
+        "note": "补齐后 1 个场景的数据可得分从 1 分回到可评估区间"
+      }
+    ],
+    "pct": 24,
+    "level": "数据条件待补齐",
+    "zeroDep": 3,
+    "text": "本行业 13 个场景共提出 17 项数据源需求，当前已具备 4 项（24%）。补齐「ERP」可解锁 7 个场景。另有 3 个场景无需接入业务系统，整理现有资料即可起步。"
+  },
+  "funnel": [
+    {
+      "key": "lib",
+      "label": "场景库全量",
+      "count": 182,
+      "note": "按行业大类整理的候选场景"
+    },
+    {
+      "key": "sector",
+      "label": "商贸流通",
+      "count": 13,
+      "note": "匹配到贵司所属行业大类"
+    },
+    {
+      "key": "pain",
+      "label": "命中所选痛点",
+      "count": 4,
+      "note": "与本次勾选的 4 项痛点有交集"
+    },
+    {
+      "key": "data",
+      "label": "数据条件具备",
+      "count": 7,
+      "note": "关键数据源现在就能拿到"
+    },
+    {
+      "key": "rank",
+      "label": "进入排序表",
+      "count": 8,
+      "note": "按四维总分取前 8 个"
+    },
+    {
+      "key": "start",
+      "label": "首批启动",
+      "count": 1,
+      "note": "第 1–3 个月先做这一个"
+    }
+  ],
+  "sankey": {
+    "groups": [
+      {
+        "key": "sales",
+        "name": "获客与销售",
+        "color": "#8A54DC",
+        "desc": "线索、报价、成交与客户维护",
+        "count": 1,
+        "severity": 5,
+        "pct": 29,
+        "tags": [
+          "报价慢"
+        ]
+      },
+      {
+        "key": "deliver",
+        "name": "交付与生产",
+        "color": "#0FA3C7",
+        "desc": "订单、生产、项目与服务交付",
+        "count": 1,
+        "severity": 4,
+        "pct": 24,
+        "tags": [
+          "断货"
+        ]
+      },
+      {
+        "key": "cost",
+        "name": "成本与财务",
+        "color": "#C4457E",
+        "desc": "成本、库存、回款与费用",
+        "count": 1,
+        "severity": 5,
+        "pct": 29,
+        "tags": [
+          "毛利不清"
+        ]
+      },
+      {
+        "key": "org",
+        "name": "组织与管理",
+        "color": "#FF8A3D",
+        "desc": "人员、经验、报表与协同",
+        "count": 1,
+        "severity": 3,
+        "pct": 18,
+        "tags": [
+          "跑店督导"
+        ]
+      }
+    ],
+    "scenes": [
+      {
+        "id": "trade-s12",
+        "name": "门店巡检与店员带教",
+        "rank": 1,
+        "score": 83,
+        "module": "AI人力官"
+      },
+      {
+        "id": "trade-s01",
+        "name": "智能报价与库存查价",
+        "rank": 2,
+        "score": 70,
+        "module": "AI获客"
+      },
+      {
+        "id": "trade-s03",
+        "name": "跨境询盘分级与多语回复",
+        "rank": 3,
+        "score": 69,
+        "module": "AI获客"
+      },
+      {
+        "id": "trade-s09",
+        "name": "进口到岸成本测算",
+        "rank": 4,
+        "score": 67,
+        "module": "AI CFO"
+      },
+      {
+        "id": "trade-s07",
+        "name": "报关单证预审",
+        "rank": 5,
+        "score": 66,
+        "module": "AI流程提效"
+      },
+      {
+        "id": "trade-s11",
+        "name": "账期与回款预警",
+        "rank": 6,
+        "score": 63,
+        "module": "AI CFO"
+      }
+    ],
+    "modules": [
+      {
+        "name": "AI人力官",
+        "count": 1
+      },
+      {
+        "name": "AI获客",
+        "count": 2
+      },
+      {
+        "name": "AI CFO",
+        "count": 2
+      },
+      {
+        "name": "AI流程提效",
+        "count": 1
+      }
+    ],
+    "links": [
+      {
+        "scene": "trade-s12",
+        "groups": [
+          "org"
+        ],
+        "module": "AI人力官",
+        "weight": 83
+      },
+      {
+        "scene": "trade-s01",
+        "groups": [
+          "sales",
+          "cost"
+        ],
+        "module": "AI获客",
+        "weight": 70
+      },
+      {
+        "scene": "trade-s03",
+        "groups": [
+          "sales"
+        ],
+        "module": "AI获客",
+        "weight": 69
+      },
+      {
+        "scene": "trade-s09",
+        "groups": [
+          "cost"
+        ],
+        "module": "AI CFO",
+        "weight": 67
+      },
+      {
+        "scene": "trade-s07",
+        "groups": [
+          "sales"
+        ],
+        "module": "AI流程提效",
+        "weight": 66
+      },
+      {
+        "scene": "trade-s11",
+        "groups": [
+          "sales"
+        ],
+        "module": "AI CFO",
+        "weight": 63
+      }
+    ]
+  },
+  "investment": {
+    "tier": "轻",
+    "name": "轻量场景",
+    "range": "1–5 万元",
+    "desc": "单个场景配置上线，配套一次数据整理与一轮培训。",
+    "fit": "数据基本可得、希望快速见效的企业",
+    "tiers": [
+      {
+        "key": "零",
+        "name": "零投入起步",
+        "range": "0 元",
+        "desc": "用轻享版与内部整理动作起步，两周使用记录即可验证价值。",
+        "fit": "先要看到效果再谈投入的企业"
+      },
+      {
+        "key": "轻",
+        "name": "轻量场景",
+        "range": "1–5 万元",
+        "desc": "单个场景配置上线，配套一次数据整理与一轮培训。",
+        "fit": "数据基本可得、希望快速见效的企业"
+      },
+      {
+        "key": "中",
+        "name": "流程级应用",
+        "range": "5–20 万元",
+        "desc": "场景嵌入日常作业流程，打通一到两个业务系统的取数。",
+        "fit": "有系统基础、准备把 AI 变成日常工具的企业"
+      },
+      {
+        "key": "重",
+        "name": "平台与私域",
+        "range": "20 万元以上",
+        "desc": "多场景平台化推进，含系统对接、私域部署与陪跑。",
+        "fit": "多地多组织、数据不出域要求明确的企业"
+      }
+    ],
+    "note": "投入区间为同类企业落地的常见范围，实际以方案确认后的报价为准。全部付费金额可抵后续正式服务费用。",
+    "roiNote": "收益口径写明「按什么折算」，具体金额在「企业AI投入ROI测算器」中按贵司人员工资与业务量测算。",
+    "rationale": "前两批共 3 个场景中，投入档最高的一档为「轻量场景」（1–5 万元）。按 暂时没有专人、期望 3 个月内见效的条件，建议以这一档规划第一年预算。",
+    "byScene": [
+      {
+        "name": "门店巡检与店员带教",
+        "cost": "零",
+        "range": "0 元",
+        "weeks": 3,
+        "roiBasis": "按督导差旅工时与新人培训周期下降折算"
+      },
+      {
+        "name": "智能报价与库存查价",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 4,
+        "roiBasis": "按报价提速带来的成单率提升折算"
+      },
+      {
+        "name": "跨境询盘分级与多语回复",
+        "cost": "零",
+        "range": "0 元",
+        "weeks": 2,
+        "roiBasis": "按询盘回复提速带来的转化率提升折算"
+      },
+      {
+        "name": "进口到岸成本测算",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 10,
+        "roiBasis": "按报价修正与低毛利商品调整带来的毛利提升折算"
+      },
+      {
+        "name": "报关单证预审",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 4,
+        "roiBasis": "按单证返工工时与滞港费用下降折算"
+      },
+      {
+        "name": "账期与回款预警",
+        "cost": "轻",
+        "range": "1–5 万元",
+        "weeks": 4,
+        "roiBasis": "按回款提前天数与资金成本折算"
+      },
+      {
+        "name": "多店多平台经营日报",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 8,
+        "roiBasis": "按对数工时下降与决策提前折算"
+      },
+      {
+        "name": "多平台账单与费用核对",
+        "cost": "中",
+        "range": "5–20 万元",
+        "weeks": 10,
+        "roiBasis": "按对账工时下降与差错追回金额折算"
+      }
+    ]
+  },
+  "checklist": [
+    {
+      "week": "第 1–2 周",
+      "item": "把陈列与服务标准整理成一份带图清单，先在三家门店试用",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "起步",
+      "no": 1
+    },
+    {
+      "week": "第 1–2 周",
+      "item": "把所需数据清单交给对应岗位：陈列与服务标准清单",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "数据",
+      "no": 2
+    },
+    {
+      "week": "第 3–4 周",
+      "item": "标准需要有人牵头统一，各店自行发挥的部分先做收口",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "前置",
+      "no": 3
+    },
+    {
+      "week": "第 3–4 周",
+      "item": "整理门店巡检照片与整改记录与高频问题与应答话术整理，确认口径一致",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "数据",
+      "no": 4
+    },
+    {
+      "week": "第 5–8 周",
+      "item": "在「AI人力官」里配置该场景并试运行两周",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "上线",
+      "no": 5
+    },
+    {
+      "week": "第 5–8 周",
+      "item": "记录使用前后的对比：新店员独立上岗周期缩短三分之一",
+      "owner": "督导与店长",
+      "scene": "门店巡检与店员带教",
+      "kind": "验收",
+      "no": 6
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "把近三个月询盘汇总成一张表，标注来源、国家与当前状态",
+      "owner": "外贸业务员与平台运营",
+      "scene": "跨境询盘分级与多语回复",
+      "kind": "准备",
+      "no": 7
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "收集近一年退单记录，整理出高频出错的申报要素清单",
+      "owner": "单证员与关务主管",
+      "scene": "报关单证预审",
+      "kind": "准备",
+      "no": 8
+    },
+    {
+      "week": "第 9–12 周",
+      "item": "评估补齐「ERP」，它关系到 7 个场景",
+      "owner": "数字化负责人",
+      "scene": "数据补齐",
+      "kind": "数据",
+      "no": 9
+    }
+  ],
+  "risks": [
+    {
+      "level": "中",
+      "title": "暂无专人推进",
+      "text": "建议指定一名业务骨干牵头，每周固定半天推进。同时启动多个场景会让进度都停在半途。"
+    },
+    {
+      "level": "中",
+      "title": "关键数据源缺失 4 项",
+      "text": "缺少ERP、电商 / 门店系统、CRM、OA / 协同办公，影响 6 个场景。补齐顺序建议按解锁场景数排：ERP（7 个）、电商 / 门店系统（3 个）、CRM（2 个）、OA / 协同办公（1 个）。"
+    }
+  ],
+  "sectorInsight": {
+    "name": "商贸流通",
+    "insight": "商贸企业的核心是周转与转化：询盘分级、报价生成、库存周转预测、应收账款预警、多平台运营。数据大多沉淀在财务软件与平台后台，两者之间靠人工对账，AI 的第一步往往是把订单、库存、回款三类数据拉到一张表上。",
+    "aiFocus": [
+      "询盘分级与自动报价",
+      "库存周转与补货预测",
+      "应收账款与回款预警"
+    ]
+  },
+  "keyNumbers": [
+    {
+      "k": "候选场景",
+      "v": "13",
+      "sub": "商贸流通场景库"
+    },
+    {
+      "k": "进入排序",
+      "v": "8",
+      "sub": "按四维总分排序"
+    },
+    {
+      "k": "首选场景",
+      "v": "门店巡检与店员带教",
+      "sub": "83 分 · 排名第 1",
+      "wide": true
+    },
+    {
+      "k": "数据就绪",
+      "v": "24%",
+      "sub": "数据条件待补齐"
+    },
+    {
+      "k": "起步投入",
+      "v": "1–5 万元",
+      "sub": "轻量场景"
+    },
+    {
+      "k": "首批见效",
+      "v": "3 周",
+      "sub": "上线周期"
+    }
+  ],
+  "quickView": [
+    {
+      "n": 1,
+      "q": "先做哪一个？",
+      "a": "门店巡检与店员带教",
+      "text": "门店运营环节，给督导与店长用，替代督导轮流跑店看陈列、口头讲一遍标准的做法。",
+      "tone": "cyan"
+    },
+    {
+      "n": 2,
+      "q": "为什么是它？",
+      "a": "83 分 · 四维均衡",
+      "text": "痛点强度 3、数据可得 5、见效周期 5、实施门槛 2（计分取反）。命中所选痛点「跑店督导」，严重度合计 3 / 10。",
+      "tone": "purple"
+    },
+    {
+      "n": 3,
+      "q": "数据够不够？",
+      "a": "数据条件待补齐 24%",
+      "text": "补齐「ERP」可解锁 7 个场景；首选场景所需数据现在就能拿到。",
+      "tone": "blue"
+    },
+    {
+      "n": 4,
+      "q": "多久见效？",
+      "a": "3 周上线",
+      "text": "新店员独立上岗周期缩短三分之一。第一步：把陈列与服务标准整理成一份带图清单，先在三家门店试用。",
+      "tone": "green"
+    },
+    {
+      "n": 5,
+      "q": "投多少？",
+      "a": "轻量场景 · 1–5 万元",
+      "text": "单个场景配置上线，配套一次数据整理与一轮培训。",
+      "tone": "navy"
+    },
+    {
+      "n": 6,
+      "q": "接下来做什么？",
+      "a": "跨境询盘分级与多语回复 · 报关单证预审",
+      "text": "第 4–8 个月并行推进，两个场景的改善出现在经营报表上，形成可复制的推进方式。",
+      "tone": "orange"
+    }
+  ],
+  "verdict": {
+    "label": "排序结论",
+    "headline": "先做「门店巡检与店员带教」，3 周上线，零投入起步，对应AI人力官模块",
+    "text": "排在前列：正面命中「跑店督导」，数据可得 5 / 5，见效 5 / 5，门槛 2 / 5。",
+    "score": 83,
+    "scoreLabel": "综合得分"
+  },
+  "summary": {
+    "position": "义乌恒益日用品商行所属商贸流通，本次从 13 个候选场景中排出优先级。所选 4 项痛点集中在「获客与销售」，数据就绪度 24%（数据条件待补齐）。",
+    "top": "排在第一的是「门店巡检与店员带教」，综合得分 83 分：门店运营环节，给督导与店长用，替代督导轮流跑店看陈列、口头讲一遍标准的做法，预期新店员独立上岗周期缩短三分之一。",
+    "combo": "三步走：第 1–3 个月先做「门店巡检与店员带教」；第 4–8 个月并行「跨境询盘分级与多语回复」「报关单证预审」；第 9–12 个月储备「智能报价与库存查价」「沉睡客户识别与复购提醒」。",
+    "next": "第一步：把陈列与服务标准整理成一份带图清单，先在三家门店试用。同时评估补齐「ERP」，它关系到 7 个场景。"
+  },
+  "summaryText": "义乌恒益日用品商行所属商贸流通，本次从 13 个候选场景中排出优先级。所选 4 项痛点集中在「获客与销售」，数据就绪度 24%（数据条件待补齐）。排在第一的是「门店巡检与店员带教」，综合得分 83 分：门店运营环节，给督导与店长用，替代督导轮流跑店看陈列、口头讲一遍标准的做法，预期新店员独立上岗周期缩短三分之一。三步走：第 1–3 个月先做「门店巡检与店员带教」；第 4–8 个月并行「跨境询盘分级与多语回复」「报关单证预审」；第 9–12 个月储备「智能报价与库存查价」「沉睡客户识别与复购提醒」。第一步：把陈列与服务标准整理成一份带图清单，先在三家门店试用。同时评估补齐「ERP」，它关系到 7 个场景。",
+  "render": [
+    {
+      "type": "summary",
+      "source": "summary"
+    },
+    {
+      "type": "rank-table",
+      "source": "ranked"
+    },
+    {
+      "type": "bubble-matrix",
+      "source": "scenes"
+    },
+    {
+      "type": "axis-bars",
+      "source": "axes"
+    },
+    {
+      "type": "funnel",
+      "source": "funnel"
+    },
+    {
+      "type": "sankey",
+      "source": "sankey"
+    },
+    {
+      "type": "scene-card",
+      "source": "top1"
+    },
+    {
+      "type": "heatmap",
+      "source": "readiness"
+    },
+    {
+      "type": "gantt",
+      "source": "roadmap"
+    },
+    {
+      "type": "invest-tiers",
+      "source": "investment"
+    },
+    {
+      "type": "risk-list",
+      "source": "risks"
+    },
+    {
+      "type": "checklist",
+      "source": "checklist"
+    }
+  ]
+}

@@ -7,17 +7,24 @@ skill 是这份定义加一个面向 AI OS 的清单，原型是这份定义加�
 skills/
   _shared/                 企业画像字段表 + 生成的 JSON Schema · 14 大类 / 54 细分行业表 · 积分表 · 禁忌词表 · lint
   01-ai-maturity/          企业AI成熟度评估（SKILL.md · schema · data · core · prompts · examples · scripts）
+  02-scene-ranking/        企业AI高价值场景排序（data/sectors 14 个大类场景库 · core · examples · scripts）
 prototype/
-  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js）+ 模板
+  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js）+ 图表（charts.js · charts-m2.js）+ 模板
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
-  test/screenshot.js       Chromium 走一遍流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
+  test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
+  test/screenshot-m2.js    模块 2 全流程：含权重拖动重排、预设切换、行详情联动、42 页报告与 PDF
   dist/index.html          交付物
 ```
 
 ## 常用命令
 
 ```bash
-cd skills/01-ai-maturity
+cd skills/02-scene-ranking
+node scripts/validate-data.js     # 场景库校验：字段、取值、标签闭环、覆盖度、14 个大类齐全
+node scripts/run-examples.js      # 四套样例企业跑内核，写 examples/*.output.json
+node scripts/lint.js              # 禁忌词扫描
+
+cd ../01-ai-maturity
 node scripts/run-examples.js      # 四套样例企业跑内核，写 examples/*.output.json
 node scripts/lint.js              # 禁忌词扫描
 node scripts/validate-schema.js   # 契约校验：样例过 schema · 画像 schema 与数据表一致 · 常量与内核一致 · 反例被拒
@@ -27,7 +34,9 @@ node scripts/gen-benchmark.js     # 重新生成参考带（业务侧抽样到�
 cd ../../prototype
 node build.js                     # 构建 dist/index.html
 NODE_PATH=$(npm root -g) node test/screenshot.js   # 需要 playwright + chromium：走完整流程、截图、比对内核、导出 PDF
-NODE_PATH=$(npm root -g) node test/measure.js      # 打印模拟下量每页高度，找 A4 溢出
+NODE_PATH=$(npm root -g) node test/screenshot-m2.js   # 模块 2 全流程
+NODE_PATH=$(npm root -g) node test/measure.js      # 模块 1 打印模拟下量每页高度
+NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（S1–S4）
 ```
 
 ## 原型的 URL 参数
@@ -45,6 +54,7 @@ NODE_PATH=$(npm root -g) node test/measure.js      # 打印模拟下量每页高
 | # | 模块 | 内核 + 数据 | 原型 | SKILL.md 契约 | 状态 |
 |---|---|---|---|---|---|
 | 1 | 企业AI成熟度评估 | v2 | v3 | v2（已与内核、原型同步） | 屏幕与内核逐字一致；咨询报告风格 33 页 / 速览 5 页，A4 逐页无溢出；契约校验全部通过 |
+| 2 | 企业AI高价值场景排序 | v1 | v1 | 待原型确认后同步 | 屏幕与内核逐字一致；交互式排序台（权重现场可调、实时重排）；报告 42 页 / 速览 6 页，四套样例 A4 均无溢出 |
 
 ### 模块 1 · v2 规模
 
@@ -56,3 +66,15 @@ NODE_PATH=$(npm root -g) node test/measure.js      # 打印模拟下量每页高
 - 12 种图表：封面主视觉（数据驱动六边形）· 雷达 · 渐变条 + 说明 · 竖条 + 参考带区间 · 等级刻度 · 堆叠条 · 同行分布曲线 · 环图 · 进度环 · 十八项排序 · 12 月路线图 · 价值难度矩阵
 - 内容库：60 条结构化行动（负责人 / 三步 / 交付物 / 周期 / 投入档 / 验收指标）· 54 段子维度诊断 · 70 个场景 · 16 条风险规则 · 270 格参考带
 - 契约 v2：`schema/input.json`（profile 13 项 + answers 36 × 0–3）· `schema/output.json`（success / failure 两种形态，definitions 内含全部子结构）· `_shared/company-profile.schema.json` 由字段表与行业表生成 · `SKILL.md` 写明追问顺序、计算规则表、对话回复格式、`render` 表与 33 页报告页表、降级表
+
+### 模块 2 · v1 规模
+
+- 场景库 14 个行业大类 × 13 个场景 = 182 个场景，覆盖各大类下的细分行业；痛点库 14 × 16 = 224 条
+- 每个场景 18 个字段：环节 / 使用者 / 替代什么 / 痛点标签 / 数据依赖 / 所需数据清单 / 价值 / 见效 / 门槛 / 投入档 / 上线周数 / 对应模块 / 预期指标 / 第一步 / 前置条件 / 收益折算口径
+- 评分按 DM 定稿公式：痛点强度 × 0.35 + 数据可得 × 0.30 + 见效周期 × 0.20 + (6 − 实施门槛) × 0.15，换算百分制
+- 四项现状条件（数据现状 / 半年目标 / 见效窗口 / 可投入人力）各自改变对应维度的得分，排序随企业实际情况变化
+- 四维权重现场可调：四个预设 + 四个滑块，拖动即重算重排；关键数据源缺失的场景数据可得直接计 1 分
+- 交互式排序台：结论横幅 · 排序表（可切前 8 / 全部 13）· 紧凑气泡矩阵 · 场景详情联动 · 三步走阶梯 · 紧凑筛选漏斗
+- 报告 42 页：封面 / 导航 / 01 结论速览 ×2 / 02 企业画像 ×2 / 03 痛点画像 ×2 / 04 评分方法 ×2 / 05 排序总表 ×3 / 06 价值与门槛 ×2 / 07–11 前五场景各 2 页 / 12 数据就绪度 ×2 / 13 排期 ×2 / 14 投入与回报 ×2 / 15 风险 / 16 90 天清单 / 17 未入选场景 / 附录 A–E / 相关服务 / 封底
+- 新增 14 种图表：封面主视觉 · 气泡矩阵（含紧凑模式）· 桑基（痛点→场景→模块）· 数据就绪热力图 · 筛选漏斗 · 12 月甘特 · 四维贡献堆叠条 · 得分瀑布 · 四维雷达对比 · 痛点分组条 · 痛点严重度气泡 · 半环仪表 · 三步走阶梯 · 数据依赖弧
+- 色板分域并通过色觉校验：四维轴 #E0635C / #1157B5 / #0E9F6E / #C9A227，痛点四组 #8A54DC / #0FA3C7 / #C4457E / #FF8A3D，两组不同图；模块名一律中性底色直接标注，不做颜色编码
