@@ -7,10 +7,10 @@ import type { UnitGroup } from '../units'
 import { POST_MODELS, postModelById, ABILITY_SETS, GRADE_LINE, FUNC_GRADES, PROD_GRADES, UNITS, short, unitOf } from './data'
 import { useNav, Typewriter, Kpi, Field } from './nav'
 
-export function MatrixView() {
+export function MatrixView({ line: line0 }: { line?: string }) {
   const { push, toast } = useNav()
   const [grp, setGrp] = useState<UnitGroup | '全部'>('全部')
-  const [line, setLine] = useState('全部')
+  const [line, setLine] = useState(line0 ?? '全部')
   const [q, setQ] = useState('')
   const lines = ['全部', ...Object.keys(ABILITY_SETS)]
   const list = useMemo(() => POST_MODELS.filter(m => (grp === '全部' || m.grp === grp) && (line === '全部' || m.line === line) && (!q || m.post.includes(q) || m.unit.includes(q) || m.dept.includes(q))), [grp, line, q])
@@ -62,7 +62,7 @@ export function PostModelView({ id }: { id: string }) {
       <div className="flex flex-col gap-3 min-h-0">
         <div className="panel p-4 shrink-0"><div className="flex items-center gap-2"><span className="tag">{m.line}</span><span className="tag">{m.ver}</span><span className="num text-[11px] text-slate-500 ml-auto">更新 {m.updated}</span></div><div className="text-[18px] font-semibold serif mt-1">{m.post}</div><div className="text-[11.5px] text-slate-500">{short(m.unit)} · {m.dept} · 在岗 {m.people.toLocaleString()} 人</div>
           <div className="grid grid-cols-3 gap-2 mt-3 text-center">{[['达标率', `${m.ready}%`], ['能力项', `${m.abilities.length} 项`], ['关联课程', `${m.abilities.reduce((s, a) => s + a.courses, 0)} 门`]].map(([k, v], i) => <div key={k} className="hairline py-2"><div className={`num text-[17px] font-semibold ${i === 0 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[10.5px] text-slate-500">{k}</div></div>)}</div></div>
-        <Panel title="能力项 × 等级要求线" className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入能力项定义</span>}>
+        <Panel title="能力项 × 等级要求线" className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-3"><Heatmap rows={m.abilities.map(a => `${a.k} · ${a.w}%`)} cols={grades} cells={cells} cellH={30} rowW={130} colorOf={v => heat(v)} onCell={r => push({ v: 'abilityDef', id: m.id, k: m.abilities[r].k })} /></div>
         </Panel>
       </div>

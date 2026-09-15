@@ -113,7 +113,7 @@ export function CatalogView({ r }: { r: Extract<Route, { v: 'catalog' }> }) {
             <span className="text-slate-500">筛选：</span>
             {crumbs.map(c => <span key={c} className="tag tag-gold">{c}</span>)}
             <button className="text-[11px] text-slate-500 underline ml-1" onClick={clearAll}>清除</button>
-            <span className="ml-auto text-[10.5px] text-slate-400">点击任一行进入二级详情页</span>
+            
           </div>
         )}
         <table className="grid">
@@ -221,7 +221,7 @@ export function AssetDetail({ id }: { id: string }) {
         </div>
       </div>
       <div className="flex flex-col gap-3 min-h-0">
-        <Panel title={`引用关系　共 ${refTotal} 处`} extra={<span className="text-[10.5px] text-slate-500">点击进入三级清单</span>}>
+        <Panel title={`引用关系　共 ${refTotal} 处`}>
           <div className="p-2 space-y-1.5">
             {a.refs.map(r => (
               <button key={r.kind} onClick={() => push({ v: 'refs', id: a.id, kind: r.kind })} className="w-full flex items-center gap-2 hairline px-2.5 py-2 hover:border-[var(--indigo-2)] hover:bg-slate-50 text-[12px]">

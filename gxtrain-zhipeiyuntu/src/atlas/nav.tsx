@@ -9,7 +9,7 @@ export type Route =
   | { v: 'board' }
   | { v: 'person'; id?: string; unit?: string; team?: string } | { v: 'ability'; p: string; k: string; unit?: string; team?: string } | { v: 'evidence'; p: string; idx: number; unit?: string; team?: string } | { v: 'compare'; p: string; unit?: string; team?: string } | { v: 'pathSim'; p: string; unit?: string; team?: string }
   | { v: 'unit' } | { v: 'unitDetail'; name: string } | { v: 'teamDetail'; unit: string; team: string }
-  | { v: 'matrix' } | { v: 'postModel'; id: string } | { v: 'abilityDef'; id: string; k: string }
+  | { v: 'matrix'; line?: string } | { v: 'postModel'; id: string } | { v: 'abilityDef'; id: string; k: string }
   | { v: 'gaps' } | { v: 'gapDetail'; id: string } | { v: 'gapPeople'; id: string }
   | { v: 'talent' } | { v: 'pool'; box: string } | { v: 'succession'; post: string }
   | { v: 'journey' } | { v: 'cohort'; id: string } | { v: 'cohortStage'; id: string; m: number }
@@ -27,7 +27,7 @@ export function labelOf(r: Route): string {
     case 'unit': return '单位能力全景'
     case 'unitDetail': return short(r.name)
     case 'teamDetail': return r.team
-    case 'matrix': return '岗位能力模型'
+    case 'matrix': return r.line ? `岗位能力模型 · ${r.line}` : '岗位能力模型'
     case 'postModel': return `${postModelById(r.id)?.post ?? ''} 模型`
     case 'abilityDef': return `能力项 · ${r.k}`
     case 'gaps': return '缺口与预警'

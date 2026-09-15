@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Panel, Bars, Progress } from '../ui'
 import { ROLES, roleById, METRICS, metricById, metricValue, teamRows, personRows, monthSeries, unitShort, SKILLS } from './data'
 import { answer, suggest } from './engine'
-import type { DrillRow } from './engine'
+import type { Answer, DrillRow } from './engine'
 import { SESSIONS, current, switchSession, newSession, addTurn, resolveTurn, answerById, togglePin } from './store'
 import type { Turn } from './store'
 import { useNav, KindTag, Typewriter, Field, useWidth } from './nav'
+import { ABILITY_SETS } from '../atlas/data'
 import type { Route } from './nav'
 import { UNITS } from '../units'
 
@@ -102,7 +103,7 @@ export function ChatView({ r }: { r: Extract<Route, { v: 'chat' }> }) {
         </Panel>
         <Panel title="本会话出处" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1">
-            {cites.map(c => <button key={c.t} className="w-full text-left cite justify-start" onClick={() => c.id ? jump('hub', 'catalog', { v: 'asset', id: c.id }) : jump('hub', 'search', { v: 'search', q: c.s })}><b>{c.t}</b><span className="text-slate-500 truncate">{c.s}</span></button>)}
+            {cites.map(c => <button key={c.t} className="w-full text-left cite justify-start" onClick={() => c.m ? push({ v: 'metric', id: c.m }) : c.id ? jump('hub', 'catalog', { v: 'asset', id: c.id }) : jump('hub', 'search', { v: 'search', q: c.s })}><b>{c.t}</b><span className="text-slate-500 truncate">{c.s}</span></button>)}
             {cites.length === 0 && <div className="text-[11.5px] text-slate-400 p-2">回答中的出处会汇总在这里，可直接跳到中枢条目</div>}
           </div>
         </Panel>
@@ -132,6 +133,21 @@ function MiniLine({ data, unit }: { data: { label: string; v: number }[]; unit?:
   </svg>}</div>
 }
 
+const LINES = Object.keys(ABILITY_SETS)
+/* 图表柱子的去向：与下钻行对得上就进该行的三级页，整张图都是专业线就进成长地图的岗位能力模型；对不上就不做成可点 */
+function pickOf(a: Answer, push: (r: Route) => void, jump: (n: string, tab: string, r?: { v: string; [k: string]: unknown }) => void) {
+  if (!a.chart || a.chart.type !== 'bar') return undefined
+  const rows = a.drill?.rows ?? []
+  const rowOf = (l: string) => rows.find(x => x.short === l || x.name === l)
+  if (a.drill && a.drill.dim !== '月份' && a.chart.data.some(d => rowOf(d.label))) {
+    return (l: string) => { const r = rowOf(l); if (r) push({ v: 'row', a: a.id, name: r.name }) }
+  }
+  if (a.chart.data.length > 1 && a.chart.data.every(d => LINES.includes(d.label))) {
+    return (l: string) => jump('map', 'matrix', { v: 'matrix', line: l })
+  }
+  return undefined
+}
+
 function TurnView({ t, last, stepIdx, onAsk, onFb, push, jump, toast }: { t: Turn; last: boolean; stepIdx: number; onAsk: (q: string) => void; onFb: (f: 'up' | 'down') => void; push: (r: Route) => void; jump: (n: string, tab: string, r?: { v: string; [k: string]: unknown }) => void; toast: (m: string) => void }) {
   const a = t.a
   const steps = a?.think ?? ['识别意图与范围…', '匹配口径与检索来源…', '取数与校验…', '生成回答…']
@@ -151,9 +167,9 @@ function TurnView({ t, last, stepIdx, onAsk, onFb, push, jump, toast }: { t: Tur
               <div className="flex items-center gap-2 mt-2"><KindTag k={a.kind} /><span className="text-[10.5px] text-slate-400">范围：{a.scope}</span>{a.skill && <span className="tag">{SKILLS.find(s => s.id === a.skill)?.name}</span>}</div>
               <div className="atext">{last ? <Typewriter text={a.text} speed={6} /> : a.text}</div>
               {a.exec && <div className="exec mt-2">{a.exec.steps.map(s => <div key={s} className="row"><i>✓</i>{s}</div>)}<div className="mt-1.5 flex flex-wrap gap-1.5">{a.exec.params.map(p => <span key={p.k} className="tag">{p.k}：{p.v}</span>)}</div></div>}
-              {a.chart && <div className="mt-3 hair-t pt-3">{a.chart.type === 'line' ? <><div className="text-[11.5px] text-slate-600 mb-1">{a.chart.title}</div><MiniLine data={a.chart.data} unit={a.chart.unit} /></> : <Bars title={a.chart.title} data={a.chart.data} unit={a.chart.unit === '%' ? '%' : ''} />}</div>}
+              {a.chart && <div className="mt-3 hair-t pt-3">{a.chart.type === 'line' ? <><div className="text-[11.5px] text-slate-600 mb-1">{a.chart.title}</div><MiniLine data={a.chart.data} unit={a.chart.unit} /></> : <Bars title={a.chart.title} data={a.chart.data} unit={a.chart.unit === '%' ? '%' : ''} onPick={pickOf(a, push, jump)} />}</div>}
               {a.caliber && <div className="caliber mt-3"><b>口径</b> {a.caliber.name} = {a.caliber.formula}<span className="text-slate-500"> · 来源 {a.caliber.src} · {a.caliber.freq} · 责任 {a.caliber.owner}</span></div>}
-              {a.refs.length > 0 && <div className="mt-3 hair-t pt-2.5"><div className="text-[10.5px] text-slate-500 mb-1.5">出处</div><div className="chips-row">{a.refs.map(r => <button key={r.t} className="cite" onClick={() => r.id ? jump('hub', 'catalog', { v: 'asset', id: r.id }) : jump('hub', 'search', { v: 'search', q: r.s })}><b>{r.t}</b><span className="text-slate-500">{r.s}</span></button>)}</div></div>}
+              {a.refs.length > 0 && <div className="mt-3 hair-t pt-2.5"><div className="text-[10.5px] text-slate-500 mb-1.5">出处</div><div className="chips-row">{a.refs.map(r => <button key={r.t} className="cite" onClick={() => r.m ? push({ v: 'metric', id: r.m }) : r.id ? jump('hub', 'catalog', { v: 'asset', id: r.id }) : jump('hub', 'search', { v: 'search', q: r.s })}><b>{r.t}</b><span className="text-slate-500">{r.s}</span></button>)}</div></div>}
               <div className="mt-3 flex flex-wrap items-center gap-1.5">
                 {a.drill && <button className="ans-act" onClick={() => push({ v: 'drill', a: a.id })}><span className="ic">钻</span>数据下钻 · {a.drill.rows.length} 条</button>}
                 <button className="ans-act" onClick={() => push({ v: 'trace', a: a.id })}><span className="ic" style={{ background: 'linear-gradient(135deg,var(--gold),var(--gold-2))' }}>溯</span>答案溯源</button>
@@ -262,7 +278,9 @@ export function RowView({ aid, name }: { aid: string; name: string }) {
   if (!a || !a.drill) return null
   const m = metricById(a.drill.metric)!
   const dim = a.drill.dim
-  const sub = dim === '单位' || dim === '地市局' ? teamRows(m, name) : dim === '班组' || dim === '科室' ? personRows(m, name) : []
+  const atTeam = name.includes(' · ')
+  const sub = atTeam ? personRows(m, name) : dim === '单位' || dim === '地市局' ? teamRows(m, name) : dim === '班组' || dim === '科室' ? personRows(m, name) : []
+  const subDim = atTeam ? '成员' : sub.length ? `下属${sub[0].grp}` : '成员'
   const series = monthSeries(m, name)
   const others = METRICS.filter(x => x.id !== m.id).slice(0, 5)
   return (
@@ -272,8 +290,8 @@ export function RowView({ aid, name }: { aid: string; name: string }) {
           <div className="grid grid-cols-6 gap-2 mt-3">{[m, ...others].map((x, i) => <div key={x.id} className="hairline py-2 text-center"><div className={`num text-[17px] font-semibold ${i === 0 ? 'num-grad' : 'gold-grad'}`}>{x.fmt(metricValue(x, name))}</div><div className="text-[10px] text-slate-500 truncate px-1">{x.name}</div></div>)}</div></div>
         <Panel title={`${m.name} · 近 12 个月`} className="flex-1"><div className="p-3"><MiniLine data={series} unit={m.unit} /></div></Panel>
       </div>
-      <Panel title={sub.length ? `${dim === '单位' || dim === '地市局' ? '下属班组' : '成员'}　${sub.length}` : '记录'} bodyClass="overflow-auto scroll">
-        {sub.length ? <table className="grid"><thead><tr><th>#</th><th>名称</th><th>{m.name}</th><th>环比</th></tr></thead><tbody>{sub.map((r, i) => <tr key={r.name} className="tbl-row" onClick={() => dim === '单位' || dim === '地市局' ? push({ v: 'row', a: aid, name: r.name }) : jump('map', 'person')}><td className="num text-slate-400">{i + 1}</td><td className="font-medium">{r.short}</td><td className="w-[150px]"><div className="flex items-center gap-2"><div className="heat flex-1"><i style={{ width: `${Math.min(100, m.unit === '%' ? r.v : 60)}%`, background: 'linear-gradient(90deg,var(--indigo),var(--ai))' }} /></div><span className="num w-[48px] text-right">{m.fmt(r.v)}</span></div></td><td className="num" style={{ color: r.trend >= 0 ? 'var(--ok)' : 'var(--bad)' }}>{r.trend >= 0 ? '↑' : '↓'} {Math.abs(r.trend)}</td></tr>)}</tbody></table>
+      <Panel title={sub.length ? `${subDim}　${sub.length}` : '记录'} bodyClass="overflow-auto scroll">
+        {sub.length ? <table className="grid"><thead><tr><th>#</th><th>名称</th><th>{m.name}</th><th>环比</th></tr></thead><tbody>{sub.map((r, i) => <tr key={r.name} className="tbl-row" onClick={() => atTeam || dim === '班组' || dim === '科室' ? jump('map', 'person') : push({ v: 'row', a: aid, name: r.name })}><td className="num text-slate-400">{i + 1}</td><td className="font-medium">{r.short}</td><td className="w-[150px]"><div className="flex items-center gap-2"><div className="heat flex-1"><i style={{ width: `${Math.min(100, m.unit === '%' ? r.v : 60)}%`, background: 'linear-gradient(90deg,var(--indigo),var(--ai))' }} /></div><span className="num w-[48px] text-right">{m.fmt(r.v)}</span></div></td><td className="num" style={{ color: r.trend >= 0 ? 'var(--ok)' : 'var(--bad)' }}>{r.trend >= 0 ? '↑' : '↓'} {Math.abs(r.trend)}</td></tr>)}</tbody></table>
           : <div className="p-3 space-y-1.5 text-[12px]">{[['2026-09-05', '陪练 · 线路由运行转检修', '86 分 · 通过'], ['2026-08-22', '考试 · 安规年度考试', '92 分 · 合格'], ['2026-08-10', '课程 · 低压台区反送电判断', '4 学时 · 完成'], ['2026-07-18', '陪练 · 母线倒闸操作', '74 分 · 未通过']].map(([t, n, r]) => <div key={t} className="hairline px-2.5 py-2"><div className="flex items-center gap-2"><span className="num text-[10.5px] text-slate-400">{t}</span><span className="ml-auto text-[11px]" style={{ color: r.includes('未') ? 'var(--bad)' : 'var(--ok)' }}>{r}</span></div><div>{n}</div></div>)}</div>}
       </Panel>
       <div className="flex flex-col gap-3 min-h-0">

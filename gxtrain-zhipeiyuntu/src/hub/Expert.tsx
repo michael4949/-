@@ -120,7 +120,7 @@ export function ExpertDetail({ id }: { id: string }) {
         </Panel>
       </div>
       <div className="flex flex-col gap-3 min-h-0">
-        <Panel title={`已沉淀诀窍　${e.items} 条`} className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入三级条目页</span>}>
+        <Panel title={`已沉淀诀窍　${e.items} 条`} className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1">
             {tips.map((a, i) => (
               <button key={a!.id} onClick={() => push({ v: 'asset', id: a!.id })} className="w-full text-left px-2 py-1.5 hover:bg-slate-50 hairline row-in" style={{ animationDelay: `${i * .04}s` }}>

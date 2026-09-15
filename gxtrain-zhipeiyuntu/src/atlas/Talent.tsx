@@ -27,7 +27,7 @@ export function TalentView() {
         <Kpi k="3 年内退休高技能" v={<CountUp to={186} />} d="其中技师及以上 64 人" gold onClick={() => push({ v: 'succession', post: KEY_POSTS[0].post })} />
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[1fr_300px_360px] gap-3">
-        <Panel title="能力 × 潜力九宫格　全公司样本" extra={<span className="text-[10.5px] text-slate-500">点击人员进入成长地图</span>}>
+        <Panel title="能力 × 潜力九宫格　全公司样本">
           <div className="px-2 pt-1"><Scatter points={pts} xLabel="能力得分" yLabel="潜力评估" h={300} xMin={58} xMax={94} yMin={46} yMax={94} quadrants quadLabels={['潜力型', '高潜骨干', '明星', '待观察', '中坚', '专家型', '待改进', '稳定执行', '技术能手']} sel={sel} onPoint={p => { setSel(p.id); const t = TALENTS.find(x => x.id === p.id); const pp = t && ALL_PEOPLE.find(x => x.id === t.id); if (pp) push({ v: 'person', id: pp.id, unit: pp.unit, team: pp.team }) }} /></div>
           <div className="grid grid-cols-3 gap-1.5 px-3 pb-3">{BOXES.flat().map(b => <button key={b} onClick={() => push({ v: 'pool', box: b })} className="hairline px-2 py-1.5 text-left hover:border-[var(--ai)] flex items-center gap-2"><span className="w-2 h-2 rounded-full" style={{ background: BOX_COLOR[b] }} /><span className="text-[11px]">{BOX_NAME[b]}</span><span className="ml-auto num text-[12px] font-semibold" style={{ color: 'var(--indigo)' }}>{Math.round(count(b) * SCALE).toLocaleString()}</span></button>)}</div>
         </Panel>
@@ -36,7 +36,7 @@ export function TalentView() {
           <Panel title="预测明年晋级　按当前进度" className="flex-1" extra={<span className="ai-badge">预测</span>}><div className="p-3"><Columns h={120} data={nextYear} /><button className="btn btn-sm w-full mt-2" onClick={() => { toast('已把 128 名仅差一项的人员纳入第四季度专项陪练'); jump('coach', 'company') }}>安排 128 人专项陪练</button></div></Panel>
         </div>
         <div className="flex flex-col gap-3 min-h-0">
-          <Panel title="关键岗位继任" className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入继任视图</span>}>
+          <Panel title="关键岗位继任" className="flex-1" bodyClass="overflow-auto scroll">
             <div className="p-2 space-y-1.5">{KEY_POSTS.map(k => <button key={k.post} onClick={() => push({ v: 'succession', post: k.post })} className="a-card w-full text-left"><div className="flex items-center gap-2"><span className={`tag ${k.readyN < 2 ? 'tag-bad' : k.readyN < 3 ? 'tag-warn' : 'tag-ok'}`}>{k.readyN < 2 ? '储备不足' : k.readyN < 3 ? '待加强' : '充足'}</span><span className="text-[12px] font-medium truncate flex-1">{k.post}</span></div><div className="flex items-center gap-2 text-[10.5px] text-slate-500 mt-1"><span>{k.unit} · {k.holder}</span><span className="ml-auto num">退休 {k.retire}</span></div><div className="flex items-center gap-1 mt-1.5">{Array.from({ length: k.poolN }).map((_, i) => <span key={i} className="w-3 h-1.5 rounded-sm" style={{ background: i < k.readyN ? 'var(--ok)' : '#e2e8f0' }} />)}<span className="num text-[10px] text-slate-500 ml-1">{k.readyN} / {k.poolN} 就绪</span></div><span className="go">›</span></button>)}</div>
           </Panel>
           <Panel title="AI 判读"><div className="p-3"><div className="ai-out text-[12px]"><Typewriter text={`明星区 ${Math.round(star * SCALE)} 人，建议纳入内训师与带教师傅候选；${KEY_POSTS.filter(k => k.readyN < 2).map(k => k.post).join('、')}继任储备不足，需在 ${KEY_POSTS.filter(k => k.readyN < 2)[0]?.retire ?? '今年'} 前完成经验萃取。技师层同比 +6.1%，中级工层 -3.8%，说明晋级通道畅通。`} speed={7} /></div></div></Panel>
@@ -56,7 +56,7 @@ export function PoolView({ box }: { box: string }) {
   const units = Object.entries(list.reduce<Record<string, number>>((m, t) => { m[t.unit] = (m[t.unit] ?? 0) + 1; return m }, {})).sort((a, b) => b[1] - a[1]).slice(0, 8)
   return (
     <div className="h-full grid grid-cols-[1fr_300px_320px] gap-3 p-3 min-h-0">
-      <Panel title={`${BOX_NAME[box]} · ${box}　样本 ${list.length} 人 / 推算 ${Math.round(list.length * SCALE).toLocaleString()} 人`} bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入个人成长地图</span>}>
+      <Panel title={`${BOX_NAME[box]} · ${box}　样本 ${list.length} 人 / 推算 ${Math.round(list.length * SCALE).toLocaleString()} 人`} bodyClass="overflow-auto scroll">
         <table className="grid"><thead><tr><th>姓名</th><th>单位</th><th>岗位</th><th>等级</th><th>能力</th><th>潜力</th><th>建议动作</th></tr></thead>
           <tbody>{list.map(t => { const p = personById(t.id); return <tr key={t.id} className="cursor-pointer row-in" onClick={() => p && push({ v: 'person', id: p.id, unit: p.unit, team: p.team })}><td className="font-medium">{t.name}</td><td>{t.unit}</td><td>{t.post}</td><td>{t.grade}</td><td className="num font-semibold">{t.ability}</td><td className="num">{t.potential}</td><td><span className="tag">{box.startsWith('高') ? '继任 / 带教' : box.endsWith('高潜力') ? '导师 + 加密陪练' : '补短板'}</span></td></tr> })}</tbody></table>
       </Panel>

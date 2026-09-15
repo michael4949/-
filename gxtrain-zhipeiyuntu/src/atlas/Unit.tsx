@@ -30,12 +30,12 @@ export function UnitView() {
         <Kpi k="平均达标率" v={<><CountUp to={avg} dec={1} /><span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d={`最高 ${short(units[0]?.name ?? '')} ${unitReady(units[0])}%`} gold />
         <Kpi k={bureauMode ? '低于 80% 的地市局' : '低于 80% 的单位'} v={<CountUp to={bureauMode ? BUREAUS.filter(b => bureauReady(b) < 80).length : below.length} />} d={(bureauMode ? BUREAUS.filter(b => bureauReady(b) < 80).slice(0, 3) : below.slice(0, 3).map(u => short(u.name))).join(' · ') || '无'} onClick={() => bureauMode ? push({ v: 'unitDetail', name: BUREAU_UNIT.name }) : below[0] && push({ v: 'unitDetail', name: below[0].name })} />
         <Kpi k="最薄弱领域" v={weak[0].k} d={`平均 ${weak[0].v} 分 · 其次 ${weak[1].k} ${weak[1].v} 分`} gold />
-        <Kpi k="岗位模型" v={<CountUp to={POST_MODELS.filter(m => grp === '全部' || m.grp === grp).length} />} d="点击进入岗位能力模型" onClick={() => push({ v: 'matrix' })} />
+        <Kpi k="岗位模型" v={<CountUp to={POST_MODELS.filter(m => grp === '全部' || m.grp === grp).length} />} d="覆盖 9 个专业与领域" onClick={() => push({ v: 'matrix' })} />
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[1fr_400px] gap-3">
         <Panel title="单位 × 能力领域热力矩阵" bodyClass="overflow-auto scroll" extra={<div className="seg">{(['全部', ...UNIT_GROUPS] as const).map(g => <button key={g} className={grp === g ? 'on' : ''} onClick={() => setGrp(g)}>{g}</button>)}</div>}>
           <div className="p-3"><Heatmap rows={rows} cols={DOMAINS} cells={cells} cellH={26} rowW={124} colorOf={v => heat(v)} sel={sel && !bureauMode ? [units.findIndex(u => u.id === sel), -1] : null} onCell={(r) => bureauMode ? push({ v: 'teamDetail', unit: BUREAU_UNIT.name, team: rows[r] }) : push({ v: 'unitDetail', name: units[r].name })} />
-            <div className="flex items-center gap-3 text-[10.5px] text-slate-500 mt-2"><span>颜色越深达标率越高</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(65) }} />65</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(80) }} />80</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(95) }} />95</span><span className="ml-auto">点击任一格进入单位详情</span></div>
+            <div className="flex items-center gap-3 text-[10.5px] text-slate-500 mt-2"><span>颜色越深达标率越高</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(65) }} />65</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(80) }} />80</span><span className="flex items-center gap-1"><i className="w-3 h-3 rounded-sm inline-block" style={{ background: heat(95) }} />95</span><span className="ml-auto"></span></div>
           </div>
         </Panel>
         <div className="flex flex-col gap-3 min-h-0">
@@ -76,7 +76,7 @@ export function UnitDetail({ name }: { name: string }) {
       </div>
       <div className="flex flex-col gap-3 min-h-0">
         <Panel title="达标率走势　12 个月 · 与公司均值对照"><div className="px-3 pt-2"><LineChart labels={MONTHS} h={150} unit="%" series={[{ name: short(u.name), color: '#2f6df6', area: true, data: trend }, { name: '公司均值', color: '#94a3b8', dash: true, data: companyAvg }]} target={{ v: 90, label: '年度目标 90%' }} yMin={60} yMax={100} /></div></Panel>
-        <Panel title={`${isFunc(u) ? '科室' : isBureauUnit(u) ? '地市局' : '班组'}达标排行　${teams.length} 个`} className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入三级</span>}>
+        <Panel title={`${isFunc(u) ? '科室' : isBureauUnit(u) ? '地市局' : '班组'}达标排行　${teams.length} 个`} className="flex-1" bodyClass="overflow-auto scroll">
           <table className="grid"><thead><tr><th>#</th><th>{isFunc(u) ? '科室' : isBureauUnit(u) ? '地市局' : '班组'}</th><th>负责人</th><th>人数</th><th>达标率</th><th>缺口项</th><th>趋势</th></tr></thead>
             <tbody>{teams.map((t, i) => <tr key={t.name} className="cursor-pointer" onClick={() => push({ v: 'teamDetail', unit: u.name, team: t.name })}><td className="num" style={{ color: i < 3 ? 'var(--gold)' : '#94a3b8' }}>{i + 1}</td><td className="font-medium">{t.name}</td><td>{t.lead}</td><td className="num">{t.n}</td><td className="num font-semibold" style={{ color: t.v >= 85 ? 'var(--ok)' : t.v >= 75 ? 'var(--indigo)' : 'var(--bad)' }}>{t.v}%</td><td className="num">{t.gaps} 项</td><td><Delta v={t.trend} unit="pt" /></td></tr>)}</tbody></table>
         </Panel>
@@ -120,13 +120,13 @@ export function TeamDetail({ unit, team }: { unit: string; team: string }) {
     <div className="h-full grid grid-cols-[1fr_1fr_320px] gap-3 p-3 min-h-0">
       <div className="flex flex-col gap-3 min-h-0">
         <div className="panel p-3 shrink-0 flex items-center gap-3"><div><div className="text-[15px] font-semibold serif">{team}</div><div className="text-[11px] text-slate-500">{short(u.name)} · 负责人 {t.lead} · {t.n.toLocaleString()} 人{isBureau ? ' · 样本班组 变电管理一所' : ` · 岗位 ${post}`}</div></div><div className="ml-auto flex items-center gap-2"><Ring v={t.v} size={54} stroke={6} /><div className="text-[11px] text-slate-500">达标率<br /><Delta v={t.trend} unit="pt" /></div></div></div>
-        <Panel title={`成员 × 能力项热力　样本 ${people.length} 人`} className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击格子看该成员该能力</span>}>
+        <Panel title={`成员 × 能力项热力　样本 ${people.length} 人`} className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-3"><Heatmap rows={people.map(p => p.name)} cols={abilities} cells={cells} cellH={26} rowW={70} colorOf={v => heat(v)} onCell={(r, c) => push({ v: 'ability', p: people[r].id, k: abilities[c], unit: people[r].unit, team: people[r].team })} /></div>
         </Panel>
       </div>
       <div className="flex flex-col gap-3 min-h-0">
         <Panel title="能力项均值"><div className="p-3"><Columns h={120} data={avgAb.map(a => ({ ...a, color: a.v < 70 ? 'var(--bad)' : undefined }))} max={100} /></div></Panel>
-        <Panel title="成员达标排行" className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入个人成长地图</span>}>
+        <Panel title="成员达标排行" className="flex-1" bodyClass="overflow-auto scroll">
           <table className="grid"><thead><tr><th>#</th><th>姓名</th><th>等级</th><th>综合</th><th>缺口</th><th>完成度</th><th>预计达标</th></tr></thead>
             <tbody>{sorted.map((p, i) => <tr key={p.id} className="cursor-pointer" onClick={() => push({ v: 'person', id: p.id, unit: p.unit, team: p.team })}><td className="num" style={{ color: i < 3 ? 'var(--gold)' : '#94a3b8' }}>{i + 1}</td><td className="font-medium">{p.name}</td><td>{p.grade}</td><td className="num font-semibold">{score(p.abilities)}</td><td className="num" style={{ color: p.abilities.filter(a => a.v < a.need).length >= 3 ? 'var(--bad)' : 'inherit' }}>{p.abilities.filter(a => a.v < a.need).length} 项</td><td><div className="flex items-center gap-1.5"><div className="w-[60px] h-[6px] bg-slate-100 rounded overflow-hidden"><div className="h-full bar-grow" style={{ width: `${p.progress}%`, background: 'var(--ai)' }} /></div><span className="num text-[10.5px]">{p.progress}%</span></div></td><td className="num">{p.eta} 个月</td></tr>)}</tbody></table>
         </Panel>

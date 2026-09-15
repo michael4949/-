@@ -22,7 +22,7 @@ export function PersonView({ id, unit, team }: { id?: string; unit?: string; tea
       <div className="flex flex-col gap-3 min-h-0">
         <Panel title="学员" extra={<input value={q} onChange={e => setQ(e.target.value)} placeholder="搜本班组成员" className="hairline px-2 py-0.5 text-[11px] w-[100px] outline-none" />}>
           <div className="p-3.5">
-            <div className="flex items-center gap-3 mb-2"><div className="w-12 h-12 rounded-2xl flex items-center justify-center text-[18px] font-semibold text-white serif" style={{ background: 'linear-gradient(135deg,var(--indigo),var(--ai))' }}>{p.name[0]}</div><div><div className="text-[15px] font-semibold">{p.name}</div><div className="text-[11.5px] text-slate-500">{p.post} · {p.grade}</div></div><div className="ml-auto"><Ring v={p.progress} size={56} stroke={6} sub="" /></div></div>
+            <div className="flex items-center gap-3 mb-2"><div className="w-12 h-12 rounded-2xl flex items-center justify-center text-[18px] font-semibold text-white serif" style={{ background: 'linear-gradient(135deg,var(--indigo),var(--ai))' }}>{p.name[0]}</div><div><div className="text-[15px] font-semibold">{p.name}</div><div className="text-[11.5px] text-slate-500">{p.post} · {p.grade}</div></div><div className="ml-auto"><Ring v={p.progress} size={56} stroke={6} /></div></div>
             <div className="text-[11.5px] text-slate-500">{p.team} · 从业 {p.years} 年 · 师傅 {p.mentor}</div>
             <div className="gold-rule my-2.5" />
             <div className="text-[11px] text-slate-500 mb-1">距 {p.nextGrade} 要求线完成度 <b className="num" style={{ color: 'var(--gold)' }}>{p.progress}%</b> · 预计 {p.eta} 个月</div>
@@ -53,7 +53,7 @@ export function PersonView({ id, unit, team }: { id?: string; unit?: string; tea
         </Panel>
         <Panel title="缺口与补齐路径" className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1.5">
-            {gaps.map((g, i) => <button key={g.k} onClick={() => push({ v: 'ability', p: p.id, k: g.k, unit: p.unit, team: p.team })} className="a-card w-full text-left"><div className="flex items-center gap-2"><span className={`tag ${i === 0 ? 'tag-bad' : i === 1 ? 'tag-warn' : ''}`}>{i === 0 ? '高优先' : i === 1 ? '中优先' : '低优先'}</span><span className="text-[12.5px] font-medium">{g.k}</span><span className="ml-auto num text-[12px]" style={{ color: 'var(--bad)' }}>差 {g.need - g.v}</span></div><div className="text-[11px] text-slate-500 mt-1">课程 · 陪练 · 带教三条路径，点开查看证据与方案</div><span className="go">›</span></button>)}
+            {gaps.map((g, i) => <button key={g.k} onClick={() => push({ v: 'ability', p: p.id, k: g.k, unit: p.unit, team: p.team })} className="a-card w-full text-left"><div className="flex items-center gap-2"><span className={`tag ${i === 0 ? 'tag-bad' : i === 1 ? 'tag-warn' : ''}`}>{i === 0 ? '高优先' : i === 1 ? '中优先' : '低优先'}</span><span className="text-[12.5px] font-medium">{g.k}</span><span className="ml-auto num text-[12px]" style={{ color: 'var(--bad)' }}>差 {g.need - g.v}</span></div><div className="text-[11px] text-slate-500 mt-1">课程、陪练与带教三条补齐路径</div><span className="go">›</span></button>)}
             {gaps.length === 0 && <div className="text-[12px] p-3" style={{ color: 'var(--ok)' }}>✓ 全部能力项已达要求线，可申报 {p.nextGrade}</div>}
           </div>
         </Panel>
@@ -79,7 +79,7 @@ export function AbilityView({ p: pid, k, unit, team }: { p: string; k: string; u
         <Panel title="得分走势　12 个月" className="flex-1"><div className="px-3 pt-2"><LineChart labels={labels} h={200} series={[{ name: a.k, color: '#2f6df6', area: true, data: a.history }, { name: '要求线', color: '#b08a3e', dash: true, data: Array(12).fill(a.need) }, { name: '班组均值', color: '#94a3b8', dash: true, data: Array.from({ length: 12 }).map((_, m) => Math.round(mates.reduce((s, x) => s + (x.abilities.find(y => y.k === a.k)?.history[m] ?? 0), 0) / mates.length)) }]} yMin={40} yMax={100} /></div></Panel>
         <Panel title="同岗位分布　本班组"><div className="p-3"><Columns h={110} data={bins} /><div className="text-[10.5px] text-slate-500 mt-1">金色为本人所在区间</div></div></Panel>
       </div>
-      <Panel title={`证据记录　${ev.length} 条`} bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入三级</span>}>
+      <Panel title={`证据记录　${ev.length} 条`} bodyClass="overflow-auto scroll">
         <div className="p-2 space-y-1.5">{ev.length ? ev.map(r => <button key={r.t} onClick={() => push({ v: 'evidence', p: p.id, idx: p.records.indexOf(r), unit: p.unit, team: p.team })} className="a-card w-full text-left"><div className="flex items-center gap-1.5"><span className="tag">{r.k}</span><span className="num text-[10.5px] text-slate-400 ml-auto">{r.t}</span></div><div className="text-[12.5px] mt-1">{r.n}</div><div className="flex items-center gap-2 text-[11px] mt-0.5"><span style={{ color: r.ok ? 'var(--ok)' : 'var(--bad)' }}>{r.r}</span><span className="ml-auto"><Delta v={r.delta} /></span></div><span className="go">›</span></button>) : <div className="text-[12px] text-slate-400 p-3">近 12 个月无直接证据，得分来自上一次认定与关联能力推算。建议安排一次陪练或考试形成证据。</div>}
           <div className="hair-t pt-2 mt-2 px-1 text-[11px] text-slate-500">评价方式：陪练得分 40% · 考试 30% · 课程完成 15% · 带教评价 15%</div></div>
       </Panel>

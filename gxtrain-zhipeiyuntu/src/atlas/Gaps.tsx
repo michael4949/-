@@ -94,7 +94,7 @@ export function GapPeople({ id }: { id: string }) {
   const bins = ['差 > 15', '差 10–15', '差 5–10', '差 < 5', '已达标'].map((label, i) => ({ label, v: people.filter(x => i === 0 ? x.gap > 15 : i === 1 ? x.gap > 10 && x.gap <= 15 : i === 2 ? x.gap > 5 && x.gap <= 10 : i === 3 ? x.gap > 0 && x.gap <= 5 : x.gap <= 0).length, color: i < 2 ? 'var(--bad)' : i === 4 ? 'var(--ok)' : undefined }))
   return (
     <div className="h-full grid grid-cols-[1fr_320px] gap-3 p-3 min-h-0">
-      <Panel title={`${g.ability} · 人员清单　样本 ${people.length} 人 / 共 ${g.people} 人`} bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入个人成长地图</span>}>
+      <Panel title={`${g.ability} · 人员清单　样本 ${people.length} 人 / 共 ${g.people} 人`} bodyClass="overflow-auto scroll">
         <table className="grid"><thead><tr><th>姓名</th><th>单位 · 班组</th><th>岗位</th><th>等级</th><th>{g.ability}</th><th>要求</th><th>差距</th><th>预计达标</th><th>建议</th></tr></thead>
           <tbody>{people.map(({ p, a, gap }) => <tr key={p.id} className="cursor-pointer row-in" onClick={() => push({ v: 'person', id: p.id, unit: p.unit, team: p.team })}><td className="font-medium">{p.name}</td><td className="text-slate-600">{short(p.unit)} · {p.team.replace(/^.*· /, '')}</td><td>{p.post}</td><td>{p.grade}</td><td className="num font-semibold" style={{ color: gap > 0 ? 'var(--bad)' : 'var(--ok)' }}>{a.v}</td><td className="num">{a.need}</td><td className="num">{gap > 0 ? `-${gap}` : '达标'}</td><td className="num">{gap > 0 ? `${Math.max(1, Math.round(gap * .6))} 个月` : '—'}</td><td><span className="tag">{gap > 12 ? '集训 + 带教' : gap > 5 ? '课程 + 陪练' : gap > 0 ? '专项陪练' : '维持'}</span></td></tr>)}</tbody></table>
       </Panel>

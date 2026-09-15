@@ -21,7 +21,7 @@ function render(r: Route) {
     case 'unit': return <UnitView />
     case 'unitDetail': return <UnitDetail name={r.name} />
     case 'teamDetail': return <TeamDetail unit={r.unit} team={r.team} />
-    case 'matrix': return <MatrixView />
+    case 'matrix': return <MatrixView line={r.line} />
     case 'postModel': return <PostModelView id={r.id} />
     case 'abilityDef': return <AbilityDef id={r.id} k={r.k} />
     case 'gaps': return <GapsView />

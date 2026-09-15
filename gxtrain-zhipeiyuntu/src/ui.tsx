@@ -30,15 +30,16 @@ export function Stat({ k, v, u, d, accent }: { k: string; v: string; u?: string;
   )
 }
 
-export function Bars({ data, title, unit = '', max, color = 'var(--indigo-2)' }:
-  { data: { label: string; v: number; note?: string }[]; title?: string; unit?: string; max?: number; color?: string }) {
+export function Bars({ data, title, unit = '', max, color = 'var(--indigo-2)', onPick }:
+  { data: { label: string; v: number; note?: string }[]; title?: string; unit?: string; max?: number; color?: string; onPick?: (label: string) => void }) {
   const m = max ?? Math.max(...data.map(d => d.v)) * 1.12
   return (
     <div>
       {title && <div className="text-[12px] text-slate-600 mb-2.5">{title}</div>}
       <div className="space-y-[7px]">
         {data.map((d, i) => (
-          <div key={d.label} className="flex items-center gap-2.5">
+          <div key={d.label} className={`flex items-center gap-2.5 ${onPick ? 'cursor-pointer rounded hover:bg-slate-50' : ''}`}
+            onClick={onPick ? () => onPick(d.label) : undefined}>
             <div className="w-[104px] shrink-0 text-[11.5px] text-slate-600 text-right truncate">{d.label}</div>
             <div className="flex-1 h-[15px] bg-slate-100 relative overflow-hidden">
               <div className="h-full bar-grow"
@@ -46,6 +47,7 @@ export function Bars({ data, title, unit = '', max, color = 'var(--indigo-2)' }:
             </div>
             <div className="w-[76px] shrink-0 text-[11.5px] num" style={{ color: 'var(--ink)' }}>
               {d.v}{unit}{d.note && <span className="ml-1 text-[10px]" style={{ color: 'var(--gold)' }}>{d.note}</span>}
+              {onPick && <span className="ml-1 text-[10px]" style={{ color: 'var(--gold)' }}>›</span>}
             </div>
           </div>
         ))}

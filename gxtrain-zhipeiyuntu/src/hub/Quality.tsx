@@ -22,7 +22,7 @@ export function QualityView() {
             <div className="text-[11.5px] text-slate-600 leading-relaxed">由时效、来源、引用、一致性四项加权。本月复核 1,203 条，配电与营销两个专业的 2024 年入库条目集中到期。</div>
           </div>
         </Panel>
-        <Panel title="问题分类" className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入清单</span>}>
+        <Panel title="问题分类" className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1.5">
             {Q_CATS.map(c => (
               <button key={c.id} onClick={() => push({ v: 'issues', cat: c.id })} className="a-card w-full text-left">

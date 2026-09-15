@@ -7,7 +7,7 @@ import { UNITS } from '../units'
 import { METRICS, findMetric, metricValue, unitRows, bureauRows, teamRows, personRows, monthSeries, roleById, unitShort, SKILLS } from './data'
 import type { Metric, Skill } from './data'
 
-export type Cite = { id?: string; t: string; s: string }
+export type Cite = { id?: string; t: string; s: string; m?: string }
 export type ChartSpec = { type: 'bar' | 'line' | 'donut'; title: string; unit?: string; data: { label: string; v: number; note?: string }[] }
 export type DrillRow = { name: string; short: string; grp: string; n: number; v: number; trend: number }
 export type Drill = { metric: string; dim: '单位' | '地市局' | '班组' | '个人' | '科室' | '月份'; key: string; rows: DrillRow[]; note: string }
@@ -26,6 +26,27 @@ const citeOf = (t: string, s: string): Cite => {
   const id = ANCHOR[t] ?? ASSETS.find(a => a.src.includes(s) || a.anchor === t || a.title.includes(s.slice(0, 6)))?.id
   return { id, t, s }
 }
+/* 指标对应的制度依据，点出处进中枢看原文 */
+const METRIC_SRC: Record<string, string[]> = {
+  ready: ['GC-5120', 'GC-5121'], pass: ['GC-5121', 'BZ-5112'], coach: ['GC-5120', 'BZ-5112'],
+  hours: ['BZ-5112', 'BZ-5110'], done: ['BZ-5112', 'GC-5120'], plan: ['BZ-5110', 'BZ-5112'],
+  cert: ['GC-5122', 'GC-5120'], budget: ['GC-5102', 'KZ-5106'], rating: ['BZ-5110', 'BZ-5112'],
+  trainer: ['BZ-5110', 'GC-5121'], ai: ['BZ-5110', 'BZ-5112'], hit: ['BZ-5110', 'GC-5120'],
+}
+/* 数据类回答的出处：指标口径条目（进数据口径中心看血缘）+ 中枢里对应的制度依据（进条目看原文） */
+function dataCites(m: Metric, roleId: string): Cite[] {
+  const out: Cite[] = [{ m: m.id, t: `指标口径 · ${m.name}`, s: `${m.src} · 更新 ${m.freq}` }]
+  const ids = METRIC_SRC[m.id] ?? []
+  ids.map(id => assetById(id)).filter((a): a is NonNullable<typeof a> => !!a)
+    .filter(a => roleId === 'dept' || a.sens !== '敏感')
+    .forEach(a => out.push({ id: a.id, t: a.anchor !== '—' ? a.anchor : a.id, s: a.src }))
+  if (out.length === 1) {
+    searchAssets(`${m.name} ${m.aliases.slice(0, 3).join(' ')}`)
+      .filter(h => (roleId === 'dept' || h.asset.sens !== '敏感') && (h.asset.kind === '规程条款' || h.asset.kind === '作业步骤'))
+      .slice(0, 2).forEach(h => out.push({ id: h.asset.id, t: h.asset.anchor !== '—' ? h.asset.anchor : h.asset.id, s: h.asset.src }))
+  }
+  return out
+}
 export const scopeOf = (roleId: string) => {
   const r = roleById(roleId)
   return { dept: '全公司 · 28 个一级单位', spec: '柳州供电局 · 本单位', lead: '南宁供电局 · 变电管理一所 · 本班组', staff: '本人 · 韦明', fin: '财务部 · 本部门', office: '办公室 · 本部门', cs: '客户服务中心 · 话务班', mat: '物资部 · 本部门' }[roleId] ?? r.scope
@@ -40,7 +61,7 @@ function fromBank(qa: AskQA, roleId: string, q: string): Answer {
   return {
     id: `a${++seq}`, q: qa.q, kind: qa.kind === '数据' ? (qa.refs ? '混合' : '数据') : '知识', text: qa.a,
     think: data ? [`识别意图：数据问答${m ? ` · 指标「${m.name}」` : ''}`, `确定范围：${roleById(roleId).name} · ${scopeOf(roleId)}`, `取数口径：${m ? `${m.src} · 更新 ${m.freq}` : '培训与人事数据（管理信息大区）'}`, '生成回答与图表，附口径卡与下钻'] : ['识别意图：知识问答 · 规程与制度', `检索范围：知识资产中枢 · ${roleById(roleId).name}可见分级`, `命中 ${qa.refs?.length ?? 1} 条出处，按锚点校验现行版本`, '按岗位语境组织回答，附出处与追问'],
-    refs: (qa.refs ?? []).map(r => citeOf(r.t, r.s)), chart: qa.chart ? { type: 'bar', title: qa.chartTitle ?? '', data: qa.chart } : undefined, drill, follow: qa.follow ?? (m ? [`按${drill?.dim === '单位' ? '班组' : '单位'}看`, '近 12 个月趋势', '导出成报表'] : ['相关的作业步骤是什么？', '有没有典型案例？']),
+    refs: qa.refs ? qa.refs.map(r => citeOf(r.t, r.s)) : (data && m ? dataCites(m, roleId) : []), chart: qa.chart ? { type: 'bar', title: qa.chartTitle ?? '', data: qa.chart } : undefined, drill, follow: qa.follow ?? (m ? [`按${drill?.dim === '单位' ? '班组' : '单位'}看`, '近 12 个月趋势', '导出成报表'] : ['相关的作业步骤是什么？', '有没有典型案例？']),
     actions: data ? [{ k: '导出报表', d: '按月报模板', node: 'ask', tab: 'chat', skill: 'gen_report' }, { k: '生成学习计划', d: '按缺口一键生成', node: 'plan', tab: 'engine', skill: 'gen_plan' }, ...(m && (m.id === 'pass' || m.id === 'coach' || m.id === 'ready') ? [{ k: '下发陪练任务', d: '推送到班组看板', node: 'coach', tab: 'team', skill: 'do_coach' }] : [])] : [{ k: '在中枢查看条目', d: '原文、版本与引用', node: 'hub', tab: 'catalog', route: qa.refs?.[0] ? { v: 'asset', id: citeOf(qa.refs[0].t, qa.refs[0].s).id ?? 'GC-0871' } : { v: 'catalog' } }, { k: '生成课件片段', d: '推送到课程工厂', node: 'factory', tab: 'gen', skill: 'do_course' }, { k: '生成陪练分支', d: '推送到教练编辑器', node: 'coach', tab: 'editor' }],
     metric: m?.id, caliber: m && data ? { name: m.name, formula: m.formula, src: m.src, freq: m.freq, scope: scopeOf(roleId), owner: m.owner } : undefined, confidence: data ? .93 : .96, scope: scopeOf(roleId), ms: 640 + (qa.q.length * 9) % 500,
     retrieved: qa.refs ? qa.refs.map((r, i) => { const c = citeOf(r.t, r.s); return { id: c.id ?? r.t, title: assetById(c.id ?? '')?.title ?? r.s, score: Math.round((.96 - i * .07) * 100) / 100, why: i === 0 ? '锚点直接命中' : '同主题相关条目', kind: assetById(c.id ?? '')?.kind ?? '规程条款' } }) : undefined,
@@ -73,7 +94,7 @@ function dataAnswer(q: string, roleId: string, m: Metric, ctx?: Ctx): Answer {
   const role = roleById(roleId)
   const n = norm(q)
   const outside = !['dept', 'spec'].includes(roleId) && (UNITS.some(u => n.includes(unitShort(u.name)) && unitShort(u.name) !== unitShort(ownUnit[roleId] ?? '')) || BUREAUS.some(b => n.includes(b.slice(0, 2)) && !(ownUnit[roleId] ?? '').startsWith(b.slice(0, 2))))
-  if (outside) return { id: `a${++seq}`, q, kind: '数据', text: `这个问题涉及其他单位的数据，超出您当前的数据范围（${scopeOf(roleId)}）。已按您的范围回答：${d.note}的${m.name}为 ${m.fmt(d.rows.reduce((a, r) => a + r.v, 0) / d.rows.length)}${m.unit === '%' ? '' : ' ' + m.unit}。如需跨单位数据，可向培训专责申请授权。`, think: [`识别意图：数据问答 · 指标「${m.name}」`, `范围校验：请求范围超出 ${role.name} 的数据权限`, '按可见范围改写问题并取数', '生成回答，附申请授权入口'], refs: [], drill: d, follow: [`本${d.dim}${m.name}趋势`, '申请跨单位查询权限'], actions: [{ k: '申请授权', d: '发送给培训专责', node: 'ask', tab: 'chat', skill: 'remind' }], metric: m.id, caliber: { name: m.name, formula: m.formula, src: m.src, freq: m.freq, scope: scopeOf(roleId), owner: m.owner }, confidence: .9, scope: scopeOf(roleId), ms: 520 }
+  if (outside) return { id: `a${++seq}`, q, kind: '数据', text: `这个问题涉及其他单位的数据，超出您当前的数据范围（${scopeOf(roleId)}）。已按您的范围回答：${d.note}的${m.name}为 ${m.fmt(d.rows.reduce((a, r) => a + r.v, 0) / d.rows.length)}${m.unit === '%' ? '' : ' ' + m.unit}。如需跨单位数据，可向培训专责申请授权。`, think: [`识别意图：数据问答 · 指标「${m.name}」`, `范围校验：请求范围超出 ${role.name} 的数据权限`, '按可见范围改写问题并取数', '生成回答，附申请授权入口'], refs: dataCites(m, roleId), drill: d, follow: [`本${d.dim}${m.name}趋势`, '申请跨单位查询权限'], actions: [{ k: '申请授权', d: '发送给培训专责', node: 'ask', tab: 'chat', skill: 'remind' }], metric: m.id, caliber: { name: m.name, formula: m.formula, src: m.src, freq: m.freq, scope: scopeOf(roleId), owner: m.owner }, confidence: .9, scope: scopeOf(roleId), ms: 520 }
   const rows = d.rows
   const avg = rows.reduce((a, r) => a + r.v, 0) / rows.length
   const best = rows[0], worst = rows[rows.length - 1]
@@ -93,7 +114,7 @@ function dataAnswer(q: string, roleId: string, m: Metric, ctx?: Ctx): Answer {
   if (m.id === 'done' || m.id === 'plan' || m.id === 'hours') actions.push({ k: '生成补强学习计划', d: '千人千面计划引擎', node: 'plan', tab: 'engine', skill: 'gen_plan' })
   if (m.id === 'cert') actions.push({ k: '生成复审提醒', d: '推送到移动端', node: 'ask', tab: 'chat', skill: 'remind' })
   actions.push({ k: '看成长地图', d: '按单位能力全景', node: 'map', tab: 'unit' })
-  return { id: `a${++seq}`, q, kind: '数据', text, think: [`识别意图：数据问答 · 指标「${m.name}」${ctx?.metric === m.id ? '（沿用上一轮指标）' : ''}`, `确定范围：${role.name} · ${d.note}`, `取数口径：${m.src} · ${m.freq}${m.history[0] ? ` · 最近口径变更 ${m.history[0].date}` : ''}`, `聚合 ${rows.length} 条记录，比对全公司同期与要求线`, '生成回答、图表与下钻，附口径卡'], refs: [], chart, drill: d, follow, actions, metric: m.id, caliber: { name: m.name, formula: m.formula, src: m.src, freq: m.freq, scope: d.note, owner: m.owner }, confidence: .93, scope: scopeOf(roleId), ms: 480 + rows.length * 12 }
+  return { id: `a${++seq}`, q, kind: '数据', text, think: [`识别意图：数据问答 · 指标「${m.name}」${ctx?.metric === m.id ? '（沿用上一轮指标）' : ''}`, `确定范围：${role.name} · ${d.note}`, `取数口径：${m.src} · ${m.freq}${m.history[0] ? ` · 最近口径变更 ${m.history[0].date}` : ''}`, `聚合 ${rows.length} 条记录，比对全公司同期与要求线`, '生成回答、图表与下钻，附口径卡'], refs: dataCites(m, roleId), chart, drill: d, follow, actions, metric: m.id, caliber: { name: m.name, formula: m.formula, src: m.src, freq: m.freq, scope: d.note, owner: m.owner }, confidence: .93, scope: scopeOf(roleId), ms: 480 + rows.length * 12 }
 }
 
 const SKILL_MATCH: [RegExp, string][] = [[/陪练|对练|重练/, 'do_coach'], [/立项|做成课|生成课程|课程需求|微课/, 'do_course'], [/报名|预约|开班/, 'do_class'], [/知识卡|班前会/, 'gen_card'], [/提醒|到期前/, 'remind'], [/导出|报表|月报|简报/, 'gen_report'], [/学习计划|补强计划|IDP/, 'gen_plan'], [/工单/, 'do_ticket']]

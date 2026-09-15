@@ -25,7 +25,7 @@ export function VersionView() {
             </tr>
           ))}</tbody>
         </table>
-        <div className="p-3 text-[11.5px] text-slate-500 leading-relaxed hair-t">改一次，处处更新。中枢维护规程条款与全部下游资产的引用关系，修订后可定位到具体课件章节、题目、陪练剧本分支与助手条目。点击任一行进入版本详情。</div>
+        <div className="p-3 text-[11.5px] text-slate-500 leading-relaxed hair-t">改一次，处处更新。中枢维护规程条款与全部下游资产的引用关系，修订后可定位到具体课件章节、题目、陪练剧本分支与助手条目。</div>
       </Panel>
       <div className="flex flex-col gap-3 min-h-0">
         <Panel title="待生效与修订中">
@@ -101,7 +101,7 @@ export function DocView({ id }: { id: string }) {
             )}
           </div>
         </Panel>
-        <Panel title={`同步任务单　${d.tasks.length} 张`} className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入三级</span>}>
+        <Panel title={`同步任务单　${d.tasks.length} 张`} className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1.5">
             {d.tasks.map(t => (
               <button key={t.id} onClick={() => push({ v: 'task', doc: d.id, id: t.id })} className="a-card w-full text-left">

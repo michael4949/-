@@ -57,9 +57,15 @@ export function unitRows(m: Metric, filterGrp?: UnitGroup | 'all') {
 export function bureauRows(m: Metric) {
   return BUREAUS.map(b => ({ name: b, short: b, grp: '地市供电局' as UnitGroup, n: 1800 + (hash(b) % 2400), v: metricValue(m, b), trend: ((hash(m.id + b + 't') % 9) - 4) })).sort((a, b) => m.higherBetter ? b.v - a.v : a.v - b.v)
 }
+const PROD_TEAMS = ['变电管理一所', '变电管理二所', '配电管理所', '输电管理所', '营销部', '调度控制中心', '客户服务中心', '安全监管部']
+/* 下级维度按单位类型取：地市局取班组，本部职能部门与直属机构取科室，"地市供电局（14个）"取 14 个局 */
 export function teamRows(m: Metric, unit: string) {
-  const base = ['变电管理一所', '变电管理二所', '配电管理所', '输电管理所', '营销部', '调度控制中心', '客户服务中心', '安全监管部']
-  return base.map(t => ({ name: `${unitShort(unit)} · ${t}`, short: t, grp: '班组' as const, n: 24 + (hash(unit + t) % 40), v: metricValue(m, unit + t), trend: ((hash(m.id + unit + t) % 9) - 4) })).sort((a, b) => m.higherBetter ? b.v - a.v : a.v - b.v)
+  const u = UNITS.find(x => x.name === unit || unitShort(x.name) === unitShort(unit))
+  const isBureau = BUREAUS.some(b => unit.startsWith(b.slice(0, 2)))
+  if (u && u.grp === '地市供电局' && !isBureau) return bureauRows(m)
+  const dept = !isBureau && !!u && u.grp !== '地市供电局'
+  const base = dept ? u.depts.map(d => d.name) : PROD_TEAMS
+  return base.map(t => ({ name: `${unitShort(unit)} · ${t}`, short: t, grp: dept ? '科室' : '班组', n: dept ? Math.max(4, Math.round(u.people / u.depts.length)) : 24 + (hash(unit + t) % 40), v: metricValue(m, unit + t), trend: ((hash(m.id + unit + t) % 9) - 4) })).sort((a, b) => m.higherBetter ? b.v - a.v : a.v - b.v)
 }
 const NAMES = ['韦明', '黄文杰', '周伟', '李明辉', '农小刚', '陈立', '蓝海', '覃丽', '梁雨桐', '陆泽宇', '莫晓萌', '潘子豪']
 export function personRows(m: Metric, team: string) {

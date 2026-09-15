@@ -545,7 +545,7 @@ export function PanelPrep() {
           <div className="tk3" style={{ marginTop: 10 }}>精神不集中、疲劳或身体不适会降低识别设备、复诵和执行操作票的准确性，容易引发误操作。</div></div>
       </div>
       <div className="risks"><h5>四、风险分析及管控措施（12 项）</h5>
-        <div className="sub2">监护人逐条宣读，操作人逐条确认。点击条目展开管控措施与后果。已确认 <b style={{ color: '#1d7a4f' }}>{S.prep.risks.filter(Boolean).length}</b>/12</div>
+        <div className="sub2">监护人逐条宣读，操作人逐条确认。已确认 <b style={{ color: '#1d7a4f' }}>{S.prep.risks.filter(Boolean).length}</b>/12</div>
         {RISKS.map((r, i) => <div key={i} className={`rk ${S.prep.risks[i] ? 'on' : ''} ${open[i] ? 'open' : ''}`} data-r={i}>
           <div className="rh" onClick={() => { touch(); if (!S.prep.risks[i]) { riskConfirm(i); setOpen(o => ({ ...o, [i]: true })) } else setOpen(o => ({ ...o, [i]: !o[i] })) }}><div className="n">{i + 1}</div><div className="t">{r[0]}</div><div className="s">{S.prep.risks[i] ? '已确认 ✓' : '待确认'}</div></div>
           <div className="rb"><b>管控措施：</b>{r[1]}<br /><b>原因及后果：</b>{r[2]}</div></div>)}

@@ -74,7 +74,7 @@ export function TrainerDetail({ id }: { id: string }) {
           </div>
         </Panel>
       </div>
-      <Panel title={`产出课程　${courses.length} 门`} bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入课程详情</span>}>
+      <Panel title={`产出课程　${courses.length} 门`} bodyClass="overflow-auto scroll">
         <div className="p-2 space-y-1.5">
           {courses.map((c, i) => (
             <button key={c!.id} onClick={() => push({ v: 'course', id: c!.id })} className="a-card w-full text-left row-in" style={{ animationDelay: `${i * .05}s` }}>

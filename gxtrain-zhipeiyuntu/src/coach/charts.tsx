@@ -78,7 +78,7 @@ export function Heat({ dims, mine, team, onDim }: { dims: string[]; mine: number
         <div className="heatn hitv" onClick={() => onDim && onDim(i)}>{n}</div>
         <div className="heatc" style={heatBg(mine[i])} title={`我的「${n}」 ${mine[i]} 分`}>{mine[i]}</div>
         <div className="heatc" style={heatBg(team[i])} title={`班组均值 ${team[i]} 分（组织级口径）`}>{team[i]}</div>
-        <div className={`heatc hitv ${d < 0 ? 'neg' : 'pos'}`} onClick={() => onDim && onDim(i)} title={`点击查看「${n}」明细与练习建议`}>{d >= 0 ? '+' + d : d}</div></span> })}
+        <div className={`heatc hitv ${d < 0 ? 'neg' : 'pos'}`} onClick={() => onDim && onDim(i)} title={`${n}明细与练习建议`}>{d >= 0 ? '+' + d : d}</div></span> })}
     </div>)
 }
 

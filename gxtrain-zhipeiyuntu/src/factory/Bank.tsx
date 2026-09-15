@@ -105,7 +105,7 @@ export function QuestionView({ id }: { id: string }) {
             {[['难度', <Diff d={q.diff} key="d" />, `${q.diff} / 5`], ['区分度', q.disc.toFixed(2), q.disc >= .3 ? '良好' : q.disc >= .2 ? '一般' : '偏低，建议修订'], ['作答次数', q.stats.n.toLocaleString(), '近 12 个月'], ['正确率', q.stats.correct + '%', q.stats.correct < 60 ? '偏低' : '正常']].map(([k, v, d]) => (
               <button key={k as string} onClick={() => push({ v: 'answers', id: q.id })} className="hairline p-3 text-left hover:border-[var(--ai)]"><div className="text-[11px] text-slate-500">{k as string}</div><div className="num text-[20px] font-semibold num-grad mt-1">{v as never}</div><div className="text-[10.5px] text-slate-500 mt-1">{d as string}</div></button>
             ))}
-            <div className="col-span-4 text-[11.5px] text-slate-500">点击任一指标进入三级作答分析。</div>
+            <div className="col-span-4 text-[11.5px] text-slate-500"></div>
           </div>
         </Panel>
       </div>

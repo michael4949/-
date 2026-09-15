@@ -42,7 +42,7 @@ export function HotDetail({ rank }: { rank: number }) {
         <Panel title="提问来源"><div className="p-3"><Bars title="集中单位（次）" data={h.units.map((u, i) => ({ label: u, v: Math.round(h.n * ([.42, .31, .27][i] ?? .2)) }))} /><div className="mt-3 hair-t pt-2 flex flex-wrap gap-1.5"><span className="text-[11px] text-slate-500">身份</span>{h.roles.map(r => <span key={r} className="tag">{r}</span>)}</div></div></Panel>
         <Panel title="标准回答" className="flex-1"><div className="p-3"><div className="ai-out text-[12px]"><Typewriter text={`${h.q}：${h.assetId ? '已挂接中枢条目 ' + h.assetId + '，回答带出处与锚点。' : '已由知识运营整理为标准回答，纳入助手示例库。'}高频问法已归并为 ${h.samples.length} 种表述，命中率 ${h.assetId ? '98.4' : '95.1'}%。`} speed={8} /></div>{h.assetId && <button className="btn btn-sm w-full mt-3" onClick={() => jump('hub', 'catalog', { v: 'asset', id: h.assetId })}>查看中枢条目 {h.assetId} ›</button>}</div></Panel>
       </div>
-      <Panel title="触发动作" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入三级</span>}>
+      <Panel title="触发动作" bodyClass="overflow-auto scroll">
         <div className="p-2 space-y-1.5">{h.actions.map((a, i) => <button key={a.k} className="a-card w-full text-left" onClick={() => push({ v: 'hotAction', rank: h.rank, idx: i })}><div className="flex items-center gap-2"><StatusTag s={a.st} /><span className="text-[12.5px] font-medium">{a.k}</span></div><div className="text-[11px] text-slate-500 mt-0.5">{a.d}</div><span className="go">›</span></button>)}<button className="btn btn-primary w-full mt-1" onClick={() => toast('已创建课程需求工单并推送到课程工厂')}>再生成一个动作</button></div>
       </Panel>
     </div>

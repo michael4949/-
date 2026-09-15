@@ -64,7 +64,7 @@ export function IngestView() {
             )}
           </div>
         </Panel>
-        <Panel title="入库批次" className="flex-1" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">点击进入二级审核页</span>}>
+        <Panel title="入库批次" className="flex-1" bodyClass="overflow-auto scroll">
           <table className="grid">
             <thead><tr><th>批次</th><th>来源</th><th>责任单位</th><th>条目</th><th>阶段</th><th>状态</th><th>时间</th></tr></thead>
             <tbody>{BATCHES.map((b, i) => (
