@@ -382,43 +382,85 @@
     right.appendChild(d);
   }
 
-  // ---------- 屏 5 · 报告 ----------
+  // ---------- 屏 5 · 报告（28 页 · 3D 凸浮标题栏版式） ----------
   function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
-  function reportNo(r) { var s = 0, n = r.profile.name; for (var i = 0; i < n.length; i++) s = (s * 31 + n.charCodeAt(i)) % 100000; return 'DGG-S-' + today().replace(/-/g, '') + '-' + ('00000' + s).slice(-5); }
-  function tag(text, cls, style) { return h('span', { class: 'tag ' + (cls || ''), style: style || '' }, [text]); }
-  function banner(no, title, sub, right) { return h('div', { class: 'ch-banner' }, [h('div', { class: 'no' }, [no]), h('div', {}, [h('div', { class: 't' }, [title]), h('div', { class: 'st' }, [sub])]), right ? h('div', { class: 'rt' }, [right]) : null]); }
-  function fig(title, sub, body, note) { var f = h('div', { class: 'fig' }, [h('div', { class: 'ft' }, [title]), sub ? h('div', { class: 'fs' }, [sub]) : null]); (Array.isArray(body) ? body : [body]).forEach(function (b) { if (b) f.appendChild(b); }); if (note) f.appendChild(h('div', { class: 'fnote' }, [note])); return f; }
-  function callout(label, headline, text, cls) { return h('div', { class: 'callout ' + (cls || '') }, [h('div', { class: 'lb' }, [label]), h('div', {}, [headline ? h('div', { class: 'hl' }, [headline]) : null, text ? h('div', { class: 'x' }, [text]) : null])]); }
-  function findings(items) { return h('ul', { class: 'findings' }, items.map(function (it) { return h('li', {}, [h('b', {}, [it[0]]), it[1]]); })); }
-  function verdictBar(v, slim) { return h('div', { class: 'verdict' + (slim ? ' slim' : '') }, [h('div', {}, [h('div', { class: 'lb' }, [v.label]), h('div', { class: 'hl' }, [v.headline])]), v.score != null ? h('div', { class: 'sc' }, [h('div', { class: 'k' }, [v.scoreLabel]), h('div', { class: 'v num' }, [String(v.score)])]) : null]); }
-  function kv(pairs) { var dl = h('dl', { class: 'kv' }); pairs.forEach(function (x) { if (!x[1]) return; dl.appendChild(h('dt', {}, [x[0]])); dl.appendChild(h('dd', {}, [x[1]])); }); return dl; }
-  function tbl(headers, rows, cls) {
-    var t = h('table', { class: 'tbl ' + (cls || '') });
-    t.appendChild(h('thead', {}, [h('tr', {}, headers.map(function (x) { return h('th', { class: x[1] || '' }, [x[0]]); }))]));
-    var tb = h('tbody');
-    rows.forEach(function (r) { tb.appendChild(h('tr', {}, r.map(function (c) { return h('td', { class: (c && c.cls) || '' }, [c && c.el ? c.el : (c && c.t != null ? c.t : c)]); }))); });
-    t.appendChild(tb); return t;
+  function reportNo(r) { var x = 0, n = r.profile.name; for (var i = 0; i < n.length; i++) x = (x * 31 + n.charCodeAt(i)) % 100000; return 'DGG-S-' + today().replace(/-/g, '') + '-' + ('00000' + x).slice(-5); }
+  function printBrief() { document.body.classList.add('print-brief'); var off = function () { document.body.classList.remove('print-brief'); window.removeEventListener('afterprint', off); }; window.addEventListener('afterprint', off); sh.print(); }
+
+  // 章节配色：每章一对渐变端点，全部取自已过色觉校验的色板
+  var CH_COLOR = {
+    nav: ['#0A2A5E', '#1157B5'], quick: ['#1157B5', '#00C2F0'], profile: ['#0FA3C7', '#0E9F6E'],
+    pain: ['#8A54DC', '#C4457E'], method: ['#C9A227', '#FF8A3D'], rank: ['#0A2A5E', '#1157B5'],
+    matrix: ['#0E9F6E', '#0FA3C7'], scene: ['#1157B5', '#8A54DC'], ready: ['#0FA3C7', '#1157B5'],
+    plan: ['#0E9F6E', '#C9A227'], invest: ['#C9A227', '#E0635C'], risk: ['#E0635C', '#C4457E'],
+    check: ['#1157B5', '#00C2F0'], out: ['#6B7A99', '#919FB7'], app: ['#0A2A5E', '#57708F']
+  };
+
+  // ---- 版式构件 ----
+  function page2(chapter, r, key, cls) {
+    var c = CH_COLOR[key] || CH_COLOR.nav;
+    var p = h('section', { class: 'page m2 ' + (cls || ''), style: '--mc:' + c[0] + ';--mc2:' + c[1] });
+    if (chapter !== null) p.appendChild(h('div', { class: 'm2-head' }, [
+      h('span', { class: 'ch' }, [h('i', {}), chapter || RT().reportTitle]),
+      h('span', { class: 'rt' }, [r.profile.name + '　·　' + reportNo(r)])
+    ]));
+    var body = h('div', { class: 'page-body' }); p.appendChild(body); p._body = body; p._c = c; return p;
   }
-  function wbar(r) {
-    var b = h('div', { class: 'wbar' });
-    r.axes.forEach(function (a) { b.appendChild(h('i', { style: 'width:' + (a.weight * 100) + '%;background:' + a.color })); });
-    var lg = h('div', { class: 'wbar-lg' });
-    r.axes.forEach(function (a) { lg.appendChild(h('span', {}, [h('i', { style: 'background:' + a.color }), a.name + ' ' + Math.round(a.weight * 100) + '%'])); });
-    return h('div', {}, [b, lg]);
-  }
-  function scHead(s) {
-    return h('div', { class: 'sc-hd' }, [
-      h('div', { class: 'rk' }, [String(s.rank)]),
-      h('div', {}, [h('div', { class: 't' }, [s.name]), h('div', { class: 's' }, [s.stage + ' 环节 · 给' + s.user + '用 · 对应' + s.module])]),
-      h('div', { class: 'sc' }, [h('div', { class: 'v num' }, [s.score.toFixed(1)]), h('div', { class: 'k' }, ['综合得分 · 排名第 ' + s.rank])])
+  function bar(no, title, en, rv, rk, slim) {
+    return h('div', { class: 'm2-bar' + (slim ? ' slim' : '') }, [
+      h('div', { class: 'no' }, [no]),
+      h('div', {}, [h('div', { class: 't' }, [title]), en ? h('div', { class: 'en' }, [en]) : null]),
+      rv ? h('div', { class: 'rt' }, [h('div', { class: 'v num' }, [rv]), rk ? h('div', { class: 'k' }, [rk]) : null]) : h('div', {})
     ]);
   }
-  function page(chapter, r, cls) {
-    var p = h('section', { class: 'page ' + (cls || '') });
-    if (chapter) p.appendChild(h('div', { class: 'page-head' }, [h('span', { class: 'ch' }, [chapter]), h('span', { class: 'rt' }, [RT().reportTitle + ' · ' + r.profile.name])]));
-    var body = h('div', { class: 'page-body' }); p.appendChild(body); p._body = body; return p;
+  function hh(title, en) { return h('h3', { class: 'm2-h' }, [title, en ? h('span', { class: 'en' }, [en]) : null]); }
+  function card(title, sub, body, note, c1, c2) {
+    var k = h('div', { class: 'm2-card', style: c1 ? '--cc:' + c1 + ';--cc2:' + (c2 || c1) : '' });
+    if (title) k.appendChild(h('div', { class: 'ct' }, [title]));
+    if (sub) k.appendChild(h('div', { class: 'cs' }, [sub]));
+    (Array.isArray(body) ? body : [body]).forEach(function (b) { if (b) k.appendChild(b); });
+    if (note) k.appendChild(h('div', { class: 'cn' }, [note]));
+    return k;
   }
-  function printBrief() { document.body.classList.add('print-brief'); var off = function () { document.body.classList.remove('print-brief'); window.removeEventListener('afterprint', off); }; window.addEventListener('afterprint', off); sh.print(); }
+  function block(lb, val, text, color, items) {
+    return h('div', { class: 'm2-block', style: '--bc:' + color }, [
+      h('div', { class: 'bt' }, [lb]), h('div', { class: 'bv' }, [val]),
+      text ? h('div', { class: 'bx' }, [text]) : null,
+      items && items.length ? h('ul', {}, items.map(function (x) { return h('li', {}, [x]); })) : null
+    ]);
+  }
+  function stats(items, n, c) {
+    return h('div', { class: 'm2-stats s' + (n || items.length) }, items.map(function (x) {
+      return h('div', { class: 'm2-stat', style: x.c ? '--sc:' + x.c + ';--sc2:' + (x.c2 || x.c) : (c ? '--sc:' + c[0] + ';--sc2:' + c[1] : '') }, [
+        h('div', { class: 'k' }, [x.k]),
+        h('div', { class: 'v num' }, [x.v, x.u ? h('small', {}, [x.u]) : null]),
+        h('div', { class: 's' }, [x.s])
+      ]);
+    }));
+  }
+  function note2(lb, hl, x) { return h('div', { class: 'm2-note' }, [h('div', { class: 'lb' }, [lb]), hl ? h('div', { class: 'hl' }, [hl]) : null, x ? h('div', { class: 'x' }, [x]) : null]); }
+  function pill(t, cls) { return h('span', { class: 'm2-pill ' + (cls || 'dim') }, [t]); }
+  function mtbl(headers, rows) {
+    var t = h('table', { class: 'm2-tbl' });
+    t.appendChild(h('thead', {}, [h('tr', {}, headers.map(function (x) { return h('th', { class: x[1] || '' }, [x[0]]); }))]));
+    var tb = h('tbody');
+    rows.forEach(function (row) { tb.appendChild(h('tr', {}, row.map(function (c) { return h('td', { class: (c && c.cls) || '' }, [c && c.el ? c.el : (c && c.t != null ? c.t : c)]); }))); });
+    t.appendChild(tb); return t;
+  }
+  function mlist(items) { return h('ul', { class: 'm2-list' }, items.map(function (x) { return h('li', {}, Array.isArray(x) ? [h('b', {}, [x[0]]), x[1]] : [x]); })); }
+  function msteps(items) { return h('ol', { class: 'm2-steps' }, items.map(function (x) { return h('li', {}, Array.isArray(x) ? [h('b', {}, [x[0]]), x[1]] : [x]); })); }
+  function two(a, b, cls) { return h('div', { class: 'm2-two ' + (cls || '') }, [a, b]); }
+  function wbar(r) {
+    var b = h('div', { style: 'display:flex;height:24px;border-radius:6px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 3px 8px -3px rgba(16,42,86,.3)' });
+    r.axes.forEach(function (a2) { b.appendChild(h('i', { style: 'display:block;height:100%;width:' + (a2.weight * 100) + '%;background:linear-gradient(180deg,' + a2.color + ',color-mix(in srgb,' + a2.color + ' 78%,#0A2A5E))' })); });
+    var lg = h('div', { style: 'display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px' });
+    r.axes.forEach(function (a2) {
+      lg.appendChild(h('span', { style: 'font-size:10.5px;color:var(--r-sub);display:flex;align-items:center;gap:5px' }, [
+        h('i', { style: 'width:10px;height:10px;border-radius:2px;background:' + a2.color }), a2.name + ' ' + Math.round(a2.weight * 100) + '%'
+      ]));
+    });
+    return h('div', {}, [b, lg]);
+  }
 
   function drawReport() {
     var r = M.result; M.pages = [];
@@ -431,50 +473,42 @@
       h('button', { class: 'btn ghost', onclick: function () { M.picks = []; M.result = null; M.cond = { dataState: null, objective: null, window: null, capacity: null }; M.weights = defaultWeights(); sh.setQrReady(false); setStep('input'); } }, [sh.station() === '1' ? '下一位' : '重新排序'])
     ]));
     var wrap = h('div', { class: 'report' }), toc = h('nav', { class: 'toc' }), pages = h('div', { class: 'pages' });
-    var add = function (title, el, o) { o = o || {}; M.pages.push({ title: title, sub: o.sub, one: o.one, el: el, brief: !!o.brief }); };
-    var top5 = r.ranked.slice(0, 5);
+    var add = function (title, el2, o) { o = o || {}; M.pages.push({ title: title, sub: o.sub, one: o.one, el: el2, brief: !!o.brief }); };
 
-    add('封面', pCover(r), { brief: true });
-    add('本报告导航', pNav(r), { one: '章节与一句话内容' });
-    add('01 排序结论速览', pQuick1(r), { brief: true, one: '六个问题、六句回答，以及排序结论' });
+    add('封面', pFront(r), { brief: true });
+    add('本报告导航', pNav(r), { one: '阅读指引、章节索引与本次评分口径' });
+    add('01 排序结论速览', pQuick1(r), { brief: true, one: '六个问题、六句回答与总体判断' });
     add('', pQuick2(r), { brief: true, sub: '三步走与前三个场景' });
-    add('02 企业画像', pProfile(r), { one: '基本情况、现状条件与行业视角' });
-    add('', pSectorView(r), { sub: '行业视角与场景库覆盖' });
-    add('03 痛点画像', pPain1(r), { one: '勾选的痛点分布与严重度' });
-    add('', pPain2(r), { sub: '痛点与场景的对应关系' });
-    add('04 评分方法', pMethod(r), { one: '四维定义、权重与计分口径' });
+    add('02 企业画像与现状', pProfile(r), { one: '基本情况、现状条件、行业视角与场景库覆盖' });
+    add('03 痛点画像', pPain1(r), { one: '所选痛点的分布、严重度与对应场景' });
+    add('', pPain2(r), { sub: '痛点与场景对应、行业痛点库全表' });
+    add('04 评分方法', pMethod(r), { one: '四维定义、权重与 1–5 分含义' });
     add('', pFunnel(r), { sub: '从场景库到排序表' });
-    add('05 场景排序总表', pRank1(r), { brief: true, one: '前 8 个场景的四维得分与排名' });
-    add('', pRank2(r), { sub: '四维得分构成' });
-    add('', pRank3(r), { sub: '全部候选场景评分' });
-    add('06 价值与门槛', pMatrix(r), { one: '四象限定位与前三对比' });
-    add('', pRadar(r), { sub: '前三个场景四维对比' });
-    top5.forEach(function (s, i) {
+    add('05 场景排序总表', pRank1(r), { brief: true, one: '前 8 个场景的四维得分、排名与理由' });
+    add('', pRank2(r), { sub: '得分构成与全部候选评分' });
+    add('06 价值与门槛', pMatrix(r), { one: '四象限定位与前三个场景四维对比' });
+    r.ranked.slice(0, 5).forEach(function (sc, i) {
       var no = ('0' + (7 + i)).slice(-2);
-      add(no + ' 第 ' + (i + 1) + ' 场景 · ' + s.name, pScene1(r, s), i === 0 ? { brief: true, one: '前五个场景逐个展开：做法、数据、指标与前置条件' } : { });
-      add('', pScene2(r, s), { sub: s.name + ' · 做法与验收' });
+      add(no + ' 第 ' + (i + 1) + ' 场景 · ' + sc.name, pScene(r, sc, i), i === 0 ? { brief: true, one: '前五个场景逐个展开：做法、数据、指标与前置条件' } : {});
     });
-    add('12 数据就绪度', pReady1(r), { one: '场景与数据源的对应与缺口' });
+    add('12 数据就绪度', pReady1(r), { one: '场景与数据源的对应关系与缺口' });
     add('', pReady2(r), { sub: '补齐清单与解锁关系' });
-    add('13 12 个月排期', pPlan1(r), { brief: true, one: '三批次排期与里程碑' });
-    add('', pPlan2(r), { sub: '三批次交付物与验收' });
-    add('14 投入与回报', pInvest1(r), { one: '投入档位、区间与折算口径' });
-    add('', pInvest2(r), { sub: '逐场景投入与收益口径' });
-    add('15 风险与前置条件', pRisks(r), { one: '由现状条件触发的提示' });
-    add('16 90 天启动清单', pChecklist(r), { one: '可勾选执行项与负责人' });
-    add('17 未入选场景', pExcluded(r), { one: '本轮暂不启动的场景与原因' });
-    add('附录 A 全部场景评分', pAppA(r, 0), { one: '候选场景四维得分明细' });
-    add('', pAppA(r, 1), { sub: '评分明细（续）' });
-    add('附录 B 行业痛点库', pAppB(r), { one: '本行业 16 项候选痛点' });
-    add('附录 C 场景与模块', pAppC(r), { one: '场景对应的薯片AI智能体模块' });
-    add('附录 D 术语与方法', pAppD(r), { one: '四维定义与计分说明' });
-    add('附录 E 信息来源', pAppE(r), { one: '数据来源、置信度与边界' });
-    add('相关服务', pServices(r), { one: '入企诊断与落地服务' });
-    add('封底', pBack(r), {});
+    add('13 12 个月排期', pPlan(r), { brief: true, one: '三批次排期、里程碑与交付物' });
+    add('14 投入与回报', pInvest1(r), { one: '投入档位、逐场景区间与收益折算口径' });
+    add('', pInvest2(r), { sub: '三档推进情景与相关服务' });
+    add('15 风险与前置条件', pRisks(r), { one: '风险提示、前置条件与角色分工' });
+    add('16 90 天启动清单', pChecklist(r), { one: '可勾选执行项、负责人与验收' });
+    add('17 未入选与复盘', pExcluded(r), { one: '本轮暂不启动的场景与何时重跑' });
+    add('附录 A 评分明细', pAppA(r), { one: '全部候选场景四维原始分与加权贡献' });
+    add('附录 B 方法与来源', pAppB(r), { one: '术语、计分口径、信息来源与置信度' });
+    add('封底', pEnd(r), {});
 
     M.pages.forEach(function (pg, i) {
       pg.el.setAttribute('data-page', String(i + 1)); if (pg.brief) pg.el.classList.add('brief');
-      if (i > 0 && i < M.pages.length - 1) pg.el.appendChild(h('div', { class: 'page-foot' }, [h('span', {}, [r.profile.name + ' · ' + RT().reportTitle + ' · ' + RT().issuer]), h('span', { class: 'num' }, ['第 ' + (i + 1) + ' 页 / 共 ' + M.pages.length + ' 页'])]));
+      if (i > 0 && i < M.pages.length - 1) pg.el.appendChild(h('div', { class: 'm2-foot' }, [
+        h('div', { class: 'rule' }),
+        h('div', { class: 'row' }, [h('span', {}, [r.profile.name + '　·　' + RT().reportTitle + '　·　' + RT().issuer]), h('span', { class: 'num' }, ['第 ' + (i + 1) + ' 页 / 共 ' + M.pages.length + ' 页'])])
+      ]));
       pages.appendChild(pg.el);
     });
     toc.appendChild(h('h4', {}, ['目录']));
@@ -485,14 +519,18 @@
     wrap.appendChild(toc); wrap.appendChild(pages); $root.appendChild(wrap);
     document.getElementById('m2-pages-count').textContent = '共 ' + M.pages.length + ' 页';
     var nav = document.getElementById('m2-nav-tbl');
-    if (nav) M.pages.forEach(function (pg, i) { if (!pg.title || !pg.one) return; nav.appendChild(h('tr', {}, [h('td', {}, [pg.title.split(' ')[0]]), h('td', {}, [pg.title.replace(/^\S+\s/, '')]), h('td', {}, [pg.one]), h('td', { class: 'num' }, [String(i + 1)])])); });
+    if (nav) M.pages.forEach(function (pg, i) {
+      if (!pg.title || !pg.one) return;
+      nav.appendChild(h('tr', {}, [h('td', { class: 'b' }, [pg.title.split(' ')[0]]), h('td', {}, [pg.title.replace(/^\S+\s/, '')]), h('td', {}, [pg.one]), h('td', { class: 'r num' }, [String(i + 1)])]));
+    });
   }
 
-  // ---- 1 封面 ----
-  function pCover(r) {
-    var p = page('', r, 'cover m2-cover');
+  // ==== 1 封面 ====
+  function pFront(r) {
+    var p = page2(null, r, 'quick', 'm2-front');
+    var t1 = r.ranked[0];
     var hero = h('div', { class: 'hero' });
-    hero.appendChild(CH.cover2(r.scenes, r.scenes.length * 13 + r.pains.length));
+    hero.appendChild(CH.heroM2(r, r.scenes.length * 13 + r.pains.length));
     hero.appendChild(h('img', { class: 'logo', src: sh.CFG.logo, alt: '顶呱呱' }));
     hero.appendChild(h('div', { class: 'ov' }, [
       h('div', { class: 'co' }, [r.profile.name]),
@@ -500,545 +538,542 @@
       h('div', { class: 'en' }, [RT().reportTitleEn])
     ]));
     p._body.appendChild(hero);
-    var t1 = r.ranked[0];
-    p._body.appendChild(h('div', { class: 'low' }, [
+    var body = h('div', { class: 'body' });
+    body.appendChild(h('div', { class: 'split' }, [
       h('div', { class: 'pick' }, [
-        h('div', { class: 'lb' }, ['先做这一个']),
+        h('div', { class: 'lb' }, ['先做这一个 · START HERE']),
         h('div', { class: 'nm' }, [t1.name]),
-        h('div', { class: 'mt' }, [t1.stage + ' 环节 · 给' + t1.user + '用 · 替代' + t1.replaces]),
-        h('div', { class: 'chips' }, [
-          h('span', {}, [t1.module]), h('span', {}, [t1.weeks + ' 周上线']), h('span', {}, [t1.cost + '投入']),
-          h('span', {}, ['综合 ' + t1.score.toFixed(1) + ' 分'])
-        ])
+        h('div', { class: 'mt' }, [t1.stage + ' 环节 · 给' + t1.user + '用 · 替代' + t1.replaces + '。预期' + t1.metric + '。']),
+        h('div', { class: 'chips' }, [h('span', {}, [t1.module]), h('span', {}, [t1.weeks + ' 周上线']), h('span', {}, [t1.cost + '投入 · ' + RT().investment.tiers.filter(function (x) { return x.key === t1.cost; })[0].range]), h('span', {}, ['综合 ' + t1.score.toFixed(1) + ' 分'])])
       ]),
       CH.dial(t1.score, '首选场景得分', '共 ' + r.meta.sceneCount + ' 个候选')
     ]));
-    var q = h('div', { class: 'qrow' });
-    r.keyNumbers.slice(0, 6).forEach(function (k) { if (k.wide) return; q.appendChild(h('div', {}, [h('i', {}, [k.v]), k.k])); });
-    p._body.appendChild(q);
-    p._body.appendChild(h('div', { class: 'bot' }, [
-      h('span', {}, [RT().issuer + ' · ' + RT().product]),
+    body.appendChild(stats([
+      { k: '候选场景', v: String(r.meta.sceneCount), u: '个', s: r.profile.sectorName + '场景库', c: '#1157B5', c2: '#00C2F0' },
+      { k: '所选痛点', v: String(r.pains.length), u: '项', s: '严重度合计 ' + r.painProfile.severityTotal, c: '#8A54DC', c2: '#C4457E' },
+      { k: '数据就绪', v: r.readiness.pct + '%', s: r.readiness.level, c: '#0FA3C7', c2: '#0E9F6E' },
+      { k: '起步投入', v: r.investment.range, s: r.investment.name, c: '#C9A227', c2: '#FF8A3D' },
+      { k: '首批见效', v: t1.weeks + ' 周', s: '上线周期', c: '#0E9F6E', c2: '#0FA3C7' }
+    ], 5));
+    body.appendChild(h('div', { class: 'bot' }, [
+      h('span', {}, [RT().issuer + '　·　' + RT().product]),
       h('span', {}, ['报告编号 ' + reportNo(r) + '　出具日期 ' + today()])
     ]));
+    p._body.appendChild(body);
     return p;
   }
 
-  // ---- 2 导航 ----
+  // ==== 2 导航 ====
   function pNav(r) {
-    var p = page('本报告导航', r);
-    p._body.appendChild(banner('00', '本报告导航', '共 ' + M.pages.length + ' 页（生成后回填），按「结论 → 依据 → 方案 → 条件」四段组织'));
-    p._body.appendChild(h('div', { class: 'guide' }, [h('ol', {}, RT().readingGuide.map(function (t) { return h('li', {}, [t]); }))]));
-    var t = h('table', { class: 'tbl nav-tbl compact' });
+    var p = page2('本报告导航', r, 'nav');
+    p._body.appendChild(bar('00', '本报告导航', 'HOW TO READ', '28', '页'));
+    p._body.appendChild(two(
+      h('div', {}, [hh('阅读指引', 'READING GUIDE'), mlist(RT().readingGuide.map(function (t) { var i = t.indexOf('。'); return [t.slice(0, i + 1), t.slice(i + 1)]; }))]),
+      h('div', {}, [
+        hh('本次评分口径', 'SCORING BASIS'),
+        card('四维权重 · ' + r.weights.presetName, AX().formula, [wbar(r)], '实施门槛计分时取（6 − 门槛），门槛越低得分越高。', r.axes[0].color, r.axes[3].color),
+        stats([
+          { k: '场景库全量', v: String(DATA.m2.libTotal), u: '个', s: DATA.industries.sectors.length + ' 个行业大类' },
+          { k: '本行业候选', v: String(r.meta.sceneCount), u: '个', s: r.profile.sectorName },
+          { k: '进入排序表', v: String(r.ranked.length), u: '个', s: '按四维总分' }
+        ], 3, CH_COLOR.nav)
+      ]), 'wl'));
+    p._body.appendChild(hh('章节索引', 'CONTENTS'));
+    var t = h('table', { class: 'm2-tbl' });
     t.appendChild(h('thead', {}, [h('tr', {}, [h('th', {}, ['章']), h('th', {}, ['标题']), h('th', {}, ['一句话内容']), h('th', { class: 'r' }, ['页'])])]));
     t.appendChild(h('tbody', { id: 'm2-nav-tbl' }));
     p._body.appendChild(t);
-    p._body.appendChild(callout('本次口径', '四维权重为「' + r.weights.presetName + '」', AX().formula + '　权重：' + r.axes.map(function (a) { return a.name + ' ' + Math.round(a.weight * 100) + '%'; }).join('、') + '。'));
     return p;
   }
 
-  // ---- 3 结论速览 ----
+  // ==== 3-4 结论速览 ====
   function pQuick1(r) {
-    var p = page('01 排序结论速览', r);
-    p._body.appendChild(banner('01', '排序结论速览', '六个问题、六句回答', r.profile.sectorName + ' · ' + r.meta.sceneCount + ' 个候选场景'));
-    var g = h('div', { class: 'qcards' });
+    var p = page2('01 排序结论速览', r, 'quick');
+    p._body.appendChild(bar('01', '排序结论速览', 'EXECUTIVE SUMMARY', r.ranked[0].score.toFixed(1), '首选场景综合得分'));
+    var TONE = { cyan: ['#0FA3C7', '#00C2F0'], purple: ['#8A54DC', '#C4457E'], orange: ['#FF8A3D', '#C9A227'], blue: ['#1157B5', '#0FA3C7'], green: ['#0E9F6E', '#0FA3C7'], navy: ['#0A2A5E', '#1157B5'] };
+    var g = h('div', { class: 'm2-cards c3' });
     r.quickView.forEach(function (q) {
-      g.appendChild(h('div', { class: 'qcard tone-' + q.tone }, [
-        h('div', { class: 'hd' }, [h('span', { class: 'n' }, [String(q.n)]), h('span', { class: 'q' }, [q.q])]),
-        h('div', { class: 'bd' }, [h('div', { class: 'a' }, [q.a]), h('div', { class: 'x' }, [q.text])])
-      ]));
+      var c = TONE[q.tone] || TONE.blue;
+      g.appendChild(card(q.q, null, [
+        h('div', { style: 'font-size:15px;font-weight:900;color:' + c[0] + ';line-height:1.3;margin:2px 0 6px' }, [q.a]),
+        h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.68' }, [q.text])
+      ], null, c[0], c[1]));
     });
     p._body.appendChild(g);
-    p._body.appendChild(verdictBar(r.verdict));
+    p._body.appendChild(h('div', { style: 'margin-top:16px' }, [block('总体判断 · VERDICT', r.verdict.headline, r.verdict.text, '#0A2A5E')]));
+    p._body.appendChild(stats([
+      { k: '候选场景', v: String(r.meta.sceneCount), u: '个', s: r.profile.sectorName + '场景库', c: '#1157B5', c2: '#00C2F0' },
+      { k: '命中所选痛点', v: String(r.funnel[2].count), u: '个', s: '与 ' + r.pains.length + ' 项痛点有交集', c: '#8A54DC', c2: '#C4457E' },
+      { k: '数据条件具备', v: String(r.funnel[3].count), u: '个', s: '关键数据源现在可取', c: '#0FA3C7', c2: '#0E9F6E' },
+      { k: '首批启动', v: String(r.combo[0].scenes.length), u: '个', s: '第 1–3 个月', c: '#0E9F6E', c2: '#C9A227' },
+      { k: '12 个月覆盖', v: String(r.combo.reduce(function (t, c) { return t + c.scenes.length; }, 0)), u: '个', s: '三批次合计', c: '#C9A227', c2: '#FF8A3D' }
+    ], 5));
     return p;
   }
   function pQuick2(r) {
-    var p = page('01 排序结论速览', r);
-    p._body.appendChild(fig('三步走：先做一个，再做两个，储备两个', '按四维总分与数据条件分批，合计 12 个月', CH.ladder(r.combo), '批次内的场景可并行；储备批次在数据补齐后重新评估。'));
-    var g = h('div', { class: 'three' });
-    r.ranked.slice(0, 3).forEach(function (s) {
-      g.appendChild(h('div', { class: 'scene-card' }, [
-        h('div', { class: 'hd' }, [h('span', { class: 'rk' }, [String(s.rank)]), h('span', {}, [s.name]), h('span', { class: 'num' }, [s.score.toFixed(1)])]),
-        h('div', { class: 'bd' }, [
-          h('div', { class: 'row' }, [h('span', {}, ['环节']), s.stage]),
-          h('div', { class: 'row' }, [h('span', {}, ['给谁用']), s.user]),
-          h('div', { class: 'row' }, [h('span', {}, ['替代']), trunc(s.replaces, 18)]),
-          h('div', { class: 'row' }, [h('span', {}, ['预期']), s.metric]),
-          h('div', { class: 'row' }, [h('span', {}, ['第一步']), s.firstStep]),
-          h('div', { class: 'row' }, [h('span', {}, ['模块']), s.module + ' · ' + s.weeks + ' 周 · ' + s.cost + '投入'])
+    var p = page2('01 排序结论速览', r, 'quick');
+    p._body.appendChild(bar('01', '三步走与前三个场景', 'ROADMAP AT A GLANCE', String(r.combo.reduce(function (t, c) { return t + c.scenes.length; }, 0)), '个场景 · 12 个月', true));
+    p._body.appendChild(CH.ladder(r.combo));
+    p._body.appendChild(hh('前三个场景', 'TOP 3 SCENARIOS'));
+    var g = h('div', { class: 'm2-cards c3' });
+    var CS = [['#1157B5', '#00C2F0'], ['#0E9F6E', '#0FA3C7'], ['#8A54DC', '#C4457E']];
+    r.ranked.slice(0, 3).forEach(function (sc, i) {
+      g.appendChild(card('No.' + sc.rank + '　' + sc.name, sc.stage + ' · ' + sc.user, [
+        mtbl([['项目'], ['内容']], [
+          [{ t: '替代', cls: 'k' }, trunc(sc.replaces, 16)],
+          [{ t: '预期', cls: 'k' }, sc.metric],
+          [{ t: '第一步', cls: 'k' }, sc.firstStep],
+          [{ t: '模块', cls: 'k' }, { el: h('span', {}, [pill(sc.module, 'mod'), ' ' + sc.weeks + ' 周 · ' + sc.cost + '投入']) }]
         ])
-      ]));
+      ], '综合 ' + sc.score.toFixed(1) + ' 分（痛 ' + sc.axis.pain + ' 数 ' + sc.axis.data + ' 效 ' + sc.axis.cycle + ' 槛 ' + sc.axis.barrier + '）', CS[i][0], CS[i][1]));
     });
     p._body.appendChild(g);
-    p._body.appendChild(callout('下一步', '第一步就是这一件事', r.summary.next, 'ok'));
+    p._body.appendChild(note2('下一步 · NEXT', '第一步就是这一件事', r.summary.next));
     return p;
   }
 
-  // ---- 5 企业画像 ----
+  // ==== 5 企业画像 ====
   function pProfile(r) {
-    var p = page('02 企业画像', r);
-    p._body.appendChild(banner('02', '企业画像', '基本情况与现状条件', reportNo(r)));
-    p._body.appendChild(h('p', { class: 'lead' }, [r.profile.portrait]));
-    var chips = h('div', { class: 'chips sm' });
-    r.profile.tags.forEach(function (t) { chips.appendChild(h('span', { class: 'chip' }, [t])); });
+    var p = page2('02 企业画像与现状', r, 'profile');
+    p._body.appendChild(bar('02', '企业画像与现状', 'COMPANY PROFILE', String(r.profile.tags.length), '项画像标签'));
+    p._body.appendChild(h('p', { style: 'font-size:12.5px;color:var(--r-text);line-height:1.8;margin:0' }, [r.profile.portrait]));
+    var chips = h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px' });
+    r.profile.tags.forEach(function (t) { chips.appendChild(pill(t, 'dim')); });
     p._body.appendChild(chips);
-    p._body.appendChild(h('h3', {}, ['现状与目标']));
-    var cd = CD().fields;
-    p._body.appendChild(tbl([['问题'], ['本次作答'], ['对排序的影响']], cd.map(function (f) {
-      var v = r.conditions[f.key], nm = r.conditions[f.key + 'Name'];
-      var o = f.options.filter(function (x) { return x.v === v; })[0] || {};
-      var eff = f.key === 'dataState' ? (o.adj ? '依赖业务系统的场景数据可得分调整 ' + o.adj + ' 分' : '数据可得分不做调整')
-        : f.key === 'objective' ? '同分场景中优先排与该目标相关的'
-        : f.key === 'window' ? (o.fast > 0 ? '见效慢的场景下调 ' + o.fast + ' 分' : o.fast < 0 ? '长周期场景回调 ' + (-o.fast) + ' 分' : '见效周期分不做调整')
-        : (o.adj ? '实施门槛分调整 ' + (o.adj > 0 ? '+' : '') + o.adj + ' 分' : '实施门槛分不做调整');
-      return [{ t: f.label, cls: 'k' }, { t: nm, cls: 'b' }, eff];
-    }), 'compact'));
-    p._body.appendChild(h('h3', {}, ['现有业务系统']));
-    var sys = h('div', { class: 'mods' });
-    r.readiness.systems.forEach(function (s) {
-      sys.appendChild(h('div', { class: 'm', style: s.has ? 'border-color:#BFE3D4;background:#F3FBF7' : '' }, [
-        h('div', { class: 'n' }, [s.name, ' ', tag(s.has ? '已有' : '暂无', s.has ? 'ok' : 'dim')]),
-        h('div', { class: 'x' }, [s.need ? '本行业 ' + s.need + ' 个场景需要它' : '本行业场景暂不依赖'])
-      ]));
-    });
-    p._body.appendChild(sys);
-    p._body.appendChild(callout('数据现状', r.conditions.dataStateName, r.conditions.dataStateNote));
-    return p;
-  }
-  function pSectorView(r) {
-    var p = page('02 企业画像', r);
-    p._body.appendChild(h('h3', {}, ['行业视角 · ' + r.sectorInsight.name]));
-    p._body.appendChild(h('p', {}, [r.sectorInsight.insight]));
-    p._body.appendChild(fig('本行业最常见的三个 AI 切入点', '按服务同类企业的落地顺序排列',
-      h('div', { class: 'three' }, r.sectorInsight.aiFocus.map(function (t, i) {
-        return h('div', { class: 'tile', style: '--tc:' + r.axes[i % r.axes.length].color }, [h('div', { class: 'k' }, ['切入点 ' + (i + 1)]), h('div', { class: 'v', style: 'font-size:15px;line-height:1.4' }, [t])]);
-      })), '来源：行业场景库的落地经验归纳。'));
-    p._body.appendChild(h('h3', {}, ['场景库覆盖']));
-    p._body.appendChild(findings([
-      ['场景库共 ' + DATA.m2.libTotal + ' 个场景，', '按 ' + DATA.industries.sectors.length + ' 个行业大类整理，每个大类 ' + r.meta.sceneCount + ' 个，覆盖该大类下的各细分行业。'],
-      ['本次匹配到' + r.sectorInsight.name + '的 ' + r.meta.sceneCount + ' 个场景，', '逐个按四维打分，再按贵司勾选的痛点与现有系统重排。'],
-      ['其中 ' + r.readiness.zeroDep + ' 个场景无需接入业务系统，', '整理现有资料即可起步；' + r.blocked.length + ' 个场景因关键数据源缺失本轮暂缓。']
-    ]));
-    p._body.appendChild(tbl([['行业大类'], ['候选场景数', 'r'], ['本次是否匹配', 'c']], DATA.industries.sectors.map(function (s) {
-      var sd = DATA.m2.sectors[s.key];
-      return [s.name, { t: String(sd ? sd.scenes.length : 0), cls: 'r num' }, { el: s.key === r.profile.sector ? tag('本次匹配', 'ok') : h('span', { class: 'muted' }, ['—']), cls: 'c' }];
-    }), 'compact'));
+    p._body.appendChild(two(
+      h('div', {}, [
+        hh('现状与目标', 'CURRENT STATE'),
+        mtbl([['问题'], ['本次作答'], ['对排序的影响']], CD().fields.map(function (f) {
+          var v = r.conditions[f.key], o = f.options.filter(function (x) { return x.v === v; })[0] || {};
+          var eff = f.key === 'dataState' ? (o.adj ? '数据可得分调整 ' + o.adj + ' 分' : '数据可得分不调整')
+            : f.key === 'objective' ? '同分场景优先排与该目标相关的'
+            : f.key === 'window' ? (o.fast > 0 ? '见效慢的场景下调 ' + o.fast + ' 分' : o.fast < 0 ? '长周期场景回调 ' + (-o.fast) + ' 分' : '见效周期分不调整')
+            : (o.adj ? '实施门槛分调整 ' + (o.adj > 0 ? '+' : '') + o.adj + ' 分' : '实施门槛分不调整');
+          return [{ t: f.label, cls: 'k' }, { t: r.conditions[f.key + 'Name'], cls: 'b' }, eff];
+        }))
+      ]),
+      h('div', {}, [
+        hh('现有业务系统', 'SYSTEMS IN PLACE'),
+        h('div', { class: 'm2-cards c2', style: 'gap:10px;margin-top:10px' }, r.readiness.systems.map(function (sy) {
+          return card(null, null, [
+            h('div', { style: 'font-size:12px;font-weight:800;color:var(--r-navy)' }, [sy.name, ' ', pill(sy.has ? '已有' : '暂无', sy.has ? 'ok' : 'warn')]),
+            h('div', { style: 'font-size:10px;color:var(--r-sub);margin-top:3px' }, [sy.need ? '本行业 ' + sy.need + ' 个场景需要' : '本行业场景暂不依赖'])
+          ], null, sy.has ? '#0E9F6E' : '#C9A227', sy.has ? '#0FA3C7' : '#FF8A3D');
+        }))
+      ]), 'wl'));
+    p._body.appendChild(two(
+      h('div', {}, [hh('行业视角 · ' + r.sectorInsight.name, 'SECTOR VIEW'), h('p', { style: 'font-size:11.5px;color:var(--r-body);line-height:1.75;margin:0' }, [r.sectorInsight.insight])]),
+      h('div', {}, [hh('本行业常见的三个切入点', 'ENTRY POINTS'), mlist(r.sectorInsight.aiFocus.map(function (t, i) { return ['切入点 ' + (i + 1) + '　', t]; }))]), 'wr'));
+    p._body.appendChild(note2('数据现状 · DATA STATE', r.conditions.dataStateName, r.conditions.dataStateNote + '　本行业 ' + r.meta.sceneCount + ' 个候选场景中，' + r.readiness.zeroDep + ' 个无需接入业务系统。'));
     return p;
   }
 
-  // ---- 7-8 痛点画像 ----
+  // ==== 6-7 痛点画像 ====
   function pPain1(r) {
-    var p = page('03 痛点画像', r);
-    p._body.appendChild(banner('03', '痛点画像', '本次勾选 ' + r.pains.length + ' 项，严重度合计 ' + r.painProfile.severityTotal, '候选 ' + r.meta.painCount + ' 项'));
-    p._body.appendChild(fig('痛点集中在「' + r.painProfile.groups.filter(function (g) { return g.key === r.painProfile.focus; })[0].name + '」',
-      '四个经营面的严重度合计与占比', CH.painBars(r.painProfile.groups), '严重度为 1–5 分，由填表人按当前困扰程度给出。'));
-    p._body.appendChild(fig('所选痛点与严重度', '圆圈越大表示当前越困扰', CH.painBubbles(r.pains)));
-    p._body.appendChild(callout('读法', r.painProfile.focusText.split('。')[0] + '。', r.painProfile.focusText.split('。').slice(1).join('。')));
+    var p = page2('03 痛点画像', r, 'pain');
+    p._body.appendChild(bar('03', '痛点画像', 'PAIN PROFILE', String(r.pains.length), '项 / 共 ' + r.meta.painCount + ' 项候选'));
+    p._body.appendChild(two(
+      card('痛点集中在「' + r.painProfile.groups.filter(function (g) { return g.key === r.painProfile.focus; })[0].name + '」', '四个经营面的严重度合计与占比', [CH.painBars(r.painProfile.groups)], '严重度 1–5 分，由填表人按当前困扰程度给出。', '#8A54DC', '#C4457E'),
+      card('所选痛点与严重度', '圆圈越大表示当前越困扰', [CH.painBubbles(r.pains)], null, '#C4457E', '#FF8A3D')));
+    p._body.appendChild(note2('读法 · HOW TO READ', r.painProfile.focusText.split('。')[0] + '。', r.painProfile.focusText.split('。').slice(1).join('。')));
+    p._body.appendChild(hh('痛点与场景的逐项对应', 'PAIN TO SCENARIO'));
+    p._body.appendChild(mtbl([['所选痛点'], ['严重度', 'c'], ['对应场景'], ['最高排名', 'c']], r.pains.map(function (x) {
+      var hit = r.scenes.filter(function (sc) { return sc.hitTags.indexOf(x.tag) >= 0; }).sort(function (a, b) { return a.rank - b.rank; });
+      return [
+        { el: h('span', {}, [h('b', { style: 'color:' + x.color }, [x.tag]), '　', h('span', { style: 'color:var(--r-sub)' }, [trunc(x.text, 22)])]) },
+        { t: String(x.severity), cls: 'c num b' },
+        hit.length ? hit.map(function (sc) { return sc.name; }).join('、') : { el: h('span', { style: 'color:var(--r-sub)' }, ['本行业场景库暂无直接对应，已并入相邻场景考虑']) },
+        { t: hit.length ? '第 ' + hit[0].rank + ' 名' : '—', cls: 'c' }
+      ];
+    })));
     return p;
   }
   function pPain2(r) {
-    var p = page('03 痛点画像', r);
-    p._body.appendChild(fig('痛点如何变成场景', '左：勾选的痛点分组　中：匹配到的场景与得分　右：对应的薯片AI智能体模块',
-      CH.sankey(r.sankey), '连线粗细表示该场景的综合得分；一个场景可同时对应多个痛点分组。'));
-    p._body.appendChild(h('h3', {}, ['逐项对应']));
-    p._body.appendChild(tbl([['所选痛点'], ['严重度', 'c'], ['对应场景'], ['排名', 'c']], r.pains.map(function (x) {
-      var hit = r.scenes.filter(function (s) { return s.hitTags.indexOf(x.tag) >= 0; }).sort(function (a, b) { return a.rank - b.rank; });
-      return [
-        { el: h('span', {}, [h('b', {}, [x.tag]), '　', h('span', { class: 'muted' }, [trunc(x.text, 20)])]) },
-        { t: String(x.severity), cls: 'c num' },
-        hit.length ? hit.map(function (s) { return s.name; }).join('、') : { el: h('span', { class: 'muted' }, ['本行业场景库暂无直接对应，已并入相邻场景考虑']) },
-        { t: hit.length ? '第 ' + hit[0].rank + ' 名' : '—', cls: 'c' }
-      ];
-    }), 'compact'));
+    var p = page2('03 痛点画像', r, 'pain');
+    p._body.appendChild(bar('03', '痛点与场景的对应', 'PAIN TO SCENARIO', String(r.meta.painCount), '项候选痛点', true));
+    p._body.appendChild(card('痛点如何变成场景', '左：勾选的痛点分组　中：匹配到的场景与得分　右：对应的薯片AI智能体模块', [CH.sankey(r.sankey)], '连线粗细表示该场景的综合得分；一个场景可同时对应多个痛点分组。', '#8A54DC', '#0FA3C7'));
+    p._body.appendChild(hh('本行业候选痛点全表', r.profile.sectorName + ' · ' + r.meta.painCount + ' ITEMS'));
+    var g = h('div', { class: 'm2-two' });
+    [0, 1].forEach(function (col) {
+      var box = h('div', {});
+      CD().groups.slice(col * 2, col * 2 + 2).forEach(function (grp) {
+        box.appendChild(mtbl([[grp.name], ['本次', 'c']], r.painLibrary.filter(function (x) { return x.group === grp.key; }).map(function (x) {
+          return [{ el: h('span', {}, [h('b', { style: 'color:' + grp.color }, [x.tag]), '　', trunc(x.text, 18)]) },
+            { el: x.picked ? pill('严重度 ' + x.severity, 'ok') : h('span', { style: 'color:var(--r-sub)' }, ['—']), cls: 'c' }];
+        })));
+      });
+      g.appendChild(box);
+    });
+    p._body.appendChild(g);
     return p;
   }
 
-  // ---- 9-10 评分方法 ----
+  // ==== 8-9 评分方法 ====
   function pMethod(r) {
-    var p = page('04 评分方法', r);
-    p._body.appendChild(banner('04', '评分方法', '四维各 1–5 分，加权后换算为百分制', r.weights.presetName));
-    p._body.appendChild(fig('四维权重：' + r.axes.map(function (a) { return a.name + ' ' + Math.round(a.weight * 100) + '%'; }).join(' · '), AX().formula, wbar(r),
-      '实施门槛在计分时取（6 − 门槛），门槛越低得分越高。'));
-    var g = h('div', { class: 'two' });
+    var p = page2('04 评分方法', r, 'method');
+    p._body.appendChild(bar('04', '评分方法', 'SCORING METHOD', r.weights.presetName, '本次权重'));
+    p._body.appendChild(card('总分 = 四维加权，换算为百分制', AX().formula, [wbar(r)], '权重可在排序台现场调整，调整后按和为 1 归一化并立即重排。', r.axes[0].color, r.axes[3].color));
+    var g = h('div', { class: 'm2-cards c4' });
     r.axes.forEach(function (a) {
-      g.appendChild(h('div', { class: 'dir-card', style: '--dc:' + a.color }, [
-        h('div', { class: 'hd' }, [h('span', {}, [a.name]), h('span', { class: 'tg', style: 'background:' + a.color }, [Math.round(a.weight * 100) + '%'])]),
-        h('div', { class: 'bd' }, [h('div', { class: 'n' }, [a.desc]), h('div', {}, [a.how])])
-      ]));
+      g.appendChild(card(a.name + '　' + Math.round(a.weight * 100) + '%', a.desc, [
+        h('div', { style: 'font-size:10.5px;color:var(--r-body);line-height:1.65' }, [a.how])
+      ], null, a.color, a.color));
     });
     p._body.appendChild(g);
-    p._body.appendChild(h('h3', {}, ['1–5 分的含义']));
-    p._body.appendChild(tbl([['维度'], ['1 分'], ['3 分'], ['5 分']], r.axes.map(function (a) {
+    p._body.appendChild(hh('1–5 分的含义', 'SCALE DEFINITION'));
+    p._body.appendChild(mtbl([['维度', 'nw'], ['1 分'], ['2 分'], ['3 分'], ['4 分'], ['5 分']], r.axes.map(function (a) {
       var sc = AX().items.filter(function (x) { return x.key === a.key; })[0].scale;
-      return [{ el: h('span', {}, [h('b', { style: 'color:' + a.color }, [a.name])]) }, sc[0], sc[2], sc[4]];
-    }), 'compact'));
-    p._body.appendChild(callout('口径说明', '痛点强度与数据可得来自本次作答', RT().method.confidence));
+      return [{ el: h('b', { style: 'color:' + a.color }, [a.name]), cls: 'nw' }].concat(sc.map(function (t) { return t; }));
+    })));
+    p._body.appendChild(note2('口径说明 · CONFIDENCE', '两维来自本次作答，两维为经验估算', RT().method.confidence));
     return p;
   }
   function pFunnel(r) {
-    var p = page('04 评分方法', r);
-    p._body.appendChild(fig('从 ' + DATA.m2.libTotal + ' 个场景到 1 个起步动作', '每一层的筛选依据都写在右侧', CH.funnel(r.funnel),
-      '数据条件具备 = 该场景所需的业务系统现在就能取到数；关键数据源缺失的场景计 1 分，自动排到后面。'));
-    p._body.appendChild(h('h3', {}, ['本次筛选的关键动作']));
-    p._body.appendChild(findings([
-      ['按行业大类取库，', '贵司属' + r.profile.sectorName + '，取该大类 ' + r.meta.sceneCount + ' 个场景作为候选，不跨行业混排。'],
-      ['按勾选痛点计强度，', r.funnel[2].count + ' 个场景与所选痛点有交集，其余按 1 分计入，仍参与排序。'],
-      ['按现有系统计数据可得，', r.funnel[3].count + ' 个场景的关键数据源现在就能拿到；' + (r.meta.sceneCount - r.funnel[3].count) + ' 个场景缺关键数据源，计 1 分。'],
-      ['按四维总分排序取前 ' + r.ranked.length + ' 个，', '再从中挑出数据条件具备、门槛可控的一个作为首批启动。']
-    ]));
-    p._body.appendChild(callout('这份排序是为贵司算的', '换一组现有系统，排序就会变', '数据可得占 ' + Math.round(r.weights.data * 100) + '% 权重，关键数据源缺失直接计 1 分。补齐一个数据源，相关场景的排名会明显上移。'));
+    var p = page2('04 评分方法', r, 'method');
+    p._body.appendChild(bar('04', '从场景库到排序表', 'SELECTION FUNNEL', String(DATA.m2.libTotal), '个场景全量', true));
+    p._body.appendChild(two(
+      card('从 ' + DATA.m2.libTotal + ' 个场景到 1 个起步动作', '每一层的筛选依据写在右侧', [CH.funnel(r.funnel)], null, '#C9A227', '#FF8A3D'),
+      h('div', {}, [
+        hh('本次筛选的关键动作', 'KEY FILTERS'),
+        mlist([
+          ['按行业大类取库，', '贵司属' + r.profile.sectorName + '，取该大类 ' + r.meta.sceneCount + ' 个场景作为候选，不跨行业混排。'],
+          ['按勾选痛点计强度，', r.funnel[2].count + ' 个场景与所选痛点有交集，其余按 1 分计入，仍参与排序。'],
+          ['按现有系统计数据可得，', r.funnel[3].count + ' 个场景的关键数据源现在就能拿到，其余计 1 分。'],
+          ['按四维总分取前 ' + r.ranked.length + ' 个，', '再从中挑出数据条件具备、门槛可控的一个作为首批启动。']
+        ]),
+        block('差异化 · WHY IT CHANGES', '换一组现有系统，排序就会变', '数据可得占 ' + Math.round(r.weights.data * 100) + '% 权重，关键数据源缺失直接计 1 分。补齐一个数据源，相关场景排名会明显上移。', '#C9A227')
+      ]), 'wr'));
     return p;
   }
 
-  // ---- 11-13 排序总表 ----
+  // ==== 10-11 排序总表 ====
   function pRank1(r) {
-    var p = page('05 场景排序总表', r);
-    p._body.appendChild(banner('05', '场景排序总表', '前 ' + r.ranked.length + ' 个场景的四维得分与排名', '满分 100'));
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['总分', 'r'], ['对应模块']],
-      r.ranked.map(function (s) {
+    var p = page2('05 场景排序总表', r, 'rank');
+    p._body.appendChild(bar('05', '场景排序总表', 'RANKING', String(r.ranked.length), '个进入排序 / 共 ' + r.meta.sceneCount + ' 个'));
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['总分', 'r'], ['对应模块']],
+      r.ranked.map(function (sc) {
         return [
-          { el: h('span', { class: 'dot', style: 'background:' + (s.rank <= 3 ? 'var(--r-blue)' : 'var(--r-gray)') + ';color:#fff' }, [String(s.rank)]), cls: 'c' },
-          { el: h('span', {}, [h('b', {}, [s.name]), h('div', { class: 'muted' }, [s.stage + ' · ' + s.user])]) },
-          { t: String(s.axis.pain), cls: 'c num' }, { t: String(s.axis.data), cls: 'c num' },
-          { t: String(s.axis.cycle), cls: 'c num' }, { t: String(s.axis.barrier), cls: 'c num' },
-          { el: h('b', { class: 'num', style: 'color:var(--r-navy);font-size:14px' }, [s.score.toFixed(1)]), cls: 'r' },
-          { el: h('span', {}, [s.module, s.blocked ? tag('需补数据', 'warn') : null]) }
+          { el: h('b', { style: 'color:' + (sc.rank <= 3 ? '#1157B5' : 'var(--r-sub)') + ';font-size:13px' }, [String(sc.rank)]), cls: 'c' },
+          { el: h('span', {}, [h('b', { style: 'color:var(--r-navy)' }, [sc.name]), h('div', { style: 'color:var(--r-sub);font-size:10px' }, [sc.stage + ' · ' + sc.user])]) },
+          { t: String(sc.axis.pain), cls: 'c num' }, { t: String(sc.axis.data), cls: 'c num' },
+          { t: String(sc.axis.cycle), cls: 'c num' }, { t: String(sc.axis.barrier), cls: 'c num' },
+          { el: h('b', { class: 'num', style: 'color:var(--r-navy);font-size:14px' }, [sc.score.toFixed(1)]), cls: 'r' },
+          { el: h('span', {}, [pill(sc.module, 'mod'), sc.blocked ? h('span', {}, [' ', pill('需补数据', 'warn')]) : null]) }
         ];
-      }), 'compact'));
-    p._body.appendChild(h('div', { class: 'fig-cap' }, ['门槛一列为原始分，分数越高表示落地要动的流程与系统越多，计分时取（6 − 门槛）。']));
-    p._body.appendChild(h('h3', {}, ['为什么排这里']));
-    var ol = h('ol', { style: 'margin:0;padding-left:20px;font-size:12px;line-height:1.75;color:var(--r-body)' });
-    r.ranked.slice(0, 5).forEach(function (s) { ol.appendChild(h('li', {}, [h('b', {}, [s.name + '：']), s.reason])); });
-    p._body.appendChild(ol);
+      })));
+    p._body.appendChild(hh('为什么排这里', 'RATIONALE'));
+    p._body.appendChild(msteps(r.ranked.slice(0, 5).map(function (sc) { return [sc.name + '（' + sc.score.toFixed(1) + ' 分）', sc.reason]; })));
     return p;
   }
   function pRank2(r) {
-    var p = page('05 场景排序总表', r);
-    p._body.appendChild(fig('总分由四维加权构成', '每段长度 = 该维得分 × 权重，四段之和即综合得分', CH.axisStack(r.ranked, r.axes, 100),
-      '权重为「' + r.weights.presetName + '」：' + r.axes.map(function (a) { return a.name + ' ' + Math.round(a.weight * 100) + '%'; }).join('、') + '。'));
-    p._body.appendChild(fig('首选场景的得分构成', r.ranked[0].name + ' 的四维贡献与合计', CH.waterfall(r.ranked[0].contrib, r.axes, r.ranked[0].score)));
-    return p;
-  }
-  function pRank3(r) {
-    var p = page('05 场景排序总表', r);
-    p._body.appendChild(h('h3', {}, ['全部 ' + r.meta.sceneCount + ' 个候选场景']));
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['环节'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['总分', 'r'], ['状态', 'c']],
-      r.scenes.map(function (s) {
-        return [
-          { t: String(s.rank), cls: 'c num' },
-          { el: h('b', {}, [s.name]) }, s.stage,
-          { t: String(s.axis.pain), cls: 'c num' }, { t: String(s.axis.data), cls: 'c num' },
-          { t: String(s.axis.cycle), cls: 'c num' }, { t: String(s.axis.barrier), cls: 'c num' },
-          { el: h('b', { class: 'num' }, [s.score.toFixed(1)]), cls: 'r' },
-          { el: s.blocked ? tag('需补数据', 'warn') : s.rank <= r.ranked.length ? tag('进入排序', 'ok') : tag('本轮暂缓', 'dim'), cls: 'c' }
-        ];
-      }), 'compact'));
+    var p = page2('05 场景排序总表', r, 'rank');
+    p._body.appendChild(bar('05', '得分构成与全部候选', 'SCORE COMPOSITION', String(r.meta.sceneCount), '个候选场景', true));
+    p._body.appendChild(two(
+      card('总分由四维加权构成', '每段长度 = 该维得分 × 权重', [CH.axisStack(r.ranked, r.axes, 100)], null, '#0A2A5E', '#1157B5'),
+      card('首选场景的得分构成', r.ranked[0].name, [CH.waterfall(r.ranked[0].contrib, r.axes, r.ranked[0].score)], null, '#1157B5', '#00C2F0')));
+    p._body.appendChild(hh('全部 ' + r.meta.sceneCount + ' 个候选场景', 'ALL CANDIDATES'));
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['环节'], ['痛', 'c'], ['数', 'c'], ['效', 'c'], ['槛', 'c'], ['总分', 'r'], ['状态', 'c']],
+      r.scenes.map(function (sc) {
+        return [{ t: String(sc.rank), cls: 'c num' }, { el: h('b', {}, [sc.name]) }, sc.stage,
+          { t: String(sc.axis.pain), cls: 'c num' }, { t: String(sc.axis.data), cls: 'c num' },
+          { t: String(sc.axis.cycle), cls: 'c num' }, { t: String(sc.axis.barrier), cls: 'c num' },
+          { el: h('b', { class: 'num' }, [sc.score.toFixed(1)]), cls: 'r' },
+          { el: sc.blocked ? pill('需补数据', 'warn') : sc.rank <= r.ranked.length ? pill('进入排序', 'ok') : pill('本轮暂缓', 'dim'), cls: 'c' }];
+      })));
     return p;
   }
 
-  // ---- 14-15 价值与门槛 ----
+  // ==== 12 价值与门槛 ====
   function pMatrix(r) {
-    var p = page('06 价值与门槛', r);
-    p._body.appendChild(banner('06', '价值与门槛', '四象限定位，先做左上角', '气泡大小 = 投入档'));
-    p._body.appendChild(fig('前 ' + r.ranked.length + ' 个场景的价值与门槛定位', '横轴为实施门槛，纵轴为业务价值，越靠左上越该先做',
-      CH.bubbleMatrix(r.ranked), '虚线圈表示关键数据源缺失，补齐后再看位置。'));
-    p._body.appendChild(findings([
-      ['左上角是先做的，', '价值高、门槛低，' + (r.ranked.filter(function (s) { return s.value >= 3.5 && s.axis.barrier <= 3 && !s.blocked; }).length || 0) + ' 个场景落在这一区。'],
-      ['右上角要规划，', '价值高但要改流程或系统，适合在第一个场景跑通、团队有经验之后启动。'],
-      ['左下角可顺带做，', '门槛低、见效快，适合在主线场景推进的同时让更多岗位先用起来。']
-    ]));
-    return p;
-  }
-  function pRadar(r) {
-    var p = page('06 价值与门槛', r);
-    p._body.appendChild(fig('前三个场景的四维对比', '四角越靠外越有利（门槛已取反）', CH.radarCompare(r.ranked.slice(0, 3), r.axes)));
-    p._body.appendChild(tbl([['场景'], ['强在哪'], ['弱在哪'], ['总分', 'r']], r.ranked.slice(0, 3).map(function (s) {
-      var vals = r.axes.map(function (a) { return { a: a, v: a.invert ? 6 - s.axis[a.key] : s.axis[a.key] }; }).sort(function (x, y) { return y.v - x.v; });
-      return [{ el: h('b', {}, [s.rank + '. ' + s.name]) },
-        { el: h('span', {}, [h('b', { style: 'color:' + vals[0].a.color }, [vals[0].a.name]), '　' + first(s.why[vals[0].a.key])]) },
-        { el: h('span', {}, [h('b', { style: 'color:' + vals[3].a.color }, [vals[3].a.name]), '　' + first(s.why[vals[3].a.key])]) },
-        { el: h('b', { class: 'num' }, [s.score.toFixed(1)]), cls: 'r' }];
-    }), 'compact'));
+    var p = page2('06 价值与门槛', r, 'matrix');
+    p._body.appendChild(bar('06', '价值与门槛', 'VALUE VS BARRIER', String(r.ranked.filter(function (s) { return s.value >= 4 && s.axis.barrier <= 3 && !s.blocked; }).length), '个落在先做区'));
+    p._body.appendChild(two(
+      card('四象限定位', '横轴实施门槛，纵轴业务价值，气泡大小为投入档', [CH.bubbleMatrix(r.ranked)], '虚线圈表示关键数据源缺失，补齐后再看位置。', '#0E9F6E', '#0FA3C7'),
+      h('div', {}, [
+        hh('四象限怎么读', 'HOW TO READ'),
+        mlist([
+          ['左上「先做」：', '价值高、门槛低，是首批启动的来源。'],
+          ['右上「规划」：', '价值高但要改流程或系统，适合在首批跑通后启动。'],
+          ['左下「顺带」：', '门槛低、见效快，可在主线推进的同时让更多岗位先用起来。'],
+          ['右下「暂缓」：', '本轮不投入精力，等条件变化后重新评估。']
+        ]),
+        card('前三个场景四维对比', '四角越靠外越有利（门槛已取反）', [CH.radarCompare(r.ranked.slice(0, 3), r.axes)], null, '#1157B5', '#8A54DC')
+      ]), 'wr'));
+    p._body.appendChild(mtbl([['场景'], ['强在哪'], ['弱在哪'], ['总分', 'r']], r.ranked.slice(0, 3).map(function (sc) {
+      var vals = r.axes.map(function (a) { return { a: a, v: a.invert ? 6 - sc.axis[a.key] : sc.axis[a.key] }; }).sort(function (x, y) { return y.v - x.v; });
+      return [{ el: h('b', {}, [sc.rank + '. ' + sc.name]) },
+        { el: h('span', {}, [h('b', { style: 'color:' + vals[0].a.color }, [vals[0].a.name]), '　' + first(sc.why[vals[0].a.key])]) },
+        { el: h('span', {}, [h('b', { style: 'color:' + vals[3].a.color }, [vals[3].a.name]), '　' + first(sc.why[vals[3].a.key])]) },
+        { el: h('b', { class: 'num' }, [sc.score.toFixed(1)]), cls: 'r' }];
+    })));
     return p;
   }
 
-  // ---- 16-23 场景一页纸 ----
-  function pScene1(r, s) {
-    var i = r.ranked.indexOf(s);
-    var p = page(('0' + (7 + i)).slice(-2) + ' 第 ' + (i + 1) + ' 场景 · ' + s.name, r);
-    p._body.appendChild(scHead(s));
-    p._body.appendChild(h('div', { class: 'two wide-l' }, [
+  // ==== 13-17 五个场景一页纸 ====
+  function pScene(r, sc, i) {
+    var p = page2(('0' + (7 + i)).slice(-2) + ' 第 ' + (i + 1) + ' 场景 · ' + sc.name, r, 'scene');
+    var tier = RT().investment.tiers.filter(function (t) { return t.key === sc.cost; })[0];
+    p._body.appendChild(bar(String(sc.rank), sc.name, sc.stage + ' · ' + sc.user, sc.score.toFixed(1), '综合得分 · 排名第 ' + sc.rank));
+    p._body.appendChild(stats([
+      { k: '对应模块', v: sc.module, s: '轻享版可开通', c: '#1157B5', c2: '#00C2F0' },
+      { k: '上线周期', v: String(sc.weeks), u: '周', s: '含数据整理与试运行', c: '#0E9F6E', c2: '#0FA3C7' },
+      { k: '投入档', v: sc.cost, s: tier.range, c: '#C9A227', c2: '#FF8A3D' },
+      { k: '数据条件', v: sc.blocked ? '需补齐' : sc.dataDeps.length ? '已具备' : '零依赖', s: sc.blocked ? sc.missingSystemsName.join('、') : sc.dataDeps.length ? sc.presentSystems.join('、') : '无需接入业务系统', c: sc.blocked ? '#E0635C' : '#0E9F6E', c2: sc.blocked ? '#C4457E' : '#0FA3C7' }
+    ], 4));
+    p._body.appendChild(two(
       h('div', {}, [
-        kv([['替代什么', s.replaces], ['给谁用', s.user], ['所在环节', s.stage], ['预期指标', s.metric], ['对应模块', s.module], ['上线周期', s.weeks + ' 周'], ['投入档', s.cost + '（' + RT().investment.tiers.filter(function (t) { return t.key === s.cost; })[0].range + '）']]),
-        h('h3', {}, ['为什么排在第 ' + s.rank + ' 位']),
-        h('p', {}, [s.reason])
-      ]),
-      CH.waterfall(s.contrib, r.axes, s.score)
-    ]));
-    p._body.appendChild(h('h3', {}, ['四维逐项依据']));
-    p._body.appendChild(tbl([['维度'], ['得分', 'c'], ['依据']], r.axes.map(function (a) {
-      return [{ el: h('b', { style: 'color:' + a.color }, [a.name]) }, { t: String(s.axis[a.key]), cls: 'c num' }, s.why[a.key]];
-    }), 'compact'));
-    return p;
-  }
-  function pScene2(r, s) {
-    var i = r.ranked.indexOf(s);
-    var p = page(('0' + (7 + i)).slice(-2) + ' 第 ' + (i + 1) + ' 场景 · ' + s.name, r);
-    p._body.appendChild(h('h3', {}, [s.name + ' · 落地做法']));
-    p._body.appendChild(h('div', { class: 'two' }, [
-      h('div', {}, [
-        h('div', { class: 'stepbox' }, [
-          h('div', { class: 's' }, [h('i', {}, ['1']), h('div', {}, [h('b', {}, ['第一步']), h('p', {}, [s.firstStep])])]),
-          h('div', { class: 's' }, [h('i', {}, ['2']), h('div', {}, [h('b', {}, ['补齐前置条件']), h('p', {}, [s.precondition])])]),
-          h('div', { class: 's' }, [h('i', {}, ['3']), h('div', {}, [h('b', {}, ['在 ' + s.module + ' 中配置并试运行']), h('p', {}, ['由' + s.user + '使用两周，记录使用前后的对比。'])])])
+        hh('这件事具体是什么', 'WHAT IT DOES'),
+        mtbl([['项目'], ['内容']], [
+          [{ t: '替代什么', cls: 'k' }, { el: h('b', {}, [sc.replaces]) }],
+          [{ t: '给谁用', cls: 'k' }, sc.user],
+          [{ t: '预期指标', cls: 'k' }, { el: h('b', { style: 'color:var(--r-green)' }, [sc.metric]) }],
+          [{ t: '收益折算', cls: 'k' }, sc.roiBasis],
+          [{ t: '前置条件', cls: 'k' }, sc.precondition]
+        ]),
+        hh('落地三步', 'THREE STEPS'),
+        msteps([
+          ['第一步　' + sc.firstStep, ''],
+          ['补齐前置　' + sc.precondition, ''],
+          ['在 ' + sc.module + ' 中配置并试运行两周', '由' + sc.user + '使用，记录使用前后的对比：' + sc.metric + '。']
         ])
       ]),
       h('div', {}, [
-        h('div', { style: 'font-weight:800;color:var(--r-navy);font-size:13px;margin-bottom:8px' }, ['所需数据清单']),
-        h('ol', { style: 'margin:0;padding-left:20px;font-size:12px;line-height:1.8;color:var(--r-body)' }, s.dataList.map(function (x) { return h('li', {}, [x]); })),
-        h('div', { style: 'margin-top:12px' }, [
-          s.dataDeps.length
-            ? tbl([['数据源'], ['状态', 'c']], s.dataDeps.map(function (d) {
-                var nm = sh.optText('systems', d), ok = r.profile.systems.indexOf(d) >= 0;
-                return [nm, { el: ok ? tag('已具备', 'ok') : tag('需补齐', 'warn'), cls: 'c' }];
-              }), 'compact')
-            : callout('数据条件', '无需接入业务系统', '整理现有资料即可起步，这也是它排名靠前的原因之一。', 'ok')
-        ])
-      ])
-    ]));
-    p._body.appendChild(h('h3', {}, ['验收与收益口径']));
-    p._body.appendChild(tbl([['项目'], ['内容']], [
-      [{ t: '验收指标', cls: 'k' }, { el: h('b', {}, [s.metric]) }],
-      [{ t: '收益折算', cls: 'k' }, s.roiBasis],
-      [{ t: '投入区间', cls: 'k' }, s.cost + ' 档 · ' + RT().investment.tiers.filter(function (t) { return t.key === s.cost; })[0].range + '，上线约 ' + s.weeks + ' 周'],
-      [{ t: '前置条件', cls: 'k' }, s.precondition]
-    ], 'compact'));
-    p._body.appendChild(callout('金额口径', '本报告给出投入区间与折算口径', RT().investment.roiNote));
+        hh('四维逐项依据', 'SCORE BREAKDOWN'),
+        mtbl([['维度', 'nw'], ['得分', 'c'], ['依据']], r.axes.map(function (a) {
+          return [{ el: h('b', { style: 'color:' + a.color }, [a.name]), cls: 'nw' }, { t: String(sc.axis[a.key]), cls: 'c num b' }, { el: h('span', { style: 'font-size:10px' }, [sc.why[a.key]]) }];
+        })),
+        hh('所需数据清单', 'DATA REQUIRED'),
+        mtbl([['#', 'c'], ['数据'], ['来源', 'c']], sc.dataList.map(function (d, k) {
+          return [{ t: String(k + 1), cls: 'c num' }, d, { el: sc.dataDeps.length ? pill(sc.dataDeps.map(function (x) { return sh.optText('systems', x); }).join('/'), r.profile.systems.indexOf(sc.dataDeps[0]) >= 0 ? 'ok' : 'warn') : pill('现有资料', 'ok'), cls: 'c' }];
+        }))
+      ]), 'wl'));
+    p._body.appendChild(note2('为什么排在第 ' + sc.rank + ' 位 · RATIONALE', null, sc.reason));
     return p;
   }
 
-  // ---- 数据就绪度 ----
+  // ==== 18-19 数据就绪度 ====
   function pReady1(r) {
-    var p = page('12 数据就绪度', r);
-    p._body.appendChild(banner('12', '数据就绪度', r.readiness.level + ' · ' + r.readiness.pct + '%', r.readiness.zeroDep + ' 个场景无需接入系统'));
-    p._body.appendChild(fig('场景与数据源的对应关系', '绿色为需要且已具备，橙色为需要但缺失', CH.heatmap(r.readiness.matrix, r.readiness.systems),
-      '一行一个场景，一列一个业务系统。整行无色块表示该场景无需接入任何系统。'));
-    p._body.appendChild(callout('读法', r.readiness.text.split('。')[0] + '。', r.readiness.text.split('。').slice(1).join('。')));
+    var p = page2('12 数据就绪度', r, 'ready');
+    p._body.appendChild(bar('12', '数据就绪度', 'DATA READINESS', r.readiness.pct + '%', r.readiness.level));
+    p._body.appendChild(card('场景与数据源的对应关系', '绿色为需要且已具备，橙色为需要但缺失', [CH.heatmap(r.readiness.matrix, r.readiness.systems)], '一行一个场景，一列一个业务系统。整行无色块表示该场景无需接入任何系统。', '#0FA3C7', '#1157B5'));
+    p._body.appendChild(two(
+      note2('读法 · HOW TO READ', r.readiness.text.split('。')[0] + '。', r.readiness.text.split('。').slice(1).join('。')),
+      h('div', {}, [
+        hh('无需接入系统即可起步', 'ZERO DEPENDENCY'),
+        mtbl([['排名', 'c'], ['场景'], ['上线', 'c']], r.scenes.filter(function (sc) { return !sc.dataDeps.length; }).map(function (sc) {
+          return [{ t: String(sc.rank), cls: 'c num' }, { el: h('b', {}, [sc.name]) }, { t: sc.weeks + ' 周', cls: 'c' }];
+        }))
+      ]), 'wr'));
     return p;
   }
   function pReady2(r) {
-    var p = page('12 数据就绪度', r);
+    var p = page2('12 数据就绪度', r, 'ready');
+    p._body.appendChild(bar('12', '补齐清单与解锁关系', 'GAPS & UNLOCKS', String(r.readiness.missing.length), '项数据源待补齐', true));
     if (r.readiness.missing.length) {
-      p._body.appendChild(fig('补齐哪一个数据源最划算', '按解锁场景数排序', CH.depArc(r.readiness.missing, r.blocked),
-        '解锁指该场景的数据可得分从 1 分回到可评估区间，并非直接进入前三。'));
-      p._body.appendChild(tbl([['缺失数据源'], ['解锁场景数', 'c'], ['受影响的场景'], ['最高排名', 'c']], r.readiness.missing.map(function (m) {
-        return [{ el: h('b', {}, [m.name]) }, { t: String(m.unlock), cls: 'c num' }, m.scenes.join('、'), { t: '第 ' + m.bestRank + ' 名', cls: 'c' }];
-      }), 'compact'));
+      p._body.appendChild(two(
+        card('补齐哪一个数据源最划算', '按解锁场景数排序', [CH.depArc(r.readiness.missing, r.blocked)], '解锁指该场景的数据可得分从 1 分回到可评估区间。', '#C9A227', '#FF8A3D'),
+        h('div', {}, [
+          hh('补齐清单', 'GAP LIST'),
+          mtbl([['缺失数据源'], ['解锁', 'c'], ['最高排名', 'c']], r.readiness.missing.map(function (m) {
+            return [{ el: h('b', {}, [m.name]) }, { t: m.unlock + ' 个', cls: 'c b' }, { t: '第 ' + m.bestRank + ' 名', cls: 'c' }];
+          })),
+          block('测算 · IMPACT', '补齐「' + r.readiness.missing[0].name + '」', '该数据源关系到 ' + r.readiness.missing[0].unlock + ' 个场景，其中排名最高的是第 ' + r.readiness.missing[0].bestRank + ' 名。补齐后建议重新跑一次排序。', '#C9A227')
+        ]), 'wl'));
+      p._body.appendChild(hh('受影响的场景', 'BLOCKED SCENARIOS'));
+      p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['缺什么'], ['对应模块']], r.blocked.map(function (b) {
+        return [{ t: String(b.rank), cls: 'c num' }, { el: h('b', {}, [b.name]) }, { el: pill(b.missing.join('、'), 'warn') }, { el: pill(b.module, 'mod') }];
+      })));
     } else {
-      p._body.appendChild(callout('数据条件', '所需数据源均已具备', '本行业候选场景所需的业务系统贵司都已具备，可直接按排序推进。', 'ok'));
+      p._body.appendChild(block('数据条件 · READY', '所需数据源均已具备', '本行业候选场景所需的业务系统贵司都已具备，可直接按排序推进，无需先做数据补齐。', '#0E9F6E'));
+      p._body.appendChild(hh('各场景数据来源', 'DATA SOURCES'));
+      p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['数据来源']], r.ranked.map(function (sc) {
+        return [{ t: String(sc.rank), cls: 'c num' }, { el: h('b', {}, [sc.name]) }, sc.dataDeps.length ? sc.presentSystems.join('、') : '无需接入业务系统'];
+      })));
     }
-    p._body.appendChild(h('h3', {}, ['无需接入系统即可起步的场景']));
-    var zero = r.scenes.filter(function (s) { return !s.dataDeps.length; });
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['所需资料'], ['上线', 'c']], zero.map(function (s) {
-      return [{ t: String(s.rank), cls: 'c num' }, { el: h('b', {}, [s.name]) }, s.dataList.join('、'), { t: s.weeks + ' 周', cls: 'c' }];
-    }), 'compact'));
     return p;
   }
 
-  // ---- 排期 ----
-  function pPlan1(r) {
-    var p = page('13 12 个月排期', r);
-    p._body.appendChild(banner('13', '12 个月排期', '三批次，先做一个、再做两个、储备两个', r.combo.reduce(function (t, c) { return t + c.scenes.length; }, 0) + ' 个场景'));
-    p._body.appendChild(fig('三批次排期', '横条长度为该场景的上线周期，虚线框为数据补齐后再启动', CH.gantt(r.roadmap),
-      '批次之间可衔接推进；同一批次内的场景建议错开一到两周启动。'));
-    p._body.appendChild(callout('推进节奏', r.conditions.capacityName, r.conditions.capacityNote));
+  // ==== 20 排期 ====
+  function pPlan(r) {
+    var p = page2('13 12 个月排期', r, 'plan');
+    p._body.appendChild(bar('13', '12 个月排期', 'ROADMAP', String(r.combo.reduce(function (t, c) { return t + c.scenes.length; }, 0)), '个场景 · 三批次'));
+    p._body.appendChild(card('三批次排期', '横条长度为该场景的上线周期，虚线框为数据补齐后再启动', [CH.gantt(r.roadmap)], '批次之间可衔接推进；同一批次内的场景建议错开一到两周启动。', '#0E9F6E', '#C9A227'));
+    var g = h('div', { class: 'm2-cards c3' });
+    var PC = { p1: ['#0E9F6E', '#0FA3C7'], p2: ['#1157B5', '#00C2F0'], p3: ['#8A54DC', '#C4457E'] };
+    r.combo.forEach(function (c) {
+      g.appendChild(card(c.name + ' · ' + c.title, c.desc, [
+        mtbl([['场景'], ['周期', 'c']], c.scenes.map(function (sc) {
+          return [{ el: h('span', {}, [h('b', {}, ['No.' + sc.rank + ' ' + sc.name]), h('div', { style: 'font-size:10px;color:var(--r-sub)' }, [sc.firstStep])]) }, { t: sc.weeks + ' 周', cls: 'c' }];
+        }))
+      ], '里程碑：' + c.milestone, PC[c.key][0], PC[c.key][1]));
+    });
+    p._body.appendChild(g);
+    p._body.appendChild(note2('推进节奏 · CAPACITY', r.conditions.capacityName, r.conditions.capacityNote));
     return p;
   }
-  function pPlan2(r) {
-    var p = page('13 12 个月排期', r);
-    var g = h('div', { class: 'phase-cards' });
-    var PC = { p1: '#0E9F6E', p2: '#1157B5', p3: '#8A54DC' };
-    r.combo.forEach(function (c) {
-      var ul = h('ul');
-      c.scenes.forEach(function (s) {
-        var full = r.scenes.filter(function (x) { return x.id === s.id; })[0];
-        ul.appendChild(h('li', {}, [h('b', {}, [s.name]), '　' + s.module + ' · ' + s.weeks + ' 周 · ' + s.cost + '投入', h('div', { class: 'muted' }, ['第一步：' + s.firstStep]), h('div', { class: 'muted' }, ['验收：' + (full ? full.metric : s.metric)])]));
-      });
-      g.appendChild(h('div', { class: 'phase-card', style: '--pc:' + PC[c.key] }, [
-        h('div', { class: 'hd' }, [h('span', { class: 'pn' }, [c.name]), h('span', { class: 'pt' }, [c.title])]),
-        h('div', { class: 'muted', style: 'margin-bottom:6px' }, [c.desc]),
-        ul,
-        h('div', { class: 'ms' }, ['里程碑：' + c.milestone])
-      ]));
+
+  // ==== 21-22 投入与回报 ====
+  function pInvest1(r) {
+    var p = page2('14 投入与回报', r, 'invest');
+    p._body.appendChild(bar('14', '投入与回报', 'INVESTMENT', r.investment.range, r.investment.name));
+    var g = h('div', { class: 'm2-cards c4' });
+    var TC = [['#919FB7', '#6B7A99'], ['#0E9F6E', '#0FA3C7'], ['#1157B5', '#00C2F0'], ['#8A54DC', '#C4457E']];
+    r.investment.tiers.forEach(function (t, i) {
+      g.appendChild(card(t.name + (t.key === r.investment.tier ? '　★' : ''), t.range, [
+        h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.65' }, [t.desc]),
+        h('div', { style: 'font-size:10px;color:var(--r-sub);margin-top:6px' }, ['适合：' + t.fit])
+      ], t.key === r.investment.tier ? '本次建议' : null, TC[i][0], TC[i][1]));
+    });
+    p._body.appendChild(g);
+    p._body.appendChild(note2('为什么是这一档 · RATIONALE', r.investment.name + ' · ' + r.investment.range, r.investment.rationale));
+    p._body.appendChild(hh('逐场景投入与收益口径', 'BY SCENARIO'));
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['投入档', 'c'], ['区间'], ['上线', 'c'], ['收益折算口径']], r.investment.byScene.map(function (x, i) {
+      return [{ t: String(i + 1), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.cost, cls: 'c' }, x.range, { t: x.weeks + ' 周', cls: 'c' }, x.roiBasis];
+    })));
+    return p;
+  }
+  function pInvest2(r) {
+    var p = page2('14 投入与回报', r, 'invest');
+    p._body.appendChild(bar('14', '三档推进情景', 'THREE SCENARIOS', '3', '档可选', true));
+    var g = h('div', { class: 'm2-cards c3' });
+    var SC = [['#919FB7', '#6B7A99'], ['#1157B5', '#00C2F0'], ['#E0635C', '#C4457E']];
+    r.scenarios.forEach(function (x, i) {
+      g.appendChild(card(x.name, x.sub, [
+        h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.65;margin-bottom:8px' }, [x.desc]),
+        mtbl([['项目'], ['内容']], [
+          [{ t: '范围', cls: 'k' }, { el: h('b', {}, [x.scope]) }],
+          [{ t: '场景', cls: 'k' }, x.scenes.join('、')],
+          [{ t: '投入', cls: 'k' }, x.cost + ' 档 · ' + x.range],
+          [{ t: '人力', cls: 'k' }, x.effort],
+          [{ t: '预期', cls: 'k' }, x.expect],
+          [{ t: '注意', cls: 'k' }, x.risk]
+        ])
+      ], null, SC[i][0], SC[i][1]));
+    });
+    p._body.appendChild(g);
+    p._body.appendChild(note2('金额口径 · SCOPE', '本报告给出推进范围与投入区间', r.scenarioNote));
+    p._body.appendChild(hh('相关服务', 'SERVICES'));
+    p._body.appendChild(mtbl([['服务'], ['价格'], ['说明']], RT().services.map(function (sv) {
+      return [{ el: h('b', {}, [sv.name]) }, { el: h('b', { class: 'num', style: 'color:var(--r-blue)' }, [sv.price]) }, sv.desc];
+    })));
+    return p;
+  }
+
+  // ==== 23 风险与前置 ====
+  function pRisks(r) {
+    var p = page2('15 风险与前置条件', r, 'risk');
+    p._body.appendChild(bar('15', '风险与前置条件', 'RISK & PREREQUISITES', String(r.risks.length), '条提示'));
+    var g = h('div', { class: 'm2-cards c2' });
+    var LC = { '高': ['#E0635C', '#C4457E'], '中': ['#C9A227', '#FF8A3D'], '提示': ['#919FB7', '#6B7A99'] };
+    r.risks.forEach(function (x) {
+      g.appendChild(card(x.title, null, [
+        h('div', { style: 'margin-bottom:6px' }, [pill(x.level + '级', x.level === '高' ? 'risk' : x.level === '中' ? 'warn' : 'dim')]),
+        h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.68' }, [x.text])
+      ], null, LC[x.level][0], LC[x.level][1]));
+    });
+    p._body.appendChild(g);
+    p._body.appendChild(two(
+      h('div', {}, [hh('前置条件汇总', 'PREREQUISITES'), mtbl([['场景'], ['前置条件']], r.ranked.slice(0, 5).map(function (sc) {
+        return [{ el: h('b', {}, [sc.rank + '. ' + sc.name]) }, sc.precondition];
+      }))]),
+      h('div', {}, [hh('角色分工', 'WHO DOES WHAT'), mtbl([['角色'], ['由谁担任'], ['投入', 'c']], r.roles.map(function (x) {
+        return [{ el: h('span', {}, [h('b', {}, [x.name]), h('div', { style: 'font-size:10px;color:var(--r-sub)' }, [x.duty])]) }, x.who, { t: x.time, cls: 'c' }];
+      }))]), 'wl'));
+    return p;
+  }
+
+  // ==== 24 90 天清单 ====
+  function pChecklist(r) {
+    var p = page2('16 90 天启动清单', r, 'check');
+    p._body.appendChild(bar('16', '90 天启动清单', 'FIRST 90 DAYS', String(r.checklist.length), '项执行动作'));
+    p._body.appendChild(mtbl([['✓', 'c'], ['时间'], ['要做的事'], ['类型', 'c'], ['负责人'], ['对应场景']], r.checklist.map(function (c) {
+      return [{ el: h('span', { style: 'display:inline-block;width:13px;height:13px;border:1.5px solid var(--r-line);border-radius:3px' }), cls: 'c' },
+        { t: c.week, cls: 'k' }, { el: h('b', {}, [c.item]) }, { el: pill(c.kind, 'mod'), cls: 'c' }, c.owner, c.scene];
+    })));
+    p._body.appendChild(two(
+      block('验收 · ACCEPTANCE', r.ranked[0].name, r.ranked[0].metric + '。试运行两周后对比使用前后的数据，确认后再推第二批。', '#1157B5'),
+      h('div', {}, [hh('推进节奏建议', 'CADENCE'), mlist([
+        ['每周固定半天，', '由' + r.roles[1].name + '牵头推进，避免被日常事务挤掉。'],
+        ['每月一次复盘，', r.roles[0].name + '看一次进展与指标变化，决定是否进入下一批。'],
+        ['同时只推一个场景，', '首批跑通之后再并行，避免进度都停在半途。']
+      ])]), 'wl'));
+    return p;
+  }
+
+  // ==== 25 未入选与复盘 ====
+  function pExcluded(r) {
+    var p = page2('17 未入选与复盘', r, 'out');
+    p._body.appendChild(bar('17', '未入选与复盘', 'NOT THIS ROUND', String(r.excluded.length), '个场景本轮暂缓'));
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['总分', 'r'], ['对应模块'], ['未入选原因']], r.excluded.map(function (x) {
+      return [{ t: String(x.rank), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.score.toFixed(1), cls: 'r num' }, { el: pill(x.module, 'mod') }, x.reason];
+    })));
+    p._body.appendChild(hh('什么时候值得重新跑一次排序', 'WHEN TO RE-RUN'));
+    var g = h('div', { class: 'm2-cards c2' });
+    r.retrigger.forEach(function (x) {
+      g.appendChild(card(x.when, null, [
+        h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.68' }, [x.why]),
+        x.extra ? h('div', { style: 'font-size:10.5px;color:var(--r-navy);font-weight:700;margin-top:6px' }, [x.extra]) : null
+      ], null, '#6B7A99', '#919FB7'));
     });
     p._body.appendChild(g);
     return p;
   }
 
-  // ---- 投入 ----
-  function pInvest1(r) {
-    var p = page('14 投入与回报', r);
-    p._body.appendChild(banner('14', '投入与回报', '建议以「' + r.investment.name + '」档规划第一年', r.investment.range));
-    var t = h('div', { class: 'tiers' });
-    r.investment.tiers.forEach(function (x) {
-      t.appendChild(h('div', { class: 'tier' + (x.key === r.investment.tier ? ' cur' : '') }, [
-        h('div', { class: 'nm' }, [x.name, x.key === r.investment.tier ? tag('本次建议', 'ok') : null]),
-        h('div', { class: 'rg num' }, [x.range]), h('p', {}, [x.desc]), h('div', { class: 'fit' }, ['适合：' + x.fit])
-      ]));
-    });
-    p._body.appendChild(t);
-    p._body.appendChild(callout('为什么是这一档', r.investment.name + ' · ' + r.investment.range, r.investment.rationale));
-    p._body.appendChild(h('div', { class: 'fig-cap' }, [r.investment.note]));
-    return p;
-  }
-  function pInvest2(r) {
-    var p = page('14 投入与回报', r);
-    p._body.appendChild(h('h3', {}, ['逐场景投入与收益口径']));
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['投入档', 'c'], ['区间'], ['上线', 'c'], ['收益折算口径']], r.investment.byScene.map(function (x, i) {
-      return [{ t: String(i + 1), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.cost, cls: 'c' }, x.range, { t: x.weeks + ' 周', cls: 'c' }, x.roiBasis];
-    }), 'compact'));
-    p._body.appendChild(callout('下一步算账', '具体金额与回收期在「企业AI投入ROI测算器」中测算', RT().investment.roiNote));
-    p._body.appendChild(h('h3', {}, ['相关服务']));
-    p._body.appendChild(tbl([['服务'], ['价格'], ['说明']], RT().services.map(function (s) {
-      return [{ el: h('b', {}, [s.name]) }, { el: h('b', { class: 'num', style: 'color:var(--r-blue)' }, [s.price]) }, s.desc];
-    }), 'compact'));
-    return p;
-  }
-
-  // ---- 风险 / 清单 / 未入选 ----
-  function pRisks(r) {
-    var p = page('15 风险与前置条件', r);
-    p._body.appendChild(banner('15', '风险与前置条件', '由本次现状条件与数据缺口触发', r.risks.length + ' 条'));
-    r.risks.forEach(function (x) {
-      p._body.appendChild(h('div', { class: 'risk' }, [
-        h('div', { class: 't' }, [tag(x.level, x.level === '高' ? 'risk' : x.level === '中' ? 'warn' : 'dim'), x.title]),
-        h('p', {}, [x.text])
-      ]));
-    });
-    p._body.appendChild(h('h3', {}, ['前置条件汇总']));
-    p._body.appendChild(tbl([['场景'], ['前置条件']], r.ranked.slice(0, 5).map(function (s) {
-      return [{ el: h('b', {}, [s.rank + '. ' + s.name]) }, s.precondition];
-    }), 'compact'));
-    return p;
-  }
-  function pChecklist(r) {
-    var p = page('16 90 天启动清单', r);
-    p._body.appendChild(banner('16', '90 天启动清单', '把首选场景推到试运行', r.checklist.length + ' 项'));
-    var t = h('table', { class: 'tbl checklist chk-tbl compact' });
-    t.appendChild(h('thead', {}, [h('tr', {}, [h('th', { class: 'c' }, ['✓']), h('th', {}, ['时间']), h('th', {}, ['要做的事']), h('th', {}, ['类型']), h('th', {}, ['负责人']), h('th', {}, ['对应场景'])])]));
-    var tb = h('tbody');
-    r.checklist.forEach(function (c) {
-      tb.appendChild(h('tr', {}, [
-        h('td', { class: 'c' }, [h('span', { class: 'box' })]),
-        h('td', {}, [c.week]), h('td', {}, [h('b', {}, [c.item])]),
-        h('td', {}, [h('span', { class: 'kind' }, [c.kind])]),
-        h('td', {}, [c.owner]), h('td', {}, [c.scene])
-      ]));
-    });
-    t.appendChild(tb); p._body.appendChild(t);
-    p._body.appendChild(callout('验收', r.ranked[0].name + ' 的验收指标', r.ranked[0].metric + '。试运行两周后对比使用前后的数据，确认后再推第二批。', 'ok'));
-    return p;
-  }
-  function pExcluded(r) {
-    var p = page('17 未入选场景', r);
-    p._body.appendChild(banner('17', '未入选场景', '本轮暂不启动的场景与原因', r.excluded.length + ' 个'));
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['总分', 'r'], ['对应模块'], ['未入选原因']], r.excluded.map(function (x) {
-      return [{ t: String(x.rank), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.score.toFixed(1), cls: 'r num' }, x.module, { el: h('span', { class: 'exc-why' }, [x.reason]) }];
-    }), 'compact exc'));
-    p._body.appendChild(callout('复盘用法', '未入选不等于没有价值', '前两批场景跑通、数据沉淀之后，这些场景的数据可得与实施门槛都会改善，届时重新跑一次排序即可。'));
-    return p;
-  }
-
-  // ---- 附录 ----
-  function pAppA(r, part) {
-    var p = page('附录 A 全部场景评分', r);
-    if (!part) p._body.appendChild(banner('A', '全部场景评分明细', '四维原始分、加权贡献与总分', r.meta.sceneCount + ' 个场景'));
-    var half = Math.ceil(r.scenes.length / 2);
-    var list = part ? r.scenes.slice(half) : r.scenes.slice(0, half);
-    p._body.appendChild(tbl([['排名', 'c'], ['场景'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['加权贡献'], ['总分', 'r']],
-      list.map(function (s) {
-        return [{ t: String(s.rank), cls: 'c num' }, { el: h('b', {}, [s.name]) },
-          { t: String(s.axis.pain), cls: 'c num' }, { t: String(s.axis.data), cls: 'c num' },
-          { t: String(s.axis.cycle), cls: 'c num' }, { t: String(s.axis.barrier), cls: 'c num' },
-          { el: h('span', { class: 'muted' }, [r.axes.map(function (a) { return s.contrib[a.key].toFixed(1); }).join(' + ')]) },
-          { el: h('b', { class: 'num' }, [s.score.toFixed(1)]), cls: 'r' }];
-      }), 'compact'));
-    if (part) p._body.appendChild(h('div', { class: 'fig-cap' }, ['加权贡献顺序：' + r.axes.map(function (a) { return a.name; }).join(' + ') + '；门槛项按（6 − 门槛）× 权重计。']));
+  // ==== 26-27 附录 ====
+  function pAppA(r) {
+    var p = page2('附录 A 评分明细', r, 'app');
+    p._body.appendChild(bar('A', '全部场景评分明细', 'SCORING DETAIL', String(r.meta.sceneCount), '个候选场景', true));
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['环节'], ['痛', 'c'], ['数', 'c'], ['效', 'c'], ['槛', 'c'], ['加权贡献'], ['总分', 'r'], ['模块']],
+      r.scenes.map(function (sc) {
+        return [{ t: String(sc.rank), cls: 'c num' }, { el: h('b', {}, [sc.name]) }, sc.stage,
+          { t: String(sc.axis.pain), cls: 'c num' }, { t: String(sc.axis.data), cls: 'c num' },
+          { t: String(sc.axis.cycle), cls: 'c num' }, { t: String(sc.axis.barrier), cls: 'c num' },
+          { el: h('span', { style: 'color:var(--r-sub);font-size:10px' }, [r.axes.map(function (a) { return sc.contrib[a.key].toFixed(1); }).join(' + ')]) },
+          { el: h('b', { class: 'num' }, [sc.score.toFixed(1)]), cls: 'r' },
+          { el: pill(sc.module, 'mod') }];
+      })));
+    p._body.appendChild(h('div', { style: 'font-size:10px;color:var(--r-sub);margin-top:8px' }, ['加权贡献顺序：' + r.axes.map(function (a) { return a.name; }).join(' + ') + '；门槛项按（6 − 门槛）× 权重计。']));
     return p;
   }
   function pAppB(r) {
-    var p = page('附录 B 行业痛点库', r);
-    p._body.appendChild(banner('B', '本行业候选痛点', r.profile.sectorName + ' · ' + r.meta.painCount + ' 项', '本次勾选 ' + r.pains.length + ' 项'));
-    var sd = DATA.m2.sectors[r.profile.sector];
-    CD().groups.forEach(function (g) {
-      p._body.appendChild(h('h3', { style: '--gc:' + g.color }, [g.name]));
-      p._body.appendChild(tbl([['标签'], ['现象'], ['本次', 'c']], sd.pains.filter(function (x) { return x.group === g.key; }).map(function (x) {
-        var pk = r.pains.filter(function (y) { return y.id === x.id; })[0];
-        return [{ el: h('b', { style: 'color:' + g.color }, [x.tag]) }, x.text, { el: pk ? tag('严重度 ' + pk.severity, 'ok') : h('span', { class: 'muted' }, ['—']), cls: 'c' }];
-      }), 'compact'));
-    });
+    var p = page2('附录 B 方法与来源', r, 'app');
+    p._body.appendChild(bar('B', '方法、术语与信息来源', 'METHOD & SOURCES', '', '', true));
+    p._body.appendChild(two(
+      h('div', {}, [hh('术语', 'GLOSSARY'), mtbl([['术语'], ['说明']], RT().glossary.map(function (g) { return [{ el: h('b', {}, [g.term]) }, g.desc]; }))]),
+      h('div', {}, [hh('信息来源与置信度', 'SOURCE & CONFIDENCE'), mtbl([['内容'], ['来源'], ['置信度', 'c']], [
+        ['企业画像 13 项', '本次填写', { el: pill('填报', 'ok'), cls: 'c' }],
+        ['痛点与严重度', '本次勾选与打分', { el: pill('填报', 'ok'), cls: 'c' }],
+        ['现有业务系统', '本次填写', { el: pill('填报', 'ok'), cls: 'c' }],
+        ['见效速度与实施门槛', '场景库预设值', { el: pill('经验估算', 'warn'), cls: 'c' }],
+        ['预期指标区间', '同类企业落地经验', { el: pill('经验估算', 'warn'), cls: 'c' }],
+        ['投入区间', '同类项目常见报价', { el: pill('经验估算', 'warn'), cls: 'c' }],
+        ['四维得分与排序', '按公式计算', { el: pill('可复算', 'ok'), cls: 'c' }]
+      ])]), 'wl'));
+    p._body.appendChild(hh('计分口径与适用边界', 'SCOPE'));
+    p._body.appendChild(mlist([
+      ['评分公式：', RT().method.formula],
+      ['痛点强度：', RT().method.pain],
+      ['数据可得：', RT().method.data],
+      ['场景库来源：', RT().method.source],
+      ['适用边界：', RT().method.scope]
+    ]));
+    p._body.appendChild(note2('复算方式 · REPRODUCIBLE', '同样的输入会得到同样的排序', '四维得分与总分为确定性计算，调整权重、补充系统或修改痛点严重度后重新提交，即可看到排序变化。'));
     return p;
   }
-  function pAppC(r) {
-    var p = page('附录 C 场景与模块', r);
-    p._body.appendChild(banner('C', '场景对应的模块', '薯片AI智能体 11 个模块中，本次涉及的部分', ''));
-    var byMod = {};
-    r.scenes.forEach(function (s) { (byMod[s.module] = byMod[s.module] || []).push(s); });
-    p._body.appendChild(tbl([['模块'], ['本行业场景数', 'c'], ['涉及场景'], ['最高排名', 'c']], Object.keys(byMod).sort(function (a, b) {
-      return Math.min.apply(null, byMod[a].map(function (s) { return s.rank; })) - Math.min.apply(null, byMod[b].map(function (s) { return s.rank; }));
-    }).map(function (m) {
-      var list = byMod[m].sort(function (a, b) { return a.rank - b.rank; });
-      return [{ el: h('b', {}, [m]) }, { t: String(list.length), cls: 'c num' }, list.map(function (s) { return s.name; }).join('、'), { t: '第 ' + list[0].rank + ' 名', cls: 'c' }];
-    }), 'compact'));
-    p._body.appendChild(callout('开通方式', '轻享版 0 元 / 套年，赠 10000 积分', '首选场景对应的是「' + r.ranked[0].module + '」，在轻享版里就能开通试用。'));
-    return p;
-  }
-  function pAppD(r) {
-    var p = page('附录 D 术语与方法', r);
-    p._body.appendChild(banner('D', '术语与方法说明', '本报告用到的口径', ''));
-    p._body.appendChild(tbl([['术语'], ['说明']], RT().glossary.map(function (g) { return [{ el: h('b', {}, [g.term]) }, g.desc]; }), 'compact'));
-    p._body.appendChild(h('h3', {}, ['计分口径']));
-    p._body.appendChild(findings([['评分公式：', RT().method.formula], ['痛点强度：', RT().method.pain], ['数据可得：', RT().method.data]]));
-    return p;
-  }
-  function pAppE(r) {
-    var p = page('附录 E 信息来源', r);
-    p._body.appendChild(banner('E', '信息来源与置信度', '每一项结论的来源与可信程度', ''));
-    p._body.appendChild(tbl([['内容'], ['来源'], ['置信度', 'c']], [
-      ['企业画像 13 项', '本次填写', { el: tag('填报', 'ok'), cls: 'c' }],
-      ['痛点与严重度', '本次勾选与打分', { el: tag('填报', 'ok'), cls: 'c' }],
-      ['现有业务系统', '本次填写', { el: tag('填报', 'ok'), cls: 'c' }],
-      ['场景的见效速度与实施门槛', '场景库预设值，由同类企业落地经验归纳', { el: tag('经验估算', 'warn'), cls: 'c' }],
-      ['预期指标区间', '同类企业落地后的常见改善幅度', { el: tag('经验估算', 'warn'), cls: 'c' }],
-      ['投入区间', '同类项目的常见报价范围', { el: tag('经验估算', 'warn'), cls: 'c' }],
-      ['四维得分与排序', '按本页公式由上述输入计算', { el: tag('可复算', 'ok'), cls: 'c' }]
-    ], 'compact'));
-    p._body.appendChild(h('h3', {}, ['适用边界']));
-    p._body.appendChild(h('p', {}, [RT().method.scope]));
-    p._body.appendChild(h('p', {}, [RT().method.source]));
-    p._body.appendChild(callout('复算方式', '同样的输入会得到同样的排序', '四维得分与总分为确定性计算，调整权重、补充系统或修改痛点严重度后重新提交，即可看到排序变化。'));
-    return p;
-  }
-  function pServices(r) {
-    var p = page('相关服务', r);
-    p._body.appendChild(banner('', '把排序变成落地', '顶呱呱四维一体交付', RT().contact.company));
-    p._body.appendChild(h('div', { class: 'two' }, RT().services.map(function (s) {
-      return h('div', { class: 'tier' }, [h('div', { class: 'nm' }, [s.name]), h('div', { class: 'rg num' }, [s.price]), h('p', {}, [s.desc])]);
-    })));
-    p._body.appendChild(callout('现在就能开始', '第一步：' + r.ranked[0].firstStep, '这件事不需要采购、不需要开发，今天就能安排下去。', 'ok'));
-    p._body.appendChild(h('div', { class: 'fig-cap' }, [RT().investment.note]));
-    return p;
-  }
-  function pBack(r) {
-    var p = page('', r, 'back');
+
+  // ==== 28 封底 ====
+  function pEnd(r) {
+    var p = page2(null, r, 'app', 'm2-end');
     p._body.appendChild(h('img', { src: sh.CFG.logo, alt: '顶呱呱' }));
     p._body.appendChild(h('div', { class: 'slogan' }, [RT().contact.tagline]));
     p._body.appendChild(h('div', { class: 'contact' }, [
-      h('div', {}, [RT().contact.company + ' · ' + RT().product]),
+      h('div', {}, [RT().contact.company + '　·　' + RT().product]),
       h('div', {}, ['平台 ' + RT().contact.platform + '　展位号 ' + RT().contact.booth]),
       h('div', {}, [RT().contact.address]),
       h('div', {}, ['联系电话 ' + RT().contact.phone]),
       h('div', {}, ['服务城市 ' + RT().contact.cities])
     ]));
+    p._body.appendChild(h('div', { class: 'rule' }));
     p._body.appendChild(h('div', { class: 'disc' }, [RT().closing]));
     return p;
   }

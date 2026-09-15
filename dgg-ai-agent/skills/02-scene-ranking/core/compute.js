@@ -357,6 +357,36 @@
       byScene: ranked.map(function (s) { return { name: s.name, cost: s.cost, range: RT.investment.tiers.filter(function (t) { return t.key === s.cost; })[0].range, weeks: s.weeks, roiBasis: s.roiBasis }; })
     };
 
+    // --- 三档推进情景 ---
+    var tierRange = function (k) { return RT.investment.tiers.filter(function (t) { return t.key === k; })[0].range; };
+    var comboCost = function (list) { return COST_ORDER[Math.max.apply(null, list.map(function (x) { return COST_ORDER.indexOf(x.cost); }).concat([0]))]; };
+    var pickN = function (n) { var out = [], i = 0; combo.forEach(function (c) { c.scenes.forEach(function (x) { if (out.length < n) out.push(x); }); }); return out; };
+    var scenarios = RT.scenarios.items.map(function (t, i) {
+      var list = pickN([1, 3, 5][i]);
+      var ck = comboCost(list);
+      return { key: t.key, name: t.name, sub: t.sub, desc: t.desc, scope: t.scope, effort: t.effort, expect: t.expect, risk: t.risk,
+        count: list.length, scenes: list.map(function (x) { return x.name; }), cost: ck, range: tierRange(ck),
+        weeks: list.reduce(function (a, x) { return a + x.weeks; }, 0),
+        modules: uniq(list.map(function (x) { return x.module; })),
+        metrics: list.map(function (x) { var f = scenes.filter(function (y) { return y.id === x.id; })[0]; return { name: x.name, metric: f ? f.metric : '' }; }) };
+    });
+
+    // --- 角色分工 ---
+    var roles = RT.roles.items.map(function (r) {
+      var who = r.who;
+      if (r.key === 'biz') who = top1.user + '（首批场景）';
+      if (r.key === 'data') who = profile.itStaff === 'none' ? '暂无专职，建议由熟悉' + (has('none') ? '现有台账' : profile.systemsName[0]) + '的同事兼任' : r.who + '（现有 ' + profile.itStaffName + '）';
+      return { key: r.key, name: r.name, who: who, duty: r.duty, time: r.time };
+    });
+
+    // --- 何时重跑 ---
+    var retrigger = RT.retrigger.items.map(function (x) {
+      var extra = '';
+      if (x.when === '补齐了一个业务系统' && missingList.length) extra = '本次缺 ' + missingList.map(function (m) { return m.name; }).join('、') + '，其中「' + missingList[0].name + '」影响 ' + missingList[0].unlock + ' 个场景。';
+      if (x.when === '首批场景上线并稳定运行') extra = '首批为「' + top1.name + '」，约 ' + top1.weeks + ' 周。';
+      return { when: x.when, why: x.why, extra: extra };
+    });
+
     // --- 90 天清单 ---
     var checklist = [];
     var wk = ['第 1–2 周', '第 3–4 周', '第 5–8 周', '第 9–12 周'];
@@ -430,6 +460,8 @@
         dataList: top1.dataList, dataDeps: top1.dataDeps, missingSystemsName: top1.missingSystemsName, module: top1.module, cost: top1.cost, weeks: top1.weeks, roiBasis: top1.roiBasis,
         painTags: top1.painTags, hitTags: top1.hitTags, reason: top1.reason },
       combo: combo, roadmap: roadmap, readiness: readiness, funnel: funnel, sankey: sankey,
+      scenarios: scenarios, scenarioNote: RT.scenarios.note, roles: roles, retrigger: retrigger,
+      painLibrary: sec.pains.map(function (x) { var pk = pains.filter(function (y) { return y.id === x.id; })[0]; return { id: x.id, group: x.group, groupName: groupMap[x.group].name, color: groupMap[x.group].color, tag: x.tag, text: x.text, hint: x.hint, picked: !!pk, severity: pk ? pk.severity : 0 }; }),
       investment: investment, checklist: checklist, risks: risks,
       sectorInsight: { name: ind.sector.name, insight: ind.sector.insight, aiFocus: ind.sector.aiFocus },
       keyNumbers: keyNumbers, quickView: quickView, verdict: verdict, summary: summary, summaryText: summaryText,

@@ -22,10 +22,10 @@ const S1 = JSON.parse(fs.readFileSync(path.join(ex, SAMPLE + '.input.json'), 'ut
   await page.emulateMedia({ media: 'print' });
   const LIMIT = Math.round((297 - 20) * 96 / 25.4);
   const rows = await page.evaluate((LIMIT) => [...document.querySelectorAll('.report .page')].map((el) => {
-    const hd = el.querySelector('.page-head');
+    const hd = el.querySelector('.m2-head') || el.querySelector('.page-head');
     const h = Math.round(el.getBoundingClientRect().height);
     return { n: el.getAttribute('data-page'), h, over: h > LIMIT,
-      ch: hd ? hd.querySelector('.ch').textContent.trim() : (el.classList.contains('cover') ? '封面' : '封底') };
+      ch: hd ? hd.querySelector('.ch').textContent.trim() : (el.classList.contains('m2-front') ? '封面' : '封底') };
   }), LIMIT);
   console.log(SAMPLE + ' · A4 可打印高度 ≈ ' + LIMIT + 'px');
   await browser.close();

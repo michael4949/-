@@ -2346,6 +2346,349 @@
       }
     ]
   },
+  "scenarios": [
+    {
+      "key": "base",
+      "name": "保守推进",
+      "sub": "CONSERVATIVE",
+      "desc": "只做首批一个场景，跑通后再评估。适合决策层尚未形成共识、先要看见效果的企业。",
+      "scope": "首批 1 个场景",
+      "effort": "一名业务骨干每周半天",
+      "expect": "取预期指标区间的下限",
+      "risk": "推进最稳，12 个月内 AI 覆盖面有限",
+      "count": 1,
+      "scenes": [
+        "门店巡检与店员带教"
+      ],
+      "cost": "零",
+      "range": "0 元",
+      "weeks": 3,
+      "modules": [
+        "AI人力官"
+      ],
+      "metrics": [
+        {
+          "name": "门店巡检与店员带教",
+          "metric": "新店员独立上岗周期缩短三分之一"
+        }
+      ]
+    },
+    {
+      "key": "mid",
+      "name": "中性推进",
+      "sub": "BALANCED",
+      "desc": "按三步走的前两批推进，让改善出现在经营报表上。多数同规模企业选择这一档。",
+      "scope": "前两批 3 个场景",
+      "effort": "一名专职 + 各场景一名业务对接人",
+      "expect": "取预期指标区间的中值",
+      "risk": "需要在第 4 个月前完成首批验收，否则第二批顺延",
+      "count": 3,
+      "scenes": [
+        "门店巡检与店员带教",
+        "跨境询盘分级与多语回复",
+        "报关单证预审"
+      ],
+      "cost": "轻",
+      "range": "1–5 万元",
+      "weeks": 9,
+      "modules": [
+        "AI人力官",
+        "AI获客",
+        "AI流程提效"
+      ],
+      "metrics": [
+        {
+          "name": "门店巡检与店员带教",
+          "metric": "新店员独立上岗周期缩短三分之一"
+        },
+        {
+          "name": "跨境询盘分级与多语回复",
+          "metric": "询盘首次回复时间缩短到 2 小时内"
+        },
+        {
+          "name": "报关单证预审",
+          "metric": "单证退单返工次数下降 50% 以上"
+        }
+      ]
+    },
+    {
+      "key": "fast",
+      "name": "积极推进",
+      "sub": "AGGRESSIVE",
+      "desc": "三批并行推进，同步补齐缺失数据源。适合已有数字化团队、且决策层已明确投入的企业。",
+      "scope": "三批 5 个场景 + 数据补齐",
+      "effort": "一个小团队，含一名数据对接人",
+      "expect": "取预期指标区间的上限",
+      "risk": "同时铺开会分散精力，需要明确的阶段验收节点",
+      "count": 5,
+      "scenes": [
+        "门店巡检与店员带教",
+        "跨境询盘分级与多语回复",
+        "报关单证预审",
+        "智能报价与库存查价",
+        "沉睡客户识别与复购提醒"
+      ],
+      "cost": "轻",
+      "range": "1–5 万元",
+      "weeks": 17,
+      "modules": [
+        "AI人力官",
+        "AI获客",
+        "AI流程提效"
+      ],
+      "metrics": [
+        {
+          "name": "门店巡检与店员带教",
+          "metric": "新店员独立上岗周期缩短三分之一"
+        },
+        {
+          "name": "跨境询盘分级与多语回复",
+          "metric": "询盘首次回复时间缩短到 2 小时内"
+        },
+        {
+          "name": "报关单证预审",
+          "metric": "单证退单返工次数下降 50% 以上"
+        },
+        {
+          "name": "智能报价与库存查价",
+          "metric": "询价回复时间从隔天缩短到 30 分钟内"
+        },
+        {
+          "name": "沉睡客户识别与复购提醒",
+          "metric": "沉睡客户唤醒率提升 10–15 个百分点"
+        }
+      ]
+    }
+  ],
+  "scenarioNote": "三档给的是推进范围与节奏，具体金额、回收期与分月现金流在「企业AI投入ROI测算器」中按贵司人员工资与业务量测算。",
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "定目标与验收标准、协调跨部门、每月看一次进展",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "督导与店长（首批场景）",
+      "duty": "提供业务规则、参与试运行、反馈使用问题",
+      "time": "上线期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "暂无专职，建议由熟悉财务软件的同事兼任",
+      "duty": "导出所需数据、确认字段口径、处理系统对接",
+      "time": "起步阶段集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "补齐了一个业务系统",
+      "why": "该系统相关场景的数据可得分会从 1 分回到可评估区间，排序会明显变化",
+      "extra": "本次缺 ERP、电商 / 门店系统、CRM、OA / 协同办公，其中「ERP」影响 7 个场景。"
+    },
+    {
+      "when": "首批场景上线并稳定运行",
+      "why": "团队有了经验，实施门槛下降；同时沉淀出的数据会让后续场景的数据可得分提高",
+      "extra": "首批为「门店巡检与店员带教」，约 3 周。"
+    },
+    {
+      "when": "经营重点发生变化",
+      "why": "痛点勾选与半年目标变了，痛点强度这一维（占 35%）会重新分配",
+      "extra": ""
+    },
+    {
+      "when": "人员规模或业务线发生较大变化",
+      "why": "可投入人力与适用场景都会变，建议重新填一次画像",
+      "extra": ""
+    },
+    {
+      "when": "距上次排序超过 6 个月",
+      "why": "场景库会持续补充，同类企业的落地经验也在更新",
+      "extra": ""
+    }
+  ],
+  "painLibrary": [
+    {
+      "id": "trade-p01",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "报价慢",
+      "text": "客户问价要业务员翻价格表和库存，常常隔天才回",
+      "hint": "价格与库存分散在几张表里",
+      "picked": true,
+      "severity": 5
+    },
+    {
+      "id": "trade-p02",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "客户流失",
+      "text": "下游批发客户几个月不下单，没人发现也没人问",
+      "hint": "客户活跃度缺少监测机制",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p03",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "询盘散",
+      "text": "平台询盘和展会名片散在各人手机里，跟进靠记性",
+      "hint": "询盘缺少统一入口与跟进节奏",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p04",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "会员沉睡",
+      "text": "会员卡办了几万张，真正回头买的只有一小部分",
+      "hint": "会员标签与触达手段都缺",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p05",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "断货",
+      "text": "爆款总是断货，滞销品压仓，补货全靠店长感觉",
+      "hint": "补货缺少销量预测支撑",
+      "picked": true,
+      "severity": 4
+    },
+    {
+      "id": "trade-p06",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "错发漏发",
+      "text": "拣货发货靠人工核对，错发漏发的赔付每月都有",
+      "hint": "拣货环节没有二次校验",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p07",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "单证返工",
+      "text": "报关单证靠手工录入，一个数字对不上整票退回重做",
+      "hint": "单证数据在多份文件间重复录入",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p08",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "跟单进度",
+      "text": "客户催出货进度，跟单员要挨个问工厂和货代才敢回",
+      "hint": "订单节点散在邮件与聊天记录里",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p09",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "毛利不清",
+      "text": "单个商品到底赚多少算不清，促销做完才发现越卖越薄",
+      "hint": "费用与折扣没有分摊到单品",
+      "picked": true,
+      "severity": 5
+    },
+    {
+      "id": "trade-p10",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "呆滞库存",
+      "text": "仓库里压着两年前的货，账上有量实际卖不动",
+      "hint": "库存周转与临期状况缺少监控",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p11",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "平台对账",
+      "text": "多个平台和门店的账单费用，月底对账要对上一周",
+      "hint": "账单口径不一，人工逐笔核对",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p12",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "账期垫资",
+      "text": "下游账期越拉越长，上游要现款，中间靠自己垫",
+      "hint": "回款与付款节奏没有排过表",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p13",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "跑店督导",
+      "text": "门店多了以后，陈列价格执行全靠督导轮流跑店看",
+      "hint": "门店标准执行缺少日常反馈",
+      "picked": true,
+      "severity": 3
+    },
+    {
+      "id": "trade-p14",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "新人上手",
+      "text": "店员和客服流动快，招进来的新人上手要一个多月",
+      "hint": "话术与流程靠老员工口头带",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p15",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "客户在人",
+      "text": "老业务手上的客户和价格底线都在他自己脑子里",
+      "hint": "客户信息没有沉淀到公司",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "trade-p16",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "报表口径",
+      "text": "各门店各平台的数据口径不一，开会先对数再谈事",
+      "hint": "指标定义与取数方式不统一",
+      "picked": false,
+      "severity": 0
+    }
+  ],
   "investment": {
     "tier": "轻",
     "name": "轻量场景",

@@ -22,6 +22,7 @@ html = put(html, '/*__TOKENS_CSS__*/', R('src/tokens.css'));
 html = put(html, '/*__SHELL_CSS__*/', R('src/shell.css'));
 html = put(html, '/*__REPORT_CSS__*/', R('src/report.css'));
 html = put(html, '/*__MODULE_02_CSS__*/', R('src/module-02.css'));
+html = put(html, '/*__REPORT_M2_CSS__*/', R('src/report-m2.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));

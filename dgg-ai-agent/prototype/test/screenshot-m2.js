@@ -86,11 +86,11 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
     brief: document.querySelectorAll('.report .page.brief').length,
     toc: document.querySelectorAll('.toc button').length,
     nav: document.querySelectorAll('#m2-nav-tbl tr').length,
-    cover: document.querySelector('.m2-cover .pick .nm').textContent.trim(),
-    coverScore: [...document.querySelectorAll('.m2-cover svg[aria-label="综合得分"] text')].map((t) => t.textContent.trim()).find((t) => t.includes('.')) || ''
+    cover: document.querySelector('.m2-front .pick .nm').textContent.trim(),
+    coverScore: [...document.querySelectorAll('.m2-front svg[aria-label="综合得分"] text')].map((t) => t.textContent.trim()).find((t) => t.includes('.')) || ''
   }));
   await page.screenshot({ path: `${out}/land-6-report-top.png` });
-  const shots = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 24, 25, 26, 27, 28, 30, 33, 34, 36, 40, 42];
+  const shots = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
   for (const n of shots) {
     const el = page.locator(`.report .page[data-page="${n}"]`);
     if (!(await el.count())) continue;
@@ -115,7 +115,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
   const ok2 = land.spent === '20' && land.left === '9,980';
   const ok3 = land.verdict === golden.verdict.headline;
   const ok4 = JSON.stringify(after.top) !== JSON.stringify(land.top) && !after.preset;
-  const ok5 = rep.pages === 42 && rep.cover === golden.ranked[0].name;
+  const ok5 = rep.pages === 28 && rep.cover === golden.ranked[0].name;
   console.log('屏上（横屏）:', JSON.stringify(land, null, 0));
   console.log('内核 golden :', JSON.stringify(gTop));
   console.log(ok1 ? '✔ 排序表与内核逐字一致' : '✘ 排序表不一致');
@@ -125,7 +125,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
   console.log(ok4 ? '✔ 权重拖动触发重排，预设自动切到自定义' : '✘ 权重拖动未改变排序');
   console.log('预设「先看条件」Top3:', JSON.stringify(preset3), '| 点第 4 行详情:', selName, '| 看全部行数:', allRows);
   console.log('报告:', JSON.stringify(rep));
-  console.log(ok5 ? '✔ 报告 42 页，封面首选场景与内核一致' : '✘ 报告页数或封面不符');
+  console.log(ok5 ? '✔ 报告 28 页，封面首选场景与内核一致' : '✘ 报告页数或封面不符');
   console.log('PDF 页数：完整', pdfPages(`${out}/m2-print-full.pdf`), '· 速览', pdfPages(`${out}/m2-print-brief.pdf`));
   console.log('竖屏排序表行数:', port.rows, '| 竖屏 Top1:', port.top[0]);
   if (errors.length) { console.log('JS 错误:'); errors.forEach((e) => console.log('  ' + e)); }

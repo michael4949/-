@@ -371,7 +371,7 @@
 
   // ---------- 综合分半环仪表 ----------
   C.dial = function (score, label, sub) {
-    var W = 230, H = 156, cx = 115, cy = 118, R = 88, sw = 17, s = svg(W, H, '综合得分');
+    var W = 234, H = 162, cx = 117, cy = 120, R = 88, sw = 17, s = svg(W, H, '综合得分');
     var arc = function (a0, a1, r) {
       var x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0), x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
       return 'M' + x0 + ' ' + y0 + ' A' + r + ' ' + r + ' 0 ' + ((a1 - a0) > Math.PI ? 1 : 0) + ' 1 ' + x1 + ' ' + y1;
@@ -379,8 +379,8 @@
     s.appendChild(el('path', { d: arc(Math.PI, 2 * Math.PI, R), fill: 'none', stroke: '#E9EEF6', 'stroke-width': sw, 'stroke-linecap': 'round' }));
     var a1 = Math.PI + Math.PI * Math.max(0, Math.min(100, score)) / 100;
     s.appendChild(el('path', { d: arc(Math.PI, a1, R), fill: 'none', stroke: grad(s, P.cyan, P.blue, false), 'stroke-width': sw, 'stroke-linecap': 'round' }));
-    s.appendChild(txt(cx - R, cy + 16, '0', { 'text-anchor': 'middle', 'font-size': 10, fill: P.sub }));
-    s.appendChild(txt(cx + R, cy + 16, '100', { 'text-anchor': 'middle', 'font-size': 10, fill: P.sub }));
+    s.appendChild(txt(cx - R, cy + 20, '0', { 'text-anchor': 'middle', 'font-size': 10, fill: P.sub }));
+    s.appendChild(txt(cx + R, cy + 20, '100', { 'text-anchor': 'middle', 'font-size': 10, fill: P.sub }));
     s.appendChild(txt(cx, cy - 16, score.toFixed(1), { 'text-anchor': 'middle', 'font-size': 32, 'font-weight': 800, fill: P.navy }));
     s.appendChild(txt(cx, cy + 2, label || '综合得分', { 'text-anchor': 'middle', 'font-size': 11, fill: P.sub }));
     if (sub) s.appendChild(txt(cx, cy + 18, sub, { 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 700, fill: P.blue }));
@@ -437,6 +437,129 @@
     });
     s.appendChild(txt(LX + LW / 2, 20, '需要补齐的数据源', { 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 800, fill: P.sub }));
     s.appendChild(txt(RX + RW / 2, 20, '因此暂缓的场景', { 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 800, fill: P.sub }));
+    return s;
+  };
+
+  // ---------- 封面主视觉 v2：左「企服」→ 中「AI」→ 右「排序结果」 ----------
+  C.heroM2 = function (r, seed) {
+    var W = 1000, H = 452, s = svg(W, H, '封面主视觉');
+    var d = el('defs'); s.appendChild(d);
+    // 底：深墨蓝斜向渐变
+    var bg = el('linearGradient', { id: 'hm2bg', x1: 0, y1: 0, x2: 1, y2: 1 });
+    [['0%', '#05122A'], ['46%', '#0A2A5E'], ['100%', '#0D3F7A']].forEach(function (t) { bg.appendChild(el('stop', { offset: t[0], 'stop-color': t[1] })); });
+    d.appendChild(bg);
+    s.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#hm2bg)' }));
+    // 网格
+    var pat = el('pattern', { id: 'hm2grid', width: 44, height: 44, patternUnits: 'userSpaceOnUse' });
+    pat.appendChild(el('path', { d: 'M44 0H0V44', fill: 'none', stroke: 'rgba(120,180,255,.09)', 'stroke-width': 1 }));
+    d.appendChild(pat);
+    s.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#hm2grid)' }));
+    // 中心辉光
+    var rg = el('radialGradient', { id: 'hm2glow' });
+    rg.appendChild(el('stop', { offset: '0%', 'stop-color': 'rgba(0,194,240,.30)' }));
+    rg.appendChild(el('stop', { offset: '100%', 'stop-color': 'rgba(0,194,240,0)' }));
+    d.appendChild(rg);
+    s.appendChild(el('ellipse', { cx: 500, cy: 216, rx: 212, ry: 152, fill: 'url(#hm2glow)' }));
+
+    var LN = 'rgba(158,205,255,.82)', LN2 = 'rgba(120,175,240,.45)', CY = '#5FE0FF';
+    function g(x, y) { return el('g', { transform: 'translate(' + x + ' ' + y + ')' }); }
+
+    // ===== 左：企服元素（园区楼宇 · 证照与公章 · 经营报表）=====
+    var L = g(66, 180);
+    [[0, 58, 34, 86], [40, 30, 38, 114], [86, 66, 30, 78]].forEach(function (b, i) {
+      L.appendChild(el('rect', { x: b[0], y: b[1], width: b[2], height: b[3], rx: 3, fill: 'rgba(30,86,160,.30)', stroke: LN, 'stroke-width': 1.6 }));
+      for (var ry = b[1] + 10; ry < b[1] + b[3] - 8; ry += 16) {
+        for (var rx = b[0] + 7; rx < b[0] + b[2] - 7; rx += 13) {
+          L.appendChild(el('rect', { x: rx, y: ry, width: 7, height: 8, rx: 1, fill: (rx + ry) % 3 === 0 ? 'rgba(95,224,255,.72)' : 'rgba(150,200,255,.24)' }));
+        }
+      }
+    });
+    L.appendChild(el('line', { x1: -8, y1: 146, x2: 240, y2: 146, stroke: LN2, 'stroke-width': 1.4 }));
+    s.appendChild(L);
+    // 证照 + 公章
+    var C1 = g(198, 178);
+    C1.appendChild(el('rect', { x: 0, y: 0, width: 92, height: 62, rx: 5, fill: 'rgba(20,64,124,.46)', stroke: LN, 'stroke-width': 1.6 }));
+    [12, 22, 32].forEach(function (y, i) { C1.appendChild(el('rect', { x: 10, y: y, width: [54, 44, 38][i], height: 3.4, rx: 1.7, fill: 'rgba(160,205,255,.55)' })); });
+    C1.appendChild(el('circle', { cx: 70, cy: 44, r: 13, fill: 'none', stroke: '#FF8A3D', 'stroke-width': 2 }));
+    C1.appendChild(el('path', { d: 'M63 44h14M70 37v14', stroke: '#FF8A3D', 'stroke-width': 1.6 }));
+    C1.appendChild(el('circle', { cx: 70, cy: 44, r: 17, fill: 'none', stroke: 'rgba(255,138,61,.30)', 'stroke-width': 1 }));
+    s.appendChild(C1);
+    // 经营报表
+    var C2 = g(198, 252);
+    C2.appendChild(el('rect', { x: 0, y: 0, width: 74, height: 58, rx: 5, fill: 'rgba(20,64,124,.40)', stroke: LN2, 'stroke-width': 1.4 }));
+    [[12, 30], [26, 20], [40, 38], [54, 26]].forEach(function (b) {
+      C2.appendChild(el('rect', { x: b[0], y: 46 - b[1], width: 8, height: b[1], rx: 2, fill: 'rgba(95,224,255,.62)' }));
+    });
+    s.appendChild(C2);
+    s.appendChild(txt(166, 358, '企业经营现状', { 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: 'rgba(206,232,255,.92)' }));
+    s.appendChild(txt(166, 374, 'PROFILE · PAIN · SYSTEMS', { 'text-anchor': 'middle', 'font-size': 8.5, 'letter-spacing': 2.4, fill: 'rgba(130,180,235,.72)' }));
+
+    // ===== 中：AI 芯片 + 节点网络 =====
+    var nodes = [[-84, -70], [0, -96], [84, -70], [-104, 6], [104, 6], [-76, 76], [4, 100], [82, 74]];
+    var NC = g(500, 206);
+    nodes.forEach(function (n) {
+      NC.appendChild(el('line', { x1: 0, y1: 0, x2: n[0], y2: n[1], stroke: 'rgba(95,224,255,.34)', 'stroke-width': 1.2 }));
+    });
+    nodes.forEach(function (n, i) {
+      NC.appendChild(el('circle', { cx: n[0], cy: n[1], r: 5.5, fill: '#0A2A5E', stroke: CY, 'stroke-width': 2 }));
+      NC.appendChild(el('circle', { cx: n[0], cy: n[1], r: 11, fill: 'none', stroke: 'rgba(95,224,255,.24)', 'stroke-width': 1 }));
+    });
+    for (var i = 0; i < nodes.length; i++) {
+      var a = nodes[i], b = nodes[(i + 1) % nodes.length];
+      NC.appendChild(el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: 'rgba(95,224,255,.16)', 'stroke-width': 1 }));
+    }
+    // 芯片
+    var chip = el('linearGradient', { id: 'hm2chip', x1: 0, y1: 0, x2: 1, y2: 1 });
+    chip.appendChild(el('stop', { offset: '0%', 'stop-color': '#13AEDC' }));
+    chip.appendChild(el('stop', { offset: '100%', 'stop-color': '#1157B5' }));
+    d.appendChild(chip);
+    for (var k = 0; k < 4; k++) {
+      var off = -30 + k * 20;
+      NC.appendChild(el('line', { x1: off, y1: -46, x2: off, y2: -58, stroke: CY, 'stroke-width': 2.2, 'stroke-linecap': 'round' }));
+      NC.appendChild(el('line', { x1: off, y1: 46, x2: off, y2: 58, stroke: CY, 'stroke-width': 2.2, 'stroke-linecap': 'round' }));
+      NC.appendChild(el('line', { x1: -46, y1: off, x2: -58, y2: off, stroke: CY, 'stroke-width': 2.2, 'stroke-linecap': 'round' }));
+      NC.appendChild(el('line', { x1: 46, y1: off, x2: 58, y2: off, stroke: CY, 'stroke-width': 2.2, 'stroke-linecap': 'round' }));
+    }
+    NC.appendChild(el('rect', { x: -46, y: -46, width: 92, height: 92, rx: 16, fill: 'url(#hm2chip)', stroke: 'rgba(160,235,255,.85)', 'stroke-width': 2 }));
+    NC.appendChild(el('rect', { x: -33, y: -33, width: 66, height: 66, rx: 10, fill: 'none', stroke: 'rgba(255,255,255,.30)', 'stroke-width': 1.2 }));
+    var t1 = txt(0, 9, 'AI', { 'text-anchor': 'middle', 'font-size': 27, 'font-weight': 900, fill: '#fff' });
+    t1.setAttribute('letter-spacing', '1'); NC.appendChild(t1);
+    s.appendChild(NC);
+    s.appendChild(txt(500, 358, '场景匹配与四维评分', { 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: 'rgba(206,232,255,.92)' }));
+    s.appendChild(txt(500, 374, 'MATCH · SCORE · RANK', { 'text-anchor': 'middle', 'font-size': 8.5, 'letter-spacing': 2.4, fill: 'rgba(130,180,235,.72)' }));
+
+    // ===== 右：排序结果 =====
+    var R = g(756, 120);
+    var top3 = (r && r.ranked ? r.ranked : []).slice(0, 3);
+    top3.forEach(function (sc, i) {
+      var y = i * 56, w = 96 + (sc.score / 100) * 96;
+      R.appendChild(el('rect', { x: 0, y: y, width: 190, height: 42, rx: 8, fill: 'rgba(16,58,116,.44)', stroke: LN2, 'stroke-width': 1.2 }));
+      R.appendChild(el('rect', { x: 0, y: y, width: w, height: 42, rx: 8, fill: i === 0 ? 'rgba(0,194,240,.30)' : 'rgba(95,180,255,.14)' }));
+      R.appendChild(el('rect', { x: 0, y: y, width: 4, height: 42, rx: 2, fill: i === 0 ? CY : 'rgba(120,180,240,.6)' }));
+      R.appendChild(txt(14, y + 26, 'No.' + (i + 1), { 'font-size': 12, 'font-weight': 800, fill: i === 0 ? CY : 'rgba(190,220,255,.86)' }));
+      R.appendChild(txt(56, y + 26, trunc(sc.name, 7), { 'font-size': 12, 'font-weight': 700, fill: 'rgba(226,240,255,.95)' }));
+      R.appendChild(txt(180, y + 26, sc.score.toFixed(1), { 'text-anchor': 'end', 'font-size': 12, 'font-weight': 800, fill: i === 0 ? '#fff' : 'rgba(190,220,255,.86)' }));
+    });
+    s.appendChild(R);
+    s.appendChild(txt(851, 358, '先做哪一个', { 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: 'rgba(206,232,255,.92)' }));
+    s.appendChild(txt(851, 374, 'PRIORITY · ROADMAP', { 'text-anchor': 'middle', 'font-size': 8.5, 'letter-spacing': 2.4, fill: 'rgba(130,180,235,.72)' }));
+
+    // ===== 流动弧线：企服 → AI → 结果 =====
+    var fl = el('linearGradient', { id: 'hm2flow', x1: 0, y1: 0, x2: 1, y2: 0 });
+    [['0%', 'rgba(255,138,61,.12)'], ['34%', 'rgba(95,224,255,.72)'], ['70%', 'rgba(95,224,255,.72)'], ['100%', 'rgba(14,159,110,.20)']].forEach(function (t) { fl.appendChild(el('stop', { offset: t[0], 'stop-color': t[1] })); });
+    d.appendChild(fl);
+    [[150, -46], [168, 0], [150, 46]].forEach(function (c, i) {
+      s.appendChild(el('path', { d: 'M300 ' + (206 + c[1]) + 'C' + (300 + c[0]) + ' ' + (206 + c[1] * 1.7) + ',' + (742 - c[0]) + ' ' + (206 + c[1] * 1.7) + ',742 ' + (206 + c[1]),
+        fill: 'none', stroke: 'url(#hm2flow)', 'stroke-width': i === 1 ? 2.4 : 1.6, 'stroke-linecap': 'round' }));
+    });
+    var rnd = (function (x) { return function () { x = (x * 1103515245 + 12345) % 2147483648; return x / 2147483648; }; })(seed || 11);
+    for (var q = 0; q < 16; q++) {
+      var px = 312 + rnd() * 410, py = 160 + rnd() * 96;
+      s.appendChild(el('circle', { cx: px, cy: py, r: 1.6 + rnd() * 1.8, fill: 'rgba(150,225,255,' + (0.28 + rnd() * 0.42) + ')' }));
+    }
+    // 底部波纹
+    s.appendChild(el('path', { d: 'M0 406C170 386,330 424,500 406S830 386,1000 410V452H0Z', fill: 'rgba(6,20,48,.55)' }));
+    s.appendChild(el('path', { d: 'M0 424C180 408,340 440,520 424S840 408,1000 428V452H0Z', fill: 'rgba(4,14,36,.75)' }));
     return s;
   };
 

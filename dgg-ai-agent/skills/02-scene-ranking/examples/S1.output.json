@@ -2296,6 +2296,350 @@
       }
     ]
   },
+  "scenarios": [
+    {
+      "key": "base",
+      "name": "保守推进",
+      "sub": "CONSERVATIVE",
+      "desc": "只做首批一个场景，跑通后再评估。适合决策层尚未形成共识、先要看见效果的企业。",
+      "scope": "首批 1 个场景",
+      "effort": "一名业务骨干每周半天",
+      "expect": "取预期指标区间的下限",
+      "risk": "推进最稳，12 个月内 AI 覆盖面有限",
+      "count": 1,
+      "scenes": [
+        "报价自动生成"
+      ],
+      "cost": "轻",
+      "range": "1–5 万元",
+      "weeks": 4,
+      "modules": [
+        "AI获客"
+      ],
+      "metrics": [
+        {
+          "name": "报价自动生成",
+          "metric": "报价响应从 2 天缩短到 4 小时内"
+        }
+      ]
+    },
+    {
+      "key": "mid",
+      "name": "中性推进",
+      "sub": "BALANCED",
+      "desc": "按三步走的前两批推进，让改善出现在经营报表上。多数同规模企业选择这一档。",
+      "scope": "前两批 3 个场景",
+      "effort": "一名专职 + 各场景一名业务对接人",
+      "expect": "取预期指标区间的中值",
+      "risk": "需要在第 4 个月前完成首批验收，否则第二批顺延",
+      "count": 3,
+      "scenes": [
+        "报价自动生成",
+        "订单交付预警",
+        "经营日报与指标归因"
+      ],
+      "cost": "中",
+      "range": "5–20 万元",
+      "weeks": 20,
+      "modules": [
+        "AI获客",
+        "AI ERP",
+        "AI决策"
+      ],
+      "metrics": [
+        {
+          "name": "报价自动生成",
+          "metric": "报价响应从 2 天缩短到 4 小时内"
+        },
+        {
+          "name": "订单交付预警",
+          "metric": "交期达成率提升 8–12 个百分点"
+        },
+        {
+          "name": "经营日报与指标归因",
+          "metric": "经营数据从月度口径变为每日可查"
+        }
+      ]
+    },
+    {
+      "key": "fast",
+      "name": "积极推进",
+      "sub": "AGGRESSIVE",
+      "desc": "三批并行推进，同步补齐缺失数据源。适合已有数字化团队、且决策层已明确投入的企业。",
+      "scope": "三批 5 个场景 + 数据补齐",
+      "effort": "一个小团队，含一名数据对接人",
+      "expect": "取预期指标区间的上限",
+      "risk": "同时铺开会分散精力，需要明确的阶段验收节点",
+      "count": 5,
+      "scenes": [
+        "报价自动生成",
+        "订单交付预警",
+        "经营日报与指标归因",
+        "询盘分级与跟进提醒",
+        "来料与过程质检辅助"
+      ],
+      "cost": "中",
+      "range": "5–20 万元",
+      "weeks": 35,
+      "modules": [
+        "AI获客",
+        "AI ERP",
+        "AI决策",
+        "AI流程提效"
+      ],
+      "metrics": [
+        {
+          "name": "报价自动生成",
+          "metric": "报价响应从 2 天缩短到 4 小时内"
+        },
+        {
+          "name": "订单交付预警",
+          "metric": "交期达成率提升 8–12 个百分点"
+        },
+        {
+          "name": "经营日报与指标归因",
+          "metric": "经营数据从月度口径变为每日可查"
+        },
+        {
+          "name": "询盘分级与跟进提醒",
+          "metric": "询盘首次响应时间缩短一半"
+        },
+        {
+          "name": "来料与过程质检辅助",
+          "metric": "批量不良的发现时点提前到当班次内"
+        }
+      ]
+    }
+  ],
+  "scenarioNote": "三档给的是推进范围与节奏，具体金额、回收期与分月现金流在「企业AI投入ROI测算器」中按贵司人员工资与业务量测算。",
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "定目标与验收标准、协调跨部门、每月看一次进展",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "销售内勤与报价工程师（首批场景）",
+      "duty": "提供业务规则、参与试运行、反馈使用问题",
+      "time": "上线期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "IT 或熟悉业务系统的人员（现有 1–2 人）",
+      "duty": "导出所需数据、确认字段口径、处理系统对接",
+      "time": "起步阶段集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "补齐了一个业务系统",
+      "why": "该系统相关场景的数据可得分会从 1 分回到可评估区间，排序会明显变化",
+      "extra": "本次缺 MES / 生产系统、CRM，其中「MES / 生产系统」影响 3 个场景。"
+    },
+    {
+      "when": "首批场景上线并稳定运行",
+      "why": "团队有了经验，实施门槛下降；同时沉淀出的数据会让后续场景的数据可得分提高",
+      "extra": "首批为「报价自动生成」，约 4 周。"
+    },
+    {
+      "when": "经营重点发生变化",
+      "why": "痛点勾选与半年目标变了，痛点强度这一维（占 35%）会重新分配",
+      "extra": ""
+    },
+    {
+      "when": "人员规模或业务线发生较大变化",
+      "why": "可投入人力与适用场景都会变，建议重新填一次画像",
+      "extra": ""
+    },
+    {
+      "when": "距上次排序超过 6 个月",
+      "why": "场景库会持续补充，同类企业的落地经验也在更新",
+      "extra": ""
+    }
+  ],
+  "painLibrary": [
+    {
+      "id": "mfg-p01",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "报价慢",
+      "text": "客户询价后报价要等两三天，单子被同行先接走",
+      "hint": "报价依赖技术与成本两头确认",
+      "picked": true,
+      "severity": 3
+    },
+    {
+      "id": "mfg-p02",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "客户集中",
+      "text": "订单集中在几个老客户身上，新客户进不来",
+      "hint": "订单集中度高，议价空间小",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p03",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "询盘流失",
+      "text": "展会与平台来的询盘散在微信和邮箱里，跟进靠记性",
+      "hint": "询盘没有统一入口与跟进节奏",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p04",
+      "group": "sales",
+      "groupName": "获客与销售",
+      "color": "#8A54DC",
+      "tag": "售后响应",
+      "text": "客户问参数、问配件，要翻图纸再找老师傅确认",
+      "hint": "技术资料分散，响应时间长",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p05",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "交期",
+      "text": "交期常被客户催，能不能按时交货说不准",
+      "hint": "交期承诺缺少数据支撑",
+      "picked": true,
+      "severity": 5
+    },
+    {
+      "id": "mfg-p06",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "插单排产",
+      "text": "插单一来整个排产就乱，靠车间主任凭经验调",
+      "hint": "排产依赖个人经验，难以复算",
+      "picked": true,
+      "severity": 4
+    },
+    {
+      "id": "mfg-p07",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "质量追溯",
+      "text": "来料与过程质检靠人眼，批量问题事后才发现",
+      "hint": "质检记录不成体系，追溯困难",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p08",
+      "group": "deliver",
+      "groupName": "交付与生产",
+      "color": "#0FA3C7",
+      "tag": "设备停机",
+      "text": "设备故障停机没有预兆，停一次影响一周计划",
+      "hint": "维护按固定周期做，与实际状态脱节",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p09",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "成本不清",
+      "text": "单件成本算不准，报价靠毛估，做完才知道赚多少",
+      "hint": "料工费未归集到订单与产品",
+      "picked": true,
+      "severity": 4
+    },
+    {
+      "id": "mfg-p10",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "库存积压",
+      "text": "原材料与半成品积压，账上有货车间找不到",
+      "hint": "账实不符，占用流动资金",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p11",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "应收拖期",
+      "text": "应收账款拖期，催款靠业务员想起来才打电话",
+      "hint": "账期与回款没有预警机制",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p12",
+      "group": "cost",
+      "groupName": "成本与财务",
+      "color": "#C4457E",
+      "tag": "能耗不明",
+      "text": "水电气与辅料消耗只有总数，分不到产线与班次",
+      "hint": "能耗成本无法归因",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p13",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "加班",
+      "text": "关键岗位天天加班，人一休假事情就停",
+      "hint": "工作集中在少数人身上",
+      "picked": true,
+      "severity": 3
+    },
+    {
+      "id": "mfg-p14",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "经验流失",
+      "text": "老师傅的工艺经验在脑子里，人走了就带走了",
+      "hint": "隐性经验没有沉淀载体",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p15",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "报表口径",
+      "text": "各部门报表口径不一，经营会上先对数再讨论",
+      "hint": "指标定义与取数方式不统一",
+      "picked": false,
+      "severity": 0
+    },
+    {
+      "id": "mfg-p16",
+      "group": "org",
+      "groupName": "组织与管理",
+      "color": "#FF8A3D",
+      "tag": "新人上手",
+      "text": "一线与技术岗招人难，新人上手要三个月",
+      "hint": "培训依赖师徒带教，周期长",
+      "picked": false,
+      "severity": 0
+    }
+  ],
   "investment": {
     "tier": "中",
     "name": "流程级应用",
