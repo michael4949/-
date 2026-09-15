@@ -139,14 +139,14 @@
     clear($rail);
     var c = S.company;
     var name = c && c.name ? c.name : (c ? '本企业' : '未选择');
-    var meta = c ? [industryNameOf(c.industry), DATA.labels.size[c.size], c.province, DATA.labels.years[c.years]].filter(Boolean).join(' · ') : '';
+    var meta = c ? [industryNameOf(c.industry), optText('size', c.size), c.province, optText('years', c.years)].filter(Boolean).join(' · ') : '';
     var picker = h('div', { class: 'picker' });
     var menu = null;
     var toggle = h('button', { class: 'link', onclick: function () {
       if (menu) { picker.removeChild(menu); menu = null; return; }
       menu = h('div', { class: 'menu' });
       DATA.companies.forEach(function (sc) {
-        menu.appendChild(h('button', { onclick: function () { setCompany(sc.company); picker.removeChild(menu); menu = null; } }, [sc.company.name]));
+        menu.appendChild(h('button', { onclick: function () { setCompany(sc.profile); picker.removeChild(menu); menu = null; } }, [sc.profile.name]));
       });
       menu.appendChild(h('button', { class: 'muted', onclick: function () { setCompany(null); picker.removeChild(menu); menu = null; } }, ['清空']));
       picker.appendChild(menu);
@@ -195,8 +195,14 @@
     if (S.activeModule && BUILT[S.activeModule].onCompany) BUILT[S.activeModule].onCompany(S.company);
   }
   function industryNameOf(slug) {
-    var hit = DATA.industryMap.internal.filter(function (x) { return x.slug === slug; })[0];
+    var hit = null;
+    DATA.industries.sectors.forEach(function (s) { s.industries.forEach(function (i) { if (i.slug === slug) hit = i; }); });
     return hit ? hit.name : slug;
+  }
+  function optText(key, v) {
+    var f = DATA.fields.filter(function (x) { return x.key === key; })[0];
+    var o = f && f.options ? f.options.filter(function (x) { return x.v === v; })[0] : null;
+    return o ? o.t : (v == null ? '' : String(v));
   }
   function qrSvg(text, cell) {
     try {
@@ -323,9 +329,9 @@
     getCompany: function () { return S.company; }, setCompany: setCompany,
     charge: charge, setQrReady: setQrReady, recommend: function (k) { S.recommended = k; renderPricebar(); },
     holdIdle: holdIdle, touch: touch, showWeChat: showWeChat, print: print, llm: llm,
-    industryNameOf: industryNameOf, station: function () { return S.station; },
+    industryNameOf: industryNameOf, optText: optText, station: function () { return S.station; },
     displayIndustryDefault: function () {
-      var d = DATA.industryMap.display.filter(function (x) { return x.key === S.industryDisplay; })[0];
+      var d = DATA.industries.display.filter(function (x) { return x.key === S.industryDisplay; })[0];
       return d ? d.default : null;
     }
   };
@@ -339,7 +345,7 @@
     $body.setAttribute('data-station', S.station || '3');
     document.getElementById('logo').src = CFG.logo;
     var sel = document.getElementById('industry');
-    DATA.industryMap.display.forEach(function (d) { sel.appendChild(h('option', { value: d.key }, [d.name])); });
+    DATA.industries.display.forEach(function (d) { sel.appendChild(h('option', { value: d.key }, [d.name])); });
     sel.value = S.industryDisplay;
     sel.addEventListener('change', function () {
       S.industryDisplay = sel.value;

@@ -3,194 +3,2153 @@
   "meta": {
     "module": "企业AI成熟度评估",
     "credits": 20,
-    "version": "1.0.0"
+    "version": "2.0.0",
+    "questionCount": 36
   },
-  "company": {
+  "profile": {
     "name": "义乌恒益日用品有限公司",
-    "industry": "trade",
+    "industry": "trade-wholesale",
     "industryName": "贸易与批发",
+    "sector": "trade",
+    "sectorName": "商贸流通",
     "size": "21_50",
     "sizeName": "21–50 人",
+    "revenue": "20m_100m",
+    "revenueName": "2000 万–1 亿",
     "province": "浙江",
     "years": "5_10",
-    "yearsName": "5–10 年"
+    "yearsName": "5–10 年",
+    "ownership": "private",
+    "ownershipName": "民营企业",
+    "customers": "b2b",
+    "customersName": "企业客户",
+    "systems": [
+      "finance"
+    ],
+    "systemsName": [
+      "财务软件"
+    ],
+    "itStaff": "none",
+    "itStaffName": "无专职",
+    "branches": "single",
+    "branchesName": "单一经营地",
+    "overseas": "yes",
+    "overseasName": "有",
+    "role": "owner",
+    "roleName": "企业负责人",
+    "tags": [
+      "商贸流通 · 贸易与批发",
+      "21–50 人",
+      "2000 万–1 亿",
+      "民营企业",
+      "企业客户",
+      "已有 财务软件",
+      "无数字化专职",
+      "有海外业务"
+    ],
+    "portrait": "义乌恒益日用品有限公司是一家位于浙江的贸易与批发企业，民营企业，成立 5–10 年，21–50 人，上年营收 2000 万–1 亿，主要面向企业客户。现有系统：财务软件，没有数字化专职人员。"
   },
   "answers": [
-    1,
-    1,
-    2,
-    1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0
+    {
+      "id": "q01",
+      "dimension": "strategy",
+      "sub": "S1",
+      "text": "过去 12 个月是否有过明确的 AI 立项或预算讨论？",
+      "optionIndex": 1,
+      "optionText": "有人提过没落实",
+      "score": 1,
+      "max": 3,
+      "explain": "立项与预算是 AI 从想法变成事项的分界线，决定后续资源能否到位。"
+    },
+    {
+      "id": "q02",
+      "dimension": "strategy",
+      "sub": "S1",
+      "text": "AI 相关事项在公司里由谁牵头？",
+      "optionIndex": 1,
+      "optionText": "某个员工自发在做",
+      "score": 1,
+      "max": 3,
+      "explain": "没有牵头人的 AI 应用会停留在个人层面，无法跨部门推进。"
+    },
+    {
+      "id": "q03",
+      "dimension": "strategy",
+      "sub": "S2",
+      "text": "公司高层对 AI 的期望是否落到了某个具体业务指标？",
+      "optionIndex": 1,
+      "optionText": "有方向没指标",
+      "score": 1,
+      "max": 3,
+      "explain": "有指标才能验收，有分解才有人对结果负责。"
+    },
+    {
+      "id": "q04",
+      "dimension": "strategy",
+      "sub": "S2",
+      "text": "未来 1–3 年的经营规划里，AI 或数字化占什么位置？",
+      "optionIndex": 0,
+      "optionText": "没有提及",
+      "score": 0,
+      "max": 3,
+      "explain": "进入经营规划的事项才会持续获得预算与关注。"
+    },
+    {
+      "id": "q05",
+      "dimension": "strategy",
+      "sub": "S3",
+      "text": "决策层对 AI 能做什么、不能做什么的了解程度？",
+      "optionIndex": 1,
+      "optionText": "听过一些案例",
+      "score": 1,
+      "max": 3,
+      "explain": "对能力边界的认知决定了场景选择是否靠谱、期望是否合理。"
+    },
+    {
+      "id": "q06",
+      "dimension": "strategy",
+      "sub": "S3",
+      "text": "高层是否亲自参与过 AI 相关的评审、试用或复盘？",
+      "optionIndex": 0,
+      "optionText": "从未参与",
+      "score": 0,
+      "max": 3,
+      "explain": "高层亲身参与是跨部门协同与资源调配的最有效保证。"
+    },
+    {
+      "id": "q07",
+      "dimension": "data",
+      "sub": "D1",
+      "text": "核心业务数据（订单、客户、财务）主要存放在哪里？",
+      "optionIndex": 2,
+      "optionText": "部分在系统",
+      "score": 2,
+      "max": 3,
+      "explain": "AI 只能处理已经数字化的数据，存放方式决定了起点。"
+    },
+    {
+      "id": "q08",
+      "dimension": "data",
+      "sub": "D1",
+      "text": "各业务系统之间的数据是否打通？",
+      "optionIndex": 1,
+      "optionText": "各系统独立，靠人工导来导去",
+      "score": 1,
+      "max": 3,
+      "explain": "系统孤岛意味着 AI 场景需要额外的数据搬运，成本与出错率都会上升。"
+    },
+    {
+      "id": "q09",
+      "dimension": "data",
+      "sub": "D2",
+      "text": "跨部门取一份数据需要多长时间？",
+      "optionIndex": 1,
+      "optionText": "三天以上",
+      "score": 1,
+      "max": 3,
+      "explain": "取数速度反映数据的组织方式与权限设计，直接影响 AI 场景的响应时效。"
+    },
+    {
+      "id": "q10",
+      "dimension": "data",
+      "sub": "D2",
+      "text": "管理层看经营数据的方式？",
+      "optionIndex": 1,
+      "optionText": "每月手工汇总的表格",
+      "score": 1,
+      "max": 3,
+      "explain": "看数方式反映数据回流到决策的链路是否已经建立。"
+    },
+    {
+      "id": "q11",
+      "dimension": "data",
+      "sub": "D3",
+      "text": "同一个客户或产品，在不同部门或系统里的编码与名称是否一致？",
+      "optionIndex": 0,
+      "optionText": "经常不一致",
+      "score": 0,
+      "max": 3,
+      "explain": "主数据不一致是 AI 结果出错最常见的根源，也是数据打通的前提。"
+    },
+    {
+      "id": "q12",
+      "dimension": "data",
+      "sub": "D3",
+      "text": "数据出错（重复、缺失、口径不一）被发现的方式？",
+      "optionIndex": 1,
+      "optionText": "靠个别人经验核对",
+      "score": 1,
+      "max": 3,
+      "explain": "校验机制决定了 AI 输入数据的可信度与问题被发现的时间。"
+    },
+    {
+      "id": "q13",
+      "dimension": "process",
+      "sub": "P1",
+      "text": "主要业务流程是否有书面规范且实际按规范执行？",
+      "optionIndex": 2,
+      "optionText": "部分执行",
+      "score": 2,
+      "max": 3,
+      "explain": "没有规范的流程无法交给 AI 承接，因为没有可依据的规则。"
+    },
+    {
+      "id": "q14",
+      "dimension": "process",
+      "sub": "P1",
+      "text": "流程规范多久更新一次？",
+      "optionIndex": 0,
+      "optionText": "从未更新",
+      "score": 0,
+      "max": 3,
+      "explain": "更新机制反映流程是否活着，AI 嵌入后需要随流程一起迭代。"
+    },
+    {
+      "id": "q15",
+      "dimension": "process",
+      "sub": "P2",
+      "text": "同一件事不同人做，结果差异有多大？",
+      "optionIndex": 1,
+      "optionText": "差异明显",
+      "score": 1,
+      "max": 3,
+      "explain": "执行差异大说明规则没有真正落地，AI 学到的会是混乱的做法。"
+    },
+    {
+      "id": "q16",
+      "dimension": "process",
+      "sub": "P2",
+      "text": "新员工上手核心业务流程需要多久？",
+      "optionIndex": 1,
+      "optionText": "一到三个月",
+      "score": 1,
+      "max": 3,
+      "explain": "上手速度是流程显性化程度的直接体现，也是 AI 知识库的素材来源。"
+    },
+    {
+      "id": "q17",
+      "dimension": "process",
+      "sub": "P3",
+      "text": "核心流程中，有多少环节是在系统里完成的？",
+      "optionIndex": 1,
+      "optionText": "少数环节",
+      "score": 1,
+      "max": 3,
+      "explain": "在系统里完成的环节才有数据留痕，AI 才能接入。"
+    },
+    {
+      "id": "q18",
+      "dimension": "process",
+      "sub": "P3",
+      "text": "重复性工作（录入、核对、汇总、通知）是否有自动化？",
+      "optionIndex": 1,
+      "optionText": "用了一些 Excel 公式或宏",
+      "score": 1,
+      "max": 3,
+      "explain": "已有自动化说明团队接受机器承接工作，AI 场景可以直接叠加。"
+    },
+    {
+      "id": "q19",
+      "dimension": "people",
+      "sub": "H1",
+      "text": "是否有人在日常工作中稳定使用 AI 工具？",
+      "optionIndex": 2,
+      "optionText": "几个岗位常用",
+      "score": 2,
+      "max": 3,
+      "explain": "个人使用是组织应用的种子，普及度决定推广阻力。"
+    },
+    {
+      "id": "q20",
+      "dimension": "people",
+      "sub": "H1",
+      "text": "公司对员工使用 AI 工具的态度与安排？",
+      "optionIndex": 1,
+      "optionText": "不反对，也没组织",
+      "score": 1,
+      "max": 3,
+      "explain": "组织态度决定 AI 使用是野生的还是可管理、可复制的。"
+    },
+    {
+      "id": "q21",
+      "dimension": "people",
+      "sub": "H2",
+      "text": "是否有人能把业务需求翻译成可执行的技术任务？",
+      "optionIndex": 0,
+      "optionText": "没有",
+      "score": 0,
+      "max": 3,
+      "explain": "需求翻译是 AI 项目成败的关键岗位，决定了供应商能否做对东西。"
+    },
+    {
+      "id": "q22",
+      "dimension": "people",
+      "sub": "H2",
+      "text": "与外部技术供应商合作时，公司内部谁来对接与验收？",
+      "optionIndex": 0,
+      "optionText": "老板直接对接，无人验收",
+      "score": 0,
+      "max": 3,
+      "explain": "对接与验收能力决定了外部交付能否真正被用起来。"
+    },
+    {
+      "id": "q23",
+      "dimension": "people",
+      "sub": "H3",
+      "text": "公司是否有组织过 AI 或数字化相关的培训？",
+      "optionIndex": 0,
+      "optionText": "从未",
+      "score": 0,
+      "max": 3,
+      "explain": "培训机制决定 AI 能力是否能从个别人扩展到岗位。"
+    },
+    {
+      "id": "q24",
+      "dimension": "people",
+      "sub": "H3",
+      "text": "公司内部是否沉淀了 AI 应用的经验或案例？",
+      "optionIndex": 0,
+      "optionText": "没有",
+      "score": 0,
+      "max": 3,
+      "explain": "经验沉淀决定了第二个场景是否比第一个更快、更省。"
+    },
+    {
+      "id": "q25",
+      "dimension": "budget",
+      "sub": "B1",
+      "text": "过去一年在软件与数字化上的投入占营收比例？",
+      "optionIndex": 1,
+      "optionText": "0.5% 以内",
+      "score": 1,
+      "max": 3,
+      "explain": "投入占比反映数字化在经营中的实际权重。"
+    },
+    {
+      "id": "q26",
+      "dimension": "budget",
+      "sub": "B1",
+      "text": "过去的数字化投入，效果如何？",
+      "optionIndex": 1,
+      "optionText": "投了但基本没用起来",
+      "score": 1,
+      "max": 3,
+      "explain": "既往投入的使用情况预示 AI 项目会遇到的组织阻力。"
+    },
+    {
+      "id": "q27",
+      "dimension": "budget",
+      "sub": "B2",
+      "text": "对一个 6 个月见效的 AI 项目可接受的投入区间？",
+      "optionIndex": 1,
+      "optionText": "5 万以内",
+      "score": 1,
+      "max": 3,
+      "explain": "投入区间决定首个场景的选型范围与交付形态。"
+    },
+    {
+      "id": "q28",
+      "dimension": "budget",
+      "sub": "B2",
+      "text": "如果第一个 AI 项目见效，是否愿意追加投入？",
+      "optionIndex": 1,
+      "optionText": "视情况",
+      "score": 1,
+      "max": 3,
+      "explain": "追加意愿决定 AI 应用能否从单点扩展到流程。"
+    },
+    {
+      "id": "q29",
+      "dimension": "budget",
+      "sub": "B3",
+      "text": "数字化投入的决策依据？",
+      "optionIndex": 1,
+      "optionText": "供应商推荐",
+      "score": 1,
+      "max": 3,
+      "explain": "决策依据决定投入是否对准真实痛点、能否被验收。"
+    },
+    {
+      "id": "q30",
+      "dimension": "budget",
+      "sub": "B3",
+      "text": "是否对数字化投入的效果做过复盘？",
+      "optionIndex": 0,
+      "optionText": "从未",
+      "score": 0,
+      "max": 3,
+      "explain": "复盘机制让每一次投入都变成下一次决策的依据。"
+    },
+    {
+      "id": "q31",
+      "dimension": "compliance",
+      "sub": "C1",
+      "text": "客户数据与财税数据是否有明确的权限与留存规则？",
+      "optionIndex": 1,
+      "optionText": "口头约定",
+      "score": 1,
+      "max": 3,
+      "explain": "权限与留存规则是 AI 处理企业数据的合规底线。"
+    },
+    {
+      "id": "q32",
+      "dimension": "compliance",
+      "sub": "C1",
+      "text": "员工离职时，其经手的数据与账号如何处理？",
+      "optionIndex": 0,
+      "optionText": "没有处理",
+      "score": 0,
+      "max": 3,
+      "explain": "离职交接是数据泄露最常见的环节，也是制度是否落地的试金石。"
+    },
+    {
+      "id": "q33",
+      "dimension": "compliance",
+      "sub": "C2",
+      "text": "是否清楚哪些数据可以交给外部模型处理？",
+      "optionIndex": 0,
+      "optionText": "不清楚",
+      "score": 0,
+      "max": 3,
+      "explain": "外部模型数据清单决定了哪些 AI 场景可以用公有服务、哪些必须私有部署。"
+    },
+    {
+      "id": "q34",
+      "dimension": "compliance",
+      "sub": "C2",
+      "text": "员工使用外部 AI 工具时，是否有输入数据的限制？",
+      "optionIndex": 0,
+      "optionText": "没有限制",
+      "score": 0,
+      "max": 3,
+      "explain": "没有限制的外部 AI 使用是当前最常见的商业秘密外泄途径。"
+    },
+    {
+      "id": "q35",
+      "dimension": "compliance",
+      "sub": "C3",
+      "text": "公司是否有过数据泄露、误删或账号被盗等事件？",
+      "optionIndex": 2,
+      "optionText": "没发生过，也没预案",
+      "score": 2,
+      "max": 3,
+      "explain": "预案与应急记录反映安全意识是否已经制度化。"
+    },
+    {
+      "id": "q36",
+      "dimension": "compliance",
+      "sub": "C3",
+      "text": "数据与系统安全是否有明确责任人？",
+      "optionIndex": 0,
+      "optionText": "没有",
+      "score": 0,
+      "max": 3,
+      "explain": "责任人是所有安全制度落地的前提。"
+    }
+  ],
+  "subdims": [
+    {
+      "key": "S1",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "立项与牵头",
+      "desc": "是否有正式立项、预算与明确的牵头人",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "AI 尚未进入公司议程：没有立项、预算与牵头人。任何 AI 应用都会停留在个人层面，无法获得资源。",
+      "questions": [
+        "q01",
+        "q02"
+      ]
+    },
+    {
+      "key": "S2",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "目标与指标",
+      "desc": "AI 期望是否落到业务指标并进入经营规划",
+      "score": 1,
+      "max": 6,
+      "pct": 16.7,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "AI 期望没有落到具体业务指标，经营规划中也没有位置。没有指标就无法验收，也无法说服团队投入。",
+      "questions": [
+        "q03",
+        "q04"
+      ]
+    },
+    {
+      "key": "S3",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "高层认知与推动",
+      "desc": "决策层对 AI 边界的认知与亲身参与程度",
+      "score": 1,
+      "max": 6,
+      "pct": 16.7,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "决策层对 AI 能做什么、不能做什么了解有限，也未亲身参与。场景选择容易受供应商影响，期望容易失准。",
+      "questions": [
+        "q05",
+        "q06"
+      ]
+    },
+    {
+      "key": "D1",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "存储与系统化",
+      "desc": "核心数据是否在系统里、系统之间是否打通",
+      "score": 3,
+      "max": 6,
+      "pct": 50,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "核心数据部分在系统里，系统之间有部分接口，仍有人工导入导出。需要先补齐关键数据的系统化。",
+      "questions": [
+        "q07",
+        "q08"
+      ]
+    },
+    {
+      "key": "D2",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "可得与共享",
+      "desc": "跨部门取数的速度与管理层看数的方式",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "跨部门取数耗时不定，管理层看数靠口头或临时统计。数据没有形成向决策回流的链路。",
+      "questions": [
+        "q09",
+        "q10"
+      ]
+    },
+    {
+      "key": "D3",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "质量与标准",
+      "desc": "主数据一致性与数据校验机制",
+      "score": 1,
+      "max": 6,
+      "pct": 16.7,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "客户、产品等主数据在不同系统与部门间经常不一致，数据出错靠事后发现。这是 AI 结果失真最常见的根源。",
+      "questions": [
+        "q11",
+        "q12"
+      ]
+    },
+    {
+      "key": "P1",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "流程规范化",
+      "desc": "书面规范的覆盖与更新机制",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "主要业务流程没有书面规范或有规范不执行，规范从未更新。AI 没有可依据的规则，无法承接流程。",
+      "questions": [
+        "q13",
+        "q14"
+      ]
+    },
+    {
+      "key": "P2",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "执行一致性",
+      "desc": "不同人执行同一流程的结果差异与新人上手速度",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "同一件事不同人做结果差异很大，新人上手要三个月以上全靠带教。流程停留在个人经验里。",
+      "questions": [
+        "q15",
+        "q16"
+      ]
+    },
+    {
+      "key": "P3",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "数字化与自动化",
+      "desc": "流程环节的系统化比例与重复工作自动化程度",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "核心流程几乎没有在系统里完成的环节，重复工作全部人工。没有数据留痕，AI 无处接入。",
+      "questions": [
+        "q17",
+        "q18"
+      ]
+    },
+    {
+      "key": "H1",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "AI 工具使用",
+      "desc": "AI 工具在日常工作中的普及度与公司的组织安排",
+      "score": 3,
+      "max": 6,
+      "pct": 50,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "几个岗位常用 AI 工具，公司不反对或已提供账号。有种子用户，但使用是野生的、没有规范。",
+      "questions": [
+        "q19",
+        "q20"
+      ]
+    },
+    {
+      "key": "H2",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "业务技术转译",
+      "desc": "需求翻译能力与对外部供应商的对接验收能力",
+      "score": 0,
+      "max": 6,
+      "pct": 0,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "没有人能把业务需求翻译成技术任务，与供应商合作靠老板直接对接、无人验收。AI 项目容易做偏、做完没人用。",
+      "questions": [
+        "q21",
+        "q22"
+      ]
+    },
+    {
+      "key": "H3",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "学习与沉淀",
+      "desc": "培训机制与内部经验案例的积累",
+      "score": 0,
+      "max": 6,
+      "pct": 0,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "从未组织过 AI 或数字化培训，内部没有经验沉淀。每个场景都是从零开始。",
+      "questions": [
+        "q23",
+        "q24"
+      ]
+    },
+    {
+      "key": "B1",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "历史投入与效果",
+      "desc": "数字化投入占比与既往投入的实际使用情况",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "过去一年数字化投入几乎没有，或投了但基本没用起来。既往经验预示 AI 项目会遇到落地阻力。",
+      "questions": [
+        "q25",
+        "q26"
+      ]
+    },
+    {
+      "key": "B2",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "投入意愿",
+      "desc": "对首个项目的可接受投入与追加意愿",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "对 AI 项目暂不考虑投入或只接受 5 万以内，追加意愿不确定。首个场景需要选零投入或极轻量的形态。",
+      "questions": [
+        "q27",
+        "q28"
+      ]
+    },
+    {
+      "key": "B3",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "评估与复盘",
+      "desc": "投入决策依据与效果复盘机制",
+      "score": 1,
+      "max": 6,
+      "pct": 16.7,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "数字化投入靠老板拍板或供应商推荐，从未复盘。投入容易偏离真实痛点，也无法积累决策经验。",
+      "questions": [
+        "q29",
+        "q30"
+      ]
+    },
+    {
+      "key": "C1",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "权限与留存",
+      "desc": "数据权限、留存规则与离职交接",
+      "score": 1,
+      "max": 6,
+      "pct": 16.7,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "客户与财税数据没有权限与留存规则，员工离职时数据与账号无处理。数据处于无防护状态。",
+      "questions": [
+        "q31",
+        "q32"
+      ]
+    },
+    {
+      "key": "C2",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "外部模型边界",
+      "desc": "哪些数据可交给外部模型、员工使用外部 AI 的管控",
+      "score": 0,
+      "max": 6,
+      "pct": 0,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "不清楚哪些数据可以交给外部模型，员工使用外部 AI 没有限制。这是当前商业秘密外泄最常见的途径。",
+      "questions": [
+        "q33",
+        "q34"
+      ]
+    },
+    {
+      "key": "C3",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "安全与责任",
+      "desc": "安全事件预案与明确的责任人",
+      "score": 2,
+      "max": 6,
+      "pct": 33.3,
+      "band": "low",
+      "bandName": "待加强",
+      "diagnosis": "发生过数据事件未处理或没有任何预案，安全没有责任人。风险处于放任状态。",
+      "questions": [
+        "q35",
+        "q36"
+      ]
+    }
   ],
   "dimensions": [
     {
       "key": "strategy",
       "name": "战略",
-      "score": 2,
-      "max": 6,
+      "color": "#4974F6",
+      "desc": "决策层是否把 AI 当作经营事项来立项、定指标、亲自推动。战略维度决定了后面五个维度的投入能否持续。",
+      "score": 4,
+      "max": 18,
+      "pct": 22.2,
       "band": [
-        1,
-        3
+        22,
+        42
       ],
-      "position": "within"
+      "bandMid": 32,
+      "position": "within",
+      "positionName": "处于同行参考带内",
+      "level": {
+        "code": "L0",
+        "name": "起步"
+      },
+      "subdims": [
+        {
+          "key": "S1",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "立项与牵头",
+          "desc": "是否有正式立项、预算与明确的牵头人",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "AI 尚未进入公司议程：没有立项、预算与牵头人。任何 AI 应用都会停留在个人层面，无法获得资源。",
+          "questions": [
+            "q01",
+            "q02"
+          ]
+        },
+        {
+          "key": "S2",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "目标与指标",
+          "desc": "AI 期望是否落到业务指标并进入经营规划",
+          "score": 1,
+          "max": 6,
+          "pct": 16.7,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "AI 期望没有落到具体业务指标，经营规划中也没有位置。没有指标就无法验收，也无法说服团队投入。",
+          "questions": [
+            "q03",
+            "q04"
+          ]
+        },
+        {
+          "key": "S3",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "高层认知与推动",
+          "desc": "决策层对 AI 边界的认知与亲身参与程度",
+          "score": 1,
+          "max": 6,
+          "pct": 16.7,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "决策层对 AI 能做什么、不能做什么了解有限，也未亲身参与。场景选择容易受供应商影响，期望容易失准。",
+          "questions": [
+            "q05",
+            "q06"
+          ]
+        }
+      ],
+      "weakest": "S2",
+      "strongest": "S1",
+      "recommendations": [
+        {
+          "id": "S-L0-1",
+          "title": "把 AI 立项写进下季度经营会议",
+          "why": "AI 尚未进入议程，没有立项就没有资源。",
+          "steps": [
+            "选一个部门与一个可衡量的指标（如报价响应时长、交期达成率）",
+            "用一页纸写清 AI 要改善什么、怎么衡量、谁负责",
+            "列入下季度经营会议议程，当场确定牵头人"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "一页纸 AI 立项书",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "立项书通过，牵头人到位",
+          "service": "专家入企 AI 诊断",
+          "module": "企业AI高价值场景排序"
+        },
+        {
+          "id": "S-L0-2",
+          "title": "决策层做一次 AI 能力边界认知",
+          "why": "决策层对 AI 能做什么了解有限，场景选择容易失准。",
+          "steps": [
+            "安排一次 2 小时的 AI 能力边界工作坊，看 3 个同行案例",
+            "现场用体验版三项跑一遍本企业数据",
+            "形成决策层认可的 3 个候选场景清单"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "候选场景清单（3 个）",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "决策层能说出 3 个本企业场景",
+          "service": "专家入企 AI 诊断",
+          "module": "企业AI成熟度评估"
+        }
+      ],
+      "summary": "战略维度得分 4 / 18（22.2%），处于同行参考带内（参考 22%–42%）。三个子维度中「立项与牵头」相对最好（2/6），「目标与指标」最需要补（1/6）。AI 期望没有落到具体业务指标，经营规划中也没有位置。没有指标就无法验收，也无法说服团队投入。"
     },
     {
       "key": "data",
       "name": "数据",
-      "score": 3,
-      "max": 6,
+      "color": "#1BA5B8",
+      "desc": "业务数据是否系统化存放、能否被及时取用、口径是否一致。数据维度决定了 AI 场景能跑多快、结果可信到什么程度。",
+      "score": 6,
+      "max": 18,
+      "pct": 33.3,
       "band": [
-        1,
-        3
+        28,
+        48
       ],
-      "position": "within"
+      "bandMid": 38,
+      "position": "within",
+      "positionName": "处于同行参考带内",
+      "level": {
+        "code": "L1",
+        "name": "尝试"
+      },
+      "subdims": [
+        {
+          "key": "D1",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "存储与系统化",
+          "desc": "核心数据是否在系统里、系统之间是否打通",
+          "score": 3,
+          "max": 6,
+          "pct": 50,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "核心数据部分在系统里，系统之间有部分接口，仍有人工导入导出。需要先补齐关键数据的系统化。",
+          "questions": [
+            "q07",
+            "q08"
+          ]
+        },
+        {
+          "key": "D2",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "可得与共享",
+          "desc": "跨部门取数的速度与管理层看数的方式",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "跨部门取数耗时不定，管理层看数靠口头或临时统计。数据没有形成向决策回流的链路。",
+          "questions": [
+            "q09",
+            "q10"
+          ]
+        },
+        {
+          "key": "D3",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "质量与标准",
+          "desc": "主数据一致性与数据校验机制",
+          "score": 1,
+          "max": 6,
+          "pct": 16.7,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "客户、产品等主数据在不同系统与部门间经常不一致，数据出错靠事后发现。这是 AI 结果失真最常见的根源。",
+          "questions": [
+            "q11",
+            "q12"
+          ]
+        }
+      ],
+      "weakest": "D3",
+      "strongest": "D1",
+      "recommendations": [
+        {
+          "id": "D-L1-1",
+          "title": "把共享表迁入轻量业务系统",
+          "why": "Excel 共享无法支撑多人同时操作与权限管理。",
+          "steps": [
+            "选一套轻量业务系统（进销存或 CRM），先迁订单与客户",
+            "保留原表三个月作为核对",
+            "设定系统为唯一录入入口，Excel 只做导出分析"
+          ],
+          "owner": "运营负责人",
+          "deliverable": "系统上线 + 迁移核对记录",
+          "weeks": 8,
+          "cost": "轻",
+          "kpi": "系统录入率 100%",
+          "service": "行业软件定制",
+          "module": "AI流程提效"
+        },
+        {
+          "id": "D-L1-2",
+          "title": "建立一张管理层周报表",
+          "why": "管理层靠口头汇报看数，数据没有回流到决策。",
+          "steps": [
+            "定义 8–12 个经营指标与取数口径",
+            "指定专人每周从系统导出并更新",
+            "管理层周会以此表为唯一数据来源"
+          ],
+          "owner": "财务或运营负责人",
+          "deliverable": "管理层周报表模板",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "连续 8 周按时更新",
+          "service": "AI 落地陪跑",
+          "module": "AI决策"
+        }
+      ],
+      "summary": "数据维度得分 6 / 18（33.3%），处于同行参考带内（参考 28%–48%）。三个子维度中「存储与系统化」相对最好（3/6），「质量与标准」最需要补（1/6）。客户、产品等主数据在不同系统与部门间经常不一致，数据出错靠事后发现。这是 AI 结果失真最常见的根源。"
     },
     {
       "key": "process",
       "name": "流程",
-      "score": 2,
-      "max": 6,
+      "color": "#7C5CD6",
+      "desc": "业务流程是否有规范、执行是否一致、有多少环节已数字化。流程维度决定了 AI 能否嵌入日常作业而非停留在个人工具。",
+      "score": 6,
+      "max": 18,
+      "pct": 33.3,
       "band": [
-        1,
-        3
+        22,
+        42
       ],
-      "position": "within"
+      "bandMid": 32,
+      "position": "within",
+      "positionName": "处于同行参考带内",
+      "level": {
+        "code": "L1",
+        "name": "尝试"
+      },
+      "subdims": [
+        {
+          "key": "P1",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "流程规范化",
+          "desc": "书面规范的覆盖与更新机制",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "主要业务流程没有书面规范或有规范不执行，规范从未更新。AI 没有可依据的规则，无法承接流程。",
+          "questions": [
+            "q13",
+            "q14"
+          ]
+        },
+        {
+          "key": "P2",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "执行一致性",
+          "desc": "不同人执行同一流程的结果差异与新人上手速度",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "同一件事不同人做结果差异很大，新人上手要三个月以上全靠带教。流程停留在个人经验里。",
+          "questions": [
+            "q15",
+            "q16"
+          ]
+        },
+        {
+          "key": "P3",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "数字化与自动化",
+          "desc": "流程环节的系统化比例与重复工作自动化程度",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "核心流程几乎没有在系统里完成的环节，重复工作全部人工。没有数据留痕，AI 无处接入。",
+          "questions": [
+            "q17",
+            "q18"
+          ]
+        }
+      ],
+      "weakest": "P1",
+      "strongest": "P1",
+      "recommendations": [
+        {
+          "id": "P-L1-1",
+          "title": "给流程规范加检查点与抽查",
+          "why": "有规范不执行，等于没有规范。",
+          "steps": [
+            "在流程的 3 个关键节点设检查点",
+            "每周抽查 5 单，记录执行偏差",
+            "把执行率纳入部门月度指标"
+          ],
+          "owner": "业务部门负责人",
+          "deliverable": "检查点清单 + 抽查记录",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "执行率纳入月度指标",
+          "service": "AI 落地陪跑",
+          "module": "AI流程提效"
+        },
+        {
+          "id": "P-L1-2",
+          "title": "把最重复的一项工作自动化",
+          "why": "重复工作全部人工，团队还没有机器承接工作的体验。",
+          "steps": [
+            "找出每周耗时最多的一项重复工作（录入、核对、汇总、通知）",
+            "用现有系统功能或轻量自动化工具替代",
+            "记录节省的工时"
+          ],
+          "owner": "业务骨干",
+          "deliverable": "一项自动化上线 + 工时记录",
+          "weeks": 4,
+          "cost": "轻",
+          "kpi": "该项工作人工耗时下降 50%",
+          "service": "垂直场景智能体开发",
+          "module": "AI流程提效"
+        }
+      ],
+      "summary": "流程维度得分 6 / 18（33.3%），处于同行参考带内（参考 22%–42%）。三个子维度中「流程规范化」相对最好（2/6），「流程规范化」最需要补（2/6）。主要业务流程没有书面规范或有规范不执行，规范从未更新。AI 没有可依据的规则，无法承接流程。"
     },
     {
       "key": "people",
       "name": "人员",
-      "score": 1,
-      "max": 6,
+      "color": "#E0635C",
+      "desc": "团队是否在用 AI、有没有人能把业务需求变成技术任务、是否有学习与沉淀机制。人员维度决定了 AI 项目能否被内部接住。",
+      "score": 3,
+      "max": 18,
+      "pct": 16.7,
       "band": [
-        1,
-        3
+        22,
+        42
       ],
-      "position": "within"
+      "bandMid": 32,
+      "position": "below",
+      "positionName": "低于同行参考带",
+      "level": {
+        "code": "L0",
+        "name": "起步"
+      },
+      "subdims": [
+        {
+          "key": "H1",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "AI 工具使用",
+          "desc": "AI 工具在日常工作中的普及度与公司的组织安排",
+          "score": 3,
+          "max": 6,
+          "pct": 50,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "几个岗位常用 AI 工具，公司不反对或已提供账号。有种子用户，但使用是野生的、没有规范。",
+          "questions": [
+            "q19",
+            "q20"
+          ]
+        },
+        {
+          "key": "H2",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "业务技术转译",
+          "desc": "需求翻译能力与对外部供应商的对接验收能力",
+          "score": 0,
+          "max": 6,
+          "pct": 0,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "没有人能把业务需求翻译成技术任务，与供应商合作靠老板直接对接、无人验收。AI 项目容易做偏、做完没人用。",
+          "questions": [
+            "q21",
+            "q22"
+          ]
+        },
+        {
+          "key": "H3",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "学习与沉淀",
+          "desc": "培训机制与内部经验案例的积累",
+          "score": 0,
+          "max": 6,
+          "pct": 0,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "从未组织过 AI 或数字化培训，内部没有经验沉淀。每个场景都是从零开始。",
+          "questions": [
+            "q23",
+            "q24"
+          ]
+        }
+      ],
+      "weakest": "H2",
+      "strongest": "H1",
+      "recommendations": [
+        {
+          "id": "H-L0-1",
+          "title": "让一个岗位先把 AI 工具用起来",
+          "why": "没有种子用户，AI 应用会从零开始推广。",
+          "steps": [
+            "选一个文档与信息处理量最大的岗位",
+            "配一套 AI 工具与 10 条使用清单",
+            "两周内形成日常习惯，记录节省的时间"
+          ],
+          "owner": "部门负责人",
+          "deliverable": "岗位 AI 使用清单 + 两周记录",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "该岗位每天使用 AI",
+          "service": "AI 落地陪跑",
+          "module": "AI获客"
+        },
+        {
+          "id": "H-L0-2",
+          "title": "组织一次全员 AI 工具入门",
+          "why": "公司对 AI 没有关注，员工缺少接触机会。",
+          "steps": [
+            "安排一次 2 小时的全员入门课，用本公司的真实工作举例",
+            "发放公司统一的 AI 工具账号",
+            "一周后收集使用反馈"
+          ],
+          "owner": "人事负责人",
+          "deliverable": "入门培训 + 账号发放记录",
+          "weeks": 2,
+          "cost": "轻",
+          "kpi": "一周后使用率 30% 以上",
+          "service": "FDE 认证培训",
+          "module": "AI人力官"
+        }
+      ],
+      "summary": "人员维度得分 3 / 18（16.7%），低于同行参考带（参考 22%–42%）。三个子维度中「AI 工具使用」相对最好（3/6），「业务技术转译」最需要补（0/6）。没有人能把业务需求翻译成技术任务，与供应商合作靠老板直接对接、无人验收。AI 项目容易做偏、做完没人用。"
     },
     {
       "key": "budget",
       "name": "预算",
-      "score": 2,
-      "max": 6,
+      "color": "#E8A33D",
+      "desc": "过去投了多少、效果如何、愿意投多少、怎么评估。预算维度决定了 AI 场景的投入节奏与可持续性。",
+      "score": 5,
+      "max": 18,
+      "pct": 27.8,
       "band": [
-        1,
-        3
+        22,
+        42
       ],
-      "position": "within"
+      "bandMid": 32,
+      "position": "within",
+      "positionName": "处于同行参考带内",
+      "level": {
+        "code": "L1",
+        "name": "尝试"
+      },
+      "subdims": [
+        {
+          "key": "B1",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "历史投入与效果",
+          "desc": "数字化投入占比与既往投入的实际使用情况",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "过去一年数字化投入几乎没有，或投了但基本没用起来。既往经验预示 AI 项目会遇到落地阻力。",
+          "questions": [
+            "q25",
+            "q26"
+          ]
+        },
+        {
+          "key": "B2",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "投入意愿",
+          "desc": "对首个项目的可接受投入与追加意愿",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "对 AI 项目暂不考虑投入或只接受 5 万以内，追加意愿不确定。首个场景需要选零投入或极轻量的形态。",
+          "questions": [
+            "q27",
+            "q28"
+          ]
+        },
+        {
+          "key": "B3",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "评估与复盘",
+          "desc": "投入决策依据与效果复盘机制",
+          "score": 1,
+          "max": 6,
+          "pct": 16.7,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "数字化投入靠老板拍板或供应商推荐，从未复盘。投入容易偏离真实痛点，也无法积累决策经验。",
+          "questions": [
+            "q29",
+            "q30"
+          ]
+        }
+      ],
+      "weakest": "B3",
+      "strongest": "B1",
+      "recommendations": [
+        {
+          "id": "B-L1-1",
+          "title": "把首个场景控制在 5 万以内并按效果追加",
+          "why": "投入意愿有限，需要用小投入验证再滚动。",
+          "steps": [
+            "选一个见效周期 3 个月内的轻量场景",
+            "以标准版起步，设定追加条件",
+            "3 个月后按实际收益决定追加"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "首个场景投入方案 + 追加条件",
+          "weeks": 2,
+          "cost": "轻",
+          "kpi": "3 个月内达到追加条件",
+          "service": "薯片AI智能体 标准版",
+          "module": "企业AI投入ROI测算器"
+        },
+        {
+          "id": "B-L1-2",
+          "title": "为数字化投入建一张验收表",
+          "why": "投入靠拍板或供应商推荐，没有验收就没有效果。",
+          "steps": [
+            "每笔投入写清预期效果与验收指标",
+            "上线 3 个月后按表验收",
+            "验收结果决定是否续费或追加"
+          ],
+          "owner": "财务负责人",
+          "deliverable": "数字化投入验收表",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "每笔投入有验收记录",
+          "service": "AI 落地陪跑",
+          "module": "AI CFO"
+        }
+      ],
+      "summary": "预算维度得分 5 / 18（27.8%），处于同行参考带内（参考 22%–42%）。三个子维度中「历史投入与效果」相对最好（2/6），「评估与复盘」最需要补（1/6）。数字化投入靠老板拍板或供应商推荐，从未复盘。投入容易偏离真实痛点，也无法积累决策经验。"
     },
     {
       "key": "compliance",
       "name": "合规",
-      "score": 1,
-      "max": 6,
+      "color": "#22A06B",
+      "desc": "数据权限、留存、外部模型边界与安全责任是否有制度并执行。合规维度决定了 AI 应用的风险底线，也是客户与监管的共同要求。",
+      "score": 3,
+      "max": 18,
+      "pct": 16.7,
       "band": [
-        1,
-        3
+        20,
+        40
       ],
-      "position": "within"
+      "bandMid": 30,
+      "position": "below",
+      "positionName": "低于同行参考带",
+      "level": {
+        "code": "L0",
+        "name": "起步"
+      },
+      "subdims": [
+        {
+          "key": "C1",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "权限与留存",
+          "desc": "数据权限、留存规则与离职交接",
+          "score": 1,
+          "max": 6,
+          "pct": 16.7,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "客户与财税数据没有权限与留存规则，员工离职时数据与账号无处理。数据处于无防护状态。",
+          "questions": [
+            "q31",
+            "q32"
+          ]
+        },
+        {
+          "key": "C2",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "外部模型边界",
+          "desc": "哪些数据可交给外部模型、员工使用外部 AI 的管控",
+          "score": 0,
+          "max": 6,
+          "pct": 0,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "不清楚哪些数据可以交给外部模型，员工使用外部 AI 没有限制。这是当前商业秘密外泄最常见的途径。",
+          "questions": [
+            "q33",
+            "q34"
+          ]
+        },
+        {
+          "key": "C3",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "安全与责任",
+          "desc": "安全事件预案与明确的责任人",
+          "score": 2,
+          "max": 6,
+          "pct": 33.3,
+          "band": "low",
+          "bandName": "待加强",
+          "diagnosis": "发生过数据事件未处理或没有任何预案，安全没有责任人。风险处于放任状态。",
+          "questions": [
+            "q35",
+            "q36"
+          ]
+        }
+      ],
+      "weakest": "C2",
+      "strongest": "C3",
+      "recommendations": [
+        {
+          "id": "C-L0-1",
+          "title": "写一页数据权限与留存规则",
+          "why": "客户与财税数据没有任何规则，处于无防护状态。",
+          "steps": [
+            "列出客户数据与财税数据的存放位置、可访问人员、保存期限",
+            "形成一页纸制度并全员签收",
+            "离职交接加入账号与数据回收项"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "数据权限与留存制度（一页纸）",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "全员签收，离职交接执行",
+          "service": "法务合规服务",
+          "module": "AI法务"
+        },
+        {
+          "id": "C-L0-2",
+          "title": "指定数据与系统安全责任人",
+          "why": "没有责任人，任何安全制度都无法落地。",
+          "steps": [
+            "指定一名兼职安全责任人",
+            "列出账号、密码、备份三项基本检查",
+            "每月检查一次并记录"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "安全责任人 + 月度检查记录",
+          "weeks": 1,
+          "cost": "零",
+          "kpi": "月度检查连续 3 次",
+          "service": "法务合规服务",
+          "module": "AI法务"
+        }
+      ],
+      "summary": "合规维度得分 3 / 18（16.7%），低于同行参考带（参考 20%–40%）。三个子维度中「安全与责任」相对最好（2/6），「外部模型边界」最需要补（0/6）。不清楚哪些数据可以交给外部模型，员工使用外部 AI 没有限制。这是当前商业秘密外泄最常见的途径。"
     }
   ],
-  "total": 11,
-  "max": 36,
+  "total": 27,
+  "max": 108,
+  "pct": 25,
   "level": {
     "code": "L1",
     "name": "尝试",
-    "range": [
-      9,
-      15
+    "verdict": "个别岗位在用 AI 工具，尚未形成统一场景",
+    "desc": "部分员工在用 AI 工具提升个人效率，公司也有了初步的数字化基础，但 AI 应用零散、没有牵头人与指标。这个阶段的关键是选定一个场景、指定一个人、定一个指标，把个人使用变成公司事项。",
+    "traits": [
+      "个别员工自发使用 AI 工具",
+      "有财务软件或轻量系统，数据部分在线",
+      "AI 有讨论没立项，或有立项没指标"
     ],
-    "verdict": "个别岗位在用 AI 工具，尚未形成统一场景"
+    "focus": "选定首个场景并立项",
+    "typical": "有一定规模、老板关注数字化但尚未系统推进的企业",
+    "minPct": 25
   },
+  "levels": [
+    {
+      "code": "L0",
+      "name": "起步",
+      "minPct": 0
+    },
+    {
+      "code": "L1",
+      "name": "尝试",
+      "minPct": 25
+    },
+    {
+      "code": "L2",
+      "name": "场景",
+      "minPct": 44.4
+    },
+    {
+      "code": "L3",
+      "name": "流程",
+      "minPct": 66.7
+    },
+    {
+      "code": "L4",
+      "name": "经营",
+      "minPct": 86.1
+    }
+  ],
   "nextLevel": {
     "code": "L2",
     "name": "场景",
-    "range": [
-      16,
-      23
-    ],
-    "gap": 5
+    "minPct": 44.4,
+    "gapPct": 19.4,
+    "gapPts": 21,
+    "focus": "场景复制与流程嵌入"
+  },
+  "percentile": 28,
+  "distribution": {
+    "mean": 33,
+    "sd": 14
+  },
+  "benchmark": {
+    "key": "trade-wholesale-21_50",
+    "basis": "exact"
   },
   "positions": {
     "above": 0,
-    "within": 6,
-    "below": 0,
+    "within": 4,
+    "below": 2,
     "unknown": 0
   },
-  "benchmark": {
-    "key": "trade-21_50",
-    "basis": "exact"
-  },
+  "strengths": [
+    "D1",
+    "H1",
+    "B1"
+  ],
+  "weaknesses": [
+    "H3",
+    "H2",
+    "C2"
+  ],
+  "weakDims": [
+    "people",
+    "compliance",
+    "strategy"
+  ],
+  "strongDims": [
+    "data",
+    "budget",
+    "process"
+  ],
   "actions": [
     {
       "order": 1,
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
       "dimension": "people",
       "dimensionName": "人员",
-      "score": 1,
-      "band": [
-        1,
-        3
+      "color": "#E0635C",
+      "id": "H-L0-1",
+      "title": "让一个岗位先把 AI 工具用起来",
+      "why": "没有种子用户，AI 应用会从零开始推广。",
+      "steps": [
+        "选一个文档与信息处理量最大的岗位",
+        "配一套 AI 工具与 10 条使用清单",
+        "两周内形成日常习惯，记录节省的时间"
       ],
-      "title": "把个别人的用法变成岗位方法",
-      "text": "把常用 AI 的同事的做法整理成岗位操作指引，推广到同类岗位。",
+      "owner": "部门负责人",
+      "deliverable": "岗位 AI 使用清单 + 两周记录",
+      "weeks": 2,
+      "cost": "零",
+      "kpi": "该岗位每天使用 AI",
       "service": "AI 落地陪跑",
-      "module": "AI人力官",
+      "module": "AI获客",
       "source": "template"
     },
     {
       "order": 2,
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
       "dimension": "compliance",
       "dimensionName": "合规",
-      "score": 1,
-      "band": [
-        1,
-        3
+      "color": "#22A06B",
+      "id": "C-L0-1",
+      "title": "写一页数据权限与留存规则",
+      "why": "客户与财税数据没有任何规则，处于无防护状态。",
+      "steps": [
+        "列出客户数据与财税数据的存放位置、可访问人员、保存期限",
+        "形成一页纸制度并全员签收",
+        "离职交接加入账号与数据回收项"
       ],
-      "title": "把口头约定变成书面制度",
-      "text": "把现有的数据使用口头约定写成制度文件，明确责任人与违规处理方式。",
+      "owner": "企业负责人",
+      "deliverable": "数据权限与留存制度（一页纸）",
+      "weeks": 2,
+      "cost": "零",
+      "kpi": "全员签收，离职交接执行",
       "service": "法务合规服务",
       "module": "AI法务",
       "source": "template"
     },
     {
       "order": 3,
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
       "dimension": "strategy",
       "dimensionName": "战略",
-      "score": 2,
-      "band": [
-        1,
-        3
+      "color": "#4974F6",
+      "id": "S-L0-1",
+      "title": "把 AI 立项写进下季度经营会议",
+      "why": "AI 尚未进入议程，没有立项就没有资源。",
+      "steps": [
+        "选一个部门与一个可衡量的指标（如报价响应时长、交期达成率）",
+        "用一页纸写清 AI 要改善什么、怎么衡量、谁负责",
+        "列入下季度经营会议议程，当场确定牵头人"
       ],
-      "title": "给 AI 期望配一个可量化指标",
-      "text": "把高层对 AI 的期望落到一个业务指标上，例如报价响应时长或交期达成率，设定 6 个月目标值。",
+      "owner": "企业负责人",
+      "deliverable": "一页纸 AI 立项书",
+      "weeks": 2,
+      "cost": "零",
+      "kpi": "立项书通过，牵头人到位",
       "service": "专家入企 AI 诊断",
+      "module": "企业AI高价值场景排序",
+      "source": "template"
+    },
+    {
+      "order": 4,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "id": "H-L0-2",
+      "title": "组织一次全员 AI 工具入门",
+      "why": "公司对 AI 没有关注，员工缺少接触机会。",
+      "steps": [
+        "安排一次 2 小时的全员入门课，用本公司的真实工作举例",
+        "发放公司统一的 AI 工具账号",
+        "一周后收集使用反馈"
+      ],
+      "owner": "人事负责人",
+      "deliverable": "入门培训 + 账号发放记录",
+      "weeks": 2,
+      "cost": "轻",
+      "kpi": "一周后使用率 30% 以上",
+      "service": "FDE 认证培训",
+      "module": "AI人力官",
+      "source": "template"
+    },
+    {
+      "order": 5,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "color": "#22A06B",
+      "id": "C-L0-2",
+      "title": "指定数据与系统安全责任人",
+      "why": "没有责任人，任何安全制度都无法落地。",
+      "steps": [
+        "指定一名兼职安全责任人",
+        "列出账号、密码、备份三项基本检查",
+        "每月检查一次并记录"
+      ],
+      "owner": "企业负责人",
+      "deliverable": "安全责任人 + 月度检查记录",
+      "weeks": 1,
+      "cost": "零",
+      "kpi": "月度检查连续 3 次",
+      "service": "法务合规服务",
+      "module": "AI法务",
+      "source": "template"
+    },
+    {
+      "order": 6,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "id": "S-L0-2",
+      "title": "决策层做一次 AI 能力边界认知",
+      "why": "决策层对 AI 能做什么了解有限，场景选择容易失准。",
+      "steps": [
+        "安排一次 2 小时的 AI 能力边界工作坊，看 3 个同行案例",
+        "现场用体验版三项跑一遍本企业数据",
+        "形成决策层认可的 3 个候选场景清单"
+      ],
+      "owner": "企业负责人",
+      "deliverable": "候选场景清单（3 个）",
+      "weeks": 2,
+      "cost": "零",
+      "kpi": "决策层能说出 3 个本企业场景",
+      "service": "专家入企 AI 诊断",
+      "module": "企业AI成熟度评估",
+      "source": "template"
+    },
+    {
+      "order": 7,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "color": "#1BA5B8",
+      "id": "D-L1-1",
+      "title": "把共享表迁入轻量业务系统",
+      "why": "Excel 共享无法支撑多人同时操作与权限管理。",
+      "steps": [
+        "选一套轻量业务系统（进销存或 CRM），先迁订单与客户",
+        "保留原表三个月作为核对",
+        "设定系统为唯一录入入口，Excel 只做导出分析"
+      ],
+      "owner": "运营负责人",
+      "deliverable": "系统上线 + 迁移核对记录",
+      "weeks": 8,
+      "cost": "轻",
+      "kpi": "系统录入率 100%",
+      "service": "行业软件定制",
+      "module": "AI流程提效",
+      "source": "template"
+    },
+    {
+      "order": 8,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "color": "#E8A33D",
+      "id": "B-L1-1",
+      "title": "把首个场景控制在 5 万以内并按效果追加",
+      "why": "投入意愿有限，需要用小投入验证再滚动。",
+      "steps": [
+        "选一个见效周期 3 个月内的轻量场景",
+        "以标准版起步，设定追加条件",
+        "3 个月后按实际收益决定追加"
+      ],
+      "owner": "企业负责人",
+      "deliverable": "首个场景投入方案 + 追加条件",
+      "weeks": 2,
+      "cost": "轻",
+      "kpi": "3 个月内达到追加条件",
+      "service": "薯片AI智能体 标准版",
       "module": "企业AI投入ROI测算器",
+      "source": "template"
+    },
+    {
+      "order": 9,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "color": "#7C5CD6",
+      "id": "P-L1-1",
+      "title": "给流程规范加检查点与抽查",
+      "why": "有规范不执行，等于没有规范。",
+      "steps": [
+        "在流程的 3 个关键节点设检查点",
+        "每周抽查 5 单，记录执行偏差",
+        "把执行率纳入部门月度指标"
+      ],
+      "owner": "业务部门负责人",
+      "deliverable": "检查点清单 + 抽查记录",
+      "weeks": 3,
+      "cost": "零",
+      "kpi": "执行率纳入月度指标",
+      "service": "AI 落地陪跑",
+      "module": "AI流程提效",
       "source": "template"
     }
   ],
-  "summary": "义乌恒益日用品有限公司处于 L1 尝试 级，个别岗位在用 AI 工具，尚未形成统一场景。六维中 0 维高于同行参考带，6 维在参考带内，0 维低于参考带。距 L2 场景 级还差 5 分。",
-  "render": [
+  "roadmap": [
     {
-      "type": "radar",
-      "title": "六维成熟度",
-      "source": "dimensions",
-      "band": true,
-      "bandLabel": "同行参考带"
+      "key": "p1",
+      "name": "第 1–3 个月",
+      "title": "打基础",
+      "months": [
+        1,
+        3
+      ],
+      "actions": [
+        1,
+        2,
+        3
+      ],
+      "milestone": "三个短板维度各完成一项基础动作，指标基线建立"
     },
     {
-      "type": "level-badge",
+      "key": "p2",
+      "name": "第 4–6 个月",
+      "title": "见成效",
+      "months": [
+        4,
+        6
+      ],
+      "actions": [
+        4,
+        5,
+        6
+      ],
+      "milestone": "短板维度出现可衡量的改善，首个场景稳定运行"
+    },
+    {
+      "key": "p3",
+      "name": "第 7–12 个月",
+      "title": "扩规模",
+      "months": [
+        7,
+        12
+      ],
+      "actions": [
+        7,
+        8,
+        9
+      ],
+      "milestone": "优势维度扩展，进入 L2 场景 级的条件基本具备"
+    }
+  ],
+  "checklist": [
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 1,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "选一个文档与信息处理量最大的岗位",
+      "owner": "部门负责人"
+    },
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 2,
+      "dimensionName": "合规",
+      "color": "#22A06B",
+      "item": "列出客户数据与财税数据的存放位置、可访问人员、保存期限",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "选一个部门与一个可衡量的指标（如报价响应时长、交期达成率）",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 1,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "配一套 AI 工具与 10 条使用清单",
+      "owner": "部门负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 2,
+      "dimensionName": "合规",
+      "color": "#22A06B",
+      "item": "形成一页纸制度并全员签收",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "用一页纸写清 AI 要改善什么、怎么衡量、谁负责",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 1,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "两周内形成日常习惯，记录节省的时间",
+      "owner": "部门负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 2,
+      "dimensionName": "合规",
+      "color": "#22A06B",
+      "item": "离职交接加入账号与数据回收项",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "列入下季度经营会议议程，当场确定牵头人",
+      "owner": "企业负责人"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "trade-3",
+      "name": "应收账款预警",
+      "stage": "财务",
+      "value": 4,
+      "difficulty": 2,
+      "desc": "按账龄与客户回款习惯自动预警逾期风险并生成催收提醒。",
+      "firstStep": "导出应收账龄表",
+      "module": "AI CFO",
+      "dims": [
+        "data",
+        "compliance"
+      ],
+      "score": 4.6,
+      "dataFit": 5,
+      "dataNote": "数据条件已具备",
+      "why": "拉动短板维度「合规」；数据条件具备，价值 4 / 难度 2",
+      "rank": 1
+    },
+    {
+      "id": "trade-1",
+      "name": "询盘分级与自动回复",
+      "stage": "销售",
+      "value": 5,
+      "difficulty": 2,
+      "desc": "按询盘内容与客户画像自动分级，高意向优先跟进，低意向自动回复。",
+      "firstStep": "导出近 3 个月询盘与成交记录",
+      "module": "AI获客",
+      "dims": [
+        "process",
+        "people"
+      ],
+      "score": 3.7,
+      "dataFit": 1,
+      "dataNote": "需先补齐：CRM",
+      "why": "拉动短板维度「人员」；数据条件待补，价值 5 / 难度 2",
+      "rank": 2
+    },
+    {
+      "id": "trade-5",
+      "name": "客户经营报告",
+      "stage": "客户管理",
+      "value": 3,
+      "difficulty": 2,
+      "desc": "按客户维度自动汇总销售、回款与毛利，月度推送给业务员。",
+      "firstStep": "定义客户报告的 8 个指标",
+      "module": "AI决策",
+      "dims": [
+        "data",
+        "strategy"
+      ],
+      "score": 3.6,
+      "dataFit": 3,
+      "dataNote": "需先补齐：CRM",
+      "why": "拉动短板维度「战略」；数据条件待补，价值 3 / 难度 2",
+      "rank": 3
+    },
+    {
+      "id": "trade-4",
+      "name": "多平台 Listing 生成",
+      "stage": "运营",
+      "value": 4,
+      "difficulty": 1,
+      "desc": "按产品资料自动生成多平台、多语言的商品页文案。",
+      "firstStep": "整理 20 个核心 SKU 的产品资料",
+      "module": "AI获客",
+      "dims": [
+        "people"
+      ],
+      "score": 3.5,
+      "dataFit": 1,
+      "dataNote": "需先补齐：电商 / 门店系统",
+      "why": "拉动短板维度「人员」；数据条件待补，价值 4 / 难度 1",
+      "rank": 4
+    },
+    {
+      "id": "trade-2",
+      "name": "库存周转预测",
+      "stage": "供应链",
+      "value": 5,
+      "difficulty": 3,
+      "desc": "按销售趋势与在途库存预测补货时点与数量，降低缺货与积压。",
+      "firstStep": "整理近 12 个月 SKU 销量与库存",
+      "module": "AI ERP",
+      "dims": [
+        "data"
+      ],
+      "score": 3.1,
+      "dataFit": 1,
+      "dataNote": "需先补齐：ERP、电商 / 门店系统",
+      "why": "数据条件待补，价值 5 / 难度 3",
+      "rank": 5
+    }
+  ],
+  "investment": {
+    "tier": "轻",
+    "name": "轻量场景",
+    "range": "1–5 万元",
+    "desc": "标准版订阅 + 一个场景的配置与培训，3 个月内见效。",
+    "fit": "已选定首个场景、希望快速验证的企业",
+    "rationale": "按可接受投入区间「5 万以内」与当前 L1 级判断，首个 12 个月以「轻量场景」档推进最稳妥。",
+    "tiers": [
+      {
+        "key": "零",
+        "name": "零投入起步",
+        "range": "0 元",
+        "desc": "以轻享版与内部整理动作起步，用两周使用记录验证价值。",
+        "fit": "投入意愿尚未形成、或先要说服决策层的企业"
+      },
+      {
+        "key": "轻",
+        "name": "轻量场景",
+        "range": "1–5 万元",
+        "desc": "标准版订阅 + 一个场景的配置与培训，3 个月内见效。",
+        "fit": "已选定首个场景、希望快速验证的企业"
+      },
+      {
+        "key": "中",
+        "name": "流程级应用",
+        "range": "5–20 万元",
+        "desc": "高级版或旗舰版 + 系统数据打通 + 智能体承接一条跨部门流程。",
+        "fit": "有数据基础、准备把 AI 嵌入日常作业的企业"
+      },
+      {
+        "key": "重",
+        "name": "平台与私域",
+        "range": "20 万元以上",
+        "desc": "私域部署 + 智能体平台搭建 + 行业软件定制 + AI 落地陪跑。",
+        "fit": "多场景并行、数据不出域要求明确的企业"
+      }
+    ],
+    "note": "投入区间为常见范围，具体以场景与数据现状测算为准。释放工时按增收折算，测算工具见「企业AI投入ROI测算器」。"
+  },
+  "risks": [
+    {
+      "id": "R-C1-low",
+      "level": "高",
+      "title": "数据权限与留存缺失",
+      "text": "客户与财税数据没有权限与留存规则，员工离职时数据与账号未处理。在引入任何 AI 场景前，先落实一页纸的数据权限制度与离职交接清单，否则 AI 会放大数据外泄的影响面。"
+    },
+    {
+      "id": "R-C2-low",
+      "level": "高",
+      "title": "外部模型使用无边界",
+      "text": "员工使用外部 AI 工具没有输入限制，也不清楚哪些数据可以外发。这是当前商业秘密与个人信息外泄最常见的途径。建议两周内发布外部 AI 使用规定并培训，涉及客户名单、财务、合同与个人信息的场景走私有部署或本地处理。"
+    },
+    {
+      "id": "R-C3-low",
+      "level": "高",
+      "title": "安全无责任人、无预案",
+      "text": "数据与系统安全没有明确责任人，发生过事件未处理或没有任何预案。建议先指定安全责任人并做账号、密码、备份三项基本检查，再考虑 AI 场景扩展。"
+    },
+    {
+      "id": "R-D3-low",
+      "level": "中",
+      "title": "主数据不一致导致 AI 结果失真",
+      "text": "客户、产品等主数据在不同系统与部门间经常不一致，数据出错靠事后发现。AI 场景上线前先统一主数据编码并建立校验规则，否则输出结果的可信度会受到质疑。"
+    },
+    {
+      "id": "R-H2-low",
+      "level": "中",
+      "title": "供应商依赖与验收缺位",
+      "text": "内部没有人能翻译需求、也没有验收标准，AI 项目容易被供应商主导、做完没人用。建议先指定对接人并写一页验收标准，再启动外部合作。"
+    },
+    {
+      "id": "R-B3-low",
+      "level": "提示",
+      "title": "投入决策缺少测算",
+      "text": "数字化投入靠拍板或供应商推荐，从未复盘。建议每笔 AI 投入先做 ROI 测算并设验收指标，避免重复过去投了没用起来的情况。"
+    },
+    {
+      "id": "R-overseas",
+      "level": "提示",
+      "title": "跨境数据传输合规",
+      "text": "有海外业务的企业在 AI 场景中涉及境外客户或员工数据时，需要关注数据出境的合规要求与目标国的数据保护法规。建议为跨境场景单独做数据清单与传输路径评估。"
+    }
+  ],
+  "answerDistribution": [
+    13,
+    19,
+    4,
+    0
+  ],
+  "sectorInsight": {
+    "name": "商贸流通",
+    "insight": "商贸企业的核心是周转与转化：询盘分级、报价生成、库存周转预测、应收账款预警、多平台运营。数据大多沉淀在财务软件与平台后台，两者之间靠人工对账，AI 的第一步往往是把订单、库存、回款三类数据拉到一张表上。",
+    "aiFocus": [
+      "询盘分级与自动报价",
+      "库存周转与补货预测",
+      "应收账款与回款预警"
+    ]
+  },
+  "keyNumbers": [
+    {
+      "k": "综合得分",
+      "v": "25%",
+      "sub": "27 / 108"
+    },
+    {
+      "k": "成熟度等级",
+      "v": "L1",
+      "sub": "尝试"
+    },
+    {
+      "k": "同行位置",
+      "v": "超过 28%",
+      "sub": "同行业同规模企业"
+    },
+    {
+      "k": "高于参考带",
+      "v": "0",
+      "sub": "个维度"
+    },
+    {
+      "k": "低于参考带",
+      "v": "2",
+      "sub": "个维度"
+    },
+    {
+      "k": "待加强子维度",
+      "v": "16",
+      "sub": "共 18 项"
+    }
+  ],
+  "summary": {
+    "position": "义乌恒益日用品有限公司的企业 AI 成熟度综合得分 25%（27 / 108），处于 L1 尝试 级：个别岗位在用 AI 工具，尚未形成统一场景。在贸易与批发、21–50 人的同行中，估算超过 28% 的企业。",
+    "dims": "六个维度中，0 个高于同行参考带，4 个在参考带内，2 个低于参考带。最强的是「流程」（33.3%），最需要补的是「人员」（16.7%）。",
+    "subs": "十八个子维度中，「存储与系统化」「AI 工具使用」「历史投入与效果」已经建立；「学习与沉淀」「业务技术转译」「外部模型边界」需要优先加强。",
+    "next": "距 L2 场景 级还差 21 分。未来三个月建议先做三件事：1）让一个岗位先把 AI 工具用起来；2）写一页数据权限与留存规则；3）把 AI 立项写进下季度经营会议。"
+  },
+  "summaryText": "义乌恒益日用品有限公司的企业 AI 成熟度综合得分 25%（27 / 108），处于 L1 尝试 级：个别岗位在用 AI 工具，尚未形成统一场景。在贸易与批发、21–50 人的同行中，估算超过 28% 的企业。六个维度中，0 个高于同行参考带，4 个在参考带内，2 个低于参考带。最强的是「流程」（33.3%），最需要补的是「人员」（16.7%）。十八个子维度中，「存储与系统化」「AI 工具使用」「历史投入与效果」已经建立；「学习与沉淀」「业务技术转译」「外部模型边界」需要优先加强。距 L2 场景 级还差 21 分。未来三个月建议先做三件事：1）让一个岗位先把 AI 工具用起来；2）写一页数据权限与留存规则；3）把 AI 立项写进下季度经营会议。",
+  "render": [
+    {
+      "type": "summary",
+      "source": "summary"
+    },
+    {
+      "type": "radar",
+      "source": "dimensions",
+      "band": true
+    },
+    {
+      "type": "level-scale",
       "source": "level"
     },
     {
+      "type": "distribution",
+      "source": "distribution"
+    },
+    {
+      "type": "dimension-detail",
+      "source": "dimensions"
+    },
+    {
+      "type": "ranked-bars",
+      "source": "subdims"
+    },
+    {
+      "type": "roadmap",
+      "source": "roadmap"
+    },
+    {
       "type": "action-list",
-      "title": "升到 L2 场景 的三件事",
       "source": "actions"
+    },
+    {
+      "type": "scene-matrix",
+      "source": "scenes"
+    },
+    {
+      "type": "risk-list",
+      "source": "risks"
+    },
+    {
+      "type": "checklist",
+      "source": "checklist"
     }
   ]
 }

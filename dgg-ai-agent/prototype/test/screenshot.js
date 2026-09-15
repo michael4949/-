@@ -1,65 +1,71 @@
-// 用 Chromium 走一遍模块 1：首页 → 输入 → 12 题 → 结果；横屏 / 竖屏 / 打印 各截一张
+// 用 Chromium 走一遍模块 1：首页 → 企业画像 → 36 题 → 30 页报告；横屏 / 竖屏 / 打印（速览 + 完整）各截图
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
 const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
 const out = path.join(__dirname, 'shots'); fs.mkdirSync(out, { recursive: true });
-const S1 = [2, 1, 3, 2, 2, 1, 1, 1, 2, 2, 1, 0]; // 与 skills/01-ai-maturity/examples/S1.input.json 一致
+const S1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'skills', '01-ai-maturity', 'examples', 'S1.input.json'), 'utf8'));
+const golden = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'skills', '01-ai-maturity', 'examples', 'S1.output.json'), 'utf8'));
+const errors = [];
 
-async function runFlow(page, tag, answers) {
+async function runFlow(page, tag) {
+  page.on('pageerror', (e) => errors.push(tag.name + ': ' + e.message));
   await page.goto(url + '?station=' + tag.station);
-  await page.waitForSelector('.grid, .form-wrap');
+  await page.waitForSelector('.grid, .form-grid');
   await page.screenshot({ path: `${out}/${tag.name}-1-landing.png` });
-  if (tag.station !== '1') { await page.click('.card[data-id="m1"]'); await page.waitForSelector('.form-wrap'); }
-  // 选样例企业 S1（右栏「切换」）
-  await page.click('.rail .link'); await page.click('.rail .menu button:first-child');
-  await page.waitForTimeout(200);
+  if (tag.station !== '1') { await page.click('.card[data-id="m1"]'); await page.waitForSelector('.form-grid'); }
+  await page.click('.rail .link'); await page.click('.rail .menu button:first-child'); await page.waitForTimeout(200);
   await page.screenshot({ path: `${out}/${tag.name}-2-input.png` });
   await page.click('button:has-text("开始评估")');
   await page.waitForSelector('.quiz');
   await page.screenshot({ path: `${out}/${tag.name}-3-quiz.png` });
-  for (const a of answers) { await page.click(`.opt >> nth=${a}`); await page.waitForTimeout(220); }
-  await page.waitForSelector('.result');
-  await page.waitForTimeout(900);
-  await page.screenshot({ path: `${out}/${tag.name}-4-result.png` });
-  // 屏上的数字 vs 内核 golden 输出
-  const onScreen = await page.evaluate(() => ({
-    level: document.querySelector('.level .code').textContent + ' ' + document.querySelector('.level .lname').textContent,
-    total: document.querySelector('.level .total').textContent.replace(/\s/g, ''),
-    dims: [...document.querySelectorAll('.dim-table tr')].map((tr) => [...tr.children].map((td) => td.textContent.trim()).join('|')),
-    actions: [...document.querySelectorAll('.act .t')].map((t) => t.textContent.trim()),
-    spent: document.getElementById('cr-spent').textContent, left: document.getElementById('cr-left').textContent
+  for (const a of S1.answers) { await page.click(`.opt >> nth=${a}`); await page.waitForTimeout(200); }
+  await page.waitForSelector('.report .page[data-page="1"]');
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${out}/${tag.name}-4-report-top.png` });
+  const info = await page.evaluate(() => ({
+    pages: document.querySelectorAll('.report .page').length,
+    level: document.querySelector('.cover .badge .code').textContent + ' ' + document.querySelector('.cover .badge .lname').textContent,
+    pct: document.querySelector('.cover .lv .big').firstChild.textContent,
+    top3: [...document.querySelectorAll('.acts-mini .act-card .t')].map((t) => t.textContent.trim()),
+    spent: document.getElementById('cr-spent').textContent, left: document.getElementById('cr-left').textContent,
+    tocCount: document.querySelectorAll('#toc-list li').length
   }));
-  return onScreen;
+  return info;
 }
+async function shootPages(page, list, prefix) {
+  for (const n of list) {
+    const el = page.locator(`.report .page[data-page="${n}"]`);
+    await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(120);
+    await el.screenshot({ path: `${out}/${prefix}-p${String(n).padStart(2, '0')}.png` });
+  }
+}
+function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length; }
+
 (async () => {
   const browser = await chromium.launch();
-  // 横屏 1920×1080（station=3）
   let page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
-  const land = await runFlow(page, { name: 'land', station: '3' }, S1);
+  const land = await runFlow(page, { name: 'land', station: '3' });
+  await shootPages(page, [1, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 25, 26, 27, 28, 31], 'land');
   await page.emulateMedia({ media: 'print' });
-  await page.pdf({ path: `${out}/land-5-print.pdf`, format: 'A4', printBackground: true });
+  await page.pdf({ path: `${out}/land-print-full.pdf`, format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' } });
+  await page.evaluate(() => document.body.classList.add('print-brief'));
+  await page.pdf({ path: `${out}/land-print-brief.pdf`, format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' } });
+  await page.evaluate(() => document.body.classList.remove('print-brief'));
   await page.emulateMedia({ media: 'screen' });
-  // 待机页
-  const qrOk = await page.evaluate(() => !!document.querySelector('.rail .qr svg'));
-  await page.evaluate(() => { window.DGG_CONFIG.idle.resultMs = 1; document.dispatchEvent(new Event('pointerdown')); });
-  await page.waitForTimeout(2200);
-  const idleShown = await page.evaluate(() => !document.getElementById('idle').classList.contains('hidden'));
-  await page.screenshot({ path: `${out}/land-6-idle.png` });
-  await page.mouse.click(960, 540); await page.waitForTimeout(300);
-  const afterIdle = await page.evaluate(() => ({ hash: location.hash, left: document.getElementById('cr-left').textContent, company: document.querySelector('.rail .company-name').textContent }));
-  console.log('二维码渲染:', qrOk, '| 待机页出现:', idleShown, '| 退出待机后:', JSON.stringify(afterIdle));
   await page.close();
-  // 竖屏 1080×1920（station=1）
   page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
-  const port = await runFlow(page, { name: 'port', station: '1' }, S1);
+  const port = await runFlow(page, { name: 'port', station: '1' });
+  await shootPages(page, [3, 22], 'port');
   await page.close();
   await browser.close();
-  const golden = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'skills', '01-ai-maturity', 'examples', 'S1.output.json'), 'utf8'));
-  console.log('屏上（横屏）:', JSON.stringify(land, null, 1));
-  console.log('内核 golden : level', golden.level.code, golden.level.name, '| total', golden.total, '| actions', golden.actions.map((a) => a.dimensionName + a.title));
-  const ok = land.level === golden.level.code + ' ' + golden.level.name && land.total.startsWith(String(golden.total)) && land.actions.every((t, i) => t.includes(golden.actions[i].title)) && land.spent === '20' && land.left === '9,980';
+
+  console.log('屏上（横屏）:', JSON.stringify(land));
+  console.log('内核 golden : ', golden.level.code, golden.level.name, golden.pct + '%', golden.actions.slice(0, 3).map((a) => a.title));
+  const ok = land.level === golden.level.code + ' ' + golden.level.name && land.pct === golden.pct + '%' && land.top3.every((t, i) => t === golden.actions[i].title) && land.spent === '20' && land.left === '9,980';
   console.log(ok ? '✔ 屏幕与内核一致' : '✘ 不一致');
-  console.log('竖屏 level:', port.level, port.total);
-  process.exitCode = ok ? 0 : 1;
+  console.log('报告页数（屏）:', land.pages, '| 竖屏页数:', port.pages, '| 目录条目:', land.tocCount);
+  console.log('PDF 页数：完整', pdfPages(`${out}/land-print-full.pdf`), '· 速览', pdfPages(`${out}/land-print-brief.pdf`));
+  if (errors.length) { console.log('JS 错误:'); errors.forEach((e) => console.log('  ' + e)); }
+  process.exitCode = ok && !errors.length ? 0 : 1;
 })();

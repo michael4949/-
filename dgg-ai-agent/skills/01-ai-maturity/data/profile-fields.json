@@ -1,0 +1,29 @@
+{
+  "_note": "通用输入（企业画像）字段定义。原型的输入页与 skill 的追问顺序共用此表。required 字段缺失时不计算。",
+  "fields": [
+    { "key": "name",      "label": "企业名称",       "type": "text",     "required": false, "placeholder": "选填，为空时报告以「本企业」称呼" },
+    { "key": "industry",  "label": "所属行业",       "type": "industry", "required": true,  "hint": "先选大类，再选细分" },
+    { "key": "size",      "label": "人员规模",       "type": "chips",    "required": true,
+      "options": [ { "v": "1_20", "t": "1–20 人" }, { "v": "21_50", "t": "21–50 人" }, { "v": "51_100", "t": "51–100 人" }, { "v": "101_300", "t": "101–300 人" }, { "v": "300_plus", "t": "300 人以上" } ] },
+    { "key": "revenue",   "label": "上年营收",       "type": "chips",    "required": true,
+      "options": [ { "v": "lt5m", "t": "500 万以下" }, { "v": "5m_20m", "t": "500–2000 万" }, { "v": "20m_100m", "t": "2000 万–1 亿" }, { "v": "100m_500m", "t": "1–5 亿" }, { "v": "gt500m", "t": "5 亿以上" } ] },
+    { "key": "province",  "label": "所在地",         "type": "select",   "required": true },
+    { "key": "years",     "label": "成立年限",       "type": "chips",    "required": true,
+      "options": [ { "v": "lt1", "t": "1 年内" }, { "v": "1_3", "t": "1–3 年" }, { "v": "3_5", "t": "3–5 年" }, { "v": "5_10", "t": "5–10 年" }, { "v": "10_plus", "t": "10 年以上" } ] },
+    { "key": "ownership", "label": "企业性质",       "type": "chips",    "required": true,
+      "options": [ { "v": "private", "t": "民营企业" }, { "v": "soe", "t": "国有 / 集体企业" }, { "v": "foreign", "t": "外资 / 合资企业" }, { "v": "individual", "t": "个体工商户" } ] },
+    { "key": "customers", "label": "主要客户类型",   "type": "chips",    "required": true,
+      "options": [ { "v": "b2b", "t": "企业客户" }, { "v": "b2c", "t": "个人消费者" }, { "v": "b2g", "t": "政府与事业单位" }, { "v": "mixed", "t": "混合" } ] },
+    { "key": "systems",   "label": "现有业务系统",   "type": "multi",    "required": true,  "hint": "可多选",
+      "options": [ { "v": "erp", "t": "ERP" }, { "v": "finance", "t": "财务软件" }, { "v": "crm", "t": "CRM" }, { "v": "oa", "t": "OA / 协同办公" }, { "v": "mes", "t": "MES / 生产系统" }, { "v": "shop", "t": "电商 / 门店系统" }, { "v": "hr", "t": "人事系统" }, { "v": "none", "t": "无", "exclusive": true } ] },
+    { "key": "itStaff",   "label": "数字化专职人员", "type": "chips",    "required": true,
+      "options": [ { "v": "none", "t": "无专职" }, { "v": "1_2", "t": "1–2 人" }, { "v": "3_10", "t": "3–10 人" }, { "v": "10_plus", "t": "10 人以上" } ] },
+    { "key": "branches",  "label": "分支机构 / 门店", "type": "chips",   "required": false,
+      "options": [ { "v": "single", "t": "单一经营地" }, { "v": "2_5", "t": "2–5 个" }, { "v": "6_20", "t": "6–20 个" }, { "v": "20_plus", "t": "20 个以上" } ] },
+    { "key": "overseas",  "label": "海外业务",       "type": "chips",    "required": false,
+      "options": [ { "v": "no", "t": "无" }, { "v": "yes", "t": "有" } ] },
+    { "key": "role",      "label": "填表人",         "type": "chips",    "required": false,
+      "options": [ { "v": "owner", "t": "企业负责人" }, { "v": "dept", "t": "部门负责人" }, { "v": "it", "t": "IT / 数字化负责人" }, { "v": "other", "t": "其他" } ] }
+  ],
+  "provinces": ["北京", "天津", "河北", "山西", "内蒙古", "辽宁", "吉林", "黑龙江", "上海", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "广西", "海南", "重庆", "四川", "贵州", "云南", "西藏", "陕西", "甘肃", "青海", "宁夏", "新疆", "香港", "澳门", "台湾"]
+}

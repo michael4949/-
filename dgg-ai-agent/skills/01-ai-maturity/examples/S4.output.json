@@ -3,194 +3,2145 @@
   "meta": {
     "module": "企业AI成熟度评估",
     "credits": 20,
-    "version": "1.0.0"
+    "version": "2.0.0",
+    "questionCount": 36
   },
-  "company": {
+  "profile": {
     "name": "深圳梵图家居科技有限公司",
-    "industry": "ecom",
-    "industryName": "电商与跨境",
+    "industry": "trade-ecom",
+    "industryName": "电商与跨境电商",
+    "sector": "trade",
+    "sectorName": "商贸流通",
     "size": "21_50",
     "sizeName": "21–50 人",
+    "revenue": "20m_100m",
+    "revenueName": "2000 万–1 亿",
     "province": "广东",
     "years": "3_5",
-    "yearsName": "3–5 年"
+    "yearsName": "3–5 年",
+    "ownership": "private",
+    "ownershipName": "民营企业",
+    "customers": "b2c",
+    "customersName": "个人消费者",
+    "systems": [
+      "erp",
+      "shop",
+      "crm"
+    ],
+    "systemsName": [
+      "ERP",
+      "电商 / 门店系统",
+      "CRM"
+    ],
+    "itStaff": "3_10",
+    "itStaffName": "3–10 人",
+    "branches": "single",
+    "branchesName": "单一经营地",
+    "overseas": "yes",
+    "overseasName": "有",
+    "role": "it",
+    "roleName": "IT / 数字化负责人",
+    "tags": [
+      "商贸流通 · 电商与跨境电商",
+      "21–50 人",
+      "2000 万–1 亿",
+      "民营企业",
+      "个人消费者",
+      "已有 ERP / 电商 / 门店系统 / CRM",
+      "数字化专职 3–10 人",
+      "有海外业务"
+    ],
+    "portrait": "深圳梵图家居科技有限公司是一家位于广东的电商与跨境电商企业，民营企业，成立 3–5 年，21–50 人，上年营收 2000 万–1 亿，主要面向个人消费者。现有系统：ERP、电商 / 门店系统、CRM，数字化专职人员 3–10 人。"
   },
   "answers": [
-    2,
-    2,
-    3,
-    3,
-    2,
-    2,
-    3,
-    2,
-    2,
-    2,
-    2,
-    2
+    {
+      "id": "q01",
+      "dimension": "strategy",
+      "sub": "S1",
+      "text": "过去 12 个月是否有过明确的 AI 立项或预算讨论？",
+      "optionIndex": 2,
+      "optionText": "讨论过并列入计划",
+      "score": 2,
+      "max": 3,
+      "explain": "立项与预算是 AI 从想法变成事项的分界线，决定后续资源能否到位。"
+    },
+    {
+      "id": "q02",
+      "dimension": "strategy",
+      "sub": "S1",
+      "text": "AI 相关事项在公司里由谁牵头？",
+      "optionIndex": 2,
+      "optionText": "指定了部门或负责人",
+      "score": 2,
+      "max": 3,
+      "explain": "没有牵头人的 AI 应用会停留在个人层面，无法跨部门推进。"
+    },
+    {
+      "id": "q03",
+      "dimension": "strategy",
+      "sub": "S2",
+      "text": "公司高层对 AI 的期望是否落到了某个具体业务指标？",
+      "optionIndex": 2,
+      "optionText": "有一两个指标",
+      "score": 2,
+      "max": 3,
+      "explain": "有指标才能验收，有分解才有人对结果负责。"
+    },
+    {
+      "id": "q04",
+      "dimension": "strategy",
+      "sub": "S2",
+      "text": "未来 1–3 年的经营规划里，AI 或数字化占什么位置？",
+      "optionIndex": 2,
+      "optionText": "是规划中的一个专项",
+      "score": 2,
+      "max": 3,
+      "explain": "进入经营规划的事项才会持续获得预算与关注。"
+    },
+    {
+      "id": "q05",
+      "dimension": "strategy",
+      "sub": "S3",
+      "text": "决策层对 AI 能做什么、不能做什么的了解程度？",
+      "optionIndex": 3,
+      "optionText": "有系统认知并亲自推动过项目",
+      "score": 3,
+      "max": 3,
+      "explain": "对能力边界的认知决定了场景选择是否靠谱、期望是否合理。"
+    },
+    {
+      "id": "q06",
+      "dimension": "strategy",
+      "sub": "S3",
+      "text": "高层是否亲自参与过 AI 相关的评审、试用或复盘？",
+      "optionIndex": 2,
+      "optionText": "参与过一次试用或评审",
+      "score": 2,
+      "max": 3,
+      "explain": "高层亲身参与是跨部门协同与资源调配的最有效保证。"
+    },
+    {
+      "id": "q07",
+      "dimension": "data",
+      "sub": "D1",
+      "text": "核心业务数据（订单、客户、财务）主要存放在哪里？",
+      "optionIndex": 3,
+      "optionText": "全部在系统",
+      "score": 3,
+      "max": 3,
+      "explain": "AI 只能处理已经数字化的数据，存放方式决定了起点。"
+    },
+    {
+      "id": "q08",
+      "dimension": "data",
+      "sub": "D1",
+      "text": "各业务系统之间的数据是否打通？",
+      "optionIndex": 2,
+      "optionText": "部分系统有接口",
+      "score": 2,
+      "max": 3,
+      "explain": "系统孤岛意味着 AI 场景需要额外的数据搬运，成本与出错率都会上升。"
+    },
+    {
+      "id": "q09",
+      "dimension": "data",
+      "sub": "D2",
+      "text": "跨部门取一份数据需要多长时间？",
+      "optionIndex": 3,
+      "optionText": "随时自取",
+      "score": 3,
+      "max": 3,
+      "explain": "取数速度反映数据的组织方式与权限设计，直接影响 AI 场景的响应时效。"
+    },
+    {
+      "id": "q10",
+      "dimension": "data",
+      "sub": "D2",
+      "text": "管理层看经营数据的方式？",
+      "optionIndex": 3,
+      "optionText": "有实时或按日更新的看板",
+      "score": 3,
+      "max": 3,
+      "explain": "看数方式反映数据回流到决策的链路是否已经建立。"
+    },
+    {
+      "id": "q11",
+      "dimension": "data",
+      "sub": "D3",
+      "text": "同一个客户或产品，在不同部门或系统里的编码与名称是否一致？",
+      "optionIndex": 2,
+      "optionText": "主要数据一致，少量差异",
+      "score": 2,
+      "max": 3,
+      "explain": "主数据不一致是 AI 结果出错最常见的根源，也是数据打通的前提。"
+    },
+    {
+      "id": "q12",
+      "dimension": "data",
+      "sub": "D3",
+      "text": "数据出错（重复、缺失、口径不一）被发现的方式？",
+      "optionIndex": 2,
+      "optionText": "有定期人工核对",
+      "score": 2,
+      "max": 3,
+      "explain": "校验机制决定了 AI 输入数据的可信度与问题被发现的时间。"
+    },
+    {
+      "id": "q13",
+      "dimension": "process",
+      "sub": "P1",
+      "text": "主要业务流程是否有书面规范且实际按规范执行？",
+      "optionIndex": 2,
+      "optionText": "部分执行",
+      "score": 2,
+      "max": 3,
+      "explain": "没有规范的流程无法交给 AI 承接，因为没有可依据的规则。"
+    },
+    {
+      "id": "q14",
+      "dimension": "process",
+      "sub": "P1",
+      "text": "流程规范多久更新一次？",
+      "optionIndex": 2,
+      "optionText": "每年梳理一次",
+      "score": 2,
+      "max": 3,
+      "explain": "更新机制反映流程是否活着，AI 嵌入后需要随流程一起迭代。"
+    },
+    {
+      "id": "q15",
+      "dimension": "process",
+      "sub": "P2",
+      "text": "同一件事不同人做，结果差异有多大？",
+      "optionIndex": 2,
+      "optionText": "略有差异",
+      "score": 2,
+      "max": 3,
+      "explain": "执行差异大说明规则没有真正落地，AI 学到的会是混乱的做法。"
+    },
+    {
+      "id": "q16",
+      "dimension": "process",
+      "sub": "P2",
+      "text": "新员工上手核心业务流程需要多久？",
+      "optionIndex": 2,
+      "optionText": "两到四周，有操作手册",
+      "score": 2,
+      "max": 3,
+      "explain": "上手速度是流程显性化程度的直接体现，也是 AI 知识库的素材来源。"
+    },
+    {
+      "id": "q17",
+      "dimension": "process",
+      "sub": "P3",
+      "text": "核心流程中，有多少环节是在系统里完成的？",
+      "optionIndex": 3,
+      "optionText": "大部分环节，线下只做例外处理",
+      "score": 3,
+      "max": 3,
+      "explain": "在系统里完成的环节才有数据留痕，AI 才能接入。"
+    },
+    {
+      "id": "q18",
+      "dimension": "process",
+      "sub": "P3",
+      "text": "重复性工作（录入、核对、汇总、通知）是否有自动化？",
+      "optionIndex": 2,
+      "optionText": "部分环节用了自动化工具",
+      "score": 2,
+      "max": 3,
+      "explain": "已有自动化说明团队接受机器承接工作，AI 场景可以直接叠加。"
+    },
+    {
+      "id": "q19",
+      "dimension": "people",
+      "sub": "H1",
+      "text": "是否有人在日常工作中稳定使用 AI 工具？",
+      "optionIndex": 3,
+      "optionText": "多部门日常在用",
+      "score": 3,
+      "max": 3,
+      "explain": "个人使用是组织应用的种子，普及度决定推广阻力。"
+    },
+    {
+      "id": "q20",
+      "dimension": "people",
+      "sub": "H1",
+      "text": "公司对员工使用 AI 工具的态度与安排？",
+      "optionIndex": 2,
+      "optionText": "鼓励使用，提供了账号或工具",
+      "score": 2,
+      "max": 3,
+      "explain": "组织态度决定 AI 使用是野生的还是可管理、可复制的。"
+    },
+    {
+      "id": "q21",
+      "dimension": "people",
+      "sub": "H2",
+      "text": "是否有人能把业务需求翻译成可执行的技术任务？",
+      "optionIndex": 2,
+      "optionText": "有一人",
+      "score": 2,
+      "max": 3,
+      "explain": "需求翻译是 AI 项目成败的关键岗位，决定了供应商能否做对东西。"
+    },
+    {
+      "id": "q22",
+      "dimension": "people",
+      "sub": "H2",
+      "text": "与外部技术供应商合作时，公司内部谁来对接与验收？",
+      "optionIndex": 2,
+      "optionText": "有专人对接，验收靠感觉",
+      "score": 2,
+      "max": 3,
+      "explain": "对接与验收能力决定了外部交付能否真正被用起来。"
+    },
+    {
+      "id": "q23",
+      "dimension": "people",
+      "sub": "H3",
+      "text": "公司是否有组织过 AI 或数字化相关的培训？",
+      "optionIndex": 2,
+      "optionText": "组织过一两次讲座",
+      "score": 2,
+      "max": 3,
+      "explain": "培训机制决定 AI 能力是否能从个别人扩展到岗位。"
+    },
+    {
+      "id": "q24",
+      "dimension": "people",
+      "sub": "H3",
+      "text": "公司内部是否沉淀了 AI 应用的经验或案例？",
+      "optionIndex": 2,
+      "optionText": "有几个案例，口头传播",
+      "score": 2,
+      "max": 3,
+      "explain": "经验沉淀决定了第二个场景是否比第一个更快、更省。"
+    },
+    {
+      "id": "q25",
+      "dimension": "budget",
+      "sub": "B1",
+      "text": "过去一年在软件与数字化上的投入占营收比例？",
+      "optionIndex": 2,
+      "optionText": "0.5%–2%",
+      "score": 2,
+      "max": 3,
+      "explain": "投入占比反映数字化在经营中的实际权重。"
+    },
+    {
+      "id": "q26",
+      "dimension": "budget",
+      "sub": "B1",
+      "text": "过去的数字化投入，效果如何？",
+      "optionIndex": 2,
+      "optionText": "部分用起来，效果一般",
+      "score": 2,
+      "max": 3,
+      "explain": "既往投入的使用情况预示 AI 项目会遇到的组织阻力。"
+    },
+    {
+      "id": "q27",
+      "dimension": "budget",
+      "sub": "B2",
+      "text": "对一个 6 个月见效的 AI 项目可接受的投入区间？",
+      "optionIndex": 2,
+      "optionText": "5–20 万",
+      "score": 2,
+      "max": 3,
+      "explain": "投入区间决定首个场景的选型范围与交付形态。"
+    },
+    {
+      "id": "q28",
+      "dimension": "budget",
+      "sub": "B2",
+      "text": "如果第一个 AI 项目见效，是否愿意追加投入？",
+      "optionIndex": 2,
+      "optionText": "会追加，按项目审批",
+      "score": 2,
+      "max": 3,
+      "explain": "追加意愿决定 AI 应用能否从单点扩展到流程。"
+    },
+    {
+      "id": "q29",
+      "dimension": "budget",
+      "sub": "B3",
+      "text": "数字化投入的决策依据？",
+      "optionIndex": 2,
+      "optionText": "内部评估过需求",
+      "score": 2,
+      "max": 3,
+      "explain": "决策依据决定投入是否对准真实痛点、能否被验收。"
+    },
+    {
+      "id": "q30",
+      "dimension": "budget",
+      "sub": "B3",
+      "text": "是否对数字化投入的效果做过复盘？",
+      "optionIndex": 2,
+      "optionText": "做过一次总结",
+      "score": 2,
+      "max": 3,
+      "explain": "复盘机制让每一次投入都变成下一次决策的依据。"
+    },
+    {
+      "id": "q31",
+      "dimension": "compliance",
+      "sub": "C1",
+      "text": "客户数据与财税数据是否有明确的权限与留存规则？",
+      "optionIndex": 2,
+      "optionText": "有制度未落实",
+      "score": 2,
+      "max": 3,
+      "explain": "权限与留存规则是 AI 处理企业数据的合规底线。"
+    },
+    {
+      "id": "q32",
+      "dimension": "compliance",
+      "sub": "C1",
+      "text": "员工离职时，其经手的数据与账号如何处理？",
+      "optionIndex": 2,
+      "optionText": "有交接清单",
+      "score": 2,
+      "max": 3,
+      "explain": "离职交接是数据泄露最常见的环节，也是制度是否落地的试金石。"
+    },
+    {
+      "id": "q33",
+      "dimension": "compliance",
+      "sub": "C2",
+      "text": "是否清楚哪些数据可以交给外部模型处理？",
+      "optionIndex": 2,
+      "optionText": "有清单",
+      "score": 2,
+      "max": 3,
+      "explain": "外部模型数据清单决定了哪些 AI 场景可以用公有服务、哪些必须私有部署。"
+    },
+    {
+      "id": "q34",
+      "dimension": "compliance",
+      "sub": "C2",
+      "text": "员工使用外部 AI 工具时，是否有输入数据的限制？",
+      "optionIndex": 2,
+      "optionText": "有书面规定",
+      "score": 2,
+      "max": 3,
+      "explain": "没有限制的外部 AI 使用是当前最常见的商业秘密外泄途径。"
+    },
+    {
+      "id": "q35",
+      "dimension": "compliance",
+      "sub": "C3",
+      "text": "公司是否有过数据泄露、误删或账号被盗等事件？",
+      "optionIndex": 2,
+      "optionText": "没发生过，也没预案",
+      "score": 2,
+      "max": 3,
+      "explain": "预案与应急记录反映安全意识是否已经制度化。"
+    },
+    {
+      "id": "q36",
+      "dimension": "compliance",
+      "sub": "C3",
+      "text": "数据与系统安全是否有明确责任人？",
+      "optionIndex": 2,
+      "optionText": "有兼职负责人",
+      "score": 2,
+      "max": 3,
+      "explain": "责任人是所有安全制度落地的前提。"
+    }
+  ],
+  "subdims": [
+    {
+      "key": "S1",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "立项与牵头",
+      "desc": "是否有正式立项、预算与明确的牵头人",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。需要一个明确的牵头人把计划变成事项。",
+      "questions": [
+        "q01",
+        "q02"
+      ]
+    },
+    {
+      "key": "S2",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "目标与指标",
+      "desc": "AI 期望是否落到业务指标并进入经营规划",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "有了方向或一两个指标，但尚未分解到部门或写进规划。指标停在公司层面，部门没有对应的责任。",
+      "questions": [
+        "q03",
+        "q04"
+      ]
+    },
+    {
+      "key": "S3",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "name": "高层认知与推动",
+      "desc": "决策层对 AI 边界的认知与亲身参与程度",
+      "score": 5,
+      "max": 6,
+      "pct": 83.3,
+      "band": "high",
+      "bandName": "已建立",
+      "diagnosis": "决策层有系统认知并定期参与推动。这是跨部门协同与资源调配最可靠的保证。",
+      "questions": [
+        "q05",
+        "q06"
+      ]
+    },
+    {
+      "key": "D1",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "存储与系统化",
+      "desc": "核心数据是否在系统里、系统之间是否打通",
+      "score": 5,
+      "max": 6,
+      "pct": 83.3,
+      "band": "high",
+      "bandName": "已建立",
+      "diagnosis": "核心数据全部在系统里，主要系统已打通，数据自动流转。AI 场景可以直接接入。",
+      "questions": [
+        "q07",
+        "q08"
+      ]
+    },
+    {
+      "key": "D2",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "可得与共享",
+      "desc": "跨部门取数的速度与管理层看数的方式",
+      "score": 6,
+      "max": 6,
+      "pct": 100,
+      "band": "high",
+      "bandName": "已建立",
+      "diagnosis": "数据随时自取，管理层有按日或实时更新的看板。数据回流决策的链路已经建立。",
+      "questions": [
+        "q09",
+        "q10"
+      ]
+    },
+    {
+      "key": "D3",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "name": "质量与标准",
+      "desc": "主数据一致性与数据校验机制",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "主要数据基本一致，少量差异靠人核对，有定期人工检查。需要建立统一主数据与校验规则。",
+      "questions": [
+        "q11",
+        "q12"
+      ]
+    },
+    {
+      "key": "P1",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "流程规范化",
+      "desc": "书面规范的覆盖与更新机制",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "流程规范部分执行，每年会梳理一次。规范存在但覆盖与更新不足，AI 嵌入前需要先补齐。",
+      "questions": [
+        "q13",
+        "q14"
+      ]
+    },
+    {
+      "key": "P2",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "执行一致性",
+      "desc": "不同人执行同一流程的结果差异与新人上手速度",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "执行略有差异，新人一到三个月能上手，有部分操作手册。规则基本落地，但还没有完全显性化。",
+      "questions": [
+        "q15",
+        "q16"
+      ]
+    },
+    {
+      "key": "P3",
+      "dimension": "process",
+      "dimensionName": "流程",
+      "name": "数字化与自动化",
+      "desc": "流程环节的系统化比例与重复工作自动化程度",
+      "score": 5,
+      "max": 6,
+      "pct": 83.3,
+      "band": "high",
+      "bandName": "已建立",
+      "diagnosis": "大部分环节在系统里完成，多数重复工作已自动化。团队接受机器承接工作，AI 场景可直接叠加。",
+      "questions": [
+        "q17",
+        "q18"
+      ]
+    },
+    {
+      "key": "H1",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "AI 工具使用",
+      "desc": "AI 工具在日常工作中的普及度与公司的组织安排",
+      "score": 5,
+      "max": 6,
+      "pct": 83.3,
+      "band": "high",
+      "bandName": "已建立",
+      "diagnosis": "多部门日常在用，公司有使用规范、培训与考核。AI 使用已经可管理、可复制。",
+      "questions": [
+        "q19",
+        "q20"
+      ]
+    },
+    {
+      "key": "H2",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "业务技术转译",
+      "desc": "需求翻译能力与对外部供应商的对接验收能力",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "有一人能翻译需求，有专人对接供应商但验收靠感觉。关键岗位存在，但能力与流程都是单点的。",
+      "questions": [
+        "q21",
+        "q22"
+      ]
+    },
+    {
+      "key": "H3",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "name": "学习与沉淀",
+      "desc": "培训机制与内部经验案例的积累",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "组织过讲座，有几个案例口头传播。学习在发生，但没有机制与载体。",
+      "questions": [
+        "q23",
+        "q24"
+      ]
+    },
+    {
+      "key": "B1",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "历史投入与效果",
+      "desc": "数字化投入占比与既往投入的实际使用情况",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "投入占营收 0.5%–2%，部分用起来效果一般。有投入基础，但使用与效果需要提升。",
+      "questions": [
+        "q25",
+        "q26"
+      ]
+    },
+    {
+      "key": "B2",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "投入意愿",
+      "desc": "对首个项目的可接受投入与追加意愿",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "可接受 5–20 万投入，见效会按项目审批追加。具备启动一个中等场景的预算条件。",
+      "questions": [
+        "q27",
+        "q28"
+      ]
+    },
+    {
+      "key": "B3",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "name": "评估与复盘",
+      "desc": "投入决策依据与效果复盘机制",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "内部评估过需求，做过一次总结。有评估意识，但缺少测算与定期机制。",
+      "questions": [
+        "q29",
+        "q30"
+      ]
+    },
+    {
+      "key": "C1",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "权限与留存",
+      "desc": "数据权限、留存规则与离职交接",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "有口头约定或有制度未落实，离职有交接清单。规则存在但执行不到位。",
+      "questions": [
+        "q31",
+        "q32"
+      ]
+    },
+    {
+      "key": "C2",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "外部模型边界",
+      "desc": "哪些数据可交给外部模型、员工使用外部 AI 的管控",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "大致知道边界，口头提醒或有书面规定。有意识但缺少清单与管控手段。",
+      "questions": [
+        "q33",
+        "q34"
+      ]
+    },
+    {
+      "key": "C3",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "name": "安全与责任",
+      "desc": "安全事件预案与明确的责任人",
+      "score": 4,
+      "max": 6,
+      "pct": 66.7,
+      "band": "mid",
+      "bandName": "基本具备",
+      "diagnosis": "没发生过事件也没预案，或有兼职负责人。缺少主动的安全机制。",
+      "questions": [
+        "q35",
+        "q36"
+      ]
+    }
   ],
   "dimensions": [
     {
       "key": "strategy",
       "name": "战略",
-      "score": 4,
-      "max": 6,
+      "color": "#4974F6",
+      "desc": "决策层是否把 AI 当作经营事项来立项、定指标、亲自推动。战略维度决定了后面五个维度的投入能否持续。",
+      "score": 13,
+      "max": 18,
+      "pct": 72.2,
       "band": [
-        2,
-        4
+        32,
+        52
       ],
-      "position": "within"
+      "bandMid": 42,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "S1",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "立项与牵头",
+          "desc": "是否有正式立项、预算与明确的牵头人",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。需要一个明确的牵头人把计划变成事项。",
+          "questions": [
+            "q01",
+            "q02"
+          ]
+        },
+        {
+          "key": "S2",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "目标与指标",
+          "desc": "AI 期望是否落到业务指标并进入经营规划",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "有了方向或一两个指标，但尚未分解到部门或写进规划。指标停在公司层面，部门没有对应的责任。",
+          "questions": [
+            "q03",
+            "q04"
+          ]
+        },
+        {
+          "key": "S3",
+          "dimension": "strategy",
+          "dimensionName": "战略",
+          "name": "高层认知与推动",
+          "desc": "决策层对 AI 边界的认知与亲身参与程度",
+          "score": 5,
+          "max": 6,
+          "pct": 83.3,
+          "band": "high",
+          "bandName": "已建立",
+          "diagnosis": "决策层有系统认知并定期参与推动。这是跨部门协同与资源调配最可靠的保证。",
+          "questions": [
+            "q05",
+            "q06"
+          ]
+        }
+      ],
+      "weakest": "S1",
+      "strongest": "S3",
+      "recommendations": [
+        {
+          "id": "S-L3-1",
+          "title": "把 AI 指标分解到部门考核",
+          "why": "AI 已嵌入跨部门流程，指标停在公司层面会让部门失去动力。",
+          "steps": [
+            "把公司级 AI 指标拆到各相关部门负责人",
+            "纳入季度考核，权重不低于 10%",
+            "明确各部门的数据回流责任与时限"
+          ],
+          "owner": "企业负责人 + 人事负责人",
+          "deliverable": "部门级 AI 指标与考核办法",
+          "weeks": 4,
+          "cost": "零",
+          "kpi": "季度考核含 AI 指标",
+          "service": "AI 落地陪跑",
+          "module": "AI人力官"
+        },
+        {
+          "id": "S-L3-2",
+          "title": "建立跨部门 AI 推进小组",
+          "why": "多场景协同靠人推，需要固定的跨部门机制。",
+          "steps": [
+            "由牵头人牵头，各业务部门各出一名成员",
+            "每两周一次例会，议题固定为场景进度、数据问题、复核规则",
+            "小组有权调整场景优先级并向决策层提案"
+          ],
+          "owner": "牵头人",
+          "deliverable": "推进小组章程与例会记录",
+          "weeks": 2,
+          "cost": "零",
+          "kpi": "例会连续 6 次",
+          "service": "AI 落地陪跑",
+          "module": "AI决策"
+        }
+      ],
+      "summary": "战略维度得分 13 / 18（72.2%），高于同行参考带（参考 32%–52%）。三个子维度中「高层认知与推动」相对最好（5/6），「立项与牵头」最需要补（4/6）。AI 已被讨论或列入计划，也有人在推动，但立项与预算尚未完全落地。需要一个明确的牵头人把计划变成事项。"
     },
     {
       "key": "data",
       "name": "数据",
-      "score": 6,
-      "max": 6,
+      "color": "#1BA5B8",
+      "desc": "业务数据是否系统化存放、能否被及时取用、口径是否一致。数据维度决定了 AI 场景能跑多快、结果可信到什么程度。",
+      "score": 15,
+      "max": 18,
+      "pct": 83.3,
       "band": [
-        2,
-        4
+        40,
+        60
       ],
-      "position": "above"
+      "bandMid": 50,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "D1",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "存储与系统化",
+          "desc": "核心数据是否在系统里、系统之间是否打通",
+          "score": 5,
+          "max": 6,
+          "pct": 83.3,
+          "band": "high",
+          "bandName": "已建立",
+          "diagnosis": "核心数据全部在系统里，主要系统已打通，数据自动流转。AI 场景可以直接接入。",
+          "questions": [
+            "q07",
+            "q08"
+          ]
+        },
+        {
+          "key": "D2",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "可得与共享",
+          "desc": "跨部门取数的速度与管理层看数的方式",
+          "score": 6,
+          "max": 6,
+          "pct": 100,
+          "band": "high",
+          "bandName": "已建立",
+          "diagnosis": "数据随时自取，管理层有按日或实时更新的看板。数据回流决策的链路已经建立。",
+          "questions": [
+            "q09",
+            "q10"
+          ]
+        },
+        {
+          "key": "D3",
+          "dimension": "data",
+          "dimensionName": "数据",
+          "name": "质量与标准",
+          "desc": "主数据一致性与数据校验机制",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "主要数据基本一致，少量差异靠人核对，有定期人工检查。需要建立统一主数据与校验规则。",
+          "questions": [
+            "q11",
+            "q12"
+          ]
+        }
+      ],
+      "weakest": "D3",
+      "strongest": "D2",
+      "recommendations": [
+        {
+          "id": "D-L3-1",
+          "title": "建立 AI 场景数据回流与质量闭环",
+          "why": "AI 产出的数据需要回写系统并可追溯可修正。",
+          "steps": [
+            "为每个 AI 场景定义回写字段与回写规则",
+            "设置回写数据的质量校验与人工抽检",
+            "月度复盘回流数据的准确率"
+          ],
+          "owner": "牵头人 + IT 负责人",
+          "deliverable": "回流规则 + 月度质量报告",
+          "weeks": 6,
+          "cost": "轻",
+          "kpi": "回流准确率 98% 以上",
+          "service": "AI 落地陪跑",
+          "module": "AI决策"
+        },
+        {
+          "id": "D-L3-2",
+          "title": "上线管理层按日更新的经营看板",
+          "why": "固定报表人工更新已跟不上多场景运行的节奏。",
+          "steps": [
+            "基于中间表建看板，覆盖 12 个核心经营指标",
+            "设置异常自动标红规则",
+            "管理层日会改为看板驱动"
+          ],
+          "owner": "IT 负责人",
+          "deliverable": "经营看板",
+          "weeks": 6,
+          "cost": "中",
+          "kpi": "看板按日更新，异常自动标出",
+          "service": "垂直场景智能体开发",
+          "module": "AI决策"
+        }
+      ],
+      "summary": "数据维度得分 15 / 18（83.3%），高于同行参考带（参考 40%–60%）。三个子维度中「可得与共享」相对最好（6/6），「质量与标准」最需要补（4/6）。主要数据基本一致，少量差异靠人核对，有定期人工检查。需要建立统一主数据与校验规则。"
     },
     {
       "key": "process",
       "name": "流程",
-      "score": 4,
-      "max": 6,
+      "color": "#7C5CD6",
+      "desc": "业务流程是否有规范、执行是否一致、有多少环节已数字化。流程维度决定了 AI 能否嵌入日常作业而非停留在个人工具。",
+      "score": 13,
+      "max": 18,
+      "pct": 72.2,
       "band": [
-        1,
-        3
+        28,
+        48
       ],
-      "position": "above"
+      "bandMid": 38,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "P1",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "流程规范化",
+          "desc": "书面规范的覆盖与更新机制",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "流程规范部分执行，每年会梳理一次。规范存在但覆盖与更新不足，AI 嵌入前需要先补齐。",
+          "questions": [
+            "q13",
+            "q14"
+          ]
+        },
+        {
+          "key": "P2",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "执行一致性",
+          "desc": "不同人执行同一流程的结果差异与新人上手速度",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "执行略有差异，新人一到三个月能上手，有部分操作手册。规则基本落地，但还没有完全显性化。",
+          "questions": [
+            "q15",
+            "q16"
+          ]
+        },
+        {
+          "key": "P3",
+          "dimension": "process",
+          "dimensionName": "流程",
+          "name": "数字化与自动化",
+          "desc": "流程环节的系统化比例与重复工作自动化程度",
+          "score": 5,
+          "max": 6,
+          "pct": 83.3,
+          "band": "high",
+          "bandName": "已建立",
+          "diagnosis": "大部分环节在系统里完成，多数重复工作已自动化。团队接受机器承接工作，AI 场景可直接叠加。",
+          "questions": [
+            "q17",
+            "q18"
+          ]
+        }
+      ],
+      "weakest": "P1",
+      "strongest": "P3",
+      "recommendations": [
+        {
+          "id": "P-L3-1",
+          "title": "让智能体承接一条跨部门流程",
+          "why": "流程已规范且数字化，可以把重复节点交给智能体。",
+          "steps": [
+            "选一条跨部门流程，标出重复性节点与人工复核节点",
+            "配置智能体承接重复节点，人工只处理例外与审批",
+            "运行一个月，记录耗时与异常率"
+          ],
+          "owner": "牵头人 + IT 负责人",
+          "deliverable": "智能体承接的流程上线",
+          "weeks": 8,
+          "cost": "中",
+          "kpi": "流程耗时下降 30%",
+          "service": "垂直场景智能体开发",
+          "module": "AI ERP"
+        },
+        {
+          "id": "P-L3-2",
+          "title": "建立流程规范的版本管理",
+          "why": "AI 嵌入后流程需要随规则一起迭代，没有版本会失控。",
+          "steps": [
+            "为每条流程规范建版本号与变更记录",
+            "变更需经推进小组评审",
+            "智能体规则随版本同步更新"
+          ],
+          "owner": "牵头人",
+          "deliverable": "流程版本库",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "全部规范有版本记录",
+          "service": "AI 落地陪跑",
+          "module": "AI流程提效"
+        }
+      ],
+      "summary": "流程维度得分 13 / 18（72.2%），高于同行参考带（参考 28%–48%）。三个子维度中「数字化与自动化」相对最好（5/6），「流程规范化」最需要补（4/6）。流程规范部分执行，每年会梳理一次。规范存在但覆盖与更新不足，AI 嵌入前需要先补齐。"
     },
     {
       "key": "people",
       "name": "人员",
-      "score": 5,
-      "max": 6,
+      "color": "#E0635C",
+      "desc": "团队是否在用 AI、有没有人能把业务需求变成技术任务、是否有学习与沉淀机制。人员维度决定了 AI 项目能否被内部接住。",
+      "score": 13,
+      "max": 18,
+      "pct": 72.2,
       "band": [
-        2,
-        4
+        34,
+        54
       ],
-      "position": "above"
+      "bandMid": 44,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "H1",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "AI 工具使用",
+          "desc": "AI 工具在日常工作中的普及度与公司的组织安排",
+          "score": 5,
+          "max": 6,
+          "pct": 83.3,
+          "band": "high",
+          "bandName": "已建立",
+          "diagnosis": "多部门日常在用，公司有使用规范、培训与考核。AI 使用已经可管理、可复制。",
+          "questions": [
+            "q19",
+            "q20"
+          ]
+        },
+        {
+          "key": "H2",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "业务技术转译",
+          "desc": "需求翻译能力与对外部供应商的对接验收能力",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "有一人能翻译需求，有专人对接供应商但验收靠感觉。关键岗位存在，但能力与流程都是单点的。",
+          "questions": [
+            "q21",
+            "q22"
+          ]
+        },
+        {
+          "key": "H3",
+          "dimension": "people",
+          "dimensionName": "人员",
+          "name": "学习与沉淀",
+          "desc": "培训机制与内部经验案例的积累",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "组织过讲座，有几个案例口头传播。学习在发生，但没有机制与载体。",
+          "questions": [
+            "q23",
+            "q24"
+          ]
+        }
+      ],
+      "weakest": "H2",
+      "strongest": "H1",
+      "recommendations": [
+        {
+          "id": "H-L3-1",
+          "title": "组建 2–3 人的 AI 应用小组",
+          "why": "多场景运行需要内部团队独立主导。",
+          "steps": [
+            "以 FDE L2 认证为标准组建小组",
+            "小组负责场景排期、验收与推广",
+            "每季度主导一个新场景上线"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "AI 应用小组 + 季度场景计划",
+          "weeks": 8,
+          "cost": "中",
+          "kpi": "季度上线一个新场景",
+          "service": "FDE 认证培训",
+          "module": "AI软件开发"
+        },
+        {
+          "id": "H-L3-2",
+          "title": "建立 AI 案例库与知识库",
+          "why": "经验靠口头传播，第二个场景没有比第一个更快。",
+          "steps": [
+            "把已运行场景写成案例：背景、做法、数据、效果",
+            "建内部知识库，新场景先查库",
+            "季度评选最佳案例"
+          ],
+          "owner": "牵头人",
+          "deliverable": "AI 案例库",
+          "weeks": 4,
+          "cost": "零",
+          "kpi": "案例库季度新增",
+          "service": "AI 落地陪跑",
+          "module": "AI人力官"
+        }
+      ],
+      "summary": "人员维度得分 13 / 18（72.2%），高于同行参考带（参考 34%–54%）。三个子维度中「AI 工具使用」相对最好（5/6），「业务技术转译」最需要补（4/6）。有一人能翻译需求，有专人对接供应商但验收靠感觉。关键岗位存在，但能力与流程都是单点的。"
     },
     {
       "key": "budget",
       "name": "预算",
-      "score": 4,
-      "max": 6,
+      "color": "#E8A33D",
+      "desc": "过去投了多少、效果如何、愿意投多少、怎么评估。预算维度决定了 AI 场景的投入节奏与可持续性。",
+      "score": 12,
+      "max": 18,
+      "pct": 66.7,
       "band": [
-        2,
-        4
+        30,
+        50
       ],
-      "position": "within"
+      "bandMid": 40,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "B1",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "历史投入与效果",
+          "desc": "数字化投入占比与既往投入的实际使用情况",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "投入占营收 0.5%–2%，部分用起来效果一般。有投入基础，但使用与效果需要提升。",
+          "questions": [
+            "q25",
+            "q26"
+          ]
+        },
+        {
+          "key": "B2",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "投入意愿",
+          "desc": "对首个项目的可接受投入与追加意愿",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "可接受 5–20 万投入，见效会按项目审批追加。具备启动一个中等场景的预算条件。",
+          "questions": [
+            "q27",
+            "q28"
+          ]
+        },
+        {
+          "key": "B3",
+          "dimension": "budget",
+          "dimensionName": "预算",
+          "name": "评估与复盘",
+          "desc": "投入决策依据与效果复盘机制",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "内部评估过需求，做过一次总结。有评估意识，但缺少测算与定期机制。",
+          "questions": [
+            "q29",
+            "q30"
+          ]
+        }
+      ],
+      "weakest": "B1",
+      "strongest": "B1",
+      "recommendations": [
+        {
+          "id": "B-L3-1",
+          "title": "按场景回收期分配下一期预算",
+          "why": "多场景并行，预算需要向回收期短的场景倾斜。",
+          "steps": [
+            "核算各场景实测回收期",
+            "回收期最短的场景优先扩展",
+            "形成预算分配规则"
+          ],
+          "owner": "财务负责人",
+          "deliverable": "预算分配规则",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "预算分配有据可查",
+          "service": "AI 落地陪跑",
+          "module": "AI决策"
+        },
+        {
+          "id": "B-L3-2",
+          "title": "设立 AI 滚动投入计划",
+          "why": "按项目审批追加已跟不上多场景节奏。",
+          "steps": [
+            "设定年度 AI 投入总额与季度释放规则",
+            "见效场景可直接申请下一期额度",
+            "年度复盘调整总额"
+          ],
+          "owner": "企业负责人",
+          "deliverable": "滚动投入计划",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "季度额度按规则释放",
+          "service": "AI 落地陪跑",
+          "module": "AI CFO"
+        }
+      ],
+      "summary": "预算维度得分 12 / 18（66.7%），高于同行参考带（参考 30%–50%）。三个子维度中「历史投入与效果」相对最好（4/6），「历史投入与效果」最需要补（4/6）。投入占营收 0.5%–2%，部分用起来效果一般。有投入基础，但使用与效果需要提升。"
     },
     {
       "key": "compliance",
       "name": "合规",
-      "score": 4,
-      "max": 6,
+      "color": "#22A06B",
+      "desc": "数据权限、留存、外部模型边界与安全责任是否有制度并执行。合规维度决定了 AI 应用的风险底线，也是客户与监管的共同要求。",
+      "score": 12,
+      "max": 18,
+      "pct": 66.7,
       "band": [
-        1,
-        3
+        24,
+        44
       ],
-      "position": "above"
+      "bandMid": 34,
+      "position": "above",
+      "positionName": "高于同行参考带",
+      "level": {
+        "code": "L3",
+        "name": "流程"
+      },
+      "subdims": [
+        {
+          "key": "C1",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "权限与留存",
+          "desc": "数据权限、留存规则与离职交接",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "有口头约定或有制度未落实，离职有交接清单。规则存在但执行不到位。",
+          "questions": [
+            "q31",
+            "q32"
+          ]
+        },
+        {
+          "key": "C2",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "外部模型边界",
+          "desc": "哪些数据可交给外部模型、员工使用外部 AI 的管控",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "大致知道边界，口头提醒或有书面规定。有意识但缺少清单与管控手段。",
+          "questions": [
+            "q33",
+            "q34"
+          ]
+        },
+        {
+          "key": "C3",
+          "dimension": "compliance",
+          "dimensionName": "合规",
+          "name": "安全与责任",
+          "desc": "安全事件预案与明确的责任人",
+          "score": 4,
+          "max": 6,
+          "pct": 66.7,
+          "band": "mid",
+          "bandName": "基本具备",
+          "diagnosis": "没发生过事件也没预案，或有兼职负责人。缺少主动的安全机制。",
+          "questions": [
+            "q35",
+            "q36"
+          ]
+        }
+      ],
+      "weakest": "C1",
+      "strongest": "C1",
+      "recommendations": [
+        {
+          "id": "C-L3-1",
+          "title": "制定安全事件预案并演练",
+          "why": "多场景运行后，安全事件的影响面扩大，需要预案。",
+          "steps": [
+            "编写数据泄露、误删、账号被盗三类预案",
+            "每半年演练一次",
+            "事件记录纳入复盘"
+          ],
+          "owner": "IT 负责人",
+          "deliverable": "安全预案 + 演练记录",
+          "weeks": 4,
+          "cost": "零",
+          "kpi": "半年一次演练",
+          "service": "法务合规服务",
+          "module": "AI法务"
+        },
+        {
+          "id": "C-L3-2",
+          "title": "为 AI 场景加人工复核与审批节点",
+          "why": "AI 嵌入流程后，关键决策必须有人工复核留痕。",
+          "steps": [
+            "识别每个场景的关键决策点",
+            "设置人工复核与审批节点，记录复核结果",
+            "季度复盘复核比例与拦截率"
+          ],
+          "owner": "牵头人",
+          "deliverable": "复核节点清单",
+          "weeks": 3,
+          "cost": "零",
+          "kpi": "关键决策 100% 有复核记录",
+          "service": "AI 落地陪跑",
+          "module": "AI ERP"
+        }
+      ],
+      "summary": "合规维度得分 12 / 18（66.7%），高于同行参考带（参考 24%–44%）。三个子维度中「权限与留存」相对最好（4/6），「权限与留存」最需要补（4/6）。有口头约定或有制度未落实，离职有交接清单。规则存在但执行不到位。"
     }
   ],
-  "total": 27,
-  "max": 36,
+  "total": 78,
+  "max": 108,
+  "pct": 72.2,
   "level": {
     "code": "L3",
     "name": "流程",
-    "range": [
-      24,
-      30
+    "verdict": "AI 已嵌入跨部门流程，有数据回流",
+    "desc": "AI 已嵌入跨部门流程，结果数据回流到系统，人工只处理例外与审批。这个阶段的关键是把 AI 指标分解到部门、建立数据回流与质量校验，并让内部团队具备独立主导新场景的能力。",
+    "traits": [
+      "多个场景跨部门协同，有人工复核节点",
+      "主要系统打通，数据自动流转",
+      "有内部团队能翻译需求、验收交付"
     ],
-    "verdict": "AI 已嵌入跨部门流程，有数据回流"
+    "focus": "指标分解与团队能力建设",
+    "typical": "数字化基础扎实、AI 已进入日常作业的企业",
+    "minPct": 66.7
   },
+  "levels": [
+    {
+      "code": "L0",
+      "name": "起步",
+      "minPct": 0
+    },
+    {
+      "code": "L1",
+      "name": "尝试",
+      "minPct": 25
+    },
+    {
+      "code": "L2",
+      "name": "场景",
+      "minPct": 44.4
+    },
+    {
+      "code": "L3",
+      "name": "流程",
+      "minPct": 66.7
+    },
+    {
+      "code": "L4",
+      "name": "经营",
+      "minPct": 86.1
+    }
+  ],
   "nextLevel": {
     "code": "L4",
     "name": "经营",
-    "range": [
-      31,
-      36
-    ],
-    "gap": 4
+    "minPct": 86.1,
+    "gapPct": 13.9,
+    "gapPts": 15,
+    "focus": "平台化与组织能力沉淀"
+  },
+  "percentile": 99,
+  "distribution": {
+    "mean": 41,
+    "sd": 14
+  },
+  "benchmark": {
+    "key": "trade-ecom-21_50",
+    "basis": "exact"
   },
   "positions": {
-    "above": 4,
-    "within": 2,
+    "above": 6,
+    "within": 0,
     "below": 0,
     "unknown": 0
   },
-  "benchmark": {
-    "key": "ecom-21_50",
-    "basis": "exact"
-  },
+  "strengths": [
+    "D2",
+    "D1",
+    "H1"
+  ],
+  "weaknesses": [
+    "S2",
+    "S1",
+    "P2"
+  ],
+  "weakDims": [
+    "budget",
+    "people",
+    "strategy"
+  ],
+  "strongDims": [
+    "compliance",
+    "data",
+    "process"
+  ],
   "actions": [
     {
       "order": 1,
-      "dimension": "strategy",
-      "dimensionName": "战略",
-      "score": 4,
-      "band": [
-        2,
-        4
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "color": "#E8A33D",
+      "id": "B-L3-1",
+      "title": "按场景回收期分配下一期预算",
+      "why": "多场景并行，预算需要向回收期短的场景倾斜。",
+      "steps": [
+        "核算各场景实测回收期",
+        "回收期最短的场景优先扩展",
+        "形成预算分配规则"
       ],
-      "title": "把 AI 指标分解到部门",
-      "text": "把公司级 AI 指标拆到各部门负责人，纳入季度考核，明确数据回流责任。",
+      "owner": "财务负责人",
+      "deliverable": "预算分配规则",
+      "weeks": 3,
+      "cost": "零",
+      "kpi": "预算分配有据可查",
       "service": "AI 落地陪跑",
       "module": "AI决策",
       "source": "template"
     },
     {
       "order": 2,
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "id": "H-L3-1",
+      "title": "组建 2–3 人的 AI 应用小组",
+      "why": "多场景运行需要内部团队独立主导。",
+      "steps": [
+        "以 FDE L2 认证为标准组建小组",
+        "小组负责场景排期、验收与推广",
+        "每季度主导一个新场景上线"
+      ],
+      "owner": "企业负责人",
+      "deliverable": "AI 应用小组 + 季度场景计划",
+      "weeks": 8,
+      "cost": "中",
+      "kpi": "季度上线一个新场景",
+      "service": "FDE 认证培训",
+      "module": "AI软件开发",
+      "source": "template"
+    },
+    {
+      "order": 3,
+      "phase": "p1",
+      "phaseName": "第 1–3 个月",
+      "phaseTitle": "打基础",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "id": "S-L3-1",
+      "title": "把 AI 指标分解到部门考核",
+      "why": "AI 已嵌入跨部门流程，指标停在公司层面会让部门失去动力。",
+      "steps": [
+        "把公司级 AI 指标拆到各相关部门负责人",
+        "纳入季度考核，权重不低于 10%",
+        "明确各部门的数据回流责任与时限"
+      ],
+      "owner": "企业负责人 + 人事负责人",
+      "deliverable": "部门级 AI 指标与考核办法",
+      "weeks": 4,
+      "cost": "零",
+      "kpi": "季度考核含 AI 指标",
+      "service": "AI 落地陪跑",
+      "module": "AI人力官",
+      "source": "template"
+    },
+    {
+      "order": 4,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
       "dimension": "budget",
       "dimensionName": "预算",
-      "score": 4,
-      "band": [
-        2,
-        4
+      "color": "#E8A33D",
+      "id": "B-L3-2",
+      "title": "设立 AI 滚动投入计划",
+      "why": "按项目审批追加已跟不上多场景节奏。",
+      "steps": [
+        "设定年度 AI 投入总额与季度释放规则",
+        "见效场景可直接申请下一期额度",
+        "年度复盘调整总额"
       ],
-      "title": "按场景收益分配投入",
-      "text": "以各场景实测回收期为依据分配下一期预算，回收期短的场景优先扩展。",
+      "owner": "企业负责人",
+      "deliverable": "滚动投入计划",
+      "weeks": 3,
+      "cost": "零",
+      "kpi": "季度额度按规则释放",
+      "service": "AI 落地陪跑",
+      "module": "AI CFO",
+      "source": "template"
+    },
+    {
+      "order": 5,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
+      "dimension": "people",
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "id": "H-L3-2",
+      "title": "建立 AI 案例库与知识库",
+      "why": "经验靠口头传播，第二个场景没有比第一个更快。",
+      "steps": [
+        "把已运行场景写成案例：背景、做法、数据、效果",
+        "建内部知识库，新场景先查库",
+        "季度评选最佳案例"
+      ],
+      "owner": "牵头人",
+      "deliverable": "AI 案例库",
+      "weeks": 4,
+      "cost": "零",
+      "kpi": "案例库季度新增",
+      "service": "AI 落地陪跑",
+      "module": "AI人力官",
+      "source": "template"
+    },
+    {
+      "order": 6,
+      "phase": "p2",
+      "phaseName": "第 4–6 个月",
+      "phaseTitle": "见成效",
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "id": "S-L3-2",
+      "title": "建立跨部门 AI 推进小组",
+      "why": "多场景协同靠人推，需要固定的跨部门机制。",
+      "steps": [
+        "由牵头人牵头，各业务部门各出一名成员",
+        "每两周一次例会，议题固定为场景进度、数据问题、复核规则",
+        "小组有权调整场景优先级并向决策层提案"
+      ],
+      "owner": "牵头人",
+      "deliverable": "推进小组章程与例会记录",
+      "weeks": 2,
+      "cost": "零",
+      "kpi": "例会连续 6 次",
       "service": "AI 落地陪跑",
       "module": "AI决策",
       "source": "template"
     },
     {
-      "order": 3,
+      "order": 7,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "color": "#22A06B",
+      "id": "C-L3-1",
+      "title": "制定安全事件预案并演练",
+      "why": "多场景运行后，安全事件的影响面扩大，需要预案。",
+      "steps": [
+        "编写数据泄露、误删、账号被盗三类预案",
+        "每半年演练一次",
+        "事件记录纳入复盘"
+      ],
+      "owner": "IT 负责人",
+      "deliverable": "安全预案 + 演练记录",
+      "weeks": 4,
+      "cost": "零",
+      "kpi": "半年一次演练",
+      "service": "法务合规服务",
+      "module": "AI法务",
+      "source": "template"
+    },
+    {
+      "order": 8,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
+      "dimension": "data",
+      "dimensionName": "数据",
+      "color": "#1BA5B8",
+      "id": "D-L3-1",
+      "title": "建立 AI 场景数据回流与质量闭环",
+      "why": "AI 产出的数据需要回写系统并可追溯可修正。",
+      "steps": [
+        "为每个 AI 场景定义回写字段与回写规则",
+        "设置回写数据的质量校验与人工抽检",
+        "月度复盘回流数据的准确率"
+      ],
+      "owner": "牵头人 + IT 负责人",
+      "deliverable": "回流规则 + 月度质量报告",
+      "weeks": 6,
+      "cost": "轻",
+      "kpi": "回流准确率 98% 以上",
+      "service": "AI 落地陪跑",
+      "module": "AI决策",
+      "source": "template"
+    },
+    {
+      "order": 9,
+      "phase": "p3",
+      "phaseName": "第 7–12 个月",
+      "phaseTitle": "扩规模",
       "dimension": "process",
       "dimensionName": "流程",
-      "score": 4,
-      "band": [
-        1,
-        3
+      "color": "#7C5CD6",
+      "id": "P-L3-1",
+      "title": "让智能体承接一条跨部门流程",
+      "why": "流程已规范且数字化，可以把重复节点交给智能体。",
+      "steps": [
+        "选一条跨部门流程，标出重复性节点与人工复核节点",
+        "配置智能体承接重复节点，人工只处理例外与审批",
+        "运行一个月，记录耗时与异常率"
       ],
-      "title": "用智能体承接跨部门流程节点",
-      "text": "选一条跨部门流程，把重复性节点交给智能体自动执行，人工只处理异常与审批。",
+      "owner": "牵头人 + IT 负责人",
+      "deliverable": "智能体承接的流程上线",
+      "weeks": 8,
+      "cost": "中",
+      "kpi": "流程耗时下降 30%",
       "service": "垂直场景智能体开发",
       "module": "AI ERP",
       "source": "template"
     }
   ],
-  "summary": "深圳梵图家居科技有限公司处于 L3 流程 级，AI 已嵌入跨部门流程，有数据回流。六维中 4 维高于同行参考带，2 维在参考带内，0 维低于参考带。距 L4 经营 级还差 4 分。",
-  "render": [
+  "roadmap": [
     {
-      "type": "radar",
-      "title": "六维成熟度",
-      "source": "dimensions",
-      "band": true,
-      "bandLabel": "同行参考带"
+      "key": "p1",
+      "name": "第 1–3 个月",
+      "title": "打基础",
+      "months": [
+        1,
+        3
+      ],
+      "actions": [
+        1,
+        2,
+        3
+      ],
+      "milestone": "三个短板维度各完成一项基础动作，指标基线建立"
     },
     {
-      "type": "level-badge",
+      "key": "p2",
+      "name": "第 4–6 个月",
+      "title": "见成效",
+      "months": [
+        4,
+        6
+      ],
+      "actions": [
+        4,
+        5,
+        6
+      ],
+      "milestone": "短板维度出现可衡量的改善，首个场景稳定运行"
+    },
+    {
+      "key": "p3",
+      "name": "第 7–12 个月",
+      "title": "扩规模",
+      "months": [
+        7,
+        12
+      ],
+      "actions": [
+        7,
+        8,
+        9
+      ],
+      "milestone": "优势维度扩展，进入 L4 经营 级的条件基本具备"
+    }
+  ],
+  "checklist": [
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 1,
+      "dimensionName": "预算",
+      "color": "#E8A33D",
+      "item": "核算各场景实测回收期",
+      "owner": "财务负责人"
+    },
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 2,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "以 FDE L2 认证为标准组建小组",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 1–4 周",
+      "weekIndex": 0,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "把公司级 AI 指标拆到各相关部门负责人",
+      "owner": "企业负责人 + 人事负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 1,
+      "dimensionName": "预算",
+      "color": "#E8A33D",
+      "item": "回收期最短的场景优先扩展",
+      "owner": "财务负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 2,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "小组负责场景排期、验收与推广",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 5–8 周",
+      "weekIndex": 1,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "纳入季度考核，权重不低于 10%",
+      "owner": "企业负责人 + 人事负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 1,
+      "dimensionName": "预算",
+      "color": "#E8A33D",
+      "item": "形成预算分配规则",
+      "owner": "财务负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 2,
+      "dimensionName": "人员",
+      "color": "#E0635C",
+      "item": "每季度主导一个新场景上线",
+      "owner": "企业负责人"
+    },
+    {
+      "week": "第 9–12 周",
+      "weekIndex": 2,
+      "action": 3,
+      "dimensionName": "战略",
+      "color": "#4974F6",
+      "item": "明确各部门的数据回流责任与时限",
+      "owner": "企业负责人 + 人事负责人"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "trade-1",
+      "name": "询盘分级与自动回复",
+      "stage": "销售",
+      "value": 5,
+      "difficulty": 2,
+      "desc": "按询盘内容与客户画像自动分级，高意向优先跟进，低意向自动回复。",
+      "firstStep": "导出近 3 个月询盘与成交记录",
+      "module": "AI获客",
+      "dims": [
+        "process",
+        "people"
+      ],
+      "score": 5.1,
+      "dataFit": 5,
+      "dataNote": "数据条件已具备",
+      "why": "拉动短板维度「人员」；数据条件具备，价值 5 / 难度 2",
+      "rank": 1
+    },
+    {
+      "id": "trade-4",
+      "name": "多平台 Listing 生成",
+      "stage": "运营",
+      "value": 4,
+      "difficulty": 1,
+      "desc": "按产品资料自动生成多平台、多语言的商品页文案。",
+      "firstStep": "整理 20 个核心 SKU 的产品资料",
+      "module": "AI获客",
+      "dims": [
+        "people"
+      ],
+      "score": 4.9,
+      "dataFit": 5,
+      "dataNote": "数据条件已具备",
+      "why": "拉动短板维度「人员」；数据条件具备，价值 4 / 难度 1",
+      "rank": 2
+    },
+    {
+      "id": "trade-2",
+      "name": "库存周转预测",
+      "stage": "供应链",
+      "value": 5,
+      "difficulty": 3,
+      "desc": "按销售趋势与在途库存预测补货时点与数量，降低缺货与积压。",
+      "firstStep": "整理近 12 个月 SKU 销量与库存",
+      "module": "AI ERP",
+      "dims": [
+        "data"
+      ],
+      "score": 4.5,
+      "dataFit": 5,
+      "dataNote": "数据条件已具备",
+      "why": "数据条件具备，价值 5 / 难度 3",
+      "rank": 3
+    },
+    {
+      "id": "trade-5",
+      "name": "客户经营报告",
+      "stage": "客户管理",
+      "value": 3,
+      "difficulty": 2,
+      "desc": "按客户维度自动汇总销售、回款与毛利，月度推送给业务员。",
+      "firstStep": "定义客户报告的 8 个指标",
+      "module": "AI决策",
+      "dims": [
+        "data",
+        "strategy"
+      ],
+      "score": 3.6,
+      "dataFit": 3,
+      "dataNote": "需先补齐：财务软件",
+      "why": "拉动短板维度「战略」；数据条件待补，价值 3 / 难度 2",
+      "rank": 4
+    },
+    {
+      "id": "trade-3",
+      "name": "应收账款预警",
+      "stage": "财务",
+      "value": 4,
+      "difficulty": 2,
+      "desc": "按账龄与客户回款习惯自动预警逾期风险并生成催收提醒。",
+      "firstStep": "导出应收账龄表",
+      "module": "AI CFO",
+      "dims": [
+        "data",
+        "compliance"
+      ],
+      "score": 3,
+      "dataFit": 1,
+      "dataNote": "需先补齐：财务软件",
+      "why": "数据条件待补，价值 4 / 难度 2",
+      "rank": 5
+    }
+  ],
+  "investment": {
+    "tier": "中",
+    "name": "流程级应用",
+    "range": "5–20 万元",
+    "desc": "高级版或旗舰版 + 系统数据打通 + 智能体承接一条跨部门流程。",
+    "fit": "有数据基础、准备把 AI 嵌入日常作业的企业",
+    "rationale": "按可接受投入区间「5–20 万」与当前 L3 级判断，首个 12 个月以「流程级应用」档推进最稳妥。",
+    "tiers": [
+      {
+        "key": "零",
+        "name": "零投入起步",
+        "range": "0 元",
+        "desc": "以轻享版与内部整理动作起步，用两周使用记录验证价值。",
+        "fit": "投入意愿尚未形成、或先要说服决策层的企业"
+      },
+      {
+        "key": "轻",
+        "name": "轻量场景",
+        "range": "1–5 万元",
+        "desc": "标准版订阅 + 一个场景的配置与培训，3 个月内见效。",
+        "fit": "已选定首个场景、希望快速验证的企业"
+      },
+      {
+        "key": "中",
+        "name": "流程级应用",
+        "range": "5–20 万元",
+        "desc": "高级版或旗舰版 + 系统数据打通 + 智能体承接一条跨部门流程。",
+        "fit": "有数据基础、准备把 AI 嵌入日常作业的企业"
+      },
+      {
+        "key": "重",
+        "name": "平台与私域",
+        "range": "20 万元以上",
+        "desc": "私域部署 + 智能体平台搭建 + 行业软件定制 + AI 落地陪跑。",
+        "fit": "多场景并行、数据不出域要求明确的企业"
+      }
+    ],
+    "note": "投入区间为常见范围，具体以场景与数据现状测算为准。释放工时按增收折算，测算工具见「企业AI投入ROI测算器」。"
+  },
+  "risks": [
+    {
+      "id": "R-C1-mid",
+      "level": "中",
+      "title": "数据权限制度未完全落地",
+      "text": "已有约定或制度，但执行与审计不足。建议在 AI 场景上线前完成一次执行抽查，并把离职权限回收作为固定动作。"
+    },
+    {
+      "id": "R-C2-mid",
+      "level": "中",
+      "title": "外部模型数据清单待建立",
+      "text": "有意识但缺少清单与管控手段。建议建立「可外发 / 脱敏后可外发 / 不可外发」三类数据清单，新场景上线前按清单审批。"
+    },
+    {
+      "id": "R-C3-mid",
+      "level": "中",
+      "title": "安全机制被动",
+      "text": "没有发生过事件但也没有预案，或只有兼职负责人。建议编写数据泄露、误删、账号被盗三类预案，每半年演练一次。"
+    },
+    {
+      "id": "R-overseas",
+      "level": "提示",
+      "title": "跨境数据传输合规",
+      "text": "有海外业务的企业在 AI 场景中涉及境外客户或员工数据时，需要关注数据出境的合规要求与目标国的数据保护法规。建议为跨境场景单独做数据清单与传输路径评估。"
+    },
+    {
+      "id": "R-b2c",
+      "level": "提示",
+      "title": "个人信息保护",
+      "text": "面向个人消费者的企业持有大量个人信息，AI 场景（营销、客服、随访）直接处理这些数据。需要落实最小必要、告知同意与留存期限，营销类场景注意用户退订与频次限制。"
+    }
+  ],
+  "answerDistribution": [
+    0,
+    0,
+    30,
+    6
+  ],
+  "sectorInsight": {
+    "name": "商贸流通",
+    "insight": "商贸企业的核心是周转与转化：询盘分级、报价生成、库存周转预测、应收账款预警、多平台运营。数据大多沉淀在财务软件与平台后台，两者之间靠人工对账，AI 的第一步往往是把订单、库存、回款三类数据拉到一张表上。",
+    "aiFocus": [
+      "询盘分级与自动报价",
+      "库存周转与补货预测",
+      "应收账款与回款预警"
+    ]
+  },
+  "keyNumbers": [
+    {
+      "k": "综合得分",
+      "v": "72.2%",
+      "sub": "78 / 108"
+    },
+    {
+      "k": "成熟度等级",
+      "v": "L3",
+      "sub": "流程"
+    },
+    {
+      "k": "同行位置",
+      "v": "超过 99%",
+      "sub": "同行业同规模企业"
+    },
+    {
+      "k": "高于参考带",
+      "v": "6",
+      "sub": "个维度"
+    },
+    {
+      "k": "低于参考带",
+      "v": "0",
+      "sub": "个维度"
+    },
+    {
+      "k": "待加强子维度",
+      "v": "0",
+      "sub": "共 18 项"
+    }
+  ],
+  "summary": {
+    "position": "深圳梵图家居科技有限公司的企业 AI 成熟度综合得分 72.2%（78 / 108），处于 L3 流程 级：AI 已嵌入跨部门流程，有数据回流。在电商与跨境电商、21–50 人的同行中，估算超过 99% 的企业。",
+    "dims": "六个维度中，6 个高于同行参考带，0 个在参考带内，0 个低于参考带。最强的是「流程」（72.2%），最需要补的是「预算」（66.7%）。",
+    "subs": "十八个子维度中，「可得与共享」「存储与系统化」「AI 工具使用」已经建立；「目标与指标」「立项与牵头」「执行一致性」需要优先加强。",
+    "next": "距 L4 经营 级还差 15 分。未来三个月建议先做三件事：1）按场景回收期分配下一期预算；2）组建 2–3 人的 AI 应用小组；3）把 AI 指标分解到部门考核。"
+  },
+  "summaryText": "深圳梵图家居科技有限公司的企业 AI 成熟度综合得分 72.2%（78 / 108），处于 L3 流程 级：AI 已嵌入跨部门流程，有数据回流。在电商与跨境电商、21–50 人的同行中，估算超过 99% 的企业。六个维度中，6 个高于同行参考带，0 个在参考带内，0 个低于参考带。最强的是「流程」（72.2%），最需要补的是「预算」（66.7%）。十八个子维度中，「可得与共享」「存储与系统化」「AI 工具使用」已经建立；「目标与指标」「立项与牵头」「执行一致性」需要优先加强。距 L4 经营 级还差 15 分。未来三个月建议先做三件事：1）按场景回收期分配下一期预算；2）组建 2–3 人的 AI 应用小组；3）把 AI 指标分解到部门考核。",
+  "render": [
+    {
+      "type": "summary",
+      "source": "summary"
+    },
+    {
+      "type": "radar",
+      "source": "dimensions",
+      "band": true
+    },
+    {
+      "type": "level-scale",
       "source": "level"
     },
     {
+      "type": "distribution",
+      "source": "distribution"
+    },
+    {
+      "type": "dimension-detail",
+      "source": "dimensions"
+    },
+    {
+      "type": "ranked-bars",
+      "source": "subdims"
+    },
+    {
+      "type": "roadmap",
+      "source": "roadmap"
+    },
+    {
       "type": "action-list",
-      "title": "升到 L4 经营 的三件事",
       "source": "actions"
+    },
+    {
+      "type": "scene-matrix",
+      "source": "scenes"
+    },
+    {
+      "type": "risk-list",
+      "source": "risks"
+    },
+    {
+      "type": "checklist",
+      "source": "checklist"
     }
   ]
 }

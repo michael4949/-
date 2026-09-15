@@ -1,0 +1,88 @@
+{
+  "_note": "报告「场景推荐」用的精简场景库：14 个大类 × 5 个场景。value/difficulty 1–5；dataDeps 对应 profile.systems；dims 为该场景主要拉动的维度；module 为可先试的模块。完整场景库（约 180 条）在模块 2 里，届时本文件并入。",
+  "items": [
+    { "id": "mfg-1", "sector": "mfg", "name": "订单交付预警", "stage": "生产计划", "value": 5, "difficulty": 3, "dataDeps": ["erp"], "dims": ["process", "data"], "desc": "按订单交期、产能与物料状态自动预警延期风险，替代每天手工核对交期。", "firstStep": "导出近 6 个月订单与实际交付日期，做一次准点率基线", "module": "AI ERP" },
+    { "id": "mfg-2", "sector": "mfg", "name": "报价自动生成", "stage": "销售", "value": 4, "difficulty": 2, "dataDeps": ["erp", "crm"], "dims": ["process", "people"], "desc": "按 BOM、工时与历史报价自动生成报价单，响应时长从天缩到小时。", "firstStep": "整理近 50 份报价单与对应成本", "module": "AI获客" },
+    { "id": "mfg-3", "sector": "mfg", "name": "来料质检辅助", "stage": "质量", "value": 4, "difficulty": 4, "dataDeps": ["mes", "erp"], "dims": ["data", "process"], "desc": "按供应商历史合格率与批次数据给出抽检建议与风险标记。", "firstStep": "汇总近 12 个月来料检验记录", "module": "AI ERP" },
+    { "id": "mfg-4", "sector": "mfg", "name": "售后知识库", "stage": "售后", "value": 3, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "把维修与客诉记录整理成可检索的知识库，新人也能快速答复。", "firstStep": "收集近一年售后工单与处理方案", "module": "AI软件开发" },
+    { "id": "mfg-5", "sector": "mfg", "name": "设备预测维护", "stage": "生产", "value": 4, "difficulty": 5, "dataDeps": ["mes"], "dims": ["data"], "desc": "基于设备运行数据预测故障与保养时点，减少非计划停机。", "firstStep": "确认关键设备是否有运行数据采集", "module": "AI决策" },
+
+    { "id": "trade-1", "sector": "trade", "name": "询盘分级与自动回复", "stage": "销售", "value": 5, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process", "people"], "desc": "按询盘内容与客户画像自动分级，高意向优先跟进，低意向自动回复。", "firstStep": "导出近 3 个月询盘与成交记录", "module": "AI获客" },
+    { "id": "trade-2", "sector": "trade", "name": "库存周转预测", "stage": "供应链", "value": 5, "difficulty": 3, "dataDeps": ["erp", "shop"], "dims": ["data"], "desc": "按销售趋势与在途库存预测补货时点与数量，降低缺货与积压。", "firstStep": "整理近 12 个月 SKU 销量与库存", "module": "AI ERP" },
+    { "id": "trade-3", "sector": "trade", "name": "应收账款预警", "stage": "财务", "value": 4, "difficulty": 2, "dataDeps": ["finance"], "dims": ["data", "compliance"], "desc": "按账龄与客户回款习惯自动预警逾期风险并生成催收提醒。", "firstStep": "导出应收账龄表", "module": "AI CFO" },
+    { "id": "trade-4", "sector": "trade", "name": "多平台 Listing 生成", "stage": "运营", "value": 4, "difficulty": 1, "dataDeps": ["shop"], "dims": ["people"], "desc": "按产品资料自动生成多平台、多语言的商品页文案。", "firstStep": "整理 20 个核心 SKU 的产品资料", "module": "AI获客" },
+    { "id": "trade-5", "sector": "trade", "name": "客户经营报告", "stage": "客户管理", "value": 3, "difficulty": 2, "dataDeps": ["crm", "finance"], "dims": ["data", "strategy"], "desc": "按客户维度自动汇总销售、回款与毛利，月度推送给业务员。", "firstStep": "定义客户报告的 8 个指标", "module": "AI决策" },
+
+    { "id": "life-1", "sector": "life", "name": "门店经营日报", "stage": "运营", "value": 5, "difficulty": 2, "dataDeps": ["shop"], "dims": ["data", "strategy"], "desc": "每日自动汇总各门店营收、客单、复购与异常，推送给店长与总部。", "firstStep": "确认门店系统可导出日数据", "module": "AI决策" },
+    { "id": "life-2", "sector": "life", "name": "投流与私域获客", "stage": "营销", "value": 5, "difficulty": 2, "dataDeps": [], "dims": ["people"], "desc": "自动生成投放文案与短视频脚本，按渠道效果调整预算分配。", "firstStep": "整理近 3 个月各渠道投放与到店数据", "module": "AI获客" },
+    { "id": "life-3", "sector": "life", "name": "供应链补货建议", "stage": "供应链", "value": 4, "difficulty": 3, "dataDeps": ["shop", "erp"], "dims": ["data", "process"], "desc": "按门店销量与损耗自动生成补货单，降低损耗与缺货。", "firstStep": "整理近 3 个月门店进销存", "module": "AI ERP" },
+    { "id": "life-4", "sector": "life", "name": "评价分析与回复", "stage": "客户服务", "value": 3, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "自动汇总各平台评价、提炼问题并生成回复。", "firstStep": "导出近 1 个月各平台评价", "module": "AI获客" },
+    { "id": "life-5", "sector": "life", "name": "排班与用工成本", "stage": "人力", "value": 3, "difficulty": 3, "dataDeps": ["hr"], "dims": ["process", "budget"], "desc": "按客流预测生成排班建议并测算用工成本。", "firstStep": "整理近 3 个月客流与排班表", "module": "AI人力官" },
+
+    { "id": "prof-1", "sector": "prof", "name": "票据处理与异常凭证", "stage": "交付", "value": 5, "difficulty": 2, "dataDeps": ["finance"], "dims": ["process", "data"], "desc": "票据自动识别、分录生成、异常凭证队列，千户级流水线作业。", "firstStep": "抽 50 户账套做识别准确率测试", "module": "AI流程提效" },
+    { "id": "prof-2", "sector": "prof", "name": "合同审阅", "stage": "交付", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["process", "compliance"], "desc": "合同条款自动标注风险、给出修改建议与谈判要点。", "firstStep": "整理 4 类常用合同模板", "module": "AI法务" },
+    { "id": "prof-3", "sector": "prof", "name": "政策匹配与申报", "stage": "服务", "value": 4, "difficulty": 3, "dataDeps": ["crm"], "dims": ["data", "strategy"], "desc": "按客户画像自动匹配可申报政策并生成材料目录。", "firstStep": "整理本地区常用政策清单", "module": "AI CFO" },
+    { "id": "prof-4", "sector": "prof", "name": "客户经营报告", "stage": "服务", "value": 4, "difficulty": 2, "dataDeps": ["finance"], "dims": ["data", "people"], "desc": "月结后自动生成客户经营报告，从记账升级为经营顾问。", "firstStep": "定义报告模板与 10 个指标", "module": "AI CFO" },
+    { "id": "prof-5", "sector": "prof", "name": "内部知识库与新人培训", "stage": "内部", "value": 3, "difficulty": 1, "dataDeps": [], "dims": ["people", "process"], "desc": "把作业规范与常见问题做成可检索知识库，新人上手时间缩短一半。", "firstStep": "收集现有作业规范与 FAQ", "module": "AI人力官" },
+
+    { "id": "build-1", "sector": "build", "name": "投标文件生成", "stage": "投标", "value": 5, "difficulty": 2, "dataDeps": [], "dims": ["people", "process"], "desc": "按招标要求与历史标书自动生成技术标初稿与资料清单。", "firstStep": "整理近 10 份中标标书", "module": "AI软件开发" },
+    { "id": "build-2", "sector": "build", "name": "进度与成本预警", "stage": "项目管理", "value": 5, "difficulty": 4, "dataDeps": ["erp", "oa"], "dims": ["data", "process"], "desc": "按周回流项目进度与成本，自动预警偏差。", "firstStep": "统一各项目部的周报模板", "module": "AI决策" },
+    { "id": "build-3", "sector": "build", "name": "合规检查与资料归档", "stage": "合规", "value": 4, "difficulty": 2, "dataDeps": ["oa"], "dims": ["compliance"], "desc": "按项目阶段自动核对资质与资料完整性，缺项提醒。", "firstStep": "列出项目资料清单与责任人", "module": "AI法务" },
+    { "id": "build-4", "sector": "build", "name": "供应商与分包评价", "stage": "采购", "value": 3, "difficulty": 3, "dataDeps": ["erp"], "dims": ["data"], "desc": "按履约、质量与结算数据自动评价供应商与分包。", "firstStep": "汇总近 2 年供应商履约记录", "module": "AI ERP" },
+    { "id": "build-5", "sector": "build", "name": "设计变更与工程量核对", "stage": "设计", "value": 3, "difficulty": 4, "dataDeps": [], "dims": ["process"], "desc": "识别设计变更并自动核对工程量差异。", "firstStep": "整理近期变更单与工程量清单", "module": "AI软件开发" },
+
+    { "id": "med-1", "sector": "med", "name": "患者随访管理", "stage": "服务", "value": 5, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process", "compliance"], "desc": "按诊疗计划自动生成随访提醒与话术，记录随访结果。", "firstStep": "确认随访数据的合规使用范围", "module": "AI获客" },
+    { "id": "med-2", "sector": "med", "name": "学术与注册资料生成", "stage": "内容", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["people"], "desc": "按模板生成学术内容、注册资料初稿与合规审阅清单。", "firstStep": "整理常用资料模板", "module": "AI软件开发" },
+    { "id": "med-3", "sector": "med", "name": "供应链与追溯", "stage": "供应链", "value": 4, "difficulty": 4, "dataDeps": ["erp"], "dims": ["data", "compliance"], "desc": "药品与器械的批次追溯与效期预警。", "firstStep": "确认批次数据在系统中的完整性", "module": "AI ERP" },
+    { "id": "med-4", "sector": "med", "name": "预约与客服自动化", "stage": "服务", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process"], "desc": "预约确认、改期与常见问题自动应答。", "firstStep": "整理近 1 个月客服问答记录", "module": "AI获客" },
+    { "id": "med-5", "sector": "med", "name": "经营数据看板", "stage": "管理", "value": 3, "difficulty": 3, "dataDeps": ["finance", "crm"], "dims": ["data", "strategy"], "desc": "科室或门店的营收、客单、复诊率按日更新。", "firstStep": "定义 10 个经营指标口径", "module": "AI决策" },
+
+    { "id": "edu-1", "sector": "edu", "name": "课程内容与题库生成", "stage": "教研", "value": 5, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "按大纲自动生成课件、练习题与讲义初稿。", "firstStep": "整理 3 门核心课程的大纲", "module": "AI软件开发" },
+    { "id": "edu-2", "sector": "edu", "name": "招生线索分级", "stage": "招生", "value": 5, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process", "data"], "desc": "按咨询内容与互动行为自动给线索打分，优先跟进高意向。", "firstStep": "导出近 3 个月咨询与报名记录", "module": "AI获客" },
+    { "id": "edu-3", "sector": "edu", "name": "学员续费预测", "stage": "运营", "value": 4, "difficulty": 3, "dataDeps": ["crm", "shop"], "dims": ["data"], "desc": "按出勤、作业与互动数据预测流失风险并提前干预。", "firstStep": "整理学员出勤与续费历史", "module": "AI决策" },
+    { "id": "edu-4", "sector": "edu", "name": "教务排课与通知", "stage": "教务", "value": 3, "difficulty": 2, "dataDeps": ["oa"], "dims": ["process"], "desc": "自动排课、冲突检测与家长通知。", "firstStep": "整理教室、教师与课程约束", "module": "AI流程提效" },
+    { "id": "edu-5", "sector": "edu", "name": "学习报告自动生成", "stage": "服务", "value": 3, "difficulty": 2, "dataDeps": ["crm"], "dims": ["data", "people"], "desc": "按学员数据自动生成阶段学习报告推送家长。", "firstStep": "定义报告模板", "module": "AI软件开发" },
+
+    { "id": "logi-1", "sector": "logi", "name": "路径与装载优化", "stage": "调度", "value": 5, "difficulty": 4, "dataDeps": ["erp"], "dims": ["data", "process"], "desc": "按订单、车辆与路况自动生成配送路径与装载方案。", "firstStep": "确认 TMS 数据可导出", "module": "AI ERP" },
+    { "id": "logi-2", "sector": "logi", "name": "单据识别与对账", "stage": "财务", "value": 5, "difficulty": 2, "dataDeps": ["finance"], "dims": ["process"], "desc": "运单、回单与发票自动识别、匹配与对账。", "firstStep": "抽 200 张单据做识别测试", "module": "AI流程提效" },
+    { "id": "logi-3", "sector": "logi", "name": "异常预警与上报", "stage": "运营", "value": 4, "difficulty": 3, "dataDeps": ["erp"], "dims": ["process", "data"], "desc": "延误、破损与签收异常自动预警并生成处理工单。", "firstStep": "梳理异常类型与处理流程", "module": "AI软件开发" },
+    { "id": "logi-4", "sector": "logi", "name": "客服自动应答", "stage": "客户服务", "value": 4, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "查件、改址、投诉等常见问题自动应答。", "firstStep": "整理近 1 个月客服记录", "module": "AI获客" },
+    { "id": "logi-5", "sector": "logi", "name": "仓储调度建议", "stage": "仓储", "value": 3, "difficulty": 4, "dataDeps": ["erp"], "dims": ["data"], "desc": "按入库、出库与库位数据给出调度与库位建议。", "firstStep": "确认 WMS 数据完整性", "module": "AI ERP" },
+
+    { "id": "tech-1", "sector": "tech", "name": "需求文档与测试用例生成", "stage": "研发", "value": 5, "difficulty": 1, "dataDeps": [], "dims": ["process", "people"], "desc": "按需求描述自动生成 PRD 初稿与测试用例。", "firstStep": "选一个在研项目试点", "module": "AI软件开发" },
+    { "id": "tech-2", "sector": "tech", "name": "售前方案自动生成", "stage": "销售", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["people"], "desc": "按客户需求与历史方案自动生成售前方案初稿。", "firstStep": "整理近 20 份方案", "module": "AI获客" },
+    { "id": "tech-3", "sector": "tech", "name": "客户成功与工单分析", "stage": "服务", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["data"], "desc": "工单自动分类、根因归集与流失预警。", "firstStep": "导出近 6 个月工单", "module": "AI决策" },
+    { "id": "tech-4", "sector": "tech", "name": "代码评审与文档生成", "stage": "研发", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["process"], "desc": "自动生成代码评审意见与技术文档。", "firstStep": "选一个代码库试点", "module": "AI软件开发" },
+    { "id": "tech-5", "sector": "tech", "name": "项目交付进度预警", "stage": "项目管理", "value": 3, "difficulty": 3, "dataDeps": ["oa"], "dims": ["data", "process"], "desc": "按任务进度与工时自动预警延期风险。", "firstStep": "统一项目管理工具", "module": "AI决策" },
+
+    { "id": "agri-1", "sector": "agri", "name": "产销预测", "stage": "经营", "value": 5, "difficulty": 4, "dataDeps": ["erp"], "dims": ["data"], "desc": "按历史产量、季节与渠道订单预测产销匹配。", "firstStep": "整理近 3 年产销记录", "module": "AI决策" },
+    { "id": "agri-2", "sector": "agri", "name": "质量追溯与合规资料", "stage": "合规", "value": 5, "difficulty": 3, "dataDeps": ["erp"], "dims": ["compliance", "data"], "desc": "批次追溯记录自动归集，合规资料一键生成。", "firstStep": "确定追溯字段与采集方式", "module": "AI法务" },
+    { "id": "agri-3", "sector": "agri", "name": "渠道客户经营", "stage": "销售", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["people"], "desc": "按渠道与客户自动汇总订单与回款，生成跟进提醒。", "firstStep": "整理渠道客户名单", "module": "AI获客" },
+    { "id": "agri-4", "sector": "agri", "name": "生产记录数字化", "stage": "生产", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["data", "process"], "desc": "把种养或加工记录从纸面搬到手机端，形成可分析的数据。", "firstStep": "设计 10 个关键记录字段", "module": "AI软件开发" },
+    { "id": "agri-5", "sector": "agri", "name": "补贴与政策匹配", "stage": "经营", "value": 3, "difficulty": 2, "dataDeps": [], "dims": ["strategy"], "desc": "按企业画像匹配可申报的农业补贴与政策。", "firstStep": "整理企业资质信息", "module": "AI CFO" },
+
+    { "id": "energy-1", "sector": "energy", "name": "能耗与设备运维优化", "stage": "运营", "value": 5, "difficulty": 4, "dataDeps": ["mes"], "dims": ["data"], "desc": "基于监测数据优化能耗与设备保养计划。", "firstStep": "确认监测数据采集完整性", "module": "AI决策" },
+    { "id": "energy-2", "sector": "energy", "name": "监测报告自动生成", "stage": "合规", "value": 5, "difficulty": 2, "dataDeps": ["oa"], "dims": ["process", "compliance"], "desc": "按监测数据自动生成排放与运行报告。", "firstStep": "整理报告模板与数据口径", "module": "AI软件开发" },
+    { "id": "energy-3", "sector": "energy", "name": "投标资料生成", "stage": "投标", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["people"], "desc": "按招标要求自动生成技术方案与资质资料。", "firstStep": "整理近 10 份标书", "module": "AI软件开发" },
+    { "id": "energy-4", "sector": "energy", "name": "项目进度与成本预警", "stage": "项目", "value": 4, "difficulty": 3, "dataDeps": ["erp", "oa"], "dims": ["data", "process"], "desc": "项目进度与成本按周回流并自动预警。", "firstStep": "统一项目周报模板", "module": "AI决策" },
+    { "id": "energy-5", "sector": "energy", "name": "客户服务与工单", "stage": "服务", "value": 3, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process"], "desc": "运维工单自动分派与进度通知。", "firstStep": "梳理工单类型", "module": "AI流程提效" },
+
+    { "id": "fin-1", "sector": "fin", "name": "尽调资料整理", "stage": "业务", "value": 5, "difficulty": 3, "dataDeps": [], "dims": ["process", "compliance"], "desc": "自动整理尽调资料、提取关键信息并生成初审清单。", "firstStep": "确定可用外部模型处理的资料范围", "module": "AI法务" },
+    { "id": "fin-2", "sector": "fin", "name": "风险初筛", "stage": "风控", "value": 5, "difficulty": 4, "dataDeps": ["crm"], "dims": ["data", "compliance"], "desc": "按客户资料与公开信息做风险初筛与标记。", "firstStep": "梳理初筛规则", "module": "AI CFO" },
+    { "id": "fin-3", "sector": "fin", "name": "合规报告生成", "stage": "合规", "value": 4, "difficulty": 2, "dataDeps": ["oa"], "dims": ["compliance"], "desc": "按模板自动生成监管报送与内部合规报告。", "firstStep": "整理报告模板", "module": "AI软件开发" },
+    { "id": "fin-4", "sector": "fin", "name": "客户服务与咨询", "stage": "服务", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["people"], "desc": "常见咨询自动应答，复杂问题转人工。", "firstStep": "整理近 1 个月咨询记录", "module": "AI获客" },
+    { "id": "fin-5", "sector": "fin", "name": "内部知识库", "stage": "内部", "value": 3, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "制度、产品与案例的可检索知识库。", "firstStep": "收集制度与产品文档", "module": "AI人力官" },
+
+    { "id": "media-1", "sector": "media", "name": "脚本与文案生成", "stage": "内容", "value": 5, "difficulty": 1, "dataDeps": [], "dims": ["people"], "desc": "按选题自动生成脚本、文案与多版本标题。", "firstStep": "整理近 3 个月高表现内容", "module": "AI获客" },
+    { "id": "media-2", "sector": "media", "name": "素材管理与检索", "stage": "内容", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["data", "process"], "desc": "素材自动打标与检索，减少重复制作。", "firstStep": "盘点素材库规模", "module": "AI软件开发" },
+    { "id": "media-3", "sector": "media", "name": "多渠道分发与效果分析", "stage": "运营", "value": 4, "difficulty": 3, "dataDeps": ["shop"], "dims": ["data"], "desc": "多平台分发数据自动汇总与效果归因。", "firstStep": "整理各平台数据导出方式", "module": "AI决策" },
+    { "id": "media-4", "sector": "media", "name": "版权与内容审核", "stage": "合规", "value": 4, "difficulty": 2, "dataDeps": [], "dims": ["compliance"], "desc": "素材来源合规检查与内容审核初筛。", "firstStep": "整理审核规则", "module": "AI法务" },
+    { "id": "media-5", "sector": "media", "name": "客户提案生成", "stage": "销售", "value": 3, "difficulty": 2, "dataDeps": ["crm"], "dims": ["people"], "desc": "按客户需求自动生成提案初稿。", "firstStep": "整理近 10 份提案", "module": "AI软件开发" },
+
+    { "id": "other-1", "sector": "other", "name": "文档处理与知识库", "stage": "内部", "value": 4, "difficulty": 1, "dataDeps": [], "dims": ["people", "process"], "desc": "合同、制度与资料的整理、检索与问答。", "firstStep": "收集常用文档", "module": "AI软件开发" },
+    { "id": "other-2", "sector": "other", "name": "客户服务自动化", "stage": "服务", "value": 4, "difficulty": 2, "dataDeps": ["crm"], "dims": ["process"], "desc": "常见问题自动应答与工单分派。", "firstStep": "整理近 1 个月客服记录", "module": "AI获客" },
+    { "id": "other-3", "sector": "other", "name": "经营数据周报", "stage": "管理", "value": 4, "difficulty": 2, "dataDeps": ["finance"], "dims": ["data", "strategy"], "desc": "自动汇总经营指标生成周报。", "firstStep": "定义 8 个核心指标", "module": "AI决策" },
+    { "id": "other-4", "sector": "other", "name": "合同审阅", "stage": "法务", "value": 3, "difficulty": 2, "dataDeps": [], "dims": ["compliance"], "desc": "合同条款风险标注与修改建议。", "firstStep": "整理常用合同模板", "module": "AI法务" },
+    { "id": "other-5", "sector": "other", "name": "招聘与用工管理", "stage": "人力", "value": 3, "difficulty": 2, "dataDeps": ["hr"], "dims": ["people"], "desc": "JD 生成、简历筛选与用工成本测算。", "firstStep": "整理在招岗位", "module": "AI人力官" }
+  ]
+}

@@ -5,13 +5,15 @@ const path = require('path');
 const core = require('../core/compute.js');
 const data = require('./load-data.js')();
 const dir = path.join(__dirname, '..', 'examples');
+const P = { above: '↑', within: '·', below: '↓', unknown: '?' };
 for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.input.json')).sort()) {
   const input = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
   const r = core.compute(input, data);
   if (!r.ok) { console.error(f, r.errors); process.exitCode = 1; continue; }
   fs.writeFileSync(path.join(dir, f.replace('.input.', '.output.')), JSON.stringify(r, null, 2));
-  console.log(`\n【${r.company.name}】${r.company.industryName} · ${r.company.sizeName} · 参考格 ${r.benchmark.key}（${r.benchmark.basis}）`);
-  console.log(`  ${r.level.code} ${r.level.name}  ${r.total}/${r.max}   ` + r.dimensions.map((d) => `${d.name}${d.score}${d.band ? `[${d.band[0]}-${d.band[1]}]` : ''}${{ above: '↑', within: '·', below: '↓', unknown: '?' }[d.position]}`).join('  '));
-  console.log('  ' + r.summary);
-  r.actions.forEach((x) => console.log(`  ${x.order}. [${x.dimensionName}] ${x.title} —— ${x.text}（${x.service} / 可先试 ${x.module}）`));
+  console.log(`\n【${r.profile.name}】${r.profile.sectorName} · ${r.profile.industryName} · ${r.profile.sizeName} · 参考格 ${r.benchmark.key}（${r.benchmark.basis}）`);
+  console.log(`  ${r.level.code} ${r.level.name}  ${r.total}/${r.max} = ${r.pct}%  同行百分位 ${r.percentile}  ` + r.dimensions.map((d) => `${d.name}${d.pct}%${d.band ? `[${d.band[0]}-${d.band[1]}]` : ''}${P[d.position]}`).join('  '));
+  console.log('  短板维度: ' + r.weakDims.join(' > ') + ' | 最弱子维度: ' + r.weaknesses.join(', ') + ' | 最强: ' + r.strengths.join(', '));
+  r.actions.filter((x) => x.phase === 'p1').forEach((x) => console.log(`  P1 ${x.order}. [${x.dimensionName}·${x.id}] ${x.title} —— ${x.owner} / ${x.weeks} 周 / ${x.cost} / ${x.service}`));
+  console.log('  场景 Top3: ' + r.scenes.slice(0, 3).map((s) => `${s.name}(${s.score})`).join(', ') + ' | 投入档: ' + r.investment.name + ' | 风险: ' + r.risks.map((x) => x.level + x.title).join('; '));
 }

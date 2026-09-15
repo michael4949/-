@@ -1,1567 +1,8108 @@
 {
-  "_meta": {
-    "basis": "estimated",
-    "version": "0.1",
-    "note": "开发侧估算，业务侧抽样到位后替换；缺失格由 core 按相邻规模插值"
+ "_meta": {
+  "basis": "estimated",
+  "version": "0.2",
+  "scale": "pct",
+  "note": "开发侧估算，业务侧抽样到位后替换；缺失格由 core 按相邻规模插值"
+ },
+ "mfg-machinery-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    22,
+    42
+   ]
   },
-  "mfg-discrete-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 34,
+  "sd": 14
+ },
+ "mfg-machinery-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "mfg-discrete-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 38,
+  "sd": 14
+ },
+ "mfg-machinery-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
   },
-  "mfg-discrete-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      3
-    ]
+  "mean": 42,
+  "sd": 14
+ },
+ "mfg-machinery-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    36,
+    56
+   ]
   },
-  "mfg-discrete-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 48,
+  "sd": 14
+ },
+ "mfg-machinery-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    42,
+    62
+   ]
   },
-  "mfg-discrete-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 54,
+  "sd": 14
+ },
+ "mfg-electronics-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    24,
+    44
+   ]
   },
-  "mfg-process-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 38,
+  "sd": 14
+ },
+ "mfg-electronics-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    28,
+    48
+   ]
   },
-  "mfg-process-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 42,
+  "sd": 14
+ },
+ "mfg-electronics-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "mfg-process-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 46,
+  "sd": 14
+ },
+ "mfg-electronics-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    38,
+    58
+   ]
   },
-  "mfg-process-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 52,
+  "sd": 14
+ },
+ "mfg-electronics-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    54,
+    74
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    44,
+    64
+   ]
   },
-  "mfg-process-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      4,
-      6
-    ],
-    "process": [
-      4,
-      6
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 58,
+  "sd": 14
+ },
+ "mfg-auto-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "trade-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 39,
+  "sd": 14
+ },
+ "mfg-auto-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
   },
-  "trade-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 43,
+  "sd": 14
+ },
+ "mfg-auto-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    34,
+    54
+   ]
   },
-  "trade-51_100": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 47,
+  "sd": 14
+ },
+ "mfg-auto-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    40,
+    60
+   ]
   },
-  "trade-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 53,
+  "sd": 14
+ },
+ "mfg-auto-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    58,
+    78
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    46,
+    66
+   ]
   },
-  "trade-300_plus": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 59,
+  "sd": 14
+ },
+ "mfg-process-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    28,
+    48
+   ]
   },
-  "ecom-1_20": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 37,
+  "sd": 14
+ },
+ "mfg-process-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "ecom-21_50": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 41,
+  "sd": 14
+ },
+ "mfg-process-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    36,
+    56
+   ]
   },
-  "ecom-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 45,
+  "sd": 14
+ },
+ "mfg-process-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    42,
+    62
+   ]
   },
-  "ecom-101_300": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 51,
+  "sd": 14
+ },
+ "mfg-process-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    58,
+    78
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    48,
+    68
+   ]
   },
-  "ecom-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      4,
-      6
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 57,
+  "sd": 14
+ },
+ "mfg-textile-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    18,
+    38
+   ]
   },
-  "frs-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      0,
-      2
-    ]
+  "mean": 30,
+  "sd": 14
+ },
+ "mfg-textile-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    22,
+    42
+   ]
   },
-  "frs-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      0,
-      2
-    ]
+  "mean": 34,
+  "sd": 14
+ },
+ "mfg-textile-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "frs-51_100": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 38,
+  "sd": 14
+ },
+ "mfg-textile-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "frs-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 44,
+  "sd": 14
+ },
+ "mfg-textile-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    38,
+    58
+   ]
   },
-  "frs-300_plus": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 50,
+  "sd": 14
+ },
+ "mfg-furniture-1_20": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    18,
+    38
+   ]
   },
-  "prof-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 32,
+  "sd": 14
+ },
+ "mfg-furniture-21_50": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    22,
+    42
+   ]
   },
-  "prof-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 36,
+  "sd": 14
+ },
+ "mfg-furniture-51_100": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "prof-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 40,
+  "sd": 14
+ },
+ "mfg-furniture-101_300": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "prof-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 46,
+  "sd": 14
+ },
+ "mfg-furniture-300_plus": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    38,
+    58
+   ]
   },
-  "prof-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 52,
+  "sd": 14
+ },
+ "mfg-equipment-1_20": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    24,
+    44
+   ]
   },
-  "build-1_20": {
-    "strategy": [
-      0,
-      2
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      0,
-      2
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 39,
+  "sd": 14
+ },
+ "mfg-equipment-21_50": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    28,
+    48
+   ]
   },
-  "build-21_50": {
-    "strategy": [
-      0,
-      2
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      0,
-      2
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 43,
+  "sd": 14
+ },
+ "mfg-equipment-51_100": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "build-51_100": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 47,
+  "sd": 14
+ },
+ "mfg-equipment-101_300": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    38,
+    58
+   ]
   },
-  "build-101_300": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 53,
+  "sd": 14
+ },
+ "mfg-equipment-300_plus": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    50,
+    70
+   ],
+   "compliance": [
+    44,
+    64
+   ]
   },
-  "build-300_plus": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 59,
+  "sd": 14
+ },
+ "mfg-packaging-1_20": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    20,
+    40
+   ]
   },
-  "med-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 33,
+  "sd": 14
+ },
+ "mfg-packaging-21_50": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    24,
+    44
+   ]
   },
-  "med-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 37,
+  "sd": 14
+ },
+ "mfg-packaging-51_100": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    28,
+    48
+   ]
   },
-  "med-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 41,
+  "sd": 14
+ },
+ "mfg-packaging-101_300": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    34,
+    54
+   ]
   },
-  "med-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 47,
+  "sd": 14
+ },
+ "mfg-packaging-300_plus": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    40,
+    60
+   ]
   },
-  "med-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      4,
-      6
-    ]
+  "mean": 53,
+  "sd": 14
+ },
+ "trade-wholesale-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    18,
+    38
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    16,
+    36
+   ]
   },
-  "edu-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 29,
+  "sd": 14
+ },
+ "trade-wholesale-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    20,
+    40
+   ]
   },
-  "edu-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 33,
+  "sd": 14
+ },
+ "trade-wholesale-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    24,
+    44
+   ]
   },
-  "edu-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 37,
+  "sd": 14
+ },
+ "trade-wholesale-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
   },
-  "edu-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 43,
+  "sd": 14
+ },
+ "trade-wholesale-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    36,
+    56
+   ]
   },
-  "edu-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 49,
+  "sd": 14
+ },
+ "trade-retail-1_20": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    18,
+    38
+   ]
   },
-  "logi-1_20": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 31,
+  "sd": 14
+ },
+ "trade-retail-21_50": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    22,
+    42
+   ]
   },
-  "logi-21_50": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 35,
+  "sd": 14
+ },
+ "trade-retail-51_100": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "logi-51_100": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 39,
+  "sd": 14
+ },
+ "trade-retail-101_300": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    32,
+    52
+   ]
   },
-  "logi-101_300": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 45,
+  "sd": 14
+ },
+ "trade-retail-300_plus": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    38,
+    58
+   ]
   },
-  "logi-300_plus": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 51,
+  "sd": 14
+ },
+ "trade-ecom-1_20": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    20,
+    40
+   ]
   },
-  "tech-1_20": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 37,
+  "sd": 14
+ },
+ "trade-ecom-21_50": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    24,
+    44
+   ]
   },
-  "tech-21_50": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 41,
+  "sd": 14
+ },
+ "trade-ecom-51_100": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    28,
+    48
+   ]
   },
-  "tech-51_100": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      3,
-      5
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      3,
-      5
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 45,
+  "sd": 14
+ },
+ "trade-ecom-101_300": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    44,
+    64
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    34,
+    54
+   ]
   },
-  "tech-101_300": {
-    "strategy": [
-      3,
-      5
-    ],
-    "data": [
-      4,
-      6
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      4,
-      6
-    ],
-    "budget": [
-      3,
-      5
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 51,
+  "sd": 14
+ },
+ "trade-ecom-300_plus": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    40,
+    60
+   ]
   },
-  "tech-300_plus": {
-    "strategy": [
-      4,
-      6
-    ],
-    "data": [
-      4,
-      6
-    ],
-    "process": [
-      3,
-      5
-    ],
-    "people": [
-      4,
-      6
-    ],
-    "budget": [
-      4,
-      6
-    ],
-    "compliance": [
-      3,
-      5
-    ]
+  "mean": 57,
+  "sd": 14
+ },
+ "trade-import-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    22,
+    42
+   ]
   },
-  "agri-1_20": {
-    "strategy": [
-      0,
-      2
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      0,
-      2
-    ],
-    "budget": [
-      0,
-      2
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 31,
+  "sd": 14
+ },
+ "trade-import-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    26,
+    46
+   ]
   },
-  "agri-21_50": {
-    "strategy": [
-      0,
-      2
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      0,
-      2
-    ],
-    "budget": [
-      0,
-      2
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 35,
+  "sd": 14
+ },
+ "trade-import-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    30,
+    50
+   ]
   },
-  "agri-51_100": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      1,
-      3
-    ],
-    "process": [
-      1,
-      3
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      1,
-      3
-    ]
+  "mean": 39,
+  "sd": 14
+ },
+ "trade-import-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    36,
+    56
+   ]
   },
-  "agri-101_300": {
-    "strategy": [
-      1,
-      3
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      1,
-      3
-    ],
-    "budget": [
-      1,
-      3
-    ],
-    "compliance": [
-      2,
-      4
-    ]
+  "mean": 45,
+  "sd": 14
+ },
+ "trade-import-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    42,
+    62
+   ]
   },
-  "agri-300_plus": {
-    "strategy": [
-      2,
-      4
-    ],
-    "data": [
-      2,
-      4
-    ],
-    "process": [
-      2,
-      4
-    ],
-    "people": [
-      2,
-      4
-    ],
-    "budget": [
-      2,
-      4
-    ],
-    "compliance": [
-      2,
-      4
-    ]
-  }
+  "mean": 51,
+  "sd": 14
+ },
+ "life-catering-1_20": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    10,
+    30
+   ]
+  },
+  "mean": 28,
+  "sd": 14
+ },
+ "life-catering-21_50": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    14,
+    34
+   ]
+  },
+  "mean": 32,
+  "sd": 14
+ },
+ "life-catering-51_100": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 36,
+  "sd": 14
+ },
+ "life-catering-101_300": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 42,
+  "sd": 14
+ },
+ "life-catering-300_plus": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 48,
+  "sd": 14
+ },
+ "life-hotel-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    12,
+    32
+   ]
+  },
+  "mean": 30,
+  "sd": 14
+ },
+ "life-hotel-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    16,
+    36
+   ]
+  },
+  "mean": 34,
+  "sd": 14
+ },
+ "life-hotel-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    20,
+    40
+   ]
+  },
+  "mean": 38,
+  "sd": 14
+ },
+ "life-hotel-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 44,
+  "sd": 14
+ },
+ "life-hotel-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 50,
+  "sd": 14
+ },
+ "life-beauty-1_20": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    10,
+    30
+   ]
+  },
+  "mean": 27,
+  "sd": 14
+ },
+ "life-beauty-21_50": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    14,
+    34
+   ]
+  },
+  "mean": 31,
+  "sd": 14
+ },
+ "life-beauty-51_100": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "life-beauty-101_300": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "life-beauty-300_plus": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "life-property-1_20": {
+  "bands": {
+   "strategy": [
+    12,
+    32
+   ],
+   "data": [
+    18,
+    38
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    12,
+    32
+   ],
+   "compliance": [
+    10,
+    30
+   ]
+  },
+  "mean": 25,
+  "sd": 14
+ },
+ "life-property-21_50": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    14,
+    34
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "life-property-51_100": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "life-property-101_300": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "life-property-300_plus": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "life-autocare-1_20": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    14,
+    34
+   ],
+   "compliance": [
+    8,
+    28
+   ]
+  },
+  "mean": 26,
+  "sd": 14
+ },
+ "life-autocare-21_50": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    12,
+    32
+   ]
+  },
+  "mean": 30,
+  "sd": 14
+ },
+ "life-autocare-51_100": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    16,
+    36
+   ]
+  },
+  "mean": 34,
+  "sd": 14
+ },
+ "life-autocare-101_300": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 40,
+  "sd": 14
+ },
+ "life-autocare-300_plus": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 46,
+  "sd": 14
+ },
+ "prof-accounting-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "prof-accounting-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "prof-accounting-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "prof-accounting-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "prof-accounting-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 59,
+  "sd": 14
+ },
+ "prof-legal-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "prof-legal-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "prof-legal-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "prof-legal-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    56,
+    76
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "prof-legal-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    62,
+    82
+   ]
+  },
+  "mean": 59,
+  "sd": 14
+ },
+ "prof-consulting-1_20": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "prof-consulting-21_50": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "prof-consulting-51_100": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "prof-consulting-101_300": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    48,
+    68
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "prof-consulting-300_plus": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    54,
+    74
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 61,
+  "sd": 14
+ },
+ "prof-marketing-1_20": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "prof-marketing-21_50": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "prof-marketing-51_100": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    44,
+    64
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "prof-marketing-101_300": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "prof-marketing-300_plus": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    56,
+    76
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 59,
+  "sd": 14
+ },
+ "prof-design-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "prof-design-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "prof-design-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "prof-design-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    48,
+    68
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 51,
+  "sd": 14
+ },
+ "prof-design-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    54,
+    74
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 57,
+  "sd": 14
+ },
+ "prof-ip-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "prof-ip-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "prof-ip-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "prof-ip-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    56,
+    76
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "prof-ip-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    62,
+    82
+   ]
+  },
+  "mean": 61,
+  "sd": 14
+ },
+ "build-construction-1_20": {
+  "bands": {
+   "strategy": [
+    10,
+    30
+   ],
+   "data": [
+    16,
+    36
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    8,
+    28
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 26,
+  "sd": 14
+ },
+ "build-construction-21_50": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 30,
+  "sd": 14
+ },
+ "build-construction-51_100": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 34,
+  "sd": 14
+ },
+ "build-construction-101_300": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 40,
+  "sd": 14
+ },
+ "build-construction-300_plus": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 46,
+  "sd": 14
+ },
+ "build-design-1_20": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 30,
+  "sd": 14
+ },
+ "build-design-21_50": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 34,
+  "sd": 14
+ },
+ "build-design-51_100": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 38,
+  "sd": 14
+ },
+ "build-design-101_300": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 44,
+  "sd": 14
+ },
+ "build-design-300_plus": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 50,
+  "sd": 14
+ },
+ "build-decoration-1_20": {
+  "bands": {
+   "strategy": [
+    6,
+    26
+   ],
+   "data": [
+    10,
+    30
+   ],
+   "process": [
+    18,
+    38
+   ],
+   "people": [
+    4,
+    24
+   ],
+   "budget": [
+    12,
+    32
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 21,
+  "sd": 14
+ },
+ "build-decoration-21_50": {
+  "bands": {
+   "strategy": [
+    10,
+    30
+   ],
+   "data": [
+    14,
+    34
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    8,
+    28
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 25,
+  "sd": 14
+ },
+ "build-decoration-51_100": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    18,
+    38
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "build-decoration-101_300": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "build-decoration-300_plus": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "build-realestate-1_20": {
+  "bands": {
+   "strategy": [
+    12,
+    32
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    10,
+    30
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "build-realestate-21_50": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "build-realestate-51_100": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "build-realestate-101_300": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "build-realestate-300_plus": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "build-landscape-1_20": {
+  "bands": {
+   "strategy": [
+    6,
+    26
+   ],
+   "data": [
+    12,
+    32
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    4,
+    24
+   ],
+   "budget": [
+    12,
+    32
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 23,
+  "sd": 14
+ },
+ "build-landscape-21_50": {
+  "bands": {
+   "strategy": [
+    10,
+    30
+   ],
+   "data": [
+    16,
+    36
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    8,
+    28
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 27,
+  "sd": 14
+ },
+ "build-landscape-51_100": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 31,
+  "sd": 14
+ },
+ "build-landscape-101_300": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "build-landscape-300_plus": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "med-clinic-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "med-clinic-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "med-clinic-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "med-clinic-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 51,
+  "sd": 14
+ },
+ "med-clinic-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    60,
+    80
+   ]
+  },
+  "mean": 57,
+  "sd": 14
+ },
+ "med-pharma-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "med-pharma-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "med-pharma-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "med-pharma-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    60,
+    80
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "med-pharma-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    58,
+    78
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    66,
+    86
+   ]
+  },
+  "mean": 61,
+  "sd": 14
+ },
+ "med-device-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "med-device-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "med-device-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 51,
+  "sd": 14
+ },
+ "med-device-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    60,
+    80
+   ]
+  },
+  "mean": 57,
+  "sd": 14
+ },
+ "med-device-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    58,
+    78
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    50,
+    70
+   ],
+   "compliance": [
+    66,
+    86
+   ]
+  },
+  "mean": 63,
+  "sd": 14
+ },
+ "med-wellness-1_20": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    10,
+    30
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "med-wellness-21_50": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "med-wellness-51_100": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "med-wellness-101_300": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "med-wellness-300_plus": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "edu-k12-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    18,
+    38
+   ],
+   "process": [
+    16,
+    36
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    10,
+    30
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 28,
+  "sd": 14
+ },
+ "edu-k12-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    20,
+    40
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    14,
+    34
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 32,
+  "sd": 14
+ },
+ "edu-k12-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 36,
+  "sd": 14
+ },
+ "edu-k12-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 42,
+  "sd": 14
+ },
+ "edu-k12-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 48,
+  "sd": 14
+ },
+ "edu-vocational-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    18,
+    38
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 31,
+  "sd": 14
+ },
+ "edu-vocational-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "edu-vocational-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "edu-vocational-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "edu-vocational-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 51,
+  "sd": 14
+ },
+ "edu-tech-1_20": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 42,
+  "sd": 14
+ },
+ "edu-tech-21_50": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 46,
+  "sd": 14
+ },
+ "edu-tech-51_100": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 50,
+  "sd": 14
+ },
+ "edu-tech-101_300": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    56,
+    76
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 56,
+  "sd": 14
+ },
+ "edu-tech-300_plus": {
+  "bands": {
+   "strategy": [
+    54,
+    74
+   ],
+   "data": [
+    58,
+    78
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    62,
+    82
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 62,
+  "sd": 14
+ },
+ "logi-transport-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "logi-transport-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "logi-transport-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "logi-transport-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "logi-transport-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "logi-warehouse-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "logi-warehouse-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "logi-warehouse-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "logi-warehouse-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "logi-warehouse-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    54,
+    74
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "logi-scm-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 39,
+  "sd": 14
+ },
+ "logi-scm-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "logi-scm-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "logi-scm-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "logi-scm-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 59,
+  "sd": 14
+ },
+ "tech-software-1_20": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    48,
+    68
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 50,
+  "sd": 14
+ },
+ "tech-software-21_50": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    52,
+    72
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 54,
+  "sd": 14
+ },
+ "tech-software-51_100": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    56,
+    76
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 58,
+  "sd": 14
+ },
+ "tech-software-101_300": {
+  "bands": {
+   "strategy": [
+    54,
+    74
+   ],
+   "data": [
+    60,
+    80
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    62,
+    82
+   ],
+   "budget": [
+    54,
+    74
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 64,
+  "sd": 14
+ },
+ "tech-software-300_plus": {
+  "bands": {
+   "strategy": [
+    60,
+    80
+   ],
+   "data": [
+    66,
+    86
+   ],
+   "process": [
+    54,
+    74
+   ],
+   "people": [
+    68,
+    88
+   ],
+   "budget": [
+    60,
+    80
+   ],
+   "compliance": [
+    52,
+    72
+   ]
+  },
+  "mean": 70,
+  "sd": 14
+ },
+ "tech-internet-1_20": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    54,
+    74
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 54,
+  "sd": 14
+ },
+ "tech-internet-21_50": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    58,
+    78
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 58,
+  "sd": 14
+ },
+ "tech-internet-51_100": {
+  "bands": {
+   "strategy": [
+    52,
+    72
+   ],
+   "data": [
+    60,
+    80
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    62,
+    82
+   ],
+   "budget": [
+    52,
+    72
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 62,
+  "sd": 14
+ },
+ "tech-internet-101_300": {
+  "bands": {
+   "strategy": [
+    58,
+    78
+   ],
+   "data": [
+    66,
+    86
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    68,
+    88
+   ],
+   "budget": [
+    58,
+    78
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 68,
+  "sd": 14
+ },
+ "tech-internet-300_plus": {
+  "bands": {
+   "strategy": [
+    64,
+    84
+   ],
+   "data": [
+    72,
+    92
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    74,
+    94
+   ],
+   "budget": [
+    64,
+    84
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 74,
+  "sd": 14
+ },
+ "tech-hardware-1_20": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 48,
+  "sd": 14
+ },
+ "tech-hardware-21_50": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 52,
+  "sd": 14
+ },
+ "tech-hardware-51_100": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    40,
+    60
+   ]
+  },
+  "mean": 56,
+  "sd": 14
+ },
+ "tech-hardware-101_300": {
+  "bands": {
+   "strategy": [
+    50,
+    70
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    56,
+    76
+   ],
+   "budget": [
+    52,
+    72
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 62,
+  "sd": 14
+ },
+ "tech-hardware-300_plus": {
+  "bands": {
+   "strategy": [
+    56,
+    76
+   ],
+   "data": [
+    62,
+    82
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    62,
+    82
+   ],
+   "budget": [
+    58,
+    78
+   ],
+   "compliance": [
+    52,
+    72
+   ]
+  },
+  "mean": 68,
+  "sd": 14
+ },
+ "tech-integration-1_20": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    48,
+    68
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "tech-integration-21_50": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    52,
+    72
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "tech-integration-51_100": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    56,
+    76
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 57,
+  "sd": 14
+ },
+ "tech-integration-101_300": {
+  "bands": {
+   "strategy": [
+    52,
+    72
+   ],
+   "data": [
+    58,
+    78
+   ],
+   "process": [
+    48,
+    68
+   ],
+   "people": [
+    62,
+    82
+   ],
+   "budget": [
+    52,
+    72
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 63,
+  "sd": 14
+ },
+ "tech-integration-300_plus": {
+  "bands": {
+   "strategy": [
+    58,
+    78
+   ],
+   "data": [
+    64,
+    84
+   ],
+   "process": [
+    54,
+    74
+   ],
+   "people": [
+    68,
+    88
+   ],
+   "budget": [
+    58,
+    78
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 69,
+  "sd": 14
+ },
+ "agri-farming-1_20": {
+  "bands": {
+   "strategy": [
+    8,
+    28
+   ],
+   "data": [
+    14,
+    34
+   ],
+   "process": [
+    16,
+    36
+   ],
+   "people": [
+    8,
+    28
+   ],
+   "budget": [
+    8,
+    28
+   ],
+   "compliance": [
+    14,
+    34
+   ]
+  },
+  "mean": 21,
+  "sd": 14
+ },
+ "agri-farming-21_50": {
+  "bands": {
+   "strategy": [
+    12,
+    32
+   ],
+   "data": [
+    18,
+    38
+   ],
+   "process": [
+    20,
+    40
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    12,
+    32
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 25,
+  "sd": 14
+ },
+ "agri-farming-51_100": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "agri-farming-101_300": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "agri-farming-300_plus": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "agri-food-1_20": {
+  "bands": {
+   "strategy": [
+    12,
+    32
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    12,
+    32
+   ],
+   "budget": [
+    14,
+    34
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 27,
+  "sd": 14
+ },
+ "agri-food-21_50": {
+  "bands": {
+   "strategy": [
+    16,
+    36
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    28,
+    48
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 31,
+  "sd": 14
+ },
+ "agri-food-51_100": {
+  "bands": {
+   "strategy": [
+    20,
+    40
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 35,
+  "sd": 14
+ },
+ "agri-food-101_300": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "agri-food-300_plus": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "agri-distribute-1_20": {
+  "bands": {
+   "strategy": [
+    10,
+    30
+   ],
+   "data": [
+    18,
+    38
+   ],
+   "process": [
+    18,
+    38
+   ],
+   "people": [
+    10,
+    30
+   ],
+   "budget": [
+    10,
+    30
+   ],
+   "compliance": [
+    14,
+    34
+   ]
+  },
+  "mean": 23,
+  "sd": 14
+ },
+ "agri-distribute-21_50": {
+  "bands": {
+   "strategy": [
+    14,
+    34
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    14,
+    34
+   ],
+   "budget": [
+    14,
+    34
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 27,
+  "sd": 14
+ },
+ "agri-distribute-51_100": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 31,
+  "sd": 14
+ },
+ "agri-distribute-101_300": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    28,
+    48
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "agri-distribute-300_plus": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "energy-newenergy-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 38,
+  "sd": 14
+ },
+ "energy-newenergy-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 42,
+  "sd": 14
+ },
+ "energy-newenergy-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 46,
+  "sd": 14
+ },
+ "energy-newenergy-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    48,
+    68
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    42,
+    62
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 52,
+  "sd": 14
+ },
+ "energy-newenergy-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    54,
+    74
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    48,
+    68
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 58,
+  "sd": 14
+ },
+ "energy-env-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    16,
+    36
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 36,
+  "sd": 14
+ },
+ "energy-env-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    34,
+    54
+   ],
+   "process": [
+    34,
+    54
+   ],
+   "people": [
+    20,
+    40
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    34,
+    54
+   ]
+  },
+  "mean": 40,
+  "sd": 14
+ },
+ "energy-env-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 44,
+  "sd": 14
+ },
+ "energy-env-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 50,
+  "sd": 14
+ },
+ "energy-env-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 56,
+  "sd": 14
+ },
+ "fin-leasing-1_20": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    46,
+    66
+   ]
+  },
+  "mean": 44,
+  "sd": 14
+ },
+ "fin-leasing-21_50": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    50,
+    70
+   ]
+  },
+  "mean": 48,
+  "sd": 14
+ },
+ "fin-leasing-51_100": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    46,
+    66
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    54,
+    74
+   ]
+  },
+  "mean": 52,
+  "sd": 14
+ },
+ "fin-leasing-101_300": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    50,
+    70
+   ],
+   "process": [
+    52,
+    72
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    60,
+    80
+   ]
+  },
+  "mean": 58,
+  "sd": 14
+ },
+ "fin-leasing-300_plus": {
+  "bands": {
+   "strategy": [
+    48,
+    68
+   ],
+   "data": [
+    56,
+    76
+   ],
+   "process": [
+    58,
+    78
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    50,
+    70
+   ],
+   "compliance": [
+    66,
+    86
+   ]
+  },
+  "mean": 64,
+  "sd": 14
+ },
+ "fin-invest-1_20": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "fin-invest-21_50": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    36,
+    56
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    52,
+    72
+   ]
+  },
+  "mean": 51,
+  "sd": 14
+ },
+ "fin-invest-51_100": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    40,
+    60
+   ],
+   "budget": [
+    44,
+    64
+   ],
+   "compliance": [
+    56,
+    76
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "fin-invest-101_300": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    46,
+    66
+   ],
+   "budget": [
+    50,
+    70
+   ],
+   "compliance": [
+    62,
+    82
+   ]
+  },
+  "mean": 61,
+  "sd": 14
+ },
+ "fin-invest-300_plus": {
+  "bands": {
+   "strategy": [
+    52,
+    72
+   ],
+   "data": [
+    58,
+    78
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    52,
+    72
+   ],
+   "budget": [
+    56,
+    76
+   ],
+   "compliance": [
+    68,
+    88
+   ]
+  },
+  "mean": 67,
+  "sd": 14
+ },
+ "fin-insurance-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    24,
+    44
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    44,
+    64
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "fin-insurance-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    40,
+    60
+   ],
+   "people": [
+    28,
+    48
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    48,
+    68
+   ]
+  },
+  "mean": 45,
+  "sd": 14
+ },
+ "fin-insurance-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    40,
+    60
+   ],
+   "process": [
+    44,
+    64
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    52,
+    72
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "fin-insurance-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    46,
+    66
+   ],
+   "process": [
+    50,
+    70
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    58,
+    78
+   ]
+  },
+  "mean": 55,
+  "sd": 14
+ },
+ "fin-insurance-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    52,
+    72
+   ],
+   "process": [
+    56,
+    76
+   ],
+   "people": [
+    44,
+    64
+   ],
+   "budget": [
+    46,
+    66
+   ],
+   "compliance": [
+    64,
+    84
+   ]
+  },
+  "mean": 61,
+  "sd": 14
+ },
+ "media-video-1_20": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    18,
+    38
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    16,
+    36
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "media-video-21_50": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    20,
+    40
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "media-video-51_100": {
+  "bands": {
+   "strategy": [
+    34,
+    54
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    42,
+    62
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    24,
+    44
+   ]
+  },
+  "mean": 41,
+  "sd": 14
+ },
+ "media-video-101_300": {
+  "bands": {
+   "strategy": [
+    40,
+    60
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    32,
+    52
+   ],
+   "people": [
+    48,
+    68
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 47,
+  "sd": 14
+ },
+ "media-video-300_plus": {
+  "bands": {
+   "strategy": [
+    46,
+    66
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    38,
+    58
+   ],
+   "people": [
+    54,
+    74
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 53,
+  "sd": 14
+ },
+ "media-publishing-1_20": {
+  "bands": {
+   "strategy": [
+    24,
+    44
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 34,
+  "sd": 14
+ },
+ "media-publishing-21_50": {
+  "bands": {
+   "strategy": [
+    28,
+    48
+   ],
+   "data": [
+    28,
+    48
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 38,
+  "sd": 14
+ },
+ "media-publishing-51_100": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    32,
+    52
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    28,
+    48
+   ],
+   "compliance": [
+    30,
+    50
+   ]
+  },
+  "mean": 42,
+  "sd": 14
+ },
+ "media-publishing-101_300": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    38,
+    58
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    44,
+    64
+   ],
+   "budget": [
+    34,
+    54
+   ],
+   "compliance": [
+    36,
+    56
+   ]
+  },
+  "mean": 48,
+  "sd": 14
+ },
+ "media-publishing-300_plus": {
+  "bands": {
+   "strategy": [
+    44,
+    64
+   ],
+   "data": [
+    44,
+    64
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    40,
+    60
+   ],
+   "compliance": [
+    42,
+    62
+   ]
+  },
+  "mean": 54,
+  "sd": 14
+ },
+ "media-event-1_20": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    16,
+    36
+   ],
+   "process": [
+    16,
+    36
+   ],
+   "people": [
+    30,
+    50
+   ],
+   "budget": [
+    16,
+    36
+   ],
+   "compliance": [
+    12,
+    32
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "media-event-21_50": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    20,
+    40
+   ],
+   "process": [
+    20,
+    40
+   ],
+   "people": [
+    34,
+    54
+   ],
+   "budget": [
+    20,
+    40
+   ],
+   "compliance": [
+    16,
+    36
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "media-event-51_100": {
+  "bands": {
+   "strategy": [
+    30,
+    50
+   ],
+   "data": [
+    24,
+    44
+   ],
+   "process": [
+    24,
+    44
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    24,
+    44
+   ],
+   "compliance": [
+    20,
+    40
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "media-event-101_300": {
+  "bands": {
+   "strategy": [
+    36,
+    56
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    44,
+    64
+   ],
+   "budget": [
+    30,
+    50
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "media-event-300_plus": {
+  "bands": {
+   "strategy": [
+    42,
+    62
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    50,
+    70
+   ],
+   "budget": [
+    36,
+    56
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ },
+ "other-general-1_20": {
+  "bands": {
+   "strategy": [
+    18,
+    38
+   ],
+   "data": [
+    22,
+    42
+   ],
+   "process": [
+    22,
+    42
+   ],
+   "people": [
+    18,
+    38
+   ],
+   "budget": [
+    18,
+    38
+   ],
+   "compliance": [
+    18,
+    38
+   ]
+  },
+  "mean": 29,
+  "sd": 14
+ },
+ "other-general-21_50": {
+  "bands": {
+   "strategy": [
+    22,
+    42
+   ],
+   "data": [
+    26,
+    46
+   ],
+   "process": [
+    26,
+    46
+   ],
+   "people": [
+    22,
+    42
+   ],
+   "budget": [
+    22,
+    42
+   ],
+   "compliance": [
+    22,
+    42
+   ]
+  },
+  "mean": 33,
+  "sd": 14
+ },
+ "other-general-51_100": {
+  "bands": {
+   "strategy": [
+    26,
+    46
+   ],
+   "data": [
+    30,
+    50
+   ],
+   "process": [
+    30,
+    50
+   ],
+   "people": [
+    26,
+    46
+   ],
+   "budget": [
+    26,
+    46
+   ],
+   "compliance": [
+    26,
+    46
+   ]
+  },
+  "mean": 37,
+  "sd": 14
+ },
+ "other-general-101_300": {
+  "bands": {
+   "strategy": [
+    32,
+    52
+   ],
+   "data": [
+    36,
+    56
+   ],
+   "process": [
+    36,
+    56
+   ],
+   "people": [
+    32,
+    52
+   ],
+   "budget": [
+    32,
+    52
+   ],
+   "compliance": [
+    32,
+    52
+   ]
+  },
+  "mean": 43,
+  "sd": 14
+ },
+ "other-general-300_plus": {
+  "bands": {
+   "strategy": [
+    38,
+    58
+   ],
+   "data": [
+    42,
+    62
+   ],
+   "process": [
+    42,
+    62
+   ],
+   "people": [
+    38,
+    58
+   ],
+   "budget": [
+    38,
+    58
+   ],
+   "compliance": [
+    38,
+    58
+   ]
+  },
+  "mean": 49,
+  "sd": 14
+ }
 }
