@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dgg/shared/company-profile",
+  "title": "企业画像",
+  "description": "11 个模块共用的第一个输入。体验版三连之间、以及角色模块读取体验版结果时，传递的就是这个对象。",
+  "type": "object",
+  "properties": {
+    "name":     { "type": "string", "description": "企业名称，选填；为空时界面与输出一律用「本企业」" },
+    "industry": { "type": "string", "description": "内部 12 行业 slug，见 industry-map.json",
+                  "enum": ["mfg-discrete","mfg-process","trade","ecom","frs","prof","build","med","edu","logi","tech","agri"] },
+    "size":     { "type": "string", "enum": ["1_20","21_50","51_100","101_300","300_plus"] },
+    "province": { "type": "string", "description": "省级行政区名称" },
+    "years":    { "type": "string", "enum": ["lt1","1_3","3_5","5_10","10_plus"] },
+    "systems":  { "type": "array", "items": { "type": "string", "enum": ["ERP","财务软件","CRM","MES","无"] },
+                  "description": "现有系统，场景排序与 ROI 使用；成熟度评估不需要" }
+  },
+  "required": ["industry", "size", "province", "years"],
+  "additionalProperties": false
+}

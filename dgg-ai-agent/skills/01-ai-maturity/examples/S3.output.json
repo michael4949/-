@@ -1,0 +1,196 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI成熟度评估",
+    "credits": 20,
+    "version": "1.0.0"
+  },
+  "company": {
+    "name": "成都巷子里餐饮管理有限公司",
+    "industry": "frs",
+    "industryName": "餐饮与零售连锁",
+    "size": "51_100",
+    "sizeName": "51–100 人",
+    "province": "四川",
+    "years": "3_5",
+    "yearsName": "3–5 年"
+  },
+  "answers": [
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    2,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "dimensions": [
+    {
+      "key": "strategy",
+      "name": "战略",
+      "score": 1,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "within"
+    },
+    {
+      "key": "data",
+      "name": "数据",
+      "score": 1,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "below"
+    },
+    {
+      "key": "process",
+      "name": "流程",
+      "score": 2,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "within"
+    },
+    {
+      "key": "people",
+      "name": "人员",
+      "score": 2,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "within"
+    },
+    {
+      "key": "budget",
+      "name": "预算",
+      "score": 2,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "within"
+    },
+    {
+      "key": "compliance",
+      "name": "合规",
+      "score": 0,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "below"
+    }
+  ],
+  "total": 8,
+  "max": 36,
+  "level": {
+    "code": "L0",
+    "name": "起步",
+    "range": [
+      0,
+      8
+    ],
+    "verdict": "尚无系统化数据基础，先做数据与流程整理"
+  },
+  "nextLevel": {
+    "code": "L1",
+    "name": "尝试",
+    "range": [
+      9,
+      15
+    ],
+    "gap": 1
+  },
+  "positions": {
+    "above": 0,
+    "within": 4,
+    "below": 2,
+    "unknown": 0
+  },
+  "benchmark": {
+    "key": "frs-51_100",
+    "basis": "exact"
+  },
+  "actions": [
+    {
+      "order": 1,
+      "dimension": "compliance",
+      "dimensionName": "合规",
+      "score": 0,
+      "band": [
+        1,
+        3
+      ],
+      "title": "先写一页数据权限规则",
+      "text": "列出客户数据与财税数据的存放位置、可访问人员与保存期限，形成一页纸制度。",
+      "service": "法务合规服务",
+      "module": "AI法务",
+      "source": "template"
+    },
+    {
+      "order": 2,
+      "dimension": "data",
+      "dimensionName": "数据",
+      "score": 1,
+      "band": [
+        2,
+        4
+      ],
+      "title": "先把订单与客户数据集中到一张表",
+      "text": "把分散在纸面与个人电脑的订单、客户、财务数据统一进一套共享表格，指定专人维护。",
+      "service": "行业软件定制",
+      "module": "AI ERP",
+      "source": "template"
+    },
+    {
+      "order": 3,
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "score": 1,
+      "band": [
+        1,
+        3
+      ],
+      "title": "把 AI 立项写进下季度计划",
+      "text": "选一个部门、一个指标，用一页纸写清 AI 要改善什么、怎么衡量，列入下季度经营会议议程。",
+      "service": "专家入企 AI 诊断",
+      "module": "企业AI高价值场景排序",
+      "source": "template"
+    }
+  ],
+  "summary": "成都巷子里餐饮管理有限公司处于 L0 起步 级，尚无系统化数据基础，先做数据与流程整理。六维中 0 维高于同行参考带，4 维在参考带内，2 维低于参考带。距 L1 尝试 级还差 1 分。",
+  "render": [
+    {
+      "type": "radar",
+      "title": "六维成熟度",
+      "source": "dimensions",
+      "band": true,
+      "bandLabel": "同行参考带"
+    },
+    {
+      "type": "level-badge",
+      "source": "level"
+    },
+    {
+      "type": "action-list",
+      "title": "升到 L1 尝试 的三件事",
+      "source": "actions"
+    }
+  ]
+}

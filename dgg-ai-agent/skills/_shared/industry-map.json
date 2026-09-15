@@ -1,0 +1,25 @@
+{
+  "_note": "顶栏与对外文案用 DM 的 6 个行业；数据（场景库、参考带、财务均值带）按 12 个内部行业分组。display→default 是顶栏切换时的默认落点；internal.display 为空表示该内部行业仅通过样例企业或体验版输入进入。",
+  "display": [
+    { "key": "finance",       "name": "财税", "default": "prof",         "members": ["prof"] },
+    { "key": "manufacturing", "name": "制造", "default": "mfg-discrete", "members": ["mfg-discrete", "mfg-process"] },
+    { "key": "medical",       "name": "医疗", "default": "med",          "members": ["med"] },
+    { "key": "ecommerce",     "name": "电商", "default": "ecom",         "members": ["ecom"] },
+    { "key": "education",     "name": "教育", "default": "edu",          "members": ["edu"] },
+    { "key": "logistics",     "name": "物流", "default": "logi",         "members": ["logi"] }
+  ],
+  "internal": [
+    { "slug": "mfg-discrete", "name": "制造（离散）",               "display": "manufacturing" },
+    { "slug": "mfg-process",  "name": "制造（流程）",               "display": "manufacturing" },
+    { "slug": "trade",        "name": "贸易与批发",                 "display": null },
+    { "slug": "ecom",         "name": "电商与跨境",                 "display": "ecommerce" },
+    { "slug": "frs",          "name": "餐饮与零售连锁",             "display": null },
+    { "slug": "prof",         "name": "专业服务（代账/法务/咨询）", "display": "finance" },
+    { "slug": "build",        "name": "建筑与工程",                 "display": null },
+    { "slug": "med",          "name": "医疗与大健康",               "display": "medical" },
+    { "slug": "edu",          "name": "教育与培训",                 "display": "education" },
+    { "slug": "logi",         "name": "物流与仓储",                 "display": "logistics" },
+    { "slug": "tech",         "name": "科技与软件",                 "display": null },
+    { "slug": "agri",         "name": "农业与食品",                 "display": null }
+  ]
+}

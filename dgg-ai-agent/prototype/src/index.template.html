@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>薯片AI智能体</title>
+<style>
+/*__TOKENS_CSS__*/
+/*__SHELL_CSS__*/
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="home-link" id="home-link" aria-label="首页">
+      <img id="logo" class="logo" alt="顶呱呱">
+      <span class="divider"></span>
+      <span class="product">薯片AI智能体</span>
+    </button>
+    <span class="booth">展位号 <b>6A-B034-B035</b></span>
+    <label class="industry">行业 <select id="industry"></select></label>
+  </header>
+  <main class="main" id="main"></main>
+  <aside class="rail" id="rail"></aside>
+  <footer class="pricebar" id="pricebar"></footer>
+</div>
+<div class="idle hidden" id="idle"></div>
+
+<script type="application/json" id="dgg-data">/*__DATA_JSON__*/</script>
+<script>
+/*__QRCODE_JS__*/
+</script>
+<script>
+/*__LINT_JS__*/
+/*__CORE_M1_JS__*/
+</script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  window.DGG_DATA = JSON.parse(document.getElementById('dgg-data').textContent);
+  window.DGG_CONFIG = {
+    station: q.get('station') || '3',
+    logo: '/*__LOGO_DATA_URI__*/',
+    wechatUrl: q.get('wx') || 'https://platform.dgg.cn',
+    llm: { endpoint: q.get('llm') || '', model: q.get('model') || '', timeoutMs: 8000 },
+    idle: { defaultMs: 30000, quizMs: 60000, resultMs: 120000 },
+    credits: { start: 10000 }
+  };
+})();
+/*__SHELL_JS__*/
+/*__MODULE_01_JS__*/
+</script>
+</body>
+</html>

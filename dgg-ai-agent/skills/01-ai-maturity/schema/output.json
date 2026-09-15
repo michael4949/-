@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dgg/01-ai-maturity/output",
+  "title": "企业AI成熟度评估 · 输出",
+  "type": "object",
+  "properties": {
+    "ok": { "const": true },
+    "meta": { "type": "object", "properties": { "module": { "const": "企业AI成熟度评估" }, "credits": { "const": 20 }, "version": { "type": "string" } }, "required": ["module", "credits"] },
+    "company": { "type": "object", "properties": {
+      "name": { "type": "string" }, "industry": { "type": "string" }, "industryName": { "type": "string" },
+      "size": { "type": "string" }, "sizeName": { "type": "string" }, "province": { "type": "string" },
+      "years": { "type": "string" }, "yearsName": { "type": "string" } }, "required": ["name", "industry", "industryName", "size", "sizeName"] },
+    "answers": { "type": "array", "items": { "type": "integer" } },
+    "dimensions": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "object", "properties": {
+      "key": { "type": "string" }, "name": { "type": "string" },
+      "score": { "type": "integer", "minimum": 0, "maximum": 6 }, "max": { "const": 6 },
+      "band": { "oneOf": [ { "type": "null" }, { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 } ] },
+      "position": { "enum": ["above", "within", "below", "unknown"] } }, "required": ["key", "name", "score", "max", "band", "position"] } },
+    "total": { "type": "integer", "minimum": 0, "maximum": 36 },
+    "max": { "const": 36 },
+    "level": { "type": "object", "properties": { "code": { "enum": ["L0", "L1", "L2", "L3", "L4"] }, "name": { "type": "string" }, "range": { "type": "array" }, "verdict": { "type": "string" } }, "required": ["code", "name", "verdict"] },
+    "nextLevel": { "oneOf": [ { "type": "null" }, { "type": "object", "properties": { "code": { "type": "string" }, "name": { "type": "string" }, "gap": { "type": "integer" } }, "required": ["code", "name", "gap"] } ] },
+    "positions": { "type": "object", "properties": { "above": { "type": "integer" }, "within": { "type": "integer" }, "below": { "type": "integer" }, "unknown": { "type": "integer" } } },
+    "benchmark": { "type": "object", "properties": { "key": { "type": "string" }, "basis": { "enum": ["exact", "nearest-size", "none"] } } },
+    "actions": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "object", "properties": {
+      "order": { "type": "integer" }, "dimension": { "type": "string" }, "dimensionName": { "type": "string" },
+      "score": { "type": "integer" }, "band": {},
+      "title": { "type": "string", "maxLength": 14 }, "text": { "type": "string", "maxLength": 60 },
+      "service": { "type": "string" }, "module": { "type": "string" },
+      "source": { "enum": ["template", "llm"] } }, "required": ["order", "dimension", "dimensionName", "title", "text", "service", "module", "source"] } },
+    "summary": { "type": "string" },
+    "render": { "type": "array", "items": { "type": "object", "properties": { "type": { "enum": ["radar", "level-badge", "action-list"] }, "source": { "type": "string" } }, "required": ["type", "source"] } }
+  },
+  "required": ["ok", "meta", "company", "dimensions", "total", "max", "level", "nextLevel", "positions", "benchmark", "actions", "summary", "render"]
+}

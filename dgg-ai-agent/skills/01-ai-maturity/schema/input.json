@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dgg/01-ai-maturity/input",
+  "title": "企业AI成熟度评估 · 输入",
+  "type": "object",
+  "properties": {
+    "company": { "$ref": "../../_shared/company-profile.schema.json" },
+    "answers": {
+      "type": "array", "minItems": 12, "maxItems": 12,
+      "items": { "type": "integer", "minimum": 0, "maximum": 3 },
+      "description": "按 data/questions.json 顺序，每题选项下标 0–3（即得分）"
+    }
+  },
+  "required": ["company", "answers"],
+  "additionalProperties": false
+}

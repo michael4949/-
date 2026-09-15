@@ -1,0 +1,196 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI成熟度评估",
+    "credits": 20,
+    "version": "1.0.0"
+  },
+  "company": {
+    "name": "深圳梵图家居科技有限公司",
+    "industry": "ecom",
+    "industryName": "电商与跨境",
+    "size": "21_50",
+    "sizeName": "21–50 人",
+    "province": "广东",
+    "years": "3_5",
+    "yearsName": "3–5 年"
+  },
+  "answers": [
+    2,
+    2,
+    3,
+    3,
+    2,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "dimensions": [
+    {
+      "key": "strategy",
+      "name": "战略",
+      "score": 4,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "within"
+    },
+    {
+      "key": "data",
+      "name": "数据",
+      "score": 6,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "above"
+    },
+    {
+      "key": "process",
+      "name": "流程",
+      "score": 4,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "above"
+    },
+    {
+      "key": "people",
+      "name": "人员",
+      "score": 5,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "above"
+    },
+    {
+      "key": "budget",
+      "name": "预算",
+      "score": 4,
+      "max": 6,
+      "band": [
+        2,
+        4
+      ],
+      "position": "within"
+    },
+    {
+      "key": "compliance",
+      "name": "合规",
+      "score": 4,
+      "max": 6,
+      "band": [
+        1,
+        3
+      ],
+      "position": "above"
+    }
+  ],
+  "total": 27,
+  "max": 36,
+  "level": {
+    "code": "L3",
+    "name": "流程",
+    "range": [
+      24,
+      30
+    ],
+    "verdict": "AI 已嵌入跨部门流程，有数据回流"
+  },
+  "nextLevel": {
+    "code": "L4",
+    "name": "经营",
+    "range": [
+      31,
+      36
+    ],
+    "gap": 4
+  },
+  "positions": {
+    "above": 4,
+    "within": 2,
+    "below": 0,
+    "unknown": 0
+  },
+  "benchmark": {
+    "key": "ecom-21_50",
+    "basis": "exact"
+  },
+  "actions": [
+    {
+      "order": 1,
+      "dimension": "strategy",
+      "dimensionName": "战略",
+      "score": 4,
+      "band": [
+        2,
+        4
+      ],
+      "title": "把 AI 指标分解到部门",
+      "text": "把公司级 AI 指标拆到各部门负责人，纳入季度考核，明确数据回流责任。",
+      "service": "AI 落地陪跑",
+      "module": "AI决策",
+      "source": "template"
+    },
+    {
+      "order": 2,
+      "dimension": "budget",
+      "dimensionName": "预算",
+      "score": 4,
+      "band": [
+        2,
+        4
+      ],
+      "title": "按场景收益分配投入",
+      "text": "以各场景实测回收期为依据分配下一期预算，回收期短的场景优先扩展。",
+      "service": "AI 落地陪跑",
+      "module": "AI决策",
+      "source": "template"
+    },
+    {
+      "order": 3,
+      "dimension": "process",
+      "dimensionName": "流程",
+      "score": 4,
+      "band": [
+        1,
+        3
+      ],
+      "title": "用智能体承接跨部门流程节点",
+      "text": "选一条跨部门流程，把重复性节点交给智能体自动执行，人工只处理异常与审批。",
+      "service": "垂直场景智能体开发",
+      "module": "AI ERP",
+      "source": "template"
+    }
+  ],
+  "summary": "深圳梵图家居科技有限公司处于 L3 流程 级，AI 已嵌入跨部门流程，有数据回流。六维中 4 维高于同行参考带，2 维在参考带内，0 维低于参考带。距 L4 经营 级还差 4 分。",
+  "render": [
+    {
+      "type": "radar",
+      "title": "六维成熟度",
+      "source": "dimensions",
+      "band": true,
+      "bandLabel": "同行参考带"
+    },
+    {
+      "type": "level-badge",
+      "source": "level"
+    },
+    {
+      "type": "action-list",
+      "title": "升到 L4 经营 的三件事",
+      "source": "actions"
+    }
+  ]
+}
