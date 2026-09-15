@@ -5,7 +5,7 @@ const here = path.join(__dirname, '..');
 const shared = path.join(here, '..', '_shared');
 const J = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 module.exports = function loadData() {
-  const pf = J(path.join(here, 'data', 'profile-fields.json'));
+  const pf = J(path.join(shared, 'profile-fields.json'));
   return {
     fields: pf.fields,
     provinces: pf.provinces,

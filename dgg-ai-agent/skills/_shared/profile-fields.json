@@ -1,5 +1,5 @@
 {
-  "_note": "通用输入（企业画像）字段定义。原型的输入页与 skill 的追问顺序共用此表。required 字段缺失时不计算。",
+  "_note": "企业画像字段定义（11 个模块共用的第一个输入）。原型的输入页、skill 的追问顺序、company-profile.schema.json 的生成，三者共用此表。required 字段缺失时不计算。",
   "fields": [
     { "key": "name",      "label": "企业名称",       "type": "text",     "required": false, "placeholder": "选填，为空时报告以「本企业」称呼" },
     { "key": "industry",  "label": "所属行业",       "type": "industry", "required": true,  "hint": "先选大类，再选细分" },

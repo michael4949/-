@@ -94,6 +94,7 @@
       else if (!v) errs.push('profile.' + f.key + ' 缺失');
     });
     if (p.industry && !findIndustry(data.industries, p.industry)) errs.push('profile.industry 无效');
+    if (Array.isArray(p.systems) && p.systems.indexOf('none') >= 0 && p.systems.length > 1) errs.push('profile.systems 选「无」时不能再选其他系统');
     var n = data.questions.length, a = input.answers;
     if (!Array.isArray(a) || a.length !== n) errs.push('answers 需为 ' + n + ' 项');
     else a.forEach(function (v, i) { if (!(v === 0 || v === 1 || v === 2 || v === 3)) errs.push('answers[' + i + '] 需为 0–3'); });

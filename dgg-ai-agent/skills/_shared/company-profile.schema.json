@@ -1,19 +1,317 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "dgg/shared/company-profile",
+  "$comment": "由 skills/01-ai-maturity/scripts/gen-profile-schema.js 生成，请勿手改；改 _shared/profile-fields.json 或 _shared/industries.json 后重新生成",
   "title": "企业画像",
-  "description": "11 个模块共用的第一个输入。体验版三连之间、以及角色模块读取体验版结果时，传递的就是这个对象。",
+  "description": "11 个模块共用的第一个输入（13 项，其中 9 项必填）。体验版三连之间、以及角色模块读取体验版结果时，传递的就是这个对象；字段顺序即追问顺序。",
   "type": "object",
   "properties": {
-    "name":     { "type": "string", "description": "企业名称，选填；为空时界面与输出一律用「本企业」" },
-    "industry": { "type": "string", "description": "内部 12 行业 slug，见 industry-map.json",
-                  "enum": ["mfg-discrete","mfg-process","trade","ecom","frs","prof","build","med","edu","logi","tech","agri"] },
-    "size":     { "type": "string", "enum": ["1_20","21_50","51_100","101_300","300_plus"] },
-    "province": { "type": "string", "description": "省级行政区名称" },
-    "years":    { "type": "string", "enum": ["lt1","1_3","3_5","5_10","10_plus"] },
-    "systems":  { "type": "array", "items": { "type": "string", "enum": ["ERP","财务软件","CRM","MES","无"] },
-                  "description": "现有系统，场景排序与 ROI 使用；成熟度评估不需要" }
+    "name": {
+      "description": "企业名称，选填；为空时报告与回复一律用「本企业」",
+      "type": "string",
+      "maxLength": 60
+    },
+    "industry": {
+      "description": "内部细分行业 slug（14 大类 / 54 细分：制造业(8) / 商贸流通(4) / 生活服务(5) / 专业服务(6) / 建筑与地产(5) / 医疗健康(4) / 教育培训(3) / 物流与供应链(3) / 科技与互联网(4) / 农业与食品(3) / 能源与环保(2) / 金融与投资服务(3) / 文化传媒(3) / 其他行业(1)），见 industries.json；顶栏 6 行业按 display[].default 落到默认细分",
+      "type": "string",
+      "enum": [
+        "mfg-machinery",
+        "mfg-electronics",
+        "mfg-auto",
+        "mfg-process",
+        "mfg-textile",
+        "mfg-furniture",
+        "mfg-equipment",
+        "mfg-packaging",
+        "trade-wholesale",
+        "trade-retail",
+        "trade-ecom",
+        "trade-import",
+        "life-catering",
+        "life-hotel",
+        "life-beauty",
+        "life-property",
+        "life-autocare",
+        "prof-accounting",
+        "prof-legal",
+        "prof-consulting",
+        "prof-marketing",
+        "prof-design",
+        "prof-ip",
+        "build-construction",
+        "build-design",
+        "build-decoration",
+        "build-realestate",
+        "build-landscape",
+        "med-clinic",
+        "med-pharma",
+        "med-device",
+        "med-wellness",
+        "edu-k12",
+        "edu-vocational",
+        "edu-tech",
+        "logi-transport",
+        "logi-warehouse",
+        "logi-scm",
+        "tech-software",
+        "tech-internet",
+        "tech-hardware",
+        "tech-integration",
+        "agri-farming",
+        "agri-food",
+        "agri-distribute",
+        "energy-newenergy",
+        "energy-env",
+        "fin-leasing",
+        "fin-invest",
+        "fin-insurance",
+        "media-video",
+        "media-publishing",
+        "media-event",
+        "other-general"
+      ]
+    },
+    "size": {
+      "description": "人员规模",
+      "type": "string",
+      "enum": [
+        "1_20",
+        "21_50",
+        "51_100",
+        "101_300",
+        "300_plus"
+      ],
+      "x-labels": {
+        "1_20": "1–20 人",
+        "21_50": "21–50 人",
+        "51_100": "51–100 人",
+        "101_300": "101–300 人",
+        "300_plus": "300 人以上"
+      }
+    },
+    "revenue": {
+      "description": "上年营收",
+      "type": "string",
+      "enum": [
+        "lt5m",
+        "5m_20m",
+        "20m_100m",
+        "100m_500m",
+        "gt500m"
+      ],
+      "x-labels": {
+        "lt5m": "500 万以下",
+        "5m_20m": "500–2000 万",
+        "20m_100m": "2000 万–1 亿",
+        "100m_500m": "1–5 亿",
+        "gt500m": "5 亿以上"
+      }
+    },
+    "province": {
+      "description": "所在地（省级行政区简称，如「浙江」「广东」；带「省」「市」后缀的先去掉）",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "北京",
+        "天津",
+        "河北",
+        "山西",
+        "内蒙古",
+        "辽宁",
+        "吉林",
+        "黑龙江",
+        "上海",
+        "江苏",
+        "浙江",
+        "安徽",
+        "福建",
+        "江西",
+        "山东",
+        "河南",
+        "湖北",
+        "湖南",
+        "广东",
+        "广西",
+        "海南",
+        "重庆",
+        "四川",
+        "贵州",
+        "云南",
+        "西藏",
+        "陕西",
+        "甘肃",
+        "青海",
+        "宁夏",
+        "新疆",
+        "香港",
+        "澳门",
+        "台湾"
+      ]
+    },
+    "years": {
+      "description": "成立年限",
+      "type": "string",
+      "enum": [
+        "lt1",
+        "1_3",
+        "3_5",
+        "5_10",
+        "10_plus"
+      ],
+      "x-labels": {
+        "lt1": "1 年内",
+        "1_3": "1–3 年",
+        "3_5": "3–5 年",
+        "5_10": "5–10 年",
+        "10_plus": "10 年以上"
+      }
+    },
+    "ownership": {
+      "description": "企业性质",
+      "type": "string",
+      "enum": [
+        "private",
+        "soe",
+        "foreign",
+        "individual"
+      ],
+      "x-labels": {
+        "private": "民营企业",
+        "soe": "国有 / 集体企业",
+        "foreign": "外资 / 合资企业",
+        "individual": "个体工商户"
+      }
+    },
+    "customers": {
+      "description": "主要客户类型",
+      "type": "string",
+      "enum": [
+        "b2b",
+        "b2c",
+        "b2g",
+        "mixed"
+      ],
+      "x-labels": {
+        "b2b": "企业客户",
+        "b2c": "个人消费者",
+        "b2g": "政府与事业单位",
+        "mixed": "混合"
+      }
+    },
+    "systems": {
+      "description": "现有业务系统，可多选；「none」（无）只能单独出现",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "erp",
+          "finance",
+          "crm",
+          "oa",
+          "mes",
+          "shop",
+          "hr",
+          "none"
+        ]
+      },
+      "x-labels": {
+        "erp": "ERP",
+        "finance": "财务软件",
+        "crm": "CRM",
+        "oa": "OA / 协同办公",
+        "mes": "MES / 生产系统",
+        "shop": "电商 / 门店系统",
+        "hr": "人事系统",
+        "none": "无"
+      },
+      "not": {
+        "allOf": [
+          {
+            "contains": {
+              "enum": [
+                "none"
+              ]
+            }
+          },
+          {
+            "minItems": 2
+          }
+        ]
+      }
+    },
+    "itStaff": {
+      "description": "数字化专职人员",
+      "type": "string",
+      "enum": [
+        "none",
+        "1_2",
+        "3_10",
+        "10_plus"
+      ],
+      "x-labels": {
+        "none": "无专职",
+        "1_2": "1–2 人",
+        "3_10": "3–10 人",
+        "10_plus": "10 人以上"
+      }
+    },
+    "branches": {
+      "description": "分支机构 / 门店，选填",
+      "type": "string",
+      "enum": [
+        "single",
+        "2_5",
+        "6_20",
+        "20_plus"
+      ],
+      "x-labels": {
+        "single": "单一经营地",
+        "2_5": "2–5 个",
+        "6_20": "6–20 个",
+        "20_plus": "20 个以上"
+      }
+    },
+    "overseas": {
+      "description": "海外业务，选填",
+      "type": "string",
+      "enum": [
+        "no",
+        "yes"
+      ],
+      "x-labels": {
+        "no": "无",
+        "yes": "有"
+      }
+    },
+    "role": {
+      "description": "填表人，选填",
+      "type": "string",
+      "enum": [
+        "owner",
+        "dept",
+        "it",
+        "other"
+      ],
+      "x-labels": {
+        "owner": "企业负责人",
+        "dept": "部门负责人",
+        "it": "IT / 数字化负责人",
+        "other": "其他"
+      }
+    }
   },
-  "required": ["industry", "size", "province", "years"],
+  "required": [
+    "industry",
+    "size",
+    "revenue",
+    "province",
+    "years",
+    "ownership",
+    "customers",
+    "systems",
+    "itStaff"
+  ],
   "additionalProperties": false
 }

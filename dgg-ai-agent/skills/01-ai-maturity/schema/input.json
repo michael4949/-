@@ -2,15 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "dgg/01-ai-maturity/input",
   "title": "企业AI成熟度评估 · 输入",
+  "description": "profile 为共用企业画像（13 项，9 项必填）；answers 为 36 题作答，按 data/questions.json 顺序（q01–q36），每题记选项下标 0–3，下标即得分。",
   "type": "object",
   "properties": {
-    "company": { "$ref": "../../_shared/company-profile.schema.json" },
+    "profile": { "$ref": "../../_shared/company-profile.schema.json" },
     "answers": {
-      "type": "array", "minItems": 12, "maxItems": 12,
+      "type": "array", "minItems": 36, "maxItems": 36,
       "items": { "type": "integer", "minimum": 0, "maximum": 3 },
-      "description": "按 data/questions.json 顺序，每题选项下标 0–3（即得分）"
+      "description": "六个维度各 6 题（每维 3 个子维度 × 2 题）：q01–q06 战略，q07–q12 数据，q13–q18 流程，q19–q24 人员，q25–q30 预算，q31–q36 合规"
     }
   },
-  "required": ["company", "answers"],
+  "required": ["profile", "answers"],
   "additionalProperties": false
 }
