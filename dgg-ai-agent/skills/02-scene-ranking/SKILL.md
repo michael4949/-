@@ -80,12 +80,12 @@ brief_pages: 6
 总分 = 痛点强度 × 0.35 + 数据可得 × 0.30 + 见效周期 × 0.20 + (6 − 实施门槛) × 0.15
 ```
 
-四维各 1–5 分，加权后除以 5 再乘 100 换算为百分制。
+四维各 1–5 分。数据可得与实施门槛在按 `dataState` / `capacity` 调整后会落到 0.5 档（内核用 `clamp(round1(...), 1, 5)` 保留一位小数），所以单轴分数可能是 4.5 这样的值。加权后除以 5 再乘 100 换算为百分制。
 
 | 维度 | 怎么算 |
 |---|---|
 | 痛点强度 | 场景的 `painTags` 与用户勾选痛点求交集，命中项的严重度求和除以 `painTags.length × 5` 得比值，映射到 1–5 分：0 → 1；≤0.25 → 2；≤0.5 → 3；≤0.8 → 4；>0.8 → 5 |
-| 数据可得 | 场景 `dataDeps` 为空 → 5 分；与 `profile.systems` 交集为空 → **直接 1 分**；全部具备 → 5 分；具备过半 → 4 分；否则 3 分。再按 `dataState` 调整，1 分的不再下调 |
+| 数据可得 | 场景 `dataDeps` 为空 → **5 分且不再调整**（无需接入系统，`dataState` 对它不起作用）；与 `profile.systems` 交集为空 → **直接 1 分且不再调整**；其余按覆盖比例定基分：全部具备 → 5 分，具备比例 ≥ 半数 → 4 分（正好半数也算），否则 3 分；只有这三档基分会再按 `dataState` 调整（−1 / −0.5 / 0 / −0.5） |
 | 见效周期 | 取场景库预设 `cycle`，再按 `window` 调整 |
 | 实施门槛 | 取场景库预设 `barrier`，再按 `capacity` 调整；计分时取（6 − 门槛） |
 
@@ -102,7 +102,7 @@ brief_pages: 6
 | 角色分工 | 牵头人、业务对接人（取首选场景的使用岗位）、数据对接人（按 `itStaff` 生成） |
 | 何时重跑 | 5 条触发条件，结合本次缺失数据源与首批场景生成补充说明 |
 | 90 天清单 | 首选场景的第一步、数据整理、前置条件、配置试运行、验收，再加第二批准备与数据补齐评估 |
-| 风险提示 | 由 `dataState`、`systems`、`capacity`、缺失数据源、周期与期望窗口的差距触发，按 高 > 中 > 提示 排序 |
+| 风险提示 | 由 `dataState`、`systems`、`capacity`、缺失数据源、周期与期望窗口的差距触发，**按规则书写顺序输出，不做级别排序**；壳层若要按 高 > 中 > 提示 呈现，自己排 |
 
 输入不合法时返回 `{ ok: false, errors: [...] }`，不扣积分，把 `errors` 翻译成一句追问。
 
@@ -130,7 +130,7 @@ brief_pages: 6
 
 ### 排序台（`delivers: board`，有交互能力的壳）
 
-现场可调的四维权重滑块 + 四个预设按钮，调整后立即重算重排。排序表、气泡矩阵、场景详情三者联动。这是本模块在展台上的主形态，演示脚本：勾痛点 40 秒 → 读 Top1 的「为什么排这里」30 秒 → 展开 Top1 指出第一步与所需数据 40 秒 → 说明对应模块 10 秒。
+现场可调的四维权重滑块 + 四个预设按钮，调整后立即重算重排。排序表与场景详情联动（点行即切换右栏详情）；气泡矩阵只随权重与「看全部 / 只看前 8 个」整体重画，本身不可点选。这是本模块在展台上的主形态，演示脚本：勾痛点 40 秒 → 读 Top1 的「为什么排这里」30 秒 → 展开 Top1 指出第一步与所需数据 40 秒 → 说明对应模块 10 秒。
 
 ### 结构化呈现（按 `render` 顺序）
 
@@ -153,13 +153,13 @@ brief_pages: 6
 
 完整版 28 页，A4 逐页不溢出；速览版 6 页（带 `brief` 标记的页：1 / 3 / 4 / 10 / 13 / 20）。
 
-**版式身份**——与「企业AI成熟度评估」明确区分：章节标题为整条 3D 彩色凸浮条配圆角方序号徽章，条面带一道横贯整条的斜向光泽；小节标题为粗体黑字加灰色拉丁副题；内容卡为顶部凸浮帽条（模块 1 走左侧色轨）；页脚为贯穿全宽的五色渐变条（模块 1 为六色）；封面为「企服 → AI → 排序结果」主视觉；封底为深墨蓝满版。样式 `prototype/src/report-m2.css`、图表 `prototype/src/charts-m2.js`，与模块 1 的 `report-m1.css` / `charts-m1.js` 互不复用。
+**版式身份**——与「企业AI成熟度评估」明确区分：章节标题为整条 3D 彩色凸浮条配圆角方序号徽章，条面带一道横贯整条的斜向光泽；小节标题为粗体黑字加灰色拉丁副题；内容卡为顶部凸浮帽条（模块 1 走左侧色轨）；页脚为贯穿全宽的五色渐变条（模块 1 为六色）；封面为「企服 → AI → 排序结果」主视觉；封底为深墨蓝满版。样式 `prototype/src/report-m2.css`、图表 `prototype/src/charts-m2.js`：这两个文件与模块 1 的 `report-m1.css` / `charts-m1.js` 作用域分别是 `.page.m2` 与 `.page.m1`，互不复用。两个模块仍共用三个底座文件——`report.css`（A4 页盒）、`charts.js`（调色板与通用图元）、`tokens.css`（设计变量）；排序台另有本模块专属的 `module-02.css`。
 
 图表库共 14 种：`heroM2`（封面主视觉）· `dial` · `ladder` · `painBars` · `painBubbles` · `sankey` · `funnel` · `axisStack` · `waterfall` · `bubbleMatrix` · `radarCompare` · `heatmap` · `depArc` · `gantt`。
 
 | 页 | 章节 | 数据 |
 |---|---|---|
-| 1 | 封面（速览） | `profile` · `ranked[0]` · 五个关键数字 |
+| 1 | 封面（速览） | `profile` · `ranked[0]` · `keyNumbers`（六项：候选场景 / 进入排序 / 首选场景 / 数据就绪 / 起步投入 / 首批见效） |
 | 2 | 本报告导航 | `reportText.readingGuide` · `weights` · `axes` |
 | 3–4 | 01 排序结论速览（速览） | `quickView` · `verdict` · `combo` · `ranked[0..2]` |
 | 5 | 02 企业画像与现状 | `profile` · `conditions` · `readiness.systems` · `sectorInsight` |
@@ -223,7 +223,8 @@ brief_pages: 6
 |---|---|---|
 | 痛点项数 3–8、严重度 1–5、id 格式 | ✔ | ✔ |
 | conditions 四项必填与取值 | ✔ | ✔ |
-| 权重 0–1、画像必填、systems「无」互斥、多出字段 | ✔ | ✔ |
+| 权重 0–1、画像必填、systems「无」互斥 | ✔ | ✔ |
+| 多出字段 | ✔ | ✘（内核忽略多余字段照常计算，由输入补全层拦截） |
 | 痛点 id 是否属于本企业所在行业大类 | 表达不了（需跨字段比对 `profile.industry`） | ✔ |
 | 痛点按 id 去重 | 表达不了（`uniqueItems` 比的是整个对象） | ✔ |
 | 四维权重之和大于 0 | 表达不了（draft-07 无求和约束） | ✔ |
@@ -261,6 +262,7 @@ scripts/validate-data.js          场景库校验：字段取值、标签闭环�
 scripts/validate-schema.js        契约校验：样例过 schema · 枚举与数据表一致 · 常量与内核一致 · 反例被拒
 scripts/lint.js                   构建期禁忌词扫描
 ../../prototype/src/module-02.js  报告与排序台渲染参考实现（28 页 / 速览 6 页）
+../../prototype/src/module-02.css 排序台样式（痛点矩阵 · 权重滑块 · 排序表 · 报告增补）
 ../../prototype/src/report-m2.css 模块 2 专属版式（3D 凸浮标题栏 · 圆角方徽章 · 卡片顶部帽条）
 ../../prototype/src/charts-m2.js  模块 2 专属图表库（14 种，含封面主视觉 heroM2）
 ../_shared/company-profile.schema.json  企业画像 JSON Schema（由模块 1 的生成脚本产出）
@@ -277,6 +279,11 @@ node scripts/validate-data.js     # 场景库校验，14 / 14 个大类，问题
 node scripts/run-examples.js      # 四套样例 → examples/*.output.json（改内核或数据后先跑）
 node scripts/validate-schema.js   # 契约校验，全部 ✔ 才能交付
 node scripts/lint.js              # 禁忌词扫描，硬命中为 0
+
+# 报告版式改动后还要在原型里验分页（脚本在 prototype/ 下，需 NODE_PATH 指向全局 playwright）
+cd ../../prototype && node build.js
+NODE_PATH=$(npm root -g) node test/measure-m2.js      # 逐页量高，溢出须为 0 页
+NODE_PATH=$(npm root -g) node test/screenshot-m2.js   # 全流程 + 屏幕与内核逐字比对 + 导出 PDF 核页数
 ```
 
 ## 与 AI OS 的对应

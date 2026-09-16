@@ -69,12 +69,15 @@ brief_pages: 6
 | 同行参考带 | `data/benchmark.json` 取「细分行业-规模」格（`basis = exact`）；缺格取同行业最近规模格（`nearest-size`）；行业无格则 `none`，参考带相关字段为 null |
 | 维度位置 | 低于参考带下限 = `below`，高于上限 = `above`，其余 = `within`；无参考带 = `unknown` |
 | 同行百分位 | 用参考格的均值与标准差做正态估算，取 1–99 之间的整数；无参考带为 null |
-| 短板维度 | 六维按「得分 − 参考带下限」升序（无参考带按得分），前三个为 `weakDims`，后三个为 `strongDims` |
+| 短板维度 | 六维按「本维百分比 − 参考带下限」升序（参考带也是百分制；无参考带时直接按百分比），同值再按百分比兜底；前三个为 `weakDims`，后三个为 `strongDims`。注意比的是百分比不是 0–18 的原始得分，两者量纲不同 |
 | 九项行动 | 每个维度按「维度 × 该维度自身等级」从 `data/actions.json`（60 条）取模板：短板三维各取第 1 条进「第 1–3 个月 · 打基础」，各取第 2 条进「第 4–6 个月 · 见成效」，优势三维各取第 1 条进「第 7–12 个月 · 扩规模」；每条带负责人、三步做法、交付物、周期、投入档、验收指标、对应服务与模块 |
 | 90 天清单 | 打基础三项行动的三步做法，按第 1–4 / 5–8 / 9–12 周落位，共 9 条 |
 | 推荐场景 | `data/scenes.json` 取本行业大类的场景（每个大类 5 个，`other` 大类为通用场景），按 价值×0.4 + (6−难度)×0.25 + 数据条件×0.35 + 拉动短板维度数（至多 2）×0.3 打分排序，取前 5；数据条件由 `profile.systems` 是否覆盖场景的 `dataDeps` 决定，并写明「需先补齐：…」 |
 | 投入档 | 由 q27（可接受投入区间）的选项直接映射：暂不考虑 = 零 / 5 万以内 = 轻 / 5–20 万 = 中 / 20 万以上 = 重；四档说明见 `data/report-text.json` |
 | 风险提示 | `data/risks.json` 16 条规则，条件为「某子维度处于某分档」或「画像某字段等于某值」，命中即列出，按 高 > 中 > 提示 排序；可能为空 |
+| 逐维补分计划 | `gapPlan`：`needPts` = ⌈下一级门槛百分比 × 108⌉ − 当前总分；逐维缺口 = max(0, 下一级门槛百分比 − 本维百分比) 折算成分，按缺口占比把 `needPts` 摊成每维的 `alloc`；`gapPct` 为「门槛 − 本维百分比」，本维已过门槛时为负数且 `reached = true`、`alloc = 0`。已是 L4 时整个 `gapPlan = null` |
+| 角色分工 | `roles`：三条模板取 `data/report-text.json` 的 `roles`，`who` 按画像与最弱维度改写（牵头人 / 业务对接人 / 数据对接人），各带职责与每月投入时间 |
+| 何时重评 | `retrigger`：五条模板取 `data/report-text.json` 的 `retrigger`，`extra` 结合本次结果补一句（如本次的三件事、当前已有系统、当前 IT 人数），无补充时为空串 |
 | 结论速览 | `quickView` 六问六答（阶段 / 同行位置 / 最强 / 短板 / 先做什么 / 投多少）、`verdict` 总体判断横幅、`directions` 六维标 优先 / 次批 / 保持、`keyNumbers` 六个关键数字、`summary` 四段摘要与 `summaryText` |
 
 输入不合法时返回 `{ ok: false, errors: [...] }`，不扣积分，把 `errors` 翻译成一句追问（如「行业没识别出来，是机械五金还是电子电器？」）。
@@ -107,8 +110,8 @@ brief_pages: 6
 |---|---|---|
 | `summary` | `summary` | 四段摘要 |
 | `radar` | `dimensions` | 六维雷达，`band = true` 时叠加同行参考带 |
-| `level-scale` | `level` / `levels` / `nextLevel` | 等级刻度 + 当前位置 + 距下一级 |
-| `distribution` | `distribution` / `percentile` | 同行分布曲线与本企业位置（有参考带时） |
+| `level-scale` | `level` | 等级刻度 + 当前位置 + 距下一级（同时取用 `levels` 与 `nextLevel`） |
+| `distribution` | `distribution` | 同行分布曲线与本企业位置（同时取用 `percentile`；无参考带时两者均为 null，本项不渲染） |
 | `dimension-detail` | `dimensions[]` | 每维：得分 / 位置 / 三个子维度诊断 / 两条建议 |
 | `ranked-bars` | `subdims` | 十八项子维度排序条 |
 | `roadmap` | `roadmap` / `actions` | 12 个月三阶段九项行动 |
@@ -123,31 +126,31 @@ brief_pages: 6
 
 完整版 28 页，A4 逐页不溢出；速览版 6 页（带 `brief` 标记的页：1 / 3 / 4 / 6 / 17 / 19）。
 
-**版式身份**——与「企业AI高价值场景排序」明确区分：章节标题为整条 3D 彩色凸浮条配六边形序号徽章，章节栏右端带刻度装饰；内容卡走左侧色轨（档案感）；小节标题为粗体黑字加拉丁副题加双细线；页脚为六色渐变条；封面主视觉为「企业经营现状 → 六维雷达加 AI 核心 → 等级阶梯」三段式；封底深墨蓝满版。样式 `prototype/src/report-m1.css`、图表 `prototype/src/charts-m1.js`，与模块 2 的 `report-m2.css` / `charts-m2.js` 互不复用。
+**版式身份**——与「企业AI高价值场景排序」明确区分：章节标题为整条 3D 彩色凸浮条配六边形序号徽章，章节栏右端带刻度装饰；内容卡走左侧色轨（档案感）；小节标题为粗体黑字加拉丁副题加双细线；页脚为六色渐变条；封面主视觉为「企业经营现状 → 六维雷达加 AI 核心 → 等级阶梯」三段式；封底深墨蓝满版。样式 `prototype/src/report-m1.css`、图表 `prototype/src/charts-m1.js`：这两个文件与模块 2 的 `report-m2.css` / `charts-m2.js` 作用域分别是 `.page.m1` 与 `.page.m2`，互不复用。两个模块仍共用三个底座文件——`report.css`（A4 页盒 `.report` / `.pages` / `.page`）、`charts.js`（调色板与通用图元）、`tokens.css`（设计变量）。
 
 | 页 | 章节 | 数据 | 图表 |
 |---|---|---|---|
-| 1 | 封面（速览） | `profile` · `level` · `pct` · `percentile` · `keyNumbers` · `investment` | `heroM1` · `scoreArc` |
-| 2 | 00 本报告导航 | `levels` · `benchmark` · `distribution` | — |
+| 1 | 封面（速览） | `profile` · `level` · `pct` · `percentile` · `total` · `nextLevel` · `positions` · `investment` · `summary.position` | `heroM1` · `scoreArc` |
+| 2 | 本报告导航 | `levels` · `benchmark` · `distribution` | — |
 | 3 | 01 诊断结论速览（速览） | `quickView` · `verdict` · `dimensions` · `strongDims` · `weakDims` · `investment` | — |
-| 4 | 01 未来三个月先做三件事（速览） | `actions[0..2]` · `directions` · `summary.next` | — |
+| 4 | 01 诊断结论速览 · 续（速览）〔页内标题「未来三个月先做三件事」〕 | `actions[0..2]` · `directions` · `summary.next` | — |
 | 5 | 02 企业画像 | `profile` · `sectorInsight` · `benchmark` · `level` | — |
 | 6 | 03 总体成熟度（速览） | `pct` · `total` · `level` · `levels` · `nextLevel` | `scoreArc` · `levelLadder` |
-| 7 | 03 六维形状与同行参考带 | `dimensions` · `positions` · `summary.dims` | `radarPro` · `dimBullet` |
-| 8 | 03 同行位置与作答分布 | `percentile` · `distribution` · `answers` · `answerDistribution` | `distCurve` · `gauge6` · `answerGrid` |
+| 7 | 03 总体成熟度 · 续〔页内标题「六维形状与同行参考带」〕 | `dimensions` · `positions` · `summary.dims` | `radarPro` · `dimBullet` |
+| 8 | 03 总体成熟度 · 续〔页内标题「同行位置与作答分布」〕 | `percentile` · `distribution` · `answers` · `answerDistribution` | `distCurve` · `gauge6` · `answerGrid` |
 | 9–14 | 04.1–04.6 六维逐项诊断（战略 / 数据 / 流程 / 人员 / 预算 / 合规，每维一页） | `dimensions[i]`（含 `subdims` 的 `diagnosis` 与 `recommendations`）· `answers` 本维六题 | — |
 | 15 | 05 优势与短板 | `subdims` 排序 · `strengths` · `weaknesses` · `summary.subs` | `subHeat` |
 | 16 | 06 AI 优先方向 | `directions` · `dimensions` | `dimDiverge` |
 | 17 | 07 距下一级的差距（速览） | `gapPlan`（`needPts` · `needPct` · `focus` · 六维 `items`）· `level` · `directions` | `gapBars` |
 | 18 | 08 推荐场景 | `scenes` | `matrix` |
 | 19 | 09 升级路线图（速览） | `roadmap` · `actions` | `actionFlow` |
-| 20 | 09 九项行动明细 | `actions` | — |
+| 20 | 09 升级路线图 · 续〔页内标题「九项行动明细」〕 | `actions` | — |
 | 21 | 10 投入与回报 | `investment`（含四档 `tiers`）· `reportText.services` | — |
 | 22 | 11 风险与合规 | `risks` · `roles` | — |
 | 23 | 12 90 天行动清单 | `checklist` · `actions[0].kpi` | — |
-| 24 | 13 何时重新评一次 | `retrigger` | — |
-| 25–26 | 附录 A 36 题作答与得分 | `answers` · `dimensions` · `subdims` | — |
-| 27 | 附录 B 方法、术语与信息来源 | `benchmark` · `reportText.method` · `reportText.glossary` | — |
+| 24 | 13 何时重评 | `retrigger` | — |
+| 25–26 | 附录 A 评分明细 | `answers` · `dimensions` · `subdims` | — |
+| 27 | 附录 B 方法与来源 | `benchmark` · `reportText.method` · `reportText.glossary` | — |
 | 28 | 封底 | `reportText.contact` · `reportText.closing` | — |
 
 标题为 L4 经营级时没有下一级，`gapPlan` 为 `null`，第 17 页改述「已在最高一级」，页数不变。
@@ -170,7 +173,7 @@ brief_pages: 6
 
 章节标题栏的凸浮结构自上而下六层：顶棱硬高光 → 柱面连续衰减（白与黑的 alpha 叠层，不换色，保住 `--mc → --mc2` 的彩色流动）→ 左右棱受光与背光 → `inset` 压暗的底部侧壁（厚度）→ 1px 转折暗线 → 三级 blur = 0 落影（浮）。侧壁厚度由 `--wall` 控制，取无单位数值，`calc()` 里乘 `1px` 使用。
 
-自查办法：导出后统计 PDF 里 `/Subtype /Image` 与 `/SMask` 对象数。当前基准为完整版 8 张位图、速览版 7 张，其中带 `/SMask` 的各 3 张，来自封面主视觉与 logo，属正常内容。数量级跳到几十上百，说明有模糊效果漏进来了。
+自查办法：导出后统计 PDF 里的 `/Subtype /Image` 对象数，以及 **`/SMask <对象号> <代号> R` 这种引用形式**的出现次数。注意不能裸数 `/SMask`——压缩流里有大量同名字面量，完整版裸数会得到 201，只有按引用形式数才是 3。当前基准：完整版 8 张位图、速览版 7 张，带蒙版的各 3 张，来自封面主视觉与 logo，属正常内容。位图数量级跳到几十上百，说明有模糊效果漏进来了。
 
 会话内保存 `profile` 与 `dimensions` / `weakDims`，供「企业AI高价值场景排序」读取最弱两维作为痛点提示，「企业AI投入ROI测算器」读取 `investment.tier` 作为默认投入档。
 
@@ -180,7 +183,7 @@ brief_pages: 6
 
 ## 转化
 
-结果给出后，一句收尾：「完整评估报告与改进路线在专家入企 AI 诊断里出，1980 元 / 1 天。」用户提到「先做哪个场景」时，直接进入「企业AI高价值场景排序」，不再重复问企业信息；提到「要花多少钱」时进入「企业AI投入ROI测算器」。
+结果给出后，一句收尾：「完整评估报告与改进路线在专家入企 AI 诊断里出，1980 元，1 天入企。」用户提到「先做哪个场景」时，直接进入「企业AI高价值场景排序」，不再重复问企业信息；提到「要花多少钱」时进入「企业AI投入ROI测算器」。
 
 ## 结论词纪律
 
@@ -197,8 +200,8 @@ brief_pages: 6
 |---|---|
 | LLM 超时 / 解析失败 / 命中禁忌 | 用模板行动，`source = template`；界面标「初稿」 |
 | 参考带缺格 | 取同行业最近规模格，`benchmark.basis = nearest-size`，附录 B 注明（当前 270 格齐全，只在业务侧替换参考带后可能出现） |
-| 行业无任何参考带 | `basis = none`：雷达不画参考带，位置全部 `unknown`，`percentile` / `distribution` 为 null，速览第 2 问答「参考带待补」，摘要不写位置句，报告第 7 页不画分布曲线 |
-| 无风险规则命中 | `risks = []`，第 29 页以结论框写「合规维度各项均已基本建立，当前无需特别提示」 |
+| 行业无任何参考带 | `basis = none`：雷达不画参考带，位置全部 `unknown`，`percentile` / `distribution` 为 null，速览第 2 问答「参考带待补」，摘要不写位置句，报告第 8 页不画分布曲线 |
+| 无风险规则命中 | `risks = []`，第 22 页的风险卡片区为空，只保留该页的角色分工块；壳层若需要空态文案，自行补一句「合规维度各项均已基本建立，当前无需特别提示」——内核与原型都不产出这句 |
 | 输入不合法 | `ok = false` + `errors`，翻译成追问，不扣积分 |
 | 网络不可用 | 全流程照常，本 skill 无任何必需的网络调用 |
 
@@ -218,7 +221,7 @@ data/actions.json                 60 条结构化行动（6 维 × 5 级 × 2）
 data/scenes.json                  70 个行业场景（价值 / 难度 / 数据依赖 / 拉动维度 / 第一步 / 模块）
 data/risks.json                   16 条风险规则
 data/benchmark.json               同行参考带 270 格（54 细分 × 5 规模；v0 估算，业务侧抽样后替换）
-data/report-text.json             报告固定文案：标题 · 出具方 · 阅读指引 · 方法 · 投入四档 · 服务 · 术语 · 联系方式 · 结语
+data/report-text.json             报告固定文案：标题（中英）· 出具方 · 阅读指引 · 方法 · 投入四档 · 服务 · 术语 · 联系方式 · 结语，以及 roles（三条角色分工模板）与 retrigger（五条重评时机模板）
 examples/S1–S4.*.json             四套样例企业的输入与 golden 输出
 ../../prototype/src/module-01.js  报告渲染参考实现（28 页 / 速览 6 页）
 ../../prototype/src/report-m1.css 模块 1 专属版式（3D 凸浮标题栏 · 六边形徽章 · 左侧色轨）
@@ -243,6 +246,11 @@ node scripts/run-examples.js      # 四套样例 → examples/*.output.json（�
 node scripts/validate-schema.js   # 契约校验，全部 ✔ 才能交付
 node scripts/lint.js              # 禁忌词扫描，硬命中为 0
 node scripts/gen-profile-schema.js  # 画像字段或行业表改动后重新生成 schema
+
+# 报告版式改动后还要在原型里验分页（脚本在 prototype/ 下，需 NODE_PATH 指向全局 playwright）
+cd ../../prototype && node build.js
+NODE_PATH=$(npm root -g) node test/measure-m1.js     # 逐页量高，溢出须为 0 页
+NODE_PATH=$(npm root -g) node test/screenshot.js     # 屏幕与内核逐字比对 + 导出 PDF 核页数
 ```
 
 ## 与 AI OS 的对应
