@@ -91,7 +91,7 @@
 .verdict { display: flex; align-items: center; gap: 18px; background: linear-gradient(95deg, var(--r-navy2) 0%, var(--r-navy) 50%, var(--r-blue) 100%); color: #fff; border-radius: 10px; padding: 16px 22px; }
 .verdict .lb { font-size: calc(11.5px * var(--scale)); color: var(--r-cyan); font-weight: 700; }
 .verdict .hl { font-size: calc(16px * var(--scale)); font-weight: 800; line-height: 1.4; margin-top: 2px; }
-.verdict .sc { margin-left: auto; flex: none; background: linear-gradient(135deg, #00C2F0, #19A8E8); border-radius: 10px; padding: 10px 22px; text-align: center; box-shadow: 0 6px 16px rgba(0,194,240,.3); }
+.verdict .sc { margin-left: auto; flex: none; background: linear-gradient(135deg, #00C2F0, #19A8E8); border-radius: 10px; padding: 10px 22px; text-align: center; box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 2px 0 #9FDDF2, 0 4px 0 #D6EEF8; }
 .verdict .sc .k { font-size: calc(11px * var(--scale)); color: var(--r-navy2); font-weight: 700; }
 .verdict .sc .v { font-size: calc(24px * var(--scale)); font-weight: 900; color: var(--r-navy2); line-height: 1.1; }
 .verdict.slim { padding: 12px 18px; border-radius: 8px; }
@@ -143,12 +143,12 @@
 .cover .hero svg { display: block; }
 .cover .hero .ov { position: absolute; left: 40px; top: 34px; color: #fff; }
 .cover .hero .ov .en { font-size: calc(12px * var(--scale)); letter-spacing: 4px; color: #9FD8FF; font-weight: 700; }
-.cover .hero .ov .co { font-size: calc(30px * var(--scale)); font-weight: 900; margin: 10px 0 6px; text-shadow: 0 2px 12px rgba(0,0,0,.35); }
+.cover .hero .ov .co { font-size: calc(30px * var(--scale)); font-weight: 900; margin: 10px 0 6px; text-shadow: 0 2px 0 rgba(2,10,26,.5); }
 .cover .hero .ov .rt { font-size: calc(18px * var(--scale)); font-weight: 700; color: #DCE8FF; }
 .cover .hero .logo { position: absolute; right: 36px; top: 30px; height: 40px; background: #fff; border-radius: 8px; padding: 6px 10px; }
 .cover .low { padding: 26px 40px 28px; flex: 1; display: flex; flex-direction: column; }
 .cover .low .lv { display: flex; align-items: center; gap: 22px; }
-.cover .low .badge { width: 120px; height: 120px; border-radius: 28px; background: linear-gradient(160deg, var(--r-blue2), var(--r-navy)); color: #fff; display: grid; place-content: center; text-align: center; box-shadow: 0 14px 30px rgba(10,42,94,.32); flex: none; }
+.cover .low .badge { width: 120px; height: 120px; border-radius: 28px; background: linear-gradient(160deg, var(--r-blue2), var(--r-navy)); color: #fff; display: grid; place-content: center; text-align: center; box-shadow: inset 0 2px 0 rgba(255,255,255,.28), 0 3px 0 #C3D0E4, 0 6px 0 #E2E9F3; flex: none; }
 .cover .low .badge .code { font-size: calc(42px * var(--scale)); font-weight: 900; line-height: 1; }
 .cover .low .badge .lname { font-size: calc(15px * var(--scale)); font-weight: 700; }
 .cover .low .big { font-size: calc(30px * var(--scale)); font-weight: 900; color: var(--r-blue); }
@@ -174,7 +174,7 @@
 .tile .v { font-size: calc(24px * var(--scale)); font-weight: 900; color: var(--tc, var(--r-blue)); line-height: 1.15; margin-top: 2px; }
 .tile .s { color: var(--r-sub); font-size: calc(10.5px * var(--scale)); }
 .level-card { text-align: center; padding: 4px 0; }
-.level-card .badge { width: 120px; height: 120px; border-radius: 28px; margin: 0 auto 10px; background: linear-gradient(160deg, var(--r-blue2), var(--r-navy)); color: #fff; display: grid; place-content: center; box-shadow: 0 14px 30px rgba(10,42,94,.3); }
+.level-card .badge { width: 120px; height: 120px; border-radius: 28px; margin: 0 auto 10px; background: linear-gradient(160deg, var(--r-blue2), var(--r-navy)); color: #fff; display: grid; place-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,.28), 0 3px 0 #C3D0E4, 0 6px 0 #E2E9F3; }
 .level-card .badge .code { font-size: calc(42px * var(--scale)); font-weight: 900; line-height: 1; }
 .level-card .badge .lname { font-size: calc(15px * var(--scale)); }
 .level-card .total { font-size: calc(24px * var(--scale)); font-weight: 900; color: var(--r-blue); }
@@ -232,7 +232,7 @@
 .model .col .s b { display: block; font-size: calc(11.5px * var(--scale)); color: var(--r-text); }
 .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .tier { border: 1.5px solid var(--r-line); border-radius: 10px; padding: 12px 14px; background: #fff; }
-.tier.cur { border-color: var(--r-blue); background: linear-gradient(180deg, #EEF4FF, #fff); box-shadow: 0 8px 20px rgba(17,87,181,.12); }
+.tier.cur { border-color: var(--r-blue); background: linear-gradient(180deg, #EEF4FF, #fff); box-shadow: inset 0 1px 0 #fff, 0 2px 0 #DCE6F5, 0 3px 0 #EDF2FA; }
 .tier .nm { font-weight: 800; font-size: calc(14px * var(--scale)); color: var(--r-text); }
 .tier .rg { color: var(--r-blue); font-weight: 900; font-size: calc(18px * var(--scale)); margin: 4px 0; }
 .tier p { font-size: calc(11.5px * var(--scale)); color: var(--r-body); }
@@ -293,6 +293,7 @@
   .model { grid-template-columns: repeat(6, 1fr) !important; }
   .fig, .verdict, .ch-banner, .qcard .hd, .dir-card .hd, .phase-card .hd, .scene-card .hd, .tbl th, .cover .low .badge, .level-card .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   /* 阴影与模糊在 PDF 里会被栅格化成灰块，打印时一律关闭 */
-  .report, .report * { box-shadow: none !important; filter: none !important; }
+  /* 只关模糊：blur=0 的阴影保持矢量，立体感需要它 */
+  .report *, .report *::before, .report *::after { filter: none !important; }
 }
 .page svg[aria-label="场景价值难度矩阵"] { max-width: 520px; margin: 0 auto; }
