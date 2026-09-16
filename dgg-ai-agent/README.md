@@ -7,7 +7,7 @@ skill 是这份定义加一个面向 AI OS 的清单，原型是这份定义加�
 skills/
   _shared/                 企业画像字段表 + 生成的 JSON Schema · 14 大类 / 54 细分行业表 · 积分表 · 禁忌词表 · lint
   01-ai-maturity/          企业AI成熟度评估（SKILL.md · schema · data · core · prompts · examples · scripts）
-  02-scene-ranking/        企业AI高价值场景排序（data/sectors 14 个大类场景库 · core · examples · scripts）
+  02-scene-ranking/        企业AI高价值场景排序（SKILL.md · schema · data/sectors 14 个大类场景库 · core · prompts · examples · scripts）
 prototype/
   src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js）+ 报告版式（report.css · report-m2.css）+ 图表（charts.js · charts-m2.js）+ 模板
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
@@ -22,6 +22,7 @@ prototype/
 cd skills/02-scene-ranking
 node scripts/validate-data.js     # 场景库校验：字段、取值、标签闭环、覆盖度、14 个大类齐全
 node scripts/run-examples.js      # 四套样例企业跑内核，写 examples/*.output.json
+node scripts/validate-schema.js   # 契约校验：样例过 schema · 枚举与数据表一致 · 常量与内核一致 · 反例被拒
 node scripts/lint.js              # 禁忌词扫描
 
 cd ../01-ai-maturity
@@ -54,7 +55,7 @@ NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（
 | # | 模块 | 内核 + 数据 | 原型 | SKILL.md 契约 | 状态 |
 |---|---|---|---|---|---|
 | 1 | 企业AI成熟度评估 | v2 | v3 | v2（已与内核、原型同步） | 屏幕与内核逐字一致；咨询报告风格 33 页 / 速览 5 页，A4 逐页无溢出；契约校验全部通过 |
-| 2 | 企业AI高价值场景排序 | v1.1 | v2 | 待原型确认后同步 | 屏幕与内核逐字一致；交互式排序台（权重现场可调、实时重排）；报告 28 页 / 速览 6 页，独立版式，四套样例 A4 均无溢出 |
+| 2 | 企业AI高价值场景排序 | v1.1 | v2 | v1（已与内核、原型同步） | 屏幕与内核逐字一致；交互式排序台（权重现场可调、实时重排）；报告 28 页 / 速览 6 页，独立版式，四套样例 A4 均无溢出；契约校验全部通过 |
 
 ### 模块 1 · v2 规模
 
@@ -76,6 +77,8 @@ NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（
 - 四维权重现场可调：四个预设 + 四个滑块，拖动即重算重排；关键数据源缺失的场景数据可得直接计 1 分
 - 交互式排序台：结论横幅 · 排序表（可切前 8 / 全部 13）· 紧凑气泡矩阵 · 场景详情联动 · 三步走阶梯 · 紧凑筛选漏斗
 - 内核另出三档推进情景、角色分工、何时重跑、本行业痛点库全表，供报告使用
+- 契约 v1：`schema/input.json`（profile + pains 3–8 带严重度 + conditions 四项 + 可选 weights）· `schema/output.json`（success / failure 两种形态）· `SKILL.md` 写明追问顺序、评分规则表、排序台形态、`render` 表与 28 页报告页表、降级表
+- 校验分两层：schema 拦项数 / 取值 / 必填 / 多出字段，内核兜底三项 draft-07 表达不了的跨字段约束（痛点跨行业、按 id 去重、权重之和大于 0）
 
 ### 模块 2 报告 · v2 版式（与模块 1 明确区分）
 
