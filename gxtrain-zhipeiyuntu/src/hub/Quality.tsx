@@ -55,7 +55,7 @@ export function QualityView() {
                 </tr>
               ))}</tbody>
             </table>
-            <div className="text-[11px] text-slate-500 leading-relaxed mt-3 hair-t pt-2">敏感条目在助手回答中自动脱敏；培训科与知识运营可配置权限并回滚版本；专业部门审核人负责本专业条目的审核发布。</div>
+            
           </div>
         </Panel>
       </div>

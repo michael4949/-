@@ -10,30 +10,30 @@ export default function Board() {
   const max = dist[0].n
   const hot = [...COURSES].filter(c => c.status === '已发布').sort((a, b) => b.stats.learners - a.stats.learners).slice(0, 8)
   const kinds = ['必修课', '专题课', '岗位入门', '复训课', '微课'] as const
-  const kindN: Record<string, number> = { 必修课: 186, 专题课: 512, 岗位入门: 214, 复训课: 168, 微课: 206 }
+  const kindN: Record<string, number> = { 必修课: 14.5, 专题课: 39.8, 岗位入门: 16.6, 复训课: 13.1, 微课: 16.0 }
   return (
     <div className="h-full flex flex-col gap-3 p-3 min-h-0">
       <div className="grid grid-cols-6 gap-3 shrink-0">
         <Kpi k="累计成课" v={<CountUp to={TOTAL_COURSES} />} d="本年新增 342 门 · 内训师自主 71%" onClick={() => push({ v: 'lib' })} spark={TREND_F.map(t => t.made)} />
         <Kpi k="题库题量" v={<CountUp to={TOTAL_QUESTIONS} />} d="逐题挂接规程锚点" gold onClick={() => push({ v: 'bank' })} />
         <Kpi k="平均开发周期" v={<><CountUp to={2.4} dec={1} /><span className="text-[12px] font-normal text-slate-500 ml-1">天</span></>} d="原料入库到发布，含两级审核" onClick={() => push({ v: 'gen' })} />
-        <Kpi k="待审核课程" v={<CountUp to={REVIEW_QUEUE.length + 9} />} d="内训师审核 · 专业部门审核" gold onClick={() => push({ v: 'review' })} />
+        <Kpi k="待审核课程" v={<CountUp to={REVIEW_QUEUE.length} />} d="内训师审核 · 专业部门审核" gold onClick={() => push({ v: 'review' })} />
         <Kpi k="本周学习人次" v={<CountUp to={TREND_F[25].learners} />} d={`通过率 ${TREND_F[25].pass}%`} onClick={() => push({ v: 'analytics' })} spark={TREND_F.map(t => t.learners)} />
         <Kpi k="微课与内训师" v={<><CountUp to={MICROS.length + 182} /><span className="text-[12px] font-normal text-slate-500 ml-1">/ {TRAINERS.length + 154}</span></>} d="数字人微课 · 认证内训师" gold onClick={() => push({ v: 'media' })} />
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[300px_1fr_360px] gap-3">
         <div className="flex flex-col gap-3 min-h-0">
-          <Panel title="课程构成" extra={<button className="btn btn-sm" onClick={() => push({ v: 'lib' })}>课程库</button>}>
+          <Panel title="课程构成　按类型占比" extra={<button className="btn btn-sm" onClick={() => push({ v: 'lib' })}>课程库</button>}>
             <div className="p-3 space-y-2">
               {kinds.map((k, i) => (
                 <button key={k} onClick={() => push({ v: 'lib', kind: k })} className="w-full text-left group">
-                  <div className="flex items-center text-[11.5px] mb-1"><KindTag k={k} /><span className="ml-auto num text-slate-600 group-hover:text-[var(--ai)]">{kindN[k]}</span></div>
-                  <div className="h-[6px] bg-slate-100 rounded"><div className="h-full bar-grow" style={{ width: `${kindN[k] / 5.4}%`, background: ['#1e3a6e', '#2f6df6', '#19b8d8', '#b08a3e', '#7b5cf5'][i], animationDelay: `${i * .06}s` }} /></div>
+                  <div className="flex items-center text-[11.5px] mb-1"><KindTag k={k} /><span className="ml-auto num text-slate-600 group-hover:text-[var(--ai)]">{kindN[k]}%</span></div>
+                  <div className="h-[6px] bg-slate-100 rounded"><div className="h-full bar-grow" style={{ width: `${kindN[k] * 2.3}%`, background: ['#1e3a6e', '#2f6df6', '#19b8d8', '#b08a3e', '#7b5cf5'][i], animationDelay: `${i * .06}s` }} /></div>
                 </button>
               ))}
             </div>
           </Panel>
-          <Panel title="产线状态" extra={<span className="text-[10.5px] text-slate-500">实时</span>}>
+          <Panel title="产线状态" bodyClass="overflow-auto scroll" extra={<span className="text-[10.5px] text-slate-500">实时</span>}>
             <div className="p-3 space-y-1.5">
               {[['生成中', allCourses().filter(c => c.status === '生成中').length + 3, { v: 'gen' } as Route], ['内训师审核中', allCourses().filter(c => c.status === '内训师审核中').length, { v: 'review' } as Route], ['专业部门审核中', allCourses().filter(c => c.status === '专业部门审核中').length, { v: 'review' } as Route], ['微课渲染中', MICROS.filter(m => m.status === '渲染中').length, { v: 'media' } as Route], ['规程更新待处理', 26, { v: 'review' } as Route]].map(([k, n, r]) => (
                 <button key={k as string} onClick={() => push(r as Route)} className="w-full flex items-center gap-2 hairline px-2.5 py-2 text-[12px] hover:border-[var(--ai)]">
@@ -43,7 +43,7 @@ export default function Board() {
               ))}
             </div>
           </Panel>
-          <Panel title="AI 洞察" className="flex-1" bodyClass="overflow-auto scroll">
+          <Panel title="AI 洞察" className="flex-1 min-h-[168px]" bodyClass="overflow-auto scroll">
             <div className="p-2 space-y-1.5">
               {F_INSIGHTS.map(x => (
                 <button key={x.k} onClick={() => push(x.go as Route)} className="a-card w-full text-left">

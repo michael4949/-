@@ -5,9 +5,10 @@ import { UNITS, UNIT_GROUPS } from '../units'
 import { ASSETS } from '../hub/data'
 import { buildDraft, OUTPUTS, lectureText, taskbookText, slidesFor, QUESTIONS, COACH_FOR } from './data'
 import type { Course, CourseKind, OutputKind, Chapter } from './data'
-import { addDraft, findCourse, submitDraft, DRAFTS } from './store'
+import { addDraft, findCourse, submitDraft, DRAFTS, GEN_LAST, rememberGen} from './store'
 import { useNav, KindTag, Typewriter, StatusTag, QTag, Field } from './nav'
 import { KindTag as AssetKindTag } from '../hub/nav'
+import { AdaptDialog } from './AdaptDialog'
 
 const STEPS = [['解析原料', '拆分条款、步骤、案例与诀窍，建立引用锚点'], ['匹配能力项', '对齐岗位能力矩阵与评估表场景'], ['生成大纲', '按课时切分章节，排布知识点'], ['生成讲义与课件', '每章讲义、课件页与讲解词'], ['生成微课脚本', '分镜、口播与画面提示'], ['生成实训任务书与试题', '任务、评分要点与配套试题'], ['自检与校审清单', '术语、时效、敏感信息、答案一致性']]
 let seq = 0
@@ -26,20 +27,20 @@ export function GenView() {
   const pool = useMemo(() => ASSETS.filter(a => a.unit === unit || a.unit === '公司通用').filter(a => !q || a.title.includes(q)).sort((a, b) => (b.post === post ? 1 : 0) - (a.post === post ? 1 : 0) || b.use - a.use).slice(0, 14), [unit, post, q])
   const [sel, setSel] = useState<string[]>([])
   useEffect(() => { setSel(pool.filter(a => a.post === post).slice(0, 5).map(a => a.id)) }, [pool, post])
-  const [phase, setPhase] = useState<'idle' | 'run' | 'done'>('idle')
-  const [step, setStep] = useState(-1)
-  const [log, setLog] = useState<string[]>([])
-  const [key, setKey] = useState('')
+  const [phase, setPhase] = useState<'idle' | 'run' | 'done'>(GEN_LAST.key ? 'done' : 'idle')
+  const [step, setStep] = useState(GEN_LAST.key ? STEPS.length : -1)
+  const [log, setLog] = useState<string[]>(GEN_LAST.log)
+  const [key, setKey] = useState(GEN_LAST.key)
   useEffect(() => {
     if (phase !== 'run') return
-    if (step >= STEPS.length) { const t = setTimeout(() => setPhase('done'), 300); return () => clearTimeout(t) }
+    if (step >= STEPS.length) { const t = setTimeout(() => { setPhase('done'); rememberGen(key, log, unit, post, hours) }, 300); return () => clearTimeout(t) }
     const t = setTimeout(() => {
       const c = DRAFTS[key]
       const lines = [`已解析 ${sel.length} 条原料，抽取条款 ${sel.length * 3} 处、案例 ${Math.max(1, Math.round(sel.length / 2))} 个`, `匹配 ${post} 能力项 ${6 + sel.length} 项，评估表场景「${u.scenes.find(s => s.post === post)?.name ?? u.top}」`, `大纲 ${c?.chapters.length ?? 5} 章，合计 ${hours} 学时`, `讲义 ${c?.outputs.讲义 ?? 0} 页 · 课件 ${c?.outputs.课件 ?? 0} 页，讲解词已生成`, `微课脚本 ${c?.chapters.length ?? 5} 段，建议数字人讲师：${c ? COACH_FOR(c).n.split(' · ')[1] ?? '黄志远' : '黄志远'}`, `实训任务书 ${c?.outputs.实训任务书 ?? 1} 份 · 试题 ${c?.outputs.配套试题 ?? 0} 道`, `自检 ${3 + (sel.length % 3)} 处待确认：术语 1 · 时效 1 · 敏感信息 ${sel.length % 2}`]
       setLog(l => [...l, lines[step] ?? '']); setStep(s => s + 1)
     }, 560)
     return () => clearTimeout(t)
-  }, [phase, step, key, sel, post, hours, u])
+  }, [phase, step, key, sel, post, hours, u, log, unit])
   const start = () => {
     const k = `d${++seq}`
     addDraft(k, buildDraft({ unit, post, hours, kind, materials: sel, outputs: outs }))
@@ -197,15 +198,7 @@ export function DraftView({ courseKey, courseId }: { courseKey?: string; courseI
           </div>
         </Panel>
       </div>
-      {adapt && (
-        <div className="ai-mask" onClick={() => setAdapt(null)}>
-          <div className="ai-dlg" onClick={e => e.stopPropagation()}>
-            <div className="hd"><span className="w-[3px] h-[13px]" style={{ background: 'var(--gold)' }} /><span className="text-[13px] font-semibold">AI · {adapt}</span><span className="text-[11px] text-slate-500">基于 {c.id}</span><button className="ml-auto text-slate-400" onClick={() => setAdapt(null)}>✕</button></div>
-            <div className="bd"><div className="ai-out"><Typewriter text={adapt === '改编到其他岗位' ? `【改编建议 · ${c.name}】\n\n目标岗位：${c.post === '变电值班员' ? '配网运维员' : '新入职员工'}\n保留：${c.chapters.slice(0, 2).map(x => x.title).join('、')}（口径通用）\n改写：${c.chapters[2]?.title ?? '标准作业流程'} → 按目标岗位的作业场景替换案例与术语\n新增：目标岗位常见错项 3 条（来自中枢同主题诀窍）\n试题：保留 60%，按岗位重新生成 40%\n\n预计生成时间 1.2 天，内训师校对 0.5 天。` : adapt === '生成复训版' ? `【复训版 · ${c.name}】\n\n课时：1 学时　形式：线上 + 班前会 10 分钟\n要点页：${c.chapters.map(x => x.kps[0] ?? x.title).join(' / ')}\n近一年变化：${c.src.map(x => x).slice(0, 2).join('、')} 相关条款已按新版更新\n复训题：10 道，全部来自本课错题率最高的知识点\n通过线：80 分` : `【规程新版更新 · ${c.name}】\n\n检测到引用条款变化 ${Math.max(1, c.src.length - 2)} 处：\n· 第十八条 接令后核实操作票 → 新版扩展到操作顺序与安全措施\n· 附录G-5 位置核对 → 由两项扩展为四项\n\n将自动：更新讲义与课件页 ${Math.round(c.outputs.课件 * .3)} 页、替换题目 ${Math.round(c.outputs.配套试题 * .25)} 道、更新微课口播 2 段，并生成审核任务单。`} speed={7} /></div></div>
-            <div className="ft"><button className="btn" onClick={() => setAdapt(null)}>关闭</button><button className="btn btn-primary" onClick={() => { toast(`已创建任务：${adapt}`); setAdapt(null) }}>创建任务</button></div>
-          </div>
-        </div>
-      )}
+      <AdaptDialog c={c} adapt={adapt} onClose={() => setAdapt(null)} toast={toast} />
     </div>
   )
 }

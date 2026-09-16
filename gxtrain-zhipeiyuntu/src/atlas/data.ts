@@ -30,9 +30,16 @@ export const FUNC_GRADES = ['助理级', '中级', '高级', '资深']
 export const isFunc = (u: UnitDef | undefined) => !!u && (u.grp === '本部职能部门' || u.grp === '直属机构' || u.grp === '产业公司')
 export function lineOf(unitName: string, post: string): string {
   const u = UNITS.find(x => x.name === unitName)
+  if (/变电|继电保护|主变|开关站/.test(post)) return '变电'
+  if (/配电|配网|台区|带电|供电所|抢修|农网/.test(post)) return '配电'
+  if (/装表|营销|抄核|用电|计量|线损|业扩|勘查|客户|坐席|收费/.test(post)) return '营销'
+  if (/输电|线路|通道|杆塔|机巡/.test(post)) return '输电'
+  if (/调度|方式|调控|运行值班/.test(post)) return '调度'
+  if (/信息|通信|网络|数据|智能体|系统运维/.test(post)) return '信息通信'
+  if (/基建|工程|施工|造价|监理/.test(post)) return '基建'
+  if (/安全|安监|监督|应急/.test(post)) return '安监'
   if (u && isFunc(u)) return u.name.includes('数字化') ? '信息通信' : u.name.includes('基建') || u.name.includes('送变电') ? '基建' : u.name.includes('安全') ? '安监' : u.name.includes('调度') ? '调度' : '职能'
-  if (/变电|继电/.test(post)) return '变电'; if (/配电|台区|带电|配网/.test(post)) return '配电'; if (/装表|营销|抄核|用电|客户/.test(post)) return '营销'; if (/输电|线路|通道/.test(post)) return '输电'; if (/调度/.test(post)) return '调度'
-  return pick(['变电', '配电', '营销', '输电'], hash(post))
+  return '职能'
 }
 export const abilitiesOf = (unitName: string, post: string) => ABILITY_SETS[lineOf(unitName, post)] ?? ABILITY_SETS.职能
 
@@ -73,7 +80,7 @@ export function buildPerson(name: string, unit: string, team: string, post: stri
     { t: '2026-06-30', k: s % 2 ? '竞赛' : '带教', n: s % 2 ? `${short(unit)}技术比武` : `师带徒 · ${pick(POOL, s >>> 5)} 带教季度评价`, r: s % 2 ? `第 ${3 + (s % 9)} 名` : '优秀', delta: 3, ability: ab[3], ok: true },
     { t: '2026-05-14', k: '课程', n: COURSES[(s >>> 5) % 40].name, r: `${COURSES[(s >>> 5) % 40].hours} 学时 · 完成`, delta: 3, ability: ab[5], ok: true, id: COURSES[(s >>> 5) % 40].id },
   ]
-  return { id: `p-${hash(name + unit + team).toString(36)}`, name, unit, team, post, grade, years: 2 + (s % 14), grades, abilities, records, potential, nextGrade, eta, progress, mentor: pick(POOL, s >>> 7), joined: `${2026 - 2 - (s % 14)}-0${1 + (s % 9)}` }
+  return { id: `p-${hash(name + unit + team).toString(36)}`, name, unit, team, post, grade, years: 2 + (s % 14), grades, abilities, records, potential, nextGrade, eta, progress, mentor: pick(POOL.filter(x => x !== name), s >>> 7), joined: `${2026 - 2 - (s % 14)}-0${1 + (s % 9)}` }
 }
 export const MAIN_PERSON: Person = (() => {
   const p = buildPerson('韦明', '地市供电局（14个）', '南宁供电局 · 变电管理一所', '变电值班员', 11)
@@ -121,7 +128,7 @@ export const ALL_PEOPLE: Person[] = (() => {
 /* ---------- 单位全景 ---------- */
 export const DOMAINS = ['专业技能', '安全规程', '异常处置', '数字化与 AI', '管理协作', '合规风控']
 export function unitReady(u: UnitDef) { return clamp(Math.round(70 + (u.avg - 2.6) * 16 + (u.id.length % 5)), 66, 96) }
-export function unitRadar(u: UnitDef) { return DOMAINS.map((k, i) => ({ k, v: clamp(Math.round(unitReady(u) + ((hash(u.id + k) % 21) - 10) + (i === 3 ? -6 : 0)), 50, 98), need: 80 })) }
+export function unitRadar(u: UnitDef) { return DOMAINS.map((k, i) => ({ k, v: clamp(Math.round(unitReady(u) + ((hash(`${u.id}#${i}#${k}`) % 21) - 10) + (i === 3 ? -6 : 0)), 50, 98), need: 80 })) }
 export function unitTrend(u: UnitDef) { const r = unitReady(u); return Array.from({ length: 12 }).map((_, i) => clamp(Math.round(r - (11 - i) * .45 + Math.sin(i / 1.8 + hash(u.id) % 5) * 1.6), 50, 99)) }
 export function unitTeams(u: UnitDef) { return teamsOf(u).map((t, i) => { const h = hash(u.id + t); return { name: t, n: isFunc(u) ? Math.max(4, Math.round(u.people / u.depts.length)) : isBureauUnit(u) ? 1800 + (h % 1500) : 22 + (h % 40), v: isBureauUnit(u) ? bureauReady(t) : clamp(unitReady(u) + ((h % 25) - 12), 55, 98), gaps: 1 + (h % 4), trend: ((h % 9) - 4), lead: pick(POOL, h >>> 3), i } }).sort((a, b) => b.v - a.v) }
 /* 任意班组（含「地市局 · 班组」两段式）的统计口径 */
@@ -131,12 +138,24 @@ export function gapDist(v: number, n: number) { return [Math.round(n * v / 100),
 
 /* ---------- 岗位能力模型 ---------- */
 export type PostModel = { id: string; unit: string; grp: UnitGroup; dept: string; post: string; line: string; abilities: { k: string; w: number; lines: Record<string, number>; src: string; courses: number; coaches: number; questions: number }[]; people: number; ready: number; ver: string; updated: string; scene?: string }
-export const POST_MODELS: PostModel[] = UNITS.flatMap(u => u.depts.flatMap(d => d.posts.map(post => {
+/* 地市供电局的生产岗位：评估表按场景列岗位，这里补上班组建制里的核心工种 */
+const BUREAU_POSTS: { dept: string; post: string }[] = [
+  { dept: '变电管理一所', post: '变电值班员' }, { dept: '变电管理一所', post: '变电检修员' },
+  { dept: '变电管理二所', post: '继电保护员' }, { dept: '配电管理所', post: '配网运维员' },
+  { dept: '配电管理所', post: '带电作业员' }, { dept: '输电管理所', post: '线路运维员' },
+  { dept: '营销部', post: '装表接电员' }, { dept: '营销部', post: '用电检查员' },
+  { dept: '营销部', post: '计量检定员' }, { dept: '调度控制中心', post: '调度员' },
+  { dept: '客户服务中心', post: '客服坐席' }, { dept: '安全监管部', post: '安全专责' },
+]
+const withBureauPosts = (u: UnitDef) => u.grp === '地市供电局'
+  ? [...u.depts, ...BUREAU_POSTS.reduce<{ name: string; posts: string[] }[]>((acc, x) => { const hit = acc.find(d => d.name === x.dept); if (hit) hit.posts.push(x.post); else acc.push({ name: x.dept, posts: [x.post] }); return acc }, [])]
+  : u.depts
+export const POST_MODELS: PostModel[] = UNITS.flatMap(u => withBureauPosts(u).flatMap(d => d.posts.map(post => {
   const line = lineOf(u.name, post)
   const grades = isFunc(u) ? FUNC_GRADES : PROD_GRADES
   const h = hash(u.id + post)
   const scene = u.scenes.find(s => s.post === post)
-  return { id: `pm-${h.toString(36)}`, unit: u.name, grp: u.grp, dept: d.name, post, line, people: isFunc(u) ? Math.max(3, Math.round(u.people / Math.max(1, u.depts.length))) : 60 + (h % 900), ready: clamp(unitReady(u) + ((h % 17) - 8), 60, 97), ver: `v${1 + (h % 3)}`, updated: `2026-0${1 + (h % 9)}-1${h % 9}`, scene: scene?.name,
+  return { id: `pm-${h.toString(36)}`, unit: u.name, grp: u.grp, dept: d.name, post, line, people: isFunc(u) ? Math.max(3, Math.round(u.people / Math.max(1, u.depts.length))) : u.grp === '地市供电局' ? 14 * (60 + (h % 190)) : 60 + (h % 900), ready: clamp(unitReady(u) + ((h % 17) - 8), 60, 97), ver: `v${1 + (h % 3)}`, updated: `2026-0${1 + (h % 9)}-1${h % 9}`, scene: scene?.name,
     abilities: (ABILITY_SETS[line] ?? ABILITY_SETS.职能).map((k, i) => ({ k, w: [25, 20, 20, 15, 10, 10][i], lines: Object.fromEntries(grades.map((g, gi) => [g, GRADE_LINE[g] + (i % 3 === 1 ? -5 : 0) + gi * 0])), src: i === 3 && scene ? `评估表场景：${scene.name}` : i < 2 ? '规程与作业指导书' : i === 4 ? '安规与制度' : '岗位说明书', courses: 2 + ((h >>> i) % 9), coaches: (h >>> (i + 2)) % 4, questions: 30 + ((h >>> (i + 1)) % 200) })) }
 })))
 export const postModelById = (id: string) => POST_MODELS.find(m => m.id === id)

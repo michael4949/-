@@ -98,7 +98,7 @@ export function ChatView({ r }: { r: Extract<Route, { v: 'chat' }> }) {
             <div className="flex justify-between"><span className="text-slate-500">数据范围</span><span className="text-right">{rl.scope}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">沿用指标</span><span>{ctx.metric ? metricById(ctx.metric)?.name : '—'}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">沿用范围</span><span className="truncate ml-3">{ctx.key ? `${unitShort(ctx.key)} · ${ctx.dim}` : '—'}</span></div>
-            <div className="text-[10.5px] text-slate-400 pt-1 leading-relaxed">追问"那 XX 呢"、"按班组看"、"近 12 个月趋势"时沿用上一轮的指标与范围。</div>
+            
           </div>
         </Panel>
         <Panel title="本会话出处" bodyClass="overflow-auto scroll">

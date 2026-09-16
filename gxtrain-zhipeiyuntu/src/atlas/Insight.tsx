@@ -16,7 +16,7 @@ function Slider({ k, v, min, max, step, unit, onChange }: { k: string; v: number
 
 export function InsightView() {
   const { push, toast, jump } = useNav()
-  const [coach, setCoach] = useState(1.6), [course, setCourse] = useState(86), [mentor, setMentor] = useState(42)
+  const [coach, setCoach] = useState(2.6), [course, setCourse] = useState(92), [mentor, setMentor] = useState(60)
   const [sel, setSel] = useState<string>()
   const r = simulate(coach, course, mentor)
   const scen = READY_FORECAST.base.map((v, i) => Math.round((v + r.delta * Math.min(1, (i + 1) / 6)) * 10) / 10)
@@ -47,7 +47,7 @@ export function InsightView() {
               <Slider k="师带徒结对率" v={mentor} min={20} max={90} step={1} unit="%" onChange={setMentor} />
               <div className="flex items-center gap-3 hair-t pt-3"><Ring v={r.ready} size={72} stroke={7} color={r.ready >= 90 ? 'var(--ok)' : 'var(--ai)'} sub="预测达标" /><div className="grid grid-cols-2 gap-1.5 flex-1 text-center">{[['变化', `${r.delta >= 0 ? '+' : ''}${r.delta} pt`], ['见效', `${r.weeks} 周`], ['增量投入', `${r.cost >= 0 ? '+' : ''}${r.cost} 万`], ['目标', r.ready >= 90 ? '达成' : '未达']].map(([k, v], i) => <div key={k} className="hairline py-1"><div className={`num text-[13px] font-semibold ${i === 0 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[9.5px] text-slate-500">{k}</div></div>)}</div></div>
               <div className="mt-3"><LineChart labels={M12} h={110} unit="%" series={[{ name: '基线', color: '#94a3b8', dash: true, data: READY_FORECAST.base }, { name: '方案', color: '#178a54', area: true, data: scen }]} target={{ v: 90, label: '90%' }} yMin={84} yMax={98} /></div>
-              <div className="flex gap-2 mt-2"><button className="btn btn-primary btn-sm flex-1" onClick={() => push({ v: 'scenario', coach, course, mentor })}>保存为干预方案 ›</button><button className="btn btn-sm flex-1" onClick={() => { setCoach(2.6); setCourse(92); setMentor(60); toast('已载入 AI 推荐组合') }}>AI 推荐组合</button></div>
+              <div className="flex gap-2 mt-2"><button className="btn btn-primary btn-sm flex-1" onClick={() => push({ v: 'scenario', coach, course, mentor })}>保存为干预方案 ›</button><button className="btn btn-sm flex-1" onClick={() => { setCoach(1.6); setCourse(86); setMentor(42); toast('已回到当前水平') }}>回到当前水平</button></div>
             </div>
           </Panel>
           <Panel title="推荐动作" className="flex-1"><div className="p-2 space-y-1.5"><button className="act-btn" onClick={() => { toast('已向 7 个低频单位下发陪练任务'); jump('coach', 'company') }}><span className="ic">练</span>低频单位加密陪练<small>7 个单位 · 陪练中心</small></button><button className="act-btn gold" onClick={() => { toast('已推送必修课催办'); jump('plan', 'track') }}><span className="ic">课</span>催办必修课<small>千人千面 · 跟踪</small></button></div></Panel>

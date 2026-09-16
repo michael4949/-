@@ -1,7 +1,7 @@
-/* 语义检索：意图解析、综合回答、分类结果，点击结果进入条目详情 */
+/* 语义检索：意图解析、综合回答、分类结果 */
 import { useEffect, useState } from 'react'
 import { Panel } from '../ui'
-import { parseIntent, searchAssets, answerFor, SEARCH_PRESETS, KINDS } from './data'
+import { ASSETS, parseIntent, searchAssets, answerFor, SEARCH_PRESETS, KINDS } from './data'
 import type { AssetKind } from './data'
 import { useNav, KindTag, Typewriter, StatusTag } from './nav'
 
@@ -31,9 +31,9 @@ export function SearchView({ q0 }: { q0?: string }) {
       </div>
       {phase === 'idle' ? (
         <div className="flex-1 grid grid-cols-3 gap-3 min-h-0">
-          {[['语义召回', '按意思找条款，同义表述与口语提问均可命中，答案带出处与锚点。'], ['意图解析', '自动识别岗位、单位、类型与主题，按身份收窄范围，敏感条目自动脱敏。'], ['多路召回', '语义向量、关键词与图谱关系三路召回后融合排序，结果可直接下钻到条目、原文与引用。']].map(([k, d], i) => (
-            <div key={k} className="panel p-5 fade-in" style={{ animationDelay: `${i * .1}s` }}><div className="w-[26px] h-[26px] flex items-center justify-center text-white text-[12px] mb-3" style={{ background: i === 1 ? 'var(--gold)' : 'var(--indigo)' }}>{i + 1}</div><div className="text-[14px] font-semibold mb-1.5">{k}</div><div className="text-[12px] text-slate-600 leading-relaxed">{d}</div></div>
-          ))}
+          <Panel title="最近检索" bodyClass="overflow-auto scroll"><div className="p-2 space-y-0.5">{SEARCH_PRESETS.map((x, i2) => <button key={x} className="w-full text-left px-2 py-1.5 hover:bg-slate-50 rounded-lg text-[12px] flex items-center gap-2" onClick={() => go(x)}><span className="num text-[10.5px] text-slate-400 w-[34px]">09-{String(15 - i2).padStart(2, '0')}</span><span className="truncate flex-1">{x}</span><span className="text-[var(--gold)]">›</span></button>)}</div></Panel>
+          <Panel title="常被引用的条目" bodyClass="overflow-auto scroll"><div className="p-2 space-y-0.5">{[...ASSETS].sort((a, b) => b.use - a.use).slice(0, 9).map(a => <button key={a.id} className="w-full text-left px-2 py-1.5 hover:bg-slate-50 rounded-lg" onClick={() => push({ v: 'asset', id: a.id })}><div className="flex items-center gap-1.5"><KindTag k={a.kind} /><span className="text-[12px] truncate flex-1">{a.title}</span><span className="num text-[11px] text-slate-500">{a.use}</span></div></button>)}</div></Panel>
+          <Panel title="本周更新" bodyClass="overflow-auto scroll"><div className="p-2 space-y-0.5">{[...ASSETS].sort((a, b) => b.updated.localeCompare(a.updated)).slice(0, 9).map(a => <button key={a.id} className="w-full text-left px-2 py-1.5 hover:bg-slate-50 rounded-lg" onClick={() => push({ v: 'asset', id: a.id })}><div className="flex items-center gap-1.5"><span className="num text-[10.5px] text-slate-400 w-[46px]">{a.updated.slice(5)}</span><span className="text-[12px] truncate flex-1">{a.title}</span><StatusTag s={a.status} /></div></button>)}</div></Panel>
         </div>
       ) : (
         <div className="flex-1 min-h-0 grid grid-cols-[260px_1fr] gap-3">
@@ -43,7 +43,7 @@ export function SearchView({ q0 }: { q0?: string }) {
                 {[['岗位', it.post], ['单位', it.unit?.replace(/（.*）/, '')], ['类型', it.kind], ['主题', it.topic]].map(([k, v]) => (
                   <div key={k as string} className="flex items-center gap-2"><span className="text-slate-500 w-[32px]">{k}</span>{v ? <span className="intent"><b>{v}</b></span> : <span className="text-slate-300">未指定</span>}</div>
                 ))}
-                <div className="text-[10.5px] text-slate-400 pt-1 leading-relaxed">当前身份：陈科长 · 培训科，可见全部分级；一线员工身份下敏感条目自动隐藏。</div>
+                
               </div>
             </Panel>
             <Panel title="按类型" className="flex-1">

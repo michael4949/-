@@ -278,7 +278,19 @@ function genFromUnits(): CoreIn[] {
   return out
 }
 
-const ALL_IN: CoreIn[] = [...CORE_IN, ...genFromUnits().filter(g => !CORE_IN.some(c => c.id === g.id))]
+/* 批量生成的编号可能与已有编号撞号，撞号时顺延到下一个空位，保证一条编号只对应一条资产 */
+function uniqueIds(list: CoreIn[]): CoreIn[] {
+  const used = new Set<string>()
+  return list.map(a => {
+    if (!used.has(a.id)) { used.add(a.id); return a }
+    const m = a.id.match(/^([A-Z]{2})-(\d{4})$/)
+    if (!m) { let k = 2; while (used.has(`${a.id}-${k}`)) k++; used.add(`${a.id}-${k}`); return { ...a, id: `${a.id}-${k}` } }
+    let n = parseInt(m[2], 10)
+    for (let i = 0; i < 10000; i++) { n = (n + 1) % 10000; const id = `${m[1]}-${String(n).padStart(4, '0')}`; if (!used.has(id)) { used.add(id); return { ...a, id } } }
+    return a
+  })
+}
+const ALL_IN: CoreIn[] = uniqueIds([...CORE_IN, ...genFromUnits().filter(g => !CORE_IN.some(c => c.id === g.id))])
 export const ASSETS: Asset[] = ALL_IN.map((a, i) => ({
   ...a, core: i < CORE_IN.length,
   refs: refsFor(a.id, a.title, a.unit, a.use, a.topic),

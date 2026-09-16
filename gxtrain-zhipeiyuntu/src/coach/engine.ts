@@ -803,7 +803,7 @@ export async function enterWufang() {
 }
 function startRun() {
   S.stage = 'run'; bump()
-  const go = () => { enterStep(0); if (!S.toured) setTimeout(startTour, 700) }
+  const go = () => { enterStep(0) }
   if (S.previewed[1]) return go()
   S.previewed[1] = true; openPreview(1, go)
 }
@@ -880,7 +880,7 @@ export function entryGo() {
   else if (P.preset) applyPreset(P.preset)
   closeDlg('entry'); S.arenaEntered = true; bump()
   if (P.prep) { if (S.filled || !S.fillOn) enterPrep(); else enterFill() }
-  else { S.stage = 'run'; S.t0 = Date.now(); startClock(); S.previewed[STEPS[S.plan.steps[0]].phase] = false; bump(); enterStep(S.plan.steps[0]); if (!S.toured) setTimeout(startTour, 900) }
+  else { S.stage = 'run'; S.t0 = Date.now(); startClock(); S.previewed[STEPS[S.plan.steps[0]].phase] = false; bump(); enterStep(S.plan.steps[0]);  }
 }
 export function planHasWrong() { return wrongSteps().length > 0 }
 

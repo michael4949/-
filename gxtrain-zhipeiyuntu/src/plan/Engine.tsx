@@ -4,7 +4,7 @@ import { Panel, Bars, Radar } from '../ui'
 import { Gantt, Columns, Ring } from '../charts'
 import { UNIT_GROUPS } from '../units'
 import type { UnitGroup } from '../units'
-import { PLAN_INPUTS, UNITS, BUREAUS, ENGINE_STEPS, engineStats, personPlan, planHours, KIND_COLOR, short, personById } from './data'
+import { PLAN_INPUTS, UNITS, BUREAUS, ENGINE_STEPS, engineStats, personPlan, planHours, KIND_COLOR, short, personById, ENGINE_LAST} from './data'
 import type { EngineScope } from './data'
 import { teamPersons, postOfTeam, unitOf, isFunc, isBureauUnit, GRADES } from '../atlas/data'
 import { useNav, Typewriter, Field, KindTag, StTag } from './nav'
@@ -15,13 +15,13 @@ export function EngineView() {
   const { push, toast } = useNav()
   const [w, setW] = useState(PLAN_INPUTS.map(p => p.w))
   const [scope, setScope] = useState<EngineScope>({ grp: '全部', grade: '全部', onlyGaps: false })
-  const [step, setStep] = useState(-1)
-  const [ran, setRan] = useState(false)
+  const [step, setStep] = useState(ENGINE_LAST.ran ? ENGINE_STEPS.length : -1)
+  const [ran, setRan] = useState(ENGINE_LAST.ran)
   const st = engineStats(w, scope)
   const unit = scope.grp === '全部' ? UNITS[23] : UNITS.find(u => u.grp === scope.grp) ?? UNITS[0]
   const team = sampleTeam(unit.name)
   const people = useMemo(() => teamPersons(unit.name, team, postOfTeam(team)).slice(0, 5), [unit.name, team])
-  useEffect(() => { if (step < 0 || step >= ENGINE_STEPS.length) return; const t = setTimeout(() => { if (step === ENGINE_STEPS.length - 1) { setRan(true); setStep(ENGINE_STEPS.length) } else setStep(step + 1) }, 650); return () => clearTimeout(t) }, [step])
+  useEffect(() => { if (step < 0 || step >= ENGINE_STEPS.length) return; const t = setTimeout(() => { if (step === ENGINE_STEPS.length - 1) { setRan(true); ENGINE_LAST.ran = true; setStep(ENGINE_STEPS.length) } else setStep(step + 1) }, 650); return () => clearTimeout(t) }, [step])
   const run = () => { setRan(false); setStep(0) }
   const rows = ran ? people.flatMap(p => { const it = personPlan(p); return [{ name: `${p.name} · ${p.grade}`, sub: `${planHours(it)} 学时`, spans: it.map(i => ({ from: i.m - 1, to: i.m, color: KIND_COLOR[i.kind], label: i.kind, st: i.st })) }] }) : []
   return (

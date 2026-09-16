@@ -8,6 +8,7 @@ import { findCourse } from './store'
 import { useNav, KindTag, StatusTag, QTag } from './nav'
 import type { Route } from './nav'
 import { ProgressRow } from './Gen'
+import { AdaptDialog } from './AdaptDialog'
 
 const KINDS: CourseKind[] = ['必修课', '专题课', '岗位入门', '复训课', '微课']
 const STATUSES = ['已发布', '内训师审核中', '专业部门审核中', '生成中', '草稿', '已下线']
@@ -88,6 +89,7 @@ export function LibView({ r }: { r: Extract<Route, { v: 'lib' }> }) {
 /* ---------- 二级：课程详情 ---------- */
 export function CourseView({ id }: { id: string }) {
   const { push, toast, jump } = useNav()
+  const [adapt, setAdapt] = useState<string | null>(null)
   const c = findCourse(id)
   if (!c) return <div className="p-6 text-slate-400">课程不存在</div>
   const idx = c.reviews.findIndex(r => r.result === '进行中')
@@ -139,7 +141,7 @@ export function CourseView({ id }: { id: string }) {
         <Panel title="AI 动作">
           <div className="p-2 space-y-1.5">
             {[['改编到其他岗位', '同课换岗位口径', 'draft'], ['生成复训版', '压缩为 1 学时', 'draft'], ['按规程新版更新', '自动替换引用', 'draft'], ['生成数字人微课', '推送微课工作室', 'media'], ['生成陪练剧本', '推送教练编辑器', 'coach']].map(([k, d, go], i) => (
-              <button key={k} className={`act-btn ${i % 2 ? 'gold' : ''}`} onClick={() => go === 'media' ? push({ v: 'media' }) : go === 'coach' ? (toast('已推送到教练编辑器'), jump('coach', 'editor')) : push({ v: 'output', course: c.id, kind: '讲义' })}><span className="ic">{['改', '复', '新', '微', '练'][i]}</span>{k}<small>{d}</small></button>
+              <button key={k} className={`act-btn ${i % 2 ? 'gold' : ''}`} onClick={() => go === 'media' ? push({ v: 'media' }) : go === 'coach' ? (toast('已推送到教练编辑器'), jump('coach', 'editor')) : setAdapt(k as string)}><span className="ic">{['改', '复', '新', '微', '练'][i]}</span>{k}<small>{d}</small></button>
             ))}
           </div>
         </Panel>
@@ -153,6 +155,7 @@ export function CourseView({ id }: { id: string }) {
         </Panel>
         <Panel title="版本"><div className="p-3 space-y-1.5">{c.history.map(h => <div key={h.ver} className="text-[11.5px]"><b>{h.ver}</b> <span className="num text-slate-400">{h.date}</span> · {h.by} <div className="text-slate-500">{h.note}</div></div>)}</div></Panel>
       </div>
+      <AdaptDialog c={c} adapt={adapt} onClose={() => setAdapt(null)} toast={toast} />
     </div>
   )
 }

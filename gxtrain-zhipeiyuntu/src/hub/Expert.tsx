@@ -45,7 +45,7 @@ export function ExpertView() {
               <div key={k} className="hairline py-2 text-center"><div className="num text-[17px] font-semibold" style={{ color: i % 2 ? 'var(--gold)' : 'var(--indigo)' }}>{v}</div><div className="text-[10.5px] text-slate-500">{k}</div></div>
             ))}
           </div>
-          <div className="px-3 pb-3 text-[11.5px] text-slate-500 leading-relaxed">萃取对象覆盖生产一线、本部职能部门与直属机构，人力资源部自身的培训开发经验亦纳入萃取。</div>
+          
         </Panel>
         <Panel title="退休与流失预警" className="flex-1" bodyClass="overflow-auto scroll">
           <div className="p-2 space-y-1.5">

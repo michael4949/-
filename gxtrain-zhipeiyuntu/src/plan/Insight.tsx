@@ -6,6 +6,8 @@ import { UNIT_GROUPS } from '../units'
 import { TOTAL, DONE_TREND, DONE_FORECAST, MONTHS, NOW_M, LOAD_PTS, SUGGESTIONS, optimize, UNIT_PLANS, BUREAU_PLANS, unitPlanOf, short } from './data'
 import { useNav, Typewriter, Kpi } from './nav'
 
+/* 建议里的 money 为负代表省钱，与模拟器省下的额度合并成一个净额 */
+const net = (r: { saved: number }, money: number) => Math.round((r.saved - money) * 10) / 10
 const LABELS = [...MONTHS.slice(0, NOW_M), ...MONTHS.slice(NOW_M).map(m => `${m}（预测）`)]
 function Slider({ k, v, min, max, step, unit, onChange }: { k: string; v: number; min: number; max: number; step: number; unit: string; onChange: (v: number) => void }) {
   return <div className="mb-3"><div className="flex items-center text-[11.5px] mb-1"><span className="text-slate-600">{k}</span><span className="ml-auto num font-semibold" style={{ color: 'var(--indigo)' }}>{v}{unit}</span></div><input type="range" min={min} max={max} step={step} value={v} onChange={e => onChange(parseFloat(e.target.value))} className="w-full accent-[var(--ai)]" /></div>
@@ -13,7 +15,7 @@ function Slider({ k, v, min, max, step, unit, onChange }: { k: string; v: number
 
 export function PInsightView() {
   const { push, toast } = useNav()
-  const [cap, setCap] = useState(60), [online, setOnline] = useState(32), [coach, setCoach] = useState(24)
+  const [cap, setCap] = useState(52), [online, setOnline] = useState(45), [coach, setCoach] = useState(60)
   const [applied, setApplied] = useState<string[]>([])
   const [sel, setSel] = useState<string>()
   const r = optimize(cap, online, coach)
@@ -27,7 +29,7 @@ export function PInsightView() {
         <Kpi k="当前完成率" v={<>{TOTAL.done}<span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d="较上季 +3.1 个百分点" spark={DONE_TREND} />
         <Kpi k="年末预测" v={<>{DONE_FORECAST.base[3]}<span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d={`区间 ${DONE_FORECAST.lo[3]}% – ${DONE_FORECAST.hi[3]}% · 目标 88%`} gold />
         <Kpi k="负荷过重单位" v={over.length} d={`人均超 70 学时 · 完成率平均 ${Math.round(over.reduce((s, p) => s + p.y, 0) / Math.max(1, over.length))}%`} onClick={() => over[0] && push({ v: 'optUnit', cap, online, coach, unit: over[0].id })} />
-        <Kpi k="方案后预测" v={<>{Math.min(97, Math.round((r.done + bonus) * 10) / 10)}<span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d={`${r.delta + bonus >= 0 ? '+' : ''}${Math.round((r.delta + bonus) * 10) / 10} pt · 预算 ${r.saved + money >= 0 ? '省' : '增'} ${Math.abs(Math.round((r.saved - money) * 10) / 10)} 万`} gold onClick={() => push({ v: 'optScenario', cap, online, coach })} />
+        <Kpi k="方案后预测" v={<>{Math.min(97, Math.round((r.done + bonus) * 10) / 10)}<span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d={`${r.delta + bonus >= 0 ? '+' : ''}${Math.round((r.delta + bonus) * 10) / 10} pt · 预算 ${net(r, money) >= 0 ? '省' : '增'} ${Math.abs(net(r, money))} 万`} gold onClick={() => push({ v: 'optScenario', cap, online, coach })} />
         <Kpi k="已采纳建议" v={`${applied.length} / ${SUGGESTIONS.length}`} d="采纳后预测实时重算" />
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[1fr_1fr_340px] gap-3">
@@ -44,8 +46,8 @@ export function PInsightView() {
             <Slider k="人均学时上限" v={cap} min={40} max={80} step={1} unit=" 学时" onChange={setCap} />
             <Slider k="线上化比例" v={online} min={20} max={70} step={1} unit="%" onChange={setOnline} />
             <Slider k="陪练前置比例" v={coach} min={10} max={70} step={1} unit="%" onChange={setCoach} />
-            <div className="flex items-center gap-3 hair-t pt-3"><Ring v={Math.min(97, r.done + bonus)} size={72} stroke={7} color={r.done + bonus >= 88 ? 'var(--ok)' : 'var(--ai)'} sub="年末预测" /><div className="grid grid-cols-2 gap-1.5 flex-1 text-center">{[['变化', `${r.delta + bonus >= 0 ? '+' : ''}${Math.round((r.delta + bonus) * 10) / 10} pt`], ['预算', `${r.budget + money} 万`], ['总学时', `${Math.round(r.hours / 10000)} 万`], ['目标', r.done + bonus >= 88 ? '达成' : '未达']].map(([k, v], i) => <div key={k} className="hairline py-1"><div className={`num text-[13px] font-semibold ${i === 0 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[9.5px] text-slate-500">{k}</div></div>)}</div></div>
-            <div className="flex gap-2 mt-3"><button className="btn btn-primary btn-sm flex-1" onClick={() => push({ v: 'optScenario', cap, online, coach })}>生成优化方案 ›</button><button className="btn btn-sm flex-1" onClick={() => { setCap(52); setOnline(45); setCoach(60); setApplied(SUGGESTIONS.map(s => s.id)); toast('已载入 AI 推荐组合并采纳全部建议') }}>AI 推荐组合</button></div>
+            <div className="flex items-center gap-3 hair-t pt-3"><Ring v={Math.min(97, r.done + bonus)} size={72} stroke={7} color={r.done + bonus >= 88 ? 'var(--ok)' : 'var(--ai)'} sub="年末预测" /><div className="grid grid-cols-2 gap-1.5 flex-1 text-center">{[['变化', `${r.delta + bonus >= 0 ? '+' : ''}${Math.round((r.delta + bonus) * 10) / 10} pt`], ['预算', `${Math.round((r.budget + money) * 10) / 10} 万`], ['总学时', `${Math.round(r.hours / 10000)} 万`], ['目标', r.done + bonus >= 88 ? '达成' : '未达']].map(([k, v], i) => <div key={k} className="hairline py-1"><div className={`num text-[13px] font-semibold ${i === 0 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[9.5px] text-slate-500">{k}</div></div>)}</div></div>
+            <div className="flex gap-2 mt-3"><button className="btn btn-primary btn-sm flex-1" onClick={() => push({ v: 'optScenario', cap, online, coach })}>生成优化方案 ›</button><button className="btn btn-sm flex-1" onClick={() => { setCap(60); setOnline(32); setCoach(24); setApplied([]); toast('已回到当前水平') }}>回到当前水平</button></div>
           </div></Panel>
           <Panel title="AI 预测报告" className="flex-1"><div className="p-3"><div className="ai-out text-[12px]"><Typewriter text={`按当前进度，年末完成率 ${DONE_FORECAST.base[3]}%（区间 ${DONE_FORECAST.lo[3]}–${DONE_FORECAST.hi[3]}），距 88% 目标差 ${Math.round((88 - DONE_FORECAST.base[3]) * 10) / 10} 个百分点。负荷过重是主因：${over.slice(0, 3).map(p => p.label).join('、')}人均超 70 学时。采纳学时上限 52 + 线上化 45% + 陪练前置 60% 的组合，年末可达 ${Math.min(97, Math.round((optimize(52, 45, 60).done + SUGGESTIONS.reduce((s, x) => s + parseFloat(x.effect), 0)) * 10) / 10)}%，预算节省 ${Math.round((optimize(52, 45, 60).saved - SUGGESTIONS.reduce((s, x) => s + x.money, 0)) * 10) / 10} 万元。`} speed={7} /></div></div></Panel>
         </div>

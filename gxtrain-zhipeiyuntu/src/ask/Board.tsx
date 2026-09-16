@@ -12,7 +12,7 @@ export default function Board() {
   return (
     <div className="h-full flex flex-col gap-3 p-3 min-h-0">
       <div className="grid grid-cols-6 gap-3 shrink-0">
-        <Kpi k="本周提问" v={<CountUp to={last.q} />} d={`日均 ${Math.round(last.q / 7).toLocaleString()} · 较上周 +${Math.round((last.q / TREND_A[24].q - 1) * 100)}%`} onClick={() => push({ v: 'chat' })} spark={TREND_A.map(t => t.q)} />
+        <Kpi k="本周提问" v={<CountUp to={last.q} />} d={`日均 ${Math.round(last.q / 7).toLocaleString()} · 较上周 ${Math.round((last.q / TREND_A[24].q - 1) * 100) >= 0 ? '+' : ''}${Math.round((last.q / TREND_A[24].q - 1) * 100)}%`} onClick={() => push({ v: 'chat' })} spark={TREND_A.map(t => t.q)} />
         <Kpi k="知识命中率" v={<><CountUp to={last.hit} dec={1} /><span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d="回答带出处或口径卡" gold onClick={() => push({ v: 'quality' })} spark={TREND_A.map(t => t.hit)} />
         <Kpi k="满意度" v={<><CountUp to={last.sat} dec={2} /><span className="text-[12px] font-normal text-slate-500 ml-1">/ 5</span></>} d="12,840 条反馈" onClick={() => push({ v: 'quality' })} spark={TREND_A.map(t => t.sat)} />
         <Kpi k="数据问答占比" v={<><CountUp to={38} /><span className="text-[12px] font-normal text-slate-500 ml-1">%</span></>} d="知识 54% · 动作 8%" gold onClick={() => push({ v: 'metrics' })} />

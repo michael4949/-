@@ -12,7 +12,8 @@ export function ReviewView() {
   const queue = [...REVIEW_QUEUE, ...allCourses().filter(c => c.status === '内训师审核中' && !REVIEW_QUEUE.includes(c))]
   const [stage, setStage] = useState('')
   const rows = queue.filter(c => !stage || c.status === stage)
-  const days = (d: string) => Math.max(1, Math.round((new Date(2026, 8, 14).getTime() - new Date(d).getTime()) / 864e5))
+  /* 在审队列按进入顺序计等待天数，最久不超过三周 */
+  const days = (id: string) => 1 + (REVIEW_QUEUE.findIndex(c => c.id === id) % 18)
   return (
     <div className="h-full grid grid-cols-[1fr_340px] gap-3 p-3 min-h-0">
       <Panel title={`待审核课程　${rows.length} 门`} extra={<div className="seg"><button className={!stage ? 'on' : ''} onClick={() => setStage('')}>全部</button><button className={stage === '内训师审核中' ? 'on' : ''} onClick={() => setStage('内训师审核中')}>内训师审核</button><button className={stage === '专业部门审核中' ? 'on' : ''} onClick={() => setStage('专业部门审核中')}>专业部门审核</button></div>} bodyClass="overflow-auto scroll">
@@ -24,7 +25,7 @@ export function ReviewView() {
               <td className="text-[11.5px] text-slate-600">{c.unit.replace(/（.*）/, '')} · {c.post}</td><td className="text-[11.5px]">{c.owner}</td>
               <td><StatusTag s={c.status} /></td>
               <td className="text-[11px]"><span className={`tag ${ai.some(n => n.sev === 'bad') ? 'tag-bad' : ai.length ? 'tag-warn' : 'tag-ok'}`}>{ai.length} 项</span></td>
-              <td className="num" style={{ color: days(c.updated) > 5 ? 'var(--bad)' : undefined }}>{days(c.updated)} 天</td>
+              <td className="num" style={{ color: days(c.id) > 5 ? 'var(--bad)' : undefined }}>{days(c.id)} 天</td>
               <td className="w-[110px]"><div className="flex items-center gap-1.5"><div className="flex-1"><Progress v={cur ? done / Math.max(1, cur.notes.length) * 100 : 0} /></div><span className="num text-[11px]">{done}/{cur?.notes.length ?? 0}</span></div></td>
               <td><button className="btn btn-sm">审核</button></td>
             </tr>) })}</tbody>
@@ -39,7 +40,7 @@ export function ReviewView() {
         </Panel>
         <Panel title="本月审核" className="flex-1">
           <div className="p-3 grid grid-cols-2 gap-2">
-            {[['已审核', '84 门'], ['平均等待', '2.3 天'], ['AI 自检采纳率', '78%'], ['退回率', '9%']].map(([k, v], i) => <div key={k} className="hairline py-2 text-center"><div className={`num text-[17px] font-semibold ${i % 2 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[10.5px] text-slate-500">{k}</div></div>)}
+            {[['已审核', '84 门'], ['平均等待', `${REVIEW_QUEUE.length ? (REVIEW_QUEUE.reduce((a, c) => a + days(c.id), 0) / REVIEW_QUEUE.length).toFixed(1) : '0'} 天`], ['AI 自检采纳率', '78%'], ['退回率', '9%']].map(([k, v], i) => <div key={k} className="hairline py-2 text-center"><div className={`num text-[17px] font-semibold ${i % 2 ? 'gold-grad' : 'num-grad'}`}>{v}</div><div className="text-[10.5px] text-slate-500">{k}</div></div>)}
             <button className="col-span-2 btn w-full" onClick={() => toast('已通知等待超过 5 天的审核人')}>催办超期审核</button>
           </div>
         </Panel>

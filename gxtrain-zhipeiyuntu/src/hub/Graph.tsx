@@ -93,7 +93,7 @@ export function GraphView({ id }: { id?: string }) {
               <Field k="引用位置" v={sel.hint ?? '—'} />
               <button className="btn btn-sm w-full" onClick={() => push({ v: 'refs', id: center.asset!.id, kind: sel.kind as never })}>查看{sel.kind}引用清单</button>
             </>}
-            <div className="text-[10.5px] text-slate-400 mt-3 pt-2 hair-t">单击查看节点，双击条目节点以其为中心重新展开。</div>
+            
           </div>
         </Panel>
       </div>

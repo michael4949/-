@@ -159,7 +159,7 @@ export function PlazaPage() {
         <div className="cunit">服务单位：{c.unit}{c.scene && <> · 对应场景「{c.scene}」</>}</div>
         <div className="cdesc">{c.desc}</div><div className="ctags">{c.tags.map(t => <i key={t}>{t}</i>)}</div>
         <div className="cstat"><span>难度 {'●'.repeat(c.lvl)}{'○'.repeat(3 - c.lvl)}</span><span>{c.min} 分钟</span><span>已练 {c.users} 人</span><span>平均提分 +{c.gain}</span></div>
-        {c.open ? <button className="btn btn-primary cgo" onClick={() => c.id === 'daozha' ? ctx.train(null) : ctx.toast(`「${c.n}」剧本已开通，本次演示以倒闸操作陪练舱为例`)}>开始练习</button> : c.custom ? <button className="btn cgo" onClick={() => ctx.go('editor')}>在教练编辑器中继续完善</button> : ap ? <div className="capply">开通申请 {ap.at} · {ap.st}</div> : <button className="btn cgo" onClick={() => apply(c)}>申请开通</button>}
+        {c.open ? <button className="btn btn-primary cgo" onClick={() => c.id === 'daozha' ? ctx.train(null) : ctx.toast(`「${c.n}」剧本已开通，可在陪练舱选择该科目`)}>开始练习</button> : c.custom ? <button className="btn cgo" onClick={() => ctx.go('editor')}>在教练编辑器中继续完善</button> : ap ? <div className="capply">开通申请 {ap.at} · {ap.st}</div> : <button className="btn cgo" onClick={() => apply(c)}>申请开通</button>}
       </div> })}{!list.length && <div className="pzempty">当前筛选条件下暂无教练</div>}</div>
     </div>)
 }

@@ -25,7 +25,7 @@ export function VersionView() {
             </tr>
           ))}</tbody>
         </table>
-        <div className="p-3 text-[11.5px] text-slate-500 leading-relaxed hair-t">改一次，处处更新。中枢维护规程条款与全部下游资产的引用关系，修订后可定位到具体课件章节、题目、陪练剧本分支与助手条目。</div>
+        
       </Panel>
       <div className="flex flex-col gap-3 min-h-0">
         <Panel title="待生效与修订中">
@@ -125,7 +125,7 @@ export function DocView({ id }: { id: string }) {
 }
 
 export function TaskView({ doc, id }: { doc: string; id: string }) {
-  const { push, toast } = useNav()
+  const { toast, back } = useNav()
   const d = docById(doc)
   const t = d?.tasks.find(x => x.id === id)
   const [st, setSt] = useState(t?.st ?? '待处理')
@@ -161,7 +161,7 @@ export function TaskView({ doc, id }: { doc: string; id: string }) {
           <div className="p-3 space-y-2">
             <button className="btn btn-primary w-full" onClick={() => toast(`已推送提醒给 ${t.owner}`)}>一键推送提醒</button>
             <button className="btn w-full" onClick={() => toast('已延期 5 个工作日并记录原因')}>申请延期</button>
-            <button className="btn w-full" onClick={() => push({ v: 'doc', id: d.id })}>返回版本详情</button>
+            <button className="btn w-full" onClick={() => back()}>返回版本详情</button>
             <div className="text-[10.5px] text-slate-400 leading-relaxed pt-1">全部项完成后，本规程在该责任单位范围内的同步状态自动置为已完成。</div>
           </div>
         </Panel>

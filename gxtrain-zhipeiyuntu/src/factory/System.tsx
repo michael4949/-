@@ -27,7 +27,7 @@ const P3_DELIVERY = [
   { no: 1, dept: '客户服务中心', n: '停电投诉工单智能归类', k: '智能体', st: '已上线' },
 ]
 const PRI_TAG: Record<string, string> = { P1: 'tag-bad', P2: 'tag-warn', P3: '', P4: '' }
-const batchesOf = (id: string) => { const n = id === 'p1' ? 6 : id === 'p3' ? 4 : 12; return Array.from({ length: n + 1 }).map((_, i) => { const h = hash(id + i); return { no: i + 1, d: `2026-${String(1 + Math.floor(i * 10 / n)).padStart(2, '0')}-${String(6 + (h % 20)).padStart(2, '0')}`, n: id === 'p2' ? 1800 + (h % 900) : 24 + (h % 8), venue: id === 'p2' ? '线上 + 地市局' : ['培训评价中心', '广西电科院', '数字化部实训室'][h % 3], pass: 86 + (h % 12), score: 4.4 + (h % 6) / 10, done: i < n } }) }
+const batchesOf = (id: string) => { const n = id === 'p1' ? 6 : id === 'p3' ? 4 : 12; return Array.from({ length: n + 1 }).map((_, i) => { const h = hash(id + i); return { no: i + 1, d: `2026-${String(i < n ? 1 + Math.floor(i * 9 / n) : 10).padStart(2, '0')}-${String(6 + (h % 20)).padStart(2, '0')}`, n: id === 'p2' ? 1800 + (h % 900) : 24 + (h % 8), venue: id === 'p2' ? '线上 + 地市局' : ['培训评价中心', '广西电科院', '数字化部实训室'][h % 3], pass: 86 + (h % 12), score: 4.4 + (h % 6) / 10, done: i < n } }) }
 
 export function SystemView() {
   const { push, toast, jump } = useNav()
@@ -55,8 +55,8 @@ export function SystemView() {
         </div>
         <div className="flex flex-col gap-3 min-h-0">
           <Panel title="开班日历" bodyClass="overflow-auto scroll" extra={<button className="btn btn-sm" onClick={() => jump('plan', 'schedule')}>排期 ›</button>}><div className="p-2 space-y-1">{CLASS_CAL.map((c, i) => <button key={c.d + c.n} onClick={() => push({ v: 'classDetail', i })} className="w-full text-left px-2 py-1.5 hover:bg-slate-50 rounded-lg"><div className="flex items-center gap-2 text-[12px]"><span className="num text-slate-500">{c.d}</span><span className="flex-1 truncate">{c.n}</span><span className={`tag ${c.st === '已满员' ? 'tag-gold' : 'tag-ok'}`}>{c.st}</span></div><div className="flex items-center gap-2 mt-1"><div className="flex-1"><Progress v={c.sign / c.cap * 100} /></div><span className="num text-[10.5px] text-slate-500">{c.sign}/{c.cap}</span></div></button>)}</div></Panel>
-          <Panel title="结业产出物构成　件"><div className="p-3"><Bars data={[{ label: '成套课件', v: 178 }, { label: '可用智能体', v: 96 }, { label: '岗位应用场景', v: 788 }, { label: '班组训练安排', v: 142 }]} /></div></Panel>
-          <Panel title="AI 判读" className="flex-1"><div className="p-3"><div className="ai-out text-[12px]"><Typewriter text={`全员 AI 素养覆盖 61.9%，一线层 56% 是缺口，按排期年底可达 92%；${CLASS_CAL.filter(c => c.st === '已满员').map(c => c.n.replace(/（.*）/, '')).join('、')}已满员，候补合计 38 人，建议各加开一期；专题课报名名单来自千人千面计划自动派发。`} speed={7} /></div><button className="btn btn-primary btn-sm w-full mt-2" onClick={() => toast('已为满员班次各加开一期')}>满员班次加开</button></div></Panel>
+          <Panel title="结业产出物构成　件" bodyClass="overflow-auto scroll"><div className="p-3"><Bars data={[{ label: '成套课件', v: 178 }, { label: '可用智能体', v: 96 }, { label: '岗位应用场景', v: 788 }, { label: '班组训练安排', v: 142 }]} /></div></Panel>
+          <Panel title="AI 判读" className="flex-1 min-h-[172px]" bodyClass="overflow-auto scroll"><div className="p-3"><div className="ai-out text-[12px]"><Typewriter text={`全员 AI 素养覆盖 61.9%，一线层 56% 是缺口，按排期年底可达 92%；${CLASS_CAL.filter(c => c.st === '已满员').map(c => c.n.replace(/（.*）/, '')).join('、')}已满员，候补合计 38 人，建议各加开一期；专题课报名名单来自千人千面计划自动派发。`} speed={7} /></div><button className="btn btn-primary btn-sm w-full mt-2" onClick={() => toast('已为满员班次各加开一期')}>满员班次加开</button></div></Panel>
         </div>
       </div>
     </div>

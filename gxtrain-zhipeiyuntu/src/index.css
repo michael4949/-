@@ -87,6 +87,10 @@ body {
   border-radius: var(--r);
   overflow: hidden;
 }
+
+/* 整列里最后一块面板用 flex-1 吃掉剩余高度；容器不够高时给它一个下限，让上面的面板先压缩 */
+.panel.flex-1 { min-height: 150px }
+
 .panel-head {
   display: flex; align-items: center; gap: 8px;
   padding: 9px 14px; border-bottom: 1px solid var(--line-2);

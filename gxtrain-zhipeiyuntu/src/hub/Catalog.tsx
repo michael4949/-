@@ -195,7 +195,7 @@ export function AssetDetail({ id }: { id: string }) {
             </div>
           </Panel>
           <div className="flex flex-col gap-3 min-h-0">
-            <Panel title="AI 加工" extra={<span className="text-[10.5px] text-slate-500">结果可直接推送到下游</span>}>
+            <Panel title="AI 加工">
               <div className="p-2 grid grid-cols-2 gap-1.5">
                 {(['slide', 'quiz', 'branch', 'plain', 'brief'] as AiKind[]).map((k, i) => (
                   <button key={k} className={`act-btn ${i % 2 ? 'gold' : ''}`} onClick={() => setAi(k)}>
@@ -285,14 +285,14 @@ export function AssetDetail({ id }: { id: string }) {
 
 /* ---------- 三级：引用清单 ---------- */
 export function RefsView({ id, kind }: { id: string; kind: RefKind }) {
-  const { push, toast, jump } = useNav()
+  const { toast, jump, back, replace } = useNav()
   const a = assetById(id)
   if (!a) return null
   const list = a.refs.find(r => r.kind === kind)?.items ?? []
   const target = kind === '课件' ? ['factory', 'lib'] : kind === '题目' ? ['factory', 'bank'] : kind === '陪练剧本' ? ['coach', 'plaza'] : ['ask', 'chat']
   return (
     <div className="h-full grid grid-cols-[1fr_320px] gap-3 p-3 min-h-0">
-      <Panel title={`${kind}引用清单　${list.length} 处`} extra={<div className="flex gap-1">{REF_KINDS.map(k => <button key={k} className={`dim-tab ${k === kind ? 'on' : ''}`} onClick={() => push({ v: 'refs', id, kind: k })}>{k}</button>)}</div>} bodyClass="overflow-auto scroll">
+      <Panel title={`${kind}引用清单　${list.length} 处`} extra={<div className="flex gap-1">{REF_KINDS.map(k => <button key={k} className={`dim-tab ${k === kind ? 'on' : ''}`} onClick={() => { if (k !== kind) replace({ v: 'refs', id, kind: k }) }}>{k}</button>)}</div>} bodyClass="overflow-auto scroll">
         <table className="grid">
           <thead><tr><th>编号</th><th>名称</th><th>引用位置</th><th>最近同步</th><th>状态</th><th></th></tr></thead>
           <tbody>{list.map((x, i) => (
@@ -308,7 +308,7 @@ export function RefsView({ id, kind }: { id: string; kind: RefKind }) {
       <div className="flex flex-col gap-3">
         <Panel title="被引用条目">
           <div className="p-3"><div className="flex items-center gap-2 mb-1"><KindTag k={a.kind} /><span className="num text-[11px] text-slate-400">{a.id}</span></div><div className="text-[13px] font-semibold leading-snug">{a.title}</div><div className="text-[11.5px] text-slate-500 mt-1">{a.src}</div>
-            <button className="btn btn-sm mt-2" onClick={() => push({ v: 'asset', id })}>返回条目详情</button></div>
+            <button className="btn btn-sm mt-2" onClick={() => back()}>返回条目详情</button></div>
         </Panel>
         <Panel title="同步动作" className="flex-1">
           <div className="p-3 space-y-2">
@@ -324,7 +324,7 @@ export function RefsView({ id, kind }: { id: string; kind: RefKind }) {
 
 /* ---------- 三级：规程原文 ---------- */
 export function ClauseView({ id }: { id: string }) {
-  const { push } = useNav()
+  const { push, back } = useNav()
   const a = assetById(id)
   if (!a) return null
   const doc = DOCS.find(d => a.src.includes(d.name))
@@ -346,7 +346,7 @@ export function ClauseView({ id }: { id: string }) {
         </div>
       </Panel>
       <div className="flex flex-col gap-3">
-        <Panel title="锚点条目"><div className="p-3"><div className="flex items-center gap-2 mb-1"><KindTag k={a.kind} /><span className="num text-[11px] text-slate-400">{a.id}</span></div><div className="text-[13px] font-semibold leading-snug">{a.title}</div><button className="btn btn-sm mt-2" onClick={() => push({ v: 'asset', id })}>返回条目详情</button></div></Panel>
+        <Panel title="锚点条目"><div className="p-3"><div className="flex items-center gap-2 mb-1"><KindTag k={a.kind} /><span className="num text-[11px] text-slate-400">{a.id}</span></div><div className="text-[13px] font-semibold leading-snug">{a.title}</div><button className="btn btn-sm mt-2" onClick={() => back()}>返回条目详情</button></div></Panel>
         {doc && <Panel title="该规程的版本" className="flex-1"><div className="p-3 text-[12px] space-y-1.5">
           <div className="flex justify-between"><span className="text-slate-500">当前</span><span>{doc.ver}</span></div>
           <div className="flex justify-between"><span className="text-slate-500">上一版</span><span>{doc.prev}</span></div>
@@ -367,7 +367,7 @@ function diffWords(oldS: string, newS: string) {
   return n.map((seg, i) => ({ seg, changed: o[i] !== seg }))
 }
 export function DiffView({ id }: { id: string }) {
-  const { push, toast } = useNav()
+  const { push, toast, back } = useNav()
   const a = assetById(id)
   const [pair, setPair] = useState<[number, number]>([1, 0])
   if (!a) return null
@@ -381,7 +381,7 @@ export function DiffView({ id }: { id: string }) {
         <select value={pair[0]} onChange={e => setPair([+e.target.value, pair[1]])} className="hairline px-2 py-1 text-[12px]">{vers.map((v, i) => <option key={v.ver} value={i}>{v.ver} · {v.date}</option>)}</select>
         <span className="text-slate-400">→</span>
         <select value={pair[1]} onChange={e => setPair([pair[0], +e.target.value])} className="hairline px-2 py-1 text-[12px]">{vers.map((v, i) => <option key={v.ver} value={i}>{v.ver} · {v.date}</option>)}</select>
-        <button className="btn btn-sm" onClick={() => push({ v: 'asset', id })}>返回详情</button>
+        <button className="btn btn-sm" onClick={() => back()}>返回详情</button>
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[1fr_1fr_300px] gap-3">
         <Panel title={`${vers[Math.min(pair[0], vers.length - 1)]?.ver ?? '旧版'}　旧版`} bodyClass="overflow-auto scroll">

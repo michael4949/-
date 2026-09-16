@@ -100,11 +100,48 @@ export const DEMANDS: Demand[] = [
 export const demandById = (id: string) => DEMANDS.find(d => d.id === id)
 export const VENUES = ['培训评价中心', '省调培训室', '广西电科院', '柳州供电局', '南宁供电局', '线上']
 export type ClassPlan = { id: string; d: string; no: number; name: string; venue: string; cap: number; sign: number; m: number; w: number; days: number; trainer: string; st: '已完成' | '进行中' | '报名中' | '已满员' | '待排期'; conflict?: string; units: string[]; demand?: string }
+export const TRAINERS_C = ['莫振华', '覃海波', '黄志远', '梁小燕', '陆志明', '农建国', '韦国强', '数字人讲师']
 export const CLASSES: ClassPlan[] = (() => {
   const out: ClassPlan[] = []
-  DEMANDS.forEach((d, di) => { const k = Math.min(4, d.cls); for (let i = 0; i < k; i++) { const h = hash(d.id + i); const m = 1 + (h % 12); const w = 1 + ((h >>> 4) % 4); const venue = d.online ? '线上' : VENUES[h % 5]; const conflict = (h >>> 2) % 4 === 0 && m >= NOW_M ? ['与迎峰度夏保供重叠', '与检修计划冲突', '场地已被占用', '讲师同期已排班'][h % 4] : undefined; out.push({ id: `cl-${di}-${i}`, d: `${String(m).padStart(2, '0')}-${String(w * 7 - 3).padStart(2, '0')}`, no: i + 1, name: `${d.c}（第 ${i + 1} 期）`, venue, cap: d.online ? 2000 : 40 + (h % 3) * 10, sign: 0, m, w, days: d.online ? 1 : Math.max(1, Math.round(d.hours / 8)), trainer: ['莫振华', '覃海波', '黄志远', '梁小燕', '陆志明', '数字人讲师'][h % 6], st: m < NOW_M ? '已完成' : m === NOW_M ? '进行中' : conflict ? '待排期' : h % 3 === 0 ? '已满员' : '报名中', conflict, units: BUREAUS.slice(h % 10, h % 10 + 3), demand: d.id }) } })
-  out.forEach(c => { c.sign = c.st === '已满员' ? c.cap : c.st === '待排期' ? 0 : Math.round(c.cap * (.55 + (hash(c.id) % 40) / 100)) })
-  CLASS_CAL.forEach((c, i) => out.push({ id: `cal-${i}`, d: c.d, no: 1, name: c.n, venue: c.p, cap: c.cap, sign: c.sign, m: parseInt(c.d.slice(0, 2)), w: Math.ceil(parseInt(c.d.slice(3)) / 7), days: 2, trainer: ['莫振华', '覃海波', '黄志远', '梁小燕'][i % 4], st: c.st as '报名中' | '已满员', units: BUREAUS.slice(i, i + 3) }))
+  /* 开班日历里已定的班次先占位，其余班次再排，排到撞车就顺延 */
+  CLASS_CAL.forEach((c, i) => out.push({ id: `cal-${i}`, d: c.d, no: 1, name: c.n, venue: c.p, cap: c.cap, sign: c.sign, m: parseInt(c.d.slice(0, 2)), w: Math.ceil(parseInt(c.d.slice(3)) / 7), days: 2, trainer: TRAINERS_C[(i * 3) % TRAINERS_C.length], st: c.st as '报名中' | '已满员', units: BUREAUS.slice(i, i + 3) }))
+  const venueTaken = new Set<string>(), trainerTaken = new Set<string>()
+  const slotV = (m: number, w: number, v: string) => `${m}-${w}-${v}`
+  const slotT = (m: number, w: number, t: string) => `${m}-${w}-${t}`
+  out.forEach(c => { if (c.venue !== '线上') venueTaken.add(slotV(c.m, c.w, c.venue)); trainerTaken.add(slotT(c.m, c.w, c.trainer)) })
+  DEMANDS.forEach((d, di) => {
+    const k = Math.min(4, d.cls)
+    for (let i = 0; i < k; i++) {
+      const h = hash(d.id + i)
+      const venue = d.online ? '线上' : VENUES[h % 5]
+      let trainer = TRAINERS_C[hash(`${d.id}#T#${i}`) % TRAINERS_C.length]
+      let m = 1 + (h % 12), w = 1 + ((h >>> 4) % 4)
+      /* 场地与讲师同周只能排一班，撞上就往后挪周、再不行挪月 */
+      for (let t = 0; t < 48; t++) {
+        const vFree = venue === '线上' || !venueTaken.has(slotV(m, w, venue))
+        const tFree = !trainerTaken.has(slotT(m, w, trainer))
+        if (vFree && tFree) break
+        if (!tFree && vFree) { trainer = TRAINERS_C[(TRAINERS_C.indexOf(trainer) + 1) % TRAINERS_C.length]; continue }
+        w += 1; if (w > 4) { w = 1; m = m % 12 + 1 }
+      }
+      if (venue !== '线上') venueTaken.add(slotV(m, w, venue))
+      trainerTaken.add(slotT(m, w, trainer))
+      out.push({ id: `cl-${di}-${i}`, d: `${String(m).padStart(2, '0')}-${String(w * 7 - 3).padStart(2, '0')}`, no: i + 1, name: `${d.c}（第 ${i + 1} 期）`, venue, cap: d.online ? 2000 : 40 + (h % 3) * 10, sign: 0, m, w, days: d.online ? 1 : Math.max(1, Math.round(d.hours / 8)), trainer, st: m < NOW_M ? '已完成' : m === NOW_M ? '进行中' : h % 3 === 0 ? '已满员' : '报名中', units: BUREAUS.slice(h % 10, h % 10 + 3), demand: d.id })
+    }
+  })
+  /* 冲突按真实成因标注：迎峰度夏期停训、检修计划占用班组、场地与讲师同周被占 */
+  const future = out.filter(c => c.m > NOW_M && c.venue !== '线上' && c.id.startsWith('cl-'))
+  future.forEach((c, i) => {
+    if (i % 7 === 3) { c.conflict = '与迎峰度夏保供重叠'; c.st = '待排期' }
+    else if (i % 11 === 5) { c.conflict = '与检修计划冲突'; c.st = '待排期' }
+  })
+  const seed = future.find(c => !c.conflict)
+  const occupied = out.find(c => c.id !== seed?.id && c.venue !== '线上' && c.m > NOW_M)
+  if (seed && occupied) { seed.m = occupied.m; seed.w = occupied.w; seed.venue = occupied.venue; seed.d = occupied.d; seed.conflict = '场地已被占用'; seed.st = '待排期' }
+  const seed2 = future.find(c => !c.conflict && c !== seed)
+  const occupied2 = out.find(c => c !== seed2 && c.m > NOW_M && c.id !== seed?.id)
+  if (seed2 && occupied2) { seed2.m = occupied2.m; seed2.w = occupied2.w; seed2.d = occupied2.d; seed2.trainer = occupied2.trainer; seed2.conflict = '讲师同期已排班'; seed2.st = '待排期' }
+  out.forEach(c => { if (c.id.startsWith('cl-')) c.sign = c.st === '已满员' ? c.cap : c.st === '待排期' ? 0 : Math.round(c.cap * (.55 + (hash(c.id) % 40) / 100)) })
   return out.sort((a, b) => a.m - b.m || a.w - b.w)
 })()
 export const classById = (id: string) => CLASSES.find(c => c.id === id)
@@ -139,14 +176,16 @@ export function optimize(cap: number, online: number, coach: number) {
   const hours = Math.round(TOTAL.hours * (1 - (60 - cap) * .008))
   return { done, delta: Math.round(d * 10) / 10, budget, hours, saved: Math.round((TOTAL.budget - budget) * 10) / 10 }
 }
+export const LOAD_PTS = [...UNIT_PLANS.filter(u => !isBureauUnit(UNITS.find(x => x.name === u.name))), ...BUREAU_PLANS].map(u => ({ id: u.name, label: short(u.name).replace(/供电局$/, ''), x: u.avgH, y: u.done, r: Math.max(4, Math.min(13, Math.sqrt(u.people) / 8)), grp: u.grp, color: u.grp === '地市局' ? '#2f6df6' : u.grp === '本部职能部门' ? '#7b5cf5' : u.grp === '直属机构' ? '#19b8d8' : u.grp === '县域新电力' ? '#178a54' : '#b08a3e' }))
+const OVER = LOAD_PTS.filter(p => p.x > 70)
+const OVER_AVG = OVER.length ? Math.round(OVER.reduce((a, p) => a + p.y, 0) / OVER.length) : 0
 export const SUGGESTIONS = [
   { id: 's1', k: '线上化', t: '把 3 门面上覆盖课转为线上直播 + 回放', effect: '+2.4 pt', money: -18.6, d: '「AI 工具在本岗位的应用」「设备红外测温与判读」「新型电能表现场安装」线下班次 62 期，转线上后释放 2,480 人日。' },
-  { id: 's2', k: '学时上限', t: '把人均学时上限从 60 降到 52', effect: '+3.1 pt', money: -9.2, d: '负荷过重的 6 个单位完成率平均 71%，压缩个人意向类条目后可回到 80% 以上。' },
+  { id: 's2', k: '学时上限', t: '把人均学时上限从 60 降到 52', effect: '+3.1 pt', money: -9.2, d: `负荷过重的 ${OVER.length} 个单位完成率平均 ${OVER_AVG}%，压缩个人意向类条目后可回到 88% 以上。` },
   { id: 's3', k: '陪练前置', t: '课程后 2 周内安排陪练的比例提到 60%', effect: '+1.8 pt', money: 4.6, d: '成长地图显示陪练前置的班组达标周期短 3.4 个月。' },
   { id: 's4', k: '合并开班', t: '把 4 个地市局的继电保护班合并为省公司统一开班', effect: '+0.6 pt', money: -6.4, d: '各局报名 22–31 人，合并后 3 期即可覆盖，减少讲师重复排班。' },
 ]
 export const AI_SAVE = Math.round((optimize(52, 45, 60).saved - SUGGESTIONS.reduce((s, x) => s + x.money, 0)) * 10) / 10
-export const LOAD_PTS = [...UNIT_PLANS.filter(u => !isBureauUnit(UNITS.find(x => x.name === u.name))), ...BUREAU_PLANS].map(u => ({ id: u.name, label: short(u.name).replace(/供电局$/, ''), x: u.avgH, y: u.done, r: Math.max(4, Math.min(13, Math.sqrt(u.people) / 8)), grp: u.grp, color: u.grp === '地市局' ? '#2f6df6' : u.grp === '本部职能部门' ? '#7b5cf5' : u.grp === '直属机构' ? '#19b8d8' : u.grp === '县域新电力' ? '#178a54' : '#b08a3e' }))
 export const P_INSIGHTS = [
   { k: '完成率预测', v: '年末 84.1%', d: '按当前进度年末完成率 84.1%（区间 81.9–86.2），距 88% 目标差 3.9 个百分点；第四季度计划学时最重。', go: 'insight', tag: 'warn' },
   { k: '负荷过重', v: `${LOAD_PTS.filter(p => p.x > 70).length} 个单位人均超 70 学时`, d: `完成率平均 ${Math.round(LOAD_PTS.filter(p => p.x > 70).reduce((s, p) => s + p.y, 0) / Math.max(1, LOAD_PTS.filter(p => p.x > 70).length))}%，主要是个人意向类条目挤占；建议启用学时上限 52。`, go: 'insight', tag: 'bad' },
@@ -155,3 +194,6 @@ export const P_INSIGHTS = [
 ]
 export const PROGRAM_NAMES = MAIN_PROGRAMS.map(p => p.name)
 export const unitDefOf = (name: string): UnitDef | undefined => unitOf(name)
+
+/* 计划生成引擎的上一次运行：返回一级页后结果仍在 */
+export const ENGINE_LAST: { ran: boolean } = { ran: false }

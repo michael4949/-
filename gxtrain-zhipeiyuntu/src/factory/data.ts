@@ -122,14 +122,36 @@ export const TOTAL_COURSES = 1286
 /* ---------- 题目 ---------- */
 const LEVELS_PROD = ['初级工', '中级工', '高级工', '技师', '高级技师']
 const LEVELS_FUNC = ['助理级', '中级', '高级', '资深']
+/* 选项文本取条文里的一个完整分句，不截半句；干扰项按生产口径与职能口径各备一套 */
+const clause = (t: string, max = 34) => {
+  const raw = (t ?? '').replace(/^[：:，,、]/, '').trim()
+  const head = raw.split(/[。；;]/)[0] ?? raw
+  if (head.length <= max) return head
+  const parts = head.split(/[，,、]/)
+  let out = ''
+  for (const x of parts) { if (out && (out + x).length > max) break; out = out ? `${out}，${x}` : x }
+  return out || head.slice(0, max)
+}
+const WRONG_PROD = ['凭经验直接操作，事后补记录', '由监护人口头确认即可，不再逐项核对', '等下一班接班后再处理', '按上一次的做法照做']
+const WRONG_FUNC = ['先按口头通知办理，材料随后再补', '参照其他单位的做法执行', '待领导签字后再补办流程', '本次从简，下次检查前再补齐']
+
 function qFromAsset(a: Asset, i: number, course?: string): Question {
   const seed = hash(a.id + i)
-  const kind: QKind = (['判断', '单选', '多选', '情景'] as QKind[])[(seed + i) % 4]
+  const kind: QKind = (['判断', '单选', '多选', '情景'] as QKind[])[(hash(a.id) + i) % 4]
   const isFunc = a.grp === '本部职能部门' || a.grp === '直属机构' || a.grp === '产业公司'
   const level = pick(isFunc ? LEVELS_FUNC : LEVELS_PROD, seed >>> 2)
-  const opts = kind === '判断' ? ['正确', '错误'] : kind === '单选' ? ['凭经验直接处理', `${a.body[0].slice(0, 26)}…`, '先执行后补记录', '以上均可'] : kind === '多选' ? [`${a.body[0].slice(0, 20)}…`, `${(a.body[1] ?? a.summary).slice(0, 20)}…`, '无需核对，按习惯做法', `${(a.body[2] ?? a.summary).slice(0, 20)}…`] : ['立即按经验处理并事后汇报', `${(a.body[2] ?? a.body[0]).slice(0, 26)}…`, '等待他人决定', '跳过本环节']
+  const wrong = isFunc ? WRONG_FUNC : WRONG_PROD
+  const w = (k: number) => wrong[(seed + k) % wrong.length]
+  const anchorShort = a.anchor !== '—' ? a.anchor : a.src.split(' ')[0]
+  const right = clause(a.body[0] ?? a.summary)
+  const right2 = clause(a.body[1] ?? a.summary, 30)
+  const right3 = clause(a.body[2] ?? a.body[1] ?? a.summary, 30)
+  const opts = kind === '判断' ? ['正确', '错误']
+    : kind === '单选' ? [w(0), right, w(1), w(2)]
+      : kind === '多选' ? [right, right2 === right ? clause(a.summary, 30) : right2, w(0), right3 === right || right3 === right2 ? clause(a.title, 30) : right3]
+        : [w(1), seed % 2 ? `立即中止操作并向发令人报告，按${anchorShort}重新核对后再执行` : `暂停执行，按${anchorShort}逐项核对，确认一致后继续`, w(2), w(3)]
   const answer = kind === '判断' ? [(seed % 5 === 0 ? 1 : 0)] : kind === '多选' ? [0, 1, 3] : [1]
-  const stem = kind === '判断' ? `${a.summary.replace(/。$/, '')}${seed % 5 === 0 ? '，无需再作其他核对' : ''}。` : kind === '单选' ? `关于"${a.title}"，下列做法正确的是` : kind === '多选' ? `${a.title}中，应当做到的包括` : `${a.post}在${a.topic}环节遇到与"${a.title}"要求不一致的情况，应当`
+  const stem = kind === '判断' ? `${a.summary.replace(/。$/, '')}${seed % 5 === 0 ? '，无需再作其他核对' : ''}。` : kind === '单选' ? `关于"${a.title}"，下列做法正确的是` : kind === '多选' ? `${a.title}中，应当做到的包括` : (seed + i) % 2 ? `${a.post}在${a.topic}环节遇到与"${a.title}"要求不一致的情况，应当` : `${a.post}执行${a.topic}作业时，发现现场情况与"${a.title}"不符，正确做法是`
   const n = 60 + (seed % 900)
   return { id: `Q-${pad(10000 + (seed % 80000), 5)}`, kind, stem, options: opts, answer, analysis: a.body[0], kp: a.tags[0] ?? a.topic, anchor: a.id, anchorText: `${a.src}${a.anchor !== '—' ? `（${a.anchor}）` : ''}`, unit: a.unit, post: a.post, level, diff: 1 + (seed % 5), disc: Math.round((0.18 + (seed % 40) / 100) * 100) / 100, stats: { n, correct: 48 + (seed % 48) }, status: seed % 9 === 0 ? '待审核' : seed % 31 === 0 ? '已停用' : '已发布', src: (['AI 生成', '内训师编写', '规程解析'] as const)[seed % 3], course, updated: a.updated, wrongOpt: kind === '判断' ? undefined : answer[0] === 1 ? 0 : 2 }
 }

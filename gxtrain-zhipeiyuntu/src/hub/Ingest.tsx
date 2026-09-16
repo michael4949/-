@@ -103,7 +103,7 @@ export function IngestView() {
 }
 
 export function BatchView({ id }: { id: string }) {
-  const { push, toast } = useNav()
+  const { push, toast, back } = useNav()
   const b = batchById(id)
   const [items, setItems] = useState<BatchItem[]>(b?.items ?? [])
   if (!b) return null
@@ -111,7 +111,7 @@ export function BatchView({ id }: { id: string }) {
   return (
     <div className="h-full flex flex-col gap-3 p-3 min-h-0">
       <div className="panel p-4 shrink-0">
-        <div className="flex items-center gap-2 mb-2"><span className="text-[15px] font-semibold">{b.name}</span><StatusTag s={b.st} /><span className="text-[11.5px] text-slate-500 ml-auto">{SOURCES.find(s => s.id === b.src)?.name} · {b.unit} · {b.time} · 共 {b.n} 条（本页展示代表性条目）</span></div>
+        <div className="flex items-center gap-2 mb-2"><span className="text-[15px] font-semibold">{b.name}</span><StatusTag s={b.st} /><span className="text-[11.5px] text-slate-500 ml-auto">{SOURCES.find(s => s.id === b.src)?.name} · {b.unit} · {b.time} · 共 {b.n} 条</span></div>
         <Pipe stage={b.stage} counts={[1, b.n + 12, b.n, b.n, b.n - 3, b.stage >= 5 ? b.n - 3 : 0, b.stage >= 6 ? b.n - 3 : 0]} />
       </div>
       <div className="flex-1 min-h-0 grid grid-cols-[1fr_300px] gap-3">
@@ -141,7 +141,7 @@ export function BatchView({ id }: { id: string }) {
             <div className="p-3 text-[11.5px] text-slate-600 leading-relaxed space-y-2">
               <div>通过的条目发布后自动：写入资产目录并挂接规程锚点；推送到问数助手更新回答；题目类进入题库待审核；含"建议关联陪练"标记的推送到教练编辑器。</div>
               <button className="btn btn-primary w-full" disabled={items.some(x => x.st === '待审')} onClick={() => toast('批次已发布，下游 4 类引用已更新')}>发布本批次</button>
-              <button className="btn w-full" onClick={() => push({ v: 'ingest' })}>返回流水线</button>
+              <button className="btn w-full" onClick={() => back()}>返回流水线</button>
             </div>
           </Panel>
         </div>
