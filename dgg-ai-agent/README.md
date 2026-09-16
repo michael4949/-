@@ -50,6 +50,19 @@ NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（
 | `&wx=<url>` | 「结果发送到微信」二维码内容（承接方式定下来后改默认值） |
 | `&llm=<endpoint>&model=<id>` | 可选：LLM 薄代理，`POST {model, prompt} → {text}`；不填则全程模板 |
 
+## PDF 导出规则（两套版式共用）
+
+Chromium 导出 PDF 时会把带 `box-shadow`、`filter`、以及被圆角容器裁剪的元素栅格化成带透明蒙版的位图。
+部分阅读器不合成蒙版，这些位图就会在纸面上显示为灰色方块。因此打印样式里统一做四件事：
+
+1. `box-shadow` / `filter` / `text-shadow` 全部关闭，改用 1px 发丝线保持层次
+2. 半透明叠加伪元素（高光条、刻度、卡片顶部帽条）关闭或改为实色边框
+3. 所有容器 `overflow: visible`、圆角归零，避免裁剪产生蒙版
+4. 表头渐变在打印时改为实色
+
+效果：模块 1 的完整报告位图从 424 张降到 4 张，模块 2 从 563 张降到 25 张，剩下的只有 logo。
+`test/screenshot*.js` 会核对 PDF 页数是否等于屏上页数，`test/measure-m*.js` 在 A4 版心 703px 下逐页量高。
+
 ## 已完成模块
 
 | # | 模块 | 内核 + 数据 | 原型 | SKILL.md 契约 | 状态 |

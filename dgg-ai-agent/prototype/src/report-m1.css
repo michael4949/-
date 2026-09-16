@@ -38,6 +38,7 @@
 }
 .m1-bar .t { font-size: calc(21px * var(--scale)); font-weight: 900; color: #fff; line-height: 1.15; text-shadow: 0 2px 6px rgba(0,0,0,.24); letter-spacing: .3px; }
 .m1-bar .en { font-size: calc(9.5px * var(--scale)); font-weight: 700; color: rgba(255,255,255,.74); letter-spacing: 3.2px; margin-top: 4px; text-transform: uppercase; }
+.m1-bar .en.zh { letter-spacing: .4px; text-transform: none; font-weight: 500; font-size: calc(10.5px * var(--scale)); color: rgba(255,255,255,.82); line-height: 1.5; }
 .m1-bar .rt { text-align: right; color: #fff; padding-right: 54px; }
 .m1-bar .rt .v { font-size: calc(19px * var(--scale)); font-weight: 900; line-height: 1; text-shadow: 0 2px 5px rgba(0,0,0,.26); }
 .m1-bar .rt .k { font-size: calc(10px * var(--scale)); color: rgba(255,255,255,.78); margin-top: 3px; }
@@ -175,7 +176,7 @@
 .m1-end .rule { height: 4px; border-radius: 3px; width: 210px; margin: 20px auto 0; background: linear-gradient(90deg, #1157B5, #0FA3C7, #0E9F6E, #C9A227); }
 
 @media print {
-  .page.m1 { padding: 0 0 6mm; background: #fff; --scale: .715; }
+  .page.m1 { padding: 0 0 6mm; background: #fff; --scale: .70; }
   .page.m1-front, .page.m1-end { padding: 0; min-height: 268mm; }
   .page.m1-end { padding: 40px; }
   .m1-cards.c2 { grid-template-columns: 1fr 1fr !important; }
@@ -206,3 +207,28 @@
 .page.m1 svg[aria-label="六维得分仪表"] { max-width: 590px; margin: 0 auto; }
 .page.m1 svg[aria-label="综合得分"] { max-width: 250px; }
 .page.m1 svg[aria-label="场景价值难度矩阵"] { max-width: 520px; margin: 0 auto; }
+
+/* ---------- 打印：阴影与模糊一律关闭 ----------
+ * Chromium 导出 PDF 时会把每个 box-shadow / filter 栅格化成带透明蒙版的位图，
+ * 在纸面上表现为灰色方块。改用发丝线保持层次，全程保持矢量。
+ */
+@media print {
+  .page.m1, .page.m1 *, .page.m1-front, .page.m1-front *, .page.m1-end, .page.m1-end * {
+    box-shadow: none !important; filter: none !important; text-shadow: none !important;
+  }
+  .page.m1 .m1-card, .page.m1 .m1-stat, .page.m1 .m1-tbl, .m1-front .lvcard { border: 1px solid #E6ECF4; }
+  .page.m1 .m1-tbl { border-radius: 0; overflow: visible; }
+  .page.m1 .m1-tbl th { background: var(--mc); }
+  .page.m1 .m1-tbl th:first-child, .page.m1 .m1-tbl td:first-child { border-left: 0; }
+  .page.m1 .m1-note { border: 1px solid #E6ECF4; }
+  .page.m1 .m1-card, .page.m1 .m1-stat, .page.m1 .m1-note { border-radius: 0; overflow: visible; }
+  .page.m1 .m1-card::before, .page.m1 .m1-stat::after, .page.m1 .m1-note::before { border-radius: 0; }
+  .page.m1 .m1-block, .page.m1 .m1-bar { border-radius: 0; }
+  /* 圆角容器裁剪子元素会让 Chromium 生成蒙版位图，打印时一律去掉裁剪 */
+  .page.m1 *, .page.m1 *::before, .page.m1 *::after { overflow: visible !important; }
+  .m1-bar { border-bottom: 3px solid #0B1B33; }
+  .m1-bar::before, .m1-bar::after, .m1-card::after { display: none !important; }
+  .m1-bar .no { border: 1px solid #FFFFFF; }
+  .m1-block { border-bottom: 3px solid #0B1B33; }
+  .page.m1 .m1-head::after { background: linear-gradient(90deg, var(--mc) 0%, var(--mc2) 18%, #E7EDF5 18%); }
+}

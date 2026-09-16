@@ -444,7 +444,7 @@
     var p = page1('04.' + (i + 1) + ' ' + d.name + '维度', r, 'dim');
     p._body.appendChild(h('div', { class: 'm1-bar', style: '--mc:' + d.color + ';--mc2:' + d.color }, [
       h('div', { class: 'no' }, ['0' + (4)]),
-      h('div', {}, [h('div', { class: 't' }, [d.name + '维度']), h('div', { class: 'en' }, [d.desc])]),
+      h('div', {}, [h('div', { class: 't' }, [d.name + '维度']), h('div', { class: 'en zh' }, [d.desc])]),
       h('div', { class: 'rt' }, [h('div', { class: 'v num' }, [d.pct + '%']), h('div', { class: 'k' }, [d.score + ' / ' + d.max + ' 分 · ' + d.level.code + ' ' + d.level.name + ' · ' + (d.positionName || '参考带待补')])])
     ]));
     p._body.appendChild(stats1(d.subdims.map(function (sd) {
@@ -458,7 +458,8 @@
             h('div', { style: 'margin-bottom:5px' }, [pill1(sd.bandName, sd.band === 'high' ? 'ok' : sd.band === 'mid' ? 'mod' : 'warn')]),
             h('div', { style: 'font-size:11px;color:var(--r-body);line-height:1.68' }, [sd.diagnosis])
           ], null, sd.band === 'high' ? '#0E9F6E' : sd.band === 'mid' ? '#1157B5' : '#E8A33D');
-        }))
+        })),
+        note1('本维度小结 · SUMMARY', null, d.summary)
       ]),
       h('div', {}, [
         hh1('本维度作答明细', 'ANSWERS'),
@@ -473,7 +474,6 @@
           ], '对应服务 ' + a.service + '　可先试 ' + a.module, d.color, d.color);
         }))
       ]), 'wr'));
-    p._body.appendChild(note1('本维度小结 · SUMMARY', null, d.summary));
     return p;
   }
 

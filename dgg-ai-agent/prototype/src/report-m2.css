@@ -43,6 +43,7 @@
 }
 .m2-bar .t { font-size: calc(21px * var(--scale)); font-weight: 900; color: #fff; line-height: 1.15; text-shadow: 0 2px 6px rgba(0,0,0,.22); letter-spacing: .3px; }
 .m2-bar .en { font-size: calc(9.5px * var(--scale)); font-weight: 700; color: rgba(255,255,255,.72); letter-spacing: 3.2px; margin-top: 4px; text-transform: uppercase; }
+.m2-bar .en.zh { letter-spacing: .4px; text-transform: none; font-weight: 500; font-size: calc(10.5px * var(--scale)); color: rgba(255,255,255,.82); line-height: 1.5; }
 .m2-bar .rt { text-align: right; color: #fff; }
 .m2-bar .rt .v { font-size: calc(19px * var(--scale)); font-weight: 900; line-height: 1; text-shadow: 0 2px 5px rgba(0,0,0,.24); }
 .m2-bar .rt .k { font-size: calc(10px * var(--scale)); color: rgba(255,255,255,.76); margin-top: 3px; }
@@ -179,4 +180,31 @@
   .m2-two.wr { grid-template-columns: .78fr 1.22fr !important; }
   .m2-front .split { grid-template-columns: 1fr 232px !important; }
   .m2-bar, .m2-block, .m2-tbl th, .m2-card::before, .m2-stat::after, .m2-note::before, .m2-foot .rule, .m2-steps li::before, .m2-list li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ---------- 打印：阴影与模糊一律关闭（同模块 1 口径） ---------- */
+@media print {
+  .page.m2, .page.m2 *, .page.m2-front, .page.m2-front *, .page.m2-end, .page.m2-end * {
+    box-shadow: none !important; filter: none !important; text-shadow: none !important;
+  }
+  .m2-bar::after { display: none !important; }
+  .page.m2 .m2-card, .page.m2 .m2-stat, .page.m2 .m2-tbl, .m2-front .pick { border: 1px solid #E6ECF4; }
+  .page.m2 .m2-tbl { border-radius: 0; overflow: visible; }
+  .page.m2 .m2-tbl th { background: var(--mc); }
+  .page.m2 .m2-tbl th:first-child, .page.m2 .m2-tbl td:first-child { border-left: 0; }
+  .page.m2 .m2-note { border: 1px solid #E6ECF4; }
+  .page.m2 .m2-card { border-radius: 0; overflow: visible; }
+  .page.m2 .m2-card::before { display: none; }
+  .page.m2 .m2-card { border-top: 5px solid var(--cc, var(--mc)); }
+  .page.m2 .m2-stat { border-radius: 0; overflow: visible; }
+  .page.m2 .m2-stat::after { border-radius: 0; }
+  .page.m2 .m2-note { border-radius: 0; overflow: visible; }
+  .page.m2 .m2-block, .page.m2 .m2-bar { border-radius: 0; }
+  .page.m2 .m2-bar .no { border-radius: 0; }
+  /* 圆角容器裁剪子元素会让 Chromium 生成蒙版位图，打印时一律去掉裁剪 */
+  .page.m2 *, .page.m2 *::before, .page.m2 *::after { overflow: visible !important; }
+  .m2-bar { border-bottom: 3px solid #0B1B33; }
+  .m2-bar::before, .m2-bar::after { display: none !important; }
+  .m2-bar .no { border: 1px solid #FFFFFF; }
+  .m2-block { border-bottom: 3px solid #0B1B33; }
 }

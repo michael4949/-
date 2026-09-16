@@ -292,5 +292,7 @@
   .tiers { grid-template-columns: repeat(4, 1fr) !important; }
   .model { grid-template-columns: repeat(6, 1fr) !important; }
   .fig, .verdict, .ch-banner, .qcard .hd, .dir-card .hd, .phase-card .hd, .scene-card .hd, .tbl th, .cover .low .badge, .level-card .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* 阴影与模糊在 PDF 里会被栅格化成灰块，打印时一律关闭 */
+  .report, .report * { box-shadow: none !important; filter: none !important; }
 }
 .page svg[aria-label="场景价值难度矩阵"] { max-width: 520px; margin: 0 auto; }

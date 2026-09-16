@@ -413,6 +413,13 @@
       rv ? h('div', { class: 'rt' }, [h('div', { class: 'v num' }, [rv]), rk ? h('div', { class: 'k' }, [rk]) : null]) : h('div', {})
     ]);
   }
+  function barZh(no, title, zh, rv, rk) {
+    return h('div', { class: 'm2-bar' }, [
+      h('div', { class: 'no' }, [no]),
+      h('div', {}, [h('div', { class: 't' }, [title]), zh ? h('div', { class: 'en zh' }, [zh]) : null]),
+      rv ? h('div', { class: 'rt' }, [h('div', { class: 'v num' }, [rv]), rk ? h('div', { class: 'k' }, [rk]) : null]) : h('div', {})
+    ]);
+  }
   function hh(title, en) { return h('h3', { class: 'm2-h' }, [title, en ? h('span', { class: 'en' }, [en]) : null]); }
   function card(title, sub, body, note, c1, c2) {
     var k = h('div', { class: 'm2-card', style: c1 ? '--cc:' + c1 + ';--cc2:' + (c2 || c1) : '' });
@@ -813,7 +820,7 @@
   function pScene(r, sc, i) {
     var p = page2(('0' + (7 + i)).slice(-2) + ' 第 ' + (i + 1) + ' 场景 · ' + sc.name, r, 'scene');
     var tier = RT().investment.tiers.filter(function (t) { return t.key === sc.cost; })[0];
-    p._body.appendChild(bar(String(sc.rank), sc.name, sc.stage + ' · ' + sc.user, sc.score.toFixed(1), '综合得分 · 排名第 ' + sc.rank));
+    p._body.appendChild(barZh(String(sc.rank), sc.name, sc.stage + ' · ' + sc.user, sc.score.toFixed(1), '综合得分 · 排名第 ' + sc.rank));
     p._body.appendChild(stats([
       { k: '对应模块', v: sc.module, s: '轻享版可开通', c: '#1157B5', c2: '#00C2F0' },
       { k: '上线周期', v: String(sc.weeks), u: '周', s: '含数据整理与试运行', c: '#0E9F6E', c2: '#0FA3C7' },
