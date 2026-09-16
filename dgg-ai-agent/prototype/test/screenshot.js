@@ -25,11 +25,11 @@ async function runFlow(page, tag) {
   await page.screenshot({ path: `${out}/${tag.name}-4-report-top.png` });
   const info = await page.evaluate(() => ({
     pages: document.querySelectorAll('.report .page').length,
-    level: document.querySelector('.cover .low .badge .code').textContent + ' ' + document.querySelector('.cover .low .badge .lname').textContent,
-    pct: document.querySelector('.cover .low .big').firstChild.textContent,
-    top3: [...document.querySelectorAll('.acts-mini .act-card .t')].map((t) => t.textContent.trim()),
+    level: document.querySelector('.m1-front .lvcard .code').textContent + ' ' + document.querySelector('.m1-front .lvcard .lname').textContent.replace(' 级',''),
+    pct: document.querySelector('.m1-front .m1-stat .v').textContent,
+    top3: [...document.querySelectorAll('.report .page[data-page="4"] .m1-cards .m1-card > .ct')].map((t) => t.textContent.trim()).slice(0, 3),
     spent: document.getElementById('cr-spent').textContent, left: document.getElementById('cr-left').textContent,
-    tocCount: document.querySelectorAll('#toc-list li').length
+    tocCount: document.querySelectorAll('.toc button').length
   }));
   return info;
 }
@@ -46,7 +46,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
   const browser = await chromium.launch();
   let page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const land = await runFlow(page, { name: 'land', station: '3' });
-  await shootPages(page, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 24, 25, 26, 28, 29, 30, 32, 33], 'land');
+  await shootPages(page, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28], 'land');
   await page.emulateMedia({ media: 'print' });
   await page.pdf({ path: `${out}/land-print-full.pdf`, format: 'A4', printBackground: true, margin: { top: '10mm', bottom: '10mm', left: '12mm', right: '12mm' } });
   await page.evaluate(() => document.body.classList.add('print-brief'));
@@ -62,7 +62,7 @@ function pdfPages(file) { const d = fs.readFileSync(file); return (d.toString('l
 
   console.log('屏上（横屏）:', JSON.stringify(land));
   console.log('内核 golden : ', golden.level.code, golden.level.name, golden.pct + '%', golden.actions.slice(0, 3).map((a) => a.title));
-  const ok = land.level === golden.level.code + ' ' + golden.level.name && land.pct === golden.pct + '%' && land.top3.every((t, i) => t === golden.actions[i].title) && land.spent === '20' && land.left === '9,980';
+  const ok = land.level === golden.level.code + ' ' + golden.level.name && land.pct === golden.pct + '%' && land.top3.every((t, i) => t === golden.actions[i].title) && land.spent === '20' && land.left === '9,980' && land.pages === 28;
   console.log(ok ? '✔ 屏幕与内核一致' : '✘ 不一致');
   console.log('报告页数（屏）:', land.pages, '| 竖屏页数:', port.pages, '| 目录条目:', land.tocCount);
   console.log('PDF 页数：完整', pdfPages(`${out}/land-print-full.pdf`), '· 速览', pdfPages(`${out}/land-print-brief.pdf`));

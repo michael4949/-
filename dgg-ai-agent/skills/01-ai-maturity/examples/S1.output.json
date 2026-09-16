@@ -2168,6 +2168,144 @@
       "报价与售后知识库"
     ]
   },
+  "gapPlan": {
+    "needPts": 24,
+    "needPct": 21.3,
+    "code": "L3",
+    "name": "流程",
+    "focus": "指标分解与团队能力建设",
+    "items": [
+      {
+        "dimension": "people",
+        "name": "人员",
+        "color": "#E0635C",
+        "score": 4,
+        "max": 18,
+        "pct": 22.2,
+        "targetPct": 66.7,
+        "gapPct": 44.5,
+        "alloc": 8.3,
+        "reached": false,
+        "note": "还差 44.5 个百分点，约需在本维再拿 8.3 分"
+      },
+      {
+        "dimension": "compliance",
+        "name": "合规",
+        "color": "#0E9F6E",
+        "score": 5,
+        "max": 18,
+        "pct": 27.8,
+        "targetPct": 66.7,
+        "gapPct": 38.9,
+        "alloc": 7.3,
+        "reached": false,
+        "note": "还差 38.9 个百分点，约需在本维再拿 7.3 分"
+      },
+      {
+        "dimension": "process",
+        "name": "流程",
+        "color": "#8A54DC",
+        "score": 8,
+        "max": 18,
+        "pct": 44.4,
+        "targetPct": 66.7,
+        "gapPct": 22.3,
+        "alloc": 4.2,
+        "reached": false,
+        "note": "还差 22.3 个百分点，约需在本维再拿 4.2 分"
+      },
+      {
+        "dimension": "data",
+        "name": "数据",
+        "color": "#0FA3C7",
+        "score": 10,
+        "max": 18,
+        "pct": 55.6,
+        "targetPct": 66.7,
+        "gapPct": 11.1,
+        "alloc": 2.1,
+        "reached": false,
+        "note": "还差 11.1 个百分点，约需在本维再拿 2.1 分"
+      },
+      {
+        "dimension": "strategy",
+        "name": "战略",
+        "color": "#1157B5",
+        "score": 11,
+        "max": 18,
+        "pct": 61.1,
+        "targetPct": 66.7,
+        "gapPct": 5.6,
+        "alloc": 1,
+        "reached": false,
+        "note": "还差 5.6 个百分点，约需在本维再拿 1 分"
+      },
+      {
+        "dimension": "budget",
+        "name": "预算",
+        "color": "#C9A227",
+        "score": 11,
+        "max": 18,
+        "pct": 61.1,
+        "targetPct": 66.7,
+        "gapPct": 5.6,
+        "alloc": 1,
+        "reached": false,
+        "note": "还差 5.6 个百分点，约需在本维再拿 1 分"
+      }
+    ],
+    "text": "进入 L3 流程 级需要总分再提高 24 分。按各维与门槛的差距分摊，缺口最大的是「人员」。"
+  },
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "定目标与验收标准、协调跨部门、每月看一次进展",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "合规维度对应的业务负责人",
+      "duty": "提供业务规则、参与试运行、反馈使用问题",
+      "time": "推进期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "IT 或熟悉业务系统的人员（现有 1–2 人）",
+      "duty": "导出所需数据、确认字段口径、处理系统对接",
+      "time": "起步阶段集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "完成了一轮三个月的改进动作",
+      "why": "打基础阶段的三件事做完后，对应维度的作答会变化，等级位置会重新定位",
+      "extra": "本次的三件事：把口头约定变成书面制度并落实、让一个岗位先把 AI 工具用起来、把执行差异最大的环节做成模板与清单。"
+    },
+    {
+      "when": "上线了新的业务系统",
+      "why": "数据维度的子维度得分会明显提高，六维形状随之改变",
+      "extra": "当前已有 ERP、财务软件。"
+    },
+    {
+      "when": "配置了数字化专职人员",
+      "why": "人员与流程两维的推进能力变化，行动建议的优先级会重排",
+      "extra": "当前 1–2 人。"
+    },
+    {
+      "when": "经营规模或业务线发生较大变化",
+      "why": "同行参考带按行业与规模分格，规模变了参考带也会换一格",
+      "extra": ""
+    },
+    {
+      "when": "距上次评估超过 6 个月",
+      "why": "同类企业的落地经验在更新，参考带与行动库会随之调整",
+      "extra": ""
+    }
+  ],
   "keyNumbers": [
     {
       "k": "综合得分",

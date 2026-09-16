@@ -8,7 +8,7 @@ const SAMPLE = process.argv[2] || 'S1';
 const S1 = JSON.parse(fs.readFileSync(path.join(ex, SAMPLE + '.input.json'), 'utf8'));
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 794, height: 1123 } }); // A4 @96dpi
+  const page = await browser.newPage({ viewport: { width: 703, height: 1123 } }); // A4 版心：210 - 12×2 mm 边距 = 186mm @96dpi
   await page.goto(url + '?station=3');
   await page.click('.card[data-id="m2"]'); await page.waitForSelector('.form-grid');
   await page.click('.rail .link'); await page.click(`.rail .menu button:nth-child(${Number(SAMPLE.slice(1))})`);

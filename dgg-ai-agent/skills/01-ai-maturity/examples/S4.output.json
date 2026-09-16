@@ -2171,6 +2171,144 @@
       "应收账款与回款预警"
     ]
   },
+  "gapPlan": {
+    "needPts": 15,
+    "needPct": 13.9,
+    "code": "L4",
+    "name": "经营",
+    "focus": "平台化与组织能力沉淀",
+    "items": [
+      {
+        "dimension": "budget",
+        "name": "预算",
+        "color": "#C9A227",
+        "score": 12,
+        "max": 18,
+        "pct": 66.7,
+        "targetPct": 86.1,
+        "gapPct": 19.4,
+        "alloc": 3.5,
+        "reached": false,
+        "note": "还差 19.4 个百分点，约需在本维再拿 3.5 分"
+      },
+      {
+        "dimension": "compliance",
+        "name": "合规",
+        "color": "#0E9F6E",
+        "score": 12,
+        "max": 18,
+        "pct": 66.7,
+        "targetPct": 86.1,
+        "gapPct": 19.4,
+        "alloc": 3.5,
+        "reached": false,
+        "note": "还差 19.4 个百分点，约需在本维再拿 3.5 分"
+      },
+      {
+        "dimension": "strategy",
+        "name": "战略",
+        "color": "#1157B5",
+        "score": 13,
+        "max": 18,
+        "pct": 72.2,
+        "targetPct": 86.1,
+        "gapPct": 13.9,
+        "alloc": 2.5,
+        "reached": false,
+        "note": "还差 13.9 个百分点，约需在本维再拿 2.5 分"
+      },
+      {
+        "dimension": "process",
+        "name": "流程",
+        "color": "#8A54DC",
+        "score": 13,
+        "max": 18,
+        "pct": 72.2,
+        "targetPct": 86.1,
+        "gapPct": 13.9,
+        "alloc": 2.5,
+        "reached": false,
+        "note": "还差 13.9 个百分点，约需在本维再拿 2.5 分"
+      },
+      {
+        "dimension": "people",
+        "name": "人员",
+        "color": "#E0635C",
+        "score": 13,
+        "max": 18,
+        "pct": 72.2,
+        "targetPct": 86.1,
+        "gapPct": 13.9,
+        "alloc": 2.5,
+        "reached": false,
+        "note": "还差 13.9 个百分点，约需在本维再拿 2.5 分"
+      },
+      {
+        "dimension": "data",
+        "name": "数据",
+        "color": "#0FA3C7",
+        "score": 15,
+        "max": 18,
+        "pct": 83.3,
+        "targetPct": 86.1,
+        "gapPct": 2.8,
+        "alloc": 0.5,
+        "reached": false,
+        "note": "还差 2.8 个百分点，约需在本维再拿 0.5 分"
+      }
+    ],
+    "text": "进入 L4 经营 级需要总分再提高 15 分。按各维与门槛的差距分摊，缺口最大的是「预算」。"
+  },
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "定目标与验收标准、协调跨部门、每月看一次进展",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "预算维度对应的业务负责人",
+      "duty": "提供业务规则、参与试运行、反馈使用问题",
+      "time": "推进期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "IT 或熟悉业务系统的人员（现有 3–10 人）",
+      "duty": "导出所需数据、确认字段口径、处理系统对接",
+      "time": "起步阶段集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "完成了一轮三个月的改进动作",
+      "why": "打基础阶段的三件事做完后，对应维度的作答会变化，等级位置会重新定位",
+      "extra": "本次的三件事：按场景回收期分配下一期预算、组建 2–3 人的 AI 应用小组、把 AI 指标分解到部门考核。"
+    },
+    {
+      "when": "上线了新的业务系统",
+      "why": "数据维度的子维度得分会明显提高，六维形状随之改变",
+      "extra": "当前已有 ERP、电商 / 门店系统、CRM。"
+    },
+    {
+      "when": "配置了数字化专职人员",
+      "why": "人员与流程两维的推进能力变化，行动建议的优先级会重排",
+      "extra": "当前 3–10 人。"
+    },
+    {
+      "when": "经营规模或业务线发生较大变化",
+      "why": "同行参考带按行业与规模分格，规模变了参考带也会换一格",
+      "extra": ""
+    },
+    {
+      "when": "距上次评估超过 6 个月",
+      "why": "同类企业的落地经验在更新，参考带与行动库会随之调整",
+      "extra": ""
+    }
+  ],
   "keyNumbers": [
     {
       "k": "综合得分",

@@ -263,6 +263,42 @@
     // 答案分布
     var dist = [0, 0, 0, 0]; answers.forEach(function (x) { dist[x.score]++; });
 
+    // 距下一级：逐维需要补多少分
+    var gapPlan = null;
+    if (next) {
+      var needTotal = Math.ceil(next.minPct / 100 * max) - total;
+      var deficits = dims.map(function (d) { return { d: d, gap: Math.max(0, Math.round((next.minPct - d.pct) / 100 * d.max * 10) / 10) }; });
+      var sumDef = deficits.reduce(function (t, x) { return t + x.gap; }, 0) || 1;
+      gapPlan = {
+        needPts: needTotal, needPct: gapPct, code: next.code, name: next.name, focus: next.focus,
+        items: deficits.sort(function (a, b) { return b.gap - a.gap; }).map(function (x) {
+          var alloc = Math.round(needTotal * x.gap / sumDef * 10) / 10;
+          return { dimension: x.d.key, name: x.d.name, color: x.d.color, score: x.d.score, max: x.d.max, pct: x.d.pct,
+            targetPct: next.minPct, gapPct: Math.round((next.minPct - x.d.pct) * 10) / 10, alloc: alloc,
+            reached: x.d.pct >= next.minPct,
+            note: x.d.pct >= next.minPct ? '已达到 ' + next.code + ' 级门槛，保持即可'
+              : '还差 ' + Math.round((next.minPct - x.d.pct) * 10) / 10 + ' 个百分点，约需在本维再拿 ' + alloc + ' 分' };
+        }),
+        text: '进入 ' + next.code + ' ' + next.name + ' 级需要总分再提高 ' + needTotal + ' 分。按各维与门槛的差距分摊，缺口最大的是「' +
+          deficits.slice().sort(function (a, b) { return b.gap - a.gap; })[0].d.name + '」。'
+      };
+    }
+
+    // 角色分工与何时重评
+    var roles = data.reportText.roles.items.map(function (r0) {
+      var who = r0.who;
+      if (r0.key === 'biz') who = weakDims[0].name + '维度对应的业务负责人';
+      if (r0.key === 'data') who = p.itStaff === 'none' ? '暂无专职，建议由熟悉' + (has('none') ? '现有台账' : profile.systemsName[0]) + '的同事兼任' : r0.who + '（现有 ' + profile.itStaffName + '）';
+      return { key: r0.key, name: r0.name, who: who, duty: r0.duty, time: r0.time };
+    });
+    var retrigger = data.reportText.retrigger.items.map(function (x) {
+      var extra = '';
+      if (x.when === '完成了一轮三个月的改进动作') extra = '本次的三件事：' + actions.slice(0, 3).map(function (a) { return a.title; }).join('、') + '。';
+      if (x.when === '上线了新的业务系统') extra = has('none') ? '当前无业务系统，上线首个系统后数据维度会明显变化。' : '当前已有 ' + profile.systemsName.join('、') + '。';
+      if (x.when === '配置了数字化专职人员') extra = p.itStaff === 'none' ? '当前无数字化专职人员。' : '当前 ' + profile.itStaffName + '。';
+      return { when: x.when, why: x.why, extra: extra };
+    });
+
     // 关键数字与摘要
     var keyNumbers = [
       { k: '综合得分', v: tp + '%', sub: total + ' / ' + max },
@@ -337,6 +373,7 @@
       risks: risks,
       answerDistribution: dist,
       sectorInsight: { name: profile.sectorName, insight: ind.sector.insight, aiFocus: ind.sector.aiFocus },
+      gapPlan: gapPlan, roles: roles, retrigger: retrigger,
       keyNumbers: keyNumbers,
       summary: summary,
       summaryText: summaryText,
