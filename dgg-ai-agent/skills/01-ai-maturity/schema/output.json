@@ -2,232 +2,1682 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "dgg/01-ai-maturity/output",
   "title": "企业AI成熟度评估 · 输出",
-  "description": "core/compute.js 的返回值。成功时 ok=true，携带 33 页报告所需的全部结构化数据；输入不合法时 ok=false 并列出 errors，不扣积分。所有文本字段均为可直接呈现的肯定句，已过禁忌词扫描。",
-  "oneOf": [ { "$ref": "#/definitions/success" }, { "$ref": "#/definitions/failure" } ],
-
+  "description": "core/compute.js 的返回值。成功时 ok=true，携带 28 页报告所需的全部结构化数据；输入不合法时 ok=false 并列出 errors，不扣积分。所有文本字段均为可直接呈现的肯定句，已过禁忌词扫描。",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/success"
+    },
+    {
+      "$ref": "#/definitions/failure"
+    }
+  ],
   "definitions": {
-    "dimKey": { "enum": ["strategy", "data", "process", "people", "budget", "compliance"] },
-    "subKey": { "type": "string", "pattern": "^[SDPHBC][123]$" },
-    "questionId": { "type": "string", "pattern": "^q(0[1-9]|[12][0-9]|3[0-6])$" },
-    "actionId": { "type": "string", "pattern": "^[SDPHBC]-L[0-4]-[12]$", "description": "data/actions.json 条目 id：维度首字母-等级-序号" },
-    "levelCode": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
-    "levelName": { "enum": ["起步", "尝试", "场景", "流程", "经营"] },
-    "pct": { "type": "number", "minimum": 0, "maximum": 100, "description": "百分比，保留一位小数" },
-    "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
-    "band": { "enum": ["low", "mid", "high"], "description": "子维度分档：0–2 待加强 / 3–4 基本具备 / 5–6 已建立" },
-    "bandName": { "enum": ["待加强", "基本具备", "已建立"] },
-    "position": { "enum": ["above", "within", "below", "unknown"], "description": "相对同行参考带：高于 / 带内 / 低于 / 无参考带" },
-    "positionName": { "enum": ["高于同行参考带", "处于同行参考带内", "低于同行参考带", ""] },
-    "cost": { "enum": ["零", "轻", "中", "重"], "description": "投入档位：零投入 / 1–5 万 / 5–20 万 / 20 万以上" },
-    "phase": { "enum": ["p1", "p2", "p3"] },
-    "module": { "enum": ["企业AI成熟度评估", "企业AI高价值场景排序", "企业AI投入ROI测算器", "AI获客", "AI人力官", "AI法务", "AI CFO", "AI流程提效", "AI决策", "AI ERP", "AI软件开发"], "description": "薯片AI智能体 11 个模块名，以 DM 为准" },
-
+    "dimKey": {
+      "enum": [
+        "strategy",
+        "data",
+        "process",
+        "people",
+        "budget",
+        "compliance"
+      ]
+    },
+    "subKey": {
+      "type": "string",
+      "pattern": "^[SDPHBC][123]$"
+    },
+    "questionId": {
+      "type": "string",
+      "pattern": "^q(0[1-9]|[12][0-9]|3[0-6])$"
+    },
+    "actionId": {
+      "type": "string",
+      "pattern": "^[SDPHBC]-L[0-4]-[12]$",
+      "description": "data/actions.json 条目 id：维度首字母-等级-序号"
+    },
+    "levelCode": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ]
+    },
+    "levelName": {
+      "enum": [
+        "起步",
+        "尝试",
+        "场景",
+        "流程",
+        "经营"
+      ]
+    },
+    "pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "百分比，保留一位小数"
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "band": {
+      "enum": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "description": "子维度分档：0–2 待加强 / 3–4 基本具备 / 5–6 已建立"
+    },
+    "bandName": {
+      "enum": [
+        "待加强",
+        "基本具备",
+        "已建立"
+      ]
+    },
+    "position": {
+      "enum": [
+        "above",
+        "within",
+        "below",
+        "unknown"
+      ],
+      "description": "相对同行参考带：高于 / 带内 / 低于 / 无参考带"
+    },
+    "positionName": {
+      "enum": [
+        "高于同行参考带",
+        "处于同行参考带内",
+        "低于同行参考带",
+        ""
+      ]
+    },
+    "cost": {
+      "enum": [
+        "零",
+        "轻",
+        "中",
+        "重"
+      ],
+      "description": "投入档位：零投入 / 1–5 万 / 5–20 万 / 20 万以上"
+    },
+    "phase": {
+      "enum": [
+        "p1",
+        "p2",
+        "p3"
+      ]
+    },
+    "module": {
+      "enum": [
+        "企业AI成熟度评估",
+        "企业AI高价值场景排序",
+        "企业AI投入ROI测算器",
+        "AI获客",
+        "AI人力官",
+        "AI法务",
+        "AI CFO",
+        "AI流程提效",
+        "AI决策",
+        "AI ERP",
+        "AI软件开发"
+      ],
+      "description": "薯片AI智能体 11 个模块名，以 DM 为准"
+    },
     "failure": {
       "type": "object",
       "properties": {
-        "ok": { "const": false },
-        "errors": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "如「profile.industry 无效」「answers 需为 36 项」「answers[3] 需为 0–3」" }
+        "ok": {
+          "const": false
+        },
+        "errors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "如「profile.industry 无效」「answers 需为 36 项」「answers[3] 需为 0–3」"
+        }
       },
-      "required": ["ok", "errors"], "additionalProperties": false
+      "required": [
+        "ok",
+        "errors"
+      ],
+      "additionalProperties": false
     },
-
     "recommendation": {
       "type": "object",
       "description": "行动库条目（data/actions.json）投影，负责人 / 三步 / 交付物 / 周期 / 投入档 / 验收指标齐全",
       "properties": {
-        "id": { "$ref": "#/definitions/actionId" },
-        "title": { "type": "string", "maxLength": 20 },
-        "why": { "type": "string", "maxLength": 80 },
-        "steps": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
-        "owner": { "type": "string" },
-        "deliverable": { "type": "string" },
-        "weeks": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "cost": { "$ref": "#/definitions/cost" },
-        "kpi": { "type": "string" },
-        "service": { "type": "string", "description": "顶呱呱对应服务名，原文，禁止改写" },
-        "module": { "$ref": "#/definitions/module" }
+        "id": {
+          "$ref": "#/definitions/actionId"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "why": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "owner": {
+          "type": "string"
+        },
+        "deliverable": {
+          "type": "string"
+        },
+        "weeks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "cost": {
+          "$ref": "#/definitions/cost"
+        },
+        "kpi": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string",
+          "description": "顶呱呱对应服务名，原文，禁止改写"
+        },
+        "module": {
+          "$ref": "#/definitions/module"
+        }
       },
-      "required": ["id", "title", "why", "steps", "owner", "deliverable", "weeks", "cost", "kpi", "service", "module"]
+      "required": [
+        "id",
+        "title",
+        "why",
+        "steps",
+        "owner",
+        "deliverable",
+        "weeks",
+        "cost",
+        "kpi",
+        "service",
+        "module"
+      ]
     },
-
     "subdim": {
       "type": "object",
       "properties": {
-        "key": { "$ref": "#/definitions/subKey" },
-        "dimension": { "$ref": "#/definitions/dimKey" },
-        "dimensionName": { "type": "string" },
-        "name": { "type": "string" },
-        "desc": { "type": "string" },
-        "score": { "type": "integer", "minimum": 0, "maximum": 6 },
-        "max": { "const": 6 },
-        "pct": { "$ref": "#/definitions/pct" },
-        "band": { "$ref": "#/definitions/band" },
-        "bandName": { "$ref": "#/definitions/bandName" },
-        "diagnosis": { "type": "string", "description": "data/diagnostics.json 按分档取的诊断段落" },
-        "questions": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/definitions/questionId" } }
+        "key": {
+          "$ref": "#/definitions/subKey"
+        },
+        "dimension": {
+          "$ref": "#/definitions/dimKey"
+        },
+        "dimensionName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "max": {
+          "const": 6
+        },
+        "pct": {
+          "$ref": "#/definitions/pct"
+        },
+        "band": {
+          "$ref": "#/definitions/band"
+        },
+        "bandName": {
+          "$ref": "#/definitions/bandName"
+        },
+        "diagnosis": {
+          "type": "string",
+          "description": "data/diagnostics.json 按分档取的诊断段落"
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/definitions/questionId"
+          }
+        }
       },
-      "required": ["key", "dimension", "dimensionName", "name", "desc", "score", "max", "pct", "band", "bandName", "diagnosis", "questions"]
+      "required": [
+        "key",
+        "dimension",
+        "dimensionName",
+        "name",
+        "desc",
+        "score",
+        "max",
+        "pct",
+        "band",
+        "bandName",
+        "diagnosis",
+        "questions"
+      ]
     },
-
     "dimension": {
       "type": "object",
       "properties": {
-        "key": { "$ref": "#/definitions/dimKey" },
-        "name": { "type": "string" },
-        "color": { "$ref": "#/definitions/color" },
-        "desc": { "type": "string" },
-        "score": { "type": "integer", "minimum": 0, "maximum": 18 },
-        "max": { "const": 18 },
-        "pct": { "$ref": "#/definitions/pct" },
-        "band": { "oneOf": [ { "type": "null" }, { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 100 } } ], "description": "同行参考带 [下限%, 上限%]；无参考带时为 null" },
-        "bandMid": { "oneOf": [ { "type": "null" }, { "type": "number" } ] },
-        "position": { "$ref": "#/definitions/position" },
-        "positionName": { "$ref": "#/definitions/positionName" },
-        "level": { "type": "object", "properties": { "code": { "$ref": "#/definitions/levelCode" }, "name": { "$ref": "#/definitions/levelName" } }, "required": ["code", "name"] },
-        "subdims": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/subdim" } },
-        "weakest": { "$ref": "#/definitions/subKey" },
-        "strongest": { "$ref": "#/definitions/subKey" },
-        "recommendations": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "#/definitions/recommendation" } },
-        "summary": { "type": "string" }
-      },
-      "required": ["key", "name", "color", "desc", "score", "max", "pct", "band", "bandMid", "position", "positionName", "level", "subdims", "weakest", "strongest", "recommendations", "summary"]
-    },
-
-    "action": {
-      "allOf": [
-        { "$ref": "#/definitions/recommendation" },
-        { "type": "object",
+        "key": {
+          "$ref": "#/definitions/dimKey"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "$ref": "#/definitions/color"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "max": {
+          "const": 18
+        },
+        "pct": {
+          "$ref": "#/definitions/pct"
+        },
+        "band": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          ],
+          "description": "同行参考带 [下限%, 上限%]；无参考带时为 null"
+        },
+        "bandMid": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "position": {
+          "$ref": "#/definitions/position"
+        },
+        "positionName": {
+          "$ref": "#/definitions/positionName"
+        },
+        "level": {
+          "type": "object",
           "properties": {
-            "order": { "type": "integer", "minimum": 1, "maximum": 9 },
-            "phase": { "$ref": "#/definitions/phase" },
-            "phaseName": { "type": "string" },
-            "phaseTitle": { "enum": ["打基础", "见成效", "扩规模"] },
-            "dimension": { "$ref": "#/definitions/dimKey" },
-            "dimensionName": { "type": "string" },
-            "color": { "$ref": "#/definitions/color" },
-            "source": { "enum": ["template", "llm"], "description": "title / why 是否经 LLM 润色；润色失败一律 template" }
+            "code": {
+              "$ref": "#/definitions/levelCode"
+            },
+            "name": {
+              "$ref": "#/definitions/levelName"
+            }
           },
-          "required": ["order", "phase", "phaseName", "phaseTitle", "dimension", "dimensionName", "color", "source"] }
+          "required": [
+            "code",
+            "name"
+          ]
+        },
+        "subdims": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/subdim"
+          }
+        },
+        "weakest": {
+          "$ref": "#/definitions/subKey"
+        },
+        "strongest": {
+          "$ref": "#/definitions/subKey"
+        },
+        "recommendations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/definitions/recommendation"
+          }
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "color",
+        "desc",
+        "score",
+        "max",
+        "pct",
+        "band",
+        "bandMid",
+        "position",
+        "positionName",
+        "level",
+        "subdims",
+        "weakest",
+        "strongest",
+        "recommendations",
+        "summary"
       ]
     },
-
+    "action": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/recommendation"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "order": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9
+            },
+            "phase": {
+              "$ref": "#/definitions/phase"
+            },
+            "phaseName": {
+              "type": "string"
+            },
+            "phaseTitle": {
+              "enum": [
+                "打基础",
+                "见成效",
+                "扩规模"
+              ]
+            },
+            "dimension": {
+              "$ref": "#/definitions/dimKey"
+            },
+            "dimensionName": {
+              "type": "string"
+            },
+            "color": {
+              "$ref": "#/definitions/color"
+            },
+            "source": {
+              "enum": [
+                "template",
+                "llm"
+              ],
+              "description": "title / why 是否经 LLM 润色；润色失败一律 template"
+            }
+          },
+          "required": [
+            "order",
+            "phase",
+            "phaseName",
+            "phaseTitle",
+            "dimension",
+            "dimensionName",
+            "color",
+            "source"
+          ]
+        }
+      ]
+    },
     "success": {
       "type": "object",
       "properties": {
-        "ok": { "const": true },
-        "meta": { "type": "object",
-          "properties": { "module": { "const": "企业AI成熟度评估" }, "credits": { "const": 20 }, "version": { "type": "string", "pattern": "^2\\.\\d+\\.\\d+$" }, "questionCount": { "const": 36 } },
-          "required": ["module", "credits", "version", "questionCount"] },
-
-        "profile": { "type": "object",
+        "ok": {
+          "const": true
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "module": {
+              "const": "企业AI成熟度评估"
+            },
+            "credits": {
+              "const": 20
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^2\\.\\d+\\.\\d+$"
+            },
+            "questionCount": {
+              "const": 36
+            }
+          },
+          "required": [
+            "module",
+            "credits",
+            "version",
+            "questionCount"
+          ]
+        },
+        "profile": {
+          "type": "object",
           "description": "输入画像 + 每个编码字段对应的显示文案（xxxName）+ 标签 + 一段画像描述",
           "properties": {
-            "name": { "type": "string", "minLength": 1 },
-            "industry": { "type": "string" }, "industryName": { "type": "string" },
-            "sector": { "type": "string" }, "sectorName": { "type": "string" },
-            "size": { "type": "string" }, "sizeName": { "type": "string" },
-            "revenue": { "type": "string" }, "revenueName": { "type": "string" },
-            "province": { "type": "string" },
-            "years": { "type": "string" }, "yearsName": { "type": "string" },
-            "ownership": { "type": "string" }, "ownershipName": { "type": "string" },
-            "customers": { "type": "string" }, "customersName": { "type": "string" },
-            "systems": { "type": "array", "items": { "type": "string" } }, "systemsName": { "type": "array", "items": { "type": "string" } },
-            "itStaff": { "type": "string" }, "itStaffName": { "type": "string" },
-            "branches": { "type": ["string", "null"] }, "branchesName": { "type": "string" },
-            "overseas": { "type": ["string", "null"] }, "overseasName": { "type": "string" },
-            "role": { "type": ["string", "null"] }, "roleName": { "type": "string" },
-            "tags": { "type": "array", "items": { "type": "string" } },
-            "portrait": { "type": "string" }
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "industry": {
+              "type": "string"
+            },
+            "industryName": {
+              "type": "string"
+            },
+            "sector": {
+              "type": "string"
+            },
+            "sectorName": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string"
+            },
+            "sizeName": {
+              "type": "string"
+            },
+            "revenue": {
+              "type": "string"
+            },
+            "revenueName": {
+              "type": "string"
+            },
+            "province": {
+              "type": "string"
+            },
+            "years": {
+              "type": "string"
+            },
+            "yearsName": {
+              "type": "string"
+            },
+            "ownership": {
+              "type": "string"
+            },
+            "ownershipName": {
+              "type": "string"
+            },
+            "customers": {
+              "type": "string"
+            },
+            "customersName": {
+              "type": "string"
+            },
+            "systems": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "systemsName": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "itStaff": {
+              "type": "string"
+            },
+            "itStaffName": {
+              "type": "string"
+            },
+            "branches": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "branchesName": {
+              "type": "string"
+            },
+            "overseas": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "overseasName": {
+              "type": "string"
+            },
+            "role": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "roleName": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "portrait": {
+              "type": "string"
+            }
           },
-          "required": ["name", "industry", "industryName", "sector", "sectorName", "size", "sizeName", "revenue", "revenueName", "province", "years", "yearsName", "ownership", "ownershipName", "customers", "customersName", "systems", "systemsName", "itStaff", "itStaffName", "tags", "portrait"] },
-
-        "answers": { "type": "array", "minItems": 36, "maxItems": 36,
-          "items": { "type": "object",
+          "required": [
+            "name",
+            "industry",
+            "industryName",
+            "sector",
+            "sectorName",
+            "size",
+            "sizeName",
+            "revenue",
+            "revenueName",
+            "province",
+            "years",
+            "yearsName",
+            "ownership",
+            "ownershipName",
+            "customers",
+            "customersName",
+            "systems",
+            "systemsName",
+            "itStaff",
+            "itStaffName",
+            "tags",
+            "portrait"
+          ]
+        },
+        "answers": {
+          "type": "array",
+          "minItems": 36,
+          "maxItems": 36,
+          "items": {
+            "type": "object",
             "properties": {
-              "id": { "$ref": "#/definitions/questionId" }, "dimension": { "$ref": "#/definitions/dimKey" }, "sub": { "$ref": "#/definitions/subKey" },
-              "text": { "type": "string" }, "optionIndex": { "type": "integer", "minimum": 0, "maximum": 3 }, "optionText": { "type": "string" },
-              "score": { "type": "integer", "minimum": 0, "maximum": 3 }, "max": { "const": 3 }, "explain": { "type": "string" } },
-            "required": ["id", "dimension", "sub", "text", "optionIndex", "optionText", "score", "max", "explain"] } },
-
-        "subdims": { "type": "array", "minItems": 18, "maxItems": 18, "items": { "$ref": "#/definitions/subdim" } },
-        "dimensions": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "$ref": "#/definitions/dimension" } },
-
-        "total": { "type": "integer", "minimum": 0, "maximum": 108 },
-        "max": { "const": 108 },
-        "pct": { "$ref": "#/definitions/pct" },
-        "level": { "type": "object",
+              "id": {
+                "$ref": "#/definitions/questionId"
+              },
+              "dimension": {
+                "$ref": "#/definitions/dimKey"
+              },
+              "sub": {
+                "$ref": "#/definitions/subKey"
+              },
+              "text": {
+                "type": "string"
+              },
+              "optionIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "optionText": {
+                "type": "string"
+              },
+              "score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "max": {
+                "const": 3
+              },
+              "explain": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "dimension",
+              "sub",
+              "text",
+              "optionIndex",
+              "optionText",
+              "score",
+              "max",
+              "explain"
+            ]
+          }
+        },
+        "subdims": {
+          "type": "array",
+          "minItems": 18,
+          "maxItems": 18,
+          "items": {
+            "$ref": "#/definitions/subdim"
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/definitions/dimension"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 108
+        },
+        "max": {
+          "const": 108
+        },
+        "pct": {
+          "$ref": "#/definitions/pct"
+        },
+        "level": {
+          "type": "object",
           "properties": {
-            "code": { "$ref": "#/definitions/levelCode" }, "name": { "$ref": "#/definitions/levelName" },
-            "verdict": { "type": "string", "description": "一句判断，levels.json 原文" }, "desc": { "type": "string" },
-            "traits": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
-            "focus": { "type": "string" }, "typical": { "type": "string" }, "minPct": { "type": "number" } },
-          "required": ["code", "name", "verdict", "desc", "traits", "focus", "typical", "minPct"] },
-        "levels": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "type": "object", "properties": { "code": { "$ref": "#/definitions/levelCode" }, "name": { "$ref": "#/definitions/levelName" }, "minPct": { "type": "number" } }, "required": ["code", "name", "minPct"] } },
-        "nextLevel": { "oneOf": [ { "type": "null" }, { "type": "object",
-          "properties": { "code": { "$ref": "#/definitions/levelCode" }, "name": { "$ref": "#/definitions/levelName" }, "minPct": { "type": "number" }, "gapPct": { "type": "number" }, "gapPts": { "type": "integer", "minimum": 1 }, "focus": { "type": "string" } },
-          "required": ["code", "name", "minPct", "gapPct", "gapPts", "focus"] } ], "description": "已是 L4 时为 null" },
-
-        "percentile": { "oneOf": [ { "type": "null" }, { "type": "integer", "minimum": 0, "maximum": 100 } ], "description": "同行业同规模中超过的企业比例（估算）；无参考带时 null" },
-        "distribution": { "oneOf": [ { "type": "null" }, { "type": "object", "properties": { "mean": { "type": "number" }, "sd": { "type": "number" } }, "required": ["mean", "sd"] } ] },
-        "benchmark": { "type": "object", "properties": { "key": { "type": "string", "description": "行业 slug-规模，如 mfg-machinery-101_300" }, "basis": { "enum": ["exact", "nearest-size", "none"] } }, "required": ["key", "basis"] },
-        "positions": { "type": "object", "properties": { "above": { "type": "integer", "minimum": 0, "maximum": 6 }, "within": { "type": "integer", "minimum": 0, "maximum": 6 }, "below": { "type": "integer", "minimum": 0, "maximum": 6 }, "unknown": { "type": "integer", "minimum": 0, "maximum": 6 } }, "required": ["above", "within", "below", "unknown"] },
-
-        "strengths": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/subKey" }, "description": "最强三个子维度 key，按得分降序" },
-        "weaknesses": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/subKey" }, "description": "最弱三个子维度 key，按得分升序" },
-        "weakDims": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/dimKey" }, "description": "短板维度，按「得分 − 参考带下限」升序" },
-        "strongDims": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/definitions/dimKey" } },
-
-        "actions": { "type": "array", "minItems": 9, "maxItems": 9, "items": { "$ref": "#/definitions/action" }, "description": "12 个月九项行动：1–3 短板维度打基础，4–6 短板维度见成效，7–9 优势维度扩规模" },
-        "roadmap": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "object",
-          "properties": { "key": { "$ref": "#/definitions/phase" }, "name": { "type": "string" }, "title": { "type": "string" }, "months": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } }, "actions": { "type": "array", "items": { "type": "integer" } }, "milestone": { "type": "string" } },
-          "required": ["key", "name", "title", "months", "actions", "milestone"] } },
-        "checklist": { "type": "array", "minItems": 9, "maxItems": 9, "items": { "type": "object",
-          "properties": { "week": { "type": "string" }, "weekIndex": { "type": "integer", "minimum": 0, "maximum": 2 }, "action": { "type": "integer", "minimum": 1, "maximum": 9 }, "dimensionName": { "type": "string" }, "color": { "$ref": "#/definitions/color" }, "item": { "type": "string" }, "owner": { "type": "string" } },
-          "required": ["week", "weekIndex", "action", "dimensionName", "color", "item", "owner"] }, "description": "90 天清单：三个打基础行动各取第一步，分三个月落位" },
-
-        "scenes": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "type": "object",
+            "code": {
+              "$ref": "#/definitions/levelCode"
+            },
+            "name": {
+              "$ref": "#/definitions/levelName"
+            },
+            "verdict": {
+              "type": "string",
+              "description": "一句判断，levels.json 原文"
+            },
+            "desc": {
+              "type": "string"
+            },
+            "traits": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "string"
+              }
+            },
+            "focus": {
+              "type": "string"
+            },
+            "typical": {
+              "type": "string"
+            },
+            "minPct": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "code",
+            "name",
+            "verdict",
+            "desc",
+            "traits",
+            "focus",
+            "typical",
+            "minPct"
+          ]
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "$ref": "#/definitions/levelCode"
+              },
+              "name": {
+                "$ref": "#/definitions/levelName"
+              },
+              "minPct": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "code",
+              "name",
+              "minPct"
+            ]
+          }
+        },
+        "nextLevel": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "$ref": "#/definitions/levelCode"
+                },
+                "name": {
+                  "$ref": "#/definitions/levelName"
+                },
+                "minPct": {
+                  "type": "number"
+                },
+                "gapPct": {
+                  "type": "number"
+                },
+                "gapPts": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "focus": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "name",
+                "minPct",
+                "gapPct",
+                "gapPts",
+                "focus"
+              ]
+            }
+          ],
+          "description": "已是 L4 时为 null"
+        },
+        "percentile": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          ],
+          "description": "同行业同规模中超过的企业比例（估算）；无参考带时 null"
+        },
+        "distribution": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "mean": {
+                  "type": "number"
+                },
+                "sd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "mean",
+                "sd"
+              ]
+            }
+          ]
+        },
+        "benchmark": {
+          "type": "object",
           "properties": {
-            "id": { "type": "string" }, "name": { "type": "string" }, "stage": { "type": "string" },
-            "value": { "type": "integer", "minimum": 1, "maximum": 5 }, "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
-            "desc": { "type": "string" }, "firstStep": { "type": "string" }, "module": { "$ref": "#/definitions/module" },
-            "dims": { "type": "array", "items": { "$ref": "#/definitions/dimKey" } },
-            "score": { "type": "number" }, "dataFit": { "type": "number", "minimum": 0, "maximum": 5 }, "dataNote": { "type": "string" },
-            "why": { "type": "string" }, "rank": { "type": "integer", "minimum": 1, "maximum": 5 } },
-          "required": ["id", "name", "stage", "value", "difficulty", "desc", "firstStep", "module", "dims", "score", "dataFit", "dataNote", "why", "rank"] },
-          "description": "本行业大类的 5 个场景按「价值 × 难度 × 数据条件 × 拉动短板」打分排序，rank 即顺序" },
-
-        "investment": { "type": "object",
+            "key": {
+              "type": "string",
+              "description": "行业 slug-规模，如 mfg-machinery-101_300"
+            },
+            "basis": {
+              "enum": [
+                "exact",
+                "nearest-size",
+                "none"
+              ]
+            }
+          },
+          "required": [
+            "key",
+            "basis"
+          ]
+        },
+        "positions": {
+          "type": "object",
           "properties": {
-            "tier": { "$ref": "#/definitions/cost" }, "name": { "type": "string" }, "range": { "type": "string" }, "desc": { "type": "string" }, "fit": { "type": "string" }, "rationale": { "type": "string" },
-            "tiers": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "object", "properties": { "key": { "$ref": "#/definitions/cost" }, "name": { "type": "string" }, "range": { "type": "string" }, "desc": { "type": "string" }, "fit": { "type": "string" } }, "required": ["key", "name", "range", "desc", "fit"] } },
-            "note": { "type": "string" } },
-          "required": ["tier", "name", "range", "desc", "fit", "rationale", "tiers", "note"] },
-
-        "risks": { "type": "array", "items": { "type": "object",
-          "properties": { "id": { "type": "string" }, "level": { "enum": ["高", "中", "提示"] }, "title": { "type": "string" }, "text": { "type": "string" } },
-          "required": ["id", "level", "title", "text"] }, "description": "data/risks.json 规则命中项，按 高 > 中 > 提示 排序；可为空数组" },
-
-        "answerDistribution": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "integer", "minimum": 0, "maximum": 36 }, "description": "36 题里选 0 / 1 / 2 / 3 分选项的题数" },
-        "sectorInsight": { "type": "object", "properties": { "name": { "type": "string" }, "insight": { "type": "string" }, "aiFocus": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } } }, "required": ["name", "insight", "aiFocus"] },
-        "keyNumbers": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "object", "properties": { "k": { "type": "string" }, "v": { "type": "string" }, "sub": { "type": "string" } }, "required": ["k", "v", "sub"] } },
-
-        "summary": { "type": "object", "properties": { "position": { "type": "string" }, "dims": { "type": "string" }, "subs": { "type": "string" }, "next": { "type": "string" } }, "required": ["position", "dims", "subs", "next"], "description": "四段式摘要：位置 / 六维 / 子维度 / 下一步" },
-        "summaryText": { "type": "string", "minLength": 40, "description": "summary 四段拼成的一段话，对话回复用" },
-
-        "quickView": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "object",
-          "properties": { "n": { "type": "integer", "minimum": 1, "maximum": 6 }, "q": { "type": "string" }, "a": { "type": "string" }, "text": { "type": "string" }, "tone": { "enum": ["cyan", "purple", "orange", "blue", "green", "navy"] } },
-          "required": ["n", "q", "a", "text", "tone"] }, "description": "结论速览六问：处在什么阶段 / 同行里在哪 / 最强在哪 / 短板在哪 / 先做什么 / 投多少" },
-        "verdict": { "type": "object", "properties": { "label": { "type": "string" }, "headline": { "type": "string" }, "text": { "type": "string" }, "score": { "$ref": "#/definitions/pct" }, "scoreLabel": { "type": "string" } }, "required": ["label", "headline", "text", "score", "scoreLabel"], "description": "总体判断横幅" },
-        "directions": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "object",
-          "properties": { "dimension": { "$ref": "#/definitions/dimKey" }, "name": { "type": "string" }, "pct": { "$ref": "#/definitions/pct" }, "position": { "$ref": "#/definitions/position" }, "tag": { "enum": ["优先", "次批", "保持"] }, "order": { "type": "integer", "minimum": 1, "maximum": 3 }, "color": { "$ref": "#/definitions/color" }, "reason": { "type": "string" } },
-          "required": ["dimension", "name", "pct", "position", "tag", "order", "color", "reason"] }, "description": "六维按短板顺序：前 2 优先、中 2 次批、后 2 保持" },
-
-        "render": { "type": "array", "minItems": 11, "maxItems": 11, "items": { "type": "object",
-          "properties": { "type": { "enum": ["summary", "radar", "level-scale", "distribution", "dimension-detail", "ranked-bars", "roadmap", "action-list", "scene-matrix", "risk-list", "checklist"] }, "source": { "type": "string" }, "band": { "type": "boolean" } },
-          "required": ["type", "source"] }, "description": "对话式呈现顺序；source 指向本对象的字段名" }
+            "above": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "within": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "below": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "unknown": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            }
+          },
+          "required": [
+            "above",
+            "within",
+            "below",
+            "unknown"
+          ]
+        },
+        "strengths": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/subKey"
+          },
+          "description": "最强三个子维度 key，按得分降序"
+        },
+        "weaknesses": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/subKey"
+          },
+          "description": "最弱三个子维度 key，按得分升序"
+        },
+        "weakDims": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/dimKey"
+          },
+          "description": "短板维度，按「得分 − 参考带下限」升序"
+        },
+        "strongDims": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/dimKey"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "$ref": "#/definitions/action"
+          },
+          "description": "12 个月九项行动：1–3 短板维度打基础，4–6 短板维度见成效，7–9 优势维度扩规模"
+        },
+        "roadmap": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "$ref": "#/definitions/phase"
+              },
+              "name": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "months": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              "milestone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "name",
+              "title",
+              "months",
+              "actions",
+              "milestone"
+            ]
+          }
+        },
+        "checklist": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "properties": {
+              "week": {
+                "type": "string"
+              },
+              "weekIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "action": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9
+              },
+              "dimensionName": {
+                "type": "string"
+              },
+              "color": {
+                "$ref": "#/definitions/color"
+              },
+              "item": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "week",
+              "weekIndex",
+              "action",
+              "dimensionName",
+              "color",
+              "item",
+              "owner"
+            ]
+          },
+          "description": "90 天清单：三个打基础行动各取第一步，分三个月落位"
+        },
+        "scenes": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "string"
+              },
+              "value": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "difficulty": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "desc": {
+                "type": "string"
+              },
+              "firstStep": {
+                "type": "string"
+              },
+              "module": {
+                "$ref": "#/definitions/module"
+              },
+              "dims": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/dimKey"
+                }
+              },
+              "score": {
+                "type": "number"
+              },
+              "dataFit": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "dataNote": {
+                "type": "string"
+              },
+              "why": {
+                "type": "string"
+              },
+              "rank": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "stage",
+              "value",
+              "difficulty",
+              "desc",
+              "firstStep",
+              "module",
+              "dims",
+              "score",
+              "dataFit",
+              "dataNote",
+              "why",
+              "rank"
+            ]
+          },
+          "description": "本行业大类的 5 个场景按「价值 × 难度 × 数据条件 × 拉动短板」打分排序，rank 即顺序"
+        },
+        "investment": {
+          "type": "object",
+          "properties": {
+            "tier": {
+              "$ref": "#/definitions/cost"
+            },
+            "name": {
+              "type": "string"
+            },
+            "range": {
+              "type": "string"
+            },
+            "desc": {
+              "type": "string"
+            },
+            "fit": {
+              "type": "string"
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "$ref": "#/definitions/cost"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "range": {
+                    "type": "string"
+                  },
+                  "desc": {
+                    "type": "string"
+                  },
+                  "fit": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "name",
+                  "range",
+                  "desc",
+                  "fit"
+                ]
+              }
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "tier",
+            "name",
+            "range",
+            "desc",
+            "fit",
+            "rationale",
+            "tiers",
+            "note"
+          ]
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "高",
+                  "中",
+                  "提示"
+                ]
+              },
+              "title": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "level",
+              "title",
+              "text"
+            ]
+          },
+          "description": "data/risks.json 规则命中项，按 高 > 中 > 提示 排序；可为空数组"
+        },
+        "answerDistribution": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 36
+          },
+          "description": "36 题里选 0 / 1 / 2 / 3 分选项的题数"
+        },
+        "sectorInsight": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "insight": {
+              "type": "string"
+            },
+            "aiFocus": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "name",
+            "insight",
+            "aiFocus"
+          ]
+        },
+        "gapPlan": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/definitions/gapPlan"
+            }
+          ],
+          "description": "距下一级的逐维补分计划；已是 L4 经营级（无下一级）时为 null"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/role"
+          },
+          "description": "推进这件事需要的三个角色，who 随画像与最弱维改写"
+        },
+        "retrigger": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/definitions/retriggerItem"
+          },
+          "description": "什么情况下值得重新评一次"
+        },
+        "keyNumbers": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "properties": {
+              "k": {
+                "type": "string"
+              },
+              "v": {
+                "type": "string"
+              },
+              "sub": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "k",
+              "v",
+              "sub"
+            ]
+          }
+        },
+        "summary": {
+          "type": "object",
+          "properties": {
+            "position": {
+              "type": "string"
+            },
+            "dims": {
+              "type": "string"
+            },
+            "subs": {
+              "type": "string"
+            },
+            "next": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "position",
+            "dims",
+            "subs",
+            "next"
+          ],
+          "description": "四段式摘要：位置 / 六维 / 子维度 / 下一步"
+        },
+        "summaryText": {
+          "type": "string",
+          "minLength": 40,
+          "description": "summary 四段拼成的一段话，对话回复用"
+        },
+        "quickView": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              },
+              "q": {
+                "type": "string"
+              },
+              "a": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "tone": {
+                "enum": [
+                  "cyan",
+                  "purple",
+                  "orange",
+                  "blue",
+                  "green",
+                  "navy"
+                ]
+              }
+            },
+            "required": [
+              "n",
+              "q",
+              "a",
+              "text",
+              "tone"
+            ]
+          },
+          "description": "结论速览六问：处在什么阶段 / 同行里在哪 / 最强在哪 / 短板在哪 / 先做什么 / 投多少"
+        },
+        "verdict": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "headline": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "score": {
+              "$ref": "#/definitions/pct"
+            },
+            "scoreLabel": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "label",
+            "headline",
+            "text",
+            "score",
+            "scoreLabel"
+          ],
+          "description": "总体判断横幅"
+        },
+        "directions": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "$ref": "#/definitions/dimKey"
+              },
+              "name": {
+                "type": "string"
+              },
+              "pct": {
+                "$ref": "#/definitions/pct"
+              },
+              "position": {
+                "$ref": "#/definitions/position"
+              },
+              "tag": {
+                "enum": [
+                  "优先",
+                  "次批",
+                  "保持"
+                ]
+              },
+              "order": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "color": {
+                "$ref": "#/definitions/color"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "dimension",
+              "name",
+              "pct",
+              "position",
+              "tag",
+              "order",
+              "color",
+              "reason"
+            ]
+          },
+          "description": "六维按短板顺序：前 2 优先、中 2 次批、后 2 保持"
+        },
+        "render": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "summary",
+                  "radar",
+                  "level-scale",
+                  "distribution",
+                  "dimension-detail",
+                  "ranked-bars",
+                  "roadmap",
+                  "action-list",
+                  "scene-matrix",
+                  "risk-list",
+                  "checklist"
+                ]
+              },
+              "source": {
+                "type": "string"
+              },
+              "band": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "type",
+              "source"
+            ]
+          },
+          "description": "对话式呈现顺序；source 指向本对象的字段名"
+        }
       },
-      "required": ["ok", "meta", "profile", "answers", "subdims", "dimensions", "total", "max", "pct", "level", "levels", "nextLevel", "percentile", "distribution", "benchmark", "positions", "strengths", "weaknesses", "weakDims", "strongDims", "actions", "roadmap", "checklist", "scenes", "investment", "risks", "answerDistribution", "sectorInsight", "keyNumbers", "summary", "summaryText", "quickView", "verdict", "directions", "render"],
+      "required": [
+        "ok",
+        "meta",
+        "profile",
+        "answers",
+        "subdims",
+        "dimensions",
+        "total",
+        "max",
+        "pct",
+        "level",
+        "levels",
+        "nextLevel",
+        "percentile",
+        "distribution",
+        "benchmark",
+        "positions",
+        "strengths",
+        "weaknesses",
+        "weakDims",
+        "strongDims",
+        "actions",
+        "roadmap",
+        "checklist",
+        "scenes",
+        "investment",
+        "risks",
+        "answerDistribution",
+        "sectorInsight",
+        "gapPlan",
+        "roles",
+        "retrigger",
+        "keyNumbers",
+        "summary",
+        "summaryText",
+        "quickView",
+        "verdict",
+        "directions",
+        "render"
+      ],
       "additionalProperties": false
+    },
+    "gapItem": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "$ref": "#/definitions/dimKey"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "$ref": "#/definitions/color"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18
+        },
+        "max": {
+          "const": 18
+        },
+        "pct": {
+          "$ref": "#/definitions/pct"
+        },
+        "targetPct": {
+          "$ref": "#/definitions/pct",
+          "description": "下一级门槛对应的本维百分比"
+        },
+        "gapPct": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100,
+          "description": "下一级门槛减去本维当前百分比；本维已超过门槛时为负数（此时 reached 为 true、alloc 为 0）"
+        },
+        "alloc": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 108,
+          "description": "按缺口占比分摊给本维的补分，保留一位小数；本维已达标时为 0"
+        },
+        "reached": {
+          "type": "boolean",
+          "description": "本维是否已达到下一级门槛"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "name",
+        "color",
+        "score",
+        "max",
+        "pct",
+        "targetPct",
+        "gapPct",
+        "alloc",
+        "reached",
+        "note"
+      ]
+    },
+    "gapPlan": {
+      "type": "object",
+      "properties": {
+        "needPts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 108,
+          "description": "总分还需提高多少分才够下一级门槛，与 nextLevel.gapPts 同值"
+        },
+        "needPct": {
+          "$ref": "#/definitions/pct",
+          "description": "折算成百分点，与 nextLevel.gapPct 同值"
+        },
+        "code": {
+          "$ref": "#/definitions/levelCode",
+          "description": "下一级代号"
+        },
+        "name": {
+          "$ref": "#/definitions/levelName"
+        },
+        "focus": {
+          "type": "string",
+          "description": "下一级的着力点，取 data/levels.json"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/definitions/gapItem"
+          },
+          "description": "六维逐项差距，与 dimensions 同序"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "needPts",
+        "needPct",
+        "code",
+        "name",
+        "focus",
+        "items",
+        "text"
+      ]
+    },
+    "role": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "enum": [
+            "owner",
+            "biz",
+            "data"
+          ]
+        },
+        "name": {
+          "enum": [
+            "牵头人",
+            "业务对接人",
+            "数据对接人"
+          ]
+        },
+        "who": {
+          "type": "string"
+        },
+        "duty": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "who",
+        "duty",
+        "time"
+      ]
+    },
+    "retriggerItem": {
+      "type": "object",
+      "properties": {
+        "when": {
+          "type": "string"
+        },
+        "why": {
+          "type": "string"
+        },
+        "extra": {
+          "type": "string",
+          "description": "结合本次结果的补充，可为空串"
+        }
+      },
+      "required": [
+        "when",
+        "why",
+        "extra"
+      ]
     }
   }
 }

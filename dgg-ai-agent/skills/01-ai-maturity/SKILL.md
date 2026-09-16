@@ -3,20 +3,20 @@ name: 企业AI成熟度评估
 id: ai-maturity
 kind: 计算
 credits: 20
-version: 2.0.0
+version: 2.1.0
 triggers: [AI成熟度, 成熟度评估, 数字化程度, 我们公司适合上AI吗, AI基础, 同行水平, 六维, AI诊断, 该从哪一步开始]
 inputs: [profile, answers]
 llm_calls: 1
 llm_timeout_ms: 8000
 offline: true
 delivers: [chat, print, wechat]
-report_pages: 33
-brief_pages: 5
+report_pages: 28
+brief_pages: 6
 ---
 
 # 企业AI成熟度评估
 
-用 36 道题给企业的 AI 成熟度打分：六个维度（战略、数据、流程、人员、预算、合规）各三个子维度，每个子维度两题，每题四选项对应 0–3 分。子维度 0–6 分、维度 0–18 分、总分 0–108 分，换算成百分比后映射到 L0–L4 五级；与同行业同规模的参考带比较，估算同行百分位；输出 12 个月九项行动、90 天清单、五个推荐场景、投入档位与风险提示。同一份输出既能在对话里三句话讲完，也能直接排成 33 页咨询报告（速览 5 页）。
+用 36 道题给企业的 AI 成熟度打分：六个维度（战略、数据、流程、人员、预算、合规）各三个子维度，每个子维度两题，每题四选项对应 0–3 分。子维度 0–6 分、维度 0–18 分、总分 0–108 分，换算成百分比后映射到 L0–L4 五级；与同行业同规模的参考带比较，估算同行百分位；输出 12 个月九项行动、90 天清单、五个推荐场景、投入档位与风险提示，另出距下一级的逐维补分计划、推进这件事的三个角色分工、以及什么情况下值得重评。同一份输出既能在对话里三句话讲完，也能直接排成 28 页咨询报告（速览 6 页）。
 
 ## 何时调用
 
@@ -99,7 +99,7 @@ brief_pages: 5
 2. 然后按 `quickView` 六问六答列出，每问一行：`问 → 答（一句说明）`
 3. 然后「未来三个月先做三件事」：`actions[0..2]` 各一行，格式 `维度 · 标题 · 负责人 / 周数 / 投入档 · 对应服务`
 4. 末尾积分行，再接转化句（见下）
-5. 用户追问某个维度时，用该维度的 `summary` + 三个子维度 `diagnosis` + `recommendations` 回答；追问场景时用 `scenes`；追问风险时用 `risks`；追问「投多少」时用 `investment`
+5. 用户追问某个维度时，用该维度的 `summary` + 三个子维度 `diagnosis` + `recommendations` 回答；追问场景时用 `scenes`；追问风险时用 `risks`；追问「投多少」时用 `investment`；追问「离下一级还差多少」「差在哪一维」时用 `gapPlan`；追问「谁来做」时用 `roles`；追问「多久再评一次」时用 `retrigger`
 
 ### 结构化呈现（有渲染能力的壳按 `render` 顺序）
 
@@ -117,30 +117,60 @@ brief_pages: 5
 | `risk-list` | `risks` | 风险提示，按级别 |
 | `checklist` | `checklist` | 90 天可勾选清单 |
 
+`gapPlan`、`roles`、`retrigger` 不进 `render` 序列（与「企业AI高价值场景排序」同口径）：它们是报告页与追问的内容，由报告第 07 / 11 / 13 章消费，对话里按上面第 5 条按需引用。`gapPlan` 在已是 L4 经营级时为 `null`，此时报告第 07 章改述「已在最高一级，重点是保持」。
+
 ### 报告（`delivers: print / wechat`，原型 `prototype/src/module-01.js` 为参考实现）
 
-完整版 33 页，A4 逐页不溢出；速览版 5 页（带 `brief` 标记的页）。章节与数据来源：
+完整版 28 页，A4 逐页不溢出；速览版 6 页（带 `brief` 标记的页：1 / 3 / 4 / 6 / 17 / 19）。
 
-| 页 | 章节 | 数据 |
-|---|---|---|
-| 1 | 封面（速览） | `profile` · `level` · `pct` · `keyNumbers` |
-| 2 | 本报告导航 | 章节表 |
-| 3–4 | 01 诊断结论速览（速览） | `quickView` · `verdict` · `directions` · `actions[0..2]` |
-| 5 | 02 企业画像 | `profile` · `sectorInsight` · `reportText.method` |
-| 6–8 | 03 总体成熟度（第 6 页速览） | `dimensions` · `level` · `levels` · `nextLevel` · `distribution` · `percentile` · `answerDistribution` |
-| 9–20 | 04 六维详解（每维两页） | `dimensions[i]` · `subdims` · `answers` · `recommendations` |
-| 21 | 05 优势与短板 | `subdims` 排序 · `strengths` · `weaknesses` |
-| 22 | 06 AI 优先方向 | `directions` |
-| 23–24 | 07 推荐场景 | `scenes` |
-| 25–27 | 08 升级路线图（第 25 页速览） | `roadmap` · `actions` |
-| 28 | 09 投入与回报 | `investment` · `reportText.services` |
-| 29 | 10 风险与合规 | `risks` |
-| 30 | 11 90 天行动清单 | `checklist` · `actions[0..2].kpi` |
-| 31 | 附录 A 评分明细 | `answers` |
-| 32 | 附录 B 信息来源 | `benchmark` · `reportText.glossary` · 置信度说明 |
-| 33 | 封底 | `reportText.contact` · `reportText.closing` |
+**版式身份**——与「企业AI高价值场景排序」明确区分：章节标题为整条 3D 彩色凸浮条配六边形序号徽章，章节栏右端带刻度装饰；内容卡走左侧色轨（档案感）；小节标题为粗体黑字加拉丁副题加双细线；页脚为六色渐变条；封面主视觉为「企业经营现状 → 六维雷达加 AI 核心 → 等级阶梯」三段式；封底深墨蓝满版。样式 `prototype/src/report-m1.css`、图表 `prototype/src/charts-m1.js`，与模块 2 的 `report-m2.css` / `charts-m2.js` 互不复用。
+
+| 页 | 章节 | 数据 | 图表 |
+|---|---|---|---|
+| 1 | 封面（速览） | `profile` · `level` · `pct` · `percentile` · `keyNumbers` · `investment` | `heroM1` · `scoreArc` |
+| 2 | 00 本报告导航 | `levels` · `benchmark` · `distribution` | — |
+| 3 | 01 诊断结论速览（速览） | `quickView` · `verdict` · `dimensions` · `strongDims` · `weakDims` · `investment` | — |
+| 4 | 01 未来三个月先做三件事（速览） | `actions[0..2]` · `directions` · `summary.next` | — |
+| 5 | 02 企业画像 | `profile` · `sectorInsight` · `benchmark` · `level` | — |
+| 6 | 03 总体成熟度（速览） | `pct` · `total` · `level` · `levels` · `nextLevel` | `scoreArc` · `levelLadder` |
+| 7 | 03 六维形状与同行参考带 | `dimensions` · `positions` · `summary.dims` | `radarPro` · `dimBullet` |
+| 8 | 03 同行位置与作答分布 | `percentile` · `distribution` · `answers` · `answerDistribution` | `distCurve` · `gauge6` · `answerGrid` |
+| 9–14 | 04.1–04.6 六维逐项诊断（战略 / 数据 / 流程 / 人员 / 预算 / 合规，每维一页） | `dimensions[i]`（含 `subdims` 的 `diagnosis` 与 `recommendations`）· `answers` 本维六题 | — |
+| 15 | 05 优势与短板 | `subdims` 排序 · `strengths` · `weaknesses` · `summary.subs` | `subHeat` |
+| 16 | 06 AI 优先方向 | `directions` · `dimensions` | `dimDiverge` |
+| 17 | 07 距下一级的差距（速览） | `gapPlan`（`needPts` · `needPct` · `focus` · 六维 `items`）· `level` · `directions` | `gapBars` |
+| 18 | 08 推荐场景 | `scenes` | `matrix` |
+| 19 | 09 升级路线图（速览） | `roadmap` · `actions` | `actionFlow` |
+| 20 | 09 九项行动明细 | `actions` | — |
+| 21 | 10 投入与回报 | `investment`（含四档 `tiers`）· `reportText.services` | — |
+| 22 | 11 风险与合规 | `risks` · `roles` | — |
+| 23 | 12 90 天行动清单 | `checklist` · `actions[0].kpi` | — |
+| 24 | 13 何时重新评一次 | `retrigger` | — |
+| 25–26 | 附录 A 36 题作答与得分 | `answers` · `dimensions` · `subdims` | — |
+| 27 | 附录 B 方法、术语与信息来源 | `benchmark` · `reportText.method` · `reportText.glossary` | — |
+| 28 | 封底 | `reportText.contact` · `reportText.closing` | — |
+
+标题为 L4 经营级时没有下一级，`gapPlan` 为 `null`，第 17 页改述「已在最高一级」，页数不变。
 
 报告标题、出具方、阅读指引、方法说明、术语、联系方式、结语全部取 `data/report-text.json`，界面上不出现「演示环境」「样例企业」等非正式系统文案。
+
+### 打印与 PDF
+
+报告的立体感全部由 **blur = 0** 的硬边明暗层次做出，屏幕与 PDF 是同一套视觉，不设「打印时降级」的分支样式。这条纪律不能松：Chromium 导出 PDF 时会把带模糊的效果栅格化成带 `/SMask` 的位图，在纸面上表现为灰色方块。
+
+| 绝对不能用（实测会产生位图） | 改用 |
+|---|---|
+| `box-shadow` 的 blur > 0 | 多层 blur = 0 的外阴影逐级变淡 |
+| `text-shadow` 的 blur > 0 | `text-shadow: 0 1px 0 <不透明色>` |
+| 任何 `filter`——`blur` / `drop-shadow` 自不必说，`brightness` / `saturate` / `opacity(1)` 实测同样栅格化 | 用 `background` 层或 `box-shadow` 的 `inset` 表达 |
+| 半透明 `border`（`rgba` / 八位 hex / `color-mix` 带 `transparent`）叠在渐变背景上 | 不透明实色描边 |
+| 被圆角裁剪的表格单元格上堆多层 `background` | 单层渐变加 `inset` 阴影 |
+
+矢量安全、可放心使用：`border-radius`、`overflow: hidden` 裁剪、`clip-path`、`opacity`、单层渐变、`box-shadow` 的 `inset` 与 blur = 0 外阴影。
+
+章节标题栏的凸浮结构自上而下六层：顶棱硬高光 → 柱面连续衰减（白与黑的 alpha 叠层，不换色，保住 `--mc → --mc2` 的彩色流动）→ 左右棱受光与背光 → `inset` 压暗的底部侧壁（厚度）→ 1px 转折暗线 → 三级 blur = 0 落影（浮）。侧壁厚度由 `--wall` 控制，取无单位数值，`calc()` 里乘 `1px` 使用。
+
+自查办法：导出后统计 PDF 里 `/Subtype /Image` 与 `/SMask` 对象数。当前基准为完整版 8 张位图、速览版 7 张，其中带 `/SMask` 的各 3 张，来自封面主视觉与 logo，属正常内容。数量级跳到几十上百，说明有模糊效果漏进来了。
 
 会话内保存 `profile` 与 `dimensions` / `weakDims`，供「企业AI高价值场景排序」读取最弱两维作为痛点提示，「企业AI投入ROI测算器」读取 `investment.tier` 作为默认投入档。
 
@@ -190,6 +220,9 @@ data/risks.json                   16 条风险规则
 data/benchmark.json               同行参考带 270 格（54 细分 × 5 规模；v0 估算，业务侧抽样后替换）
 data/report-text.json             报告固定文案：标题 · 出具方 · 阅读指引 · 方法 · 投入四档 · 服务 · 术语 · 联系方式 · 结语
 examples/S1–S4.*.json             四套样例企业的输入与 golden 输出
+../../prototype/src/module-01.js  报告渲染参考实现（28 页 / 速览 6 页）
+../../prototype/src/report-m1.css 模块 1 专属版式（3D 凸浮标题栏 · 六边形徽章 · 左侧色轨）
+../../prototype/src/charts-m1.js  模块 1 专属图表库（12 种，含封面主视觉 heroM1）
 scripts/load-data.js              组装 compute() 的 data 包（data/ + _shared/）
 scripts/run-examples.js           跑样例、写 golden、打印摘要
 scripts/validate-schema.js        契约校验：样例过 schema · 画像 schema 与数据表一致 · 常量与内核一致 · 反例被拒

@@ -151,7 +151,11 @@ brief_pages: 6
 
 ### 报告（`delivers: print / wechat`，原型 `prototype/src/module-02.js` 为参考实现）
 
-完整版 28 页，A4 逐页不溢出；速览版 6 页（带 `brief` 标记的页）。**版式与「企业AI成熟度评估」明确区分**：章节标题为整条 3D 彩色凸浮条，小节标题为粗体黑字加灰色拉丁副题，图表框为卡片加顶部圆角渐变凸浮帽条，页脚为贯穿全宽的五色渐变条，封面为「企服 → AI → 排序结果」主视觉，封底为深墨蓝满版。样式文件 `prototype/src/report-m2.css`，与模块 1 的 `report.css` 互不复用。
+完整版 28 页，A4 逐页不溢出；速览版 6 页（带 `brief` 标记的页：1 / 3 / 4 / 10 / 13 / 20）。
+
+**版式身份**——与「企业AI成熟度评估」明确区分：章节标题为整条 3D 彩色凸浮条配圆角方序号徽章，条面带一道横贯整条的斜向光泽；小节标题为粗体黑字加灰色拉丁副题；内容卡为顶部凸浮帽条（模块 1 走左侧色轨）；页脚为贯穿全宽的五色渐变条（模块 1 为六色）；封面为「企服 → AI → 排序结果」主视觉；封底为深墨蓝满版。样式 `prototype/src/report-m2.css`、图表 `prototype/src/charts-m2.js`，与模块 1 的 `report-m1.css` / `charts-m1.js` 互不复用。
+
+图表库共 14 种：`heroM2`（封面主视觉）· `dial` · `ladder` · `painBars` · `painBubbles` · `sankey` · `funnel` · `axisStack` · `waterfall` · `bubbleMatrix` · `radarCompare` · `heatmap` · `depArc` · `gantt`。
 
 | 页 | 章节 | 数据 |
 |---|---|---|
@@ -172,6 +176,24 @@ brief_pages: 6
 | 25 | 17 未入选与复盘 | `excluded` · `retrigger` |
 | 26–27 | 附录 A–B | `scenes` · `reportText.glossary` · `reportText.method` |
 | 28 | 封底 | `reportText.contact` · `reportText.closing` |
+
+### 打印与 PDF
+
+与「企业AI成熟度评估」同一套纪律：报告的立体感全部由 **blur = 0** 的硬边明暗层次做出，屏幕与 PDF 是同一套视觉，不设「打印时降级」的分支样式。Chromium 导出 PDF 时会把带模糊的效果栅格化成带 `/SMask` 的位图，在纸面上表现为灰色方块。
+
+| 绝对不能用（实测会产生位图） | 改用 |
+|---|---|
+| `box-shadow` 的 blur > 0 | 多层 blur = 0 的外阴影逐级变淡 |
+| `text-shadow` 的 blur > 0 | `text-shadow: 0 1px 0 <不透明色>` |
+| 任何 `filter`——`blur` / `drop-shadow` 自不必说，`brightness` / `saturate` / `opacity(1)` 实测同样栅格化 | 用 `background` 层或 `box-shadow` 的 `inset` 表达 |
+| 半透明 `border`（`rgba` / 八位 hex / `color-mix` 带 `transparent`）叠在渐变背景上 | 不透明实色描边 |
+| 被圆角裁剪的表格单元格上堆多层 `background` | 单层渐变加 `inset` 阴影 |
+
+矢量安全、可放心使用：`border-radius`、`overflow: hidden` 裁剪、`clip-path`、`opacity`、单层渐变、`box-shadow` 的 `inset` 与 blur = 0 外阴影。
+
+章节标题栏的凸浮结构自上而下六层：顶棱硬高光 → 柱面连续衰减（白与黑的 alpha 叠层，不换色，保住 `--mc → --mc2` 的彩色流动）→ 左右棱受光与背光 → `inset` 压暗的底部侧壁（厚度）→ 1px 转折暗线 → 三级 blur = 0 落影（浮）。侧壁厚度由 `--wall` 控制，取无单位数值，`calc()` 里乘 `1px` 使用。卡片顶部的凸浮帽条同口径：单层横向渐变加上下两道 `inset`，外加一层 blur = 0 落影。
+
+自查办法：导出后统计 PDF 里 `/Subtype /Image` 与 `/SMask` 对象数。当前基准为完整版 22 张位图、速览版 6 张，其中带 `/SMask` 的各 3 张，来自封面主视觉与 logo，属正常内容。数量级跳到几十上百，说明有模糊效果漏进来了。
 
 会话内保存 `profile`、`ranked[0]` 与 `investment.tier`，供「企业AI投入ROI测算器」读取首选场景与投入档作为默认值。
 
@@ -238,6 +260,9 @@ scripts/run-examples.js           跑样例、写 golden、打印摘要
 scripts/validate-data.js          场景库校验：字段取值、标签闭环、模块与投入档覆盖度、14 个大类齐全
 scripts/validate-schema.js        契约校验：样例过 schema · 枚举与数据表一致 · 常量与内核一致 · 反例被拒
 scripts/lint.js                   构建期禁忌词扫描
+../../prototype/src/module-02.js  报告与排序台渲染参考实现（28 页 / 速览 6 页）
+../../prototype/src/report-m2.css 模块 2 专属版式（3D 凸浮标题栏 · 圆角方徽章 · 卡片顶部帽条）
+../../prototype/src/charts-m2.js  模块 2 专属图表库（14 种，含封面主视觉 heroM2）
 ../_shared/company-profile.schema.json  企业画像 JSON Schema（由模块 1 的生成脚本产出）
 ../_shared/profile-fields.json    企业画像 13 字段定义
 ../_shared/industries.json        14 大类 / 54 细分行业
