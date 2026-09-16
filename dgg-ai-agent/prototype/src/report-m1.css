@@ -20,7 +20,11 @@
   position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px;
   --wall: 7;
   padding: 12px 18px calc(12px + var(--wall) * 1px) 15px; margin: 0 0 19px; border-radius: 13px;
-  background: linear-gradient(118deg, var(--mc) 0%, var(--mc2) 62%, color-mix(in srgb, var(--mc2) 70%, #FFFFFF) 100%);
+  background:
+    /* ② 柱面受光衰减：把平面色块读成一段拱起的弧面（只叠白/黑 alpha，不换色，彩色流动完整保留） */
+    linear-gradient(180deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .05) 38%, rgba(3, 14, 33, .03) 60%, rgba(3, 14, 33, .15) 100%),
+    /* ① 主体双色 */
+    linear-gradient(118deg, var(--mc) 0%, var(--mc2) 62%, color-mix(in srgb, var(--mc2) 70%, #FFFFFF) 100%);
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, .54),      /* 顶棱高光：受光的那一道 */
     inset 0 4px 0 rgba(255, 255, 255, .16),      /* 顶面余光 */
