@@ -1,0 +1,15 @@
+{
+  "note": "风险规则：指标由引擎算出，band 取自 benchmarks.json 按行业大类的参考带；level 由 概率 × 影响 落矩阵。actions 的效果由引擎按 key 落账或改现金预测。",
+  "rules": [
+    { "id": "K01", "name": "应收逾期", "cat": "回款", "metric": "arOverdue90Share", "metricLabel": "逾期 90 天以上占应收比", "unit": "%", "band": "arOverdue90Share", "impactNote": "按逾期 90 天以上金额 × 行业坏账率估", "actions": [ { "key": "collect", "label": "发起催收", "desc": "对逾期 30 天以上客户按账龄分级催收，30–90 天电话对账，90 天以上发函" }, { "key": "provision", "label": "计提坏账", "desc": "对逾期 180 天以上按 50% 计提坏账准备" } ] },
+    { "id": "K02", "name": "客户集中", "cat": "回款", "metric": "top1Share", "metricLabel": "前一大客户收入占比", "unit": "%", "band": "top1Share", "impactNote": "按该客户年收入 × 毛利率估", "actions": [ { "key": "note", "label": "列入经营会议", "desc": "该客户的账期与订单变化纳入月度经营会议跟踪" } ] },
+    { "id": "K03", "name": "存货周转", "cat": "资产", "metric": "inventoryDays", "metricLabel": "存货周转天数", "unit": "天", "band": "inventoryDays", "applies": "hasInventory", "impactNote": "按超出参考带的存货占用 × 资金成本估", "actions": [ { "key": "disposeSlow", "label": "处置呆滞", "desc": "按 ERP 呆滞清单折价处置，回笼资金计入现金预测" } ] },
+    { "id": "K04", "name": "增值税税负率偏离", "cat": "税务", "metric": "vatBurden", "metricLabel": "增值税税负率", "unit": "%", "band": "vatBurden", "impactNote": "按偏离对应的应补税额 + 滞纳金估", "actions": [ { "key": "declareUninvoiced", "label": "申报未开票收入", "desc": "本期未开票收入按规定申报，税负率回到参考带" } ] },
+    { "id": "K05", "name": "现金可用月数", "cat": "资金", "metric": "cashMonths", "metricLabel": "现金 ÷ 月均刚性支出", "unit": "月", "band": "cashMonths", "impactNote": "按未来 13 周现金缺口估", "actions": [ { "key": "gotoCash", "label": "看 13 周现金预测", "desc": "缺口周与三种补缺方案在现金预测页" } ] },
+    { "id": "K06", "name": "业务招待费超限", "cat": "税务", "metric": "entertainShare", "metricLabel": "业务招待费 ÷ 收入", "unit": "‰", "band": "entertainShare", "impactNote": "按超限部分不得税前扣除 × 税率估", "actions": [ { "key": "cutEntertain", "label": "压缩招待预算", "desc": "后四个月招待费按收入 5‰ 控制，超出部分需总经理审批" } ] },
+    { "id": "K07", "name": "毛利率连续下滑", "cat": "经营", "metric": "gmDrop3", "metricLabel": "近三期毛利率累计下降", "unit": "pct", "band": "gmDrop3", "impactNote": "按下降幅度 × 季度收入估", "actions": [ { "key": "reviewCost", "label": "复核成本结转", "desc": "先核账面存货与 ERP 库存差异，再看材料价与工时" } ] },
+    { "id": "K08", "name": "应付逾期", "cat": "供应", "metric": "apOverdue", "metricLabel": "逾期 30 天以上应付", "unit": "元", "band": "apOverdue", "impactNote": "按逾期供应商对应的在途物料估断供影响", "actions": [ { "key": "payCritical", "label": "优先支付关键供应商", "desc": "对 ERP 里有在途物料的供应商先付，其余协商付款计划" }, { "key": "negotiateAP", "label": "协商付款计划", "desc": "非关键供应商延后两周分期付款" } ] },
+    { "id": "K09", "name": "短贷长用", "cat": "资金", "metric": "shortLoanCapexRatio", "metricLabel": "近 12 个月资本支出 ÷ 短期借款", "unit": "%", "band": "shortLoanCapexRatio", "impactNote": "按到期短贷本金对现金预测的冲击估", "actions": [ { "key": "refinance", "label": "申请中长期贷款置换", "desc": "到期短贷本金用中长期贷款置换，现金预测按新还款计划重排" } ] },
+    { "id": "K10", "name": "社保缴费基数", "cat": "合规", "metric": "socialBaseRatio", "metricLabel": "社保缴费基数 ÷ 工资表应发", "unit": "%", "band": "socialBaseRatio", "impactNote": "按基数差额 × 综合费率 × 12 估", "actions": [ { "key": "fixSocialBase", "label": "按实际工资调整基数", "desc": "下一缴费年度按上年工资表平均数申报基数，每月社保支出相应增加" } ] }
+  ]
+}

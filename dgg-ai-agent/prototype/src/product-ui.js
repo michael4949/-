@@ -300,6 +300,101 @@
     return s;
   }
 
+  /* ---------- 风险矩阵（概率 × 影响） ---------- */
+  function matrix(o) {
+    var W = o.width || 520, H = o.height || 300, padL = 44, padR = 16, padT = 14, padB = 34;
+    var s = svg('svg', { class: 'pd-matrix', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMinYMin meet' });
+    var x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+    var maxI = Math.max(1, Math.max.apply(null, o.points.map(function (p) { return p.impact; })));
+    s.appendChild(svg('rect', { x: mx, y: y0, width: x1 - mx, height: my - y0, fill: '#FCE9E7' }));
+    s.appendChild(svg('rect', { x: x0, y: y0, width: mx - x0, height: my - y0, fill: '#FDF3E1' }));
+    s.appendChild(svg('rect', { x: mx, y: my, width: x1 - mx, height: y1 - my, fill: '#FDF3E1' }));
+    s.appendChild(svg('rect', { x: x0, y: my, width: mx - x0, height: y1 - my, fill: '#EEF1F6' }));
+    s.appendChild(svg('text', { x: x1 - 6, y: y0 + 14, 'text-anchor': 'end', class: 'q' }, ['高：概率高 · 影响大']));
+    s.appendChild(svg('text', { x: x0 + 6, y: y1 - 6, class: 'q' }, ['低']));
+    s.appendChild(svg('text', { x: x0 + 6, y: y0 + 14, class: 'q' }, ['影响大 · 概率低']));
+    s.appendChild(svg('text', { x: x1 - 6, y: y1 - 6, 'text-anchor': 'end', class: 'q' }, ['概率高 · 影响小']));
+    s.appendChild(svg('text', { x: (x0 + x1) / 2, y: H - 8, 'text-anchor': 'middle', class: 'ax' }, ['发生概率 →']));
+    s.appendChild(svg('text', { x: 12, y: (y0 + y1) / 2, 'text-anchor': 'middle', class: 'ax', transform: 'rotate(-90 12 ' + (y0 + y1) / 2 + ')' }, ['影响金额 →']));
+    var sx = function (p) { return x0 + p * (x1 - x0); }, sy = function (v) { return y1 - Math.sqrt(v / maxI) * (y1 - y0); };
+    // 标签避让：默认放右侧；靠右边缘的放左侧；与已放标签重叠的挪到圆点下方
+    var placed = [];
+    var pts = o.points.map(function (p) { return { p: p, cx: sx(p.prob), cy: sy(p.impact) }; }).sort(function (a, b) { return a.cy - b.cy || a.cx - b.cx; });
+    pts.forEach(function (q) {
+      var p = q.p, cx = q.cx, cy = q.cy, tone = p.level === 'high' ? '#D9483B' : p.level === 'mid' ? '#E8A33D' : '#7C8799';
+      var g = svg('g', { class: 'pt' + (p.onClick ? ' click' : ''), style: p.onClick ? 'cursor:pointer' : '' });
+      g.appendChild(svg('circle', { cx: cx, cy: cy, r: p.handled ? 9 : 11, fill: p.handled ? '#fff' : tone, stroke: tone, 'stroke-width': 2 }));
+      g.appendChild(svg('text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'id', fill: p.handled ? tone : '#fff' }, [p.short || p.id]));
+      var w = p.label.length * 12.5, left = cx + 14 > x1 - w;
+      var lx = left ? cx - 14 : cx + 14, ly = cy + 4, anchor = left ? 'end' : 'start';
+      var box = function (x, y) { return { x0: anchor === 'end' ? x - w : x, x1: anchor === 'end' ? x : x + w, y0: y - 11, y1: y + 3 }; };
+      var hit = function (b) { return placed.some(function (q2) { return b.x0 < q2.x1 && b.x1 > q2.x0 && b.y0 < q2.y1 && b.y1 > q2.y0; }); };
+      var b = box(lx, ly);
+      if (hit(b)) { ly = cy + 22; lx = cx; anchor = 'middle'; b = { x0: cx - w / 2, x1: cx + w / 2, y0: ly - 11, y1: ly + 3 }; }
+      if (hit(b)) { ly = cy - 16; b = { x0: cx - w / 2, x1: cx + w / 2, y0: ly - 11, y1: ly + 3 }; }
+      placed.push(b);
+      g.appendChild(svg('text', { x: lx, y: ly, 'text-anchor': anchor, class: 'lbl' }, [p.label]));
+      g.appendChild(svg('title', {}, [p.label + ' · 概率 ' + Math.round(p.prob * 100) + '% · 影响 ' + fmtN(p.impact) + ' 元']));
+      if (p.onClick) g.addEventListener('click', p.onClick);
+      s.appendChild(g);
+    });
+    return s;
+  }
+
+  /* ---------- 周粒度现金曲线 ---------- */
+  function cashChart(o) {
+    var W = o.width || 960, H = o.height || 260, padL = 64, padR = 16, padT = 16, padB = 34;
+    var weeks = o.weeks, n = weeks.length;
+    var vals = [o.opening].concat(weeks.map(function (w) { return w.ending; }));
+    var max = Math.max.apply(null, vals.concat(weeks.map(function (w) { return w.inflow; }), weeks.map(function (w) { return w.outflow; }), [o.safety || 0]));
+    var min = Math.min(0, Math.min.apply(null, vals));
+    var s = svg('svg', { class: 'pd-cash', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMinYMin meet' });
+    var x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB, colW = (x1 - x0) / n;
+    var sy = function (v) { return y1 - (v - min) * (y1 - y0) / (max - min || 1); };
+    var ticks = 4; for (var t = 0; t <= ticks; t++) { var v = min + (max - min) * t / ticks; s.appendChild(svg('line', { x1: x0, y1: sy(v), x2: x1, y2: sy(v), stroke: '#EEF1F7' })); s.appendChild(svg('text', { x: x0 - 6, y: sy(v) + 4, 'text-anchor': 'end', class: 'ax' }, [(v / 10000).toFixed(0) + '万'])); }
+    // 缺口周底色
+    weeks.forEach(function (w, i) { if (w.ending < (o.safety || 0)) s.appendChild(svg('rect', { x: x0 + i * colW, y: y0, width: colW, height: y1 - y0, fill: '#FCE9E7' })); });
+    if (o.safety) { s.appendChild(svg('line', { x1: x0, y1: sy(o.safety), x2: x1, y2: sy(o.safety), stroke: '#E8A33D', 'stroke-dasharray': '5 3', 'stroke-width': 1.5 })); s.appendChild(svg('text', { x: x1 - 4, y: sy(o.safety) - 4, 'text-anchor': 'end', class: 'ax', fill: '#A8690F' }, ['安全线 ' + fmtN(o.safety / 10000) + ' 万'])); }
+    s.appendChild(svg('line', { x1: x0, y1: sy(0), x2: x1, y2: sy(0), stroke: '#98A2B8' }));
+    weeks.forEach(function (w, i) {
+      var cx = x0 + i * colW, bw = colW * 0.3;
+      s.appendChild(svg('rect', { x: cx + colW * 0.15, y: sy(w.inflow), width: bw, height: Math.max(0, sy(0) - sy(w.inflow)), fill: '#22A06B', opacity: 0.55 }));
+      s.appendChild(svg('rect', { x: cx + colW * 0.55, y: sy(w.outflow), width: bw, height: Math.max(0, sy(0) - sy(w.outflow)), fill: '#D9483B', opacity: 0.45 }));
+      s.appendChild(svg('text', { x: cx + colW / 2, y: H - 18, 'text-anchor': 'middle', class: 'ax' + (o.active === i ? ' on' : '') }, ['第' + (i + 1) + '周']));
+      s.appendChild(svg('text', { x: cx + colW / 2, y: H - 6, 'text-anchor': 'middle', class: 'ax sub' }, [w.label]));
+      if (o.onWeek) { var hit = svg('rect', { x: cx, y: y0, width: colW, height: y1 - y0, fill: 'transparent', style: 'cursor:pointer' }); hit.addEventListener('click', function () { o.onWeek(i); }); s.appendChild(hit); }
+      if (o.active === i) s.appendChild(svg('rect', { x: cx, y: y0, width: colW, height: y1 - y0, fill: 'none', stroke: 'var(--pa)', 'stroke-width': 2 }));
+    });
+    var pts = vals.map(function (v, i) { return [i === 0 ? x0 : x0 + (i - 1) * colW + colW / 2, sy(v)]; });
+    s.appendChild(svg('path', { d: pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' '), fill: 'none', stroke: 'var(--pa)', 'stroke-width': 2.5 }));
+    pts.forEach(function (p, i) { if (i) { var w = weeks[i - 1]; s.appendChild(svg('circle', { cx: p[0], cy: p[1], r: 4, fill: w.ending < (o.safety || 0) ? '#D9483B' : 'var(--pa)' })); if (i === o.minWeek + 1) s.appendChild(svg('text', { x: p[0], y: p[1] - 10, 'text-anchor': 'middle', class: 'ax', fill: w.ending < (o.safety || 0) ? '#D9483B' : '#1A2233', style: 'font-weight:700' }, ['最低 ' + (w.ending / 10000).toFixed(1) + ' 万'])); } });
+    if (o.compare) { var pts2 = [o.opening].concat(o.compare.map(function (w) { return w.ending; })).map(function (v, i) { return [i === 0 ? x0 : x0 + (i - 1) * colW + colW / 2, sy(v)]; }); s.appendChild(svg('path', { d: pts2.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' '), fill: 'none', stroke: '#4974F6', 'stroke-width': 2, 'stroke-dasharray': '6 4' })); }
+    return s;
+  }
+
+  /* ---------- 多序列趋势线（12 期） ---------- */
+  function lineChart(o) {
+    var W = o.width || 560, H = o.height || 200, padL = 48, padR = o.right ? 48 : 12, padT = 14, padB = 26;
+    var labels = o.labels, n = labels.length;
+    var s = svg('svg', { class: 'pd-line', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMinYMin meet' });
+    var x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+    var sx = function (i) { return x0 + i * (x1 - x0) / Math.max(1, n - 1); };
+    function scale(series) { var all = [].concat.apply([], series.map(function (q) { return q.values; })); var max = Math.max.apply(null, all), min = Math.min(0, Math.min.apply(null, all)); return function (v) { return y1 - (v - min) * (y1 - y0) / (max - min || 1); }; }
+    var left = o.series.filter(function (q) { return !q.right; }), right = o.series.filter(function (q) { return q.right; });
+    var syL = scale(left), syR = right.length ? scale(right) : null;
+    for (var t = 0; t <= 3; t++) { var yy = y0 + (y1 - y0) * t / 3; s.appendChild(svg('line', { x1: x0, y1: yy, x2: x1, y2: yy, stroke: '#EEF1F7' })); }
+    labels.forEach(function (l, i) { if (i % (o.every || 1) === 0) s.appendChild(svg('text', { x: sx(i), y: H - 8, 'text-anchor': 'middle', class: 'ax' }, [l])); });
+    o.series.forEach(function (q) {
+      var sy = q.right ? syR : syL;
+      if (q.bar) { q.values.forEach(function (v, i) { var bw = (x1 - x0) / n * 0.5; s.appendChild(svg('rect', { x: sx(i) - bw / 2, y: sy(v), width: bw, height: Math.max(0, sy(0) - sy(v)), fill: q.color, opacity: 0.35 })); }); return; }
+      s.appendChild(svg('path', { d: q.values.map(function (v, i) { return (i ? 'L' : 'M') + sx(i).toFixed(1) + ' ' + sy(v).toFixed(1); }).join(' '), fill: 'none', stroke: q.color, 'stroke-width': 2.2 }));
+      q.values.forEach(function (v, i) { s.appendChild(svg('circle', { cx: sx(i), cy: sy(v), r: 3, fill: q.color })); });
+      var lastV = q.values[n - 1];
+      s.appendChild(svg('text', { x: x1 + 4, y: sy(lastV) + 4, class: 'ax', fill: q.color, style: 'font-weight:700' }, [q.fmt ? q.fmt(lastV) : String(lastV)]));
+    });
+    return s;
+  }
+
   /* ---------- 提示 ---------- */
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
@@ -309,5 +404,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, toast: toast, STATUS: STATUS };
 })();

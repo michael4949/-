@@ -1,0 +1,32 @@
+/* ===================== AI CFO · 模块专属版式（组件全部来自 product.css） ===================== */
+.m6-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m6-connect .cap-row:last-child { border-bottom: 0; }
+.m6-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m6-connect .cap-row .t { font-weight: 700; } .m6-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m6-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m6-connect .src-row:last-child { border-bottom: 0; }
+.m6-connect .src-row .t { font-weight: 700; } .m6-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m6-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m6-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m6-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m6-connect .go .sp { flex: 1; } .m6-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m6-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+.m6-stmts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+.m6-stmts .st { display: inline-flex; align-items: center; gap: 8px; font-size: calc(13px * var(--scale)); }
+.m6-entry { display: grid; gap: 4px; }
+.m6-entry > div { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; }
+.m6-entry .dr { color: var(--t-hand); font-weight: 800; } .m6-entry .cr { color: var(--pa-ink); font-weight: 800; padding-left: 6px; }
+.m6-riskhead { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-bottom: 14px; }
+.m6-riskhead .m { display: flex; flex-direction: column; gap: 2px; }
+.m6-riskhead .m b { font-size: calc(18px * var(--scale)); } .m6-riskhead .m span { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m6-items { display: grid; gap: 6px; }
+.m6-items .it { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 10px; border: 1px solid var(--pd-line); border-radius: 9px; font-size: calc(13px * var(--scale)); }
+.m6-items .it .l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m6-items .it .neg { color: var(--t-late); } .m6-items .it .pos { color: var(--t-ok); }
+.m6-reason { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 600; line-height: 1.5; margin-top: 14px; }
+.m6-reason .tag { flex: none; background: var(--pa); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
+.m6-policy .who { display: flex; flex-wrap: wrap; gap: 6px; }
+.m6-policy .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
+.m6-policy .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m6-log { display: grid; gap: 6px; }
+.m6-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
+.m6-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+.m6-log .l b { white-space: nowrap; } .m6-log .l span { color: var(--pd-sub); }

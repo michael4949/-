@@ -1,0 +1,298 @@
+{
+  "note": "三表勾稽规则。lhs / rhs 是引擎当期指标名的算式；tol 为容差（abs 元或 rel 比例）；差异在 1 倍容差内为正常、1–3 倍为差异、超过 3 倍为异常。explain 模板里的 {diff} 为差异绝对值。fix 只是分录的文字模板，效果由引擎按 id 落账。",
+  "rules": [
+    {
+      "id": "R01",
+      "name": "资产负债表平衡",
+      "pair": "资产负债表",
+      "lhs": "assets",
+      "lhsLabel": "资产总计",
+      "rhs": "liabilities + equity",
+      "rhsLabel": "负债 + 所有者权益",
+      "tol": {
+        "abs": 10
+      },
+      "explain": "资产与负债加权益不平 {diff} 元，科目余额表有未过账凭证",
+      "drill": "bs"
+    },
+    {
+      "id": "R02",
+      "name": "未分配利润变动与净利润",
+      "pair": "资产负债表 ↔ 利润表",
+      "lhs": "dRetained",
+      "lhsLabel": "未分配利润本期变动",
+      "rhs": "netProfit - dividends",
+      "rhsLabel": "净利润 − 本期分红",
+      "tol": {
+        "abs": 10
+      },
+      "explain": "未分配利润变动与净利润相差 {diff} 元，有直接调整权益的分录",
+      "drill": "bs"
+    },
+    {
+      "id": "R03",
+      "name": "应收账款变动与银行回款",
+      "pair": "资产负债表 ↔ 银行流水",
+      "lhs": "dAR",
+      "lhsLabel": "应收账款本期变动",
+      "rhs": "rev * (1 + vatRate) - collectionsBank",
+      "rhsLabel": "含税收入 − 银行回款",
+      "tol": {
+        "abs": 5000
+      },
+      "explain": "银行已到账 {diff} 元货款未冲减应收账款，客户对账时会重复催收",
+      "drill": "bankUnmatched",
+      "fix": {
+        "key": "bookCollection",
+        "label": "补记回款分录",
+        "entry": [
+          [
+            "借",
+            "银行存款",
+            "{diff}"
+          ],
+          [
+            "贷",
+            "应收账款",
+            "{diff}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R04",
+      "name": "账面存货与 ERP 库存",
+      "pair": "资产负债表 ↔ ERP",
+      "lhs": "invLedger",
+      "lhsLabel": "账面存货",
+      "rhs": "invErp",
+      "rhsLabel": "ERP 库存金额",
+      "tol": {
+        "abs": 10000
+      },
+      "applies": "hasInventory",
+      "explain": "账面存货比 ERP 库存多 {diff} 元，有已出库物料未结转成本或盘亏未处理",
+      "drill": "inventory",
+      "fix": {
+        "key": "writeOffInventory",
+        "label": "按 ERP 盘点数调整存货",
+        "entry": [
+          [
+            "借",
+            "管理费用 · 存货盘亏",
+            "{diff}"
+          ],
+          [
+            "贷",
+            "原材料 / 库存商品",
+            "{diff}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R05",
+      "name": "应付账款变动与付款",
+      "pair": "资产负债表 ↔ 银行流水",
+      "lhs": "dAP",
+      "lhsLabel": "应付账款本期变动",
+      "rhs": "purchases * (1 + vatRate) - paymentsBank",
+      "rhsLabel": "含税采购 − 银行付款",
+      "tol": {
+        "abs": 5000
+      },
+      "explain": "应付账款变动与采购付款相差 {diff} 元",
+      "drill": "ap"
+    },
+    {
+      "id": "R06",
+      "name": "经营现金流：间接法与直接法",
+      "pair": "现金流量表",
+      "lhs": "cfoIndirect",
+      "lhsLabel": "净利润 + 折旧 ± 营运资本变动",
+      "rhs": "cfoDirect",
+      "rhsLabel": "回款 − 付款 − 工资 − 税费 − 费用现付",
+      "tol": {
+        "abs": 20000
+      },
+      "explain": "两种口径的经营现金流相差 {diff} 元",
+      "drill": "cf"
+    },
+    {
+      "id": "R07",
+      "name": "货币资金与银行对账单",
+      "pair": "资产负债表 ↔ 银行流水",
+      "lhs": "cashLedger",
+      "lhsLabel": "账面货币资金",
+      "rhs": "bankBalance",
+      "rhsLabel": "银行对账单余额",
+      "tol": {
+        "abs": 2000
+      },
+      "explain": "账面货币资金与银行对账单相差 {diff} 元，银行已发生的收支有未入账项",
+      "drill": "bankRecon",
+      "fix": {
+        "key": "bookBankItems",
+        "label": "补记银行未达账项",
+        "entry": [
+          [
+            "借",
+            "财务费用 · 手续费",
+            "{fees}"
+          ],
+          [
+            "贷",
+            "银行存款",
+            "{fees}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R08",
+      "name": "账面收入与开票收入",
+      "pair": "利润表 ↔ 发票数据",
+      "lhs": "rev",
+      "lhsLabel": "账面营业收入",
+      "rhs": "invoiced",
+      "rhsLabel": "本期开票收入（不含税）",
+      "tol": {
+        "abs": 20000
+      },
+      "explain": "本期有 {diff} 元收入已确认未开票，销项税已在待转销项税额中，增值税申报时需按未开票收入申报",
+      "drill": "invoice",
+      "fix": {
+        "key": "declareUninvoiced",
+        "label": "按未开票收入申报",
+        "entry": [
+          [
+            "申报",
+            "增值税申报表附表一 · 未开票收入",
+            "{diff}"
+          ],
+          [
+            "核对",
+            "待转销项税额",
+            "{vat}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R09",
+      "name": "工资费用与工资表",
+      "pair": "利润表 ↔ 工资表",
+      "lhs": "wagesBooked",
+      "lhsLabel": "本期计提工资",
+      "rhs": "wagesPayroll",
+      "rhsLabel": "工资表应发合计",
+      "tol": {
+        "abs": 5000
+      },
+      "explain": "计提工资与工资表相差 {diff} 元",
+      "drill": "payroll"
+    },
+    {
+      "id": "R10",
+      "name": "折旧计提与固定资产台账",
+      "pair": "利润表 ↔ 固定资产台账",
+      "lhs": "depBooked",
+      "lhsLabel": "本期计提折旧",
+      "rhs": "depExpected",
+      "rhsLabel": "台账按类别年限应提折旧",
+      "tol": {
+        "abs": 500
+      },
+      "explain": "本期折旧少提 {diff} 元，新增设备未按台账启用折旧",
+      "drill": "assets",
+      "fix": {
+        "key": "accrueDepreciation",
+        "label": "补提折旧",
+        "entry": [
+          [
+            "借",
+            "制造费用 · 折旧",
+            "{diff}"
+          ],
+          [
+            "贷",
+            "累计折旧",
+            "{diff}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R11",
+      "name": "财务费用与借款合同",
+      "pair": "利润表 ↔ 借款合同",
+      "lhs": "interestBooked",
+      "lhsLabel": "本期利息费用",
+      "rhs": "interestSched",
+      "rhsLabel": "借款合同应计利息",
+      "tol": {
+        "abs": 1000
+      },
+      "explain": "利息费用与借款合同相差 {diff} 元",
+      "drill": "loans"
+    },
+    {
+      "id": "R12",
+      "name": "房租费用与租赁合同",
+      "pair": "利润表 ↔ 租赁合同",
+      "lhs": "rentBooked",
+      "lhsLabel": "本期计入费用的房租",
+      "rhs": "rentContract",
+      "rhsLabel": "合同月租",
+      "tol": {
+        "abs": 500
+      },
+      "explain": "本期多计房租 {diff} 元，下期租金预付被一次计入本期费用",
+      "drill": "vouchers",
+      "fix": {
+        "key": "deferRent",
+        "label": "预付租金转待摊",
+        "entry": [
+          [
+            "借",
+            "预付账款 · 房租",
+            "{diff}"
+          ],
+          [
+            "贷",
+            "管理费用 · 房租",
+            "{diff}"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "R13",
+      "name": "所得税费用与利润总额",
+      "pair": "利润表",
+      "lhs": "incomeTax",
+      "lhsLabel": "所得税费用",
+      "rhs": "ebtTaxable * citRate",
+      "rhsLabel": "应纳税所得额 × 适用税率",
+      "tol": {
+        "rel": 0.05
+      },
+      "explain": "所得税费用与利润总额 × 税率相差 {diff} 元",
+      "drill": "pl"
+    },
+    {
+      "id": "R14",
+      "name": "现金流量净额与货币资金变动",
+      "pair": "现金流量表 ↔ 资产负债表",
+      "lhs": "cfNet",
+      "lhsLabel": "现金及现金等价物净增加额",
+      "rhs": "dCash",
+      "rhsLabel": "货币资金本期变动",
+      "tol": {
+        "abs": 10
+      },
+      "explain": "现金流量表净额与货币资金变动相差 {diff} 元",
+      "drill": "cf"
+    }
+  ]
+}

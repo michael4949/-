@@ -93,6 +93,7 @@
 .pd-table th .arr { color: var(--pa); margin-left: 3px; }
 .pd-table td { padding: 9px 12px; border-bottom: 1px solid #EEF1F7; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
 .pd-table td.r, .pd-table th.r { text-align: right; }
+.pd-table td.w320 { max-width: 320px; white-space: normal; line-height: 1.35; }
 .pd-table td.c, .pd-table th.c { text-align: center; }
 .pd-table tr.click { cursor: pointer; }
 .pd-table tr.click:hover td { background: #F6F8FD; }
@@ -209,8 +210,8 @@
 .pd-item .ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-weight: 800; font-size: 12px; }
 .pd-item .ic.late { background: var(--t-late-soft); color: var(--t-late); } .pd-item .ic.risk { background: var(--t-risk-soft); color: #A8690F; } .pd-item .ic.ok { background: var(--t-ok-soft); color: var(--t-ok); } .pd-item .ic.accent { background: var(--pa-soft); color: var(--pa-ink); } .pd-item .ic.hand { background: var(--t-hand-soft); color: var(--t-hand); }
 .pd-item .m { min-width: 0; }
-.pd-item .m .t { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pd-item .m .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-item .m .t { display: block; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-item .m .s { display: block; color: var(--pd-sub); font-size: calc(12px * var(--scale)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pd-item .r { text-align: right; font-weight: 700; white-space: nowrap; }
 .pd-item .r .s { display: block; color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); font-weight: 500; }
 .pd-kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: calc(13px * var(--scale)); }
@@ -235,3 +236,14 @@
 .pd-dot.ok { background: var(--t-ok); } .pd-dot.risk { background: var(--t-risk); } .pd-dot.late { background: var(--t-late); } .pd-dot.mute { background: var(--pd-mute); }
 .pd-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: calc(12px * var(--scale)); color: var(--pd-sub); }
 .pd-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+
+/* ---------- 风险矩阵 / 现金曲线 / 趋势线 ---------- */
+.pd-matrix { width: 100%; display: block; font-family: var(--font); }
+.pd-matrix .q { font-size: 11px; fill: #66718A; font-weight: 600; }
+.pd-matrix .ax { font-size: 11px; fill: #98A2B8; }
+.pd-matrix .id { font-size: 10px; font-weight: 800; }
+.pd-matrix .lbl { font-size: 11.5px; fill: #1A2233; font-weight: 600; }
+.pd-cash, .pd-line { width: 100%; display: block; font-family: var(--font); }
+.pd-cash .ax, .pd-line .ax { font-size: 11px; fill: #66718A; font-weight: 600; }
+.pd-cash .ax.sub { fill: #98A2B8; font-weight: 500; font-size: 10px; }
+.pd-cash .ax.on { fill: var(--pa-ink); }
