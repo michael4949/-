@@ -37,7 +37,7 @@
   var MODULES = [
     { id: 'm1',  name: '企业AI成熟度评估',      sub: '六维打分，看清同行位置', big: true,  icon: 'radar' },
     { id: 'm2',  name: '企业AI高价值场景排序',  sub: '先做哪个场景最值',       big: true,  icon: 'target' },
-    { id: 'm3',  name: '企业AI投入ROI测算器',   sub: '三笔账算清回收期',       big: true,  icon: 'calc' },
+    { id: 'm3',  name: '企业AI投入ROI测算器',   sub: '整批场景一次算清回收期',       big: true,  icon: 'calc' },
     { id: 'm4',  name: 'AI获客',                sub: '画像脚本线索一次出',     icon: 'person' },
     { id: 'm5',  name: 'AI人力官',              sub: 'JD简历面试合规成本',     icon: 'badge' },
     { id: 'm6',  name: 'AI CFO',                sub: '三表勾稽风险现金政策',   icon: 'coin' },
@@ -333,6 +333,7 @@
     charge: charge, setQrReady: setQrReady, recommend: function (k) { S.recommended = k; renderPricebar(); },
     holdIdle: holdIdle, touch: touch, showWeChat: showWeChat, print: print, llm: llm,
     industryNameOf: industryNameOf, optText: optText, station: function () { return S.station; },
+    isBuilt: function (id) { return !!BUILT[id]; },
     displayIndustryDefault: function () {
       var d = DATA.industries.display.filter(function (x) { return x.key === S.industryDisplay; })[0];
       return d ? d.default : null;

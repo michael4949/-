@@ -6,6 +6,7 @@ const skills = path.join(__dirname, '..', 'skills');
 const m1 = require(path.join(skills, '01-ai-maturity', 'scripts', 'load-data.js'))();
 const m2 = require(path.join(skills, '02-scene-ranking', 'scripts', 'load-data.js'))();
 const m3 = require(path.join(skills, '03-roi-calculator', 'scripts', 'load-data.js'))();
+const m10 = require(path.join(skills, '10-ai-erp', 'scripts', 'load-data.js'))();
 const exDir = path.join(skills, '01-ai-maturity', 'examples');
 const examples = fs.readdirSync(exDir).filter((f) => f.endsWith('.input.json')).sort().map((f) => JSON.parse(fs.readFileSync(path.join(exDir, f), 'utf8')));
 const data = {
@@ -14,7 +15,8 @@ const data = {
   m1: { dimensions: m1.dimensions, questions: m1.questions, levels: m1.levels, diagnostics: m1.diagnostics, benchmark: m1.benchmark,
         actions: m1.actions, scenes: m1.scenes, risks: m1.risks, reportText: m1.reportText, promptTemplate: m1.promptTemplate },
   m2: { sectors: m2.sectors, libTotal: m2.libTotal, axes: m2.axes, conditions: m2.conditions, reportText: m2.reportText, promptTemplate: m2.promptTemplate },
-  m3: { sectors: m3.sectors, constants: m3.constants, levers: m3.levers, sceneLevers: m3.sceneLevers, benchmarks: m3.benchmarks, investmentProfile: m3.investmentProfile, reportText: m3.reportText, promptTemplate: m3.promptTemplate }
+  m3: { sectors: m3.sectors, constants: m3.constants, levers: m3.levers, sceneLevers: m3.sceneLevers, benchmarks: m3.benchmarks, investmentProfile: m3.investmentProfile, reportText: m3.reportText, promptTemplate: m3.promptTemplate },
+  m10: { archetypes: m10.archetypes, samples: m10.samples }
 };
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释
@@ -28,12 +30,15 @@ html = put(html, '/*__REPORT_M1_CSS__*/', R('src/report-m1.css'));
 html = put(html, '/*__REPORT_M2_CSS__*/', R('src/report-m2.css'));
 html = put(html, '/*__MODULE_03_CSS__*/', R('src/module-03.css'));
 html = put(html, '/*__REPORT_M3_CSS__*/', R('src/report-m3.css'));
+html = put(html, '/*__PRODUCT_CSS__*/', R('src/product.css'));
+html = put(html, '/*__MODULE_10_CSS__*/', R('src/module-10.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));
 html = put(html, '/*__CORE_M1_JS__*/', R('../skills/01-ai-maturity/core/compute.js'));
 html = put(html, '/*__CORE_M2_JS__*/', R('../skills/02-scene-ranking/core/compute.js'));
 html = put(html, '/*__CORE_M3_JS__*/', R('../skills/03-roi-calculator/core/compute.js'));
+html = put(html, '/*__CORE_M10_JS__*/', R('../skills/10-ai-erp/core/sim.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
 html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
@@ -43,6 +48,8 @@ html = put(html, '/*__CHARTS_M2_JS__*/', R('src/charts-m2.js'));
 html = put(html, '/*__MODULE_02_JS__*/', R('src/module-02.js'));
 html = put(html, '/*__CHARTS_M3_JS__*/', R('src/charts-m3.js'));
 html = put(html, '/*__MODULE_03_JS__*/', R('src/module-03.js'));
+html = put(html, '/*__PRODUCT_UI_JS__*/', R('src/product-ui.js'));
+html = put(html, '/*__MODULE_10_JS__*/', R('src/module-10.js'));
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'dist', 'index.html'), html);
 console.log('dist/index.html', (html.length / 1024).toFixed(0) + ' KB');

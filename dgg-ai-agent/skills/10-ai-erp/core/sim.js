@@ -219,6 +219,7 @@
           }
           op.mat = matWait;
           var earliest = maxT(natural, { d: matReady, h: 0 });
+          op.naturalF = frac(cal, op.line, natural); op.earliestF = frac(cal, op.line, earliest);
           op.waitMaterial = Math.max(0, wfrac(cal, op.line, { d: matReady, h: 0 }) - wfrac(cal, op.line, natural));
           op.matReady = matReady;
           if (!op.inProgress) {
@@ -300,6 +301,7 @@
             work: r1(op.work), remain: r1(op.remain), setup: op.setup, startF: op.startF == null ? null : r1(op.startF * 100) / 100, endF: op.endF == null ? null : r1(op.endF * 100) / 100,
             startDay: op.start ? op.start.d : null, endDay: op.end ? op.end.d : null, startLabel: op.startLabel || null, endLabel: op.endLabel || null,
             waitMaterial: r1(op.waitMaterial || 0), waitCapacity: r1(op.waitCapacity || 0), matReady: op.matReady || 0, queueAhead: op.queueAhead || [],
+            naturalF: op.naturalF == null ? null : r1(op.naturalF * 100) / 100, earliestF: op.earliestF == null ? null : r1(op.earliestF * 100) / 100,
             mat: (op.mat || []).map(function (rec) { return { material: rec.material, name: mats[rec.material] ? mats[rec.material].name : rec.material, unit: mats[rec.material] ? mats[rec.material].unit : '', need: r0(rec.need), fromStock: r0(rec.fromStock), fromPO: rec.fromPO, ready: rec.ready, readyLabel: short(data, rec.ready), assumed: rec.assumed, short: rec.short ? r0(rec.short) : 0 }; }),
             segs: (op.segs || []).map(function (s) { return { d: s.d, from: r1(s.from), to: r1(s.to) }; }) };
         })
@@ -618,6 +620,33 @@
     return { items: items, slow: slow, po: poList, summary: { short: items.filter(function (x) { return x.urgency === 'short'; }).length, safety: items.filter(function (x) { return x.urgency === 'safety'; }).length, watch: items.filter(function (x) { return x.urgency === 'watch'; }).length, buy: buy.length, amount: sum(buy.map(function (x) { return x.amount; })), slow: slow.length, slowCapital: sum(slow.map(function (x) { return x.capital; })), overdue: buy.filter(function (x) { return x.overdue; }).length } };
   }
 
+  /* ---------------- 采购单落单 ---------------- */
+  function nextPoId(data) {
+    var n = 0;
+    data.materials.forEach(function (m) { (m.onOrder || []).forEach(function (a) { var x = /-(\d+)$/.exec(a.po || ''); if (x) n = Math.max(n, +x[1]); }); });
+    data.log.forEach(function (l) { (l.pos || []).forEach(function (po) { var x = /-(\d+)$/.exec(po); if (x) n = Math.max(n, +x[1]); }); });
+    return function () { n++; return 'PO-' + data.today.slice(2, 4) + data.today.slice(5, 7) + '-' + String(n).padStart(3, '0'); };
+  }
+  // 把采购建议里的下单项落成在途（按供应商各成一张采购单）；返回新数据与采购单列表
+  function applyPurchase(raw, plan, ids) {
+    var data = normalize(raw), V = data.vocab || {};
+    var next = nextPoId(data), mats = byId(data.materials);
+    var groups = {}, pos = [];
+    plan.items.forEach(function (x) {
+      if (!(x.suggestQty > 0)) return;
+      if (ids && ids.indexOf(x.id) < 0) return;
+      var m = mats[x.id]; if (!m) return;
+      var g = groups[x.supplier] = groups[x.supplier] || { po: next(), supplier: x.supplier, lines: [], amount: 0, eta: 0 };
+      var eta = Math.max(1, m.leadDays);
+      m.onOrder.push({ po: g.po, qty: x.suggestQty, eta: dateOf(data, eta) });
+      g.lines.push({ material: m.id, name: m.name, qty: x.suggestQty, unit: m.unit, amount: x.amount, eta: dateOf(data, eta) });
+      g.amount += x.amount; g.eta = Math.max(g.eta, eta);
+    });
+    Object.keys(groups).forEach(function (k) { pos.push(groups[k]); });
+    if (pos.length) data.log.push({ seq: data.log.length + 1, orderId: '', customer: '', action: 'purchase', label: V.purchase || '采购建议', detail: '生成 ' + pos.length + ' 张采购单：' + pos.map(function (p) { return p.po + ' ' + p.supplier + ' ' + fmtN(p.amount) + ' 元'; }).join('；'), cost: sum(pos.map(function (p) { return p.amount; })), pos: pos.map(function (p) { return p.po; }) });
+    return { data: data, pos: pos };
+  }
+
   /* ---------------- 交付日报 ---------------- */
   function daily(raw, S, plan) {
     var data = normalize(raw), V = data.vocab || {};
@@ -647,7 +676,7 @@
   return {
     VERSION: VERSION, MODULE_NAME: MODULE_NAME, CREDITS: CREDITS, CAUSES: CAUSES, HZ: HZ,
     normalize: normalize, schedule: schedule, explain: explain, actions: actions, applyAction: applyAction,
-    simulateInsert: simulateInsert, applyInsert: applyInsert, purchasePlan: purchasePlan, daily: daily, diff: diff,
+    simulateInsert: simulateInsert, applyInsert: applyInsert, purchasePlan: purchasePlan, applyPurchase: applyPurchase, daily: daily, diff: diff,
     dayIdx: dayIdx, dateOf: dateOf, short: short, isRest: isRest, weekday: weekday, fmtN: fmtN, overtimeCost: overtimeCost, nextOrderId: nextOrderId
   };
 });

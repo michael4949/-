@@ -1,0 +1,57 @@
+/* ===================== AI ERP · 模块专属版式（组件全部来自 product.css） ===================== */
+.m10-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m10-connect .cap-row:last-child { border-bottom: 0; }
+.m10-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m10-connect .cap-row .t { font-weight: 700; }
+.m10-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m10-connect .src-row:last-child { border-bottom: 0; }
+.m10-connect .src-row .t { font-weight: 700; }
+.m10-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-connect .arche { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.m10-connect .arche button { text-align: left; padding: 10px 12px; border: 1px solid var(--pd-line); border-radius: 10px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
+.m10-connect .arche button .t { font-weight: 700; }
+.m10-connect .arche button .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-connect .arche button.on { border-color: var(--pa); background: var(--pa-soft); }
+.m10-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m10-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); }
+.m10-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m10-connect .go .sp { flex: 1; }
+.m10-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
+.m10-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+
+.m10-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+.m10-head .id { font-size: calc(22px * var(--scale)); font-weight: 800; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.m10-head .sub { color: var(--pd-sub); margin-top: 2px; font-size: calc(13.5px * var(--scale)); }
+.m10-head .facts { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 10px; }
+.m10-head .facts .f .k { color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 600; }
+.m10-head .facts .f .v { font-size: calc(18px * var(--scale)); font-weight: 800; }
+.m10-head .facts .f .v.late { color: var(--t-late); } .m10-head .facts .f .v.ok { color: var(--t-ok); } .m10-head .facts .f .v.risk { color: #A8690F; }
+.m10-head .btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.m10-ops .pd-table td { white-space: normal; }
+.m10-mat { display: grid; gap: 8px; }
+.m10-mat .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 9px; }
+.m10-mat .row .t { font-weight: 700; }
+.m10-mat .row .s { grid-column: 1 / -1; color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-insert .presets { display: flex; flex-direction: column; gap: 6px; }
+.m10-insert .presets button { text-align: left; padding: 8px 10px; border: 1px dashed var(--pd-line); border-radius: 9px; background: #fff; font-size: calc(12.5px * var(--scale)); }
+.m10-insert .presets button:hover { border-color: var(--pa); }
+.m10-insert .reason { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 600; line-height: 1.5; }
+.m10-insert .reason .tag { flex: none; background: var(--pa); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
+.m10-po .sup { border: 1px solid var(--pd-line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.m10-po .sup .t { display: flex; justify-content: space-between; font-weight: 700; }
+.m10-po .sup .ln { display: flex; justify-content: space-between; gap: 10px; color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
+.m10-po .sup .ln b { color: var(--pd-ink); }
+.m10-daily .kp { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.m10-daily .kp .b { background: #F7F9FD; border-radius: 10px; padding: 10px 12px; }
+.m10-daily .kp .b .k { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-daily .kp .b .v { font-size: calc(22px * var(--scale)); font-weight: 800; }
+.m10-daily .kp .b .v.late { color: var(--t-late); } .m10-daily .kp .b .v.risk { color: #A8690F; } .m10-daily .kp .b .v.ok { color: var(--t-ok); }
+.m10-daily .who { display: flex; flex-wrap: wrap; gap: 6px; }
+.m10-daily .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
+.m10-daily .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m10-log { display: grid; gap: 6px; }
+.m10-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
+.m10-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+.m10-log .l b { white-space: nowrap; }
+.m10-log .l span { color: var(--pd-sub); }

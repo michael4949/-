@@ -10,12 +10,16 @@ skills/
   02-scene-ranking/        企业AI高价值场景排序（SKILL.md · schema · data/sectors 14 个大类场景库 · core · prompts · examples · scripts）
   03-roi-calculator/       企业AI投入ROI测算器（SKILL.md · schema · data 价目/杠杆/场景映射/收益侧参考值/投入侧规模推导表 · core · prompts · examples · scripts）
                            测算单元是场景组合：内核做账号复用、接口去重、配置复用与跨场景效益去重
+  10-ai-erp/               AI ERP · 订单交付指挥室（SKILL.md · schema · data 业态词表 + 四业态样本 · core/sim.js 排程引擎 · examples · scripts）
+                           纯预制、无 LLM：排程、延期归因、处置预演、插单三方案、采购建议、交付日报都出自同一个确定性引擎
 prototype/
-  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
+  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-10.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
+                           product.css · product-ui.js：八个产品模块共用的一套 UI 语言（左导航 + 页签 + 工作区；KPI 砖 / 状态签 / 可排序表 / 负荷热力 / SVG 甘特 / 抽屉 / 方案对比 / AI 判断面板），每个模块只换一个强调色
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
   test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
   test/screenshot-m2.js    模块 2 全流程：含权重拖动重排、预设切换、行详情联动、28 页报告与 PDF
   test/screenshot-m3.js    模块 3 全流程：现场输入企业画像、多选场景组合、逐场景填参、三栏测算台、34 页报告与 PDF
+  test/screenshot-m10.js   AI ERP 六屏走查：接入 → 指挥室（扣积分）→ 订单下钻（执行处置）→ 插单三方案 → 落单 → 生成采购单 → 日报发送；禁词扫描、屏上数字与内核比对
   dist/index.html          交付物
 ```
 
@@ -35,6 +39,11 @@ node scripts/validate-schema.js   # 契约校验：样例过 schema · 画像 sc
 node scripts/gen-profile-schema.js  # 画像字段或行业表改动后重新生成 _shared/company-profile.schema.json
 node scripts/gen-benchmark.js     # 重新生成参考带（业务侧抽样到位后改为直接替换 data/benchmark.json）
 
+cd ../10-ai-erp
+node scripts/gen-samples.js       # 重新生成流通 / 项目 / 服务三套样本（制造业样本 data/samples/mfg.json 手写）
+node scripts/run-examples.js      # 四种业态样本跑引擎，写 examples/*.output.json
+node scripts/validate.js          # 引擎自检：确定性、工序顺序、产能不超、归因一致、处置与插单闭环、采购与日报、禁词
+
 cd ../../prototype
 node build.js                     # 构建 dist/index.html
 NODE_PATH=$(npm root -g) node test/screenshot.js   # 需要 playwright + chromium：走完整流程、截图、比对内核、导出 PDF
@@ -43,6 +52,7 @@ NODE_PATH=$(npm root -g) node test/measure.js      # 模块 1 打印模拟下量
 NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（S1–S4）
 NODE_PATH=$(npm root -g) node test/screenshot-m3.js   # 模块 3 全流程
 NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（S1–S4）
+NODE_PATH=$(npm root -g) node test/screenshot-m10.js  # AI ERP 六屏走查（W=1600 H=900 OUT=shots-m10-1600 可换视口与输出目录）
 ```
 
 ## 原型的 URL 参数
