@@ -8,6 +8,7 @@ const m2 = require(path.join(skills, '02-scene-ranking', 'scripts', 'load-data.j
 const m3 = require(path.join(skills, '03-roi-calculator', 'scripts', 'load-data.js'))();
 const m10 = require(path.join(skills, '10-ai-erp', 'scripts', 'load-data.js'))();
 const m6 = require(path.join(skills, '06-ai-cfo', 'scripts', 'load-data.js'))();
+const m4 = require(path.join(skills, '04-ai-lead', 'scripts', 'load-data.js'))();
 const exDir = path.join(skills, '01-ai-maturity', 'examples');
 const examples = fs.readdirSync(exDir).filter((f) => f.endsWith('.input.json')).sort().map((f) => JSON.parse(fs.readFileSync(path.join(exDir, f), 'utf8')));
 const data = {
@@ -18,7 +19,8 @@ const data = {
   m2: { sectors: m2.sectors, libTotal: m2.libTotal, axes: m2.axes, conditions: m2.conditions, reportText: m2.reportText, promptTemplate: m2.promptTemplate },
   m3: { sectors: m3.sectors, constants: m3.constants, levers: m3.levers, sceneLevers: m3.sceneLevers, benchmarks: m3.benchmarks, investmentProfile: m3.investmentProfile, reportText: m3.reportText, promptTemplate: m3.promptTemplate },
   m10: { archetypes: m10.archetypes, samples: m10.samples },
-  m6: { rules: m6.rules, riskRules: m6.riskRules, benchmarks: m6.benchmarks, policies: m6.policies, samples: m6.samples }
+  m6: { rules: m6.rules, riskRules: m6.riskRules, benchmarks: m6.benchmarks, policies: m6.policies, samples: m6.samples },
+  m4: { channels: m4.channels, signals: m4.signals, stages: m4.stages, scripts: m4.scripts, pains: m4.pains, samples: m4.samples }
 };
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释
@@ -35,6 +37,7 @@ html = put(html, '/*__REPORT_M3_CSS__*/', R('src/report-m3.css'));
 html = put(html, '/*__PRODUCT_CSS__*/', R('src/product.css'));
 html = put(html, '/*__MODULE_10_CSS__*/', R('src/module-10.css'));
 html = put(html, '/*__MODULE_06_CSS__*/', R('src/module-06.css'));
+html = put(html, '/*__MODULE_04_CSS__*/', R('src/module-04.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));
@@ -43,6 +46,7 @@ html = put(html, '/*__CORE_M2_JS__*/', R('../skills/02-scene-ranking/core/comput
 html = put(html, '/*__CORE_M3_JS__*/', R('../skills/03-roi-calculator/core/compute.js'));
 html = put(html, '/*__CORE_M10_JS__*/', R('../skills/10-ai-erp/core/sim.js'));
 html = put(html, '/*__CORE_M6_JS__*/', R('../skills/06-ai-cfo/core/fin.js'));
+html = put(html, '/*__CORE_M4_JS__*/', R('../skills/04-ai-lead/core/lead.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
 html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
@@ -55,6 +59,7 @@ html = put(html, '/*__MODULE_03_JS__*/', R('src/module-03.js'));
 html = put(html, '/*__PRODUCT_UI_JS__*/', R('src/product-ui.js'));
 html = put(html, '/*__MODULE_10_JS__*/', R('src/module-10.js'));
 html = put(html, '/*__MODULE_06_JS__*/', R('src/module-06.js'));
+html = put(html, '/*__MODULE_04_JS__*/', R('src/module-04.js'));
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'dist', 'index.html'), html);
 console.log('dist/index.html', (html.length / 1024).toFixed(0) + ' KB');

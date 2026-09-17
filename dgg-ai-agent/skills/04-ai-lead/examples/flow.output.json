@@ -1,0 +1,809 @@
+{
+  "version": "1.0.0",
+  "archetype": "flow",
+  "sector": "trade",
+  "company": "义乌恒益日用品有限公司",
+  "kpi": {
+    "leads": 30,
+    "newWeek": 6,
+    "gradeA": 1,
+    "gradeB": 5,
+    "following": 13,
+    "unassigned": 14,
+    "overdue": 2,
+    "dormant": 3,
+    "wonMonth": 1,
+    "conversion": 19.4,
+    "avgCycle": 24,
+    "costPerLead": 1000,
+    "expected": 3915500,
+    "pipeline": 23430000,
+    "deals90": 5
+  },
+  "profile": {
+    "weights": {
+      "sector": 0.3920805176061141,
+      "role": 0.19699454408518308,
+      "size": 0.14573326388487104,
+      "region": 0.2651916744238317
+    },
+    "avgCycle": 24,
+    "avgAmount": 1557000,
+    "repeatRate": 0.7,
+    "segments": [
+      {
+        "id": "S1",
+        "name": "连锁便利店等 · 采购经理",
+        "count": 5,
+        "amount": 2930000,
+        "cycle": 35,
+        "repeat": 0.8,
+        "share": 47,
+        "pains": [
+          "报价慢",
+          "客户流失"
+        ],
+        "offers": [
+          "delivery",
+          "price"
+        ]
+      },
+      {
+        "id": "S2",
+        "name": "社区团购平台等 · 平台运营",
+        "count": 3,
+        "amount": 2520000,
+        "cycle": 20,
+        "repeat": 0.6666666666666666,
+        "share": 25,
+        "pains": [
+          "报价慢",
+          "客户流失"
+        ],
+        "offers": [
+          "delivery",
+          "newsku"
+        ]
+      },
+      {
+        "id": "S3",
+        "name": "连锁便利店 · 供应链总监",
+        "count": 1,
+        "amount": 3100000,
+        "cycle": 45,
+        "repeat": 1,
+        "share": 10,
+        "pains": [
+          "报价慢",
+          "客户流失"
+        ],
+        "offers": [
+          "delivery",
+          "exchange"
+        ]
+      }
+    ],
+    "focus": "S1"
+  },
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "连锁便利店",
+      "grade": "A",
+      "total": 84,
+      "match": 88,
+      "signal": 74.6,
+      "stage": "opp",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "连锁便利店",
+      "grade": "B",
+      "total": 69,
+      "match": 82,
+      "signal": 38.1,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0026",
+      "industry": "区域商超",
+      "grade": "B",
+      "total": 69,
+      "match": 88,
+      "signal": 26.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "连锁便利店",
+      "grade": "B",
+      "total": 68,
+      "match": 88,
+      "signal": 23.3,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0031",
+      "industry": "区域商超",
+      "grade": "B",
+      "total": 67,
+      "match": 88,
+      "signal": 18.5,
+      "stage": "won",
+      "owner": "T1",
+      "action": "done",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "学校食堂配送",
+      "grade": "B",
+      "total": 58,
+      "match": 61,
+      "signal": 53.2,
+      "stage": "quote",
+      "owner": "T1",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "区域商超",
+      "grade": "B",
+      "total": 55,
+      "match": 69,
+      "signal": 21.3,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "社区团购平台",
+      "grade": "C",
+      "total": 53,
+      "match": 62,
+      "signal": 33.1,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "连锁便利店",
+      "grade": "C",
+      "total": 53,
+      "match": 66,
+      "signal": 23.2,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "区域商超",
+      "grade": "C",
+      "total": 51,
+      "match": 66,
+      "signal": 13.8,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "跨境电商公司",
+      "grade": "C",
+      "total": 50,
+      "match": 61,
+      "signal": 24.6,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0023",
+      "industry": "校园超市",
+      "grade": "C",
+      "total": 50,
+      "match": 61,
+      "signal": 24.2,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0030",
+      "industry": "连锁便利店",
+      "grade": "C",
+      "total": 48,
+      "match": 67,
+      "signal": 3.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0024",
+      "industry": "酒店用品采购",
+      "grade": "C",
+      "total": 47,
+      "match": 48,
+      "signal": 44.9,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "社区团购平台",
+      "grade": "C",
+      "total": 46,
+      "match": 49,
+      "signal": 39.3,
+      "stage": "opp",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "便利店加盟商",
+      "grade": "C",
+      "total": 44,
+      "match": 61,
+      "signal": 6.9,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "餐饮连锁",
+      "grade": "C",
+      "total": 44,
+      "match": 42,
+      "signal": 48,
+      "stage": "quote",
+      "owner": "T2",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "区域商超",
+      "grade": "C",
+      "total": 44,
+      "match": 63,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0028",
+      "industry": "便利店加盟商",
+      "grade": "C",
+      "total": 44,
+      "match": 61,
+      "signal": 4.6,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "校园超市",
+      "grade": "C",
+      "total": 42,
+      "match": 61,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0027",
+      "industry": "餐饮连锁",
+      "grade": "C",
+      "total": 40,
+      "match": 27,
+      "signal": 68.7,
+      "stage": "opp",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "餐饮连锁",
+      "grade": "C",
+      "total": 35,
+      "match": 48,
+      "signal": 4.8,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "企业福利采购",
+      "grade": "D",
+      "total": 32,
+      "match": 42,
+      "signal": 7.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0029",
+      "industry": "企业福利采购",
+      "grade": "D",
+      "total": 32,
+      "match": 27,
+      "signal": 41.8,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0022",
+      "industry": "跨境电商公司",
+      "grade": "D",
+      "total": 30,
+      "match": 43,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "便利店加盟商",
+      "grade": "D",
+      "total": 29,
+      "match": 42,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0025",
+      "industry": "社区团购平台",
+      "grade": "D",
+      "total": 29,
+      "match": 42,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "企业福利采购",
+      "grade": "D",
+      "total": 23,
+      "match": 29,
+      "signal": 8,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "社区生鲜店",
+      "grade": "D",
+      "total": 23,
+      "match": 21,
+      "signal": 25.3,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "酒店用品采购",
+      "grade": "D",
+      "total": 17,
+      "match": 24,
+      "signal": 2.9,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "社区生鲜店",
+      "grade": "D",
+      "total": 15,
+      "match": 21,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    }
+  ],
+  "explainTop": {
+    "seen": [
+      "来源 展会扫码 · 建档 9-10 · 阶段 商机 · 负责 渠道一组",
+      "字段：行业大类 商贸流通、决策人 采购经理、企业规模 101–300 人、区域 华东",
+      "行为：索取报价 9-16（1 天前）、询价 9-14（3 天前）、展会扫码 9-10（7 天前）",
+      "最近动作 9-16 索取报价，要求 9-24 前"
+    ],
+    "reasons": [
+      "匹配画像「连锁便利店等 · 采购经理」88 分：行业大类一致（该细分 100% 成交客户如此，权重 39%），决策人一致（该细分 100% 成交客户如此，权重 20%），企业规模一致（该细分 51% 成交客户如此，权重 15%），区域一致（该细分 81% 成交客户如此，权重 27%）",
+      "行为信号 74.6 分：索取报价 33.8、询价 27、展会扫码 13.8",
+      "综合 84 分 → 意向 A，跟进节奏正常"
+    ],
+    "action": "follow",
+    "actionLabel": "二次跟进"
+  },
+  "script": {
+    "key": "S1|phone|first",
+    "words": 275,
+    "sections": [
+      {
+        "key": "open",
+        "title": "开场",
+        "text": "采购经理您好，我是恒益的业务，做日用百货与快消品的。冒昧打扰两分钟：最近和几家连锁便利店聊下来，大家在供应端都卡在同一件事上，想跟您核对一下贵司是否也有同样情况。"
+      },
+      {
+        "key": "pain",
+        "title": "痛点",
+        "text": "您这个位置最怕两件事：客户问价要业务员翻价格表和库存，常常隔天才回，下游批发客户几个月不下单，没人发现也没人问。这两件事我们都碰到过，也都有对应的做法。"
+      },
+      {
+        "key": "value",
+        "title": "价值",
+        "text": "我们能给到的是两点：48 小时到店，冷链到仓当日上架；按量阶梯价，月结对账单随货。"
+      },
+      {
+        "key": "proof",
+        "title": "案例",
+        "text": "举个例子，K-102 · 连锁便利店总部：86 家门店统一配送两年，缺货率 1.2%。"
+      },
+      {
+        "key": "cta",
+        "title": "行动",
+        "text": "您看这样：我把样品和检测数据寄到您那边，下周三前后我再联系您，行吗？"
+      }
+    ],
+    "objections": [
+      {
+        "q": "价格比现在的供应商高",
+        "a": "我理解。建议把交期延误和批次退货的损失一起算，多数客户算完发现总成本反而低。我可以按贵司去年的数据帮您算一遍。"
+      },
+      {
+        "q": "现在的供应商合作很多年了",
+        "a": "老供应商有老供应商的好，我们不是来替换谁的，先做第二供应商，有急单或者对方出问题时贵司多一个选择。"
+      },
+      {
+        "q": "账期太短",
+        "a": "账期可以按贵司习惯来，首批我们按 30 天，稳定合作后可以放到 60 天。"
+      }
+    ]
+  },
+  "funnel": {
+    "stages": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 31,
+        "rate": null,
+        "prob": 0.05
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 17,
+        "rate": 55,
+        "prob": 0.15
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 6,
+        "rate": 35,
+        "prob": 0.35
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 3,
+        "rate": 50,
+        "prob": 0.6
+      },
+      {
+        "key": "won",
+        "name": "成交",
+        "count": 1,
+        "rate": 33,
+        "prob": 1
+      }
+    ],
+    "channels": [
+      {
+        "id": "wechat",
+        "name": "公众号",
+        "kind": "私域",
+        "leads": 7,
+        "recent": 6,
+        "gradeA": 0,
+        "deals12": 5,
+        "dealAmount": 5980000,
+        "cost": 3500,
+        "costPerLead": 583,
+        "costPerDeal": 8400
+      },
+      {
+        "id": "referral",
+        "name": "老客户转介绍",
+        "kind": "关系",
+        "leads": 7,
+        "recent": 6,
+        "gradeA": 0,
+        "deals12": 6,
+        "dealAmount": 11500000,
+        "cost": 0,
+        "costPerLead": 0,
+        "costPerDeal": 0
+      },
+      {
+        "id": "fair",
+        "name": "展会扫码",
+        "kind": "线下",
+        "leads": 5,
+        "recent": 5,
+        "gradeA": 1,
+        "deals12": 3,
+        "dealAmount": 9450000,
+        "cost": 12000,
+        "costPerLead": 2400,
+        "costPerDeal": 48000
+      },
+      {
+        "id": "list",
+        "name": "名录导入",
+        "kind": "外采",
+        "leads": 5,
+        "recent": 2,
+        "gradeA": 0,
+        "deals12": 3,
+        "dealAmount": 1670000,
+        "cost": 2500,
+        "costPerLead": 1250,
+        "costPerDeal": 10000
+      },
+      {
+        "id": "inquiry",
+        "name": "平台询盘",
+        "kind": "线上",
+        "leads": 4,
+        "recent": 3,
+        "gradeA": 0,
+        "deals12": 2,
+        "dealAmount": 1780000,
+        "cost": 4000,
+        "costPerLead": 1333,
+        "costPerDeal": 24000
+      },
+      {
+        "id": "web",
+        "name": "官网留资",
+        "kind": "线上",
+        "leads": 3,
+        "recent": 2,
+        "gradeA": 0,
+        "deals12": 1,
+        "dealAmount": 760000,
+        "cost": 2000,
+        "costPerLead": 1000,
+        "costPerDeal": 24000
+      }
+    ]
+  },
+  "forecast": {
+    "expected": 3915500,
+    "pipeline": 23430000,
+    "count": 27,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "渠道一组",
+        "count": 4,
+        "expected": 1578000,
+        "pipeline": 6680000
+      },
+      {
+        "id": "T2",
+        "name": "渠道二组",
+        "count": 4,
+        "expected": 978500,
+        "pipeline": 2930000
+      },
+      {
+        "id": "T3",
+        "name": "平台组",
+        "count": 5,
+        "expected": 862000,
+        "pipeline": 3880000
+      }
+    ],
+    "byStage": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 14,
+        "pipeline": 9940000,
+        "expected": 497000
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 8,
+        "pipeline": 7890000,
+        "expected": 1183500
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 3,
+        "pipeline": 4500000,
+        "expected": 1575000
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 2,
+        "pipeline": 1100000,
+        "expected": 660000
+      }
+    ],
+    "expectedDeals": 4.1
+  },
+  "plan": {
+    "days": [
+      {
+        "date": "2026-09-17",
+        "count": 4
+      },
+      {
+        "date": "2026-09-18",
+        "count": 0
+      },
+      {
+        "date": "2026-09-21",
+        "count": 0
+      },
+      {
+        "date": "2026-09-22",
+        "count": 0
+      },
+      {
+        "date": "2026-09-23",
+        "count": 0
+      }
+    ],
+    "overdue": 2,
+    "unassigned": 14,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "渠道一组",
+        "count": 3
+      },
+      {
+        "id": "T2",
+        "name": "渠道二组",
+        "count": 1
+      },
+      {
+        "id": "T3",
+        "name": "平台组",
+        "count": 0
+      }
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "渠道一组",
+      "sectors": [
+        "trade"
+      ],
+      "cap": 16,
+      "load": 4,
+      "free": 12
+    },
+    {
+      "id": "T2",
+      "name": "渠道二组",
+      "sectors": [
+        "trade",
+        "life"
+      ],
+      "cap": 16,
+      "load": 4,
+      "free": 12
+    },
+    {
+      "id": "T3",
+      "name": "平台组",
+      "sectors": [
+        "trade",
+        "other"
+      ],
+      "cap": 12,
+      "load": 5,
+      "free": 7
+    }
+  ],
+  "report": "【获客周报】9-14 周 · 义乌恒益日用品有限公司\n线索 30 条：本周新增 6 · A 级 1 · B 级 5 · 跟进中 13 · 未分派 14 · 逾期 2 · 沉睡 3\n漏斗：线索 31 → 已联系 17 → 商机 6 → 已报价 3 → 成交 1；商机转化率 19.4%\n重点画像「连锁便利店等 · 采购经理」：101–300 人 · 华东 · 客单 293 万元 · 周期 35 天 · 复购 80%\n成交预测：在手 27 条 · 管道 2343 万元 · 按阶段加权 391.6 万元（约 4.1 单）\n渠道：公众号 7 条（583 元/条） · 老客户转介绍 7 条（0 元/条） · 展会扫码 5 条（2,400 元/条） · 名录导入 5 条（1,250 元/条）\n本周计划 4 次跟进：渠道一组 3 · 渠道二组 1；逾期待补：L-2609-0015 餐饮连锁、L-2609-0002 区域商超\n待办：L-2609-0021 连锁便利店：待分派（B 级）；L-2609-0026 区域商超：待分派（B 级）；L-2609-0013 连锁便利店：待分派（B 级）；L-2609-0015 餐饮连锁：二次跟进，已 14 天；L-2609-0002 区域商超：二次跟进，已 8 天"
+}

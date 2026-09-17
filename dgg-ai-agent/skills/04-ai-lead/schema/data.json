@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI获客 · 获客数据包",
+  "description": "一家企业的成交客户、线索池、销售团队与渠道投入。客户代号 K-编号 · 行业，线索代号 L-年月-流水，联系人只出现职务。",
+  "type": "object",
+  "required": ["archetype", "sector", "company", "co", "prod", "today", "weekStart", "offers", "roleOffers", "proofs", "teams", "deals", "leads"],
+  "properties": {
+    "archetype": { "enum": ["make", "flow", "project", "service"] }, "sector": { "type": "string" }, "company": { "type": "string" }, "co": { "type": "string", "description": "脚本里用的公司简称" }, "prod": { "type": "string", "description": "主打产品或服务" },
+    "today": { "type": "string" }, "weekStart": { "type": "string" },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["id", "name", "mode"], "properties": { "mode": { "enum": ["direct", "import"] } } } },
+    "offers": { "type": "array", "minItems": 2, "items": { "type": "object", "required": ["key", "text"] } },
+    "roleOffers": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } }, "description": "按决策人职务选两条价值点" },
+    "proofs": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["customer", "sector", "text"] } },
+    "segmentPainTags": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string" } }, "description": "按客户行业大类选模块 2 痛点库里的标签" },
+    "teams": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "name", "sectors", "cap"] } },
+    "channelCosts": { "type": "object", "additionalProperties": { "type": "number" } },
+    "deals": { "type": "array", "minItems": 5, "items": { "type": "object", "required": ["customer", "industry", "sector", "size", "region", "role", "cycleDays", "amount", "repeat", "channel", "closedAt"] } },
+    "leads": { "type": "array", "minItems": 5, "items": { "type": "object", "required": ["id", "industry", "sector", "size", "region", "role", "channel", "createdAt", "stage", "signals", "amountEst"], "properties": {
+      "stage": { "enum": ["lead", "contact", "opp", "quote", "won"] }, "owner": { "type": ["string", "null"] },
+      "signals": { "type": "array", "items": { "type": "object", "required": ["key", "date"], "properties": { "key": { "enum": ["quote", "inquiry", "sample", "referral", "form", "scan", "revisit", "wechat"] } } } },
+      "lastAction": { "type": ["object", "null"], "properties": { "date": { "type": "string" }, "text": { "type": "string" } } }, "dormant": { "type": "boolean" } } } },
+    "focusSegment": { "type": ["string", "null"] }, "weights": { "type": "object" }, "adopted": { "type": "object" }, "planned": { "type": "array", "items": { "type": "string" } },
+    "log": { "type": "array", "items": { "type": "object", "required": ["seq", "kind", "label", "detail"] } }
+  }
+}

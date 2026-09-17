@@ -247,3 +247,20 @@
 .pd-cash .ax, .pd-line .ax { font-size: 11px; fill: #66718A; font-weight: 600; }
 .pd-cash .ax.sub { fill: #98A2B8; font-weight: 500; font-size: 10px; }
 .pd-cash .ax.on { fill: var(--pa-ink); }
+
+/* ---------- 漏斗 / 分布条 ---------- */
+.pd-funnel { display: grid; gap: 8px; }
+.pd-funnel .row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 10px; align-items: center; }
+.pd-funnel .lbl { font-weight: 700; font-size: calc(13px * var(--scale)); text-align: right; }
+.pd-funnel .trk { display: block; height: 30px; background: #F3F5FA; border-radius: 6px; overflow: hidden; }
+.pd-funnel .trk i { display: flex; align-items: center; justify-content: flex-end; height: 100%; padding: 0 10px; background: var(--pa); color: #fff; border-radius: 6px; font-size: calc(13px * var(--scale)); min-width: 40px; }
+.pd-funnel .trk i.last { background: var(--t-ok); }
+.pd-funnel .rate { color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 600; }
+.pd-dist { display: grid; gap: 6px; }
+.pd-dist .row { display: grid; grid-template-columns: minmax(0, 118px) minmax(0, 1fr) 52px; gap: 10px; align-items: center; font-size: calc(13px * var(--scale)); }
+.pd-dist .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--pd-ink); }
+.pd-dist .trk { height: 12px; background: #F3F5FA; border-radius: 6px; overflow: hidden; }
+.pd-dist .trk i { display: block; height: 100%; background: #C9D4F0; border-radius: 6px; }
+.pd-dist .row.hi .trk i { background: var(--pa); }
+.pd-dist .row.hi .lbl { font-weight: 700; }
+.pd-dist .val { color: var(--pd-sub); text-align: right; font-weight: 600; }

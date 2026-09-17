@@ -1,0 +1,1241 @@
+{
+  "version": "1.0.0",
+  "archetype": "make",
+  "sector": "mfg",
+  "company": "杭州锐合精密五金有限公司",
+  "kpi": {
+    "leads": 60,
+    "newWeek": 9,
+    "gradeA": 3,
+    "gradeB": 18,
+    "following": 28,
+    "unassigned": 23,
+    "overdue": 7,
+    "dormant": 9,
+    "wonMonth": 2,
+    "conversion": 19.4,
+    "avgCycle": 42,
+    "costPerLead": 1351,
+    "expected": 9867000,
+    "pipeline": 47540000,
+    "deals90": 7
+  },
+  "profile": {
+    "weights": {
+      "sector": 0.3739569605580118,
+      "role": 0.1871299286629195,
+      "size": 0.16386188817243766,
+      "region": 0.2750512226066312
+    },
+    "avgCycle": 42,
+    "avgAmount": 1326333,
+    "repeatRate": 0.6,
+    "segments": [
+      {
+        "id": "S1",
+        "name": "汽配一级供应商等 · 采购经理",
+        "count": 13,
+        "amount": 1515385,
+        "cycle": 40,
+        "repeat": 0.6923076923076923,
+        "share": 50,
+        "pains": [
+          "交期",
+          "质量追溯",
+          "库存积压",
+          "成本不清"
+        ],
+        "offers": [
+          "ontime",
+          "quote24"
+        ]
+      },
+      {
+        "id": "S2",
+        "name": "家电整机厂等 · 供应链总监",
+        "count": 3,
+        "amount": 2300000,
+        "cycle": 66,
+        "repeat": 1,
+        "share": 19,
+        "pains": [
+          "交期",
+          "质量追溯",
+          "库存积压",
+          "成本不清"
+        ],
+        "offers": [
+          "ontime",
+          "quality"
+        ]
+      },
+      {
+        "id": "S3",
+        "name": "电动工具制造商等 · 技术负责人",
+        "count": 6,
+        "amount": 1101667,
+        "cycle": 46,
+        "repeat": 0.5,
+        "share": 16,
+        "pains": [
+          "交期",
+          "质量追溯",
+          "库存积压",
+          "成本不清"
+        ],
+        "offers": [
+          "quality",
+          "pilot"
+        ]
+      }
+    ],
+    "focus": "S1"
+  },
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "汽配一级供应商",
+      "grade": "A",
+      "total": 77,
+      "match": 86,
+      "signal": 58.5,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0025",
+      "industry": "医疗器械配件商",
+      "grade": "A",
+      "total": 75,
+      "match": 84,
+      "signal": 52.5,
+      "stage": "opp",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0058",
+      "industry": "家电整机厂",
+      "grade": "A",
+      "total": 75,
+      "match": 86,
+      "signal": 48.8,
+      "stage": "contact",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "阀门制造商",
+      "grade": "B",
+      "total": 73,
+      "match": 84,
+      "signal": 47.5,
+      "stage": "opp",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0032",
+      "industry": "电梯配件厂",
+      "grade": "B",
+      "total": 73,
+      "match": 86,
+      "signal": 43,
+      "stage": "contact",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0028",
+      "industry": "汽配一级供应商",
+      "grade": "B",
+      "total": 71,
+      "match": 84,
+      "signal": 38.1,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "家电整机厂",
+      "grade": "B",
+      "total": 67,
+      "match": 86,
+      "signal": 24.2,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0043",
+      "industry": "汽配一级供应商",
+      "grade": "B",
+      "total": 67,
+      "match": 67,
+      "signal": 68.5,
+      "stage": "quote",
+      "owner": "T1",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0053",
+      "industry": "汽配一级供应商",
+      "grade": "B",
+      "total": 67,
+      "match": 84,
+      "signal": 25.9,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0061",
+      "industry": "汽配二级供应商",
+      "grade": "B",
+      "total": 62,
+      "match": 84,
+      "signal": 9.8,
+      "stage": "won",
+      "owner": "T1",
+      "action": "done",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "新能源电池壳体厂",
+      "grade": "B",
+      "total": 61,
+      "match": 84,
+      "signal": 6.1,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0024",
+      "industry": "汽配二级供应商",
+      "grade": "B",
+      "total": 61,
+      "match": 84,
+      "signal": 7.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0030",
+      "industry": "新能源电池壳体厂",
+      "grade": "B",
+      "total": 61,
+      "match": 67,
+      "signal": 45.7,
+      "stage": "opp",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0038",
+      "industry": "汽配一级供应商",
+      "grade": "B",
+      "total": 61,
+      "match": 68,
+      "signal": 42.4,
+      "stage": "contact",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0046",
+      "industry": "家电整机厂",
+      "grade": "B",
+      "total": 61,
+      "match": 79,
+      "signal": 19,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "智能门锁厂商",
+      "grade": "B",
+      "total": 60,
+      "match": 79,
+      "signal": 18,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "汽配一级供应商",
+      "grade": "B",
+      "total": 59,
+      "match": 67,
+      "signal": 42,
+      "stage": "quote",
+      "owner": "T4",
+      "action": "quote",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0048",
+      "industry": "电动工具制造商",
+      "grade": "B",
+      "total": 59,
+      "match": 84,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0062",
+      "industry": "家电整机厂",
+      "grade": "B",
+      "total": 59,
+      "match": 84,
+      "signal": 0,
+      "stage": "won",
+      "owner": "T4",
+      "action": "done",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "电动工具制造商",
+      "grade": "B",
+      "total": 57,
+      "match": 66,
+      "signal": 36.2,
+      "stage": "quote",
+      "owner": "T1",
+      "action": "quote",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "储能设备厂",
+      "grade": "B",
+      "total": 56,
+      "match": 47,
+      "signal": 75.6,
+      "stage": "opp",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0022",
+      "industry": "电机制造商",
+      "grade": "B",
+      "total": 55,
+      "match": 79,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0059",
+      "industry": "汽配二级供应商",
+      "grade": "B",
+      "total": 55,
+      "match": 79,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "卫浴五金品牌",
+      "grade": "C",
+      "total": 54,
+      "match": 67,
+      "signal": 21.9,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0050",
+      "industry": "医疗器械配件商",
+      "grade": "C",
+      "total": 54,
+      "match": 67,
+      "signal": 25.3,
+      "stage": "contact",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0056",
+      "industry": "电机制造商",
+      "grade": "C",
+      "total": 53,
+      "match": 66,
+      "signal": 23.8,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "汽配一级供应商",
+      "grade": "C",
+      "total": 52,
+      "match": 64,
+      "signal": 24.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0045",
+      "industry": "卫浴五金品牌",
+      "grade": "C",
+      "total": 52,
+      "match": 50,
+      "signal": 56.4,
+      "stage": "opp",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "精密仪器厂",
+      "grade": "C",
+      "total": 50,
+      "match": 60,
+      "signal": 27.3,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0047",
+      "industry": "汽配二级供应商",
+      "grade": "C",
+      "total": 50,
+      "match": 66,
+      "signal": 15,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "家电整机厂",
+      "grade": "C",
+      "total": 49,
+      "match": 50,
+      "signal": 46.3,
+      "stage": "opp",
+      "owner": "T4",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "医疗器械配件商",
+      "grade": "C",
+      "total": 49,
+      "match": 60,
+      "signal": 25.3,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0039",
+      "industry": "阀门制造商",
+      "grade": "C",
+      "total": 49,
+      "match": 60,
+      "signal": 24,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0034",
+      "industry": "精密仪器厂",
+      "grade": "C",
+      "total": 48,
+      "match": 66,
+      "signal": 8,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "电梯配件厂",
+      "grade": "C",
+      "total": 47,
+      "match": 66,
+      "signal": 4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0037",
+      "industry": "家电整机厂",
+      "grade": "C",
+      "total": 47,
+      "match": 65,
+      "signal": 4.6,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "摩托车配件厂",
+      "grade": "C",
+      "total": 45,
+      "match": 64,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0057",
+      "industry": "精密仪器厂",
+      "grade": "C",
+      "total": 44,
+      "match": 59,
+      "signal": 8.8,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0033",
+      "industry": "汽配二级供应商",
+      "grade": "C",
+      "total": 43,
+      "match": 61,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0051",
+      "industry": "新能源电池壳体厂",
+      "grade": "C",
+      "total": 43,
+      "match": 61,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0052",
+      "industry": "电梯配件厂",
+      "grade": "C",
+      "total": 43,
+      "match": 59,
+      "signal": 7.6,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "汽配二级供应商",
+      "grade": "C",
+      "total": 41,
+      "match": 59,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0044",
+      "industry": "机械设备厂",
+      "grade": "C",
+      "total": 40,
+      "match": 47,
+      "signal": 23,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0027",
+      "industry": "电动工具制造商",
+      "grade": "C",
+      "total": 39,
+      "match": 50,
+      "signal": 15,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0054",
+      "industry": "农机制造商",
+      "grade": "C",
+      "total": 39,
+      "match": 47,
+      "signal": 21,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "光伏支架厂",
+      "grade": "D",
+      "total": 34,
+      "match": 30,
+      "signal": 44,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0036",
+      "industry": "智能门锁厂商",
+      "grade": "D",
+      "total": 34,
+      "match": 48,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "农机制造商",
+      "grade": "D",
+      "total": 32,
+      "match": 46,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0041",
+      "industry": "摩托车配件厂",
+      "grade": "D",
+      "total": 31,
+      "match": 39,
+      "signal": 12.8,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0026",
+      "industry": "家电配件贸易商",
+      "grade": "D",
+      "total": 28,
+      "match": 40,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0029",
+      "industry": "农机制造商",
+      "grade": "D",
+      "total": 28,
+      "match": 40,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0031",
+      "industry": "五金工具贸易商",
+      "grade": "D",
+      "total": 26,
+      "match": 22,
+      "signal": 35,
+      "stage": "quote",
+      "owner": "T3",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0060",
+      "industry": "光伏支架厂",
+      "grade": "D",
+      "total": 26,
+      "match": 28,
+      "signal": 19,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "出口贸易公司",
+      "grade": "D",
+      "total": 22,
+      "match": 21,
+      "signal": 22.1,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0035",
+      "industry": "储能设备厂",
+      "grade": "D",
+      "total": 21,
+      "match": 22,
+      "signal": 18.1,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0042",
+      "industry": "光伏支架厂",
+      "grade": "D",
+      "total": 18,
+      "match": 26,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0040",
+      "industry": "出口贸易公司",
+      "grade": "D",
+      "total": 17,
+      "match": 24,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0049",
+      "industry": "智能家居厂商",
+      "grade": "D",
+      "total": 17,
+      "match": 22,
+      "signal": 5.7,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0023",
+      "industry": "智能家居厂商",
+      "grade": "D",
+      "total": 13,
+      "match": 11,
+      "signal": 17.2,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "五金工具贸易商",
+      "grade": "D",
+      "total": 8,
+      "match": 4,
+      "signal": 16,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "机械设备厂",
+      "grade": "D",
+      "total": 1,
+      "match": 1,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0055",
+      "industry": "五金工具贸易商",
+      "grade": "D",
+      "total": 0,
+      "match": 0,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    }
+  ],
+  "explainTop": {
+    "seen": [
+      "来源 展会扫码 · 建档 9-11 · 阶段 已联系 · 负责 业务一组",
+      "字段：行业大类 制造业、决策人 采购经理、企业规模 300 人以上、区域 华东",
+      "行为：索取报价 9-16（1 天前）、展会扫码 9-11（6 天前）、二次访问 9-15（2 天前）",
+      "最近动作 9-15 电话沟通，索取报价单"
+    ],
+    "reasons": [
+      "匹配画像「汽配一级供应商等 · 采购经理」86 分：行业大类一致（该细分 100% 成交客户如此，权重 37%），决策人一致（该细分 100% 成交客户如此，权重 19%），企业规模一致（该细分 50% 成交客户如此，权重 16%），区域一致（该细分 77% 成交客户如此，权重 28%）",
+      "行为信号 58.5 分：索取报价 33.8、展会扫码 14.4、二次访问 10.3",
+      "综合 77 分 → 意向 A，跟进节奏正常"
+    ],
+    "action": "follow",
+    "actionLabel": "二次跟进"
+  },
+  "script": {
+    "key": "S1|phone|first",
+    "words": 281,
+    "sections": [
+      {
+        "key": "open",
+        "title": "开场",
+        "text": "采购经理您好，我是锐合的业务，做精密五金件与冲压件的。冒昧打扰两分钟：最近和几家汽配一级供应商聊下来，大家在供应端都卡在同一件事上，想跟您核对一下贵司是否也有同样情况。"
+      },
+      {
+        "key": "pain",
+        "title": "痛点",
+        "text": "您这个位置最怕两件事：交期常被客户催，能不能按时交货说不准，来料与过程质检靠人眼，批量问题事后才发现。这两件事我们都碰到过，也都有对应的做法。"
+      },
+      {
+        "key": "value",
+        "title": "价值",
+        "text": "我们能给到的是两点：交期准点率 96%，延期提前 3 天告知；报价 24 小时内出，附工艺路线。"
+      },
+      {
+        "key": "proof",
+        "title": "案例",
+        "text": "举个例子，K-017 · 汽配一级供应商：合作 4 年，月供 3 万件，准点率 97%。"
+      },
+      {
+        "key": "cta",
+        "title": "行动",
+        "text": "您看这样：我把样品和检测数据寄到您那边，下周三前后我再联系您，行吗？"
+      }
+    ],
+    "objections": [
+      {
+        "q": "价格比现在的供应商高",
+        "a": "我理解。建议把交期延误和批次退货的损失一起算，多数客户算完发现总成本反而低。我可以按贵司去年的数据帮您算一遍。"
+      },
+      {
+        "q": "现在的供应商合作很多年了",
+        "a": "老供应商有老供应商的好，我们不是来替换谁的，先做第二供应商，有急单或者对方出问题时贵司多一个选择。"
+      },
+      {
+        "q": "账期太短",
+        "a": "账期可以按贵司习惯来，首批我们按 30 天，稳定合作后可以放到 60 天。"
+      }
+    ]
+  },
+  "funnel": {
+    "stages": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 62,
+        "rate": null,
+        "prob": 0.05
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 36,
+        "rate": 58,
+        "prob": 0.15
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 12,
+        "rate": 33,
+        "prob": 0.35
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 6,
+        "rate": 50,
+        "prob": 0.6
+      },
+      {
+        "key": "won",
+        "name": "成交",
+        "count": 2,
+        "rate": 33,
+        "prob": 1
+      }
+    ],
+    "channels": [
+      {
+        "id": "inquiry",
+        "name": "平台询盘",
+        "kind": "线上",
+        "leads": 13,
+        "recent": 9,
+        "gradeA": 0,
+        "deals12": 6,
+        "dealAmount": 5970000,
+        "cost": 12000,
+        "costPerLead": 1333,
+        "costPerDeal": 24000
+      },
+      {
+        "id": "fair",
+        "name": "展会扫码",
+        "kind": "线下",
+        "leads": 12,
+        "recent": 11,
+        "gradeA": 2,
+        "deals12": 8,
+        "dealAmount": 14870000,
+        "cost": 38000,
+        "costPerLead": 3455,
+        "costPerDeal": 57000
+      },
+      {
+        "id": "web",
+        "name": "官网留资",
+        "kind": "线上",
+        "leads": 11,
+        "recent": 9,
+        "gradeA": 0,
+        "deals12": 4,
+        "dealAmount": 3120000,
+        "cost": 6000,
+        "costPerLead": 667,
+        "costPerDeal": 18000
+      },
+      {
+        "id": "referral",
+        "name": "老客户转介绍",
+        "kind": "关系",
+        "leads": 10,
+        "recent": 9,
+        "gradeA": 1,
+        "deals12": 6,
+        "dealAmount": 11300000,
+        "cost": 0,
+        "costPerLead": 0,
+        "costPerDeal": 0
+      },
+      {
+        "id": "list",
+        "name": "名录导入",
+        "kind": "外采",
+        "leads": 9,
+        "recent": 3,
+        "gradeA": 0,
+        "deals12": 3,
+        "dealAmount": 2550000,
+        "cost": 4500,
+        "costPerLead": 1500,
+        "costPerDeal": 18000
+      },
+      {
+        "id": "wechat",
+        "name": "公众号",
+        "kind": "私域",
+        "leads": 7,
+        "recent": 6,
+        "gradeA": 0,
+        "deals12": 3,
+        "dealAmount": 1980000,
+        "cost": 3000,
+        "costPerLead": 500,
+        "costPerDeal": 12000
+      }
+    ]
+  },
+  "forecast": {
+    "expected": 9867000,
+    "pipeline": 47540000,
+    "count": 51,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "业务一组",
+        "count": 9,
+        "expected": 2615000,
+        "pipeline": 7960000
+      },
+      {
+        "id": "T2",
+        "name": "业务二组",
+        "count": 6,
+        "expected": 1366500,
+        "pipeline": 6310000
+      },
+      {
+        "id": "T3",
+        "name": "业务三组",
+        "count": 6,
+        "expected": 571500,
+        "pipeline": 2790000
+      },
+      {
+        "id": "T4",
+        "name": "大客户组",
+        "count": 7,
+        "expected": 4537500,
+        "pipeline": 14950000
+      }
+    ],
+    "byStage": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 23,
+        "pipeline": 15530000,
+        "expected": 776500
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 18,
+        "pipeline": 17740000,
+        "expected": 2661000
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 6,
+        "pipeline": 8530000,
+        "expected": 2985500
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 4,
+        "pipeline": 5740000,
+        "expected": 3444000
+      }
+    ],
+    "expectedDeals": 8.4
+  },
+  "plan": {
+    "days": [
+      {
+        "date": "2026-09-17",
+        "count": 9
+      },
+      {
+        "date": "2026-09-18",
+        "count": 5
+      },
+      {
+        "date": "2026-09-21",
+        "count": 2
+      },
+      {
+        "date": "2026-09-22",
+        "count": 0
+      },
+      {
+        "date": "2026-09-23",
+        "count": 0
+      }
+    ],
+    "overdue": 7,
+    "unassigned": 23,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "业务一组",
+        "count": 8
+      },
+      {
+        "id": "T2",
+        "name": "业务二组",
+        "count": 4
+      },
+      {
+        "id": "T3",
+        "name": "业务三组",
+        "count": 0
+      },
+      {
+        "id": "T4",
+        "name": "大客户组",
+        "count": 4
+      }
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "业务一组",
+      "sectors": [
+        "mfg"
+      ],
+      "cap": 18,
+      "load": 9,
+      "free": 9
+    },
+    {
+      "id": "T2",
+      "name": "业务二组",
+      "sectors": [
+        "mfg",
+        "energy"
+      ],
+      "cap": 18,
+      "load": 6,
+      "free": 12
+    },
+    {
+      "id": "T3",
+      "name": "业务三组",
+      "sectors": [
+        "trade",
+        "other",
+        "tech"
+      ],
+      "cap": 16,
+      "load": 6,
+      "free": 10
+    },
+    {
+      "id": "T4",
+      "name": "大客户组",
+      "sectors": [
+        "mfg"
+      ],
+      "cap": 12,
+      "load": 7,
+      "free": 5
+    }
+  ],
+  "report": "【获客周报】9-14 周 · 杭州锐合精密五金有限公司\n线索 60 条：本周新增 9 · A 级 3 · B 级 18 · 跟进中 28 · 未分派 23 · 逾期 7 · 沉睡 9\n漏斗：线索 62 → 已联系 36 → 商机 12 → 已报价 6 → 成交 2；商机转化率 19.4%\n重点画像「汽配一级供应商等 · 采购经理」：101–300 人 · 华东 · 客单 151.5 万元 · 周期 40 天 · 复购 69%\n成交预测：在手 51 条 · 管道 4754 万元 · 按阶段加权 986.7 万元（约 8.4 单）\n渠道：平台询盘 13 条（1,333 元/条） · 展会扫码 12 条（3,455 元/条） · 官网留资 11 条（667 元/条） · 老客户转介绍 10 条（0 元/条）\n本周计划 16 次跟进：业务一组 8 · 业务二组 4 · 大客户组 4；逾期待补：L-2609-0034 精密仪器厂、L-2609-0004 新能源电池壳体厂、L-2609-0057 精密仪器厂\n待办：L-2609-0028 汽配一级供应商：待分派（B 级）；L-2609-0012 家电整机厂：待分派（B 级）；L-2609-0053 汽配一级供应商：待分派（B 级）；L-2609-0034 精密仪器厂：二次跟进，已 20 天；L-2609-0004 新能源电池壳体厂：二次跟进，已 16 天；L-2609-0057 精密仪器厂：二次跟进，已 16 天"
+}

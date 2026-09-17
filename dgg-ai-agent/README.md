@@ -10,17 +10,20 @@ skills/
   02-scene-ranking/        企业AI高价值场景排序（SKILL.md · schema · data/sectors 14 个大类场景库 · core · prompts · examples · scripts）
   03-roi-calculator/       企业AI投入ROI测算器（SKILL.md · schema · data 价目/杠杆/场景映射/收益侧参考值/投入侧规模推导表 · core · prompts · examples · scripts）
                            测算单元是场景组合：内核做账号复用、接口去重、配置复用与跨场景效益去重
+  04-ai-lead/              AI获客 · 画像 脚本 线索 一次出（SKILL.md · schema · data 渠道 / 信号 / 阶段 / 脚本段落块 + 三套样本 · core/lead.js · examples · scripts）
+                           画像从成交客户反推（分布、集中度权重、三细分）；线索 = 匹配画像 + 行为信号衰减；脚本按细分 × 渠道 × 阶段拼装；分派、本周计划、成交预测、周报
   06-ai-cfo/               AI CFO · 财务副驾驶（SKILL.md · schema · data 勾稽规则 / 风险规则 / 参考带 / 政策库 + 三套账套 · core/fin.js · examples · scripts）
                            三表由科目余额生成，14 条勾稽逐条核对并可落调整分录；10 条风险落概率 × 影响矩阵；13 周现金日历带情景开关与补缺三方案；12 项政策按画像与账套核对
   10-ai-erp/               AI ERP · 订单交付指挥室（SKILL.md · schema · data 业态词表 + 四业态样本 · core/sim.js 排程引擎 · examples · scripts）
                            纯预制、无 LLM：排程、延期归因、处置预演、插单三方案、采购建议、交付日报都出自同一个确定性引擎
 prototype/
-  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-06.js · module-10.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
+  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-04.js · module-06.js · module-10.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
                            product.css · product-ui.js：八个产品模块共用的一套 UI 语言（左导航 + 页签 + 工作区；KPI 砖 / 状态签 / 可排序表 / 负荷热力 / SVG 甘特 / 抽屉 / 方案对比 / AI 判断面板），每个模块只换一个强调色
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
   test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
   test/screenshot-m2.js    模块 2 全流程：含权重拖动重排、预设切换、行详情联动、28 页报告与 PDF
   test/screenshot-m3.js    模块 3 全流程：现场输入企业画像、多选场景组合、逐场景填参、三栏测算台、34 页报告与 PDF
+  test/screenshot-m04.js   AI获客 六屏走查：接入 → 驾驶舱（扣积分）→ 画像（切细分 / 调权重）→ 脚本（换一版 / 采用）→ 线索池（分派 / 一键分派 / 加入计划）→ 跟进与周报（发送）
   test/screenshot-m06.js   AI CFO 六屏走查：接入 → 驾驶舱（扣积分）→ 勾稽（按建议调整）→ 风险（处置）→ 现金（情景 → 按方案执行）→ 政策（加入清单 → 发送）
   test/screenshot-m10.js   AI ERP 六屏走查：接入 → 指挥室（扣积分）→ 订单下钻（执行处置）→ 插单三方案 → 落单 → 生成采购单 → 日报发送；禁词扫描、屏上数字与内核比对
   dist/index.html          交付物
@@ -42,6 +45,11 @@ node scripts/validate-schema.js   # 契约校验：样例过 schema · 画像 sc
 node scripts/gen-profile-schema.js  # 画像字段或行业表改动后重新生成 _shared/company-profile.schema.json
 node scripts/gen-benchmark.js     # 重新生成参考带（业务侧抽样到位后改为直接替换 data/benchmark.json）
 
+cd ../04-ai-lead
+node scripts/gen-samples.js       # 重新生成三套样本（成交客户 / 线索 / 团队 / 渠道）
+node scripts/run-examples.js      # 三套样本跑引擎，写 examples/*.output.json
+node scripts/validate.js          # 引擎自检：权重、评分与等级、脚本占位符与长度、分派不超负载、计划不重复、预测复算、禁词
+
 cd ../06-ai-cfo
 node scripts/gen-samples.js       # 重新生成三套账套（驱动参数 → 三表天然平衡，五处异常做在外部来源与账面的差异上）
 node scripts/run-examples.js      # 三套账套跑引擎，写 examples/*.output.json
@@ -60,6 +68,7 @@ NODE_PATH=$(npm root -g) node test/measure.js      # 模块 1 打印模拟下量
 NODE_PATH=$(npm root -g) node test/measure-m2.js S1   # 模块 2 逐页量高（S1–S4）
 NODE_PATH=$(npm root -g) node test/screenshot-m3.js   # 模块 3 全流程
 NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（S1–S4）
+NODE_PATH=$(npm root -g) node test/screenshot-m04.js  # AI获客 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m06.js  # AI CFO 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m10.js  # AI ERP 六屏走查（W=1600 H=900 OUT=shots-m10-1600 可换视口与输出目录）
 ```

@@ -395,6 +395,35 @@
     return s;
   }
 
+  /* ---------- 漏斗 ---------- */
+  function funnel(o) {
+    var max = Math.max.apply(null, o.stages.map(function (s) { return s.count; })) || 1;
+    var el = h('div', { class: 'pd-funnel' });
+    o.stages.forEach(function (s, i) {
+      var w = Math.max(6, 100 * s.count / max);
+      el.appendChild(h('div', { class: 'row' }, [
+        h('span', { class: 'lbl' }, [s.name]),
+        h('span', { class: 'trk' }, [h('i', { style: 'width:' + w + '%' + (o.color ? ';background:' + o.color : ''), class: i === o.stages.length - 1 ? 'last' : '' }, [h('b', { class: 'num' }, [String(s.count)])])]),
+        h('span', { class: 'rate num' }, [s.rate != null ? '→ ' + s.rate + '%' : ''])
+      ]));
+    });
+    return el;
+  }
+
+  /* ---------- 分布条 ---------- */
+  function dist(o) {
+    var max = Math.max.apply(null, o.rows.map(function (r) { return r.value; })) || 1;
+    var el = h('div', { class: 'pd-dist' });
+    o.rows.forEach(function (r) {
+      el.appendChild(h('div', { class: 'row' + (r.hi ? ' hi' : '') }, [
+        h('span', { class: 'lbl', title: r.label }, [r.label]),
+        h('span', { class: 'trk' }, [h('i', { style: 'width:' + Math.max(2, 100 * r.value / max) + '%' })]),
+        h('span', { class: 'val num' }, [r.text != null ? r.text : (r.share != null ? Math.round(r.share * 100) + '%' : String(r.value))])
+      ]));
+    });
+    return el;
+  }
+
   /* ---------- 提示 ---------- */
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
@@ -404,5 +433,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, toast: toast, STATUS: STATUS };
 })();

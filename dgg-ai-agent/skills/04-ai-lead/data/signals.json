@@ -1,0 +1,13 @@
+{
+  "note": "行为信号分：score 为满分，按 decayDays 线性衰减到 0；同类信号取最近一次。",
+  "signals": [
+    { "key": "quote", "name": "索取报价", "score": 35, "decayDays": 30 },
+    { "key": "inquiry", "name": "询价", "score": 30, "decayDays": 30 },
+    { "key": "sample", "name": "索样", "score": 28, "decayDays": 45 },
+    { "key": "referral", "name": "老客户引荐", "score": 25, "decayDays": 60 },
+    { "key": "form", "name": "官网留资", "score": 20, "decayDays": 21 },
+    { "key": "scan", "name": "展会扫码", "score": 18, "decayDays": 30 },
+    { "key": "revisit", "name": "二次访问", "score": 12, "decayDays": 14 },
+    { "key": "wechat", "name": "公众号互动", "score": 8, "decayDays": 14 }
+  ]
+}

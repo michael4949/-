@@ -1,0 +1,686 @@
+{
+  "version": "1.0.0",
+  "archetype": "service",
+  "sector": "prof",
+  "company": "成都启元财税服务有限公司",
+  "kpi": {
+    "leads": 20,
+    "newWeek": 5,
+    "gradeA": 1,
+    "gradeB": 7,
+    "following": 9,
+    "unassigned": 9,
+    "overdue": 2,
+    "dormant": 2,
+    "wonMonth": 1,
+    "conversion": 28.6,
+    "avgCycle": 17,
+    "costPerLead": 688,
+    "expected": 362100,
+    "pipeline": 1680000,
+    "deals90": 5
+  },
+  "profile": {
+    "weights": {
+      "sector": 0.13288976831463134,
+      "role": 0.2715937053069899,
+      "size": 0.16049741697534883,
+      "region": 0.4350191094030299
+    },
+    "avgCycle": 17,
+    "avgAmount": 97600,
+    "repeatRate": 0.7,
+    "segments": [
+      {
+        "id": "S1",
+        "name": "餐饮管理公司等 · 总经理",
+        "count": 3,
+        "amount": 152000,
+        "cycle": 18,
+        "repeat": 1,
+        "share": 26,
+        "pains": [
+          "损耗",
+          "客流"
+        ],
+        "offers": [
+          "monthly",
+          "policy"
+        ]
+      },
+      {
+        "id": "S2",
+        "name": "电商公司等 · 总经理",
+        "count": 4,
+        "amount": 112500,
+        "cycle": 18,
+        "repeat": 0.75,
+        "share": 22,
+        "pains": [
+          "报价慢",
+          "客户流失"
+        ],
+        "offers": [
+          "monthly",
+          "policy"
+        ]
+      },
+      {
+        "id": "S3",
+        "name": "贸易公司 · 财务负责人",
+        "count": 2,
+        "amount": 99000,
+        "cycle": 17,
+        "repeat": 1,
+        "share": 11,
+        "pains": [
+          "报价慢",
+          "客户流失"
+        ],
+        "offers": [
+          "switch",
+          "monthly"
+        ]
+      }
+    ],
+    "focus": "S1"
+  },
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "餐饮管理公司",
+      "grade": "A",
+      "total": 79,
+      "match": 92,
+      "signal": 49.1,
+      "stage": "opp",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "电商公司",
+      "grade": "B",
+      "total": 71,
+      "match": 79,
+      "signal": 52,
+      "stage": "quote",
+      "owner": "T1",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "连锁餐饮",
+      "grade": "B",
+      "total": 70,
+      "match": 92,
+      "signal": 19,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "物流公司",
+      "grade": "B",
+      "total": 63,
+      "match": 78,
+      "signal": 26.7,
+      "stage": "contact",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "软件公司",
+      "grade": "B",
+      "total": 62,
+      "match": 71,
+      "signal": 40.6,
+      "stage": "quote",
+      "owner": "T2",
+      "action": "quote",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "连锁餐饮",
+      "grade": "B",
+      "total": 61,
+      "match": 64,
+      "signal": 52.3,
+      "stage": "opp",
+      "owner": "T3",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "餐饮管理公司",
+      "grade": "B",
+      "total": 59,
+      "match": 84,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "建材经销商",
+      "grade": "B",
+      "total": 57,
+      "match": 71,
+      "signal": 24.2,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "贸易公司",
+      "grade": "C",
+      "total": 53,
+      "match": 71,
+      "signal": 11.7,
+      "stage": "won",
+      "owner": "T1",
+      "action": "done",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "培训机构",
+      "grade": "C",
+      "total": 52,
+      "match": 71,
+      "signal": 6.9,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "广告公司",
+      "grade": "C",
+      "total": 52,
+      "match": 71,
+      "signal": 7.4,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "五金加工厂",
+      "grade": "C",
+      "total": 50,
+      "match": 71,
+      "signal": 1.7,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "装修公司",
+      "grade": "C",
+      "total": 49,
+      "match": 71,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "咨询公司",
+      "grade": "C",
+      "total": 49,
+      "match": 71,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": true,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "设计工作室",
+      "grade": "C",
+      "total": 49,
+      "match": 71,
+      "signal": 0,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "wake",
+      "overdue": false,
+      "dormant": true
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "软件公司",
+      "grade": "C",
+      "total": 48,
+      "match": 52,
+      "signal": 40.2,
+      "stage": "opp",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "教育科技公司",
+      "grade": "C",
+      "total": 45,
+      "match": 52,
+      "signal": 27.3,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "贸易公司",
+      "grade": "C",
+      "total": 44,
+      "match": 52,
+      "signal": 23.8,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "医疗器械公司",
+      "grade": "C",
+      "total": 44,
+      "match": 52,
+      "signal": 24,
+      "stage": "contact",
+      "owner": "T2",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "电商公司",
+      "grade": "C",
+      "total": 37,
+      "match": 44,
+      "signal": 23.2,
+      "stage": "contact",
+      "owner": "T1",
+      "action": "follow",
+      "overdue": false,
+      "dormant": false
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "贸易公司",
+      "grade": "D",
+      "total": 30,
+      "match": 44,
+      "signal": 0,
+      "stage": "lead",
+      "owner": null,
+      "action": "first",
+      "overdue": false,
+      "dormant": false
+    }
+  ],
+  "explainTop": {
+    "seen": [
+      "来源 老客户转介绍 · 建档 9-10 · 阶段 商机 · 负责 客户一组",
+      "字段：行业大类 生活服务、决策人 总经理、企业规模 51–100 人、区域 西南",
+      "行为：询价 9-14（3 天前）、老客户引荐 9-10（7 天前）",
+      "最近动作 9-14 K-311 引荐，已发方案"
+    ],
+    "reasons": [
+      "匹配画像「餐饮管理公司等 · 总经理」92 分：行业大类一致（该细分 100% 成交客户如此，权重 13%），决策人一致（该细分 100% 成交客户如此，权重 27%），企业规模一致（该细分 53% 成交客户如此，权重 16%），区域一致（该细分 100% 成交客户如此，权重 44%）",
+      "行为信号 49.1 分：询价 27、老客户引荐 22.1",
+      "综合 79 分 → 意向 A，跟进节奏正常"
+    ],
+    "action": "follow",
+    "actionLabel": "二次跟进"
+  },
+  "script": {
+    "key": "S1|phone|first",
+    "words": 294,
+    "sections": [
+      {
+        "key": "open",
+        "title": "开场",
+        "text": "总经理您好，我是启元的业务，做代理记账与财税服务的。冒昧打扰两分钟：最近和几家餐饮管理公司聊下来，大家在供应端都卡在同一件事上，想跟您核对一下贵司是否也有同样情况。"
+      },
+      {
+        "key": "pain",
+        "title": "痛点",
+        "text": "老板层面看的无非是每天食材报损多少心里没数，月底盘出来才心疼和门店客流靠位置和外卖平台带，自己手里没有客源这两件事会不会影响生意。我们能做的是把这两件事变成可以核的数字。"
+      },
+      {
+        "key": "value",
+        "title": "价值",
+        "text": "我们能给到的是两点：每月 10 日前出报表，含税负与现金提示；政策匹配每季一次，可享项目主动提醒。"
+      },
+      {
+        "key": "proof",
+        "title": "案例",
+        "text": "举个例子，K-311 · 餐饮管理公司：12 家门店账务统一，季度政策匹配拿到稳岗返还。"
+      },
+      {
+        "key": "cta",
+        "title": "行动",
+        "text": "您看这样：我把样品和检测数据寄到您那边，下周三前后我再联系您，行吗？"
+      }
+    ],
+    "objections": [
+      {
+        "q": "值不值得换",
+        "a": "换不换看数字：交期、退货率、总成本，三个数我帮您算，不合适您不用换。"
+      },
+      {
+        "q": "你们规模够不够",
+        "a": "我们服务的客户里有比贵司大的，交付记录可以查；量大的单我们提前排产。"
+      },
+      {
+        "q": "没时间",
+        "a": "理解，我十分钟说完，您觉得没意思随时打断。"
+      }
+    ]
+  },
+  "funnel": {
+    "stages": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 21,
+        "rate": null,
+        "prob": 0.05
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 12,
+        "rate": 57,
+        "prob": 0.15
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 6,
+        "rate": 50,
+        "prob": 0.35
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 3,
+        "rate": 50,
+        "prob": 0.6
+      },
+      {
+        "key": "won",
+        "name": "成交",
+        "count": 1,
+        "rate": 33,
+        "prob": 1
+      }
+    ],
+    "channels": [
+      {
+        "id": "wechat",
+        "name": "公众号",
+        "kind": "私域",
+        "leads": 6,
+        "recent": 3,
+        "gradeA": 0,
+        "deals12": 5,
+        "dealAmount": 390000,
+        "cost": 4000,
+        "costPerLead": 1333,
+        "costPerDeal": 9600
+      },
+      {
+        "id": "referral",
+        "name": "老客户转介绍",
+        "kind": "关系",
+        "leads": 6,
+        "recent": 6,
+        "gradeA": 1,
+        "deals12": 7,
+        "dealAmount": 884000,
+        "cost": 0,
+        "costPerLead": 0,
+        "costPerDeal": 0
+      },
+      {
+        "id": "web",
+        "name": "官网留资",
+        "kind": "线上",
+        "leads": 4,
+        "recent": 3,
+        "gradeA": 0,
+        "deals12": 4,
+        "dealAmount": 294000,
+        "cost": 2500,
+        "costPerLead": 833,
+        "costPerDeal": 7500
+      },
+      {
+        "id": "list",
+        "name": "名录导入",
+        "kind": "外采",
+        "leads": 3,
+        "recent": 2,
+        "gradeA": 0,
+        "deals12": 2,
+        "dealAmount": 126000,
+        "cost": 1500,
+        "costPerLead": 750,
+        "costPerDeal": 9000
+      },
+      {
+        "id": "inquiry",
+        "name": "平台询盘",
+        "kind": "线上",
+        "leads": 2,
+        "recent": 2,
+        "gradeA": 0,
+        "deals12": 2,
+        "dealAmount": 258000,
+        "cost": 3000,
+        "costPerLead": 1500,
+        "costPerDeal": 18000
+      },
+      {
+        "id": "fair",
+        "name": "展会扫码",
+        "kind": "线下",
+        "leads": 0,
+        "recent": 0,
+        "gradeA": 0,
+        "deals12": 0,
+        "dealAmount": 0,
+        "cost": 0,
+        "costPerLead": null,
+        "costPerDeal": null
+      }
+    ]
+  },
+  "forecast": {
+    "expected": 362100,
+    "pipeline": 1680000,
+    "count": 18,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "客户一组",
+        "count": 4,
+        "expected": 140100,
+        "pipeline": 378000
+      },
+      {
+        "id": "T2",
+        "name": "客户二组",
+        "count": 3,
+        "expected": 110400,
+        "pipeline": 306000
+      },
+      {
+        "id": "T3",
+        "name": "大客户组",
+        "count": 2,
+        "expected": 77700,
+        "pipeline": 318000
+      }
+    ],
+    "byStage": [
+      {
+        "key": "lead",
+        "name": "线索",
+        "count": 9,
+        "pipeline": 678000,
+        "expected": 33900
+      },
+      {
+        "key": "contact",
+        "name": "已联系",
+        "count": 4,
+        "pipeline": 390000,
+        "expected": 58500
+      },
+      {
+        "key": "opp",
+        "name": "商机",
+        "count": 3,
+        "pipeline": 390000,
+        "expected": 136500
+      },
+      {
+        "key": "quote",
+        "name": "已报价",
+        "count": 2,
+        "pipeline": 222000,
+        "expected": 133200
+      }
+    ],
+    "expectedDeals": 3.3
+  },
+  "plan": {
+    "days": [
+      {
+        "date": "2026-09-17",
+        "count": 6
+      },
+      {
+        "date": "2026-09-18",
+        "count": 0
+      },
+      {
+        "date": "2026-09-21",
+        "count": 0
+      },
+      {
+        "date": "2026-09-22",
+        "count": 0
+      },
+      {
+        "date": "2026-09-23",
+        "count": 0
+      }
+    ],
+    "overdue": 2,
+    "unassigned": 9,
+    "byTeam": [
+      {
+        "id": "T1",
+        "name": "客户一组",
+        "count": 3
+      },
+      {
+        "id": "T2",
+        "name": "客户二组",
+        "count": 1
+      },
+      {
+        "id": "T3",
+        "name": "大客户组",
+        "count": 2
+      }
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "客户一组",
+      "sectors": [
+        "life",
+        "trade",
+        "other"
+      ],
+      "cap": 14,
+      "load": 4,
+      "free": 10
+    },
+    {
+      "id": "T2",
+      "name": "客户二组",
+      "sectors": [
+        "tech",
+        "edu",
+        "mfg"
+      ],
+      "cap": 14,
+      "load": 3,
+      "free": 11
+    },
+    {
+      "id": "T3",
+      "name": "大客户组",
+      "sectors": [
+        "life",
+        "trade",
+        "tech",
+        "edu",
+        "mfg",
+        "other"
+      ],
+      "cap": 10,
+      "load": 2,
+      "free": 8
+    }
+  ],
+  "report": "【获客周报】9-14 周 · 成都启元财税服务有限公司\n线索 20 条：本周新增 5 · A 级 1 · B 级 7 · 跟进中 9 · 未分派 9 · 逾期 2 · 沉睡 2\n漏斗：线索 21 → 已联系 12 → 商机 6 → 已报价 3 → 成交 1；商机转化率 28.6%\n重点画像「餐饮管理公司等 · 总经理」：51–100 人 · 西南 · 客单 15.2 万元 · 周期 18 天 · 复购 100%\n成交预测：在手 18 条 · 管道 168 万元 · 按阶段加权 36.2 万元（约 3.3 单）\n渠道：公众号 6 条（1,333 元/条） · 老客户转介绍 6 条（0 元/条） · 官网留资 4 条（833 元/条） · 名录导入 3 条（750 元/条）\n本周计划 6 次跟进：客户一组 3 · 客户二组 1 · 大客户组 2；逾期待补：L-2609-0008 咨询公司、L-2609-0015 物流公司\n待办：L-2609-0019 连锁餐饮：待分派（B 级）；L-2609-0016 建材经销商：待分派（B 级）；L-2609-0005 培训机构：待分派（C 级）；L-2609-0008 咨询公司：二次跟进，已 43 天；L-2609-0015 物流公司：二次跟进，已 9 天"
+}

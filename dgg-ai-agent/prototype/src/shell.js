@@ -21,7 +21,7 @@
     });
     (children || []).forEach(function (c) {
       if (c == null || c === false) return;
-      el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+      el.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
     });
     return el;
   }

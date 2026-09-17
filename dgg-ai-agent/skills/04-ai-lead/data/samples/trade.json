@@ -1,0 +1,1174 @@
+{
+  "archetype": "flow",
+  "sector": "trade",
+  "company": "义乌恒益日用品有限公司",
+  "co": "恒益",
+  "prod": "日用百货与快消品",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "trade-wholesale",
+    "size": "21_50"
+  },
+  "sources": [
+    {
+      "id": "crm",
+      "name": "CRM · 客户与成交记录",
+      "mode": "import",
+      "lastSync": "2026-09-16 18:00",
+      "rows": 20
+    },
+    {
+      "id": "oms",
+      "name": "订单系统 · 客户与订单",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 388
+    },
+    {
+      "id": "fair",
+      "name": "展会扫码名单",
+      "mode": "import",
+      "lastSync": "2026-09-10 18:00",
+      "rows": 14
+    },
+    {
+      "id": "wechat",
+      "name": "公众号与社群",
+      "mode": "direct",
+      "lastSync": "2026-09-17 06:00",
+      "rows": 210
+    },
+    {
+      "id": "list",
+      "name": "名录导入",
+      "mode": "import",
+      "lastSync": "2026-09-05 10:00",
+      "rows": 40
+    }
+  ],
+  "offers": [
+    {
+      "key": "delivery",
+      "text": "48 小时到店，冷链到仓当日上架"
+    },
+    {
+      "key": "exchange",
+      "text": "滞销品 30 天内可换货"
+    },
+    {
+      "key": "price",
+      "text": "按量阶梯价，月结对账单随货"
+    },
+    {
+      "key": "newsku",
+      "text": "每月 20 个新品优先供货"
+    }
+  ],
+  "roleOffers": {
+    "采购经理": [
+      "delivery",
+      "price"
+    ],
+    "店主": [
+      "exchange",
+      "newsku"
+    ],
+    "平台运营": [
+      "delivery",
+      "newsku"
+    ],
+    "总经理": [
+      "price",
+      "exchange"
+    ]
+  },
+  "proofs": [
+    {
+      "customer": "K-102 · 连锁便利店总部",
+      "sector": "trade",
+      "text": "86 家门店统一配送两年，缺货率 1.2%"
+    },
+    {
+      "customer": "K-117 · 社区团购平台",
+      "sector": "trade",
+      "text": "周均 1,200 单，次日达 98%"
+    },
+    {
+      "customer": "K-088 · 区域商超",
+      "sector": "trade",
+      "text": "节庆礼盒三年独家供货"
+    }
+  ],
+  "segmentPainTags": {
+    "trade": [
+      "缺货",
+      "库存积压",
+      "账期"
+    ],
+    "life": [
+      "门店一致性",
+      "损耗"
+    ],
+    "other": [
+      "报价慢"
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "渠道一组",
+      "sectors": [
+        "trade"
+      ],
+      "cap": 16
+    },
+    {
+      "id": "T2",
+      "name": "渠道二组",
+      "sectors": [
+        "trade",
+        "life"
+      ],
+      "cap": 16
+    },
+    {
+      "id": "T3",
+      "name": "平台组",
+      "sectors": [
+        "trade",
+        "other"
+      ],
+      "cap": 12
+    }
+  ],
+  "channelCosts": {
+    "fair": 12000,
+    "inquiry": 4000,
+    "web": 2000,
+    "wechat": 3500,
+    "referral": 0,
+    "list": 2500
+  },
+  "deals": [
+    {
+      "customer": "K-102 · 连锁便利店总部",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 30,
+      "amount": 5600000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2025-10-12"
+    },
+    {
+      "customer": "K-088 · 区域商超",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 40,
+      "amount": 3900000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-11-08"
+    },
+    {
+      "customer": "K-117 · 社区团购平台",
+      "industry": "社区团购平台",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华东",
+      "role": "平台运营",
+      "cycleDays": 20,
+      "amount": 4200000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-01-15"
+    },
+    {
+      "customer": "K-131 · 餐饮连锁",
+      "industry": "餐饮连锁",
+      "sector": "life",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 25,
+      "amount": 1400000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-02-20"
+    },
+    {
+      "customer": "K-063 · 学校食堂配送",
+      "industry": "学校食堂配送",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "cycleDays": 15,
+      "amount": 980000,
+      "repeat": true,
+      "channel": "list",
+      "closedAt": "2025-12-01"
+    },
+    {
+      "customer": "K-145 · 企业福利采购",
+      "industry": "企业福利采购",
+      "sector": "other",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 35,
+      "amount": 620000,
+      "repeat": false,
+      "channel": "wechat",
+      "closedAt": "2026-03-10"
+    },
+    {
+      "customer": "K-150 · 便利店加盟商",
+      "industry": "便利店加盟商",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "cycleDays": 7,
+      "amount": 260000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-04-02"
+    },
+    {
+      "customer": "K-152 · 社区生鲜店",
+      "industry": "社区生鲜店",
+      "sector": "life",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "cycleDays": 10,
+      "amount": 180000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-05-11"
+    },
+    {
+      "customer": "K-154 · 连锁便利店总部",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华南",
+      "role": "采购经理",
+      "cycleDays": 32,
+      "amount": 2100000,
+      "repeat": false,
+      "channel": "fair",
+      "closedAt": "2026-06-06"
+    },
+    {
+      "customer": "K-156 · 区域商超",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华中",
+      "role": "采购经理",
+      "cycleDays": 38,
+      "amount": 1300000,
+      "repeat": true,
+      "channel": "inquiry",
+      "closedAt": "2026-03-28"
+    },
+    {
+      "customer": "K-158 · 跨境电商公司",
+      "industry": "跨境电商公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "平台运营",
+      "cycleDays": 18,
+      "amount": 760000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-07-14"
+    },
+    {
+      "customer": "K-160 · 酒店用品采购",
+      "industry": "酒店用品采购",
+      "sector": "life",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 28,
+      "amount": 540000,
+      "repeat": true,
+      "channel": "list",
+      "closedAt": "2026-02-05"
+    },
+    {
+      "customer": "K-162 · 社区团购平台",
+      "industry": "社区团购平台",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华南",
+      "role": "平台运营",
+      "cycleDays": 22,
+      "amount": 2600000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-05-25"
+    },
+    {
+      "customer": "K-164 · 便利店加盟商",
+      "industry": "便利店加盟商",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "cycleDays": 8,
+      "amount": 210000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-08-03"
+    },
+    {
+      "customer": "K-166 · 企业福利采购",
+      "industry": "企业福利采购",
+      "sector": "other",
+      "size": "101_300",
+      "region": "华东",
+      "role": "总经理",
+      "cycleDays": 30,
+      "amount": 480000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-08-21"
+    },
+    {
+      "customer": "K-168 · 区域商超",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 36,
+      "amount": 1750000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2025-10-30"
+    },
+    {
+      "customer": "K-170 · 校园超市",
+      "industry": "校园超市",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "店主",
+      "cycleDays": 12,
+      "amount": 320000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-06-18"
+    },
+    {
+      "customer": "K-172 · 餐饮连锁",
+      "industry": "餐饮连锁",
+      "sector": "life",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "cycleDays": 26,
+      "amount": 690000,
+      "repeat": false,
+      "channel": "wechat",
+      "closedAt": "2026-07-30"
+    },
+    {
+      "customer": "K-174 · 连锁便利店总部",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "300_plus",
+      "region": "华中",
+      "role": "供应链总监",
+      "cycleDays": 45,
+      "amount": 3100000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-01-30"
+    },
+    {
+      "customer": "K-176 · 社区生鲜店",
+      "industry": "社区生鲜店",
+      "sector": "life",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "cycleDays": 9,
+      "amount": 150000,
+      "repeat": false,
+      "channel": "list",
+      "closedAt": "2026-08-28"
+    }
+  ],
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-10",
+      "stage": "opp",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-14"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-16",
+        "text": "索取报价，要求 9-24 前"
+      },
+      "amountEst": 1800000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-09-08",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-08"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-09",
+        "text": "K-088 引荐，电话沟通"
+      },
+      "amountEst": 1200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "社区团购平台",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华东",
+      "role": "平台运营",
+      "channel": "wechat",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "微信报价"
+      },
+      "amountEst": 900000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "便利店加盟商",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "channel": "wechat",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 150000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "餐饮连锁",
+      "sector": "life",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-09-05",
+      "stage": "quote",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-05"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-11",
+        "text": "报价已发"
+      },
+      "amountEst": 620000,
+      "note": "K-131 引荐"
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "企业福利采购",
+      "sector": "other",
+      "size": "101_300",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "inquiry",
+      "createdAt": "2026-08-26",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-08-26"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-08-28",
+        "text": "电话沟通，中秋后再谈"
+      },
+      "amountEst": 380000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "校园超市",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "店主",
+      "channel": "list",
+      "createdAt": "2026-08-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "fair",
+      "createdAt": "2026-09-10",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-13",
+        "text": "展会后邮件跟进"
+      },
+      "amountEst": 3200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "社区生鲜店",
+      "sector": "life",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "channel": "wechat",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-14"
+        },
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 120000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "酒店用品采购",
+      "sector": "life",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-05",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-08"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 300000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "跨境电商公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "平台运营",
+      "channel": "web",
+      "createdAt": "2026-09-11",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-11"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "电话沟通，要商品清单"
+      },
+      "amountEst": 500000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华中",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-06-20",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-06-20"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-06-28",
+        "text": "报价后无回应"
+      },
+      "amountEst": 400000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-09-13",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-13"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 1500000,
+      "note": "K-102 引荐"
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "社区团购平台",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华南",
+      "role": "平台运营",
+      "channel": "fair",
+      "createdAt": "2026-09-10",
+      "stage": "opp",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-13"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-13",
+        "text": "样品已寄"
+      },
+      "amountEst": 1400000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "餐饮连锁",
+      "sector": "life",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "web",
+      "createdAt": "2026-09-01",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-01"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-03",
+        "text": "电话沟通，客户比价"
+      },
+      "amountEst": 560000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "便利店加盟商",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华南",
+      "role": "店主",
+      "channel": "list",
+      "createdAt": "2026-08-20",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 90000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "企业福利采购",
+      "sector": "other",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 260000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "学校食堂配送",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "referral",
+      "createdAt": "2026-09-09",
+      "stage": "quote",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "报价已发，客户比价"
+      },
+      "amountEst": 480000,
+      "note": "K-063 引荐"
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "fair",
+      "createdAt": "2026-09-10",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-10"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 2600000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "社区生鲜店",
+      "sector": "life",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "channel": "wechat",
+      "createdAt": "2026-07-02",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-07-02"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-07-05",
+        "text": "微信沟通后无回应"
+      },
+      "amountEst": 110000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-14"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 800000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0022",
+      "industry": "跨境电商公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华南",
+      "role": "平台运营",
+      "channel": "list",
+      "createdAt": "2026-08-12",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 350000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0023",
+      "industry": "校园超市",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "channel": "referral",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 140000,
+      "note": "K-170 引荐"
+    },
+    {
+      "id": "L-2609-0024",
+      "industry": "酒店用品采购",
+      "sector": "life",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-07",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-07"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "样品已寄"
+      },
+      "amountEst": 450000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0025",
+      "industry": "社区团购平台",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华中",
+      "role": "平台运营",
+      "channel": "web",
+      "createdAt": "2026-05-18",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-05-18"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-05-22",
+        "text": "客户暂缓"
+      },
+      "amountEst": 300000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0026",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-16"
+        },
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 1100000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0027",
+      "industry": "餐饮连锁",
+      "sector": "life",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "referral",
+      "createdAt": "2026-09-04",
+      "stage": "opp",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-04"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "样品测试中"
+      },
+      "amountEst": 1300000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0028",
+      "industry": "便利店加盟商",
+      "sector": "trade",
+      "size": "1_20",
+      "region": "华东",
+      "role": "店主",
+      "channel": "wechat",
+      "createdAt": "2026-09-11",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 130000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0029",
+      "industry": "企业福利采购",
+      "sector": "other",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "fair",
+      "createdAt": "2026-09-10",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "电话沟通，要礼盒方案"
+      },
+      "amountEst": 700000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0030",
+      "industry": "连锁便利店",
+      "sector": "trade",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-25",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-09"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 2200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0031",
+      "industry": "区域商超",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-08-10",
+      "stage": "won",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-08-10"
+        },
+        {
+          "key": "quote",
+          "date": "2026-08-26"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-11",
+        "text": "签约，首单 9-20 配送"
+      },
+      "amountEst": 960000,
+      "note": "K-168 引荐",
+      "closedAt": "2026-09-11"
+    }
+  ],
+  "focusSegment": null,
+  "weights": {},
+  "adopted": {},
+  "planned": [],
+  "log": []
+}
