@@ -3,7 +3,7 @@
   "meta": {
     "module": "企业AI投入ROI测算器",
     "credits": 20,
-    "version": "1.1.0",
+    "version": "1.2.0",
     "horizon": 24
   },
   "profile": {
@@ -49,10 +49,10 @@
   "plan": {
     "tier": "std",
     "tierName": "标准版",
-    "seats": 2,
-    "diagnosisDays": 0,
+    "seats": 4,
+    "diagnosisDays": 1,
     "privateDeploy": null,
-    "customBudget": 0,
+    "customBudget": 12000,
     "dataState": "excel",
     "setupPeople": 1,
     "setupSalary": 6500
@@ -62,14 +62,56 @@
       {
         "key": "sub",
         "name": "标准版订阅",
-        "detail": "1280 元 / 套年 × 2 套",
-        "amount": 2560,
+        "detail": "1280 元 / 套年 × 4 套",
+        "amount": 5120,
         "yearly": true
+      },
+      {
+        "key": "diag",
+        "name": "专家入企 AI 诊断",
+        "detail": "1980 元 × 1 天",
+        "amount": 1980,
+        "yearly": false
+      },
+      {
+        "key": "custom",
+        "name": "另议项合计",
+        "detail": "3 个科目，明细见逐项表",
+        "amount": 12000,
+        "yearly": false
       }
     ],
-    "cashOnce": 0,
-    "cashYearly": 2560,
-    "cashYear1": 2560,
+    "cashOnce": 13980,
+    "cashYearly": 5120,
+    "cashYear1": 19100,
+    "customItems": [
+      {
+        "key": "customDev",
+        "name": "定制开发与配置",
+        "detail": "轻档基数 8000 元 × 规模系数 0.8",
+        "basis": "含业务规则配置、表单与报表定制、权限模型搭建",
+        "refAmount": 6400,
+        "amount": 4484
+      },
+      {
+        "key": "coaching",
+        "name": "落地陪跑",
+        "detail": "4.6 周 × 1800 元 / 周",
+        "basis": "含配置陪同、使用培训、试运行期问题响应与效益数据复盘",
+        "refAmount": 8280,
+        "amount": 5800
+      },
+      {
+        "key": "dataPrep",
+        "name": "历史数据整理",
+        "detail": "规模基数 7000 元 × 数据现状系数 0.35",
+        "basis": "按数据现状调整：纸质为主需先完成电子化，已在系统内的接近于零",
+        "refAmount": 2450,
+        "amount": 1716
+      }
+    ],
+    "customRefTotal": 17130,
+    "customOverridden": true,
     "laborItems": [
       {
         "key": "setup",
@@ -92,10 +134,19 @@
     "setupHourly": 48.56,
     "setupWeeks": 4.6,
     "dataStateMult": 1.15,
+    "dataPrepFactor": 0.35,
     "runLaborMonthly": 194,
     "tierName": "标准版",
-    "seats": 2,
-    "total12": 2560,
+    "seats": 4,
+    "seatsSource": "user",
+    "diagnosisDays": 1,
+    "hitSystems": [],
+    "revenueShare": 0.16,
+    "shareBandLow": 0.15,
+    "shareBandHigh": 0.6,
+    "shareVerdict": "in",
+    "shareText": "首年现金支出占营业收入 0.16%，落在单场景常见区间 0.15% 至 0.6% 之内，投入总额与企业体量匹配。",
+    "total12": 19100,
     "totalNote": "回收期按现金口径测算；内部工时投入单列，不参与回收期计算"
   },
   "benefit": {
@@ -131,9 +182,9 @@
     {
       "m": 1,
       "benefit": 2016,
-      "cost": 2560,
-      "net": -544,
-      "cum": -544,
+      "cost": 19100,
+      "net": -17084,
+      "cum": -17084,
       "ramp": 0.35
     },
     {
@@ -141,7 +192,7 @@
       "benefit": 4032,
       "cost": 0,
       "net": 4032,
-      "cum": 3488,
+      "cum": -13052,
       "ramp": 0.7
     },
     {
@@ -149,7 +200,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 9248,
+      "cum": -7292,
       "ramp": 1
     },
     {
@@ -157,7 +208,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 15008,
+      "cum": -1532,
       "ramp": 1
     },
     {
@@ -165,7 +216,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 20768,
+      "cum": 4228,
       "ramp": 1
     },
     {
@@ -173,7 +224,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 26528,
+      "cum": 9988,
       "ramp": 1
     },
     {
@@ -181,7 +232,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 32288,
+      "cum": 15748,
       "ramp": 1
     },
     {
@@ -189,7 +240,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 38048,
+      "cum": 21508,
       "ramp": 1
     },
     {
@@ -197,7 +248,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 43808,
+      "cum": 27268,
       "ramp": 1
     },
     {
@@ -205,7 +256,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 49568,
+      "cum": 33028,
       "ramp": 1
     },
     {
@@ -213,7 +264,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 55328,
+      "cum": 38788,
       "ramp": 1
     },
     {
@@ -221,15 +272,15 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 61088,
+      "cum": 44548,
       "ramp": 1
     },
     {
       "m": 13,
       "benefit": 5760,
-      "cost": 2560,
-      "net": 3200,
-      "cum": 64288,
+      "cost": 5120,
+      "net": 640,
+      "cum": 45188,
       "ramp": 1
     },
     {
@@ -237,7 +288,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 70048,
+      "cum": 50948,
       "ramp": 1
     },
     {
@@ -245,7 +296,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 75808,
+      "cum": 56708,
       "ramp": 1
     },
     {
@@ -253,7 +304,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 81568,
+      "cum": 62468,
       "ramp": 1
     },
     {
@@ -261,7 +312,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 87328,
+      "cum": 68228,
       "ramp": 1
     },
     {
@@ -269,7 +320,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 93088,
+      "cum": 73988,
       "ramp": 1
     },
     {
@@ -277,7 +328,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 98848,
+      "cum": 79748,
       "ramp": 1
     },
     {
@@ -285,7 +336,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 104608,
+      "cum": 85508,
       "ramp": 1
     },
     {
@@ -293,7 +344,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 110368,
+      "cum": 91268,
       "ramp": 1
     },
     {
@@ -301,7 +352,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 116128,
+      "cum": 97028,
       "ramp": 1
     },
     {
@@ -309,7 +360,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 121888,
+      "cum": 102788,
       "ramp": 1
     },
     {
@@ -317,7 +368,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 127648,
+      "cum": 108548,
       "ramp": 1
     }
   ],
@@ -325,9 +376,9 @@
     {
       "m": 1,
       "benefit": 2016,
-      "cost": 2560,
-      "net": -544,
-      "cum": -544,
+      "cost": 19100,
+      "net": -17084,
+      "cum": -17084,
       "ramp": 0.35
     },
     {
@@ -335,7 +386,7 @@
       "benefit": 4032,
       "cost": 0,
       "net": 4032,
-      "cum": 3488,
+      "cum": -13052,
       "ramp": 0.7
     },
     {
@@ -343,7 +394,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 9248,
+      "cum": -7292,
       "ramp": 1
     },
     {
@@ -351,7 +402,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 15008,
+      "cum": -1532,
       "ramp": 1
     },
     {
@@ -359,7 +410,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 20768,
+      "cum": 4228,
       "ramp": 1
     },
     {
@@ -367,7 +418,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 26528,
+      "cum": 9988,
       "ramp": 1
     },
     {
@@ -375,7 +426,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 32288,
+      "cum": 15748,
       "ramp": 1
     },
     {
@@ -383,7 +434,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 38048,
+      "cum": 21508,
       "ramp": 1
     },
     {
@@ -391,7 +442,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 43808,
+      "cum": 27268,
       "ramp": 1
     },
     {
@@ -399,7 +450,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 49568,
+      "cum": 33028,
       "ramp": 1
     },
     {
@@ -407,7 +458,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 55328,
+      "cum": 38788,
       "ramp": 1
     },
     {
@@ -415,15 +466,15 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 61088,
+      "cum": 44548,
       "ramp": 1
     },
     {
       "m": 13,
       "benefit": 5760,
-      "cost": 2560,
-      "net": 3200,
-      "cum": 64288,
+      "cost": 5120,
+      "net": 640,
+      "cum": 45188,
       "ramp": 1
     },
     {
@@ -431,7 +482,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 70048,
+      "cum": 50948,
       "ramp": 1
     },
     {
@@ -439,7 +490,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 75808,
+      "cum": 56708,
       "ramp": 1
     },
     {
@@ -447,7 +498,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 81568,
+      "cum": 62468,
       "ramp": 1
     },
     {
@@ -455,7 +506,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 87328,
+      "cum": 68228,
       "ramp": 1
     },
     {
@@ -463,7 +514,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 93088,
+      "cum": 73988,
       "ramp": 1
     },
     {
@@ -471,7 +522,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 98848,
+      "cum": 79748,
       "ramp": 1
     },
     {
@@ -479,7 +530,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 104608,
+      "cum": 85508,
       "ramp": 1
     },
     {
@@ -487,7 +538,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 110368,
+      "cum": 91268,
       "ramp": 1
     },
     {
@@ -495,7 +546,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 116128,
+      "cum": 97028,
       "ramp": 1
     },
     {
@@ -503,7 +554,7 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 121888,
+      "cum": 102788,
       "ramp": 1
     },
     {
@@ -511,22 +562,22 @@
       "benefit": 5760,
       "cost": 0,
       "net": 5760,
-      "cum": 127648,
+      "cum": 108548,
       "ramp": 1
     }
   ],
-  "payback": 2,
-  "paybackAll": 2,
+  "payback": 5,
+  "paybackAll": 5,
   "paybackBasis": "cash",
   "sensitivityBasis": "cash",
   "reCross": null,
   "roi": {
-    "roi12": 2386.3,
-    "roi24": 2493.1,
-    "inv12": 2560,
-    "inv24": 5120,
-    "meaningful": false,
-    "note": "本次首年现金投入仅 2560 元，比率指标的分母过小，投报率已不具备参考意义，建议以回收期作为主要判断依据。"
+    "roi12": 233.2,
+    "roi24": 448.2,
+    "inv12": 19100,
+    "inv24": 24220,
+    "meaningful": true,
+    "note": ""
   },
   "scenarios": [
     {
@@ -535,12 +586,12 @@
       "desc": "收益按中性的 65% 计，投入按 1.2 倍计",
       "benefitMul": 0.65,
       "costMul": 1.2,
-      "payback": 2,
-      "cum12": 38299,
-      "cum24": 80155,
-      "roi12": 1496.1,
+      "payback": 8,
+      "cum12": 18451,
+      "cum24": 57235,
+      "roi12": 96.6,
       "monthlyBenefit": 3744,
-      "cashYear1": 3072
+      "cashYear1": 22920
     },
     {
       "key": "mid",
@@ -548,12 +599,12 @@
       "desc": "按企业填报参数直接计算，未作调整",
       "benefitMul": 1,
       "costMul": 1,
-      "payback": 2,
-      "cum12": 61088,
-      "cum24": 127648,
-      "roi12": 2386.3,
+      "payback": 5,
+      "cum12": 44548,
+      "cum24": 108548,
+      "roi12": 233.2,
       "monthlyBenefit": 5760,
-      "cashYear1": 2560
+      "cashYear1": 19100
     },
     {
       "key": "opt",
@@ -561,81 +612,84 @@
       "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计",
       "benefitMul": 1.25,
       "costMul": 0.95,
-      "payback": 1,
-      "cum12": 77128,
-      "cum24": 161096,
-      "roi12": 3012.8,
+      "payback": 4,
+      "cum12": 61415,
+      "cum24": 142951,
+      "roi12": 321.5,
       "monthlyBenefit": 7200,
-      "cashYear1": 2432
+      "cashYear1": 18145
     }
   ],
   "sensitivity": [
     {
-      "key": "rampSpeed",
-      "label": "效益释放节奏",
-      "note": "过渡期达到满额效能所需的期数",
-      "low": 1,
-      "high": 2,
-      "lowText": "第 1 个月",
-      "highText": "第 2 个月",
-      "base": 2,
-      "spread": 1
-    },
-    {
       "key": "benefitCut",
       "label": "效益折减系数",
       "note": "工具对该项损失的实际改善幅度",
-      "low": 2,
-      "high": 2,
-      "lowText": "第 2 个月",
-      "highText": "第 2 个月",
-      "base": 2,
-      "spread": 0
+      "low": 6,
+      "high": 4,
+      "lowText": "第 6 个月",
+      "highText": "第 4 个月",
+      "base": 5,
+      "spread": 2
     },
     {
       "key": "customBudget",
       "label": "另议项预算",
       "note": "系统对接与定制开发的实际报价",
-      "low": 2,
-      "high": 2,
-      "lowText": "第 2 个月",
-      "highText": "第 2 个月",
-      "base": 2,
-      "spread": 0
-    },
-    {
-      "key": "seats",
-      "label": "订阅套数",
-      "note": "实际开通使用的账号数量",
-      "low": 2,
-      "high": 2,
-      "lowText": "第 2 个月",
-      "highText": "第 2 个月",
-      "base": 2,
-      "spread": 0
+      "low": 4,
+      "high": 5,
+      "lowText": "第 4 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 1
     },
     {
       "key": "setupCost",
       "label": "上线期一次性支出",
       "note": "诊断与配置环节的实际发生额",
-      "low": 2,
-      "high": 2,
-      "lowText": "第 2 个月",
-      "highText": "第 2 个月",
-      "base": 2,
+      "low": 4,
+      "high": 5,
+      "lowText": "第 4 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 1
+    },
+    {
+      "key": "rampSpeed",
+      "label": "效益释放节奏",
+      "note": "过渡期达到满额效能所需的期数",
+      "low": 4,
+      "high": 5,
+      "lowText": "第 4 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 1
+    },
+    {
+      "key": "seats",
+      "label": "订阅套数",
+      "note": "实际开通使用的账号数量",
+      "low": 5,
+      "high": 5,
+      "lowText": "第 5 个月",
+      "highText": "第 5 个月",
+      "base": 5,
       "spread": 0
     }
   ],
   "missing": [],
   "insufficient": false,
   "inputSource": {
+    "revenueAnnual": "profile",
+    "seats": "user",
+    "diagnosisDays": "user",
+    "customBudget": "user",
     "dealsMonthly": "user",
     "dealValue": "user",
     "grossMargin": "user",
     "opsPeople": "user",
     "opsHoursPerDay": "user",
-    "opsSalary": "user",
-    "revenueAnnual": "profile"
+    "opsSalary": "user"
   },
   "confidence": {
     "score": 94,
@@ -649,7 +703,7 @@
   "keyNumbers": [
     {
       "k": "首年现金支出",
-      "v": 2560,
+      "v": 19100,
       "unit": "元",
       "s": "含订阅与一次性支出"
     },
@@ -661,20 +715,20 @@
     },
     {
       "k": "回收期",
-      "v": 2,
+      "v": 5,
       "unit": "期",
       "s": "现金口径 · 中性档",
       "wide": true
     },
     {
       "k": "首年累计净额",
-      "v": 61088,
+      "v": 44548,
       "unit": "元",
       "s": "现金口径，第 12 期末"
     },
     {
       "k": "含非现金口径",
-      "v": 2,
+      "v": 5,
       "unit": "期",
       "s": "并计人工工时节约"
     },
@@ -694,13 +748,13 @@
   "quickView": [
     {
       "q": "投入总额",
-      "a": "2560 元",
-      "text": "首年现金支出，标准版 2 套，未计列另议项；次年起续费 2560 元。"
+      "a": "19100 元",
+      "text": "首年现金支出，标准版 4 套，含另议项 12000 元；次年起续费 5120 元。"
     },
     {
       "q": "投入结构",
       "a": "标准版订阅",
-      "text": "标准版订阅 2560 元。一次性支出占比 0%。"
+      "text": "标准版订阅 5120 元；专家入企 AI 诊断 1980 元；另议项合计 12000 元。一次性支出占比 73%。"
     },
     {
       "q": "效益来源",
@@ -714,8 +768,8 @@
     },
     {
       "q": "回收期",
-      "a": "第 2 期",
-      "text": "现金口径，中性档；保守档第 2。"
+      "a": "第 5 期",
+      "text": "现金口径，中性档；保守档第 8。"
     },
     {
       "q": "参数可信度",
@@ -724,8 +778,8 @@
     }
   ],
   "verdict": {
-    "headline": "按本次参数测算，累计净现金流于第 2 期转正",
-    "text": "首年现金支出 2560 元，其中一次性支出占 0%；效益释放满额后月度现金收益 5760 元，计入过渡期爬坡后，累计净额于第 2 期由负转正。保守档对应第 2，为决策建议的基准值。"
+    "headline": "按本次参数测算，累计净现金流于第 5 期转正",
+    "text": "首年现金支出 19100 元，其中一次性支出占 73%；效益释放满额后月度现金收益 5760 元，计入过渡期爬坡后，累计净额于第 5 期由负转正。保守档对应第 8，为决策建议的基准值。"
   },
   "roles": [
     {
@@ -772,7 +826,7 @@
       "why": "单量、人员编制、资金占用等收益基数随之变化，原测算基础不再成立。"
     }
   ],
-  "summaryText": "首年现金支出 2560 元，其中一次性支出占 0%；效益释放满额后月度现金收益 5760 元，计入过渡期爬坡后，累计净额于第 2 期由负转正。保守档对应第 2，为决策建议的基准值。",
+  "summaryText": "首年现金支出 19100 元，其中一次性支出占 73%；效益释放满额后月度现金收益 5760 元，计入过渡期爬坡后，累计净额于第 5 期由负转正。保守档对应第 8，为决策建议的基准值。",
   "render": [
     {
       "type": "three-accounts",

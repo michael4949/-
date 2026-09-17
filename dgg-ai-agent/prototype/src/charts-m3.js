@@ -217,9 +217,12 @@
       if (v.cash === false) for (var g = x0 + 4; g < x0 + w; g += 6) s.appendChild(el('line', { x1: g, y1: y + 3, x2: g - 6, y2: y + 18, stroke: '#fff', 'stroke-opacity': .5 }));
       if (ghost > .5) {
         s.appendChild(el('rect', { x: x0 + w, y: y + 3, width: ghost, height: 15, fill: M.line, stroke: M.sh1 }));
-        s.appendChild(txt(x0 + w + ghost + 5, y + 14, fmtS(counted) + '（折减 ' + fmtS(v.monthly - counted) + '）', { 'font-size': 8.5, 'font-weight': 700, fill: M.ink2 }));
+        var lab = fmtS(counted) + '（折减 ' + fmtS(v.monthly - counted) + '）';
+        var lx = x0 + w + ghost + 5, lw = lab.length * 7.6;
+        if (lx + lw > W - 4) { lx = Math.max(L, x0 + w - lw - 5); }   // 贴右缘时改为左置，避免被裁掉
+        s.appendChild(txt(lx, y + 14, lab, { 'font-size': 8.5, 'font-weight': 700, fill: M.ink2 }));
       } else {
-        s.appendChild(txt(x0 + w + 5, y + 14, fmtS(counted), { 'font-size': 9, 'font-weight': 700, fill: M.ink2 }));
+        s.appendChild(txt(Math.min(x0 + w + 5, W - 52), y + 14, fmtS(counted), { 'font-size': 9, 'font-weight': 700, fill: M.ink2 }));
       }
       if (i < levers.length - 1) s.appendChild(el('line', { x1: x0 + w, y1: y + 18, x2: x0 + w, y2: y + rowH + 3, stroke: M.sub, 'stroke-dasharray': '2 2' }));
       acc += counted;
@@ -652,16 +655,16 @@
 
   /* ---------- 25. 报告结构导航：章节与页次 ---------- */
   function chapterMap(chapters, o) {
-    var cols = 2, rows = Math.ceil(chapters.length / cols);
-    var W = 560, rowH = 24, H = 18 + rows * rowH + 12, cw = W / cols;
+    var cols = 3, rows = Math.ceil(chapters.length / cols);
+    var W = 580, rowH = 22, H = 17 + rows * rowH + 11, cw = W / cols;
     var s = svg(W, H, '报告结构');
     chapters.forEach(function (c, i) {
       var x = (i % cols) * cw + 6, y = 18 + Math.floor(i / cols) * rowH;
-      s.appendChild(el('rect', { x: x, y: y, width: cw - 14, height: rowH - 5, fill: i % 2 ? M.zebra : M.paper, stroke: M.line2 }));
-      s.appendChild(el('rect', { x: x, y: y, width: 22, height: rowH - 5, fill: CATS[i % CATS.length] }));
-      s.appendChild(txt(x + 11, y + 13, c.no, { 'text-anchor': 'middle', 'font-size': 8.5, 'font-weight': 800, fill: '#fff' }));
-      s.appendChild(txt(x + 28, y + 13, trunc(c.title, 11), { 'font-size': 9.5, 'font-weight': 700, fill: M.ink }));
-      s.appendChild(txt(x + cw - 20, y + 13, '第 ' + c.page + ' 页', { 'text-anchor': 'end', 'font-size': 8, fill: M.sub }));
+      s.appendChild(el('rect', { x: x, y: y, width: cw - 13, height: rowH - 5, fill: i % 2 ? M.zebra : M.paper, stroke: M.line2 }));
+      s.appendChild(el('rect', { x: x, y: y, width: 21, height: rowH - 5, fill: CATS[i % CATS.length] }));
+      s.appendChild(txt(x + 10.5, y + 12.5, c.no, { 'text-anchor': 'middle', 'font-size': 8.4, 'font-weight': 800, fill: '#fff' }));
+      s.appendChild(txt(x + 27, y + 12.5, trunc(c.title, 7), { 'font-size': 9.2, 'font-weight': 700, fill: M.ink }));
+      s.appendChild(txt(x + cw - 18, y + 12.5, 'P' + c.page, { 'text-anchor': 'end', 'font-size': 8.4, fill: M.sub }));
     });
     s.appendChild(txt(6, 11, '全文共 ' + (o && o.total ? o.total : chapters.length) + ' 页，正文 13 章，附录 3 篇', { 'font-size': 8, fill: M.sub }));
     return s;
@@ -810,6 +813,90 @@
     return s;
   }
 
+  /* ---------- 32. 投入合理性核验：占营收比重在常见区间中的位置 ---------- */
+  function shareGauge(share, lo, hi, o) {
+    var W = 560, H = 112, L = 16, R = 16, T = 34;
+    var s = svg(W, H, '投入占营收核验');
+    var iw = W - L - R;
+    var mx = Math.max(hi * 1.9, share * 1.25, hi + 0.1);
+    var X = function (v) { return L + Math.min(1, v / mx) * iw; };
+    // 三段标尺：偏低 / 常见区间 / 偏高
+    s.appendChild(el('rect', { x: L, y: T, width: X(lo) - L, height: 20, fill: M.neg, 'fill-opacity': .16 }));
+    s.appendChild(el('rect', { x: X(lo), y: T, width: X(hi) - X(lo), height: 20, fill: M.pos, 'fill-opacity': .20 }));
+    s.appendChild(el('rect', { x: X(hi), y: T, width: L + iw - X(hi), height: 20, fill: M.cu, 'fill-opacity': .16 }));
+    s.appendChild(el('rect', { x: X(lo), y: T + 20, width: X(hi) - X(lo), height: 2.4, fill: M.pos }));
+    s.appendChild(el('line', { x1: L, y1: T + 20, x2: L + iw, y2: T + 20, stroke: M.ink }));
+    [[L, X(lo), '明显偏低', M.neg], [X(lo), X(hi), '常见区间', M.pos], [X(hi), L + iw, '明显偏高', M.cu2]]
+      .forEach(function (g) {
+        if (g[1] - g[0] < 42) return;
+        s.appendChild(txt((g[0] + g[1]) / 2, T + 36, g[2], { 'text-anchor': 'middle', 'font-size': 9.5, 'font-weight': 700, fill: g[3] }));
+      });
+    [lo, hi].forEach(function (v) {
+      s.appendChild(el('line', { x1: X(v), y1: T - 4, x2: X(v), y2: T + 24, stroke: M.ink3, 'stroke-dasharray': '3 2' }));
+      s.appendChild(txt(X(v), T + 50, v + '%', { 'text-anchor': 'middle', 'font-size': 9, fill: M.sub }));
+    });
+    if (share != null) {
+      var px = X(share);
+      var col = share < lo ? M.neg : (share > hi ? M.cu2 : M.pos);
+      s.appendChild(el('path', { d: 'M' + px + ' ' + (T - 3) + ' l-6 -9 l12 0 Z', fill: col }));
+      s.appendChild(el('line', { x1: px, y1: T - 3, x2: px, y2: T + 22, stroke: col, 'stroke-width': 2 }));
+      var lab = share + '%', lw = lab.length * 8 + 18;
+      var lx = Math.max(L, Math.min(px - lw / 2, L + iw - lw));
+      s.appendChild(el('rect', { x: lx, y: 4, width: lw, height: 19, fill: '#fff', stroke: col }));
+      s.appendChild(txt(lx + lw / 2, 17.5, lab, { 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 900, fill: col }));
+    }
+    s.appendChild(txt(L, H - 6, '横轴为首年现金支出占年度营业收入的比重；区间按单一场景计', { 'font-size': 9, fill: M.sub }));
+    return s;
+  }
+
+  /* ---------- 33. 测算单元界定：环节 → 角色 → 替代事项 ---------- */
+  function sceneFrame(sc, o) {
+    var W = 580, H = 148, s = svg(W, H, '测算单元界定');
+    var cols = [
+      { t: '所属环节', v: sc.stage || '—', c: M.mc2 },
+      { t: '使用角色', v: sc.user || '—', c: M.cu },
+      { t: '替代事项', v: sc.replaces || '—', c: M.cat }
+    ];
+    var bw = (W - 24 - 2 * 26) / 3;
+    cols.forEach(function (col, i) {
+      var x = 12 + i * (bw + 26);
+      s.appendChild(el('rect', { x: x, y: 20, width: bw, height: 66, rx: 6, fill: col.c, 'fill-opacity': .07, stroke: col.c, 'stroke-opacity': .45 }));
+      s.appendChild(el('rect', { x: x, y: 20, width: bw, height: 3, rx: 1.5, fill: col.c }));
+      s.appendChild(txt(x + 11, 39, col.t, { 'font-size': 9.5, 'font-weight': 800, fill: col.c }));
+      var words = String(col.v), per = Math.floor((bw - 22) / 11.2);
+      for (var k = 0; k < 3 && k * per < words.length; k++) {
+        s.appendChild(txt(x + 11, 57 + k * 15, words.slice(k * per, (k + 1) * per), { 'font-size': 11, 'font-weight': 700, fill: M.ink }));
+      }
+      if (i < 2) s.appendChild(el('path', { d: 'M' + (x + bw + 7) + ' 53 l11 0 M' + (x + bw + 14) + ' 49 l4 4 l-4 4', stroke: M.sub, fill: 'none', 'stroke-width': 1.4 }));
+    });
+    s.appendChild(txt(12, 12, '场景边界由下列三项场景库字段共同界定', { 'font-size': 9, fill: M.sub }));
+    s.appendChild(el('rect', { x: 12, y: 98, width: W - 24, height: 32, rx: 5, fill: M.zebra, stroke: M.line }));
+    s.appendChild(el('rect', { x: 12, y: 98, width: 3.5, height: 32, fill: M.cu }));
+    s.appendChild(txt(24, 112, '效益折算口径', { 'font-size': 9, 'font-weight': 800, fill: M.sub }));
+    s.appendChild(txt(24, 125, trunc(sc.roiBasis || '—', 44), { 'font-size': 10.5, 'font-weight': 700, fill: M.ink }));
+    s.appendChild(txt(12, 143, '折算口径决定本场景命中哪几项效益杠杆，逐项测算见第 04 章', { 'font-size': 9, fill: M.sub }));
+    return s;
+  }
+
+  /* ---------- 34. 锁定优先级：按影响幅度排序的条 ---------- */
+  function priorityBars(items, o) {
+    var W = 560, rowH = 26, H = 20 + items.length * rowH + 14;
+    var s = svg(W, H, '锁定优先级');
+    var L = 126, R = 96, iw = W - L - R;
+    var mx = Math.max.apply(null, items.map(function (x) { return x.spread; }).concat([1]));
+    items.forEach(function (it, i) {
+      var y = 20 + i * rowH, must = it.spread >= 2;
+      s.appendChild(txt(L - 8, y + 14, trunc(it.label, 9), { 'text-anchor': 'end', 'font-size': 10, 'font-weight': must ? 800 : 600, fill: must ? M.ink : M.sub }));
+      s.appendChild(el('rect', { x: L, y: y + 5, width: iw, height: 14, fill: M.zebra, stroke: M.line2 }));
+      s.appendChild(el('rect', { x: L, y: y + 5, width: Math.max(2, it.spread / mx * iw), height: 14, fill: must ? M.neg : M.sh1 }));
+      s.appendChild(txt(L + Math.max(2, it.spread / mx * iw) + 6, y + 15.5, it.spread + ' 期', { 'font-size': 9.5, 'font-weight': 700, fill: must ? M.neg : M.sub }));
+      s.appendChild(txt(W - 8, y + 15.5, must ? '合同锁定' : '实施中可调', { 'text-anchor': 'end', 'font-size': 9, 'font-weight': must ? 800 : 400, fill: must ? M.ink2 : M.sub }));
+    });
+    s.appendChild(txt(6, 12, '条长为该项上下扰动 20% 所引起的转正期次变动幅度', { 'font-size': 9, fill: M.sub }));
+    s.appendChild(txt(6, H - 3, '影响 2 期及以上的口径建议写入方案或合同，其余可按实施进展调整', { 'font-size': 9, fill: M.sub }));
+    return s;
+  }
+
   window.DGG = window.DGG || {}; window.DGG.charts = window.DGG.charts || {};
   Object.assign(window.DGG.charts, {
     heroM3: heroM3, miniCurve: miniCurve, cashflowBars: cashflowBars, paybackCurve: paybackCurve,
@@ -819,6 +906,6 @@
     weeksGantt: weeksGantt, sourceGrid: sourceGrid, confidenceBar: confidenceBar, gapImpact: gapImpact,
     roleMatrix: roleMatrix, triggerMap: triggerMap, roiTrack: roiTrack, peerBars: peerBars,
     priceLadder: priceLadder, chapterMap: chapterMap, laborTiming: laborTiming, dualCurve: dualCurve,
-    readinessLadder: readinessLadder, formulaFlow: formulaFlow, cutScale: cutScale, recoveryShare: recoveryShare, M3PALETTE: M
+    readinessLadder: readinessLadder, formulaFlow: formulaFlow, shareGauge: shareGauge, sceneFrame: sceneFrame, priorityBars: priorityBars, cutScale: cutScale, recoveryShare: recoveryShare, M3PALETTE: M
   });
 })();

@@ -8,7 +8,7 @@ skills/
   _shared/                 企业画像字段表 + 生成的 JSON Schema · 14 大类 / 54 细分行业表 · 积分表 · 禁忌词表 · lint
   01-ai-maturity/          企业AI成熟度评估（SKILL.md · schema · data · core · prompts · examples · scripts）
   02-scene-ranking/        企业AI高价值场景排序（SKILL.md · schema · data/sectors 14 个大类场景库 · core · prompts · examples · scripts）
-  03-roi-calculator/       企业AI投入ROI测算器（SKILL.md · schema · data 价目/杠杆/场景映射/参考值 · core · prompts · examples · scripts）
+  03-roi-calculator/       企业AI投入ROI测算器（SKILL.md · schema · data 价目/杠杆/场景映射/收益侧参考值/投入侧规模推导表 · core · prompts · examples · scripts）
 prototype/
   src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
@@ -66,13 +66,15 @@ NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（
 | `text-shadow` 的 blur > 0 | `text-shadow: 0 1px 0 <不透明色>` |
 | 任何 `filter`——`blur` / `drop-shadow` 自不必说，`brightness` / `saturate` / `opacity(1)` 实测同样栅格化 | `background` 层或 `box-shadow` 的 `inset` |
 | 半透明 `border`（`rgba` / 八位 hex / `color-mix` 带 `transparent`）叠在渐变背景上 | 不透明实色描边 |
-| 被圆角裁剪的表格单元格上堆多层 `background` | 单层渐变 + `inset` 阴影 |
+| **`border-radius` + `overflow: hidden` 的容器里，任何后代元素用渐变背景** | 容器内一律实色 + `inset` 阴影做层次 |
 
-矢量安全、可放心使用：`border-radius`、`overflow: hidden` 裁剪、`clip-path`、`opacity`、单层渐变、`box-shadow` 的 `inset` 与 blur = 0 外阴影。
+矢量安全、可放心使用：`border-radius`、`overflow: hidden` 裁剪本身、`clip-path`、`opacity`、**不被圆角容器裁剪的**单层渐变、`box-shadow` 的 `inset` 与 blur = 0 外阴影。
+
+最后一条是做模块 3 的编号展品容器时实测出来的：给图表与表格套上带圆角与裁剪的容器后，容器里的表头渐变与序号徽章渐变让完整版 PDF 的位图数从 2 张涨到 258 张。把这三处渐变改成实色加 `inset` 层次之后回到 2 张，观感没有损失——表头改用本章色实底反而与标题栏更统一。
 
 所以三套版式的立体感一律用 blur = 0 的硬边明暗层次做出，**屏幕与 PDF 是同一套视觉**，打印样式里不再抹平阴影与圆角。章节标题栏的凸浮结构自上而下六层：顶棱硬高光 → 柱面连续衰减（白与黑的 alpha 叠层，不换色，保住彩色流动）→ 左右棱 → `inset` 压暗的底部侧壁 → 1px 转折暗线 → 三级 blur = 0 落影。
 
-效果：模块 1 完整报告的位图从 424 张降到 8 张，模块 2 从 563 张降到 22 张，带透明蒙版的各 3 张；模块 3 从设计之初就守这条规矩，完整版与速览版各只有 2 张位图、1 张蒙版，全部来自 logo。自查办法是导出后统计 PDF 里 `/Subtype /Image` 与 `/SMask` 对象数，数量级跳到几十上百就说明有模糊漏进来了。
+效果：模块 1 完整报告的位图从 424 张降到 8 张，模块 2 从 563 张降到 22 张，带透明蒙版的各 3 张；模块 3 完整版与速览版各只有 2 张位图、1 张蒙版，全部来自 logo。自查办法是导出后统计 PDF 里 `/Subtype /Image` 与 `/SMask` 对象数，数量级跳到几十上百就说明有模糊漏进来了。
 
 `test/screenshot*.js` 会核对 PDF 页数是否等于屏上页数，`test/measure-m*.js` 在 A4 版心 703px 下逐页量高。
 
@@ -82,7 +84,7 @@ NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（
 |---|---|---|---|---|---|
 | 1 | 企业AI成熟度评估 | v2.1 | v4 | v2.1.0（已与内核、原型同步） | 屏幕与内核逐字一致；独立高端版式，报告 28 页 / 速览 6 页，四套样例 A4 均无溢出；契约校验全部通过 |
 | 2 | 企业AI高价值场景排序 | v1.1 | v2 | v1.0.0（已与内核、原型同步） | 屏幕与内核逐字一致；交互式排序台（权重现场可调、实时重排）；报告 28 页 / 速览 6 页，独立版式，四套样例 A4 均无溢出；契约校验全部通过 |
-| 3 | 企业AI投入ROI测算器 | v1.1 | v2 | v1.1.0（已与内核、原型同步） | 屏幕与内核逐字一致；三栏测算台（10 余项参数实时重算 + 基线对照）；报告 28 页 / 速览 6 页，深墨绿 + 香槟金独立版式、31 个专属图表，四套样例 A4 均无溢出；PDF 仅 2 张位图；契约校验全部通过 |
+| 3 | 企业AI投入ROI测算器 | v1.2 | v3 | v1.2.0（已与内核、原型同步） | 屏幕与内核逐字一致；三栏测算台（10 余项参数实时重算 + 基线对照）；报告 33 页 / 速览 6 页，深墨绿 + 香槟金独立版式、34 个专属图表、编号展品体系（图 N-M / 表 N-M），四套样例 A4 均无溢出；PDF 仅 2 张位图；契约校验全部通过 |
 
 ### 模块 1 · v2 规模
 

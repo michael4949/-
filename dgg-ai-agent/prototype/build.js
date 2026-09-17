@@ -14,7 +14,7 @@ const data = {
   m1: { dimensions: m1.dimensions, questions: m1.questions, levels: m1.levels, diagnostics: m1.diagnostics, benchmark: m1.benchmark,
         actions: m1.actions, scenes: m1.scenes, risks: m1.risks, reportText: m1.reportText, promptTemplate: m1.promptTemplate },
   m2: { sectors: m2.sectors, libTotal: m2.libTotal, axes: m2.axes, conditions: m2.conditions, reportText: m2.reportText, promptTemplate: m2.promptTemplate },
-  m3: { sectors: m3.sectors, constants: m3.constants, levers: m3.levers, sceneLevers: m3.sceneLevers, benchmarks: m3.benchmarks, reportText: m3.reportText, promptTemplate: m3.promptTemplate }
+  m3: { sectors: m3.sectors, constants: m3.constants, levers: m3.levers, sceneLevers: m3.sceneLevers, benchmarks: m3.benchmarks, investmentProfile: m3.investmentProfile, reportText: m3.reportText, promptTemplate: m3.promptTemplate }
 };
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释

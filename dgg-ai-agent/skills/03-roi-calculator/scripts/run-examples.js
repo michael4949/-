@@ -9,23 +9,25 @@ const P = (n) => JSON.parse(fs.readFileSync(path.join(m2ex, n + '.input.json'), 
 
 // 四套覆盖不同的收益杠杆与投入档，确保报告与 golden 有代表性
 const CASES = {
+  // S1 借它演示规模推导：套数、诊断天数、另议项都不填，由 investment-profile.json 按规模与场景投入档取参考值
   S1: { profile: P('S1'),
-        plan: { sceneId: 'mfg-s01', tier: 'adv', seats: 3, diagnosisDays: 1, customBudget: 20000,
-                dataState: 'excel', setupPeople: 2, setupSalary: 7500 },
-        gain: { errorFreqMonthly: 4.3, errorCostPerCase: 5000, opsPeople: 2, opsHoursPerDay: 1, opsSalary: 7000 } },
+        plan: { sceneId: 'mfg-s01', tier: 'adv', dataState: 'excel', setupPeople: 2, setupSalary: 7500 },
+        gain: { errorFreqMonthly: 6, errorCostPerCase: 8000, opsPeople: 3, opsHoursPerDay: 2, opsSalary: 7500 } },
+  // S2 企业自报套数与另议项，演示填报值覆盖参考值
   S2: { profile: P('S2'),
-        plan: { sceneId: 'trade-s01', tier: 'std', seats: 2, diagnosisDays: 0, customBudget: 0,
+        plan: { sceneId: 'trade-s01', tier: 'std', seats: 4, diagnosisDays: 1, customBudget: 12000,
                 dataState: 'excel', setupPeople: 1, setupSalary: 6500 },
         gain: { dealsMonthly: 60, dealValue: 8000, grossMargin: 0.15, opsPeople: 2, opsHoursPerDay: 2, opsSalary: 6000 } },
+  // S3 纸质台账的连锁餐饮，历史数据整理占另议项的大头；收益以非现金工时为主
   S3: { profile: P('S3'),
-        plan: { sceneId: 'life-s06', tier: 'std', seats: 2, diagnosisDays: 0, customBudget: 8000,
-                dataState: 'paper', setupPeople: 1, setupSalary: 5500 },
-        gain: { opsPeople: 3, opsHoursPerDay: 1.5, opsSalary: 5500 } },
+        plan: { sceneId: 'life-s06', tier: 'std', dataState: 'paper', setupPeople: 1, setupSalary: 5500 },
+        gain: { opsPeople: 5, opsHoursPerDay: 2, opsSalary: 5500 } },
+  // S4 1–5 亿营收电商，IT 有编制，企业自报较大预算并选私域部署
   S4: { profile: P('S4'),
-        plan: { sceneId: 'trade-s05', tier: 'flag', seats: 5, diagnosisDays: 1, privateDeploy: 'base',
-                customBudget: 60000, dataState: 'system', setupPeople: 3, setupSalary: 11000 },
-        gain: { errorFreqMonthly: 11, errorCostPerCase: 3000, tiedCapital: 4000000,
-                opsPeople: 4, opsHoursPerDay: 2, opsSalary: 8000 } }
+        plan: { sceneId: 'trade-s05', tier: 'flag', seats: 12, diagnosisDays: 1, privateDeploy: 'top',
+                customBudget: 180000, dataState: 'system', setupPeople: 3, setupSalary: 11000 },
+        gain: { errorFreqMonthly: 14, errorCostPerCase: 4500, tiedCapital: 6000000,
+                opsPeople: 5, opsHoursPerDay: 2.5, opsSalary: 8500 } }
 };
 
 fs.mkdirSync(dir, { recursive: true });

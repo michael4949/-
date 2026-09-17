@@ -155,12 +155,38 @@ console.log('5) 口径纪律');
   const hoursLever = s3.benefit.levers.filter((x) => x.key === 'hours')[0];
   pass(hoursLever && hoursLever.cash === false, '省下的工时标记为非现金');
   pass(s3.benefit.cashMonthly === 0 && s3.benefit.hoursMonthly > 0, 'S3 是纯工时场景：现金收益 0、工时收益单列');
-  pass(s3.payback === null && s3.paybackAll !== null, 'S3 现金口径不回本，含工时口径给出月份——两个口径分开给');
+  pass(s3.payback === null, 'S3 现金口径 24 期内不转正');
+  pass(/不产生可确认的现金效益/.test(s3.verdict.headline),
+    'S3 纯工时场景：结论说明现金口径不可能转正的成因，并给出合并立项的建议，不含糊带过');
 }
 {
-  const s2 = J(path.join(ex, 'S2.output.json'));
-  pass(s2.roi.meaningful === false && s2.roi.note.length > 0,
-    `S2 投入仅 ${s2.roi.inv12} 元、回报率 ${s2.roi.roi12}% → 标记为失去参考意义并给出说明`);
+  // 投报率失真护栏：用一组极小投入的合成输入直接验证，不依赖某个样例恰好落在该区间
+  const tiny = { profile: J(path.join(ex, 'S2.input.json')).profile,
+                 plan: { sceneId: 'trade-s01', tier: 'std', seats: 1, diagnosisDays: 0, customBudget: 0,
+                         dataState: 'system', setupPeople: 1, setupSalary: 6000 },
+                 gain: { dealsMonthly: 200, dealValue: 20000, grossMargin: 0.3, opsPeople: 3, opsHoursPerDay: 3, opsSalary: 6000 } };
+  const tr = core.compute(tiny, data);
+  pass(tr.ok && tr.roi.meaningful === false && tr.roi.note.length > 0,
+    `投入基数极小（${tr.ok ? tr.roi.inv12 : '?'} 元）、回报率 ${tr.ok ? tr.roi.roi12 : '?'}% → 标记为失去参考意义并给出说明`);
+}
+{
+  // 投入侧的规模推导：不填套数与另议项时按参考值取值，且明细与合计始终对得上
+  const s1 = J(path.join(ex, 'S1.output.json'));
+  pass(s1.invest.seatsSource === 'benchmark' && s1.invest.seats > 3,
+    `S1 未填套数 → 按规模推导表取 ${s1.invest.seats} 套并标为参考值`);
+  pass(s1.inputSource.seats === 'benchmark' && s1.inputSource.customBudget === 'benchmark',
+    'S1 的套数与另议项在 inputSource 里标为 benchmark，报告逐处可追溯');
+  const sumCustom = s1.invest.customItems.reduce((a, b) => a + b.amount, 0);
+  const customLine = s1.invest.cashItems.filter((x) => x.key === 'custom')[0];
+  pass(customLine && sumCustom === customLine.amount,
+    `另议项四个科目合计 ${sumCustom} 元 = 计列总额 ${customLine ? customLine.amount : '?'} 元`);
+  pass(s1.invest.shareVerdict === 'in',
+    `S1 首年投入占营收 ${s1.invest.revenueShare}%，落在常见区间 ${s1.invest.shareBandLow}–${s1.invest.shareBandHigh}% 之内`);
+  const s4 = J(path.join(ex, 'S4.output.json'));
+  const pdLine = s4.invest.cashItems.filter((x) => x.key === 'pd')[0];
+  const pdPrices = data.constants.prices.privateDeploy.map((x) => x.yearly);
+  pass(pdLine && pdPrices.indexOf(pdLine.amount) >= 0,
+    `私域部署按一套部署计列 ${pdLine ? pdLine.amount : '?'} 元，取 DM 区间端点 ${pdPrices.join(' / ')}，不乘套数`);
 }
 {
   // 多杠杆的主次由算出的金额决定，与 roiBasis 的行文顺序无关

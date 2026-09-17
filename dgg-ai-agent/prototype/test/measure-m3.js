@@ -14,7 +14,7 @@ const S = JSON.parse(fs.readFileSync(path.join(ex, key + '.input.json'), 'utf8')
   await p.evaluate((inp) => {
     const core = window.DGG.coreM3, D = window.DGG_DATA;
     const bundle = { fields: D.fields, industries: D.industries, sectors: D.m3.sectors, constants: D.m3.constants,
-      levers: D.m3.levers, sceneLevers: D.m3.sceneLevers, benchmarks: D.m3.benchmarks, reportText: D.m3.reportText,
+      levers: D.m3.levers, sceneLevers: D.m3.sceneLevers, benchmarks: D.m3.benchmarks, investmentProfile: D.m3.investmentProfile, reportText: D.m3.reportText,
       credits: D.credits, lintWords: D.lintWords, promptTemplate: D.m3.promptTemplate };
     const out = core.compute(inp, bundle);
     if (!out.ok) throw new Error(JSON.stringify(out.errors));

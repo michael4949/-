@@ -16,7 +16,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
   var MODULE_NAME = '企业AI投入ROI测算器';
   var CREDITS = 20;
   var LEVER_ORDER = ['hours', 'error', 'revenue', 'margin', 'cash', 'spend', 'output'];
@@ -45,8 +45,8 @@
     else {
       var tiers = data.constants.prices.subscription.map(function (t) { return t.key; });
       if (!has(pl, 'tier') || tiers.indexOf(pl.tier) < 0) e.push({ field: 'plan.tier', msg: '版本需为 ' + tiers.join(' / ') });
-      if (!has(pl, 'seats') || !(pl.seats >= 1 && pl.seats <= 50)) e.push({ field: 'plan.seats', msg: '套数需为 1–50' });
-      if (!has(pl, 'diagnosisDays') || !(pl.diagnosisDays >= 0 && pl.diagnosisDays <= 3)) e.push({ field: 'plan.diagnosisDays', msg: '入企诊断天数需为 0–3' });
+      if (has(pl, 'seats') && !(pl.seats >= 1 && pl.seats <= 60)) e.push({ field: 'plan.seats', msg: '套数需为 1–60' });
+      if (has(pl, 'diagnosisDays') && !(pl.diagnosisDays >= 0 && pl.diagnosisDays <= 5)) e.push({ field: 'plan.diagnosisDays', msg: '入企诊断天数需为 0–5' });
       if (has(pl, 'privateDeploy')) {
         var pk = data.constants.prices.privateDeploy.map(function (x) { return x.key; });
         if (pk.indexOf(pl.privateDeploy) < 0) e.push({ field: 'plan.privateDeploy', msg: '私域部署需为 ' + pk.join(' / ') + '，DM 口径只有这两个锚点' });
@@ -145,21 +145,74 @@
     };
     var levers = (scene && data.sceneLevers.map[scene.id]) || ['hours'];
 
-    // ---- 第一笔账：投入 ----
+    // ---- 企业营收（投入与收益两侧都要用，先算）----
+    var revenueAnnual = null;
+    var REV = { lt5m: 3000000, '5m_20m': 12000000, '20m_100m': 50000000, '100m_500m': 250000000, gt500m: 800000000 };
+    if (has(p, 'revenue') && REV[p.revenue] != null) { revenueAnnual = REV[p.revenue]; mark('revenueAnnual', 'profile'); }
+
+    // ---- 第一项：投入 ----
+    // 订阅套数与另议项若不给参考值，测算会按最小规模计列，得出与企业体量明显不符的投入总额。
+    // 这两项按 investment-profile.json 逐项推导，每一处在报告里标注为参考值；企业填报值一律优先。
+    var IP = data.investmentProfile;
+    var szKey = has(p, 'size') ? p.size : null;
+    function ipSeats() {
+      var row = (szKey && IP.seats.values[szKey]) || IP.seats.fallback;
+      return row[sceneView.cost] || row['中'] || 6;
+    }
     var priceOf = {};
     C.prices.subscription.forEach(function (t) { priceOf[t.key] = t; });
     var tier = priceOf[plan.tier];
-    var subYear = tier.yearly * plan.seats;
-    var diagnosis = plan.diagnosisDays * C.prices.diagnosisPerDay;
+    var seats = has(plan, 'seats') ? plan.seats : ipSeats();
+    mark('seats', has(plan, 'seats') ? 'user' : 'benchmark');
+    var subYear = tier.yearly * seats;
+    var diagDays = has(plan, 'diagnosisDays') ? plan.diagnosisDays
+      : (IP.diagnosisDays.values[sceneView.cost] != null ? IP.diagnosisDays.values[sceneView.cost] : IP.diagnosisDays.fallback);
+    mark('diagnosisDays', has(plan, 'diagnosisDays') ? 'user' : 'benchmark');
+    var diagnosis = diagDays * C.prices.diagnosisPerDay;
     var pd = null;
     if (has(plan, 'privateDeploy')) C.prices.privateDeploy.forEach(function (x) { if (x.key === plan.privateDeploy) pd = x; });
-    var pdYear = pd ? pd.yearly * plan.seats : 0;
-    var custom = has(plan, 'customBudget') ? r0(plan.customBudget) : 0;
-    if (!has(plan, 'customBudget')) mark('customBudget', 'default');
+    var pdYear = pd ? pd.yearly : 0;   // 按部署计，不乘套数：DM 口径为 12800–33800 的区间端点
 
+    // 另议项拆成四个可追溯的科目，每一项都由已知字段推导，不是一个拍出来的总额
+    var sysOwned = (p.systems || []).slice();
+    var hitSystems = (sceneView.dataDeps || []).filter(function (s) { return sysOwned.indexOf(s) >= 0; });
+    var intUnit = (szKey && IP.integration.values[szKey]) || IP.integration.fallback;
+    var devBase = IP.customDev.base[sceneView.cost] != null ? IP.customDev.base[sceneView.cost] : IP.customDev.base['中'];
+    var devFactor = (szKey && IP.customDev.sizeFactor[szKey]) || IP.customDev.fallbackFactor;
+    var coachUnit = (szKey && IP.coaching.values[szKey]) || IP.coaching.fallback;
+    var prepBase = (szKey && IP.dataPrep.base[szKey]) || IP.dataPrep.fallbackBase;
     var dsMult = BM.setupWeeksBuffer.values[plan.dataState] || BM.setupWeeksBuffer.fallback;
     if (!has(plan, 'dataState')) mark('dataState', 'default');
     var setupWeeks = r1(sceneView.weeks * dsMult);
+    var prepFactor = IP.dataPrep.stateFactor[plan.dataState] != null ? IP.dataPrep.stateFactor[plan.dataState] : IP.dataPrep.fallbackFactor;
+
+    var customRef = [
+      { key: 'integration', name: '系统对接', amount: r0(hitSystems.length * intUnit),
+        detail: hitSystems.length ? hitSystems.length + ' 个在用系统接口 × ' + intUnit + ' 元' : '本场景无在用系统依赖',
+        basis: '按场景数据依赖与企业在用系统的交集逐个计列' },
+      { key: 'customDev', name: '定制开发与配置', amount: r0(devBase * devFactor),
+        detail: sceneView.cost + '档基数 ' + devBase + ' 元 × 规模系数 ' + devFactor,
+        basis: '含业务规则配置、表单与报表定制、权限模型搭建' },
+      { key: 'coaching', name: '落地陪跑', amount: r0(setupWeeks * coachUnit),
+        detail: setupWeeks + ' 周 × ' + coachUnit + ' 元 / 周',
+        basis: '含配置陪同、使用培训、试运行期问题响应与效益数据复盘' },
+      { key: 'dataPrep', name: '历史数据整理', amount: r0(prepBase * prepFactor),
+        detail: '规模基数 ' + prepBase + ' 元 × 数据现状系数 ' + prepFactor,
+        basis: '按数据现状调整：纸质为主需先完成电子化，已在系统内的接近于零' }
+    ].filter(function (x) { return x.amount > 0; });
+    var customRefTotal = sum(customRef.map(function (x) { return x.amount; }));
+    var custom = has(plan, 'customBudget') ? r0(plan.customBudget) : customRefTotal;
+    mark('customBudget', has(plan, 'customBudget') ? 'user' : 'benchmark');
+    // 企业给了总额就按总额计列，四个科目按参考构成等比缩放，保证明细与合计始终对得上
+    var customScale = customRefTotal > 0 ? custom / customRefTotal : 0;
+    var customItems = customRef.map(function (x) {
+      return { key: x.key, name: x.name, detail: x.detail, basis: x.basis,
+               refAmount: x.amount, amount: r0(x.amount * customScale) };
+    });
+    if (customItems.length) {
+      var drift = custom - sum(customItems.map(function (x) { return x.amount; }));
+      customItems[0].amount = r0(customItems[0].amount + drift);
+    }
     var setupHours = r0(setupWeeks * 5 * 2 * plan.setupPeople);          // 上线期每人每天约 2 小时
     var setupHourly = hourly(plan.setupSalary, C);
     var setupLabor = r0(setupHours * setupHourly);
@@ -167,10 +220,10 @@
     var runLaborMonthly = r0(runHoursMonthly * setupHourly);
 
     var cashItems = [];
-    cashItems.push({ key: 'sub', name: tier.name + '订阅', detail: (tier.yearly ? tier.yearly + ' 元 / 套年 × ' + plan.seats + ' 套' : '0 元开通，按次消耗积分'), amount: subYear, yearly: true });
-    if (diagnosis) cashItems.push({ key: 'diag', name: C.prices.diagnosisName, detail: C.prices.diagnosisPerDay + ' 元 × ' + plan.diagnosisDays + ' 天', amount: diagnosis, yearly: false });
-    if (pdYear) cashItems.push({ key: 'pd', name: pd.name, detail: pd.yearly + ' 元 / 套年 × ' + plan.seats + ' 套', amount: pdYear, yearly: true });
-    if (custom) cashItems.push({ key: 'custom', name: '另议项（系统对接 / 定制 / 陪跑）', detail: '按贵司填写的预算计入', amount: custom, yearly: false });
+    cashItems.push({ key: 'sub', name: tier.name + '订阅', detail: (tier.yearly ? tier.yearly + ' 元 / 套年 × ' + seats + ' 套' : '0 元开通，按次消耗积分'), amount: subYear, yearly: true });
+    if (diagnosis) cashItems.push({ key: 'diag', name: C.prices.diagnosisName, detail: C.prices.diagnosisPerDay + ' 元 × ' + diagDays + ' 天', amount: diagnosis, yearly: false });
+    if (pdYear) cashItems.push({ key: 'pd', name: pd.name, detail: pd.yearly + ' 元 / 套年，按一套部署计列（区间 ' + C.prices.privateDeploy[0].yearly + ' 至 ' + C.prices.privateDeploy[1].yearly + ' 元，本次取' + (plan.privateDeploy === 'base' ? '下限' : '上限') + '）', amount: pdYear, yearly: true });
+    if (custom) cashItems.push({ key: 'custom', name: '另议项合计', detail: customItems.length ? customItems.length + ' 个科目，明细见逐项表' : '按企业填报预算计列', amount: custom, yearly: false });
     var cashOnce = sum(cashItems.filter(function (x) { return !x.yearly; }).map(function (x) { return x.amount; }));
     var cashYearly = sum(cashItems.filter(function (x) { return x.yearly; }).map(function (x) { return x.amount; }));
     var cashYear1 = cashOnce + cashYearly;
@@ -181,11 +234,32 @@
     ];
     var laborYear1 = setupLabor + runLaborMonthly * 12;
 
+    // ---- 投入合理性核验：首年现金支出占营业收入的比重 ----
+    var shareBand = IP.revenueShare;
+    var revShare = revenueAnnual ? cashYear1 / revenueAnnual : null;
+    var shareVerdict = revShare == null ? 'unknown'
+      : (revShare < shareBand.low ? 'low' : (revShare > shareBand.high ? 'high' : 'in'));
+    var shareText = revShare == null
+      ? '企业营业收入区间未知，本项核验未启用。'
+      : (shareVerdict === 'in'
+        ? '首年现金支出占营业收入 ' + r2(revShare * 100) + '%，落在单场景常见区间 '
+          + r2(shareBand.low * 100) + '% 至 ' + r2(shareBand.high * 100) + '% 之内，投入总额与企业体量匹配。'
+        : (shareVerdict === 'low'
+          ? '首年现金支出占营业收入 ' + r2(revShare * 100) + '%，低于单场景常见区间下限 ' + r2(shareBand.low * 100)
+            + '%。该情形通常意味着系统对接或落地陪跑未计列，据此得出的回收期会系统性偏短，建议补齐后复核。'
+          : '首年现金支出占营业收入 ' + r2(revShare * 100) + '%，高于单场景常见区间上限 ' + r2(shareBand.high * 100)
+            + '%。建议复核场景范围是否过大，或按阶段拆分实施。'));
+
     var invest = {
       cashItems: cashItems, cashOnce: cashOnce, cashYearly: cashYearly, cashYear1: cashYear1,
+      customItems: customItems, customRefTotal: customRefTotal, customOverridden: has(plan, 'customBudget'),
       laborItems: laborItems, laborYear1: laborYear1, setupHours: setupHours, setupHourly: setupHourly,
-      setupWeeks: setupWeeks, dataStateMult: dsMult, runLaborMonthly: runLaborMonthly,
-      tierName: tier.name, seats: plan.seats,
+      setupWeeks: setupWeeks, dataStateMult: dsMult, dataPrepFactor: prepFactor, runLaborMonthly: runLaborMonthly,
+      tierName: tier.name, seats: seats, seatsSource: has(plan, 'seats') ? 'user' : 'benchmark',
+      diagnosisDays: diagDays, hitSystems: hitSystems,
+      revenueShare: revShare == null ? null : r2(revShare * 100),
+      shareBandLow: r2(shareBand.low * 100), shareBandHigh: r2(shareBand.high * 100),
+      shareVerdict: shareVerdict, shareText: shareText,
       total12: cashYear1, totalNote: '回收期按现金口径测算；内部工时投入单列，不参与回收期计算'
     };
 
@@ -224,9 +298,6 @@
     // 封顶：场景价值折一次 + 年营收 6% 封顶
     var vf = C.caps.valueFactor[String(sceneView.value)] || 1;
     var afterValue = r0(rawMonthly * vf);
-    var revenueAnnual = null;
-    var REV = { lt5m: 3000000, '5m_20m': 12000000, '20m_100m': 50000000, '100m_500m': 250000000, gt500m: 800000000 };
-    if (has(p, 'revenue') && REV[p.revenue] != null) { revenueAnnual = REV[p.revenue]; mark('revenueAnnual', 'profile'); }
     var capMonthly = revenueAnnual ? r0(revenueAnnual * C.caps.revenueShare / 12) : null;
     var capped = capMonthly != null && afterValue > capMonthly;
     var fullMonthly = capped ? capMonthly : afterValue;
@@ -280,13 +351,16 @@
       if (!f) return null;
       var inv12 = cashYear1, inv24 = cashYear1 + cashYearly;
       var v12 = inv12 > 0 ? r1((f.cum12 / inv12) * 100) : null;
-      var meaningful = !(v12 != null && v12 > 500);
+      var meaningful = v12 != null && v12 <= 500;
       return {
         roi12: v12,
         roi24: inv24 > 0 ? r1((f.cum24 / inv24) * 100) : null,
         inv12: inv12, inv24: inv24,
         meaningful: meaningful,
-        note: meaningful ? '' : '本次首年现金投入仅 ' + r0(inv12) + ' 元，比率指标的分母过小，投报率已不具备参考意义，建议以回收期作为主要判断依据。'
+        note: meaningful ? ''
+          : (v12 == null
+            ? '本次首年现金投入为 0 元，投报率的分母不成立，该指标不予出具，请以回收期与累计净额作为判断依据。'
+            : '本次首年现金投入仅 ' + r0(inv12) + ' 元，比率指标的分母过小，投报率已不具备参考意义，建议以回收期作为主要判断依据。')
       };
     }
     var roi = roiOf(flow);
@@ -390,11 +464,19 @@
       verdict = '现金口径月度收益 ' + r0(cashMonthly) + ' 元，24 期累计净额 ' + r0(flow.cum24) + ' 元，期内不转正。'
         + '若将人工工时节约 ' + r0(hoursMonthly) + ' 元/月一并确认，累计净额于第 ' + pa + ' 期转正——'
         + '该口径成立的前提是释放工时被重新配置至产出性岗位，在未发生人员结构调整的情形下不宜作为决策依据。';
+    } else if (cashMonthly === 0 && hoursMonthly > 0) {
+      headline = '本场景不产生可确认的现金效益，不宜单独立项';
+      verdict = '本场景命中的效益杠杆全部为人工工时节约，折合 ' + r0(hoursMonthly) + ' 元/月，属非现金科目；'
+        + '现金口径月度收益为 0，故 ' + C.horizonMonths + ' 期内累计净现金流不可能转正。'
+        + '并计非现金科目后，' + C.horizonMonths + ' 期累计净额为 ' + r0(flowAll.cum24) + ' 元，同样未转正。'
+        + '该结论不表示本场景没有价值，而在于其价值无法在现金口径下确认：'
+        + '建议与同一批次中现金效益明确的场景合并立项，由后者承担投入的回收，本场景作为附带收益计列。';
     } else {
-      headline = '按本次参数测算，24 期内累计净额未转正';
+      headline = '按本次参数测算，' + C.horizonMonths + ' 期内累计净额未转正';
       verdict = '现金口径月度收益 ' + r0(cashMonthly) + ' 元，含非现金科目合计 ' + r0(cashMonthly + hoursMonthly) + ' 元，'
-        + '两种口径于测算期内均未转正。主要成因为投入端一次性支出占比达 ' + onceShare + '%。'
-        + '建议重新审议另议项预算，或选择投入档位更低的场景优先实施。';
+        + '两种口径于测算期内均未转正。投入端一次性支出占首年现金支出的 ' + onceShare + '%'
+        + (revShare != null ? '，首年现金支出占营业收入 ' + r2(revShare * 100) + '%' : '') + '。'
+        + '建议按阶段拆分实施，先落地投入档位更低的场景，或重新审议另议项预算后复核。';
     }
 
     var keyNumbers = [
@@ -409,7 +491,7 @@
 
     var quickView = [
       { q: '投入总额', a: r0(cashYear1) + ' 元',
-        text: '首年现金支出，' + invest.tierName + ' ' + plan.seats + ' 套' + (custom ? '，含另议项 ' + custom + ' 元' : '，未计列另议项') + '；次年起续费 ' + cashYearly + ' 元。' },
+        text: '首年现金支出，' + invest.tierName + ' ' + seats + ' 套' + (custom ? '，含另议项 ' + custom + ' 元' : '，未计列另议项') + '；次年起续费 ' + cashYearly + ' 元。' },
       { q: '投入结构', a: cashItems[0].name,
         text: cashItems.map(function (x) { return x.name + ' ' + x.amount + ' 元'; }).join('；') + '。一次性支出占比 ' + onceShare + '%。' },
       { q: '效益来源', a: usable.length ? usable[0].name : '参数不足',
@@ -429,7 +511,7 @@
       profile: p,
       scene: sceneView, sceneBasis: generic ? 'generic' : 'library', sector: sector,
       levers: levers,
-      plan: { tier: plan.tier, tierName: tier.name, seats: plan.seats, diagnosisDays: plan.diagnosisDays,
+      plan: { tier: plan.tier, tierName: tier.name, seats: seats, diagnosisDays: diagDays,
               privateDeploy: plan.privateDeploy || null, customBudget: custom, dataState: plan.dataState || null,
               setupPeople: plan.setupPeople, setupSalary: plan.setupSalary },
       invest: invest,

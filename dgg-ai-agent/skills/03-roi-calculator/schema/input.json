@@ -5,23 +5,84 @@
   "description": "profile 与 sceneId 通常由模块 1 / 模块 2 的会话变量带过来，不重问；现场只需填 plan 的投入项与 gain 的收益端数字。",
   "type": "object",
   "additionalProperties": false,
-  "required": ["profile", "plan"],
+  "required": [
+    "profile",
+    "plan"
+  ],
   "properties": {
-    "profile": { "$ref": "../../_shared/company-profile.schema.json" },
+    "profile": {
+      "$ref": "../../_shared/company-profile.schema.json"
+    },
     "plan": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["tier", "seats", "diagnosisDays", "setupPeople", "setupSalary"],
+      "required": [
+        "tier",
+        "setupPeople",
+        "setupSalary"
+      ],
       "properties": {
-        "sceneId": { "type": ["string", "null"], "description": "模块 2 场景库的场景 id；为空时走通用轻量场景口径，输出 sceneBasis = generic" },
-        "tier": { "enum": ["light", "std", "adv", "flag"], "description": "订阅版本，价格取自 DM：轻享版 0 / 标准版 1280 / 高级版 2280 / 旗舰版 3280，单位元每套年" },
-        "seats": { "type": "integer", "minimum": 1, "maximum": 50, "description": "订阅套数" },
-        "diagnosisDays": { "type": "integer", "minimum": 0, "maximum": 3, "description": "专家入企 AI 诊断天数，1980 元一天" },
-        "privateDeploy": { "enum": ["base", "top"], "description": "私域部署。DM 口径为 12800 元起一套年、区间 12800–33800，只取这两个端点，不取中间值" },
-        "customBudget": { "type": "integer", "minimum": 0, "description": "另议项预算：系统对接 / 定制开发 / 落地陪跑。不填按 0 计，并在置信度上扣分" },
-        "dataState": { "enum": ["paper", "excel", "system", "scattered"], "description": "数据现状，影响上线前的整理工作量" },
-        "setupPeople": { "type": "integer", "minimum": 1, "maximum": 10, "description": "公司这边跟这件事的人数" },
-        "setupSalary": { "type": "integer", "minimum": 2000, "maximum": 60000, "description": "跟这件事的人平均月薪" }
+        "sceneId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "模块 2 场景库的场景 id；为空时走通用轻量场景口径，输出 sceneBasis = generic"
+        },
+        "tier": {
+          "enum": [
+            "light",
+            "std",
+            "adv",
+            "flag"
+          ],
+          "description": "订阅版本，价格取自 DM：轻享版 0 / 标准版 1280 / 高级版 2280 / 旗舰版 3280，单位元每套年"
+        },
+        "seats": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "订阅套数。缺失时按 investment-profile.json 的规模 × 场景投入档参考值取值，并在报告标注为参考值。"
+        },
+        "diagnosisDays": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "入企诊断天数。缺失时按场景投入档取建议值，并在报告标注为参考值。"
+        },
+        "privateDeploy": {
+          "enum": [
+            "base",
+            "top"
+          ],
+          "description": "私域部署。DM 口径为 12800 元起一套年、区间 12800–33800，只取这两个端点，不取中间值"
+        },
+        "customBudget": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "另议项预算：系统对接 / 定制开发 / 落地陪跑。不填按 0 计，并在置信度上扣分"
+        },
+        "dataState": {
+          "enum": [
+            "paper",
+            "excel",
+            "system",
+            "scattered"
+          ],
+          "description": "数据现状，影响上线前的整理工作量"
+        },
+        "setupPeople": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "公司这边跟这件事的人数"
+        },
+        "setupSalary": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 60000,
+          "description": "跟这件事的人平均月薪"
+        }
       }
     },
     "gain": {
@@ -29,18 +90,66 @@
       "additionalProperties": false,
       "description": "收益端。只需填场景命中的那几条杠杆对应的字段；缺了就明说算不准，不替客户填默认值。",
       "properties": {
-        "opsPeople": { "type": "integer", "minimum": 1, "maximum": 50 },
-        "opsHoursPerDay": { "type": "number", "minimum": 0.25, "maximum": 8 },
-        "opsSalary": { "type": "integer", "minimum": 2000, "maximum": 60000 },
-        "errorFreqMonthly": { "type": "number", "minimum": 0.05, "maximum": 200 },
-        "errorCostPerCase": { "type": "integer", "minimum": 50, "maximum": 500000 },
-        "dealsMonthly": { "type": "number", "minimum": 0.5, "maximum": 100000 },
-        "dealValue": { "type": "integer", "minimum": 50, "maximum": 20000000 },
-        "grossMargin": { "type": "number", "minimum": 0.01, "maximum": 0.8 },
-        "relatedRevenueMonthly": { "type": "integer", "minimum": 5000, "maximum": 500000000 },
-        "tiedCapital": { "type": "integer", "minimum": 10000, "maximum": 2000000000 },
-        "spendAnnual": { "type": "integer", "minimum": 10000, "maximum": 1000000000 },
-        "lostOutputMonthly": { "type": "integer", "minimum": 5000, "maximum": 200000000 }
+        "opsPeople": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "opsHoursPerDay": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 8
+        },
+        "opsSalary": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 60000
+        },
+        "errorFreqMonthly": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 200
+        },
+        "errorCostPerCase": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 500000
+        },
+        "dealsMonthly": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 100000
+        },
+        "dealValue": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 20000000
+        },
+        "grossMargin": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 0.8
+        },
+        "relatedRevenueMonthly": {
+          "type": "integer",
+          "minimum": 5000,
+          "maximum": 500000000
+        },
+        "tiedCapital": {
+          "type": "integer",
+          "minimum": 10000,
+          "maximum": 2000000000
+        },
+        "spendAnnual": {
+          "type": "integer",
+          "minimum": 10000,
+          "maximum": 1000000000
+        },
+        "lostOutputMonthly": {
+          "type": "integer",
+          "minimum": 5000,
+          "maximum": 200000000
+        }
       }
     }
   }

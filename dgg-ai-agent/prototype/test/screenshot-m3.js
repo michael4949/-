@@ -51,9 +51,9 @@ function pdfPages(f) { return (fs.readFileSync(f).toString('latin1').match(/\/Ty
     await page.waitForTimeout(80);
   };
   await pickOpt('高级版');
-  await setNum('订阅套数', S1.plan.seats);
-  await pickOpt('1 天');
-  await setNum('另议项预算', S1.plan.customBudget);
+  if (S1.plan.seats != null) await setNum('订阅套数', S1.plan.seats);
+  if (S1.plan.diagnosisDays === 1) await pickOpt('1 天');
+  if (S1.plan.customBudget != null) await setNum('另议项预算', S1.plan.customBudget);
   await pickOpt('表格为主');
   await setNum('推进人员数', S1.plan.setupPeople);
   await setNum('推进人员平均月薪', S1.plan.setupSalary);
@@ -97,7 +97,7 @@ function pdfPages(f) { return (fs.readFileSync(f).toString('latin1').match(/\/Ty
     toc: document.querySelectorAll('.toc button').length
   }));
   console.log('报告:', JSON.stringify(info));
-  for (const n of [1, 3, 6, 8, 11, 14, 17, 20, 24]) {
+  for (const n of [1, 3, 7, 9, 11, 14, 16, 21, 28]) {
     const el = page.locator(`.report .page[data-page="${n}"]`);
     await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(120);
     await el.screenshot({ path: `${out}/land-p${String(n).padStart(2, '0')}.png` });

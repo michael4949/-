@@ -21,6 +21,7 @@ module.exports = function loadData() {
     levers: J(path.join(here, 'data', 'levers.json')),
     sceneLevers: J(path.join(here, 'data', 'scene-levers.json')),
     benchmarks: J(path.join(here, 'data', 'benchmarks.json')),
+    investmentProfile: J(path.join(here, 'data', 'investment-profile.json')),
     reportText: J(path.join(here, 'data', 'report-text.json')),
     credits: J(path.join(shared, 'credits.json')),
     lintWords: J(path.join(shared, 'lint-words.json')),
