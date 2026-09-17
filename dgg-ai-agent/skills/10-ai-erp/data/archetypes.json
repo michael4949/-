@@ -1,0 +1,182 @@
+{
+  "note": "AI ERP 的指挥室骨架不变，按四种业态原型换对象名与核心交互。行业大类 → 原型的映射在 map；每个原型的词表在 vocab；insert 是第 4 屏核心交互的名称与三个方案的叫法。",
+  "map": {
+    "mfg": "make",
+    "agri": "make",
+    "energy": "make",
+    "trade": "flow",
+    "logi": "flow",
+    "life": "flow",
+    "med": "flow",
+    "build": "project",
+    "tech": "project",
+    "media": "project",
+    "edu": "service",
+    "fin": "service",
+    "other": "service"
+  },
+  "vocab": {
+    "make": {
+      "room": "订单交付指挥室",
+      "order": "生产订单",
+      "orders": "在手订单",
+      "op": "工序",
+      "ops": "工序路线",
+      "line": "产线",
+      "lines": "产线负荷",
+      "material": "物料",
+      "materials": "物料与库存",
+      "customer": "客户",
+      "product": "产品",
+      "qty": "数量",
+      "qtyUnit": "件",
+      "due": "交期",
+      "finish": "预计完工",
+      "progress": "工序进度",
+      "insert": "插单模拟",
+      "insertNoun": "加急订单",
+      "strategies": {
+        "A": "优先插队",
+        "B": "末尾排队",
+        "C": "拆分并行 + 加班"
+      },
+      "actions": {
+        "expedite": "催料",
+        "reroute": "调线",
+        "overtime": "加班",
+        "reschedule": "改期"
+      },
+      "purchase": "采购建议",
+      "supplier": "供应商",
+      "daily": "交付日报",
+      "handler": "生产计划员",
+      "counter": "张"
+    },
+    "flow": {
+      "room": "订单履约指挥室",
+      "order": "订单",
+      "orders": "在途订单",
+      "op": "环节",
+      "ops": "履约环节",
+      "line": "作业区",
+      "lines": "作业负荷",
+      "material": "商品",
+      "materials": "商品与库存",
+      "customer": "客户",
+      "product": "商品",
+      "qty": "数量",
+      "qtyUnit": "件",
+      "due": "承诺送达",
+      "finish": "预计送达",
+      "progress": "履约进度",
+      "insert": "加急与调拨",
+      "insertNoun": "加急订单",
+      "strategies": {
+        "A": "优先发运",
+        "B": "顺序排队",
+        "C": "跨仓调拨 + 加班"
+      },
+      "actions": {
+        "expedite": "催货",
+        "reroute": "调仓",
+        "overtime": "加班",
+        "reschedule": "改约"
+      },
+      "purchase": "补货建议",
+      "supplier": "供应商",
+      "daily": "履约日报",
+      "handler": "订单专员",
+      "counter": "张"
+    },
+    "project": {
+      "room": "项目交付指挥室",
+      "order": "项目",
+      "orders": "在建项目",
+      "op": "节点",
+      "ops": "里程碑",
+      "line": "班组",
+      "lines": "班组负荷",
+      "material": "资源",
+      "materials": "资源与人天",
+      "customer": "业主",
+      "product": "交付物",
+      "qty": "工作量",
+      "qtyUnit": "人天",
+      "due": "合同工期",
+      "finish": "预计完工",
+      "progress": "节点进度",
+      "insert": "插项目与资源调配",
+      "insertNoun": "新增项目",
+      "strategies": {
+        "A": "优先投入",
+        "B": "顺序排队",
+        "C": "拆分并行 + 增员"
+      },
+      "actions": {
+        "expedite": "催资源",
+        "reroute": "调班组",
+        "overtime": "赶工",
+        "reschedule": "调整工期"
+      },
+      "purchase": "资源调配建议",
+      "supplier": "分包方",
+      "daily": "项目日报",
+      "handler": "项目经理",
+      "counter": "个"
+    },
+    "service": {
+      "room": "服务排期指挥室",
+      "order": "服务单",
+      "orders": "在办服务",
+      "op": "环节",
+      "ops": "服务环节",
+      "line": "小组",
+      "lines": "小组负荷",
+      "material": "资源",
+      "materials": "资源与排期",
+      "customer": "客户",
+      "product": "服务项目",
+      "qty": "工作量",
+      "qtyUnit": "工时",
+      "due": "承诺完成",
+      "finish": "预计完成",
+      "progress": "办理进度",
+      "insert": "改约与重排",
+      "insertNoun": "加急服务单",
+      "strategies": {
+        "A": "优先安排",
+        "B": "顺序排队",
+        "C": "拆分并行 + 增派"
+      },
+      "actions": {
+        "expedite": "催材料",
+        "reroute": "调小组",
+        "overtime": "加班",
+        "reschedule": "改约"
+      },
+      "purchase": "资源增补建议",
+      "supplier": "协作方",
+      "daily": "服务日报",
+      "handler": "服务主管",
+      "counter": "个"
+    }
+  },
+  "causes": {
+    "material": {
+      "label": "缺料",
+      "desc": "开工所需物料的到货日晚于计划开工日"
+    },
+    "capacity": {
+      "label": "产能不足",
+      "desc": "工序排队等待产线，前序订单占用了产能"
+    },
+    "upstream": {
+      "label": "前道拖后",
+      "desc": "前道工序实际进度落后于计划，后道无法按时开工"
+    },
+    "none": {
+      "label": "按期",
+      "desc": "各工序均可按计划开工与完工"
+    }
+  }
+}

@@ -1,0 +1,1818 @@
+{
+  "version": "1.0.0",
+  "archetype": "flow",
+  "company": "宁波优选百货供应链有限公司",
+  "today": "2026-09-17",
+  "kpi": {
+    "total": 10,
+    "open": 9,
+    "done": 1,
+    "late": 2,
+    "risk": 6,
+    "ok": 1,
+    "handled": 0,
+    "onTimeRate": 78,
+    "load7": 61,
+    "overLines": 0,
+    "shortMaterials": 4,
+    "dueToday": 1,
+    "lateDaysTotal": 4
+  },
+  "orders": [
+    {
+      "id": "SO-2609-0868",
+      "customer": "K-088 · 区域商超",
+      "productName": "冷藏乳品组合箱",
+      "qty": 420,
+      "due": "2026-09-18",
+      "finishDate": "2026-09-21",
+      "status": "late",
+      "riskReason": null,
+      "cause": "material",
+      "lateDays": 3,
+      "kitRate": 0.67,
+      "waitMaterial": 0.7,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 9.8
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 1,
+          "remain": 4.4
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 2,
+          "remain": 6.6
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 3.9
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0871",
+      "customer": "K-102 · 连锁便利店总部",
+      "productName": "常温饮料组合箱",
+      "qty": 900,
+      "due": "2026-09-19",
+      "finishDate": "2026-09-19",
+      "status": "risk",
+      "riskReason": "tight",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 4.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 7.4
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 11
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 5.9
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0886",
+      "customer": "K-063 · 学校食堂配送",
+      "productName": "冷藏乳品组合箱",
+      "qty": 260,
+      "due": "2026-09-21",
+      "finishDate": "2026-09-22",
+      "status": "late",
+      "riskReason": null,
+      "cause": "material",
+      "lateDays": 1,
+      "kitRate": 0.33,
+      "waitMaterial": 3,
+      "waitCapacity": 0.4,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 4,
+          "remain": 6.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 4,
+          "remain": 2.8
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 4,
+          "remain": 4.2
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 5,
+          "endDay": 5,
+          "remain": 2.6
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0878",
+      "customer": "K-102 · 连锁便利店总部",
+      "productName": "日化用品组合箱",
+      "qty": 640,
+      "due": "2026-09-24",
+      "finishDate": "2026-09-19",
+      "status": "ok",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 1,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 6.7
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 5.3
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 1,
+          "remain": 6.6
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 2,
+          "remain": 3.7
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0866",
+      "customer": "K-063 · 学校食堂配送",
+      "productName": "常温饮料组合箱",
+      "qty": 300,
+      "due": "2026-09-17",
+      "finishDate": "2026-09-17",
+      "status": "done",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0875",
+      "customer": "K-117 · 社区团购平台",
+      "productName": "休闲食品组合箱",
+      "qty": 1200,
+      "due": "2026-09-22",
+      "finishDate": "2026-09-22",
+      "status": "risk",
+      "riskReason": "tight",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0.5,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 18.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 12.2
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 14.6
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 5,
+          "remain": 7.7
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0880",
+      "customer": "K-131 · 餐饮连锁",
+      "productName": "冷藏乳品组合箱",
+      "qty": 380,
+      "due": "2026-09-23",
+      "finishDate": "2026-09-23",
+      "status": "risk",
+      "riskReason": "tight",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.33,
+      "waitMaterial": 3,
+      "waitCapacity": 0.3,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 5,
+          "remain": 8.9
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 5,
+          "endDay": 5,
+          "remain": 4
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 5,
+          "endDay": 6,
+          "remain": 6
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 6,
+          "remain": 3.5
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0882",
+      "customer": "K-088 · 区域商超",
+      "productName": "休闲食品组合箱",
+      "qty": 800,
+      "due": "2026-09-26",
+      "finishDate": "2026-09-25",
+      "status": "risk",
+      "riskReason": "unordered",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 5,
+      "waitCapacity": 0.4,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 6,
+          "remain": 12.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 7,
+          "remain": 8.2
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 7,
+          "remain": 9.8
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 8,
+          "remain": 5.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0885",
+      "customer": "K-117 · 社区团购平台",
+      "productName": "常温饮料组合箱",
+      "qty": 1500,
+      "due": "2026-09-29",
+      "finishDate": "2026-09-24",
+      "status": "risk",
+      "riskReason": "unordered",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 0,
+      "waitCapacity": 1.6,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 18.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 12.2
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 6,
+          "remain": 18.2
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 7,
+          "remain": 9.5
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0884",
+      "customer": "K-145 · 企业福利采购",
+      "productName": "日化用品组合箱",
+      "qty": 500,
+      "due": "2026-09-25",
+      "finishDate": "2026-09-24",
+      "status": "risk",
+      "riskReason": "unordered",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.33,
+      "waitMaterial": 0,
+      "waitCapacity": 5,
+      "ops": [
+        {
+          "op": "拣货",
+          "line": "A1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 5.3
+        },
+        {
+          "op": "复核",
+          "line": "C1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 5,
+          "remain": 4.2
+        },
+        {
+          "op": "打包",
+          "line": "P1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 6,
+          "remain": 5.2
+        },
+        {
+          "op": "装车发运",
+          "line": "D1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 7,
+          "remain": 3
+        }
+      ]
+    }
+  ],
+  "lines": [
+    {
+      "id": "A1",
+      "name": "拣货区 A（常温）",
+      "load7": 68,
+      "loadHorizon": 23,
+      "status": "ok"
+    },
+    {
+      "id": "A2",
+      "name": "拣货区 B（冷链）",
+      "load7": 52,
+      "loadHorizon": 17,
+      "status": "ok"
+    },
+    {
+      "id": "C1",
+      "name": "复核台",
+      "load7": 59,
+      "loadHorizon": 21,
+      "status": "ok"
+    },
+    {
+      "id": "P1",
+      "name": "打包台",
+      "load7": 75,
+      "loadHorizon": 29,
+      "status": "ok"
+    },
+    {
+      "id": "D1",
+      "name": "发运月台",
+      "load7": 51,
+      "loadHorizon": 25,
+      "status": "ok"
+    }
+  ],
+  "focus": {
+    "orderId": "SO-2609-0868",
+    "explain": {
+      "cause": "material",
+      "label": "缺料",
+      "desc": "开工所需物料的到货日晚于可开工日",
+      "seen": [
+        "履约环节 4 道 · 已完成 0 道 · 当前「拣货」待开工",
+        "承诺送达 9-18 · 预计送达 9-21 · 晚 3 天",
+        "商品 保温箱 + 冰袋 需 420 套 · 可用库存 180 套 · 在途 PO-2609-119 9-19 到货，分配 240 套"
+      ],
+      "reasons": [
+        "物料 保温箱 + 冰袋 齐备日 9-19，晚于可开工日，后续 环节整体后移 0.7 天"
+      ]
+    },
+    "actions": [
+      {
+        "key": "expedite",
+        "label": "催货",
+        "desc": "与冷链耗材协商 PO-2609-119 提前到 9-18 到货",
+        "cost": 312,
+        "rank": 1,
+        "advised": true,
+        "effect": {
+          "finishBefore": "9-21",
+          "finishAfter": "9-19",
+          "finishBeforeDay": 4,
+          "finishAfterDay": 2,
+          "lateBefore": 3,
+          "lateAfter": 1,
+          "gain": 2,
+          "meetsDue": false,
+          "affected": 1,
+          "newlyLate": 0,
+          "rows": [
+            {
+              "id": "SO-2609-0878",
+              "customer": "K-102 · 连锁便利店总部",
+              "before": "9-19",
+              "after": "9-21",
+              "beforeDay": 2,
+              "afterDay": 4,
+              "delta": 2,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "ok",
+              "statusAfter": "ok"
+            }
+          ]
+        }
+      },
+      {
+        "key": "overtime",
+        "label": "加班",
+        "desc": "拣货区 B（冷链） 未来 7 个工作日每天加班 3 小时",
+        "cost": 2527,
+        "rank": 2,
+        "advised": false,
+        "effect": {
+          "finishBefore": "9-21",
+          "finishAfter": "9-21",
+          "finishBeforeDay": 4,
+          "finishAfterDay": 4,
+          "lateBefore": 3,
+          "lateAfter": 3,
+          "gain": 0,
+          "meetsDue": false,
+          "affected": 1,
+          "newlyLate": 0,
+          "rows": [
+            {
+              "id": "SO-2609-0878",
+              "customer": "K-102 · 连锁便利店总部",
+              "before": "9-19",
+              "after": "9-21",
+              "beforeDay": 2,
+              "afterDay": 4,
+              "delta": 2,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "ok",
+              "statusAfter": "ok"
+            }
+          ]
+        }
+      },
+      {
+        "key": "reroute",
+        "label": "调仓",
+        "desc": "「拣货」由 拣货区 B（冷链） 改到 拣货区 A（常温）",
+        "cost": 0,
+        "rank": 3,
+        "advised": false,
+        "effect": {
+          "finishBefore": "9-21",
+          "finishAfter": "9-21",
+          "finishBeforeDay": 4,
+          "finishAfterDay": 4,
+          "lateBefore": 3,
+          "lateAfter": 3,
+          "gain": 0,
+          "meetsDue": false,
+          "affected": 2,
+          "newlyLate": 1,
+          "rows": [
+            {
+              "id": "SO-2609-0875",
+              "customer": "K-117 · 社区团购平台",
+              "before": "9-22",
+              "after": "9-23",
+              "beforeDay": 5,
+              "afterDay": 6,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 1,
+              "turnsLate": true,
+              "turnsOk": false,
+              "statusBefore": "risk",
+              "statusAfter": "late"
+            },
+            {
+              "id": "SO-2609-0884",
+              "customer": "K-145 · 企业福利采购",
+              "before": "9-24",
+              "after": "9-25",
+              "beforeDay": 7,
+              "afterDay": 8,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "risk",
+              "statusAfter": "risk"
+            }
+          ]
+        }
+      },
+      {
+        "key": "reschedule",
+        "label": "改约",
+        "desc": "与 K-088 · 区域商超 改约到 9-22",
+        "cost": 0,
+        "rank": 4,
+        "advised": false,
+        "effect": {
+          "finishBefore": "9-21",
+          "finishAfter": "9-23",
+          "finishBeforeDay": 4,
+          "finishAfterDay": 6,
+          "lateBefore": 3,
+          "lateAfter": 1,
+          "gain": -2,
+          "meetsDue": false,
+          "affected": 2,
+          "newlyLate": 1,
+          "rows": [
+            {
+              "id": "SO-2609-0880",
+              "customer": "K-131 · 餐饮连锁",
+              "before": "9-23",
+              "after": "9-24",
+              "beforeDay": 6,
+              "afterDay": 7,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 1,
+              "turnsLate": true,
+              "turnsOk": false,
+              "statusBefore": "risk",
+              "statusAfter": "late"
+            },
+            {
+              "id": "SO-2609-0884",
+              "customer": "K-145 · 企业福利采购",
+              "before": "9-24",
+              "after": "9-25",
+              "beforeDay": 7,
+              "afterDay": 8,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "risk",
+              "statusAfter": "risk"
+            },
+            {
+              "id": "SO-2609-0886",
+              "customer": "K-063 · 学校食堂配送",
+              "before": "9-22",
+              "after": "9-19",
+              "beforeDay": 5,
+              "afterDay": 2,
+              "delta": -3,
+              "lateBefore": 1,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": true,
+              "statusBefore": "late",
+              "statusAfter": "risk"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "insert": {
+    "request": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G02",
+      "qty": 600,
+      "due": "2026-09-20",
+      "note": "门店促销临时补货"
+    },
+    "options": [
+      {
+        "key": "A",
+        "name": "优先发运",
+        "orderId": "SO-2609-0887",
+        "finishLabel": "9-19",
+        "finishDay": 2,
+        "lateDays": 0,
+        "meetsDue": true,
+        "affected": 4,
+        "newlyLate": 2,
+        "delayDaysTotal": 6,
+        "cost": 0,
+        "notes": [],
+        "rows": [
+          {
+            "id": "SO-2609-0871",
+            "customer": "K-102 · 连锁便利店总部",
+            "before": "9-19",
+            "after": "9-21",
+            "beforeDay": 2,
+            "afterDay": 4,
+            "delta": 2,
+            "lateBefore": 0,
+            "lateAfter": 2,
+            "turnsLate": true,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "late"
+          },
+          {
+            "id": "SO-2609-0878",
+            "customer": "K-102 · 连锁便利店总部",
+            "before": "9-19",
+            "after": "9-21",
+            "beforeDay": 2,
+            "afterDay": 4,
+            "delta": 2,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0875",
+            "customer": "K-117 · 社区团购平台",
+            "before": "9-22",
+            "after": "9-23",
+            "beforeDay": 5,
+            "afterDay": 6,
+            "delta": 1,
+            "lateBefore": 0,
+            "lateAfter": 1,
+            "turnsLate": true,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "late"
+          },
+          {
+            "id": "SO-2609-0884",
+            "customer": "K-145 · 企业福利采购",
+            "before": "9-24",
+            "after": "9-25",
+            "beforeDay": 7,
+            "afterDay": 8,
+            "delta": 1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "risk"
+          }
+        ],
+        "ops": [
+          {
+            "op": "拣货",
+            "part": "",
+            "line": "A1",
+            "lineName": "拣货区 A（常温）",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 9.3,
+            "setup": 0.3,
+            "startF": 0.18,
+            "endF": 0.568,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0.2,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "S02",
+                "name": "休闲食品",
+                "unit": "箱",
+                "need": 600,
+                "fromStock": 600,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 4.3,
+                "to": 13.6
+              }
+            ]
+          },
+          {
+            "op": "复核",
+            "part": "",
+            "line": "C1",
+            "lineName": "复核台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 6,
+            "remain": 6.2,
+            "setup": 0.2,
+            "startF": 0.568,
+            "endF": 1.159,
+            "startDay": 0,
+            "endDay": 1,
+            "startLabel": "9-17",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 13.6,
+                "to": 16
+              },
+              {
+                "d": 1,
+                "from": 0,
+                "to": 3.8
+              }
+            ]
+          },
+          {
+            "op": "打包",
+            "part": "",
+            "line": "P1",
+            "lineName": "打包台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 7.2,
+            "remain": 7.4,
+            "setup": 0.2,
+            "startF": 1.159,
+            "endF": 1.4680000000000002,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S07",
+                "name": "周转纸箱",
+                "unit": "个",
+                "need": 600,
+                "fromStock": 600,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 3.8,
+                "to": 11.2
+              }
+            ]
+          },
+          {
+            "op": "装车发运",
+            "part": "",
+            "line": "D1",
+            "lineName": "发运月台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3.6,
+            "remain": 4.1,
+            "setup": 0.5,
+            "startF": 2,
+            "endF": 2.171,
+            "startDay": 2,
+            "endDay": 2,
+            "startLabel": "9-19",
+            "endLabel": "9-19",
+            "waitMaterial": 0,
+            "waitCapacity": 0.5,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S08",
+                "name": "托盘与缠绕膜",
+                "unit": "托",
+                "need": 30,
+                "fromStock": 30,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 2,
+                "from": 0,
+                "to": 4.1
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 11,
+          "open": 10,
+          "done": 1,
+          "late": 4,
+          "risk": 4,
+          "ok": 2,
+          "handled": 0,
+          "onTimeRate": 60,
+          "load7": 66,
+          "overLines": 0,
+          "shortMaterials": 4,
+          "dueToday": 1,
+          "lateDaysTotal": 7
+        }
+      },
+      {
+        "key": "B",
+        "name": "顺序排队",
+        "orderId": "SO-2609-0887",
+        "finishLabel": "9-25",
+        "finishDay": 8,
+        "lateDays": 5,
+        "meetsDue": false,
+        "affected": 0,
+        "newlyLate": 0,
+        "delayDaysTotal": 0,
+        "cost": 0,
+        "notes": [],
+        "rows": [],
+        "ops": [
+          {
+            "op": "拣货",
+            "part": "",
+            "line": "A1",
+            "lineName": "拣货区 A（常温）",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 9.3,
+            "setup": 0.3,
+            "startF": 6.513,
+            "endF": 7.233,
+            "startDay": 6,
+            "endDay": 7,
+            "startLabel": "9-23",
+            "endLabel": "9-24",
+            "waitMaterial": 5,
+            "waitCapacity": 0.5,
+            "matReady": 6,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "S02",
+                "name": "休闲食品",
+                "unit": "箱",
+                "need": 600,
+                "fromStock": 0,
+                "fromPO": [],
+                "ready": 6,
+                "readyLabel": "9-23",
+                "assumed": true,
+                "short": 600
+              }
+            ],
+            "segs": [
+              {
+                "d": 6,
+                "from": 12.3,
+                "to": 16
+              },
+              {
+                "d": 7,
+                "from": 0,
+                "to": 5.6
+              }
+            ]
+          },
+          {
+            "op": "复核",
+            "part": "",
+            "line": "C1",
+            "lineName": "复核台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 6,
+            "remain": 6.2,
+            "setup": 0.2,
+            "startF": 7.233,
+            "endF": 7.492000000000001,
+            "startDay": 7,
+            "endDay": 7,
+            "startLabel": "9-24",
+            "endLabel": "9-24",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 7,
+                "from": 5.6,
+                "to": 11.8
+              }
+            ]
+          },
+          {
+            "op": "打包",
+            "part": "",
+            "line": "P1",
+            "lineName": "打包台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 7.2,
+            "remain": 7.4,
+            "setup": 0.2,
+            "startF": 7.596,
+            "endF": 8.238,
+            "startDay": 7,
+            "endDay": 8,
+            "startLabel": "9-24",
+            "endLabel": "9-25",
+            "waitMaterial": 0,
+            "waitCapacity": 0.1,
+            "matReady": 3,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "S07",
+                "name": "周转纸箱",
+                "unit": "个",
+                "need": 600,
+                "fromStock": 0,
+                "fromPO": [],
+                "ready": 3,
+                "readyLabel": "9-20",
+                "assumed": true,
+                "short": 600
+              }
+            ],
+            "segs": [
+              {
+                "d": 7,
+                "from": 14.3,
+                "to": 16
+              },
+              {
+                "d": 8,
+                "from": 0,
+                "to": 5.7
+              }
+            ]
+          },
+          {
+            "op": "装车发运",
+            "part": "",
+            "line": "D1",
+            "lineName": "发运月台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3.6,
+            "remain": 4.1,
+            "setup": 0.5,
+            "startF": 8.238,
+            "endF": 8.408,
+            "startDay": 8,
+            "endDay": 8,
+            "startLabel": "9-25",
+            "endLabel": "9-25",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 4,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S08",
+                "name": "托盘与缠绕膜",
+                "unit": "托",
+                "need": 30,
+                "fromStock": 0,
+                "fromPO": [],
+                "ready": 4,
+                "readyLabel": "9-21",
+                "assumed": true,
+                "short": 30
+              }
+            ],
+            "segs": [
+              {
+                "d": 8,
+                "from": 5.7,
+                "to": 9.8
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 11,
+          "open": 10,
+          "done": 1,
+          "late": 3,
+          "risk": 6,
+          "ok": 1,
+          "handled": 0,
+          "onTimeRate": 70,
+          "load7": 62,
+          "overLines": 0,
+          "shortMaterials": 4,
+          "dueToday": 1,
+          "lateDaysTotal": 9
+        }
+      },
+      {
+        "key": "C",
+        "name": "跨仓调拨 + 加班",
+        "orderId": "SO-2609-0887",
+        "finishLabel": "9-18",
+        "finishDay": 1,
+        "lateDays": 0,
+        "meetsDue": true,
+        "affected": 1,
+        "newlyLate": 0,
+        "delayDaysTotal": 2,
+        "cost": 9266,
+        "notes": [
+          "「拣货」分到 拣货区 A（常温） 与 拣货区 B（冷链） 并行",
+          "拣货区 A（常温）、打包台 未来 7 个工作日每天加班 3 小时"
+        ],
+        "rows": [
+          {
+            "id": "SO-2609-0878",
+            "customer": "K-102 · 连锁便利店总部",
+            "before": "9-19",
+            "after": "9-21",
+            "beforeDay": 2,
+            "afterDay": 4,
+            "delta": 2,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          }
+        ],
+        "ops": [
+          {
+            "op": "拣货",
+            "part": "A",
+            "line": "A1",
+            "lineName": "拣货区 A（常温）",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4.5,
+            "remain": 4.8,
+            "setup": 0.3,
+            "startF": 0.18,
+            "endF": 0.38,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0.2,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "S02",
+                "name": "休闲食品",
+                "unit": "箱",
+                "need": 300,
+                "fromStock": 300,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 4.3,
+                "to": 9.1
+              }
+            ]
+          },
+          {
+            "op": "复核",
+            "part": "A",
+            "line": "C1",
+            "lineName": "复核台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.2,
+            "setup": 0.2,
+            "startF": 0.38,
+            "endF": 0.513,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 9.1,
+                "to": 12.3
+              }
+            ]
+          },
+          {
+            "op": "打包",
+            "part": "A",
+            "line": "P1",
+            "lineName": "打包台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3.6,
+            "remain": 3.8,
+            "setup": 0.2,
+            "startF": 0.513,
+            "endF": 0.672,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S07",
+                "name": "周转纸箱",
+                "unit": "个",
+                "need": 300,
+                "fromStock": 300,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 12.3,
+                "to": 16.1
+              }
+            ]
+          },
+          {
+            "op": "装车发运",
+            "part": "A",
+            "line": "D1",
+            "lineName": "发运月台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.8,
+            "remain": 2.3,
+            "setup": 0.5,
+            "startF": 1,
+            "endF": 1.0959999999999999,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0.3,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S08",
+                "name": "托盘与缠绕膜",
+                "unit": "托",
+                "need": 15,
+                "fromStock": 15,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 0,
+                "to": 2.3
+              }
+            ]
+          },
+          {
+            "op": "拣货",
+            "part": "B",
+            "line": "A2",
+            "lineName": "拣货区 B（冷链）",
+            "rerouted": true,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 5,
+            "remain": 5.3,
+            "setup": 0.3,
+            "startF": 0,
+            "endF": 0.221,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S02",
+                "name": "休闲食品",
+                "unit": "箱",
+                "need": 300,
+                "fromStock": 300,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 0,
+                "to": 5.3
+              }
+            ]
+          },
+          {
+            "op": "复核",
+            "part": "B",
+            "line": "C1",
+            "lineName": "复核台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.2,
+            "setup": 0.2,
+            "startF": 0.221,
+            "endF": 0.354,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 5.3,
+                "to": 8.5
+              }
+            ]
+          },
+          {
+            "op": "打包",
+            "part": "B",
+            "line": "P1",
+            "lineName": "打包台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3.6,
+            "remain": 3.8,
+            "setup": 0.2,
+            "startF": 0.354,
+            "endF": 0.513,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "S07",
+                "name": "周转纸箱",
+                "unit": "个",
+                "need": 300,
+                "fromStock": 300,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 8.5,
+                "to": 12.3
+              }
+            ]
+          },
+          {
+            "op": "装车发运",
+            "part": "B",
+            "line": "D1",
+            "lineName": "发运月台",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.8,
+            "remain": 2.3,
+            "setup": 0.5,
+            "startF": 1.0959999999999999,
+            "endF": 1.192,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0.6,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "S08",
+                "name": "托盘与缠绕膜",
+                "unit": "托",
+                "need": 15,
+                "fromStock": 15,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 2.3,
+                "to": 4.6
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 11,
+          "open": 10,
+          "done": 1,
+          "late": 2,
+          "risk": 6,
+          "ok": 2,
+          "handled": 0,
+          "onTimeRate": 80,
+          "load7": 65,
+          "overLines": 0,
+          "shortMaterials": 4,
+          "dueToday": 1,
+          "lateDaysTotal": 4
+        }
+      }
+    ],
+    "recommend": "C",
+    "reason": "跨仓调拨 + 加班能按期交付且不让任何订单转为延期，代价是加班费 9,266 元"
+  },
+  "purchase": {
+    "summary": {
+      "short": 4,
+      "safety": 2,
+      "watch": 1,
+      "buy": 6,
+      "amount": 195160,
+      "slow": 2,
+      "slowCapital": 142720,
+      "overdue": 2
+    },
+    "items": [
+      {
+        "id": "S02",
+        "name": "休闲食品",
+        "urgency": "short",
+        "suggestQty": 1300,
+        "unit": "箱",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 80600,
+        "reason": "按排程 9-23 出现缺口，SO-2609-0875 9-17 需 1,200 箱；提前期 6 天，今日下单刚好赶上"
+      },
+      {
+        "id": "S07",
+        "name": "周转纸箱",
+        "urgency": "short",
+        "suggestQty": 3500,
+        "unit": "个",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 14700,
+        "reason": "按排程 9-24 出现缺口，SO-2609-0871 9-17 需 900 个；提前期 3 天，今日下单刚好赶上"
+      },
+      {
+        "id": "S08",
+        "name": "托盘与缠绕膜",
+        "urgency": "short",
+        "suggestQty": 220,
+        "unit": "托",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 8360,
+        "reason": "按排程 9-23 出现缺口，SO-2609-0871 9-18 需 45 托；提前期 4 天，今日下单刚好赶上"
+      },
+      {
+        "id": "S09",
+        "name": "保温箱 + 冰袋",
+        "urgency": "short",
+        "suggestQty": 700,
+        "unit": "套",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 18200,
+        "reason": "按排程 9-21 出现缺口，SO-2609-0868 9-19 需 420 套；提前期 4 天，今日下单刚好赶上"
+      },
+      {
+        "id": "S04",
+        "name": "日化用品",
+        "urgency": "safety",
+        "suggestQty": 500,
+        "unit": "箱",
+        "latestOrderLabel": "今日",
+        "overdue": true,
+        "amount": 47500,
+        "reason": "9-19 起低于安全库存 800 箱，提前期 7 天，按提前期本应更早下单，建议今日补单"
+      },
+      {
+        "id": "S03",
+        "name": "冷藏乳品",
+        "urgency": "safety",
+        "suggestQty": 300,
+        "unit": "箱",
+        "latestOrderLabel": "今日",
+        "overdue": true,
+        "amount": 25800,
+        "reason": "9-17 起低于安全库存 400 箱，提前期 3 天，按提前期本应更早下单，建议今日补单"
+      },
+      {
+        "id": "S01",
+        "name": "常温饮料",
+        "urgency": "watch",
+        "suggestQty": 0,
+        "unit": "箱",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 0,
+        "reason": "9-18 起低于安全库存，在途 PO-2609-118 9-22 到 2,000 箱 后回补，暂不下单"
+      }
+    ],
+    "slow": [
+      {
+        "id": "S05",
+        "name": "进口零食",
+        "unit": "箱",
+        "stock": 640,
+        "daysCover": 213,
+        "capital": 81920,
+        "reason": "库存可用 213 天且排程内无需求，占用资金 81,920 元"
+      },
+      {
+        "id": "S06",
+        "name": "节庆礼盒",
+        "unit": "箱",
+        "stock": 380,
+        "daysCover": 253,
+        "capital": 60800,
+        "reason": "库存可用 253 天且排程内无需求，占用资金 60,800 元"
+      }
+    ],
+    "po": [
+      {
+        "supplier": "华东食品分销",
+        "amount": 80600,
+        "lines": 1
+      },
+      {
+        "supplier": "日化品牌总代",
+        "amount": 47500,
+        "lines": 1
+      },
+      {
+        "supplier": "乳企直供",
+        "amount": 25800,
+        "lines": 1
+      },
+      {
+        "supplier": "冷链耗材",
+        "amount": 18200,
+        "lines": 1
+      },
+      {
+        "supplier": "本地纸箱厂",
+        "amount": 14700,
+        "lines": 1
+      },
+      {
+        "supplier": "本地包材",
+        "amount": 8360,
+        "lines": 1
+      }
+    ]
+  },
+  "daily": {
+    "kpi": {
+      "total": 10,
+      "open": 9,
+      "done": 1,
+      "late": 2,
+      "risk": 6,
+      "ok": 1,
+      "handled": 0,
+      "onTimeRate": 78,
+      "load7": 61,
+      "overLines": 0,
+      "shortMaterials": 4,
+      "dueToday": 1,
+      "lateDaysTotal": 4
+    },
+    "text": "【履约日报】2026.09.17 周四\n在途订单 9 张：按期 7 · 风险 6 · 延期 2（按期率 78%）\n今日交付：SO-2609-0866 K-063 · 学校食堂配送\n风险订单：SO-2609-0868 缺料 晚 3 天；SO-2609-0886 缺料 晚 1 天；SO-2609-0871 按期；SO-2609-0875 按期；SO-2609-0880 按期\n补货建议：缺口 4 项 · 低于安全库存 2 项 · 建议下单 6 项 合计 195,160 元 · 2 项已错过最晚下单日\n明日提醒：SO-2609-0868 K-088 · 区域商超 明日到期，预计 9-21 完工；SO-2609-0868 「复核」明日在 复核台 开工；SO-2609-0871 「装车发运」明日在 发运月台 开工；SO-2609-0878 「打包」明日在 打包台 开工；SO-2609-0875 「复核」明日在 复核台 开工；SO-2609-0885 「拣货」明日在 拣货区 A（常温） 开工\n作业负荷：拣货区 A（常温） 68% · 拣货区 B（冷链） 52% · 复核台 59% · 打包台 75% · 发运月台 51%"
+  }
+}

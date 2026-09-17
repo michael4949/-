@@ -1,0 +1,2426 @@
+{
+  "version": "1.0.0",
+  "archetype": "make",
+  "company": "杭州锐合精密五金有限公司",
+  "today": "2026-09-17",
+  "kpi": {
+    "total": 15,
+    "open": 13,
+    "done": 2,
+    "late": 4,
+    "risk": 5,
+    "ok": 4,
+    "handled": 0,
+    "onTimeRate": 69,
+    "load7": 60,
+    "overLines": 2,
+    "shortMaterials": 1,
+    "dueToday": 1,
+    "lateDaysTotal": 15
+  },
+  "orders": [
+    {
+      "id": "SO-2609-0129",
+      "customer": "K-009 · 医疗器械配件商",
+      "productName": "螺纹套 M10×1.5",
+      "qty": 30000,
+      "due": "2026-09-19",
+      "finishDate": "2026-09-26",
+      "status": "late",
+      "riskReason": null,
+      "cause": "upstream",
+      "lateDays": 7,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "车削",
+          "line": "L8",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 4,
+          "remain": 31.8
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 8,
+          "remain": 30.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 9,
+          "remain": 12.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0138",
+      "customer": "K-003 · 家电整机厂",
+      "productName": "冲压支架 ZJ-210",
+      "qty": 12000,
+      "due": "2026-09-23",
+      "finishDate": "2026-09-21",
+      "status": "risk",
+      "riskReason": "waiting",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 0.7,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 4.3
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 19
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 18.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 4,
+          "remain": 6.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0142",
+      "customer": "K-017 · 汽配一级供应商",
+      "productName": "精密五金件 Ø12×45",
+      "qty": 12000,
+      "due": "2026-09-25",
+      "finishDate": "2026-09-26",
+      "status": "late",
+      "riskReason": null,
+      "cause": "material",
+      "lateDays": 1,
+      "kitRate": 0.67,
+      "waitMaterial": 2.9,
+      "waitCapacity": 1.2,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 13.5
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 4,
+          "remain": 18.5
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 8,
+          "remain": 25
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 9,
+          "remain": 6.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0159",
+      "customer": "K-009 · 医疗器械配件商",
+      "productName": "精密五金件 Ø8×30",
+      "qty": 6000,
+      "due": "2026-09-26",
+      "finishDate": "2026-09-26",
+      "status": "risk",
+      "riskReason": "tight",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 3.5,
+      "waitCapacity": 3,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 4.1
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 13
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 9,
+          "remain": 10
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 9,
+          "remain": 2.7
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0155",
+      "customer": "K-017 · 汽配一级供应商",
+      "productName": "精密五金件 Ø8×30",
+      "qty": 20000,
+      "due": "2026-10-05",
+      "finishDate": "2026-09-29",
+      "status": "risk",
+      "riskReason": "unordered",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 0.8,
+      "waitCapacity": 3.7,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 12.5
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 6,
+          "remain": 41
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 12,
+          "remain": 31
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 12,
+          "endDay": 12,
+          "remain": 8.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0133",
+      "customer": "K-031 · 出口贸易公司",
+      "productName": "精密五金件 Ø8×30",
+      "qty": 8000,
+      "due": "2026-09-17",
+      "finishDate": "2026-09-17",
+      "status": "done",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0135",
+      "customer": "K-005 · 卫浴五金品牌",
+      "productName": "弹簧片 TP-05",
+      "qty": 40000,
+      "due": "2026-09-18",
+      "finishDate": "2026-09-17",
+      "status": "done",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0151",
+      "customer": "K-022 · 电动工具制造商",
+      "productName": "铝合金外壳 AL-77",
+      "qty": 6000,
+      "due": "2026-09-24",
+      "finishDate": "2026-09-22",
+      "status": "ok",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": true,
+          "inProgress": false,
+          "startDay": null,
+          "endDay": null,
+          "remain": 0
+        },
+        {
+          "op": "铣削",
+          "line": "L4",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 16.8
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 5,
+          "remain": 15.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 5,
+          "endDay": 5,
+          "remain": 5.1
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0156",
+      "customer": "K-026 · 电机制造商",
+      "productName": "螺纹套 M10×1.5",
+      "qty": 18000,
+      "due": "2026-09-28",
+      "finishDate": "2026-09-30",
+      "status": "late",
+      "riskReason": null,
+      "cause": "capacity",
+      "lateDays": 2,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 3.2,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 1,
+          "remain": 9.5
+        },
+        {
+          "op": "车削",
+          "line": "L8",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 9,
+          "remain": 32.8
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 12,
+          "remain": 18.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 12,
+          "endDay": 13,
+          "remain": 7.5
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0149",
+      "customer": "K-018 · 智能门锁厂商",
+      "productName": "冲压支架 ZJ-210",
+      "qty": 15000,
+      "due": "2026-09-29",
+      "finishDate": "2026-09-24",
+      "status": "ok",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.67,
+      "waitMaterial": 0,
+      "waitCapacity": 1.9,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": true,
+          "startDay": 0,
+          "endDay": 0,
+          "remain": 3
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 0,
+          "endDay": 1,
+          "remain": 20
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 23.5
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 5,
+          "endDay": 7,
+          "remain": 23
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 7,
+          "remain": 7.8
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0147",
+      "customer": "K-012 · 新能源电池壳体厂",
+      "productName": "铝合金外壳 AL-77",
+      "qty": 4000,
+      "due": "2026-09-30",
+      "finishDate": "2026-09-26",
+      "status": "ok",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 1,
+      "waitMaterial": 0,
+      "waitCapacity": 4.9,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 1,
+          "endDay": 2,
+          "remain": 4.5
+        },
+        {
+          "op": "铣削",
+          "line": "L4",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 7,
+          "remain": 17.5
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 8,
+          "remain": 10.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 9,
+          "remain": 3.5
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0153",
+      "customer": "K-003 · 家电整机厂",
+      "productName": "弹簧片 TP-05",
+      "qty": 60000,
+      "due": "2026-10-02",
+      "finishDate": "2026-10-07",
+      "status": "late",
+      "riskReason": null,
+      "cause": "material",
+      "lateDays": 5,
+      "kitRate": 0.67,
+      "waitMaterial": 7,
+      "waitCapacity": 0,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 9,
+          "remain": 18.5
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 13,
+          "remain": 49.5
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": false,
+          "inProgress": false,
+          "startDay": 13,
+          "endDay": 19,
+          "remain": 36.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 19,
+          "endDay": 20,
+          "remain": 18.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0160",
+      "customer": "K-005 · 卫浴五金品牌",
+      "productName": "冲压支架 ZJ-210",
+      "qty": 8000,
+      "due": "2026-10-03",
+      "finishDate": "2026-09-28",
+      "status": "ok",
+      "riskReason": null,
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.75,
+      "waitMaterial": 0,
+      "waitCapacity": 7,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 2,
+          "remain": 4.5
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 4,
+          "remain": 11.6
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 4,
+          "endDay": 4,
+          "remain": 13
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 9,
+          "endDay": 11,
+          "remain": 12.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 11,
+          "endDay": 11,
+          "remain": 4.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0158",
+      "customer": "K-031 · 出口贸易公司",
+      "productName": "精密五金件 Ø12×45",
+      "qty": 4000,
+      "due": "2026-10-06",
+      "finishDate": "2026-09-30",
+      "status": "risk",
+      "riskReason": "unordered",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.75,
+      "waitMaterial": 0,
+      "waitCapacity": 6.4,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 2,
+          "endDay": 2,
+          "remain": 3.7
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "done": false,
+          "inProgress": false,
+          "startDay": 7,
+          "endDay": 8,
+          "remain": 11
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 12,
+          "remain": 6.5
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "done": false,
+          "inProgress": false,
+          "startDay": 12,
+          "endDay": 13,
+          "remain": 9
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 13,
+          "endDay": 13,
+          "remain": 2.3
+        }
+      ]
+    },
+    {
+      "id": "SO-2609-0161",
+      "customer": "K-022 · 电动工具制造商",
+      "productName": "铝合金外壳 AL-77",
+      "qty": 3000,
+      "due": "2026-10-07",
+      "finishDate": "2026-09-30",
+      "status": "risk",
+      "riskReason": "waiting",
+      "cause": "none",
+      "lateDays": 0,
+      "kitRate": 0.75,
+      "waitMaterial": 5,
+      "waitCapacity": 3.9,
+      "ops": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "done": false,
+          "inProgress": false,
+          "startDay": 6,
+          "endDay": 6,
+          "remain": 3.5
+        },
+        {
+          "op": "铣削",
+          "line": "L4",
+          "done": false,
+          "inProgress": false,
+          "startDay": 8,
+          "endDay": 8,
+          "remain": 13.5
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 11,
+          "endDay": 13,
+          "remain": 8
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "done": false,
+          "inProgress": false,
+          "startDay": 13,
+          "endDay": 13,
+          "remain": 2.7
+        }
+      ]
+    }
+  ],
+  "lines": [
+    {
+      "id": "L1",
+      "name": "下料线",
+      "load7": 47,
+      "loadHorizon": 22,
+      "status": "ok"
+    },
+    {
+      "id": "L2",
+      "name": "冲压线 A",
+      "load7": 37,
+      "loadHorizon": 30,
+      "status": "ok"
+    },
+    {
+      "id": "L3",
+      "name": "冲压线 B",
+      "load7": 0,
+      "loadHorizon": 0,
+      "status": "ok"
+    },
+    {
+      "id": "L4",
+      "name": "CNC 车铣中心",
+      "load7": 100,
+      "loadHorizon": 44,
+      "status": "over"
+    },
+    {
+      "id": "L8",
+      "name": "CNC 车铣中心 B",
+      "load7": 100,
+      "loadHorizon": 45,
+      "status": "over"
+    },
+    {
+      "id": "L5",
+      "name": "热处理炉",
+      "load7": 72,
+      "loadHorizon": 77,
+      "status": "ok"
+    },
+    {
+      "id": "L6",
+      "name": "电镀线",
+      "load7": 58,
+      "loadHorizon": 45,
+      "status": "ok"
+    },
+    {
+      "id": "L7",
+      "name": "装配包装线",
+      "load7": 68,
+      "loadHorizon": 61,
+      "status": "ok"
+    }
+  ],
+  "focus": {
+    "orderId": "SO-2609-0129",
+    "explain": {
+      "cause": "upstream",
+      "label": "前道拖后",
+      "desc": "前道工序实际进度落后，剩余工时已装不进交期",
+      "seen": [
+        "工序路线 4 道 · 已完成 1 道 · 当前「车削」进度 40%",
+        "交期 9-19 · 预计完工 9-26 · 晚 7 天"
+      ],
+      "reasons": [
+        "剩余 74.6 小时按当前产线日历排完已超过交期，前道工序实际进度落后于计划"
+      ]
+    },
+    "actions": [
+      {
+        "key": "overtime",
+        "label": "加班",
+        "desc": "CNC 车铣中心 B 未来 7 个工作日每天加班 3 小时",
+        "cost": 1966,
+        "rank": 1,
+        "advised": true,
+        "effect": {
+          "finishBefore": "9-26",
+          "finishAfter": "9-25",
+          "finishBeforeDay": 9,
+          "finishAfterDay": 8,
+          "lateBefore": 7,
+          "lateAfter": 6,
+          "gain": 1,
+          "meetsDue": false,
+          "affected": 3,
+          "newlyLate": 0,
+          "rows": [
+            {
+              "id": "SO-2609-0142",
+              "customer": "K-017 · 汽配一级供应商",
+              "before": "9-26",
+              "after": "9-28",
+              "beforeDay": 9,
+              "afterDay": 11,
+              "delta": 2,
+              "lateBefore": 1,
+              "lateAfter": 3,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "late",
+              "statusAfter": "late"
+            },
+            {
+              "id": "SO-2609-0149",
+              "customer": "K-018 · 智能门锁厂商",
+              "before": "9-24",
+              "after": "9-25",
+              "beforeDay": 7,
+              "afterDay": 8,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "ok",
+              "statusAfter": "ok"
+            },
+            {
+              "id": "SO-2609-0160",
+              "customer": "K-005 · 卫浴五金品牌",
+              "before": "9-28",
+              "after": "9-29",
+              "beforeDay": 11,
+              "afterDay": 12,
+              "delta": 1,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "ok",
+              "statusAfter": "ok"
+            },
+            {
+              "id": "SO-2609-0159",
+              "customer": "K-009 · 医疗器械配件商",
+              "before": "9-26",
+              "after": "9-25",
+              "beforeDay": 9,
+              "afterDay": 8,
+              "delta": -1,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "risk",
+              "statusAfter": "risk"
+            },
+            {
+              "id": "SO-2609-0156",
+              "customer": "K-026 · 电机制造商",
+              "before": "9-30",
+              "after": "9-28",
+              "beforeDay": 13,
+              "afterDay": 11,
+              "delta": -2,
+              "lateBefore": 2,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": true,
+              "statusBefore": "late",
+              "statusAfter": "risk"
+            }
+          ]
+        }
+      },
+      {
+        "key": "reroute",
+        "label": "调线",
+        "desc": "「车削」剩余 60% 由 CNC 车铣中心 B 改到 CNC 车铣中心",
+        "cost": 0,
+        "rank": 2,
+        "advised": false,
+        "effect": {
+          "finishBefore": "9-26",
+          "finishAfter": "9-26",
+          "finishBeforeDay": 9,
+          "finishAfterDay": 9,
+          "lateBefore": 7,
+          "lateAfter": 7,
+          "gain": 0,
+          "meetsDue": false,
+          "affected": 1,
+          "newlyLate": 0,
+          "rows": [
+            {
+              "id": "SO-2609-0147",
+              "customer": "K-012 · 新能源电池壳体厂",
+              "before": "9-26",
+              "after": "9-28",
+              "beforeDay": 9,
+              "afterDay": 11,
+              "delta": 2,
+              "lateBefore": 0,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": false,
+              "statusBefore": "ok",
+              "statusAfter": "ok"
+            }
+          ]
+        }
+      },
+      {
+        "key": "reschedule",
+        "label": "改期",
+        "desc": "与 K-009 · 医疗器械配件商 改约到 9-27",
+        "cost": 0,
+        "rank": 3,
+        "advised": false,
+        "effect": {
+          "finishBefore": "9-26",
+          "finishAfter": "9-26",
+          "finishBeforeDay": 9,
+          "finishAfterDay": 9,
+          "lateBefore": 7,
+          "lateAfter": 0,
+          "gain": 0,
+          "meetsDue": true,
+          "affected": 0,
+          "newlyLate": 0,
+          "rows": [
+            {
+              "id": "SO-2609-0142",
+              "customer": "K-017 · 汽配一级供应商",
+              "before": "9-26",
+              "after": "9-25",
+              "beforeDay": 9,
+              "afterDay": 8,
+              "delta": -1,
+              "lateBefore": 1,
+              "lateAfter": 0,
+              "turnsLate": false,
+              "turnsOk": true,
+              "statusBefore": "late",
+              "statusAfter": "risk"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "insert": {
+    "request": {
+      "customer": "K-017 · 汽配一级供应商",
+      "product": "P03",
+      "qty": 6000,
+      "due": "2026-09-24",
+      "note": "客户产线临时切换型号"
+    },
+    "options": [
+      {
+        "key": "A",
+        "name": "优先插队",
+        "orderId": "SO-2609-0162",
+        "finishLabel": "9-19",
+        "finishDay": 2,
+        "lateDays": 0,
+        "meetsDue": true,
+        "affected": 5,
+        "newlyLate": 0,
+        "delayDaysTotal": 7,
+        "cost": 0,
+        "notes": [],
+        "rows": [
+          {
+            "id": "SO-2609-0147",
+            "customer": "K-012 · 新能源电池壳体厂",
+            "before": "9-26",
+            "after": "9-28",
+            "beforeDay": 9,
+            "afterDay": 11,
+            "delta": 2,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0160",
+            "customer": "K-005 · 卫浴五金品牌",
+            "before": "9-28",
+            "after": "9-30",
+            "beforeDay": 11,
+            "afterDay": 13,
+            "delta": 2,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "risk"
+          },
+          {
+            "id": "SO-2609-0151",
+            "customer": "K-022 · 电动工具制造商",
+            "before": "9-22",
+            "after": "9-23",
+            "beforeDay": 5,
+            "afterDay": 6,
+            "delta": 1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0149",
+            "customer": "K-018 · 智能门锁厂商",
+            "before": "9-24",
+            "after": "9-25",
+            "beforeDay": 7,
+            "afterDay": 8,
+            "delta": 1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0161",
+            "customer": "K-022 · 电动工具制造商",
+            "before": "9-30",
+            "after": "10-1",
+            "beforeDay": 13,
+            "afterDay": 14,
+            "delta": 1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "risk"
+          },
+          {
+            "id": "SO-2609-0138",
+            "customer": "K-003 · 家电整机厂",
+            "before": "9-21",
+            "after": "9-21",
+            "beforeDay": 4,
+            "afterDay": 4,
+            "delta": 0,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "ok"
+          }
+        ],
+        "ops": [
+          {
+            "op": "下料",
+            "part": "",
+            "line": "L1",
+            "lineName": "下料线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.5,
+            "setup": 0.5,
+            "startF": 0.125,
+            "endF": 0.271,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0.1,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "M01",
+                "name": "冷轧钢带 SPCC",
+                "unit": "kg",
+                "need": 510,
+                "fromStock": 510,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 3,
+                "to": 6.5
+              }
+            ]
+          },
+          {
+            "op": "冲压",
+            "part": "",
+            "line": "L2",
+            "lineName": "冲压线 A",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 7.2,
+            "remain": 9.2,
+            "setup": 2,
+            "startF": 0.271,
+            "endF": 0.654,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 6.5,
+                "to": 15.7
+              }
+            ]
+          },
+          {
+            "op": "电镀",
+            "part": "",
+            "line": "L6",
+            "lineName": "电镀线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 10,
+            "setup": 1,
+            "startF": 0.654,
+            "endF": 1.4040000000000001,
+            "startDay": 0,
+            "endDay": 1,
+            "startLabel": "9-17",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M06",
+                "name": "镀锌液",
+                "unit": "L",
+                "need": 36,
+                "fromStock": 36,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 15.7,
+                "to": 16
+              },
+              {
+                "d": 1,
+                "from": 0,
+                "to": 9.7
+              }
+            ]
+          },
+          {
+            "op": "装配",
+            "part": "",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 9.5,
+            "setup": 0.5,
+            "startF": 1.4040000000000001,
+            "endF": 2.133,
+            "startDay": 1,
+            "endDay": 2,
+            "startLabel": "9-18",
+            "endLabel": "9-19",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M17",
+                "name": "螺钉 M4×10",
+                "unit": "个",
+                "need": 12000,
+                "fromStock": 12000,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 9.7,
+                "to": 16
+              },
+              {
+                "d": 2,
+                "from": 0,
+                "to": 3.2
+              }
+            ]
+          },
+          {
+            "op": "包装",
+            "part": "",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.3,
+            "setup": 0.3,
+            "startF": 2.133,
+            "endF": 2.271,
+            "startDay": 2,
+            "endDay": 2,
+            "startLabel": "9-19",
+            "endLabel": "9-19",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M12",
+                "name": "包装纸箱",
+                "unit": "个",
+                "need": 120,
+                "fromStock": 120,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 2,
+                "from": 3.2,
+                "to": 6.5
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 16,
+          "open": 14,
+          "done": 2,
+          "late": 4,
+          "risk": 5,
+          "ok": 5,
+          "handled": 0,
+          "onTimeRate": 71,
+          "load7": 64,
+          "overLines": 2,
+          "shortMaterials": 2,
+          "dueToday": 1,
+          "lateDaysTotal": 15
+        }
+      },
+      {
+        "key": "B",
+        "name": "末尾排队",
+        "orderId": "SO-2609-0162",
+        "finishLabel": "10-1",
+        "finishDay": 14,
+        "lateDays": 7,
+        "meetsDue": false,
+        "affected": 0,
+        "newlyLate": 0,
+        "delayDaysTotal": 0,
+        "cost": 0,
+        "notes": [],
+        "rows": [],
+        "ops": [
+          {
+            "op": "下料",
+            "part": "",
+            "line": "L1",
+            "lineName": "下料线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.5,
+            "setup": 0.5,
+            "startF": 2.408,
+            "endF": 2.5540000000000003,
+            "startDay": 2,
+            "endDay": 2,
+            "startLabel": "9-19",
+            "endLabel": "9-19",
+            "waitMaterial": 0,
+            "waitCapacity": 2.4,
+            "matReady": 0,
+            "queueAhead": 9,
+            "mat": [
+              {
+                "material": "M01",
+                "name": "冷轧钢带 SPCC",
+                "unit": "kg",
+                "need": 510,
+                "fromStock": 510,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 2,
+                "from": 9.8,
+                "to": 13.3
+              }
+            ]
+          },
+          {
+            "op": "冲压",
+            "part": "",
+            "line": "L2",
+            "lineName": "冲压线 A",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 7.2,
+            "remain": 9.2,
+            "setup": 2,
+            "startF": 4.071000000000001,
+            "endF": 4.454,
+            "startDay": 4,
+            "endDay": 4,
+            "startLabel": "9-21",
+            "endLabel": "9-21",
+            "waitMaterial": 0,
+            "waitCapacity": 0.5,
+            "matReady": 0,
+            "queueAhead": 2,
+            "mat": [],
+            "segs": [
+              {
+                "d": 4,
+                "from": 1.7,
+                "to": 10.9
+              }
+            ]
+          },
+          {
+            "op": "电镀",
+            "part": "",
+            "line": "L6",
+            "lineName": "电镀线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 10,
+            "setup": 1,
+            "startF": 4.613,
+            "endF": 5.3629999999999995,
+            "startDay": 4,
+            "endDay": 5,
+            "startLabel": "9-21",
+            "endLabel": "9-22",
+            "waitMaterial": 0,
+            "waitCapacity": 0.2,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "M06",
+                "name": "镀锌液",
+                "unit": "L",
+                "need": 36,
+                "fromStock": 36,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 4,
+                "from": 14.7,
+                "to": 16
+              },
+              {
+                "d": 5,
+                "from": 0,
+                "to": 8.7
+              }
+            ]
+          },
+          {
+            "op": "装配",
+            "part": "",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 9,
+            "remain": 9.5,
+            "setup": 0.5,
+            "startF": 13.475,
+            "endF": 14.204,
+            "startDay": 13,
+            "endDay": 14,
+            "startLabel": "9-30",
+            "endLabel": "10-1",
+            "waitMaterial": 0,
+            "waitCapacity": 7.1,
+            "matReady": 5,
+            "queueAhead": 24,
+            "mat": [
+              {
+                "material": "M17",
+                "name": "螺钉 M4×10",
+                "unit": "个",
+                "need": 12000,
+                "fromStock": 0,
+                "fromPO": [
+                  {
+                    "po": "PO-2609-030",
+                    "qty": 5000,
+                    "eta": 2
+                  }
+                ],
+                "ready": 5,
+                "readyLabel": "9-22",
+                "assumed": true,
+                "short": 7000
+              }
+            ],
+            "segs": [
+              {
+                "d": 13,
+                "from": 11.4,
+                "to": 16
+              },
+              {
+                "d": 14,
+                "from": 0,
+                "to": 4.9
+              }
+            ]
+          },
+          {
+            "op": "包装",
+            "part": "",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3,
+            "remain": 3.3,
+            "setup": 0.3,
+            "startF": 14.204,
+            "endF": 14.342,
+            "startDay": 14,
+            "endDay": 14,
+            "startLabel": "10-1",
+            "endLabel": "10-1",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M12",
+                "name": "包装纸箱",
+                "unit": "个",
+                "need": 120,
+                "fromStock": 120,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 14,
+                "from": 4.9,
+                "to": 8.2
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 16,
+          "open": 14,
+          "done": 2,
+          "late": 5,
+          "risk": 5,
+          "ok": 4,
+          "handled": 0,
+          "onTimeRate": 64,
+          "load7": 63,
+          "overLines": 2,
+          "shortMaterials": 2,
+          "dueToday": 1,
+          "lateDaysTotal": 22
+        }
+      },
+      {
+        "key": "C",
+        "name": "拆分并行 + 加班",
+        "orderId": "SO-2609-0162",
+        "finishLabel": "9-18",
+        "finishDay": 1,
+        "lateDays": 0,
+        "meetsDue": true,
+        "affected": 0,
+        "newlyLate": 0,
+        "delayDaysTotal": 0,
+        "cost": 5897,
+        "notes": [
+          "「冲压」分到 冲压线 A 与 冲压线 B 并行",
+          "装配包装线 未来 7 个工作日每天加班 3 小时"
+        ],
+        "rows": [
+          {
+            "id": "SO-2609-0138",
+            "customer": "K-003 · 家电整机厂",
+            "before": "9-21",
+            "after": "9-21",
+            "beforeDay": 4,
+            "afterDay": 4,
+            "delta": 0,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0160",
+            "customer": "K-005 · 卫浴五金品牌",
+            "before": "9-28",
+            "after": "9-28",
+            "beforeDay": 11,
+            "afterDay": 11,
+            "delta": 0,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "risk"
+          },
+          {
+            "id": "SO-2609-0149",
+            "customer": "K-018 · 智能门锁厂商",
+            "before": "9-24",
+            "after": "9-23",
+            "beforeDay": 7,
+            "afterDay": 6,
+            "delta": -1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0147",
+            "customer": "K-012 · 新能源电池壳体厂",
+            "before": "9-26",
+            "after": "9-25",
+            "beforeDay": 9,
+            "afterDay": 8,
+            "delta": -1,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "ok",
+            "statusAfter": "ok"
+          },
+          {
+            "id": "SO-2609-0161",
+            "customer": "K-022 · 电动工具制造商",
+            "before": "9-30",
+            "after": "9-28",
+            "beforeDay": 13,
+            "afterDay": 11,
+            "delta": -2,
+            "lateBefore": 0,
+            "lateAfter": 0,
+            "turnsLate": false,
+            "turnsOk": false,
+            "statusBefore": "risk",
+            "statusAfter": "risk"
+          }
+        ],
+        "ops": [
+          {
+            "op": "下料",
+            "part": "A",
+            "line": "L1",
+            "lineName": "下料线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.5,
+            "remain": 2,
+            "setup": 0.5,
+            "startF": 0.125,
+            "endF": 0.20800000000000002,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0.1,
+            "matReady": 0,
+            "queueAhead": 1,
+            "mat": [
+              {
+                "material": "M01",
+                "name": "冷轧钢带 SPCC",
+                "unit": "kg",
+                "need": 255,
+                "fromStock": 255,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 3,
+                "to": 5
+              }
+            ]
+          },
+          {
+            "op": "冲压",
+            "part": "A",
+            "line": "L2",
+            "lineName": "冲压线 A",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 3.6,
+            "remain": 5.6,
+            "setup": 2,
+            "startF": 0.20800000000000002,
+            "endF": 0.442,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 5,
+                "to": 10.6
+              }
+            ]
+          },
+          {
+            "op": "电镀",
+            "part": "A",
+            "line": "L6",
+            "lineName": "电镀线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4.5,
+            "remain": 5.5,
+            "setup": 1,
+            "startF": 0.442,
+            "endF": 1.004,
+            "startDay": 0,
+            "endDay": 1,
+            "startLabel": "9-17",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M06",
+                "name": "镀锌液",
+                "unit": "L",
+                "need": 18,
+                "fromStock": 18,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 10.6,
+                "to": 16
+              },
+              {
+                "d": 1,
+                "from": 0,
+                "to": 0.1
+              }
+            ]
+          },
+          {
+            "op": "装配",
+            "part": "A",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4.5,
+            "remain": 5,
+            "setup": 0.5,
+            "startF": 1.004,
+            "endF": 1.212,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M17",
+                "name": "螺钉 M4×10",
+                "unit": "个",
+                "need": 6000,
+                "fromStock": 6000,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 0.1,
+                "to": 5.1
+              }
+            ]
+          },
+          {
+            "op": "包装",
+            "part": "A",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.5,
+            "remain": 1.8,
+            "setup": 0.3,
+            "startF": 1.212,
+            "endF": 1.288,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M12",
+                "name": "包装纸箱",
+                "unit": "个",
+                "need": 60,
+                "fromStock": 60,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 5.1,
+                "to": 6.9
+              }
+            ]
+          },
+          {
+            "op": "下料",
+            "part": "B",
+            "line": "L1",
+            "lineName": "下料线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.5,
+            "remain": 2,
+            "setup": 0.5,
+            "startF": 0.20800000000000002,
+            "endF": 0.292,
+            "startDay": 0,
+            "endDay": 0,
+            "startLabel": "9-17",
+            "endLabel": "9-17",
+            "waitMaterial": 0,
+            "waitCapacity": 0.2,
+            "matReady": 0,
+            "queueAhead": 2,
+            "mat": [
+              {
+                "material": "M01",
+                "name": "冷轧钢带 SPCC",
+                "unit": "kg",
+                "need": 255,
+                "fromStock": 255,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 0,
+                "from": 5,
+                "to": 7
+              }
+            ]
+          },
+          {
+            "op": "冲压",
+            "part": "B",
+            "line": "L3",
+            "lineName": "冲压线 B",
+            "rerouted": true,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4,
+            "remain": 6,
+            "setup": 2,
+            "startF": 0.292,
+            "endF": 1.208,
+            "startDay": 0,
+            "endDay": 1,
+            "startLabel": "9-17",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [],
+            "segs": [
+              {
+                "d": 0,
+                "from": 7,
+                "to": 8
+              },
+              {
+                "d": 1,
+                "from": 0,
+                "to": 5
+              }
+            ]
+          },
+          {
+            "op": "电镀",
+            "part": "B",
+            "line": "L6",
+            "lineName": "电镀线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4.5,
+            "remain": 5.5,
+            "setup": 1,
+            "startF": 1.208,
+            "endF": 1.4380000000000002,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M06",
+                "name": "镀锌液",
+                "unit": "L",
+                "need": 18,
+                "fromStock": 18,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 5,
+                "to": 10.5
+              }
+            ]
+          },
+          {
+            "op": "装配",
+            "part": "B",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 4.5,
+            "remain": 5,
+            "setup": 0.5,
+            "startF": 1.4380000000000002,
+            "endF": 1.646,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M17",
+                "name": "螺钉 M4×10",
+                "unit": "个",
+                "need": 6000,
+                "fromStock": 6000,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 10.5,
+                "to": 15.5
+              }
+            ]
+          },
+          {
+            "op": "包装",
+            "part": "B",
+            "line": "L7",
+            "lineName": "装配包装线",
+            "rerouted": false,
+            "prog": 0,
+            "done": false,
+            "inProgress": false,
+            "work": 1.5,
+            "remain": 1.8,
+            "setup": 0.3,
+            "startF": 1.646,
+            "endF": 1.7209999999999999,
+            "startDay": 1,
+            "endDay": 1,
+            "startLabel": "9-18",
+            "endLabel": "9-18",
+            "waitMaterial": 0,
+            "waitCapacity": 0,
+            "matReady": 0,
+            "queueAhead": [],
+            "mat": [
+              {
+                "material": "M12",
+                "name": "包装纸箱",
+                "unit": "个",
+                "need": 60,
+                "fromStock": 60,
+                "fromPO": [],
+                "ready": 0,
+                "readyLabel": "9-17",
+                "assumed": false,
+                "short": 0
+              }
+            ],
+            "segs": [
+              {
+                "d": 1,
+                "from": 15.5,
+                "to": 17.3
+              }
+            ]
+          }
+        ],
+        "kpiAfter": {
+          "total": 16,
+          "open": 14,
+          "done": 2,
+          "late": 4,
+          "risk": 5,
+          "ok": 5,
+          "handled": 0,
+          "onTimeRate": 71,
+          "load7": 66,
+          "overLines": 2,
+          "shortMaterials": 2,
+          "dueToday": 1,
+          "lateDaysTotal": 15
+        }
+      }
+    ],
+    "recommend": "A",
+    "reason": "优先插队能按 9-24 交付，不增加加班费；5 张在手订单完工日后移 1–2 天但仍在交期内"
+  },
+  "purchase": {
+    "summary": {
+      "short": 1,
+      "safety": 5,
+      "watch": 1,
+      "buy": 6,
+      "amount": 25560,
+      "slow": 4,
+      "slowCapital": 37125,
+      "overdue": 3
+    },
+    "items": [
+      {
+        "id": "M07",
+        "name": "镀镍添加剂",
+        "urgency": "short",
+        "suggestQty": 60,
+        "unit": "L",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 5760,
+        "reason": "按排程 9-26 出现缺口，SO-2609-0142 9-24 需 48 L；提前期 6 天，今日下单刚好赶上"
+      },
+      {
+        "id": "M02",
+        "name": "不锈钢棒 304",
+        "urgency": "safety",
+        "suggestQty": 500,
+        "unit": "kg",
+        "latestOrderLabel": "今日",
+        "overdue": true,
+        "amount": 10500,
+        "reason": "9-19 起低于安全库存 600 kg，提前期 10 天，按提前期本应更早下单，建议今日补单"
+      },
+      {
+        "id": "M17",
+        "name": "螺钉 M4×10",
+        "urgency": "safety",
+        "suggestQty": 15000,
+        "unit": "个",
+        "latestOrderLabel": "今日",
+        "overdue": true,
+        "amount": 1200,
+        "reason": "9-17 起低于安全库存 20,000 个，提前期 5 天，按提前期本应更早下单，建议今日补单"
+      },
+      {
+        "id": "M06",
+        "name": "镀锌液",
+        "urgency": "safety",
+        "suggestQty": 200,
+        "unit": "L",
+        "latestOrderLabel": "今日",
+        "overdue": true,
+        "amount": 3600,
+        "reason": "9-18 起低于安全库存 150 L，提前期 5 天，按提前期本应更早下单，建议今日补单"
+      },
+      {
+        "id": "M18",
+        "name": "密封圈 Ø22",
+        "urgency": "safety",
+        "suggestQty": 2000,
+        "unit": "个",
+        "latestOrderLabel": "9-19",
+        "overdue": false,
+        "amount": 900,
+        "reason": "9-28 起低于安全库存 2,000 个，提前期 9 天，最晚 9-19 下单"
+      },
+      {
+        "id": "M12",
+        "name": "包装纸箱",
+        "urgency": "safety",
+        "suggestQty": 1000,
+        "unit": "个",
+        "latestOrderLabel": "9-27",
+        "overdue": false,
+        "amount": 3600,
+        "reason": "9-30 起低于安全库存 1,200 个，提前期 3 天，最晚 9-27 下单"
+      },
+      {
+        "id": "M04",
+        "name": "铝板 5052",
+        "urgency": "watch",
+        "suggestQty": 0,
+        "unit": "kg",
+        "latestOrderLabel": "今日",
+        "overdue": false,
+        "amount": 0,
+        "reason": "9-18 起低于安全库存，在途 PO-2609-027 9-23 到 1,200 kg 后回补，暂不下单"
+      }
+    ],
+    "slow": [
+      {
+        "id": "M16",
+        "name": "塑料托盘",
+        "unit": "个",
+        "stock": 210,
+        "daysCover": 420,
+        "capital": 13650,
+        "reason": "库存可用 420 天且排程内无需求，占用资金 13,650 元"
+      },
+      {
+        "id": "M10",
+        "name": "冲压模具备件",
+        "unit": "套",
+        "stock": 6,
+        "daysCover": 200,
+        "capital": 11100,
+        "reason": "库存可用 200 天且排程内无需求，占用资金 11,100 元"
+      },
+      {
+        "id": "M20",
+        "name": "铝棒 6061",
+        "unit": "kg",
+        "stock": 300,
+        "daysCover": 150,
+        "capital": 8100,
+        "reason": "库存可用 150 天且排程内无需求，占用资金 8,100 元"
+      },
+      {
+        "id": "M11",
+        "name": "润滑脂",
+        "unit": "kg",
+        "stock": 95,
+        "daysCover": 119,
+        "capital": 4275,
+        "reason": "库存可用 119 天且排程内无需求，占用资金 4,275 元"
+      }
+    ],
+    "po": [
+      {
+        "supplier": "无锡不锈钢材料",
+        "amount": 10500,
+        "lines": 1
+      },
+      {
+        "supplier": "绍兴表面处理材料",
+        "amount": 9360,
+        "lines": 2
+      },
+      {
+        "supplier": "萧山纸箱厂",
+        "amount": 3600,
+        "lines": 1
+      },
+      {
+        "supplier": "温州紧固件",
+        "amount": 1200,
+        "lines": 1
+      },
+      {
+        "supplier": "宁波橡塑",
+        "amount": 900,
+        "lines": 1
+      }
+    ]
+  },
+  "daily": {
+    "kpi": {
+      "total": 15,
+      "open": 13,
+      "done": 2,
+      "late": 4,
+      "risk": 5,
+      "ok": 4,
+      "handled": 0,
+      "onTimeRate": 69,
+      "load7": 60,
+      "overLines": 2,
+      "shortMaterials": 1,
+      "dueToday": 1,
+      "lateDaysTotal": 15
+    },
+    "text": "【交付日报】2026.09.17 周四\n在手订单 13 张：按期 9 · 风险 5 · 延期 4（按期率 69%）\n今日交付：SO-2609-0133 K-031 · 出口贸易公司；SO-2609-0135 K-005 · 卫浴五金品牌\n风险生产订单：SO-2609-0129 前道拖后 晚 7 天；SO-2609-0142 缺料 晚 1 天；SO-2609-0156 产能不足 晚 2 天；SO-2609-0153 缺料 晚 5 天；SO-2609-0138 按期\n采购建议：缺口 1 项 · 低于安全库存 5 项 · 建议下单 6 项 合计 25,560 元 · 3 项已错过最晚下单日\n明日提醒：SO-2609-0142 「热处理」明日在 热处理炉 开工；SO-2609-0159 「车削」明日在 CNC 车铣中心 开工；SO-2609-0135 K-005 · 卫浴五金品牌 明日到期，已完工待发运；SO-2609-0151 「装配」明日在 装配包装线 开工；SO-2609-0156 「下料」明日在 下料线 开工；SO-2609-0149 「电镀」明日在 电镀线 开工\n产线负荷：下料线 47% · 冲压线 A 37% · 冲压线 B 0% · CNC 车铣中心 100% · CNC 车铣中心 B 100% · 热处理炉 72% · 电镀线 58% · 装配包装线 68%"
+  }
+}
