@@ -1,0 +1,104 @@
+{
+  "note": "七条收益杠杆。每条自带需要问的字段、折算公式与面向老板的说法。场景命中哪几条由 scene-levers.json 决定；多条命中时按各自算出的金额从大到小排序，最大的全额、其余按 overlapDiscount 计入。",
+  "items": [
+    {
+      "key": "hours",
+      "name": "省下来的工时",
+      "en": "HOURS SAVED",
+      "money": "同一件事少花人时，省下的时间折成钱",
+      "formula": "月收益 = 人数 × 每人每天小时数 × 折减比例 × 21.75 天 × 时薪；时薪 = 月薪 × 1.3 ÷ (21.75 × 8)",
+      "cut": 0.45,
+      "cutNote": "只按能省下的部分计，默认取 45%：上了工具也还要看、还要改，不可能把这段时间全部省掉。",
+      "cash": false,
+      "cashNote": "省下的是时间不是现金。除非这段时间确实换成了别的产出，否则不进现金口径。",
+      "fields": [
+        { "key": "opsPeople",     "label": "现在几个人在做这件事", "unit": "人",     "type": "int",    "min": 1, "max": 50,   "presets": [1, 2, 4, 8] },
+        { "key": "opsHoursPerDay","label": "每人每天花多少时间",   "unit": "小时",   "type": "number", "min": 0.25, "max": 8, "presets": [0.5, 1, 2, 4] },
+        { "key": "opsSalary",     "label": "这几个人平均月薪",     "unit": "元/月",  "type": "int",    "min": 2000, "max": 60000, "presets": [5000, 7500, 11000, 16000] }
+      ]
+    },
+    {
+      "key": "error",
+      "name": "少出的差错",
+      "en": "FEWER ERRORS",
+      "money": "返工、赔付、货损、罚款、客诉的损失下降",
+      "formula": "月收益 = 每月发生次数 × 单次损失 × 折减比例",
+      "cut": 0.4,
+      "cutNote": "只按能拦下来的部分计，默认取 40%：工具能提醒能拦，但拦不住全部。",
+      "cash": true,
+      "fields": [
+        { "key": "errorFreqMonthly",  "label": "这类问题多久出一次", "unit": "次/月", "type": "number", "min": 0.05, "max": 200, "presets": [0.33, 1.5, 4.3, 11] },
+        { "key": "errorCostPerCase",  "label": "出一次大概搭进去多少钱", "unit": "元", "type": "int", "min": 50, "max": 500000, "presets": [500, 2000, 5000, 20000] }
+      ]
+    },
+    {
+      "key": "revenue",
+      "name": "多成的单",
+      "en": "MORE DEALS",
+      "money": "线索转化、成单率、复购、续约上去带来的毛利",
+      "formula": "月收益 = 月成单数 × 提升比例 × 单均金额 × 毛利率",
+      "cut": 0.08,
+      "cutNote": "按成单数提升 8% 估算，这是工具能影响的响应速度与跟进及时性带来的部分。",
+      "cash": true,
+      "fields": [
+        { "key": "dealsMonthly", "label": "一个月大概成几单",   "unit": "单/月", "type": "number", "min": 0.5, "max": 100000, "presets": [5, 20, 80, 300] },
+        { "key": "dealValue",    "label": "一单平均多少钱",     "unit": "元",   "type": "int",    "min": 50, "max": 20000000, "presets": [3000, 10000, 50000, 200000] },
+        { "key": "grossMargin",  "label": "一百块生意去掉料和工剩多少", "unit": "", "type": "number", "min": 0.01, "max": 0.8, "presets": [0.07, 0.15, 0.27, 0.45] }
+      ]
+    },
+    {
+      "key": "margin",
+      "name": "提上来的毛利",
+      "en": "MARGIN LIFT",
+      "money": "认出低毛利的单子、把报价与折扣修回来",
+      "formula": "月收益 = 这块业务月营业额 × 毛利修正幅度",
+      "cut": 0.015,
+      "cutNote": "按毛利率修正 1.5 个百分点估算，只算把明显做亏的部分拉回来，不算涨价。",
+      "cash": true,
+      "fields": [
+        { "key": "relatedRevenueMonthly", "label": "这块业务一个月做多少钱", "unit": "元/月", "type": "int", "min": 5000, "max": 500000000, "presets": [200000, 800000, 3000000, 10000000] }
+      ]
+    },
+    {
+      "key": "cash",
+      "name": "转快的资金",
+      "en": "CASH TURNS",
+      "money": "库存与应收占用下降，少付的利息和少压的呆货",
+      "formula": "月收益 = 占用资金 × 占用下降比例 × 年资金成本率 ÷ 12",
+      "cut": 0.08,
+      "cutNote": "按占用下降 8% 估算。资金成本按年化 6% 计，这是一年期经营贷款的常见水平。",
+      "rate": 0.06,
+      "cash": true,
+      "fields": [
+        { "key": "tiedCapital", "label": "库存加还没收回的货款，大概压着多少", "unit": "元", "type": "int", "min": 10000, "max": 2000000000, "presets": [200000, 500000, 1000000, 3000000] }
+      ]
+    },
+    {
+      "key": "spend",
+      "name": "省下的开支",
+      "en": "SPEND CUT",
+      "money": "原料、能耗、运费、外包、耗材直接少花的钱",
+      "formula": "月收益 = 这项年开支 ÷ 12 × 下降比例",
+      "cut": 0.04,
+      "cutNote": "按这项开支下降 4% 估算，只算靠比价、核对与用量提醒能省下的部分。",
+      "cash": true,
+      "fields": [
+        { "key": "spendAnnual", "label": "这项开支一年多少钱", "unit": "元/年", "type": "int", "min": 10000, "max": 1000000000, "presets": [100000, 500000, 2000000, 8000000] }
+      ]
+    },
+    {
+      "key": "output",
+      "name": "多出来的产出",
+      "en": "MORE OUTPUT",
+      "money": "停机减少、产能释放、人效提升换来的毛利",
+      "formula": "月收益 = 每月耽误的产值 × 挽回比例 × 毛利率",
+      "cut": 0.12,
+      "cutNote": "按耽误的产值挽回 12% 估算。产值要乘毛利率才是真正落到手里的钱。",
+      "cash": true,
+      "fields": [
+        { "key": "lostOutputMonthly", "label": "因为这个问题一个月耽误多少产值", "unit": "元/月", "type": "int", "min": 5000, "max": 200000000, "presets": [20000, 100000, 300000, 1000000] },
+        { "key": "grossMargin",       "label": "一百块生意去掉料和工剩多少", "unit": "", "type": "number", "min": 0.01, "max": 0.8, "presets": [0.07, 0.15, 0.27, 0.45] }
+      ]
+    }
+  ]
+}

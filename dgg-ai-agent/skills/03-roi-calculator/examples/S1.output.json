@@ -1,0 +1,840 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI投入ROI测算器",
+    "credits": 20,
+    "version": "1.0.0",
+    "horizon": 24
+  },
+  "profile": {
+    "name": "杭州锐合精密五金有限公司",
+    "industry": "mfg-machinery",
+    "size": "101_300",
+    "revenue": "20m_100m",
+    "province": "浙江",
+    "years": "10_plus",
+    "ownership": "private",
+    "customers": "b2b",
+    "systems": [
+      "erp",
+      "finance"
+    ],
+    "itStaff": "1_2",
+    "branches": "single",
+    "overseas": "no",
+    "role": "owner"
+  },
+  "scene": {
+    "id": "mfg-s01",
+    "name": "订单交付预警",
+    "stage": "生产计划",
+    "user": "生产计划员与业务经理",
+    "replaces": "每天上午手工核对交期的两小时",
+    "module": "AI ERP",
+    "metric": "交期达成率提升 8–12 个百分点",
+    "roiBasis": "按延期订单减少与催单沟通工时折算",
+    "weeks": 8,
+    "cost": "中",
+    "value": 5,
+    "dataDeps": [
+      "erp"
+    ],
+    "firstStep": "导出近 6 个月订单与实际交付日期，做一次准点率基线",
+    "precondition": "工序进度需要每日回填，纸质流转卡先做电子化"
+  },
+  "sceneBasis": "library",
+  "sector": "mfg",
+  "levers": [
+    "error",
+    "hours"
+  ],
+  "plan": {
+    "tier": "adv",
+    "tierName": "高级版",
+    "seats": 3,
+    "diagnosisDays": 1,
+    "privateDeploy": null,
+    "customBudget": 20000,
+    "dataState": "excel",
+    "setupPeople": 2,
+    "setupSalary": 7500
+  },
+  "invest": {
+    "cashItems": [
+      {
+        "key": "sub",
+        "name": "高级版订阅",
+        "detail": "2280 元 / 套年 × 3 套",
+        "amount": 6840,
+        "yearly": true
+      },
+      {
+        "key": "diag",
+        "name": "专家入企 AI 诊断",
+        "detail": "1980 元 × 1 天",
+        "amount": 1980,
+        "yearly": false
+      },
+      {
+        "key": "custom",
+        "name": "另议项（系统对接 / 定制 / 陪跑）",
+        "detail": "按贵司填写的预算计入",
+        "amount": 20000,
+        "yearly": false
+      }
+    ],
+    "cashOnce": 21980,
+    "cashYearly": 6840,
+    "cashYear1": 28820,
+    "laborItems": [
+      {
+        "key": "setup",
+        "name": "上线期投入的工时",
+        "detail": "2 人 × 约 9.2 周 × 每天 2 小时",
+        "hours": 184,
+        "amount": 10310
+      },
+      {
+        "key": "run",
+        "name": "上线后每月维护工时",
+        "detail": "2 人 × 每月 4 小时",
+        "hours": 8,
+        "amount": 448,
+        "monthly": true
+      }
+    ],
+    "laborYear1": 15686,
+    "setupHours": 184,
+    "setupHourly": 56.03,
+    "setupWeeks": 9.2,
+    "dataStateMult": 1.15,
+    "runLaborMonthly": 448,
+    "tierName": "高级版",
+    "seats": 3,
+    "total12": 28820,
+    "totalNote": "回收期按现金口径计算；内部工时单列，不计入回收期"
+  },
+  "benefit": {
+    "levers": [
+      {
+        "key": "error",
+        "name": "少出的差错",
+        "en": "FEWER ERRORS",
+        "money": "返工、赔付、货损、罚款、客诉的损失下降",
+        "monthly": 8600,
+        "weight": 1,
+        "discounted": false,
+        "final": 8600,
+        "basis": "每月 4.3 次 × 单次 5000 元 × 折减 40%",
+        "cash": true,
+        "cut": 0.4,
+        "cutNote": "只按能拦下来的部分计，默认取 40%：工具能提醒能拦，但拦不住全部。",
+        "rank": 1
+      },
+      {
+        "key": "hours",
+        "name": "省下来的工时",
+        "en": "HOURS SAVED",
+        "money": "同一件事少花人时，省下的时间折成钱",
+        "monthly": 1024,
+        "weight": 0.35,
+        "discounted": true,
+        "final": 358,
+        "basis": "2 人 × 每天 1 小时 × 折减 45% × 21.75 天 × 时薪 52.3 元",
+        "cash": false,
+        "cut": 0.45,
+        "cutNote": "只按能省下的部分计，默认取 45%：上了工具也还要看、还要改，不可能把这段时间全部省掉。",
+        "rank": 2
+      }
+    ],
+    "rawMonthly": 8958,
+    "valueFactor": 1,
+    "afterValue": 8958,
+    "capMonthly": 250000,
+    "capped": false,
+    "fullMonthly": 8958,
+    "cashMonthly": 8600,
+    "hoursMonthly": 358,
+    "cashYear1": 0,
+    "note": "省下来的工时不计入现金收益，单列一栏"
+  },
+  "flow": [
+    {
+      "m": 1,
+      "benefit": 3010,
+      "cost": 28820,
+      "net": -25810,
+      "cum": -25810,
+      "ramp": 0.35
+    },
+    {
+      "m": 2,
+      "benefit": 6020,
+      "cost": 0,
+      "net": 6020,
+      "cum": -19790,
+      "ramp": 0.7
+    },
+    {
+      "m": 3,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": -11190,
+      "ramp": 1
+    },
+    {
+      "m": 4,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": -2590,
+      "ramp": 1
+    },
+    {
+      "m": 5,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 6010,
+      "ramp": 1
+    },
+    {
+      "m": 6,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 14610,
+      "ramp": 1
+    },
+    {
+      "m": 7,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 23210,
+      "ramp": 1
+    },
+    {
+      "m": 8,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 31810,
+      "ramp": 1
+    },
+    {
+      "m": 9,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 40410,
+      "ramp": 1
+    },
+    {
+      "m": 10,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 49010,
+      "ramp": 1
+    },
+    {
+      "m": 11,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 57610,
+      "ramp": 1
+    },
+    {
+      "m": 12,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 66210,
+      "ramp": 1
+    },
+    {
+      "m": 13,
+      "benefit": 8600,
+      "cost": 6840,
+      "net": 1760,
+      "cum": 67970,
+      "ramp": 1
+    },
+    {
+      "m": 14,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 76570,
+      "ramp": 1
+    },
+    {
+      "m": 15,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 85170,
+      "ramp": 1
+    },
+    {
+      "m": 16,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 93770,
+      "ramp": 1
+    },
+    {
+      "m": 17,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 102370,
+      "ramp": 1
+    },
+    {
+      "m": 18,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 110970,
+      "ramp": 1
+    },
+    {
+      "m": 19,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 119570,
+      "ramp": 1
+    },
+    {
+      "m": 20,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 128170,
+      "ramp": 1
+    },
+    {
+      "m": 21,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 136770,
+      "ramp": 1
+    },
+    {
+      "m": 22,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 145370,
+      "ramp": 1
+    },
+    {
+      "m": 23,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 153970,
+      "ramp": 1
+    },
+    {
+      "m": 24,
+      "benefit": 8600,
+      "cost": 0,
+      "net": 8600,
+      "cum": 162570,
+      "ramp": 1
+    }
+  ],
+  "flowAll": [
+    {
+      "m": 1,
+      "benefit": 3135,
+      "cost": 28820,
+      "net": -25685,
+      "cum": -25685,
+      "ramp": 0.35
+    },
+    {
+      "m": 2,
+      "benefit": 6271,
+      "cost": 0,
+      "net": 6271,
+      "cum": -19414,
+      "ramp": 0.7
+    },
+    {
+      "m": 3,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": -10456,
+      "ramp": 1
+    },
+    {
+      "m": 4,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": -1498,
+      "ramp": 1
+    },
+    {
+      "m": 5,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 7460,
+      "ramp": 1
+    },
+    {
+      "m": 6,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 16418,
+      "ramp": 1
+    },
+    {
+      "m": 7,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 25376,
+      "ramp": 1
+    },
+    {
+      "m": 8,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 34334,
+      "ramp": 1
+    },
+    {
+      "m": 9,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 43292,
+      "ramp": 1
+    },
+    {
+      "m": 10,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 52250,
+      "ramp": 1
+    },
+    {
+      "m": 11,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 61208,
+      "ramp": 1
+    },
+    {
+      "m": 12,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 70166,
+      "ramp": 1
+    },
+    {
+      "m": 13,
+      "benefit": 8958,
+      "cost": 6840,
+      "net": 2118,
+      "cum": 72284,
+      "ramp": 1
+    },
+    {
+      "m": 14,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 81242,
+      "ramp": 1
+    },
+    {
+      "m": 15,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 90200,
+      "ramp": 1
+    },
+    {
+      "m": 16,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 99158,
+      "ramp": 1
+    },
+    {
+      "m": 17,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 108116,
+      "ramp": 1
+    },
+    {
+      "m": 18,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 117074,
+      "ramp": 1
+    },
+    {
+      "m": 19,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 126032,
+      "ramp": 1
+    },
+    {
+      "m": 20,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 134990,
+      "ramp": 1
+    },
+    {
+      "m": 21,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 143948,
+      "ramp": 1
+    },
+    {
+      "m": 22,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 152906,
+      "ramp": 1
+    },
+    {
+      "m": 23,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 161864,
+      "ramp": 1
+    },
+    {
+      "m": 24,
+      "benefit": 8958,
+      "cost": 0,
+      "net": 8958,
+      "cum": 170822,
+      "ramp": 1
+    }
+  ],
+  "payback": 5,
+  "paybackAll": 5,
+  "paybackBasis": "cash",
+  "sensitivityBasis": "cash",
+  "reCross": null,
+  "roi": {
+    "roi12": 229.7,
+    "roi24": 455.9,
+    "inv12": 28820,
+    "inv24": 35660,
+    "meaningful": true,
+    "note": ""
+  },
+  "scenarios": [
+    {
+      "key": "cons",
+      "name": "保守",
+      "desc": "收益按中性的 65% 计，投入按 1.2 倍计",
+      "benefitMul": 0.65,
+      "costMul": 1.2,
+      "payback": 8,
+      "cum12": 27186,
+      "cum24": 86058,
+      "roi12": 94.3,
+      "monthlyBenefit": 5590,
+      "cashYear1": 34584
+    },
+    {
+      "key": "mid",
+      "name": "中性",
+      "desc": "按填写的数字直接计算",
+      "benefitMul": 1,
+      "costMul": 1,
+      "payback": 5,
+      "cum12": 66210,
+      "cum24": 162570,
+      "roi12": 229.7,
+      "monthlyBenefit": 8600,
+      "cashYear1": 28820
+    },
+    {
+      "key": "opt",
+      "name": "积极",
+      "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计",
+      "benefitMul": 1.25,
+      "costMul": 0.95,
+      "payback": 4,
+      "cum12": 91409,
+      "cum24": 213911,
+      "roi12": 317.2,
+      "monthlyBenefit": 10750,
+      "cashYear1": 27379
+    }
+  ],
+  "sensitivity": [
+    {
+      "key": "benefitCut",
+      "label": "折减比例",
+      "note": "工具实际能改善多少",
+      "low": 6,
+      "high": 4,
+      "lowText": "第 6 个月",
+      "highText": "第 4 个月",
+      "base": 5,
+      "spread": 2
+    },
+    {
+      "key": "customBudget",
+      "label": "另议项预算",
+      "note": "系统对接与定制的实际报价",
+      "low": 4,
+      "high": 5,
+      "lowText": "第 4 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 1
+    },
+    {
+      "key": "setupCost",
+      "label": "上线期一次性支出",
+      "note": "诊断与配置的实际花费",
+      "low": 4,
+      "high": 5,
+      "lowText": "第 4 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 1
+    },
+    {
+      "key": "seats",
+      "label": "订阅套数",
+      "note": "实际有几个人要用",
+      "low": 5,
+      "high": 5,
+      "lowText": "第 5 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 0
+    },
+    {
+      "key": "rampSpeed",
+      "label": "爬坡快慢",
+      "note": "多久能用顺手",
+      "low": 5,
+      "high": 5,
+      "lowText": "第 5 个月",
+      "highText": "第 5 个月",
+      "base": 5,
+      "spread": 0
+    }
+  ],
+  "missing": [],
+  "insufficient": false,
+  "inputSource": {
+    "errorFreqMonthly": "user",
+    "errorCostPerCase": "user",
+    "opsPeople": "user",
+    "opsHoursPerDay": "user",
+    "opsSalary": "user",
+    "revenueAnnual": "profile"
+  },
+  "confidence": {
+    "score": 94,
+    "band": "high",
+    "name": "口径扎实",
+    "desc": "关键数字都是贵司填的，测算可以直接用于决策讨论"
+  },
+  "capped": false,
+  "capMonthly": 250000,
+  "revenueAnnual": 50000000,
+  "keyNumbers": [
+    {
+      "k": "现金支出合计",
+      "v": 28820,
+      "unit": "元",
+      "s": "首年，含订阅与一次性"
+    },
+    {
+      "k": "每月现金收益",
+      "v": 8600,
+      "unit": "元",
+      "s": "满额后，不含工时"
+    },
+    {
+      "k": "现金累计转正",
+      "v": 5,
+      "unit": "个月",
+      "s": "中性档 · 只算真金白银",
+      "wide": true
+    },
+    {
+      "k": "首年净收益",
+      "v": 66210,
+      "unit": "元",
+      "s": "现金口径"
+    },
+    {
+      "k": "含工时转正",
+      "v": 5,
+      "unit": "个月",
+      "s": "把省下的工时一并折算"
+    },
+    {
+      "k": "省下的工时",
+      "v": 358,
+      "unit": "元/月",
+      "s": "单列，不计入现金口径"
+    },
+    {
+      "k": "口径可信度",
+      "v": 94,
+      "unit": "分",
+      "s": "口径扎实"
+    }
+  ],
+  "quickView": [
+    {
+      "q": "一共要投多少？",
+      "a": "28820 元",
+      "text": "首年现金支出，高级版 × 3 套，含另议项 20000 元"
+    },
+    {
+      "q": "钱花在哪？",
+      "a": "高级版订阅",
+      "text": "高级版订阅 6840 元、专家入企 AI 诊断 1980 元、另议项（系统对接 / 定制 / 陪跑） 20000 元"
+    },
+    {
+      "q": "收益从哪来？",
+      "a": "少出的差错",
+      "text": "少出的差错 + 省下来的工时，按 按延期订单减少与催单沟通工时折算"
+    },
+    {
+      "q": "每月能收回多少？",
+      "a": "8600 元",
+      "text": "现金口径；另有工时折合 358 元/月不计入"
+    },
+    {
+      "q": "什么时候回本？",
+      "a": "第 5 个月",
+      "text": "现金口径，中性档；保守档第 8 个月"
+    },
+    {
+      "q": "这个数准吗？",
+      "a": "口径扎实",
+      "text": "关键数字都是贵司填的，测算可以直接用于决策讨论"
+    }
+  ],
+  "verdict": {
+    "headline": "按这组数测算，第 5 个月累计现金转正",
+    "text": "首年现金支出 28820 元，现金收益每月约 8600 元，累计净额在第 5 个月由负转正；保守档为第 8 个月。另有省下的工时折合 358 元/月，未计入这一行。"
+  },
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "拍板投入、定验收标准、每月看一次账",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "这个场景所在部门的负责人",
+      "duty": "提供业务规则、带队试运行、反馈使用问题",
+      "time": "推进期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "IT 或熟悉业务系统的人员",
+      "duty": "导出数据、确认字段口径、处理系统对接",
+      "time": "上线前集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "真实数据替换掉了参考值",
+      "why": "参考值只是常见区间，换成贵司的真实数字后回本月可能前后移动"
+    },
+    {
+      "when": "场景换了一个",
+      "why": "不同场景的收益杠杆不同，投入档与上线周期也不同"
+    },
+    {
+      "when": "另议项报价下来了",
+      "why": "系统对接与定制的实际报价往往是投入侧最大的一笔，直接决定回本月"
+    },
+    {
+      "when": "试运行满三个月",
+      "why": "爬坡期结束后有了真实的使用数据，可以用实际效果替换折减比例"
+    },
+    {
+      "when": "经营规模发生较大变化",
+      "why": "单量、人数、占用资金变了，收益端的基数跟着变"
+    }
+  ],
+  "summaryText": "首年现金支出 28820 元，现金收益每月约 8600 元，累计净额在第 5 个月由负转正；保守档为第 8 个月。另有省下的工时折合 358 元/月，未计入这一行。",
+  "render": [
+    {
+      "type": "three-accounts",
+      "source": "keyNumbers"
+    },
+    {
+      "type": "cost-ledger",
+      "source": "invest"
+    },
+    {
+      "type": "benefit-ledger",
+      "source": "benefit"
+    },
+    {
+      "type": "cashflow-bars",
+      "source": "flow"
+    },
+    {
+      "type": "payback-curve",
+      "source": "flow"
+    },
+    {
+      "type": "scenario-band",
+      "source": "scenarios"
+    },
+    {
+      "type": "tornado",
+      "source": "sensitivity"
+    },
+    {
+      "type": "roles",
+      "source": "roles"
+    }
+  ]
+}

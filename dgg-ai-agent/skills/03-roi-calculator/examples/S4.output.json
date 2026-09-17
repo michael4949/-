@@ -1,0 +1,852 @@
+{
+  "ok": true,
+  "meta": {
+    "module": "企业AI投入ROI测算器",
+    "credits": 20,
+    "version": "1.0.0",
+    "horizon": 24
+  },
+  "profile": {
+    "name": "深圳梵图家居科技有限公司",
+    "industry": "trade-ecom",
+    "size": "101_300",
+    "revenue": "100m_500m",
+    "province": "广东",
+    "years": "5_10",
+    "ownership": "private",
+    "customers": "b2c",
+    "systems": [
+      "erp",
+      "finance",
+      "crm",
+      "oa",
+      "shop"
+    ],
+    "itStaff": "3_10",
+    "branches": "2_5",
+    "overseas": "yes",
+    "role": "it"
+  },
+  "scene": {
+    "id": "trade-s05",
+    "name": "门店补货与跨店调拨建议",
+    "stage": "商品库存",
+    "user": "商品部与店长",
+    "replaces": "店长凭感觉报货、总部逐店核对的每周一天",
+    "module": "AI ERP",
+    "metric": "缺货率下降 25–35%，库存周转天数缩短 5–8 天",
+    "roiBasis": "按缺货损失减少与库存资金占用下降折算",
+    "weeks": 16,
+    "cost": "重",
+    "value": 5,
+    "dataDeps": [
+      "erp",
+      "shop"
+    ],
+    "firstStep": "选三家门店做试点，把近一年日销与库存数据拉齐",
+    "precondition": "门店库存需要账实一致，差异大的门店先补一次盘点"
+  },
+  "sceneBasis": "library",
+  "sector": "trade",
+  "levers": [
+    "error",
+    "cash"
+  ],
+  "plan": {
+    "tier": "flag",
+    "tierName": "旗舰版",
+    "seats": 5,
+    "diagnosisDays": 1,
+    "privateDeploy": "base",
+    "customBudget": 60000,
+    "dataState": "system",
+    "setupPeople": 3,
+    "setupSalary": 11000
+  },
+  "invest": {
+    "cashItems": [
+      {
+        "key": "sub",
+        "name": "旗舰版订阅",
+        "detail": "3280 元 / 套年 × 5 套",
+        "amount": 16400,
+        "yearly": true
+      },
+      {
+        "key": "diag",
+        "name": "专家入企 AI 诊断",
+        "detail": "1980 元 × 1 天",
+        "amount": 1980,
+        "yearly": false
+      },
+      {
+        "key": "pd",
+        "name": "私域部署（起）",
+        "detail": "12800 元 / 套年 × 5 套",
+        "amount": 64000,
+        "yearly": true
+      },
+      {
+        "key": "custom",
+        "name": "另议项（系统对接 / 定制 / 陪跑）",
+        "detail": "按贵司填写的预算计入",
+        "amount": 60000,
+        "yearly": false
+      }
+    ],
+    "cashOnce": 61980,
+    "cashYearly": 80400,
+    "cashYear1": 142380,
+    "laborItems": [
+      {
+        "key": "setup",
+        "name": "上线期投入的工时",
+        "detail": "3 人 × 约 16 周 × 每天 2 小时",
+        "hours": 480,
+        "amount": 39446
+      },
+      {
+        "key": "run",
+        "name": "上线后每月维护工时",
+        "detail": "3 人 × 每月 4 小时",
+        "hours": 12,
+        "amount": 986,
+        "monthly": true
+      }
+    ],
+    "laborYear1": 51278,
+    "setupHours": 480,
+    "setupHourly": 82.18,
+    "setupWeeks": 16,
+    "dataStateMult": 1,
+    "runLaborMonthly": 986,
+    "tierName": "旗舰版",
+    "seats": 5,
+    "total12": 142380,
+    "totalNote": "回收期按现金口径计算；内部工时单列，不计入回收期"
+  },
+  "benefit": {
+    "levers": [
+      {
+        "key": "error",
+        "name": "少出的差错",
+        "en": "FEWER ERRORS",
+        "money": "返工、赔付、货损、罚款、客诉的损失下降",
+        "monthly": 13200,
+        "weight": 1,
+        "discounted": false,
+        "final": 13200,
+        "basis": "每月 11 次 × 单次 3000 元 × 折减 40%",
+        "cash": true,
+        "cut": 0.4,
+        "cutNote": "只按能拦下来的部分计，默认取 40%：工具能提醒能拦，但拦不住全部。",
+        "rank": 1
+      },
+      {
+        "key": "cash",
+        "name": "转快的资金",
+        "en": "CASH TURNS",
+        "money": "库存与应收占用下降，少付的利息和少压的呆货",
+        "monthly": 1600,
+        "weight": 0.35,
+        "discounted": true,
+        "final": 560,
+        "basis": "占用 4000000 元 × 下降 8% × 年资金成本 6% ÷ 12",
+        "cash": true,
+        "cut": 0.08,
+        "cutNote": "按占用下降 8% 估算。资金成本按年化 6% 计，这是一年期经营贷款的常见水平。",
+        "rank": 2
+      }
+    ],
+    "rawMonthly": 13760,
+    "valueFactor": 1,
+    "afterValue": 13760,
+    "capMonthly": 1250000,
+    "capped": false,
+    "fullMonthly": 13760,
+    "cashMonthly": 13760,
+    "hoursMonthly": 0,
+    "cashYear1": 0,
+    "note": "省下来的工时不计入现金收益，单列一栏"
+  },
+  "flow": [
+    {
+      "m": 1,
+      "benefit": 4816,
+      "cost": 142380,
+      "net": -137564,
+      "cum": -137564,
+      "ramp": 0.35
+    },
+    {
+      "m": 2,
+      "benefit": 9632,
+      "cost": 0,
+      "net": 9632,
+      "cum": -127932,
+      "ramp": 0.7
+    },
+    {
+      "m": 3,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -114172,
+      "ramp": 1
+    },
+    {
+      "m": 4,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -100412,
+      "ramp": 1
+    },
+    {
+      "m": 5,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -86652,
+      "ramp": 1
+    },
+    {
+      "m": 6,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -72892,
+      "ramp": 1
+    },
+    {
+      "m": 7,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -59132,
+      "ramp": 1
+    },
+    {
+      "m": 8,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -45372,
+      "ramp": 1
+    },
+    {
+      "m": 9,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -31612,
+      "ramp": 1
+    },
+    {
+      "m": 10,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -17852,
+      "ramp": 1
+    },
+    {
+      "m": 11,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -4092,
+      "ramp": 1
+    },
+    {
+      "m": 12,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 9668,
+      "ramp": 1
+    },
+    {
+      "m": 13,
+      "benefit": 13760,
+      "cost": 80400,
+      "net": -66640,
+      "cum": -56972,
+      "ramp": 1
+    },
+    {
+      "m": 14,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -43212,
+      "ramp": 1
+    },
+    {
+      "m": 15,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -29452,
+      "ramp": 1
+    },
+    {
+      "m": 16,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -15692,
+      "ramp": 1
+    },
+    {
+      "m": 17,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -1932,
+      "ramp": 1
+    },
+    {
+      "m": 18,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 11828,
+      "ramp": 1
+    },
+    {
+      "m": 19,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 25588,
+      "ramp": 1
+    },
+    {
+      "m": 20,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 39348,
+      "ramp": 1
+    },
+    {
+      "m": 21,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 53108,
+      "ramp": 1
+    },
+    {
+      "m": 22,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 66868,
+      "ramp": 1
+    },
+    {
+      "m": 23,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 80628,
+      "ramp": 1
+    },
+    {
+      "m": 24,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 94388,
+      "ramp": 1
+    }
+  ],
+  "flowAll": [
+    {
+      "m": 1,
+      "benefit": 4816,
+      "cost": 142380,
+      "net": -137564,
+      "cum": -137564,
+      "ramp": 0.35
+    },
+    {
+      "m": 2,
+      "benefit": 9632,
+      "cost": 0,
+      "net": 9632,
+      "cum": -127932,
+      "ramp": 0.7
+    },
+    {
+      "m": 3,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -114172,
+      "ramp": 1
+    },
+    {
+      "m": 4,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -100412,
+      "ramp": 1
+    },
+    {
+      "m": 5,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -86652,
+      "ramp": 1
+    },
+    {
+      "m": 6,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -72892,
+      "ramp": 1
+    },
+    {
+      "m": 7,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -59132,
+      "ramp": 1
+    },
+    {
+      "m": 8,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -45372,
+      "ramp": 1
+    },
+    {
+      "m": 9,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -31612,
+      "ramp": 1
+    },
+    {
+      "m": 10,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -17852,
+      "ramp": 1
+    },
+    {
+      "m": 11,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -4092,
+      "ramp": 1
+    },
+    {
+      "m": 12,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 9668,
+      "ramp": 1
+    },
+    {
+      "m": 13,
+      "benefit": 13760,
+      "cost": 80400,
+      "net": -66640,
+      "cum": -56972,
+      "ramp": 1
+    },
+    {
+      "m": 14,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -43212,
+      "ramp": 1
+    },
+    {
+      "m": 15,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -29452,
+      "ramp": 1
+    },
+    {
+      "m": 16,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -15692,
+      "ramp": 1
+    },
+    {
+      "m": 17,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": -1932,
+      "ramp": 1
+    },
+    {
+      "m": 18,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 11828,
+      "ramp": 1
+    },
+    {
+      "m": 19,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 25588,
+      "ramp": 1
+    },
+    {
+      "m": 20,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 39348,
+      "ramp": 1
+    },
+    {
+      "m": 21,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 53108,
+      "ramp": 1
+    },
+    {
+      "m": 22,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 66868,
+      "ramp": 1
+    },
+    {
+      "m": 23,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 80628,
+      "ramp": 1
+    },
+    {
+      "m": 24,
+      "benefit": 13760,
+      "cost": 0,
+      "net": 13760,
+      "cum": 94388,
+      "ramp": 1
+    }
+  ],
+  "payback": 12,
+  "paybackAll": 12,
+  "paybackBasis": "cash",
+  "sensitivityBasis": "cash",
+  "reCross": 18,
+  "roi": {
+    "roi12": 6.8,
+    "roi24": 42.4,
+    "inv12": 142380,
+    "inv24": 222780,
+    "meaningful": true,
+    "note": ""
+  },
+  "scenarios": [
+    {
+      "key": "cons",
+      "name": "保守",
+      "desc": "收益按中性的 65% 计，投入按 1.2 倍计",
+      "benefitMul": 0.65,
+      "costMul": 1.2,
+      "payback": null,
+      "cum12": -72025,
+      "cum24": -61177,
+      "roi12": -50.6,
+      "monthlyBenefit": 8944,
+      "cashYear1": 170856
+    },
+    {
+      "key": "mid",
+      "name": "中性",
+      "desc": "按填写的数字直接计算",
+      "benefitMul": 1,
+      "costMul": 1,
+      "payback": 12,
+      "cum12": 9668,
+      "cum24": 94388,
+      "roi12": 6.8,
+      "monthlyBenefit": 13760,
+      "cashYear1": 142380
+    },
+    {
+      "key": "opt",
+      "name": "积极",
+      "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计",
+      "benefitMul": 1.25,
+      "costMul": 0.95,
+      "payback": 9,
+      "cum12": 54799,
+      "cum24": 184819,
+      "roi12": 38.5,
+      "monthlyBenefit": 17200,
+      "cashYear1": 135261
+    }
+  ],
+  "sensitivity": [
+    {
+      "key": "benefitCut",
+      "label": "折减比例",
+      "note": "工具实际能改善多少",
+      "low": 22,
+      "high": 10,
+      "lowText": "第 22 个月",
+      "highText": "第 10 个月",
+      "base": 12,
+      "spread": 12
+    },
+    {
+      "key": "seats",
+      "label": "订阅套数",
+      "note": "实际有几个人要用",
+      "low": 11,
+      "high": 20,
+      "lowText": "第 11 个月",
+      "highText": "第 20 个月",
+      "base": 12,
+      "spread": 9
+    },
+    {
+      "key": "customBudget",
+      "label": "另议项预算",
+      "note": "系统对接与定制的实际报价",
+      "low": 11,
+      "high": 19,
+      "lowText": "第 11 个月",
+      "highText": "第 19 个月",
+      "base": 12,
+      "spread": 8
+    },
+    {
+      "key": "setupCost",
+      "label": "上线期一次性支出",
+      "note": "诊断与配置的实际花费",
+      "low": 11,
+      "high": 19,
+      "lowText": "第 11 个月",
+      "highText": "第 19 个月",
+      "base": 12,
+      "spread": 8
+    },
+    {
+      "key": "rampSpeed",
+      "label": "爬坡快慢",
+      "note": "多久能用顺手",
+      "low": 11,
+      "high": 12,
+      "lowText": "第 11 个月",
+      "highText": "第 12 个月",
+      "base": 12,
+      "spread": 1
+    }
+  ],
+  "missing": [],
+  "insufficient": false,
+  "inputSource": {
+    "errorFreqMonthly": "user",
+    "errorCostPerCase": "user",
+    "tiedCapital": "user",
+    "opsPeople": "user",
+    "opsHoursPerDay": "user",
+    "opsSalary": "user",
+    "revenueAnnual": "profile"
+  },
+  "confidence": {
+    "score": 94,
+    "band": "high",
+    "name": "口径扎实",
+    "desc": "关键数字都是贵司填的，测算可以直接用于决策讨论"
+  },
+  "capped": false,
+  "capMonthly": 1250000,
+  "revenueAnnual": 250000000,
+  "keyNumbers": [
+    {
+      "k": "现金支出合计",
+      "v": 142380,
+      "unit": "元",
+      "s": "首年，含订阅与一次性"
+    },
+    {
+      "k": "每月现金收益",
+      "v": 13760,
+      "unit": "元",
+      "s": "满额后，不含工时"
+    },
+    {
+      "k": "现金累计转正",
+      "v": 12,
+      "unit": "个月",
+      "s": "中性档 · 只算真金白银",
+      "wide": true
+    },
+    {
+      "k": "首年净收益",
+      "v": 9668,
+      "unit": "元",
+      "s": "现金口径"
+    },
+    {
+      "k": "含工时转正",
+      "v": 12,
+      "unit": "个月",
+      "s": "把省下的工时一并折算"
+    },
+    {
+      "k": "省下的工时",
+      "v": 0,
+      "unit": "元/月",
+      "s": "单列，不计入现金口径"
+    },
+    {
+      "k": "口径可信度",
+      "v": 94,
+      "unit": "分",
+      "s": "口径扎实"
+    }
+  ],
+  "quickView": [
+    {
+      "q": "一共要投多少？",
+      "a": "142380 元",
+      "text": "首年现金支出，旗舰版 × 5 套，含另议项 60000 元"
+    },
+    {
+      "q": "钱花在哪？",
+      "a": "旗舰版订阅",
+      "text": "旗舰版订阅 16400 元、专家入企 AI 诊断 1980 元、私域部署（起） 64000 元、另议项（系统对接 / 定制 / 陪跑） 60000 元"
+    },
+    {
+      "q": "收益从哪来？",
+      "a": "少出的差错",
+      "text": "少出的差错 + 转快的资金，按 按缺货损失减少与库存资金占用下降折算"
+    },
+    {
+      "q": "每月能收回多少？",
+      "a": "13760 元",
+      "text": "现金口径；另有工时折合 0 元/月不计入"
+    },
+    {
+      "q": "什么时候回本？",
+      "a": "第 12 个月",
+      "text": "现金口径，中性档；保守档第 — 个月"
+    },
+    {
+      "q": "这个数准吗？",
+      "a": "口径扎实",
+      "text": "关键数字都是贵司填的，测算可以直接用于决策讨论"
+    }
+  ],
+  "verdict": {
+    "headline": "按这组数测算，第 12 个月累计现金转正",
+    "text": "首年现金支出 142380 元，现金收益每月约 13760 元，累计净额在第 12 个月由负转正；保守档为第 — 个月。"
+  },
+  "roles": [
+    {
+      "key": "owner",
+      "name": "牵头人",
+      "who": "企业负责人或分管副总",
+      "duty": "拍板投入、定验收标准、每月看一次账",
+      "time": "每月 2 小时"
+    },
+    {
+      "key": "biz",
+      "name": "业务对接人",
+      "who": "这个场景所在部门的负责人",
+      "duty": "提供业务规则、带队试运行、反馈使用问题",
+      "time": "推进期每周半天"
+    },
+    {
+      "key": "data",
+      "name": "数据对接人",
+      "who": "IT 或熟悉业务系统的人员",
+      "duty": "导出数据、确认字段口径、处理系统对接",
+      "time": "上线前集中 3–5 天"
+    }
+  ],
+  "retrigger": [
+    {
+      "when": "真实数据替换掉了参考值",
+      "why": "参考值只是常见区间，换成贵司的真实数字后回本月可能前后移动"
+    },
+    {
+      "when": "场景换了一个",
+      "why": "不同场景的收益杠杆不同，投入档与上线周期也不同"
+    },
+    {
+      "when": "另议项报价下来了",
+      "why": "系统对接与定制的实际报价往往是投入侧最大的一笔，直接决定回本月"
+    },
+    {
+      "when": "试运行满三个月",
+      "why": "爬坡期结束后有了真实的使用数据，可以用实际效果替换折减比例"
+    },
+    {
+      "when": "经营规模发生较大变化",
+      "why": "单量、人数、占用资金变了，收益端的基数跟着变"
+    }
+  ],
+  "summaryText": "首年现金支出 142380 元，现金收益每月约 13760 元，累计净额在第 12 个月由负转正；保守档为第 — 个月。",
+  "render": [
+    {
+      "type": "three-accounts",
+      "source": "keyNumbers"
+    },
+    {
+      "type": "cost-ledger",
+      "source": "invest"
+    },
+    {
+      "type": "benefit-ledger",
+      "source": "benefit"
+    },
+    {
+      "type": "cashflow-bars",
+      "source": "flow"
+    },
+    {
+      "type": "payback-curve",
+      "source": "flow"
+    },
+    {
+      "type": "scenario-band",
+      "source": "scenarios"
+    },
+    {
+      "type": "tornado",
+      "source": "sensitivity"
+    },
+    {
+      "type": "roles",
+      "source": "roles"
+    }
+  ]
+}

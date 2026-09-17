@@ -1,0 +1,51 @@
+{
+  "note": "全部常量在报告的方法页逐条列出，测算口径对客户公开。",
+  "work": {
+    "daysPerMonth": 21.75,
+    "hoursPerDay": 8,
+    "laborBurden": 1.3,
+    "laborBurdenNote": "工资之外的社保、公积金等综合用工系数"
+  },
+  "horizonMonths": 24,
+  "prices": {
+    "note": "取自 DM 定稿宣传单，一字不改。订阅价单位为元/套年。",
+    "subscription": [
+      { "key": "light", "name": "轻享版", "yearly": 0,    "desc": "0 元开通，每次消耗积分" },
+      { "key": "std",   "name": "标准版", "yearly": 1280, "desc": "1280 元 / 套年" },
+      { "key": "adv",   "name": "高级版", "yearly": 2280, "desc": "2280 元 / 套年" },
+      { "key": "flag",  "name": "旗舰版", "yearly": 3280, "desc": "3280 元 / 套年" }
+    ],
+    "diagnosisPerDay": 1980,
+    "diagnosisName": "专家入企 AI 诊断",
+    "diagnosisDesc": "1980 元，1 天入企",
+    "privateDeploy": [
+      { "key": "base", "name": "私域部署（起）", "yearly": 12800, "desc": "12800 元起 / 套年" },
+      { "key": "top",  "name": "私域部署（区间上限）", "yearly": 33800, "desc": "区间上限 33800 元 / 套年" }
+    ],
+    "privateDeployNote": "DM 口径为「12800 元起 / 套年」，区间 12800–33800。测算只用区间的两个端点，不取中间值。"
+  },
+  "rampMonths": [0.35, 0.7, 1],
+  "rampNote": "上线后的前三个月按 35% / 70% / 100% 爬坡，第四个月起按满额计。",
+  "overlapDiscount": 0.35,
+  "overlapNote": "一个场景命中多条收益杠杆时，按各自算出的金额从大到小排序，最大的一条全额计入，其余每条按 35% 计入，避免同一笔钱被算两遍。排序依据是算出来的金额，与场景描述的行文顺序无关。",
+  "caps": {
+    "revenueShare": 0.06,
+    "revenueShareNote": "单个场景的年化收益上限为企业年营收的 6%，超出部分不计入，并在报告里注明已封顶。",
+    "valueFactor": { "1": 0.35, "2": 0.55, "3": 0.75, "4": 0.9, "5": 1 },
+    "valueFactorNote": "按场景库的 value（1–5）折一次：价值低的场景不因为输入的数字大就算出很高的收益。"
+  },
+  "scenarios": [
+    { "key": "cons", "name": "保守", "benefit": 0.65, "cost": 1.2,  "desc": "收益按中性的 65% 计，投入按 1.2 倍计" },
+    { "key": "mid",  "name": "中性", "benefit": 1,    "cost": 1,    "desc": "按填写的数字直接计算" },
+    { "key": "opt",  "name": "积极", "benefit": 1.25, "cost": 0.95, "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计" }
+  ],
+  "confidence": {
+    "start": 100,
+    "penalty": { "default": 10, "profile": 6, "noCustomBudget": 12, "genericScene": 15, "noSceneData": 8 },
+    "bands": [
+      { "min": 80, "key": "high", "name": "口径扎实", "desc": "关键数字都是贵司填的，测算可以直接用于决策讨论" },
+      { "min": 60, "key": "mid",  "name": "可作参考", "desc": "有几项用了参考值，结论的方向可信，具体数字建议补齐后重算" },
+      { "min": 0,  "key": "low",  "name": "需要补数", "desc": "核心数字缺得较多，本次只给投入侧，回收期需要补齐后再算" }
+    ]
+  }
+}

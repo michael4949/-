@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dgg/03-roi-calculator/output",
+  "title": "企业AI投入ROI测算器 · 输出",
+  "description": "core/compute.js 的返回值。成功时 ok=true，携带 28 页报告所需的全部结构化数据；输入不合法时 ok=false 并列出 errors，不扣积分。金额一律为整数元。",
+  "oneOf": [{ "$ref": "#/definitions/success" }, { "$ref": "#/definitions/failure" }],
+  "definitions": {
+    "leverKey": { "enum": ["hours", "error", "revenue", "margin", "cash", "spend", "output"] },
+    "money": { "type": "integer", "description": "整数元" },
+    "month": { "type": ["integer", "null"], "minimum": 1, "maximum": 24, "description": "第几个月；算不出为 null" },
+    "source": { "enum": ["user", "profile", "default", "scene"], "description": "这个数字是谁给的" },
+    "failure": {
+      "type": "object", "additionalProperties": false, "required": ["ok", "errors"],
+      "properties": {
+        "ok": { "const": false },
+        "errors": { "type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["field", "msg"],
+          "properties": { "field": { "type": "string" }, "msg": { "type": "string" } } } }
+      }
+    },
+    "flowRow": {
+      "type": "object", "required": ["m", "benefit", "cost", "net", "cum", "ramp"],
+      "properties": {
+        "m": { "type": "integer", "minimum": 1, "maximum": 24 },
+        "benefit": { "$ref": "#/definitions/money" },
+        "cost": { "$ref": "#/definitions/money" },
+        "net": { "$ref": "#/definitions/money" },
+        "cum": { "$ref": "#/definitions/money" },
+        "ramp": { "type": "number", "minimum": 0, "maximum": 1, "description": "当月收益爬坡系数" }
+      }
+    },
+    "leverResult": {
+      "type": "object", "required": ["key", "name", "monthly", "weight", "discounted", "final", "basis", "cash", "cut", "rank"],
+      "properties": {
+        "key": { "$ref": "#/definitions/leverKey" },
+        "name": { "type": "string" }, "en": { "type": "string" }, "money": { "type": "string" },
+        "monthly": { "$ref": "#/definitions/money", "description": "这条杠杆自己算出的月收益，未经合并折扣与封顶" },
+        "weight": { "type": "number", "enum": [1, 0.35], "description": "金额最大的一条全额计入，其余按 35%" },
+        "discounted": { "type": "boolean" },
+        "final": { "$ref": "#/definitions/money", "description": "封顶后实际计入的月收益" },
+        "basis": { "type": "string", "description": "算式原文，直接展示给客户" },
+        "cash": { "type": "boolean", "description": "是否计入现金口径。hours 为 false" },
+        "cut": { "type": "number", "minimum": 0, "maximum": 1 }, "cutNote": { "type": "string" },
+        "rank": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "success": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ok", "meta", "profile", "scene", "sceneBasis", "sector", "levers", "plan", "invest", "benefit",
+                   "flow", "flowAll", "payback", "paybackAll", "paybackBasis", "sensitivityBasis", "reCross", "roi",
+                   "scenarios", "sensitivity", "missing", "insufficient", "inputSource", "confidence",
+                   "capped", "capMonthly", "revenueAnnual", "keyNumbers", "quickView", "verdict", "roles", "retrigger",
+                   "summaryText", "render"],
+      "properties": {
+        "ok": { "const": true },
+        "meta": { "type": "object", "required": ["module", "credits", "version", "horizon"],
+          "properties": { "module": { "const": "企业AI投入ROI测算器" }, "credits": { "const": 20 },
+            "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }, "horizon": { "const": 24 } } },
+        "profile": { "type": "object" },
+        "scene": { "type": "object", "required": ["id", "name", "module", "weeks", "cost", "value", "roiBasis"],
+          "properties": { "id": { "type": ["string", "null"] }, "name": { "type": "string" }, "stage": { "type": "string" },
+            "user": { "type": "string" }, "replaces": { "type": "string" }, "module": { "type": "string" },
+            "metric": { "type": "string" }, "roiBasis": { "type": "string" }, "weeks": { "type": "number" },
+            "cost": { "enum": ["零", "轻", "中", "重"] }, "value": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "dataDeps": { "type": "array", "items": { "type": "string" } },
+            "firstStep": { "type": "string" }, "precondition": { "type": "string" } } },
+        "sceneBasis": { "enum": ["library", "generic"] },
+        "sector": { "type": "string" },
+        "levers": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/definitions/leverKey" } },
+        "plan": { "type": "object" },
+        "invest": { "type": "object", "required": ["cashItems", "cashOnce", "cashYearly", "cashYear1", "laborItems", "laborYear1", "setupWeeks", "tierName", "seats"],
+          "properties": {
+            "cashItems": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["key", "name", "detail", "amount", "yearly"],
+              "properties": { "key": { "type": "string" }, "name": { "type": "string" }, "detail": { "type": "string" },
+                "amount": { "$ref": "#/definitions/money" }, "yearly": { "type": "boolean" } } } },
+            "cashOnce": { "$ref": "#/definitions/money" }, "cashYearly": { "$ref": "#/definitions/money" },
+            "cashYear1": { "$ref": "#/definitions/money" },
+            "laborItems": { "type": "array", "minItems": 2, "items": { "type": "object" } },
+            "laborYear1": { "$ref": "#/definitions/money" },
+            "setupHours": { "type": "integer" }, "setupHourly": { "type": "number" },
+            "setupWeeks": { "type": "number" }, "dataStateMult": { "type": "number" },
+            "runLaborMonthly": { "$ref": "#/definitions/money" },
+            "tierName": { "type": "string" }, "seats": { "type": "integer" },
+            "total12": { "$ref": "#/definitions/money" }, "totalNote": { "type": "string" } } },
+        "benefit": { "type": "object", "required": ["levers", "rawMonthly", "valueFactor", "afterValue", "capped", "fullMonthly", "cashMonthly", "hoursMonthly"],
+          "properties": {
+            "levers": { "type": "array", "items": { "$ref": "#/definitions/leverResult" } },
+            "rawMonthly": { "$ref": "#/definitions/money" },
+            "valueFactor": { "type": "number", "minimum": 0.35, "maximum": 1 },
+            "afterValue": { "$ref": "#/definitions/money" },
+            "capMonthly": { "type": ["integer", "null"] }, "capped": { "type": "boolean" },
+            "fullMonthly": { "$ref": "#/definitions/money" },
+            "cashMonthly": { "$ref": "#/definitions/money" },
+            "hoursMonthly": { "$ref": "#/definitions/money", "description": "省下的工时折算，不计入现金口径" },
+            "cashYear1": { "type": "integer" }, "note": { "type": "string" } } },
+        "flow": { "type": "array", "items": { "$ref": "#/definitions/flowRow" }, "description": "现金口径 24 个月；insufficient 时为空数组" },
+        "flowAll": { "type": "array", "items": { "$ref": "#/definitions/flowRow" }, "description": "综合口径（含工时折算）24 个月" },
+        "payback": { "$ref": "#/definitions/month", "description": "现金口径回本月，报告的主数字" },
+        "paybackAll": { "$ref": "#/definitions/month", "description": "含工时折算的回本月，作第二行" },
+        "paybackBasis": { "enum": ["cash", "hours", "none"] },
+        "sensitivityBasis": { "enum": ["cash", "all"] },
+        "reCross": { "type": ["integer", "null"], "description": "第 13 个月年费入账后若再次转负，这里是二次转正的月份" },
+        "roi": { "type": ["object", "null"], "required": ["roi12", "roi24", "inv12", "inv24", "meaningful"],
+          "properties": { "roi12": { "type": ["number", "null"] }, "roi24": { "type": ["number", "null"] },
+            "inv12": { "$ref": "#/definitions/money" }, "inv24": { "$ref": "#/definitions/money" },
+            "meaningful": { "type": "boolean", "description": "投入极小时回报率失去参考意义，此处为 false，报告改用回本月作主数字" },
+            "note": { "type": "string" } } },
+        "scenarios": { "type": "array", "minItems": 3, "maxItems": 3, "items": {
+          "type": "object", "required": ["key", "name", "desc", "benefitMul", "costMul", "payback"],
+          "properties": { "key": { "enum": ["cons", "mid", "opt"] }, "name": { "enum": ["保守", "中性", "积极"] },
+            "desc": { "type": "string" }, "benefitMul": { "type": "number" }, "costMul": { "type": "number" },
+            "payback": { "$ref": "#/definitions/month" }, "cum12": { "type": ["integer", "null"] },
+            "cum24": { "type": ["integer", "null"] }, "roi12": { "type": ["number", "null"] },
+            "monthlyBenefit": { "type": "integer" }, "cashYear1": { "type": "integer" } } } },
+        "sensitivity": { "type": "array", "items": {
+          "type": "object", "required": ["key", "label", "note", "low", "high", "spread"],
+          "properties": { "key": { "enum": ["benefitCut", "customBudget", "seats", "setupCost", "rampSpeed"] },
+            "label": { "type": "string" }, "note": { "type": "string" },
+            "low": { "$ref": "#/definitions/month" }, "high": { "$ref": "#/definitions/month" },
+            "lowText": { "type": "string" }, "highText": { "type": "string" },
+            "base": { "type": ["integer", "null"] }, "spread": { "type": "number", "minimum": 0 } } } },
+        "missing": { "type": "array", "items": {
+          "type": "object", "required": ["lever", "leverName", "field", "label", "why"],
+          "properties": { "lever": { "$ref": "#/definitions/leverKey" }, "leverName": { "type": "string" },
+            "field": { "type": "string" }, "label": { "type": "string" }, "why": { "type": "string" } } } },
+        "insufficient": { "type": "boolean", "description": "收益端一条杠杆都算不出来；此时只出投入侧，不出回收期" },
+        "inputSource": { "type": "object", "additionalProperties": { "$ref": "#/definitions/source" } },
+        "confidence": { "type": "object", "required": ["score", "band", "name", "desc"],
+          "properties": { "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "band": { "enum": ["high", "mid", "low"] }, "name": { "type": "string" }, "desc": { "type": "string" } } },
+        "capped": { "type": "boolean" },
+        "capMonthly": { "type": ["integer", "null"] },
+        "revenueAnnual": { "type": ["integer", "null"] },
+        "keyNumbers": { "type": "array", "minItems": 7, "maxItems": 7, "items": {
+          "type": "object", "required": ["k", "v", "unit", "s"],
+          "properties": { "k": { "type": "string" }, "v": { "type": ["number", "null"] },
+            "unit": { "type": "string" }, "s": { "type": "string" }, "wide": { "type": "boolean" } } } },
+        "quickView": { "type": "array", "minItems": 6, "maxItems": 6, "items": {
+          "type": "object", "required": ["q", "a", "text"],
+          "properties": { "q": { "type": "string" }, "a": { "type": "string" }, "text": { "type": "string" } } } },
+        "verdict": { "type": "object", "required": ["headline", "text"],
+          "properties": { "headline": { "type": "string" }, "text": { "type": "string" } } },
+        "roles": { "type": "array", "minItems": 3, "maxItems": 3, "items": {
+          "type": "object", "required": ["key", "name", "who", "duty", "time"],
+          "properties": { "key": { "enum": ["owner", "biz", "data"] }, "name": { "type": "string" },
+            "who": { "type": "string" }, "duty": { "type": "string" }, "time": { "type": "string" } } } },
+        "retrigger": { "type": "array", "minItems": 5, "maxItems": 5, "items": {
+          "type": "object", "required": ["when", "why"],
+          "properties": { "when": { "type": "string" }, "why": { "type": "string" } } } },
+        "summaryText": { "type": "string" },
+        "render": { "type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["type", "source"],
+          "properties": { "type": { "type": "string" }, "source": { "type": "string" } } } }
+      }
+    }
+  }
+}
