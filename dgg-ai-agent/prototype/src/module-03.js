@@ -6,7 +6,7 @@
   'use strict';
   var sh, $root, h, DATA, CH;
   var core = window.DGG.coreM3;
-  var M = { step: 'input', form: null, plan: null, gain: null, result: null, pages: [], llmState: 'none', cutMul: 1, base: null, baseSnap: null };
+  var M = { step: 'input', form: null, plan: null, picks: [], result: null, pages: [], llmState: 'none', cutMul: 1, base: null, baseSnap: null };
 
   function levers() {
     var src = DATA.m3.levers;
@@ -31,9 +31,13 @@
   function sceneById(id) { var r = null; secScenes().forEach(function (s) { if (s.id === id) r = s; }); return r; }
   function leversOf(id) { return (DATA.m3.sceneLevers.map[id] || ['hours']).slice(); }
   function leverDef(k) { var r = null; LV().items.forEach(function (x) { if (x.key === k) r = x; }); return r; }
-  function emptyForm() { return { name: '', industry: sh.displayIndustryDefault() || 'mfg-machinery', size: null, revenue: null, province: '浙江', years: null, ownership: 'private', customers: null, systems: [], itStaff: null, branches: 'single', overseas: 'no', role: 'owner' }; }
+  function emptyForm() {
+    return { name: '', industry: sh.displayIndustryDefault() || 'mfg-machinery', size: null, revenue: null,
+             province: '浙江', years: null, ownership: 'private', customers: null, systems: [],
+             itStaff: null, branches: 'single', overseas: 'no', role: 'owner' };
+  }
   function fromProfile(p) { var f = emptyForm(); Object.keys(f).forEach(function (k) { if (p[k] != null) f[k] = Array.isArray(p[k]) ? p[k].slice() : p[k]; }); return f; }
-  function emptyPlan() { return { sceneId: null, tier: 'adv', dataState: 'excel', setupPeople: 1, setupSalary: 7500 }; }
+  function emptyPlan() { return { tier: 'adv', dataState: 'excel', setupPeople: 2, setupSalary: 7500 }; }
   function fmt(n) { return (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('en-US'); }
   function trunc(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   function reportNo(r) { var d = r.meta && r.meta.date ? r.meta.date : '20260917'; return 'DGG-R-' + d + '-' + String(Math.abs(hashOf(r.profile.name)) % 100000).padStart(5, '0'); }
@@ -44,29 +48,360 @@
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; CH = window.DGG.charts;
     if (!M.form) M.form = sh.getCompany() ? fromProfile(sh.getCompany()) : emptyForm();
     if (!M.plan) M.plan = emptyPlan();
-    if (!M.gain) M.gain = {};
+    if (!M.picks) M.picks = [];
     M.step = step || (M.result ? 'report' : 'input');
     if ((M.step === 'report' || M.step === 'board') && !M.result) M.step = 'input';
+    if ((M.step === 'gain' || M.step === 'plan') && !M.picks.length) M.step = 'scenes';
+    if (M.step === 'scenes' && profileGaps().length) M.step = 'input';
     draw();
   }
   function unmount() { }
-  function onCompany(c) { M.form = c ? fromProfile(c) : emptyForm(); M.result = null; M.base = null; M.baseSnap = null; if (M.step !== 'input') setStep('input'); else draw(); }
-  function onIndustry(slug) { if (slug && M.form.industry !== slug) { M.form.industry = slug; M.plan.sceneId = null; M.result = null; M.base = null; M.baseSnap = null; if (M.step === 'input') draw(); else setStep('input'); } }
+  function onCompany(c) {
+    // 本模块自己把画像写回外壳时会回调到这里，此时内容与当前状态一致，不应把用户弹回第一屏
+    if (c && M.form && JSON.stringify(fromProfile(c)) === JSON.stringify(M.form)) return;
+    M.form = c ? fromProfile(c) : emptyForm();
+    M.result = null; M.base = null; M.baseSnap = null; M.picks = [];
+    if (M.step !== 'input') setStep('input'); else draw();
+  }
+  function onIndustry(slug) {
+    // 外壳顶部的行业选择器只在第一屏生效：用户已经往下走了就不要把他弹回来重选
+    if (!slug || M.form.industry === slug) return;
+    if (M.step !== 'input') return;
+    M.form.industry = slug; M.picks = []; M.result = null; M.base = null; M.baseSnap = null;
+    draw();
+  }
   function setStep(s) { M.step = s; sh.go('m3', s); }
 
+  // ---------- 选中的场景组合 ----------
+  function picked() { return M.picks; }
+  function isPicked(id) { return M.picks.some(function (x) { return x.sceneId === id; }); }
+  function pickOf(id) { return M.picks.filter(function (x) { return x.sceneId === id; })[0]; }
+  function togglePick(id) {
+    if (isPicked(id)) M.picks = M.picks.filter(function (x) { return x.sceneId !== id; });
+    else if (M.picks.length < 12) M.picks.push({ sceneId: id, gain: {} });
+  }
+  function inputOf() {
+    return { profile: M.form,
+             scenes: M.picks.filter(function (x) { return !x.off; }).map(function (x) { return { sceneId: x.sceneId, gain: x.gain }; }),
+             plan: M.plan };
+  }
+
+  // ---------- 缺口与就绪状态：按钮为什么不能点，必须写在屏幕上 ----------
+  function profileGaps() {
+    var need = DATA.fields.filter(function (f) { return f.required; });
+    return need.filter(function (f) {
+      var v = M.form[f.key];
+      return f.type === 'multi' ? !(Array.isArray(v) && v.length) : !v;
+    }).map(function (f) { return f.label; });
+  }
+  function gainGapsOf(x) {
+    var out = [];
+    leversOf(x.sceneId).forEach(function (k) {
+      var d = leverDef(k); if (!d) return;
+      d.fields.forEach(function (f) { if (!(x.gain[f.key] != null && x.gain[f.key] !== '')) out.push({ lever: d.name, label: f.label, key: f.key }); });
+    });
+    return out;
+  }
+  function gainGaps() {
+    var n = 0; M.picks.forEach(function (x) { n += gainGapsOf(x).length; });
+    return n;
+  }
+  // 预估：场景还没填收益参数时也要能给出组合规模，让客户看得见选择的后果
+  function preview() {
+    if (!M.picks.length) return null;
+    try {
+      var o = core.compute(inputOf(), bundle());
+      return o.ok ? o : null;
+    } catch (e) { return null; }
+  }
+
   function recompute() {
-    var out = core.compute({ profile: M.form, plan: M.plan, gain: M.gain }, bundle());
+    var out = core.compute(inputOf(), bundle());
     if (out.ok) { out.meta.date = '20260917'; M.result = out; }
     return out;
   }
 
-  // ================= 屏 1–3：输入 =================
+  // ---------- 通用件 ----------
   function steps(n) {
-    var names = ['企业与场景', '投入方案', '收益端', '测算台'];
+    var names = ['企业画像', '场景组合', '收益参数', '投入方案', '测算台'];
     return h('div', { class: 'm3-steps-bar' }, names.map(function (t, i) {
-      return h('span', { class: 'st' + (i + 1 === n ? ' on' : (i + 1 < n ? ' done' : '')) }, [String(i + 1) + ' ' + t]);
+      return h('button', {
+        class: 'st' + (i + 1 === n ? ' on' : (i + 1 < n ? ' done' : '')),
+        onclick: function () { if (i + 1 < n) setStep(['input', 'scenes', 'gain', 'plan', 'board'][i]); }
+      }, [String(i + 1) + ' ' + t]);
     }));
   }
+  function blocked(list, label) {
+    if (!list.length) return null;
+    return h('div', { class: 'm3-block' }, [
+      h('b', {}, [label]),
+      h('span', {}, [list.slice(0, 6).join('、') + (list.length > 6 ? ' 等 ' + list.length + ' 项' : '')])
+    ]);
+  }
+
+  // ================= 屏 1：企业画像（可编辑） =================
+  function screenInput() {
+    var f = M.form, gaps = profileGaps();
+    var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(steps(1));
+    pane.appendChild(h('h2', { class: 'm3-h2' }, ['第一步　企业画像']));
+    pane.appendChild(h('p', { class: 'm3-p' }, [
+      '本测算的对象是贵司在 AI 方面的整体投入与回报，不是单个场景。企业画像决定场景库的取用范围、'
+      + '订阅账号数与另议项的规模推导，以及收益侧营收封顶的口径——下面每一项都会进入测算。'
+    ]));
+    var grid = h('div', { class: 'm3-form' });
+    DATA.fields.forEach(function (fd) {
+      var ctrl, cls = '';
+      if (fd.type === 'text') {
+        var inp = h('input', { class: 'm3-txt', type: 'text', value: f.name || '', placeholder: fd.placeholder || '请输入企业全称', maxlength: '40' });
+        inp.addEventListener('input', function () { f.name = inp.value; var b = document.getElementById('m3-next1'); if (b) b.disabled = profileGaps().length > 0; var g = document.getElementById('m3-gap1'); if (g) { sh.clear(g); var gg = profileGaps(); var nb = blocked(gg, gg.length ? '还需填写：' : ''); if (nb) g.appendChild(nb); } });
+        ctrl = inp;
+      } else if (fd.type === 'industry') {
+        cls = 'span2';
+        var sec = sectorOf(f.industry) || DATA.industries.sectors[0], box = h('div');
+        box.appendChild(h('div', { class: 'm3-chips sm' }, DATA.industries.sectors.map(function (s) {
+          return h('button', { class: 'ch' + (s.key === sec.key ? ' on' : ''), onclick: function () { f.industry = s.industries[0].slug; M.picks = []; draw(); } }, [s.name]);
+        })));
+        box.appendChild(h('div', { class: 'm3-chips' }, sec.industries.map(function (i) {
+          return h('button', { class: 'ch' + (i.slug === f.industry ? ' on' : ''), onclick: function () { f.industry = i.slug; M.picks = []; draw(); } }, [i.name]);
+        })));
+        ctrl = box;
+      } else if (fd.type === 'select') {
+        var sel = h('select', { class: 'm3-sel', onchange: function () { f.province = sel.value; } });
+        (DATA.provinces || ['浙江']).forEach(function (pv) { sel.appendChild(h('option', { value: pv, selected: pv === f.province }, [pv])); });
+        ctrl = sel;
+      } else if (fd.type === 'multi') {
+        cls = 'span2';
+        ctrl = h('div', { class: 'm3-chips' }, fd.options.map(function (o) {
+          var on = (f.systems || []).indexOf(o.v) >= 0;
+          return h('button', { class: 'ch' + (on ? ' on' : ''), onclick: function () {
+            if (o.exclusive) f.systems = on ? [] : [o.v];
+            else { f.systems = (f.systems || []).filter(function (x) { return x !== 'none' && x !== o.v; }); if (!on) f.systems.push(o.v); }
+            draw();
+          } }, [o.t]);
+        }));
+      } else {
+        ctrl = h('div', { class: 'm3-chips' }, fd.options.map(function (o) {
+          return h('button', { class: 'ch' + (f[fd.key] === o.v ? ' on' : ''), onclick: function () { f[fd.key] = o.v; draw(); } }, [o.t]);
+        }));
+      }
+      grid.appendChild(h('div', { class: 'm3-field ' + cls }, [
+        h('label', {}, [fd.label, fd.required ? h('i', { class: 'req' }, ['必填']) : null,
+          fd.key === 'revenue' ? h('i', { class: 'why' }, ['决定收益封顶与投入合理性核验']) : null,
+          fd.key === 'systems' ? h('i', { class: 'why' }, ['决定系统对接科目的计列范围']) : null,
+          fd.key === 'size' ? h('i', { class: 'why' }, ['决定订阅账号数与另议项的规模推导']) : null]),
+        ctrl
+      ]));
+    });
+    pane.appendChild(grid);
+    pane.appendChild(h('div', { id: 'm3-gap1' }, [blocked(gaps, '还需填写：')].filter(Boolean)));
+    pane.appendChild(h('div', { class: 'm3-act' }, [
+      h('span', { class: 'm3-cnt' }, ['必填 ', h('b', {}, [(DATA.fields.filter(function (x) { return x.required; }).length - gaps.length) + ' / ' + DATA.fields.filter(function (x) { return x.required; }).length]), ' 项']),
+      h('button', { class: 'btn', id: 'm3-next1', disabled: gaps.length > 0, onclick: function () {
+        sh.setCompany(JSON.parse(JSON.stringify(M.form)));
+        setStep('scenes');
+      } }, ['下一步：选场景组合'])
+    ]));
+    $root.appendChild(pane);
+  }
+
+  // ================= 屏 2：场景组合（多选） =================
+  function screenScenes() {
+    var list = secScenes();
+    var byStage = [];
+    list.forEach(function (s) {
+      var g = byStage.filter(function (x) { return x.stage === s.stage; })[0];
+      if (!g) { g = { stage: s.stage, items: [] }; byStage.push(g); }
+      g.items.push(s);
+    });
+    var pv = preview();
+    var pane = h('div', { class: 'm3-pane wide' });
+    pane.appendChild(steps(2));
+    pane.appendChild(h('h2', { class: 'm3-h2' }, ['第二步　选定拟实施的场景组合']));
+    pane.appendChild(h('p', { class: 'm3-p' }, [
+      '企业级测算不是把单场景的账相加。多个场景同批实施时，账号可跨场景复用、同一个业务系统只对接一次、'
+      + '配置能力可复用，同类效益也会在不同场景之间重复计算——这四处都会在测算中逐项归集。'
+      + '本行业场景库共 ' + list.length + ' 个条目，按业务环节分组，勾选贵司本次拟立项的范围。'
+    ]));
+
+    // 组合摘要：选择的后果实时可见
+    var sum = h('div', { class: 'm3-picksum' }, [
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['已选场景']), h('div', { class: 'v' }, [String(M.picks.length), h('small', {}, [' / 12'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['实施批次']), h('div', { class: 'v' }, [pv ? String(pv.portfolio.waves.length) : '—', h('small', {}, [' 批'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['总工期']), h('div', { class: 'v' }, [pv ? String(pv.portfolio.totalWeeks) : '—', h('small', {}, [' 周'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['预估账号数']), h('div', { class: 'v' }, [pv ? String(pv.invest.seats) : '—', h('small', {}, [' 套'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['命中效益杠杆']), h('div', { class: 'v' }, [
+        String((function () { var s = {}; M.picks.forEach(function (x) { leversOf(x.sceneId).forEach(function (k) { s[k] = 1; }); }); return Object.keys(s).length; })()),
+        h('small', {}, [' / 7 类'])])])
+    ]);
+    pane.appendChild(sum);
+
+    pane.appendChild(h('div', { class: 'm3-quickpick' }, [
+      h('span', {}, ['快速选择']),
+      h('button', { class: 'qp', onclick: function () {
+        M.picks = list.slice().sort(function (a, b) { return (b.value - a.value) || (a.weeks - b.weeks); }).slice(0, 4)
+          .map(function (s) { return { sceneId: s.id, gain: (pickOf(s.id) || {}).gain || {} }; });
+        draw();
+      } }, ['价值最高的 4 个']),
+      h('button', { class: 'qp', onclick: function () {
+        M.picks = list.slice().filter(function (s) { return s.cost === '零' || s.cost === '轻'; })
+          .sort(function (a, b) { return (b.value - a.value) || (a.weeks - b.weeks); }).slice(0, 4)
+          .map(function (s) { return { sceneId: s.id, gain: (pickOf(s.id) || {}).gain || {} }; });
+        draw();
+      } }, ['先做轻投入的 4 个']),
+      h('button', { class: 'qp', onclick: function () { M.picks = []; draw(); } }, ['清空'])
+    ]));
+
+    byStage.forEach(function (g) {
+      pane.appendChild(h('h3', { class: 'm3-h3' }, [g.stage, h('span', { class: 'n' }, [g.items.length + ' 个场景'])]));
+      pane.appendChild(h('div', { class: 'm3-scenes' }, g.items.map(function (s) {
+        var on = isPicked(s.id);
+        var lv = leversOf(s.id).map(function (k) { var d = leverDef(k); return d ? d.name : k; });
+        return h('button', { class: 'sc' + (on ? ' on' : ''), onclick: function () { togglePick(s.id); draw(); } }, [
+          h('div', { class: 'tick' }, [on ? '✓' : '']),
+          h('div', { class: 'n' }, [s.name]),
+          h('div', { class: 'm' }, [(s.user || '业务岗') + '　·　替代「' + trunc(s.replaces || '手工处理', 14) + '」']),
+          h('div', { class: 'meta' }, [
+            h('span', {}, ['上线 ' + s.weeks + ' 周']),
+            h('span', {}, ['投入 ' + s.cost + ' 档']),
+            h('span', { class: 'val' }, ['价值 ' + s.value + '/5'])
+          ]),
+          h('div', { class: 'l' }, lv.map(function (x) { return h('span', {}, [x]); }))
+        ]);
+      })));
+    });
+
+    pane.appendChild(h('div', { class: 'm3-act' }, [
+      h('button', { class: 'btn ghost', onclick: function () { setStep('input'); } }, ['上一步']),
+      M.picks.length ? null : h('span', { class: 'm3-cnt warn' }, ['请至少勾选 1 个场景']),
+      h('button', { class: 'btn', disabled: !M.picks.length, onclick: function () { setStep('gain'); } },
+        ['下一步：填收益参数' + (M.picks.length ? '（' + M.picks.length + ' 个场景）' : '')])
+    ].filter(Boolean)));
+    $root.appendChild(pane);
+  }
+
+  // ================= 屏 3：逐场景收益参数 =================
+  function screenGain() {
+    var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(steps(3));
+    var gap = gainGaps();
+    pane.appendChild(h('h2', { class: 'm3-h2' }, ['第三步　逐场景填写收益参数']));
+    pane.appendChild(h('p', { class: 'm3-p' }, [
+      '每个场景各自命中的效益杠杆不同，所需参数也不同，下面只问用得上的那几个数。'
+      + '本工具不对收益侧的核心参数设定默认值：留空的场景不参与收益测算，报告会逐项写明缺什么、缺在哪个场景。'
+    ]));
+    M.picks.forEach(function (x, idx) {
+      var sc = sceneById(x.sceneId); if (!sc) return;
+      var lv = leversOf(x.sceneId);
+      var g = gainGapsOf(x);
+      var card = h('div', { class: 'm3-lv' + (g.length ? '' : ' done') });
+      card.appendChild(h('div', { class: 'hd' }, [
+        h('span', { class: 'ix' }, [String(idx + 1)]),
+        h('b', {}, [sc.name]),
+        h('i', {}, [sc.stage + '　·　' + sc.roiBasis]),
+        h('span', { class: 'st' + (g.length ? '' : ' ok') }, [g.length ? '还缺 ' + g.length + ' 项' : '已填齐'])
+      ]));
+      lv.forEach(function (k) {
+        var d = leverDef(k); if (!d) return;
+        card.appendChild(h('div', { class: 'cut' }, [h('b', {}, [d.name + '　']), d.cutNote]));
+        d.fields.forEach(function (f) {
+          card.appendChild(numRow(f.label, f.hint || '', x.gain[f.key] == null ? null : x.gain[f.key], f.unit, f.presets, function (v) {
+            if (v == null) delete x.gain[f.key]; else x.gain[f.key] = v;
+          }));
+        });
+        if (!d.cash) card.appendChild(h('div', { class: 'm3-hint' }, ['本项属非现金科目：除非释放工时被重新配置至产出性岗位，否则不构成可确认的现金流入，故不参与回收期测算，报告中单独列示。']));
+      });
+      pane.appendChild(card);
+    });
+    pane.appendChild(h('div', { class: 'm3-act' }, [
+      h('button', { class: 'btn ghost', onclick: function () { setStep('scenes'); } }, ['上一步']),
+      h('span', { class: 'm3-cnt' + (gap ? ' warn' : '') }, [gap ? '尚有 ' + gap + ' 项未填，留空的场景不计入收益' : '全部参数已填齐']),
+      h('button', { class: 'btn', onclick: function () { setStep('plan'); } }, ['下一步：投入方案'])
+    ]));
+    $root.appendChild(pane);
+  }
+
+  // ================= 屏 4：投入方案 =================
+  function screenPlan() {
+    var P = C().prices;
+    var pv = preview();
+    var refCustom = pv ? pv.invest.customRefTotal : null;
+    var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(steps(4));
+    pane.appendChild(h('h2', { class: 'm3-h2' }, ['第四步　投入方案']));
+    pane.appendChild(h('p', { class: 'm3-p' }, [
+      '价格取自定稿产品资料，未作调整。下列各项留空时按企业规模与本次场景组合推导参考值，'
+      + '参考值在报告里逐处标注，企业填报值一律优先。'
+    ]));
+    if (pv) pane.appendChild(h('div', { class: 'm3-picksum' }, [
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['场景组合']), h('div', { class: 'v' }, [String(pv.portfolio.count), h('small', {}, [' 个'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['首年现金支出']), h('div', { class: 'v' }, [fmt(pv.invest.cashYear1), h('small', {}, [' 元'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['占营业收入']), h('div', { class: 'v' }, [pv.invest.revenueShare == null ? '—' : String(pv.invest.revenueShare), h('small', {}, [' %'])])]),
+      h('div', { class: 'it' }, [h('div', { class: 'k' }, ['核验']), h('div', { class: 'v sm ' + (pv.invest.shareVerdict === 'in' ? 'ok' : 'warn') }, [
+        pv.invest.shareVerdict === 'in' ? '与体量匹配' : (pv.invest.shareVerdict === 'low' ? '偏低' : (pv.invest.shareVerdict === 'high' ? '偏高' : '未启用'))])])
+    ]));
+    pane.appendChild(field('订阅版本', '按套年计价，全部场景共用账号', opts(P.subscription.map(function (t) {
+      return { v: t.key, t: t.name, s: t.yearly ? t.yearly + ' 元 / 套年' : '0 元开通' };
+    }), M.plan.tier, function (v) { M.plan.tier = v; })));
+    pane.appendChild(numRow('订阅账号数',
+      pv && M.plan.seats == null ? '留空则按规模与组合推导 ' + pv.invest.seats + ' 套（各场景人数按 ' + pv.portfolio.seatOverlap + ' 复用系数归并）' : '按实际开通账号数计列',
+      M.plan.seats == null ? null : M.plan.seats, '套', [5, 12, 20, 30],
+      function (v) { if (v == null) delete M.plan.seats; else M.plan.seats = v; }));
+    pane.appendChild(field('专家入企 AI 诊断',
+      pv && M.plan.diagnosisDays == null ? P.diagnosisPerDay + ' 元 / 天　留空则按 ' + pv.portfolio.count + ' 个场景建议 ' + pv.invest.diagnosisDays + ' 天' : P.diagnosisPerDay + ' 元 / 天',
+      opts([{ v: null, t: '按建议计列', s: pv ? pv.invest.diagnosisDays + ' 天' : '—' },
+            { v: 0, t: '暂不安排', s: '0 元' }, { v: 1, t: '1 天', s: P.diagnosisPerDay + ' 元' },
+            { v: 2, t: '2 天', s: P.diagnosisPerDay * 2 + ' 元' }, { v: 3, t: '3 天', s: P.diagnosisPerDay * 3 + ' 元' }],
+        M.plan.diagnosisDays == null ? null : M.plan.diagnosisDays,
+        function (v) { if (v == null) delete M.plan.diagnosisDays; else M.plan.diagnosisDays = v; })));
+    pane.appendChild(field('私域部署', '数据不出企业内网时选用，按一套部署计，不随账号数增加', opts(
+      [{ v: null, t: '不需要', s: '—' }].concat(P.privateDeploy.map(function (x) { return { v: x.key, t: x.name, s: x.yearly + ' 元 / 套年' }; })),
+      M.plan.privateDeploy == null ? null : M.plan.privateDeploy,
+      function (v) { if (v == null) delete M.plan.privateDeploy; else M.plan.privateDeploy = v; })));
+    pane.appendChild(numRow('另议项预算',
+      refCustom != null && M.plan.customBudget == null
+        ? '系统对接 / 定制开发 / 落地陪跑 / 数据整理　留空则按四科目推导 ' + fmt(refCustom) + ' 元'
+        : '系统对接 / 定制开发 / 落地陪跑 / 历史数据整理',
+      M.plan.customBudget == null ? null : M.plan.customBudget, '元',
+      refCustom ? [0, Math.round(refCustom * 0.6 / 1000) * 1000, refCustom, Math.round(refCustom * 1.5 / 1000) * 1000] : [0, 50000, 150000, 300000],
+      function (v) { if (v == null) delete M.plan.customBudget; else M.plan.customBudget = v; }));
+    if (refCustom != null && M.plan.customBudget == null && pv) {
+      pane.appendChild(h('div', { class: 'm3-hint' }, ['另议项按四个科目分别推导：'
+        + pv.invest.customItems.map(function (x) { return x.name + ' ' + fmt(x.amount) + ' 元'; }).join('、')
+        + '。多场景的协同已计入——系统接口去重、定制开发按 ' + pv.portfolio.devPerScene.map(function (x) { return x.factor; }).join(' / ') + ' 递减、数据整理只做一次。']));
+    }
+    pane.appendChild(h('h3', { class: 'm3-h3' }, ['实施节奏与内部投入']));
+    pane.appendChild(field('数据现状', '决定上线周期倍率与历史数据整理工作量', opts([
+      { v: 'paper', t: '纸质为主', s: '倍率 1.6' }, { v: 'scattered', t: '分散在多个系统', s: '1.3' },
+      { v: 'excel', t: '表格管理', s: '1.15' }, { v: 'system', t: '系统内齐全', s: '1.0' }
+    ], M.plan.dataState, function (v) { M.plan.dataState = v; })));
+    pane.appendChild(field('每批同时上线的场景数',
+      pv ? '当前 ' + pv.portfolio.count + ' 个场景将分 ' + pv.portfolio.waves.length + ' 批推进，总工期 ' + pv.portfolio.totalWeeks + ' 周' : '同批工期取该批最长者，批与批之间串行',
+      opts([{ v: null, t: '按建议', s: '每批 2 个' }, { v: 1, t: '每批 1 个', s: '最稳' },
+            { v: 2, t: '每批 2 个', s: '常规' }, { v: 3, t: '每批 3 个', s: '较快' }, { v: 4, t: '每批 4 个', s: '最快' }],
+        M.plan.waveSize == null ? null : M.plan.waveSize,
+        function (v) { if (v == null) delete M.plan.waveSize; else M.plan.waveSize = v; })));
+    pane.appendChild(numRow('推进人员数', '负责数据准备与配置对接', M.plan.setupPeople, '人', [1, 2, 3, 5],
+      function (v) { M.plan.setupPeople = v || 1; }));
+    pane.appendChild(numRow('推进人员平均月薪', '用于工时的综合用工成本折算', M.plan.setupSalary, '元/月', [5500, 7500, 11000, 16000],
+      function (v) { M.plan.setupSalary = v || 7500; }));
+
+    var chk = core.compute(inputOf(), bundle());
+    var errs = chk.ok ? [] : chk.errors.map(function (e) { return e.msg; });
+    pane.appendChild(h('div', {}, [blocked(errs, '参数有误，无法进入测算台：')].filter(Boolean)));
+    pane.appendChild(h('div', { class: 'm3-act' }, [
+      h('button', { class: 'btn ghost', onclick: function () { setStep('gain'); } }, ['上一步']),
+      h('button', { class: 'btn', disabled: !chk.ok, onclick: function () {
+        var r = recompute();
+        if (!r.ok) return;
+        sh.charge(r.meta.credits); sh.setQrReady(false);
+        M.base = null; M.baseSnap = null;
+        setStep('board');
+      } }, ['进入测算台'])
+    ]));
+    $root.appendChild(pane);
+  }
+
   function field(label, hint, node) {
     return h('label', { class: 'm3-f' }, [h('span', { class: 'lb' }, [label, hint ? h('i', {}, [hint]) : null]), node]);
   }
@@ -88,131 +423,15 @@
     }));
   }
 
-  function screenInput() {
-    var list = secScenes();
-    var cur = M.plan.sceneId;
-    $root.appendChild(h('div', { class: 'm3-pane' }, [
-      steps(1),
-      h('h2', { class: 'm3-h2' }, ['第一步　确认测算对象与场景']),
-      h('p', { class: 'm3-p' }, ['企业信息与首选场景由前序模块带入；亦可在本页直接指定。测算以单一业务场景为单元，不同场景的效益杠杆与投入档位均不相同。']),
-      h('div', { class: 'm3-co' }, [
-        h('div', { class: 'nm' }, [M.form.name || '未填写企业名称']),
-        h('div', { class: 'tg' }, [sh.industryNameOf(M.form.industry) || '—',
-          M.form.size ? ' · ' + sh.optText('size', M.form.size) : '',
-          M.form.revenue ? ' · 年营收 ' + sh.optText('revenue', M.form.revenue) : ''])
-      ]),
-      h('h3', { class: 'm3-h3' }, ['本行业场景库共 ' + list.length + ' 个条目，请指定测算场景']),
-      h('div', { class: 'm3-scenes' }, list.map(function (s) {
-        var lv = leversOf(s.id).map(function (k) { var d = leverDef(k); return d ? d.name : k; });
-        return h('button', { class: 'sc' + (cur === s.id ? ' on' : ''), onclick: function () { M.plan.sceneId = s.id; M.gain = {}; draw(); } }, [
-          h('div', { class: 'n' }, [s.name]),
-          h('div', { class: 'm' }, [s.stage + ' · ' + s.module + ' · 上线约 ' + s.weeks + ' 周 · 投入 ' + s.cost + '档']),
-          h('div', { class: 'l' }, lv.map(function (x) { return h('span', {}, [x]); }))
-        ]);
-      })),
-      h('div', { class: 'm3-act' }, [
-        h('button', { class: 'btn ghost', onclick: function () { M.plan.sceneId = null; M.gain = {}; setStep('plan'); } }, ['未定场景，按通用轻量口径测算']),
-        h('button', { class: 'btn', disabled: !cur, onclick: function () { setStep('plan'); } }, ['下一步：投入方案'])
-      ])
-    ]));
-  }
-
-  // 未填写的投入项按规模推导表取参考值：这里预跑一次内核，把参考值作为提示显示出来
-  function planPreview() {
-    try {
-      var o = core.compute({ profile: M.form, plan: M.plan, gain: M.gain }, bundle());
-      return o.ok ? o.invest : null;
-    } catch (e) { return null; }
-  }
-  function refHint(pv, label, val) { return pv == null ? label : label + '　未填写时按参考值 ' + val + ' 计列'; }
-
-  function screenPlan() {
-    var P = C().prices, sc = M.plan.sceneId ? sceneById(M.plan.sceneId) : null;
-    var pv = planPreview();
-    var refCustom = pv ? pv.customRefTotal : null;
-    $root.appendChild(h('div', { class: 'm3-pane' }, [
-      steps(2),
-      h('h2', { class: 'm3-h2' }, ['第二步　投入方案']),
-      h('p', { class: 'm3-p' }, ['价格取自定稿产品资料，未作调整。另议项按预估金额填入即可，测算台会给出该项对回收期的影响幅度。']),
-      field('订阅版本', '按套年计价', opts(P.subscription.map(function (t) {
-        return { v: t.key, t: t.name, s: t.yearly ? t.yearly + ' 元 / 套年' : '0 元开通' };
-      }), M.plan.tier, function (v) { M.plan.tier = v; })),
-      numRow('订阅套数', pv && M.plan.seats == null ? '按实际开通账号数计列　留空则按规模参考值 ' + pv.seats + ' 套计列' : '按实际开通账号数计列',
-        M.plan.seats == null ? null : M.plan.seats, '套', [3, 6, 12, 20],
-        function (v) { if (v == null) delete M.plan.seats; else M.plan.seats = v; }),
-      field('专家入企 AI 诊断', pv && M.plan.diagnosisDays == null
-        ? P.diagnosisPerDay + ' 元 / 天　未选择时按场景投入档建议的 ' + pv.diagnosisDays + ' 天计列'
-        : P.diagnosisPerDay + ' 元 / 天', opts([
-        { v: null, t: '按建议计列', s: pv ? pv.diagnosisDays + ' 天' : '—' },
-        { v: 0, t: '暂不安排', s: '0 元' }, { v: 1, t: '1 天', s: P.diagnosisPerDay + ' 元' }, { v: 2, t: '2 天', s: P.diagnosisPerDay * 2 + ' 元' }
-      ], M.plan.diagnosisDays == null ? null : M.plan.diagnosisDays,
-        function (v) { if (v == null) delete M.plan.diagnosisDays; else M.plan.diagnosisDays = v; })),
-      field('私域部署', '数据不出企业内网时选用', opts([{ v: null, t: '不需要', s: '—' }].concat(P.privateDeploy.map(function (x) {
-        return { v: x.key, t: x.name, s: x.yearly + ' 元 / 套年' };
-      })), M.plan.privateDeploy == null ? null : M.plan.privateDeploy, function (v) { if (v == null) delete M.plan.privateDeploy; else M.plan.privateDeploy = v; })),
-      numRow('另议项预算', refCustom != null && M.plan.customBudget == null
-        ? '系统对接 / 定制开发 / 落地陪跑 / 数据整理　留空则按四科目推导值 ' + fmt(refCustom) + ' 元计列'
-        : '系统对接 / 定制开发 / 落地陪跑 / 数据整理',
-        M.plan.customBudget == null ? null : M.plan.customBudget, '元',
-        refCustom ? [0, Math.round(refCustom * 0.6 / 1000) * 1000, refCustom, Math.round(refCustom * 1.5 / 1000) * 1000] : [0, 20000, 60000, 150000],
-        function (v) { if (v == null) delete M.plan.customBudget; else M.plan.customBudget = v; }),
-      M.plan.customBudget === 0 && sc && sc.cost !== '零'
-        ? h('div', { class: 'm3-warn' }, ['本场景为「' + sc.cost + '」投入档，通常涉及系统对接与落地陪跑。另议项计列为 0 将使回收期系统性偏短，报告的投入合理性核验会标记为「明显偏低」。'])
-        : (refCustom != null && M.plan.customBudget == null
-          ? h('div', { class: 'm3-hint' }, ['另议项未填写时按四个科目分别推导：系统对接、定制开发与配置、落地陪跑、历史数据整理，合计 '
-            + fmt(refCustom) + ' 元。逐项拆解见报告第 03 章，可在测算台调整后即时看到回收期变化。'])
-          : null),
-      h('h3', { class: 'm3-h3' }, ['上线期的企业内部投入']),
-      field('数据现状', '决定整理工作量', opts([
-        { v: 'paper', t: '纸质为主', s: '倍率 1.6' }, { v: 'excel', t: '表格为主', s: '1.15' },
-        { v: 'scattered', t: '散在多个系统', s: '1.3' }, { v: 'system', t: '系统里齐全', s: '1.0' }
-      ], M.plan.dataState, function (v) { M.plan.dataState = v; })),
-      numRow('推进人员数', '负责数据准备与配置对接', M.plan.setupPeople, '人', [1, 2, 3], function (v) { M.plan.setupPeople = v || 1; }),
-      numRow('推进人员平均月薪', '用于工时的综合用工成本折算', M.plan.setupSalary, '元/月', [5500, 7500, 11000, 16000], function (v) { M.plan.setupSalary = v || 7500; }),
-      h('div', { class: 'm3-act' }, [
-        h('button', { class: 'btn ghost', onclick: function () { setStep('input'); } }, ['上一步']),
-        h('button', { class: 'btn', onclick: function () { setStep('gain'); } }, ['下一步：收益端'])
-      ])
-    ]));
-  }
-
-  function screenGain() {
-    var lv = M.plan.sceneId ? leversOf(M.plan.sceneId) : ['hours'];
-    var sc = M.plan.sceneId ? sceneById(M.plan.sceneId) : null;
-    var blocks = lv.map(function (k) {
-      var d = leverDef(k); if (!d) return null;
-      return h('div', { class: 'm3-lv' }, [
-        h('div', { class: 'hd' }, [h('b', {}, [d.name]), h('i', {}, [d.money])]),
-        h('div', { class: 'cut' }, [d.cutNote]),
-        h('div', { class: 'fs' }, d.fields.map(function (f) {
-          return numRow(f.label, f.hint || '', M.gain[f.key] == null ? null : M.gain[f.key], f.unit, f.presets, function (v) {
-            if (v == null) delete M.gain[f.key]; else M.gain[f.key] = v;
-          });
-        })),
-        d.cash ? null : h('div', { class: 'm3-hint' }, ['本项属非现金科目。除非释放工时被重新配置至产出性岗位，否则不构成可确认的现金流入，故不参与回收期测算，报告中单独列示。'])
-      ]);
-    }).filter(Boolean);
-    $root.appendChild(h('div', { class: 'm3-pane' }, [
-      steps(3),
-      h('h2', { class: 'm3-h2' }, ['第三步　收益端参数']),
-      h('p', { class: 'm3-p' }, [sc ? '「' + sc.name + '」的效益按「' + sc.roiBasis + '」折算，下列字段为该口径所需的全部参数。' : '未指定场景，按通用轻量口径测算，仅采集人工工时节约所需参数。']),
-      h('div', {}, blocks),
-      h('div', { class: 'm3-hint' }, ['无法提供的字段可留空。留空项不参与测算，报告在「数据缺口与补齐建议」一章逐项列示。本工具不对效益杠杆的核心参数设定默认值。']),
-      h('div', { class: 'm3-act' }, [
-        h('button', { class: 'btn ghost', onclick: function () { setStep('plan'); } }, ['上一步']),
-        h('button', { class: 'btn', onclick: function () { var r = recompute(); if (r.ok) { sh.charge(r.meta.credits); sh.setQrReady(false); setStep('board'); } } }, ['进入测算台'])
-      ])
-    ]));
-  }
 
   // ================= 屏 4：测算台 =================
   // 三栏控制台：左「参数台」实时调参，中「结论台」主口径与基线对照，右「推演台」情景 / 敏感度 / 护栏。
   // 全部控件都走内核 compute()，屏上任何一个数字都能在报告里找到同名同值的出处。
   function snapshot() {
-    return JSON.stringify({ plan: M.plan, gain: M.gain, cutMul: M.cutMul });
+    return JSON.stringify({ plan: M.plan, picks: M.picks, cutMul: M.cutMul });
   }
   function boardRecalc() {
-    var o = core.compute({ profile: M.form, plan: M.plan, gain: M.gain }, bundle());
+    var o = core.compute(inputOf(), bundle());
     if (o.ok) { o.meta.date = '20260917'; M.result = o; }
     return o.ok;
   }
@@ -243,8 +462,15 @@
     if (b.plan.setupPeople !== M.plan.setupPeople) out.push('推进人员数');
     if (b.plan.setupSalary !== M.plan.setupSalary) out.push('推进人员月薪');
     if (b.cutMul !== M.cutMul) out.push('折减系数');
-    Object.keys(M.gain).forEach(function (k) { if (b.gain[k] !== M.gain[k]) out.push(fieldLabelMap()[k] || k); });
-    return out;
+    if (b.plan.waveSize !== M.plan.waveSize) out.push('每批场景数');
+    if ((b.picks || []).length !== M.picks.length) out.push('场景组合');
+    var lab = fieldLabelMap();
+    M.picks.forEach(function (x, i) {
+      var b0 = (b.picks || [])[i];
+      if (!b0 || b0.sceneId !== x.sceneId) { if (out.indexOf('场景组合') < 0) out.push('场景组合'); return; }
+      Object.keys(x.gain).forEach(function (k) { if ((b0.gain || {})[k] !== x.gain[k]) out.push(lab[k] || k); });
+    });
+    return out.filter(function (v, i, a) { return a.indexOf(v) === i; });
   }
 
   function screenBoard() {
@@ -264,7 +490,7 @@
     grid.appendChild(panel); grid.appendChild(main); grid.appendChild(side);
     wrap.appendChild(grid);
     wrap.appendChild(h('div', { class: 'm3-act' }, [
-      h('button', { class: 'btn ghost', onclick: function () { setStep('gain'); } }, ['返回收益端']),
+      h('button', { class: 'btn ghost', onclick: function () { setStep('plan'); } }, ['返回投入方案']),
       h('button', { class: 'btn', onclick: function () { sh.setQrReady(true); setStep('report'); } }, ['出具完整报告'])
     ]));
     $root.appendChild(wrap);
@@ -335,24 +561,41 @@
       function () { return M.plan.setupPeople + ' 人'; }, function () { return !!b && b.plan.setupPeople !== M.plan.setupPeople; }));
     box.appendChild(inv);
 
-    var lv = M.plan.sceneId ? leversOf(M.plan.sceneId) : ['hours'];
     var gain = h('div', { class: 'card' }, [h('h4', {}, ['收益参数', h('span', {}, ['BENEFIT'])])]);
-    var any = false;
-    lv.forEach(function (k) {
-      var d = leverDef(k); if (!d) return;
-      gain.appendChild(h('h5', {}, [d.name]));
-      d.fields.forEach(function (f) {
-        if (M.gain[f.key] == null) return;
-        any = true;
-        var lo = f.min != null ? f.min : 0, hi = f.max != null ? f.max : Math.max(1, M.gain[f.key] * 3);
-        var st = f.type === 'int' ? 1 : (hi > 10000 ? 500 : (hi > 100 ? 1 : 0.05));
-        gain.appendChild(slider('g_' + f.key, f.label, f.unit, lo, hi, st,
-          function () { return M.gain[f.key]; }, function (v) { M.gain[f.key] = v; },
-          function () { return (Math.round(M.gain[f.key] * 100) / 100) + ' ' + (f.unit || ''); },
-          function () { return !!b && b.gain[f.key] !== M.gain[f.key]; }));
+    gain.appendChild(h('h5', {}, ['场景开关']));
+    gain.appendChild(h('div', { class: 'm3-toggles' }, M.picks.map(function (x) {
+      var sc0 = sceneById(x.sceneId);
+      return h('button', { class: 'tg' + (x.off ? '' : ' on'), onclick: function () {
+        x.off = !x.off;
+        var keep = M.picks.filter(function (y) { return !y.off; });
+        if (!keep.length) { x.off = false; return; }
+        if (boardRecalc()) refreshBoard();
+      } }, [(x.off ? '○ ' : '● ') + trunc(sc0 ? sc0.name : x.sceneId, 9)]);
+    })));
+    gain.appendChild(h('div', { class: 'ghint' }, ['关掉某个场景即可看到它对组合回收期的实际贡献。至少保留一个场景。']));
+    var anyG = false;
+    M.picks.filter(function (x) { return !x.off; }).forEach(function (x) {
+      var sc1 = sceneById(x.sceneId); if (!sc1) return;
+      gain.appendChild(h('h5', {}, [sc1.name]));
+      leversOf(x.sceneId).forEach(function (k) {
+        var d = leverDef(k); if (!d) return;
+        d.fields.forEach(function (f) {
+          if (x.gain[f.key] == null) return;
+          anyG = true;
+          var lo = f.min != null ? f.min : 0, hi = f.max != null ? f.max : Math.max(1, x.gain[f.key] * 3);
+          var st = f.type === 'int' ? 1 : (hi > 10000 ? 500 : (hi > 100 ? 1 : 0.05));
+          gain.appendChild(slider('g_' + x.sceneId + '_' + f.key, f.label, f.unit, lo, hi, st,
+            function () { return x.gain[f.key]; }, function (v) { x.gain[f.key] = v; },
+            function () { return (Math.round(x.gain[f.key] * 100) / 100) + ' ' + (f.unit || ''); },
+            function () {
+              if (!b) return false;
+              var b0 = (b.picks || []).filter(function (y) { return y.sceneId === x.sceneId; })[0];
+              return !!b0 && (b0.gain || {})[f.key] !== x.gain[f.key];
+            }));
+        });
       });
     });
-    if (!any) gain.appendChild(h('div', { class: 'ghint' }, ['收益端参数尚未填报，返回上一步补齐后方可在此调节。']));
+    if (!anyG) gain.appendChild(h('div', { class: 'ghint' }, ['收益端参数尚未填报，返回上一步补齐后方可在此调节。']));
     gain.appendChild(h('h5', {}, ['折减系数整体调节']));
     gain.appendChild(slider('cut', '折减系数', '× 基准值', 0.4, 1.6, 0.05,
       function () { return M.cutMul; }, function (v) { M.cutMul = Math.round(v * 100) / 100; },
@@ -361,7 +604,7 @@
     gain.appendChild(h('button', { class: 'reset', onclick: function () {
       if (!M.baseSnap) return;
       var s0 = JSON.parse(M.baseSnap);
-      M.plan = JSON.parse(JSON.stringify(s0.plan)); M.gain = JSON.parse(JSON.stringify(s0.gain)); M.cutMul = s0.cutMul;
+      M.plan = JSON.parse(JSON.stringify(s0.plan)); M.picks = JSON.parse(JSON.stringify(s0.picks || [])); M.cutMul = s0.cutMul;
       if (boardRecalc()) { sh.clear($root); screenBoard(); }
     } }, ['恢复基线参数']));
     box.appendChild(gain);
@@ -457,10 +700,12 @@
   function draw() {
     sh.clear($root);
     if (M.step === 'input') screenInput();
-    else if (M.step === 'plan') screenPlan();
+    else if (M.step === 'scenes') screenScenes();
     else if (M.step === 'gain') screenGain();
+    else if (M.step === 'plan') screenPlan();
     else if (M.step === 'board') screenBoard();
-    else screenReport();
+    else if (M.step === 'report') screenReport();
+    else { M.step = 'input'; screenInput(); }
   }
 
   window.DGG.registerModule('m3', { mount: mount, unmount: unmount, onCompany: onCompany, onIndustry: onIndustry });
@@ -557,7 +802,8 @@
     add('阅读说明与口径声明', pNav(r), { one: '测算范围、科目划分、参数来源与结论适用边界' });
     add('01 测算结论', pQuick1(r), { brief: true, one: '投入、收益、回收期三项核心指标与总体结论' });
     add('', pQuick2(r), { brief: true, sub: '核心结论问答' });
-    add('02 测算对象', pProfile(r), { one: '企业基本情况、场景界定与测算单元' });
+    add('02 测算对象', pProfile(r), { one: '企业基本情况、场景组合与测算单元' });
+    add('', pWaves(r), { sub: '实施波次与上线顺序' });
     add('', pLevers(r), { sub: '效益杠杆识别' });
     add('03 投入测算', pCost1(r), { brief: true, one: '现金支出逐项计列、结构分析与发生期次' });
     add('', pCustom(r), { sub: '另议项逐项拆解' });
@@ -565,8 +811,8 @@
     add('', pCost2(r), { sub: '人工工时投入与上线周期' });
     add('04 收益测算', pGain1(r), { one: '效益杠杆建模、合并口径与两道护栏' });
     add('', pGain2(r), { sub: '逐项测算过程' });
-    add('', pGain3(r), { sub: '现金与非现金科目划分' });
-    add('', pGain4(r), { sub: '同业场景横向对照' });
+    add('', pGain3(r), { sub: '逐场景贡献与组合结构' });
+    add('', pGain4(r), { sub: '两种口径的累计净额对照' });
     add('05 回收期测算', pPay1(r), { brief: true, one: '累计净现金流、转正期次与双口径对照' });
     add('', pPay2(r), { sub: '24 期现金流分布' });
     add('', pPay3(r), { sub: '前 12 期逐期明细' });
@@ -697,8 +943,8 @@
           h('div', { class: 'm3-cap', style: 'margin:0 0 4px' }, ['测算对象']),
           rows3([
             row3('企业名称', r.profile.name, { b: true }),
-            row3('测算场景', r.scene.name, { b: true, i: r.scene.module }),
-            row3('投入配置', iv.tierName + ' ' + iv.seats + ' 套', { i: iv.seatsSource === 'benchmark' ? '套数为规模参考值' : '套数由企业填报' }),
+            row3('场景组合', r.portfolio.count + ' 个场景', { b: true, i: trunc(r.portfolio.scenes.map(function (s) { return s.name; }).join('、'), 26) }),
+            row3('实施安排', r.portfolio.waves.length + ' 批 · ' + r.portfolio.totalWeeks + ' 周', { i: iv.tierName + ' ' + iv.seats + ' 套' }),
             row3('测算期', r.meta.horizon + ' 期', { i: '自上线当月起计' })
           ])
         ]),
@@ -733,10 +979,10 @@
         h('div', {}, [
           hh3('本次测算要素', 'PARAMETERS'),
           rows3([
-            row3('测算单元', '单一业务场景', { i: r.scene.name }),
+            row3('测算单元', '一次立项的场景组合', { i: r.portfolio.count + ' 个场景，分 ' + r.portfolio.waves.length + ' 批' }),
             row3('测算期', r.meta.horizon + ' 期'),
             row3('计量单位', '人民币元', { i: '取整至元' }),
-            row3('效益杠杆数', r.benefit.levers.length + ' 项', { i: '共七类' }),
+            row3('命中效益杠杆', r.benefit.groups.length + ' 类', { i: '共七类' }),
             row3('参数总数', String(Object.keys(r.inputSource).length) + ' 项'),
             row3('企业填报 / 参考值', nUser + ' / ' + nRef + ' 项', { sum: true, neg: nRef > 0, pos: nRef === 0 })
           ])
@@ -759,7 +1005,7 @@
         { k: '投入 · 首年现金支出', v: money(iv.cashYear1), u: '元',
           s: '一次性 ' + pctOf(iv.cashOnce, iv.cashYear1) + '% · 次年续费 ' + money(iv.cashYearly) + ' 元', neg: true },
         { k: '收益 · 月度现金收益', v: money(r.benefit.cashMonthly), u: '元',
-          s: r.benefit.levers.length + ' 项效益杠杆合并后', pos: true },
+          s: r.portfolio.count + ' 个场景、' + r.benefit.groups.length + ' 类杠杆去重后', pos: true },
         { k: '回收期 · 转正期次', v: pm == null ? '>' + r.meta.horizon + ' 期' : '第 ' + pm + ' 期',
           s: payBasisLabel(r) + (r.scenarios[0].payback ? ' · 保守档第 ' + r.scenarios[0].payback + ' 期' : ' · 保守档期内未转正'), hl: true }
       ], 3),
@@ -813,8 +1059,13 @@
 
   function pProfile(r) {
     var p = page3('02', r, 'prof');
-    var sc = r.scene;
-    return wrapPage(p, r, '02 测算对象', '02', '测算对象界定', 'SUBJECT DEFINITION', null, null, [
+    var pf = r.portfolio;
+    return wrapPage(p, r, '02 测算对象', '02', '测算对象与场景组合', 'SUBJECT AND PORTFOLIO',
+      String(pf.count), '个 · 拟实施场景', [
+      basis3('本报告的测算单元是企业一次立项的整批场景，不是单个场景。'
+        + '组合与把单场景的账相加有五处不同：订阅账号跨场景复用、同一业务系统只对接一次、'
+        + '配置能力可跨场景复用、入企诊断与历史数据整理只做一次、同类效益杠杆在场景之间去重。'
+        + '这五处在第 03 与第 04 章逐项列示。'),
       h('div', { class: 'm3-two' }, [
         h('div', {}, [tab3('企业基本情况', rows3([
           row3('企业名称', r.profile.name, { b: true }),
@@ -824,53 +1075,89 @@
           row3('客户结构', r.profile.customers ? sh.optText('customers', r.profile.customers) : '—'),
           row3('在用业务系统', (r.profile.systems || []).length ? r.profile.systems.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无')
         ]))]),
-        h('div', {}, [tab3('场景界定', rows3([
-          row3('场景名称', sc.name, { b: true }),
-          row3('所属环节', sc.stage || '—'),
-          row3('使用角色', sc.user || '—'),
-          row3('替代事项', sc.replaces || '—'),
-          row3('对应产品模块', sc.module),
-          row3('基准上线周期', sc.weeks + ' 周', { i: '场景库所载' }),
-          row3('投入档位', sc.cost + ' 档', { i: '价值分级 ' + sc.value + '/5' })
+        h('div', {}, [tab3('组合概览', rows3([
+          row3('场景数', pf.count + ' 个', { b: true }),
+          row3('覆盖业务环节', (function () { var s = {}; pf.scenes.forEach(function (x) { s[x.stage] = 1; }); return Object.keys(s).length; })() + ' 个',
+            { i: (function () { var s = []; pf.scenes.forEach(function (x) { if (s.indexOf(x.stage) < 0) s.push(x.stage); }); return s.join('、'); })() }),
+          row3('命中效益杠杆', r.benefit.groups.length + ' 类', { i: '共七类' }),
+          row3('实施批次', pf.waves.length + ' 批', { i: '每批 ' + pf.waveSize + ' 个' }),
+          row3('总工期', pf.totalWeeks + ' 周', { i: '含数据现状系数 ' + r.invest.dataStateMult }),
+          row3('订阅账号数', r.invest.seats + ' 套', { sum: true, i: r.invest.seatsSource === 'benchmark' ? '规模参考值' : '企业填报' })
         ]))])
       ]),
-      fig3('测算单元的界定', CH.sceneFrame(sc),
-        '三项字段为场景库所载，对同行业大类的全部企业一致，不随企业填报参数变化。'),
-      hh3('测算单元的界定依据', 'UNIT OF ANALYSIS'),
-      list3([
-        '本报告以「' + sc.name + '」这一个场景为测算单元。场景的边界由场景库所载的所属环节、使用角色与替代事项三项字段共同界定，不因企业不同而变化。',
-        '效益折算口径为「' + (sc.roiBasis || '—') + '」，该口径决定本场景命中哪几项效益杠杆，逐项测算见第 04 章。',
-        '投入档位「' + sc.cost + '」与价值分级「' + sc.value + '/5」是场景库所载的固定字段：前者决定定制开发与配置的计列基数，后者决定合并收益的价值系数。',
-        sc.precondition ? '本场景的实施前置条件为「' + sc.precondition + '」。该条件未满足时上线周期将延长，效益释放相应后移。' : '本场景无特定实施前置条件。'
-      ]),
-      r.sceneBasis === 'generic' ? note3('口径提示', '本次按通用轻量场景口径测算', '未指定具体场景，效益仅按沟通与查找环节的人工工时节约建模，参数可信度已扣减 ' + C().confidence.penalty.genericScene + ' 分。', true) : null,
-      sc.metric ? fn3('场景库所载预期指标为「' + sc.metric + '」。该指标为区间表述，仅作口径说明，未参与任何金额计算。') : null
+      tab3('场景清单',
+        tbl3([['序', 'c'], ['场景'], ['业务环节'], ['使用角色'], ['上线周期', 'c'], ['投入档', 'c'], ['价值分级', 'c'], ['效益杠杆']],
+          pf.scenes.map(function (x, i) {
+            return [[String(i + 1), 'c'], [x.name, 'b'], [x.stage || '—'], [x.user || '—'],
+              [x.weeks + ' 周', 'c'], [x.cost, 'c'], [x.value + '/5', 'c'],
+              [x.levers.map(function (k) { var d = leverDef(k); return d ? d.name : k; }).join('、')]];
+          })),
+        '清单按价值分级降序、上线周期升序排列，该顺序同时决定实施批次与各场景的上线期次。'),
+      pf.generic ? note3('口径提示', '本次按通用轻量场景口径测算', '未指定具体场景，效益仅按沟通与查找环节的人工工时节约建模，参数可信度已扣减 ' + C().confidence.penalty.genericScene + ' 分。', true) : null,
+      fn3('场景库字段对同行业大类的全部企业一致，不随企业填报参数变化，全部字段见附录 C。')
+    ]);
+  }
+
+  function pWaves(r) {
+    var p = page3('02', r, 'prof');
+    var pf = r.portfolio;
+    var phases = pf.waves.map(function (w) {
+      return { name: '第 ' + w.no + ' 批', weeks: w.weeks, duty: w.sceneNames.join('、') };
+    });
+    return wrapPage(p, r, '02 测算对象', '02', '实施波次与上线顺序', 'IMPLEMENTATION WAVES',
+      String(pf.totalWeeks), '周 · 总工期', [
+      basis3('场景按价值分级降序、上线周期升序排序，每批同时推进 ' + pf.waveSize + ' 个；同批工期取该批最长者，批与批之间串行。'
+        + '效益因此不是同时开始释放，而是随各批上线逐步叠加。'),
+      fig3('实施批次与工期分配', CH.weeksGantt(phases, pf.totalWeeks),
+        '每批的工期取该批最长场景的上线周期乘以数据现状系数 ' + r.invest.dataStateMult + '，批与批之间串行推进。', '周'),
+      tab3('各批场景与上线期次',
+        tbl3([['批次', 'c'], ['场景'], ['本批工期', 'c'], ['起止周', 'c'], ['效益起算期次', 'c']],
+          pf.waves.map(function (w) {
+            return [['第 ' + w.no + ' 批', 'b c'], [trunc(w.sceneNames.join('、'), 24)], [w.weeks + ' 周', 'c'],
+              ['第 ' + w.startWeek + ' – ' + w.endWeek + ' 周', 'c'], ['第 ' + w.startMonth + ' 期', 'c b']];
+          })),
+        '效益起算期次为该批完成后的当期，各场景自该期起按 ' + C().rampMonths.map(function (x) { return Math.round(x * 100) + '%'; }).join(' / ') + ' 逐期释放。'),
+      h('div', { class: 'm3-two wl' }, [
+        h('div', {}, [hh3('分批的代价与收益', 'TRADE-OFF'), list3([
+          '首批从第 ' + pf.waves[0].startMonth + ' 期起产生效益，末批从第 ' + pf.waves[pf.waves.length - 1].startMonth + ' 期起，相差 '
+            + (pf.waves[pf.waves.length - 1].startMonth - pf.waves[0].startMonth) + ' 期——这是回收期被拉长的主要原因，也是分批的直接代价。',
+          '与之相对，分批降低了同期的资源占用：推进人员不必同时对接 ' + pf.count + ' 个场景的业务规则与数据口径。每批场景数可在测算台现场调整。'
+        ])]),
+        h('div', {}, [tab3('上线顺序的依据', rows3(pf.scenes.slice(0, 4).map(function (x, i) {
+          return row3((i + 1) + '　' + trunc(x.name, 8), '第 ' + x.startMonth + ' 期起',
+            { i: '价值 ' + x.value + '/5' });
+        })), pf.scenes.length > 4 ? '其余 ' + (pf.scenes.length - 4) + ' 个场景的顺序见上表。' : null)])
+      ])
     ]);
   }
 
   function pLevers(r) {
     var p = page3('02', r, 'prof');
-    var sc = r.scene;
+    var used = [];
+    r.portfolio.scenes.forEach(function (x) { x.levers.forEach(function (k) { if (used.indexOf(k) < 0) used.push(k); }); });
     return wrapPage(p, r, '02 测算对象', '02', '效益杠杆识别', 'LEVER IDENTIFICATION', null, null, [
-      basis3('效益杠杆依据场景库所载折算口径「' + sc.roiBasis + '」识别。命中多项时，按各项测算金额降序排列，金额最高项全额计列，其余各项按 ' + Math.round(C().overlapDiscount * 100) + '% 计列。'),
-      fig3('七项效益杠杆的命中情况与折减系数', CH.cutScale(LV().items, r.levers),
-        '深色条为本次场景命中的杠杆，浅色条为未命中项。条长为折减系数，即工具可影响的部分占该事项全量的比例。', '%'),
-      tab3('本次命中的效益杠杆', tbl3([['效益杠杆'], ['效益来源'], ['折减系数', 'c'], ['科目性质', 'c'], ['本次测算', 'n']], r.levers.map(function (k) {
-        var d = leverDef(k); if (!d) return null;
-        var used = r.benefit.levers.filter(function (x) { return x.key === k; })[0];
-        return [[d.name, 'b'], [d.money], [Math.round(d.cut * 100) + '%', 'c'],
-          [d.cash ? '现金' : '非现金', 'c ' + (d.cash ? 'pos' : '')],
-          [used ? fmt(used.final) + ' 元/月' : '参数不足', 'n ' + (used ? 'b' : 'neg')]];
-      }).filter(Boolean)), '折减系数的取值依据逐项见第 04 章，全表见附录 A。'),
+      basis3('效益杠杆依据各场景库所载的折算口径逐个识别。同一类杠杆被多个场景命中时，'
+        + '在第 04 章按测算金额降序去重：金额最高的场景全额计列，其余各场景按 '
+        + Math.round(C().overlapDiscount * 100) + '% 计列——同一批人的同一段时间、同一笔返工成本不能算两遍。'),
+      fig3('七项效益杠杆的命中情况与折减系数', CH.cutScale(LV().items, used),
+        '深色条为本次组合命中的杠杆，浅色条为未命中项。条长为折减系数，即工具可影响的部分占该事项全量的比例。', '%'),
+      tab3('杠杆与场景的对应关系',
+        tbl3([['效益杠杆'], ['效益来源'], ['折减系数', 'c'], ['科目', 'c'], ['命中场景'], ['命中数', 'c']],
+          LV().items.filter(function (d) { return used.indexOf(d.key) >= 0; }).map(function (d) {
+            var hit = r.portfolio.scenes.filter(function (x) { return x.levers.indexOf(d.key) >= 0; });
+            return [[d.name, 'b'], [d.money], [Math.round(d.cut * 100) + '%', 'c'],
+              [d.cash ? '现金' : '非现金', 'c ' + (d.cash ? 'pos' : '')],
+              [hit.map(function (x) { return x.name; }).join('、')], [String(hit.length), 'c b']];
+          })),
+        '命中数大于 1 的杠杆会在第 04 章触发跨场景去重。'),
       hh3('未命中杠杆的说明', 'LEVERS NOT APPLICABLE'),
-      h('div', { class: 'm3-lead' }, ['未命中的杠杆不是「本企业不存在该项损失」，而是本场景的作用路径不经过该项。' +
-        '同一家企业实施其他场景时，可能命中不同的杠杆组合，届时需按该场景重新测算，不可沿用本报告结论。']),
-      list3(LV().items.filter(function (x) { return r.levers.indexOf(x.key) < 0; }).slice(0, 4).map(function (x) {
-        return x.name + '：' + x.money + '。本场景不经过该路径，故不予计列。';
+      h('div', { class: 'm3-lead' }, ['未命中的杠杆不表示本企业不存在该项损失，而是本次组合内的场景作用路径不经过该项。'
+        + '后续新增场景时可能命中不同的杠杆组合，届时需按新的组合重新测算，不可沿用本报告结论。']),
+      list3(LV().items.filter(function (x) { return used.indexOf(x.key) < 0; }).slice(0, 4).map(function (x) {
+        return x.name + '：' + x.money + '。本次组合不经过该路径，故不予计列。';
       }))
     ]);
   }
-
   function pCost1(r) {
     var p = page3('03', r, 'cost');
     var iv = r.invest;
@@ -909,7 +1196,7 @@
           + pctOf(iv.cashYearly, iv.cashYear1) + '%。', '元'),
       iv.seatsSource === 'benchmark'
         ? fn3('订阅套数 ' + iv.seats + ' 套为参考值，按企业人员规模「' + (r.profile.size ? sh.optText('size', r.profile.size) : '未知')
-          + '」与场景投入档「' + r.scene.cost + '」取自规模推导表，企业填报值优先。诊断天数同理。取值全表见附录 C。')
+          + '」与各场景投入档取值后，按复用系数 ' + r.portfolio.seatOverlap + ' 归并——一个账号可使用全部已开通场景。诊断天数按场景数量分档。企业填报值优先，取值全表见附录 C。')
         : fn3('订阅套数与诊断天数均由企业填报。价格取自《薯片AI智能体》定稿产品资料，未作调整。')
     ]);
   }
@@ -934,12 +1221,12 @@
         : h('div', { class: 'm3-lead' }, ['本场景无系统依赖、投入档为零档且数据已在系统内，四个另议科目的推导金额均为 0，故本次未计列另议项。']),
       h('div', { class: 'm3-two wl' }, [
         h('div', {}, [hh3('逐项推导说明', 'DERIVATION'), list3([
-          '系统对接按场景数据依赖与企业在用系统的交集逐个计列。本场景依赖 '
-            + ((r.scene.dataDeps || []).length ? r.scene.dataDeps.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无特定系统')
-            + '，与企业在用系统命中 ' + (iv.hitSystems || []).length + ' 个；企业未在用的系统不计列。',
-          '定制开发与配置按场景投入档「' + r.scene.cost + '」取基数，再按企业规模调整。含业务规则配置、表单与报表定制、权限模型搭建。',
-          '落地陪跑按测算上线周期 ' + iv.setupWeeks + ' 周逐周计列，含配置陪同、使用培训、试运行期问题响应与效益数据复盘。',
-          '历史数据整理按企业规模取基数、按数据现状系数 ' + iv.dataPrepFactor + ' 调整。数据已在系统内的企业本项接近于零，纸质为主的企业本项占比最高。'
+          '系统对接取全部 ' + r.portfolio.count + ' 个场景的数据依赖并集，再与企业在用系统求交集。本组合依赖 '
+            + ((r.portfolio.depUnion || []).length ? r.portfolio.depUnion.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无特定系统')
+            + '，命中 ' + (iv.hitSystems || []).length + ' 个接口。多个场景依赖同一系统时该接口只计列一次，这是同批实施最主要的成本节约来源。',
+          '定制开发与配置按各场景投入档取基数、按企业规模调整，再按测算金额降序乘以复用递减系数 ' + (r.portfolio.devPerScene || []).map(function (x) { return x.factor; }).join(' / ') + '——业务规则引擎、表单与报表框架、权限模型可跨场景复用。',
+          '落地陪跑按分批上线的总工期 ' + iv.setupWeeks + ' 周逐周计列，含配置陪同、使用培训、试运行期问题响应与效益数据复盘。',
+          '历史数据整理按企业规模取基数、按数据现状系数 ' + iv.dataPrepFactor + ' 调整，为全企业一次性投入，不随场景数量增加。'
         ])]),
         h('div', {}, [hh3('为什么要拆开', 'WHY ITEMISED'), h('div', { class: 'm3-lead' }, [
           '另议项计列为 0 或凭印象填一个整数，是投入侧最常见的两种失真。前者使回收期系统性偏短，'
@@ -1011,9 +1298,10 @@
           row3('折算综合时薪', iv.setupHourly + ' 元/小时', { sum: true })
         ]))]),
         h('div', {}, [tab3('上线周期测算', rows3([
-          row3('场景基准周期', r.scene.weeks + ' 周', { i: '场景库所载' }),
+          row3('场景批次', r.portfolio.waves.length + ' 批', { i: '每批 ' + r.portfolio.waveSize + ' 个场景' }),
+          row3('各批基准周期合计', r.portfolio.waves.map(function (x) { return Math.round(x.weeks / iv.dataStateMult * 10) / 10; }).join(' + ') + ' 周', { i: '取各批最长场景' }),
           row3('数据现状系数', '× ' + iv.dataStateMult, { i: '按在用系统与数据组织形式' }),
-          row3('测算上线周期', iv.setupWeeks + ' 周', { sum: true })
+          row3('测算总工期', iv.setupWeeks + ' 周', { sum: true })
         ]))])
       ]),
       h('div', { class: 'm3-two wl' }, [
@@ -1035,135 +1323,126 @@
     var b = r.benefit;
     return wrapPage(p, r, '04 收益测算', '04', '收益测算', 'BENEFIT MODELLING',
       money(b.cashMonthly), '元/月 · 现金口径', [
-      b.levers.length ? fig3('效益杠杆的逐项累加与合并口径', CH.benefitBridge(b.levers, b.fullMonthly),
-        '横轴为累计月度效益金额。金额最高项全额计列，其余各项按 ' + Math.round(C().overlapDiscount * 100)
-        + '% 计列，灰色段为因此扣除的部分；斜纹填充为非现金科目。', '元 / 月')
+      basis3('收益按两层折减合并，缺一层都会把企业级收益算高。'
+        + '场景内：同一场景命中多条杠杆时，不同路径往往指向同一笔损失，按测算金额降序，最高全额、其余按 '
+        + Math.round(C().overlapDiscount * 100) + '% 计列。'
+        + '跨场景：同一类杠杆在多个场景命中时，节约的是同一批人的同一段时间，同样按金额降序去重。'
+        + '本次跨场景去重共扣减 ' + fmt(b.crossDiscount) + ' 元/月。'),
+      b.groups.length ? tab3('按效益杠杆归组的跨场景去重',
+        tbl3([['效益杠杆'], ['命中场景数', 'c'], ['科目', 'c'], ['去重前', 'n'], ['去重扣减', 'n'], ['计列值', 'n']],
+          b.groups.map(function (g) {
+            return [[g.name, 'b'], [String(g.scenes), 'c'], [g.cash ? '现金' : '非现金', 'c ' + (g.cash ? 'pos' : '')],
+              [fmt(g.gross), 'n'], [g.gross - g.counted ? '−' + fmt(g.gross - g.counted) : '—', 'n' + (g.gross - g.counted ? ' neg' : '')],
+              [fmt(g.counted), 'n b']];
+          }).concat([[['合计', 'b'], [String(r.portfolio.count), 'c'], ['—', 'c'],
+            [fmt(b.rawMonthly), 'n b'], ['−' + fmt(b.crossDiscount), 'n b neg'], [fmt(b.afterCross), 'n b']]])),
+        '去重前为各场景内合并并经价值系数折算后的金额；命中场景数为 1 的杠杆不发生跨场景去重。', '元 / 月')
         : note3('参数不足', '收益科目关键参数未填报', '本次仅出具投入侧测算，缺口清单见第 09 章。', true),
       h('div', { class: 'm3-two' }, [
-        h('div', {}, [tab3('合并口径与两道护栏', rows3([
-          row3('逐项合并（已计重叠折减）', fmt(b.rawMonthly) + ' 元/月'),
-          row3('价值系数折算', '× ' + b.valueFactor, { i: '场景价值分级 ' + r.scene.value + '/5' }),
-          row3('折算后', fmt(b.afterValue) + ' 元/月'),
+        h('div', {}, [tab3('合并口径与营收封顶', rows3([
+          row3('各场景合并（含场景内折减与价值系数）', fmt(b.rawMonthly) + ' 元/月'),
+          row3('跨场景同类杠杆去重', '−' + fmt(b.crossDiscount) + ' 元/月', { neg: true }),
+          row3('去重后合并', fmt(b.afterCross) + ' 元/月'),
           b.capMonthly != null
-            ? row3('营收封顶线', fmt(b.capMonthly) + ' 元/月', { i: '年营收 6% 折月，' + (r.capped ? '本次已触顶' : '本次未触及') })
+            ? row3('营收封顶线', fmt(b.capMonthly) + ' 元/月', { i: '年营收 ' + Math.round(C().caps.revenueShare * 100) + '% 折月，' + (r.capped ? '本次已触顶' : '本次未触及') })
             : row3('营收封顶', '未启用', { i: '企业营业收入区间未知' }),
           row3('计列月度收益', fmt(b.fullMonthly) + ' 元/月', { sum: true, pos: true })
         ]))]),
-        h('div', {}, [fig3('两道护栏的依次作用', CH.capFunnel(b),
-          '价值系数与营收封顶依次作用于合并后的月度收益，两者都只会向下调整，不会向上放大。', '元 / 月')])
+        h('div', {}, [fig3('收益科目构成', CH.cashVsHours(b.cashMonthly, b.hoursMonthly),
+          '实心部分为现金科目，参与回收期测算；斜纹部分为非现金科目，单独列示。', '元 / 月')])
       ]),
-      b.levers.length ? fig3('各项杠杆折减前后对照', CH.leverBars(b.levers),
-        '上条为按企业填报参数直接测算的金额，下条为乘以折减系数后的金额，黑色标记为合并权重折减后的计列值。', '元 / 月') : null,
       basis3(RT().method.overlap),
-      r.capped ? note3('封顶提示', '合并收益已触及营收封顶线，超出部分未予确认', '该护栏用于规避输入参数偏大时产生失真的测算结果。', true) : null
+      r.capped ? note3('封顶提示', '合并收益已触及营收封顶线，超出部分未予确认', '营收封顶按企业年度营业收入的 ' + Math.round(C().caps.revenueShare * 100) + '% 折月计列，作用于全部场景合计，用于规避输入参数偏大时产生失真的测算结果。', true) : null
     ]);
   }
 
   function pGain2(r) {
     var p = page3('04', r, 'gain');
-    var labels = fieldLabelMap();
-    return wrapPage(p, r, '04 收益测算', '04', '逐项测算过程', 'ITEM-LEVEL CALCULATION', null, null, [
-      r.benefit.levers.length ? tab3('逐项测算与合并权重',
-        tbl3([['序'], ['效益杠杆'], ['测算式'], ['测算值', 'n'], ['合并权重', 'c'], ['计列值', 'n']],
-          r.benefit.levers.map(function (lv) {
-            return [[String(lv.rank), 'c'], [lv.name + (lv.cash ? '' : '（非现金）'), 'b'], [lv.basis],
-              [fmt(lv.monthly), 'n'], [lv.discounted ? '35%' : '100%', 'c'],
-              [fmt(lv.final), 'n b ' + (lv.cash ? 'pos' : '')]];
-          })), null, '元 / 月')
+    var its = r.benefit.items;
+    return wrapPage(p, r, '04 收益测算', '04', '逐场景逐项测算过程', 'ITEM-LEVEL CALCULATION', null, null, [
+      its.length ? tab3('逐（场景 × 杠杆）测算明细',
+        tbl3([['场景'], ['效益杠杆'], ['测算式'], ['测算值', 'n'], ['场景内', 'c'], ['价值系数', 'c'], ['跨场景', 'c'], ['计列值', 'n']],
+          its.map(function (x) {
+            return [[trunc(x.sceneName, 8), 'b'], [x.name + (x.cash ? '' : '（非现金）')], [x.basis],
+              [fmt(x.monthly), 'n'], [x.inSceneWeight === 1 ? '全额' : Math.round(x.inSceneWeight * 100) + '%', 'c'],
+              ['×' + x.valueFactor, 'c'],
+              [x.crossWeight === 1 ? '全额' : Math.round(x.crossWeight * 100) + '%', 'c'],
+              [fmt(x.final), 'n b ' + (x.cash ? 'pos' : '')]];
+          })),
+        '测算值为按企业填报参数直接算出的月度金额；计列值为依次经场景内折减、场景价值系数、跨场景去重与营收封顶后的结果。', '元 / 月')
         : h('div', { class: 'm3-lead' }, ['本次无可测算的效益杠杆。']),
-      r.benefit.levers.length ? fig3('测算式的数值代入', CH.formulaFlow(r.benefit.levers),
-        '方块为代入的参数值，右端为该项的月度测算金额，末行标注科目性质与合并权重。') : null,
-      r.benefit.levers.length ? tab3('参数取值与来源',
-        tbl3([['参数项'], ['所属杠杆'], ['取值', 'n'], ['单位', 'c'], ['来源', 'c']],
-          (function () {
-            var out = [], seen = {};
-            r.benefit.levers.forEach(function (lv) {
-              var d = leverDef(lv.key); if (!d) return;
-              d.fields.forEach(function (f) {
-                if (seen[f.key]) return; seen[f.key] = 1;
-                var v = M.gain[f.key];
-                if (v == null) v = '按参考值';
-                out.push([[f.label, 'b'], [d.name], [String(v), 'n'], [f.unit || '—', 'c'],
-                  [SRCNAME[r.inputSource[f.key]] || '参考值', 'c' + (r.inputSource[f.key] === 'user' ? ' pos' : '')]]);
-              });
-            });
-            return out.length ? out : [[['—'], ['—'], ['—', 'n'], ['—', 'c'], ['—', 'c']]];
-          })()), '标注为参考值的参数由本工具按行业与规模赋值，替换为企业实际数据后测算结论可能变化。') : null,
+      its.length ? fig3('测算式的数值代入', CH.formulaFlow(its.slice().sort(function (a, b) { return b.monthly - a.monthly; }).slice(0, 3)),
+        '方块为代入的参数值，右端为该项的月度测算金额。仅列示金额最高的前 ' + Math.min(3, its.length) + ' 项，其余各项的测算式见上表。') : null,
       hh3('折减系数取值依据', 'DISCOUNT FACTORS'),
-      r.benefit.levers.length ? h('div', {}, r.benefit.levers.map(function (lv) {
-        return h('div', { class: 'm3-basis', style: 'margin-top:7px' }, [h('b', {}, [lv.name + '　']), lv.cutNote]);
-      })) : null,
+      (function () {
+        var seen = {}, out = [];
+        its.forEach(function (x) { if (seen[x.key]) return; seen[x.key] = 1; out.push(x); });
+        return h('div', {}, out.slice(0, 3).map(function (x) {
+          return h('div', { class: 'm3-basis', style: 'margin-top:7px' }, [h('b', {}, [x.name + '　']), x.cutNote]);
+        }));
+      })(),
       fn3('折减系数反映工具可影响的部分占该事项全量的比例，非效率提升幅度。各系数取值见附录 A 常量表。')
     ]);
   }
 
   function pGain3(r) {
     var p = page3('04', r, 'gain');
-    var cash = r.benefit.levers.filter(function (x) { return x.cash; });
-    var hrs = r.benefit.levers.filter(function (x) { return !x.cash; });
-    return wrapPage(p, r, '04 收益测算', '04', '现金与非现金科目划分', 'CASH VS NON-CASH', null, null, [
-      fig3('收益科目构成', CH.cashVsHours(r.benefit.cashMonthly, r.benefit.hoursMonthly),
-        '实心部分为现金科目，参与回收期测算；斜纹部分为非现金科目，单独列示。', '元 / 月'),
+    var pf = r.portfolio;
+    return wrapPage(p, r, '04 收益测算', '04', '逐场景贡献与组合结构', 'SCENE CONTRIBUTION', null, null, [
+      basis3('下表把组合的月度现金收益拆回到各个场景。份额高的场景决定回收期，'
+        + '份额低且上线周期长的场景则在拉长总工期的同时贡献有限——这类场景适合放到第二批或下一次立项。'),
+      fig3('各场景的现金收益贡献', CH.contribBars(pf.scenes),
+        '条长为该场景计列的月度现金收益，灰色段为其非现金部分；右侧为占组合现金收益的份额。', '元 / 月'),
+      tab3('逐场景贡献明细',
+        tbl3([['场景'], ['批次', 'c'], ['上线期次', 'c'], ['价值系数', 'c'], ['现金收益', 'n'], ['非现金', 'n'], ['占组合', 'n']],
+          pf.scenes.map(function (x) {
+            return [[x.name, 'b'], ['第 ' + x.wave + ' 批', 'c'], ['第 ' + x.startMonth + ' 期', 'c'],
+              ['×' + x.valueFactor, 'c'], [fmt(x.cashMonthly), 'n pos'], [fmt(x.hoursMonthly), 'n'],
+              [x.share + '%', 'n b']];
+          }).concat([[['合计', 'b'], ['—', 'c'], ['—', 'c'], ['—', 'c'],
+            [fmt(r.benefit.cashMonthly), 'n b pos'], [fmt(r.benefit.hoursMonthly), 'n b'], ['100%', 'n b']]])),
+        '各场景现金收益之和等于组合月度现金收益，取整误差不超过场景数。', '元 / 月'),
       h('div', { class: 'm3-two' }, [
-        h('div', {}, [tab3('现金科目', cash.length ? tbl3([['杠杆'], ['月度金额', 'n']],
-          cash.map(function (x) { return [[x.name, 'b'], [fmt(x.final) + ' 元', 'n pos']]; })
-            .concat([[['小计', 'b'], [fmt(r.benefit.cashMonthly) + ' 元', 'n b']]]))
-          : h('div', { class: 'm3-lead', style: 'padding:10px 12px' }, ['本次无现金科目效益。']))]),
-        h('div', {}, [tab3('非现金科目', hrs.length ? tbl3([['杠杆'], ['月度金额', 'n']],
-          hrs.map(function (x) { return [[x.name, 'b'], [fmt(x.final) + ' 元', 'n']]; })
-            .concat([[['小计', 'b'], [fmt(r.benefit.hoursMonthly) + ' 元', 'n b']]]))
-          : h('div', { class: 'm3-lead', style: 'padding:10px 12px' }, ['本次无非现金科目效益。']))])
-      ]),
-      r.flow.length ? fig3('两种口径的累计净额对照', CH.dualCurve(r.flow, r.flowAll, r.payback, r.paybackAll),
-        '实线为现金口径，虚线为并计非现金科目后的口径；空心点为各自的转正期次。', '元') : null,
-      note3('划分依据', '人工工时节约不构成可确认的现金流入',
-        '该部分转化为现金流入的前提是释放工时被重新配置至产出性岗位。在未发生人员结构调整的情形下，工时节约表现为人员负荷下降而非成本下降，故不参与回收期测算。若企业已明确释放工时的再配置安排，可参考含非现金口径的转正期次。'),
-      basis3('两种口径的回收期差异见第 05 章。决策建议以现金口径为准。')
+        h('div', {}, [hh3('组合结构判读', 'READING'), list3((function () {
+          var top = pf.scenes.slice().sort(function (a, b) { return b.cashMonthly - a.cashMonthly; })[0];
+          var tail = pf.scenes.slice().sort(function (a, b) { return a.cashMonthly - b.cashMonthly; })[0];
+          var out = [];
+          if (top) out.push('「' + top.name + '」贡献 ' + top.share + '% 的现金收益，为本组合的主要回收来源；该场景的参数口径应优先锁定。');
+          if (tail && pf.scenes.length > 1 && tail.share < 10) out.push('「' + tail.name + '」占比仅 ' + tail.share + '%，上线周期 ' + tail.weeks + ' 周。若需压缩总工期，可优先考虑将其移出首批。');
+          out.push('组合中有 ' + pf.scenes.filter(function (x) { return x.cashMonthly === 0; }).length + ' 个场景不产生现金收益，其价值体现在非现金科目，由其余场景承担投入的回收。');
+          return out;
+        })())]),
+        h('div', {}, [tab3('现金与非现金划分', tbl3([['科目'], ['月度金额', 'n'], ['是否参与回收期', 'c']], [
+          [['现金科目', 'b'], [fmt(r.benefit.cashMonthly) + ' 元', 'n pos'], ['参与', 'c pos']],
+          [['非现金科目', 'b'], [fmt(r.benefit.hoursMonthly) + ' 元', 'n'], ['不参与', 'c']],
+          [['合计', 'b'], [fmt(r.benefit.cashMonthly + r.benefit.hoursMonthly) + ' 元', 'n b'], ['—', 'c']]
+        ]), '人工工时节约除非被重新配置至产出性岗位，否则不构成可确认的现金流入。')])
+      ])
     ]);
   }
 
   function pGain4(r) {
     var p = page3('04', r, 'gain');
-    var list = secScenes().slice(0, 5).map(function (s) {
-      return { id: s.id, name: s.name, weeks: s.weeks, value: s.value, cost: s.cost, levers: leversOf(s.id) };
-    });
-    if (!list.some(function (x) { return x.id === r.scene.id; }) && list.length) {
-      list[list.length - 1] = { id: r.scene.id, name: r.scene.name, weeks: r.scene.weeks, value: r.scene.value, cost: r.scene.cost, levers: r.levers };
-    }
-    var n = list.length || 1;
-    var avgW = Math.round(list.reduce(function (a, b) { return a + b.weeks; }, 0) / n * 10) / 10;
-    var avgV = Math.round(list.reduce(function (a, b) { return a + b.value; }, 0) / n * 10) / 10;
-    var rank = list.slice().sort(function (a, b) { return b.value - a.value || a.weeks - b.weeks; })
-      .map(function (x) { return x.id; }).indexOf(r.scene.id) + 1;
-    return wrapPage(p, r, '04 收益测算', '04', '同业场景横向对照', 'PEER BENCHMARK', null, null, [
-      basis3('对照样本取自本行业大类场景库所载条目，横向比较上线周期、价值分级与投入档位三项字段。'
-        + '该对照用于判断本次场景在同业场景中所处的位置，不参与任何金额计算。'),
-      fig3('同行业场景的上线周期与价值分级', CH.peerBars(list, r.scene.id),
-        '横条长度为场景库所载基准上线周期，右侧方块数为价值分级；绿底行为本次测算场景。', '周'),
-      h('div', { class: 'm3-two wl' }, [
-        h('div', {}, [tab3('对照结论', rows3([
-          row3('样本场景数', n + ' 个', { i: '同行业大类' }),
-          row3('本场景价值分级', r.scene.value + ' / 5', { i: '样本均值 ' + avgV }),
-          row3('本场景上线周期', r.scene.weeks + ' 周', { i: '样本均值 ' + avgW + ' 周' }),
-          row3('本场景命中杠杆', r.levers.length + ' 项', { i: r.levers.map(function (k) { var d = leverDef(k); return d ? d.name : k; }).join('、') }),
-          row3('价值—周期综合位次', '第 ' + rank + ' 位', { sum: true, pos: rank <= 3 })
-        ]))]),
-        h('div', {}, [hh3('位次解读', 'INTERPRETATION'), list3([
-          r.scene.value >= avgV ? '本场景价值分级不低于样本均值，单位投入可承载的效益空间处于同业中上水平。' : '本场景价值分级低于样本均值，价值系数折算后的收益上限相应受限，测算已计入该折算。',
-          r.scene.weeks <= avgW ? '本场景基准上线周期短于样本均值，效益进入满额释放的期次相对靠前。' : '本场景基准上线周期长于样本均值，过渡期占用的期次较多，回收期相应后移。',
-          '价值分级与上线周期为场景库所载固定字段，不随企业填报参数变化。'
-        ])])
-      ]),
-      tab3('样本明细', tbl3([['场景'], ['上线周期', 'c'], ['价值分级', 'c'], ['投入档位', 'c'], ['效益杠杆']],
-        list.map(function (x) {
-          var on = x.id === r.scene.id;
-          return [[x.name + (on ? '（本次测算）' : ''), on ? 'b' : ''], [x.weeks + ' 周', 'c'],
-            [x.value + '/5', 'c'], [x.cost, 'c'],
-            [x.levers.map(function (k) { var d = leverDef(k); return d ? d.name : k; }).join('、')]];
-        })), '场景库条目按行业大类归集，同一大类下的企业共用同一份场景清单。上线周期为不含数据现状系数的基准值。')
+    return wrapPage(p, r, '04 收益测算', '04', '两种口径的累计净额对照', 'DUAL BASIS', null, null, [
+      basis3('现金口径只确认实际发生的现金收支；含非现金口径把人工工时节约按综合用工成本折算后一并计入。'
+        + '两者的差值即本组合非现金效益的规模，' + fmt(r.benefit.hoursMonthly) + ' 元/月。'),
+      r.flow.length ? fig3('两种口径的累计净现金流', CH.dualCurve(r.flow, r.flowAll, r.payback, r.paybackAll),
+        '实线为现金口径，虚线为并计非现金科目后的口径；空心点为各自的转正期次。', '元') : null,
+      tab3('双口径对照', tbl3([['口径'], ['月度收益', 'n'], ['转正期次', 'c'], ['24 期末累计净额', 'n'], ['用途']], [
+        [['现金口径', 'b'], [fmt(r.benefit.cashMonthly) + ' 元', 'n'],
+          [r.payback == null ? '未转正' : '第 ' + r.payback + ' 期', 'c b'],
+          [r.flow.length ? fmt(r.flow[23].cum) + ' 元' : '—', 'n'], ['投资决策与预算审批的唯一依据']],
+        [['含非现金口径'], [fmt(r.benefit.cashMonthly + r.benefit.hoursMonthly) + ' 元', 'n'],
+          [r.paybackAll == null ? '未转正' : '第 ' + r.paybackAll + ' 期', 'c'],
+          [r.flowAll.length ? fmt(r.flowAll[23].cum) + ' 元' : '—', 'n'], ['仅在已明确释放工时再配置安排时参考']]
+      ])),
+      note3('划分依据', '人工工时节约不构成可确认的现金流入',
+        '该部分转化为现金流入的前提是释放工时被重新配置至产出性岗位。在未发生人员结构调整的情形下，'
+        + '工时节约表现为人员负荷下降而非成本下降，故不参与回收期测算。'
+        + '本组合中命中人工工时节约的场景共 ' + r.portfolio.scenes.filter(function (x) { return x.hoursMonthly > 0; }).length + ' 个。'),
+      basis3('结论与决策建议一律以现金口径为准。')
     ]);
   }
-
   function pPay1(r) {
     var p = page3('05', r, 'pay');
     var pm = payMonth(r), f12 = r.flow.length ? r.flow[11].cum : 0, f24 = r.flow.length ? r.flow[23].cum : 0;
@@ -1404,7 +1683,7 @@
         '企业填报项可直接用于决策讨论；参考值项需在复核时以企业实际数据替换。'),
       tab3('逐项参数来源与复核建议',
         tbl3([['参数项'], ['来源', 'c'], ['对测算结论的作用'], ['复核建议']],
-          entries.map(function (e) {
+          entries.slice(0, 7).map(function (e) {
             var eff = e.key.indexOf('ops') === 0 ? '构成人工工时节约的测算基数'
               : e.key.indexOf('error') === 0 ? '构成差错与返工损失下降的测算基数'
                 : e.key === 'revenueAnnual' ? '决定营收封顶线与投入合理性核验的分母'
@@ -1415,7 +1694,8 @@
                           : '构成对应效益杠杆的测算基数';
             return [[e.label, 'b'], [SRCNAME[e.src] || e.src, 'c' + (e.src === 'user' ? ' pos' : '')], [eff],
               [e.src === 'user' ? '无需复核' : '建议以企业实际数据替换后复核']];
-          }))),
+          })),
+        entries.length > 7 ? '上表列示前 7 项，其余 ' + (entries.length - 7) + ' 项的来源见上方分布图。' : null),
       basis3('可信度评分自 100 分起算，按各项参数的来源逐项扣减：采用画像推定扣 ' + C().confidence.penalty.profile
         + ' 分，采用参考值或未填报扣 ' + C().confidence.penalty['default'] + ' 分，未填报另议项预算扣 '
         + C().confidence.penalty.noCustomBudget + ' 分，未指定具体场景扣 ' + C().confidence.penalty.genericScene + ' 分。'),
@@ -1425,25 +1705,24 @@
 
   function pMissing(r) {
     var p = page3('09', r, 'conf');
-    var labels = fieldLabelMap();
-    var items = (r.missing || []).map(function (m) {
-      return { label: labels[m.field] || m.label || m.field, impact: m.impact || 'mid', fix: m.how || m.fix || '补齐后重新测算' };
-    });
+    var items = (r.missing || []);
     var nRef = Object.keys(r.inputSource).filter(function (k) { return r.inputSource[k] !== 'user'; }).length;
     return wrapPage(p, r, '09 数据缺口与补齐建议', '09', '数据缺口与补齐建议', 'DATA GAPS',
       String(items.length), '项 · 待补齐参数', [
-      basis3('数据缺口指效益杠杆所需、但本次未取得企业实际数值的参数。核心效益参数不设默认值：'
-        + '缺失时在报告中明示测算受限，不代为赋值，以免测算结论建立在虚构基数之上。'),
-      fig3('缺口影响程度与补齐路径', CH.gapImpact(items),
-        '影响程度按该参数对回收期的期次变动幅度划分：高为 3 期以上，中为 1 至 3 期，低为 1 期以内。'),
+      basis3('数据缺口指效益杠杆所需、但本次未取得企业实际数值的参数，按场景逐项列示。'
+        + '核心效益参数不设默认值：缺失时在报告中明示该场景测算受限，不代为赋值，'
+        + '以免整个组合的结论建立在虚构基数之上。'),
+      fig3('缺口影响程度与补齐路径', CH.gapImpact(items.map(function (x) {
+        return { label: trunc(x.sceneName + '·' + x.label, 14), impact: x.impact, fix: x.how };
+      })), '影响程度按该参数对回收期的期次变动幅度划分：高为 3 期以上，中为 1 至 3 期，低为 1 期以内。'),
       items.length ? tab3('缺口清单',
-        tbl3([['缺口参数'], ['所属效益杠杆'], ['影响程度', 'c'], ['补齐路径'], ['补齐后的测算变化']],
-          items.map(function (x, i) {
-            return [[x.label, 'b'], [(r.missing[i] && r.missing[i].lever) || '—'],
-              [x.impact === 'high' ? '高' : x.impact === 'low' ? '低' : '中', 'c'],
-              [x.fix], ['该杠杆由不可测算转为可测算，月度收益与回收期同步更新']];
-          })))
-        : note3('缺口核查', '本次测算所需的效益参数均已取得', '全部效益杠杆的测算基数均由企业填报或按画像推定，无待补齐项。测算结论可直接用于投资决策讨论。'),
+        tbl3([['场景'], ['缺口参数'], ['所属杠杆'], ['影响', 'c'], ['补齐路径']],
+          items.map(function (x) {
+            return [[x.sceneName, 'b'], [x.label], [x.lever],
+              [x.impact === 'high' ? '高' : x.impact === 'low' ? '低' : '中', 'c'], [x.how]];
+          })),
+        '同一字段在不同场景各自独立填报：同一类损失在不同环节的发生频次与金额并不相同。')
+        : note3('缺口核查', '本次组合所需的效益参数均已取得', '全部场景的效益杠杆测算基数均由企业填报或按画像推定，无待补齐项。测算结论可直接用于投资决策讨论。'),
       fig3('参数可信度的补齐路径', CH.readinessLadder([
         { name: '本次测算', score: r.confidence.score, note: r.confidence.name },
         { name: '参考值替换后', score: Math.min(100, r.confidence.score + nRef * C().confidence.penalty.profile), note: '以企业实际数据替换' },
@@ -1451,47 +1730,47 @@
       ]), '第三级以实测效能数据替换折减系数后达成，该替换对测算精度的提升幅度最大。', '分'),
       tab3('参数完整度核查', tbl3([['核查项'], ['状态', 'c'], ['说明']], [
         [['效益杠杆测算基数', 'b'], [r.insufficient ? '缺失' : '齐备', 'c ' + (r.insufficient ? 'neg' : 'pos')],
-          [r.insufficient ? '效益侧关键参数未取得，回收期不予出具' : '全部命中杠杆的测算基数均已取得']],
+          [r.insufficient ? '效益侧关键参数未取得，回收期不予出具' : '已取得 ' + r.portfolio.scenes.filter(function (x) { return !x.noData; }).length + ' / ' + r.portfolio.count + ' 个场景的测算基数']],
         [['另议项预算', 'b'], [r.inputSource.customBudget === 'user' ? '企业填报' : '按参考值', 'c ' + (r.inputSource.customBudget === 'user' ? 'pos' : '')],
-          [r.inputSource.customBudget === 'user' ? '按企业填报金额计列，方案报价确定后建议复核' : '按规模推导表计列，方案报价确定后应以实际金额替换']],
-        [['订阅套数', 'b'], [r.invest.seatsSource === 'user' ? '企业填报' : '按参考值', 'c ' + (r.invest.seatsSource === 'user' ? 'pos' : '')],
-          [r.invest.seatsSource === 'user' ? '按企业填报套数计列' : '按企业规模与场景投入档取参考值，实际开通数确定后应替换']],
+          [r.inputSource.customBudget === 'user' ? '按企业填报金额计列' : '按四科目推导计列，方案报价确定后应以实际金额替换']],
+        [['订阅账号数', 'b'], [r.invest.seatsSource === 'user' ? '企业填报' : '按参考值', 'c ' + (r.invest.seatsSource === 'user' ? 'pos' : '')],
+          [r.invest.seatsSource === 'user' ? '按企业填报套数计列' : '按各场景覆盖人数与复用系数 ' + r.portfolio.seatOverlap + ' 归并取值']],
         [['营业收入区间', 'b'], [r.revenueAnnual ? '已取得' : '未取得', 'c ' + (r.revenueAnnual ? 'pos' : '')],
-          [r.revenueAnnual ? '营收封顶线与投入合理性核验均已启用' : '营收封顶护栏与投入合理性核验本次未启用']],
-        [['场景指定', 'b'], [r.sceneBasis === 'library' ? '已指定' : '通用口径', 'c ' + (r.sceneBasis === 'library' ? 'pos' : '')],
-          [r.sceneBasis === 'library' ? '按场景库条目测算，效益杠杆由场景决定' : '未指定具体场景，按通用轻量口径测算']]
+          [r.revenueAnnual ? '营收封顶线与投入合理性核验均已启用' : '营收封顶护栏与投入合理性核验本次未启用']]
       ])),
       r.insufficient ? note3('测算受限', '效益侧关键参数缺失，本次仅出具投入侧测算', '在缺口补齐前，报告不给出回收期结论。投入侧科目与金额不受影响，可直接用于预算编制。', true) : null
     ]);
   }
-
   function pRamp(r) {
     var p = page3('10', r, 'plan');
-    var iv = r.invest, w = iv.setupWeeks;
-    var phases = [
-      { name: '诊断与确认', weeks: Math.round(w * 0.15 * 10) / 10, duty: '确认场景边界、业务规则与验收标准' },
-      { name: '数据准备', weeks: Math.round(w * 0.30 * 10) / 10, duty: '导出基础数据、统一字段口径、完成必要的电子化整理' },
-      { name: '配置上线', weeks: Math.round(w * 0.35 * 10) / 10, duty: '完成账号开通、规则配置、系统对接与使用培训' },
-      { name: '试运行', weeks: Math.round(w * 0.20 * 10) / 10, duty: '并行运行、问题响应与效益数据采集' }
-    ];
+    var iv = r.invest, pf = r.portfolio;
     var dsName = { paper: '纸质为主', scattered: '分散在多个系统', excel: '表格管理', system: '系统内齐全' };
+    var pre = [];
+    pf.scenes.forEach(function (x) { if (x.precondition) pre.push({ name: x.name, t: x.precondition }); });
     return wrapPage(p, r, '10 实施周期与效益释放', '10', '实施周期与效益释放', 'IMPLEMENTATION',
-      String(w), '周 · 测算上线周期', [
-      basis3('上线周期以场景库所载基准周期 ' + r.scene.weeks + ' 周为基数，乘以按数据现状取值的倍率 ' + iv.dataStateMult
-        + '（当前为「' + (dsName[r.plan.dataState] || r.plan.dataState) + '」）得出，合计 ' + w + ' 周。阶段划分按四段式推进，各阶段占比为固定经验值。'),
-      fig3('实施阶段与周期分配', CH.weeksGantt(phases, w),
-        '阶段按顺序推进，不含企业内部审批与预算流程所需时间。', '周'),
+      String(pf.totalWeeks), '周 · 总工期', [
+      basis3('总工期由各批工期串行累加得出：每批取该批最长场景的基准周期，乘以按数据现状取值的倍率 '
+        + iv.dataStateMult + '（当前为「' + (dsName[r.plan.dataState] || r.plan.dataState) + '」）。'
+        + '共 ' + pf.waves.length + ' 批，合计 ' + pf.totalWeeks + ' 周。'),
+      fig3('各批工期与效益起算期次',
+        CH.weeksGantt(pf.waves.map(function (w) { return { name: '第 ' + w.no + ' 批', weeks: w.weeks, duty: w.sceneNames.join('、') }; }), pf.totalWeeks),
+        '批与批之间串行推进，不含企业内部审批与预算流程所需时间。', '周'),
       h('div', { class: 'm3-two wl' }, [
-        h('div', {}, [tab3('阶段职责', tbl3([['阶段'], ['周期', 'c'], ['主要工作']],
-          phases.map(function (x) { return [[x.name, 'b'], [x.weeks + ' 周', 'c'], [x.duty]]; })))]),
-        h('div', {}, [fig3('效益释放节奏', CH.rampSteps(C().rampMonths, r.benefit.cashMonthly),
-          '释放比例自上线当月起计，与上线周期不重叠计算。', '%')])
+        h('div', {}, [tab3('各批场景与起算期次',
+          tbl3([['批次', 'c'], ['场景'], ['工期', 'c'], ['效益起算', 'c']],
+            pf.waves.map(function (w) {
+              return [['第 ' + w.no + ' 批', 'c b'], [w.sceneNames.join('、')], [w.weeks + ' 周', 'c'], ['第 ' + w.startMonth + ' 期', 'c b']];
+            })))]),
+        h('div', {}, [fig3('单场景的效益释放比例', CH.rampSteps(C().rampMonths, r.benefit.cashMonthly / Math.max(1, pf.count)),
+          '每个场景自其起算期次起按该比例逐期释放，第 ' + (C().rampMonths.length + 1) + ' 期起满额。', '%')])
       ]),
       tab3('前置条件', tbl3([['事项'], ['内容'], ['未满足的后果']], [
-        [['数据依赖', 'b'], [(r.scene.dataDeps || []).length ? r.scene.dataDeps.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无特定系统依赖'],
+        [['数据依赖', 'b'], [(pf.depUnion || []).length ? pf.depUnion.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无特定系统依赖'],
           ['需以人工方式补足数据来源，数据准备阶段延长']],
-        [['第一步动作', 'b'], [r.scene.firstStep || '—'], ['缺少基线数据，效益无法在试运行期核验']],
-        [['实施前置条件', 'b'], [r.scene.precondition || '无'], ['上线周期延长，效益释放相应后移']]
+        [['已在用系统', 'b'], [(iv.hitSystems || []).length ? iv.hitSystems.map(function (x) { return sh.optText('systems', x) || x; }).join('、') + '（已计列对接费用）' : '无'],
+          ['未在用的依赖系统需先行建设，否则相关场景无法上线']],
+        [['场景前置条件', 'b'], [pre.length ? pre.map(function (x) { return x.name + '：' + x.t; }).join('；') : '无'],
+          ['对应场景的上线周期延长，效益释放相应后移']]
       ])),
       basis3(RT().method.ramp),
       fn3('数据现状倍率取值见附录 C。倍率作用于场景库所载基准周期，不作用于效益释放比例。')
@@ -1652,32 +1931,29 @@
 
   function pAppD(r) {
     var p = page3('C', r, 'app');
-    var sc = r.scene, bm = DATA.m3.benchmarks;
+    var bm = DATA.m3.benchmarks, pf = r.portfolio;
     var bmRows = [];
     ['opsSalary', 'grossMargin', 'setupWeeksBuffer'].forEach(function (k) {
       var b = bm[k]; if (!b) return;
       bmRows.push([[b.label, 'b'], [b.by], [Object.keys(b.values).map(function (x) { return x + '：' + b.values[x]; }).join('　')], [String(b.fallback), 'c']]);
     });
     return wrapPage(p, r, '附录 C 场景基础数据', 'C', '场景库字段与收益侧参考值', 'SOURCE DATA', null, null, [
-      basis3('本页列示场景库所载原始字段与收益侧参考值表，供口径追溯与复核之用。场景库字段对同行业大类的全部企业一致，不随企业填报参数变化。'),
-      tab3('场景库字段', tbl3([['字段'], ['取值']], [
-        [['场景编号', 'b'], [sc.id || '—']],
-        [['场景名称', 'b'], [sc.name]],
-        [['所属环节', 'b'], [sc.stage || '—']],
-        [['使用角色', 'b'], [sc.user || '—']],
-        [['替代事项', 'b'], [sc.replaces || '—']],
-        [['对应产品模块', 'b'], [sc.module]],
-        [['预期指标', 'b'], [(sc.metric || '—') + '（区间表述，未参与金额计算）']],
-        [['折算口径', 'b'], [sc.roiBasis || '—']],
-        [['基准上线周期', 'b'], [sc.weeks + ' 周']],
-        [['投入档位', 'b'], [sc.cost + ' 档']],
-        [['价值分级', 'b'], [sc.value + ' / 5']],
-        [['数据依赖', 'b'], [(sc.dataDeps || []).length ? sc.dataDeps.map(function (x) { return sh.optText('systems', x) || x; }).join('、') : '无']],
-        [['第一步动作', 'b'], [sc.firstStep || '—']],
-        [['实施前置条件', 'b'], [sc.precondition || '—']]
-      ])),
+      basis3('本页列示本次组合内各场景的场景库原始字段与收益侧参考值表，供口径追溯与复核之用。'
+        + '场景库字段对同行业大类的全部企业一致，不随企业填报参数变化。'),
+      tab3('场景库字段（逐场景）',
+        tbl3([['场景'], ['编号', 'c'], ['环节'], ['使用角色'], ['替代事项'], ['产品模块'], ['周期', 'c'], ['档', 'c'], ['价值', 'c']],
+          pf.scenes.map(function (x) {
+            return [[x.name, 'b'], [x.id || '—', 'c'], [x.stage || '—'], [x.user || '—'],
+              [trunc(x.replaces || '—', 16)], [x.module || '—'], [x.weeks + ' 周', 'c'], [x.cost, 'c'], [x.value + '/5', 'c']];
+          }))),
+      tab3('折算口径与预期指标',
+        tbl3([['场景'], ['效益折算口径'], ['预期指标']],
+          pf.scenes.map(function (x) {
+            return [[x.name, 'b'], [x.roiBasis || '—'], [(x.metric || '—') + '（区间表述，未参与金额计算）']];
+          })),
+        '折算口径决定各场景命中哪几项效益杠杆；预期指标仅作口径说明。'),
       tab3('收益侧参考值表', tbl3([['参考值'], ['取值依据'], ['分档取值'], ['缺省值', 'c']], bmRows), bm.disclosure),
-      fn3('收益杠杆的核心参数（人数、次数、单量、金额、占用资金）一律不设参考值，缺失时在第 09 章明示测算受限。')
+      fn3('收益杠杆的核心参数（人数、次数、单量、金额、占用资金）一律不设参考值，缺失时在第 09 章逐场景明示测算受限。')
     ]);
   }
 
@@ -1723,9 +1999,12 @@
     return p;
   }
 
+  window.__M3_STATE = function () { return { step: M.step, picks: M.picks.length, gaps: profileGaps(), name: M.form && M.form.name }; };
   window.__M3_REPORT_PAGES = function () { return M.pages.length; };
   // 量高脚本专用：跳过输入流程直接进报告，只为验证版式分页
   window.__M3_INJECT = function (inp, out) {
-    M.form = inp.profile; M.plan = inp.plan; M.gain = inp.gain || {}; M.result = out; setStep('report');
+    M.form = inp.profile; M.plan = inp.plan;
+    M.picks = (inp.scenes || []).map(function (x) { return { sceneId: x.sceneId, gain: x.gain || {} }; });
+    M.result = out; setStep('report');
   };
 })();

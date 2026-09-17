@@ -287,7 +287,10 @@
       touch();
     }, { passive: true });
   });
+  // 展会现场不希望屏幕停一会儿就跳回首页：默认关闭待机，?idle=on 时才启用
+  var IDLE_ON = /(?:^|[?&])idle=on(?:&|$)/.test(location.search);
   idleTimer = setInterval(function () {
+    if (!IDLE_ON) return;
     if (S.idleHold) return;
     if (Date.now() > S.idleUntil && $idle.classList.contains('hidden')) showIdle();
   }, 1000);

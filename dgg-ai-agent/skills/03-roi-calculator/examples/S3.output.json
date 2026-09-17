@@ -3,7 +3,7 @@
   "meta": {
     "module": "企业AI投入ROI测算器",
     "credits": 20,
-    "version": "1.2.0",
+    "version": "2.0.0",
     "horizon": 24
   },
   "profile": {
@@ -23,53 +23,153 @@
     "overseas": "no",
     "role": "owner"
   },
-  "scene": {
-    "id": "life-s06",
-    "name": "上门服务派单与改约调度",
-    "stage": "服务调度",
-    "user": "调度客服与服务主管",
-    "replaces": "打电话逐个协调改约的每天三小时",
-    "module": "AI流程提效",
-    "metric": "派单耗时下降一半，改约成功率提升 15–20 个百分点",
-    "roiBasis": "按调度人工工时与单人日均服务单量折算",
-    "weeks": 10,
-    "cost": "中",
-    "value": 5,
-    "dataDeps": [
-      "crm"
+  "portfolio": {
+    "count": 2,
+    "generic": false,
+    "totalWeeks": 16,
+    "waveSize": 2,
+    "waves": [
+      {
+        "no": 1,
+        "weeks": 16,
+        "startWeek": 0,
+        "endWeek": 16,
+        "startMonth": 4,
+        "sceneIds": [
+          "life-s06",
+          "life-s08"
+        ],
+        "sceneNames": [
+          "上门服务派单与改约调度",
+          "出品标准问答与新人带教"
+        ]
+      }
     ],
-    "firstStep": "把一周订单与服务人员排班画在一张表上，看清冲突集中在哪",
-    "precondition": "服务人员的可用时段需要每日更新，靠电话确认的先改线上填报"
+    "scenes": [
+      {
+        "id": "life-s06",
+        "name": "上门服务派单与改约调度",
+        "stage": "服务调度",
+        "user": "调度客服与服务主管",
+        "replaces": "打电话逐个协调改约的每天三小时",
+        "module": "AI流程提效",
+        "metric": "派单耗时下降一半，改约成功率提升 15–20 个百分点",
+        "roiBasis": "按调度人工工时与单人日均服务单量折算",
+        "weeks": 10,
+        "cost": "中",
+        "value": 5,
+        "dataDeps": [
+          "crm"
+        ],
+        "firstStep": "把一周订单与服务人员排班画在一张表上，看清冲突集中在哪",
+        "precondition": "服务人员的可用时段需要每日更新，靠电话确认的先改线上填报",
+        "levers": [
+          "hours"
+        ],
+        "wave": 1,
+        "startMonth": 4,
+        "valueFactor": 1,
+        "rawMonthly": 4022,
+        "afterValue": 4022,
+        "cashMonthly": 0,
+        "hoursMonthly": 4022,
+        "finalMonthly": 4022,
+        "noData": false,
+        "share": 0
+      },
+      {
+        "id": "life-s08",
+        "name": "出品标准问答与新人带教",
+        "stage": "门店培训",
+        "user": "厨师长与新入职员工",
+        "replaces": "师傅口头讲一遍、新人边做边问的带教方式",
+        "module": "AI人力官",
+        "metric": "新人独立上岗周期缩短三分之一",
+        "roiBasis": "按培训工时下降与出品返工减少折算",
+        "weeks": 3,
+        "cost": "零",
+        "value": 3,
+        "dataDeps": [],
+        "firstStep": "选十道点单量高的菜品，把做法与份量拍成图文标准",
+        "precondition": "标准做法需要厨师长确认一次，各店做法不同的先统一",
+        "levers": [
+          "error",
+          "hours"
+        ],
+        "wave": 1,
+        "startMonth": 4,
+        "valueFactor": 0.75,
+        "rawMonthly": 1521,
+        "afterValue": 1141,
+        "cashMonthly": 0,
+        "hoursMonthly": 399,
+        "finalMonthly": 399,
+        "noData": false,
+        "share": 0
+      }
+    ],
+    "seatDetail": [
+      {
+        "name": "上门服务派单与改约调度",
+        "seats": 9
+      },
+      {
+        "name": "出品标准问答与新人带教",
+        "seats": 3
+      }
+    ],
+    "seatOverlap": 0.4,
+    "seatsRef": 11,
+    "devPerScene": [
+      {
+        "id": "life-s06",
+        "name": "上门服务派单与改约调度",
+        "cost": "中",
+        "base": 25000,
+        "rank": 1,
+        "factor": 1,
+        "amount": 25000
+      },
+      {
+        "id": "life-s08",
+        "name": "出品标准问答与新人带教",
+        "cost": "零",
+        "base": 0,
+        "rank": 2,
+        "factor": 0.82,
+        "amount": 0
+      }
+    ],
+    "depUnion": [
+      "crm"
+    ]
   },
-  "sceneBasis": "library",
   "sector": "life",
-  "levers": [
-    "hours"
-  ],
   "plan": {
     "tier": "std",
     "tierName": "标准版",
-    "seats": 9,
+    "seats": 11,
     "diagnosisDays": 1,
     "privateDeploy": null,
     "customBudget": 78600,
     "dataState": "paper",
     "setupPeople": 1,
-    "setupSalary": 5500
+    "setupSalary": 5500,
+    "waveSize": 2
   },
   "invest": {
     "cashItems": [
       {
         "key": "sub",
         "name": "标准版订阅",
-        "detail": "1280 元 / 套年 × 9 套",
-        "amount": 11520,
+        "detail": "1280 元 / 套年 × 11 套（2 个场景共用）",
+        "amount": 14080,
         "yearly": true
       },
       {
         "key": "diag",
         "name": "专家入企 AI 诊断",
-        "detail": "1980 元 × 1 天",
+        "detail": "1980 元 × 1 天，覆盖全部 2 个场景",
         "amount": 1980,
         "yearly": false
       },
@@ -82,22 +182,22 @@
       }
     ],
     "cashOnce": 80580,
-    "cashYearly": 11520,
-    "cashYear1": 92100,
+    "cashYearly": 14080,
+    "cashYear1": 94660,
     "customItems": [
       {
         "key": "customDev",
         "name": "定制开发与配置",
-        "detail": "中档基数 25000 元 × 规模系数 1",
-        "basis": "含业务规则配置、表单与报表定制、权限模型搭建",
+        "detail": "2 个场景按 1 / 0.82 递减计列，规模系数 1",
+        "basis": "业务规则引擎、表单与报表框架、权限模型可跨场景复用，故按金额降序逐个乘以 0.82 的幂",
         "refAmount": 25000,
         "amount": 25000
       },
       {
         "key": "coaching",
         "name": "落地陪跑",
-        "detail": "16 周 × 2600 元 / 周",
-        "basis": "含配置陪同、使用培训、试运行期问题响应与效益数据复盘",
+        "detail": "总工期 16 周 × 2600 元 / 周",
+        "basis": "按分批上线的总工期逐周计列，含配置陪同、使用培训、试运行期问题响应与效益数据复盘",
         "refAmount": 41600,
         "amount": 41600
       },
@@ -105,7 +205,7 @@
         "key": "dataPrep",
         "name": "历史数据整理",
         "detail": "规模基数 12000 元 × 数据现状系数 1",
-        "basis": "按数据现状调整：纸质为主需先完成电子化，已在系统内的接近于零",
+        "basis": "全企业一次性投入，不随场景数量增加：整理的是同一批业务台账",
         "refAmount": 12000,
         "amount": 12000
       }
@@ -116,14 +216,14 @@
       {
         "key": "setup",
         "name": "上线期内部工时投入",
-        "detail": "1 人 × 约 16 周 × 每天 2 小时",
+        "detail": "1 人 × 总工期 16 周 × 每天 2 小时",
         "hours": 160,
         "amount": 6574
       },
       {
         "key": "run",
         "name": "上线后每月维护工时",
-        "detail": "1 人 × 每月 4 小时",
+        "detail": "1 人 × 每月 4 小时（2 个场景）",
         "hours": 4,
         "amount": 164,
         "monthly": true
@@ -137,445 +237,542 @@
     "dataPrepFactor": 1,
     "runLaborMonthly": 164,
     "tierName": "标准版",
-    "seats": 9,
+    "seats": 11,
     "seatsSource": "benchmark",
     "diagnosisDays": 1,
     "hitSystems": [],
-    "revenueShare": 0.77,
-    "shareBandLow": 0.15,
-    "shareBandHigh": 0.6,
-    "shareVerdict": "high",
-    "shareText": "首年现金支出占营业收入 0.77%，高于单场景常见区间上限 0.6%。建议复核场景范围是否过大，或按阶段拆分实施。",
-    "total12": 92100,
+    "integrationUnit": 14000,
+    "revenueShare": 0.79,
+    "shareBandLow": 0.3,
+    "shareBandHigh": 1.2,
+    "shareVerdict": "in",
+    "shareText": "本次 2 个场景的首年现金支出合计占营业收入 0.79%，落在企业级常见区间 0.3% 至 1.2% 之内，投入总额与企业体量匹配。",
+    "total12": 94660,
     "totalNote": "回收期按现金口径测算；内部工时投入单列，不参与回收期计算"
   },
   "benefit": {
-    "levers": [
+    "groups": [
       {
         "key": "hours",
         "name": "人工工时节约",
-        "en": "HOURS SAVED",
-        "money": "同一事项所需人工投入下降，按综合用工成本折算",
-        "monthly": 4022,
-        "weight": 1,
-        "discounted": false,
-        "final": 4022,
-        "basis": "5 人 × 每天 2 小时 × 折减 45% × 21.75 天 × 时薪 41.09 元",
+        "cash": false,
+        "scenes": 2,
+        "gross": 5163,
+        "counted": 4421,
+        "items": [
+          {
+            "sceneId": "life-s06",
+            "sceneName": "上门服务派单与改约调度",
+            "afterValue": 4022,
+            "crossWeight": 1,
+            "counted": 4022
+          },
+          {
+            "sceneId": "life-s08",
+            "sceneName": "出品标准问答与新人带教",
+            "afterValue": 1141,
+            "crossWeight": 0.35,
+            "counted": 399
+          }
+        ]
+      }
+    ],
+    "items": [
+      {
+        "sceneId": "life-s06",
+        "sceneName": "上门服务派单与改约调度",
+        "key": "hours",
+        "name": "人工工时节约",
         "cash": false,
         "cut": 0.45,
         "cutNote": "折减系数 45%。工具承接的是信息查找、录入与初步判断环节，复核与决策环节仍需人工，故不按全量计列。",
-        "rank": 1
+        "basis": "5 人 × 每天 2 小时 × 折减 45% × 21.75 天 × 时薪 41.09 元",
+        "money": "同一事项所需人工投入下降，按综合用工成本折算",
+        "monthly": 4022,
+        "inSceneWeight": 1,
+        "inScene": 4022,
+        "valueFactor": 1,
+        "afterValue": 4022,
+        "crossWeight": 1,
+        "counted": 4022,
+        "final": 4022
+      },
+      {
+        "sceneId": "life-s08",
+        "sceneName": "出品标准问答与新人带教",
+        "key": "hours",
+        "name": "人工工时节约",
+        "cash": false,
+        "cut": 0.45,
+        "cutNote": "折减系数 45%。工具承接的是信息查找、录入与初步判断环节，复核与决策环节仍需人工，故不按全量计列。",
+        "basis": "4 人 × 每天 1 小时 × 折减 45% × 21.75 天 × 时薪 38.85 元",
+        "money": "同一事项所需人工投入下降，按综合用工成本折算",
+        "monthly": 1521,
+        "inSceneWeight": 1,
+        "inScene": 1521,
+        "valueFactor": 0.75,
+        "afterValue": 1141,
+        "crossWeight": 0.35,
+        "counted": 399,
+        "final": 399
       }
     ],
-    "rawMonthly": 4022,
-    "valueFactor": 1,
-    "afterValue": 4022,
+    "rawMonthly": 5163,
+    "afterCross": 4421,
     "capMonthly": 60000,
     "capped": false,
-    "fullMonthly": 4022,
+    "fullMonthly": 4421,
     "cashMonthly": 0,
-    "hoursMonthly": 4022,
-    "cashYear1": 0,
+    "hoursMonthly": 4421,
+    "crossDiscount": 742,
     "note": "人工工时节约列为非现金科目，不参与回收期测算"
   },
   "flow": [
     {
       "m": 1,
       "benefit": 0,
-      "cost": 92100,
-      "net": -92100,
-      "cum": -92100,
-      "ramp": 0.35
+      "cost": 94660,
+      "net": -94660,
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 2,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 0.7
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 3,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 4,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 5,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 6,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 7,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 8,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 9,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 10,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 11,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 12,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -92100,
-      "ramp": 1
+      "cum": -94660,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 13,
       "benefit": 0,
-      "cost": 11520,
-      "net": -11520,
-      "cum": -103620,
-      "ramp": 1
+      "cost": 14080,
+      "net": -14080,
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 14,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 15,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 16,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 17,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 18,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 19,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 20,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 21,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 22,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 23,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     },
     {
       "m": 24,
       "benefit": 0,
       "cost": 0,
       "net": 0,
-      "cum": -103620,
-      "ramp": 1
+      "cum": -108740,
+      "ramp": 0,
+      "live": 2
     }
   ],
   "flowAll": [
     {
       "m": 1,
-      "benefit": 1408,
-      "cost": 92100,
-      "net": -90692,
-      "cum": -90692,
-      "ramp": 0.35
+      "benefit": 0,
+      "cost": 94660,
+      "net": -94660,
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 2,
-      "benefit": 2815,
+      "benefit": 0,
       "cost": 0,
-      "net": 2815,
-      "cum": -87877,
-      "ramp": 0.7
+      "net": 0,
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 3,
-      "benefit": 4022,
+      "benefit": 0,
       "cost": 0,
-      "net": 4022,
-      "cum": -83855,
-      "ramp": 1
+      "net": 0,
+      "cum": -94660,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 4,
-      "benefit": 4022,
+      "benefit": 1547,
       "cost": 0,
-      "net": 4022,
-      "cum": -79833,
-      "ramp": 1
+      "net": 1547,
+      "cum": -93113,
+      "ramp": 0.35,
+      "live": 2
     },
     {
       "m": 5,
-      "benefit": 4022,
+      "benefit": 3095,
       "cost": 0,
-      "net": 4022,
-      "cum": -75811,
-      "ramp": 1
+      "net": 3095,
+      "cum": -90018,
+      "ramp": 0.7,
+      "live": 2
     },
     {
       "m": 6,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -71789,
-      "ramp": 1
+      "net": 4421,
+      "cum": -85597,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 7,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -67767,
-      "ramp": 1
+      "net": 4421,
+      "cum": -81176,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 8,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -63745,
-      "ramp": 1
+      "net": 4421,
+      "cum": -76755,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 9,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -59723,
-      "ramp": 1
+      "net": 4421,
+      "cum": -72334,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 10,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -55701,
-      "ramp": 1
+      "net": 4421,
+      "cum": -67913,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 11,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -51679,
-      "ramp": 1
+      "net": 4421,
+      "cum": -63492,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 12,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -47657,
-      "ramp": 1
+      "net": 4421,
+      "cum": -59071,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 13,
-      "benefit": 4022,
-      "cost": 11520,
-      "net": -7498,
-      "cum": -55155,
-      "ramp": 1
+      "benefit": 4421,
+      "cost": 14080,
+      "net": -9659,
+      "cum": -68730,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 14,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -51133,
-      "ramp": 1
+      "net": 4421,
+      "cum": -64309,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 15,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -47111,
-      "ramp": 1
+      "net": 4421,
+      "cum": -59888,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 16,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -43089,
-      "ramp": 1
+      "net": 4421,
+      "cum": -55467,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 17,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -39067,
-      "ramp": 1
+      "net": 4421,
+      "cum": -51046,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 18,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -35045,
-      "ramp": 1
+      "net": 4421,
+      "cum": -46625,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 19,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -31023,
-      "ramp": 1
+      "net": 4421,
+      "cum": -42204,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 20,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -27001,
-      "ramp": 1
+      "net": 4421,
+      "cum": -37783,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 21,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -22979,
-      "ramp": 1
+      "net": 4421,
+      "cum": -33362,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 22,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -18957,
-      "ramp": 1
+      "net": 4421,
+      "cum": -28941,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 23,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -14935,
-      "ramp": 1
+      "net": 4421,
+      "cum": -24520,
+      "ramp": 1,
+      "live": 2
     },
     {
       "m": 24,
-      "benefit": 4022,
+      "benefit": 4421,
       "cost": 0,
-      "net": 4022,
-      "cum": -10913,
-      "ramp": 1
+      "net": 4421,
+      "cum": -20099,
+      "ramp": 1,
+      "live": 2
     }
   ],
   "payback": null,
   "paybackAll": null,
   "paybackBasis": "none",
-  "sensitivityBasis": "all",
+  "sensitivityBasis": "cash",
   "reCross": null,
   "roi": {
     "roi12": -100,
     "roi24": -100,
-    "inv12": 92100,
-    "inv24": 103620,
+    "inv12": 94660,
+    "inv24": 108740,
     "meaningful": true,
     "note": ""
   },
@@ -587,11 +784,11 @@
       "benefitMul": 0.65,
       "costMul": 1.2,
       "payback": null,
-      "cum12": -110520,
-      "cum24": -124344,
+      "cum12": -113592,
+      "cum24": -130488,
       "roi12": -120,
       "monthlyBenefit": 0,
-      "cashYear1": 110520
+      "cashYear1": 113592
     },
     {
       "key": "mid",
@@ -600,11 +797,11 @@
       "benefitMul": 1,
       "costMul": 1,
       "payback": null,
-      "cum12": -92100,
-      "cum24": -103620,
+      "cum12": -94660,
+      "cum24": -108740,
       "roi12": -100,
       "monthlyBenefit": 0,
-      "cashYear1": 92100
+      "cashYear1": 94660
     },
     {
       "key": "opt",
@@ -613,71 +810,92 @@
       "benefitMul": 1.25,
       "costMul": 0.95,
       "payback": null,
-      "cum12": -87495,
-      "cum24": -98439,
+      "cum12": -89927,
+      "cum24": -103303,
       "roi12": -95,
       "monthlyBenefit": 0,
-      "cashYear1": 87495
+      "cashYear1": 89927
     }
   ],
   "sensitivity": [
     {
       "key": "benefitCut",
       "label": "效益折减系数",
-      "note": "工具对该项损失的实际改善幅度",
+      "note": "工具对各项损失的实际改善幅度",
       "low": null,
-      "high": 23,
-      "lowText": "超过 24 个月",
-      "highText": "第 23 个月",
+      "high": null,
+      "lowText": "期内未转正",
+      "highText": "期内未转正",
       "base": null,
-      "spread": 2
+      "spread": 0
     },
     {
       "key": "customBudget",
       "label": "另议项预算",
       "note": "系统对接与定制开发的实际报价",
-      "low": 23,
+      "low": null,
       "high": null,
-      "lowText": "第 23 个月",
-      "highText": "超过 24 个月",
+      "lowText": "期内未转正",
+      "highText": "期内未转正",
       "base": null,
-      "spread": 2
+      "spread": 0
+    },
+    {
+      "key": "seats",
+      "label": "订阅账号数",
+      "note": "实际开通使用的账号数量",
+      "low": null,
+      "high": null,
+      "lowText": "期内未转正",
+      "highText": "期内未转正",
+      "base": null,
+      "spread": 0
     },
     {
       "key": "setupCost",
       "label": "上线期一次性支出",
       "note": "诊断与配置环节的实际发生额",
-      "low": 23,
-      "high": null,
-      "lowText": "第 23 个月",
-      "highText": "超过 24 个月",
-      "base": null,
-      "spread": 2
-    },
-    {
-      "key": "seats",
-      "label": "订阅套数",
-      "note": "实际开通使用的账号数量",
       "low": null,
       "high": null,
-      "lowText": "超过 24 个月",
-      "highText": "超过 24 个月",
+      "lowText": "期内未转正",
+      "highText": "期内未转正",
       "base": null,
       "spread": 0
     },
     {
       "key": "rampSpeed",
-      "label": "效益释放节奏",
-      "note": "过渡期达到满额效能所需的期数",
+      "label": "上线节奏",
+      "note": "各批场景的实际上线时点",
       "low": null,
       "high": null,
-      "lowText": "超过 24 个月",
-      "highText": "超过 24 个月",
+      "lowText": "期内未转正",
+      "highText": "期内未转正",
       "base": null,
       "spread": 0
     }
   ],
-  "missing": [],
+  "missing": [
+    {
+      "sceneId": "life-s08",
+      "sceneName": "出品标准问答与新人带教",
+      "lever": "差错与返工损失下降",
+      "field": "errorFreqMonthly",
+      "label": "月均发生次数",
+      "unit": "次/月",
+      "impact": "high",
+      "how": "向厨师长与新入职员工确认后填入"
+    },
+    {
+      "sceneId": "life-s08",
+      "sceneName": "出品标准问答与新人带教",
+      "lever": "差错与返工损失下降",
+      "field": "errorCostPerCase",
+      "label": "单次损失金额",
+      "unit": "元",
+      "impact": "high",
+      "how": "向厨师长与新入职员工确认后填入"
+    }
+  ],
   "insufficient": false,
   "inputSource": {
     "revenueAnnual": "profile",
@@ -689,94 +907,99 @@
     "opsSalary": "user"
   },
   "confidence": {
-    "score": 94,
-    "band": "high",
-    "name": "口径扎实",
-    "desc": "关键参数均由企业填报，测算结论可直接用于投资决策讨论"
+    "score": 56,
+    "band": "low",
+    "name": "待补齐",
+    "desc": "核心参数缺口较多，本次仅出具投入侧测算，回收期需在参数补齐后重新计算"
   },
   "capped": false,
   "capMonthly": 60000,
   "revenueAnnual": 12000000,
   "keyNumbers": [
     {
+      "k": "场景数",
+      "v": 2,
+      "unit": "个",
+      "s": "分 1 批上线，总工期 16 周"
+    },
+    {
       "k": "首年现金支出",
-      "v": 92100,
+      "v": 94660,
       "unit": "元",
-      "s": "含订阅与一次性支出"
+      "s": "含订阅、诊断与一次性支出"
     },
     {
       "k": "月度现金收益",
       "v": 0,
       "unit": "元",
-      "s": "效益释放满额后"
+      "s": "全部场景满额释放后合计"
     },
     {
       "k": "回收期",
       "v": null,
       "unit": "期",
-      "s": "现金口径 24 期内未转正",
+      "s": "现金口径 · 中性档",
       "wide": true
     },
     {
       "k": "首年累计净额",
-      "v": -92100,
+      "v": -94660,
       "unit": "元",
       "s": "现金口径，第 12 期末"
     },
     {
-      "k": "含非现金口径",
-      "v": null,
-      "unit": "期",
-      "s": "该口径亦未转正"
-    },
-    {
       "k": "非现金效益",
-      "v": 4022,
+      "v": 4421,
       "unit": "元/月",
       "s": "人工工时节约，不计入回收期"
     },
     {
       "k": "参数可信度",
-      "v": 94,
+      "v": 56,
       "unit": "分",
-      "s": "口径扎实"
+      "s": "待补齐"
     }
   ],
   "quickView": [
     {
+      "q": "测算范围",
+      "a": "2 个场景",
+      "text": "上门服务派单与改约调度、出品标准问答与新人带教。按价值分级降序、上线周期升序排出实施顺序，分 1 批推进，总工期 16 周。"
+    },
+    {
       "q": "投入总额",
-      "a": "92100 元",
-      "text": "首年现金支出，标准版 9 套，含另议项 78600 元；次年起续费 11520 元。"
+      "a": "94660 元",
+      "text": "首年现金支出，标准版 11 套（2 个场景共用账号），含另议项 78600 元；次年起续费 14080 元。"
     },
     {
       "q": "投入结构",
       "a": "标准版订阅",
-      "text": "标准版订阅 11520 元；专家入企 AI 诊断 1980 元；另议项合计 78600 元。一次性支出占比 87%。"
+      "text": "标准版订阅 14080 元；专家入企 AI 诊断 1980 元；另议项合计 78600 元。一次性支出占比 85%。"
     },
     {
       "q": "效益来源",
-      "a": "人工工时节约",
-      "text": "本场景命中 1 项效益杠杆：人工工时节约；折算口径为「按调度人工工时与单人日均服务单量折算」。"
+      "a": "上门服务派单与改约调度",
+      "text": "现金效益贡献最高的是「上门服务派单与改约调度」，月度 0 元，占全组合的 0%。共命中 1 类效益杠杆。"
     },
     {
       "q": "月度收益",
       "a": "0 元",
-      "text": "现金口径，效益释放满额后。另有非现金科目 4022 元/月未计入。"
+      "text": "现金口径，全部场景满额释放后合计。另有非现金科目 4421 元/月未计入。"
     },
     {
       "q": "回收期",
       "a": "期内未转正",
-      "text": "两种口径于 24 期测算期内均未转正。"
+      "text": "现金口径，中性档；保守档期内未转正。"
     },
     {
       "q": "参数可信度",
-      "a": "口径扎实（94 分）",
-      "text": "关键参数均由企业填报，测算结论可直接用于投资决策讨论"
+      "a": "待补齐（56 分）",
+      "text": "核心参数缺口较多，本次仅出具投入侧测算，回收期需在参数补齐后重新计算"
     }
   ],
   "verdict": {
-    "headline": "本场景不产生可确认的现金效益，不宜单独立项",
-    "text": "本场景命中的效益杠杆全部为人工工时节约，折合 4022 元/月，属非现金科目；现金口径月度收益为 0，故 24 期内累计净现金流不可能转正。并计非现金科目后，24 期累计净额为 -10913 元，同样未转正。该结论不表示本场景没有价值，而在于其价值无法在现金口径下确认：建议与同一批次中现金效益明确的场景合并立项，由后者承担投入的回收，本场景作为附带收益计列。"
+    "headline": "本组合不产生可确认的现金效益，不宜按此范围立项",
+    "text": "所选 2 个场景命中的效益杠杆全部为人工工时节约，折合 4421 元/月，属非现金科目；现金口径月度收益为 0，故 24 期内累计净现金流不可能转正。该结论不表示这些场景没有价值，而在于其价值无法在现金口径下确认：建议在组合中补入差错与返工损失下降、成交转化提升一类现金效益明确的场景，由其承担投入的回收。"
   },
   "roles": [
     {
@@ -823,8 +1046,12 @@
       "why": "单量、人员编制、资金占用等收益基数随之变化，原测算基础不再成立。"
     }
   ],
-  "summaryText": "本场景命中的效益杠杆全部为人工工时节约，折合 4022 元/月，属非现金科目；现金口径月度收益为 0，故 24 期内累计净现金流不可能转正。并计非现金科目后，24 期累计净额为 -10913 元，同样未转正。该结论不表示本场景没有价值，而在于其价值无法在现金口径下确认：建议与同一批次中现金效益明确的场景合并立项，由后者承担投入的回收，本场景作为附带收益计列。",
+  "summaryText": "本组合不产生可确认的现金效益，不宜按此范围立项",
   "render": [
+    {
+      "type": "portfolio",
+      "source": "portfolio"
+    },
     {
       "type": "three-accounts",
       "source": "keyNumbers"
@@ -836,6 +1063,14 @@
     {
       "type": "benefit-ledger",
       "source": "benefit"
+    },
+    {
+      "type": "scene-contribution",
+      "source": "portfolio.scenes"
+    },
+    {
+      "type": "wave-gantt",
+      "source": "portfolio.waves"
     },
     {
       "type": "cashflow-bars",

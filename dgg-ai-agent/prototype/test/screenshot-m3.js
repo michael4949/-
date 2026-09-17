@@ -1,4 +1,4 @@
-// 模块 3 全流程：企业与场景 → 投入方案 → 收益端 → 测算台 → 28 页报告；核对屏幕与内核一致
+// 模块 3 全流程：企业画像（现场输入）→ 场景组合多选 → 逐场景收益参数 → 投入方案 → 测算台 → 34 页报告
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
 const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
@@ -8,74 +8,99 @@ const S1 = JSON.parse(fs.readFileSync(path.join(ex, 'S1.input.json'), 'utf8'));
 const golden = JSON.parse(fs.readFileSync(path.join(ex, 'S1.output.json'), 'utf8'));
 const errors = [];
 function pdfPages(f) { return (fs.readFileSync(f).toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length; }
+const setVal = (el, v) => el.evaluate((e, x) => {
+  const s = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+  s.call(e, String(x)); e.dispatchEvent(new Event('input', { bubbles: true }));
+}, v);
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 1600, height: 1100 }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(url + '?station=3');
   await page.waitForSelector('.grid, .form-grid');
   await page.click('.card[data-id="m3"]');
   await page.waitForSelector('.m3-pane');
-  await page.click('.rail .link'); await page.click('.rail .menu button:first-child'); await page.waitForTimeout(200);
-  await page.screenshot({ path: `${out}/land-1-scene.png` });
 
-  // 屏 1：选场景
-  await page.evaluate((id) => {
-    const btns = [...document.querySelectorAll('.m3-scenes .sc')];
-    const i = btns.findIndex((b) => b.querySelector('.n').textContent.trim() === '订单交付预警');
-    btns[i >= 0 ? i : 0].click();
-  }, S1.plan.sceneId);
-  await page.waitForTimeout(150);
-  await page.screenshot({ path: `${out}/land-1-scene-picked.png` });
-  await page.click('button:has-text("下一步：投入方案")');
+  // 屏 1：企业画像全部走界面输入，不走后门
+  await setVal(await page.$('.m3-txt'), S1.profile.name);
+  await page.evaluate((prof) => {
+    const byLabel = (lb) => [...document.querySelectorAll('.m3-field')]
+      .find((x) => x.querySelector('label') && x.querySelector('label').textContent.startsWith(lb));
+    const clickIn = (fieldEl, text) => {
+      if (!fieldEl) return;
+      const chips = [...fieldEl.querySelectorAll('.ch')];
+      const hit = text ? chips.find((c) => c.textContent.trim() === text) : null;
+      (hit || chips[0]).click();
+    };
+    const D = window.DGG_DATA;
+    const opt = (key, v) => { const f = D.fields.find((x) => x.key === key); const o = f && f.options && f.options.find((x) => x.v === v); return o ? o.t : null; };
+    clickIn(byLabel('人员规模'), opt('size', prof.size));
+    clickIn(byLabel('上年营收'), opt('revenue', prof.revenue));
+    clickIn(byLabel('成立年限'), opt('years', prof.years));
+    clickIn(byLabel('企业性质'), opt('ownership', prof.ownership));
+    clickIn(byLabel('主要客户类型'), opt('customers', prof.customers));
+    clickIn(byLabel('数字化专职人员'), opt('itStaff', prof.itStaff));
+    clickIn(byLabel('分支机构'), opt('branches', prof.branches));
+    clickIn(byLabel('海外业务'), opt('overseas', prof.overseas));
+    clickIn(byLabel('填表人'), opt('role', prof.role));
+    const sysField = byLabel('现有业务系统');
+    (prof.systems || []).forEach((s) => clickIn(sysField, opt('systems', s)));
+  }, S1.profile);
   await page.waitForTimeout(200);
+  await page.screenshot({ path: `${out}/land-1-profile.png`, fullPage: true });
+  const nx1 = await page.$('#m3-next1');
+  if (await nx1.isDisabled()) throw new Error('屏 1 下一步被禁用：' + await page.$$eval('.m3-block', (n) => n.map((x) => x.textContent).join(' | ')));
+  await nx1.click(); await page.waitForTimeout(300);
 
-  // 屏 2：投入方案 —— 真的去点界面，不走后门
-  const setNum = async (label, v) => {
-    await page.evaluate(([lb, val]) => {
-      const row = [...document.querySelectorAll('.m3-nrow')].find((r) => r.querySelector('.lb').textContent.includes(lb));
-      if (!row) throw new Error('找不到输入行: ' + lb);
-      const inp = row.querySelector('input');
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-      setter.call(inp, String(val));
-      inp.dispatchEvent(new Event('input', { bubbles: true }));
-    }, [label, v]);
-    await page.waitForTimeout(60);
-  };
-  const pickOpt = async (labelText) => {
-    await page.evaluate((t) => {
-      const b = [...document.querySelectorAll('.m3-opts .ob')].find((x) => x.querySelector('b').textContent.trim() === t);
-      if (!b) throw new Error('找不到选项: ' + t); b.click();
-    }, labelText);
-    await page.waitForTimeout(80);
-  };
-  await pickOpt('高级版');
-  if (S1.plan.seats != null) await setNum('订阅套数', S1.plan.seats);
-  if (S1.plan.diagnosisDays === 1) await pickOpt('1 天');
-  if (S1.plan.customBudget != null) await setNum('另议项预算', S1.plan.customBudget);
-  await pickOpt('表格为主');
-  await setNum('推进人员数', S1.plan.setupPeople);
-  await setNum('推进人员平均月薪', S1.plan.setupSalary);
-  await page.screenshot({ path: `${out}/land-2-plan.png` });
-  await page.click('button:has-text("下一步：收益端")');
-  await page.waitForSelector('.m3-lv');
-  await page.screenshot({ path: `${out}/land-3-gain.png` });
+  // 屏 2：按 golden 的组合逐个勾选
+  await page.evaluate((ids) => {
+    const D = window.DGG_DATA;
+    const nameOf = (id) => { let n = null; Object.keys(D.m3.sectors).forEach((k) => (D.m3.sectors[k].scenes || []).forEach((s) => { if (s.id === id) n = s.name; })); return n; };
+    ids.forEach((id) => {
+      const nm = nameOf(id);
+      const card = [...document.querySelectorAll('.m3-scenes .sc')].find((c) => c.querySelector('.n').textContent.trim() === nm);
+      if (!card) throw new Error('找不到场景卡：' + nm);
+      if (!card.classList.contains('on')) card.click();
+    });
+  }, S1.scenes.map((x) => x.sceneId));
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${out}/land-2-scenes.png`, fullPage: true });
+  const picked = await page.$$eval('.m3-scenes .sc.on', (n) => n.length);
+  console.log('场景组合：已选', picked, '个（期望', S1.scenes.length, '）');
+  await page.click('.m3-act .btn:not(.ghost)'); await page.waitForTimeout(300);
 
-  // 屏 3：收益端填数 —— 同样走真实输入
-  const GAIN_LABEL = { errorFreqMonthly: '月均发生次数', errorCostPerCase: '单次损失金额',
-    opsPeople: '当前投入人数', opsHoursPerDay: '人均每日投入时长', opsSalary: '该岗位平均月薪',
-    dealsMonthly: '月均成交单数', dealValue: '单均成交金额', grossMargin: '毛利率',
-    relatedRevenueMonthly: '相关业务月营业额', tiedCapital: '占用资金规模',
-    spendAnnual: '该科目年度支出', lostOutputMonthly: '月均受影响产值' };
-  for (const k of Object.keys(S1.gain)) {
-    if (GAIN_LABEL[k]) await setNum(GAIN_LABEL[k], S1.gain[k]);
-  }
-  await page.screenshot({ path: `${out}/land-3-gain-filled.png` });
-  await page.click('button:has-text("进入测算台")');
+  // 屏 3：逐场景填收益参数
+  await page.evaluate((scenes) => {
+    const D = window.DGG_DATA;
+    const nameOf = (id) => { let n = null; Object.keys(D.m3.sectors).forEach((k) => (D.m3.sectors[k].scenes || []).forEach((s) => { if (s.id === id) n = s.name; })); return n; };
+    const labelOf = (key) => { let l = key; D.m3.levers.items.forEach((it) => it.fields.forEach((f) => { if (f.key === key) l = f.label; })); return l; };
+    const cards = [...document.querySelectorAll('.m3-lv')];
+    scenes.forEach((sc) => {
+      const nm = nameOf(sc.sceneId);
+      const card = cards.find((c) => c.querySelector('.hd b').textContent.trim() === nm);
+      if (!card) throw new Error('找不到场景卡：' + nm);
+      Object.keys(sc.gain || {}).forEach((k) => {
+        const row = [...card.querySelectorAll('.m3-nrow')].find((r) => r.querySelector('.lb').textContent.startsWith(labelOf(k)));
+        if (!row) return;
+        const inp = row.querySelector('input');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(inp, String(sc.gain[k])); inp.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  }, S1.scenes);
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: `${out}/land-3-gain.png`, fullPage: true });
+  await page.click('.m3-act .btn:not(.ghost)'); await page.waitForTimeout(400);
+
+  // 屏 4：投入方案（全部留空，走规模推导）
+  await page.screenshot({ path: `${out}/land-4-plan.png`, fullPage: true });
+  const nx4 = await page.$('.m3-act .btn:not(.ghost)');
+  if (await nx4.isDisabled()) throw new Error('屏 4 进入测算台被禁用：' + await page.$$eval('.m3-block', (n) => n.map((x) => x.textContent).join(' | ')));
+  await nx4.click();
   await page.waitForSelector('.m3-console');
   await page.waitForTimeout(500);
-  await page.screenshot({ path: `${out}/land-4-board.png`, fullPage: true });
+  await page.screenshot({ path: `${out}/land-5-board.png`, fullPage: true });
 
   const shown = await page.evaluate(() => ({
     verdict: document.querySelector('.m3-console .verd .hl').textContent.trim(),
@@ -97,7 +122,7 @@ function pdfPages(f) { return (fs.readFileSync(f).toString('latin1').match(/\/Ty
     toc: document.querySelectorAll('.toc button').length
   }));
   console.log('报告:', JSON.stringify(info));
-  for (const n of [1, 3, 7, 9, 11, 14, 16, 21, 28]) {
+  for (const n of [1, 3, 5, 6, 12, 14, 17, 22, 29]) {
     const el = page.locator(`.report .page[data-page="${n}"]`);
     await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(120);
     await el.screenshot({ path: `${out}/land-p${String(n).padStart(2, '0')}.png` });

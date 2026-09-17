@@ -189,10 +189,7 @@
         "ok",
         "meta",
         "profile",
-        "scene",
-        "sceneBasis",
         "sector",
-        "levers",
         "plan",
         "invest",
         "benefit",
@@ -219,7 +216,8 @@
         "roles",
         "retrigger",
         "summaryText",
-        "render"
+        "render",
+        "portfolio"
       ],
       "properties": {
         "ok": {
@@ -252,91 +250,8 @@
         "profile": {
           "type": "object"
         },
-        "scene": {
-          "type": "object",
-          "required": [
-            "id",
-            "name",
-            "module",
-            "weeks",
-            "cost",
-            "value",
-            "roiBasis"
-          ],
-          "properties": {
-            "id": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "name": {
-              "type": "string"
-            },
-            "stage": {
-              "type": "string"
-            },
-            "user": {
-              "type": "string"
-            },
-            "replaces": {
-              "type": "string"
-            },
-            "module": {
-              "type": "string"
-            },
-            "metric": {
-              "type": "string"
-            },
-            "roiBasis": {
-              "type": "string"
-            },
-            "weeks": {
-              "type": "number"
-            },
-            "cost": {
-              "enum": [
-                "零",
-                "轻",
-                "中",
-                "重"
-              ]
-            },
-            "value": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 5
-            },
-            "dataDeps": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "firstStep": {
-              "type": "string"
-            },
-            "precondition": {
-              "type": "string"
-            }
-          }
-        },
-        "sceneBasis": {
-          "enum": [
-            "library",
-            "generic"
-          ]
-        },
         "sector": {
           "type": "string"
-        },
-        "levers": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 3,
-          "items": {
-            "$ref": "#/definitions/leverKey"
-          }
         },
         "plan": {
           "type": "object"
@@ -437,29 +352,19 @@
         "benefit": {
           "type": "object",
           "required": [
-            "levers",
+            "groups",
+            "items",
             "rawMonthly",
-            "valueFactor",
-            "afterValue",
+            "afterCross",
             "capped",
             "fullMonthly",
             "cashMonthly",
-            "hoursMonthly"
+            "hoursMonthly",
+            "crossDiscount"
           ],
           "properties": {
-            "levers": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/leverResult"
-              }
-            },
             "rawMonthly": {
               "$ref": "#/definitions/money"
-            },
-            "valueFactor": {
-              "type": "number",
-              "minimum": 0.35,
-              "maximum": 1
             },
             "afterValue": {
               "$ref": "#/definitions/money"
@@ -488,6 +393,55 @@
             },
             "note": {
               "type": "string"
+            },
+            "groups": {
+              "type": "array",
+              "description": "按效益杠杆归组：同一类杠杆在多个场景命中时的跨场景去重明细",
+              "items": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "name",
+                  "scenes",
+                  "gross",
+                  "counted",
+                  "items"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "cash": {
+                    "type": "boolean"
+                  },
+                  "scenes": {
+                    "type": "integer"
+                  },
+                  "gross": {
+                    "type": "number"
+                  },
+                  "counted": {
+                    "type": "number"
+                  },
+                  "items": {
+                    "type": "array"
+                  }
+                }
+              }
+            },
+            "items": {
+              "type": "array",
+              "description": "逐（场景 × 杠杆）的测算明细，含场景内权重、价值系数、跨场景权重与最终计列值"
+            },
+            "afterCross": {
+              "type": "number"
+            },
+            "crossDiscount": {
+              "type": "number",
+              "description": "跨场景同类杠杆去重扣减的月度金额"
             }
           }
         },
@@ -699,17 +653,24 @@
           "items": {
             "type": "object",
             "required": [
-              "lever",
-              "leverName",
               "field",
               "label",
-              "why"
+              "lever",
+              "impact",
+              "how"
             ],
+            "description": "待补齐参数。多场景时逐场景列示：同一字段在不同场景各自独立填报。",
             "properties": {
-              "lever": {
-                "$ref": "#/definitions/leverKey"
+              "sceneId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
-              "leverName": {
+              "sceneName": {
+                "type": "string"
+              },
+              "lever": {
                 "type": "string"
               },
               "field": {
@@ -718,7 +679,18 @@
               "label": {
                 "type": "string"
               },
-              "why": {
+              "unit": {
+                "type": "string"
+              },
+              "impact": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "mid",
+                  "low"
+                ]
+              },
+              "how": {
                 "type": "string"
               }
             }
@@ -814,8 +786,8 @@
         },
         "quickView": {
           "type": "array",
-          "minItems": 6,
-          "maxItems": 6,
+          "minItems": 7,
+          "maxItems": 7,
           "items": {
             "type": "object",
             "required": [
@@ -926,6 +898,174 @@
               "source": {
                 "type": "string"
               }
+            }
+          }
+        },
+        "portfolio": {
+          "type": "object",
+          "required": [
+            "count",
+            "scenes",
+            "waves",
+            "totalWeeks"
+          ],
+          "description": "场景组合：逐场景的上线波次、价值系数与最终贡献，以及账号 / 定制开发的归集明细",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "generic": {
+              "type": "boolean"
+            },
+            "totalWeeks": {
+              "type": "number"
+            },
+            "waveSize": {
+              "type": "integer"
+            },
+            "waves": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "no",
+                  "weeks",
+                  "startMonth",
+                  "sceneIds"
+                ],
+                "properties": {
+                  "no": {
+                    "type": "integer"
+                  },
+                  "weeks": {
+                    "type": "number"
+                  },
+                  "startWeek": {
+                    "type": "number"
+                  },
+                  "endWeek": {
+                    "type": "number"
+                  },
+                  "startMonth": {
+                    "type": "integer"
+                  },
+                  "sceneIds": {
+                    "type": "array"
+                  },
+                  "sceneNames": {
+                    "type": "array"
+                  }
+                }
+              }
+            },
+            "scenes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "wave",
+                  "startMonth",
+                  "cashMonthly"
+                ],
+                "properties": {
+                  "id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "stage": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "string"
+                  },
+                  "replaces": {
+                    "type": "string"
+                  },
+                  "module": {
+                    "type": "string"
+                  },
+                  "metric": {
+                    "type": "string"
+                  },
+                  "roiBasis": {
+                    "type": "string"
+                  },
+                  "weeks": {
+                    "type": "number"
+                  },
+                  "cost": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "dataDeps": {
+                    "type": "array"
+                  },
+                  "firstStep": {
+                    "type": "string"
+                  },
+                  "precondition": {
+                    "type": "string"
+                  },
+                  "levers": {
+                    "type": "array"
+                  },
+                  "wave": {
+                    "type": "integer"
+                  },
+                  "startMonth": {
+                    "type": "integer"
+                  },
+                  "valueFactor": {
+                    "type": "number"
+                  },
+                  "rawMonthly": {
+                    "type": "number"
+                  },
+                  "afterValue": {
+                    "type": "number"
+                  },
+                  "cashMonthly": {
+                    "type": "number"
+                  },
+                  "hoursMonthly": {
+                    "type": "number"
+                  },
+                  "finalMonthly": {
+                    "type": "number"
+                  },
+                  "noData": {
+                    "type": "boolean"
+                  },
+                  "share": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "seatDetail": {
+              "type": "array"
+            },
+            "seatOverlap": {
+              "type": "number"
+            },
+            "seatsRef": {
+              "type": "integer"
+            },
+            "devPerScene": {
+              "type": "array"
+            },
+            "depUnion": {
+              "type": "array"
             }
           }
         }

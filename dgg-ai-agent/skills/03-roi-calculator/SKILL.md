@@ -3,27 +3,39 @@ name: 企业AI投入ROI测算器
 id: roi-calculator
 kind: 计算
 credits: 20
-version: 1.2.0
+version: 2.0.0
 triggers: [ROI, 投入产出, 多久回本, 回收期, 要花多少钱, 值不值得, 投入多少, 投资回报, 回本周期, 效益测算]
-inputs: [profile, plan, gain]
+inputs: [profile, scenes, plan]
 data_files: 6
 llm_calls: 1
 llm_timeout_ms: 8000
 offline: true
 delivers: [chat, print, wechat]
-report_pages: 33
+report_pages: 34
 brief_pages: 6
 ---
 
 # 企业AI投入ROI测算器
 
-把一个具体业务场景的 AI 投入拆成三个科目分别建模：**投入**按定稿价目逐项计列、**收益**按场景命中的效益杠杆分别折算、**回收期**取两者按期次展开后累计净现金流首次由负转正的期次。另出 24 期现金流、三档情景、单因素敏感度、参数来源与可信度评分。
+把企业**一次立项的整批场景**算成一笔企业级的投入回报账：**投入**按定稿价目在企业级归集、**收益**逐场景建模后跨场景去重、**回收期**取两者按期次展开后累计净现金流首次由负转正的期次。另出实施波次、逐场景贡献、24 期现金流、三档情景、单因素敏感度、参数来源与可信度评分。
+
+**测算单元是组合，不是单个场景。** 把单场景的账相加会同时高估投入与收益，五处都要归集：
+
+| 归集项 | 单场景相加 | 组合口径 |
+|---|---|---|
+| 订阅账号 | 各场景人数逐个相加 | 一个账号可用全部已开通场景：覆盖人数最多的场景全额，其余按复用系数 0.4 归并 |
+| 系统对接 | 每个场景各对接一次 | 全部场景的数据依赖取并集后与在用系统求交集，同一系统只对接一次 |
+| 定制开发 | 每个场景全额 | 规则引擎、表单报表框架、权限模型可复用，按金额降序乘 0.82 的幂递减 |
+| 入企诊断 / 历史数据整理 | 每个场景各做一次 | 全企业各做一次，诊断天数按场景数量分档 |
+| 效益杠杆 | 各场景各自计入 | 同一类杠杆在多个场景命中时按金额降序去重：最高全额、其余按 35% |
+
+这五处的归集结果在报告第 02、03、04 章逐项列示，每一项都可以逐条复核。
 
 本模块是三个体验版的第三步：模块 1 给出投入档，模块 2 给出首选场景，到这里回答「那到底要花多少钱、多久回本」。
 
 ## 何时调用
 
-- 用户问投入金额、回收期、是否值得投、可节约金额
+- 用户问企业整体的 AI 投入要花多少钱、多久回本、是否值得投
 - 用户刚在「企业AI高价值场景排序」里看到首选场景，追问这个场景的账
 - 顶呱呱销售或 FDE 在报价前需当场出具一份可追溯口径的投入回报测算
 
@@ -42,7 +54,18 @@ brief_pages: 6
 
 `profile` 与 `plan.sceneId` 从会话变量继承，不重问。现场只问下面这些。
 
-### 1. 投入方案 `plan`
+### 1. 场景组合 `scenes`
+
+**先问范围，再问钱。** 一次立项通常覆盖 2 至 6 个场景，跨 2 至 4 个业务环节；单次最多 12 个，超出时建议分两次立项。
+
+| 追问话术 | 默认值来源 |
+|---|---|
+| 「这一轮打算先上哪几个场景？可以跨环节挑，我按组合算总账。」 | 模块 2 的排序结果取前 3 至 5 个；没有上游时按价值分级降序推荐 |
+| 「每批同时推几个？默认 2 个，调大能压缩总工期，但对内部承接能力要求更高。」 | `investment-profile.json` 的 `waveSize`（2） |
+
+每个场景带自己的 `gain`：**同一字段在不同场景各自独立填报**——同一类损失在不同环节的发生频次与金额并不相同，共用一个数会把组合收益算错。
+
+### 2. 投入方案 `plan`
 
 | 字段 | 追问话术 | 默认值来源 |
 |---|---|---|
@@ -54,7 +77,7 @@ brief_pages: 6
 | `dataState` | 与模块 2 同一问，继承不重问 | 上游 `conditions.dataState` |
 | `setupPeople` / `setupSalary` | 「上线期贵司安排几位同事推进？该岗位平均月薪多少？」 | 1 人；月薪按企业规模取参考值 |
 
-### 2. 收益端 `gain`
+### 3. 收益端 `scenes[].gain`
 
 **只采集场景命中的效益杠杆所需字段**，其余不问。七项杠杆及各自字段见 `data/levers.json`。字段的 `label` 为正式名称（进报告），`hint` 为口语化追问提示（只在界面上出现）。
 
@@ -116,57 +139,68 @@ brief_pages: 6
 
 `missing`、`inputSource`、`confidence` 不进 `render` 序列：它们是报告方法页与测算受限提示的内容。
 
-## 报告版式（33 页 / 速览 6 页）
+## 报告版式（34 页 / 速览 6 页）
 
 **版式身份**——与前两个模块明确区分：模块 1 六边形序号徽章配海军蓝，模块 2 圆角方徽章配蓝青，本模块为**圆形金环徽章配深墨绿与香槟金**。章节标题栏沿用集团统一的「整条 3D 彩色凸浮」结构，棱线与落影常数换成墨绿系（`rgba(6,28,20,…)` / `#C8D6D0` 系）。封面主视觉为「企业服务投入 ⇄ AI 能力支点 ⇄ 效益回报」的天平构图，标题独占顶部色带；封底深墨绿满版。图表族语汇取自财务报表——横向累加桥、穿越零轴的期次柱、累计净额曲线、区间杠铃、期次脉冲——刻意避开模块 1 的弧形仪表与模块 2 的环形、纵向瀑布。
 
-**编号展品体系**——每一张图与每一张表都有编号（图 4-1 / 表 3-3）、图题与单位说明，装在带边框与阶梯投影的展品容器里，正文可以直接写「见图 3-2」。编号按章重置，由 `page3()` 在每页开头登记章号。表头底色随本章色变化，与章节标题栏同源。正文每页按「测算依据 → 数据 → 数据解读 → 结论边界」四层展开：`m3-basis` 行交代口径出处，`m3-cap` 行解释图怎么读，`m3-fn` 行给脚注与免责。**每一个正文页都配图或多张表**，33 页的版心高度落在 813–1041px（A4 版心 1047px）。
+**编号展品体系**——每一张图与每一张表都有编号（图 4-1 / 表 3-3）、图题与单位说明，装在带边框与阶梯投影的展品容器里，正文可以直接写「见图 3-2」。编号按章重置，由 `page3()` 在每页开头登记章号。表头底色随本章色变化，与章节标题栏同源。正文每页按「测算依据 → 数据 → 数据解读 → 结论边界」四层展开：`m3-basis` 行交代口径出处，`m3-cap` 行解释图怎么读，`m3-fn` 行给脚注与免责。**每一个正文页都配图或多张表**，34 页的版心高度落在 752–1026px（A4 版心 1047px）。
 
-样式 `prototype/src/report-m3.css`（作用域 `.page.m3`）、图表 `prototype/src/charts-m3.js`（34 个函数，与前两个模块的 39 个零重名）。三个模块共用 `report.css`（A4 页盒）、`charts.js`（通用图元）、`tokens.css`（设计变量）。
+样式 `prototype/src/report-m3.css`（作用域 `.page.m3`）、图表 `prototype/src/charts-m3.js`（35 个函数，与前两个模块的 39 个零重名）。三个模块共用 `report.css`（A4 页盒）、`charts.js`（通用图元）、`tokens.css`（设计变量）。
 
 | 页 | 章节 | 数据 | 图表 |
 |---|---|---|---|
-| 1 | 封面（速览） | `profile` · `verdict` · `payback` · `keyNumbers` · `scenarios` · `invest.revenueShare` | `heroM3` · `miniCurve` |
+| 1 | 封面（速览） | `profile` · `verdict` · `payback` · `keyNumbers` · `scenarios` · `portfolio` | `heroM3` · `miniCurve` |
 | 2 | 阅读说明与口径声明 | `reportText.readingGuide` · `reportText.honesty` · `inputSource` | `chapterMap` |
 | 3 | 01 测算结论（速览） | `verdict` · `invest` · `benefit` · `flow` · `keyNumbers` | `paybackCurve` · `recoveryShare` |
 | 4 | 01 核心结论问答（速览） | `keyNumbers` · `quickView` · `roi` | `cashVsHours` |
-| 5 | 02 测算对象界定 | `profile` · `scene` | `sceneFrame` |
-| 6 | 02 效益杠杆识别 | `levers` · `benefit.levers` | `cutScale` |
-| 7 | 03 投入测算（速览） | `invest.cashItems` · `cashOnce` / `cashYearly` · `revenueShare` | `investStack` · `costTiming` |
-| 8 | 03 另议项逐项拆解 | `invest.customItems`（四科目）· `customRefTotal` · `hitSystems` | — |
-| 9 | 03 投入合理性核验 | `invest.revenueShare` · `shareBandLow/High` · `shareVerdict` · `shareText` | `shareGauge` |
-| 10 | 03 人工工时投入 | `invest.laborItems` · `setupHourly` · `setupWeeks` | `laborTiming` |
-| 11 | 04 收益测算 | `benefit`（`rawMonthly` · `valueFactor` · `capMonthly` · `fullMonthly`） | `benefitBridge` · `capFunnel` · `leverBars` |
-| 12 | 04 逐项测算过程 | `benefit.levers[]`（`basis` · `cut` · `cutNote` · `weight`）· `inputSource` | `formulaFlow` |
-| 13 | 04 现金与非现金科目划分 | `benefit.cashMonthly` / `hoursMonthly` · `flow` · `flowAll` | `cashVsHours` · `dualCurve` |
-| 14 | 04 同业场景横向对照 | 场景库同大类条目 · `scene` | `peerBars` |
-| 15 | 05 回收期测算（速览） | `payback` · `paybackAll` · `flow` · `roi` · `reCross` | `paybackCurve` · `roiTrack` |
-| 16 | 05 24 期现金流分布 | `flow` · `constants.rampMonths` | `cashflowBars` · `rampSteps` · `monthLadder` |
-| 17 | 05 前 12 期逐期明细 | `flow[0..11]` | `recoveryShare` |
-| 18 | 06 三档情景分析（速览） | `scenarios` | `scenarioBand` |
-| 19 | 06 三档逐期对照 | `scenarios` + 本地按同式复算的逐期流 | `scenarioLines` |
-| 20 | 07 单因素敏感度分析 | `sensitivity` | `sensitivityRange` |
-| 21 | 07 敏感度的决策含义 | `sensitivity` 排序 + 锁定动作表 | `priorityBars` |
-| 22 | 08 参数来源与可信度 | `inputSource` · `confidence` | `confidenceBar` · `sourceGrid` |
-| 23 | 09 数据缺口与补齐建议 | `missing` · `insufficient` · `plan` · `sceneBasis` | `gapImpact` · `readinessLadder` |
-| 24 | 10 实施周期与效益释放 | `invest.setupWeeks` · `dataStateMult` · `scene.precondition` | `weeksGantt` · `rampSteps` |
-| 25 | 11 组织保障与职责分工 | `roles` · `invest.laborItems` | `roleMatrix` |
-| 26 | 12 服务与报价口径 | `constants.prices` · `reportText.services` | `priceLadder` |
-| 27 | 13 测算复核触发条件 | `retrigger` · `sensitivity` | `triggerMap` |
-| 28 | 附录 A 测算常量与公式 | `constants` · `levers` · 复算校验 | — |
-| 29 | 附录 A 24 期逐期明细 | `flow` · `flowAll` | `monthLadder` |
-| 30 | 附录 B 方法与术语 | `reportText.method` · `reportText.glossary` | — |
-| 31 | 附录 C 场景库字段与收益侧参考值 | `scene` 全字段 · `benchmarks` | — |
-| 32 | 附录 C 投入侧规模推导表 | `investmentProfile` 全表 | — |
-| 33 | 封底 | `reportText.contact` · `reportText.closing` | — |
+| 5 | 02 测算对象与场景组合 | `profile` · `portfolio.scenes` | — |
+| 6 | 02 实施波次与上线顺序 | `portfolio.waves` · `totalWeeks` | `weeksGantt` |
+| 7 | 02 效益杠杆识别 | `benefit.groups` · 逐场景 `levers` | `cutScale` |
+| 8 | 03 投入测算（速览） | `invest.cashItems` · `revenueShare` | `investStack` · `costTiming` |
+| 9 | 03 另议项逐项拆解 | `invest.customItems` · `portfolio.devPerScene` · `depUnion` | — |
+| 10 | 03 投入合理性核验 | `invest.shareVerdict` · `shareText` | `shareGauge` |
+| 11 | 03 人工工时投入 | `invest.laborItems` · `setupWeeks` | `laborTiming` |
+| 12 | 04 收益测算 | `benefit.groups`（跨场景去重）· `capMonthly` | `cashVsHours` |
+| 13 | 04 逐场景逐项测算过程 | `benefit.items`（场景内权重 · 价值系数 · 跨场景权重） | `formulaFlow` |
+| 14 | 04 逐场景贡献与组合结构 | `portfolio.scenes[].cashMonthly` / `share` | `contribBars` |
+| 15 | 04 两种口径的累计净额对照 | `flow` · `flowAll` | `dualCurve` |
+| 16 | 05 回收期测算（速览） | `payback` · `paybackAll` · `roi` · `reCross` | `paybackCurve` · `roiTrack` |
+| 17 | 05 24 期现金流分布 | `flow` · `constants.rampMonths` | `cashflowBars` · `rampSteps` · `monthLadder` |
+| 18 | 05 前 12 期逐期明细 | `flow[0..11]` | `recoveryShare` |
+| 19 | 06 三档情景分析（速览） | `scenarios` | `scenarioBand` |
+| 20 | 06 三档逐期对照 | `scenarios` + 本地按同式复算的逐期流 | `scenarioLines` |
+| 21 | 07 单因素敏感度分析 | `sensitivity` | `sensitivityRange` |
+| 22 | 07 敏感度的决策含义 | `sensitivity` 排序 + 锁定动作表 | `priorityBars` |
+| 23 | 08 参数来源与可信度 | `inputSource` · `confidence` | `confidenceBar` · `sourceGrid` |
+| 24 | 09 数据缺口与补齐建议 | `missing`（逐场景）· `insufficient` | `gapImpact` · `readinessLadder` |
+| 25 | 10 实施周期与效益释放 | `portfolio.waves` · `dataStateMult` | `weeksGantt` · `rampSteps` |
+| 26 | 11 组织保障与职责分工 | `roles` · `invest.laborItems` | `roleMatrix` |
+| 27 | 12 服务与报价口径 | `constants.prices` · `reportText.services` | `priceLadder` |
+| 28 | 13 测算复核触发条件 | `retrigger` · `sensitivity` | `triggerMap` |
+| 29 | 附录 A 测算常量与公式 | `constants` · `levers` · 复算校验 | — |
+| 30 | 附录 A 24 期逐期明细 | `flow` · `flowAll` | `monthLadder` |
+| 31 | 附录 B 方法与术语 | `reportText.method` · `reportText.glossary` | — |
+| 32 | 附录 C 场景库字段与收益侧参考值 | `portfolio.scenes` 全字段 · `benchmarks` | — |
+| 33 | 附录 C 投入侧规模推导表 | `investmentProfile` 全表 | — |
+| 34 | 封底 | `reportText.contact` · `reportText.closing` | — |
 
-第 19 页的三档逐期流在原型侧按与内核 `flowFor` **完全相同的式子**复算，第 12 与第 24 期的累计净额与内核 `scenarios[].cum12` / `cum24` 逐项相等（由契约校验断言）。
+第 20 页的三档逐期流在原型侧按与内核 `flowFor` **完全相同的式子**复算，第 12 与第 24 期的累计净额与内核 `scenarios[].cum12` / `cum24` 逐项相等（由契约校验断言）。
 
 报告标题、出具方、阅读说明、方法说明、术语、角色分工、复核条件、联系方式、结语全部取 `data/report-text.json`；界面上不出现「演示环境」「样例企业」「点击此处可下钻」等讲解员式文案。
 
+### 原型流程（五屏 + 报告）
+
+屏 1 **企业画像**：13 项画像字段全部可现场编辑，企业名称为文本输入；必填未齐时下一步按钮禁用，并在屏上列出还缺哪几项——不做静默失效。
+屏 2 **场景组合**：本行业场景库按业务环节分组多选，顶部实时给出已选数、实施批次、总工期、预估账号数与命中杠杆类数；另有「价值最高的 4 个」「先做轻投入的 4 个」快速选择。
+屏 3 **逐场景收益参数**：按选中场景分卡，每卡只问该场景命中杠杆所需字段，卡头标「还缺 n 项 / 已填齐」。
+屏 4 **投入方案**：档位、账号数、诊断天数、私域、另议项、数据现状、每批场景数、推进人员；留空项显示按组合推导的参考值。
+屏 5 **测算台**，屏 6 **报告**。
+
+外壳的待机自动返回首页默认关闭（`?idle=on` 可开），展会上停在哪一屏就留在哪一屏。
+
 ### 测算台
 
-原型第 4 屏是三栏控制台，不是静态结果页：左栏「参数台」把订阅档位、套数、诊断天数、另议项预算、数据现状、推进人员数、每一项收益参数以及**折减系数整体倍率**做成实时控件，未填写项以规模推导表的参考值作为起始值并标注「参考值」，拖动即转为企业填报；中栏「结论台」给转正期次、与基线的四项差值、叠加基线虚线的累计净额曲线、七个关键数字、24 期现金流与敏感度；右栏「推演台」给三档情景、收益护栏与投入结构。任何一次调节都重新走 `core/compute.js`，屏上每个数字都能在报告里找到同名同值的出处。进台时自动记一次基线，可随时「设为基线」或「恢复基线参数」。
+原型第 4 屏是三栏控制台，不是静态结果页：左栏「参数台」把订阅档位、套数、诊断天数、另议项预算、数据现状、推进人员数、每一项收益参数以及**折减系数整体倍率**做成实时控件，未填写项以规模推导表的参考值作为起始值并标注「参考值」，拖动即转为企业填报；左栏另有**场景开关**：现场关掉某个场景即可看到它对组合回收期的实际贡献。中栏「结论台」给转正期次、与基线的四项差值、叠加基线虚线的累计净额曲线、七个关键数字、24 期现金流与敏感度；右栏「推演台」给三档情景、收益护栏与投入结构。任何一次调节都重新走 `core/compute.js`，屏上每个数字都能在报告里找到同名同值的出处。进台时自动记一次基线，可随时「设为基线」或「恢复基线参数」。
 
 折减系数倍率通过改写传入内核的 `levers[].cut` 生效，报告随之按调整后的系数出具——屏上调了什么，纸上就是什么，不存在两套口径。
 

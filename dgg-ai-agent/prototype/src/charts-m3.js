@@ -897,6 +897,30 @@
     return s;
   }
 
+  /* ---------- 35. 逐场景贡献：现金 + 非现金，右侧标份额 ---------- */
+  function contribBars(scenes, o) {
+    var rowH = 26, W = 560, H = 20 + scenes.length * rowH + 14;
+    var s = svg(W, H, '逐场景贡献');
+    var L = 132, R = 64, iw = W - L - R;
+    var mx = Math.max.apply(null, scenes.map(function (x) { return x.cashMonthly + x.hoursMonthly; }).concat([1]));
+    scenes.forEach(function (x, i) {
+      var y = 20 + i * rowH;
+      var wc = x.cashMonthly / mx * iw, wh = x.hoursMonthly / mx * iw;
+      s.appendChild(txt(L - 8, y + 13, trunc(x.name, 9), { 'text-anchor': 'end', 'font-size': 9.5, 'font-weight': 700, fill: M.ink }));
+      s.appendChild(txt(L - 8, y + 23, '第 ' + x.wave + ' 批 · 第 ' + x.startMonth + ' 期起', { 'text-anchor': 'end', 'font-size': 7.5, fill: M.sub }));
+      s.appendChild(el('rect', { x: L, y: y + 4, width: iw, height: 14, fill: M.zebra, stroke: M.line2 }));
+      if (wc > 0) s.appendChild(el('rect', { x: L, y: y + 4, width: Math.max(2, wc), height: 14, fill: CATS[i % CATS.length] }));
+      if (wh > 0) {
+        s.appendChild(el('rect', { x: L + wc, y: y + 4, width: Math.max(2, wh), height: 14, fill: M.line, stroke: M.sh1 }));
+        for (var g = L + wc + 4; g < L + wc + wh; g += 6) s.appendChild(el('line', { x1: g, y1: y + 4, x2: g - 6, y2: y + 18, stroke: M.sub, 'stroke-opacity': .5 }));
+      }
+      s.appendChild(txt(L + Math.max(wc + wh, 2) + 6, y + 15, fmtS(x.cashMonthly), { 'font-size': 9, 'font-weight': 700, fill: M.ink2 }));
+      s.appendChild(txt(W - 6, y + 15, x.share + '%', { 'text-anchor': 'end', 'font-size': 10, 'font-weight': 900, fill: x.share >= 30 ? M.mc : M.sub }));
+    });
+    s.appendChild(txt(6, 12, '实色为现金收益，斜纹为非现金收益；右列为占组合现金收益的份额', { 'font-size': 8.5, fill: M.sub }));
+    return s;
+  }
+
   window.DGG = window.DGG || {}; window.DGG.charts = window.DGG.charts || {};
   Object.assign(window.DGG.charts, {
     heroM3: heroM3, miniCurve: miniCurve, cashflowBars: cashflowBars, paybackCurve: paybackCurve,
@@ -906,6 +930,6 @@
     weeksGantt: weeksGantt, sourceGrid: sourceGrid, confidenceBar: confidenceBar, gapImpact: gapImpact,
     roleMatrix: roleMatrix, triggerMap: triggerMap, roiTrack: roiTrack, peerBars: peerBars,
     priceLadder: priceLadder, chapterMap: chapterMap, laborTiming: laborTiming, dualCurve: dualCurve,
-    readinessLadder: readinessLadder, formulaFlow: formulaFlow, shareGauge: shareGauge, sceneFrame: sceneFrame, priorityBars: priorityBars, cutScale: cutScale, recoveryShare: recoveryShare, M3PALETTE: M
+    readinessLadder: readinessLadder, formulaFlow: formulaFlow, shareGauge: shareGauge, sceneFrame: sceneFrame, priorityBars: priorityBars, contribBars: contribBars, cutScale: cutScale, recoveryShare: recoveryShare, M3PALETTE: M
   });
 })();

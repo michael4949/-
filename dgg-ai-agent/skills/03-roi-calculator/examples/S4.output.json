@@ -3,7 +3,7 @@
   "meta": {
     "module": "企业AI投入ROI测算器",
     "credits": 20,
-    "version": "1.2.0",
+    "version": "2.0.0",
     "horizon": 24
   },
   "profile": {
@@ -27,56 +27,324 @@
     "overseas": "yes",
     "role": "it"
   },
-  "scene": {
-    "id": "trade-s05",
-    "name": "门店补货与跨店调拨建议",
-    "stage": "商品库存",
-    "user": "商品部与店长",
-    "replaces": "店长凭感觉报货、总部逐店核对的每周一天",
-    "module": "AI ERP",
-    "metric": "缺货率下降 25–35%，库存周转天数缩短 5–8 天",
-    "roiBasis": "按缺货损失减少与库存资金占用下降折算",
-    "weeks": 16,
-    "cost": "重",
-    "value": 5,
-    "dataDeps": [
-      "erp",
-      "shop"
+  "portfolio": {
+    "count": 5,
+    "generic": false,
+    "totalWeeks": 32,
+    "waveSize": 2,
+    "waves": [
+      {
+        "no": 1,
+        "weeks": 16,
+        "startWeek": 0,
+        "endWeek": 16,
+        "startMonth": 4,
+        "sceneIds": [
+          "trade-s05",
+          "trade-s02"
+        ],
+        "sceneNames": [
+          "门店补货与跨店调拨建议",
+          "沉睡客户识别与复购提醒"
+        ]
+      },
+      {
+        "no": 2,
+        "weeks": 8,
+        "startWeek": 16,
+        "endWeek": 24,
+        "startMonth": 6,
+        "sceneIds": [
+          "trade-s04",
+          "trade-s06"
+        ],
+        "sceneNames": [
+          "会员分层与到店唤醒",
+          "拣货复核与错发拦截"
+        ]
+      },
+      {
+        "no": 3,
+        "weeks": 8,
+        "startWeek": 24,
+        "endWeek": 32,
+        "startMonth": 8,
+        "sceneIds": [
+          "trade-s08"
+        ],
+        "sceneNames": [
+          "外贸订单跟单播报"
+        ]
+      }
     ],
-    "firstStep": "选三家门店做试点，把近一年日销与库存数据拉齐",
-    "precondition": "门店库存需要账实一致，差异大的门店先补一次盘点"
+    "scenes": [
+      {
+        "id": "trade-s05",
+        "name": "门店补货与跨店调拨建议",
+        "stage": "商品库存",
+        "user": "商品部与店长",
+        "replaces": "店长凭感觉报货、总部逐店核对的每周一天",
+        "module": "AI ERP",
+        "metric": "缺货率下降 25–35%，库存周转天数缩短 5–8 天",
+        "roiBasis": "按缺货损失减少与库存资金占用下降折算",
+        "weeks": 16,
+        "cost": "重",
+        "value": 5,
+        "dataDeps": [
+          "erp",
+          "shop"
+        ],
+        "firstStep": "选三家门店做试点，把近一年日销与库存数据拉齐",
+        "precondition": "门店库存需要账实一致，差异大的门店先补一次盘点",
+        "levers": [
+          "error",
+          "cash"
+        ],
+        "wave": 1,
+        "startMonth": 4,
+        "valueFactor": 1,
+        "rawMonthly": 26040,
+        "afterValue": 26040,
+        "cashMonthly": 26040,
+        "hoursMonthly": 0,
+        "finalMonthly": 26040,
+        "noData": false,
+        "share": 49.1
+      },
+      {
+        "id": "trade-s02",
+        "name": "沉睡客户识别与复购提醒",
+        "stage": "客户经营",
+        "user": "销售主管与业务员",
+        "replaces": "凭印象判断哪个客户该跟进的每周梳理",
+        "module": "AI获客",
+        "metric": "沉睡客户唤醒率提升 10–15 个百分点",
+        "roiBasis": "按唤醒客户带来的复购金额折算",
+        "weeks": 4,
+        "cost": "轻",
+        "value": 4,
+        "dataDeps": [
+          "crm",
+          "erp"
+        ],
+        "firstStep": "导出近两年下单记录，按 90 天未下单筛出沉睡客户名单",
+        "precondition": "客户联系人需要归集到公司档案，个人微信好友先做登记",
+        "levers": [
+          "revenue"
+        ],
+        "wave": 1,
+        "startMonth": 4,
+        "valueFactor": 0.9,
+        "rawMonthly": 12096,
+        "afterValue": 10886,
+        "cashMonthly": 3810,
+        "hoursMonthly": 0,
+        "finalMonthly": 3810,
+        "noData": false,
+        "share": 7.2
+      },
+      {
+        "id": "trade-s04",
+        "name": "会员分层与到店唤醒",
+        "stage": "会员运营",
+        "user": "会员运营与店长",
+        "replaces": "给全部会员群发同一条消息的粗放触达",
+        "module": "AI获客",
+        "metric": "会员月度复购率提升 5–8 个百分点",
+        "roiBasis": "按会员复购金额提升与券核销成本折算",
+        "weeks": 8,
+        "cost": "中",
+        "value": 4,
+        "dataDeps": [
+          "crm",
+          "shop"
+        ],
+        "firstStep": "按近一年消费次数与金额把会员分成四层，各挑一个触达动作试跑",
+        "precondition": "会员消费需要与手机号打通，线下散客先引导注册",
+        "levers": [
+          "revenue"
+        ],
+        "wave": 2,
+        "startMonth": 6,
+        "valueFactor": 0.9,
+        "rawMonthly": 15288,
+        "afterValue": 13759,
+        "cashMonthly": 13759,
+        "hoursMonthly": 0,
+        "finalMonthly": 13759,
+        "noData": false,
+        "share": 25.9
+      },
+      {
+        "id": "trade-s06",
+        "name": "拣货复核与错发拦截",
+        "stage": "仓储发货",
+        "user": "仓库主管与打包员",
+        "replaces": "出库前人工二次核对商品与数量的重复动作",
+        "module": "AI流程提效",
+        "metric": "错发漏发率下降 40–60%",
+        "roiBasis": "按赔付与二次运费下降折算",
+        "weeks": 8,
+        "cost": "中",
+        "value": 4,
+        "dataDeps": [
+          "erp"
+        ],
+        "firstStep": "统计近一年错发工单，按商品与时段找出高发环节",
+        "precondition": "商品需要条码与图片齐备，无码商品先补打标签",
+        "levers": [
+          "error"
+        ],
+        "wave": 2,
+        "startMonth": 6,
+        "valueFactor": 0.9,
+        "rawMonthly": 15840,
+        "afterValue": 14256,
+        "cashMonthly": 4990,
+        "hoursMonthly": 0,
+        "finalMonthly": 4990,
+        "noData": false,
+        "share": 9.4
+      },
+      {
+        "id": "trade-s08",
+        "name": "外贸订单跟单播报",
+        "stage": "订单执行",
+        "user": "跟单员与业务经理",
+        "replaces": "挨个问工厂与货代再手写进度邮件的每天一小时",
+        "module": "AI ERP",
+        "metric": "客户进度问询量下降 30–40%",
+        "roiBasis": "按跟单沟通工时与延误索赔下降折算",
+        "weeks": 8,
+        "cost": "中",
+        "value": 4,
+        "dataDeps": [
+          "erp",
+          "oa"
+        ],
+        "firstStep": "定下每个订单的 6 个关键节点，先在一张表里每日回填",
+        "precondition": "工厂与货代的节点信息需要按时回传，先约定回填时点",
+        "levers": [
+          "error",
+          "hours"
+        ],
+        "wave": 3,
+        "startMonth": 8,
+        "valueFactor": 0.9,
+        "rawMonthly": 16800,
+        "afterValue": 15120,
+        "cashMonthly": 4435,
+        "hoursMonthly": 2448,
+        "finalMonthly": 6883,
+        "noData": false,
+        "share": 8.4
+      }
+    ],
+    "seatDetail": [
+      {
+        "name": "门店补货与跨店调拨建议",
+        "seats": 20
+      },
+      {
+        "name": "会员分层与到店唤醒",
+        "seats": 12
+      },
+      {
+        "name": "拣货复核与错发拦截",
+        "seats": 12
+      },
+      {
+        "name": "外贸订单跟单播报",
+        "seats": 12
+      },
+      {
+        "name": "沉睡客户识别与复购提醒",
+        "seats": 7
+      }
+    ],
+    "seatOverlap": 0.4,
+    "seatsRef": 38,
+    "devPerScene": [
+      {
+        "id": "trade-s05",
+        "name": "门店补货与跨店调拨建议",
+        "cost": "重",
+        "base": 60000,
+        "rank": 1,
+        "factor": 1,
+        "amount": 78000
+      },
+      {
+        "id": "trade-s04",
+        "name": "会员分层与到店唤醒",
+        "cost": "中",
+        "base": 25000,
+        "rank": 2,
+        "factor": 0.82,
+        "amount": 26650
+      },
+      {
+        "id": "trade-s06",
+        "name": "拣货复核与错发拦截",
+        "cost": "中",
+        "base": 25000,
+        "rank": 3,
+        "factor": 0.67,
+        "amount": 21853
+      },
+      {
+        "id": "trade-s08",
+        "name": "外贸订单跟单播报",
+        "cost": "中",
+        "base": 25000,
+        "rank": 4,
+        "factor": 0.55,
+        "amount": 17919
+      },
+      {
+        "id": "trade-s02",
+        "name": "沉睡客户识别与复购提醒",
+        "cost": "轻",
+        "base": 8000,
+        "rank": 5,
+        "factor": 0.45,
+        "amount": 4702
+      }
+    ],
+    "depUnion": [
+      "erp",
+      "shop",
+      "crm",
+      "oa"
+    ]
   },
-  "sceneBasis": "library",
   "sector": "trade",
-  "levers": [
-    "error",
-    "cash"
-  ],
   "plan": {
     "tier": "flag",
     "tierName": "旗舰版",
-    "seats": 12,
-    "diagnosisDays": 1,
+    "seats": 24,
+    "diagnosisDays": 2,
     "privateDeploy": "top",
-    "customBudget": 180000,
+    "customBudget": 420000,
     "dataState": "system",
     "setupPeople": 3,
-    "setupSalary": 11000
+    "setupSalary": 11000,
+    "waveSize": 2
   },
   "invest": {
     "cashItems": [
       {
         "key": "sub",
         "name": "旗舰版订阅",
-        "detail": "3280 元 / 套年 × 12 套",
-        "amount": 39360,
+        "detail": "3280 元 / 套年 × 24 套（5 个场景共用）",
+        "amount": 78720,
         "yearly": true
       },
       {
         "key": "diag",
         "name": "专家入企 AI 诊断",
-        "detail": "1980 元 × 1 天",
-        "amount": 1980,
+        "detail": "1980 元 × 2 天，覆盖全部 5 个场景",
+        "amount": 3960,
         "yearly": false
       },
       {
@@ -90,531 +358,775 @@
         "key": "custom",
         "name": "另议项合计",
         "detail": "4 个科目，明细见逐项表",
-        "amount": 180000,
+        "amount": 420000,
         "yearly": false
       }
     ],
-    "cashOnce": 181980,
-    "cashYearly": 73160,
-    "cashYear1": 255140,
+    "cashOnce": 423960,
+    "cashYearly": 112520,
+    "cashYear1": 536480,
     "customItems": [
       {
         "key": "integration",
         "name": "系统对接",
-        "detail": "2 个在用系统接口 × 20000 元",
-        "basis": "按场景数据依赖与企业在用系统的交集逐个计列",
-        "refAmount": 40000,
-        "amount": 40381
+        "detail": "4 个在用系统接口 × 20000 元",
+        "basis": "全部 5 个场景的数据依赖取并集后与企业在用系统求交集，同一系统只对接一次",
+        "refAmount": 80000,
+        "amount": 96823
       },
       {
         "key": "customDev",
         "name": "定制开发与配置",
-        "detail": "重档基数 60000 元 × 规模系数 1.3",
-        "basis": "含业务规则配置、表单与报表定制、权限模型搭建",
-        "refAmount": 78000,
-        "amount": 78744
+        "detail": "5 个场景按 1 / 0.82 / 0.67 / 0.55 / 0.45 递减计列，规模系数 1.3",
+        "basis": "业务规则引擎、表单与报表框架、权限模型可跨场景复用，故按金额降序逐个乘以 0.82 的幂",
+        "refAmount": 149124,
+        "amount": 180483
       },
       {
         "key": "coaching",
         "name": "落地陪跑",
-        "detail": "16 周 × 3600 元 / 周",
-        "basis": "含配置陪同、使用培训、试运行期问题响应与效益数据复盘",
-        "refAmount": 57600,
-        "amount": 58149
+        "detail": "总工期 32 周 × 3600 元 / 周",
+        "basis": "按分批上线的总工期逐周计列，含配置陪同、使用培训、试运行期问题响应与效益数据复盘",
+        "refAmount": 115200,
+        "amount": 139426
       },
       {
         "key": "dataPrep",
         "name": "历史数据整理",
         "detail": "规模基数 18000 元 × 数据现状系数 0.15",
-        "basis": "按数据现状调整：纸质为主需先完成电子化，已在系统内的接近于零",
+        "basis": "全企业一次性投入，不随场景数量增加：整理的是同一批业务台账",
         "refAmount": 2700,
-        "amount": 2726
+        "amount": 3268
       }
     ],
-    "customRefTotal": 178300,
+    "customRefTotal": 347024,
     "customOverridden": true,
     "laborItems": [
       {
         "key": "setup",
         "name": "上线期内部工时投入",
-        "detail": "3 人 × 约 16 周 × 每天 2 小时",
-        "hours": 480,
-        "amount": 39446
+        "detail": "3 人 × 总工期 32 周 × 每天 2 小时",
+        "hours": 960,
+        "amount": 78893
       },
       {
         "key": "run",
         "name": "上线后每月维护工时",
-        "detail": "3 人 × 每月 4 小时",
-        "hours": 12,
-        "amount": 986,
+        "detail": "3 人 × 每月 12 小时（5 个场景）",
+        "hours": 36,
+        "amount": 2958,
         "monthly": true
       }
     ],
-    "laborYear1": 51278,
-    "setupHours": 480,
+    "laborYear1": 114389,
+    "setupHours": 960,
     "setupHourly": 82.18,
-    "setupWeeks": 16,
+    "setupWeeks": 32,
     "dataStateMult": 1,
     "dataPrepFactor": 0.15,
-    "runLaborMonthly": 986,
+    "runLaborMonthly": 2958,
     "tierName": "旗舰版",
-    "seats": 12,
+    "seats": 24,
     "seatsSource": "user",
-    "diagnosisDays": 1,
+    "diagnosisDays": 2,
     "hitSystems": [
       "erp",
-      "shop"
+      "shop",
+      "crm",
+      "oa"
     ],
-    "revenueShare": 0.1,
-    "shareBandLow": 0.15,
-    "shareBandHigh": 0.6,
+    "integrationUnit": 20000,
+    "revenueShare": 0.21,
+    "shareBandLow": 0.3,
+    "shareBandHigh": 1.2,
     "shareVerdict": "low",
-    "shareText": "首年现金支出占营业收入 0.1%，低于单场景常见区间下限 0.15%。该情形通常意味着系统对接或落地陪跑未计列，据此得出的回收期会系统性偏短，建议补齐后复核。",
-    "total12": 255140,
+    "shareText": "首年现金支出占营业收入 0.21%，低于企业级常见区间下限 0.3%。该情形通常意味着系统对接或落地陪跑未计列，或本次场景组合偏小，据此得出的回收期会系统性偏短。",
+    "total12": 536480,
     "totalNote": "回收期按现金口径测算；内部工时投入单列，不参与回收期计算"
   },
   "benefit": {
-    "levers": [
+    "groups": [
+      {
+        "key": "hours",
+        "name": "人工工时节约",
+        "cash": false,
+        "scenes": 1,
+        "gross": 2448,
+        "counted": 2448,
+        "items": [
+          {
+            "sceneId": "trade-s08",
+            "sceneName": "外贸订单跟单播报",
+            "afterValue": 2448,
+            "crossWeight": 1,
+            "counted": 2448
+          }
+        ]
+      },
       {
         "key": "error",
         "name": "差错与返工损失下降",
-        "en": "FEWER ERRORS",
-        "money": "返工、赔付、货损、罚没与客诉处理成本的减少",
-        "monthly": 25200,
-        "weight": 1,
-        "discounted": false,
-        "final": 25200,
-        "basis": "每月 14 次 × 单次 4500 元 × 折减 40%",
         "cash": true,
-        "cut": 0.4,
-        "cutNote": "折减系数 40%。工具可提示与拦截规则明确的异常，对依赖经验判断的情形拦截率有限。",
-        "rank": 1
+        "scenes": 3,
+        "gross": 52128,
+        "counted": 34625,
+        "items": [
+          {
+            "sceneId": "trade-s05",
+            "sceneName": "门店补货与跨店调拨建议",
+            "afterValue": 25200,
+            "crossWeight": 1,
+            "counted": 25200
+          },
+          {
+            "sceneId": "trade-s06",
+            "sceneName": "拣货复核与错发拦截",
+            "afterValue": 14256,
+            "crossWeight": 0.35,
+            "counted": 4990
+          },
+          {
+            "sceneId": "trade-s08",
+            "sceneName": "外贸订单跟单播报",
+            "afterValue": 12672,
+            "crossWeight": 0.35,
+            "counted": 4435
+          }
+        ]
+      },
+      {
+        "key": "revenue",
+        "name": "成交转化提升",
+        "cash": true,
+        "scenes": 2,
+        "gross": 24645,
+        "counted": 17569,
+        "items": [
+          {
+            "sceneId": "trade-s04",
+            "sceneName": "会员分层与到店唤醒",
+            "afterValue": 13759,
+            "crossWeight": 1,
+            "counted": 13759
+          },
+          {
+            "sceneId": "trade-s02",
+            "sceneName": "沉睡客户识别与复购提醒",
+            "afterValue": 10886,
+            "crossWeight": 0.35,
+            "counted": 3810
+          }
+        ]
       },
       {
         "key": "cash",
         "name": "资金周转效率提升",
-        "en": "CASH TURNS",
-        "money": "存货与应收占用下降所节约的资金成本",
-        "monthly": 2400,
-        "weight": 0.35,
-        "discounted": true,
-        "final": 840,
-        "basis": "占用 6000000 元 × 下降 8% × 年资金成本 6% ÷ 12",
+        "cash": true,
+        "scenes": 1,
+        "gross": 840,
+        "counted": 840,
+        "items": [
+          {
+            "sceneId": "trade-s05",
+            "sceneName": "门店补货与跨店调拨建议",
+            "afterValue": 840,
+            "crossWeight": 1,
+            "counted": 840
+          }
+        ]
+      }
+    ],
+    "items": [
+      {
+        "sceneId": "trade-s05",
+        "sceneName": "门店补货与跨店调拨建议",
+        "key": "error",
+        "name": "差错与返工损失下降",
+        "cash": true,
+        "cut": 0.4,
+        "cutNote": "折减系数 40%。工具可提示与拦截规则明确的异常，对依赖经验判断的情形拦截率有限。",
+        "basis": "每月 14 次 × 单次 4500 元 × 折减 40%",
+        "money": "返工、赔付、货损、罚没与客诉处理成本的减少",
+        "monthly": 25200,
+        "inSceneWeight": 1,
+        "inScene": 25200,
+        "valueFactor": 1,
+        "afterValue": 25200,
+        "crossWeight": 1,
+        "counted": 25200,
+        "final": 25200
+      },
+      {
+        "sceneId": "trade-s05",
+        "sceneName": "门店补货与跨店调拨建议",
+        "key": "cash",
+        "name": "资金周转效率提升",
         "cash": true,
         "cut": 0.08,
         "cutNote": "按占用资金下降 8%、资金成本年化 6% 测算。资金成本参照一年期经营性贷款的常见水平。",
-        "rank": 2
+        "basis": "占用 6000000 元 × 下降 8% × 年资金成本 6% ÷ 12",
+        "money": "存货与应收占用下降所节约的资金成本",
+        "monthly": 2400,
+        "inSceneWeight": 0.35,
+        "inScene": 840,
+        "valueFactor": 1,
+        "afterValue": 840,
+        "crossWeight": 1,
+        "counted": 840,
+        "final": 840
+      },
+      {
+        "sceneId": "trade-s02",
+        "sceneName": "沉睡客户识别与复购提醒",
+        "key": "revenue",
+        "name": "成交转化提升",
+        "cash": true,
+        "cut": 0.08,
+        "cutNote": "按成交量提升 8% 测算。该幅度对应响应时效与跟进覆盖率的改善，不含产品力与价格策略变动的影响。",
+        "basis": "每月 900 单 × 提升 8% × 单均 480 元 × 毛利率 35%",
+        "money": "响应速度与跟进及时性改善带来的成交增量，按毛利计列",
+        "monthly": 12096,
+        "inSceneWeight": 1,
+        "inScene": 12096,
+        "valueFactor": 0.9,
+        "afterValue": 10886,
+        "crossWeight": 0.35,
+        "counted": 3810,
+        "final": 3810
+      },
+      {
+        "sceneId": "trade-s04",
+        "sceneName": "会员分层与到店唤醒",
+        "key": "revenue",
+        "name": "成交转化提升",
+        "cash": true,
+        "cut": 0.08,
+        "cutNote": "按成交量提升 8% 测算。该幅度对应响应时效与跟进覆盖率的改善，不含产品力与价格策略变动的影响。",
+        "basis": "每月 1400 单 × 提升 8% × 单均 390 元 × 毛利率 35%",
+        "money": "响应速度与跟进及时性改善带来的成交增量，按毛利计列",
+        "monthly": 15288,
+        "inSceneWeight": 1,
+        "inScene": 15288,
+        "valueFactor": 0.9,
+        "afterValue": 13759,
+        "crossWeight": 1,
+        "counted": 13759,
+        "final": 13759
+      },
+      {
+        "sceneId": "trade-s06",
+        "sceneName": "拣货复核与错发拦截",
+        "key": "error",
+        "name": "差错与返工损失下降",
+        "cash": true,
+        "cut": 0.4,
+        "cutNote": "折减系数 40%。工具可提示与拦截规则明确的异常，对依赖经验判断的情形拦截率有限。",
+        "basis": "每月 22 次 × 单次 1800 元 × 折减 40%",
+        "money": "返工、赔付、货损、罚没与客诉处理成本的减少",
+        "monthly": 15840,
+        "inSceneWeight": 1,
+        "inScene": 15840,
+        "valueFactor": 0.9,
+        "afterValue": 14256,
+        "crossWeight": 0.35,
+        "counted": 4990,
+        "final": 4990
+      },
+      {
+        "sceneId": "trade-s08",
+        "sceneName": "外贸订单跟单播报",
+        "key": "error",
+        "name": "差错与返工损失下降",
+        "cash": true,
+        "cut": 0.4,
+        "cutNote": "折减系数 40%。工具可提示与拦截规则明确的异常，对依赖经验判断的情形拦截率有限。",
+        "basis": "每月 16 次 × 单次 2200 元 × 折减 40%",
+        "money": "返工、赔付、货损、罚没与客诉处理成本的减少",
+        "monthly": 14080,
+        "inSceneWeight": 1,
+        "inScene": 14080,
+        "valueFactor": 0.9,
+        "afterValue": 12672,
+        "crossWeight": 0.35,
+        "counted": 4435,
+        "final": 4435
+      },
+      {
+        "sceneId": "trade-s08",
+        "sceneName": "外贸订单跟单播报",
+        "key": "hours",
+        "name": "人工工时节约",
+        "cash": false,
+        "cut": 0.45,
+        "cutNote": "折减系数 45%。工具承接的是信息查找、录入与初步判断环节，复核与决策环节仍需人工，故不按全量计列。",
+        "basis": "5 人 × 每天 2.5 小时 × 折减 45% × 21.75 天 × 时薪 63.51 元",
+        "money": "同一事项所需人工投入下降，按综合用工成本折算",
+        "monthly": 7770,
+        "inSceneWeight": 0.35,
+        "inScene": 2720,
+        "valueFactor": 0.9,
+        "afterValue": 2448,
+        "crossWeight": 1,
+        "counted": 2448,
+        "final": 2448
       }
     ],
-    "rawMonthly": 26040,
-    "valueFactor": 1,
-    "afterValue": 26040,
+    "rawMonthly": 80061,
+    "afterCross": 55482,
     "capMonthly": 1250000,
     "capped": false,
-    "fullMonthly": 26040,
-    "cashMonthly": 26040,
-    "hoursMonthly": 0,
-    "cashYear1": 0,
+    "fullMonthly": 55482,
+    "cashMonthly": 53034,
+    "hoursMonthly": 2448,
+    "crossDiscount": 24579,
     "note": "人工工时节约列为非现金科目，不参与回收期测算"
   },
   "flow": [
     {
       "m": 1,
-      "benefit": 9114,
-      "cost": 255140,
-      "net": -246026,
-      "cum": -246026,
-      "ramp": 0.35
+      "benefit": 0,
+      "cost": 536480,
+      "net": -536480,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 2,
-      "benefit": 18228,
+      "benefit": 0,
       "cost": 0,
-      "net": 18228,
-      "cum": -227798,
-      "ramp": 0.7
+      "net": 0,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 3,
-      "benefit": 26040,
+      "benefit": 0,
       "cost": 0,
-      "net": 26040,
-      "cum": -201758,
-      "ramp": 1
+      "net": 0,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 4,
-      "benefit": 26040,
+      "benefit": 10448,
       "cost": 0,
-      "net": 26040,
-      "cum": -175718,
-      "ramp": 1
+      "net": 10448,
+      "cum": -526032,
+      "ramp": 0.2,
+      "live": 2
     },
     {
       "m": 5,
-      "benefit": 26040,
+      "benefit": 20895,
       "cost": 0,
-      "net": 26040,
-      "cum": -149678,
-      "ramp": 1
+      "net": 20895,
+      "cum": -505137,
+      "ramp": 0.39,
+      "live": 2
     },
     {
       "m": 6,
-      "benefit": 26040,
+      "benefit": 36412,
       "cost": 0,
-      "net": 26040,
-      "cum": -123638,
-      "ramp": 1
+      "net": 36412,
+      "cum": -468725,
+      "ramp": 0.69,
+      "live": 4
     },
     {
       "m": 7,
-      "benefit": 26040,
+      "benefit": 42974,
       "cost": 0,
-      "net": 26040,
-      "cum": -97598,
-      "ramp": 1
+      "net": 42974,
+      "cum": -425751,
+      "ramp": 0.81,
+      "live": 4
     },
     {
       "m": 8,
-      "benefit": 26040,
+      "benefit": 50151,
       "cost": 0,
-      "net": 26040,
-      "cum": -71558,
-      "ramp": 1
+      "net": 50151,
+      "cum": -375600,
+      "ramp": 0.95,
+      "live": 5
     },
     {
       "m": 9,
-      "benefit": 26040,
+      "benefit": 51704,
       "cost": 0,
-      "net": 26040,
-      "cum": -45518,
-      "ramp": 1
+      "net": 51704,
+      "cum": -323896,
+      "ramp": 0.97,
+      "live": 5
     },
     {
       "m": 10,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": -19478,
-      "ramp": 1
+      "net": 53034,
+      "cum": -270862,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 11,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 6562,
-      "ramp": 1
+      "net": 53034,
+      "cum": -217828,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 12,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 32602,
-      "ramp": 1
+      "net": 53034,
+      "cum": -164794,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 13,
-      "benefit": 26040,
-      "cost": 73160,
-      "net": -47120,
-      "cum": -14518,
-      "ramp": 1
+      "benefit": 53034,
+      "cost": 112520,
+      "net": -59486,
+      "cum": -224280,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 14,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 11522,
-      "ramp": 1
+      "net": 53034,
+      "cum": -171246,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 15,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 37562,
-      "ramp": 1
+      "net": 53034,
+      "cum": -118212,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 16,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 63602,
-      "ramp": 1
+      "net": 53034,
+      "cum": -65178,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 17,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 89642,
-      "ramp": 1
+      "net": 53034,
+      "cum": -12144,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 18,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 115682,
-      "ramp": 1
+      "net": 53034,
+      "cum": 40890,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 19,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 141722,
-      "ramp": 1
+      "net": 53034,
+      "cum": 93924,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 20,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 167762,
-      "ramp": 1
+      "net": 53034,
+      "cum": 146958,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 21,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 193802,
-      "ramp": 1
+      "net": 53034,
+      "cum": 199992,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 22,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 219842,
-      "ramp": 1
+      "net": 53034,
+      "cum": 253026,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 23,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 245882,
-      "ramp": 1
+      "net": 53034,
+      "cum": 306060,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 24,
-      "benefit": 26040,
+      "benefit": 53034,
       "cost": 0,
-      "net": 26040,
-      "cum": 271922,
-      "ramp": 1
+      "net": 53034,
+      "cum": 359094,
+      "ramp": 1,
+      "live": 5
     }
   ],
   "flowAll": [
     {
       "m": 1,
-      "benefit": 9114,
-      "cost": 255140,
-      "net": -246026,
-      "cum": -246026,
-      "ramp": 0.35
+      "benefit": 0,
+      "cost": 536480,
+      "net": -536480,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 2,
-      "benefit": 18228,
+      "benefit": 0,
       "cost": 0,
-      "net": 18228,
-      "cum": -227798,
-      "ramp": 0.7
+      "net": 0,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 3,
-      "benefit": 26040,
+      "benefit": 0,
       "cost": 0,
-      "net": 26040,
-      "cum": -201758,
-      "ramp": 1
+      "net": 0,
+      "cum": -536480,
+      "ramp": 0,
+      "live": 0
     },
     {
       "m": 4,
-      "benefit": 26040,
+      "benefit": 10448,
       "cost": 0,
-      "net": 26040,
-      "cum": -175718,
-      "ramp": 1
+      "net": 10448,
+      "cum": -526032,
+      "ramp": 0.19,
+      "live": 2
     },
     {
       "m": 5,
-      "benefit": 26040,
+      "benefit": 20895,
       "cost": 0,
-      "net": 26040,
-      "cum": -149678,
-      "ramp": 1
+      "net": 20895,
+      "cum": -505137,
+      "ramp": 0.38,
+      "live": 2
     },
     {
       "m": 6,
-      "benefit": 26040,
+      "benefit": 36412,
       "cost": 0,
-      "net": 26040,
-      "cum": -123638,
-      "ramp": 1
+      "net": 36412,
+      "cum": -468725,
+      "ramp": 0.66,
+      "live": 4
     },
     {
       "m": 7,
-      "benefit": 26040,
+      "benefit": 42974,
       "cost": 0,
-      "net": 26040,
-      "cum": -97598,
-      "ramp": 1
+      "net": 42974,
+      "cum": -425751,
+      "ramp": 0.77,
+      "live": 4
     },
     {
       "m": 8,
-      "benefit": 26040,
+      "benefit": 51008,
       "cost": 0,
-      "net": 26040,
-      "cum": -71558,
-      "ramp": 1
+      "net": 51008,
+      "cum": -374743,
+      "ramp": 0.92,
+      "live": 5
     },
     {
       "m": 9,
-      "benefit": 26040,
+      "benefit": 53417,
       "cost": 0,
-      "net": 26040,
-      "cum": -45518,
-      "ramp": 1
+      "net": 53417,
+      "cum": -321326,
+      "ramp": 0.96,
+      "live": 5
     },
     {
       "m": 10,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": -19478,
-      "ramp": 1
+      "net": 55482,
+      "cum": -265844,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 11,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 6562,
-      "ramp": 1
+      "net": 55482,
+      "cum": -210362,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 12,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 32602,
-      "ramp": 1
+      "net": 55482,
+      "cum": -154880,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 13,
-      "benefit": 26040,
-      "cost": 73160,
-      "net": -47120,
-      "cum": -14518,
-      "ramp": 1
+      "benefit": 55482,
+      "cost": 112520,
+      "net": -57038,
+      "cum": -211918,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 14,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 11522,
-      "ramp": 1
+      "net": 55482,
+      "cum": -156436,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 15,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 37562,
-      "ramp": 1
+      "net": 55482,
+      "cum": -100954,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 16,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 63602,
-      "ramp": 1
+      "net": 55482,
+      "cum": -45472,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 17,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 89642,
-      "ramp": 1
+      "net": 55482,
+      "cum": 10010,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 18,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 115682,
-      "ramp": 1
+      "net": 55482,
+      "cum": 65492,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 19,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 141722,
-      "ramp": 1
+      "net": 55482,
+      "cum": 120974,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 20,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 167762,
-      "ramp": 1
+      "net": 55482,
+      "cum": 176456,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 21,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 193802,
-      "ramp": 1
+      "net": 55482,
+      "cum": 231938,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 22,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 219842,
-      "ramp": 1
+      "net": 55482,
+      "cum": 287420,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 23,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 245882,
-      "ramp": 1
+      "net": 55482,
+      "cum": 342902,
+      "ramp": 1,
+      "live": 5
     },
     {
       "m": 24,
-      "benefit": 26040,
+      "benefit": 55482,
       "cost": 0,
-      "net": 26040,
-      "cum": 271922,
-      "ramp": 1
+      "net": 55482,
+      "cum": 398384,
+      "ramp": 1,
+      "live": 5
     }
   ],
-  "payback": 11,
-  "paybackAll": 11,
+  "payback": 18,
+  "paybackAll": 17,
   "paybackBasis": "cash",
   "sensitivityBasis": "cash",
-  "reCross": 14,
+  "reCross": null,
   "roi": {
-    "roi12": 12.8,
-    "roi24": 82.8,
-    "inv12": 255140,
-    "inv24": 328300,
+    "roi12": -30.7,
+    "roi24": 55.3,
+    "inv12": 536480,
+    "inv24": 649000,
     "meaningful": true,
     "note": ""
   },
@@ -626,11 +1138,11 @@
       "benefitMul": 0.65,
       "costMul": 1.2,
       "payback": null,
-      "cum12": -119136,
-      "cum24": -3816,
-      "roi12": -46.7,
-      "monthlyBenefit": 16926,
-      "cashYear1": 306168
+      "cum12": -402181,
+      "cum24": -123541,
+      "roi12": -75,
+      "monthlyBenefit": 34472,
+      "cashYear1": 643776
     },
     {
       "key": "mid",
@@ -638,12 +1150,12 @@
       "desc": "按企业填报参数直接计算，未作调整",
       "benefitMul": 1,
       "costMul": 1,
-      "payback": 11,
-      "cum12": 32602,
-      "cum24": 271922,
-      "roi12": 12.8,
-      "monthlyBenefit": 26040,
-      "cashYear1": 255140
+      "payback": 18,
+      "cum12": -164794,
+      "cum24": 359094,
+      "roi12": -30.7,
+      "monthlyBenefit": 53034,
+      "cashYear1": 536480
     },
     {
       "key": "opt",
@@ -651,69 +1163,69 @@
       "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计",
       "benefitMul": 1.25,
       "costMul": 0.95,
-      "payback": 9,
-      "cum12": 117295,
-      "cum24": 438393,
-      "roi12": 46,
-      "monthlyBenefit": 32550,
-      "cashYear1": 242383
+      "payback": 15,
+      "cum12": -45048,
+      "cum24": 643574,
+      "roi12": -8.4,
+      "monthlyBenefit": 66293,
+      "cashYear1": 509656
     }
   ],
   "sensitivity": [
     {
       "key": "benefitCut",
       "label": "效益折减系数",
-      "note": "工具对该项损失的实际改善幅度",
-      "low": 17,
-      "high": 10,
-      "lowText": "第 17 个月",
-      "highText": "第 10 个月",
-      "base": 11,
-      "spread": 7
+      "note": "工具对各项损失的实际改善幅度",
+      "low": 21,
+      "high": 16,
+      "lowText": "第 21 个月",
+      "highText": "第 16 个月",
+      "base": 18,
+      "spread": 5
     },
     {
       "key": "customBudget",
       "label": "另议项预算",
       "note": "系统对接与定制开发的实际报价",
-      "low": 10,
-      "high": 15,
-      "lowText": "第 10 个月",
-      "highText": "第 15 个月",
-      "base": 11,
-      "spread": 5
+      "low": 19,
+      "high": 16,
+      "lowText": "第 19 个月",
+      "highText": "第 16 个月",
+      "base": 18,
+      "spread": 3
+    },
+    {
+      "key": "seats",
+      "label": "订阅账号数",
+      "note": "实际开通使用的账号数量",
+      "low": 18,
+      "high": 17,
+      "lowText": "第 18 个月",
+      "highText": "第 17 个月",
+      "base": 18,
+      "spread": 1
     },
     {
       "key": "setupCost",
       "label": "上线期一次性支出",
       "note": "诊断与配置环节的实际发生额",
-      "low": 10,
-      "high": 15,
-      "lowText": "第 10 个月",
-      "highText": "第 15 个月",
-      "base": 11,
-      "spread": 5
-    },
-    {
-      "key": "seats",
-      "label": "订阅套数",
-      "note": "实际开通使用的账号数量",
-      "low": 11,
-      "high": 12,
-      "lowText": "第 11 个月",
-      "highText": "第 12 个月",
-      "base": 11,
-      "spread": 1
+      "low": 19,
+      "high": 16,
+      "lowText": "第 19 个月",
+      "highText": "第 16 个月",
+      "base": 18,
+      "spread": 3
     },
     {
       "key": "rampSpeed",
-      "label": "效益释放节奏",
-      "note": "过渡期达到满额效能所需的期数",
-      "low": 11,
-      "high": 12,
-      "lowText": "第 11 个月",
-      "highText": "第 12 个月",
-      "base": 11,
-      "spread": 1
+      "label": "上线节奏",
+      "note": "各批场景的实际上线时点",
+      "low": 19,
+      "high": 17,
+      "lowText": "第 19 个月",
+      "highText": "第 17 个月",
+      "base": 18,
+      "spread": 2
     }
   ],
   "missing": [],
@@ -726,12 +1238,15 @@
     "errorFreqMonthly": "user",
     "errorCostPerCase": "user",
     "tiedCapital": "user",
+    "dealsMonthly": "user",
+    "dealValue": "user",
+    "grossMargin": "user",
     "opsPeople": "user",
     "opsHoursPerDay": "user",
     "opsSalary": "user"
   },
   "confidence": {
-    "score": 94,
+    "score": 97,
     "band": "high",
     "name": "口径扎实",
     "desc": "关键参数均由企业填报，测算结论可直接用于投资决策讨论"
@@ -741,84 +1256,89 @@
   "revenueAnnual": 250000000,
   "keyNumbers": [
     {
+      "k": "场景数",
+      "v": 5,
+      "unit": "个",
+      "s": "分 3 批上线，总工期 32 周"
+    },
+    {
       "k": "首年现金支出",
-      "v": 255140,
+      "v": 536480,
       "unit": "元",
-      "s": "含订阅与一次性支出"
+      "s": "含订阅、诊断与一次性支出"
     },
     {
       "k": "月度现金收益",
-      "v": 26040,
+      "v": 53034,
       "unit": "元",
-      "s": "效益释放满额后"
+      "s": "全部场景满额释放后合计"
     },
     {
       "k": "回收期",
-      "v": 11,
+      "v": 18,
       "unit": "期",
       "s": "现金口径 · 中性档",
       "wide": true
     },
     {
       "k": "首年累计净额",
-      "v": 32602,
+      "v": -164794,
       "unit": "元",
       "s": "现金口径，第 12 期末"
     },
     {
-      "k": "含非现金口径",
-      "v": 11,
-      "unit": "期",
-      "s": "并计人工工时节约"
-    },
-    {
       "k": "非现金效益",
-      "v": 0,
+      "v": 2448,
       "unit": "元/月",
       "s": "人工工时节约，不计入回收期"
     },
     {
       "k": "参数可信度",
-      "v": 94,
+      "v": 97,
       "unit": "分",
       "s": "口径扎实"
     }
   ],
   "quickView": [
     {
+      "q": "测算范围",
+      "a": "5 个场景",
+      "text": "门店补货与跨店调拨建议、沉睡客户识别与复购提醒、会员分层与到店唤醒、拣货复核与错发拦截、外贸订单跟单播报。按价值分级降序、上线周期升序排出实施顺序，分 3 批推进，总工期 32 周。"
+    },
+    {
       "q": "投入总额",
-      "a": "255140 元",
-      "text": "首年现金支出，旗舰版 12 套，含另议项 180000 元；次年起续费 73160 元。"
+      "a": "536480 元",
+      "text": "首年现金支出，旗舰版 24 套（5 个场景共用账号），含另议项 420000 元；次年起续费 112520 元。"
     },
     {
       "q": "投入结构",
       "a": "旗舰版订阅",
-      "text": "旗舰版订阅 39360 元；专家入企 AI 诊断 1980 元；私域部署（区间上限） 33800 元；另议项合计 180000 元。一次性支出占比 71%。"
+      "text": "旗舰版订阅 78720 元；专家入企 AI 诊断 3960 元；私域部署（区间上限） 33800 元；另议项合计 420000 元。一次性支出占比 79%。"
     },
     {
       "q": "效益来源",
-      "a": "差错与返工损失下降",
-      "text": "本场景命中 2 项效益杠杆：差错与返工损失下降、资金周转效率提升；折算口径为「按缺货损失减少与库存资金占用下降折算」。"
+      "a": "门店补货与跨店调拨建议",
+      "text": "现金效益贡献最高的是「门店补货与跨店调拨建议」，月度 26040 元，占全组合的 49%。共命中 4 类效益杠杆。"
     },
     {
       "q": "月度收益",
-      "a": "26040 元",
-      "text": "现金口径，效益释放满额后。本场景无非现金科目。"
+      "a": "53034 元",
+      "text": "现金口径，全部场景满额释放后合计。另有非现金科目 2448 元/月未计入。"
     },
     {
       "q": "回收期",
-      "a": "第 11 期",
-      "text": "现金口径，中性档；保守档第 24 期以后。"
+      "a": "第 18 期",
+      "text": "现金口径，中性档；保守档期内未转正。"
     },
     {
       "q": "参数可信度",
-      "a": "口径扎实（94 分）",
+      "a": "口径扎实（97 分）",
       "text": "关键参数均由企业填报，测算结论可直接用于投资决策讨论"
     }
   ],
   "verdict": {
-    "headline": "按本次参数测算，累计净现金流于第 11 期转正",
-    "text": "首年现金支出 255140 元，其中一次性支出占 71%；效益释放满额后月度现金收益 26040 元，计入过渡期爬坡后，累计净额于第 11 期由负转正。保守档对应第 24 期以后，为决策建议的基准值。"
+    "headline": "按本次参数测算，5 个场景合计的累计净现金流于第 18 期转正",
+    "text": "本次组合含 门店补货与跨店调拨建议、沉睡客户识别与复购提醒、会员分层与到店唤醒、拣货复核与错发拦截、外贸订单跟单播报，分 3 批上线，总工期 32 周。首年现金支出 536480 元，其中一次性支出占 79%；全部场景效益释放满额后月度现金收益合计 53034 元，计入分批上线与过渡期爬坡后，累计净额于第 18 期由负转正。保守档对应第 24 期以后，为决策建议的基准值。另有人工工时节约折合 2448 元/月，属非现金科目，未计入上述口径。"
   },
   "roles": [
     {
@@ -865,8 +1385,12 @@
       "why": "单量、人员编制、资金占用等收益基数随之变化，原测算基础不再成立。"
     }
   ],
-  "summaryText": "首年现金支出 255140 元，其中一次性支出占 71%；效益释放满额后月度现金收益 26040 元，计入过渡期爬坡后，累计净额于第 11 期由负转正。保守档对应第 24 期以后，为决策建议的基准值。",
+  "summaryText": "按本次参数测算，5 个场景合计的累计净现金流于第 18 期转正",
   "render": [
+    {
+      "type": "portfolio",
+      "source": "portfolio"
+    },
     {
       "type": "three-accounts",
       "source": "keyNumbers"
@@ -878,6 +1402,14 @@
     {
       "type": "benefit-ledger",
       "source": "benefit"
+    },
+    {
+      "type": "scene-contribution",
+      "source": "portfolio.scenes"
+    },
+    {
+      "type": "wave-gantt",
+      "source": "portfolio.waves"
     },
     {
       "type": "cashflow-bars",

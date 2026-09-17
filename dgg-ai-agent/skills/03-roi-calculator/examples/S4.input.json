@@ -20,23 +20,57 @@
     "overseas": "yes",
     "role": "it"
   },
+  "scenes": [
+    {
+      "sceneId": "trade-s05",
+      "gain": {
+        "errorFreqMonthly": 14,
+        "errorCostPerCase": 4500,
+        "tiedCapital": 6000000
+      }
+    },
+    {
+      "sceneId": "trade-s06",
+      "gain": {
+        "errorFreqMonthly": 22,
+        "errorCostPerCase": 1800
+      }
+    },
+    {
+      "sceneId": "trade-s02",
+      "gain": {
+        "dealsMonthly": 900,
+        "dealValue": 480,
+        "grossMargin": 0.35
+      }
+    },
+    {
+      "sceneId": "trade-s04",
+      "gain": {
+        "dealsMonthly": 1400,
+        "dealValue": 390,
+        "grossMargin": 0.35
+      }
+    },
+    {
+      "sceneId": "trade-s08",
+      "gain": {
+        "errorFreqMonthly": 16,
+        "errorCostPerCase": 2200,
+        "opsPeople": 5,
+        "opsHoursPerDay": 2.5,
+        "opsSalary": 8500
+      }
+    }
+  ],
   "plan": {
-    "sceneId": "trade-s05",
     "tier": "flag",
-    "seats": 12,
-    "diagnosisDays": 1,
+    "seats": 24,
+    "diagnosisDays": 2,
     "privateDeploy": "top",
-    "customBudget": 180000,
+    "customBudget": 420000,
     "dataState": "system",
     "setupPeople": 3,
     "setupSalary": 11000
-  },
-  "gain": {
-    "errorFreqMonthly": 14,
-    "errorCostPerCase": 4500,
-    "tiedCapital": 6000000,
-    "opsPeople": 5,
-    "opsHoursPerDay": 2.5,
-    "opsSalary": 8500
   }
 }

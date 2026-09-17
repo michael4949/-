@@ -22,13 +22,6 @@
         "setupSalary"
       ],
       "properties": {
-        "sceneId": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "模块 2 场景库的场景 id；为空时走通用轻量场景口径，输出 sceneBasis = generic"
-        },
         "tier": {
           "enum": [
             "light",
@@ -82,73 +75,98 @@
           "minimum": 2000,
           "maximum": 60000,
           "description": "跟这件事的人平均月薪"
+        },
+        "waveSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "每批同时上线的场景数。缺失时取 investment-profile.json 的 waveSize（2）。"
         }
       }
     },
-    "gain": {
-      "type": "object",
-      "additionalProperties": false,
-      "description": "收益端。只需填场景命中的那几条杠杆对应的字段；缺了就明说算不准，不替客户填默认值。",
-      "properties": {
-        "opsPeople": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 50
-        },
-        "opsHoursPerDay": {
-          "type": "number",
-          "minimum": 0.25,
-          "maximum": 8
-        },
-        "opsSalary": {
-          "type": "integer",
-          "minimum": 2000,
-          "maximum": 60000
-        },
-        "errorFreqMonthly": {
-          "type": "number",
-          "minimum": 0.05,
-          "maximum": 200
-        },
-        "errorCostPerCase": {
-          "type": "integer",
-          "minimum": 50,
-          "maximum": 500000
-        },
-        "dealsMonthly": {
-          "type": "number",
-          "minimum": 0.5,
-          "maximum": 100000
-        },
-        "dealValue": {
-          "type": "integer",
-          "minimum": 50,
-          "maximum": 20000000
-        },
-        "grossMargin": {
-          "type": "number",
-          "minimum": 0.01,
-          "maximum": 0.8
-        },
-        "relatedRevenueMonthly": {
-          "type": "integer",
-          "minimum": 5000,
-          "maximum": 500000000
-        },
-        "tiedCapital": {
-          "type": "integer",
-          "minimum": 10000,
-          "maximum": 2000000000
-        },
-        "spendAnnual": {
-          "type": "integer",
-          "minimum": 10000,
-          "maximum": 1000000000
-        },
-        "lostOutputMonthly": {
-          "type": "integer",
-          "minimum": 5000,
-          "maximum": 200000000
+    "scenes": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 12,
+      "description": "拟实施的场景组合。测算单元是企业一次立项的整批场景，不是单个场景。留空则按通用轻量口径测算一个场景。",
+      "items": {
+        "type": "object",
+        "required": [
+          "sceneId"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "sceneId": {
+            "type": "string",
+            "description": "场景库编号，须存在于 02-scene-ranking/data/sectors"
+          },
+          "gain": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "该场景命中的效益杠杆所需参数；不同场景各自独立填报",
+            "properties": {
+              "opsPeople": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              },
+              "opsHoursPerDay": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 8
+              },
+              "opsSalary": {
+                "type": "integer",
+                "minimum": 2000,
+                "maximum": 60000
+              },
+              "errorFreqMonthly": {
+                "type": "number",
+                "minimum": 0.05,
+                "maximum": 200
+              },
+              "errorCostPerCase": {
+                "type": "integer",
+                "minimum": 50,
+                "maximum": 500000
+              },
+              "dealsMonthly": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 100000
+              },
+              "dealValue": {
+                "type": "integer",
+                "minimum": 50,
+                "maximum": 20000000
+              },
+              "grossMargin": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 0.8
+              },
+              "relatedRevenueMonthly": {
+                "type": "integer",
+                "minimum": 5000,
+                "maximum": 500000000
+              },
+              "tiedCapital": {
+                "type": "integer",
+                "minimum": 10000,
+                "maximum": 2000000000
+              },
+              "spendAnnual": {
+                "type": "integer",
+                "minimum": 10000,
+                "maximum": 1000000000
+              },
+              "lostOutputMonthly": {
+                "type": "integer",
+                "minimum": 5000,
+                "maximum": 200000000
+              }
+            }
+          }
         }
       }
     }

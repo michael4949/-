@@ -95,9 +95,9 @@ pass(eq(inS.properties.plan.properties.privateDeploy.enum, C.prices.privateDeplo
 pass(eq(outS.definitions.success.properties.confidence.properties.band.enum, C.confidence.bands.map((b) => b.key)),
   '置信度分档枚举 = constants.json');
 pass(Object.keys(data.sceneLevers.map).length === 182, `场景映射 ${Object.keys(data.sceneLevers.map).length} 条 = 场景库 182 个`);
-const inputFields = Object.keys(inS.properties.gain.properties).sort();
+const inputFields = Object.keys(inS.properties.scenes.items.properties.gain.properties).sort();
 const leverFields = [...new Set(LV.items.flatMap((x) => x.fields.map((f) => f.key)))].sort();
-pass(eq(inputFields, leverFields), `gain 字段 ${inputFields.length} 个 = 七条杠杆声明的字段并集`);
+pass(eq(inputFields, leverFields), `scenes[].gain 字段 ${inputFields.length} 个 = 七条杠杆声明的字段并集`);
 
 console.log('3) 契约常量与内核、credits.json、SKILL.md 一致');
 pass(outS.definitions.success.properties.meta.properties.credits.const === core.CREDITS
@@ -127,6 +127,15 @@ const bad = (mut, label, expectField) => {
 };
 bad((v) => { v.plan.tier = 'pro'; }, '订阅档不在 DM 四档内', 'plan.tier');
 bad((v) => { v.plan.seats = 0; }, '套数为 0', 'plan.seats');
+// 这两条是库内一致性，JSON Schema 表达不了，只在内核层校验
+const badKernel = (mut, label, expectField) => {
+  const v = JSON.parse(JSON.stringify(base)); mut(v);
+  const c = core.compute(v, data);
+  pass(!c.ok && (!expectField || c.errors.some((e) => e.field === expectField)),
+    `${label} → 内核返回 ok=false` + (c.ok ? '（实际通过了）' : `（${c.errors[0].msg}）`));
+};
+badKernel((v) => { v.scenes.push({ sceneId: v.scenes[0].sceneId }); }, '同一场景重复选择', 'scenes');
+badKernel((v) => { v.scenes = [{ sceneId: 'no-such-scene' }]; }, '场景不在场景库内', 'scenes[0].sceneId');
 bad((v) => { v.plan.privateDeploy = 'mid'; }, '私域取了 DM 上没有的中间档', 'plan.privateDeploy');
 bad((v) => { v.plan.setupSalary = 100; }, '推进人月薪越界', 'plan.setupSalary');
 {
@@ -143,7 +152,7 @@ bad((v) => { v.plan.setupSalary = 100; }, '推进人月薪越界', 'plan.setupSa
 console.log('5) 口径纪律');
 {
   // 主杠杆核心量不给默认值：把收益端清空，必须走 insufficient，而不是编一个数出来
-  const v = JSON.parse(JSON.stringify(base)); v.gain = {};
+  const v = JSON.parse(JSON.stringify(base)); v.scenes.forEach((s) => { s.gain = {}; });
   const r = core.compute(v, data);
   pass(r.ok && r.insufficient === true, '收益端全空 → insufficient=true，只出投入侧');
   pass(r.ok && r.payback === null && r.paybackAll === null, '收益端全空 → 不给回收期');
@@ -152,9 +161,9 @@ console.log('5) 口径纪律');
 }
 {
   const s3 = J(path.join(ex, 'S3.output.json'));
-  const hoursLever = s3.benefit.levers.filter((x) => x.key === 'hours')[0];
-  pass(hoursLever && hoursLever.cash === false, '省下的工时标记为非现金');
-  pass(s3.benefit.cashMonthly === 0 && s3.benefit.hoursMonthly > 0, 'S3 是纯工时场景：现金收益 0、工时收益单列');
+  const hoursGroup = s3.benefit.groups.filter((x) => x.key === 'hours')[0];
+  pass(hoursGroup && hoursGroup.cash === false, '省下的工时标记为非现金');
+  pass(s3.benefit.cashMonthly === 0 && s3.benefit.hoursMonthly > 0, 'S3 组合只命中工时杠杆：现金收益 0、工时收益单列');
   pass(s3.payback === null, 'S3 现金口径 24 期内不转正');
   pass(/不产生可确认的现金效益/.test(s3.verdict.headline),
     'S3 纯工时场景：结论说明现金口径不可能转正的成因，并给出合并立项的建议，不含糊带过');
@@ -162,9 +171,9 @@ console.log('5) 口径纪律');
 {
   // 投报率失真护栏：用一组极小投入的合成输入直接验证，不依赖某个样例恰好落在该区间
   const tiny = { profile: J(path.join(ex, 'S2.input.json')).profile,
-                 plan: { sceneId: 'trade-s01', tier: 'std', seats: 1, diagnosisDays: 0, customBudget: 0,
-                         dataState: 'system', setupPeople: 1, setupSalary: 6000 },
-                 gain: { dealsMonthly: 200, dealValue: 20000, grossMargin: 0.3, opsPeople: 3, opsHoursPerDay: 3, opsSalary: 6000 } };
+                 scenes: [{ sceneId: 'trade-s01', gain: { dealsMonthly: 200, dealValue: 20000, grossMargin: 0.3 } }],
+                 plan: { tier: 'std', seats: 1, diagnosisDays: 0, customBudget: 0,
+                         dataState: 'system', setupPeople: 1, setupSalary: 6000 } };
   const tr = core.compute(tiny, data);
   pass(tr.ok && tr.roi.meaningful === false && tr.roi.note.length > 0,
     `投入基数极小（${tr.ok ? tr.roi.inv12 : '?'} 元）、回报率 ${tr.ok ? tr.roi.roi12 : '?'}% → 标记为失去参考意义并给出说明`);
@@ -189,11 +198,40 @@ console.log('5) 口径纪律');
     `私域部署按一套部署计列 ${pdLine ? pdLine.amount : '?'} 元，取 DM 区间端点 ${pdPrices.join(' / ')}，不乘套数`);
 }
 {
-  // 多杠杆的主次由算出的金额决定，与 roiBasis 的行文顺序无关
+  // 两层折减：场景内按金额降序、跨场景按金额降序，权重都只有 1 与 overlapDiscount 两种
   const s1 = J(path.join(ex, 'S1.output.json'));
-  const ls = s1.benefit.levers;
-  pass(ls.length < 2 || ls[0].monthly >= ls[1].monthly, '多条杠杆按算出的金额降序，第一条全额、其余按 35%');
-  pass(ls.every((x, i) => x.weight === (i === 0 ? 1 : 0.35)), '合并权重只有 1 与 0.35 两种');
+  const its = s1.benefit.items;
+  pass(its.length > 0 && its.every((x) => x.inSceneWeight === 1 || x.inSceneWeight === C.overlapDiscount),
+    `场景内合并权重只有 1 与 ${C.overlapDiscount} 两种`);
+  pass(its.every((x) => x.crossWeight === 1 || x.crossWeight === C.overlapDiscount),
+    `跨场景合并权重只有 1 与 ${C.overlapDiscount} 两种`);
+  s1.benefit.groups.forEach((g) => {
+    const desc = g.items.every((x, i) => i === 0 || g.items[i - 1].afterValue >= x.afterValue);
+    pass(desc, `「${g.name}」跨 ${g.scenes} 个场景按金额降序，最高全额、其余按 ${C.overlapDiscount}`);
+    pass(g.items.every((x, i) => x.crossWeight === (i === 0 ? 1 : C.overlapDiscount)),
+      `「${g.name}」组内权重分配正确`);
+  });
+  pass(s1.benefit.crossDiscount > 0,
+    `跨场景去重共扣减 ${s1.benefit.crossDiscount} 元/月——企业级测算不是把单场景相加`);
+}
+{
+  // 企业级归集的三处协同：账号复用、接口去重、配置复用
+  const s1 = J(path.join(ex, 'S1.output.json'));
+  const pf = s1.portfolio;
+  const naive = pf.seatDetail.reduce((a, b) => a + b.seats, 0);
+  pass(pf.seatsRef < naive,
+    `账号按复用系数 ${pf.seatOverlap} 归并：${naive} 套逐场景相加 → ${pf.seatsRef} 套`);
+  pass(pf.depUnion.length >= s1.invest.hitSystems.length,
+    `系统依赖取并集后与在用系统求交集：${pf.depUnion.length} 项依赖 → ${s1.invest.hitSystems.length} 个接口，同一系统只对接一次`);
+  pass(pf.devPerScene.every((x, i) => i === 0 ? x.factor === 1 : x.factor < pf.devPerScene[i - 1].factor),
+    `定制开发按复用递减：${pf.devPerScene.map((x) => x.factor).join(' / ')}`);
+  pass(pf.waves.every((w, i) => i === 0 || w.startMonth >= pf.waves[i - 1].startMonth),
+    `实施波次按顺序串行，共 ${pf.waves.length} 批，总工期 ${pf.totalWeeks} 周`);
+  pass(pf.scenes.every((s) => s.startMonth >= 1 && s.startMonth <= 24),
+    '每个场景的上线期次落在测算期内');
+  const sumShare = pf.scenes.reduce((a, b) => a + b.cashMonthly, 0);
+  pass(Math.abs(sumShare - s1.benefit.cashMonthly) <= pf.scenes.length,
+    `逐场景现金贡献合计 ${sumShare} 元 = 组合月度现金收益 ${s1.benefit.cashMonthly} 元`);
 }
 
 console.log(failed ? `\n校验失败 ${failed} 项` : '\n契约校验全部通过');

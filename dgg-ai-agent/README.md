@@ -9,12 +9,13 @@ skills/
   01-ai-maturity/          企业AI成熟度评估（SKILL.md · schema · data · core · prompts · examples · scripts）
   02-scene-ranking/        企业AI高价值场景排序（SKILL.md · schema · data/sectors 14 个大类场景库 · core · prompts · examples · scripts）
   03-roi-calculator/       企业AI投入ROI测算器（SKILL.md · schema · data 价目/杠杆/场景映射/收益侧参考值/投入侧规模推导表 · core · prompts · examples · scripts）
+                           测算单元是场景组合：内核做账号复用、接口去重、配置复用与跨场景效益去重
 prototype/
   src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
   test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
   test/screenshot-m2.js    模块 2 全流程：含权重拖动重排、预设切换、行详情联动、28 页报告与 PDF
-  test/screenshot-m3.js    模块 3 全流程：真实填写投入与收益参数、三栏测算台、28 页报告与 PDF
+  test/screenshot-m3.js    模块 3 全流程：现场输入企业画像、多选场景组合、逐场景填参、三栏测算台、34 页报告与 PDF
   dist/index.html          交付物
 ```
 
@@ -54,6 +55,8 @@ NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（
 | `&wx=<url>` | 「结果发送到微信」二维码内容（承接方式定下来后改默认值） |
 | `&llm=<endpoint>&model=<id>` | 可选：LLM 薄代理，`POST {model, prompt} → {text}`；不填则全程模板 |
 
+`?idle=on` 打开待机自动返回首页（默认关闭：展会上停在哪一屏就留在哪一屏）。
+
 ## PDF 导出规则（三套版式共用）
 
 逐项渲染 A4 PDF 数位图对象实测得出：Chromium **只会把「模糊」栅格化**成带 `/SMask` 的位图，部分阅读器不合成蒙版，这些位图就在纸面上显示为灰色方块。除此之外的立体手段全部保持矢量。
@@ -84,7 +87,7 @@ NODE_PATH=$(npm root -g) node test/measure-m3.js S1   # 模块 3 逐页量高（
 |---|---|---|---|---|---|
 | 1 | 企业AI成熟度评估 | v2.1 | v4 | v2.1.0（已与内核、原型同步） | 屏幕与内核逐字一致；独立高端版式，报告 28 页 / 速览 6 页，四套样例 A4 均无溢出；契约校验全部通过 |
 | 2 | 企业AI高价值场景排序 | v1.1 | v2 | v1.0.0（已与内核、原型同步） | 屏幕与内核逐字一致；交互式排序台（权重现场可调、实时重排）；报告 28 页 / 速览 6 页，独立版式，四套样例 A4 均无溢出；契约校验全部通过 |
-| 3 | 企业AI投入ROI测算器 | v1.2 | v3 | v1.2.0（已与内核、原型同步） | 屏幕与内核逐字一致；三栏测算台（10 余项参数实时重算 + 基线对照）；报告 33 页 / 速览 6 页，深墨绿 + 香槟金独立版式、34 个专属图表、编号展品体系（图 N-M / 表 N-M），四套样例 A4 均无溢出；PDF 仅 2 张位图；契约校验全部通过 |
+| 3 | 企业AI投入ROI测算器 | v2.0 | v4 | v2.0.0（已与内核、原型同步） | **测算单元是企业一次立项的整批场景，不是单个场景**：账号跨场景复用、系统接口去重、配置复用、诊断与数据整理只做一次、同类效益杠杆跨场景去重，五处归集逐项可追溯。五屏流程（画像可编辑 → 场景组合多选 → 逐场景收益参数 → 投入方案 → 三栏测算台，含场景开关）；报告 34 页 / 速览 6 页，35 个专属图表、编号展品体系；四套样例 A4 均无溢出；PDF 仅 2 张位图；屏幕与内核逐字一致；契约校验全部通过 |
 
 ### 模块 1 · v2 规模
 
