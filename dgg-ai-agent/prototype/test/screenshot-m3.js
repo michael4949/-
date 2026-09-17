@@ -51,35 +51,35 @@ function pdfPages(f) { return (fs.readFileSync(f).toString('latin1').match(/\/Ty
     await page.waitForTimeout(80);
   };
   await pickOpt('高级版');
-  await setNum('几个人要用', S1.plan.seats);
+  await setNum('订阅套数', S1.plan.seats);
   await pickOpt('1 天');
   await setNum('另议项预算', S1.plan.customBudget);
   await pickOpt('表格为主');
-  await setNum('几个人跟这件事', S1.plan.setupPeople);
-  await setNum('他们平均月薪', S1.plan.setupSalary);
+  await setNum('推进人员数', S1.plan.setupPeople);
+  await setNum('推进人员平均月薪', S1.plan.setupSalary);
   await page.screenshot({ path: `${out}/land-2-plan.png` });
   await page.click('button:has-text("下一步：收益端")');
   await page.waitForSelector('.m3-lv');
   await page.screenshot({ path: `${out}/land-3-gain.png` });
 
   // 屏 3：收益端填数 —— 同样走真实输入
-  const GAIN_LABEL = { errorFreqMonthly: '这类问题多久出一次', errorCostPerCase: '出一次大概搭进去多少钱',
-    opsPeople: '现在几个人在做这件事', opsHoursPerDay: '每人每天花多少时间', opsSalary: '这几个人平均月薪',
-    dealsMonthly: '一个月大概成几单', dealValue: '一单平均多少钱', grossMargin: '一百块生意去掉料和工剩多少',
-    relatedRevenueMonthly: '这块业务一个月做多少钱', tiedCapital: '库存加还没收回的货款',
-    spendAnnual: '这项开支一年多少钱', lostOutputMonthly: '因为这个问题' };
+  const GAIN_LABEL = { errorFreqMonthly: '月均发生次数', errorCostPerCase: '单次损失金额',
+    opsPeople: '当前投入人数', opsHoursPerDay: '人均每日投入时长', opsSalary: '该岗位平均月薪',
+    dealsMonthly: '月均成交单数', dealValue: '单均成交金额', grossMargin: '毛利率',
+    relatedRevenueMonthly: '相关业务月营业额', tiedCapital: '占用资金规模',
+    spendAnnual: '该科目年度支出', lostOutputMonthly: '月均受影响产值' };
   for (const k of Object.keys(S1.gain)) {
     if (GAIN_LABEL[k]) await setNum(GAIN_LABEL[k], S1.gain[k]);
   }
   await page.screenshot({ path: `${out}/land-3-gain-filled.png` });
-  await page.click('button:has-text("算这笔账")');
-  await page.waitForSelector('.m3-board');
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: `${out}/land-4-board.png` });
+  await page.click('button:has-text("进入测算台")');
+  await page.waitForSelector('.m3-console');
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `${out}/land-4-board.png`, fullPage: true });
 
   const shown = await page.evaluate(() => ({
-    verdict: document.querySelector('.m3-board .vt').textContent.trim(),
-    figs: [...document.querySelectorAll('.m3-board .bf')].map((b) => b.querySelector('.k').textContent.trim() + '=' + b.querySelector('.v').textContent.trim())
+    verdict: document.querySelector('.m3-console .verd .hl').textContent.trim(),
+    figs: [...document.querySelectorAll('.m3-console .kf')].map((b) => b.querySelector('.k').textContent.trim() + '=' + b.querySelector('.v').textContent.trim())
   }));
   console.log('测算台结论:', shown.verdict);
   console.log('关键数字:', shown.figs.join(' | '));

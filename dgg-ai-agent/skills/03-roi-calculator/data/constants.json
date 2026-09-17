@@ -10,42 +10,121 @@
   "prices": {
     "note": "取自 DM 定稿宣传单，一字不改。订阅价单位为元/套年。",
     "subscription": [
-      { "key": "light", "name": "轻享版", "yearly": 0,    "desc": "0 元开通，每次消耗积分" },
-      { "key": "std",   "name": "标准版", "yearly": 1280, "desc": "1280 元 / 套年" },
-      { "key": "adv",   "name": "高级版", "yearly": 2280, "desc": "2280 元 / 套年" },
-      { "key": "flag",  "name": "旗舰版", "yearly": 3280, "desc": "3280 元 / 套年" }
+      {
+        "key": "light",
+        "name": "轻享版",
+        "yearly": 0,
+        "desc": "0 元开通，每次消耗积分"
+      },
+      {
+        "key": "std",
+        "name": "标准版",
+        "yearly": 1280,
+        "desc": "1280 元 / 套年"
+      },
+      {
+        "key": "adv",
+        "name": "高级版",
+        "yearly": 2280,
+        "desc": "2280 元 / 套年"
+      },
+      {
+        "key": "flag",
+        "name": "旗舰版",
+        "yearly": 3280,
+        "desc": "3280 元 / 套年"
+      }
     ],
     "diagnosisPerDay": 1980,
     "diagnosisName": "专家入企 AI 诊断",
     "diagnosisDesc": "1980 元，1 天入企",
     "privateDeploy": [
-      { "key": "base", "name": "私域部署（起）", "yearly": 12800, "desc": "12800 元起 / 套年" },
-      { "key": "top",  "name": "私域部署（区间上限）", "yearly": 33800, "desc": "区间上限 33800 元 / 套年" }
+      {
+        "key": "base",
+        "name": "私域部署（起）",
+        "yearly": 12800,
+        "desc": "12800 元起 / 套年"
+      },
+      {
+        "key": "top",
+        "name": "私域部署（区间上限）",
+        "yearly": 33800,
+        "desc": "区间上限 33800 元 / 套年"
+      }
     ],
     "privateDeployNote": "DM 口径为「12800 元起 / 套年」，区间 12800–33800。测算只用区间的两个端点，不取中间值。"
   },
-  "rampMonths": [0.35, 0.7, 1],
-  "rampNote": "上线后的前三个月按 35% / 70% / 100% 爬坡，第四个月起按满额计。",
+  "rampMonths": [
+    0.35,
+    0.7,
+    1
+  ],
+  "rampNote": "上线后第 1 至第 3 期的收益按 35%、70%、100% 逐期释放，第 4 期起按满额计列。",
   "overlapDiscount": 0.35,
-  "overlapNote": "一个场景命中多条收益杠杆时，按各自算出的金额从大到小排序，最大的一条全额计入，其余每条按 35% 计入，避免同一笔钱被算两遍。排序依据是算出来的金额，与场景描述的行文顺序无关。",
+  "overlapNote": "场景命中多项效益杠杆时，按各项测算金额降序排列，金额最高项全额计列，其余各项按 35% 计列，以规避同一笔效益被重复确认。排序依据为测算金额，与场景描述的行文顺序无关。",
   "caps": {
     "revenueShare": 0.06,
     "revenueShareNote": "单个场景的年化收益上限为企业年营收的 6%，超出部分不计入，并在报告里注明已封顶。",
-    "valueFactor": { "1": 0.35, "2": 0.55, "3": 0.75, "4": 0.9, "5": 1 },
-    "valueFactorNote": "按场景库的 value（1–5）折一次：价值低的场景不因为输入的数字大就算出很高的收益。"
+    "valueFactor": {
+      "1": 0.35,
+      "2": 0.55,
+      "3": 0.75,
+      "4": 0.9,
+      "5": 1
+    },
+    "valueFactorNote": "按场景库所载场景价值分级（1 至 5 级）对合并收益折算一次，避免低价值场景因输入参数偏大而产生失真的测算结果。"
   },
   "scenarios": [
-    { "key": "cons", "name": "保守", "benefit": 0.65, "cost": 1.2,  "desc": "收益按中性的 65% 计，投入按 1.2 倍计" },
-    { "key": "mid",  "name": "中性", "benefit": 1,    "cost": 1,    "desc": "按填写的数字直接计算" },
-    { "key": "opt",  "name": "积极", "benefit": 1.25, "cost": 0.95, "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计" }
+    {
+      "key": "cons",
+      "name": "保守",
+      "benefit": 0.65,
+      "cost": 1.2,
+      "desc": "收益按中性的 65% 计，投入按 1.2 倍计"
+    },
+    {
+      "key": "mid",
+      "name": "中性",
+      "benefit": 1,
+      "cost": 1,
+      "desc": "按企业填报参数直接计算，未作调整"
+    },
+    {
+      "key": "opt",
+      "name": "积极",
+      "benefit": 1.25,
+      "cost": 0.95,
+      "desc": "收益按中性的 1.25 倍计，投入按 0.95 倍计"
+    }
   ],
   "confidence": {
     "start": 100,
-    "penalty": { "default": 10, "profile": 6, "noCustomBudget": 12, "genericScene": 15, "noSceneData": 8 },
+    "penalty": {
+      "default": 10,
+      "profile": 6,
+      "noCustomBudget": 12,
+      "genericScene": 15,
+      "noSceneData": 8
+    },
     "bands": [
-      { "min": 80, "key": "high", "name": "口径扎实", "desc": "关键数字都是贵司填的，测算可以直接用于决策讨论" },
-      { "min": 60, "key": "mid",  "name": "可作参考", "desc": "有几项用了参考值，结论的方向可信，具体数字建议补齐后重算" },
-      { "min": 0,  "key": "low",  "name": "需要补数", "desc": "核心数字缺得较多，本次只给投入侧，回收期需要补齐后再算" }
+      {
+        "min": 80,
+        "key": "high",
+        "name": "口径扎实",
+        "desc": "关键参数均由企业填报，测算结论可直接用于投资决策讨论"
+      },
+      {
+        "min": 60,
+        "key": "mid",
+        "name": "可作参考",
+        "desc": "部分参数采用行业参考值，结论方向可信，具体数值建议以企业实际数据替换后复核"
+      },
+      {
+        "min": 0,
+        "key": "low",
+        "name": "待补齐",
+        "desc": "核心参数缺口较多，本次仅出具投入侧测算，回收期需在参数补齐后重新计算"
+      }
     ]
   }
 }

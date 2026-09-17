@@ -1,12 +1,12 @@
 /*
  * 企业AI投入ROI测算器 · 内核
  * 输入：企业画像 + 选定场景 + 投入方案 + 收益端实际经营数字
- * 计算：三笔账 —— 投入构成 / 收益构成 / 24 个月现金流与回收期
+ * 计算：三个科目 —— 投入构成 / 收益构成 / 24 期现金流与回收期
  *       另出三档情景、敏感度、口径来源与置信度
  * 口径纪律：
  *   · 价格全部取自 DM 定稿宣传单，不取区间中间值，不造单子上没有的价。
  *   · 主杠杆的核心数字一律不给默认值——缺了就明说算不准，不替客户编。
- *   · 省下来的工时不计入现金收益，单列一栏。
+ *   · 人工工时节约列为非现金科目，不计入回收期测算。
  *   · 多条杠杆命中时按各自算出的金额排序，与场景描述的行文顺序无关。
  * 确定性、离线、无网络。UMD：Node 与浏览器共用。
  */
@@ -16,7 +16,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var MODULE_NAME = '企业AI投入ROI测算器';
   var CREDITS = 20;
   var LEVER_ORDER = ['hours', 'error', 'revenue', 'margin', 'cash', 'spend', 'output'];
@@ -176,7 +176,7 @@
     var cashYear1 = cashOnce + cashYearly;
 
     var laborItems = [
-      { key: 'setup', name: '上线期投入的工时', detail: plan.setupPeople + ' 人 × 约 ' + setupWeeks + ' 周 × 每天 2 小时', hours: setupHours, amount: setupLabor },
+      { key: 'setup', name: '上线期内部工时投入', detail: plan.setupPeople + ' 人 × 约 ' + setupWeeks + ' 周 × 每天 2 小时', hours: setupHours, amount: setupLabor },
       { key: 'run', name: '上线后每月维护工时', detail: plan.setupPeople + ' 人 × 每月 4 小时', hours: runHoursMonthly, amount: runLaborMonthly, monthly: true }
     ];
     var laborYear1 = setupLabor + runLaborMonthly * 12;
@@ -186,7 +186,7 @@
       laborItems: laborItems, laborYear1: laborYear1, setupHours: setupHours, setupHourly: setupHourly,
       setupWeeks: setupWeeks, dataStateMult: dsMult, runLaborMonthly: runLaborMonthly,
       tierName: tier.name, seats: plan.seats,
-      total12: cashYear1, totalNote: '回收期按现金口径计算；内部工时单列，不计入回收期'
+      total12: cashYear1, totalNote: '回收期按现金口径测算；内部工时投入单列，不参与回收期计算'
     };
 
     // ---- 第二笔账：收益 ----
@@ -246,13 +246,13 @@
       rawMonthly: rawMonthly, valueFactor: vf, afterValue: afterValue,
       capMonthly: capMonthly, capped: capped, fullMonthly: fullMonthly,
       cashMonthly: cashMonthly, hoursMonthly: hoursMonthly,
-      cashYear1: 0, note: '省下来的工时不计入现金收益，单列一栏'
+      cashYear1: 0, note: '人工工时节约列为非现金科目，不参与回收期测算'
     };
 
     // ---- 是否算得准 ----
     var insufficient = usable.length === 0;
 
-    // ---- 第三笔账：24 个月现金流（现金口径）----
+    // ---- 第三项：24 期现金流（现金口径）----
     function flowFor(bMul, cMul, withHours) {
       var perMonth = withHours ? (cashMonthly + hoursMonthly) : cashMonthly;
       var rows = [], cum = 0, payMonth = null, reCross = null, wasPos = false;
@@ -274,8 +274,8 @@
     var flow = insufficient ? null : flowFor(1, 1, false);        // 现金口径：主数字
     var flowAll = insufficient ? null : flowFor(1, 1, true);       // 综合口径：含工时折算，作第二行
 
-    // 投入极小的场景，回报率会算出几百上千个百分点——数学上没错，但这个指标已经失去参考意义。
-    // 照实给出数值，同时标出 meaningful=false，报告改用回本月作主数字。
+    // 投入基数极小时，投报率会呈现数百个百分点的数值：计算无误，但比率指标已失去参考意义。
+    // 照实给出数值，同时标注 meaningful=false，报告改以回收期作为主指标。
     function roiOf(f) {
       if (!f) return null;
       var inv12 = cashYear1, inv24 = cashYear1 + cashYearly;
@@ -286,7 +286,7 @@
         roi24: inv24 > 0 ? r1((f.cum24 / inv24) * 100) : null,
         inv12: inv12, inv24: inv24,
         meaningful: meaningful,
-        note: meaningful ? '' : '本次现金投入只有 ' + r0(inv12) + ' 元，分母太小，回报率这个比例已经失去参考意义。看回本月更实在。'
+        note: meaningful ? '' : '本次首年现金投入仅 ' + r0(inv12) + ' 元，比率指标的分母过小，投报率已不具备参考意义，建议以回收期作为主要判断依据。'
       };
     }
     var roi = roiOf(flow);
@@ -309,20 +309,20 @@
       SENS_ORDER.forEach(function (k) {
         var lo = null, hi = null, label = '', note = '';
         if (k === 'benefitCut') {
-          label = '折减比例'; note = '工具实际能改善多少';
+          label = '效益折减系数'; note = '工具对该项损失的实际改善幅度';
           lo = flowFor(0.8, 1, sensHours).payback; hi = flowFor(1.2, 1, sensHours).payback;
         } else if (k === 'customBudget') {
-          label = '另议项预算'; note = '系统对接与定制的实际报价';
+          label = '另议项预算'; note = '系统对接与定制开发的实际报价';
           lo = flowCustom(cashOnce - custom + r0(custom * 0.8), null, sensHours);
           hi = flowCustom(cashOnce - custom + r0(custom * 1.2), null, sensHours);
         } else if (k === 'seats') {
-          label = '订阅套数'; note = '实际有几个人要用';
+          label = '订阅套数'; note = '实际开通使用的账号数量';
           lo = flowCustom(cashOnce, r0(cashYearly * 0.8), sensHours); hi = flowCustom(cashOnce, r0(cashYearly * 1.2), sensHours);
         } else if (k === 'setupCost') {
-          label = '上线期一次性支出'; note = '诊断与配置的实际花费';
+          label = '上线期一次性支出'; note = '诊断与配置环节的实际发生额';
           lo = flowCustom(r0(cashOnce * 0.8), null, sensHours); hi = flowCustom(r0(cashOnce * 1.2), null, sensHours);
         } else if (k === 'rampSpeed') {
-          label = '爬坡快慢'; note = '多久能用顺手';
+          label = '效益释放节奏'; note = '过渡期达到满额效能所需的期数';
           lo = flowRamp([0.5, 0.85, 1], sensHours); hi = flowRamp([0.2, 0.5, 0.85], sensHours);
         }
         // 算不出回本的那一侧按「超过 24 个月」记，不能当成 0 跨度
@@ -372,47 +372,54 @@
 
     // ---- 结论（陈述计算事实，不作承诺）----
     var verdict, headline;
-    var pc = flow ? flow.payback : null;          // 现金口径回本月
-    var pa = flowAll ? flowAll.payback : null;    // 综合口径（含工时折算）
+    var pc = flow ? flow.payback : null;
+    var pa = flowAll ? flowAll.payback : null;
+    var onceShare = Math.round(cashOnce / (cashYear1 || 1) * 100);
     if (insufficient) {
-      headline = '本次只出投入侧，回收期需要补齐数字后再算';
-      verdict = '收益端还缺 ' + missing.length + ' 项关键数字，补齐后可以当场重算。投入侧已经按 DM 价目列清楚。';
+      headline = '收益科目参数不足，本次仅出具投入侧测算';
+      verdict = '收益端尚缺 ' + missing.length + ' 项关键参数。' + r0(cashYear1) + ' 元的投入测算已按合同价目逐项计列，可直接用于预算审议；'
+        + '回收期需在参数补齐后重新测算。缺口清单及补齐路径见正文。';
     } else if (pc != null) {
-      headline = '按这组数测算，第 ' + pc + ' 个月累计现金转正';
-      verdict = '首年现金支出 ' + r0(cashYear1) + ' 元，现金收益每月约 ' + r0(cashMonthly) + ' 元，累计净额在第 ' + pc
-        + ' 个月由负转正；保守档为第 ' + (scenarios[0].payback || '—') + ' 个月。'
-        + (hoursMonthly > 0 ? '另有省下的工时折合 ' + r0(hoursMonthly) + ' 元/月，未计入这一行。' : '');
+      headline = '按本次参数测算，累计净现金流于第 ' + pc + ' 期转正';
+      verdict = '首年现金支出 ' + r0(cashYear1) + ' 元，其中一次性支出占 ' + onceShare + '%；'
+        + '效益释放满额后月度现金收益 ' + r0(cashMonthly) + ' 元，计入过渡期爬坡后，累计净额于第 ' + pc + ' 期由负转正。'
+        + '保守档对应第 ' + (scenarios[0].payback || '24 期以后') + '，为决策建议的基准值。'
+        + (hoursMonthly > 0 ? '另有人工工时节约折合 ' + r0(hoursMonthly) + ' 元/月，属非现金科目，未计入上述口径。' : '');
     } else if (pa != null) {
-      headline = '这个场景省的是工时，按现金口径 24 个月内不转正';
-      verdict = '现金收益每月约 ' + r0(cashMonthly) + ' 元，单看现金 24 个月累计 ' + r0(flow.cum24)
-        + ' 元。把省下的工时按 ' + r0(hoursMonthly) + ' 元/月一并折算，累计净额在第 ' + pa
-        + ' 个月转正——这笔账成立的前提是省下来的时间真的换成了别的产出。';
+      headline = '本场景效益以人工工时节约为主，现金口径 24 期内不转正';
+      verdict = '现金口径月度收益 ' + r0(cashMonthly) + ' 元，24 期累计净额 ' + r0(flow.cum24) + ' 元，期内不转正。'
+        + '若将人工工时节约 ' + r0(hoursMonthly) + ' 元/月一并确认，累计净额于第 ' + pa + ' 期转正——'
+        + '该口径成立的前提是释放工时被重新配置至产出性岗位，在未发生人员结构调整的情形下不宜作为决策依据。';
     } else {
-      headline = '按这组数测算，24 个月内累计净额未转正';
-      verdict = '现金收益每月约 ' + r0(cashMonthly) + ' 元，含工时折算每月约 ' + r0(cashMonthly + hoursMonthly)
-        + ' 元，两种口径 24 个月内都未转正。建议先压缩另议项预算，或换一个投入更轻的场景。';
+      headline = '按本次参数测算，24 期内累计净额未转正';
+      verdict = '现金口径月度收益 ' + r0(cashMonthly) + ' 元，含非现金科目合计 ' + r0(cashMonthly + hoursMonthly) + ' 元，'
+        + '两种口径于测算期内均未转正。主要成因为投入端一次性支出占比达 ' + onceShare + '%。'
+        + '建议重新审议另议项预算，或选择投入档位更低的场景优先实施。';
     }
 
     var keyNumbers = [
-      { k: '现金支出合计', v: r0(cashYear1), unit: '元', s: '首年，含订阅与一次性' },
-      { k: '每月现金收益', v: r0(cashMonthly), unit: '元', s: '满额后，不含工时' },
-      { k: '现金累计转正', v: pc, unit: '个月', s: pc ? '中性档 · 只算真金白银' : '现金口径 24 个月内未转正', wide: true },
-      { k: '首年净收益', v: flow ? r0(flow.cum12) : null, unit: '元', s: roi && !roi.meaningful ? '现金口径 · 投入小，看绝对额' : '现金口径' },
-      { k: '含工时转正', v: pa, unit: '个月', s: pa ? '把省下的工时一并折算' : '含工时也未转正' },
-      { k: '省下的工时', v: r0(hoursMonthly), unit: '元/月', s: '单列，不计入现金口径' },
-      { k: '口径可信度', v: conf, unit: '分', s: band.name }
+      { k: '首年现金支出', v: r0(cashYear1), unit: '元', s: '含订阅与一次性支出' },
+      { k: '月度现金收益', v: r0(cashMonthly), unit: '元', s: '效益释放满额后' },
+      { k: '回收期', v: pc, unit: '期', s: pc ? '现金口径 · 中性档' : '现金口径 24 期内未转正', wide: true },
+      { k: '首年累计净额', v: flow ? r0(flow.cum12) : null, unit: '元', s: '现金口径，第 12 期末' },
+      { k: '含非现金口径', v: pa, unit: '期', s: pa ? '并计人工工时节约' : '该口径亦未转正' },
+      { k: '非现金效益', v: r0(hoursMonthly), unit: '元/月', s: '人工工时节约，不计入回收期' },
+      { k: '参数可信度', v: conf, unit: '分', s: band.name }
     ];
 
     var quickView = [
-      { q: '一共要投多少？', a: r0(cashYear1) + ' 元', text: '首年现金支出，' + invest.tierName + ' × ' + plan.seats + ' 套' + (custom ? '，含另议项 ' + custom + ' 元' : '') },
-      { q: '钱花在哪？', a: cashItems[0].name, text: cashItems.map(function (x) { return x.name + ' ' + x.amount + ' 元'; }).join('、') },
-      { q: '收益从哪来？', a: usable.length ? usable[0].name : '待补数', text: usable.length ? usable.map(function (x) { return x.name; }).join(' + ') + '，按 ' + sceneView.roiBasis : '收益端关键数字未填齐' },
-      { q: '每月能收回多少？', a: r0(cashMonthly) + ' 元', text: '现金口径；另有工时折合 ' + r0(hoursMonthly) + ' 元/月不计入' },
-      { q: '什么时候回本？', a: pc ? '第 ' + pc + ' 个月' : (pa ? '第 ' + pa + ' 个月（含工时）' : '未转正'),
-        text: pc ? '现金口径，中性档；保守档第 ' + (scenarios[0].payback || '—') + ' 个月' : (pa ? '现金口径 24 个月内不转正；把省下的工时折算进来是第 ' + pa + ' 个月' : '两种口径 24 个月内都未转正') },
-      { q: '这个数准吗？', a: band.name, text: band.desc }
+      { q: '投入总额', a: r0(cashYear1) + ' 元',
+        text: '首年现金支出，' + invest.tierName + ' ' + plan.seats + ' 套' + (custom ? '，含另议项 ' + custom + ' 元' : '，未计列另议项') + '；次年起续费 ' + cashYearly + ' 元。' },
+      { q: '投入结构', a: cashItems[0].name,
+        text: cashItems.map(function (x) { return x.name + ' ' + x.amount + ' 元'; }).join('；') + '。一次性支出占比 ' + onceShare + '%。' },
+      { q: '效益来源', a: usable.length ? usable[0].name : '参数不足',
+        text: usable.length ? '本场景命中 ' + usable.length + ' 项效益杠杆：' + usable.map(function (x) { return x.name; }).join('、') + '；折算口径为「' + sceneView.roiBasis + '」。' : '收益科目关键参数未填报，无法建模。' },
+      { q: '月度收益', a: r0(cashMonthly) + ' 元',
+        text: '现金口径，效益释放满额后。' + (hoursMonthly > 0 ? '另有非现金科目 ' + r0(hoursMonthly) + ' 元/月未计入。' : '本场景无非现金科目。') },
+      { q: '回收期', a: pc ? '第 ' + pc + ' 期' : (pa ? '第 ' + pa + ' 期（含非现金）' : '期内未转正'),
+        text: pc ? '现金口径，中性档；保守档第 ' + (scenarios[0].payback || '24 期以后') + '。' : (pa ? '现金口径 24 期内不转正；并计人工工时节约后为第 ' + pa + ' 期。' : '两种口径于 24 期测算期内均未转正。') },
+      { q: '参数可信度', a: band.name + '（' + conf + ' 分）', text: band.desc }
     ];
-
     var roles = RT.roles.items.map(function (x) { return { key: x.key, name: x.name, who: x.who, duty: x.duty, time: x.time }; });
     var retrigger = RT.retrigger.items.map(function (x) { return { when: x.when, why: x.why }; });
 

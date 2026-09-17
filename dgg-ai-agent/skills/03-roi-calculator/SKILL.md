@@ -3,8 +3,8 @@ name: 企业AI投入ROI测算器
 id: roi-calculator
 kind: 计算
 credits: 20
-version: 1.0.0
-triggers: [ROI, 投入产出, 多久回本, 回收期, 要花多少钱, 值不值得, 投入多少, 算一笔账, 省多少钱, 投资回报]
+version: 1.1.0
+triggers: [ROI, 投入产出, 多久回本, 回收期, 要花多少钱, 值不值得, 投入多少, 投资回报, 回本周期, 效益测算]
 inputs: [profile, plan, gain]
 llm_calls: 1
 llm_timeout_ms: 8000
@@ -16,15 +16,15 @@ brief_pages: 6
 
 # 企业AI投入ROI测算器
 
-把一个具体场景的 AI 投入算成三笔账：**投入**按 DM 定稿价目逐项列、**收益**按场景对应的收益杠杆分别折算、**回收期**把两笔账按月摆开求累计净额第一次转正的月份。另出 24 个月现金流、三档情景、敏感度、口径来源与置信度。
+把一个具体业务场景的 AI 投入拆成三个科目分别建模：**投入**按定稿价目逐项计列、**收益**按场景命中的效益杠杆分别折算、**回收期**取两者按期次展开后累计净现金流首次由负转正的期次。另出 24 期现金流、三档情景、单因素敏感度、参数来源与可信度评分。
 
 本模块是三个体验版的第三步：模块 1 给出投入档，模块 2 给出首选场景，到这里回答「那到底要花多少钱、多久回本」。
 
 ## 何时调用
 
-- 用户问「要花多少钱」「多久能回本」「值不值得投」「能省多少」
+- 用户问投入金额、回收期、是否值得投、可节约金额
 - 用户刚在「企业AI高价值场景排序」里看到首选场景，追问这个场景的账
-- 顶呱呱销售或 FDE 在报价前，当着客户的面把一笔账算给他看
+- 顶呱呱销售或 FDE 在报价前需当场出具一份可追溯口径的投入回报测算
 
 ## 三条口径纪律
 
@@ -32,7 +32,7 @@ brief_pages: 6
 
 1. **价格一字不改**。订阅 0 / 1280 / 2280 / 3280 元一套年、入企诊断 1980 元一天、私域部署 12800 元起一套年（区间 12800–33800）。私域**只取 12800 与 33800 两个端点**，不取中间值——单子上没有的价不报。
 2. **主杠杆的核心数字不给默认值**。收益端算不出来就返回 `insufficient = true`，只出投入侧，明说缺哪几项，不替客户编一个数。参考值只覆盖「月薪」与「毛利率」两项，且每一处都标出来。
-3. **省下来的工时不计入现金收益**。它单列一栏，同时给出「含工时」的第二个回本月。中小企业不会因为省了两小时就少发一个人的工资，这笔钱只有真的换成别的产出才成立，报告里必须这样交代。
+3. **人工工时节约列为非现金科目**。单独列示，另给「含非现金口径」的第二个转正期次。在未发生人员结构调整的情形下，工时节约表现为人员负荷下降而非成本下降，不构成可确认的现金流入，报告必须按此口径交代。
 
 ## 输入补全
 
@@ -43,18 +43,18 @@ brief_pages: 6
 | 字段 | 追问话术 | 默认值来源 |
 |---|---|---|
 | `tier` | 「先按哪个版本算？轻享版 0 元，标准版 1280、高级版 2280、旗舰版 3280，都是一套年。」 | 模块 1 / 2 的 `investment.tier`：零→轻享 / 轻→标准 / 中→高级 / 重→旗舰，复述一遍让用户确认 |
-| `seats` | 「这件事有几个人要用？按套算。」 | 场景投入档：零轻档 1 套、中档 3 套、重档 5 套 |
+| `seats` | 「本场景实际开通几个账号？按套年计价。」 | 场景投入档：零轻档 1 套、中档 3 套、重档 5 套 |
 | `diagnosisDays` | 「要不要安排专家入企 AI 诊断？1980 元一天。不安排也可以。」 | 零轻档 0 天，中重档 1 天 |
 | `privateDeploy` | 只在用户主动提「数据不能出去」时问。「私域部署 12800 元起一套年。」 | 不填 |
-| `customBudget` | 「系统对接和定制这块打算留多少预算？没想好先记 0，后面可以再加进来看回本变多久。」 | 0，但中重档场景不填会扣置信度 |
+| `customBudget` | 「系统对接与定制这块预留多少预算？未确定可先计 0，测算台会给出该项对回收期的影响幅度。」 | 0，但中重档场景不填会扣可信度 |
 | `dataState` | 与模块 2 同一问，继承不重问 | 上游 `conditions.dataState` |
-| `setupPeople` / `setupSalary` | 「上线这几周公司这边安排几个人跟？他们月薪大概多少？」 | 1 人；月薪按规模取参考值 |
+| `setupPeople` / `setupSalary` | 「上线期贵司安排几位同事推进？该岗位平均月薪多少？」 | 1 人；月薪按企业规模取参考值 |
 
 ### 2. 收益端 `gain`
 
-**只问场景命中的那几条杠杆对应的字段**，其余不问。七条杠杆与各自要问的字段见 `data/levers.json`。
+**只采集场景命中的效益杠杆所需字段**，其余不问。七项杠杆及各自字段见 `data/levers.json`。字段的 `label` 为正式名称（进报告），`hint` 为口语化追问提示（只在界面上出现）。
 
-场景命中哪几条由 `data/scene-levers.json` 查表得到（182 个场景全部有归类，构建期由 `scripts/gen-scene-levers.js` 生成、人工复核后签入，运行期只查表）。
+场景命中哪几项由 `data/scene-levers.json` 查表得到（182 个场景全部有归类，构建期由 `scripts/gen-scene-levers.js` 生成、人工复核后签入，运行期只查表）。命中多项时按各项**测算金额**降序排列，金额最高项全额计列、其余各项按 35% 计列——排序依据是算出来的金额，与场景描述的行文顺序无关。
 
 ## 步骤
 
@@ -93,24 +93,91 @@ brief_pages: 6
 
 1. 第一段用 `verdict.headline` + `verdict.text`
 2. 然后按 `quickView` 六问六答列出
-3. 然后三笔账各一行：投入合计 / 每月现金收益 / 回本月（现金口径，附含工时口径）
+3. 然后三个科目各一行：首年现金支出 / 月度现金收益 / 转正期次（现金口径，附含非现金口径）
 4. 末尾积分行与转化句
-5. 追问「钱花在哪」用 `invest.cashItems`；追问「收益怎么算的」用 `benefit.levers[].basis`；追问「准不准」用 `confidence` 与 `inputSource`；追问「最怕什么变」用 `sensitivity`
+5. 追问投入构成用 `invest.cashItems`；追问收益测算过程用 `benefit.levers[].basis`；追问结论可信度用 `confidence` 与 `inputSource`；追问主要不确定来源用 `sensitivity`
 
 ### 结构化呈现（按 `render` 顺序）
 
 | render.type | 数据 | 呈现 |
 |---|---|---|
-| `three-accounts` | `keyNumbers` | 三笔账的六个关键数字 |
-| `cost-ledger` | `invest` | 投入账页：现金栏与工时栏分列 |
-| `benefit-ledger` | `benefit` | 收益账页：逐条杠杆、算式、是否打折 |
-| `cashflow-bars` | `flow` | 24 个月现金流柱，正负分列穿越零轴 |
-| `payback-curve` | `flow` | 累计净额回本曲线，标出转正点 |
-| `scenario-band` | `scenarios` | 保守 / 中性 / 积极的区间带 |
-| `tornado` | `sensitivity` | 哪个假设影响最大 |
-| `roles` | `roles` | 三个角色与各自要花的时间 |
+| `three-accounts` | `keyNumbers` | 七个关键数字（投入 / 收益 / 回收期 / 可信度） |
+| `cost-ledger` | `invest` | 投入科目：现金栏与内部工时栏分列 |
+| `benefit-ledger` | `benefit` | 收益科目：逐项杠杆、测算式、合并权重 |
+| `cashflow-bars` | `flow` | 24 期现金流，收支分列穿越零轴 |
+| `payback-curve` | `flow` | 累计净现金流曲线，标出转正期次 |
+| `scenario-band` | `scenarios` | 保守 / 中性 / 积极三档区间 |
+| `tornado` | `sensitivity` | 单因素扰动下各项假设的影响幅度 |
+| `roles` | `roles` | 三类角色的职责边界与时间投入 |
 
-`missing`、`inputSource`、`confidence` 不进 `render` 序列：它们是报告的方法页与「算不准」提示的内容。
+`missing`、`inputSource`、`confidence` 不进 `render` 序列：它们是报告方法页与测算受限提示的内容。
+
+## 报告版式（28 页 / 速览 6 页）
+
+**版式身份**——与前两个模块明确区分：模块 1 六边形序号徽章配海军蓝，模块 2 圆角方徽章配蓝青，本模块为**圆形金环徽章配深墨绿与香槟金**。章节标题栏沿用集团统一的「整条 3D 彩色凸浮」结构，但棱线与落影常数换成墨绿系（`rgba(6,28,20,…)` / `#C8D6D0` 系），不沿用前两个模块的蓝黑。封面主视觉为「企业服务投入 ⇄ AI 能力支点 ⇄ 效益回报」的天平构图，标题独占顶部色带；封底深墨绿满版。图表族语汇取自财务报表——横向累加桥、穿越零轴的期次柱、累计净额曲线、区间杠铃、期次脉冲——刻意避开模块 1 的弧形仪表与模块 2 的环形、纵向瀑布。
+
+样式 `prototype/src/report-m3.css`（作用域 `.page.m3`）、图表 `prototype/src/charts-m3.js`（31 个函数，与前两个模块的 39 个零重名）。三个模块共用 `report.css`（A4 页盒）、`charts.js`（通用图元）、`tokens.css`（设计变量）。
+
+正文每页按「测算依据 → 数据 → 数据解读 → 结论边界」四层展开：`m3-basis` 行交代口径出处，`m3-cap` 行解释图怎么读，`m3-fn` 行给脚注与免责。每一个正文页都配图。
+
+| 页 | 章节 | 数据 | 图表 |
+|---|---|---|---|
+| 1 | 封面（速览） | `profile` · `verdict` · `payback` · `keyNumbers` · `scenarios` | `heroM3` · `miniCurve` |
+| 2 | 阅读说明与口径声明 | `reportText.readingGuide` · `reportText.honesty` · `inputSource` | `chapterMap` |
+| 3 | 01 测算结论（速览） | `verdict` · `invest` · `benefit` · `flow` · `keyNumbers` | `paybackCurve` · `recoveryShare` |
+| 4 | 01 核心结论问答（速览） | `keyNumbers` · `quickView` · `roi` | `cashVsHours` |
+| 5 | 02 测算对象界定 | `profile` · `scene` · `levers` | `cutScale` |
+| 6 | 03 投入测算（速览） | `invest.cashItems` · `invest.cashOnce` / `cashYearly` | `investStack` · `costTiming` |
+| 7 | 03 人工工时投入 | `invest.laborItems` · `setupHourly` · `setupWeeks` | `laborTiming` |
+| 8 | 04 收益测算 | `benefit`（`rawMonthly` · `valueFactor` · `capMonthly` · `fullMonthly`） | `benefitBridge` · `capFunnel` · `leverBars` |
+| 9 | 04 逐项测算过程 | `benefit.levers[]`（`basis` · `cut` · `cutNote` · `weight`）· `inputSource` | `formulaFlow` |
+| 10 | 04 现金与非现金科目划分 | `benefit.cashMonthly` / `hoursMonthly` · `flow` · `flowAll` | `cashVsHours` · `dualCurve` |
+| 11 | 04 同业场景横向对照 | 场景库同大类条目 · `scene` | `peerBars` |
+| 12 | 05 回收期测算（速览） | `payback` · `paybackAll` · `flow` · `roi` · `reCross` | `paybackCurve` · `roiTrack` |
+| 13 | 05 24 期现金流分布 | `flow` · `constants.rampMonths` | `cashflowBars` · `rampSteps` · `monthLadder` |
+| 14 | 05 前 12 期逐期明细 | `flow[0..11]` | `recoveryShare` |
+| 15 | 06 三档情景分析（速览） | `scenarios` | `scenarioBand` |
+| 16 | 06 三档逐期对照 | `scenarios` + 本地按同式复算的逐期流 | `scenarioLines` |
+| 17 | 07 单因素敏感度分析 | `sensitivity` | `sensitivityRange` |
+| 18 | 08 参数来源与可信度 | `inputSource` · `confidence` | `confidenceBar` · `sourceGrid` |
+| 19 | 09 数据缺口与补齐建议 | `missing` · `insufficient` · `plan` · `sceneBasis` | `gapImpact` · `readinessLadder` |
+| 20 | 10 实施周期与效益释放 | `invest.setupWeeks` · `dataStateMult` · `scene.precondition` | `weeksGantt` · `rampSteps` |
+| 21 | 11 组织保障与职责分工 | `roles` · `invest.laborItems` | `roleMatrix` |
+| 22 | 12 服务与报价口径 | `constants.prices` · `reportText.services` | `priceLadder` |
+| 23 | 13 测算复核触发条件 | `retrigger` · `sensitivity` | `triggerMap` |
+| 24 | 附录 A 测算常量与公式 | `constants` · `levers` · 复算校验 | — |
+| 25 | 附录 A 24 期逐期明细 | `flow` · `flowAll` | `monthLadder` |
+| 26 | 附录 B 方法与术语 | `reportText.method` · `reportText.glossary` | — |
+| 27 | 附录 C 场景基础数据与参考值 | `scene` 全字段 · `benchmarks` | — |
+| 28 | 封底 | `reportText.contact` · `reportText.closing` | — |
+
+第 16 页的三档逐期流在原型侧按与内核 `flowFor` **完全相同的式子**复算，第 12 与第 24 期的累计净额与内核 `scenarios[].cum12` / `cum24` 逐项相等（`scripts/` 之外由原型测试断言）。
+
+报告标题、出具方、阅读说明、方法说明、术语、角色分工、复核条件、联系方式、结语全部取 `data/report-text.json`；界面上不出现「演示环境」「样例企业」「点击此处可下钻」等讲解员式文案。
+
+### 测算台
+
+原型第 4 屏是三栏控制台，不是静态结果页：左栏「参数台」把订阅档位、套数、诊断天数、另议项预算、数据现状、推进人员数、每一项收益参数以及**折减系数整体倍率**做成实时控件；中栏「结论台」给转正期次、与基线的四项差值、叠加基线虚线的累计净额曲线、七个关键数字、24 期现金流与敏感度；右栏「推演台」给三档情景、收益护栏与投入结构。任何一次调节都重新走 `core/compute.js`，屏上每个数字都能在报告里找到同名同值的出处。进台时自动记一次基线，可随时「设为基线」或「恢复基线参数」。
+
+折减系数倍率通过改写传入内核的 `levers[].cut` 生效，报告随之按调整后的系数出具——屏上调了什么，纸上就是什么，不存在两套口径。
+
+### 打印与 PDF
+
+报告的立体感全部由 **blur = 0** 的硬边明暗层次做出，屏幕与 PDF 是同一套视觉，不设「打印时降级」的分支样式。Chromium 导出 PDF 时会把带模糊的效果栅格化成带 `/SMask` 的位图，在纸面上表现为灰色方块。
+
+| 绝对不能用（实测会产生位图） | 改用 |
+|---|---|
+| `box-shadow` 的 blur > 0 | 多层 blur = 0 的外阴影逐级变淡 |
+| `text-shadow` 的 blur > 0 | `text-shadow: 0 1px 0 <不透明色>` |
+| 任何 `filter`——`blur` / `drop-shadow` 自不必说，`brightness` / `saturate` / `opacity(1)` 实测同样栅格化 | 用 `background` 层或 `box-shadow` 的 `inset` 表达 |
+| 半透明 `border` 叠在渐变背景上 | 不透明实色描边 |
+| 被圆角裁剪的表格单元格上堆多层 `background` | 单层渐变加 `inset` 阴影 |
+
+矢量安全：`border-radius`、`overflow: hidden` 裁剪、`clip-path`、`opacity`、单层渐变、`box-shadow` 的 `inset` 与 blur = 0 外阴影。章节标题栏的凸浮结构自上而下六层：顶棱硬高光 → 柱面连续衰减（白与黑的 alpha 叠层，不换色，保住 `--cc → --cc2` 的彩色流动）→ 左右棱受光与背光 → `inset` 压暗的底部侧壁（厚度）→ 1px 转折暗线 → 三级 blur = 0 落影。侧壁厚度由 `--wall` 控制，取**无单位数值**，`calc()` 里乘 `1px` 使用（带单位会让整条 `box-shadow` 静默失效）。
+
+自查办法：统计 PDF 里的 `/Subtype /Image` 对象数，以及 **`/SMask <对象号> <代号> R` 这种引用形式**的出现次数——不能裸数 `/SMask`，压缩流里有大量同名字面量。当前基准：完整版与速览版各 **2 张位图、1 张蒙版**，全部来自 logo，是三个模块里最干净的。数量级跳到几十上百，说明有模糊效果漏进来了。
+
+会话内保存 `profile` 与 `plan`，供后续模块复用。
 
 ## 积分
 
@@ -118,24 +185,26 @@ brief_pages: 6
 
 ## 转化
 
-结果给出后一句收尾：「这笔账里的另议项要准，得先把流程走一遍——专家入企 AI 诊断 1980 元，1 天入企。」用户问「能不能先试」时指向轻享版 0 元开通；问「数据能不能不出去」时给私域部署 12800 元起一套年。
+结果给出后一句收尾：「测算中另议项的金额要落实，需先完成一次流程梳理——专家入企 AI 诊断 1980 元，1 天入企。」用户问能否先试用时指向轻享版 0 元开通；问数据能否不出内网时给私域部署 12800 元起一套年。
 
 ## 结论词纪律
 
-- 只陈述计算事实：写「按这组数测算，第 N 个月累计现金转正」，不写「N 个月回本」这种承诺句
+- 只陈述计算事实：写「按本次参数测算，累计净现金流于第 N 期转正」，不写「N 个月回本」这类承诺句
 - 不说「一定」「保证」「必然」「稳赚」
-- 参考值必须标出来，不能混在客户填的数字里
-- 省下的工时不能说成省下的钱
+- 参考值必须逐处标注，不与企业填报数据混列
+- 非现金科目不得表述为现金收益
+- 报告正文一律用书面语：期次而非「个月」、科目而非「笔账」、参数而非「数字」；界面追问提示可用口语，报告不可
 - 禁用「不是……而是……」句式、「手术」「骨架」「刀」「裁员」「减员」，以及任何软件或数据源厂商名
 
 ## 降级
 
 | 情况 | 处理 |
 |---|---|
-| 收益端关键数字缺失 | `insufficient = true`：只出投入侧与 `missing` 清单，不出回收期，不打问号也不填 0 |
+| 收益端关键参数缺失 | `insufficient = true`：只出投入侧与 `missing` 清单，不出回收期，不代为赋值 |
+| 投入基数过小致回报率失真 | `roi.meaningful = false`：照实给出数值并标注该比率已不具备参考意义，报告改以回收期为主指标 |
 | 没有上游场景 | `sceneBasis = generic`：按通用轻量场景口径测算，置信度扣 15 分，报告首页写明 |
 | 企业营收未知 | 不做营收封顶，`capMonthly = null`，方法页注明未封顶 |
-| 现金口径 24 个月不转正 | 照实说，同时给含工时口径的月份与「这笔账成立的前提」 |
+| 现金口径 24 期内不转正 | 照实列示，同时给出含非现金口径的转正期次与结论成立的前提条件 |
 | LLM 超时 / 命中禁忌 | 用模板文案，标「初稿」 |
 | 网络不可用 | 全流程照常，本 skill 无任何必需的网络调用 |
 
