@@ -226,7 +226,7 @@
       else if (C.stage === 'offer') acts.appendChild(h('div', { class: 'pd-action' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['·']), 'offer 已发 · 月薪 ' + fmtN(C.offer.salary) + ' 元 · ' + short(C.offer.date)]), P.chip('ok', '待入职'), h('div', { class: 'd' }, ['入职当天签合同、办参保；试用期按合同期限对应的法定上限'])]));
       right.appendChild(P.card({ title: '评分结果与录用建议', sub: '按岗位族权重加权 · 定薪在薪酬带内、不低于期望、按评分在内部同岗位中位上浮或下调', accent: true, body: [h('div', { class: 'm5-result' }, [
         h('div', {}, [P.radar({ axes: r.radar.map(function (x) { return { key: x.key, label: x.label }; }), values: r.radar.map(function (x) { return x.value; }), max: 5, size: 240 })]),
-        h('div', { class: 'verdict' }, [h('div', { class: 'big' }, [h('b', { class: 'num' }, [String(r.avg)]), h('span', {}, ['/ 5 · ' + r.radar.map(function (x) { return x.label + ' ' + x.value; }).join(' · ')]), P.chip(r.verdict === 'hire' ? 'ok' : r.verdict === 'backup' ? 'risk' : 'late', r.verdictName)]),
+        h('div', { class: 'm5-vd' }, [h('div', { class: 'big' }, [h('b', { class: 'num' }, [String(r.avg)]), h('span', {}, ['/ 5 · ' + r.radar.map(function (x) { return x.label + ' ' + x.value; }).join(' · ')]), P.chip(r.verdict === 'hire' ? 'ok' : r.verdict === 'backup' ? 'risk' : 'late', r.verdictName)]),
           P.kv([['薪酬带', fmtN(r.band[0]) + '–' + fmtN(r.band[1]) + ' 元'], ['内部中位', fmtN(r.median) + ' 元'], ['候选人期望', fmtN(C.expected) + ' 元'], ['建议定薪', h('b', { class: 'num', style: 'color:var(--pa);font-size:16px' }, [fmtN(r.suggested) + ' 元 / 月'])]]),
           h('ul', { class: 'm5-ul' }, r.notes.map(function (t) { return h('li', {}, [t]); })), acts])
       ])] }));

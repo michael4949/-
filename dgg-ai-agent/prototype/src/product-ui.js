@@ -458,7 +458,7 @@
     if (o.compare) s.appendChild(svg('polygon', { points: o.compare.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: 'none', stroke: '#98A2B8', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }));
     var vals = o.values;
     s.appendChild(svg('polygon', { points: vals.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: o.color || 'var(--pa)', 'fill-opacity': 0.22, stroke: o.color || 'var(--pa)', 'stroke-width': 2 }));
-    vals.forEach(function (v, i) { var p = pt(i, v); s.appendChild(svg('circle', { cx: p[0], cy: p[1], r: 4, fill: o.color || 'var(--pa)' })); s.appendChild(svg('text', { x: p[0] + (p[0] > cx ? 8 : p[0] < cx ? -8 : 0), y: p[1] + (p[1] > cy ? 14 : -8), 'text-anchor': p[0] > cx + 1 ? 'start' : p[0] < cx - 1 ? 'end' : 'middle', class: 'val' }, [String(v)])); });
+    vals.forEach(function (v, i) { var p = pt(i, v); s.appendChild(svg('circle', { cx: p[0], cy: p[1], r: 4, fill: o.color || 'var(--pa)' })); if (v > 0) { var q = pt(i, Math.max(0.6, v - 0.75)); s.appendChild(svg('text', { x: q[0], y: q[1] + 4, 'text-anchor': 'middle', class: 'val' }, [String(v)])); } });
     return s;
   }
 
