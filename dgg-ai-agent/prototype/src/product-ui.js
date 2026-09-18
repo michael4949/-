@@ -450,11 +450,11 @@
 
   /* ---------- 四维雷达（面试评分） ---------- */
   function radar(o) {
-    var n = o.axes.length, size = o.size || 220, cx = size / 2, cy = size / 2, r = size / 2 - 34, max = o.max || 5;
-    var s = svg('svg', { class: 'pd-radar', viewBox: '0 0 ' + size + ' ' + size, preserveAspectRatio: 'xMidYMid meet' });
+    var n = o.axes.length, size = o.size || 220, Wd = size + 120, cx = Wd / 2, cy = size / 2, r = size / 2 - 30, max = o.max || 5;
+    var s = svg('svg', { class: 'pd-radar', viewBox: '0 0 ' + Wd + ' ' + size, preserveAspectRatio: 'xMidYMid meet' });
     var pt = function (i, v) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * r * v / max, cy + Math.sin(a) * r * v / max]; };
     for (var ring = 1; ring <= max; ring++) { s.appendChild(svg('polygon', { points: o.axes.map(function (_, i) { return pt(i, ring).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: ring === max ? '#FAFBFE' : 'none', stroke: ring === max ? '#DFE5F1' : '#EEF1F7' })); }
-    o.axes.forEach(function (a, i) { var p = pt(i, max); s.appendChild(svg('line', { x1: cx, y1: cy, x2: p[0], y2: p[1], stroke: '#DFE5F1' })); var lp = pt(i, max + 0.9); s.appendChild(svg('text', { x: lp[0], y: lp[1] + 4, 'text-anchor': 'middle', class: 'ax' }, [a.label])); });
+    o.axes.forEach(function (a, i) { var p = pt(i, max); s.appendChild(svg('line', { x1: cx, y1: cy, x2: p[0], y2: p[1], stroke: '#DFE5F1' })); var lp = pt(i, max + 0.7); s.appendChild(svg('text', { x: lp[0], y: lp[1] + 4, 'text-anchor': lp[0] > cx + 1 ? 'start' : lp[0] < cx - 1 ? 'end' : 'middle', class: 'ax' }, [a.label])); });
     if (o.compare) s.appendChild(svg('polygon', { points: o.compare.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: 'none', stroke: '#98A2B8', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }));
     var vals = o.values;
     s.appendChild(svg('polygon', { points: vals.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: o.color || 'var(--pa)', 'fill-opacity': 0.22, stroke: o.color || 'var(--pa)', 'stroke-width': 2 }));
