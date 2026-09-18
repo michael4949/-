@@ -1,0 +1,1299 @@
+{
+  "archetype": "make",
+  "sector": "mfg",
+  "company": "杭州锐合精密五金有限公司",
+  "co": "锐合",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "mfg-machinery",
+    "size": "101_300",
+    "province": "浙江",
+    "founded": "2012-05-18",
+    "legalRep": "法定代表人",
+    "capital": 10000000
+  },
+  "sources": [
+    {
+      "id": "oa",
+      "name": "OA · 合同审批与用印",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 64
+    },
+    {
+      "id": "contracts",
+      "name": "合同台账",
+      "mode": "import",
+      "lastSync": "2026-09-16 18:00",
+      "rows": 12
+    },
+    {
+      "id": "licenses",
+      "name": "证照清单",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 6
+    },
+    {
+      "id": "ip",
+      "name": "知产清单 · 商标专利软著",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 11
+    },
+    {
+      "id": "erp",
+      "name": "ERP · 客户与供应商",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 42
+    }
+  ],
+  "contracts": [
+    {
+      "id": "HT-2609-018",
+      "type": "sale",
+      "role": "supply",
+      "title": "精密五金件年度供货合同",
+      "party": "K-017 · 汽配一级供应商",
+      "amount": 4200000,
+      "signed": "2026-01-15",
+      "start": "2026-01-15",
+      "end": "2026-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-10",
+          "text": "第三季度对账"
+        },
+        {
+          "date": "2026-12-15",
+          "text": "年度价格复核"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "供方向需方供应精密五金件 Ø12×45、Ø8×30 等，具体型号、数量以需方月度订单为准。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "quality",
+          "title": "质量标准",
+          "text": "产品质量以双方确认的技术协议与封样为准；无约定的按国家标准或行业标准执行。",
+          "params": {
+            "standard": "双方确认的技术协议与封样"
+          }
+        },
+        {
+          "no": "3",
+          "type": "delivery",
+          "title": "交付",
+          "text": "供方按需方订单约定日期交付至需方指定仓库，运费由供方承担。",
+          "params": {
+            "latePenalty": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "需方于每批货物验收合格后 120 日内支付该批货款。",
+          "params": {
+            "termDays": 120,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "5",
+          "type": "acceptance",
+          "title": "验收与异议期",
+          "text": "需方应在到货后 7 日内验收；数量与外观异议当场提出，质量异议在 15 日内书面提出，逾期视为验收合格。",
+          "params": {
+            "objectionDays": 15,
+            "standard": "技术协议与封样"
+          }
+        },
+        {
+          "no": "6",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应赔偿对方因此遭受的全部损失，包括直接损失与可得利益损失。",
+          "params": {
+            "capMultiple": null
+          }
+        },
+        {
+          "no": "7",
+          "type": "penalty",
+          "title": "违约金",
+          "text": "一方逾期履行的，应按合同总价款的 50% 向对方支付违约金。",
+          "params": {
+            "rate": 0.5
+          }
+        },
+        {
+          "no": "8",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        },
+        {
+          "no": "9",
+          "type": "force",
+          "title": "不可抗力",
+          "text": "因不可抗力不能履行合同的，根据不可抗力的影响部分或全部免除责任，受影响方应在 7 日内书面通知对方并提供证明。",
+          "params": {}
+        },
+        {
+          "no": "10",
+          "type": "notice",
+          "title": "通知与送达",
+          "text": "双方确认合同载明的地址、电子邮箱为有效送达地址，变更应提前 5 日书面通知。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2609-021",
+      "type": "purchase",
+      "role": "buy",
+      "title": "不锈钢棒材采购合同",
+      "party": "无锡不锈钢材料",
+      "amount": 1860000,
+      "signed": "2026-08-20",
+      "start": "2026-08-20",
+      "end": "2027-02-28",
+      "status": "审查中",
+      "milestones": [
+        {
+          "date": "2026-09-22",
+          "text": "合同签署截止"
+        },
+        {
+          "date": "2026-09-28",
+          "text": "首批到货"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "需方向供方采购 304 不锈钢棒 Ø14 × 3000，数量 60 吨，分批交付。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "delivery",
+          "title": "交付",
+          "text": "供方于 2026 年 9 月 28 日前交付首批 20 吨，其余按需方通知分批交付。",
+          "params": {
+            "latePenalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "合同签订后 5 日内需方支付 50% 预付款，每批到货后 10 日内支付该批余款。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 0.5
+          }
+        },
+        {
+          "no": "4",
+          "type": "warranty",
+          "title": "质量保证",
+          "text": "供方对材料提供自到货之日起 12 个月的质量保证。",
+          "params": {
+            "months": 12
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        },
+        {
+          "no": "7",
+          "type": "force",
+          "title": "不可抗力",
+          "text": "因不可抗力不能履行合同的，根据不可抗力的影响部分或全部免除责任，受影响方应在 7 日内书面通知对方并提供证明。",
+          "params": {}
+        },
+        {
+          "no": "8",
+          "type": "notice",
+          "title": "通知与送达",
+          "text": "双方确认合同载明的地址、电子邮箱为有效送达地址，变更应提前 5 日书面通知。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2608-009",
+      "type": "framework",
+      "role": "buy",
+      "title": "冷轧钢带年度框架供货协议",
+      "party": "宁波钢材贸易",
+      "amount": 2400000,
+      "signed": "2026-03-01",
+      "start": "2026-03-01",
+      "end": "2027-02-28",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-09-15",
+          "text": "8 月对账单确认"
+        },
+        {
+          "date": "2026-11-15",
+          "text": "下年度价格谈判"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "供方向需方供应冷轧钢带 SPCC 1.0mm × 120mm，年度预计 400 吨，按月度订单执行。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "price",
+          "title": "价格",
+          "text": "价格按附件价格表执行；市场价格变动时，供方有权调整价格并于调价后通知需方。",
+          "params": {
+            "adjust": "unilateral"
+          }
+        },
+        {
+          "no": "3",
+          "type": "delivery",
+          "title": "交付",
+          "text": "供方在收到订单后 7 日内交付。",
+          "params": {
+            "latePenalty": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结 45 天，需方于次月 15 日前支付上月货款。",
+          "params": {
+            "termDays": 45,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "5",
+          "type": "term",
+          "title": "期限",
+          "text": "本协议有效期 1 年，期满自动续期 1 年。",
+          "params": {
+            "autoRenew": true,
+            "exitNotice": false
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        },
+        {
+          "no": "7",
+          "type": "force",
+          "title": "不可抗力",
+          "text": "因不可抗力不能履行合同的，根据不可抗力的影响部分或全部免除责任，受影响方应在 7 日内书面通知对方并提供证明。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2601-003",
+      "type": "loan",
+      "role": "borrower",
+      "title": "流动资金借款合同",
+      "party": "城商行",
+      "amount": 1800000,
+      "signed": "2025-11-20",
+      "start": "2025-11-20",
+      "end": "2026-11-20",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-20",
+          "text": "付息日"
+        },
+        {
+          "date": "2026-11-20",
+          "text": "本金到期"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "贷款人向借款人发放流动资金贷款 180 万元，用于购买原材料。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "interest",
+          "title": "利率",
+          "text": "年利率 5.0%，按月于每月 20 日结息。",
+          "params": {
+            "rate": 0.05
+          }
+        },
+        {
+          "no": "3",
+          "type": "repayment",
+          "title": "还款",
+          "text": "借款期限 12 个月，到期一次性归还本金。",
+          "params": {}
+        },
+        {
+          "no": "4",
+          "type": "prepay",
+          "title": "提前还款",
+          "text": "借款人提前还款的，应按提前还款金额的 1% 支付违约金。",
+          "params": {
+            "penalty": true
+          }
+        },
+        {
+          "no": "5",
+          "type": "crossdefault",
+          "title": "交叉违约",
+          "text": "借款人在其他合同项下发生任何违约的，贷款人有权宣布本合同借款提前到期。",
+          "params": {
+            "enabled": true,
+            "threshold": null,
+            "cureDays": null
+          }
+        },
+        {
+          "no": "6",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "7",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2412-031",
+      "type": "lease",
+      "role": "lessee",
+      "title": "厂房租赁合同",
+      "party": "园区物业",
+      "amount": 540000,
+      "signed": "2024-12-20",
+      "start": "2025-01-01",
+      "end": "2027-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-01",
+          "text": "第四季度租金"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "出租人将园区 3 号厂房 4,200 ㎡出租给承租人用于生产经营。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "租赁期 3 年，自 2025 年 1 月 1 日至 2027 年 12 月 31 日。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "rent",
+          "title": "租金",
+          "text": "月租金 45,000 元，按季度预付，每季度首月 1 日前支付。",
+          "params": {}
+        },
+        {
+          "no": "4",
+          "type": "renewal",
+          "title": "续租",
+          "text": "租赁期满，双方另行协商续租事宜。",
+          "params": {
+            "priority": false
+          }
+        },
+        {
+          "no": "5",
+          "type": "improvements",
+          "title": "装修与附属设施",
+          "text": "承租人装修改造须经出租人同意，租赁期满装修归出租人所有。",
+          "params": {
+            "owner": "lessor",
+            "compensated": false
+          }
+        },
+        {
+          "no": "6",
+          "type": "termination",
+          "title": "提前解约",
+          "text": "承租人提前解除合同的，应支付 3 个月租金作为违约金。",
+          "params": {
+            "earlyExitMonths": 3
+          }
+        },
+        {
+          "no": "7",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2603-012",
+      "type": "processing",
+      "role": "orderer",
+      "title": "密封件加工承揽合同",
+      "party": "宁波橡塑",
+      "amount": 380000,
+      "signed": "2026-03-10",
+      "start": "2026-03-10",
+      "end": "2027-03-09",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-09-24",
+          "text": "新模具首件验收"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "定作方委托承揽方按图纸加工密封圈 Ø22，年度预计 30 万件。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "quality",
+          "title": "质量标准",
+          "text": "产品质量以定作方图纸与封样为准；无约定的按国家标准或行业标准执行。",
+          "params": {
+            "standard": "定作方图纸与封样"
+          }
+        },
+        {
+          "no": "3",
+          "type": "material",
+          "title": "材料",
+          "text": "主要材料由定作方提供，承揽方负责保管。",
+          "params": {
+            "lossRate": null
+          }
+        },
+        {
+          "no": "4",
+          "type": "delivery",
+          "title": "交付",
+          "text": "承揽方在收到定作方通知后 10 日内交付。",
+          "params": {
+            "latePenalty": true
+          }
+        },
+        {
+          "no": "5",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结 30 天。",
+          "params": {
+            "termDays": 30,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "6",
+          "type": "ip",
+          "title": "知识产权",
+          "text": "本合同项下加工形成的模具、工艺改进及相关技术资料归承揽方所有。",
+          "params": {
+            "owner": "counterparty"
+          }
+        },
+        {
+          "no": "7",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应赔偿对方因此遭受的全部损失，包括直接损失与可得利益损失。",
+          "params": {
+            "capMultiple": null
+          }
+        },
+        {
+          "no": "8",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2606-015",
+      "type": "nda",
+      "role": "disclosing",
+      "title": "技术资料保密协议",
+      "party": "K-022 · 电动工具制造商",
+      "amount": 0,
+      "signed": "2026-06-05",
+      "start": "2026-06-05",
+      "end": "2027-06-04",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "scope",
+          "title": "保密范围",
+          "text": "披露方提供的图纸、工艺参数、报价及合作信息均属保密信息。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "confidentiality",
+          "title": "保密义务与期限",
+          "text": "接收方对保密信息负有保密义务，保密期限自协议终止后 1 年。",
+          "params": {
+            "years": 1,
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "term",
+          "title": "期限",
+          "text": "本协议有效期 1 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2607-019",
+      "type": "sale",
+      "role": "supply",
+      "title": "冲压支架供货合同",
+      "party": "K-003 · 家电整机厂",
+      "amount": 3600000,
+      "signed": "2026-07-01",
+      "start": "2026-07-01",
+      "end": "2027-06-30",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-08",
+          "text": "第三季度对账"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "供方向需方供应冲压支架 ZJ-210，年度预计 15 万件。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "quality",
+          "title": "质量标准",
+          "text": "产品质量以双方确认的技术协议与封样为准；无约定的按国家标准或行业标准执行。",
+          "params": {
+            "standard": "双方确认的技术协议与封样"
+          }
+        },
+        {
+          "no": "3",
+          "type": "delivery",
+          "title": "交付",
+          "text": "按需方月度订单交付。",
+          "params": {
+            "latePenalty": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结 60 天。",
+          "params": {
+            "termDays": 60,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "5",
+          "type": "acceptance",
+          "title": "验收与异议期",
+          "text": "需方应在到货后 7 日内验收；数量与外观异议当场提出，质量异议在 45 日内书面提出，逾期视为验收合格。",
+          "params": {
+            "objectionDays": 45,
+            "standard": "技术协议与封样"
+          }
+        },
+        {
+          "no": "6",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "7",
+          "type": "penalty",
+          "title": "违约金",
+          "text": "一方逾期履行的，应按合同总价款的 10% 向对方支付违约金。",
+          "params": {
+            "rate": 0.1
+          }
+        },
+        {
+          "no": "8",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        },
+        {
+          "no": "9",
+          "type": "force",
+          "title": "不可抗力",
+          "text": "因不可抗力不能履行合同的，根据不可抗力的影响部分或全部免除责任，受影响方应在 7 日内书面通知对方并提供证明。",
+          "params": {}
+        },
+        {
+          "no": "10",
+          "type": "notice",
+          "title": "通知与送达",
+          "text": "双方确认合同载明的地址、电子邮箱为有效送达地址，变更应提前 5 日书面通知。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2605-011",
+      "type": "labor",
+      "role": "employer",
+      "title": "劳动合同（技术岗模板）",
+      "party": "员工 · 技术岗",
+      "amount": 0,
+      "signed": "2026-05-01",
+      "start": "2026-05-01",
+      "end": "2029-04-30",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "用人单位聘用员工担任工艺工程师岗位。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "劳动合同期限 3 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true,
+            "years": 3
+          }
+        },
+        {
+          "no": "3",
+          "type": "probation",
+          "title": "试用期",
+          "text": "试用期 6 个月。",
+          "params": {
+            "months": 6,
+            "allowedMonths": 6
+          }
+        },
+        {
+          "no": "4",
+          "type": "wage",
+          "title": "劳动报酬",
+          "text": "月工资由基本工资与绩效工资构成，每月 10 日发放上月工资。",
+          "params": {}
+        },
+        {
+          "no": "5",
+          "type": "worktime",
+          "title": "工作时间",
+          "text": "标准工时制，每周工作 5 天、每天 8 小时。",
+          "params": {}
+        },
+        {
+          "no": "6",
+          "type": "noncompete",
+          "title": "竞业限制",
+          "text": "员工离职后 12 个月内不得到与本单位有竞争关系的单位任职。",
+          "params": {
+            "compensation": false,
+            "months": 12
+          }
+        },
+        {
+          "no": "7",
+          "type": "serviceterm",
+          "title": "服务期",
+          "text": "本单位出资培训的，约定服务期 3 年，提前离职支付违约金 5 万元。",
+          "params": {
+            "penalty": 50000,
+            "trainingCost": 18000
+          }
+        },
+        {
+          "no": "8",
+          "type": "termination",
+          "title": "解除与终止",
+          "text": "双方依法解除或终止劳动合同。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2604-008",
+      "type": "equipment",
+      "role": "buy",
+      "title": "CNC 车铣中心采购合同",
+      "party": "设备商",
+      "amount": 620000,
+      "signed": "2026-04-10",
+      "start": "2026-04-10",
+      "end": "2027-04-09",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-30",
+          "text": "设备尾款"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "需方向供方采购 CNC 车铣中心 1 台，含安装调试与培训。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "delivery",
+          "title": "交付",
+          "text": "供方于合同签订后 45 日内交付并完成安装调试。",
+          "params": {
+            "latePenalty": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "签订后 30%，到货后 60%，验收合格 12 个月后支付 10% 尾款。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 0.3
+          }
+        },
+        {
+          "no": "4",
+          "type": "acceptance",
+          "title": "验收与异议期",
+          "text": "需方应在到货后 7 日内验收；数量与外观异议当场提出，质量异议在 15 日内书面提出，逾期视为验收合格。",
+          "params": {
+            "objectionDays": 15,
+            "standard": "技术协议与封样"
+          }
+        },
+        {
+          "no": "5",
+          "type": "warranty",
+          "title": "质量保证",
+          "text": "整机质保 10 个月。",
+          "params": {
+            "months": 10
+          }
+        },
+        {
+          "no": "6",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "7",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        },
+        {
+          "no": "8",
+          "type": "force",
+          "title": "不可抗力",
+          "text": "因不可抗力不能履行合同的，根据不可抗力的影响部分或全部免除责任，受影响方应在 7 日内书面通知对方并提供证明。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2609-024",
+      "type": "agency",
+      "role": "principal",
+      "title": "海外市场代理协议",
+      "party": "K-031 · 出口贸易公司",
+      "amount": 0,
+      "signed": "2026-09-01",
+      "start": "2026-09-01",
+      "end": "2029-08-31",
+      "status": "审查中",
+      "milestones": [
+        {
+          "date": "2026-09-25",
+          "text": "代理协议签署截止"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "委托方授权代理方在东南亚市场代理销售委托方的精密五金件。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "exclusivity",
+          "title": "独家代理",
+          "text": "代理方在代理区域内享有独家代理权。",
+          "params": {
+            "exclusive": true,
+            "minVolume": null
+          }
+        },
+        {
+          "no": "3",
+          "type": "term",
+          "title": "期限",
+          "text": "本协议有效期 3 年，期满自动续期 3 年。",
+          "params": {
+            "autoRenew": true,
+            "exitNotice": false
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "代理方按订单金额预付 30%，发货前付清余款。",
+          "params": {
+            "termDays": 0,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "5",
+          "type": "termination",
+          "title": "终止",
+          "text": "任何一方严重违约的，对方可书面通知解除本协议。",
+          "params": {}
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2602-006",
+      "type": "software",
+      "role": "client",
+      "title": "生产管理软件服务合同",
+      "party": "软件服务商",
+      "amount": 96000,
+      "signed": "2026-02-01",
+      "start": "2026-02-01",
+      "end": "2027-01-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-11-30",
+          "text": "续约评估"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "服务方向客户方提供生产管理软件的订阅服务，含 30 个账号。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "服务方保证系统月度可用率不低于 99.5%。",
+          "params": {
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "data",
+          "title": "数据",
+          "text": "客户方在服务过程中产生的业务数据归客户方所有，服务方不得用于其他用途。",
+          "params": {
+            "owner": "client"
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "年费 96,000 元，签订后 10 日内一次性支付。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 1
+          }
+        },
+        {
+          "no": "5",
+          "type": "ip",
+          "title": "知识产权",
+          "text": "软件著作权归服务方所有，客户方享有合同期内的使用权。",
+          "params": {
+            "owner": "provider"
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "id": "ZZ-01",
+      "name": "营业执照",
+      "no": "9133********01",
+      "issuer": "市场监督管理局",
+      "expiry": null,
+      "status": "长期"
+    },
+    {
+      "id": "ZZ-02",
+      "name": "排污许可证",
+      "no": "9133********01001P",
+      "issuer": "生态环境局",
+      "expiry": "2026-11-30",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-03",
+      "name": "特种设备使用登记（叉车 3 台）",
+      "no": "叉浙 C****",
+      "issuer": "市场监督管理局",
+      "expiry": "2026-10-15",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-04",
+      "name": "安全生产标准化三级",
+      "no": "浙 AQB ****",
+      "issuer": "应急管理局",
+      "expiry": "2027-03-20",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-05",
+      "name": "ISO 9001 质量管理体系认证",
+      "no": "CN ****-Q",
+      "issuer": "认证机构",
+      "expiry": "2027-05-12",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-06",
+      "name": "消防验收备案",
+      "no": "杭消备 ****",
+      "issuer": "消防救援机构",
+      "expiry": null,
+      "status": "长期"
+    }
+  ],
+  "ip": {
+    "trademarks": [
+      {
+        "id": "TM-01",
+        "name": "锐合",
+        "regNo": "第 2306**** 号",
+        "classes": [
+          "06"
+        ],
+        "regDate": "2017-03-14",
+        "status": "已注册"
+      },
+      {
+        "id": "TM-02",
+        "name": "锐合",
+        "regNo": "第 2306**** 号",
+        "classes": [
+          "07"
+        ],
+        "regDate": "2017-03-14",
+        "status": "已注册"
+      },
+      {
+        "id": "TM-03",
+        "name": "锐合",
+        "regNo": "第 4187**** 号",
+        "classes": [
+          "40"
+        ],
+        "regDate": "2020-08-21",
+        "status": "已注册"
+      },
+      {
+        "id": "TM-04",
+        "name": "锐合精工",
+        "regNo": "第 5522**** 号",
+        "classes": [
+          "07"
+        ],
+        "regDate": "2021-11-07",
+        "status": "已注册"
+      }
+    ],
+    "patents": [
+      {
+        "id": "ZL-01",
+        "title": "一种精密五金件多工位冷镦成型方法",
+        "kind": "invention",
+        "appDate": "2019-11-20",
+        "grantDate": "2022-04-06",
+        "status": "有效"
+      },
+      {
+        "id": "ZL-02",
+        "title": "一种薄壁铝合金外壳压铸工艺",
+        "kind": "invention",
+        "appDate": "2023-06-08",
+        "grantDate": "2025-09-15",
+        "status": "有效"
+      },
+      {
+        "id": "ZL-03",
+        "title": "一种冲压支架自动上料装置",
+        "kind": "utility",
+        "appDate": "2022-11-02",
+        "grantDate": "2023-06-20",
+        "status": "有效"
+      },
+      {
+        "id": "ZL-04",
+        "title": "一种密封圈装配检测治具",
+        "kind": "utility",
+        "appDate": "2023-10-08",
+        "grantDate": "2024-04-12",
+        "status": "有效"
+      },
+      {
+        "id": "ZL-05",
+        "title": "一种电镀挂具快换结构",
+        "kind": "utility",
+        "appDate": "2024-01-15",
+        "grantDate": "2024-08-30",
+        "status": "有效"
+      }
+    ],
+    "software": [
+      {
+        "id": "RZ-01",
+        "title": "锐合生产报工系统 V1.0",
+        "regDate": "2024-03-18"
+      },
+      {
+        "id": "RZ-02",
+        "title": "锐合质检数据采集软件 V2.0",
+        "regDate": "2025-07-22"
+      }
+    ],
+    "domains": [
+      {
+        "name": "ruihe-****.com",
+        "expiry": "2026-12-01"
+      }
+    ],
+    "similarMarks": [
+      {
+        "name": "锐合五金",
+        "classes": [
+          "07"
+        ],
+        "holder": "同行 · 华南",
+        "similarity": 0.82,
+        "status": "初审公告中",
+        "deadline": "2026-10-05",
+        "note": "公告期内可提异议"
+      },
+      {
+        "name": "睿合",
+        "classes": [
+          "06"
+        ],
+        "holder": "贸易商 · 华东",
+        "similarity": 0.61,
+        "status": "已注册",
+        "deadline": null,
+        "note": "可评估无效宣告"
+      }
+    ],
+    "infringementLeads": [
+      {
+        "where": "电商平台店铺",
+        "product": "精密五金件 Ø12×45 同款",
+        "note": "商品标题使用「锐合」字样，月销 300+",
+        "similarity": 0.9,
+        "found": "2026-09-10"
+      },
+      {
+        "where": "行业展会",
+        "product": "冲压支架",
+        "note": "展品外观与 ZL-03 装置相近",
+        "similarity": 0.7,
+        "found": "2026-09-12"
+      }
+    ]
+  },
+  "setup": {
+    "type": "subsidiary",
+    "name": "锐合精密五金（华南）有限公司",
+    "region": "广东 · 东莞",
+    "capital": 5000000,
+    "shares": [
+      {
+        "holder": "杭州锐合精密五金有限公司",
+        "pct": 70
+      },
+      {
+        "holder": "华南业务团队持股平台",
+        "pct": 30,
+        "platform": true
+      }
+    ],
+    "scope": [
+      "精密五金件与冲压件销售",
+      "金属材料加工"
+    ],
+    "licenses": [
+      "排污许可"
+    ],
+    "confirmed": false,
+    "startDate": "2026-10-08",
+    "reason": "K-048、K-074 等华南客户年采购额已超 500 万元，就近仓储与加工可缩短交期"
+  },
+  "renewList": [],
+  "applyList": [],
+  "log": []
+}

@@ -237,9 +237,9 @@
 .tier .rg { color: var(--r-blue); font-weight: 900; font-size: calc(18px * var(--scale)); margin: 4px 0; }
 .tier p { font-size: calc(11.5px * var(--scale)); color: var(--r-body); }
 .tier .fit { font-size: calc(11px * var(--scale)); color: var(--r-sub); margin-top: 6px; }
-.risk { border-radius: 8px; padding: 11px 14px; margin-bottom: 9px; border-left: 5px solid; background: var(--r-bg); break-inside: avoid; }
-.risk .t { font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 3px; color: var(--r-text); }
-.risk p { font-size: calc(12px * var(--scale)); margin: 0; }
+.page .risk, .page.risk { border-radius: 8px; padding: 11px 14px; margin-bottom: 9px; border-left: 5px solid; background: var(--r-bg); break-inside: avoid; }
+.page .risk .t, .page.risk .t { font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 3px; color: var(--r-text); }
+.page .risk p, .page.risk p { font-size: calc(12px * var(--scale)); margin: 0; }
 .checklist td:first-child { font-weight: 800; white-space: nowrap; color: var(--r-navy); }
 .checklist .box { display: inline-block; width: 14px; height: 14px; border: 1.5px solid var(--r-sub); border-radius: 3px; }
 .scene-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }

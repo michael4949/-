@@ -424,6 +424,30 @@
     return el;
   }
 
+  /* ---------- 90 天周格日历（13 周 × 7 天） ---------- */
+  var KIND_ICON = { contract: '合', milestone: '履', license: '证', ip: '知', setup: '设' };
+  function addDays(s, n) { var p = s.split('-'); var t = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]) + n * 86400000); return t.getUTCFullYear() + '-' + String(t.getUTCMonth() + 1).padStart(2, '0') + '-' + String(t.getUTCDate()).padStart(2, '0'); }
+  function weekGrid(o) {
+    var g = h('div', { class: 'pd-weekgrid' });
+    g.appendChild(h('div', { class: 'hd' }, ['周']));
+    ['一', '二', '三', '四', '五', '六', '日'].forEach(function (w, i) { g.appendChild(h('div', { class: 'hd' + (i >= 5 ? ' rest' : '') }, ['周' + w])); });
+    o.weeks.forEach(function (wk) {
+      g.appendChild(h('div', { class: 'wk' }, [h('b', {}, [wk.label]), h('span', {}, [wk.items.length ? wk.items.length + ' 项' : ''])]));
+      for (var i = 0; i < 7; i++) {
+        var date = addDays(wk.start, i), p = date.split('-');
+        var items = wk.items.filter(function (it) { return it.date === date; });
+        var isToday = date === o.today, past = date < o.today;
+        var cell = h('div', { class: 'day' + (isToday ? ' today' : '') + (past ? ' past' : '') + (i >= 5 ? ' rest' : '') + (items.length ? ' has' : '') });
+        cell.appendChild(h('div', { class: 'dn' }, [h('span', {}, [+p[2] === 1 || (i === 0 && wk.w === 0) ? (+p[1]) + ' 月 ' + (+p[2]) + ' 日' : String(+p[2])]), isToday ? h('span', { class: 'tt' }, ['今天']) : null]));
+        var show = items.slice(0, o.maxItems || 2);
+        show.forEach(function (it) { cell.appendChild(h(o.onItem ? 'button' : 'div', { class: 'it ' + (it.tone || 'ok'), title: it.kindName + ' · ' + it.title + (it.sub ? ' · ' + it.sub : ''), onclick: o.onItem ? function () { o.onItem(it); } : null }, [h('i', {}, [KIND_ICON[it.kind] || '·']), h('span', {}, [it.title])])); });
+        if (items.length > show.length) cell.appendChild(h('div', { class: 'more' }, ['+' + (items.length - show.length) + ' 项']));
+        g.appendChild(cell);
+      }
+    });
+    return g;
+  }
+
   /* ---------- 提示 ---------- */
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
@@ -433,5 +457,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, toast: toast, STATUS: STATUS };
 })();
