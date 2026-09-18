@@ -1,0 +1,65 @@
+/* ===================== AI人力官 · 模块专属版式（组件全部来自 product.css） ===================== */
+.m5-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m5-connect .cap-row:last-child { border-bottom: 0; }
+.m5-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m5-connect .cap-row .t { font-weight: 700; } .m5-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m5-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m5-connect .src-row:last-child { border-bottom: 0; }
+.m5-connect .src-row .t { font-weight: 700; } .m5-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m5-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m5-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m5-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m5-connect .go .sp { flex: 1; } .m5-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m5-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+/* 需求单块 */
+.m5-needs { display: grid; gap: 8px; }
+.m5-needs .nd { text-align: left; border: 2px solid var(--pd-line); border-radius: 12px; padding: 10px 12px; background: #fff; display: grid; gap: 6px; }
+.m5-needs .nd.on { border-color: var(--pa); background: #F5FAFC; }
+.m5-needs .nd .hd { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.m5-needs .nd .hd .sp { flex: 1; }
+.m5-needs .nd .kv { color: var(--pd-sub); font-size: calc(12px * var(--scale)); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.m5-stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.m5-stages .st { border-radius: 6px; background: var(--pd-bg); padding: 4px 0; text-align: center; font-size: calc(11px * var(--scale)); color: var(--pd-sub); }
+.m5-stages .st b { display: block; font-size: calc(14px * var(--scale)); color: var(--pd-ink); }
+.m5-stages .st.has { background: var(--pa-soft); color: var(--pa-ink); } .m5-stages .st.has b { color: var(--pa-ink); }
+.m5-jd .m5-p { margin: 0; font-size: calc(14px * var(--scale)); line-height: 1.7; }
+.m5-jd ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: calc(14px * var(--scale)); line-height: 1.6; }
+.m5-chead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
+.m5-chead .m { display: flex; flex-direction: column; gap: 2px; }
+.m5-chead .m b { font-size: calc(20px * var(--scale)); } .m5-chead .m span { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+/* 面试 */
+.m5-qs { display: grid; gap: 12px; }
+.m5-qs .ab { border: 1px solid var(--pd-line); border-radius: 10px; overflow: hidden; }
+.m5-qs .ab .h { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FAFBFE; border-bottom: 1px solid var(--pd-line); font-weight: 700; }
+.m5-qs .ab .h .w { color: var(--pd-sub); font-weight: 600; font-size: calc(12px * var(--scale)); }
+.m5-qs .ab .h .sp { flex: 1; }
+.m5-qs .ab .h .pick { display: flex; gap: 4px; }
+.m5-qs .ab .h .pick button { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--pd-line); background: #fff; font-weight: 800; font-size: 12px; }
+.m5-qs .ab .h .pick button.on { border-color: var(--pa); background: var(--pa); color: #fff; }
+.m5-qs .q { padding: 8px 12px; border-bottom: 1px solid #EEF1F7; display: grid; gap: 4px; }
+.m5-qs .q:last-child { border-bottom: 0; }
+.m5-qs .q .t { font-weight: 600; line-height: 1.5; }
+.m5-qs .q .p { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m5-qs .q .an { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; font-size: calc(11.5px * var(--scale)); color: var(--pd-sub); }
+.m5-qs .q .an span { background: var(--pd-bg); border-radius: 6px; padding: 4px 8px; line-height: 1.4; }
+.m5-qs .q .an span b { color: var(--pd-ink); margin-right: 4px; }
+.m5-result { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; align-items: start; }
+.m5-result .verdict { display: flex; flex-direction: column; gap: 10px; }
+.m5-result .big { display: flex; align-items: baseline; gap: 8px; }
+.m5-result .big b { font-size: calc(30px * var(--scale)); }
+.m5-result .big span { color: var(--pd-sub); }
+.m5-ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
+/* 合规 */
+.m5-aff { display: grid; gap: 6px; }
+.m5-aff .a { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--pd-line); border-radius: 8px; font-size: calc(12.5px * var(--scale)); }
+.m5-aff .a b { white-space: nowrap; }
+.m5-aff .a .d { color: var(--pd-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m5-aff .a .d .j { color: var(--pd-ink); font-weight: 600; margin-right: 6px; }
+.m5-compliance .legend, .m5-register .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.m5-compliance .legend i { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; font-style: normal; font-size: 10px; font-weight: 800; margin-right: 5px; background: var(--t-hand-soft); color: var(--t-hand); }
+/* 成本 */
+.m5-cost .who { display: flex; flex-wrap: wrap; gap: 6px; }
+.m5-cost .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
+.m5-cost .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m5-log { display: grid; gap: 6px; }
+.m5-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
+.m5-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+.m5-log .l b { white-space: nowrap; } .m5-log .l span { color: var(--pd-sub); }

@@ -425,7 +425,7 @@
   }
 
   /* ---------- 90 天周格日历（13 周 × 7 天） ---------- */
-  var KIND_ICON = { contract: '合', milestone: '履', license: '证', ip: '知', setup: '设' };
+  var KIND_ICON = { contract: '合', milestone: '履', license: '证', ip: '知', setup: '设', probation: '试', need: '岗', interview: '面', leave: '假' };
   function addDays(s, n) { var p = s.split('-'); var t = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]) + n * 86400000); return t.getUTCFullYear() + '-' + String(t.getUTCMonth() + 1).padStart(2, '0') + '-' + String(t.getUTCDate()).padStart(2, '0'); }
   function weekGrid(o) {
     var g = h('div', { class: 'pd-weekgrid' });
@@ -448,6 +448,20 @@
     return g;
   }
 
+  /* ---------- 四维雷达（面试评分） ---------- */
+  function radar(o) {
+    var n = o.axes.length, size = o.size || 220, cx = size / 2, cy = size / 2, r = size / 2 - 34, max = o.max || 5;
+    var s = svg('svg', { class: 'pd-radar', viewBox: '0 0 ' + size + ' ' + size, preserveAspectRatio: 'xMidYMid meet' });
+    var pt = function (i, v) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * r * v / max, cy + Math.sin(a) * r * v / max]; };
+    for (var ring = 1; ring <= max; ring++) { s.appendChild(svg('polygon', { points: o.axes.map(function (_, i) { return pt(i, ring).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: ring === max ? '#FAFBFE' : 'none', stroke: ring === max ? '#DFE5F1' : '#EEF1F7' })); }
+    o.axes.forEach(function (a, i) { var p = pt(i, max); s.appendChild(svg('line', { x1: cx, y1: cy, x2: p[0], y2: p[1], stroke: '#DFE5F1' })); var lp = pt(i, max + 0.9); s.appendChild(svg('text', { x: lp[0], y: lp[1] + 4, 'text-anchor': 'middle', class: 'ax' }, [a.label])); });
+    if (o.compare) s.appendChild(svg('polygon', { points: o.compare.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: 'none', stroke: '#98A2B8', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }));
+    var vals = o.values;
+    s.appendChild(svg('polygon', { points: vals.map(function (v, i) { return pt(i, v).map(function (x) { return x.toFixed(1); }).join(','); }).join(' '), fill: o.color || 'var(--pa)', 'fill-opacity': 0.22, stroke: o.color || 'var(--pa)', 'stroke-width': 2 }));
+    vals.forEach(function (v, i) { var p = pt(i, v); s.appendChild(svg('circle', { cx: p[0], cy: p[1], r: 4, fill: o.color || 'var(--pa)' })); s.appendChild(svg('text', { x: p[0] + (p[0] > cx ? 8 : p[0] < cx ? -8 : 0), y: p[1] + (p[1] > cy ? 14 : -8), 'text-anchor': p[0] > cx + 1 ? 'start' : p[0] < cx - 1 ? 'end' : 'middle', class: 'val' }, [String(v)])); });
+    return s;
+  }
+
   /* ---------- 提示 ---------- */
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
@@ -457,5 +471,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, toast: toast, STATUS: STATUS };
 })();

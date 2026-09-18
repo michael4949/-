@@ -1,0 +1,25 @@
+{
+  "note": "用工成本参数：地区社保公积金费率与工资基线（预计）、福利与招聘培训单价、行业参考带、编制三方案说明。费用一律标预计。",
+  "regions": {
+    "浙江": { "socialEmployer": 0.26, "fundEmployer": 0.05, "minWage": 2490, "avgAnnualWagePrev": 82000, "bandFactor": 1.0, "hotAllowance": 300, "socialBaseFloor": 4462 },
+    "广东": { "socialEmployer": 0.235, "fundEmployer": 0.05, "minWage": 2300, "avgAnnualWagePrev": 86000, "bandFactor": 1.05, "hotAllowance": 300, "socialBaseFloor": 4546 },
+    "四川": { "socialEmployer": 0.26, "fundEmployer": 0.05, "minWage": 2100, "avgAnnualWagePrev": 74000, "bandFactor": 0.85, "hotAllowance": 250, "socialBaseFloor": 4071 }
+  },
+  "welfarePerCapita": 350,
+  "recruitingCost": { "ops": 900, "tech": 6500, "sales": 3200, "func": 1800 },
+  "trainingCost": { "ops": 1200, "tech": 3000, "sales": 2500, "func": 1500 },
+  "referralBonus": { "ops": 1000, "tech": 3000, "sales": 2000, "func": 1500 },
+  "turnoverCostMonths": 1,
+  "rampMonths": { "ops": 1, "tech": 3, "sales": 3, "func": 2 },
+  "naturalTurnoverMonthly": 0.015,
+  "benchmarks": {
+    "turnover": { "mfg": 18, "trade": 26, "prof": 20 },
+    "laborShare": { "mfg": [24, 32], "trade": [10, 16], "prof": [45, 60] },
+    "note": "行业参考为公开统计与同规模企业抽样的常见区间"
+  },
+  "plans": [
+    { "key": "A", "name": "按需求单招满", "desc": "三张需求单全部招满，按薪酬带中位定薪；社保基数维持现状" },
+    { "key": "B", "name": "招满并把社保基数调到位", "desc": "在 A 的基础上，下一缴费年度按实际工资申报基数，一并处理 H05 与 AI CFO 的 K10" },
+    { "key": "C", "name": "自然流失不补，内部转岗", "desc": "暂停外招，六个月内自然流失不补员，从装配线转岗培训补 CNC 岗；到岗慢，加班超限持续" }
+  ]
+}
