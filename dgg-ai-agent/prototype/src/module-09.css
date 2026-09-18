@@ -1,0 +1,74 @@
+/* ===================== AI决策 · 模块专属版式（组件全部来自 product.css） ===================== */
+.m9-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m9-connect .cap-row:last-child { border-bottom: 0; }
+.m9-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m9-connect .cap-row .t { font-weight: 700; } .m9-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m9-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m9-connect .src-row:last-child { border-bottom: 0; }
+.m9-connect .src-row .t { font-weight: 700; } .m9-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m9-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m9-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m9-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m9-connect .go .sp { flex: 1; } .m9-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m9-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+/* 指标树 */
+.m9-tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.m9-tree .grp { border: 1px solid var(--pd-line); border-radius: 12px; overflow: hidden; background: #fff; }
+.m9-tree .grp .gh { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FAFBFE; border-bottom: 1px solid var(--pd-line); font-weight: 700; font-size: calc(12.5px * var(--scale)); color: var(--pd-sub); }
+.m9-tree .grp .gh .sp { flex: 1; }
+.m9-tree .nd { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 10px; align-items: center; padding: 7px 12px; border-bottom: 1px solid #EEF1F7; text-align: left; background: #fff; width: 100%; }
+.m9-tree .nd:last-child { border-bottom: 0; }
+.m9-tree .nd.root { background: #FFF8FA; }
+.m9-tree .nd.root .n { font-weight: 800; font-size: calc(14px * var(--scale)); }
+.m9-tree .nd.root .v { font-size: calc(18px * var(--scale)); }
+.m9-tree .nd.click:hover { background: var(--pa-soft); }
+.m9-tree .nd .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m9-tree .nd .n .src { color: var(--pd-mute); font-weight: 500; font-size: calc(11px * var(--scale)); margin-left: 4px; }
+.m9-tree .nd .v { font-weight: 800; white-space: nowrap; }
+.m9-tree .nd .d { font-size: calc(11.5px * var(--scale)); color: var(--pd-sub); white-space: nowrap; }
+.m9-tree .nd .d.neg { color: var(--t-late); } .m9-tree .nd .d.pos { color: var(--t-ok); }
+.m9-tree .nd .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: 1px; }
+.m9-tree .nd .dot.ok { background: var(--t-ok); } .m9-tree .nd .dot.watch { background: var(--t-risk); } .m9-tree .nd .dot.risk { background: var(--t-late); }
+.m9-tree .nd.sub .n { padding-left: 14px; font-weight: 500; }
+/* 归因 */
+.m9-attr .ctl { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.m9-attr .ctl .lb { color: var(--pd-sub); font-weight: 700; font-size: calc(12.5px * var(--scale)); margin-right: 4px; }
+.m9-ev { display: grid; gap: 8px; }
+.m9-ev .ev { border: 1px solid var(--pd-line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.m9-ev .ev .h { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.m9-ev .ev .d { grid-column: 1 / -1; color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
+.m9-ev .ev .r { grid-column: 1 / -1; color: var(--pd-mute); font-size: calc(11.5px * var(--scale)); }
+/* 方案 */
+.m9-params { display: grid; gap: 12px; }
+.m9-params .pm label { display: flex; justify-content: space-between; font-weight: 700; font-size: calc(12.5px * var(--scale)); color: var(--pd-sub); margin-bottom: 4px; }
+.m9-params .pm label b { color: var(--pa); font-size: calc(14px * var(--scale)); }
+.m9-params .pm input[type=range] { width: 100%; accent-color: var(--pa); }
+.m9-params .pm .mm { display: flex; justify-content: space-between; color: var(--pd-mute); font-size: 11px; }
+.m9-opt-meta { display: grid; gap: 6px; font-size: calc(13px * var(--scale)); }
+.m9-opt-meta .r { display: flex; justify-content: space-between; gap: 10px; }
+.m9-opt-meta .r span:first-child { color: var(--pd-sub); }
+/* 审批 */
+.m9-sign { display: grid; gap: 8px; }
+.m9-sign .s { display: grid; grid-template-columns: 110px auto minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--pd-line); border-radius: 10px; }
+.m9-sign .s .role { font-weight: 700; }
+.m9-sign .s .tx { color: var(--pd-ink); font-size: calc(13px * var(--scale)); line-height: 1.5; }
+.m9-sign .s.object { border-color: #F2B8B2; background: #FFF7F6; } .m9-sign .s.cond { border-color: #F5D9A8; background: #FFFBF3; }
+.m9-final { border: 2px solid var(--pa); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; background: #FFF8FA; }
+.m9-final .t { font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.m9-final textarea { width: 100%; min-height: 64px; border: 1px solid var(--pd-line); border-radius: 9px; padding: 8px 10px; font-family: var(--font); font-size: calc(13.5px * var(--scale)); resize: vertical; }
+.m9-final .btns { display: flex; gap: 10px; }
+/* 执行 */
+.m9-ms { display: grid; gap: 6px; }
+.m9-ms .m { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 9px; font-size: calc(13px * var(--scale)); }
+.m9-ms .m.done { background: #FAFBFE; color: var(--pd-sub); } .m9-ms .m.doing { border-color: var(--pa); } .m9-ms .m.late { border-color: #F2B8B2; }
+.m9-ms .m .i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--pd-bg); color: var(--pd-sub); }
+.m9-ms .m.done .i { background: var(--t-ok-soft); color: var(--t-ok); } .m9-ms .m.doing .i { background: var(--pa); color: #fff; }
+.m9-ms .m .t { font-weight: 600; } .m9-ms .m .t .o { color: var(--pd-sub); font-weight: 500; margin-left: 6px; font-size: calc(12px * var(--scale)); }
+.m9-ms .m .due { color: var(--pd-sub); white-space: nowrap; font-size: calc(12px * var(--scale)); }
+.m9-review { border-left: 4px solid var(--t-late); background: var(--t-late-soft); border-radius: 8px; padding: 10px 12px; line-height: 1.55; font-size: calc(13px * var(--scale)); }
+.m9-review.hit { border-left-color: var(--t-ok); background: var(--t-ok-soft); }
+.m9-cost .who, .m9-exec .who { display: flex; flex-wrap: wrap; gap: 6px; }
+.m9-exec .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
+.m9-exec .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m9-log { display: grid; gap: 6px; }
+.m9-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
+.m9-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+.m9-log .l b { white-space: nowrap; } .m9-log .l span { color: var(--pd-sub); }

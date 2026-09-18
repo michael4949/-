@@ -462,6 +462,37 @@
     return s;
   }
 
+  /* ---------- 瀑布图（归因贡献） ---------- */
+  function waterfall(o) {
+    var W = o.width || 760, H = o.height || 260, padL = 56, padR = 12, padT = 22, padB = 46;
+    var items = o.items, n = items.length + 2, colW = (W - padL - padR) / n, bw = colW * 0.62;
+    var cum = o.start.value, seq = [{ label: o.start.label, y0: 0, y1: o.start.value, kind: 'total' }];
+    items.forEach(function (it) { seq.push({ label: it.label, y0: cum, y1: cum + it.value, kind: it.value >= 0 ? 'up' : 'down', value: it.value, id: it.id }); cum += it.value; });
+    seq.push({ label: o.end.label, y0: 0, y1: o.end.value, kind: 'total' });
+    var all = []; seq.forEach(function (s) { all.push(s.y0, s.y1); });
+    var max = Math.max.apply(null, all), min = Math.min(0, Math.min.apply(null, all)); if (max === min) max = min + 1;
+    var s = svg('svg', { class: 'pd-waterfall', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMinYMin meet' });
+    var sy = function (v) { return padT + (max - v) * (H - padT - padB) / (max - min); };
+    for (var t = 0; t <= 4; t++) { var v = min + (max - min) * t / 4; s.appendChild(svg('line', { x1: padL, y1: sy(v), x2: W - padR, y2: sy(v), stroke: '#EEF1F7' })); s.appendChild(svg('text', { x: padL - 6, y: sy(v) + 4, 'text-anchor': 'end', class: 'ax' }, [o.axisFmt ? o.axisFmt(v) : String(Math.round(v))])); }
+    s.appendChild(svg('line', { x1: padL, y1: sy(0), x2: W - padR, y2: sy(0), stroke: '#98A2B8' }));
+    var fmt = o.fmt || function (v) { return String(Math.round(v)); };
+    seq.forEach(function (b, i) {
+      var x = padL + i * colW + (colW - bw) / 2, top = sy(Math.max(b.y0, b.y1)), h = Math.max(2, Math.abs(sy(b.y0) - sy(b.y1)));
+      var fill = b.kind === 'total' ? 'var(--pa)' : b.kind === 'up' ? '#22A06B' : '#D9483B';
+      var g = svg('g', { class: 'bar' + (b.id && o.onPick ? ' click' : '') + (b.id && b.id === o.active ? ' on' : ''), style: b.id && o.onPick ? 'cursor:pointer' : '' });
+      g.appendChild(svg('rect', { x: x, y: top, width: bw, height: h, rx: 3, fill: fill, opacity: b.kind === 'total' ? 1 : 0.9 }));
+      if (b.id && b.id === o.active) g.appendChild(svg('rect', { x: x - 3, y: top - 3, width: bw + 6, height: h + 6, rx: 5, fill: 'none', stroke: '#1A2233', 'stroke-width': 1.5, 'stroke-dasharray': '3 2' }));
+      g.appendChild(svg('text', { x: x + bw / 2, y: top - 6, 'text-anchor': 'middle', class: 'val' + (b.kind === 'down' ? ' neg' : b.kind === 'up' ? ' pos' : '') }, [b.kind === 'total' ? fmt(b.y1) : (b.value >= 0 ? '+' : '−') + fmt(Math.abs(b.value))]));
+      var lbl = b.label.length > 6 ? b.label.slice(0, 6) + '…' : b.label;
+      g.appendChild(svg('text', { x: x + bw / 2, y: H - padB + 16, 'text-anchor': 'middle', class: 'lbl' }, [lbl]));
+      if (o.subs && o.subs[i]) g.appendChild(svg('text', { x: x + bw / 2, y: H - padB + 30, 'text-anchor': 'middle', class: 'sub' }, [o.subs[i]]));
+      if (b.id && o.onPick) g.addEventListener('click', function () { o.onPick(b.id); });
+      s.appendChild(g);
+      if (i < seq.length - 1) s.appendChild(svg('line', { x1: x + bw, y1: sy(b.kind === 'total' ? b.y1 : b.y1), x2: padL + (i + 1) * colW + (colW - bw) / 2, y2: sy(b.kind === 'total' ? b.y1 : b.y1), stroke: '#98A2B8', 'stroke-dasharray': '3 2' }));
+    });
+    return s;
+  }
+
   /* ---------- 提示 ---------- */
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
@@ -471,5 +502,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, toast: toast, STATUS: STATUS };
 })();

@@ -1,0 +1,26 @@
+{
+  "note": "会签规则：三位会签人按方案标签、参数与预演结果自动给意见（agree 同意 / cond 有条件同意 / object 反对）；总经理终批由使用者操作。阈值可调。",
+  "signers": [
+    { "role": "财务负责人", "key": "finance", "checks": [
+      { "when": "netBenefit < 0", "opinion": "object", "text": "12 个月净效益为负 {netBenefit}，不建议" },
+      { "when": "invest > cash * 0.15", "opinion": "cond", "text": "投入 {invest} 超过账面现金 15%，建议分两期投入" },
+      { "when": "cashDelta12 < 0", "opinion": "cond", "text": "12 个月现金影响 {cashDelta12}，前三个月现金压力加大，需与 13 周现金计划对齐" },
+      { "when": "true", "opinion": "agree", "text": "12 个月净效益 {netBenefit}，现金影响 {cashDelta12}，同意" }
+    ] },
+    { "role": "生产负责人", "key": "production", "checks": [
+      { "when": "tag_outsourcing", "opinion": "cond", "text": "外协件须按封样抽检，首批全检；制造费用占比会上升" },
+      { "when": "tag_capacity", "opinion": "agree", "text": "解除 CNC 瓶颈，准时交付率预计到 {onTimeEnd}%，同意" },
+      { "when": "tag_process", "opinion": "cond", "text": "工艺改善需停线试验，安排在周末与低负荷时段" },
+      { "when": "true", "opinion": "agree", "text": "不影响排产，同意" }
+    ] },
+    { "role": "销售总监", "key": "sales", "checks": [
+      { "when": "pricePct > 3", "opinion": "object", "text": "调价 {pricePct}% 超过客户可接受区间，年度客户有流失风险，建议不超过 3%" },
+      { "when": "pricePct > 0", "opinion": "cond", "text": "调价 {pricePct}% 分客户分批，先谈有年度价格复核条款的客户" },
+      { "when": "tag_credit", "opinion": "cond", "text": "账期收紧先对逾期客户谈分期回款，新客户按信用额度执行，避免影响续单" },
+      { "when": "orderEndPct < -1", "opinion": "cond", "text": "预演显示订单量下降 {orderEndPct}%，需要同步补线索" },
+      { "when": "true", "opinion": "agree", "text": "不影响客户，同意" }
+    ] }
+  ],
+  "final": { "role": "总经理", "actions": ["approve", "reject"] },
+  "idPrefix": { "approval": "A", "decision": "D" }
+}

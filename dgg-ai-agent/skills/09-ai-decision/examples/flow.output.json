@@ -1,0 +1,541 @@
+{
+  "version": "1.0.0",
+  "archetype": "flow",
+  "sector": "trade",
+  "company": "义乌恒益日用品有限公司",
+  "period": "2026-08",
+  "kpi": {
+    "period": "2026-08",
+    "profit": 66690.99999999988,
+    "profitPrev": 104385.00000000023,
+    "profitDelta": -37694.00000000035,
+    "profitBudget": 285000,
+    "rev": 3260000,
+    "revDeltaPct": -0.038348082595870206,
+    "gm": 0.16499999999999998,
+    "gmPrev": 0.16800000000000007,
+    "gmBudget": 0.19,
+    "ccc": 80.44703130427715,
+    "cccBudget": 60,
+    "onTimeRate": 0.78,
+    "onTimeBudget": 0.95,
+    "deals": 3,
+    "perCapitaRevenue": 630967.7419354839,
+    "complianceExposure": 1046609,
+    "risk": 9,
+    "watch": 2,
+    "ok": 20,
+    "rootCause": "出库订单",
+    "rootCauseValue": -22074.41860465117,
+    "pending": 0,
+    "approved": 0,
+    "executing": 1,
+    "doneDecisions": 1,
+    "overdueMilestones": 0,
+    "missedReviews": 1
+  },
+  "tree": [
+    {
+      "id": "profit",
+      "name": "经营利润",
+      "cur": "6.7 万元",
+      "prev": "10.4 万元",
+      "budget": "28.5 万元",
+      "delta": "−3.8 万元",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "grossProfit",
+      "name": "毛利",
+      "cur": "53.8 万元",
+      "prev": "57 万元",
+      "budget": "66.5 万元",
+      "delta": "−3.2 万元",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "rev",
+      "name": "收入",
+      "cur": "326 万元",
+      "prev": "339 万元",
+      "budget": "350 万元",
+      "delta": "−13 万元",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "orders",
+      "name": "出库订单",
+      "cur": "1,240 单",
+      "prev": "1,290 单",
+      "budget": null,
+      "delta": "−50 单",
+      "status": "ok",
+      "source": "m10"
+    },
+    {
+      "id": "avgOrder",
+      "name": "平均订单金额",
+      "cur": "2,629 元",
+      "prev": "2,628 元",
+      "budget": null,
+      "delta": "+1 元",
+      "status": "ok",
+      "source": "m10"
+    },
+    {
+      "id": "gm",
+      "name": "毛利率",
+      "cur": "16.5%",
+      "prev": "16.8%",
+      "budget": "19%",
+      "delta": "−0.3 个点",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "materialRatio",
+      "name": "材料占比",
+      "cur": "76.4%",
+      "prev": "75.8%",
+      "budget": null,
+      "delta": "+0.6 个点",
+      "status": "watch",
+      "source": "m6"
+    },
+    {
+      "id": "laborRatio",
+      "name": "直接人工占比",
+      "cur": "5.4%",
+      "prev": "5.2%",
+      "budget": null,
+      "delta": "+0.2 个点",
+      "status": "ok",
+      "source": "m5"
+    },
+    {
+      "id": "overheadRatio",
+      "name": "制造费用占比",
+      "cur": "1.7%",
+      "prev": "2.2%",
+      "budget": null,
+      "delta": "−0.5 个点",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "opex",
+      "name": "期间费用",
+      "cur": "47.1 万元",
+      "prev": "46.5 万元",
+      "budget": "38 万元",
+      "delta": "+6,074 元",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "sellExp",
+      "name": "销售费用",
+      "cur": "18.4 万元",
+      "prev": "19.1 万元",
+      "budget": null,
+      "delta": "−6,240 元",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "adminExp",
+      "name": "管理费用",
+      "cur": "29.5 万元",
+      "prev": "26.5 万元",
+      "budget": null,
+      "delta": "+3 万元",
+      "status": "watch",
+      "source": "m6"
+    },
+    {
+      "id": "rdExp",
+      "name": "研发费用",
+      "cur": "0 元",
+      "prev": "0 元",
+      "budget": null,
+      "delta": "0 元",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "finExp",
+      "name": "财务费用",
+      "cur": "−8,550 元",
+      "prev": "9,450 元",
+      "budget": null,
+      "delta": "−1.8 万元",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "ccc",
+      "name": "现金周期",
+      "cur": "80 天",
+      "prev": "75 天",
+      "budget": "60 天",
+      "delta": "+5.6 天",
+      "status": "risk",
+      "source": "m6"
+    },
+    {
+      "id": "dso",
+      "name": "回款天数",
+      "cur": "53 天",
+      "prev": "49 天",
+      "budget": null,
+      "delta": "+3.4 天",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "dio",
+      "name": "库存天数",
+      "cur": "78 天",
+      "prev": "74 天",
+      "budget": null,
+      "delta": "+4.2 天",
+      "status": "ok",
+      "source": "m10"
+    },
+    {
+      "id": "dpo",
+      "name": "付款天数",
+      "cur": "51 天",
+      "prev": "49 天",
+      "budget": null,
+      "delta": "+2 天",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "arOverdue",
+      "name": "应收逾期",
+      "cur": "101 万元",
+      "prev": "98 万元",
+      "budget": null,
+      "delta": "+3 万元",
+      "status": "ok",
+      "source": "m6"
+    },
+    {
+      "id": "onTimeRate",
+      "name": "准时交付率",
+      "cur": "78%",
+      "prev": "79.6%",
+      "budget": "95%",
+      "delta": "−1.6 个点",
+      "status": "risk",
+      "source": "m10"
+    },
+    {
+      "id": "lateOrders",
+      "name": "延期订单",
+      "cur": "2 单",
+      "prev": "3 单",
+      "budget": null,
+      "delta": "−1 单",
+      "status": "ok",
+      "source": "m10"
+    },
+    {
+      "id": "load",
+      "name": "瓶颈工序负荷",
+      "cur": "84%",
+      "prev": "82%",
+      "budget": null,
+      "delta": "+2 个点",
+      "status": "ok",
+      "source": "m10"
+    },
+    {
+      "id": "deals",
+      "name": "新客成交",
+      "cur": "3 单",
+      "prev": "2 单",
+      "budget": "3 单",
+      "delta": "+1 单",
+      "status": "ok",
+      "source": "m4"
+    },
+    {
+      "id": "leads",
+      "name": "新增线索",
+      "cur": "7 条",
+      "prev": "11 条",
+      "budget": null,
+      "delta": "−4 条",
+      "status": "risk",
+      "source": "m4"
+    },
+    {
+      "id": "winRate",
+      "name": "商机转化率",
+      "cur": "19.4%",
+      "prev": "19.4%",
+      "budget": null,
+      "delta": "0 个点",
+      "status": "ok",
+      "source": "m4"
+    },
+    {
+      "id": "perCapitaRevenue",
+      "name": "人均产值",
+      "cur": "63.1 万元",
+      "prev": "65.6 万元",
+      "budget": null,
+      "delta": "−2.5 万元",
+      "status": "ok",
+      "source": "m5"
+    },
+    {
+      "id": "headcount",
+      "name": "在编",
+      "cur": "62 人",
+      "prev": "62 人",
+      "budget": null,
+      "delta": "0 人",
+      "status": "ok",
+      "source": "m5"
+    },
+    {
+      "id": "turnover",
+      "name": "离职率",
+      "cur": "26%",
+      "prev": "26%",
+      "budget": "22%",
+      "delta": "0 个点",
+      "status": "risk",
+      "source": "m5"
+    },
+    {
+      "id": "overtimeOver",
+      "name": "加班超限",
+      "cur": "6 人",
+      "prev": "5 人",
+      "budget": null,
+      "delta": "+1 人",
+      "status": "ok",
+      "source": "m5"
+    },
+    {
+      "id": "complianceExposure",
+      "name": "合规敞口",
+      "cur": "104.7 万元",
+      "prev": "103.6 万元",
+      "budget": null,
+      "delta": "+1 万元",
+      "status": "ok",
+      "source": "m5"
+    },
+    {
+      "id": "highRiskContracts",
+      "name": "高风险合同",
+      "cur": "1 份",
+      "prev": "1 份",
+      "budget": null,
+      "delta": "0 份",
+      "status": "ok",
+      "source": "m7"
+    }
+  ],
+  "attribution": {
+    "metric": "经营利润",
+    "basis": "较上期",
+    "from": "10.4 万元",
+    "to": "6.7 万元",
+    "delta": "−3.8 万元",
+    "method": "连环替代法：按 毛利、期间费用 的顺序逐个替换因子，各因子贡献之和等于 经营利润 的变动",
+    "groups": [
+      "毛利 −3.2 万元",
+      "期间费用 −6,074 元"
+    ],
+    "leaves": [
+      {
+        "id": "adminExp",
+        "name": "管理费用",
+        "value": -30314,
+        "text": "−3 万元",
+        "factor": "26.5 万元 → 29.5 万元（+3 万元）",
+        "hurt": true,
+        "adj": "剔除一次性 2 万元 后 −1 万元"
+      },
+      {
+        "id": "orders",
+        "name": "出库订单",
+        "value": -22074.41860465117,
+        "text": "−2.2 万元",
+        "factor": "1,290 单 → 1,240 单（−50 单）",
+        "hurt": true,
+        "adj": null
+      },
+      {
+        "id": "materialRatio",
+        "name": "材料占比",
+        "value": -20180.669616519375,
+        "text": "−2 万元",
+        "factor": "75.8% → 76.4%（+0.6 个点）",
+        "hurt": true,
+        "adj": null
+      },
+      {
+        "id": "finExp",
+        "name": "财务费用",
+        "value": 18000,
+        "text": "+1.8 万元",
+        "factor": "9,450 元 → −8,550 元（−1.8 万元）",
+        "hurt": false,
+        "adj": null
+      },
+      {
+        "id": "overheadRatio",
+        "name": "制造费用占比",
+        "value": 17102.418879056044,
+        "text": "+1.7 万元",
+        "factor": "2.2% → 1.7%（−0.5 个点）",
+        "hurt": false,
+        "adj": null
+      },
+      {
+        "id": "laborRatio",
+        "name": "直接人工占比",
+        "value": -6701.749262536861,
+        "text": "−6,702 元",
+        "factor": "5.2% → 5.4%（+0.2 个点）",
+        "hurt": true,
+        "adj": null
+      },
+      {
+        "id": "sellExp",
+        "name": "销售费用",
+        "value": 6240,
+        "text": "+6,240 元",
+        "factor": "19.1 万元 → 18.4 万元（−6,240 元）",
+        "hurt": false,
+        "adj": null
+      },
+      {
+        "id": "avgOrder",
+        "name": "平均订单金额",
+        "value": 234.41860465115235,
+        "text": "+234 元",
+        "factor": "2,628 元 → 2,629 元（+1 元）",
+        "hurt": false,
+        "adj": null
+      },
+      {
+        "id": "rdExp",
+        "name": "研发费用",
+        "value": 0,
+        "text": "0 元",
+        "factor": "0 元 → 0 元（0 元）",
+        "hurt": false,
+        "adj": null
+      }
+    ],
+    "rootCause": "出库订单"
+  },
+  "evidence": [
+    "AI ERP · 延期订单挤占出库：延期 2 单，准时交付率 78%，部分订单出库推到下月",
+    "AI获客 · 新客成交节奏：本月新客成交 3 单，线索 7 条"
+  ],
+  "options": [
+    {
+      "key": "A",
+      "name": "线索池一键分派并按周跟进",
+      "owner": "销售总监",
+      "invest": 0,
+      "risk": "low",
+      "params": {
+        "followPct": 100
+      },
+      "summary": "12 个月利润 +14.2 万元，毛利率 16.8% → 16.8%，现金 +14.2 万元",
+      "netBenefit": 142397.103201726,
+      "cashDelta12": 142397.103201726,
+      "recommended": false
+    },
+    {
+      "key": "B",
+      "name": "解除交付瓶颈释放出库",
+      "owner": "生产负责人",
+      "invest": 12000,
+      "risk": "low",
+      "params": {
+        "hires": 4
+      },
+      "summary": "12 个月利润 +18.2 万元，毛利率 16.8% → 16.8%，现金 +17 万元，投入 1.2 万元",
+      "netBenefit": 170268.2920982088,
+      "cashDelta12": 170268.2920982088,
+      "recommended": true
+    }
+  ],
+  "approvalExample": {
+    "id": "A-2609-01",
+    "option": "解除交付瓶颈释放出库",
+    "opinions": [
+      {
+        "role": "财务负责人",
+        "key": "finance",
+        "opinion": "agree",
+        "opinionName": "同意",
+        "text": "12 个月净效益 +17 万元，现金影响 +17 万元，同意"
+      },
+      {
+        "role": "生产负责人",
+        "key": "production",
+        "opinion": "agree",
+        "opinionName": "同意",
+        "text": "解除 CNC 瓶颈，准时交付率预计到 96%，同意"
+      },
+      {
+        "role": "销售总监",
+        "key": "sales",
+        "opinion": "agree",
+        "opinionName": "同意",
+        "text": "不影响客户，同意"
+      }
+    ],
+    "status": "approved",
+    "decisionId": "D-2609-01"
+  },
+  "decisions": [
+    {
+      "id": "D-2609-01",
+      "title": "解除交付瓶颈释放出库",
+      "status": "执行中",
+      "owner": "生产负责人",
+      "progress": 0,
+      "next": "2026-09-20 发布 JD 并启动面试（AI人力官 需求单 R-2609-01）",
+      "tracking": "毛利率 目标 16.8%/16.8%/16.8%/16.8%/16.8%/16.8%",
+      "review": null
+    },
+    {
+      "id": "D-2605-01",
+      "title": "中心仓扩容 1,000 ㎡",
+      "status": "已完成",
+      "owner": "生产负责人",
+      "progress": 100,
+      "next": null,
+      "tracking": "准时交付率 目标 93%/95%/95% 实际 90%/88%/86%",
+      "review": "仓容不再是瓶颈，分拣打包人手成为新瓶颈，大促期加班超限；下一步补分拣人手并调整排班"
+    },
+    {
+      "id": "D-2607-02",
+      "title": "华南分公司设立",
+      "status": "执行中",
+      "owner": "总经理",
+      "progress": 0,
+      "next": "2026-09-30 设立方案确认（AI法务）",
+      "tracking": null,
+      "review": null
+    }
+  ],
+  "report": "【决策月报】2026 年 08 月 · 义乌恒益日用品有限公司\n指标 31 项：风险 9 · 关注 2 · 正常 20；经营利润 6.7 万元（较上期 −3.8 万元，较预算 −21.8 万元）· 收入 326 万元（−3.8%）· 毛利率 16.5%（上期 16.8%，预算 19%）· 现金周期 80 天 · 准时交付率 78%\n风险指标：经营利润 6.7 万元；毛利 53.8 万元；收入 326 万元；毛利率 16.5%；期间费用 47.1 万元；现金周期 80 天；准时交付率 78%；新增线索 7 条；离职率 26%\n归因（经营利润 较上期 −3.8 万元）：出库订单 −2.2 万元（1,290 单 → 1,240 单（−50 单））；材料占比 −2 万元（75.8% → 76.4%（+0.6 个点））；管理费用 −3 万元（26.5 万元 → 29.5 万元（+3 万元））；直接人工占比 −6,702 元（5.2% → 5.4%（+0.2 个点））；主因 出库订单\n审批：待批 0 单 · 本期批准 1 · 驳回 0\n决议执行：执行中 2 项 · 已完成 1 项 · 逾期节点 0；D-2609-01 解除交付瓶颈释放出库 0%，下一节点 9-20 发布 JD 并启动面试（AI人力官 需求单 R-2609-01）；D-2607-02 华南分公司设立 0%，下一节点 9-30 设立方案确认（AI法务）\n复盘 D-2605-01 中心仓扩容 1,000 ㎡：未达标。仓容不再是瓶颈，分拣打包人手成为新瓶颈，大促期加班超限；下一步补分拣人手并调整排班\n本期处置：发起审批 A-2609-01 解除交付瓶颈释放出库；批准并形成决议 D-2609-01 解除交付瓶颈释放出库"
+}
