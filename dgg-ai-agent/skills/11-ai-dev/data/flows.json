@@ -1,0 +1,138 @@
+{
+  "_note": "三类流程模板。states 里 optional 标记的节点只有开关打开才出现；transitions 里 when 是条件路由（同一 from + actionEn 下先判条件再走默认）。actionSlots 用来把需求句里紧跟动作的角色词绑定到槽位。script 是试用屏「下一步」三步走单脚本。",
+  "templates": [
+    {
+      "key": "approve", "name": "提交-审批", "signature": ["submit", "approve", "lend", "return"],
+      "slots": ["submitter", "handler", "handler2", "lead"],
+      "states": [
+        { "key": "pending", "label": "待审批", "initial": true },
+        { "key": "pending2", "label": "待二级审批", "optional": "secondLevel" },
+        { "key": "approved", "label": "已通过", "terminal": true },
+        { "key": "rejected", "label": "已驳回", "terminal": true },
+        { "key": "lent", "label": "已领用", "optional": "tail", "terminal": true },
+        { "key": "returned", "label": "已归还", "optional": "tail2", "terminal": true }
+      ],
+      "transitions": [
+        { "key": "approve1", "from": "pending", "to": "pending2", "actionEn": "approve", "action": "一级通过", "by": ["handler"], "optional": "secondLevel", "when": "threshold", "require": ["@approve"], "sla": 24 },
+        { "key": "approve", "from": "pending", "to": "approved", "actionEn": "approve", "action": "通过", "by": ["handler"], "require": ["@approve"], "sla": 24 },
+        { "key": "reject", "from": "pending", "to": "rejected", "actionEn": "reject", "action": "驳回", "by": ["handler"], "require": ["@approve"] },
+        { "key": "approve2", "from": "pending2", "to": "approved", "actionEn": "approve2", "action": "二级通过", "by": ["handler2"], "optional": "secondLevel", "sla": 24 },
+        { "key": "reject2", "from": "pending2", "to": "rejected", "actionEn": "reject2", "action": "二级驳回", "by": ["handler2"], "optional": "secondLevel" },
+        { "key": "resubmit", "from": "rejected", "to": "pending", "actionEn": "resubmit", "action": "重新提交", "by": ["submitter"] },
+        { "key": "lend", "from": "approved", "to": "lent", "actionEn": "lend", "action": "领用", "by": ["handler"], "optional": "tail", "require": ["@lend"] },
+        { "key": "return", "from": "lent", "to": "returned", "actionEn": "return", "action": "归还", "by": ["handler"], "optional": "tail2", "require": ["@return"] }
+      ],
+      "actionSlots": { "submit": "submitter", "approve": "handler", "reject": "handler", "lend": "handler", "return": "handler", "view": "lead", "remind": "lead" },
+      "pages": [
+        { "key": "form", "kind": "form", "name": "提交{verb}", "device": "phone", "roles": ["submitter"] },
+        { "key": "mine", "kind": "mine", "name": "我的{short}", "device": "phone", "roles": ["submitter"] },
+        { "key": "list", "kind": "list", "name": "待我审批", "device": "phone", "roles": ["handler"] },
+        { "key": "detail", "kind": "detail", "name": "{short}详情与审批", "device": "phone", "roles": ["handler"] },
+        { "key": "board", "kind": "board", "name": "{verb}看板", "device": "pc", "roles": ["lead"] },
+        { "key": "admin", "kind": "admin", "name": "应用管理", "device": "pc", "roles": ["admin"] }
+      ],
+      "secondLevelPages": [{ "key": "list2", "kind": "list", "name": "待二级审批", "device": "phone", "roles": ["handler2"], "after": "list" }],
+      "secondLevelDetailRoles": ["handler2"],
+      "script": [
+        { "label": "提交", "kind": "submit", "actor": "submitter" },
+        { "label": "审批", "kind": "transition", "actions": ["approve", "approve2"], "actor": "handler", "actor2": "handler2" },
+        { "label": "领用与归还", "kind": "transition", "actions": ["lend", "return"], "actor": "handler", "optional": "tail" }
+      ],
+      "statusTone": { "pending": "risk", "pending2": "risk", "approved": "ok", "rejected": "late", "lent": "handled", "returned": "done" }
+    },
+    {
+      "key": "dispatch", "name": "派单-处理", "signature": ["submit", "accept", "process", "complete", "rate"],
+      "slots": ["submitter", "handler", "handler2", "lead"],
+      "states": [
+        { "key": "open", "label": "待接单", "initial": true },
+        { "key": "accepted", "label": "已接单" },
+        { "key": "doing", "label": "处理中" },
+        { "key": "done", "label": "已完成", "terminal": true },
+        { "key": "rated", "label": "已评价", "optional": "rated", "terminal": true },
+        { "key": "rejected", "label": "已驳回", "optional": "rejected", "terminal": true }
+      ],
+      "transitions": [
+        { "key": "accept", "from": "open", "to": "accepted", "actionEn": "accept", "action": "接单", "by": ["handler"], "sets": { "assignee": "actor" }, "sla": 2 },
+        { "key": "start", "from": "accepted", "to": "doing", "actionEn": "start", "action": "开始处理", "by": ["handler"], "scope": "assignee" },
+        { "key": "complete", "from": "doing", "to": "done", "actionEn": "complete", "action": "完成", "by": ["handler"], "scope": "assignee", "require": ["@complete"] },
+        { "key": "rate", "from": "done", "to": "rated", "actionEn": "rate", "action": "评价", "by": ["submitter"], "optional": "rated", "require": ["@rate"] },
+        { "key": "rejectOpen", "from": "open", "to": "rejected", "actionEn": "reject", "action": "驳回", "by": ["handler"], "optional": "rejected", "require": ["@reject"] }
+      ],
+      "modes": {
+        "accept": { "name": "处理人自领" },
+        "assign": { "name": "组长指派", "labels": { "open": "待分配", "accepted": "已分配" }, "transitions": { "accept": { "actionEn": "assign", "action": "分配", "require": ["@assign"], "sets": { "assignee": "values.@assignee" }, "sla": 24 }, "start": { "by": ["handler2"] }, "complete": { "by": ["handler2"] } } },
+        "dual": { "name": "双处理人", "transitions": { "accept": { "action": "审核", "sla": 24 }, "start": { "by": ["handler2"], "action": "收货", "scope": null, "sets": { "assignee": "actor" } }, "complete": { "by": ["handler2"], "action": "入库" } } }
+      },
+      "actionSlots": { "submit": "submitter", "accept": "handler", "approve": "handler", "assign": "handler", "process": "handler", "complete": "handler", "rate": "submitter", "view": "lead", "remind": "lead", "reject": "handler" },
+      "modeActionSlots": { "assign": { "process": "handler2", "complete": "handler2" }, "dual": { "process": "handler2", "complete": "handler2" } },
+      "pages": [
+        { "key": "form", "kind": "form", "name": "扫码{verb}", "device": "phone", "roles": ["submitter"] },
+        { "key": "mine", "kind": "mine", "name": "我的{short}", "device": "phone", "roles": ["submitter"] },
+        { "key": "list", "kind": "list", "name": "我的待办", "device": "phone", "roles": ["handler"] },
+        { "key": "detail", "kind": "detail", "name": "{short}详情与处理", "device": "phone", "roles": ["handler"] },
+        { "key": "board", "kind": "board", "name": "{verb}看板", "device": "pc", "roles": ["lead"] },
+        { "key": "admin", "kind": "admin", "name": "应用管理", "device": "pc", "roles": ["admin"] }
+      ],
+      "modePages": {
+        "assign": { "list": { "name": "待分配" }, "extra": [{ "key": "list2", "kind": "list", "name": "我的任务", "device": "phone", "roles": ["handler2"], "after": "list" }], "detailRoles": ["handler", "handler2"] },
+        "dual": { "list": { "name": "待审核" }, "extra": [{ "key": "list2", "kind": "list", "name": "待入库", "device": "phone", "roles": ["handler2"], "after": "list" }], "detailRoles": ["handler", "handler2"] }
+      },
+      "script": {
+        "accept": [
+          { "label": "提交", "kind": "submit", "actor": "submitter" },
+          { "label": "接单", "kind": "transition", "actions": ["accept"], "actor": "handler" },
+          { "label": "完成", "kind": "transition", "actions": ["start", "complete"], "actor": "handler" }
+        ],
+        "assign": [
+          { "label": "提交", "kind": "submit", "actor": "submitter" },
+          { "label": "分配", "kind": "transition", "actions": ["assign"], "actor": "handler", "assignTo": "handler2" },
+          { "label": "完成", "kind": "transition", "actions": ["start", "complete"], "actor": "handler2" }
+        ],
+        "dual": [
+          { "label": "提交", "kind": "submit", "actor": "submitter" },
+          { "label": "审核", "kind": "transition", "actions": ["accept"], "actor": "handler" },
+          { "label": "入库", "kind": "transition", "actions": ["start", "complete"], "actor": "handler2" }
+        ]
+      },
+      "statusTone": { "open": "risk", "accepted": "handled", "doing": "handled", "done": "ok", "rated": "done", "rejected": "late" }
+    },
+    {
+      "key": "inspect", "name": "巡检-异常-整改", "signature": ["submit", "issue", "fix", "recheck", "close"],
+      "slots": ["submitter", "handler", "handler2", "lead"],
+      "states": [
+        { "key": "ok", "label": "合格", "terminal": true, "initialWhen": "noIssue" },
+        { "key": "issue", "label": "有异常", "initial": true },
+        { "key": "fixing", "label": "整改中" },
+        { "key": "recheck", "label": "待复检" },
+        { "key": "closed", "label": "已关闭", "terminal": true }
+      ],
+      "transitions": [
+        { "key": "fix", "from": "issue", "to": "fixing", "actionEn": "fix", "action": "开始整改", "by": ["handler"], "sets": { "assignee": "actor" }, "sla": 72 },
+        { "key": "submitFix", "from": "fixing", "to": "recheck", "actionEn": "submitFix", "action": "提交复检", "by": ["handler"], "scope": "assignee", "require": ["@submitFix"] },
+        { "key": "pass", "from": "recheck", "to": "closed", "actionEn": "pass", "action": "复核关闭", "by": ["handler2"], "require": ["@pass"] },
+        { "key": "fail", "from": "recheck", "to": "fixing", "actionEn": "fail", "action": "复检不合格", "by": ["handler2"], "optional": "recheckFail" }
+      ],
+      "actionSlots": { "submit": "submitter", "issue": "submitter", "fix": "handler", "recheck": "handler2", "close": "handler2", "view": "lead", "remind": "lead" },
+      "pages": [
+        { "key": "form", "kind": "form", "name": "扫码{verb}", "device": "phone", "roles": ["submitter"] },
+        { "key": "mine", "kind": "mine", "name": "我的{short}", "device": "phone", "roles": ["submitter"] },
+        { "key": "list", "kind": "list", "name": "整改待办", "device": "phone", "roles": ["handler"] },
+        { "key": "detail", "kind": "detail", "name": "{short}详情与整改", "device": "phone", "roles": ["handler", "handler2"] },
+        { "key": "board", "kind": "board", "name": "{verb}看板", "device": "pc", "roles": ["lead"] },
+        { "key": "admin", "kind": "admin", "name": "应用管理", "device": "pc", "roles": ["admin"] }
+      ],
+      "script": [
+        { "label": "提交", "kind": "submit", "actor": "submitter" },
+        { "label": "整改", "kind": "transition", "actions": ["fix", "submitFix"], "actor": "handler" },
+        { "label": "复核关闭", "kind": "transition", "actions": ["pass"], "actor": "handler2" }
+      ],
+      "statusTone": { "ok": "ok", "issue": "late", "fixing": "handled", "recheck": "risk", "closed": "done" }
+    }
+  ],
+  "slotLabels": {
+    "approve": { "submitter": "提交人", "handler": "审批人", "handler2": "二级审批人", "lead": "主管", "admin": "应用管理员" },
+    "dispatch": { "submitter": "提交人", "handler": "处理人", "handler2": "第二处理人", "lead": "主管", "admin": "应用管理员" },
+    "inspect": { "submitter": "巡检人", "handler": "整改人", "handler2": "复核人", "lead": "主管", "admin": "应用管理员" }
+  },
+  "modeSlotLabels": { "assign": { "handler": "分配人", "handler2": "处理人" }, "dual": { "handler": "审核人", "handler2": "入库人" } }
+}

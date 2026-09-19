@@ -1,0 +1,39 @@
+{
+  "_note": "三业态 × 三模板的槽位默认岗位名；员工只出 E-编号（emps 按岗位名给两个，第二个用于重复接单用例）；external 岗位以客户 K-编号出现。ops 是权限矩阵的六种操作，perms 是页面种类 × 槽位的默认权限，scope 是数据范围。",
+  "defaults": {
+    "make": {
+      "approve": { "submitter": "班组长", "handler": "生产主管", "handler2": "财务主管", "lead": "生产主管" },
+      "dispatch": { "submitter": "班组长", "handler": "设备员", "handler2": "设备员", "lead": "生产主管" },
+      "inspect": { "submitter": "操作工", "handler": "设备员", "handler2": "班组长", "lead": "生产主管" }
+    },
+    "flow": {
+      "approve": { "submitter": "业务员", "handler": "仓配主管", "handler2": "财务主管", "lead": "仓配主管" },
+      "dispatch": { "submitter": "门店", "handler": "客服专员", "handler2": "仓储员", "lead": "仓配主管" },
+      "inspect": { "submitter": "业务员", "handler": "门店", "handler2": "督导", "lead": "仓配主管" }
+    },
+    "service": {
+      "approve": { "submitter": "客户经理", "handler": "作业主管", "handler2": "财务主管", "lead": "作业主管" },
+      "dispatch": { "submitter": "客户经理", "handler": "账务组长", "handler2": "代账会计", "lead": "作业主管" },
+      "inspect": { "submitter": "代账会计", "handler": "账务组长", "handler2": "作业主管", "lead": "作业主管" }
+    }
+  },
+  "admin": "应用管理员",
+  "emps": {
+    "make": { "班组长": ["E-003", "E-004"], "设备员": ["E-122", "E-123"], "操作工": ["E-009", "E-010"] },
+    "flow": { "仓储员": ["E-015", "E-016"], "配送员": ["E-029", "E-030"] },
+    "service": { "客户经理": ["E-030", "E-031"], "代账会计": ["E-001", "E-002"] }
+  },
+  "empJobs": { "班组长": "leader", "设备员": "maint", "操作工": "cut-op", "仓储员": "picker", "配送员": "delivery", "客户经理": "cust-mgr", "代账会计": "acct-agent" },
+  "external": { "门店": "customers", "客户": "customers" },
+  "ops": ["查看", "新建", "编辑", "流转", "导出", "配置"],
+  "perms": {
+    "form": { "submitter": ["查看", "新建"] },
+    "mine": { "submitter": ["查看"] },
+    "list": { "handler": ["查看", "流转"], "handler2": ["查看", "流转"] },
+    "detail": { "handler": ["查看", "编辑", "流转"], "handler2": ["查看", "编辑", "流转"] },
+    "rate": { "submitter": ["查看", "流转"] },
+    "board": { "lead": ["查看", "导出"] },
+    "admin": { "admin": ["查看", "配置"] }
+  },
+  "scope": { "submitter": "本人", "handler": "本人待办 + 已接", "handler2": "本人待办 + 已接", "lead": "全部", "admin": "全部" }
+}

@@ -1,0 +1,343 @@
+{
+  "version": "1.0.0",
+  "archetype": "flow",
+  "company": "宁波优选百货供应链有限公司",
+  "today": "2026-09-17",
+  "text": "门店扫码提交退换货申请，客服审核，仓库收货入库，仓配主管看本周退货原因分布",
+  "parsed": {
+    "object": "return_order",
+    "objectName": "退换货工单",
+    "flow": "dispatch",
+    "flowMode": "dual",
+    "hits": 12,
+    "unknown": 0,
+    "roles": [
+      {
+        "slot": "submitter",
+        "title": "门店",
+        "hit": "门店"
+      },
+      {
+        "slot": "handler",
+        "title": "客服专员",
+        "hit": "客服专员"
+      },
+      {
+        "slot": "handler2",
+        "title": "仓储员",
+        "hit": "仓储员"
+      },
+      {
+        "slot": "lead",
+        "title": "仓配主管",
+        "hit": "仓配主管"
+      }
+    ]
+  },
+  "kpi": {
+    "pages": 7,
+    "fields": 12,
+    "roles": 4,
+    "states": 4,
+    "transitions": 3,
+    "apis": 8,
+    "tests": 18,
+    "passed": 18,
+    "failed": 0,
+    "passRate": 100,
+    "roleBlocked": 3,
+    "warnings": 1,
+    "versions": 1,
+    "releases": 1,
+    "env": "staging",
+    "overdue": 1,
+    "open": 2,
+    "avgAcceptMin": 38,
+    "rows": 8,
+    "checklist": "5 / 5",
+    "changes": 0,
+    "specVer": "v0.1",
+    "version": "V1.0.0"
+  },
+  "pages": [
+    {
+      "n": 1,
+      "name": "扫码退换货",
+      "device": "phone",
+      "roles": [
+        "门店"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "我的工单",
+      "device": "phone",
+      "roles": [
+        "门店"
+      ]
+    },
+    {
+      "n": 3,
+      "name": "待审核",
+      "device": "phone",
+      "roles": [
+        "客服专员"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "待入库",
+      "device": "phone",
+      "roles": [
+        "仓储员"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "工单详情与处理",
+      "device": "phone",
+      "roles": [
+        "客服专员",
+        "仓储员"
+      ]
+    },
+    {
+      "n": 6,
+      "name": "退换货看板",
+      "device": "pc",
+      "roles": [
+        "仓配主管"
+      ]
+    },
+    {
+      "n": 7,
+      "name": "应用管理",
+      "device": "pc",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "states": [
+    "待审核",
+    "已审核",
+    "收货中",
+    "已入库"
+  ],
+  "transitions": [
+    "审核",
+    "收货",
+    "入库"
+  ],
+  "apis": [
+    {
+      "id": "API-01",
+      "method": "POST",
+      "path": "/api/return_order_order",
+      "roles": [
+        "门店"
+      ]
+    },
+    {
+      "id": "API-02",
+      "method": "GET",
+      "path": "/api/return_order_order",
+      "roles": [
+        "门店",
+        "客服专员",
+        "仓储员",
+        "仓配主管"
+      ]
+    },
+    {
+      "id": "API-03",
+      "method": "GET",
+      "path": "/api/return_order_order/:id",
+      "roles": [
+        "门店",
+        "客服专员",
+        "仓储员"
+      ]
+    },
+    {
+      "id": "API-04",
+      "method": "POST",
+      "path": "/api/return_order_order/:id/actions/accept",
+      "roles": [
+        "客服专员"
+      ]
+    },
+    {
+      "id": "API-05",
+      "method": "POST",
+      "path": "/api/return_order_order/:id/actions/start",
+      "roles": [
+        "仓储员"
+      ]
+    },
+    {
+      "id": "API-06",
+      "method": "POST",
+      "path": "/api/return_order_order/:id/actions/complete",
+      "roles": [
+        "仓储员"
+      ]
+    },
+    {
+      "id": "API-07",
+      "method": "GET",
+      "path": "/api/return_order_order/stats",
+      "roles": [
+        "仓配主管"
+      ]
+    },
+    {
+      "id": "API-08",
+      "method": "POST",
+      "path": "/api/webhooks/return_order_order/status_changed",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "tests": {
+    "byKind": {
+      "required": "4/4",
+      "boundary": "4/4",
+      "transition": "3/3",
+      "role": "3/3",
+      "state": "1/1",
+      "version": "1/1",
+      "ref": "1/1",
+      "overdue": "1/1"
+    },
+    "passed": 18,
+    "total": 18,
+    "warnings": [
+      "商品照片未限制文件大小，建议 ≤ 5MB"
+    ]
+  },
+  "stats": {
+    "open": 2,
+    "doing": 3,
+    "done": 3,
+    "avgAcceptMin": 38,
+    "overdueN": 1
+  },
+  "checklist": {
+    "passed": 5,
+    "total": 5,
+    "all": true,
+    "items": [
+      {
+        "label": "用例通过率 100%",
+        "ok": true
+      },
+      {
+        "label": "必填字段均有校验",
+        "ok": true
+      },
+      {
+        "label": "每个角色至少一个页面",
+        "ok": true
+      },
+      {
+        "label": "通知渠道已配置",
+        "ok": true
+      },
+      {
+        "label": "主数据关联已映射",
+        "ok": true
+      }
+    ]
+  },
+  "deliverables": [
+    {
+      "name": "需求说明",
+      "no": "XQ-001",
+      "count": "12 词 · 已确认"
+    },
+    {
+      "name": "页面清单",
+      "no": "GG-001 v0.1",
+      "count": "7 页"
+    },
+    {
+      "name": "数据字典",
+      "no": "return_order_order",
+      "count": "1 表 12 字段"
+    },
+    {
+      "name": "接口文档",
+      "no": "API",
+      "count": "8 个"
+    },
+    {
+      "name": "测试报告",
+      "no": "CS-001",
+      "count": "18 / 18 通过"
+    },
+    {
+      "name": "发布记录",
+      "no": "FB-001",
+      "count": "1 版 · 1 次"
+    },
+    {
+      "name": "权限矩阵",
+      "no": "GG-001",
+      "count": "5 角色 × 7 页"
+    }
+  ],
+  "report": {
+    "text": "【应用交付】宁波优选百货供应链有限公司 · 退换货工单 V1.0.0\n【需求】退换货工单 · 派单-处理（双处理人） · 识别 12 词\n【应用】7 页 · 12 字段 · 4 角色 · 4 个流程节点 · 渠道 微信扫码 H5 · PC 后台\n【测试】CS-001 · 18 条用例 · 通过 18 · 越权拦截 3\n【发布】V1.0.0 测试环境 09-17 09:00 · 共 1 次\n【变更】本版无追加变更\n【主数据】客户主数据 6 家（AI ERP） · 商品主数据 4 种（AI ERP） · 订单 10 单（AI ERP） · 仓配员工名册 24 人（AI流程提效）\n【收件】仓配主管 · 应用管理员"
+  },
+  "followUps": [
+    {
+      "text": "入库后让门店打分评价，仓配主管看满意度",
+      "mode": "exact",
+      "types": [
+        "addState",
+        "addField",
+        "addField",
+        "addStat"
+      ],
+      "states": 1,
+      "fields": 2,
+      "pages": 1,
+      "apis": 3,
+      "tests": 3,
+      "rules": 0,
+      "stats": 1
+    },
+    {
+      "text": "退货原因改为必选，客服驳回要填驳回原因",
+      "mode": "exact",
+      "types": [
+        "addState",
+        "addField",
+        "addValidation"
+      ],
+      "states": 1,
+      "fields": 1,
+      "pages": 0,
+      "apis": 1,
+      "tests": 4,
+      "rules": 0,
+      "stats": 0
+    },
+    {
+      "text": "仓配主管看板按商品统计本月退货数量",
+      "mode": "exact",
+      "types": [
+        "addStat"
+      ],
+      "states": 0,
+      "fields": 0,
+      "pages": 0,
+      "apis": 1,
+      "tests": 1,
+      "rules": 0,
+      "stats": 1
+    }
+  ]
+}

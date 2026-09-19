@@ -1,0 +1,340 @@
+{
+  "version": "1.0.0",
+  "archetype": "service",
+  "company": "成都启元财税服务有限公司",
+  "today": "2026-09-17",
+  "text": "客户经理提交新客户资料，账务组长分配代账会计，作业主管看接入进度",
+  "parsed": {
+    "object": "client_onboard",
+    "objectName": "新客户资料",
+    "flow": "dispatch",
+    "flowMode": "assign",
+    "hits": 9,
+    "unknown": 0,
+    "roles": [
+      {
+        "slot": "submitter",
+        "title": "客户经理",
+        "hit": "客户经理"
+      },
+      {
+        "slot": "handler",
+        "title": "账务组长",
+        "hit": "账务组长"
+      },
+      {
+        "slot": "handler2",
+        "title": "代账会计",
+        "hit": "代账会计"
+      },
+      {
+        "slot": "lead",
+        "title": "作业主管",
+        "hit": "作业主管"
+      }
+    ]
+  },
+  "kpi": {
+    "pages": 7,
+    "fields": 10,
+    "roles": 4,
+    "states": 4,
+    "transitions": 3,
+    "apis": 8,
+    "tests": 19,
+    "passed": 19,
+    "failed": 0,
+    "passRate": 100,
+    "roleBlocked": 3,
+    "warnings": 1,
+    "versions": 1,
+    "releases": 1,
+    "env": "staging",
+    "overdue": 1,
+    "open": 2,
+    "avgAcceptMin": 38,
+    "rows": 8,
+    "checklist": "5 / 5",
+    "changes": 0,
+    "specVer": "v0.1",
+    "version": "V1.0.0"
+  },
+  "pages": [
+    {
+      "n": 1,
+      "name": "扫码新客户接入",
+      "device": "phone",
+      "roles": [
+        "客户经理"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "我的接入单",
+      "device": "phone",
+      "roles": [
+        "客户经理"
+      ]
+    },
+    {
+      "n": 3,
+      "name": "待分配",
+      "device": "phone",
+      "roles": [
+        "账务组长"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "我的任务",
+      "device": "phone",
+      "roles": [
+        "代账会计"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "接入单详情与处理",
+      "device": "phone",
+      "roles": [
+        "账务组长",
+        "代账会计"
+      ]
+    },
+    {
+      "n": 6,
+      "name": "新客户接入看板",
+      "device": "pc",
+      "roles": [
+        "作业主管"
+      ]
+    },
+    {
+      "n": 7,
+      "name": "应用管理",
+      "device": "pc",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "states": [
+    "待分配",
+    "已分配",
+    "建账中",
+    "已接入"
+  ],
+  "transitions": [
+    "分配",
+    "开始建账",
+    "完成接入"
+  ],
+  "apis": [
+    {
+      "id": "API-01",
+      "method": "POST",
+      "path": "/api/client_onboard_order",
+      "roles": [
+        "客户经理"
+      ]
+    },
+    {
+      "id": "API-02",
+      "method": "GET",
+      "path": "/api/client_onboard_order",
+      "roles": [
+        "客户经理",
+        "账务组长",
+        "代账会计",
+        "作业主管"
+      ]
+    },
+    {
+      "id": "API-03",
+      "method": "GET",
+      "path": "/api/client_onboard_order/:id",
+      "roles": [
+        "客户经理",
+        "账务组长",
+        "代账会计"
+      ]
+    },
+    {
+      "id": "API-04",
+      "method": "POST",
+      "path": "/api/client_onboard_order/:id/actions/assign",
+      "roles": [
+        "账务组长"
+      ]
+    },
+    {
+      "id": "API-05",
+      "method": "POST",
+      "path": "/api/client_onboard_order/:id/actions/start",
+      "roles": [
+        "代账会计"
+      ]
+    },
+    {
+      "id": "API-06",
+      "method": "POST",
+      "path": "/api/client_onboard_order/:id/actions/complete",
+      "roles": [
+        "代账会计"
+      ]
+    },
+    {
+      "id": "API-07",
+      "method": "GET",
+      "path": "/api/client_onboard_order/stats",
+      "roles": [
+        "作业主管"
+      ]
+    },
+    {
+      "id": "API-08",
+      "method": "POST",
+      "path": "/api/webhooks/client_onboard_order/status_changed",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "tests": {
+    "byKind": {
+      "required": "6/6",
+      "boundary": "3/3",
+      "transition": "3/3",
+      "role": "3/3",
+      "state": "1/1",
+      "version": "1/1",
+      "ref": "1/1",
+      "overdue": "1/1"
+    },
+    "passed": 19,
+    "total": 19,
+    "warnings": [
+      "营业执照未限制文件大小，建议 ≤ 5MB"
+    ]
+  },
+  "stats": {
+    "open": 2,
+    "doing": 3,
+    "done": 3,
+    "avgAcceptMin": 38,
+    "overdueN": 1
+  },
+  "checklist": {
+    "passed": 5,
+    "total": 5,
+    "all": true,
+    "items": [
+      {
+        "label": "用例通过率 100%",
+        "ok": true
+      },
+      {
+        "label": "必填字段均有校验",
+        "ok": true
+      },
+      {
+        "label": "每个角色至少一个页面",
+        "ok": true
+      },
+      {
+        "label": "通知渠道已配置",
+        "ok": true
+      },
+      {
+        "label": "主数据关联已映射",
+        "ok": true
+      }
+    ]
+  },
+  "deliverables": [
+    {
+      "name": "需求说明",
+      "no": "XQ-001",
+      "count": "9 词 · 已确认"
+    },
+    {
+      "name": "页面清单",
+      "no": "GG-001 v0.1",
+      "count": "7 页"
+    },
+    {
+      "name": "数据字典",
+      "no": "client_onboard_order",
+      "count": "1 表 10 字段"
+    },
+    {
+      "name": "接口文档",
+      "no": "API",
+      "count": "8 个"
+    },
+    {
+      "name": "测试报告",
+      "no": "CS-001",
+      "count": "19 / 19 通过"
+    },
+    {
+      "name": "发布记录",
+      "no": "FB-001",
+      "count": "1 版 · 1 次"
+    },
+    {
+      "name": "权限矩阵",
+      "no": "GG-001",
+      "count": "5 角色 × 7 页"
+    }
+  ],
+  "report": {
+    "text": "【应用交付】成都启元财税服务有限公司 · 新客户资料 V1.0.0\n【需求】新客户资料 · 派单-处理（组长指派） · 识别 9 词\n【应用】7 页 · 10 字段 · 4 角色 · 4 个流程节点 · 渠道 微信扫码 H5 · PC 后台\n【测试】CS-001 · 19 条用例 · 通过 19 · 越权拦截 3\n【发布】V1.0.0 测试环境 09-17 09:00 · 共 1 次\n【变更】本版无追加变更\n【主数据】客户主数据 9 家（AI ERP） · 服务项目 3 种（AI ERP） · 员工名册 46 人（AI人力官） · 作业小组 4 个（AI ERP）\n【收件】作业主管 · 应用管理员"
+  },
+  "followUps": [
+    {
+      "text": "完成后让客户打分评价",
+      "mode": "exact",
+      "types": [
+        "addState",
+        "addField",
+        "addField"
+      ],
+      "states": 1,
+      "fields": 2,
+      "pages": 1,
+      "apis": 2,
+      "tests": 2,
+      "rules": 0,
+      "stats": 0
+    },
+    {
+      "text": "作业主管看板按代账会计统计在办客户数",
+      "mode": "exact",
+      "types": [
+        "addStat"
+      ],
+      "states": 0,
+      "fields": 0,
+      "pages": 0,
+      "apis": 1,
+      "tests": 1,
+      "rules": 0,
+      "stats": 1
+    },
+    {
+      "text": "超过 3 个工作日未分配，自动提醒作业主管",
+      "mode": "exact",
+      "types": [
+        "addRule"
+      ],
+      "states": 0,
+      "fields": 0,
+      "pages": 0,
+      "apis": 1,
+      "tests": 3,
+      "rules": 1,
+      "stats": 0
+    }
+  ]
+}

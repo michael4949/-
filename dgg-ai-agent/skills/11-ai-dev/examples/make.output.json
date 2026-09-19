@@ -1,0 +1,325 @@
+{
+  "version": "1.0.0",
+  "archetype": "make",
+  "company": "杭州锐合精密五金有限公司",
+  "today": "2026-09-17",
+  "text": "车间扫码提报设备故障，设备员接单处理，生产主管看停机与处理时效",
+  "parsed": {
+    "object": "repair",
+    "objectName": "报修单",
+    "flow": "dispatch",
+    "flowMode": "accept",
+    "hits": 11,
+    "unknown": 0,
+    "roles": [
+      {
+        "slot": "submitter",
+        "title": "班组长",
+        "hit": "班组长"
+      },
+      {
+        "slot": "handler",
+        "title": "设备员",
+        "hit": "设备员"
+      },
+      {
+        "slot": "lead",
+        "title": "生产主管",
+        "hit": "生产主管"
+      }
+    ]
+  },
+  "kpi": {
+    "pages": 6,
+    "fields": 12,
+    "roles": 3,
+    "states": 4,
+    "transitions": 3,
+    "apis": 8,
+    "tests": 20,
+    "passed": 20,
+    "failed": 0,
+    "passRate": 100,
+    "roleBlocked": 3,
+    "warnings": 1,
+    "versions": 1,
+    "releases": 1,
+    "env": "staging",
+    "overdue": 1,
+    "open": 2,
+    "avgAcceptMin": 36,
+    "rows": 8,
+    "checklist": "5 / 5",
+    "changes": 0,
+    "specVer": "v0.1",
+    "version": "V1.0.0"
+  },
+  "pages": [
+    {
+      "n": 1,
+      "name": "扫码报修",
+      "device": "phone",
+      "roles": [
+        "班组长"
+      ]
+    },
+    {
+      "n": 2,
+      "name": "我的工单",
+      "device": "phone",
+      "roles": [
+        "班组长"
+      ]
+    },
+    {
+      "n": 3,
+      "name": "我的待办",
+      "device": "phone",
+      "roles": [
+        "设备员"
+      ]
+    },
+    {
+      "n": 4,
+      "name": "工单详情与处理",
+      "device": "phone",
+      "roles": [
+        "设备员"
+      ]
+    },
+    {
+      "n": 5,
+      "name": "报修看板",
+      "device": "pc",
+      "roles": [
+        "生产主管"
+      ]
+    },
+    {
+      "n": 6,
+      "name": "应用管理",
+      "device": "pc",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "states": [
+    "待接单",
+    "已接单",
+    "处理中",
+    "已完成"
+  ],
+  "transitions": [
+    "接单",
+    "开始处理",
+    "完成"
+  ],
+  "apis": [
+    {
+      "id": "API-01",
+      "method": "POST",
+      "path": "/api/repair_order",
+      "roles": [
+        "班组长"
+      ]
+    },
+    {
+      "id": "API-02",
+      "method": "GET",
+      "path": "/api/repair_order",
+      "roles": [
+        "班组长",
+        "设备员",
+        "生产主管"
+      ]
+    },
+    {
+      "id": "API-03",
+      "method": "GET",
+      "path": "/api/repair_order/:id",
+      "roles": [
+        "班组长",
+        "设备员"
+      ]
+    },
+    {
+      "id": "API-04",
+      "method": "POST",
+      "path": "/api/repair_order/:id/actions/accept",
+      "roles": [
+        "设备员"
+      ]
+    },
+    {
+      "id": "API-05",
+      "method": "POST",
+      "path": "/api/repair_order/:id/actions/start",
+      "roles": [
+        "设备员"
+      ]
+    },
+    {
+      "id": "API-06",
+      "method": "POST",
+      "path": "/api/repair_order/:id/actions/complete",
+      "roles": [
+        "设备员"
+      ]
+    },
+    {
+      "id": "API-07",
+      "method": "GET",
+      "path": "/api/repair_order/stats",
+      "roles": [
+        "生产主管"
+      ]
+    },
+    {
+      "id": "API-08",
+      "method": "POST",
+      "path": "/api/webhooks/repair_order/status_changed",
+      "roles": [
+        "应用管理员"
+      ]
+    }
+  ],
+  "tests": {
+    "byKind": {
+      "required": "6/6",
+      "boundary": "4/4",
+      "transition": "3/3",
+      "role": "3/3",
+      "state": "1/1",
+      "version": "1/1",
+      "ref": "1/1",
+      "overdue": "1/1"
+    },
+    "passed": 20,
+    "total": 20,
+    "warnings": [
+      "故障照片未限制文件大小，建议 ≤ 5MB"
+    ]
+  },
+  "stats": {
+    "open": 2,
+    "doing": 3,
+    "done": 3,
+    "avgAcceptMin": 36,
+    "overdueN": 1
+  },
+  "checklist": {
+    "passed": 5,
+    "total": 5,
+    "all": true,
+    "items": [
+      {
+        "label": "用例通过率 100%",
+        "ok": true
+      },
+      {
+        "label": "必填字段均有校验",
+        "ok": true
+      },
+      {
+        "label": "每个角色至少一个页面",
+        "ok": true
+      },
+      {
+        "label": "通知渠道已配置",
+        "ok": true
+      },
+      {
+        "label": "主数据关联已映射",
+        "ok": true
+      }
+    ]
+  },
+  "deliverables": [
+    {
+      "name": "需求说明",
+      "no": "XQ-001",
+      "count": "11 词 · 已确认"
+    },
+    {
+      "name": "页面清单",
+      "no": "GG-001 v0.1",
+      "count": "6 页"
+    },
+    {
+      "name": "数据字典",
+      "no": "repair_order",
+      "count": "1 表 12 字段"
+    },
+    {
+      "name": "接口文档",
+      "no": "API",
+      "count": "8 个"
+    },
+    {
+      "name": "测试报告",
+      "no": "CS-001",
+      "count": "20 / 20 通过"
+    },
+    {
+      "name": "发布记录",
+      "no": "FB-001",
+      "count": "1 版 · 1 次"
+    },
+    {
+      "name": "权限矩阵",
+      "no": "GG-001",
+      "count": "4 角色 × 6 页"
+    }
+  ],
+  "report": {
+    "text": "【应用交付】杭州锐合精密五金有限公司 · 报修单 V1.0.0\n【需求】报修单 · 派单-处理（处理人自领） · 识别 11 词\n【应用】6 页 · 12 字段 · 3 角色 · 4 个流程节点 · 渠道 微信扫码 H5 · PC 后台\n【测试】CS-001 · 20 条用例 · 通过 20 · 越权拦截 3\n【发布】V1.0.0 测试环境 09-17 09:00 · 共 1 次\n【变更】本版无追加变更\n【主数据】设备台账 13 台（AI流程提效） · 员工名册 168 人（AI人力官）\n【收件】生产主管 · 应用管理员"
+  },
+  "followUps": [
+    {
+      "text": "完成后让班组长打分评价",
+      "mode": "exact",
+      "types": [
+        "addState",
+        "addField",
+        "addField"
+      ],
+      "states": 1,
+      "fields": 2,
+      "pages": 1,
+      "apis": 2,
+      "tests": 2,
+      "rules": 0,
+      "stats": 0
+    },
+    {
+      "text": "生产主管看板按设备员统计接单数与平均处理时长",
+      "mode": "exact",
+      "types": [
+        "addStat",
+        "addStat"
+      ],
+      "states": 0,
+      "fields": 0,
+      "pages": 0,
+      "apis": 1,
+      "tests": 2,
+      "rules": 0,
+      "stats": 2
+    },
+    {
+      "text": "超过 2 小时未接单，自动提醒生产主管",
+      "mode": "exact",
+      "types": [
+        "addRule"
+      ],
+      "states": 0,
+      "fields": 0,
+      "pages": 0,
+      "apis": 1,
+      "tests": 3,
+      "rules": 1,
+      "stats": 0
+    }
+  ]
+}

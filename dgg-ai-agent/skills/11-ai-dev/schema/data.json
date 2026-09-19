@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI软件开发 · 业态样本数据包",
+  "description": "一个业态（archetype = make 制造 / flow 仓配 / service 服务）的试用样本：公司名与今日取自 AI ERP 同业态样本，主数据（设备 / 员工 / 客户 / 商品）只引用兄弟模块样本里存在的编号，本包只放沙箱时钟、企业现有系统、每个业务对象的预埋记录（由内核运行时真实走出来：提交 → 各节点，再按固定偏移改写时间）、预置句对应对象的预期规格数量与客户动作留下的状态。员工只出现 E-编号，客户只出现「K-编号 · 类型」，联系人只写职务。记录流水号 = 对象前缀-年月-流水（BX-2609-007），应用 APP-001，需求 XQ-001，规格 GG-001 v0.x，用例 CS-00n，发布 FB-00n，变更 BG-00n。",
+  "type": "object",
+  "required": ["archetype", "company", "today", "clockMin", "systems", "seed", "expect", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "archetype": { "enum": ["make", "flow", "service"], "description": "业态：制造 / 仓配 / 服务；决定对象库、默认岗位与主数据来源样本" },
+    "company": { "type": "string", "description": "与 AI ERP 同业态样本的 company 一致" },
+    "today": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "与各模块样本对齐的今日（2026-09-17）" },
+    "clockMin": { "type": "integer", "minimum": 0, "maximum": 1439, "description": "沙箱时钟起点：今日 00:00 起的分钟数（540 = 09:00），每个动作 +15 分钟" },
+    "systems": { "type": "array", "items": { "enum": ["erp", "mes", "hr", "oa", "crm", "shop"] }, "description": "企业现有系统；命中主数据来源 directIf 时关联方式为直连，否则导入" },
+    "seed": {
+      "type": "object", "required": ["byObject"], "additionalProperties": false,
+      "properties": { "byObject": { "type": "object", "additionalProperties": { "type": "array", "items": { "$ref": "#/definitions/row" } }, "description": "对象 key → 预埋记录；预置句对象 8 条、其他对象 4 条，含超时未接单的记录" } }
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/expect" },
+      "description": "预置句对象 key → 解析与规格的预期数量（校验与 examples 用）"
+    },
+    "state": {
+      "type": "object",
+      "description": "客户动作留下的状态；空对象表示未生成。内核 ensure 会补齐默认键",
+      "properties": {
+        "text": { "type": ["string", "null"] },
+        "presetIndex": { "type": "integer", "minimum": 0 },
+        "parsed": { "type": ["object", "null"] },
+        "spec": { "type": ["object", "null"] },
+        "prevSpec": { "type": ["object", "null"] },
+        "rt": { "type": ["object", "null"], "required": ["rows", "seq", "clock", "log"], "properties": { "rows": { "type": "array", "items": { "$ref": "#/definitions/row" } }, "seq": { "type": "integer" }, "clock": { "type": "number" }, "log": { "type": "array" } } },
+        "releases": { "type": "array", "items": { "type": "object", "required": ["id", "version", "env", "envName", "publisher", "at", "note", "status"], "properties": { "id": { "type": "string", "pattern": "^FB-\\d{3}$" }, "version": { "type": "string", "pattern": "^V\\d+\\.\\d+\\.\\d+$" }, "env": { "enum": ["staging", "prod"] } } } },
+        "log": { "type": "array", "items": { "type": "object", "required": ["seq", "kind", "label", "detail", "at"], "properties": { "seq": { "type": "integer", "minimum": 1 }, "kind": { "enum": ["generate", "field", "submit", "transition", "script", "tests", "perm", "publish", "delta", "send"] }, "label": { "type": "string" }, "detail": { "type": "string" }, "at": { "type": "string" } } } },
+        "testRuns": { "type": "integer", "minimum": 0 },
+        "changes": { "type": "array", "items": { "type": "object", "required": ["id", "text", "from", "to", "items"], "properties": { "id": { "type": "string", "pattern": "^BG-\\d{3}$" } } } },
+        "script": { "type": "object", "required": ["step", "id"], "properties": { "step": { "type": "integer", "minimum": 0 }, "id": { "type": ["string", "null"] } } },
+        "env": { "enum": [null, "staging", "smoke", "prod", "live"] },
+        "sent": { "type": "boolean" },
+        "lastResult": { "type": ["object", "null"] },
+        "delta": { "type": ["object", "null"] }
+      }
+    }
+  },
+  "definitions": {
+    "row": {
+      "type": "object",
+      "required": ["id", "status", "values", "createdBy", "assignee", "version", "createdAt", "updatedAt", "history"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Z]{2}-\\d{4}-\\d{3}$", "description": "对象前缀-年月-流水" },
+        "status": { "type": "string", "description": "流程模板的节点 key（open / accepted / pending / issue / closed …）" },
+        "values": { "type": "object", "description": "字段 key → 值；member 字段只放 E-编号，ref 字段只放兄弟模块样本里存在的编号或「编号 · 名称」" },
+        "createdBy": { "type": "object", "required": ["slot", "title", "id"], "additionalProperties": false, "properties": { "slot": { "enum": ["submitter", "handler", "handler2", "lead"] }, "title": { "type": "string" }, "id": { "type": "string" } } },
+        "assignee": { "type": ["string", "null"], "description": "当前处理人：E-编号 / 外部方 K-编号 / 无员工编号的岗位名" },
+        "version": { "type": "integer", "minimum": 1, "description": "乐观锁版本，每次流转 +1" },
+        "createdAt": { "type": "number", "description": "相对今日 00:00 的分钟数，可为负（往日）" },
+        "updatedAt": { "type": "number" },
+        "history": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/historyItem" }, "description": "第一条恒为 submit" }
+      }
+    },
+    "historyItem": {
+      "type": "object",
+      "required": ["seq", "actionEn", "action", "by", "role", "atMin", "from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "seq": { "type": "integer", "minimum": 1 },
+        "actionEn": { "type": "string" },
+        "action": { "type": "string" },
+        "by": { "type": "string" },
+        "role": { "type": "string" },
+        "atMin": { "type": "number" },
+        "from": { "type": ["string", "null"] },
+        "to": { "type": "string" }
+      }
+    },
+    "expect": {
+      "type": "object",
+      "required": ["object", "flow", "mode", "pages", "fields", "roles", "states", "apis", "testsMin", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "object": { "type": "string" },
+        "flow": { "enum": ["approve", "dispatch", "inspect"] },
+        "mode": { "enum": ["accept", "assign", "dual", null], "description": "只有派单-处理有模式" },
+        "pages": { "type": "integer", "minimum": 5 },
+        "fields": { "type": "integer", "minimum": 5 },
+        "roles": { "type": "integer", "minimum": 1, "description": "不含应用管理员" },
+        "states": { "type": "integer", "minimum": 2 },
+        "apis": { "type": "integer", "minimum": 4 },
+        "testsMin": { "type": "integer", "minimum": 15 },
+        "rows": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

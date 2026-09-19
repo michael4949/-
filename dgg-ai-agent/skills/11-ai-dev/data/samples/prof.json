@@ -1,0 +1,3791 @@
+{
+ "archetype": "service",
+ "company": "成都启元财税服务有限公司",
+ "today": "2026-09-17",
+ "clockMin": 540,
+ "systems": [],
+ "seed": {
+  "byObject": {
+   "repair": [
+    {
+     "id": "BX-2609-001",
+     "status": "done",
+     "values": {
+      "device": "SYS-01",
+      "faultType": "机械",
+      "desc": "主轴异响，转速上不去",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 1,
+      "urgency": "紧急",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-001",
+      "handler": "设备员",
+      "result": "更换主轴轴承",
+      "cost": 1200
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-001"
+     },
+     "assignee": "设备员",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -435,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -785,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -695,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -435,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-002",
+     "status": "open",
+     "values": {
+      "device": "SYS-02",
+      "faultType": "电气",
+      "desc": "机械手卡滞，报警 1012",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 2,
+      "urgency": "停机",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-001"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 380,
+     "updatedAt": 380,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 380,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-003",
+     "status": "doing",
+     "values": {
+      "device": "SYS-03",
+      "faultType": "液压",
+      "desc": "液压站压力上不去",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 1,
+      "urgency": "一般",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-001",
+      "handler": "设备员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-001"
+     },
+     "assignee": "设备员",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-004",
+     "status": "accepted",
+     "values": {
+      "device": "SYS-04",
+      "faultType": "机械",
+      "desc": "加热区温度波动大",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 2,
+      "urgency": "紧急",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-002",
+      "handler": "设备员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-002"
+     },
+     "assignee": "设备员",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "expense": [
+    {
+     "id": "BS-2609-001",
+     "status": "pending",
+     "values": {
+      "type": "差旅",
+      "amount": 2360,
+      "date": "2026-09-12",
+      "desc": "赴苏州客户现场技术支持",
+      "invoice": 3,
+      "photo": 3,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-002",
+     "status": "approved",
+     "values": {
+      "type": "交通",
+      "amount": 680,
+      "date": "2026-09-12",
+      "desc": "市内送样打车",
+      "invoice": 1,
+      "photo": 1,
+      "applicant": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-003",
+     "status": "rejected",
+     "values": {
+      "type": "办公",
+      "amount": 4999,
+      "date": "2026-09-12",
+      "desc": "打印耗材",
+      "invoice": 2,
+      "photo": 3,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-004",
+     "status": "pending",
+     "values": {
+      "type": "差旅",
+      "amount": 2360,
+      "date": "2026-09-12",
+      "desc": "赴苏州客户现场技术支持",
+      "invoice": 3,
+      "photo": 1,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "leave": [
+    {
+     "id": "QJ-2609-001",
+     "status": "pending",
+     "values": {
+      "kind": "年假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 2,
+      "reason": "家中事务",
+      "handover": "E-001",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-002",
+     "status": "approved",
+     "values": {
+      "kind": "事假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 1,
+      "reason": "就医",
+      "handover": "E-002",
+      "applicant": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-003",
+     "status": "rejected",
+     "values": {
+      "kind": "调休",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 0.5,
+      "reason": "调休",
+      "handover": "E-003",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-004",
+     "status": "pending",
+     "values": {
+      "kind": "年假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 2,
+      "reason": "家中事务",
+      "handover": "E-004",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "vehicle": [
+    {
+     "id": "YC-2609-001",
+     "status": "pending",
+     "values": {
+      "purpose": "送样到客户现场",
+      "dest": "苏州工业园区",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 2,
+      "driver": "否",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-002",
+     "status": "approved",
+     "values": {
+      "purpose": "接送来访客户",
+      "dest": "杭州萧山",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 1,
+      "driver": "是",
+      "applicant": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-003",
+     "status": "lent",
+     "values": {
+      "purpose": "采购取料",
+      "dest": "宁波北仑",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 3,
+      "driver": "否",
+      "applicant": "E-030",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -780,
+     "updatedAt": -632,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -632,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-004",
+     "status": "pending",
+     "values": {
+      "purpose": "送样到客户现场",
+      "dest": "苏州工业园区",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 2,
+      "driver": "是",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "training": [
+    {
+     "id": "PX-2609-001",
+     "status": "pending",
+     "values": {
+      "course": "设备点检与保养基础",
+      "date": "2026-09-25",
+      "venue": "培训室",
+      "reason": "岗位需要",
+      "cost": 0,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-002",
+     "status": "approved",
+     "values": {
+      "course": "安全生产培训",
+      "date": "2026-09-25",
+      "venue": "二号会议室",
+      "reason": "新员工必修",
+      "cost": 800,
+      "applicant": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-003",
+     "status": "rejected",
+     "values": {
+      "course": "质量意识培训",
+      "date": "2026-09-25",
+      "venue": "培训室",
+      "reason": "岗位需要",
+      "cost": 0,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-004",
+     "status": "pending",
+     "values": {
+      "course": "设备点检与保养基础",
+      "date": "2026-09-25",
+      "venue": "二号会议室",
+      "reason": "新员工必修",
+      "cost": 800,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "meeting": [
+    {
+     "id": "HY-2609-001",
+     "status": "pending",
+     "values": {
+      "room": "一号会议室",
+      "topic": "周生产计划会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 8,
+      "equip": "投影",
+      "booker": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-002",
+     "status": "approved",
+     "values": {
+      "room": "二号会议室",
+      "topic": "客户来访评审",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 12,
+      "equip": "视频会议",
+      "booker": "E-031",
+      "opinion": "已安排"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-003",
+     "status": "rejected",
+     "values": {
+      "room": "培训室",
+      "topic": "质量月度会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 6,
+      "equip": "投影",
+      "booker": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-004",
+     "status": "pending",
+     "values": {
+      "room": "一号会议室",
+      "topic": "周生产计划会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 8,
+      "equip": "视频会议",
+      "booker": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "complaint": [
+    {
+     "id": "TS-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "channel": "微信",
+      "content": "交付件表面划伤，要求补发",
+      "level": "严重",
+      "photo": 1,
+      "receiver": "E-030",
+      "handler": "E-001",
+      "result": "已补发并致歉",
+      "closeType": "已解决"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -435,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -785,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -695,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -435,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-002",
+     "status": "open",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "channel": "电话",
+      "content": "到货延迟一天",
+      "level": "一般",
+      "photo": 0,
+      "receiver": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 260,
+     "updatedAt": 260,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 260,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-003",
+     "status": "doing",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "channel": "微信",
+      "content": "账务凭证录入有误",
+      "level": "严重",
+      "photo": 1,
+      "receiver": "E-030",
+      "handler": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-004",
+     "status": "accepted",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "channel": "电话",
+      "content": "交付件表面划伤，要求补发",
+      "level": "一般",
+      "photo": 0,
+      "receiver": "E-031",
+      "handler": "E-002"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": "E-002",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "asset": [
+    {
+     "id": "GD-2609-001",
+     "status": "pending",
+     "values": {
+      "asset": "笔记本电脑 T14",
+      "assetNo": "ZC-2025-031",
+      "qty": 1,
+      "purpose": "外出客户现场演示",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-002",
+     "status": "approved",
+     "values": {
+      "asset": "测量投影仪",
+      "assetNo": "ZC-2024-118",
+      "qty": 1,
+      "purpose": "车间首件检测",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-003",
+     "status": "lent",
+     "values": {
+      "asset": "手持扫码枪",
+      "assetNo": "ZC-2026-007",
+      "qty": 1,
+      "purpose": "仓库盘点",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "E-030",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -780,
+     "updatedAt": -632,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -632,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-004",
+     "status": "pending",
+     "values": {
+      "asset": "笔记本电脑 T14",
+      "assetNo": "ZC-2025-031",
+      "qty": 1,
+      "purpose": "外出客户现场演示",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "visitor": [
+    {
+     "id": "FK-2609-001",
+     "status": "pending",
+     "values": {
+      "company": "汽配一级供应商",
+      "count": 2,
+      "purpose": "技术交流",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "车间",
+      "host": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-002",
+     "status": "approved",
+     "values": {
+      "company": "设备厂商",
+      "count": 1,
+      "purpose": "审核",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "办公区",
+      "host": "E-031",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-003",
+     "status": "rejected",
+     "values": {
+      "company": "审核机构",
+      "count": 4,
+      "purpose": "商务洽谈",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "车间",
+      "host": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-004",
+     "status": "pending",
+     "values": {
+      "company": "汽配一级供应商",
+      "count": 2,
+      "purpose": "技术交流",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "办公区",
+      "host": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "client_onboard": [
+    {
+     "id": "XK-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "taxType": "一般纳税人",
+      "service": "V01 · 小规模纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "齐全",
+      "photo": 1,
+      "group": "G1 · 资料组",
+      "manager": "E-030",
+      "assignee": "E-001",
+      "note": "账套已建，首月账期 2026-10"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -2330,
+     "updatedAt": -1945,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -2330,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -2295,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始建账",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -2205,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成接入",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -1945,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-002",
+     "status": "open",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "taxType": "小规模纳税人",
+      "service": "V02 · 一般纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "待补",
+      "photo": 1,
+      "group": "G2 · 账务一组",
+      "manager": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-003",
+     "status": "done",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "taxType": "一般纳税人",
+      "service": "V03 · 年度汇算清缴",
+      "startMonth": "2026-10",
+      "docs": "齐全",
+      "photo": 1,
+      "group": "G3 · 账务二组",
+      "manager": "E-030",
+      "assignee": "E-001",
+      "note": "账套已建，首月账期 2026-10"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -372,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -792,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始建账",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -672,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成接入",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -372,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-004",
+     "status": "done",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "taxType": "小规模纳税人",
+      "service": "V01 · 小规模纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "待补",
+      "photo": 1,
+      "group": "G4 · 税务组",
+      "manager": "E-031",
+      "assignee": "E-002",
+      "note": "账套已建，首月账期 2026-10"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": "E-002",
+     "version": 4,
+     "createdAt": -500,
+     "updatedAt": -174,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -500,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -449,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始建账",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -374,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成接入",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -174,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-005",
+     "status": "doing",
+     "values": {
+      "customer": "K-342 · 电商公司",
+      "taxType": "一般纳税人",
+      "service": "V02 · 一般纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "齐全",
+      "photo": 1,
+      "group": "G1 · 资料组",
+      "manager": "E-030",
+      "assignee": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 600,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 500,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始建账",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 600,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-006",
+     "status": "accepted",
+     "values": {
+      "customer": "K-298 · 培训机构",
+      "taxType": "小规模纳税人",
+      "service": "V03 · 年度汇算清缴",
+      "startMonth": "2026-10",
+      "docs": "待补",
+      "photo": 1,
+      "group": "G2 · 账务一组",
+      "manager": "E-031",
+      "assignee": "E-002"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": "E-002",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 534,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 534,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-007",
+     "status": "accepted",
+     "values": {
+      "customer": "K-351 · 咨询公司",
+      "taxType": "一般纳税人",
+      "service": "V01 · 小规模纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "齐全",
+      "photo": 1,
+      "group": "G3 · 账务二组",
+      "manager": "E-030",
+      "assignee": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "E-001",
+     "version": 2,
+     "createdAt": 510,
+     "updatedAt": 548,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 510,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 548,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "XK-2609-008",
+     "status": "open",
+     "values": {
+      "customer": "K-360 · 物流公司",
+      "taxType": "小规模纳税人",
+      "service": "V02 · 一般纳税人月度账务",
+      "startMonth": "2026-10",
+      "docs": "待补",
+      "photo": 1,
+      "group": "G4 · 税务组",
+      "manager": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 515,
+     "updatedAt": 515,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 515,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    }
+   ],
+   "doc_handover": [
+    {
+     "id": "PJ-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "period": "2026-08",
+      "count": 46,
+      "type": "进项发票",
+      "photo": 2,
+      "sender": "K-311 · 餐饮管理公司",
+      "signer": "E-001",
+      "signNote": "已签收，46 张与清单一致"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -2330,
+     "updatedAt": -1945,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": -2330,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -2295,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -2205,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -1945,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-002",
+     "status": "open",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "period": "2026-08",
+      "count": 12,
+      "type": "银行回单",
+      "photo": 1,
+      "sender": "K-311 · 餐饮管理公司"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-003",
+     "status": "done",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "period": "2026-08",
+      "count": 88,
+      "type": "费用票",
+      "photo": 4,
+      "sender": "K-311 · 餐饮管理公司",
+      "signer": "E-001",
+      "signNote": "已签收，46 张与清单一致"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -372,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -792,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -672,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -372,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-004",
+     "status": "done",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "period": "2026-08",
+      "count": 46,
+      "type": "进项发票",
+      "photo": 2,
+      "sender": "K-287 · 贸易公司",
+      "signer": "E-002",
+      "signNote": "已签收"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-287 · 贸易公司"
+     },
+     "assignee": "E-002",
+     "version": 4,
+     "createdAt": -500,
+     "updatedAt": -174,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-287 · 贸易公司",
+       "role": "客户",
+       "atMin": -500,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -449,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -374,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -174,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-005",
+     "status": "doing",
+     "values": {
+      "customer": "K-342 · 电商公司",
+      "period": "2026-08",
+      "count": 12,
+      "type": "银行回单",
+      "photo": 1,
+      "sender": "K-311 · 餐饮管理公司",
+      "signer": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 600,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 500,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 600,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-006",
+     "status": "accepted",
+     "values": {
+      "customer": "K-298 · 培训机构",
+      "period": "2026-08",
+      "count": 88,
+      "type": "费用票",
+      "photo": 4,
+      "sender": "K-287 · 贸易公司",
+      "signer": "E-002"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-287 · 贸易公司"
+     },
+     "assignee": "E-002",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 534,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-287 · 贸易公司",
+       "role": "客户",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": 534,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-007",
+     "status": "accepted",
+     "values": {
+      "customer": "K-351 · 咨询公司",
+      "period": "2026-08",
+      "count": 46,
+      "type": "进项发票",
+      "photo": 2,
+      "sender": "K-311 · 餐饮管理公司",
+      "signer": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 2,
+     "createdAt": 510,
+     "updatedAt": 548,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 510,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 548,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "PJ-2609-008",
+     "status": "open",
+     "values": {
+      "customer": "K-360 · 物流公司",
+      "period": "2026-08",
+      "count": 12,
+      "type": "银行回单",
+      "photo": 1,
+      "sender": "K-311 · 餐饮管理公司"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 515,
+     "updatedAt": 515,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 515,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    }
+   ],
+   "consult": [
+    {
+     "id": "ZX-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "topic": "税务",
+      "question": "小规模转一般纳税人的时点与准备材料",
+      "urgency": "一般",
+      "photo": 0,
+      "receiver": "K-311 · 餐饮管理公司",
+      "assignee": "E-001",
+      "answer": "连续 12 个月销售额超过 500 万元须登记为一般纳税人，需准备营业执照、财务负责人信息与银行开户资料"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -2330,
+     "updatedAt": -1945,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": -2330,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -2295,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始答复",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -2205,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成答复",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -1945,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-002",
+     "status": "done",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "topic": "账务",
+      "question": "8 月费用票能否跨月入账",
+      "urgency": "紧急",
+      "photo": 1,
+      "receiver": "K-287 · 贸易公司",
+      "assignee": "E-002",
+      "answer": "可以，按发票日期所属月入账"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-287 · 贸易公司"
+     },
+     "assignee": "E-002",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -538,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-287 · 贸易公司",
+       "role": "客户",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -778,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始答复",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -718,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成答复",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -538,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-003",
+     "status": "done",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "topic": "工商",
+      "question": "股东变更需要哪些材料",
+      "urgency": "一般",
+      "photo": 0,
+      "receiver": "K-311 · 餐饮管理公司",
+      "assignee": "E-001",
+      "answer": "股东会决议、股权转让协议、新股东身份材料"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 4,
+     "createdAt": -500,
+     "updatedAt": -52,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": -500,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -472,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始答复",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -352,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成答复",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -52,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-004",
+     "status": "open",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "topic": "税务",
+      "question": "小规模转一般纳税人的时点与准备材料",
+      "urgency": "紧急",
+      "photo": 1,
+      "receiver": "K-311 · 餐饮管理公司"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 260,
+     "updatedAt": 260,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 260,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-005",
+     "status": "doing",
+     "values": {
+      "customer": "K-342 · 电商公司",
+      "topic": "账务",
+      "question": "8 月费用票能否跨月入账",
+      "urgency": "一般",
+      "photo": 0,
+      "receiver": "K-311 · 餐饮管理公司",
+      "assignee": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 600,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 500,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始答复",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 600,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-006",
+     "status": "accepted",
+     "values": {
+      "customer": "K-298 · 培训机构",
+      "topic": "工商",
+      "question": "股东变更需要哪些材料",
+      "urgency": "紧急",
+      "photo": 1,
+      "receiver": "K-287 · 贸易公司",
+      "assignee": "E-002"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-287 · 贸易公司"
+     },
+     "assignee": "E-002",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 534,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-287 · 贸易公司",
+       "role": "客户",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 534,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-007",
+     "status": "accepted",
+     "values": {
+      "customer": "K-351 · 咨询公司",
+      "topic": "税务",
+      "question": "小规模转一般纳税人的时点与准备材料",
+      "urgency": "一般",
+      "photo": 0,
+      "receiver": "K-311 · 餐饮管理公司",
+      "assignee": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": "E-001",
+     "version": 2,
+     "createdAt": 510,
+     "updatedAt": 548,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 510,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 548,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "ZX-2609-008",
+     "status": "open",
+     "values": {
+      "customer": "K-360 · 物流公司",
+      "topic": "账务",
+      "question": "8 月费用票能否跨月入账",
+      "urgency": "紧急",
+      "photo": 1,
+      "receiver": "K-311 · 餐饮管理公司"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户",
+      "id": "K-311 · 餐饮管理公司"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 515,
+     "updatedAt": 515,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-311 · 餐饮管理公司",
+       "role": "客户",
+       "atMin": 515,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    }
+   ],
+   "renewal": [
+    {
+     "id": "XF-2609-001",
+     "status": "open",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "service": "V01 · 小规模纳税人月度账务",
+      "expireAt": "2026-10-15",
+      "fee": 4800,
+      "creator": "账务组长"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "账务组长",
+      "id": "账务组长"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "XF-2609-002",
+     "status": "done",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "service": "V02 · 一般纳税人月度账务",
+      "expireAt": "2026-10-15",
+      "fee": 9600,
+      "creator": "账务组长",
+      "assignee": "E-031",
+      "contactResult": "考虑中",
+      "note": "客户比价中，下周再联系"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "账务组长",
+      "id": "账务组长"
+     },
+     "assignee": "E-031",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -538,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": -778,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始跟进",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -718,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成跟进",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -538,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "XF-2609-003",
+     "status": "doing",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "service": "V03 · 年度汇算清缴",
+      "expireAt": "2026-10-15",
+      "fee": 2400,
+      "creator": "账务组长",
+      "assignee": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "账务组长",
+      "id": "账务组长"
+     },
+     "assignee": "E-030",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始跟进",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "XF-2609-004",
+     "status": "accepted",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "service": "V01 · 小规模纳税人月度账务",
+      "expireAt": "2026-10-15",
+      "fee": 4800,
+      "creator": "账务组长",
+      "assignee": "E-031"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "账务组长",
+      "id": "账务组长"
+     },
+     "assignee": "E-031",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "assign",
+       "action": "分配",
+       "by": "作业主管",
+       "role": "作业主管",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "biz_change": [
+    {
+     "id": "GS-2609-001",
+     "status": "returned",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "changeType": "注册地址",
+      "desc": "迁至新园区办公地址",
+      "docs": "股东会决议、章程修正案、新地址证明",
+      "photo": 3,
+      "applicant": "E-030",
+      "opinion": "材料齐全，受理",
+      "handler": "办理人",
+      "doneAt": "2026-09-24",
+      "result": "已换发营业执照"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 4,
+     "createdAt": -3730,
+     "updatedAt": -3345,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -3730,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "受理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -3695,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "开始办理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -3605,
+       "from": "approved",
+       "to": "lent"
+      },
+      {
+       "seq": 4,
+       "actionEn": "return",
+       "action": "办结",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -3345,
+       "from": "lent",
+       "to": "returned"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-002",
+     "status": "approved",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "changeType": "经营范围",
+      "desc": "新增食品经营范围",
+      "docs": "股东会决议、章程修正案",
+      "photo": 2,
+      "applicant": "E-031",
+      "opinion": "材料齐全，受理"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -2320,
+     "updatedAt": -2278,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -2320,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "受理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -2278,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-003",
+     "status": "lent",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "changeType": "股权",
+      "desc": "股东股权内部转让",
+      "docs": "股权转让协议、股东会决议",
+      "photo": 3,
+      "applicant": "E-030",
+      "opinion": "材料齐全，受理",
+      "handler": "办理人"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -2270,
+     "updatedAt": -2122,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -2270,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "受理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -2242,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "开始办理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -2122,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-004",
+     "status": "pending",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "changeType": "注册地址",
+      "desc": "迁至新园区办公地址",
+      "docs": "股东会决议、章程修正案、新地址证明",
+      "photo": 2,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-005",
+     "status": "approved",
+     "values": {
+      "customer": "K-342 · 电商公司",
+      "changeType": "经营范围",
+      "desc": "新增食品经营范围",
+      "docs": "股东会决议、章程修正案",
+      "photo": 3,
+      "applicant": "E-030",
+      "opinion": "材料齐全，受理"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -810,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "受理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -810,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-006",
+     "status": "rejected",
+     "values": {
+      "customer": "K-298 · 培训机构",
+      "changeType": "股权",
+      "desc": "股东股权内部转让",
+      "docs": "股权转让协议、股东会决议",
+      "photo": 2,
+      "applicant": "E-031"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -736,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -736,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-007",
+     "status": "approved",
+     "values": {
+      "customer": "K-351 · 咨询公司",
+      "changeType": "注册地址",
+      "desc": "迁至新园区办公地址",
+      "docs": "股东会决议、章程修正案、新地址证明",
+      "photo": 3,
+      "applicant": "E-030",
+      "opinion": "材料齐全，受理"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -540,
+     "updatedAt": -502,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -540,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "受理",
+       "by": "办理人",
+       "role": "办理人",
+       "atMin": -502,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "GS-2609-008",
+     "status": "pending",
+     "values": {
+      "customer": "K-360 · 物流公司",
+      "changeType": "经营范围",
+      "desc": "新增食品经营范围",
+      "docs": "股东会决议、章程修正案",
+      "photo": 2,
+      "applicant": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "visit_log": [
+    {
+     "id": "HF-2609-001",
+     "status": "open",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "visitAt": "2026-09-16 15:00",
+      "way": "电话",
+      "content": "月度账务交付满意，希望提前 3 天出报表",
+      "satisfaction": "满意",
+      "issues": "报表提前 3 天",
+      "visitor": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "HF-2609-002",
+     "status": "done",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "visitAt": "2026-09-16 15:00",
+      "way": "微信",
+      "content": "申报提醒及时",
+      "satisfaction": "一般",
+      "issues": "无",
+      "visitor": "E-031",
+      "handler": "账务组长",
+      "result": "已反馈会计组"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": "账务组长",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -538,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -778,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -718,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": -538,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "HF-2609-003",
+     "status": "doing",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "visitAt": "2026-09-16 15:00",
+      "way": "上门",
+      "content": "票据签收慢",
+      "satisfaction": "不满意",
+      "issues": "票据签收提速",
+      "visitor": "E-030",
+      "handler": "账务组长"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-030"
+     },
+     "assignee": "账务组长",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "HF-2609-004",
+     "status": "accepted",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "visitAt": "2026-09-16 15:00",
+      "way": "电话",
+      "content": "月度账务交付满意，希望提前 3 天出报表",
+      "satisfaction": "满意",
+      "issues": "报表提前 3 天",
+      "visitor": "E-031",
+      "handler": "账务组长"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客户经理",
+      "id": "E-031"
+     },
+     "assignee": "账务组长",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "账务组长",
+       "role": "账务组长",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "doc_supplement": [
+    {
+     "id": "BJ-2609-001",
+     "status": "open",
+     "values": {
+      "customer": "K-311 · 餐饮管理公司",
+      "item": "银行回单",
+      "period": "2026-08",
+      "deadline": "2026-09-20",
+      "reason": "8 月对公账户回单缺 3 笔",
+      "requester": "E-001"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-001"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "BJ-2609-002",
+     "status": "done",
+     "values": {
+      "customer": "K-287 · 贸易公司",
+      "item": "工资表",
+      "period": "2026-08",
+      "deadline": "2026-09-20",
+      "reason": "工资表未盖章",
+      "requester": "E-002",
+      "receiver": "E-031",
+      "photo": 1,
+      "note": "已补交"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-002"
+     },
+     "assignee": "E-031",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -538,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -778,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -718,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": -538,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "BJ-2609-003",
+     "status": "doing",
+     "values": {
+      "customer": "K-330 · 设计工作室",
+      "item": "进项发票",
+      "period": "2026-08",
+      "deadline": "2026-09-20",
+      "reason": "缺 2 张进项票",
+      "requester": "E-001",
+      "receiver": "E-030"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-001"
+     },
+     "assignee": "E-030",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-001",
+       "role": "代账会计",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-030",
+       "role": "客户经理",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "BJ-2609-004",
+     "status": "accepted",
+     "values": {
+      "customer": "K-256 · 建材经销商",
+      "item": "银行回单",
+      "period": "2026-08",
+      "deadline": "2026-09-20",
+      "reason": "8 月对公账户回单缺 3 笔",
+      "requester": "E-002",
+      "receiver": "E-031"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "代账会计",
+      "id": "E-002"
+     },
+     "assignee": "E-031",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-002",
+       "role": "代账会计",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-031",
+       "role": "客户经理",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "expect": {
+  "client_onboard": {
+   "object": "client_onboard",
+   "flow": "dispatch",
+   "mode": "assign",
+   "pages": 7,
+   "fields": 10,
+   "roles": 4,
+   "states": 4,
+   "apis": 8,
+   "testsMin": 19,
+   "rows": 8
+  },
+  "doc_handover": {
+   "object": "doc_handover",
+   "flow": "dispatch",
+   "mode": "accept",
+   "pages": 6,
+   "fields": 8,
+   "roles": 3,
+   "states": 4,
+   "apis": 8,
+   "testsMin": 18,
+   "rows": 8
+  },
+  "consult": {
+   "object": "consult",
+   "flow": "dispatch",
+   "mode": "assign",
+   "pages": 7,
+   "fields": 8,
+   "roles": 4,
+   "states": 4,
+   "apis": 8,
+   "testsMin": 17,
+   "rows": 8
+  },
+  "biz_change": {
+   "object": "biz_change",
+   "flow": "approve",
+   "mode": null,
+   "pages": 6,
+   "fields": 10,
+   "roles": 3,
+   "states": 5,
+   "apis": 10,
+   "testsMin": 20,
+   "rows": 8
+  }
+ },
+ "state": {}
+}

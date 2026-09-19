@@ -1,0 +1,3410 @@
+{
+ "archetype": "flow",
+ "company": "宁波优选百货供应链有限公司",
+ "today": "2026-09-17",
+ "clockMin": 540,
+ "systems": [],
+ "seed": {
+  "byObject": {
+   "repair": [
+    {
+     "id": "BX-2609-001",
+     "status": "done",
+     "values": {
+      "device": "CV-01",
+      "faultType": "机械",
+      "desc": "主轴异响，转速上不去",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 1,
+      "urgency": "紧急",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-015",
+      "handler": "设备员",
+      "result": "更换主轴轴承",
+      "cost": 1200
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "仓储员",
+      "id": "E-015"
+     },
+     "assignee": "设备员",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -435,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -785,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -695,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": -435,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-002",
+     "status": "open",
+     "values": {
+      "device": "CV-02",
+      "faultType": "电气",
+      "desc": "机械手卡滞，报警 1012",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 2,
+      "urgency": "停机",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-015"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "仓储员",
+      "id": "E-015"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 380,
+     "updatedAt": 380,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": 380,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-003",
+     "status": "doing",
+     "values": {
+      "device": "SC-01",
+      "faultType": "液压",
+      "desc": "液压站压力上不去",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 1,
+      "urgency": "一般",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-015",
+      "handler": "设备员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "仓储员",
+      "id": "E-015"
+     },
+     "assignee": "设备员",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "BX-2609-004",
+     "status": "accepted",
+     "values": {
+      "device": "PK-01",
+      "faultType": "机械",
+      "desc": "加热区温度波动大",
+      "startedAt": "2026-09-17 08:20",
+      "photo": 2,
+      "urgency": "紧急",
+      "expectAt": "2026-09-17 14:00",
+      "reporter": "E-016",
+      "handler": "设备员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "仓储员",
+      "id": "E-016"
+     },
+     "assignee": "设备员",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "E-016",
+       "role": "仓储员",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "设备员",
+       "role": "设备员",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "expense": [
+    {
+     "id": "BS-2609-001",
+     "status": "pending",
+     "values": {
+      "type": "差旅",
+      "amount": 2360,
+      "date": "2026-09-12",
+      "desc": "赴苏州客户现场技术支持",
+      "invoice": 3,
+      "photo": 3,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-002",
+     "status": "approved",
+     "values": {
+      "type": "交通",
+      "amount": 680,
+      "date": "2026-09-12",
+      "desc": "市内送样打车",
+      "invoice": 1,
+      "photo": 1,
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-003",
+     "status": "rejected",
+     "values": {
+      "type": "办公",
+      "amount": 4999,
+      "date": "2026-09-12",
+      "desc": "打印耗材",
+      "invoice": 2,
+      "photo": 3,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "BS-2609-004",
+     "status": "pending",
+     "values": {
+      "type": "差旅",
+      "amount": 2360,
+      "date": "2026-09-12",
+      "desc": "赴苏州客户现场技术支持",
+      "invoice": 3,
+      "photo": 1,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "leave": [
+    {
+     "id": "QJ-2609-001",
+     "status": "pending",
+     "values": {
+      "kind": "年假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 2,
+      "reason": "家中事务",
+      "handover": "E-015",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-002",
+     "status": "approved",
+     "values": {
+      "kind": "事假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 1,
+      "reason": "就医",
+      "handover": "E-016",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-003",
+     "status": "rejected",
+     "values": {
+      "kind": "调休",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 0.5,
+      "reason": "调休",
+      "handover": "E-017",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "QJ-2609-004",
+     "status": "pending",
+     "values": {
+      "kind": "年假",
+      "from": "2026-09-21 08:00",
+      "to": "2026-09-22 17:30",
+      "days": 2,
+      "reason": "家中事务",
+      "handover": "E-018",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "vehicle": [
+    {
+     "id": "YC-2609-001",
+     "status": "pending",
+     "values": {
+      "purpose": "送样到客户现场",
+      "dest": "苏州工业园区",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 2,
+      "driver": "否",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-002",
+     "status": "approved",
+     "values": {
+      "purpose": "接送来访客户",
+      "dest": "杭州萧山",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 1,
+      "driver": "是",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-003",
+     "status": "lent",
+     "values": {
+      "purpose": "采购取料",
+      "dest": "宁波北仑",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 3,
+      "driver": "否",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -780,
+     "updatedAt": -632,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -632,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "YC-2609-004",
+     "status": "pending",
+     "values": {
+      "purpose": "送样到客户现场",
+      "dest": "苏州工业园区",
+      "from": "2026-09-18 08:30",
+      "to": "2026-09-18 18:00",
+      "passengers": 2,
+      "driver": "是",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "training": [
+    {
+     "id": "PX-2609-001",
+     "status": "pending",
+     "values": {
+      "course": "设备点检与保养基础",
+      "date": "2026-09-25",
+      "venue": "培训室",
+      "reason": "岗位需要",
+      "cost": 0,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-002",
+     "status": "approved",
+     "values": {
+      "course": "安全生产培训",
+      "date": "2026-09-25",
+      "venue": "二号会议室",
+      "reason": "新员工必修",
+      "cost": 800,
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-003",
+     "status": "rejected",
+     "values": {
+      "course": "质量意识培训",
+      "date": "2026-09-25",
+      "venue": "培训室",
+      "reason": "岗位需要",
+      "cost": 0,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "PX-2609-004",
+     "status": "pending",
+     "values": {
+      "course": "设备点检与保养基础",
+      "date": "2026-09-25",
+      "venue": "二号会议室",
+      "reason": "新员工必修",
+      "cost": 800,
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "meeting": [
+    {
+     "id": "HY-2609-001",
+     "status": "pending",
+     "values": {
+      "room": "一号会议室",
+      "topic": "周生产计划会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 8,
+      "equip": "投影",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-002",
+     "status": "approved",
+     "values": {
+      "room": "二号会议室",
+      "topic": "客户来访评审",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 12,
+      "equip": "视频会议",
+      "booker": "业务员",
+      "opinion": "已安排"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-003",
+     "status": "rejected",
+     "values": {
+      "room": "培训室",
+      "topic": "质量月度会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 6,
+      "equip": "投影",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "HY-2609-004",
+     "status": "pending",
+     "values": {
+      "room": "一号会议室",
+      "topic": "周生产计划会",
+      "from": "2026-09-18 14:00",
+      "to": "2026-09-18 15:30",
+      "people": 8,
+      "equip": "视频会议",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "complaint": [
+    {
+     "id": "TS-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "channel": "微信",
+      "content": "交付件表面划伤，要求补发",
+      "level": "严重",
+      "photo": 1,
+      "receiver": "客服专员",
+      "handler": "E-015",
+      "result": "已补发并致歉",
+      "closeType": "已解决"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客服专员",
+      "id": "客服专员"
+     },
+     "assignee": "E-015",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -435,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -785,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -695,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "完成",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -435,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-002",
+     "status": "open",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "channel": "电话",
+      "content": "到货延迟一天",
+      "level": "一般",
+      "photo": 0,
+      "receiver": "客服专员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客服专员",
+      "id": "客服专员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 260,
+     "updatedAt": 260,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 260,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-003",
+     "status": "doing",
+     "values": {
+      "customer": "K-117 · 社区团购平台",
+      "channel": "微信",
+      "content": "账务凭证录入有误",
+      "level": "严重",
+      "photo": 1,
+      "receiver": "客服专员",
+      "handler": "E-015"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客服专员",
+      "id": "客服专员"
+     },
+     "assignee": "E-015",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 618,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": 498,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "开始处理",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": 618,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "TS-2609-004",
+     "status": "accepted",
+     "values": {
+      "customer": "K-063 · 学校食堂配送",
+      "channel": "电话",
+      "content": "交付件表面划伤，要求补发",
+      "level": "一般",
+      "photo": 0,
+      "receiver": "客服专员",
+      "handler": "E-016"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "客服专员",
+      "id": "客服专员"
+     },
+     "assignee": "E-016",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 541,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "接单",
+       "by": "E-016",
+       "role": "仓储员",
+       "atMin": 541,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    }
+   ],
+   "asset": [
+    {
+     "id": "GD-2609-001",
+     "status": "pending",
+     "values": {
+      "asset": "笔记本电脑 T14",
+      "assetNo": "ZC-2025-031",
+      "qty": 1,
+      "purpose": "外出客户现场演示",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-002",
+     "status": "approved",
+     "values": {
+      "asset": "测量投影仪",
+      "assetNo": "ZC-2024-118",
+      "qty": 1,
+      "purpose": "车间首件检测",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-003",
+     "status": "lent",
+     "values": {
+      "asset": "手持扫码枪",
+      "assetNo": "ZC-2026-007",
+      "qty": 1,
+      "purpose": "仓库盘点",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -780,
+     "updatedAt": -632,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -632,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "GD-2609-004",
+     "status": "pending",
+     "values": {
+      "asset": "笔记本电脑 T14",
+      "assetNo": "ZC-2025-031",
+      "qty": 1,
+      "purpose": "外出客户现场演示",
+      "from": "2026-09-17",
+      "to": "2026-10-17",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "visitor": [
+    {
+     "id": "FK-2609-001",
+     "status": "pending",
+     "values": {
+      "company": "汽配一级供应商",
+      "count": 2,
+      "purpose": "技术交流",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "车间",
+      "host": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-002",
+     "status": "approved",
+     "values": {
+      "company": "设备厂商",
+      "count": 1,
+      "purpose": "审核",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "办公区",
+      "host": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-003",
+     "status": "rejected",
+     "values": {
+      "company": "审核机构",
+      "count": 4,
+      "purpose": "商务洽谈",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "车间",
+      "host": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "FK-2609-004",
+     "status": "pending",
+     "values": {
+      "company": "汽配一级供应商",
+      "count": 2,
+      "purpose": "技术交流",
+      "visitAt": "2026-09-18 10:00",
+      "leaveAt": "2026-09-18 12:00",
+      "area": "办公区",
+      "host": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "return_order": [
+    {
+     "id": "TH-2609-001",
+     "status": "done",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G01 · 常温饮料组合箱",
+      "qty": 12,
+      "reason": "破损",
+      "type": "退货",
+      "photo": 2,
+      "desc": "外箱受潮破损 12 箱",
+      "order": "SO-2609-0871",
+      "auditNote": "同意退货",
+      "auditor": "客服专员",
+      "receiver": "E-015",
+      "stock": 12
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": "E-015",
+     "version": 4,
+     "createdAt": -2330,
+     "updatedAt": -1945,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -2330,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": -2295,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "收货",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -2205,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "入库",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -1945,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-002",
+     "status": "open",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "product": "G02 · 休闲食品组合箱",
+      "qty": 6,
+      "reason": "临期",
+      "type": "换货",
+      "photo": 1,
+      "desc": "临期 15 天，门店要求退回",
+      "order": "SO-2609-0868"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -940,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-003",
+     "status": "done",
+     "values": {
+      "customer": "K-117 · 社区团购平台",
+      "product": "G03 · 冷藏乳品组合箱",
+      "qty": 30,
+      "reason": "发错货",
+      "type": "退货",
+      "photo": 2,
+      "desc": "到货与订单不符",
+      "order": "SO-2609-0875",
+      "auditNote": "同意退货",
+      "auditor": "客服专员",
+      "receiver": "E-015",
+      "stock": 30
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": "E-015",
+     "version": 4,
+     "createdAt": -820,
+     "updatedAt": -372,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -820,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": -792,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "收货",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -672,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "入库",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": -372,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-004",
+     "status": "done",
+     "values": {
+      "customer": "K-063 · 学校食堂配送",
+      "product": "G04 · 日化用品组合箱",
+      "qty": 12,
+      "reason": "破损",
+      "type": "换货",
+      "photo": 1,
+      "desc": "外箱受潮破损 12 箱",
+      "order": "SO-2609-0866",
+      "auditNote": "同意换货",
+      "auditor": "客服专员",
+      "receiver": "E-016",
+      "stock": 12
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-088 · 区域商超"
+     },
+     "assignee": "E-016",
+     "version": 4,
+     "createdAt": -500,
+     "updatedAt": -174,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-088 · 区域商超",
+       "role": "门店",
+       "atMin": -500,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": -449,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "收货",
+       "by": "E-016",
+       "role": "仓储员",
+       "atMin": -374,
+       "from": "accepted",
+       "to": "doing"
+      },
+      {
+       "seq": 4,
+       "actionEn": "complete",
+       "action": "入库",
+       "by": "E-016",
+       "role": "仓储员",
+       "atMin": -174,
+       "from": "doing",
+       "to": "done"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-005",
+     "status": "doing",
+     "values": {
+      "customer": "K-131 · 餐饮连锁",
+      "product": "G01 · 常温饮料组合箱",
+      "qty": 6,
+      "reason": "临期",
+      "type": "退货",
+      "photo": 2,
+      "desc": "临期 15 天，门店要求退回",
+      "order": "SO-2609-0878",
+      "auditNote": "同意退货",
+      "auditor": "客服专员",
+      "receiver": "E-015"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": "E-015",
+     "version": 3,
+     "createdAt": 470,
+     "updatedAt": 600,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": 470,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 500,
+       "from": "open",
+       "to": "accepted"
+      },
+      {
+       "seq": 3,
+       "actionEn": "start",
+       "action": "收货",
+       "by": "E-015",
+       "role": "仓储员",
+       "atMin": 600,
+       "from": "accepted",
+       "to": "doing"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-006",
+     "status": "accepted",
+     "values": {
+      "customer": "K-145 · 企业福利采购",
+      "product": "G02 · 休闲食品组合箱",
+      "qty": 30,
+      "reason": "发错货",
+      "type": "换货",
+      "photo": 1,
+      "desc": "到货与订单不符",
+      "order": "SO-2609-0880",
+      "auditNote": "同意换货",
+      "auditor": "客服专员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-088 · 区域商超"
+     },
+     "assignee": "客服专员",
+     "version": 2,
+     "createdAt": 490,
+     "updatedAt": 534,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-088 · 区域商超",
+       "role": "门店",
+       "atMin": 490,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 534,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-007",
+     "status": "accepted",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G03 · 冷藏乳品组合箱",
+      "qty": 12,
+      "reason": "破损",
+      "type": "退货",
+      "photo": 2,
+      "desc": "外箱受潮破损 12 箱",
+      "order": "SO-2609-0882",
+      "auditNote": "同意退货",
+      "auditor": "客服专员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": "客服专员",
+     "version": 2,
+     "createdAt": 510,
+     "updatedAt": 548,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": 510,
+       "from": null,
+       "to": "open"
+      },
+      {
+       "seq": 2,
+       "actionEn": "accept",
+       "action": "审核",
+       "by": "客服专员",
+       "role": "客服专员",
+       "atMin": 548,
+       "from": "open",
+       "to": "accepted"
+      }
+     ]
+    },
+    {
+     "id": "TH-2609-008",
+     "status": "open",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "product": "G04 · 日化用品组合箱",
+      "qty": 6,
+      "reason": "临期",
+      "type": "换货",
+      "photo": 1,
+      "desc": "临期 15 天，门店要求退回",
+      "order": "SO-2609-0884"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "门店",
+      "id": "K-102 · 连锁便利店总部"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 515,
+     "updatedAt": 515,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": 515,
+       "from": null,
+       "to": "open"
+      }
+     ]
+    }
+   ],
+   "sample_req": [
+    {
+     "id": "YP-2609-001",
+     "status": "approved",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G01 · 常温饮料组合箱",
+      "qty": 2,
+      "purpose": "新客试用",
+      "address": "客户仓库（杭州余杭）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员",
+      "opinion": "同意寄样"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -2320,
+     "updatedAt": -2285,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -2320,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -2285,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-002",
+     "status": "lent",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "product": "G02 · 休闲食品组合箱",
+      "qty": 1,
+      "purpose": "招标",
+      "address": "客户门店（宁波鄞州）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员",
+      "opinion": "同意寄样",
+      "express": "SF-2609-118377"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -2270,
+     "updatedAt": -2168,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -2270,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -2228,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -2168,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-003",
+     "status": "pending",
+     "values": {
+      "customer": "K-117 · 社区团购平台",
+      "product": "G03 · 冷藏乳品组合箱",
+      "qty": 3,
+      "purpose": "展会",
+      "address": "展会现场（上海）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-004",
+     "status": "approved",
+     "values": {
+      "customer": "K-063 · 学校食堂配送",
+      "product": "G04 · 日化用品组合箱",
+      "qty": 2,
+      "purpose": "新客试用",
+      "address": "客户仓库（杭州余杭）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员",
+      "opinion": "同意寄样"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -789,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -789,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-005",
+     "status": "rejected",
+     "values": {
+      "customer": "K-131 · 餐饮连锁",
+      "product": "G01 · 常温饮料组合箱",
+      "qty": 1,
+      "purpose": "招标",
+      "address": "客户门店（宁波鄞州）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -750,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -750,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-006",
+     "status": "approved",
+     "values": {
+      "customer": "K-145 · 企业福利采购",
+      "product": "G02 · 休闲食品组合箱",
+      "qty": 3,
+      "purpose": "展会",
+      "address": "展会现场（上海）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员",
+      "opinion": "同意寄样"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -540,
+     "updatedAt": -496,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -540,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -496,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-007",
+     "status": "pending",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G03 · 冷藏乳品组合箱",
+      "qty": 2,
+      "purpose": "新客试用",
+      "address": "客户仓库（杭州余杭）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "YP-2609-008",
+     "status": "pending",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "product": "G04 · 日化用品组合箱",
+      "qty": 1,
+      "purpose": "招标",
+      "address": "客户门店（宁波鄞州）",
+      "needBy": "2026-09-20",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 520,
+     "updatedAt": 520,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 520,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "display_check": [
+    {
+     "id": "CL-2609-001",
+     "status": "issue",
+     "values": {
+      "store": "K-102 · 连锁便利店总部",
+      "date": "2026-09-17",
+      "photo": 3,
+      "items": 8,
+      "issues": 2,
+      "issueDesc": "堆头缺货、价签过期",
+      "inspector": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -3820,
+     "updatedAt": -3820,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -3820,
+       "from": null,
+       "to": "issue"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-002",
+     "status": "closed",
+     "values": {
+      "store": "K-088 · 区域商超",
+      "date": "2026-09-17",
+      "photo": 4,
+      "items": 8,
+      "issues": 1,
+      "issueDesc": "端架陈列与计划不符",
+      "inspector": "业务员",
+      "fixer": "K-088 · 区域商超",
+      "fixResult": "已按陈列图调整",
+      "verify": "复核合格"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": "K-088 · 区域商超",
+     "version": 4,
+     "createdAt": -2340,
+     "updatedAt": -2058,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -2340,
+       "from": null,
+       "to": "issue"
+      },
+      {
+       "seq": 2,
+       "actionEn": "fix",
+       "action": "开始整改",
+       "by": "K-088 · 区域商超",
+       "role": "门店",
+       "atMin": -2298,
+       "from": "issue",
+       "to": "fixing"
+      },
+      {
+       "seq": 3,
+       "actionEn": "submitFix",
+       "action": "提交复检",
+       "by": "K-088 · 区域商超",
+       "role": "门店",
+       "atMin": -2238,
+       "from": "fixing",
+       "to": "recheck"
+      },
+      {
+       "seq": 4,
+       "actionEn": "pass",
+       "action": "复核关闭",
+       "by": "督导",
+       "role": "督导",
+       "atMin": -2058,
+       "from": "recheck",
+       "to": "closed"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-003",
+     "status": "closed",
+     "values": {
+      "store": "K-117 · 社区团购平台",
+      "date": "2026-09-17",
+      "photo": 3,
+      "items": 8,
+      "issues": 1,
+      "issueDesc": "堆头缺货、价签过期",
+      "inspector": "业务员",
+      "fixer": "K-102 · 连锁便利店总部",
+      "fixResult": "已补货并更换价签",
+      "verify": "复核合格"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": "K-102 · 连锁便利店总部",
+     "version": 4,
+     "createdAt": -840,
+     "updatedAt": -392,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "issue"
+      },
+      {
+       "seq": 2,
+       "actionEn": "fix",
+       "action": "开始整改",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -812,
+       "from": "issue",
+       "to": "fixing"
+      },
+      {
+       "seq": 3,
+       "actionEn": "submitFix",
+       "action": "提交复检",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -692,
+       "from": "fixing",
+       "to": "recheck"
+      },
+      {
+       "seq": 4,
+       "actionEn": "pass",
+       "action": "复核关闭",
+       "by": "督导",
+       "role": "督导",
+       "atMin": -392,
+       "from": "recheck",
+       "to": "closed"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-004",
+     "status": "ok",
+     "values": {
+      "store": "K-063 · 学校食堂配送",
+      "date": "2026-09-17",
+      "photo": 4,
+      "items": 8,
+      "issues": 0,
+      "issueDesc": "端架陈列与计划不符",
+      "inspector": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -740,
+     "updatedAt": -740,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -740,
+       "from": null,
+       "to": "ok"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-005",
+     "status": "recheck",
+     "values": {
+      "store": "K-131 · 餐饮连锁",
+      "date": "2026-09-17",
+      "photo": 3,
+      "items": 8,
+      "issues": 1,
+      "issueDesc": "堆头缺货、价签过期",
+      "inspector": "业务员",
+      "fixer": "K-102 · 连锁便利店总部",
+      "fixResult": "已补货并更换价签"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": "K-102 · 连锁便利店总部",
+     "version": 3,
+     "createdAt": -640,
+     "updatedAt": -510,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -640,
+       "from": null,
+       "to": "issue"
+      },
+      {
+       "seq": 2,
+       "actionEn": "fix",
+       "action": "开始整改",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -610,
+       "from": "issue",
+       "to": "fixing"
+      },
+      {
+       "seq": 3,
+       "actionEn": "submitFix",
+       "action": "提交复检",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": -510,
+       "from": "fixing",
+       "to": "recheck"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-006",
+     "status": "fixing",
+     "values": {
+      "store": "K-145 · 企业福利采购",
+      "date": "2026-09-17",
+      "photo": 4,
+      "items": 8,
+      "issues": 1,
+      "issueDesc": "端架陈列与计划不符",
+      "inspector": "业务员",
+      "fixer": "K-088 · 区域商超"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": "K-088 · 区域商超",
+     "version": 2,
+     "createdAt": -540,
+     "updatedAt": -496,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -540,
+       "from": null,
+       "to": "issue"
+      },
+      {
+       "seq": 2,
+       "actionEn": "fix",
+       "action": "开始整改",
+       "by": "K-088 · 区域商超",
+       "role": "门店",
+       "atMin": -496,
+       "from": "issue",
+       "to": "fixing"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-007",
+     "status": "fixing",
+     "values": {
+      "store": "K-102 · 连锁便利店总部",
+      "date": "2026-09-17",
+      "photo": 3,
+      "items": 8,
+      "issues": 2,
+      "issueDesc": "堆头缺货、价签过期",
+      "inspector": "业务员",
+      "fixer": "K-102 · 连锁便利店总部"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": "K-102 · 连锁便利店总部",
+     "version": 2,
+     "createdAt": 460,
+     "updatedAt": 498,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 460,
+       "from": null,
+       "to": "issue"
+      },
+      {
+       "seq": 2,
+       "actionEn": "fix",
+       "action": "开始整改",
+       "by": "K-102 · 连锁便利店总部",
+       "role": "门店",
+       "atMin": 498,
+       "from": "issue",
+       "to": "fixing"
+      }
+     ]
+    },
+    {
+     "id": "CL-2609-008",
+     "status": "issue",
+     "values": {
+      "store": "K-088 · 区域商超",
+      "date": "2026-09-17",
+      "photo": 4,
+      "items": 8,
+      "issues": 1,
+      "issueDesc": "端架陈列与计划不符",
+      "inspector": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 495,
+     "updatedAt": 495,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 495,
+       "from": null,
+       "to": "issue"
+      }
+     ]
+    }
+   ],
+   "price_req": [
+    {
+     "id": "JG-2609-001",
+     "status": "pending",
+     "values": {
+      "customer": "K-102 · 连锁便利店总部",
+      "product": "G01 · 常温饮料组合箱",
+      "listPrice": 86,
+      "askPrice": 76,
+      "discount": 9,
+      "qty": 600,
+      "reason": "竞品同规格低价，客户要求跟进",
+      "validTo": "2026-10-31",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "JG-2609-002",
+     "status": "approved",
+     "values": {
+      "customer": "K-088 · 区域商超",
+      "product": "G02 · 休闲食品组合箱",
+      "listPrice": 72,
+      "askPrice": 66,
+      "discount": 8,
+      "qty": 300,
+      "reason": "年度框架量大",
+      "validTo": "2026-10-31",
+      "applicant": "业务员",
+      "opinion": "同意"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "JG-2609-003",
+     "status": "rejected",
+     "values": {
+      "customer": "K-117 · 社区团购平台",
+      "product": "G03 · 冷藏乳品组合箱",
+      "listPrice": 118,
+      "askPrice": 112,
+      "discount": 5,
+      "qty": 1200,
+      "reason": "新品铺货",
+      "validTo": "2026-10-31",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "JG-2609-004",
+     "status": "pending",
+     "values": {
+      "customer": "K-063 · 学校食堂配送",
+      "product": "G04 · 日化用品组合箱",
+      "listPrice": 86,
+      "askPrice": 76,
+      "discount": 9,
+      "qty": 600,
+      "reason": "竞品同规格低价，客户要求跟进",
+      "validTo": "2026-10-31",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "promo_material": [
+    {
+     "id": "WL-2609-001",
+     "status": "approved",
+     "values": {
+      "item": "堆头",
+      "qty": 6,
+      "store": "K-102 · 连锁便利店总部",
+      "campaign": "中秋礼盒专场",
+      "needBy": "2026-09-19",
+      "applicant": "业务员",
+      "opinion": "同意发放"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -2320,
+     "updatedAt": -2285,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -2320,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -2285,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-002",
+     "status": "lent",
+     "values": {
+      "item": "海报",
+      "qty": 40,
+      "store": "K-088 · 区域商超",
+      "campaign": "开学季饮品周",
+      "needBy": "2026-09-19",
+      "applicant": "业务员",
+      "opinion": "同意发放",
+      "issuer": "运营专员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 3,
+     "createdAt": -2270,
+     "updatedAt": -2168,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -2270,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -2228,
+       "from": "pending",
+       "to": "approved"
+      },
+      {
+       "seq": 3,
+       "actionEn": "lend",
+       "action": "领用",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -2168,
+       "from": "approved",
+       "to": "lent"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-003",
+     "status": "pending",
+     "values": {
+      "item": "礼品",
+      "qty": 100,
+      "store": "K-117 · 社区团购平台",
+      "campaign": "十一大促",
+      "needBy": "2026-09-19",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-004",
+     "status": "approved",
+     "values": {
+      "item": "堆头",
+      "qty": 6,
+      "store": "K-063 · 学校食堂配送",
+      "campaign": "中秋礼盒专场",
+      "needBy": "2026-09-19",
+      "applicant": "业务员",
+      "opinion": "同意发放"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -789,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -789,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-005",
+     "status": "rejected",
+     "values": {
+      "item": "海报",
+      "qty": 40,
+      "store": "K-131 · 餐饮连锁",
+      "campaign": "开学季饮品周",
+      "needBy": "2026-09-19",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -750,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -750,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-006",
+     "status": "approved",
+     "values": {
+      "item": "礼品",
+      "qty": 100,
+      "store": "K-145 · 企业福利采购",
+      "campaign": "十一大促",
+      "needBy": "2026-09-19",
+      "applicant": "业务员",
+      "opinion": "同意发放"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -540,
+     "updatedAt": -496,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -540,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "运营专员",
+       "role": "运营专员",
+       "atMin": -496,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-007",
+     "status": "pending",
+     "values": {
+      "item": "堆头",
+      "qty": 6,
+      "store": "K-102 · 连锁便利店总部",
+      "campaign": "中秋礼盒专场",
+      "needBy": "2026-09-19",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "WL-2609-008",
+     "status": "pending",
+     "values": {
+      "item": "海报",
+      "qty": 40,
+      "store": "K-088 · 区域商超",
+      "campaign": "开学季饮品周",
+      "needBy": "2026-09-19",
+      "applicant": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 520,
+     "updatedAt": 520,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 520,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ],
+   "arrival": [
+    {
+     "id": "DH-2609-001",
+     "status": "pending",
+     "values": {
+      "supplier": "常温饮料供应商",
+      "product": "G01 · 常温饮料组合箱",
+      "qty": 600,
+      "plate": "厢式货车",
+      "arriveAt": "2026-09-18 09:00",
+      "dock": "收货月台 A",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": -940,
+     "updatedAt": -940,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -940,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    },
+    {
+     "id": "DH-2609-002",
+     "status": "approved",
+     "values": {
+      "supplier": "休闲食品供应商",
+      "product": "G02 · 休闲食品组合箱",
+      "qty": 400,
+      "plate": "冷藏车",
+      "arriveAt": "2026-09-18 09:00",
+      "dock": "收货月台 B",
+      "booker": "业务员",
+      "opinion": "已安排"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -840,
+     "updatedAt": -798,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -840,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "approve",
+       "action": "通过",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -798,
+       "from": "pending",
+       "to": "approved"
+      }
+     ]
+    },
+    {
+     "id": "DH-2609-003",
+     "status": "rejected",
+     "values": {
+      "supplier": "乳品供应商",
+      "product": "G03 · 冷藏乳品组合箱",
+      "qty": 900,
+      "plate": "厢式货车",
+      "arriveAt": "2026-09-18 09:00",
+      "dock": "收货月台 A",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 2,
+     "createdAt": -780,
+     "updatedAt": -752,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": -780,
+       "from": null,
+       "to": "pending"
+      },
+      {
+       "seq": 2,
+       "actionEn": "reject",
+       "action": "驳回",
+       "by": "仓配主管",
+       "role": "仓配主管",
+       "atMin": -752,
+       "from": "pending",
+       "to": "rejected"
+      }
+     ]
+    },
+    {
+     "id": "DH-2609-004",
+     "status": "pending",
+     "values": {
+      "supplier": "常温饮料供应商",
+      "product": "G04 · 日化用品组合箱",
+      "qty": 600,
+      "plate": "冷藏车",
+      "arriveAt": "2026-09-18 09:00",
+      "dock": "收货月台 B",
+      "booker": "业务员"
+     },
+     "createdBy": {
+      "slot": "submitter",
+      "title": "业务员",
+      "id": "业务员"
+     },
+     "assignee": null,
+     "version": 1,
+     "createdAt": 500,
+     "updatedAt": 500,
+     "history": [
+      {
+       "seq": 1,
+       "actionEn": "submit",
+       "action": "提交",
+       "by": "业务员",
+       "role": "业务员",
+       "atMin": 500,
+       "from": null,
+       "to": "pending"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "expect": {
+  "return_order": {
+   "object": "return_order",
+   "flow": "dispatch",
+   "mode": "dual",
+   "pages": 7,
+   "fields": 12,
+   "roles": 4,
+   "states": 4,
+   "apis": 8,
+   "testsMin": 18,
+   "rows": 8
+  },
+  "sample_req": {
+   "object": "sample_req",
+   "flow": "approve",
+   "mode": null,
+   "pages": 6,
+   "fields": 9,
+   "roles": 3,
+   "states": 4,
+   "apis": 9,
+   "testsMin": 21,
+   "rows": 8
+  },
+  "display_check": {
+   "object": "display_check",
+   "flow": "inspect",
+   "mode": null,
+   "pages": 6,
+   "fields": 10,
+   "roles": 4,
+   "states": 5,
+   "apis": 8,
+   "testsMin": 19,
+   "rows": 8
+  },
+  "promo_material": {
+   "object": "promo_material",
+   "flow": "approve",
+   "mode": null,
+   "pages": 6,
+   "fields": 8,
+   "roles": 3,
+   "states": 4,
+   "apis": 9,
+   "testsMin": 20,
+   "rows": 8
+  }
+ },
+ "state": {}
+}

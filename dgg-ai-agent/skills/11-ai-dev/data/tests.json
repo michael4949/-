@@ -1,0 +1,119 @@
+{
+  "_note": "用例种类的命名模板、预期文案与错误码文案。{} 占位由内核填充；内核按固定顺序枚举，两次同序同果。",
+  "kinds": [
+    {
+      "key": "required",
+      "name": "必填",
+      "nameTpl": "{field}为空提交",
+      "expect": "拒绝「{field}必填」",
+      "max": 6
+    },
+    {
+      "key": "boundary",
+      "name": "边界",
+      "nameTpl": "{field}{desc}",
+      "expect": "拒绝「{err}」",
+      "max": 4
+    },
+    {
+      "key": "transition",
+      "name": "流程迁移",
+      "nameTpl": "{from} → {to}（{role} {action}）",
+      "expect": "允许",
+      "max": 12
+    },
+    {
+      "key": "role",
+      "name": "越权",
+      "nameTpl": "{role}调用 {action}",
+      "expect": "拒绝「无权操作」",
+      "max": 6
+    },
+    {
+      "key": "state",
+      "name": "非法迁移",
+      "nameTpl": "{from}直接{action}",
+      "expect": "拒绝「当前状态不允许」",
+      "max": 1
+    },
+    {
+      "key": "version",
+      "name": "重复接单",
+      "nameTpl": "同一单被第二个{role} {emp2} {action}",
+      "expect": "拒绝「该单已由 {emp} {action}」",
+      "max": 1
+    },
+    {
+      "key": "ref",
+      "name": "主数据校验",
+      "nameTpl": "{field} {value} 不在{source}",
+      "expect": "拒绝「{field}不在主数据内」",
+      "max": 1
+    },
+    {
+      "key": "overdue",
+      "name": "超时标记",
+      "nameTpl": "推进 {hours} 小时后仍{state}",
+      "expect": "标记超时",
+      "max": 1
+    },
+    {
+      "key": "perm",
+      "name": "权限",
+      "nameTpl": "{role}可查看{page}",
+      "expect": "允许",
+      "max": 6
+    },
+    {
+      "key": "stat",
+      "name": "看板统计",
+      "nameTpl": "看板按{by}统计{metric}",
+      "expect": "返回 {n} 组",
+      "max": 4
+    },
+    {
+      "key": "rule",
+      "name": "提醒规则",
+      "nameTpl": "{desc}",
+      "expect": "{expect}",
+      "max": 6
+    },
+    {
+      "key": "validation",
+      "name": "校验",
+      "nameTpl": "{field}{desc}",
+      "expect": "拒绝「{err}」",
+      "max": 6
+    }
+  ],
+  "errors": {
+    "E_REQUIRED": "{field}必填",
+    "E_STATE": "当前状态不允许",
+    "E_ROLE": "无权操作",
+    "E_SCOPE": "只能处理本人接的单",
+    "E_VERSION": "该单已由 {emp} {action}",
+    "E_REF": "{field}不在主数据内",
+    "E_LEN": "{field}超过 {len} 字",
+    "E_RANGE": "{field}超出范围 {min}–{max}",
+    "E_ENUM": "{field}取值不在选项内",
+    "E_DATE": "{field}需晚于{other}",
+    "E_PHOTO": "{field}最多 {max} 张",
+    "E_PHONE": "{field}格式不对",
+    "E_FORMAT": "{field}格式不对",
+    "E_NOTFOUND": "记录不存在"
+  },
+  "boundaryDesc": {
+    "E_LEN": "超长 {n} 字",
+    "E_RANGE_LOW": "低于下限 {v}",
+    "E_RANGE_HIGH": "高于上限 {v}",
+    "E_ENUM": "取值不在选项内",
+    "E_PHOTO": "超过 {n} 张",
+    "E_DATE": "早于{other}"
+  },
+  "warnings": {
+    "photoSize": {
+      "id": "W-01",
+      "text": "{field}未限制文件大小，建议 ≤ 5MB"
+    }
+  }
+}

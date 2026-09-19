@@ -19,13 +19,14 @@ skills/
   06-ai-cfo/               AI CFO · 财务副驾驶（SKILL.md · schema · data 勾稽规则 / 风险规则 / 参考带 / 政策库 + 三套账套 · core/fin.js · examples · scripts）
                            三表由科目余额生成，14 条勾稽逐条核对并可落调整分录；10 条风险落概率 × 影响矩阵；13 周现金日历带情景开关与补缺三方案；12 项政策按画像与账套核对
   08-ai-process/           AI流程提效 · 生产部门的生产环节（SKILL.md · schema · data 词表 / 异常规则与根因 / 改善方案库 + 三套样本 · core/flow.js · examples · scripts）
+  11-ai-dev/               AI软件开发 · 一句需求变可点页面（SKILL.md · schema · data 词典 / 30 个对象库 / 三类流程模板 / 岗位 / 组件 / 预置句 / 用例文案 / 变更类型 / 主数据来源 + 三套样本 · core/build.js · examples · scripts）
                            纯规则、无 LLM：产线 / 工序 / 路线 / 标准工时取自 AI ERP 样本；报工核验六条规则、约束识别与瓶颈前在制 7 天预测、异常六条规则各指一条根因与岗位、时间损失瀑布与可用率 × 性能率、标准工时校准、按瓶颈节拍投料、换型合批枚举、四方案在 AI ERP 排程引擎上重算、明日派工与多能工支援、保养窗口、增效账与周报
   09-ai-decision/          AI决策 · 指标 归因 方案 审批（SKILL.md · schema · data 指标树 / 证据库 / 方案库 / 会签规则 + 三套样本 · core/decide.js · examples · scripts）
                            指标从 CFO / ERP / 获客 / 人力官 / 法务 的样本取数；连环替代法归因（贡献之和等于变动，一次性项剔除后判主因）；方案预演 12 个月与净效益；会签规则 + 总经理终批成决议；节点跟踪与复盘
   10-ai-erp/               AI ERP · 订单交付指挥室（SKILL.md · schema · data 业态词表 + 四业态样本 · core/sim.js 排程引擎 · examples · scripts）
                            纯预制、无 LLM：排程、延期归因、处置预演、插单三方案、采购建议、交付日报都出自同一个确定性引擎
 prototype/
-  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-04.js · module-05.js · module-06.js · module-07.js · module-08.js · module-09.js · module-10.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
+  src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-04.js · module-05.js · module-06.js · module-07.js · module-08.js · module-09.js · module-10.js · module-11.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
                            product.css · product-ui.js：八个产品模块共用的一套 UI 语言（左导航 + 页签 + 工作区；KPI 砖 / 状态签 / 可排序表 / 负荷热力 / SVG 甘特 / 抽屉 / 方案对比 / AI 判断面板 / 风险矩阵 / 现金曲线 / 漏斗 / 分布条 / 90 天周格日历 / 四维雷达 / 瀑布图 / 流程条 / 动作日志），每个模块只换一个强调色
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
   test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
@@ -36,6 +37,7 @@ prototype/
   test/screenshot-m05.js   AI人力官 六屏走查：接入 → 驾驶舱（扣积分）→ 招聘（换版 / 发布 / 筛选 / 初筛 / 安排面试）→ 面试（打分 / 录入 / 发 offer）→ 合规（整改写回 / 台账 / 日历筛选）→ 成本（选方案 / 采纳 / 月报发送）
   test/screenshot-m06.js   AI CFO 六屏走查：接入 → 驾驶舱（扣积分）→ 勾稽（按建议调整）→ 风险（处置）→ 现金（情景 → 按方案执行）→ 政策（加入清单 → 发送）
   test/screenshot-m08.js   AI流程提效 六屏走查：接入（报工核验 · 扣积分）→ 工序流看板（约束判断 / 异常处置）→ 工序诊断（时间损失 / 采纳标准工时 / 按瓶颈节拍投料）→ 改善预演（AI 重排顺序 / 拖参数 / 立项）→ 执行与派工（生成派工单 / 保养窗口 / 带教 / 节点完成）→ 提效周报（增效账 / 发送）；重进落回上次屏、积分不重复扣
+  test/screenshot-m11.js   AI软件开发 六屏走查：接入（需求句解析 · 改词实时重算 · 扣积分）→ 生成应用（页面逐条点亮 / 怎么生成的 / 推荐字段写回）→ 试用（校验失败提示 / 三步走单 / 角色切换 · PC 看板联动）→ 测试与产物（用例逐行执行 / 采纳权限建议 / 数据字典 / 接口清单）→ 发布（屏内二维码 / 发布流水 / 发布记录）→ 迭代交付（追加需求 → V1.1.0 / 变更清单 / 交付报告 / 发送）；重进落回上次屏、积分不重复扣
   test/screenshot-m09.js   AI决策 六屏走查：接入 → 驾驶舱（扣积分）→ 归因（切基期 / 选因子 / 证据）→ 方案预演（调参数 / 选方案 / 发起审批）→ 审批（会签 / 批准 / 驳回）→ 执行（节点完成 / 复盘 / 月报发送）
   test/screenshot-m10.js   AI ERP 六屏走查：接入 → 指挥室（扣积分）→ 订单下钻（执行处置）→ 插单三方案 → 落单 → 生成采购单 → 日报发送；禁词扫描、屏上数字与内核比对
   dist/index.html          交付物
@@ -82,6 +84,11 @@ node scripts/gen-samples.js       # 重新生成三套样本（产线与路线�
 node scripts/run-examples.js      # 三套样本跑引擎，写 examples/*.output.json
 node scripts/validate.js          # 引擎自检：确定性与不改原样本、约束与加班事实一致、报工核验、瀑布守恒与三率、校准、投料、合批、预演与推荐、立项、派工、保养、增效账、周报、禁词、examples 一致
 
+cd ../11-ai-dev
+node scripts/gen-samples.js       # 由 scripts/objects.js 的 DSL 生成 30 个对象库，再用内核运行时真实走出三套样本的预埋记录（设备 / 员工 / 客户 / 商品只引用兄弟模块样本里的编号）
+node scripts/run-examples.js      # 三套样本跑引擎，写 examples/*.output.json
+node scripts/validate.js          # 引擎自检：词典 / 对象库 / 流程模板 / 预置句与同义改写 / 确定性 / 世界一致 / 运行时守卫 / 用例 / 追加变更 / 发布 / 文案禁词 / examples 一致
+
 cd ../09-ai-decision
 node scripts/gen-samples.js       # 重新生成三套样本（指标从各模块样本与内核结果取数，先保证那几个模块的样本是最新的）
 node scripts/run-examples.js      # 三套样本跑引擎，写 examples/*.output.json
@@ -105,6 +112,7 @@ NODE_PATH=$(npm root -g) node test/screenshot-m07.js  # AI法务 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m05.js  # AI人力官 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m06.js  # AI CFO 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m08.js  # AI流程提效 六屏走查
+NODE_PATH=$(npm root -g) node test/screenshot-m11.js  # AI软件开发 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m09.js  # AI决策 六屏走查
 NODE_PATH=$(npm root -g) node test/screenshot-m10.js  # AI ERP 六屏走查（W=1600 H=900 OUT=shots-m10-1600 可换视口与输出目录）
 ```

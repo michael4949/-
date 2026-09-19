@@ -1,0 +1,48 @@
+{
+  "_note": "页面种类 → 组件序列（手机 / PC 渲染器按此拼页面）、字段类型 → 控件与校验触发时机、固定文案模板。",
+  "pageKinds": {
+    "form": { "name": "表单", "phone": ["title", "fields", "submitBtn"], "pc": ["title", "fields", "submitBtn"] },
+    "mine": { "name": "我的列表", "phone": ["tabs", "rows"], "pc": ["table"] },
+    "list": { "name": "待办列表", "phone": ["tabs", "rows"], "pc": ["table"] },
+    "detail": { "name": "详情与处理", "phone": ["kv", "steps", "actions"], "pc": ["kv", "steps", "actions"] },
+    "board": { "name": "看板", "phone": ["kpis", "dist"], "pc": ["kpis", "dist", "table"] },
+    "admin": { "name": "应用管理", "phone": ["roles"], "pc": ["roles", "fields", "flow", "perms"] },
+    "rate": { "name": "评价页", "phone": ["stars", "comment", "submitBtn"], "pc": ["stars", "comment", "submitBtn"] },
+    "entry": { "name": "扫码入口", "phone": ["qr", "title", "version"], "pc": ["qr", "title", "version"] }
+  },
+  "controls": {
+    "text": { "name": "输入框", "validateOn": "blur" }, "textarea": { "name": "多行输入", "validateOn": "blur" }, "select": { "name": "单选", "validateOn": "change" },
+    "number": { "name": "数字", "validateOn": "blur" }, "money": { "name": "金额（元）", "validateOn": "blur" }, "date": { "name": "日期", "validateOn": "change" },
+    "datetime": { "name": "日期时间", "validateOn": "change" }, "photo": { "name": "拍照附件", "validateOn": "change" }, "phone": { "name": "手机号", "validateOn": "blur" },
+    "rating": { "name": "星级", "validateOn": "change" }, "ref": { "name": "主数据下拉", "validateOn": "change" }, "member": { "name": "自动带入", "validateOn": "submit" }
+  },
+  "columnTypes": { "text": "varchar({len})", "textarea": "text", "select": "varchar(32)", "number": "decimal(12,2)", "money": "decimal(14,2)", "date": "date", "datetime": "datetime", "photo": "json", "phone": "varchar(20)", "rating": "tinyint", "ref": "varchar(32)", "member": "varchar(16)" },
+  "systemColumns": [
+    { "col": "id", "label": "流水号", "type": "varchar(24)", "unique": true },
+    { "col": "status", "label": "状态", "type": "varchar(16)" },
+    { "col": "assignee", "label": "当前处理人", "type": "varchar(16)" },
+    { "col": "version", "label": "版本号（乐观锁）", "type": "int" },
+    { "col": "created_at", "label": "创建时间", "type": "datetime" },
+    { "col": "updated_at", "label": "更新时间", "type": "datetime" }
+  ],
+  "texts": {
+    "publishNote": "{title}，{pages} 页 {fields} 字段 {states} 节点 {roles} 角色",
+    "notifyChannel": "微信服务通知",
+    "envNames": { "staging": "测试环境", "prod": "正式环境" },
+    "pipeline": ["构建", "测试环境", "冒烟", "正式环境", "已上线"],
+    "checklist": [
+      { "key": "pass", "label": "用例通过率 100%" },
+      { "key": "required", "label": "必填字段均有校验" },
+      { "key": "rolePage", "label": "每个角色至少一个页面" },
+      { "key": "notify", "label": "通知渠道已配置" },
+      { "key": "refs", "label": "主数据关联已映射" }
+    ],
+    "sources": { "lib": "对象库", "parse": "需求识别", "delta": "需求追加", "perm": "权限调整", "system": "系统字段" },
+    "scopeText": { "本人": "只看本人提交的", "本人待办 + 已接": "待办 + 本人已接的", "全部": "全部记录" },
+    "report": {
+      "title": "【应用交付】{company} · {title} {version}",
+      "lines": ["【需求】{reqText}", "【应用】{pages} 页 · {fields} 字段 · {roles} 角色 · {states} 个流程节点 · 渠道 {channels}", "【测试】{testNo} · {tests} 条用例 · 通过 {passed} · 越权拦截 {roleBlocked}", "【发布】{releaseText}", "【变更】{changeText}", "【主数据】{refText}", "【收件】{recipients}"],
+      "noChange": "本版无追加变更"
+    }
+  }
+}

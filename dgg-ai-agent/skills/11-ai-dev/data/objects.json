@@ -1,0 +1,4911 @@
+{
+ "_note": "30 个业务对象（通用 9 · 制造 8 · 贸易 6 · 服务 7），由 scripts/objects.js 的 DSL 生成；字段 example 以 @ 开头的按主数据 / 角色在运行时解析。",
+ "objects": [
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "downtime",
+     "label": "停机影响",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "是"
+    },
+    {
+     "key": "parts",
+     "label": "备件需求",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 60,
+     "example": "主轴轴承 6205 ×2"
+    },
+    {
+     "key": "recur",
+     "label": "复发标记",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "首次",
+      "复发"
+     ],
+     "example": "首次"
+    },
+    {
+     "key": "hours",
+     "label": "维修工时（预计）",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 200,
+     "at": "complete",
+     "example": 3
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "设备员",
+     "lead": "生产主管"
+    },
+    "flow": {
+     "submitter": "仓储员",
+     "handler": "设备员",
+     "lead": "仓配主管"
+    },
+    "service": {
+     "submitter": "代账会计",
+     "handler": "设备员",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 2
+   },
+   "key": "repair",
+   "name": "报修单",
+   "arche": "common",
+   "prefix": "BX",
+   "verb": "报修",
+   "short": "工单",
+   "flow": "dispatch",
+   "ruleText": "接单约定时效 2 小时，超过标记超时",
+   "fields": [
+    {
+     "key": "device",
+     "label": "设备编号",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "machines",
+     "example": "@machines"
+    },
+    {
+     "key": "faultType",
+     "label": "故障类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "机械",
+      "电气",
+      "液压",
+      "其他"
+     ],
+     "example": "机械",
+     "examples": [
+      "机械",
+      "电气",
+      "液压"
+     ]
+    },
+    {
+     "key": "desc",
+     "label": "故障描述",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "主轴异响，转速上不去",
+     "examples": [
+      "主轴异响，转速上不去",
+      "机械手卡滞，报警 1012",
+      "液压站压力上不去",
+      "加热区温度波动大"
+     ]
+    },
+    {
+     "key": "startedAt",
+     "label": "故障发生时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-17 08:20"
+    },
+    {
+     "key": "photo",
+     "label": "故障照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1,
+     "examples": [
+      1,
+      2
+     ]
+    },
+    {
+     "key": "urgency",
+     "label": "紧急度",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "一般",
+      "紧急",
+      "停机"
+     ],
+     "example": "紧急",
+     "examples": [
+      "紧急",
+      "停机",
+      "一般"
+     ]
+    },
+    {
+     "key": "expectAt",
+     "label": "期望到场时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "startedAt",
+     "example": "2026-09-17 14:00"
+    },
+    {
+     "key": "reporter",
+     "label": "报修人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "handler",
+     "label": "处理人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "E-122"
+    },
+    {
+     "key": "result",
+     "label": "处理结果",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "complete",
+     "example": "更换主轴轴承",
+     "examples": [
+      "更换主轴轴承",
+      "清理机械手并润滑",
+      "更换液压泵密封"
+     ]
+    },
+    {
+     "key": "cost",
+     "label": "维修费用（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "complete",
+     "example": 1200,
+     "examples": [
+      1200,
+      300,
+      2600
+     ]
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "project",
+     "label": "所属项目",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 60,
+     "example": "新能源电池壳体打样"
+    },
+    {
+     "key": "pay",
+     "label": "支付方式",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "转账",
+      "现金"
+     ],
+     "example": "转账"
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": {
+    "field": "amount",
+    "gte": 5000,
+    "text": "金额 ≥ 5,000 元二级审批"
+   },
+   "initialRule": null,
+   "sla": null,
+   "key": "expense",
+   "name": "报销单",
+   "arche": "common",
+   "prefix": "BS",
+   "verb": "报销",
+   "short": "报销单",
+   "flow": "approve",
+   "ruleText": "金额 ≥ 5,000 元进入二级审批",
+   "fields": [
+    {
+     "key": "type",
+     "label": "费用类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "差旅",
+      "招待",
+      "办公",
+      "交通",
+      "其他"
+     ],
+     "example": "差旅",
+     "examples": [
+      "差旅",
+      "交通",
+      "办公"
+     ]
+    },
+    {
+     "key": "amount",
+     "label": "报销金额（预计）",
+     "type": "money",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 1000000,
+     "example": 2360,
+     "examples": [
+      2360,
+      680,
+      5800
+     ]
+    },
+    {
+     "key": "date",
+     "label": "发生日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-12"
+    },
+    {
+     "key": "desc",
+     "label": "事由",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 120,
+     "example": "赴苏州客户现场技术支持",
+     "examples": [
+      "赴苏州客户现场技术支持",
+      "市内送样打车",
+      "打印耗材"
+     ]
+    },
+    {
+     "key": "invoice",
+     "label": "发票张数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 50,
+     "example": 3,
+     "examples": [
+      3,
+      1,
+      2
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "发票照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 9,
+     "example": 3,
+     "examples": [
+      3,
+      1
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "attach",
+     "label": "证明材料",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "contact",
+     "label": "假期联系方式",
+     "type": "phone",
+     "required": false,
+     "source": "对象库",
+     "example": "138 0000 0000"
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "leave",
+   "name": "请假单",
+   "arche": "common",
+   "prefix": "QJ",
+   "verb": "请假",
+   "short": "请假单",
+   "flow": "approve",
+   "ruleText": "结束时间须晚于开始时间",
+   "fields": [
+    {
+     "key": "kind",
+     "label": "请假类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "事假",
+      "病假",
+      "年假",
+      "调休",
+      "婚假"
+     ],
+     "example": "年假",
+     "examples": [
+      "年假",
+      "事假",
+      "调休"
+     ]
+    },
+    {
+     "key": "from",
+     "label": "开始时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-21 08:00"
+    },
+    {
+     "key": "to",
+     "label": "结束时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "from",
+     "example": "2026-09-22 17:30"
+    },
+    {
+     "key": "days",
+     "label": "天数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0.5,
+     "max": 30,
+     "example": 2,
+     "examples": [
+      2,
+      1,
+      0.5
+     ]
+    },
+    {
+     "key": "reason",
+     "label": "事由",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 120,
+     "example": "家中事务",
+     "examples": [
+      "家中事务",
+      "就医",
+      "调休"
+     ]
+    },
+    {
+     "key": "handover",
+     "label": "工作交接人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "ref": "employees",
+     "example": "@employees"
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "plate",
+     "label": "指定车牌",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 12,
+     "example": "不指定"
+    },
+    {
+     "key": "toll",
+     "label": "路桥费（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 5000,
+     "at": "return",
+     "example": 60
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": {
+    "lent": "已领用",
+    "returned": "已归还"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "vehicle",
+   "name": "用车申请",
+   "arche": "common",
+   "prefix": "YC",
+   "verb": "用车",
+   "short": "用车单",
+   "flow": "approve",
+   "ruleText": "预计归还超过约定时间标记超期",
+   "fields": [
+    {
+     "key": "purpose",
+     "label": "用车事由",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 120,
+     "example": "送样到客户现场",
+     "examples": [
+      "送样到客户现场",
+      "接送来访客户",
+      "采购取料"
+     ]
+    },
+    {
+     "key": "dest",
+     "label": "目的地",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "苏州工业园区",
+     "examples": [
+      "苏州工业园区",
+      "杭州萧山",
+      "宁波北仑"
+     ]
+    },
+    {
+     "key": "from",
+     "label": "用车开始",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18 08:30"
+    },
+    {
+     "key": "to",
+     "label": "预计归还",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "from",
+     "due": true,
+     "example": "2026-09-18 18:00"
+    },
+    {
+     "key": "passengers",
+     "label": "乘车人数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 7,
+     "example": 2,
+     "examples": [
+      2,
+      1,
+      3
+     ]
+    },
+    {
+     "key": "driver",
+     "label": "是否需要司机",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "否",
+     "examples": [
+      "否",
+      "是"
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    },
+    {
+     "key": "mileage",
+     "label": "行驶里程（预计）",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 5000,
+     "at": "return",
+     "example": 120
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "cert",
+     "label": "是否需要证书",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "否"
+    },
+    {
+     "key": "seats",
+     "label": "名额",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 1,
+     "max": 100,
+     "example": 20
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "training",
+   "name": "培训报名",
+   "arche": "common",
+   "prefix": "PX",
+   "verb": "培训报名",
+   "short": "报名单",
+   "flow": "approve",
+   "ruleText": "培训费用（预计）大于 0 时审批人可填意见",
+   "fields": [
+    {
+     "key": "course",
+     "label": "课程名称",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "设备点检与保养基础",
+     "examples": [
+      "设备点检与保养基础",
+      "安全生产培训",
+      "质量意识培训"
+     ]
+    },
+    {
+     "key": "date",
+     "label": "培训日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-25"
+    },
+    {
+     "key": "venue",
+     "label": "培训地点",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 60,
+     "example": "培训室",
+     "examples": [
+      "培训室",
+      "二号会议室"
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "报名人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "reason",
+     "label": "报名理由",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "example": "岗位需要",
+     "examples": [
+      "岗位需要",
+      "新员工必修"
+     ]
+    },
+    {
+     "key": "cost",
+     "label": "培训费用（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 50000,
+     "example": 0,
+     "examples": [
+      0,
+      800
+     ]
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "tea",
+     "label": "茶水",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "需要",
+      "不需要"
+     ],
+     "example": "不需要"
+    },
+    {
+     "key": "note",
+     "label": "备注",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "example": "无"
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "meeting",
+   "name": "会议室预约",
+   "arche": "common",
+   "prefix": "HY",
+   "verb": "会议室预约",
+   "short": "预约单",
+   "flow": "approve",
+   "ruleText": "结束时间须晚于开始时间",
+   "fields": [
+    {
+     "key": "room",
+     "label": "会议室",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "一号会议室",
+      "二号会议室",
+      "培训室"
+     ],
+     "example": "一号会议室",
+     "examples": [
+      "一号会议室",
+      "二号会议室",
+      "培训室"
+     ]
+    },
+    {
+     "key": "topic",
+     "label": "会议主题",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "周生产计划会",
+     "examples": [
+      "周生产计划会",
+      "客户来访评审",
+      "质量月度会"
+     ]
+    },
+    {
+     "key": "from",
+     "label": "开始时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18 14:00"
+    },
+    {
+     "key": "to",
+     "label": "结束时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "from",
+     "example": "2026-09-18 15:30"
+    },
+    {
+     "key": "people",
+     "label": "参会人数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 60,
+     "example": 8,
+     "examples": [
+      8,
+      12,
+      6
+     ]
+    },
+    {
+     "key": "booker",
+     "label": "预约人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "equip",
+     "label": "需要设备",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "投影",
+      "视频会议",
+      "白板",
+      "无"
+     ],
+     "example": "投影",
+     "examples": [
+      "投影",
+      "视频会议"
+     ]
+    },
+    {
+     "key": "opinion",
+     "label": "确认意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "已安排"
+    }
+   ]
+  },
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "rating",
+     "label": "客户评分",
+     "type": "rating",
+     "required": false,
+     "source": "对象库",
+     "at": "rate",
+     "example": 5,
+     "min": 1,
+     "max": 5
+    },
+    {
+     "key": "comp",
+     "label": "补偿金额（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "complete",
+     "example": 0
+    },
+    {
+     "key": "cause",
+     "label": "原因分类",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "质量",
+      "交期",
+      "服务",
+      "其他"
+     ],
+     "at": "complete",
+     "example": "质量"
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "业务员",
+     "handler": "班组长",
+     "lead": "生产主管"
+    },
+    "flow": {
+     "submitter": "客服专员",
+     "handler": "仓储员",
+     "lead": "仓配主管"
+    },
+    "service": {
+     "submitter": "客户经理",
+     "handler": "代账会计",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 4
+   },
+   "key": "complaint",
+   "name": "投诉工单",
+   "arche": "common",
+   "prefix": "TS",
+   "verb": "投诉登记",
+   "short": "工单",
+   "flow": "dispatch",
+   "ruleText": "接单约定时效 4 小时",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "channel",
+     "label": "投诉渠道",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "电话",
+      "微信",
+      "现场",
+      "邮件"
+     ],
+     "example": "微信",
+     "examples": [
+      "微信",
+      "电话"
+     ]
+    },
+    {
+     "key": "content",
+     "label": "投诉内容",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 300,
+     "example": "交付件表面划伤，要求补发",
+     "examples": [
+      "交付件表面划伤，要求补发",
+      "到货延迟一天",
+      "账务凭证录入有误"
+     ]
+    },
+    {
+     "key": "level",
+     "label": "严重程度",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "一般",
+      "严重",
+      "重大"
+     ],
+     "example": "严重",
+     "examples": [
+      "严重",
+      "一般"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "附件",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 5,
+     "example": 1,
+     "examples": [
+      1,
+      0
+     ]
+    },
+    {
+     "key": "receiver",
+     "label": "登记人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "@submitter"
+    },
+    {
+     "key": "handler",
+     "label": "处理人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "@handler"
+    },
+    {
+     "key": "result",
+     "label": "处理结果",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "complete",
+     "example": "已补发并致歉",
+     "examples": [
+      "已补发并致歉",
+      "已协调加急",
+      "已更正并复核"
+     ]
+    },
+    {
+     "key": "closeType",
+     "label": "处理结论",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "已解决",
+      "部分解决",
+      "无法解决"
+     ],
+     "at": "complete",
+     "example": "已解决"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "photo",
+     "label": "资产照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "note",
+     "label": "备注",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "example": "无"
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": {
+    "lent": "已领用",
+    "returned": "已归还"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "asset",
+   "name": "固定资产领用",
+   "arche": "common",
+   "prefix": "GD",
+   "verb": "资产领用",
+   "short": "领用单",
+   "flow": "approve",
+   "ruleText": "预计归还日期到期未归还标记超期",
+   "fields": [
+    {
+     "key": "asset",
+     "label": "资产名称",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "笔记本电脑 T14",
+     "examples": [
+      "笔记本电脑 T14",
+      "测量投影仪",
+      "手持扫码枪"
+     ]
+    },
+    {
+     "key": "assetNo",
+     "label": "资产编号",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 24,
+     "example": "ZC-2025-031",
+     "examples": [
+      "ZC-2025-031",
+      "ZC-2024-118",
+      "ZC-2026-007"
+     ]
+    },
+    {
+     "key": "qty",
+     "label": "数量",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 20,
+     "example": 1
+    },
+    {
+     "key": "purpose",
+     "label": "用途",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 100,
+     "example": "外出客户现场演示",
+     "examples": [
+      "外出客户现场演示",
+      "车间首件检测",
+      "仓库盘点"
+     ]
+    },
+    {
+     "key": "from",
+     "label": "领用日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-17"
+    },
+    {
+     "key": "to",
+     "label": "预计归还日期",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "after": "from",
+     "due": true,
+     "example": "2026-10-17"
+    },
+    {
+     "key": "applicant",
+     "label": "领用人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "@submitter"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    },
+    {
+     "key": "condition",
+     "label": "归还状态",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "完好",
+      "损坏",
+      "丢失"
+     ],
+     "at": "return",
+     "example": "完好"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "nda",
+     "label": "是否签保密协议",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "是"
+    },
+    {
+     "key": "photo",
+     "label": "证件照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 2,
+     "example": 1
+    }
+   ],
+   "roles": null,
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "visitor",
+   "name": "访客登记单",
+   "arche": "common",
+   "prefix": "FK",
+   "verb": "访客登记",
+   "short": "登记单",
+   "flow": "approve",
+   "ruleText": "预计离开须晚于来访时间",
+   "fields": [
+    {
+     "key": "company",
+     "label": "来访单位",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "汽配一级供应商",
+     "examples": [
+      "汽配一级供应商",
+      "设备厂商",
+      "审核机构"
+     ]
+    },
+    {
+     "key": "count",
+     "label": "来访人数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 30,
+     "example": 2,
+     "examples": [
+      2,
+      1,
+      4
+     ]
+    },
+    {
+     "key": "purpose",
+     "label": "来访事由",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "商务洽谈",
+      "技术交流",
+      "审核",
+      "参观",
+      "其他"
+     ],
+     "example": "技术交流",
+     "examples": [
+      "技术交流",
+      "审核",
+      "商务洽谈"
+     ]
+    },
+    {
+     "key": "visitAt",
+     "label": "来访时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18 10:00"
+    },
+    {
+     "key": "leaveAt",
+     "label": "预计离开",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "visitAt",
+     "example": "2026-09-18 12:00"
+    },
+    {
+     "key": "host",
+     "label": "接待人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "@submitter"
+    },
+    {
+     "key": "area",
+     "label": "到访区域",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "办公区",
+      "车间",
+      "仓库",
+      "全部"
+     ],
+     "example": "车间",
+     "examples": [
+      "车间",
+      "办公区"
+     ]
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "dueDays",
+     "label": "整改期限（天）",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 1,
+     "max": 30,
+     "example": 3
+    },
+    {
+     "key": "downtime",
+     "label": "停机影响",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "否"
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "操作工",
+     "handler": "设备员",
+     "handler2": "班组长",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": {
+    "field": "issues",
+    "gt": 0
+   },
+   "sla": {
+    "fix": 72
+   },
+   "key": "inspection",
+   "name": "设备点检单",
+   "arche": "make",
+   "prefix": "DJ",
+   "verb": "点检",
+   "short": "点检单",
+   "flow": "inspect",
+   "ruleText": "异常项 > 0 自动转整改，整改约定 3 天",
+   "fields": [
+    {
+     "key": "device",
+     "label": "设备编号",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "machines",
+     "example": "CNC-03",
+     "examples": [
+      "CNC-03",
+      "CNC-01",
+      "CNC-05",
+      "PA-02"
+     ]
+    },
+    {
+     "key": "shift",
+     "label": "班次",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "白班",
+      "夜班"
+     ],
+     "example": "白班",
+     "examples": [
+      "白班",
+      "夜班"
+     ]
+    },
+    {
+     "key": "items",
+     "label": "点检项数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 30,
+     "example": 12
+    },
+    {
+     "key": "issues",
+     "label": "异常项数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 30,
+     "example": 1,
+     "examples": [
+      1,
+      0,
+      2
+     ]
+    },
+    {
+     "key": "issueDesc",
+     "label": "异常描述",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "主轴润滑油位偏低",
+     "examples": [
+      "主轴润滑油位偏低",
+      "冷却液浓度偏低",
+      "导轨防护罩破损"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "现场照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1,
+     "examples": [
+      1,
+      0
+     ]
+    },
+    {
+     "key": "inspector",
+     "label": "点检人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-009"
+    },
+    {
+     "key": "fixer",
+     "label": "整改人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "fix",
+     "example": "E-122"
+    },
+    {
+     "key": "fixResult",
+     "label": "整改结果",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "submitFix",
+     "example": "已补充润滑油并复测",
+     "examples": [
+      "已补充润滑油并复测",
+      "已更换冷却液",
+      "已更换防护罩"
+     ]
+    },
+    {
+     "key": "recheckNote",
+     "label": "复检意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "pass",
+     "example": "复检合格"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "cost",
+     "label": "整改费用（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "submitFix",
+     "example": 800
+    },
+    {
+     "key": "level",
+     "label": "问题等级",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "一般",
+      "重要",
+      "紧急"
+     ],
+     "example": "重要"
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "设备员",
+     "handler2": "生产主管",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "fix": 72
+   },
+   "key": "rectify",
+   "name": "整改单",
+   "arche": "make",
+   "prefix": "ZG",
+   "verb": "整改登记",
+   "short": "整改单",
+   "flow": "inspect",
+   "ruleText": "整改约定 3 天，复核关闭",
+   "fields": [
+    {
+     "key": "source",
+     "label": "问题来源",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "点检",
+      "巡检",
+      "审核",
+      "客户投诉"
+     ],
+     "example": "点检",
+     "examples": [
+      "点检",
+      "审核",
+      "巡检"
+     ]
+    },
+    {
+     "key": "device",
+     "label": "设备编号",
+     "type": "ref",
+     "required": false,
+     "source": "对象库",
+     "ref": "machines",
+     "example": "CNC-02",
+     "examples": [
+      "CNC-02",
+      "PL-01"
+     ]
+    },
+    {
+     "key": "problem",
+     "label": "问题描述",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "机械手定位偏差",
+     "examples": [
+      "机械手定位偏差",
+      "电镀槽液温度记录缺失",
+      "冲床光电保护失效"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "问题照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "due",
+     "label": "整改期限",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "due": true,
+     "example": "2026-09-20"
+    },
+    {
+     "key": "reporter",
+     "label": "登记人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "owner",
+     "label": "责任人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "fix",
+     "example": "E-122"
+    },
+    {
+     "key": "fixResult",
+     "label": "整改措施",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "submitFix",
+     "example": "重新校准机械手",
+     "examples": [
+      "重新校准机械手",
+      "补录并增设自动记录",
+      "更换光电传感器"
+     ]
+    },
+    {
+     "key": "verify",
+     "label": "复核意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "pass",
+     "example": "复核通过"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "photo",
+     "label": "模具照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "shots",
+     "label": "本次模次",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "return",
+     "example": 3200
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "模具管理员",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": {
+    "lent": "已领用",
+    "returned": "已归还"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "mold",
+   "name": "模具领用单",
+   "arche": "make",
+   "prefix": "MJ",
+   "verb": "模具领用",
+   "short": "领用单",
+   "flow": "approve",
+   "ruleText": "预计归还超过约定时间标记超期并提醒",
+   "fields": [
+    {
+     "key": "mold",
+     "label": "模具编号",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 24,
+     "example": "F-12",
+     "examples": [
+      "F-12",
+      "F-07",
+      "F-03",
+      "F-09"
+     ]
+    },
+    {
+     "key": "workOrder",
+     "label": "工单号",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "orders",
+     "example": "@orders"
+    },
+    {
+     "key": "machine",
+     "label": "使用设备",
+     "type": "ref",
+     "required": false,
+     "source": "对象库",
+     "ref": "machines",
+     "example": "CNC-02",
+     "examples": [
+      "CNC-02",
+      "PA-01",
+      "CNC-04"
+     ]
+    },
+    {
+     "key": "from",
+     "label": "领用时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-17 09:30"
+    },
+    {
+     "key": "to",
+     "label": "预计归还",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "from",
+     "due": true,
+     "example": "2026-09-19 18:00"
+    },
+    {
+     "key": "applicant",
+     "label": "领用人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    },
+    {
+     "key": "condition",
+     "label": "归还状态",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "完好",
+      "需维修",
+      "报废"
+     ],
+     "at": "return",
+     "example": "完好",
+     "examples": [
+      "完好",
+      "需维修"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "cost",
+     "label": "损失金额（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 1000000,
+     "at": "complete",
+     "example": 0
+    },
+    {
+     "key": "recheck",
+     "label": "复检结果",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "合格",
+      "不合格"
+     ],
+     "at": "complete",
+     "example": "合格"
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "操作工",
+     "handler": "班组长",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 4
+   },
+   "key": "incoming",
+   "name": "来料异常单",
+   "arche": "make",
+   "prefix": "LY",
+   "verb": "来料异常登记",
+   "short": "异常单",
+   "flow": "dispatch",
+   "ruleText": "接单约定时效 4 小时，处置方式四选一",
+   "fields": [
+    {
+     "key": "material",
+     "label": "物料",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "materials",
+     "example": "@materials"
+    },
+    {
+     "key": "supplier",
+     "label": "供应商",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 60,
+     "example": "不锈钢棒材供应商",
+     "examples": [
+      "不锈钢棒材供应商",
+      "冷轧钢带供应商"
+     ]
+    },
+    {
+     "key": "batch",
+     "label": "批次号",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 24,
+     "example": "PC-260915-02",
+     "examples": [
+      "PC-260915-02",
+      "PC-260916-05"
+     ]
+    },
+    {
+     "key": "qty",
+     "label": "异常数量",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 100000,
+     "example": 120,
+     "examples": [
+      120,
+      40,
+      600
+     ]
+    },
+    {
+     "key": "unit",
+     "label": "单位",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "件",
+      "kg",
+      "m",
+      "卷"
+     ],
+     "example": "件",
+     "examples": [
+      "件",
+      "kg",
+      "卷"
+     ]
+    },
+    {
+     "key": "type",
+     "label": "异常类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "尺寸",
+      "外观",
+      "材质",
+      "数量",
+      "包装"
+     ],
+     "example": "尺寸",
+     "examples": [
+      "尺寸",
+      "外观",
+      "数量"
+     ]
+    },
+    {
+     "key": "desc",
+     "label": "异常描述",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "棒材直径超差 0.05",
+     "examples": [
+      "棒材直径超差 0.05",
+      "表面锈蚀",
+      "实收少 40 件"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 5,
+     "example": 2,
+     "examples": [
+      2,
+      1
+     ]
+    },
+    {
+     "key": "reporter",
+     "label": "报告人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-009"
+    },
+    {
+     "key": "handler",
+     "label": "处理人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "E-003"
+    },
+    {
+     "key": "disposition",
+     "label": "处置方式",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "退货",
+      "挑选使用",
+      "让步接收",
+      "报废"
+     ],
+     "at": "complete",
+     "example": "挑选使用",
+     "examples": [
+      "挑选使用",
+      "退货"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "urgency",
+     "label": "紧急程度",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "一般",
+      "紧急"
+     ],
+     "example": "一般"
+    },
+    {
+     "key": "cost",
+     "label": "金额（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "example": 360
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "生产主管",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "consumable",
+   "name": "耗材申领单",
+   "arche": "make",
+   "prefix": "HC",
+   "verb": "耗材申领",
+   "short": "申领单",
+   "flow": "approve",
+   "ruleText": "按产线申领，审批后领取",
+   "fields": [
+    {
+     "key": "item",
+     "label": "耗材名称",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "切削液 20L",
+     "examples": [
+      "切削液 20L",
+      "砂轮片 Ø150",
+      "劳保手套"
+     ]
+    },
+    {
+     "key": "qty",
+     "label": "数量",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 1000,
+     "example": 2,
+     "examples": [
+      2,
+      10,
+      50
+     ]
+    },
+    {
+     "key": "unit",
+     "label": "单位",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "桶",
+      "盒",
+      "件",
+      "箱"
+     ],
+     "example": "桶",
+     "examples": [
+      "桶",
+      "盒",
+      "箱"
+     ]
+    },
+    {
+     "key": "line",
+     "label": "用于产线",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "lines",
+     "example": "@lines"
+    },
+    {
+     "key": "reason",
+     "label": "用途",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "example": "CNC 线周耗",
+     "examples": [
+      "CNC 线周耗",
+      "冲压线换砂轮",
+      "月度劳保"
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申领人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "due",
+     "label": "整改期限",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "example": "2026-09-20"
+    },
+    {
+     "key": "cost",
+     "label": "整改费用（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "submitFix",
+     "example": 200
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "操作工",
+     "handler": "班组长",
+     "handler2": "生产主管",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "fix": 72
+   },
+   "key": "hazard",
+   "name": "安全隐患上报",
+   "arche": "make",
+   "prefix": "AQ",
+   "verb": "隐患上报",
+   "short": "隐患单",
+   "flow": "inspect",
+   "ruleText": "隐患一律进整改，整改约定 3 天，复核后关闭",
+   "fields": [
+    {
+     "key": "area",
+     "label": "区域",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "下料区",
+      "冲压区",
+      "CNC 区",
+      "热处理区",
+      "电镀区",
+      "装配区",
+      "仓库"
+     ],
+     "example": "CNC 区",
+     "examples": [
+      "CNC 区",
+      "冲压区",
+      "电镀区"
+     ]
+    },
+    {
+     "key": "type",
+     "label": "隐患类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "机械",
+      "电气",
+      "消防",
+      "化学品",
+      "操作行为",
+      "其他"
+     ],
+     "example": "机械",
+     "examples": [
+      "机械",
+      "电气",
+      "化学品"
+     ]
+    },
+    {
+     "key": "desc",
+     "label": "隐患描述",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "CNC-04 防护门联锁失效，开门仍可运行",
+     "examples": [
+      "CNC-04 防护门联锁失效，开门仍可运行",
+      "配电柜门未关，线缆裸露",
+      "酸液桶未加盖"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "现场照片",
+     "type": "photo",
+     "required": true,
+     "source": "对象库",
+     "max": 3,
+     "example": 2,
+     "examples": [
+      2,
+      1
+     ]
+    },
+    {
+     "key": "level",
+     "label": "风险等级",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "低",
+      "中",
+      "高"
+     ],
+     "example": "高",
+     "examples": [
+      "高",
+      "中",
+      "低"
+     ]
+    },
+    {
+     "key": "reporter",
+     "label": "上报人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-009"
+    },
+    {
+     "key": "owner",
+     "label": "整改责任人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "fix",
+     "example": "E-003"
+    },
+    {
+     "key": "measure",
+     "label": "整改措施",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "submitFix",
+     "example": "更换联锁开关并测试",
+     "examples": [
+      "更换联锁开关并测试",
+      "关闭柜门并整理线缆",
+      "加盖并贴标识"
+     ]
+    },
+    {
+     "key": "verify",
+     "label": "复核意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "pass",
+     "example": "复核合格，联锁恢复"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "meal",
+     "label": "是否安排餐食",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "是"
+    },
+    {
+     "key": "order",
+     "label": "关联订单",
+     "type": "ref",
+     "required": false,
+     "source": "对象库",
+     "ref": "orders",
+     "example": "@orders"
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "生产主管",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "overtime",
+   "name": "加班申请",
+   "arche": "make",
+   "prefix": "JB",
+   "verb": "加班申请",
+   "short": "加班单",
+   "flow": "approve",
+   "ruleText": "结束须晚于开始，按产线申请",
+   "fields": [
+    {
+     "key": "date",
+     "label": "加班日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18"
+    },
+    {
+     "key": "from",
+     "label": "开始",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18 17:30"
+    },
+    {
+     "key": "to",
+     "label": "结束",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "after": "from",
+     "example": "2026-09-18 19:30"
+    },
+    {
+     "key": "hours",
+     "label": "加班时长（小时）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0.5,
+     "max": 12,
+     "example": 2,
+     "examples": [
+      2,
+      3,
+      1.5
+     ]
+    },
+    {
+     "key": "reason",
+     "label": "加班事由",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 120,
+     "example": "紧急订单 SO-2609-0142 赶工",
+     "examples": [
+      "紧急订单 SO-2609-0142 赶工",
+      "换型后补产",
+      "设备保养"
+     ]
+    },
+    {
+     "key": "line",
+     "label": "产线",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "lines",
+     "example": "@lines"
+    },
+    {
+     "key": "people",
+     "label": "加班人数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 50,
+     "example": 6,
+     "examples": [
+      6,
+      4,
+      8
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "audit",
+     "label": "现场审核日期",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "example": "2026-09-26"
+    },
+    {
+     "key": "photo",
+     "label": "现场照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 5,
+     "example": 2
+    }
+   ],
+   "roles": {
+    "make": {
+     "submitter": "班组长",
+     "handler": "生产主管",
+     "handler2": "财务主管",
+     "lead": "生产主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": {
+    "field": "score",
+    "gte": 0,
+    "text": "一律二级审批"
+   },
+   "initialRule": null,
+   "sla": null,
+   "key": "supplier",
+   "name": "供应商准入",
+   "arche": "make",
+   "prefix": "GY",
+   "verb": "供应商准入",
+   "short": "准入单",
+   "flow": "approve",
+   "ruleText": "一律二级审批，样品合格才可通过",
+   "fields": [
+    {
+     "key": "name",
+     "label": "供应商名称",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "不锈钢棒材供应商（宁波）",
+     "examples": [
+      "不锈钢棒材供应商（宁波）",
+      "精密弹簧外协厂",
+      "液压件备件商"
+     ]
+    },
+    {
+     "key": "category",
+     "label": "供应品类",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "原材料",
+      "辅料",
+      "外协加工",
+      "设备备件"
+     ],
+     "example": "原材料",
+     "examples": [
+      "原材料",
+      "外协加工",
+      "设备备件"
+     ]
+    },
+    {
+     "key": "license",
+     "label": "营业执照",
+     "type": "photo",
+     "required": true,
+     "source": "对象库",
+     "max": 1,
+     "example": 1
+    },
+    {
+     "key": "cert",
+     "label": "质量体系证书",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "ISO 9001",
+      "IATF 16949",
+      "无"
+     ],
+     "example": "ISO 9001",
+     "examples": [
+      "ISO 9001",
+      "IATF 16949"
+     ]
+    },
+    {
+     "key": "sample",
+     "label": "样品检验结果",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "合格",
+      "不合格",
+      "待检"
+     ],
+     "example": "合格",
+     "examples": [
+      "合格",
+      "待检"
+     ]
+    },
+    {
+     "key": "contact",
+     "label": "联系人职务",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 20,
+     "example": "销售经理",
+     "examples": [
+      "销售经理",
+      "业务经理"
+     ]
+    },
+    {
+     "key": "score",
+     "label": "评审得分",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 100,
+     "example": 86,
+     "examples": [
+      86,
+      78,
+      91
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-003"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意准入"
+    }
+   ]
+  },
+  {
+   "mode": "dual",
+   "optional": [
+    {
+     "key": "refund",
+     "label": "退款金额（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "at": "complete",
+     "example": 1032
+    },
+    {
+     "key": "express",
+     "label": "快递单号",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 24,
+     "example": "SF-2609-118203"
+    },
+    {
+     "key": "rejectReason",
+     "label": "驳回原因",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 100,
+     "at": "reject",
+     "example": "照片不清晰，请重拍后再提交"
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "门店",
+     "handler": "客服专员",
+     "handler2": "仓储员",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": {
+    "open": "待审核",
+    "accepted": "已审核",
+    "doing": "收货中",
+    "done": "已入库"
+   },
+   "actionLabels": {
+    "accept": "审核",
+    "start": "收货",
+    "complete": "入库"
+   },
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "return_order",
+   "name": "退换货工单",
+   "arche": "flow",
+   "prefix": "TH",
+   "verb": "退换货",
+   "short": "工单",
+   "flow": "dispatch",
+   "ruleText": "客服审核 24 小时内，仓库收货后入库",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "门店",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "product",
+     "label": "商品",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "products",
+     "example": "@products"
+    },
+    {
+     "key": "qty",
+     "label": "数量（箱）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 999,
+     "example": 12,
+     "examples": [
+      12,
+      6,
+      30
+     ]
+    },
+    {
+     "key": "reason",
+     "label": "退货原因",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "破损",
+      "临期",
+      "发错货",
+      "多发",
+      "质量问题"
+     ],
+     "example": "破损",
+     "examples": [
+      "破损",
+      "临期",
+      "发错货"
+     ]
+    },
+    {
+     "key": "type",
+     "label": "类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "退货",
+      "换货"
+     ],
+     "example": "退货",
+     "examples": [
+      "退货",
+      "换货"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "商品照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 5,
+     "example": 2,
+     "examples": [
+      2,
+      1
+     ]
+    },
+    {
+     "key": "desc",
+     "label": "说明",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "外箱受潮破损 12 箱",
+     "examples": [
+      "外箱受潮破损 12 箱",
+      "临期 15 天，门店要求退回",
+      "到货与订单不符"
+     ]
+    },
+    {
+     "key": "order",
+     "label": "原订单号",
+     "type": "ref",
+     "required": false,
+     "source": "对象库",
+     "ref": "orders",
+     "example": "@orders"
+    },
+    {
+     "key": "auditor",
+     "label": "审核人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "客服专员"
+    },
+    {
+     "key": "auditNote",
+     "label": "审核意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "accept",
+     "example": "同意退货",
+     "examples": [
+      "同意退货",
+      "同意换货"
+     ]
+    },
+    {
+     "key": "receiver",
+     "label": "入库员",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "start",
+     "example": "E-015"
+    },
+    {
+     "key": "stock",
+     "label": "入库数量（箱）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 999,
+     "at": "complete",
+     "example": 12,
+     "examples": [
+      12,
+      6,
+      30
+     ]
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "cost",
+     "label": "样品成本（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 10000,
+     "example": 172
+    },
+    {
+     "key": "feedback",
+     "label": "客户反馈",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "待反馈"
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "业务员",
+     "handler": "仓配主管",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": {
+    "lent": "已寄出"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "sample_req",
+   "name": "样品申请",
+   "arche": "flow",
+   "prefix": "YP",
+   "verb": "样品申请",
+   "short": "样品单",
+   "flow": "approve",
+   "ruleText": "审批通过后仓库寄样并登记快递单号",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "product",
+     "label": "商品",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "products",
+     "example": "@products"
+    },
+    {
+     "key": "qty",
+     "label": "样品数量（箱）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 50,
+     "example": 2,
+     "examples": [
+      2,
+      1,
+      3
+     ]
+    },
+    {
+     "key": "purpose",
+     "label": "用途",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "新客试用",
+      "招标",
+      "展会",
+      "其他"
+     ],
+     "example": "新客试用",
+     "examples": [
+      "新客试用",
+      "招标",
+      "展会"
+     ]
+    },
+    {
+     "key": "address",
+     "label": "收件地址",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 80,
+     "example": "客户仓库（杭州余杭）",
+     "examples": [
+      "客户仓库（杭州余杭）",
+      "客户门店（宁波鄞州）",
+      "展会现场（上海）"
+     ]
+    },
+    {
+     "key": "needBy",
+     "label": "需要日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-20"
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "业务员"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意寄样"
+    },
+    {
+     "key": "express",
+     "label": "快递单号",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 24,
+     "at": "lend",
+     "example": "SF-2609-118203",
+     "examples": [
+      "SF-2609-118203",
+      "SF-2609-118377"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "score",
+     "label": "陈列评分",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100,
+     "example": 82
+    },
+    {
+     "key": "due",
+     "label": "整改期限",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "example": "2026-09-20"
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "业务员",
+     "handler": "门店",
+     "handler2": "督导",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": {
+    "field": "issues",
+    "gt": 0
+   },
+   "sla": {
+    "fix": 72
+   },
+   "key": "display_check",
+   "name": "门店陈列检查",
+   "arche": "flow",
+   "prefix": "CL",
+   "verb": "陈列检查",
+   "short": "检查单",
+   "flow": "inspect",
+   "ruleText": "不合格项 > 0 转整改，整改约定 3 天，督导复核",
+   "fields": [
+    {
+     "key": "store",
+     "label": "门店",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "date",
+     "label": "检查日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-17"
+    },
+    {
+     "key": "photo",
+     "label": "陈列照片",
+     "type": "photo",
+     "required": true,
+     "source": "对象库",
+     "max": 6,
+     "example": 3,
+     "examples": [
+      3,
+      4
+     ]
+    },
+    {
+     "key": "items",
+     "label": "检查项数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 20,
+     "example": 8
+    },
+    {
+     "key": "issues",
+     "label": "不合格项",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 20,
+     "example": 2,
+     "examples": [
+      2,
+      0,
+      1
+     ]
+    },
+    {
+     "key": "issueDesc",
+     "label": "问题描述",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "堆头缺货、价签过期",
+     "examples": [
+      "堆头缺货、价签过期",
+      "端架陈列与计划不符"
+     ]
+    },
+    {
+     "key": "inspector",
+     "label": "检查人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "业务员"
+    },
+    {
+     "key": "fixer",
+     "label": "整改人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "fix",
+     "example": "门店"
+    },
+    {
+     "key": "fixResult",
+     "label": "整改说明",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "submitFix",
+     "example": "已补货并更换价签",
+     "examples": [
+      "已补货并更换价签",
+      "已按陈列图调整"
+     ]
+    },
+    {
+     "key": "verify",
+     "label": "复核意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "pass",
+     "example": "复核合格"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "competitor",
+     "label": "竞品价格（元/箱，预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "example": 74
+    },
+    {
+     "key": "term",
+     "label": "账期（天）",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 180,
+     "example": 30
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "业务员",
+     "handler": "仓配主管",
+     "handler2": "财务主管",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": {
+    "field": "discount",
+    "gte": 10,
+    "text": "折扣 ≥ 10% 二级审批"
+   },
+   "initialRule": null,
+   "sla": null,
+   "key": "price_req",
+   "name": "价格申请",
+   "arche": "flow",
+   "prefix": "JG",
+   "verb": "价格申请",
+   "short": "价格单",
+   "flow": "approve",
+   "ruleText": "折扣 ≥ 10% 进入二级审批",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "product",
+     "label": "商品",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "products",
+     "example": "@products"
+    },
+    {
+     "key": "listPrice",
+     "label": "标准价（元/箱，预计）",
+     "type": "money",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 100000,
+     "example": 86,
+     "examples": [
+      86,
+      72,
+      118
+     ]
+    },
+    {
+     "key": "askPrice",
+     "label": "申请价（元/箱，预计）",
+     "type": "money",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 100000,
+     "example": 76,
+     "examples": [
+      76,
+      66,
+      112
+     ]
+    },
+    {
+     "key": "discount",
+     "label": "折扣（%）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 50,
+     "example": 12,
+     "examples": [
+      12,
+      8,
+      5
+     ]
+    },
+    {
+     "key": "qty",
+     "label": "预计数量（箱）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 100000,
+     "example": 600,
+     "examples": [
+      600,
+      300,
+      1200
+     ]
+    },
+    {
+     "key": "reason",
+     "label": "申请理由",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 150,
+     "example": "竞品同规格低价，客户要求跟进",
+     "examples": [
+      "竞品同规格低价，客户要求跟进",
+      "年度框架量大",
+      "新品铺货"
+     ]
+    },
+    {
+     "key": "validTo",
+     "label": "有效期至",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-10-31"
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "业务员"
+    },
+    {
+     "key": "opinion",
+     "label": "审批意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "photo",
+     "label": "陈列效果照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "cost",
+     "label": "物料成本（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 50000,
+     "example": 480
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "业务员",
+     "handler": "运营专员",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": {
+    "lent": "已发放"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "promo_material",
+   "name": "促销物料申领单",
+   "arche": "flow",
+   "prefix": "WL",
+   "verb": "物料申领",
+   "short": "申领单",
+   "flow": "approve",
+   "ruleText": "审核通过后仓库发放登记",
+   "fields": [
+    {
+     "key": "item",
+     "label": "物料名称",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "海报",
+      "堆头",
+      "价签",
+      "试吃台",
+      "礼品"
+     ],
+     "example": "堆头",
+     "examples": [
+      "堆头",
+      "海报",
+      "礼品"
+     ]
+    },
+    {
+     "key": "qty",
+     "label": "数量",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 500,
+     "example": 6,
+     "examples": [
+      6,
+      40,
+      100
+     ]
+    },
+    {
+     "key": "store",
+     "label": "用于门店",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "campaign",
+     "label": "活动名称",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "中秋礼盒专场",
+     "examples": [
+      "中秋礼盒专场",
+      "开学季饮品周",
+      "十一大促"
+     ]
+    },
+    {
+     "key": "needBy",
+     "label": "需要日期",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-19"
+    },
+    {
+     "key": "applicant",
+     "label": "申领人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "业务员"
+    },
+    {
+     "key": "opinion",
+     "label": "审核意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "同意发放"
+    },
+    {
+     "key": "issuer",
+     "label": "发放人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "lend",
+     "example": "E-016"
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "temp",
+     "label": "温区",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "常温",
+      "冷藏",
+      "冷冻"
+     ],
+     "example": "常温"
+    },
+    {
+     "key": "pallets",
+     "label": "托盘数",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 1,
+     "max": 60,
+     "example": 12
+    }
+   ],
+   "roles": {
+    "flow": {
+     "submitter": "业务员",
+     "handler": "仓配主管",
+     "lead": "仓配主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "arrival",
+   "name": "到货预约单",
+   "arche": "flow",
+   "prefix": "DH",
+   "verb": "到货预约",
+   "short": "预约单",
+   "flow": "approve",
+   "ruleText": "确认后按月台与时段卸货",
+   "fields": [
+    {
+     "key": "supplier",
+     "label": "供应商",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 60,
+     "example": "常温饮料供应商",
+     "examples": [
+      "常温饮料供应商",
+      "休闲食品供应商",
+      "乳品供应商"
+     ]
+    },
+    {
+     "key": "product",
+     "label": "商品",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "products",
+     "example": "@products"
+    },
+    {
+     "key": "qty",
+     "label": "数量（箱）",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 9999,
+     "example": 600,
+     "examples": [
+      600,
+      400,
+      900
+     ]
+    },
+    {
+     "key": "plate",
+     "label": "车型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "厢式货车",
+      "平板车",
+      "冷藏车"
+     ],
+     "example": "厢式货车",
+     "examples": [
+      "厢式货车",
+      "冷藏车"
+     ]
+    },
+    {
+     "key": "arriveAt",
+     "label": "预约到货时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-18 09:00"
+    },
+    {
+     "key": "dock",
+     "label": "卸货月台",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "收货月台 A",
+      "收货月台 B",
+      "D1 发运月台"
+     ],
+     "example": "收货月台 A",
+     "examples": [
+      "收货月台 A",
+      "收货月台 B"
+     ]
+    },
+    {
+     "key": "booker",
+     "label": "预约人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "业务员"
+    },
+    {
+     "key": "opinion",
+     "label": "确认意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "已安排"
+    }
+   ]
+  },
+  {
+   "mode": "assign",
+   "optional": [
+    {
+     "key": "fee",
+     "label": "服务费（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 100000,
+     "example": 4800
+    },
+    {
+     "key": "contact",
+     "label": "客户联系人职务",
+     "type": "text",
+     "required": false,
+     "source": "对象库",
+     "len": 20,
+     "example": "财务负责人"
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "客户经理",
+     "handler": "账务组长",
+     "handler2": "代账会计",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": {
+    "open": "待分配",
+    "accepted": "已分配",
+    "doing": "建账中",
+    "done": "已接入"
+   },
+   "actionLabels": {
+    "assign": "分配",
+    "start": "开始建账",
+    "complete": "完成接入"
+   },
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "client_onboard",
+   "name": "新客户资料",
+   "arche": "service",
+   "prefix": "XK",
+   "verb": "新客户接入",
+   "short": "接入单",
+   "flow": "dispatch",
+   "ruleText": "分配约定 24 小时，超过标记超时",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "taxType",
+     "label": "纳税人类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "小规模纳税人",
+      "一般纳税人"
+     ],
+     "example": "一般纳税人",
+     "examples": [
+      "一般纳税人",
+      "小规模纳税人"
+     ]
+    },
+    {
+     "key": "service",
+     "label": "服务项目",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "services",
+     "example": "@services"
+    },
+    {
+     "key": "startMonth",
+     "label": "起始账期",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 7,
+     "example": "2026-10"
+    },
+    {
+     "key": "docs",
+     "label": "资料是否齐全",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "齐全",
+      "待补"
+     ],
+     "example": "齐全",
+     "examples": [
+      "齐全",
+      "待补"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "营业执照",
+     "type": "photo",
+     "required": true,
+     "source": "对象库",
+     "max": 1,
+     "example": 1
+    },
+    {
+     "key": "manager",
+     "label": "客户经理",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-030"
+    },
+    {
+     "key": "assignee",
+     "label": "代账会计",
+     "type": "member",
+     "required": true,
+     "source": "对象库",
+     "ref": "employees",
+     "at": "assign",
+     "example": "E-001",
+     "examples": [
+      "E-001",
+      "E-002"
+     ]
+    },
+    {
+     "key": "group",
+     "label": "账务组",
+     "type": "ref",
+     "required": false,
+     "source": "对象库",
+     "ref": "groups",
+     "example": "@groups"
+    },
+    {
+     "key": "note",
+     "label": "备注",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "at": "complete",
+     "example": "账套已建，首月账期 2026-10"
+    }
+   ]
+  },
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "missing",
+     "label": "缺失说明",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "example": "缺 8 月水电费票"
+    },
+    {
+     "key": "due",
+     "label": "应交日期",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "due": true,
+     "example": "2026-09-10"
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "客户",
+     "handler": "代账会计",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "doc_handover",
+   "name": "票据交接单",
+   "arche": "service",
+   "prefix": "PJ",
+   "verb": "票据交接",
+   "short": "交接单",
+   "flow": "dispatch",
+   "ruleText": "签收约定 24 小时，逾期未交提醒",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "period",
+     "label": "所属账期",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 7,
+     "example": "2026-08"
+    },
+    {
+     "key": "count",
+     "label": "票据张数",
+     "type": "number",
+     "required": true,
+     "source": "对象库",
+     "min": 1,
+     "max": 999,
+     "example": 46,
+     "examples": [
+      46,
+      12,
+      88
+     ]
+    },
+    {
+     "key": "type",
+     "label": "票据类型",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "进项发票",
+      "销项发票",
+      "银行回单",
+      "费用票"
+     ],
+     "example": "进项发票",
+     "examples": [
+      "进项发票",
+      "银行回单",
+      "费用票"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "票据照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 9,
+     "example": 2,
+     "examples": [
+      2,
+      1,
+      4
+     ]
+    },
+    {
+     "key": "sender",
+     "label": "交接人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "客户"
+    },
+    {
+     "key": "signer",
+     "label": "签收人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "E-001"
+    },
+    {
+     "key": "signNote",
+     "label": "签收备注",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "complete",
+     "example": "已签收，46 张与清单一致",
+     "examples": [
+      "已签收，46 张与清单一致",
+      "已签收"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": "assign",
+   "optional": [
+    {
+     "key": "rating",
+     "label": "客户评分",
+     "type": "rating",
+     "required": false,
+     "source": "对象库",
+     "at": "rate",
+     "example": 5,
+     "min": 1,
+     "max": 5
+    },
+    {
+     "key": "fee",
+     "label": "咨询费（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 10000,
+     "example": 0
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "客户",
+     "handler": "账务组长",
+     "handler2": "代账会计",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": {
+    "open": "待分配",
+    "accepted": "已分配",
+    "doing": "答复中",
+    "done": "已答复"
+   },
+   "actionLabels": {
+    "assign": "分配",
+    "start": "开始答复",
+    "complete": "完成答复"
+   },
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 4
+   },
+   "key": "consult",
+   "name": "咨询工单",
+   "arche": "service",
+   "prefix": "ZX",
+   "verb": "咨询",
+   "short": "工单",
+   "flow": "dispatch",
+   "ruleText": "分配约定 4 小时，答复后完成",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "topic",
+     "label": "咨询类别",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "税务",
+      "账务",
+      "工商",
+      "社保",
+      "其他"
+     ],
+     "example": "税务",
+     "examples": [
+      "税务",
+      "账务",
+      "工商"
+     ]
+    },
+    {
+     "key": "question",
+     "label": "咨询内容",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 300,
+     "example": "小规模转一般纳税人的时点与准备材料",
+     "examples": [
+      "小规模转一般纳税人的时点与准备材料",
+      "8 月费用票能否跨月入账",
+      "股东变更需要哪些材料"
+     ]
+    },
+    {
+     "key": "urgency",
+     "label": "紧急度",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "一般",
+      "紧急"
+     ],
+     "example": "一般",
+     "examples": [
+      "一般",
+      "紧急"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "附件",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 0,
+     "examples": [
+      0,
+      1
+     ]
+    },
+    {
+     "key": "receiver",
+     "label": "登记人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "客户"
+    },
+    {
+     "key": "assignee",
+     "label": "答复人",
+     "type": "member",
+     "required": true,
+     "source": "对象库",
+     "ref": "employees",
+     "at": "assign",
+     "example": "E-001",
+     "examples": [
+      "E-001",
+      "E-002"
+     ]
+    },
+    {
+     "key": "answer",
+     "label": "答复内容",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 500,
+     "at": "complete",
+     "example": "连续 12 个月销售额超过 500 万元须登记为一般纳税人，需准备营业执照、财务负责人信息与银行开户资料",
+     "examples": [
+      "连续 12 个月销售额超过 500 万元须登记为一般纳税人，需准备营业执照、财务负责人信息与银行开户资料",
+      "可以，按发票日期所属月入账",
+      "股东会决议、股权转让协议、新股东身份材料"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": "assign",
+   "optional": [
+    {
+     "key": "discount",
+     "label": "续费折扣（%）",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 30,
+     "example": 5
+    },
+    {
+     "key": "nextAt",
+     "label": "下次跟进",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "at": "complete",
+     "example": "2026-09-24"
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "账务组长",
+     "handler": "作业主管",
+     "handler2": "客户经理",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": {
+    "open": "待分配",
+    "accepted": "已分配",
+    "doing": "跟进中",
+    "done": "已跟进"
+   },
+   "actionLabels": {
+    "assign": "分配",
+    "start": "开始跟进",
+    "complete": "完成跟进"
+   },
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "renewal",
+   "name": "续费提醒",
+   "arche": "service",
+   "prefix": "XF",
+   "verb": "续费跟进",
+   "short": "提醒单",
+   "flow": "dispatch",
+   "ruleText": "到期前 30 天生成，分配客户经理跟进",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "service",
+     "label": "服务项目",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "services",
+     "example": "@services"
+    },
+    {
+     "key": "expireAt",
+     "label": "到期日",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-10-15"
+    },
+    {
+     "key": "fee",
+     "label": "续费金额（预计）",
+     "type": "money",
+     "required": true,
+     "source": "对象库",
+     "min": 0,
+     "max": 1000000,
+     "example": 4800,
+     "examples": [
+      4800,
+      9600,
+      2400
+     ]
+    },
+    {
+     "key": "creator",
+     "label": "发起人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "账务组长"
+    },
+    {
+     "key": "assignee",
+     "label": "跟进人",
+     "type": "member",
+     "required": true,
+     "source": "对象库",
+     "ref": "employees",
+     "at": "assign",
+     "example": "E-030",
+     "examples": [
+      "E-030",
+      "E-031"
+     ]
+    },
+    {
+     "key": "contactResult",
+     "label": "跟进结果",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "已续费",
+      "考虑中",
+      "流失"
+     ],
+     "at": "complete",
+     "example": "已续费",
+     "examples": [
+      "已续费",
+      "考虑中"
+     ]
+    },
+    {
+     "key": "note",
+     "label": "跟进记录",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "at": "complete",
+     "example": "已续一年，合同已签",
+     "examples": [
+      "已续一年，合同已签",
+      "客户比价中，下周再联系"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": null,
+   "optional": [
+    {
+     "key": "fee",
+     "label": "政府规费（预计）",
+     "type": "money",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 10000,
+     "example": 0
+    },
+    {
+     "key": "agency",
+     "label": "是否代办",
+     "type": "select",
+     "required": false,
+     "source": "对象库",
+     "options": [
+      "是",
+      "否"
+     ],
+     "example": "是"
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "客户经理",
+     "handler": "办理人",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": {
+    "approve": "受理",
+    "lend": "开始办理",
+    "return": "办结"
+   },
+   "tail": {
+    "lent": "办理中",
+    "returned": "已办结"
+   },
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": null,
+   "key": "biz_change",
+   "name": "工商变更申请",
+   "arche": "service",
+   "prefix": "GS",
+   "verb": "工商变更",
+   "short": "变更单",
+   "flow": "approve",
+   "ruleText": "受理后进入办理，办结登记结果",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "changeType",
+     "label": "变更事项",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "法定代表人",
+      "注册地址",
+      "经营范围",
+      "注册资本",
+      "股权"
+     ],
+     "example": "注册地址",
+     "examples": [
+      "注册地址",
+      "经营范围",
+      "股权"
+     ]
+    },
+    {
+     "key": "desc",
+     "label": "变更说明",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "迁至新园区办公地址",
+     "examples": [
+      "迁至新园区办公地址",
+      "新增食品经营范围",
+      "股东股权内部转让"
+     ]
+    },
+    {
+     "key": "docs",
+     "label": "材料清单",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "example": "股东会决议、章程修正案、新地址证明",
+     "examples": [
+      "股东会决议、章程修正案、新地址证明",
+      "股东会决议、章程修正案",
+      "股权转让协议、股东会决议"
+     ]
+    },
+    {
+     "key": "photo",
+     "label": "材料照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 9,
+     "example": 3,
+     "examples": [
+      3,
+      2
+     ]
+    },
+    {
+     "key": "applicant",
+     "label": "申请人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-030"
+    },
+    {
+     "key": "opinion",
+     "label": "受理意见",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "approve",
+     "example": "材料齐全，受理"
+    },
+    {
+     "key": "handler",
+     "label": "办理人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "lend",
+     "example": "办理人"
+    },
+    {
+     "key": "doneAt",
+     "label": "办结日期",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "at": "return",
+     "example": "2026-09-24"
+    },
+    {
+     "key": "result",
+     "label": "办结结果",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "return",
+     "example": "已换发营业执照"
+    }
+   ]
+  },
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "photo",
+     "label": "现场照片",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 3,
+     "example": 1
+    },
+    {
+     "key": "nextAt",
+     "label": "下次回访",
+     "type": "date",
+     "required": false,
+     "source": "对象库",
+     "at": "complete",
+     "example": "2026-10-16"
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "客户经理",
+     "handler": "账务组长",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "visit_log",
+   "name": "客户回访登记",
+   "arche": "service",
+   "prefix": "HF",
+   "verb": "回访登记",
+   "short": "回访单",
+   "flow": "dispatch",
+   "ruleText": "不满意的回访由跟进人接单处理",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "visitAt",
+     "label": "回访时间",
+     "type": "datetime",
+     "required": true,
+     "source": "对象库",
+     "example": "2026-09-16 15:00"
+    },
+    {
+     "key": "way",
+     "label": "回访方式",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "电话",
+      "微信",
+      "上门"
+     ],
+     "example": "电话",
+     "examples": [
+      "电话",
+      "微信",
+      "上门"
+     ]
+    },
+    {
+     "key": "content",
+     "label": "回访内容",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 300,
+     "example": "月度账务交付满意，希望提前 3 天出报表",
+     "examples": [
+      "月度账务交付满意，希望提前 3 天出报表",
+      "申报提醒及时",
+      "票据签收慢"
+     ]
+    },
+    {
+     "key": "satisfaction",
+     "label": "满意度",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "满意",
+      "一般",
+      "不满意"
+     ],
+     "example": "满意",
+     "examples": [
+      "满意",
+      "一般",
+      "不满意"
+     ]
+    },
+    {
+     "key": "issues",
+     "label": "待跟进事项",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "报表提前 3 天",
+     "examples": [
+      "报表提前 3 天",
+      "无",
+      "票据签收提速"
+     ]
+    },
+    {
+     "key": "visitor",
+     "label": "回访人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-030"
+    },
+    {
+     "key": "handler",
+     "label": "跟进人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "账务组长"
+    },
+    {
+     "key": "result",
+     "label": "跟进结果",
+     "type": "textarea",
+     "required": true,
+     "source": "对象库",
+     "len": 200,
+     "at": "complete",
+     "example": "已调整报表节点",
+     "examples": [
+      "已调整报表节点",
+      "已反馈会计组",
+      "已安排专人签收"
+     ]
+    }
+   ]
+  },
+  {
+   "mode": "accept",
+   "optional": [
+    {
+     "key": "remind",
+     "label": "提醒次数",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 10,
+     "example": 1
+    },
+    {
+     "key": "count",
+     "label": "补交张数",
+     "type": "number",
+     "required": false,
+     "source": "对象库",
+     "min": 0,
+     "max": 999,
+     "at": "complete",
+     "example": 3
+    }
+   ],
+   "roles": {
+    "service": {
+     "submitter": "代账会计",
+     "handler": "客户经理",
+     "lead": "作业主管"
+    }
+   },
+   "stateLabels": null,
+   "actionLabels": null,
+   "tail": null,
+   "secondLevel": null,
+   "initialRule": null,
+   "sla": {
+    "accept": 24
+   },
+   "key": "doc_supplement",
+   "name": "资料补交单",
+   "arche": "service",
+   "prefix": "BJ",
+   "verb": "资料补交",
+   "short": "补交单",
+   "flow": "dispatch",
+   "ruleText": "补交期限到期未交提醒",
+   "fields": [
+    {
+     "key": "customer",
+     "label": "客户",
+     "type": "ref",
+     "required": true,
+     "source": "对象库",
+     "ref": "customers",
+     "example": "@customers"
+    },
+    {
+     "key": "item",
+     "label": "需补资料",
+     "type": "select",
+     "required": true,
+     "source": "对象库",
+     "options": [
+      "银行回单",
+      "进项发票",
+      "工资表",
+      "社保明细",
+      "其他"
+     ],
+     "example": "银行回单",
+     "examples": [
+      "银行回单",
+      "工资表",
+      "进项发票"
+     ]
+    },
+    {
+     "key": "period",
+     "label": "所属账期",
+     "type": "text",
+     "required": true,
+     "source": "对象库",
+     "len": 7,
+     "example": "2026-08"
+    },
+    {
+     "key": "deadline",
+     "label": "补交期限",
+     "type": "date",
+     "required": true,
+     "source": "对象库",
+     "due": true,
+     "example": "2026-09-20"
+    },
+    {
+     "key": "reason",
+     "label": "说明",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 200,
+     "example": "8 月对公账户回单缺 3 笔",
+     "examples": [
+      "8 月对公账户回单缺 3 笔",
+      "工资表未盖章",
+      "缺 2 张进项票"
+     ]
+    },
+    {
+     "key": "requester",
+     "label": "发起人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "example": "E-001"
+    },
+    {
+     "key": "receiver",
+     "label": "接收人",
+     "type": "member",
+     "required": false,
+     "source": "对象库",
+     "auto": true,
+     "at": "accept",
+     "example": "E-030"
+    },
+    {
+     "key": "photo",
+     "label": "补交资料",
+     "type": "photo",
+     "required": false,
+     "source": "对象库",
+     "max": 9,
+     "at": "complete",
+     "example": 3,
+     "examples": [
+      3,
+      1
+     ]
+    },
+    {
+     "key": "note",
+     "label": "签收说明",
+     "type": "textarea",
+     "required": false,
+     "source": "对象库",
+     "len": 100,
+     "at": "complete",
+     "example": "已补齐并核对",
+     "examples": [
+      "已补齐并核对",
+      "已补交"
+     ]
+    }
+   ]
+  }
+ ]
+}
