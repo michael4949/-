@@ -227,7 +227,8 @@ input, select { font: inherit; color: inherit; }
 
 /* ===================== 竖屏（station=1 一体机 1080×1920） ===================== */
 @media (orientation: portrait) {
-  .app { grid-template-columns: 1fr; grid-template-rows: var(--topbar) 1fr auto var(--pricebar); }
+  /* 价格条一行装不下时换行（高度自适应，不裁切「私域部署」）；工作区底部留白，末行内容可滚到侧栏行之上 */
+  .app { grid-template-columns: 1fr; grid-template-rows: var(--topbar) 1fr auto auto; }
   .main { grid-row: 2; padding: 26px 28px; }
   .rail { grid-row: 3; border-left: 0; border-top: 1px solid var(--line); flex-direction: row; align-items: center; gap: 18px; padding: 14px 24px; }
   .rail > div { flex: 1; }
@@ -238,7 +239,7 @@ input, select { font: inherit; color: inherit; }
   .grid .card, .grid .card.big { grid-column: span 6; }
   .result { grid-template-columns: 1fr; }
   .result .radar-wrap svg { max-width: 560px; }
-  .pricebar { overflow-x: auto; }
+  .pricebar { flex-wrap: wrap; row-gap: 8px; min-height: var(--pricebar); padding: 10px 20px; overflow: visible; }
 }
 body[data-station="1"] { --scale: 1.22; --topbar: 76px; --pricebar: 68px; }
 body[data-station="1"] .opt { min-height: 78px; }

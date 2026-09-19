@@ -171,7 +171,7 @@
     partB: { fill: '#F0A05A', text: '#fff' }
   };
   function gantt(o) {
-    var days = o.days, labelW = o.labelW || 170, dayW = o.dayW || 42, rowH = o.rowH || 38, headH = 34;
+    var days = o.days, labelW = o.labelW || 170, dayW = o.dayW || 42, rowH = o.rowH || 38, headH = 46; /* 表头三行：日期 / 星期 / 今天标记，互不重叠 */
     var W = labelW + days.length * dayW, H = headH + o.rows.length * rowH + 6;
     var s = svg('svg', { class: 'pd-gantt', viewBox: '0 0 ' + W + ' ' + H, preserveAspectRatio: 'xMinYMin meet' });
     // 休息日底色 + 日期轴
@@ -213,7 +213,7 @@
     // 今天线
     var tx = labelW + (o.todayIdx || 0) * dayW;
     s.appendChild(svg('line', { x1: tx, y1: headH - 4, x2: tx, y2: H, stroke: '#D9483B', 'stroke-width': 1.5 }));
-    s.appendChild(svg('text', { x: tx + 3, y: headH - 6, class: 'today-lbl' }, ['今天']));
+    s.appendChild(svg('text', { x: tx + 3, y: headH - 5, class: 'today-lbl' }, ['今天']));
     if (o.marks) o.marks.forEach(function (m) {
       var mx = labelW + (m.d + 1) * dayW;
       s.appendChild(svg('line', { x1: mx, y1: headH, x2: mx, y2: H, stroke: m.color || '#D9483B', 'stroke-width': 2, 'stroke-dasharray': '4 2' }));

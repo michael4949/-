@@ -57,7 +57,7 @@
 
   // ---------- 价值 × 实施门槛 气泡矩阵：大小=投入档，描边=数据条件 ----------
   C.bubbleMatrix = function (scenes, compact) {
-    var W = compact ? 420 : 580, H = compact ? 366 : 520, L = compact ? 40 : 64, R = compact ? 400 : 552, T = compact ? 26 : 34, B = compact ? 300 : 404;
+    var W = compact ? 420 : 580, H = compact ? 404 : 520, L = compact ? 40 : 64, R = compact ? 400 : 552, T = compact ? 26 : 34, B = compact ? 300 : 404;
     var s = svg(W, H, '场景价值与实施门槛矩阵');
     var X = function (v) { return L + (R - L) * (v - 0.5) / 5; }, Y = function (v) { return B - (B - T) * (v - 0.5) / 5; };
     var mx = (L + R) / 2, my = (T + B) / 2;
@@ -118,16 +118,17 @@
       placed.push(pick.box);
       s.appendChild(txt(pick.c.x, pick.c.y, label, { 'text-anchor': pick.c.a, 'font-size': 11, 'font-weight': m.top ? 700 : 500, fill: m.top ? P.text : P.sub }));
     });
-    var ly = B + (compact ? 44 : 56);
-    s.appendChild(txt(L, ly, '气泡大小 = 投入档', { 'font-size': compact ? 12 : 11, 'font-weight': 700, fill: P.text }));
+    /* 图例独占两行，位于横轴标题（B + 34）之下，画布高度留足，不与轴标题重叠、不被裁切 */
+    var ly = B + (compact ? 58 : 56);
+    s.appendChild(txt(L, ly, '气泡大小 = 投入档', { 'font-size': compact ? 15 : 11, 'font-weight': 700, fill: P.text }));
     ['零', '轻', '中', '重'].forEach(function (c, i) {
-      var cx = L + (compact ? 116 : 118) + i * (compact ? 50 : 54);
+      var cx = L + (compact ? 150 : 118) + i * (compact ? 52 : 54);
       s.appendChild(el('circle', { cx: cx, cy: ly - 4, r: COST_R[c] * (compact ? 0.82 : 1), fill: 'none', stroke: P.line, 'stroke-width': 1.5 }));
-      s.appendChild(txt(cx, ly - 1, c, { 'text-anchor': 'middle', 'font-size': compact ? 11 : 10, fill: P.sub }));
+      s.appendChild(txt(cx, ly - 1, c, { 'text-anchor': 'middle', 'font-size': compact ? 12 : 10, fill: P.sub }));
     });
-    var ly2 = B + (compact ? 68 : 86);
+    var ly2 = B + (compact ? 90 : 86);
     s.appendChild(el('circle', { cx: L + 9, cy: ly2 - 4, r: 9, fill: '#fff', stroke: NEED, 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-    s.appendChild(txt(L + 24, ly2, compact ? '虚线圈 = 关键数据源缺失' : '虚线圈 = 关键数据源缺失，补齐后重新评估', { 'font-size': compact ? 12 : 11, fill: P.sub }));
+    s.appendChild(txt(L + 24, ly2, compact ? '虚线圈 = 关键数据源缺失' : '虚线圈 = 关键数据源缺失，补齐后重新评估', { 'font-size': compact ? 15 : 11, fill: P.sub }));
     return s;
   };
 

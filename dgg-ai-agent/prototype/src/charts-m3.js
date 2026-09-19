@@ -261,24 +261,28 @@
   }
 
   /* ---------- 8. 两道护栏：价值系数与营收封顶的依次作用 ---------- */
+  /* 内核 benefit 的两道护栏：rawMonthly（各场景合并，已含场景内折减与价值系数）→ afterCross（跨场景去重）→ fullMonthly（营收封顶）。
+   * o.console：测算台右栏用的放大版（viewBox 310 宽、字号 ≥ 12），报告版保持原样。 */
   function capFunnel(b, o) {
-    var W = 400, rows = [], s;
-    rows.push({ k: '逐项合并', v: b.rawMonthly, note: '按识别顺序加总' });
-    rows.push({ k: '价值系数 ×' + (b.valueFactor != null ? b.valueFactor : 1), v: b.afterValue, note: '按场景价值分档折算' });
+    o = o || {};
+    var C = !!o.console, W = C ? 310 : 400, RH = C ? 64 : 52, rows = [], s;
+    rows.push({ k: '逐项合并', v: b.rawMonthly, note: '各场景合并，含场景内折减与价值系数' });
+    rows.push({ k: '跨场景去重', v: b.afterCross, note: b.crossDiscount > 0 ? '同一杠杆多场景命中，折减 ' + fmtS(b.crossDiscount) + ' 元' : '无跨场景重复计列' });
     rows.push({ k: b.capMonthly != null ? '营收封顶线' : '营收封顶未启用', v: b.fullMonthly, note: b.capped ? '已触顶，超出未确认' : (b.capMonthly != null ? '未触及封顶线' : '营业收入区间未知') });
-    var H = 22 + rows.length * 52 + 14;
+    var top = C ? 26 : 22, H = top + rows.length * RH + (C ? 6 : 14);
     s = svg(W, H, '收益护栏');
-    var mx = Math.max.apply(null, rows.map(function (r) { return r.v; }).concat([1]));
-    var L = 12, iw = W - L - 78;
-    s.appendChild(txt(L, 12, '合并后的月度收益依次通过两道护栏（元 / 月）', { 'font-size': 8.5, fill: M.sub }));
+    var mx = Math.max.apply(null, rows.map(function (r) { return r.v || 0; }).concat([1]));
+    var L = 12, iw = W - L - (C ? 84 : 78);
+    var f = C ? { t: 12, k: 13, v: 12.5, n: 12 } : { t: 8.5, k: 9.5, v: 10.5, n: 8 };
+    s.appendChild(txt(L, C ? 14 : 12, '合并后的月度收益依次通过两道护栏（元 / 月）', { 'font-size': f.t, fill: M.sub }));
     rows.forEach(function (r, i) {
-      var y = 22 + i * 52, w = Math.max(3, r.v / mx * iw);
-      s.appendChild(txt(L, y + 9, r.k, { 'font-size': 9.5, 'font-weight': 700, fill: M.ink }));
-      s.appendChild(el('rect', { x: L, y: y + 14, width: iw, height: 17, fill: M.zebra, stroke: M.line }));
-      s.appendChild(el('rect', { x: L, y: y + 14, width: w, height: 17, fill: i === 2 && b.capped ? M.cu : (i === 0 ? M.mc3 : M.mc2) }));
-      s.appendChild(txt(L + iw + 6, y + 27, fmtS(r.v), { 'font-size': 10.5, 'font-weight': 800, fill: M.ink }));
-      s.appendChild(txt(L, y + 41, r.note, { 'font-size': 8, fill: M.sub }));
-      if (i < rows.length - 1) s.appendChild(el('path', { d: 'M' + (L + iw / 2 - 4) + ' ' + (y + 45) + ' l8 0 l-4 5 Z', fill: M.sub }));
+      var y = top + i * RH, v = r.v || 0, w = Math.max(3, v / mx * iw), bh = C ? 16 : 17, by = y + (C ? 17 : 14);
+      s.appendChild(txt(L, y + (C ? 11 : 9), r.k, { 'font-size': f.k, 'font-weight': 700, fill: M.ink }));
+      s.appendChild(el('rect', { x: L, y: by, width: iw, height: bh, fill: M.zebra, stroke: M.line }));
+      s.appendChild(el('rect', { x: L, y: by, width: w, height: bh, fill: i === 2 && b.capped ? M.cu : (i === 0 ? M.mc3 : M.mc2) }));
+      s.appendChild(txt(L + iw + 6, by + bh - 4, fmtS(v), { 'font-size': f.v, 'font-weight': 800, fill: M.ink }));
+      s.appendChild(txt(L, by + bh + (C ? 15 : 10), r.note, { 'font-size': f.n, fill: M.sub }));
+      if (i < rows.length - 1) s.appendChild(el('path', { d: 'M' + (L + iw / 2 - 4) + ' ' + (y + RH - 7) + ' l8 0 l-4 5 Z', fill: M.sub }));
     });
     return s;
   }
@@ -303,27 +307,27 @@
   /* ---------- 10. 投入结构：横向堆叠 + 逐项标注 ---------- */
   function investStack(items, o) {
     o = o || {};
-    var W = 420, H = 30 + items.length * 20 + 42;
+    var C = !!o.console, W = C ? 310 : 420, RH = C ? 32 : 20, y0 = C ? 60 : 46;   /* console：测算台右栏放大版，字号 ≥ 12 */
+    var yb = y0 + items.length * RH + 4, H = yb + (C ? 26 : 22);
     var s = svg(W, H, '投入结构');
-    var L = 10, R = 10, iw = W - L - R;
+    var L = 10, R = 10, iw = W - L - R, bt = C ? 8 : 10, bh = C ? 28 : 24;
     var total = items.reduce(function (a, b) { return a + b.amount; }, 0) || 1, acc = 0;
     items.forEach(function (it, i) {
       var w = it.amount / total * iw;
-      s.appendChild(el('rect', { x: L + acc, y: 10, width: Math.max(1, w), height: 24, fill: CATS[i % CATS.length] }));
-      if (w > 30) s.appendChild(txt(L + acc + w / 2, 26, Math.round(it.amount / total * 100) + '%', { 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 800, fill: '#fff' }));
+      s.appendChild(el('rect', { x: L + acc, y: bt, width: Math.max(1, w), height: bh, fill: CATS[i % CATS.length] }));
+      if (w > (C ? 36 : 30)) s.appendChild(txt(L + acc + w / 2, bt + bh / 2 + (C ? 4.5 : 4), Math.round(it.amount / total * 100) + '%', { 'text-anchor': 'middle', 'font-size': C ? 12 : 9, 'font-weight': 800, fill: '#fff' }));
       acc += w;
     });
     items.forEach(function (it, i) {
-      var y = 46 + i * 20;
-      s.appendChild(el('rect', { x: L, y: y - 8, width: 9, height: 9, fill: CATS[i % CATS.length] }));
-      s.appendChild(txt(L + 15, y, trunc(it.name, 14), { 'font-size': 9.5, fill: M.ink2 }));
-      s.appendChild(txt(L + iw, y, fmtS(it.amount) + ' 元', { 'text-anchor': 'end', 'font-size': 9.5, 'font-weight': 700, fill: M.ink }));
-      s.appendChild(txt(L + iw, y + 9, it.yearly ? '年度订阅' : '一次性', { 'text-anchor': 'end', 'font-size': 7.5, fill: M.sub }));
+      var y = y0 + i * RH;
+      s.appendChild(el('rect', { x: L, y: y - (C ? 9 : 8), width: C ? 10 : 9, height: C ? 10 : 9, fill: CATS[i % CATS.length] }));
+      s.appendChild(txt(L + (C ? 17 : 15), y, trunc(it.name, C ? 11 : 14), { 'font-size': C ? 12.5 : 9.5, fill: M.ink2 }));
+      s.appendChild(txt(L + iw, y, fmtS(it.amount) + ' 元', { 'text-anchor': 'end', 'font-size': C ? 12.5 : 9.5, 'font-weight': 700, fill: M.ink }));
+      s.appendChild(txt(L + iw, y + (C ? 14 : 9), it.yearly ? '年度订阅' : '一次性', { 'text-anchor': 'end', 'font-size': C ? 12 : 7.5, fill: M.sub }));
     });
-    var yb = 46 + items.length * 20 + 4;
     s.appendChild(el('line', { x1: L, y1: yb, x2: L + iw, y2: yb, stroke: M.ink }));
-    s.appendChild(txt(L, yb + 13, '首年现金支出合计', { 'font-size': 9.5, 'font-weight': 800, fill: M.ink }));
-    s.appendChild(txt(L + iw, yb + 13, fmtS(total) + ' 元', { 'text-anchor': 'end', 'font-size': 10.5, 'font-weight': 900, fill: M.cu2 }));
+    s.appendChild(txt(L, yb + (C ? 18 : 13), '首年现金支出合计', { 'font-size': C ? 12.5 : 9.5, 'font-weight': 800, fill: M.ink }));
+    s.appendChild(txt(L + iw, yb + (C ? 18 : 13), fmtS(total) + ' 元', { 'text-anchor': 'end', 'font-size': C ? 13 : 10.5, 'font-weight': 900, fill: M.cu2 }));
     return s;
   }
 
@@ -356,8 +360,32 @@
   }
 
   /* ---------- 12. 情景区间：三档回收期与首年净额 ---------- */
+  /* 测算台右栏放大版（o.console）：三列纵排，标签 / 数值分行，字号 ≥ 12 */
+  function scenarioBandC(list, horizon) {
+    var W = 310, H = 196, L = 8, R = 8;
+    var s = svg(W, H, '情景区间');
+    var iw = W - L - R, cw = iw / list.length, cols = [M.cat3, M.mc2, M.pos];
+    list.forEach(function (sc, i) {
+      var x = L + i * cw, mid = x + cw / 2, xl = x + 12, xr = x + cw - 12;
+      s.appendChild(el('rect', { x: x + 3, y: 4, width: cw - 6, height: H - 8, fill: i === 1 ? M.zebra : M.paper, stroke: i === 1 ? M.mc2 : M.line, 'stroke-width': i === 1 ? 1.4 : 1 }));
+      s.appendChild(el('rect', { x: x + 3, y: 4, width: cw - 6, height: 3, fill: cols[i] }));
+      s.appendChild(txt(mid, 26, sc.name + '档', { 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 800, fill: M.ink }));
+      s.appendChild(txt(mid, 58, sc.payback == null ? '> ' + horizon : '第 ' + sc.payback, { 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 900, fill: cols[i] }));
+      s.appendChild(txt(mid, 76, sc.payback == null ? '期内未转正' : '期转正', { 'text-anchor': 'middle', 'font-size': 12, fill: M.sub }));
+      s.appendChild(el('line', { x1: xl, y1: 86, x2: xr, y2: 86, stroke: M.line }));
+      [['首年净额', fmtS(sc.cum12) + ' 元', sc.cum12 >= 0 ? M.pos : M.neg],
+       ['两年净额', fmtS(sc.cum24) + ' 元', sc.cum24 >= 0 ? M.pos : M.neg],
+       ['首年投报率', sc.roi12 + '%', M.ink2]].forEach(function (kv, j) {
+        var y = 102 + j * 34;
+        s.appendChild(txt(xl, y, kv[0], { 'font-size': 12, fill: M.sub }));
+        s.appendChild(txt(xr, y + 16, kv[1], { 'text-anchor': 'end', 'font-size': 12, 'font-weight': 700, fill: kv[2] }));
+      });
+    });
+    return s;
+  }
   function scenarioBand(list, horizon, o) {
     o = o || {};
+    if (o.console) return scenarioBandC(list, horizon);
     var W = 600, H = 138, L = 16, R = 16;
     var s = svg(W, H, '情景区间');
     var iw = W - L - R, cw = iw / list.length;

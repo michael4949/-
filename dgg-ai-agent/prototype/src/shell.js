@@ -115,15 +115,18 @@
   }
 
   // ---------- 滚动提示：可滚动且未到底的容器，底部出现渐隐带 + 下箭头（点箭头翻一屏） ----------
-  var HINT_SEL = '.main, .pd-work, .pd-drawer > .bd';
+  var HINT_SEL = '.main, .pd-work, .pd-scroll, .pd-drawer > .bd';
   var hints = [], hintRaf = 0;
   function scheduleHints() { if (hintRaf) return; hintRaf = requestAnimationFrame(function () { hintRaf = 0; updateScrollHints(); }); }
   function hintFor(el) { for (var i = 0; i < hints.length; i++) if (hints[i].el === el) return hints[i]; return null; }
   function updateScrollHints() {
-    var seen = [];
+    var seen = [], shown = [];
     Array.prototype.forEach.call(document.querySelectorAll(HINT_SEL), function (el) {
       var r = el.getBoundingClientRect();
       var more = r.height > 120 && el.scrollHeight - el.clientHeight - el.scrollTop > 14;
+      /* 嵌套滚动区（卡内表格）：其底边落在外层提示带附近时不再单独出箭头，避免两枚箭头叠在一起 */
+      if (more) for (var k = 0; k < shown.length; k++) { var o = shown[k]; if (o.el !== el && o.el.contains(el) && Math.abs(o.r.bottom - r.bottom) < 110 && r.left < o.r.right && r.right > o.r.left) { more = false; break; } }
+      if (more) shown.push({ el: el, r: r });
       var hh = hintFor(el);
       if (more) {
         if (!hh) {

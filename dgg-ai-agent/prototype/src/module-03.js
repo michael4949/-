@@ -680,17 +680,17 @@
     var r = M.result;
     box.appendChild(h('div', { class: 'card' }, [
       h('h4', {}, ['三档情景', h('span', {}, ['SCENARIOS'])]),
-      CH.scenarioBand(r.scenarios, r.meta.horizon),
+      CH.scenarioBand(r.scenarios, r.meta.horizon, { console: true }),
       h('div', { class: 'cap' }, ['保守档按收益 65%、投入 120% 计；积极档按收益 125%、投入 95% 计。决策建议以保守档为基准。'])
     ]));
     box.appendChild(h('div', { class: 'card' }, [
       h('h4', {}, ['收益护栏', h('span', {}, ['CAPS'])]),
-      CH.capFunnel(r.benefit),
+      CH.capFunnel(r.benefit, { console: true }),
       h('div', { class: 'cap' }, [r.capped ? '合并收益已触及营收封顶线，超出部分未予确认。' : '合并收益未触及营收封顶线。'])
     ]));
     box.appendChild(h('div', { class: 'card' }, [
       h('h4', {}, ['投入结构', h('span', {}, ['COST STRUCTURE'])]),
-      CH.investStack(r.invest.cashItems)
+      CH.investStack(r.invest.cashItems, { console: true })
     ]));
     if (r.missing.length) box.appendChild(h('div', { class: 'm3-warn' }, [
       '待补齐参数 ' + r.missing.length + ' 项：' + r.missing.map(function (x) { return x.label; }).join('、') + '。补齐后回收期测算精度相应提升。'
@@ -1874,7 +1874,7 @@
             [it.cash ? '现金' : '非现金', 'c' + (it.cash ? ' pos' : '')]];
         }))),
       tab3('复算校验', rows3([
-        row3('月度现金收益', fmt(r.benefit.cashMonthly) + ' 元', { i: '逐项合并 ' + fmt(r.benefit.rawMonthly) + ' × 价值系数 ' + r.benefit.valueFactor + ' 后取现金科目' }),
+        row3('月度现金收益', fmt(r.benefit.cashMonthly) + ' 元', { i: '逐项合并 ' + fmt(r.benefit.rawMonthly) + ' → 跨场景去重 ' + fmt(r.benefit.afterCross) + ' → 营收封顶 ' + fmt(r.benefit.fullMonthly) + ' 后取现金科目' }),
         row3('首年现金支出', fmt(r.invest.cashYear1) + ' 元', { i: '一次性 ' + fmt(r.invest.cashOnce) + ' + 年度订阅 ' + fmt(r.invest.cashYearly) }),
         row3('转正期次', r.payback == null ? '期内未转正' : '第 ' + r.payback + ' 期', { sum: true })
       ])),
