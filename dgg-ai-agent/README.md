@@ -28,6 +28,7 @@ skills/
 prototype/
   src/                     外壳（tokens.css · shell.css · shell.js）+ 模块视图（module-01.js · module-02.js · module-03.js · module-04.js · module-05.js · module-06.js · module-07.js · module-08.js · module-09.js · module-10.js · module-11.js）+ 报告版式（report.css · report-m1.css · report-m2.css · report-m3.css）+ 图表（charts.js · charts-m1.js · charts-m2.js · charts-m3.js）+ 模板
                            product.css · product-ui.js：八个产品模块共用的一套 UI 语言（左导航 + 页签 + 工作区；KPI 砖 / 状态签 / 可排序表 / 负荷热力 / SVG 甘特 / 抽屉 / 方案对比 / AI 判断面板 / 风险矩阵 / 现金曲线 / 漏斗 / 分布条 / 90 天周格日历 / 四维雷达 / 瀑布图 / 流程条 / 动作日志），每个模块只换一个强调色
+                           palette.json · theme-shell.css · theme-product.css · fx.js：定稿视觉层 —— 十一模块各一组渐变配色（品牌蓝 / 靛紫 / 祖母绿 / 品红 / 青碧 / 琥珀金 / 紫 / 青柠 / 绯红 / 橙 / 钢蓝，由外壳按路由注入 body 的 --m-* 与产品框的 --pa* 变量）；外壳与首页 / 待机 / m1–m3 的海报化样式（色带卡 + 城市天际线 + 水墨远山长浪 + 玻璃侧栏）；产品框 m4–m11 的色带卡头与组件重绘；背景动效（渐变网格 + 模块色流光彗星与光点，30 fps，页面隐藏时暂停，减弱动效时静帧，打印隐藏）；所有可滚动区域（主区 / 工作区 / 卡内表格 / 抽屉）底部有渐隐带与下箭头提示，点箭头翻一屏
   build.js                 全部内联 → dist/index.html（file:// 双击即开，零外部请求）
   test/screenshot.js       模块 1 全流程：横屏 / 竖屏 / 打印，并把屏上数字与内核 golden 输出比对
   test/screenshot-m2.js    模块 2 全流程：含权重拖动重排、预设切换、行详情联动、28 页报告与 PDF
