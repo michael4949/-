@@ -101,6 +101,7 @@
   }
   function render() {
     var r = parseHash();
+    if (S.companyHint) { S.companyHint = null; if (!S.company) renderRail(); }
     if (S.activeModule && S.activeModule !== r.route) {
       if (BUILT[S.activeModule] && BUILT[S.activeModule].unmount) BUILT[S.activeModule].unmount();
       S.activeModule = null;
@@ -121,19 +122,21 @@
   function hintFor(el) { for (var i = 0; i < hints.length; i++) if (hints[i].el === el) return hints[i]; return null; }
   function updateScrollHints() {
     var seen = [], shown = [];
+    var overlay = document.querySelector('.pd-drawer-bg, .modal-bg'); /* 抽屉 / 弹窗打开时只给浮层内的滚动区出提示 */
     Array.prototype.forEach.call(document.querySelectorAll(HINT_SEL), function (el) {
       var r = el.getBoundingClientRect();
       var more = r.height > 120 && el.scrollHeight - el.clientHeight - el.scrollTop > 14;
+      if (more && overlay && !overlay.contains(el)) more = false;
       /* 嵌套滚动区（卡内表格）：其底边落在外层提示带附近时不再单独出箭头，避免两枚箭头叠在一起 */
       if (more) for (var k = 0; k < shown.length; k++) { var o = shown[k]; if (o.el !== el && o.el.contains(el) && r.bottom > o.r.bottom - 110 && r.left < o.r.right && r.right > o.r.left) { more = false; break; } }
       if (more) shown.push({ el: el, r: r });
       var hh = hintFor(el);
       if (more) {
         if (!hh) {
-          var node = h('div', { class: 'scroll-hint' }, [h('button', { class: 'chev', 'aria-label': '向下', onclick: function () { el.scrollBy({ top: Math.round(el.clientHeight * 0.7), behavior: 'smooth' }); } })]);
+          var node = h('div', { class: 'scroll-hint' + (el.classList.contains('pd-scroll') ? ' nested' : '') }, [h('button', { class: 'chev', 'aria-label': '向下', onclick: function () { el.scrollBy({ top: Math.round(el.clientHeight * 0.7), behavior: 'smooth' }); } })]);
           document.body.appendChild(node); hh = { el: el, node: node }; hints.push(hh);
         }
-        hh.node.style.left = r.left + 'px'; hh.node.style.width = r.width + 'px'; hh.node.style.top = (r.bottom - 64) + 'px';
+        hh.node.style.left = r.left + 'px'; hh.node.style.width = r.width + 'px'; hh.node.style.top = (r.bottom - (hh.node.offsetHeight || 80)) + 'px';
         hh.node.classList.add('on');
       } else if (hh) hh.node.classList.remove('on');
       seen.push(el);
@@ -179,9 +182,9 @@
   // ---------- 右侧常驻栏 ----------
   function renderRail() {
     clear($rail);
-    var c = S.company;
+    var c = S.company || S.companyHint; /* 未在外壳选企业时，显示当前产品模块已接入的企业 */
     var name = c && c.name ? c.name : (c ? '本企业' : '未选择');
-    var meta = c ? [industryNameOf(c.industry), optText('size', c.size), c.province, optText('years', c.years)].filter(Boolean).join(' · ') : '';
+    var meta = c ? (c.metaText != null ? c.metaText : [industryNameOf(c.industry), optText('size', c.size), c.province, optText('years', c.years)].filter(Boolean).join(' · ')) : '';
     var picker = h('div', { class: 'picker' });
     var menu = null;
     var toggle = h('button', { class: 'link', onclick: function () {
@@ -372,6 +375,7 @@
   var api = {
     h: h, svgEl: svgEl, fmt: fmt, clear: clear, go: go, DATA: DATA, CFG: CFG, lint: lint,
     getCompany: function () { return S.company; }, setCompany: setCompany,
+    setCompanyHint: function (c) { S.companyHint = c || null; if (!S.company) renderRail(); },
     charge: charge, setQrReady: setQrReady, recommend: function (k) { S.recommended = k; renderPricebar(); },
     holdIdle: holdIdle, touch: touch, showWeChat: showWeChat, print: print, llm: llm,
     industryNameOf: industryNameOf, optText: optText, station: function () { return S.station; },

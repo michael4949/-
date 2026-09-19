@@ -62,10 +62,10 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const best = await page.$('.pd-action.best .pd-btn');
   if (best) {
     await best.click(); await page.waitForTimeout(400);
+    const toast = await page.$('.pd-toast'); if (!toast) errors.push('处置后无提示'); /* 先查提示（提示 2.6 秒后自动消失，截图可能更慢） */
     await shot('3b-order-after-action');
     const chips = await page.$$eval('.m10-head .pd-chip', (c) => c.map((x) => x.textContent));
     if (!chips.some((c) => c.indexOf('已处置') >= 0)) errors.push('处置后头部无已处置标记: ' + chips.join('|'));
-    const toast = await page.$('.pd-toast'); if (!toast) errors.push('处置后无提示');
   } else errors.push('无推荐动作可执行');
   // 下一张预警
   const nextBtn = (await page.$$('.m10-head .btns .pd-btn'))[1];

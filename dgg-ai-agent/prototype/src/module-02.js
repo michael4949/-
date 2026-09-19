@@ -20,6 +20,11 @@
   function RT() { return DATA.m2.reportText; }
   function CD() { return DATA.m2.conditions; }
   function AX() { return DATA.m2.axes; }
+  /* 公式随当前权重实时改写（默认权重时与数据表中的公式文本一致） */
+  function formulaText() {
+    var w = (M.result && M.result.weights) || M.weights || {};
+    return '总分 = ' + AX().items.map(function (a) { var v = w[a.key] != null ? w[a.key] : a.weight; return (a.invert ? '(6 − ' + a.name + ')' : a.name) + ' × ' + Number(v).toFixed(2); }).join(' + ');
+  }
   function groupOf(k) { return CD().groups.filter(function (g) { return g.key === k; })[0]; }
   function pickOf(id) { return M.picks.filter(function (x) { return x.id === id; })[0]; }
   function defaultWeights() { var w = {}; AX().items.forEach(function (a) { w[a.key] = a.weight; }); return w; }
@@ -251,6 +256,7 @@
       row.querySelector('.v').textContent = Math.round(M.result.weights[k] * 100) + '%';
     });
     left.querySelectorAll('.presets button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-p') === M.result.weights.preset); });
+    var wf = left.querySelector('.wformula'); if (wf) wf.textContent = formulaText();
     sh.touch();
   }
   function fillLeft(left) {
@@ -274,7 +280,7 @@
       row.appendChild(h('div', { class: 'hint' }, [a.desc]));
       wbox.appendChild(row);
     });
-    wbox.appendChild(h('div', { style: 'font-size:10px;color:var(--text-sub);border-top:1px solid var(--line);padding-top:8px;margin-top:2px;line-height:1.5' }, [AX().formula]));
+    wbox.appendChild(h('div', { class: 'wformula', style: 'font-size:12px;color:var(--text-sub);border-top:1px solid var(--line);padding-top:8px;margin-top:2px;line-height:1.5' }, [formulaText()]));
     left.appendChild(wbox);
     var fbox = h('div', { class: 'bcard' });
     fbox.appendChild(h('h4', {}, ['筛选过程']));

@@ -66,10 +66,11 @@
     s.appendChild(el('rect', { x: L, y: my, width: mx - L, height: B - my, fill: 'rgba(255,138,61,.09)' }));
     s.appendChild(el('rect', { x: mx, y: my, width: R - mx, height: B - my, fill: 'rgba(145,159,183,.09)' }));
     var qf = compact ? 10 : 11;
-    s.appendChild(txt(L + 8, T + 15, compact ? '先做' : '先做 · 价值高 门槛低', { 'font-size': qf, 'font-weight': 800, fill: OK }));
-    s.appendChild(txt(R - 8, T + 15, compact ? '规划' : '规划 · 价值高 门槛高', { 'text-anchor': 'end', 'font-size': qf, 'font-weight': 800, fill: P.blue }));
-    s.appendChild(txt(L + 8, B - 8, compact ? '顺带' : '顺带 · 价值一般 门槛低', { 'font-size': qf, 'font-weight': 800, fill: P.orange }));
-    s.appendChild(txt(R - 8, B - 8, compact ? '暂缓' : '暂缓 · 价值一般 门槛高', { 'text-anchor': 'end', 'font-size': qf, 'font-weight': 800, fill: P.gray }));
+    var qls = [txt(L + 8, T + 15, compact ? '先做' : '先做 · 价值高 门槛低', { 'font-size': qf, 'font-weight': 800, fill: OK }),
+      txt(R - 8, T + 15, compact ? '规划' : '规划 · 价值高 门槛高', { 'text-anchor': 'end', 'font-size': qf, 'font-weight': 800, fill: P.blue }),
+      txt(L + 8, B - 8, compact ? '顺带' : '顺带 · 价值一般 门槛低', { 'font-size': qf, 'font-weight': 800, fill: P.orange }),
+      txt(R - 8, B - 8, compact ? '暂缓' : '暂缓 · 价值一般 门槛高', { 'text-anchor': 'end', 'font-size': qf, 'font-weight': 800, fill: P.gray })];
+    qls.forEach(function (q) { s.appendChild(q); });
     s.appendChild(el('line', { x1: L, y1: B, x2: R, y2: B, stroke: P.line }));
     s.appendChild(el('line', { x1: L, y1: T, x2: L, y2: B, stroke: P.line }));
     for (var i = 1; i <= 5; i++) {
@@ -89,12 +90,28 @@
       var off = (seen[k] - 1) * 26;
       var x = X(sc.axis.barrier) + off * 0.8, y = Y(sc.value) - off * 0.55;
       var r = (COST_R[sc.cost] || 12) * (compact ? 0.92 : 1), top = sc.rank <= 3;
+      marks.push({ sc: sc, x: x, y: y, r: r, top: top });
+    });
+    /* 气泡不出绘图区、互不重叠：先夹到边界内，再把重叠的成对推开（几轮即收敛） */
+    function clampM(m) { m.x = Math.max(L + m.r + 2, Math.min(R - m.r - 2, m.x)); m.y = Math.max(T + m.r + 2, Math.min(B - m.r - 2, m.y)); }
+    marks.forEach(clampM);
+    for (var it = 0; it < 14; it++) {
+      var moved = false;
+      for (var ia = 0; ia < marks.length; ia++) for (var ib = ia + 1; ib < marks.length; ib++) {
+        var A = marks[ia], Bm = marks[ib], dx = Bm.x - A.x, dy = Bm.y - A.y, d = Math.sqrt(dx * dx + dy * dy), need = A.r + Bm.r + 3;
+        if (d < need) { var ux = d < 0.1 ? 0.7 : dx / d, uy = d < 0.1 ? -0.7 : dy / d, push = (need - Math.max(d, 0.1)) / 2; A.x -= ux * push; A.y -= uy * push; Bm.x += ux * push; Bm.y += uy * push; clampM(A); clampM(Bm); moved = true; }
+      }
+      if (!moved) break;
+    }
+    marks.forEach(function (m) {
+      var sc = m.sc, x = m.x, y = m.y, r = m.r, top = m.top;
       s.appendChild(el('circle', { cx: x, cy: y, r: r, fill: sc.blocked ? '#fff' : grad(s, light(P.blue, top ? .15 : .55), top ? P.blue : light(P.blue, .35), true),
         stroke: sc.blocked ? NEED : '#fff', 'stroke-width': 2, 'stroke-dasharray': sc.blocked ? '4 3' : '' }));
       s.appendChild(txt(x, y + (compact ? 5 : 4), String(sc.rank), { 'text-anchor': 'middle', 'font-size': compact ? 14 : 11, 'font-weight': 800, fill: sc.blocked ? NEED : '#fff' }));
-      marks.push({ sc: sc, x: x, y: y, r: r, top: top });
       placed.push({ x1: x - r, y1: y - r, x2: x + r, y2: y + r });
     });
+    /* 象限标题压在气泡之上并带白描边 */
+    qls.forEach(function (q) { q.setAttribute('style', 'paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round'); s.appendChild(q); });
     // 标签防重叠：右 → 左 → 下 → 上，逐个试位；都不行就压在气泡下方并下移
     function hits(b) { return placed.some(function (a) { return !(b.x2 < a.x1 || b.x1 > a.x2 || b.y2 < a.y1 || b.y1 > a.y2); }); }
     if (!compact) marks.forEach(function (m) {

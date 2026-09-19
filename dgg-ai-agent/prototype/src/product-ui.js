@@ -52,6 +52,7 @@
     var crumb = h('div', { class: 'crumb' });
     (o.crumbs || []).forEach(function (c, i) { if (i) crumb.appendChild(h('span', { class: 'sep' }, ['›'])); crumb.appendChild(i === o.crumbs.length - 1 ? h('b', {}, [c]) : h('span', {}, [c])); });
     var co = h('div', { class: 'co' }, [h('span', { class: 'dot' }), h('span', {}, [o.company ? o.company.name : '']), o.company && o.company.meta ? h('span', { class: 'meta' }, [o.company.meta]) : null]);
+    if (o.company && window.DGG && window.DGG.shell && window.DGG.shell.setCompanyHint) window.DGG.shell.setCompanyHint({ name: o.company.name, metaText: o.company.meta || '' });
     var tabs = h('div', { class: 'pd-tabs' });
     var tabEls = {};
     (o.tabs || []).forEach(function (t, i) {
@@ -319,8 +320,9 @@
     s.appendChild(svg('text', { x: 12, y: (y0 + y1) / 2, 'text-anchor': 'middle', class: 'ax', transform: 'rotate(-90 12 ' + (y0 + y1) / 2 + ')' }, ['影响金额 →']));
     var sx = function (p) { return x0 + p * (x1 - x0); }, sy = function (v) { return y1 - Math.sqrt(v / maxI) * (y1 - y0); };
     // 标签避让：默认放右侧；靠右边缘的放左侧；与已放标签重叠的挪到圆点下方
-    var placed = [];
-    var pts = o.points.map(function (p) { return { p: p, cx: sx(p.prob), cy: sy(p.impact) }; }).sort(function (a, b) { return a.cy - b.cy || a.cx - b.cx; });
+    var placed = [], labels = [];
+    /* 圆点夹在绘图区内，避开四角象限标题 */
+    var pts = o.points.map(function (p) { return { p: p, cx: Math.max(x0 + 16, Math.min(x1 - 16, sx(p.prob))), cy: Math.max(y0 + 30, Math.min(y1 - 30, sy(p.impact))) }; }).sort(function (a, b) { return a.cy - b.cy || a.cx - b.cx; });
     pts.forEach(function (q) {
       var p = q.p, cx = q.cx, cy = q.cy, tone = p.level === 'high' ? '#D9483B' : p.level === 'mid' ? '#E8A33D' : '#7C8799';
       var g = svg('g', { class: 'pt' + (p.onClick ? ' click' : ''), style: p.onClick ? 'cursor:pointer' : '' });
@@ -334,11 +336,13 @@
       if (hit(b)) { ly = cy + 22; lx = cx; anchor = 'middle'; b = { x0: cx - w / 2, x1: cx + w / 2, y0: ly - 11, y1: ly + 3 }; }
       if (hit(b)) { ly = cy - 16; b = { x0: cx - w / 2, x1: cx + w / 2, y0: ly - 11, y1: ly + 3 }; }
       placed.push(b);
-      g.appendChild(svg('text', { x: lx, y: ly, 'text-anchor': anchor, class: 'lbl' }, [p.label]));
+      labels.push({ x: lx, y: ly, a: anchor, t: p.label });
       g.appendChild(svg('title', {}, [p.label + ' · 概率 ' + Math.round(p.prob * 100) + '% · 影响 ' + fmtN(p.impact) + ' 元']));
       if (p.onClick) g.addEventListener('click', p.onClick);
       s.appendChild(g);
     });
+    /* 标签最后画、带白描边：压不到别的圆点下面 */
+    labels.forEach(function (l) { s.appendChild(svg('text', { x: l.x, y: l.y, 'text-anchor': l.a, class: 'lbl', style: 'paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round' }, [l.t])); });
     return s;
   }
 
@@ -385,14 +389,19 @@
     var syL = scale(left), syR = right.length ? scale(right) : null;
     for (var t = 0; t <= 3; t++) { var yy = y0 + (y1 - y0) * t / 3; s.appendChild(svg('line', { x1: x0, y1: yy, x2: x1, y2: yy, stroke: '#EEF1F7' })); }
     labels.forEach(function (l, i) { if (i % (o.every || 1) === 0) s.appendChild(svg('text', { x: sx(i), y: H - 8, 'text-anchor': 'middle', class: 'ax' }, [l])); });
+    var ends = [];
     o.series.forEach(function (q) {
       var sy = q.right ? syR : syL;
       if (q.bar) { q.values.forEach(function (v, i) { var bw = (x1 - x0) / n * 0.5; s.appendChild(svg('rect', { x: sx(i) - bw / 2, y: sy(v), width: bw, height: Math.max(0, sy(0) - sy(v)), fill: q.color, opacity: 0.35 })); }); return; }
       s.appendChild(svg('path', { d: q.values.map(function (v, i) { return (i ? 'L' : 'M') + sx(i).toFixed(1) + ' ' + sy(v).toFixed(1); }).join(' '), fill: 'none', stroke: q.color, 'stroke-width': 2.2 }));
       q.values.forEach(function (v, i) { s.appendChild(svg('circle', { cx: sx(i), cy: sy(v), r: 3, fill: q.color })); });
       var lastV = q.values[n - 1];
-      s.appendChild(svg('text', { x: x1 + 4, y: sy(lastV) + 4, class: 'ax', fill: q.color, style: 'font-weight:700' }, [q.fmt ? q.fmt(lastV) : String(lastV)]));
+      ends.push({ y: sy(lastV) + 4, color: q.color, text: q.fmt ? q.fmt(lastV) : String(lastV) });
     });
+    /* 终值标签相距不足 13px 时上下错开 */
+    ends.sort(function (a, b) { return a.y - b.y; });
+    for (var e = 1; e < ends.length; e++) if (ends[e].y - ends[e - 1].y < 13) ends[e].y = ends[e - 1].y + 13;
+    ends.forEach(function (e2) { s.appendChild(svg('text', { x: x1 + 4, y: e2.y, class: 'ax', fill: e2.color, style: 'font-weight:700' }, [e2.text])); });
     return s;
   }
 
@@ -484,8 +493,10 @@
       g.appendChild(svg('rect', { x: x, y: top, width: bw, height: h, rx: 3, fill: fill, opacity: b.kind === 'total' ? 1 : 0.9 }));
       if (b.id && b.id === o.active) g.appendChild(svg('rect', { x: x - 3, y: top - 3, width: bw + 6, height: h + 6, rx: 5, fill: 'none', stroke: '#1A2233', 'stroke-width': 1.5, 'stroke-dasharray': '3 2' }));
       g.appendChild(svg('text', { x: x + bw / 2, y: top - 6, 'text-anchor': 'middle', class: 'val' + (b.kind === 'down' ? ' neg' : b.kind === 'up' ? ' pos' : '') }, [b.kind === 'total' ? fmt(b.y1) : (b.value >= 0 ? '+' : '−') + fmt(Math.abs(b.value))]));
-      var lbl = b.label.length > 6 ? b.label.slice(0, 6) + '…' : b.label;
-      g.appendChild(svg('text', { x: x + bw / 2, y: H - padB + 16, 'text-anchor': 'middle', class: 'lbl' }, [lbl]));
+      /* 列宽装不下时相邻标签交错两行；标签放宽到 8 字 */
+      var stag = (!o.subs && colW < 84 && i % 2 === 1) ? 14 : 0;
+      var lbl = b.label.length > 8 ? b.label.slice(0, 8) + '…' : b.label;
+      g.appendChild(svg('text', { x: x + bw / 2, y: H - padB + 16 + stag, 'text-anchor': 'middle', class: 'lbl' }, [lbl]));
       if (o.subs && o.subs[i]) g.appendChild(svg('text', { x: x + bw / 2, y: H - padB + 30, 'text-anchor': 'middle', class: 'sub' }, [o.subs[i]]));
       if (b.id && o.onPick) g.addEventListener('click', function () { o.onPick(b.id); });
       s.appendChild(g);

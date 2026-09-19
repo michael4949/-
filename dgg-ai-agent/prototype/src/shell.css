@@ -233,7 +233,7 @@ input, select { font: inherit; color: inherit; }
   .rail { grid-row: 3; border-left: 0; border-top: 1px solid var(--line); flex-direction: row; align-items: center; gap: 18px; padding: 14px 24px; }
   .rail > div { flex: 1; }
   .rail .qr { flex-direction: row; padding: 8px 12px; }
-  .rail .qr svg { width: 72px; height: 72px; }
+  .rail .qr svg { width: 120px; height: 120px; }
   .rail .credits { gap: 10px; }
   .topbar .booth { display: none; }
   .grid .card, .grid .card.big { grid-column: span 6; }
@@ -251,11 +251,13 @@ body[data-station="1"] .btn { min-height: 58px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(30, 63, 168, .22); border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
 *::-webkit-scrollbar-thumb:hover { background: rgba(30, 63, 168, .38); background-clip: padding-box; border: 2px solid transparent; }
-.scroll-hint { position: fixed; height: 64px; z-index: 45; pointer-events: none; opacity: 0; transition: opacity .25s; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;
+.scroll-hint { position: fixed; height: 80px; z-index: 45; pointer-events: none; opacity: 0; transition: opacity .25s; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
   background: linear-gradient(180deg, rgba(245, 248, 255, 0) 0%, rgba(245, 248, 255, .9) 100%); }
 .scroll-hint.on { opacity: 1; }
 .scroll-hint .chev { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); box-shadow: 0 6px 16px rgba(30, 63, 168, .30); display: grid; place-items: center; cursor: pointer; animation: hintBob 1.6s ease-in-out infinite; }
 .scroll-hint .chev::before { content: ''; width: 10px; height: 10px; border-right: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: translateY(-3px) rotate(45deg); }
+/* 卡内表格等嵌套滚动区：只出渐隐带，不出箭头（避免一屏两枚箭头） */
+.scroll-hint.nested .chev { display: none; }
 @keyframes hintBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
 @media print { .scroll-hint { display: none !important; } }
 
