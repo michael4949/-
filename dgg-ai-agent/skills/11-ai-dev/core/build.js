@@ -86,7 +86,7 @@
         else i++;
       }
       // 数量 + 单位
-      var re = new RegExp('(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)(' + L.units.join('|') + ')', 'g'), m;
+      var re = new RegExp('(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)个?(' + L.units.join('|') + ')', 'g'), m;
       while ((m = re.exec(cl))) { var n = cnNum(m[1]); if (n != null) tokens.push({ type: 'qty', key: 'qty', canon: n + ' ' + m[2], surface: m[0], clause: ci, pos: m.index, len: m[0].length, n: n, unit: m[2] }); }
       // 否定：否定词在同一子句、字段词之前 6 字内
       L.negations.forEach(function (ng) { var p = cl.indexOf(ng); while (p >= 0) { tokens.forEach(function (tk) { if (tk.clause === ci && tk.pos > p && tk.pos - p <= ng.length + 6 && (tk.type === 'field' || tk.type === 'action')) tk.neg = true; }); p = cl.indexOf(ng, p + 1); } });
@@ -112,13 +112,14 @@
     opts = opts || {};
     var presets = presetsOf(lib, arche), original = text == null ? '' : String(text), mode = 'exact', preset = null;
     var tk = tokenize(original, lib, arche), tokens = tk.tokens;
-    var objTokens = tokens.filter(function (x) { return x.type === 'object' && !x.neg; });
+    var allowed = objectsFor(lib, arche).map(function (o) { return o.key; });
+    var objTokens = tokens.filter(function (x) { return x.type === 'object' && !x.neg && allowed.indexOf(x.key) >= 0; });
     if (!objTokens.length) {
       var nr = nearest(original, presets, function (p) { return p.text; });
       preset = nr.score >= 0.18 && nr.index != null ? nr.index : 0;
       mode = 'fallback';
       tk = tokenize(presets[preset].text, lib, arche); tokens = tk.tokens;
-      objTokens = tokens.filter(function (x) { return x.type === 'object'; });
+      objTokens = tokens.filter(function (x) { return x.type === 'object' && allowed.indexOf(x.key) >= 0; });
     }
     // 对象打分：命中 × 3 + 业态优先 + 同子句字段数；并列取先出现的
     var score = {}, first = {};
@@ -141,18 +142,20 @@
     var bound = {}, roleTokens = tokens.filter(function (x) { return x.type === 'role'; });
     roleTokens.forEach(function (rt, idx) {
       var same = tokens.filter(function (x) { return x.clause === rt.clause; });
-      var after = find(same, function (x) { return x.type === 'action' && x.pos > rt.pos; });
-      var before = find(same.slice().reverse(), function (x) { return x.type === 'action' && x.pos < rt.pos; });
+      var nextRole = find(same, function (x) { return x.type === 'role' && x.pos > rt.pos; }), prevRole = find(same.slice().reverse(), function (x) { return x.type === 'role' && x.pos < rt.pos; });
+      var after = find(same, function (x) { return x.type === 'action' && x.pos > rt.pos && (!nextRole || x.pos < nextRole.pos); });
+      var before = find(same.slice().reverse(), function (x) { return x.type === 'action' && x.pos < rt.pos && (!prevRole || x.pos > prevRole.pos); });
       var slot = null;
-      if (before && before.key === 'assign' && slots.indexOf('handler2') >= 0) slot = 'handler2';
+      if (before && before.key === 'assign' && flowKey === 'dispatch' && flowMode === 'assign') slot = 'handler2';
       else if (after && actionSlots[after.key]) slot = actionSlots[after.key];
       else if (before && before.key === 'view') slot = 'lead';
       if (slot && slots.indexOf(slot) < 0) slot = null;
       rt.slot = slot; rt.idx = idx;
     });
-    var unbound = slots.filter(function (s) { return !roleTokens.some(function (r) { return r.slot === s; }); });
+    var unbound = slots.filter(function (s) { return s !== 'lead' && !roleTokens.some(function (r) { return r.slot === s; }); });
     roleTokens.forEach(function (rt) { if (!rt.slot) { var s = unbound.shift(); if (s) rt.slot = s; } });
     roleTokens.forEach(function (rt) { if (rt.slot && !bound[rt.slot]) { bound[rt.slot] = rt.canon; titles[rt.slot] = rt.canon; } });
+    if (slots.indexOf('handler2') >= 0 && bound.handler && !bound.handler2 && titles.handler === titles.handler2 && titles.lead !== titles.handler) titles.handler2 = titles.lead;
     var roles = slots.map(function (s) { var title = titles[s], emps = empsOf(lib, arche, title), ext = lib.roles.external[title]; return { slot: s, title: title, emp: emps[0] || null, emp2: emps[1] || null, external: ext || null, hit: bound[s] || null }; });
     // 渠道
     var channelHits = { h5: tokens.filter(function (x) { return x.type === 'channel' && x.key === 'h5'; }).map(function (x) { return x.surface; }), pc: tokens.filter(function (x) { return x.type === 'channel' && x.key === 'pc'; }).map(function (x) { return x.surface; }) };
@@ -234,9 +237,9 @@
     var addRule = function (text) { rules.push({ id: 'R' + (rules.length + 1), kind: 'base', text: text }); };
     var tr0 = find(transitions, function (x) { return x.from === initialKey(states) && x.sla; }); if (tr0) addRule(tr0.action + '约定时效 ' + tr0.sla + ' 小时，超过标记超时');
     if (obj.secondLevel) addRule(obj.secondLevel.text);
-    var dueF = find(fields, function (f) { return f.due; }); if (dueF && obj.tail) addRule(dueF.label + '到期未' + (obj.tail.returned || '办结') + '标记超期');
+    var dueF = find(fields, function (f) { return f.due; }); if (dueF && obj.tail) addRule(dueF.label + '到期未' + String(obj.tail.returned || '办结').replace(/^已/, '') + '标记超期');
     if (obj.initialRule) addRule(find(fields, function (f) { return f.key === obj.initialRule.field; }).label + ' > ' + obj.initialRule.gt + ' 自动进入' + stateLabel({ states: states }, 'issue'));
-    if (obj.ruleText && !rules.some(function (r) { return r.text === obj.ruleText; })) addRule(obj.ruleText);
+    if (obj.ruleText && !rules.some(function (r) { return r.text === obj.ruleText || r.text.indexOf(obj.ruleText) >= 0 || obj.ruleText.indexOf(r.text) >= 0 || similar(r.text, obj.ruleText) >= 0.5 || (obj.secondLevel && obj.ruleText.indexOf('二级') >= 0 && r.text.indexOf('二级') >= 0); })) addRule(obj.ruleText);
     return { id: IDS.app, reqNo: IDS.req, specNo: IDS.spec, specVer: 'v0.1', status: 'draft', version: 'V1.0.0', arche: arche, company: ctx.company || '',
       title: obj.name, objectKey: obj.key, verb: obj.verb, short: obj.short, prefix: obj.prefix, table: obj.key + (tpl.key === 'dispatch' ? '_order' : tpl.key === 'approve' ? '_request' : '_record'),
       flow: { key: tpl.key, name: tpl.name, mode: mode, modeName: mode ? modeCfg.name : null }, options: clone(opt), secondLevel: obj.secondLevel ? clone(obj.secondLevel) : null, tail: obj.tail ? clone(obj.tail) : null, initialRule: obj.initialRule ? clone(obj.initialRule) : null,
@@ -302,7 +305,7 @@
     var C = lib.components, cols = [], idx = [];
     var sys = C.systemColumns;
     cols.push({ col: sys[0].col, label: sys[0].label, type: sys[0].type, required: true, unique: true, example: spec.prefix + '-2609-001', source: C.texts.sources.system });
-    spec.fields.forEach(function (f) { cols.push({ col: snake(f.key), label: f.label, type: t(C.columnTypes[f.type] || 'varchar(64)', { len: f.len || 64 }), required: !!f.required, unique: false, example: f.example == null ? '' : f.example, source: f.source || '对象库', fieldKey: f.key, ref: f.ref || (f.type === 'member' ? 'employees' : null) }); if (f.ref) idx.push({ name: 'idx_' + snake(f.key), cols: [snake(f.key)], unique: false }); });
+    spec.fields.forEach(function (f) { cols.push({ col: snake(f.key), label: f.label, type: t(C.columnTypes[f.type] || 'varchar(64)', { len: f.len || 64 }), required: !!f.required, unique: false, example: f.type === 'member' && f.auto ? (actorOf(spec, f.at ? (find(spec.transitions, function (x) { return x.actionEn === f.at; }) || { by: ['handler'] }).by[0] : 'submitter', false, lib) || { id: '' }).id : exampleOf(f, lib, spec, 0), source: f.source || '对象库', fieldKey: f.key, ref: f.ref || (f.type === 'member' ? 'employees' : null) }); if (f.ref) idx.push({ name: 'idx_' + snake(f.key), cols: [snake(f.key)], unique: false }); });
     sys.slice(1).forEach(function (c) { cols.push({ col: c.col, label: c.label, type: c.type, required: c.col !== 'assignee', unique: false, example: c.col === 'status' ? initialState(spec) : c.col === 'version' ? 1 : c.col === 'assignee' ? '' : TODAY + ' 09:00', source: C.texts.sources.system }); });
     idx.unshift({ name: 'uk_id', cols: ['id'], unique: true }); idx.splice(1, 0, { name: 'idx_status_created', cols: ['status', 'created_at'], unique: false });
     return { table: spec.table, name: spec.title, columns: cols, indexes: idx, fieldCount: spec.fields.length };
@@ -348,11 +351,13 @@
   function exampleOf(f, lib, spec, i) {
     i = i || 0;
     var ex = f.examples && f.examples.length ? f.examples[i % f.examples.length] : f.example;
+    if (f.type === 'member' && !f.auto && f.at === 'assign') { var h2 = actorOf(spec, 'handler2', false, lib) || actorOf(spec, 'handler', false, lib); if (h2) return h2.id; }
     if (typeof ex === 'string' && ex.charAt(0) === '@') {
       var k = ex.slice(1);
       if (SLOT_ORDER.indexOf(k) >= 0) { var a = actorOf(spec, k, false, lib); return a ? a.id : ''; }
       var ls = refLabels(lib, spec.arche, k); return ls.length ? ls[i % ls.length] : '';
     }
+    if (f.ref && ex != null && ex !== '' && !refKnown(lib, spec.arche, f.ref, ex)) { var ls2 = refLabels(lib, spec.arche, f.ref); if (ls2.length) return ls2[i % ls2.length]; }
     return ex == null ? '' : ex;
   }
   function exampleValues(spec, fields, lib, i) { var v = {}; fields.forEach(function (f) { v[f.key] = exampleOf(f, lib, spec, i); }); return v; }
@@ -370,7 +375,7 @@
       else if (f.type === 'photo') { if (Number(v) > (f.max || 3)) return err(f, 'E_PHOTO', { max: f.max || 3 }); }
       else if (f.type === 'phone') { if (!/^1\d{2}\s?\d{4}\s?\d{4}$/.test(String(v))) return err(f, 'E_PHONE'); }
       else if (f.type === 'date' || f.type === 'datetime') { if (isoToMin(v) == null) return err(f, 'E_FORMAT'); if (f.after && values[f.after] != null && values[f.after] !== '' && isoToMin(values[f.after]) != null && isoToMin(v) <= isoToMin(values[f.after])) { var o = find(spec.fields, function (x) { return x.key === f.after; }); return err(f, 'E_DATE', { other: o ? o.label : f.after }); } }
-      if (f.ref || (f.type === 'member' && !f.auto)) { if (!refKnown(lib, spec.arche, f.ref || 'employees', v)) return err(f, 'E_REF'); }
+      if (f.ref || (f.type === 'member' && !f.auto)) { if (f.type === 'member' && spec.roles.some(function (r) { return r.title === String(v); })) return; if (!refKnown(lib, spec.arche, f.ref || 'employees', v)) return err(f, 'E_REF'); }
     });
     return errs;
   }
@@ -396,6 +401,7 @@
     var cands = spec.transitions.filter(function (x) { return x.from === row.status && x.actionEn === actionEn; });
     if (expectedVersion != null && expectedVersion !== row.version) { var last = row.history[row.history.length - 1]; return { ok: false, code: 'E_VERSION', error: errText(lib, 'E_VERSION', { emp: last.by, action: last.action }) }; }
     if (!cands.length) return { ok: false, code: 'E_STATE', error: errText(lib, 'E_STATE') };
+    if (!actor) return { ok: false, code: 'E_ROLE', error: errText(lib, 'E_ROLE') };
     var tr = find(cands, function (x) { return x.when === 'threshold' && spec.secondLevel && Number(row.values[spec.secondLevel.field]) >= spec.secondLevel.gte; }) || find(cands, function (x) { return !x.when; }) || cands[0];
     if (tr.by.indexOf(actor.slot) < 0) return { ok: false, code: 'E_ROLE', error: errText(lib, 'E_ROLE') };
     if (tr.scope === 'assignee' && row.assignee && row.assignee !== actor.id) return { ok: false, code: 'E_SCOPE', error: errText(lib, 'E_SCOPE') };
@@ -416,7 +422,7 @@
   function query(spec, rt, actor, pageKey) {
     var p = find(spec.pages, function (x) { return x.key === pageKey; }), kind = p ? p.kind : pageKey;
     if (kind === 'mine' || kind === 'form' || kind === 'rate') return rt.rows.filter(function (r) { return r.createdBy.id === actor.id; });
-    if (kind === 'list') return rt.rows.filter(function (r) { var can = spec.transitions.some(function (tr) { return tr.from === r.status && tr.by.indexOf(actor.slot) >= 0; }); return (can && (!r.assignee || r.assignee === actor.id)) || r.assignee === actor.id; });
+    if (kind === 'list') return rt.rows.filter(function (r) { var can = spec.transitions.some(function (tr) { return tr.from === r.status && tr.by.indexOf(actor.slot) >= 0 && (tr.scope !== 'assignee' || !r.assignee || r.assignee === actor.id); }); return can || r.assignee === actor.id; });
     return rt.rows.slice();
   }
   function enteredAt(row, status) { for (var i = row.history.length - 1; i >= 0; i--) if (row.history[i].to === status) return row.history[i].atMin; return row.createdAt; }
@@ -436,7 +442,7 @@
     spec.rules.filter(function (x) { return x.kind === 'overdueRemind'; }).forEach(function (rule) { rows.forEach(function (r) { if (r.status === rule.state && clock - enteredAt(r, rule.state) > rule.hours * 60) flagged.push({ id: r.id, rule: rule.id, role: rule.roleTitle, text: rule.listMark, waited: clock - enteredAt(r, rule.state) }); }); });
     var terminalKeys = spec.states.filter(function (s) { return s.terminal; }).map(function (s) { return s.key; });
     var todayNew = rows.filter(function (r) { return r.createdAt >= 0; }).length, todayDone = rows.filter(function (r) { return terminalKeys.indexOf(r.status) >= 0 && r.updatedAt >= 0; }).length;
-    var groupBy = function (by) { var g = {}; rows.forEach(function (r) { var k = by === 'assignee' ? (r.assignee || '未分配') : by === 'status' ? stateLabel(spec, r.status) : (r.values[by] == null ? '未填' : String(r.values[by])); g[k] = g[k] || { key: k, n: 0, done: 0, rating: 0, ratingN: 0, dur: 0, durN: 0 }; g[k].n++; if (terminalKeys.indexOf(r.status) >= 0) g[k].done++; if (r.values.rating != null) { g[k].rating += Number(r.values.rating); g[k].ratingN++; } var a = acc && find(r.history, function (h) { return h.actionEn === acc.actionEn; }); if (a && terminalKeys.indexOf(r.status) >= 0) { g[k].dur += r.updatedAt - a.atMin; g[k].durN++; } }); return Object.keys(g).sort().map(function (k) { var x = g[k]; return { key: k, n: x.n, done: x.done, avgRating: x.ratingN ? Math.round(10 * x.rating / x.ratingN) / 10 : null, avgMin: x.durN ? Math.round(x.dur / x.durN) : null }; }); };
+    var groupBy = function (by) { var g = {}; rows.forEach(function (r) { var k = by === 'assignee' ? (r.assignee || '未分配') : by === 'createdBy' ? r.createdBy.id : by === 'status' ? stateLabel(spec, r.status) : (r.values[by] == null ? '未填' : String(r.values[by])); g[k] = g[k] || { key: k, n: 0, done: 0, rating: 0, ratingN: 0, dur: 0, durN: 0 }; g[k].n++; if (terminalKeys.indexOf(r.status) >= 0) g[k].done++; if (r.values.rating != null) { g[k].rating += Number(r.values.rating); g[k].ratingN++; } var a = acc && find(r.history, function (h) { return h.actionEn === acc.actionEn; }); if (a && terminalKeys.indexOf(r.status) >= 0) { g[k].dur += r.updatedAt - a.atMin; g[k].durN++; } }); return Object.keys(g).sort().map(function (k) { var x = g[k]; return { key: k, n: x.n, done: x.done, avgRating: x.ratingN ? Math.round(10 * x.rating / x.ratingN) / 10 : null, avgMin: x.durN ? Math.round(x.dur / x.durN) : null }; }); };
     var statGroups = spec.stats.map(function (s) { return { id: s.id, by: s.by, byLabel: s.byLabel, metric: s.metric, metricLabel: s.metricLabel, groups: groupBy(s.by) }; });
     return { total: rows.length, byStatus: byStatus, byAssignee: byAssignee, avgAcceptMin: avgAcceptMin, acceptLabel: acc ? acc.action : '', slaHours: slaH, overdue: overdue, overdueN: overdue.length, flagged: flagged, todayNew: todayNew, todayDone: todayDone,
       open: rows.filter(function (r) { return r.status === init; }).length, doing: rows.filter(function (r) { return r.status !== init && terminalKeys.indexOf(r.status) < 0; }).length, done: rows.filter(function (r) { return terminalKeys.indexOf(r.status) >= 0; }).length,
@@ -457,7 +463,7 @@
       if (s.kind === 'submit') values = Object.assign(exampleValues(spec, formFields(spec), lib, 0), (preset && preset.script) || {});
       else actions.forEach(function (a) { Object.assign(values, exampleValues(spec, stageFields(spec, a).filter(function (f) { return !(f.type === 'member' && f.auto); }), lib, 0)); });
       if (s.kind !== 'submit' && preset) { if (actions.indexOf('assign') >= 0 && preset.assignValues) Object.assign(values, preset.assignValues); if (preset.completeValues) Object.keys(preset.completeValues).forEach(function (k) { if (find(spec.fields, function (f) { return f.key === k; })) values[k] = preset.completeValues[k]; }); }
-      if (s.assignTo) { var af = assigneeField(spec), a2 = actorOf(spec, s.assignTo, false, lib); if (af && a2 && !(preset && preset.assignValues)) values[af.key] = a2.id; }
+      if (s.assignTo) { var af = assigneeField(spec), a2 = actorOf(spec, s.assignTo, false, lib); if (af && a2) values[af.key] = a2.id; }
       steps.push({ n: steps.length + 1, label: s.label === '提交' ? '提交' : label, kind: s.kind, actions: actions, actor: actor, actor2: s.actor2 ? actorOf(spec, s.actor2, false, lib) : null, values: values });
     });
     return steps;
@@ -478,7 +484,7 @@
   function kindCfg(lib, key) { return find(lib.tests.kinds, function (k) { return k.key === key; }); }
   function pathTo(spec, target) {
     var init = initialState(spec), q = [[init, []]], seen = {}; seen[init] = 1;
-    while (q.length) { var cur = q.shift(); if (cur[0] === target) return cur[1]; spec.transitions.forEach(function (tr) { if (tr.from === cur[0] && !seen[tr.to] && tr.to !== init) { seen[tr.to] = 1; q.push([tr.to, cur[1].concat([tr.key])]); } }); }
+    while (q.length) { var cur = q.shift(); if (cur[0] === target) return cur[1]; spec.transitions.forEach(function (tr) { if (tr.from === cur[0] && !seen[tr.to] && tr.to !== init && roleOfSlot(spec, tr.by[0])) { seen[tr.to] = 1; q.push([tr.to, cur[1].concat([tr.key])]); } }); }
     return null;
   }
   function reach(spec, rt, target, lib, submitOverride, exIndex, alt, thr) {
@@ -495,6 +501,7 @@
     for (var i = 0; i < path.length; i++) {
       var tr = find(spec.transitions, function (x) { return x.key === path[i]; }), actor = actorOf(spec, tr.by[0], !!alt, lib);
       var sv = exampleValues(spec, stageFields(spec, tr.actionEn).filter(function (f) { return !(f.type === 'member' && f.auto); }), lib, exIndex);
+      if (tr.sets && tr.sets.assignee && String(tr.sets.assignee).indexOf('values.') === 0) { var afk = tr.sets.assignee.slice(7), nxt = find(spec.transitions, function (x) { return x.from === tr.to; }), a3 = actorOf(spec, nxt ? nxt.by[0] : 'handler2', !!alt, lib); if (a3) sv[afk] = a3.id; }
       var r2 = transition(spec, cur, actor, id, tr.actionEn, sv, null, lib); if (!r2.ok) return r2; cur = r2.rt;
     }
     return { ok: true, rt: cur, id: id, row: find(cur.rows, function (x) { return x.id === id; }) };
@@ -519,11 +526,11 @@
     var alwaysCond = !!(spec.secondLevel && (function () { var f = find(spec.fields, function (x) { return x.key === spec.secondLevel.field; }); return f && f.min != null && f.min >= spec.secondLevel.gte; })());
     var hasCondSibling = function (tr) { return spec.transitions.some(function (x) { return x !== tr && x.from === tr.from && x.actionEn === tr.actionEn && x.when === 'threshold'; }); };
     var skipTr = function (tr) { return alwaysCond && hasCondSibling(tr); };
-    spec.transitions.forEach(function (tr) { if (tr.when === 'threshold' || seenTr[tr.key] || skipTr(tr)) return; seenTr[tr.key] = 1; if (pathTo(spec, tr.from) == null) return; add('transition', t(kindCfg(lib, 'transition').nameTpl, { from: stateLabel(spec, tr.from), to: stateLabel(spec, tr.to), role: roleTitle(spec, tr.by[0]), action: tr.action }), kindCfg(lib, 'transition').expect, { tr: tr.key, below: hasCondSibling(tr) }); });
+    spec.transitions.forEach(function (tr) { if (tr.when === 'threshold' || seenTr[tr.key] || skipTr(tr) || !roleOfSlot(spec, tr.by[0])) return; seenTr[tr.key] = 1; if (pathTo(spec, tr.from) == null) return; add('transition', t(kindCfg(lib, 'transition').nameTpl, { from: stateLabel(spec, tr.from), to: stateLabel(spec, tr.to), role: roleTitle(spec, tr.by[0]), action: tr.action }), kindCfg(lib, 'transition').expect, { tr: tr.key, below: hasCondSibling(tr) }); });
     if (spec.secondLevel) { var c1 = find(spec.transitions, function (x) { return x.when === 'threshold'; }); if (c1) add('transition', t(kindCfg(lib, 'transition').nameTpl, { from: stateLabel(spec, c1.from), to: stateLabel(spec, c1.to), role: roleTitle(spec, c1.by[0]), action: c1.action + '（' + spec.secondLevel.text + '）' }), kindCfg(lib, 'transition').expect, { tr: c1.key, cond: true }); }
     // 4 越权
     var nRole = 0;
-    spec.transitions.forEach(function (tr) { if (nRole >= kindCfg(lib, 'role').max || tr.when === 'threshold' || skipTr(tr) || pathTo(spec, tr.from) == null) return; var wrong = find(SLOT_ORDER, function (s) { return tr.by.indexOf(s) < 0 && roleOfSlot(spec, s) && roleTitle(spec, s) !== roleTitle(spec, tr.by[0]); }); if (!wrong) return; nRole++; add('role', t(kindCfg(lib, 'role').nameTpl, { role: roleTitle(spec, wrong), action: tr.action }), kindCfg(lib, 'role').expect, { tr: tr.key, slot: wrong }); });
+    spec.transitions.forEach(function (tr) { if (nRole >= kindCfg(lib, 'role').max || tr.when === 'threshold' || skipTr(tr) || !roleOfSlot(spec, tr.by[0]) || pathTo(spec, tr.from) == null) return; var wrong = find(SLOT_ORDER, function (s) { return tr.by.indexOf(s) < 0 && roleOfSlot(spec, s) && roleTitle(spec, s) !== roleTitle(spec, tr.by[0]); }); if (!wrong) return; nRole++; add('role', t(kindCfg(lib, 'role').nameTpl, { role: roleTitle(spec, wrong), action: tr.action }), kindCfg(lib, 'role').expect, { tr: tr.key, slot: wrong }); });
     // 5 非法迁移
     var illegal = find(spec.transitions, function (tr) { return tr.from !== init && !spec.transitions.some(function (x) { return x.from === init && x.actionEn === tr.actionEn; }); });
     if (illegal) add('state', t(kindCfg(lib, 'state').nameTpl, { from: stateLabel(spec, init), action: illegal.action }), kindCfg(lib, 'state').expect, { tr: illegal.key });
@@ -547,7 +554,7 @@
       add('rule', '提醒对象 ' + r.roleTitle + ' 在角色表内', '允许', { rule: r.id, phase: 'target' });
     });
     // 12 追加校验
-    spec.validations.forEach(function (v) { var f = find(spec.fields, function (x) { return x.key === v.field; }); if (!f) return; if (v.kind === 'required') add('validation', f.label + '为空提交', t(kindCfg(lib, 'validation').expect, { err: errText(lib, 'E_REQUIRED', { field: f.label }) }), { field: f.key, kind: 'required' }); else add('validation', f.label + (v.kind === 'min' ? '低于 ' : '高于 ') + v.v, t(kindCfg(lib, 'validation').expect, { err: errText(lib, 'E_RANGE', { field: f.label, min: f.min == null ? '' : f.min, max: f.max == null ? '' : f.max }) }), { field: f.key, kind: v.kind, v: v.v }); });
+    spec.validations.forEach(function (v) { var f = find(spec.fields, function (x) { return x.key === v.field; }); if (!f) return; if (v.kind === 'required') add('validation', f.label + '为空提交', t(kindCfg(lib, 'validation').expect, { err: errText(lib, 'E_REQUIRED', { field: f.label }) }), { field: f.key, kind: 'required' }); else { var code = f.type === 'photo' ? 'E_PHOTO' : 'E_RANGE'; add('validation', f.label + (v.kind === 'min' ? '低于 ' : '高于 ') + v.v, t(kindCfg(lib, 'validation').expect, { err: errText(lib, code, { field: f.label, min: f.min == null ? '' : f.min, max: f.max == null ? '' : f.max }) }), { field: f.key, kind: v.kind, v: v.v, code: code }); } });
     return list;
   }
   function runOne(spec, tc, seed, lib) {
@@ -556,7 +563,7 @@
     var fieldOf = function (k) { return find(spec.fields, function (f) { return f.key === k; }); };
     if (tc.kind === 'required' || (tc.kind === 'validation' && p.kind === 'required')) { vals = exampleValues(spec, formFields(spec), lib, 0); if (fieldOf(p.field) && fieldOf(p.field).at) { res = reach(spec, rt, find(spec.transitions, function (x) { return x.actionEn === fieldOf(p.field).at; }).from, lib); if (!res.ok) return reject('E_REQUIRED'); var tr0 = find(spec.transitions, function (x) { return x.actionEn === fieldOf(p.field).at; }), sv = exampleValues(spec, stageFields(spec, tr0.actionEn), lib, 0); sv[p.field] = ''; res = transition(spec, res.rt, actorOf(spec, tr0.by[0], false, lib), res.id, tr0.actionEn, sv, null, lib); return reject('E_REQUIRED'); } vals[p.field] = ''; res = submit(spec, rt, sub, vals, lib); return reject('E_REQUIRED'); }
     if (tc.kind === 'boundary') { vals = exampleValues(spec, formFields(spec), lib, 0); vals[p.field] = p.value; res = submit(spec, rt, sub, vals, lib); return reject(p.code); }
-    if (tc.kind === 'validation') { vals = exampleValues(spec, formFields(spec), lib, 0); var fv = fieldOf(p.field); vals[p.field] = p.kind === 'min' ? fv.min - 1 : fv.max + 1; res = submit(spec, rt, sub, vals, lib); return reject('E_RANGE'); }
+    if (tc.kind === 'validation') { var fv = fieldOf(p.field), bad = p.kind === 'min' ? fv.min - 1 : fv.max + 1, code = p.code || 'E_RANGE'; if (fv.at) { var trv = find(spec.transitions, function (x) { return x.actionEn === fv.at; }); if (!trv) return { pass: false, actual: '无对应阶段' }; res = reach(spec, rt, trv.from, lib); if (!res.ok) return { pass: false, actual: '前置失败：' + res.error }; var svv = exampleValues(spec, stageFields(spec, trv.actionEn).filter(function (f) { return !(f.type === 'member' && f.auto); }), lib, 0); svv[p.field] = bad; res = transition(spec, res.rt, actorOf(spec, trv.by[0], false, lib), res.id, trv.actionEn, svv, null, lib); return reject(code); } vals = exampleValues(spec, formFields(spec), lib, 0); vals[p.field] = bad; res = submit(spec, rt, sub, vals, lib); return reject(code); }
     if (tc.kind === 'transition' || tc.kind === 'role' || tc.kind === 'state') {
       var tr = find(spec.transitions, function (x) { return x.key === p.tr; });
       var from = tc.kind === 'state' ? initialState(spec) : tr.from;
@@ -611,14 +618,23 @@
       var st = D.stateTemplates;
       if (hasT('action', 'rate')) { var byTok = find(tokens, function (x) { return x.type === 'role' && spec.roles.some(function (r) { return r.title === x.canon && !r.admin; }); }); var slot = byTok ? (roleOfSlot(spec, 'submitter').title === byTok.canon ? 'submitter' : find(spec.roles, function (r) { return r.title === byTok.canon; }).slots[0]) : 'submitter'; ops.push({ type: 'addState', state: st.rated.state, transition: Object.assign({}, st.rated.transition, { by: [slot] }), fields: [], page: st.rated.page, exists: !!find(spec.states, function (s) { return s.key === 'rated'; }) }); st.rated.fields.forEach(function (k) { pushField(k); used[k] = 1; }); tokens.forEach(function (x) { if (x.type === 'action' && (x.key === 'rate' || x.key === 'complete')) x.used = true; }); }
       if (hasT('action', 'reject') || hasT('field', 'rejectReason')) { if (spec.flow.key === 'dispatch') ops.push({ type: 'addState', state: st.rejected.state, transition: st.rejected.transition, fields: [], page: null, exists: !!find(spec.states, function (s) { return s.key === 'rejected'; }) }); pushField('rejectReason'); used.rejectReason = 1; tokens.forEach(function (x) { if (x.type === 'action' && x.key === 'reject') x.used = true; }); }
-      if (hasT('action', 'recheck') && hasT('delta', 'addState')) { ops.push({ type: 'addState', state: st.rechecked.state, transition: st.rechecked.transition, fields: [], page: null, exists: !!find(spec.states, function (s) { return s.key === 'rechecked'; }) }); pushField('recheckNote'); used.recheckNote = 1; }
+      if (hasT('action', 'recheck') && hasT('delta', 'addState')) { var rSlot = roleOfSlot(spec, 'handler2') ? 'handler2' : 'handler'; ops.push({ type: 'addState', state: st.rechecked.state, transition: Object.assign({}, st.rechecked.transition, { by: [rSlot] }), fields: [], page: null, exists: !!find(spec.states, function (s) { return s.key === 'rechecked'; }) }); pushField('recheckNote'); used.recheckNote = 1; }
       // 2 统计
-      var statToks = tokens.filter(function (x) { return x.type === 'stat'; });
+      var valClauses = {}; tokens.forEach(function (x) { if (x.type === 'delta' && x.key === 'addValidation') valClauses[x.clause] = 1; });
+      var statToks = tokens.filter(function (x) { return x.type === 'stat' && !valClauses[x.clause]; });
       if (statToks.length || hasT('delta', 'addStat') || hasT('action', 'stat')) {
         var ci = (statToks[0] || find(tokens, function (x) { return x.type === 'action' && x.key === 'stat'; }) || tokens[0]).clause, same = byClause(ci).concat(tokens.filter(function (x) { return x.clause !== ci; }));
         var roleTok = find(same, function (x) { return x.type === 'role' && spec.roles.some(function (r) { return r.title === x.canon && r.slots.indexOf('lead') < 0 && !r.admin; }); });
+        var extTok = find(same, function (x) { return x.type === 'role' && (x.key === 'role.customer' || x.key === 'role.store'); });
         var fieldTok = find(same, function (x) { return x.type === 'field' && D.statBy[x.key] && find(spec.fields, function (f) { return f.key === D.statBy[x.key]; }); });
-        var by = roleTok ? 'assignee' : fieldTok ? D.statBy[fieldTok.key] : 'assignee', byLabel = roleTok ? roleTok.canon : fieldTok ? find(spec.fields, function (f) { return f.key === by; }).label : '处理人';
+        var custField = find(spec.fields, function (f) { return f.ref === 'customers' && !f.at; });
+        var roleRole = roleTok ? find(spec.roles, function (r) { return r.title === roleTok.canon; }) : null;
+        var by, byLabel;
+        if (roleRole && roleRole.slots.indexOf('submitter') >= 0) { by = roleRole.external && custField ? custField.key : 'createdBy'; byLabel = roleRole.external && custField ? custField.label : roleTok.canon; }
+        else if (roleTok) { by = 'assignee'; byLabel = roleTok.canon; }
+        else if (extTok && custField) { by = custField.key; byLabel = custField.label; }
+        else if (fieldTok) { by = D.statBy[fieldTok.key]; byLabel = find(spec.fields, function (f) { return f.key === by; }).label; }
+        else { by = 'assignee'; byLabel = '处理人'; }
         if (fieldTok) fieldTok.used = true;
         var metrics = statToks.length ? uniq(statToks.map(function (x) { return x.key; })) : ['statCount'];
         metrics.forEach(function (m) { ops.push({ type: 'addStat', by: by, byLabel: byLabel, metric: m, metricLabel: D.statMetrics[m].label, unit: D.statMetrics[m].unit, exists: !!find(spec.stats, function (s) { return s.by === by && s.metric === m; }) }); });
@@ -638,8 +654,10 @@
       tokens.filter(function (x) { return x.type === 'delta' && x.key === 'addValidation'; }).forEach(function (x) {
         var kind = /必|不能为空/.test(x.surface) ? 'required' : /最低|至少/.test(x.surface) ? 'min' : 'max';
         var ftk = find(byClause(x.clause).slice().reverse(), function (y) { return y.type === 'field' && y.pos < x.pos && find(spec.fields, function (f) { return f.key === y.key; }); }) || find(byClause(x.clause), function (y) { return y.type === 'field' && find(spec.fields, function (f) { return f.key === y.key; }); });
-        if (!ftk) return; ftk.used = true;
-        var f = find(spec.fields, function (z) { return z.key === ftk.key; }), q = find(byClause(x.clause), function (y) { return y.type === 'qty' && !y.used; }), v = q ? q.n : null;
+        var f = ftk ? find(spec.fields, function (z) { return z.key === ftk.key; }) : null;
+        if (!f) { var lbTok = find(byClause(x.clause), function (y) { return (y.type === 'stat' || y.type === 'field') && y.pos < x.pos && spec.fields.some(function (z) { return !z.auto && z.label.indexOf(y.surface) >= 0; }); }); if (lbTok) { f = find(spec.fields, function (z) { return !z.auto && z.label.indexOf(lbTok.surface) >= 0; }); lbTok.used = true; } }
+        if (!f) return; if (ftk) ftk.used = true;
+        var q = find(byClause(x.clause), function (y) { return y.type === 'qty' && !y.used; }), v = q ? q.n : null;
         if (kind !== 'required' && v == null) return;
         var textV = t(D.validationKinds[kind].text, { field: f.label, v: v });
         ops.push({ type: 'addValidation', field: f.key, label: f.label, kind: kind, v: v, text: textV, exists: kind === 'required' ? !!f.required : (kind === 'min' ? f.min === v : f.max === v) });
@@ -736,7 +754,8 @@
     var board = find(spec.pages, function (p) { return p.kind === 'board'; }), handler = roleOfSlot(spec, 'handler');
     if (!board || !handler) return null;
     var done = can(perms, handler.key, board.key, '查看');
-    return { role: handler.key, roleTitle: handler.title, page: board.key, pageName: board.name, op: '查看', done: done, text: handler.title + '默认看不到' + board.name + ' · 建议开放 查看', reason: '看板只对' + roleTitle(spec, 'lead') + '开放；' + handler.title + '需要看到本组排队与超时才好接单' };
+    var acc = acceptTransition(spec), accName = acc ? acc.action : '处理';
+    return { role: handler.key, roleTitle: handler.title, page: board.key, pageName: board.name, op: '查看', done: done, text: handler.title + '默认看不到' + board.name + ' · 建议开放 查看', reason: '看板只对' + roleTitle(spec, 'lead') + '开放；' + handler.title + '需要看到本组排队与超时才好' + accName };
   }
 
   // ---------- 客户动作（全部返回新副本并写日志） ----------
@@ -792,7 +811,7 @@
     s.prevSpec = spec0; s.spec = cur; s.changes.push(change); s.testRuns = (s.testRuns || 1) + 1; s.env = 'staging';
     s.releases.push({ id: 'FB-' + pad3(s.releases.length + 1), version: cur.version, env: 'staging', envName: envName(lib, 'staging'), publisher: lib.roles.admin, at: fmtMin(s.rt.clock, true), note: publishNote(cur, lib), status: '已发布' });
     s.lastResult = { ok: true, msg: cur.version + ' 已生成 · ' + items.length + ' 项变更 · 用例 ' + trAfter.passed + ' / ' + trAfter.total };
-    pushLog(s, 'delta', '追加需求生成 ' + cur.version, items.map(function (i) { return i.typeName + ' ' + i.content; }).join('；') + ' · 用例 ' + trAfter.passed + ' / ' + trAfter.total + ' · 存量 ' + s.rt.rows.length + ' 条新字段置空', s.rt.clock);
+    pushLog(s, 'delta', '追加需求生成 ' + cur.version, items.map(function (i) { return i.content; }).join('；') + ' · 用例 ' + trAfter.passed + ' / ' + trAfter.total + ' · 存量 ' + s.rt.rows.length + ' 条新字段置空', s.rt.clock);
     return d;
   }
   function sendReport(raw, lib) { var d = clone(raw), s = d.state; if (!s.spec) return d; s.sent = true; s.lastResult = { ok: true, msg: '交付报告已发送' }; pushLog(s, 'send', '交付报告 ' + IDS.report + ' 已发送到微信', '收件：' + uniq([roleTitle(s.spec, 'lead'), lib.roles.admin]).join(' · '), s.rt.clock); return d; }

@@ -1,35 +1,250 @@
 {
-  "_note": "追加需求只认六种变更类型；每种给触发词与模板。addState 的 rated / signed / rejected / rechecked 由动作词触发；addStat 由 stat 词 + 维度词触发；addRule 由 remind + 时长触发；addValidation 由必选 / 最低 / 不超过触发；addField 由字段词触发；addRole 由角色词 + 新增角色触发。",
+  "_note": "追加需求只认六种变更类型；每种给触发词与模板。addState 的 rated / rejected / rechecked 由动作词触发；addStat 由 stat 词 + 维度词触发；addRule 由 remind + 时长触发；addValidation 由必选 / 最低 / 不超过触发；addField 由字段词触发；addRole 由角色词 + 新增角色触发。",
   "types": [
-    { "key": "addState", "name": "新增节点" },
-    { "key": "addField", "name": "新增字段" },
-    { "key": "addStat", "name": "新增看板维度" },
-    { "key": "addRule", "name": "新增规则" },
-    { "key": "addValidation", "name": "新增校验" },
-    { "key": "addRole", "name": "新增角色" }
+    {
+      "key": "addState",
+      "name": "新增节点"
+    },
+    {
+      "key": "addField",
+      "name": "新增字段"
+    },
+    {
+      "key": "addStat",
+      "name": "新增看板维度"
+    },
+    {
+      "key": "addRule",
+      "name": "新增规则"
+    },
+    {
+      "key": "addValidation",
+      "name": "新增校验"
+    },
+    {
+      "key": "addRole",
+      "name": "新增角色"
+    }
   ],
   "stateTemplates": {
-    "rated": { "trigger": "rate", "state": { "key": "rated", "label": "已评价", "terminal": true }, "transition": { "key": "rate", "from": "@terminal", "to": "rated", "actionEn": "rate", "action": "评价", "by": ["submitter"], "require": ["@rate"] }, "fields": ["rating", "comment"], "page": { "key": "rate", "kind": "rate", "name": "评价页", "device": "phone", "roles": ["submitter"] } },
-    "signed": { "trigger": "sign", "state": { "key": "signed", "label": "已签收", "terminal": true }, "transition": { "key": "sign", "from": "@terminal", "to": "signed", "actionEn": "sign", "action": "签收", "by": ["submitter"], "require": ["@sign"] }, "fields": ["signNote"] },
-    "rejected": { "trigger": "reject", "state": { "key": "rejected", "label": "已驳回", "terminal": true }, "transition": { "key": "rejectOpen", "from": "@initial", "to": "rejected", "actionEn": "reject", "action": "驳回", "by": ["handler"], "require": ["@reject"] }, "fields": ["rejectReason"] },
-    "rechecked": { "trigger": "recheck", "state": { "key": "rechecked", "label": "已复检", "terminal": true }, "transition": { "key": "recheckDone", "from": "@terminal", "to": "rechecked", "actionEn": "recheckDone", "action": "复检", "by": ["handler2"], "require": ["@recheckDone"] }, "fields": ["recheckNote"] }
+    "rated": {
+      "trigger": "rate",
+      "state": {
+        "key": "rated",
+        "label": "已评价",
+        "terminal": true
+      },
+      "transition": {
+        "key": "rate",
+        "from": "@terminal",
+        "to": "rated",
+        "actionEn": "rate",
+        "action": "评价",
+        "by": [
+          "submitter"
+        ],
+        "require": [
+          "@rate"
+        ]
+      },
+      "fields": [
+        "rating",
+        "comment"
+      ],
+      "page": {
+        "key": "rate",
+        "kind": "rate",
+        "name": "评价页",
+        "device": "phone",
+        "roles": [
+          "submitter"
+        ]
+      }
+    },
+    "rejected": {
+      "trigger": "reject",
+      "state": {
+        "key": "rejected",
+        "label": "已驳回",
+        "terminal": true
+      },
+      "transition": {
+        "key": "rejectOpen",
+        "from": "@initial",
+        "to": "rejected",
+        "actionEn": "reject",
+        "action": "驳回",
+        "by": [
+          "handler"
+        ],
+        "require": [
+          "@reject"
+        ]
+      },
+      "fields": [
+        "rejectReason"
+      ]
+    },
+    "rechecked": {
+      "trigger": "recheck",
+      "state": {
+        "key": "rechecked",
+        "label": "已复检",
+        "terminal": true
+      },
+      "transition": {
+        "key": "recheckDone",
+        "from": "@terminal",
+        "to": "rechecked",
+        "actionEn": "recheckDone",
+        "action": "复检",
+        "by": [
+          "handler2"
+        ],
+        "require": [
+          "@recheckDone"
+        ]
+      },
+      "fields": [
+        "recheckNote"
+      ]
+    }
   },
   "fieldLib": {
-    "rating": { "key": "rating", "label": "满意度评分", "type": "rating", "min": 1, "max": 5, "required": true, "at": "rate", "example": 5, "rule": "1–5 星" },
-    "comment": { "key": "comment", "label": "评语", "type": "textarea", "len": 100, "at": "rate", "example": "响应快，修得好", "rule": "≤ 100 字" },
-    "signNote": { "key": "signNote", "label": "签收备注", "type": "textarea", "len": 100, "at": "sign", "example": "已收到，数量相符" },
-    "rejectReason": { "key": "rejectReason", "label": "驳回原因", "type": "textarea", "len": 100, "required": true, "at": "reject", "example": "照片不清晰，请重拍后再提交" },
-    "recheckNote": { "key": "recheckNote", "label": "复检意见", "type": "textarea", "len": 100, "at": "recheckDone", "example": "复检合格" },
-    "photo": { "key": "photo", "label": "照片", "type": "photo", "max": 3, "example": 1 },
-    "note": { "key": "note", "label": "备注", "type": "textarea", "len": 200, "example": "无" },
-    "express": { "key": "express", "label": "快递单号", "type": "text", "len": 24, "example": "SF-2609-118203" },
-    "phone": { "key": "phone", "label": "联系电话", "type": "phone", "example": "138 0000 0000" },
-    "due": { "key": "due", "label": "期限", "type": "date", "example": "2026-09-20" },
-    "reason": { "key": "reason", "label": "原因", "type": "textarea", "len": 100, "example": "无" }
+    "rating": {
+      "key": "rating",
+      "label": "满意度评分",
+      "type": "rating",
+      "min": 1,
+      "max": 5,
+      "required": true,
+      "at": "rate",
+      "example": 5,
+      "rule": "1–5 星"
+    },
+    "comment": {
+      "key": "comment",
+      "label": "评语",
+      "type": "textarea",
+      "len": 100,
+      "at": "rate",
+      "example": "响应快，修得好",
+      "rule": "≤ 100 字"
+    },
+    "signNote": {
+      "key": "signNote",
+      "label": "签收备注",
+      "type": "textarea",
+      "len": 100,
+      "at": "sign",
+      "example": "已收到，数量相符"
+    },
+    "rejectReason": {
+      "key": "rejectReason",
+      "label": "驳回原因",
+      "type": "textarea",
+      "len": 100,
+      "required": true,
+      "at": "reject",
+      "example": "照片不清晰，请重拍后再提交"
+    },
+    "recheckNote": {
+      "key": "recheckNote",
+      "label": "复检意见",
+      "type": "textarea",
+      "len": 100,
+      "at": "recheckDone",
+      "example": "复检合格"
+    },
+    "photo": {
+      "key": "photo",
+      "label": "照片",
+      "type": "photo",
+      "max": 3,
+      "example": 1
+    },
+    "note": {
+      "key": "note",
+      "label": "备注",
+      "type": "textarea",
+      "len": 200,
+      "example": "无"
+    },
+    "express": {
+      "key": "express",
+      "label": "快递单号",
+      "type": "text",
+      "len": 24,
+      "example": "SF-2609-118203"
+    },
+    "phone": {
+      "key": "phone",
+      "label": "联系电话",
+      "type": "phone",
+      "example": "138 0000 0000"
+    },
+    "due": {
+      "key": "due",
+      "label": "期限",
+      "type": "date",
+      "example": "2026-09-20"
+    },
+    "reason": {
+      "key": "reason",
+      "label": "原因",
+      "type": "textarea",
+      "len": 100,
+      "example": "无"
+    }
   },
-  "statBy": { "role": "assignee", "product": "product", "reason": "reason", "device": "device", "customer": "customer", "level": "level", "urgency": "urgency" },
-  "statMetrics": { "statCount": { "label": "数量", "unit": "单" }, "statDuration": { "label": "平均处理时长", "unit": "分" }, "statRating": { "label": "满意度", "unit": "星" } },
-  "ruleTemplate": { "kind": "overdueRemind", "text": "超过 {n} {unit}未{stateLabel}，提醒{role}", "listMark": "已超 {n} {unit}" },
-  "validationKinds": { "required": { "label": "必选", "text": "{field}改为必填" }, "min": { "label": "最低", "text": "{field}最低 {v}" }, "max": { "label": "不超过", "text": "{field}不超过 {v}" } },
-  "timeStates": { "notAccepted": "open", "notAssigned": "open", "notDone": "accepted", "notSubmitted": "open", "notApproved": "pending", "overdue": "@initial" }
+  "statBy": {
+    "role": "assignee",
+    "product": "product",
+    "reason": "reason",
+    "device": "device",
+    "customer": "customer",
+    "level": "level",
+    "urgency": "urgency"
+  },
+  "statMetrics": {
+    "statCount": {
+      "label": "数量",
+      "unit": "单"
+    },
+    "statDuration": {
+      "label": "平均处理时长",
+      "unit": "分"
+    },
+    "statRating": {
+      "label": "满意度",
+      "unit": "星"
+    }
+  },
+  "ruleTemplate": {
+    "kind": "overdueRemind",
+    "text": "超过 {n} {unit}未{stateLabel}，提醒{role}",
+    "listMark": "已超 {n} {unit}"
+  },
+  "validationKinds": {
+    "required": {
+      "label": "必选",
+      "text": "{field}改为必填"
+    },
+    "min": {
+      "label": "下限",
+      "text": "{field}不低于 {v}"
+    },
+    "max": {
+      "label": "上限",
+      "text": "{field}不超过 {v}"
+    }
+  },
+  "timeStates": {
+    "notAccepted": "open",
+    "notAssigned": "open",
+    "notDone": "accepted",
+    "notSubmitted": "open",
+    "notApproved": "pending",
+    "overdue": "@initial"
+  }
 }

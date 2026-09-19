@@ -71,7 +71,7 @@ report_pages: 0
 - **components.json** 8 种页面种类 → 手机 / PC 组件序列；12 种字段类型的控件名与校验时机；列类型映射；6 个系统列；固定文案（发布说明、通知渠道 微信服务通知、环境名、五段流水、五项检查、字段来源、报告七段模板）。
 - **presets.json** 三业态各 4 条预置需求句（key / text / expect / aliases 5 条 / script / assignValues / completeValues）共 12 条，各 3 条追加句（text / expectOps / expect）共 9 条，3 条无关句作回落回归。
 - **tests.json** 12 类用例的命名模板、预期文案与上限；14 个错误码文案；边界描述 6 条；警告 W-01。
-- **deltas.json** 六种变更类型；节点模板 4 个（rated / signed / rejected / rechecked，signed 当前解析不触发）；字段库 11 个；统计维度映射 7 个；指标 3 个；提醒规则模板；校验三式；时限词 → 节点映射 6 个。
+- **deltas.json** 六种变更类型；节点模板 3 个（rated / rejected / rechecked）；字段库 11 个；统计维度映射 7 个；指标 3 个；提醒规则模板；校验三式（必填 / 下限 / 上限）；时限词 → 节点映射 6 个。
 - **integrations.json** 主数据来源 9 项（machines / lines / groups→lines / orders / materials / products / services→products / customers / employees），各给来源模块（erp / proc / hr）、路径、id、label 模板、单位、直连条件、同步时间与业态覆盖；archeMap 把本模块业态映射到来源样本键。
 
 ## 样本契约

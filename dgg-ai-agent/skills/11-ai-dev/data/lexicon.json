@@ -1,124 +1,1355 @@
 {
   "_note": "两级词典解析用的表面词表。terms 的 surfaces 全局唯一，正向最长匹配；object 键 = objects.json 的 key，role 的 canon 可按业态分（make / flow / service），action 键 = 流程模板里的 actionEn，field 键 = 对象字段或可选字段 key，stat / delta / time 供追加需求解析。",
-  "negations": ["不要", "去掉", "不需要", "取消", "无需", "删掉", "不用", "免填"],
-  "connectors": ["然后", "再", "之后", "接着", "并且", "同时", "以及", "并"],
-  "qtyUnits": ["个工作日", "工作日", "小时", "分钟", "天", "次", "人", "张", "元", "箱", "件"],
+  "negations": [
+    "不要",
+    "去掉",
+    "不需要",
+    "取消",
+    "无需",
+    "删掉",
+    "不用",
+    "免填",
+    "不再需要",
+    "不再要",
+    "去除",
+    "不带"
+  ],
+  "connectors": [
+    "然后",
+    "之后",
+    "接着",
+    "并且",
+    "同时",
+    "以及"
+  ],
+  "qtyUnits": [
+    "个工作日",
+    "工作日",
+    "小时",
+    "分钟",
+    "天",
+    "次",
+    "人",
+    "张",
+    "元",
+    "箱",
+    "件"
+  ],
   "terms": [
-    { "key": "repair", "type": "object", "canon": "报修单", "surfaces": ["报修单", "设备报修", "报修", "维修单", "报故障", "设备故障", "故障", "机台坏了", "设备坏了", "保修"] },
-    { "key": "expense", "type": "object", "canon": "报销单", "surfaces": ["报销单", "报销", "费用报销", "报账"] },
-    { "key": "leave", "type": "object", "canon": "请假单", "surfaces": ["请假单", "请假", "休假申请", "调休申请", "年假申请"] },
-    { "key": "vehicle", "type": "object", "canon": "用车申请", "surfaces": ["用车申请", "用车", "派车", "车辆申请", "借车"] },
-    { "key": "training", "type": "object", "canon": "培训报名", "surfaces": ["培训报名", "培训申请", "报名培训", "课程报名"] },
-    { "key": "meeting", "type": "object", "canon": "会议室预约", "surfaces": ["会议室预约", "会议室", "预约会议室", "订会议室"] },
-    { "key": "complaint", "type": "object", "canon": "投诉工单", "surfaces": ["投诉工单", "投诉", "客诉", "客户投诉", "投诉处理"] },
-    { "key": "asset", "type": "object", "canon": "固定资产领用", "surfaces": ["固定资产领用", "固定资产", "资产领用", "领用资产", "资产借用"] },
-    { "key": "visitor", "type": "object", "canon": "访客登记单", "surfaces": ["访客登记单", "访客登记", "访客", "来访登记", "来访预约"] },
-    { "key": "inspection", "type": "object", "canon": "设备点检单", "surfaces": ["设备点检单", "点检单", "点检", "设备点检", "巡检设备", "日常点检", "巡检"] },
-    { "key": "rectify", "type": "object", "canon": "整改单", "surfaces": ["整改单", "整改工单", "问题整改单"] },
-    { "key": "mold", "type": "object", "canon": "模具领用单", "surfaces": ["模具领用单", "模具领用", "模具", "领模具", "模具借用"] },
-    { "key": "incoming", "type": "object", "canon": "来料异常单", "surfaces": ["来料异常单", "来料异常", "来料不良", "来料检验异常", "进料异常", "物料异常"] },
-    { "key": "consumable", "type": "object", "canon": "耗材申领单", "surfaces": ["耗材申领单", "耗材申领", "耗材", "领耗材", "辅料申领", "申领耗材"] },
-    { "key": "hazard", "type": "object", "canon": "安全隐患上报", "surfaces": ["安全隐患上报", "安全隐患", "隐患上报", "隐患", "安全问题", "不安全行为"] },
-    { "key": "overtime", "type": "object", "canon": "加班申请", "surfaces": ["加班申请", "加班", "申请加班", "加班单"] },
-    { "key": "supplier", "type": "object", "canon": "供应商准入", "surfaces": ["供应商准入", "供应商准入申请", "新供应商", "供应商引入", "供应商评审"] },
-    { "key": "return_order", "type": "object", "canon": "退换货工单", "surfaces": ["退换货工单", "退换货", "退换货申请", "退货", "换货", "退货单", "退货申请", "退换"] },
-    { "key": "sample_req", "type": "object", "canon": "样品申请", "surfaces": ["样品申请", "样品", "寄样", "申请样品", "样品单"] },
-    { "key": "display_check", "type": "object", "canon": "门店陈列检查", "surfaces": ["门店陈列检查", "门店陈列", "陈列检查", "陈列", "巡店", "门店检查"] },
-    { "key": "price_req", "type": "object", "canon": "价格申请", "surfaces": ["价格申请", "特价申请", "价格", "报价申请", "折扣申请", "调价"] },
-    { "key": "promo_material", "type": "object", "canon": "促销物料申领单", "surfaces": ["促销物料申领单", "促销物料", "物料申领", "促销品申领", "宣传物料", "促销物料申领"] },
-    { "key": "arrival", "type": "object", "canon": "到货预约单", "surfaces": ["到货预约单", "到货预约", "预约到货", "送货预约", "卸货预约", "到货登记"] },
-    { "key": "client_onboard", "type": "object", "canon": "新客户资料", "surfaces": ["新客户资料", "新客户", "客户资料", "新客户接入", "客户建档", "开户资料", "新客户登记"] },
-    { "key": "doc_handover", "type": "object", "canon": "票据交接单", "surfaces": ["票据交接单", "票据交接", "票据", "交票据", "上传票据", "上传当月票据", "发票交接", "单据交接"] },
-    { "key": "consult", "type": "object", "canon": "咨询工单", "surfaces": ["咨询工单", "咨询", "提问", "问题咨询", "咨询单"] },
-    { "key": "renewal", "type": "object", "canon": "续费提醒", "surfaces": ["续费提醒", "续费", "到期续费", "续约提醒", "续约"] },
-    { "key": "biz_change", "type": "object", "canon": "工商变更申请", "surfaces": ["工商变更申请", "工商变更", "变更登记", "工商变更材料", "变更材料", "执照变更"] },
-    { "key": "visit_log", "type": "object", "canon": "客户回访登记", "surfaces": ["客户回访登记", "客户回访", "回访", "回访登记", "满意度回访"] },
-    { "key": "doc_supplement", "type": "object", "canon": "资料补交单", "surfaces": ["资料补交单", "资料补交", "补交资料", "补资料", "资料补充", "补交"] },
-
-    { "key": "role.foreman", "type": "role", "canon": "班组长", "surfaces": ["班组长", "车间", "车间班组", "班长"] },
-    { "key": "role.groupLead", "type": "role", "canon": { "make": "班组长", "flow": "仓配主管", "service": "账务组长" }, "surfaces": ["组长"] },
-    { "key": "role.maint", "type": "role", "canon": "设备员", "surfaces": ["设备员", "维修工", "维修员", "机修", "维修人员", "设备维修", "设备工程师"] },
-    { "key": "role.prodLead", "type": "role", "canon": "生产主管", "surfaces": ["生产主管", "生产经理", "车间主任", "生产部长", "厂长", "生产负责人"] },
-    { "key": "role.lead", "type": "role", "canon": { "make": "生产主管", "flow": "仓配主管", "service": "作业主管" }, "surfaces": ["主管", "领导", "负责人", "经理", "老板", "管理层"] },
-    { "key": "role.operator", "type": "role", "canon": "操作工", "surfaces": ["操作工", "操作员", "员工", "一线员工", "工人"] },
-    { "key": "role.moldKeeper", "type": "role", "canon": "模具管理员", "surfaces": ["模具管理员", "模具员", "模具管理"] },
-    { "key": "role.warehouse", "type": "role", "canon": "仓储员", "surfaces": ["仓储员", "仓库", "仓管", "仓管员", "库管", "仓库人员", "收货员"] },
-    { "key": "role.cs", "type": "role", "canon": "客服专员", "surfaces": ["客服专员", "客服", "客服人员", "售后"] },
-    { "key": "role.whLead", "type": "role", "canon": "仓配主管", "surfaces": ["仓配主管", "仓储主管", "仓库主管", "物流主管"] },
-    { "key": "role.store", "type": "role", "canon": "门店", "surfaces": ["门店", "店长", "门店店长", "加盟店", "店铺"] },
-    { "key": "role.sales", "type": "role", "canon": "业务员", "surfaces": ["业务员", "销售", "业务", "销售员", "销售代表"] },
-    { "key": "role.supervisor", "type": "role", "canon": "督导", "surfaces": ["督导", "区域督导", "市场督导"] },
-    { "key": "role.ops", "type": "role", "canon": "运营专员", "surfaces": ["运营", "运营专员", "市场部", "市场专员"] },
-    { "key": "role.custMgr", "type": "role", "canon": "客户经理", "surfaces": ["客户经理", "客户专员", "顾问"] },
-    { "key": "role.acctLead", "type": "role", "canon": "账务组长", "surfaces": ["账务组长", "账务主管"] },
-    { "key": "role.acct", "type": "role", "canon": "代账会计", "surfaces": ["代账会计", "会计", "记账会计", "账务会计", "做账会计"] },
-    { "key": "role.opsLead", "type": "role", "canon": "作业主管", "surfaces": ["作业主管", "业务主管", "运营主管", "服务主管"] },
-    { "key": "role.customer", "type": "role", "canon": "客户", "surfaces": ["客户", "客户方", "甲方", "委托方"] },
-    { "key": "role.finance", "type": "role", "canon": "财务主管", "surfaces": ["财务主管", "财务", "财务经理", "财务负责人"] },
-    { "key": "role.admin", "type": "role", "canon": "应用管理员", "surfaces": ["管理员", "应用管理员", "系统管理员"] },
-    { "key": "role.agent", "type": "role", "canon": "办理人", "surfaces": ["办理人", "办理专员", "工商专员", "外勤"] },
-
-    { "key": "submit", "type": "action", "canon": "提交", "surfaces": ["提交", "提报", "上报", "申请", "发起", "登记", "填报", "提出", "录入", "上传", "打卡", "填写", "填单"] },
-    { "key": "approve", "type": "action", "canon": "审批", "surfaces": ["审批", "审核", "批准", "同意", "核准", "审"] },
-    { "key": "reject", "type": "action", "canon": "驳回", "surfaces": ["驳回", "退回", "拒绝", "不通过"] },
-    { "key": "accept", "type": "action", "canon": "接单", "surfaces": ["接单", "受理", "认领", "抢单", "签收", "接收"] },
-    { "key": "assign", "type": "action", "canon": "分配", "surfaces": ["分配", "指派", "派单", "派给", "转派", "派发", "安排"] },
-    { "key": "process", "type": "action", "canon": "处理", "surfaces": ["处理", "跟进", "办理", "答复", "回复", "收货"] },
-    { "key": "complete", "type": "action", "canon": "完成", "surfaces": ["完成", "完工", "办结", "结案", "关单", "入库", "完成后"] },
-    { "key": "lend", "type": "action", "canon": "领用", "surfaces": ["领用", "借用", "发放", "寄出", "发出", "领走", "寄给"] },
-    { "key": "return", "type": "action", "canon": "归还", "surfaces": ["归还", "还回", "交还", "退还"] },
-    { "key": "rate", "type": "action", "canon": "评价", "surfaces": ["评价", "打分", "评分", "打分评价", "满意度评价", "星级"] },
-    { "key": "issue", "type": "action", "canon": "异常", "surfaces": ["异常", "异常项", "不合格", "问题项", "发现问题"] },
-    { "key": "fix", "type": "action", "canon": "整改", "surfaces": ["整改", "修复", "纠正", "整治"] },
-    { "key": "recheck", "type": "action", "canon": "复核", "surfaces": ["复核", "复检", "复查", "验收", "核验"] },
-    { "key": "close", "type": "action", "canon": "关闭", "surfaces": ["关闭", "关闭工单", "销项"] },
-    { "key": "view", "type": "action", "canon": "查看", "surfaces": ["查看", "看", "看到", "掌握", "了解", "监控", "盯"] },
-    { "key": "remind", "type": "action", "canon": "提醒", "surfaces": ["提醒", "通知", "催办", "预警", "自动提醒", "催"] },
-    { "key": "stat", "type": "action", "canon": "统计", "surfaces": ["统计", "汇总", "分析", "按", "维度"] },
-
-    { "key": "h5", "type": "channel", "canon": "微信扫码 H5", "surfaces": ["扫码", "微信", "手机", "移动端", "微信扫码", "扫一扫", "h5", "手机端", "小程序", "手机上"] },
-    { "key": "pc", "type": "channel", "canon": "PC 后台", "surfaces": ["后台", "看板", "电脑", "pc", "大屏", "报表", "管理后台", "电脑端", "数据看板", "驾驶舱"] },
-
-    { "key": "photo", "type": "field", "canon": "照片", "surfaces": ["照片", "拍照", "图片", "拍张照", "附件", "上传照片", "现场照片"] },
-    { "key": "downtime", "type": "field", "canon": "停机影响", "surfaces": ["停机", "停机影响", "是否停机", "停线"] },
-    { "key": "parts", "type": "field", "canon": "备件需求", "surfaces": ["备件", "备件需求", "配件", "零件"] },
-    { "key": "cost", "type": "field", "canon": "费用（预计）", "surfaces": ["费用", "金额", "花费", "成本", "维修费"] },
-    { "key": "hours", "type": "field", "canon": "工时（预计）", "surfaces": ["工时", "维修工时", "耗时"] },
-    { "key": "recur", "type": "field", "canon": "复发标记", "surfaces": ["复发", "复发标记", "重复故障"] },
-    { "key": "comment", "type": "field", "canon": "评语", "surfaces": ["评语", "留言", "评价内容"] },
-    { "key": "rejectReason", "type": "field", "canon": "驳回原因", "surfaces": ["驳回原因", "退回原因", "驳回理由"] },
-    { "key": "express", "type": "field", "canon": "快递单号", "surfaces": ["快递单号", "快递", "运单号", "物流单号"] },
-    { "key": "workOrder", "type": "field", "canon": "工单号", "surfaces": ["工单号", "工单编号", "生产工单"] },
-    { "key": "urgency", "type": "field", "canon": "紧急度", "surfaces": ["紧急度", "紧急程度", "优先级"] },
-    { "key": "reason", "type": "field", "canon": "原因", "surfaces": ["原因", "退货原因", "理由"] },
-    { "key": "due", "type": "field", "canon": "期限", "surfaces": ["期限", "整改期限", "截止", "截止日期", "归还日期"] },
-    { "key": "level", "type": "field", "canon": "等级", "surfaces": ["等级", "风险等级", "严重程度"] },
-    { "key": "location", "type": "field", "canon": "位置", "surfaces": ["位置", "区域", "地点"] },
-    { "key": "phone", "type": "field", "canon": "联系电话", "surfaces": ["电话", "联系方式", "手机号"] },
-    { "key": "signNote", "type": "field", "canon": "签收备注", "surfaces": ["签收备注", "签收说明"] },
-    { "key": "note", "type": "field", "canon": "备注", "surfaces": ["备注", "说明"] },
-    { "key": "device", "type": "field", "canon": "设备编号", "surfaces": ["设备编号", "设备号", "机台号", "设备", "cnc"] },
-    { "key": "product", "type": "field", "canon": "商品", "surfaces": ["商品", "货品", "sku", "产品"] },
-    { "key": "discount", "type": "field", "canon": "折扣", "surfaces": ["折扣", "折让"] },
-    { "key": "assignee", "type": "field", "canon": "处理人", "surfaces": ["处理人", "接单人", "经办人"] },
-    { "key": "timeliness", "type": "field", "canon": "时效", "surfaces": ["时效", "处理时效", "接单时效", "办结时效", "进度", "整改进度", "接入进度"] },
-
-    { "key": "statCount", "type": "stat", "canon": "数量", "surfaces": ["数量", "接单数", "单数", "退货数量", "在办客户数", "客户数", "次数", "件数", "整改率", "退货原因分布", "原因分布", "分布"] },
-    { "key": "statDuration", "type": "stat", "canon": "平均处理时长", "surfaces": ["平均处理时长", "时长", "处理时长", "平均时长", "处理时间"] },
-    { "key": "statRating", "type": "stat", "canon": "满意度", "surfaces": ["满意度", "评分均值", "平均评分"] },
-
-    { "key": "overdue", "type": "time", "canon": "超时", "surfaces": ["超时", "超期", "逾期", "未按时"] },
-    { "key": "notAccepted", "type": "time", "canon": "未接单", "surfaces": ["未接单", "没人接", "无人接单"] },
-    { "key": "notAssigned", "type": "time", "canon": "未分配", "surfaces": ["未分配", "没分配", "未指派"] },
-    { "key": "notDone", "type": "time", "canon": "未处理", "surfaces": ["未处理", "未完成", "未办结", "未整改"] },
-    { "key": "notSubmitted", "type": "time", "canon": "未交", "surfaces": ["未交", "没交", "未上传", "未提交"] },
-    { "key": "notApproved", "type": "time", "canon": "未审批", "surfaces": ["未审批", "未审核", "没审"] },
-
-    { "key": "addState", "type": "delta", "canon": "新增节点", "surfaces": ["增加节点", "加一步", "加一个环节", "多一步", "新增环节", "加节点"] },
-    { "key": "addField", "type": "delta", "canon": "新增字段", "surfaces": ["加字段", "增加字段", "多一个字段", "新增字段", "要填", "加一栏", "补充字段", "增加一项"] },
-    { "key": "addStat", "type": "delta", "canon": "新增看板维度", "surfaces": ["看板按", "新增统计", "增加统计", "加个统计"] },
-    { "key": "addRule", "type": "delta", "canon": "新增规则", "surfaces": ["超时提醒", "自动催", "到期提醒", "规则"] },
-    { "key": "addValidation", "type": "delta", "canon": "新增校验", "surfaces": ["必选", "必填", "不能为空", "改为必填", "改为必选", "最低", "至少", "不超过", "上限", "最多", "限制"] },
-    { "key": "addRole", "type": "delta", "canon": "新增角色", "surfaces": ["增加角色", "新增角色", "加一个角色", "角色"] }
+    {
+      "key": "repair",
+      "type": "object",
+      "canon": "报修单",
+      "surfaces": [
+        "报修单",
+        "设备报修",
+        "报修",
+        "维修单",
+        "报故障",
+        "设备故障",
+        "故障",
+        "机台坏了",
+        "设备坏了",
+        "保修"
+      ]
+    },
+    {
+      "key": "expense",
+      "type": "object",
+      "canon": "报销单",
+      "surfaces": [
+        "报销单",
+        "报销",
+        "费用报销",
+        "报账"
+      ]
+    },
+    {
+      "key": "leave",
+      "type": "object",
+      "canon": "请假单",
+      "surfaces": [
+        "请假单",
+        "请假",
+        "休假申请",
+        "调休申请",
+        "年假申请"
+      ]
+    },
+    {
+      "key": "vehicle",
+      "type": "object",
+      "canon": "用车申请",
+      "surfaces": [
+        "用车申请",
+        "用车",
+        "派车",
+        "车辆申请",
+        "借车"
+      ]
+    },
+    {
+      "key": "training",
+      "type": "object",
+      "canon": "培训报名",
+      "surfaces": [
+        "培训报名",
+        "培训申请",
+        "报名培训",
+        "课程报名"
+      ]
+    },
+    {
+      "key": "meeting",
+      "type": "object",
+      "canon": "会议室预约",
+      "surfaces": [
+        "会议室预约",
+        "会议室",
+        "预约会议室",
+        "订会议室"
+      ]
+    },
+    {
+      "key": "complaint",
+      "type": "object",
+      "canon": "投诉工单",
+      "surfaces": [
+        "投诉工单",
+        "投诉",
+        "客诉",
+        "客户投诉",
+        "投诉处理"
+      ]
+    },
+    {
+      "key": "asset",
+      "type": "object",
+      "canon": "固定资产领用",
+      "surfaces": [
+        "固定资产领用",
+        "固定资产",
+        "资产领用",
+        "领用资产",
+        "资产借用"
+      ]
+    },
+    {
+      "key": "visitor",
+      "type": "object",
+      "canon": "访客登记单",
+      "surfaces": [
+        "访客登记单",
+        "访客登记",
+        "访客",
+        "来访登记",
+        "来访预约"
+      ]
+    },
+    {
+      "key": "inspection",
+      "type": "object",
+      "canon": "设备点检单",
+      "surfaces": [
+        "设备点检单",
+        "点检单",
+        "点检",
+        "设备点检",
+        "巡检设备",
+        "日常点检",
+        "巡检"
+      ]
+    },
+    {
+      "key": "rectify",
+      "type": "object",
+      "canon": "整改单",
+      "surfaces": [
+        "整改单",
+        "整改工单",
+        "问题整改单"
+      ]
+    },
+    {
+      "key": "mold",
+      "type": "object",
+      "canon": "模具领用单",
+      "surfaces": [
+        "模具领用单",
+        "模具领用",
+        "模具",
+        "领模具",
+        "模具借用"
+      ]
+    },
+    {
+      "key": "incoming",
+      "type": "object",
+      "canon": "来料异常单",
+      "surfaces": [
+        "来料异常单",
+        "来料异常",
+        "来料不良",
+        "来料检验异常",
+        "进料异常",
+        "物料异常"
+      ]
+    },
+    {
+      "key": "consumable",
+      "type": "object",
+      "canon": "耗材申领单",
+      "surfaces": [
+        "耗材申领单",
+        "耗材申领",
+        "耗材",
+        "领耗材",
+        "辅料申领",
+        "申领耗材"
+      ]
+    },
+    {
+      "key": "hazard",
+      "type": "object",
+      "canon": "安全隐患上报",
+      "surfaces": [
+        "安全隐患上报",
+        "安全隐患",
+        "隐患上报",
+        "隐患",
+        "安全问题",
+        "不安全行为"
+      ]
+    },
+    {
+      "key": "overtime",
+      "type": "object",
+      "canon": "加班申请",
+      "surfaces": [
+        "加班申请",
+        "加班",
+        "申请加班",
+        "加班单"
+      ]
+    },
+    {
+      "key": "supplier",
+      "type": "object",
+      "canon": "供应商准入",
+      "surfaces": [
+        "供应商准入",
+        "供应商准入申请",
+        "新供应商",
+        "供应商引入",
+        "供应商评审"
+      ]
+    },
+    {
+      "key": "return_order",
+      "type": "object",
+      "canon": "退换货工单",
+      "surfaces": [
+        "退换货工单",
+        "退换货",
+        "退换货申请",
+        "退货",
+        "换货",
+        "退货单",
+        "退货申请",
+        "退换"
+      ]
+    },
+    {
+      "key": "sample_req",
+      "type": "object",
+      "canon": "样品申请",
+      "surfaces": [
+        "样品申请",
+        "样品",
+        "寄样",
+        "申请样品",
+        "样品单"
+      ]
+    },
+    {
+      "key": "display_check",
+      "type": "object",
+      "canon": "门店陈列检查",
+      "surfaces": [
+        "门店陈列检查",
+        "门店陈列",
+        "陈列检查",
+        "陈列",
+        "巡店",
+        "门店检查"
+      ]
+    },
+    {
+      "key": "price_req",
+      "type": "object",
+      "canon": "价格申请",
+      "surfaces": [
+        "价格申请",
+        "特价申请",
+        "价格",
+        "报价申请",
+        "折扣申请",
+        "调价"
+      ]
+    },
+    {
+      "key": "promo_material",
+      "type": "object",
+      "canon": "促销物料申领单",
+      "surfaces": [
+        "促销物料申领单",
+        "促销物料",
+        "物料申领",
+        "促销品申领",
+        "宣传物料",
+        "促销物料申领"
+      ]
+    },
+    {
+      "key": "arrival",
+      "type": "object",
+      "canon": "到货预约单",
+      "surfaces": [
+        "到货预约单",
+        "到货预约",
+        "预约到货",
+        "送货预约",
+        "卸货预约",
+        "到货登记"
+      ]
+    },
+    {
+      "key": "client_onboard",
+      "type": "object",
+      "canon": "新客户资料",
+      "surfaces": [
+        "新客户资料",
+        "新客户",
+        "客户资料",
+        "新客户接入",
+        "客户建档",
+        "开户资料",
+        "新客户登记"
+      ]
+    },
+    {
+      "key": "doc_handover",
+      "type": "object",
+      "canon": "票据交接单",
+      "surfaces": [
+        "票据交接单",
+        "票据交接",
+        "票据",
+        "交票据",
+        "上传票据",
+        "上传当月票据",
+        "发票交接",
+        "单据交接"
+      ]
+    },
+    {
+      "key": "consult",
+      "type": "object",
+      "canon": "咨询工单",
+      "surfaces": [
+        "咨询工单",
+        "咨询",
+        "提问",
+        "问题咨询",
+        "咨询单"
+      ]
+    },
+    {
+      "key": "renewal",
+      "type": "object",
+      "canon": "续费提醒",
+      "surfaces": [
+        "续费提醒",
+        "续费",
+        "到期续费",
+        "续约提醒",
+        "续约"
+      ]
+    },
+    {
+      "key": "biz_change",
+      "type": "object",
+      "canon": "工商变更申请",
+      "surfaces": [
+        "工商变更申请",
+        "工商变更",
+        "变更登记",
+        "工商变更材料",
+        "变更材料",
+        "执照变更"
+      ]
+    },
+    {
+      "key": "visit_log",
+      "type": "object",
+      "canon": "客户回访登记",
+      "surfaces": [
+        "客户回访登记",
+        "客户回访",
+        "回访",
+        "回访登记",
+        "满意度回访"
+      ]
+    },
+    {
+      "key": "doc_supplement",
+      "type": "object",
+      "canon": "资料补交单",
+      "surfaces": [
+        "资料补交单",
+        "资料补交",
+        "补交资料",
+        "补资料",
+        "资料补充",
+        "补交"
+      ]
+    },
+    {
+      "key": "role.foreman",
+      "type": "role",
+      "canon": "班组长",
+      "surfaces": [
+        "班组长",
+        "车间",
+        "车间班组",
+        "班长"
+      ]
+    },
+    {
+      "key": "role.groupLead",
+      "type": "role",
+      "canon": {
+        "make": "班组长",
+        "flow": "仓配主管",
+        "service": "账务组长"
+      },
+      "surfaces": [
+        "组长"
+      ]
+    },
+    {
+      "key": "role.maint",
+      "type": "role",
+      "canon": "设备员",
+      "surfaces": [
+        "设备员",
+        "维修工",
+        "维修员",
+        "机修",
+        "维修人员",
+        "设备维修",
+        "设备工程师"
+      ]
+    },
+    {
+      "key": "role.prodLead",
+      "type": "role",
+      "canon": "生产主管",
+      "surfaces": [
+        "生产主管",
+        "生产经理",
+        "车间主任",
+        "生产部长",
+        "厂长",
+        "生产负责人"
+      ]
+    },
+    {
+      "key": "role.lead",
+      "type": "role",
+      "canon": {
+        "make": "生产主管",
+        "flow": "仓配主管",
+        "service": "作业主管"
+      },
+      "surfaces": [
+        "主管",
+        "领导",
+        "负责人",
+        "经理",
+        "老板",
+        "管理层"
+      ]
+    },
+    {
+      "key": "role.operator",
+      "type": "role",
+      "canon": "操作工",
+      "surfaces": [
+        "操作工",
+        "操作员",
+        "员工",
+        "一线员工",
+        "工人"
+      ]
+    },
+    {
+      "key": "role.moldKeeper",
+      "type": "role",
+      "canon": "模具管理员",
+      "surfaces": [
+        "模具管理员",
+        "模具员",
+        "模具管理"
+      ]
+    },
+    {
+      "key": "role.warehouse",
+      "type": "role",
+      "canon": "仓储员",
+      "surfaces": [
+        "仓储员",
+        "仓库",
+        "仓管",
+        "仓管员",
+        "库管",
+        "仓库人员",
+        "收货员"
+      ]
+    },
+    {
+      "key": "role.cs",
+      "type": "role",
+      "canon": "客服专员",
+      "surfaces": [
+        "客服专员",
+        "客服",
+        "客服人员",
+        "售后"
+      ]
+    },
+    {
+      "key": "role.whLead",
+      "type": "role",
+      "canon": "仓配主管",
+      "surfaces": [
+        "仓配主管",
+        "仓储主管",
+        "仓库主管",
+        "物流主管"
+      ]
+    },
+    {
+      "key": "role.store",
+      "type": "role",
+      "canon": "门店",
+      "surfaces": [
+        "门店",
+        "店长",
+        "门店店长",
+        "加盟店",
+        "店铺"
+      ]
+    },
+    {
+      "key": "role.sales",
+      "type": "role",
+      "canon": "业务员",
+      "surfaces": [
+        "业务员",
+        "销售",
+        "业务",
+        "销售员",
+        "销售代表"
+      ]
+    },
+    {
+      "key": "role.supervisor",
+      "type": "role",
+      "canon": "督导",
+      "surfaces": [
+        "督导",
+        "区域督导",
+        "市场督导"
+      ]
+    },
+    {
+      "key": "role.ops",
+      "type": "role",
+      "canon": "运营专员",
+      "surfaces": [
+        "运营",
+        "运营专员",
+        "市场部",
+        "市场专员"
+      ]
+    },
+    {
+      "key": "role.custMgr",
+      "type": "role",
+      "canon": "客户经理",
+      "surfaces": [
+        "客户经理",
+        "客户专员",
+        "顾问"
+      ]
+    },
+    {
+      "key": "role.acctLead",
+      "type": "role",
+      "canon": "账务组长",
+      "surfaces": [
+        "账务组长",
+        "账务主管"
+      ]
+    },
+    {
+      "key": "role.acct",
+      "type": "role",
+      "canon": "代账会计",
+      "surfaces": [
+        "代账会计",
+        "会计",
+        "记账会计",
+        "账务会计",
+        "做账会计"
+      ]
+    },
+    {
+      "key": "role.opsLead",
+      "type": "role",
+      "canon": "作业主管",
+      "surfaces": [
+        "作业主管",
+        "业务主管",
+        "运营主管",
+        "服务主管"
+      ]
+    },
+    {
+      "key": "role.customer",
+      "type": "role",
+      "canon": "客户",
+      "surfaces": [
+        "客户",
+        "客户方",
+        "甲方",
+        "委托方"
+      ]
+    },
+    {
+      "key": "role.finance",
+      "type": "role",
+      "canon": "财务主管",
+      "surfaces": [
+        "财务主管",
+        "财务",
+        "财务经理",
+        "财务负责人"
+      ]
+    },
+    {
+      "key": "role.admin",
+      "type": "role",
+      "canon": "应用管理员",
+      "surfaces": [
+        "管理员",
+        "应用管理员",
+        "系统管理员"
+      ]
+    },
+    {
+      "key": "role.agent",
+      "type": "role",
+      "canon": "办理人",
+      "surfaces": [
+        "办理人",
+        "办理专员",
+        "工商专员",
+        "外勤"
+      ]
+    },
+    {
+      "key": "submit",
+      "type": "action",
+      "canon": "提交",
+      "surfaces": [
+        "提交",
+        "提报",
+        "上报",
+        "申请",
+        "发起",
+        "登记",
+        "填报",
+        "提出",
+        "录入",
+        "上传",
+        "打卡",
+        "填写",
+        "填单"
+      ]
+    },
+    {
+      "key": "approve",
+      "type": "action",
+      "canon": "审批",
+      "surfaces": [
+        "审批",
+        "审核",
+        "批准",
+        "同意",
+        "核准",
+        "审"
+      ]
+    },
+    {
+      "key": "reject",
+      "type": "action",
+      "canon": "驳回",
+      "surfaces": [
+        "驳回",
+        "退回",
+        "拒绝",
+        "不通过"
+      ]
+    },
+    {
+      "key": "accept",
+      "type": "action",
+      "canon": "接单",
+      "surfaces": [
+        "接单",
+        "受理",
+        "认领",
+        "抢单",
+        "签收",
+        "接收"
+      ]
+    },
+    {
+      "key": "assign",
+      "type": "action",
+      "canon": "分配",
+      "surfaces": [
+        "分配",
+        "指派",
+        "派单",
+        "派给",
+        "转派",
+        "派发",
+        "安排"
+      ]
+    },
+    {
+      "key": "process",
+      "type": "action",
+      "canon": "处理",
+      "surfaces": [
+        "处理",
+        "跟进",
+        "办理",
+        "答复",
+        "回复",
+        "收货"
+      ]
+    },
+    {
+      "key": "complete",
+      "type": "action",
+      "canon": "完成",
+      "surfaces": [
+        "完成",
+        "完工",
+        "办结",
+        "结案",
+        "关单",
+        "入库",
+        "完成后"
+      ]
+    },
+    {
+      "key": "lend",
+      "type": "action",
+      "canon": "领用",
+      "surfaces": [
+        "领用",
+        "借用",
+        "发放",
+        "寄出",
+        "发出",
+        "领走",
+        "寄给"
+      ]
+    },
+    {
+      "key": "return",
+      "type": "action",
+      "canon": "归还",
+      "surfaces": [
+        "归还",
+        "还回",
+        "交还",
+        "退还"
+      ]
+    },
+    {
+      "key": "rate",
+      "type": "action",
+      "canon": "评价",
+      "surfaces": [
+        "评价",
+        "打分",
+        "评分",
+        "打分评价",
+        "满意度评价",
+        "星级"
+      ]
+    },
+    {
+      "key": "issue",
+      "type": "action",
+      "canon": "异常",
+      "surfaces": [
+        "异常",
+        "异常项",
+        "不合格",
+        "问题项",
+        "发现问题"
+      ]
+    },
+    {
+      "key": "fix",
+      "type": "action",
+      "canon": "整改",
+      "surfaces": [
+        "整改",
+        "修复",
+        "纠正",
+        "整治"
+      ]
+    },
+    {
+      "key": "recheck",
+      "type": "action",
+      "canon": "复核",
+      "surfaces": [
+        "复核",
+        "复检",
+        "复查",
+        "验收",
+        "核验"
+      ]
+    },
+    {
+      "key": "close",
+      "type": "action",
+      "canon": "关闭",
+      "surfaces": [
+        "关闭",
+        "关闭工单",
+        "销项"
+      ]
+    },
+    {
+      "key": "view",
+      "type": "action",
+      "canon": "查看",
+      "surfaces": [
+        "查看",
+        "看",
+        "看到",
+        "掌握",
+        "了解",
+        "监控",
+        "盯"
+      ]
+    },
+    {
+      "key": "remind",
+      "type": "action",
+      "canon": "提醒",
+      "surfaces": [
+        "提醒",
+        "通知",
+        "催办",
+        "预警",
+        "自动提醒",
+        "催"
+      ]
+    },
+    {
+      "key": "stat",
+      "type": "action",
+      "canon": "统计",
+      "surfaces": [
+        "统计",
+        "汇总",
+        "分析",
+        "按",
+        "维度"
+      ]
+    },
+    {
+      "key": "h5",
+      "type": "channel",
+      "canon": "微信扫码 H5",
+      "surfaces": [
+        "扫码",
+        "微信",
+        "手机",
+        "移动端",
+        "微信扫码",
+        "扫一扫",
+        "h5",
+        "手机端",
+        "小程序",
+        "手机上"
+      ]
+    },
+    {
+      "key": "pc",
+      "type": "channel",
+      "canon": "PC 后台",
+      "surfaces": [
+        "后台",
+        "看板",
+        "电脑",
+        "pc",
+        "大屏",
+        "报表",
+        "管理后台",
+        "电脑端",
+        "数据看板",
+        "驾驶舱"
+      ]
+    },
+    {
+      "key": "photo",
+      "type": "field",
+      "canon": "照片",
+      "surfaces": [
+        "照片",
+        "拍照",
+        "图片",
+        "拍张照",
+        "附件",
+        "上传照片",
+        "现场照片"
+      ]
+    },
+    {
+      "key": "downtime",
+      "type": "field",
+      "canon": "停机影响",
+      "surfaces": [
+        "停机",
+        "停机影响",
+        "是否停机",
+        "停线"
+      ]
+    },
+    {
+      "key": "parts",
+      "type": "field",
+      "canon": "备件需求",
+      "surfaces": [
+        "备件",
+        "备件需求",
+        "配件",
+        "零件"
+      ]
+    },
+    {
+      "key": "cost",
+      "type": "field",
+      "canon": "费用（预计）",
+      "surfaces": [
+        "费用",
+        "金额",
+        "花费",
+        "成本",
+        "维修费"
+      ]
+    },
+    {
+      "key": "hours",
+      "type": "field",
+      "canon": "工时（预计）",
+      "surfaces": [
+        "工时",
+        "维修工时",
+        "耗时"
+      ]
+    },
+    {
+      "key": "recur",
+      "type": "field",
+      "canon": "复发标记",
+      "surfaces": [
+        "复发",
+        "复发标记",
+        "重复故障"
+      ]
+    },
+    {
+      "key": "comment",
+      "type": "field",
+      "canon": "评语",
+      "surfaces": [
+        "评语",
+        "留言",
+        "评价内容"
+      ]
+    },
+    {
+      "key": "rejectReason",
+      "type": "field",
+      "canon": "驳回原因",
+      "surfaces": [
+        "驳回原因",
+        "退回原因",
+        "驳回理由"
+      ]
+    },
+    {
+      "key": "express",
+      "type": "field",
+      "canon": "快递单号",
+      "surfaces": [
+        "快递单号",
+        "快递",
+        "运单号",
+        "物流单号"
+      ]
+    },
+    {
+      "key": "workOrder",
+      "type": "field",
+      "canon": "工单号",
+      "surfaces": [
+        "工单号",
+        "工单编号",
+        "生产工单"
+      ]
+    },
+    {
+      "key": "urgency",
+      "type": "field",
+      "canon": "紧急度",
+      "surfaces": [
+        "紧急度",
+        "紧急程度",
+        "优先级"
+      ]
+    },
+    {
+      "key": "reason",
+      "type": "field",
+      "canon": "原因",
+      "surfaces": [
+        "原因",
+        "退货原因",
+        "理由"
+      ]
+    },
+    {
+      "key": "due",
+      "type": "field",
+      "canon": "期限",
+      "surfaces": [
+        "期限",
+        "整改期限",
+        "截止",
+        "截止日期",
+        "归还日期"
+      ]
+    },
+    {
+      "key": "level",
+      "type": "field",
+      "canon": "等级",
+      "surfaces": [
+        "等级",
+        "风险等级",
+        "严重程度"
+      ]
+    },
+    {
+      "key": "location",
+      "type": "field",
+      "canon": "位置",
+      "surfaces": [
+        "位置",
+        "区域",
+        "地点"
+      ]
+    },
+    {
+      "key": "phone",
+      "type": "field",
+      "canon": "联系电话",
+      "surfaces": [
+        "电话",
+        "联系方式",
+        "手机号"
+      ]
+    },
+    {
+      "key": "signNote",
+      "type": "field",
+      "canon": "签收备注",
+      "surfaces": [
+        "签收备注",
+        "签收说明"
+      ]
+    },
+    {
+      "key": "note",
+      "type": "field",
+      "canon": "备注",
+      "surfaces": [
+        "备注",
+        "说明"
+      ]
+    },
+    {
+      "key": "device",
+      "type": "field",
+      "canon": "设备编号",
+      "surfaces": [
+        "设备编号",
+        "设备号",
+        "机台号",
+        "设备",
+        "cnc"
+      ]
+    },
+    {
+      "key": "product",
+      "type": "field",
+      "canon": "商品",
+      "surfaces": [
+        "商品",
+        "货品",
+        "sku",
+        "产品"
+      ]
+    },
+    {
+      "key": "discount",
+      "type": "field",
+      "canon": "折扣",
+      "surfaces": [
+        "折扣",
+        "折让"
+      ]
+    },
+    {
+      "key": "assignee",
+      "type": "field",
+      "canon": "处理人",
+      "surfaces": [
+        "处理人",
+        "接单人",
+        "经办人"
+      ]
+    },
+    {
+      "key": "timeliness",
+      "type": "field",
+      "canon": "时效",
+      "surfaces": [
+        "时效",
+        "处理时效",
+        "接单时效",
+        "办结时效",
+        "进度",
+        "整改进度",
+        "接入进度"
+      ]
+    },
+    {
+      "key": "statCount",
+      "type": "stat",
+      "canon": "数量",
+      "surfaces": [
+        "数量",
+        "接单数",
+        "单数",
+        "退货数量",
+        "在办客户数",
+        "客户数",
+        "次数",
+        "件数",
+        "整改率",
+        "退货原因分布",
+        "原因分布",
+        "分布"
+      ]
+    },
+    {
+      "key": "statDuration",
+      "type": "stat",
+      "canon": "平均处理时长",
+      "surfaces": [
+        "平均处理时长",
+        "时长",
+        "处理时长",
+        "平均时长",
+        "处理时间"
+      ]
+    },
+    {
+      "key": "statRating",
+      "type": "stat",
+      "canon": "满意度",
+      "surfaces": [
+        "满意度",
+        "评分均值",
+        "平均评分"
+      ]
+    },
+    {
+      "key": "overdue",
+      "type": "time",
+      "canon": "超时",
+      "surfaces": [
+        "超时",
+        "超期",
+        "逾期",
+        "未按时"
+      ]
+    },
+    {
+      "key": "notAccepted",
+      "type": "time",
+      "canon": "未接单",
+      "surfaces": [
+        "未接单",
+        "没人接",
+        "无人接单"
+      ]
+    },
+    {
+      "key": "notAssigned",
+      "type": "time",
+      "canon": "未分配",
+      "surfaces": [
+        "未分配",
+        "没分配",
+        "未指派"
+      ]
+    },
+    {
+      "key": "notDone",
+      "type": "time",
+      "canon": "未处理",
+      "surfaces": [
+        "未处理",
+        "未完成",
+        "未办结",
+        "未整改"
+      ]
+    },
+    {
+      "key": "notSubmitted",
+      "type": "time",
+      "canon": "未交",
+      "surfaces": [
+        "未交",
+        "没交",
+        "未上传",
+        "未提交"
+      ]
+    },
+    {
+      "key": "notApproved",
+      "type": "time",
+      "canon": "未审批",
+      "surfaces": [
+        "未审批",
+        "未审核",
+        "没审"
+      ]
+    },
+    {
+      "key": "addState",
+      "type": "delta",
+      "canon": "新增节点",
+      "surfaces": [
+        "增加节点",
+        "加一步",
+        "加一个环节",
+        "多一步",
+        "新增环节",
+        "加节点"
+      ]
+    },
+    {
+      "key": "addField",
+      "type": "delta",
+      "canon": "新增字段",
+      "surfaces": [
+        "加字段",
+        "增加字段",
+        "多一个字段",
+        "新增字段",
+        "要填",
+        "加一栏",
+        "补充字段",
+        "增加一项"
+      ]
+    },
+    {
+      "key": "addStat",
+      "type": "delta",
+      "canon": "新增看板维度",
+      "surfaces": [
+        "看板按",
+        "新增统计",
+        "增加统计",
+        "加个统计"
+      ]
+    },
+    {
+      "key": "addRule",
+      "type": "delta",
+      "canon": "新增规则",
+      "surfaces": [
+        "超时提醒",
+        "自动催",
+        "到期提醒",
+        "规则"
+      ]
+    },
+    {
+      "key": "addValidation",
+      "type": "delta",
+      "canon": "新增校验",
+      "surfaces": [
+        "必选",
+        "必填",
+        "不能为空",
+        "改为必填",
+        "改为必选",
+        "最低",
+        "至少",
+        "不超过",
+        "上限",
+        "最多",
+        "限制"
+      ]
+    },
+    {
+      "key": "addRole",
+      "type": "delta",
+      "canon": "新增角色",
+      "surfaces": [
+        "增加角色",
+        "新增角色",
+        "加一个角色",
+        "角色"
+      ]
+    }
   ]
 }

@@ -258,7 +258,7 @@
    "secondLevel": {
     "field": "amount",
     "gte": 5000,
-    "text": "金额 ≥ 5,000 元二级审批"
+    "text": "报销金额（预计）≥ 5,000 元二级审批"
    },
    "initialRule": null,
    "sla": null,
@@ -269,7 +269,7 @@
    "verb": "报销",
    "short": "报销单",
    "flow": "approve",
-   "ruleText": "金额 ≥ 5,000 元进入二级审批",
+   "ruleText": "报销金额（预计）≥ 5,000 元进入二级审批",
    "fields": [
     {
      "key": "type",
@@ -1213,9 +1213,9 @@
      "required": true,
      "source": "对象库",
      "len": 100,
-     "example": "外出客户现场演示",
+     "example": "外出客户现场讲解",
      "examples": [
-      "外出客户现场演示",
+      "外出客户现场讲解",
       "车间首件检测",
       "仓库盘点"
      ]
@@ -3820,7 +3820,7 @@
    "name": "新客户资料",
    "arche": "service",
    "prefix": "XK",
-   "verb": "新客户接入",
+   "verb": "接入",
    "short": "接入单",
    "flow": "dispatch",
    "ruleText": "分配约定 24 小时，超过标记超时",
@@ -4307,7 +4307,7 @@
    "name": "续费提醒",
    "arche": "service",
    "prefix": "XF",
-   "verb": "续费跟进",
+   "verb": "续费提醒",
    "short": "提醒单",
    "flow": "dispatch",
    "ruleText": "到期前 30 天生成，分配客户经理跟进",
