@@ -389,7 +389,7 @@ body[data-module="m6"] .pd-app .pd-card:has(.pd-line) > .ft .pd-dot.ok { backgro
 @keyframes tp-toast-in { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 /* 表格：长文本换行而不是省略或裁切；编号 / 数字 / 状态签保持不换行 */
 .pd-table { font-size: calc(13.5px * var(--scale)); }
-.pd-table td { white-space: normal; max-width: 380px; line-height: 1.35; }
+.pd-table td { white-space: normal; word-break: keep-all; max-width: 380px; line-height: 1.35; } /* 只在空格 / 标点处折行，窄列不会逐字竖排 */
 .pd-table td b, .pd-table td.r, .pd-table td.c, .pd-table td .pd-chip, .pd-table td .pd-bar { white-space: nowrap; }
 .pd-table td .sub { white-space: normal; }
 .pd-drawer .pd-table td { max-width: none; }
