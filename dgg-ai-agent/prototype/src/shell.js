@@ -125,7 +125,7 @@
       var r = el.getBoundingClientRect();
       var more = r.height > 120 && el.scrollHeight - el.clientHeight - el.scrollTop > 14;
       /* 嵌套滚动区（卡内表格）：其底边落在外层提示带附近时不再单独出箭头，避免两枚箭头叠在一起 */
-      if (more) for (var k = 0; k < shown.length; k++) { var o = shown[k]; if (o.el !== el && o.el.contains(el) && Math.abs(o.r.bottom - r.bottom) < 110 && r.left < o.r.right && r.right > o.r.left) { more = false; break; } }
+      if (more) for (var k = 0; k < shown.length; k++) { var o = shown[k]; if (o.el !== el && o.el.contains(el) && r.bottom > o.r.bottom - 110 && r.left < o.r.right && r.right > o.r.left) { more = false; break; } }
       if (more) shown.push({ el: el, r: r });
       var hh = hintFor(el);
       if (more) {
