@@ -106,6 +106,7 @@
       S.activeModule = null;
     }
     clear($main);
+    setModuleTheme(r.route === 'home' || !BUILT[r.route] ? 'home' : r.route, r.step || '');
     if (r.route === 'home' || !BUILT[r.route]) { renderHome(); S.recommended = null; }
     else { S.activeModule = r.route; BUILT[r.route].mount($main, r.step, api); }
     renderPricebar();
@@ -141,6 +142,14 @@
   new MutationObserver(scheduleHints).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
   setInterval(scheduleHints, 1500);
 
+  // ---------- 当前模块主题：body[data-module] + 模块色变量（首页用品牌蓝） ----------
+  function setModuleTheme(id, step) {
+    var P = (window.DGG && window.DGG.PALETTE) || {}, c = P[id] || P.m1 || { pa: '#4974F6', pa2: '#38D4E8', soft: '#E8EFFD', ink: '#1E3FA8', hd1: '#1E3FA8', hd2: '#4974F6', hdt: '#fff', on: '#fff' };
+    $body.setAttribute('data-module', id); $body.setAttribute('data-step', step || '');
+    ['pa', 'pa2', 'soft', 'ink', 'hd1', 'hd2', 'hdt', 'on'].forEach(function (k) { $body.style.setProperty('--m-' + k, c[k]); });
+    if (window.DGG && window.DGG.FX && window.DGG.FX.setModule) window.DGG.FX.setModule(id, c);
+  }
+
   // ---------- 首页 11 宫格 ----------
   function renderHome() {
     $main.appendChild(h('div', { class: 'page-title' }, [h('h1', {}, ['薯片AI智能体']), h('span', { class: 'sub' }, ['AI 赋能企业经营全链路解决方案'])]));
@@ -149,8 +158,9 @@
   function gridEl(onClick) {
     var g = h('div', { class: 'grid' });
     MODULES.forEach(function (m) {
+      var pc = (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[m.id]) || null;
       var card = h('button', {
-        class: 'card' + (m.big ? ' big' : ''), 'data-id': m.id, disabled: !BUILT[m.id],
+        class: 'card' + (m.big ? ' big' : ''), 'data-id': m.id, disabled: !BUILT[m.id], style: pc ? '--c-pa:' + pc.pa + ';--c-pa2:' + pc.pa2 + ';--c-soft:' + pc.soft + ';--c-ink:' + pc.ink + ';--c-hd1:' + pc.hd1 + ';--c-hd2:' + pc.hd2 + ';--c-hdt:' + pc.hdt : null,
         onclick: function () { onClick && onClick(m); }
       }, [
         h('span', { class: 'icon', html: '<svg viewBox="0 0 24 24">' + ICONS[m.icon] + '</svg>' }),

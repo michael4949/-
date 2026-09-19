@@ -39,7 +39,8 @@
 
   /* ---------- 框架 ---------- */
   function frame(o) {
-    var root = h('div', { class: 'pd-app ' + (o.cls || ''), style: o.accent ? '--pa:' + o.accent.pa + ';--pa-soft:' + o.accent.soft + ';--pa-ink:' + o.accent.ink : '' });
+    var a = o.accent || {};
+    var root = h('div', { class: 'pd-app ' + (o.cls || ''), style: o.accent ? '--pa:' + a.pa + ';--pa-soft:' + a.soft + ';--pa-ink:' + a.ink + ';--pa2:' + (a.pa2 || a.pa) + ';--hd1:' + (a.hd1 || a.ink) + ';--hd2:' + (a.hd2 || a.pa) + ';--hdt:' + (a.hdt || '#fff') + ';--pa-on:' + (a.on || '#fff') : '' });
     var nav = h('nav', { class: 'pd-nav' }, [h('div', { class: 'mark' }, [o.mark || 'AI'])]);
     (o.modules || []).forEach(function (m) {
       nav.appendChild(h('button', { class: 'item' + (m.on ? ' on' : ''), disabled: !!m.disabled, onclick: function () { if (!m.disabled && m.onClick) m.onClick(m); } }, [
@@ -525,17 +526,17 @@
 
   // 十一个模块的强调色（每个模块一个色相，互不相近；pa2 为渐变终点）
   var PALETTE = {
-    m1: { pa: '#4974F6', pa2: '#1E3FA8', soft: '#E8EFFD', ink: '#1E3FA8' },
-    m2: { pa: '#4974F6', pa2: '#38D4E8', soft: '#E8EFFD', ink: '#1E3FA8' },
-    m3: { pa: '#11705A', pa2: '#C69A18', soft: '#E6F3EE', ink: '#0A3A2E' },
-    m4: { pa: '#3B5BDB', pa2: '#5B8DEF', soft: '#E8ECFB', ink: '#2740A8' },
-    m5: { pa: '#0B8FA8', pa2: '#38D4E8', soft: '#E3F3F7', ink: '#075F70' },
-    m6: { pa: '#0E9F6E', pa2: '#5BD39A', soft: '#E6F6EE', ink: '#0B6B4A' },
-    m7: { pa: '#6B3FD6', pa2: '#A07BF2', soft: '#EFE9FB', ink: '#4A2A9E' },
-    m8: { pa: '#B7791F', pa2: '#E8B84A', soft: '#FBF3E1', ink: '#7A4E0E' },
-    m9: { pa: '#C2255C', pa2: '#F06595', soft: '#FBE7EE', ink: '#8E1A44' },
-    m10: { pa: '#E8862B', pa2: '#F5B942', soft: '#FDF1E6', ink: '#9A4F0E' },
-    m11: { pa: '#3D4F73', pa2: '#6F86B3', soft: '#E8ECF6', ink: '#26345A' }
+    m1: { name: '企业AI成熟度评估 · 品牌蓝', pa: '#2F6BFF', pa2: '#5AA0FF', soft: '#E8EFFD', ink: '#1E3FA8', hd1: '#1E3FA8', hd2: '#3B7BFF', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m2: { name: '企业AI高价值场景排序 · 靛紫', pa: '#6A3BE0', pa2: '#A98CFF', soft: '#EFE9FE', ink: '#4A25B5', hd1: '#4A25B5', hd2: '#7A4FF0', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m3: { name: '企业AI投入ROI测算器 · 祖母绿', pa: '#0E8A57', pa2: '#4FD08F', soft: '#E4F5EC', ink: '#0A6440', hd1: '#0A6440', hd2: '#11945C', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m4: { name: 'AI获客 · 品红', pa: '#E2358F', pa2: '#FF7BC0', soft: '#FDE8F2', ink: '#A8215F', hd1: '#A8215F', hd2: '#D9307F', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m5: { name: 'AI人力官 · 青碧', pa: '#0E9C9C', pa2: '#5EE5D8', soft: '#E2F7F6', ink: '#0A6E6E', hd1: '#0A6E6E', hd2: '#118F8F', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m6: { name: 'AI CFO · 琥珀金', pa: '#C48A0A', pa2: '#F6C651', soft: '#FDF3DC', ink: '#8C5A06', hd1: '#EDB53A', hd2: '#FFD466', hdt: '#4A2F00', on: '#3A2600' },
+    m7: { name: 'AI法务 · 紫', pa: '#8E2FD0', pa2: '#CE7CFF', soft: '#F3E8FB', ink: '#62188F', hd1: '#62188F', hd2: '#8E2FD0', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m8: { name: 'AI流程提效 · 青柠', pa: '#5E9A12', pa2: '#B5E655', soft: '#EEF8DF', ink: '#3F6E0A', hd1: '#3F6E0A', hd2: '#5E9A12', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m9: { name: 'AI决策 · 绯红', pa: '#D92642', pa2: '#FF6B6B', soft: '#FDE8EB', ink: '#A3182F', hd1: '#A3182F', hd2: '#D12B45', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m10: { name: 'AI ERP · 橙', pa: '#F0661A', pa2: '#FFB454', soft: '#FEEFE2', ink: '#A8430A', hd1: '#B54A0E', hd2: '#EE6A1C', hdt: '#FFFFFF', on: '#FFFFFF' },
+    m11: { name: 'AI软件开发 · 钢蓝', pa: '#3A5686', pa2: '#7C99C8', soft: '#E9EEF7', ink: '#22355C', hd1: '#22355C', hd2: '#3E5E92', hdt: '#FFFFFF', on: '#FFFFFF' }
   };
   window.DGG = window.DGG || {};
   window.DGG.PALETTE = PALETTE;
