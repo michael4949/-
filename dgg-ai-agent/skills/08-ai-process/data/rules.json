@@ -1,0 +1,24 @@
+{
+  "_note": "异常预警规则与根因表。cond 由内核按规则 id 求值（不做表达式引擎）；savedH 为处置后预计回收工时（小时），只在处置时进增效账。文案里的 {x} 由内核填充。",
+  "spc": { "sigma": 3, "minN": 3 },
+  "thresholds": { "waitMin": 240, "downMinSingle": 30, "downCount24h": 3, "firstHourRatio": 0.6, "devStd": 0.3 },
+  "rules": [
+    { "id": "R1", "name": "{wip}超限", "text": "{bottleneck}前{wip} {hours} h，超过缓冲上限 {max} h", "kind": "wip" },
+    { "id": "R2", "name": "单批{wait}超时", "text": "{line} {op} {lot} {reason} {min} min", "kind": "wait" },
+    { "id": "R3", "name": "{fpy}判异", "text": "{machine} {op} {fpy} {pbar} → {value}，连续 {k} 批低于下限 {lcl}", "kind": "quality" },
+    { "id": "R4", "name": "单件工时判异", "text": "{machine} {op} 单件 {actual} h，超过标准 {std} h 的 3σ 上限", "kind": "speed" },
+    { "id": "R5", "name": "{machine}频繁{down}", "text": "{machine} {span}{down} {count} 次（{reason}）", "kind": "down" },
+    { "id": "R6", "name": "交接班首小时落后", "text": "{line} {shift} 首小时产出 {actual}，低于计划 {plan} 的 60%", "kind": "plan" }
+  ],
+  "rootCauses": [
+    { "id": "C1", "when": "quality_after_setup", "cause": "{setup}后{firstPiece}确认缺失", "role": "foreman", "action": "补做{firstPieceCheck}并复核前两批", "savedH": 4 },
+    { "id": "C2", "when": "quality_after_down", "cause": "{machine}参数漂移", "role": "maint", "action": "校核{machine}参数后恢复", "savedH": 3 },
+    { "id": "C3", "when": "wait_upstream_idle", "cause": "前道派工不足", "role": "foreman", "action": "前道补派 1 人至该批完成", "savedH": 2.2 },
+    { "id": "C4", "when": "wait_inspection", "cause": "{firstPieceCheck}响应", "role": "eng", "action": "{firstPieceCheck}前移到{setup}内完成", "savedH": 2 },
+    { "id": "C5", "when": "speed_low_skill", "cause": "操作者技能等级不足", "role": "foreman", "action": "调整派工并安排带教", "savedH": 1.5 },
+    { "id": "C6", "when": "down_repeat", "cause": "{machine}待检", "role": "maint", "action": "排入保养窗口检修", "savedH": 1.4 },
+    { "id": "C7", "when": "wip_over", "cause": "投放快于{bottleneck}产出", "role": "lead", "action": "按{bottleneck}节拍{release}", "savedH": 0 },
+    { "id": "C8", "when": "plan_behind", "cause": "交接班准备不足", "role": "foreman", "action": "交接班前完成{tooling}与物料就位", "savedH": 1 },
+    { "id": "C9", "when": "default", "cause": "待{foreman}补充", "role": "foreman", "action": "现场确认后填写原因", "savedH": 0 }
+  ]
+}

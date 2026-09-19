@@ -1,0 +1,82 @@
+/* ===================== AI流程提效 · 模块专属版式（组件全部来自 product.css） ===================== */
+.m8-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #EEF1F7; }
+.m8-connect .cap-row:last-child { border-bottom: 0; }
+.m8-connect .cap-row .ic { width: 30px; height: 30px; border-radius: 8px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 11.5px; }
+.m8-connect .cap-row .t { font-weight: 700; font-size: calc(13px * var(--scale)); }
+.m8-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+.m8-connect .src-row:last-child { border-bottom: 0; }
+.m8-connect .src-row .t { font-weight: 700; } .m8-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m8-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m8-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m8-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m8-connect .go .sp { flex: 1; } .m8-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m8-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+/* 页头计数器 */
+.m8-counter { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 800; font-size: calc(12.5px * var(--scale)); white-space: nowrap; }
+.m8-counter b { font-size: calc(15px * var(--scale)); }
+/* 工序流 */
+.m8-flow { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0; align-items: stretch; }
+.m8-flow .stg { position: relative; display: grid; gap: 6px; padding: 10px 10px 10px 12px; border: 1px solid var(--pd-line); border-radius: 12px; background: #fff; margin-right: 18px; text-align: left; min-width: 0; }
+.m8-flow .stg:last-child { margin-right: 0; }
+.m8-flow .stg::after { content: '›'; position: absolute; right: -15px; top: 50%; transform: translateY(-50%); color: var(--pd-mute); font-size: 20px; font-weight: 800; }
+.m8-flow .stg:last-child::after { display: none; }
+.m8-flow .stg.con { border-color: var(--pa); box-shadow: inset 0 0 0 1px var(--pa); background: var(--pa-soft); }
+.m8-flow .stg .h { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: calc(13.5px * var(--scale)); white-space: nowrap; overflow: hidden; }
+.m8-flow .stg .h .sp { flex: 1; }
+.m8-flow .stg .ln { display: flex; flex-wrap: wrap; gap: 4px; }
+.m8-flow .stg .ln span { font-size: 10.5px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: #fff; border: 1px solid var(--pd-line); color: var(--pd-sub); white-space: nowrap; }
+.m8-flow .stg .ln span.over { border-color: #F2B8B2; color: var(--t-late); background: var(--t-late-soft); }
+.m8-flow .stg .ln span.tight { border-color: #F5D9A8; color: #A8690F; background: var(--t-risk-soft); }
+.m8-flow .stg .r { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: calc(11.5px * var(--scale)); color: var(--pd-sub); }
+.m8-flow .stg .r > span:first-child { white-space: nowrap; flex: 0 0 auto; }
+.m8-flow .stg .r b { color: var(--pd-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.m8-flow .stg .r b.neg { color: var(--t-late); } .m8-flow .stg .r b.pos { color: var(--t-ok); }
+.m8-flow button.stg:hover { background: var(--pa-soft); }
+/* 缓冲仪 */
+.m8-gauge { display: grid; gap: 6px; }
+.m8-gauge .trk { position: relative; height: 14px; border-radius: 7px; background: var(--pd-bg); overflow: hidden; }
+.m8-gauge .trk i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--t-ok); }
+.m8-gauge .trk i.yellow { background: var(--t-risk); } .m8-gauge .trk i.red, .m8-gauge .trk i.over { background: var(--t-late); }
+.m8-gauge .trk .lim { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--pd-ink); }
+.m8-gauge .lb { display: flex; justify-content: space-between; font-size: calc(11.5px * var(--scale)); color: var(--pd-sub); }
+/* 换型顺序 */
+.m8-seq { display: grid; gap: 10px; }
+.m8-seq .row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px; align-items: center; }
+.m8-seq .row .lb { font-weight: 700; font-size: calc(12px * var(--scale)); color: var(--pd-sub); }
+.m8-seq .strip { display: flex; gap: 0; align-items: stretch; height: 34px; }
+.m8-seq .strip .lot { display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; border-radius: 6px; min-width: 0; overflow: hidden; white-space: nowrap; }
+.m8-seq .strip .gap { display: grid; place-items: center; font-size: 10px; font-weight: 800; color: #A8690F; background: var(--t-risk-soft); border: 1px dashed #F5D9A8; border-radius: 6px; min-width: 18px; }
+.m8-seq .strip .gap.big { color: var(--t-late); background: var(--t-late-soft); border-color: #F2B8B2; }
+.m8-seq .strip .gap.small { color: var(--pd-sub); background: var(--pd-bg); border-color: var(--pd-line); }
+.m8-seq .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: calc(11.5px * var(--scale)); color: var(--pd-sub); }
+.m8-seq .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+/* 参数 */
+.m8-params { display: grid; gap: 12px; }
+.m8-params .pm label { display: flex; justify-content: space-between; font-weight: 700; font-size: calc(12.5px * var(--scale)); color: var(--pd-sub); margin-bottom: 4px; }
+.m8-params .pm label b { color: var(--pa); font-size: calc(14px * var(--scale)); }
+.m8-params .pm input[type=range] { width: 100%; accent-color: var(--pa); }
+.m8-params .pm .mm { display: flex; justify-content: space-between; color: var(--pd-mute); font-size: 11px; }
+.m8-pick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.m8-pick button { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-weight: 700; font-size: calc(12.5px * var(--scale)); }
+.m8-pick button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+/* 项目节点 */
+.m8-ms { display: grid; gap: 6px; }
+.m8-ms .m { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 9px; font-size: calc(13px * var(--scale)); }
+.m8-ms .m.done { background: #FAFBFE; color: var(--pd-sub); } .m8-ms .m.doing { border-color: var(--pa); }
+.m8-ms .m .i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--pd-bg); color: var(--pd-sub); }
+.m8-ms .m.done .i { background: var(--t-ok-soft); color: var(--t-ok); } .m8-ms .m.doing .i { background: var(--pa); color: #fff; }
+.m8-ms .m .t { font-weight: 600; } .m8-ms .m .t .o { color: var(--pd-sub); font-weight: 500; margin-left: 6px; font-size: calc(12px * var(--scale)); }
+.m8-ms .m .due { color: var(--pd-sub); white-space: nowrap; font-size: calc(12px * var(--scale)); }
+/* 报工看板 */
+.m8-hit { display: grid; gap: 8px; }
+.m8-hit .r { display: grid; grid-template-columns: 120px minmax(0, 1fr) 84px; gap: 10px; align-items: center; font-size: calc(12.5px * var(--scale)); }
+.m8-hit .r .lb { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m8-hit .r .v { text-align: right; color: var(--pd-sub); white-space: nowrap; }
+/* 技能矩阵 */
+.m8-skill { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.m8-skill .c { border: 1px solid var(--pd-line); border-radius: 9px; padding: 8px 10px; display: grid; gap: 4px; }
+.m8-skill .c .t { font-weight: 700; font-size: calc(12.5px * var(--scale)); display: flex; justify-content: space-between; gap: 6px; }
+.m8-skill .c.single { border-color: #F5D9A8; background: var(--t-risk-soft); }
+.m8-report .who { display: flex; flex-wrap: wrap; gap: 6px; }
+.m8-report .who span { height: 28px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pa); background: var(--pa-soft); color: var(--pa-ink); font-size: calc(12.5px * var(--scale)); font-weight: 600; display: inline-flex; align-items: center; }
+.m8-diag .lines { display: flex; flex-wrap: wrap; gap: 6px; }
+.m8-diag .lines button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
+.m8-diag .lines button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }

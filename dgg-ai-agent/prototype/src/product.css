@@ -298,3 +298,22 @@
 .pd-waterfall .lbl { font-size: 11px; fill: #66718A; font-weight: 600; }
 .pd-waterfall .sub { font-size: 10px; fill: #98A2B8; }
 .pd-waterfall .bar.click:hover rect { opacity: 1; }
+
+/* ---------- 流程条 ---------- */
+.pd-steps { display: flex; gap: 6px; }
+.pd-steps .st { flex: 1; min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 10px; background: #fff; text-align: left; }
+.pd-steps .st .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--pd-bg); color: var(--pd-sub); }
+.pd-steps .st .t { display: block; font-weight: 700; font-size: calc(12.5px * var(--scale)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-steps .st .s { display: block; color: var(--pd-sub); font-size: calc(11px * var(--scale)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-steps .st .tag { font-size: 10.5px; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: var(--pd-bg); color: var(--pd-sub); white-space: nowrap; }
+.pd-steps .st.done { background: var(--t-ok-soft); border-color: #BFE3D2; } .pd-steps .st.done .n { background: var(--t-ok); color: #fff; }
+.pd-steps .st.on { border-color: var(--pa); box-shadow: inset 0 0 0 1px var(--pa); } .pd-steps .st.on .n { background: var(--pa); color: #fff; }
+.pd-steps .st.wait { background: var(--t-risk-soft); border-color: #F5D9A8; } .pd-steps .st.wait .n { background: var(--t-risk); color: #fff; }
+.pd-steps .st.hi { outline: 2px solid var(--pa); outline-offset: 1px; }
+.pd-steps.compact .st { padding: 6px 8px; }
+.pd-steps button.st:hover { background: var(--pa-soft); }
+/* ---------- 动作日志 ---------- */
+.pd-log { display: grid; gap: 6px; }
+.pd-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
+.pd-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+.pd-log .l b { white-space: nowrap; } .pd-log .l span:last-child { color: var(--pd-sub); }

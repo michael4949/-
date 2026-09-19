@@ -1,0 +1,376 @@
+{
+  "version": "1.0.0",
+  "archetype": "flow",
+  "company": "宁波优选百货供应链有限公司",
+  "dept": "仓配作业部",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "kpi": {
+    "period": "2026-09-14",
+    "constraint": "打包台",
+    "load7": 75,
+    "queueDays": 1.4,
+    "balanceRate": 81,
+    "wipDays": 0,
+    "wipUnits": 0,
+    "effUtil": 67,
+    "fpy": 97.2,
+    "otHours": 41,
+    "alertsOpen": 5,
+    "alertsTotal": 5,
+    "reportsPending": 4,
+    "reportsTotal": 28,
+    "stdExpired": 1,
+    "projects": 0,
+    "maintDue": 2,
+    "savedH": 0,
+    "weeklyUnits": 5910,
+    "flowDays": 3.1,
+    "lines": 5,
+    "stages": 4,
+    "products": 4,
+    "lots": 9
+  },
+  "bottleneck": {
+    "line": {
+      "id": "P1",
+      "name": "打包台"
+    },
+    "load7": 75,
+    "queueDays": 1.4,
+    "longestQueue": {
+      "id": "A1",
+      "name": "拣货区 A（常温）",
+      "days": 4.8
+    },
+    "sameLine": false,
+    "balanceRate": 81,
+    "hpu": 0.01225,
+    "capHoursPerDay": 16,
+    "wip": {
+      "today": 0,
+      "tomorrow": 6.6,
+      "maxHours": 24,
+      "maxUnits": 1959,
+      "capDays": 1.5,
+      "overDay": null
+    },
+    "wipDays": 0
+  },
+  "verify": {
+    "counts": {
+      "missing": 1,
+      "dev": 1,
+      "conserve": 1,
+      "dup": 1
+    },
+    "pending": 4,
+    "total": 28
+  },
+  "alerts": [
+    {
+      "id": "EX-0917-01",
+      "rule": "R2",
+      "lineName": "复核台",
+      "cause": "待作业组长补充",
+      "roleName": "作业组长",
+      "savedH": 0
+    },
+    {
+      "id": "EX-0917-02",
+      "rule": "R3",
+      "lineName": "打包台",
+      "cause": "波次切换后首箱确认缺失",
+      "roleName": "作业组长",
+      "savedH": 4
+    },
+    {
+      "id": "EX-0917-03",
+      "rule": "R4",
+      "lineName": "打包台",
+      "cause": "操作者技能等级不足",
+      "roleName": "作业组长",
+      "savedH": 1.5
+    },
+    {
+      "id": "EX-0917-04",
+      "rule": "R5",
+      "lineName": "打包台",
+      "cause": "PK-01待检",
+      "roleName": "设备员",
+      "savedH": 1.4
+    },
+    {
+      "id": "EX-0917-05",
+      "rule": "R6",
+      "lineName": "打包台",
+      "cause": "交接班准备不足",
+      "roleName": "作业组长",
+      "savedH": 1
+    }
+  ],
+  "loss": {
+    "line": {
+      "id": "P1",
+      "name": "打包台"
+    },
+    "start": {
+      "label": "计划 作业时间",
+      "value": 16
+    },
+    "end": {
+      "label": "有效作业",
+      "value": 10.8
+    },
+    "items": [
+      {
+        "id": "setup",
+        "label": "波次切换",
+        "value": -1.6
+      },
+      {
+        "id": "wait:等前道",
+        "label": "等前道",
+        "value": -0.8
+      },
+      {
+        "id": "down",
+        "label": "停机",
+        "value": -0.6
+      },
+      {
+        "id": "wait:等货",
+        "label": "等货",
+        "value": -0.6
+      },
+      {
+        "id": "wait:等复核",
+        "label": "等复核",
+        "value": -0.5
+      },
+      {
+        "id": "wait:等包材",
+        "label": "等包材",
+        "value": -0.4
+      },
+      {
+        "id": "speed",
+        "label": "速度损失",
+        "value": -0.4
+      },
+      {
+        "id": "rework",
+        "label": "重拣",
+        "value": -0.3
+      }
+    ],
+    "availability": 72,
+    "performance": 97,
+    "effUtil": 67
+  },
+  "calibrationExpired": [
+    {
+      "key": "G03|打包",
+      "product": "G03",
+      "productName": "冷藏乳品组合箱",
+      "op": "打包",
+      "line": "P1",
+      "std": 0.015,
+      "median": 0.0174,
+      "dev": 16,
+      "n": 13,
+      "iqrRatio": 0.14,
+      "stable": true,
+      "status": "expired",
+      "statusName": "过期",
+      "direction": "排程偏乐观",
+      "suggest": 0.0174,
+      "adopted": false
+    }
+  ],
+  "sequence": {
+    "before": {
+      "seq": [
+        "B-0917-01",
+        "B-0917-02",
+        "B-0917-03",
+        "B-0917-04",
+        "B-0917-05",
+        "B-0917-06",
+        "B-0917-07",
+        "B-0917-08"
+      ],
+      "changeovers": 7,
+      "minutes": 165
+    },
+    "after": {
+      "seq": [
+        "B-0917-02",
+        "B-0917-06",
+        "B-0917-01",
+        "B-0917-04",
+        "B-0917-08",
+        "B-0917-03",
+        "B-0917-07",
+        "B-0917-05"
+      ],
+      "changeovers": 3,
+      "minutes": 80
+    },
+    "savedHPerDay": 1.4
+  },
+  "preview": {
+    "base": {
+      "load": 75,
+      "queueDays": 1.4,
+      "weeklyUnits": 5910,
+      "lineUnits": 5910,
+      "flowIndex": 5.32,
+      "otHours": 0,
+      "spareLoad": 75,
+      "wipTomorrow": 6.6
+    },
+    "recommended": "A",
+    "cards": [
+      {
+        "key": "A",
+        "name": "波次切换合批",
+        "recommended": true,
+        "result": {
+          "metrics": {
+            "load": 69,
+            "queueDays": 1.2,
+            "weeklyUnits": 5910,
+            "lineUnits": 5910,
+            "flowIndex": 5.27,
+            "otHours": 0,
+            "spareLoad": 69,
+            "wipTomorrow": 6.6
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "B",
+        "name": "跨区支援打包台延长晚班",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 67,
+            "queueDays": 1.2,
+            "weeklyUnits": 5910,
+            "lineUnits": 5910,
+            "flowIndex": 5.26,
+            "otHours": 0,
+            "spareLoad": 67,
+            "wipTomorrow": 6.6
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "C",
+        "name": "错峰午休 + 首箱复核前移",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 69,
+            "queueDays": 1.2,
+            "weeklyUnits": 5910,
+            "lineUnits": 5910,
+            "flowIndex": 5.27,
+            "otHours": 0,
+            "spareLoad": 69,
+            "wipTomorrow": 6.6
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "D",
+        "name": "打包台加班",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 64,
+            "queueDays": 1,
+            "weeklyUnits": 5910,
+            "lineUnits": 5910,
+            "flowIndex": 5.18,
+            "otHours": 18,
+            "spareLoad": 64,
+            "wipTomorrow": 6.6
+          },
+          "cost": 4212
+        }
+      }
+    ],
+    "combo": {
+      "keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "metrics": {
+        "load": 58,
+        "queueDays": 0.7,
+        "weeklyUnits": 5910,
+        "lineUnits": 5910,
+        "flowIndex": 5.16,
+        "otHours": 0,
+        "spareLoad": 58,
+        "wipTomorrow": 6.6
+      }
+    }
+  },
+  "dispatch": {
+    "id": "DP-0918",
+    "date": "2026-09-18",
+    "filled": 22,
+    "support": 1,
+    "unmet": [],
+    "otWeek": {
+      "before": 41,
+      "after": 41,
+      "delta": 0
+    }
+  },
+  "maintenance": [
+    {
+      "machine": "CV-01",
+      "lineName": "拣货区 A（常温）",
+      "reasons": [
+        "近两周停机 2 次（周均 0.6）"
+      ],
+      "window": "9-20（休息日）",
+      "minutes": 120,
+      "role": "设备员",
+      "scheduled": false
+    },
+    {
+      "machine": "PK-01",
+      "lineName": "打包台",
+      "reasons": [
+        "距上次设备保养运行 486 / 500 h",
+        "近两周停机 5 次（周均 0.9）"
+      ],
+      "window": "9-20（休息日）",
+      "minutes": 120,
+      "role": "设备员",
+      "scheduled": false
+    }
+  ],
+  "ledger": {
+    "totals": {
+      "bottleneckH": 0,
+      "nonBottleneckH": 0,
+      "units": 0,
+      "otH": 0,
+      "count": 0
+    },
+    "counterText": "本周 AI 建议预计节省 0.0 h"
+  },
+  "weekly": {
+    "text": "【仓配作业部提效周报】宁波优选百货供应链有限公司 · 09-14 至 09-20 周\n一、作业流：约束环节 打包台，负荷 75%，排队等待 1.4 天；有效利用率 67%（上周 71.1%）；复核一次通过率 96.9%；待处理箱天数 0 天\n二、本周异常 5 起，已处置 0 起：单批等待超时（待作业组长补充）；复核一次通过率判异（波次切换后首箱确认缺失）；单件工时判异（操作者技能等级不足）\n三、已下发：无\n四、改善项目：本周无新立项\n五、增效账：本周尚无采纳记录\n六、下周提醒：CV-01 设备保养窗口 9-20（休息日）、PK-01 设备保养窗口 9-20（休息日）；标准工时待校准 1 项\n收件人：仓配主管、作业流程工程师、作业组长、设备员"
+  }
+}

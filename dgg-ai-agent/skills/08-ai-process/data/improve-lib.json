@@ -1,0 +1,143 @@
+{
+  "_note": "改善方案库。每个方案是一组对 AI ERP 样本副本的确定性改法（mapTo），改完调 coreM10.schedule 重算；指标只用工序口径。params 的 default 是展台默认值。费用只在 D 出现且标预计。",
+  "cards": [
+    {
+      "key": "A",
+      "name": "{setup}合批",
+      "role": "eng",
+      "desc": "按{tooling}与{program}相似度重排{bottleneck}当日{lot}顺序，节省的{setup}时间折成{bottleneck}日可用小时",
+      "params": [
+        {
+          "key": "setupMin",
+          "label": "停机{setup}时间",
+          "unit": "min",
+          "min": 10,
+          "max": 45,
+          "step": 5,
+          "default": null
+        }
+      ],
+      "mapTo": "bottleneckCapPlus:sequenceSaved",
+      "milestones": [
+        {
+          "days": 3,
+          "title": "{setup}步骤表与{lot}顺序表下发"
+        },
+        {
+          "days": 7,
+          "title": "试运行一周并复核{setup}记录"
+        },
+        {
+          "days": 14,
+          "title": "核验：{queue}与{capacity}"
+        }
+      ]
+    },
+    {
+      "key": "B",
+      "name": "{cardB}",
+      "role": "foreman",
+      "desc": "{cardBDesc}",
+      "params": [
+        {
+          "key": "support",
+          "label": "{support}人数",
+          "unit": "人",
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "default": 2
+        }
+      ],
+      "mapTo": "spareSecondShift",
+      "milestones": [
+        {
+          "days": 2,
+          "title": "多能工名单与{dispatch}确认"
+        },
+        {
+          "days": 5,
+          "title": "{spareLine}{secondShift}开始"
+        },
+        {
+          "days": 14,
+          "title": "核验：{spareLine}负荷与{queue}"
+        }
+      ]
+    },
+    {
+      "key": "C",
+      "name": "错峰午休 + {firstPieceCheck}前移",
+      "role": "lead",
+      "desc": "{bottleneck}午休错峰不停机，{firstPieceCheck}在{setup}内完成",
+      "params": [
+        {
+          "key": "lunchH",
+          "label": "错峰回收",
+          "unit": "h/日",
+          "min": 0,
+          "max": 1.5,
+          "step": 0.5,
+          "default": 1
+        }
+      ],
+      "mapTo": "bottleneckCapPlus:lunchH+firstPiece",
+      "milestones": [
+        {
+          "days": 3,
+          "title": "错峰排班表下发"
+        },
+        {
+          "days": 7,
+          "title": "{firstPieceCheck}表更新"
+        },
+        {
+          "days": 14,
+          "title": "核验：有效利用率"
+        }
+      ]
+    },
+    {
+      "key": "D",
+      "name": "{bottleneck}加班",
+      "role": "lead",
+      "desc": "{bottleneck}未来 7 个工作日每天加班",
+      "params": [
+        {
+          "key": "otHours",
+          "label": "每日加班",
+          "unit": "h",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "default": 3
+        }
+      ],
+      "mapTo": "overtime",
+      "milestones": [
+        {
+          "days": 1,
+          "title": "加班排班下发"
+        },
+        {
+          "days": 7,
+          "title": "核验：{queue}"
+        }
+      ]
+    }
+  ],
+  "combo": [
+    "A",
+    "B",
+    "C"
+  ],
+  "kpiTargets": {
+    "queueDays": 8,
+    "effUtil": 85,
+    "wipDays": 1.5,
+    "fpy": 97
+  },
+  "recoverRates": {
+    "firstPiece": 0.8
+  }
+}

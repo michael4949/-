@@ -12,6 +12,7 @@ const m4 = require(path.join(skills, '04-ai-lead', 'scripts', 'load-data.js'))()
 const m7 = require(path.join(skills, '07-ai-legal', 'scripts', 'load-data.js'))();
 const m5 = require(path.join(skills, '05-ai-hr', 'scripts', 'load-data.js'))();
 const m9 = require(path.join(skills, '09-ai-decision', 'scripts', 'load-data.js'))();
+const m8 = require(path.join(skills, '08-ai-process', 'scripts', 'load-data.js'))();
 const exDir = path.join(skills, '01-ai-maturity', 'examples');
 const examples = fs.readdirSync(exDir).filter((f) => f.endsWith('.input.json')).sort().map((f) => JSON.parse(fs.readFileSync(path.join(exDir, f), 'utf8')));
 const data = {
@@ -26,7 +27,8 @@ const data = {
   m4: { channels: m4.channels, signals: m4.signals, stages: m4.stages, scripts: m4.scripts, pains: m4.pains, samples: m4.samples },
   m7: { contractRules: m7.contractRules, setupRules: m7.setupRules, ipClasses: m7.ipClasses, samples: m7.samples },
   m5: { jobs: m5.jobs, jdBlocks: m5.jdBlocks, questions: m5.questions, complianceRules: m5.complianceRules, costParams: m5.costParams, samples: m5.samples },
-  m9: { metricTree: m9.metricTree, evidence: m9.evidence, playbooks: m9.playbooks, approvalRules: m9.approvalRules, samples: m9.samples }
+  m9: { metricTree: m9.metricTree, evidence: m9.evidence, playbooks: m9.playbooks, approvalRules: m9.approvalRules, samples: m9.samples },
+  m8: { vocab: m8.vocab, rules: m8.rules, improveLib: m8.improveLib, samples: m8.samples }
 };
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释
@@ -47,6 +49,7 @@ html = put(html, '/*__MODULE_04_CSS__*/', R('src/module-04.css'));
 html = put(html, '/*__MODULE_07_CSS__*/', R('src/module-07.css'));
 html = put(html, '/*__MODULE_05_CSS__*/', R('src/module-05.css'));
 html = put(html, '/*__MODULE_09_CSS__*/', R('src/module-09.css'));
+html = put(html, '/*__MODULE_08_CSS__*/', R('src/module-08.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));
@@ -59,6 +62,7 @@ html = put(html, '/*__CORE_M4_JS__*/', R('../skills/04-ai-lead/core/lead.js'));
 html = put(html, '/*__CORE_M7_JS__*/', R('../skills/07-ai-legal/core/legal.js'));
 html = put(html, '/*__CORE_M5_JS__*/', R('../skills/05-ai-hr/core/hr.js'));
 html = put(html, '/*__CORE_M9_JS__*/', R('../skills/09-ai-decision/core/decide.js'));
+html = put(html, '/*__CORE_M8_JS__*/', R('../skills/08-ai-process/core/flow.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
 html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
@@ -75,6 +79,7 @@ html = put(html, '/*__MODULE_04_JS__*/', R('src/module-04.js'));
 html = put(html, '/*__MODULE_07_JS__*/', R('src/module-07.js'));
 html = put(html, '/*__MODULE_05_JS__*/', R('src/module-05.js'));
 html = put(html, '/*__MODULE_09_JS__*/', R('src/module-09.js'));
+html = put(html, '/*__MODULE_08_JS__*/', R('src/module-08.js'));
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'dist', 'index.html'), html);
 console.log('dist/index.html', (html.length / 1024).toFixed(0) + ' KB');

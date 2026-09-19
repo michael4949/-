@@ -494,6 +494,28 @@
   }
 
   /* ---------- 提示 ---------- */
+  // 流程条：横向若干步，每步 名称 / 状态 / 副文（责任 · 时间戳或预计）；state: done | on | todo | wait
+  function steps(o) {
+    var el = h('div', { class: 'pd-steps' + (o.compact ? ' compact' : '') });
+    (o.items || []).forEach(function (it, i) {
+      var st = h(o.onPick ? 'button' : 'div', { class: 'st ' + (it.state || 'todo') + (it.hi ? ' hi' : ''), onclick: o.onPick ? function () { o.onPick(it, i); } : null, title: it.title || '' }, [
+        h('span', { class: 'n' }, [String(i + 1)]),
+        h('span', { class: 'm' }, [h('span', { class: 't' }, [node(it.label)]), it.sub ? h('span', { class: 's' }, [node(it.sub)]) : null]),
+        it.tag ? h('span', { class: 'tag' }, [it.tag]) : null
+      ]);
+      el.appendChild(st);
+    });
+    return el;
+  }
+  // 动作日志：seq / 标题 / 详情
+  function log(entries, o) {
+    o = o || {};
+    var el = h('div', { class: 'pd-log' });
+    var list = entries.slice(); if (o.reverse !== false) list.reverse(); if (o.limit) list = list.slice(0, o.limit);
+    if (!list.length) el.appendChild(empty(o.empty || '暂无动作'));
+    list.forEach(function (l) { el.appendChild(h('div', { class: 'l' }, [h('span', { class: 'n' }, [String(l.seq)]), h('b', {}, [l.label]), h('span', {}, [l.detail || ''])])); });
+    return el;
+  }
   function toast(container, msg, ms) {
     var old = container.querySelector('.pd-toast'); if (old) old.parentNode.removeChild(old);
     var t = h('div', { class: 'pd-toast' }, [h('span', { class: 'ok' }, ['✓']), h('span', {}, [node(msg)])]);
@@ -502,5 +524,5 @@
   }
 
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, steps: steps, log: log, toast: toast, STATUS: STATUS };
 })();

@@ -1,0 +1,378 @@
+{
+  "version": "1.0.0",
+  "archetype": "service",
+  "company": "成都启元财税服务有限公司",
+  "dept": "作业部",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "kpi": {
+    "period": "2026-09-14",
+    "constraint": "账务一组",
+    "load7": 100,
+    "queueDays": 17.8,
+    "balanceRate": 64,
+    "wipDays": 1.4,
+    "wipUnits": 30,
+    "effUtil": 78,
+    "fpy": 94.2,
+    "otHours": 107,
+    "alertsOpen": 3,
+    "alertsTotal": 3,
+    "reportsPending": 5,
+    "reportsTotal": 23,
+    "stdExpired": 2,
+    "projects": 0,
+    "maintDue": 2,
+    "savedH": 0,
+    "weeklyUnits": 140,
+    "flowDays": 6,
+    "lines": 4,
+    "stages": 5,
+    "products": 3,
+    "lots": 9
+  },
+  "bottleneck": {
+    "line": {
+      "id": "G2",
+      "name": "账务一组"
+    },
+    "load7": 100,
+    "queueDays": 17.8,
+    "longestQueue": {
+      "id": "G2",
+      "name": "账务一组",
+      "days": 17.8
+    },
+    "sameLine": true,
+    "balanceRate": 64,
+    "hpu": 0.4166666666666667,
+    "capHoursPerDay": 8,
+    "wip": {
+      "today": 10.8,
+      "tomorrow": 9.4,
+      "maxHours": 12,
+      "maxUnits": 29,
+      "capDays": 1.5,
+      "overDay": "9-21"
+    },
+    "wipDays": 1.4
+  },
+  "verify": {
+    "counts": {
+      "missing": 1,
+      "dev": 1,
+      "conserve": 2,
+      "dup": 1
+    },
+    "pending": 5,
+    "total": 23
+  },
+  "alerts": [
+    {
+      "id": "EX-0917-01",
+      "rule": "R2",
+      "lineName": "税务组",
+      "cause": "首户复核响应",
+      "roleName": "流程专员",
+      "savedH": 2
+    },
+    {
+      "id": "EX-0917-02",
+      "rule": "R3",
+      "lineName": "账务一组",
+      "cause": "账套切换后首户确认缺失",
+      "roleName": "小组长",
+      "savedH": 4
+    },
+    {
+      "id": "EX-0917-03",
+      "rule": "R5",
+      "lineName": "账务一组",
+      "cause": "SYS-02待检",
+      "roleName": "系统管理员",
+      "savedH": 1.4
+    }
+  ],
+  "loss": {
+    "line": {
+      "id": "G2",
+      "name": "账务一组"
+    },
+    "start": {
+      "label": "计划 作业时间",
+      "value": 8
+    },
+    "end": {
+      "label": "有效作业",
+      "value": 6.3
+    },
+    "items": [
+      {
+        "id": "setup",
+        "label": "账套切换",
+        "value": -0.4
+      },
+      {
+        "id": "wait:等资料",
+        "label": "等资料",
+        "value": -0.4
+      },
+      {
+        "id": "wait:等复核",
+        "label": "等复核",
+        "value": -0.2
+      },
+      {
+        "id": "speed",
+        "label": "速度损失",
+        "value": -0.2
+      },
+      {
+        "id": "rework",
+        "label": "退回重录",
+        "value": -0.2
+      },
+      {
+        "id": "down",
+        "label": "系统停用",
+        "value": -0.1
+      },
+      {
+        "id": "wait:等前道",
+        "label": "等前道",
+        "value": -0.1
+      },
+      {
+        "id": "wait:等模板",
+        "label": "等模板",
+        "value": -0.1
+      }
+    ],
+    "availability": 83,
+    "performance": 98,
+    "effUtil": 78
+  },
+  "calibrationExpired": [
+    {
+      "key": "V02|账务处理",
+      "product": "V02",
+      "productName": "一般纳税人月度账务",
+      "op": "账务处理",
+      "line": "G2",
+      "std": 0.3,
+      "median": 0.354,
+      "dev": 18,
+      "n": 17,
+      "iqrRatio": 0.19,
+      "stable": true,
+      "status": "expired",
+      "statusName": "过期",
+      "direction": "排程偏乐观",
+      "suggest": 0.354,
+      "adopted": false
+    },
+    {
+      "key": "V02|凭证录入",
+      "product": "V02",
+      "productName": "一般纳税人月度账务",
+      "op": "凭证录入",
+      "line": "G2",
+      "std": 0.35,
+      "median": 0.4025,
+      "dev": 15,
+      "n": 11,
+      "iqrRatio": 0.2,
+      "stable": true,
+      "status": "expired",
+      "statusName": "过期",
+      "direction": "排程偏乐观",
+      "suggest": 0.4026,
+      "adopted": false
+    }
+  ],
+  "sequence": {
+    "before": {
+      "seq": [
+        "B-0917-01",
+        "B-0917-02",
+        "B-0917-03",
+        "B-0917-04",
+        "B-0917-05",
+        "B-0917-06",
+        "B-0917-07",
+        "B-0917-08"
+      ],
+      "changeovers": 4,
+      "minutes": 75
+    },
+    "after": {
+      "seq": [
+        "B-0917-01",
+        "B-0917-02",
+        "B-0917-03",
+        "B-0917-05",
+        "B-0917-07",
+        "B-0917-08",
+        "B-0917-04",
+        "B-0917-06"
+      ],
+      "changeovers": 1,
+      "minutes": 45
+    },
+    "savedHPerDay": 0.5
+  },
+  "preview": {
+    "base": {
+      "load": 100,
+      "queueDays": 17.8,
+      "weeklyUnits": 140,
+      "lineUnits": 96,
+      "flowIndex": 7.82,
+      "otHours": 0,
+      "spareLoad": 100,
+      "wipTomorrow": 9.4
+    },
+    "recommended": "B",
+    "cards": [
+      {
+        "key": "A",
+        "name": "账套切换合批",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 16.7,
+            "weeklyUnits": 146,
+            "lineUnits": 102,
+            "flowIndex": 7.52,
+            "otHours": 0,
+            "spareLoad": 100,
+            "wipTomorrow": 9.4
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "B",
+        "name": "跨组增派账务一组",
+        "recommended": true,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 9.9,
+            "weeklyUnits": 178,
+            "lineUnits": 134,
+            "flowIndex": 6.28,
+            "otHours": 0,
+            "spareLoad": 100,
+            "wipTomorrow": 9.4
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "C",
+        "name": "错峰午休 + 首户复核前移",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 15.3,
+            "weeklyUnits": 148,
+            "lineUnits": 104,
+            "flowIndex": 7.5,
+            "otHours": 0,
+            "spareLoad": 100,
+            "wipTomorrow": 9.4
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "D",
+        "name": "账务一组加班",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 12.8,
+            "weeklyUnits": 176,
+            "lineUnits": 132,
+            "flowIndex": 6.51,
+            "otHours": 15,
+            "spareLoad": 100,
+            "wipTomorrow": 9.4
+          },
+          "cost": 3900
+        }
+      }
+    ],
+    "combo": {
+      "keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "metrics": {
+        "load": 100,
+        "queueDays": 8.3,
+        "weeklyUnits": 193,
+        "lineUnits": 149,
+        "flowIndex": 5.45,
+        "otHours": 0,
+        "spareLoad": 100,
+        "wipTomorrow": 9.4
+      }
+    }
+  },
+  "dispatch": {
+    "id": "DP-0918",
+    "date": "2026-09-18",
+    "filled": 15,
+    "support": 0,
+    "unmet": [],
+    "otWeek": {
+      "before": 107,
+      "after": 107,
+      "delta": 0
+    }
+  },
+  "maintenance": [
+    {
+      "machine": "SYS-02",
+      "lineName": "账务一组",
+      "reasons": [
+        "距上次系统与模板更新运行 486 / 500 h",
+        "近两周系统停用 5 次（周均 0.8）"
+      ],
+      "window": "9-19（休息日）",
+      "minutes": 60,
+      "role": "系统管理员",
+      "scheduled": false
+    },
+    {
+      "machine": "SYS-04",
+      "lineName": "税务组",
+      "reasons": [
+        "近两周系统停用 2 次（周均 0.3）"
+      ],
+      "window": "9-19（休息日）",
+      "minutes": 60,
+      "role": "系统管理员",
+      "scheduled": false
+    }
+  ],
+  "ledger": {
+    "totals": {
+      "bottleneckH": 0,
+      "nonBottleneckH": 0,
+      "units": 0,
+      "otH": 0,
+      "count": 0
+    },
+    "counterText": "本周 AI 建议预计节省 0.0 h"
+  },
+  "weekly": {
+    "text": "【作业部提效周报】成都启元财税服务有限公司 · 09-14 至 09-20 周\n一、作业流：约束环节 账务一组，负荷 100%，排队等待 17.8 天；有效利用率 78%（上周 65.9%）；一次通过率 95.3%；在办户天数 1.4 天\n二、本周异常 3 起，已处置 0 起：单批等待超时（首户复核响应）；一次通过率判异（账套切换后首户确认缺失）；SYS-02频繁系统停用（SYS-02待检）\n三、已下发：无\n四、改善项目：本周无新立项\n五、增效账：本周尚无采纳记录\n六、下周提醒：SYS-02 系统与模板更新窗口 9-19（休息日）、SYS-04 系统与模板更新窗口 9-19（休息日）；标准工时待校准 2 项\n收件人：作业主管、流程专员、小组长、系统管理员"
+  }
+}

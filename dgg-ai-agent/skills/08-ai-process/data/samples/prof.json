@@ -1,0 +1,3537 @@
+{
+ "archetype": "service",
+ "company": "成都启元财税服务有限公司",
+ "dept": "作业部",
+ "today": "2026-09-17",
+ "weekStart": "2026-09-14",
+ "erpKey": "service",
+ "sources": [
+  {
+   "id": "route",
+   "name": "工艺路线与标准工时",
+   "mode": "direct",
+   "lastSync": "2026-09-17 07:30",
+   "rows": 14
+  },
+  {
+   "id": "report",
+   "name": "工时记录",
+   "mode": "direct",
+   "lastSync": "2026-09-17 12:00",
+   "rows": 23
+  },
+  {
+   "id": "machine",
+   "name": "系统运行记录",
+   "mode": "import",
+   "lastSync": "2026-09-17 07:00",
+   "rows": 4
+  },
+  {
+   "id": "roster",
+   "name": "班组排班",
+   "mode": "import",
+   "lastSync": "2026-09-16 18:00",
+   "rows": 20
+  }
+ ],
+ "constraintExpected": "G2",
+ "spareLine": "G2",
+ "releaseLine": "G1",
+ "supportIds": [
+  "E-026",
+  "E-027"
+ ],
+ "spcMachine": "SYS-02",
+ "dueMachine": "SYS-02",
+ "shiftHours": 8,
+ "otCap": {
+  "month": 36,
+  "day": 3
+ },
+ "buffers": {
+  "G2": {
+   "capDays": 1.5
+  }
+ },
+ "fixtures": {
+  "V01": {
+   "fixture": "小规模模板",
+   "program": "资料包 S"
+  },
+  "V02": {
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  "V03": {
+   "fixture": "一般纳税人模板",
+   "program": "资料包 Y"
+  }
+ },
+ "setupMatrix": {
+  "sameProduct": 5,
+  "sameFixture": 15,
+  "diffFixture": 30
+ },
+ "setupSteps": [
+  {
+   "name": "账套切换与核对",
+   "min": 4,
+   "internal": true
+  },
+  {
+   "name": "模板加载",
+   "min": 6,
+   "internal": true
+  },
+  {
+   "name": "首户复核",
+   "min": 6,
+   "internal": true
+  },
+  {
+   "name": "下户资料包预整理",
+   "min": 8,
+   "internal": false
+  },
+  {
+   "name": "常用科目与模板预设",
+   "min": 5,
+   "internal": false
+  }
+ ],
+ "firstPieceItems": [
+  "资料包完整",
+  "模板版本核对",
+  "首户复核",
+  "异常科目标记",
+  "首户签字"
+ ],
+ "spare": {
+  "line": "G2",
+  "capPerPerson": 1.6,
+  "effTo": 1,
+  "defaultSupport": 2
+ },
+ "lunchH": 0.5,
+ "firstPieceMinPerSetup": 6,
+ "employees": [
+  {
+   "id": "E-001",
+   "job": "acct-agent",
+   "overtimeH": 36
+  },
+  {
+   "id": "E-002",
+   "job": "acct-agent",
+   "overtimeH": 39
+  },
+  {
+   "id": "E-003",
+   "job": "acct-agent",
+   "overtimeH": 42
+  },
+  {
+   "id": "E-004",
+   "job": "acct-agent",
+   "overtimeH": 45
+  },
+  {
+   "id": "E-005",
+   "job": "acct-agent",
+   "overtimeH": 48
+  },
+  {
+   "id": "E-006",
+   "job": "acct-agent",
+   "overtimeH": 51
+  },
+  {
+   "id": "E-007",
+   "job": "acct-agent",
+   "overtimeH": 54
+  },
+  {
+   "id": "E-008",
+   "job": "acct-agent",
+   "overtimeH": 57
+  },
+  {
+   "id": "E-009",
+   "job": "acct-agent",
+   "overtimeH": 60
+  },
+  {
+   "id": "E-010",
+   "job": "acct-agent",
+   "overtimeH": 63
+  },
+  {
+   "id": "E-011",
+   "job": "acct-agent",
+   "overtimeH": 5
+  },
+  {
+   "id": "E-012",
+   "job": "acct-agent",
+   "overtimeH": 0
+  },
+  {
+   "id": "E-013",
+   "job": "acct-agent",
+   "overtimeH": 2
+  },
+  {
+   "id": "E-014",
+   "job": "acct-agent",
+   "overtimeH": 3
+  },
+  {
+   "id": "E-015",
+   "job": "acct-agent",
+   "overtimeH": 1
+  },
+  {
+   "id": "E-016",
+   "job": "acct-agent",
+   "overtimeH": 7
+  },
+  {
+   "id": "E-017",
+   "job": "acct-agent",
+   "overtimeH": 1
+  },
+  {
+   "id": "E-018",
+   "job": "acct-agent",
+   "overtimeH": 1
+  },
+  {
+   "id": "E-019",
+   "job": "acct-agent",
+   "overtimeH": 3
+  },
+  {
+   "id": "E-020",
+   "job": "acct-agent",
+   "overtimeH": 6
+  },
+  {
+   "id": "E-021",
+   "job": "acct-agent",
+   "overtimeH": 8
+  },
+  {
+   "id": "E-022",
+   "job": "acct-agent",
+   "overtimeH": 4
+  },
+  {
+   "id": "E-023",
+   "job": "acct-agent",
+   "overtimeH": 8
+  },
+  {
+   "id": "E-024",
+   "job": "acct-agent",
+   "overtimeH": 4
+  },
+  {
+   "id": "E-025",
+   "job": "tax-consult",
+   "overtimeH": 7
+  },
+  {
+   "id": "E-026",
+   "job": "tax-consult",
+   "overtimeH": 1
+  },
+  {
+   "id": "E-027",
+   "job": "tax-consult",
+   "overtimeH": 1
+  },
+  {
+   "id": "E-028",
+   "job": "tax-consult",
+   "overtimeH": 4
+  },
+  {
+   "id": "E-029",
+   "job": "tax-consult",
+   "overtimeH": 2
+  },
+  {
+   "id": "E-030",
+   "job": "cust-mgr",
+   "overtimeH": 6
+  },
+  {
+   "id": "E-031",
+   "job": "cust-mgr",
+   "overtimeH": 7
+  },
+  {
+   "id": "E-032",
+   "job": "cust-mgr",
+   "overtimeH": 4
+  },
+  {
+   "id": "E-033",
+   "job": "cust-mgr",
+   "overtimeH": 6
+  },
+  {
+   "id": "E-034",
+   "job": "cust-mgr",
+   "overtimeH": 5
+  },
+  {
+   "id": "E-035",
+   "job": "cust-mgr",
+   "overtimeH": 8
+  },
+  {
+   "id": "E-036",
+   "job": "cust-mgr",
+   "overtimeH": 8
+  }
+ ],
+ "skills": [
+  {
+   "emp": "E-001",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 2,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-002",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-003",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-004",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 1,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-005",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-006",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-007",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-008",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 1,
+    "账务处理": 2,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-009",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-010",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-011",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-012",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 2,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-013",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-014",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 1,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-015",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-016",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-017",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-018",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-019",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-020",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-021",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 1,
+    "账务处理": 1,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-022",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-023",
+   "home": "G2",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 1,
+    "账务处理": 1,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-024",
+   "home": "G3",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 3,
+    "账务处理": 3,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-025",
+   "home": "G4",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 3,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-026",
+   "home": "G4",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 3,
+    "归档": 3
+   }
+  },
+  {
+   "emp": "E-027",
+   "home": "G4",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 3,
+    "归档": 3
+   }
+  },
+  {
+   "emp": "E-028",
+   "home": "G4",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 1,
+    "归档": 1
+   }
+  },
+  {
+   "emp": "E-029",
+   "home": "G4",
+   "levels": {
+    "资料收集": 0,
+    "凭证录入": 2,
+    "账务处理": 2,
+    "申报": 3,
+    "归档": 1
+   }
+  },
+  {
+   "emp": "E-030",
+   "home": "G1",
+   "levels": {
+    "资料收集": 1,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-031",
+   "home": "G1",
+   "levels": {
+    "资料收集": 3,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-032",
+   "home": "G1",
+   "levels": {
+    "资料收集": 2,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-033",
+   "home": "G1",
+   "levels": {
+    "资料收集": 3,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-034",
+   "home": "G1",
+   "levels": {
+    "资料收集": 2,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-035",
+   "home": "G1",
+   "levels": {
+    "资料收集": 3,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  },
+  {
+   "emp": "E-036",
+   "home": "G1",
+   "levels": {
+    "资料收集": 3,
+    "凭证录入": 0,
+    "账务处理": 0,
+    "申报": 0,
+    "归档": 0
+   }
+  }
+ ],
+ "empStats": [
+  {
+   "emp": "E-001",
+   "op": "凭证录入",
+   "n": 33,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-001",
+   "op": "账务处理",
+   "n": 13,
+   "effMed": 0.92
+  },
+  {
+   "emp": "E-002",
+   "op": "凭证录入",
+   "n": 34,
+   "effMed": 1.03
+  },
+  {
+   "emp": "E-002",
+   "op": "账务处理",
+   "n": 17,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-003",
+   "op": "凭证录入",
+   "n": 13,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-003",
+   "op": "账务处理",
+   "n": 12,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-004",
+   "op": "凭证录入",
+   "n": 13,
+   "effMed": 0.91
+  },
+  {
+   "emp": "E-004",
+   "op": "账务处理",
+   "n": 3,
+   "effMed": 0.66
+  },
+  {
+   "emp": "E-005",
+   "op": "凭证录入",
+   "n": 15,
+   "effMed": 0.97
+  },
+  {
+   "emp": "E-006",
+   "op": "凭证录入",
+   "n": 22,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-007",
+   "op": "凭证录入",
+   "n": 9,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-008",
+   "op": "凭证录入",
+   "n": 3,
+   "effMed": 0.78
+  },
+  {
+   "emp": "E-008",
+   "op": "账务处理",
+   "n": 11,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-009",
+   "op": "凭证录入",
+   "n": 10,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-009",
+   "op": "账务处理",
+   "n": 12,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-010",
+   "op": "凭证录入",
+   "n": 19,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-010",
+   "op": "账务处理",
+   "n": 27,
+   "effMed": 0.96
+  },
+  {
+   "emp": "E-011",
+   "op": "凭证录入",
+   "n": 21,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-011",
+   "op": "账务处理",
+   "n": 25,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-012",
+   "op": "凭证录入",
+   "n": 34,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-012",
+   "op": "账务处理",
+   "n": 10,
+   "effMed": 0.8
+  },
+  {
+   "emp": "E-013",
+   "op": "凭证录入",
+   "n": 27,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-014",
+   "op": "凭证录入",
+   "n": 6,
+   "effMed": 0.92
+  },
+  {
+   "emp": "E-014",
+   "op": "账务处理",
+   "n": 1,
+   "effMed": 0.64
+  },
+  {
+   "emp": "E-015",
+   "op": "凭证录入",
+   "n": 25,
+   "effMed": 1
+  },
+  {
+   "emp": "E-015",
+   "op": "账务处理",
+   "n": 25,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-016",
+   "op": "凭证录入",
+   "n": 22,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-016",
+   "op": "账务处理",
+   "n": 27,
+   "effMed": 1
+  },
+  {
+   "emp": "E-017",
+   "op": "凭证录入",
+   "n": 27,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-017",
+   "op": "账务处理",
+   "n": 22,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-018",
+   "op": "凭证录入",
+   "n": 9,
+   "effMed": 0.92
+  },
+  {
+   "emp": "E-018",
+   "op": "账务处理",
+   "n": 17,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-019",
+   "op": "凭证录入",
+   "n": 7,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-019",
+   "op": "账务处理",
+   "n": 30,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-020",
+   "op": "凭证录入",
+   "n": 21,
+   "effMed": 0.95
+  },
+  {
+   "emp": "E-020",
+   "op": "账务处理",
+   "n": 21,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-021",
+   "op": "凭证录入",
+   "n": 3,
+   "effMed": 0.7
+  },
+  {
+   "emp": "E-021",
+   "op": "账务处理",
+   "n": 3,
+   "effMed": 0.64
+  },
+  {
+   "emp": "E-022",
+   "op": "凭证录入",
+   "n": 7,
+   "effMed": 0.84
+  },
+  {
+   "emp": "E-023",
+   "op": "凭证录入",
+   "n": 1,
+   "effMed": 0.64
+  },
+  {
+   "emp": "E-023",
+   "op": "账务处理",
+   "n": 3,
+   "effMed": 0.64
+  },
+  {
+   "emp": "E-024",
+   "op": "凭证录入",
+   "n": 22,
+   "effMed": 0.96
+  },
+  {
+   "emp": "E-024",
+   "op": "账务处理",
+   "n": 19,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-025",
+   "op": "申报",
+   "n": 27,
+   "effMed": 1
+  },
+  {
+   "emp": "E-026",
+   "op": "凭证录入",
+   "n": 8,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-026",
+   "op": "账务处理",
+   "n": 5,
+   "effMed": 0.88
+  },
+  {
+   "emp": "E-026",
+   "op": "申报",
+   "n": 17,
+   "effMed": 1.03
+  },
+  {
+   "emp": "E-026",
+   "op": "归档",
+   "n": 15,
+   "effMed": 1
+  },
+  {
+   "emp": "E-027",
+   "op": "凭证录入",
+   "n": 12,
+   "effMed": 0.88
+  },
+  {
+   "emp": "E-027",
+   "op": "账务处理",
+   "n": 6,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-027",
+   "op": "申报",
+   "n": 19,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-027",
+   "op": "归档",
+   "n": 27,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-028",
+   "op": "凭证录入",
+   "n": 12,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-028",
+   "op": "账务处理",
+   "n": 9,
+   "effMed": 0.8
+  },
+  {
+   "emp": "E-028",
+   "op": "申报",
+   "n": 1,
+   "effMed": 0.73
+  },
+  {
+   "emp": "E-028",
+   "op": "归档",
+   "n": 2,
+   "effMed": 0.65
+  },
+  {
+   "emp": "E-029",
+   "op": "凭证录入",
+   "n": 8,
+   "effMed": 0.89
+  },
+  {
+   "emp": "E-029",
+   "op": "账务处理",
+   "n": 12,
+   "effMed": 0.82
+  },
+  {
+   "emp": "E-029",
+   "op": "申报",
+   "n": 30,
+   "effMed": 1.02
+  },
+  {
+   "emp": "E-029",
+   "op": "归档",
+   "n": 1,
+   "effMed": 0.61
+  },
+  {
+   "emp": "E-030",
+   "op": "资料收集",
+   "n": 1,
+   "effMed": 0.71
+  },
+  {
+   "emp": "E-031",
+   "op": "资料收集",
+   "n": 22,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-032",
+   "op": "资料收集",
+   "n": 10,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-033",
+   "op": "资料收集",
+   "n": 34,
+   "effMed": 0.95
+  },
+  {
+   "emp": "E-034",
+   "op": "资料收集",
+   "n": 6,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-035",
+   "op": "资料收集",
+   "n": 24,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-036",
+   "op": "资料收集",
+   "n": 16,
+   "effMed": 1.02
+  }
+ ],
+ "roster": [
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G1",
+   "leader": null,
+   "emps": [
+    "E-030",
+    "E-031",
+    "E-032"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G1",
+   "leader": null,
+   "emps": [
+    "E-033",
+    "E-034",
+    "E-035"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G1",
+   "leader": null,
+   "emps": [
+    "E-036",
+    "E-030",
+    "E-031"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G1",
+   "leader": null,
+   "emps": [
+    "E-032",
+    "E-033",
+    "E-034"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "G1",
+   "leader": null,
+   "emps": [
+    "E-035",
+    "E-036",
+    "E-030"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G2",
+   "leader": null,
+   "emps": [
+    "E-001",
+    "E-003",
+    "E-005",
+    "E-007",
+    "E-009"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G2",
+   "leader": null,
+   "emps": [
+    "E-011",
+    "E-013",
+    "E-015",
+    "E-017",
+    "E-019"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G2",
+   "leader": null,
+   "emps": [
+    "E-021",
+    "E-023",
+    "E-001",
+    "E-003",
+    "E-005"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G2",
+   "leader": null,
+   "emps": [
+    "E-007",
+    "E-009",
+    "E-011",
+    "E-013",
+    "E-015"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "G2",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-019",
+    "E-021",
+    "E-023",
+    "E-001"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G3",
+   "leader": null,
+   "emps": [
+    "E-002",
+    "E-004",
+    "E-006",
+    "E-008"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G3",
+   "leader": null,
+   "emps": [
+    "E-010",
+    "E-012",
+    "E-014",
+    "E-016"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G3",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-020",
+    "E-022",
+    "E-024"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G3",
+   "leader": null,
+   "emps": [
+    "E-002",
+    "E-004",
+    "E-006",
+    "E-008"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "G3",
+   "leader": null,
+   "emps": [
+    "E-010",
+    "E-012",
+    "E-014",
+    "E-016"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G4",
+   "leader": null,
+   "emps": [
+    "E-025",
+    "E-026",
+    "E-027"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G4",
+   "leader": null,
+   "emps": [
+    "E-028",
+    "E-029",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G4",
+   "leader": null,
+   "emps": [
+    "E-026",
+    "E-027",
+    "E-028"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G4",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-025",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "G4",
+   "leader": null,
+   "emps": [
+    "E-027",
+    "E-028",
+    "E-029"
+   ],
+   "planned": true
+  }
+ ],
+ "reports": [
+  {
+   "id": "RP-0917-01",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G1",
+   "machine": "SYS-01",
+   "op": "资料收集",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "emp": "E-031",
+   "qtyGood": 36,
+   "qtyRework": 1,
+   "runMin": 432,
+   "setupMin": 7,
+   "waitMin": 34,
+   "waitReason": "等模板",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 953,
+   "source": "scan",
+   "verified": true,
+   "std": 0.2
+  },
+  {
+   "id": "RP-0917-06",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "emp": "E-003",
+   "qtyGood": 83,
+   "qtyRework": 0,
+   "runMin": 1992,
+   "setupMin": 10,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 706,
+   "source": "scan",
+   "verified": false,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-14",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G3",
+   "machine": "SYS-03",
+   "op": "凭证录入",
+   "order": "SV-2609-0214",
+   "product": "V01",
+   "emp": "E-004",
+   "qtyGood": 11,
+   "qtyRework": 0,
+   "runMin": 203,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 690,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-19",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G4",
+   "machine": "SYS-04",
+   "op": "申报",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "emp": "E-026",
+   "qtyGood": 64,
+   "qtyRework": 2,
+   "runMin": 391,
+   "setupMin": 8,
+   "waitMin": 84,
+   "waitReason": "等资料",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 963,
+   "source": "scan",
+   "verified": true,
+   "std": 0.1
+  },
+  {
+   "id": "RP-0917-24",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G1",
+   "machine": "SYS-01",
+   "op": "资料收集",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "emp": "E-031",
+   "qtyGood": 36,
+   "qtyRework": 1,
+   "runMin": 432,
+   "setupMin": 7,
+   "waitMin": 34,
+   "waitReason": "等模板",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 953,
+   "source": "manual",
+   "verified": false,
+   "std": 0.2
+  },
+  {
+   "id": "RP-0917-07",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "emp": "E-007",
+   "qtyGood": 10,
+   "qtyRework": 0,
+   "runMin": 247,
+   "setupMin": 11,
+   "waitMin": 106,
+   "waitReason": "等复核",
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 1084,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-15",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "G3",
+   "machine": "SYS-03",
+   "op": "凭证录入",
+   "order": "SV-2609-0221",
+   "product": "V01",
+   "emp": "E-008",
+   "qtyGood": 10,
+   "qtyRework": 0,
+   "runMin": 189,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 916,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-02",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G1",
+   "machine": "SYS-01",
+   "op": "资料收集",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "emp": "E-035",
+   "qtyGood": 18,
+   "qtyRework": 1,
+   "runMin": 225,
+   "setupMin": 8,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 713,
+   "source": "scan",
+   "verified": true,
+   "std": 0.2
+  },
+  {
+   "id": "RP-0917-08",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0218",
+   "product": "V02",
+   "emp": "E-017",
+   "qtyGood": 9,
+   "qtyRework": 0,
+   "runMin": 223,
+   "setupMin": 14,
+   "waitMin": 69,
+   "waitReason": "等前道",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 786,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-16",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G3",
+   "machine": "SYS-03",
+   "op": "凭证录入",
+   "order": "SV-2609-0225",
+   "product": "V01",
+   "emp": "E-016",
+   "qtyGood": 19,
+   "qtyRework": 0,
+   "runMin": 364,
+   "setupMin": 6,
+   "waitMin": 47,
+   "waitReason": "等复核",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 897,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-20",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G4",
+   "machine": "SYS-04",
+   "op": "申报",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "emp": "E-025",
+   "qtyGood": 36,
+   "qtyRework": 1,
+   "runMin": 232,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 719,
+   "source": "scan",
+   "verified": true,
+   "std": 0.1
+  },
+  {
+   "id": "RP-0917-03",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G1",
+   "machine": "SYS-01",
+   "op": "资料收集",
+   "order": "SV-2609-0218",
+   "product": "V02",
+   "emp": "E-034",
+   "qtyGood": 15,
+   "qtyRework": 0,
+   "runMin": 255,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 982,
+   "source": "scan",
+   "verified": false,
+   "std": 0.2
+  },
+  {
+   "id": "RP-0917-09",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0224",
+   "product": "V02",
+   "emp": "E-011",
+   "qtyGood": 10,
+   "qtyRework": 0,
+   "runMin": 232,
+   "setupMin": 10,
+   "waitMin": 38,
+   "waitReason": "等复核",
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 1000,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-21",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "G4",
+   "machine": "SYS-04",
+   "op": "申报",
+   "order": "SV-2609-0218",
+   "product": "V02",
+   "emp": "E-029",
+   "qtyGood": 35,
+   "qtyRework": 1,
+   "runMin": 213,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 940,
+   "source": "manual",
+   "verified": true,
+   "std": 0.1
+  },
+  {
+   "id": "RP-0917-10",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "账务处理",
+   "order": "SV-2609-0219",
+   "product": "V03",
+   "emp": "E-021",
+   "qtyGood": 6,
+   "qtyRework": 0,
+   "runMin": 234,
+   "setupMin": 20,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 734,
+   "source": "manual",
+   "verified": true,
+   "std": 0.6
+  },
+  {
+   "id": "RP-0917-17",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G3",
+   "machine": "SYS-03",
+   "op": "凭证录入",
+   "order": "SV-2609-0214",
+   "product": "V01",
+   "emp": "E-018",
+   "qtyGood": 18,
+   "qtyRework": 1,
+   "runMin": 346,
+   "setupMin": 9,
+   "waitMin": 27,
+   "waitReason": "等模板",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 862,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-22",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G4",
+   "machine": "SYS-04",
+   "op": "申报",
+   "order": "SV-2609-0214",
+   "product": "V01",
+   "emp": "E-027",
+   "qtyGood": 45,
+   "qtyRework": 1,
+   "runMin": 423,
+   "setupMin": 8,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 911,
+   "source": "scan",
+   "verified": true,
+   "std": 0.15
+  },
+  {
+   "id": "RP-0917-11",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "账务处理",
+   "order": "SV-2609-0223",
+   "product": "V03",
+   "emp": "E-001",
+   "qtyGood": 31,
+   "qtyRework": 9,
+   "runMin": 1480,
+   "setupMin": 20,
+   "waitMin": 69,
+   "waitReason": "等模板",
+   "firstPieceOk": false,
+   "startMin": 720,
+   "endMin": 2289,
+   "source": "scan",
+   "verified": true,
+   "std": 0.6
+  },
+  {
+   "id": "RP-0917-05",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G1",
+   "machine": "SYS-01",
+   "op": "资料收集",
+   "order": "SV-2609-0224",
+   "product": "V02",
+   "emp": "E-034",
+   "qtyGood": 29,
+   "qtyRework": 1,
+   "runMin": 360,
+   "setupMin": 9,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 849,
+   "source": "scan",
+   "verified": true,
+   "std": 0.2
+  },
+  {
+   "id": "RP-0917-12",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "emp": "E-011",
+   "qtyGood": 30,
+   "qtyRework": 10,
+   "runMin": 938,
+   "setupMin": 11,
+   "waitMin": 37,
+   "waitReason": "等模板",
+   "firstPieceOk": false,
+   "startMin": 480,
+   "endMin": 1466,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-18",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G3",
+   "machine": "SYS-03",
+   "op": "凭证录入",
+   "order": "SV-2609-0221",
+   "product": "V01",
+   "emp": "E-004",
+   "qtyGood": 18,
+   "qtyRework": 1,
+   "runMin": 348,
+   "setupMin": 8,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 836,
+   "source": "manual",
+   "verified": true,
+   "std": 0.35
+  },
+  {
+   "id": "RP-0917-23",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G4",
+   "machine": "SYS-04",
+   "op": "申报",
+   "order": "SV-2609-0224",
+   "product": "V02",
+   "emp": "E-026",
+   "qtyGood": 72,
+   "qtyRework": 1,
+   "runMin": 431,
+   "setupMin": 8,
+   "waitMin": 252,
+   "waitReason": "等复核",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1171,
+   "source": "scan",
+   "verified": true,
+   "std": 0.1
+  },
+  {
+   "id": "RP-0917-13",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "G2",
+   "machine": "SYS-02",
+   "op": "凭证录入",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "emp": "E-015",
+   "qtyGood": 30,
+   "qtyRework": 10,
+   "runMin": 929,
+   "setupMin": 9,
+   "waitMin": 89,
+   "waitReason": "等前道",
+   "firstPieceOk": false,
+   "startMin": 720,
+   "endMin": 1747,
+   "source": "scan",
+   "verified": true,
+   "std": 0.35
+  }
+ ],
+ "missingSlot": {
+  "date": "2026-09-16",
+  "shift": "A",
+  "line": "G1",
+  "order": "SV-2609-0214",
+  "op": "资料收集",
+  "product": "V01",
+  "suggestQty": 44,
+  "suggestRunMin": 380
+ },
+ "stdStats": [
+  {
+   "product": "V01",
+   "op": "资料收集",
+   "line": "G1",
+   "std": 0.15,
+   "n": 4,
+   "median": 0.1485,
+   "p25": 0.125131,
+   "p75": 0.171869,
+   "setupN": 4,
+   "setupMedian": 8
+  },
+  {
+   "product": "V01",
+   "op": "凭证录入",
+   "line": "G3",
+   "std": 0.35,
+   "n": 27,
+   "median": 0.308,
+   "p25": 0.28031,
+   "p75": 0.33569,
+   "setupN": 27,
+   "setupMedian": 8
+  },
+  {
+   "product": "V01",
+   "op": "账务处理",
+   "line": "G3",
+   "std": 0.3,
+   "n": 6,
+   "median": 0.312,
+   "p25": 0.267509,
+   "p75": 0.356491,
+   "setupN": 6,
+   "setupMedian": 8
+  },
+  {
+   "product": "V01",
+   "op": "申报",
+   "line": "G4",
+   "std": 0.15,
+   "n": 20,
+   "median": 0.1455,
+   "p25": 0.135015,
+   "p75": 0.155985,
+   "setupN": 20,
+   "setupMedian": 7
+  },
+  {
+   "product": "V01",
+   "op": "归档",
+   "line": "G4",
+   "std": 0.05,
+   "n": 4,
+   "median": 0.05,
+   "p25": 0.042959,
+   "p75": 0.057041,
+   "setupN": 4,
+   "setupMedian": 0
+  },
+  {
+   "product": "V02",
+   "op": "资料收集",
+   "line": "G1",
+   "std": 0.2,
+   "n": 13,
+   "median": 0.204,
+   "p25": 0.182358,
+   "p75": 0.225642,
+   "setupN": 13,
+   "setupMedian": 7
+  },
+  {
+   "product": "V02",
+   "op": "凭证录入",
+   "line": "G2",
+   "std": 0.35,
+   "n": 11,
+   "median": 0.4025,
+   "p25": 0.362104,
+   "p75": 0.442896,
+   "setupN": 11,
+   "setupMedian": 13
+  },
+  {
+   "product": "V02",
+   "op": "账务处理",
+   "line": "G2",
+   "std": 0.3,
+   "n": 17,
+   "median": 0.354,
+   "p25": 0.320462,
+   "p75": 0.387538,
+   "setupN": 17,
+   "setupMedian": 12
+  },
+  {
+   "product": "V02",
+   "op": "申报",
+   "line": "G4",
+   "std": 0.1,
+   "n": 13,
+   "median": 0.099,
+   "p25": 0.08891,
+   "p75": 0.10909,
+   "setupN": 13,
+   "setupMedian": 8
+  },
+  {
+   "product": "V02",
+   "op": "归档",
+   "line": "G4",
+   "std": 0.05,
+   "n": 17,
+   "median": 0.048,
+   "p25": 0.043604,
+   "p75": 0.052396,
+   "setupN": 17,
+   "setupMedian": 0
+  },
+  {
+   "product": "V03",
+   "op": "资料收集",
+   "line": "G1",
+   "std": 0.2,
+   "n": 16,
+   "median": 0.198,
+   "p25": 0.18562,
+   "p75": 0.21038,
+   "setupN": 16,
+   "setupMedian": 20
+  },
+  {
+   "product": "V03",
+   "op": "账务处理",
+   "line": "G2",
+   "std": 0.6,
+   "n": 24,
+   "median": 0.636,
+   "p25": 0.588543,
+   "p75": 0.683457,
+   "setupN": 24,
+   "setupMedian": 22
+  },
+  {
+   "product": "V03",
+   "op": "申报",
+   "line": "G4",
+   "std": 0.15,
+   "n": 19,
+   "median": 0.15,
+   "p25": 0.134226,
+   "p75": 0.165774,
+   "setupN": 19,
+   "setupMedian": 10
+  },
+  {
+   "product": "V03",
+   "op": "归档",
+   "line": "G4",
+   "std": 0.05,
+   "n": 8,
+   "median": 0.0515,
+   "p25": 0.047579,
+   "p75": 0.055421,
+   "setupN": 8,
+   "setupMedian": 0
+  }
+ ],
+ "lossWeekly": [
+  {
+   "week": "2026-06-29",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 16,
+   "waitMin": {
+    "等资料": 65,
+    "等前道": 41,
+    "等复核": 28,
+    "等模板": 17
+   },
+   "speedMin": 45,
+   "reworkMin": 33
+  },
+  {
+   "week": "2026-07-06",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 16,
+   "waitMin": {
+    "等资料": 57,
+    "等前道": 36,
+    "等复核": 27,
+    "等模板": 16
+   },
+   "speedMin": 44,
+   "reworkMin": 27
+  },
+  {
+   "week": "2026-07-13",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 12,
+   "waitMin": {
+    "等资料": 71,
+    "等前道": 40,
+    "等复核": 28,
+    "等模板": 15
+   },
+   "speedMin": 45,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-07-20",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 45,
+   "downMin": 18,
+   "waitMin": {
+    "等资料": 51,
+    "等前道": 37,
+    "等复核": 30,
+    "等模板": 13
+   },
+   "speedMin": 41,
+   "reworkMin": 35
+  },
+  {
+   "week": "2026-07-27",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 63,
+    "等前道": 48,
+    "等复核": 34,
+    "等模板": 15
+   },
+   "speedMin": 49,
+   "reworkMin": 29
+  },
+  {
+   "week": "2026-08-03",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 71,
+    "等前道": 45,
+    "等复核": 35,
+    "等模板": 18
+   },
+   "speedMin": 48,
+   "reworkMin": 28
+  },
+  {
+   "week": "2026-08-10",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 12,
+   "waitMin": {
+    "等资料": 50,
+    "等前道": 36,
+    "等复核": 35,
+    "等模板": 13
+   },
+   "speedMin": 37,
+   "reworkMin": 25
+  },
+  {
+   "week": "2026-08-17",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 49,
+    "等前道": 52,
+    "等复核": 30,
+    "等模板": 17
+   },
+   "speedMin": 43,
+   "reworkMin": 29
+  },
+  {
+   "week": "2026-08-24",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 49,
+    "等前道": 50,
+    "等复核": 25,
+    "等模板": 14
+   },
+   "speedMin": 43,
+   "reworkMin": 31
+  },
+  {
+   "week": "2026-08-31",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 12,
+   "waitMin": {
+    "等资料": 72,
+    "等前道": 43,
+    "等复核": 33,
+    "等模板": 13
+   },
+   "speedMin": 41,
+   "reworkMin": 27
+  },
+  {
+   "week": "2026-09-07",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 45,
+   "downMin": 15,
+   "waitMin": {
+    "等资料": 70,
+    "等前道": 40,
+    "等复核": 30,
+    "等模板": 16
+   },
+   "speedMin": 46,
+   "reworkMin": 27
+  },
+  {
+   "week": "2026-09-14",
+   "line": "G1",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 16,
+   "waitMin": {
+    "等资料": 57,
+    "等前道": 39,
+    "等复核": 29,
+    "等模板": 14
+   },
+   "speedMin": 44,
+   "reworkMin": 26
+  },
+  {
+   "week": "2026-06-29",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 159,
+   "downMin": 54,
+   "waitMin": {
+    "等资料": 133,
+    "等前道": 24,
+    "等复核": 83,
+    "等模板": 28
+   },
+   "speedMin": 36,
+   "reworkMin": 60
+  },
+  {
+   "week": "2026-07-06",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 151,
+   "downMin": 46,
+   "waitMin": {
+    "等资料": 143,
+    "等前道": 26,
+    "等复核": 75,
+    "等模板": 29
+   },
+   "speedMin": 43,
+   "reworkMin": 58
+  },
+  {
+   "week": "2026-07-13",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 149,
+   "downMin": 35,
+   "waitMin": {
+    "等资料": 117,
+    "等前道": 34,
+    "等复核": 73,
+    "等模板": 28
+   },
+   "speedMin": 50,
+   "reworkMin": 55
+  },
+  {
+   "week": "2026-07-20",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 142,
+   "downMin": 42,
+   "waitMin": {
+    "等资料": 114,
+    "等前道": 33,
+    "等复核": 77,
+    "等模板": 32
+   },
+   "speedMin": 52,
+   "reworkMin": 70
+  },
+  {
+   "week": "2026-07-27",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 140,
+   "downMin": 35,
+   "waitMin": {
+    "等资料": 141,
+    "等前道": 32,
+    "等复核": 82,
+    "等模板": 29
+   },
+   "speedMin": 44,
+   "reworkMin": 62
+  },
+  {
+   "week": "2026-08-03",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 145,
+   "downMin": 45,
+   "waitMin": {
+    "等资料": 114,
+    "等前道": 29,
+    "等复核": 89,
+    "等模板": 34
+   },
+   "speedMin": 52,
+   "reworkMin": 48
+  },
+  {
+   "week": "2026-08-10",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 145,
+   "downMin": 37,
+   "waitMin": {
+    "等资料": 105,
+    "等前道": 33,
+    "等复核": 62,
+    "等模板": 25
+   },
+   "speedMin": 39,
+   "reworkMin": 55
+  },
+  {
+   "week": "2026-08-17",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 140,
+   "downMin": 49,
+   "waitMin": {
+    "等资料": 139,
+    "等前道": 29,
+    "等复核": 85,
+    "等模板": 31
+   },
+   "speedMin": 43,
+   "reworkMin": 67
+  },
+  {
+   "week": "2026-08-24",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 134,
+   "downMin": 37,
+   "waitMin": {
+    "等资料": 113,
+    "等前道": 28,
+    "等复核": 61,
+    "等模板": 31
+   },
+   "speedMin": 49,
+   "reworkMin": 48
+  },
+  {
+   "week": "2026-08-31",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 135,
+   "downMin": 34,
+   "waitMin": {
+    "等资料": 135,
+    "等前道": 34,
+    "等复核": 73,
+    "等模板": 31
+   },
+   "speedMin": 42,
+   "reworkMin": 59
+  },
+  {
+   "week": "2026-09-07",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 129,
+   "downMin": 53,
+   "waitMin": {
+    "等资料": 133,
+    "等前道": 29,
+    "等复核": 82,
+    "等模板": 32
+   },
+   "speedMin": 45,
+   "reworkMin": 61
+  },
+  {
+   "week": "2026-09-14",
+   "line": "G2",
+   "plannedMin": 2400,
+   "setupMin": 128,
+   "downMin": 52,
+   "waitMin": {
+    "等资料": 107,
+    "等前道": 31,
+    "等复核": 64,
+    "等模板": 25
+   },
+   "speedMin": 53,
+   "reworkMin": 54
+  },
+  {
+   "week": "2026-06-29",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 11,
+   "waitMin": {
+    "等资料": 57,
+    "等前道": 49,
+    "等复核": 27,
+    "等模板": 15
+   },
+   "speedMin": 45,
+   "reworkMin": 35
+  },
+  {
+   "week": "2026-07-06",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 60,
+    "等前道": 50,
+    "等复核": 33,
+    "等模板": 15
+   },
+   "speedMin": 38,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-07-13",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 45,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 69,
+    "等前道": 43,
+    "等复核": 35,
+    "等模板": 15
+   },
+   "speedMin": 40,
+   "reworkMin": 30
+  },
+  {
+   "week": "2026-07-20",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 51,
+    "等前道": 40,
+    "等复核": 34,
+    "等模板": 12
+   },
+   "speedMin": 44,
+   "reworkMin": 27
+  },
+  {
+   "week": "2026-07-27",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 72,
+    "等前道": 45,
+    "等复核": 32,
+    "等模板": 16
+   },
+   "speedMin": 47,
+   "reworkMin": 34
+  },
+  {
+   "week": "2026-08-03",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 59,
+    "等前道": 39,
+    "等复核": 31,
+    "等模板": 13
+   },
+   "speedMin": 46,
+   "reworkMin": 30
+  },
+  {
+   "week": "2026-08-10",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 47,
+   "downMin": 19,
+   "waitMin": {
+    "等资料": 62,
+    "等前道": 48,
+    "等复核": 28,
+    "等模板": 17
+   },
+   "speedMin": 43,
+   "reworkMin": 25
+  },
+  {
+   "week": "2026-08-17",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 66,
+    "等前道": 53,
+    "等复核": 25,
+    "等模板": 16
+   },
+   "speedMin": 52,
+   "reworkMin": 26
+  },
+  {
+   "week": "2026-08-24",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 47,
+   "downMin": 14,
+   "waitMin": {
+    "等资料": 61,
+    "等前道": 44,
+    "等复核": 28,
+    "等模板": 15
+   },
+   "speedMin": 37,
+   "reworkMin": 30
+  },
+  {
+   "week": "2026-08-31",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 19,
+   "waitMin": {
+    "等资料": 58,
+    "等前道": 39,
+    "等复核": 31,
+    "等模板": 15
+   },
+   "speedMin": 51,
+   "reworkMin": 33
+  },
+  {
+   "week": "2026-09-07",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 11,
+   "waitMin": {
+    "等资料": 69,
+    "等前道": 37,
+    "等复核": 30,
+    "等模板": 13
+   },
+   "speedMin": 45,
+   "reworkMin": 29
+  },
+  {
+   "week": "2026-09-14",
+   "line": "G3",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 15,
+   "waitMin": {
+    "等资料": 68,
+    "等前道": 42,
+    "等复核": 32,
+    "等模板": 17
+   },
+   "speedMin": 38,
+   "reworkMin": 31
+  },
+  {
+   "week": "2026-06-29",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 47,
+   "downMin": 16,
+   "waitMin": {
+    "等资料": 52,
+    "等前道": 39,
+    "等复核": 28,
+    "等模板": 12
+   },
+   "speedMin": 44,
+   "reworkMin": 29
+  },
+  {
+   "week": "2026-07-06",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 15,
+   "waitMin": {
+    "等资料": 52,
+    "等前道": 36,
+    "等复核": 29,
+    "等模板": 14
+   },
+   "speedMin": 41,
+   "reworkMin": 33
+  },
+  {
+   "week": "2026-07-13",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 45,
+   "downMin": 15,
+   "waitMin": {
+    "等资料": 53,
+    "等前道": 37,
+    "等复核": 30,
+    "等模板": 18
+   },
+   "speedMin": 43,
+   "reworkMin": 34
+  },
+  {
+   "week": "2026-07-20",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 59,
+    "等前道": 51,
+    "等复核": 30,
+    "等模板": 14
+   },
+   "speedMin": 38,
+   "reworkMin": 34
+  },
+  {
+   "week": "2026-07-27",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 11,
+   "waitMin": {
+    "等资料": 66,
+    "等前道": 54,
+    "等复核": 25,
+    "等模板": 17
+   },
+   "speedMin": 41,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-08-03",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 19,
+   "waitMin": {
+    "等资料": 57,
+    "等前道": 47,
+    "等复核": 34,
+    "等模板": 17
+   },
+   "speedMin": 36,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-08-10",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 18,
+   "waitMin": {
+    "等资料": 69,
+    "等前道": 43,
+    "等复核": 27,
+    "等模板": 13
+   },
+   "speedMin": 38,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-08-17",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 46,
+   "downMin": 12,
+   "waitMin": {
+    "等资料": 62,
+    "等前道": 46,
+    "等复核": 34,
+    "等模板": 13
+   },
+   "speedMin": 47,
+   "reworkMin": 27
+  },
+  {
+   "week": "2026-08-24",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 47,
+   "downMin": 19,
+   "waitMin": {
+    "等资料": 64,
+    "等前道": 46,
+    "等复核": 30,
+    "等模板": 16
+   },
+   "speedMin": 48,
+   "reworkMin": 34
+  },
+  {
+   "week": "2026-08-31",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 13,
+   "waitMin": {
+    "等资料": 54,
+    "等前道": 49,
+    "等复核": 28,
+    "等模板": 15
+   },
+   "speedMin": 51,
+   "reworkMin": 25
+  },
+  {
+   "week": "2026-09-07",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 43,
+   "downMin": 17,
+   "waitMin": {
+    "等资料": 62,
+    "等前道": 53,
+    "等复核": 27,
+    "等模板": 17
+   },
+   "speedMin": 38,
+   "reworkMin": 33
+  },
+  {
+   "week": "2026-09-14",
+   "line": "G4",
+   "plannedMin": 2400,
+   "setupMin": 44,
+   "downMin": 11,
+   "waitMin": {
+    "等资料": 67,
+    "等前道": 44,
+    "等复核": 35,
+    "等模板": 14
+   },
+   "speedMin": 43,
+   "reworkMin": 28
+  }
+ ],
+ "lossToday": [
+  {
+   "date": "2026-09-14",
+   "line": "G1",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 3,
+   "waitMin": {
+    "等资料": 13,
+    "等前道": 8,
+    "等复核": 5,
+    "等模板": 3
+   },
+   "speedMin": 11,
+   "reworkMin": 6
+  },
+  {
+   "date": "2026-09-15",
+   "line": "G1",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 4,
+   "waitMin": {
+    "等资料": 12,
+    "等前道": 8,
+    "等复核": 7,
+    "等模板": 4
+   },
+   "speedMin": 10,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-16",
+   "line": "G1",
+   "plannedMin": 480,
+   "setupMin": 10,
+   "downMin": 2,
+   "waitMin": {
+    "等资料": 12,
+    "等前道": 11,
+    "等复核": 7,
+    "等模板": 3
+   },
+   "speedMin": 10,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-17",
+   "line": "G1",
+   "plannedMin": 240,
+   "setupMin": 5,
+   "downMin": 2,
+   "waitMin": {
+    "等资料": 6,
+    "等前道": 4,
+    "等复核": 3,
+    "等模板": 2
+   },
+   "speedMin": 5,
+   "reworkMin": 3
+  },
+  {
+   "date": "2026-09-14",
+   "line": "G2",
+   "plannedMin": 480,
+   "setupMin": 28,
+   "downMin": 6,
+   "waitMin": {
+    "等资料": 20,
+    "等前道": 5,
+    "等复核": 16,
+    "等模板": 7
+   },
+   "speedMin": 8,
+   "reworkMin": 13
+  },
+  {
+   "date": "2026-09-15",
+   "line": "G2",
+   "plannedMin": 480,
+   "setupMin": 27,
+   "downMin": 7,
+   "waitMin": {
+    "等资料": 29,
+    "等前道": 6,
+    "等复核": 14,
+    "等模板": 5
+   },
+   "speedMin": 11,
+   "reworkMin": 11
+  },
+  {
+   "date": "2026-09-16",
+   "line": "G2",
+   "plannedMin": 480,
+   "setupMin": 25,
+   "downMin": 7,
+   "waitMin": {
+    "等资料": 22,
+    "等前道": 5,
+    "等复核": 16,
+    "等模板": 5
+   },
+   "speedMin": 10,
+   "reworkMin": 14
+  },
+  {
+   "date": "2026-09-17",
+   "line": "G2",
+   "plannedMin": 240,
+   "setupMin": 14,
+   "downMin": 3,
+   "waitMin": {
+    "等资料": 14,
+    "等前道": 3,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 4,
+   "reworkMin": 5
+  },
+  {
+   "date": "2026-09-14",
+   "line": "G3",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 2,
+   "waitMin": {
+    "等资料": 14,
+    "等前道": 11,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 11,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-15",
+   "line": "G3",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 3,
+   "waitMin": {
+    "等资料": 14,
+    "等前道": 8,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 7,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-16",
+   "line": "G3",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 4,
+   "waitMin": {
+    "等资料": 11,
+    "等前道": 8,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 10,
+   "reworkMin": 6
+  },
+  {
+   "date": "2026-09-17",
+   "line": "G3",
+   "plannedMin": 240,
+   "setupMin": 5,
+   "downMin": 2,
+   "waitMin": {
+    "等资料": 6,
+    "等前道": 4,
+    "等复核": 4,
+    "等模板": 1
+   },
+   "speedMin": 5,
+   "reworkMin": 3
+  },
+  {
+   "date": "2026-09-14",
+   "line": "G4",
+   "plannedMin": 480,
+   "setupMin": 8,
+   "downMin": 3,
+   "waitMin": {
+    "等资料": 12,
+    "等前道": 10,
+    "等复核": 7,
+    "等模板": 3
+   },
+   "speedMin": 8,
+   "reworkMin": 6
+  },
+  {
+   "date": "2026-09-15",
+   "line": "G4",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 2,
+   "waitMin": {
+    "等资料": 11,
+    "等前道": 9,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 8,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-16",
+   "line": "G4",
+   "plannedMin": 480,
+   "setupMin": 9,
+   "downMin": 4,
+   "waitMin": {
+    "等资料": 12,
+    "等前道": 10,
+    "等复核": 6,
+    "等模板": 3
+   },
+   "speedMin": 9,
+   "reworkMin": 5
+  },
+  {
+   "date": "2026-09-17",
+   "line": "G4",
+   "plannedMin": 240,
+   "setupMin": 4,
+   "downMin": 1,
+   "waitMin": {
+    "等资料": 5,
+    "等前道": 5,
+    "等复核": 3,
+    "等模板": 1
+   },
+   "speedMin": 4,
+   "reworkMin": 3
+  }
+ ],
+ "machines": [
+  {
+   "id": "SYS-01",
+   "line": "G1",
+   "cumRunH": 258,
+   "pmIntervalH": 500,
+   "pmMinutes": 60,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-16",
+     "fromMin": 780,
+     "toMin": 800,
+     "reason": "账号"
+    }
+   ],
+   "stops12w": [
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "SYS-02",
+   "line": "G2",
+   "cumRunH": 486,
+   "pmIntervalH": 500,
+   "pmMinutes": 60,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-16",
+     "fromMin": 580,
+     "toMin": 625,
+     "reason": "系统"
+    },
+    {
+     "date": "2026-09-17",
+     "fromMin": 495,
+     "toMin": 527,
+     "reason": "系统"
+    },
+    {
+     "date": "2026-09-17",
+     "fromMin": 650,
+     "toMin": 690,
+     "reason": "系统"
+    }
+   ],
+   "stops12w": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "SYS-03",
+   "line": "G3",
+   "cumRunH": 235,
+   "pmIntervalH": 500,
+   "pmMinutes": 60,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-15",
+     "fromMin": 780,
+     "toMin": 822,
+     "reason": "账号"
+    }
+   ],
+   "stops12w": [
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "SYS-04",
+   "line": "G4",
+   "cumRunH": 221,
+   "pmIntervalH": 500,
+   "pmMinutes": 60,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-15",
+     "fromMin": 780,
+     "toMin": 802,
+     "reason": "网络"
+    }
+   ],
+   "stops12w": [
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1
+   ]
+  }
+ ],
+ "planHit": [
+  {
+   "line": "G1",
+   "shift": "A",
+   "plan": 44,
+   "hours": [
+    5,
+    11,
+    16,
+    22
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "G2",
+   "shift": "A",
+   "plan": 19,
+   "hours": [
+    1,
+    2,
+    4,
+    7
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "G3",
+   "shift": "A",
+   "plan": 1,
+   "hours": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "G4",
+   "shift": "A",
+   "plan": 35,
+   "hours": [
+    4,
+    8,
+    13,
+    17
+   ],
+   "elapsedH": 4
+  }
+ ],
+ "jobsToday": [
+  {
+   "id": "B-0917-01",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 5,
+   "dueDay": 1,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  {
+   "id": "B-0917-02",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 9,
+   "dueDay": 1,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  {
+   "id": "B-0917-03",
+   "order": "SV-2609-0218",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 8,
+   "dueDay": 8,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  {
+   "id": "B-0917-04",
+   "order": "SV-2609-0223",
+   "product": "V03",
+   "op": "账务处理",
+   "qty": 12,
+   "dueDay": 21,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 Y"
+  },
+  {
+   "id": "B-0917-05",
+   "order": "SV-2609-0206",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 7,
+   "dueDay": 1,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  {
+   "id": "B-0917-06",
+   "order": "SV-2609-0223",
+   "product": "V03",
+   "op": "账务处理",
+   "qty": 12,
+   "dueDay": 21,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 Y"
+  },
+  {
+   "id": "B-0917-07",
+   "order": "SV-2609-0218",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 8,
+   "dueDay": 8,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  },
+  {
+   "id": "B-0917-08",
+   "order": "SV-2609-0210",
+   "product": "V02",
+   "op": "凭证录入",
+   "qty": 7,
+   "dueDay": 2,
+   "fixture": "一般纳税人模板",
+   "program": "资料包 G"
+  }
+ ],
+ "weekly": [
+  {
+   "week": "2026-06-29",
+   "flowDays": 6.9,
+   "balanceRate": 55,
+   "effUtil": 60.2,
+   "wipDays": 2.3,
+   "fpy": 95.6,
+   "otHours": 72,
+   "setupH": 5,
+   "waitH": 11.6,
+   "downH": 1.6,
+   "output": 263,
+   "planHit": 81
+  },
+  {
+   "week": "2026-07-06",
+   "flowDays": 6.8,
+   "balanceRate": 55,
+   "effUtil": 60.7,
+   "wipDays": 2.4,
+   "fpy": 95.4,
+   "otHours": 72,
+   "setupH": 4.7,
+   "waitH": 11.6,
+   "downH": 1.5,
+   "output": 275,
+   "planHit": 79
+  },
+  {
+   "week": "2026-07-13",
+   "flowDays": 6.6,
+   "balanceRate": 57,
+   "effUtil": 60.6,
+   "wipDays": 2.4,
+   "fpy": 95.3,
+   "otHours": 72,
+   "setupH": 4.8,
+   "waitH": 11.8,
+   "downH": 1.3,
+   "output": 275,
+   "planHit": 80
+  },
+  {
+   "week": "2026-07-20",
+   "flowDays": 6.5,
+   "balanceRate": 56,
+   "effUtil": 61.8,
+   "wipDays": 2.4,
+   "fpy": 95.4,
+   "otHours": 83,
+   "setupH": 4.6,
+   "waitH": 11.3,
+   "downH": 1.4,
+   "output": 277,
+   "planHit": 80
+  },
+  {
+   "week": "2026-07-27",
+   "flowDays": 6.7,
+   "balanceRate": 57,
+   "effUtil": 61.9,
+   "wipDays": 2.2,
+   "fpy": 95.3,
+   "otHours": 82,
+   "setupH": 4.6,
+   "waitH": 12.9,
+   "downH": 1.3,
+   "output": 273,
+   "planHit": 83
+  },
+  {
+   "week": "2026-08-03",
+   "flowDays": 6.6,
+   "balanceRate": 59,
+   "effUtil": 62.5,
+   "wipDays": 2.2,
+   "fpy": 95.5,
+   "otHours": 85,
+   "setupH": 4.6,
+   "waitH": 12.2,
+   "downH": 1.6,
+   "output": 280,
+   "planHit": 81
+  },
+  {
+   "week": "2026-08-10",
+   "flowDays": 6.4,
+   "balanceRate": 58,
+   "effUtil": 62.9,
+   "wipDays": 2.3,
+   "fpy": 95.4,
+   "otHours": 87,
+   "setupH": 4.7,
+   "waitH": 11.1,
+   "downH": 1.4,
+   "output": 287,
+   "planHit": 83
+  },
+  {
+   "week": "2026-08-17",
+   "flowDays": 6.2,
+   "balanceRate": 61,
+   "effUtil": 63.2,
+   "wipDays": 2.1,
+   "fpy": 95.3,
+   "otHours": 96,
+   "setupH": 4.6,
+   "waitH": 12.5,
+   "downH": 1.5,
+   "output": 288,
+   "planHit": 83
+  },
+  {
+   "week": "2026-08-24",
+   "flowDays": 6.4,
+   "balanceRate": 62,
+   "effUtil": 64.7,
+   "wipDays": 2,
+   "fpy": 95.2,
+   "otHours": 93,
+   "setupH": 4.5,
+   "waitH": 11.3,
+   "downH": 1.5,
+   "output": 286,
+   "planHit": 86
+  },
+  {
+   "week": "2026-08-31",
+   "flowDays": 6.3,
+   "balanceRate": 63,
+   "effUtil": 64.4,
+   "wipDays": 2.1,
+   "fpy": 95.3,
+   "otHours": 103,
+   "setupH": 4.4,
+   "waitH": 12.1,
+   "downH": 1.3,
+   "output": 289,
+   "planHit": 84
+  },
+  {
+   "week": "2026-09-07",
+   "flowDays": 6,
+   "balanceRate": 61,
+   "effUtil": 65.9,
+   "wipDays": 2,
+   "fpy": 95.1,
+   "otHours": 107,
+   "setupH": 4.4,
+   "waitH": 12.3,
+   "downH": 1.6,
+   "output": 295,
+   "planHit": 87
+  },
+  {
+   "week": "2026-09-14",
+   "flowDays": 6,
+   "balanceRate": 61,
+   "effUtil": 65.9,
+   "wipDays": 2,
+   "fpy": 95.3,
+   "otHours": 107,
+   "setupH": 4.4,
+   "waitH": 11.4,
+   "downH": 1.6,
+   "output": 298,
+   "planHit": 85
+  }
+ ],
+ "wipHistory": [
+  {
+   "week": "2026-06-29",
+   "units": 128
+  },
+  {
+   "week": "2026-07-06",
+   "units": 125
+  },
+  {
+   "week": "2026-07-13",
+   "units": 122
+  },
+  {
+   "week": "2026-07-20",
+   "units": 126
+  },
+  {
+   "week": "2026-07-27",
+   "units": 120
+  },
+  {
+   "week": "2026-08-03",
+   "units": 120
+  },
+  {
+   "week": "2026-08-10",
+   "units": 114
+  },
+  {
+   "week": "2026-08-17",
+   "units": 118
+  },
+  {
+   "week": "2026-08-24",
+   "units": 113
+  },
+  {
+   "week": "2026-08-31",
+   "units": 108
+  },
+  {
+   "week": "2026-09-07",
+   "units": 103
+  },
+  {
+   "week": "2026-09-14",
+   "units": 102
+  }
+ ],
+ "facts": {
+  "bottleneck": "申报期作业",
+  "overtimeOver": 9
+ },
+ "focus": null,
+ "focusLoss": null,
+ "verified": {},
+ "adopted": {},
+ "releasePlan": null,
+ "jobSeq": null,
+ "projects": [],
+ "ledger": [],
+ "exceptions": {},
+ "dispatch": null,
+ "maintenance": [],
+ "training": [],
+ "log": []
+}

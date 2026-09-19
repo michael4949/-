@@ -1,0 +1,399 @@
+{
+  "version": "1.0.0",
+  "archetype": "make",
+  "company": "杭州锐合精密五金有限公司",
+  "dept": "生产部",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "kpi": {
+    "period": "2026-09-14",
+    "constraint": "CNC 车铣中心",
+    "load7": 100,
+    "queueDays": 14,
+    "balanceRate": 60,
+    "wipDays": 0.8,
+    "wipUnits": 6000,
+    "effUtil": 63,
+    "fpy": 97.7,
+    "otHours": 96,
+    "alertsOpen": 6,
+    "alertsTotal": 6,
+    "reportsPending": 5,
+    "reportsTotal": 59,
+    "stdExpired": 2,
+    "projects": 0,
+    "maintDue": 2,
+    "savedH": 0,
+    "weeklyUnits": 61082,
+    "flowDays": 8.6,
+    "lines": 8,
+    "stages": 6,
+    "products": 6,
+    "lots": 13
+  },
+  "bottleneck": {
+    "line": {
+      "id": "L4",
+      "name": "CNC 车铣中心"
+    },
+    "load7": 100,
+    "queueDays": 14,
+    "longestQueue": {
+      "id": "L4",
+      "name": "CNC 车铣中心",
+      "days": 14
+    },
+    "sameLine": true,
+    "balanceRate": 60,
+    "hpu": 0.0028333333333333335,
+    "capHoursPerDay": 16,
+    "wip": {
+      "today": 13,
+      "tomorrow": 41,
+      "maxHours": 24,
+      "maxUnits": 8471,
+      "capDays": 1.5,
+      "overDay": "9-18"
+    },
+    "wipDays": 0.8
+  },
+  "verify": {
+    "counts": {
+      "missing": 1,
+      "dev": 1,
+      "conserve": 1,
+      "overlap": 1,
+      "dup": 1
+    },
+    "pending": 5,
+    "total": 59
+  },
+  "alerts": [
+    {
+      "id": "EX-0917-01",
+      "rule": "R1",
+      "lineName": "CNC 车铣中心",
+      "cause": "投放快于CNC 车铣中心产出",
+      "roleName": "生产主管",
+      "savedH": 0
+    },
+    {
+      "id": "EX-0917-02",
+      "rule": "R2",
+      "lineName": "CNC 车铣中心 B",
+      "cause": "前道派工不足",
+      "roleName": "班组长",
+      "savedH": 2.2
+    },
+    {
+      "id": "EX-0917-03",
+      "rule": "R3",
+      "lineName": "CNC 车铣中心",
+      "cause": "换型后首件确认缺失",
+      "roleName": "班组长",
+      "savedH": 4
+    },
+    {
+      "id": "EX-0917-04",
+      "rule": "R4",
+      "lineName": "CNC 车铣中心",
+      "cause": "操作者技能等级不足",
+      "roleName": "班组长",
+      "savedH": 1.5
+    },
+    {
+      "id": "EX-0917-05",
+      "rule": "R5",
+      "lineName": "CNC 车铣中心",
+      "cause": "CNC-02待检",
+      "roleName": "设备员",
+      "savedH": 1.4
+    },
+    {
+      "id": "EX-0917-06",
+      "rule": "R6",
+      "lineName": "CNC 车铣中心 B",
+      "cause": "交接班准备不足",
+      "roleName": "班组长",
+      "savedH": 1
+    }
+  ],
+  "loss": {
+    "line": {
+      "id": "L4",
+      "name": "CNC 车铣中心"
+    },
+    "start": {
+      "label": "计划 加工时间",
+      "value": 16
+    },
+    "end": {
+      "label": "有效切削",
+      "value": 10.2
+    },
+    "items": [
+      {
+        "id": "setup",
+        "label": "换型",
+        "value": -2.5
+      },
+      {
+        "id": "down",
+        "label": "停机",
+        "value": -1
+      },
+      {
+        "id": "wait:等检",
+        "label": "等检",
+        "value": -0.9
+      },
+      {
+        "id": "wait:等料",
+        "label": "等料",
+        "value": -0.7
+      },
+      {
+        "id": "speed",
+        "label": "速度损失",
+        "value": -0.3
+      },
+      {
+        "id": "rework",
+        "label": "返工",
+        "value": -0.3
+      },
+      {
+        "id": "wait:等工装",
+        "label": "等工装",
+        "value": -0.1
+      }
+    ],
+    "availability": 67,
+    "performance": 97,
+    "effUtil": 63
+  },
+  "calibrationExpired": [
+    {
+      "key": "P04|铣削",
+      "product": "P04",
+      "productName": "铝合金外壳 AL-77",
+      "op": "铣削",
+      "line": "L4",
+      "std": 0.004,
+      "median": 0.0047,
+      "dev": 17.5,
+      "n": 21,
+      "iqrRatio": 0.19,
+      "stable": true,
+      "status": "expired",
+      "statusName": "过期",
+      "direction": "排程偏乐观",
+      "suggest": 0.0047,
+      "adopted": false
+    },
+    {
+      "key": "P01|车削",
+      "product": "P01",
+      "productName": "精密五金件 Ø12×45",
+      "op": "车削",
+      "line": "L4",
+      "std": 0.0025,
+      "median": 0.0029,
+      "dev": 16,
+      "n": 11,
+      "iqrRatio": 0.21,
+      "stable": true,
+      "status": "expired",
+      "statusName": "过期",
+      "direction": "排程偏乐观",
+      "suggest": 0.0029,
+      "adopted": false
+    }
+  ],
+  "sequence": {
+    "before": {
+      "seq": [
+        "B-0917-01",
+        "B-0917-02",
+        "B-0917-03",
+        "B-0917-04",
+        "B-0917-05",
+        "B-0917-06",
+        "B-0917-07",
+        "B-0917-08"
+      ],
+      "changeovers": 7,
+      "minutes": 275
+    },
+    "after": {
+      "seq": [
+        "B-0917-02",
+        "B-0917-05",
+        "B-0917-08",
+        "B-0917-01",
+        "B-0917-04",
+        "B-0917-07",
+        "B-0917-03",
+        "B-0917-06"
+      ],
+      "changeovers": 2,
+      "minutes": 120
+    },
+    "savedHPerDay": 2.6
+  },
+  "preview": {
+    "base": {
+      "load": 100,
+      "queueDays": 14,
+      "weeklyUnits": 61082,
+      "lineUnits": 33882,
+      "flowIndex": 10.67,
+      "otHours": 0,
+      "spareLoad": 100,
+      "wipTomorrow": 41
+    },
+    "recommended": "B",
+    "cards": [
+      {
+        "key": "A",
+        "name": "换型合批",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 11.1,
+            "weeklyUnits": 66588,
+            "lineUnits": 39388,
+            "flowIndex": 10.53,
+            "otHours": 0,
+            "spareLoad": 100,
+            "wipTomorrow": 41
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "B",
+        "name": "多能工支援开CNC 车铣中心 B第二班",
+        "recommended": true,
+        "result": {
+          "metrics": {
+            "load": 99,
+            "queueDays": 3.9,
+            "weeklyUnits": 90219,
+            "lineUnits": 33459,
+            "flowIndex": 10.49,
+            "otHours": 0,
+            "spareLoad": 99,
+            "wipTomorrow": 0
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "C",
+        "name": "错峰午休 + 首件检查前移",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 11.7,
+            "weeklyUnits": 64682,
+            "lineUnits": 37482,
+            "flowIndex": 10.64,
+            "otHours": 0,
+            "spareLoad": 100,
+            "wipTomorrow": 41
+          },
+          "cost": 0
+        }
+      },
+      {
+        "key": "D",
+        "name": "CNC 车铣中心加班",
+        "recommended": false,
+        "result": {
+          "metrics": {
+            "load": 100,
+            "queueDays": 10.6,
+            "weeklyUnits": 67435,
+            "lineUnits": 40235,
+            "flowIndex": 10.53,
+            "otHours": 18,
+            "spareLoad": 100,
+            "wipTomorrow": 41
+          },
+          "cost": 3931
+        }
+      }
+    ],
+    "combo": {
+      "keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "metrics": {
+        "load": 79,
+        "queueDays": 2.9,
+        "weeklyUnits": 90572,
+        "lineUnits": 33812,
+        "flowIndex": 10.35,
+        "otHours": 0,
+        "spareLoad": 99,
+        "wipTomorrow": 0
+      }
+    }
+  },
+  "dispatch": {
+    "id": "DP-0918",
+    "date": "2026-09-18",
+    "filled": 48,
+    "support": 1,
+    "unmet": [],
+    "otWeek": {
+      "before": 96,
+      "after": 96,
+      "delta": 0
+    }
+  },
+  "maintenance": [
+    {
+      "machine": "PA-01",
+      "lineName": "冲压线 A",
+      "reasons": [
+        "近两周停机 1 次（周均 0.3）"
+      ],
+      "window": "9-20（休息日）",
+      "minutes": 120,
+      "role": "设备员",
+      "scheduled": false
+    },
+    {
+      "machine": "CNC-02",
+      "lineName": "CNC 车铣中心",
+      "reasons": [
+        "距上次设备保养运行 486 / 500 h",
+        "工装 F-12 寿命 92%",
+        "近两周停机 5 次（周均 1）"
+      ],
+      "window": "9-20（休息日）",
+      "minutes": 120,
+      "role": "设备员",
+      "scheduled": false
+    }
+  ],
+  "ledger": {
+    "totals": {
+      "bottleneckH": 0,
+      "nonBottleneckH": 0,
+      "units": 0,
+      "otH": 0,
+      "count": 0
+    },
+    "counterText": "本周 AI 建议预计节省 0.0 h"
+  },
+  "weekly": {
+    "text": "【生产部提效周报】杭州锐合精密五金有限公司 · 09-14 至 09-20 周\n一、工序流：约束工序 CNC 车铣中心，负荷 100%，排队等待 14 天；有效利用率 63%（上周 68.5%）；报工一次合格率 96%；在制品天数 0.8 天\n二、本周异常 6 起，已处置 0 起：在制品超限（投放快于CNC 车铣中心产出）；单批等待超时（前道派工不足）；报工一次合格率判异（换型后首件确认缺失）\n三、已下发：无\n四、改善项目：本周无新立项\n五、增效账：本周尚无采纳记录\n六、下周提醒：PA-01 设备保养窗口 9-20（休息日）、CNC-02 设备保养窗口 9-20（休息日）；标准工时待校准 2 项；带教 2 对\n收件人：生产主管、工艺工程师、班组长、设备员"
+  }
+}
