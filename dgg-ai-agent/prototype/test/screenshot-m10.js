@@ -2,7 +2,7 @@
 // 全部走真实界面；每屏截图；扫禁词；核对界面数字与内核一致
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m10'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/10-ai-erp/core/sim.js');
 const data = require('../../skills/10-ai-erp/scripts/load-data.js')();

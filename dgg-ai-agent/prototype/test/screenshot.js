@@ -2,8 +2,8 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
-const out = path.join(__dirname, 'shots'); fs.mkdirSync(out, { recursive: true });
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
+const out = path.join(__dirname, process.env.OUT || 'shots'); fs.mkdirSync(out, { recursive: true });
 const S1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'skills', '01-ai-maturity', 'examples', 'S1.input.json'), 'utf8'));
 const golden = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'skills', '01-ai-maturity', 'examples', 'S1.output.json'), 'utf8'));
 const errors = [];

@@ -2,7 +2,7 @@
 // → 测试与产物（用例逐行执行 / 采纳权限建议 / 数据字典 / 接口清单）→ 发布（屏内二维码 / 发布流水 / 发布记录）→ 迭代交付（追加需求 → V1.1.0 / 变更清单 / 交付报告 / 发送）；重进落回上次屏、积分不重复扣
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m11'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/11-ai-dev/core/build.js');
 const lib = require('../../skills/11-ai-dev/scripts/load-data.js')(); lib.qrBase = 'https://platform.dgg.cn';

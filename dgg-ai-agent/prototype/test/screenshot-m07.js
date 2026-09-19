@@ -1,7 +1,7 @@
 // AI法务 六屏走查：接入 → 驾驶舱（扣积分）→ 合同审查（筛选 / 采纳修订 / 审查意见 / 条款全文 / 一键采纳）→ 新设主体（换类型 / 股权预设 / 确认）→ 知识产权（加入续展 / 申请清单）→ 台账与提醒（日历 / 发送月报）
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m07'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/07-ai-legal/core/legal.js');
 const lib = require('../../skills/07-ai-legal/scripts/load-data.js')();

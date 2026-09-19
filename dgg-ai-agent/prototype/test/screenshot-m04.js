@@ -1,7 +1,7 @@
 // AI获客 六屏走查：接入 → 驾驶舱（扣积分）→ 画像（切细分 / 调权重）→ 脚本（换一版 / 采用）→ 线索池（分派 / 加入计划 / 一键分派）→ 跟进与周报（发送）
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m04'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/04-ai-lead/core/lead.js');
 const lib = require('../../skills/04-ai-lead/scripts/load-data.js')();

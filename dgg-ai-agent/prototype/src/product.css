@@ -9,7 +9,7 @@
   --t-ok: #22A06B; --t-ok-soft: #E6F6EE; --t-risk: #E8A33D; --t-risk-soft: #FDF3E1; --t-late: #D9483B; --t-late-soft: #FCE9E7;
   --t-hand: #4974F6; --t-hand-soft: #E9EFFE; --t-done: #7C8799; --t-done-soft: #EEF1F6; --t-watch: #6B7AA6; --t-watch-soft: #EDF0F8;
   margin: -28px -32px; height: calc(100vh - var(--topbar) - var(--pricebar));
-  display: grid; grid-template-columns: 68px minmax(0, 1fr); background: var(--pd-bg); color: var(--pd-ink);
+  display: grid; grid-template-columns: 68px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); background: var(--pd-bg); color: var(--pd-ink);
   font-size: calc(14px * var(--scale)); overflow: hidden;
 }
 .pd-app .num { font-variant-numeric: tabular-nums; }
@@ -28,7 +28,7 @@
 .pd-nav .stamp { color: #6F7DAA; font-size: 10px; letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); }
 
 /* ---------- 主体 ---------- */
-.pd-body { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; position: relative; }
+.pd-body { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; position: relative; }
 .pd-top { background: #fff; border-bottom: 1px solid var(--pd-line); padding: 10px 24px 0; display: flex; flex-direction: column; gap: 8px; }
 .pd-top .row { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .pd-top .crumb { color: var(--pd-sub); font-size: calc(13px * var(--scale)); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
@@ -317,3 +317,6 @@
 .pd-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
 .pd-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .pd-log .l b { white-space: nowrap; } .pd-log .l span:last-child { color: var(--pd-sub); }
+
+/* ---------- 竖屏：产品框填满主区（外壳竖屏时内边距 26 / 28） ---------- */
+@media (orientation: portrait) { .pd-app { margin: -26px -28px; height: calc(100% + 52px); } }

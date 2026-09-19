@@ -245,6 +245,19 @@ body[data-station="1"] .opt { min-height: 78px; }
 body[data-station="1"] .chip { min-height: 52px; padding: 12px 20px; }
 body[data-station="1"] .btn { min-height: 58px; }
 
+/* ===================== 滚动条与滚动提示 ===================== */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(30, 63, 168, .22); border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(30, 63, 168, .38); background-clip: padding-box; border: 2px solid transparent; }
+.scroll-hint { position: fixed; height: 64px; z-index: 45; pointer-events: none; opacity: 0; transition: opacity .25s; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px;
+  background: linear-gradient(180deg, rgba(245, 248, 255, 0) 0%, rgba(245, 248, 255, .9) 100%); }
+.scroll-hint.on { opacity: 1; }
+.scroll-hint .chev { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); box-shadow: 0 6px 16px rgba(30, 63, 168, .30); display: grid; place-items: center; cursor: pointer; animation: hintBob 1.6s ease-in-out infinite; }
+.scroll-hint .chev::before { content: ''; width: 10px; height: 10px; border-right: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: translateY(-3px) rotate(45deg); }
+@keyframes hintBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+@media print { .scroll-hint { display: none !important; } }
+
 /* ===================== 打印（A4 一页，隐藏导航与侧栏） ===================== */
 @page { size: A4; margin: 12mm; }
 @media print {

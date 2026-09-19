@@ -1,7 +1,7 @@
 // AI人力官 六屏走查：接入 → 驾驶舱（扣积分）→ 招聘（切需求单 / 换版 / 发布 / 筛选 / 初筛 / 安排面试）→ 面试（打分 / 录入 / 发 offer）→ 合规（整改写回 / 日历筛选）→ 成本（选方案 / 采纳 / 月报发送）
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m05'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/05-ai-hr/core/hr.js');
 const lib = require('../../skills/05-ai-hr/scripts/load-data.js')();

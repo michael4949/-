@@ -7,7 +7,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#1F7A5A', soft: '#E4F3EC', ink: '#0F5A40' };
+  var ACCENT = window.DGG.PALETTE.m8;
   var CAP_DESC = { 0: '六条规则逐条核对，只标记不改数', 1: '负荷最高的线为约束，瓶颈前在制按前道产出逐日推 7 天', 2: '六条规则各命中一条根因并指到岗位', 3: '计划时间 → 有效时间，可用率 × 性能率', 4: '按 12 周中位数与稳定性判定过期标准', 5: '缓冲上限反推明日允许投放量', 6: '按相似度枚举顺序，交期约束下换型最少', 7: '四个方案在排程引擎上重算', 8: '技能矩阵 + 加班上限，缺口由多能工补', 9: '到期与停机趋势，排进负荷最低班次', 10: '每次采纳按小时入账，周报自动生成' };
   var STATUS_TONE = { ok: 'ok', tight: 'risk', over: 'late' };
   var LOT_COLORS = ['#1F7A5A', '#3B5BDB', '#C2255C', '#E8862B', '#6B3FD6', '#0B8FA8'];

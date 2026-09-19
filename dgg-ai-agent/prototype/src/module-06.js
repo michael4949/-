@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#0E9F6E', soft: '#E6F6EE', ink: '#0B6B4A' };
+  var ACCENT = window.DGG.PALETTE.m6;
   var CAPS = [['三表勾稽', '14 条勾稽关系 · 下钻到单据 · 调整分录'], ['风险预警', '10 条规则 · 概率 × 影响矩阵 · 处置写回'], ['现金预测', '13 周现金日历 · 情景开关 · 缺口三方案'], ['政策匹配', '12 项政策条件核对 · 预计金额 · 申报清单']];
   var LEVEL = { high: ['late', '高'], mid: ['risk', '中'], low: ['done', '低'] };
   var STAT = { ok: ['ok', '正常'], warn: ['risk', '差异'], bad: ['late', '异常'], na: ['done', '不适用'] };

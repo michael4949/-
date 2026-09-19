@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#3B5BDB', soft: '#E8ECFB', ink: '#2740A8' };
+  var ACCENT = window.DGG.PALETTE.m4;
   var CAPS = [['客户画像', '成交客户反推 · 三个典型细分 · 权重可调'], ['话术脚本', '细分 × 渠道 × 阶段 · 换一版 · 采用后带入跟进'], ['线索池', '匹配画像 + 行为信号打分 · 逐条解释 · 一键分派'], ['跟进与周报', '本周日程 · 逾期 · 成交预测 · 发送到微信']];
   var GRADE = { A: 'late', B: 'risk', C: 'handled', D: 'done' };
   var CH = [['phone', '电话'], ['wechat', '微信首触'], ['fair', '展会现场'], ['mail', '邮件']];

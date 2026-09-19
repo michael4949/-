@@ -110,7 +110,36 @@
     else { S.activeModule = r.route; BUILT[r.route].mount($main, r.step, api); }
     renderPricebar();
     touch();
+    scheduleHints();
   }
+
+  // ---------- 滚动提示：可滚动且未到底的容器，底部出现渐隐带 + 下箭头（点箭头翻一屏） ----------
+  var HINT_SEL = '.main, .pd-work, .pd-drawer > .bd';
+  var hints = [], hintRaf = 0;
+  function scheduleHints() { if (hintRaf) return; hintRaf = requestAnimationFrame(function () { hintRaf = 0; updateScrollHints(); }); }
+  function hintFor(el) { for (var i = 0; i < hints.length; i++) if (hints[i].el === el) return hints[i]; return null; }
+  function updateScrollHints() {
+    var seen = [];
+    Array.prototype.forEach.call(document.querySelectorAll(HINT_SEL), function (el) {
+      var r = el.getBoundingClientRect();
+      var more = r.height > 120 && el.scrollHeight - el.clientHeight - el.scrollTop > 14;
+      var hh = hintFor(el);
+      if (more) {
+        if (!hh) {
+          var node = h('div', { class: 'scroll-hint' }, [h('button', { class: 'chev', 'aria-label': '向下', onclick: function () { el.scrollBy({ top: Math.round(el.clientHeight * 0.7), behavior: 'smooth' }); } })]);
+          document.body.appendChild(node); hh = { el: el, node: node }; hints.push(hh);
+        }
+        hh.node.style.left = r.left + 'px'; hh.node.style.width = r.width + 'px'; hh.node.style.top = (r.bottom - 64) + 'px';
+        hh.node.classList.add('on');
+      } else if (hh) hh.node.classList.remove('on');
+      seen.push(el);
+    });
+    hints = hints.filter(function (x) { if (seen.indexOf(x.el) >= 0 && document.contains(x.el)) return true; if (x.node.parentNode) x.node.parentNode.removeChild(x.node); return false; });
+  }
+  document.addEventListener('scroll', scheduleHints, true);
+  window.addEventListener('resize', scheduleHints);
+  new MutationObserver(scheduleHints).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+  setInterval(scheduleHints, 1500);
 
   // ---------- 首页 11 宫格 ----------
   function renderHome() {

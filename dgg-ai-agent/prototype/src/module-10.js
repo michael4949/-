@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K;
-  var ACCENT = { pa: '#E8862B', soft: '#FDF1E6', ink: '#9A4F0E' };
+  var ACCENT = window.DGG.PALETTE.m10;
   var CAP_NAMES = ['订单交付预警', '智能排产与插单模拟', '库存与安全库存预警', '交付日报'];
   var CAP_DESC = { '订单交付预警': '交期倒推 · 延期归因 · 处置预演', '智能排产与插单模拟': '产线日历排程 · 加急单三方案对比', '库存与安全库存预警': '库存走势 · 缺口倒推 · 采购单草稿', '交付日报': '今日交付 · 风险 · 明日提醒 · 发送到微信' };
   var ARCHE = { make: { name: '制造型', desc: '生产订单 · 工序 · 产线 · 物料' }, flow: { name: '流通型', desc: '订单 · 履约环节 · 作业区 · 商品' }, project: { name: '项目型', desc: '项目 · 节点 · 班组 · 资源' }, service: { name: '服务型', desc: '服务单 · 环节 · 小组 · 资源' } };

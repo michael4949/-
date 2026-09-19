@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#C2255C', soft: '#FBE7EE', ink: '#8E1A44' };
+  var ACCENT = window.DGG.PALETTE.m9;
   var CAPS = [['指标树', '31 个节点 · 六组 · 与预算或上期比给红黄绿'], ['指标归因', '连环替代法拆到驱动因子 · 证据卡指回对应模块'], ['方案预演', '按根因两到三个方案 · 参数可调 · 12 个月走势与净效益'], ['审批与复盘', '会签意见 · 总经理终批 · 决议编号 · 节点跟踪 · 复盘']];
   var STATUS_TONE = { ok: 'ok', watch: 'risk', risk: 'late' };
   var OP_TONE = { agree: 'ok', cond: 'risk', object: 'late' };

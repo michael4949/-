@@ -2,7 +2,7 @@
 // → 改善预演（AI 重排顺序 / 拖参数 / 选方案 / 立项）→ 执行与派工（生成派工单 / 排入保养窗口 / 带教 / 节点完成）→ 提效周报（增效账 / 发送）
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m08'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/08-ai-process/core/flow.js');
 const lib = require('../../skills/08-ai-process/scripts/load-data.js')(); lib.erp = require('../../skills/10-ai-erp/core/sim.js');

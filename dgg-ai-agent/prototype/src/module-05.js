@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#0B8FA8', soft: '#E3F3F7', ink: '#075F70' };
+  var ACCENT = window.DGG.PALETTE.m5;
   var CAPS = [['招聘 · JD 与简历', '需求单出 JD 两版 · 简历硬门槛与匹配打分 · 逐条解释'], ['面试与录用', '结构化题库 · 四维评分雷达 · 录用建议与 offer 定薪'], ['用工合规', '12 条规则逐人核对 · 影响金额 · 整改写回 · 90 天人事日历'], ['成本与编制', '用工成本结构 · 12 个月三方案对比 · 月报到微信']];
   var GRADE = { A: 'ok', B: 'handled', C: 'risk', D: 'done' }, GRADE_NAME = { A: 'A 级', B: 'B 级', C: 'C 级', D: '不满足' };
   var STAGE_TONE = { new: 'watch', screened: 'handled', interview: 'accent', done: 'risk', offer: 'ok', hired: 'ok', rejected: 'done' };

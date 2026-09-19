@@ -1,8 +1,8 @@
 // 模块 3 全流程：企业画像（现场输入）→ 场景组合多选 → 逐场景收益参数 → 投入方案 → 测算台 → 34 页报告
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
-const out = path.join(__dirname, 'shots-m3'); fs.mkdirSync(out, { recursive: true });
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
+const out = path.join(__dirname, process.env.OUT || 'shots-m3'); fs.mkdirSync(out, { recursive: true });
 const ex = path.join(__dirname, '..', '..', 'skills', '03-roi-calculator', 'examples');
 const S1 = JSON.parse(fs.readFileSync(path.join(ex, 'S1.input.json'), 'utf8'));
 const golden = JSON.parse(fs.readFileSync(path.join(ex, 'S1.output.json'), 'utf8'));

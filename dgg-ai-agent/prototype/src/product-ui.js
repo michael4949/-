@@ -523,6 +523,21 @@
     setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, ms || 2600);
   }
 
+  // 十一个模块的强调色（每个模块一个色相，互不相近；pa2 为渐变终点）
+  var PALETTE = {
+    m1: { pa: '#4974F6', pa2: '#1E3FA8', soft: '#E8EFFD', ink: '#1E3FA8' },
+    m2: { pa: '#4974F6', pa2: '#38D4E8', soft: '#E8EFFD', ink: '#1E3FA8' },
+    m3: { pa: '#11705A', pa2: '#C69A18', soft: '#E6F3EE', ink: '#0A3A2E' },
+    m4: { pa: '#3B5BDB', pa2: '#5B8DEF', soft: '#E8ECFB', ink: '#2740A8' },
+    m5: { pa: '#0B8FA8', pa2: '#38D4E8', soft: '#E3F3F7', ink: '#075F70' },
+    m6: { pa: '#0E9F6E', pa2: '#5BD39A', soft: '#E6F6EE', ink: '#0B6B4A' },
+    m7: { pa: '#6B3FD6', pa2: '#A07BF2', soft: '#EFE9FB', ink: '#4A2A9E' },
+    m8: { pa: '#B7791F', pa2: '#E8B84A', soft: '#FBF3E1', ink: '#7A4E0E' },
+    m9: { pa: '#C2255C', pa2: '#F06595', soft: '#FBE7EE', ink: '#8E1A44' },
+    m10: { pa: '#E8862B', pa2: '#F5B942', soft: '#FDF1E6', ink: '#9A4F0E' },
+    m11: { pa: '#3D4F73', pa2: '#6F86B3', soft: '#E8ECF6', ink: '#26345A' }
+  };
   window.DGG = window.DGG || {};
-  window.DGG.pui = { init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, steps: steps, log: log, toast: toast, STATUS: STATUS };
+  window.DGG.PALETTE = PALETTE;
+  window.DGG.pui = { PALETTE: PALETTE, init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, steps: steps, log: log, toast: toast, STATUS: STATUS };
 })();

@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#6B3FD6', soft: '#EFE9FB', ink: '#4A2A9E' };
+  var ACCENT = window.DGG.PALETTE.m7;
   var CAPS = [['合同审查', '必备条款缺失 · 风险条款 · 修订建议 · 审查意见'], ['新设主体', '子公司 / 分公司 / 新公司 · 流程时间线 · 股权控制线'], ['知识产权', '商标专利到期与年费 · 布局缺口 · 近似与侵权线索'], ['台账与提醒', '合同 证照 知产 设立一本台账 · 90 天日历 · 月报到微信']];
   var LV = { high: 'late', mid: 'risk', low: 'ok' }, LV_NAME = { high: '高风险', mid: '中风险', low: '低风险' };
   var SEV = { high: 'late', mid: 'risk', low: 'watch' }, SEV_NAME = { high: '高', mid: '中', low: '低' };

@@ -1,7 +1,7 @@
 // AI决策 六屏走查：接入 → 驾驶舱（扣积分）→ 归因（切基期 / 选因子 / 证据）→ 方案预演（调参数 / 选方案 / 发起审批）→ 审批（会签 / 批准 / 驳回）→ 执行（节点完成 / 月报发送）
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m09'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/09-ai-decision/core/decide.js');
 const lib = require('../../skills/09-ai-decision/scripts/load-data.js')();

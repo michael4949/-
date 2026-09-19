@@ -69,6 +69,7 @@ html = put(html, '/*__CORE_M8_JS__*/', R('../skills/08-ai-process/core/flow.js')
 html = put(html, '/*__CORE_M11_JS__*/', R('../skills/11-ai-dev/core/build.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
 html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
+html = put(html, '/*__FX_JS__*/', R('src/fx.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
 html = put(html, '/*__MODULE_01_JS__*/', R('src/module-01.js'));
 html = put(html, '/*__CHARTS_M1_JS__*/', R('src/charts-m1.js'));

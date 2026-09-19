@@ -2,7 +2,7 @@
 // 全部走真实界面；每屏截图；扫禁词；核对界面数字与内核一致
 const { chromium } = require('playwright');
 const path = require('path'); const fs = require('fs');
-const url = 'file://' + path.join(__dirname, '..', 'dist', 'index.html');
+const url = 'file://' + (process.env.HTML || path.join(__dirname, '..', 'dist', 'index.html'));
 const out = path.join(__dirname, process.env.OUT || 'shots-m06'); fs.mkdirSync(out, { recursive: true });
 const core = require('../../skills/06-ai-cfo/core/fin.js');
 const lib = require('../../skills/06-ai-cfo/scripts/load-data.js')();

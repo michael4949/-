@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
-  var ACCENT = { pa: '#3D4F73', soft: '#E8ECF6', ink: '#26345A' };
+  var ACCENT = window.DGG.PALETTE.m11;
   var STEPS = ['connect', 'build', 'try', 'test', 'ship', 'iterate'];
   var TYPE_LABEL = { object: '业务对象', role: '角色', action: '动作', channel: '渠道', field: '字段', qty: '时限', time: '时限', stat: '统计', delta: '变更' };
   var RULES = ['G-01 对象按词典正向最长匹配打分，并列取先出现的', 'G-02 字段来自对象库，需求句里命中的可选字段一并加入，否定词移除', 'G-03 模板由对象决定，动作序列与模板签名的最长公共子序列作证据', 'G-04 渠道固定 微信扫码 H5 · PC 后台', 'G-05 角色槽位按业态默认岗位填，句中角色词按其后的动作绑定槽位'];
