@@ -3,15 +3,22 @@ name: 企业AI成熟度评估
 id: ai-maturity
 kind: 计算
 credits: 20
-version: 2.1.0
+version: 2.2.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [AI成熟度, 成熟度评估, 数字化程度, 我们公司适合上AI吗, AI基础, 同行水平, 六维, AI诊断, 该从哪一步开始]
 inputs: [profile, answers]
+data_files: 9
+datasets: 4
+actions: 4
 llm_calls: 1
 llm_timeout_ms: 8000
 offline: true
+deterministic: true
 delivers: [chat, print, wechat]
 report_pages: 28
 brief_pages: 6
+universal: dus-1
 ---
 
 # 企业AI成熟度评估

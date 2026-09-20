@@ -9,7 +9,7 @@
   else { root.DGG = root.DGG || {}; root.DGG.coreM8 = factory(); }
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var VERSION = '1.0.0', MODULE_NAME = 'AI流程提效', CREDITS = 50;
+  var VERSION = '1.1.0', MODULE_NAME = 'AI流程提效', CREDITS = 50;
   var EXC_STATUS = { open: '待处置', doing: '处置中', closed: '已关闭' };
   var LEDGER_KIND = { setup: '换型', wait: '等待', rework: '返工', down: '停机', ot: '加班', release: '投料', support: '支援' };
 

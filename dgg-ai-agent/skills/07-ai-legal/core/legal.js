@@ -12,7 +12,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var MODULE_NAME = 'AI法务';
   var CREDITS = 30;
   var DAY = 86400000;

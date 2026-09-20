@@ -3,15 +3,22 @@ name: 企业AI高价值场景排序
 id: scene-ranking
 kind: 计算
 credits: 20
-version: 1.0.0
+version: 1.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [场景排序, 高价值场景, 先做哪个场景, 从哪开始, AI能干什么, 哪个场景最值, 优先级, 场景优先级排序台, 痛点]
 inputs: [profile, pains, conditions, weights]
+data_files: 17
+datasets: 4
+actions: 6
 llm_calls: 1
 llm_timeout_ms: 8000
 offline: true
+deterministic: true
 delivers: [chat, board, print, wechat]
 report_pages: 28
 brief_pages: 6
+universal: dus-1
 ---
 
 # 企业AI高价值场景排序

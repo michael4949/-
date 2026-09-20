@@ -3,14 +3,20 @@ name: AI ERP
 id: ai-erp
 kind: 产品
 credits: 100
-version: 1.0.0
+version: 1.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [ERP, 排产, 交期, 延期, 插单, 缺料, 齐套, 产能, 安全库存, 采购建议, 交付日报, 订单交付]
 inputs: [data]
 data_files: 5
+datasets: 4
+actions: 11
 llm_calls: 0
 offline: true
+deterministic: true
 delivers: [screen, wechat]
 report_pages: 0
+universal: dus-1
 ---
 
 # AI ERP · 订单交付指挥室

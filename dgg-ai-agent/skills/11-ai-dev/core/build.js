@@ -10,7 +10,7 @@
   else { root.DGG = root.DGG || {}; root.DGG.coreM11 = factory(); }
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  var VERSION = '1.0.0', MODULE_NAME = 'AI软件开发', CREDITS = 100;
+  var VERSION = '1.1.0', MODULE_NAME = 'AI软件开发', CREDITS = 100;
   var TODAY = '2026-09-17', CLOCK0 = 540, STEP_MIN = 15, QR_BASE = 'https://platform.dgg.cn';
   var IDS = { app: 'APP-001', req: 'XQ-001', spec: 'GG-001', report: 'JF-001' };
   var CHANNELS = { h5: '微信扫码 H5', pc: 'PC 后台' };

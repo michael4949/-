@@ -125,8 +125,8 @@ function buildManifest(m, fm, datasets, exCtx) {
   return {
     spec: 'dus-1',
     id: m.id,
-    name: m.moduleName || fm.name,
-    version: m.version,
+    name: fm.name || m.moduleName,
+    version: fm.version || m.version,      /* 版本以 SKILL.md 前言为准，内核 VERSION 与它一致（自检里会比对） */
     suite: SUITE,
     summary: m.summary,
     kind: fm.kind === '计算' ? 'compute' : 'product',

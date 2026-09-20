@@ -3,14 +3,20 @@ name: AI获客
 id: ai-lead
 kind: 产品
 credits: 30
-version: 1.0.0
+version: 1.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [获客, 客户画像, 话术, 脚本, 线索, 跟进, 询盘, 转化, 分派, 成交预测, 周报]
 inputs: [data]
-data_files: 4
+data_files: 7
+datasets: 3
+actions: 15
 llm_calls: 0
 offline: true
+deterministic: true
 delivers: [screen, wechat]
 report_pages: 0
+universal: dus-1
 ---
 
 # AI获客 · 画像 脚本 线索 一次出

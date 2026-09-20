@@ -19,7 +19,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '2.0.0';
+  var VERSION = '2.1.0';
   var MODULE_NAME = '企业AI投入ROI测算器';
   var CREDITS = 20;
   var LEVER_ORDER = ['hours', 'error', 'revenue', 'margin', 'cash', 'spend', 'output'];

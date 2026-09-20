@@ -3,16 +3,22 @@ name: 企业AI投入ROI测算器
 id: roi-calculator
 kind: 计算
 credits: 20
-version: 2.0.0
+version: 2.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [ROI, 投入产出, 多久回本, 回收期, 要花多少钱, 值不值得, 投入多少, 投资回报, 回本周期, 效益测算]
 inputs: [profile, scenes, plan]
 data_files: 6
+datasets: 4
+actions: 5
 llm_calls: 1
 llm_timeout_ms: 8000
 offline: true
+deterministic: true
 delivers: [chat, print, wechat]
 report_pages: 34
 brief_pages: 6
+universal: dus-1
 ---
 
 # 企业AI投入ROI测算器

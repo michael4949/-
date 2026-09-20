@@ -3,14 +3,20 @@ name: AI软件开发
 id: ai-dev
 kind: 产品
 credits: 100
-version: 1.0.0
+version: 1.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [软件开发, 一句需求, 生成应用, 报修单, 派单, 审批流, 巡检整改, 表单, 页面清单, 数据字典, 接口清单, 权限矩阵, 用例, 发布, 追加需求, 迭代交付]
 inputs: [data]
-data_files: 3
+data_files: 12
+datasets: 3
+actions: 16
 llm_calls: 0
 offline: true
+deterministic: true
 delivers: [screen, wechat]
 report_pages: 0
+universal: dus-1
 ---
 
 # AI软件开发 · 一句需求 规格 生成 试用 用例 发布 追加

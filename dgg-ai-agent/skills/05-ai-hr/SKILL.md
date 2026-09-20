@@ -3,14 +3,20 @@ name: AI人力官
 id: ai-hr
 kind: 产品
 credits: 30
-version: 1.0.0
+version: 1.1.0
+suite: 薯片AI智能体 2026.09
+updated: 2026-09-20
 triggers: [人力, 招聘, JD, 职位描述, 简历, 筛选, 面试, 录用, offer, 定薪, 用工合规, 劳动合同, 社保基数, 加班, 编制, 用工成本, 离职率, 人力月报]
 inputs: [data]
-data_files: 5
+data_files: 8
+datasets: 3
+actions: 16
 llm_calls: 0
 offline: true
+deterministic: true
 delivers: [screen, wechat]
 report_pages: 0
+universal: dus-1
 ---
 
 # AI人力官 · JD 简历 面试 合规 成本
