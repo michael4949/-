@@ -3476,5 +3476,2116 @@
       }
     ],
     "notes": "$data 默认取 data.samples.make（另有 service / flow）；$lib 由 load-data 固定注入。reconcile / risks / policies / kpi / report 的第二个形参要 statements 对象，无法只靠 JSON 输入拆参，故不单独暴露，结果统一由 run 返回（rows 内已含 drill 下钻表）。5 个 mutate 动作返回整份账套新副本，平台须回灌为下次调用的 $data。fmtN/fmtW/short/dateOf/monthLabel/evalExpr 为格式化与工具函数，未暴露。11 个动作已对三套样本实跑通过，仓库文件零改动（scripts/validate.js 714 项断言仍通过）。"
+  },
+  {
+    "id": "ai-legal",
+    "dir": "07-ai-legal",
+    "kernelPath": "core/legal.js",
+    "legacyGlobal": "DGG.coreM7",
+    "version": "1.0.0",
+    "moduleName": "AI法务",
+    "credits": 30,
+    "summary": "纯规则离线法务引擎：合同逐条审查、新设主体方案、知产到期与布局、90 天台账与月报。",
+    "dataFiles": 6,
+    "dataKeys": [
+      "contractRules",
+      "credits",
+      "industries",
+      "ipClasses",
+      "lintWords",
+      "samples",
+      "setupRules"
+    ],
+    "crossSkillDeps": [],
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造主样本 · 杭州锐合精密五金（12 份合同 / 子公司设立 / 9 项知产）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "service",
+        "label": "服务变体 · 成都启元财税服务（8 份合同）",
+        "source": "data.samples.service"
+      },
+      {
+        "key": "flow",
+        "label": "贸易变体 · 义乌恒益日用品（8 份合同）",
+        "source": "data.samples.flow"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "一次算全",
+        "description": "一次调用得到法务全量结果：合同逐份审查、新设主体方案、知产盘点、证照状态、90 天台账、KPI 与法务月报文本。驾驶舱与月报都读它。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "法务数据包（样本或上一步 mutate 动作返回的新副本）；内部自带 ensure，可直接吃原始样本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包，内核只读 contractRules / setupRules / ipClasses"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version,data,contracts,byId,setup,ip,licenses,register,kpi,report}，report.text 即法务月报",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"data\":{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"indust"
+      },
+      {
+        "name": "ensure",
+        "fn": "ensure",
+        "kind": "mutate",
+        "title": "初始化副本",
+        "description": "把原始数据包规整成可写的工作副本：补 renewList / applyList / log / setup、每份合同补 revisions、每条条款补 params。其它只读动作的前置。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "原始法务数据包（样本或外部接入数据）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "规整后的 data 新副本（深拷贝，不改原对象）",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "review-all",
+        "fn": "reviewAll",
+        "kind": "compute",
+        "title": "合同台账",
+        "description": "全部合同逐份审查并按风险分升序排序，给出类型 / 角色 / 金额 / 到期天数 / 风险分 / 等级 / 问题明细，供合同列表与风险榜使用。",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "必须是 ensure 后的副本，原始样本缺 revisions 会抛错"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "合同行数组，每行含 review{findings,score,level,counts}、findings、revisions",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"id\":\"HT-2609-021\",\"title\":\"不锈钢棒材采购合同\",\"type\":\"purchase\",\"typeName\":\"采购合同\",\"role\":\"buy\",\"roleName\":\"我方为买方\",\"party\":\"无锡不锈钢材料\",\"amount\":1860000,\"signed\":\"2026-0"
+      },
+      {
+        "name": "review-contract",
+        "fn": "reviewContract",
+        "kind": "compute",
+        "title": "单份审查",
+        "description": "下钻一份合同：查必备条款缺失、跑 27 条风险规则算式，给逐条问题、法律依据、修订建议与风险分（高中低各扣 20 / 10 / 4 分）。",
+        "args": [
+          {
+            "from": "contract",
+            "required": true,
+            "note": "一份合同对象，取自 ensure 后 data.contracts 的一条"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "contract",
+            "type": "object",
+            "required": true,
+            "description": "合同对象（含 id / type / role / clauses / revisions）"
+          }
+        ],
+        "returns": "{findings,score,level,counts{high,mid,low},revised}",
+        "mutates": false,
+        "exampleInput": {
+          "contract": {
+            "$dataset": "make",
+            "path": "contracts.1",
+            "ensure": true
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"findings\":[{\"id\":\"M-quality\",\"kind\":\"missing\",\"clauseNo\":null,\"clauseType\":\"quality\",\"clauseTitle\":\"质量标准\",\"severity\":\"high\",\"issue\":\"缺少「质量标准」条款，履行中最容易起争议的环节没有"
+      },
+      {
+        "name": "opinion",
+        "fn": "opinion",
+        "kind": "compute",
+        "title": "生成审查意见",
+        "description": "把一份合同的审查结果写成可发送的审查意见书文本：抬头、风险分、逐条问题与依据建议、签署结论。合同屏「审查意见 / 发微信」用它。",
+        "args": [
+          {
+            "from": "contract",
+            "required": true,
+            "note": "合同对象，取自 ensure 后 data.contracts 的一条"
+          },
+          {
+            "from": "review",
+            "required": true,
+            "note": "该合同的审查结果，来自 review-contract 或 run 返回的 byId[id].review"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "contract",
+            "type": "object",
+            "required": true,
+            "description": "合同对象"
+          },
+          {
+            "name": "review",
+            "type": "object",
+            "required": true,
+            "description": "审查结果 {findings,score,level,counts,revised}"
+          }
+        ],
+        "returns": "{lines,text}，text 为整篇审查意见",
+        "mutates": false,
+        "exampleInput": {
+          "contract": {
+            "$dataset": "make",
+            "path": "contracts.1",
+            "ensure": true
+          },
+          "review": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            },
+            "path": "byId.HT-2609-021.review"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"lines\":[\"【合同审查意见】HT-2609-021 不锈钢棒材采购合同\",\"相对方 无锡不锈钢材料 · 采购合同 · 我方为买方 · 金额 186 万元 · 期限 8-20 至 2-28\",\"风险分 40（高风险）· 高 2 · 中 2 · 低 0\",\"1. [高] 质量标准：缺少「质量标准」条款，履行中最容"
+      },
+      {
+        "name": "apply-fix",
+        "fn": "applyFix",
+        "kind": "mutate",
+        "title": "采纳修订",
+        "description": "采纳某份合同的一处修订建议：按模板新增条款或替换条款正文与参数（保留修订前文），写入 revisions 与处置日志，风险分随之重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "contractId",
+            "required": true,
+            "note": "合同编号，如 HT-2609-021"
+          },
+          {
+            "from": "findingId",
+            "required": true,
+            "note": "问题编号，来自 review-contract 的 findings[].id"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "contractId",
+            "type": "string",
+            "required": true,
+            "description": "合同 id"
+          },
+          {
+            "name": "findingId",
+            "type": "string",
+            "required": true,
+            "description": "问题 id，如 M-quality 或规则 id"
+          }
+        ],
+        "returns": "新的 data 副本（条款已改、revisions 与 log 各加一条）",
+        "mutates": true,
+        "exampleInput": {
+          "contractId": "HT-2609-021",
+          "findingId": "M-quality",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "equity",
+        "fn": "equity",
+        "kind": "compute",
+        "title": "股权控制线",
+        "description": "按股权结构算控制类型（绝对控制 / 相对控制 / 否决 / 僵局）与三条控制线是否达到，并给对应章程要点。可传任意假设股比做模拟。",
+        "args": [
+          {
+            "from": "shares",
+            "required": true,
+            "note": "股东数组 [{holder,pct,platform?}]，取自 data.setup.shares 或用户模拟输入"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包，读 setupRules.equity"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "shares",
+            "type": "array",
+            "required": true,
+            "description": "股东与持股比例数组"
+          }
+        ],
+        "returns": "{holders,top,second,control,deadlock,lines,charter,totalOk,total}",
+        "mutates": false,
+        "exampleInput": {
+          "shares": [
+            {
+              "holder": "杭州锐合精密五金有限公司",
+              "pct": 70
+            },
+            {
+              "holder": "华南业务团队持股平台",
+              "pct": 30,
+              "platform": true
+            }
+          ]
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"holders\":[{\"holder\":\"杭州锐合精密五金有限公司\",\"pct\":70},{\"holder\":\"华南业务团队持股平台\",\"pct\":30,\"platform\":true}],\"top\":0.7,\"second\":0.3,\"control\":\"绝对控制\",\"deadlock\":false,\"lines"
+      },
+      {
+        "name": "setup-plan",
+        "fn": "setupPlan",
+        "kind": "compute",
+        "title": "设立方案",
+        "description": "按主体类型串出设立流程时间线（名称申报到社保，许可并行）、材料清单、股权控制线、风险提示与预计费用。新设主体屏的主计算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含 setup 输入的数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包，读 setupRules"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{typeName,name,region,startDate,endDate,totalDays,steps,equity,risks,fees,materials,confirmed}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"type\":\"subsidiary\",\"typeName\":\"子公司（有限责任公司）\",\"typeDesc\":\"独立法人，母公司按出资比例承担有限责任\",\"name\":\"锐合精密五金（华南）有限公司\",\"region\":\"广东 · 东莞\",\"capital\":5000000,\"scope\":[\"精密五金件与冲压件销"
+      },
+      {
+        "name": "update-setup",
+        "fn": "updateSetup",
+        "kind": "mutate",
+        "title": "改设立输入",
+        "description": "改新设主体的输入项（主体类型、名称、地区、注册资本、股权、经营范围、许可、启动日），改完自动置为待确认，时间线与控制线按新副本重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "patch",
+            "required": true,
+            "note": "要覆盖到 data.setup 上的字段对象"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "patch",
+            "type": "object",
+            "required": true,
+            "description": "setup 的补丁字段，如 {type,name,region,capital,shares,licenses,startDate}"
+          }
+        ],
+        "returns": "新的 data 副本（setup 已更新，confirmed 置 false）",
+        "mutates": true,
+        "exampleInput": {
+          "patch": {
+            "type": "branch",
+            "name": "锐合精密五金东莞分公司",
+            "region": "广东 · 东莞"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "confirm-setup",
+        "fn": "confirmSetup",
+        "kind": "mutate",
+        "title": "确认设立方案",
+        "description": "确认新设主体方案：设立各节点进 90 天台账，并写一条处置日志。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的 data 副本（setup.confirmed=true，log 加一条）",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "ip-review",
+        "fn": "ipReview",
+        "kind": "compute",
+        "title": "知产盘点",
+        "description": "商标续展窗口与宽展、专利逐年年费、软著与域名到期，按行业算商标类别布局缺口与覆盖率，近似商标与侵权线索动作，续展 / 申请清单费用合计。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含 ip / profile / renewList / applyList 的数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包，读 ipClasses"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{assets,gaps,coverage,covered,similar,leads,counts,renewFee,applyFee,renewCount,applyCount}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"assets\":[{\"id\":\"ZL-04\",\"kind\":\"patent\",\"kindName\":\"实用新型\",\"title\":\"一种密封圈装配检测治具\",\"patentKind\":\"utility\",\"appDate\":\"2023-10-08\",\"grantDate\":\"2024-04-12\",\"expiry\""
+      },
+      {
+        "name": "toggle-renew",
+        "fn": "toggleRenew",
+        "kind": "mutate",
+        "title": "续展清单增删",
+        "description": "把一项知产资产加入或移出续展 / 缴费清单，加入时写一条处置日志，清单费用与月报随之重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "id",
+            "required": true,
+            "note": "资产编号，如 TM-01 / ZL-03 / DM-1，来自 ip-review 的 assets[].id"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "知产资产 id"
+          }
+        ],
+        "returns": "新的 data 副本（renewList 增删）",
+        "mutates": true,
+        "exampleInput": {
+          "id": "TM-01",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "toggle-apply",
+        "fn": "toggleApply",
+        "kind": "mutate",
+        "title": "申请清单增删",
+        "description": "把一个缺口商标类别加入或移出申请清单，加入时写一条处置日志，申请费用合计与月报随之重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "cls",
+            "required": true,
+            "note": "尼斯类别号两位字符串，来自 ip-review 的 gaps[].cls"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "cls",
+            "type": "string",
+            "required": true,
+            "description": "商标类别号，如 08"
+          }
+        ],
+        "returns": "新的 data 副本（applyList 增删）",
+        "mutates": true,
+        "exampleInput": {
+          "cls": "08",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "licenses",
+        "fn": "licenses",
+        "kind": "query",
+        "title": "证照状态",
+        "description": "逐项证照算剩余天数与状态（长期有效 / 有效 / 到期前 60 天提醒 / 已过期），驾驶舱证照卡与台账用它。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含 licenses 的数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包，读 ipClasses.rules.licenseAheadDays"
+          }
+        ],
+        "inputProps": [],
+        "returns": "证照数组，每项加 daysLeft / state / stateName",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"id\":\"ZZ-01\",\"name\":\"营业执照\",\"no\":\"9133********01\",\"issuer\":\"市场监督管理局\",\"expiry\":null,\"status\":\"长期\",\"daysLeft\":null,\"state\":\"ok\",\"stateName\":\"长期有效\"},{\"id\":\"ZZ-02\""
+      },
+      {
+        "name": "register",
+        "fn": "register",
+        "kind": "compute",
+        "title": "90 天台账",
+        "description": "把合同到期与履约节点、证照到期、商标续展 / 专利年费 / 域名续费、异议期截止、已确认的设立节点排进 13 周日历，给逾期与 30 天内清单。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本，提供 today / weekStart"
+          },
+          {
+            "from": "contracts",
+            "required": true,
+            "note": "合同行数组，来自 review-all 或 run 的 contracts"
+          },
+          {
+            "from": "setup",
+            "required": true,
+            "note": "设立方案，来自 setup-plan 或 run 的 setup"
+          },
+          {
+            "from": "ip",
+            "required": true,
+            "note": "知产盘点结果，来自 ip-review 或 run 的 ip"
+          },
+          {
+            "from": "licenses",
+            "required": true,
+            "note": "证照状态数组，来自 licenses 动作或 run 的 licenses"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "contracts",
+            "type": "array",
+            "required": true,
+            "description": "review-all / run.contracts 的返回"
+          },
+          {
+            "name": "setup",
+            "type": "object",
+            "required": true,
+            "description": "setup-plan / run.setup 的返回"
+          },
+          {
+            "name": "ip",
+            "type": "object",
+            "required": true,
+            "description": "ip-review / run.ip 的返回"
+          },
+          {
+            "name": "licenses",
+            "type": "array",
+            "required": true,
+            "description": "licenses / run.licenses 的返回"
+          }
+        ],
+        "returns": "{items,weeks(13 周),overdue,due30,counts{total,overdue,due30,contract,license,ip,setup}}",
+        "mutates": false,
+        "exampleInput": {
+          "contracts": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            },
+            "path": "contracts"
+          },
+          "setup": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            },
+            "path": "setup"
+          },
+          "ip": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            },
+            "path": "ip"
+          },
+          "licenses": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            },
+            "path": "licenses"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"items\":[{\"date\":\"2026-09-15\",\"kind\":\"milestone\",\"kindName\":\"履约节点\",\"title\":\"HT-2608-009 8 月对账单确认\",\"sub\":\"宁波钢材贸易\",\"tone\":\"late\",\"ref\":\"HT-2608-009\",\"daysLeft\":-"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 3",
+        "says": "数据文件 3 个",
+        "actual": "data/ 下实际 6 个 json：contract-rules.json、setup-rules.json、ip-classes.json + data/samples/{mfg,prof,trade}.json",
+        "fix": "改为 data_files: 6；若口径是「不含样本」，在前言或目录里写明"
+      },
+      {
+        "where": "SKILL.md 引擎表最后一行 `kpi / report`",
+        "says": "把 kpi、report 列为引擎 `core/legal.js` 的函数",
+        "actual": "内核 return 的导出表里没有 kpi / report，它们是内部函数，只能通过 run 的返回值拿到 R.kpi / R.report",
+        "fix": "表中注明「内部函数，随 run 返回」，或在内核导出里补上 kpi / report"
+      },
+      {
+        "where": "SKILL.md 引擎表（第 22–32 行）",
+        "says": "只列了 run / reviewContract / applyFix / opinion / equity / setupPlan 等",
+        "actual": "内核还导出了 ensure 与 reviewAll，且 ensure 是 reviewAll / reviewContract 的硬前置——直接传原始样本会因 c.revisions 未定义抛错",
+        "fix": "补两行：ensure（规整为可写副本，其它只读函数的前置）、reviewAll（全部合同逐份审查并排序）"
+      },
+      {
+        "where": "SKILL.md 目录小节（第 44–52 行）",
+        "says": "目录只列了 core / data / schema / scripts / examples",
+        "actual": "scripts/load-data.js 还读 ../_shared/industries.json、credits.json、lint-words.json，装配出的数据包有 7 个键，而内核只用 contractRules / setupRules / ipClasses 三个键",
+        "fix": "目录补一行 _shared 依赖，并注明后三个键供原型 / 校验用，通用包可裁剪"
+      },
+      {
+        "where": "SKILL.md 第 30、38 行与目录对 data/ip-classes.json 的描述",
+        "says": "到期规则与官费、年费表都在 data/ip-classes.json",
+        "actual": "域名续费规则是硬编码在 core/legal.js 里的：提前 60 天提示、费用固定 120 元，ip-classes.json 的 rules / fees 中没有域名项",
+        "fix": "把 domainAheadDays / domainFee 移进 ip-classes.json，或在口径里写明域名是内核默认值"
+      },
+      {
+        "where": "SKILL.md 前言 inputs: [data]",
+        "says": "输入只有 data",
+        "actual": "内核所有主函数是 fn(data, lib) 两参，lib 是 load-data 装配的固定数据包（规则 + 样本），少了它无法调用",
+        "fix": "改为 inputs: [data, lib]，并注明 lib 由 scripts/load-data.js 装配"
+      }
+    ],
+    "notes": "invoke 层入口先对 $data 跑一次 ensure：run / applyFix / updateSetup / confirmSetup / toggleRenew / toggleApply 内部已 ensure，但 reviewAll / reviewContract 吃原始样本会因缺 revisions 抛错。mutate 动作返回新 data 副本，平台写回会话状态后再调 run 重算。内核只用 lib 的 contractRules / setupRules / ipClasses 三键。exampleInput 中以 $ 开头的值是指针（预置样本或 run 的返回），不是字面量。"
+  },
+  {
+    "id": "ai-process",
+    "dir": "08-ai-process",
+    "kernelPath": "core/flow.js",
+    "legacyGlobal": "DGG.coreM8",
+    "version": "1.0.0",
+    "moduleName": "AI流程提效",
+    "credits": 50,
+    "summary": "按约束理论做工序流诊断与提效：识别约束、挖尽、迁就、提升、核验，全程纯规则无LLM。",
+    "dataFiles": 6,
+    "dataKeys": [
+      "credits",
+      "erpSamples",
+      "improveLib",
+      "industries",
+      "lintWords",
+      "rules",
+      "samples",
+      "vocab"
+    ],
+    "crossSkillDeps": [
+      "10-ai-erp"
+    ],
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造业样本（data/samples/mfg.json · 杭州锐合精密五金）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "flow",
+        "label": "仓配业样本（data/samples/trade.json · 宁波优选百货供应链）",
+        "source": "data.samples.flow"
+      },
+      {
+        "key": "service",
+        "label": "服务业样本（data/samples/prof.json · 成都启元财税）",
+        "source": "data.samples.service"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "一次算全",
+        "description": "一次调用得到工序流提效的完整结果：约束线与7天在制曲线、分段卡、报工核验、异常、时间损失、标准工时校准、投料缓冲、换型合批、改善预演、派工、保养、增效账、提效周报与KPI。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 data.samples.<archetype>，后续用上一步动作返回的新副本）；内核内部会先 ensure 补默认字段"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，并且必须额外注入 lib.erp = 10-ai-erp/core/sim.js"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version,data,es,S,vocab,bottleneck,metrics,flow,verify,sequence,loss,calibration,buffer,skills,alerts,preview,committed,dispatch,maintenance,planHit,ledger,weekly,kpi,improveCards}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"kpi\":{\"period\":\"2026-09-14\",\"constraint\":\"CNC 车铣中心\",\"load7\":100,\"queueDays\":14,\"balanceRate\":60,\"wipDays\":0.8,\"wipUnits\":6000,\"effUtil\":63,\""
+      },
+      {
+        "name": "loss-waterfall",
+        "fn": "lossWaterfall",
+        "kind": "query",
+        "title": "时间损失瀑布",
+        "description": "对指定产线下钻时间损失：计划时间减换型、停机、四类等待、速度、返工等于有效时间，并给可用率、性能率、有效利用率、12周序列与可回收工时。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "lineId",
+            "required": true,
+            "note": "产线/作业区/小组 id，通常取 run 结果的 bottleneck.line.id"
+          },
+          {
+            "from": "scope",
+            "required": false,
+            "note": "'week' 按本周有效天数折算；其他值或缺省按今日（0.5 天）"
+          },
+          {
+            "from": "seqSaved",
+            "required": false,
+            "note": "换型合批每日可省工时，取 run 结果的 sequence.savedHPerDay；缺省则可回收里的换型项为 0"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "lineId",
+            "type": "string",
+            "required": true,
+            "description": "要下钻的产线 id，如 L4"
+          },
+          {
+            "name": "scope",
+            "type": "string",
+            "required": false,
+            "description": "week = 本周口径；缺省 = 今日口径"
+          },
+          {
+            "name": "seqSaved",
+            "type": "number",
+            "required": false,
+            "description": "换型合批每日可省工时（h/日）"
+          }
+        ],
+        "returns": "{line,scope,days,start,end,items[],availability,performance,effUtil,waitDist,weeklySeries,recoverable}",
+        "mutates": false,
+        "exampleInput": {
+          "lineId": "L4",
+          "scope": "week",
+          "seqSaved": 2.6,
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"line\":{\"id\":\"L4\",\"name\":\"CNC 车铣中心\"},\"scope\":\"week\",\"days\":3.5,\"start\":{\"label\":\"计划 加工时间\",\"value\":16},\"end\":{\"label\":\"有效切削\",\"value\":10.2},\"items\":[{\"id\":\"setup"
+      },
+      {
+        "name": "preview",
+        "fn": "preview",
+        "kind": "compute",
+        "title": "改善预演",
+        "description": "在 AI ERP 排程引擎上重算四张改善卡（A换型合批、B多能工支援开第二班、C错峰午休加首件前移、D约束线加班）与 A+B+C 组合，给基线对比、增量、费用与 AI 推荐方案。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp，卡 D 的费用要调 lib.erp.overtimeCost）"
+          },
+          {
+            "from": "keys",
+            "required": false,
+            "note": "要预演的卡 key 数组，如 ['A','D']；缺省或空数组则四张卡全算"
+          },
+          {
+            "from": "params",
+            "required": false,
+            "note": "调参对象 {setupMin,support,lunchH,otHours}，缺省用卡自带默认值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "keys",
+            "type": "array",
+            "required": false,
+            "description": "改善卡 key 子集，取值 A/B/C/D"
+          },
+          {
+            "name": "params",
+            "type": "object",
+            "required": false,
+            "description": "调参：setupMin 换型分钟、support 支援人数、lunchH 错峰午休小时、otHours 每日加班小时"
+          }
+        ],
+        "returns": "{base:{metrics,flowDays},cards[{key,name,params,milestones,result}],combo,recommended,seqSaved,firstPieceH}",
+        "mutates": false,
+        "exampleInput": {
+          "params": {
+            "setupMin": 20,
+            "support": 2,
+            "lunchH": 0.5,
+            "otHours": 3
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"recommended\":\"B\",\"base\":{\"metrics\":{\"load\":100,\"queueDays\":14,\"weeklyUnits\":61082,\"lineUnits\":33882,\"flowIndex\":10.67,\"otHours\":0,\"spareLoad\":100,\"wipTomorrow"
+      },
+      {
+        "name": "sequence-jobs",
+        "fn": "sequenceJobs",
+        "kind": "compute",
+        "title": "换型合批模拟",
+        "description": "按工装与程序相似度枚举今日批次全排列（批次数不超过 9），交期不超过 1 天的批次锁在前半段，给出换型次数、分钟数与每日可省工时的前后对比顺序表。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "setupMin",
+            "required": false,
+            "note": "停机换型分钟，用于按 setupMin/setupMatrix.diffFixture 折算换型系数；缺省按样本原始换型矩阵"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "setupMin",
+            "type": "number",
+            "required": false,
+            "description": "可调的换型时间（分钟）"
+          }
+        ],
+        "returns": "{before:{seq,changeovers,minutes},after:{seq,changeovers,minutes,rows[]},savedMin,savedHPerDay,savedHPerWeek,factor,setupMin,dueOk}",
+        "mutates": false,
+        "exampleInput": {
+          "setupMin": 20,
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"before\":{\"seq\":[\"B-0917-01\",\"B-0917-02\",\"B-0917-03\",\"B-0917-04\",\"B-0917-05\",\"B-0917-06\",\"B-0917-07\",\"B-0917-08\"],\"changeovers\":7,\"minutes\":122},\"after\":{\"seq\""
+      },
+      {
+        "name": "confirm-report",
+        "fn": "confirmReport",
+        "kind": "mutate",
+        "title": "确认单条报工",
+        "description": "按核验建议值确认一条报工核验记录，只标记不改数，写 verified 与操作日志，返回新的数据副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "rowId",
+            "required": true,
+            "note": "核验行 id（run 结果 verify.rows[].id，形如 V-xxx），不是报工单号"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "rowId",
+            "type": "string",
+            "required": true,
+            "description": "待确认的核验行 id，如 V-MISS-0916A"
+          }
+        ],
+        "returns": "新的 data 副本；verified[rowId]=true，log 追加一条 kind=verify 记录",
+        "mutates": true,
+        "exampleInput": {
+          "rowId": "V-MISS-0916A",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":1,\"kind\":\"verify\",\"label\":\"确认报工\",\"detail\":\"漏报 · V-MISS-0916A · 按批次 SO-2609-0151 补录 6,622 件 · 399 min\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "confirm-all-reports",
+        "fn": "confirmAllReports",
+        "kind": "mutate",
+        "title": "全部确认报工",
+        "description": "把本周所有未确认的报工核验记录一次性按建议值确认（原型进看板前的动作），写日志并返回新的数据副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的 data 副本；所有待核验行 verified=true，log 追加一条汇总记录",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":2,\"kind\":\"verify\",\"label\":\"核验报工记录\",\"detail\":\"4 条已确认 · 工时偏离 / 数量守恒 / 时段重叠 / 重复报工\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "handle-exception",
+        "fn": "handleException",
+        "kind": "mutate",
+        "title": "处置异常",
+        "description": "处置一条异常预警：状态置 doing，命中的根因动作按 savedH 大于 0 记入增效账并写日志，返回新的数据副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "alertId",
+            "required": true,
+            "note": "run 结果 alerts[].id（如 EX-0917-02）或 alerts[].key 均可"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "alertId",
+            "type": "string",
+            "required": true,
+            "description": "异常 id 或 key，如 EX-0917-02"
+          }
+        ],
+        "returns": "新的 data 副本；exceptions[key]='doing'，savedH>0 时 ledger 追加一笔",
+        "mutates": true,
+        "exampleInput": {
+          "alertId": "EX-0917-02",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":3,\"kind\":\"exception\",\"label\":\"处置异常 EX-0917-02\",\"detail\":\"单批等待超时 · 前道派工不足 · 前道补派 1 人至该批完成 · 班组长\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "adopt-std",
+        "fn": "adoptStd",
+        "kind": "mutate",
+        "title": "采纳标准工时",
+        "description": "采纳某产品某工序的标准工时建议值（仅对 status=expired 且未采纳的行生效），写入本模块副本的路线并在后续 run 时重算排程。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "product",
+            "required": true,
+            "note": "run 结果 calibration[].product（产品 id，如 P04）"
+          },
+          {
+            "from": "op",
+            "required": true,
+            "note": "run 结果 calibration[].op（工序名，如 铣削）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "product",
+            "type": "string",
+            "required": true,
+            "description": "产品 id，如 P04"
+          },
+          {
+            "name": "op",
+            "type": "string",
+            "required": true,
+            "description": "工序名，如 铣削"
+          }
+        ],
+        "returns": "新的 data 副本；adopted[product|op]=建议工时，log 追加一条 kind=std 记录",
+        "mutates": true,
+        "exampleInput": {
+          "product": "P04",
+          "op": "铣削",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":4,\"kind\":\"std\",\"label\":\"采纳标准工时\",\"detail\":\"铝合金外壳 AL-77 铣削 0.004 → 0.0047 h/件 · 工艺工程师复核\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "apply-release",
+        "fn": "applyRelease",
+        "kind": "mutate",
+        "title": "下发投料计划",
+        "description": "按约束线节拍下发明日投料计划：写入 releasePlan（允许投放量、暂缓批次、释放工时），释放工时进增效账，幂等（已下发则原样返回）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的 data 副本；releasePlan 已写入，freedHours>0 时 ledger 追加一笔 kind=release",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":5,\"kind\":\"release\",\"label\":\"投料计划下发\",\"detail\":\"下料线 09-18 计划 16 → 11.5 h · 暂缓 1 个批次 · 班组长\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "apply-sequence",
+        "fn": "applySequence",
+        "kind": "mutate",
+        "title": "下发合批顺序",
+        "description": "下发换型合批后的今日批次顺序：写入 jobSeq，按工作日把每日可省工时折成每周节省进增效账，幂等（已下发或无可省时只写日志）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "setupMin",
+            "required": false,
+            "note": "与 sequence-jobs 同一个换型分钟参数，需与预演时保持一致"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "setupMin",
+            "type": "number",
+            "required": false,
+            "description": "换型时间（分钟）"
+          }
+        ],
+        "returns": "新的 data 副本；jobSeq 已写入，ledger 追加一笔 kind=setup",
+        "mutates": true,
+        "exampleInput": {
+          "setupMin": 20,
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":6,\"kind\":\"sequence\",\"label\":\"AI 重排今日批次顺序\",\"detail\":\"CNC 车铣中心 换型 7 次 2 h → 2 次 0.9 h · 省 1.2 h/日\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "commit-project",
+        "fn": "commitProject",
+        "kind": "mutate",
+        "title": "改善立项",
+        "description": "把选中的改善卡立项：生成 IMP-年月-流水、按卡合并去重生成节点与负责人、写目标与预计指标，A/B/C 相关收益记入增效账。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "keys",
+            "required": true,
+            "note": "改善卡 key 数组，如 ['A','B','C']；内部会去重并排序，空数组直接返回原副本"
+          },
+          {
+            "from": "params",
+            "required": false,
+            "note": "与 preview 同形的调参对象，会存进项目 params"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "keys",
+            "type": "array",
+            "required": true,
+            "description": "立项的改善卡 key，取值 A/B/C/D"
+          },
+          {
+            "name": "params",
+            "type": "object",
+            "required": false,
+            "description": "调参：setupMin / support / lunchH / otHours"
+          }
+        ],
+        "returns": "新的 data 副本；projects 追加一个 {id,keys,name,owner,target,expected,baseline,milestones}",
+        "mutates": true,
+        "exampleInput": {
+          "keys": [
+            "A",
+            "B",
+            "C"
+          ],
+          "params": {
+            "setupMin": 20,
+            "support": 2,
+            "lunchH": 0.5
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":7,\"kind\":\"project\",\"label\":\"立项 IMP-2609-01\",\"detail\":\"换型合批 + 多能工支援开CNC 车铣中心 B第二班 + 错峰午休 + 首件检查前移 · 工艺工程师 · 目标 排队等待 ≤ 8 天 · 预计 15.2 → 3.6 天\",\"at\":\"2026-09"
+      },
+      {
+        "name": "set-milestone",
+        "fn": "setMilestone",
+        "kind": "mutate",
+        "title": "推进项目节点",
+        "description": "更新改善项目某个节点的状态，全部节点完成后项目自动转入 observing（观察中），写日志并返回新的数据副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "projectId",
+            "required": true,
+            "note": "项目 id，如 IMP-2609-01"
+          },
+          {
+            "from": "index",
+            "required": true,
+            "note": "节点在 project.milestones 中的下标，从 0 开始"
+          },
+          {
+            "from": "status",
+            "required": true,
+            "note": "节点状态，done 表示完成，其余值按更新处理"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "projectId",
+            "type": "string",
+            "required": true,
+            "description": "改善项目 id"
+          },
+          {
+            "name": "index",
+            "type": "number",
+            "required": true,
+            "description": "节点下标（0 起）"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "description": "节点状态，如 done / pending"
+          }
+        ],
+        "returns": "新的 data 副本；对应 milestone.status 更新，全完成时 project.status='observing'",
+        "mutates": true,
+        "exampleInput": {
+          "projectId": "IMP-2609-01",
+          "index": 0,
+          "status": "done",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":8,\"kind\":\"milestone\",\"label\":\"IMP-2609-01 节点完成\",\"detail\":\"多能工名单与派工单确认\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "add-training",
+        "fn": "addTraining",
+        "kind": "mutate",
+        "title": "加入带教",
+        "description": "把约束线单点工序上的一对带教关系加入本周：按技能矩阵匹配师徒，生成 TR-年月-流水，派工时该学员排为副手。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "trainee",
+            "required": true,
+            "note": "学员工号，取 run 结果 skills.pairs[].trainee（形如 E-040）"
+          },
+          {
+            "from": "op",
+            "required": true,
+            "note": "工序名，取同一条 pair 的 op"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "trainee",
+            "type": "string",
+            "required": true,
+            "description": "学员工号，如 E-040"
+          },
+          {
+            "name": "op",
+            "type": "string",
+            "required": true,
+            "description": "带教工序，如 铣削"
+          }
+        ],
+        "returns": "新的 data 副本；training 追加一条 {id,trainee,mentor,op,start}",
+        "mutates": true,
+        "exampleInput": {
+          "trainee": "E-040",
+          "op": "铣削",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":9,\"kind\":\"training\",\"label\":\"加入本周带教\",\"detail\":\"E-040 由 E-039 带教 铣削\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "apply-dispatch",
+        "fn": "applyDispatch",
+        "kind": "mutate",
+        "title": "下发明日派工",
+        "description": "下发明日派工单：两遍贪心排本线人员、跨线多能工支援与备用线第二班，加班减少量记入增效账，幂等（已下发则原样返回）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的 data 副本；dispatch={id,date,rows,support,otWeek}，otWeek.delta<0 时 ledger 追加 kind=ot",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":10,\"kind\":\"dispatch\",\"label\":\"派工单 DP-0918 已下发\",\"detail\":\"38 人 · 支援 3 人 · 未覆盖 0 · 班组长\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "schedule-maint",
+        "fn": "scheduleMaint",
+        "kind": "mutate",
+        "title": "排入保养窗口",
+        "description": "把一台到期设备排入避开约束线在制高峰的保养窗口（负荷最低日或休息日），按近两周高于12周均值的停机次数折算进增效账。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（含注入的 lib.erp）"
+          },
+          {
+            "from": "machineId",
+            "required": true,
+            "note": "设备 id，取 run 结果 maintenance[].machine 中 scheduled=false 且 window 不为空的那台"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "machineId",
+            "type": "string",
+            "required": true,
+            "description": "设备 id，如 PA-01"
+          }
+        ],
+        "returns": "新的 data 副本；maintenance 追加一条 {id,machine,line,date,d,minutes}，ledger 追加 kind=down",
+        "mutates": true,
+        "exampleInput": {
+          "machineId": "PA-01",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seq\":11,\"kind\":\"maint\",\"label\":\"设备保养 PA-01 已排入\",\"detail\":\"9-20（休息日） · 120 min · 设备员\",\"at\":\"2026-09-17\"}"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 3",
+        "says": "data_files: 3",
+        "actual": "data/ 下实际有 6 个 json：vocab.json、rules.json、improve-lib.json、samples/mfg.json、samples/trade.json、samples/prof.json",
+        "fix": "改为 data_files: 6（若只想计非样本配置文件，应改成 data_files: 3 + samples: 3 两个字段说明）"
+      },
+      {
+        "where": "SKILL.md 前言 inputs: [data]",
+        "says": "inputs: [data]",
+        "actual": "内核所有对外函数签名都是 (data, lib, ...)，lib 由 scripts/load-data.js 装配；且 load-data() 的返回值里没有 erp 键，必须由调用方另行注入 lib.erp = skills/10-ai-erp/core/sim.js，否则 run 立即抛 \"Cannot read properties of undefined (reading 'schedule')\"",
+        "fix": "前言补 inputs: [data, lib] 与一条 runtime_deps: [10-ai-erp/core/sim.js]，或把注入动作收进 load-data.js 本身"
+      },
+      {
+        "where": "SKILL.md 正文「引擎 core/flow.js」表格 verifyReports 行（第 27 行）",
+        "says": "报工核验六条规则只标记不改数：工时偏离、重复报工、漏报、数量守恒、时段重叠",
+        "fix": "改为「报工核验五条规则」，或补上缺失的第六条规则实现",
+        "actual": "verifyReports 实际只产出 5 类：dev 工时偏离、dup 重复报工、missing 漏报、conserve 数量守恒、overlap 时段重叠（实跑 counts = {missing:1,dev:1,conserve:1,overlap:1,dup:1}），文字自身也只列了 5 项"
+      },
+      {
+        "where": "SKILL.md 正文「引擎 core/flow.js」表格 run 行（第 24 行）",
+        "says": "run(data, lib) 一次算全：es、S、bottleneck、metrics、flow、verify、sequence、loss、calibration、buffer、skills、alerts、preview、committed、dispatch、maintenance、planHit、ledger、weekly、kpi、improveCards",
+        "actual": "实跑返回 24 个键，清单漏了 version、data、vocab 三项（R.data 是 ensure 后的数据副本，原型与 invoke 层都会用到）",
+        "fix": "在清单里补 version / data / vocab"
+      },
+      {
+        "where": "SKILL.md 正文「原型流程（六屏）」末句（第 61 行）",
+        "says": "进看板扣 50 积分，一次",
+        "actual": "内核只导出 CREDITS = 50 常量，扣分逻辑完全不在 core/flow.js 里（内核无任何计费代码），由原型外壳实现",
+        "fix": "把该句移到「原型流程」说明里并注明扣分由外壳负责，通用 invoke 层不实现计费；或在前言加 credits_by: shell"
+      }
+    ],
+    "notes": "生成器三点必须注意：1) $lib 不能只用 load-data() 的返回值，必须再注入 lib.erp = skills/10-ai-erp/core/sim.js，否则全部动作都抛错；2) 所有 mutate 动作都是「先 ensure 再返回新副本」，平台要把返回值整体写回会话状态作为下一次的 $data，链式调用已实跑验证（15 个动作按表顺序跑通）；3) apply-release / apply-sequence / apply-dispatch / schedule-maint / add-training 均幂等，重复调用原样返回；commit-project 不幂等，会新增项目。mutate 动作的 verifiedOutputDigest 取返回副本 log 数组最后一条（最能证明该动作生效），其余取返回值本身前 160 字。工具函数 fmtN/fmtH/short/addDays/fill/r1/t/words/V/roleName 及中间态 ensure/simOf/erpBase 未暴露为动作。"
+  },
+  {
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "query",
+        "title": "一次出全",
+        "description": "一次算全：31 节点指标树、默认归因（经营利润较上期）、决议台账、KPI 与决策月报文本，驾驶舱首屏与月报都取它",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（样本或上一步 mutate 返回的新副本），内核内部会先 ensure 补齐 approvals/decisions/log"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（metricTree/evidence/playbooks/approvalRules/samples/...）"
+          },
+          {
+            "from": "opts",
+            "required": false,
+            "note": "{ metric, basis }，缺省 { metric:'profit', basis:'prev' }，决定返回里 attribution 算哪个指标、比哪个基期"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "opts",
+            "type": "object",
+            "required": false,
+            "description": "可选：{ metric: 指标节点 id（attributable 六选一），basis: 'prev' | 'avg3' }"
+          }
+        ],
+        "returns": "{ version, data, tree, attribution, decisions, approvals, kpi, report{lines,text,todo} }",
+        "mutates": false,
+        "exampleInput": {
+          "opts": {
+            "metric": "profit",
+            "basis": "prev"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"data\":{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"202"
+      },
+      {
+        "name": "tree",
+        "fn": "tree",
+        "kind": "query",
+        "title": "指标树看板",
+        "description": "按 metric-tree.json 的公式逐月算全树，每节点给本期、上期、前三月均值、预算、偏差与红黄绿状态，并按 6 组归拢",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{ nodes:{31 个节点}, groups:[6 组], counts:{ok,watch,risk}, period, months }",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"nodes\":{\"profit\":{\"id\":\"profit\",\"name\":\"经营利润\",\"unit\":\"元\",\"kind\":\"sum\",\"group\":\"profit\",\"source\":\"m6\",\"sourceName\":\"AI CFO\",\"explain\":\"毛利减去销售、管理、研发与财务费用\",\"good"
+      },
+      {
+        "name": "attribute",
+        "fn": "attribute",
+        "kind": "query",
+        "title": "指标归因",
+        "description": "连环替代法把某指标的变动拆到叶子因子，各因子贡献之和等于变动（实跑校验残差 5e-11），含一次性项的叶子剔除后再判主因",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "metric",
+            "required": true,
+            "note": "要归因的指标节点 id，取 lib.metricTree.attributable：profit/grossProfit/rev/gm/opex/ccc"
+          },
+          {
+            "from": "basis",
+            "required": false,
+            "note": "基期：'prev' 上期（缺省）或 'avg3' 前三月均值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "metric",
+            "type": "string",
+            "required": true,
+            "description": "指标节点 id，建议限定在 profit / grossProfit / rev / gm / opex / ccc"
+          },
+          {
+            "name": "basis",
+            "type": "string",
+            "required": false,
+            "description": "'prev' 或 'avg3'，缺省 'prev'"
+          }
+        ],
+        "returns": "{ name, from/to/delta 及文本, groups, leaves, hurts, rootCause, check(残差), method }",
+        "mutates": false,
+        "exampleInput": {
+          "metric": "profit",
+          "basis": "prev",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"metric\":\"profit\",\"name\":\"经营利润\",\"unit\":\"元\",\"basis\":\"prev\",\"basisName\":\"较上期\",\"from\":268383,\"to\":211371,\"fromText\":\"26.8 万元\",\"toText\":\"21.1 万元\",\"delta\":-57012,\"d"
+      },
+      {
+        "name": "evidence",
+        "fn": "evidence",
+        "kind": "query",
+        "title": "证据卡",
+        "description": "把一个因子翻成证据卡：来自哪个模块、哪一屏、说明文本（占位符由 data.facts 填充），用于从归因跳回 AI CFO / AI ERP 等模块",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包，facts 用来填证据文案里的占位符"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "factor",
+            "required": true,
+            "note": "叶子因子 id，通常取 attribute 返回的 rootCause.id 或 hurts[i].id"
+          },
+          {
+            "from": "direction",
+            "required": false,
+            "note": "'+' 或 '-'，取 rootCause.direction；缺省回落到 '+' 再回落到 default 卡"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "factor",
+            "type": "string",
+            "required": true,
+            "description": "因子（叶子节点）id，如 orders / materialRatio / dso"
+          },
+          {
+            "name": "direction",
+            "type": "string",
+            "required": false,
+            "description": "因子变动方向 '+' 或 '-'"
+          }
+        ],
+        "returns": "证据卡数组 [{ module, moduleName, screen, title, detail, ref, factor }]",
+        "mutates": false,
+        "exampleInput": {
+          "factor": "orders",
+          "direction": "-",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"module\":\"m10\",\"moduleName\":\"AI ERP\",\"screen\":\"board\",\"title\":\"延期订单挤占出库\",\"detail\":\"延期 4 单，准时交付率 69%，部分订单出库推到下月\",\"ref\":\"AI ERP 指挥室\",\"factor\":\"出库订单\"},{\"module\":"
+      },
+      {
+        "name": "options",
+        "fn": "options",
+        "kind": "query",
+        "title": "取方案库",
+        "description": "按根因从方案库取两到三个可调参数的方案（叶子没有则沿指标树向上回退到父节点取），含参数定义、默认值、执行节点、责任人、投入与风险",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包，facts 用来填方案文案占位符"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "causeId",
+            "required": true,
+            "note": "根因节点 id；内核先用 playbookKey 回退找到有方案的祖先节点"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "causeId",
+            "type": "string",
+            "required": true,
+            "description": "根因节点 id，方案库覆盖 11 个根因：orders/avgOrder/materialRatio/laborRatio/overheadRatio/opex/dso/dio/onTimeRate/turnover/complianceExposure"
+          }
+        ],
+        "returns": "{ cause, causeName, playbook(实际命中的节点), options:[{key,name,desc,owner,invest,risk,leadMonths,params,defaults,milestones}] }",
+        "mutates": false,
+        "exampleInput": {
+          "causeId": "orders",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"cause\":\"orders\",\"causeName\":\"出库订单减少\",\"playbook\":\"orders\",\"options\":[{\"key\":\"A\",\"name\":\"线索池一键分派并按周跟进\",\"desc\":\"AI获客 的未分派与逾期线索本周清零，按等级节奏跟进\",\"owner\":\"销售总监\",\"tags\""
+      },
+      {
+        "name": "simulate",
+        "fn": "simulate",
+        "kind": "compute",
+        "title": "单方案预演",
+        "description": "把一个方案的参数作用在驱动节点上，按见效期与爬坡线性到位，预演 12 个月利润、毛利率、现金周期、准时率走势与净效益",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "causeId",
+            "required": true,
+            "note": "根因节点 id"
+          },
+          {
+            "from": "optionKey",
+            "required": true,
+            "note": "方案 key，取 options 返回里的 option.key，如 'A' / 'B'"
+          },
+          {
+            "from": "params",
+            "required": false,
+            "note": "参数覆盖对象，缺省用方案 defaults；键为 option.params[].key，如 { hires: 4 }"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "causeId",
+            "type": "string",
+            "required": true,
+            "description": "根因节点 id"
+          },
+          {
+            "name": "optionKey",
+            "type": "string",
+            "required": true,
+            "description": "方案 key"
+          },
+          {
+            "name": "params",
+            "type": "object",
+            "required": false,
+            "description": "参数覆盖，缺省取方案默认值；方案 key 不存在时内核返回 null"
+          }
+        ],
+        "returns": "{ option, params, labels(12 月), months, base, totals{netBenefit,cashDelta12,profitDelta12,riskFactor,score...}, summary }",
+        "mutates": false,
+        "exampleInput": {
+          "causeId": "orders",
+          "optionKey": "B",
+          "params": {
+            "hires": 4
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"cause\":\"orders\",\"causeName\":\"出库订单减少\",\"option\":{\"key\":\"B\",\"name\":\"解除交付瓶颈释放出库\",\"desc\":\"延期订单出库后订单数回补，与准时交付率方案联动\",\"owner\":\"生产负责人\",\"tags\":[\"capacity\"],\"invest\":120"
+      },
+      {
+        "name": "simulate-all",
+        "fn": "simulateAll",
+        "kind": "compute",
+        "title": "方案对比推荐",
+        "description": "同一根因下所有方案一起预演并横向对比，按 净效益 × 风险系数 最高者打上推荐标记，方案预演屏直接用它",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "causeId",
+            "required": true,
+            "note": "根因节点 id"
+          },
+          {
+            "from": "paramsByKey",
+            "required": false,
+            "note": "按方案 key 分组的参数覆盖，如 { A:{followPct:80}, B:{hires:2} }；缺省各方案取自身默认值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "causeId",
+            "type": "string",
+            "required": true,
+            "description": "根因节点 id"
+          },
+          {
+            "name": "paramsByKey",
+            "type": "object",
+            "required": false,
+            "description": "{ 方案key: 参数对象 }，注意是按方案分组，不是扁平参数"
+          }
+        ],
+        "returns": "{ cause, causeName, sims:[单方案预演结果，带 recommended 标记], recommended: 推荐方案 key }",
+        "mutates": false,
+        "exampleInput": {
+          "causeId": "orders",
+          "paramsByKey": {},
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"cause\":\"orders\",\"causeName\":\"出库订单减少\",\"sims\":[{\"cause\":\"orders\",\"causeName\":\"出库订单减少\",\"option\":{\"key\":\"A\",\"name\":\"线索池一键分派并按周跟进\",\"desc\":\"AI获客 的未分派与逾期线索本周清零，按等级节奏"
+      },
+      {
+        "name": "submit",
+        "fn": "submit",
+        "kind": "mutate",
+        "title": "发起审批",
+        "description": "按选定方案与参数生成审批单（编号 A-年月-流水），三位会签人按规则给同意 / 有条件同意 / 反对，写进数据副本的 approvals 与 log",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "当前经营数据包；内核 ensure 后深拷贝，不改原对象"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "causeId",
+            "required": true,
+            "note": "根因节点 id"
+          },
+          {
+            "from": "optionKey",
+            "required": true,
+            "note": "方案 key，常取 simulate-all 返回的 recommended"
+          },
+          {
+            "from": "params",
+            "required": false,
+            "note": "参数覆盖，缺省取方案默认值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "causeId",
+            "type": "string",
+            "required": true,
+            "description": "根因节点 id"
+          },
+          {
+            "name": "optionKey",
+            "type": "string",
+            "required": true,
+            "description": "方案 key"
+          },
+          {
+            "name": "params",
+            "type": "object",
+            "required": false,
+            "description": "参数覆盖"
+          }
+        ],
+        "returns": "新的 data 副本；实跑生成 A-2609-01，三位会签均「同意」，净效益 34.4 万元，log 增一条",
+        "mutates": true,
+        "exampleInput": {
+          "causeId": "orders",
+          "optionKey": "B",
+          "params": {
+            "hires": 4
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      },
+      {
+        "name": "approve",
+        "fn": "approve",
+        "kind": "mutate",
+        "title": "批准成决议",
+        "description": "总经理终批：审批单置 approved 并形成决议（编号 D-年月-流水），执行节点按天数排期、跟踪目标取预演前 6 个月，进决议台账",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含待批审批单的数据副本（通常是 submit 的返回值）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "approvalId",
+            "required": true,
+            "note": "审批单编号，如 'A-2609-01'；非 pending 状态时内核原样返回"
+          },
+          {
+            "from": "comment",
+            "required": false,
+            "note": "批复意见文本"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "approvalId",
+            "type": "string",
+            "required": true,
+            "description": "审批单编号"
+          },
+          {
+            "name": "comment",
+            "type": "string",
+            "required": false,
+            "description": "总经理批复意见"
+          }
+        ],
+        "returns": "新的 data 副本；实跑生成决议 D-2609-01，责任人 生产负责人，4 个执行节点，跟踪指标 毛利率",
+        "mutates": true,
+        "exampleInput": {
+          "approvalId": "A-2609-01",
+          "comment": "同意，按方案执行",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      },
+      {
+        "name": "reject",
+        "fn": "reject",
+        "kind": "mutate",
+        "title": "驳回审批",
+        "description": "总经理驳回：审批单置 rejected、记下批复意见与日期，写进 log，不产生决议",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含待批审批单的数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包（本函数不读，但保持与 approve 同形参）"
+          },
+          {
+            "from": "approvalId",
+            "required": true,
+            "note": "审批单编号"
+          },
+          {
+            "from": "comment",
+            "required": false,
+            "note": "驳回理由"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "approvalId",
+            "type": "string",
+            "required": true,
+            "description": "审批单编号"
+          },
+          {
+            "name": "comment",
+            "type": "string",
+            "required": false,
+            "description": "驳回理由"
+          }
+        ],
+        "returns": "新的 data 副本；实跑 A-2609-01 置 rejected，decidedAt 2026-09-17，log 追加「驳回」",
+        "mutates": true,
+        "exampleInput": {
+          "approvalId": "A-2609-01",
+          "comment": "投入过大，本季度不批",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      },
+      {
+        "name": "set-milestone",
+        "fn": "setMilestone",
+        "kind": "mutate",
+        "title": "推进节点",
+        "description": "推进决议的执行节点状态；置 done 时自动把下一个 todo 拉成 doing，全部完成则决议置 done，并写 log。注意本函数不收 lib",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "含决议台账的数据副本"
+          },
+          {
+            "from": "decisionId",
+            "required": true,
+            "note": "决议编号，如 'D-2609-01'。第二个形参就是它，内核这里不传 lib"
+          },
+          {
+            "from": "index",
+            "required": true,
+            "note": "节点在 decision.milestones 里的下标，从 0 起"
+          },
+          {
+            "from": "status",
+            "required": true,
+            "note": "'todo' | 'doing' | 'done'"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "decisionId",
+            "type": "string",
+            "required": true,
+            "description": "决议编号"
+          },
+          {
+            "name": "index",
+            "type": "number",
+            "required": true,
+            "description": "执行节点下标（0 起）"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "description": "节点状态：todo / doing / done"
+          }
+        ],
+        "returns": "新的 data 副本；实跑 D-2609-01 首节点置 done，第二节点自动转 doing，log 增至 3 条",
+        "mutates": true,
+        "exampleInput": {
+          "decisionId": "D-2609-01",
+          "index": 0,
+          "status": "done",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      },
+      {
+        "name": "decisions",
+        "fn": "decisions",
+        "kind": "query",
+        "title": "决议台账",
+        "description": "决议台账视图：进度、下一节点、逾期节点、跟踪目标与实际的偏差、是否在轨、复盘结论",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（含 decisions）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包，用于取跟踪指标的名称与单位"
+          }
+        ],
+        "inputProps": [],
+        "returns": "决议数组 [{ id, title, statusName, progress, done/total, next, overdue, ageDays, tracking{target/actual/variance/onTrack}, review }]",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"id\":\"D-2609-01\",\"title\":\"解除交付瓶颈释放出库\",\"cause\":\"orders\",\"causeName\":\"出库订单减少\",\"option\":\"解除交付瓶颈释放出库\",\"owner\":\"生产负责人\",\"approvedAt\":\"2026-09-17\",\"status\":\"executin"
+      },
+      {
+        "name": "ensure",
+        "fn": "ensure",
+        "kind": "mutate",
+        "title": "数据接入",
+        "description": "接入屏用：深拷贝并补齐 approvals / decisions / log / milestones 等可选字段，得到后续所有写操作共用的数据副本",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "原始样本或外部传入的经营数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "规整后的 data 副本（原对象不被改动）；其余 query/compute 动作也可直接吃原始样本",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      }
+    ],
+    "credits": 100,
+    "crossSkillDeps": [],
+    "dataFiles": 7,
+    "dataKeys": [
+      "approvalRules",
+      "credits",
+      "evidence",
+      "industries",
+      "lintWords",
+      "metricTree",
+      "playbooks",
+      "samples"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造样本 · 杭州锐合精密五金（2026-08 账期，12 个月序列，3 条在执行决议）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "flow",
+        "label": "贸易样本 · 义乌恒益日用品（2026-08 账期，12 个月序列，2 条决议）",
+        "source": "data.samples.flow"
+      },
+      {
+        "key": "service",
+        "label": "服务样本 · 成都启元财税服务（2026-08 账期，12 个月序列，2 条决议）",
+        "source": "data.samples.service"
+      }
+    ],
+    "dir": "09-ai-decision",
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 4",
+        "says": "data_files: 4",
+        "actual": "data/ 下实际有 7 个 json：4 个规则库（metric-tree / evidence / playbooks / approval-rules）+ samples/ 下 3 套样本（mfg / trade / prof）",
+        "fix": "改为 data_files: 7，或补一句「不含 samples」并在前言另加 sample_files: 3；11 个 skill 统一口径"
+      },
+      {
+        "where": "SKILL.md 引擎表 `kpi / report` 行",
+        "says": "把 kpi / report 与 run、tree 等并列为引擎函数",
+        "actual": "kpi 与 report 是模块内私有函数，未出现在 core/decide.js 末尾的 return 导出表里，外部只能从 run() 返回值的 .kpi / .report 取",
+        "fix": "表格该行标注「由 run 返回，不单独导出」，或把 kpi / report 补进导出对象"
+      },
+      {
+        "where": "SKILL.md 引擎表 `run(data, lib)` 行",
+        "says": "run(data, lib)，两个参数",
+        "actual": "run(data, lib, opt)，opt = { metric, basis }，决定返回里 attribution 算哪个指标、比哪个基期（缺省 profit / prev）；原型 module-09.js 的 recompute() 正是靠第三参数切换归因",
+        "fix": "签名补成 run(data, lib, opt)，并说明 opt 的两个字段"
+      },
+      {
+        "where": "SKILL.md 引擎表 `setMilestone / decisions` 行",
+        "says": "与其它函数并列，未给形参",
+        "actual": "setMilestone(data, decisionId, index, status) —— 内核里唯一一个不接收 lib 的写操作，第二个形参直接是决议编号；decisions(data, lib) 则要 lib",
+        "fix": "显式写出两者形参，尤其点明 setMilestone 不传 lib，避免按惯例照抄 (d, lib, ...) 而错位"
+      },
+      {
+        "where": "SKILL.md 引擎表 `options / simulate / simulateAll` 行",
+        "says": "只写作用，未给形参",
+        "actual": "options(d, lib, causeId) / simulate(d, lib, causeId, optionKey, params) / simulateAll(d, lib, causeId, paramsByKey)；simulateAll 第四参是按方案 key 分组的 { A:{...}, B:{...} }，不是扁平参数对象",
+        "fix": "补齐三者形参，并强调 paramsByKey 的分组结构"
+      },
+      {
+        "where": "SKILL.md 引擎表 `submit / approve / reject` 行",
+        "says": "只写作用，未给形参",
+        "actual": "submit(d, lib, causeId, optionKey, params) 是五参（不是直接传方案对象）；approve(d, lib, approvalId, comment) / reject(d, lib, approvalId, comment)；三者都只对 status 为 pending 的单子生效，否则原样返回副本",
+        "fix": "补齐形参并注明 pending 前置条件"
+      },
+      {
+        "where": "SKILL.md 正文「归因」与「目录」段",
+        "says": "未提指标树里的 attributable 字段",
+        "actual": "data/metric-tree.json 有 attributable: [profit, grossProfit, rev, gm, opex, ccc]，attribute() 只对这 6 个节点有意义；原型在下钻时用它把非 attributable 节点回退到所属组的 root",
+        "fix": "在「归因」段写明可归因指标只有这 6 个，目录段的 metric-tree.json 说明里补上 attributable"
+      },
+      {
+        "where": "SKILL.md 目录段 `data/samples/*.json 三套样本`",
+        "says": "以文件名 mfg / trade / prof 指代三套样本",
+        "actual": "scripts/load-data.js 以 sample.archetype 为键装配：mfg.json→make、trade.json→flow、prof.json→service；examples/ 下的产物也叫 make/flow/service.output.json",
+        "fix": "注明「键名取 archetype：make / flow / service，与文件名不同」"
+      }
+    ],
+    "id": "ai-decision",
+    "kernelPath": "core/decide.js",
+    "legacyGlobal": "DGG.coreM9",
+    "moduleName": "AI决策",
+    "notes": "数据流是「一份副本贯穿」：submit → approve → set-milestone 依次把新副本传给下一步，平台必须把 mutate 返回值写回会话状态，否则编号（A-2609-01 / D-2609-01）会重复生成。setMilestone 是唯一不吃 lib 的函数，生成器别按惯例插 $lib。simulateAll 第四参按方案 key 分组。审批与决议编号来自 data.today，同一天重复 submit 会顺延流水。纯规则、离线、无 LLM 调用。",
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "summary": "老板经营决策台：31 节点指标树、连环替代法归因、方案 12 个月预演、三位会签与决议执行复盘",
+    "version": "1.0.0"
   }
 ]

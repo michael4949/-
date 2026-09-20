@@ -37,6 +37,25 @@ function copyDir(from, to) {
   return n;
 }
 
+/* ---------- 依赖内核探测：有的内核要把兄弟内核当参数（如 AI流程提效 用 AI ERP 排程引擎）
+ *            JSON 数据包装不下函数，所以要把那份内核也放进包里并在入口注入 ---------- */
+function kernelDeps(srcDir) {
+  const dir = path.join(srcDir, 'scripts');
+  if (!fs.existsSync(dir)) return [];
+  const re = /lib\.(\w+)\s*=\s*require\(path\.join\(__dirname,\s*'\.\.',\s*'\.\.',\s*'([0-9a-z-]+)',\s*'core',\s*'([a-z0-9.]+)'\)\)/g;
+  const seen = {}, out = [];
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.js'))) {
+    const src = R(path.join(dir, f));
+    let m;
+    while ((m = re.exec(src))) {
+      if (seen[m[1]]) continue;
+      seen[m[1]] = 1;
+      out.push({ key: m[1], fromDir: m[2], file: m[3] });
+    }
+  }
+  return out;
+}
+
 function frontmatter(md) {
   const m = md.match(/^---\n([\s\S]*?)\n---\n/);
   if (!m) return {};
@@ -60,6 +79,7 @@ function normalizeExample(v, ctx) {
   if (Array.isArray(v)) return v.map((x) => normalizeExample(x, ctx));
   if (v && typeof v === 'object') {
     const keys = Object.keys(v);
+    if (v.$action || v.$dataset || v.$file) return v;      // 结构化引用原样带进清单，跑用例时再展开
     if (keys.length === 1 && keys[0] === '$ref') {
       const ref = String(v.$ref).replace(/^\.?\//, '');
       const abs = ref.indexOf('skills/') === 0 ? path.join(ROOT, ref) : path.join(ctx.srcDir, ref);
@@ -147,7 +167,7 @@ function buildManifest(m, fm, datasets, exCtx) {
 }
 
 /* ---------- 单文件打包（内核 + 运行时 + 数据 内联） ---------- */
-function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets, format) {
+function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets, format, deps) {
   const body = [
     "  'use strict';",
     '  function _mod(fn) { var module = { exports: {} }; fn(module, module.exports); return module.exports; }',
@@ -163,6 +183,7 @@ function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets,
     '  var data = ' + JSON.stringify(data) + ';',
     '  var datasets = ' + JSON.stringify(datasets) + ';',
     '  var manifest = ' + JSON.stringify(manifest) + ';',
+    ...(deps || []).map((d, i) => '  data.' + d.key + ' = _mod(function (module, exports) {\n' + d.src + '\n  });'),
     '  var helpers = data.lintWords ? { lint: makeLint(data.lintWords).hit } : {};',
     '  return createSkill({ manifest: manifest, kernel: kernel, data: data, datasets: datasets, helpers: helpers });'
   ].join('\n');
@@ -339,7 +360,13 @@ const ID = '${id}';
     if (Array.isArray(v)) return v.map(resolveEx);
     if (v && typeof v === 'object') {
       const ks = Object.keys(v);
-      if (v.$action) { const env = cjs.invoke(v.$action, resolveEx(v.input || {})); if (!env.ok) throw new Error('示例前置动作失败 ' + v.$action + ' ' + JSON.stringify(env.errors)); return env.data; }
+      const pick = (o, p) => (p ? String(p).split('.').reduce((x, k) => (x == null ? x : x[k]), o) : o);
+      if (v.$action) { const env = cjs.invoke(v.$action, resolveEx(v.input || {})); if (!env.ok) throw new Error('示例前置动作失败 ' + v.$action + ' ' + JSON.stringify(env.errors)); return pick(env.data, v.path); }
+      if (v.$dataset) {
+        let base = JSON.parse(JSON.stringify(cjs.datasets[v.$dataset]));
+        if (v.ensure && cjs.kernel && typeof cjs.kernel.ensure === 'function') base = cjs.kernel.ensure(base, cjs.data);
+        return pick(base, v.path);
+      }
       if (ks.length === 1 && v.$file) return JSON.parse(fs.readFileSync(path.join(ROOT, v.$file), 'utf8'));
       const o = {}; ks.forEach((k) => { o[k] = resolveEx(v[k]); }); return o;
     }
@@ -371,7 +398,9 @@ const ID = '${id}';
     }
   }
   /* 产品类另查状态流转：run(dataset) → 改数据的动作 → 把新副本传回 run；并确认包内样本没被污染 */
-  const mut = cjs.manifest.actions.filter((a) => a.mutates && a.example && Object.keys(a.example).length)[0];
+  /* 只对「吃业务数据、吐新业务数据」的动作查状态流转；计算类的 merge-polish 改的是结果不是业务数据，不适用 */
+  const mut = cjs.manifest.actions.filter((a) => a.mutates && a.example && Object.keys(a.example).length
+    && (a.args || []).some((x) => String(x.from).indexOf('$data') === 0))[0];
   if (mut) {
     n++;
     try {
@@ -434,8 +463,19 @@ function build(m) {
   });
   WJ(path.join(out, 'bundle', 'datasets.json'), dsMap);
 
+  // 3.5 依赖内核（函数，JSON 装不下，入口与单文件都要注入）
+  const deps = kernelDeps(srcDir);
+  deps.forEach((d) => {
+    const from = path.join(SRC, d.fromDir, 'core', d.file);
+    d.dest = 'core/_deps/' + d.file;
+    W(path.join(out, d.dest), R(from));
+    d.src = R(from);
+  });
+
   // 4 清单
   const manifest = buildManifest(m, fm, datasets, { srcDir, out, datasets });
+  manifest.runtime.kernelDeps = deps.map((d) => ({ key: d.key, path: d.dest, from: 'skills/' + d.fromDir + '/core/' + d.file, note: '内核依赖的兄弟引擎，入口注入到数据包的 ' + d.key + ' 字段' }));
+  WJ(path.join(out, 'manifest.json'), manifest);
   WJ(path.join(out, 'manifest.json'), manifest);
 
   // 5 运行时 + 入口
@@ -451,6 +491,7 @@ function build(m) {
     "const datasets = require('./bundle/datasets.json');",
     "const manifest = require('./manifest.json');",
     "const makeLint = require('./shared/lint.js');",
+    ...deps.map((d) => "data." + d.key + " = require('./" + d.dest + "');   /* 依赖内核：JSON 数据包装不下函数，这里注入 */"),
     '/* 禁忌词判定函数：JSON 传不了函数，由入口注入（见 SPEC.md §5 $lint） */',
     'const helpers = data.lintWords ? { lint: makeLint(data.lintWords).hit } : {};',
     'const skill = createSkill({ manifest, kernel, data, datasets, helpers });',
@@ -463,8 +504,8 @@ function build(m) {
   const kernelSrc = R(path.join(srcDir, kernelRel));
   const lintSrc = R(path.join(SRC, '_shared', 'lint.js'));
   W(path.join(out, 'shared', 'lint.js'), lintSrc);
-  W(path.join(out, 'dist', m.id + '.umd.js'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'umd'));
-  W(path.join(out, 'dist', m.id + '.mjs'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'esm'));
+  W(path.join(out, 'dist', m.id + '.umd.js'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'umd', deps));
+  W(path.join(out, 'dist', m.id + '.mjs'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'esm', deps));
 
   // 7 适配器
   ['cli.js', 'http.js', 'mcp.js', 'aios.js'].forEach((f) => W(path.join(out, 'adapters', f), R(path.join(UNI, 'adapters', f))));
@@ -503,7 +544,7 @@ function build(m) {
   W(path.join(out, 'README.md'), readme(m, manifest, datasets));
 
   const files = (function count(d) { let n = 0; for (const e of fs.readdirSync(d, { withFileTypes: true })) n += e.isDirectory() ? count(path.join(d, e.name)) : 1; return n; })(out);
-  console.log('✔ ' + m.id.padEnd(15) + 'v' + manifest.version.padEnd(7) + manifest.actions.length + ' 动作 · ' + datasets.length + ' 数据集 · data ' + nData + ' 个 · 产出 ' + files + ' 个文件');
+  console.log('✔ ' + m.id.padEnd(15) + 'v' + manifest.version.padEnd(7) + manifest.actions.length + ' 动作 · ' + datasets.length + ' 数据集 · data ' + nData + ' 个 · 产出 ' + files + ' 个文件' + (deps.length ? ' · 依赖内核 ' + deps.map((d) => d.key).join('/') : ''));
   return { id: m.id, actions: manifest.actions.length, files };
 }
 

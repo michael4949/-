@@ -91,8 +91,12 @@
         else if (from === '$ctx') v = ctx || {};
         else if (from.indexOf('$helper:') === 0) v = helpers[from.slice(8)];
         else if (from === '$lint') v = (ctx && ctx.lint) || helpers.lint;
-        else if (from === '$data') {
+        else if (from === '$data' || from === '$data:ensure') {
           v = bag.business;
+          /* 有些内核的单个动作要求传 ensure 后的副本（run 内部会自己 ensure，单独调用时不会） */
+          if (v !== undefined && from === '$data:ensure' && typeof kernel.ensure === 'function') {
+            try { v = kernel.ensure(v, data); } catch (e) { return { error: fail(a.name, 'E_RUNTIME', '数据补全失败：' + (e && e.message ? e.message : String(e))) }; }
+          }
           if (v === undefined) return { error: fail(a.name, 'E_INPUT', '缺少业务数据：请传 data（上一步返回的副本），或传 dataset 指定预置数据集（可选 ' + datasetKeys().join(' / ') + '）', 'data') };
         } else if (from === '$input') {
           v = bag.payload();

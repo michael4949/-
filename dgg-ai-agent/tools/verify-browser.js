@@ -23,10 +23,16 @@ const registry = JSON.parse(fs.readFileSync(path.join(DIST, 'skills.json'), 'utf
 function resolveEx(skill, v) {
   if (Array.isArray(v)) return v.map((x) => resolveEx(skill, x));
   if (v && typeof v === 'object') {
+    const pick = (o, p) => (p ? String(p).split('.').reduce((x, k) => (x == null ? x : x[k]), o) : o);
     if (v.$action) {
       const env = skill.invoke(v.$action, resolveEx(skill, v.input || {}));
       if (!env.ok) throw new Error('前置动作失败 ' + v.$action);
-      return env.data;
+      return pick(env.data, v.path);
+    }
+    if (v.$dataset) {
+      let base = JSON.parse(JSON.stringify(skill.datasets[v.$dataset]));
+      if (v.ensure && skill.kernel && typeof skill.kernel.ensure === 'function') base = skill.kernel.ensure(base, skill.data);
+      return pick(base, v.path);
     }
     const ks = Object.keys(v);
     if (ks.length === 1 && v.$file) return JSON.parse(fs.readFileSync(path.join(DIST, skill.manifest.id, v.$file), 'utf8'));
