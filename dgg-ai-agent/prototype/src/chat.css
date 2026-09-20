@@ -1,0 +1,131 @@
+/* ==========================================================================
+   chat.css · 产品页常驻对话坞
+   在 product.css / theme-product.css 之后加载；用模块主色 --pa 系列，跟随各模块换色。
+   ========================================================================== */
+.pd-app.has-chat { grid-template-columns: 68px minmax(0, 1fr) auto; }
+
+.pd-chat {
+  --ch-w: 360px;
+  width: var(--ch-w); min-width: var(--ch-w);
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  background: #fff; border-left: 1px solid var(--pd-line); position: relative; min-height: 0;
+  transition: width .28s cubic-bezier(.2, .7, .3, 1), min-width .28s cubic-bezier(.2, .7, .3, 1);
+}
+.pd-chat.off { width: 54px; min-width: 54px; }
+.pd-chat.off .hd, .pd-chat.off .bd { display: none; }
+.pd-chat .tab { display: none; width: 40px; height: 40px; border-radius: 12px; margin: 10px auto; color: var(--pa); background: var(--pa-soft); place-items: center; }
+.pd-chat .tab svg { width: 22px; height: 22px; }
+.pd-chat.off .tab { display: grid; }
+
+/* 头 */
+.pd-chat .hd {
+  display: flex; align-items: center; gap: 9px; padding: 11px 14px; border-bottom: 1px solid var(--pd-line);
+  background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); color: var(--hdt, #fff);
+}
+.pd-chat .hd b { font-size: calc(14px * var(--scale)); font-weight: 700; letter-spacing: .4px; }
+.pd-chat .hd .sp { flex: 1; }
+.pd-chat .hd .live { width: 7px; height: 7px; border-radius: 50%; background: #5BE08F; box-shadow: 0 0 0 0 rgba(91, 224, 143, .7); animation: chLive 2.4s ease-out infinite; }
+@keyframes chLive { 0% { box-shadow: 0 0 0 0 rgba(91, 224, 143, .65); } 70% { box-shadow: 0 0 0 7px rgba(91, 224, 143, 0); } 100% { box-shadow: 0 0 0 0 rgba(91, 224, 143, 0); } }
+.pd-chat .hd .fold { width: 26px; height: 26px; border-radius: 8px; color: inherit; opacity: .8; display: grid; place-items: center; }
+.pd-chat .hd .fold:hover { background: rgba(255, 255, 255, .18); opacity: 1; }
+.pd-chat .hd .fold svg { width: 16px; height: 16px; }
+
+/* 体 */
+.pd-chat .bd { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-height: 0; }
+.pd-chat .ms { overflow: auto; padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 11px; scroll-behavior: smooth; }
+.pd-chat .m { display: flex; gap: 8px; align-items: flex-start; animation: chIn .34s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes chIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.pd-chat .m.me { justify-content: flex-end; }
+.pd-chat .m .av { width: 26px; height: 26px; border-radius: 9px; flex: 0 0 26px; display: grid; place-items: center; background: var(--pa-soft); color: var(--pa); margin-top: 1px; }
+.pd-chat .m .av svg { width: 15px; height: 15px; }
+.pd-chat .m .bb {
+  max-width: 82%; padding: 9px 12px; border-radius: 13px; font-size: calc(13px * var(--scale)); line-height: 1.68;
+  background: #F4F6FB; color: var(--pd-ink); border: 1px solid var(--pd-line); word-break: break-word;
+}
+.pd-chat .m.me .bb { background: var(--pa); color: var(--pa-on, #fff); border-color: transparent; }
+.pd-chat .m.me .bb b { color: inherit; }
+
+/* 思考中的三个点 */
+.pd-chat .dots { display: inline-flex; gap: 4px; padding: 2px 0; }
+.pd-chat .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--pd-mute); animation: chDot 1.1s ease-in-out infinite; }
+.pd-chat .dots i:nth-child(2) { animation-delay: .16s; }
+.pd-chat .dots i:nth-child(3) { animation-delay: .32s; }
+@keyframes chDot { 0%, 60%, 100% { opacity: .28; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+
+/* 逐字显示时的光标 */
+.pd-chat .tw::after { content: ''; display: inline-block; width: 2px; height: 1em; background: var(--pa); margin-left: 2px; vertical-align: -2px; animation: chCur .9s step-end infinite; }
+.pd-chat .m:last-child .tw::after { animation: chCur .9s step-end infinite; }
+@keyframes chCur { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+/* 气泡里的小组件 */
+.pd-chat .bb .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin-top: 8px; font-size: calc(12px * var(--scale)); }
+.pd-chat .bb .kv span:nth-child(odd) { color: var(--pd-sub); }
+.pd-chat .bb .kv span:nth-child(even) { font-weight: 700; text-align: right; }
+.pd-chat .bb .mini { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: calc(12px * var(--scale)); }
+.pd-chat .bb .mini th { text-align: left; color: var(--pd-sub); font-weight: 600; padding: 3px 6px 3px 0; border-bottom: 1px solid var(--pd-line); }
+.pd-chat .bb .mini td { padding: 4px 6px 4px 0; border-bottom: 1px solid var(--pd-line); }
+.pd-chat .bb .mini tr:last-child td { border-bottom: 0; }
+.pd-chat .bb .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.pd-chat .bb .tags span { padding: 2px 8px; border-radius: 999px; background: var(--pa-soft); color: var(--pa-ink); font-size: calc(11.5px * var(--scale)); font-weight: 600; }
+
+/* 文件卡 */
+.pd-chat .doc { display: flex; align-items: center; gap: 9px; min-width: 210px; position: relative; }
+.pd-chat .doc .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(255, 255, 255, .22); color: inherit; flex: 0 0 30px; }
+.pd-chat .doc .ic svg { width: 18px; height: 18px; }
+.pd-chat .doc .tt { min-width: 0; }
+.pd-chat .doc .tt b { display: block; font-size: calc(12.5px * var(--scale)); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px; }
+.pd-chat .doc .tt span { font-size: calc(11px * var(--scale)); opacity: .82; }
+.pd-chat .doc .bar { position: absolute; left: 0; right: 0; bottom: -6px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .28); overflow: hidden; }
+.pd-chat .doc .bar i { display: block; height: 100%; width: 30%; background: #fff; border-radius: 2px; animation: chScan 1.05s ease-in-out infinite; }
+@keyframes chScan { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+.pd-chat .doc.done .bar i { animation: none; width: 100%; transform: none; }
+
+/* 快捷问句 */
+.pd-chat .sug { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px 4px; }
+.pd-chat .sug button {
+  padding: 6px 11px; border-radius: 999px; border: 1px solid var(--pd-line); background: #fff;
+  color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 600; transition: all .16s;
+}
+.pd-chat .sug button:hover { border-color: var(--pa); color: var(--pa); background: var(--pa-soft); }
+
+/* 输入行 */
+.pd-chat .ip { display: flex; align-items: center; gap: 7px; padding: 10px 12px 12px; border-top: 1px solid var(--pd-line); }
+.pd-chat .ip .tx {
+  flex: 1; min-width: 0; height: 38px; border-radius: 11px; border: 1px solid var(--pd-line); background: #F7F9FD;
+  padding: 0 12px; font-size: calc(13px * var(--scale)); color: var(--pd-ink); transition: border-color .16s, background .16s;
+}
+.pd-chat .ip .tx:focus { outline: none; border-color: var(--pa); background: #fff; }
+.pd-chat .ip .tx::placeholder { color: var(--pd-mute); }
+.pd-chat .ip .clip, .pd-chat .ip .send { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: 0 0 36px; }
+.pd-chat .ip .clip { color: var(--pd-sub); border: 1px solid var(--pd-line); background: #fff; }
+.pd-chat .ip .clip:hover { color: var(--pa); border-color: var(--pa); background: var(--pa-soft); }
+.pd-chat .ip .send { color: var(--pa-on, #fff); background: var(--pa); }
+.pd-chat .ip .send:hover { filter: brightness(1.06); }
+.pd-chat .ip svg { width: 18px; height: 18px; }
+.pd-chat .hidden-file { display: none; }
+
+/* 对话点名页面里的元素时的高亮 */
+.chat-focus { animation: chFocus 2.4s ease-out 1; position: relative; z-index: 3; }
+@keyframes chFocus {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pa) 60%, transparent); background-color: color-mix(in srgb, var(--pa) 16%, transparent); }
+  60% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--pa) 0%, transparent); background-color: color-mix(in srgb, var(--pa) 8%, transparent); }
+  100% { box-shadow: none; background-color: transparent; }
+}
+
+/* 竖屏：对话坞改为底部抽屉 */
+@media (orientation: portrait) {
+  .pd-app.has-chat { grid-template-columns: 68px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .pd-app.has-chat .pd-nav { grid-row: 1 / span 2; }
+  .pd-chat {
+    width: auto; min-width: 0; grid-column: 2; grid-row: 2; height: 40vh;
+    border-left: 0; border-top: 1px solid var(--pd-line);
+    transition: height .28s cubic-bezier(.2, .7, .3, 1);
+  }
+  .pd-chat.off { width: auto; min-width: 0; height: 52px; }
+  .pd-chat.off .hd { display: flex; }
+  .pd-chat.off .tab { display: none; }
+  .pd-chat .hd .fold svg { transform: rotate(90deg); }
+  .pd-chat.off .hd .fold svg { transform: rotate(-90deg); }
+  .pd-chat .m .bb { max-width: 74%; }
+}
+@media print { .pd-chat { display: none !important; } }

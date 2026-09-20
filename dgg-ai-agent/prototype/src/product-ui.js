@@ -39,6 +39,8 @@
 
   /* ---------- 框架 ---------- */
   function frame(o) {
+    /* 换屏即收表：上一屏的动画句柄全部停掉，不留野定时器 */
+    if (window.DGG && window.DGG.anim && window.DGG.anim.stopAll) window.DGG.anim.stopAll();
     var a = o.accent || {};
     var root = h('div', { class: 'pd-app ' + (o.cls || ''), style: o.accent ? '--pa:' + a.pa + ';--pa-soft:' + a.soft + ';--pa-ink:' + a.ink + ';--pa2:' + (a.pa2 || a.pa) + ';--hd1:' + (a.hd1 || a.ink) + ';--hd2:' + (a.hd2 || a.pa) + ';--hdt:' + (a.hdt || '#fff') + ';--pa-on:' + (a.on || '#fff') : '' });
     var nav = h('nav', { class: 'pd-nav' }, [h('div', { class: 'mark' }, [o.mark || 'AI'])]);
@@ -65,7 +67,17 @@
     var work = h('div', { class: 'pd-work' });
     var body = h('div', { class: 'pd-body' }, [top, work]);
     root.appendChild(nav); root.appendChild(body);
-    return { root: root, work: work, body: body, tabs: tabEls };
+    /* 常驻对话坞：每一屏都能对话、都能上传文档 */
+    var chat = null;
+    if (o.chat && window.DGG && window.DGG.chat) {
+      root.classList.add('has-chat');
+      chat = window.DGG.chat.dock({
+        id: o.chat.id, name: o.chat.name || o.mark, step: o.chat.step,
+        work: function () { return work; }, onGo: o.chat.onGo
+      });
+      root.appendChild(chat);
+    }
+    return { root: root, work: work, body: body, tabs: tabEls, chat: chat };
   }
 
   /* ---------- 基础件 ---------- */

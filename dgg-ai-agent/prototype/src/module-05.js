@@ -52,7 +52,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '人力驾驶舱' }, { key: 'recruit', label: '招聘 · JD 与简历', badge: k.candidates ? R.candidates.filter(function (x) { return x.stage === 'new' && x.grade !== 'D'; }).length : 0 }, { key: 'interview', label: '面试与录用', badge: k.interviewing || 0 }, { key: 'compliance', label: '用工合规', badge: k.complianceOpen || 0 }, { key: 'cost', label: '成本与编制' }];
-    var F = P.frame({ mark: '人力', accent: ACCENT, modules: P.navModules('m5'), crumbs: ['AI人力官', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+    var F = P.frame({ mark: '人力', accent: ACCENT, modules: P.navModules('m5'), crumbs: ['AI人力官', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, chat: { id: 'm5', name: 'AI人力官', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, recruit: screenRecruit, interview: screenInterview, compliance: screenCompliance, cost: screenCost })[M.step](F.work);

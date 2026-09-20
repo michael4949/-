@@ -64,7 +64,8 @@
     var R = M.R, k = R.kpi, c = M.company, s = R.spec;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'build', label: '生成应用', badge: s ? k.pages : 0 }, { key: 'try', label: '试用', badge: s ? R.stats.open : 0 }, { key: 'test', label: '测试与产物', badge: s ? k.failed : 0 }, { key: 'ship', label: '发布', badge: s ? (R.checklist.total - R.checklist.passed) : 0 }, { key: 'iterate', label: '迭代交付', badge: s ? k.changes : 0 }];
-    var F = P.frame({ mark: '开发', accent: ACCENT, modules: P.navModules('m11'), crumbs: ['AI软件开发', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + (s ? s.title + ' ' + s.id : '一句需求变可点页面') }, tabs: tabs, active: M.step, onTab: function (key) { if (key !== 'connect' && !M.charged) { enterBuild(); if (key !== 'build') setStep(key); } else setStep(key); } });
+    var F = P.frame({ mark: '开发', accent: ACCENT, modules: P.navModules('m11'), crumbs: ['AI软件开发', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + (s ? s.title + ' ' + s.id : '一句需求变可点页面') }, tabs: tabs, active: M.step, chat: { id: 'm11', name: 'AI软件开发', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key !== 'connect' && !M.charged) { enterBuild(); if (key !== 'build') setStep(key); } else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step !== 'connect' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     if (s) { var row = F.root.querySelector('.pd-top .row'); if (row) row.appendChild(h('span', { class: 'm11-tags' }, [h('span', {}, [s.reqNo + ' ' + (s.status === 'confirmed' ? '已确认' : '已识别')]), h('span', {}, [s.specNo + ' ' + s.specVer]), h('span', { class: 'mute' }, [s.id + ' ' + s.version + (R.env === 'live' ? ' 正式' : ' 测试')])])); }

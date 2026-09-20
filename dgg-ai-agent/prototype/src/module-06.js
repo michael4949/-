@@ -61,7 +61,8 @@
     ];
     var F = P.frame({ mark: 'CFO', accent: ACCENT, modules: P.navModules('m6'),
       crumbs: ['AI CFO', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
-      tabs: tabs, active: M.step, onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+      tabs: tabs, active: M.step, chat: { id: 'm6', name: 'AI CFO', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, recon: screenRecon, risk: screenRisk, cash: screenCash, policy: screenPolicy })[M.step](F.work);

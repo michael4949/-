@@ -57,7 +57,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : (LIB.ipClasses.byIndustry[M.data.profile.industry] ? '' : '');
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '法务驾驶舱' }, { key: 'contracts', label: '合同审查', badge: k.highRisk || 0 }, { key: 'setup', label: '新设主体' }, { key: 'ip', label: '知识产权', badge: k.ipUrgent || 0 }, { key: 'register', label: '台账与提醒', badge: k.overdue || 0 }];
-    var F = P.frame({ mark: '法务', accent: ACCENT, modules: P.navModules('m7'), crumbs: ['AI法务', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+    var F = P.frame({ mark: '法务', accent: ACCENT, modules: P.navModules('m7'), crumbs: ['AI法务', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, chat: { id: 'm7', name: 'AI法务', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, contracts: screenContracts, setup: screenSetup, ip: screenIp, register: screenRegister })[M.step](F.work);

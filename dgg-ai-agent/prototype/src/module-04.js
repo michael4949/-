@@ -50,7 +50,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : M.data.prod;
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '获客驾驶舱' }, { key: 'profile', label: '客户画像' }, { key: 'script', label: '话术脚本' }, { key: 'leads', label: '线索池', badge: k.unassigned || 0 }, { key: 'plan', label: '跟进与周报', badge: k.overdue || 0 }];
-    var F = P.frame({ mark: '获客', accent: ACCENT, modules: P.navModules('m4'), crumbs: ['AI获客', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+    var F = P.frame({ mark: '获客', accent: ACCENT, modules: P.navModules('m4'), crumbs: ['AI获客', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, chat: { id: 'm4', name: 'AI获客', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, profile: screenProfile, script: screenScript, leads: screenLeads, plan: screenPlan })[M.step](F.work);

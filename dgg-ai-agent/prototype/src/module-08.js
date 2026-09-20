@@ -57,7 +57,8 @@
     var R = M.R, k = R.kpi, v = V(), c = M.company;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入', badge: k.reportsPending || 0 }, { key: 'board', label: v.flowName + '看板', badge: k.alertsOpen || 0 }, { key: 'diag', label: v.op + '诊断', badge: k.stdExpired || 0 }, { key: 'improve', label: '改善预演' }, { key: 'exec', label: '执行与' + v.dispatch.replace('单', ''), badge: k.maintDue || 0 }, { key: 'report', label: '提效周报' }];
-    var F = P.frame({ mark: '提效', accent: ACCENT, modules: P.navModules('m8'), crumbs: ['AI流程提效', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, onTab: function (key) { if (key !== 'connect' && !M.charged) enterBoard(); else setStep(key); } });
+    var F = P.frame({ mark: '提效', accent: ACCENT, modules: P.navModules('m8'), crumbs: ['AI流程提效', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, chat: { id: 'm8', name: 'AI流程提效', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key !== 'connect' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step !== 'connect' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     if (M.step !== 'connect' && M.step !== 'board') { var row = F.root.querySelector('.pd-top .row'); if (row) row.appendChild(h('span', { class: 'm8-counter' }, ['本周 AI 建议预计节省 ', h('b', { class: 'num' }, [String(k.savedH)]), ' h'])); }

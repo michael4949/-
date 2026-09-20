@@ -81,7 +81,8 @@
     ];
     var F = P.frame({ mark: 'ERP', accent: ACCENT, modules: P.navModules('m10'),
       crumbs: ['AI ERP', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
-      tabs: tabs, active: M.step, onTab: function (key) { if (key === 'room' && !M.charged) enterRoom(); else setStep(key); } });
+      tabs: tabs, active: M.step, chat: { id: 'm10', name: 'AI ERP', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'room' && !M.charged) enterRoom(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'room' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, room: screenRoom, order: screenOrder, insert: screenInsert, stock: screenStock, daily: screenDaily })[M.step](F.work);

@@ -53,7 +53,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '决策驾驶舱', badge: k.risk || 0 }, { key: 'attr', label: '指标归因' }, { key: 'options', label: '方案预演' }, { key: 'approval', label: '审批', badge: k.pending || 0 }, { key: 'execute', label: '执行与复盘', badge: k.overdueMilestones || 0 }];
-    var F = P.frame({ mark: '决策', accent: ACCENT, modules: P.navModules('m9'), crumbs: ['AI决策', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + M.data.period.replace('-', ' 年 ') + ' 月账期' }, tabs: tabs, active: M.step, onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+    var F = P.frame({ mark: '决策', accent: ACCENT, modules: P.navModules('m9'), crumbs: ['AI决策', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + M.data.period.replace('-', ' 年 ') + ' 月账期' }, tabs: tabs, active: M.step, chat: { id: 'm9', name: 'AI决策', step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, attr: screenAttr, options: screenOptions, approval: screenApproval, execute: screenExecute })[M.step](F.work);

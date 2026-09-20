@@ -1,0 +1,74 @@
+/* ==========================================================================
+   anim.css · 场景动画的公共类（配合 anim.js）
+   ========================================================================== */
+/* 数字滚动时用等宽数字，避免抖动 */
+.an-count { font-variant-numeric: tabular-nums; }
+
+/* 逐行流入 */
+.an-row-wait { opacity: 0; }
+.an-row-in { animation: anRowIn .52s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes anRowIn {
+  0% { opacity: 0; transform: translateX(-14px); background-color: color-mix(in srgb, var(--pa) 14%, transparent); }
+  60% { opacity: 1; transform: none; background-color: color-mix(in srgb, var(--pa) 10%, transparent); }
+  100% { opacity: 1; transform: none; background-color: transparent; }
+}
+
+/* 数据包 */
+.an-packet {
+  position: absolute; left: 0; top: 0; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--pa); pointer-events: none; z-index: 30;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pa) 22%, transparent), 0 0 14px 2px color-mix(in srgb, var(--pa) 55%, transparent);
+}
+.an-packet.lab {
+  width: auto; height: auto; border-radius: 999px; padding: 3px 10px; color: var(--pa-on, #fff);
+  font-size: calc(11.5px * var(--scale)); font-weight: 700; white-space: nowrap; box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--pa) 70%, transparent);
+}
+
+/* 聚焦脉冲 */
+.an-pulse { position: relative; z-index: 3; animation: anPulse 2.2s cubic-bezier(.2, .7, .3, 1) 1; border-radius: 10px; }
+@keyframes anPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pa) 55%, transparent); }
+  45% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--pa) 0%, transparent); }
+  55% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pa) 40%, transparent); }
+  100% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--pa) 0%, transparent); }
+}
+
+/* 打字光标 */
+.an-caret::after { content: ''; display: inline-block; width: 2px; height: 1em; background: var(--pa); margin-left: 2px; vertical-align: -2px; animation: anCaret .9s step-end infinite; }
+@keyframes anCaret { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+/* 扫描光带 */
+.an-scan { position: relative; overflow: hidden; }
+.an-scan::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: linear-gradient(100deg, transparent 38%, color-mix(in srgb, var(--pa) 26%, transparent) 50%, transparent 62%);
+  transform: translateX(-100%); animation: anScan 1.4s cubic-bezier(.3, .6, .3, 1) 1;
+}
+@keyframes anScan { to { transform: translateX(100%); } }
+
+/* 流动管线：给「接入 → 处理 → 产出」这类结构用 */
+.an-pipe { position: relative; overflow: hidden; }
+.an-pipe::before {
+  content: ''; position: absolute; left: 0; top: 50%; height: 2px; width: 100%; transform: translateY(-50%);
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--pa) 55%, transparent) 0 10px, transparent 10px 22px);
+  animation: anPipe 1.1s linear infinite; opacity: .8;
+}
+@keyframes anPipe { to { background-position: 22px 0; } }
+
+/* 呼吸中的实时点 */
+.an-live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--t-ok, #22A06B); animation: anLive 2.2s ease-out infinite; }
+@keyframes anLive {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--t-ok, #22A06B) 60%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* 结论横幅：动画结束后把一句话结论推上来 */
+.an-verdict { animation: anVerdict .6s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes anVerdict { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .an-row-wait { opacity: 1; }
+  .an-row-in, .an-scan::after, .an-pulse, .an-verdict, .an-pipe::before { animation: none !important; }
+}
+@media print { .an-packet { display: none !important; } }
