@@ -13,7 +13,7 @@
 | `universal/runtime/invoke.js` | 统一调用层，11 包共用同一份 | 规范升级时改 |
 | `universal/adapters/*.js` | cli / http / mcp / aios 四个适配器模板 | 接平台时改 `aios.js` |
 | `skills/_shared/docparse.js` | 共用件：离线文档解析（同步、ES5、自带解压与解码），8 个产品包各内联一份 | 解析能力迭代时改 |
-| `skills/<模块>/core/chat.js` | 各包的对话内核：`screens / brief / suggest / ask / ingestDocument`，纯规则、从内核结果里算真数据 | 业务迭代改这里 |
+| `skills/<模块>/core/chat.js` | 各包的对话内核：`screens / brief / suggest / ask / ingestDocument`，纯规则、从内核结果里算真数据（**待建**，8 个产品包各一份） | 业务迭代改这里 |
 | `tools/skills.map.json` | 11 个 skill 的动作映射表（动作名 → 内核函数 → 入参；1.1 起带 `on` / `family` / `mutatesPath`） | 加动作时改 |
 | `tools/build-universal.js` | 生成器：一条命令产出 11 个通用包 | 很少改 |
 | `dist-universal/<id>/` | **生成物**，交付给平台的东西（不进仓库，随时可重建） | 不手改 |
@@ -80,7 +80,7 @@ descriptors().forEach((d) => platform.load(d));
 
 两处最容易搞混的，规范里专门写了：
 
-- **两份 `SKILL.md` 不是一回事。** `skills/<模块>/SKILL.md` 是工程契约（手写，`name` 是中文展示名）；通用包里的 `SKILL.md` 是给 agent 平台读的说明书（生成物，`name` 是小写 kebab 的 id）。源文件会原样搬到包内 `references/skill-source.md`，信息一条不丢。见 §13.2。
+- **两份 `SKILL.md` 不是一回事。** `skills/<模块>/SKILL.md` 是工程契约（手写，`name` 是中文展示名）；通用包里的 `SKILL.md` 是给 agent 平台读的说明书（生成物，`name` 是小写 kebab 的 id）。源文件会原样搬到包内 `references/engineering.md`，信息一条不丢。见 §13.2。
 - **动作 `brief` 与前言字段 `brief_pages` 无关。** 前者是对话里的一句发现，后者是打印报告的速览页数。见 §10.7。
 
 ## 11 个包
@@ -112,9 +112,9 @@ descriptors().forEach((d) => platform.load(d));
 
 DUS-1.1 另加六项：
 
-- [ ] 老调用方回归：只认 `spec === 'dus-1'`、不认 `specVersion` 的调用方跑 `run` / `health`，结果与 1.0 完全一致
+- [ ] 老调用方回归：只认 `spec === 'dus-1'`、不认 `specVersion` 的调用方跑 `run` / `health`，**老字段一个不少、值不变**（信封会多出 `specVersion` 与 `meta.family` / `meta.mutatesPath`，这是 1.1 的「只增不改」，不是「逐字节不变」）
 - [ ] 现有 127 个动作的 golden 逐字节不变（1.1 只加动作，不改老动作）
 - [ ] 8 个产品包各 6 个新动作到位（`screens` / `brief` / `suggest` / `ask` / `parse-document` / `ingest-document`），动作合计 175
 - [ ] `suggest` 回灌 `ask`：每一条建议问句都答得上（无 `null`）
-- [ ] `parse-document` 对 `examples/docs/*.b64` 六种文件类型的 Doc 逐字节一致，且全程无网络、无异步
+- [ ] `parse-document` 对 `examples/docs/*.json`（`{name, base64}`）六种文件类型的 Doc 逐字节一致，且全程无网络、无异步
 - [ ] 七项跨平台产物齐全且与 `manifest.json` 对得上（§13.9）

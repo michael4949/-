@@ -52,8 +52,6 @@
     return cut(s, 12);
   }
   function soft(s) { return String(s || '').split('最容易').join('容易').split('最短').join('较短').split('最长').join('较长').split('最近').join('近期'); }
-  function softL(list) { return (list || []).map(soft); }
-  function pad2(n) { return String(+n).length < 2 ? '0' + (+n) : String(+n); }
 
   /* ---------- 动画件 ---------- */
   function cnt(to, o) {
@@ -72,13 +70,20 @@
   function grid() { return h('div', { class: 'pd-grid m7-g' }); }
   function nodes(scope, sel) { return scope ? Array.prototype.slice.call(scope.querySelectorAll(sel)) : []; }
   function trs(el) { return el ? Array.prototype.slice.call(el.querySelectorAll('tbody tr')) : []; }
+  /* 给行与卡片标上业务 id，内核的 {type:'focus'|'open', ref} 就能找到它 */
+  function tagRef(el, ref) { if (el && el.setAttribute) el.setAttribute('data-ref', ref); return el; }
+  function tagRefs(tbl, rows, textOf, refOf) {
+    trs(tbl).forEach(function (tr) {
+      var t = tr.textContent, i, s2;
+      for (i = 0; i < rows.length; i++) { s2 = textOf(rows[i]); if (s2 && t.indexOf(s2) >= 0) { tr.setAttribute('data-ref', refOf(rows[i])); return; } }
+    });
+  }
   function workEl() { return M.frame ? M.frame.work : null; }
   function rowOf(scope, txt) {
     var list = scope ? scope.querySelectorAll('.pd-table tbody tr, .pd-item, .m7-classes .cl, .m7-lines .ln') : [], i;
     for (i = 0; i < list.length; i++) if (list[i].textContent.indexOf(txt) >= 0) return list[i];
     return null;
   }
-  function refocus(txt, ms) { setTimeout(function () { var el = rowOf(workEl(), txt); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 90); }
 
   function flowBar(o) {
     var srcWrap = h('div', { class: 'src' }, o.src.map(function (s) { return h('div', { class: 's' }, [h('b', {}, [s[0]]), h('span', {}, [s[1] || ''])]); }));
@@ -158,7 +163,7 @@
 
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM7;
-    LIB = { contractRules: DATA.m7.contractRules, setupRules: DATA.m7.setupRules, ipClasses: DATA.m7.ipClasses };
+    LIB = { contractRules: DATA.m7.contractRules, setupRules: DATA.m7.setupRules, ipClasses: DATA.m7.ipClasses, industries: DATA.industries };
     P.init(sh);
     var c = sh.getCompany();
     if (!M.data) { M.company = c; M.name = c ? c.name : null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); }
@@ -307,6 +312,7 @@
       { key: 'level', label: '等级', render: function (c) { return levelChip(c.level); } },
       { key: 'findings', label: '问题', render: function (c) { return h('span', {}, [h('span', { class: c.review.counts.high ? 'neg' : '' }, ['高 ' + c.review.counts.high]), ' 中 ' + c.review.counts.mid]); } }
     ], rows: R.contracts.slice(0, 5), rowKey: function (c) { return c.id; }, onRow: function (c) { M.contract = c.id; M.filter = null; setStep('contracts'); } });
+    tagRefs(tbl, R.contracts, function (c) { return c.id; }, function (c) { return c.id; });
     var cTop = P.card({ cls: 'c7', title: '合同风险榜', sub: '5 份', tight: true, body: [tbl], extra: [P.btn('全部 ' + k.contracts + ' 份', { cls: 'sm', onClick: function () { M.filter = null; setStep('contracts'); } })] });
     g.appendChild(cTop);
     var todo = h('div', { class: 'pd-list' });
@@ -318,7 +324,7 @@
     var cW = P.card({ cls: 'c4', title: '90 天到期节奏', sub: reg.counts.total + ' 项', body: [wl, kindBars(reg.counts)] });
     g.appendChild(cW);
     var lic = h('div', { class: 'pd-list' });
-    R.licenses.slice().sort(function (a, b) { return (a.daysLeft == null ? 9999 : a.daysLeft) - (b.daysLeft == null ? 9999 : b.daysLeft); }).slice(0, 3).forEach(function (l) { lic.appendChild(P.item({ tone: l.state === 'ok' ? 'ok' : l.state === 'due' ? 'risk' : 'late', icon: '证', title: cut(l.name, 14), sub: l.issuer, right: l.expiry ? dsh(l.expiry) : '长期', rightSub: l.state === 'ok' ? (l.expiry ? l.daysLeft + ' 天' : '') : l.stateName, onClick: function () { openLicense(l); } })); });
+    R.licenses.slice().sort(function (a, b) { return (a.daysLeft == null ? 9999 : a.daysLeft) - (b.daysLeft == null ? 9999 : b.daysLeft); }).slice(0, 3).forEach(function (l) { lic.appendChild(tagRef(P.item({ tone: l.state === 'ok' ? 'ok' : l.state === 'due' ? 'risk' : 'late', icon: '证', title: cut(l.name, 14), sub: l.issuer, right: l.expiry ? dsh(l.expiry) : '长期', rightSub: l.state === 'ok' ? (l.expiry ? l.daysLeft + ' 天' : '') : l.stateName, onClick: function () { openLicense(l); } }), l.id)); });
     var cLic = P.card({ cls: 'c4', title: '证照', sub: k.licTotal + ' 项 · 待办 ' + k.licDue, body: [lic] });
     g.appendChild(cLic);
     var cSet = P.card({ cls: 'c4', title: '新设主体', sub: S.typeName.replace(/（.*/, ''), accent: true, body: [
@@ -368,6 +374,7 @@
       { key: 'level', label: '等级', render: function (c) { return levelChip(c.level); } },
       { key: 'endDays', label: '到期', align: 'r', sort: true, render: function (c) { return h('span', {}, [dsh(c.end), h('span', { class: 'sub' }, [c.endDays + ' 天'])]); } }
     ], rows: shown, sortKey: 'score', sortDir: 'asc', rowKey: function (c) { return c.id; }, activeKey: M.contract, onRow: function (c) { M.contract = c.id; draw(); } });
+    tagRefs(tbl, shown, function (c) { return c.id; }, function (c) { return c.id; });
     var hiAll = rows.reduce(function (t, c) { return t + c.review.counts.high; }, 0);
     var cList = P.card({ cls: 'c7', title: '合同台账', sub: shown.length + ' 份' + (f ? ' · 已筛选' : ''), tight: true,
       body: [h('div', { class: 'pd-scroll m7-tbl' }, [tbl])],
@@ -460,7 +467,7 @@
       var eq = S.equity, holders = h('div', { class: 'm7-holders' });
       eq.holders.forEach(function (x, i) { holders.appendChild(h('div', { class: 'hr' }, [h('span', { class: 'n' }, [cut(x.holder, 16), h('span', { class: 'sub' }, [i === 0 ? '控股股东' : x.platform ? '员工持股平台' : '其他股东'])]), P.bar(x.pct, i === 0 ? (eq.deadlock ? 'late' : 'ok') : x.pct >= E.equity.veto * 100 ? 'risk' : undefined, x.pct + '%')])); });
       var lines = h('div', { class: 'm7-lines' });
-      eq.lines.forEach(function (l) { lines.appendChild(h('div', { class: 'ln' + (l.met ? ' met' : '') }, [P.chip(l.met ? (l.key === 'veto' ? 'risk' : 'ok') : 'done', l.met ? '达到' : '未达'), h('span', { class: 'l' }, [l.label + ' · ' + l.pct + '%'])])); });
+      eq.lines.forEach(function (l) { lines.appendChild(h('div', { class: 'ln' + (l.met ? ' met' : ''), 'data-ref': 'EQ-' + l.key }, [P.chip(l.met ? (l.key === 'veto' ? 'risk' : 'ok') : 'done', l.met ? '达到' : '未达'), h('span', { class: 'l' }, [l.label + ' · ' + l.pct + '%'])])); });
       cEq = P.card({ title: '股权控制线', sub: eq.control + (eq.deadlock ? ' · 两方各半' : ''), body: [
         eq.deadlock ? P.judge({ verdict: { tone: 'late', chip: '僵局', text: soft(E.equity.notes.deadlock) } }) : null,
         h('div', { style: eq.deadlock ? 'margin-top:12px' : '' }, [holders]), lines
@@ -523,12 +530,13 @@
       { key: 'status', label: '状态', render: function (a) { return P.chip(a.status === '有效' ? 'ok' : a.status === '可续展' ? 'risk' : 'late', a.status); } },
       { key: 'listed', label: '清单', render: function (a) { return a.listed ? P.chip('handled', '已列入') : a.action ? P.btn(a.action + ' ' + fmtN(a.fee), { cls: 'sm', onClick: function (e) { e.stopPropagation(); commit(K.toggleRenew(d, a.id), a.title + ' 已加入清单'); } }) : ''; } }
     ], rows: I.assets, sortKey: 'daysLeft', sortDir: 'asc', rowKey: function (a) { return a.id; }, empty: '暂无知产资产' });
+    tagRefs(tbl, I.assets, function (a) { return ipT(a); }, function (a) { return a.id; });
     var cTbl = P.card({ title: '资产到期表', sub: I.counts.total + ' 项', tight: true, body: [h('div', { class: 'pd-scroll m7-tbl' }, [tbl])] });
     var have = {}; d.ip.trademarks.forEach(function (t) { t.classes.forEach(function (c) { have[c] = (have[c] || []).concat([t.name]); }); });
     var cls = h('div', { class: 'm7-classes' });
     map.core.concat(map.extend).forEach(function (c) {
       var tier = map.core.indexOf(c) >= 0 ? 'core' : 'extend', gap = I.gaps.filter(function (x) { return x.cls === c; })[0];
-      cls.appendChild(h('div', { class: 'cl ' + (have[c] ? 'have' : 'gap-' + tier) }, [
+      cls.appendChild(h('div', { class: 'cl ' + (have[c] ? 'have' : 'gap-' + tier), 'data-ref': 'CLS-' + c }, [
         h('span', { class: 'no' }, [c]), h('span', { class: 'nm' }, [(IC.classNames[c] || c), h('span', { class: 'sub' }, [tier === 'core' ? '核心' : '延伸'])]),
         have[c] ? P.chip('ok', have[c].length > 1 ? cut(have[c][0], 6) + ' +' + (have[c].length - 1) : cut(have[c][0], 7)) : gap && gap.listed ? P.chip('handled', '已列入') : P.btn('申请', { cls: 'sm', onClick: function () { commit(K.toggleApply(d, c), '第 ' + c + ' 类已加入申请清单，预计 ' + fmtN(gap.fee) + ' 元'); } })
       ]));
@@ -609,417 +617,155 @@
       rise: [cCal, cDue, cRep].concat(cells.slice(0, 12)).concat(items2), verdict: say, focus: items2[0] });
   }
 
-  /* ================= 对话大脑 ================= */
-  function mini(head, rows) {
-    var t = h('table', { class: 'mini' });
-    if (head) t.appendChild(h('thead', {}, [h('tr', {}, head.map(function (x) { return h('th', {}, [String(x)]); }))]));
-    var tb = h('tbody');
-    rows.forEach(function (r) { tb.appendChild(h('tr', {}, r.map(function (x) { return h('td', {}, [String(x)]); }))); });
-    t.appendChild(tb);
-    return t;
+  /* ================= 对话坞 · 内核大脑的落地 =================
+     问答、开场发现、快捷问句、文档摄入全部走 DGG.coreM7 的 screens / brief / suggest / ask / ingest
+     （与 skill 内核同一份实现）。这一段只做两件事：把当前上下文交出去，把内核返回的声明式动作落到页面上。 */
+  function refEl(ref) {
+    var w = workEl();
+    if (!w || ref == null) return null;
+    var el = w.querySelector('[data-ref="' + String(ref) + '"]');
+    if (el) return el;
+    if (String(ref).slice(0, 4) === 'CLS-') return rowOf(w, '第 ' + String(ref).slice(4) + ' 类');
+    var a = M.R.ip.assets.filter(function (x) { return x.id === ref; })[0];
+    return rowOf(w, a ? ipT(a) : String(ref));          /* 表头排序后重绘过的行，退回按文本找 */
   }
-  function kvb(pairs) { var g = h('div', { class: 'kv' }); pairs.forEach(function (p) { g.appendChild(h('span', {}, [String(p[0])])); g.appendChild(h('span', {}, [String(p[1])])); }); return g; }
-  function tagsb(list) { return h('div', { class: 'tags' }, list.map(function (t) { return h('span', {}, [String(t)]); })); }
-  function has(q, arr) { for (var i = 0; i < arr.length; i++) if (q.indexOf(arr[i]) >= 0) return true; return false; }
-
-  function opener(step) {
-    var R = M.R; if (!R) return null;
-    var k = R.kpi, d = M.data, reg = R.register, I = R.ip, S = R.setup;
-    if (step === 'connect') {
-      var dir = d.sources.filter(function (s) { return s.mode === 'direct'; }).length;
-      return d.sources.length + ' 个来源已接入（直连 ' + dir + ' 个）：合同 ' + k.contracts + ' 份、证照 ' + k.licTotal + ' 项、知产 ' + k.ipAssets + ' 项，其中高风险合同 ' + k.highRisk + ' 份。';
-    }
-    if (step === 'board') {
-      var t = topContract(), ls = licSoon();
-      return '合规分 ' + k.compliance + '；' + t.id + ' 风险分 ' + t.score + '，' + dsh(t.end) + ' 到期' + (ls && ls.daysLeft != null ? '；' + ls.name + ' ' + ls.stateName : '') + '。';
-    }
-    if (step === 'contracts') {
-      var C = curContract(), ms = missingOf(C);
-      return C.id + ' ' + C.party + '：风险分 ' + C.score + '，' + (ms.length ? '缺「' + ms.map(function (x) { return x.clauseTitle; }).join('」「') + '」' : C.findings.length + ' 处待改') + '，高 ' + C.review.counts.high + ' 中 ' + C.review.counts.mid + '。';
-    }
-    if (step === 'setup') {
-      var lic = (S.licenses || [])[0], ld = lic ? (LIB.setupRules.licenses[lic] || {}).days : 0;
-      return S.equity
-        ? '股权 ' + S.equity.holders.map(function (x) { return x.pct + '%'; }).join(' / ') + ' 落在' + S.equity.control + '；' + (ld ? lic + ' ' + ld + ' 天与登记并行，' : '') + '全程 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成。'
-        : S.typeName + ' ' + S.name + '：' + S.steps.length + ' 个节点 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成，预计费用 ' + fmtN(S.fees.total) + ' 元。';
-    }
-    if (step === 'ip') {
-      var u = urgentIp()[0], gp = coreGap();
-      return (u ? ipT(u) + ' ' + u.dueLabel + ' 还有 ' + u.daysLeft + ' 天，预计 ' + fmtN(u.fee) + ' 元' : '60 天内无续展与缴费') + '；商标覆盖 ' + I.coverage + '%，缺口 ' + I.counts.gaps + ' 类' + (gp ? '，第 ' + gp.cls + ' 类' + gp.name + '属' + (gp.tier === 'core' ? '核心' : '延伸') + '类' : '') + '。';
-    }
-    if (step === 'register') {
-      if (reg.counts.overdue) { var o = reg.overdue[0]; return o.kindName + '「' + o.title + '」逾期 ' + (-o.daysLeft) + ' 天；30 天内还有 ' + reg.counts.due30 + ' 项，其中证照 ' + reg.counts.license + ' 项。'; }
-      var nx = nextItem();
-      return nx ? '下一项 ' + short(nx.date) + ' ' + nx.title + '（' + nx.daysLeft + ' 天后）；90 天台账共 ' + reg.counts.total + ' 项。' : '90 天内无到期事项。';
-    }
-    return null;
-  }
-  function suggest(step) {
-    if (step === 'connect') return ['接了哪几个来源', '高风险合同有几份', '进法务驾驶舱'];
-    if (step === 'board') return ['哪份合同风险高', '合规分是怎么算的', '30 天内要办什么', '先处理哪一件'];
-    if (step === 'contracts') return ['缺哪些必备条款', '为什么判高风险', '采纳全部高风险修订', '账期超过 90 天的是哪份'];
-    if (step === 'setup') return ['为什么要 ' + (M.R ? M.R.setup.totalDays : 41) + ' 天', '股权够控股吗', '改成 51 / 49 会怎样', '要花多少钱'];
-    if (step === 'ip') return ['哪几项快到期', '缺口类别为什么要补', '近似商标怎么办', '把快到期的加入清单'];
-    if (step === 'register') return ['有没有逾期', '只看证照', '月报写了什么', '哪一周事项密集'];
-    return null;
-  }
-
-  function answer(q, step) {
-    if (!M.R) return null;
-    q = String(q || '');
-    var R = M.R, k = R.kpi, d = M.data, I = R.ip, S = R.setup, reg = R.register, w = workEl(), m, i;
-
-    /* 点名某份合同 */
-    m = q.match(/HT[-\s]?(\d{4})[-\s]?(\d{3})/i);
-    if (m) {
-      var cid = 'HT-' + m[1] + '-' + m[2];
-      var cc = R.byId[cid];
-      if (cc) return { text: cc.id + ' ' + cc.title + '（' + cc.party + ' · ' + cc.typeName + ' · ' + cc.roleName + '）：风险分 ' + cc.score + '，' + LV_NAME[cc.level] + '，高 ' + cc.review.counts.high + ' 中 ' + cc.review.counts.mid + ' 低 ' + cc.review.counts.low + '，' + dsh(cc.start) + ' 至 ' + dsh(cc.end) + '（' + cc.endDays + ' 天）。',
-        blocks: [mini(['等级', '条款', '问题'], cc.findings.slice(0, 4).map(function (f) { return [SEV_NAME[f.severity], cut(f.clauseTitle, 8), cut(soft(f.issue), 16)]; }))],
-        act: function () { M.contract = cid; M.filter = null; if (step === 'contracts') { draw(); refocus(cid); } else setStep('contracts'); } };
-    }
-    /* 点名某项知产 */
-    m = q.match(/(TM|ZL|RZ|DM)[-\s]?0?(\d{1,2})/i);
-    if (m) {
-      var pre = m[1].toUpperCase(), aid = pre + '-' + (pre === 'DM' ? String(+m[2]) : pad2(m[2]));
-      var aa = I.assets.filter(function (x) { return x.id === aid; })[0];
-      if (aa) return { text: aa.id + ' ' + aa.title + '（' + aa.kindName + '）：' + (aa.due ? aa.dueLabel + ' ' + aa.due + '，还有 ' + aa.daysLeft + ' 天' : aa.dueLabel) + '，状态' + aa.status + (aa.action ? '，动作' + aa.action + '，预计 ' + fmtN(aa.fee) + ' 元' : '') + '。',
-        act: aa.action ? function () { if (step !== 'ip') { setStep('ip'); return; } commit(K.toggleRenew(d, aa.id), aa.title + (aa.listed ? ' 已移出清单' : ' 已加入清单')); refocus(aipT(a), 260); }
-          : function () { if (step !== 'ip') setStep('ip'); else refocus(aipT(a)); } };
-    }
-    /* 点名某个商标类别 */
-    m = q.match(/第\s*(\d{1,2})\s*类/);
-    if (m) {
-      var cls = pad2(m[1]);
-      var gpx = I.gaps.filter(function (x) { return x.cls === cls; })[0];
-      var IC = LIB.ipClasses, mp = IC.byIndustry[d.profile.industry] || IC.byIndustry.default;
-      if (gpx) return { text: '第 ' + cls + ' 类' + gpx.name + '（' + (gpx.tier === 'core' ? '核心类' : '延伸类') + '）尚未注册：' + gpx.reason + '。申请预计 ' + fmtN(gpx.fee) + ' 元。',
-        act: function () { if (step !== 'ip') { setStep('ip'); return; } commit(K.toggleApply(d, cls), '第 ' + cls + ' 类' + (gpx.listed ? '已移出申请清单' : '已加入申请清单')); refocus('第 ' + cls + ' 类', 260); } };
-      var own = d.ip.trademarks.filter(function (t) { return t.classes.indexOf(cls) >= 0; });
-      if (own.length) return { text: '第 ' + cls + ' 类' + (IC.classNames[cls] || '') + '已注册：' + own.map(function (t) { return t.name + '（' + t.regNo + '，注册 ' + t.regDate + '）'; }).join('；') + '。',
-        focus: step === 'ip' ? rowOf(w, '第 ' + cls + ' 类') : null };
-      if (mp.core.concat(mp.extend).indexOf(cls) < 0) return { text: '第 ' + cls + ' 类不在本行业应覆盖的 ' + (mp.core.length + mp.extend.length) + ' 个类别里，核心类是第 ' + mp.core.join('、') + ' 类。' };
-    }
-    /* 点名某张证照 */
-    var lic = R.licenses.filter(function (l) { return q.indexOf(l.name) >= 0 || (l.name.length > 4 && q.indexOf(l.name.slice(0, 4)) >= 0); })[0];
-    if (lic) return { text: lic.name + '（' + lic.issuer + (lic.no ? ' · ' + lic.no : '') + '）：' + lic.stateName + (lic.expiry ? '，到期 ' + lic.expiry : '') + '。到期前 60 天启动换证，换证期间原证继续有效。',
-      act: function () { openLicense(lic); } };
-    /* 换屏 */
-    if (has(q, ['进法务驾驶舱', '驾驶舱', '开始审查', '开始分析'])) return { text: '合规分 ' + k.compliance + '，合同 ' + k.contracts + ' 份、高风险 ' + k.highRisk + ' 份，30 天内到期 ' + k.due30 + ' 项。',
-      act: function () { if (!M.charged) enterBoard(); else setStep('board'); } };
-
-    if (step === 'connect') {
-      if (has(q, ['来源', '直连', '接了', '同步', '导入', '几个'])) {
-        var dir = d.sources.filter(function (s) { return s.mode === 'direct'; });
-        return { text: '共 ' + d.sources.length + ' 个来源，系统直连 ' + dir.length + ' 个，其余表格导入，合计 ' + fmtN(d.sources.reduce(function (t, s) { return t + s.rows; }, 0)) + ' 条。',
-          blocks: [mini(['来源', '方式', '条数'], d.sources.map(function (s) { return [srcShort(s.name), s.mode === 'direct' ? '直连' : '导入', fmtN(s.rows)]; }))] };
-      }
-      if (has(q, ['高风险', '几份', '合同'])) return { text: '合同 ' + k.contracts + ' 份：高风险 ' + k.highRisk + ' 份、中风险 ' + k.midRisk + ' 份，待处理 ' + k.findingsOpen + ' 处，平均风险分 ' + k.avgScore + '。',
-        blocks: [mini(['合同', '相对方', '风险分'], R.contracts.slice(0, 4).map(function (c) { return [c.id, cut(c.party, 10), c.score]; }))],
-        act: function () { M.filter = 'high'; setStep('contracts'); } };
-      if (has(q, ['能力', '开通', '能做'])) return { text: '已开通 ' + CAPS.length + ' 项：' + CAPS.join('、') + '。' };
-      if (has(q, ['注册资本', '主体', '成立', '行业'])) return { text: d.company + '：' + sh.industryNameOf(d.profile.industry) + '，注册资本 ' + W(d.profile.capital) + (d.profile.province ? '，' + d.profile.province : '') + (d.profile.founded ? '，成立 ' + d.profile.founded.slice(0, 4) + ' 年' : '') + '。' };
-    }
-
-    if (step === 'board') {
-      if (has(q, ['合规分', '怎么算', '为什么低'])) return { text: '合规分 ' + k.compliance + ' = 合同平均风险分 ' + k.avgScore + ' × 40% + 证照有效率 ' + licOkPct() + '% × 30% + 商标布局覆盖 ' + k.coverage + '% × 30%。',
-        blocks: [kvb([['合同 40%', k.avgScore], ['证照 30%', licOkPct() + '%'], ['商标布局 30%', k.coverage + '%'], ['合规分', k.compliance]])] };
-      if (has(q, ['风险高', '哪份', '哪几份', '高风险'])) {
-        var hi = R.contracts.filter(function (c) { return c.level === 'high'; });
-        return { text: hi.length ? '高风险 ' + hi.length + ' 份：' + hi.map(function (c) { return c.id + ' ' + c.party + '（' + c.score + ' 分）'; }).join('；') + '。' : '当前无高风险合同，中风险 ' + k.midRisk + ' 份。',
-          blocks: [mini(['合同', '相对方', '风险分', '高'], hi.map(function (c) { return [c.id, cut(c.party, 10), c.score, c.review.counts.high]; }))],
-          act: function () { M.filter = 'high'; setStep('contracts'); } };
-      }
-      if (has(q, ['30 天', '待办', '要办', '到期'])) return { text: '30 天内 ' + reg.counts.due30 + ' 项' + (reg.counts.overdue ? '，另有逾期 ' + reg.counts.overdue + ' 项' : '') + '：合同与节点 ' + reg.counts.contract + '、证照 ' + reg.counts.license + '、知产 ' + reg.counts.ip + '。',
-        blocks: [mini(['日期', '事项', '剩余'], reg.overdue.concat(reg.due30).slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft < 0 ? '逾期 ' + (-it.daysLeft) : it.daysLeft + ' 天']; }))],
-        act: function () { M.regKind = null; setStep('register'); } };
-      if (has(q, ['先处理', '优先', '哪一件', '怎么办', '建议'])) {
-        var t0 = topContract(), u0 = urgentIp()[0], o0 = reg.overdue[0];
-        return { text: '先看三件：' + (o0 ? o0.title + ' 已逾期 ' + (-o0.daysLeft) + ' 天；' : '') + t0.id + ' 风险分 ' + t0.score + '，' + (missingOf(t0).length ? '缺 ' + missingOf(t0).length + ' 项必备条款' : t0.findings.length + ' 处待改') + '；' + (u0 ? ipT(u0) + ' ' + u0.dueLabel + ' 还有 ' + u0.daysLeft + ' 天' : '知产无近期到期') + '。',
-          act: function () { M.contract = t0.id; M.filter = null; setStep('contracts'); } };
-      }
-      if (has(q, ['证照', '换证'])) { var l0 = licSoon();
-        return { text: '证照 ' + k.licTotal + ' 项，待办 ' + k.licDue + ' 项' + (l0 ? '：' + l0.name + ' ' + l0.stateName + '（' + l0.issuer + '）' : '') + '。',
-          blocks: [mini(['证照', '发证机关', '到期'], R.licenses.map(function (l) { return [cut(l.name, 12), cut(l.issuer, 10), l.expiry ? short(l.expiry) : '长期']; }))],
-          act: l0 ? function () { openLicense(l0); } : null };
-      }
-      if (has(q, ['知产', '商标', '专利', '覆盖'])) return { text: '知产 ' + k.ipAssets + ' 项，待续展 / 缴费 ' + k.ipUrgent + ' 项；商标布局覆盖 ' + k.coverage + '%，缺口 ' + k.ipGaps + ' 类（核心类 ' + I.counts.coreGaps + '）。',
-        act: function () { setStep('ip'); } };
-    }
-
-    if (step === 'contracts') {
-      var C = curContract();
-      if (has(q, ['缺', '必备条款', '少了'])) {
-        var ms = missingOf(C);
-        return { text: ms.length ? C.id + ' 缺 ' + ms.length + ' 项必备条款：' + ms.map(function (x) { return '「' + x.clauseTitle + '」' + SEV_NAME[x.severity] + '风险'; }).join('、') + '。采纳后按模板新增，风险分随之重算。'
-          : C.id + ' 必备条款齐全，剩下 ' + C.findings.length + ' 处是条款内容的风险项。',
-          blocks: ms.length ? [mini(['条款', '等级', '处理'], ms.map(function (x) { return [x.clauseTitle, SEV_NAME[x.severity], x.fix ? '新增' : '人工核对']; }))] : null,
-          focus: rowOf(w, C.id) };
-      }
-      if (has(q, ['为什么', '凭什么', '依据', '判高', '判'])) {
-        var Wt = LIB.contractRules.weights, L = LIB.contractRules.levels;
-        return { text: C.id + ' 风险分 ' + C.score + '：满分 100，高风险每处扣 ' + Wt.high + '、中风险 ' + Wt.mid + '、低风险 ' + Wt.low + '；本份高 ' + C.review.counts.high + ' 中 ' + C.review.counts.mid + ' 低 ' + C.review.counts.low + '，扣 ' + (100 - C.score) + ' 分。低于 ' + L.mid + ' 判高风险。\n首要一处：' + C.findings[0].clauseTitle + '——' + soft(C.findings[0].issue) + '。依据：' + cut(soft(C.findings[0].basis), 46) + '。',
-          blocks: [mini(['等级', '处数', '扣分'], [['高', C.review.counts.high, C.review.counts.high * Wt.high], ['中', C.review.counts.mid, C.review.counts.mid * Wt.mid], ['低', C.review.counts.low, C.review.counts.low * Wt.low]])],
-          focus: rowOf(w, C.id) };
-      }
-      if (has(q, ['采纳', '改过来', '按建议', '修订'])) {
-        var hiAll = R.contracts.reduce(function (t, c) { return t + c.review.counts.high; }, 0);
-        if (has(q, ['全部', '所有', '高风险'])) {
-          if (!hiAll) return { text: '当前没有待采纳的高风险修订，已采纳 ' + k.revised + ' 处。' };
-          return { text: '采纳全部高风险修订 ' + hiAll + ' 处：按条款模板新增或改写，' + R.contracts.filter(function (c) { return c.review.counts.high; }).map(function (c) { return c.id; }).join('、') + ' 的风险分一起重算。',
-            act: function () { doAllHigh(); } };
-        }
-        var f0 = C.findings.filter(function (x) { return x.fix; })[0];
-        if (!f0) return { text: C.id + ' 没有可直接采纳的修订，剩下的要人工核对原件。' };
-        return { text: C.id + ' ' + (f0.fix.mode === 'insert' ? '新增' : '修订') + '「' + f0.fix.title + '」：' + cut(f0.fix.text, 52) + '。采纳后风险分重算。',
-          act: function () { commit(K.applyFix(d, C.id, f0.id, LIB), C.id + ' 已' + (f0.fix.mode === 'insert' ? '新增' : '修订') + '「' + f0.fix.title + '」'); refocus(C.id, 260); } };
-      }
-      if (has(q, ['账期', '90 天', '付款', '回款'])) {
-        var long = [];
-        R.contracts.forEach(function (c) { c.findings.forEach(function (f) { if (f.id === 'C01') long.push([c.id, cut(c.party, 10), f.issue.replace(/[^0-9]*(\d+).*/, '$1') + ' 天']); }); });
-        return { text: long.length ? '账期超过 90 天的有 ' + long.length + ' 份：' + long.map(function (x) { return x[0] + '（' + x[2] + '）'; }).join('、') + '，我方为供方时资金占用与坏账风险高。' : '没有账期超过 90 天的销售合同。',
-          blocks: long.length ? [mini(['合同', '相对方', '账期'], long)] : null };
-      }
-      if (has(q, ['金额', '多少钱', '合计'])) {
-        var tot = R.contracts.reduce(function (t, c) { return t + (c.amount || 0); }, 0);
-        return { text: '在册合同金额合计 ' + W(tot) + '，其中高风险 ' + W(R.contracts.filter(function (c) { return c.level === 'high'; }).reduce(function (t, c) { return t + (c.amount || 0); }, 0)) + '。',
-          blocks: [mini(['合同', '金额', '等级'], R.contracts.slice().sort(function (a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 4).map(function (c) { return [c.id, c.amount ? W(c.amount) : '—', LV_NAME[c.level]]; }))] };
-      }
-      if (has(q, ['意见', '发给', '微信'])) { var raw0 = d.contracts.filter(function (x) { return x.id === C.id; })[0];
-        return { text: softL(K.opinion(raw0, C.review, LIB).lines.slice(0, 4)).join('\n') };
-      }
-    }
-
-    if (step === 'setup') {
-      if (has(q, ['多少天', '为什么', '几天', '工期', '天数'])) {
-        var lp = S.steps.filter(function (x) { return x.kind === 'license'; });
-        return { text: '全程 ' + S.totalDays + ' 天：' + S.steps.length + ' 个节点，' + short(S.startDate) + ' 启动、' + short(S.endDate) + ' 完成' + (lp.length ? '；' + lp.map(function (x) { return x.title + ' ' + x.days + ' 天'; }).join('、') + '与登记并行办理' : '') + '。',
-          blocks: [mini(['节点', '天数'], S.steps.slice(0, 6).map(function (x) { return [x.order + '. ' + cut(x.title, 10), x.days + ' 天']; }))] };
-      }
-      if (has(q, ['51', '49', '改成', '换成', '60', '50 / 50'])) {
-        var pk = PRESETS.filter(function (p) { return q.indexOf(String(p[0])) >= 0 && q.indexOf(String(p[1])) >= 0; })[0] || [51, 49];
-        var nd = K.updateSetup(M.data, (function () { var sp = M.data.setup.shares || [{ holder: M.data.company, pct: 100 }]; var n2 = clone(sp); if (n2.length < 2) n2.push({ holder: '合作方', pct: 0 }); n2[0].pct = pk[0]; n2[1].pct = pk[1]; return { shares: n2 }; })());
-        var eq2 = K.run(nd, LIB).setup.equity;
-        return { text: '改成 ' + pk[0] + ' / ' + pk[1] + '：落在' + eq2.control + (eq2.deadlock ? '，两方各半形成僵局' : '') + '；' + eq2.lines.map(function (l) { return l.label + (l.met ? ' 达到' : ' 未达'); }).join('、') + '。已按这个比例重算。',
-          act: function () { setShares(pk); } };
-      }
-      if (has(q, ['控股', '控制', '够吗', '股权'])) {
-        if (!S.equity) return { text: S.typeName + '不设股权，由总公司全资，' + S.typeDesc + '。' };
-        return { text: '股权 ' + S.equity.holders.map(function (x) { return cut(x.holder, 10) + ' ' + x.pct + '%'; }).join(' / ')+ '：控股股东 ' + Math.round(S.equity.top * 100) + '%，落在' + S.equity.control + '。' + S.equity.lines.map(function (l) { return l.label + ' ' + l.pct + '% ' + (l.met ? '达到' : '未达'); }).join('；') + '。',
-          blocks: [mini(['控制线', '门槛', '判断'], S.equity.lines.map(function (l) { return [l.label.replace(/线.*/, '线'), l.pct + '%', l.met ? '达到' : '未达']; }))],
-          focus: rowOf(w, S.equity.lines[0].label) };
-      }
-      if (has(q, ['多少钱', '费用', '花'])) return { text: '预计费用 ' + fmtN(S.fees.total) + ' 元：刻章 ' + fmtN(S.fees.seal) + ' 元、代办 ' + fmtN(S.fees.agency) + ' 元。' + S.fees.note + '。' };
-      if (has(q, ['材料', '要交什么', '清单'])) return { text: '材料合计 ' + S.materials.length + ' 项，按节点分摊。',
-        blocks: [mini(['节点', '材料'], S.materials.slice(0, 6).map(function (x) { return [cut(x.step, 10), cut(x.item, 14)]; }))] };
-      if (has(q, ['许可', '排污', '经营范围'])) return { text: (S.licenses || []).length ? '涉及许可 ' + S.licenses.join('、') + '，约 ' + S.licenses.map(function (n) { return (LIB.setupRules.licenses[n] || {}).days; }).join(' / ') + ' 天，与登记并行；取得许可前不得开展相应业务。' : '当前方案不涉及前置或后置许可。' };
-      if (has(q, ['确认', '进台账'])) return { text: S.confirmed ? '方案已确认，' + S.steps.length + ' 个节点已进 90 天台账。' : '确认后 ' + S.steps.length + ' 个节点按日期进 90 天台账。',
-        act: S.confirmed ? null : function () { commit(K.confirmSetup(M.data, LIB), '方案已确认，' + S.steps.length + ' 个节点已进台账'); } };
-    }
-
-    if (step === 'ip') {
-      if (has(q, ['加入清单', '加进清单', '都加', '一起加'])) {
-        var pend = urgentIp().filter(function (a) { return !a.listed && a.action; });
-        if (!pend.length) return { text: '待续展 / 缴费的都已在清单里，预计 ' + fmtN(I.renewFee) + ' 元。' };
-        return { text: '把 ' + pend.length + ' 项加入清单：' + pend.map(function (a) { return ipT(a); }).join('、') + '，预计合计 ' + fmtN(pend.reduce(function (t, a) { return t + a.fee; }, 0)) + ' 元。',
-          act: function () { var cur = M.data; pend.forEach(function (a) { cur = K.toggleRenew(cur, a.id); }); commit(cur, pend.length + ' 项已加入续展 / 缴费清单'); } };
-      }
-      if (has(q, ['快到期', '到期', '几项', '续展', '年费'])) {
-        var us = urgentIp();
-        return { text: us.length ? '60 天内 ' + us.length + ' 项：' + us.map(function (a) { return ipT(a) + ' ' + a.dueLabel + ' ' + a.daysLeft + ' 天'; }).join('；') + '，预计合计 ' + fmtN(us.reduce(function (t, a) { return t + a.fee; }, 0)) + ' 元。' : '60 天内没有需要续展或缴费的资产。',
-          blocks: [mini(['资产', '事项', '剩余', '预计'], us.map(function (a) { return [cut(ipT(a), 12), a.dueLabel, a.daysLeft + ' 天', fmtN(a.fee)]; }))],
-          focus: us.length ? rowOf(w, ipT(us[0])) : null };
-      }
-      if (has(q, ['缺口', '为什么要补', '补哪几类', '布局'])) {
-        return { text: '应覆盖 ' + (I.covered.length + I.gaps.length) + ' 类，已覆盖 ' + I.covered.length + ' 类（' + I.coverage + '%），缺 ' + I.gaps.length + ' 类，核心类 ' + I.counts.coreGaps + ' 类。' + (coreGap() ? '第 ' + coreGap().cls + ' 类' + coreGap().name + '：' + coreGap().reason + '。' : ''),
-          blocks: [mini(['类别', '核心 / 延伸', '预计'], I.gaps.map(function (x) { return ['第 ' + x.cls + ' 类 ' + x.name, x.tier === 'core' ? '核心' : '延伸', fmtN(x.fee)]; }))],
-          focus: coreGap() ? rowOf(w, '第 ' + coreGap().cls + ' 类') : null };
-      }
-      if (has(q, ['近似', '异议', '侵权', '线索', '怎么办'])) {
-        if (!I.similar.length && !I.leads.length) return { text: '当前无近似商标与侵权线索。' };
-        return { text: I.similar.map(function (s) { return '「' + s.name + '」第 ' + s.classes.join('、') + ' 类（' + s.holder + '，相似 ' + Math.round(s.similarity * 100) + '%）' + s.status + (s.deadline ? '，' + s.deadline + ' 前' + s.action + '，还有 ' + s.daysLeft + ' 天' : '，' + s.action); }).join('；') + (I.leads.length ? '。侵权线索 ' + I.leads.length + ' 条：' + I.leads.map(function (l) { return l.where + ' ' + l.action; }).join('；') : '') + '。',
-          blocks: [tagsb(I.leads.map(function (l) { return cut(l.where + ' · ' + l.note, 20); }))] };
-      }
-      if (has(q, ['多少钱', '费用', '合计', '预计'])) return { text: '续展 / 缴费清单 ' + I.renewCount + ' 项预计 ' + fmtN(I.renewFee) + ' 元，商标申请清单 ' + I.applyCount + ' 类预计 ' + fmtN(I.applyFee) + ' 元，合计 ' + fmtN(I.renewFee + I.applyFee) + ' 元（官费加预计代理费）。' };
-    }
-
-    if (step === 'register') {
-      if (has(q, ['逾期', '过期', '超了'])) return { text: reg.counts.overdue ? '逾期 ' + reg.counts.overdue + ' 项：' + reg.overdue.map(function (it) { return it.title + '（' + it.kindName + '，' + (-it.daysLeft) + ' 天）'; }).join('；') + '。' : '当前没有逾期事项，30 天内 ' + reg.counts.due30 + ' 项。',
-        act: reg.counts.overdue ? function () { jump(reg.overdue[0]); } : null };
-      if (has(q, ['只看', '筛', '过滤'])) {
-        var key = q.indexOf('证照') >= 0 ? 'license' : q.indexOf('知产') >= 0 || q.indexOf('商标') >= 0 || q.indexOf('专利') >= 0 ? 'ip' : q.indexOf('设立') >= 0 ? 'setup' : q.indexOf('合同') >= 0 ? 'contract' : null;
-        if (key) { var nm = KINDS.filter(function (x) { return x[0] === key; })[0][1];
-          return { text: '只看' + nm + '：' + kindCount(key) + ' 项。', act: function () { M.regKind = key; draw(); } }; }
-      }
-      if (has(q, ['哪一周', '哪周', '事多', '密集', '集中'])) {
-        var top = reg.weeks.slice().sort(function (a, b) { return b.items.length - a.items.length; })[0];
-        return { text: '第 ' + (top.w + 1) + ' 周（' + top.start + ' 起）事项 ' + top.items.length + ' 项：' + top.items.slice(0, 3).map(function (it) { return short(it.date) + ' ' + cut(it.title, 14); }).join('；') + '。',
-          blocks: [mini(['日期', '事项', '类型'], top.items.slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.kindName]; }))] };
-      }
-      if (has(q, ['月报', '报告', '写了什么', '发给'])) return { text: softL(R.report.lines.slice(1, 4)).join('\n'),
-        blocks: [tagsb(R.report.todo.slice(0, 3).map(function (t) { return cut(soft(t), 20); }))] };
-      if (has(q, ['30 天', '近期', '要办'])) return { text: '30 天内 ' + reg.counts.due30 + ' 项：合同与节点 ' + reg.counts.contract + '、证照 ' + reg.counts.license + '、知产 ' + reg.counts.ip + (reg.counts.setup ? '、设立 ' + reg.counts.setup : '') + '。',
-        blocks: [mini(['日期', '事项', '剩余'], reg.due30.slice(0, 6).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft + ' 天']; }))] };
-    }
-    return null;
-  }
-
-  /* ================= 文档 ================= */
-  var CTYPE = [[/采购/, 'purchase', 'buy'], [/设备/, 'equipment', 'buy'], [/销售|供货|订货/, 'sale', 'supply'], [/借款|贷款/, 'loan', 'borrower'],
-    [/租赁/, 'lease', 'lessee'], [/加工|承揽/, 'processing', 'orderer'], [/保密|NDA/i, 'nda', 'disclosing'], [/劳动/, 'labor', 'employer'],
-    [/代理/, 'agency', 'principal'], [/软件/, 'software', 'client'], [/服务/, 'service', 'client'], [/框架/, 'framework', 'buy']];
-  var CLAUSE_MAP = [
-    [/质量标准|技术协议|封样|质量要求/, 'quality', '质量标准'],
-    [/质保|保修|warranty/i, 'warranty', '质保期'],
-    [/验收|异议期/, 'acceptance', '验收与异议期'],
-    [/交付|交货|delivery|发货/i, 'delivery', '交付期限'],
-    [/违约|penalty|赔偿责任/i, 'liability', '违约责任'],
-    [/合同金额|价款|付款|支付|amount|payment/i, 'payment', '合同金额与付款'],
-    [/争议|管辖|仲裁|诉讼/, 'dispute', '争议解决'],
-    [/保密/, 'confidentiality', '保密'],
-    [/知识产权|图纸|著作权|专利权/, 'ip', '知识产权归属'],
-    [/不可抗力/, 'force', '不可抗力'],
-    [/标的|品名|规格型号/, 'subject', '标的']
-  ];
-  function num0(s) { var v = parseFloat(String(s == null ? '' : s).replace(/[,，\s元%]/g, '')); return isNaN(v) ? null : v; }
-  function lines0(doc) {
-    var ls = (doc.paragraphs && doc.paragraphs.length ? doc.paragraphs : String(doc.text || '').split(/[\n\r]+/));
-    return ls.map(function (x) { return String(x).replace(/\s+/g, ' ').trim(); }).filter(function (x) { return x.length > 1; });
-  }
-  function docContract(doc) {
-    var txt = String(doc.text || '').replace(/\s+/g, ' '), ls = lines0(doc), CR = LIB.contractRules, d0 = M.data, i;
-    var mAmt = txt.match(/(?:合同金额|金额|价款|总价)[^0-9]{0,8}([\d][\d,，.]*)\s*元/) || txt.match(/(?:CNY|RMB|人民币)\s*([\d][\d,.]*)/i) || txt.match(/Amount[^0-9]{0,10}([\d][\d,.]*)/i);
-    var total = mAmt ? num0(mAmt[1]) : null;
-    if (!total) return null;
-    var mTax = txt.match(/含税\s*(\d{1,2})\s*%/) || txt.match(/Tax\s*(\d{1,2})\s*%/i);
-    var mDue = txt.match(/(?:交付|交货|delivery)[^0-9]{0,12}(20\d{2})\s*[年\-\.]\s*(\d{1,2})\s*[月\-\.]\s*(\d{1,2})/i);
-    var due = mDue ? mDue[1] + '-' + pad2(mDue[2]) + '-' + pad2(mDue[3]) : null;
-    var mCap = txt.match(/(?:累计)?不超过[^0-9]{0,10}(\d{1,3}(?:\.\d+)?)\s*%/) || txt.match(/cap\s*(\d{1,3}(?:\.\d+)?)\s*%/i);
-    var capPct = mCap ? parseFloat(mCap[1]) : null;
-    var mWar = txt.match(/质保期?\s*(\d{1,2})\s*个?月/) || txt.match(/保修\s*(\d{1,2})\s*个?月/) || txt.match(/warranty[^0-9]{0,8}(\d{1,2})/i);
-    var warMonths = mWar ? +mWar[1] : null;
-    /* 付款表：期次 / 比例 / 金额 */
-    var payTbl = null, adv = null;
-    (doc.tables || []).forEach(function (t) { if (!payTbl && t.length > 1 && String(t[0].join('')).match(/比例|金额|期次|款/)) payTbl = t; });
-    if (payTbl) { var r1 = payTbl[1] || [], pc = r1.filter(function (x) { return /%/.test(String(x)); })[0]; if (pc) adv = num0(pc) / 100; }
-    if (adv == null) { var mAdv = txt.match(/(?:首付|预付)[^0-9]{0,6}(\d{1,3})\s*%/); if (mAdv) adv = +mAdv[1] / 100; }
-    /* 条款拆解 */
-    var seen = {}, clauses = [];
-    ls.forEach(function (ln) {
-      if (clauses.length >= 12 || /^(甲方|乙方|双方|供方|需方|出租方|承租方|From|To)[：:\s]/.test(ln)) return;
-      var hit = null;
-      CLAUSE_MAP.forEach(function (mp) { if (!hit && mp[0].test(ln) && !seen[mp[1]]) hit = mp; });
-      if (!hit) return;
-      seen[hit[1]] = 1;
-      var params = {};
-      if (hit[1] === 'payment') { params.termDays = 0; params.advanceRatio = adv == null ? 0 : adv; }
-      if (hit[1] === 'delivery') params.latePenalty = /违约|penalty|逾期/i.test(txt);
-      if (hit[1] === 'liability') params.capMultiple = capPct == null ? null : capPct / 100;
-      if (hit[1] === 'warranty') params.months = warMonths == null ? 12 : warMonths;
-      if (hit[1] === 'acceptance') params.objectionDays = 15;
-      if (hit[1] === 'quality') params.standard = '文档约定';
-      if (hit[1] === 'dispute') params.venue = /乙方所在地|对方所在地/.test(ln) ? 'counterparty' : 'ours';
-      clauses.push({ no: String(clauses.length + 1), type: hit[1], title: hit[2], text: cut(ln, 96), params: params });
+  function refocus(ref, ms) { setTimeout(function () { var el = refEl(ref); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 90); }
+  function docBody(list) {
+    var out = [];
+    (list || []).forEach(function (b) {
+      if (b && b.type === 'text') { out.push(h('div', { class: 'pd-pre' }, [String(b.text == null ? '' : b.text)])); return; }
+      var n = window.DGG.chat.block(b);
+      if (n) out.push(n);
     });
-    if (!clauses.length) return null;
-    /* 抬头与相对方 */
-    var title = ls[0] && ls[0].length <= 24 ? ls[0] : '导入合同';
-    var mParty = txt.match(/乙方[：:]\s*([^\s　，,；;甲]+)/) || txt.match(/供方[：:]\s*([^\s　，,；;]+)/);
-    var party = mParty ? mParty[1].replace(/(股份)?有限(责任)?公司$/, '').replace(/公司$/, '') : '文档相对方';
-    var tp = 'purchase', role = 'buy';
-    for (i = 0; i < CTYPE.length; i++) { if (CTYPE[i][0].test(title) || CTYPE[i][0].test(txt.slice(0, 90))) { tp = CTYPE[i][1]; role = CTYPE[i][2]; break; } }
-    var end = due || K.dateOf(d0.today, 365);
-    M.docN++;
-    var id = 'HT-DOC-' + pad2(M.docN);
-    var cObj = { id: id, type: tp, role: role, title: title, party: party, amount: Math.round(total), signed: d0.today, start: d0.today, end: end,
-      status: '审查中', milestones: due ? [{ date: due, text: '交付期限' }] : [], clauses: clauses, revisions: [] };
-    var rv = K.reviewContract(cObj, LIB);
-    var miss = rv.findings.filter(function (f) { return f.kind === 'missing'; });
-    var L = window.DGG.docparse.label(doc.kind);
-    var lines = [L + '《' + doc.name + '》读完：' + title + '，相对方 ' + party + '，金额 ' + fmtN(total) + ' 元' + (mTax ? '（含税 ' + mTax[1] + '%）' : '') + (due ? '，交付 ' + due : '') + (capPct != null ? '，违约金上限 ' + capPct + '%' : '') + (warMonths ? '，质保 ' + warMonths + ' 个月' : '') + '。'];
-    lines.push('按' + (CR.types[tp] || tp) + '必备条款逐项核对：文档里读到 ' + clauses.length + ' 条（' + clauses.map(function (c) { return c.title; }).join('、') + '）' + (miss.length ? '，缺 ' + miss.length + ' 项：' + miss.map(function (x) { return '「' + x.clauseTitle + '」'; }).join('') : '，必备条款齐全') + '。');
-    lines.push('风险分 ' + rv.score + '（' + LV_NAME[rv.level] + '）：高 ' + rv.counts.high + ' 中 ' + rv.counts.mid + ' 低 ' + rv.counts.low + '。已进合同台账 ' + id + '，' + (due ? '交付期限 ' + due + ' 一并进 90 天台账。' : '到期日按一年计。'));
-    var kvl = [['金额', fmtN(total) + ' 元']];
-    if (mTax) kvl.push(['税率', mTax[1] + '%']);
-    if (due) kvl.push(['交付期限', due]);
-    if (adv != null) kvl.push(['首期比例', Math.round(adv * 100) + '%']);
-    if (capPct != null) kvl.push(['违约金上限', capPct + '%']);
-    kvl.push(['风险分', rv.score + ' · ' + LV_NAME[rv.level]]);
-    var blocks = [kvb(kvl)];
-    if (payTbl) blocks.push(mini(payTbl[0].slice(0, 3), payTbl.slice(1, 4).map(function (r) { return r.slice(0, 3); })));
-    if (miss.length) blocks.push(tagsb(miss.map(function (x) { return '缺 ' + x.clauseTitle; })));
-    return { text: lines.join('\n'), blocks: blocks,
-      act: function () {
-        var nd = K.ensure(M.data);
-        nd.contracts.push(clone(cObj));
-        nd.log.push({ seq: nd.log.length + 1, kind: 'contract', label: '文档进台账', detail: id + ' ' + title + '，' + fmtN(total) + ' 元，风险分 ' + rv.score + '，缺 ' + miss.length + ' 项必备条款' });
-        M.contract = id; M.filter = null;
-        if (M.step === 'contracts') { commit(nd, id + ' 已进合同台账，风险分 ' + rv.score); refocus(id, 300); }
-        else { M.data = nd; recompute(); setStep('contracts'); }
-      } };
+    return out;
   }
-  function docSheet(doc) {
-    var s0 = (doc.sheets || [])[0];
-    if (!s0 || !s0.rows.length) return null;
-    var head = (s0.rows[0] || []).map(function (x) { return String(x).trim(); });
-    var body = s0.rows.slice(1).filter(function (r) { return String(r[0] || '').trim(); });
-    var iId = -1, iParty = -1, iAmt = -1, iEnd = -1;
-    head.forEach(function (x, i) {
-      if (iId < 0 && /合同编号|合同号|编号/.test(x)) iId = i;
-      if (iParty < 0 && /相对方|对方|客户|供应商|乙方/.test(x)) iParty = i;
-      if (iAmt < 0 && /金额|价款|总价/.test(x)) iAmt = i;
-      if (iEnd < 0 && /到期|结束|终止/.test(x)) iEnd = i;
-    });
-    if (iId >= 0 && iParty >= 0) {
-      return { text: 'Excel《' + doc.name + '》读完：' + doc.sheets.length + ' 张表、' + body.length + ' 行合同，表头 ' + head.slice(0, 6).join(' / ') + '。\n台账里已有 ' + M.R.contracts.length + ' 份，导入的 ' + body.length + ' 行按合同编号比对后并入。',
-        blocks: [mini(head.slice(0, 4), body.slice(0, 4).map(function (r) { return r.slice(0, 4); }))],
-        act: function () { M.filter = null; if (M.step !== 'contracts') setStep('contracts'); } };
+  /* 文档摄入的写回：内核已经算好新数据副本，这里只管进合同屏、选中与提示 */
+  function commitDoc(next) {
+    var had = {};
+    M.data.contracts.forEach(function (c) { had[c.id] = 1; });
+    var added = next.contracts.filter(function (c) { return !had[c.id]; })[0];
+    var last = next.log[next.log.length - 1];
+    if (added) { M.contract = added.id; M.filter = null; }
+    if (added && M.step !== 'contracts') { M.data = next; recompute(); setStep('contracts'); return; }
+    commit(next, last ? last.label + ' · ' + last.detail : null);
+    if (added) refocus(added.id, 300);
+  }
+  function openPanel(a) {
+    var R = M.R;
+    if (a.panel === 'contract') {
+      if (!R.byId[a.ref]) return false;
+      M.contract = a.ref; M.filter = null;
+      if (M.step !== 'contracts') setStep('contracts');
+      else { draw(); refocus(a.ref); }
+      return true;
     }
-    return { text: 'Excel《' + doc.name + '》读完：' + doc.sheets.length + ' 张表、' + body.length + ' 行，表头 ' + head.slice(0, 6).join(' / ') + '。\n这张表没有合同编号与相对方两列，进不了合同台账；合同台账要的列是 合同编号 / 相对方 / 类型 / 金额 / 起止日期 / 状态。' + (/科目/.test(head.join('')) ? '\n表头是科目口径，属于账务数据，法务这边不动。' : ''),
-      blocks: [mini(head.slice(0, 4), body.slice(0, 4).map(function (r) { return r.slice(0, 4); }))] };
+    if (a.panel === 'ip') {
+      if (!R.ip.assets.some(function (x) { return x.id === a.ref; })) return false;
+      if (M.step !== 'ip') setStep('ip');
+      else refocus(a.ref);
+      return true;
+    }
+    if (a.panel === 'license') {
+      var l = R.licenses.filter(function (x) { return x.id === a.ref; })[0];
+      if (!l) return false;
+      openLicense(l);
+      return true;
+    }
+    if (a.panel === 'opinion') {
+      var c = R.byId[a.ref], raw = c ? M.data.contracts.filter(function (x) { return x.id === c.id; })[0] : null;
+      if (!raw) return false;
+      var op = K.opinion(raw, c.review, LIB);
+      P.drawer(M.frame.body, { title: '审查意见 · ' + c.id, sub: c.title + ' · ' + c.party, body: [h('div', { class: 'pd-pre' }, [soft(op.text)])],
+        actions: [P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } })] });
+      return true;
+    }
+    if (a.panel === 'doc') { P.drawer(M.frame.body, { title: a.title || a.ref, sub: a.sub, body: docBody(a.blocks) }); return true; }
+    return false;
   }
-  function docSlides(doc) {
-    var titles = (doc.slides || []).map(function (s) { return s.title || ''; }).filter(Boolean);
-    var txt = String(doc.text || '').replace(/\s+/g, ' ');
-    var hits = [];
-    [[/合同/, '合同'], [/商标/, '商标'], [/专利/, '专利'], [/许可|资质|证照/, '证照'], [/子公司|分公司|设立/, '设立'], [/诉讼|仲裁|纠纷/, '争议']].forEach(function (x) { if (x[0].test(txt)) hits.push(x[1]); });
-    var dates = (txt.match(/20\d{2}\s*[年\-]\s*\d{1,2}\s*[月\-]?\s*\d{0,2}/g) || []).slice(0, 3);
-    var lines = ['PPT《' + doc.name + '》读完：' + doc.slides.length + ' 页，首页「' + (titles[0] || '—') + '」' + (titles[1] ? '，第 2 页「' + titles[1] + '」' : '') + '。'];
-    lines.push(hits.length ? '正文里出现法务口径：' + hits.join('、') + '，可以对上台账核；' : '正文没有合同、知产、证照、设立这几类法务口径，台账不动；');
-    lines.push('台账现状：合同 ' + M.R.kpi.contracts + ' 份（高风险 ' + M.R.kpi.highRisk + '）、证照 ' + M.R.kpi.licTotal + ' 项、知产 ' + M.R.kpi.ipAssets + ' 项' + (dates.length ? '；文档提到的日期 ' + dates.join('、') : '') + '。');
-    return { text: lines.join('\n'), blocks: [tagsb(titles.slice(0, 4))],
-      act: function () { P.drawer(M.frame.body, { title: doc.name, sub: 'PPT · ' + doc.slides.length + ' 页 · ' + doc.sizeText, body: [h('div', { class: 'pd-pre' }, [(doc.slides || []).map(function (s) { return '第 ' + s.no + ' 页 ' + (s.title || '') + '\n' + s.lines.join('\n'); }).join('\n\n')])] }); } };
+  function applyAction(a) {
+    var input = a.input || {};
+    if (a.action === 'applyFix') {
+      var c = M.R.byId[input.contractId];
+      if (!c || !c.findings.some(function (f) { return f.id === input.findingId && f.fix; })) return false;
+      var f = c.findings.filter(function (x) { return x.id === input.findingId; })[0];
+      M.contract = c.id; M.filter = null;
+      commit(K.applyFix(M.data, c.id, f.id, LIB), c.id + ' 已' + (f.fix.mode === 'insert' ? '新增' : '修订') + '「' + f.fix.title + '」');
+      refocus(c.id, 260);
+      return true;
+    }
+    if (a.action === 'applyAllHigh') {
+      if (!M.R.contracts.some(function (c) { return c.review.counts.high; })) return false;
+      doAllHigh();
+      return true;
+    }
+    if (a.action === 'toggleRenew') {
+      var ids = input.ids || (input.id ? [input.id] : []);
+      ids = ids.filter(function (id) { return M.R.ip.assets.some(function (x) { return x.id === id; }); });
+      if (!ids.length) return false;
+      var cur = M.data;
+      ids.forEach(function (id) { cur = K.toggleRenew(cur, id); });
+      var one = M.R.ip.assets.filter(function (x) { return x.id === ids[0]; })[0];
+      commit(cur, ids.length > 1 ? ids.length + ' 项已加入续展 / 缴费清单' : one.title + (one.listed ? ' 已移出清单' : ' 已加入清单'));
+      refocus(ids[0], 260);
+      return true;
+    }
+    if (a.action === 'toggleApply') {
+      var gp = M.R.ip.gaps.filter(function (x) { return x.cls === input.cls; })[0];
+      if (!gp) return false;
+      commit(K.toggleApply(M.data, gp.cls), '第 ' + gp.cls + ' 类' + (gp.listed ? '已移出申请清单' : '已加入申请清单'));
+      refocus('CLS-' + gp.cls, 260);
+      return true;
+    }
+    if (a.action === 'confirmSetup') {
+      if (M.R.setup.confirmed) return false;
+      commit(K.confirmSetup(M.data, LIB), '方案已确认，' + M.R.setup.steps.length + ' 个节点已进台账');
+      return true;
+    }
+    if (a.action === 'ingest') {
+      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
+      if (!r || !r.data) return false;
+      commitDoc(r.data);
+      return true;
+    }
+    return false;
   }
-  function docMail(doc) {
-    var ml = doc.mail || {}, txt = String(doc.text || '').replace(/\s+/g, ' ');
-    var wan = (txt.match(/([\d][\d,.]*)\s*万元/g) || []);
-    var buys = M.R.contracts.filter(function (c) { return c.role === 'buy' || c.roleName.indexOf('买方') >= 0 || c.roleName.indexOf('定作') >= 0; });
-    var tot = buys.reduce(function (t, c) { return t + (c.amount || 0); }, 0);
-    var lines = ['邮件《' + (ml.subject || doc.name) + '》读完：发件 ' + (ml.from || '—') + '，' + (ml.date || '') + (wan.length ? '，正文金额 ' + wan.join('、') : '') + '。'];
-    if (wan.length) lines.push('对上合同台账：我方为买方 / 定作方的合同 ' + buys.length + ' 份，金额合计 ' + W(tot) + '，其中 30 天内有履约节点的 ' + M.R.register.due30.filter(function (it) { return it.kind === 'milestone'; }).length + ' 项。');
-    else lines.push('正文没读到金额，合同台账不动。');
-    lines.push('附件 ' + ((ml.attaches || []).length) + ' 个；' + (M.R.register.counts.overdue ? '台账里已有逾期 ' + M.R.register.counts.overdue + ' 项，先处理那一项。' : '台账里暂无逾期项。'));
-    return { text: lines.join('\n'), blocks: [kvb([['发件', ml.from || '—'], ['主题', cut(ml.subject || '—', 16)], ['日期', ml.date || '—']]),
-      buys.length ? mini(['合同', '相对方', '金额'], buys.slice(0, 4).map(function (c) { return [c.id, cut(c.party, 10), c.amount ? W(c.amount) : '—']; })) : null],
-      act: function () { M.filter = null; M.contract = (buys[0] || M.R.contracts[0]).id; if (M.step === 'contracts') { draw(); refocus(M.contract); } else setStep('contracts'); } };
-  }
-  function onDoc(doc) {
-    if (!doc || !doc.ok || !M.R) return null;
-    if (doc.kind === 'excel') return docSheet(doc);
-    if (doc.kind === 'ppt') return docSlides(doc);
-    if (doc.kind === 'eml') return docMail(doc);
-    var c = docContract(doc);
-    if (c) return c;
-    var ls = lines0(doc);
-    return { text: window.DGG.docparse.label(doc.kind) + '《' + doc.name + '》读完：' + ls.length + ' 段。没读到合同金额，进不了审查；审查要的是金额、交付期限、付款方式、违约责任这几项。\n开头：' + cut(ls[0] || '—', 40),
-      blocks: [tagsb(ls.slice(0, 4).map(function (x) { return cut(x, 16); }))] };
+  function setParam(a) {
+    if (a.path === 'filter') {
+      M.filter = a.value || null;
+      if (M.step !== 'contracts') setStep('contracts');
+      else draw();
+      return true;
+    }
+    if (a.path === 'regKind') {
+      M.regKind = a.value || null;
+      if (M.step !== 'register') setStep('register');
+      else draw();
+      return true;
+    }
+    if (a.path === 'setup.shares') {
+      if (!a.value || a.value.length < 2 || !M.R.setup.equity) return false;
+      setShares(a.value);
+      return true;
+    }
+    return false;
   }
 
   window.DGG.chatBrain('m7', {
-    opener: function (step) { return opener(step); },
-    suggest: function (step) { return suggest(step); },
-    answer: function (q, step) { return answer(q, step); },
-    onDoc: function (doc, step) { return onDoc(doc, step); }
+    kernel: window.DGG.coreM7,
+    ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    act: function (a, api) {
+      if (!a || !a.type || !M.R) return false;
+      if (a.type === 'goto') {
+        if (['connect', 'board', 'contracts', 'setup', 'ip', 'register'].indexOf(a.step) < 0) return false;
+        setStep(a.step);
+        return true;
+      }
+      if (a.type === 'focus') { var el = refEl(a.ref); if (!el) return false; api.focus(el); return true; }
+      if (a.type === 'open') return openPanel(a);
+      if (a.type === 'apply') return applyAction(a);
+      if (a.type === 'set') return setParam(a);
+      return false;                                        /* 不认识的动作交给通用兜底 */
+    }
   });
 
   window.DGG = window.DGG || {};

@@ -5,6 +5,7 @@ const path = require('path');
 const core = require('../core/legal.js');
 const lib = require('./load-data.js')();
 const lint = require('../../_shared/lint.js')(lib.lintWords);
+const docparse = require('../../_shared/docparse.js');
 let checks = 0;
 const ok = (c, m) => { assert(c, m); checks++; };
 const lintText = (t, where) => { const hits = lint.hard(String(t)); ok(hits.length === 0, where + ' 命中禁词: ' + hits.join(',')); };
@@ -153,6 +154,74 @@ Object.keys(lib.samples).sort().forEach((k) => {
   lintText(JSON.stringify(d), k + ' 样本全文');
   d.contracts.forEach((c) => ok(/^HT-\d{4}-\d{3}$/.test(c.id), k + ' 合同编号 ' + c.id));
   ok(!/企查查|天眼查|启信宝|爱企查/.test(JSON.stringify(d)), k + ' 数据源厂商名');
+  // 11. 对话与文档摄入：六屏开场、快捷问句、问答、文档
+  const raw0 = JSON.stringify(d);
+  const steps = core.screens().map((x) => x.key);
+  ok(steps.length === 6 && core.screens().every((x) => x.key && x.label), k + ' screens 六屏登记');
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && JSON.stringify(a) === JSON.stringify(JSON.parse(JSON.stringify(a))));
+  steps.forEach((st) => {
+    const b = core.brief(st, d, lib, R);
+    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
+    lintText(b, k + ' brief ' + st);
+    ok(JSON.stringify(core.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = core.suggest(st, d, lib, R);
+    ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
+    sg.forEach((q) => {
+      const a = core.ask(q, st, d, lib, R);
+      ok(a && a.text && !/undefined|NaN|\{\w+\}/.test(a.text), k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib, R)) === JSON.stringify(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib)) === JSON.stringify(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      lintText(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  // 点名类：合同号、知产编号、商标类别、证照名
+  const nc = core.ask(R.contracts[0].id + ' 怎么样', 'board', d, lib, R);
+  ok(nc && nc.ref === R.contracts[0].id && nc.act.type === 'open' && nc.act.panel === 'contract', k + ' 点名合同');
+  const na = core.ask(R.ip.assets[0].id + ' 什么时候到期', 'ip', d, lib, R);
+  ok(na && na.ref === R.ip.assets[0].id && isAct(na.act), k + ' 点名知产 ' + R.ip.assets[0].id);
+  const ng = core.ask('第 ' + R.ip.gaps[0].cls + ' 类', 'ip', d, lib, R);
+  ok(ng && ng.act.type === 'apply' && ng.act.action === 'toggleApply', k + ' 点名缺口类别');
+  ok(core.ask('第 ' + R.ip.gaps[0].cls + ' 类', 'board', d, lib, R).act.type === 'goto', k + ' 缺口类别不在知产屏先换屏');
+  const nl = core.ask(R.licenses[0].name + ' 还有多久', 'board', d, lib, R);
+  ok(nl && nl.ref === R.licenses[0].id && nl.act.panel === 'license', k + ' 点名证照');
+  ok(core.ask('今天天气如何', 'board', d, lib, R) === null, k + ' 答不上返回 null');
+  ok(core.brief('没有这一屏', d, lib, R) === null && core.ask('有没有逾期', '没有这一屏', d, lib, R) === null, k + ' 未知屏返回 null');
+  ok(JSON.stringify(d) === raw0, k + ' 对话没动入参');
+  // 文档：合同文本进台账写新副本、台账 Excel 与科目 Excel 分流、PPT 与邮件只换屏 / 开抽屉
+  const cdoc = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('采购框架合同\n甲方：' + d.company + '　乙方：宁波德昌模具有限公司\n第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付，首付 30%。\n第二条 交付期限：2026 年 11 月 30 日前完成全部交付。\n第三条 违约责任：逾期交付按日万分之五计收违约金，累计不超过合同金额 5%。\n第四条 质保期 12 个月，自验收合格之日起算。\n', 'utf8') });
+  const cIn = core.ingest(cdoc, 'contracts', d, lib, R);
+  ok(cIn && cIn.text && cIn.data && cIn.data !== d, k + ' ingest 合同文本');
+  ok(cIn.data.contracts.length === d.contracts.length + 1 && JSON.stringify(d) === raw0, k + ' ingest 写新副本、不动入参');
+  const added = cIn.data.contracts[cIn.data.contracts.length - 1];
+  ok(added.id === 'HT-DOC-01' && cIn.ref === added.id && added.amount === 1860000, k + ' ingest 合同编号与金额');
+  ok(core.run(cIn.data, lib).byId[added.id].score === core.reviewContract(added, lib).score, k + ' ingest 合同可继续算');
+  ok(cIn.act.type === 'apply' && cIn.act.action === 'ingest', k + ' ingest 合同动作');
+  ok(JSON.stringify(core.ingest(cdoc, 'contracts', d, lib, R)) === JSON.stringify(cIn), k + ' ingest 两次不一致');
+  ok(isBlocks(cIn.blocks), k + ' ingest 合同块型');
+  lintText(cIn.text, k + ' ingest 合同');
+  const ledger = { ok: true, kind: 'excel', name: 'contracts.xlsx', size: 2048, sizeText: '2 KB', ext: 'xlsx', text: '', paragraphs: [], tables: [], slides: [], mail: null, stats: {}, note: '',
+    sheets: [{ name: '合同台账', rows: [['合同编号', '相对方', '金额'], ['HT-2601-001', 'K-001 · 汽配', '860000']] }] };
+  const lIn = core.ingest(ledger, 'contracts', d, lib, R);
+  ok(lIn && !lIn.data && lIn.act.type === 'set' && lIn.act.path === 'filter', k + ' ingest 合同台账表');
+  const tb = { ok: true, kind: 'excel', name: 'trial-balance.xlsx', size: 2048, sizeText: '2 KB', ext: 'xlsx', text: '', paragraphs: [], tables: [], slides: [], mail: null, stats: {}, note: '',
+    sheets: [{ name: '科目余额表', rows: [['科目编码', '科目名称', '期末余额'], ['1001', '库存现金', '12000']] }] };
+  const tIn = core.ingest(tb, 'contracts', d, lib, R);
+  ok(tIn && !tIn.data && !tIn.act && tIn.text.indexOf('进不了合同台账') >= 0, k + ' ingest 科目表不进台账');
+  lintText(tIn.text, k + ' ingest 科目表');
+  const deck = { ok: true, kind: 'ppt', name: 'review.pptx', size: 1024, sizeText: '1 KB', ext: 'pptx', text: '三季度经营回顾 收入 4,260 万元', paragraphs: [], tables: [], sheets: [], mail: null, stats: {}, note: '',
+    slides: [{ no: 1, title: '三季度经营回顾', lines: ['收入 4,260 万元'] }] };
+  const pIn = core.ingest(deck, 'register', d, lib, R);
+  ok(pIn && !pIn.data && pIn.act.type === 'open' && pIn.act.panel === 'doc' && isBlocks(pIn.act.blocks), k + ' ingest PPT');
+  lintText(pIn.text, k + ' ingest PPT');
+  const mail = { ok: true, kind: 'eml', name: 'mail.eml', size: 900, sizeText: '900 B', ext: 'eml', text: '本月付款 234 万元，请安排。', paragraphs: [], tables: [], sheets: [], slides: [], stats: {}, note: '',
+    mail: { from: '采购部', to: '财务部', cc: '', subject: '关于 11 月付款申请', date: '2026-09-16', attaches: [] } };
+  const mIn = core.ingest(mail, 'board', d, lib, R);
+  ok(mIn && !mIn.data && mIn.act.type === 'open' && mIn.act.panel === 'contract' && R.byId[mIn.act.ref], k + ' ingest 邮件');
+  lintText(mIn.text, k + ' ingest 邮件');
+  ok(core.ingest({ ok: false }, 'board', d, lib, R) === null && core.ingest(null, 'board', d, lib, R) === null, k + ' ingest 解析失败返回 null');
 });
 ok(levelCounts.make.high === 3 && levelCounts.make.mid === 5 && levelCounts.make.low === 4, '制造样本等级分布 ' + JSON.stringify(levelCounts.make));
 console.log('validate ok: ' + checks + ' 项断言通过 · ' + JSON.stringify(levelCounts));

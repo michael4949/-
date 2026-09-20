@@ -5,6 +5,7 @@ const path = require('path');
 const core = require('../core/hr.js');
 const lib = require('./load-data.js')();
 const lint = require('../../_shared/lint.js')(lib.lintWords);
+const docparse = require('../../_shared/docparse.js');
 let checks = 0;
 const ok = (c, m) => { assert(c, m); checks++; };
 const lintText = (t, where) => { const hits = lint.hard(String(t)); ok(hits.length === 0, where + ' 命中禁词: ' + hits.join(',')); };
@@ -135,5 +136,49 @@ Object.keys(lib.samples).sort().forEach((k) => {
   ok(JSON.stringify(ex.kpi) === JSON.stringify(R.kpi), k + ' examples 与内核不一致，先跑 run-examples');
   lintText(JSON.stringify(d), k + ' 样本全文');
   d.needs.forEach((n) => ok(/^R-\d{4}-\d{2}$/.test(n.id), k + ' 需求单编号 ' + n.id)); d.leavers.forEach((l) => ok(/^L-\d{3}$/.test(l.id), k + ' 离职记录 ' + l.id));
+  // 10. 对话与文档摄入：六屏开场、快捷问句、问答、文档
+  const steps = core.screens().map((x) => x.key);
+  ok(steps.length === 6 && core.screens().every((x) => x.key && x.label), k + ' screens 六屏登记');
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && JSON.stringify(a) === JSON.stringify(JSON.parse(JSON.stringify(a))));
+  steps.forEach((st) => {
+    const b = core.brief(st, d, lib, R);
+    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
+    lintText(b, k + ' brief ' + st);
+    ok(JSON.stringify(core.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = core.suggest(st, d, lib, R);
+    ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
+    sg.forEach((q) => {
+      const a = core.ask(q, st, d, lib, R);
+      ok(a && a.text && !/undefined|NaN/.test(a.text), k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib, R)) === JSON.stringify(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib)) === JSON.stringify(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      lintText(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  ok(core.ask('今天天气如何', 'board', d, lib, R) === null, k + ' 答不上返回 null');
+  ok(core.brief('没有这一屏', d, lib, R) === null, k + ' 未知屏 brief 返回 null');
+  // 文档：简历入池写新副本、合同核对只开抽屉、经营回顾改收入口径
+  const resume = docparse.parse({ name: 'resume.txt', bytes: Buffer.from('求职简历\n应聘 ' + lib.jobs.jobs[d.needs[0].job].title + '\n工作经历：8 年相关工作经验\n教育背景：大专\n期望薪资 7800 元\n自我评价：踏实\n', 'utf8') });
+  const rIn = core.ingest(resume, 'recruit', d, lib, R);
+  ok(rIn && rIn.text && rIn.data && rIn.data !== d, k + ' ingest 简历');
+  ok(rIn.data.candidates.length === d.candidates.length + 1 && JSON.stringify(d) === before, k + ' ingest 简历写新副本、不动入参');
+  ok(core.run(rIn.data, lib).byId[rIn.data.candidates[rIn.data.candidates.length - 1].id].score.total > 0, k + ' ingest 简历可继续算');
+  ok(rIn.act && rIn.act.type === 'apply' && rIn.act.action === 'ingest', k + ' ingest 简历动作');
+  ok(JSON.stringify(core.ingest(resume, 'recruit', d, lib, R)) === JSON.stringify(rIn), k + ' ingest 两次不一致');
+  lintText(rIn.text, k + ' ingest 简历');
+  const contract = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('第一条 合同金额：人民币 186 万元\n第二条 交付期限：2026 年 11 月 30 日\n第三条 违约责任：逾期交付按万分之三计违约金\n', 'utf8') });
+  const cIn = core.ingest(contract, 'compliance', d, lib, R);
+  ok(cIn && cIn.text && !cIn.data && cIn.act.type === 'open' && cIn.act.panel === 'doc' && isBlocks(cIn.act.blocks), k + ' ingest 合同文本');
+  ok(isBlocks(cIn.blocks) && cIn.ref === 'H01', k + ' ingest 合同文本块与高亮');
+  lintText(cIn.text, k + ' ingest 合同');
+  const deck = { ok: true, kind: 'ppt', name: 'review.pptx', size: 1024, sizeText: '1 KB', ext: 'pptx', text: '三季度经营回顾 收入 4,260 万元 同比 +12%', paragraphs: [], tables: [], sheets: [], slides: [{ no: 1, title: '三季度经营回顾', lines: ['收入 4,260 万元'] }], mail: null, stats: {}, note: '' };
+  const pIn = core.ingest(deck, 'cost', d, lib, R);
+  ok(pIn && pIn.data && pIn.data !== d && pIn.data.profile.revenue12 === 42600000 && d.profile.revenue12 !== 42600000, k + ' ingest 经营回顾改收入口径');
+  ok(core.run(pIn.data, lib).cost.perCapitaRevenue === Math.round(42600000 / hc) && JSON.stringify(d) === before, k + ' ingest 收入口径重算');
+  lintText(pIn.text, k + ' ingest 经营回顾');
+  ok(core.ingest({ ok: false }, 'board', d, lib, R) === null, k + ' ingest 解析失败返回 null');
 });
 console.log('validate ok: ' + checks + ' 项断言通过');

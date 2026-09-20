@@ -21,7 +21,13 @@
  *   kindOf(name) / label(kind) / sizeText(n)
  *   parse({ name, bytes })     bytes 可以是 Uint8Array / Node Buffer / base64 串 / 普通数组 / ArrayBuffer
  *                              也可以写成 parse(name, bytes)
- *   低层件：inflateRaw / inflateZlib / zipEntries / zipRead / zipText / toBytes / utf8 / b64bytes
+ *   低层件（别的 skill 与自测用得上，不进 manifest.actions）：
+ *     inflateRaw / inflateZlib / zipEntries / zipRead / zipText
+ *     toBytes / utf8 / utf8self / latin1 / b64bytes / VERSION
+ *
+ * 确定性：base64 与 UTF-8 解码都是包内自实现，同一份字节在任何宿主上得到同一份结果。
+ * 唯一的例外是 .eml 里声明为 GBK / Big5 等非 UTF-8 字符集的正文 —— 码表上百 KB，没法零依赖实现，
+ * 宿主有 TextDecoder 就借用，没有就退回 latin1，这一处会随宿主而异，已在 decodeCharset 处标注。
  *
  * 返回（纯数据，可直接 JSON 序列化）：
  *   { ok, kind, name, size, sizeText, ext, text, paragraphs[], tables[[[]]],
@@ -545,7 +551,10 @@
       var arg = m[1], s = '';
       var sre = /\((?:\\.|[^\\()])*\)/g, sm;
       while ((sm = sre.exec(arg))) {
-        var lit = sm[0].slice(1, -1)
+        var lit = sm[0].slice(1, -1);
+        /* 绝大多数串里没有反斜杠转义，先看一眼再决定要不要走三趟带回调的 replace。
+           这是纯快路径：有反斜杠时走的还是下面同一段代码，结果逐字不变 */
+        if (lit.indexOf('\\') >= 0) lit = lit
           .replace(/\\([nrtbf])/g, function (_, c) { return { n: '\n', r: '\r', t: '\t', b: '', f: '' }[c]; })
           .replace(/\\([0-7]{1,3})/g, function (_, o) { return String.fromCharCode(parseInt(o, 8)); })
           .replace(/\\(.)/g, '$1');
@@ -575,12 +584,18 @@
       if (/\/FlateDecode/.test(head)) { try { streams.push(latin1(inflateZlib(body))); } catch (e) { streams.push(''); } }
       else if (/\/Filter/.test(head)) streams.push('');                  /* 其它滤镜跳过 */
       else streams.push(latin1(body));
-      sre.lastIndex = end;
+      /* 必须跳过整个 endstream（9 个字符）。只写 = end 的话，下一轮会命中 endstream 里自带的
+         那个 stream，把「本流结尾 → 下一个流结尾」当成一段假流，于是真正的下一个流被整段吞掉 ——
+         结果是多流 PDF 只读得出第一个内容流的文字（字体流在前时甚至一个字都读不到） */
+      sre.lastIndex = end + 9;
     }
-    var lines = [], i;
+    var lines = [], i, j, part;
     for (i = 0; i < streams.length; i++) {
       if (streams[i].indexOf('BT') < 0) continue;
-      lines = lines.concat(pdfStrings(streams[i]));
+      /* 原地 push，不用 concat —— concat 每轮都整份复制已有的 lines，
+         几百个内容流的 PDF 会退化成平方级（实测 460 页时光这一步就 250 ms） */
+      part = pdfStrings(streams[i]);
+      for (j = 0; j < part.length; j++) lines.push(part[j]);
     }
     var text = lines.join('\n');
     var note = '';

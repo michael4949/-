@@ -8,6 +8,7 @@
   var sh, $root, h, DATA, P, K, LIB;
   var ACCENT = window.DGG.PALETTE.m5;
   var CAPS = [['招聘 · JD 与简历', 'JD · 简历打分'], ['面试与录用', '题库 · 评分 · 定薪'], ['用工合规', '12 条规则 · 人事日历'], ['成本与编制', '成本结构 · 三方案']];
+  var STEPS = ['connect', 'board', 'recruit', 'interview', 'compliance', 'cost'];
   var GRADE = { A: 'ok', B: 'handled', C: 'risk', D: 'done' }, GRADE_NAME = { A: 'A 级', B: 'B 级', C: 'C 级', D: '不满足' };
   var STAGE_TONE = { new: 'watch', screened: 'handled', interview: 'accent', done: 'risk', offer: 'ok', hired: 'ok', rejected: 'done' };
   var SEV = { high: 'late', mid: 'risk', low: 'watch' }, SEV_NAME = { high: '高', mid: '中', low: '低' };
@@ -95,10 +96,16 @@
   }
   function bars(work, sel) { return Array.prototype.slice.call(work.querySelectorAll(sel)); }
   function trs(el) { return el ? Array.prototype.slice.call(el.querySelectorAll('tbody tr')) : []; }
-  function refocus(txt, ms) {
-    setTimeout(function () { var el = rowOf(workEl(), txt); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 80);
+  /* 给表格行标上业务 id，内核的 {type:'focus'|'open', ref} 就能找到这一行 */
+  function tagRefs(tbl, rows, textOf, refOf) {
+    trs(tbl).forEach(function (tr) {
+      var t = tr.textContent, i, s2;
+      for (i = 0; i < rows.length; i++) { s2 = textOf(rows[i]); if (s2 && t.indexOf(s2) >= 0) { tr.setAttribute('data-ref', refOf ? refOf(rows[i]) : s2); return; } }
+    });
   }
+  function tagRef(el, ref) { if (el && el.setAttribute) el.setAttribute('data-ref', ref); return el; }
   function rowOf(scope, txt) {
+    if (!scope) return null;
     var list = scope.querySelectorAll('.pd-table tbody tr'), i;
     for (i = 0; i < list.length; i++) if (list[i].textContent.indexOf(txt) >= 0) return list[i];
     return null;
@@ -111,7 +118,7 @@
     var c = sh.getCompany();
     if (!M.data) { M.company = c; M.name = c ? c.name : null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); }
     M.step = step || 'connect';
-    if (['connect', 'board', 'recruit', 'interview', 'compliance', 'cost'].indexOf(M.step) < 0) M.step = 'connect';
+    if (STEPS.indexOf(M.step) < 0) M.step = 'connect';
     draw();
   }
   function unmount() { M.replay = null; }
@@ -135,12 +142,11 @@
   function col(cls, kids) { return h('div', { class: cls, style: 'display:flex;flex-direction:column;gap:16px' }, kids); }
   function gradeChip(g) { return P.chip(GRADE[g], GRADE_NAME[g]); }
   function stageChip(c) { return P.chip(STAGE_TONE[c.stage] || 'watch', c.stageName); }
-  function sevChip(s) { return P.chip(SEV[s], SEV_NAME[s] + '风险'); }
   function needBlock(n, on, onClick, full) {
-    if (!on && !full) return h('button', { class: 'nd slim', onclick: onClick }, [
+    if (!on && !full) return h('button', { class: 'nd slim', 'data-ref': n.id, onclick: onClick }, [
       h('div', { class: 'hd' }, [h('span', {}, [n.title]), h('span', { class: 'sp' }), h('span', { class: 'n' }, [n.count + ' 人 · 候选 ' + n.active]), P.chip(n.status === 'published' ? 'ok' : 'watch', n.status === 'published' ? '已发布' : '未发布')])
     ]);
-    return h('button', { class: 'nd' + (on ? ' on' : ''), onclick: onClick }, [
+    return h('button', { class: 'nd' + (on ? ' on' : ''), 'data-ref': n.id, onclick: onClick }, [
       h('div', { class: 'hd' }, [h('span', {}, [n.title]), h('span', { class: 'sp' }), P.chip(n.status === 'published' ? 'ok' : 'watch', n.status === 'published' ? '已发布' : '未发布')]),
       h('div', { class: 'kv' }, [h('span', {}, [n.count + ' 人 · ' + n.deptName]), h('span', {}, ['到岗 ' + short(n.dueDate) + '（' + n.dueDays + ' 天）']), h('span', {}, [fmtN(n.band[0]) + '–' + fmtN(n.band[1]) + ' 元'])]),
       h('div', { class: 'm5-stages' }, [['new', '新简历'], ['screened', '初筛'], ['interview', '面试'], ['done', '完成'], ['offer', 'offer']].map(function (s) { return h('span', { class: 'st' + (n.stages[s[0]] ? ' has' : '') }, [h('b', {}, [String(n.stages[s[0]])]), s[1]]); }))
@@ -149,7 +155,6 @@
   function currentNeed() { var R = M.R; if (!M.need || !R.needs.some(function (n) { return n.id === M.need; })) M.need = R.needs[0].id; return R.needs.filter(function (n) { return n.id === M.need; })[0]; }
   function topDept() { var l = M.R.org.byDept.slice().sort(function (a, b) { return (b.overtimeOver - a.overtimeOver) || (b.vacancy - a.vacancy); }); return l[0]; }
   function topRule() { var o = M.R.compliance.open; return o.length ? o[0] : M.R.compliance.items[0]; }
-  function topCand() { var n = currentNeed(); var l = M.R.candidates.filter(function (c) { return c.needId === n.id && c.stage !== 'rejected'; }); return l[0]; }
 
   /* ---------- 屏 1 · 接入 ---------- */
   function screenConnect(work) {
@@ -208,6 +213,7 @@
       { key: 'overtimeOver', label: '加班超限', align: 'r', sort: true, render: function (x) { return x.overtimeOver ? h('span', { class: 'neg' }, [x.overtimeOver + ' 人']) : '—'; } },
       { key: 'needs', label: '在招', align: 'r', render: function (x) { return x.needs ? P.chip('accent', x.needs + ' 人') : '—'; } }
     ], rows: O.byDept, rowKey: function (x) { return x.id; } });
+    tagRefs(tbl, O.byDept, function (x) { return x.name; }, function (x) { return x.id; });
     var cDept = P.card({ cls: 'c7', title: '部门盘点', sub: d.departments.length + ' 个 · 平均工资 ' + fmtN(O.avgWage) + ' 元', tight: true, body: [h('div', { class: 'pd-scroll', style: 'max-height:250px' }, [tbl])] });
     g.appendChild(cDept);
     var needs = h('div', { class: 'm5-needs' });
@@ -215,7 +221,7 @@
     var cNeed = P.card({ cls: 'c5', title: '招聘进度', sub: k.needs + ' 张 · ' + k.needCount + ' 人', body: [needs] });
     g.appendChild(cNeed);
     var risks = h('div', { class: 'pd-list' });
-    comp.open.slice(0, 5).forEach(function (i) { risks.appendChild(P.item({ tone: SEV[i.severity] === 'watch' ? 'hand' : SEV[i.severity], icon: i.id.slice(1), title: i.name, sub: i.cat, right: i.count + ' 人', rightSub: '预计 ' + W(i.impact), onClick: function () { M.rule = i.id; setStep('compliance'); } })); });
+    comp.open.slice(0, 5).forEach(function (i) { risks.appendChild(tagRef(P.item({ tone: SEV[i.severity] === 'watch' ? 'hand' : SEV[i.severity], icon: i.id.slice(1), title: i.name, sub: i.cat, right: i.count + ' 人', rightSub: '预计 ' + W(i.impact), onClick: function () { M.rule = i.id; setStep('compliance'); } }), i.id)); });
     if (!comp.open.length) risks.appendChild(P.empty('无待处理合规问题'));
     var cRisk = P.card({ cls: 'c4', title: '合规风险榜', sub: '待处理 ' + comp.counts.open + ' 项', body: [risks], extra: [P.btn('全部', { cls: 'sm', onClick: function () { M.rule = null; setStep('compliance'); } })] });
     g.appendChild(cRisk);
@@ -289,6 +295,7 @@
       { key: 'expected', label: '期望', align: 'r', sort: true, render: function (c) { return h('span', { class: c.expected > n.band[1] ? 'neg' : '' }, [fmtN(c.expected)]); } },
       { key: 'stageIdx', label: '阶段', sort: true, render: function (c) { return stageChip(c); } }
     ], rows: shown, sortKey: 'total', sortDir: 'desc', rowKey: function (c) { return c.id; }, activeKey: M.cand, onRow: function (c) { M.cand = c.id; draw(); }, empty: '此筛选下没有候选人' });
+    tagRefs(tbl, shown, function (c) { return c.id; });
     var cTbl = P.card({ cls: 'c7', title: '候选人 · ' + n.title, sub: shown.length + ' 人' + (f ? ' · 已筛选' : ''), tight: true, body: [h('div', { class: 'pd-scroll', style: 'max-height:330px' }, [tbl])] });
     g.appendChild(cTbl);
     var s = C.score, acts = h('div', { class: 'pd-actions' });
@@ -346,7 +353,7 @@
       : vd('待面试 ' + R.kpi.interviewing + ' 人，四项打分后出录用建议与定薪。');
     g.appendChild(h('div', { class: 'c12' }, [say]));
     var il = h('div', { class: 'pd-list' });
-    list.forEach(function (c) { il.appendChild(P.item({ tone: c.stage === 'offer' ? 'ok' : c.stage === 'done' ? 'risk' : 'accent', icon: c.grade, title: c.id + ' · ' + c.jobTitle, sub: (c.interviewDate ? short(c.interviewDate) + ' · ' : '') + c.stageName, right: c.interview ? c.interview.avg + ' 分' : '待评', rightSub: c.offer ? fmtN(c.offer.salary) + ' 元' : '', onClick: function () { M.icand = c.id; M.scores = {}; draw(); } })); });
+    list.forEach(function (c) { il.appendChild(tagRef(P.item({ tone: c.stage === 'offer' ? 'ok' : c.stage === 'done' ? 'risk' : 'accent', icon: c.grade, title: c.id + ' · ' + c.jobTitle, sub: (c.interviewDate ? short(c.interviewDate) + ' · ' : '') + c.stageName, right: c.interview ? c.interview.avg + ' 分' : '待评', rightSub: c.offer ? fmtN(c.offer.salary) + ' 元' : '', onClick: function () { M.icand = c.id; M.scores = {}; draw(); } }), c.id)); });
     if (!list.length) il.appendChild(P.empty('还没有面试安排'));
     var cList = P.card({ cls: 'c4', title: '面试安排', sub: list.length + ' 人', body: [il] });
     g.appendChild(cList);
@@ -416,10 +423,11 @@
       { key: 'impact', label: '影响预计', align: 'r', cls: 'm5-im', sort: true, sortDesc: true, render: function (i) { return i.impact ? h('span', {}, [h('b', { class: i.status === 'open' ? 'neg' : '' }, [W(i.impact)]), h('span', { class: 'm5-mb' }, [h('i', { 'data-to': String(Math.max(10, Math.round(100 * Math.sqrt(i.impact / mx)))) })])]) : '—'; } },
       { key: 'action', label: '动作', render: function (i) { return i.status === 'open' ? P.btn(i.action.label, { cls: 'sm', onClick: function (e) { e.stopPropagation(); M.rule = i.id; commit(K.resolve(d, i.id, LIB), i.id + ' ' + i.action.label); } }) : P.chip(STATUS_TONE[i.status], STATUS_NAME[i.status]); } }
     ], rows: comp.items, rowKey: function (i) { return i.id; }, activeKey: M.rule, onRow: function (i) { M.rule = i.id; draw(); } });
+    tagRefs(tbl, comp.items, function (i) { return i.id; });
     var cTbl = P.card({ cls: 'c7', title: '规则核对', sub: LIB.complianceRules.rules.length + ' 条 · 待处理 ' + comp.counts.open + ' 项', tight: true, body: [h('div', { class: 'pd-scroll', style: 'max-height:290px' }, [tbl])] });
     g.appendChild(cTbl);
     var aff = h('div', { class: 'm5-aff' });
-    I.affected.slice(0, 5).forEach(function (a) { aff.appendChild(h('div', { class: 'a' }, [h('b', {}, [a.id]), h('span', { class: 'd' }, [h('span', { class: 'j' }, [a.job + ' · ' + a.dept]), a.detail]), h('span', { class: 'num' }, [a.amount ? fmtN(a.amount) + ' 元' : ''])])); });
+    I.affected.slice(0, 5).forEach(function (a) { aff.appendChild(h('div', { class: 'a', 'data-ref': a.id }, [h('b', {}, [a.id]), h('span', { class: 'd' }, [h('span', { class: 'j' }, [a.job + ' · ' + a.dept]), a.detail]), h('span', { class: 'num' }, [a.amount ? fmtN(a.amount) + ' 元' : ''])])); });
     var acts = h('div', { class: 'pd-actions' });
     if (I.status === 'open') acts.appendChild(h('div', { class: 'pd-action best' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['1']), I.action.label]), P.btn(I.mode === 'fix' ? '执行并写回' : '进台账', { cls: 'primary sm', onClick: function () { commit(K.resolve(d, I.id, LIB), I.id + ' ' + I.action.label); } }), h('div', { class: 'd' }, [I.action.desc])]));
     else acts.appendChild(h('div', { class: 'pd-action' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['·']), I.action.label]), P.chip(STATUS_TONE[I.status], STATUS_NAME[I.status]), h('div', { class: 'd' }, [I.status === 'clear' ? '本次核对未命中' : I.action.desc])]));
@@ -441,7 +449,7 @@
   }
   function affDrawer(I) {
     var aff = h('div', { class: 'm5-aff' });
-    I.affected.forEach(function (a) { aff.appendChild(h('div', { class: 'a' }, [h('b', {}, [a.id]), h('span', { class: 'd' }, [h('span', { class: 'j' }, [a.job + ' · ' + a.dept]), a.detail]), h('span', { class: 'num' }, [a.amount ? fmtN(a.amount) + ' 元' : ''])])); });
+    I.affected.forEach(function (a) { aff.appendChild(h('div', { class: 'a', 'data-ref': a.id }, [h('b', {}, [a.id]), h('span', { class: 'd' }, [h('span', { class: 'j' }, [a.job + ' · ' + a.dept]), a.detail]), h('span', { class: 'num' }, [a.amount ? fmtN(a.amount) + ' 元' : ''])])); });
     P.drawer(M.frame.body, { title: I.id + ' ' + I.name, sub: I.count + ' 人 · 影响预计 ' + W(I.impact) + ' · ' + I.law, body: [aff] });
   }
 
@@ -477,7 +485,7 @@
     var lc = P.lineChart({ labels: S.labels, right: true, series: [{ values: S.base.map(function () { return 0; }), color: colors.base, fmt: function () { return '现状'; } }].concat(S.plans.map(function (p) { return { values: p.months.map(function (m, i) { return Math.round((m.cost - S.base[i].cost) / 1000) / 10; }), color: colors[p.key], fmt: function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v) + ' 万'; } }; })), height: 230, width: 900 });
     var cLine = P.card({ cls: 'c7', title: '12 个月用工成本走势', sub: '较现状差额 · 万元 / 月', body: [lc, h('div', { class: 'pd-legend', style: 'margin-top:8px' }, [h('span', {}, [h('i', { style: 'background:' + colors.base }), '现状'])].concat(S.plans.map(function (p) { return h('span', {}, [h('i', { style: 'background:' + colors[p.key] }), p.key + ' ' + p.name]); })))] });
     g.appendChild(cLine);
-    var cmp = P.compare({ active: M.plan, onPick: function (key) { M.plan = key; draw(); }, options: S.plans.map(function (p) { return { key: p.key, name: p.name, recommended: p.recommended, headline: { big: W(p.total12), sub: (p.delta >= 0 ? '+' : '−') + W(Math.abs(p.delta)) + ' 较现状', tone: p.key === 'C' ? 'ok' : '' }, rows: [{ k: '期末在编', v: p.endHeadcount + ' 人' }, { k: '新增招聘', v: p.hires + ' 人' }, { k: '缺编', v: p.vacancyAfter + ' 人', tone: p.vacancyAfter > 0 ? 'bad' : 'good' }, { k: '用工占收入', v: p.share + '%' }, { k: '人均产值', v: W(p.perCapitaRevenue) }], notes: planNote(p) }; }) });
+    var cmp = P.compare({ active: M.plan, onPick: function (key) { M.plan = key; draw(); }, options: S.plans.map(function (p) { return { key: p.key, name: p.name, recommended: p.recommended, headline: { big: W(p.total12), sub: (p.delta >= 0 ? '+' : '−') + W(Math.abs(p.delta)) + ' 较现状', tone: p.key === 'C' ? 'ok' : '' }, rows: [{ k: '期末在编', v: p.endHeadcount + ' 人' }, { k: '新增招聘', v: p.hires + ' 人' }, { k: '缺编', v: p.vacancyAfter + ' 人', tone: p.vacancyAfter > 0 ? 'bad' : 'good' }, { k: '用工占收入', v: p.share + '%' }, { k: '人均产值', v: W(p.perCapitaRevenue) }], notes: K.planNote(R, p) }; }) });
     var cCmp = P.card({ cls: 'c12', title: '编制三方案', sub: '12 个月预计', extra: [P.btn('逐月明细', { cls: 'sm', onClick: function () { monthDrawer(Pn, S); } })], body: [cmp], foot: [
       d.plan === M.plan ? P.chip('ok', '已采纳 ' + M.plan) : P.btn('采纳方案 ' + M.plan, { cls: 'primary', onClick: function () { commit(K.adoptPlan(d, M.plan, LIB), '已采纳方案 ' + M.plan + '，月报已更新'); } })] });
     g.appendChild(cCmp);
@@ -492,333 +500,142 @@
       verdict: say, focus: opts[['A', 'B', 'C'].indexOf(M.plan)] || null });
   }
 
-  /* ================= 对话大脑 ================= */
-  function mini(head, rows) {
-    var t = h('table', { class: 'mini' });
-    if (head) t.appendChild(h('thead', {}, [h('tr', {}, head.map(function (x) { return h('th', {}, [String(x)]); }))]));
-    var tb = h('tbody');
-    rows.forEach(function (r) { tb.appendChild(h('tr', {}, r.map(function (x) { return h('td', {}, [String(x)]); }))); });
-    t.appendChild(tb);
-    return t;
-  }
-  function kvb(pairs) { var g2 = h('div', { class: 'kv' }); pairs.forEach(function (p) { g2.appendChild(h('span', {}, [String(p[0])])); g2.appendChild(h('span', {}, [String(p[1])])); }); return g2; }
-  function tagsb(list) { return h('div', { class: 'tags' }, list.map(function (t) { return h('span', {}, [String(t)]); })); }
-  function has(q, arr) { for (var i = 0; i < arr.length; i++) if (q.indexOf(arr[i]) >= 0) return true; return false; }
+  /* ================= 对话坞 · 内核大脑的落地 =================
+     问答、开场发现、快捷问句、文档摄入全部走 DGG.coreM5 的 screens / brief / suggest / ask / ingest
+     （与 skill 内核同一份实现）。这一段只做两件事：把当前上下文交出去，把内核返回的声明式动作落到页面上。 */
   function workEl() { return M.frame ? M.frame.work : null; }
-
-  function opener(step) {
-    if (!M.R) return null;
-    var R = M.R, k = R.kpi, C = R.cost, comp = R.compliance;
-    if (step === 'connect') return '社保申报表的基数合计 ' + W(C.socialBase) + ' / 月，工资表 ' + W(C.wages) + ' / 月，差 ' + W(C.wages - C.socialBase) + '，这块按实际工资申报要补。';
-    if (step === 'board') { var dp = topDept(); return dp.name + ' 在编 ' + dp.headcount + ' 人、缺编 ' + dp.vacancy + ' 人，' + dp.overtimeOver + ' 人上月加班超 36 小时，缺编与加班是同一件事。'; }
-    if (step === 'recruit') { var n = currentNeed(), t = topCand(); return n.title + ' 还有 ' + n.dueDays + ' 天到岗期限，候选 ' + n.active + ' 人里 A 级 ' + n.gradeA + ' 人；' + t.id + ' 匹配 ' + t.total + ' 分，期望 ' + fmtN(t.expected) + ' 元。'; }
-    if (step === 'interview') {
-      var dn = R.candidates.filter(function (c) { return c.scores; });
-      if (!dn.length) return '待面试 ' + k.interviewing + ' 人，四项打分录入后出录用建议与定薪。';
-      var c0 = dn[0];
-      return c0.id + ' 综合 ' + c0.interview.avg + ' 分，' + c0.interview.lowest + ' 只有 ' + c0.interview.lowestScore + ' 分；建议定薪 ' + fmtN(c0.interview.suggested) + ' 元，正好卡在候选人期望上。';
-    }
-    if (step === 'compliance') { var t2 = topRule(); return t2.id + ' ' + t2.name + ' 涉及 ' + t2.count + ' 人，影响预计 ' + W(t2.impact) + '，占 ' + comp.counts.open + ' 项待处理影响的 ' + Math.round(100 * t2.impact / (comp.impact || 1)) + '%。'; }
-    if (step === 'cost') {
-      var cs = '用工成本占收入 ' + C.share + '%，高于同行参考 ' + C.bench[0] + '–' + C.bench[1] + '%';
-      if (R.sim.socialDelta > 0) return cs + '；社保基数补到位每月多 ' + W(R.sim.socialDelta) + '，一年 ' + W(R.sim.socialDelta * 12) + '。';
-      var h5o = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
-      return '社保基数已按实际工资申报到位' + (h5o && h5o.status !== 'open' ? '，' + h5o.id + ' 敞口已关闭' : '') + '；' + cs + '。';
-    }
-    return null;
+  function refEl(ref) {
+    var w = workEl();
+    if (!w || ref == null) return null;
+    var el = w.querySelector('[data-ref="' + String(ref) + '"]');
+    if (el) return el;
+    var dp = M.data.departments.filter(function (x) { return x.id === ref; })[0];
+    return rowOf(w, dp ? dp.name : String(ref));            /* 表头排序后重绘过的行，退回按文本找 */
   }
-  function suggest(step) {
-    if (step === 'connect') return ['哪些数据是直连的', '社保基数和工资差多少', '进人力驾驶舱'];
-    if (step === 'board') return ['哪个部门缺编多', '离职为什么高', '加班超限多少人', '先处理哪一项'];
-    if (step === 'recruit') return ['A 级候选人有几个', '把 A 级筛出来', '谁不满足硬条件', '薪酬带多少'];
-    if (step === 'interview') return ['建议定薪多少', '为什么是这个分', '谁还没评分', '发 offer'];
-    if (step === 'compliance') return ['H05 影响多少钱', '先处理哪一条', '按实际工资调基数', '30 天内到期几项'];
-    if (step === 'cost') return ['方案 B 贵多少', '社保基数补齐要多少', '采纳方案 B', '看逐月明细'];
-    return null;
+  function refocus(ref, ms) { setTimeout(function () { var el = refEl(ref); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 80); }
+  function refocusTop(sel) { setTimeout(function () { var w = workEl(); var tr = w && w.querySelector(sel); if (tr) anim().pulse(tr, { ms: 2200, scroll: true }); }, 80); }
+  function docBody(list) {
+    var out = [];
+    (list || []).forEach(function (b) {
+      if (b && b.type === 'text') { out.push(h('div', { class: 'pd-pre' }, [String(b.text == null ? '' : b.text)])); return; }
+      var n = window.DGG.chat.block(b);
+      if (n) out.push(n);
+    });
+    return out;
   }
-
-  function answer(q, step) {
-    if (!M.R) return null;
-    q = String(q || '');
-    var R = M.R, k = R.kpi, C = R.cost, comp = R.compliance, w = workEl();
-    var i, m;
-    /* 点名某条规则 */
-    m = q.match(/H\s*0?(\d{1,2})/i);
-    if (m) {
-      var rid = 'H' + (m[1].length < 2 ? '0' + m[1] : m[1]);
-      var it = comp.items.filter(function (x) { return x.id === rid; })[0];
-      if (it) return { text: it.id + ' ' + it.name + '：' + STATUS_NAME[it.status] + '，涉及 ' + it.count + ' 人，影响预计 ' + W(it.impact) + '。依据 ' + it.law + '；口径 ' + it.impactNote + '。',
-        blocks: it.affected.length ? [mini(['员工', '情况', '金额'], it.affected.slice(0, 4).map(function (a) { return [a.id, cut(a.detail, 16), a.amount ? fmtN(a.amount) + ' 元' : '—']; }))] : null,
-        focus: step === 'compliance' ? rowOf(w, it.id) : null,
-        act: step === 'compliance' ? (M.rule === it.id ? null : function () { M.rule = it.id; draw(); refocus(it.id); }) : function () { M.rule = it.id; setStep('compliance'); } };
+  /* 文档摄入的写回：内核已经算好新数据副本，这里只管换屏、选中与提示 */
+  function commitDoc(next) {
+    var had = {};
+    M.data.candidates.forEach(function (c) { had[c.id] = 1; });
+    var added = next.candidates.filter(function (c) { return !had[c.id]; })[0];
+    var revChanged = next.profile.revenue12 !== M.data.profile.revenue12;
+    var last = next.log[next.log.length - 1];
+    if (added) { M.need = added.needId; M.cand = added.id; M.filter = null; }
+    if ((added && M.step !== 'recruit') || (!added && revChanged && M.step !== 'cost')) {
+      M.data = next; recompute(); setStep(added ? 'recruit' : 'cost');
+      return;
     }
-    /* 点名某个候选人 */
-    m = q.match(/C-?\s?(\d{4})-?(\d{3})/i);
-    if (m) {
-      var cid = 'C-' + m[1] + '-' + m[2], cc = R.byId[cid];
-      if (cc) {
-        var blocks = [kvb([['匹配分', cc.total + ' · ' + GRADE_NAME[cc.grade]], ['学历 · 经验', cc.eduName + ' · ' + cc.years + ' 年'], ['期望', fmtN(cc.expected) + ' 元'], ['到岗', cc.availableDays + ' 天']])];
-        return { text: cc.id + ' ' + cc.jobTitle + '：' + cc.score.reasons.slice(0, 2).join('；') + '。当前 ' + cc.stageName + '，建议' + cc.action + '。', blocks: blocks,
-          focus: step === 'recruit' ? rowOf(w, cid) : null,
-          act: step === 'recruit' && M.cand === cid ? null : function () { M.cand = cid; M.need = cc.needId; if (step === 'recruit') { draw(); refocus(cid); } else setStep('recruit'); } };
-      }
-    }
-    /* 换屏 */
-    if (has(q, ['进人力驾驶舱', '驾驶舱', '开始分析'])) return { text: '在编 ' + k.headcount + ' / 编制 ' + k.budget + '，合规待处理 ' + k.complianceOpen + ' 项，影响预计 ' + W(k.complianceImpact) + '。', act: function () { if (!M.charged) enterBoard(); else setStep('board'); } };
-
-    if (step === 'connect') {
-      if (has(q, ['直连', '数据源', '同步', '导入'])) {
-        var dir = M.data.sources.filter(function (s) { return s.mode === 'direct'; });
-        return { text: '共 ' + M.data.sources.length + ' 个来源，系统直连 ' + dir.length + ' 个，其余表格导入。', blocks: [mini(['来源', '方式', '条数'], M.data.sources.map(function (s) { return [cut(s.name, 10), s.mode === 'direct' ? '直连' : '导入', fmtN(s.rows)]; }))] };
-      }
-      if (has(q, ['社保', '基数', '差多少'])) return { text: '社保申报基数合计 ' + W(C.socialBase) + ' / 月，工资表 ' + W(C.wages) + ' / 月，差 ' + W(C.wages - C.socialBase) + '，基数只有工资的 ' + comp.socialBaseRatio + '%。', blocks: [kvb([['基数合计', W(C.socialBase) + ' / 月'], ['工资合计', W(C.wages) + ' / 月'], ['差额', W(C.wages - C.socialBase) + ' / 月']])] };
-      if (has(q, ['能力', '开通', '能做'])) return { text: '已开通 4 项：' + CAPS.map(function (c) { return c[0]; }).join('、') + '。' };
-      if (has(q, ['多少人', '在编', '编制'])) return { text: '在编 ' + k.headcount + ' 人 / 编制 ' + k.budget + '，缺编 ' + k.vacancy + '；' + M.data.departments.length + ' 个部门。' };
-    }
-    if (step === 'board') {
-      if (has(q, ['缺编', '哪个部门', '部门'])) {
-        var vac = R.org.byDept.filter(function (x) { return x.vacancy > 0; }).sort(function (a, b) { return b.vacancy - a.vacancy; });
-        return { text: '缺编 ' + k.vacancy + ' 人，集中在 ' + vac.map(function (x) { return x.name + ' ' + x.vacancy + ' 人'; }).join('、') + '。', blocks: [mini(['部门', '在编', '缺编'], vac.map(function (x) { return [x.name, x.headcount, x.vacancy]; }))], focus: rowOf(w, vac[0].name) };
-      }
-      if (has(q, ['离职', '流失', '为什么高'])) {
-        var rs = R.org.reasons.slice(0, 3);
-        return { text: '近 12 个月离职 ' + R.org.leavers12 + ' 人、离职率 ' + k.turnover + '%，行业参考 ' + k.turnoverBench + '%。原因前三：' + rs.map(function (x) { return x.label + ' ' + x.value + ' 人'; }).join('、') + '。' };
-      }
-      if (has(q, ['加班', '超限', '工时'])) {
-        var ot = R.org.byDept.filter(function (x) { return x.overtimeOver > 0; });
-        return { text: mon() + ' 月加班超 36 小时 ' + comp.overtimeOver + ' 人，全在 ' + ot.map(function (x) { return x.name; }).join('、') + '；加班费敞口预计 ' + W(R.sim.otPremium) + ' / 月。', focus: ot.length ? rowOf(w, ot[0].name) : null };
-      }
-      if (has(q, ['先处理', '建议', '哪一项', '怎么办'])) {
-        var t3 = topRule();
-        return { text: '先处理 ' + t3.id + ' ' + t3.name + '：' + t3.count + ' 人，影响预计 ' + W(t3.impact) + '。整改动作是' + t3.action.label + '。', act: function () { M.rule = t3.id; setStep('compliance'); } };
-      }
-      if (has(q, ['在招', '招聘', '需求单'])) return { text: '在招 ' + k.needCount + ' 人 / ' + k.needs + ' 张需求单，候选 ' + k.candidates + ' 人、A 级 ' + k.gradeA + '。', blocks: [mini(['岗位', '人数', '到岗'], R.needs.map(function (n) { return [n.title, n.count, short(n.dueDate)]; }))], act: function () { M.filter = null; setStep('recruit'); } };
-      if (has(q, ['成本', '占收入', '人均'])) return { text: '用工成本占收入 ' + C.share + '%（参考 ' + C.bench[0] + '–' + C.bench[1] + '%），年化 ' + W0(C.annual) + '，人均产值 ' + W(C.perCapitaRevenue) + '。', act: function () { setStep('cost'); } };
-    }
-    if (step === 'recruit') {
-      var n2 = currentNeed(), all2 = R.candidates.filter(function (c) { return c.needId === n2.id; });
-      if (has(q, ['A 级', 'A级', '筛出', '好的候选'])) {
-        var as = all2.filter(function (c) { return c.grade === 'A' && c.stage !== 'rejected'; });
-        return { text: n2.title + ' A 级 ' + as.length + ' 人：' + as.slice(0, 4).map(function (c) { return c.id + ' ' + c.total + ' 分'; }).join('、') + '。已按 A 级筛这一屏。',
-          blocks: [mini(['候选人', '匹配分', '期望'], as.slice(0, 5).map(function (c) { return [c.id, c.total, fmtN(c.expected)]; }))],
-          act: function () { M.filter = 'A'; draw(); if (as.length) refocus(as[0].id); } };
-      }
-      if (has(q, ['不满足', '淘汰', '硬条件', '不合格'])) {
-        var ds = all2.filter(function (c) { return c.grade === 'D'; });
-        if (!ds.length) return { text: n2.title + ' 本批没有不满足硬条件的候选人。' };
-        return { text: '不满足硬条件 ' + ds.length + ' 人。' + ds[0].id + '：' + ds[0].score.gates.join('；') + '。', blocks: [mini(['候选人', '卡在哪'], ds.slice(0, 4).map(function (c) { return [c.id, cut(c.score.gates[0], 18)]; }))], act: function () { M.filter = 'fail'; draw(); refocus(ds[0].id); } };
-      }
-      if (has(q, ['薪酬带', '多少钱', '工资', '期望'])) return { text: n2.title + ' 薪酬带 ' + fmtN(n2.band[0]) + '–' + fmtN(n2.band[1]) + ' 元 / 月；候选人期望中位 ' + fmtN(all2.map(function (c) { return c.expected; }).sort(function (a, b) { return a - b; })[Math.floor(all2.length / 2)]) + ' 元。' };
-      if (has(q, ['怎么打分', '打分', '匹配分', '怎么算'])) return { text: '匹配分 = 技能 35% + 经验 20% + 行业 15% + 稳定性 15% + 薪酬 10% + 通勤 5%；学历、经验、必备技能、证书、到岗日期任一不过直接判不满足。' };
-      if (has(q, ['JD', 'jd', '职位描述'])) return { text: n2.title + ' JD ' + K.jd(M.data, n2.id, LIB, M.jdVariant).words + ' 字，' + (n2.status === 'published' ? '已发布' : '未发布') + '。全文在 JD 卡的「查看全文」里。', act: function () { jdDrawer(K.jd(M.data, n2.id, LIB, M.jdVariant)); } };
-      if (has(q, ['下一步', '怎么办', '建议', '为什么'])) { var cf = R.byId[M.cand]; return { text: cf.id + ' 当前 ' + cf.stageName + '，建议' + cf.action + '：' + cf.score.reasons[0] + '。', focus: rowOf(w, cf.id) }; }
-    }
-    if (step === 'interview') {
-      var dn2 = R.candidates.filter(function (c) { return c.scores; });
-      var cur = M.icand ? R.byId[M.icand] : null;
-      if (has(q, ['定薪', '多少钱', '工资', 'offer 定'])) {
-        var cx = (cur && cur.interview) ? cur : dn2[0];
-        if (!cx) return { text: '还没有评分记录，四项打分后才有定薪建议。' };
-        var r2 = cx.interview;
-        return { text: cx.id + ' 建议定薪 ' + fmtN(r2.suggested) + ' 元 / 月：薪酬带 ' + fmtN(r2.band[0]) + '–' + fmtN(r2.band[1]) + '，内部中位 ' + fmtN(r2.median) + '，候选人期望 ' + fmtN(cx.expected) + '，综合 ' + r2.avg + ' 分在中位上' + (r2.avg >= 3.5 ? '浮' : '调') + '。', blocks: [kvb([['薪酬带', fmtN(r2.band[0]) + '–' + fmtN(r2.band[1])], ['内部中位', fmtN(r2.median)], ['期望', fmtN(cx.expected)], ['建议定薪', fmtN(r2.suggested)]])] };
-      }
-      if (has(q, ['没评', '待评', '谁还'])) {
-        var wait = R.candidates.filter(function (c) { return c.stage === 'interview'; });
-        return { text: '待评 ' + wait.length + ' 人：' + wait.map(function (c) { return c.id + ' ' + short(c.interviewDate); }).join('、') + '。' };
-      }
-      if (has(q, ['为什么', '这个分', '评分', '几分'])) {
-        var cy = (cur && cur.interview) ? cur : dn2[0];
-        if (!cy) return { text: '这一屏还没有评分结果。' };
-        return { text: cy.id + ' 综合 ' + cy.interview.avg + ' 分（' + cy.interview.verdictName + '）：' + cy.interview.radar.map(function (x) { return x.label + ' ' + x.value + ' 分 × ' + Math.round(x.weight * 100) + '%'; }).join('，') + '。', blocks: [mini(['能力', '分', '权重'], cy.interview.radar.map(function (x) { return [x.label, x.value, Math.round(x.weight * 100) + '%']; }))] };
-      }
-      if (has(q, ['发 offer', '发offer', '录用', '要不要'])) {
-        var cz = R.candidates.filter(function (c) { return c.stage === 'done' && c.interview && c.interview.verdict === 'hire'; })[0];
-        if (!cz) return { text: '当前没有处在「面试完成 · 建议录用」的候选人。' };
-        return { text: cz.id + ' 综合 ' + cz.interview.avg + ' 分，建议录用，月薪 ' + fmtN(cz.interview.suggested) + ' 元；已按这个数发 offer。', act: function () { M.icand = cz.id; commit(K.offer(M.data, cz.id, cz.interview.suggested, LIB), cz.id + ' offer 已发，月薪 ' + fmtN(cz.interview.suggested) + ' 元'); } };
-      }
-      if (has(q, ['题', '问什么', '题库'])) { var kit2 = cur ? K.interviewKit(M.data, cur, LIB) : null; if (kit2) return { text: cur.jobTitle + ' 四项能力共 ' + kit2.sets.reduce(function (t, s) { return t + s.questions.length; }, 0) + ' 道题，按 1 / 3 / 5 分锚点打分；面试官 ' + kit2.interviewers.join('、') + '。', act: function () { kitDrawer(kit2, cur); } }; }
-    }
-    if (step === 'compliance') {
-      if (has(q, ['先处理', '哪一条', '最急', '怎么办', '建议'])) {
-        var t4 = topRule();
-        return { text: '先处理 ' + t4.id + ' ' + t4.name + '：' + t4.count + ' 人，影响预计 ' + W(t4.impact) + '，' + SEV_NAME[t4.severity] + '风险。动作是' + t4.action.label + '。', focus: rowOf(w, t4.id), act: M.rule === t4.id ? null : function () { M.rule = t4.id; draw(); refocus(t4.id); } };
-      }
-      if (has(q, ['调基数', '按实际工资', '整改', '执行'])) {
-        var h05 = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
-        if (!h05 || h05.status !== 'open') return { text: 'H05 已处置，社保基数占工资 ' + comp.socialBaseRatio + '%。' };
-        return { text: 'H05 按实际工资调整基数：' + h05.count + ' 人写回花名册，年补缴敞口 ' + W(h05.impact) + ' 关闭，每月社保多 ' + W(R.sim.socialDelta) + '。已执行。', act: function () { M.rule = 'H05'; commit(K.resolve(M.data, 'H05', LIB), 'H05 按实际工资调整基数，已写回花名册'); } };
-      }
-      if (has(q, ['影响', '多少钱', '金额'])) return { text: '待处理 ' + comp.counts.open + ' 项，影响预计合计 ' + W(comp.impact) + '。前三：' + comp.open.slice(0, 3).map(function (x) { return x.id + ' ' + W(x.impact); }).join('、') + '。', blocks: [mini(['规则', '涉及', '影响预计'], comp.open.slice(0, 5).map(function (x) { return [x.id + ' ' + cut(x.name, 8), x.count + ' 人', W(x.impact)]; }))] };
-      if (has(q, ['到期', '日历', '30 天', '30天'])) {
-        var cal2 = R.calendar;
-        return { text: '30 天内 ' + cal2.due30.length + ' 项：合同到期 ' + cal2.due30.filter(function (x) { return x.kind === 'contract'; }).length + '、试用期届满 ' + cal2.due30.filter(function (x) { return x.kind === 'probation'; }).length + '、面试 ' + cal2.due30.filter(function (x) { return x.kind === 'interview'; }).length + '。接下来：' + cal2.items.slice(0, 3).map(function (x) { return short(x.date) + ' ' + x.kindName; }).join('、') + '。' };
-      }
-      if (has(q, ['派遣'])) return { text: '派遣 ' + R.org.dispatch + ' 人，占 ' + comp.dispatchRatio + '%，上限 10%。' };
-    }
-    if (step === 'cost') {
-      var S2 = R.sim;
-      m = q.match(/方案\s*([ABC])|([ABC])\s*方案/i);
-      if (has(q, ['采纳', '就按', '定了'])) {
-        var ak = m ? (m[1] || m[2]).toUpperCase() : M.plan;
-        var ap = S2.plans.filter(function (p) { return p.key === ak; })[0] || Pn2();
-        return { text: '已采纳方案 ' + ap.key + '，12 个月预计 ' + W(ap.total12) + '，月报按这个口径出。', act: function () { M.plan = ap.key; commit(K.adoptPlan(M.data, ap.key, LIB), '已采纳方案 ' + ap.key + '，月报已更新'); } };
-      }
-      if (m) {
-        var pk = (m[1] || m[2]).toUpperCase(), pp = S2.plans.filter(function (p) { return p.key === pk; })[0];
-        return { text: '方案 ' + pp.key + ' ' + pp.name + '：12 个月预计 ' + W(pp.total12) + '，较现状 ' + (pp.delta >= 0 ? '+' : '−') + W(Math.abs(pp.delta)) + '；期末在编 ' + pp.endHeadcount + ' 人，缺编 ' + pp.vacancyAfter + '，用工占收入 ' + pp.share + '%。' + planNote(pp) + '。',
-          blocks: [kvb([['12 个月预计', W(pp.total12)], ['较现状', (pp.delta >= 0 ? '+' : '−') + W(Math.abs(pp.delta))], ['期末在编', pp.endHeadcount + ' 人'], ['用工占收入', pp.share + '%']])],
-          act: function () { M.plan = pk; draw(); } };
-      }
-      if (has(q, ['逐月', '明细', '每个月'])) return { text: '方案 ' + M.plan + ' 逐月明细已打开：12 个月在编与用工成本，以及较现状差额。', act: function () { monthDrawer(Pn2(), S2); } };
-      if (has(q, ['社保', '基数', '补齐'])) {
-        var h5c = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
-        if (S2.socialDelta <= 0) return { text: '社保基数已补齐，当前申报基数等于工资口径，无待补差额' + (h5c && h5c.status !== 'open' ? '；' + h5c.id + ' ' + STATUS_NAME[h5c.status] + '，补缴敞口已关闭' : '') + '。' };
-        return { text: '按实际工资申报后每月多 ' + W(S2.socialDelta) + '，12 个月 ' + W(S2.socialDelta * 12) + '；同时关闭 H05 的补缴敞口 ' + W((h5c || {}).impact || 0) + '。' };
-      }
-      if (has(q, ['人均', '产值', '成本结构', '结构'])) return { text: '人均成本 ' + W(C.perCapitaCost) + ' / 年，人均产值 ' + W(C.perCapitaRevenue) + '；年化结构：' + C.structure.slice(0, 4).map(function (x) { return x.label + ' ' + W(x.value); }).join('、') + '。', blocks: [mini(['项', '年化'], C.structure.map(function (x) { return [x.label, W(x.value)]; }))] };
-      if (has(q, ['月报', '发', '微信'])) return { text: '人力月报 ' + R.report.lines.length + ' 段，收件人 ' + ['总经理', '财务负责人', '各部门负责人'][M.who] + '。全文已打开。', act: function () { reportDrawer(R); } };
-    }
-    return null;
+    commit(next, last ? last.label + ' · ' + last.detail : null);
+    if (added) refocus(added.id);
   }
-  function Pn2() { return M.R.sim.plans.filter(function (p) { return p.key === M.plan; })[0] || M.R.sim.plans[1]; }
-  function planNote(p) {
-    var R = M.R, h5 = R.compliance.items.filter(function (x) { return x.id === 'H05'; })[0];
-    if (!h5 || h5.status === 'open' || R.sim.socialDelta > 0 || p.key === 'B') return p.compliance;
-    if (p.key === 'C') return '社保基数已按实际工资申报到位' + (R.compliance.counts.open ? '；其余 ' + R.compliance.counts.open + ' 项待处理敞口不变' : '');
-    return '社保基数已按实际工资申报到位，' + h5.id + ' 敞口已关闭';
-  }
-
-  /* ---------- 上传文档 ---------- */
-  function medianOf(arr) { if (!arr.length) return 0; var s = arr.slice().sort(function (a, b) { return a - b; }); return s[Math.floor(s.length / 2)]; }
-  function docResume(doc, txt) {
-    var d = M.data, n = currentNeed(), J = LIB.jobs.jobs[n.job] || {};
-    var edu = /硕士|研究生/.test(txt) ? 'master' : /本科|学士/.test(txt) ? 'bachelor' : /大专|专科/.test(txt) ? 'college' : 'secondary';
-    var ym = txt.match(/(\d{1,2})\s*年[^。；,，]{0,8}(经验|工作|从业)/), years = ym ? +ym[1] : 0;
-    var em = txt.match(/期望[^0-9]{0,10}([\d,]{4,8})/), expected = em ? +em[1].replace(/,/g, '') : 0;
-    var skills = Object.keys(LIB.jobs.skills).filter(function (kk) { return txt.indexOf(LIB.jobs.skills[kk]) >= 0; });
-    var certs = Object.keys(LIB.jobs.certs || {}).filter(function (kk) { return txt.indexOf(LIB.jobs.certs[kk]) >= 0; });
-    var pool = d.candidates;
-    var cand = { id: 'C-' + d.today.slice(2, 4) + d.today.slice(5, 7) + '-' + (900 + pool.length), needId: n.id, stage: 'new', source: 'site', certs: certs, industries: [], scores: null, offer: null,
-      edu: edu, years: years, skills: skills, lastTenureMonths: medianOf(pool.map(function (c) { return c.lastTenureMonths; })), jobs5y: medianOf(pool.map(function (c) { return c.jobs5y; })),
-      expected: expected || Math.round((n.band[0] + n.band[1]) / 2), availableDays: medianOf(pool.map(function (c) { return c.availableDays; })), distanceKm: medianOf(pool.map(function (c) { return c.distanceKm; })), age: medianOf(pool.map(function (c) { return c.age; })) };
-    var s = K.screenOne(d, cand, LIB);
-    var lines = ['Word《' + doc.name + '》按 ' + n.title + ' 的口径打分：' + s.total + ' 分 · ' + GRADE_NAME[s.grade] + '。',
-      '读到：' + (LIB.jobs.edu[edu] || edu) + ' · ' + years + ' 年经验 · 技能 ' + skills.length + ' 项' + (expected ? ' · 期望 ' + fmtN(expected) + ' 元' : '') + '。',
-      s.reasons.slice(0, 2).join('；') + '。'];
-    if (!expected || !years) lines.push('简历没写明的项（' + [years ? null : '工作年限', expected ? null : '期望薪资'].filter(Boolean).join('、') + '）按本批候选中位代入。');
-    lines.push('已加进 ' + n.title + ' 候选人表。');
-    return { text: lines.join('\n'),
-      blocks: [kvb([['学历', LIB.jobs.edu[edu] || edu], ['经验', years + ' 年'], ['技能命中', s.mustHit + '/' + (J.must || []).length], ['匹配分', s.total + ' · ' + GRADE_NAME[s.grade]]]), skills.length ? tagsb(skills.map(function (kk) { return LIB.jobs.skills[kk]; })) : null],
-      act: function () {
-        var d2 = K.ensure(M.data);
-        d2.candidates.push(cand);
-        d2.log.push({ seq: d2.log.length + 1, kind: 'recruit', label: '简历入池', detail: cand.id + ' 由《' + doc.name + '》解析 · ' + s.total + ' 分' });
-        M.need = n.id; M.cand = cand.id; M.filter = null;
-        if (M.step !== 'recruit') { M.data = d2; recompute(); setStep('recruit'); }
-        else commit(d2, cand.id + ' 已加进候选人表 · ' + s.total + ' 分');
-      } };
-  }
-  function docContract(doc, txt, paras) {
-    var MUST = [['合同期限', /合同期限|劳动合同期限|固定期限|无固定期限/], ['工作内容与工作地点', /工作内容|工作地点|工作岗位|岗位职责/],
-      ['工作时间与休息休假', /工作时间|休息休假|工时制|综合计算工时/], ['劳动报酬', /劳动报酬|工资标准|月工资|薪酬待遇|计件单价/],
-      ['社会保险', /社会保险|五险|社保|工伤保险/], ['劳动保护与职业危害防护', /劳动保护|劳动条件|职业危害|防护用品/]];
-    var hits = MUST.map(function (x) { return { name: x[0], ok: x[1].test(txt) }; });
-    var miss = hits.filter(function (x) { return !x.ok; });
-    var clauses = paras.filter(function (p) { return /^第[一二三四五六七八九十百]+条/.test(String(p).trim()); }).map(function (p) { return String(p).trim(); });
-    var money = (txt.match(/[\d][\d,]{4,}\s*元/g) || []);
-    var dates = (txt.match(/\d{4}\s*年\s*\d{1,2}\s*月(\s*\d{1,2}\s*日)?/g) || []);
-    var penalty = /违约金|万分之|逾期.{0,6}(交付|付款|违约)/.test(txt);
-    var lines = [(doc.kind === 'pdf' ? 'PDF' : 'Word') + '《' + doc.name + '》读完：条款 ' + clauses.length + ' 条' + ((doc.tables || []).length ? '、表 ' + doc.tables.length + ' 张' : '') + '，' + (doc.stats && doc.stats['字数'] ? doc.stats['字数'] + ' 字' : '')];
-    lines.push('按劳动合同必备条款核对：命中 ' + (MUST.length - miss.length) + '/' + MUST.length + (miss.length ? '，缺' + miss.map(function (x) { return x.name; }).join('、') : ''));
-    if (penalty) lines.push('文本里约定了逾期违约金；劳动合同只有培训服务期与竞业限制两种情形可以约定违约金，这条搬不过来');
-    lines.push(miss.length === MUST.length ? '判定：商务合同文本，走不了用工合规这一套' : '判定：可按劳动合同继续核对，缺项补齐后入库');
-    var kv = [];
-    if (money.length) kv.push(['金额', money[0]]);
-    if (dates.length) kv.push(['日期', dates[0]]);
-    kv.push(['段落', (doc.paragraphs || []).length]);
-    kv.push(['表格', (doc.tables || []).length + ' 张']);
-    return { text: lines.join('。\n') + '。',
-      blocks: [mini(['必备条款', '核对'], hits.map(function (x) { return [x.name, x.ok ? '有' : '缺']; })), clauses.length ? tagsb(clauses.slice(0, 4).map(function (c) { return cut(c, 12); })) : null, kvb(kv)],
-      focus: M.step === 'compliance' ? rowOf(workEl(), 'H01') : null,
-      act: function () {
-        var body = [kvb(kv), mini(['必备条款', '核对'], hits.map(function (x) { return [x.name, x.ok ? '有' : '缺']; }))];
-        var ul = h('ul', { class: 'm5-ul' }, clauses.map(function (c) { return h('li', {}, [c]); }));
-        if (clauses.length) body.push(h('div', {}, [h('div', { class: 'm5-sub' }, ['读到的条款 ' + clauses.length + ' 条']), ul]));
-        (doc.tables || []).slice(0, 1).forEach(function (t) { body.push(mini(t[0], t.slice(1))); });
-        P.drawer(M.frame.body, { title: '文档核对 · ' + doc.name, sub: '劳动合同必备条款 ' + (MUST.length - miss.length) + '/' + MUST.length + ' · ' + doc.sizeText, body: body });
-      } };
-  }
-  function docSheet(doc) {
-    var s0 = (doc.sheets || [])[0];
-    if (!s0 || !s0.rows.length) return null;
-    var head = (s0.rows[0] || []).map(String);
-    var MAP = [['工号', /工号|员工编号|人员编号/], ['岗位', /岗位|职务|工种/], ['工资', /工资|月薪|应发|薪酬/], ['社保基数', /缴费基数|社保基数|基数/], ['工时', /加班|工时|出勤/], ['入职日期', /入职|到岗|合同起/]];
-    var hit = MAP.map(function (m) { return { name: m[0], ok: head.some(function (x) { return m[1].test(x); }) }; });
-    var got = hit.filter(function (x) { return x.ok; });
-    var rows = s0.rows.length - 1;
-    var lines = ['Excel《' + doc.name + '》读完：' + doc.sheets.length + ' 张表、' + rows + ' 行数据，表头 ' + head.slice(0, 6).join(' / ')];
-    if (got.length >= 3) {
-      lines.push('命中花名册字段 ' + got.length + '/' + MAP.length + '：' + got.map(function (x) { return x.name; }).join('、') + '，可以进逐人核对');
-    } else {
-      lines.push('花名册字段命中 ' + got.length + '/' + MAP.length + '，这份表进不了逐人核对；核对要的列是 ' + MAP.map(function (x) { return x[0]; }).join(' / '));
-      var pay = s0.rows.slice(1).filter(function (r) { return /职工薪酬|工资|社保|公积金/.test(r.join('')); });
-      lines.push(pay.length ? '表里有 ' + pay.length + ' 行职工薪酬类科目，可与用工成本对一对' : '表里也没有职工薪酬类科目');
+  function openPanel(a) {
+    var R = M.R;
+    if (a.panel === 'rule') {
+      if (!R.compliance.items.some(function (i) { return i.id === a.ref; })) return false;
+      M.rule = a.ref;
+      if (M.step !== 'compliance') setStep('compliance');
+      else { draw(); refocus(a.ref); }
+      return true;
     }
-    return { text: lines.join('。\n') + '。',
-      blocks: [mini(['需要的列', '本表'], hit.map(function (x) { return [x.name, x.ok ? '有' : '无']; }))],
-      act: function () {
-        P.drawer(M.frame.body, { title: '表格解析 · ' + doc.name, sub: s0.name + ' · ' + rows + ' 行 × ' + head.length + ' 列 · ' + doc.sizeText,
-          body: [mini(head, s0.rows.slice(1, 9)), mini(['需要的列', '本表'], hit.map(function (x) { return [x.name, x.ok ? '有' : '无']; }))] });
-      } };
-  }
-  function docSlides(doc) {
-    var txt = (doc.text || '').replace(/\s+/g, ' ');
-    var m = txt.match(/收入[^0-9]{0,6}([\d,.]+)\s*万元/);
-    var titles = (doc.slides || []).map(function (s) { return s.title || ''; }).filter(Boolean);
-    if (!m) return { text: 'PPT《' + doc.name + '》读完：' + doc.slides.length + ' 页，标题「' + (titles[0] || '—') + '」。没读到收入口径，人力这边的人均产值不动。', blocks: [tagsb(titles.slice(0, 4))] };
-    var rev = Math.round(parseFloat(m[1].replace(/,/g, '')) * 10000);
-    var d = M.data, hc = d.employees.length;
-    var before = M.R.cost, oldRev = d.profile.revenue12;
-    var perNew = Math.round(rev / hc), shareNew = Math.round(1000 * before.annual / rev) / 10;
-    return { text: 'PPT《' + doc.name + '》读到收入 ' + m[1] + ' 万元（' + (titles[0] || doc.slides[0].title) + '）。\n按这个口径重算：人均产值 ' + W(perNew) + '（原 ' + W(before.perCapitaRevenue) + '），用工成本占收入 ' + shareNew + '%（原 ' + before.share + '%）。\n已把收入口径改成文档里的数，六屏一起重算。',
-      blocks: [kvb([['文档收入', m[1] + ' 万元'], ['原口径', W0(oldRev)], ['人均产值', W(perNew)], ['占收入', shareNew + '%']]), tagsb(titles.slice(0, 3))],
-      act: function () {
-        var d2 = K.ensure(M.data);
-        d2.profile.revenue12 = rev;
-        d2.log.push({ seq: d2.log.length + 1, kind: 'plan', label: '收入口径改按文档', detail: '《' + doc.name + '》' + m[1] + ' 万元 · 人均产值 ' + W(perNew) });
-        if (M.step !== 'cost') { M.data = d2; recompute(); setStep('cost'); }
-        else commit(d2, '收入口径已按《' + doc.name + '》重算');
-      } };
-  }
-  function docMail(doc) {
-    var ml = doc.mail || {}, txt = (doc.text || '').replace(/\s+/g, ' ');
-    var money = (txt.match(/[\d][\d,.]{2,}\s*万元|[\d][\d,]{4,}\s*元/g) || []);
-    var hr = /入职|离职|转正|调岗|加班|年假|社保|工资条|试用期/.test(txt);
-    var lines = ['邮件《' + (ml.subject || doc.name) + '》读完：发件 ' + (ml.from || '—') + '，' + (ml.date || '') + '，正文 ' + (doc.stats && doc.stats['正文行'] ? doc.stats['正文行'] + ' 行' : '') + (money.length ? '，金额 ' + money.join('、') : '')];
-    lines.push(hr ? '命中人事事项，已留到本屏待办' : '没有人事事项（入转调离 / 工时 / 假期 / 社保 / 薪酬），这一屏不动');
-    return { text: lines.join('。\n') + '。',
-      blocks: [kvb([['发件', ml.from || '—'], ['主题', cut(ml.subject || '—', 14)], ['日期', ml.date || '—'], ['附件', (ml.attaches || []).length + ' 个']])],
-      act: function () { P.drawer(M.frame.body, { title: ml.subject || doc.name, sub: (ml.from || '—') + ' · ' + (ml.date || '') + ' · ' + doc.sizeText, body: [h('div', { class: 'pd-pre' }, [doc.text || ''])] }); } };
-  }
-  function onDoc(doc) {
-    if (!doc || !doc.ok || !M.R) return null;
-    var txt = (doc.text || '').replace(/\s+/g, ' ');
-    if (doc.kind === 'word' || doc.kind === 'pdf' || doc.kind === 'text') {
-      var rk = ['求职', '简历', '工作经历', '教育背景', '期望薪', '项目经验', '自我评价', '应聘'].filter(function (k2) { return txt.indexOf(k2) >= 0; });
-      if (rk.length >= 2) return docResume(doc, txt);
-      return docContract(doc, txt, (doc.paragraphs || []));
+    if (a.panel === 'candidate') {
+      var cc = R.byId[a.ref];
+      if (!cc) return false;
+      M.cand = cc.id; M.need = cc.needId; M.filter = null;
+      if (M.step !== 'recruit') setStep('recruit');
+      else { draw(); refocus(cc.id); }
+      return true;
     }
-    if (doc.kind === 'excel') return docSheet(doc);
-    if (doc.kind === 'ppt') return docSlides(doc);
-    if (doc.kind === 'eml') return docMail(doc);
-    return null;
+    if (a.panel === 'jd') {
+      var n = R.needs.filter(function (x) { return x.id === a.ref; })[0];
+      if (!n) return false;
+      if (M.need !== n.id) { M.need = n.id; M.cand = null; if (M.step === 'recruit') draw(); }
+      jdDrawer(K.jd(M.data, n.id, LIB, M.jdVariant));
+      return true;
+    }
+    if (a.panel === 'kit') {
+      var c = R.byId[a.ref];
+      if (!c) return false;
+      M.icand = c.id;
+      kitDrawer(K.interviewKit(M.data, c, LIB), c);
+      return true;
+    }
+    if (a.panel === 'months') {
+      var pn = R.sim.plans.filter(function (x) { return x.key === (a.ref || M.plan); })[0];
+      if (!pn) return false;
+      M.plan = pn.key; monthDrawer(pn, R.sim);
+      return true;
+    }
+    if (a.panel === 'report') { reportDrawer(R); return true; }
+    if (a.panel === 'doc') { P.drawer(M.frame.body, { title: a.title || a.ref, sub: a.sub, body: docBody(a.blocks) }); return true; }
+    return false;
+  }
+  function applyAction(a) {
+    var input = a.input || {};
+    if (a.action === 'resolve') {
+      var it = M.R.compliance.items.filter(function (i) { return i.id === input.rule; })[0];
+      if (!it || it.status !== 'open') return false;
+      M.rule = it.id;
+      commit(K.resolve(M.data, it.id, LIB), it.id + ' ' + it.action.label);
+      return true;
+    }
+    if (a.action === 'offer') {
+      var c = M.R.byId[input.id];
+      if (!c) return false;
+      M.icand = c.id;
+      commit(K.offer(M.data, c.id, input.salary, LIB), c.id + ' offer 已发，月薪 ' + fmtN(input.salary) + ' 元');
+      return true;
+    }
+    if (a.action === 'adoptPlan') {
+      if (!M.R.sim.plans.some(function (p) { return p.key === input.key; })) return false;
+      M.plan = input.key;
+      commit(K.adoptPlan(M.data, input.key, LIB), '已采纳方案 ' + input.key + '，月报已更新');
+      return true;
+    }
+    if (a.action === 'ingest') {
+      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
+      if (!r || !r.data) return false;
+      commitDoc(r.data);
+      return true;
+    }
+    return false;
+  }
+  function setParam(a) {
+    if (a.path === 'filter') { M.filter = a.value; draw(); refocusTop('.pd-table tbody tr[data-ref^="C-"]'); return true; }
+    if (a.path === 'plan') {
+      if (!M.R.sim.plans.some(function (p) { return p.key === a.value; })) return false;
+      M.plan = a.value; draw();
+      return true;
+    }
+    return false;
   }
 
   window.DGG.chatBrain('m5', {
-    opener: function (step) { return opener(step); },
-    suggest: function (step) { return suggest(step); },
-    answer: function (q, step) { return answer(q, step); },
-    onDoc: function (doc, step) { return onDoc(doc, step); }
+    kernel: window.DGG.coreM5,
+    ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    act: function (a, api) {
+      if (!a || !a.type || !M.R) return false;
+      if (a.type === 'goto') {
+        if (STEPS.indexOf(a.step) < 0) return false;
+        if (a.step === 'recruit') M.filter = null;
+        setStep(a.step);
+        return true;
+      }
+      if (a.type === 'focus') { var el = refEl(a.ref); if (!el) return false; api.focus(el); return true; }
+      if (a.type === 'open') return openPanel(a);
+      if (a.type === 'apply') return applyAction(a);
+      if (a.type === 'set') return setParam(a);
+      return false;                                        /* 不认识的动作交给通用兜底 */
+    }
   });
 
   window.DGG = window.DGG || {};

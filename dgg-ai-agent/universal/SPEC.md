@@ -214,9 +214,9 @@ invoke(action, input, ctx) -> Envelope           // 同步，不返回 Promise
       "on": "chat",                             // 函数宿主：kernel（默认）| chat | docparse
       "family": "conversation",                 // core（默认）| conversation | ingest
       "input": { "type": "object", "properties": { } }, "returns": "Answer 或 null" },
-    { "name": "ingest-document", "kind": "mutate", "mutates": true,
-      "mutatesPath": "data",                    // 新业务数据在返回值的哪个字段；缺省 = 整个返回值就是新数据（1.0 语义）
-      "on": "chat", "family": "ingest" }
+    { "name": "ingest-document", "kind": "mutate", "mutates": false,
+      "mutatesPath": "data",                    // 新业务数据在返回值的这个字段里；缺省 = 整个返回值就是新数据（1.0 语义）
+      "on": "chat", "family": "ingest" }        // 注意 mutates 是 false，理由见下
   ]
 }
 ```
@@ -230,6 +230,15 @@ invoke(action, input, ctx) -> Envelope           // 同步，不返回 Promise
 | `mutatesPath` | 点号路径 | 无 | 有它 = 新业务数据在返回值的这个字段里（可能不存在，表示这次没改数据）；没它 = §4 原语义 |
 
 `features` 缺失即视为「只有 1.0 能力」。老包不加这一段也完全合法。
+
+> **带 `mutatesPath` 的动作一律写 `mutates: false`。**
+> §4 把 `mutates: true` 定死成「返回值就是新数据，平台**必须**把它存回会话状态」。只认 1.0 的平台看不懂 `mutatesPath`，
+> 会照 §4 把整份 Answer（`{ text, blocks, act, data }`）当业务数据存回去 —— 会话状态当场被污染，下一次 `run` 直接崩。
+> 所以 1.1 里 `mutates` 的语义一个字不动，「局部写回」只由 `mutatesPath` 表达：认得 1.1 的平台按路径取新数据；
+> 只认 1.0 的平台读到 `mutates: false`，退化成「这次不写回」—— 用户最多白传一次文档，不会存错东西。
+> `kind` 仍可写 `mutate` 表意（`kind` 只是分类，存回判定只看 `mutates` 与 `mutatesPath`）。
+>
+> 顺带说明：`actions[]` 里的 `fn` / `args` / `inputProps` 是生成器从 `tools/skills.map.json` 透传进清单的实现字段（§3 的 1.0 原文没列，但 11 个包的 `manifest.json` 里一直都有）。`on` 是它们的同伴 —— 它决定 `fn` 到哪个模块上去找。
 
 ### 9.3 信封新增字段
 
@@ -400,23 +409,28 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 
 | 动作 | 入参 | 返回 | `family` | `on` | 说明 |
 |---|---|---|---|---|---|
-| `parse-document` | `{ input: { name, base64 } }` | Doc（§11.3） | `ingest` | `docparse` | 纯解析，不碰业务数据。由共用件 `skills/_shared/docparse.js` 提供，**8 个产品包各内联一份，逐字一致** |
-| `ingest-document` | `{ doc, step?, data \| dataset }` | `{ text, blocks?, act?, data? }` | `ingest` | `chat` | 按各自业务把文档用起来，可写回业务数据（`mutates: true` + `mutatesPath: "data"`） |
+| `parse-document` | `{ name, base64 }` | Doc（§11.3） | `ingest` | `docparse` | 纯解析，不碰业务数据。由共用件 `skills/_shared/docparse.js` 提供，**8 个产品包各内联一份，逐字一致** |
+| `ingest-document` | `{ doc, step?, data \| dataset }` | `{ text, blocks?, act?, data? }` | `ingest` | `chat` | 按各自业务把文档用起来，可写回业务数据（`mutates: false` + `mutatesPath: "data"`，理由见 §9.2） |
 
 拆成两个动作而不是一个的理由：解析是所有包共用的同一份代码（改一次全体受益），用法是各包各自的业务（AI CFO 看到的是科目余额表，AI ERP 看到的是采购计划）。平台也可以只解析不摄入（比如只想拿 `doc.text` 自己处理）。
 
-兼容形态：`parse-document` 也接受平铺的 `{ name, base64 }`；两种写法结果一致。
+**入参一律平铺**：`{ "name": "9月采购计划.xlsx", "base64": "UEsDBB…" }`，**不要**写成 `{ input: { name, base64 } }`。
+点号路径在 `args[].from` 与 `inputProps[].name` 上虽然取得到值（运行时的 `get()` 会拆点号），但生成器 `tools/build-universal.js`
+的 `inputSchema()` 是拿 `inputProps[].name` **当 JSON Schema 的属性名**直接写进 `actions[].input` 的 —— 写 `input.base64`
+就会生成一个字面量叫 `"input.base64"` 的属性，这份 schema 再原样进 `tools.openai.json` / `tools.anthropic.json` / `openapi.json`，
+模型照着回传 `{"input.base64": "…"}`，运行时又按点号去 `input → base64` 里找，找不到 → `E_INPUT`。
+平铺没有这个坑，而且运行时与生成器一行都不用改。`name` / `base64` 与 §5 的控制字段 `data` / `dataset` 不撞名，平铺是安全的。
 
 **怎么接到共用件**：共用件对外是 `parse({ name, bytes })`，也接受两参形态 `parse(name, bytes)`，其中 `bytes` 允许是 `Uint8Array` / Node `Buffer` / **base64 串** / 普通数组 / `ArrayBuffer`。所以动作映射直接写成两参即可，运行时不需要任何新机制：
 
 ```jsonc
 { "name": "parse-document", "on": "docparse", "fn": "parse", "kind": "compute", "family": "ingest",
-  "args": [ { "from": "input.name", "required": true }, { "from": "input.base64", "required": true } ],
-  "inputProps": [ { "name": "input.name", "type": "string", "required": true },
-                  { "name": "input.base64", "type": "string", "required": true } ] }
+  "args": [ { "from": "name", "required": true }, { "from": "base64", "required": true } ],
+  "inputProps": [ { "name": "name", "type": "string", "required": true, "description": "文件名，只用扩展名判类型" },
+                  { "name": "base64", "type": "string", "required": true, "description": "文件字节的 base64" } ] }
 ```
 
-共用件另导出 `VERSION` / `kindOf` / `label` / `sizeText` 与一组低层件（`toBytes` / `utf8` / `b64bytes` / `inflateRaw` / `inflateZlib` / `zipEntries` / `zipRead` / `zipText`），自测与别的 skill 可以直接用；它们不是动作，不进 `manifest.actions`。
+共用件另导出 `VERSION` / `ACCEPT` / `kindOf` / `label` / `sizeText` 与一组低层件（`toBytes` / `utf8` / `utf8self` / `latin1` / `b64bytes` / `inflateRaw` / `inflateZlib` / `zipEntries` / `zipRead` / `zipText`），自测与别的 skill 可以直接用；它们不是动作，不进 `manifest.actions`。
 
 ### 11.2 base64 入参约定与大小上限
 
@@ -424,14 +438,16 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 |---|---|
 | 正文 | 标准 RFC 4648 字母表，`=` 补齐；**不带 `data:` 前缀**；允许含换行与空白（解码前自行剔除） |
 | 文件名 | `name` 必填，解析**只看扩展名**决定 kind；没有扩展名按 `text` 处理 |
-| 大小上限 | 原始字节 **≤ 8 MB**（base64 约 10.9 MB 字符）。超限**不算调用失败**：共用件在 `parse` 入口直接返回 `{ ok:false, note:"文件 12.4 MB，超过 8 MB 上限" }`，信封仍是 `ok:true`。只有缺 `name` / `base64` 才是 `E_INPUT` |
+| 大小上限 | 原始字节 **≤ 8 MB**（base64 约 10.9 MB 字符）。超限**不算调用失败**：共用件应在 `parse` 入口直接返回 `{ ok:false, note:"文件 12.4 MB，超过 8 MB 上限" }`，信封仍是 `ok:true`。只有缺 `name` / `base64` 才是 `E_INPUT`。**现状：共用件还没有这道闸**（一份 50 MB 的 base64 会直接进解压），8 MB 是 1.1 定的建议值，落地项见 §14.3 第 3 条 |
 | 平台建议 | 在 5 MB 处提示用户「文件较大，解析会慢」；展台现场实际文件多在 1 MB 以内 |
-| 解码实现 | 包内**自实现** ES5 解码，**不依赖**宿主的 `atob` / `TextDecoder` / `FileReader` / `DecompressionStream`；Node `Buffer`、`Uint8Array`、`ArrayBuffer` 只是允许的入参形态，不是依赖 |
+| 解码实现 | base64 与 UTF-8 解码**包内各自带一份**，宿主没有 `atob` / `TextDecoder` / `FileReader` / `DecompressionStream` 照样跑；Node `Buffer`、`Uint8Array`、`ArrayBuffer` 只是允许的入参形态，不是依赖。共用件对 >4 KB 的 UTF-8 块会借宿主 `TextDecoder` 提速 —— 这是允许的，因为包内实现已逐字对齐 WHATWG 口径、两条路在任意字节串上结果相同。**借宿主 API 只许发生在可证明等价的地方** |
+| 字符集 | 只保证 UTF-8 与 Latin-1 逐字确定。**唯一例外**：`.eml` 正文声明成 GBK / Big5 等非 UTF-8 字符集时，共用件借宿主 `TextDecoder`，宿主没有就退回 latin1 —— 这一处**结果会随宿主而异**，违反「同一份字节 → 同一份 Doc」。落地时二选一：固定成一种行为（如一律 latin1 + `note` 如实说明），或把这类样本排除出 golden。见 §14.3 第 3 条 |
 | 解压实现 | ZIP 的 `deflate-raw` 与 PDF 的 `FlateDecode`（zlib 包装或裸流）都用包内自带的**同步** inflate |
 
 > **为什么必须自带同步解压：** 浏览器的 `DecompressionStream` 是异步且浏览器专用的，一旦用它，`parse-document` 就得返回 Promise —— 那就违反了 §5「invoke 同步返回信封，不返回 Promise」，六种接入形态里的 CLI / HTTP / MCP 全要改。原型里用它是对的（浏览器现场、零体积）；下沉到 skill 层必须换成包内的同步实现。
 >
-> 同理，字符解码也要自实现：`TextDecoder` 在 Node 与浏览器上对**非法字节序列**的替换行为可能不一致，会破坏「同一份字节 → 同一份 Doc」的确定性。字符集只保证 UTF-8 与 Latin-1，其余按 UTF-8 尽力解码并在 `note` 里说明。
+> 同理，字符解码必须**自带一份**：宿主可以没有 `TextDecoder`（老引擎、严格沙箱），而 GBK / Big5 这类码表几百 KB，零依赖实现不了。
+> 所以口径是：UTF-8 / Latin-1 自己解，逐字确定；非 UTF-8 字符集只可能出现在 `.eml` 正文里，是全规范**唯一**一处允许「随宿主而异」的解码，必须在 `note` 里如实说明，并且不进 golden。
 
 ### 11.3 Doc 结构（平台中立，可 JSON 序列化）
 
@@ -459,6 +475,10 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 - **四个容器字段永远存在**：`paragraphs` / `tables` / `sheets` / `slides` 用不上时是**空数组**；`mail` 只有邮件才有，其余为 `null`，平台读之前判一下空。
 - `tables` 是**二维数组的数组**（`string[][][]`），与 `sheets` / `slides` 的对象形态不一致 —— 这是为了与共用件现行实现逐字一致。要统一成 `{ name, rows }` 得同时改共用件与各包的 `chat.js`，留给 1.2。
 - **失败不抛异常**：返回 `{ ok:false, note:'原因' }`，其余字段给空值。**信封仍然是 `ok:true`** —— 解析不成功是业务事实，不是调用失败（入参不合法才是 `E_INPUT`）。
+
+  > **这条在现行运行时上落不了地，必须先改运行时。** `universal/runtime/invoke.js:166` 有一条 1.0 的规矩：内核返回的对象只要带 `ok:false`，就整条翻成 `E_KERNEL` 错误信封、`data` 置 `null`。
+  > Doc 正好把 `ok` 挂在自己身上，于是「文件解析失败 / 超限」会被当成「调用失败」，`note` 传不出去，平台只拿到一条 `E_KERNEL`。改法见 §14.1 第 9 条（按 `family` 分家族跳过这条透传）。
+
 - `.doc` / `.xls` / `.ppt` 等 Office 97 老格式：`ok:false` + `note:"这是 Office 97 的老格式（.doc），请另存为 .docx 再上传"`。
 - 扫描件 PDF（无文字层）：`ok:true`、`text` 为空、`note` 如实说明「没有可提取的文字层」。
 - `stats` 的键按 kind 固定，键序即下表顺序，不得随内容变动（否则 golden 不稳）：
@@ -532,6 +552,15 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 - `set.path` 是业务数据上的点号路径，`value` 是 JSON 标量或小对象（≤ 1 KB）。平台改完应重算。
 - `act` 永远是**建议**，不是命令：平台可以先问用户再执行，尤其是 `apply` 与 `set` 这两种会改数的。
 
+**防递归（`apply` / `set` 必读）。** 执行 `apply` 或 `set` 之后会再拿到一份返回，那份返回里**可能又带一个 `act`** —— 不拦就是一个死循环。两头各担一半：
+
+- **平台侧：只展开一跳。** 由 `act` 触发的那次调用，其返回里的 `act` 只许呈现给用户（按钮 / toast），**不许自动再执行**。深度上限固定为 1，不可配置。
+- **平台侧执行 `apply` 前的三道校验：** ① `action` 在 `manifest.actions` 里；② 它的 `family` 是 `core`；③ 它不是当前这次调用的动作名。任一不过就按「未知 act」忽略，不报错、不中断渲染。
+- **skill 侧：** `apply.action` 不得指向 `ask` / `brief` / `suggest` / `ingest-document`（`family` 不是 `core` 的一律不许），也不得指回吐出这个 `act` 的动作自己。
+- `set` 同理：平台改完数据重算一次即可，重算结果里的 `act` 不自动执行。
+
+上面几条加起来，「skill 吐 act → 平台调动作 → 又吐 act → 再调」的环闭不上。
+
 ## 13. 跨平台形态清单
 
 §6 的六种接入形态说的是「怎么调」；这一节说的是「每个包必须产出哪些**给别的平台读**的文件」。七项全部是**生成物**，由 `manifest.json` 一份真相生成，**不得手改**。
@@ -546,7 +575,19 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 | `openapi.json` | 包根 | HTTP 形态的 OpenAPI 3.1，可喂给任何语言的代码生成器 | manifest + `adapters/http.js` 的路由 |
 | `llms.txt` | 包根 | 给模型看的一页速览（纯文本，≤ 8 KB） | manifest |
 
-1.0 已有的 `tools/openai-tools.json` **保留**为别名（内容与 `tools.openai.json` 一致），免得已经接进去的平台断链。
+1.0 已有的 `tools/openai-tools.json` **保留**为别名，免得已经接进去的平台断链。注意：现在两份文件的**内容并不一致** —— 老的那份工具名是 `ai_erp_run`，新的那份是裸动作名 `run`。按 §13.4 收口之后才真的成为别名。
+
+> **现状（2026.09，读这一节之前先看）：这七项已经在仓库里了。**
+> `tools/platform-artifacts.js`（约 400 行）由 `tools/build-universal.js` 第 10 步调用，`node tools/build-universal.js ai-erp` 当场产出
+> `SKILL.md` · `references/` · `scripts/skill.js` · `tools.openai.json` · `tools.anthropic.json` · `manifest.mcp.json` · `openapi.json` · `llms.txt`。
+> 所以 §13 不是「从零新增」，是「把已产出的东西定死口径」。已产出的与下面条文有五处对不上 —— 工具名（§13.4）、references 文件名（§13.3）、
+> MCP `transport` 形态（§13.6）、OpenAPI 的 server 与 `operationId`（§13.7）、`SKILL.md` 前言的 `metadata`（§13.1）—— 逐条差异与改法在 §14.2 第 12 条，别把它们当成还没做。
+>
+> 另外，§2 的包结构树是 1.0 原文，与 1.1 的实际产物有两处出入，**以本节为准**：① 包根 `SKILL.md` 不再是「源文件原样保留」，而是生成物（§13.2）；
+> ② 包内除 §2 树里列的文件外，还有 `references/` · `scripts/skill.js` · `shared/` · `llms.txt` · `openapi.json` · `manifest.mcp.json` · `tools.*.json`。
+>
+> 套件级（`dist-universal/` 根）另有一套同名产物：`SKILL.md`（总入口）· `tools.openai.json` · `tools.anthropic.json` · `mcp.json` · `llms.txt` · `INSTALL.md` · `skills.json` · `gateway.js`。
+> 本节只约束包级；套件级跟着包级走，工具名等口径必须一致（§13.9）。
 
 ### 13.1 `SKILL.md`（通用包版）
 
@@ -588,7 +629,7 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 
 - 「今天」是数据包里的常量，不取系统时间；同一输入永远同一输出。
 - 业务数据由调用方持有：带「改数据」标记的动作返回新副本，存回会话状态下次传回。
-- 详细口径见 `references/conventions.md`，字段含义见 `references/data-dictionary.md`。
+- 详细口径见 `references/conventions.md`，字段含义见 `references/data.md`。
 ````
 
 | 前言字段 | 必填 | 约定 |
@@ -597,6 +638,11 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 | `description` | 是 | ≤ 1024 字符，必须写清**做什么 + 什么时候用**（触发条件）。平台就是靠这一句决定要不要加载这个 skill |
 | `license` | 否 | 默认 `UNLICENSED` |
 | `metadata` | 否 | 自由字典，平台忽略也不影响。放 id / version / spec / specVersion / suite / kind / credits / offline / deterministic |
+
+两条补充：
+
+- **目录名即技能名。** Claude Code / claude.ai 的装载器按目录名找 skill，前言 `name` 必须与**包目录名**一致。本套件里三者同一个值：目录名 = `manifest.id` = `name`（`dist-universal/ai-erp/` → `ai-erp`）。改目录名就要同步改前言。
+- **`metadata` 现在没写。** 生成器（`tools/platform-artifacts.js` 的 `skillMd()`）只写 `name` + `description` 两个字段。所以 §13.9 的自测按「有 `metadata` 才查 `metadata.version`」执行；若决定补生成 `license` / `metadata`（§14.2 第 12 条），再把那条自测改回必查。
 
 正文按**渐进披露**写：
 
@@ -617,9 +663,9 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 | 给谁看 | 仓库里的人、`tools/build-universal.js`、`tools/verify-skills.js` | Claude / 其它 agent 平台的 skill 装载器 |
 | 正文 | 完整施工图：口径、字段、算法、验收 | 渐进披露的四段，细节指向 `references/` |
 
-**两者的桥**：生成器把源 `SKILL.md`（连同它的工程契约前言）**原样搬到 `references/skill-source.md`**，再按 §13.1 另生成包根的 `SKILL.md`。所以信息一条不丢，两份各就各位：
+**两者的桥**：生成器把源 `SKILL.md`（连同它的工程契约前言）**原样搬到 `references/engineering.md`**，再按 §13.1 另生成包根的 `SKILL.md`。所以信息一条不丢，两份各就各位：
 
-- 想知道「这个能力怎么做出来的」→ 读 `references/skill-source.md`。
+- 想知道「这个能力怎么做出来的」→ 读 `references/engineering.md`。
 - 想让 agent 平台把这个能力挂上去 → 用包根 `SKILL.md`。
 - 机器要精确参数 → 只认 `manifest.json`。
 
@@ -630,13 +676,16 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 | 文件 | 必产 | 内容 |
 |---|---|---|
 | `references/actions.md` | 全部包 | 动作清单：动作 / 类型 / 改数据 / 必填入参 / 返回 / 一个可复制的例子。每个动作一段 |
-| `references/data-dictionary.md` | 全部包 | 数据字典：业务数据与结果的字段 → 含义 → 取值范围 → 单位 → 出处；预置数据集清单 |
-| `references/conventions.md` | 全部包 | 口径说明：算法口径、单位与取整、「今天」是常量、状态由调用方持有、错误码、积分口径 |
-| `references/conversation.md` | 实现了 conversation 的包 | 屏清单、每屏 brief 说什么、suggest 的问句、ask 能接住的问题类型 |
-| `references/documents.md` | 实现了 ingest 的包 | 支持的文件类型、本模块从文档里找什么、找不到时怎么说、Doc 结构摘要 |
-| `references/skill-source.md` | 全部包 | 源 `SKILL.md` 原样搬运（含它的工程契约前言） |
+| `references/data.md` | 全部包 | 数据字典：规则表与样本的键、预置数据集清单、依赖的兄弟引擎 |
+| `references/platforms.md` | 全部包 | 六种接入路径 + 各家 agent 平台怎么接（生成器一直在产，1.0 规范漏写了） |
+| `references/engineering.md` | 全部包 | 源 `SKILL.md` 原样搬运（含它的工程契约前言）—— **这就是 §13.2 说的那一份** |
+| `references/conventions.md` | 全部包 | 口径说明：算法口径、单位与取整、「今天」是常量、状态由调用方持有、错误码、积分口径（**待补，生成器还没有**） |
+| `references/conversation.md` | 实现了 conversation 的包 | 屏清单、每屏 brief 说什么、suggest 的问句、ask 能接住的问题类型（**待补**） |
+| `references/documents.md` | 实现了 ingest 的包 | 支持的文件类型、本模块从文档里找什么、找不到时怎么说、Doc 结构摘要（**待补**） |
 
 每篇独立可读（agent 只会加载其中一篇），开头一句说明「这篇讲什么」。
+
+**文件名以现行生成器为准**：草稿里的 `data-dictionary.md` / `skill-source.md` 一律按 `data.md` / `engineering.md` 理解 —— `manifest.agentSkill.engineering`、包根 `SKILL.md` 的「还有这些可以查」、`llms.txt` 的「细节」段都已经指着这两个名字，改名要同时改清单、三份生成物与已发出去的包，不值当。
 
 ### 13.4 `tools.openai.json`
 
@@ -658,7 +707,11 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 ]
 ```
 
-- `name` = `<id>_<action>`，`-` 换 `_`，匹配 `^[a-zA-Z0-9_-]{1,64}$`。
+- `name` = `<id>_<action>`，`-` 换 `_`（`ai-erp` + `simulate-insert` → `ai_erp_simulate_insert`），匹配 `^[a-zA-Z0-9_-]{1,64}$`。
+  **四处必须同一个口径**：包级 `tools.openai.json` / `tools.anthropic.json`、包级 `openapi.json` 的 `operationId`、套件级 `dist-universal/tools.*.json`、以及 `gateway.js` 的 `/tools/call` 解析。
+  **现状是三处各写各的**：包级用裸动作名（`run`）、套件级用 `ai-erp__simulate-insert`、`gateway.js` 只认 `ai_erp_simulate_insert`。
+  后果是实打实的：把套件级工具表喂给模型，模型回传的工具名网关一个都认不出来，全部 404。改法见 §14.2 第 12 条。
+  单包场景不加前缀也能用，但 11 个包一起喂给模型时 11 个 `run` 会撞名，所以统一加前缀。
 - `description` = `title：description`，第一句说清楚「什么时候用」。改数据的动作在末尾追加「（返回新的业务数据副本，请存回会话状态）」。
 - `parameters` 直接取 `manifest.actions[].input`，一字不改。
 - 不设 `strict: true`：动作的 `input` 允许 `additionalProperties`，开严格模式会拒掉合法调用。
@@ -701,7 +754,8 @@ Node：`require('./ai-erp').invoke('run', { dataset: 'make' })`，同步返回�
 
 - `tools[].name` 是**动作名本身**（不加 id 前缀）—— MCP 服务器本身已经按 skill 分好了。与 `adapters/mcp.js` 的 `tools/list` 返回值必须一致（自测项）。
 - `mcpServers` 块是给人直接粘进客户端配置的，路径留占位符 `<包的绝对路径>`。
-- `protocolVersion` 与 `adapters/mcp.js` 里的 `PROTOCOL` 常量同源。
+- `protocolVersion` 与 `adapters/mcp.js` 里的 `PROTOCOL` 常量同源（现在两边都是 `2024-11-05`，对得上）。
+- **现状**：生成器写的是 `"transport": "stdio"`（一个字符串），与上面的对象形态对不上；`mcpServers.args` 写的是相对路径 `adapters/mcp.js`，粘进客户端配置直接找不到文件。两处一起改（§14.2 第 12 条）。
 
 ### 13.7 `openapi.json`
 
@@ -742,7 +796,8 @@ OpenAPI 3.1，描述 `adapters/http.js` 已有的路由，不新增端点。
 }
 ```
 
-- 每个动作一条 `POST /actions/<name>`，`operationId` = `tools.openai.json` 里的函数名（两边对得上，便于代码生成）。
+- 每个动作一条 `POST /actions/<name>`，`operationId` = `tools.openai.json` 里的函数名（两边对得上，便于代码生成）。现状两边都是裸动作名，随 §13.4 一起改成 `<id>_<action>`。
+- `servers[0].url` 用 `http://127.0.0.1:8711`：`adapters/http.js` 的端口取 `PORT || 8711`，**它不读命令行参数**。现状生成器写的是 `http://localhost:8787`，`references/platforms.md` 还教人 `node adapters/http.js 8787` —— 那个参数会被忽略，服务照样起在 8711。两处一起改（§14.2 第 12 条）。
 - `requestBody` 的 schema 直接取 `actions[].input`。
 - 实现了 conversation / ingest 的包，另在 `components.schemas` 里给出 `Answer` / `Block` / `Act` / `Doc` 四个 schema（字段见 §10.5、§10.6、§12、§11.3）。
 
@@ -785,7 +840,7 @@ make 制造型 / flow 流程型 / project 项目型 / service 服务型
 3 答不上返回 data:null，不是错误；错误只有 E_ACTION / E_INPUT / E_DATASET / E_KERNEL / E_RUNTIME。
 
 ## 细节
-manifest.json · references/actions.md · references/data-dictionary.md · references/conventions.md
+manifest.json · references/actions.md · references/data.md · references/conventions.md
 ```
 
 ### 13.9 七项产物的一致性要求（自测）
@@ -793,8 +848,10 @@ manifest.json · references/actions.md · references/data-dictionary.md · refer
 - 全部生成自 `manifest.json`：动作集合、顺序、描述、参数 schema 必须逐项对得上。
 - `tools.openai.json` / `tools.anthropic.json` / `openapi.json` 的动作集合相同。
 - `manifest.mcp.json` 的 `tools` 与 `adapters/mcp.js` 的 `tools/list` 返回值相同。
-- `SKILL.md` 前言的 `name` = `manifest.id`，`metadata.version` = `manifest.version`。
+- `SKILL.md` 前言的 `name` = `manifest.id`（且 = 包目录名）；**带了 `metadata` 才查** `metadata.version` = `manifest.version`（现行生成器不写 `metadata`，见 §13.1）。
 - `llms.txt` ≤ 8 KB，动作数与 `manifest.actions.length` 一致。
+- **工具名四处一致**：包级 `tools.*.json` = 包级 `openapi.json` 的 `operationId` = 套件级 `tools.*.json`，并且拿套件工具表里的第一个名字打一次 `gateway.js` 的 `/tools/call`，**不许 404**。
+- `manifest.mcp.json` 的 `transport` 是对象形态，`mcpServers.<id>.args` 指向 `adapters/mcp.js` 的绝对路径占位符。
 - 以上任一项不符 = 生成器有 bug，不是文档问题。
 
 ## 14. 从 1.0 升到 1.1 要做什么
@@ -810,7 +867,11 @@ manifest.json · references/actions.md · references/data-dictionary.md · refer
 5. 内置动作增 `screens`：**skill 没有声明同名动作时**，直接返回 `manifest.screens || []`；声明了就走声明的那条（两者结果必须一致，见 §10.1）。
 6. `listActions()` 的每一项增 `on` / `family` / `mutatesPath`，供适配器按家族过滤。
 7. `health()` 增 `specVersion` / `features` / `screens` 条数 / `modules` 的键名，便于自检一眼看出 1.1 能力是否装上。
-8. **不必改**的两处，先确认再动手：`checkInput` 已经支持点号路径（`get(input,'input.base64')` 能取到），所以 `parse-document` 的必填校验直接用 `inputProps:[{name:'input.base64',required:true}]` 即可；`$data:ensure` / `$lib` 等实参装配一律沿用，对话动作不需要新的 `from` 动词。
+8. **不必改**的一处，先确认再动手：`$data:ensure` / `$lib` / `$input` / `$lint` / `$helper:` / `$ctx` 这套实参装配一律沿用，对话与摄入动作不需要新的 `from` 动词。
+   （`checkInput` 确实支持点号路径，但 `parse-document` **不要**用点号 —— 生成器会把 `inputProps[].name` 当 JSON Schema 属性名，点号会生成一个叫 `"input.base64"` 的字面量属性，见 §11.1。入参平铺成 `{ name, base64 }`。）
+9. **`ok:false` 透传要分家族**（不改则 §11.3 落不了地）：`invoke()` 现在对任何 `isObj(out) && out.ok === false` 都翻成 `E_KERNEL` 错误信封、`data` 置 `null`（`invoke.js:166`）。Doc 把 `ok` 挂在自己身上，解析失败与超限会被误判成调用失败。
+   改成：`a.family === 'ingest'`（或动作上显式标一个 `rawResult: true`）时跳过这条透传，直接 `envelope(action, true, out)`。`family` 不写默认 `core`，所以 127 个老动作行为一字不变。
+10. `screens` 走内置兜底时 `byName['screens']` 是空的，`envelope()` 会把 `meta.kind` 写成默认的 `'compute'`、`meta.family` 写成 `'core'`，与 §10 说的 `kind:'query'` / `family:'conversation'` 对不上。内置分支要自带一份 `extraMeta`。
 
 ### 14.2 生成器 `tools/build-universal.js`
 
@@ -820,18 +881,25 @@ manifest.json · references/actions.md · references/data-dictionary.md · refer
 4. `singleFile()`（UMD / ESM 两种）：把 `chat.js` 与 `docparse.js` 一并 `_mod()` 内联，与内核、运行时、数据同一份文件 —— 浏览器单文件必须自带对话与解析，否则 `file://` 打开就残废。
 5. `buildManifest()`：写出 `specVersion` / `features` / `screens`，动作条目透传 `on` / `family` / `mutatesPath`。
 6. 新增七项跨平台产物（§13）：`SKILL.md`（重写，不再直接拷源文件）、`references/*.md`、`tools.openai.json`、`tools.anthropic.json`、`manifest.mcp.json`、`openapi.json`、`llms.txt`。
-7. 源 `SKILL.md` 改为搬到 `references/skill-source.md`（原样，含前言）。
+7. 源 `SKILL.md` 搬到 `references/engineering.md`（原样，含前言）—— **生成器已经这么做了**，这一条只是确认，不用改代码。
 8. `tools/openai-tools.json` 保留为 `tools.openai.json` 的别名，内容一致。
 9. `package.json` 的 `files` 数组补上新增文件与目录（`references`、`llms.txt`、`openapi.json`、`manifest.mcp.json`、`tools.*.json`、`shared`）。
 10. `writeSuite()`：`skills.json` 增 `specVersion` 与每包的 `features`；`gateway.js` 的 `/tools` 增一条可选的 `?format=anthropic`，并在 404 体里补 `specVersion`。
-11. §2 的包结构树同步补上新增文件（本 SPEC 的 §2 是 1.0 原文，1.1 的新增项在 §13 表里，两处都要对得上）。
+11. §2 的包结构树同步补上新增文件（本 SPEC 的 §2 是 1.0 原文，1.1 的新增项在 §13 表与 §13 开头的「现状」框里，两处都要对得上）。
+12. `tools/platform-artifacts.js`（**已存在，不是新写**，第 6 条说的七项产物它已经在产）按 §13 收口，五处：
+    ① `toolName()` 加 `<id>_` 前缀并把 `-` 换 `_`，包级 `tools.*.json`、套件级 `tools.*.json`、`openapi.operationId`、`gateway.js` 的 `/tools/call` **四处共用同一个函数**（现状三种写法互不通用，套件工具表喂给模型后网关全部 404）；
+    ② `references/` 补 `conventions.md`，实现了新能力的包补 `conversation.md` / `documents.md`（`actions.md` / `data.md` / `platforms.md` / `engineering.md` 四个现有文件名不动）；
+    ③ `mcpManifest()` 的 `transport` 改成对象形态，`mcpServers.args` 用绝对路径占位符；
+    ④ `openapi()` 的 `servers[0].url` 改 `http://127.0.0.1:8711`，`platformsMd()` 里的 `node adapters/http.js 8787` 改成 `PORT=8711 node adapters/http.js`（http.js 不读命令行参数）；
+    ⑤ 决定要不要写 `license` / `metadata` 前言 —— 写了就把 §13.9 的 `metadata.version` 自测改回必查。
+13. `describeFor()` 拼出来的 description 现在会出现连着两个句号（`summary` 自带句号，模板又补一个），生成物里肉眼可见，顺手修。
 
 ### 14.3 映射表与源 skill
 
 1. `tools/skills.map.json`：**8 个产品包**各补 6 个动作条目 —— `screens` / `brief` / `suggest` / `ask` / `parse-document` / `ingest-document`。3 个计算包按需，可先不补。
    动作总数：127 → **175**（127 + 8 × 6）。**原有 127 个一个不动。**
 2. 每个产品包新增 `screens` 静态清单（写进 map，生成器透传进 manifest）。
-3. 共用件 `skills/_shared/docparse.js`（**已落地**：ES5、UMD、全同步、自带 RFC 1951 inflate 与 base64 / UTF-8 解码，不碰 `File` / `FileReader` / `DecompressionStream`）。还差两件：按 §11.3 的上限表做截断并给出 `truncated` 标记；补一组 `examples/docs/*.b64` 的 golden。
+3. 共用件 `skills/_shared/docparse.js`（**已落地**：ES5、UMD、全同步、自带 RFC 1951 inflate 与 base64 / UTF-8 解码，不碰 `File` / `FileReader` / `DecompressionStream`）。还差四件：按 §11.3 的上限表做截断并给出 `truncated` 标记；补一组文档 golden（形态见 §14.4 第 2 条）；在 `parse` 入口补 §11.2 的 8 MB 闸门（现在完全没有大小判断）；`.eml` 非 UTF-8 正文那处借宿主 `TextDecoder` 的分支要么固定成一种行为，要么明确排除出 golden（§11.2「字符集」一行）。
 4. 每个产品包新增 `skills/<模块>/core/chat.js`：从 `prototype/src/module-04..11.js` 的对话大脑下沉，`blocks` 改纯数据、`act` 改声明式、`onDoc` 改 `ingestDocument`。
 5. 源 `SKILL.md` 前言：`universal: dus-1` → `universal: dus-1.1`，`actions` 数字更新；正文补一节「对话与文档」。
 6. `tools/verify-skills.js` / `tools/unify-skills.js`：认得 `dus-1.1` 与新增的动作家族。
@@ -842,11 +910,16 @@ manifest.json · references/actions.md · references/data-dictionary.md · refer
    - 对话 golden：固定 `(step, question, dataset)` 跑 `brief` / `suggest` / `ask`，四条路径逐字节一致。
    - **suggest 回灌**：`suggest` 的每一条丢给 `ask`，必须都不为 `null`。
    - 文档 golden：`examples/docs/*.b64`（每种 kind 一份小样本）跑 `parse-document`，Doc 逐字节一致。
-   - 摄入状态流转：`parse-document` → `ingest-document` → 返回的 `data` 回传 `run`，且包内样本未被污染。
-2. `examples/docs/` 新增六份小样本（word / excel / ppt / pdf / eml / text），每份 ≤ 64 KB，base64 存放。
+   - 摄入状态流转：`parse-document` → `ingest-document` → 按 `mutatesPath` 从返回值里取出新业务数据，回传 `run`，且包内样本未被污染。
+     **现有那条状态流转用例挑不到它**：它按 `a.mutates && args 里有 $data` 选动作，而 `ingest-document` 按 §9.2 写 `mutates:false`。要另写一条按 `mutatesPath` 取数的用例。
+2. `examples/docs/` 新增六份小样本（word / excel / ppt / pdf / eml / text），每份 ≤ 64 KB。
+   **存成 `.json`（`{ "name": "…", "base64": "…" }`），不要存成裸 `.b64`** —— 自测里展开样例的 `resolveEx()` 对 `$file` 是 `JSON.parse(readFileSync(...))`，裸 base64 文本会当场抛 JSON 解析错。
+   `.eml` 那份别用非 UTF-8 字符集（§11.2「字符集」一行：那一处结果随宿主而异，进不了逐字节比对）。
 3. `universal/README.md`：目录分工表补共用件与对话内核，迁移检查清单补 1.1 的几项（**本次已改**）。
 4. 各包 `README.md` 模板：六种接入形态后面补一段「对话与文档怎么接」。
 5. 回归门槛（不达标不发版）：
-   - 现有 127 个动作的 golden **逐字节不变**。
+   - 现有 127 个动作的 golden **逐字节不变**。这里的 golden 指内核输出 `examples/*.output.json`，不是信封 —— 信封会多出新字段，见下一条。
    - `node dist-universal/register-all.js` 11 行全部版本一致。
-   - 老调用方（只认 `spec === 'dus-1'`、不认 `specVersion`）跑一遍 `run` / `health`，结果与 1.0 完全一致。
+   - 老调用方（只认 `spec === 'dus-1'`、不认 `specVersion`）跑一遍 `run` / `health`：**老字段一个不少、值一模一样**。
+     注意这不是「整份信封逐字节不变」—— §14.1 第 1、4、7 条会让信封多出 `specVersion` 与 `meta.family` / `meta.mutatesPath`，`health()` 多出 `specVersion` / `features` / `screens` / `modules`。
+     1.1 的兼容承诺是**只增不改**：新增字段一律可选、老字段值不变、`spec` 仍是 `"dus-1"`。要求「逐字节不变」与 §14.1 直接冲突，做不到。

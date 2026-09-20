@@ -11,7 +11,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
   var MODULE_NAME = 'AI获客';
   var CREDITS = 30;
   var DAY = 86400000;
@@ -29,11 +29,21 @@
   function fmtN(n) { return (n < 0 ? '−' : '') + String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function fmtW(n) { return Math.abs(n) >= 10000 ? r1(n / 10000) + ' 万元' : fmtN(n) + ' 元'; }
   function ms(s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
-  function dateOf(base, d) { var t = new Date(ms(base) + d * DAY); return t.getUTCFullYear() + '-' + String(t.getUTCMonth() + 1).padStart(2, '0') + '-' + String(t.getUTCDate()).padStart(2, '0'); }
+  /* 纯算术的公历换算：不碰系统时钟，日期一律从数据里的 today 起算 */
+  function civil(z) {
+    z += 719468;
+    var era = Math.floor(z / 146097), doe = z - era * 146097;
+    var yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+    var y = yoe + era * 400, doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+    var mp = Math.floor((5 * doy + 2) / 153), dd = doy - Math.floor((153 * mp + 2) / 5) + 1;
+    var mm = mp + (mp < 10 ? 3 : -9);
+    return [y + (mm <= 2 ? 1 : 0), mm, dd];
+  }
+  function dateOf(base, d) { var c = civil(Math.round(ms(base) / DAY) + d); return c[0] + '-' + String(c[1]).padStart(2, '0') + '-' + String(c[2]).padStart(2, '0'); }
   function short(s) { var p = s.split('-'); return (+p[1]) + '-' + (+p[2]); }
   function daysBetween(a, b) { return Math.round((ms(b) - ms(a)) / DAY); }
   var WD = ['日', '一', '二', '三', '四', '五', '六'];
-  function weekday(s) { return WD[new Date(ms(s)).getUTCDay()]; }
+  function weekday(s) { return WD[((Math.round(ms(s) / DAY) % 7) + 11) % 7]; }
   function sizeLabel(k) { return SIZE_LABEL[k] || k; }
   function stageIdx(k) { return STAGE_ORDER.indexOf(k); }
 
@@ -304,10 +314,475 @@
     return { version: VERSION, data: d, profile: P, leads: rows, byId: byId, funnel: fn, forecast: fc, plan: pl, teams: teams, kpi: k, report: rep };
   }
 
+  /* ---------------- 对话：六屏登记、开场、快捷问句、问答、文档摄入 ---------------- */
+  var SCREENS = [{ key: 'connect', label: '接入' }, { key: 'board', label: '获客驾驶舱' }, { key: 'profile', label: '客户画像' },
+    { key: 'script', label: '话术脚本' }, { key: 'leads', label: '线索池' }, { key: 'plan', label: '跟进与周报' }];
+  var CHN = { phone: '电话', wechat: '微信首触', fair: '展会现场', mail: '邮件' };
+  var STN = { first: '首触', follow: '二次跟进', quote: '报价后', wake: '沉睡唤醒' };
+  var COLMAP = [
+    { key: 'industry', words: ['企业', '公司', '客户', '厂商', '单位'] },
+    { key: 'sector', words: ['行业'] },
+    { key: 'region', words: ['区域', '地区', '省份', '城市'] },
+    { key: 'size', words: ['规模', '人数'] },
+    { key: 'role', words: ['职务', '岗位', '角色', '决策人'] },
+    { key: 'channel', words: ['来源', '渠道'] },
+    { key: 'amountEst', words: ['金额', '预算', '预计', '年采购'] }
+  ];
+
+  function screens() { return clone(SCREENS); }
+  function got(data, lib, result) { return result && result.leads && result.profile && result.kpi ? result : run(data, lib); }
+  function segOf(P) { return P.segments.filter(function (s) { return s.id === P.focus; })[0]; }
+  function openOf(R) { return R.leads.filter(function (l) { return l.stage !== 'won' && !l.dormant; }); }
+  function hit(q, words) { for (var i = 0; i < words.length; i++) if (q.indexOf(words[i]) >= 0) return true; return false; }
+  function bTable(head, rows) { return { type: 'table', head: head, rows: rows }; }
+  function bKv(rows) { return { type: 'kv', rows: rows }; }
+  function bTags(items) { return { type: 'tags', items: items }; }
+  function chanRank(R) { return R.funnel.channels.filter(function (c) { return c.costPerLead != null && c.costPerLead > 0; }).slice().sort(function (a, b) { return a.costPerLead - b.costPerLead; }); }
+  function staleSource(d) {
+    var best = null;
+    (d.sources || []).forEach(function (s) { var a = daysBetween(String(s.lastSync).slice(0, 10), d.today); if (!best || a > best.age) best = { id: s.id, name: s.name, sync: s.lastSync, age: a }; });
+    return best;
+  }
+  /* 脚本屏与线索池的当前视角：宿主把它写进数据副本，内核只读，不读也能给默认值 */
+  function scriptView(d, P) {
+    var v = d.scriptView || {};
+    return { segId: v.segId || P.focus, channel: v.channel || 'phone', stage: v.stage || 'first', variant: v.variant || 0 };
+  }
+  function leadInView(R, d, q) {
+    var m = q ? String(q).match(/L-\d{4}-\d{4}/) : null;
+    if (m && R.byId[m[0]]) return R.byId[m[0]];
+    if (d.focusLead && R.byId[d.focusLead]) return R.byId[d.focusLead];
+    return R.leads.filter(function (l) { return l.stage !== 'won'; })[0] || R.leads[0];
+  }
+
+  function brief(step, data, lib, result) {
+    var R = got(data, lib, result), d = R.data, k = R.kpi, P = R.profile, seg = segOf(P);
+    if (step === 'connect') {
+      var st = staleSource(d);
+      if (!st) return null;
+      return st.name + ' 停在 ' + st.sync.slice(5, 10) + '，已 ' + st.age + ' 天没同步；其余 ' + (d.sources.length - 1) + ' 个源今天都刷过。';
+    }
+    if (step === 'board') {
+      var r = chanRank(R);
+      if (!r.length) return '在手 ' + k.leads + ' 条，A 级 ' + k.gradeA + ' 条，未分派 ' + k.unassigned + ' 条。';
+      var lo = r[0], hi = r[r.length - 1];
+      return hi.name + ' ' + fmtN(hi.costPerLead) + ' 元一条，' + lo.name + ' ' + fmtN(lo.costPerLead) + ' 元一条，差 ' + (hi.costPerLead / lo.costPerLead).toFixed(1) + ' 倍。';
+    }
+    if (step === 'profile') return seg.id + ' ' + seg.name + ' 只有 ' + seg.count + ' 家，却占成交价值 ' + r0(seg.share * 100) + '%，客单 ' + fmtW(seg.amount) + '。';
+    if (step === 'script') {
+      var sc = script(d, P, lib, scriptView(d, P));
+      var lg = sc.sections.slice().sort(function (a, b) { return b.text.length - a.text.length; })[0];
+      return '这版 ' + sc.words + ' 字，口播约 ' + r0(sc.words / 5) + ' 秒；' + lg.title + '段 ' + lg.text.length + ' 字，占 ' + r0(100 * lg.text.length / sc.words) + '%。';
+    }
+    if (step === 'leads') {
+      var top = R.leads.filter(function (l) { return l.stage !== 'won'; })[0];
+      if (!top) return null;
+      return top.id + ' ' + top.total + ' 分排在前面：' + (top.signalParts.slice(0, 2).map(function (p) { return p.name + ' ' + p.score + ' 分'; }).join('、') || '暂无行为信号') + '，' + top.grade + ' 级。';
+    }
+    if (step === 'plan') {
+      var pl = R.plan;
+      var busy = pl.days.slice().sort(function (a, b) { return b.items.length - a.items.length; })[0];
+      return '本周排了 ' + pl.items.length + ' 次跟进，' + busy.label + ' 一天 ' + busy.items.length + ' 次；逾期 ' + pl.overdue.length + ' 条还没补。';
+    }
+    return null;
+  }
+
+  function suggest(step, data, lib, result) {
+    var R = got(data, lib, result), k = R.kpi;
+    if (step === 'connect') return ['哪个源同步落后', '一共归集了多少条', '直连和导入各几个', '线索里有几条 A 级'];
+    if (step === 'board') return ['哪个渠道单条便宜', '未分派的 ' + k.unassigned + ' 条怎么办', '成交预测怎么算的', '逾期为什么有 ' + k.overdue + ' 条'];
+    if (step === 'profile') return ['行业权重为什么高', 'S2 和 S1 差在哪', '把区域权重调低', '匹配这个画像的线索'];
+    if (step === 'script') return ['换成微信怎么说', '报价后那版给我', '异议怎么答', '这版多少字'];
+    if (step === 'leads') return ['为什么它分这么高', '未分派的有哪几条', '逾期的是哪几条', '这条分派给谁'];
+    return ['逾期的是哪几条', '哪个组排得满', '成交预测多少', '周报里写了什么'];
+  }
+
+  function ask(question, step, data, lib, result) {
+    var R = got(data, lib, result), d = R.data, k = R.kpi, P = R.profile, seg = segOf(P);
+    var s = String(question || '').trim();
+    if (!s) return null;
+
+    /* ---- 数据源 / 接入 ---- */
+    if (hit(s, ['同步', '落后', '几天没', '数据源', '源'])) {
+      var st = staleSource(d);
+      if (!st) return null;
+      return {
+        text: st.name + ' 停在 ' + st.sync + '，已 ' + st.age + ' 天。其余源今天都同步过。',
+        blocks: [bTable(['源', '同步', '条数'], d.sources.map(function (x) { return [x.name, x.lastSync.slice(5, 10), fmtN(x.rows)]; }))],
+        act: { type: 'focus', ref: st.id }
+      };
+    }
+    if (hit(s, ['归集', '多少条', '总共', '一共'])) {
+      var tot = (d.sources || []).reduce(function (t, x) { return t + x.rows; }, 0);
+      return { text: (d.sources || []).length + ' 个源共 ' + fmtN(tot) + ' 条，归集后在手线索 ' + k.leads + ' 条，A 级 ' + k.gradeA + ' 条。' };
+    }
+    if (hit(s, ['直连', '导入'])) {
+      var dir = (d.sources || []).filter(function (x) { return x.mode === 'direct'; });
+      return {
+        text: '系统直连 ' + dir.length + ' 个，表格导入 ' + ((d.sources || []).length - dir.length) + ' 个。',
+        blocks: [bTags((d.sources || []).map(function (x) { return x.name.split(' · ')[0] + (x.mode === 'direct' ? ' 直连' : ' 导入'); }))]
+      };
+    }
+
+    /* ---- 渠道成本 ---- */
+    if (hit(s, ['渠道', '便宜', '划算', '成本', '元一条', '元/条'])) {
+      var rc = chanRank(R);
+      if (!rc.length) return null;
+      var clo = rc[0], chi = rc[rc.length - 1];
+      return {
+        text: clo.name + ' ' + fmtN(clo.costPerLead) + ' 元一条，' + chi.name + ' ' + fmtN(chi.costPerLead) + ' 元一条。'
+          + chi.name + ' 贵，但近 12 月带来 ' + chi.deals12 + ' 单 ' + fmtW(chi.dealAmount) + '，单均成交成本 ' + fmtN(chi.costPerDeal) + ' 元。',
+        blocks: [bTable(['渠道', '元/条', '元/单'], rc.map(function (c) { return [c.name, fmtN(c.costPerLead), c.costPerDeal != null ? fmtN(c.costPerDeal) : '—']; }))],
+        act: { type: 'focus', ref: clo.id }
+      };
+    }
+
+    /* ---- 未分派 → 切到线索池并筛出未分派 ---- */
+    if (hit(s, ['未分派', '没分派', '待分派'])) {
+      var un = openOf(R).filter(function (l) { return !l.owner; });
+      return {
+        text: '未分派 ' + un.length + ' 条，A 级 ' + un.filter(function (l) { return l.grade === 'A'; }).length
+          + ' 条、B 级 ' + un.filter(function (l) { return l.grade === 'B'; }).length + ' 条。各组还空 '
+          + R.teams.reduce(function (t, x) { return t + x.free; }, 0) + ' 个位，按行业熟悉度可一次分完。已切到线索池并筛出未分派。',
+        act: { type: 'goto', step: 'leads', filter: 'unassigned' }
+      };
+    }
+
+    /* ---- 逾期 → 切到线索池并筛出逾期 ---- */
+    if (hit(s, ['逾期', '超时', '没跟进'])) {
+      var ov = R.plan.overdue;
+      return {
+        text: '逾期 ' + ov.length + ' 条：' + ov.slice(0, 3).map(function (l) { return l.id + ' 已 ' + l.lastAge + ' 天'; }).join('、')
+          + '。按等级节奏 A 级 ' + lib.stages.followUpDays.A + ' 天、B 级 ' + lib.stages.followUpDays.B + ' 天，超过就算逾期。已切到线索池并筛出逾期。',
+        blocks: [bTable(['代号', '天数', '负责'], ov.slice(0, 5).map(function (l) { return [l.id, l.lastAge + ' 天', l.ownerName || '—']; }))],
+        act: { type: 'goto', step: 'leads', filter: 'overdue' }
+      };
+    }
+
+    /* ---- 等级分布 ---- */
+    if (hit(s, ['A 级', 'A级', '几条 A', '等级', '级分布'])) {
+      var pool2 = R.leads.filter(function (l) { return l.stage !== 'won'; });
+      var byGrade = function (g) { return pool2.filter(function (l) { return l.grade === g; }); };
+      var unA = byGrade('A').filter(function (l) { return !l.owner; }).length;
+      return {
+        text: '在手 ' + pool2.length + ' 条里 A 级 ' + byGrade('A').length + ' 条、B 级 ' + byGrade('B').length + ' 条、C 级 '
+          + byGrade('C').length + ' 条、D 级 ' + byGrade('D').length + ' 条。A 级按 ' + lib.stages.followUpDays.A + ' 天节奏跟，'
+          + (unA ? '其中 ' + unA + ' 条还没分派。' : '已全部分派。'),
+        blocks: [bTable(['意向', '条数', '预计金额'], ['A', 'B', 'C', 'D'].map(function (g) {
+          var ls = byGrade(g);
+          return [g + ' 级', ls.length + ' 条', fmtW(ls.reduce(function (t, l) { return t + l.amountEst; }, 0))];
+        }))]
+      };
+    }
+
+    /* ---- 成交预测 ---- */
+    if (hit(s, ['预测', '管道', '能成多少', '预计成交'])) {
+      return {
+        text: '在手 ' + R.forecast.count + ' 条、管道 ' + fmtW(R.forecast.pipeline) + '，按阶段概率加权 ' + fmtW(R.forecast.expected) + '，约 ' + R.forecast.expectedDeals + ' 单。',
+        blocks: [bTable(['阶段', '条数', '加权'], R.forecast.byStage.map(function (x) { return [x.name, x.count, fmtW(x.expected)]; }))]
+      };
+    }
+
+    /* ---- 改权重并重算：要排在「解释权重」前面，否则被它先接走 ---- */
+    if (hit(s, ['调低', '调高', '降权', '加权', '提高']) || (hit(s, ['区域', '行业大类', '规模', '决策人']) && hit(s, ['调', '改']))) {
+      var dim2 = 'region';
+      DIMS.forEach(function (x) { if (s.indexOf(DIM_LABEL[x]) >= 0) dim2 = x; });
+      if (s.indexOf('行业') >= 0) dim2 = 'sector';
+      var mul = hit(s, ['调高', '加权', '提高']) ? 1.5 : 0.5;
+      return {
+        text: DIM_LABEL[dim2] + '按 ×' + mul + ' 重算：权重从 ' + r0(P.weights[dim2] * 100) + '% 起变，'
+          + openOf(R).length + ' 条在手商机的匹配分跟着动，A 级条数可能变。正在重算。',
+        act: { type: 'set', path: 'params.weights.' + dim2, value: mul }
+      };
+    }
+
+    /* ---- 画像权重 ---- */
+    if (hit(s, ['权重', '为什么高', '怎么定的'])) {
+      var dim = null;
+      DIMS.forEach(function (x) { if (s.indexOf(DIM_LABEL[x]) >= 0 || (x === 'sector' && s.indexOf('行业') >= 0) || (x === 'region' && s.indexOf('区域') >= 0)) dim = x; });
+      if (!dim) dim = DIMS.slice().sort(function (a, b) { return P.weights[b] - P.weights[a]; })[0];
+      var drows = P.dist[dim].rows;
+      return {
+        text: DIM_LABEL[dim] + '权重 ' + r0(P.weights[dim] * 100) + '%：' + drows[0].label + ' 一家占 ' + r0(drows[0].share * 100)
+          + '%，分布越集中越能预测成交，所以权重给得高。' + (drows[1] ? '第二是 ' + drows[1].label + ' ' + r0(drows[1].share * 100) + '%。' : ''),
+        blocks: [bTable([DIM_LABEL[dim], '占成交价值'], drows.slice(0, 4).map(function (x) { return [x.label, r0(x.share * 100) + '%']; }))],
+        act: { type: 'focus', ref: 'dim-' + dim }
+      };
+    }
+
+    /* ---- 匹配画像的线索 → 切到线索池筛 A 级 ---- */
+    if (hit(s, ['匹配', '像这个画像', '哪些线索'])) {
+      var msx = R.leads.filter(function (l) { return l.grade === 'A' && l.stage !== 'won'; });
+      return {
+        text: '匹配 ' + seg.id + ' 且 A 级的有 ' + msx.length + ' 条：' + msx.slice(0, 3).map(function (l) { return l.id + ' ' + l.total + ' 分'; }).join('、') + '。已切到线索池筛 A 级。',
+        act: { type: 'goto', step: 'leads', filter: 'A' }
+      };
+    }
+
+    /* ---- 细分对比 ---- */
+    if (/S[123]/.test(s) || hit(s, ['细分', '画像'])) {
+      var ids = (s.match(/S[123]/g) || []).slice(0, 2);
+      if (ids.length >= 2) {
+        var x1 = P.segments.filter(function (z) { return z.id === ids[0]; })[0], x2 = P.segments.filter(function (z) { return z.id === ids[1]; })[0];
+        if (x1 && x2) return {
+          text: x1.id + ' 客单 ' + fmtW(x1.amount) + '、周期 ' + x1.cycle + ' 天、复购 ' + r0(x1.repeat * 100) + '%；'
+            + x2.id + ' 客单 ' + fmtW(x2.amount) + '、周期 ' + x2.cycle + ' 天、复购 ' + r0(x2.repeat * 100) + '%。'
+            + (x1.amount > x2.amount ? x1.id : x2.id) + ' 客单更高，' + (x1.cycle < x2.cycle ? x1.id : x2.id) + ' 成得更快。',
+          blocks: [bTable(['', x1.id, x2.id], [['家数', x1.count, x2.count], ['客单', fmtW(x1.amount), fmtW(x2.amount)], ['周期', x1.cycle + ' 天', x2.cycle + ' 天'], ['占价值', r0(x1.share * 100) + '%', r0(x2.share * 100) + '%']])]
+        };
+      }
+      var one = ids.length ? P.segments.filter(function (z) { return z.id === ids[0]; })[0] : seg;
+      if (one) return {
+        text: one.id + ' ' + one.name + '：' + one.count + ' 家，占成交价值 ' + r0(one.share * 100) + '%，客单 ' + fmtW(one.amount) + '，周期 ' + one.cycle + ' 天，复购 ' + r0(one.repeat * 100) + '%。',
+        blocks: [bTags(one.pains.map(function (p) { return p.tag; }))]
+      };
+    }
+
+    /* ---- 脚本：换渠道 / 换阶段 ---- */
+    var V = scriptView(d, P);
+    if (hit(s, ['微信', '电话', '展会现场', '邮件']) && (step === 'script' || hit(s, ['脚本', '话术', '怎么说']))) {
+      var ch = s.indexOf('微信') >= 0 ? 'wechat' : s.indexOf('展会') >= 0 ? 'fair' : s.indexOf('邮件') >= 0 ? 'mail' : 'phone';
+      var sc2 = script(d, P, lib, { segId: V.segId, channel: ch, stage: V.stage, variant: V.variant });
+      return {
+        text: CHN[ch] + '版开场：' + sc2.sections[0].text + '\n全篇 ' + sc2.words + ' 字。已把脚本屏切到 ' + CHN[ch] + '。',
+        act: { type: 'set', path: 'params.script.channel', value: ch }
+      };
+    }
+    if (hit(s, ['报价后', '二次跟进', '首触', '沉睡'])) {
+      var stg = s.indexOf('报价') >= 0 ? 'quote' : s.indexOf('二次') >= 0 ? 'follow' : s.indexOf('沉睡') >= 0 ? 'wake' : 'first';
+      var sc3 = script(d, P, lib, { segId: V.segId, channel: V.channel, stage: stg, variant: V.variant });
+      return {
+        text: STN[stg] + '版：' + sc3.sections[0].text + '\n行动段：' + sc3.sections[4].text,
+        act: { type: 'set', path: 'params.script.stage', value: stg }
+      };
+    }
+    if (hit(s, ['异议', '嫌贵', '怎么答', '回绝'])) {
+      var sc4 = script(d, P, lib, V);
+      return { text: sc4.objections.slice(0, 2).map(function (o) { return '「' + o.q + '」→ ' + o.a; }).join('\n') };
+    }
+    if (hit(s, ['多少字', '几个字', '口播', '念多久'])) {
+      var sc5 = script(d, P, lib, V);
+      return {
+        text: '全篇 ' + sc5.words + ' 字，口播约 ' + r0(sc5.words / 5) + ' 秒。',
+        blocks: [bTable(['段', '字数'], sc5.sections.map(function (x) { return [x.title, x.text.length]; }))]
+      };
+    }
+
+    /* ---- 单条线索 ---- */
+    var idm = s.match(/L-\d{4}-\d{4}/);
+    if (idm && R.byId[idm[0]]) {
+      var L2 = R.byId[idm[0]];
+      return {
+        text: L2.id + ' 综合 ' + L2.total + ' 分 = 匹配 ' + L2.match + ' × ' + r0(lib.stages.weights.match * 100) + '% + 信号 ' + L2.signal + ' × ' + r0(lib.stages.weights.signal * 100) + '%，'
+          + L2.grade + ' 级 · ' + L2.stageName + ' · ' + (L2.ownerName || '未分派') + '。',
+        blocks: [bKv([['行业', L2.industry], ['区域', L2.region], ['规模', L2.sizeLabel], ['职务', L2.role], ['预计金额', fmtW(L2.amountEst)], ['上次动作', L2.lastAction ? short(L2.lastAction.date) : '无']])],
+        act: { type: 'focus', ref: L2.id }
+      };
+    }
+    if (hit(s, ['为什么', '凭什么', '怎么打的分', '分这么高', '分高'])) {
+      var L3 = leadInView(R, d, s);
+      var ok3 = L3.parts.filter(function (p) { return p.share >= 30; });
+      return {
+        text: L3.id + ' 综合 ' + L3.total + ' 分 = 匹配 ' + L3.match + ' × ' + r0(lib.stages.weights.match * 100)
+          + '% + 信号 ' + L3.signal + ' × ' + r0(lib.stages.weights.signal * 100) + '%。\n匹配高在 '
+          + (ok3.length ? ok3.map(function (p) { return p.label + ' ' + p.value; }).join('、') + ' 都落在重点细分里' : '没有维度落在重点细分里')
+          + '；信号来自 ' + (L3.signalParts.slice(0, 2).map(function (p) { return p.name + ' ' + p.score + ' 分'; }).join('、') || '无'),
+        blocks: [bTable(['维度', '该细分占比', '权重'], L3.parts.map(function (p) { return [p.label, p.share + '%', p.weight + '%']; }))],
+        act: { type: 'focus', ref: L3.id }
+      };
+    }
+    if (hit(s, ['分派给谁', '给谁', '谁来跟', '推荐'])) {
+      var L4 = leadInView(R, d, s);
+      var rec2 = recommendTeam(L4, R.teams);
+      if (!rec2) return { text: '各组都满了，先把沉睡线索清一清再分。' };
+      var loadTbl = bTable(['小组', '在手', '上限'], R.teams.map(function (t) { return [t.name, t.load, t.cap]; }));
+      var own4 = R.teams.filter(function (t) { return t.id === L4.owner; })[0];
+      if (own4) return {
+        text: L4.id + ' 已经在 ' + own4.name + ' 手上，负载 ' + own4.load + '/' + own4.cap + '。要转的话 ' + rec2.name
+          + ' 合适：' + (rec2.sectors.indexOf(L4.sector) >= 0 ? '熟悉该行业' : '有空位') + '，负载 ' + rec2.load + '/' + rec2.cap + '。',
+        blocks: [loadTbl], act: { type: 'focus', ref: L4.id }
+      };
+      return {
+        text: L4.id + ' 建议给 ' + rec2.name + '：' + (rec2.sectors.indexOf(L4.sector) >= 0 ? '熟悉该行业' : '有空位') + '，当前负载 ' + rec2.load + '/' + rec2.cap + '。',
+        blocks: [loadTbl], act: { type: 'focus', ref: L4.id }
+      };
+    }
+
+    /* ---- 计划 / 负载 / 周报 / 动作 ---- */
+    if (hit(s, ['排得满', '负载', '哪个组', '忙'])) {
+      var t2 = R.teams.slice().sort(function (a, b) { return (b.load / b.cap) - (a.load / a.cap); })[0];
+      return {
+        text: t2.name + ' 在手 ' + t2.load + '/' + t2.cap + '，占用 ' + r0(100 * t2.load / t2.cap) + '%。本周跟进 '
+          + (R.plan.byTeam.filter(function (x) { return x.id === t2.id; })[0] || {}).count + ' 次。',
+        blocks: [bTable(['小组', '在手/上限', '本周', '加权预测'], R.teams.map(function (x) {
+          var fc2 = R.forecast.byTeam.filter(function (y) { return y.id === x.id; })[0] || {};
+          return [x.name, x.load + '/' + x.cap, (R.plan.byTeam.filter(function (y) { return y.id === x.id; })[0] || {}).count || 0, fmtW(fc2.expected || 0)];
+        }))]
+      };
+    }
+    if (hit(s, ['跟进中', '在跟', '本月成交', '成交了几单', '近 90 天', '近90天'])) {
+      return {
+        text: '跟进中 ' + k.following + ' 条（已分派且已联系）；本月成交 ' + k.wonMonth + ' 单，近 90 天 ' + k.deals90
+          + ' 单；商机转化率 ' + k.conversion + '%，平均成交周期 ' + k.avgCycle + ' 天。'
+      };
+    }
+    if (hit(s, ['周报', '发给谁', '写了什么'])) {
+      return { text: R.report.lines.slice(0, 3).join('\n') + '\n全文已打开。', act: { type: 'open', panel: 'report' } };
+    }
+    if (hit(s, ['动作', '做了什么', '日志'])) {
+      if (!d.log.length) return { text: '本周还没有动作记录。分派、加入计划、记录跟进都会写进这里。' };
+      return { text: '本周 ' + d.log.length + ' 条动作：' + d.log.slice(-3).map(function (l) { return l.label; }).join('、') + '。已打开全部。', act: { type: 'open', panel: 'log' } };
+    }
+    return null;
+  }
+
+  /* ---------------- 文档摄入 ---------------- */
+  function moneyList(text) {
+    var out = [], m, re = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*(万元|元)/g;
+    while ((m = re.exec(text))) {
+      var v = parseFloat(m[1].replace(/,/g, ''));
+      if (isNaN(v)) continue;
+      out.push(m[2] === '万元' ? v * 10000 : v);
+    }
+    return out.sort(function (a, b) { return b - a; });
+  }
+  function dateIn(text) {
+    var m = /(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/.exec(text);
+    if (m) return m[1] + '-' + String(+m[2]).padStart(2, '0') + '-' + String(+m[3]).padStart(2, '0');
+    m = /(20\d{2})-(\d{1,2})-(\d{1,2})/.exec(text);
+    return m ? m[1] + '-' + String(+m[2]).padStart(2, '0') + '-' + String(+m[3]).padStart(2, '0') : null;
+  }
+  function nearest(R, amount) {
+    var best = null;
+    openOf(R).forEach(function (l) { var gap = Math.abs(l.amountEst - amount); if (!best || gap < best.gap) best = { l: l, gap: gap }; });
+    return best;
+  }
+  /* 合同 / 报价单：金额回填到最接近的在手线索，并记一次跟进 */
+  function docContract(doc, R, d) {
+    var text = doc.text || '';
+    var money = moneyList(text), amount = money[0] || null;
+    var due = dateIn(text);
+    var warr = (/质保期?\s*(\d+)\s*个月/.exec(text) || [])[1];
+    var mine = text.indexOf(d.company) >= 0 || (d.co && text.indexOf(d.co) >= 0);
+    var rows = [];
+    if (amount) rows.push(['合同金额', fmtW(amount)]);
+    if (due) rows.push(['交付期限', due]);
+    if (warr) rows.push(['质保', warr + ' 个月']);
+    if (doc.tables.length) rows.push(['付款期次', (doc.tables[0].length - 1) + ' 期']);
+    rows.push(['条款', doc.paragraphs.length + ' 段']);
+    if (!amount) {
+      return {
+        text: doc.name + ' 读完 ' + doc.paragraphs.length + ' 段、' + doc.tables.length + ' 张表，没有抽到金额，没法回填。开头是「' + (doc.paragraphs[0] || '').slice(0, 24) + '」。',
+        blocks: [bKv(rows)]
+      };
+    }
+    var pool = openOf(R), best = nearest(R, amount);
+    var t0 = doc.tables[0] || null;
+    var blocks = [bKv(rows)];
+    if (t0 && t0.length > 1) blocks.push(bTable(t0[0].slice(0, 3), t0.slice(1, 4).map(function (r) { return r.slice(0, 3); })));
+    if (!best) return { text: doc.name + '：合同金额 ' + fmtW(amount) + (due ? '、交付期限 ' + due : '') + '。在手线索里没有可对应的条目。', blocks: blocks };
+    var l = best.l;
+    var nd = logAction(d, l.id, '合同金额 ' + fmtN(amount) + ' 元回填' + (due ? ' · 交付 ' + due : ''));
+    var row = nd.leads.filter(function (x) { return x.id === l.id; })[0];
+    if (row) { row.amountEst = amount; if (due) row.note = '交付期限 ' + due; }
+    return {
+      text: doc.name + '：合同金额 ' + fmtN(amount) + ' 元' + (due ? '、交付期限 ' + due : '') + (warr ? '、质保 ' + warr + ' 个月' : '')
+        + (mine ? '，甲方就是本企业' : '') + '。\n在手 ' + pool.length + ' 条里 ' + l.id + '（' + l.industry + '）预计 ' + fmtW(l.amountEst) + ' 与它差 ' + fmtW(best.gap)
+        + '，已按合同金额回填并记一次跟进。',
+      blocks: blocks, data: nd, act: { type: 'apply', action: 'ingest', input: { doc: doc }, ref: l.id }
+    };
+  }
+  /* 表格：认线索字段，够用就能入池；认不出就把全表打开 */
+  function docSheet(doc, R, d) {
+    var sheet = (doc.sheets || [])[0];
+    if (!sheet || !sheet.rows.length) return { text: doc.name + ' 里没有可读的工作表。' };
+    var head = sheet.rows[0].map(function (x) { return String(x == null ? '' : x).trim(); });
+    var body = sheet.rows.slice(1).filter(function (r) { return r.join('').trim().length; });
+    var map = {};
+    COLMAP.forEach(function (c) {
+      head.forEach(function (hd, i) { if (map[c.key] == null && c.words.some(function (w) { return hd.indexOf(w) >= 0; })) map[c.key] = i; });
+    });
+    var keys = Object.keys(map);
+    var open = { type: 'open', panel: 'sheet', ref: sheet.name, input: { head: head, rows: body.slice(0, 20) } };
+    if (map.industry == null && map.sector == null) {
+      return {
+        text: doc.name + '《' + sheet.name + '》' + body.length + ' 行 × ' + head.length + ' 列，列名是：' + head.join(' / ')
+          + '。里面没有企业、行业、区域这类线索字段，没有入池。全表已打开。',
+        blocks: [bKv([['工作表', sheet.name], ['行', body.length], ['列', head.length]]),
+          bTable(head.slice(0, 4), body.slice(0, 3).map(function (r) { return r.slice(0, 4).map(function (c) { return c == null ? '' : String(c); }); }))],
+        act: open
+      };
+    }
+    var made = body.slice(0, 8).map(function (r) {
+      return {
+        name: String(r[map.industry != null ? map.industry : map.sector] || '').trim(),
+        region: map.region != null ? String(r[map.region] || '') : '',
+        role: map.role != null ? String(r[map.role] || '') : '',
+        amount: map.amountEst != null ? parseFloat(String(r[map.amountEst]).replace(/[^0-9.]/g, '')) || 0 : 0
+      };
+    }).filter(function (x) { return x.name; });
+    return {
+      text: doc.name + '《' + sheet.name + '》' + body.length + ' 行，认出 ' + keys.length + ' 个线索字段（' + keys.map(function (x) { return head[map[x]]; }).join('、')
+        + '），前 ' + made.length + ' 行可以入池。全表已打开。',
+      blocks: [bTable(['企业', '区域', '预计金额'], made.slice(0, 4).map(function (x) { return [x.name, x.region || '—', x.amount ? fmtN(x.amount) : '—']; }))],
+      act: open
+    };
+  }
+  /* 来函：抽金额与期限，记一次来函跟进 */
+  function docMail(doc, R, d) {
+    var m = doc.mail || {};
+    var money = moneyList(doc.text || ''), due = dateIn(doc.text || '');
+    var from = String(m.from || '').replace(/<[^>]*>/g, '').trim() || '来函方';
+    var rows = [['发件', from], ['主题', m.subject || '—'], ['日期', (m.date || '').slice(0, 24)]];
+    if (money[0]) rows.push(['正文金额', fmtW(money[0])]);
+    if (due) rows.push(['期限', due]);
+    var best = money[0] ? nearest(R, money[0]) : null;
+    var txt = '来函《' + (m.subject || doc.name) + '》，发件 ' + from + '，' + (m.date || '').slice(0, 16) + '。'
+      + (money[0] ? '正文里抽到 ' + fmtW(money[0]) + (money[1] ? '、' + fmtW(money[1]) : '') : '正文没有金额')
+      + (due ? '，期限 ' + due : '') + '。';
+    if (!best) return { text: txt, blocks: [bKv(rows)] };
+    var nd = logAction(d, best.l.id, '来函「' + (m.subject || doc.name) + '」' + (money[0] ? ' · ' + fmtN(money[0]) + ' 元' : ''));
+    return {
+      text: txt + '\n在手线索里 ' + best.l.id + '（' + best.l.industry + '）预计 ' + fmtW(best.l.amountEst) + ' 与它接近，已记一次来函跟进。',
+      blocks: [bKv(rows)], data: nd, act: { type: 'apply', action: 'ingest', input: { doc: doc }, ref: best.l.id }
+    };
+  }
+  /* 幻灯片：把里面的数字与本模块口径并排 */
+  function docSlides(doc, R) {
+    var lines = [];
+    (doc.slides || []).forEach(function (s) { lines = lines.concat(s.lines || []); if (s.title) lines.push(s.title); });
+    var nums = lines.filter(function (x) { return /\d/.test(x); }).slice(0, 5);
+    var k = R.kpi;
+    var deal = lines.filter(function (x) { return x.indexOf('成交') >= 0 || x.indexOf('新客') >= 0; })[0];
+    return {
+      text: doc.name + ' 共 ' + doc.slides.length + ' 页，第 1 页「' + ((doc.slides[0] || {}).title || '—') + '」。'
+        + (deal ? '里面写着「' + deal + '」；' : '') + '本模块口径：近 90 天成交 ' + k.deals90 + ' 单，本月 ' + k.wonMonth + ' 单，在手 ' + k.leads + ' 条。',
+      blocks: [bTable(['幻灯片里的数'], nums.map(function (x) { return [x]; }))]
+    };
+  }
+  function docPlain(doc) {
+    var lines = (doc.text || '').split(/\r?\n/).filter(function (x) { return x.trim(); });
+    return {
+      text: doc.name + ' 共 ' + lines.length + ' 行。开头是「' + (lines[0] || '').slice(0, 30) + '」。没有识别到线索字段，没有入池。',
+      blocks: [bTable(['前几行'], lines.slice(0, 3).map(function (x) { return [x.slice(0, 26)]; }))]
+    };
+  }
+  function ingest(doc, step, data, lib, result) {
+    if (!doc) return null;
+    var R = got(data, lib, result), d = R.data;
+    if (!doc.ok) return { text: doc.name + ' 没读出内容：' + (doc.note || '格式不支持') };
+    if (doc.kind === 'word' || doc.kind === 'pdf') return docContract(doc, R, d);
+    if (doc.kind === 'excel') return docSheet(doc, R, d);
+    if (doc.kind === 'eml') return docMail(doc, R, d);
+    if (doc.kind === 'ppt') return docSlides(doc, R);
+    return docPlain(doc);
+  }
+
   return {
     VERSION: VERSION, MODULE_NAME: MODULE_NAME, CREDITS: CREDITS, DIMS: DIMS, DIM_LABEL: DIM_LABEL, CHANNEL_NAME: CHANNEL_NAME, ACTION: ACTION, STAGE_ORDER: STAGE_ORDER,
     ensure: ensure, profile: profile, leadsScored: leadsScored, explain: explain, script: script, run: run,
     assign: assign, assignAll: assignAll, addPlan: addPlan, markDormant: markDormant, advance: advance, logAction: logAction, setFocus: setFocus, setWeight: setWeight, adoptScript: adoptScript,
+    screens: screens, brief: brief, suggest: suggest, ask: ask, ingest: ingest,
     recommendTeam: recommendTeam, teamLoad: teamLoad, fmtN: fmtN, fmtW: fmtW, short: short, sizeLabel: sizeLabel, weekday: weekday, dateOf: dateOf
   };
 });
