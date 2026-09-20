@@ -1,0 +1,264 @@
+/* ==========================================================================
+   theme-home.css · 首页与待机页「深空」暗场主题
+   ------------------------------------------------------------------
+   只在 body.dark-scheme 生效（外壳在首页与待机页加这个类），模块页完全不受影响。
+   设计口径：单色克制、留白、细发丝线、玻璃质感；11 个模块色只以「图标描边 + 顶边发丝 +
+   悬停辉光」三处极小面积出现，既保留各板块可区分，又不再是满屏色块。
+   背景由 fx.js 的暗场画布提供（setScheme('dark')），此处只负责前景与外壳。
+   仅作用于屏幕，打印保持原样。
+   ========================================================================== */
+@media screen {
+
+/* ---------- 0. 暗场令牌 ---------- */
+body.dark-scheme {
+  --hm-ink: #EEF3FF;                 /* 主字 */
+  --hm-sub: #93A0C2;                 /* 次字 */
+  --hm-mute: #66739A;                /* 弱字 */
+  --hm-line: rgba(255, 255, 255, .085);
+  --hm-line-2: rgba(255, 255, 255, .17);
+  --hm-glass: linear-gradient(180deg, rgba(255, 255, 255, .060) 0%, rgba(255, 255, 255, .022) 100%);
+  --hm-glass-h: linear-gradient(180deg, rgba(255, 255, 255, .105) 0%, rgba(255, 255, 255, .042) 100%);
+  --hm-shadow: 0 1px 0 rgba(255, 255, 255, .055) inset, 0 20px 46px -26px rgba(0, 0, 0, .9);
+  background: #05080F;
+  background-image: linear-gradient(170deg, #060A16 0%, #070B18 40%, #05070F 100%);
+  color: var(--hm-ink);
+  transition: background-color .45s ease;
+}
+
+/* ---------- 1. 外壳：顶栏 / 侧栏 / 价格条同步转暗 ---------- */
+body.dark-scheme .topbar {
+  background: linear-gradient(90deg, #060A16 0%, #0A1024 46%, #0E1730 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .07), 0 18px 40px -28px rgba(0, 0, 0, .9);
+}
+body.dark-scheme .topbar::before { opacity: .55; height: 1px; }
+body.dark-scheme .topbar .product { letter-spacing: 1px; }
+body.dark-scheme .topbar .booth { color: rgba(255, 255, 255, .62); }
+body.dark-scheme .topbar .industry { color: rgba(255, 255, 255, .62); }
+body.dark-scheme .topbar .industry select {
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); color: #E8EEFF;
+}
+body.dark-scheme .topbar .industry select option { background: #0B1224; color: #E8EEFF; }
+
+body.dark-scheme .rail {
+  background: rgba(8, 12, 24, .58); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-left: 1px solid var(--hm-line); box-shadow: none; color: var(--hm-sub);
+}
+body.dark-scheme .rail h4 { color: var(--hm-mute); }
+body.dark-scheme .rail .company-name { color: var(--hm-ink); }
+body.dark-scheme .rail .company-meta { color: var(--hm-sub); }
+body.dark-scheme .rail .link { color: #9CC0FF; }
+body.dark-scheme .rail .menu { background: #0C1326; border: 1px solid var(--hm-line-2); box-shadow: 0 24px 48px -20px rgba(0, 0, 0, .9); }
+body.dark-scheme .rail .menu button { color: var(--hm-ink); }
+body.dark-scheme .rail .menu button:hover { background: rgba(255, 255, 255, .07); }
+body.dark-scheme .rail .credit { background: rgba(255, 255, 255, .045); border: 1px solid var(--hm-line); box-shadow: none; }
+body.dark-scheme .rail .credit .k { color: var(--hm-mute); }
+body.dark-scheme .rail .credit .v { color: #DCE6FF; background: none; -webkit-background-clip: initial; background-clip: initial; }
+body.dark-scheme .rail .qr { background: rgba(226, 234, 252, .9); border: 1px solid var(--hm-line); border-radius: 14px; padding: 12px; }
+body.dark-scheme .rail .qr svg { width: 108px; height: 108px; }
+body.dark-scheme .rail .qr .cap { color: #46516D; }
+
+body.dark-scheme .pricebar {
+  background: rgba(8, 12, 24, .62); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--hm-line); box-shadow: none;
+}
+body.dark-scheme .pricebar .pill { background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px var(--hm-line); color: var(--hm-sub); }
+body.dark-scheme .pricebar .pill:hover { box-shadow: inset 0 0 0 1px var(--hm-line-2); background: rgba(255, 255, 255, .085); }
+body.dark-scheme .pricebar .pill .n { color: var(--hm-ink); }
+body.dark-scheme .pricebar .pill .p { color: #DCE6FF; background: none; -webkit-background-clip: initial; background-clip: initial; }
+body.dark-scheme .pricebar .pill .u { color: var(--hm-mute); }
+body.dark-scheme .pricebar .pill.rec { background: linear-gradient(100deg, #1B3A8C, #2F6BFF); color: #fff; box-shadow: 0 10px 26px -12px rgba(47, 107, 255, .8); }
+body.dark-scheme .pricebar .pill.rec .n, body.dark-scheme .pricebar .pill.rec .p { color: #fff; }
+body.dark-scheme .pricebar .pill.rec .u { color: rgba(255, 255, 255, .8); }
+body.dark-scheme .pricebar .pop { background: #0C1326; border: 1px solid var(--hm-line-2); color: var(--hm-ink); box-shadow: 0 28px 56px -20px rgba(0, 0, 0, .92); }
+body.dark-scheme .pricebar .pop .row { color: var(--hm-sub); }
+body.dark-scheme .pricebar .pop .row span:last-child { color: var(--hm-ink); }
+
+/* 滚动条与滚动提示：暗场版 */
+body.dark-scheme *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16); }
+body.dark-scheme *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .3); }
+body.dark-scheme .scroll-hint { background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, .78) 46%, rgba(5, 8, 15, .96) 100%); }
+body.dark-scheme .scroll-hint .chev { background: rgba(255, 255, 255, .14); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 10px 22px -8px rgba(0, 0, 0, .9); }
+
+/* 工作区底纹：极细坐标网格（2.6% 白），给暗场一点科技质感，不抢内容 */
+body[data-module="home"].dark-scheme .main::before {
+  content: ''; position: fixed; left: 0; right: var(--rail); top: var(--topbar); bottom: var(--pricebar); z-index: -1; pointer-events: none;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, .026) 1px, transparent 1px),
+                    linear-gradient(0deg, rgba(255, 255, 255, .026) 1px, transparent 1px);
+  background-size: 76px 76px;
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 34%, #000 0%, rgba(0, 0, 0, .35) 62%, transparent 100%);
+  mask-image: radial-gradient(120% 90% at 50% 34%, #000 0%, rgba(0, 0, 0, .35) 62%, transparent 100%);
+}
+
+/* 工作区：去掉浅色水墨远山，换一道极淡的地平线辉光 */
+body.dark-scheme .main::after {
+  background: linear-gradient(180deg, rgba(47, 107, 255, 0) 0%, rgba(47, 107, 255, .10) 62%, rgba(122, 79, 240, .14) 100%);
+  -webkit-mask: none; mask: none; opacity: .55; height: 220px;
+}
+
+/* ---------- 2. 首页标题：无渐变彩虹，白 → 钢蓝的单色降调 ---------- */
+body.dark-scheme .page-title { align-items: baseline; gap: 16px; margin: 6px 0 34px; }
+body.dark-scheme .page-title h1 {
+  font-size: calc(40px * var(--scale)); font-weight: 700; letter-spacing: 3px; line-height: 1.2; padding-bottom: 0;
+  background-image: linear-gradient(118deg, #FFFFFF 0%, #E2EAFF 44%, #93A7D8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+body.dark-scheme .page-title h1::after { display: none; }           /* 去掉笔触下划线 */
+body.dark-scheme .page-title .sub {
+  color: var(--hm-sub); font-size: calc(15px * var(--scale)); font-weight: 400; letter-spacing: 1.4px;
+  padding-left: 17px; position: relative;
+}
+body.dark-scheme .page-title .sub::before {
+  content: ''; position: absolute; left: 0; top: .18em; bottom: .18em; width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, .34), transparent);
+}
+
+/* ---------- 3. 宫格：深色玻璃卡，模块色只留三处极小面积 ---------- */
+/* 工作区改成纵向弹性：宫格吃掉剩余高度，三行自动均分，1920×1080 与 1080×1920 都不留空底 */
+body[data-module="home"].dark-scheme .main { display: flex; flex-direction: column; padding-bottom: 26px; }
+body.dark-scheme .grid { gap: 20px; flex: 1 1 auto; grid-auto-rows: minmax(150px, 1fr); align-content: stretch; }
+body.dark-scheme .grid > .card {
+  --c-lit: color-mix(in srgb, var(--c-pa) 55%, #D6E4FF);            /* 暗底上的可读模块色 */
+  border: 1px solid color-mix(in srgb, var(--c-pa) 15%, rgba(255, 255, 255, .085)); border-radius: 16px;
+  background: var(--hm-glass); box-shadow: var(--hm-shadow);
+  backdrop-filter: blur(12px) saturate(1.06); -webkit-backdrop-filter: blur(12px) saturate(1.06);
+  padding: 24px 24px 18px; min-height: 178px; gap: 0; overflow: hidden; isolation: isolate;
+  transition: transform .26s cubic-bezier(.2, .7, .3, 1), box-shadow .26s, border-color .26s, background .26s;
+}
+body.dark-scheme .grid > .card.big { min-height: 214px; padding: 28px 28px 20px; }
+
+/* 顶边发丝线：模块色，常态很淡，悬停点亮 */
+body.dark-scheme .grid > .card::before {
+  content: ''; position: absolute; left: 18px; right: 18px; top: 0; height: 1px; z-index: 2; border-radius: 0;
+  background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--c-pa) 80%, #FFFFFF) 50%, transparent 100%);
+  opacity: .44; transition: opacity .26s; animation: none;
+}
+body.dark-scheme .grid > .card:not([disabled]):hover::before { opacity: 1; }
+
+/* 右上极光：模块色的一小片辉光，代替原来的彩色色带与城市剪影 */
+body.dark-scheme .grid > .card::after {
+  content: ''; position: absolute; inset: 0; width: auto; height: auto; z-index: 0; pointer-events: none;
+  -webkit-mask: none; mask: none; border-radius: inherit;
+  background: radial-gradient(128% 96% at 92% -24%, color-mix(in srgb, var(--c-pa) 38%, transparent) 0%, transparent 62%),
+              radial-gradient(90% 70% at 6% 106%, color-mix(in srgb, var(--c-pa2) 20%, transparent) 0%, transparent 60%);
+  opacity: .62; transition: opacity .26s;
+}
+body.dark-scheme .grid > .card:not([disabled]):hover::after { opacity: 1; }
+
+/* 图标：方形细边框 + 模块色线稿（不再是白色圆形徽标） */
+body.dark-scheme .grid > .card .icon {
+  position: static; width: 44px; height: 44px; border-radius: 12px; z-index: 1;
+  background: rgba(255, 255, 255, .055); border: 1px solid var(--hm-line);
+  color: var(--c-lit); box-shadow: none;
+  display: grid; place-items: center; transition: border-color .26s, background .26s;
+}
+body.dark-scheme .grid > .card.big .icon { width: 50px; height: 50px; border-radius: 14px; }
+body.dark-scheme .grid > .card .icon svg { width: 23px; height: 23px; }
+body.dark-scheme .grid > .card.big .icon svg { width: 26px; height: 26px; }
+body.dark-scheme .grid > .card:not([disabled]):hover .icon {
+  border-color: color-mix(in srgb, var(--c-pa) 44%, transparent); background: rgba(255, 255, 255, .09);
+}
+
+/* 名称 / 说明 / 积分：回到正常文档流，层级靠字号与灰度 */
+body.dark-scheme .grid > .card .name {
+  position: static; z-index: 1; color: var(--hm-ink); font-weight: 650; letter-spacing: .6px;
+  font-size: calc(19px * var(--scale)); line-height: 1.35; margin-top: 20px; white-space: normal;
+}
+body.dark-scheme .grid > .card.big .name { font-size: calc(23px * var(--scale)); margin-top: 24px; letter-spacing: 1px; }
+body.dark-scheme .grid > .card .sub {
+  position: static; z-index: 1; color: var(--hm-sub); font-size: calc(14px * var(--scale)); font-weight: 400;
+  line-height: 1.6; margin-top: 8px; letter-spacing: .3px;
+}
+body.dark-scheme .grid > .card.big .sub { font-size: calc(15px * var(--scale)); }
+body.dark-scheme .grid > .card .cr {
+  position: static; z-index: 1; margin-top: auto; padding-top: 16px; display: flex; align-items: baseline; gap: 5px;
+  color: var(--hm-mute); font-size: calc(12px * var(--scale)); font-weight: 400; letter-spacing: .4px;
+}
+body.dark-scheme .grid > .card .cr b {
+  font-size: calc(15px * var(--scale)); font-weight: 700; letter-spacing: 0; line-height: 1;
+  background: none; -webkit-background-clip: initial; background-clip: initial; color: #C3D1F2;
+}
+/* 右下角箭头：悬停时滑出，不占文字 */
+body.dark-scheme .grid > .card .cr::after {
+  content: ''; position: absolute; right: 22px; bottom: 20px; width: 9px; height: 9px;
+  border-right: 1.6px solid var(--c-lit); border-top: 1.6px solid var(--c-lit); transform: rotate(45deg) translate(-4px, 4px);
+  opacity: 0; transition: opacity .26s, transform .26s;
+}
+body.dark-scheme .grid > .card:not([disabled]):hover .cr::after { opacity: .95; transform: rotate(45deg) translate(0, 0); }
+
+body.dark-scheme .grid > .card:not([disabled]):hover {
+  transform: translateY(-4px);
+  background: var(--hm-glass-h);
+  border-color: color-mix(in srgb, var(--c-pa) 38%, rgba(255, 255, 255, .16));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-pa) 16%, transparent),
+              0 30px 64px -30px color-mix(in srgb, var(--c-pa) 75%, transparent),
+              0 20px 44px -26px rgba(0, 0, 0, .92);
+}
+body.dark-scheme .grid > .card[disabled] { opacity: .3; }
+
+/* 进场：错峰淡入上浮，一次性 */
+@keyframes hmRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+body.dark-scheme .grid > .card { animation: hmRise .62s cubic-bezier(.2, .7, .3, 1) both; }
+body.dark-scheme .grid > .card:nth-child(1) { animation-delay: .04s; }
+body.dark-scheme .grid > .card:nth-child(2) { animation-delay: .10s; }
+body.dark-scheme .grid > .card:nth-child(3) { animation-delay: .16s; }
+body.dark-scheme .grid > .card:nth-child(4) { animation-delay: .24s; }
+body.dark-scheme .grid > .card:nth-child(5) { animation-delay: .29s; }
+body.dark-scheme .grid > .card:nth-child(6) { animation-delay: .34s; }
+body.dark-scheme .grid > .card:nth-child(7) { animation-delay: .39s; }
+body.dark-scheme .grid > .card:nth-child(8) { animation-delay: .46s; }
+body.dark-scheme .grid > .card:nth-child(9) { animation-delay: .51s; }
+body.dark-scheme .grid > .card:nth-child(10) { animation-delay: .56s; }
+body.dark-scheme .grid > .card:nth-child(11) { animation-delay: .61s; }
+body.dark-scheme .grid > .card[disabled] { animation-name: hmRiseOff; }
+@keyframes hmRiseOff { from { opacity: 0; transform: translateY(16px); } to { opacity: .3; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { body.dark-scheme .grid > .card { animation: none; } }
+
+/* ---------- 4. 待机页：同一套暗场语言 ---------- */
+body.dark-scheme .idle { background: rgba(5, 8, 15, .5); gap: 38px; }
+body.dark-scheme .idle .brand .t {
+  background-image: linear-gradient(118deg, #FFFFFF 0%, #E2EAFF 46%, #93A7D8 100%); letter-spacing: 3px;
+}
+body.dark-scheme .idle .brand img { filter: brightness(0) invert(1); opacity: .92; }
+body.dark-scheme .idle .n {
+  background: var(--hm-glass); border: 1px solid var(--hm-line); box-shadow: var(--hm-shadow);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 18px; padding: 0 0 24px;
+}
+body.dark-scheme .idle .n .k {
+  background: none; color: var(--hm-sub); font-weight: 500; letter-spacing: 1.2px;
+  padding: 16px 30px 0; font-size: calc(15px * var(--scale));
+}
+body.dark-scheme .idle .n .k::after {
+  background: none; border-bottom: 1px solid var(--hm-line); inset: auto 30px 0 30px; height: 1px;
+}
+body.dark-scheme .idle .n .v {
+  background-image: linear-gradient(118deg, #FFFFFF 0%, #DCE6FF 50%, #9DB0DE 100%); margin-top: 16px; padding: 0 30px;
+}
+body.dark-scheme .idle .foot { color: var(--hm-sub); }
+body.dark-scheme .idle .foot b { color: #DCE6FF; }
+
+/* ---------- 5. 竖屏 1080×1920：3 大卡一行、8 小卡两行，主次不变 ---------- */
+@media (orientation: portrait) {
+  /* 三张诊断大卡各占整行、横向版式；八张产品卡两列 —— 共 7 行，正好铺满竖屏 */
+  /* 三行大卡矮一些、四行小卡高一些：7 行按 .62 : 1 分配高度，避免大卡内部空荡 */
+  body.dark-scheme .grid { gap: 16px; grid-auto-rows: minmax(120px, 1fr); grid-template-rows: repeat(3, minmax(104px, .62fr)) repeat(4, minmax(140px, 1fr)); }
+  body.dark-scheme .grid > .card { grid-column: span 6; min-height: 120px; padding: 20px 22px 16px; }
+  body.dark-scheme .grid > .card.big {
+    grid-column: span 12; min-height: 120px; padding: 18px 28px;
+    display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto;
+    column-gap: 20px; row-gap: 5px; align-content: center;
+  }
+  body.dark-scheme .grid > .card.big .icon { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+  body.dark-scheme .grid > .card.big .name { grid-column: 2; grid-row: 1; margin-top: 0; font-size: calc(21px * var(--scale)); }
+  body.dark-scheme .grid > .card.big .sub { grid-column: 2; grid-row: 2; margin-top: 0; }
+  body.dark-scheme .grid > .card.big .cr { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin-top: 0; padding-top: 0; padding-right: 22px; }
+  body.dark-scheme .grid > .card.big .cr::after { right: 0; bottom: auto; top: 50%; transform: rotate(45deg) translate(-4px, 4px); margin-top: -5px; }
+  body.dark-scheme .grid > .card:not(.big):hover .cr::after, body.dark-scheme .grid > .card.big:hover .cr::after { transform: rotate(45deg) translate(0, 0); }
+  body.dark-scheme .grid > .card .name { font-size: calc(18px * var(--scale)); margin-top: 14px; }
+  body.dark-scheme .grid > .card .sub, body.dark-scheme .grid > .card.big .sub { font-size: calc(13.5px * var(--scale)); }
+  body.dark-scheme .grid > .card .icon, body.dark-scheme .grid > .card.big .icon { width: 40px; height: 40px; border-radius: 11px; }
+  body.dark-scheme .grid > .card .icon svg, body.dark-scheme .grid > .card.big .icon svg { width: 21px; height: 21px; }
+  body.dark-scheme .page-title h1 { font-size: calc(34px * var(--scale)); }
+  body.dark-scheme .idle .grid > .card, body.dark-scheme .idle .grid > .card.big { grid-column: span 3; }
+}
+
+}

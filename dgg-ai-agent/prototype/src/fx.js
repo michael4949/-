@@ -7,7 +7,8 @@
                + 七十余颗缓慢上浮的光点（实心小点 + 柔和光晕），全部按当前模块色着色，30 fps 封顶。
    规则：页面不可见时暂停；prefers-reduced-motion 只画一帧静态；零外部依赖；随机数带种子，每次开机画面一致；
          待机页可见时把画布抬到 .app 之上、待机层（z-index 100）之下。
-   对外：window.DGG.FX = { start(), stop(), setModule(id, colors), running }（同时保留 window.DGG_FX 别名）
+   对外：window.DGG.FX = { start(), stop(), setModule(id, colors), setScheme('light'|'dark'), running, scheme }（同时保留 window.DGG_FX 别名）
+         setScheme 切换浅场／暗场底色（首页与待机用暗场），约 0.6 s 交叉过渡。
          外壳在每次路由切换时调用 setModule(id, 调色板条目 {pa, pa2, soft, ink, hd1, hd2, hdt, on})，颜色约 1 s 内交叉过渡。
    ========================================================================== */
 (function () {
@@ -104,26 +105,49 @@
     { x: .92, y: .72, r: .50, c: [201, 228, 255], a: .55, sp: .045, ph: 2.3, amp: .05 }, /* 淡蓝 */
     { x: .50, y: .35, r: .55, c: [255, 255, 255], a: .75, sp: .030, ph: 5.2, amp: .04 }  /* 高光 */
   ];
+  /* ---------- 暗场色块（与 BLOBS 一一对应，只换颜色与浓度；首页/待机用） ---------- */
+  var BLOBS_DARK = [
+    { c: [30, 58, 130],  a: .70 },   /* 深蓝 */
+    { c: [52, 36, 112],  a: .62 },   /* 深紫 */
+    { c: [10, 62, 78],   a: .52 },   /* 深青 */
+    { c: [64, 40, 34],   a: .26 },   /* 暗棕 */
+    { c: [22, 50, 104],  a: .48 },   /* 墨蓝 */
+    { c: [16, 26, 56],   a: .80 }    /* 夜芯 */
+  ];
+  var BASE_LIGHT = [247, 249, 255], BASE_DARK = [5, 8, 18];
+  var schemeMix = 0, schemeTarget = 0;                 /* 0 = 浅场 · 1 = 暗场；约 0.6 s 过渡 */
+  function mix1(a, b, k) { return a + (b - a) * k; }
+  function css3(c) { return 'rgb(' + (c[0] + .5 | 0) + ',' + (c[1] + .5 | 0) + ',' + (c[2] + .5 | 0) + ')'; }
+  function setScheme(name) {
+    var v = name === 'dark' ? 1 : 0;
+    if (v === schemeTarget) return;
+    schemeTarget = v;
+    if (reduce) { schemeMix = v; if (started) render(performance.now()); }
+  }
+
   function drawMesh(t) {
-    mctx.fillStyle = '#F7F9FF'; mctx.fillRect(0, 0, MW, MH);
-    var big = Math.max(MW, MH), i, b, x, y, r, g;
+    var k = schemeMix;
+    mctx.fillStyle = css3([mix1(BASE_LIGHT[0], BASE_DARK[0], k), mix1(BASE_LIGHT[1], BASE_DARK[1], k), mix1(BASE_LIGHT[2], BASE_DARK[2], k)]);
+    mctx.fillRect(0, 0, MW, MH);
+    var big = Math.max(MW, MH), i, b, d, x, y, r, g, cr, cg, cb, ca;
     for (i = 0; i < BLOBS.length; i++) {
-      b = BLOBS[i];
+      b = BLOBS[i]; d = BLOBS_DARK[i];
       x = (b.x + Math.sin(t * b.sp + b.ph) * b.amp) * MW; y = (b.y + Math.cos(t * b.sp * .8 + b.ph) * b.amp) * MH;
       r = b.r * big * (1 + .05 * Math.sin(t * b.sp * 1.3 + b.ph));
+      cr = mix1(b.c[0], d.c[0], k); cg = mix1(b.c[1], d.c[1], k); cb = mix1(b.c[2], d.c[2], k); ca = mix1(b.a, d.a, k);
       g = mctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, 'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',' + b.a + ')');
-      g.addColorStop(1, 'rgba(' + b.c[0] + ',' + b.c[1] + ',' + b.c[2] + ',0)');
+      g.addColorStop(0, 'rgba(' + (cr + .5 | 0) + ',' + (cg + .5 | 0) + ',' + (cb + .5 | 0) + ',' + ca + ')');
+      g.addColorStop(1, 'rgba(' + (cr + .5 | 0) + ',' + (cg + .5 | 0) + ',' + (cb + .5 | 0) + ',0)');
       mctx.fillStyle = g; mctx.fillRect(0, 0, MW, MH);
     }
-    /* 模块主色：两团淡色晕（右中 pa、左下 pa2），随路由交叉过渡 */
+    /* 模块主色：两团淡色晕（右中 pa、左下 pa2），随路由交叉过渡；暗场下略提浓度当作辉光 */
     x = (.74 + Math.sin(t * .04) * .05) * MW; y = (.52 + Math.cos(t * .03) * .06) * MH;
     g = mctx.createRadialGradient(x, y, 0, x, y, .52 * MW);
-    g.addColorStop(0, rgba(cur.a, .21)); g.addColorStop(1, rgba(cur.a, 0));
+    g.addColorStop(0, rgba(cur.a, mix1(.21, .30, k))); g.addColorStop(1, rgba(cur.a, 0));
     mctx.fillStyle = g; mctx.fillRect(0, 0, MW, MH);
     x = (.14 + Math.cos(t * .035) * .04) * MW; y = (.84 + Math.sin(t * .045) * .05) * MH;
     g = mctx.createRadialGradient(x, y, 0, x, y, .40 * MW);
-    g.addColorStop(0, rgba(cur.b, .16)); g.addColorStop(1, rgba(cur.b, 0));
+    g.addColorStop(0, rgba(cur.b, mix1(.16, .26, k))); g.addColorStop(1, rgba(cur.b, 0));
     mctx.fillStyle = g; mctx.fillRect(0, 0, MW, MH);
   }
 
@@ -191,9 +215,9 @@
       y = ((o.y - t * o.vy) % 1 + 1) % 1; x = (o.x + Math.sin(t * .3 + o.ph) * o.sway + 1) % 1;
       tw = .5 + .5 * Math.sin(t * o.tw + o.ph);                    /* 0–1 缓慢呼吸 */
       px = x * W; py = y * H; sz = o.r * 5;
-      ctx.globalAlpha = (.12 + .18 * tw) * (o.a / .35);
+      ctx.globalAlpha = (.12 + .18 * tw) * (o.a / .35) * (1 + .55 * schemeMix);
       ctx.drawImage(sprite(o.tone), px - sz / 2, py - sz / 2, sz, sz);
-      ctx.globalAlpha = o.a * (.7 + .3 * tw);
+      ctx.globalAlpha = Math.min(1, o.a * (.7 + .3 * tw) * (1 + .5 * schemeMix));
       ctx.beginPath(); ctx.arc(px, py, o.r, 0, 6.2832); ctx.fillStyle = rgba(c, 1); ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -203,6 +227,11 @@
     var t = (ms - t0) / 1000;
     var fading = !same(cur.a, tgt.a) || !same(cur.b, tgt.b) || !same(cur.k, tgt.k);
     if (fading) { toward(cur.a, tgt.a, .1); toward(cur.b, tgt.b, .1); toward(cur.k, tgt.k, .1); }   /* 30 fps × .1 ≈ 1 s 过渡 */
+    if (schemeMix !== schemeTarget) {                                   /* 浅场 ⇄ 暗场：约 0.6 s */
+      schemeMix += (schemeTarget - schemeMix) * .16;
+      if (Math.abs(schemeTarget - schemeMix) < .004) schemeMix = schemeTarget;
+      fading = true;
+    }
     ensureSprites();
     if (fading || frame % 3 === 0) drawMesh(t);             /* 网格 10 fps 足够（变化极慢）；过渡期间逐帧 */
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -280,7 +309,7 @@
   }
   function stop() { running = false; pause(); if (ctx) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height); } }
 
-  var api = { start: start, stop: stop, setModule: setModule, _real: true, get running() { return running; } };
+  var api = { start: start, stop: stop, setModule: setModule, setScheme: setScheme, _real: true, get running() { return running; }, get scheme() { return schemeTarget ? 'dark' : 'light'; } };
   window.DGG.FX = api; window.DGG_FX = api;
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })();

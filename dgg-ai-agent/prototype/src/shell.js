@@ -154,6 +154,14 @@
     $body.setAttribute('data-module', id); $body.setAttribute('data-step', step || '');
     ['pa', 'pa2', 'soft', 'ink', 'hd1', 'hd2', 'hdt', 'on'].forEach(function (k) { $body.style.setProperty('--m-' + k, c[k]); });
     if (window.DGG && window.DGG.FX && window.DGG.FX.setModule) window.DGG.FX.setModule(id, c);
+    syncScheme();
+  }
+
+  // ---------- 明暗场：首页与待机页用暗场底（深空），模块页用浅场底 ----------
+  function syncScheme() {
+    var dark = $body.getAttribute('data-module') === 'home' || ($idle && !$idle.classList.contains('hidden'));
+    $body.classList.toggle('dark-scheme', !!dark);
+    if (window.DGG && window.DGG.FX && window.DGG.FX.setScheme) window.DGG.FX.setScheme(dark ? 'dark' : 'light');
   }
 
   // ---------- 首页 11 宫格 ----------
@@ -305,6 +313,7 @@
     var g = gridEl(null); $idle.appendChild(g);
     $idle.appendChild(h('div', { class: 'foot' }, [h('b', {}, ['18 年']), ' 行业沉淀 · ', h('b', {}, ['530 万+']), ' 真实数据验证　　培育企业核心竞争力，让老板经营企业更简单']));
     $idle.classList.remove('hidden');
+    syncScheme();
     var cards = g.querySelectorAll('.card'), i = 0;
     litTimer = setInterval(function () {
       cards.forEach(function (c) { c.classList.remove('lit'); });
@@ -314,6 +323,7 @@
   function hideIdle() {
     if ($idle.classList.contains('hidden')) return;
     $idle.classList.add('hidden'); clearInterval(litTimer);
+    syncScheme();
     resetSession();
   }
   function resetSession() {

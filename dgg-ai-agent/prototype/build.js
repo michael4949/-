@@ -55,6 +55,7 @@ html = put(html, '/*__MODULE_08_CSS__*/', R('src/module-08.css'));
 html = put(html, '/*__MODULE_11_CSS__*/', R('src/module-11.css'));
 html = put(html, '/*__THEME_SHELL_CSS__*/', R('src/theme-shell.css'));
 html = put(html, '/*__THEME_PRODUCT_CSS__*/', R('src/theme-product.css'));
+html = put(html, '/*__THEME_HOME_CSS__*/', R('src/theme-home.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));
