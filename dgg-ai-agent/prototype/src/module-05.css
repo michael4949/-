@@ -63,3 +63,72 @@
 .m5-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
 .m5-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .m5-log .l b { white-space: nowrap; } .m5-log .l span { color: var(--pd-sub); }
+
+/* ===================== 六屏叙事件：接入带 · 结论横幅 · 紧凑题库 · JD 摘要 ===================== */
+.m5-flow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m5-flow .src { display: flex; gap: 8px; flex-wrap: wrap; }
+.m5-flow .src .s { border: 1px solid var(--pd-line); border-radius: 9px; padding: 4px 11px; line-height: 1.32; background: #FCFDFE; }
+.m5-flow .src .s b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m5-flow .src .s span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m5-flow .pipe { flex: 0 0 48px; height: 16px; border-radius: 8px; }
+.m5-flow .hub { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 10px; background: var(--pa-soft); border: 1px solid var(--pa); color: var(--pa-ink); font-weight: 800; white-space: nowrap; }
+.m5-flow .out { padding: 4px 12px; border-radius: 9px; background: var(--pd-bg); line-height: 1.32; white-space: nowrap; }
+.m5-flow .out b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m5-flow .out span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m5-flow .sp { flex: 1; }
+/* 结论横幅 */
+.m5-say { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
+.m5-say.off { opacity: 0; }
+.m5-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
+.m5-say b { font-size: calc(17px * var(--scale)); font-weight: 800; line-height: 1.45; }
+/* 滚动数字 */
+.m5-cnt { font-variant-numeric: tabular-nums; }
+.m5-big { font-size: calc(18px * var(--scale)); font-weight: 800; color: var(--pa-ink); }
+.m5-sub { font-weight: 700; margin: 12px 0 6px; }
+/* 影响金额迷你条 */
+.m5-mb { display: inline-block; width: 46px; height: 6px; border-radius: 3px; background: var(--pd-bg); overflow: hidden; vertical-align: middle; margin-left: 7px; }
+.m5-mb i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--pa); }
+/* JD 摘要 */
+.m5-jdc { display: grid; gap: 9px; }
+.m5-jdc .t { font-size: calc(21px * var(--scale)); font-weight: 800; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.m5-jdc .t .d { font-size: calc(14px * var(--scale)); font-weight: 700; color: var(--pa); }
+.m5-jdc .meta { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m5-jdc .ln { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: calc(13.5px * var(--scale)); line-height: 1.6; }
+.m5-jdc .ln i { font-style: normal; color: var(--pd-sub); font-weight: 700; }
+/* 紧凑评分表 */
+.m5-qc { display: grid; gap: 8px; }
+.m5-qc .r { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; gap: 14px; align-items: center; border: 1px solid var(--pd-line); border-radius: 10px; padding: 9px 12px; }
+.m5-qc .r .lb b { font-weight: 800; }
+.m5-qc .r .lb span { color: var(--pd-sub); font-size: calc(12px * var(--scale)); margin-left: 6px; }
+.m5-qc .r .lb .wbar { display: block; width: 100%; height: 5px; border-radius: 3px; background: var(--pd-bg); overflow: hidden; margin: 5px 0 0; }
+.m5-qc .r .lb .wbar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--pa); }
+.m5-qc .r .q { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m5-qc .pick { display: flex; gap: 4px; }
+.m5-qc .pick button { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--pd-line); background: #fff; font-weight: 800; font-size: 12px; }
+.m5-qc .pick button.on { border-color: var(--pa); background: var(--pa); color: #fff; }
+/* 竖屏：主区单列铺满，接入带换行 */
+@media (orientation: portrait) {
+  .m5-g > * { grid-column: span 12 !important; }
+  .m5-flow { flex-wrap: wrap; row-gap: 8px; }
+  .m5-flow .pipe { flex: 0 0 26px; }
+  .m5-flow .sp { flex: 0 0 auto; }
+  .m5-result { grid-template-columns: minmax(0, 1fr); }
+  .m5-qc .r { grid-template-columns: 150px minmax(0, 1fr); }
+  .m5-qc .pick { grid-column: 1 / -1; }
+}
+
+/* 需求单块瘦身：一屏放得下三张 */
+.m5-needs .nd { padding: 8px 12px; gap: 5px; }
+.m5-needs .nd .hd { font-size: calc(13.5px * var(--scale)); }
+.m5-stages .st { padding: 3px 0; font-size: calc(10.5px * var(--scale)); }
+.m5-stages .st b { font-size: calc(13px * var(--scale)); }
+/* 规则表：规则名换行、影响条独占一行，六列在 c7 里放得下 */
+.pd-table td.m5-rl { white-space: normal; max-width: 210px; line-height: 1.34; }
+.pd-table td.m5-im { min-width: 96px; }
+.m5-mb { display: block; width: 100%; margin: 4px 0 0; }
+.pd-table td.m5-rl { white-space: normal; max-width: 150px; line-height: 1.34; }
+.pd-table td.m5-rl b, .pd-table td.m5-rl .sub { white-space: normal; }
+.pd-table td.m5-rl, .pd-table td.m5-rl b, .pd-table td.m5-rl .sub { word-break: normal; }
+.m5-needs .nd.slim { padding: 9px 12px; }
+.m5-needs .nd.slim .hd { font-weight: 700; }
+.m5-needs .nd.slim .hd .n { color: var(--pd-sub); font-weight: 600; font-size: calc(12px * var(--scale)); }

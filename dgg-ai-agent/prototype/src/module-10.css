@@ -1,47 +1,118 @@
 /* ===================== AI ERP · 模块专属版式（组件全部来自 product.css） ===================== */
-.m10-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
-.m10-connect .cap-row:last-child { border-bottom: 0; }
-.m10-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
-.m10-connect .cap-row .t { font-weight: 700; }
-.m10-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m10-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
-.m10-connect .src-row:last-child { border-bottom: 0; }
-.m10-connect .src-row .t { font-weight: 700; }
-.m10-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m10-connect .arche { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.m10-connect .arche button { text-align: left; padding: 10px 12px; border: 1px solid var(--pd-line); border-radius: 10px; background: #fff; display: flex; flex-direction: column; gap: 2px; }
-.m10-connect .arche button .t { font-weight: 700; }
-.m10-connect .arche button .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m10-connect .arche button.on { border-color: var(--pa); background: var(--pa-soft); }
-.m10-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m10-g { align-content: start; }
+
+/* ---- 接入带：来源 → 排程引擎 → 产出，一眼看出数据从哪来 ---- */
+.m10-flow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m10-flow .src { display: flex; gap: 8px; flex-wrap: wrap; }
+.m10-flow .src .s { border: 1px solid var(--pd-line); border-radius: 9px; padding: 4px 11px; line-height: 1.32; background: #FCFDFE; }
+.m10-flow .src .s b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; white-space: nowrap; }
+.m10-flow .src .s span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m10-flow .pipe { flex: 0 0 44px; height: 16px; border-radius: 8px; }
+.m10-flow .hub { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 10px; background: var(--pa-soft); border: 1px solid var(--pa); color: var(--pa-ink); font-weight: 800; white-space: nowrap; }
+.m10-flow .out { padding: 4px 12px; border-radius: 9px; background: var(--pd-bg); line-height: 1.32; white-space: nowrap; }
+.m10-flow .out b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m10-flow .out span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m10-flow .sp { flex: 1; }
+
+/* ---- 结论横幅：动画最后一拍把这一屏唯一那句话推上来 ---- */
+.m10-say { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
+.m10-say.off { opacity: 0; }
+.m10-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
+.m10-say b { font-size: calc(17px * var(--scale)); font-weight: 800; line-height: 1.45; }
+.m10-cnt { font-variant-numeric: tabular-nums; }
+
+/* 滚动区：默认露出 5–7 行，其余滚动 */
+.m10-sc7 { max-height: 352px; }
+.m10-sc5 { max-height: 204px; }
+
+/* ---- 屏 1 接入 ---- */
+.m10-connect .arche { display: flex; flex-wrap: wrap; gap: 8px; }
+.m10-connect .arche button { padding: 7px 14px; border: 1px solid var(--pd-line); border-radius: 9px; background: #fff; font-weight: 700; font-size: calc(13px * var(--scale)); }
+.m10-connect .arche button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m10-cap { display: grid; gap: 2px; }
+.m10-cap .r { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid #EEF1F7; }
+.m10-cap .r:last-child { border-bottom: 0; }
+.m10-cap .r .ic { width: 30px; height: 30px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m10-cap .r .t { font-weight: 700; }
+.m10-connect .go { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
 .m10-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); }
 .m10-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
 .m10-connect .go .sp { flex: 1; }
 .m10-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
 .m10-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
 
+/* ---- 屏 2 指挥室：7 天平均负荷那根线 ---- */
+.m10-g .pd-heat { gap: 3px; }
+.m10-g .pd-heat .cell { height: 22px; }
+.m10-curve { width: 120px; height: 26px; }
+.m10-curve .ln { fill: none; stroke: var(--pa); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.m10-curve .full { stroke: #D9483B; stroke-width: 1; stroke-dasharray: 3 3; opacity: .7; }
+
+.m10-short { display: grid; gap: 6px; }
+.m10-short .r { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto auto auto; gap: 9px; align-items: center; padding: 7px 10px; border: 1px solid var(--pd-line); border-radius: 9px; background: #fff; text-align: left; font-size: calc(13px * var(--scale)); }
+.m10-short .r .sv { color: var(--pd-sub); font-size: calc(12px * var(--scale)); white-space: nowrap; }
+.m10-short .rest { color: var(--pd-sub); font-size: calc(12px * var(--scale)); padding: 1px 2px 0; }
+.m10-short .r:hover { border-color: var(--pa); }
+.m10-short .r .d { width: 8px; height: 8px; border-radius: 50%; background: var(--t-risk); }
+.m10-short .r.late .d { background: var(--t-late); }
+.m10-short .r .t { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m10-short .r .x { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-short .r .x.neg { color: var(--t-late); font-weight: 700; }
+
+/* ---- 屏 3 订单下钻 ---- */
 .m10-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
-.m10-head .id { font-size: calc(22px * var(--scale)); font-weight: 800; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.m10-head .id { font-size: calc(21px * var(--scale)); font-weight: 800; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .m10-head .sub { color: var(--pd-sub); margin-top: 2px; font-size: calc(13.5px * var(--scale)); }
-.m10-head .facts { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 10px; }
+.m10-head .facts { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 10px; }
 .m10-head .facts .f .k { color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 600; }
-.m10-head .facts .f .v { font-size: calc(18px * var(--scale)); font-weight: 800; }
+.m10-head .facts .f .v { font-size: calc(19px * var(--scale)); font-weight: 800; }
 .m10-head .facts .f .v.late { color: var(--t-late); } .m10-head .facts .f .v.ok { color: var(--t-ok); } .m10-head .facts .f .v.risk { color: #A8690F; }
 .m10-head .btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.m10-ops .pd-table td { white-space: normal; }
+
+.m10-judge { display: flex; flex-direction: column; gap: 10px; }
+.m10-judge .vd { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--pd-bg); font-weight: 700; }
+.m10-judge .vd.late { background: var(--t-late-soft); color: var(--t-late); }
+.m10-judge .vd.risk { background: var(--t-risk-soft); color: #A8690F; }
+.m10-judge .vd.ok, .m10-judge .vd.done { background: var(--t-ok-soft); color: var(--t-ok); }
+.m10-judge .why { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); line-height: 1.6; }
+.m10-acts { display: grid; gap: 8px; }
+.m10-act { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 10px 12px; border: 1px solid var(--pd-line); border-radius: 10px; background: #fff; }
+.m10-act.best { border-color: var(--pa); background: var(--pa-soft); }
+.m10-act .t { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.m10-act .t b { font-weight: 800; white-space: nowrap; }
+.m10-act .t .rk { width: 20px; height: 20px; border-radius: 50%; background: var(--pa); color: var(--pa-on, #fff); font-size: 11px; font-weight: 800; display: grid; place-items: center; flex: none; }
+.m10-act .t .tg { color: var(--pd-sub); font-size: calc(12px * var(--scale)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m10-act .dn { color: var(--t-hand); font-weight: 700; font-size: calc(12px * var(--scale)); }
+.m10-act .e { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-act .e b { color: var(--pd-ink); font-weight: 700; }
+.m10-act .e b.good { color: var(--t-ok); } .m10-act .e b.bad { color: var(--t-late); }
 .m10-mat { display: grid; gap: 8px; }
-.m10-mat .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 9px; }
-.m10-mat .row .t { font-weight: 700; }
-.m10-mat .row .s { grid-column: 1 / -1; color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m10-mat .row { display: grid; grid-template-columns: minmax(0, 1fr) auto 136px; gap: 6px 10px; padding: 7px 10px; border: 1px solid var(--pd-line); border-radius: 9px; align-items: center; }
+.m10-mat .row .t { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- 屏 4 插单 ---- */
 .m10-insert .presets { display: flex; flex-direction: column; gap: 6px; }
-.m10-insert .presets button { text-align: left; padding: 8px 10px; border: 1px dashed var(--pd-line); border-radius: 9px; background: #fff; font-size: calc(12.5px * var(--scale)); }
+.m10-insert .presets button { text-align: left; padding: 7px 10px; border: 1px dashed var(--pd-line); border-radius: 9px; background: #fff; font-size: calc(12.5px * var(--scale)); }
 .m10-insert .presets button:hover { border-color: var(--pa); }
-.m10-insert .reason { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 600; line-height: 1.5; }
-.m10-insert .reason .tag { flex: none; background: var(--pa); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-top: 2px; }
-.m10-po .sup { border: 1px solid var(--pd-line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.m10-load { display: grid; gap: 7px; }
+.m10-load .r { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; align-items: center; font-size: calc(12.5px * var(--scale)); }
+.m10-load .r .t { color: var(--pd-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.m10-insert .m10-sc5 { max-height: 140px; }
+.m10-insert .pd-option .head .big { font-size: calc(22px * var(--scale)); }
+/* 方案卡副文 + 推荐理由：屏上就能看见为什么推这一个 */
+.m10-insert .pd-option .notes { line-height: 1.5; }
+.m10-why { color: var(--pd-sub); border-top: 1px dashed var(--pd-line); padding-top: 9px; }
+
+/* ---- 屏 5 物料 ---- */
+.m10-po { display: grid; gap: 8px; }
+.m10-po .sup { border: 1px solid var(--pd-line); border-radius: 10px; padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; }
 .m10-po .sup .t { display: flex; justify-content: space-between; font-weight: 700; }
 .m10-po .sup .ln { display: flex; justify-content: space-between; gap: 10px; color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
 .m10-po .sup .ln b { color: var(--pd-ink); }
+.m10-po .rest { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); padding: 1px 2px 0; }
+.pd-why { line-height: 1.6; font-size: calc(13px * var(--scale)); }
+
+/* ---- 屏 6 日报 ---- */
 .m10-daily .kp { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .m10-daily .kp .b { background: #F7F9FD; border-radius: 10px; padding: 10px 12px; }
 .m10-daily .kp .b .k { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
@@ -50,8 +121,20 @@
 .m10-daily .who { display: flex; flex-wrap: wrap; gap: 6px; }
 .m10-daily .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
 .m10-daily .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m10-daily .m10-sc5 { max-height: 168px; }
+.m10-daily .m10-sc3 { max-height: 56px; }
 .m10-log { display: grid; gap: 6px; }
 .m10-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
 .m10-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .m10-log .l b { white-space: nowrap; }
 .m10-log .l span { color: var(--pd-sub); }
+
+@media (orientation: portrait) {
+  .m10-flow { flex-wrap: wrap; row-gap: 8px; }
+  .m10-flow .pipe { flex: 0 0 24px; }
+  .m10-flow .sp { flex: 0 0 auto; }
+  .m10-say b { font-size: calc(15px * var(--scale)); }
+  .m10-head { grid-template-columns: minmax(0, 1fr); }
+  .m10-head .btns { justify-content: flex-start; }
+  .m10-sc7 { max-height: 300px; }
+}

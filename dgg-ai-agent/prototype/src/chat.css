@@ -33,6 +33,8 @@
 /* 体 */
 .pd-chat .bd { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-height: 0; }
 .pd-chat .ms { overflow: auto; padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 11px; scroll-behavior: smooth; }
+/* 消息少时贴着输入框放，不在上方留一大块空白；消息多了照常从顶部滚 */
+.pd-chat .ms > .m:first-child { margin-top: auto; }
 .pd-chat .m { display: flex; gap: 8px; align-items: flex-start; animation: chIn .34s cubic-bezier(.2, .7, .3, 1) both; }
 @keyframes chIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .pd-chat .m.me { justify-content: flex-end; }
@@ -117,11 +119,11 @@
   .pd-app.has-chat { grid-template-columns: 68px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
   .pd-app.has-chat .pd-nav { grid-row: 1 / span 2; }
   .pd-chat {
-    width: auto; min-width: 0; grid-column: 2; grid-row: 2; height: 40vh;
+    width: auto; min-width: 0; grid-column: 2; grid-row: 2; height: auto; max-height: 42vh;
     border-left: 0; border-top: 1px solid var(--pd-line);
     transition: height .28s cubic-bezier(.2, .7, .3, 1);
   }
-  .pd-chat.off { width: auto; min-width: 0; height: 52px; }
+  .pd-chat.off { width: auto; min-width: 0; height: 52px; max-height: 52px; }
   .pd-chat.off .hd { display: flex; }
   .pd-chat.off .tab { display: none; }
   .pd-chat .hd .fold svg { transform: rotate(90deg); }

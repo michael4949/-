@@ -17,8 +17,11 @@
 .m6-riskhead { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-bottom: 14px; }
 .m6-riskhead .m { display: flex; flex-direction: column; gap: 2px; }
 .m6-riskhead .m b { font-size: calc(18px * var(--scale)); } .m6-riskhead .m span { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m6-items { display: grid; gap: 6px; }
-.m6-items .it { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 10px; border: 1px solid var(--pd-line); border-radius: 9px; font-size: calc(13px * var(--scale)); }
+.m6-items { display: grid; gap: 5px; }
+.m6-items .it { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 5px 10px; border: 1px solid var(--pd-line); border-radius: 9px; font-size: calc(13px * var(--scale)); }
+/* 周收付合计：一行摊开，比 pd-kv 省一半高度，补缺方案就能抬进首屏 */
+.m6-wk { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 9px; color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
+.m6-wk b { color: var(--pd-ink); font-weight: 700; margin-left: 2px; }
 .m6-items .it .l { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .m6-items .it .neg { color: var(--t-late); } .m6-items .it .pos { color: var(--t-ok); }
 .m6-reason { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 600; line-height: 1.5; margin-top: 14px; }
@@ -30,3 +33,49 @@
 .m6-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
 .m6-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .m6-log .l b { white-space: nowrap; } .m6-log .l span { color: var(--pd-sub); }
+
+/* ===================== 六屏叙事件：接入带 · 结论横幅 · 三表关系图 ===================== */
+.m6-flow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m6-flow .src { display: flex; gap: 8px; flex-wrap: wrap; }
+.m6-flow .src .s { border: 1px solid var(--pd-line); border-radius: 9px; padding: 4px 11px; line-height: 1.32; background: #FCFDFE; }
+.m6-flow .src .s b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m6-flow .src .s span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m6-flow .pipe { flex: 0 0 48px; height: 16px; border-radius: 8px; }
+.m6-flow .hub { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 10px; background: var(--pa-soft); border: 1px solid var(--pa); color: var(--pa-ink); font-weight: 800; white-space: nowrap; }
+.m6-flow .out { padding: 4px 12px; border-radius: 9px; background: var(--pd-bg); line-height: 1.32; white-space: nowrap; }
+.m6-flow .out b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m6-flow .out span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m6-flow .sp { flex: 1; }
+/* 结论横幅 */
+.m6-say { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
+.m6-say.off { opacity: 0; }
+.m6-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
+.m6-say b { font-size: calc(17px * var(--scale)); font-weight: 800; line-height: 1.45; }
+/* 滚动数字：金额 KPI 的数值与单位各占一格，1440 宽与竖屏下都不折行 */
+.m6-cnt { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.m6-amt { display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; min-width: 0; }
+/* 金额比纯计数多带一个单位，字号收一档，1440 宽的五连 KPI 里也不会被卡片裁掉 */
+.pd-kpi .v .m6-amt { font-size: calc(26px * var(--scale)); }
+.m6-sub { font-weight: 700; margin: 2px 0 6px; }
+.m6-ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
+.m6-sc { overflow: auto; }
+.m6-rep { max-height: 232px; overflow: auto; }
+/* 三表关系图：半幅卡里按原尺寸铺，竖屏铺满时也不会被拉成一大块 */
+.m6-map { width: 100%; max-width: 640px; height: auto; display: block; margin: 0 auto; }
+.m6-map .bt { font-size: 14px; font-weight: 800; fill: var(--pd-ink); }
+.m6-map .bn { font-size: 11.5px; font-weight: 700; }
+.m6-map .bk { font-size: 11.5px; fill: var(--pd-sub); }
+.m6-map .bv { font-size: 19px; font-weight: 800; fill: var(--pd-ink); font-variant-numeric: tabular-nums; }
+.m6-map .el { font-size: 11px; font-weight: 700; fill: var(--pa); }
+/* 表格：关系名与政策名换行，四五列在半幅卡里放得下 */
+.pd-table td.m6-rl { white-space: normal; max-width: 220px; line-height: 1.34; }
+.pd-table td.m6-rl b, .pd-table td.m6-rl .sub { white-space: normal; word-break: normal; }
+/* 竖屏：主区单列铺满，接入带换行 */
+@media (orientation: portrait) {
+  .m6-g > * { grid-column: span 12 !important; }
+  .m6-flow { flex-wrap: wrap; row-gap: 8px; }
+  .m6-flow .pipe { flex: 0 0 26px; }
+  .m6-flow .sp { flex: 0 0 auto; }
+  .m6-connect .go { flex-wrap: wrap; row-gap: 10px; }
+  .m6-riskhead { gap: 10px 16px; }
+}

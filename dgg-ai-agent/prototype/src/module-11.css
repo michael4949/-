@@ -3,9 +3,6 @@
 .m11-connect .src-row:last-child { border-bottom: 0; }
 .m11-connect .src-row .t { font-weight: 700; } .m11-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
 .m11-connect .src-row .ids { color: var(--pd-mute); font-size: calc(11.5px * var(--scale)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m11-go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
-.m11-go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m11-go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
-.m11-go .sp { flex: 1; } .m11-go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m11-go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
 /* 需求句与解析芯片 */
 .m11-req { display: grid; gap: 10px; }
 .m11-req .pd-item.on { border-color: var(--pa); box-shadow: inset 0 0 0 1px var(--pa); background: var(--pa-soft); }
@@ -31,6 +28,9 @@
 .m11-lit { animation: m11lit .35s ease-out; }
 @keyframes m11lit { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .m11-pages .pd-item.on { border-color: var(--pa); box-shadow: inset 0 0 0 1px var(--pa); }
+.m11-pages .pd-item { padding-top: 7px; padding-bottom: 7px; }
+.m11-iterate .m11-ta { min-height: 52px; }
+.m11-iterate .m11-follow .pd-item { padding-top: 7px; padding-bottom: 7px; }
 .m11-rec { display: flex; flex-wrap: wrap; gap: 6px; }
 .m11-rec button { height: 30px; padding: 0 11px; border-radius: 8px; border: 1px dashed var(--pa); background: #fff; color: var(--pa-ink); font-weight: 700; font-size: calc(12.5px * var(--scale)); }
 .m11-rec button:hover { background: var(--pa-soft); }
@@ -104,8 +104,11 @@
 .m11-pc { border: 1px solid var(--pd-line); border-radius: 12px; overflow: hidden; background: #fff; }
 .m11-pc .chrome { height: 30px; background: #EEF1F7; display: flex; align-items: center; gap: 6px; padding: 0 12px; font-size: 11.5px; color: var(--pd-sub); font-weight: 700; }
 .m11-pc .chrome i { width: 9px; height: 9px; border-radius: 50%; background: #D9DDE7; } .m11-pc .chrome .url { margin-left: 8px; background: #fff; border-radius: 6px; padding: 2px 10px; flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m11-pc .bd { padding: 14px; display: grid; gap: 12px; }
-.m11-pc .pd-kpi .v { font-size: calc(22px * var(--scale)); }
+.m11-pc .bd { padding: 14px; display: grid; gap: 10px; }
+.m11-pc .pd-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.m11-pc .pd-kpi { padding: 7px 9px 6px; gap: 0; }
+.m11-pc .pd-kpi .v { font-size: calc(19px * var(--scale)); }
+.m11-pc .pd-kpi .k, .m11-pc .pd-kpi .d { font-size: calc(11px * var(--scale)); }
 /* 用例表 */
 .m11-tests { overflow: hidden; }
 .m11-tests .pd-table { table-layout: fixed; }
@@ -129,9 +132,76 @@
 .m11-checks .c { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; font-weight: 700; font-size: calc(12.5px * var(--scale)); background: var(--t-ok-soft); color: var(--t-ok); }
 .m11-checks .c.bad { background: var(--t-late-soft); color: var(--t-late); } .m11-checks .c .d { font-weight: 500; color: inherit; opacity: .8; font-size: calc(11.5px * var(--scale)); }
 /* 交付栏 */
-.m11-deliver { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.m11-deliver .dv { display: inline-grid; gap: 1px; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--pd-line); background: #fff; }
+.m11-deliver { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.m11-deliver .dv { display: inline-grid; gap: 1px; padding: 5px 10px; border-radius: 10px; border: 1px solid var(--pd-line); background: #fff; }
+.m11-deliver .lb { font-weight: 800; font-size: calc(13px * var(--scale)); margin-right: 4px; }
+.m11-bar { padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
 .m11-deliver .dv .t { font-weight: 800; font-size: calc(13px * var(--scale)); } .m11-deliver .dv .s { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
 .m11-deliver .dv .s b { color: var(--t-ok); }
 .m11-deliver .sp { flex: 1; }
 .m11-follow .pd-item.on { border-color: var(--pa); box-shadow: inset 0 0 0 1px var(--pa); }
+/* 版本对比 · 变更清单：两版并排挤在半栏里，行距收紧，清单多于四行就在卡内滚 */
+.m11-iterate .pd-compare { gap: 10px; }
+.m11-iterate .pd-option { padding: 10px 12px; gap: 6px; }
+.m11-iterate .pd-option .key { width: 24px; height: 24px; border-radius: 7px; }
+.m11-iterate .pd-option .name { font-size: calc(13.5px * var(--scale)); line-height: 1.3; padding-right: 62px; }
+.m11-iterate .pd-option .head .big { font-size: calc(22px * var(--scale)); }
+.m11-iterate .pd-option .rows { gap: 3px; }
+.m11-iterate .pd-option .rows .r { font-size: calc(12.5px * var(--scale)); }
+.m11-iterate .pd-option .notes { padding-top: 6px; font-size: calc(11.5px * var(--scale)); line-height: 1.4; }
+.m11-iterate .m11-chg { margin-top: 10px; max-height: 140px; overflow: auto; }
+.m11-iterate .m11-chg .pd-table { table-layout: fixed; }
+.m11-iterate .m11-chg .pd-table th, .m11-iterate .m11-chg .pd-table td { padding: 7px 8px; max-width: none; white-space: normal; line-height: 1.3; }
+.m11-iterate .m11-chg .pd-table .pg { display: block; color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m11-iterate .c7 .pd-kv { font-size: calc(12.5px * var(--scale)); }
+
+/* ===================== 叙事：接入带 · 结论横幅 · 滚动数字 ===================== */
+.m11-flow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m11-flow .src { display: flex; gap: 8px; flex-wrap: wrap; }
+.m11-flow .src .s { border: 1px solid var(--pd-line); border-radius: 9px; padding: 4px 11px; line-height: 1.32; background: #FCFDFE; }
+.m11-flow .src .s.done { border-color: var(--t-ok); background: var(--t-ok-soft); }
+.m11-flow .src .s.on { border-color: var(--pa); background: var(--pa-soft); }
+.m11-flow .src .s b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; white-space: nowrap; }
+.m11-flow .src .s span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); white-space: nowrap; }
+.m11-flow .pipe { flex: 0 0 44px; height: 16px; border-radius: 8px; }
+.m11-flow .hub { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 10px; background: var(--pa-soft); border: 1px solid var(--pa); color: var(--pa-ink); font-weight: 800; white-space: nowrap; }
+.m11-flow .out { padding: 4px 12px; border-radius: 9px; background: var(--pd-bg); line-height: 1.32; white-space: nowrap; min-width: 92px; }
+.m11-flow .out > b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m11-flow .out .m11-cnt { display: inline; font-size: inherit; }
+.m11-flow .out > span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m11-flow .sp { flex: 1; }
+.m11-say { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
+.m11-say.off { opacity: 0; }
+.m11-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
+.m11-say > b { font-size: calc(17px * var(--scale)); font-weight: 800; line-height: 1.45; }
+.m11-say .sp { flex: 1; }
+.m11-say .cr { font-size: calc(12.5px * var(--scale)); opacity: .92; white-space: nowrap; }
+.m11-say .cr b { font-size: calc(16px * var(--scale)); font-weight: 800; }
+.m11-say .pd-btn { background: #fff; color: var(--pa-ink); border-color: transparent; box-shadow: 0 6px 18px -10px rgba(12, 26, 74, .6); }
+.m11-say .pd-btn:hover { background: #fff; filter: brightness(.96); }
+.m11-cnt { font: inherit; color: inherit; font-variant-numeric: tabular-nums; }
+.m11-tests .sc { max-height: 268px; overflow: auto; }
+.m11-prods { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.m11-prods .pd-item { padding: 5px 10px; gap: 8px; }
+.m11-prods .pd-item .ic { width: 28px; height: 28px; border-radius: 8px; font-size: 11px; }
+.m11-prods .pd-item .m .t { font-size: calc(13px * var(--scale)); }
+.m11-prods .pd-item .r { font-size: calc(12px * var(--scale)); color: var(--pd-sub); }
+.m11-tests .kd { display: inline-block; font-size: calc(10.5px * var(--scale)); font-weight: 800; color: var(--pd-sub); background: var(--pd-bg); border-radius: 5px; padding: 1px 5px; margin-right: 3px; }
+.m11-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+@media (orientation: portrait) {
+  .m11-flow { flex-wrap: wrap; row-gap: 8px; }
+  .m11-flow .pipe { flex: 0 0 22px; }
+  .m11-flow .sp { flex: 0 0 auto; }
+  .m11-say { flex-wrap: wrap; row-gap: 8px; padding: 10px 14px; }
+  .m11-say > b { font-size: calc(15px * var(--scale)); }
+  .m11-say .sp { flex: 1 0 0; }
+  .m11-tests .sc { max-height: 240px; }
+  .m11-phone-wrap { overflow: hidden; }
+  .m11-seg { grid-auto-flow: row; grid-auto-columns: auto; }
+  /* 竖屏：对话坞变底部抽屉后主区变窄，各栏改为整行铺开，表格不再被横向切掉 */
+  .m11-connect > .pd-grid > *, .m11-build > .pd-grid > *, .m11-try > .pd-grid > *,
+  .m11-test > .pd-grid > *, .m11-ship > .pd-grid > *, .m11-iterate > .pd-grid > * { grid-column: span 12; }
+  .m11-pc .pd-grid > * { grid-column: span 12; }
+  .m11-iterate > .pd-grid > .pd-grid > * { grid-column: span 12; }
+  .m11-tests .sc { max-height: 300px; }
+}

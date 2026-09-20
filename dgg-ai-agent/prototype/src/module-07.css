@@ -1,28 +1,71 @@
 /* ===================== AI法务 · 模块专属版式（组件全部来自 product.css） ===================== */
-.m7-connect .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
-.m7-connect .cap-row:last-child { border-bottom: 0; }
-.m7-connect .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
-.m7-connect .cap-row .t { font-weight: 700; } .m7-connect .cap-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m7-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #EEF1F7; }
+/* ---- 叙事件：接入带 · 结论横幅 · 滚动数字 ---- */
+.m7-g { gap: 12px; }
+.m7-flow { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m7-flow .src { display: flex; gap: 8px; flex-wrap: wrap; }
+.m7-flow .src .s { border: 1px solid var(--pd-line); border-radius: 9px; padding: 4px 11px; line-height: 1.32; background: #FCFDFE; }
+.m7-flow .src .s b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m7-flow .src .s span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m7-flow .pipe { flex: 0 0 48px; height: 16px; border-radius: 8px; }
+.m7-flow .hub { display: flex; align-items: center; gap: 8px; padding: 8px 15px; border-radius: 10px; background: var(--pa-soft); border: 1px solid var(--pa); color: var(--pa-ink); font-weight: 800; white-space: nowrap; }
+.m7-flow .out { padding: 4px 12px; border-radius: 9px; background: var(--pd-bg); line-height: 1.32; white-space: nowrap; }
+.m7-flow .out b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
+.m7-flow .out span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m7-flow .sp { flex: 1; }
+.m7-say { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
+.m7-say.off { opacity: 0; }
+.m7-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
+.m7-say b { font-size: calc(16.5px * var(--scale)); font-weight: 800; line-height: 1.4; }
+.m7-cnt { font-variant-numeric: tabular-nums; }
+.m7-sub { font-weight: 700; margin: 12px 0 6px; }
+
+.m7-g .pd-card > .hd { padding: 10px 14px; }
+.m7-g .pd-card > .bd { padding: 12px 14px; }
+.m7-g .pd-card > .ft { padding: 8px 14px; }
+.m7-g .pd-list { gap: 7px; }
+.m7-g .pd-empty { padding: 16px; }
+.m7-g .pd-kpi { padding: 10px 14px 9px; }
+.m7-g .pd-table.compact th, .m7-g .pd-table.compact td { padding: 6px 10px; }
+.m7-g .pd-item { padding: 7px 11px; }
+
+/* ---- 屏 1 接入 ---- */
+.m7-caps .cap-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 17px 0; border-bottom: 1px solid #EEF1F7; }
+.m7-caps .cap-row:last-child { border-bottom: 0; }
+.m7-caps .cap-row .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--pa-soft); color: var(--pa-ink); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.m7-caps .cap-row .t { font-weight: 700; }
+.m7-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 13px 0; border-bottom: 1px solid #EEF1F7; }
 .m7-connect .src-row:last-child { border-bottom: 0; }
 .m7-connect .src-row .t { font-weight: 700; } .m7-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
-.m7-connect .go { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
-.m7-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m7-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
+.m7-connect .pd-card { min-height: 330px; }
+.m7-connect .go { display: flex; align-items: center; gap: 16px; padding: 24px 24px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
+.m7-connect .go .nums { display: flex; gap: 26px; flex-wrap: wrap; }
+.m7-connect .go .nums .n { display: flex; flex-direction: column; gap: 1px; }
+.m7-connect .go .nums .n b { font-size: calc(34px * var(--scale)); font-weight: 800; line-height: 1.1; }
+.m7-connect .go .nums .n span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); font-weight: 600; }
 .m7-connect .go .sp { flex: 1; } .m7-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m7-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
-/* 合同焦点 */
+
+/* ---- 屏 2 驾驶舱：到期节奏 ---- */
+.m7-wl { width: 100%; height: auto; display: block; }
+.m7-wl .ax { font-size: 10px; fill: var(--pd-sub); }
+.m7-kinds { display: grid; gap: 7px; margin-top: 10px; }
+.m7-kinds .kb { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; align-items: center; font-size: calc(12.5px * var(--scale)); }
+.m7-kinds .kb .l { color: var(--pd-sub); font-weight: 600; }
+
+/* ---- 屏 3 合同审查 ---- */
+.m7-tbl { max-height: 240px; }
+.m7-ip .m7-tbl { max-height: 290px; }
+.m7-ip .pd-table td, .m7-ip .pd-table th { max-width: 176px; }
+.m7-cal { max-height: 372px; padding: 4px 8px 8px; }
 .m7-chead { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 12px; }
 .m7-chead .m { display: flex; flex-direction: column; gap: 2px; }
 .m7-chead .m b { font-size: calc(20px * var(--scale)); } .m7-chead .m span { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
 .m7-chead .m b.late { color: var(--t-late); } .m7-chead .m b.risk { color: #A8690F; } .m7-chead .m b.ok { color: var(--t-ok); }
 .m7-findings { display: grid; gap: 8px; }
-.m7-findings .f { border: 1px solid var(--pd-line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 5px; }
-.m7-findings .f.high { border-color: #F2B8B2; } .m7-findings .f.done { background: #FAFBFE; }
+.m7-findings .f { border: 1px solid var(--pd-line); border-radius: 10px; padding: 9px 12px; display: grid; gap: 4px; }
+.m7-findings .f.high { border-color: #F2B8B2; background: #FEF7F6; }
 .m7-findings .f .h { display: flex; align-items: center; gap: 8px; font-weight: 700; }
 .m7-findings .f .h .sp { flex: 1; }
-.m7-findings .f .issue { line-height: 1.5; }
-.m7-findings .f .basis { color: var(--pd-sub); font-size: calc(12px * var(--scale)); line-height: 1.45; }
-.m7-findings .f .fix { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--pa-soft); border-radius: 8px; padding: 8px 10px; font-size: calc(12.5px * var(--scale)); line-height: 1.5; color: var(--pa-ink); }
-.m7-findings .f .fix .lb { font-weight: 700; margin-right: 4px; }
+.m7-findings .f .issue { line-height: 1.5; color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
 .m7-clauses { display: grid; gap: 10px; }
 .m7-clauses .k { border: 1px solid var(--pd-line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 5px; }
 .m7-clauses .k.rev { border-color: var(--pa); }
@@ -34,46 +77,80 @@
 .m7-clauses .k .after { background: var(--pa-soft); border-radius: 6px; padding: 6px 8px; }
 .m7-rev { display: grid; gap: 6px; }
 .m7-rev .r { display: flex; gap: 8px; align-items: center; font-size: calc(13px * var(--scale)); }
-.m7-rev .r span { color: var(--pd-sub); }
-/* 新设主体 */
-.m7-setup .share { display: grid; grid-template-columns: minmax(0, 1fr) 76px; gap: 8px; margin-bottom: 6px; }
+
+/* ---- 屏 4 新设主体 ---- */
+.m7-setup .pd-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; }
+.m7-setup .pd-form > .pd-field { grid-column: span 2; }
+.m7-setup .pd-form > .pd-field.half { grid-column: span 1; }
+.m7-setup .share { display: grid; grid-template-columns: minmax(0, 1fr) 76px; gap: 8px; margin-bottom: 4px; }
 .m7-setup .share input { height: 34px; }
 .m7-setup .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .m7-setup .presets button { height: 26px; padding: 0 9px; border-radius: 6px; border: 1px solid var(--pd-line); background: #fff; font-size: 11.5px; font-weight: 700; }
 .m7-setup .presets button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
-.m7-setup .reason { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
+.m7-setup .pd-gantt .ax text { font-size: 15px; }
+.m7-setup .pd-gantt .row-lbl { font-size: 15px; }
+.m7-setup .pd-gantt .row-sub { font-size: 11px; }
+.m7-setup .pd-gantt .bar-lbl { font-size: 14.5px; }
+.m7-setup .pd-gantt .today-lbl { font-size: 14px; }
 .m7-holders { display: grid; gap: 8px; margin-bottom: 12px; }
 .m7-holders .hr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
 .m7-holders .hr .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .m7-holders .hr .n .sub { display: block; color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); font-weight: 500; }
-.m7-holders .pd-bar .trk { width: 160px; }
-.m7-lines { display: grid; gap: 6px; }
-.m7-lines .ln { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 8px; font-size: calc(12.5px * var(--scale)); }
+.m7-holders .pd-bar .trk { width: 220px; }
+.m7-lines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.m7-lines .ln { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--pd-line); border-radius: 8px; font-size: calc(12.5px * var(--scale)); }
 .m7-lines .ln.met { background: var(--t-ok-soft); border-color: #BFE8D2; }
 .m7-lines .ln .l { font-weight: 700; white-space: nowrap; }
-.m7-lines .ln .t { color: var(--pd-sub); }
-.m7-ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
-.m7-risks { display: grid; gap: 6px; }
-.m7-risks .r { display: flex; gap: 8px; align-items: flex-start; font-size: calc(13px * var(--scale)); line-height: 1.5; }
+.m7-ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: calc(13px * var(--scale)); line-height: 1.55; }
+.m7-risks { display: grid; gap: 8px; }
+.m7-risks .r { display: flex; gap: 8px; align-items: flex-start; font-size: calc(13px * var(--scale)); line-height: 1.55; }
 .m7-risks .r .pd-chip { flex: none; margin-top: 1px; }
-/* 知识产权 */
+
+/* ---- 屏 5 知识产权 ---- */
+.m7-cover { display: grid; gap: 12px; justify-items: center; }
+.m7-cover > div { width: 100%; }
+.m7-ring { width: 108px; height: 108px; display: block; }
+.m7-ring .v { font-size: 25px; font-weight: 800; fill: var(--pd-ink); font-variant-numeric: tabular-nums; }
 .m7-classes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.m7-classes .cl { border: 1px solid var(--pd-line); border-radius: 10px; padding: 8px 10px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; }
+.m7-classes .cl { border: 1px solid var(--pd-line); border-radius: 10px; padding: 7px 9px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .m7-classes .cl.gap-core { border-color: #F2B8B2; } .m7-classes .cl.gap-extend { border-color: #F5D9A8; } .m7-classes .cl.have { background: #FAFBFE; }
-.m7-classes .cl .no { width: 34px; height: 34px; border-radius: 8px; background: var(--pd-bg); display: grid; place-items: center; font-weight: 800; font-size: 13px; grid-row: span 2; }
+.m7-classes .cl .no { width: 30px; height: 30px; border-radius: 8px; background: var(--pd-bg); display: grid; place-items: center; font-weight: 800; font-size: 12.5px; }
 .m7-classes .cl.have .no { background: var(--t-ok-soft); color: var(--t-ok); }
-.m7-classes .cl .nm { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m7-classes .cl .why { grid-column: 2 / -1; color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); line-height: 1.4; }
+.m7-classes .cl .nm { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: calc(12.5px * var(--scale)); }
+.m7-classes .cl .nm .sub { display: block; color: var(--pd-sub); font-size: calc(11px * var(--scale)); font-weight: 500; }
 .m7-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .m7-lists .h { font-weight: 700; margin-bottom: 8px; display: flex; justify-content: space-between; }
 .m7-lists .h span { color: var(--pd-sub); font-weight: 600; }
-/* 台账 */
+
+/* ---- 屏 6 台账 ---- */
+.m7-register .pd-weekgrid .day { min-height: 46px; }
+.m7-register .pd-weekgrid .it { height: auto; min-height: 17px; align-items: flex-start; padding: 2px 4px; gap: 3px; white-space: normal; line-height: 1.24; }
+.m7-register .pd-weekgrid .it i { line-height: 1.32; }
+.m7-register .pd-weekgrid .it span { font-size: 10.5px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .m7-register .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
 .m7-register .legend i { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; font-style: normal; font-size: 10px; font-weight: 800; margin-right: 5px; background: var(--t-hand-soft); color: var(--t-hand); }
 .m7-register .who { display: flex; flex-wrap: wrap; gap: 6px; }
 .m7-register .who button { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--pd-line); background: #fff; font-size: calc(12.5px * var(--scale)); font-weight: 600; }
 .m7-register .who button.on { border-color: var(--pa); background: var(--pa-soft); color: var(--pa-ink); }
+.m7-rep { display: grid; gap: 5px; margin-top: 10px; }
+.m7-rep .l { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); line-height: 1.5; }
 .m7-log { display: grid; gap: 6px; }
 .m7-log .l { display: grid; grid-template-columns: 24px auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: calc(13px * var(--scale)); }
 .m7-log .l .n { width: 22px; height: 22px; border-radius: 50%; background: var(--t-hand-soft); color: var(--t-hand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
 .m7-log .l b { white-space: nowrap; } .m7-log .l span { color: var(--pd-sub); }
+
+/* ---- 竖屏：主区单列铺满，接入带换行 ---- */
+@media (orientation: portrait) {
+  .m7-g > * { grid-column: span 12 !important; }
+  .m7-flow { flex-wrap: wrap; row-gap: 8px; }
+  .m7-flow .pipe { flex: 0 0 26px; }
+  .m7-flow .sp { flex: 0 0 auto; }
+  .m7-connect .go { flex-wrap: wrap; row-gap: 12px; }
+  .m7-chead { gap: 10px 16px; }
+  .m7-lines { grid-template-columns: minmax(0, 1fr); }
+  .m7-cover { grid-template-columns: 96px minmax(0, 1fr); }
+  .m7-tbl { max-height: 360px; }
+  .m7-cal { max-height: 620px; }
+  .m7-setup .pd-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .m7-connect .pd-card { min-height: 0; }
+}
