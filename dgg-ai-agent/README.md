@@ -42,6 +42,17 @@ prototype/
   test/screenshot-m09.js   AI决策 六屏走查：接入 → 驾驶舱（扣积分）→ 归因（切基期 / 选因子 / 证据）→ 方案预演（调参数 / 选方案 / 发起审批）→ 审批（会签 / 批准 / 驳回）→ 执行（节点完成 / 复盘 / 月报发送）
   test/screenshot-m10.js   AI ERP 六屏走查：接入 → 指挥室（扣积分）→ 订单下钻（执行处置）→ 插单三方案 → 落单 → 生成采购单 → 日报发送；禁词扫描、屏上数字与内核比对
   dist/index.html          交付物
+universal/                 通用 skill 层（DUS-1）：把同一批内核做成平台无关的包，可跑在 Node / 浏览器 / CLI / HTTP / MCP / 自研 agent 平台
+  SPEC.md                  规范：包结构 · 清单字段 · invoke 调用契约（同步信封 + 五种错误码）· 确定性与离线约束
+  README.md                迁移说明：一条命令重建、AI OS 接入、状态回写与确定性三条约定、迁移检查清单
+  runtime/invoke.js        11 包共用的统一调用层（listActions / describe / health / invoke；$lib / $data / $input / $lint 实参装配）
+  adapters/                cli（支持标准输入）· http（Node 与 fetch 双签名）· mcp（stdio JSON-RPC）· aios（自研平台注册骨架，唯一需按平台改写的文件）
+  clients/python/          Python 平台的瘦客户端：子进程与 HTTP 两种模式，只依赖标准库，不必把内核移植成 Python
+tools/
+  skills.map.json          11 个 skill 的动作映射表（动作名 → 内核函数 → 入参装配 → 可运行示例），生成器的唯一输入
+  build-universal.js       一键产出 dist-universal/<id>/：清单 · 预合并数据 · 浏览器 UMD 与 ESM 单文件 · 四个适配器 · function-calling 定义 · 跨形态一致性自测 · 套件索引
+  unify-skills.js          统一 11 个 SKILL.md 前言字段与版本口径
+  pack-universal.js        打包成交付 zip
 ```
 
 ## 常用命令

@@ -87,6 +87,7 @@
       for (var i = 0; i < (a.args || []).length; i++) {
         var spec = a.args[i], from = spec.from, v;
         if (from === '$lib') v = data;
+        else if (from.indexOf('$lib.') === 0) v = get(data, from.slice(5));   // 数据包的子字段，如 $lib.promptTemplate
         else if (from === '$ctx') v = ctx || {};
         else if (from.indexOf('$helper:') === 0) v = helpers[from.slice(8)];
         else if (from === '$lint') v = (ctx && ctx.lint) || helpers.lint;
@@ -94,7 +95,7 @@
           v = bag.business;
           if (v === undefined) return { error: fail(a.name, 'E_INPUT', '缺少业务数据：请传 data（上一步返回的副本），或传 dataset 指定预置数据集（可选 ' + datasetKeys().join(' / ') + '）', 'data') };
         } else if (from === '$input') {
-          v = bag.payload;
+          v = bag.payload();
         } else {
           v = get(input, from);
           if ((v === undefined || v === null) && spec.required) return { error: fail(a.name, 'E_INPUT', '缺少必填字段 ' + from + (spec.note ? '（' + spec.note + '）' : ''), from) };
@@ -133,14 +134,15 @@
         if (ds === undefined) return fail(action, 'E_DATASET', '没有这个数据集：' + input.dataset + '；可选 ' + datasetKeys().join(' / '), 'dataset');
         bag.business = ds;
       }
-      var payload = stripControl(input);
-      if (bag.business !== undefined && !Object.keys(payload).length) payload = bag.business;
-      else if (bag.business !== undefined) {
+      /* $input 懒装配：只有动作真的要整包输入时才合并，产品类不必每次深拷样本 */
+      bag.payload = function () {
+        var payload = stripControl(input);
+        if (bag.business === undefined) return payload;
+        if (!Object.keys(payload).length) return bag.business;
         var merged = clone(bag.business) || {};
         for (var k2 in payload) if (Object.prototype.hasOwnProperty.call(payload, k2)) merged[k2] = payload[k2];
-        payload = merged;
-      }
-      bag.payload = payload;
+        return merged;
+      };
 
       var errs = checkInput(a, input);
       if (errs.length) return envelope(action, false, null, errs);
