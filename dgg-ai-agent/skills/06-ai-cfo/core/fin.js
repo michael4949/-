@@ -470,8 +470,9 @@
   /* ---------------- 对话与文档摄入 ----------------
      screens / brief / suggest / ask / ingest 五个导出：纯函数，只认入参，不碰 DOM、window、时钟与随机数。
      result 是 run(data, lib) 的结果，可选：传了就用，没传自己算一次。答不上返回 null，不编数。
-     回答里的 blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / focus / open / apply / set）。
-     选中态（当前勾稽条 / 风险条 / 周）不在契约里，内核按数据默认取：勾稽取异常里排在前面的一条（都正常取头一条）、
+     回答里的 blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / open / apply / set），高亮走顶层 ref。
+     ask 的第 6 个入参 sel 是平台的选中态 {rule, risk, week}，可选：点名的那条在 rows 里存在就按它答、按它写回；
+     不传或对不上才按数据默认取：勾稽取异常里排在前面的一条（都正常取头一条）、
      风险取按 概率 × 影响 排在前面的一条、周取头一个缺口周（无缺口取最低点那一周）。
      cashOptions 与 forecast 的第二遍测算都走入参 data（未落账的原副本），不走 result.data，避免调整分录二次落账。 */
   var SCREENS = [['connect', '接入'], ['board', '财务驾驶舱'], ['recon', '三表勾稽'], ['risk', '风险预警'], ['cash', '现金预测'], ['policy', '政策与月报']];
@@ -507,9 +508,21 @@
   function textB(t) { return { type: 'text', text: t }; }
   function screens() { return SCREENS.map(function (s) { return { key: s[0], label: s[1] }; }); }
   function badRows(R) { return R.reconcile.rows.filter(function (r) { return r.status === 'bad'; }); }
-  function curRule(R) { var b = badRows(R); return b.length ? b[0] : R.reconcile.rows[0]; }
-  function curRisk(R) { return R.risks.rows[0]; }
-  function curWeekIdx(R) { var f = R.forecast; return f.gapWeeks.length ? f.gapWeeks[0] : f.minWeek; }
+  /* 当前条：平台传进来的选中态优先（点名的那条要在 rows 里确实存在），没传或对不上才按数据默认取 */
+  function curRule(R, sel) {
+    var pick = sel && sel.rule ? rowById(R.reconcile.rows, sel.rule) : null;
+    if (pick) return pick;
+    var b = badRows(R); return b.length ? b[0] : R.reconcile.rows[0];
+  }
+  function curRisk(R, sel) {
+    var pick = sel && sel.risk ? rowById(R.risks.rows, sel.risk) : null;
+    return pick || R.risks.rows[0];
+  }
+  function curWeekIdx(R, sel) {
+    var f = R.forecast, w = sel ? sel.week : null;
+    if (typeof w === 'number' && w === Math.floor(w) && w >= 0 && w < f.weeks.length) return w;
+    return f.gapWeeks.length ? f.gapWeeks[0] : f.minWeek;
+  }
   function rowById(list, id) { return list.filter(function (x) { return x.id === id; })[0] || null; }
   function optOf(list, key) { return list.filter(function (x) { return x.key === key; })[0] || null; }
   function rv(r) { return r.unit === '元' ? W(r.value) : neg(r.value) + r.unit; }
@@ -573,9 +586,10 @@
       blocks: [kvB([['判断', STAT_NAME[rr.status]], ['差异', fmtN(rr.diff) + ' 元'], ['建议', rr.fixed ? '已调整' : rr.fix ? rr.fix.label + ' ' + fmtN(rr.fix.amount) + ' 元' : '核实原始凭证']])],
       ref: step === 'recon' ? rr.id : null, act: { type: 'open', panel: 'rule', ref: rr.id } };
   }
-  /* 点名字问到的那一条：措辞比点编号短一截，不重复关系对，本屏问时不带小表 */
-  function ruleCardNamed(nn, step, blocks) {
-    var out = { text: nn.id + ' ' + nn.name + '：' + (nn.status === 'na' ? '本企业无此科目。' : nn.lhsLabel + ' ' + fmtN(nn.lhs) + ' 元，' + nn.rhsLabel + ' ' + fmtN(nn.rhs) + ' 元，差 ' + fmtN(nn.diff) + ' 元，' + STAT_NAME[nn.status] + '。' + nn.explain + '。'),
+  /* 点名字问到的那一条：措辞比点编号短一截，本屏问时不带小表也不重复关系对；
+     在勾稽屏以外按名字问（全局兜底）要带上关系对，不然看不出这条勾稽拿哪两张表对 */
+  function ruleCardNamed(nn, step, blocks, withPair) {
+    var out = { text: nn.id + ' ' + nn.name + (withPair ? '（' + nn.pair + '）' : '') + '：' + (nn.status === 'na' ? '本企业无此科目。' : nn.lhsLabel + ' ' + fmtN(nn.lhs) + ' 元，' + nn.rhsLabel + ' ' + fmtN(nn.rhs) + ' 元，差 ' + fmtN(nn.diff) + ' 元，' + STAT_NAME[nn.status] + '。' + nn.explain + '。'),
       ref: step === 'recon' ? nn.id : null, act: { type: 'open', panel: 'rule', ref: nn.id } };
     if (blocks) out.blocks = [kvB([['判断', STAT_NAME[nn.status]], ['差异', fmtN(nn.diff) + ' 元'], ['建议', nn.fixed ? '已调整' : nn.fix ? nn.fix.label + ' ' + fmtN(nn.fix.amount) + ' 元' : '核实原始凭证']])];
     return out;
@@ -601,7 +615,7 @@
   }
 
   /* 问答：认得的问法逐条作答，答不上返回 null 交给平台兜底 */
-  function ask(question, step, data, lib, result) {
+  function ask(question, step, data, lib, result, sel) {
     var R = ctxOf(data, lib, result), k = R.kpi, rec = R.reconcile, rk = R.risks, f = R.forecast, po = R.policies, d = R.data;
     var q = String(question == null ? '' : question), m, i;
 
@@ -672,7 +686,7 @@
     }
 
     if (step === 'recon') {
-      var cur = curRule(R);
+      var cur = curRule(R, sel);
       if (has(q, ['哪几条', '哪些异常', '异常', '几处'])) return { text: rec.counts.bad + ' 处异常：' + badRows(R).map(function (r) { return r.id + ' ' + r.name + ' 差 ' + fmtN(r.diff) + ' 元'; }).join('；') + '。',
         blocks: [tableB(['编号', '关系', '差异'], badRows(R).map(function (r) { return [r.id, cut(r.name, 10), fmtN(r.diff)]; }))],
         ref: badRows(R).length ? badRows(R)[0].id : null };
@@ -698,7 +712,7 @@
     }
 
     if (step === 'risk') {
-      var cr = curRisk(R);
+      var cr = curRisk(R, sel);
       if (has(q, ['高风险', '哪几项', '哪些风险'])) {
         var hi = rk.rows.filter(function (r) { return r.level === 'high'; });
         return { text: hi.length ? '高风险 ' + hi.length + ' 项：' + hi.map(function (r) { return r.id + ' ' + r.name + '（概率 ' + Math.round(r.prob * 100) + '%、影响 ' + W(r.impact) + '）'; }).join('；') + '。' : '当前无高风险项，中风险 ' + rk.counts.mid + ' 项。',
@@ -728,7 +742,7 @@
     }
 
     if (step === 'cash') {
-      var co = cashOptions(data, lib), wi2 = curWeekIdx(R), wkc = f.weeks[wi2];
+      var co = cashOptions(data, lib), wi2 = curWeekIdx(R, sel), wkc = f.weeks[wi2];
       if (has(q, ['缺口', '差多少', '多少钱'])) return { text: f.gap ? '缺口 ' + W(f.gap) + '：13 周低点第 ' + (f.minWeek + 1) + ' 周 ' + W(f.minEnding) + '，安全线 ' + W(f.safety) + '，' + f.gapWeeks.length + ' 周低于安全线。' : '窗口内无缺口周，13 周低点 ' + W(f.minEnding) + '，高于安全线 ' + W(f.minEnding - f.safety) + '。',
         act: { type: 'open', panel: 'kpi', ref: 'gap' } };
       if (has(q, ['最紧', '吃紧', '哪一周', '哪周'])) return { text: '第 ' + (f.minWeek + 1) + ' 周（' + f.weeks[f.minWeek].label + ' 起）吃紧，周末 ' + W(f.minEnding) + '；当周流出 ' + W(f.weeks[f.minWeek].outflow) + '。',
@@ -785,7 +799,7 @@
     /* 全局：点名字问某一条勾稽关系 / 某一项风险 / 某一项政策，不在本屏也能答并跳过去 */
     var gl = [byNameHit(q, rec.rows), byNameHit(q, rk.rows), byNameHit(q, po.rows)], gi = -1, gn = 0;
     for (i = 0; i < 3; i++) if (gl[i] && gl[i].n > gn) { gn = gl[i].n; gi = i; }
-    if (gi === 0) return ruleCardNamed(gl[0].row, step, true);
+    if (gi === 0) return ruleCardNamed(gl[0].row, step, true, true);
     if (gi === 1) return riskCard(gl[1].row, step);
     if (gi === 2) return policyCard(gl[2].row, step);
     return null;

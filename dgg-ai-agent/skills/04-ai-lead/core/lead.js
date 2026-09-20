@@ -343,6 +343,28 @@
     (d.sources || []).forEach(function (s) { var a = daysBetween(String(s.lastSync).slice(0, 10), d.today); if (!best || a > best.age) best = { id: s.id, name: s.name, sync: s.lastSync, age: a }; });
     return best;
   }
+  /* 今天没刷过的源，按落后天数倒序；判断只看日期部分，时分秒不参与 */
+  function staleList(d) {
+    var out = [];
+    (d.sources || []).forEach(function (s) {
+      var day = String(s.lastSync).slice(0, 10);
+      if (day === d.today) return;
+      out.push({ id: s.id, name: s.name, sync: s.lastSync, age: daysBetween(day, d.today) });
+    });
+    return out.sort(function (a, b) { return b.age - a.age || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+  }
+  /* 同步情况一句话：最落后的那个说清楚，其余没刷过的据实点名，最后才说今天刷过几个 */
+  function syncSay(d, full) {
+    var all = d.sources || [], sl = staleList(d), fresh = all.length - sl.length;
+    if (!all.length) return null;
+    if (!sl.length) return all.length + ' 个源今天都同步过。';
+    var st = sl[0], rest = sl.slice(1);
+    var t = st.name + ' 停在 ' + (full ? st.sync : st.sync.slice(5, 10)) + '，已 ' + st.age + ' 天没同步';
+    if (rest.length === 1) t += '；另有 ' + rest[0].name + ' 停在 ' + rest[0].sync.slice(5, 10);
+    else if (rest.length > 1) t += '；另有 ' + rest.length + ' 个源也没在今天同步，最早的 ' + rest[0].name + ' 停在 ' + rest[0].sync.slice(5, 10);
+    if (fresh > 0) t += '，其余 ' + fresh + ' 个源今天刷过';
+    return t + '。';
+  }
   /* 脚本屏与线索池的当前视角：宿主把它写进数据副本，内核只读，不读也能给默认值 */
   function scriptView(d, P) {
     var v = d.scriptView || {};
@@ -357,11 +379,7 @@
 
   function brief(step, data, lib, result) {
     var R = got(data, lib, result), d = R.data, k = R.kpi, P = R.profile, seg = segOf(P);
-    if (step === 'connect') {
-      var st = staleSource(d);
-      if (!st) return null;
-      return st.name + ' 停在 ' + st.sync.slice(5, 10) + '，已 ' + st.age + ' 天没同步；其余 ' + (d.sources.length - 1) + ' 个源今天都刷过。';
-    }
+    if (step === 'connect') return syncSay(d, false);
     if (step === 'board') {
       var r = chanRank(R);
       if (!r.length) return '在手 ' + k.leads + ' 条，A 级 ' + k.gradeA + ' 条，未分派 ' + k.unassigned + ' 条。';
@@ -404,10 +422,11 @@
 
     /* ---- 数据源 / 接入 ---- */
     if (hit(s, ['同步', '落后', '几天没', '数据源', '源'])) {
-      var st = staleSource(d);
-      if (!st) return null;
+      var say = syncSay(d, true);
+      if (!say) return null;
+      var st = staleList(d)[0] || staleSource(d);
       return {
-        text: st.name + ' 停在 ' + st.sync + '，已 ' + st.age + ' 天。其余源今天都同步过。',
+        text: say,
         blocks: [bTable(['源', '同步', '条数'], d.sources.map(function (x) { return [x.name, x.lastSync.slice(5, 10), fmtN(x.rows)]; }))],
         act: { type: 'focus', ref: st.id }
       };
@@ -513,8 +532,14 @@
     /* ---- 匹配画像的线索 → 切到线索池筛 A 级 ---- */
     if (hit(s, ['匹配', '像这个画像', '哪些线索'])) {
       var msx = R.leads.filter(function (l) { return l.grade === 'A' && l.stage !== 'won'; });
+      var inSeg = function (l) { return l.sector === seg.sector && l.role === seg.role; };
+      var hitSeg = msx.filter(inSeg);
+      var more = function (n) { return n > 3 ? ' 等' : ''; };
+      if (!msx.length) return { text: '在手线索里现在没有 A 级：综合分要到 ' + lib.stages.grades.A + ' 分。重点细分是 ' + seg.id + ' ' + seg.name + '。', act: { type: 'goto', step: 'leads', filter: 'A' } };
       return {
-        text: '匹配 ' + seg.id + ' 且 A 级的有 ' + msx.length + ' 条：' + msx.slice(0, 3).map(function (l) { return l.id + ' ' + l.total + ' 分'; }).join('、') + '。已切到线索池筛 A 级。',
+        text: 'A 级在手 ' + msx.length + ' 条：' + msx.slice(0, 3).map(function (l) { return l.id + ' ' + l.total + ' 分'; }).join('、') + more(msx.length)
+          + '。其中行业大类与决策人都落在 ' + seg.id + ' ' + seg.name + ' 的有 ' + hitSeg.length + ' 条'
+          + (hitSeg.length && hitSeg.length < msx.length ? '：' + hitSeg.slice(0, 3).map(function (l) { return l.id; }).join('、') + more(hitSeg.length) : '') + '。已切到线索池筛 A 级。',
         act: { type: 'goto', step: 'leads', filter: 'A' }
       };
     }
@@ -638,11 +663,13 @@
 
   /* ---------------- 文档摄入 ---------------- */
   function moneyList(text) {
-    var out = [], m, re = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*(万元|元)/g;
+    /* 认两种写法：后缀「元 / 万元」，或前缀 CNY / RMB / ¥ / 人民币（合同正文常见）。前后缀同时出现只算一次 */
+    var out = [], m, re = /(?:(CNY|RMB|¥|￥|人民币)\s*)?([0-9][0-9,]*(?:\.[0-9]+)?)\s*(万元|元)?/gi;
     while ((m = re.exec(text))) {
-      var v = parseFloat(m[1].replace(/,/g, ''));
+      if (!m[1] && !m[3]) continue;
+      var v = parseFloat(m[2].replace(/,/g, ''));
       if (isNaN(v)) continue;
-      out.push(m[2] === '万元' ? v * 10000 : v);
+      out.push(m[3] === '万元' ? v * 10000 : v);
     }
     return out.sort(function (a, b) { return b - a; });
   }
@@ -750,7 +777,7 @@
   /* 幻灯片：把里面的数字与本模块口径并排 */
   function docSlides(doc, R) {
     var lines = [];
-    (doc.slides || []).forEach(function (s) { lines = lines.concat(s.lines || []); if (s.title) lines.push(s.title); });
+    (doc.slides || []).forEach(function (s) { var ls = s.lines || []; lines = lines.concat(ls); if (s.title && ls.indexOf(s.title) < 0) lines.push(s.title); });
     var nums = lines.filter(function (x) { return /\d/.test(x); }).slice(0, 5);
     var k = R.kpi;
     var deal = lines.filter(function (x) { return x.indexOf('成交') >= 0 || x.indexOf('新客') >= 0; })[0];

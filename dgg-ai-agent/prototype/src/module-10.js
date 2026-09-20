@@ -1,7 +1,8 @@
 /* AI ERP · 订单交付指挥室（六屏）
  * 接入 → 指挥室 → 订单下钻 → 插单模拟 → 物料与库存 → 交付日报
  * 每屏三拍：接入（来源亮起、数据包飞向排程引擎）→ 展开（数字滚、路径画、条形长、行流入）→ 结论（一句话横幅 + 聚焦）
- * 全部计算走 DGG.coreM10（与 skill 同一份内核）；对话大脑登记在 DGG.chatBrain('m10')
+ * 全部计算走 DGG.coreM10（与 skill 同一份内核），开场发现 / 快捷问句 / 问答 / 文档摄入也在内核里
+ * （screens / brief / suggest / ask / ingest）；本文件在 DGG.chatBrain('m10') 上只登记 ctx（取上下文）与 act（把声明式动作落到页面）
  * 纯预制、断网可用；不用任何存储 API
  */
 (function () {
@@ -140,14 +141,18 @@
   function tomorrowList() { return uniq(M.daily.tomorrow, function (t) { return TX(t.text); }); }
   function nodes(scope, sel) { return scope ? Array.prototype.slice.call(scope.querySelectorAll(sel)) : []; }
   function trs(el, n) { var l = el ? Array.prototype.slice.call(el.querySelectorAll('tbody tr')) : []; return n ? l.slice(0, n) : l; }
+  /* 给行 / 卡片标上业务 id，内核的 {type:'focus'|'open', ref} 就能找到它 */
+  function tagRefs(tbl, rows, textOf, refOf) {
+    trs(tbl).forEach(function (tr) {
+      var t = tr.textContent, i, s2;
+      for (i = 0; i < rows.length; i++) { s2 = textOf(rows[i]); if (s2 && t.indexOf(s2) >= 0) { tr.setAttribute('data-ref', refOf(rows[i])); return; } }
+    });
+  }
   function workEl() { return M.frame ? M.frame.work : null; }
   function rowOf(scope, txt) {
     var list = scope ? scope.querySelectorAll('.pd-table tbody tr') : [], i;
     for (i = 0; i < list.length; i++) if (list[i].textContent.indexOf(txt) >= 0) return list[i];
     return null;
-  }
-  function refocus(txt, ms) {
-    setTimeout(function () { var el = rowOf(workEl(), txt); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 140);
   }
   function focusSel(sel, ms) {
     setTimeout(function () { var el = workEl() && workEl().querySelector(sel); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 140);
@@ -259,6 +264,7 @@
       { key: 'lastSync', label: '同步', render: function (r) { return r.lastSync.slice(5); } },
       { key: 'rows', label: '条数', align: 'r', render: function (r) { return fmtN(r.rows); } }
     ], rows: d.sources });
+    tagRefs(stbl, d.sources, function (r) { return r.name; }, function (r) { return r.id; });
     g.appendChild(P.card({ cls: 'c4', title: '数据源', sub: d.sources.length + ' 个', tight: true, body: [stbl] }));
 
     /* 已开通能力 */
@@ -317,6 +323,7 @@
 
     var rows = S.orders.filter(function (o) { return !M.filter || o.status === M.filter; });
     var tbl = P.table({ cols: orderCols(), rows: rows, sortKey: 'status', onRow: function (r) { openOrder(r.id); }, rowKey: function (r) { return r.id; } });
+    tagRefs(tbl, rows, function (r) { return r.id; }, function (r) { return r.id; });
     var left = P.card({ cls: 'c8', title: v.orders + '全景', sub: rows.length + ' ' + v.counter + (M.filter ? ' · 已筛选' : '') + ' · 点行下钻', tight: true,
       body: [h('div', { class: 'pd-scroll m10-sc7' }, [tbl])],
       extra: [P.btn(v.insert, { cls: 'sm', onClick: function () { setStep('insert'); } }), P.btn(v.daily, { cls: 'sm', onClick: function () { setStep('daily'); } })] });
@@ -325,11 +332,12 @@
     var curve = loadPath(240, 34);
     var days7 = S.days.slice(0, 7);
     var heat = P.heat({ days: days7, wd: true, labelW: '104px', rows: S.lines.map(function (L) { return { label: L.name, cells: L.days.slice(0, 7).map(function (c) { return { pct: c.pct, rest: c.rest, ot: c.ot > 0, title: L.name + ' ' + c.label + ' ' + c.used + '/' + c.cap + ' h' }; }) }; }) });
+    nodes(heat, '.lbl').forEach(function (el, i) { if (S.lines[i]) el.setAttribute('data-ref', S.lines[i].id); });
     var shorts = plan.items.filter(function (x) { return x.urgency === 'short' || x.urgency === 'safety'; });
     var shortShow = shorts.slice(0, 3);
     var list = h('div', { class: 'm10-short' });
     shortShow.forEach(function (x) {
-      list.appendChild(h('button', { class: 'r ' + (x.urgency === 'short' ? 'late' : 'risk'), onclick: function () { setStep('stock'); } }, [
+      list.appendChild(h('button', { class: 'r ' + (x.urgency === 'short' ? 'late' : 'risk'), 'data-ref': x.id, onclick: function () { setStep('stock'); } }, [
         h('span', { class: 'd' }), h('span', { class: 't' }, [x.name]),
         h('span', { class: 'sv num' }, [fmtN(x.stock) + ' / ' + fmtN(x.onOrder)]),
         h('b', { class: 'num' }, [fmtN(x.suggestQty) + ' ' + x.unit]),
@@ -433,7 +441,7 @@
     acts.slice(0, 3).forEach(function (a) { actsEl.appendChild(actionRow(o, a)); });
     if (!acts.length && !(o.actions || []).length) actsEl.appendChild(P.empty(o.status === 'done' ? '等待发运' : '无需处置'));
     var tone = o.status === 'late' ? 'late' : o.status === 'risk' ? 'risk' : o.status === 'done' ? 'done' : 'ok';
-    var judgeCard = P.card({ title: 'AI 判断', sub: ex.label, body: [h('div', { class: 'm10-judge' }, [
+    var judgeCard = P.card({ title: 'AI 判断', sub: ex.label, body: [h('div', { class: 'm10-judge', 'data-ref': o.id }, [
       h('div', { class: 'vd ' + tone }, [P.chip(tone, ex.label), h('span', {}, [o.status === 'late' ? v.finish + ' ' + o.finishLabel + '，晚 ' + o.lateDays + ' 天' : o.status === 'risk' ? causeText(o) + ' · ' + v.finish + ' ' + o.finishLabel : v.finish + ' ' + o.finishLabel])]),
       h('div', { class: 'why' }, [cut(TX(ex.reasons[0] || ''), 40)]),
       actsEl
@@ -444,7 +452,7 @@
     var matEl = h('div', { class: 'm10-mat' });
     mats.slice(0, 4).forEach(function (m) {
       var pct = m.need > 0 ? Math.max(4, Math.min(100, Math.round(100 * (m.need - (m.short || 0)) / m.need))) : 100;
-      matEl.appendChild(h('div', { class: 'row' }, [
+      matEl.appendChild(h('div', { class: 'row', 'data-ref': m.material }, [
         h('span', { class: 't' }, [m.name]),
         m.ready === 0 ? P.chip('ok', '齐备') : m.assumed ? P.chip('late', '缺 ' + fmtN(m.short) + ' ' + m.unit) : P.chip('risk', m.readyLabel + ' 到'),
         P.bar(pct, m.ready === 0 ? 'ok' : m.assumed ? 'late' : 'risk', fmtN(m.need) + ' ' + m.unit)
@@ -463,7 +471,7 @@
   function screenInsert(work) {
     var v = V(), S = M.S, d = M.data;
     work.classList.add('m10-insert');
-    if (!M.insert.req) M.insert.req = clone(d.insertPresets[0]);
+    if (!M.insert.req) M.insert.req = clone(d.insertDraft || d.insertPresets[0]);
     var req = M.insert.req;
     if (!M.insert.sim) { M.insert.sim = K.simulateInsert(d, req); M.insert.pick = M.insert.sim.recommend; }
     var sim = M.insert.sim;
@@ -489,13 +497,15 @@
       var pn = d.products.filter(function (x) { return x.id === p.product; })[0];
       presets.appendChild(h('button', { onclick: function () { M.insert.req = clone(p); M.insert.sim = null; M.insert.pick = null; draw(); } }, [cut(p.customer, 10) + ' · ' + (pn ? pn.name : p.product) + ' × ' + fmtN(p.qty)]));
     });
-    g.appendChild(P.card({ cls: 'c4', title: v.insertNoun, body: [h('div', { class: 'pd-form' }, [
+    var draftCard = P.card({ cls: 'c4', title: v.insertNoun, body: [h('div', { class: 'pd-form' }, [
       h('div', { class: 'pd-field' }, [h('label', {}, [v.customer]), custIn]),
       h('div', { class: 'pd-field' }, [h('label', {}, [v.product]), prodSel]),
       h('div', { class: 'pd-field' }, [h('label', {}, [v.qty + '（' + v.qtyUnit + '）']), qtyIn]),
       h('div', { class: 'pd-field' }, [h('label', {}, [v.due]), dueSel]),
       h('div', { class: 'pd-field' }, [h('label', {}, ['常用']), presets])
-    ])] }));
+    ])] });
+    draftCard.setAttribute('data-ref', 'insert-draft');     /* 摄入订单表后草稿落在这张卡上，高亮按它定位 */
+    g.appendChild(draftCard);
 
     var opts = sim.options.map(function (op) {
       return { key: op.key, name: op.name, recommended: op.key === sim.recommend,
@@ -504,6 +514,7 @@
         notes: op.notes && op.notes.length ? TX(op.notes[0]) : null };
     });
     var cmp = P.compare({ options: opts, active: M.insert.pick, onPick: function (kk) { M.insert.pick = kk; draw(); } });
+    nodes(cmp, '.pd-option').forEach(function (el, i) { if (sim.options[i]) el.setAttribute('data-ref', sim.options[i].key); });
     var pick = sim.options.filter(function (x) { return x.key === M.insert.pick; })[0];
     var affected = pick.rows.filter(function (r) { return r.delta !== 0; });
     var affTbl = P.table({ compact: true, cols: [
@@ -514,6 +525,7 @@
       { key: 'delta', label: '变化', align: 'r', sort: true, render: function (r) { return h('span', { class: r.delta > 0 ? 'neg' : 'pos' }, [(r.delta > 0 ? '+' : '') + r.delta + ' 天']); } },
       { key: 'st', label: '状态', render: function (r) { return r.turnsLate ? P.chip('late', '转延期') : r.turnsOk ? P.chip('ok', '转按期') : P.chip(r.statusAfter, P.STATUS[r.statusAfter]); } }
     ], rows: affected, sortKey: 'delta', sortDir: 'desc', empty: '不影响在手' + v.order });
+    tagRefs(affTbl, affected, function (r) { return r.id; }, function (r) { return r.id; });
     var S1 = sim._S[pick.key];
     var loadRows = S.lines.map(function (L, ii) { var L1 = S1.lines[ii]; return { name: L.name, a: L.load7, b: L1.load7, ot: L1.overtimeHours }; }).filter(function (r) { return r.a || r.b; });
     var loadEl = h('div', { class: 'm10-load' }, loadRows.map(function (r) {
@@ -527,7 +539,8 @@
         h('div', { class: 'c5' }, [h('div', { class: 'pd-scroll m10-sc5' }, [loadEl])])
       ])],
       foot: [P.btn('按方案 ' + pick.key + ' 落单', { cls: 'primary', onClick: function () {
-        var nd = K.applyInsert(d, req, pick.key); M.insert = { req: null, sim: null, pick: null }; M.focus = pick.orderId;
+        var nd = K.applyInsert(d, req, pick.key); delete nd.insertDraft; delete nd.insertPick;
+        M.insert = { req: null, sim: null, pick: null }; M.focus = pick.orderId;
         commit(nd, '已落单 ' + pick.orderId + '（' + pick.name + '）· ' + v.room + '已重排'); setStep('room');
       } })] });
     var right = col('c8', [cmpCard, detCard]);
@@ -569,6 +582,7 @@
       { key: 'suggestQty', label: '建议下单', align: 'r', sort: true, render: function (r) { return r.suggestQty ? h('b', {}, [fmtN(r.suggestQty) + ' ' + r.unit]) : '—'; } },
       { key: 'latestOrderDay', label: '下单截止', align: 'c', w: '92px', sort: true, render: function (r) { return r.suggestQty ? h('span', { class: r.overdue ? 'neg' : '' }, [r.latestOrderLabel + (r.overdue ? ' · 已过' : '')]) : '—'; } }
     ], rows: plan.items, sortKey: 'urgency', onRow: function (r) { openMaterial(r); }, rowKey: function (r) { return r.id; } });
+    tagRefs(tbl, plan.items, function (r) { return r.name; }, function (r) { return r.id; });
     var left = P.card({ cls: 'c8', title: v.materials, sub: plan.items.length + ' 种 · 点行看走势', tight: true, body: [h('div', { class: 'pd-scroll m10-sc7' }, [tbl])] });
     g.appendChild(left);
 
@@ -576,7 +590,7 @@
     var poShow = 2;
     var po = h('div', { class: 'm10-po' });
     plan.po.slice(0, poShow).forEach(function (p) {
-      var sup = h('div', { class: 'sup' }, [h('div', { class: 't' }, [h('span', {}, [p.supplier || v.supplier]), h('span', { class: 'num' }, [fmtN(p.amount) + ' 元'])])]);
+      var sup = h('div', { class: 'sup', 'data-ref': p.supplier || '' }, [h('div', { class: 't' }, [h('span', {}, [p.supplier || v.supplier]), h('span', { class: 'num' }, [fmtN(p.amount) + ' 元'])])]);
       p.lines.slice(0, 2).forEach(function (l) { sup.appendChild(h('div', { class: 'ln' }, [h('span', {}, [l.name]), h('span', { class: 'num' }, [h('b', {}, [fmtN(l.suggestQty) + ' ' + l.unit]), ' · ' + l.leadDays + ' 天到'])])); });
       po.appendChild(sup);
     });
@@ -652,6 +666,7 @@
       { key: 'productName', label: v.product, render: function (r) { return r.productName + ' × ' + fmtN(r.qty); } },
       { key: 'st', label: '状态', render: function (r) { return r.ok ? P.chip('done', r.status === 'done' ? '已完工待发运' : '可交付') : P.chip('late', '延至 ' + r.finishLabel); } }
     ], rows: D.deliveries }) : P.empty('今日无到期' + v.order);
+    if (D.deliveries.length) tagRefs(delTbl, D.deliveries, function (r) { return r.id; }, function (r) { return r.id; });
     doc.appendChild(sec('今日交付', delTbl));
     var riskTbl = D.risks.length ? P.table({ compact: true, cols: [
       { key: 'id', label: '单号', render: function (r) { return h('b', { class: 'id' }, [r.id]); } },
@@ -661,6 +676,7 @@
       { key: 'causeLabel', label: '判断', render: function (r) { return r.status === 'late' ? r.causeLabel + ' · 晚 ' + r.lateDays + ' 天' : '风险'; } },
       { key: 'hd', label: '处置', render: function (r) { return r.handled ? P.chip('handled', r.actions.map(function (a) { return a.label; }).join('、')) : P.chip('watch', '待处置'); } }
     ], rows: D.risks }) : P.empty('无风险' + v.order);
+    if (D.risks.length) tagRefs(riskTbl, D.risks, function (r) { return r.id; }, function (r) { return r.id; });
     doc.appendChild(sec('风险' + v.order, h('div', { class: 'pd-scroll m10-sc5' }, [riskTbl])));
     if (M.data.log.length) doc.appendChild(sec('今日处置 · ' + M.data.log.length + ' 项', h('div', { class: 'pd-scroll m10-sc3' }, [logList(M.data.log)])));
     /* 小节标题带总数与分组，横幅上的两个数字在这里都能对上；正文先露开工 */
@@ -689,466 +705,160 @@
       verdict: say, focus: doc.querySelector('.kp') });
   }
 
-  /* ================= 对话大脑 ================= */
-  function mini(head, rows) {
-    var t = h('table', { class: 'mini' });
-    var tr = h('tr'); head.forEach(function (x) { tr.appendChild(h('th', {}, [String(x)])); });
-    t.appendChild(tr);
-    rows.slice(0, 6).forEach(function (r) { var q = h('tr'); r.forEach(function (x) { q.appendChild(h('td', {}, [String(x)])); }); t.appendChild(q); });
-    return t;
-  }
-  function kvb(pairs) { var g = h('div', { class: 'kv' }); pairs.forEach(function (p) { g.appendChild(h('span', { class: 'k' }, [String(p[0])])); g.appendChild(h('span', { class: 'v' }, [String(p[1])])); }); return g; }
-  function tagsb(list) { return h('div', { class: 'tags' }, list.filter(Boolean).map(function (x) { return h('span', {}, [String(x)]); })); }
-  function has(q, list) { for (var i = 0; i < list.length; i++) if (q.indexOf(list[i]) >= 0) return true; return false; }
-  function lateOrders() { return M.S.orders.filter(function (o) { return o.status === 'late'; }).sort(function (a, b) { return b.lateDays - a.lateDays; }); }
-  function riskOrders() { return M.S.orders.filter(function (o) { return o.status === 'risk'; }); }
-  function findOrder(q) {
-    var hit = null;
-    M.S.orders.forEach(function (o) { if (q.indexOf(o.id) >= 0 || q.indexOf(o.id.slice(-4)) >= 0) hit = o; });
-    if (!hit) M.S.orders.forEach(function (o) { var c = o.customer.split(' · ')[0]; if (c && q.indexOf(c) >= 0) hit = o; });
-    return hit;
-  }
-  function findMaterial(q) {
-    var hit = null;
-    M.plan.items.forEach(function (m) { if (q.indexOf(m.name) >= 0) hit = m; });
-    if (!hit) M.plan.items.forEach(function (m) { if (m.name.length > 3 && q.indexOf(m.name.slice(0, 3)) >= 0) hit = m; });
-    return hit;
+  /* ================= 对话坞：取上下文 + 落地动作 =================
+     开场发现、快捷问句、问答与文档摄入全在内核（DGG.coreM10 与 skill 同一份），
+     本文件只做两件事：把当前屏的上下文交出去，把内核返回的声明式动作落到页面上。 */
+  var STEPS = ['connect', 'room', 'order', 'insert', 'stock', 'daily'];
+
+  /* 取上下文：屏上的选中态（看哪一张 / 加急单草稿 / 选中方案）随数据一起交给内核 */
+  function chatCtx() {
+    var d = {}, k;
+    for (k in M.data) if (Object.prototype.hasOwnProperty.call(M.data, k)) d[k] = M.data[k];
+    if (M.focus) d.focus = M.focus;
+    if (M.insert.req) d.insertDraft = M.insert.req;
+    if (M.insert.pick) d.insertPick = M.insert.pick;
+    return { data: d, lib: null, result: { S: M.S, plan: M.plan, daily: M.daily } };
   }
 
-  function opener(step) {
-    var v = V(), S = M.S, k = S.kpi, plan = M.plan, D = M.daily;
-    var worst = lateOrders()[0];
-    if (step === 'connect') {
-      var total = M.data.sources.reduce(function (a, s) { return a + s.rows; }, 0);
-      return M.data.sources.length + ' 个来源今早同步 ' + fmtN(total) + ' 条，' + k.open + ' ' + v.counter + v.orders + '里 ' + k.late + ' ' + v.counter + '已延期，合计晚 ' + k.lateDaysTotal + ' 天。';
-    }
-    if (step === 'room') {
-      var over = S.lines.filter(function (L) { return L.status === 'over'; });
-      return '按期率 ' + k.onTimeRate + '%' + (worst ? '，' + worst.id + ' 晚 ' + worst.lateDays + ' 天，延期天数居首' : '') + (over.length ? '；' + over.map(function (L) { return L.name + ' ' + L.load7 + '%'; }).join('、') + ' 已满负荷。' : '。');
-    }
-    if (step === 'order') {
-      var o = S.byId[M.focus] || worst || S.orders[0];
-      var acts = o.status === 'done' ? [] : K.actions(M.data, S, o.id);
-      return o.id + ' ' + (o.lateDays > 0 ? '晚 ' + o.lateDays + ' 天' : causeText(o)) + '，卡在' + (o.currentOp ? '「' + o.currentOp + '」' + o.currentLine : v.ops)
-        + (acts[0] ? '；' + acts[0].label + ' ' + acts[0].targetName + ' 可到 ' + acts[0].effect.finishAfter + '，预计 ' + fmtN(acts[0].cost) + ' 元。' : '。');
-    }
-    if (step === 'insert') {
-      if (!M.insert.sim) return v.insertNoun + '填好就能按三种策略各排一遍。';
-      var sim = M.insert.sim, rec = sim.options.filter(function (x) { return x.key === sim.recommend; })[0];
-      return M.insert.req.customer + ' 加急 ' + fmtN(M.insert.req.qty) + ' ' + v.qtyUnit + '：方案 ' + rec.key + ' ' + rec.name + ' ' + rec.finishLabel + ' 完工，拖累 ' + rec.affected + ' ' + v.counter + '，预计 ' + fmtN(rec.cost) + ' 元。';
-    }
-    if (step === 'stock') {
-      var t0 = plan.items.filter(function (x) { return x.urgency === 'short'; })[0] || plan.items[0];
-      return t0.name + ' 库存 ' + fmtN(t0.stock) + '、在途 ' + fmtN(t0.onOrder) + '，排程需 ' + fmtN(t0.demand) + ' ' + t0.unit + '、安全库存 ' + fmtN(t0.safety) + ' ' + t0.unit + '，下单截止 ' + t0.latestOrderLabel + '；' + plan.summary.buy + ' 项待下单预计 ' + fmtN(plan.summary.amount) + ' 元。';
-    }
-    if (step === 'daily') {
-      var mustBuy = plan.items.filter(function (x) { return x.suggestQty > 0 && x.latestOrderDay <= 0; }).length;
-      return '今日 ' + D.deliveries.filter(function (x) { return x.ok; }).length + ' ' + v.counter + '可交付；风险与延期 ' + D.risks.length + ' ' + v.counter + '（延期 ' + D.kpi.late + ' ' + v.counter + '、风险 ' + D.kpi.risk + ' ' + v.counter + '）；' + mustBuy + ' 项' + v.material + '今日须下单。';
-    }
+  /* 按业务 id 找页面上那一条：先认 data-ref，重绘或排序过的行退回按文本找 */
+  function refEl(ref) {
+    var w = workEl(), s = String(ref == null ? '' : ref);
+    if (!w || !s) return null;
+    return w.querySelector('[data-ref="' + s + '"]') || rowOf(w, s);
+  }
+  function pulseRef(ref, ms) {
+    setTimeout(function () { var el = refEl(ref); if (el) anim().pulse(el, { ms: 2200, scroll: true }); }, ms || 140);
+  }
+  /* 这条业务记录住在哪一屏 */
+  function homeOf(ref) {
+    var s = String(ref == null ? '' : ref);
+    if (!s) return null;
+    /* 摄入回来的两个固定位置：草稿卡在插单屏、导入批次行在接入屏。
+     * 这两条记录在高亮那一刻可能还没落库（动作在高亮之后才重放），所以按屏名直接给。 */
+    if (s === 'insert-draft') return 'insert';
+    if (s === 'doc-import') return 'connect';
+    if (M.S.byId[s]) return M.step === 'daily' ? 'daily' : 'room';
+    if (M.plan.items.filter(function (x) { return x.id === s; }).length) return 'stock';
+    if (M.plan.po.filter(function (x) { return x.supplier === s; }).length) return 'stock';
+    if (M.S.lines.filter(function (x) { return x.id === s; }).length) return 'room';
+    if (M.data.sources.filter(function (x) { return x.id === s; }).length) return 'connect';
     return null;
   }
-
-  function suggest(step) {
-    var v = V();
-    if (step === 'connect') return ['延期的是哪几' + v.counter, '数据源都通了吗', '为什么会延期', '直接进' + v.room];
-    if (step === 'room') return ['按期率为什么只有 ' + M.S.kpi.onTimeRate + '%', '哪条' + v.line + '满负荷', '先处理哪一' + v.counter, v.material + '缺口在哪'];
-    if (step === 'order') return ['为什么晚', '加班要花多少', '调线行不行', '换下一' + v.counter];
-    if (step === 'insert') return ['三个方案差在哪', '哪些' + v.order + '被拖累', '按 C 排要多少钱', '就按推荐落单'];
-    if (step === 'stock') return ['今天哪几项要下单', '采购单一共多少钱', '呆滞占了多少钱', '生成采购单'];
-    if (step === 'daily') return ['今天能交几' + v.counter, '明天要注意什么', '风险' + v.order + '有哪些', '发给谁'];
-    return null;
+  function doFocus(ref, api) {
+    var el = refEl(ref);
+    if (el) { api.focus(el); return true; }
+    var to = homeOf(ref);
+    if (!to) return false;
+    if (M.step !== to) setStep(to); else draw();
+    pulseRef(ref, 700);
+    return true;
   }
-
-  function answer(q, step) {
-    if (!M.S) return null;
-    var v = V(), S = M.S, k = S.kpi, plan = M.plan, D = M.daily, w = workEl();
-    q = String(q || '');
-
-    /* —— 点名某一张单 —— */
-    var oq = findOrder(q);
-    if (oq && !has(q, ['物料', '库存'])) {
-      var acts0 = oq.status === 'done' ? [] : K.actions(M.data, S, oq.id);
-      var txt = oq.id + ' ' + cut(oq.customer, 14) + ' · ' + oq.productName + ' × ' + fmtN(oq.qty) + ' ' + v.qtyUnit + '\n'
-        + v.due + ' ' + oq.dueLabel + '，' + v.finish + ' ' + oq.finishLabel + (oq.lateDays > 0 ? '，晚 ' + oq.lateDays + ' 天' : '，余量 ' + oq.slack + ' 天')
-        + '；齐套 ' + Math.round(oq.kitRate * 100) + '%，' + (oq.currentOp ? '当前「' + oq.currentOp + '」在 ' + oq.currentLine : '全部完工') + '。';
-      if (acts0[0]) txt += '\n建议' + acts0[0].label + ' ' + acts0[0].targetName + '：' + v.finish + ' ' + acts0[0].effect.finishBefore + ' → ' + acts0[0].effect.finishAfter + '，预计 ' + fmtN(acts0[0].cost) + ' 元。';
-      return { text: txt, act: function () { M.focus = oq.id; if (step !== 'order') setStep('order'); else draw(); } };
+  function openPanel(a) {
+    if (a.panel === 'material') {
+      if (!M.plan.items.filter(function (x) { return x.id === a.ref; }).length) return false;
+      var open = function () { var it = M.plan.items.filter(function (x) { return x.id === a.ref; })[0]; if (it) openMaterial(it); };
+      if (M.step !== 'stock') { setStep('stock'); setTimeout(open, 420); } else open();
+      return true;
     }
-
-    /* —— 点名某一种物料 —— */
-    var mq = findMaterial(q);
-    if (mq) {
-      return { text: mq.name + '：库存 ' + fmtN(mq.stock) + ' ' + mq.unit + '、安全库存 ' + fmtN(mq.safety) + '、在途 ' + fmtN(mq.onOrder) + '，排程需 ' + fmtN(mq.demand) + ' ' + mq.unit + '。\n'
-        + (mq.suggestQty ? '建议下单 ' + fmtN(mq.suggestQty) + ' ' + mq.unit + '（' + mq.supplier + '，提前期 ' + mq.leadDays + ' 天），下单截止 ' + mq.latestOrderLabel + '，预计 ' + fmtN(mq.amount) + ' 元。' : '排程内无需补单。'),
-        blocks: mq.drivers.length ? [tagsb(mq.drivers.slice(0, 3))] : null,
-        act: function () { if (step !== 'stock') { setStep('stock'); setTimeout(function () { openMaterial(mq); }, 420); } else openMaterial(mq); } };
+    if (a.panel === 'slow') {
+      if (!M.plan.slow.length) return false;
+      if (M.step !== 'stock') { setStep('stock'); setTimeout(openSlow, 420); } else openSlow();
+      return true;
     }
-
-    if (has(q, ['数据源', '来源', '同步', '接入', '通了'])) {
-      return { text: M.data.sources.map(function (s) { return s.name + ' ' + (s.mode === 'direct' ? '系统直连' : '表格导入') + ' ' + fmtN(s.rows) + ' 条 · ' + s.lastSync.slice(5); }).join('\n'),
-        act: function () { if (step !== 'connect') setStep('connect'); focusSel('.pd-table', 600); } };
-    }
-    if (has(q, ['进指挥室', '进入', '开始', '直接进'])) return { text: v.room + '按' + v.due + '倒推排了一遍，' + k.late + ' ' + v.counter + '延期、' + k.risk + ' ' + v.counter + '风险。', act: function () { if (!M.charged) enterRoom(); else setStep('room'); } };
-
-    /* 屏内问句先由本屏分支接：站在订单下钻屏问「为什么晚」，答的是这一张单，不跳走 */
-    if (step === 'order') {
-      var o = S.byId[M.focus] || lateOrders()[0] || S.orders[0];
-      var ex = K.explain(S, o.id), acts = o.status === 'done' ? [] : K.actions(M.data, S, o.id);
-      if (has(q, ['为什么', '原因', '怎么回事', '卡在'])) {
-        return { text: o.id + ' ' + ex.label + '：' + TX(ex.reasons[0]) + '。\n' + TX(ex.seen[0]),
-          blocks: [kvb([[v.due, o.dueLabel], [v.finish, o.finishLabel], ['余量', o.slack + ' 天'], ['齐套', Math.round(o.kitRate * 100) + '%']])],
-          focus: w ? w.querySelector('.m10-judge') : null };
-      }
-      if (has(q, ['加班'])) {
-        var ot = acts.filter(function (a) { return a.key === 'overtime'; })[0];
-        if (!ot) return { text: '这一' + v.counter + '排不出加班收益，换调线或改期更划算。' };
-        return { text: ot.targetName + ' 加班 3 h/日，' + v.finish + ' ' + ot.effect.finishBefore + ' → ' + ot.effect.finishAfter + '，'
-          + (ot.effect.meetsDue ? '赶上' + v.due : '追回 ' + ot.effect.gain + ' 天') + '，拖累 ' + ot.effect.affected + ' ' + v.counter + '，预计 ' + fmtN(ot.cost) + ' 元。\n已按这个方案执行，' + v.room + '重排。',
-          act: function () { var p = clone(ot.params); p.cost = ot.cost; commit(K.applyAction(M.data, o.id, 'overtime', p), '已加班 · ' + ot.targetName); } };
-      }
-      if (has(q, ['调线', '换线', '换条'])) {
-        var rr = acts.filter(function (a) { return a.key === 'reroute'; })[0];
-        if (!rr) return { text: '这道' + v.op + '没有可替代' + v.line + '，调线走不通。' };
-        return { text: TX(rr.desc) + '：' + v.finish + ' ' + rr.effect.finishBefore + ' → ' + rr.effect.finishAfter
-          + (rr.effect.gain > 0 ? '，追回 ' + rr.effect.gain + ' 天，不花钱。已按这个方案执行。' : rr.effect.gain < 0 ? '，反而晚 ' + (-rr.effect.gain) + ' 天，不建议动。' : '，没改善，不建议动。'),
-          act: rr.effect.gain > 0 ? function () { var p = clone(rr.params); p.cost = 0; commit(K.applyAction(M.data, o.id, 'reroute', p), '已调线 · ' + rr.targetName); } : null };
-      }
-      if (has(q, ['改期', '改约', '跟客户'])) {
-        var rs = acts.filter(function (a) { return a.key === 'reschedule'; })[0];
-        if (!rs) return { text: '这一' + v.counter + '不需要改期。' };
-        return { text: TX(rs.desc) + '：改完不再算延期，不动其他' + v.orders + '的排程，不花钱。\n已按这个方案执行。',
-          act: function () { var p = clone(rs.params); p.cost = 0; commit(K.applyAction(M.data, o.id, 'reschedule', p), '已改期 · ' + cut(rs.targetName, 12)); } };
-      }
-      if (has(q, ['齐套', '物料', '缺料', '领料'])) {
-        var mats = [];
-        o.ops.forEach(function (op) { (op.mat || []).forEach(function (m) { mats.push(m); }); });
-        if (!mats.length) return { text: '这一' + v.counter + '没有待领' + v.material + '，齐套 100%。' };
-        return { text: '齐套 ' + Math.round(o.kitRate * 100) + '%：' + mats.map(function (m) { return m.name + ' 需 ' + fmtN(m.need) + ' ' + m.unit + (m.ready === 0 ? ' 齐备' : m.assumed ? ' 缺 ' + fmtN(m.short) : ' ' + m.readyLabel + ' 到'); }).join('；') + '。',
-          focus: w ? w.querySelector('.m10-mat') : null };
-      }
-      if (has(q, ['下一', '换一', '别的'])) {
-        var al = S.orders.filter(function (x) { return x.status === 'late' || x.status === 'risk'; });
-        var i2 = al.map(function (x) { return x.id; }).indexOf(o.id), nx = al[(i2 + 1) % al.length];
-        return { text: nx.id + ' ' + causeText(nx) + '，' + v.finish + ' ' + nx.finishLabel + (nx.lateDays > 0 ? '，晚 ' + nx.lateDays + ' 天' : '') + '。',
-          act: function () { M.focus = nx.id; draw(); } };
-      }
-    }
-
-    if (has(q, ['为什么']) && has(q, ['延期', '晚', '按期'])) {
-      var L0 = lateOrders();
-      if (!L0.length) return { text: '在手 ' + k.open + ' ' + v.counter + '全部按期，按期率 ' + k.onTimeRate + '%。' };
-      var by = {};
-      L0.forEach(function (o) { var c = K.CAUSES[o.cause].label; by[c] = (by[c] || 0) + 1; });
-      var ov = S.lines.filter(function (L2) { return L2.status === 'over'; });
-      return { text: '延期 ' + L0.length + ' ' + v.counter + '的归因：' + Object.keys(by).map(function (c) { return c + ' ' + by[c] + ' ' + v.counter; }).join('、') + '。\n'
-        + (ov.length ? ov.map(function (L2) { return L2.name; }).join('、') + ' 未来 7 天负荷 ' + ov[0].load7 + '%，' + v.op + '排队等' + v.line + '；' : '')
-        + '齐套率低于 100% 的有 ' + S.orders.filter(function (o) { return o.status !== 'done' && o.kitRate < 1; }).length + ' ' + v.counter + '。',
-        blocks: [mini(['单号', '归因', '晚'], L0.map(function (o) { return [o.id.slice(-4), K.CAUSES[o.cause].label, o.lateDays + ' 天']; }))],
-        act: function () { if (step !== 'room') setStep('room'); M.filter = 'late'; draw(); refocus(L0[0].id, 900); } };
-    }
-    if (has(q, ['延期', '晚了', '迟', '按期率', '准时'])) {
-      var L = lateOrders();
-      if (!L.length) return { text: '在手 ' + k.open + ' ' + v.counter + '全部按期，按期率 ' + k.onTimeRate + '%。' };
-      return { text: '按期率 ' + k.onTimeRate + '%：' + k.open + ' ' + v.counter + '在手，' + k.late + ' ' + v.counter + '延期合计 ' + k.lateDaysTotal + ' 天。\n'
-        + L.map(function (o) { return o.id + ' ' + K.CAUSES[o.cause].label + ' 晚 ' + o.lateDays + ' 天'; }).join('；') + '。',
-        blocks: [mini(['单号', v.due, v.finish, '晚'], L.map(function (o) { return [o.id.slice(-4), o.dueLabel, o.finishLabel, o.lateDays + ' 天']; }))],
-        act: function () { if (step !== 'room') setStep('room'); M.filter = 'late'; draw(); refocus(L[0].id, 900); } };
-    }
-    if (has(q, ['风险', '要小心', '会不会'])) {
-      /* 日报屏的「风险与延期」是延期 + 风险的合集，屏上与气泡里取同一份 */
-      if (step === 'daily') {
-        if (!D.risks.length) return { text: v.daily + '里没有延期或风险' + v.order + '。' };
-        return { text: v.daily + '「风险与延期」' + D.risks.length + ' ' + v.counter + '：延期 ' + k.late + ' ' + v.counter + '、风险 ' + k.risk + ' ' + v.counter + '。\n'
-          + D.risks.map(function (r) { return r.id + ' ' + r.causeLabel + (r.lateDays > 0 ? ' 晚 ' + r.lateDays + ' 天' : '') + (r.handled ? '（已处置）' : ''); }).join('；') + '。',
-          blocks: [mini(['单号', '判断', v.finish], D.risks.map(function (r) { return [r.id.slice(-4), r.causeLabel, r.finishLabel]; }))],
-          focus: w ? w.querySelector('.pd-doc .m10-sc5') : null };
-      }
-      var R = riskOrders();
-      if (!R.length) return { text: '当前没有风险' + v.order + '。' };
-      return { text: R.length + ' ' + v.counter + '风险：' + R.map(function (o) { return o.id + ' ' + causeText(o) + '（余量 ' + o.slack + ' 天）'; }).join('；') + '。',
-        blocks: [mini(['单号', '判断', '余量'], R.map(function (o) { return [o.id.slice(-4), causeText(o), o.slack + ' 天']; }))],
-        act: step === 'daily' ? null : function () { if (step !== 'room') setStep('room'); M.filter = 'risk'; draw(); } };
-    }
-    if (has(q, [v.line, '负荷', '瓶颈', '满负荷', '产能'])) {
-      var over = S.lines.filter(function (L2) { return L2.status !== 'ok'; });
-      return { text: '7 日平均负荷 ' + k.load7 + '%' + (over.length ? '；' + over.map(function (L2) { return L2.name + ' ' + L2.load7 + '%'; }).join('、') + '。' : '，没有满负荷' + v.line + '。'),
-        blocks: [mini([v.line, '负荷'], S.lines.map(function (L2) { return [cut(L2.name, 8), L2.load7 + '%']; }))],
-        act: function () { if (step !== 'room') setStep('room'); focusSel('.pd-heat', 700); } };
-    }
-    if (has(q, ['先处理', '先做', '怎么办', '下一步', '建议'])) {
-      var L3 = lateOrders(), o3 = L3[0] || riskOrders()[0];
-      if (!o3) return { text: '在手' + v.orders + '按期，先把 ' + plan.summary.buy + ' 项采购单下掉。', act: function () { setStep('stock'); } };
-      var a3 = K.actions(M.data, S, o3.id)[0];
-      return { text: '先看 ' + o3.id + '（' + K.CAUSES[o3.cause].label + '，晚 ' + o3.lateDays + ' 天）'
-        + (a3 ? '：' + a3.label + ' ' + a3.targetName + '，' + v.finish + ' ' + a3.effect.finishBefore + ' → ' + a3.effect.finishAfter + '，拖累 ' + a3.effect.affected + ' ' + v.counter + '，预计 ' + fmtN(a3.cost) + ' 元。' : '。'),
-        act: function () { M.focus = o3.id; setStep('order'); } };
-    }
-
-    if (step === 'insert' && M.insert.sim) {
-      var sim = M.insert.sim, rec = sim.options.filter(function (x) { return x.key === sim.recommend; })[0];
-      var pick = sim.options.filter(function (x) { return x.key === M.insert.pick; })[0] || rec;
-      if (has(q, ['落单', '就按', '执行', '下单'])) {
-        var use = has(q, ['推荐']) ? rec : pick;
-        return { text: '按方案 ' + use.key + '（' + use.name + '）落单，' + v.finish + ' ' + use.finishLabel + '；落单后' + v.orders + '按新排程刷新。',
-          act: function () { var nd = K.applyInsert(M.data, M.insert.req, use.key); var oid = use.orderId; M.insert = { req: null, sim: null, pick: null }; M.focus = oid; commit(nd, '已落单 ' + oid + ' · ' + v.room + '已重排'); setStep('room'); } };
-      }
-      if (has(q, ['差在哪', '三个方案', '对比', '哪个好', '推荐'])) {
-        return { text: sim.options.map(function (op) { return op.key + ' ' + op.name + ' ' + op.finishLabel + (op.meetsDue ? ' 按期' : ' 晚 ' + op.lateDays + ' 天') + '，拖累 ' + op.affected + ' ' + v.counter + '，预计 ' + fmtN(op.cost) + ' 元'; }).join('\n') + '。\nAI 推荐 ' + sim.recommend + '：' + TX(sim.reason) + '。',
-          blocks: [mini(['方案', v.finish, '拖累', '费用'], sim.options.map(function (op) { return [op.key, op.finishLabel, op.affected + ' ' + v.counter, fmtN(op.cost)]; }))],
-          act: function () { M.insert.pick = sim.recommend; draw(); focusSel('.pd-option.on', 700); } };
-      }
-      if (has(q, ['拖累', '影响', '谁被', '哪些'])) {
-        var aff = pick.rows.filter(function (r) { return r.delta > 0; });
-        if (!aff.length) return { text: '方案 ' + pick.key + ' 不推后任何在手' + v.order + '。' };
-        return { text: '方案 ' + pick.key + ' 推后 ' + aff.length + ' ' + v.counter + '：' + aff.map(function (r) { return r.id + ' ' + r.before + ' → ' + r.after + '（+' + r.delta + ' 天）'; }).join('；') + '，转延期 ' + pick.newlyLate + ' ' + v.counter + '。',
-          blocks: [mini(['单号', '前', '后'], aff.map(function (r) { return [r.id.slice(-4), r.before, r.after]; }))],
-          focus: w ? w.querySelector('.pd-table') : null };
-      }
-      if (has(q, ['C', '加班', '多少钱', '费用'])) {
-        var C = sim.options.filter(function (x) { return x.key === 'C'; })[0];
-        return { text: '方案 C ' + C.name + '：' + v.finish + ' ' + C.finishLabel + '，拖累 ' + C.affected + ' ' + v.counter + '，预计加班费 ' + fmtN(C.cost) + ' 元。'
-          + (C.notes.length ? '\n' + TX(C.notes.join('；')) + '。' : ''),
-          act: function () { M.insert.pick = 'C'; draw(); focusSel('.pd-option.on', 700); } };
-      }
-    }
-
-    if (step === 'stock' || has(q, ['采购', '下单', '缺口', '呆滞', '库存'])) {
-      if (has(q, ['呆滞', '占用', '压着'])) {
-        if (!plan.slow.length) return { text: '没有呆滞' + v.material + '。' };
-        return { text: '呆滞 ' + plan.slow.length + ' 项占用 ' + fmtN(plan.summary.slowCapital) + ' 元：' + plan.slow.map(function (x) { return x.name + ' ' + fmtN(x.stock) + ' ' + x.unit + '（' + fmtN(x.capital) + ' 元）'; }).join('；') + '。',
-          act: function () { if (step !== 'stock') setStep('stock'); setTimeout(openSlow, 420); } };
-      }
-      if (has(q, ['今天', '今日', '要下单', '来不及', '截止'])) {
-        var today = plan.items.filter(function (x) { return x.suggestQty > 0 && x.latestOrderDay <= 0; });
-        if (!today.length) return { text: '今日没有到下单截止的' + v.material + '。' };
-        return { text: today.length + ' 项今日到截止：' + today.map(function (x) { return x.name + ' ' + fmtN(x.suggestQty) + ' ' + x.unit + (x.overdue ? '（已过）' : ''); }).join('；') + '，合计预计 ' + fmtN(today.reduce(function (a, x) { return a + x.amount; }, 0)) + ' 元。',
-          blocks: [mini([v.material, '建议', '截止'], today.map(function (x) { return [cut(x.name, 7), fmtN(x.suggestQty) + ' ' + x.unit, x.latestOrderLabel]; }))],
-          act: function () { if (step !== 'stock') setStep('stock'); refocus(today[0].name, 900); } };
-      }
-      if (has(q, ['多少钱', '总共', '一共', '金额'])) {
-        return { text: plan.po.length + ' 张采购单、' + plan.summary.buy + ' 项，预计 ' + fmtN(plan.summary.amount) + ' 元：' + plan.po.map(function (p) { return p.supplier + ' ' + fmtN(p.amount) + ' 元'; }).join('；') + '。',
-          blocks: [mini([v.supplier, '金额'], plan.po.map(function (p) { return [cut(p.supplier, 8), fmtN(p.amount) + ' 元']; }))],
-          act: function () { if (step !== 'stock') setStep('stock'); focusSel('.m10-po', 700); } };
-      }
-      if (has(q, ['生成', '下掉', '开单'])) {
-        if (!plan.po.length) return { text: '当前没有需要下单的' + v.material + '。' };
-        return { text: '生成 ' + plan.po.length + ' 张采购单，预计 ' + fmtN(plan.summary.amount) + ' 元；计入在途后' + v.orders + '按到货日重排。',
-          act: function () { var r = K.applyPurchase(M.data, plan); M.pos = M.pos.concat(r.pos); if (step !== 'stock') setStep('stock'); commit(r.data, '已生成 ' + r.pos.length + ' 张采购单'); } };
-      }
-      if (has(q, ['缺口', '缺料', '不够'])) {
-        var sh2 = plan.items.filter(function (x) { return x.urgency === 'short' || x.urgency === 'safety'; });
-        return { text: '缺口 ' + plan.summary.short + ' 项、低于安全库存 ' + plan.summary.safety + ' 项：' + sh2.slice(0, 4).map(function (x) { return x.name + ' 库存 ' + fmtN(x.stock) + ' / 需 ' + fmtN(x.demand) + ' ' + x.unit; }).join('；') + '。',
-          blocks: [mini([v.material, '库存', '需求'], sh2.slice(0, 5).map(function (x) { return [cut(x.name, 7), fmtN(x.stock), fmtN(x.demand)]; }))],
-          act: function () { if (step !== 'stock') setStep('stock'); } };
-      }
-    }
-
-    if (step === 'daily' || has(q, ['日报', '今天能交', '明天', '发给谁'])) {
-      if (has(q, ['发给谁', '收件', '微信', '发送'])) {
-        return { text: '收件人：' + [v.handler, '车间主任', '总经理', '采购主管'].join('、')+ '。' + v.daily + '是微信文本版，扫码接收。',
-          act: function () { sh.setQrReady(true); sh.showWeChat(); } };
-      }
-      if (has(q, ['今天能交', '今日交付', '几' + v.counter, '交几'])) {
-        if (!D.deliveries.length) return { text: '今日没有到期' + v.order + '。' };
-        return { text: D.deliveries.map(function (x) { return x.id + ' ' + cut(x.customer, 12) + ' ' + (x.ok ? '可交付' : '延至 ' + x.finishLabel); }).join('\n') + '。',
-          act: function () { if (step !== 'daily') setStep('daily'); focusSel('.pd-doc .sec', 700); } };
-      }
-      if (has(q, ['明天', '明日', '注意'])) {
-        if (!D.tomorrow.length) return { text: '明日无到期、开工与到货事项。' };
-        return { text: tomorrowList().slice(0, 6).map(function (t) { return TX(t.text); }).join('\n'),
-          act: function () { if (step !== 'daily') setStep('daily'); focusSel('.pd-doc ul', 700); } };
-      }
-    }
-
-    if (has(q, ['插单', '加急', '模拟'])) {
-      return { text: v.insertNoun + '按三种策略各排一遍：' + v.strategies.A + ' / ' + v.strategies.B + ' / ' + v.strategies.C + '，逐' + v.counter + '对比受影响的在手' + v.order + '与代价。',
-        act: function () { setStep('insert'); } };
-    }
-    if (has(q, ['多少' + v.counter, '在手', '几' + v.counter])) {
-      return { text: '在手 ' + k.open + ' ' + v.counter + '：按期 ' + (k.open - k.late) + '、风险 ' + k.risk + '、延期 ' + k.late + '；已完工待发运 ' + k.done + ' ' + v.counter + '。' };
-    }
-    return null;
+    if (a.panel === 'wechat') { sh.setQrReady(true); sh.showWeChat(); return true; }
+    return false;
   }
-
-  /* ---------- 文档：订单表排产 / 科目余额对账 / 采购合同 / 邮件 ---------- */
-  function colsOf(head) {
-    var map = {};
-    (head || []).forEach(function (x, i) {
-      var s = String(x || '');
-      if (map.id == null && /单号|订单|编号|工单/.test(s)) map.id = i;
-      if (map.cust == null && /客户|甲方|收货|买方/.test(s)) map.cust = i;
-      if (map.prod == null && /产品|品名|物料名|规格|型号|商品/.test(s)) map.prod = i;
-      if (map.qty == null && /数量|件数|台数|订量/.test(s)) map.qty = i;
-      if (map.due == null && /交期|交付|到期|需求日|完成日/.test(s)) map.due = i;
-      if (map.acc == null && /科目/.test(s)) map.acc = i;
-      if (map.end == null && /期末/.test(s)) map.end = i;
-      if (map.dr == null && /借方/.test(s)) map.dr = i;
-      if (map.cr == null && /贷方/.test(s)) map.cr = i;
-    });
-    return map;
-  }
-  function numOf(x) { var n = parseFloat(String(x == null ? '' : x).replace(/[,，\s元]/g, '')); return isNaN(n) ? 0 : n; }
-  var CN = { '零': 0, '一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
-  function cnNum(t) {
-    t = String(t || '').trim();
-    if (/^[\d.]+$/.test(t)) return parseFloat(t);
-    if (CN[t] != null) return CN[t];
-    var m = /^十([一二三四五六七八九])$/.exec(t); if (m) return 10 + CN[m[1]];
-    var m2 = /^([一二三四五六七八九])十([一二三四五六七八九])?$/.exec(t); if (m2) return CN[m2[1]] * 10 + (m2[2] ? CN[m2[2]] : 0);
-    return NaN;
-  }
-  function addSource(doc, rows, note) {
-    var nd = clone(M.data);
-    nd.sources = nd.sources.filter(function (s) { return s.id !== 'doc-import'; });
-    nd.sources.push({ id: 'doc-import', name: cut(doc.name, 16), mode: 'import', lastSync: nd.today + ' 14:20', rows: rows });
-    M.data = nd; recompute();
-    return note;
-  }
-  function docExcel(doc) {
-    var v = V(), s0 = (doc.sheets || [])[0];
-    if (!s0 || !s0.rows.length) return { text: 'Excel《' + doc.name + '》读完，没有可用数据行。' };
-    var head = s0.rows[0], body = s0.rows.slice(1).filter(function (r) { return r.join('').trim(); });
-    var map = colsOf(head);
-
-    /* 1) 订单表 → 真的排一遍产 */
-    if (map.qty != null && (map.due != null || map.prod != null) && (map.id != null || map.cust != null)) {
-      var r0 = body[0] || [];
-      var qty = Math.max(1, Math.round(numOf(r0[map.qty])));
-      var prod = M.data.products[0];
-      if (map.prod != null) {
-        var pn = String(r0[map.prod] || '');
-        M.data.products.forEach(function (p) { if (pn && (p.name.indexOf(pn) >= 0 || pn.indexOf(p.name.slice(0, 4)) >= 0)) prod = p; });
+  function applyAct(a) {
+    var input = a.input || {}, v = V();
+    if (a.action === 'applyAction') {
+      if (!M.S.byId[input.orderId] || !input.key) return false;
+      M.focus = input.orderId;
+      if (M.step !== 'order') setStep('order');
+      commit(K.applyAction(M.data, input.orderId, input.key, input.params), '已' + ((v.actions || {})[input.key] || '处置') + ' · ' + v.room + '已重排');
+      return true;
+    }
+    if (a.action === 'applyInsert') {
+      var req = M.insert.req || input.req;
+      if (!req || !input.strategy) return false;
+      var sim = M.insert.sim || K.simulateInsert(M.data, req);
+      var op = sim.options.filter(function (x) { return x.key === input.strategy; })[0];
+      if (!op) return false;
+      var nd = K.applyInsert(M.data, req, input.strategy);
+      delete nd.insertDraft; delete nd.insertPick;
+      M.insert = { req: null, sim: null, pick: null }; M.focus = op.orderId;
+      commit(nd, '已落单 ' + op.orderId + '（' + op.name + '）· ' + v.room + '已重排');
+      setStep('room');
+      return true;
+    }
+    if (a.action === 'applyPurchase') {
+      if (!M.plan.po.length) return false;
+      var r = K.applyPurchase(M.data, M.plan, input.ids && input.ids.length ? input.ids : null);
+      if (!r.pos.length) return false;
+      M.pos = M.pos.concat(r.pos);
+      if (M.step !== 'stock') setStep('stock');
+      commit(r.data, '已生成 ' + r.pos.length + ' 张采购单 · ' + v.room + '已重排');
+      return true;
+    }
+    if (a.action === 'ingest') {
+      var c = chatCtx();
+      var res = K.ingest(input.doc, M.step, c.data, c.lib, c.result);
+      if (!res || !res.data) return false;
+      M.data = res.data; recompute();
+      if (res.data.insertDraft) {                           /* 订单表：草稿填进插单模拟，按三策略重排 */
+        M.insert = { req: clone(res.data.insertDraft), sim: null, pick: res.data.insertPick || null };
+        if (M.step !== 'insert') setStep('insert'); else { M.told = null; draw(); }
+        focusSel('.pd-option.on', 900);
+        return true;
       }
-      var dueDay = 7, dueRaw = map.due != null ? String(r0[map.due] || '') : '';
-      var md = dueRaw.match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);
-      if (md) { var dd = K.dayIdx(M.data, md[1] + '-' + ('0' + md[2]).slice(-2) + '-' + ('0' + md[3]).slice(-2)); if (dd >= 1 && dd <= 20) dueDay = dd; }
-      var req = { customer: cut(map.cust != null ? String(r0[map.cust] || '') : (map.id != null ? String(r0[map.id]) : ''), 16) || 'K-040 · 导入', product: prod.id, qty: qty, due: K.dateOf(M.data, dueDay) };
-      var sim = K.simulateInsert(M.data, req), rec = sim.options.filter(function (x) { return x.key === sim.recommend; })[0];
-      addSource(doc, body.length, '');
-      M.insert = { req: req, sim: sim, pick: sim.recommend };
-      return { text: 'Excel《' + doc.name + '》读完：《' + s0.name + '》' + body.length + ' 行 ' + head.length + ' 列。\n'
-        + '按第 1 行排产：' + req.customer + ' · ' + prod.name + ' × ' + fmtN(qty) + ' ' + v.qtyUnit + '，' + v.due + ' ' + K.short(M.data, dueDay) + '。\n'
-        + '三种策略各排一遍：' + sim.options.map(function (op) { return op.key + ' ' + op.finishLabel + '（拖累 ' + op.affected + '，' + fmtN(op.cost) + ' 元）'; }).join('，') + '；推荐 ' + rec.key + '。已填进' + v.insert + '。',
-        blocks: [mini(head.slice(0, 4).map(function (x) { return cut(x, 6); }), body.slice(0, 3).map(function (r) { return r.slice(0, 4).map(function (x) { return cut(x, 10); }); }))],
-        act: function () { setStep('insert'); focusSel('.pd-option.on', 900); } };
+      var to = homeOf(res.ref) || 'connect';
+      if (M.step !== to) setStep(to); else draw();
+      pulseRef(res.ref, 700);
+      return true;
     }
-
-    /* 2) 科目余额表 → 与库存、应付口径对一遍 */
-    if (map.acc != null && (map.end != null || map.dr != null)) {
-      var pick = function (re) { for (var i = 0; i < body.length; i++) { if (re.test(body[i].join('|'))) return body[i]; } return null; };
-      var gr = pick(/库存商品|产成品/), ap = pick(/应付账款/), ar = pick(/应收账款/);
-      var matCap = M.data.materials.reduce(function (a, m) { return a + (m.stock || 0) * (m.unitCost || 0); }, 0);
-      var lines = ['Excel《' + doc.name + '》读完：《' + s0.name + '》' + body.length + ' 行，列是 ' + head.slice(0, 6).map(function (x) { return cut(x, 6); }).join(' / ') + '。'];
-      var kv = [];
-      var cell = function (row, i) { return row && i != null && row[i] != null && String(row[i]).trim() !== '' ? numOf(row[i]) : null; };
-      if (gr) {
-        var endV = cell(gr, map.end), d1 = cell(gr, map.dr) || 0, c1 = cell(gr, map.cr) || 0;
-        lines.push('库存商品' + (endV != null ? '期末 ' + fmtN(endV) + ' 元，' : '') + '本期借 ' + fmtN(d1) + ' / 贷 ' + fmtN(c1) + '，净增 ' + fmtN(d1 - c1) + ' 元；本模块' + v.material + '库存按单价折 ' + fmtN(matCap) + ' 元，其中呆滞 ' + M.plan.slow.length + ' 项占 ' + fmtN(M.plan.summary.slowCapital) + ' 元。');
-        if (endV != null) kv.push(['库存商品期末', fmtN(endV) + ' 元']);
-        kv.push([v.material + '折价', fmtN(matCap) + ' 元'], ['呆滞占用', fmtN(M.plan.summary.slowCapital) + ' 元']);
-      }
-      if (ap) {
-        var apEnd = cell(ap, map.end), apCr = cell(ap, map.cr);
-        lines.push('应付账款' + (apEnd != null ? '期末 ' + fmtN(apEnd) + ' 元' : '本期贷方 ' + fmtN(apCr || 0) + ' 元（这张表没有期末格）') + '；本模块 ' + M.plan.summary.buy + ' 项采购单草稿预计 ' + fmtN(M.plan.summary.amount) + ' 元，落单后应付增 ' + fmtN(M.plan.summary.amount) + ' 元。');
-        kv.push([apEnd != null ? '应付账款期末' : '应付账款本期贷方', fmtN(apEnd != null ? apEnd : (apCr || 0)) + ' 元'], ['采购单草稿', fmtN(M.plan.summary.amount) + ' 元']);
-      }
-      if (ar && cell(ar, map.end) != null) kv.push(['应收账款期末', fmtN(cell(ar, map.end)) + ' 元']);
-      lines.push('这张表没有' + v.order + '与' + v.due + '列，排程不动数；已登记为导入批次。');
-      addSource(doc, body.length, '');
-      return { text: lines.join('\n'), blocks: [kvb(kv)],
-        act: function () { if (M.step !== 'stock') setStep('stock'); focusSel('.m10-po', 800); } };
-    }
-
-    /* 3) 其他表：把真读到的列与行数说清楚 */
-    addSource(doc, body.length, '');
-    return { text: 'Excel《' + doc.name + '》读完：' + doc.sheets.length + ' 张表，《' + s0.name + '》' + body.length + ' 行 ' + head.length + ' 列。\n'
-      + '列是 ' + head.slice(0, 6).map(function (x) { return cut(x, 8); }).join(' / ') + '。\n'
-      + '排产要 ' + ['单号', v.customer, v.product, v.qty, v.due].join(' / ') + ' 这几列，这张表里没有，排程不动数。已按 ' + body.length + ' 行登记为导入批次。',
-      blocks: [mini(head.slice(0, 4).map(function (x) { return cut(x, 6); }), body.slice(0, 3).map(function (r) { return r.slice(0, 4).map(function (x) { return cut(x, 10); }); }))],
-      act: function () { if (M.step !== 'connect') setStep('connect'); else draw(); focusSel('.pd-table tbody tr:last-child', 700); } };
+    return false;
   }
-  function docWord(doc, txt) {
-    var v = V(), k = M.S.kpi;
-    var mAmt = txt.match(/(?:合同)?金额[^0-9]{0,8}([\d,]+(?:\.\d+)?)\s*元/) || txt.match(/人民币\s*([\d,]+(?:\.\d+)?)\s*元/);
-    var mDue = txt.match(/(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
-    var mPen = txt.match(/万分之\s*([\d.]+|[零一二三四五六七八九十]{1,3})/);
-    var mCap = txt.match(/不超过[^0-9]{0,10}([\d.]+)\s*%/);
-    var mB = txt.match(/乙方[：:\s]*([^\s　,，。；]{3,20})/);
-    var lines = [(doc.kind === 'pdf' ? 'PDF' : 'Word') + '《' + doc.name + '》读完：' + (doc.paragraphs.length || 1) + ' 段'
-      + (doc.tables && doc.tables.length ? '、' + doc.tables.length + ' 张表' : '') + '。'];
-    var kv = [];
-    if (mB) { lines.push('乙方 ' + mB[1] + '。'); kv.push(['乙方', cut(mB[1], 14)]); }
-    if (mAmt) kv.push(['合同金额', mAmt[1] + ' 元']);
-    if (mDue) {
-      var due = mDue[1] + '-' + ('0' + mDue[2]).slice(-2) + '-' + ('0' + mDue[3]).slice(-2);
-      var days = Math.round((Date.parse(due) - Date.parse(M.data.today)) / 86400000);
-      lines.push('交付期限 ' + due + '，距 ' + M.data.today + ' 还有 ' + days + ' 天；排程窗口 ' + M.data.horizon + ' 天，落在窗口' + (days <= M.data.horizon ? '内' : '外') + '。');
-      kv.push(['交付期限', due], ['剩余', days + ' 天']);
+  function setPath(a) {
+    if (a.path === 'focus') {
+      if (!M.S.byId[a.value]) return false;
+      M.focus = a.value;
+      if (M.step !== 'order') setStep('order'); else draw();
+      return true;
     }
-    if (mPen && mAmt && !isNaN(cnNum(mPen[1]))) {
-      var amt = numOf(mAmt[1]), pen = cnNum(mPen[1]), rate = pen / 10000;
-      var fee = Math.round(amt * rate * k.lateDaysTotal);
-      var capV = mCap ? Math.round(amt * parseFloat(mCap[1]) / 100) : null;
-      lines.push('逾期口径按日万分之 ' + pen + (mCap ? '、累计不超 ' + mCap[1] + '%' : '') + '：套当前延期合计 ' + k.lateDaysTotal + ' 天，'
-        + fmtN(amt) + ' × ' + pen + '‱ × ' + k.lateDaysTotal + ' = 预计 ' + fmtN(fee) + ' 元'
-        + (capV != null ? '，' + (fee >= capV ? '已到 ' + fmtN(capV) + ' 元上限。' : '未到 ' + fmtN(capV) + ' 元上限。') : '。'));
-      kv.push(['逾期口径', '日万分之 ' + pen], ['延期合计', k.lateDaysTotal + ' 天'], ['预计违约金', fmtN(fee) + ' 元']);
+    if (a.path === 'filter') {
+      if (a.value != null && ['late', 'risk', 'ok', 'handled', 'done'].indexOf(a.value) < 0) return false;
+      M.filter = a.value || null;
+      if (M.step !== 'room') setStep('room'); else draw();
+      var first = M.S.orders.filter(function (o) { return !M.filter || o.status === M.filter; })
+        .sort(function (x, y) { return (y.lateDays || 0) - (x.lateDays || 0); })[0];
+      if (first) pulseRef(first.id, 900);
+      return true;
     }
-    if (!mAmt && !mDue && !mPen) {
-      lines.push('没读到金额、交付期限或逾期口径，排程这边不动数。');
-      return { text: lines.join('\n'), blocks: [tagsb((doc.paragraphs || []).slice(0, 3).map(function (p) { return cut(p, 16); }))] };
+    if (a.path === 'insert.pick') {
+      if (['A', 'B', 'C'].indexOf(a.value) < 0) return false;
+      M.insert.pick = a.value;
+      if (M.step !== 'insert') setStep('insert'); else draw();
+      focusSel('.pd-option.on', 700);
+      return true;
     }
-    lines.push('延期' + v.orders + ' ' + k.late + ' ' + v.counter + '：' + lateOrders().slice(0, 3).map(function (o) { return o.id + ' 晚 ' + o.lateDays + ' 天'; }).join('、') + '。');
-    return { text: lines.join('\n'), blocks: [kvb(kv)],
-      act: function () { if (M.step !== 'room') setStep('room'); M.filter = 'late'; draw(); refocus(lateOrders()[0] ? lateOrders()[0].id : '', 900); } };
-  }
-  function docSlides(doc) {
-    var v = V(), k = M.S.kpi, txt = (doc.text || '').replace(/\s+/g, ' ');
-    var titles = (doc.slides || []).map(function (s) { return s.title || ''; }).filter(Boolean);
-    var mHit = txt.match(/(?:准时率|按期率|达成率)[^0-9]{0,6}(\d{1,3}(?:\.\d+)?)\s*%/);
-    var lines = ['PPT《' + doc.name + '》读完：' + doc.slides.length + ' 页，第 1 页「' + (titles[0] || '—') + '」' + (titles[1] ? '、第 2 页「' + titles[1] + '」' : '') + '。'];
-    if (!mHit) {
-      lines.push('没读到按期率口径，排程这边不动数。');
-      return { text: lines.join('\n'), blocks: [tagsb(titles.slice(0, 3))] };
-    }
-    var target = parseFloat(mHit[1]);
-    var need = Math.ceil(k.open * target / 100);
-    var gap = Math.max(0, need - (k.open - k.late));
-    lines.push('文档目标按期率 ' + target + '%，当前 ' + k.onTimeRate + '%；' + k.open + ' ' + v.counter + '在手要按期 ' + need + ' ' + v.counter + '，现在 ' + (k.open - k.late) + ' ' + v.counter + '，差 ' + gap + ' ' + v.counter + '。');
-    if (gap) lines.push('按延期天数排，先救 ' + lateOrders().slice(0, gap).map(function (o) { return o.id + '（晚 ' + o.lateDays + ' 天）'; }).join('、') + '。');
-    return { text: lines.join('\n'), blocks: [kvb([['文档目标', target + '%'], ['当前按期率', k.onTimeRate + '%'], ['要补', gap + ' ' + v.counter]]), tagsb(titles.slice(0, 2))],
-      act: function () { if (M.step !== 'room') setStep('room'); M.filter = 'late'; draw(); refocus(lateOrders()[0] ? lateOrders()[0].id : '', 900); } };
-  }
-  function docMail(doc) {
-    var v = V(), ml = doc.mail || {}, txt = (doc.text || '').replace(/\s+/g, ' ');
-    var mWan = txt.match(/([\d.]+)\s*万元/);
-    var mDay = txt.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
-    var kv = [['发件', cut(ml.from || '—', 16)], ['主题', cut(ml.subject || '—', 16)], ['日期', ml.date || '—']];
-    var lines = ['邮件《' + (ml.subject || doc.name) + '》读完：发件 ' + (ml.from || '—') + '，' + (ml.date || '') + '。'];
-    if (mWan) {
-      var amt = Math.round(parseFloat(mWan[1]) * 10000);
-      lines.push('正文提到 ' + mWan[1] + ' 万元付款' + (mDay ? '、' + mDay[1] + ' 月 ' + mDay[2] + ' 日前审批' : '') + '；本模块采购单草稿 ' + M.plan.summary.buy + ' 项预计 ' + fmtN(M.plan.summary.amount) + ' 元，占其中 ' + (amt ? Math.round(1000 * M.plan.summary.amount / amt) / 10 : 0) + '%。');
-      kv.push(['邮件金额', fmtN(amt) + ' 元'], ['采购单草稿', fmtN(M.plan.summary.amount) + ' 元']);
-      return { text: lines.join('\n'), blocks: [kvb(kv)], act: function () { if (M.step !== 'stock') setStep('stock'); else draw(); focusSel('.m10-po', 800); } };
-    }
-    lines.push('正文没有' + v.order + '、' + v.due + '或采购金额，排程这边不动数。');
-    return { text: lines.join('\n'), blocks: [kvb(kv), tagsb((ml.attaches || []).slice(0, 3).map(function (a) { return cut(a, 14); }))] };
-  }
-  function onDoc(doc) {
-    if (!doc || !doc.ok || !M.S) return null;
-    var txt = (doc.text || '').replace(/\s+/g, ' ');
-    if (doc.kind === 'excel') return docExcel(doc);
-    if (doc.kind === 'ppt') return docSlides(doc);
-    if (doc.kind === 'eml') return docMail(doc);
-    if (doc.kind === 'word' || doc.kind === 'pdf' || doc.kind === 'text') return docWord(doc, txt);
-    return null;
+    return false;
   }
 
   window.DGG.chatBrain('m10', {
-    opener: function (step) { return TX(opener(step)); },
-    suggest: function (step) { return suggest(step); },
-    answer: function (q, step) { return answer(q, step); },
-    onDoc: function (doc, step) { return onDoc(doc, step); }
+    kernel: window.DGG.coreM10,
+    ctx: chatCtx,
+    act: function (a, api) {
+      if (!a || !a.type || !M.S) return false;
+      if (a.type === 'goto') {
+        if (STEPS.indexOf(a.step) < 0) return false;
+        if (a.step !== M.step) setStep(a.step);
+        return true;
+      }
+      if (a.type === 'focus') return doFocus(a.ref, api);
+      if (a.type === 'open') return openPanel(a);
+      if (a.type === 'apply') return applyAct(a);
+      if (a.type === 'set') return setPath(a);
+      return false;                                         /* 不认识的动作交给通用兜底 */
+    }
   });
 
   window.DGG = window.DGG || {};

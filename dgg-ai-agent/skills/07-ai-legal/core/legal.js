@@ -98,6 +98,14 @@
     d.log.push({ seq: d.log.length + 1, kind: 'contract', label: '采纳修订', detail: c.id + ' ' + (f.fix.mode === 'insert' ? '新增' : '修订') + '「' + f.fix.title + '」，风险分 ' + rv.score + ' → ' + after.score });
     return d;
   }
+  /* 批量采纳：按入参那一刻的审查结果收集全部高风险可修订项，逐条走 applyFix，逐处写日志 */
+  function applyAllHigh(raw, lib) {
+    var d = ensure(raw);
+    reviewAll(d, lib).forEach(function (c) {
+      c.findings.filter(function (x) { return x.severity === 'high' && x.fix; }).forEach(function (x) { d = applyFix(d, c.id, x.id, lib); });
+    });
+    return d;
+  }
   function opinion(c, rv, lib) {
     var R = lib.contractRules;
     var lines = ['【合同审查意见】' + c.id + ' ' + c.title, '相对方 ' + c.party + ' · ' + R.types[c.type] + ' · ' + R.roles[c.role] + (c.amount ? ' · 金额 ' + fmtW(c.amount) : '') + ' · 期限 ' + short(c.start) + ' 至 ' + short(c.end), '风险分 ' + rv.score + '（' + { high: '高风险', mid: '中风险', low: '低风险' }[rv.level] + '）· 高 ' + rv.counts.high + ' · 中 ' + rv.counts.mid + ' · 低 ' + rv.counts.low + (rv.revised ? ' · 已采纳修订 ' + rv.revised + ' 处' : '')];
@@ -478,6 +486,7 @@
       }
       if (has(q, ['51', '49', '改成', '换成', '60', '50 / 50'])) {
         var pk = PRESETS.filter(function (p) { return q.indexOf(String(p[0])) >= 0 && q.indexOf(String(p[1])) >= 0; })[0] || [51, 49];
+        if (!S.equity) return { text: S.typeName + '不设股权，由总公司全资，' + S.typeDesc + '。' };
         var sp = d.setup.shares || [{ holder: d.company, pct: 100 }];
         var n2 = clone(sp);
         if (n2.length < 2) n2.push({ holder: '合作方', pct: 0 });
@@ -702,7 +711,7 @@
 
   return {
     VERSION: VERSION, MODULE_NAME: MODULE_NAME, CREDITS: CREDITS, SEV_LABEL: SEV_LABEL,
-    ensure: ensure, run: run, reviewContract: reviewContract, reviewAll: reviewAll, applyFix: applyFix, opinion: opinion,
+    ensure: ensure, run: run, reviewContract: reviewContract, reviewAll: reviewAll, applyFix: applyFix, applyAllHigh: applyAllHigh, opinion: opinion,
     equity: equity, setupPlan: setupPlan, updateSetup: updateSetup, confirmSetup: confirmSetup,
     ipReview: ipReview, toggleRenew: toggleRenew, toggleApply: toggleApply, licenses: licenses, register: register,
     screens: screens, brief: brief, suggest: suggest, ask: ask, ingest: ingest,

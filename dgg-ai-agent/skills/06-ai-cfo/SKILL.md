@@ -46,7 +46,7 @@ universal: dus-1
 | `screens()` | 六个环节登记 `[{key,label}]`：`connect` 接入 / `board` 财务驾驶舱 / `recon` 三表勾稽 / `risk` 风险预警 / `cash` 现金预测 / `policy` 政策与月报 |
 | `brief(step, data, lib, result)` | 进这一屏先说的一条发现，字符串或 `{text, blocks?, act?, ref?}`；未知屏返回 null |
 | `suggest(step, data, lib, result)` | 该屏的快捷问句 3–4 条，条条都能被 `ask` 答上 |
-| `ask(question, step, data, lib, result)` | 问答：`{text, blocks?, act?, ref?}`；认不出的问法返回 null，交给平台兜底，不编数 |
+| `ask(question, step, data, lib, result, sel)` | 问答：`{text, blocks?, act?, ref?}`；`sel` 是平台的选中态 `{rule, risk, week}`，可选；认不出的问法返回 null，交给平台兜底，不编数 |
 | `ingest(doc, step, data, lib, result)` | 文档摄入：`{text, blocks?, act?, data?}`；写回业务数据时 `data` 是新副本，入参不动 |
 
 `metrics(d, st)` 是上列函数共用的内部指标计算，不单独对外。前言 `inputs` 只列 `data`（一套账套）；另有一个固定注入的数据包 `lib`，即 `scripts/load-data.js` 返回的 `rules`、`riskRules`、`benchmarks`、`policies`、`samples`、`industries`、`credits`、`lintWords` 八个键，16 个动作里 `run` / `cashOptions` / `applyFix` / `applyRiskAction` / `applyCashOption` 与对话三件 `brief` / `ask` / `ingest` 共八个必须带上它（`screens` 与 `suggest` 只认屏名），生成 invoke 层时按 `$lib` 注入。对话五件的第四个参数 `result` 是 `run(data, lib)` 的结果，可选：传了就用，没传自己算一次；五件都是纯函数，不碰 DOM、window、时钟与随机数，同一组入参永远得到同一份输出。
@@ -76,7 +76,7 @@ examples/*.output.json   三套样本的驾驶舱摘要
 
 ## 对话与文档摄入
 
-`brief / suggest / ask / ingest` 与六屏一一对应，回答里的数字全部从 `run()` 的结果里取，答不上返回 null，不编数。选中态（当前勾稽条 / 风险条 / 周）不在契约里，内核按数据默认取：勾稽取异常里排在前面的一条（都在容差内则取 R01）、风险取按 概率 × 影响 排在前面的一条、周取头一个缺口周（无缺口取最低点那一周）。`cashOptions` 与第二遍 `forecast` 都走入参 `data`（未落账的原副本），不走 `result.data`，调整分录不会二次落账。
+`brief / suggest / ask / ingest` 与六屏一一对应，回答里的数字全部从 `run()` 的结果里取，答不上返回 null，不编数。选中态（当前勾稽条 / 风险条 / 周）由平台通过 `ask` 的第 6 个入参 `sel`（`{rule:'R12', risk:'K03', week:5}`，三项都可缺）传进来：点名的那条在 `run()` 的 rows 里确实存在，就按它作答、按它写回；不传或对不上才按数据默认取——勾稽取异常里排在前面的一条（都在容差内则取 R01）、风险取按 概率 × 影响 排在前面的一条、周取头一个缺口周（无缺口取最低点那一周）。屏上能点选的平台要把 `sel` 递进来，不然读到的与写回的都落在默认那一条上。`cashOptions` 与第二遍 `forecast` 都走入参 `data`（未落账的原副本），不走 `result.data`，调整分录不会二次落账。
 
 | 屏 | 认得的问法 | 回答里给的数 |
 |---|---|---|
@@ -91,10 +91,11 @@ examples/*.output.json   三套样本的驾驶舱摘要
 
 **act 在本模块的落法**（平台只实现子集也能跑，不认识的 type 静默忽略）
 
+高亮不走 act：回答对象顶层的 `ref` 就是要高亮的那一行，平台按 `data-ref` 找到它（勾稽行 `R03`、风险行 `K09`、政策行 `P03`）并加高亮，表头排序后重绘过的行退回按文本找。`{type:'focus', ref}` 作为模块侧兼容接的一种 act 保留，内核当前不产出这一类。
+
 | act | 本模块 |
 |---|---|
 | `{type:'goto', step}` | 切到那一屏；切到财务驾驶舱且本次还没扣积分时走扣分入口 |
-| `{type:'focus', ref}` | 按 `data-ref` 高亮：勾稽行（`R03`）、风险行（`K09`）、政策行（`P02`）；表头排序后重绘过的行退回按文本找 |
 | `{type:'open', panel, ref}` | `rule` 选中勾稽条并进勾稽屏、`drill` 同上并把下钻明细摆到焦点卡、`risk` 选中风险条并进风险屏、`policy` 开政策抽屉（不在政策屏先切过去）、`week` 选中第 N 周并进现金屏、`option` 点亮方案卡、`kpi` 点亮驾驶舱毛利率砖（`gm`）或现金屏缺口砖（`gap`）、`trial` 把导入的科目余额摆进勾稽屏、`doc` 开文档解析抽屉（内容在 act 的 `blocks` 里，同一套块型） |
 | `{type:'apply', action, input}` | `applyFix{rule}` 生成调整分录、`applyRiskAction{risk,key}` 风险处置、`applyCashOption{key}` 执行现金方案、`togglePolicy{id}` 进出申报清单、`ingest{doc}` 重放这次摄入取新数据副本（带 `step` 时摄入后切到那一屏）；动作名用内核导出名 |
 | `{type:'set', path, value}` | `cashScenario.loanDraw` 打开授信提款开关并按缺口周前一周提用，13 周现金预测重排 |

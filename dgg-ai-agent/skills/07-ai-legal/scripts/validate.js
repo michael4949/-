@@ -83,6 +83,18 @@ Object.keys(lib.samples).sort().forEach((k) => {
   // 采纳一处高风险修订后，合同等级不升高、KPI 待处理问题减一
   const hiC = R.contracts.filter((c) => c.findings.some((f) => f.severity === 'high'))[0];
   if (hiC) { const f = hiC.findings.filter((x) => x.severity === 'high')[0]; const R3 = core.run(core.applyFix(d, hiC.id, f.id, lib), lib); ok(R3.kpi.findingsOpen <= R.kpi.findingsOpen - 1 && R3.kpi.revised === 1, k + ' 采纳后 KPI'); ok(R3.byId[hiC.id].score === hiC.score + W.high, k + ' 采纳高风险后分数'); }
+  // 批量采纳全部高风险：与逐条 applyFix 同一结果；原数据不动；两次调用一致
+  const hiPairs = [];
+  R.contracts.forEach((c) => c.findings.filter((x) => x.severity === 'high' && x.fix).forEach((x) => hiPairs.push([c.id, x.id])));
+  const beforeAll = JSON.stringify(d);
+  let loopAll = core.ensure(d); hiPairs.forEach((pr) => { loopAll = core.applyFix(loopAll, pr[0], pr[1], lib); });
+  const all1 = core.applyAllHigh(d, lib);
+  ok(JSON.stringify(all1) === JSON.stringify(loopAll), k + ' applyAllHigh 与逐条 applyFix 结果不一致');
+  ok(JSON.stringify(d) === beforeAll && all1 !== d, k + ' applyAllHigh 改动了原数据');
+  ok(JSON.stringify(core.applyAllHigh(d, lib)) === JSON.stringify(all1), k + ' applyAllHigh 两次不一致');
+  const Rall = core.run(all1, lib);
+  ok(Rall.contracts.reduce((t, c) => t + c.review.counts.high, 0) === 0, k + ' applyAllHigh 后仍有高风险项');
+  ok(Rall.kpi.revised === hiPairs.length && Rall.kpi.highRisk === 0, k + ' applyAllHigh 后 KPI 已修订 ' + Rall.kpi.revised + ' / 高风险 ' + Rall.kpi.highRisk);
   // 3. 股权控制线
   const eq = core.equity([{ holder: 'A', pct: 70 }, { holder: 'B', pct: 30 }], lib);
   ok(eq.control === '绝对控制' && eq.lines[0].met && eq.lines[1].met && !eq.lines[2].met, '70/30');
@@ -177,6 +189,25 @@ Object.keys(lib.samples).sort().forEach((k) => {
       lintText(a.text, k + ' ask ' + st + ' · ' + q);
     });
   });
+  // 分公司不设股权：改比例这句不得给出 setup.shares，口径与「股权够控股吗」一致
+  const brD = core.updateSetup(d, { type: 'branch' });
+  const brR = core.run(brD, lib);
+  ok(!brR.setup.equity, k + ' 分公司 setup.equity 应为 null');
+  const brHold = core.ask('股权够控股吗', 'setup', brD, lib, brR);
+  ['改成 51 / 49 会怎样', '改成 60 / 40', '换成 50 / 50'].forEach((q) => {
+    const a = core.ask(q, 'setup', brD, lib, brR);
+    ok(a && a.text, k + ' 分公司改比例答不上 · ' + q);
+    ok(!(a.act && a.act.type === 'set' && a.act.path === 'setup.shares'), k + ' 分公司这句不得给 set setup.shares · ' + q);
+    ok(!a.act, k + ' 分公司这句不该带 act · ' + q);
+    ok(a.text === brHold.text, k + ' 分公司改比例与股权问答口径不一致 · ' + q);
+    ok(JSON.stringify(core.ask(q, 'setup', brD, lib)) === JSON.stringify(a), k + ' 分公司改比例不传 result 不一致 · ' + q);
+    lintText(a.text, k + ' 分公司改比例 · ' + q);
+  });
+  // 设股权的主体仍按比例重算并回写
+  if (R.setup.equity) {
+    const a51 = core.ask('改成 51 / 49 会怎样', 'setup', d, lib, R);
+    ok(a51 && a51.act && a51.act.type === 'set' && a51.act.path === 'setup.shares' && a51.act.value[0] === 51 && a51.act.value[1] === 49, k + ' 子公司改 51 / 49 应回写 setup.shares');
+  }
   // 点名类：合同号、知产编号、商标类别、证照名
   const nc = core.ask(R.contracts[0].id + ' 怎么样', 'board', d, lib, R);
   ok(nc && nc.ref === R.contracts[0].id && nc.act.type === 'open' && nc.act.panel === 'contract', k + ' 点名合同');

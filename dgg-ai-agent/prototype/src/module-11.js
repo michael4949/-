@@ -2,6 +2,8 @@
  * 接入（需求句解析 · 主数据关联）→ 生成应用（页面逐条点亮 · 手机同步渲染 · 推荐字段写回）→ 试用（三角色走单 · PC 看板联动）
  * → 测试与产物（用例逐行执行 · 权限矩阵 · 数据字典 / 接口 / 主数据关联）→ 发布（发布前检查 · 流水 · 屏内二维码）→ 迭代交付（追加需求 → 六种变更 → V1.1.0 · 交付清单 · 发微信）
  * 全部计算走 DGG.coreM11（与 skill 同一份内核）；每个动作都写回同一份数据副本；纯预制、断网可用；不用任何存储 API
+ * 对话与文档摄入也在同一份内核里（screens / brief / suggest / ask / ingest），本文件在 DGG.chatBrain('m11') 上只登记
+ * ctx（交出当前数据）与 act（把内核给的声明式动作 goto / focus / open / apply / set 落到这六屏上）
  */
 (function () {
   'use strict';
@@ -9,7 +11,6 @@
   var ACCENT = window.DGG.PALETTE.m11;
   var STEPS = ['connect', 'build', 'try', 'test', 'ship', 'iterate'];
   var TYPE_LABEL = { object: '业务对象', role: '角色', action: '动作', channel: '渠道', field: '字段', qty: '时限', time: '时限', stat: '统计', delta: '变更' };
-  var RULES = ['G-01 对象按词典正向长词优先匹配打分，并列取先出现的', 'G-02 字段来自对象库，需求句里命中的可选字段一并加入，否定词移除', 'G-03 模板由对象决定，动作序列与模板签名的公共子序列长度作证据', 'G-04 渠道固定 微信扫码 H5 · PC 后台', 'G-05 角色槽位按业态默认岗位填，句中角色词按其后的动作绑定槽位'];
   var M = { step: 'connect', arche: null, data: null, R: null, charged: false, name: null, company: null, frame: null, lastStep: null, role: null, page: null, rowId: null, formVals: null, formErr: null, timers: [], deltaText: '', drawer: null, pipeStage: null, told: null, replay: null, newKey: null, newPerm: null };
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -32,6 +33,8 @@
   function A() { return window.DGG.anim; }
   function nodes(scope, sel) { return scope ? Array.prototype.slice.call(scope.querySelectorAll(sel)) : []; }
   function trs(el, n) { var l = el ? Array.prototype.slice.call(el.querySelectorAll('tbody tr')) : []; return n ? l.slice(0, n) : l; }
+  /* 给表格行标上业务 id，内核的 {type:'focus', ref} 就能找到它 */
+  function tagRefs(tbl, rows, refOf) { trs(tbl).forEach(function (tr, i) { if (rows[i]) tr.setAttribute('data-ref', refOf(rows[i])); }); }
   function workEl() { return M.frame ? M.frame.work : null; }
   function cnt(to, o) { o = o || {}; var dec = o.dec || 0; return h('b', { class: 'm11-cnt num', 'data-to': String(to), 'data-dec': String(dec), 'data-suf': o.suf || '' }, [dec ? (0).toFixed(dec) : '0']); }
   function resetCounts(scope) { nodes(scope, '.m11-cnt').forEach(function (e) { var d = +e.getAttribute('data-dec') || 0; e.textContent = d ? (0).toFixed(d) : '0'; }); }
@@ -109,7 +112,7 @@
     draw();
   }
   function unmount() { clearTimers(); M.told = null; M.replay = null; }
-  function onCompany(c) { SAID.length = 0; M.company = c; M.name = c ? c.name : null; M.charged = false; M.lastStep = null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); if (M.step !== 'connect') setStep('connect'); else draw(); }
+  function onCompany(c) { M.company = c; M.name = c ? c.name : null; M.charged = false; M.lastStep = null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); if (M.step !== 'connect') setStep('connect'); else draw(); }
   function onIndustry(slug) { if (M.step !== 'connect' || !slug) return; var a = archeOf(slug); if (a !== M.arche) { loadArche(a); draw(); } }
   function setStep(s) { M.step = s; M.lastStep = s; sh.go('m11', s); }
   function enterBuild() { if (!M.data.state.spec) M.data = K.generate(M.data, LIB); setStep('build'); }
@@ -170,7 +173,7 @@
     if (!list.length) return [h('div', { class: 'card' }, [h('div', { class: 'sub', style: 'text-align:center;padding:20px 0' }, [o.empty || '暂无记录'])])];
     return list.map(function (r) {
       var flag = o.flags ? o.flags[r.id] : null, ov = o.overdue ? o.overdue[r.id] : null;
-      return h('div', { class: 'row' + (M.rowId === r.id ? ' on' : ''), onclick: o.onPick ? function () { o.onPick(r); } : null }, [
+      return h('div', { class: 'row' + (M.rowId === r.id ? ' on' : ''), 'data-ref': r.id, onclick: o.onPick ? function () { o.onPick(r); } : null }, [
         h('div', { class: 't' }, [h('span', {}, [rowTitle(r)]), r.createdAt >= rt().clock - 30 && r.status === K.initialState(s) ? h('span', { class: 'new' }, ['新']) : null, flag ? h('span', { class: 'flag' }, [flag]) : null]),
         h('div', { class: 's' }, [r.id + ' · ' + r.createdBy.id + ' · ' + K.fmtMin(r.createdAt) + (ov ? ' · ' + ov : '')]),
         h('div', { class: 'r' }, [statusChip(r.status), h('span', {}, [r.status === K.initialState(s) ? '已等待 ' + waited(rt().clock - r.createdAt) : (r.assignee || '')])])
@@ -313,7 +316,7 @@
     var seen = ['需求句命中 ' + pr.hits + ' 词 · 未识别 ' + pr.unknown + '（' + pr.evidence.map(function (e) { return e.surface; }).slice(0, 8).join('、') + '）', '对象库 ' + obj.name + ' ' + obj.fields.length + ' 字段 · 可选 ' + obj.optional.length, '流程模板 ' + pr.flowName + (pr.flowModeName ? '（' + pr.flowModeName + '）' : '') + ' · 签名匹配 ' + pr.lcs[0].lcs + ' 个动作'].concat(s.integrations.map(function (i) { return i.name + ' ' + i.rows + ' ' + i.unit + '（' + i.system + '）'; }));
     var ev = P.table({ compact: true, cols: [{ key: 'type', label: '类型', w: '70px', render: function (r) { return TYPE_LABEL[r.type] || r.type; } }, { key: 'surface', label: '识别词' }, { key: 'canon', label: '映射', render: function (r) { return r.canon + (r.slot ? ' · ' + r.slot : '') + (r.neg ? ' · 否定' : ''); } }], rows: pr.evidence });
     var ft = P.table({ compact: true, cols: [{ key: 'label', label: '字段' }, { key: 'type', label: '类型', render: function (r) { return LIB.components.controls[r.type].name; } }, { key: 'required', label: '必填', render: function (r) { return r.required ? '是' : ''; } }, { key: 'rule', label: '校验', render: function (r) { return r.len ? '≤ ' + r.len + ' 字' : r.min != null || r.max != null ? (r.min != null ? r.min : '') + '–' + (r.max != null ? r.max : '') : r.options ? r.options.length + ' 选 1' : r.ref ? '主数据' : r.at ? '在「' + (s.transitions.filter(function (t) { return t.actionEn === r.at; })[0] || { action: r.at }).action + '」时填' : ''; } }, { key: 'source', label: '来源' }], rows: s.fields });
-    P.drawer(M.frame.body, { title: '怎么生成的', sub: s.reqNo + ' → ' + s.specNo + ' ' + s.specVer + ' → ' + s.id, body: [P.judge({ verdict: { tone: 'ok', chip: '已生成', text: s.title + ' · ' + s.pages.length + ' 页 · ' + s.fields.length + ' 字段' }, seen: seen, reasons: RULES }), h('div', { class: 'pd-card' }, [h('div', { class: 'hd' }, [h('div', { class: 't' }, ['需求解析单 ' + s.reqNo])]), h('div', { class: 'bd tight' }, [ev])]), h('div', { class: 'pd-card' }, [h('div', { class: 'hd' }, [h('div', { class: 't' }, ['字段设计表 · 应用规格 ' + s.specNo + ' ' + s.specVer])]), h('div', { class: 'bd tight' }, [ft])])] });
+    P.drawer(M.frame.body, { title: '怎么生成的', sub: s.reqNo + ' → ' + s.specNo + ' ' + s.specVer + ' → ' + s.id, body: [P.judge({ verdict: { tone: 'ok', chip: '已生成', text: s.title + ' · ' + s.pages.length + ' 页 · ' + s.fields.length + ' 字段' }, seen: seen, reasons: K.RULES }), h('div', { class: 'pd-card' }, [h('div', { class: 'hd' }, [h('div', { class: 't' }, ['需求解析单 ' + s.reqNo])]), h('div', { class: 'bd tight' }, [ev])]), h('div', { class: 'pd-card' }, [h('div', { class: 'hd' }, [h('div', { class: 't' }, ['字段设计表 · 应用规格 ' + s.specNo + ' ' + s.specVer])]), h('div', { class: 'bd tight' }, [ft])])] });
   }
   function addRecField(f) {
     M.page = f.at ? 'detail' : 'form'; M.newKey = f.key;
@@ -395,8 +398,7 @@
     if (!M.role) M.role = 'submitter';
     var openLabel = K.stateLabel(s, K.initialState(s));
     var g = h('div', { class: 'pd-grid' });
-    var doNext = function () { var stp = M.R.script[M.R.scriptStep]; if (!stp) return; M.role = stp.actor.slot; M.formErr = null; var d = K.nextScript(M.data, LIB); var lr = d.state.lastResult; if (!lr || !lr.ok) { P.toast(M.frame.body, lr ? lr.error : '脚本已走完'); return; } M.rowId = lr.id; M.page = stp.kind === 'submit' ? 'mine' : 'detail'; commit(d, lr.msg); };
-    var nextBtn = P.btn(R.scriptStep >= R.script.length ? '脚本已走完' : '下一步 · ' + R.script[R.scriptStep].label, { cls: 'primary sm', disabled: R.scriptStep >= R.script.length, onClick: doNext });
+    var nextBtn = P.btn(R.scriptStep >= R.script.length ? '脚本已走完' : '下一步 · ' + R.script[R.scriptStep].label, { cls: 'primary sm', disabled: R.scriptStep >= R.script.length, onClick: doNextScript });
     var fb = flowBar({ src: R.script.map(function (sc, i) { return [sc.actor.title + (sc.actor.emp ? ' ' + sc.actor.emp : ''), sc.label, i < R.scriptStep ? 'done' : i === R.scriptStep ? 'on' : '']; }),
       hub: '沙箱 ' + st.clockText, out: [s.short + ' ' + st.total + ' 条', [cnt(st.open, { suf: ' ' + openLabel }), ' · ', cnt(st.overdueN, { suf: ' 超时' })]],
       btn: '刷新看板', onClick: recalc, extra: [nextBtn] });
@@ -433,6 +435,7 @@
     if (!hot.length) hot = rt().rows.filter(function (r) { return r.status === K.initialState(s); });
     var ovMap = {}; st.overdue.forEach(function (o) { ovMap[o.id] = o; });
     var tbl = P.table({ compact: true, cols: [{ key: 'id', label: '编号', w: '104px', render: function (r) { return h('b', { class: 'id' }, [r.id]); } }, { key: 'sum', label: s.short, render: function (r) { return rowTitle(r); } }, { key: 'status', label: '状态', w: '78px', render: function (r) { return statusChip(r.status); } }, { key: 'assignee', label: '处理人', w: '68px', render: function (r) { return r.assignee || '—'; } }, { key: 'w', label: '已等待', align: 'right', w: '92px', render: function (r) { return ovMap[r.id] ? h('span', { class: 'neg' }, [waited(rt().clock - r.createdAt)]) : (s.states.filter(function (x) { return x.key === r.status; })[0].terminal ? '—' : waited(rt().clock - r.createdAt)); } }], rows: hot.slice(0, 4), rowKey: function (r) { return r.id; }, activeKey: M.rowId, empty: '没有超时或紧急的' + s.short });
+    tagRefs(tbl, hot.slice(0, 4), function (r) { return r.id; });
     var hist = []; rt().rows.forEach(function (r) { r.history.forEach(function (x) { hist.push({ at: x.atMin, role: x.role, action: x.action, id: r.id, to: K.stateLabel(s, x.to) }); }); }); hist.sort(function (a, b) { return b.at - a.at; });
     var pcKpis = P.kpis([{ label: '今日' + s.verb, value: st.todayNew, unit: '单', sub: '记录 ' + st.total }, { label: openLabel, value: st.open, unit: '单', tone: st.open > 2 ? 'risk' : 'ok', sub: '处理中 ' + st.doing }, { label: '处理中', value: st.doing, unit: '单', sub: '在办' }, { label: '已完成', value: st.done, unit: '单', tone: 'ok', sub: '今日 ' + st.todayDone }, { label: '平均' + st.acceptLabel, value: st.avgAcceptMin == null ? '—' : st.avgAcceptMin, unit: '分', tone: st.slaHours && st.avgAcceptMin > st.slaHours * 60 ? 'late' : 'ok', sub: st.slaHours ? '约定 ' + st.slaHours + ' 小时' : '' }, { label: '超时', value: st.overdueN, unit: '单', tone: st.overdueN ? 'late' : 'ok', sub: '约定内 ' + (st.total - st.overdueN) }]);
     var distEl = P.dist({ rows: st.byStatus.map(function (x) { return { label: x.label, value: x.n, text: String(x.n), hi: x.key === K.initialState(s) }; }) });
@@ -489,6 +492,7 @@
     g.appendChild(kpiRow);
     var left = col('c7', []), right = col('c5', []);
     var tbl = P.table({ compact: true, cols: [{ key: 'id', label: '编号', w: '62px' }, { key: 'name', label: '用例', render: function (r) { return h('span', {}, [h('b', { class: 'kd' }, [r.kindName]), ' ' + r.name]); } }, { key: 'expect', label: '预期' }, { key: 'actual', label: '实际', w: '116px', render: function (r) { return r.actual === r.expect ? '同预期' : r.actual; } }, { key: 'pass', label: '结果', w: '80px', align: 'right', render: function (r) { return h('span', { class: 'res' }, [P.chip(r.pass ? 'ok' : 'late', r.pass ? '通过' : '失败')]); } }], rows: tr.rows });
+    tagRefs(tbl, tr.rows, function (r) { return r.id; });
     var wrap = h('div', { class: 'm11-tests' }, [h('div', { class: 'sc' }, [tbl])]);
     left.appendChild(P.card({ title: '测试报告 ' + runNo, sub: tr.passed + ' / ' + tr.total + ' 通过', extra: P.btn('再跑一遍', { cls: 'sm', onClick: rerunTests }), tight: true, body: [wrap], foot: [tr.warnings.length ? tr.warnings.map(function (w) { return w.id + ' ' + w.text; }).join('；') : '无警告'] }));
     var sugg = sg ? h('div', { class: 'm11-sugg' }, [h('div', { class: 't' }, [P.chip(sg.done ? 'ok' : 'risk', sg.done ? '已采纳' : 'AI 建议', true), sg.done ? sg.roleTitle + '已可查看' + sg.pageName : sg.text]), sg.done ? P.chip('ok', '已更新', true) : P.btn('采纳', { cls: 'primary sm', onClick: function () { adoptSuggestion(); } }), h('div', { class: 'd' }, [sg.reason])]) : null;
@@ -621,459 +625,145 @@
     rp.recipients.split(' · ').forEach(function (r) { who.appendChild(P.chip('handled', r, true)); });
     P.drawer(M.frame.body, { title: '交付报告 ' + rp.no, sub: '微信文本版', body: [h('div', { class: 'pd-field' }, [h('label', {}, ['收件人']), who]), h('div', { class: 'pd-pre', style: 'margin-top:10px' }, [rp.text])] });
   }
-  /* ================= 对话大脑 ================= */
-  function cut(x, n) { x = String(x == null ? '' : x); return x.length > n ? x.slice(0, n) + '…' : x; }
-  function has(q, list) { for (var i = 0; i < list.length; i++) if (q.indexOf(list[i]) >= 0) return true; return false; }
-  function mini(head, rows) {
-    var t = h('table', { class: 'mini' }), tr = h('tr');
-    head.forEach(function (x) { tr.appendChild(h('th', {}, [String(x)])); });
-    t.appendChild(tr);
-    rows.slice(0, 6).forEach(function (r) { var q = h('tr'); r.forEach(function (x) { q.appendChild(h('td', {}, [String(x)])); }); t.appendChild(q); });
-    return t;
-  }
-  function kvb(pairs) { var g = h('div', { class: 'kv' }); pairs.forEach(function (p) { g.appendChild(h('span', { class: 'k' }, [String(p[0])])); g.appendChild(h('span', { class: 'v' }, [String(p[1])])); }); return g; }
-  function tagsb(list) { return h('div', { class: 'tags' }, list.filter(Boolean).map(function (x) { return h('span', {}, [String(x)]); })); }
+  /* ================= 对话坞 · 取上下文 + 落地动作 =================
+     问答与文档摄入全在内核（DGG.coreM11 的 screens / brief / suggest / ask / ingest），
+     本文件只做两件事：ctx() 把当前数据交出去，act() 把内核给的声明式动作落到这六屏上。 */
   function rowOf(scope, txt) { var list = scope ? scope.querySelectorAll('.pd-table tbody tr') : [], i; for (i = 0; i < list.length; i++) if (list[i].textContent.indexOf(txt) >= 0) return list[i]; return null; }
+  function refEl(ref) { var w = workEl(), s = String(ref == null ? '' : ref); if (!w || !s) return null; return w.querySelector('[data-ref="' + s + '"]') || rowOf(w, s); }
   function focusSel(sel, ms) { later(function () { var w = workEl(), el = w && w.querySelector(sel); if (el) A().pulse(el, { ms: 2200, scroll: true }); }, ms || 180); }
-  function refocus(txt, ms) { later(function () { var el = rowOf(workEl(), txt); if (el) A().pulse(el, { ms: 2200, scroll: true }); }, ms || 180); }
+  function refocus(ref, ms) { later(function () { var el = refEl(ref); if (el) A().pulse(el, { ms: 2200, scroll: true }); }, ms || 180); }
   function goStep(step, after, ms) { if (M.step !== step) setStep(step); if (after) later(after, ms || 520); }
   function openRow(id) { var rows = rt() ? rt().rows : []; var hit = null; rows.forEach(function (r) { if (id === r.id) hit = r; }); return hit; }
-  function waitOf(r) { return waited(rt().clock - r.createdAt); }
-
-  function brainOpener(step) {
-    var R = M.R;
-    if (!R) return null;
-    if (!R.spec || step === 'connect') {
-      var p = R.parsed, v = R.preview || R.kpi;
-      return '这句话命中 ' + p.hits + ' 词、未识别 ' + p.unknown + '，落下来是 ' + p.objectName + ' ' + v.pages + ' 页 ' + v.fields + ' 字段 ' + v.roles + ' 角色 ' + v.states + ' 节点。';
-    }
-    var s = R.spec, k = R.kpi;
-    if (step === 'build') {
-      var ph = R.pages.filter(function (p) { return p.device === 'phone'; }).length;
-      return s.id + ' ' + s.version + '：' + k.pages + ' 页里手机 ' + ph + ' 页、PC ' + (k.pages - ph) + ' 页，' + k.fields + ' 字段必填 ' + s.fields.filter(function (f) { return f.required; }).length + ' 个。';
-    }
-    if (step === 'try') {
-      var st = R.stats, ov = st.overdue[0], row = ov ? openRow(ov.id) : null;
-      if (ov) return ov.id + ' 已等 ' + (row ? waitOf(row) : '—') + '，' + ov.text + '，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。';
-      return '今日' + s.verb + ' ' + st.todayNew + ' 单，' + K.stateLabel(s, K.initialState(s)) + ' ' + st.open + ' 单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '。';
-    }
-    if (step === 'test') {
-      var tr = R.testResult, sg = R.suggestion;
-      return tr.passed + ' / ' + tr.total + ' 条用例通过、越权拦截 ' + tr.roleBlocked + ' 次' + (sg && !sg.done ? '；' + sg.roleTitle + '默认看不到' + sg.pageName + '。' : '。');
-    }
-    if (step === 'ship') {
-      var ck = R.checklist;
-      return '发布前检查 ' + ck.passed + ' / ' + ck.total + '，' + s.version + (R.env === 'live' ? ' 已上线，冒烟通过。' : ' 还在测试环境，可发正式。');
-    }
-    if (step === 'iterate') {
-      var last = R.changes[R.changes.length - 1];
-      if (last) return last.from + ' → ' + last.to + '：' + last.items.length + ' 项变更，旧用例 ' + last.oldPassed + ' / ' + last.oldTests + ' 仍通过，存量 ' + last.stock.rows + ' 条不动。';
-      var fu = R.followUps.slice().sort(function (a, b) { return (b.pages + b.fields + b.states + b.tests) - (a.pages + a.fields + a.states + a.tests); })[0];
-      if (fu) return '追加需求 ' + R.followUps.length + ' 条，改动大的一条「' + cut(fu.text, 14) + '」+' + fu.pages + ' 页 ' + fu.fields + ' 字段 ' + fu.tests + ' 用例。';
-    }
-    return null;
+  function doNextScript() {
+    if (!M.data.state.spec) return false;
+    var stp = M.R.script[M.R.scriptStep]; if (!stp) return false;
+    M.role = stp.actor.slot; M.formErr = null;
+    var d = K.nextScript(M.data, LIB), lr = d.state.lastResult;
+    if (!lr || !lr.ok) { if (M.frame) P.toast(M.frame.body, lr ? lr.error : '脚本已走完'); return false; }
+    M.rowId = lr.id; M.page = stp.kind === 'submit' ? 'mine' : 'detail';
+    M.data = d; recompute();
+    if (M.step !== 'try') setStep('try'); else draw();
+    if (M.frame) P.toast(M.frame.body, lr.msg);
+    return true;
   }
-
-  function brainSuggest(step) {
-    var R = M.R;
-    if (!R) return null;
-    if (!R.spec || step === 'connect') return ['哪些词命中了', '主数据从哪来', '能生成几页', '生成应用'];
-    var s = R.spec;
-    if (step === 'build') return ['手机上有哪几页', '哪些字段必填', R.recommended[0] ? '加一个' + R.recommended[0].label : '流程几个节点', '怎么生成的'];
-    if (step === 'try') return ['哪一单超时了', K.stateLabel(s, K.initialState(s)) + '还有几单', '平均' + R.stats.acceptLabel + '多久', '走下一步'];
-    if (step === 'test') return ['有没有失败的用例', '越权拦截了什么', R.suggestion && !R.suggestion.done ? '采纳这条建议' : '接口有几个', '数据字典多少列'];
-    if (step === 'ship') return ['发布前检查过了吗', '二维码扫出来是什么', '发到正式环境'];
-    if (step === 'iterate') return [K.bump(s.version, 'minor') + ' 会多什么', '存量数据怎么办', '生成 ' + K.bump(s.version, 'minor'), '交付清单有哪些'];
-    return null;
+  /* {type:'focus', ref} 上的业务 id：记录编号 → 试用屏那一行，用例编号 → 测试屏那一行 */
+  function focusRef(ref) {
+    var id = String(ref == null ? '' : ref);
+    if (!id) return false;
+    if (/^TC-\d/.test(id)) { if (M.step !== 'test') { setStep('test'); refocus(id, 620); } else refocus(id); return true; }
+    if (openRow(id)) {
+      M.rowId = id;
+      if (M.step !== 'try') { M.role = 'lead'; M.page = 'board'; setStep('try'); refocus(id, 620); } else refocus(id);
+      return true;
+    }
+    var el = refEl(id); if (!el) return false;
+    A().pulse(el, { ms: 2200, scroll: true });
+    return true;
   }
-
-  function brainAnswer(q, step) {
-    var R = M.R, w = workEl();
-    if (!R) return null;
-    q = String(q || '');
-    var s = R.spec;
-
-    if (has(q, ['命中', '哪些词', '识别', '没认出', '未识别', '解析', '哪几个词'])) {
-      var p0 = R.parsed;
-      return { text: '命中 ' + p0.hits + ' 词、未识别 ' + p0.unknown + '。' + p0.evidence.slice(0, 4).map(function (e) { return e.surface + ' → ' + e.canon; }).join('；') + '。',
-        blocks: [mini(['识别词', '映射', '类型'], p0.evidence.slice(0, 6).map(function (e) { return [e.surface, e.canon, TYPE_LABEL[e.type] || e.type]; }))],
-        act: function () { goStep('connect', function () { focusSel('.m11-chips', 0); }); } };
-    }
-    if (has(q, ['主数据', '数据源', '来源', '哪来', '同步', '台账', '名册', '接入', '通了', '连上'])) {
-      var keys = Object.keys(R.refs).slice(0, 3);
-      return { text: keys.map(function (x) { var r = R.refs[x]; return r.name + ' ' + fmtN(r.count) + ' ' + r.unit + '（' + r.system + ' · ' + (r.mode === 'direct' ? '系统直连' : '表格导入') + '，同步 ' + r.syncAt + '）'; }).join('\n'),
-        blocks: [mini(['主数据', '条数', '方式'], keys.map(function (x) { var r = R.refs[x]; return [r.name, fmtN(r.count) + ' ' + r.unit, r.mode === 'direct' ? '直连' : '导入']; }))],
-        act: function () { goStep('connect', function () { focusSel('.src-row', 0); }); } };
-    }
-    if (!s) {
-      if (has(q, ['几页', '多少页', '能生成', '多大'])) {
-        var v0 = R.preview;
-        return { text: R.parsed.objectName + ' ' + v0.pages + ' 页 · ' + v0.fields + ' 字段 · ' + v0.roles + ' 角色 · ' + v0.states + ' 节点，接口 ' + v0.apis + ' 个、用例 ' + v0.tests + ' 条。',
-          act: function () { goStep('connect', function () { focusSel('.m11-flow .out', 0); }); } };
-      }
-      if (has(q, ['生成应用', '开始生成', '直接生成', '做出来'])) {
-        return { text: '按这句话生成 ' + R.parsed.objectName + '，' + R.preview.pages + ' 页 ' + R.preview.fields + ' 字段，一次 ' + K.CREDITS + ' 积分。', act: function () { enterBuild(); } };
-      }
-      return null;
-    }
-
-    var k = R.kpi, st = R.stats, tr = R.testResult;
-
-    /* —— 点名某一条记录 / 用例 / 接口 —— */
-    var idHit = null;
-    (rt() ? rt().rows : []).forEach(function (r) { if (q.indexOf(r.id) >= 0 || (r.id.length > 4 && q.indexOf(r.id.slice(-3)) >= 0)) idHit = r; });
-    if (idHit) {
-      var ovx = st.overdue.filter(function (o) { return o.id === idHit.id; })[0];
-      return { text: idHit.id + ' ' + rowTitle(idHit) + '\n' + K.stateLabel(s, idHit.status) + ' · ' + (idHit.assignee ? '处理人 ' + idHit.assignee : '未接单') + ' · ' + K.fmtMin(idHit.createdAt) + ' 提交，已等 ' + waitOf(idHit) + (ovx ? '（' + ovx.text + '）' : '') + '。',
-        blocks: [mini(['动作', '角色', '时刻'], idHit.history.slice(0, 5).map(function (x) { return [x.action, x.role, K.fmtMin(x.atMin)]; }))],
-        act: function () { M.rowId = idHit.id; if (M.step !== 'try') { M.role = 'lead'; M.page = 'board'; setStep('try'); } later(function () { refocus(idHit.id, 0); }, 620); } };
-    }
-    var mTc = /TC[-\s]?(\d{1,2})/i.exec(q);
-    if (mTc) {
-      var t1 = tr.rows.filter(function (x) { return x.id === 'TC-' + ('0' + mTc[1]).slice(-2); })[0];
-      if (t1) return { text: t1.id + ' ' + t1.kindName + '：' + t1.name + '\n预期 ' + t1.expect + '\n实际 ' + t1.actual + '\n' + (t1.pass ? '通过' : '失败') + '。', act: function () { goStep('test', function () { refocus(t1.id, 0); }); } };
-    }
-    var mApi = /API[-\s]?(\d{1,2})/i.exec(q);
-    if (mApi) {
-      var a1 = R.apis.filter(function (x) { return x.id === 'API-' + ('0' + mApi[1]).slice(-2); })[0];
-      if (a1) return { text: a1.id + ' ' + a1.name + '：' + a1.method + ' ' + a1.path + '，需要角色 ' + a1.roles.join(' / ') + '。', act: function () { goStep('test', function () { apiDrawer(); }); } };
-    }
-
-    /* —— 页面 / 字段 / 角色 / 流程 —— */
-    if (has(q, ['哪几页', '几页', '页面', '手机上', 'PC 上', '有哪些页'])) {
-      var ph = R.pages.filter(function (p) { return p.device === 'phone'; });
-      return { text: k.pages + ' 页：手机 ' + ph.length + ' 页（' + ph.map(function (p) { return p.name; }).join(' / ') + '），PC ' + (k.pages - ph.length) + ' 页（' + R.pages.filter(function (p) { return p.device === 'pc'; }).map(function (p) { return p.name; }).join(' / ') + '）。',
-        blocks: [mini(['页面', '端', '角色'], R.pages.map(function (p) { return [p.name, p.deviceName, p.roles.join('/')]; }))],
-        act: function () { goStep('build', function () { focusSel('.m11-pages', 0); }); } };
-    }
-    if (has(q, ['必填', '字段', '表单填什么'])) {
-      var req = s.fields.filter(function (f) { return f.required; });
-      return { text: k.fields + ' 个字段里必填 ' + req.length + ' 个：' + req.map(function (f) { return f.label; }).join('、') + '。\n非必填 ' + (k.fields - req.length) + ' 个，全部写进数据字典与用例。',
-        blocks: [tagsb(req.map(function (f) { return f.label; }))],
-        act: function () { M.page = 'form'; goStep('build', function () { focusSel('.m11-phone', 0); }); } };
-    }
-    var recHit = null;
-    R.recommended.forEach(function (f) { if (q.indexOf(f.label) >= 0 || q.indexOf(f.label.replace(/（.*/, '')) >= 0) recHit = f; });
-    if (recHit && has(q, ['加', '添', '要', '补'])) {
-      return { text: '把「' + recHit.label + '」加进表单、数据字典与用例，规格升一版；存量记录这一格置空。',
-        act: function () { if (M.step !== 'build') setStep('build'); addRecField(recHit); later(function () { focusSel('.m11-phone .fld.new', 0); }, 700); } };
-    }
-    if (has(q, ['角色', '谁能', '谁看', '权限', '矩阵', '看不到', '越权'])) {
-      var pm = R.perms, sg0 = R.suggestion;
-      if (has(q, ['越权', '拦截'])) {
-        var rb = tr.rows.filter(function (x) { return x.kind === 'role'; });
-        return { text: '越权拦截 ' + tr.roleBlocked + ' 次：' + rb.map(function (x) { return x.name; }).join('；') + '，一律拒绝。',
-          blocks: [mini(['用例', '实际'], rb.map(function (x) { return [x.name, x.actual]; }))],
-          act: function () { goStep('test', function () { refocus(rb[0] ? rb[0].id : 'TC-', 0); }); } };
-      }
-      return { text: pm.rows.map(function (r) { return r.title + '（' + r.scope + '）可进 ' + pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length + ' 页'; }).join('；') + '。' + (sg0 && !sg0.done ? '\n' + sg0.text + '：' + sg0.reason + '。' : ''),
-        blocks: [mini(['角色', '数据范围', '页数'], pm.rows.map(function (r) { return [r.title, r.scope, String(pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length)]; }))],
-        act: function () { goStep('test', function () { focusSel('.m11-matrix', 0); }); } };
-    }
-    if (has(q, ['采纳', '开放', '建议'])) {
-      var sg = R.suggestion;
-      if (!sg) return { text: '权限矩阵上没有待处理的建议。' };
-      if (sg.done) return { text: sg.roleTitle + '已可查看' + sg.pageName + '，接口需要角色与用例同步更新。', act: function () { goStep('test', function () { focusSel('.m11-sugg', 0); }); } };
-      return { text: '给' + sg.roleTitle + '开放' + sg.pageName + '的' + sg.op + '：' + sg.reason + '。\n开放后接口需要角色、手机页签与用例一起更新。',
-        act: function () { if (M.step !== 'test') setStep('test'); adoptSuggestion(); later(function () { focusSel('.m11-sugg', 0); }, 700); } };
-    }
-    if (has(q, ['流程', '节点', '几步', '状态'])) {
-      return { text: s.states.map(function (x) { return x.label; }).join(' → ') + '，' + s.transitions.length + ' 条流转。\n' + s.transitions.map(function (t) { return K.roleTitle(s, t.by[0]) + ' ' + t.action + (t.sla ? '（约定 ' + t.sla + ' 小时）' : ''); }).join('；') + '。',
-        act: function () { goStep('build', function () { focusSel('.pd-steps', 0); }); } };
-    }
-
-    /* —— 试用与看板 —— */
-    if (has(q, ['超时', '等了', '最久', '拖了'])) {
-      if (!st.overdue.length) return { text: '没有超时单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，约定 ' + (st.slaHours || '—') + ' 小时。' };
-      var o0 = st.overdue[0], r0 = openRow(o0.id);
-      return { text: '超时 ' + st.overdueN + ' 单。' + o0.id + ' 已等 ' + (r0 ? waitOf(r0) : '—') + '，' + o0.text + '，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。',
-        blocks: [mini(['编号', '状态', '已等'], st.overdue.map(function (o) { var r = openRow(o.id); return [o.id, r ? K.stateLabel(s, r.status) : '—', r ? waitOf(r) : '—']; }))],
-        act: function () { M.rowId = o0.id; if (M.step !== 'try') { M.role = 'lead'; M.page = 'board'; setStep('try'); } later(function () { refocus(o0.id, 0); }, 620); } };
-    }
-    if (has(q, ['几单', '多少单', '看板', '统计', '分布', '今日', '今天'])) {
-      return { text: '今日' + s.verb + ' ' + st.todayNew + ' 单，记录 ' + st.total + ' 条：' + st.byStatus.map(function (x) { return x.label + ' ' + x.n; }).join('、') + '；平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，超时 ' + st.overdueN + ' 单。',
-        blocks: [mini(['状态', '单数'], st.byStatus.map(function (x) { return [x.label, String(x.n)]; }))],
-        act: function () { goStep('try', function () { focusSel('.pd-dist', 0); }); } };
-    }
-    if (has(q, ['平均', '多久', '时效'])) {
-      return { text: '平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，约定 ' + (st.slaHours || '—') + ' 小时；按处理人看 ' + st.byAssignee.map(function (x) { return x.id + ' ' + x.n + ' 单'; }).join('、') + '。',
-        blocks: [mini(['处理人', '单数', '完成'], st.byAssignee.map(function (x) { return [x.id, String(x.n), String(x.done)]; }))],
-        act: function () { goStep('try', function () { focusSel('.m11-pc .pd-kpis', 0); }); } };
-    }
-    if (has(q, ['下一步', '走一步', '跑一单', '演一遍'])) {
-      if (R.scriptStep >= R.script.length) return { text: '走单脚本已走完 ' + R.script.length + ' 步，' + (R.scriptId || '') + ' 已到 ' + K.stateLabel(s, (openRow(R.scriptId) || { status: s.states[s.states.length - 1].key }).status) + '。' };
-      var nx = R.script[R.scriptStep];
-      return { text: '下一步：' + nx.actor.title + (nx.actor.emp ? ' ' + nx.actor.emp : '') + ' ' + nx.label + '，沙箱时钟走 ' + K.STEP_MIN + ' 分。',
-        act: function () { if (M.step !== 'try') { setStep('try'); later(function () { var b = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b) b.click(); }, 620); } else { var b2 = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b2) b2.click(); } } };
-    }
-
-    /* —— 用例 / 产物 —— */
-    if (has(q, ['用例', '测试', '通过', '失败', '跑一遍'])) {
-      var bad = tr.rows.filter(function (x) { return !x.pass; });
-      return { text: tr.total + ' 条用例，通过 ' + tr.passed + '、失败 ' + tr.failed + '（通过率 ' + tr.passRate + '%），越权拦截 ' + tr.roleBlocked + ' 次。'
-        + (bad.length ? '\n失败：' + bad.map(function (x) { return x.id + ' ' + x.name; }).join('；') + '。' : '\n没有失败用例。')
-        + (tr.warnings.length ? '\n警告 ' + tr.warnings.map(function (x) { return x.id + ' ' + x.text; }).join('；') + '。' : ''),
-        blocks: [mini(['分组', '条数', '通过'], tr.byKind.map(function (b) { return [b.kindName, String(b.n), String(b.passed)]; }))],
-        act: function () { goStep('test', function () { focusSel('.m11-tests', 0); }); } };
-    }
-    if (has(q, ['数据字典', '几列', '表结构', '索引', '数据表'])) {
-      var sc = R.schema;
-      return { text: sc.table + ' 一张表 ' + sc.columns.length + ' 列、' + sc.indexes.length + ' 个索引，来源逐列标注。',
-        act: function () { goStep('test', function () { dictDrawer(); }); } };
-    }
-    if (has(q, ['接口', 'API', 'api', '几个接口'])) {
-      return { text: R.apis.length + ' 个接口：' + R.apis.filter(function (a) { return a.method === 'POST'; }).length + ' 写、' + R.apis.filter(function (a) { return a.method === 'GET'; }).length + ' 读，每个都标了需要角色。',
-        blocks: [mini(['编号', '方法', '接口'], R.apis.slice(0, 6).map(function (a) { return [a.id, a.method, a.name]; }))],
-        act: function () { goStep('test', function () { apiDrawer(); }); } };
-    }
-
-    /* —— 发布 —— */
-    if (has(q, ['二维码', '扫码', '扫出来', '链接'])) {
-      return { text: '二维码内容 ' + R.qrText + '，' + s.channels.map(function (c) { return c.name; }).join(' · ') + '，当前' + (R.env === 'live' ? '正式环境' : '测试环境') + '。',
-        act: function () { goStep('ship', function () { focusSel('.m11-phone .entry', 0); }); } };
-    }
-    if (has(q, ['发布', '上线', '检查', '正式环境', '冒烟'])) {
-      var ck = R.checklist;
-      if (has(q, ['发到', '发布到', '上线吧', '发正式'])) {
-        if (R.env === 'live') return { text: s.version + ' 已在正式环境，冒烟 ' + (R.releases[R.releases.length - 1].smoke || '—') + '。' };
-        if (!ck.all) return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '，未过：' + ck.items.filter(function (i) { return !i.ok; }).map(function (i) { return i.label; }).join('、') + '，先补齐再发。' };
-        return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + ' 全通过，走构建 → 测试环境 → 冒烟 → 正式环境 → 已上线。',
-          act: function () { if (M.step !== 'ship') { setStep('ship'); later(function () { var b = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b && !b.disabled) b.click(); }, 620); } else { var b3 = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b3 && !b3.disabled) b3.click(); } } };
-      }
-      return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '：' + ck.items.map(function (i) { return (i.ok ? '✓ ' : '✗ ') + i.label + ' ' + i.detail; }).join('；') + '。',
-        blocks: [mini(['检查项', '结果'], ck.items.map(function (i) { return [i.label, i.ok ? '通过' : '未过']; }))],
-        act: function () { goStep('ship', function () { focusSel('.m11-checks', 0); }); } };
-    }
-
-    /* —— 迭代交付 —— */
-    if (has(q, ['存量', '旧数据', '老数据', '历史数据'])) {
-      var lastC = R.changes[R.changes.length - 1];
-      if (!lastC) return { text: '还没生成新版本。追加变更后存量记录不动，新字段置空，已完结的可补填。' };
-      return { text: '存量 ' + lastC.stock.rows + ' 条不动，新字段置空；' + (lastC.stock.newFields.length ? lastC.stock.fillable + ' 条' + lastC.stock.terminalLabel + '的可补 ' + lastC.stock.newFields.join(' / ') : '本次无新字段') + '；旧用例 ' + lastC.oldPassed + ' / ' + lastC.oldTests + ' 仍通过。',
-        act: function () { goStep('iterate', function () { focusSel('.pd-kv', 0); }); } };
-    }
-    if (has(q, ['交付', '清单', '产物', '报告', '发微信', '收件'])) {
-      return { text: R.deliverables.length + ' 项产物：' + R.deliverables.map(function (x) { return x.name + ' ' + x.no + '（' + x.count + '）'; }).join('；') + '。收件 ' + R.report.recipients + '。',
-        blocks: [mini(['产物', '编号', '数量'], R.deliverables.map(function (x) { return [x.name, x.no, x.count]; }))],
-        act: function () { goStep('iterate', function () { reportDrawer(); }); } };
-    }
-    var nextV = K.bump(s.version, 'minor');
-    if (has(q, ['追加', '迭代', '新版本', '变更', nextV, '会多什么', '生成 '])) {
-      var lastD = R.changes[R.changes.length - 1];
-      if (has(q, ['生成', '做出来', '就按'])) {
-        var pick = null;
-        R.followUps.forEach(function (f) { if (q.indexOf(cut(f.text, 6).replace('…', '')) >= 0) pick = f; });
-        if (!pick) pick = R.followUps.filter(function (f) { return !f.applied; })[0];
-        if (!pick) return { text: '追加需求都已生成，当前 ' + s.version + '。' };
-        return { text: '按「' + pick.text + '」生成 ' + nextV + '：+' + pick.pages + ' 页 +' + pick.fields + ' 字段 +' + pick.states + ' 节点 +' + pick.tests + ' 用例，存量数据不动。',
-          act: function () { if (M.step !== 'iterate') setStep('iterate'); genDelta(pick.text); later(function () { focusSel('.pd-option.on', 0); }, 800); } };
-      }
-      if (lastD) return { text: lastD.from + ' → ' + lastD.to + '：' + lastD.items.map(function (i) { return i.content; }).join('；') + '。用例 ' + lastD.passed + ' / ' + lastD.tests + ' 通过。',
-        blocks: [mini(['类型', '内容', '用例'], lastD.items.map(function (i) { return [i.typeName, cut(String(i.content).replace(i.typeName + ' ', ''), 12), '+' + i.tests]; }))],
-        act: function () { goStep('iterate', function () { focusSel('.pd-table', 0); }); } };
-      return { text: R.followUps.length + ' 条追加需求：' + R.followUps.map(function (f) { return '「' + cut(f.text, 12) + '」+' + f.tests + ' 用例'; }).join('；') + '；只认 ' + LIB.deltas.types.length + ' 种变更，存量数据不动。',
-        blocks: [mini(['追加需求', '页', '字段', '用例'], R.followUps.map(function (f) { return [cut(f.text, 10), '+' + f.pages, '+' + f.fields, '+' + f.tests]; }))],
-        act: function () { goStep('iterate', function () { focusSel('.m11-follow', 0); }); } };
-    }
-
-    /* —— 为什么 / 怎么办 —— */
-    if (has(q, ['怎么生成', '为什么这么', '凭什么', '依据', '怎么判断'])) {
-      return { text: '按五条规则落的：' + RULES.slice(0, 3).map(function (x) { return x; }).join('；') + '。',
-        act: function () { goStep('build', function () { judgeDrawer(); }); } };
-    }
-    if (has(q, ['为什么'])) {
-      if (st.overdue.length) { var oW = st.overdue[0], rW = openRow(oW.id); return { text: oW.id + ' ' + oW.text + '：' + K.stateLabel(s, rW ? rW.status : '') + '，' + K.fmtMin(rW ? rW.createdAt : 0) + ' 提交到现在没人接，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。', act: function () { if (M.step !== 'try') { M.role = 'lead'; M.page = 'board'; setStep('try'); } later(function () { refocus(oW.id, 0); }, 620); } }; }
-      return { text: s.title + ' 按' + s.flow.name + '模板落的，' + s.states.map(function (x) { return x.label; }).join(' → ') + '；' + tr.passed + ' / ' + tr.total + ' 条用例通过。', act: function () { goStep('build', function () { judgeDrawer(); }); } };
-    }
-    if (has(q, ['怎么办', '下一步做什么', '接下来', '先做什么'])) {
-      var sgN = R.suggestion;
-      if (sgN && !sgN.done) return { text: '先采纳权限建议：给' + sgN.roleTitle + '开放' + sgN.pageName + '的' + sgN.op + '，再发正式环境。', act: function () { if (M.step !== 'test') setStep('test'); adoptSuggestion(); } };
-      if (R.env !== 'live' && R.checklist.all) return { text: '发布前检查 ' + R.checklist.passed + ' / ' + R.checklist.total + ' 全通过，可以发正式环境了。', act: function () { setStep('ship'); } };
-      if (R.followUps.filter(function (f) { return !f.applied; }).length) return { text: '线上稳住了，下一步挑一条追加需求生成 ' + nextV + '。', act: function () { setStep('iterate'); } };
-      return { text: '产物 ' + R.deliverables.length + ' 项都已生成，把交付报告发出去。', act: function () { goStep('iterate', function () { reportDrawer(); }); } };
-    }
-    return null;
-  }
-
-  /* ---------- 上传文档：读出来的东西真写回页面 ---------- */
-  function ctrlOf(nm) {
-    nm = String(nm || ''); var t = 'text';
-    if (/金额|余额|价|费|款|借方|贷方|收入/.test(nm)) t = 'money';
-    else if (/日期|时间/.test(nm)) t = 'datetime';
-    else if (/数量|个数|条数|次数|天数|工时|比例|率/.test(nm)) t = 'number';
-    else if (/说明|描述|备注|原因|内容|摘要/.test(nm)) t = 'textarea';
-    else if (/状态|类型|级别|等级|分类|科目名称/.test(nm)) t = 'select';
-    else if (/编码|编号|单号|代码/.test(nm)) t = 'text';
-    var c = LIB.components.controls[t];
-    return (c && c.name) || t;
-  }
-  function docClauses(txt) {
-    txt = String(txt || ''); var out = [], m;
-    m = txt.match(/(?:金额|价款|合计|总价|付款)[^0-9]{0,8}([\d,]+(?:\.\d+)?)\s*元/) || txt.match(/人民币\s*([\d,]+(?:\.\d+)?)\s*元/) || txt.match(/([\d,]+(?:\.\d+)?)\s*万元/);
-    if (m) out.push(['金额', m[1] + (m[0].indexOf('万元') >= 0 ? ' 万元' : ' 元') + '（预计）']);
-    m = txt.match(/(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/) || txt.match(/(20\d{2})-(\d{1,2})-(\d{1,2})/);
-    if (m) out.push(['日期', m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2)]);
-    m = txt.match(/(?:质保|保修|服务|账)期?\s*(\d{1,3})\s*(个月|年|天)/);
-    if (m) out.push(['时限', m[1] + ' ' + m[2]]);
-    m = txt.match(/万分之\s*([\d.]+|[零一二三四五六七八九十]{1,3})/);
-    if (m) out.push(['违约', '逾期 日万分之' + m[1]]);
-    m = txt.match(/(\d{1,3})\s*(?:小时|工作日|天)内/);
-    if (m) out.push(['时效', m[0]]);
-    m = txt.match(/(\d{1,3}(?:\.\d+)?)\s*%/);
-    if (m) out.push(['比例', m[1] + '%']);
+  function docBody(list) {
+    var out = [];
+    (list || []).forEach(function (b) {
+      if (b && b.type === 'text') { out.push(h('div', { class: 'pd-pre', style: 'max-height:320px;overflow:auto' }, [String(b.text == null ? '' : b.text)])); return; }
+      var n = window.DGG.chat.block(b);
+      if (n) out.push(n);
+    });
     return out;
   }
-  /* 算不算认到：触发这条变更的那个词至少要两个汉字，单字「按」「的」不作数；同样硬的再比命中词多、未识别少 */
-  function cjkLen(x) { var m = String(x == null ? '' : x).match(/[\u4e00-\u9fa5]/g); return m ? m.length : 0; }
-  function opEvidence(op, ev) {
-    var t = op.type;
-    return (ev || []).filter(function (e) {
-      if (e.neg) return false;
-      if (e.type === 'delta' && e.key === t) return true;
-      if (t === 'addField') return e.type === 'field' && !!op.field && e.key === op.field.key;
-      if (t === 'addState') return e.type === 'action' && (e.key === 'rate' || e.key === 'reject' || e.key === 'recheck');
-      if (t === 'addStat') return e.type === 'stat' || (e.type === 'action' && e.key === 'stat');
-      if (t === 'addRule') return e.type === 'action' && e.key === 'remind';
-      if (t === 'addRole') return e.type === 'role';
-      return false;
-    });
+  function openPanel(a) {
+    var p = a.panel;
+    if (p === 'parse') { goStep('connect', function () { focusSel('.m11-chips', 0); }); return true; }
+    if (p === 'source') { goStep('connect', function () { focusSel('.src-row', 0); }); return true; }
+    if (p === 'preview') { goStep('connect', function () { focusSel('.m11-flow .out', 0); }); return true; }
+    if (p === 'pages') { goStep('build', function () { focusSel('.m11-pages', 0); }); return true; }
+    if (p === 'page') { if (a.ref) M.page = String(a.ref); goStep('build', function () { focusSel('.m11-phone', 0); }); return true; }
+    if (p === 'judge') { goStep('build', judgeDrawer); return true; }
+    if (p === 'board') { goStep('try', function () { focusSel('.pd-dist', 0); }); return true; }
+    if (p === 'perf') { goStep('try', function () { focusSel('.m11-pc .pd-kpis', 0); }); return true; }
+    if (p === 'matrix') { goStep('test', function () { focusSel('.m11-matrix', 0); }); return true; }
+    if (p === 'sugg') { goStep('test', function () { focusSel('.m11-sugg', 0); }); return true; }
+    if (p === 'tests') { goStep('test', function () { focusSel('.m11-tests', 0); }); return true; }
+    if (p === 'dict') { goStep('test', dictDrawer); return true; }
+    if (p === 'api') { goStep('test', apiDrawer); return true; }
+    if (p === 'entry') { goStep('ship', function () { focusSel('.m11-phone .entry', 0); }); return true; }
+    if (p === 'checks') { goStep('ship', function () { focusSel('.m11-checks', 0); }); return true; }
+    if (p === 'stock') { goStep('iterate', function () { focusSel('.pd-kv', 0); }); return true; }
+    if (p === 'follow') { goStep('iterate', function () { focusSel('.m11-follow', 0); }); return true; }
+    if (p === 'change') { goStep('iterate', function () { focusSel('.pd-table', 0); }); return true; }
+    if (p === 'report') { goStep('iterate', reportDrawer); return true; }
+    if (p === 'doc') { P.drawer(M.frame.body, { title: a.title || String(a.ref || '文档'), sub: a.sub, body: docBody(a.blocks) }); return true; }
+    return false;
   }
-  function deltaStrength(dl) {
-    var n = 0;
-    if (!dl || !dl.effective || !dl.effective.length) return 0;
-    dl.effective.forEach(function (op) { opEvidence(op, dl.evidence).forEach(function (e) { if (cjkLen(e.surface) >= 2) n++; }); });
-    return n;
+  function applyAction(a) {
+    var input = a.input || {}, R = M.R;
+    if (a.action === 'generate') { if (M.data.state.spec) return false; enterBuild(); return true; }
+    if (a.action === 'addField') {
+      var f = (R.recommended || []).filter(function (x) { return x.key === input.key; })[0];
+      if (!f) return false;
+      if (M.step !== 'build') setStep('build');
+      addRecField(f);
+      later(function () { focusSel('.m11-phone .fld.new', 0); }, 700);
+      return true;
+    }
+    if (a.action === 'grantPermission') {
+      var sg = R.suggestion;
+      if (!sg || sg.done || sg.role !== input.role || sg.page !== input.page) return false;
+      if (M.step !== 'test') setStep('test');
+      adoptSuggestion();
+      later(function () { focusSel('.m11-sugg', 0); }, 700);
+      return true;
+    }
+    if (a.action === 'nextScript') return doNextScript();
+    if (a.action === 'publish') {
+      if (!R.spec || R.env === 'live' || !R.checklist.all) return false;
+      var hit = function () { var b = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b && !b.disabled) b.click(); };
+      if (M.step !== 'ship') { setStep('ship'); later(hit, 620); } else hit();
+      return true;
+    }
+    if (a.action === 'applyDelta') {
+      if (!input.text) return false;
+      if (M.step !== 'iterate') setStep('iterate');
+      genDelta(input.text);
+      later(function () { focusSel('.pd-option.on', 0); }, 800);
+      return true;
+    }
+    return false;
   }
-  function parseStrength(pp) {
-    var n = 0;
-    ((pp && pp.evidence) || []).forEach(function (e) { if (!e.neg && e.type === 'object' && cjkLen(e.surface) >= 2) n++; });
-    return n;
-  }
-  function docPick(lines, forDelta) {
-    var best = null;
-    (lines || []).forEach(function (raw, i) {
-      var t = String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim();
-      if (t.length < 6 || t.length > 90) return;
-      var exact = false, note = '', strong = 0, hits = 0, unk = 0, score;
-      try {
-        if (forDelta) {
-          var pv = K.previewDelta(spec(), t, LIB), dl = pv.delta;
-          strong = deltaStrength(dl); hits = dl.hits; unk = dl.unknown;
-          exact = dl.mode === 'exact' && strong > 0;
-          note = dl.ops.map(function (o) { return K.deltaText(o, LIB); }).join('、');
-        } else {
-          var pp = K.parse(t, LIB, M.arche);
-          strong = parseStrength(pp); hits = pp.hits; unk = pp.unknown;
-          exact = pp.mode === 'exact' && strong > 0;
-          note = pp.objectName + ' · ' + pp.flowName + '，命中「' + pp.evidence.map(function (e) { return e.surface; }).slice(0, 3).join('」「') + '」';
-        }
-      } catch (e) { return; }
-      score = exact ? 100 + strong * 5 + hits * 2 - unk * 3 - i * 0.01 : t.length / 300;
-      if (!best || score > best.score) best = { text: t, exact: exact, note: note, score: score, i: i };
-    });
-    return best;
-  }
-  function docApply(sentence) {
-    if (!M.R.spec) {
-      M.told = null; M.data = K.setText(M.data, LIB, sentence); recompute();
+  function setParam(a) {
+    if (a.path === 'state.text') {
+      var txt = String(a.value == null ? '' : a.value); if (!txt) return false;
+      M.told = null; M.data = K.setText(M.data, LIB, txt); recompute();
       if (M.step !== 'connect') setStep('connect'); else draw();
       later(function () { focusSel('.m11-chips', 0); }, 620);
-      return;
+      return true;
     }
-    M.told = null; M.deltaText = sentence;
-    if (M.step !== 'iterate') setStep('iterate'); else draw();
-    later(function () { focusSel('.m11-note, .m11-chips', 0); }, 620);
-  }
-  function docDraftDrawer(doc, name, draft, head, body) {
-    P.drawer(M.frame.body, { title: '字段草案 · 来自《' + doc.name + '》', sub: name + ' · ' + body.length + ' 行 ' + head.length + ' 列 · 未写入规格',
-      body: [P.table({ compact: true, cols: [{ key: 'col', label: '列名' }, { key: 'ctrl', label: '控件' }, { key: 'sample', label: '取值' }], rows: draft }),
-        h('div', { class: 'pd-kv', style: 'margin-top:10px' }, [h('span', { class: 'k' }, ['来源']), h('span', { class: 'v' }, [doc.name + ' · ' + doc.sizeText]), h('span', { class: 'k' }, ['写入']), h('span', { class: 'v' }, ['未写入 · 规格 ' + (M.R.spec ? M.R.spec.specNo + ' ' + M.R.spec.specVer : '待生成') + ' 不动数'])])] });
-  }
-  function docExcel(doc, L) {
-    var s0 = (doc.sheets || [])[0];
-    if (!s0 || !s0.rows.length) return { text: L + '《' + doc.name + '》读完，没有可用数据行。' };
-    var head = s0.rows[0].filter(function (x) { return String(x).trim(); });
-    var body = s0.rows.slice(1).filter(function (r) { return r.join('').trim(); });
-    var draft = head.slice(0, 8).map(function (nm, i) { return { col: nm, ctrl: ctrlOf(nm), sample: cut((body[0] || [])[i] || '', 12) }; });
-    var hitF = null;
-    (M.R.spec ? M.R.recommended : []).forEach(function (f) { var base = f.label.replace(/（.*/, ''); head.forEach(function (nm) { if (!hitF && base && (String(nm).indexOf(base) >= 0 || base.indexOf(String(nm)) >= 0)) hitF = f; }); });
-    var lines = [L + '《' + doc.name + '》读完：' + doc.sheets.length + ' 张表，《' + s0.name + '》' + body.length + ' 行 ' + head.length + ' 列。'];
-    lines.push('表头 ' + head.slice(0, 6).join(' / ') + '。');
-    lines.push('按表头出字段草案 ' + draft.length + ' 个：' + draft.slice(0, 4).map(function (d) { return d.col + ' → ' + d.ctrl; }).join('；') + '。');
-    if (hitF) lines.push('「' + hitF.label + '」在对象库里对得上，已加进表单、数据字典与用例。');
-    else lines.push('这些列对不上' + (M.R.spec ? M.R.spec.short : '当前对象') + '的字段，规格不动数，草案放在抽屉里。');
-    return { text: lines.join('\n'),
-      blocks: [mini(head.slice(0, 3).map(function (x) { return cut(x, 6); }), body.slice(0, 3).map(function (r) { return r.slice(0, 3).map(function (x) { return cut(x, 10); }); }))],
-      act: function () { if (hitF && M.R.spec) { var need = M.step !== 'build'; if (need) setStep('build'); later(function () { addRecField(hitF); later(function () { focusSel('.m11-phone .fld.new', 0); }, 700); }, need ? 520 : 0); } else docDraftDrawer(doc, s0.name, draft, head, body); } };
-  }
-  function docTextish(doc, L, lines0, headLine) {
-    var paras = lines0.filter(function (x) { return String(x).trim(); });
-    var tbl = (doc.tables || [])[0] || null;
-    var cls = docClauses(doc.text || paras.join('\n'));
-    var forDelta = !!M.R.spec;
-    var best = docPick(paras, forDelta);
-    var lines = [headLine];
-    if (cls.length) lines.push('读到：' + cls.map(function (c) { return c[0] + ' ' + c[1]; }).join('；') + '。');
-    if (tbl && tbl.length > 1) lines.push('附表 ' + tbl[0].slice(0, 4).join(' / ') + '，' + (tbl.length - 1) + ' 行。');
-    var blocks = [];
-    if (cls.length) blocks.push(kvb(cls));
-    if (tbl && tbl.length > 1) blocks.push(mini(tbl[0].slice(0, 3), tbl.slice(1, 4).map(function (r) { return r.slice(0, 3); })));
-    if (best && best.exact) {
-      lines.push('第 ' + (best.i + 1) + ' 段「' + cut(best.text, 22) + '」' + (forDelta ? '认到变更：' + best.note + '。' : '→ ' + best.note + '。'));
-      lines.push(forDelta ? '已写进追加需求，点「生成 ' + K.bump(spec().version, 'minor') + '」就落版本。' : '已写进需求句，屏上回显命中词。');
-      return { text: lines.join('\n'), blocks: blocks, act: function () { docApply(best.text); } };
+    if (a.path === 'state.delta') {
+      if (!M.data.state.spec) return false;
+      M.told = null; M.deltaText = String(a.value == null ? '' : a.value);
+      if (M.step !== 'iterate') setStep('iterate'); else draw();
+      later(function () { focusSel('.m11-note, .m11-chips', 0); }, 620);
+      return true;
     }
-    var fb = paras.slice().sort(function (a, b) { return String(b).length - String(a).length; })[0] || '';
-    lines.push(forDelta ? ('全文没有认到' + LIB.deltas.types.length + ' 种变更里的任何一种，规格不动数；已把条款多的一段放进追加需求框，可以改词再生成。')
-      : '全文没有命中业务对象词典，已把条款多的一段放进需求句，屏上按相近的一条解析。');
-    return { text: lines.join('\n'), blocks: blocks, act: fb ? function () { docApply(cut(String(fb).replace(/\s+/g, ' ').trim(), 60)); } : null };
-  }
-  function brainDoc(doc) {
-    if (!doc || !doc.ok) return { text: '这份文件读不出来：' + ((doc && doc.note) || '格式不支持') + '。' };
-    var L = window.DGG.docparse.label(doc.kind), st = doc.stats || {};
-    if (doc.kind === 'excel') return docExcel(doc, L);
-    if (doc.kind === 'ppt') {
-      var ls = [], i;
-      (doc.slides || []).forEach(function (sl) { if (sl.title) ls.push(sl.title); (sl.lines || []).forEach(function (x) { ls.push(x); }); });
-      return docTextish(doc, L, ls, L + '《' + doc.name + '》读完：' + (doc.slides || []).length + ' 页 · ' + ls.length + ' 行文本，首页「' + ((doc.slides || [])[0] || {}).title + '」。');
+    if (a.path === 'state.presetIndex') {
+      var i = a.value | 0;
+      M.told = null; M.data = K.pickPreset(M.data, LIB, i); recompute();
+      if (M.step !== 'connect') setStep('connect'); else draw();
+      later(function () { focusSel('.m11-chips', 0); }, 620);
+      return true;
     }
-    if (doc.kind === 'eml') {
-      var m = doc.mail || {}, body = String(doc.text || '').split(/\n/).filter(function (x) { return x.trim(); });
-      var ls2 = [m.subject || ''].concat(body);
-      return docTextish(doc, L, ls2, L + '《' + doc.name + '》读完：' + (m.from || '—') + ' 发来，主题「' + (m.subject || '—') + '」，' + (m.date || '') + '，正文 ' + body.length + ' 行' + ((m.attaches || []).length ? ' · 附件 ' + m.attaches.length + ' 个' : '') + '。');
-    }
-    var paras = (doc.paragraphs || []).filter(function (x) { return String(x).trim(); });
-    if (!paras.length && doc.text) paras = String(doc.text).split(/[\n。；]/).filter(function (x) { return x.trim(); });
-    return docTextish(doc, L, paras, L + '《' + doc.name + '》读完：' + paras.length + ' 段' + ((doc.tables || []).length ? ' · ' + doc.tables.length + ' 张表' : '') + ' · ' + (st['字数'] || String(doc.text || '').replace(/\s/g, '').length) + ' 字。');
-  }
-
-  /* 切屏会把整页连同对话坞重画，共用件回放只留纯文字；这里把答过的小表按原文接回新气泡 */
-  var SAID = [];
-  function sameText(x) { return String(x == null ? '' : x).replace(/\s+/g, ''); }
-  function remember(res) {
-    if (res && typeof res === 'object' && res.blocks && res.blocks.length) { SAID.push({ t: sameText(res.text), b: res.blocks }); if (SAID.length > 24) SAID.shift(); }
-    return res;
-  }
-  function restoreBlocks(root) {
-    if (!root || !SAID.length) return;
-    var used = {};
-    Array.prototype.slice.call(root.querySelectorAll('.ms .m.ai .bb')).forEach(function (bb) {
-      if (bb.querySelector('table.mini') || bb.querySelector('.kv') || bb.querySelector('.tags')) return;
-      var key = sameText(bb.textContent), i;
-      for (i = 0; i < SAID.length; i++) {
-        if (used[i] || SAID[i].t !== key) continue;
-        used[i] = 1;
-        SAID[i].b.forEach(function (n) { if (n) bb.appendChild(n); });
-        break;
-      }
-    });
+    return false;
   }
 
   window.DGG.chatBrain('m11', {
-    opener: function (step) { return remember(brainOpener(step)); },
-    suggest: function (step, api) { if (api && api.el) restoreBlocks(api.el); return brainSuggest(step); },
-    answer: function (q, step) { return remember(brainAnswer(q, step)); },
-    onDoc: function (doc) { return remember(brainDoc(doc)); }
+    kernel: window.DGG.coreM11,
+    ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    act: function (a) {
+      if (!a || !a.type || !M.R) return false;
+      if (a.type === 'focus') return focusRef(a.ref);
+      if (a.type === 'open') return openPanel(a);
+      if (a.type === 'apply') return applyAction(a);
+      if (a.type === 'set') return setParam(a);
+      return false;                                      /* goto 与不认识的动作交给通用兜底 */
+    }
   });
   window.DGG.registerModule('m11', { mount: mount, unmount: unmount, onCompany: onCompany, onIndustry: onIndustry });
 })();

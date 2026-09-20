@@ -5,8 +5,10 @@ const path = require('path');
 const core = require('../core/sim.js');
 const data = require('./load-data.js')();
 const lint = require('../../_shared/lint.js')(data.lintWords);
+const docparse = require('../../_shared/docparse.js');
 let checks = 0;
 const ok = (c, m) => { assert(c, m); checks++; };
+const clean = (t, where) => { ok(!/\{\w+\}|undefined|NaN/.test(t), where + ' 文本异常 ' + t); lintText(t, where); };
 
 // 全部可见文案过词表：硬禁词命中即失败
 function lintText(t, where) {
@@ -113,6 +115,110 @@ Object.keys(data.samples).sort().forEach((k) => {
   // 9. 输出契约：examples 与本次重算一致
   const ex = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'examples', k + '.output.json'), 'utf8'));
   ok(ex.kpi.late === S.kpi.late && ex.kpi.onTimeRate === S.kpi.onTimeRate, k + ' examples 与内核不一致，先跑 run-examples');
+
+  // 11. 对话与文档摄入：六屏开场、快捷问句、问答、声明式动作、文档写回
+  const raw0 = JSON.stringify(d);
+  const steps = core.screens().map((x) => x.key);
+  ok(steps.length === 6 && core.screens().every((x) => x.key && x.label), k + ' screens 六屏登记');
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && JSON.stringify(a) === JSON.stringify(JSON.parse(JSON.stringify(a))));
+  const R = { S, plan, daily };
+  steps.forEach((st) => {
+    const b = core.brief(st, d, null, R);
+    ok(typeof b === 'string' && b.length > 10, k + ' brief ' + st + '：' + b);
+    clean(b, k + ' brief ' + st);
+    ok(core.brief(st, d, null) === b, k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = core.suggest(st, d, null, R);
+    ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
+    sg.forEach((q) => {
+      const a = core.ask(q, st, d, null, R);
+      ok(a && a.text, k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, null, R)) === JSON.stringify(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, null)) === JSON.stringify(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      clean(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  // 点名类与动作词表：单号、物料名、处置、插单落单、采购下单、下钻与抽屉
+  const anyLate = S.orders.filter((o) => o.status === 'late')[0];
+  if (anyLate) {
+    const oQ = core.ask(anyLate.id + ' 怎么样', 'room', d, null, R);
+    ok(oQ && oQ.ref === anyLate.id && oQ.act.type === 'set' && oQ.act.path === 'focus', k + ' 点名订单');
+    const wQ = core.ask('为什么晚', 'order', Object.assign({}, d, { focus: anyLate.id }), null, R);
+    ok(wQ && wQ.act.type === 'focus' && wQ.act.ref === anyLate.id && wQ.text.indexOf(anyLate.id) === 0, k + ' 下钻屏问为什么');
+    const acts0 = core.actions(d, S, anyLate.id);
+    const otQ = core.ask('加班要花多少', 'order', Object.assign({}, d, { focus: anyLate.id }), null, R);
+    if (acts0.filter((a) => a.key === 'overtime').length) {
+      ok(otQ && otQ.act.type === 'apply' && otQ.act.action === 'applyAction' && otQ.act.input.key === 'overtime' && otQ.act.input.orderId === anyLate.id, k + ' 加班动作');
+      const dOt = core.applyAction(d, otQ.act.input.orderId, otQ.act.input.key, otQ.act.input.params);
+      ok(dOt.log.length === d.log.length + 1 && JSON.stringify(d) === raw0, k + ' 加班动作可落单且不动入参');
+    }
+    const lQ = core.ask('延期的是哪几张', 'room', d, null, R);
+    ok(lQ && lQ.act.type === 'set' && lQ.act.path === 'filter' && lQ.act.value === 'late' && lQ.blocks[0].type === 'table', k + ' 延期清单');
+  }
+  const mTop = plan.items.filter((x) => x.suggestQty > 0)[0];
+  if (mTop) {
+    const mQ = core.ask(mTop.name + '还剩多少', 'stock', d, null, R);
+    ok(mQ && mQ.act.type === 'open' && mQ.act.panel === 'material' && mQ.act.ref === mTop.id, k + ' 点名物料开抽屉');
+    const gQ = core.ask('生成采购单', 'stock', d, null, R);
+    ok(gQ && gQ.act.type === 'apply' && gQ.act.action === 'applyPurchase' && gQ.act.input.ids.length === plan.summary.buy, k + ' 生成采购单动作');
+    const pr = core.applyPurchase(d, plan, gQ.act.input.ids);
+    ok(pr.pos.length === plan.po.length && JSON.stringify(d) === raw0, k + ' 采购动作可落单且不动入参');
+  }
+  const iQ = core.ask('就按推荐落单', 'insert', d, null, R);
+  ok(iQ && iQ.act.type === 'apply' && iQ.act.action === 'applyInsert' && ['A', 'B', 'C'].indexOf(iQ.act.input.strategy) >= 0, k + ' 插单落单动作');
+  ok(core.applyInsert(d, iQ.act.input.req, iQ.act.input.strategy).orders.length === d.orders.length + 1, k + ' 插单动作可落单');
+  const cQ = core.ask('三个方案差在哪', 'insert', d, null, R);
+  ok(cQ && cQ.act.type === 'set' && cQ.act.path === 'insert.pick', k + ' 方案对比动作');
+  const wxQ = core.ask('发给谁', 'daily', d, null, R);
+  ok(wxQ && wxQ.act.type === 'open' && wxQ.act.panel === 'wechat', k + ' 日报发送动作');
+  ok(core.ask('今天天气如何', 'room', d, null, R) === null, k + ' 答不上返回 null');
+  ok(core.brief('没有这一屏', d, null, R) === null && core.ask('有没有延期', '没有这一屏', d, null, R) === null, k + ' 未知屏返回 null');
+  ok(JSON.stringify(d) === raw0, k + ' 对话没动入参');
+
+  // 12. 文档摄入：订单表排产、科目余额对账、合同违约金、PPT 目标、邮件金额；写回一律新副本
+  const mkDoc = (o) => Object.assign({ ok: true, name: 'doc', size: 1024, sizeText: '1 KB', ext: '', text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {}, note: '' }, o);
+  const V2 = d.vocab;
+  const orderSheet = mkDoc({ kind: 'excel', name: 'orders.xlsx', ext: 'xlsx',
+    sheets: [{ name: '订单导入', rows: [['单号', '客户', '产品', '数量', '交期'], ['WT-0001', 'K-088 · 导入客户', d.products[0].name, '1200', core.dateOf(d, 9)], ['WT-0002', 'K-089 · 导入客户', d.products[0].name, '800', core.dateOf(d, 12)]] }] });
+  const oIn = core.ingest(orderSheet, 'connect', d, null, R);
+  ok(oIn && oIn.text && oIn.data && oIn.data !== d && JSON.stringify(d) === raw0, k + ' ingest 订单表写新副本、不动入参');
+  ok(oIn.data.insertDraft && oIn.data.insertDraft.qty === 1200 && oIn.data.insertPick, k + ' ingest 订单表填出加急单草稿');
+  ok(oIn.data.sources.filter((s) => s.id === 'doc-import').length === 1, k + ' ingest 记导入批次');
+  ok(core.ingest(orderSheet, 'connect', oIn.data, null).data.sources.filter((s) => s.id === 'doc-import').length === 1, k + ' ingest 重复导入不叠批次');
+  ok(oIn.act.type === 'apply' && oIn.act.action === 'ingest', k + ' ingest 动作');
+  ok(JSON.stringify(core.ingest(orderSheet, 'connect', d, null, R)) === JSON.stringify(oIn), k + ' ingest 两次不一致');
+  ok(isBlocks(oIn.blocks) && isAct(oIn.act), k + ' ingest 块型与动作');
+  clean(oIn.text, k + ' ingest 订单表');
+  ok(core.schedule(oIn.data).kpi.open === S.kpi.open, k + ' ingest 写回后可继续算');
+  const tb = mkDoc({ kind: 'excel', name: 'trial-balance.xlsx', ext: 'xlsx',
+    sheets: [{ name: '科目余额表', rows: [['科目编码', '科目名称', '期初余额', '本期借方', '本期贷方', '期末余额'], ['1405', '库存商品', '2180000', '1620000', '1450000', '2350000'], ['2202', '应付账款', '1980000', '1200000', '1560000', '2340000']] }] });
+  const tIn = core.ingest(tb, 'stock', d, null, R);
+  ok(tIn && tIn.data && tIn.data !== d && tIn.text.indexOf('库存商品期末 2,350,000 元') >= 0, k + ' ingest 科目表取期末余额');
+  ok(tIn.text.indexOf('应付账款期末 2,340,000 元') >= 0 && tIn.text.indexOf('采购单草稿') >= 0, k + ' ingest 科目余额对账');
+  clean(tIn.text, k + ' ingest 科目表');
+  const contract = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('采购框架合同\n甲方：' + d.company + '\n乙方：宁波华兴紧固件有限公司\n第一条 合同金额：人民币 1,860,000 元。\n第二条 交付期限：2026 年 9 月 30 日前交付。\n第三条 逾期交付按日万分之五计违约金，累计不超过 5%。\n', 'utf8') });
+  const cIn = core.ingest(contract, 'room', d, null, R);
+  ok(cIn && cIn.text.indexOf('逾期口径按日万分之 5') >= 0 && cIn.text.indexOf('交付期限 2026-09-30') >= 0 && !cIn.data, k + ' ingest 合同算违约金、不动数');
+  ok(cIn.blocks[0].type === 'kv' && cIn.blocks[0].rows.filter((r) => r[0] === '预计违约金').length === 1, k + ' ingest 合同违约金块');
+  ok(S.kpi.late === 0 || (cIn.act.type === 'set' && cIn.act.path === 'filter' && cIn.act.value === 'late'), k + ' ingest 合同动作');
+  clean(cIn.text, k + ' ingest 合同');
+  const ppt = mkDoc({ kind: 'ppt', name: 'review.pptx', ext: 'pptx', text: '2026 年三季度经营回顾 交付准时率 95% 客户投诉 3 起',
+    slides: [{ no: 1, title: '2026 年三季度经营回顾', lines: ['交付准时率 95%'] }] });
+  const pIn = core.ingest(ppt, 'room', d, null, R);
+  ok(pIn && pIn.text.indexOf('文档目标按期率 95%') >= 0 && !pIn.data, k + ' ingest PPT 取按期率口径');
+  clean(pIn.text, k + ' ingest PPT');
+  const mail = mkDoc({ kind: 'eml', name: 'mail.eml', ext: 'eml', text: '本月需付供应商货款 18.6 万元，请在 9 月 30 日前审批。',
+    mail: { from: '采购部', to: '财务部', cc: '', subject: '关于 9 月付款申请', date: '2026-09-16', attaches: [] } });
+  const mIn = core.ingest(mail, 'stock', d, null, R);
+  ok(mIn && mIn.text.indexOf('18.6 万元付款') >= 0 && mIn.text.indexOf('采购单草稿') >= 0 && !mIn.data, k + ' ingest 邮件对采购金额');
+  clean(mIn.text, k + ' ingest 邮件');
+  const plain = docparse.parse({ name: 'note.txt', bytes: Buffer.from('本周生产例会纪要\n各班组按既定分工推进。\n', 'utf8') });
+  const nIn = core.ingest(plain, 'room', d, null, R);
+  ok(nIn && !nIn.data && !nIn.act && nIn.text.indexOf('不动数') >= 0, k + ' ingest 无口径文档不动数');
+  ok(core.ingest({ ok: false }, 'room', d, null, R) === null && core.ingest(null, 'room', d, null, R) === null, k + ' ingest 解析失败返回 null');
+  ok(JSON.stringify(d) === raw0, k + ' 文档摄入没动入参');
 });
 
 // 10. 内核常量

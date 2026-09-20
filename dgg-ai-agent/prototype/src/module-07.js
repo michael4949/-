@@ -16,7 +16,7 @@
   var TYPES = [['subsidiary', '子公司'], ['branch', '分公司'], ['newco', '新公司']];
   var PRESETS = [[70, 30], [60, 40], [51, 49], [50, 50]];
   var KINDS = [['contract', '合同与节点'], ['license', '证照'], ['ip', '知产'], ['setup', '设立']];
-  var M = { step: 'connect', arche: null, data: null, R: null, contract: null, filter: null, regKind: null, charged: false, name: null, company: null, frame: null, who: 0, told: null, replay: null, docN: 0 };
+  var M = { step: 'connect', arche: null, data: null, R: null, contract: null, filter: null, regKind: null, charged: false, name: null, company: null, frame: null, who: 0, told: null, replay: null };
 
   function anim() { return window.DGG.anim; }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -32,7 +32,7 @@
       (base.setup.shares || []).forEach(function (s) { if (s.holder === sample.company) s.holder = M.name; });
     }
     if (M.company && M.company.systems) { var sys = M.company.systems; base.sources.forEach(function (s) { if (s.id === 'oa') s.mode = sys.indexOf('oa') >= 0 ? 'direct' : 'import'; if (s.id === 'erp' || s.id === 'oms') s.mode = sys.indexOf('erp') >= 0 || sys.indexOf('shop') >= 0 ? 'direct' : 'import'; if (s.id === 'crm') s.mode = sys.indexOf('crm') >= 0 ? 'direct' : 'import'; }); }
-    M.data = base; M.contract = null; M.filter = null; M.regKind = null; M.docN = 0;
+    M.data = base; M.contract = null; M.filter = null; M.regKind = null;
     recompute();
   }
   function recompute() { M.R = K.run(M.data, LIB); }
@@ -147,16 +147,9 @@
   /* ---------- 取数小工具 ---------- */
   function srcShort(name) { return String(name).split(' · ')[0]; }
   function srcChips() { return M.data.sources.map(function (s) { return [srcShort(s.name), fmtN(s.rows) + ' 条']; }); }
-  function topContract() { return M.R.contracts[0]; }
-  function curContract() {
-    var R = M.R;
-    if (!M.contract || !R.byId[M.contract]) M.contract = (R.contracts[0] || {}).id;
-    return R.byId[M.contract];
-  }
   function missingOf(c) { return c.findings.filter(function (f) { return f.kind === 'missing'; }); }
   function urgentIp() { return M.R.ip.assets.filter(function (a) { return a.urgent; }); }
   function coreGap() { return M.R.ip.gaps.filter(function (g) { return g.tier === 'core'; })[0] || M.R.ip.gaps[0]; }
-  function licSoon() { return M.R.licenses.filter(function (l) { return l.state !== 'ok'; }).sort(function (a, b) { return (a.daysLeft == null ? 9999 : a.daysLeft) - (b.daysLeft == null ? 9999 : b.daysLeft); })[0]; }
   function licOkPct() { var l = M.R.licenses; return l.length ? Math.round(100 * l.filter(function (x) { return x.state === 'ok'; }).length / l.length) : 100; }
   function nextItem() { var reg = M.R.register; return reg.overdue[0] || reg.due30[0] || reg.items[0]; }
   function kindCount(key) { var c = M.R.register.counts; return key === 'contract' ? c.contract : key === 'license' ? c.license : key === 'ip' ? c.ip : c.setup; }

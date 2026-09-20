@@ -3,14 +3,14 @@ name: AI软件开发
 id: ai-dev
 kind: 产品
 credits: 100
-version: 1.1.0
+version: 1.2.0
 suite: 薯片AI智能体 2026.09
 updated: 2026-09-20
 triggers: [软件开发, 一句需求, 生成应用, 报修单, 派单, 审批流, 巡检整改, 表单, 页面清单, 数据字典, 接口清单, 权限矩阵, 用例, 发布, 追加需求, 迭代交付]
 inputs: [data]
 data_files: 12
 datasets: 3
-actions: 16
+actions: 21
 llm_calls: 0
 offline: true
 deterministic: true
@@ -25,11 +25,11 @@ universal: dus-1
 
 ## 引擎 `core/build.js`
 
-浏览器下挂在 `DGG.coreM11`，Node 下 `require('./core/build.js')`；导出 94 项（10 个常量 + 84 个函数）。
+浏览器下挂在 `DGG.coreM11`，Node 下 `require('./core/build.js')`；导出 100 项（11 个常量 + 89 个函数）。
 
 | 分组 | 函数 | 作用 |
 |---|---|---|
-| 常量 | `VERSION / MODULE_NAME / CREDITS / TODAY / CLOCK0 / STEP_MIN / IDS / QR_BASE / CHANNELS / SLOT_ORDER` | 1.0.0 · AI软件开发 · 100 积分 · 今日 2026-09-17 · 时钟起点 540 分（09:00）· 每动作 15 分 · 编号 APP-001 / XQ-001 / GG-001 / JF-001 · 扫码入口域名 · 渠道 微信扫码 H5 / PC 后台 · 槽位顺序 submitter → handler → handler2 → lead |
+| 常量 | `VERSION / MODULE_NAME / CREDITS / TODAY / CLOCK0 / STEP_MIN / IDS / QR_BASE / CHANNELS / SLOT_ORDER / RULES` | 1.2.0 · AI软件开发 · 100 积分 · 今日 2026-09-17 · 时钟起点 540 分（09:00）· 每动作 15 分 · 编号 APP-001 / XQ-001 / GG-001 / JF-001 · 扫码入口域名 · 渠道 微信扫码 H5 / PC 后台 · 槽位顺序 submitter → handler → handler2 → lead · 生成依据五条 G-01..G-05 |
 | 工具 | `fmtMin / fmtDur / fmtN / t / isoToMin / dateOfMin / addDays / bump` | 相对分钟 ↔「MM-DD HH:mm」与时长文案、千分位、`{占位}` 模板填充、ISO 时间转相对今日分钟、版本号按 major / minor / patch 递增 |
 | 解析 | `normalize / tokenize` | 全角转半角、去空白、转小写；按标点与连接词（然后 / 之后 / 接着 / 并且 / 同时 / 以及，即 lexicon.connectors 的 6 个词，长词优先）切子句，子句内正向长词优先匹配词典表面词，得到 object / role / action / channel / field / stat / time / delta 八类词；「数量 + 单位」单独出 qty；否定词（不要 / 去掉 / 不需要 …）给同子句后 6 字内的字段词与动作词标 neg |
 | 解析 | `similar / nearest / lcs` | 字符二连 Dice 相似度；对候选句（含 aliases）取相似度高者；动作序列与模板签名的公共子序列长度 |
@@ -67,6 +67,11 @@ universal: dus-1
 | 客户动作 | `publish` | 五项检查不全过 → E_CHECK；同版本已在正式环境 → E_DONE；冒烟有失败 → E_SMOKE 留在测试环境；否则 env = live，FB-00n 记正式环境与冒烟结果 |
 | 客户动作 | `applyDelta` | 追加句 → 变更 BG-00n：逐项 patch 并记录涉及页面 / 新增接口 / 新增用例数，版本 minor +1（V1.1.0），给旧用例回归与新用例结果，存量记录新字段置空并算终态可补填数，env 回到测试环境并记 FB-00n；未识别 → E_PARSE，已包含 → E_DONE |
 | 客户动作 | `sendReport` | 标记已发送，日志写收件人 |
+| 对话 | `screens()` | 本 skill 的六屏登记 `[{key,label}]`：connect / build / try / test / ship / iterate |
+| 对话 | `brief(step, data, lib, result?)` | 进这一屏的开场发现，一句话，从 `run()` 的结果里取数；已生成后遇未知屏返回 null |
+| 对话 | `suggest(step, data, lib, result?)` | 这一屏的快捷问句 3–4 条，条条都能被 `ask` 答上 |
+| 对话 | `ask(question, step, data, lib, result?)` | 问答，返回 `{text, blocks?, act?, ref?}`；答不上返回 null，不编数 |
+| 对话 | `ingest(doc, step, data, lib, result?)` | 文档摄入，入参是 `_shared/docparse.js` 的输出；写回业务数据时返回 `{…, data: 新副本}` |
 
 ## 数据表
 
@@ -93,6 +98,7 @@ universal: dus-1
 - 产物是页面模型、数据字典、接口清单、权限矩阵、用例、发布记录与扫码入口文本，不产出代码包、小程序码、部署脚本。
 - 用例在运行时上真实执行，结果不预存；发布前五项检查与冒烟由同一套用例决定。
 - 离线无 LLM；内核确定性；主数据只读解析；不改原样本与兄弟模块样本。
+- 对话只答 `run()` 结果里算得出的数，答不上返回 null；文档摄入只认 `_shared/docparse.js` 的六类输出，写回一律返回新副本，原数据不动。
 
 ## 命名规则
 
@@ -121,10 +127,47 @@ examples/*.output.json      三套样本的交付摘要
 ```
 node scripts/gen-samples.js     # objects.js DSL → data/objects.json；三套样本的预埋行由内核真实走出并按固定偏移改写时间
 node scripts/run-examples.js    # 三套样本 × 预置句：生成 → 走单 → 用例 → 发布 → 追加，写 examples/*.output.json 并打印摘要
-node scripts/validate.js        # 断言：确定性、不改样本、预置句与 aliases 解析、规格计数与 expect 一致、用例全过、发布、六种变更、禁词、examples 一致
+node scripts/validate.js        # 断言：确定性、不改样本、预置句与 aliases 解析、规格计数与 expect 一致、用例全过、发布、六种变更、禁词、examples 一致、对话五件（六屏开场非空、快捷问句条条能答、同一问两次同果、文档摄入返回新副本）
 ```
 
 改对象库或内核后按 gen-samples → run-examples → validate 的顺序跑；`load-data.js` 返回 lib = { lexicon, objects, flows, roles, components, presets, tests, deltas, integrations, samples, erpSamples, procSamples, hrSamples, industries, credits, lintWords }。
+
+## 对话与文档摄入
+
+`brief / suggest / ask / ingest` 与六屏一一对应，回答里的数字全部从 `run()` 的结果里取，答不上返回 null，不编数。四个都是纯函数：不碰页面、宿主全局、时钟与随机数，`result` 传了就用、没传自己算一次，同一组入参永远得到同一份输出。选中态不在契约里：记录取超时那条、追加需求取改动大的那条、手机页取表单页，平台自己的选中态靠 `act` 回写。
+
+| 屏 | 认得的问法 | 回答里给的数 |
+|---|---|---|
+| 接入 | 命中、哪些词、识别、未识别、解析；主数据、数据源、来源、哪来、同步、台账、名册；几页、多少页、能生成、多大（未生成时）；生成应用、开始生成、直接生成（未生成时） | 命中词数与未识别子句数、前四条「识别词 → 映射」与前六条的类型；三张主数据表的条数、来源模块、直连或导入、同步时刻；预览的页 / 字段 / 角色 / 节点 / 接口 / 用例数；生成一次扣的积分数 |
+| 生成应用 | 哪几页、几页、页面、手机上、PC 上；必填、字段、表单填什么；加一个某字段、补某字段；流程、节点、几步、状态；怎么生成、凭什么、依据、怎么判断 | 页数按手机 / PC 拆并逐页给端与可见角色；必填字段数与字段名、非必填数；推荐字段加进表单 / 数据字典 / 用例后规格升一版、存量这一格置空；节点链、流转条数与每条的职务、动作、约定小时数；生成依据的前三条 G-01..G-03 |
+| 试用 | 超时、等了、最久、拖了；几单、多少单、看板、统计、分布、今日；平均、多久、时效；下一步、走一步、跑一单、演一遍 | 超时单数、排在前面那条的编号、已等时长、超时文案与约定时限；今日单数、记录数、各节点单数、平均接单分钟；按处理人的单数与完成数；走单脚本下一步的职务、E-编号、动作与时钟步长 |
+| 测试与产物 | 用例、测试、通过、失败、跑一遍；角色、谁能、谁看、权限、矩阵、看不到；越权、拦截；采纳、开放、建议；数据字典、几列、表结构、索引；接口、API | 用例总数 / 通过 / 失败 / 通过率 / 越权拦截次数、失败条目与警告、按分组的条数；每个角色的数据范围与可进页数；越权用例的名称与实际结果；权限建议的角色、页面、操作与理由；表名、列数、索引数；接口数按读写拆、前六个的编号与方法 |
+| 发布 | 二维码、扫码、扫出来、链接；发布、上线、检查、正式环境、冒烟；发到、发正式、上线吧 | 扫码入口文本、渠道与当前环境；五项检查逐项的通过与明细；未过时列出未过项，全过时给构建 → 测试环境 → 冒烟 → 正式环境 → 已上线的走法；已在正式环境时给冒烟结果 |
+| 迭代交付 | 存量、旧数据、老数据、历史数据；交付、清单、产物、报告、发微信、收件；追加、迭代、新版本、变更、V1.x.0、会多什么；生成 V1.x.0、就按某一条 | 存量条数、新字段置空与可补填条数、旧用例回归；产物项数、每项的名称 / 编号 / 数量与收件职务；追加需求条数与每条的 +页 / +字段 / +用例；已生成版本时给变更清单逐项与新用例通过数 |
+
+六屏都认的跨屏问法：**点名一条记录**（编号如 BX-2609-004，末三位也认）给它的摘要、节点、处理人、提交时刻、已等时长与前五条流转；**TC-编号** 给那条用例的分组、名称、预期、实际与结果；**API-编号** 给方法、路径与需要角色；**为什么** 有超时单时说那一单为什么停着，没有时说这张应用按哪个模板落的；**怎么办 / 接下来 / 先做什么** 按权限建议 → 发正式环境 → 追加需求 → 发交付报告的次序给下一件事。
+
+**act 在本模块的落法**（平台只实现子集也能跑，不认识的 type 静默忽略）
+
+| act | 本模块 |
+|---|---|
+| `{type:'goto', step}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底；问流程节点只换屏不高亮） |
+| `{type:'focus', ref}` | 按 `data-ref` 高亮：记录编号高亮试用屏看板表与手机列表里那一行（不在试用屏就先切过去），`TC-编号` 高亮测试屏用例表那一行；找不到就退回按文本找行 |
+| `{type:'open', panel, ref}` | `parse` / `source` / `preview` 进接入屏高亮命中词条、主数据来源行、预览结果；`pages` 进生成应用屏高亮页面清单、`page`（ref 用页面 key）切手机预览到那一页、`judge` 开「怎么生成的」抽屉；`board` / `perf` 进试用屏高亮状态分布与 PC 指标；`matrix` / `sugg` / `tests` 进测试屏高亮权限矩阵、权限建议、用例表，`dict` / `api` 开数据字典与接口清单抽屉；`entry` / `checks` 进发布屏高亮扫码入口与发布前检查；`stock` / `follow` / `change` 进迭代屏高亮存量说明、追加需求清单、变更清单，`report` 开交付报告抽屉；`doc` 开文档草案抽屉（内容在 act 的 `blocks` 里） |
+| `{type:'apply', action, input}` | `generate{}` 按当前需求句生成、`addField{key}` 加一个推荐字段、`grantPermission{role,page,op}` 采纳权限建议、`nextScript{}` 走单脚本下一步、`publish{}` 发到正式环境、`applyDelta{text}` 按这一条追加需求生成新版本；动作名用内核导出名，平台照名字调同名写回函数 |
+| `{type:'set', path, value}` | `state.text` 改需求句后重解析、`state.delta` 把一句话填进追加需求框、`state.presetIndex` 换一条预置句 |
+
+**ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）
+
+| 文档 | 判定 | 结果 |
+|---|---|---|
+| Word / PDF / 文本 | 段落逐条送解析：已生成按六种变更认，未生成按需求句认 | 段数、表数、字数；读到的金额 / 日期 / 时限 / 违约 / 时效 / 比例逐项列出，附表给前三列三行；认到的那一段给它落成的变更或「对象 · 模板」，`data` 里写进 `state.delta`（已生成）或 `state.text`（未生成）；一条都没认到就把条款多的那一段放进去并说明规格不动数 |
+| Excel | 表头与对象库可选字段对得上 | 表数、行列数、表头、按列名出的字段草案（列名 → 控件 → 取值）；对得上就把那个字段加进表单 / 数据字典 / 用例，`data` 是加过字段的新规格副本；对不上只给草案，规格不动数，草案随 `act` 的 `blocks` 走抽屉 |
+| PPT | 标题与每页文字当段落 | 页数、行数与首页标题，其余与 Word 同一套 |
+| 邮件 | 主题加正文当段落 | 发件、主题、日期、正文行数与附件数，其余与 Word 同一套 |
+| 读不出来（`ok:false`） | — | 如实说原因，六屏不动数 |
+
+写数据的那一类返回 `{text, blocks, data, act}`：`data` 是新副本（入参不动，照 `ensure` 先出副本再改），`act` 是与之等价的声明式动作（`set` 或 `apply`）——只实现 act 的平台重放这一次写回，两条路等价，取其一即可。
 
 ## 原型流程
 

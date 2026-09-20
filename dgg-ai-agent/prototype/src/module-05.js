@@ -504,6 +504,14 @@
      问答、开场发现、快捷问句、文档摄入全部走 DGG.coreM5 的 screens / brief / suggest / ask / ingest
      （与 skill 内核同一份实现）。这一段只做两件事：把当前上下文交出去，把内核返回的声明式动作落到页面上。 */
   function workEl() { return M.frame ? M.frame.work : null; }
+  /* 选中态跟着数据一起交出去：内核只认入参 data 上的 focus，页面选了哪一条，回答就说哪一条。
+     用浅副本挂上去，M.data 本身不动；取不到的字段留空，内核自己退回默认。 */
+  function ctxData() {
+    var d = {}, k;
+    for (k in M.data) if (Object.prototype.hasOwnProperty.call(M.data, k)) d[k] = M.data[k];
+    d.focus = { need: M.need, cand: M.cand, icand: M.icand, rule: M.rule, plan: M.plan, jdVariant: M.jdVariant, who: M.who };
+    return d;
+  }
   function refEl(ref) {
     var w = workEl();
     if (!w || ref == null) return null;
@@ -525,6 +533,7 @@
   }
   /* 文档摄入的写回：内核已经算好新数据副本，这里只管换屏、选中与提示 */
   function commitDoc(next) {
+    if (next.focus) delete next.focus;                   /* 选中态只在调用时挂一次，不留在业务数据里 */
     var had = {};
     M.data.candidates.forEach(function (c) { had[c.id] = 1; });
     var added = next.candidates.filter(function (c) { return !had[c.id]; })[0];
@@ -602,7 +611,7 @@
       return true;
     }
     if (a.action === 'ingest') {
-      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
+      var r = K.ingest(input.doc, M.step, ctxData(), LIB, M.R);   /* 与气泡里那次摄入同一个选中态 */
       if (!r || !r.data) return false;
       commitDoc(r.data);
       return true;
@@ -621,7 +630,7 @@
 
   window.DGG.chatBrain('m5', {
     kernel: window.DGG.coreM5,
-    ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    ctx: function () { return { data: ctxData(), lib: LIB, result: M.R }; },
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {

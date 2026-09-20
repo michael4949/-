@@ -315,6 +315,7 @@
   /* ================= 屏 3 · 客户画像 ================= */
   function screenProfile(work) {
     var R = M.R, Pf = R.profile, d = M.data, seg = focusSeg();
+    work.classList.add('m4-profile');
     var g = h('div', { class: 'pd-grid' });
     var a1 = nspan(String(Pf.dealCount)), a2 = nspan(W(Pf.avgAmount)), a3 = nspan(String(Pf.avgCycle)), a4 = nspan(String(Math.round(Pf.repeatRate * 100)));
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([

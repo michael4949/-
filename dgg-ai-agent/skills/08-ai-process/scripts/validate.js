@@ -258,6 +258,92 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const exo = JSON.parse(fs.readFileSync(exPath, 'utf8'));
   ok(JSON.stringify(exo.kpi) === JSON.stringify(R.kpi) && exo.weekly.text === R.weekly.text && exo.bottleneck.line.id === R.bottleneck.line.id, k + ' examples 与内核不一致，先跑 run-examples');
   lintText(JSON.stringify(exo), k + ' examples 全文');
+  // 19. 对话与文档摄入：六屏开场、快捷问句、问答、点名、文档
+  const raw0 = JSON.stringify(d);
+  const steps = K.screens().map((x) => x.key);
+  ok(steps.length === 6 && K.screens().every((x) => x.key && x.label) && steps.join() === 'connect,board,diag,improve,exec,report', k + ' screens 六屏登记');
+  // 纯数据 = 递归下去一个函数都没有。JSON 往返查不出函数（两边一样被丢掉，永远相等），必须自己走一遍
+  const pure = (o) => o == null || (typeof o !== 'function' && (typeof o !== 'object' || Object.keys(o).every((key) => pure(o[key]))));
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && pure(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && pure(a));
+  steps.forEach((st) => {
+    const b = K.brief(st, d, lib, R);
+    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
+    clean(b, k + ' brief ' + st);
+    ok(JSON.stringify(K.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = K.suggest(st, d, lib, R);
+    ok(Array.isArray(sg) && sg.length === 4, k + ' suggest ' + st + ' 固定 4 条，实得 ' + (Array.isArray(sg) ? sg.length : '非数组'));
+    sg.forEach((q) => {
+      const a = K.ask(q, st, d, lib, R);
+      ok(a && a.text && !/undefined|NaN|\{\w+\}/.test(a.text), k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(JSON.stringify(K.ask(q, st, d, lib, R)) === JSON.stringify(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+      ok(JSON.stringify(K.ask(q, st, d, lib)) === JSON.stringify(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      clean(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  // 点名：报工 / 异常 / 批次 / 员工 / 设备 / 产线 / 方案 / 换型参数
+  const rpRow = R.verify.rows.filter((x) => x.reportId)[0];
+  const nRp = K.ask(rpRow.reportId + ' 怎么回事', 'connect', d, lib, R);
+  ok(nRp && nRp.ref === rpRow.reportId && nRp.act.type === 'focus', k + ' 点名报工 ' + rpRow.reportId);
+  ok(K.ask(rpRow.reportId + ' 怎么回事', 'board', d, lib, R).act.panel === 'verify', k + ' 点名报工不在接入屏先换屏');
+  const al0 = R.alerts.filter((a) => a.status === 'open')[0];
+  const nEx = K.ask(al0.id, 'board', d, lib, R);
+  ok(nEx && nEx.ref === al0.id && nEx.act.type === 'apply' && nEx.act.action === 'handleException', k + ' 点名异常 ' + al0.id);
+  const job0 = R.sequence.after.rows[0];
+  const nJob = K.ask(job0.id + ' 排第几', 'improve', d, lib, R);
+  ok(nJob && nJob.ref === job0.id && nJob.act.panel === 'job', k + ' 点名' + v.lot + ' ' + job0.id);
+  const emp0 = R.dispatch.rows[0];
+  const nEmp = K.ask(emp0.emp + ' 明天排哪', 'exec', d, lib, R);
+  ok(nEmp && nEmp.ref === emp0.emp && nEmp.act.panel === 'roster', k + ' 点名员工 ' + emp0.emp);
+  const mac0 = R.maintenance.filter((m) => !m.scheduled && m.window)[0];
+  if (mac0) { const nMac = K.ask(mac0.machine + ' 要保养吗', 'exec', d, lib, R); ok(nMac && nMac.act.action === 'scheduleMaint', k + ' 点名' + v.machine + ' ' + mac0.machine); }
+  const nWhy = K.ask('为什么是' + R.bottleneck.line.name, 'board', d, lib, R);
+  ok(nWhy && nWhy.act.type === 'open' && nWhy.act.panel === 'stage' && nWhy.blocks[0].type === 'table', k + ' 为什么是约束');
+  ok(K.ask('为什么是约束线', 'report', d, lib, R).act.type === 'goto', k + ' 为什么是约束不在看板先换屏');
+  const other = R.S.lines.filter((l) => l.id !== R.bottleneck.line.id)[0];
+  const nLine = K.ask(other.name + ' 怎么样', 'board', d, lib, R);
+  ok(nLine && nLine.act.type === 'set' && nLine.act.path === 'line' && nLine.act.value === other.id, k + ' 点名' + v.line + ' ' + other.name);
+  const nCard = K.ask('方案 B 怎么样', 'improve', d, lib, R);
+  ok(nCard && nCard.act.type === 'set' && nCard.act.path === 'pick' && nCard.act.value === 'B', k + ' 点名方案');
+  const nSet = K.ask('把换型时间调到 25 分钟', 'improve', d, lib, R);
+  ok(nSet && nSet.act.type === 'set' && nSet.act.path === 'params.setupMin' && nSet.act.value === 25, k + ' 调' + v.setup + '参数');
+  ok(K.ask('今天天气如何', 'board', d, lib, R) === null, k + ' 答不上返回 null');
+  ok(K.brief('没有这一屏', d, lib, R) === null && K.ask('负荷怎么样', '没有这一屏', d, lib, R) !== null, k + ' 未知屏 brief 返回 null、跨屏问法仍能答');
+  ok(JSON.stringify(d) === raw0, k + ' 对话没动入参');
+  // 文档：报工表 Excel 写新副本、非报工表 Excel 也登记来源、PPT 改参数、Word 开抽屉、邮件记动作
+  const sheetDoc = (name, sheetName, rows) => ({ ok: true, kind: 'excel', name: name, size: 2048, sizeText: '2 KB', ext: 'xlsx', text: '', paragraphs: [], tables: [], slides: [], mail: null, stats: {}, note: '', sheets: [{ name: sheetName, rows: rows }] });
+  const repDoc = sheetDoc('reports.xlsx', v.report + '明细', [[v.lot, v.op, '员工', '工时（min）', '数量', '日期'],
+    ['SO-2609-0101', R.flow[0].ops[0], 'E-001', '420', '1200', '2026-09-16'],
+    ['SO-2609-0101', R.flow[0].ops[0], 'E-001', '420', '1200', '2026-09-16'],
+    ['SO-2609-0102', R.flow[0].ops[0], '', '380', '0', '2026-09-16']]);
+  const rIn = K.ingest(repDoc, 'connect', d, lib, R);
+  ok(rIn && rIn.text && rIn.data && rIn.data !== d, k + ' ingest ' + v.report + '表');
+  ok(rIn.data.sources.some((s) => s.id === 'doc-import') && !d.sources.some((s) => s.id === 'doc-import'), k + ' ingest 写新副本、不动入参');
+  ok(rIn.data.log.length === d.log.length + 1 && rIn.act.type === 'apply' && rIn.act.action === 'ingest' && rIn.ref === 'doc-import', k + ' ingest 写日志与重放动作');
+  ok(rIn.text.indexOf('重复 1 条') >= 0 && rIn.text.indexOf('数量为零 1 条') >= 0 && rIn.text.indexOf('缺 E-编号 1 条') >= 0, k + ' ingest ' + v.report + '表三条离线核验：' + rIn.text.split('\n')[1]);
+  ok(JSON.stringify(K.ingest(repDoc, 'connect', d, lib, R)) === JSON.stringify(rIn), k + ' ingest 两次不一致');
+  ok(JSON.stringify(K.run(rIn.data, lib).kpi) === JSON.stringify(R.kpi), k + ' ingest 后看板可继续算且不改指标');
+  ok(isBlocks(rIn.blocks) && isAct(rIn.act), k + ' ingest 块型与动作');
+  clean(rIn.text, k + ' ingest ' + v.report + '表');
+  const tbIn = K.ingest(sheetDoc('trial-balance.xlsx', '科目余额表', [['科目编码', '科目名称', '期末余额'], ['1001', '库存现金', '12000']]), 'connect', d, lib, R);
+  ok(tbIn && tbIn.data && tbIn.text.indexOf('核验不动数') >= 0, k + ' ingest 科目表不进核验');
+  clean(tbIn.text, k + ' ingest 科目表');
+  const deck = { ok: true, kind: 'ppt', name: 'review.pptx', size: 1024, sizeText: '1 KB', ext: 'pptx', text: '三季度复盘 ' + v.setup + '时间 35 分钟，准时率 95%', paragraphs: [], tables: [], sheets: [], mail: null, stats: {}, note: '', slides: [{ no: 1, title: '三季度复盘', lines: [v.setup + '时间 35 分钟'] }] };
+  const pIn = K.ingest(deck, 'improve', d, lib, R);
+  ok(pIn && !pIn.data && pIn.act.type === 'set' && pIn.act.path === 'params.setupMin' && pIn.act.value === 35, k + ' ingest PPT 改参数');
+  clean(pIn.text, k + ' ingest PPT');
+  const word = { ok: true, kind: 'word', name: 'contract.docx', size: 970, sizeText: '970 B', ext: 'docx', text: '交付期限：2026 年 11 月 30 日前完成全部交付。合同金额 1,860,000 元。', paragraphs: ['交付期限：2026 年 11 月 30 日前完成全部交付。'], tables: [], sheets: [], slides: [], mail: null, stats: {}, note: '' };
+  const wIn = K.ingest(word, 'board', d, lib, R);
+  ok(wIn && !wIn.data && wIn.act.type === 'open' && wIn.act.panel === 'doc' && isBlocks(wIn.act.blocks) && wIn.text.indexOf('2026-11-30') >= 0, k + ' ingest Word 交付期限');
+  clean(wIn.text, k + ' ingest Word');
+  const mail = { ok: true, kind: 'eml', name: 'mail.eml', size: 900, sizeText: '900 B', ext: 'eml', text: '昨晚设备停机 90 分钟，今天的计划要顺延。', paragraphs: [], tables: [], sheets: [], slides: [], stats: {}, note: '', mail: { from: '生产部', to: '设备组', cc: '', subject: '昨晚停机情况', date: '2026-09-16', attaches: [] } };
+  const mIn = K.ingest(mail, 'report', d, lib, R);
+  ok(mIn && mIn.data && mIn.data.log.length === d.log.length + 1 && mIn.act.action === 'ingest', k + ' ingest 邮件记进本周动作');
+  clean(mIn.text, k + ' ingest 邮件');
+  ok(K.ingest({ ok: false }, 'board', d, lib, R) === null && K.ingest(null, 'board', d, lib, R) === null, k + ' ingest 解析失败返回 null');
+  ok(JSON.stringify(d) === raw0 && JSON.stringify(raw) === before, k + ' 文档摄入没动入参与原样本');
 });
 ok(['missing', 'dev', 'dup', 'conserve', 'overlap'].every((x) => seenVerifyKinds[x]), '核验五条规则各至少命中一次');
 

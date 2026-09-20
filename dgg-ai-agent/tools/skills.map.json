@@ -3050,7 +3050,7 @@
     "dir": "06-ai-cfo",
     "kernelPath": "core/fin.js",
     "legacyGlobal": "DGG.coreM6",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "moduleName": "AI CFO",
     "credits": 50,
     "summary": "接企业账套，算三表勾稽、风险预警、13周现金与政策匹配，处置写回副本",
@@ -3114,7 +3114,7 @@
           "dataset": "make"
         },
         "verified": true,
-        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"kpi\":{\"period\":\"2026-08\",\"rev\":4260000,\"revMoM\":-3,\"gm\":24.8,\"gmPrev\":25.3,\"nm\":3.3,\"netProfit\":139358,\"cfo\":-3225,\"cash\":2563680,\"cashMonth"
+        "verifiedOutputDigest": "{\"version\":\"1.2.0\",\"kpi\":{\"period\":\"2026-08\",\"rev\":4260000,\"revMoM\":-3,\"gm\":24.8,\"gmPrev\":25.3,\"nm\":3.3,\"netProfit\":139358,\"cfo\":-3225,\"cash\":2563680,\"cashMonth"
       },
       {
         "name": "statements",
@@ -3435,6 +3435,241 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"adjustments\":[{\"rule\":\"R03\",\"key\":\"bookCollection\",\"amount\":180000,\"base\":0,\"label\":\"补记回款分录\",\"entry\":[[\"借\",\"银行存款\",\"180,000\"],[\"贷\",\"应收账款\",\"180,000\"]],\"seq\":1}]"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "title": "六屏登记",
+        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest 的 step 都从这里取。不吃账套也不吃数据包。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / recon / risk / cash / policy",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"财务驾驶舱\"},{\"key\":\"recon\",\"label\":\"三表勾稽\"},{\"key\":\"risk\",\"label\":\"风险预警\"},{\"key\":\"cash\",\"label\":\"现金预测\"},{\"key"
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "title": "开场发现",
+        "description": "进某一屏先说的一条发现，数字全部来自同一份账套的测算结果；返回字符串或 {text, blocks?, act?, ref?}，未知屏返回 null。同一组入参永远得到同一句话。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（rules/riskRules/benchmarks/policies/samples/industries/credits/lintWords）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
+          }
+        ],
+        "returns": "字符串，或 {text, blocks?, act?, ref?}；未知屏为 null",
+        "mutates": false,
+        "exampleInput": {
+          "step": "recon",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"一笔到账货款 18 万元没入账，同时抬高应收、压低账面现金，R03 与 R07 是同一件事。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；只认屏名，不吃账套也不吃数据包，未知屏返回空数组。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
+          }
+        ],
+        "returns": "[string]，3–4 条",
+        "mutates": false,
+        "exampleInput": {
+          "step": "cash"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"缺口多少\",\"哪一周吃紧\",\"催收够不够\",\"授信提款能补上吗\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "title": "问答",
+        "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。sel 是平台的选中态（当前勾稽条 / 风险条 / 周），点名的那条在测算结果里存在就按它作答、按它写回，不传才按数据默认取。blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / open / apply / set），高亮走顶层 ref。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（rules/riskRules/benchmarks/policies/samples/industries/credits/lintWords）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          },
+          {
+            "from": "sel",
+            "required": false,
+            "note": "可选：平台的选中态"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "问句原文；也认「R01–R14」「K01–K10」「P01–P12」「第 N 周」四种点名与各行名字"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          },
+          {
+            "name": "sel",
+            "type": "object",
+            "required": false,
+            "description": "可选：选中态 {rule:\"R12\", risk:\"K03\", week:5}，三项都可缺；点名的那条不在行里就退回默认那一条"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null",
+        "mutates": false,
+        "exampleInput": {
+          "question": "哪几条异常",
+          "step": "recon",
+          "sel": {
+            "rule": "R12"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"6 处异常：R03 应收账款变动与银行回款 差 180,000 元；R04 账面存货与 ERP 库存 差 62,000 元；R07 货币资金与银行对账单 差 −145,000 元；R08 账面收入与开票收入 差 240,000"
+      },
+      {
+        "name": "ingest",
+        "fn": "ingest",
+        "kind": "query",
+        "title": "文档摄入",
+        "description": "读一份已解析的文档（科目余额表 / 采购合同 / 经营回顾 PPT / 往来邮件），与账面逐项对差：{text, blocks?, act?, data?}。合同类会在 data 里返回新副本（入参不动，应付多一条、13 周现金预测按新账重排），其余只回消息不写数据；doc.ok 为假返回 null。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "skills/_shared/docparse.js 的解析结果"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（rules/riskRules/benchmarks/policies/samples/industries/credits/lintWords）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "docparse 输出：{ok, kind(excel/word/pdf/text/ppt/eml), name, text, sheets, slides, mail, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
+          }
+        ],
+        "returns": "{text, blocks?, act?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
+        "mutates": false,
+        "exampleInput": {
+          "doc": {
+            "kind": "text",
+            "paragraphs": [
+              "采购框架合同",
+              "第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付。",
+              "第二条 首付 30%，交付验收后付 60%，质保金 10%。",
+              "第三条 交付期限：2026 年 11 月 30 日前完成全部交付。"
+            ],
+            "text": "采购框架合同\n第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付。\n第二条 首付 30%，交付验收后付 60%，质保金 10%。\n第三条 交付期限：2026 年 11 月 30 日前完成全部交付。\n",
+            "stats": {
+              "行": 4,
+              "字数": 94
+            },
+            "ok": true,
+            "name": "采购框架合同.txt",
+            "size": 242,
+            "sizeText": "242 B",
+            "ext": "txt",
+            "note": "",
+            "tables": [],
+            "sheets": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "cash",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"Word《采购框架合同.txt》读完：合同金额 1,860,000 元（含税 13%），交付期限 2026-11-30。\\n首付 30% · 558,000 元，已按 2026-09-30 到期排进 13 周现金预测。"
       }
     ],
     "drift": [
@@ -3475,14 +3710,14 @@
         "fix": "口径段补「概率下限 0.1；概率 ≤ 0.1 一律判低」"
       }
     ],
-    "notes": "$data 默认取 data.samples.make（另有 service / flow）；$lib 由 load-data 固定注入。reconcile / risks / policies / kpi / report 的第二个形参要 statements 对象，无法只靠 JSON 输入拆参，故不单独暴露，结果统一由 run 返回（rows 内已含 drill 下钻表）。5 个 mutate 动作返回整份账套新副本，平台须回灌为下次调用的 $data。fmtN/fmtW/short/dateOf/monthLabel/evalExpr 为格式化与工具函数，未暴露。11 个动作已对三套样本实跑通过，仓库文件零改动（scripts/validate.js 714 项断言仍通过）。"
+    "notes": "$data 默认取 data.samples.make（另有 service / flow）；$lib 由 load-data 固定注入。reconcile / risks / policies / kpi / report 的第二个形参要 statements 对象，无法只靠 JSON 输入拆参，故不单独暴露，结果统一由 run 返回（rows 内已含 drill 下钻表）。5 个 mutate 动作返回整份账套新副本，平台须回灌为下次调用的 $data。fmtN/fmtW/short/dateOf/monthLabel/evalExpr 为格式化与工具函数，未暴露。16 个动作已对三套样本实跑通过。对话五件 screens / brief / suggest / ask / ingest 是内核 1.2.0 下沉的那一层：brief / ask / ingest 要 $lib，ask 另收可选的 result 与选中态 sel（{rule, risk, week}），screens 与 suggest 只收屏名；ingest 的 doc 走 skills/_shared/docparse.js 的解析结果，合同类返回的新副本同样要回灌为下次调用的 $data。"
   },
   {
     "id": "ai-legal",
     "dir": "07-ai-legal",
     "kernelPath": "core/legal.js",
     "legacyGlobal": "DGG.coreM7",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "moduleName": "AI法务",
     "credits": 30,
     "summary": "纯规则离线法务引擎：合同逐条审查、新设主体方案、知产到期与布局、90 天台账与月报。",
@@ -3545,7 +3780,7 @@
           "dataset": "make"
         },
         "verified": true,
-        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"data\":{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"indust"
+        "verifiedOutputDigest": "{\"version\":\"1.2.0\",\"data\":{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"indust"
       },
       {
         "name": "ensure",
@@ -3737,6 +3972,33 @@
         "exampleInput": {
           "contractId": "HT-2609-021",
           "findingId": "M-quality",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mfg-machinery\",\"size\""
+      },
+      {
+        "name": "apply-all-high",
+        "fn": "applyAllHigh",
+        "kind": "mutate",
+        "title": "采纳全部高风险修订",
+        "description": "批量采纳：按入参那一刻的审查结果取出全部高风险且有修订模板的问题，逐条走 applyFix，逐处写 revisions 与处置日志；对话里 act 的 applyAllHigh 就调它。没有可采纳的高风险项时原样返回规整后的副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的 data 副本（高风险条款已改、revisions 与 log 逐处各加一条）",
+        "mutates": true,
+        "exampleInput": {
           "dataset": "make"
         },
         "verified": true,
@@ -4102,6 +4364,273 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"items\":[{\"date\":\"2026-09-15\",\"kind\":\"milestone\",\"kindName\":\"履约节点\",\"title\":\"HT-2608-009 8 月对账单确认\",\"sub\":\"宁波钢材贸易\",\"tone\":\"late\",\"ref\":\"HT-2608-009\",\"daysLeft\":-"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "title": "六屏登记",
+        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest 的 step 都从这里取。不吃企业数据也不吃数据包。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / contracts / setup / ip / register",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"法务驾驶舱\"},{\"key\":\"contracts\",\"label\":\"合同审查\"},{\"key\":\"setup\",\"label\":\"新设主体\"},{\"key\":\"ip\",\"label\":\"知识产权\"},{\""
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "title": "开场发现",
+        "description": "进某一屏先说的一条发现，数字全部来自同一份企业数据的测算结果；返回字符串或 {text, blocks?, act?, ref?}，未知屏返回 null。同一组入参永远得到同一句话。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "法务数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包，内核只读 contractRules / setupRules / ipClasses，对话层再可选读 industries"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "字符串，或 {text, blocks?, act?, ref?}；未知屏为 null",
+        "mutates": false,
+        "exampleInput": {
+          "step": "board",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"合规分 67；HT-2609-021 风险分 40，2027-02-28 到期；特种设备使用登记（叉车 3 台） 28 天后到期。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；新设主体那一屏的第一条会带上方案总天数，所以要吃企业数据与数据包，未知屏返回空数组。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "法务数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包，内核只读 contractRules / setupRules / ipClasses，对话层再可选读 industries"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条",
+        "mutates": false,
+        "exampleInput": {
+          "step": "setup",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"为什么要 41 天\",\"股权够控股吗\",\"改成 51 / 49 会怎样\",\"要花多少钱\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "title": "问答",
+        "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。任一屏还认四种点名：HT-年月-序号 的合同、TM / ZL / RZ / DM-序号 的知产、第 N 类的商标类别、证照名。blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / focus / open / apply / set），高亮走顶层 ref。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "法务数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包，内核只读 contractRules / setupRules / ipClasses，对话层再可选读 industries"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "问句原文；也认合同号 HT-年月-序号、知产编号 TM / ZL / RZ / DM-序号、「第 N 类」与证照名四种点名"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null",
+        "mutates": false,
+        "exampleInput": {
+          "question": "哪份合同风险高",
+          "step": "board",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"高风险 3 份：HT-2609-021 无锡不锈钢材料（40 分）；HT-2609-018 K-017 · 汽配一级供应商（50 分）；HT-2603-012 宁波橡塑（50 分）。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"合同\",\"相对方\",\"风险分\",\"高\"],\"r"
+      },
+      {
+        "name": "ingest",
+        "fn": "ingest",
+        "kind": "query",
+        "title": "文档摄入",
+        "description": "读一份已解析的文档（合同正文 / 合同台账 Excel / 科目余额表 / 经营回顾 PPT / 往来邮件），按法务口径用起来：{text, blocks?, act?, ref?, data?}。正文读得到合同金额的那一类会在 data 里返回新副本（入参不动，台账多一份 HT-DOC-序号 合同、交付期限进 90 天台账），其余只回消息不写数据；doc.ok 为假返回 null。doc 由 parse-document 产出。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的解析结果"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "法务数据包"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包，内核只读 contractRules / setupRules / ipClasses，对话层再可选读 industries"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, note}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
+        "mutates": false,
+        "exampleInput": {
+          "doc": {
+            "kind": "text",
+            "paragraphs": [
+              "采购框架合同",
+              "甲方：杭州锐合精密五金有限公司　乙方：宁波德昌模具有限公司",
+              "第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付，首付 30%。",
+              "第二条 交付期限：2026 年 11 月 30 日前完成全部交付。",
+              "第三条 违约责任：逾期交付按日万分之五计收违约金，累计不超过合同金额 5%。",
+              "第四条 质保期 12 个月，自验收合格之日起算。"
+            ],
+            "text": "采购框架合同\n甲方：杭州锐合精密五金有限公司　乙方：宁波德昌模具有限公司\n第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付，首付 30%。\n第二条 交付期限：2026 年 11 月 30 日前完成全部交付。\n第三条 违约责任：逾期交付按日万分之五计收违约金，累计不超过合同金额 5%。\n第四条 质保期 12 个月，自验收合格之日起算。\n",
+            "stats": {
+              "行": 6,
+              "字数": 159
+            },
+            "ok": true,
+            "name": "采购框架合同.txt",
+            "size": 448,
+            "sizeText": "448 B",
+            "ext": "txt",
+            "note": "",
+            "tables": [],
+            "sheets": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "contracts",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"文本《采购框架合同.txt》读完：采购框架合同，相对方 宁波德昌模具，金额 1,860,000 元（含税 13%），交付 2026-11-30，违约金上限 5%，质保 12 个月。\\n按采购合同必备条款逐项核对：文档里读到 4 条（合同金额与付款、交付期限、违约责任、质保期），缺 4 项：「质量标准」"
       }
     ],
     "drift": [
@@ -5593,7 +6122,7 @@
     "dir": "10-ai-erp",
     "kernelPath": "core/sim.js",
     "legacyGlobal": "DGG.coreM10",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "moduleName": "AI ERP",
     "credits": 100,
     "summary": "把在手订单沿工序路线排进产线日历：延期归因、处置预演、插单三方案、采购建议与交付日报，纯规则无 LLM。",
@@ -6193,6 +6722,294 @@
         },
         "verified": true,
         "verifiedOutputDigest": "1966"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "title": "六屏登记",
+        "description": "列出六个环节的屏名与中文标签，顺序即原型标签顺序；brief / suggest / ask / ingest 的 step 都从这里取。不吃业务数据也不吃数据包。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / room / order / insert / stock / daily",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"room\",\"label\":\"指挥室\"},{\"key\":\"order\",\"label\":\"订单下钻\"},{\"key\":\"insert\",\"label\":\"插单模拟\"},{\"key\":\"stock\",\"label\":\"物料与库存\"},{\"ke"
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "title": "开场发现",
+        "description": "进某一屏先说的一条发现，数字全部从同一次排程结果里取；返回字符串，未知屏返回 null。同一组入参永远得到同一句话，今天一律取 data.today，不读系统时钟。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据（首次用 dataset 指定的预置样本）；入口内部自带 normalize"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（archetypes/samples/industries/credits/lintWords）；本 skill 的对话五件不读它，形参只为对齐通用契约，词表在数据包的 vocab 里"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run（schedule）的结果，或 {S, plan, daily} 整套；缺哪个补算哪个，不传就自己算一遍"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果或 {S, plan, daily}，传了就用，省一次重算"
+          }
+        ],
+        "returns": "字符串；未知屏为 null",
+        "mutates": false,
+        "exampleInput": {
+          "step": "room",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"按期率 69%，SO-2609-0129 晚 7 天，延期天数居首；CNC 车铣中心 100%、CNC 车铣中心 B 100% 已满负荷。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；问句里的数字（如按期率）来自当次排程结果，未知屏返回空数组。",
+        "args": [
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据（首次用 dataset 指定的预置样本）；入口内部自带 normalize"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（archetypes/samples/industries/credits/lintWords）；本 skill 的对话五件不读它，形参只为对齐通用契约，词表在数据包的 vocab 里"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run（schedule）的结果，或 {S, plan, daily} 整套；缺哪个补算哪个，不传就自己算一遍"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果或 {S, plan, daily}，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条",
+        "mutates": false,
+        "exampleInput": {
+          "step": "insert",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"三个方案差在哪\",\"哪些生产订单被拖累\",\"按 C 排要多少钱\",\"就按推荐落单\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "title": "问答",
+        "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。任一屏还认两种点名：单号 / 后四位 / 客户代号给这一张的交期、预计完工、余量、齐套与建议处置，物料名给库存、安全库存、在途、排程需求与建议下单量。blocks 是平台中立的纯数据（kv / table / tags），act 是声明式动作（goto / focus / open / apply / set），高亮走顶层 ref。屏上的选中态按数据包里的 focus / insertDraft / insertPick 三个可选字段取。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据（首次用 dataset 指定的预置样本）；入口内部自带 normalize"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（archetypes/samples/industries/credits/lintWords）；本 skill 的对话五件不读它，形参只为对齐通用契约，词表在数据包的 vocab 里"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run（schedule）的结果，或 {S, plan, daily} 整套；缺哪个补算哪个，不传就自己算一遍"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "问句原文；也认单号（SO-…）、单号后四位、客户代号（K-…）与物料名四种点名"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果或 {S, plan, daily}，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null",
+        "mutates": false,
+        "exampleInput": {
+          "question": "先处理哪一张",
+          "step": "room",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"先看 SO-2609-0129（前道拖后，晚 7 天）：加班 CNC 车铣中心 B，预计完工 9-26 → 9-25，拖累 3 张，预计 1,966 元。\",\"act\":{\"type\":\"set\",\"path\":\"focus\",\"value\":\"SO-2609-0129\"}}"
+      },
+      {
+        "name": "ingest",
+        "fn": "ingest",
+        "kind": "query",
+        "title": "文档摄入",
+        "description": "读一份已解析的文档（订单表 / 科目余额表 / 采购或交付合同 / 经营回顾 PPT / 往来邮件），按本模块业务用起来：{text, blocks?, act?, ref?, data?}。订单表那一类会在 data 里返回新副本（入参不动，按行数记一条导入批次，第 1 行填成加急单草稿写进 insertDraft / insertPick），其余只回消息不写数据；同一份文档重复导入只留一条 doc-import 批次。表里的产品对不上在册产品、交期落在排程窗口外或读不成日期时，换成排得动的值并在回答里逐条说破。合同类的金额 / 交付期限 / 逾期口径各认中文与拉丁两种写法。doc.ok 为假返回 null。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "skills/_shared/docparse.js 的解析结果，即 parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "required": true,
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据（首次用 dataset 指定的预置样本）；入口内部自带 normalize"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（archetypes/samples/industries/credits/lintWords）；本 skill 的对话五件不读它，形参只为对齐通用契约，词表在数据包的 vocab 里"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run（schedule）的结果，或 {S, plan, daily} 整套；缺哪个补算哪个，不传就自己算一遍"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "docparse 输出：{ok, kind(excel/word/pdf/text/ppt/eml), name, text, sheets, slides, mail, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "required": true,
+            "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果或 {S, plan, daily}，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
+        "mutates": false,
+        "exampleInput": {
+          "doc": {
+            "kind": "excel",
+            "sheets": [
+              {
+                "name": "CSV",
+                "rows": [
+                  [
+                    "订单号",
+                    "客户名称",
+                    "产品名称",
+                    "数量",
+                    "交期"
+                  ],
+                  [
+                    "PO-9901",
+                    "K-091 · 汽车零部件",
+                    "精密支架",
+                    "320",
+                    "2026-12-01"
+                  ],
+                  [
+                    "PO-9902",
+                    "K-092 · 通用设备",
+                    "导向套",
+                    "150",
+                    "2026-09-25"
+                  ]
+                ]
+              }
+            ],
+            "text": "订单号,客户名称,产品名称,数量,交期\nPO-9901,K-091 · 汽车零部件,精密支架,320,2026-12-01\nPO-9902,K-092 · 通用设备,导向套,150,2026-09-25\n",
+            "stats": {
+              "工作表": 1,
+              "行": 3,
+              "非空单元格": 15
+            },
+            "ok": true,
+            "name": "orders.csv",
+            "size": 166,
+            "sizeText": "166 B",
+            "ext": "csv",
+            "note": "",
+            "paragraphs": [],
+            "tables": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "connect",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"Excel《orders.csv》读完：《CSV》2 行 5 列。\\n按第 1 行排产：K-091 · 汽车零部件 · 精密五金件 Ø12×45 × 320 件，交期 9-24。\\n产品名「精密支架」没对上在册产品，按更贴近的「精密五金件 Ø12×45」排；表里交期 2026-12-01 落在 21 "
       }
     ],
     "drift": [

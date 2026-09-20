@@ -122,7 +122,24 @@ function inputSchema(a, datasets, kind) {
   return { type: 'object', properties: props, required, additionalProperties: true };
 }
 
+function hasIngest(m) { return (m.actions || []).some((a) => a.name === 'ingest'); }
+
 function buildManifest(m, fm, datasets, exCtx) {
+  const acts = (m.actions || []).map((a) => ({
+    name: a.name,
+    title: a.title,
+    kind: a.kind,
+    mutates: !!a.mutates,
+    description: a.description,
+    input: inputSchema(a, datasets, fm.kind === '计算' ? 'compute' : 'product'),
+    returns: a.returns,
+    fn: a.fn,
+    args: a.args,
+    inputProps: a.inputProps || [],
+    example: normalizeExample(a.exampleInput || {}, exCtx)
+  }));
+  /* 摄入能力齐了就把共用解析挂成 parse-document：实现不在内核里，所以动作定义由生成器补 */
+  if (hasIngest(m)) acts.push(parseDocumentAction(m));
   return {
     spec: 'dus-1',
     id: m.id,
@@ -149,19 +166,7 @@ function buildManifest(m, fm, datasets, exCtx) {
     },
     i18n: { default: 'zh-CN', available: ['zh-CN'] },
     datasets: datasets.map((d) => ({ key: d.key, label: d.label, note: d.note || '' })),
-    actions: (m.actions || []).map((a) => ({
-      name: a.name,
-      title: a.title,
-      kind: a.kind,
-      mutates: !!a.mutates,
-      description: a.description,
-      input: inputSchema(a, datasets, fm.kind === '计算' ? 'compute' : 'product'),
-      returns: a.returns,
-      fn: a.fn,
-      args: a.args,
-      inputProps: a.inputProps || [],
-      example: normalizeExample(a.exampleInput || {}, exCtx)
-    })),
+    actions: acts,
     legacy: { browserGlobal: m.legacyGlobal, sourceDir: 'skills/' + m.dir },
     agentSkill: { skillMd: 'SKILL.md', engineering: 'references/engineering.md', references: 'references/', entry: 'scripts/skill.js' },
     build: { spec: 'dus-1', generator: 'tools/build-universal.js' }
@@ -169,13 +174,157 @@ function buildManifest(m, fm, datasets, exCtx) {
 }
 
 /* ---------- 单文件打包（内核 + 运行时 + 数据 内联） ---------- */
-function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets, format, deps) {
+/* ---------- parse-document 的边界闸门（SPEC §11.2 大小上限 / §11.3 截断表）----------
+ * 共用件 skills/_shared/docparse.js 本身不做大小判断也不截断 —— 那会改变展台原型对大文件的行为，
+ * 所以闸门只加在通用包的 parse-document 动作边界上，解析器一个字不动。
+ * 产物写进包内 shared/doc-gate.js，Node 入口与浏览器单文件共用同一份。 */
+function docGateSrc() {
+  return `/*
+ * parse-document 边界闸门 · 生成物，勿手改（tools/build-universal.js）
+ * ------------------------------------------------------------------
+ * 1) 大小上限：原始字节 > 8 MB 时不进解析，直接返回 { ok:false, note:'文件 x MB，超过 8 MB 上限' }。
+ *    这不是调用失败，是业务事实；字节数只按 base64 字符数算，不先解码。
+ * 2) 截断表：解析结果按 SPEC §11.3 的上限裁一遍，裁过的在 doc.truncated 上标出来
+ *    （text / paragraphs / rows 三个键，只出现被裁的那几个）。
+ * 3) 现行运行时（DUS-1.0）对任何带 ok:false 的内核返回值都翻成 E_KERNEL 信封、data 置 null，
+ *    note 传不出去。所以失败的 Doc 这里多挂一个 errors 数组，让原因至少能从信封的 errors 里读到；
+ *    运行时按 family 分家族透传之后（SPEC §14.1 第 9 条），这一处可以去掉。
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else { root.DGG = root.DGG || {}; root.DGG.docGate = factory(); }
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var MAX_BYTES = 8 * 1024 * 1024;
+  var LIM = { text: 200000, paragraphs: 5000, paragraph: 2000,
+    sheets: 20, sheetRows: 2000, cells: 64, cell: 512,
+    tables: 200, tableRows: 500, slides: 200, slideLines: 200, attaches: 50 };
+
+  /* base64 字符数 → 原始字节数：每 4 个有效字符 3 字节，空白与 = 不计 */
+  function b64size(s) {
+    var body = /^data:/.test(s) ? s.slice(s.indexOf(',') + 1) : s;
+    var n = 0, i, c;
+    for (i = 0; i < body.length; i++) {
+      c = body.charCodeAt(i);
+      if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c === 43 || c === 47 || c === 45 || c === 95) n++;
+    }
+    return { body: body, size: Math.floor(n * 3 / 4) };
+  }
+  function clip(s, n) { s = String(s == null ? '' : s); return s.length > n ? s.slice(0, n) : s; }
+
+  function truncate(doc) {
+    var t = {}, i, j, rows, row;
+    if (typeof doc.text === 'string' && doc.text.length > LIM.text) { doc.text = doc.text.slice(0, LIM.text); t.text = true; }
+    if (doc.paragraphs && doc.paragraphs.length) {
+      if (doc.paragraphs.length > LIM.paragraphs) { doc.paragraphs = doc.paragraphs.slice(0, LIM.paragraphs); t.paragraphs = true; }
+      for (i = 0; i < doc.paragraphs.length; i++) {
+        if (String(doc.paragraphs[i]).length > LIM.paragraph) { doc.paragraphs[i] = clip(doc.paragraphs[i], LIM.paragraph); t.paragraphs = true; }
+      }
+    }
+    if (doc.sheets && doc.sheets.length) {
+      if (doc.sheets.length > LIM.sheets) { doc.sheets = doc.sheets.slice(0, LIM.sheets); t.rows = true; }
+      for (i = 0; i < doc.sheets.length; i++) {
+        rows = doc.sheets[i].rows || [];
+        if (rows.length > LIM.sheetRows) { rows = rows.slice(0, LIM.sheetRows); t.rows = true; }
+        for (j = 0; j < rows.length; j++) {
+          row = rows[j] || [];
+          if (row.length > LIM.cells) { row = row.slice(0, LIM.cells); t.rows = true; }
+          for (var c0 = 0; c0 < row.length; c0++) if (String(row[c0]).length > LIM.cell) { row[c0] = clip(row[c0], LIM.cell); t.rows = true; }
+          rows[j] = row;
+        }
+        doc.sheets[i].rows = rows;
+      }
+    }
+    if (doc.tables && doc.tables.length) {
+      if (doc.tables.length > LIM.tables) { doc.tables = doc.tables.slice(0, LIM.tables); t.rows = true; }
+      for (i = 0; i < doc.tables.length; i++) {
+        if ((doc.tables[i] || []).length > LIM.tableRows) { doc.tables[i] = doc.tables[i].slice(0, LIM.tableRows); t.rows = true; }
+      }
+    }
+    if (doc.slides && doc.slides.length) {
+      if (doc.slides.length > LIM.slides) { doc.slides = doc.slides.slice(0, LIM.slides); t.rows = true; }
+      for (i = 0; i < doc.slides.length; i++) {
+        if ((doc.slides[i].lines || []).length > LIM.slideLines) { doc.slides[i].lines = doc.slides[i].lines.slice(0, LIM.slideLines); t.rows = true; }
+      }
+    }
+    if (doc.mail && doc.mail.attaches && doc.mail.attaches.length > LIM.attaches) { doc.mail.attaches = doc.mail.attaches.slice(0, LIM.attaches); t.rows = true; }
+    for (var k in t) if (Object.prototype.hasOwnProperty.call(t, k)) { doc.truncated = t; break; }
+    return doc;
+  }
+
+  return function (docparse) {
+    return function parseDocument(name, base64) {
+      var nm = String(name == null ? '' : name);
+      var m0 = /\\.([A-Za-z0-9]+)$/.exec(nm), ext = m0 ? m0[1].toLowerCase() : '';
+      var b = b64size(String(base64 == null ? '' : base64));
+      if (b.size > MAX_BYTES) {
+        var note = '文件 ' + docparse.sizeText(b.size) + '，超过 8 MB 上限';
+        return { ok: false, note: note, name: nm, size: b.size, sizeText: docparse.sizeText(b.size), ext: ext,
+          kind: docparse.kindOf(nm), text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {},
+          errors: [{ code: 'E_DOC', message: note }] };
+      }
+      var doc = docparse.parse({ name: nm, bytes: b.body });
+      if (!doc.ok) doc.errors = [{ code: 'E_DOC', message: doc.note || '解析失败' }];
+      return truncate(doc);
+    };
+  };
+});
+`;
+}
+
+/* parse-document：动作定义由生成器补，不进 skills.map.json ——
+ * 它的实现不在各包内核里，而是共用解析件，各包内联一份（SPEC §11.1）。 */
+function parseDocumentAction(m) {
+  /* 例子直接用本包 ingest 例子里的那份文档：先 parse-document 拿 Doc，再喂给 ingest，两条例子首尾相接 */
+  const dex = ((m.actions || []).filter((a) => a.name === 'ingest')[0] || {}).exampleInput || {};
+  const d0 = dex.doc || {};
+  const exName = typeof d0.name === 'string' && d0.name ? d0.name : '往来函件.txt';
+  const exText = typeof d0.text === 'string' && d0.text ? d0.text : '甲方：\n乙方：\n事由：\n';
+  return {
+    name: 'parse-document',
+    title: '解析文档',
+    kind: 'compute',
+    mutates: false,
+    description: '把一份文件的字节解析成平台中立的 Doc：Word / Excel / PPT / PDF / 邮件 / 纯文本六类，全同步、零依赖、不碰网络与时钟。入参平铺成 { name, base64 }，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功时返回 { ok:false, note }（业务事实，不是调用失败）；超限与过大内容按上限表裁剪，裁过的在 truncated 上标出。产出的 Doc 直接喂给 ingest。',
+    input: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: '文件名，只用扩展名判类型：docx / xlsx / pptx / pdf / eml / txt / csv / md / json' },
+        base64: { type: 'string', description: '文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB' }
+      },
+      required: ['name', 'base64'],
+      additionalProperties: false
+    },
+    returns: '{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}',
+    fn: 'parseDocument',
+    args: [{ from: 'name', required: true, note: '文件名' }, { from: 'base64', required: true, note: '文件字节的 base64' }],
+    inputProps: [
+      { name: 'name', type: 'string', required: true, description: '文件名，只用扩展名判类型' },
+      { name: 'base64', type: 'string', required: true, description: '文件字节的 base64' }
+    ],
+    example: { name: exName, base64: Buffer.from(exText, 'utf8').toString('base64') }
+  };
+}
+
+function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets, format, deps, mods) {
+  mods = mods || {};
   const body = [
     "  'use strict';",
     '  function _mod(fn) { var module = { exports: {} }; fn(module, module.exports); return module.exports; }',
-    '  var kernel = _mod(function (module, exports) {',
+    '  var core = _mod(function (module, exports) {',
     kernelSrc,
     '  });',
+    ...(mods.docSrc ? [
+      '  var docparse = _mod(function (module, exports) {',
+      mods.docSrc,
+      '  });',
+      '  var makeGate = _mod(function (module, exports) {',
+      mods.gateSrc,
+      '  });',
+      '  var kernel = {}; for (var _k in core) if (Object.prototype.hasOwnProperty.call(core, _k)) kernel[_k] = core[_k];',
+      '  kernel.parseDocument = makeGate(docparse);'
+    ] : ['  var kernel = core;']),
     '  var createSkill = _mod(function (module, exports) {',
     runtimeSrc,
     '  });',
@@ -484,11 +633,18 @@ function build(m) {
   fs.mkdirSync(path.join(out, 'runtime'), { recursive: true });
   const runtimeSrc = R(path.join(UNI, 'runtime', 'invoke.js'));
   W(path.join(out, 'runtime', 'invoke.js'), runtimeSrc);
+  const ingest = hasIngest(m);
   W(path.join(out, 'index.js'), [
     '/* ' + manifest.name + ' · ' + m.id + ' · DUS-1 Node 入口（生成物） */',
     "'use strict';",
     "const createSkill = require('./runtime/invoke.js');",
-    "const kernel = require('./" + kernelRel + "');",
+    "const core = require('./" + kernelRel + "');",
+    ...(ingest ? [
+      "const docparse = require('./shared/docparse.js');",
+      "const makeGate = require('./shared/doc-gate.js');",
+      '/* parse-document 的实现不在内核里：共用解析件 + 8 MB 上限与截断闸门，挂成内核的一个函数 */',
+      "const kernel = Object.assign({}, core, { parseDocument: makeGate(docparse) });"
+    ] : ['const kernel = core;']),
     "const data = require('./bundle/data.json');",
     "const datasets = require('./bundle/datasets.json');",
     "const manifest = require('./manifest.json');",
@@ -506,8 +662,17 @@ function build(m) {
   const kernelSrc = R(path.join(srcDir, kernelRel));
   const lintSrc = R(path.join(SRC, '_shared', 'lint.js'));
   W(path.join(out, 'shared', 'lint.js'), lintSrc);
-  W(path.join(out, 'dist', m.id + '.umd.js'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'umd', deps));
-  W(path.join(out, 'dist', m.id + '.mjs'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'esm', deps));
+  /* 共用解析件与它的边界闸门：与 lint.js 同法进包；浏览器单文件也必须自带，否则 file:// 打开就没有解析 */
+  let docSrc = null, gateSrc = null;
+  if (ingest) {
+    docSrc = R(path.join(SRC, '_shared', 'docparse.js'));
+    gateSrc = docGateSrc();
+    W(path.join(out, 'shared', 'docparse.js'), docSrc);
+    W(path.join(out, 'shared', 'doc-gate.js'), gateSrc);
+  }
+  const mods = { docSrc, gateSrc };
+  W(path.join(out, 'dist', m.id + '.umd.js'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'umd', deps, mods));
+  W(path.join(out, 'dist', m.id + '.mjs'), singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, dsMap, 'esm', deps, mods));
 
   // 7 适配器
   ['cli.js', 'http.js', 'mcp.js', 'aios.js'].forEach((f) => W(path.join(out, 'adapters', f), R(path.join(UNI, 'adapters', f))));

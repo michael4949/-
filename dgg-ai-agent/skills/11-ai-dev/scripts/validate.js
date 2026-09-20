@@ -450,6 +450,81 @@ ARCHES.forEach((k) => {
   lintText(J(exo), k + ' examples 全文');
   ok(!/E-\d{3}/.test(exo.report.text) && !/企查查|天眼查|启信宝|爱企查/.test(J(exo)), k + ' examples 无员工编号 / 厂商名');
 
+  // 11. 对话与文档摄入：六屏开场、快捷问句、问答、点名、文档
+  const dBefore11 = J(d), d0Before11 = J(d0);
+  const STEPS11 = K.screens().map((x) => x.key);
+  ok(STEPS11.length === 6 && K.screens().every((x) => x.key && x.label) && STEPS11.join() === 'connect,build,try,test,ship,iterate', k + ' screens 六屏登记');
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && J(a) === J(JSON.parse(J(a))));
+  const askPair = (q, st, dd, RR) => {
+    const a = K.ask(q, st, dd, lib, RR);
+    ok(J(K.ask(q, st, dd, lib, RR)) === J(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+    ok(J(K.ask(q, st, dd, lib)) === J(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+    return a;
+  };
+  STEPS11.forEach((st) => {
+    // 接入屏按未生成的状态核（原型也是在那一步问的），其余五屏按已生成的状态核
+    const dd = st === 'connect' ? d0 : d, RR = st === 'connect' ? R0 : R;
+    const b = K.brief(st, dd, lib, RR);
+    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
+    clean(b, k + ' brief ' + st);
+    ok(J(K.brief(st, dd, lib)) === J(b), k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = K.suggest(st, dd, lib, RR);
+    ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st + ' 条数 ' + (sg || []).length);
+    sg.forEach((q) => {
+      const a = askPair(q, st, dd, RR);
+      ok(a && a.text && !/undefined|NaN|\{\w+\}/.test(a.text), k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      clean(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  // 点名一条记录 / 用例 / 接口
+  const row11 = R.rt.rows[3], tc11 = R.testResult.rows[2], api11 = R.apis[4];
+  const nRow = askPair(row11.id + ' 怎么回事', 'try', d, R);
+  ok(nRow && nRow.act.type === 'focus' && nRow.act.ref === row11.id && nRow.ref === row11.id && nRow.text.indexOf(row11.id) === 0, k + ' 点名记录 ' + row11.id);
+  clean(nRow.text, k + ' 点名记录');
+  const nTc = askPair(tc11.id + ' 是什么', 'test', d, R);
+  ok(nTc && nTc.act.type === 'focus' && nTc.act.ref === tc11.id && nTc.text.indexOf(tc11.kindName) > 0, k + ' 点名用例 ' + tc11.id);
+  const nApi = askPair(api11.id + ' 干什么的', 'test', d, R);
+  ok(nApi && nApi.act.type === 'open' && nApi.act.panel === 'api' && nApi.act.ref === api11.id && nApi.text.indexOf(api11.path) > 0, k + ' 点名接口 ' + api11.id);
+  // 写回类动作：建议 → grantPermission、追加 → applyDelta、发布 → publish、走单 → nextScript
+  const nSug = askPair('采纳这条建议', 'test', d, R);
+  ok(nSug.act.type === 'apply' && nSug.act.action === 'grantPermission' && nSug.act.input.role === R.suggestion.role && nSug.act.input.page === R.suggestion.page, k + ' 采纳建议给写回动作');
+  ok(K.run(K.grantPermission(d, lib, nSug.act.input.role, nSug.act.input.page, nSug.act.input.op), lib).suggestion.done === true, k + ' 采纳建议的动作真能执行');
+  const nDelta = askPair('生成 ' + K.bump(spec.version, 'minor'), 'iterate', d, R);
+  ok(nDelta.act.type === 'apply' && nDelta.act.action === 'applyDelta' && R.followUps.some((f) => f.text === nDelta.act.input.text), k + ' 追加需求给写回动作');
+  ok(K.applyDelta(d, lib, nDelta.act.input.text).state.lastResult.ok, k + ' 追加需求的动作真能执行');
+  ok(askPair('发到正式环境', 'ship', d, R).act.action === 'publish' && askPair('走下一步', 'try', d, R).act.action === 'nextScript', k + ' 发布 / 走单给写回动作');
+  ok(askPair('加一个' + R.recommended[0].label, 'build', d, R).act.input.key === R.recommended[0].key, k + ' 推荐字段给写回动作');
+  ok(K.ask('食堂午饭吃什么', 'ship', d, lib, R) === null, k + ' 答不上返回 null');
+  ok(K.brief('没有这一屏', d, lib, R) === null && K.ask('用例通过了吗', '没有这一屏', d, lib, R) !== null, k + ' 未知屏 brief 返回 null、跨屏问法仍能答');
+  // 文档摄入：Word 认到追加需求写进 state.delta、Excel 表头对得上就加字段、对不上只出草案
+  const docOf = (o) => Object.assign({ ok: true, kind: 'text', name: '', size: 2048, sizeText: '2 KB', ext: '', text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {}, note: '' }, o);
+  const fuText = R.followUps.filter((f) => !f.applied)[0].text;
+  const wDoc = docOf({ kind: 'word', name: 'need.docx', ext: 'docx', paragraphs: ['需求补充说明', fuText, '以上一条按现行版本执行。'], text: '需求补充说明\n' + fuText + '\n以上一条按现行版本执行。', tables: [[['期次', '比例'], ['第一期', '30%']]], stats: { 字数: 40 } });
+  const wIn = K.ingest(wDoc, 'iterate', d, lib, R);
+  ok(wIn && wIn.text && wIn.data && wIn.data !== d, k + ' ingest Word 返回新副本');
+  ok(wIn.data.state.delta === fuText && d.state.delta === null, k + ' ingest 写新副本、不动入参');
+  ok(wIn.act.type === 'set' && wIn.act.path === 'state.delta' && wIn.act.value === fuText, k + ' ingest 给声明式写回动作');
+  ok(isBlocks(wIn.blocks) && isAct(wIn.act) && wIn.text.indexOf('认到变更') > 0, k + ' ingest 块型与动作');
+  ok(J(K.ingest(wDoc, 'iterate', d, lib, R)) === J(wIn), k + ' ingest 两次不一致');
+  ok(J(K.run(wIn.data, lib).kpi) === J(R.kpi), k + ' ingest 后可继续算且不改指标');
+  clean(wIn.text, k + ' ingest Word');
+  const wIn0 = K.ingest(docOf({ kind: 'word', name: 'need.docx', ext: 'docx', paragraphs: [R0.presets[1].text], text: R0.presets[1].text }), 'connect', d0, lib, R0);
+  ok(wIn0 && wIn0.data && wIn0.data !== d0 && wIn0.data.state.text === R0.presets[1].text && d0.state.text === null && wIn0.act.path === 'state.text', k + ' ingest 未生成时写需求句');
+  clean(wIn0.text, k + ' ingest 未生成时的 Word');
+  const rec0 = R.recommended[0], recHead = rec0.label.replace(/（.*/, '');
+  const xIn = K.ingest(docOf({ kind: 'excel', name: 'fields.xlsx', ext: 'xlsx', sheets: [{ name: '字段表', rows: [['编号', recHead], ['001', '甲']] }] }), 'build', d, lib, R);
+  ok(xIn && xIn.data && xIn.data !== d && xIn.act.type === 'apply' && xIn.act.action === 'addField' && xIn.act.input.key === rec0.key, k + ' ingest Excel 表头对得上就加字段');
+  ok(xIn.data.state.spec.fields.some((f) => f.key === rec0.key) && !d.state.spec.fields.some((f) => f.key === rec0.key), k + ' ingest 加字段写新副本、不动入参');
+  clean(xIn.text, k + ' ingest Excel 命中');
+  const xIn2 = K.ingest(docOf({ kind: 'excel', name: 'trial-balance.xlsx', ext: 'xlsx', sheets: [{ name: '科目余额表', rows: [['科目编码', '科目名称', '期末余额'], ['1001', '库存现金', '12000']] }] }), 'build', d, lib, R);
+  ok(xIn2 && !xIn2.data && xIn2.act.type === 'open' && xIn2.act.panel === 'doc' && isBlocks(xIn2.act.blocks) && xIn2.text.indexOf('规格不动数') > 0, k + ' ingest Excel 对不上只出草案');
+  clean(xIn2.text, k + ' ingest Excel 草案');
+  ok(K.ingest(docOf({ ok: false, name: 'x.doc', note: '老版 .doc 请改存为 .docx' }), 'build', d, lib, R).text.indexOf('读不出来') >= 0, k + ' ingest 读不出来的文件如实说');
+  ok(J(d) === dBefore11 && J(d0) === d0Before11 && J(raw) === before, k + ' 对话与摄入没有改动入参与原样本');
+
   // 10. 全部动作后原样本与兄弟样本不变
   ok(J(raw) === before && J([lib.erpSamples, lib.procSamples, lib.hrSamples]) === sibBefore, k + ' 全部动作后原样本与兄弟模块样本不变');
   Object.keys(dSend).forEach((key) => ok(key in d0, k + ' 动作后无新增顶层键 ' + key));

@@ -712,6 +712,8 @@
   window.DGG.chatBrain('m6', {
     kernel: window.DGG.coreM6,
     ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    /* 屏上选中的那条勾稽 / 风险 / 周要一起递给内核，不然问的和写回的都落到默认那一条上 */
+    answer: function (q, step) { return M.R ? K.ask(q, step, M.data, LIB, M.R, { rule: M.rule, risk: M.risk, week: M.week }) : null; },
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {
