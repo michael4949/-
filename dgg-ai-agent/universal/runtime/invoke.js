@@ -111,7 +111,8 @@
 
     // ---------- 内置动作 ----------
     function health() {
-      var keys = []; for (var k in data) if (Object.prototype.hasOwnProperty.call(data, k)) keys.push(k);
+      /* 下划线开头的是内核自己在数据包上挂的内部缓存（如 AI软件开发 的词典索引），不算对外字段 */
+      var keys = []; for (var k in data) if (Object.prototype.hasOwnProperty.call(data, k) && k.charAt(0) !== '_') keys.push(k);
       return {
         id: manifest.id, name: manifest.name, version: manifest.version,
         kernelVersion: kernel && kernel.VERSION, kernelName: kernel && kernel.MODULE_NAME,

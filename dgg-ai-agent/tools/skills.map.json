@@ -5587,5 +5587,1415 @@
     ],
     "summary": "老板经营决策台：31 节点指标树、连环替代法归因、方案 12 个月预演、三位会签与决议执行复盘",
     "version": "1.0.0"
+  },
+  {
+    "id": "ai-erp",
+    "dir": "10-ai-erp",
+    "kernelPath": "core/sim.js",
+    "legacyGlobal": "DGG.coreM10",
+    "version": "1.0.0",
+    "moduleName": "AI ERP",
+    "credits": 100,
+    "summary": "把在手订单沿工序路线排进产线日历：延期归因、处置预演、插单三方案、采购建议与交付日报，纯规则无 LLM。",
+    "dataFiles": 5,
+    "dataKeys": [
+      "archetypes",
+      "credits",
+      "industries",
+      "lintWords",
+      "samples"
+    ],
+    "crossSkillDeps": [],
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造型主样本 · 杭州锐合精密五金（15 张生产订单 / 8 条产线 / 6 条工艺路线 / 20 种物料，延期 4 张）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "flow",
+        "label": "流通型样本 · 宁波优选百货供应链（10 张订单 / 5 个作业区 / 9 种商品，延期 2 张）",
+        "source": "data.samples.flow"
+      },
+      {
+        "key": "project",
+        "label": "项目型样本 · 苏州筑合空间装饰（9 个项目 / 6 个班组 / 8 种资源，延期 4 个）",
+        "source": "data.samples.project"
+      },
+      {
+        "key": "service",
+        "label": "服务型样本 · 成都启元财税（10 张服务单 / 4 个小组 / 5 种资源，延期 2 张）",
+        "source": "data.samples.service"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "schedule",
+        "kind": "compute",
+        "title": "排程全景",
+        "description": "一次排完全部在手订单：每道工序的开工完工与甘特段、每张订单的预计完工/延期天数/归因（缺料·产能不足·前道拖后）/齐套率、产线 7 日与窗口负荷、物料分配与指挥室 KPI。第 2、3 屏的只读内容全部来自这一次调用。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据（首次用 dataset 指定的预置样本，之后用上一步 mutate 动作返回的新副本）；内核入口自带 normalize，传原始样本即可"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version,today,horizon,days[],orders[]（工序段/归因/齐套/瓶颈）,byId,lines[]负荷,materials[]分配,kpi,data 规范化副本}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"today\":\"2026-09-17\",\"horizon\":21,\"days\":[{\"d\":0,\"date\":\"2026-09-17\",\"label\":\"9-17\",\"wd\":\"四\",\"rest\":false},{\"d\":1,\"date\":\"2026-09-18\",\"label\""
+      },
+      {
+        "name": "explain-order",
+        "fn": "explain",
+        "kind": "query",
+        "title": "订单下钻",
+        "description": "给一张订单的「看了哪些数据 / 判断依据」：工序进度、交期与预计完工、卡住的物料（需求量·可用库存·在途到货）、瓶颈产线负荷与排队天数，以及一句归因结论。第 3 屏 AI 判断卡用它。",
+        "args": [
+          {
+            "from": "S",
+            "required": true,
+            "note": "run（schedule）返回的排程结果，原样 JSON 回传即可"
+          },
+          {
+            "from": "orderId",
+            "required": true,
+            "note": "订单号，取 run 结果 orders[].id"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "S",
+            "type": "object",
+            "required": true,
+            "description": "run 动作的返回值（排程结果）"
+          },
+          {
+            "name": "orderId",
+            "type": "string",
+            "required": true,
+            "description": "要下钻的订单号，如 SO-2609-0129"
+          }
+        ],
+        "returns": "{cause,label,desc,seen[] 看了哪些数据,reasons[] 判断依据}",
+        "mutates": false,
+        "exampleInput": {
+          "S": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            }
+          },
+          "orderId": "SO-2609-0129"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"cause\":\"upstream\",\"label\":\"前道拖后\",\"desc\":\"前道工序实际进度落后，剩余工时已装不进交期\",\"seen\":[\"工序路线 4 道 · 已完成 1 道 · 当前「车削」进度 40%\",\"交期 9-19 · 预计完工 9-26 · 晚 7 天\"],\"reasons\":[\"剩余 74.6"
+      },
+      {
+        "name": "order-actions",
+        "fn": "actions",
+        "kind": "compute",
+        "title": "处置候选",
+        "description": "给一张订单列出催料 / 加班 / 调线 / 改期四类处置候选，每项都已在数据副本上整体重排预演：本单完工前后对比、能否赶上交期、拖累几张单、新增几张延期与费用，并按推荐序排好（改期垫底）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本，必须与 S 同源"
+          },
+          {
+            "from": "S",
+            "required": true,
+            "note": "run 返回的排程结果"
+          },
+          {
+            "from": "orderId",
+            "required": true,
+            "note": "订单号"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "S",
+            "type": "object",
+            "required": true,
+            "description": "run 动作的返回值（排程结果）"
+          },
+          {
+            "name": "orderId",
+            "type": "string",
+            "required": true,
+            "description": "要处置的订单号"
+          }
+        ],
+        "returns": "候选[]：{key,label,target,targetName,desc,params,cost,costNote,effect 预演,advised,rank}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "S": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            }
+          },
+          "orderId": "SO-2609-0129"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"overtime\",\"label\":\"加班\",\"target\":\"L8\",\"targetName\":\"CNC 车铣中心 B\",\"desc\":\"CNC 车铣中心 B 未来 7 个工作日每天加班 3 小时\",\"params\":{\"line\":\"L8\",\"hours\":3,\"days\":7},\"cost\":"
+      },
+      {
+        "name": "apply-action",
+        "fn": "applyAction",
+        "kind": "mutate",
+        "title": "执行处置",
+        "description": "把某个处置动作真正写进数据副本并记日志（催料改在途到货日或紧急下单 / 加班加产线日历 / 调线改工序产线 / 改期改交期），返回新副本；再跑一次 run 即为处置后的指挥室。原数据不动。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "orderId",
+            "required": true,
+            "note": "订单号"
+          },
+          {
+            "from": "key",
+            "required": true,
+            "note": "动作 key：expedite / overtime / reroute / reschedule，取 order-actions 的 key"
+          },
+          {
+            "from": "params",
+            "required": true,
+            "note": "原样回传 order-actions 里对应候选的 params；另加 cost 字段才会把费用记进 log（第 4 个实参，内核第 5 个参数 dry 不暴露）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "orderId",
+            "type": "string",
+            "required": true,
+            "description": "订单号"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "expedite 催料 / overtime 加班 / reroute 调线 / reschedule 改期"
+          },
+          {
+            "name": "params",
+            "type": "object",
+            "required": true,
+            "description": "order-actions 候选里的 params（expedite:{material,eta,qty} · overtime:{line,hours,days} · reroute:{op,line} · reschedule:{due}），可再加 cost 记账"
+          }
+        ],
+        "returns": "新的业务数据副本：订单标 handled 并写 actions，log 末条即本次处置",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "orderId": "SO-2609-0129",
+          "key": "overtime",
+          "params": {
+            "$action": "order-actions",
+            "input": {
+              "dataset": "make",
+              "S": {
+                "$action": "run",
+                "input": {
+                  "dataset": "make"
+                }
+              },
+              "orderId": "SO-2609-0129"
+            },
+            "path": "0.params"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "log[last]={\"seq\":1,\"orderId\":\"SO-2609-0129\",\"customer\":\"K-009 · 医疗器械配件商\",\"action\":\"overtime\",\"label\":\"加班\",\"detail\":\"CNC 车铣中心 B 加班 3 小时 × 7 天\",\"cost\":0}"
+      },
+      {
+        "name": "simulate-insert",
+        "fn": "simulateInsert",
+        "kind": "compute",
+        "title": "插单模拟",
+        "description": "同一张加急单按三种策略各排一遍并逐单对比：A 优先插队 / B 末尾排队 / C 拆分并行加加班，给各自完工日、能否按期、拖累张数、转为延期张数、合计后移天数与加班费，再推荐一个并给理由。第 4 屏。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "req",
+            "required": true,
+            "note": "加急单 {customer,product,qty,due}，可直接取样本的 insertPresets[i]"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "req",
+            "type": "object",
+            "required": true,
+            "description": "加急单：customer 客户、product 产品 id、qty 数量、due 交期（YYYY-MM-DD），可选 note"
+          }
+        ],
+        "returns": "{request,base,options[3]（完工/拖累/转延期/费用/受影响明细/工序）,recommend,reason,_S 三方案完整排程}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "req": {
+            "$dataset": "make",
+            "path": "insertPresets.0"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"request\":{\"customer\":\"K-017 · 汽配一级供应商\",\"product\":\"P03\",\"qty\":6000,\"due\":\"2026-09-24\",\"note\":\"客户产线临时切换型号\"},\"base\":{\"version\":\"1.0.0\",\"today\":\"2026-09-17\",\"hori"
+      },
+      {
+        "name": "apply-insert",
+        "fn": "applyInsert",
+        "kind": "mutate",
+        "title": "插单落单",
+        "description": "按选定策略把加急单真正落进数据副本并记日志：A 置顶优先级、B 排到末尾、C 拆两批并行并给相关产线加 7 天班，返回新副本，所有在手订单按新排程刷新。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "req",
+            "required": true,
+            "note": "与 simulate-insert 同一张加急单"
+          },
+          {
+            "from": "strategy",
+            "required": true,
+            "note": "A / B / C，一般取 simulate-insert 的 recommend 或用户选定方案"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "req",
+            "type": "object",
+            "required": true,
+            "description": "加急单 {customer,product,qty,due}"
+          },
+          {
+            "name": "strategy",
+            "type": "string",
+            "required": true,
+            "description": "A 优先插队 / B 末尾排队 / C 拆分并行 + 加班"
+          }
+        ],
+        "returns": "新的业务数据副本：新增一张 inserted 订单（C 方案带 parts 与加班），log 末条为落单记录",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "req": {
+            "$dataset": "make",
+            "path": "insertPresets.0"
+          },
+          "strategy": "A"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "log[last]={\"seq\":1,\"orderId\":\"SO-2609-0162\",\"customer\":\"K-017 · 汽配一级供应商\",\"action\":\"insert\",\"label\":\"插单模拟 · 优先插队\",\"detail\":\"K-017 · 汽配一级供应商 6,000 件，交期 9-24\",\"cos"
+      },
+      {
+        "name": "purchase-plan",
+        "fn": "purchasePlan",
+        "kind": "compute",
+        "title": "采购建议",
+        "description": "按排程推算每种物料的库存走势曲线，倒推缺口日与低于安全库存日、建议下单量（含 MOQ 与包装规格）、最晚下单日与是否已错过，并给呆滞清单和按供应商归集的采购单草稿。第 5 屏。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本，必须与 S 同源"
+          },
+          {
+            "from": "S",
+            "required": true,
+            "note": "run 返回的排程结果，用它的工序开工日推算物料消耗时点"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "S",
+            "type": "object",
+            "required": true,
+            "description": "run 动作的返回值（排程结果）"
+          }
+        ],
+        "returns": "{items[]（curve 走势/缺口日/建议量/最晚下单日/理由）,slow[] 呆滞,po[] 按供应商归集,summary}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "S": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"items\":[{\"id\":\"M07\",\"name\":\"镀镍添加剂\",\"spec\":\"光亮剂 5L/桶\",\"unit\":\"L\",\"supplier\":\"绍兴表面处理材料\",\"stock\":22,\"safety\":40,\"onOrder\":100,\"demand\":142,\"curve\":[{\"d\":0,\"level"
+      },
+      {
+        "name": "apply-purchase",
+        "fn": "applyPurchase",
+        "kind": "mutate",
+        "title": "生成采购单",
+        "description": "把采购建议里的下单项按供应商各开一张采购单，写进数据副本的在途并记一条日志；给 ids 只落指定物料，不给则全落。落单后重排，缺口随到货日回补。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本，必须与 plan 同源"
+          },
+          {
+            "from": "plan",
+            "required": true,
+            "note": "purchase-plan 的返回值，原样 JSON 回传"
+          },
+          {
+            "from": "ids",
+            "required": false,
+            "note": "只落这些物料 id（如 [\"M07\"]）；省略则把 suggestQty>0 的全部落单"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "plan",
+            "type": "object",
+            "required": true,
+            "description": "purchase-plan 动作的返回值"
+          },
+          {
+            "name": "ids",
+            "type": "array",
+            "required": false,
+            "description": "要落单的物料 id 数组，省略为全部"
+          }
+        ],
+        "returns": "{data 新的业务数据副本（下单项进 onOrder + 一条 purchase 日志）, pos[] 生成的采购单}",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "plan": {
+            "$action": "purchase-plan",
+            "input": {
+              "dataset": "make",
+              "S": {
+                "$action": "run",
+                "input": {
+                  "dataset": "make"
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "log[last]={\"seq\":1,\"orderId\":\"\",\"customer\":\"\",\"action\":\"purchase\",\"label\":\"采购建议\",\"detail\":\"生成 5 张采购单：PO-2609-032 绍兴表面处理材料 9,360 元；PO-2609-033 无锡不锈钢材料 10,500 元；P"
+      },
+      {
+        "name": "daily-report",
+        "fn": "daily",
+        "kind": "compute",
+        "title": "交付日报",
+        "description": "出交付日报：今日交付、风险与延期订单及归因、今日已处置、明日提醒（到期 / 开工 / 到货 / 需下单）、产线负荷，并拼一段可直接发到微信的文本。第 6 屏。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本，必须与 S 同源"
+          },
+          {
+            "from": "S",
+            "required": true,
+            "note": "run 返回的排程结果"
+          },
+          {
+            "from": "plan",
+            "required": false,
+            "note": "purchase-plan 的返回值；省略则日报不含采购段与需下单提醒"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "S",
+            "type": "object",
+            "required": true,
+            "description": "run 动作的返回值（排程结果）"
+          },
+          {
+            "name": "plan",
+            "type": "object",
+            "required": false,
+            "description": "purchase-plan 动作的返回值，建议一并传入"
+          }
+        ],
+        "returns": "{date,weekday,kpi,deliveries[],risks[],handled[],tomorrow[],lines[],text 可发送文本}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "S": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            }
+          },
+          "plan": {
+            "$action": "purchase-plan",
+            "input": {
+              "dataset": "make",
+              "S": {
+                "$action": "run",
+                "input": {
+                  "dataset": "make"
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"date\":\"2026-09-17\",\"weekday\":\"四\",\"kpi\":{\"total\":15,\"open\":13,\"done\":2,\"late\":4,\"risk\":5,\"ok\":4,\"handled\":0,\"onTimeRate\":69,\"load7\":60,\"overLines\":2,\"shortMate"
+      },
+      {
+        "name": "compare-schedules",
+        "fn": "diff",
+        "kind": "query",
+        "title": "排程对比",
+        "description": "两次排程结果逐单对比：完工日变化天数、延期天数变化、谁转为延期、谁转为按期，按后移天数排序。处置前后、插单前后、落采购单前后都用它出「受影响订单」表。",
+        "args": [
+          {
+            "from": "before",
+            "required": true,
+            "note": "处置前的排程结果（run 的返回值）"
+          },
+          {
+            "from": "after",
+            "required": true,
+            "note": "处置后的排程结果（把 mutate 动作返回的新副本再跑一次 run）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "before",
+            "type": "object",
+            "required": true,
+            "description": "变更前 run 的返回值"
+          },
+          {
+            "name": "after",
+            "type": "object",
+            "required": true,
+            "description": "变更后 run 的返回值"
+          }
+        ],
+        "returns": "逐单对比[]：{id,customer,before,after,delta,lateBefore,lateAfter,turnsLate,turnsOk,状态}",
+        "mutates": false,
+        "exampleInput": {
+          "before": {
+            "$action": "run",
+            "input": {
+              "dataset": "make"
+            }
+          },
+          "after": {
+            "$action": "run",
+            "input": {
+              "data": {
+                "$action": "apply-insert",
+                "input": {
+                  "dataset": "make",
+                  "req": {
+                    "$dataset": "make",
+                    "path": "insertPresets.0"
+                  },
+                  "strategy": "A"
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"id\":\"SO-2609-0147\",\"customer\":\"K-012 · 新能源电池壳体厂\",\"before\":\"9-26\",\"after\":\"9-28\",\"beforeDay\":9,\"afterDay\":11,\"delta\":2,\"lateBefore\":0,\"lateAfter\":0,\"turnsLate"
+      },
+      {
+        "name": "overtime-cost",
+        "fn": "overtimeCost",
+        "kind": "compute",
+        "title": "加班费测算",
+        "description": "按统一口径测算某条产线加班的费用：小时数 × 窗口内工作日数 × 班组人数 × 综合时薪 × 1.3（休息日不计）。处置与插单方案 C 的费用都走这一口径，平台可单独调它做试算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（要有 lines / labor / workday）"
+          },
+          {
+            "from": "lineId",
+            "required": true,
+            "note": "产线 / 作业区 / 班组 id，如 L8"
+          },
+          {
+            "from": "hours",
+            "required": true,
+            "note": "每个工作日加班小时数"
+          },
+          {
+            "from": "days",
+            "required": true,
+            "note": "从今天起的日历天数窗口，其中的休息日不计费"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "lineId",
+            "type": "string",
+            "required": true,
+            "description": "产线 id，取 run 结果 lines[].id"
+          },
+          {
+            "name": "hours",
+            "type": "number",
+            "required": true,
+            "description": "每工作日加班小时数，处置默认 3"
+          },
+          {
+            "name": "days",
+            "type": "number",
+            "required": true,
+            "description": "窗口天数，处置默认 7"
+          }
+        ],
+        "returns": "数字：加班费（元），已取整",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "lineId": "L8",
+          "hours": 3,
+          "days": 7
+        },
+        "verified": true,
+        "verifiedOutputDigest": "1966"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 inputs: [data]",
+        "says": "对外输入只有 data 一项",
+        "actual": "explain / actions / purchasePlan / daily 还必须收一个由 schedule(data) 产出的 S，daily 再加 purchasePlan 的 plan，applyPurchase 也要 plan；只给 data 这 5 个函数根本调不动（其余字段 version 1.0.0、credits 100、data_files 5、llm_calls 0 与代码一致）",
+        "fix": "前言写成 inputs: [data, S, plan]，或加一行 derived_inputs 说明 S / plan 由 schedule / purchasePlan 产出后回传（通用包已落为 input.S / input.plan）"
+      },
+      {
+        "where": "SKILL.md「引擎接口」表",
+        "says": "只列 schedule / explain / actions / applyAction / simulateInsert / applyInsert / purchasePlan / daily 八个函数",
+        "actual": "内核还导出 applyPurchase(data, plan, ids)——第 5 屏「生成采购单」的唯一入口，prototype/src/module-10.js:383、402 正在调——以及 diff、overtimeCost、normalize、nextOrderId、CAUSES、HZ 与 dayIdx / dateOf / short / isRest / weekday / fmtN",
+        "fix": "表里补 applyPurchase、diff、overtimeCost 三行（通用包已暴露为 apply-purchase / compare-schedules / overtime-cost），其余标注为内部工具函数不对外"
+      },
+      {
+        "where": "SKILL.md「引擎接口」表 · applyAction 一行",
+        "says": "applyAction(data, orderId, key, params)",
+        "actual": "实际签名是 (raw, orderId, key, params, dry)；dry=true 时只重排预演、不记 log、不标 handled，actions() 的 effect 预演就靠它",
+        "fix": "补第 5 个参数 dry 的说明；通用包的 apply-action 只映射前 4 个实参（落单口径）"
+      },
+      {
+        "where": "SKILL.md「引擎接口」表 · schedule 返回值",
+        "says": "schedule(data) → { orders, byId, lines, materials, kpi, days }",
+        "actual": "实际还返回 version、today、horizon 与 data，其中 data 是 normalize 后的完整数据副本，explain / actions 下游直接取 S.data",
+        "fix": "返回值补 version / today / horizon / data 四个键，并标注 data 为规范化副本"
+      },
+      {
+        "where": "SKILL.md 前言 kind: 产品（对照 universal/SPEC.md §4「每个包必须有 run」）",
+        "says": "产品类应有一次调用拿到完整结果的入口",
+        "actual": "内核没有 run 或任何聚合函数，指挥室完整结果要 schedule → purchasePlan → daily 三次调用（scripts/run-examples.js 正是这么拼的）；通用包里 run 只能映射到 schedule",
+        "fix": "内核补一个 run(data) = { S, plan, daily } 的聚合导出并升 minor 版本；在此之前 SKILL.md 注明 run 等同 schedule，完整结果需三步"
+      }
+    ],
+    "notes": "1) 内核无一次成型函数，run 映射 schedule；完整指挥室 = run → purchase-plan → daily-report 三步，examples/*.output.json 就是这三步的摘要。2) 所有入口函数内部自带 normalize，$data 直传原始样本即可，不需要 $data:ensure，也不需要 $lib（内核签名里没有 lib）。3) S 与 plan 是上一步的返回值，JSON 回传已实测安全（byId 等引用关系不影响结果）。4) apply-purchase 返回 {data,pos}，平台必须把 .data 写回会话状态，且不幂等（重复调用会重复下单）；apply-action / apply-insert 直接返回新副本，其 digest 取 log 末条最能证明动作生效。5) apply-action 的 params 原样回传 order-actions[i].params，再加 cost 字段才会把费用记进日志。6) simulate-insert 返回含 base 与 _S（三方案完整排程，约 520KB），第 4 屏甘特要用，别裁。7) fmtN / short / dateOf / dayIdx / weekday / isRest / normalize / nextOrderId 属工具函数，未暴露为动作。8) 四套样本（make/flow/project/service）均跑通 run + purchase-plan + daily-report，make 与 examples/make.output.json 的 kpi、插单推荐、采购 summary、日报全文逐字一致；scripts/validate.js 783 项断言通过；仓库零改动。"
+  },
+  {
+    "id": "ai-dev",
+    "dir": "11-ai-dev",
+    "kernelPath": "core/build.js",
+    "legacyGlobal": "DGG.coreM11",
+    "version": "1.0.0",
+    "moduleName": "AI软件开发",
+    "credits": 100,
+    "summary": "一句需求解析成应用规格，生成页面接口权限、试用走单、用例执行、发布与追加迭代交付",
+    "dataFiles": 12,
+    "dataKeys": [
+      "components",
+      "credits",
+      "deltas",
+      "erpSamples",
+      "flows",
+      "hrSamples",
+      "industries",
+      "integrations",
+      "lexicon",
+      "lintWords",
+      "objects",
+      "presets",
+      "procSamples",
+      "roles",
+      "samples",
+      "tests"
+    ],
+    "crossSkillDeps": [
+      "05-ai-hr",
+      "08-ai-process",
+      "10-ai-erp"
+    ],
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造业样本 · 杭州锐合精密五金有限公司（17 对象 84 预埋行）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "flow",
+        "label": "贸易仓配样本 · 宁波优选百货供应链有限公司（15 对象 76 预埋行）",
+        "source": "data.samples.flow"
+      },
+      {
+        "key": "service",
+        "label": "服务业样本 · 成都启元财税服务有限公司（16 对象 80 预埋行）",
+        "source": "data.samples.service"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "一次成型",
+        "description": "一次调用得到这个 skill 的完整结果：需求解析、规格、权限矩阵、页面模型、数据字典、接口清单、用例与执行结果、运行时统计、发布检查与流水、扫码入口、追加需求预览、交付清单、微信报告与 KPI；传未生成的原始样本时只给 4 条预置句的页/字段/用例数预览与主数据来源",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "当前业务数据副本：原始样本（只出预览）或 ensure→generate 之后的副本（出完整交付结果）（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包（词典/对象库/流程模板/岗位/组件/预置句/用例文案/变更类型/主数据来源 + 三套样本 + erp/proc/hr 兄弟样本）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{ text, parsed, presets, refs, spec, perms, pages, schema, apis, tests, testResult, stats, checklist, script, recommended, suggestion, releases, pipeline, qrText, diff, changes, followUps, deliverables, report, kpi, log }",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kpi\":{\"pages\":6,\"fields\":10,\"roles\":4,\"states\":5,\"transitions\":3,\"apis\":8,\"tests\":18,\"passed\":18,\"failed\":0,\"passRate\":100,\"roleBlocked\":3,\"warnings\":1,\"versi"
+      },
+      {
+        "name": "ensure",
+        "fn": "ensure",
+        "kind": "mutate",
+        "title": "初始化数据",
+        "description": "把样本补成可用的数据副本：补齐 state 的 14 个默认键（text/presetIndex/parsed/spec/prevSpec/rt/releases/log/testRuns/changes/script/env/sent/lastResult）与 seed、systems，所有后续动作都在这个副本上进行",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "原始业态样本（data.samples.make / flow / service）（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的数据副本（archetype / company / today / clockMin / systems / seed / expect / state 全部就绪）",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"company\":\"杭州锐合精密五金有限公司\",\"stateKeys\":[\"text\",\"presetIndex\",\"parsed\",\"spec\",\"prevSpec\",\"rt\",\"releases\",\"log\",\"testRuns\",\"changes\",\"script\",\"e"
+      },
+      {
+        "name": "set-text",
+        "fn": "setText",
+        "kind": "mutate",
+        "title": "写需求句",
+        "description": "接入屏：写入一句自由需求，下一次 run 会按两级词典重新解析对象/角色/动作/渠道/字段/时限；句中无对象词时回落到本业态相近的预置句并在 mode 里标 fallback",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "当前数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "text",
+            "required": true,
+            "note": "需求句原文，传 null 表示清空回到预置句"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "一句话需求，如「模具扫码领用登记工单号，归还登记，超期自动提醒」"
+          }
+        ],
+        "returns": "新数据副本，state.text 已更新、state.lastResult 置空",
+        "mutates": true,
+        "exampleInput": {
+          "text": "模具扫码领用登记工单号，归还登记，超期自动提醒",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"模具扫码领用登记工单号，归还登记，超期自动提醒\",\"parsedNow\":\"模具领用单\"}"
+      },
+      {
+        "name": "pick-preset",
+        "fn": "pickPreset",
+        "kind": "mutate",
+        "title": "选预置句",
+        "description": "接入屏：按下标选本业态 4 条预置需求句之一，同时把句子写进 state.text；下标越界自动夹到 0..3",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "当前数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "index",
+            "required": true,
+            "note": "预置句下标 0-3，对应 run 结果里的 presets[i]"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "index",
+            "type": "number",
+            "required": true,
+            "description": "预置句下标（0 起），可从 run().presets 取"
+          }
+        ],
+        "returns": "新数据副本，state.presetIndex 与 state.text 已更新",
+        "mutates": true,
+        "exampleInput": {
+          "index": 1,
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"presetIndex\":1,\"text\":\"每班扫码点检 CNC 设备，异常项自动转整改单，生产主管看整改进度\"}"
+      },
+      {
+        "name": "generate",
+        "fn": "generate",
+        "kind": "mutate",
+        "title": "生成应用",
+        "description": "主动作：解析需求句 → 确认应用规格（XQ-001 / GG-001 v0.1 / V1.0.0）→ 预埋运行时（沙箱时钟 09:00）→ 跑第 1 轮用例 CS-001 → FB-001 发布到测试环境，env = staging；每次生成扣 100 积分",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 ensure 且写好需求句的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新数据副本：state.spec / state.rt / state.releases[FB-001] / state.env='staging' / state.log 就绪",
+        "mutates": true,
+        "exampleInput": {
+          "data": {
+            "$action": "pick-preset",
+            "input": {
+              "dataset": "make",
+              "index": 1
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"specNo\":\"GG-001\",\"ver\":\"v0.1\",\"version\":\"V1.0.0\",\"env\":\"staging\",\"rows\":8,\"releases\":1,\"log\":1}"
+      },
+      {
+        "name": "add-field",
+        "fn": "addField",
+        "kind": "mutate",
+        "title": "追加字段",
+        "description": "产物屏：把推荐字段（对象可选字段或 deltas.fieldLib 键）加进规格，规格版本 specVer +0.1，表单/数据字典/接口/用例同步更新；字段已存在则原样返回",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "key",
+            "required": true,
+            "note": "字段 key，取自 run().recommended[i].key"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "字段 key，如 dueDays；来源 run().recommended 或 deltas.fieldLib"
+          }
+        ],
+        "returns": "新数据副本，spec.fields 增一项、specVer +0.1、lastResult 给提示文案",
+        "mutates": true,
+        "exampleInput": {
+          "key": "dueDays",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"key\":\"dueDays\",\"label\":\"整改期限（天）\",\"specVer\":\"v0.2\",\"fields\":11,\"lastResult\":{\"ok\":true,\"msg\":\"GG-001 v0.2 · 新增字段 整改期限（天）\"}}"
+      },
+      {
+        "name": "grant-permission",
+        "fn": "grantPermission",
+        "kind": "mutate",
+        "title": "开放权限",
+        "description": "产物屏：采纳权限建议（run().suggestion），给某角色在某页面开放一种操作，权限矩阵与接口需要角色、越权用例同步更新，specVer +0.1",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "role",
+            "required": true,
+            "note": "角色 key，如 r2，取自 run().suggestion.role 或 spec.roles[i].key"
+          },
+          {
+            "from": "page",
+            "required": true,
+            "note": "页面 key，如 board，取自 run().suggestion.page 或 spec.pages[i].key"
+          },
+          {
+            "from": "op",
+            "required": false,
+            "note": "操作名，缺省「查看」；六种：查看/新建/编辑/流转/导出/配置"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "role",
+            "type": "string",
+            "required": true,
+            "description": "角色 key"
+          },
+          {
+            "name": "page",
+            "type": "string",
+            "required": true,
+            "description": "页面 key"
+          },
+          {
+            "name": "op",
+            "type": "string",
+            "required": false,
+            "description": "操作名，默认「查看」"
+          }
+        ],
+        "returns": "新数据副本，permOverrides 增一条、specVer +0.1、lastResult 给提示文案",
+        "mutates": true,
+        "exampleInput": {
+          "role": "r2",
+          "page": "board",
+          "op": "查看",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"arg\":[\"r2\",\"board\",\"查看\"],\"specVer\":\"v0.3\",\"lastResult\":{\"ok\":true,\"msg\":\"权限矩阵已更新 · GG-001 v0.3\"}}"
+      },
+      {
+        "name": "submit-row",
+        "fn": "submitRow",
+        "kind": "mutate",
+        "title": "提交记录",
+        "description": "试用屏：按槽位操作者在沙箱运行时上真实提交一条记录，先做字段校验（必填/长度/范围/选项/照片/手机号/日期/主数据），通过后给流水号 前缀-年月-三位序号并按 initialRule 落节点，时钟 +15 分；校验不过时 lastResult.ok=false 并带 errors",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "slot",
+            "required": true,
+            "note": "槽位：submitter / handler / handler2 / lead"
+          },
+          {
+            "from": "values",
+            "required": true,
+            "note": "表单字段值对象，key 取 run().spec 的表单字段；可用 exampleValues 生成的示例值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "slot",
+            "type": "string",
+            "required": true,
+            "description": "提交人槽位，通常 submitter"
+          },
+          {
+            "name": "values",
+            "type": "object",
+            "required": true,
+            "description": "字段 key → 值，如 {device:'CNC-01', shift:'夜班', items:12, issues:0, issueDesc:'冷却液浓度偏低', photo:0, dueDays:3}"
+          }
+        ],
+        "returns": "新数据副本，state.rt 增一行、lastResult = { ok, id, msg } 或 { ok:false, code, error, errors }",
+        "mutates": true,
+        "exampleInput": {
+          "slot": "submitter",
+          "values": {
+            "device": "CNC-01",
+            "shift": "夜班",
+            "items": 12,
+            "issues": 0,
+            "issueDesc": "冷却液浓度偏低",
+            "photo": 0,
+            "dueDays": 3
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"lastResult\":{\"ok\":true,\"id\":\"DJ-2609-009\",\"msg\":\"DJ-2609-009 已提交 · 合格\"},\"rows\":9,\"values\":[\"device\",\"shift\",\"items\",\"issues\",\"issueDesc\",\"photo\",\"dueDays\"]}"
+      },
+      {
+        "name": "do-transition",
+        "fn": "doTransition",
+        "kind": "mutate",
+        "title": "流转处置",
+        "description": "试用屏：按槽位对某条记录发起一次流转（接单/分配/处理/完成/评价/驳回等），依次判乐观锁 E_VERSION、状态 E_STATE、二级审批阈值路由、角色 E_ROLE、本人范围 E_SCOPE 与阶段字段校验，通过后写 assignee / version / history，时钟 +15 分",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "slot",
+            "required": true,
+            "note": "操作者槽位，需在该迁移的 by 里"
+          },
+          {
+            "from": "id",
+            "required": true,
+            "note": "记录流水号，如 DJ-2609-001"
+          },
+          {
+            "from": "actionEn",
+            "required": true,
+            "note": "迁移的英文动作名，取自 run().spec.transitions[i].actionEn"
+          },
+          {
+            "from": "values",
+            "required": false,
+            "note": "该阶段必填字段的值对象，没有阶段字段时可省"
+          },
+          {
+            "from": "expectedVersion",
+            "required": false,
+            "note": "乐观锁版本号，不传不校验；重复接单演示时传旧版本会得 E_VERSION"
+          },
+          {
+            "from": "alt",
+            "required": false,
+            "note": "true 时取同职务第二人（E 编号第二个），用于重复接单/并发演示"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "slot",
+            "type": "string",
+            "required": true,
+            "description": "操作者槽位 submitter / handler / handler2 / lead"
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "记录流水号"
+          },
+          {
+            "name": "actionEn",
+            "type": "string",
+            "required": true,
+            "description": "动作英文名，如 accept / assign / fix / done / rate"
+          },
+          {
+            "name": "values",
+            "type": "object",
+            "required": false,
+            "description": "阶段字段值"
+          },
+          {
+            "name": "expectedVersion",
+            "type": "number",
+            "required": false,
+            "description": "期望版本号（乐观锁）"
+          },
+          {
+            "name": "alt",
+            "type": "boolean",
+            "required": false,
+            "description": "是否用同职务第二人操作"
+          }
+        ],
+        "returns": "新数据副本，行状态/版本/历史已推进，lastResult = { ok, id, msg } 或 { ok:false, code, error, errors }",
+        "mutates": true,
+        "exampleInput": {
+          "slot": "handler",
+          "id": "DJ-2609-001",
+          "actionEn": "fix",
+          "values": {
+            "fixer": "E-122"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"args\":{\"slot\":\"handler\",\"id\":\"DJ-2609-001\",\"actionEn\":\"fix\",\"values\":[\"fixer\"]},\"lastResult\":{\"ok\":true,\"id\":\"DJ-2609-001\",\"msg\":\"DJ-2609-001 开始整改 · 整改中\"}}"
+      },
+      {
+        "name": "next-script",
+        "fn": "nextScript",
+        "kind": "mutate",
+        "title": "走单下一步",
+        "description": "试用屏：按模板三步走单脚本执行下一步（提交 → 接单/分配 → 处理完成），操作者按槽位自动选，值取字段示例与预置句 script/assignValues/completeValues；走完返回 E_DONE",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新数据副本，state.script = { step, id } 前进一步，lastResult = { ok, id, step, msg } 或 { ok:false, code:'E_DONE' }",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"step\":1,\"id\":\"DJ-2609-010\",\"lastResult\":{\"ok\":true,\"id\":\"DJ-2609-010\",\"step\":1,\"msg\":\"DJ-2609-010 提交 · 有异常\"}}"
+      },
+      {
+        "name": "run-all-tests",
+        "fn": "runAllTests",
+        "kind": "mutate",
+        "title": "再跑用例",
+        "description": "用例屏：在预埋行副本上重跑 12 类用例（必填/边界/流程迁移/越权/非法迁移/重复接单/主数据/超时/权限开放/看板统计/提醒规则/追加校验），测试编号 CS-00n 递增，结果写日志",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新数据副本，state.testRuns +1，lastResult 给 CS-00n · 条数 · 通过 · 失败",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"testRuns\":2,\"lastResult\":{\"ok\":true,\"msg\":\"CS-002 · 19 条 · 通过 19 · 失败 0\"}}"
+      },
+      {
+        "name": "publish",
+        "fn": "publish",
+        "kind": "mutate",
+        "title": "发布上线",
+        "description": "发布屏：五项发布前检查全过才冒烟，冒烟全过则 env = live 并记 FB-00n（正式环境、冒烟结果、发布人 应用管理员）；检查不过 E_CHECK，冒烟有失败 E_SMOKE 停在测试环境，同版本已上线 E_DONE",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate（通常也已走单/跑用例）的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新数据副本，state.env 与 state.releases 更新，lastResult = { ok, msg } 或 { ok:false, code:'E_CHECK'|'E_SMOKE'|'E_DONE' }",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"env\":\"live\",\"lastResult\":{\"ok\":true,\"msg\":\"V1.0.0 已上线 · 冒烟 19 / 19\"},\"releases\":[\"FB-001:V1.0.0:staging\",\"FB-002:V1.0.0:prod\"]}"
+      },
+      {
+        "name": "preview-delta",
+        "fn": "previewDelta",
+        "kind": "query",
+        "title": "预演变更",
+        "description": "迭代屏模拟：把一句追加需求解析成六种变更（新增节点/字段/看板维度/规则/校验/角色）并在规格副本上试套，给出新增节点数、字段数、页数、接口数、用例数、规则数、统计数与每项变更文案；不改任何数据",
+        "args": [
+          {
+            "from": "spec",
+            "required": true,
+            "note": "当前应用规格对象，取自 run().spec 或数据副本的 state.spec"
+          },
+          {
+            "from": "text",
+            "required": true,
+            "note": "追加需求句，可取 followUps 预置句或自由输入"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "spec",
+            "type": "object",
+            "required": true,
+            "description": "应用规格（run 结果里的 spec）"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "追加需求句，如「完成后让班组长打分评价」"
+          }
+        ],
+        "returns": "{ delta:{ mode, ops[], types, preset }, diff, states, fields, pages, apis, tests, rules, stats }",
+        "mutates": false,
+        "exampleInput": {
+          "spec": {
+            "$action": "generate",
+            "input": {
+              "data": {
+                "$action": "pick-preset",
+                "input": {
+                  "dataset": "make",
+                  "index": 1
+                }
+              }
+            },
+            "path": "state.spec"
+          },
+          "text": "完成后让班组长打分评价"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"完成后让班组长打分评价\",\"mode\":\"exact\",\"types\":[\"addState\",\"addField\",\"addField\"],\"states\":1,\"fields\":2,\"pages\":1,\"apis\":2,\"tests\":2,\"rules\":0,\"stats\":0}"
+      },
+      {
+        "name": "apply-delta",
+        "fn": "applyDelta",
+        "kind": "mutate",
+        "title": "追加需求",
+        "description": "迭代屏：把追加需求句逐项套用成新版本 V1.x.0 并记变更单 BG-00n（每项含涉及页面/新增接口/新增用例数），旧用例回归 + 新用例结果，存量记录新字段置空并算终态可补填数，env 回到测试环境并记 FB-00n；未识别 E_PARSE，已包含 E_DONE",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          },
+          {
+            "from": "text",
+            "required": true,
+            "note": "追加需求句，取自 run().followUps[i].text 或自由输入"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "追加需求句"
+          }
+        ],
+        "returns": "新数据副本：spec 升到 V1.x.0、prevSpec 留旧版、changes 增 BG-00n、env='staging'、releases 增 FB-00n",
+        "mutates": true,
+        "exampleInput": {
+          "text": "完成后让班组长打分评价",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"V1.1.0\",\"changes\":[\"BG-001:V1.0.0→V1.1.0:3项\"],\"env\":\"staging\",\"lastResult\":{\"ok\":true,\"msg\":\"V1.1.0 已生成 · 3 项变更 · 用例 21 / 21\"}}"
+      },
+      {
+        "name": "send-report",
+        "fn": "sendReport",
+        "kind": "mutate",
+        "title": "发交付报告",
+        "description": "交付屏：把【应用交付】微信报告 JF-001 标记已发送，收件人 = 主管职务 · 应用管理员，报告七段（需求/应用/测试/发布/变更/主数据/收件）由 run().report 给出",
+        "args": [
+          {
+            "from": "$data:ensure",
+            "required": true,
+            "note": "已 generate 的数据副本（运行时先 ensure 补默认字段，ensure 幂等，单独调用任一动作都能自给自足）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新数据副本，state.sent=true，lastResult 给「交付报告已发送」，日志写收件人",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"sent\":true,\"lastResult\":{\"ok\":true,\"msg\":\"交付报告已发送\"},\"recipients\":\"生产主管 · 应用管理员\",\"reportNo\":\"JF-001\"}"
+      },
+      {
+        "name": "ref-table",
+        "fn": "refTable",
+        "kind": "query",
+        "title": "主数据下钻",
+        "description": "接入屏与表单控件：按 integrations.json 从兄弟模块样本（AI ERP / AI流程提效 / AI人力官）只读取一张主数据表，给来源系统、行数、单位、同步时间、直连条件与去重后的 id/label 列表；只解析不复制",
+        "args": [
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 数据包（含 erpSamples / procSamples / hrSamples）"
+          },
+          {
+            "from": "arche",
+            "required": true,
+            "note": "业态 make / flow / service，通常取数据副本的 archetype"
+          },
+          {
+            "from": "source",
+            "required": true,
+            "note": "主数据来源 key：machines / lines / groups / orders / materials / products / services / customers / employees"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "arche",
+            "type": "string",
+            "required": true,
+            "description": "业态 make / flow / service"
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "required": true,
+            "description": "主数据来源 key，共 9 项"
+          }
+        ],
+        "returns": "{ source, name, system, unit, rows:[{id,label,name}], count, syncAt, directIf } ；来源不存在返回 null",
+        "mutates": false,
+        "exampleInput": {
+          "arche": "make",
+          "source": "machines"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"source\":\"machines\",\"name\":\"设备台账\",\"system\":\"AI流程提效\",\"count\":13,\"unit\":\"台\",\"syncAt\":\"2026-09-17 07:30\",\"sample\":[{\"id\":\"CT-01\",\"label\":\"CT-01\",\"name\":\"\"},{\"id\":"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 3",
+        "says": "data_files: 3",
+        "actual": "data/ 下实有 12 个 json：顶层 9 个（lexicon / objects / flows / roles / components / presets / tests / deltas / integrations）+ data/samples/ 3 个（mfg / trade / prof）；SKILL.md 正文「目录」段落本身也列了这 12 个文件",
+        "fix": "把前言改成 data_files: 12（如只想计业态样本，字段名应改为 sample_files: 3）"
+      },
+      {
+        "where": "SKILL.md 数据表 · lexicon.json 一条（正文第 67 行）",
+        "says": "另有连接词 8、否定词 8、数量单位 11",
+        "actual": "data/lexicon.json 实有 connectors 6（然后/之后/接着/并且/同时/以及）、negations 12（不要/去掉/不需要/取消/无需/删掉/不用/免填/不再需要/不再要/去除/不带）、qtyUnits 11",
+        "fix": "改成「连接词 6、否定词 12、数量单位 11」"
+      },
+      {
+        "where": "SKILL.md 解析 · tokenize 一行（正文第 28 行）",
+        "says": "按标点与连接词（然后 / 再 / 之后 / 接着 / 并且 / 同时 / 以及 / 并）切子句",
+        "actual": "词典 connectors 里没有「再」和「并」，实际只按 6 个连接词切分",
+        "fix": "删掉「再」「并」，与 lexicon.connectors 的 6 个词对齐"
+      },
+      {
+        "where": "SKILL.md 样本契约 · systems 一条（正文第 79 行）",
+        "says": "`systems`（企业现有系统列表，含 mes / erp / hr / oa / crm / shop 时对应主数据为 direct，否则 import）",
+        "actual": "mfg / trade / prof 三套样本的 systems 都是空数组 []，所以只跑 skill 数据包时主数据关联一律是 import；direct 只在原型把企业画像的 systems 注入副本后才出现",
+        "fix": "注明样本 systems 默认为空、direct 需由调用方注入 systems（通用 skill 的 run 输入要能接收 systems）"
+      },
+      {
+        "where": "SKILL.md 数据表 · objects.json 与 schema/data.json 对 archetype=flow 的中文叫法",
+        "says": "objects.json 30 个对象（通用 9 · 制造 8 · 贸易 6 · 服务 7）",
+        "actual": "对象数与分布正确（common 9 / make 8 / flow 6 / service 7），但同一个 archetype=flow 在 schema/data.json 里叫「仓配」、在 SKILL.md 里叫「贸易」，样本文件名又是 trade.json",
+        "fix": "统一 flow 的中文名（建议「贸易仓配」），三处叫法一致，便于通用 skill 的业态枚举"
+      }
+    ],
+    "notes": "产品类 skill，全部动作签名都是 (data, lib, ...)，lib = load-data 返回的 16 键数据包（含 05/08/10 三个兄弟 skill 的样本，主数据只读引用），必须由平台固定注入。调用链有先后：ensure → set-text/pick-preset → generate → 其余动作，未 generate 时除 run/ensure/set-text/pick-preset/ref-table 外都原样返回。preview-delta 的第一参是 spec 对象（run 结果里的 spec），不是 data。12 个 mutate 动作返回整份新副本，本表 digest 取副本里的 state 关键字段（整副本过大）。内核确定性，同序调用同果；实跑脚本见 scratchpad/verify-m11.js，未改仓库任何文件。"
   }
 ]
