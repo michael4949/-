@@ -11,12 +11,32 @@
    对外：
      DGG.chatBrain(id, brain)            登记模块大脑
      DGG.chat.dock({ id, name, step, … }) 造一个对话坞（product-ui 的 frame 会调）
-     brain = {
-       opener(step, api)   → 字符串或 {text, blocks}   进入这一屏时 AI 主动说的一句「发现」
-       suggest(step, api)  → [问句…]                   快捷问句
-       answer(q, step, api)→ 同上 / null               命中就回答，null 交给通用问答
-       onDoc(doc, step, api)→ 同上 / null              上传文档后的回应；doc 见 docparse 的结果
-     }
+     brain 有两种写法，推荐第一种：
+       一、交给内核（与 skill 同一份实现，原型与通用包永远一致）
+         { kernel, ctx, act }
+           kernel  skill 内核对象，需实现 screens / brief / suggest / ask / ingest
+           ctx()   → { data, lib, result }  当前业务数据、固定数据包、run() 结果
+           act(a, api) → true 表示这条声明式动作已被模块处理；返回 false / 不实现则走通用兜底
+       二、自己实现（旧写法，仍然支持）
+         { opener(step, api), suggest(step, api), answer(q, step, api), onDoc(doc, step, api) }
+
+     内核侧签名（平台中立，通用包按同一套暴露成动作）：
+       screens()                                → [{key,label}]
+       brief(step, data, lib, result?)          → 字符串 / {text, blocks?, act?, ref?} / null
+       suggest(step, data, lib, result?)        → [问句…]
+       ask(question, step, data, lib, result?)  → {text, blocks?, act?, ref?} / null
+       ingest(doc, step, data, lib, result?)    → {text, blocks?, act?, data?} / null
+     回答里的 blocks 是平台中立的纯数据，不是 DOM：
+       {type:'kv',    rows:[[键,值]…]}
+       {type:'table', head:[…], rows:[[…]…]}
+       {type:'tags',  items:[…]}
+       {type:'text',  text:'…'}
+     act 是声明式动作，平台可以只实现子集，未知 type 一律忽略且不报错：
+       {type:'goto',  step}                切到某一屏
+       {type:'focus', ref}                 高亮某条业务记录（页面上用 data-ref 标出）
+       {type:'open',  panel, ref}          打开下钻 / 抽屉
+       {type:'apply', action, input}       调用本 skill 的某个动作（通常是写回类）
+       {type:'set',   path, value}         改一个参数后重算
      api = { say, saying, blocks…, go(step), highlight(sel), toast(msg), work() }
    ========================================================================== */
 (function () {
@@ -55,6 +75,63 @@
     text: '<rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
   };
   function svg(name) { return '<svg viewBox="0 0 24 24">' + (ICON[name] || ICON.text) + '</svg>'; }
+
+  /* ---------- 平台中立的块 → DOM（气泡里的小表 / 键值 / 标签） ---------- */
+  function renderBlock(b) {
+    if (!b) return null;
+    if (b.nodeType === 1) return b;                     /* 已经是 DOM，直接用 */
+    if (!b.type) return null;
+    if (b.type === 'text') return h('div', { class: 'tx' }, [String(b.text == null ? '' : b.text)]);
+    if (b.type === 'kv') {
+      var kv = h('div', { class: 'kv' });
+      (b.rows || []).forEach(function (r) {
+        kv.appendChild(h('span', {}, [String(r[0] == null ? '' : r[0])]));
+        kv.appendChild(h('span', {}, [String(r[1] == null ? '' : r[1])]));
+      });
+      return kv;
+    }
+    if (b.type === 'table') {
+      var t = h('table', { class: 'mini' });
+      if (b.head && b.head.length) {
+        var tr = h('tr', {});
+        b.head.forEach(function (x) { tr.appendChild(h('th', {}, [String(x == null ? '' : x)])); });
+        t.appendChild(h('thead', {}, [tr]));
+      }
+      var tb = h('tbody', {});
+      (b.rows || []).forEach(function (r) {
+        var line = h('tr', {});
+        (r || []).forEach(function (x) { line.appendChild(h('td', {}, [String(x == null ? '' : x)])); });
+        tb.appendChild(line);
+      });
+      t.appendChild(tb);
+      return t;
+    }
+    if (b.type === 'tags') {
+      var g = h('div', { class: 'tags' });
+      (b.items || []).forEach(function (x) { g.appendChild(h('span', {}, [String(x == null ? '' : x)])); });
+      return g;
+    }
+    return null;                                         /* 不认识的块型静默忽略 */
+  }
+  function renderBlocks(list) {
+    var out = [];
+    (list || []).forEach(function (b) { var n = renderBlock(b); if (n) out.push(n); });
+    return out;
+  }
+
+  /* ---------- 把内核大脑接成对话坞大脑 ---------- */
+  function derive(brain) {
+    if (!brain || !brain.kernel || typeof brain.ctx !== 'function') return brain || {};
+    var K = brain.kernel;
+    function c() { var x = brain.ctx() || {}; return [x.data, x.lib, x.result]; }
+    return {
+      kernel: K, ctx: brain.ctx, act: brain.act,
+      opener: brain.opener || function (step) { var a = c(); return K.brief ? K.brief(step, a[0], a[1], a[2]) : null; },
+      suggest: brain.suggest || function (step) { var a = c(); return K.suggest ? K.suggest(step, a[0], a[1], a[2]) : null; },
+      answer: brain.answer || function (q, step) { var a = c(); return K.ask ? K.ask(q, step, a[0], a[1], a[2]) : null; },
+      onDoc: brain.onDoc || function (doc, step) { var a = c(); return K.ingest ? K.ingest(doc, step, a[0], a[1], a[2]) : null; }
+    };
+  }
 
   /* ---------- 通用问答：直接读当前屏的 KPI 与表格作答 ---------- */
   function scanScreen(work) {
@@ -152,7 +229,7 @@
 
   /* ---------- 对话坞 ---------- */
   function dock(o) {
-    var id = o.id, brain = BRAINS[id] || {}, api = null;
+    var id = o.id, brain = derive(BRAINS[id]), api = null;
     var log = LOGS[id] || (LOGS[id] = []);
     var msgs = h('div', { class: 'ms' });
     var sug = h('div', { class: 'sug' });
@@ -175,7 +252,7 @@
       return bb;
     }
     function putBlocks(bb, blocks) {
-      (blocks || []).forEach(function (b) { if (b) bb.appendChild(b); });
+      renderBlocks(blocks).forEach(function (b) { bb.appendChild(b); });
       scroll();
     }
     /* 逐字显示：AI 的回答一个字一个字出来，是这个展台最该有的动效 */
@@ -211,12 +288,28 @@
     }
     function mine(text) { var bb = bubble('me'); bb.textContent = text; record('me', text); scroll(); }
 
+    function findRef(ref) {
+      var w = o.work && o.work();
+      if (!w || ref == null) return null;
+      var list = w.querySelectorAll('[data-ref]'), i, s2 = String(ref);
+      for (i = 0; i < list.length; i++) if (list[i].getAttribute('data-ref') === s2) return list[i];
+      return null;
+    }
+    /* 声明式动作派发：先给模块自己处理，模块不接的给通用兜底，不认识的静默忽略 */
+    function applyAct(a) {
+      if (!a || !a.type) return;
+      if (brain.act) { try { if (brain.act(a, api) !== false) return; } catch (e) { /* 落到兜底 */ } }
+      if (a.type === 'goto' && a.step) { api.go(a.step); return; }
+      if ((a.type === 'focus' || a.type === 'open') && a.ref != null) { var el = findRef(a.ref); if (el) focus(el); }
+    }
     function apply(res, bb) {
       if (!res) return;
       if (typeof res === 'string') res = { text: res };
       say(res.text, res.blocks, { into: bb, after: function () {
-        if (res.focus) focus(res.focus);
+        if (res.focus && res.focus.nodeType === 1) focus(res.focus);
+        else if (res.ref != null) { var el = findRef(res.ref); if (el) focus(el); }
         if (typeof res.act === 'function') { try { res.act(api); } catch (e) { /* 忽略 */ } }
+        else if (res.act) applyAct(res.act);
       } });
     }
     function focus(el) {
@@ -305,5 +398,5 @@
   }
 
   window.DGG.chatBrain = function (id, brain) { BRAINS[id] = brain; };
-  window.DGG.chat = { dock: dock, brains: BRAINS, reset: function (id) { if (id) { delete LOGS[id]; } else { LOGS = {}; } } };
+  window.DGG.chat = { dock: dock, brains: BRAINS, blocks: renderBlocks, block: renderBlock, reset: function (id) { if (id) { delete LOGS[id]; } else { LOGS = {}; } } };
 })();
