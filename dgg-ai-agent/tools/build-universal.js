@@ -370,7 +370,22 @@ const ID = '${id}';
       if (!env.ok) fail++;
     }
   }
-  console.log((fail ? '✘ ' : '✔ ') + ID + '：' + (n - fail) + '/' + n + ' 个动作四条路径一致且成功');
+  /* 产品类另查状态流转：run(dataset) → 改数据的动作 → 把新副本传回 run；并确认包内样本没被污染 */
+  const mut = cjs.manifest.actions.filter((a) => a.mutates && a.example && Object.keys(a.example).length)[0];
+  if (mut) {
+    n++;
+    try {
+      const first = (cjs.manifest.datasets[0] || {}).key;
+      const base = first ? cjs.invoke('run', { dataset: first }) : null;
+      const step = cjs.invoke(mut.name, resolveEx(mut.example));
+      const back = step.ok && step.data && typeof step.data === 'object' ? cjs.invoke('run', { data: step.data }) : { ok: false, errors: [{ message: '改数据的动作没返回数据副本' }] };
+      const clean = first ? JSON.stringify(cjs.invoke('run', { dataset: first })) === JSON.stringify(base) : true;
+      if (step.ok && back.ok && clean) console.log('✔ 状态流转            ' + mut.name + ' → 新副本回传 run 正常，包内样本未被污染');
+      else { fail++; console.error('✘ 状态流转            ' + mut.name + ' step=' + step.ok + ' back=' + back.ok + ' 样本干净=' + clean); }
+    } catch (e) { fail++; console.error('✘ 状态流转            ' + e.message); }
+  }
+
+  console.log((fail ? '✘ ' : '✔ ') + ID + '：' + (n - fail) + '/' + n + ' 项通过（四条路径逐字节一致' + (mut ? ' + 状态流转' : '') + '）');
   process.exit(fail ? 1 : 0);
 })();
 `;
