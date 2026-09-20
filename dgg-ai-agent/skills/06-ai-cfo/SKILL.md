@@ -3,14 +3,14 @@ name: AI CFO
 id: ai-cfo
 kind: 产品
 credits: 50
-version: 1.1.0
+version: 1.2.0
 suite: 薯片AI智能体 2026.09
 updated: 2026-09-20
 triggers: [三表, 勾稽, 对账, 财务风险, 现金流, 资金缺口, 回款, 应收, 税负, 政策, 补贴, 加计扣除, 小微, 月报]
 inputs: [data]
 data_files: 7
 datasets: 3
-actions: 11
+actions: 16
 llm_calls: 0
 offline: true
 deterministic: true
@@ -43,8 +43,13 @@ universal: dus-1
 | `togglePolicy(raw, id)` | 把一条政策加入申报清单，已在清单则移出；政策汇总与月报按清单重算（原型第 6 屏） |
 | `kpi(d, st, rec, rk, fc, po)` | 驾驶舱 KPI：收入与环比、毛利率 / 净利率、经营现金流、货币资金与现金月数、逾期应收、异常与已调整条数、高中风险条数、13 周现金低点与缺口、政策金额 |
 | `report(...)` | 财务月报（结构 + 可发送文本） |
+| `screens()` | 六个环节登记 `[{key,label}]`：`connect` 接入 / `board` 财务驾驶舱 / `recon` 三表勾稽 / `risk` 风险预警 / `cash` 现金预测 / `policy` 政策与月报 |
+| `brief(step, data, lib, result)` | 进这一屏先说的一条发现，字符串或 `{text, blocks?, act?, ref?}`；未知屏返回 null |
+| `suggest(step, data, lib, result)` | 该屏的快捷问句 3–4 条，条条都能被 `ask` 答上 |
+| `ask(question, step, data, lib, result)` | 问答：`{text, blocks?, act?, ref?}`；认不出的问法返回 null，交给平台兜底，不编数 |
+| `ingest(doc, step, data, lib, result)` | 文档摄入：`{text, blocks?, act?, data?}`；写回业务数据时 `data` 是新副本，入参不动 |
 
-`metrics(d, st)` 是上列函数共用的内部指标计算，不单独对外。前言 `inputs` 只列 `data`（一套账套）；另有一个固定注入的数据包 `lib`，即 `scripts/load-data.js` 返回的 `rules`、`riskRules`、`benchmarks`、`policies`、`samples`、`industries`、`credits`、`lintWords` 八个键，11 个动作里 `run` / `cashOptions` / `applyFix` / `applyRiskAction` / `applyCashOption` 五个必须带上它，生成 invoke 层时按 `$lib` 注入。
+`metrics(d, st)` 是上列函数共用的内部指标计算，不单独对外。前言 `inputs` 只列 `data`（一套账套）；另有一个固定注入的数据包 `lib`，即 `scripts/load-data.js` 返回的 `rules`、`riskRules`、`benchmarks`、`policies`、`samples`、`industries`、`credits`、`lintWords` 八个键，16 个动作里 `run` / `cashOptions` / `applyFix` / `applyRiskAction` / `applyCashOption` 与对话三件 `brief` / `ask` / `ingest` 共八个必须带上它（`screens` 与 `suggest` 只认屏名），生成 invoke 层时按 `$lib` 注入。对话五件的第四个参数 `result` 是 `run(data, lib)` 的结果，可选：传了就用，没传自己算一次；五件都是纯函数，不碰 DOM、window、时钟与随机数，同一组入参永远得到同一份输出。
 
 ## 勾稽与风险的口径
 
