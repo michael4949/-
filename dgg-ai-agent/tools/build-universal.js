@@ -18,6 +18,7 @@ const SRC = path.join(ROOT, 'skills');
 const UNI = path.join(ROOT, 'universal');
 const OUT = path.join(ROOT, 'dist-universal');
 const MAP = require(path.join(__dirname, 'skills.map.json'));
+const PA = require(path.join(__dirname, 'platform-artifacts.js'));   /* 跨平台适配物：Agent Skills / OpenAI / Anthropic / MCP / OpenAPI */
 const SUITE = { name: '薯片AI智能体', version: '2026.09' };
 
 const J = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -161,7 +162,8 @@ function buildManifest(m, fm, datasets, exCtx) {
       inputProps: a.inputProps || [],
       example: normalizeExample(a.exampleInput || {}, exCtx)
     })),
-    legacy: { browserGlobal: m.legacyGlobal, claudeSkill: 'SKILL.md', sourceDir: 'skills/' + m.dir },
+    legacy: { browserGlobal: m.legacyGlobal, sourceDir: 'skills/' + m.dir },
+    agentSkill: { skillMd: 'SKILL.md', engineering: 'references/engineering.md', references: 'references/', entry: 'scripts/skill.js' },
     build: { spec: 'dus-1', generator: 'tools/build-universal.js' }
   };
 }
@@ -438,7 +440,7 @@ function build(m) {
   copyDir(path.join(srcDir, 'schema'), path.join(out, 'schema'));
   copyDir(path.join(srcDir, 'examples'), path.join(out, 'examples'));
   copyDir(path.join(srcDir, 'prompts'), path.join(out, 'prompts'));
-  W(path.join(out, 'SKILL.md'), md);
+  /* 根目录的 SKILL.md 由 platform-artifacts 换成 Agent Skills 形态，工程原文进 references/engineering.md */
 
   // 2 数据包：跑源包的 load-data.js，把装配结果固化进 bundle
   delete require.cache[require.resolve(path.join(srcDir, 'scripts', 'load-data.js'))];
@@ -537,15 +539,18 @@ function build(m) {
     },
     bin: { ['dgg-' + m.id]: 'adapters/cli.js' },
     scripts: { test: 'node tests/conformance.js', serve: 'node adapters/http.js', mcp: 'node adapters/mcp.js' },
-    files: ['manifest.json', 'index.js', 'core', 'data', 'bundle', 'dist', 'adapters', 'runtime', 'shared', 'schema', 'examples', 'tools', 'tests', 'SKILL.md', 'README.md'],
+    files: ['manifest.json', 'index.js', 'core', 'data', 'bundle', 'dist', 'adapters', 'runtime', 'shared', 'schema', 'examples', 'tools', 'tests', 'scripts', 'references', 'SKILL.md', 'README.md', 'llms.txt', 'tools.openai.json', 'tools.anthropic.json', 'manifest.mcp.json', 'openapi.json'],
     dependencies: {},
     engines: { node: '>=14' }
   });
   W(path.join(out, 'README.md'), readme(m, manifest, datasets));
 
+  // 10 跨平台适配物：Agent Skills 形态 SKILL.md + references/ + 各家工具 schema
+  const pa = PA.emit(out, manifest, { sourceMd: md, dataKeys: m.dataKeys || [], dataFiles: nData });
+
   const files = (function count(d) { let n = 0; for (const e of fs.readdirSync(d, { withFileTypes: true })) n += e.isDirectory() ? count(path.join(d, e.name)) : 1; return n; })(out);
   console.log('✔ ' + m.id.padEnd(15) + 'v' + manifest.version.padEnd(7) + manifest.actions.length + ' 动作 · ' + datasets.length + ' 数据集 · data ' + nData + ' 个 · 产出 ' + files + ' 个文件' + (deps.length ? ' · 依赖内核 ' + deps.map((d) => d.key).join('/') : ''));
-  return { id: m.id, actions: manifest.actions.length, files };
+  return { id: m.id, actions: manifest.actions.length, files, agentSkillName: pa.skillName };
 }
 
 /* ---------- 套件索引：一次注册 11 个能力 ---------- */
@@ -642,7 +647,114 @@ function writeSuite(ids) {
     'module.exports = { route, skills, registry, allTools };',
     ''
   ].join('\n'));
+  /* 套件级跨平台适配物：11 个包合成一张工具表 / 一份 MCP 声明 / 一个总入口 skill */
+  const mfs = ids.map((id) => J(path.join(OUT, id, 'manifest.json')));
+  const oa = [], an = [], mcp = {};
+  mfs.forEach((mf) => {
+    PA.openaiTools(mf, mf.id).forEach((t) => oa.push(t));
+    PA.anthropicTools(mf, mf.id).forEach((t) => an.push(t));
+    mcp[mf.id] = { command: 'node', args: [mf.id + '/adapters/mcp.js'], env: {} };
+  });
+  WJ(path.join(OUT, 'tools.openai.json'), oa);
+  WJ(path.join(OUT, 'tools.anthropic.json'), an);
+  WJ(path.join(OUT, 'mcp.json'), { mcpServers: mcp });
+  W(path.join(OUT, 'SKILL.md'), [
+    '---',
+    'name: dgg-ai-suite',
+    'description: ' + PA.safeText(SUITE.name + ' ' + SUITE.version + '：' + mfs.length + ' 个企业经营智能体的总入口，覆盖'
+      + mfs.map((x) => x.name).join('、')
+      + '。当用户要做企业 AI 成熟度评估、场景价值排序、投入 ROI 测算，或要处理获客、人力、财务、法务、流程、决策、订单交付、软件需求这些经营事务时，先读本文件挑出合适的子技能，再读那个子技能目录下的 SKILL.md。全部纯规则计算，结果确定、可离线、零网络请求。', 1024),
+    '---',
+    '',
+    '# ' + SUITE.name + ' ' + SUITE.version,
+    '',
+    '这是一个套件，下面 ' + mfs.length + ' 个子技能各管一摊。**先按下表挑出要用的那个，再读它目录下的 `SKILL.md`**，不要一次全读。',
+    '',
+    '| 子技能 | 管什么 | 动作数 | 积分/次 |',
+    '|---|---|---|---|',
+    ...mfs.map((x) => '| [`' + x.id + '`](' + x.id + '/SKILL.md) | ' + PA.safeText(x.summary, 46) + ' | ' + x.actions.length + ' | ' + x.credits + ' |'),
+    '',
+    '## 共同约定',
+    '',
+    '- 每个子技能都是一个独立目录，自带全部规则表与样例数据，互不依赖。',
+    '- 一行开跑：`node <子技能>/scripts/skill.js <动作名> \'<JSON>\'`。',
+    '- 返回一律是信封 `{ ok, spec, skill, action, data, errors, meta }`。',
+    '- 带「写回」标记的动作返回**新的业务数据副本**，要存回会话状态，下一次传 `data` 而不是 `dataset`。',
+    '- 金额一律「预计」口径；参考区间是常见范围而非统计调查；企业与人员一律用代号。',
+    '',
+    '## 整套一起用',
+    '',
+    '```bash',
+    'node register-all.js                 # 列出全部子技能与自检结果',
+    'PORT=8710 node gateway.js            # 一个端口暴露全部子技能（含 /tools 与 /tools/call）',
+    '```',
+    '',
+    '- `tools.openai.json` / `tools.anthropic.json`：全套动作合成的函数调用工具表，工具名为 `<子技能>__<动作>`。',
+    '- `mcp.json`：一次把全部子技能挂进任意 MCP 宿主。',
+    '- `INSTALL.md`：各家平台怎么装。',
+    ''
+  ].join('\n'));
+  W(path.join(OUT, 'llms.txt'), [
+    '# ' + SUITE.name + ' ' + SUITE.version,
+    '',
+    '> ' + mfs.length + ' 个企业经营智能体，纯规则、结果确定、可离线、零依赖。',
+    '',
+    ...mfs.map((x) => '- ' + x.id + '（' + x.name + '，' + x.actions.length + ' 动作）：' + PA.safeText(x.summary, 80)),
+    '',
+    '入口：<子技能>/SKILL.md · <子技能>/llms.txt · 整套 gateway.js',
+    ''
+  ].join('\n'));
+  W(path.join(OUT, 'INSTALL.md'), [
+    '# 装到各家平台',
+    '',
+    '每个子技能都是一个自包含目录，没有任何第三方依赖，也不联网。',
+    '',
+    '## Claude Code',
+    '',
+    '```bash',
+    'cp -r <子技能> ~/.claude/skills/          # 个人；或 .claude/skills/ 放进项目',
+    '```',
+    '目录名即技能名；改名请同步改该目录 `SKILL.md` 前言里的 `name`。',
+    '',
+    '## claude.ai',
+    '',
+    '把子技能目录打成 zip，从「设置 → 功能」上传（需要账号开启代码执行）。',
+    '',
+    '## Claude API',
+    '',
+    '走 `/v1/skills` 上传，配合代码执行工具使用。沙箱无网络、不能装包 —— 本包零依赖、纯离线，正好满足；',
+    '需要容器内有 Node 18+，没有的话改用下面的 HTTP 或 MCP 方式从容器外调。',
+    '',
+    '## OpenAI 兼容的函数调用',
+    '',
+    '直接把 `tools.openai.json` 塞进 `tools`；收到 `<子技能>__<动作>` 的调用后，转给',
+    '`node <子技能>/adapters/cli.js <动作> \'<arguments JSON>\'`，或 POST 给网关的 `/tools/call`。',
+    '',
+    '## Anthropic Messages API',
+    '',
+    '同上，用 `tools.anthropic.json`。',
+    '',
+    '## 任意 MCP 宿主',
+    '',
+    '把 `mcp.json` 的 `mcpServers` 合进宿主配置即可，不依赖任何 MCP SDK。',
+    '',
+    '## 自研 agent 平台',
+    '',
+    '```js',
+    "const { descriptors, registerAll } = require('./register-all.js');",
+    'registerAll(host);      // 或先看 descriptors() 再自行登记',
+    '```',
+    '',
+    '## 浏览器 / 断网现场',
+    '',
+    '```html',
+    '<script src="<子技能>/dist/<子技能>.umd.js"></script>',
+    '```',
+    '单文件、零外部请求，file:// 直接打开就能跑。',
+    ''
+  ].join('\n'));
   console.log('✔ 套件索引 → dist-universal/skills.json · register-all.js · gateway.js');
+  console.log('✔ 套件跨平台 → SKILL.md · tools.openai.json（' + oa.length + ' 个工具）· tools.anthropic.json · mcp.json · llms.txt · INSTALL.md');
 }
 
 const only = process.argv[2];
