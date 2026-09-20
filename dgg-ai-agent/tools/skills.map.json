@@ -2344,5 +2344,1137 @@
       }
     ],
     "notes": "产品类：9 个 mutate 动作都返回完整数据副本，前 160 字是数据头、差异在 log 与对应线索字段（已实跑链式验证：dataset→assign→add-plan→adopt-script→advance 后 run 可复算，一键分派后未分派归零且各组不超 cap）。score-leads / explain-lead / build-script 需先取 profile（profile 动作或 run().profile），recommend-team 的 teams 取 run().teams；示例里用 $action 引用前置动作。advance 的 text 在契约层设为必填：省略时内核默认文案会写成「推进到undefined」。内核无 LLM、无 $lint 需求；examples/ 三份 output 是 run 的摘要而非动作输入，不适合当数据集。"
+  },
+  {
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "一次算全",
+        "description": "一次调用得到人力官完整结果：组织盘点、需求单与 JD、候选人打分、合规、90 天日历、成本、三方案模拟、KPI 与月报文本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本：花名册 / 离职 / 需求单 / 候选人（样本或上一步 mutate 动作返回的新副本）；内核内部先走 ensure 规范化"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（jobs / jdBlocks / questions / complianceRules / costParams …）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version,data,org,needs,candidates,byId,compliance,calendar,cost,sim,kpi,report}；sim.plans 即 A/B/C 三方案模拟",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"kpi\":{\"headcount\":168,\"budget\":175,\"vacancy\":7,\"needs\":3,\"needCount\":7,\"published\":0,\"candidates\":30,\"gradeA\":8,\"interviewing\":3,\"offers\":0,"
+      },
+      {
+        "name": "org-review",
+        "fn": "org",
+        "kind": "query",
+        "title": "组织盘点",
+        "description": "人力驾驶舱下钻：部门×编制×在编与缺编、司龄/年龄/学历/岗位族结构、近 12 个月离职率与原因、派遣占比、同岗位工资中位、人均产值。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{headcount,budget,vacancy,byDept[],tenure[],age[],edu[],family[],turnover,turnoverBench,leaversByMonth[],reasons[],dispatchRatio,avgWage,jobStats,perCapitaRevenue}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"headcount\":168,\"budget\":175,\"vacancy\":7,\"turnover\":17,\"turnoverBench\":18,\"avgWage\":6845,\"perCapitaRevenue\":302560,\"dispatchRatio\":7.1}"
+      },
+      {
+        "name": "screen-candidates",
+        "fn": "candidates",
+        "kind": "query",
+        "title": "简历打分表",
+        "description": "全部候选人走硬门槛与加权匹配打分并按分排序，每条带 A/B/C/D 评级、六维分值、看了哪些字段与判断依据，已评分的附录用建议。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "候选人数组，每条 {id,needId,jobTitle,stage,stageName,grade,total,action,score:{dims,gates,seen,reasons,band},interview}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"id\":\"C-2609-003\",\"grade\":\"A\",\"total\":93,\"stage\":\"interview\",\"action\":\"录入评分\",\"seen\":\"学历 中专 / 高中 · 经验 8 年 · 技能 5 项\"}"
+      },
+      {
+        "name": "build-jd",
+        "fn": "jd",
+        "kind": "query",
+        "title": "生成 JD",
+        "description": "按需求单从岗位库与 JD 段落块拼装职位描述，薪酬带按地区系数与企业工资指数换算；variant 取 site（招聘网站版）或 poster（内推海报版）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "needId",
+            "required": true,
+            "note": "需求单 id，如 R-2609-01"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "variant",
+            "required": false,
+            "note": "site | poster，缺省 site"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "needId",
+            "type": "string",
+            "required": true,
+            "description": "需求单 id（data.needs[].id）"
+          },
+          {
+            "name": "variant",
+            "type": "string",
+            "required": false,
+            "description": "JD 版本：site 招聘网站版 / poster 内推海报版，缺省 site"
+          }
+        ],
+        "returns": "{needId,job,title,jobTitle,variant,variantName,sections[],text,words,band,published,publishedVariant,publishedAt}",
+        "mutates": false,
+        "exampleInput": {
+          "needId": "R-2609-01",
+          "variant": "poster",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"needId\":\"R-2609-01\",\"variantName\":\"内推海报版\",\"words\":244,\"band\":[5900,8100],\"sections\":5}"
+      },
+      {
+        "name": "publish-jd",
+        "fn": "publish",
+        "kind": "mutate",
+        "title": "发布 JD",
+        "description": "把某张需求单的 JD 标为已发布并记录版本与日期，写进数据副本的操作日志，候选人按该薪酬带重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "needId",
+            "required": true,
+            "note": "需求单 id"
+          },
+          {
+            "from": "variant",
+            "required": false,
+            "note": "发布的 JD 版本 site | poster，缺省 site"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "needId",
+            "type": "string",
+            "required": true,
+            "description": "需求单 id"
+          },
+          {
+            "name": "variant",
+            "type": "string",
+            "required": false,
+            "description": "site | poster，缺省 site"
+          }
+        ],
+        "returns": "新的 data 副本：needs[].status=published、publishedVariant、publishedAt，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "needId": "R-2609-01",
+          "variant": "site",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"status\":\"published\",\"publishedVariant\":\"site\",\"publishedAt\":\"2026-09-17\",\"log\":[{\"seq\":1,\"kind\":\"recruit\",\"label\":\"发布 JD\",\"detail\":\"R-2609-01 CNC 操作工 4 人 · 招聘"
+      },
+      {
+        "name": "pass-candidate",
+        "fn": "pass",
+        "kind": "mutate",
+        "title": "通过初筛",
+        "description": "把候选人推进到「初筛通过」，进入面试安排队列，并记一条操作日志。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "candidateId",
+            "required": true,
+            "note": "候选人编号，如 C-2609-008"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidateId",
+            "type": "string",
+            "required": true,
+            "description": "候选人编号（data.candidates[].id）"
+          }
+        ],
+        "returns": "新的 data 副本：该候选人 stage=screened，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "candidateId": "C-2609-008",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"id\":\"C-2609-008\",\"stage\":\"screened\",\"log\":[{\"seq\":1,\"kind\":\"recruit\",\"label\":\"通过初筛\",\"detail\":\"C-2609-008 → 初筛通过\"}]}"
+      },
+      {
+        "name": "reject-candidate",
+        "fn": "reject",
+        "kind": "mutate",
+        "title": "淘汰候选人",
+        "description": "淘汰候选人并入人才库，记一条操作日志；硬门槛不满足（D 级）的默认走这个动作。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "candidateId",
+            "required": true,
+            "note": "候选人编号"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidateId",
+            "type": "string",
+            "required": true,
+            "description": "候选人编号"
+          }
+        ],
+        "returns": "新的 data 副本：该候选人 stage=rejected，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "candidateId": "C-2609-018",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"id\":\"C-2609-018\",\"stage\":\"rejected\",\"log\":[{\"seq\":1,\"kind\":\"recruit\",\"label\":\"淘汰\",\"detail\":\"C-2609-018 → 已淘汰\"}]}"
+      },
+      {
+        "name": "schedule-interview",
+        "fn": "schedule",
+        "kind": "mutate",
+        "title": "安排面试",
+        "description": "把候选人推进到「面试安排」并落面试日期，同时进 90 天人事日历；不传日期时默认今天 +3 天。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "candidateId",
+            "required": true,
+            "note": "候选人编号"
+          },
+          {
+            "from": "date",
+            "required": false,
+            "note": "面试日期 YYYY-MM-DD，缺省 data.today + 3 天"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidateId",
+            "type": "string",
+            "required": true,
+            "description": "候选人编号"
+          },
+          {
+            "name": "date",
+            "type": "string",
+            "required": false,
+            "description": "面试日期 YYYY-MM-DD，缺省今天 +3 天"
+          }
+        ],
+        "returns": "新的 data 副本：stage=interview、interviewDate 落位，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "candidateId": "C-2609-008",
+          "date": "2026-09-20",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"stage\":\"interview\",\"interviewDate\":\"2026-09-20\",\"log\":{\"seq\":2,\"kind\":\"recruit\",\"label\":\"安排面试\",\"detail\":\"C-2609-008 → 面试安排 · 9-20\"}}"
+      },
+      {
+        "name": "interview-kit",
+        "fn": "interviewKit",
+        "kind": "query",
+        "title": "结构化题库",
+        "description": "按候选人所投岗位取四维结构化面试题（专业题在岗位库，协作/稳定性/价值观题按岗位族），带每维权重、评分锚点与面试官职务。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "candidate",
+            "required": true,
+            "note": "候选人对象（data.candidates 或 screen-candidates 返回的一条；内核只读取 needId）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidate",
+            "type": "object",
+            "required": true,
+            "description": "候选人对象，最少需含 needId，如 {\"id\":\"C-2609-001\",\"needId\":\"R-2609-01\"}"
+          }
+        ],
+        "returns": "{sets:[{key,label,weight,questions[]}],interviewers[],jobTitle,family}",
+        "mutates": false,
+        "exampleInput": {
+          "candidate": {
+            "id": "C-2609-001",
+            "needId": "R-2609-01"
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"jobTitle\":\"CNC 操作工\",\"family\":\"ops\",\"interviewers\":[\"车间主任\",\"人事专员\"],\"sets\":[\"专业能力×3@0.4\",\"协作沟通×3@0.2\",\"稳定性与动机×3@0.25\",\"价值观与合规×3@0.15\"]}"
+      },
+      {
+        "name": "score-interview",
+        "fn": "score",
+        "kind": "mutate",
+        "title": "录入面试评分",
+        "description": "录入专业/协作/稳定性/价值观四维 1–5 分，按岗位族权重加权出综合分，生成录用建议（≥4.0 建议录用、≥3.2 备选）与建议定薪。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "candidateId",
+            "required": true,
+            "note": "候选人编号"
+          },
+          {
+            "from": "scores",
+            "required": true,
+            "note": "四维评分对象 {pro,coop,stable,value}，各 1–5"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidateId",
+            "type": "string",
+            "required": true,
+            "description": "候选人编号"
+          },
+          {
+            "name": "scores",
+            "type": "object",
+            "required": true,
+            "description": "四维评分 {pro,coop,stable,value}，每项 1–5 分"
+          }
+        ],
+        "returns": "新的 data 副本：candidates[].scores 落位、stage=done，log 记综合分与录用建议",
+        "mutates": true,
+        "exampleInput": {
+          "candidateId": "C-2609-001",
+          "scores": {
+            "pro": 4,
+            "coop": 4,
+            "stable": 4,
+            "value": 5
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"stage\":\"done\",\"scores\":{\"pro\":4,\"coop\":4,\"stable\":4,\"value\":5},\"log\":{\"seq\":1,\"kind\":\"recruit\",\"label\":\"录入面试评分\",\"detail\":\"C-2609-001 综合 4.15 分 · 建议录用\"}}"
+      },
+      {
+        "name": "make-offer",
+        "fn": "offer",
+        "kind": "mutate",
+        "title": "发 offer 定薪",
+        "description": "给候选人发 offer 并落定薪；不传薪资时用内核按薪酬带、内部同岗位中位与面试评分算出的建议定薪。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本（一般是 score-interview 返回的副本）"
+          },
+          {
+            "from": "candidateId",
+            "required": true,
+            "note": "候选人编号"
+          },
+          {
+            "from": "salary",
+            "required": false,
+            "note": "月薪，缺省取 interviewResult 的建议定薪"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "candidateId",
+            "type": "string",
+            "required": true,
+            "description": "候选人编号"
+          },
+          {
+            "name": "salary",
+            "type": "number",
+            "required": false,
+            "description": "offer 月薪（元），缺省用系统建议定薪"
+          }
+        ],
+        "returns": "新的 data 副本：candidates[].offer={salary,date}、stage=offer，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "candidateId": "C-2609-001",
+          "salary": 7700,
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"stage\":\"offer\",\"offer\":{\"salary\":7700,\"date\":\"2026-09-17\"},\"log\":{\"seq\":1,\"kind\":\"recruit\",\"label\":\"发 offer\",\"detail\":\"C-2609-001 月薪 7,700 元\"}}"
+      },
+      {
+        "name": "check-compliance",
+        "fn": "compliance",
+        "kind": "query",
+        "title": "用工合规核对",
+        "description": "12 条用工合规规则逐人核对，给涉及人数、影响金额、法律依据与整改动作，并汇总社保基数占比、加班超限人数、60 天内到期合同。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{items[{id,name,severity,count,impact,affected[],action,mode,status}],open[],counts,impact,socialBaseRatio,overtimeOver,contractsDue60,dispatchRatio}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"counts\":{\"open\":10,\"high\":5,\"mid\":3,\"low\":2,\"handled\":0,\"clear\":2},\"impact\":2275441,\"socialBaseRatio\":68,\"overtimeOver\":11,\"contractsDue60\":14}"
+      },
+      {
+        "name": "resolve-compliance",
+        "fn": "resolve",
+        "kind": "mutate",
+        "title": "合规整改处置",
+        "description": "按规则处置：fix 类直接把整改写回花名册（补签合同、调社保基数、转固定期限等），plan 类进台账；两类都记录处置日期、人数与影响金额。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "ruleId",
+            "required": true,
+            "note": "合规规则 id，H01–H12"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "ruleId",
+            "type": "string",
+            "required": true,
+            "description": "合规规则 id，H01–H12（如 H05 社保基数）"
+          }
+        ],
+        "returns": "新的 data 副本：resolved[ruleId]={date,status,action,count,impact}，fix 类同时改写 employees，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "ruleId": "H05",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"resolved\":{\"H05\":{\"date\":\"2026-09-17\",\"status\":\"handled\",\"action\":\"按实际工资调整基数\",\"count\":168,\"impact\":1148165}},\"log\":{\"seq\":1,\"kind\":\"compliance\",\"label\":\"按实际工资"
+      },
+      {
+        "name": "hr-calendar",
+        "fn": "calendar",
+        "kind": "query",
+        "title": "人事日历",
+        "description": "90 天人事日历：合同到期、试用期届满、哺乳期结束、需求单到岗期限、面试，按 13 周分格，带逾期与 30 天内两组。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{items[{date,kind,kindName,title,sub,daysLeft}],weeks[13],overdue[],due30[],counts:{total,contract,probation,need,interview}}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"counts\":{\"total\":40,\"contract\":18,\"probation\":16,\"need\":3,\"interview\":3},\"weeks\":13,\"due30\":19}"
+      },
+      {
+        "name": "cost-breakdown",
+        "fn": "cost",
+        "kind": "query",
+        "title": "用工成本结构",
+        "description": "月用工成本 = 工资 + 社保 + 公积金 + 福利，年化再加招聘、培训、流失成本；给成本结构、人均成本、人均产值与用工占收入比及行业参考带。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          },
+          {
+            "from": "org",
+            "required": false,
+            "note": "形参 O：内核函数体内完全未使用，可不传（见 drift）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{monthly,wages,social,fund,welfare,socialBase,annual,recruiting,training,turnoverCost,share,bench,perCapitaCost,perCapitaRevenue,structure[],rates}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"monthly\":1451220,\"wages\":1150000,\"social\":203320,\"fund\":39100,\"welfare\":58800,\"socialBase\":782000,\"annual\":17859907,\"recruiting\":148800,\"training\":104800,\"tur"
+      },
+      {
+        "name": "adopt-plan",
+        "fn": "adoptPlan",
+        "kind": "mutate",
+        "title": "采纳编制方案",
+        "description": "从 12 个月三方案模拟（A 按需求单招满 / B 招满并把社保基数调到位 / C 自然流失不补加内部转岗）里采纳一个，写回数据副本并进月报。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本"
+          },
+          {
+            "from": "planKey",
+            "required": true,
+            "note": "方案 key：A | B | C"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "planKey",
+            "type": "string",
+            "required": true,
+            "description": "编制方案 key：A / B / C"
+          }
+        ],
+        "returns": "新的 data 副本：data.plan=key，log 追加一条；再调 run 可看采纳后的 sim 与月报",
+        "mutates": true,
+        "exampleInput": {
+          "planKey": "B",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"plan\":\"B\",\"log\":{\"seq\":1,\"kind\":\"plan\",\"label\":\"采纳编制方案\",\"detail\":\"B 招满并把社保基数调到位\"}}"
+      }
+    ],
+    "credits": 30,
+    "crossSkillDeps": [],
+    "dataFiles": 8,
+    "dataKeys": [
+      "complianceRules",
+      "costParams",
+      "credits",
+      "industries",
+      "jdBlocks",
+      "jobs",
+      "lintWords",
+      "questions",
+      "samples"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造样本 · 杭州锐合精密五金（168 人）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "service",
+        "label": "专业服务样本",
+        "source": "data.samples.service"
+      },
+      {
+        "key": "flow",
+        "label": "流通贸易样本",
+        "source": "data.samples.flow"
+      }
+    ],
+    "dir": "05-ai-hr",
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 5",
+        "says": "data_files: 5",
+        "actual": "data/ 下实际有 8 个 json：顶层 5 个（jobs / jd-blocks / questions / compliance-rules / cost-params）+ data/samples/ 3 个（mfg.json / prof.json / trade.json）",
+        "fix": "改为 data_files: 8；若刻意只计顶层参数文件，应在字段旁注明「不含 samples」"
+      },
+      {
+        "where": "SKILL.md 目录段「data/samples/*.json 三套样本」",
+        "says": "只按文件名列出三套样本 mfg / prof / trade",
+        "actual": "load-data.js 按样本内的 archetype 归键，运行期键名是 make / service / flow（examples 也输出 make/service/flow.output.json），与文件名 mfg/prof/trade 不一致",
+        "fix": "目录段补一句「样本键名为 archetype：make / service / flow，与文件名 mfg / prof / trade 不同」，免得调用方按文件名取 samples"
+      },
+      {
+        "where": "SKILL.md 引擎函数表",
+        "says": "表里只列 run / org / jd / screenOne / candidates / pass…publish / interviewKit / interviewResult / compliance / resolve / calendar / cost / simulate / adoptPlan",
+        "actual": "内核还导出了 ensure（规范化数据副本，原型 loadArche 必须先调用）和 band（薪酬带换算），表中未列",
+        "fix": "引擎表补 ensure(raw) 与 band(d, jobKey, lib) 两行，标明 ensure 是所有写回动作与外部接入的入口"
+      },
+      {
+        "where": "SKILL.md 引擎表 cost / simulate 一行",
+        "says": "把 cost / simulate / adoptPlan 并列，读起来像三个都能独立调用",
+        "actual": "simulate(d, lib, C, comp) 必须先拿到 cost() 与 compliance() 的返回值才能调用，无法只用 (data, lib) 独立跑；实际外部只能通过 run().sim 取三方案",
+        "fix": "表中标注 simulate 的依赖为 cost 与 compliance 的结果，并说明对外取三方案走 run().sim"
+      },
+      {
+        "where": "core/hr.js:254 function cost(d, lib, O)",
+        "says": "签名带第三个形参 O（组织盘点结果）",
+        "actual": "函数体内完全没有引用 O，run() 传入的 O 是无效实参",
+        "fix": "删掉形参 O，或在 SKILL.md 注明第三参已废弃、外部调用可省略；本映射表里该参数标为 required:false"
+      }
+    ],
+    "id": "ai-hr",
+    "kernelPath": "core/hr.js",
+    "legacyGlobal": "DGG.coreM5",
+    "moduleName": "AI人力官",
+    "notes": "1) 内核是纯 UMD、确定性、零 LLM、零网络，浏览器挂 DGG.coreM5，Node 直接 require，适配多平台无障碍。2) 所有 mutate 动作都返回「新的 data 副本」（内部先 clone+ensure），平台必须把返回值写回会话状态，下一个动作再用 $data 注入，链式跑通已验证（连发 7 个写回动作后 run 正常：log=7、合规待处理 10→9、plan=B、offers=1）。3) $lib 只需 jobs / jdBlocks / questions / complianceRules / costParams 五项即可跑全部动作（原型 module-05.js 就只注入这五项），load-data 另外返回的 industries / credits / lintWords 本内核未使用。4) 未暴露 simulate：它需要 cost() 与 compliance() 的结果作实参，无法用 (data, lib) 独立调用，三方案模拟统一从 run().sim 取。5) 未暴露 interviewResult 与 screenOne：其结果已分别挂在 candidates()/run() 返回行的 .interview 与 .score 上。6) 格式化工具 fmtN / fmtW / short / days / dateOf / addMonths 与常量 VERSION / MODULE_NAME / CREDITS / STAGES 不作为动作，建议生成器以常量或工具函数形式另行导出。7) interview-kit 的入参是候选人对象而非 id（内核只读 needId），生成器可在 invoke 层做 id→对象的查表糖衣。",
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "summary": "接花名册与简历，把 JD、简历打分、面试录用、用工合规、成本编制串成一个离线工作台。",
+    "version": "1.0.0"
+  },
+  {
+    "id": "ai-cfo",
+    "dir": "06-ai-cfo",
+    "kernelPath": "core/fin.js",
+    "legacyGlobal": "DGG.coreM6",
+    "version": "1.0.0",
+    "moduleName": "AI CFO",
+    "credits": 50,
+    "summary": "接企业账套，算三表勾稽、风险预警、13周现金与政策匹配，处置写回副本",
+    "dataFiles": 7,
+    "dataKeys": [
+      "benchmarks",
+      "credits",
+      "industries",
+      "lintWords",
+      "policies",
+      "riskRules",
+      "rules",
+      "samples"
+    ],
+    "crossSkillDeps": [],
+    "sharedFiles": [
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造样本 · 杭州锐合精密五金（主样本：勾稽异常 6 条 / 高风险 3 条 / 有现金缺口）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "service",
+        "label": "服务样本 · 专业服务变体（勾稽异常 4 条 / 无高风险）",
+        "source": "data.samples.service"
+      },
+      {
+        "key": "flow",
+        "label": "贸易样本 · 流通贸易变体（勾稽异常 6 条 / 毛利率低）",
+        "source": "data.samples.flow"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "财务全量测算",
+        "description": "一次算全：三表、14 条勾稽（含下钻与调整分录模板）、10 条风险矩阵、13 周现金预测、12 项政策匹配、KPI 与财务月报文本；六屏所有只读内容都来自这一次调用。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套：data.samples.<make|service|flow>，或上一步写回类动作返回的新副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的数据包（rules/riskRules/benchmarks/policies/samples/industries/credits/lintWords）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version, data(落账后副本), statements{pl,bs,cf}, reconcile{rows,counts,reasons}, risks{rows,counts,aging}, forecast, policies, kpi, report{lines,text,todo}}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"kpi\":{\"period\":\"2026-08\",\"rev\":4260000,\"revMoM\":-3,\"gm\":24.8,\"gmPrev\":25.3,\"nm\":3.3,\"netProfit\":139358,\"cfo\":-3225,\"cash\":2563680,\"cashMonth"
+      },
+      {
+        "name": "statements",
+        "fn": "statements",
+        "kind": "compute",
+        "title": "三表生成",
+        "description": "由 12 期科目余额生成利润表、资产负债表与间接法现金流量表。$data 传 book-adjustments 或 run 返回的落账副本；直接传原账套时未落账的调整分录不计入。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套（建议为 normalize/run 之后的落账副本）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{pl:[12 期], bs:[13 期含期初], cf:[12 期]}，每期含 rev/cogs/gross/gm/净利润与资产负债科目",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"months\":12,\"plLast\":{\"month\":\"2026-08\",\"label\":\"8月\",\"rev\":4260000,\"cogs\":3203520,\"gross\":1056480,\"gm\":0.248,\"sellExp\":178320,\"adminExp\":476904,\"rdExp\":199985,"
+      },
+      {
+        "name": "ar-aging",
+        "fn": "arAging",
+        "kind": "query",
+        "title": "应收账龄",
+        "description": "按 today 对应收明细逐条算逾期天数并落账龄桶（未到期 / 逾期 1–30 / 31–90 / 91–180 / 180 天以上），是风险屏催收与坏账处置的下钻依据。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套（读取 cash.arItems 与 today）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "[{id, customer, amount, due, overdueDays, bucket}]",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"total\":18,\"buckets\":{\"逾期 1–30 天\":3,\"未到期\":11,\"逾期 91–180 天\":2,\"逾期 31–90 天\":2}}"
+      },
+      {
+        "name": "forecast",
+        "fn": "forecast",
+        "kind": "compute",
+        "title": "现金预测",
+        "description": "13 周现金日历：应收按账期与账龄折扣、在产订单交付后回款、应付按到期、固定支出与贷款按日历；scenario 为情景开关叠加，拨动即重算最低点与缺口。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套（其自带的 cashScenario 会与 scenario 合并）"
+          },
+          {
+            "from": "scenario",
+            "required": false,
+            "note": "情景开关覆盖项，缺省时用账套里的 cashScenario"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "scenario",
+            "type": "object",
+            "required": false,
+            "description": "可选开关：collectAhead 催收提前 / delayAP 延付供应商 / rushOrder 加急订单回款 / refinance 短贷置换 / payCritical 优先付关键供应商 / disposeSlow 处置呆滞 / cutEntertain 压缩招待 / fixSocialBase 调整社保基数 / loanDraw 授信提款金额 + loanDrawWeek 提款周次"
+          }
+        ],
+        "returns": "{weeks:[13 周含 inflow/outflow/ending/items], opening, safety, minWeek, minEnding, gap, gapWeeks, inflow, outflow, ending, scenario}",
+        "mutates": false,
+        "exampleInput": {
+          "scenario": {
+            "collectAhead": true,
+            "delayAP": true
+          },
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"opening\":2563680,\"safety\":600000,\"minWeek\":3,\"minEnding\":753980,\"gap\":0,\"gapWeeks\":[],\"weeks\":13,\"scenario\":{\"collectAhead\":true,\"delayAP\":true}}"
+      },
+      {
+        "name": "cash-options",
+        "fn": "cashOptions",
+        "kind": "compute",
+        "title": "缺口三方案",
+        "description": "补缺三方案 A 催收 / B 延付 / C 融资各在副本上重算一遍，给最低点、缺口周数、资金成本与副作用，并按「能否回到安全线 → 资金成本」推荐一个。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（benchmarks 的 capitalCost / lateFeeDaily 等口径）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{base(基准预测), options:[{key:'A|B|C',name,minEnding,gap,gapWeeks,cost,clears,side,desc}], recommend, reason}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"recommend\":\"C\",\"reason\":\"融资就能把 13 周内最低现金拉回安全线以上（最低 60.9 万元，第 4 周），利息成本 11,250 元；增加有息负债\",\"options\":[{\"key\":\"A\",\"name\":\"催收\",\"minEnding\":515980,\"clears\":false,\"c"
+      },
+      {
+        "name": "apply-fix",
+        "fn": "applyFix",
+        "kind": "mutate",
+        "title": "采纳调整分录",
+        "description": "对某条勾稽异常按建议生成调整分录并写进账套副本（R03 补记回款 / R04 按 ERP 调存货 / R07 补记银行未达 / R08 申报未开票 / R10 补提折旧 / R12 预付转待摊），返回新副本，再跑 run 三表即重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套（内部深拷贝，不改原对象）"
+          },
+          {
+            "from": "ruleId",
+            "required": true,
+            "note": "勾稽规则 id"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（rules.json 取分录模板）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "ruleId",
+            "type": "string",
+            "required": true,
+            "description": "R01–R14；其中 R03/R04/R07/R08/R10/R12 有调整分录，其余为空操作；同一条重复采纳不会叠加"
+          }
+        ],
+        "returns": "账套新副本：adjustments 追加 {rule,key,amount,label,entry[借贷行],seq}，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "ruleId": "R03",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[{\"rule\":\"R03\",\"key\":\"bookCollection\",\"amount\":180000,\"base\":0,\"label\":\"补记回款分录\",\"entry\":[[\"借\",\"银行存款\",\"180,000\"],[\"贷\",\"应收账款\",\"180,000\"]],\"seq\":1}]"
+      },
+      {
+        "name": "apply-risk-action",
+        "fn": "applyRiskAction",
+        "kind": "mutate",
+        "title": "风险处置",
+        "description": "对某条风险执行处置动作并写回副本；处置后该风险发生概率下调 0.4，现金情景与月报待办同步更新。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "riskId",
+            "required": true,
+            "note": "风险规则 id"
+          },
+          {
+            "from": "key",
+            "required": true,
+            "note": "该风险下的处置动作 key"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（risk-rules.json 取动作定义）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "riskId",
+            "type": "string",
+            "required": true,
+            "description": "K01–K10"
+          },
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "K01:collect/provision · K02:note · K03:disposeSlow · K04:declareUninvoiced · K05:gotoCash · K06:cutEntertain · K07:reviewCost · K08:payCritical/negotiateAP · K09:refinance · K10:fixSocialBase；未知 key 为空操作"
+          }
+        ],
+        "returns": "账套新副本：actions 追加 {risk,key,label,detail,amount,seq}，log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "riskId": "K01",
+          "key": "collect",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[],\"actions\":[{\"risk\":\"K01\",\"key\":\"collect\",\"label\":\"发起催收\",\"detail\":\"逾期 30 天以上客户进入催收，现金预测按提前两周、80% 到账重排\",\"amount\":0,\"seq\":1}],\"policyList\":[],\"ca"
+      },
+      {
+        "name": "apply-cash-option",
+        "fn": "applyCashOption",
+        "kind": "mutate",
+        "title": "执行现金方案",
+        "description": "按 A/B/C 方案执行补缺：把对应情景开关（催收提前 / 延付 / 授信提款金额与周次）写进副本的 cashScenario 并记一条处置日志，驾驶舱与月报随之重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "key",
+            "required": true,
+            "note": "方案 key，一般取 cash-options 的 recommend"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包（资金成本口径）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "A 催收 / B 延付 / C 融资"
+          }
+        ],
+        "returns": "账套新副本：cashScenario 写入对应开关（C 为 {loanDraw, loanDrawWeek}），log 追加一条",
+        "mutates": true,
+        "exampleInput": {
+          "key": "C",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[],\"actions\":[],\"policyList\":[],\"cashScenario\":{\"loanDraw\":900000,\"loanDrawWeek\":2},\"log\":[{\"seq\":1,\"kind\":\"cash\",\"label\":\"现金方案 C · 融资\",\"detail\":"
+      },
+      {
+        "name": "toggle-policy",
+        "fn": "togglePolicy",
+        "kind": "mutate",
+        "title": "申报清单开关",
+        "description": "把某项政策加入或移出申报清单（同一 id 再调一次即移出），清单金额在政策屏与月报里汇总。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套"
+          },
+          {
+            "from": "id",
+            "required": true,
+            "note": "政策 id"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "id",
+            "type": "string",
+            "required": true,
+            "description": "P01–P12（状态为「不符」的政策也能被写入，界面上不给入口）"
+          }
+        ],
+        "returns": "账套新副本：policyList 增删该 id",
+        "mutates": true,
+        "exampleInput": {
+          "id": "P01",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[],\"actions\":[],\"policyList\":[\"P01\"],\"cashScenario\":{},\"log\":[]}"
+      },
+      {
+        "name": "load-ledger",
+        "fn": "ensure",
+        "kind": "mutate",
+        "title": "载入账套",
+        "description": "接入屏用：把样本或外部账套复制一份，补齐 adjustments / actions / log / policyList / cashScenario 五个动作字段，得到后续所有动作可回灌的工作副本（不落账）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "原始账套（样本或企业导入的账套）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "账套新副本，动作字段已补齐为空值",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[],\"actions\":[],\"policyList\":[],\"cashScenario\":{},\"log\":[]}"
+      },
+      {
+        "name": "book-adjustments",
+        "fn": "normalize",
+        "kind": "mutate",
+        "title": "调整分录落账",
+        "description": "把已采纳的调整分录落到当期账面（含按适用税率重算所得税、回冲应交税费与未分配利润），返回落账后的账套副本，供 statements 直接取用。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "账套（一般是 apply-fix 之后的副本）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "落账后的账套新副本（ledger 已按 adjustments 改写当期科目）",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"adjustments\":[{\"rule\":\"R03\",\"key\":\"bookCollection\",\"amount\":180000,\"base\":0,\"label\":\"补记回款分录\",\"entry\":[[\"借\",\"银行存款\",\"180,000\"],[\"贷\",\"应收账款\",\"180,000\"]],\"seq\":1}]"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 4",
+        "says": "data/ 下 4 个数据文件",
+        "actual": "data/ 下实有 7 个 json：顶层 rules / risk-rules / benchmarks / policies 共 4 个，另加 data/samples/ 下 mfg.json、prof.json、trade.json 共 3 个账套样本（全仓同一写法：04/05/09 也只计顶层）",
+        "fix": "据实改为 data_files: 7，或在字段旁注明「只计顶层规则表，样本另计 3」"
+      },
+      {
+        "where": "SKILL.md 正文「引擎 core/fin.js」函数表",
+        "says": "只列 run / statements / reconcile / applyFix / risks / applyRiskAction / forecast / cashOptions / policies / report 共 10 个函数",
+        "actual": "内核实际导出 19 个成员；写回类的 applyCashOption(raw,key,lib) 与 togglePolicy(raw,id) 完全没写进表里，而原型第 5、6 屏正是靠它们执行现金方案和维护申报清单；ensure / normalize / metrics / arAging / kpi 同样未列",
+        "fix": "表里补 ensure、normalize、arAging、applyCashOption、togglePolicy、kpi 六行（metrics 若视为内部可注明）"
+      },
+      {
+        "where": "SKILL.md 正文 applyRiskAction 一行列举的处置动作",
+        "says": "催收 / 计提坏账 / 处置呆滞 / 申报未开票收入 / 压缩招待 / 协商付款 / 优先付关键供应商 / 短贷置换 / 调整社保基数，共 9 个",
+        "actual": "data/risk-rules.json 实有 12 个动作 key，漏写 K02 note（列入经营会议）、K05 gotoCash（看 13 周现金预测）、K07 reviewCost（复核成本结转）",
+        "fix": "补齐这三个动作，或注明 note / gotoCash 属提示类、不改数据口径"
+      },
+      {
+        "where": "SKILL.md「样本」段：五处勾稽异常",
+        "says": "五处勾稽异常做在外部来源与账面的差异上",
+        "actual": "make 主样本实跑 reconcile.counts = {ok:8, warn:0, bad:6, na:0}，异常为 R03/R04/R07/R08/R10/R12 共 6 条；五个外部来源对应 6 条规则，因为银行流水同时命中 R03 与 R07（正文自己也说明二者同源）",
+        "fix": "改为「六条勾稽异常、来自五个外部来源（银行流水同时命中 R03 与 R07）」"
+      },
+      {
+        "where": "SKILL.md 前言 inputs: [data]",
+        "says": "运行输入只有 data 一项",
+        "actual": "主函数签名是 run(data, lib)，11 个可用动作里有 5 个（run / cashOptions / applyFix / applyRiskAction / applyCashOption）必须传 scripts/load-data.js 返回的固定数据包 lib（8 个键：rules、riskRules、benchmarks、policies、samples、industries、credits、lintWords）",
+        "fix": "inputs 保留 [data]，另补一行注明 lib 为固定注入数据包，生成 invoke 层时按 $lib 注入"
+      },
+      {
+        "where": "SKILL.md「勾稽与风险的口径」风险等级一段",
+        "says": "概率 ≥ 0.6 且影响 ≥ 20 万为高；概率 ≥ 0.35 或影响 ≥ 20 万为中；其余低。处置后概率下调 0.4",
+        "actual": "core/fin.js 第 261–264 行另有两处未写进正文的兜底：概率下调设 0.1 下限（Math.max(0.1, prob - 0.4)），且 prob ≤ 0.1 时强制判为低——处置后的高风险会直接掉到低档",
+        "fix": "口径段补「概率下限 0.1；概率 ≤ 0.1 一律判低」"
+      }
+    ],
+    "notes": "$data 默认取 data.samples.make（另有 service / flow）；$lib 由 load-data 固定注入。reconcile / risks / policies / kpi / report 的第二个形参要 statements 对象，无法只靠 JSON 输入拆参，故不单独暴露，结果统一由 run 返回（rows 内已含 drill 下钻表）。5 个 mutate 动作返回整份账套新副本，平台须回灌为下次调用的 $data。fmtN/fmtW/short/dateOf/monthLabel/evalExpr 为格式化与工具函数，未暴露。11 个动作已对三套样本实跑通过，仓库文件零改动（scripts/validate.js 714 项断言仍通过）。"
   }
 ]
