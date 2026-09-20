@@ -27,32 +27,32 @@ universal: dus-1
 
 | 函数 | 作用 |
 |---|---|
-| `run(data, lib)` | 一次算全：指标树、默认归因（经营利润较上期）、决议台账、KPI、月报 |
+| `run(data, lib, opt)` | 一次算全：指标树、归因、决议台账、KPI、月报；`opt = { metric, basis }` 决定返回里 attribution 算哪个指标、比哪个基期，缺省 `profit` / `prev`（经营利润较上期），原型正是靠这个第三参数切换归因 |
 | `tree(d, lib)` | 按 `data/metric-tree.json` 的公式算全树：sum（带符号求和）、product（乘积）、leaf（序列或表达式）；每节点给本期、上期、前三月均值、预算、偏差与状态 |
-| `attribute(d, lib, metric, basis)` | 连环替代法：按公式树逐层替换，乘法节点按 收入 → 毛利率 的顺序，加法节点直接取差；基期可选上期或前三月均值（复合节点由叶子基期值重算）；含一次性项的叶子（`facts.oneOff`）剔除后再判主因 |
+| `attribute(d, lib, metric, basis)` | 连环替代法：按公式树逐层替换，乘法节点按 收入 → 毛利率 的顺序，加法节点直接取差；基期可选上期或前三月均值（复合节点由叶子基期值重算）；含一次性项的叶子（`facts.oneOff`）剔除后再判主因；可归因指标只有指标树 `attributable` 列出的 6 个：经营利润 `profit`、毛利 `grossProfit`、收入 `rev`、毛利率 `gm`、期间费用 `opex`、现金周期 `ccc` |
 | `evidence(d, lib, factor, direction)` | 因子到证据卡：来自哪个模块、哪一屏、说明文本（占位符由 facts 填充） |
-| `options / simulate / simulateAll` | 方案库按根因取方案（叶子没有则沿指标树向上回退）；参数作用在驱动节点上按 pct / pt / add / days 生效并按见效期与爬坡线性到位；12 个月利润、毛利率、现金周期、准时率走势；净效益 = 12 个月利润增量 − 投入；现金影响另加营运资金释放；推荐 = 净效益 × 风险系数最高者 |
-| `submit / approve / reject` | 发起审批单（三位会签按规则给同意 / 有条件同意 / 反对）；批准形成决议（执行节点按天数排期、跟踪目标取预演前 6 个月）；驳回留意见 |
-| `setMilestone / decisions` | 节点状态推进、进度、逾期、跟踪目标与实际的偏差、复盘 |
-| `kpi / report` | 指标状态计数、主因、待批与执行中；决策月报含风险指标、归因、审批、执行、复盘、处置与待办 |
+| `options(d, lib, causeId)` · `simulate(d, lib, causeId, optionKey, params)` · `simulateAll(d, lib, causeId, paramsByKey)` | 方案库按根因取方案（叶子没有则沿指标树向上回退）；参数作用在驱动节点上按 pct / pt / add / days 生效并按见效期与爬坡线性到位；12 个月利润、毛利率、现金周期、准时率走势；净效益 = 12 个月利润增量 − 投入；现金影响另加营运资金释放；推荐 = 净效益 × 风险系数最高者；`simulateAll` 的第四个形参按方案 key 分组，形如 `{ A: { ... }, B: { ... } }`，不是扁平的参数对象 |
+| `submit(d, lib, causeId, optionKey, params)` · `approve(d, lib, approvalId, comment)` · `reject(d, lib, approvalId, comment)` | 发起审批单（submit 传根因、方案 key 与参数五个形参，不直接传方案对象；三位会签按规则给同意 / 有条件同意 / 反对）；批准形成决议（执行节点按天数排期、跟踪目标取预演前 6 个月）；驳回留意见。三者只对 status 为 `pending` 的单子生效，否则原样返回数据副本 |
+| `setMilestone(data, decisionId, index, status)` · `decisions(d, lib)` | `setMilestone` 推进节点状态，是内核里唯一不接收 lib 的写操作，第二个形参直接是决议编号、第三个是节点下标；`decisions` 要传 lib，给出进度、逾期、跟踪目标与实际的偏差、复盘 |
+| `kpi / report`（模块内私有，由 run 返回，不单独导出） | 指标状态计数、主因、待批与执行中；决策月报含风险指标、归因、审批、执行、复盘、处置与待办。外部从 `run()` 返回值的 `.kpi` / `.report` 取 |
 
 ## 口径
 
 - 指标数字直接取各模块样本：收入、毛利率、费用、应收、存货、应付来自 AI CFO 账套；准时交付率、延期单、瓶颈负荷来自 AI ERP 排程结果；新客成交、线索、转化率来自 AI获客；在编、离职率、加班超限、合规影响来自 AI人力官；高风险合同来自 AI法务。各模块没有月度历史的指标，按当前值向前铺序列，末月与对应模块屏上的数一致。
 - 直接人工 = 生产工资与社保 × 直接人工比例（制造 78%、贸易 50%、服务 78%），其余为间接人工计入制造费用。
-- 归因只做连环替代法，不做统计回归，不接大模型；法律与合规口径沿用对应模块。
+- 归因只做连环替代法，不做统计回归，不接大模型；可归因的只有指标树 `attributable` 标出的 6 个指标，下钻到非可归因节点时回退到所属组的根指标；法律与合规口径沿用对应模块。
 - 联系人只出现职务；决议与审批单只出现编号；费用一律标预计。
 
 ## 目录
 
 ```
 core/decide.js              引擎（UMD）
-data/metric-tree.json       指标树：31 个节点、6 组、公式、容差、来源模块
+data/metric-tree.json       指标树：31 个节点、6 组、公式、容差、来源模块、attributable（可归因的 6 个节点）
 data/evidence.json          归因证据库（按因子与方向）    data/playbooks.json     方案库（11 个根因，含参数、效果、节点）
 data/approval-rules.json    三位会签人的规则与文案
-data/samples/*.json         三套样本（gen-samples 从各模块样本取数生成）   schema/data.json   数据包契约
+data/samples/*.json         三套样本（gen-samples 从各模块样本取数生成）；load-data 以 sample.archetype 为键装配，键名与文件名不同：mfg.json → make、trade.json → flow、prof.json → service   schema/data.json   数据包契约
 scripts/load-data.js · gen-samples.js · run-examples.js · validate.js
-examples/*.output.json      三套样本的驾驶舱摘要
+examples/*.output.json      三套样本的驾驶舱摘要，按 archetype 命名：make / flow / service
 ```
 
 ## 原型流程（六屏）

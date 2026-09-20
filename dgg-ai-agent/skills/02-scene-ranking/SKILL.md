@@ -87,7 +87,7 @@ universal: dus-1
 总分 = 痛点强度 × 0.35 + 数据可得 × 0.30 + 见效周期 × 0.20 + (6 − 实施门槛) × 0.15
 ```
 
-四维各 1–5 分。数据可得与实施门槛在按 `dataState` / `capacity` 调整后会落到 0.5 档（内核用 `clamp(round1(...), 1, 5)` 保留一位小数），所以单轴分数可能是 4.5 这样的值。加权后除以 5 再乘 100 换算为百分制。
+四维各 1–5 分。数据可得、实施门槛与见效周期三轴在按 `dataState` / `capacity` / `window` 调整后都可能落到 0.5 档（内核用 `clamp(round1(...), 1, 5)` 保留一位小数），所以单轴分数可能是 4.5、2.5 这样的值。加权后除以 5 再乘 100 换算为百分制。
 
 | 维度 | 怎么算 |
 |---|---|
@@ -109,7 +109,7 @@ universal: dus-1
 | 角色分工 | 牵头人、业务对接人（取首选场景的使用岗位）、数据对接人（按 `itStaff` 生成） |
 | 何时重跑 | 5 条触发条件，结合本次缺失数据源与首批场景生成补充说明 |
 | 90 天清单 | 首选场景的第一步、数据整理、前置条件、配置试运行、验收，再加第二批准备与数据补齐评估 |
-| 风险提示 | 由 `dataState`、`systems`、`capacity`、缺失数据源、周期与期望窗口的差距触发，**按规则书写顺序输出，不做级别排序**；壳层若要按 高 > 中 > 提示 呈现，自己排 |
+| 风险提示 | 共 7 条规则：由 `dataState`、`systems`、`capacity`、缺失数据源、周期与期望窗口的差距，以及「`itStaff` 为无 × 投入档为重」触发（七条全未命中时输出一条兜底「提示」，见「降级」表），**按规则书写顺序输出，不做级别排序**；壳层若要按 高 > 中 > 提示 呈现，自己排 |
 
 输入不合法时返回 `{ ok: false, errors: [...] }`，不扣积分，把 `errors` 翻译成一句追问。
 
@@ -162,7 +162,7 @@ universal: dus-1
 
 **版式身份**——与「企业AI成熟度评估」明确区分：章节标题为整条 3D 彩色凸浮条配圆角方序号徽章，条面带一道横贯整条的斜向光泽；小节标题为粗体黑字加灰色拉丁副题；内容卡为顶部凸浮帽条（模块 1 走左侧色轨）；页脚为贯穿全宽的五色渐变条（模块 1 为六色）；封面为「企服 → AI → 排序结果」主视觉；封底为深墨蓝满版。样式 `prototype/src/report-m2.css`、图表 `prototype/src/charts-m2.js`：这两个文件与模块 1 的 `report-m1.css` / `charts-m1.js` 作用域分别是 `.page.m2` 与 `.page.m1`，互不复用。两个模块仍共用三个底座文件——`report.css`（A4 页盒）、`charts.js`（调色板与通用图元）、`tokens.css`（设计变量）；排序台另有本模块专属的 `module-02.css`。
 
-图表库共 14 种：`heroM2`（封面主视觉）· `dial` · `ladder` · `painBars` · `painBubbles` · `sankey` · `funnel` · `axisStack` · `waterfall` · `bubbleMatrix` · `radarCompare` · `heatmap` · `depArc` · `gantt`。
+图表库共 15 种：`heroM2`（封面主视觉）· `dial` · `ladder` · `painBars` · `painBubbles` · `sankey` · `funnel` · `axisStack` · `waterfall` · `bubbleMatrix` · `radarCompare` · `heatmap` · `depArc` · `gantt` · `cover2`（封面备选主视觉，保留未启用，全仓库无调用点，封面实际用 `heroM2`）。
 
 | 页 | 章节 | 数据 |
 |---|---|---|

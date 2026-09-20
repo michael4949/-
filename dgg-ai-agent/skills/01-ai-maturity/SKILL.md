@@ -92,12 +92,12 @@ universal: dus-1
 ### 2. llm（可选，至多一次，8 秒超时）
 
 - 提示词 `prompts/polish.md`，由 `buildPrompt(result, data)` 填充；只润色**打基础三项行动**（`actions[0..2]`）的 `title` 与 `why`，其余六项与所有服务名、模块名、数字一律不动
-- 返回先剥离代码围栏再解析 JSON；解析失败、条数不是 3、标题超 14 字、正文超 60 字、命中禁忌词，任一发生即整体放弃润色，保留模板
+- 返回先剥离代码围栏再解析 JSON；解析失败、条数不是 3、标题超 14 字、正文超 60 字、命中禁忌词（这一项以调用方传入 lint 为前提，见下节），任一发生即整体放弃润色，保留模板
 - 润色成功的条目 `source = "llm"`，否则 `source = "template"`（`mergePolish(result, llmText, lint)`）
 
 ### 3. 输出前
 
-全部文本字段过 `_shared/lint-words.json` 的 hard 项（`_shared/lint.js`），命中即回落模板。数据表在构建期已扫过（`scripts/lint.js`），运行期只需扫 LLM 返回。
+运行期只需扫 LLM 返回的文本，数据表在构建期已扫过（`scripts/lint.js`）。禁忌词判定由壳层/invoke 层自行构造并传入：`scripts/load-data.js` 只提供 `lintWords` 数据表，调用方用 `_shared/lint.js` 的 `makeLint(data.lintWords).hit` 得到判定函数，作为 `mergePolish(result, llmText, lint)` 的第三个形参传入。该形参可选，传入时标题或正文命中 `_shared/lint-words.json` 的 hard 项即整体回落模板；留空时内核只校验条数与字数，运行期不做禁忌词拦截。
 
 ## 输出
 
@@ -245,6 +245,8 @@ scripts/gen-benchmark.js          参考带生成器
 ../_shared/credits.json           积分表
 ../_shared/lint-words.json · lint.js  禁忌词表与扫描器
 ```
+
+运行期 `core/compute.js` 的数据包由 `scripts/load-data.js` 组装：`data/` 下 9 个 json，外加 `_shared/` 的 `profile-fields.json` / `industries.json` / `credits.json` / `lint-words.json` 四个 json，以及 `prompts/polish.md` 一个提示词文件。
 
 ## 验证
 

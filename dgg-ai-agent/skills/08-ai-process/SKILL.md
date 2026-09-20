@@ -25,12 +25,14 @@ universal: dus-1
 
 ## 引擎 `core/flow.js`
 
+对外函数签名统一为 `(data, lib, ...)`：`data` 是本模块样本副本，`lib` 由 `scripts/load-data.js` 装配（vocab、rules、improveLib、samples、erpSamples 与三份 `_shared`）。`lib` 还需由调用方注入 `lib.erp = skills/10-ai-erp/core/sim.js`，内核靠 `lib.erp.schedule` 重算排程，缺这一注入 `run` 无法执行；`scripts/run-examples.js` 与 `scripts/validate.js` 都在取到 `lib` 后先注入再调用。
+
 | 函数 | 作用 |
 |---|---|
-| `run(data, lib)` | 一次算全：es（采纳标准工时后的 ERP 副本）、S（排程）、bottleneck、metrics、flow、verify、sequence、loss、calibration、buffer、skills、alerts、preview、committed、dispatch、maintenance、planHit、ledger、weekly、kpi、improveCards |
+| `run(data, lib)` | 一次算全，返回 24 个键：version、data（ensure 后的数据副本，原型与 invoke 层都用它做下一步入参）、es（采纳标准工时后的 ERP 副本）、S（排程）、vocab（当前业态词表）、bottleneck、metrics、flow、verify、sequence、loss、calibration、buffer、skills、alerts、preview、committed、dispatch、maintenance、planHit、ledger、weekly、kpi、improveCards |
 | `bottleneck / wipCurve / queueDaysOf` | 约束线 = 负荷最高的线（并列取排队最长）；瓶颈前在制按前道完工与本道未开工推 7 天，上限 = capDays × 日可用小时；平衡率 = 各线负荷均值 / 最高负荷 |
 | `flowCards` | 工序流分段卡：按路线顺序把工序集合相同的产线并成一格（服务业按环节分），每格给标准 / 实际单件工时、在制、等待、一次合格率、可用率 |
-| `verifyReports / confirmReport / confirmAllReports` | 报工核验六条规则只标记不改数：工时偏离、重复报工、漏报、数量守恒、时段重叠；确认后写 verified 与日志 |
+| `verifyReports / confirmReport / confirmAllReports` | 报工核验五条规则只标记不改数：工时偏离、重复报工、漏报、数量守恒、时段重叠；确认后写 verified 与日志 |
 | `alerts / handleException` | 异常六条规则各命中一条根因并指到岗位：R1 在制超限、R2 单批等待超时、R3 一次合格率判异（12 周均值做 3σ 下限）、R4 单件工时判异、R5 设备频繁停机、R6 交接班首小时落后；处置置 doing，savedH > 0 才进增效账 |
 | `lossWaterfall` | 时间损失瀑布守恒：计划 − 换型 − 停机 − 等待 − 速度 − 返工 = 有效；可用率 = (T−S−D−W)/T，性能率 = (R−V)/R，有效利用率 = 有效/T；12 周序列与可回收工时 |
 | `calibrateStd / adoptStd` | 标准工时校准：\|偏差\| ≥ 15% 且稳定（n ≥ 8、IQR/中位 < 0.25）才「过期」，建议值 = 中位向上取到 0.0001；采纳写到本模块副本的路线上并重算排程 |
@@ -64,4 +66,4 @@ examples/*.output.json      三套样本的看板摘要
 
 ## 原型流程（六屏）
 
-接入（选样本或导入报工 / 设备 / 排班，四个数据源的同步时间与行数）→ 工序流看板（分段卡、约束线与 7 天在制曲线、平衡率、小时节拍、异常与报工待核计数）→ 工序诊断（报工核验逐条确认、异常根因与处置、时间损失瀑布与两率、标准工时校准采纳、按节拍投料下发、换型合批顺序表下发）→ 改善预演（四张卡调参数、组合、AI 推荐、立项）→ 执行与派工（项目节点推进、明日派工单与跨线支援、技能矩阵与带教、保养窗口排入）→ 提效周报（前后对比、增效账、效果核验、发微信给四个岗位）。进看板扣 50 积分，一次。
+接入（选样本或导入报工 / 设备 / 排班，四个数据源的同步时间与行数）→ 工序流看板（分段卡、约束线与 7 天在制曲线、平衡率、小时节拍、异常与报工待核计数）→ 工序诊断（报工核验逐条确认、异常根因与处置、时间损失瀑布与两率、标准工时校准采纳、按节拍投料下发、换型合批顺序表下发）→ 改善预演（四张卡调参数、组合、AI 推荐、立项）→ 执行与派工（项目节点推进、明日派工单与跨线支援、技能矩阵与带教、保养窗口排入）→ 提效周报（前后对比、增效账、效果核验、发微信给四个岗位）。进看板扣 50 积分，一次：扣分由原型外壳实现，内核只导出 `CREDITS = 50` 常量、不含任何计费代码，通用 invoke 层也不计费。

@@ -23,7 +23,7 @@ universal: dus-1
 
 把企业在手订单沿各自的工序路线在产线日历上向前排，得到每道工序的开工与完工、每张订单的预计完工与延期归因，并在同一套排程上做四件事：**处置动作**（催料 / 调线 / 加班 / 改期，整体重排后逐单对比）、**插单模拟**（同一张加急单按三种策略各排一遍，比较对在手订单的拖累与代价）、**采购建议**（按排程推算每种物料的库存走势，倒推缺口日、建议量与最晚下单日）、**交付日报**（今日交付、风险订单、已处置、明日提醒）。
 
-纯预制、无 LLM 调用、断网可用。同一个引擎按四种业态原型换对象名与核心交互，指挥室骨架不变。
+纯预制、无 LLM 调用、断网可用。同一个引擎按四种业态原型换对象名与核心交互，指挥室结构不变。
 
 ## 业态原型
 
@@ -63,16 +63,25 @@ examples/*.output.json   四套样本的指挥室摘要
 
 ## 引擎接口
 
+对外只收一份数据包 `data`。`S`（排程结果）与 `plan`（采购建议）分别由 `schedule` 与 `purchasePlan` 产出后回传给下游函数，不需要外部另行准备；各入口内部自带 `normalize`，原始样本可直传。
+
 | 函数 | 作用 |
 |---|---|
-| `schedule(data)` | 全量排程 → `{ orders, byId, lines, materials, kpi, days }` |
+| `schedule(data)` | 全量排程 → `{ version, today, horizon, days, orders, byId, lines, materials, kpi, data }`；其中 `data` 是规范化后的完整数据副本，`explain` / `actions` 下游直接取 `S.data` |
 | `explain(S, orderId)` | 一张订单的「看了哪些数据 / 判断依据」 |
 | `actions(data, S, orderId)` | 处置候选，每项带预演效果与费用，已排序 |
-| `applyAction(data, orderId, key, params)` | 把动作写进数据副本并记日志（不改原数据） |
+| `applyAction(data, orderId, key, params, dry)` | 把动作写进数据副本并记日志（不改原数据）；`dry=true` 时只做重排预演，不记日志、不标已处置，`actions()` 的效果预演走的就是这条路 |
 | `simulateInsert(data, req)` | 三方案对比 + 推荐与理由 |
 | `applyInsert(data, req, strategy)` | 按所选方案落单 |
-| `purchasePlan(data, S)` | 采购建议、呆滞、按供应商归集的采购单草稿 |
+| `purchasePlan(data, S)` | 采购建议、呆滞、按供应商归集的采购单草稿 → `{ items, slow, po, summary }` |
+| `applyPurchase(data, plan, ids)` | 把选中的下单项落成在途，按供应商各成一张采购单并记日志 → `{ data, pos }`；第 5 屏「生成采购单」的入口 |
 | `daily(data, S, plan)` | 交付日报（结构 + 可发送文本） |
+| `diff(S0, S1)` | 两次排程逐单对比，按完工变化排序；处置与插单的拖累账由它算出 |
+| `overtimeCost(data, lineId, hours, days)` | 按加班费公式算一笔加班费用 |
+
+内核没有一次拿到完整结果的聚合入口：指挥室的完整结果按 `schedule` → `purchasePlan` → `daily` 三步取（`scripts/run-examples.js` 即按此拼装，通用包里的 `run` 等同 `schedule`）。
+
+`normalize`、`nextOrderId`、`dayIdx`、`dateOf`、`short`、`isRest`、`weekday`、`fmtN` 以及常量 `VERSION`、`MODULE_NAME`、`CREDITS`、`CAUSES`、`HZ` 同样从内核导出，属内部工具，不作为对外接口。
 
 ## 原型流程（六屏）
 

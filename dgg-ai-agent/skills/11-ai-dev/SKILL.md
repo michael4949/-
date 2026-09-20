@@ -31,7 +31,7 @@ universal: dus-1
 |---|---|---|
 | 常量 | `VERSION / MODULE_NAME / CREDITS / TODAY / CLOCK0 / STEP_MIN / IDS / QR_BASE / CHANNELS / SLOT_ORDER` | 1.0.0 · AI软件开发 · 100 积分 · 今日 2026-09-17 · 时钟起点 540 分（09:00）· 每动作 15 分 · 编号 APP-001 / XQ-001 / GG-001 / JF-001 · 扫码入口域名 · 渠道 微信扫码 H5 / PC 后台 · 槽位顺序 submitter → handler → handler2 → lead |
 | 工具 | `fmtMin / fmtDur / fmtN / t / isoToMin / dateOfMin / addDays / bump` | 相对分钟 ↔「MM-DD HH:mm」与时长文案、千分位、`{占位}` 模板填充、ISO 时间转相对今日分钟、版本号按 major / minor / patch 递增 |
-| 解析 | `normalize / tokenize` | 全角转半角、去空白、转小写；按标点与连接词（然后 / 再 / 之后 / 接着 / 并且 / 同时 / 以及 / 并）切子句，子句内正向长词优先匹配词典表面词，得到 object / role / action / channel / field / stat / time / delta 八类词；「数量 + 单位」单独出 qty；否定词（不要 / 去掉 / 不需要 …）给同子句后 6 字内的字段词与动作词标 neg |
+| 解析 | `normalize / tokenize` | 全角转半角、去空白、转小写；按标点与连接词（然后 / 之后 / 接着 / 并且 / 同时 / 以及，即 lexicon.connectors 的 6 个词，长词优先）切子句，子句内正向长词优先匹配词典表面词，得到 object / role / action / channel / field / stat / time / delta 八类词；「数量 + 单位」单独出 qty；否定词（不要 / 去掉 / 不需要 …）给同子句后 6 字内的字段词与动作词标 neg |
 | 解析 | `similar / nearest / lcs` | 字符二连 Dice 相似度；对候选句（含 aliases）取相似度高者；动作序列与模板签名的公共子序列长度 |
 | 解析 | `parse(text, lib, arche)` | 句中无对象词时回落：与本业态 4 条预置句比相似度，≥ 0.18 取相近句否则取第 0 句，mode 标 fallback 并给 preset 下标；对象打分 = 命中 × 3 + 业态优先（本业态 2 / 通用 1）+ 同子句字段词数，并列取先出现；模板由对象决定（对象声明 altFlows 且动作序列 LCS ≥ 2 才改选，当前对象库未用）；派单模式取对象 mode，句中出现分配动作且非 dual 则为 assign；派单句里的评价 / 驳回动作词打开 rated / rejected，secondLevel / tail 来自对象；职务 = roles.defaults[业态][模板] ← 对象 roles 覆盖 ← 句中角色词，角色词按同子句相邻动作绑槽位（分配之后 → handler2、动作之前 → 模板 actionSlots、查看之前 → lead），未绑定的按槽位顺序补空位，每个角色带 E-编号（emp / emp2）或 external 主数据；渠道固定 h5 + pc 并记录命中词；可选字段命中即加入，被否定的基础字段移除（自动带入的 member 除外）；同子句「数量 + 时限词 / 提醒」得 sla 小时；返回 evidence、hits（去重命中词数）、unknown（无命中子句数） |
 | 解析 | `objOf / tplOf / objectsFor / presetsOf / followUpsOf / presetFor` | 库访问：对象、模板、业态可用对象（common + 本业态）、预置句、追加句、对象对应的预置句 |
@@ -70,8 +70,8 @@ universal: dus-1
 
 ## 数据表
 
-- **lexicon.json** 两级词典：109 个词 / 544 个表面词，按类型 object 30 · role 22 · action 17 · channel 2 · field 23 · stat 3 · time 6 · delta 6；另有连接词 8、否定词 8、数量单位 11（个工作日 / 工作日 / 小时 / 分钟 / 天 / 次 / 人 / 张 / 箱 / 件 …）。role 的 canon 可按业态分（如 role.lead → 生产主管 / 仓配主管 / 作业主管）；object 键对应 objects.json 的 key，action 键对应模板 actionEn，field 键对应对象字段。
-- **objects.json** 30 个对象（通用 9 · 制造 8 · 贸易 6 · 服务 7），由 `scripts/objects.js` 的 DSL 生成：通用 报修单 / 报销单 / 请假单 / 用车申请 / 培训报名 / 会议室预约 / 投诉工单 / 固定资产领用 / 访客登记单；制造 设备点检单 / 整改单 / 模具领用单 / 来料异常单 / 耗材申领单 / 安全隐患上报 / 加班申请 / 供应商准入；贸易 退换货工单 / 样品申请 / 门店陈列检查 / 价格申请 / 促销物料申领单 / 到货预约单；服务 新客户资料 / 票据交接单 / 咨询工单 / 续费提醒 / 工商变更申请 / 客户回访登记 / 资料补交单。每个对象给 key / name / verb / short / prefix / flow / mode / fields / optional / roles / sla / secondLevel / tail / initialRule / stateLabels / actionLabels / ruleText；字段 12 种类型（text / textarea / select / number / money / date / datetime / photo / phone / rating / ref / member），带 required / len / min / max / options / ref / at / auto / after / due / example(s)，`@` 开头的示例在运行时按槽位或主数据解析。
+- **lexicon.json** 两级词典：109 个词 / 544 个表面词，按类型 object 30 · role 22 · action 17 · channel 2 · field 23 · stat 3 · time 6 · delta 6；另有连接词 6（然后 / 之后 / 接着 / 并且 / 同时 / 以及）、否定词 12（不要 / 去掉 / 不需要 / 取消 / 无需 / 删掉 / 不用 / 免填 / 不再需要 / 不再要 / 去除 / 不带）、数量单位 11（个工作日 / 工作日 / 小时 / 分钟 / 天 / 次 / 人 / 张 / 元 / 箱 / 件）。role 的 canon 可按业态分（如 role.lead → 生产主管 / 仓配主管 / 作业主管）；object 键对应 objects.json 的 key，action 键对应模板 actionEn，field 键对应对象字段。
+- **objects.json** 30 个对象（通用 9 · 制造 8 · 贸易仓配 6 · 服务 7），由 `scripts/objects.js` 的 DSL 生成：通用 报修单 / 报销单 / 请假单 / 用车申请 / 培训报名 / 会议室预约 / 投诉工单 / 固定资产领用 / 访客登记单；制造 设备点检单 / 整改单 / 模具领用单 / 来料异常单 / 耗材申领单 / 安全隐患上报 / 加班申请 / 供应商准入；贸易仓配 退换货工单 / 样品申请 / 门店陈列检查 / 价格申请 / 促销物料申领单 / 到货预约单；服务 新客户资料 / 票据交接单 / 咨询工单 / 续费提醒 / 工商变更申请 / 客户回访登记 / 资料补交单。每个对象给 key / name / verb / short / prefix / flow / mode / fields / optional / roles / sla / secondLevel / tail / initialRule / stateLabels / actionLabels / ruleText；字段 12 种类型（text / textarea / select / number / money / date / datetime / photo / phone / rating / ref / member），带 required / len / min / max / options / ref / at / auto / after / due / example(s)，`@` 开头的示例在运行时按槽位或主数据解析。
 - **flows.json** 3 个流程模板：`approve` 提交-审批（待审批 → 待二级审批? → 已通过 / 已驳回 → 已领用? → 已归还?，8 条迁移，驳回后可重新提交）、`dispatch` 派单-处理（待接单 → 已接单 → 处理中 → 已完成 → 已评价?，另有已驳回?，5 条迁移，三种模式 处理人自领 / 组长指派 / 双处理人）、`inspect` 巡检-异常-整改（合格 / 有异常 → 整改中 → 待复检 → 已关闭，4 条迁移，复检不合格可退回整改）。每个模板给 signature、states（optional 开关）、transitions（by / require / sla / scope / sets / when）、actionSlots、6 页页面与三步 script；slotLabels / modeSlotLabels 给槽位标签。
 - **roles.json** 三业态 × 三模板 × 四槽位的默认职务；应用管理员；emps 按职务给两个 E-编号（第二个用于重复接单用例）；external 门店 / 客户 → 客户主数据；六种操作；页面种类 × 槽位的默认权限；数据范围。
 - **components.json** 8 种页面种类 → 手机 / PC 组件序列；12 种字段类型的控件名与校验时机；列类型映射；6 个系统列；固定文案（发布说明、通知渠道 微信服务通知、环境名、五段流水、五项检查、字段来源、报告七段模板）。
@@ -82,8 +82,8 @@ universal: dus-1
 
 ## 样本契约
 
-- `data/samples/{mfg,trade,prof}.json` 对应 archetype = make / flow / service，由 `scripts/gen-samples.js` 生成：`archetype`、`company`（取自 AI ERP 同业态样本）、`today` 2026-09-17、`clockMin` 540、`systems`（企业现有系统列表，含 mes / erp / hr / oa / crm / shop 时对应主数据为 direct，否则 import）、`seed.byObject`（对象 key → 预埋行）、`expect`（4 个预置对象应得的 object / flow / mode / pages / fields / roles / states / apis / testsMin / rows）、`state`（空，`ensure` 补默认）。
-- 预埋行由内核运行时真实走出：预置句对象 8 条、其他对象 4 条，每个对象一条超时行（创建于 09:00 之前 sla + 40 分）；制造 17 对象 84 行、贸易 15 对象 76 行、服务 16 对象 80 行。行结构：`id`（前缀-2609-序号）、`status`、`values`、`createdBy { slot, title, id }`、`assignee`、`version`、`createdAt / updatedAt`（相对今日 00:00 的分钟，负数为前几日）、`history[{ seq, actionEn, action, by, role, atMin, from, to }]`。
+- `data/samples/{mfg,trade,prof}.json` 对应 archetype = make / flow / service（制造 / 贸易仓配 / 服务，flow 的中文名统一叫「贸易仓配」，样本文件名沿用 trade.json），由 `scripts/gen-samples.js` 生成：`archetype`、`company`（取自 AI ERP 同业态样本）、`today` 2026-09-17、`clockMin` 540、`systems`（企业现有系统列表，三套样本里默认为空数组，所以只跑本 skill 数据包时主数据关联一律是 import；调用方可在数据副本上写入 systems（`ensure` 只在缺省时补空数组，不覆盖），命中该来源的直连条件时才变 direct：machines mes / erp，lines erp / mes，orders erp，materials erp，products erp / shop，customers erp / crm，employees hr / oa）、`seed.byObject`（对象 key → 预埋行）、`expect`（4 个预置对象应得的 object / flow / mode / pages / fields / roles / states / apis / testsMin / rows）、`state`（空，`ensure` 补默认）。
+- 预埋行由内核运行时真实走出：预置句对象 8 条、其他对象 4 条，每个对象一条超时行（创建于 09:00 之前 sla + 40 分）；制造 17 对象 84 行、贸易仓配 15 对象 76 行、服务 16 对象 80 行。行结构：`id`（前缀-2609-序号）、`status`、`values`、`createdBy { slot, title, id }`、`assignee`、`version`、`createdAt / updatedAt`（相对今日 00:00 的分钟，负数为前几日）、`history[{ seq, actionEn, action, by, role, atMin, from, to }]`。
 - `state` 由内核维护：text / presetIndex / parsed / spec / prevSpec / rt / releases / log / testRuns / changes / script / env / sent / lastResult / delta，全部可 JSON 序列化，两次 `run` 同序同果。
 
 ## 边界
@@ -111,7 +111,7 @@ data/objects.json           30 个对象（scripts/objects.js 生成）    data/
 data/roles.json             默认职务 / E-编号 / 权限默认 / 数据范围    data/components.json 页面组件 / 控件 / 列类型 / 文案
 data/presets.json           12 条预置句 + 9 条追加句 + 3 条无关句     data/tests.json      12 类用例文案与错误码
 data/deltas.json            六种变更的模板与字段库                    data/integrations.json 主数据来源映射
-data/samples/{mfg,trade,prof}.json   三套样本（archetype = make / flow / service）   schema/data.json   数据包契约
+data/samples/{mfg,trade,prof}.json   三套样本（archetype = make / flow / service · 制造 / 贸易仓配 / 服务）   schema/data.json   数据包契约
 scripts/load-data.js · objects.js · gen-samples.js · run-examples.js · validate.js
 examples/*.output.json      三套样本的交付摘要
 ```

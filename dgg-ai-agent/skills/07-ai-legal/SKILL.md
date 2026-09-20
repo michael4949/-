@@ -27,21 +27,24 @@ universal: dus-1
 
 | 函数 | 作用 |
 |---|---|
+| `ensure(data)` | 规整为可写副本：补齐每份合同的 `revisions` 与每条条款的 `params`，补齐 `renewList` / `applyList` / `log` / `setup`；`run` 与各改写函数内部先调它，`reviewAll` / `reviewContract` 也以它的产物为前置，直接传原始样本会因 `revisions` 未定义报错 |
 | `run(data, lib)` | 一次算全：合同审查、新设主体方案、知产盘点、证照状态、90 天台账、KPI、月报 |
 | `reviewContract(c, lib)` | 按合同类型查必备条款（缺失即提示，履行、验收、知产、责任类缺失记高风险），再对每条条款的参数跑 `data/contract-rules.json` 的算式规则；高 / 中 / 低分别扣 20 / 10 / 4 分；60 分以下高风险，80 分以下或含高风险项为中风险 |
+| `reviewAll(d, lib)` | 全部合同逐份 `reviewContract`，按风险分从低到高排序，每行附类型与我方角色中文名、相对方、金额、起止、到期天数、履约节点与已有修订 |
 | `applyFix(d, contractId, findingId, lib)` | 采纳一处修订：替换条款正文与参数（保留修订前文）或按模板新增条款；记修订与日志 |
 | `opinion(c, review, lib)` | 审查意见文本：逐条问题 / 依据（只写到法律名称一层）/ 建议与结论 |
 | `equity(shares, lib)` | 股权控制线：三分之二绝对控制、二分之一相对控制、三分之一否决、对半僵局；按结构给章程要点 |
 | `setupPlan / updateSetup / confirmSetup` | 新设主体方案：按主体类型串流程（名称申报 → 章程决议 → 地址 → 登记 → 刻章 → 银行 → 税务 → 社保），许可并行，材料清单、风险提示与预计费用；确认后设立节点进台账 |
-| `ipReview / toggleRenew / toggleApply` | 商标十年到期与续展窗口（前 12 个月、宽展 6 个月）、专利按申请日逐年年费、域名续费；按行业查应覆盖的商标类别给缺口与覆盖率；近似商标按异议期给动作；侵权线索按相似度给动作；续展 / 申请清单与费用合计 |
+| `ipReview / toggleRenew / toggleApply` | 商标十年到期与续展窗口（前 12 个月、宽展 6 个月）、专利按申请日逐年年费、域名续费（提前 60 天提示、每次预计 120 元，是内核默认值，不在 `data/ip-classes.json` 里）；按行业查应覆盖的商标类别给缺口与覆盖率；近似商标按异议期给动作；侵权线索按相似度给动作；续展 / 申请清单与费用合计 |
 | `licenses / register` | 证照到期状态；90 天台账：合同到期与履约节点、证照到期、商标续展 / 专利年费 / 域名续费、异议期截止、已确认的设立节点，按 13 周分格 |
-| `kpi / report` | 合规分 = 平均风险分 × 0.4 + 证照有效率 × 30 + 商标覆盖率 × 0.3；月报含高风险合同、证照、知产、设立、台账、本期处置与待办 |
+| `kpi` / `report` | 内部函数，导出表中没有这两个名字，从 `run` 的返回值取 `R.kpi` / `R.report`；合规分 = 平均风险分 × 0.4 + 证照有效率 × 30 + 商标覆盖率 × 0.3；月报含高风险合同、证照、知产、设立、台账、本期处置与待办 |
 
 ## 口径
 
+- 内核主函数都是 `fn(data, lib)` 两参：`data` 是企业数据副本，`lib` 是 `scripts/load-data.js` 装配的固定数据包（规则 + 样本），缺 `lib` 无法调用。
 - 合同只审预置的结构化合同（每条条款带类型标签与参数），不上传解析，不接大模型；审查规则、条款模板、法律依据都在 `data/contract-rules.json`。
 - 法律依据只写到法律名称一层（民法典合同编、公司法、商标法、专利法、劳动合同法），不写条款编号。
-- 费用一律标「预计」：设立只有刻章与代办，登记不收费；商标官费与代理费、专利年费按公开标准与预计代理费。
+- 费用一律标「预计」：设立只有刻章与代办，登记不收费；商标官费与代理费、专利年费按公开标准与预计代理费；域名续费取内核默认值，每次预计 120 元。
 - 制造主样本沿用杭州锐合精密五金：合同相对方就是 AI ERP / AI CFO / AI获客里的那批客户与供应商，华南子公司呼应获客里的华南客户；贸易、服务为变体。
 - 全文不出现任何数据源厂商名；联系人只出现职务。
 
@@ -51,11 +54,14 @@ universal: dus-1
 core/legal.js               引擎（UMD）
 data/contract-rules.json    合同类型、我方角色、必备条款、条款模板、27 条风险规则（算式 + 修订）
 data/setup-rules.json       三类主体的流程与材料、许可办理、股权控制线与章程要点、预计费用
-data/ip-classes.json        尼斯分类名称、行业应覆盖类别与理由、官费与年费表、到期规则
+data/ip-classes.json        尼斯分类名称、行业应覆盖类别与理由、官费与年费表、到期规则（商标续展 / 专利年费 / 证照 / 合同；域名走内核默认值）
 data/samples/*.json         三套样本（gen-samples 生成）    schema/data.json   数据包契约
+../_shared/*.json           load-data 还读 industries.json、credits.json、lint-words.json
 scripts/load-data.js · gen-samples.js · run-examples.js · validate.js
 examples/*.output.json      三套样本的驾驶舱摘要
 ```
+
+`scripts/load-data.js` 装配出的数据包有 7 个键：内核只读 `contractRules` / `setupRules` / `ipClasses`，`samples` 提供数据副本的来源，`industries` / `credits` / `lintWords` 供原型与校验用，通用包可裁剪。
 
 ## 原型流程（六屏）
 

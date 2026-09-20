@@ -1,5 +1,5 @@
 /*
- * 企业AI成熟度评估 · 能力内核 v2
+ * 企业AI成熟度评估 · 能力内核 v2.2.0
  * ------------------------------------------------------------
  * 纯函数：无 DOM、无网络、无时间、无随机。Node 与浏览器共用同一份文件。
  *
@@ -239,7 +239,7 @@
         dims: s.dims, score: score, dataFit: Math.round(dataFit * 10) / 10,
         dataNote: !deps.length ? '无需接入业务系统' : (missing.length ? '需先补齐：' + missing.join('、') : '数据条件已具备'),
         why: (boost ? '拉动短板维度「' + s.dims.filter(function (d) { return weakKeys.indexOf(d) >= 0; }).map(function (k) { return dims.filter(function (d) { return d.key === k; })[0].name; }).join('、') + '」；' : '') + (missing.length ? '数据条件待补' : '数据条件具备') + '，价值 ' + s.value + ' / 难度 ' + s.difficulty };
-    }).sort(function (x, y) { return y.score - x.score; });
+    }).sort(function (x, y) { return y.score - x.score; }).slice(0, 5);
     scenes.forEach(function (s, i) { s.rank = i + 1; });
 
     // 投入档
