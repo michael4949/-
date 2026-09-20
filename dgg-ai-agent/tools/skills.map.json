@@ -1,0 +1,913 @@
+[
+  {
+    "id": "ai-maturity",
+    "dir": "01-ai-maturity",
+    "kernelPath": "core/compute.js",
+    "legacyGlobal": "DGG.maturity",
+    "version": "2.1.0",
+    "moduleName": "企业AI成熟度评估",
+    "credits": 20,
+    "summary": "36 题给企业 AI 成熟度打分，出六维等级、同行位置与 12 个月九项行动。",
+    "dataFiles": 9,
+    "dataKeys": [
+      "actions",
+      "benchmark",
+      "credits",
+      "diagnostics",
+      "dimensions",
+      "fields",
+      "industries",
+      "levels",
+      "lintWords",
+      "promptTemplate",
+      "provinces",
+      "questions",
+      "reportText",
+      "risks",
+      "scenes"
+    ],
+    "crossSkillDeps": [],
+    "sharedFiles": [
+      "profile-fields.json",
+      "industries.json",
+      "credits.json",
+      "lint-words.json",
+      "lint.js"
+    ],
+    "datasets": [
+      {
+        "key": "S1",
+        "label": "杭州锐合精密五金（机械五金 · 101–300 人 · 有 ERP+财务 · L2 45.4%）",
+        "source": "examples/S1.input.json"
+      },
+      {
+        "key": "S2",
+        "label": "义乌恒益日用品（批发 · 21–50 人 · 仅财务 · L1 25%）",
+        "source": "examples/S2.input.json"
+      },
+      {
+        "key": "S3",
+        "label": "成都巷子里餐饮（餐饮 · 51–100 人 · 仅门店系统 · L0 17.6%）",
+        "source": "examples/S3.input.json"
+      },
+      {
+        "key": "S4",
+        "label": "深圳梵图家居科技（电商 · 21–50 人 · ERP+门店+CRM · L3 72.2%）",
+        "source": "examples/S4.input.json"
+      },
+      {
+        "key": "S1_result",
+        "label": "S1 的 golden 计算结果，用作 build-prompt / merge-polish 的 result 入参",
+        "source": "examples/S1.output.json"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "完整评估",
+        "description": "一次调用出完整评估结果：六维与十八子维度得分、L0–L4 等级、距下一级差距、同行参考带与百分位、九项行动、90 天清单、推荐场景、投入档、风险提示与报告所需全部数据。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "整个输入对象 { profile, answers }，对应 compute 第一形参 input"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包，对应第二形参 data"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "answers",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "ok:true + 38 个顶层字段（level/dimensions/actions/scenes/risks/gapPlan/render…）；否则 {ok:false,errors}",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "杭州锐合精密五金有限公司",
+            "industry": "mfg-machinery",
+            "size": "101_300",
+            "revenue": "20m_100m",
+            "province": "浙江",
+            "years": "10_plus",
+            "ownership": "private",
+            "customers": "b2b",
+            "systems": [
+              "erp",
+              "finance"
+            ],
+            "itStaff": "1_2",
+            "branches": "single",
+            "overseas": "no",
+            "role": "owner"
+          },
+          "answers": [
+            2,
+            2,
+            2,
+            1,
+            2,
+            2,
+            3,
+            1,
+            2,
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            2,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1,
+            0,
+            0,
+            2,
+            1
+          ]
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"quickView\":[{\"n\":1,\"q\":\"处在什么阶段？\",\"a\":\"L2 场景 级\",\"text\":\"至少一个业务场景由 AI 稳定承担。综合得分 45.4%，距 L3 流程 级还差 24 分。\",\"tone\":\"cyan\"},{\"n\":2,\"q\":\"同行里在哪？\",\"a\":\"超过 43% 同行\",\"tex"
+      },
+      {
+        "name": "validate",
+        "fn": "validate",
+        "kind": "compute",
+        "title": "输入校验",
+        "description": "扣积分前先校验：profile 九项必填、industry slug 是否在 54 个细分行业内、systems 选「无」时不能再选其他、answers 必须 36 项且每项 0–3。返回空数组才进入计算。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "整个输入对象 { profile, answers }，对应 validate 第一形参 input"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包，用到其中的 fields / industries / questions"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "answers",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "字符串数组；空数组=通过，例 [\"profile.size 缺失\",\"answers 需为 36 项\"]",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "杭州锐合精密五金有限公司",
+            "industry": "mfg-machinery",
+            "size": "101_300",
+            "revenue": "20m_100m",
+            "province": "浙江",
+            "years": "10_plus",
+            "ownership": "private",
+            "customers": "b2b",
+            "systems": [
+              "erp",
+              "finance"
+            ],
+            "itStaff": "1_2",
+            "branches": "single",
+            "overseas": "no",
+            "role": "owner"
+          },
+          "answers": [
+            2,
+            2,
+            2,
+            1,
+            2,
+            2,
+            3,
+            1,
+            2,
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            2,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1,
+            0,
+            0,
+            2,
+            1
+          ]
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[]（S1 样例无错误）；同脚本另跑残缺输入得 [\"profile.size 缺失\",\"answers 需为 36 项\"]"
+      },
+      {
+        "name": "build-prompt",
+        "fn": "buildPrompt",
+        "kind": "compute",
+        "title": "生成润色提示词",
+        "description": "把 run 的结果填进 prompts/polish.md 模板，产出本 skill 唯一一次 LLM 调用（8 秒超时）的提示词；只要求润色打基础三项行动的标题与理由，数字、服务名、模块名一律不动。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "run 动作返回的完整结果（ok:true），对应 buildPrompt 第一形参 result"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包，只用到其中的 promptTemplate"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "上一步 run 返回的完整结果对象"
+          }
+        ],
+        "returns": "填好占位符的提示词字符串；S1 实跑 905 字符，无 {{}} 残留",
+        "mutates": false,
+        "exampleInput": {
+          "result": {
+            "$ref": "skills/01-ai-maturity/examples/S1.output.json"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"你是顶呱呱集团「薯片AI智能体」的文案助手。下面是一家企业的 AI 成熟度评估结果，以及系统按模板给出的未来三个月（打基础阶段）三项行动。请在不改变事实、不新增承诺、不改动服务名称与模块名称、不改动任何数字的前提下，把每项行动的标题与理由改写得更贴合这家企业的行业与规模。\\n\\n要求：\\n- 只输出 JSON，不要任"
+      },
+      {
+        "name": "merge-polish",
+        "fn": "mergePolish",
+        "kind": "mutate",
+        "title": "合并润色结果",
+        "description": "把 LLM 返回的三条标题/理由并回结果：先剥代码围栏再解析 JSON，条数不是 3、标题超 14 字、正文超 60 字或命中禁忌词，任一发生即整体放弃润色保留模板；成功的条目标 source=llm。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "run 动作返回的完整结果，对应第一形参 result（内核深拷贝后再改，原对象不被污染，实跑已确认）"
+          },
+          {
+            "from": "llmText",
+            "required": true,
+            "note": "LLM 原文，对应第二形参 llmText；可带 ```json 围栏"
+          },
+          {
+            "from": "$lint",
+            "required": false,
+            "note": "禁忌词判定函数，约定为 _shared/lint.js 的 makeLint(lib.lintWords).hit；JSON 入参无法承载函数，由 invoke 层注入。不传则跳过禁忌词校验（实跑确认不报错，但失去回落保护）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "上一步 run 返回的完整结果对象"
+          },
+          {
+            "name": "llmText",
+            "type": "string",
+            "required": true,
+            "description": "LLM 返回原文，期望 {\"actions\":[{order,title,text}×3]}，允许带代码围栏"
+          }
+        ],
+        "returns": "结果的新副本：成功时 actions[0..2] 的 title/why 被替换、source=\"llm\"，其余字段不变",
+        "mutates": true,
+        "exampleInput": {
+          "result": {
+            "$ref": "skills/01-ai-maturity/examples/S1.output.json"
+          },
+          "llmText": "```json\n{\"actions\":[{\"order\":1,\"title\":\"把口头约定变成书面制度并落实\",\"text\":\"有约定没制度，或有制度不执行。\"},{\"order\":2,\"title\":\"让一个岗位先把 AI 工具用\",\"text\":\"没有种子用户，AI 应用会从零开始推广。\"},{\"order\":3,\"title\":\"把执行差异最大的环节做成模板\",\"text\":\"执行差异大，AI 学到的会是混乱的做法。\"}]}\n```"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"quickView\":[{\"n\":1,\"q\":\"处在什么阶段？\",\"a\":\"L2 场景 级\",\"text\":\"至少一个业务场景由 AI 稳定承担。综合得分 45.4%，距 L3 流程 级还差 24 分。\",\"tone\":\"cyan\"},{\"n\":2,\"q\":\"同行里在哪？\",\"a\":\"超过 43% 同行\",\"tex"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言",
+        "says": "前言只有 name/id/kind/credits/version/triggers/inputs/llm_calls/llm_timeout_ms/offline/delivers/report_pages/brief_pages，没有 data_files 字段",
+        "actual": "data/ 下实有 9 个 json：actions(60 条)、benchmark(270 格)、diagnostics(18×3=54 段)、dimensions(6 维 18 子维)、levels(L0–L4)、questions(36 题)、report-text、risks(16 条)、scenes(70 个，14 大类各 5)；运行期还需 _shared 的 4 个 json 与 prompts/polish.md",
+        "fix": "前言补 data_files: 9，并在正文注明另依赖 _shared 4 个 json（profile-fields / industries / credits / lint-words）与 1 个提示词文件"
+      },
+      {
+        "where": "scripts/load-data.js 与 SKILL.md「3. 输出前」（第 93 行）",
+        "says": "全部文本字段过 _shared/lint-words.json 的 hard 项（_shared/lint.js），命中即回落模板",
+        "actual": "内核 mergePolish 的 lint 是可选第三形参；load-data 只返回 lintWords 数据表，不返回可调用的判定函数。调用方若不自行 makeLint 并传入，禁忌词校验完全不发生——实跑传 undefined 时三条全部按 llm 合入，未做任何拦截",
+        "fix": "load-data 里直接补 lint: makeLint(lintWords).hit 一起返回；或在 SKILL.md 写明「壳层/invoke 层必须自行构造 lint 并作为 mergePolish 第三参数传入」"
+      },
+      {
+        "where": "SKILL.md「步骤 · 推荐场景」（第 75 行）",
+        "says": "取本行业大类的场景……打分排序，取前 5",
+        "actual": "core/compute.js 只做 filter(sector) + sort + 标 rank，没有 slice(0, 5)。当前 70 个场景恰好 14 大类各 5 个，所以输出长度正好是 5，看不出差别；一旦某大类补到 6 个场景，输出就会与文档和 schema 不符",
+        "fix": "内核加 .slice(0, 5)，或把文档改成「返回本大类全部场景（当前每类 5 个），已按 score 排序并标 rank」"
+      },
+      {
+        "where": "prototype/src/module-01.js 第 1 行注释",
+        "says": "三屏：企业画像（13 项）→ 36 题 → 咨询报告（33 页，信息图风格）",
+        "actual": "drawReport 里 add() 调用 28 次，正好 28 页，其中带 brief 的 6 页（封面 / 01 速览两页 / 03 总体 / 07 差距 / 09 路线图），与 SKILL.md 的 report_pages: 28、brief_pages: 6 一致",
+        "fix": "把注释里的「33 页」改成「28 页（速览 6 页）」"
+      },
+      {
+        "where": "core/compute.js 第 2 行注释 与 prototype/src/module-01.js 第 1 行注释",
+        "says": "内核标「能力内核 v2」，原型标「模块 1 · 企业AI成熟度评估 v3」",
+        "actual": "内核 VERSION 常量与 SKILL.md 前言都是 2.1.0，schema/output.json 也把 meta.version 约束成 ^2\\.\\d+\\.\\d+$",
+        "fix": "两处注释统一写 v2.1.0，避免同一模块出现 v2 / v3 / 2.1.0 三个版本号"
+      }
+    ],
+    "notes": "内核只导出 validate/compute/buildPrompt/mergePolish 四个函数，故动作只有 4 个，未凑够 6 个。两条约定需生成器支持：$lint = _shared/lint.js 的 makeLint(lib.lintWords).hit（JSON 传不了函数）；exampleInput 里的 $ref 实跑时用该文件内容替换。merge-polish 前 160 字与 run 相同，差异在 actions[0..2]（source 由 template 变 llm）。四套样例全跑通，S1 与 golden 逐字一致。路径相对仓库根 /home/user/-/dgg-ai-agent。"
+  },
+  {
+    "id": "scene-ranking",
+    "dir": "02-scene-ranking",
+    "kernelPath": "core/compute.js",
+    "legacyGlobal": "DGG.coreM2",
+    "version": "1.0.0",
+    "moduleName": "企业AI高价值场景排序",
+    "credits": 20,
+    "summary": "按四维加权把本行业 13 个场景排出优先级，并给三步走、数据补齐清单与 12 个月排期",
+    "dataFiles": 17,
+    "dataKeys": [
+      "axes",
+      "conditions",
+      "credits",
+      "fields",
+      "industries",
+      "libTotal",
+      "lintWords",
+      "promptTemplate",
+      "provinces",
+      "reportText",
+      "sectors"
+    ],
+    "crossSkillDeps": [],
+    "sharedFiles": [
+      "profile-fields.json",
+      "industries.json",
+      "credits.json",
+      "lint-words.json",
+      "lint.js"
+    ],
+    "datasets": [
+      {
+        "key": "S1",
+        "label": "S1 · 杭州锐合精密五金（机械制造 · 已有 ERP 与财务）",
+        "source": "examples/S1.input.json"
+      },
+      {
+        "key": "S2",
+        "label": "S2 · 义乌恒益日用品商行（批发贸易 · 只有财务 · 暂无专人）",
+        "source": "examples/S2.input.json"
+      },
+      {
+        "key": "S3",
+        "label": "S3 · 成都巷子里餐饮（生活服务 · 无业务系统 · 纸质为主）",
+        "source": "examples/S3.input.json"
+      },
+      {
+        "key": "S4",
+        "label": "S4 · 深圳梵图家居（电商 · 五套系统 · 有小团队）",
+        "source": "examples/S4.input.json"
+      },
+      {
+        "key": "S1.output",
+        "label": "S1 golden 输出（build-prompt 的 result 入参）",
+        "source": "examples/S1.output.json"
+      },
+      {
+        "key": "S2.output",
+        "label": "S2 golden 输出（merge-polish 的 result 入参）",
+        "source": "examples/S2.output.json"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "完整排序",
+        "description": "一次调用得到完整排序结果：13 个场景的四维得分与排名、三步走组合、首选场景一页纸、数据就绪度与补齐清单、12 个月排期、投入档、三档情景、风险与 90 天清单；输入不合法时返回 {ok:false,errors} 且不应扣积分。",
+        "args": [
+          {
+            "from": "input",
+            "required": true,
+            "note": "compute 第 1 形参：整个业务输入对象 {profile, pains, conditions, weights?}"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "compute 第 2 形参 data：scripts/load-data.js 的返回值（fields/provinces/industries/sectors/libTotal/axes/conditions/reportText/credits/lintWords/promptTemplate）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "input",
+            "type": "object",
+            "required": true,
+            "description": "profile 企业画像 13 项（9 项必填）+ pains 3–8 项痛点（含 1–5 严重度，id 须属本行业痛点库）+ conditions 四项现状（dataState/objective/window/capacity）+ weights 可选四维权重"
+          }
+        ],
+        "returns": "{ok:true} 全量结果：ranked/top1/combo/readiness/risks/render 等；否则 {ok:false,errors}",
+        "mutates": false,
+        "exampleInput": {
+          "input": {
+            "profile": {
+              "name": "杭州锐合精密五金有限公司",
+              "industry": "mfg-machinery",
+              "size": "101_300",
+              "revenue": "20m_100m",
+              "province": "浙江",
+              "years": "10_plus",
+              "ownership": "private",
+              "customers": "b2b",
+              "systems": [
+                "erp",
+                "finance"
+              ],
+              "itStaff": "1_2",
+              "branches": "single",
+              "overseas": "no",
+              "role": "owner"
+            },
+            "pains": [
+              {
+                "id": "mfg-p05",
+                "severity": 5
+              },
+              {
+                "id": "mfg-p06",
+                "severity": 4
+              },
+              {
+                "id": "mfg-p09",
+                "severity": 4
+              },
+              {
+                "id": "mfg-p13",
+                "severity": 3
+              },
+              {
+                "id": "mfg-p01",
+                "severity": 3
+              }
+            ],
+            "conditions": {
+              "dataState": "system",
+              "objective": "efficiency",
+              "window": "m6",
+              "capacity": "part"
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI高价值场景排序\",\"credits\":20,\"version\":\"1.0.0\",\"sceneCount\":13,\"painCount\":16},\"profile\":{\"name\":\"杭州锐合精密五金有限公司\",\"industry\":\"mfg-machin"
+      },
+      {
+        "name": "validate",
+        "fn": "validate",
+        "kind": "compute",
+        "title": "输入校验",
+        "description": "只校验不计算：画像 9 项必填、systems 选「无」互斥、industry 有效且该大类有场景库、痛点 3–8 项且 id 属本行业痛点库、严重度为 1–5 整数、痛点不重复、四项现状取值有效、权重四项 0–1 且之和大于 0；返回可直接翻译成追问的中文报错数组。",
+        "args": [
+          {
+            "from": "input",
+            "required": true,
+            "note": "validate 第 1 形参：与 run 同一个输入对象"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "validate 第 2 形参 data：load-data 返回值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "input",
+            "type": "object",
+            "required": true,
+            "description": "同 run 的 input；这里允许残缺，校验器负责指出缺什么"
+          }
+        ],
+        "returns": "字符串数组；空数组＝通过，否则每条是一句中文报错",
+        "mutates": false,
+        "exampleInput": {
+          "input": {
+            "profile": {
+              "name": "杭州锐合精密五金有限公司",
+              "industry": "mfg-machinery",
+              "size": "101_300",
+              "revenue": "20m_100m",
+              "province": "浙江",
+              "years": "10_plus",
+              "ownership": "private",
+              "customers": "b2b",
+              "systems": [
+                "erp",
+                "finance"
+              ],
+              "itStaff": "1_2",
+              "branches": "single",
+              "overseas": "no",
+              "role": "owner"
+            },
+            "pains": [
+              {
+                "id": "mfg-p05",
+                "severity": 5
+              },
+              {
+                "id": "mfg-p06",
+                "severity": 4
+              },
+              {
+                "id": "mfg-p09",
+                "severity": 4
+              },
+              {
+                "id": "mfg-p13",
+                "severity": 3
+              },
+              {
+                "id": "mfg-p01",
+                "severity": 3
+              }
+            ],
+            "conditions": {
+              "dataState": "system",
+              "objective": "efficiency",
+              "window": "m6",
+              "capacity": "part"
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[]（另跑反例：只留 1 项痛点 + weights.pain=2 → [\"pains 需为 3–8 项\",\"weights 四项需为 0–1 的数值\"]）"
+      },
+      {
+        "name": "rerank",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "调权重重排",
+        "description": "排序台现场改四维权重后重排：input.weights 传 pain/data/cycle/barrier 四项（可直接取 data/axes.json 的预设 dm 标准权重 / quick 先要见效 / ready 先看条件 / painful 先解痛点，也可自定义，内核按和为 1 归一化并把 preset 记为 custom），其余入参不变。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "compute 第 1 形参：与 run 相同的输入对象，但 weights 必填（这是本动作与 run 的唯一差别）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "compute 第 2 形参 data：load-data 返回值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "pains",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "conditions",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "weights",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "同 run 的全量结果；weights.preset 为 dm/quick/ready/painful/custom",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "义乌恒益日用品商行",
+            "industry": "trade-wholesale",
+            "size": "21_50",
+            "revenue": "5m_20m",
+            "province": "浙江",
+            "years": "5_10",
+            "ownership": "individual",
+            "customers": "b2b",
+            "systems": [
+              "finance"
+            ],
+            "itStaff": "none",
+            "branches": "single",
+            "overseas": "yes",
+            "role": "owner"
+          },
+          "pains": [
+            {
+              "id": "trade-p01",
+              "severity": 5
+            },
+            {
+              "id": "trade-p05",
+              "severity": 4
+            },
+            {
+              "id": "trade-p09",
+              "severity": 5
+            },
+            {
+              "id": "trade-p13",
+              "severity": 3
+            }
+          ],
+          "conditions": {
+            "dataState": "excel",
+            "objective": "revenue",
+            "window": "m3",
+            "capacity": "none"
+          },
+          "weights": {
+            "pain": 0.5,
+            "data": 0.25,
+            "cycle": 0.15,
+            "barrier": 0.1
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI高价值场景排序\",\"credits\":20,\"version\":\"1.0.0\",\"sceneCount\":13,\"painCount\":16},\"profile\":{\"name\":\"义乌恒益日用品商行\",\"industry\":\"trade-wholesa"
+      },
+      {
+        "name": "simulate-systems",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "补数据源重排",
+        "description": "回答「补上这个系统能解锁几个场景」：把 profile.systems 换成假设补齐后的系统清单再算一遍，对比 readiness.pct、blocked 与排名变化；注意 systems 选「none」时不能再选其他系统，模拟时要把 none 整体替换掉。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "compute 第 1 形参：与 run 相同的输入对象，只把 profile.systems 改成假设补齐后的清单"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "compute 第 2 形参 data：load-data 返回值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "pains",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "conditions",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "weights",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "同 run 的全量结果；readiness.pct / missing / blocked 与排名随假设变化",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "成都巷子里餐饮管理有限公司",
+            "industry": "life-catering",
+            "size": "51_100",
+            "revenue": "5m_20m",
+            "province": "四川",
+            "years": "3_5",
+            "ownership": "private",
+            "customers": "b2c",
+            "systems": [
+              "shop"
+            ],
+            "itStaff": "none",
+            "branches": "6_20",
+            "overseas": "no",
+            "role": "owner"
+          },
+          "pains": [
+            {
+              "id": "life-p01",
+              "severity": 4
+            },
+            {
+              "id": "life-p05",
+              "severity": 5
+            },
+            {
+              "id": "life-p09",
+              "severity": 4
+            },
+            {
+              "id": "life-p13",
+              "severity": 5
+            },
+            {
+              "id": "life-p14",
+              "severity": 3
+            },
+            {
+              "id": "life-p02",
+              "severity": 3
+            }
+          ],
+          "conditions": {
+            "dataState": "paper",
+            "objective": "cost",
+            "window": "m3",
+            "capacity": "none"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI高价值场景排序\",\"credits\":20,\"version\":\"1.0.0\",\"sceneCount\":13,\"painCount\":16},\"profile\":{\"name\":\"成都巷子里餐饮管理有限公司\",\"industry\":\"life-cate"
+      },
+      {
+        "name": "build-prompt",
+        "fn": "buildPrompt",
+        "kind": "compute",
+        "title": "生成润色提示词",
+        "description": "把 run 的结果填进 prompts/polish.md 的占位符（企业名、行业、痛点行、现状行、权重行、前三个场景块），生成本 skill 唯一一次 LLM 调用的提示词；只润色前三个场景的「为什么排这里」，建议 8 秒超时，失败即回落模板文案。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "buildPrompt 第 1 形参 result：run / rerank 返回的 ok:true 结果对象"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "buildPrompt 第 2 形参 data：load-data 返回值，模板取自其中的 promptTemplate"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "run 或 rerank 的返回对象（需含 profile / pains / conditions / axes / ranked）"
+          }
+        ],
+        "returns": "提示词字符串，约 1000 字，无 {{}} 占位符残留",
+        "mutates": false,
+        "exampleInput": {
+          "result": "@examples/S1.output.json"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"你是顶呱呱集团「薯片AI智能体」的文案助手。下面是一家企业的 AI 场景排序结果，以及排在前三位的场景。请为这三个场景各写一句「为什么排这里」，说明它为什么排在这个位置。\\n\\n要求：\\n- 只输出 JSON，不要任何前后文，不要代码围栏\\n- 格式：{\\\"scenes\\\":[{\\\"rank\\\":1,\\\"reason"
+      },
+      {
+        "name": "merge-polish",
+        "fn": "mergePolish",
+        "kind": "mutate",
+        "title": "合并润色文案",
+        "description": "把 LLM 返回的 JSON 合并回结果的新副本：先剥代码围栏再解析，条数必须为 3、单条 ≤80 字、不得命中禁忌词，任一不满足就原样返回模板文案；成功的条目写回 ranked/scenes 的 reason 并打 source:'llm'，第一条同时改写 top1.reason 与 verdict.text。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "mergePolish 第 1 形参 result：run / rerank 的结果对象，函数内部深拷贝，不改原对象"
+          },
+          {
+            "from": "llmText",
+            "required": true,
+            "note": "mergePolish 第 2 形参 llmText：LLM 原样返回的文本，可带 ```json 围栏"
+          },
+          {
+            "from": "$lint",
+            "required": false,
+            "note": "mergePolish 第 3 形参 lint：禁忌词命中函数，由 invoke 层用 _shared/lint.js 的 makeLint($lib.lintWords).hit 注入；不支持此注入时传 undefined，实跑确认其余校验照常生效，只是跳过禁忌词这一关"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "run 或 rerank 的返回对象"
+          },
+          {
+            "name": "llmText",
+            "type": "string",
+            "required": true,
+            "description": "LLM 返回的原文，期望形如 {\"scenes\":[{\"rank\":1,\"reason\":\"…\"},…]} 共 3 条"
+          }
+        ],
+        "returns": "result 的新副本；成功时前三条 ranked[].reason 被替换且带 source:'llm'",
+        "mutates": true,
+        "exampleInput": {
+          "result": "@examples/S2.output.json",
+          "llmText": "```json\n{\"scenes\":[{\"rank\":1,\"reason\":\"命中所选重点痛点，数据现在就能拿到，3 周内可见结果。\"},{\"rank\":2,\"reason\":\"命中所选重点痛点，数据现在就能拿到，4 周内可见结果。\"},{\"rank\":3,\"reason\":\"命中所选重点痛点，数据现在就能拿到，6 周内可见结果。\"}]}\n```"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI高价值场景排序\",\"credits\":20,\"version\":\"1.0.0\",\"sceneCount\":13,\"painCount\":16},\"profile\":{\"name\":\"义乌恒益日用品商行\",\"industry\":\"trade-wholesa"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言（第 1–15 行）",
+        "says": "没有 data_files 字段",
+        "actual": "data/ 下实际 17 个 json：顶层 axes.json / conditions.json / report-text.json 三个，sectors/ 14 个大类各一个；同仓库 03 与 10 的前言都按「含子目录全量计数」写了 data_files（6 / 5）",
+        "fix": "前言补一行 data_files: 17"
+      },
+      {
+        "where": "SKILL.md 正文「步骤 · 1 compute」第 83 行",
+        "says": "数据可得与实施门槛在按 dataState / capacity 调整后会落到 0.5 档，所以单轴分数可能是 4.5 这样的值",
+        "actual": "见效周期也会落到 0.5 档：window=m12 时 oWin.fast=-0.5，内核对 cycle ≤ 2 的场景执行 clamp(r1(s.cycle - oWin.fast),1,5)。实跑 S1 把 window 改成 m12，「设备预测性维护」的 axis.cycle = 2.5",
+        "fix": "改为「数据可得、实施门槛与见效周期三轴在调整后都可能落到 0.5 档」"
+      },
+      {
+        "where": "SKILL.md 正文「派生项」表 · 风险提示行（第 105 行）",
+        "says": "由 dataState、systems、capacity、缺失数据源、周期与期望窗口的差距触发",
+        "actual": "内核共 7 条规则：除所列 6 条外还有一条 profile.itStaff === 'none' 且 investment.tier === '重' 时的「投入档与数字化人员配置存在差距」（中），以及一条全部未命中时的兜底「提示」条",
+        "fix": "把「数字化专职为无 × 投入档为重」这条补进触发源列表（兜底条已在「降级」表里写明，可保留）"
+      },
+      {
+        "where": "SKILL.md 正文第 158 行「图表库共 14 种」",
+        "says": "图表库共 14 种：heroM2 · dial · ladder · painBars · painBubbles · sankey · funnel · axisStack · waterfall · bubbleMatrix · radarCompare · heatmap · depArc · gantt",
+        "actual": "prototype/src/charts-m2.js 实际往 window.DGG.charts 上挂了 15 个，多出 C.cover2（第 31 行，封面备选主视觉），全仓库检索无任何调用点，封面实际用的是 heroM2",
+        "fix": "删掉 cover2，或把它写进清单并注明「保留未启用」"
+      },
+      {
+        "where": "prototype/src/module-02.js 第 2 行文件头注释",
+        "says": "屏 5 报告 42 页",
+        "actual": "实际构建 28 页：23 个固定页 + ranked 前 5 个场景各一页；同文件第 391 行注释与第 582 行导航页内文本都写的 28，SKILL.md 前言 report_pages: 28、brief_pages: 6 与实际 brief 页 1/3/4/10/13/20 也都对得上",
+        "fix": "把文件头注释改为「屏 5 报告 28 页（速览 6 页）」"
+      }
+    ],
+    "notes": "内核只导出 validate/compute/buildPrompt/mergePolish 四个函数；rerank 与 simulate-systems 复用 compute，仅入参不同，可合并。$lib=load-data.js 返回值；merge-polish 的 lint 形参由 invoke 层注入 makeLint($lib.lintWords).hit，缺省即跳过禁忌词校验。"
+  }
+]
