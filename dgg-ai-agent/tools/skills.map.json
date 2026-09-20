@@ -54,11 +54,6 @@
         "key": "S4",
         "label": "深圳梵图家居科技（电商 · 21–50 人 · ERP+门店+CRM · L3 72.2%）",
         "source": "examples/S4.input.json"
-      },
-      {
-        "key": "S1_result",
-        "label": "S1 的 golden 计算结果，用作 build-prompt / merge-polish 的 result 入参",
-        "source": "examples/S1.output.json"
       }
     ],
     "actions": [
@@ -422,16 +417,6 @@
         "key": "S4",
         "label": "S4 · 深圳梵图家居（电商 · 五套系统 · 有小团队）",
         "source": "examples/S4.input.json"
-      },
-      {
-        "key": "S1.output",
-        "label": "S1 golden 输出（build-prompt 的 result 入参）",
-        "source": "examples/S1.output.json"
-      },
-      {
-        "key": "S2.output",
-        "label": "S2 golden 输出（merge-polish 的 result 入参）",
-        "source": "examples/S2.output.json"
       }
     ],
     "actions": [
@@ -443,7 +428,7 @@
         "description": "一次调用得到完整排序结果：13 个场景的四维得分与排名、三步走组合、首选场景一页纸、数据就绪度与补齐清单、12 个月排期、投入档、三档情景、风险与 90 天清单；输入不合法时返回 {ok:false,errors} 且不应扣积分。",
         "args": [
           {
-            "from": "input",
+            "from": "$input",
             "required": true,
             "note": "compute 第 1 形参：整个业务输入对象 {profile, pains, conditions, weights?}"
           },
@@ -455,62 +440,78 @@
         ],
         "inputProps": [
           {
-            "name": "input",
+            "name": "profile",
             "type": "object",
-            "required": true,
-            "description": "profile 企业画像 13 项（9 项必填）+ pains 3–8 项痛点（含 1–5 严重度，id 须属本行业痛点库）+ conditions 四项现状（dataState/objective/window/capacity）+ weights 可选四维权重"
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "pains",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "conditions",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "weights",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
           }
         ],
         "returns": "{ok:true} 全量结果：ranked/top1/combo/readiness/risks/render 等；否则 {ok:false,errors}",
         "mutates": false,
         "exampleInput": {
-          "input": {
-            "profile": {
-              "name": "杭州锐合精密五金有限公司",
-              "industry": "mfg-machinery",
-              "size": "101_300",
-              "revenue": "20m_100m",
-              "province": "浙江",
-              "years": "10_plus",
-              "ownership": "private",
-              "customers": "b2b",
-              "systems": [
-                "erp",
-                "finance"
-              ],
-              "itStaff": "1_2",
-              "branches": "single",
-              "overseas": "no",
-              "role": "owner"
-            },
-            "pains": [
-              {
-                "id": "mfg-p05",
-                "severity": 5
-              },
-              {
-                "id": "mfg-p06",
-                "severity": 4
-              },
-              {
-                "id": "mfg-p09",
-                "severity": 4
-              },
-              {
-                "id": "mfg-p13",
-                "severity": 3
-              },
-              {
-                "id": "mfg-p01",
-                "severity": 3
-              }
+          "profile": {
+            "name": "杭州锐合精密五金有限公司",
+            "industry": "mfg-machinery",
+            "size": "101_300",
+            "revenue": "20m_100m",
+            "province": "浙江",
+            "years": "10_plus",
+            "ownership": "private",
+            "customers": "b2b",
+            "systems": [
+              "erp",
+              "finance"
             ],
-            "conditions": {
-              "dataState": "system",
-              "objective": "efficiency",
-              "window": "m6",
-              "capacity": "part"
+            "itStaff": "1_2",
+            "branches": "single",
+            "overseas": "no",
+            "role": "owner"
+          },
+          "pains": [
+            {
+              "id": "mfg-p05",
+              "severity": 5
+            },
+            {
+              "id": "mfg-p06",
+              "severity": 4
+            },
+            {
+              "id": "mfg-p09",
+              "severity": 4
+            },
+            {
+              "id": "mfg-p13",
+              "severity": 3
+            },
+            {
+              "id": "mfg-p01",
+              "severity": 3
             }
+          ],
+          "conditions": {
+            "dataState": "system",
+            "objective": "efficiency",
+            "window": "m6",
+            "capacity": "part"
           }
         },
         "verified": true,
@@ -524,7 +525,7 @@
         "description": "只校验不计算：画像 9 项必填、systems 选「无」互斥、industry 有效且该大类有场景库、痛点 3–8 项且 id 属本行业痛点库、严重度为 1–5 整数、痛点不重复、四项现状取值有效、权重四项 0–1 且之和大于 0；返回可直接翻译成追问的中文报错数组。",
         "args": [
           {
-            "from": "input",
+            "from": "$input",
             "required": true,
             "note": "validate 第 1 形参：与 run 同一个输入对象"
           },
@@ -536,62 +537,78 @@
         ],
         "inputProps": [
           {
-            "name": "input",
+            "name": "profile",
             "type": "object",
-            "required": true,
-            "description": "同 run 的 input；这里允许残缺，校验器负责指出缺什么"
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "pains",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "conditions",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "weights",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
           }
         ],
         "returns": "字符串数组；空数组＝通过，否则每条是一句中文报错",
         "mutates": false,
         "exampleInput": {
-          "input": {
-            "profile": {
-              "name": "杭州锐合精密五金有限公司",
-              "industry": "mfg-machinery",
-              "size": "101_300",
-              "revenue": "20m_100m",
-              "province": "浙江",
-              "years": "10_plus",
-              "ownership": "private",
-              "customers": "b2b",
-              "systems": [
-                "erp",
-                "finance"
-              ],
-              "itStaff": "1_2",
-              "branches": "single",
-              "overseas": "no",
-              "role": "owner"
-            },
-            "pains": [
-              {
-                "id": "mfg-p05",
-                "severity": 5
-              },
-              {
-                "id": "mfg-p06",
-                "severity": 4
-              },
-              {
-                "id": "mfg-p09",
-                "severity": 4
-              },
-              {
-                "id": "mfg-p13",
-                "severity": 3
-              },
-              {
-                "id": "mfg-p01",
-                "severity": 3
-              }
+          "profile": {
+            "name": "杭州锐合精密五金有限公司",
+            "industry": "mfg-machinery",
+            "size": "101_300",
+            "revenue": "20m_100m",
+            "province": "浙江",
+            "years": "10_plus",
+            "ownership": "private",
+            "customers": "b2b",
+            "systems": [
+              "erp",
+              "finance"
             ],
-            "conditions": {
-              "dataState": "system",
-              "objective": "efficiency",
-              "window": "m6",
-              "capacity": "part"
+            "itStaff": "1_2",
+            "branches": "single",
+            "overseas": "no",
+            "role": "owner"
+          },
+          "pains": [
+            {
+              "id": "mfg-p05",
+              "severity": 5
+            },
+            {
+              "id": "mfg-p06",
+              "severity": 4
+            },
+            {
+              "id": "mfg-p09",
+              "severity": 4
+            },
+            {
+              "id": "mfg-p13",
+              "severity": 3
+            },
+            {
+              "id": "mfg-p01",
+              "severity": 3
             }
+          ],
+          "conditions": {
+            "dataState": "system",
+            "objective": "efficiency",
+            "window": "m6",
+            "capacity": "part"
           }
         },
         "verified": true,
@@ -824,7 +841,12 @@
         "returns": "提示词字符串，约 1000 字，无 {{}} 占位符残留",
         "mutates": false,
         "exampleInput": {
-          "result": "@examples/S1.output.json"
+          "result": {
+            "$action": "run",
+            "input": {
+              "dataset": "S1"
+            }
+          }
         },
         "verified": true,
         "verifiedOutputDigest": "\"你是顶呱呱集团「薯片AI智能体」的文案助手。下面是一家企业的 AI 场景排序结果，以及排在前三位的场景。请为这三个场景各写一句「为什么排这里」，说明它为什么排在这个位置。\\n\\n要求：\\n- 只输出 JSON，不要任何前后文，不要代码围栏\\n- 格式：{\\\"scenes\\\":[{\\\"rank\\\":1,\\\"reason"
@@ -869,7 +891,12 @@
         "returns": "result 的新副本；成功时前三条 ranked[].reason 被替换且带 source:'llm'",
         "mutates": true,
         "exampleInput": {
-          "result": "@examples/S2.output.json",
+          "result": {
+            "$action": "run",
+            "input": {
+              "dataset": "S1"
+            }
+          },
           "llmText": "```json\n{\"scenes\":[{\"rank\":1,\"reason\":\"命中所选重点痛点，数据现在就能拿到，3 周内可见结果。\"},{\"rank\":2,\"reason\":\"命中所选重点痛点，数据现在就能拿到，4 周内可见结果。\"},{\"rank\":3,\"reason\":\"命中所选重点痛点，数据现在就能拿到，6 周内可见结果。\"}]}\n```"
         },
         "verified": true,
@@ -909,5 +936,1413 @@
       }
     ],
     "notes": "内核只导出 validate/compute/buildPrompt/mergePolish 四个函数；rerank 与 simulate-systems 复用 compute，仅入参不同，可合并。$lib=load-data.js 返回值；merge-polish 的 lint 形参由 invoke 层注入 makeLint($lib.lintWords).hit，缺省即跳过禁忌词校验。"
+  },
+  {
+    "id": "roi-calculator",
+    "dir": "03-roi-calculator",
+    "kernelPath": "core/compute.js",
+    "legacyGlobal": "DGG.coreM3",
+    "version": "2.0.0",
+    "moduleName": "企业AI投入ROI测算器",
+    "credits": 20,
+    "summary": "把企业一次立项的整批场景算成一笔企业级投入回报账：投入归集、收益去重、24 期现金流与回收期。",
+    "dataFiles": 6,
+    "dataKeys": [
+      "benchmarks",
+      "constants",
+      "credits",
+      "fields",
+      "industries",
+      "investmentProfile",
+      "levers",
+      "lintWords",
+      "promptTemplate",
+      "reportText",
+      "sceneLevers",
+      "sectors"
+    ],
+    "crossSkillDeps": [
+      "02-scene-ranking"
+    ],
+    "sharedFiles": [
+      "profile-fields.json",
+      "industries.json",
+      "credits.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "S1",
+        "label": "制造业四场景整批立项（套数 / 诊断天数 / 另议项全走规模推导参考值）",
+        "source": "examples/S1.input.json"
+      },
+      {
+        "key": "S2",
+        "label": "小微批发两场景（企业自报套数与另议项预算，回本第 7 期）",
+        "source": "examples/S2.input.json"
+      },
+      {
+        "key": "S3",
+        "label": "连锁餐饮两场景，只命中人工工时节约，现金口径 24 期内不转正",
+        "source": "examples/S3.input.json"
+      },
+      {
+        "key": "S4",
+        "label": "中型电商五场景，旗舰版 + 私域部署 + 42 万另议项",
+        "source": "examples/S4.input.json"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "一次测算",
+        "description": "按企业画像 + 场景组合 + 投入方案一次算出完整 ROI 结果：投入企业级归集、收益跨场景去重、24 期双口径现金流、回收期、三档情景、单因素敏感度、参数来源与可信度；输入不合法返回 { ok:false, errors }，不扣积分。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "完整入参对象 { profile, scenes, plan }；scenes 省略或不带 sceneId 时走通用轻量场景口径（置信度扣 15 分）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，内核按 constants / levers / sceneLevers / benchmarks / investmentProfile / reportText / sectors 取值"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "scenes",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "plan",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "{ ok, meta, profile, portfolio, plan, invest, benefit, flow, flowAll, payback, paybackAll, roi, scenarios, sensitivity, missing, insufficient, inputSource, confidence, keyNumbers, quickView, verdict, roles, render(11 项) }；校验失败为 { ok:false, errors[] }",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "义乌恒益日用品商行",
+            "industry": "trade-wholesale",
+            "size": "21_50",
+            "revenue": "5m_20m",
+            "province": "浙江",
+            "years": "5_10",
+            "ownership": "individual",
+            "customers": "b2b",
+            "systems": [
+              "finance"
+            ],
+            "itStaff": "none",
+            "branches": "single",
+            "overseas": "yes",
+            "role": "owner"
+          },
+          "scenes": [
+            {
+              "sceneId": "trade-s01",
+              "gain": {
+                "dealsMonthly": 60,
+                "dealValue": 8000,
+                "grossMargin": 0.15
+              }
+            },
+            {
+              "sceneId": "trade-s03",
+              "gain": {
+                "dealsMonthly": 18,
+                "dealValue": 26000,
+                "grossMargin": 0.15
+              }
+            }
+          ],
+          "plan": {
+            "tier": "std",
+            "seats": 5,
+            "diagnosisDays": 1,
+            "customBudget": 26000,
+            "dataState": "excel",
+            "setupPeople": 1,
+            "setupSalary": 6500
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI投入ROI测算器\",\"credits\":20,\"version\":\"2.0.0\",\"horizon\":24},\"profile\":{\"name\":\"义乌恒益日用品商行\",\"industry\":\"trade-wholesale\",\"size\":\"21_50"
+      },
+      {
+        "name": "validate",
+        "fn": "validate",
+        "kind": "compute",
+        "title": "输入校验",
+        "description": "只跑校验不计算：逐项检查画像、投入方案与场景组合，返回错误清单。原型屏 4 用它决定「进入测算台」按钮能否点，并把缺什么写在屏幕上；不扣积分。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "同 run 的完整入参对象"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包，用于核对行业表、场景库与 DM 价目枚举"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "scenes",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "plan",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "errors 数组（{ field, msg }），空数组即通过；反例（tier 写 vip、删 profile.name、seats 填 99）实跑返回 3 条错误",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "义乌恒益日用品商行",
+            "industry": "trade-wholesale",
+            "size": "21_50",
+            "revenue": "5m_20m",
+            "province": "浙江",
+            "years": "5_10",
+            "ownership": "individual",
+            "customers": "b2b",
+            "systems": [
+              "finance"
+            ],
+            "itStaff": "none",
+            "branches": "single",
+            "overseas": "yes",
+            "role": "owner"
+          },
+          "scenes": [
+            {
+              "sceneId": "trade-s01",
+              "gain": {
+                "dealsMonthly": 60,
+                "dealValue": 8000,
+                "grossMargin": 0.15
+              }
+            },
+            {
+              "sceneId": "trade-s03",
+              "gain": {
+                "dealsMonthly": 18,
+                "dealValue": 26000,
+                "grossMargin": 0.15
+              }
+            }
+          ],
+          "plan": {
+            "tier": "std",
+            "seats": 5,
+            "diagnosisDays": 1,
+            "customBudget": 26000,
+            "dataState": "excel",
+            "setupPeople": 1,
+            "setupSalary": 6500
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[]  —— S2 合法入参校验通过；反例实跑返回 [{\"field\":\"profile.name\",\"msg\":\"缺少企业名称\"},{\"field\":\"plan.tier\",\"msg\":\"版本需为 light / std / adv / flag\"},{\"field\":\"plan.seats\",\"msg\":\"套数需为 1–60\"}]"
+      },
+      {
+        "name": "simulate",
+        "fn": "compute",
+        "kind": "compute",
+        "title": "调参模拟",
+        "description": "测算台重算：传入调整后的完整入参（关掉某个场景、改档位 / 套数 / 诊断天数 / 另议项预算 / 每批场景数 / 逐场景收益参数）再走一次内核，口径与 run 完全一致，用于与基线对照；不计费。",
+        "args": [
+          {
+            "from": "$input",
+            "required": true,
+            "note": "调参后的完整入参；场景开关＝从 scenes 里去掉该条，其余字段照常"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "数据包。注意：原型的「折减系数整体倍率」是在传入前改写 levers[].cut，内核本身没有这个入参"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "scenes",
+            "type": "array",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          },
+          {
+            "name": "plan",
+            "type": "object",
+            "required": false,
+            "description": "见 schema/input.json；也可改用 dataset 指定预置样例"
+          }
+        ],
+        "returns": "与 run 同结构；示例中关掉第 2 个场景并把套数调到 12、每批 1 个后，回收期由第 7 期后移到第 10 期，首年现金支出 34380 → 43340 元",
+        "mutates": false,
+        "exampleInput": {
+          "profile": {
+            "name": "义乌恒益日用品商行",
+            "industry": "trade-wholesale",
+            "size": "21_50",
+            "revenue": "5m_20m",
+            "province": "浙江",
+            "years": "5_10",
+            "ownership": "individual",
+            "customers": "b2b",
+            "systems": [
+              "finance"
+            ],
+            "itStaff": "none",
+            "branches": "single",
+            "overseas": "yes",
+            "role": "owner"
+          },
+          "scenes": [
+            {
+              "sceneId": "trade-s01",
+              "gain": {
+                "dealsMonthly": 60,
+                "dealValue": 8000,
+                "grossMargin": 0.15
+              }
+            }
+          ],
+          "plan": {
+            "tier": "std",
+            "seats": 12,
+            "diagnosisDays": 1,
+            "customBudget": 26000,
+            "dataState": "excel",
+            "setupPeople": 1,
+            "setupSalary": 6500,
+            "waveSize": 1
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"ok\":true,\"meta\":{\"module\":\"企业AI投入ROI测算器\",\"credits\":20,\"version\":\"2.0.0\",\"horizon\":24},\"profile\":{\"name\":\"义乌恒益日用品商行\",\"industry\":\"trade-wholesale\",\"size\":\"21_50"
+      },
+      {
+        "name": "build-prompt",
+        "fn": "buildPrompt",
+        "kind": "compute",
+        "title": "生成润色提示词",
+        "description": "把测算结果填进 prompts/polish.md 模板，生成给 LLM 的润色提示词（只润色三句话、不改任何数字）。至多调用一次，建议 8 秒超时，超时或命中禁忌词就用模板文案并标「初稿」。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "run / simulate 的返回值；实跑确认只读 verdict.headline 与 quickView[0]/[1]/[2].text，可传最小结果对象"
+          },
+          {
+            "from": "$lib.promptTemplate",
+            "required": true,
+            "note": "数据包里的 prompts/polish.md 文本。本模块第二参是模板字符串，不是整个数据包（m1/m2 传的是整包，生成器不能一刀切）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "run 的完整返回值，或至少含 verdict.headline 与 quickView[0..2].text 的子集"
+          }
+        ],
+        "returns": "填好三段待润色文本的提示词字符串（S2 实跑 453 字符），末尾要求 LLM 按 {verdict, costLine, gainLine} 的 JSON 返回；占位符实跑已全部替换干净",
+        "mutates": false,
+        "exampleInput": {
+          "result": {
+            "verdict": {
+              "headline": "按本次参数测算，2 个场景合计的累计净现金流于第 7 期转正"
+            },
+            "quickView": [
+              {
+                "text": "智能报价与库存查价、跨境询盘分级与多语回复。按价值分级降序、上线周期升序排出实施顺序，分 1 批推进，总工期 4.6 周。"
+              },
+              {
+                "text": "首年现金支出，标准版 5 套（2 个场景共用账号），含另议项 26000 元；次年起续费 6400 元。"
+              },
+              {
+                "text": "标准版订阅 6400 元；专家入企 AI 诊断 1980 元；另议项合计 26000 元。一次性支出占比 81%。"
+              }
+            ]
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"你在润色一份给中小企业主看的 AI 投入回报测算报告里的三句话。\\n\\n规则：\\n- 只改写下面给出的三段文字，不新增数字、不修改任何金额与月份。\\n- 每段不超过 45 个字，用陈述句，说清楚算出来的是什么。\\n- 不说「一定」「保证」「必然」，不把测算结果说成承诺。\\n- 不用「不是……而是……」句式；不用「手术"
+      },
+      {
+        "name": "merge-polish",
+        "fn": "mergePolish",
+        "kind": "mutate",
+        "title": "合并润色",
+        "description": "把 LLM 返回并解析后的对象合回测算结果：当前只回写 verdict.headline，polished 传 null 时原样返回。内核就地改写传入对象，平台应先深拷贝再把返回值写回会话状态。",
+        "args": [
+          {
+            "from": "result",
+            "required": true,
+            "note": "run / simulate 的返回值（或其副本），会被就地改写"
+          },
+          {
+            "from": "polished",
+            "required": true,
+            "note": "LLM 返回并解析后的对象 { verdict, costLine, gainLine }；本模块收已解析对象，m1/m2 的 mergePolish 收原始文本加 lint 回调（三参）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "result",
+            "type": "object",
+            "required": true,
+            "description": "测算结果对象，至少含 verdict.headline"
+          },
+          {
+            "name": "polished",
+            "type": "object",
+            "required": true,
+            "description": "LLM 润色结果 { verdict, costLine, gainLine }；为空或 null 时结果原样返回（已实跑验证）"
+          }
+        ],
+        "returns": "同 result 结构，verdict.headline 被替换为润色后的句子；costLine / gainLine 当前被丢弃（见 drift 第 2 条）",
+        "mutates": true,
+        "exampleInput": {
+          "result": {
+            "verdict": {
+              "headline": "按本次参数测算，2 个场景合计的累计净现金流于第 7 期转正"
+            },
+            "quickView": [
+              {
+                "text": "智能报价与库存查价、跨境询盘分级与多语回复。按价值分级降序、上线周期升序排出实施顺序，分 1 批推进，总工期 4.6 周。"
+              },
+              {
+                "text": "首年现金支出，标准版 5 套（2 个场景共用账号），含另议项 26000 元；次年起续费 6400 元。"
+              },
+              {
+                "text": "标准版订阅 6400 元；专家入企 AI 诊断 1980 元；另议项合计 26000 元。一次性支出占比 81%。"
+              }
+            ]
+          },
+          "polished": {
+            "verdict": "按本次参数测算，两个场景合计的累计净现金流在第 7 期转正"
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"verdict\":{\"headline\":\"按本次参数测算，两个场景合计的累计净现金流在第 7 期转正\"},\"quickView\":[{\"text\":\"智能报价与库存查价、跨境询盘分级与多语回复。按价值分级降序、上线周期升序排出实施顺序，分 1 批推进，总工期 4.6 周。\"},{\"text\":\"首年现金支出，标准"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md · 步骤 2「llm（可选，至多一次，8 秒超时）」",
+        "says": "只润色结论横幅与投入、收益各一句",
+        "actual": "core/compute.js:707 buildPrompt 写死下标：{costLine} 取 quickView[0].text、{gainLine} 取 quickView[2].text。实跑生成的提示词里这两段分别是「测算范围」句与「投入结构」句，真正的收益句（quickView[4] 月度收益）与投入总额句（quickView[1]）都没进提示词",
+        "fix": "buildPrompt 改取 quickView[1].text（投入总额）与 quickView[4].text（月度收益），或按 q 字段查找而非写死下标；改完重跑 scripts/run-examples.js"
+      },
+      {
+        "where": "SKILL.md · 步骤 2 与 prompts/polish.md 的返回约定",
+        "says": "润色三句，模板要求 LLM 按 {verdict, costLine, gainLine} 返回",
+        "actual": "core/compute.js:712 mergePolish 只执行 out.verdict.headline = polished.verdict，costLine 与 gainLine 收到后被直接丢弃；实跑传入三段只有横幅生效",
+        "fix": "mergePolish 把两句分别写回 quickView[1].text / quickView[4].text（保留禁忌词回退），或把 SKILL.md 与 polish.md 改成只润色结论横幅一句"
+      },
+      {
+        "where": "SKILL.md · 输出 ·「结构化呈现（按 render 顺序）」表",
+        "says": "8 种 render.type：three-accounts / cost-ledger / benefit-ledger / cashflow-bars / payback-curve / scenario-band / tornado / roles",
+        "actual": "内核实际输出 11 项，实跑顺序为 portfolio, three-accounts, cost-ledger, benefit-ledger, scene-contribution, wave-gantt, cashflow-bars, payback-curve, scenario-band, tornado, roles —— 表里缺 portfolio、scene-contribution、wave-gantt 三行",
+        "fix": "表里补这 3 行并按内核顺序排列，注明数据源 portfolio / portfolio.scenes / portfolio.waves"
+      },
+      {
+        "where": "SKILL.md · 输入补全 · 2 投入方案 · diagnosisDays 行",
+        "says": "可不填：按场景投入档取建议值（零档 0 天、轻中档 1 天、重档 2 天）",
+        "actual": "core/compute.js:223 按场景数量分档：1–2 个场景 1 天、3–5 个 2 天、6 个及以上 3 天（取自 data/investment-profile.json 的 diagnosisDays.values）；SKILL.md 正文「诊断天数按场景数量分档」是对的，只有这张表写错",
+        "fix": "该行默认值来源改为「按场景数量分档：1–2 个 1 天、3–5 个 2 天、6 个以上 3 天」"
+      },
+      {
+        "where": "SKILL.md · 步骤 1 compute 表 ·「投入 · 现金」行",
+        "says": "私域 = 端点价 × 套数",
+        "actual": "core/compute.js:231 pdYear = pd.yearly，按一套部署计列、不乘账号数，出具明细也写「按一套部署计列」；与本文件输入补全里 privateDeploy 行「按一套部署计，不乘账号数」自相矛盾",
+        "fix": "该行改为「私域 = 端点价（12800 或 33800）× 1 套」，与口径纪律第 1 条一致"
+      },
+      {
+        "where": "SKILL.md 前言 llm_calls: 1 / llm_timeout_ms: 8000，正文步骤 2",
+        "says": "至多一次 LLM 润色，8 秒超时，超时用模板标「初稿」",
+        "actual": "展台原型 prototype/src/module-03.js 从未调用 core.buildPrompt / core.mergePolish（全局只有 module-01.js:107 与 module-02.js:222 接了 sh.llm(..., 8000)），M.llmState 字段闲置；内核导出了这两个函数但 m3 展台走纯离线路径",
+        "fix": "原型补上 sh.llm 接线，或在 SKILL.md 注明 m3 的 LLM 节点仅由平台侧实现、展台不接"
+      }
+    ],
+    "notes": "内核只导出 validate / compute / buildPrompt / mergePolish 四个函数，故动作定为 5 个（run / validate / simulate 同走 compute，simulate 是测算台不计费重算），不凑到 6–16 个以免造假动作。三处跨模块差异生成器须分别映射：本模块 buildPrompt 第二参是模板字符串（$lib.promptTemplate），m1/m2 是整个数据包；本模块 mergePolish 收已解析对象、只有两参，m1/m2 收原始文本加 lint 回调；mergePolish 就地改写入参，平台须先深拷贝。原型的折减系数倍率是传入前改写 levers[].cut，内核无此入参，通用层若要支持需允许覆盖数据包。前言 version / credits / data_files(6) / inputs / report_pages(34) / brief_pages(6) 已逐项核对无误。"
+  },
+  {
+    "id": "ai-lead",
+    "dir": "04-ai-lead",
+    "kernelPath": "core/lead.js",
+    "legacyGlobal": "DGG.coreM4",
+    "version": "1.0.0",
+    "moduleName": "AI获客",
+    "credits": 30,
+    "summary": "从成交客户反推画像，一次出话术脚本、线索评分与跟进周报",
+    "dataFiles": 7,
+    "dataKeys": [
+      "channels",
+      "credits",
+      "industries",
+      "lintWords",
+      "pains",
+      "samples",
+      "scripts",
+      "signals",
+      "stages"
+    ],
+    "crossSkillDeps": [
+      "02-scene-ranking"
+    ],
+    "sharedFiles": [
+      "credits.json",
+      "industries.json",
+      "lint-words.json"
+    ],
+    "datasets": [
+      {
+        "key": "make",
+        "label": "制造型样本 · 杭州锐合精密五金（成交 30 家 · 线索 62 条 · 销售 4 组）",
+        "source": "data.samples.make"
+      },
+      {
+        "key": "service",
+        "label": "服务型样本 · 成都启元财税（成交 20 家 · 线索 21 条 · 销售 3 组）",
+        "source": "data.samples.service"
+      },
+      {
+        "key": "flow",
+        "label": "流通型样本 · 义乌恒益日用品（成交 20 家 · 线索 31 条 · 销售 3 组）",
+        "source": "data.samples.flow"
+      }
+    ],
+    "actions": [
+      {
+        "name": "run",
+        "fn": "run",
+        "kind": "compute",
+        "title": "一次算全",
+        "description": "一次调用跑出画像、线索评分、漏斗、渠道投入产出、成交预测、本周计划、团队负载、KPI 与周报；驾驶舱与其余各屏都按这一份结果渲染。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本；首次调用用 dataset 指定预置样本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包：渠道 / 信号 / 阶段 / 脚本块 / 模块 2 痛点库"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{version, data(规范化后的数据副本), profile, leads, byId, funnel, forecast, plan, teams, kpi, report}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"version\":\"1.0.0\",\"data\":{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\""
+      },
+      {
+        "name": "profile",
+        "fn": "profile",
+        "kind": "query",
+        "title": "客户画像",
+        "description": "对成交客户按行业大类 / 决策人 / 规模 / 区域统计分布，按分布集中度算维度权重，并给出加权价值前三的典型细分（带痛点、价值点、案例）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包（取行业名与痛点库）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "{dist(四维分布+HHI), weights, avgCycle, avgAmount, repeatRate, channels, segments[3], focus, dealCount, totalAmount}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"dist\":{\"sector\":{\"rows\":[{\"value\":\"mfg\",\"count\":23,\"amount\":33630000,\"weighted\":47155000,\"share\":0.8575975265981631,\"label\":\"制造业\"},{\"value\":\"trade\",\"count\":3,"
+      },
+      {
+        "name": "score-leads",
+        "fn": "leadsScored",
+        "kind": "query",
+        "title": "线索评分",
+        "description": "按画像给线索池逐条打分（0.7 匹配 + 0.3 行为信号衰减），输出等级 A/B/C/D、建议动作、逾期与沉睡判断，按综合分倒序。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "profile",
+            "required": true,
+            "note": "画像结果：profile 动作的返回值，或 run().profile"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包（信号衰减、等级阈值、跟进节奏）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": true,
+            "description": "画像结果（profile 动作或 run 返回的 profile）"
+          }
+        ],
+        "returns": "线索数组：每条含 match / signal / signalParts / total / grade / action / overdue / dormant / ownerName / planned 等评分字段",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "profile": {
+            "$action": "profile",
+            "input": {
+              "dataset": "make"
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[{\"id\":\"L-2609-0001\",\"industry\":\"汽配一级供应商\",\"sector\":\"mfg\",\"size\":\"300_plus\",\"region\":\"华东\",\"role\":\"采购经理\",\"channel\":\"fair\",\"createdAt\":\"2026-09-11\",\"stage\":\"contac"
+      },
+      {
+        "name": "explain-lead",
+        "fn": "explain",
+        "kind": "query",
+        "title": "线索下钻",
+        "description": "单条线索的 AI 判断下钻：看了哪些字段与行为信号、匹配了画像哪几条、综合结论与建议动作，供线索池点开一条时展示。",
+        "args": [
+          {
+            "from": "lead",
+            "required": true,
+            "note": "评分后的线索行：run().byId[线索号] 或 score-leads 的一行（需带 parts / signalParts 等评分字段）"
+          },
+          {
+            "from": "profile",
+            "required": true,
+            "note": "画像结果：profile 动作的返回值，或 run().profile"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "按内核形参顺序占位；explain 本身只读 lead 与 profile"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "按内核形参顺序占位"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "lead",
+            "type": "object",
+            "required": true,
+            "description": "评分后的线索对象（run().byId[线索号]）"
+          },
+          {
+            "name": "profile",
+            "type": "object",
+            "required": true,
+            "description": "画像结果（profile 动作或 run 返回的 profile）"
+          }
+        ],
+        "returns": "{seen[4] 看了哪些信息, reasons[3] 判断依据, action, actionLabel}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "lead": {
+            "id": "L-2609-0001",
+            "industry": "汽配一级供应商",
+            "sector": "mfg",
+            "size": "300_plus",
+            "region": "华东",
+            "role": "采购经理",
+            "channel": "fair",
+            "createdAt": "2026-09-11",
+            "stage": "contact",
+            "owner": "T1",
+            "signals": [
+              {
+                "key": "scan",
+                "date": "2026-09-11"
+              },
+              {
+                "key": "revisit",
+                "date": "2026-09-15"
+              },
+              {
+                "key": "quote",
+                "date": "2026-09-16"
+              }
+            ],
+            "lastAction": {
+              "date": "2026-09-15",
+              "text": "电话沟通，索取报价单"
+            },
+            "amountEst": 1800000,
+            "note": "展会当天索样",
+            "dormant": false,
+            "match": 86,
+            "signal": 58.5,
+            "signalParts": [
+              {
+                "key": "quote",
+                "name": "索取报价",
+                "date": "2026-09-16",
+                "age": 1,
+                "score": 33.8
+              },
+              {
+                "key": "scan",
+                "name": "展会扫码",
+                "date": "2026-09-11",
+                "age": 6,
+                "score": 14.4
+              },
+              {
+                "key": "revisit",
+                "name": "二次访问",
+                "date": "2026-09-15",
+                "age": 2,
+                "score": 10.3
+              }
+            ],
+            "total": 77,
+            "grade": "A",
+            "parts": [
+              {
+                "dim": "sector",
+                "label": "行业大类",
+                "value": "制造业",
+                "share": 100,
+                "weight": 37,
+                "pts": 37.4
+              },
+              {
+                "dim": "role",
+                "label": "决策人",
+                "value": "采购经理",
+                "share": 100,
+                "weight": 19,
+                "pts": 18.7
+              },
+              {
+                "dim": "size",
+                "label": "企业规模",
+                "value": "300 人以上",
+                "share": 50,
+                "weight": 16,
+                "pts": 8.2
+              },
+              {
+                "dim": "region",
+                "label": "区域",
+                "value": "华东",
+                "share": 77,
+                "weight": 28,
+                "pts": 21.3
+              }
+            ],
+            "action": "follow",
+            "actionLabel": "二次跟进",
+            "lastAge": 2,
+            "overdue": false,
+            "dueDays": 3,
+            "channelName": "展会扫码",
+            "sizeLabel": "300 人以上",
+            "stageName": "已联系",
+            "stageIdx": 1,
+            "ownerName": "业务一组",
+            "planned": false,
+            "name": "汽配一级供应商 · 华东 · 300 人以上",
+            "company": "汽配一级供应商"
+          },
+          "profile": {
+            "$action": "profile",
+            "input": {
+              "dataset": "make"
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"seen\":[\"来源 展会扫码 · 建档 9-11 · 阶段 已联系 · 负责 业务一组\",\"字段：行业大类 制造业、决策人 采购经理、企业规模 300 人以上、区域 华东\",\"行为：索取报价 9-16（1 天前）、展会扫码 9-11（6 天前）、二次访问 9-15（2 天前）\",\"最近动作 9-15 电话沟通，索"
+      },
+      {
+        "name": "build-script",
+        "fn": "script",
+        "kind": "compute",
+        "title": "话术脚本",
+        "description": "按细分 × 渠道 × 阶段拼装五段话术（开场 / 痛点 / 价值 / 案例 / 行动）与三条异议应答，占位符用细分与企业数据填充，variant 换一版。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（取公司简称、产品、价值点、案例与已采用版本）"
+          },
+          {
+            "from": "profile",
+            "required": true,
+            "note": "画像结果：profile 动作的返回值，或 run().profile"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包（脚本段落块库）"
+          },
+          {
+            "from": "opt",
+            "required": true,
+            "note": "{segId, channel, stage, variant}"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "profile",
+            "type": "object",
+            "required": true,
+            "description": "画像结果（profile 动作或 run 返回的 profile）"
+          },
+          {
+            "name": "opt",
+            "type": "object",
+            "required": true,
+            "description": "{segId: S1|S2|S3, channel: phone|wechat|fair|mail, stage: first|follow|quote|wake, variant: 0|1}"
+          }
+        ],
+        "returns": "{key, segId, segName, channel, stage, variant, sections[5], objections[3], words, text, adopted}",
+        "mutates": false,
+        "exampleInput": {
+          "dataset": "make",
+          "profile": {
+            "$action": "profile",
+            "input": {
+              "dataset": "make"
+            }
+          },
+          "opt": {
+            "segId": "S1",
+            "channel": "phone",
+            "stage": "first",
+            "variant": 0
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"segId\":\"S1\",\"segName\":\"汽配一级供应商等 · 采购经理\",\"channel\":\"phone\",\"channelName\":\"电话\",\"stage\":\"first\",\"stageName\":\"首触\",\"variant\":0,\"sections\":[{\"key\":\"open\",\"title\":\"开"
+      },
+      {
+        "name": "recommend-team",
+        "fn": "recommendTeam",
+        "kind": "query",
+        "title": "分派建议",
+        "description": "为一条未分派线索推荐承接小组：先看行业熟悉度，再看负载率，各组都满则返回 null；线索池的分派面板用它给出首选项。",
+        "args": [
+          {
+            "from": "lead",
+            "required": true,
+            "note": "评分后的线索行（run().byId[线索号]），按 lead.sector 匹配"
+          },
+          {
+            "from": "teams",
+            "required": true,
+            "note": "各组负载：run().teams（含 cap / load / free / sectors）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "lead",
+            "type": "object",
+            "required": true,
+            "description": "评分后的线索对象（run().byId[线索号]）"
+          },
+          {
+            "name": "teams",
+            "type": "array",
+            "required": true,
+            "description": "各销售组负载数组（run 返回的 teams）"
+          }
+        ],
+        "returns": "{id, name, sectors, cap, load, free}，各组已满时为 null",
+        "mutates": false,
+        "exampleInput": {
+          "lead": {
+            "id": "L-2609-0028",
+            "industry": "汽配一级供应商",
+            "sector": "mfg",
+            "size": "101_300",
+            "region": "华东",
+            "role": "采购经理",
+            "channel": "inquiry",
+            "createdAt": "2026-09-14",
+            "stage": "lead",
+            "owner": null,
+            "signals": [
+              {
+                "key": "inquiry",
+                "date": "2026-09-14"
+              },
+              {
+                "key": "revisit",
+                "date": "2026-09-16"
+              }
+            ],
+            "lastAction": null,
+            "amountEst": 900000,
+            "note": "",
+            "dormant": false,
+            "match": 84,
+            "signal": 38.1,
+            "signalParts": [
+              {
+                "key": "inquiry",
+                "name": "询价",
+                "date": "2026-09-14",
+                "age": 3,
+                "score": 27
+              },
+              {
+                "key": "revisit",
+                "name": "二次访问",
+                "date": "2026-09-16",
+                "age": 1,
+                "score": 11.1
+              }
+            ],
+            "total": 71,
+            "grade": "B",
+            "parts": [
+              {
+                "dim": "sector",
+                "label": "行业大类",
+                "value": "制造业",
+                "share": 100,
+                "weight": 37,
+                "pts": 37.4
+              },
+              {
+                "dim": "role",
+                "label": "决策人",
+                "value": "采购经理",
+                "share": 100,
+                "weight": 19,
+                "pts": 18.7
+              },
+              {
+                "dim": "size",
+                "label": "企业规模",
+                "value": "101–300 人",
+                "share": 43,
+                "weight": 16,
+                "pts": 7
+              },
+              {
+                "dim": "region",
+                "label": "区域",
+                "value": "华东",
+                "share": 77,
+                "weight": 28,
+                "pts": 21.3
+              }
+            ],
+            "action": "first",
+            "actionLabel": "首触",
+            "lastAge": 3,
+            "overdue": false,
+            "dueDays": 5,
+            "channelName": "平台询盘",
+            "sizeLabel": "101–300 人",
+            "stageName": "线索",
+            "stageIdx": 0,
+            "ownerName": null,
+            "planned": false,
+            "name": "汽配一级供应商 · 华东 · 101–300 人",
+            "company": "汽配一级供应商"
+          },
+          "teams": [
+            {
+              "id": "T1",
+              "name": "业务一组",
+              "sectors": [
+                "mfg"
+              ],
+              "cap": 18,
+              "load": 9,
+              "free": 9
+            },
+            {
+              "id": "T2",
+              "name": "业务二组",
+              "sectors": [
+                "mfg",
+                "energy"
+              ],
+              "cap": 18,
+              "load": 6,
+              "free": 12
+            },
+            {
+              "id": "T3",
+              "name": "业务三组",
+              "sectors": [
+                "trade",
+                "other",
+                "tech"
+              ],
+              "cap": 16,
+              "load": 6,
+              "free": 10
+            },
+            {
+              "id": "T4",
+              "name": "大客户组",
+              "sectors": [
+                "mfg"
+              ],
+              "cap": 12,
+              "load": 7,
+              "free": 5
+            }
+          ]
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"id\":\"T2\",\"name\":\"业务二组\",\"sectors\":[\"mfg\",\"energy\"],\"cap\":18,\"load\":6,\"free\":12}"
+      },
+      {
+        "name": "assign",
+        "fn": "assign",
+        "kind": "mutate",
+        "title": "分派线索",
+        "description": "把一条线索指派给某个销售小组：写入 owner 与分派日期，追加一条操作日志，返回新的业务数据副本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "leadId",
+            "required": true,
+            "note": "线索号，如 L-2609-0028"
+          },
+          {
+            "from": "teamId",
+            "required": true,
+            "note": "销售组 id，如 T2（可先用 recommend-team 取建议）"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "leadId",
+            "type": "string",
+            "required": true,
+            "description": "线索号"
+          },
+          {
+            "name": "teamId",
+            "type": "string",
+            "required": true,
+            "description": "销售组 id"
+          }
+        ],
+        "returns": "新的业务数据副本：对应线索的 owner / assignedAt 已更新，log 追加「分派」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "leadId": "L-2609-0028",
+          "teamId": "T2"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "assign-all",
+        "fn": "assignAll",
+        "kind": "mutate",
+        "title": "一键分派",
+        "description": "把所有未分派线索按行业熟悉度与负载贪心平衡分完，不超各组上限；实跑 make 样本后未分派归零，各组负载均在 cap 内。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包（评分所需）"
+          }
+        ],
+        "inputProps": [],
+        "returns": "新的业务数据副本：多条线索的 owner 已写入，log 追加「一键分派」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "add-plan",
+        "fn": "addPlan",
+        "kind": "mutate",
+        "title": "加入计划",
+        "description": "把一条线索加入本周跟进计划，重算后会排进负责小组的日程（每组每天不超过 5 条）。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "leadId",
+            "required": true,
+            "note": "线索号"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "leadId",
+            "type": "string",
+            "required": true,
+            "description": "线索号"
+          }
+        ],
+        "returns": "新的业务数据副本：planned 追加线索号，log 追加「加入本周计划」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "leadId": "L-2609-0001"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "log-action",
+        "fn": "logAction",
+        "kind": "mutate",
+        "title": "记录跟进",
+        "description": "记录一次跟进：最近动作更新为今天与这段文本，解除沉睡；线索阶段若仍是「线索」则推到「已联系」。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "leadId",
+            "required": true,
+            "note": "线索号"
+          },
+          {
+            "from": "text",
+            "required": true,
+            "note": "跟进记录文本"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "leadId",
+            "type": "string",
+            "required": true,
+            "description": "线索号"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "跟进记录文本"
+          }
+        ],
+        "returns": "新的业务数据副本：lastAction / dormant / stage 已更新，log 追加「记录跟进」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "leadId": "L-2609-0028",
+          "text": "电话首触，已发产品资料"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "advance",
+        "fn": "advance",
+        "kind": "mutate",
+        "title": "推进阶段",
+        "description": "把线索推进到下一阶段（线索→已联系→商机→报价→成交）并记录动作文本；推进到成交时写入成交日期。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "leadId",
+            "required": true,
+            "note": "线索号"
+          },
+          {
+            "from": "text",
+            "required": true,
+            "note": "动作文本；内核形参本可省略，但省略时默认文案有 bug，故在契约层设为必填"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "leadId",
+            "type": "string",
+            "required": true,
+            "description": "线索号"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "description": "本次动作文本，如「二次跟进 · 已完成」"
+          }
+        ],
+        "returns": "新的业务数据副本：stage / lastAction / closedAt 已更新，log 追加「推进阶段」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "leadId": "L-2609-0001",
+          "text": "二次跟进 · 已完成"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "mark-dormant",
+        "fn": "markDormant",
+        "kind": "mutate",
+        "title": "标记沉睡",
+        "description": "把线索标记为沉睡：退出本周计划与在手统计，建议动作转为「沉睡唤醒」。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "leadId",
+            "required": true,
+            "note": "线索号"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "leadId",
+            "type": "string",
+            "required": true,
+            "description": "线索号"
+          }
+        ],
+        "returns": "新的业务数据副本：dormant=true，log 追加「标记沉睡」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "leadId": "L-2609-0028"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "set-focus",
+        "fn": "setFocus",
+        "kind": "mutate",
+        "title": "切换细分",
+        "description": "切换重点细分（S1 / S2 / S3），线索匹配分、排序、脚本与本周计划都按新细分重算。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "segId",
+            "required": true,
+            "note": "细分 id：S1 / S2 / S3"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "segId",
+            "type": "string",
+            "required": true,
+            "description": "细分 id（S1 / S2 / S3）"
+          }
+        ],
+        "returns": "新的业务数据副本：focusSegment 已切换，log 追加「切换重点细分」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "segId": "S2"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "set-weight",
+        "fn": "setWeight",
+        "kind": "mutate",
+        "title": "调整权重",
+        "description": "调整某个画像维度的权重系数（×0.5 / ×1 / ×1.5 / ×2），归一后线索匹配分与排序重算；实跑 sector ×1.5 后权重 0.374→0.473。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "dim",
+            "required": true,
+            "note": "维度：sector / role / size / region"
+          },
+          {
+            "from": "mul",
+            "required": true,
+            "note": "调整系数，如 0.5 / 1 / 1.5 / 2"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "dim",
+            "type": "string",
+            "required": true,
+            "description": "画像维度：sector / role / size / region"
+          },
+          {
+            "name": "mul",
+            "type": "number",
+            "required": true,
+            "description": "权重调整系数"
+          }
+        ],
+        "returns": "新的业务数据副本：weights[dim] 已写入（此动作不写 log）",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "dim": "sector",
+          "mul": 1.5
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "adopt-script",
+        "fn": "adoptScript",
+        "kind": "mutate",
+        "title": "采用脚本",
+        "description": "采用某一版话术（细分|渠道|阶段 + 版本号），之后本周计划里对应动作的任务会带上这版脚本。",
+        "args": [
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本"
+          },
+          {
+            "from": "key",
+            "required": true,
+            "note": "脚本键：build-script 返回的 key，形如 S1|phone|first"
+          },
+          {
+            "from": "variant",
+            "required": true,
+            "note": "版本号 0 或 1"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "key",
+            "type": "string",
+            "required": true,
+            "description": "脚本键（build-script 返回的 key）"
+          },
+          {
+            "name": "variant",
+            "type": "number",
+            "required": true,
+            "description": "版本号 0 或 1"
+          }
+        ],
+        "returns": "新的业务数据副本：adopted[key]=variant，log 追加「采用脚本」一条",
+        "mutates": true,
+        "exampleInput": {
+          "dataset": "make",
+          "key": "S1|phone|first",
+          "variant": 1
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      }
+    ],
+    "drift": [
+      {
+        "where": "SKILL.md 前言 data_files: 4",
+        "says": "data_files: 4",
+        "actual": "data/ 下实为 7 个 json：channels / signals / stages / scripts 四张规则表 + data/samples/ 三套样本（mfg / prof / trade）",
+        "fix": "改为 data_files: 7（或注明「4 张规则表 + 3 套样本」）"
+      },
+      {
+        "where": "SKILL.md 引擎函数表最后一行「plan / funnel / forecast / report」",
+        "says": "把 plan / funnel / forecast / report 与其他函数并列成可调用的引擎函数",
+        "actual": "内核 return 的导出里没有这四个，它们只在 run() 内部被调用；外部只能通过 run() 的 plan / funnel / forecast / report 字段拿到结果",
+        "fix": "该行注明「仅 run() 内部计算，结果在 run 返回值的同名字段」，或在内核导出里补上这四个函数"
+      },
+      {
+        "where": "SKILL.md 引擎函数表（缺行）",
+        "says": "表中未出现 ensure / recommendTeam / teamLoad",
+        "actual": "三者都已导出；原型 module-04.js 用 ensure 规范化样本、用 recommendTeam 给线索池的「分派给哪组」出建议",
+        "fix": "补一行：ensure（数据规范化）、recommendTeam / teamLoad（分派建议与各组负载）"
+      },
+      {
+        "where": "SKILL.md 正文第 18 行来源清单 与「口径」第一条",
+        "says": "线索来源只用企业自有渠道加一个不带厂商名的「名录导入」；清单列 CRM、订单、展会扫码、官网留资、公众号、老客户转介绍、名录导入",
+        "actual": "data/channels.json 有 6 个渠道，含未在正文出现的 inquiry「平台询盘」；make 样本里它还是第一大来源（62 条线索中 13 条），驾驶舱渠道卡会展示",
+        "fix": "来源清单与口径补上「平台询盘（不带厂商名）」，或把该渠道从 channels.json 与样本中去掉"
+      }
+    ],
+    "notes": "产品类：9 个 mutate 动作都返回完整数据副本，前 160 字是数据头、差异在 log 与对应线索字段（已实跑链式验证：dataset→assign→add-plan→adopt-script→advance 后 run 可复算，一键分派后未分派归零且各组不超 cap）。score-leads / explain-lead / build-script 需先取 profile（profile 动作或 run().profile），recommend-team 的 teams 取 run().teams；示例里用 $action 引用前置动作。advance 的 text 在契约层设为必填：省略时内核默认文案会写成「推进到undefined」。内核无 LLM、无 $lint 需求；examples/ 三份 output 是 run 的摘要而非动作输入，不适合当数据集。"
   }
 ]
