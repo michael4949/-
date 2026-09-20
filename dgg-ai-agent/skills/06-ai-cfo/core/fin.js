@@ -511,6 +511,7 @@
   function curRisk(R) { return R.risks.rows[0]; }
   function curWeekIdx(R) { var f = R.forecast; return f.gapWeeks.length ? f.gapWeeks[0] : f.minWeek; }
   function rowById(list, id) { return list.filter(function (x) { return x.id === id; })[0] || null; }
+  function optOf(list, key) { return list.filter(function (x) { return x.key === key; })[0] || null; }
   function rv(r) { return r.unit === '元' ? W(r.value) : neg(r.value) + r.unit; }
   function rband(r) { return r.unit === '元' ? W(r.band[0]) + ' – ' + W(r.band[1]) : neg(r.band[0]) + '–' + neg(r.band[1]) + r.unit; }
   function gapText(R) { var f = R.forecast; return f.gap ? '第 ' + (f.minWeek + 1) + ' 周现金 ' + W(f.minEnding) + '，低于安全线 ' + W(f.gap) : '13 周低点 ' + W(f.minEnding) + '，在安全线以上'; }
@@ -543,7 +544,7 @@
     }
     if (step === 'risk') { var t = rk.rows[0]; return t.id + ' ' + t.name + '：概率 ' + Math.round(t.prob * 100) + '%，影响 ' + W(t.impact) + '；指标 ' + rv(t) + '，参考 ' + rband(t) + '。'; }
     if (step === 'cash') {
-      var co = cashOptions(data, lib), pick = rowKey(co.options, co.recommend);
+      var co = cashOptions(data, lib), pick = optOf(co.options, co.recommend);
       if (f.gap) return '第 ' + (f.minWeek + 1) + ' 周现金 ' + W(f.minEnding) + '，缺口 ' + W(f.gap) + '，' + f.gapWeeks.length + ' 周低于安全线；方案 ' + pick.key + ' ' + pick.name + '能拉回 ' + W(pick.minEnding) + '。';
       return '13 周低点 ' + W(f.minEnding) + '（第 ' + (f.minWeek + 1) + ' 周），高于安全线 ' + W(f.minEnding - f.safety) + '，窗口内无缺口周。';
     }
@@ -554,7 +555,6 @@
     }
     return null;
   }
-  function rowKey(list, key) { return list.filter(function (x) { return x.key === key; })[0] || null; }
 
   /* 快捷问句：每屏 3–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
@@ -573,10 +573,12 @@
       blocks: [kvB([['判断', STAT_NAME[rr.status]], ['差异', fmtN(rr.diff) + ' 元'], ['建议', rr.fixed ? '已调整' : rr.fix ? rr.fix.label + ' ' + fmtN(rr.fix.amount) + ' 元' : '核实原始凭证']])],
       ref: step === 'recon' ? rr.id : null, act: { type: 'open', panel: 'rule', ref: rr.id } };
   }
-  function ruleCardNamed(nn, step) {
-    return { text: nn.id + ' ' + nn.name + '（' + nn.pair + '）：' + (nn.status === 'na' ? '本企业无此科目。' : nn.lhsLabel + ' ' + fmtN(nn.lhs) + ' 元，' + nn.rhsLabel + ' ' + fmtN(nn.rhs) + ' 元，差 ' + fmtN(nn.diff) + ' 元，' + STAT_NAME[nn.status] + '。' + nn.explain + '。'),
-      blocks: [kvB([['判断', STAT_NAME[nn.status]], ['差异', fmtN(nn.diff) + ' 元'], ['建议', nn.fixed ? '已调整' : nn.fix ? nn.fix.label + ' ' + fmtN(nn.fix.amount) + ' 元' : '核实原始凭证']])],
+  /* 点名字问到的那一条：措辞比点编号短一截，不重复关系对，本屏问时不带小表 */
+  function ruleCardNamed(nn, step, blocks) {
+    var out = { text: nn.id + ' ' + nn.name + '：' + (nn.status === 'na' ? '本企业无此科目。' : nn.lhsLabel + ' ' + fmtN(nn.lhs) + ' 元，' + nn.rhsLabel + ' ' + fmtN(nn.rhs) + ' 元，差 ' + fmtN(nn.diff) + ' 元，' + STAT_NAME[nn.status] + '。' + nn.explain + '。'),
       ref: step === 'recon' ? nn.id : null, act: { type: 'open', panel: 'rule', ref: nn.id } };
+    if (blocks) out.blocks = [kvB([['判断', STAT_NAME[nn.status]], ['差异', fmtN(nn.diff) + ' 元'], ['建议', nn.fixed ? '已调整' : nn.fix ? nn.fix.label + ' ' + fmtN(nn.fix.amount) + ' 元' : '核实原始凭证']])];
+    return out;
   }
   function riskCard(kr, step) {
     return { text: kr.id + ' ' + kr.name + '：' + kr.metricLabel + ' ' + rv(kr) + '，参考 ' + rband(kr) + '，概率 ' + Math.round(kr.prob * 100) + '%，影响 ' + W(kr.impact) + '（' + kr.impactNote + '）。\n' + kr.evidence[0] + '。',
@@ -691,7 +693,7 @@
           ref: cur.id, act: { type: 'open', panel: 'drill', ref: cur.id } };
       }
       var nn = byName(q, rec.rows);
-      if (nn) return ruleCardNamed(nn, step);
+      if (nn) return ruleCardNamed(nn, step, false);
       if (has(q, ['资产', '负债', '权益', '平不平'])) return { text: '资产总计 ' + fmtN(rec.metrics.assets) + ' 元 = 负债 ' + fmtN(rec.metrics.liabilities) + ' 元 + 所有者权益 ' + fmtN(rec.metrics.equity) + ' 元，R01 ' + STAT_NAME[rec.rows[0].status] + '。' };
     }
 
@@ -747,7 +749,7 @@
           act: runC ? { type: 'apply', action: 'applyCashOption', input: { key: 'C' } } : { type: 'open', panel: 'option', ref: 'C' } };
       }
       if (has(q, ['推荐', '选哪个', '哪个方案', '怎么办'])) {
-        var pk = rowKey(co.options, co.recommend);
+        var pk = optOf(co.options, co.recommend);
         return { text: '推荐方案 ' + pk.key + ' ' + pk.name + '：13 周低点 ' + W(pk.minEnding) + (pk.cost ? '，利息 ' + fmtN(pk.cost) + ' 元' : '，不增加资金成本') + '；' + pk.side + '。',
           blocks: [tableB(['方案', '低点', '缺口周', '成本'], co.options.map(function (o) { return [o.key + ' ' + o.name, W(o.minEnding), o.gapWeeks + ' 周', o.cost ? fmtN(o.cost) : '0']; }))],
           act: { type: 'apply', action: 'applyCashOption', input: { key: co.recommend } } };
@@ -783,7 +785,7 @@
     /* 全局：点名字问某一条勾稽关系 / 某一项风险 / 某一项政策，不在本屏也能答并跳过去 */
     var gl = [byNameHit(q, rec.rows), byNameHit(q, rk.rows), byNameHit(q, po.rows)], gi = -1, gn = 0;
     for (i = 0; i < 3; i++) if (gl[i] && gl[i].n > gn) { gn = gl[i].n; gi = i; }
-    if (gi === 0) return ruleCardNamed(gl[0].row, step);
+    if (gi === 0) return ruleCardNamed(gl[0].row, step, true);
     if (gi === 1) return riskCard(gl[1].row, step);
     if (gi === 2) return policyCard(gl[2].row, step);
     return null;

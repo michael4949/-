@@ -5,6 +5,7 @@ const path = require('path');
 const core = require('../core/fin.js');
 const lib = require('./load-data.js')();
 const lint = require('../../_shared/lint.js')(lib.lintWords);
+const docparse = require('../../_shared/docparse.js');
 let checks = 0;
 const ok = (c, m) => { assert(c, m); checks++; };
 const lintText = (t, where) => { const hits = lint.hard(String(t)); ok(hits.length === 0, where + ' 命中禁词: ' + hits.join(',')); };
@@ -71,6 +72,62 @@ Object.keys(lib.samples).sort().forEach((k) => {
   // 7. examples 与本次重算一致
   const ex = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'examples', k + '.output.json'), 'utf8'));
   ok(ex.kpi.rev === R.kpi.rev && ex.reconcile.counts.bad === R.reconcile.counts.bad && ex.forecast.minEnding === R.forecast.minEnding, k + ' examples 与内核不一致，先跑 run-examples');
+  // 8. 对话与文档摄入：六屏开场、快捷问句、问答、文档
+  const steps = core.screens().map((x) => x.key);
+  ok(steps.length === 6 && core.screens().every((x) => x.key && x.label), k + ' screens 六屏登记');
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && JSON.stringify(a) === JSON.stringify(JSON.parse(JSON.stringify(a))));
+  steps.forEach((st) => {
+    const b = core.brief(st, d, lib, R);
+    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
+    lintText(b, k + ' brief ' + st);
+    ok(JSON.stringify(core.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
+    const sg = core.suggest(st, d, lib, R);
+    ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
+    sg.forEach((q) => {
+      const a = core.ask(q, st, d, lib, R);
+      ok(a && a.text && !/undefined|NaN/.test(a.text), k + ' suggest 答不上 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib, R)) === JSON.stringify(a), k + ' ask 两次不一致 ' + st + ' · ' + q);
+      ok(JSON.stringify(core.ask(q, st, d, lib)) === JSON.stringify(a), k + ' ask 不传 result 结果不一致 ' + st + ' · ' + q);
+      ok(isBlocks(a.blocks), k + ' ask blocks 块型 ' + q);
+      ok(isAct(a.act), k + ' ask act 必须是纯数据 ' + q);
+      lintText(a.text, k + ' ask ' + st + ' · ' + q);
+    });
+  });
+  // 四种点名：勾稽 / 风险 / 政策 / 周，不在本屏也能答
+  ok(core.ask('R03 为什么差', 'board', d, lib, R).act.panel === 'rule', k + ' 点名勾稽条');
+  ok(core.ask('K09 依据是什么', 'connect', d, lib, R).act.panel === 'risk', k + ' 点名风险条');
+  ok(core.ask('P02 呢', 'cash', d, lib, R).act.panel === 'policy', k + ' 点名政策条');
+  ok(core.ask('第 2 周怎么样', 'policy', d, lib, R).act.panel === 'week', k + ' 点名周');
+  ok(core.ask('今天天气如何', 'board', d, lib, R) === null, k + ' 答不上返回 null');
+  ok(core.brief('没有这一屏', d, lib, R) === null, k + ' 未知屏 brief 返回 null');
+  // 「够不够」只测算、「按方案 X 执行」才写回
+  ok(core.ask('催收够不够', 'cash', d, lib, R).act.type === 'open', k + ' 疑问句只测算');
+  ok(core.ask('就按方案 A 执行', 'cash', d, lib, R).act.type === 'apply', k + ' 执行句写回');
+  // 文档：科目余额表只摆比对、合同首期写新副本、经营 PPT 与邮件只对口径
+  const before8 = JSON.stringify(d);
+  const tb = docparse.parse({ name: 'trial-balance.csv', bytes: Buffer.from('科目编码,科目名称,期初余额,本期借方,本期贷方,期末余额\n1001,库存现金,12000,3000,4000,11000\n1122,应收账款,3200000,900000,560000,3540000\n1405,库存商品,2100000,800000,550000,2350000\n2202,应付账款,2000000,460000,800000,2340000\n', 'utf8') });
+  const tIn = core.ingest(tb, 'recon', d, lib, R);
+  ok(tIn && tIn.text && !tIn.data && tIn.act.type === 'open' && tIn.act.panel === 'trial' && tIn.act.rows.length >= 3, k + ' ingest 科目余额表');
+  ok(isBlocks(tIn.blocks) && isAct(tIn.act), k + ' ingest 科目余额表块与动作');
+  ok(JSON.stringify(core.ingest(tb, 'recon', d, lib, R)) === JSON.stringify(tIn), k + ' ingest 两次不一致');
+  lintText(tIn.text, k + ' ingest 科目余额表');
+  const ct = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('采购框架合同\n第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付。\n第二条 首付 30%，交付验收后付 60%，质保金 10%。\n第三条 交付期限：2026 年 11 月 30 日前完成全部交付。\n', 'utf8') });
+  const cIn = core.ingest(ct, 'cash', d, lib, R);
+  ok(cIn && cIn.data && cIn.data !== d && cIn.data.cash.apItems.length === d.cash.apItems.length + 1, k + ' ingest 合同首期写新副本');
+  ok(JSON.stringify(d) === before8 && cIn.act.type === 'apply' && cIn.act.action === 'ingest' && cIn.act.step === 'cash', k + ' ingest 合同不动入参');
+  ok(core.run(cIn.data, lib).forecast.weeks.length === R.forecast.weeks.length, k + ' ingest 合同后可继续算');
+  lintText(cIn.text, k + ' ingest 合同');
+  const deck = { ok: true, kind: 'ppt', name: 'review.pptx', size: 1024, sizeText: '1 KB', ext: 'pptx', text: '三季度经营回顾 收入 4,260 万元 毛利率 28.4%', paragraphs: [], tables: [], sheets: [], slides: [{ no: 1, title: '三季度经营回顾', lines: ['收入 4,260 万元'] }], mail: null, stats: {}, note: '' };
+  const pIn = core.ingest(deck, 'board', d, lib, R);
+  ok(pIn && pIn.text && !pIn.data && pIn.act.panel === 'kpi', k + ' ingest 经营回顾只对口径');
+  lintText(pIn.text, k + ' ingest 经营回顾');
+  const ml = docparse.parse({ name: 'mail.eml', bytes: Buffer.from('From: \u91c7\u8d2d\u90e8 <procurement@example.com>\nSubject: =?utf-8?B?5LuY5qy+55Sz6K+3?=\nDate: Wed, 16 Sep 2026 10:12:00 +0800\nContent-Type: text/plain; charset=utf-8\n\n\u672c\u671f\u5e94\u4ed8\u8d26\u6b3e 234 \u4e07\u5143\uff0c\u5176\u4e2d\u903e\u671f 48 \u4e07\u5143\u3002\n', 'utf8') });
+  const mIn = core.ingest(ml, 'risk', d, lib, R);
+  ok(mIn && mIn.text && !mIn.data && mIn.act.panel === 'risk', k + ' ingest 付款邮件');
+  lintText(mIn.text, k + ' ingest 付款邮件');
+  ok(core.ingest({ ok: false }, 'board', d, lib, R) === null, k + ' ingest 解析失败返回 null');
+  ok(JSON.stringify(d) === before8, k + ' ingest 全程未动入参');
 });
 ok(core.CREDITS === lib.credits.perRun['AI CFO'], '积分与 _shared/credits.json 不一致');
 ok(core.evalExpr('a * (1 + b) - c >= 10 && d == \'x\'', { a: 10, b: 0.13, c: 1, d: 'x' }) === true, '表达式求值');

@@ -644,11 +644,13 @@
     var had = {};
     M.data.contracts.forEach(function (c) { had[c.id] = 1; });
     var added = next.contracts.filter(function (c) { return !had[c.id]; })[0];
-    var last = next.log[next.log.length - 1];
-    if (added) { M.contract = added.id; M.filter = null; }
-    if (added && M.step !== 'contracts') { M.data = next; recompute(); setStep('contracts'); return; }
-    commit(next, last ? last.label + ' · ' + last.detail : null);
-    if (added) refocus(added.id, 300);
+    M.data = next; recompute();
+    if (!added) { draw(); return; }
+    M.contract = added.id; M.filter = null;
+    if (M.step !== 'contracts') { setStep('contracts'); return; }
+    draw();
+    if (M.frame) P.toast(M.frame.body, added.id + ' 已进合同台账，风险分 ' + M.R.byId[added.id].score);
+    refocus(added.id, 300);
   }
   function openPanel(a) {
     var R = M.R;

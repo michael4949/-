@@ -3,14 +3,14 @@ name: AI法务
 id: ai-legal
 kind: 产品
 credits: 30
-version: 1.1.0
+version: 1.2.0
 suite: 薯片AI智能体 2026.09
 updated: 2026-09-20
 triggers: [法务, 合同审查, 合同风险, 条款, 修订, 设立公司, 子公司, 分公司, 股权, 章程, 商标, 专利, 知识产权, 续展, 年费, 证照, 台账, 法务月报]
 inputs: [data]
 data_files: 6
 datasets: 3
-actions: 15
+actions: 20
 llm_calls: 0
 offline: true
 deterministic: true
@@ -37,6 +37,11 @@ universal: dus-1
 | `setupPlan / updateSetup / confirmSetup` | 新设主体方案：按主体类型串流程（名称申报 → 章程决议 → 地址 → 登记 → 刻章 → 银行 → 税务 → 社保），许可并行，材料清单、风险提示与预计费用；确认后设立节点进台账 |
 | `ipReview / toggleRenew / toggleApply` | 商标十年到期与续展窗口（前 12 个月、宽展 6 个月）、专利按申请日逐年年费、域名续费（提前 60 天提示、每次预计 120 元，是内核默认值，不在 `data/ip-classes.json` 里）；按行业查应覆盖的商标类别给缺口与覆盖率；近似商标按异议期给动作；侵权线索按相似度给动作；续展 / 申请清单与费用合计 |
 | `licenses / register` | 证照到期状态；90 天台账：合同到期与履约节点、证照到期、商标续展 / 专利年费 / 域名续费、异议期截止、已确认的设立节点，按 13 周分格 |
+| `screens()` | 本 skill 的六个环节登记：`[{key,label}]`，顺序即原型标签顺序（接入 / 法务驾驶舱 / 合同审查 / 新设主体 / 知识产权 / 台账与提醒） |
+| `brief(step, data, lib, result?)` | 进某一屏的开场发现：一句从 `run()` 结果里算出来的话，字符串或 `{text, blocks?, act?, ref?}`；未知屏返回 null |
+| `suggest(step, data, lib, result?)` | 该屏的快捷问句 3–4 条，每条都能被 `ask` 答上 |
+| `ask(question, step, data, lib, result?)` | 问答：返回 `{text, blocks?, act?, ref?}`，答不上返回 null（交平台兜底，不编数） |
+| `ingest(doc, step, data, lib, result?)` | 文档摄入：入参是 `../_shared/docparse.js` 的输出，返回 `{text, blocks?, act?, data?}`；写业务数据时 `data` 是新副本，入参不动 |
 | `kpi` / `report` | 内部函数，导出表中没有这两个名字，从 `run` 的返回值取 `R.kpi` / `R.report`；合规分 = 平均风险分 × 0.4 + 证照有效率 × 30 + 商标覆盖率 × 0.3；月报含高风险合同、证照、知产、设立、台账、本期处置与待办 |
 
 ## 口径
@@ -47,6 +52,8 @@ universal: dus-1
 - 费用一律标「预计」：设立只有刻章与代办，登记不收费；商标官费与代理费、专利年费按公开标准与预计代理费；域名续费取内核默认值，每次预计 120 元。
 - 制造主样本沿用杭州锐合精密五金：合同相对方就是 AI ERP / AI CFO / AI获客里的那批客户与供应商，华南子公司呼应获客里的华南客户；贸易、服务为变体。
 - 全文不出现任何数据源厂商名；联系人只出现职务。
+- `screens / brief / suggest / ask / ingest` 是纯函数：不碰 DOM、window、网络、系统时钟与随机数，同一组入参永远得到同一份输出；`result` 可选，传了就用 `run()` 的现成结果，没传自己算一次，两条路结果逐字节相同。`today` 一律从 `data.today` 取。
+- 这五个的 `lib` 多读一个可选键 `industries`（`../_shared/industries.json`），只用来把行业 slug 换成中文名；缺这个键时回落成 slug，别的算式不受影响。
 
 ## 目录
 
@@ -61,7 +68,7 @@ scripts/load-data.js · gen-samples.js · run-examples.js · validate.js
 examples/*.output.json      三套样本的驾驶舱摘要
 ```
 
-`scripts/load-data.js` 装配出的数据包有 7 个键：内核只读 `contractRules` / `setupRules` / `ipClasses`，`samples` 提供数据副本的来源，`industries` / `credits` / `lintWords` 供原型与校验用，通用包可裁剪。
+`scripts/load-data.js` 装配出的数据包有 7 个键：内核只读 `contractRules` / `setupRules` / `ipClasses`（对话层再可选读 `industries`），`samples` 提供数据副本的来源，`industries` / `credits` / `lintWords` 供原型与校验用，通用包可裁剪。
 
 ## 原型流程（六屏）
 
