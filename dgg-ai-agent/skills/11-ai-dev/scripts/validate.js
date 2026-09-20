@@ -490,12 +490,12 @@ ARCHES.forEach((k) => {
   ok(nApi && nApi.act.type === 'open' && nApi.act.panel === 'api' && nApi.act.ref === api11.id && nApi.text.indexOf(api11.path) > 0, k + ' 点名接口 ' + api11.id);
   // 写回类动作：建议 → grantPermission、追加 → applyDelta、发布 → publish、走单 → nextScript
   const nSug = askPair('采纳这条建议', 'test', d, R);
-  ok(nSug.act.type === 'apply' && nSug.act.action === 'grantPermission' && nSug.act.input.role === R.suggestion.role && nSug.act.input.page === R.suggestion.page, k + ' 采纳建议给写回动作');
+  ok(nSug.act.type === 'apply' && nSug.act.action === 'grant-permission' && nSug.act.input.role === R.suggestion.role && nSug.act.input.page === R.suggestion.page, k + ' 采纳建议给写回动作');
   ok(K.run(K.grantPermission(d, lib, nSug.act.input.role, nSug.act.input.page, nSug.act.input.op), lib).suggestion.done === true, k + ' 采纳建议的动作真能执行');
   const nDelta = askPair('生成 ' + K.bump(spec.version, 'minor'), 'iterate', d, R);
-  ok(nDelta.act.type === 'apply' && nDelta.act.action === 'applyDelta' && R.followUps.some((f) => f.text === nDelta.act.input.text), k + ' 追加需求给写回动作');
+  ok(nDelta.act.type === 'apply' && nDelta.act.action === 'apply-delta' && R.followUps.some((f) => f.text === nDelta.act.input.text), k + ' 追加需求给写回动作');
   ok(K.applyDelta(d, lib, nDelta.act.input.text).state.lastResult.ok, k + ' 追加需求的动作真能执行');
-  ok(askPair('发到正式环境', 'ship', d, R).act.action === 'publish' && askPair('走下一步', 'try', d, R).act.action === 'nextScript', k + ' 发布 / 走单给写回动作');
+  ok(askPair('发到正式环境', 'ship', d, R).act.action === 'publish' && askPair('走下一步', 'try', d, R).act.action === 'next-script', k + ' 发布 / 走单给写回动作');
   ok(askPair('加一个' + R.recommended[0].label, 'build', d, R).act.input.key === R.recommended[0].key, k + ' 推荐字段给写回动作');
   ok(K.ask('食堂午饭吃什么', 'ship', d, lib, R) === null, k + ' 答不上返回 null');
   ok(K.brief('没有这一屏', d, lib, R) === null && K.ask('用例通过了吗', '没有这一屏', d, lib, R) !== null, k + ' 未知屏 brief 返回 null、跨屏问法仍能答');
@@ -516,7 +516,7 @@ ARCHES.forEach((k) => {
   clean(wIn0.text, k + ' ingest 未生成时的 Word');
   const rec0 = R.recommended[0], recHead = rec0.label.replace(/（.*/, '');
   const xIn = K.ingest(docOf({ kind: 'excel', name: 'fields.xlsx', ext: 'xlsx', sheets: [{ name: '字段表', rows: [['编号', recHead], ['001', '甲']] }] }), 'build', d, lib, R);
-  ok(xIn && xIn.data && xIn.data !== d && xIn.act.type === 'apply' && xIn.act.action === 'addField' && xIn.act.input.key === rec0.key, k + ' ingest Excel 表头对得上就加字段');
+  ok(xIn && xIn.data && xIn.data !== d && xIn.act.type === 'apply' && xIn.act.action === 'add-field' && xIn.act.input.key === rec0.key, k + ' ingest Excel 表头对得上就加字段');
   ok(xIn.data.state.spec.fields.some((f) => f.key === rec0.key) && !d.state.spec.fields.some((f) => f.key === rec0.key), k + ' ingest 加字段写新副本、不动入参');
   clean(xIn.text, k + ' ingest Excel 命中');
   const xIn2 = K.ingest(docOf({ kind: 'excel', name: 'trial-balance.xlsx', ext: 'xlsx', sheets: [{ name: '科目余额表', rows: [['科目编码', '科目名称', '期末余额'], ['1001', '库存现金', '12000']] }] }), 'build', d, lib, R);

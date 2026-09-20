@@ -93,7 +93,7 @@ examples/*.output.json      三套样本的驾驶舱摘要
 | `{type:'goto', step}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底） |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：合同行（`HT-…`）、知产资产行（`TM / ZL / RZ / DM-…`）、商标类别格（`CLS-类号`）、股权控制线（`EQ-absolute / EQ-relative / EQ-veto`）、证照条（`ZZ-…`）；找不到就退回按文本找行 |
 | `{type:'open', panel, ref}` | `contract` 选中合同并进合同审查屏、`ip` 进知识产权屏并高亮该资产、`license` 开证照换证抽屉、`opinion` 开审查意见抽屉、`doc` 开文档解析抽屉（抽屉内容在 act 的 `blocks` 里，同一套块型） |
-| `{type:'apply', action, input}` | `applyFix{contractId,findingId}` 采纳一处修订、`applyAllHigh{}` 采纳全部高风险修订、`toggleRenew{id}` 或 `{ids}` 进出续展 / 缴费清单、`toggleApply{cls}` 进出商标申请清单、`confirmSetup{}` 确认设立方案、`ingest{doc}` 重放这次摄入取新数据副本；动作名用内核导出名，`applyAllHigh` 也是导出名（`applyAllHigh(data, lib)`），平台直接调，不必自己循环 |
+| `{type:'apply', action, input}` | `apply-fix{contractId,findingId}` 采纳一处修订、`apply-all-high{}` 采纳全部高风险修订（平台直接调这一个动作，不必自己循环）、`toggle-renew{id}` 或 `{ids}` 进出续展 / 缴费清单、`toggle-apply{cls}` 进出商标申请清单、`confirm-setup{}` 确认设立方案。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `applyFix / applyAllHigh / toggleRenew / toggleApply / confirmSetup`），SPEC §12 的三道校验按清单名比 |
 | `{type:'set', path, value}` | `filter` 切合同筛选（`high` / `mid` / `revised` / null，不在合同屏时先换屏）、`regKind` 切台账筛选（`contract` / `license` / `ip` / `setup` / null）、`setup.shares` 按 `[大股东, 二股东]` 两个百分点改股权后重算控制线 |
 
 **ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）
@@ -110,7 +110,7 @@ examples/*.output.json      三套样本的驾驶舱摘要
 通用包（`dist-universal/ai-legal/`）里，`ingest` 的入参由 `parse-document` 动作产出：它是共用解析件 `../_shared/docparse.js` 的包内副本，入参平铺成 `{name, base64}`，`name` 只用扩展名判类型。生成器在包的边界上加了两道闸：原始字节超过 8 MB 直接返回 `{ok:false, note}` 不进解析；解析结果按上限表裁剪（正文 20 万字符、段落 5000 条 × 2000 字、工作表 20 张 × 2000 行 × 64 格 × 512 字、表 200 张 × 500 行、页 200 页 × 200 行、附件名 50 个），裁过的在 `doc.truncated` 上标 `text / paragraphs / rows`。解析器本身不判大小也不截断 —— 那会改变原型对大文件的行为。
 所以本 skill 自己的动作是 21 个，通用包里是 22 个（多一个 `parse-document`）。
 
-写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照 `ensure` 先出副本再改），`act` 是 `{type:'apply', action:'ingest', input:{doc}}`——只实现 act 的平台重放同一次摄入拿 `data`，两条路等价；两者取其一即可，不要既写 `data` 又重放。
+写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照 `ensure` 先出副本再改），平台按 `mutatesPath: "data"` 取走存回会话状态；`act` 是 `{type:'focus', ref, step:'contracts'}`（指向刚进台账的那份 `HT-DOC-nn`），不再是指回自己的 `apply`（SPEC §12 禁止）。
 
 ## 原型流程（六屏）
 

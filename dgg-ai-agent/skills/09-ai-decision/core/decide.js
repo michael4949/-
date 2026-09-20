@@ -385,6 +385,7 @@
 
   /* 开场发现：进这一屏先说一条从数据里算出来的话 */
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, T = R.tree, N = T.nodes, A = R.attribution;
     if (step === 'connect') {
       var rows = d.sources.reduce(function (t, s) { return t + s.rows; }, 0);
@@ -425,6 +426,7 @@
 
   /* 快捷问句：每屏 3–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (step === 'connect') return ['哪几项亮红', '数据什么时候同步的', '决议台账有几项'];
     if (step === 'board') return ['利润为什么掉了', '现金周期怎么样', '待批的是什么', '打开利润组'];
     if (step === 'attr') {
@@ -446,7 +448,8 @@
 
   /* 问答：认得的问法逐条作答，答不上返回 null 交给平台兜底 */
   function ask(question, step, data, lib, result) {
-    if (SCREENS.every(function (s) { return s[0] !== step; })) return null;
+    /* step 选填：不传就是「没有屏上下文」，全局分支照答（SPEC §10.4）；给了不认识的屏才算没接住 */
+    if (step && SCREENS.every(function (s) { return s[0] !== step; })) return null;
     var R = ctxOf(data, lib, result), d = R.data, T = R.tree, N = T.nodes, A = R.attribution, k = R.kpi;
     var q = String(question == null ? '' : question);
 

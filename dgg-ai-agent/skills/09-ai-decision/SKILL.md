@@ -84,7 +84,7 @@ examples/*.output.json      三套样本的驾驶舱摘要，按 archetype 命�
 | `{type:'goto', step}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底） |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：驾驶舱的组瓦片与偏差榜行（指标节点 id）、接入屏的来源行（`m4 / m5 / m6 / m7 / m10`）、归因屏的因子行（叶子节点 id）、审批台账行（`A-…`）、决议台账行（`D-…`）；这条记录不在当前屏就先换到它所在的屏再高亮；找不到就退回按名称找行 |
 | `{type:'open', panel, ref}` | `group` 开某一组的指标明细抽屉（ref 是组 key 或组根节点 id）、`evidence` 进归因屏选中该因子并高亮证据卡、`review` 进执行屏选中该决议并高亮复盘、`report` 开决策月报全文抽屉 |
-| `{type:'apply', action, input}` | `submit{cause,option,params}` 发起审批并进审批屏、`approve{approvalId}` 终批成决议并进执行屏（不带单号时按 `{cause,option,params}` 发起与终批一次做完）；`cause / option / params` 取屏上选中的那一档。动作名用内核导出名，只指 `family` 是 `core` 的写回动作 —— `ask / brief / suggest / ingest` 都不许出现在这里 |
+| `{type:'apply', action, input}` | `submit{cause,option,params}` 发起审批并进审批屏、`approve{approvalId}` 终批成决议并进执行屏（不带单号时按 `{cause,option,params}` 发起与终批一次做完）；`cause / option / params` 取屏上选中的那一档。动作名用通用包 `manifest.actions` 里的动作名（`submit` / `approve` 两处导出名与动作名同形），只指 `family` 是 `core` 的写回动作 —— `ask / brief / suggest / ingest-document` 都不许出现在这里，也不许指回吐出这个 act 的动作自己（SPEC §12） |
 | `{type:'set', path, value}` | `metric` 换归因指标（非可归因节点按所属组回退到组根，并把该节点选成因子）、`factor` 选中某个因子、`basis` 换基期（`prev` / `avg3`）、`params.<根因>.<方案 key>.<参数 key>` 改方案参数后重算 |
 
 **ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）

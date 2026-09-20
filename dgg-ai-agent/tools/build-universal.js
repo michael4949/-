@@ -20,6 +20,7 @@ const OUT = path.join(ROOT, 'dist-universal');
 const MAP = require(path.join(__dirname, 'skills.map.json'));
 const PA = require(path.join(__dirname, 'platform-artifacts.js'));   /* 跨平台适配物：Agent Skills / OpenAI / Anthropic / MCP / OpenAPI */
 const SUITE = { name: '薯片AI智能体', version: '2026.09' };
+const SPEC_VERSION = '1.1';        /* 协议版本，单列在 specVersion 里；spec 永远是 dus-1（SPEC §9.1） */
 
 const J = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const R = (p) => fs.readFileSync(p, 'utf8');
@@ -122,26 +123,53 @@ function inputSchema(a, datasets, kind) {
   return { type: 'object', properties: props, required, additionalProperties: true };
 }
 
-function hasIngest(m) { return (m.actions || []).some((a) => a.name === 'ingest'); }
+/* 用不用共用解析件：看有没有动作挂在 docparse 宿主上（§11.1 的 parse-document 就是这一条）。
+ * 1.0 时这里认的是动作名 ingest，1.1 把它改名成 ingest-document 之后，再按名字判就会全盘落空 ——
+ * 解析件与闸门不进包、单文件也不内联，parse-document 当场没实现。所以改成按 on 判。 */
+function usesDocparse(m) { return (m.actions || []).some((a) => a.on === 'docparse'); }
+
+/* 能力声明（SPEC §9.2）：conversation / ingest 由动作家族推出来，平台按它判断能不能接对话 / 收文档；
+ * act / blocks 是「本包实际会吐出哪几种」，生成器从源码推不出来，由映射表的 m.features 登记（实跑扫出来的）。 */
+function buildFeatures(m) {
+  const has = {};
+  (m.actions || []).forEach((a) => { has[a.name] = true; });
+  const conversation = !!(has.screens && has.brief && has.suggest && has.ask);
+  const ingest = !!(has['parse-document'] || has['ingest-document']);
+  if (!conversation && !ingest) return null;          /* 只有 1.0 能力的包不写这一段，缺失即「只有 1.0 能力」 */
+  const f = { conversation: conversation, ingest: ingest };
+  const hint = m.features || {};
+  if (Array.isArray(hint.act) && hint.act.length) f.act = hint.act.slice();
+  if (Array.isArray(hint.blocks) && hint.blocks.length) f.blocks = hint.blocks.slice();
+  return f;
+}
 
 function buildManifest(m, fm, datasets, exCtx) {
-  const acts = (m.actions || []).map((a) => ({
-    name: a.name,
-    title: a.title,
-    kind: a.kind,
-    mutates: !!a.mutates,
-    description: a.description,
-    input: inputSchema(a, datasets, fm.kind === '计算' ? 'compute' : 'product'),
-    returns: a.returns,
-    fn: a.fn,
-    args: a.args,
-    inputProps: a.inputProps || [],
-    example: normalizeExample(a.exampleInput || {}, exCtx)
-  }));
-  /* 摄入能力齐了就把共用解析挂成 parse-document：实现不在内核里，所以动作定义由生成器补 */
-  if (hasIngest(m)) acts.push(parseDocumentAction(m));
+  const acts = (m.actions || []).map((a) => {
+    const o = {
+      name: a.name,
+      title: a.title,
+      kind: a.kind,
+      mutates: !!a.mutates,
+      description: a.description,
+      input: inputSchema(a, datasets, fm.kind === '计算' ? 'compute' : 'product'),
+      returns: a.returns,
+      fn: a.fn,
+      args: a.args,
+      inputProps: a.inputProps || [],
+      example: normalizeExample(a.exampleInput || {}, exCtx)
+    };
+    /* 1.1 的三个可选字段原样透传（SPEC §9.2）：不写就是缺省 kernel / core / 无，
+     * 所以 1.0 的老动作清单一个字节不变，运行时读到缺省值照旧走内核。 */
+    if (a.on) o.on = a.on;                            /* 函数挂在哪个宿主上：kernel（默认）/ docparse */
+    if (a.family) o.family = a.family;                /* core（默认）/ conversation / ingest */
+    if (a.mutatesPath) o.mutatesPath = a.mutatesPath; /* 新业务数据在返回值的这个点号路径上 */
+    return o;
+  });
+  const features = buildFeatures(m);
+  const screens = Array.isArray(m.screens) ? m.screens : null;
   return {
     spec: 'dus-1',
+    specVersion: SPEC_VERSION,                        /* 协议族仍是 dus-1，版本单列（SPEC §9.1） */
     id: m.id,
     name: fm.name || m.moduleName,
     version: fm.version || m.version,      /* 版本以 SKILL.md 前言为准，内核 VERSION 与它一致（自检里会比对） */
@@ -166,6 +194,10 @@ function buildManifest(m, fm, datasets, exCtx) {
     },
     i18n: { default: 'zh-CN', available: ['zh-CN'] },
     datasets: datasets.map((d) => ({ key: d.key, label: d.label, note: d.note || '' })),
+    /* 1.1：能力声明与屏清单。screens 与 screens 动作的返回值必须逐字节一致（SPEC §10.1），
+     * 平台读清单还是调动作，两条路结果一样；没有屏的计算包整段不写。 */
+    ...(features ? { features: features } : {}),
+    ...(screens ? { screens: screens } : {}),
     actions: acts,
     legacy: { browserGlobal: m.legacyGlobal, sourceDir: 'skills/' + m.dir },
     agentSkill: { skillMd: 'SKILL.md', engineering: 'references/engineering.md', references: 'references/', entry: 'scripts/skill.js' },
@@ -173,11 +205,11 @@ function buildManifest(m, fm, datasets, exCtx) {
   };
 }
 
-/* ---------- 单文件打包（内核 + 运行时 + 数据 内联） ---------- */
 /* ---------- parse-document 的边界闸门（SPEC §11.2 大小上限 / §11.3 截断表）----------
- * 共用件 skills/_shared/docparse.js 本身不做大小判断也不截断 —— 那会改变展台原型对大文件的行为，
- * 所以闸门只加在通用包的 parse-document 动作边界上，解析器一个字不动。
- * 产物写进包内 shared/doc-gate.js，Node 入口与浏览器单文件共用同一份。 */
+ * 共用件 skills/_shared/docparse.js 本身不做大小判断也不截断 —— 那会改变展台原型对大文件的行为
+ * （现场 2 MB / 55000 行的 xlsx 必须解全），所以闸门只加在通用包 parse-document 动作的边界上，解析器一个字不动。
+ * 闸门把共用件包成 docparse 宿主模块（以 parse 为键，另透传 VERSION / ACCEPT / kindOf / label / sizeText），
+ * 动作的 on:'docparse' 就找到这里。产物写进包内 shared/doc-gate.js，Node 入口与浏览器单文件共用同一份。 */
 function docGateSrc() {
   return `/*
  * parse-document 边界闸门 · 生成物，勿手改（tools/build-universal.js）
@@ -186,9 +218,8 @@ function docGateSrc() {
  *    这不是调用失败，是业务事实；字节数只按 base64 字符数算，不先解码。
  * 2) 截断表：解析结果按 SPEC §11.3 的上限裁一遍，裁过的在 doc.truncated 上标出来
  *    （text / paragraphs / rows 三个键，只出现被裁的那几个）。
- * 3) 现行运行时（DUS-1.0）对任何带 ok:false 的内核返回值都翻成 E_KERNEL 信封、data 置 null，
- *    note 传不出去。所以失败的 Doc 这里多挂一个 errors 数组，让原因至少能从信封的 errors 里读到；
- *    运行时按 family 分家族透传之后（SPEC §14.1 第 9 条），这一处可以去掉。
+ * 3) 失败的 Doc 原样返回，不再另挂 errors —— 运行时对 family:'ingest' 的动作已按 SPEC §14.1 第 9 条
+ *    跳过 ok:false 的翻译，信封仍是 ok:true、note 照样传得出去，Doc 的字段集就是 SPEC §11.3 那一份。
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -253,60 +284,49 @@ function docGateSrc() {
     return doc;
   }
 
+  /* 包成 docparse 宿主模块：动作 { on:'docparse', fn:'parse' } 找的就是这里的 parse。
+   * 签名与共用件一致，两参 parse(name, base64) 与单对象 parse({ name, bytes }) 都收。 */
   return function (docparse) {
-    return function parseDocument(name, base64) {
-      var nm = String(name == null ? '' : name);
+    function parse(name, base64) {
+      var nm, raw;
+      if (name && typeof name === 'object') { raw = name.bytes; nm = name.name; }
+      else { nm = name; raw = base64; }
+      nm = String(nm == null ? '' : nm);
       var m0 = /\\.([A-Za-z0-9]+)$/.exec(nm), ext = m0 ? m0[1].toLowerCase() : '';
-      var b = b64size(String(base64 == null ? '' : base64));
-      if (b.size > MAX_BYTES) {
-        var note = '文件 ' + docparse.sizeText(b.size) + '，超过 8 MB 上限';
-        return { ok: false, note: note, name: nm, size: b.size, sizeText: docparse.sizeText(b.size), ext: ext,
-          kind: docparse.kindOf(nm), text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {},
-          errors: [{ code: 'E_DOC', message: note }] };
+      /* 字节数只按 base64 字符数算，不先解码：超限的那一份连解压都不进（SPEC §11.2） */
+      if (typeof raw === 'string') {
+        var b = b64size(raw);
+        if (b.size > MAX_BYTES) {
+          var note = '文件 ' + docparse.sizeText(b.size) + '，超过 8 MB 上限';
+          return { ok: false, kind: docparse.kindOf(nm), name: nm, ext: ext, size: b.size, sizeText: docparse.sizeText(b.size),
+            text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {}, note: note };
+        }
+        raw = b.body;
+      } else if (raw && typeof raw.length === 'number' && raw.length > MAX_BYTES) {
+        var note2 = '文件 ' + docparse.sizeText(raw.length) + '，超过 8 MB 上限';
+        return { ok: false, kind: docparse.kindOf(nm), name: nm, ext: ext, size: raw.length, sizeText: docparse.sizeText(raw.length),
+          text: '', paragraphs: [], tables: [], sheets: [], slides: [], mail: null, stats: {}, note: note2 };
       }
-      var doc = docparse.parse({ name: nm, bytes: b.body });
-      if (!doc.ok) doc.errors = [{ code: 'E_DOC', message: doc.note || '解析失败' }];
-      return truncate(doc);
+      return truncate(docparse.parse({ name: nm, bytes: raw }));
+    }
+    return {
+      VERSION: docparse.VERSION,
+      ACCEPT: docparse.ACCEPT,
+      kindOf: docparse.kindOf,
+      label: docparse.label,
+      sizeText: docparse.sizeText,
+      parse: parse
     };
   };
 });
 `;
 }
 
-/* parse-document：动作定义由生成器补，不进 skills.map.json ——
- * 它的实现不在各包内核里，而是共用解析件，各包内联一份（SPEC §11.1）。 */
-function parseDocumentAction(m) {
-  /* 例子直接用本包 ingest 例子里的那份文档：先 parse-document 拿 Doc，再喂给 ingest，两条例子首尾相接 */
-  const dex = ((m.actions || []).filter((a) => a.name === 'ingest')[0] || {}).exampleInput || {};
-  const d0 = dex.doc || {};
-  const exName = typeof d0.name === 'string' && d0.name ? d0.name : '往来函件.txt';
-  const exText = typeof d0.text === 'string' && d0.text ? d0.text : '甲方：\n乙方：\n事由：\n';
-  return {
-    name: 'parse-document',
-    title: '解析文档',
-    kind: 'compute',
-    mutates: false,
-    description: '把一份文件的字节解析成平台中立的 Doc：Word / Excel / PPT / PDF / 邮件 / 纯文本六类，全同步、零依赖、不碰网络与时钟。入参平铺成 { name, base64 }，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功时返回 { ok:false, note }（业务事实，不是调用失败）；超限与过大内容按上限表裁剪，裁过的在 truncated 上标出。产出的 Doc 直接喂给 ingest。',
-    input: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', description: '文件名，只用扩展名判类型：docx / xlsx / pptx / pdf / eml / txt / csv / md / json' },
-        base64: { type: 'string', description: '文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB' }
-      },
-      required: ['name', 'base64'],
-      additionalProperties: false
-    },
-    returns: '{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}',
-    fn: 'parseDocument',
-    args: [{ from: 'name', required: true, note: '文件名' }, { from: 'base64', required: true, note: '文件字节的 base64' }],
-    inputProps: [
-      { name: 'name', type: 'string', required: true, description: '文件名，只用扩展名判类型' },
-      { name: 'base64', type: 'string', required: true, description: '文件字节的 base64' }
-    ],
-    example: { name: exName, base64: Buffer.from(exText, 'utf8').toString('base64') }
-  };
-}
+/* parse-document 的动作条目在 tools/skills.map.json 里（on:'docparse' / fn:'parse'，SPEC §11.1）：
+ * 动作名、描述、schema、示例都在映射表一处，生成器只管把实现（共用解析件 + 闸门）装到 docparse 宿主上。
+ * 1.0 时这里曾由生成器合成一份同名条目，1.1 起不再合成，否则清单里会出现两条同名动作。 */
 
+/* ---------- 单文件打包（内核 + 运行时 + 数据 + 解析件 内联） ---------- */
 function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets, format, deps, mods) {
   mods = mods || {};
   const body = [
@@ -315,6 +335,8 @@ function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets,
     '  var core = _mod(function (module, exports) {',
     kernelSrc,
     '  });',
+    '  var kernel = core;',
+    /* 共用解析件与闸门一并内联：浏览器单文件必须自带解析，否则 file:// 打开上传文档就残废（SPEC §14.2 第 4 条） */
     ...(mods.docSrc ? [
       '  var docparse = _mod(function (module, exports) {',
       mods.docSrc,
@@ -322,9 +344,8 @@ function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets,
       '  var makeGate = _mod(function (module, exports) {',
       mods.gateSrc,
       '  });',
-      '  var kernel = {}; for (var _k in core) if (Object.prototype.hasOwnProperty.call(core, _k)) kernel[_k] = core[_k];',
-      '  kernel.parseDocument = makeGate(docparse);'
-    ] : ['  var kernel = core;']),
+      '  var modules = { docparse: makeGate(docparse) };'
+    ] : ['  var modules = {};']),
     '  var createSkill = _mod(function (module, exports) {',
     runtimeSrc,
     '  });',
@@ -336,7 +357,7 @@ function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets,
     '  var manifest = ' + JSON.stringify(manifest) + ';',
     ...(deps || []).map((d, i) => '  data.' + d.key + ' = _mod(function (module, exports) {\n' + d.src + '\n  });'),
     '  var helpers = data.lintWords ? { lint: makeLint(data.lintWords).hit } : {};',
-    '  return createSkill({ manifest: manifest, kernel: kernel, data: data, datasets: datasets, helpers: helpers });'
+    '  return createSkill({ manifest: manifest, kernel: kernel, data: data, datasets: datasets, helpers: helpers, modules: modules });'
   ].join('\n');
 
   const head = '/* ' + manifest.name + ' · ' + manifest.id + ' v' + manifest.version + ' · DUS-1 单文件包\n'
@@ -373,6 +394,40 @@ function singleFile(m, manifest, kernelSrc, runtimeSrc, lintSrc, data, datasets,
 /* ---------- README ---------- */
 function readme(m, manifest, datasets) {
   const id = m.id;
+  const ft = manifest.features || {};
+  const docHost = !!ft.ingest;
+  /* 1.1 的两项新能力：怎么接，写在六种接入形态后面（SPEC §14.4 第 4 条）。老包（只有 1.0 能力）这一段不出 */
+  const convDoc = (ft.conversation || ft.ingest) ? ['', '## 对话与文档怎么接', ''].concat(
+    ft.conversation ? [
+      '**对话四件**（全是只读、纯规则、不调大模型）：',
+      '',
+      '```js',
+      "const steps = skill.invoke('screens', {}).data;                    // 屏 / 环节清单，与 manifest.screens 逐字节一致",
+      "const b = skill.invoke('brief', { step: steps[1].key, dataset: '" + ((datasets[0] || {}).key || 'S1') + "' }).data;   // 进屏先报一条真发现，答不上是 null",
+      "const qs = skill.invoke('suggest', { step: steps[1].key, data: biz }).data;      // 2–4 条建议问句，条条都能被 ask 答上",
+      "const a = skill.invoke('ask', { question: qs[0], step: steps[1].key, data: biz }).data;",
+      '```',
+      '',
+      '- `ask` / `brief` 答不上时是 `ok:true` + `data:null`（业务事实，不是调用失败），平台按 `data === null` 走自己的兜底。',
+      '- 回答是 `{ text, blocks?, act?, ref?, step? }`：`text` 必读得通，`blocks` 是纯数据（' + ((ft.blocks || []).join(' / ') || 'kv / table / tags') + '），',
+      '  `act` 是声明式动作（' + ((ft.act || []).join(' / ') || 'goto / focus / open / apply / set') + '），平台只实现子集也合格，不认识的一律忽略。',
+      ''
+    ] : [],
+    ft.ingest ? [
+      '**文档两件**（解析与摄入分开，解析是 11 包共用的同一份代码）：',
+      '',
+      '```js',
+      "const doc = skill.invoke('parse-document', { name: '9月采购计划.xlsx', base64: b64 }).data;   // Word / Excel / PPT / PDF / 邮件 / 纯文本",
+      "const r = skill.invoke('ingest-document', { doc: doc, step: '" + (((manifest.screens || [])[0] || {}).key || 'connect') + "', data: biz }).data;",
+      "if (r && r.data) biz = r.data;                                     // meta.mutatesPath 指到哪个字段，新业务数据就在那儿",
+      '```',
+      '',
+      '- 入参平铺成 `{ name, base64 }`；`name` 只用扩展名判类型，原始字节 ≤ 8 MB。',
+      '- 文件超限、`.doc` 之类老格式、没有文字层的扫描件都返回 `ok:true` 的信封 + `data.ok:false` + `note` 说明原因，不是调用失败。',
+      '- 过大的内容按上限表裁剪（文本 20 万字符 / 段落 5000 条 / 每表 2000 行…），裁过的在 `data.truncated` 上标出来。',
+      '- 浏览器单文件自带解析，`file://` 打开也能读本机文件，全程不发网络请求。',
+      ''
+    ] : []).join('\n') : '';
   const acts = manifest.actions.map((a) => '| `' + a.name + '` | ' + a.title + ' | ' + (a.mutates ? '是' : '否') + ' | ' + a.description + ' |').join('\n');
   const dsList = datasets.length ? datasets.map((d) => '`' + d.key + '`（' + d.label + '）').join('、') : '无';
   const runExample = JSON.stringify(manifest.actions.find((a) => a.name === 'run').example || {});
@@ -445,17 +500,21 @@ const { register, descriptor } = require('./${id}/adapters/aios.js');
 register(host);           // 或 platform.load(descriptor())
 \`\`\`
 \`adapters/aios.js\` 是唯一需要按平台改写的文件，改的只是字段名映射。
-
+${convDoc}
 ## 调用契约
 
 \`invoke(action, input, ctx)\` 同步返回信封，永不抛异常：
 
 \`\`\`jsonc
-{ "ok": true, "spec": "dus-1",
+{ "ok": true, "spec": "dus-1", "specVersion": "${SPEC_VERSION}",
   "skill": { "id": "${id}", "name": "${manifest.name}", "version": "${manifest.version}" },
   "action": "run", "data": { }, "errors": [],
-  "meta": { "credits": ${manifest.credits}, "kind": "compute", "mutates": false, "deterministic": true, "offline": true } }
+  "meta": { "credits": ${manifest.credits}, "kind": "compute", "mutates": false, "deterministic": true, "offline": true,
+            "family": "core", "mutatesPath": null } }
 \`\`\`
+
+\`spec\` 是协议族标识、永远是 \`dus-1\`；版本单列在 \`specVersion\`，缺省视为 \`1.0\`，只自述、不参与任何判定。
+\`meta.family\` 分 \`core\` / \`conversation\` / \`ingest\` 三族，平台可按族决定哪些动作进函数调用表。
 
 ${manifest.kind === 'product' ? `业务数据由调用方持有：带「改数据」标记的动作返回**新的数据副本**，平台需存回会话状态，下次调用作为 \`input.data\` 传回；首次调用用 \`input.dataset\` 指定预置数据集。\n` : ''}
 错误码：\`E_ACTION\`（无此动作）· \`E_INPUT\`（输入不合法）· \`E_DATASET\`（数据集不存在）· \`E_KERNEL\`（内核判定不合法）· \`E_RUNTIME\`（内核异常）。
@@ -474,13 +533,20 @@ index.js             Node 入口
 core/                能力内核（唯一真相，与 skills/${m.dir} 逐字一致）
 data/                规则表与样本（原样，便于人工核对）
 bundle/data.json     预合并数据包（运行期用）
-dist/                浏览器 UMD / ESM 单文件
+dist/                浏览器 UMD / ESM 单文件（内核 + 运行时 + 数据${docHost ? ' + 文档解析' : ''} 全内联）
 adapters/            cli · http · mcp · aios
+scripts/skill.js     一行入口（等价于 adapters/cli.js）
 runtime/invoke.js    统一调用层（11 包同一份）
+shared/              共用件：lint.js${docHost ? ' · docparse.js（离线文档解析）· doc-gate.js（8 MB 上限与截断）' : ''}
 schema/              输入输出 JSON Schema
 examples/            golden 基线
 tests/conformance.js 跨形态一致性自测
-SKILL.md             原 Claude Agent Skill 说明书（保留）
+SKILL.md             Agent Skills 形态说明书（生成物；工程原文在 references/engineering.md）
+references/          第二层细节：动作全表 · 数据字典 · 平台接入 · 口径${docHost ? ' · 对话 · 文档' : ''}
+llms.txt             给模型看的一页速览（≤ 8 KB）
+openapi.json         HTTP 形态的 OpenAPI 3.1
+manifest.mcp.json    MCP 宿主可直接粘贴的服务器声明
+tools.openai.json    OpenAI 兼容函数调用（tools.anthropic.json 是 Anthropic 形态）
 \`\`\`
 `;
 }
@@ -565,7 +631,76 @@ const ID = '${id}';
     } catch (e) { fail++; console.error('✘ 状态流转            ' + e.message); }
   }
 
-  console.log((fail ? '✘ ' : '✔ ') + ID + '：' + (n - fail) + '/' + n + ' 项通过（四条路径逐字节一致' + (mut ? ' + 状态流转' : '') + '）');
+  /* 对话 / 摄入包另查四件（SPEC §10.3 / §10.6 / §12 / §14.4）：
+   *   ① suggest 的每一条都能被同屏的 ask 答上（同屏口径：回灌时 step 与取 suggest 时一致）
+   *   ② 所有 Answer 的 blocks 每一项都是带合法 type 的对象（不许出现 null / 字符串 / 数组）
+   *   ③ act 是词表里的五种之一；apply.action 必须在清单里、family 是 core、且不是当前这个动作自己
+   *   ④ step 是选填：不传照样 ok:true，且清单的 input.required 里不许有 step */
+  const byName = {};
+  cjs.manifest.actions.forEach((a) => { byName[a.name] = a; });
+  const BLOCKS = { kv: 1, table: 1, tags: 1, list: 1, metric: 1, text: 1 };
+  const ACTS = { goto: 1, focus: 1, open: 1, apply: 1, set: 1 };
+  if (byName.ask && byName.suggest) {
+    const screens = (cjs.manifest.screens || []).map((s) => s.key);
+    const dsKeys = (cjs.manifest.datasets || []).map((d) => d.key);
+    const notes = [];
+    let asked = 0, checked = 0;
+    const eat = (actionName, where, out) => {
+      if (!out || typeof out !== 'object') return;
+      checked++;
+      (out.blocks || []).forEach((b, i) => {
+        if (!b || typeof b !== 'object' || Array.isArray(b) || typeof b.type !== 'string') notes.push(where + ' · blocks[' + i + '] 不是块：' + JSON.stringify(b));
+        else if (!BLOCKS[b.type] && b.type.indexOf('x-') !== 0) notes.push(where + ' · blocks[' + i + '] 未知 type ' + b.type);
+      });
+      const act = out.act;
+      if (act == null) return;
+      if (typeof act !== 'object' || typeof act.type !== 'string' || (!ACTS[act.type] && act.type.indexOf('x-') !== 0)) { notes.push(where + ' · act 不在词表里：' + JSON.stringify(act)); return; }
+      if (act.type !== 'apply') return;
+      const t = byName[act.action];
+      if (!t) notes.push(where + ' · apply.action 不在清单里：' + act.action);
+      else if ((t.family || 'core') !== 'core') notes.push(where + ' · apply.action 的 family 不是 core：' + act.action);
+      else if (act.action === actionName) notes.push(where + ' · apply.action 指回了自己：' + act.action);
+    };
+    dsKeys.forEach((ds) => {
+      screens.concat([null]).forEach((st) => {
+        const base = st === null ? { dataset: ds } : { step: st, dataset: ds };
+        const where0 = ds + '/' + (st === null ? '不传 step' : st);
+        const br = cjs.invoke('brief', base);
+        if (!br.ok) notes.push(where0 + ' · brief 不是 ok:true：' + JSON.stringify(br.errors));
+        else if (br.data && typeof br.data === 'object') eat('brief', where0 + ' brief', br.data);
+        const sg = cjs.invoke('suggest', base);
+        if (!sg.ok) notes.push(where0 + ' · suggest 不是 ok:true：' + JSON.stringify(sg.errors));
+        (sg.ok && Array.isArray(sg.data) ? sg.data : []).forEach((q) => {
+          const an = cjs.invoke('ask', Object.assign({ question: q }, base));
+          if (!an.ok) { notes.push(where0 + ' · ask 不是 ok:true：' + JSON.stringify(an.errors)); return; }
+          /* 回灌是同屏口径：不传 step 时 suggest 给的是首屏那几条，ask 没有屏上下文可以答不上（§10.4） */
+          if (st !== null && an.data === null) notes.push(where0 + ' · suggest 的「' + q + '」ask 答不上');
+          asked++;
+          eat('ask', where0 + ' ask「' + q + '」', an.data);
+        });
+      });
+    });
+    /* 摄入：拿清单里的例子跑一遍，带 step 与不带各一次 */
+    const ing = byName['ingest-document'];
+    if (ing && ing.example && ing.example.doc && dsKeys.length) {
+      [screens[0], null].forEach((st) => {
+        const input = { doc: JSON.parse(JSON.stringify(ing.example.doc)), dataset: dsKeys[0] };
+        if (st) input.step = st;
+        const env = cjs.invoke('ingest-document', input);
+        if (!env.ok) notes.push('ingest-document（' + (st || '不传 step') + '）不是 ok:true：' + JSON.stringify(env.errors));
+        else eat('ingest-document', 'ingest-document（' + (st || '不传 step') + '）', env.data);
+      });
+    }
+    ['brief', 'suggest', 'ask', 'ingest-document'].forEach((nm) => {
+      const req = (byName[nm] && byName[nm].input && byName[nm].input.required) || [];
+      if (req.indexOf('step') >= 0) notes.push(nm + ' 的 input.required 里还有 step（§10.2：step 选填，不传 = 首屏）');
+    });
+    n++;
+    if (notes.length) { fail++; console.error('✘ 对话与摄入合规        ' + notes.length + ' 处：\\n   ' + notes.slice(0, 8).join('\\n   ')); }
+    else console.log('✔ 对话与摄入合规        ' + checked + ' 条回答的 blocks/act 合规 · suggest 回灌 ask ' + asked + ' 条 · 不传 step 照样 ok:true');
+  }
+
+  console.log((fail ? '✘ ' : '✔ ') + ID + '：' + (n - fail) + '/' + n + ' 项通过（四条路径逐字节一致' + (mut ? ' + 状态流转' : '') + (byName.ask ? ' + 对话与摄入合规' : '') + '）');
   process.exit(fail ? 1 : 0);
 })();
 `;
@@ -633,18 +768,20 @@ function build(m) {
   fs.mkdirSync(path.join(out, 'runtime'), { recursive: true });
   const runtimeSrc = R(path.join(UNI, 'runtime', 'invoke.js'));
   W(path.join(out, 'runtime', 'invoke.js'), runtimeSrc);
-  const ingest = hasIngest(m);
+  const docHost = usesDocparse(m);
   W(path.join(out, 'index.js'), [
-    '/* ' + manifest.name + ' · ' + m.id + ' · DUS-1 Node 入口（生成物） */',
+    '/* ' + manifest.name + ' · ' + m.id + ' · DUS-1.1 Node 入口（生成物） */',
     "'use strict';",
     "const createSkill = require('./runtime/invoke.js');",
     "const core = require('./" + kernelRel + "');",
-    ...(ingest ? [
+    'const kernel = core;',
+    ...(docHost ? [
       "const docparse = require('./shared/docparse.js');",
       "const makeGate = require('./shared/doc-gate.js');",
-      '/* parse-document 的实现不在内核里：共用解析件 + 8 MB 上限与截断闸门，挂成内核的一个函数 */',
-      "const kernel = Object.assign({}, core, { parseDocument: makeGate(docparse) });"
-    ] : ['const kernel = core;']),
+      '/* parse-document 的实现不在内核里：共用解析件外面套一层 8 MB 上限与截断闸门，装成 docparse 宿主模块。',
+      " * 动作条目写 on:'docparse'，运行时就到 modules.docparse 上找 fn（SPEC §11.1 / §14.1 第 3 条）。 */",
+      "const modules = { docparse: makeGate(docparse) };"
+    ] : ['const modules = {};']),
     "const data = require('./bundle/data.json');",
     "const datasets = require('./bundle/datasets.json');",
     "const manifest = require('./manifest.json');",
@@ -652,7 +789,7 @@ function build(m) {
     ...deps.map((d) => "data." + d.key + " = require('./" + d.dest + "');   /* 依赖内核：JSON 数据包装不下函数，这里注入 */"),
     '/* 禁忌词判定函数：JSON 传不了函数，由入口注入（见 SPEC.md §5 $lint） */',
     'const helpers = data.lintWords ? { lint: makeLint(data.lintWords).hit } : {};',
-    'const skill = createSkill({ manifest, kernel, data, datasets, helpers });',
+    'const skill = createSkill({ manifest, kernel, data, datasets, helpers, modules });',
     '/* skill 自带 invoke / listActions / describe / health，直接导出即可（不要再往它身上挂同名包装，会自递归） */',
     'module.exports = skill;',
     ''
@@ -664,7 +801,7 @@ function build(m) {
   W(path.join(out, 'shared', 'lint.js'), lintSrc);
   /* 共用解析件与它的边界闸门：与 lint.js 同法进包；浏览器单文件也必须自带，否则 file:// 打开就没有解析 */
   let docSrc = null, gateSrc = null;
-  if (ingest) {
+  if (docHost) {
     docSrc = R(path.join(SRC, '_shared', 'docparse.js'));
     gateSrc = docGateSrc();
     W(path.join(out, 'shared', 'docparse.js'), docSrc);
@@ -679,11 +816,8 @@ function build(m) {
   fs.chmodSync(path.join(out, 'adapters', 'cli.js'), 0o755);
   fs.chmodSync(path.join(out, 'adapters', 'mcp.js'), 0o755);
 
-  // 8 function-calling 工具定义
-  WJ(path.join(out, 'tools', 'openai-tools.json'), manifest.actions.map((a) => ({
-    type: 'function',
-    function: { name: (m.id + '_' + a.name).replace(/-/g, '_'), description: a.title + '：' + a.description, parameters: a.input }
-  })));
+  // 8 function-calling 工具定义：1.0 的 tools/openai-tools.json 收口成 tools.openai.json 的别名，
+  //   两份内容逐字一致，由第 10 步的 platform-artifacts 一起产出（SPEC §13.4 / §14.2 第 8 条）。
 
   // 9 自测 + 包描述 + 说明
   W(path.join(out, 'tests', 'conformance.js'), conformance(m.id));
@@ -704,7 +838,9 @@ function build(m) {
     },
     bin: { ['dgg-' + m.id]: 'adapters/cli.js' },
     scripts: { test: 'node tests/conformance.js', serve: 'node adapters/http.js', mcp: 'node adapters/mcp.js' },
-    files: ['manifest.json', 'index.js', 'core', 'data', 'bundle', 'dist', 'adapters', 'runtime', 'shared', 'schema', 'examples', 'tools', 'tests', 'scripts', 'references', 'SKILL.md', 'README.md', 'llms.txt', 'tools.openai.json', 'tools.anthropic.json', 'manifest.mcp.json', 'openapi.json'],
+    /* 发包要带上的文件与目录：1.1 新增的 references / shared / prompts / llms.txt / openapi.json /
+     * manifest.mcp.json / tools.*.json 一个都不能漏，漏了 npm pack 出来的包就少一半产物（SPEC §14.2 第 9 条） */
+    files: ['manifest.json', 'index.js', 'core', 'data', 'bundle', 'dist', 'adapters', 'runtime', 'shared', 'schema', 'examples', 'prompts', 'tools', 'tests', 'scripts', 'references', 'SKILL.md', 'README.md', 'llms.txt', 'tools.openai.json', 'tools.anthropic.json', 'manifest.mcp.json', 'openapi.json'],
     dependencies: {},
     engines: { node: '>=14' }
   });
@@ -724,9 +860,11 @@ function writeSuite(ids) {
     const mf = J(path.join(OUT, id, 'manifest.json'));
     return { id: mf.id, name: mf.name, version: mf.version, kind: mf.kind, credits: mf.credits, summary: mf.summary,
       entry: { require: id + '/index.js', import: id + '/dist/' + id + '.mjs', browser: id + '/dist/' + id + '.umd.js' },
-      manifest: id + '/manifest.json', actions: mf.actions.map((a) => a.name), datasets: mf.datasets.map((d) => d.key) };
+      manifest: id + '/manifest.json', actions: mf.actions.map((a) => a.name), datasets: mf.datasets.map((d) => d.key),
+      /* 1.1：平台在套件索引这一层就能判出哪个包能接对话 / 收文档，不必逐个读清单（SPEC §9.4 / §14.2 第 10 条） */
+      features: mf.features || null };
   });
-  WJ(path.join(OUT, 'skills.json'), { spec: 'dus-1', suite: SUITE, count: registry.length, skills: registry });
+  WJ(path.join(OUT, 'skills.json'), { spec: 'dus-1', specVersion: SPEC_VERSION, suite: SUITE, count: registry.length, skills: registry });
   W(path.join(OUT, 'register-all.js'), [
     '/* ' + SUITE.name + ' ' + SUITE.version + ' · 一次把 11 个通用 skill 注册进宿主（生成物） */',
     "'use strict';",
@@ -758,7 +896,8 @@ function writeSuite(ids) {
     ' *   GET  /skills/<id>/manifest        单个清单',
     ' *   GET  /skills/<id>/actions         动作列表',
     ' *   POST /skills/<id>/actions/<name>  调用，body = JSON 输入，返回 DUS-1 信封',
-    ' *   GET  /tools                       11 个包的 function-calling 工具表（合成一张）',
+    ' *   GET  /tools                       11 个包的 function-calling 工具表（合成一张，OpenAI 形态）',
+    ' *   GET  /tools?format=anthropic      同一张表的 Anthropic 形态（{ name, description, input_schema }）',
     ' *   POST /tools/call                  body = { name: "<id>_<action>", arguments: {} }',
     ' */',
     "'use strict';",
@@ -769,22 +908,29 @@ function writeSuite(ids) {
     "registry.skills.forEach((s) => { skills[s.id] = require(path.join(__dirname, s.id, 'index.js')); });",
     "const H = { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'GET,POST,OPTIONS' };",
     'function toolName(id, action) { return (id + \'_\' + action).replace(/-/g, \'_\'); }',
-    'function allTools() {',
+    '/* 同一张表两种形态：不带 format 是 OpenAI 形态，?format=anthropic 是 Anthropic 形态；',
+    ' * 工具名两边同一个 toolName，与各包 tools.*.json / openapi 的 operationId / 下面的 /tools/call 四处一致 */',
+    'function allTools(format) {',
     '  const out = [];',
-    '  registry.skills.forEach((s) => skills[s.id].listActions().forEach((a) => out.push({ type: \'function\', function: { name: toolName(s.id, a.name), description: a.title + \'：\' + a.description, parameters: a.input } })));',
+    '  registry.skills.forEach((s) => skills[s.id].listActions().forEach((a) => {',
+    "    const name = toolName(s.id, a.name), desc = a.title + '：' + a.description;",
+    "    if (format === 'anthropic') out.push({ name: name, description: desc, input_schema: a.input });",
+    "    else out.push({ type: 'function', function: { name: name, description: desc, parameters: a.input } });",
+    '  }));',
     '  return out;',
     '}',
-    'function route(method, p, body) {',
+    '/* query 是解析好的查询串（{ format: "anthropic" } 之类）；不传照旧，老调用方一个字不用改 */',
+    'function route(method, p, body, query) {',
     "  if (method === 'OPTIONS') return { status: 204, body: '' };",
     "  if (method === 'GET' && (p === '/' || p === '/skills')) return { status: 200, body: registry };",
-    "  if (method === 'GET' && p === '/tools') return { status: 200, body: allTools() };",
+    "  if (method === 'GET' && p === '/tools') return { status: 200, body: allTools(query && query.format) };",
     "  if (method === 'POST' && p === '/tools/call') {",
     '    const name = (body && body.name) || \'\';',
     '    for (const s of registry.skills) {',
     "      const pre = s.id.replace(/-/g, '_') + '_';",
     "      if (name.indexOf(pre) === 0) { const env = skills[s.id].invoke(name.slice(pre.length).replace(/_/g, '-'), (body && body.arguments) || {}); return { status: env.ok ? 200 : 400, body: env }; }",
     '    }',
-    "    return { status: 404, body: { ok: false, errors: [{ code: 'E_ACTION', message: '没有这个工具：' + name }] } };",
+    "    return { status: 404, body: { ok: false, spec: 'dus-1', specVersion: '" + SPEC_VERSION + "', errors: [{ code: 'E_ACTION', message: '没有这个工具：' + name }] } };",
     '  }',
     "  const m = p.match(/^\\/skills\\/([a-z0-9-]+)(\\/.*)?$/);",
     "  if (m && skills[m[1]]) {",
@@ -794,7 +940,7 @@ function writeSuite(ids) {
     "    if (method === 'GET' && rest === '/health') return { status: 200, body: sk.invoke('health', {}) };",
     "    if (method === 'POST' && rest.indexOf('/actions/') === 0) { const env = sk.invoke(decodeURIComponent(rest.slice(9)), body || {}); return { status: env.ok ? 200 : 400, body: env }; }",
     '  }',
-    "  return { status: 404, body: { ok: false, spec: 'dus-1', errors: [{ code: 'E_ACTION', message: '无此路由：' + method + ' ' + p }] } };",
+    "  return { status: 404, body: { ok: false, spec: 'dus-1', specVersion: '" + SPEC_VERSION + "', errors: [{ code: 'E_ACTION', message: '无此路由：' + method + ' ' + p }] } };",
     '}',
     'const server = http.createServer((req, res) => {',
     '  const chunks = [];',
@@ -802,7 +948,9 @@ function writeSuite(ids) {
     "  req.on('end', () => {",
     '    let body = null;',
     "    if (chunks.length) { try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch (e) { res.writeHead(400, H); return res.end(JSON.stringify({ ok: false, errors: [{ code: 'E_INPUT', message: 'body 不是合法 JSON' }] })); } }",
-    "    const r = route(req.method.toUpperCase(), (req.url || '/').split('?')[0], body);",
+    "    const u = (req.url || '/').split('?'), query = {};",
+    "    (u[1] || '').split('&').forEach((kv) => { if (!kv) return; const i = kv.indexOf('='); const k = decodeURIComponent(i < 0 ? kv : kv.slice(0, i)); query[k] = i < 0 ? '' : decodeURIComponent(kv.slice(i + 1)); });",
+    "    const r = route(req.method.toUpperCase(), u[0], body, query);",
     '    res.writeHead(r.status, H);',
     "    res.end(r.status === 204 ? '' : JSON.stringify(r.body));",
     '  });',
@@ -854,7 +1002,7 @@ function writeSuite(ids) {
     'PORT=8710 node gateway.js            # 一个端口暴露全部子技能（含 /tools 与 /tools/call）',
     '```',
     '',
-    '- `tools.openai.json` / `tools.anthropic.json`：全套动作合成的函数调用工具表，工具名为 `<子技能>__<动作>`。',
+    '- `tools.openai.json` / `tools.anthropic.json`：全套动作合成的函数调用工具表，工具名为 `<子技能>_<动作>`（连字符换下划线，与各包的 `tools.*.json` / `openapi.json` 的 operationId / `gateway.js` 的 `/tools/call` 同一个口径）。',
     '- `mcp.json`：一次把全部子技能挂进任意 MCP 宿主。',
     '- `INSTALL.md`：各家平台怎么装。',
     ''
@@ -892,7 +1040,7 @@ function writeSuite(ids) {
     '',
     '## OpenAI 兼容的函数调用',
     '',
-    '直接把 `tools.openai.json` 塞进 `tools`；收到 `<子技能>__<动作>` 的调用后，转给',
+    '直接把 `tools.openai.json` 塞进 `tools`；工具名是 `<子技能>_<动作>`（连字符换下划线，如 `ai_erp_simulate_insert`）。收到调用后，转给',
     '`node <子技能>/adapters/cli.js <动作> \'<arguments JSON>\'`，或 POST 给网关的 `/tools/call`。',
     '',
     '## Anthropic Messages API',

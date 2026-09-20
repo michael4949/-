@@ -93,7 +93,7 @@ examples/*.output.json      三套样本的看板摘要
 | `{type:'goto', step, ref?}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底）；带 `ref` 的换屏后再按 `data-ref` 高亮那一格，顶层 `ref` 只对当前屏有效，跨屏高亮靠 act 里这一份 |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：报工核验行（`RP-…` 或 `V-…`）、异常行（`EX-…`）、批次行（`B-…`）、派工行与带教对（`E-编号`）、保养条（设备编号）、标准工时行（`ST-产品\|工序`）、数据源行（`doc-import`）、工序流分段卡（产线 id）；找不到就退回按文本找行 |
 | `{type:'open', panel, ref}` | `verify` 进接入屏并高亮那条核验、`alert` 进看板屏并高亮那条异常、`calib` 进诊断屏并高亮那行标准工时、`job` 进改善预演屏并高亮那个批次、`roster` / `maint` 进执行屏并高亮那一行、`stage` 开工序流分段抽屉（ref 用产线 id）、`doc` 开文档解析抽屉（内容在 act 的 `blocks` 里）、`wechat` 出周报二维码 |
-| `{type:'apply', action, input}` | `confirmReport{id}` 按建议值确认一条、`confirmAllReports{}` 全部确认并进看板、`handleException{id}` 处置异常、`adoptStd{product,op}` 采纳标准工时、`applyRelease{}` 按节拍投料、`applySequence{}` 下发换型合批顺序、`commitProject{keys}` 立项、`addTraining{trainee,op}` 加入本周带教、`scheduleMaint{machine}` 保养排入窗口、`applyDispatch{}` 下发明日派工、`ingest{doc}` 重放这次摄入取新数据副本；动作名用内核导出名 |
+| `{type:'apply', action, input}` | `confirm-report{id}` 按建议值确认一条、`confirm-all-reports{}` 全部确认并进看板、`handle-exception{id}` 处置异常、`adopt-std{product,op}` 采纳标准工时、`apply-release{}` 按节拍投料、`apply-sequence{}` 下发换型合批顺序、`commit-project{keys}` 立项、`add-training{trainee,op}` 加入本周带教、`schedule-maint{machine}` 保养排入窗口、`apply-dispatch{}` 下发明日派工。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `confirmReport / handleException / …`），SPEC §12 的三道校验按清单名比 |
 | `{type:'set', path, value}` | `line` 把时间损失与诊断屏切到这条产线（同时写 `data.focus`）、`pick` 选中某个方案（`A`–`D` 或 `组合`）、`params.setupMin` 改停机换型时间后重算预演 |
 
 **ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）
@@ -106,7 +106,7 @@ examples/*.output.json      三套样本的看板摘要
 | Word / PDF / 文本 | 工艺或合同 | 段落与表数；读到换型时间就改参数重算，读到工时口径就与约束线单件工时对比，读到交付期限就按通过时间 + 排队算排不排得下；三样都没有则说明不动数，不写数据 |
 | 邮件 | 停机 / 异常往来 | 发件、主题、日期；正文提到停机 / 故障 / 异常 / 待料 / 延期就对上本周异常起数与待处置数，`data` 里按停机口径记一条本周动作；没有则六屏不动数 |
 
-写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照 `ensure` 先出副本再改），`act` 是 `{type:'apply', action:'ingest', input:{doc}}`——只实现 act 的平台重放同一次摄入拿 `data`，两条路等价，取其一即可。
+写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照 `ensure` 先出副本再改），平台按 `mutatesPath: "data"` 取走存回会话状态；`act` 是 `{type:'goto', step}`（报工表进核验屏 `connect`、邮件异常进看板 `board`），不再是指回自己的 `apply`（SPEC §12 禁止）。
 
 ## 原型流程（六屏）
 

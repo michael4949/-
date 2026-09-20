@@ -375,6 +375,7 @@
 
   /* 开场发现：进这一屏先说一条从数据里算出来的话 */
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, C = R.cost, comp = R.compliance, F = focusOf(data);
     if (step === 'connect') {
       if (C.wages - C.socialBase <= 0) return '社保申报表的基数合计 ' + fmtW(C.socialBase) + ' / 月，与工资表 ' + fmtW(C.wages) + ' / 月是同一个口径，基数这块没有待补差额。';
@@ -405,6 +406,7 @@
 
   /* 快捷问句：每屏 2–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (step === 'connect') return ['哪些数据是直连的', '社保基数和工资差多少', '进人力驾驶舱'];
     if (step === 'board') return ['哪个部门缺编多', '离职为什么高', '加班超限多少人', '先处理哪一项'];
     if (step === 'recruit') return ['A 级候选人有几个', '把 A 级筛出来', '谁不满足硬条件', '薪酬带多少'];
@@ -531,7 +533,7 @@
       if (has(q, ['发 offer', '发offer', '录用', '要不要'])) {
         var cz = R.candidates.filter(function (c) { return c.stage === 'done' && c.interview && c.interview.verdict === 'hire'; })[0];
         if (!cz) return { text: '当前没有处在「面试完成 · 建议录用」的候选人。' };
-        return { text: cz.id + ' 综合 ' + cz.interview.avg + ' 分，建议录用，月薪 ' + fmtN(cz.interview.suggested) + ' 元；已按这个数发 offer。', act: { type: 'apply', action: 'offer', input: { id: cz.id, salary: cz.interview.suggested } } };
+        return { text: cz.id + ' 综合 ' + cz.interview.avg + ' 分，建议录用，月薪 ' + fmtN(cz.interview.suggested) + ' 元；已按这个数发 offer。', act: { type: 'apply', action: 'make-offer', input: { id: cz.id, salary: cz.interview.suggested } } };
       }
       if (has(q, ['题', '问什么', '题库'])) {
         if (!cur) return { text: '还没有面试安排，安排后才有题库与评分表。' };
@@ -548,7 +550,7 @@
       if (has(q, ['调基数', '按实际工资', '整改', '执行'])) {
         var h05 = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
         if (!h05 || h05.status !== 'open') return { text: 'H05 已处置，社保基数占工资 ' + comp.socialBaseRatio + '%。' };
-        return { text: 'H05 按实际工资调整基数：' + h05.count + ' 人写回花名册，年补缴敞口 ' + fmtW(h05.impact) + ' 关闭，每月社保多 ' + fmtW(S.socialDelta) + '。已执行。', act: { type: 'apply', action: 'resolve', input: { rule: 'H05' } } };
+        return { text: 'H05 按实际工资调整基数：' + h05.count + ' 人写回花名册，年补缴敞口 ' + fmtW(h05.impact) + ' 关闭，每月社保多 ' + fmtW(S.socialDelta) + '。已执行。', act: { type: 'apply', action: 'resolve-compliance', input: { rule: 'H05' } } };
       }
       if (has(q, ['影响', '多少钱', '金额'])) {
         if (!comp.counts.open) return { text: '待处理 0 项，影响预计合计 0 元；' + comp.items.length + ' 条规则里' + handledTail(comp) + '。' };
@@ -565,7 +567,7 @@
       if (has(q, ['采纳', '就按', '定了'])) {
         var ak = m ? (m[1] || m[2]).toUpperCase() : null;
         var ap = (ak && S.plans.filter(function (p) { return p.key === ak; })[0]) || currentPlan(R, F);
-        return { text: '已采纳方案 ' + ap.key + '，12 个月预计 ' + fmtW(ap.total12) + '，月报按这个口径出。', act: { type: 'apply', action: 'adoptPlan', input: { key: ap.key } } };
+        return { text: '已采纳方案 ' + ap.key + '，12 个月预计 ' + fmtW(ap.total12) + '，月报按这个口径出。', act: { type: 'apply', action: 'adopt-plan', input: { key: ap.key } } };
       }
       if (m) {
         var pk = (m[1] || m[2]).toUpperCase(), pp = S.plans.filter(function (p) { return p.key === pk; })[0];
@@ -613,7 +615,7 @@
     d2.log.push({ seq: d2.log.length + 1, kind: 'recruit', label: '简历入池', detail: cand.id + ' 由《' + doc.name + '》解析 · ' + s.total + ' 分' });
     return { text: lines.join('\n'),
       blocks: [kvB([['学历', lib.jobs.edu[edu] || edu], ['经验', years + ' 年'], ['技能命中', s.mustHit + '/' + (J.must || []).length], ['匹配分', s.total + ' · ' + GRADE_NAME[s.grade]]])].concat(skills.length ? [tagsB(skills.map(function (kk) { return lib.jobs.skills[kk]; }))] : []),
-      data: d2, act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+      data: d2, ref: cand.id, act: { type: 'focus', ref: cand.id, step: 'recruit' } };
   }
   function ingestContract(doc, text, R, step) {
     var hits = CONTRACT_MUST.map(function (x) { return { name: x[0], ok: x[1].test(text) }; });
@@ -671,7 +673,7 @@
     d2.log.push({ seq: d2.log.length + 1, kind: 'plan', label: '收入口径改按文档', detail: '《' + doc.name + '》' + m[1] + ' 万元 · 人均产值 ' + fmtW(perNew) });
     return { text: 'PPT《' + doc.name + '》读到收入 ' + m[1] + ' 万元（' + (titles[0] || (doc.slides[0] || {}).title || '—') + '）。\n按这个口径重算：人均产值 ' + fmtW(perNew) + '（原 ' + fmtW(before.perCapitaRevenue) + '），用工成本占收入 ' + shareNew + '%（原 ' + before.share + '%）。\n已把收入口径改成文档里的数，六屏一起重算。',
       blocks: [kvB([['文档收入', m[1] + ' 万元'], ['原口径', w0(oldRev)], ['人均产值', fmtW(perNew)], ['占收入', shareNew + '%']]), tagsB(titles.slice(0, 3))],
-      data: d2, act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+      data: d2, act: { type: 'goto', step: 'cost' } };
   }
   function ingestMail(doc) {
     var ml = doc.mail || {}, text = (doc.text || '').replace(/\s+/g, ' ');

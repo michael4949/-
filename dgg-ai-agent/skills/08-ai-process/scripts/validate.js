@@ -290,7 +290,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   ok(K.ask(rpRow.reportId + ' 怎么回事', 'board', d, lib, R).act.panel === 'verify', k + ' 点名报工不在接入屏先换屏');
   const al0 = R.alerts.filter((a) => a.status === 'open')[0];
   const nEx = K.ask(al0.id, 'board', d, lib, R);
-  ok(nEx && nEx.ref === al0.id && nEx.act.type === 'apply' && nEx.act.action === 'handleException', k + ' 点名异常 ' + al0.id);
+  ok(nEx && nEx.ref === al0.id && nEx.act.type === 'apply' && nEx.act.action === 'handle-exception', k + ' 点名异常 ' + al0.id);
   const job0 = R.sequence.after.rows[0];
   const nJob = K.ask(job0.id + ' 排第几', 'improve', d, lib, R);
   ok(nJob && nJob.ref === job0.id && nJob.act.panel === 'job', k + ' 点名' + v.lot + ' ' + job0.id);
@@ -298,7 +298,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const nEmp = K.ask(emp0.emp + ' 明天排哪', 'exec', d, lib, R);
   ok(nEmp && nEmp.ref === emp0.emp && nEmp.act.panel === 'roster', k + ' 点名员工 ' + emp0.emp);
   const mac0 = R.maintenance.filter((m) => !m.scheduled && m.window)[0];
-  if (mac0) { const nMac = K.ask(mac0.machine + ' 要保养吗', 'exec', d, lib, R); ok(nMac && nMac.act.action === 'scheduleMaint', k + ' 点名' + v.machine + ' ' + mac0.machine); }
+  if (mac0) { const nMac = K.ask(mac0.machine + ' 要保养吗', 'exec', d, lib, R); ok(nMac && nMac.act.action === 'schedule-maint', k + ' 点名' + v.machine + ' ' + mac0.machine); }
   const nWhy = K.ask('为什么是' + R.bottleneck.line.name, 'board', d, lib, R);
   ok(nWhy && nWhy.act.type === 'open' && nWhy.act.panel === 'stage' && nWhy.blocks[0].type === 'table', k + ' 为什么是约束');
   ok(K.ask('为什么是约束线', 'report', d, lib, R).act.type === 'goto', k + ' 为什么是约束不在看板先换屏');
@@ -321,7 +321,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const rIn = K.ingest(repDoc, 'connect', d, lib, R);
   ok(rIn && rIn.text && rIn.data && rIn.data !== d, k + ' ingest ' + v.report + '表');
   ok(rIn.data.sources.some((s) => s.id === 'doc-import') && !d.sources.some((s) => s.id === 'doc-import'), k + ' ingest 写新副本、不动入参');
-  ok(rIn.data.log.length === d.log.length + 1 && rIn.act.type === 'apply' && rIn.act.action === 'ingest' && rIn.ref === 'doc-import', k + ' ingest 写日志与重放动作');
+  ok(rIn.data.log.length === d.log.length + 1 && rIn.act.type === 'goto' && rIn.act.step === 'connect' && rIn.ref === 'doc-import', k + ' ingest 写日志与重放动作');
   ok(rIn.text.indexOf('重复 1 条') >= 0 && rIn.text.indexOf('数量为零 1 条') >= 0 && rIn.text.indexOf('缺 E-编号 1 条') >= 0, k + ' ingest ' + v.report + '表三条离线核验：' + rIn.text.split('\n')[1]);
   ok(JSON.stringify(K.ingest(repDoc, 'connect', d, lib, R)) === JSON.stringify(rIn), k + ' ingest 两次不一致');
   ok(JSON.stringify(K.run(rIn.data, lib).kpi) === JSON.stringify(R.kpi), k + ' ingest 后看板可继续算且不改指标');
@@ -340,7 +340,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   clean(wIn.text, k + ' ingest Word');
   const mail = { ok: true, kind: 'eml', name: 'mail.eml', size: 900, sizeText: '900 B', ext: 'eml', text: '昨晚设备停机 90 分钟，今天的计划要顺延。', paragraphs: [], tables: [], sheets: [], slides: [], stats: {}, note: '', mail: { from: '生产部', to: '设备组', cc: '', subject: '昨晚停机情况', date: '2026-09-16', attaches: [] } };
   const mIn = K.ingest(mail, 'report', d, lib, R);
-  ok(mIn && mIn.data && mIn.data.log.length === d.log.length + 1 && mIn.act.action === 'ingest', k + ' ingest 邮件记进本周动作');
+  ok(mIn && mIn.data && mIn.data.log.length === d.log.length + 1 && mIn.act.type === 'goto' && mIn.act.step === 'board', k + ' ingest 邮件记进本周动作');
   clean(mIn.text, k + ' ingest 邮件');
   ok(K.ingest({ ok: false }, 'board', d, lib, R) === null && K.ingest(null, 'board', d, lib, R) === null, k + ' ingest 解析失败返回 null');
   ok(JSON.stringify(d) === raw0 && JSON.stringify(raw) === before, k + ' 文档摄入没动入参与原样本');

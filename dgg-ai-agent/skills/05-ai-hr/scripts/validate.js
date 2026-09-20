@@ -166,7 +166,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   ok(rIn && rIn.text && rIn.data && rIn.data !== d, k + ' ingest 简历');
   ok(rIn.data.candidates.length === d.candidates.length + 1 && JSON.stringify(d) === before, k + ' ingest 简历写新副本、不动入参');
   ok(core.run(rIn.data, lib).byId[rIn.data.candidates[rIn.data.candidates.length - 1].id].score.total > 0, k + ' ingest 简历可继续算');
-  ok(rIn.act && rIn.act.type === 'apply' && rIn.act.action === 'ingest', k + ' ingest 简历动作');
+  ok(rIn.act && rIn.act.type === 'focus' && rIn.act.ref === rIn.ref, k + ' ingest 简历动作');
   ok(JSON.stringify(core.ingest(resume, 'recruit', d, lib, R)) === JSON.stringify(rIn), k + ' ingest 两次不一致');
   lintText(rIn.text, k + ' ingest 简历');
   const contract = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('第一条 合同金额：人民币 186 万元\n第二条 交付期限：2026 年 11 月 30 日\n第三条 违约责任：逾期交付按万分之三计违约金\n', 'utf8') });

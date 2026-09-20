@@ -781,10 +781,11 @@
     return out;
   }
   function actionOf(C, o, key) { return o.status === 'done' ? null : actions(C.d, C.S, o.id).filter(function (a) { return a.key === key; })[0] || null; }
-  function actAction(o, a) { var p = clone(a.params); p.cost = a.cost; return { type: 'apply', action: 'applyAction', input: { orderId: o.id, key: a.key, params: p } }; }
+  function actAction(o, a) { var p = clone(a.params); p.cost = a.cost; return { type: 'apply', action: 'apply-action', input: { orderId: o.id, key: a.key, params: p } }; }
 
   /* 开场发现：进这一屏先说一条从排程里算出来的话 */
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (!isStep(step)) return null;
     var C = ctxOf(data, lib, result), v = C.v, S = C.S, k = C.k, plan = C.plan, D = C.rep;
     var worst = lateOrders(C)[0];
@@ -823,6 +824,7 @@
 
   /* 快捷问句：每屏 3–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (!isStep(step)) return [];
     var C = ctxOf(data, lib, result), v = C.v;
     if (step === 'connect') return ['延期的是哪几' + v.counter, '数据源都通了吗', '为什么会延期', '直接进' + v.room];
@@ -836,7 +838,8 @@
 
   /* 问答：认得的问法逐条作答，答不上返回 null 交给平台兜底 */
   function ask(question, step, data, lib, result) {
-    if (!isStep(step)) return null;
+    /* step 选填：不传就是「没有屏上下文」，屏内分支不接、全局分支照答（SPEC §10.4）；给了不认识的屏才算没接住 */
+    if (step && !isStep(step)) return null;
     var C = ctxOf(data, lib, result), v = C.v, S = C.S, k = C.k, plan = C.plan, D = C.rep;
     var q = String(question == null ? '' : question);
 
@@ -968,7 +971,7 @@
         if (has(q, ['落单', '就按', '执行', '下单'])) {
           var use = has(q, ['推荐']) ? rec : cur;
           return say('按方案 ' + use.key + '（' + use.name + '）落单，' + v.finish + ' ' + use.finishLabel + '；落单后' + v.orders + '按新排程刷新。',
-            null, { type: 'apply', action: 'applyInsert', input: { strategy: use.key, req: sim.request } });
+            null, { type: 'apply', action: 'apply-insert', input: { strategy: use.key, req: sim.request } });
         }
         if (has(q, ['差在哪', '三个方案', '对比', '哪个好', '推荐'])) {
           return say(sim.options.map(function (op) { return op.key + ' ' + op.name + ' ' + op.finishLabel + (op.meetsDue ? ' 按期' : ' 晚 ' + op.lateDays + ' 天') + '，拖累 ' + op.affected + ' ' + v.counter + '，预计 ' + fmtN(op.cost) + ' 元'; }).join('\n') + '。\nAI 推荐 ' + sim.recommend + '：' + sim.reason + '。',
@@ -1013,7 +1016,7 @@
       if (has(q, ['生成', '下掉', '开单'])) {
         if (!plan.po.length) return say('当前没有需要下单的' + v.material + '。');
         return say('生成 ' + plan.po.length + ' 张采购单，预计 ' + fmtN(plan.summary.amount) + ' 元；计入在途后' + v.orders + '按到货日重排。',
-          null, { type: 'apply', action: 'applyPurchase', input: { ids: plan.items.filter(function (x) { return x.suggestQty > 0; }).map(function (x) { return x.id; }) } });
+          null, { type: 'apply', action: 'apply-purchase', input: { ids: plan.items.filter(function (x) { return x.suggestQty > 0; }).map(function (x) { return x.id; }) } });
       }
       if (has(q, ['缺口', '缺料', '不够'])) {
         var sh2 = plan.items.filter(function (x) { return x.urgency === 'short' || x.urgency === 'safety'; });
@@ -1125,7 +1128,7 @@
         + '按第 1 行排产：' + req.customer + ' · ' + prod.name + ' × ' + fmtN(qty) + ' ' + v.qtyUnit + '，' + v.due + ' ' + short(C.d, dueDay) + '。\n'
         + (subs.length ? subs.join('；') + '。\n' : '')
         + '三种策略各排一遍：' + sim.options.map(function (op) { return op.key + ' ' + op.finishLabel + '（拖累 ' + op.affected + '，' + fmtN(op.cost) + ' 元）'; }).join('，') + '；推荐 ' + rec.key + '。已填进' + v.insert + '。'),
-        blocks: [preview], data: nd, ref: 'insert-draft', act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+        blocks: [preview], data: nd, ref: 'insert-draft', act: { type: 'goto', step: 'insert' } };
     }
 
     /* 2) 科目余额表 → 与库存、应付口径对一遍 */
@@ -1150,14 +1153,14 @@
       if (ar && cell(ar, map.end) != null) kv.push(['应收账款期末', fmtN(cell(ar, map.end)) + ' 元']);
       lines.push('这张表没有' + v.order + '与' + v.due + '列，排程不动数；已登记为导入批次。');
       return { text: tx(lines.join('\n')), blocks: [kvB(kv)], data: docSource(C.d, doc, body.length),
-        ref: C.plan.po.length ? C.plan.po[0].supplier : 'doc-import', act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+        ref: C.plan.po.length ? C.plan.po[0].supplier : 'doc-import', act: { type: 'goto', step: 'connect' } };
     }
 
     /* 3) 其他表：把真读到的列与行数说清楚 */
     return { text: tx('Excel《' + doc.name + '》读完：' + doc.sheets.length + ' 张表，《' + s0.name + '》' + body.length + ' 行 ' + head.length + ' 列。\n'
       + '列是 ' + head.slice(0, 6).map(function (x) { return cut(x, 8); }).join(' / ') + '。\n'
       + '排产要 ' + ['单号', v.customer, v.product, v.qty, v.due].join(' / ') + ' 这几列，这张表里没有，排程不动数。已按 ' + body.length + ' 行登记为导入批次。'),
-      blocks: [preview], data: docSource(C.d, doc, body.length), ref: 'doc-import', act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+      blocks: [preview], data: docSource(C.d, doc, body.length), ref: 'doc-import', act: { type: 'goto', step: 'connect' } };
   }
 
   function ingestWord(doc, C) {

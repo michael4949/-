@@ -545,6 +545,7 @@
 
   /* 开场发现：进这一屏先说一条从数据里算出来的话 */
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), k = R.kpi, rec = R.reconcile, rk = R.risks, f = R.forecast, po = R.policies, m = rec.metrics;
     if (step === 'connect') return '银行对账单余额 ' + W(m.bankBalance) + '，账面货币资金 ' + W(m.cashLedger) + '，差 ' + W(Math.abs(m.bankBalance - m.cashLedger)) + '，这笔要在勾稽里落账。';
     if (step === 'board') return gapText(R) + '；本期收入 ' + W(k.rev) + '（环比 ' + (k.revMoM >= 0 ? '+' : '') + neg(k.revMoM) + '%），经营现金流 ' + W(k.cfo) + '。';
@@ -571,6 +572,7 @@
 
   /* 快捷问句：每屏 3–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (step === 'connect') return ['哪些来源是直连的', '账面和银行差多少', '进财务驾驶舱'];
     if (step === 'board') return ['哪一周现金吃紧', '毛利率为什么降', '勾稽异常有几处', '先处理哪一件'];
     if (step === 'recon') return ['哪几条异常', 'R03 为什么差', '按建议调整', '看银行未达账项'];
@@ -609,7 +611,7 @@
     var other = co.options.filter(function (x) { return x.clears && x.key !== o.key; })[0];
     var addon = o.clears || !other ? '' : '，补平要叠加方案 ' + other.key + ' ' + other.name;
     if (askRun(q)) return { text: '已按方案 ' + o.key + ' ' + o.name + '执行：13 周低点 ' + W(o.minEnding) + (o.clears ? '，回到安全线以上。' : '，仍差 ' + W(o.gap) + addon + '。'),
-      act: { type: 'apply', action: 'applyCashOption', input: { key: o.key } } };
+      act: { type: 'apply', action: 'apply-cash-option', input: { key: o.key } } };
     return { text: '方案 ' + o.key + ' ' + o.name + '：13 周低点 ' + W(o.minEnding) + '，' + (o.clears ? '回到安全线以上' : '仍差 ' + W(o.gap) + '，单靠这一条补不平' + addon) + '；' + (o.cost ? '利息 ' + fmtN(o.cost) + ' 元' : '不增加资金成本') + '，' + o.side + '。这一步只做测算，本期处置未动。',
       act: { type: 'open', panel: 'option', ref: o.key } };
   }
@@ -697,7 +699,7 @@
         if (!cur.fix) return { text: cur.id + ' ' + cur.name + '没有可自动生成的分录，需要会计核对原始凭证。', ref: cur.id };
         return { text: '已按建议生成分录：' + cur.fix.label + ' ' + fmtN(cur.fix.amount) + ' 元。' + cur.fix.entry.map(function (e) { return e.join(' '); }).join('；') + '，三表与月报已重算。',
           blocks: [tableB(['方向', '科目', '金额'], cur.fix.entry)],
-          act: { type: 'apply', action: 'applyFix', input: { rule: cur.id } } };
+          act: { type: 'apply', action: 'apply-fix', input: { rule: cur.id } } };
       }
       if (has(q, ['下钻', '明细', '未达', '单据', '看看'])) {
         if (!cur.drill) return null;
@@ -727,7 +729,7 @@
         if (!todo.length) return { text: cr.id + ' ' + cr.name + ' 的处置动作都已执行，概率已下调到 ' + Math.round(cr.prob * 100) + '%。', ref: cr.id };
         var a0 = todo[0];
         return { text: '按 ' + cr.id + ' ' + cr.name + ' 执行「' + a0.label + '」：' + a0.desc + '。执行后概率下调，现金预测与月报一起重算。',
-          act: { type: 'apply', action: 'applyRiskAction', input: { risk: cr.id, key: a0.key } } };
+          act: { type: 'apply', action: 'apply-risk-action', input: { risk: cr.id, key: a0.key } } };
       }
       var nr = byName(q, rk.rows);
       if (nr && !has(q, ['逾期', '应收'])) return { text: nr.id + ' ' + nr.name + '：' + nr.metricLabel + ' ' + rv(nr) + '，参考 ' + rband(nr) + '，概率 ' + Math.round(nr.prob * 100) + '%，影响 ' + W(nr.impact) + '。\n' + nr.evidence[0] + '。',
@@ -760,13 +762,13 @@
       if (has(q, ['融资', '方案 C', '方案C', '贷款', '额度'])) {
         var oc = co.options[2], runC = askRun(q);
         return { text: '方案 C ' + oc.name + '：' + d.cash.creditLine.bank + '授信额度 ' + W(d.cash.creditLine.limit) + '，按缺口提用 ' + W(oc.scenario.loanDraw) + '（第 ' + (oc.scenario.loanDrawWeek + 1) + ' 周），13 周低点 ' + W(oc.minEnding) + '，利息 ' + fmtN(oc.cost) + ' 元。' + (runC ? '已写回本期处置。' : '本期处置未动。'),
-          act: runC ? { type: 'apply', action: 'applyCashOption', input: { key: 'C' } } : { type: 'open', panel: 'option', ref: 'C' } };
+          act: runC ? { type: 'apply', action: 'apply-cash-option', input: { key: 'C' } } : { type: 'open', panel: 'option', ref: 'C' } };
       }
       if (has(q, ['推荐', '选哪个', '哪个方案', '怎么办'])) {
         var pk = optOf(co.options, co.recommend);
         return { text: '推荐方案 ' + pk.key + ' ' + pk.name + '：13 周低点 ' + W(pk.minEnding) + (pk.cost ? '，利息 ' + fmtN(pk.cost) + ' 元' : '，不增加资金成本') + '；' + pk.side + '。',
           blocks: [tableB(['方案', '低点', '缺口周', '成本'], co.options.map(function (o) { return [o.key + ' ' + o.name, W(o.minEnding), o.gapWeeks + ' 周', o.cost ? fmtN(o.cost) : '0']; }))],
-          act: { type: 'apply', action: 'applyCashOption', input: { key: co.recommend } } };
+          act: { type: 'apply', action: 'apply-cash-option', input: { key: co.recommend } } };
       }
       if (has(q, ['本周', '这一周', '明细', '收付'])) return { text: '第 ' + (wi2 + 1) + ' 周流入 ' + W(wkc.inflow) + '、流出 ' + W(wkc.outflow) + '、净额 ' + W(wkc.net) + '，' + wkc.items.length + ' 笔。',
         blocks: [tableB(['项目', '金额'], wkc.items.slice(0, 5).map(function (it) { return [cut(it.label, 16), (it.amount < 0 ? '−' : '+') + fmtN(Math.abs(it.amount))]; }))],
@@ -787,7 +789,7 @@
         var target = byName(q, po.rows) || cand[0];
         if (!target) return { text: '可享政策都已在申报清单里，合计预计 ' + W(po.amountListed) + '。' };
         return { text: '已把' + target.name + (target.listed ? '移出' : '加入') + '申报清单，预计 ' + W(target.amount) + '；材料要 ' + target.need.slice(0, 2).join('、') + '。',
-          act: { type: 'apply', action: 'togglePolicy', input: { id: target.id } } };
+          act: { type: 'apply', action: 'toggle-policy', input: { id: target.id } } };
       }
       var np = byName(q, po.rows);
       if (np) return policyCard(np, step);
@@ -895,7 +897,8 @@
     if (dueStr) kv.push(['交付期限', dueStr]);
     if (pay) kv.push([pay.from, fmtN(pay.amount) + ' 元']);
     kv.push(['账面应付', fmtN(b.ap) + ' 元']);
-    var blocks = [kvB(kv), money.length ? tagsB(money.slice(0, 4)) : null];
+    /* 同 §10.6：没抽到金额时那一块不给，不能在 blocks 里留 null */
+    var blocks = [kvB(kv)].concat(money.length ? [tagsB(money.slice(0, 4))] : []);
     if (!pay) return { text: lines.join('\n'), blocks: blocks,
       act: { type: 'open', panel: 'doc', ref: doc.name, title: '合同解析 · ' + doc.name, sub: fmtN(total) + ' 元 · ' + doc.sizeText,
         blocks: [kvB(kv), textB((doc.text || '').slice(0, 600))] } };
@@ -903,7 +906,7 @@
     d2.cash.apItems.push({ id: 'AP-DOC1', supplier: '合同乙方', amount: pay.amount, due: '2026-09-30', critical: false });
     d2.log.push({ seq: d2.log.length + 1, kind: 'cash', label: '合同首期进预测', detail: '《' + doc.name + '》合同金额 ' + fmtN(total) + ' 元，' + pay.from + ' ' + fmtN(pay.amount) + ' 元按 2026-09-30 到期', amount: pay.amount });
     return { text: lines.join('\n'), blocks: blocks, data: d2,
-      act: { type: 'apply', action: 'ingest', input: { doc: doc }, step: 'cash' } };
+      act: { type: 'goto', step: 'cash' } };
   }
   function docSlides(doc, R) {
     var txt = (doc.text || '').replace(/\s+/g, ' ');

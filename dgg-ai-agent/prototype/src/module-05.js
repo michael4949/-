@@ -590,33 +590,34 @@
   }
   function applyAction(a) {
     var input = a.input || {};
-    if (a.action === 'resolve') {
+    if (a.action === 'resolve-compliance') {
       var it = M.R.compliance.items.filter(function (i) { return i.id === input.rule; })[0];
       if (!it || it.status !== 'open') return false;
       M.rule = it.id;
       commit(K.resolve(M.data, it.id, LIB), it.id + ' ' + it.action.label);
       return true;
     }
-    if (a.action === 'offer') {
+    if (a.action === 'make-offer') {
       var c = M.R.byId[input.id];
       if (!c) return false;
       M.icand = c.id;
       commit(K.offer(M.data, c.id, input.salary, LIB), c.id + ' offer 已发，月薪 ' + fmtN(input.salary) + ' 元');
       return true;
     }
-    if (a.action === 'adoptPlan') {
+    if (a.action === 'adopt-plan') {
       if (!M.R.sim.plans.some(function (p) { return p.key === input.key; })) return false;
       M.plan = input.key;
       commit(K.adoptPlan(M.data, input.key, LIB), '已采纳方案 ' + input.key + '，月报已更新');
       return true;
     }
-    if (a.action === 'ingest') {
-      var r = K.ingest(input.doc, M.step, ctxData(), LIB, M.R);   /* 与气泡里那次摄入同一个选中态 */
-      if (!r || !r.data) return false;
-      commitDoc(r.data);
-      return true;
-    }
     return false;
+  }
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面由宿主做 */
+  function takeDoc(doc, step) {
+    var r = K.ingest(doc, step, ctxData(), LIB, M.R);            /* 与气泡里那次摄入同一个选中态 */
+    if (!r || !r.data) return r;
+    var nd = r.data;
+    return { text: r.text, blocks: r.blocks, act: function () { commitDoc(nd); } };
   }
   function setParam(a) {
     if (a.path === 'filter') { M.filter = a.value; draw(); refocusTop('.pd-table tbody tr[data-ref^="C-"]'); return true; }
@@ -631,6 +632,7 @@
   window.DGG.chatBrain('m5', {
     kernel: window.DGG.coreM5,
     ctx: function () { return { data: ctxData(), lib: LIB, result: M.R }; },
+    onDoc: takeDoc,
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {

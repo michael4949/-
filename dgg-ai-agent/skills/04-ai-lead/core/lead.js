@@ -378,6 +378,7 @@
   }
 
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0].key;                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = got(data, lib, result), d = R.data, k = R.kpi, P = R.profile, seg = segOf(P);
     if (step === 'connect') return syncSay(d, false);
     if (step === 'board') {
@@ -406,6 +407,7 @@
   }
 
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0].key;                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = got(data, lib, result), k = R.kpi;
     if (step === 'connect') return ['哪个源同步落后', '一共归集了多少条', '直连和导入各几个', '线索里有几条 A 级'];
     if (step === 'board') return ['哪个渠道单条便宜', '未分派的 ' + k.unassigned + ' 条怎么办', '成交预测怎么算的', '逾期为什么有 ' + k.overdue + ' 条'];
@@ -716,7 +718,7 @@
       text: doc.name + '：合同金额 ' + fmtN(amount) + ' 元' + (due ? '、交付期限 ' + due : '') + (warr ? '、质保 ' + warr + ' 个月' : '')
         + (mine ? '，甲方就是本企业' : '') + '。\n在手 ' + pool.length + ' 条里 ' + l.id + '（' + l.industry + '）预计 ' + fmtW(l.amountEst) + ' 与它差 ' + fmtW(best.gap)
         + '，已按合同金额回填并记一次跟进。',
-      blocks: blocks, data: nd, act: { type: 'apply', action: 'ingest', input: { doc: doc }, ref: l.id }
+      blocks: blocks, data: nd, ref: l.id, act: { type: 'focus', ref: l.id, step: 'leads' }
     };
   }
   /* 表格：认线索字段，够用就能入池；认不出就把全表打开 */
@@ -771,7 +773,7 @@
     var nd = logAction(d, best.l.id, '来函「' + (m.subject || doc.name) + '」' + (money[0] ? ' · ' + fmtN(money[0]) + ' 元' : ''));
     return {
       text: txt + '\n在手线索里 ' + best.l.id + '（' + best.l.industry + '）预计 ' + fmtW(best.l.amountEst) + ' 与它接近，已记一次来函跟进。',
-      blocks: [bKv(rows)], data: nd, act: { type: 'apply', action: 'ingest', input: { doc: doc }, ref: best.l.id }
+      blocks: [bKv(rows)], data: nd, ref: best.l.id, act: { type: 'focus', ref: best.l.id, step: 'leads' }
     };
   }
   /* 幻灯片：把里面的数字与本模块口径并排 */

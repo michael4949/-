@@ -679,7 +679,7 @@
   }
   function applyAction(a) {
     var input = a.input || {};
-    if (a.action === 'applyFix') {
+    if (a.action === 'apply-fix') {
       var c = M.R.byId[input.contractId];
       if (!c || !c.findings.some(function (f) { return f.id === input.findingId && f.fix; })) return false;
       var f = c.findings.filter(function (x) { return x.id === input.findingId; })[0];
@@ -688,12 +688,12 @@
       refocus(c.id, 260);
       return true;
     }
-    if (a.action === 'applyAllHigh') {
+    if (a.action === 'apply-all-high') {
       if (!M.R.contracts.some(function (c) { return c.review.counts.high; })) return false;
       doAllHigh();
       return true;
     }
-    if (a.action === 'toggleRenew') {
+    if (a.action === 'toggle-renew') {
       var ids = input.ids || (input.id ? [input.id] : []);
       ids = ids.filter(function (id) { return M.R.ip.assets.some(function (x) { return x.id === id; }); });
       if (!ids.length) return false;
@@ -704,25 +704,26 @@
       refocus(ids[0], 260);
       return true;
     }
-    if (a.action === 'toggleApply') {
+    if (a.action === 'toggle-apply') {
       var gp = M.R.ip.gaps.filter(function (x) { return x.cls === input.cls; })[0];
       if (!gp) return false;
       commit(K.toggleApply(M.data, gp.cls), '第 ' + gp.cls + ' 类' + (gp.listed ? '已移出申请清单' : '已加入申请清单'));
       refocus('CLS-' + gp.cls, 260);
       return true;
     }
-    if (a.action === 'confirmSetup') {
+    if (a.action === 'confirm-setup') {
       if (M.R.setup.confirmed) return false;
       commit(K.confirmSetup(M.data, LIB), '方案已确认，' + M.R.setup.steps.length + ' 个节点已进台账');
       return true;
     }
-    if (a.action === 'ingest') {
-      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
-      if (!r || !r.data) return false;
-      commitDoc(r.data);
-      return true;
-    }
     return false;
+  }
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面由宿主做 */
+  function takeDoc(doc, step) {
+    var r = K.ingest(doc, step, M.data, LIB, M.R);
+    if (!r || !r.data) return r;
+    var nd = r.data;
+    return { text: r.text, blocks: r.blocks, act: function () { commitDoc(nd); } };
   }
   function setParam(a) {
     if (a.path === 'filter') {
@@ -748,6 +749,7 @@
   window.DGG.chatBrain('m7', {
     kernel: window.DGG.coreM7,
     ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    onDoc: takeDoc,
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {

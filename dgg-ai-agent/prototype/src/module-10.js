@@ -770,14 +770,14 @@
   }
   function applyAct(a) {
     var input = a.input || {}, v = V();
-    if (a.action === 'applyAction') {
+    if (a.action === 'apply-action') {
       if (!M.S.byId[input.orderId] || !input.key) return false;
       M.focus = input.orderId;
       if (M.step !== 'order') setStep('order');
       commit(K.applyAction(M.data, input.orderId, input.key, input.params), '已' + ((v.actions || {})[input.key] || '处置') + ' · ' + v.room + '已重排');
       return true;
     }
-    if (a.action === 'applyInsert') {
+    if (a.action === 'apply-insert') {
       var req = M.insert.req || input.req;
       if (!req || !input.strategy) return false;
       var sim = M.insert.sim || K.simulateInsert(M.data, req);
@@ -790,7 +790,7 @@
       setStep('room');
       return true;
     }
-    if (a.action === 'applyPurchase') {
+    if (a.action === 'apply-purchase') {
       if (!M.plan.po.length) return false;
       var r = K.applyPurchase(M.data, M.plan, input.ids && input.ids.length ? input.ids : null);
       if (!r.pos.length) return false;
@@ -799,23 +799,26 @@
       commit(r.data, '已生成 ' + r.pos.length + ' 张采购单 · ' + v.room + '已重排');
       return true;
     }
-    if (a.action === 'ingest') {
-      var c = chatCtx();
-      var res = K.ingest(input.doc, M.step, c.data, c.lib, c.result);
-      if (!res || !res.data) return false;
-      M.data = res.data; recompute();
-      if (res.data.insertDraft) {                           /* 订单表：草稿填进插单模拟，按三策略重排 */
-        M.insert = { req: clone(res.data.insertDraft), sim: null, pick: res.data.insertPick || null };
+    return false;
+  }
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面由宿主做 */
+  function takeDoc(doc, step) {
+    var c = chatCtx();
+    var res = K.ingest(doc, step, c.data, c.lib, c.result);
+    if (!res || !res.data) return res;
+    var nd = res.data, ref = res.ref;
+    return { text: res.text, blocks: res.blocks, act: function () {
+      M.data = nd; recompute();
+      if (nd.insertDraft) {                                 /* 订单表：草稿填进插单模拟，按三策略重排 */
+        M.insert = { req: clone(nd.insertDraft), sim: null, pick: nd.insertPick || null };
         if (M.step !== 'insert') setStep('insert'); else { M.told = null; draw(); }
         focusSel('.pd-option.on', 900);
-        return true;
+        return;
       }
-      var to = homeOf(res.ref) || 'connect';
+      var to = homeOf(ref) || 'connect';
       if (M.step !== to) setStep(to); else draw();
-      pulseRef(res.ref, 700);
-      return true;
-    }
-    return false;
+      pulseRef(ref, 700);
+    } };
   }
   function setPath(a) {
     if (a.path === 'focus') {
@@ -846,6 +849,7 @@
   window.DGG.chatBrain('m10', {
     kernel: window.DGG.coreM10,
     ctx: chatCtx,
+    onDoc: takeDoc,
     act: function (a, api) {
       if (!a || !a.type || !M.S) return false;
       if (a.type === 'goto') {

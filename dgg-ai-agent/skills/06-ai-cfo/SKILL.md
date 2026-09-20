@@ -97,7 +97,7 @@ examples/*.output.json   三套样本的驾驶舱摘要
 |---|---|
 | `{type:'goto', step}` | 切到那一屏；切到财务驾驶舱且本次还没扣积分时走扣分入口 |
 | `{type:'open', panel, ref}` | `rule` 选中勾稽条并进勾稽屏、`drill` 同上并把下钻明细摆到焦点卡、`risk` 选中风险条并进风险屏、`policy` 开政策抽屉（不在政策屏先切过去）、`week` 选中第 N 周并进现金屏、`option` 点亮方案卡、`kpi` 点亮驾驶舱毛利率砖（`gm`）或现金屏缺口砖（`gap`）、`trial` 把导入的科目余额摆进勾稽屏、`doc` 开文档解析抽屉（内容在 act 的 `blocks` 里，同一套块型） |
-| `{type:'apply', action, input}` | `applyFix{rule}` 生成调整分录、`applyRiskAction{risk,key}` 风险处置、`applyCashOption{key}` 执行现金方案、`togglePolicy{id}` 进出申报清单、`ingest{doc}` 重放这次摄入取新数据副本（带 `step` 时摄入后切到那一屏）；动作名用内核导出名 |
+| `{type:'apply', action, input}` | `apply-fix{rule}` 生成调整分录、`apply-risk-action{risk,key}` 风险处置、`apply-cash-option{key}` 执行现金方案、`toggle-policy{id}` 进出申报清单。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `applyFix / applyRiskAction / applyCashOption / togglePolicy`），SPEC §12 的三道校验按清单名比 |
 | `{type:'set', path, value}` | `cashScenario.loanDraw` 打开授信提款开关并按缺口周前一周提用，13 周现金预测重排 |
 
 **ingest 认的文档与写回**（入参一律是 `skills/_shared/docparse.js` 的输出）
@@ -112,7 +112,7 @@ examples/*.output.json   三套样本的驾驶舱摘要
 | 邮件，读到应付或逾期金额 | 付款申请 | 邮件金额与账面应付、K08 应付逾期口径对差，`act` 选中 K08 并进风险屏 |
 | 邮件，其余 | 往来邮件 | 读发件、主题、日期，开原文抽屉，不写数据 |
 
-写数据的那一类返回 `{text, blocks, data, act}`：`data` 是新副本（入参不动），`act` 是 `{type:'apply', action:'ingest', input:{doc}}`——只实现 act 的平台重放同一次摄入拿 `data`，两条路等价；两者取其一即可，不要既写 `data` 又重放。
+写数据的那一类返回 `{text, blocks, data, act}`：`data` 是新副本（入参不动），平台按 `mutatesPath: "data"` 取走存回会话状态；`act` 是 `{type:'goto', step:'cash'}`（摄入后切到现金预测屏），不再是指回自己的 `apply`（SPEC §12 禁止）。
 
 ## 原型流程（六屏）
 

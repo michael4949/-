@@ -696,7 +696,7 @@
   function applyAction(a) {
     var input = a.input || {}, R = M.R;
     if (a.action === 'generate') { if (M.data.state.spec) return false; enterBuild(); return true; }
-    if (a.action === 'addField') {
+    if (a.action === 'add-field') {
       var f = (R.recommended || []).filter(function (x) { return x.key === input.key; })[0];
       if (!f) return false;
       if (M.step !== 'build') setStep('build');
@@ -704,7 +704,7 @@
       later(function () { focusSel('.m11-phone .fld.new', 0); }, 700);
       return true;
     }
-    if (a.action === 'grantPermission') {
+    if (a.action === 'grant-permission') {
       var sg = R.suggestion;
       if (!sg || sg.done || sg.role !== input.role || sg.page !== input.page) return false;
       if (M.step !== 'test') setStep('test');
@@ -712,14 +712,14 @@
       later(function () { focusSel('.m11-sugg', 0); }, 700);
       return true;
     }
-    if (a.action === 'nextScript') return doNextScript();
+    if (a.action === 'next-script') return doNextScript();
     if (a.action === 'publish') {
       if (!R.spec || R.env === 'live' || !R.checklist.all) return false;
       var hit = function () { var b = workEl() && workEl().querySelector('.pd-card .x .pd-btn'); if (b && !b.disabled) b.click(); };
       if (M.step !== 'ship') { setStep('ship'); later(hit, 620); } else hit();
       return true;
     }
-    if (a.action === 'applyDelta') {
+    if (a.action === 'apply-delta') {
       if (!input.text) return false;
       if (M.step !== 'iterate') setStep('iterate');
       genDelta(input.text);

@@ -112,7 +112,7 @@ examples/*.output.json   四套样本的指挥室摘要
 | `{type:'goto', step}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底）；进指挥室那一次扣积分 |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：订单行（单号）、物料行与缺口行（物料 id）、产线热力行（产线 id）、来源行（来源 id）、采购单卡（供应商）、下钻屏的 AI 判断卡（单号）与齐套行（物料 id）、方案卡（`A` / `B` / `C`）、插单屏的加急单草稿卡（`insert-draft`）、接入屏的导入批次行（`doc-import`）；这条记录不在当前屏就先换到它所在的屏再高亮；找不到 `data-ref` 就退回按文本找行。后两个是摄入回来的固定位置，落库在高亮之后，按屏名直接定位 |
 | `{type:'open', panel, ref}` | `material` 开这一种物料的库存走势抽屉（ref 是物料 id）、`slow` 开呆滞抽屉、`wechat` 开日报的微信发送 |
-| `{type:'apply', action, input}` | `applyAction{orderId,key,params}` 执行一条处置并整体重排、`applyInsert{strategy,req}` 按方案落单并回指挥室、`applyPurchase{ids}` 生成采购单并计入在途、`ingest{doc}` 重放这次摄入取新数据副本；动作名用内核导出名 |
+| `{type:'apply', action, input}` | `apply-action{orderId,key,params}` 执行一条处置并整体重排、`apply-insert{strategy,req}` 按方案落单并回指挥室、`apply-purchase{ids}` 生成采购单并计入在途。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `applyAction / applyInsert / applyPurchase`），SPEC §12 的三道校验按清单名比 |
 | `{type:'set', path, value}` | `focus` 换下钻屏看的那一张、`filter` 按状态筛指挥室的订单全景（`late` / `risk`）、`insert.pick` 换选中的方案 |
 
 **ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）
@@ -127,7 +127,7 @@ examples/*.output.json   四套样本的指挥室摘要
 | PPT，读得到准时率 / 按期率 / 达成率 | 经营回顾 | 页数与前两页标题；文档目标按期率与当前按期率比，算出还要补几张并按延期天数点名先救哪几张；不动业务数据 |
 | 邮件，正文读得到万元金额 | 付款申请 | 发件、主题、日期；邮件金额与采购单草稿金额的占比；不动业务数据，`act` 高亮对应供应商的采购单 |
 
-写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照写回类函数的做法先 `normalize` 出副本再改），`act` 是 `{type:'apply', action:'ingest', input:{doc}}`——只实现 act 的平台重放同一次摄入拿 `data`，两条路等价，取其一即可。同一份文档重复导入只留一条 `doc-import` 批次。
+写数据的那一类返回 `{text, blocks, ref, data, act}`：`data` 是新副本（入参不动，照写回类函数的做法先 `normalize` 出副本再改），平台按 `mutatesPath: "data"` 取走存回会话状态；`act` 是 `{type:'goto', step}`（订单表进插单模拟 `insert`、其余进接入屏 `connect`），不再是指回自己的 `apply`（SPEC §12 禁止）。同一份文档重复导入只留一条 `doc-import` 批次。
 
 ## 原型流程（六屏）
 

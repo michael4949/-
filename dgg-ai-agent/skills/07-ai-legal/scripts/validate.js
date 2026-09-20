@@ -214,7 +214,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const na = core.ask(R.ip.assets[0].id + ' 什么时候到期', 'ip', d, lib, R);
   ok(na && na.ref === R.ip.assets[0].id && isAct(na.act), k + ' 点名知产 ' + R.ip.assets[0].id);
   const ng = core.ask('第 ' + R.ip.gaps[0].cls + ' 类', 'ip', d, lib, R);
-  ok(ng && ng.act.type === 'apply' && ng.act.action === 'toggleApply', k + ' 点名缺口类别');
+  ok(ng && ng.act.type === 'apply' && ng.act.action === 'toggle-apply', k + ' 点名缺口类别');
   ok(core.ask('第 ' + R.ip.gaps[0].cls + ' 类', 'board', d, lib, R).act.type === 'goto', k + ' 缺口类别不在知产屏先换屏');
   const nl = core.ask(R.licenses[0].name + ' 还有多久', 'board', d, lib, R);
   ok(nl && nl.ref === R.licenses[0].id && nl.act.panel === 'license', k + ' 点名证照');
@@ -229,7 +229,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const added = cIn.data.contracts[cIn.data.contracts.length - 1];
   ok(added.id === 'HT-DOC-01' && cIn.ref === added.id && added.amount === 1860000, k + ' ingest 合同编号与金额');
   ok(core.run(cIn.data, lib).byId[added.id].score === core.reviewContract(added, lib).score, k + ' ingest 合同可继续算');
-  ok(cIn.act.type === 'apply' && cIn.act.action === 'ingest', k + ' ingest 合同动作');
+  ok(cIn.act.type === 'focus' && cIn.act.ref === cIn.ref, k + ' ingest 合同动作');
   ok(JSON.stringify(core.ingest(cdoc, 'contracts', d, lib, R)) === JSON.stringify(cIn), k + ' ingest 两次不一致');
   ok(isBlocks(cIn.blocks), k + ' ingest 合同块型');
   lintText(cIn.text, k + ' ingest 合同');

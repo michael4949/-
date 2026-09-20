@@ -150,7 +150,7 @@ Object.keys(data.samples).sort().forEach((k) => {
     const acts0 = core.actions(d, S, anyLate.id);
     const otQ = core.ask('加班要花多少', 'order', Object.assign({}, d, { focus: anyLate.id }), null, R);
     if (acts0.filter((a) => a.key === 'overtime').length) {
-      ok(otQ && otQ.act.type === 'apply' && otQ.act.action === 'applyAction' && otQ.act.input.key === 'overtime' && otQ.act.input.orderId === anyLate.id, k + ' 加班动作');
+      ok(otQ && otQ.act.type === 'apply' && otQ.act.action === 'apply-action' && otQ.act.input.key === 'overtime' && otQ.act.input.orderId === anyLate.id, k + ' 加班动作');
       const dOt = core.applyAction(d, otQ.act.input.orderId, otQ.act.input.key, otQ.act.input.params);
       ok(dOt.log.length === d.log.length + 1 && JSON.stringify(d) === raw0, k + ' 加班动作可落单且不动入参');
     }
@@ -162,12 +162,12 @@ Object.keys(data.samples).sort().forEach((k) => {
     const mQ = core.ask(mTop.name + '还剩多少', 'stock', d, null, R);
     ok(mQ && mQ.act.type === 'open' && mQ.act.panel === 'material' && mQ.act.ref === mTop.id, k + ' 点名物料开抽屉');
     const gQ = core.ask('生成采购单', 'stock', d, null, R);
-    ok(gQ && gQ.act.type === 'apply' && gQ.act.action === 'applyPurchase' && gQ.act.input.ids.length === plan.summary.buy, k + ' 生成采购单动作');
+    ok(gQ && gQ.act.type === 'apply' && gQ.act.action === 'apply-purchase' && gQ.act.input.ids.length === plan.summary.buy, k + ' 生成采购单动作');
     const pr = core.applyPurchase(d, plan, gQ.act.input.ids);
     ok(pr.pos.length === plan.po.length && JSON.stringify(d) === raw0, k + ' 采购动作可落单且不动入参');
   }
   const iQ = core.ask('就按推荐落单', 'insert', d, null, R);
-  ok(iQ && iQ.act.type === 'apply' && iQ.act.action === 'applyInsert' && ['A', 'B', 'C'].indexOf(iQ.act.input.strategy) >= 0, k + ' 插单落单动作');
+  ok(iQ && iQ.act.type === 'apply' && iQ.act.action === 'apply-insert' && ['A', 'B', 'C'].indexOf(iQ.act.input.strategy) >= 0, k + ' 插单落单动作');
   ok(core.applyInsert(d, iQ.act.input.req, iQ.act.input.strategy).orders.length === d.orders.length + 1, k + ' 插单动作可落单');
   const cQ = core.ask('三个方案差在哪', 'insert', d, null, R);
   ok(cQ && cQ.act.type === 'set' && cQ.act.path === 'insert.pick', k + ' 方案对比动作');
@@ -187,7 +187,7 @@ Object.keys(data.samples).sort().forEach((k) => {
   ok(oIn.data.insertDraft && oIn.data.insertDraft.qty === 1200 && oIn.data.insertPick, k + ' ingest 订单表填出加急单草稿');
   ok(oIn.data.sources.filter((s) => s.id === 'doc-import').length === 1, k + ' ingest 记导入批次');
   ok(core.ingest(orderSheet, 'connect', oIn.data, null).data.sources.filter((s) => s.id === 'doc-import').length === 1, k + ' ingest 重复导入不叠批次');
-  ok(oIn.act.type === 'apply' && oIn.act.action === 'ingest', k + ' ingest 动作');
+  ok(oIn.act.type === 'goto' && oIn.act.step === 'insert', k + ' ingest 动作');
   ok(JSON.stringify(core.ingest(orderSheet, 'connect', d, null, R)) === JSON.stringify(oIn), k + ' ingest 两次不一致');
   ok(isBlocks(oIn.blocks) && isAct(oIn.act), k + ' ingest 块型与动作');
   clean(oIn.text, k + ' ingest 订单表');

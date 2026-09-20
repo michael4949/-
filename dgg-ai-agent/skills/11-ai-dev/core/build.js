@@ -788,6 +788,7 @@
 
   // 开场发现：进这一屏先说一条从数据里算出来的话
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = resultOf(data, lib, result);
     if (!R.spec || step === 'connect') {
       var p = R.parsed, v = R.preview || R.kpi;
@@ -822,6 +823,7 @@
 
   // 快捷问句：每屏三到四条，条条都能被 ask 答上
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = resultOf(data, lib, result);
     if (!R.spec || step === 'connect') return ['哪些词命中了', '主数据从哪来', '能生成几页', '生成应用'];
     var s = R.spec;
@@ -901,7 +903,7 @@
     R.recommended.forEach(function (f) { if (q.indexOf(f.label) >= 0 || q.indexOf(f.label.replace(/（.*/, '')) >= 0) recHit = f; });
     if (recHit && hasWord(q, ['加', '添', '要', '补'])) {
       return { text: '把「' + recHit.label + '」加进表单、数据字典与用例，规格升一版；存量记录这一格置空。',
-        act: { type: 'apply', action: 'addField', input: { key: recHit.key } } };
+        act: { type: 'apply', action: 'add-field', input: { key: recHit.key } } };
     }
     if (hasWord(q, ['角色', '谁能', '谁看', '权限', '矩阵', '看不到', '越权'])) {
       var pm = R.perms, sg0 = R.suggestion;
@@ -920,7 +922,7 @@
       if (!sg) return { text: '权限矩阵上没有待处理的建议。' };
       if (sg.done) return { text: sg.roleTitle + '已可查看' + sg.pageName + '，接口需要角色与用例同步更新。', act: { type: 'open', panel: 'sugg' } };
       return { text: '给' + sg.roleTitle + '开放' + sg.pageName + '的' + sg.op + '：' + sg.reason + '。\n开放后接口需要角色、手机页签与用例一起更新。',
-        act: { type: 'apply', action: 'grantPermission', input: { role: sg.role, page: sg.page, op: sg.op } } };
+        act: { type: 'apply', action: 'grant-permission', input: { role: sg.role, page: sg.page, op: sg.op } } };
     }
     if (hasWord(q, ['流程', '节点', '几步', '状态'])) {
       return { text: s.states.map(function (x) { return x.label; }).join(' → ') + '，' + s.transitions.length + ' 条流转。\n' + s.transitions.map(function (t2) { return roleTitle(s, t2.by[0]) + ' ' + t2.action + (t2.sla ? '（约定 ' + t2.sla + ' 小时）' : ''); }).join('；') + '。',
@@ -949,7 +951,7 @@
       if (R.scriptStep >= R.script.length) return { text: '走单脚本已走完 ' + R.script.length + ' 步，' + (R.scriptId || '') + ' 已到 ' + stateLabel(s, (rowById(R, R.scriptId) || { status: s.states[s.states.length - 1].key }).status) + '。' };
       var nx = R.script[R.scriptStep];
       return { text: '下一步：' + nx.actor.title + (nx.actor.emp ? ' ' + nx.actor.emp : '') + ' ' + nx.label + '，沙箱时钟走 ' + STEP_MIN + ' 分。',
-        act: { type: 'apply', action: 'nextScript' } };
+        act: { type: 'apply', action: 'next-script' } };
     }
 
     /* —— 用例 / 产物 —— */
@@ -1011,7 +1013,7 @@
         if (!pick) pick = R.followUps.filter(function (f) { return !f.applied; })[0];
         if (!pick) return { text: '追加需求都已生成，当前 ' + s.version + '。' };
         return { text: '按「' + pick.text + '」生成 ' + nextV + '：+' + pick.pages + ' 页 +' + pick.fields + ' 字段 +' + pick.states + ' 节点 +' + pick.tests + ' 用例，存量数据不动。',
-          act: { type: 'apply', action: 'applyDelta', input: { text: pick.text } } };
+          act: { type: 'apply', action: 'apply-delta', input: { text: pick.text } } };
       }
       if (lastD) return { text: lastD.from + ' → ' + lastD.to + '：' + lastD.items.map(function (i) { return i.content; }).join('；') + '。用例 ' + lastD.passed + ' / ' + lastD.tests + ' 通过。',
         blocks: [tableB(['类型', '内容', '用例'], lastD.items.map(function (i) { return [i.typeName, cut(String(i.content).replace(i.typeName + ' ', ''), 12), '+' + i.tests]; }))],
@@ -1035,7 +1037,7 @@
     }
     if (hasWord(q, ['怎么办', '下一步做什么', '接下来', '先做什么'])) {
       var sgN = R.suggestion;
-      if (sgN && !sgN.done) return { text: '先采纳权限建议：给' + sgN.roleTitle + '开放' + sgN.pageName + '的' + sgN.op + '，再发正式环境。', act: { type: 'apply', action: 'grantPermission', input: { role: sgN.role, page: sgN.page, op: sgN.op } } };
+      if (sgN && !sgN.done) return { text: '先采纳权限建议：给' + sgN.roleTitle + '开放' + sgN.pageName + '的' + sgN.op + '，再发正式环境。', act: { type: 'apply', action: 'grant-permission', input: { role: sgN.role, page: sgN.page, op: sgN.op } } };
       if (R.env !== 'live' && R.checklist.all) return { text: '发布前检查 ' + R.checklist.passed + ' / ' + R.checklist.total + ' 全通过，可以发正式环境了。', act: { type: 'goto', step: 'ship' } };
       if (R.followUps.filter(function (f) { return !f.applied; }).length) return { text: '线上稳住了，下一步挑一条追加需求生成 ' + nextV + '。', act: { type: 'goto', step: 'iterate' } };
       return { text: '产物 ' + R.deliverables.length + ' 项都已生成，把交付报告发出去。', act: { type: 'open', panel: 'report' } };
@@ -1142,7 +1144,7 @@
     else lines.push('这些列对不上' + (R.spec ? R.spec.short : '当前对象') + '的字段，规格不动数，草案放在抽屉里。');
     var res = { text: lines.join('\n'),
       blocks: [tableB(head.slice(0, 3).map(function (x) { return cut(x, 6); }), body.slice(0, 3).map(function (r) { return r.slice(0, 3).map(function (x) { return cut(x, 10); }); }))] };
-    if (hitF && R.spec) { res.data = addField(data, lib, hitF.key); res.act = { type: 'apply', action: 'addField', input: { key: hitF.key } }; }
+    if (hitF && R.spec) { res.data = addField(data, lib, hitF.key); res.act = { type: 'apply', action: 'add-field', input: { key: hitF.key } }; }
     else res.act = { type: 'open', panel: 'doc', ref: doc.name, title: '字段草案 · 来自《' + doc.name + '》', sub: s0.name + ' · ' + body.length + ' 行 ' + head.length + ' 列 · 未写入规格',
       blocks: [tableB(['列名', '控件', '取值'], draft.map(function (d) { return [d.col, d.ctrl, d.sample]; })),
         kvB([['来源', doc.name + ' · ' + doc.sizeText], ['写入', '未写入 · 规格 ' + (R.spec ? R.spec.specNo + ' ' + R.spec.specVer : '待生成') + ' 不动数']])] };

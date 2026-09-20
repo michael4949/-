@@ -307,6 +307,7 @@
 
   /* 开场发现：进这一屏先说一条从数据里算出来的话 */
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, reg = R.register, I = R.ip, S = R.setup;
     if (step === 'connect') {
       var dir = d.sources.filter(function (s) { return s.mode === 'direct'; }).length;
@@ -340,6 +341,7 @@
 
   /* 快捷问句：每屏 3–4 条，条条都能被 ask 答上 */
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     if (step === 'connect') return ['接了哪几个来源', '高风险合同有几份', '进法务驾驶舱'];
     if (step === 'board') return ['哪份合同风险高', '合规分是怎么算的', '30 天内要办什么', '先处理哪一件'];
     if (step === 'contracts') return ['缺哪些必备条款', '为什么判高风险', '采纳全部高风险修订', '账期超过 90 天的是哪份'];
@@ -369,7 +371,7 @@
       var aa = I.assets.filter(function (x) { return x.id === aid; })[0];
       if (aa) return { text: aa.id + ' ' + aa.title + '（' + aa.kindName + '）：' + (aa.due ? aa.dueLabel + ' ' + aa.due + '，还有 ' + aa.daysLeft + ' 天' : aa.dueLabel) + '，状态' + aa.status + (aa.action ? '，动作' + aa.action + '，预计 ' + fmtN(aa.fee) + ' 元' : '') + '。',
         ref: aa.id,
-        act: (aa.action && step === 'ip') ? { type: 'apply', action: 'toggleRenew', input: { id: aa.id } } : { type: 'open', panel: 'ip', ref: aa.id } };
+        act: (aa.action && step === 'ip') ? { type: 'apply', action: 'toggle-renew', input: { id: aa.id } } : { type: 'open', panel: 'ip', ref: aa.id } };
     }
     /* 点名某个商标类别 */
     m = q.match(/第\s*(\d{1,2})\s*类/);
@@ -379,7 +381,7 @@
       var IC = lib.ipClasses, mp = IC.byIndustry[d.profile.industry] || IC.byIndustry.default;
       if (gpx) return { text: '第 ' + cls + ' 类' + gpx.name + '（' + (gpx.tier === 'core' ? '核心类' : '延伸类') + '）尚未注册：' + gpx.reason + '。申请预计 ' + fmtN(gpx.fee) + ' 元。',
         ref: 'CLS-' + cls,
-        act: step === 'ip' ? { type: 'apply', action: 'toggleApply', input: { cls: cls } } : { type: 'goto', step: 'ip' } };
+        act: step === 'ip' ? { type: 'apply', action: 'toggle-apply', input: { cls: cls } } : { type: 'goto', step: 'ip' } };
       var own = d.ip.trademarks.filter(function (t) { return t.classes.indexOf(cls) >= 0; });
       if (own.length) return { text: '第 ' + cls + ' 类' + (IC.classNames[cls] || '') + '已注册：' + own.map(function (t) { return t.name + '（' + t.regNo + '，注册 ' + t.regDate + '）'; }).join('；') + '。',
         ref: step === 'ip' ? 'CLS-' + cls : null };
@@ -453,12 +455,12 @@
         if (has(q, ['全部', '所有', '高风险'])) {
           if (!hiAll) return { text: '当前没有待采纳的高风险修订，已采纳 ' + k.revised + ' 处。' };
           return { text: '采纳全部高风险修订 ' + hiAll + ' 处：按条款模板新增或改写，' + R.contracts.filter(function (c) { return c.review.counts.high; }).map(function (c) { return c.id; }).join('、') + ' 的风险分一起重算。',
-            act: { type: 'apply', action: 'applyAllHigh', input: {} } };
+            act: { type: 'apply', action: 'apply-all-high', input: {} } };
         }
         var f0 = C.findings.filter(function (x) { return x.fix; })[0];
         if (!f0) return { text: C.id + ' 没有可直接采纳的修订，剩下的要人工核对原件。' };
         return { text: C.id + ' ' + (f0.fix.mode === 'insert' ? '新增' : '修订') + '「' + f0.fix.title + '」：' + cut(f0.fix.text, 52) + '。采纳后风险分重算。',
-          ref: C.id, act: { type: 'apply', action: 'applyFix', input: { contractId: C.id, findingId: f0.id } } };
+          ref: C.id, act: { type: 'apply', action: 'apply-fix', input: { contractId: C.id, findingId: f0.id } } };
       }
       if (has(q, ['账期', '90 天', '付款', '回款'])) {
         var long = [];
@@ -507,7 +509,7 @@
         blocks: [tableB(['节点', '材料'], S.materials.slice(0, 6).map(function (x) { return [cut(x.step, 10), cut(x.item, 14)]; }))] };
       if (has(q, ['许可', '排污', '经营范围'])) return { text: (S.licenses || []).length ? '涉及许可 ' + S.licenses.join('、') + '，约 ' + S.licenses.map(function (n) { return (lib.setupRules.licenses[n] || {}).days; }).join(' / ') + ' 天，与登记并行；取得许可前不得开展相应业务。' : '当前方案不涉及前置或后置许可。' };
       if (has(q, ['确认', '进台账'])) return { text: S.confirmed ? '方案已确认，' + S.steps.length + ' 个节点已进 90 天台账。' : '确认后 ' + S.steps.length + ' 个节点按日期进 90 天台账。',
-        act: S.confirmed ? null : { type: 'apply', action: 'confirmSetup', input: {} } };
+        act: S.confirmed ? null : { type: 'apply', action: 'confirm-setup', input: {} } };
     }
 
     if (step === 'ip') {
@@ -515,7 +517,7 @@
         var pend = urgentIp(R).filter(function (a) { return !a.listed && a.action; });
         if (!pend.length) return { text: '待续展 / 缴费的都已在清单里，预计 ' + fmtN(I.renewFee) + ' 元。' };
         return { text: '把 ' + pend.length + ' 项加入清单：' + pend.map(function (a) { return ipT(a); }).join('、') + '，预计合计 ' + fmtN(pend.reduce(function (t, a) { return t + a.fee; }, 0)) + ' 元。',
-          act: { type: 'apply', action: 'toggleRenew', input: { ids: pend.map(function (a) { return a.id; }) } } };
+          act: { type: 'apply', action: 'toggle-renew', input: { ids: pend.map(function (a) { return a.id; }) } } };
       }
       if (has(q, ['快到期', '到期', '几项', '续展', '年费'])) {
         var us = urgentIp(R);
@@ -648,7 +650,7 @@
     var d2 = ensure(d0);
     d2.contracts.push(clone(cObj));
     d2.log.push({ seq: d2.log.length + 1, kind: 'contract', label: '文档进台账', detail: id + ' ' + title + '，' + fmtN(total) + ' 元，风险分 ' + rv.score + '，缺 ' + miss.length + ' 项必备条款' });
-    return { text: lines.join('\n'), blocks: blocks, ref: id, data: d2, act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+    return { text: lines.join('\n'), blocks: blocks, ref: id, data: d2, act: { type: 'focus', ref: id, step: 'contracts' } };
   }
   function ingestSheet(doc, R) {
     var s0 = (doc.sheets || [])[0];
@@ -692,8 +694,9 @@
     lines.push('附件 ' + ((ml.attaches || []).length) + ' 个；' + (R.register.counts.overdue ? '台账里已有逾期 ' + R.register.counts.overdue + ' 项，先处理那一项。' : '台账里暂无逾期项。'));
     var pick = (buys[0] || R.contracts[0] || {}).id || null;
     return { text: lines.join('\n'),
-      blocks: [kvB([['发件', ml.from || '—'], ['主题', cut(ml.subject || '—', 16)], ['日期', ml.date || '—']]),
-        buys.length ? tableB(['合同', '相对方', '金额'], buys.slice(0, 4).map(function (c) { return [c.id, cut(c.party, 10), c.amount ? fmtW(c.amount) : '—']; })) : null],
+      /* blocks 每一项都必须是带合法 type 的对象：没有买方合同时那一块直接不给，不能塞 null（SPEC §10.6） */
+      blocks: [kvB([['发件', ml.from || '—'], ['主题', cut(ml.subject || '—', 16)], ['日期', ml.date || '—']])].concat(
+        buys.length ? [tableB(['合同', '相对方', '金额'], buys.slice(0, 4).map(function (c) { return [c.id, cut(c.party, 10), c.amount ? fmtW(c.amount) : '—']; }))] : []),
       ref: pick, act: pick ? { type: 'open', panel: 'contract', ref: pick } : null };
   }
   function ingest(doc, step, data, lib, result) {

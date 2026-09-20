@@ -154,7 +154,7 @@ node scripts/validate.js        # 断言：确定性、不改样本、预置句�
 | `{type:'goto', step}` | 切到那一屏（六屏之外的 key 不处理，交平台兜底；问流程节点只换屏不高亮） |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：记录编号高亮试用屏看板表与手机列表里那一行（不在试用屏就先切过去），`TC-编号` 高亮测试屏用例表那一行；找不到就退回按文本找行 |
 | `{type:'open', panel, ref}` | `parse` / `source` / `preview` 进接入屏高亮命中词条、主数据来源行、预览结果；`pages` 进生成应用屏高亮页面清单、`page`（ref 用页面 key）切手机预览到那一页、`judge` 开「怎么生成的」抽屉；`board` / `perf` 进试用屏高亮状态分布与 PC 指标；`matrix` / `sugg` / `tests` 进测试屏高亮权限矩阵、权限建议、用例表，`dict` / `api` 开数据字典与接口清单抽屉；`entry` / `checks` 进发布屏高亮扫码入口与发布前检查；`stock` / `follow` / `change` 进迭代屏高亮存量说明、追加需求清单、变更清单，`report` 开交付报告抽屉；`doc` 开文档草案抽屉（内容在 act 的 `blocks` 里） |
-| `{type:'apply', action, input}` | `generate{}` 按当前需求句生成、`addField{key}` 加一个推荐字段、`grantPermission{role,page,op}` 采纳权限建议、`nextScript{}` 走单脚本下一步、`publish{}` 发到正式环境、`applyDelta{text}` 按这一条追加需求生成新版本；动作名用内核导出名，平台照名字调同名写回函数 |
+| `{type:'apply', action, input}` | `generate{}` 按当前需求句生成、`add-field{key}` 加一个推荐字段、`grant-permission{role,page,op}` 采纳权限建议、`next-script{}` 走单脚本下一步、`publish{}` 发到正式环境、`apply-delta{text}` 按这一条追加需求生成新版本。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `addField / grantPermission / nextScript / applyDelta`），SPEC §12 的三道校验按清单名比 |
 | `{type:'set', path, value}` | `state.text` 改需求句后重解析、`state.delta` 把一句话填进追加需求框、`state.presetIndex` 换一条预置句 |
 
 **ingest 认的文档与写回**（入参一律是 `../_shared/docparse.js` 的输出）

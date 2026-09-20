@@ -787,20 +787,23 @@
     }
     return false;
   }
-  /* 写回类：把文档再交给内核的 ingest，取它算好的数据副本，页面按副本重绘 */
-  function actApply(a, api) {
-    if (a.action !== 'ingest' || !a.input || !a.input.doc) return false;
-    var out = K.ingest(a.input.doc, M.step, M.data, LIB, M.R);
-    if (!out || !out.data) return false;
-    M.data = out.data; recompute();
-    if (a.ref) focusLead(String(a.ref), api); else draw();
-    var lg = M.data.log[M.data.log.length - 1];
-    if (lg && M.frame) P.toast(M.frame.body, lg.label + ' · ' + lg.detail);
-    return true;
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面这件事由宿主做。
+     等回答打完再并，免得重绘把正在打字的气泡冲掉。 */
+  function takeDoc(doc, step) {
+    var out = K.ingest(doc, step, M.data, LIB, M.R);
+    if (!out || !out.data) return out;
+    var nd = out.data, ref = out.ref;
+    return { text: out.text, blocks: out.blocks, act: function (api) {
+      M.data = nd; recompute();
+      if (ref) focusLead(String(ref), api); else draw();
+      var lg = M.data.log[M.data.log.length - 1];
+      if (lg && M.frame) P.toast(M.frame.body, lg.label + ' · ' + lg.detail);
+    } };
   }
 
   window.DGG.chatBrain('m4', {
     kernel: window.DGG.coreM4,            /* 就是 mount 里拿到的那个 K，登记发生在 mount 之前，这里直接取 */
+    onDoc: takeDoc,
     ctx: function () {
       var d = M.data;
       d.focusLead = M.lead;
@@ -813,8 +816,7 @@
       if (a.type === 'focus') return actFocus(a.ref, api);
       if (a.type === 'open') return actOpen(a, api);
       if (a.type === 'set') return actSet(a);
-      if (a.type === 'apply') return actApply(a, api);
-      return false;
+      return false;                                        /* 本模块不产 apply，摄入的并数走 onDoc */
     }
   });
 

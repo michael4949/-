@@ -116,7 +116,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   ok(JSON.stringify(d) === beforeDoc, k + ' ingest 改动了原数据');
   const backfilled = wIn.data.leads.filter((l) => l.id === wIn.act.ref)[0];
   ok(backfilled.amountEst === amount && backfilled.note === '交付期限 2026-11-30', k + ' ingest 合同未回填金额与期限');
-  ok(wIn.data.log.length === d.log.length + 1 && wIn.act.type === 'apply' && wIn.act.action === 'ingest', k + ' ingest 合同动作');
+  ok(wIn.data.log.length === d.log.length + 1 && wIn.act.type === 'focus' && wIn.act.ref === wIn.ref, k + ' ingest 合同动作');
   ok(isBlocks(wIn.blocks) && JSON.stringify(core.ingest(wordDoc, 'leads', d, lib, R)) === JSON.stringify(wIn), k + ' ingest 合同两次不一致');
   ok(core.run(wIn.data, lib).byId[wIn.act.ref].amountEst === amount, k + ' ingest 合同回填后算不通');
   lintText(wIn.text, k + ' ingest 合同');

@@ -606,7 +606,7 @@
   }
   function applyAction(a) {
     var input = a.input || {}, R = M.R, v = V();
-    if (a.action === 'confirmReport') {
+    if (a.action === 'confirm-report') {
       var row = R.verify.rows.filter(function (x) { return x.id === input.id; })[0];
       if (!row || row.resolved) return false;
       if (M.step !== 'connect') setStep('connect');
@@ -614,8 +614,8 @@
       refocus(row.reportId || row.id, 260);
       return true;
     }
-    if (a.action === 'confirmAllReports') { enterBoard(); return true; }
-    if (a.action === 'handleException') {
+    if (a.action === 'confirm-all-reports') { enterBoard(); return true; }
+    if (a.action === 'handle-exception') {
       var ex = R.alerts.filter(function (x) { return x.id === input.id; })[0];
       if (!ex || ex.status !== 'open') return false;
       if (M.step !== 'board') setStep('board');
@@ -623,7 +623,7 @@
       refocus(ex.id, 260);
       return true;
     }
-    if (a.action === 'adoptStd') {
+    if (a.action === 'adopt-std') {
       var c = R.calibration.filter(function (x) { return x.product === input.product && x.op === input.op; })[0];
       if (!c || c.status !== 'expired' || c.adopted) return false;
       if (M.step !== 'diag') setStep('diag');
@@ -631,7 +631,7 @@
       refocus('ST-' + c.product + '|' + c.op, 260);
       return true;
     }
-    if (a.action === 'applyRelease') {
+    if (a.action === 'apply-release') {
       if (M.data.releasePlan) return false;
       var b = R.buffer;
       if (M.step !== 'diag') setStep('diag');
@@ -639,7 +639,7 @@
       focusSel('.m8-gauge', 300);
       return true;
     }
-    if (a.action === 'applySequence') {
+    if (a.action === 'apply-sequence') {
       if (M.data.jobSeq) return false;
       var q = R.sequence;
       if (M.step !== 'improve') setStep('improve');
@@ -647,7 +647,7 @@
       focusSel('.m8-seq', 300);
       return true;
     }
-    if (a.action === 'commitProject') {
+    if (a.action === 'commit-project') {
       var keys = (input.keys && input.keys.length ? input.keys.slice() : [M.pick || R.preview.recommended]);
       if (keys.length === 1 && keys[0] === '组合') keys = R.preview.combo.keys.slice();
       if (M.data.projects.some(function (p) { return p.keys.join() === keys.slice().sort().join(); })) return false;
@@ -658,7 +658,7 @@
       commit(nd, '已立项 ' + np.id + ' · ' + np.owner + ' · 目标 ' + v.queue + ' ≤ ' + np.target.queueDays + ' 天');
       return true;
     }
-    if (a.action === 'addTraining') {
+    if (a.action === 'add-training') {
       var p0 = R.skills.pairs.filter(function (x) { return x.trainee === input.trainee && x.op === input.op; })[0];
       if (!p0 || p0.added) return false;
       if (M.step !== 'exec') setStep('exec');
@@ -666,7 +666,7 @@
       refocus(p0.trainee, 260);
       return true;
     }
-    if (a.action === 'scheduleMaint') {
+    if (a.action === 'schedule-maint') {
       var mt = R.maintenance.filter(function (x) { return x.machine === input.machine; })[0];
       if (!mt || mt.scheduled || !mt.window) return false;
       if (M.step !== 'exec') setStep('exec');
@@ -674,20 +674,21 @@
       refocus(mt.machine, 260);
       return true;
     }
-    if (a.action === 'applyDispatch') {
+    if (a.action === 'apply-dispatch') {
       if (M.data.dispatch) return false;
       var dp = R.dispatch;
       if (M.step !== 'exec') setStep('exec');
       commit(K.applyDispatch(M.data, LIB), v.dispatch + ' ' + dp.id + ' 已下发 · ' + dp.filled + ' 人 · ' + v.support + ' ' + dp.support + ' 人');
       return true;
     }
-    if (a.action === 'ingest') {
-      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
-      if (!r || !r.data) return false;
-      commitDoc(r.data);
-      return true;
-    }
     return false;
+  }
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面由宿主做 */
+  function takeDoc(doc, step) {
+    var r = K.ingest(doc, step, M.data, LIB, M.R);
+    if (!r || !r.data) return r;
+    var nd = r.data;
+    return { text: r.text, blocks: r.blocks, act: function () { commitDoc(nd); } };
   }
   function setParam(a) {
     if (a.path === 'line') {
@@ -718,6 +719,7 @@
   window.DGG.chatBrain('m8', {
     kernel: window.DGG.coreM8,
     ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
+    onDoc: takeDoc,
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'focus') { var el = refEl(a.ref); if (!el) return false; api.focus(el); return true; }

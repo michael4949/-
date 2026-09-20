@@ -110,7 +110,7 @@ examples/*.output.json      三套样本的驾驶舱摘要
 | `{type:'goto', step}` | 切到那一屏；切到招聘屏时清掉候选人筛选 |
 | `{type:'focus', ref}` | 按 `data-ref` 高亮：部门行、候选人行、规则行、需求单块、面试安排项、涉及员工行 |
 | `{type:'open', panel, ref}` | `rule` 选中规则并进合规屏、`candidate` 选中候选人并进招聘屏、`jd` 开 JD 全文、`kit` 开题库与锚点、`months` 开方案逐月明细、`report` 开人力月报、`doc` 开文档解析抽屉（抽屉内容在 act 的 `blocks` 里，同一套块型） |
-| `{type:'apply', action, input}` | `resolve{rule}` 合规整改、`offer{id,salary}` 发 offer、`adoptPlan{key}` 采纳方案、`ingest{doc}` 重放这次摄入取新数据副本；动作名用内核导出名，通用包里对应 `resolve-compliance / make-offer / adopt-plan` |
+| `{type:'apply', action, input}` | `resolve-compliance{rule}` 合规整改、`make-offer{id,salary}` 发 offer、`adopt-plan{key}` 采纳方案。**动作名一律用通用包 `manifest.actions` 里的动作名**（不是内核导出名 `resolve / offer / adoptPlan`）—— SPEC §12：平台执行 `apply` 前会校验「在清单里 · family 是 core · 不是当前动作自己」，三条任一不过就整条忽略 |
 | `{type:'set', path, value}` | `filter` 切候选人筛选（A / new / interview / offer / fail）、`plan` 切对比中的方案 |
 
 **ingest 认的文档与写回**（入参一律是 `skills/_shared/docparse.js` 的输出）
@@ -123,4 +123,4 @@ examples/*.output.json      三套样本的驾驶舱摘要
 | PPT | 经营回顾 | 读到「收入 … 万元」就把 `profile.revenue12` 改成文档口径，`data` 里加一条「收入口径改按文档」日志，六屏按新口径重算 |
 | 邮件 | 人事事项 | 读发件、主题、日期、附件数与金额，判断是否命中入转调离 / 工时 / 假期 / 社保 / 薪酬；只开抽屉，不写数据 |
 
-写数据的两类返回 `{text, blocks, data, act}`：`data` 是新副本（入参不动），`act` 是 `{type:'apply', action:'ingest', input:{doc}}`——只实现 act 的平台重放同一次摄入拿 `data`，两条路等价；两者取其一即可，不要既写 `data` 又重放。
+写数据的两类返回 `{text, blocks, ref?, data, act}`：`data` 是新副本（入参不动），平台按 `mutatesPath: "data"` 取走存回会话状态。`act` **不再是**指回自己的 `apply`（SPEC §12 禁止）：简历入池给 `{type:'focus', ref, step:'recruit'}`，PPT 改收入口径给 `{type:'goto', step:'cost'}`。

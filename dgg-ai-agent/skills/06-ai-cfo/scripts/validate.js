@@ -115,7 +115,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const ct = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('采购框架合同\n第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付。\n第二条 首付 30%，交付验收后付 60%，质保金 10%。\n第三条 交付期限：2026 年 11 月 30 日前完成全部交付。\n', 'utf8') });
   const cIn = core.ingest(ct, 'cash', d, lib, R);
   ok(cIn && cIn.data && cIn.data !== d && cIn.data.cash.apItems.length === d.cash.apItems.length + 1, k + ' ingest 合同首期写新副本');
-  ok(JSON.stringify(d) === before8 && cIn.act.type === 'apply' && cIn.act.action === 'ingest' && cIn.act.step === 'cash', k + ' ingest 合同不动入参');
+  ok(JSON.stringify(d) === before8 && cIn.act.type === 'goto' && cIn.act.step === 'cash', k + ' ingest 合同不动入参');
   ok(core.run(cIn.data, lib).forecast.weeks.length === R.forecast.weeks.length, k + ' ingest 合同后可继续算');
   lintText(cIn.text, k + ' ingest 合同');
   const deck = { ok: true, kind: 'ppt', name: 'review.pptx', size: 1024, sizeText: '1 KB', ext: 'pptx', text: '三季度经营回顾 收入 4,260 万元 毛利率 28.4%', paragraphs: [], tables: [], sheets: [], slides: [{ no: 1, title: '三季度经营回顾', lines: ['收入 4,260 万元'] }], mail: null, stats: {}, note: '' };

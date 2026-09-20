@@ -566,6 +566,7 @@
 
   // 开场发现：进这一屏先说一条从数据里算出来的话
   function brief(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, v = R.vocab, B = R.bottleneck, vr = R.verify;
     if (step === 'connect') {
       if (!vr.pending) return '本周 ' + vr.total + ' 条' + v.report + '全部过核验，' + v.bottleneck + ' ' + B.line.name + ' 负荷 ' + k.load7 + '%。';
@@ -600,6 +601,7 @@
 
   // 快捷问句：每屏四条，条条都能被 ask 答上
   function suggest(step, data, lib, result) {
+    if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), v = R.vocab, B = R.bottleneck;
     if (step === 'connect') return ['待核验有几条', '漏报这条怎么补', '哪些来源是直连的', '全部确认并进看板'];
     if (step === 'board') return ['为什么是 ' + B.line.name, v.queue + '多少天', '先处置哪一条异常', v.wip + '会超限吗'];
@@ -631,7 +633,7 @@
       var aid = 'EX-' + m[1].replace(/^-+/, '');
       var al = R.alerts.filter(function (x) { return x.id === aid; })[0];
       if (al) return { text: al.id + ' ' + al.ruleName + '：' + al.text + '。根因 ' + al.cause + '，动作 ' + al.action + '，' + al.roleName + '负责' + (al.savedH ? '，预计回收 ' + al.savedH + ' h' : '') + '。',
-        ref: al.id, act: al.status === 'open' ? { type: 'apply', action: 'handleException', input: { id: al.id } } : { type: 'open', panel: 'alert', ref: al.id } };
+        ref: al.id, act: al.status === 'open' ? { type: 'apply', action: 'handle-exception', input: { id: al.id } } : { type: 'open', panel: 'alert', ref: al.id } };
     }
     m = q.match(/(B-\d{4}-\d{2})/i);
     if (m) {
@@ -651,7 +653,7 @@
     if (m) {
       var mid = m[1].toUpperCase(), mt = R.maintenance.filter(function (x) { return x.machine === mid; })[0];
       if (mt) return { text: mid + '（' + mt.lineName + '）：' + mt.reasons.join('；') + '。建议排进 ' + (mt.window ? mt.window.label + '，负荷 ' + mt.window.pct + '%，' + mt.minutes + ' min，' + mt.role : '负荷低的班次') + '。',
-        ref: mid, act: (!mt.scheduled && mt.window) ? { type: 'apply', action: 'scheduleMaint', input: { machine: mid } } : { type: 'open', panel: 'maint', ref: mid } };
+        ref: mid, act: (!mt.scheduled && mt.window) ? { type: 'apply', action: 'schedule-maint', input: { machine: mid } } : { type: 'open', panel: 'maint', ref: mid } };
     }
     /* —— 为什么是约束（六屏都答，排在点名产线之前） —— */
     if (has(q, ['为什么', '凭什么', '怎么定']) && has(q, ['约束', '瓶颈', B.line.name, '它'])) {
@@ -693,7 +695,7 @@
       if (has(q, ['漏报', '补', '怎么补'])) {
         var ms = vr.rows.filter(function (r) { return r.kind === 'missing'; })[0];
         if (ms) return { text: ms.text + '。AI 建议：' + ms.suggest + '。确认后只补这一条，其余不动。', ref: ms.id,
-          act: ms.resolved ? null : { type: 'apply', action: 'confirmReport', input: { id: ms.id } } };
+          act: ms.resolved ? null : { type: 'apply', action: 'confirm-report', input: { id: ms.id } } };
       }
       if (has(q, ['直连', '来源', '导入', '同步'])) {
         var dir = d.sources.filter(function (s) { return s.mode === 'direct'; });
@@ -701,7 +703,7 @@
           blocks: [tableB(['来源', '方式', '条数'], d.sources.map(function (s) { return [cut(s.name, 6), s.mode === 'direct' ? '直连' : '导入', fmtN(s.rows)]; }))] };
       }
       if (has(q, ['全部确认', '进看板', '开始', '进入'])) return { text: '确认 ' + vr.pending + ' 条后进' + v.flowName + '看板：' + v.bottleneck + ' ' + B.line.name + '，负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天。',
-        act: { type: 'apply', action: 'confirmAllReports', input: {} } };
+        act: { type: 'apply', action: 'confirm-all-reports', input: {} } };
     }
 
     if (step === 'board') {
@@ -711,7 +713,7 @@
         if (!op0) return { text: '本周 ' + R.alerts.length + ' 起异常已全部处置。' };
         return { text: '先处置 ' + op0.id + ' ' + op0.ruleName + '：' + op0.text + '。根因 ' + op0.cause + '，' + op0.roleName + ' ' + op0.action + (op0.savedH ? '，预计回收 ' + op0.savedH + ' h' : '') + '。',
           blocks: [tableB(['规则', '根因', '预计'], openAlerts(R).slice(0, 4).map(function (a) { return [cut(a.ruleName, 8), cut(a.cause, 10), (a.savedH || 0) + ' h']; }))],
-          ref: op0.id, act: { type: 'apply', action: 'handleException', input: { id: op0.id } } };
+          ref: op0.id, act: { type: 'apply', action: 'handle-exception', input: { id: op0.id } } };
       }
       if (has(q, ['在制', '超限', '缓冲', '投料', '释放'])) {
         var b2 = R.buffer;
@@ -733,12 +735,12 @@
         if (!ex.length) return { text: '标准工时与 12 周中位一致，暂无过期项。' };
         return { text: ex.length + ' 项标准工时过期：' + ex.map(function (c) { return c.productName + ' ' + c.op + ' ' + c.std + ' → ' + c.suggest + ' h（' + (c.dev > 0 ? '+' : '') + c.dev + '%）'; }).join('；') + '。采纳后排程与在制预测重算。',
           blocks: [tableB(['产品', v.op, '偏差'], ex.map(function (c) { return [cut(c.productName, 8), c.op, (c.dev > 0 ? '+' : '') + c.dev + '%']; }))],
-          ref: stdRef(ex[0]), act: { type: 'apply', action: 'adoptStd', input: { product: ex[0].product, op: ex[0].op } } };
+          ref: stdRef(ex[0]), act: { type: 'apply', action: 'adopt-std', input: { product: ex[0].product, op: ex[0].op } } };
       }
       if (has(q, ['投料', '节拍', '释放', '缓冲'])) {
         var b3 = R.buffer;
         return { text: '明日允许' + v.release + ' ' + fmtN(b3.release.allowedUnits) + ' ' + v.unit + '，' + b3.release.line.name + ' 计划 ' + b3.release.before + ' → ' + b3.release.after + ' h，' + v.wip + '天数 ' + b3.wipDays.before + ' → ' + b3.wipDays.after + ' 天，释放人时 ' + fmtH(b3.release.freedHours) + '/日。',
-          act: d.releasePlan ? null : { type: 'apply', action: 'applyRelease', input: {} } };
+          act: d.releasePlan ? null : { type: 'apply', action: 'apply-release', input: {} } };
       }
       if (has(q, ['等待', '等料', '等检'])) return { text: v.wait + '构成：' + l2.waitDist.map(function (x) { return x.label + ' ' + x.value + ' h'; }).join('，') + '。' + v.waitReasons[2] + '可由' + v.firstPieceCheck + '前移回收 80%。' };
       if (has(q, ['利用率', '可用率', '性能率'])) return { text: '可用率 ' + l2.availability + '%，性能率 ' + l2.performance + '%，有效利用率 ' + l2.effUtil + '%；12 周 ' + l2.weekly[0].effUtil + '% → ' + l2.weekly[l2.weekly.length - 1].effUtil + '%。' };
@@ -761,12 +763,12 @@
         var q4 = R.sequence;
         return { text: v.setup + ' ' + q4.before.changeovers + ' 次 ' + r1(q4.before.minutes / 60) + ' h → ' + q4.after.changeovers + ' 次 ' + r1(q4.after.minutes / 60) + ' h，省 ' + q4.savedHPerDay + ' h/日；交期约束' + (q4.dueOk ? '满足' : '未满足') + '。',
           blocks: [tableB(['序', v.lot, v.setup], q4.after.rows.slice(0, 5).map(function (r) { return [r.seq, r.id, (r.setupMin || 0) + ' min']; }))],
-          act: d.jobSeq ? null : { type: 'apply', action: 'applySequence', input: {} } };
+          act: d.jobSeq ? null : { type: 'apply', action: 'apply-sequence', input: {} } };
       }
       if (has(q, ['立项', '落地', '执行'])) {
         var kk = [pv4.recommended];
         return { text: '立项 ' + kk.join(' + ') + '，节点按天排期，进执行与' + v.dispatch.replace('单', '') + '跟踪。',
-          act: { type: 'apply', action: 'commitProject', input: { keys: kk } } };
+          act: { type: 'apply', action: 'commit-project', input: { keys: kk } } };
       }
     }
 
@@ -791,16 +793,16 @@
         return { text: sg2.length + ' 个' + v.op + '是单点：' + sg2.map(function (c) { return c.op + '（2 级以上 ' + c.qualified + ' 人 / 每日需 ' + c.need + ' 人，覆盖度 ' + c.ratio + '）'; }).join('；') + '。覆盖度低于 1.5 算单点。',
           blocks: R.skills.pairs.length ? [tagsB(R.skills.pairs.map(function (p) { return p.trainee + ' 由 ' + p.mentor + ' 带教 ' + p.op; }))] : null,
           ref: p0 ? p0.trainee : null,
-          act: (p0 && !p0.added) ? { type: 'apply', action: 'addTraining', input: { trainee: p0.trainee, op: p0.op } } : null };
+          act: (p0 && !p0.added) ? { type: 'apply', action: 'add-training', input: { trainee: p0.trainee, op: p0.op } } : null };
       }
       if (has(q, ['保养', '到期', '窗口'])) {
         var md = R.maintenance.filter(function (x) { return !x.scheduled; });
         if (!md.length) return { text: v.maint + '已全部排入窗口。' };
         return { text: md.length + ' 台到期：' + md.map(function (x) { return x.machine + '（' + cut(x.reasons[0], 16) + '）'; }).join('；') + '。建议窗口 ' + (md[0].window ? md[0].window.label : '—') + '。',
-          ref: md[0].machine, act: md[0].window ? { type: 'apply', action: 'scheduleMaint', input: { machine: md[0].machine } } : null };
+          ref: md[0].machine, act: md[0].window ? { type: 'apply', action: 'schedule-maint', input: { machine: md[0].machine } } : null };
       }
       if (has(q, ['下发', '生成', '派工'])) return { text: v.dispatch + ' ' + dp2.id + '：' + dp2.filled + ' 人，' + v.support + ' ' + dp2.support + ' 人，未覆盖 ' + dp2.unmet.length + '。',
-        act: d.dispatch ? null : { type: 'apply', action: 'applyDispatch', input: {} } };
+        act: d.dispatch ? null : { type: 'apply', action: 'apply-dispatch', input: {} } };
     }
 
     if (step === 'report') {
@@ -888,7 +890,7 @@
         + '核验：重复 ' + dup.length + ' 条、数量为零 ' + zero.length + ' 条、缺 E-编号 ' + noEmp.length + ' 条，共 ' + bad + ' 条要' + v.roles.foreman + '确认。已登记为导入批次。',
         blocks: [preview4], ref: 'doc-import',
         data: docSource(d, doc, body.length, body.length + ' 行' + v.report + '，核出 ' + bad + ' 条待核验'),
-        act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+        act: { type: 'goto', step: 'connect' } };
     }
     /* 不是报工表：把真读到的列和行数说清楚，登记为导入批次 */
     var nums = [];
@@ -899,7 +901,7 @@
       + v.report + '核验要 ' + [v.lot, v.op, 'E-编号', '工时', '数量', '日期'].join(' / ') + ' 这几列，这张表里没有，核验不动数。已按 ' + body.length + ' 行登记为导入批次。',
       blocks: [preview4], ref: 'doc-import',
       data: docSource(d, doc, body.length, '《' + s0.name + '》' + body.length + ' 行，列不含' + v.report + '字段，不参与核验'),
-      act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+      act: { type: 'goto', step: 'connect' } };
   }
   function ingestSlides(doc, R, lib) {
     var d = R.data, v = R.vocab, txt = String(doc.text || '').replace(/\s+/g, ' ');
@@ -961,7 +963,7 @@
       lines.push('正文里提到「' + mDown[0] + '」' + (mMin ? '、' + mMin[1] + ' 分钟' : '') + '，本周异常预警已有 ' + R.alerts.length + ' 起、待处置 ' + R.kpi.alertsOpen + ' 起，这一条按' + v.down + '口径记进本周动作。');
       var nd = ensure(d);
       pushLog(nd, 'exception', '邮件：' + cut(ml.subject || doc.name, 12), (ml.from || '') + ' ' + (ml.date || '') + ' · ' + mDown[0] + (mMin ? ' ' + mMin[1] + ' min' : ''));
-      return { text: lines.join('\n'), blocks: [kvB(kv)], data: nd, act: { type: 'apply', action: 'ingest', input: { doc: doc } } };
+      return { text: lines.join('\n'), blocks: [kvB(kv)], data: nd, act: { type: 'goto', step: 'board' } };
     }
     lines.push('正文没有' + v.down + '、异常或交期内容，' + v.dept + '这六屏不动数。');
     return { text: lines.join('\n'), blocks: [kvB(kv), tagsB((ml.attaches || []).slice(0, 3).map(function (a) { return cut(a, 14); }))] };

@@ -334,34 +334,18 @@
     ],
     "drift": [
       {
-        "where": "SKILL.md 前言",
-        "says": "前言只有 name/id/kind/credits/version/triggers/inputs/llm_calls/llm_timeout_ms/offline/delivers/report_pages/brief_pages，没有 data_files 字段",
-        "actual": "data/ 下实有 9 个 json：actions(60 条)、benchmark(270 格)、diagnostics(18×3=54 段)、dimensions(6 维 18 子维)、levels(L0–L4)、questions(36 题)、report-text、risks(16 条)、scenes(70 个，14 大类各 5)；运行期还需 _shared 的 4 个 json 与 prompts/polish.md",
-        "fix": "前言补 data_files: 9，并在正文注明另依赖 _shared 4 个 json（profile-fields / industries / credits / lint-words）与 1 个提示词文件"
-      },
-      {
-        "where": "scripts/load-data.js 与 SKILL.md「3. 输出前」（第 93 行）",
-        "says": "全部文本字段过 _shared/lint-words.json 的 hard 项（_shared/lint.js），命中即回落模板",
-        "actual": "内核 mergePolish 的 lint 是可选第三形参；load-data 只返回 lintWords 数据表，不返回可调用的判定函数。调用方若不自行 makeLint 并传入，禁忌词校验完全不发生——实跑传 undefined 时三条全部按 llm 合入，未做任何拦截",
-        "fix": "load-data 里直接补 lint: makeLint(lintWords).hit 一起返回；或在 SKILL.md 写明「壳层/invoke 层必须自行构造 lint 并作为 mergePolish 第三参数传入」"
-      },
-      {
-        "where": "SKILL.md「步骤 · 推荐场景」（第 75 行）",
-        "says": "取本行业大类的场景……打分排序，取前 5",
-        "actual": "core/compute.js 只做 filter(sector) + sort + 标 rank，没有 slice(0, 5)。当前 70 个场景恰好 14 大类各 5 个，所以输出长度正好是 5，看不出差别；一旦某大类补到 6 个场景，输出就会与文档和 schema 不符",
-        "fix": "内核加 .slice(0, 5)，或把文档改成「返回本大类全部场景（当前每类 5 个），已按 score 排序并标 rank」"
+        "where": "prototype/src/module-01.js 第 1 行注释",
+        "says": "三屏：企业画像（13 项）→ 36 题 → 咨询报告（33 页，信息图风格）",
+        "actual": "drawReport 实际 28 页，SKILL.md 前言 report_pages: 28 / brief_pages: 6 已与实际一致；只剩原型文件头注释还写 33 页",
+        "fix": "把注释里的「33 页」改成「28 页（速览 6 页）」",
+        "status": "仍未修：23d1b46 只收口了 11 个 SKILL.md 与三处代码，没有动 prototype/ 的文件头注释"
       },
       {
         "where": "prototype/src/module-01.js 第 1 行注释",
-        "says": "三屏：企业画像（13 项）→ 36 题 → 咨询报告（33 页，信息图风格）",
-        "actual": "drawReport 里 add() 调用 28 次，正好 28 页，其中带 brief 的 6 页（封面 / 01 速览两页 / 03 总体 / 07 差距 / 09 路线图），与 SKILL.md 的 report_pages: 28、brief_pages: 6 一致",
-        "fix": "把注释里的「33 页」改成「28 页（速览 6 页）」"
-      },
-      {
-        "where": "core/compute.js 第 2 行注释 与 prototype/src/module-01.js 第 1 行注释",
-        "says": "内核标「能力内核 v2」，原型标「模块 1 · 企业AI成熟度评估 v3」",
-        "actual": "内核 VERSION 常量与 SKILL.md 前言都是 2.1.0，schema/output.json 也把 meta.version 约束成 ^2\\.\\d+\\.\\d+$",
-        "fix": "两处注释统一写 v2.1.0，避免同一模块出现 v2 / v3 / 2.1.0 三个版本号"
+        "says": "原型标「模块 1 · 企业AI成熟度评估 v3」",
+        "actual": "内核注释已改成「能力内核 v2.2.0」、VERSION 与 SKILL.md 前言都是 2.1.0 之后的 2.2.0；原型那一处仍写 v3",
+        "fix": "原型注释改成 v2.2.0，同一模块不要出现 v3 与 2.2.0 两个版本号",
+        "status": "仍未修：内核侧已对齐，原型侧未改"
       }
     ],
     "notes": "内核只导出 validate/compute/buildPrompt/mergePolish 四个函数，故动作只有 4 个，未凑够 6 个。两条约定需生成器支持：$lint = _shared/lint.js 的 makeLint(lib.lintWords).hit（JSON 传不了函数）；exampleInput 里的 $ref 实跑时用该文件内容替换。merge-polish 前 160 字与 run 相同，差异在 actions[0..2]（source 由 template 变 llm）。四套样例全跑通，S1 与 golden 逐字一致。路径相对仓库根 /home/user/-/dgg-ai-agent。"
@@ -905,34 +889,18 @@
     ],
     "drift": [
       {
-        "where": "SKILL.md 前言（第 1–15 行）",
-        "says": "没有 data_files 字段",
-        "actual": "data/ 下实际 17 个 json：顶层 axes.json / conditions.json / report-text.json 三个，sectors/ 14 个大类各一个；同仓库 03 与 10 的前言都按「含子目录全量计数」写了 data_files（6 / 5）",
-        "fix": "前言补一行 data_files: 17"
-      },
-      {
-        "where": "SKILL.md 正文「步骤 · 1 compute」第 83 行",
-        "says": "数据可得与实施门槛在按 dataState / capacity 调整后会落到 0.5 档，所以单轴分数可能是 4.5 这样的值",
-        "actual": "见效周期也会落到 0.5 档：window=m12 时 oWin.fast=-0.5，内核对 cycle ≤ 2 的场景执行 clamp(r1(s.cycle - oWin.fast),1,5)。实跑 S1 把 window 改成 m12，「设备预测性维护」的 axis.cycle = 2.5",
-        "fix": "改为「数据可得、实施门槛与见效周期三轴在调整后都可能落到 0.5 档」"
-      },
-      {
-        "where": "SKILL.md 正文「派生项」表 · 风险提示行（第 105 行）",
-        "says": "由 dataState、systems、capacity、缺失数据源、周期与期望窗口的差距触发",
-        "actual": "内核共 7 条规则：除所列 6 条外还有一条 profile.itStaff === 'none' 且 investment.tier === '重' 时的「投入档与数字化人员配置存在差距」（中），以及一条全部未命中时的兜底「提示」条",
-        "fix": "把「数字化专职为无 × 投入档为重」这条补进触发源列表（兜底条已在「降级」表里写明，可保留）"
-      },
-      {
-        "where": "SKILL.md 正文第 158 行「图表库共 14 种」",
-        "says": "图表库共 14 种：heroM2 · dial · ladder · painBars · painBubbles · sankey · funnel · axisStack · waterfall · bubbleMatrix · radarCompare · heatmap · depArc · gantt",
-        "actual": "prototype/src/charts-m2.js 实际往 window.DGG.charts 上挂了 15 个，多出 C.cover2（第 31 行，封面备选主视觉），全仓库检索无任何调用点，封面实际用的是 heroM2",
-        "fix": "删掉 cover2，或把它写进清单并注明「保留未启用」"
+        "where": "skills/02-scene-ranking/SKILL.md 目录段（约第 274 行）",
+        "says": "../../prototype/src/charts-m2.js 模块 2 专属图表库（14 种，含封面主视觉 heroM2）",
+        "actual": "正文第 165 行已按实际改成 15 种并注明 cover2「保留未启用」，目录段这一行仍写 14 种，同一份文档里两个数",
+        "fix": "目录段改成 15 种（含封面主视觉 heroM2 与保留未启用的 cover2）",
+        "status": "仍未修：正文已修、目录段漏改"
       },
       {
         "where": "prototype/src/module-02.js 第 2 行文件头注释",
         "says": "屏 5 报告 42 页",
-        "actual": "实际构建 28 页：23 个固定页 + ranked 前 5 个场景各一页；同文件第 391 行注释与第 582 行导航页内文本都写的 28，SKILL.md 前言 report_pages: 28、brief_pages: 6 与实际 brief 页 1/3/4/10/13/20 也都对得上",
-        "fix": "把文件头注释改为「屏 5 报告 28 页（速览 6 页）」"
+        "actual": "实际 28 页（同文件第 391 行注释、第 582 行导航页内文本、SKILL.md 前言 report_pages: 28 都是 28）",
+        "fix": "把文件头注释改成「屏 5 报告 28 页（速览 6 页）」",
+        "status": "仍未修：23d1b46 没有动 prototype/ 的文件头注释"
       }
     ],
     "notes": "内核只导出 validate/compute/buildPrompt/mergePolish 四个函数；rerank 与 simulate-systems 复用 compute，仅入参不同，可合并。$lib=load-data.js 返回值；merge-polish 的 lint 形参由 invoke 层注入 makeLint($lib.lintWords).hit，缺省即跳过禁忌词校验。"
@@ -1363,40 +1331,11 @@
     ],
     "drift": [
       {
-        "where": "SKILL.md · 步骤 2「llm（可选，至多一次，8 秒超时）」",
-        "says": "只润色结论横幅与投入、收益各一句",
-        "actual": "core/compute.js:707 buildPrompt 写死下标：{costLine} 取 quickView[0].text、{gainLine} 取 quickView[2].text。实跑生成的提示词里这两段分别是「测算范围」句与「投入结构」句，真正的收益句（quickView[4] 月度收益）与投入总额句（quickView[1]）都没进提示词",
-        "fix": "buildPrompt 改取 quickView[1].text（投入总额）与 quickView[4].text（月度收益），或按 q 字段查找而非写死下标；改完重跑 scripts/run-examples.js"
-      },
-      {
-        "where": "SKILL.md · 步骤 2 与 prompts/polish.md 的返回约定",
-        "says": "润色三句，模板要求 LLM 按 {verdict, costLine, gainLine} 返回",
-        "actual": "core/compute.js:712 mergePolish 只执行 out.verdict.headline = polished.verdict，costLine 与 gainLine 收到后被直接丢弃；实跑传入三段只有横幅生效",
-        "fix": "mergePolish 把两句分别写回 quickView[1].text / quickView[4].text（保留禁忌词回退），或把 SKILL.md 与 polish.md 改成只润色结论横幅一句"
-      },
-      {
-        "where": "SKILL.md · 输出 ·「结构化呈现（按 render 顺序）」表",
-        "says": "8 种 render.type：three-accounts / cost-ledger / benefit-ledger / cashflow-bars / payback-curve / scenario-band / tornado / roles",
-        "actual": "内核实际输出 11 项，实跑顺序为 portfolio, three-accounts, cost-ledger, benefit-ledger, scene-contribution, wave-gantt, cashflow-bars, payback-curve, scenario-band, tornado, roles —— 表里缺 portfolio、scene-contribution、wave-gantt 三行",
-        "fix": "表里补这 3 行并按内核顺序排列，注明数据源 portfolio / portfolio.scenes / portfolio.waves"
-      },
-      {
-        "where": "SKILL.md · 输入补全 · 2 投入方案 · diagnosisDays 行",
-        "says": "可不填：按场景投入档取建议值（零档 0 天、轻中档 1 天、重档 2 天）",
-        "actual": "core/compute.js:223 按场景数量分档：1–2 个场景 1 天、3–5 个 2 天、6 个及以上 3 天（取自 data/investment-profile.json 的 diagnosisDays.values）；SKILL.md 正文「诊断天数按场景数量分档」是对的，只有这张表写错",
-        "fix": "该行默认值来源改为「按场景数量分档：1–2 个 1 天、3–5 个 2 天、6 个以上 3 天」"
-      },
-      {
-        "where": "SKILL.md · 步骤 1 compute 表 ·「投入 · 现金」行",
-        "says": "私域 = 端点价 × 套数",
-        "actual": "core/compute.js:231 pdYear = pd.yearly，按一套部署计列、不乘账号数，出具明细也写「按一套部署计列」；与本文件输入补全里 privateDeploy 行「按一套部署计，不乘账号数」自相矛盾",
-        "fix": "该行改为「私域 = 端点价（12800 或 33800）× 1 套」，与口径纪律第 1 条一致"
-      },
-      {
-        "where": "SKILL.md 前言 llm_calls: 1 / llm_timeout_ms: 8000，正文步骤 2",
+        "where": "skills/03-roi-calculator/SKILL.md 前言 llm_calls: 1 / llm_timeout_ms: 8000 与 prototype/src/module-03.js",
         "says": "至多一次 LLM 润色，8 秒超时，超时用模板标「初稿」",
-        "actual": "展台原型 prototype/src/module-03.js 从未调用 core.buildPrompt / core.mergePolish（全局只有 module-01.js:107 与 module-02.js:222 接了 sh.llm(..., 8000)），M.llmState 字段闲置；内核导出了这两个函数但 m3 展台走纯离线路径",
-        "fix": "原型补上 sh.llm 接线，或在 SKILL.md 注明 m3 的 LLM 节点仅由平台侧实现、展台不接"
+        "actual": "展台原型 module-03.js 至今没有任何 core.buildPrompt / core.mergePolish 调用（全仓只有 module-01.js 与 module-02.js 接了 sh.llm）；SKILL.md 已如实写明两个函数的取数与回写行为，但没写「展台不接这条链路」",
+        "fix": "原型补上 sh.llm 接线，或在 SKILL.md 注明 m3 的 LLM 节点只由平台侧实现、展台走纯离线路径",
+        "status": "仍未修：文档补了函数行为、没补「原型不接」这一句，原型也没接"
       }
     ],
     "notes": "内核只导出 validate / compute / buildPrompt / mergePolish 四个函数，故动作定为 5 个（run / validate / simulate 同走 compute，simulate 是测算台不计费重算），不凑到 6–16 个以免造假动作。三处跨模块差异生成器须分别映射：本模块 buildPrompt 第二参是模板字符串（$lib.promptTemplate），m1/m2 是整个数据包；本模块 mergePolish 收已解析对象、只有两参，m1/m2 收原始文本加 lint 回调；mergePolish 就地改写入参，平台须先深拷贝。原型的折减系数倍率是传入前改写 levers[].cut，内核无此入参，通用层若要支持需允许覆盖数据包。前言 version / credits / data_files(6) / inputs / report_pages(34) / brief_pages(6) 已逐项核对无误。"
@@ -1447,6 +1386,45 @@
         "source": "data.samples.flow"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "board",
+        "label": "获客驾驶舱"
+      },
+      {
+        "key": "profile",
+        "label": "客户画像"
+      },
+      {
+        "key": "script",
+        "label": "话术脚本"
+      },
+      {
+        "key": "leads",
+        "label": "线索池"
+      },
+      {
+        "key": "plan",
+        "label": "跟进与周报"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -2315,34 +2293,323 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"prod\":\"精密五金件与冲压件\",\"today\":\"2026-09-17\",\"weekStart\":\"2026-09-14\",\"profile\":{\"industry\":\"mf"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "family": "conversation",
+        "title": "六屏登记",
+        "description": "列出本 skill 的六个环节（屏）与中文标签：connect 接入 / board 获客驾驶舱 / profile 客户画像 / script 话术脚本 / leads 线索池 / plan 跟进与周报。brief / suggest / ask / ingest-document 的 step 只认这里的 key。什么时候用：平台接入时先调一次拿到环节清单，用来做路由、埋点与 act.goto 的目标；返回值与 manifest.screens 逐字节相同，读清单或调动作二选一。不吃业务数据，给了 data / dataset 也不影响返回。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / profile / script / leads / plan",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"获客驾驶舱\"},{\"key\":\"profile\",\"label\":\"客户画像\"},{\"key\":\"script\",\"label\":\"话术脚本\"},{\"key\":\"leads\",\"label\":\"线索池\"},{"
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "family": "conversation",
+        "title": "开场发现",
+        "description": "进某一屏时先说的一条真数据发现：一句话，里面的数字与业务 id 全部从内核算出来，能在 run 的结果里找到出处。什么时候用：用户刚切到某一屏、还没开口时主动报一条；按屏各说一条：接入说哪个源同步落后，驾驶舱说渠道单条成本差几倍，画像说重点细分占成交价值多少，话术说这版多少字、哪段最长，线索池说排在前面那条为什么高，跟进说本周排了几次、逾期几条。不讲解界面、不说空话，算不上就返回 null 交平台兜底。同一组入参永远同一句。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包：渠道 / 信号 / 阶段 / 脚本块 / 模块 2 痛点库"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 获客驾驶舱 / profile 客户画像 / script 话术脚本 / leads 线索池 / plan 跟进与周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "一句话字符串；未知屏或算不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "step": "board",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"展会扫码 3,455 元一条，公众号 500 元一条，差 6.9 倍。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "family": "conversation",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被同包的 ask 答上（展台上是按钮）。什么时候用：进屏后给用户可点的问法，如「为什么它分这么高」「未分派的有哪几条」「这条分派给谁」。顺序固定，没有可建议的返回空数组，不返回 null。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包：渠道 / 信号 / 阶段 / 脚本块 / 模块 2 痛点库"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 获客驾驶舱 / profile 客户画像 / script 话术脚本 / leads 线索池 / plan 跟进与周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条，每条 ≤ 20 汉字；没有可建议的为 []",
+        "mutates": false,
+        "exampleInput": {
+          "step": "leads",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"为什么它分这么高\",\"未分派的有哪几条\",\"逾期的是哪几条\",\"这条分派给谁\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "family": "conversation",
+        "title": "问答",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得渠道成本、画像权重、线索代号（L-2609-0001 这类）、分派与逾期、成交预测、周报等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文，不做预处理"
+          },
+          {
+            "from": "step",
+            "note": "当前屏；屏内问句先由本屏分支接"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包：渠道 / 信号 / 阶段 / 脚本块 / 模块 2 痛点库"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "用户原话"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 获客驾驶舱 / profile 客户画像 / script 话术脚本 / leads 线索池 / plan 跟进与周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "question": "为什么它分这么高",
+          "step": "leads",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"L-2609-0001 综合 77 分 = 匹配 86 × 70% + 信号 58.5 × 30%。\\n匹配高在 行业大类 制造业、决策人 采购经理、企业规模 300 人以上、区域 华东 都落在重点细分里；信号来自 索取报价 33.8 分、展会扫码 14.4 分\",\"blocks\":[{\"type\":"
+      },
+      {
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "询价函.eml",
+          "base64": "RnJvbTogPT9VVEYtOD9CPzVyV1o1ckdmNUxpdDVyRzk2WnUyNllPbzVMdTJJT21IaCtpMHJlbURxQ0Ruam92bHQ2VT0/PSA8d2FuZ0B6ai1hdXRvLXBhcnRzLmNvbT4KVG86IHNhbGVzQHJ1aWhlLmNvbQpTdWJqZWN0OiA9P1VURi04P0I/NTdLKzVhK0c1cFN2NXA2MklESXdNamNnNWJtMDVicW02SytpNUx1Mz89CkRhdGU6IE1vbiwgMTQgU2VwIDIwMjYgMDk6MTI6MDAgKzA4MDAKQ29udGVudC1UeXBlOiB0ZXh0L3BsYWluOyBjaGFyc2V0PXV0Zi04CgrplJDlkIjnsr7lr4bkupTph5Eg6ZSA5ZSu6YOo77yaCuaIkeWPuCAyMDI3IOW5tOW6pueyvuWvhuaUr+aetumHh+i0remihOeulyAxLDUwMCwwMDAg5YWD77yM6K6h5YiS5YiG5Lik5om55LiL5Y2V44CCCuivt+S6jiAyMDI2IOW5tCAxMCDmnIggMTUg5pel5YmN5Y+N6aaI5oql5Lu35LiO5Lqk5LuY5ZGo5pyf44CCCueOi+W3pQo="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"eml\",\"mail\":{\"from\":\"浙江中汽零部件 采购部 王工 <wang@zj-auto-parts.com>\",\"to\":\"sales@ruihe.com\",\"cc\":\"\",\"subject\":\"精密支架 2027 年度询价\",\"date\":\"Mon, 14 Sep 2026 09:12:"
+      },
+      {
+        "name": "ingest-document",
+        "fn": "ingest",
+        "kind": "mutate",
+        "family": "ingest",
+        "title": "文档摄入",
+        "description": "把上一步 parse-document 解析出的 Doc 按本模块的业务用起来：合同 / 报价（Word · PDF）抽合同金额、交付期限与质保，按金额就近匹配在手线索并回填预计金额、记一次跟进；表格（Excel · CSV）认企业 / 行业 / 区域 / 职务 / 金额这些线索列，够用就给入池预览；来函（.eml）抽金额与期限并记一次来函跟进；幻灯片把里面的数与本模块口径并排；其余纯文本只报行数与开头。什么时候用：用户传了文件、并且希望本模块拿它办事时；只读 Doc 的字段，拿不到也不该拿原始字节。合同与来函两类会写回业务数据（新副本在 data 里），表格与幻灯片只回消息不改数。文件读到了、内容却对不上本模块口径时也会说清读到了什么、为什么用不上，不沉默。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "note": "当前屏"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "固定数据包：渠道 / 信号 / 阶段 / 脚本块 / 模块 2 痛点库"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出的 Doc：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 获客驾驶舱 / profile 客户画像 / script 话术脚本 / leads 线索池 / plan 跟进与周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；有 data 就是业务数据被改了（新副本，入参不动），平台按 mutatesPath 取出来存回会话状态，没有 data 就是这次没改数",
+        "mutates": false,
+        "mutatesPath": "data",
+        "exampleInput": {
+          "doc": {
+            "kind": "eml",
+            "mail": {
+              "from": "浙江中汽零部件 采购部 王工 <wang@zj-auto-parts.com>",
+              "to": "sales@ruihe.com",
+              "cc": "",
+              "subject": "精密支架 2027 年度询价",
+              "date": "Mon, 14 Sep 2026 09:12:00 +0800",
+              "attaches": []
+            },
+            "paragraphs": [
+              "锐合精密五金 销售部：",
+              "我司 2027 年度精密支架采购预算 1,500,000 元，计划分两批下单。",
+              "请于 2026 年 10 月 15 日前反馈报价与交付周期。",
+              "王工"
+            ],
+            "text": "锐合精密五金 销售部：\n我司 2027 年度精密支架采购预算 1,500,000 元，计划分两批下单。\n请于 2026 年 10 月 15 日前反馈报价与交付周期。\n王工",
+            "stats": {
+              "正文行": 4,
+              "附件": 0,
+              "字数": 71
+            },
+            "ok": true,
+            "name": "询价函.eml",
+            "size": 443,
+            "sizeText": "443 B",
+            "ext": "eml",
+            "note": "",
+            "tables": [],
+            "sheets": [],
+            "slides": []
+          },
+          "step": "leads",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"来函《精密支架 2027 年度询价》，发件 浙江中汽零部件 采购部 王工，Mon, 14 Sep 2026。正文里抽到 150 万元，期限 2026-10-15。\\n在手线索里 L-2609-0016（光伏支架厂）预计 150 万元 与它接近，已记一次来函跟进。\",\"blocks\":[{\"type\":"
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 data_files: 4",
-        "says": "data_files: 4",
-        "actual": "data/ 下实为 7 个 json：channels / signals / stages / scripts 四张规则表 + data/samples/ 三套样本（mfg / prof / trade）",
-        "fix": "改为 data_files: 7（或注明「4 张规则表 + 3 套样本」）"
-      },
-      {
-        "where": "SKILL.md 引擎函数表最后一行「plan / funnel / forecast / report」",
-        "says": "把 plan / funnel / forecast / report 与其他函数并列成可调用的引擎函数",
-        "actual": "内核 return 的导出里没有这四个，它们只在 run() 内部被调用；外部只能通过 run() 的 plan / funnel / forecast / report 字段拿到结果",
-        "fix": "该行注明「仅 run() 内部计算，结果在 run 返回值的同名字段」，或在内核导出里补上这四个函数"
-      },
-      {
-        "where": "SKILL.md 引擎函数表（缺行）",
-        "says": "表中未出现 ensure / recommendTeam / teamLoad",
-        "actual": "三者都已导出；原型 module-04.js 用 ensure 规范化样本、用 recommendTeam 给线索池的「分派给哪组」出建议",
-        "fix": "补一行：ensure（数据规范化）、recommendTeam / teamLoad（分派建议与各组负载）"
-      },
-      {
-        "where": "SKILL.md 正文第 18 行来源清单 与「口径」第一条",
-        "says": "线索来源只用企业自有渠道加一个不带厂商名的「名录导入」；清单列 CRM、订单、展会扫码、官网留资、公众号、老客户转介绍、名录导入",
-        "actual": "data/channels.json 有 6 个渠道，含未在正文出现的 inquiry「平台询盘」；make 样本里它还是第一大来源（62 条线索中 13 条），驾驶舱渠道卡会展示",
-        "fix": "来源清单与口径补上「平台询盘（不带厂商名）」，或把该渠道从 channels.json 与样本中去掉"
-      }
-    ],
+    "drift": [],
     "notes": "产品类：9 个 mutate 动作都返回完整数据副本，前 160 字是数据头、差异在 log 与对应线索字段（已实跑链式验证：dataset→assign→add-plan→adopt-script→advance 后 run 可复算，一键分派后未分派归零且各组不超 cap）。score-leads / explain-lead / build-script 需先取 profile（profile 动作或 run().profile），recommend-team 的 teams 取 run().teams；示例里用 $action 引用前置动作。advance 的 text 在契约层设为必填：省略时内核默认文案会写成「推进到undefined」。内核无 LLM、无 $lint 需求；examples/ 三份 output 是 run 的摘要而非动作输入，不适合当数据集。"
   },
   {
@@ -2966,6 +3233,314 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"plan\":\"B\",\"log\":{\"seq\":1,\"kind\":\"plan\",\"label\":\"采纳编制方案\",\"detail\":\"B 招满并把社保基数调到位\"}}"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "family": "conversation",
+        "title": "六屏登记",
+        "description": "列出本 skill 的六个环节（屏）与中文标签：connect 接入 / board 人力驾驶舱 / recruit 招聘 · JD 与简历 / interview 面试与录用 / compliance 用工合规 / cost 成本与编制。brief / suggest / ask / ingest-document 的 step 只认这里的 key。什么时候用：平台接入时先调一次拿到环节清单，用来做路由、埋点与 act.goto 的目标；返回值与 manifest.screens 逐字节相同，读清单或调动作二选一。不吃业务数据，给了 data / dataset 也不影响返回。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / recruit / interview / compliance / cost",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"人力驾驶舱\"},{\"key\":\"recruit\",\"label\":\"招聘 · JD 与简历\"},{\"key\":\"interview\",\"label\":\"面试与录用\"},{\"key\":\"compliance\","
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "family": "conversation",
+        "title": "开场发现",
+        "description": "进某一屏时先说的一条真数据发现：一句话，里面的数字与业务 id 全部从内核算出来，能在 run 的结果里找到出处。什么时候用：用户刚切到某一屏、还没开口时主动报一条；按屏各说一条：接入说社保基数与工资表差多少，驾驶舱说哪个部门缺编与加班是同一件事，招聘说到岗期限与 A 级候选人数，面试说建议定薪卡在哪，合规说影响最大的那一条，成本说用工成本占收入与同行参考的差。不讲解界面、不说空话，算不上就返回 null 交平台兜底。同一组入参永远同一句。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本：花名册 / 离职 / 需求单 / 候选人（样本或上一步 mutate 动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（jobs / jdBlocks / questions / complianceRules / costParams …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 人力驾驶舱 / recruit 招聘 · JD 与简历 / interview 面试与录用 / compliance 用工合规 / cost 成本与编制，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "一句话字符串；未知屏或算不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "step": "compliance",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"H05 社保缴费基数低于工资 涉及 168 人，影响预计 114.8 万元，占 10 项待处理影响的 50%。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "family": "conversation",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被同包的 ask 答上（展台上是按钮）。什么时候用：进屏后给用户可点的问法，如「A 级候选人有几个」「先处理哪一条」「按实际工资调基数」。顺序固定，没有可建议的返回空数组，不返回 null。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本：花名册 / 离职 / 需求单 / 候选人（样本或上一步 mutate 动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（jobs / jdBlocks / questions / complianceRules / costParams …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 人力驾驶舱 / recruit 招聘 · JD 与简历 / interview 面试与录用 / compliance 用工合规 / cost 成本与编制，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条，每条 ≤ 20 汉字；没有可建议的为 []",
+        "mutates": false,
+        "exampleInput": {
+          "step": "recruit",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"A 级候选人有几个\",\"把 A 级筛出来\",\"谁不满足硬条件\",\"薪酬带多少\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "family": "conversation",
+        "title": "问答",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得部门缺编与离职、候选人代号（C-2609-003 这类）、硬条件与薪酬带、合规条目代号（H05 这类）、三方案成本等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文，不做预处理"
+          },
+          {
+            "from": "step",
+            "note": "当前屏；屏内问句先由本屏分支接"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本：花名册 / 离职 / 需求单 / 候选人（样本或上一步 mutate 动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（jobs / jdBlocks / questions / complianceRules / costParams …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "用户原话"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 人力驾驶舱 / recruit 招聘 · JD 与简历 / interview 面试与录用 / compliance 用工合规 / cost 成本与编制，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "question": "先处理哪一条",
+          "step": "compliance",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"先处理 H05 社保缴费基数低于工资：168 人，影响预计 114.8 万元，高风险。动作是按实际工资调整基数。\",\"ref\":\"H05\",\"act\":{\"type\":\"open\",\"panel\":\"rule\",\"ref\":\"H05\"}}"
+      },
+      {
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "张明-简历.txt",
+          "base64": "5byg5piO44CA5bqU6IGYIENOQyDmk43kvZzlt6UK5pWZ6IKy6IOM5pmv77yaMjAxNiDlubQg5pys56eRIOavleS4mu+8jOacuuaisOiuvuiuoeWItumAoOWPiuWFtuiHquWKqOWMlgrlt6XkvZznu4/ljobvvJo4IOW5tCDmlbDmjqfliqDlt6Xnu4/pqozvvIznhp/nu4MgQ05DIOi9pumTo+aTjeS9nOOAgeWPkemCo+enkeezu+e7n+OAgemHj+WFt+S4juajgOa1iwrpobnnm67nu4/pqozvvJrkuLvlr7znsr7lr4bku7bmibnph4/pppbku7bmo4DpqozkuI7lt6Xoibrmlofku7bnvJbliLYK5pyf5pyb6Jaq6LWEIDksNjAwIOWFgy/mnIjvvIzlj6/kuIDlkajlhoXliLDlspcK6Ieq5oiR6K+E5Lu377ya6LiP5a6e44CB6IO95YCS54+tCg=="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"text\",\"paragraphs\":[\"张明　应聘 CNC 操作工\",\"教育背景：2016 年 本科 毕业，机械设计制造及其自动化\",\"工作经历：8 年 数控加工经验，熟练 CNC 车铣操作、发那科系统、量具与检测\",\"项目经验：主导精密件批量首件检验与工艺文件编制\",\"期望薪资 9,600 元/月"
+      },
+      {
+        "name": "ingest-document",
+        "fn": "ingest",
+        "kind": "mutate",
+        "family": "ingest",
+        "title": "文档摄入",
+        "description": "把上一步 parse-document 解析出的 Doc 按本模块的业务用起来：简历（Word · PDF · 文本，命中「求职 / 简历 / 工作经历 / 期望薪」等词两个以上）按在招需求单的口径打分并入池；劳动合同按六项必备条款逐条核对；花名册 / 工资表（Excel · CSV）核对逐人核对要的列；经营 PPT 抽收入口径重算人均产值；邮件看有没有入转调离 / 工时 / 假期 / 社保 / 薪酬事项。什么时候用：用户传了文件、并且希望本模块拿它办事时；只读 Doc 的字段，拿不到也不该拿原始字节。简历入池与 PPT 改收入口径两类会写回业务数据（新副本在 data 里），其余只回消息不改数；不是这六类形态时返回 null。文件读到了、内容却对不上本模块口径时也会说清读到了什么、为什么用不上，不沉默。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "note": "当前屏"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "业务数据副本：花名册 / 离职 / 需求单 / 候选人（样本或上一步 mutate 动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（jobs / jdBlocks / questions / complianceRules / costParams …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出的 Doc：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 人力驾驶舱 / recruit 招聘 · JD 与简历 / interview 面试与录用 / compliance 用工合规 / cost 成本与编制，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；有 data 就是业务数据被改了（新副本，入参不动），平台按 mutatesPath 取出来存回会话状态，没有 data 就是这次没改数",
+        "mutates": false,
+        "mutatesPath": "data",
+        "exampleInput": {
+          "doc": {
+            "kind": "text",
+            "paragraphs": [
+              "张明　应聘 CNC 操作工",
+              "教育背景：2016 年 本科 毕业，机械设计制造及其自动化",
+              "工作经历：8 年 数控加工经验，熟练 CNC 车铣操作、发那科系统、量具与检测",
+              "项目经验：主导精密件批量首件检验与工艺文件编制",
+              "期望薪资 9,600 元/月，可一周内到岗",
+              "自我评价：踏实、能倒班"
+            ],
+            "text": "张明　应聘 CNC 操作工\n教育背景：2016 年 本科 毕业，机械设计制造及其自动化\n工作经历：8 年 数控加工经验，熟练 CNC 车铣操作、发那科系统、量具与检测\n项目经验：主导精密件批量首件检验与工艺文件编制\n期望薪资 9,600 元/月，可一周内到岗\n自我评价：踏实、能倒班\n",
+            "stats": {
+              "行": 6,
+              "字数": 124
+            },
+            "ok": true,
+            "name": "张明-简历.txt",
+            "size": 358,
+            "sizeText": "358 B",
+            "ext": "txt",
+            "note": "",
+            "tables": [],
+            "sheets": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "recruit",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"文本《张明-简历.txt》按 CNC 操作工 的口径打分：69 分 · B 级。\\n读到：本科 · 8 年经验 · 技能 4 项 · 期望 9,600 元。\\n必备技能 2/2 命中，加分项 1/3（发那科系统）；经验 8 年，高出门槛 6 年。\\n已加进 CNC 操作工 候选人表。\",\"blocks"
       }
     ],
     "credits": 30,
@@ -2999,39 +3574,49 @@
         "source": "data.samples.flow"
       }
     ],
-    "dir": "05-ai-hr",
-    "drift": [
+    "screens": [
       {
-        "where": "SKILL.md 前言 data_files: 5",
-        "says": "data_files: 5",
-        "actual": "data/ 下实际有 8 个 json：顶层 5 个（jobs / jd-blocks / questions / compliance-rules / cost-params）+ data/samples/ 3 个（mfg.json / prof.json / trade.json）",
-        "fix": "改为 data_files: 8；若刻意只计顶层参数文件，应在字段旁注明「不含 samples」"
+        "key": "connect",
+        "label": "接入"
       },
       {
-        "where": "SKILL.md 目录段「data/samples/*.json 三套样本」",
-        "says": "只按文件名列出三套样本 mfg / prof / trade",
-        "actual": "load-data.js 按样本内的 archetype 归键，运行期键名是 make / service / flow（examples 也输出 make/service/flow.output.json），与文件名 mfg/prof/trade 不一致",
-        "fix": "目录段补一句「样本键名为 archetype：make / service / flow，与文件名 mfg / prof / trade 不同」，免得调用方按文件名取 samples"
+        "key": "board",
+        "label": "人力驾驶舱"
       },
       {
-        "where": "SKILL.md 引擎函数表",
-        "says": "表里只列 run / org / jd / screenOne / candidates / pass…publish / interviewKit / interviewResult / compliance / resolve / calendar / cost / simulate / adoptPlan",
-        "actual": "内核还导出了 ensure（规范化数据副本，原型 loadArche 必须先调用）和 band（薪酬带换算），表中未列",
-        "fix": "引擎表补 ensure(raw) 与 band(d, jobKey, lib) 两行，标明 ensure 是所有写回动作与外部接入的入口"
+        "key": "recruit",
+        "label": "招聘 · JD 与简历"
       },
       {
-        "where": "SKILL.md 引擎表 cost / simulate 一行",
-        "says": "把 cost / simulate / adoptPlan 并列，读起来像三个都能独立调用",
-        "actual": "simulate(d, lib, C, comp) 必须先拿到 cost() 与 compliance() 的返回值才能调用，无法只用 (data, lib) 独立跑；实际外部只能通过 run().sim 取三方案",
-        "fix": "表中标注 simulate 的依赖为 cost 与 compliance 的结果，并说明对外取三方案走 run().sim"
+        "key": "interview",
+        "label": "面试与录用"
       },
       {
-        "where": "core/hr.js:254 function cost(d, lib, O)",
-        "says": "签名带第三个形参 O（组织盘点结果）",
-        "actual": "函数体内完全没有引用 O，run() 传入的 O 是无效实参",
-        "fix": "删掉形参 O，或在 SKILL.md 注明第三参已废弃、外部调用可省略；本映射表里该参数标为 required:false"
+        "key": "compliance",
+        "label": "用工合规"
+      },
+      {
+        "key": "cost",
+        "label": "成本与编制"
       }
     ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags",
+        "text"
+      ]
+    },
+    "dir": "05-ai-hr",
+    "drift": [],
     "id": "ai-hr",
     "kernelPath": "core/hr.js",
     "legacyGlobal": "DGG.coreM5",
@@ -3088,6 +3673,46 @@
         "source": "data.samples.flow"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "board",
+        "label": "财务驾驶舱"
+      },
+      {
+        "key": "recon",
+        "label": "三表勾稽"
+      },
+      {
+        "key": "risk",
+        "label": "风险预警"
+      },
+      {
+        "key": "cash",
+        "label": "现金预测"
+      },
+      {
+        "key": "policy",
+        "label": "政策与月报"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags",
+        "text"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -3440,8 +4065,9 @@
         "name": "screens",
         "fn": "screens",
         "kind": "query",
+        "family": "conversation",
         "title": "六屏登记",
-        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest 的 step 都从这里取。不吃账套也不吃数据包。",
+        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest-document 的 step 都从这里取。不吃账套也不吃数据包。",
         "args": [],
         "inputProps": [],
         "returns": "[{key,label}] 共 6 条：connect / board / recon / risk / cash / policy",
@@ -3454,12 +4080,12 @@
         "name": "brief",
         "fn": "brief",
         "kind": "query",
+        "family": "conversation",
         "title": "开场发现",
         "description": "进某一屏先说的一条发现，数字全部来自同一份账套的测算结果；返回字符串或 {text, blocks?, act?, ref?}，未知屏返回 null。同一组入参永远得到同一句话。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -3477,7 +4103,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
           }
         ],
@@ -3494,12 +4119,12 @@
         "name": "suggest",
         "fn": "suggest",
         "kind": "query",
+        "family": "conversation",
         "title": "快捷问句",
         "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；只认屏名，不吃账套也不吃数据包，未知屏返回空数组。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           }
         ],
@@ -3507,7 +4132,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
           }
         ],
@@ -3523,6 +4147,7 @@
         "name": "ask",
         "fn": "ask",
         "kind": "query",
+        "family": "conversation",
         "title": "问答",
         "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。sel 是平台的选中态（当前勾稽条 / 风险条 / 周），点名的那条在测算结果里存在就按它作答、按它写回，不传才按数据默认取。blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / open / apply / set），高亮走顶层 ref。",
         "args": [
@@ -3533,7 +4158,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -3567,7 +4191,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
           },
           {
@@ -3597,9 +4220,53 @@
         "verifiedOutputDigest": "{\"text\":\"6 处异常：R03 应收账款变动与银行回款 差 180,000 元；R04 账面存货与 ERP 库存 差 62,000 元；R07 货币资金与银行对账单 差 −145,000 元；R08 账面收入与开票收入 差 240,000"
       },
       {
-        "name": "ingest",
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "采购框架合同.txt",
+          "base64": "6YeH6LSt5qGG5p625ZCI5ZCMCuesrOS4gOadoSDlkIjlkIzph5Hpop3vvJrkurrmsJHluIEgMSw4NjAsMDAwIOWFg++8iOWQq+eojiAxMyXvvInvvIzliIbkuInmnJ/mlK/ku5jjgIIK56ys5LqM5p2hIOmmluS7mCAzMCXvvIzkuqTku5jpqozmlLblkI7ku5ggNjAl77yM6LSo5L+d6YeRIDEwJeOAggrnrKzkuInmnaEg5Lqk5LuY5pyf6ZmQ77yaMjAyNiDlubQgMTEg5pyIIDMwIOaXpeWJjeWujOaIkOWFqOmDqOS6pOS7mOOAggo="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"text\",\"paragraphs\":[\"采购框架合同\",\"第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付。\",\"第二条 首付 30%，交付验收后付 60%，质保金 10%。\",\"第三条 交付期限：2026 年 11 月 30 日前完成全部交付。\"],\"text\":\"采购"
+      },
+      {
+        "name": "ingest-document",
         "fn": "ingest",
-        "kind": "query",
+        "kind": "mutate",
+        "family": "ingest",
         "title": "文档摄入",
         "description": "读一份已解析的文档（科目余额表 / 采购合同 / 经营回顾 PPT / 往来邮件），与账面逐项对差：{text, blocks?, act?, data?}。合同类会在 data 里返回新副本（入参不动，应付多一条、13 周现金预测按新账重排），其余只回消息不写数据；doc.ok 为假返回 null。",
         "args": [
@@ -3610,7 +4277,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -3634,12 +4300,12 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 财务驾驶舱 / recon 三表勾稽 / risk 风险预警 / cash 现金预测 / policy 政策与月报，取自 screens"
           }
         ],
         "returns": "{text, blocks?, act?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
         "mutates": false,
+        "mutatesPath": "data",
         "exampleInput": {
           "doc": {
             "kind": "text",
@@ -3672,44 +4338,7 @@
         "verifiedOutputDigest": "{\"text\":\"Word《采购框架合同.txt》读完：合同金额 1,860,000 元（含税 13%），交付期限 2026-11-30。\\n首付 30% · 558,000 元，已按 2026-09-30 到期排进 13 周现金预测。"
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 data_files: 4",
-        "says": "data/ 下 4 个数据文件",
-        "actual": "data/ 下实有 7 个 json：顶层 rules / risk-rules / benchmarks / policies 共 4 个，另加 data/samples/ 下 mfg.json、prof.json、trade.json 共 3 个账套样本（全仓同一写法：04/05/09 也只计顶层）",
-        "fix": "据实改为 data_files: 7，或在字段旁注明「只计顶层规则表，样本另计 3」"
-      },
-      {
-        "where": "SKILL.md 正文「引擎 core/fin.js」函数表",
-        "says": "只列 run / statements / reconcile / applyFix / risks / applyRiskAction / forecast / cashOptions / policies / report 共 10 个函数",
-        "actual": "内核实际导出 19 个成员；写回类的 applyCashOption(raw,key,lib) 与 togglePolicy(raw,id) 完全没写进表里，而原型第 5、6 屏正是靠它们执行现金方案和维护申报清单；ensure / normalize / metrics / arAging / kpi 同样未列",
-        "fix": "表里补 ensure、normalize、arAging、applyCashOption、togglePolicy、kpi 六行（metrics 若视为内部可注明）"
-      },
-      {
-        "where": "SKILL.md 正文 applyRiskAction 一行列举的处置动作",
-        "says": "催收 / 计提坏账 / 处置呆滞 / 申报未开票收入 / 压缩招待 / 协商付款 / 优先付关键供应商 / 短贷置换 / 调整社保基数，共 9 个",
-        "actual": "data/risk-rules.json 实有 12 个动作 key，漏写 K02 note（列入经营会议）、K05 gotoCash（看 13 周现金预测）、K07 reviewCost（复核成本结转）",
-        "fix": "补齐这三个动作，或注明 note / gotoCash 属提示类、不改数据口径"
-      },
-      {
-        "where": "SKILL.md「样本」段：五处勾稽异常",
-        "says": "五处勾稽异常做在外部来源与账面的差异上",
-        "actual": "make 主样本实跑 reconcile.counts = {ok:8, warn:0, bad:6, na:0}，异常为 R03/R04/R07/R08/R10/R12 共 6 条；五个外部来源对应 6 条规则，因为银行流水同时命中 R03 与 R07（正文自己也说明二者同源）",
-        "fix": "改为「六条勾稽异常、来自五个外部来源（银行流水同时命中 R03 与 R07）」"
-      },
-      {
-        "where": "SKILL.md 前言 inputs: [data]",
-        "says": "运行输入只有 data 一项",
-        "actual": "主函数签名是 run(data, lib)，11 个可用动作里有 5 个（run / cashOptions / applyFix / applyRiskAction / applyCashOption）必须传 scripts/load-data.js 返回的固定数据包 lib（8 个键：rules、riskRules、benchmarks、policies、samples、industries、credits、lintWords）",
-        "fix": "inputs 保留 [data]，另补一行注明 lib 为固定注入数据包，生成 invoke 层时按 $lib 注入"
-      },
-      {
-        "where": "SKILL.md「勾稽与风险的口径」风险等级一段",
-        "says": "概率 ≥ 0.6 且影响 ≥ 20 万为高；概率 ≥ 0.35 或影响 ≥ 20 万为中；其余低。处置后概率下调 0.4",
-        "actual": "core/fin.js 第 261–264 行另有两处未写进正文的兜底：概率下调设 0.1 下限（Math.max(0.1, prob - 0.4)），且 prob ≤ 0.1 时强制判为低——处置后的高风险会直接掉到低档",
-        "fix": "口径段补「概率下限 0.1；概率 ≤ 0.1 一律判低」"
-      }
-    ],
+    "drift": [],
     "notes": "$data 默认取 data.samples.make（另有 service / flow）；$lib 由 load-data 固定注入。reconcile / risks / policies / kpi / report 的第二个形参要 statements 对象，无法只靠 JSON 输入拆参，故不单独暴露，结果统一由 run 返回（rows 内已含 drill 下钻表）。5 个 mutate 动作返回整份账套新副本，平台须回灌为下次调用的 $data。fmtN/fmtW/short/dateOf/monthLabel/evalExpr 为格式化与工具函数，未暴露。16 个动作已对三套样本实跑通过。对话五件 screens / brief / suggest / ask / ingest 是内核 1.2.0 下沉的那一层：brief / ask / ingest 要 $lib，ask 另收可选的 result 与选中态 sel（{rule, risk, week}），screens 与 suggest 只收屏名；ingest 的 doc 走 skills/_shared/docparse.js 的解析结果，合同类返回的新副本同样要回灌为下次调用的 $data。"
   },
   {
@@ -3754,6 +4383,47 @@
         "source": "data.samples.flow"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "board",
+        "label": "法务驾驶舱"
+      },
+      {
+        "key": "contracts",
+        "label": "合同审查"
+      },
+      {
+        "key": "setup",
+        "label": "新设主体"
+      },
+      {
+        "key": "ip",
+        "label": "知识产权"
+      },
+      {
+        "key": "register",
+        "label": "台账与提醒"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags",
+        "text"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -4369,8 +5039,9 @@
         "name": "screens",
         "fn": "screens",
         "kind": "query",
+        "family": "conversation",
         "title": "六屏登记",
-        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest 的 step 都从这里取。不吃企业数据也不吃数据包。",
+        "description": "列出六个环节的屏名与中文标签；brief / suggest / ask / ingest-document 的 step 都从这里取。不吃企业数据也不吃数据包。",
         "args": [],
         "inputProps": [],
         "returns": "[{key,label}] 共 6 条：connect / board / contracts / setup / ip / register",
@@ -4383,12 +5054,12 @@
         "name": "brief",
         "fn": "brief",
         "kind": "query",
+        "family": "conversation",
         "title": "开场发现",
         "description": "进某一屏先说的一条发现，数字全部来自同一份企业数据的测算结果；返回字符串或 {text, blocks?, act?, ref?}，未知屏返回 null。同一组入参永远得到同一句话。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -4411,7 +5082,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
           },
           {
@@ -4434,12 +5104,12 @@
         "name": "suggest",
         "fn": "suggest",
         "kind": "query",
+        "family": "conversation",
         "title": "快捷问句",
         "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；新设主体那一屏的第一条会带上方案总天数，所以要吃企业数据与数据包，未知屏返回空数组。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -4462,7 +5132,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
           },
           {
@@ -4485,6 +5154,7 @@
         "name": "ask",
         "fn": "ask",
         "kind": "query",
+        "family": "conversation",
         "title": "问答",
         "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。任一屏还认四种点名：HT-年月-序号 的合同、TM / ZL / RZ / DM-序号 的知产、第 N 类的商标类别、证照名。blocks 是平台中立的纯数据（kv / table / tags / text），act 是声明式动作（goto / focus / open / apply / set），高亮走顶层 ref。",
         "args": [
@@ -4495,7 +5165,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -4524,7 +5193,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
           },
           {
@@ -4545,9 +5213,53 @@
         "verifiedOutputDigest": "{\"text\":\"高风险 3 份：HT-2609-021 无锡不锈钢材料（40 分）；HT-2609-018 K-017 · 汽配一级供应商（50 分）；HT-2603-012 宁波橡塑（50 分）。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"合同\",\"相对方\",\"风险分\",\"高\"],\"r"
       },
       {
-        "name": "ingest",
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "采购框架合同.txt",
+          "base64": "6YeH6LSt5qGG5p625ZCI5ZCMCueUsuaWue+8muadreW3numUkOWQiOeyvuWvhuS6lOmHkeaciemZkOWFrOWPuOOAgOS5meaWue+8muWugeazouW+t+aYjOaooeWFt+aciemZkOWFrOWPuArnrKzkuIDmnaEg5ZCI5ZCM6YeR6aKd77ya5Lq65rCR5biBIDEsODYwLDAwMCDlhYPvvIjlkKvnqI4gMTMl77yJ77yM5YiG5LiJ5pyf5pSv5LuY77yM6aaW5LuYIDMwJeOAggrnrKzkuozmnaEg5Lqk5LuY5pyf6ZmQ77yaMjAyNiDlubQgMTEg5pyIIDMwIOaXpeWJjeWujOaIkOWFqOmDqOS6pOS7mOOAggrnrKzkuInmnaEg6L+d57qm6LSj5Lu777ya6YC+5pyf5Lqk5LuY5oyJ5pel5LiH5YiG5LmL5LqU6K6h5pS26L+d57qm6YeR77yM57Sv6K6h5LiN6LaF6L+H5ZCI5ZCM6YeR6aKdIDUl44CCCuesrOWbm+adoSDotKjkv53mnJ8gMTIg5Liq5pyI77yM6Ieq6aqM5pS25ZCI5qC85LmL5pel6LW3566X44CCCg=="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"text\",\"paragraphs\":[\"采购框架合同\",\"甲方：杭州锐合精密五金有限公司　乙方：宁波德昌模具有限公司\",\"第一条 合同金额：人民币 1,860,000 元（含税 13%），分三期支付，首付 30%。\",\"第二条 交付期限：2026 年 11 月 30 日前完成全部交付。\",\"第三条 "
+      },
+      {
+        "name": "ingest-document",
         "fn": "ingest",
-        "kind": "query",
+        "kind": "mutate",
+        "family": "ingest",
         "title": "文档摄入",
         "description": "读一份已解析的文档（合同正文 / 合同台账 Excel / 科目余额表 / 经营回顾 PPT / 往来邮件），按法务口径用起来：{text, blocks?, act?, ref?, data?}。正文读得到合同金额的那一类会在 data 里返回新副本（入参不动，台账多一份 HT-DOC-序号 合同、交付期限进 90 天台账），其余只回消息不写数据；doc.ok 为假返回 null。doc 由 parse-document 产出。",
         "args": [
@@ -4558,7 +5270,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -4587,7 +5298,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / board 法务驾驶舱 / contracts 合同审查 / setup 新设主体 / ip 知识产权 / register 台账与提醒，取自 screens"
           },
           {
@@ -4599,6 +5309,7 @@
         ],
         "returns": "{text, blocks?, act?, ref?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
         "mutates": false,
+        "mutatesPath": "data",
         "exampleInput": {
           "doc": {
             "kind": "text",
@@ -4633,44 +5344,7 @@
         "verifiedOutputDigest": "{\"text\":\"文本《采购框架合同.txt》读完：采购框架合同，相对方 宁波德昌模具，金额 1,860,000 元（含税 13%），交付 2026-11-30，违约金上限 5%，质保 12 个月。\\n按采购合同必备条款逐项核对：文档里读到 4 条（合同金额与付款、交付期限、违约责任、质保期），缺 4 项：「质量标准」"
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 data_files: 3",
-        "says": "数据文件 3 个",
-        "actual": "data/ 下实际 6 个 json：contract-rules.json、setup-rules.json、ip-classes.json + data/samples/{mfg,prof,trade}.json",
-        "fix": "改为 data_files: 6；若口径是「不含样本」，在前言或目录里写明"
-      },
-      {
-        "where": "SKILL.md 引擎表最后一行 `kpi / report`",
-        "says": "把 kpi、report 列为引擎 `core/legal.js` 的函数",
-        "actual": "内核 return 的导出表里没有 kpi / report，它们是内部函数，只能通过 run 的返回值拿到 R.kpi / R.report",
-        "fix": "表中注明「内部函数，随 run 返回」，或在内核导出里补上 kpi / report"
-      },
-      {
-        "where": "SKILL.md 引擎表（第 22–32 行）",
-        "says": "只列了 run / reviewContract / applyFix / opinion / equity / setupPlan 等",
-        "actual": "内核还导出了 ensure 与 reviewAll，且 ensure 是 reviewAll / reviewContract 的硬前置——直接传原始样本会因 c.revisions 未定义抛错",
-        "fix": "补两行：ensure（规整为可写副本，其它只读函数的前置）、reviewAll（全部合同逐份审查并排序）"
-      },
-      {
-        "where": "SKILL.md 目录小节（第 44–52 行）",
-        "says": "目录只列了 core / data / schema / scripts / examples",
-        "actual": "scripts/load-data.js 还读 ../_shared/industries.json、credits.json、lint-words.json，装配出的数据包有 7 个键，而内核只用 contractRules / setupRules / ipClasses 三个键",
-        "fix": "目录补一行 _shared 依赖，并注明后三个键供原型 / 校验用，通用包可裁剪"
-      },
-      {
-        "where": "SKILL.md 第 30、38 行与目录对 data/ip-classes.json 的描述",
-        "says": "到期规则与官费、年费表都在 data/ip-classes.json",
-        "actual": "域名续费规则是硬编码在 core/legal.js 里的：提前 60 天提示、费用固定 120 元，ip-classes.json 的 rules / fees 中没有域名项",
-        "fix": "把 domainAheadDays / domainFee 移进 ip-classes.json，或在口径里写明域名是内核默认值"
-      },
-      {
-        "where": "SKILL.md 前言 inputs: [data]",
-        "says": "输入只有 data",
-        "actual": "内核所有主函数是 fn(data, lib) 两参，lib 是 load-data 装配的固定数据包（规则 + 样本），少了它无法调用",
-        "fix": "改为 inputs: [data, lib]，并注明 lib 由 scripts/load-data.js 装配"
-      }
-    ],
+    "drift": [],
     "notes": "invoke 层入口先对 $data 跑一次 ensure：run / applyFix / updateSetup / confirmSetup / toggleRenew / toggleApply 内部已 ensure，但 reviewAll / reviewContract 吃原始样本会因缺 revisions 抛错。mutate 动作返回新 data 副本，平台写回会话状态后再调 run 重算。内核只用 lib 的 contractRules / setupRules / ipClasses 三键。exampleInput 中以 $ 开头的值是指针（预置样本或 run 的返回），不是字面量。"
   },
   {
@@ -4718,6 +5392,47 @@
         "source": "data.samples.service"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "board",
+        "label": "工序流看板"
+      },
+      {
+        "key": "diag",
+        "label": "工序诊断"
+      },
+      {
+        "key": "improve",
+        "label": "改善预演"
+      },
+      {
+        "key": "exec",
+        "label": "执行与派工"
+      },
+      {
+        "key": "report",
+        "label": "提效周报"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags",
+        "text"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -5374,40 +6089,357 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"seq\":11,\"kind\":\"maint\",\"label\":\"设备保养 PA-01 已排入\",\"detail\":\"9-20（休息日） · 120 min · 设备员\",\"at\":\"2026-09-17\"}"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "family": "conversation",
+        "title": "六屏登记",
+        "description": "列出本 skill 的六个环节（屏）与中文标签：connect 接入 / board 工序流看板 / diag 工序诊断 / improve 改善预演 / exec 执行与派工 / report 提效周报。brief / suggest / ask / ingest-document 的 step 只认这里的 key。什么时候用：平台接入时先调一次拿到环节清单，用来做路由、埋点与 act.goto 的目标；返回值与 manifest.screens 逐字节相同，读清单或调动作二选一。不吃业务数据，给了 data / dataset 也不影响返回。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / diag / improve / exec / report",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"工序流看板\"},{\"key\":\"diag\",\"label\":\"工序诊断\"},{\"key\":\"improve\",\"label\":\"改善预演\"},{\"key\":\"exec\",\"label\":\"执行与派工\"},{\""
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "family": "conversation",
+        "title": "开场发现",
+        "description": "进某一屏时先说的一条真数据发现：一句话，里面的数字与业务 id 全部从内核算出来，能在 run 的结果里找到出处。什么时候用：用户刚切到某一屏、还没开口时主动报一条；按屏各说一条：接入说本周报工有几条没过核验，看板说约束工序与 7 天负荷、排队等待，诊断说计划加工与有效切削差在哪，预演说推荐哪张改善卡、能把排队压到几天，执行说明日缺不缺人、谁在加班上限上，周报说两率走势与增效账。不讲解界面、不说空话，算不上就返回 null 交平台兜底。同一组入参永远同一句。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本，后续用上一步动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，并且必须额外注入 lib.erp = 10-ai-erp/core/sim.js（内核靠 lib.erp.schedule 重算排程）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 工序流看板 / diag 工序诊断 / improve 改善预演 / exec 执行与派工 / report 提效周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "一句话字符串；未知屏或算不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "step": "diag",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"CNC 车铣中心 每日 16 h 计划加工，有效切削只剩 10.2 h；换型每日吃掉 2.5 h，占 16%。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "family": "conversation",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被同包的 ask 答上（展台上是按钮）。什么时候用：进屏后给用户可点的问法，如「哪个方案好」「换型能省多少」「把换型时间调到 30 分钟」。顺序固定，没有可建议的返回空数组，不返回 null。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本，后续用上一步动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，并且必须额外注入 lib.erp = 10-ai-erp/core/sim.js（内核靠 lib.erp.schedule 重算排程）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 工序流看板 / diag 工序诊断 / improve 改善预演 / exec 执行与派工 / report 提效周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条，每条 ≤ 20 汉字；没有可建议的为 []",
+        "mutates": false,
+        "exampleInput": {
+          "step": "improve",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"哪个方案好\",\"B 方案要几个人\",\"换型合批省多少\",\"把换型时间调到 30 分钟\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "family": "conversation",
+        "title": "问答",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得约束工序、时间损失与两率、报工核验条目（V- 开头）、标准工时校准、四张改善卡（A/B/C/D）、派工与保养等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文，不做预处理"
+          },
+          {
+            "from": "step",
+            "note": "当前屏；屏内问句先由本屏分支接"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本，后续用上一步动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，并且必须额外注入 lib.erp = 10-ai-erp/core/sim.js（内核靠 lib.erp.schedule 重算排程）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "用户原话"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 工序流看板 / diag 工序诊断 / improve 改善预演 / exec 执行与派工 / report 提效周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "question": "哪个方案好",
+          "step": "improve",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"推荐 B 多能工支援开CNC 车铣中心 B第二班：排队等待 14 → 3.9 天，加班 0 h/周，费用 0。组合 A+B+C 能到 2.9 天。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"方案\",\"排队等待\",\"加班\"],\"rows\":[[\"A\",\"11.1 天\",\"0"
+      },
+      {
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "本周报工.csv",
+          "base64": "5om55qyhLOW3peW6jyzlt6Xlj7cs5pWw6YePLOW3peaXtm1pbizml6XmnJ8KU08tMjYwOS0wMTUxLOi9puWJiixFLTEwMjEsMTIwMCw0MjAsMjAyNi0wOS0xNQpTTy0yNjA5LTAxNTEs6L2m5YmKLEUtMTAyMSwxMjAwLDQyMCwyMDI2LTA5LTE1ClNPLTI2MDktMDE1Mizpk6PliYosLDg2MCwzMDAsMjAyNi0wOS0xNgpTTy0yNjA5LTAxNTMs54Ot5aSE55CGLEUtMTA0NCwwLDE4MCwyMDI2LTA5LTE2Cg=="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"excel\",\"sheets\":[{\"name\":\"CSV\",\"rows\":[[\"批次\",\"工序\",\"工号\",\"数量\",\"工时min\",\"日期\"],[\"SO-2609-0151\",\"车削\",\"E-1021\",\"1200\",\"420\",\"2026-09-15\"],[\"SO-2609-0151\",\"车削\""
+      },
+      {
+        "name": "ingest-document",
+        "fn": "ingest",
+        "kind": "mutate",
+        "family": "ingest",
+        "title": "文档摄入",
+        "description": "把上一步 parse-document 解析出的 Doc 按本模块的业务用起来：报工表（Excel · CSV，认批次 + 数量 / 工时列）按能离线核的三条规则核一遍（重复、数量为零、缺工号）并登记成导入批次；不是报工表的表格如实说读到哪几列、核验不动数；PPT 抽换型时间与准时率口径，换型时间会改参数重算；纯文本 / Word / PDF 抽标准工时、换型时间与交付期限；邮件认停机 / 故障 / 待料 / 延期并记进本周动作。什么时候用：用户传了文件、并且希望本模块拿它办事时；只读 Doc 的字段，拿不到也不该拿原始字节。表格与邮件两类会写回业务数据（新副本在 data 里，多一条 doc-import 来源与一条日志），PPT 与文本只给 act 建议改参数、不直接改数；不是这六类形态或 doc.ok 为假时返回 null。文件读到了、内容却对不上本模块口径时也会说清读到了什么、为什么用不上，不沉默。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "note": "当前屏"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本（首次用 dataset 指定预置样本，后续用上一步动作返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data() 返回的数据包，并且必须额外注入 lib.erp = 10-ai-erp/core/sim.js（内核靠 lib.erp.schedule 重算排程）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出的 Doc：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 工序流看板 / diag 工序诊断 / improve 改善预演 / exec 执行与派工 / report 提效周报，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；有 data 就是业务数据被改了（新副本，入参不动），平台按 mutatesPath 取出来存回会话状态，没有 data 就是这次没改数",
+        "mutates": false,
+        "mutatesPath": "data",
+        "exampleInput": {
+          "doc": {
+            "kind": "excel",
+            "sheets": [
+              {
+                "name": "CSV",
+                "rows": [
+                  [
+                    "批次",
+                    "工序",
+                    "工号",
+                    "数量",
+                    "工时min",
+                    "日期"
+                  ],
+                  [
+                    "SO-2609-0151",
+                    "车削",
+                    "E-1021",
+                    "1200",
+                    "420",
+                    "2026-09-15"
+                  ],
+                  [
+                    "SO-2609-0151",
+                    "车削",
+                    "E-1021",
+                    "1200",
+                    "420",
+                    "2026-09-15"
+                  ],
+                  [
+                    "SO-2609-0152",
+                    "铣削",
+                    "",
+                    "860",
+                    "300",
+                    "2026-09-16"
+                  ],
+                  [
+                    "SO-2609-0153",
+                    "热处理",
+                    "E-1044",
+                    "0",
+                    "180",
+                    "2026-09-16"
+                  ]
+                ]
+              }
+            ],
+            "text": "批次,工序,工号,数量,工时min,日期\nSO-2609-0151,车削,E-1021,1200,420,2026-09-15\nSO-2609-0151,车削,E-1021,1200,420,2026-09-15\nSO-2609-0152,铣削,,860,300,2026-09-16\nSO-2609-0153,热处理,E-1044,0,180,2026-09-16\n",
+            "stats": {
+              "工作表": 1,
+              "行": 5,
+              "非空单元格": 29
+            },
+            "ok": true,
+            "name": "本周报工.csv",
+            "size": 226,
+            "sizeText": "226 B",
+            "ext": "csv",
+            "note": "",
+            "paragraphs": [],
+            "tables": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "connect",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"Excel《本周报工.csv》读完：《CSV》4 行、6 列。合计 3,260 件、1,320 min。\\n核验：重复 1 条、数量为零 1 条、缺 E-编号 1 条，共 3 条要班组长确认。已登记为导入批次。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"批次\",\"工序\","
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 data_files: 3",
-        "says": "data_files: 3",
-        "actual": "data/ 下实际有 6 个 json：vocab.json、rules.json、improve-lib.json、samples/mfg.json、samples/trade.json、samples/prof.json",
-        "fix": "改为 data_files: 6（若只想计非样本配置文件，应改成 data_files: 3 + samples: 3 两个字段说明）"
-      },
-      {
-        "where": "SKILL.md 前言 inputs: [data]",
-        "says": "inputs: [data]",
-        "actual": "内核所有对外函数签名都是 (data, lib, ...)，lib 由 scripts/load-data.js 装配；且 load-data() 的返回值里没有 erp 键，必须由调用方另行注入 lib.erp = skills/10-ai-erp/core/sim.js，否则 run 立即抛 \"Cannot read properties of undefined (reading 'schedule')\"",
-        "fix": "前言补 inputs: [data, lib] 与一条 runtime_deps: [10-ai-erp/core/sim.js]，或把注入动作收进 load-data.js 本身"
-      },
-      {
-        "where": "SKILL.md 正文「引擎 core/flow.js」表格 verifyReports 行（第 27 行）",
-        "says": "报工核验六条规则只标记不改数：工时偏离、重复报工、漏报、数量守恒、时段重叠",
-        "fix": "改为「报工核验五条规则」，或补上缺失的第六条规则实现",
-        "actual": "verifyReports 实际只产出 5 类：dev 工时偏离、dup 重复报工、missing 漏报、conserve 数量守恒、overlap 时段重叠（实跑 counts = {missing:1,dev:1,conserve:1,overlap:1,dup:1}），文字自身也只列了 5 项"
-      },
-      {
-        "where": "SKILL.md 正文「引擎 core/flow.js」表格 run 行（第 24 行）",
-        "says": "run(data, lib) 一次算全：es、S、bottleneck、metrics、flow、verify、sequence、loss、calibration、buffer、skills、alerts、preview、committed、dispatch、maintenance、planHit、ledger、weekly、kpi、improveCards",
-        "actual": "实跑返回 24 个键，清单漏了 version、data、vocab 三项（R.data 是 ensure 后的数据副本，原型与 invoke 层都会用到）",
-        "fix": "在清单里补 version / data / vocab"
-      },
-      {
-        "where": "SKILL.md 正文「原型流程（六屏）」末句（第 61 行）",
-        "says": "进看板扣 50 积分，一次",
-        "actual": "内核只导出 CREDITS = 50 常量，扣分逻辑完全不在 core/flow.js 里（内核无任何计费代码），由原型外壳实现",
-        "fix": "把该句移到「原型流程」说明里并注明扣分由外壳负责，通用 invoke 层不实现计费；或在前言加 credits_by: shell"
-      }
-    ],
+    "drift": [],
     "notes": "生成器三点必须注意：1) $lib 不能只用 load-data() 的返回值，必须再注入 lib.erp = skills/10-ai-erp/core/sim.js，否则全部动作都抛错；2) 所有 mutate 动作都是「先 ensure 再返回新副本」，平台要把返回值整体写回会话状态作为下一次的 $data，链式调用已实跑验证（15 个动作按表顺序跑通）；3) apply-release / apply-sequence / apply-dispatch / schedule-maint / add-training 均幂等，重复调用原样返回；commit-project 不幂等，会新增项目。mutate 动作的 verifiedOutputDigest 取返回副本 log 数组最后一条（最能证明该动作生效），其余取返回值本身前 160 字。工具函数 fmtN/fmtH/short/addDays/fill/r1/t/words/V/roleName 及中间态 ensure/simOf/erpBase 未暴露为动作。"
   },
   {
@@ -6021,6 +7053,354 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"archetype\":\"make\",\"sector\":\"mfg\",\"company\":\"杭州锐合精密五金有限公司\",\"co\":\"锐合\",\"today\":\"2026-09-17\",\"period\":\"2026-08\",\"months\":[\"2025-09\",\"2025-10\",\"2025-11\",\"2025-12\","
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "family": "conversation",
+        "title": "六屏登记",
+        "description": "列出本 skill 的六个环节（屏）与中文标签：connect 接入 / board 决策驾驶舱 / attr 指标归因 / options 方案预演 / approval 审批 / execute 执行与复盘。brief / suggest / ask / ingest-document 的 step 只认这里的 key。什么时候用：平台接入时先调一次拿到环节清单，用来做路由、埋点与 act.goto 的目标；返回值与 manifest.screens 逐字节相同，读清单或调动作二选一。不吃业务数据，给了 data / dataset 也不影响返回。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / board / attr / options / approval / execute",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"board\",\"label\":\"决策驾驶舱\"},{\"key\":\"attr\",\"label\":\"指标归因\"},{\"key\":\"options\",\"label\":\"方案预演\"},{\"key\":\"approval\",\"label\":\"审批\"},{"
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "family": "conversation",
+        "title": "开场发现",
+        "description": "进某一屏时先说的一条真数据发现：一句话，里面的数字与业务 id 全部从内核算出来，能在 run 的结果里找到出处。什么时候用：用户刚切到某一屏、还没开口时主动报一条；按屏各说一条：接入说几个模块同步了多少条、几项亮红，驾驶舱说经营利润较预算差多少、缺口落在哪两项，归因说主因判给谁，预演说推荐方案的净效益比另一个多多少，审批说会签预判几位同意，执行说复盘达没达标。不讲解界面、不说空话，算不上就返回 null 交平台兜底。同一组入参永远同一句。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（样本或上一步 mutate 返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（metricTree / evidence / playbooks / approvalRules / samples …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 决策驾驶舱 / attr 指标归因 / options 方案预演 / approval 审批 / execute 执行与复盘，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "一句话字符串；未知屏或算不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "step": "attr",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"9 个因子里 管理费用 −4.4 万元 居前，剔除一次性项后主因判给 出库订单 −2.2 万元。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "family": "conversation",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被同包的 ask 答上（展台上是按钮）。什么时候用：进屏后给用户可点的问法，如「主因是怎么定的」「A 和 B 差在哪」「发起审批」。顺序固定，没有可建议的返回空数组，不返回 null。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（样本或上一步 mutate 返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（metricTree / evidence / playbooks / approvalRules / samples …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 决策驾驶舱 / attr 指标归因 / options 方案预演 / approval 审批 / execute 执行与复盘，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条，每条 ≤ 20 汉字；没有可建议的为 []",
+        "mutates": false,
+        "exampleInput": {
+          "step": "options",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"A 和 B 差在哪\",\"CNC 操作工增员改成 5 人\",\"多久见效\",\"发起审批\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "family": "conversation",
+        "title": "问答",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得指标节点与组、归因因子与证据、方案预演与参数改写、审批单与会签意见、决议节点与复盘等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文，不做预处理"
+          },
+          {
+            "from": "step",
+            "note": "当前屏；屏内问句先由本屏分支接"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（样本或上一步 mutate 返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（metricTree / evidence / playbooks / approvalRules / samples …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "用户原话"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 决策驾驶舱 / attr 指标归因 / options 方案预演 / approval 审批 / execute 执行与复盘，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "question": "主因是怎么定的",
+          "step": "attr",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"主因 出库订单：50 单 → 49 单（−1 单），贡献 −2.2 万元，占变动 39%。取的是剔除一次性项后对 经营利润 伤害居前的因子；各因子贡献之和等于变动，校验通过。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"因子\",\"贡献\"],\"rows\":[[\"出库订单\",\""
+      },
+      {
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "8月科目余额表.csv",
+          "base64": "56eR55uu57yW56CBLOenkeebruWQjeensCzmnJ/liJ3kvZnpop0s5YCf5pa55Y+R55SfLOi0t+aWueWPkeeUnyzmnJ/mnKvkvZnpop0KMTEyMizlupTmlLbotKbmrL4sMzE4MDAwMCw4NjAwMDAsNTQwMDAwLDM1MDAwMDAKMTQwNSzlrZjotKcsMjI2MDAwMCw0MjAwMDAsMzgwMDAwLDIzMDAwMDAKMjIwMizlupTku5jotKbmrL4sMTQ4MDAwMCwzMDAwMDAsNTIwMDAwLDE3MDAwMDAKMTAwMizpk7booYzlrZjmrL4sMjQxOTAwMCwxODYwMDAwLDE3MjAwMDAsMjU1OTAwMAo="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"excel\",\"sheets\":[{\"name\":\"CSV\",\"rows\":[[\"科目编码\",\"科目名称\",\"期初余额\",\"借方发生\",\"贷方发生\",\"期末余额\"],[\"1122\",\"应收账款\",\"3180000\",\"860000\",\"540000\",\"3500000\"],[\"1405\",\"存货\",\""
+      },
+      {
+        "name": "ingest-document",
+        "fn": "ingest",
+        "kind": "mutate",
+        "family": "ingest",
+        "title": "文档摄入",
+        "description": "把上一步 parse-document 解析出的 Doc 按本模块的业务用起来：科目余额表（Excel · CSV，认科目名称 + 期末余额两列）核借贷是否对平、按应收折回款天数与指标树对照；经营 PPT 与合同 / 纯文本抽能对上指标树的数值（收入、毛利率、回款天数这类）与合同金额、账期、违约条款，抓到的目标会写到驾驶舱对应的组上；邮件同样抽指标口径。什么时候用：用户传了文件、并且希望本模块拿它办事时；只读 Doc 的字段，拿不到也不该拿原始字节。四类都会写回业务数据（新副本在 data 里：多一条导入来源，抓到指标口径时再写一份 docTargets），没抓到数值时只登记导入批次；doc.ok 为假时返回 null。文件读到了、内容却对不上本模块口径时也会说清读到了什么、为什么用不上，不沉默。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "note": "当前屏"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "经营数据包（样本或上一步 mutate 返回的新副本）"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data 返回的固定数据包（metricTree / evidence / playbooks / approvalRules / samples …）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出的 Doc：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / board 决策驾驶舱 / attr 指标归因 / options 方案预演 / approval 审批 / execute 执行与复盘，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；有 data 就是业务数据被改了（新副本，入参不动），平台按 mutatesPath 取出来存回会话状态，没有 data 就是这次没改数",
+        "mutates": false,
+        "mutatesPath": "data",
+        "exampleInput": {
+          "doc": {
+            "kind": "excel",
+            "sheets": [
+              {
+                "name": "CSV",
+                "rows": [
+                  [
+                    "科目编码",
+                    "科目名称",
+                    "期初余额",
+                    "借方发生",
+                    "贷方发生",
+                    "期末余额"
+                  ],
+                  [
+                    "1122",
+                    "应收账款",
+                    "3180000",
+                    "860000",
+                    "540000",
+                    "3500000"
+                  ],
+                  [
+                    "1405",
+                    "存货",
+                    "2260000",
+                    "420000",
+                    "380000",
+                    "2300000"
+                  ],
+                  [
+                    "2202",
+                    "应付账款",
+                    "1480000",
+                    "300000",
+                    "520000",
+                    "1700000"
+                  ],
+                  [
+                    "1002",
+                    "银行存款",
+                    "2419000",
+                    "1860000",
+                    "1720000",
+                    "2559000"
+                  ]
+                ]
+              }
+            ],
+            "text": "科目编码,科目名称,期初余额,借方发生,贷方发生,期末余额\n1122,应收账款,3180000,860000,540000,3500000\n1405,存货,2260000,420000,380000,2300000\n2202,应付账款,1480000,300000,520000,1700000\n1002,银行存款,2419000,1860000,1720000,2559000\n",
+            "stats": {
+              "工作表": 1,
+              "行": 5,
+              "非空单元格": 30
+            },
+            "ok": true,
+            "name": "8月科目余额表.csv",
+            "size": 266,
+            "sizeText": "266 B",
+            "ext": "csv",
+            "note": "",
+            "paragraphs": [],
+            "tables": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "board",
+          "dataset": "make"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"Excel《8月科目余额表.csv》读完：《CSV》4 行 6 列。\\n本期借方合计 3,440,000 元，贷方合计 3,160,000 元，差额 280,000 元，两边没对平。\\n应收账款期末 350 万元，按本期收入 426 万元 折回款天数约 25 天，指标树里回款天数 84 天。\\n已按 "
       }
     ],
     "credits": 100,
@@ -6053,57 +7433,48 @@
         "source": "data.samples.service"
       }
     ],
-    "dir": "09-ai-decision",
-    "drift": [
+    "screens": [
       {
-        "where": "SKILL.md 前言 data_files: 4",
-        "says": "data_files: 4",
-        "actual": "data/ 下实际有 7 个 json：4 个规则库（metric-tree / evidence / playbooks / approval-rules）+ samples/ 下 3 套样本（mfg / trade / prof）",
-        "fix": "改为 data_files: 7，或补一句「不含 samples」并在前言另加 sample_files: 3；11 个 skill 统一口径"
+        "key": "connect",
+        "label": "接入"
       },
       {
-        "where": "SKILL.md 引擎表 `kpi / report` 行",
-        "says": "把 kpi / report 与 run、tree 等并列为引擎函数",
-        "actual": "kpi 与 report 是模块内私有函数，未出现在 core/decide.js 末尾的 return 导出表里，外部只能从 run() 返回值的 .kpi / .report 取",
-        "fix": "表格该行标注「由 run 返回，不单独导出」，或把 kpi / report 补进导出对象"
+        "key": "board",
+        "label": "决策驾驶舱"
       },
       {
-        "where": "SKILL.md 引擎表 `run(data, lib)` 行",
-        "says": "run(data, lib)，两个参数",
-        "actual": "run(data, lib, opt)，opt = { metric, basis }，决定返回里 attribution 算哪个指标、比哪个基期（缺省 profit / prev）；原型 module-09.js 的 recompute() 正是靠第三参数切换归因",
-        "fix": "签名补成 run(data, lib, opt)，并说明 opt 的两个字段"
+        "key": "attr",
+        "label": "指标归因"
       },
       {
-        "where": "SKILL.md 引擎表 `setMilestone / decisions` 行",
-        "says": "与其它函数并列，未给形参",
-        "actual": "setMilestone(data, decisionId, index, status) —— 内核里唯一一个不接收 lib 的写操作，第二个形参直接是决议编号；decisions(data, lib) 则要 lib",
-        "fix": "显式写出两者形参，尤其点明 setMilestone 不传 lib，避免按惯例照抄 (d, lib, ...) 而错位"
+        "key": "options",
+        "label": "方案预演"
       },
       {
-        "where": "SKILL.md 引擎表 `options / simulate / simulateAll` 行",
-        "says": "只写作用，未给形参",
-        "actual": "options(d, lib, causeId) / simulate(d, lib, causeId, optionKey, params) / simulateAll(d, lib, causeId, paramsByKey)；simulateAll 第四参是按方案 key 分组的 { A:{...}, B:{...} }，不是扁平参数对象",
-        "fix": "补齐三者形参，并强调 paramsByKey 的分组结构"
+        "key": "approval",
+        "label": "审批"
       },
       {
-        "where": "SKILL.md 引擎表 `submit / approve / reject` 行",
-        "says": "只写作用，未给形参",
-        "actual": "submit(d, lib, causeId, optionKey, params) 是五参（不是直接传方案对象）；approve(d, lib, approvalId, comment) / reject(d, lib, approvalId, comment)；三者都只对 status 为 pending 的单子生效，否则原样返回副本",
-        "fix": "补齐形参并注明 pending 前置条件"
-      },
-      {
-        "where": "SKILL.md 正文「归因」与「目录」段",
-        "says": "未提指标树里的 attributable 字段",
-        "actual": "data/metric-tree.json 有 attributable: [profit, grossProfit, rev, gm, opex, ccc]，attribute() 只对这 6 个节点有意义；原型在下钻时用它把非 attributable 节点回退到所属组的 root",
-        "fix": "在「归因」段写明可归因指标只有这 6 个，目录段的 metric-tree.json 说明里补上 attributable"
-      },
-      {
-        "where": "SKILL.md 目录段 `data/samples/*.json 三套样本`",
-        "says": "以文件名 mfg / trade / prof 指代三套样本",
-        "actual": "scripts/load-data.js 以 sample.archetype 为键装配：mfg.json→make、trade.json→flow、prof.json→service；examples/ 下的产物也叫 make/flow/service.output.json",
-        "fix": "注明「键名取 archetype：make / flow / service，与文件名不同」"
+        "key": "execute",
+        "label": "执行与复盘"
       }
     ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags"
+      ]
+    },
+    "dir": "09-ai-decision",
+    "drift": [],
     "id": "ai-decision",
     "kernelPath": "core/decide.js",
     "legacyGlobal": "DGG.coreM9",
@@ -6162,6 +7533,46 @@
         "source": "data.samples.service"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "room",
+        "label": "指挥室"
+      },
+      {
+        "key": "order",
+        "label": "订单下钻"
+      },
+      {
+        "key": "insert",
+        "label": "插单模拟"
+      },
+      {
+        "key": "stock",
+        "label": "物料与库存"
+      },
+      {
+        "key": "daily",
+        "label": "交付日报"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -6727,8 +8138,9 @@
         "name": "screens",
         "fn": "screens",
         "kind": "query",
+        "family": "conversation",
         "title": "六屏登记",
-        "description": "列出六个环节的屏名与中文标签，顺序即原型标签顺序；brief / suggest / ask / ingest 的 step 都从这里取。不吃业务数据也不吃数据包。",
+        "description": "列出六个环节的屏名与中文标签，顺序即原型标签顺序；brief / suggest / ask / ingest-document 的 step 都从这里取。不吃业务数据也不吃数据包。",
         "args": [],
         "inputProps": [],
         "returns": "[{key,label}] 共 6 条：connect / room / order / insert / stock / daily",
@@ -6741,12 +8153,12 @@
         "name": "brief",
         "fn": "brief",
         "kind": "query",
+        "family": "conversation",
         "title": "开场发现",
         "description": "进某一屏先说的一条发现，数字全部从同一次排程结果里取；返回字符串，未知屏返回 null。同一组入参永远得到同一句话，今天一律取 data.today，不读系统时钟。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -6769,7 +8181,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
           },
           {
@@ -6792,12 +8203,12 @@
         "name": "suggest",
         "fn": "suggest",
         "kind": "query",
+        "family": "conversation",
         "title": "快捷问句",
         "description": "该屏的快捷问句 3–4 条，条条都能被 ask 答上；问句里的数字（如按期率）来自当次排程结果，未知屏返回空数组。",
         "args": [
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -6820,7 +8231,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
           },
           {
@@ -6843,6 +8253,7 @@
         "name": "ask",
         "fn": "ask",
         "kind": "query",
+        "family": "conversation",
         "title": "问答",
         "description": "按问句在该屏作答：{text, blocks?, act?, ref?}；认不出的问法返回 null，交给平台兜底，不编数。任一屏还认两种点名：单号 / 后四位 / 客户代号给这一张的交期、预计完工、余量、齐套与建议处置，物料名给库存、安全库存、在途、排程需求与建议下单量。blocks 是平台中立的纯数据（kv / table / tags），act 是声明式动作（goto / focus / open / apply / set），高亮走顶层 ref。屏上的选中态按数据包里的 focus / insertDraft / insertPick 三个可选字段取。",
         "args": [
@@ -6853,7 +8264,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -6882,7 +8292,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
           },
           {
@@ -6903,9 +8312,53 @@
         "verifiedOutputDigest": "{\"text\":\"先看 SO-2609-0129（前道拖后，晚 7 天）：加班 CNC 车铣中心 B，预计完工 9-26 → 9-25，拖累 3 张，预计 1,966 元。\",\"act\":{\"type\":\"set\",\"path\":\"focus\",\"value\":\"SO-2609-0129\"}}"
       },
       {
-        "name": "ingest",
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "orders.csv",
+          "base64": "6K6i5Y2V5Y+3LOWuouaIt+WQjeensCzkuqflk4HlkI3np7As5pWw6YePLOS6pOacnwpQTy05OTAxLEstMDkxIMK3IOaxvei9pumbtumDqOS7tiznsr7lr4bmlK/mnrYsMzIwLDIwMjYtMTItMDEKUE8tOTkwMixLLTA5MiDCtyDpgJrnlKjorr7lpIcs5a+85ZCR5aWXLDE1MCwyMDI2LTA5LTI1Cg=="
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"excel\",\"sheets\":[{\"name\":\"CSV\",\"rows\":[[\"订单号\",\"客户名称\",\"产品名称\",\"数量\",\"交期\"],[\"PO-9901\",\"K-091 · 汽车零部件\",\"精密支架\",\"320\",\"2026-12-01\"],[\"PO-9902\",\"K-092 · 通用设备\","
+      },
+      {
+        "name": "ingest-document",
         "fn": "ingest",
-        "kind": "query",
+        "kind": "mutate",
+        "family": "ingest",
         "title": "文档摄入",
         "description": "读一份已解析的文档（订单表 / 科目余额表 / 采购或交付合同 / 经营回顾 PPT / 往来邮件），按本模块业务用起来：{text, blocks?, act?, ref?, data?}。订单表那一类会在 data 里返回新副本（入参不动，按行数记一条导入批次，第 1 行填成加急单草稿写进 insertDraft / insertPick），其余只回消息不写数据；同一份文档重复导入只留一条 doc-import 批次。表里的产品对不上在册产品、交期落在排程窗口外或读不成日期时，换成排得动的值并在回答里逐条说破。合同类的金额 / 交付期限 / 逾期口径各认中文与拉丁两种写法。doc.ok 为假返回 null。",
         "args": [
@@ -6916,7 +8369,6 @@
           },
           {
             "from": "step",
-            "required": true,
             "note": "屏名"
           },
           {
@@ -6945,7 +8397,6 @@
           {
             "name": "step",
             "type": "string",
-            "required": true,
             "description": "connect 接入 / room 指挥室 / order 订单下钻 / insert 插单模拟 / stock 物料与库存 / daily 交付日报，取自 screens"
           },
           {
@@ -6957,6 +8408,7 @@
         ],
         "returns": "{text, blocks?, act?, ref?, data?}；写数据的那一类 data 是新副本，平台回灌为下次调用的 $data",
         "mutates": false,
+        "mutatesPath": "data",
         "exampleInput": {
           "doc": {
             "kind": "excel",
@@ -7012,38 +8464,7 @@
         "verifiedOutputDigest": "{\"text\":\"Excel《orders.csv》读完：《CSV》2 行 5 列。\\n按第 1 行排产：K-091 · 汽车零部件 · 精密五金件 Ø12×45 × 320 件，交期 9-24。\\n产品名「精密支架」没对上在册产品，按更贴近的「精密五金件 Ø12×45」排；表里交期 2026-12-01 落在 21 "
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 inputs: [data]",
-        "says": "对外输入只有 data 一项",
-        "actual": "explain / actions / purchasePlan / daily 还必须收一个由 schedule(data) 产出的 S，daily 再加 purchasePlan 的 plan，applyPurchase 也要 plan；只给 data 这 5 个函数根本调不动（其余字段 version 1.0.0、credits 100、data_files 5、llm_calls 0 与代码一致）",
-        "fix": "前言写成 inputs: [data, S, plan]，或加一行 derived_inputs 说明 S / plan 由 schedule / purchasePlan 产出后回传（通用包已落为 input.S / input.plan）"
-      },
-      {
-        "where": "SKILL.md「引擎接口」表",
-        "says": "只列 schedule / explain / actions / applyAction / simulateInsert / applyInsert / purchasePlan / daily 八个函数",
-        "actual": "内核还导出 applyPurchase(data, plan, ids)——第 5 屏「生成采购单」的唯一入口，prototype/src/module-10.js:383、402 正在调——以及 diff、overtimeCost、normalize、nextOrderId、CAUSES、HZ 与 dayIdx / dateOf / short / isRest / weekday / fmtN",
-        "fix": "表里补 applyPurchase、diff、overtimeCost 三行（通用包已暴露为 apply-purchase / compare-schedules / overtime-cost），其余标注为内部工具函数不对外"
-      },
-      {
-        "where": "SKILL.md「引擎接口」表 · applyAction 一行",
-        "says": "applyAction(data, orderId, key, params)",
-        "actual": "实际签名是 (raw, orderId, key, params, dry)；dry=true 时只重排预演、不记 log、不标 handled，actions() 的 effect 预演就靠它",
-        "fix": "补第 5 个参数 dry 的说明；通用包的 apply-action 只映射前 4 个实参（落单口径）"
-      },
-      {
-        "where": "SKILL.md「引擎接口」表 · schedule 返回值",
-        "says": "schedule(data) → { orders, byId, lines, materials, kpi, days }",
-        "actual": "实际还返回 version、today、horizon 与 data，其中 data 是 normalize 后的完整数据副本，explain / actions 下游直接取 S.data",
-        "fix": "返回值补 version / today / horizon / data 四个键，并标注 data 为规范化副本"
-      },
-      {
-        "where": "SKILL.md 前言 kind: 产品（对照 universal/SPEC.md §4「每个包必须有 run」）",
-        "says": "产品类应有一次调用拿到完整结果的入口",
-        "actual": "内核没有 run 或任何聚合函数，指挥室完整结果要 schedule → purchasePlan → daily 三次调用（scripts/run-examples.js 正是这么拼的）；通用包里 run 只能映射到 schedule",
-        "fix": "内核补一个 run(data) = { S, plan, daily } 的聚合导出并升 minor 版本；在此之前 SKILL.md 注明 run 等同 schedule，完整结果需三步"
-      }
-    ],
+    "drift": [],
     "notes": "1) 内核无一次成型函数，run 映射 schedule；完整指挥室 = run → purchase-plan → daily-report 三步，examples/*.output.json 就是这三步的摘要。2) 所有入口函数内部自带 normalize，$data 直传原始样本即可，不需要 $data:ensure，也不需要 $lib（内核签名里没有 lib）。3) S 与 plan 是上一步的返回值，JSON 回传已实测安全（byId 等引用关系不影响结果）。4) apply-purchase 返回 {data,pos}，平台必须把 .data 写回会话状态，且不幂等（重复调用会重复下单）；apply-action / apply-insert 直接返回新副本，其 digest 取 log 末条最能证明动作生效。5) apply-action 的 params 原样回传 order-actions[i].params，再加 cost 字段才会把费用记进日志。6) simulate-insert 返回含 base 与 _S（三方案完整排程，约 520KB），第 4 屏甘特要用，别裁。7) fmtN / short / dateOf / dayIdx / weekday / isRest / normalize / nextOrderId 属工具函数，未暴露为动作。8) 四套样本（make/flow/project/service）均跑通 run + purchase-plan + daily-report，make 与 examples/make.output.json 的 kpi、插单推荐、采购 summary、日报全文逐字一致；scripts/validate.js 783 项断言通过；仓库零改动。"
   },
   {
@@ -7101,6 +8522,46 @@
         "source": "data.samples.service"
       }
     ],
+    "screens": [
+      {
+        "key": "connect",
+        "label": "接入"
+      },
+      {
+        "key": "build",
+        "label": "生成应用"
+      },
+      {
+        "key": "try",
+        "label": "试用"
+      },
+      {
+        "key": "test",
+        "label": "测试与产物"
+      },
+      {
+        "key": "ship",
+        "label": "发布"
+      },
+      {
+        "key": "iterate",
+        "label": "迭代交付"
+      }
+    ],
+    "features": {
+      "act": [
+        "goto",
+        "focus",
+        "open",
+        "apply",
+        "set"
+      ],
+      "blocks": [
+        "kv",
+        "table",
+        "tags"
+      ]
+    },
     "actions": [
       {
         "name": "run",
@@ -7779,40 +9240,358 @@
         },
         "verified": true,
         "verifiedOutputDigest": "{\"source\":\"machines\",\"name\":\"设备台账\",\"system\":\"AI流程提效\",\"count\":13,\"unit\":\"台\",\"syncAt\":\"2026-09-17 07:30\",\"sample\":[{\"id\":\"CT-01\",\"label\":\"CT-01\",\"name\":\"\"},{\"id\":"
+      },
+      {
+        "name": "screens",
+        "fn": "screens",
+        "kind": "query",
+        "family": "conversation",
+        "title": "六屏登记",
+        "description": "列出本 skill 的六个环节（屏）与中文标签：connect 接入 / build 生成应用 / try 试用 / test 测试与产物 / ship 发布 / iterate 迭代交付。brief / suggest / ask / ingest-document 的 step 只认这里的 key。什么时候用：平台接入时先调一次拿到环节清单，用来做路由、埋点与 act.goto 的目标；返回值与 manifest.screens 逐字节相同，读清单或调动作二选一。不吃业务数据，给了 data / dataset 也不影响返回。",
+        "args": [],
+        "inputProps": [],
+        "returns": "[{key,label}] 共 6 条：connect / build / try / test / ship / iterate",
+        "mutates": false,
+        "exampleInput": {},
+        "verified": true,
+        "verifiedOutputDigest": "[{\"key\":\"connect\",\"label\":\"接入\"},{\"key\":\"build\",\"label\":\"生成应用\"},{\"key\":\"try\",\"label\":\"试用\"},{\"key\":\"test\",\"label\":\"测试与产物\"},{\"key\":\"ship\",\"label\":\"发布\"},{\"key\":\"ite"
+      },
+      {
+        "name": "brief",
+        "fn": "brief",
+        "kind": "query",
+        "family": "conversation",
+        "title": "开场发现",
+        "description": "进某一屏时先说的一条真数据发现：一句话，里面的数字与业务 id 全部从内核算出来，能在 run 的结果里找到出处。什么时候用：用户刚切到某一屏、还没开口时主动报一条；按屏各说一条：还没生成规格时说这句话命中几个词、能落几页几字段；生成后 build 说页数与必填字段，try 说哪一单超时、等了多久，test 说用例通过数与越权拦截，ship 说发布前检查过了几项，iterate 说上一次变更改了几项、旧用例还通不通。不讲解界面、不说空话，算不上就返回 null 交平台兜底。同一组入参永远同一句。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本：原始样本（还没生成规格，六屏都按需求句解析作答）或 generate 之后的副本（按规格作答）；对话五件内部自己走 ensure，这里不必先规范化"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包（词典 / 对象库 / 流程模板 / 岗位 / 组件 / 预置句 / 用例文案 / 变更类型 / 主数据来源 + 三套样本 + erp/proc/hr 兄弟样本）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / build 生成应用 / try 试用 / test 测试与产物 / ship 发布 / iterate 迭代交付，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "一句话字符串；未知屏或算不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "step": "try",
+          "data": {
+            "$action": "generate",
+            "input": {
+              "data": {
+                "$action": "pick-preset",
+                "input": {
+                  "dataset": "make",
+                  "index": 1
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "\"DJ-2609-001 已等 3 天，超时 40 分，约定开始整改 72 小时。\""
+      },
+      {
+        "name": "suggest",
+        "fn": "suggest",
+        "kind": "query",
+        "family": "conversation",
+        "title": "快捷问句",
+        "description": "该屏的快捷问句 3–4 条，条条都能被同包的 ask 答上（展台上是按钮）。什么时候用：进屏后给用户可点的问法，如「哪一单超时了」「有没有失败的用例」「生成 V1.1.0」。顺序固定，没有可建议的返回空数组，不返回 null。",
+        "args": [
+          {
+            "from": "step",
+            "note": "屏名"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本：原始样本（还没生成规格，六屏都按需求句解析作答）或 generate 之后的副本（按规格作答）；对话五件内部自己走 ensure，这里不必先规范化"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包（词典 / 对象库 / 流程模板 / 岗位 / 组件 / 预置句 / 用例文案 / 变更类型 / 主数据来源 + 三套样本 + erp/proc/hr 兄弟样本）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / build 生成应用 / try 试用 / test 测试与产物 / ship 发布 / iterate 迭代交付，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "[string]，3–4 条，每条 ≤ 20 汉字；没有可建议的为 []",
+        "mutates": false,
+        "exampleInput": {
+          "step": "test",
+          "data": {
+            "$action": "generate",
+            "input": {
+              "data": {
+                "$action": "pick-preset",
+                "input": {
+                  "dataset": "make",
+                  "index": 1
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "[\"有没有失败的用例\",\"越权拦截了什么\",\"采纳这条建议\",\"数据字典多少列\"]"
+      },
+      {
+        "name": "ask",
+        "fn": "ask",
+        "kind": "query",
+        "family": "conversation",
+        "title": "问答",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得命中词与解析依据、页面与字段、记录编号（DJ-2609-001 这类）、用例与越权、发布检查与二维码、版本变更与存量数据等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "args": [
+          {
+            "from": "question",
+            "required": true,
+            "note": "问句原文，不做预处理"
+          },
+          {
+            "from": "step",
+            "note": "当前屏；屏内问句先由本屏分支接"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本：原始样本（还没生成规格，六屏都按需求句解析作答）或 generate 之后的副本（按规格作答）；对话五件内部自己走 ensure，这里不必先规范化"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包（词典 / 对象库 / 流程模板 / 岗位 / 组件 / 预置句 / 用例文案 / 变更类型 / 主数据来源 + 三套样本 + erp/proc/hr 兄弟样本）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "description": "用户原话"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / build 生成应用 / try 试用 / test 测试与产物 / ship 发布 / iterate 迭代交付，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?}；认不出返回 null（信封仍是 ok:true、data 为 null）",
+        "mutates": false,
+        "exampleInput": {
+          "question": "哪一单超时了",
+          "step": "try",
+          "data": {
+            "$action": "generate",
+            "input": {
+              "data": {
+                "$action": "pick-preset",
+                "input": {
+                  "dataset": "make",
+                  "index": 1
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"超时 1 单。DJ-2609-001 已等 3 天，超时 40 分，约定开始整改 72 小时。\",\"blocks\":[{\"type\":\"table\",\"head\":[\"编号\",\"状态\",\"已等\"],\"rows\":[[\"DJ-2609-001\",\"有异常\",\"3 天\"]]}],\"ref\":\"DJ-260"
+      },
+      {
+        "name": "parse-document",
+        "fn": "parse",
+        "on": "docparse",
+        "kind": "compute",
+        "family": "ingest",
+        "title": "解析文档",
+        "description": "把一份文件的字节解析成平台中立的 Doc：Word（.docx）/ Excel（.xlsx、.csv）/ PPT（.pptx）/ PDF / 邮件（.eml）/ 纯文本（.txt、.md、.json）六类，全同步、零依赖、不碰网络与时钟。什么时候用：用户上传文件后的第一步，拿到 Doc 再喂给 ingest-document；平台也可以只解析不摄入（只想要 doc.text 自己处理）。入参平铺成 {name, base64}，name 只用扩展名判类型。原始字节超过 8 MB 或解析不成功返回 {ok:false, note}（业务事实，不是调用失败，信封仍是 ok:true），.doc / .xls / .ppt 老格式会提示另存为新格式；过大的内容按上限表裁剪，裁过的在 truncated 上标出。",
+        "args": [
+          {
+            "from": "name",
+            "required": true,
+            "note": "文件名，只用扩展名判类型"
+          },
+          {
+            "from": "base64",
+            "required": true,
+            "note": "文件字节的 base64，共用件也直接收 base64 串"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "description": "文件名，只用扩展名判类型：docx / xlsx / csv / pptx / pdf / eml / txt / md / json；没有扩展名按纯文本处理"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "required": true,
+            "description": "文件字节的 base64（RFC 4648，可带换行，不带 data: 前缀），原始字节 ≤ 8 MB"
+          }
+        ],
+        "returns": "Doc：{ok, kind, name, ext, size, sizeText, text, paragraphs, tables, sheets, slides, mail, stats, note, truncated?}；paragraphs / tables / sheets / slides 用不上时是空数组，mail 只有邮件才有、其余为 null",
+        "mutates": false,
+        "exampleInput": {
+          "name": "二期追加需求.txt",
+          "base64": "5oql5L+u5Y2V5LqM5pyf6L+95Yqg6ZyA5rGCCuWujOaIkOWQjuiuqeePree7hOmVv+aJk+WIhuivhOS7t++8jOivhOWIhuS9juS6jiAzIOWIhueahOiHquWKqOi9rOe7tOS/ruS4u+euoeWkjeaguOOAggrlj6bpnIDlnKjliJfooajpobXlop7liqDmjInorr7lpIfnvJblj7fnrZvpgInjgIIK"
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"kind\":\"text\",\"paragraphs\":[\"报修单二期追加需求\",\"完成后让班组长打分评价，评分低于 3 分的自动转维修主管复核。\",\"另需在列表页增加按设备编号筛选。\"],\"text\":\"报修单二期追加需求\\n完成后让班组长打分评价，评分低于 3 分的自动转维修主管复核。\\n另需在列表页增加按设备编号"
+      },
+      {
+        "name": "ingest-document",
+        "fn": "ingest",
+        "kind": "mutate",
+        "family": "ingest",
+        "title": "文档摄入",
+        "description": "把上一步 parse-document 解析出的 Doc 按本模块的业务用起来：表格（Excel · CSV）按表头出字段草案并与对象库比对，对得上的字段直接加进表单、数据字典与用例；Word / PDF / 纯文本 / PPT / 邮件按段落找能认出的业务对象或变更：还没生成规格时把那一段写进需求句，已生成规格时写进追加需求（下一版生效）。什么时候用：用户传了文件、并且希望本模块拿它办事时；只读 Doc 的字段，拿不到也不该拿原始字节。认出对象或变更的那一类会写回业务数据（新副本在 data 里，改的是 state.text 或 state.delta），对不上对象库时只把草案放进 act 的抽屉、规格不动数；文件读不出来时也有一句回应，不返回 null。文件读到了、内容却对不上本模块口径时也会说清读到了什么、为什么用不上，不沉默。",
+        "args": [
+          {
+            "from": "doc",
+            "required": true,
+            "note": "parse-document 的返回值"
+          },
+          {
+            "from": "step",
+            "note": "当前屏"
+          },
+          {
+            "from": "$data",
+            "required": true,
+            "note": "当前业务数据副本：原始样本（还没生成规格，六屏都按需求句解析作答）或 generate 之后的副本（按规格作答）；对话五件内部自己走 ensure，这里不必先规范化"
+          },
+          {
+            "from": "$lib",
+            "required": true,
+            "note": "load-data.js 返回的数据包（词典 / 对象库 / 流程模板 / 岗位 / 组件 / 预置句 / 用例文案 / 变更类型 / 主数据来源 + 三套样本 + erp/proc/hr 兄弟样本）"
+          },
+          {
+            "from": "result",
+            "required": false,
+            "note": "可选：上一次 run 的结果，不传就自己算一次"
+          }
+        ],
+        "inputProps": [
+          {
+            "name": "doc",
+            "type": "object",
+            "required": true,
+            "description": "parse-document 输出的 Doc：{ok, kind(word/excel/ppt/pdf/eml/text), name, text, paragraphs, tables, sheets, slides, mail, stats, …}"
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "description": "connect 接入 / build 生成应用 / try 试用 / test 测试与产物 / ship 发布 / iterate 迭代交付，取自 screens"
+          },
+          {
+            "name": "result",
+            "type": "object",
+            "required": false,
+            "description": "可选：run 的结果，传了就用，省一次重算"
+          }
+        ],
+        "returns": "{text, blocks?, act?, ref?, data?}；有 data 就是业务数据被改了（新副本，入参不动），平台按 mutatesPath 取出来存回会话状态，没有 data 就是这次没改数",
+        "mutates": false,
+        "mutatesPath": "data",
+        "exampleInput": {
+          "doc": {
+            "kind": "text",
+            "paragraphs": [
+              "报修单二期追加需求",
+              "完成后让班组长打分评价，评分低于 3 分的自动转维修主管复核。",
+              "另需在列表页增加按设备编号筛选。"
+            ],
+            "text": "报修单二期追加需求\n完成后让班组长打分评价，评分低于 3 分的自动转维修主管复核。\n另需在列表页增加按设备编号筛选。\n",
+            "stats": {
+              "行": 3,
+              "字数": 54
+            },
+            "ok": true,
+            "name": "二期追加需求.txt",
+            "size": 165,
+            "sizeText": "165 B",
+            "ext": "txt",
+            "note": "",
+            "tables": [],
+            "sheets": [],
+            "slides": [],
+            "mail": null
+          },
+          "step": "iterate",
+          "data": {
+            "$action": "generate",
+            "input": {
+              "data": {
+                "$action": "pick-preset",
+                "input": {
+                  "dataset": "make",
+                  "index": 1
+                }
+              }
+            }
+          }
+        },
+        "verified": true,
+        "verifiedOutputDigest": "{\"text\":\"文本《二期追加需求.txt》读完：3 段 · 54 字。\\n第 2 段「完成后让班组长打分评价，评分低于 3 分的自…」认到变更：新增节点 已评价、新增字段 满意度评分、新增字段 评语。\\n已写进追加需求，点「生成 V1.1.0」就落版本。\",\"blocks\":[],\"data\":{\"archetyp"
       }
     ],
-    "drift": [
-      {
-        "where": "SKILL.md 前言 data_files: 3",
-        "says": "data_files: 3",
-        "actual": "data/ 下实有 12 个 json：顶层 9 个（lexicon / objects / flows / roles / components / presets / tests / deltas / integrations）+ data/samples/ 3 个（mfg / trade / prof）；SKILL.md 正文「目录」段落本身也列了这 12 个文件",
-        "fix": "把前言改成 data_files: 12（如只想计业态样本，字段名应改为 sample_files: 3）"
-      },
-      {
-        "where": "SKILL.md 数据表 · lexicon.json 一条（正文第 67 行）",
-        "says": "另有连接词 8、否定词 8、数量单位 11",
-        "actual": "data/lexicon.json 实有 connectors 6（然后/之后/接着/并且/同时/以及）、negations 12（不要/去掉/不需要/取消/无需/删掉/不用/免填/不再需要/不再要/去除/不带）、qtyUnits 11",
-        "fix": "改成「连接词 6、否定词 12、数量单位 11」"
-      },
-      {
-        "where": "SKILL.md 解析 · tokenize 一行（正文第 28 行）",
-        "says": "按标点与连接词（然后 / 再 / 之后 / 接着 / 并且 / 同时 / 以及 / 并）切子句",
-        "actual": "词典 connectors 里没有「再」和「并」，实际只按 6 个连接词切分",
-        "fix": "删掉「再」「并」，与 lexicon.connectors 的 6 个词对齐"
-      },
-      {
-        "where": "SKILL.md 样本契约 · systems 一条（正文第 79 行）",
-        "says": "`systems`（企业现有系统列表，含 mes / erp / hr / oa / crm / shop 时对应主数据为 direct，否则 import）",
-        "actual": "mfg / trade / prof 三套样本的 systems 都是空数组 []，所以只跑 skill 数据包时主数据关联一律是 import；direct 只在原型把企业画像的 systems 注入副本后才出现",
-        "fix": "注明样本 systems 默认为空、direct 需由调用方注入 systems（通用 skill 的 run 输入要能接收 systems）"
-      },
-      {
-        "where": "SKILL.md 数据表 · objects.json 与 schema/data.json 对 archetype=flow 的中文叫法",
-        "says": "objects.json 30 个对象（通用 9 · 制造 8 · 贸易 6 · 服务 7）",
-        "actual": "对象数与分布正确（common 9 / make 8 / flow 6 / service 7），但同一个 archetype=flow 在 schema/data.json 里叫「仓配」、在 SKILL.md 里叫「贸易」，样本文件名又是 trade.json",
-        "fix": "统一 flow 的中文名（建议「贸易仓配」），三处叫法一致，便于通用 skill 的业态枚举"
-      }
-    ],
+    "drift": [],
     "notes": "产品类 skill，全部动作签名都是 (data, lib, ...)，lib = load-data 返回的 16 键数据包（含 05/08/10 三个兄弟 skill 的样本，主数据只读引用），必须由平台固定注入。调用链有先后：ensure → set-text/pick-preset → generate → 其余动作，未 generate 时除 run/ensure/set-text/pick-preset/ref-table 外都原样返回。preview-delta 的第一参是 spec 对象（run 结果里的 spec），不是 data。12 个 mutate 动作返回整份新副本，本表 digest 取副本里的 state 关键字段（整副本过大）。内核确定性，同序调用同果；实跑脚本见 scratchpad/verify-m11.js，未改仓库任何文件。"
   }
 ]

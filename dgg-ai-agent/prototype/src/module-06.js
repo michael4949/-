@@ -661,7 +661,7 @@
   }
   function applyAction(a) {
     var input = a.input || {};
-    if (a.action === 'applyFix') {
+    if (a.action === 'apply-fix') {
       var row = M.R.reconcile.rows.filter(function (r) { return r.id === input.rule; })[0];
       if (!row || !row.fix || row.fixed) return false;
       M.rule = row.id;
@@ -669,32 +669,36 @@
       refocus(row.id, 120);
       return true;
     }
-    if (a.action === 'applyRiskAction') {
+    if (a.action === 'apply-risk-action') {
       var rk = M.R.risks.rows.filter(function (r) { return r.id === input.risk; })[0];
       if (!rk) return false;
       M.risk = rk.id;
       doRiskAct(rk.id, input.key);
       return true;
     }
-    if (a.action === 'applyCashOption') {
+    if (a.action === 'apply-cash-option') {
       if (!M.co.options.filter(function (o) { return o.key === input.key; }).length) return false;
       doCash(input.key);
       return true;
     }
-    if (a.action === 'togglePolicy') {
+    if (a.action === 'toggle-policy') {
       if (!M.R.policies.rows.filter(function (p) { return p.id === input.id; }).length) return false;
       doPolicy(input.id);
       return true;
     }
-    if (a.action === 'ingest') {
-      var r = K.ingest(input.doc, M.step, M.data, LIB, M.R);
-      if (!r || !r.data) return false;
-      M.week = null;
-      if (a.step && a.step !== M.step) { M.data = r.data; recompute(); setStep(a.step); }
-      else commit(r.data, '《' + input.doc.name + '》已并入本期账套，六屏已重算');
-      return true;
-    }
     return false;
+  }
+  /* 文档摄入：内核只给新数据副本（SPEC §12 不许 apply 指回 ingest 自己），并进页面由宿主做；
+     内核同时给 {type:'goto', step} 说明该切到哪一屏 */
+  function takeDoc(doc, step) {
+    var r = K.ingest(doc, step, M.data, LIB, M.R);
+    if (!r || !r.data) return r;
+    var nd = r.data, to = r.act && r.act.type === 'goto' ? r.act.step : null;
+    return { text: r.text, blocks: r.blocks, act: function () {
+      M.week = null;
+      if (to && to !== M.step) { M.data = nd; recompute(); setStep(to); }
+      else commit(nd, '《' + doc.name + '》已并入本期账套，六屏已重算');
+    } };
   }
   function setParam(a) {
     if (a.path === 'cashScenario.loanDraw') {
@@ -714,6 +718,7 @@
     ctx: function () { return { data: M.data, lib: LIB, result: M.R }; },
     /* 屏上选中的那条勾稽 / 风险 / 周要一起递给内核，不然问的和写回的都落到默认那一条上 */
     answer: function (q, step) { return M.R ? K.ask(q, step, M.data, LIB, M.R, { rule: M.rule, risk: M.risk, week: M.week }) : null; },
+    onDoc: takeDoc,
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {
