@@ -114,19 +114,42 @@
   /* 自带的 UTF-8 解码：不依赖宿主，跨平台逐字一致（含剥 BOM、非法字节补 U+FFFD）。
      码元先写进定长 Uint16Array 再整片 fromCharCode —— 比逐个 Array.push 快一倍多，
      15 MB 的 sheet XML 也在百毫秒量级。 */
+  /* UTF-8 解码（自带实现，逐字对齐 WHATWG Encoding 标准，与 TextDecoder / Node Buffer 结果完全相同）。
+     非法字节一律换成 U+FFFD，并且「把出错的那个字节退回去当新的首字节重读」——这三件事必须照做，
+     否则会出两类真问题：超长编码 E0 80 80 被解成 U+0000（经典的超长 NUL），
+     以及 ED A0 80 被解成落单的代理码元（落单代理不是合法字符串，JSON 出网时会被各家运行时改写，
+     确定性就断了）。另外首字节判错时不退回，会顺手吃掉后面一个正常汉字。 */
   function utf8self(bytes) {
-    var i = 0, n = bytes.length, parts = [], buf = new Uint16Array(8192), bl = 0, c, c2, c3, c4, u;
+    var i = 0, n = bytes.length, parts = [], buf = new Uint16Array(8192), bl = 0;
+    var c, need, lo, hi, cp, k, b2, u;
     if (n >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) i = 3;
     while (i < n) {
       c = bytes[i++];
-      if (c < 0x80) buf[bl++] = c;
-      else if (c < 0xc0) buf[bl++] = 0xfffd;                                 /* 孤立续字节 */
-      else if (c < 0xe0) { c2 = bytes[i++] | 0; buf[bl++] = ((c & 0x1f) << 6) | (c2 & 63); }
-      else if (c < 0xf0) { c2 = bytes[i++] | 0; c3 = bytes[i++] | 0; buf[bl++] = ((c & 0x0f) << 12) | ((c2 & 63) << 6) | (c3 & 63); }
+      if (c < 0x80) { buf[bl++] = c; }
       else {
-        c2 = bytes[i++] | 0; c3 = bytes[i++] | 0; c4 = bytes[i++] | 0;
-        u = (((c & 7) << 18) | ((c2 & 63) << 12) | ((c3 & 63) << 6) | (c4 & 63)) - 0x10000;
-        buf[bl++] = 0xd800 + (u >> 10); buf[bl++] = 0xdc00 + (u & 0x3ff);    /* 星平面字符占两个码元 */
+        /* 首字节定长度，并定第一个续字节的合法区间（这一步就把超长编码与代理区挡掉） */
+        if (c >= 0xc2 && c <= 0xdf) { need = 1; lo = 0x80; hi = 0xbf; cp = c & 0x1f; }
+        else if (c === 0xe0) { need = 2; lo = 0xa0; hi = 0xbf; cp = 0; }
+        else if (c >= 0xe1 && c <= 0xec) { need = 2; lo = 0x80; hi = 0xbf; cp = c & 0x0f; }
+        else if (c === 0xed) { need = 2; lo = 0x80; hi = 0x9f; cp = 0x0d; }
+        else if (c >= 0xee && c <= 0xef) { need = 2; lo = 0x80; hi = 0xbf; cp = c & 0x0f; }
+        else if (c === 0xf0) { need = 3; lo = 0x90; hi = 0xbf; cp = 0; }
+        else if (c >= 0xf1 && c <= 0xf3) { need = 3; lo = 0x80; hi = 0xbf; cp = c & 0x07; }
+        else if (c === 0xf4) { need = 3; lo = 0x80; hi = 0x8f; cp = 4; }
+        else { buf[bl++] = 0xfffd; need = -1; }                    /* C0 / C1 / F5–FF / 孤立续字节 */
+        if (need > 0) {
+          for (k = 0; k < need; k++) {
+            if (i >= n) { buf[bl++] = 0xfffd; need = -1; break; }  /* 截断在结尾 */
+            b2 = bytes[i];
+            if (b2 < lo || b2 > hi) { buf[bl++] = 0xfffd; need = -1; break; }   /* 出错的字节退回去重读 */
+            i++; cp = (cp << 6) | (b2 & 63);
+            lo = 0x80; hi = 0xbf;
+          }
+          if (need > 0) {
+            if (cp < 0x10000) buf[bl++] = cp;
+            else { u = cp - 0x10000; buf[bl++] = 0xd800 + (u >> 10); buf[bl++] = 0xdc00 + (u & 0x3ff); }
+          }
+        }
       }
       if (bl >= 8190) { parts.push(String.fromCharCode.apply(String, buf.subarray(0, bl))); bl = 0; }
     }
@@ -134,53 +157,21 @@
     return parts.length === 1 ? parts[0] : parts.join('');
   }
 
-  /* 严格的 UTF-8 合法性检查（RFC 3629）：拒绝超长编码、代理区码位与 > U+10FFFF。
-     通过检查的字节序列，任何合规解码器的结果都只有一种，不存在替换字符的分歧。 */
-  function wellFormedUtf8(b) {
-    var i = 0, n = b.length, c, c2, c3, c4;
-    while (i < n) {
-      c = b[i];
-      if (c < 0x80) { i++; continue; }
-      if (c < 0xc2) return false;                                      /* 续字节打头，或 C0/C1 超长编码 */
-      if (c < 0xe0) {
-        if (i + 1 >= n) return false;
-        c2 = b[i + 1]; if (c2 < 0x80 || c2 > 0xbf) return false;
-        i += 2; continue;
-      }
-      if (c < 0xf0) {
-        if (i + 2 >= n) return false;
-        c2 = b[i + 1]; c3 = b[i + 2];
-        if (c2 < 0x80 || c2 > 0xbf || c3 < 0x80 || c3 > 0xbf) return false;
-        if (c === 0xe0 && c2 < 0xa0) return false;                     /* 超长 */
-        if (c === 0xed && c2 > 0x9f) return false;                     /* 代理区 */
-        i += 3; continue;
-      }
-      if (c > 0xf4) return false;
-      if (i + 3 >= n) return false;
-      c2 = b[i + 1]; c3 = b[i + 2]; c4 = b[i + 3];
-      if (c2 < 0x80 || c2 > 0xbf || c3 < 0x80 || c3 > 0xbf || c4 < 0x80 || c4 > 0xbf) return false;
-      if (c === 0xf0 && c2 < 0x90) return false;                       /* 超长 */
-      if (c === 0xf4 && c2 > 0x8f) return false;                       /* 超出 U+10FFFF */
-      i += 4;
-    }
-    return true;
-  }
-
-  /* UTF-8 解码。语义由上面自带的 utf8self 定义，跨平台逐字一致。
-     宿主的 TextDecoder 只在字节序列已被证明合法时借用（此时两者结果必然相同，只是快五倍）；
-     字节一旦不合法就退回自带实现，避免各宿主的替换字符规则不同破坏确定性。 */
+  /* UTF-8 解码。自带实现已逐字对齐 WHATWG 标准，与宿主 TextDecoder 在任意字节串上结果都相同，
+     所以大块文本直接借宿主的（快约五倍），小块或没有 TextDecoder 时走自带的，两条路等价。 */
   var TD_UTF8, TD_TRIED = false;
   function utf8(bytes) {
-    var b = toBytes(bytes);
+    var b = toBytes(bytes), s;
     if (!TD_TRIED) {
       TD_TRIED = true;
       try { TD_UTF8 = (typeof TextDecoder !== 'undefined') ? new TextDecoder('utf-8') : null; } catch (e) { TD_UTF8 = null; }
     }
-    if (TD_UTF8 && b.length > 4096 && wellFormedUtf8(b)) {
+    if (TD_UTF8 && b.length > 4096) {
       try { return TD_UTF8.decode(b); } catch (e2) { /* 落回自带 */ }
     }
     return utf8self(b);
   }
+
   /* latin1：字节值即码位，PDF 与邮件里靠它保证「字符串下标 == 字节下标」 */
   function latin1(bytes) {
     var parts = [], i = 0, n = bytes.length, end;
