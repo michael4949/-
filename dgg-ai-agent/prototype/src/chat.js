@@ -466,8 +466,8 @@
 
     function setSuggest(list) {
       sug.innerHTML = '';
-      list = (list || []).slice(0, 3);
-      list.push('下一步做什么');                                  /* 哪一屏都留一条能把流程接下去的问句 */
+      list = (list || []).slice(0, 4);
+      list.push('下一步点哪');                                    /* 哪一屏都多留一条，问完直接替客户点下去 */
       list.forEach(function (q) {
         sug.appendChild(h('button', { onclick: function () { ask(q); } }, [q]));
       });
