@@ -100,6 +100,10 @@
   function rowTitle(row) { var s = spec(), f = s.fields.filter(function (x) { return !x.at && x.type !== 'member' && x.type !== 'photo'; }); var a = f[0] ? row.values[f[0].key] : '', b = f[1] ? row.values[f[1].key] : ''; return [a, b].filter(function (x) { return x != null && x !== ''; }).map(String).join(' · '); }
   function qrHtml(text, cell) { try { if (typeof qrcode !== 'function') return ''; var q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize: cell || 3, margin: 0, scalable: true }); } catch (e) { return ''; } }
 
+  /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
+     不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
+  var GUIDE_AIM = { connect: '生成应用', build: 'next', try: '下一步', test: '采纳', ship: '发布到正式环境', iterate: '生成 V' };
+
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM11;
     LIB = { lexicon: DATA.m11.lexicon, objects: DATA.m11.objects, flows: DATA.m11.flows, roles: DATA.m11.roles, components: DATA.m11.components, presets: DATA.m11.presets, tests: DATA.m11.tests, deltas: DATA.m11.deltas, integrations: DATA.m11.integrations, erpSamples: DATA.m10.samples, procSamples: DATA.m8.samples, hrSamples: DATA.m5.samples, qrBase: sh.CFG.wechatUrl };
@@ -124,7 +128,8 @@
     var R = M.R, k = R.kpi, c = M.company, s = R.spec;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'build', label: '生成应用', badge: s ? k.pages : 0 }, { key: 'try', label: '试用', badge: s ? R.stats.open : 0 }, { key: 'test', label: '测试与产物', badge: s ? k.failed : 0 }, { key: 'ship', label: '发布', badge: s ? (R.checklist.total - R.checklist.passed) : 0 }, { key: 'iterate', label: '迭代交付', badge: s ? k.changes : 0 }];
-    var F = P.frame({ mark: '开发', accent: ACCENT, modules: P.navModules('m11'), crumbs: ['AI软件开发', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + (s ? s.title + ' ' + s.id : '一句需求变可点页面') }, tabs: tabs, active: M.step, chat: { id: 'm11', name: 'AI软件开发', step: M.step, onGo: setStep },
+    var F = P.frame({ mark: '开发', accent: ACCENT, modules: P.navModules('m11'), crumbs: ['AI软件开发', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + (s ? s.title + ' ' + s.id : '一句需求变可点页面') }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm11', name: 'AI软件开发', step: M.step, onGo: setStep },
       onTab: function (key) { if (key !== 'connect' && !M.charged) { enterBuild(); if (key !== 'build') setStep(key); } else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step !== 'connect' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }

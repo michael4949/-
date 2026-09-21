@@ -87,7 +87,7 @@
       for (i2 = ai + 1; i2 < list.length; i2++) if (!list[i2].disabled) { nx = list[i2]; break; }
       guide = window.DGG.guide.mount({
         root: root, work: work, barHost: body,
-        id: (o.chat && o.chat.id) || o.mark, step: o.active,
+        id: (o.chat && o.chat.id) || o.mark, step: o.active, aim: o.guideAim,
         nextKey: nx ? nx.key : null, nextLabel: nx ? nx.label : '',
         onNext: function (key) { if (o.onTab) o.onTab(key); },
         onHome: function () { if (window.DGG.shell && window.DGG.shell.go) window.DGG.shell.go('home'); }

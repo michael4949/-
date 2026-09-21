@@ -154,6 +154,10 @@
   function nextItem() { var reg = M.R.register; return reg.overdue[0] || reg.due30[0] || reg.items[0]; }
   function kindCount(key) { var c = M.R.register.counts; return key === 'contract' ? c.contract : key === 'license' ? c.license : key === 'ip' ? c.ip : c.setup; }
 
+  /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
+     不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
+  var GUIDE_AIM = { connect: '进入法务驾驶舱', board: 'next', contracts: '采纳高风险修订', setup: '确认方案', ip: 'next', register: '发送到微信' };
+
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM7;
     LIB = { contractRules: DATA.m7.contractRules, setupRules: DATA.m7.setupRules, ipClasses: DATA.m7.ipClasses, industries: DATA.industries };
@@ -174,7 +178,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '法务驾驶舱' }, { key: 'contracts', label: '合同审查', badge: k.highRisk || 0 }, { key: 'setup', label: '新设主体' }, { key: 'ip', label: '知识产权', badge: k.ipUrgent || 0 }, { key: 'register', label: '台账与提醒', badge: k.overdue || 0 }];
-    var F = P.frame({ mark: '法务', accent: ACCENT, modules: P.navModules('m7'), crumbs: ['AI法务', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, chat: { id: 'm7', name: 'AI法务', step: M.step, onGo: setStep },
+    var F = P.frame({ mark: '法务', accent: ACCENT, modules: P.navModules('m7'), crumbs: ['AI法务', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm7', name: 'AI法务', step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }

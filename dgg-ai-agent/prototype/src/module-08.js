@@ -131,6 +131,10 @@
   function srcAt(i, alt) { var s2 = (M.data.sources || [])[i]; return s2 || { name: alt, rows: 0 }; }
   function scroller(el, maxH) { return h('div', { class: 'm8-sc', style: 'max-height:' + maxH + 'px' }, [el]); }
 
+  /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
+     不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
+  var GUIDE_AIM = { connect: '核验并进入工序流看板', board: 'next', diag: '按约束工序节拍投料', improve: 'AI 重排今日顺序', exec: '生成明日派工单', report: '发送到微信' };
+
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM8;
     LIB = { vocab: DATA.m8.vocab, rules: DATA.m8.rules, improveLib: DATA.m8.improveLib, erpSamples: DATA.m10.samples, erp: window.DGG.coreM10 };
@@ -153,7 +157,8 @@
     var R = M.R, k = R.kpi, v = V(), c = M.company;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入', badge: k.reportsPending || 0 }, { key: 'board', label: v.flowName + '看板', badge: k.alertsOpen || 0 }, { key: 'diag', label: v.op + '诊断', badge: k.stdExpired || 0 }, { key: 'improve', label: '改善预演' }, { key: 'exec', label: '执行与' + v.dispatch.replace('单', ''), badge: k.maintDue || 0 }, { key: 'report', label: '提效周报' }];
-    var F = P.frame({ mark: '提效', accent: ACCENT, modules: P.navModules('m8'), crumbs: ['AI流程提效', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, chat: { id: 'm8', name: 'AI流程提效', step: M.step, onGo: setStep },
+    var F = P.frame({ mark: '提效', accent: ACCENT, modules: P.navModules('m8'), crumbs: ['AI流程提效', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm8', name: 'AI流程提效', step: M.step, onGo: setStep },
       onTab: function (key) { if (key !== 'connect' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step !== 'connect' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }

@@ -184,6 +184,10 @@
   }
 
   /* ---------- 生命周期 ---------- */
+  /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
+     不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
+  var GUIDE_AIM = { connect: '进入订单交付指挥室', room: 'next', order: '执行', insert: '按方案', stock: '生成', daily: '发送到微信' };
+
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM10;
     P.init(sh);
@@ -217,7 +221,8 @@
     ];
     var F = P.frame({ mark: 'ERP', accent: ACCENT, modules: P.navModules('m10'),
       crumbs: ['AI ERP', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
-      tabs: tabs, active: M.step, chat: { id: 'm10', name: 'AI ERP', step: M.step, onGo: setStep },
+      tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm10', name: 'AI ERP', step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'room' && !M.charged) enterRoom(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'room' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }

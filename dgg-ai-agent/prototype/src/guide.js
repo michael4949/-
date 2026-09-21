@@ -77,7 +77,7 @@
     var ring = h('div', { class: 'pd-guide-ring', 'aria-hidden': 'true' });
     root.appendChild(ring);
 
-    var raf = 0, timer = 0, stopped = false, shown = false, lastTarget = null, scrolled = false;
+    var raf = 0, timer = 0, stopped = false, shown = false, lastTarget = null, scrolled = 0;
 
     function overlayOpen() { return !!root.querySelector('.pd-drawer-bg, .modal-bg'); }
 
@@ -102,13 +102,32 @@
       return false;
     }
 
+    /* 这一屏该点哪个，由模块显式告诉我们，不靠猜。
+       之前用「本屏第一个主按钮」猜，驾驶舱这种总览屏就会指到角落里一张卡的侧向操作上去。
+       顺序：模块标的 [data-guide] → 模块给的 aim 文字 → 屏底「下一步」。
+       aim 传 'next' 表示这一屏本来就没有主操作（总览屏），直接指「下一步」。 */
+    function byText(aim) {
+      var list = work.querySelectorAll('button:not([disabled]), a[role="button"]'), i, el, txt;
+      for (i = 0; i < list.length; i++) {
+        el = list[i];
+        if (el.offsetParent === null) continue;
+        txt = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (txt && txt.indexOf(aim) === 0) return el;
+      }
+      for (i = 0; i < list.length; i++) {                         /* 退一步：包含也算 */
+        el = list[i];
+        if (el.offsetParent === null) continue;
+        txt = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (txt && txt.indexOf(aim) >= 0) return el;
+      }
+      return null;
+    }
     function pickTarget() {
       if (overlayOpen()) return null;
       if (!USED[key]) {
         var m = work.querySelector('[data-guide]:not([disabled])');
         if (m && m.offsetParent !== null) return m;
-        var list = work.querySelectorAll('.pd-btn.primary:not([disabled])'), i;
-        for (i = 0; i < list.length; i++) if (list[i].offsetParent !== null) return list[i];
+        if (o.aim && o.aim !== 'next') { var t = byText(o.aim); if (t) return t; }
       }
       return goBtn;
     }
@@ -125,9 +144,16 @@
       /* 目标被滚在屏外：先把它滚进来（每屏只滚一次），滚完还看不见就把箭头交给「下一步」，
          绝不出现「有目标却没箭头」—— 客户会以为没得点。 */
       var wr = work.getBoundingClientRect();
-      if (work.contains(t) && !(tr.bottom > wr.top + 4 && tr.top < wr.bottom - 4)) {
-        if (!scrolled) { scrolled = true; try { t.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { /* 忽略 */ } setTimeout(schedule, 420); return; }
-        t = goBtn; t0 = t; tr = t.getBoundingClientRect();
+      /* 要求目标**整个**露出来再指：只露一半（卡在工作区下沿、被屏底那条压住）时，
+         客户看到的是个半截按钮，先滚到居中再指 */
+      if (work.contains(t) && !(tr.top >= wr.top - 2 && tr.bottom <= wr.bottom + 2)) {
+        if (scrolled < 3) {
+          scrolled++;
+          try { t.scrollIntoView({ block: 'center', behavior: scrolled > 1 ? 'auto' : 'smooth' }); } catch (e) { /* 忽略 */ }
+          setTimeout(schedule, 420);
+          return;
+        }
+        t = goBtn; t0 = t; tr = t.getBoundingClientRect();     /* 滚了还看不见（被藏住了），交给「下一步」 */
       }
 
       /* 箭头默认放目标左侧；左边不够就放上方 */
