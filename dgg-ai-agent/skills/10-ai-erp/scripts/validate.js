@@ -129,7 +129,7 @@ Object.keys(data.samples).sort().forEach((k) => {
     ok(typeof bt === 'string' && bt.length > 10 && !/undefined|NaN|\{\w+\}/.test(bt), k + ' brief ' + st + '：' + bt);
     ok(typeof b === 'string' || isBlocks(b.blocks), k + ' brief blocks 块型 ' + st);
     clean(bt, k + ' brief ' + st);
-    ok(core.brief(st, d, null) === b, k + ' brief 不传 result 结果不一致 ' + st);
+    ok(JSON.stringify(core.brief(st, d, null)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
     const sg = core.suggest(st, d, null, R);
     ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
     sg.forEach((q) => {

@@ -385,7 +385,7 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 
 ### 10.6 blocks 的平台中立表示
 
-**blocks 是纯数据，不许出现 DOM 节点、函数、HTML 字符串。** 原型里 `blocks` 是 `<table>` 元素，下沉时必须翻译成下面六种之一。
+**blocks 是纯数据，不许出现 DOM 节点、函数、HTML 字符串。** 原型里 `blocks` 是 `<table>` 元素，下沉时必须翻译成下面七种之一。
 
 | `type` | 字段 | 上限 | 平台怎么渲染 |
 |---|---|---|---|
@@ -395,6 +395,7 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 | `list` | `items: [文字…]`，`ordered?: false`，`title?` | items ≤ 8 | 列表 |
 | `metric` | `items: [{ label, value, unit?, sub?, tone? }]` | items ≤ 4 | 指标块 |
 | `text` | `text: "…"` | ≤ 200 字 | 补充段落 |
+| `chart` | 见 §10.6.1 | 见 §10.6.1 | 一张图；画不了就退化成它的 `labels` + `series[].data` 两列表，或直接忽略 |
 
 - 所有单元格、标签、指标值都是**字符串或数字**，不是对象。数字的格式化（千分位、百分号）由 skill 做完，平台不再加工。
 - `tone` 取值固定四种：`ok` / `warn` / `bad` / `info`。平台可以只认颜色，也可以完全忽略。
@@ -409,6 +410,32 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
   { "type": "table", "head": ["物料", "建议", "截止"], "align": ["l", "r", "c"],
     "rows": [ ["45# 圆钢 φ60", "1,200 kg", "09-21"], ["电镀外协", "—", "09-23"] ] } ]
 ```
+
+### 10.6.1 `chart` 块（1.1 新增）
+
+一条「文字 + 图表」的回答，图的**规格**由 skill 给，**画法**由平台定 —— skill 不碰颜色、不碰像素、不碰 SVG。
+
+| 字段 | 说明 |
+|---|---|
+| `chart` | 图型，取值只能是下面 14 个之一 |
+| `title?` | 图题，≤ 14 字；不给就不画标题 |
+| `unit?` | 数值单位，跟在数字后面（`' 万元'` / `'%'` / `' 条'`），包含前导空格由 skill 自己决定 |
+| `labels?` | 分类轴的标签，≤ 13 个；标签本身 ≤ 6 字 |
+| `series` | `[{ name, data: [数…] }]`，序列 ≤ 3 条；`scatter` 用 `points: [[x, y]…]` |
+| `rows?` / `matrix?` | 只有 `heat` 用：`rows` 是行标签，`matrix[i][j]` 对应 `rows[i] × labels[j]` |
+| `total?` `target?` `max?` `value?` | 环图中心数 / 目标线 / 轴上限 / 单值（`gauge` 用 `value` + `max` + `target?`） |
+| `xLabel?` `yLabel?` `note?` | 轴名与一句脚注，各 ≤ 10 字 |
+
+图型（14 种）：`column` `bar` `stack` `line` `area` `donut` `pie` `funnel` `gauge` `radar` `waterfall` `progress` `heat` `scatter`。
+
+规则：
+
+- **数值是数，不是字符串。** `data` 里放 `1280`，不放 `'1,280'`；千分位与单位交给平台。单位统一写在 `unit` 上，不许一个序列混两种单位。
+- **一条回答最多一张图**（blocks 总数仍 ≤ 3）。要对比两个量纲，出两条回答或改成两个序列同单位。
+- **`waterfall` 的 `data` 里出现 `null` 表示「这一根是累计合计」**，从 0 起画到当前累计值。
+- **未知 `chart` 值按未知块型处理**：忽略，不报错。平台只实现 `column` / `bar` / `line` 三种也是合格实现，其余退化成表或忽略。
+- **skill 不给颜色。** 需要强调正负时用数值本身的符号（`waterfall` / 带负数的 `column`），不靠颜色传达。
+- 平台侧的「表 → 图」自动配图（本仓库的 `skills/_shared/chartspec.js`）是**渲染层的可选增强**，不属于本规范要求：skill 给了 `chart` 就用 skill 的，没给平台可以自己补一张，也可以什么都不做。
 
 ### 10.7 与展台原型的对应关系（给移植的人）
 
@@ -556,6 +583,7 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 | `open` | `panel`，`ref?`，`step?` | 打开下钻 / 抽屉 | 打开对应面板；不认识 `panel` 就退化成 `focus` 或忽略 |
 | `apply` | `action`，`input?` | 调用**本 skill** 的某个动作（通常是写回类） | 按 §5 调一次 `invoke`，`mutates` 的返回值存回会话状态 |
 | `set` | `path`，`value` | 改一个参数后重算 | 按点号路径改业务数据，然后重新 `run` |
+| `click` | `aim` | 替用户按下这一屏上写着这几个字的按钮 | 按 `aim` 前缀匹配当前屏的按钮文字，命中就点；界面上没有按钮的平台忽略即可 |
 
 共同的可选字段：`note`（一句话，给平台做 toast 或按钮文案，≤ 20 字）。
 
@@ -565,11 +593,13 @@ const canDoc  = !!(m.features && m.features.ingest);         // 能不能收文�
 { "type": "open",  "panel": "material-detail", "ref": "M-45-60", "note": "看这项的库存走势" }
 { "type": "apply", "action": "apply-purchase", "input": { "ids": ["M-45-60"] }, "note": "只下这一项" }
 { "type": "set",   "path": "params.safetyDays", "value": 7, "note": "安全库存改成 7 天" }
+{ "type": "click", "aim": "一键分派", "note": "这一屏该点的就是它" }
 ```
 
 规则：
 
 - **平台可以只实现子集**。只实现 `goto` 也是合格实现；一个都不实现，对话照样能用（退化成纯文字问答）。
+- `click` 是**界面层**的动作，只有「有按钮可点」的宿主（展台、Web 控制台）才有意义；命令行、MCP、HTTP 这类没有界面的平台一律忽略。`aim` 写按钮上的字，不写选择器、不写 id。它不改数据，所以不受上面的防递归三道校验约束，但同样只展开一跳。
 - **未知 `type` 一律忽略，且不得报错、不得中断渲染**。厂商扩展用 `x-` 前缀（如 `x-print`）。
 - 一条回答**最多一个** `act`。要连做两步，由平台在执行完 `apply` 后自行决定下一步。
 - `ref` 必须是**业务 id**（`R03` / `L-2609-0001` / `SO-2609-0129`），不是数组下标、不是 DOM 选择器、不是行号。

@@ -1422,7 +1422,9 @@
       "blocks": [
         "kv",
         "table",
-        "tags"
+        "tags",
+        "list",
+        "chart"
       ]
     },
     "actions": [
@@ -2415,7 +2417,7 @@
         "kind": "query",
         "family": "conversation",
         "title": "问答",
-        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得渠道成本、画像权重、线索代号（L-2609-0001 这类）、分派与逾期、成交预测、周报等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得渠道成本、画像权重、线索代号（L-2609-0001 这类）、分派与逾期、成交预测、周报等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text / chart），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
         "args": [
           {
             "from": "question",
@@ -3355,7 +3357,7 @@
         "kind": "query",
         "family": "conversation",
         "title": "问答",
-        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得部门缺编与离职、候选人代号（C-2609-003 这类）、硬条件与薪酬带、合规条目代号（H05 这类）、三方案成本等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得部门缺编与离职、候选人代号（C-2609-003 这类）、硬条件与薪酬带、合规条目代号（H05 这类）、三方案成本等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text / chart），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
         "args": [
           {
             "from": "question",
@@ -3612,7 +3614,8 @@
         "kv",
         "table",
         "tags",
-        "text"
+        "text",
+        "chart"
       ]
     },
     "dir": "05-ai-hr",
@@ -3710,7 +3713,8 @@
         "kv",
         "table",
         "tags",
-        "text"
+        "text",
+        "chart"
       ]
     },
     "actions": [
@@ -4421,7 +4425,8 @@
         "kv",
         "table",
         "tags",
-        "text"
+        "text",
+        "chart"
       ]
     },
     "actions": [
@@ -5430,7 +5435,8 @@
         "kv",
         "table",
         "tags",
-        "text"
+        "text",
+        "chart"
       ]
     },
     "actions": [
@@ -6211,7 +6217,7 @@
         "kind": "query",
         "family": "conversation",
         "title": "问答",
-        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得约束工序、时间损失与两率、报工核验条目（V- 开头）、标准工时校准、四张改善卡（A/B/C/D）、派工与保养等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得约束工序、时间损失与两率、报工核验条目（V- 开头）、标准工时校准、四张改善卡（A/B/C/D）、派工与保养等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text / chart），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
         "args": [
           {
             "from": "question",
@@ -7175,7 +7181,7 @@
         "kind": "query",
         "family": "conversation",
         "title": "问答",
-        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得指标节点与组、归因因子与证据、方案预演与参数改写、审批单与会签意见、决议节点与复盘等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得指标节点与组、归因因子与证据、方案预演与参数改写、审批单与会签意见、决议节点与复盘等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text / chart），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
         "args": [
           {
             "from": "question",
@@ -7470,7 +7476,8 @@
       "blocks": [
         "kv",
         "table",
-        "tags"
+        "tags",
+        "chart"
       ]
     },
     "dir": "09-ai-decision",
@@ -7570,7 +7577,8 @@
       "blocks": [
         "kv",
         "table",
-        "tags"
+        "tags",
+        "chart"
       ]
     },
     "actions": [
@@ -8559,7 +8567,8 @@
       "blocks": [
         "kv",
         "table",
-        "tags"
+        "tags",
+        "chart"
       ]
     },
     "actions": [
@@ -9384,7 +9393,7 @@
         "kind": "query",
         "family": "conversation",
         "title": "问答",
-        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得命中词与解析依据、页面与字段、记录编号（DJ-2609-001 这类）、用例与越权、发布检查与二维码、版本变更与存量数据等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
+        "description": "按问句在当前屏作答：只用关键词、业务 id、数字与屏内分支匹配，纯规则、不调大模型、不编数。什么时候用：用户在某一屏提问时先交给它，认得命中词与解析依据、页面与字段、记录编号（DJ-2609-001 这类）、用例与越权、发布检查与二维码、版本变更与存量数据等问法；认不出的问法返回 null，交平台兜底，不要硬编一句「我不知道」。返回里的 blocks 是平台中立的纯数据（kv / table / tags / list / metric / text / chart），act 是声明式动作（goto / focus / open / apply / set），要高亮的业务记录在顶层 ref 上。",
         "args": [
           {
             "from": "question",

@@ -716,6 +716,21 @@
   function kvB(rows) { return { type: 'kv', rows: rows }; }
   function tableB(head, rows) { return { type: 'table', head: head, rows: (rows || []).slice(0, 6) }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: tx(o.title || ''), unit: o.unit || '', labels: (o.labels || []).map(tx), series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note ? tx(o.note) : undefined }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  /* 在手订单的四种状态：按期 / 风险 / 延期 / 已完工 */
+  function statusChart(C) {
+    var k = C.k;
+    return chartB({ chart: 'donut', title: C.v.orders + '状态', unit: ' ' + C.v.counter, total: k.total,
+      labels: ['按期', '风险', '延期', '已完工'], series: ser(C.v.counter, [k.ok, k.risk, k.late, k.done]) });
+  }
+  /* 各产线 7 天负荷 */
+  function loadChart(C) {
+    return chartB({ chart: 'bar', title: '各' + C.v.line + ' 7 天负荷', unit: '%',
+      labels: C.S.lines.map(function (L) { return L.name; }), series: ser('负荷', C.S.lines.map(function (L) { return L.load7; })) });
+  }
   function say(text, blocks, act, ref) {
     var o = { text: tx(text) };
     if (blocks && blocks.length) o.blocks = blocks;
@@ -791,33 +806,46 @@
     var worst = lateOrders(C)[0];
     if (step === 'connect') {
       var total = C.d.sources.reduce(function (a, s) { return a + s.rows; }, 0);
-      return tx(C.d.sources.length + ' 个来源今早同步 ' + fmtN(total) + ' 条，' + k.open + ' ' + v.counter + v.orders + '里 ' + k.late + ' ' + v.counter + '已延期，合计晚 ' + k.lateDaysTotal + ' 天。');
+      return say(C.d.sources.length + ' 个来源今早同步 ' + fmtN(total) + ' 条，' + k.open + ' ' + v.counter + v.orders + '里 ' + k.late + ' ' + v.counter + '已延期，合计晚 ' + k.lateDaysTotal + ' 天。', [statusChart(C)]);
     }
     if (step === 'room') {
       var over = overLines(C);
-      return tx('按期率 ' + k.onTimeRate + '%' + (worst ? '，' + worst.id + ' 晚 ' + worst.lateDays + ' 天，延期天数居首' : '')
-        + (over.length ? '；' + over.map(function (L) { return L.name + ' ' + L.load7 + '%'; }).join('、') + ' 已满负荷。' : '。'));
+      return say('按期率 ' + k.onTimeRate + '%' + (worst ? '，' + worst.id + ' 晚 ' + worst.lateDays + ' 天，延期天数居首' : '')
+        + (over.length ? '；' + over.map(function (L) { return L.name + ' ' + L.load7 + '%'; }).join('、') + ' 已满负荷。' : '。'),
+        [loadChart(C)], null, worst ? worst.id : null);
     }
     if (step === 'order') {
       var o = curOrder(C);
       var acts = o.status === 'done' ? [] : actions(C.d, S, o.id);
-      return tx(o.id + ' ' + (o.lateDays > 0 ? '晚 ' + o.lateDays + ' 天' : causeOf(o)) + '，卡在' + (o.currentOp ? '「' + o.currentOp + '」' + o.currentLine : v.ops)
-        + (acts[0] ? '；' + acts[0].label + ' ' + acts[0].targetName + ' 可到 ' + acts[0].effect.finishAfter + '，预计 ' + fmtN(acts[0].cost) + ' 元。' : '。'));
+      var ops0 = (o.ops || []).filter(function (x) { return x.work > 0; });
+      return say(o.id + ' ' + (o.lateDays > 0 ? '晚 ' + o.lateDays + ' 天' : causeOf(o)) + '，卡在' + (o.currentOp ? '「' + o.currentOp + '」' + o.currentLine : v.ops)
+        + (acts[0] ? '；' + acts[0].label + ' ' + acts[0].targetName + ' 可到 ' + acts[0].effect.finishAfter + '，预计 ' + fmtN(acts[0].cost) + ' 元。' : '。'),
+        ops0.length ? [chartB({ chart: 'bar', title: o.id + ' 各' + v.op + '工时', unit: ' h',
+          labels: ops0.map(function (x) { return x.op; }), series: ser('工时', ops0.map(function (x) { return Math.round(x.work * 10) / 10; })) })] : [],
+        null, o.id);
     }
     if (step === 'insert') {
       var sim = simOf(C);
       if (!sim) return tx(v.insertNoun + '填好就能按三种策略各排一遍。');
       var rec = optOf(sim, sim.recommend);
-      return tx(sim.request.customer + ' 加急 ' + fmtN(sim.request.qty) + ' ' + v.qtyUnit + '：方案 ' + rec.key + ' ' + rec.name + ' ' + rec.finishLabel + ' 完工，拖累 ' + rec.affected + ' ' + v.counter + '，预计 ' + fmtN(rec.cost) + ' 元。');
+      return say(sim.request.customer + ' 加急 ' + fmtN(sim.request.qty) + ' ' + v.qtyUnit + '：方案 ' + rec.key + ' ' + rec.name + ' ' + rec.finishLabel + ' 完工，拖累 ' + rec.affected + ' ' + v.counter + '，预计 ' + fmtN(rec.cost) + ' 元。',
+        [chartB({ chart: 'column', title: '三个方案被拖累的' + v.orders, unit: ' ' + v.counter,
+          labels: sim.options.map(function (x) { return x.key; }), series: ser(v.counter, sim.options.map(function (x) { return x.affected || 0; })) })],
+        null, rec.key);
     }
     if (step === 'stock') {
       var t0 = C.plan.items.filter(function (x) { return x.urgency === 'short'; })[0] || C.plan.items[0];
       if (!t0) return tx('库存与在途覆盖排程内需求。');
-      return tx(t0.name + ' 库存 ' + fmtN(t0.stock) + '、在途 ' + fmtN(t0.onOrder) + '，排程需 ' + fmtN(t0.demand) + ' ' + t0.unit + '、安全库存 ' + fmtN(t0.safety) + ' ' + t0.unit + '，下单截止 ' + t0.latestOrderLabel + '；' + plan.summary.buy + ' 项待下单预计 ' + fmtN(plan.summary.amount) + ' 元。');
+      return say(t0.name + ' 库存 ' + fmtN(t0.stock) + '、在途 ' + fmtN(t0.onOrder) + '，排程需 ' + fmtN(t0.demand) + ' ' + t0.unit + '、安全库存 ' + fmtN(t0.safety) + ' ' + t0.unit + '，下单截止 ' + t0.latestOrderLabel + '；' + plan.summary.buy + ' 项待下单预计 ' + fmtN(plan.summary.amount) + ' 元。',
+        (t0.curve && t0.curve.length) ? [chartB({ chart: 'line', title: t0.name + ' 库存走势', unit: ' ' + t0.unit,
+          labels: t0.curve.map(function (x, i2) { return (S.days[i2] || {}).label || String(i2); }),
+          series: ser('库存', t0.curve.map(function (x) { return x.level; })), note: '安全库存 ' + fmtN(t0.safety) + ' ' + t0.unit })] : [],
+        null, t0.id);
     }
     if (step === 'daily') {
       var mustBuy = plan.items.filter(function (x) { return x.suggestQty > 0 && x.latestOrderDay <= 0; }).length;
-      return tx('今日 ' + D.deliveries.filter(function (x) { return x.ok; }).length + ' ' + v.counter + '可交付；风险与延期 ' + D.risks.length + ' ' + v.counter + '（延期 ' + D.kpi.late + ' ' + v.counter + '、风险 ' + D.kpi.risk + ' ' + v.counter + '）；' + mustBuy + ' 项' + v.material + '今日须下单。');
+      return say('今日 ' + D.deliveries.filter(function (x) { return x.ok; }).length + ' ' + v.counter + '可交付；风险与延期 ' + D.risks.length + ' ' + v.counter + '（延期 ' + D.kpi.late + ' ' + v.counter + '、风险 ' + D.kpi.risk + ' ' + v.counter + '）；' + mustBuy + ' 项' + v.material + '今日须下单。',
+        [statusChart(C)]);
     }
     return null;
   }
@@ -864,20 +892,25 @@
     }
 
     if (has(q, ['数据源', '来源', '同步', '接入', '通了'])) {
-      return say(C.d.sources.map(function (s) { return s.name + ' ' + (s.mode === 'direct' ? '系统直连' : '表格导入') + ' ' + fmtN(s.rows) + ' 条 · ' + s.lastSync.slice(5); }).join('\n'),
-        null, { type: 'focus', ref: C.d.sources[0].id });
+      return say(C.d.sources.map(function (s0) { return s0.name + ' ' + (s0.mode === 'direct' ? '系统直连' : '表格导入') + ' ' + fmtN(s0.rows) + ' 条 · ' + s0.lastSync.slice(5); }).join('\n'),
+        [chartB({ chart: 'bar', title: '各来源条数', unit: ' 条',
+          labels: C.d.sources.map(function (s0) { return cut(s0.name.split(' · ')[0], 6); }), series: ser('条数', C.d.sources.map(function (s0) { return s0.rows; })) })],
+        { type: 'focus', ref: C.d.sources[0].id });
     }
     if (has(q, ['进指挥室', '进入', '开始', '直接进'])) {
-      return say(v.room + '按' + v.due + '倒推排了一遍，' + k.late + ' ' + v.counter + '延期、' + k.risk + ' ' + v.counter + '风险。', null, { type: 'goto', step: 'room' });
+      return say(v.room + '按' + v.due + '倒推排了一遍，' + k.late + ' ' + v.counter + '延期、' + k.risk + ' ' + v.counter + '风险。', [statusChart(C)], { type: 'goto', step: 'room' });
     }
 
     /* 屏内问句先由本屏分支接：站在订单下钻屏问「为什么晚」，答的是这一张单，不跳走 */
     if (step === 'order') {
       var o = curOrder(C);
       var ex = explain(S, o.id), acts = o.status === 'done' ? [] : actions(C.d, S, o.id);
+      var opsC = (o.ops || []).filter(function (x) { return x.work > 0; });
+      var opChart = opsC.length ? chartB({ chart: 'bar', title: o.id + ' 各' + v.op + '工时', unit: ' h',
+        labels: opsC.map(function (x) { return x.op; }), series: ser('工时', opsC.map(function (x) { return Math.round(x.work * 10) / 10; })) }) : null;
       if (has(q, ['为什么', '原因', '怎么回事', '卡在'])) {
         return say(o.id + ' ' + ex.label + '：' + ex.reasons[0] + '。\n' + ex.seen[0],
-          [kvB([[v.due, o.dueLabel], [v.finish, o.finishLabel], ['余量', o.slack + ' 天'], ['齐套', Math.round(o.kitRate * 100) + '%']])],
+          [opChart, kvB([[v.due, o.dueLabel], [v.finish, o.finishLabel], ['余量', o.slack + ' 天'], ['齐套', Math.round(o.kitRate * 100) + '%']])].filter(Boolean),
           { type: 'focus', ref: o.id });
       }
       if (has(q, ['加班'])) {
@@ -885,32 +918,44 @@
         if (!ot) return say('这一' + v.counter + '排不出加班收益，换调线或改期更划算。');
         return say(ot.targetName + ' 加班 3 h/日，' + v.finish + ' ' + ot.effect.finishBefore + ' → ' + ot.effect.finishAfter + '，'
           + (ot.effect.meetsDue ? '赶上' + v.due : '追回 ' + ot.effect.gain + ' 天') + '，拖累 ' + ot.effect.affected + ' ' + v.counter + '，预计 ' + fmtN(ot.cost) + ' 元。\n已按这个方案执行，' + v.room + '重排。',
-          null, actAction(o, ot));
+          [chartB({ chart: 'bar', title: '三种处置的代价', unit: ' 元',
+            labels: acts.map(function (a) { return a.label; }), series: ser('元', acts.map(function (a) { return a.cost || 0; })) })],
+          actAction(o, ot));
       }
       if (has(q, ['调线', '换线', '换条'])) {
         var rr = acts.filter(function (a) { return a.key === 'reroute'; })[0];
         if (!rr) return say('这道' + v.op + '没有可替代' + v.line + '，调线走不通。');
         return say(rr.desc + '：' + v.finish + ' ' + rr.effect.finishBefore + ' → ' + rr.effect.finishAfter
           + (rr.effect.gain > 0 ? '，追回 ' + rr.effect.gain + ' 天，不花钱。已按这个方案执行。' : rr.effect.gain < 0 ? '，反而晚 ' + (-rr.effect.gain) + ' 天，不建议动。' : '，没改善，不建议动。'),
-          null, rr.effect.gain > 0 ? actAction(o, rr) : null);
+          [chartB({ chart: 'bar', title: '三种处置能追回几天', unit: ' 天',
+            labels: acts.map(function (a) { return a.label; }), series: ser('天数', acts.map(function (a) { return Math.max(0, (a.effect && a.effect.gain) || 0); })) })],
+          rr.effect.gain > 0 ? actAction(o, rr) : null);
       }
       if (has(q, ['改期', '改约', '跟客户'])) {
         var rs = acts.filter(function (a) { return a.key === 'reschedule'; })[0];
         if (!rs) return say('这一' + v.counter + '不需要改期。');
-        return say(rs.desc + '：改完不再算延期，不动其他' + v.orders + '的排程，不花钱。\n已按这个方案执行。', null, actAction(o, rs));
+        return say(rs.desc + '：改完不再算延期，不动其他' + v.orders + '的排程，不花钱。\n已按这个方案执行。',
+          [chartB({ chart: 'bar', title: '三种处置的代价', unit: ' 元',
+            labels: acts.map(function (a) { return a.label; }), series: ser('元', acts.map(function (a) { return a.cost || 0; })) })],
+          actAction(o, rs));
       }
       if (has(q, ['齐套', '物料', '缺料', '领料'])) {
         var mats = orderMats(o);
         if (!mats.length) return say('这一' + v.counter + '没有待领' + v.material + '，齐套 100%。');
         return say('齐套 ' + Math.round(o.kitRate * 100) + '%：' + mats.map(function (m) { return m.name + ' 需 ' + fmtN(m.need) + ' ' + m.unit + (m.ready === 0 ? ' 齐备' : m.assumed ? ' 缺 ' + fmtN(m.short) : ' ' + m.readyLabel + ' 到'); }).join('；') + '。',
-          null, { type: 'focus', ref: mats[0].material });
+          [chartB({ chart: 'bar', title: '待领' + v.material, unit: '',
+            labels: mats.slice(0, 6).map(function (m) { return cut(m.name, 6); }), series: ser('需求', mats.slice(0, 6).map(function (m) { return m.need; })) })],
+          { type: 'focus', ref: mats[0].material });
       }
       if (has(q, ['下一', '换一', '别的'])) {
         var al = S.orders.filter(function (x) { return x.status === 'late' || x.status === 'risk'; });
         if (!al.length) return say('在手' + v.orders + '没有延期或风险的，不用换。');
         var i2 = al.map(function (x) { return x.id; }).indexOf(o.id), nx = al[(i2 + 1) % al.length];
+        var nxOps = (nx.ops || []).filter(function (x) { return x.work > 0; });
         return say(nx.id + ' ' + causeOf(nx) + '，' + v.finish + ' ' + nx.finishLabel + (nx.lateDays > 0 ? '，晚 ' + nx.lateDays + ' 天' : '') + '。',
-          null, { type: 'set', path: 'focus', value: nx.id });
+          nxOps.length ? [chartB({ chart: 'bar', title: nx.id + ' 各' + v.op + '工时', unit: ' h',
+            labels: nxOps.map(function (x) { return x.op; }), series: ser('工时', nxOps.map(function (x) { return Math.round(x.work * 10) / 10; })) })] : [],
+          { type: 'set', path: 'focus', value: nx.id });
       }
     }
 
@@ -923,7 +968,8 @@
       return say('延期 ' + L0.length + ' ' + v.counter + '的归因：' + Object.keys(by).map(function (c) { return c + ' ' + by[c] + ' ' + v.counter; }).join('、') + '。\n'
         + (ov.length ? ov.map(function (L2) { return L2.name; }).join('、') + ' 未来 7 天负荷 ' + ov[0].load7 + '%，' + v.op + '排队等' + v.line + '；' : '')
         + '齐套率低于 100% 的有 ' + S.orders.filter(function (o2) { return o2.status !== 'done' && o2.kitRate < 1; }).length + ' ' + v.counter + '。',
-        [tableB(['单号', '归因', '晚'], L0.map(function (o2) { return [o2.id.slice(-4), CAUSES[o2.cause].label, o2.lateDays + ' 天']; }))],
+        [chartB({ chart: 'bar', title: '延期归因', unit: ' ' + v.counter, labels: Object.keys(by), series: ser(v.counter, Object.keys(by).map(function (c) { return by[c]; })) }),
+          tableB(['单号', '归因', '晚'], L0.map(function (o2) { return [o2.id.slice(-4), CAUSES[o2.cause].label, o2.lateDays + ' 天']; }))],
         { type: 'set', path: 'filter', value: 'late' }, L0[0].id);
     }
     if (has(q, ['延期', '晚了', '迟', '按期率', '准时'])) {
@@ -931,7 +977,9 @@
       if (!L.length) return say('在手 ' + k.open + ' ' + v.counter + '全部按期，按期率 ' + k.onTimeRate + '%。');
       return say('按期率 ' + k.onTimeRate + '%：' + k.open + ' ' + v.counter + '在手，' + k.late + ' ' + v.counter + '延期合计 ' + k.lateDaysTotal + ' 天。\n'
         + L.map(function (o2) { return o2.id + ' ' + CAUSES[o2.cause].label + ' 晚 ' + o2.lateDays + ' 天'; }).join('；') + '。',
-        [tableB(['单号', v.due, v.finish, '晚'], L.map(function (o2) { return [o2.id.slice(-4), o2.dueLabel, o2.finishLabel, o2.lateDays + ' 天']; }))],
+        [chartB({ chart: 'bar', title: '各' + v.counter + '晚几天', unit: ' 天',
+          labels: L.map(function (o2) { return o2.id.slice(-4); }), series: ser('天数', L.map(function (o2) { return o2.lateDays; })) }),
+          tableB(['单号', v.due, v.finish, '晚'], L.map(function (o2) { return [o2.id.slice(-4), o2.dueLabel, o2.finishLabel, o2.lateDays + ' 天']; }))],
         { type: 'set', path: 'filter', value: 'late' }, L[0].id);
     }
     if (has(q, ['风险', '要小心', '会不会'])) {
@@ -940,28 +988,32 @@
         if (!D.risks.length) return say(v.daily + '里没有延期或风险' + v.order + '。');
         return say(v.daily + '「风险与延期」' + D.risks.length + ' ' + v.counter + '：延期 ' + k.late + ' ' + v.counter + '、风险 ' + k.risk + ' ' + v.counter + '。\n'
           + D.risks.map(function (r) { return r.id + ' ' + r.causeLabel + (r.lateDays > 0 ? ' 晚 ' + r.lateDays + ' 天' : '') + (r.handled ? '（已处置）' : ''); }).join('；') + '。',
-          [tableB(['单号', '判断', v.finish], D.risks.map(function (r) { return [r.id.slice(-4), r.causeLabel, r.finishLabel]; }))],
+          [statusChart(C), tableB(['单号', '判断', v.finish], D.risks.map(function (r) { return [r.id.slice(-4), r.causeLabel, r.finishLabel]; }))],
           { type: 'focus', ref: D.risks[0].id });
       }
       var R = riskOrders(C);
       if (!R.length) return say('当前没有风险' + v.order + '。');
       return say(R.length + ' ' + v.counter + '风险：' + R.map(function (o2) { return o2.id + ' ' + causeOf(o2) + '（余量 ' + o2.slack + ' 天）'; }).join('；') + '。',
-        [tableB(['单号', '判断', '余量'], R.map(function (o2) { return [o2.id.slice(-4), causeOf(o2), o2.slack + ' 天']; }))],
+        [chartB({ chart: 'bar', title: '风险' + v.orders + '余量', unit: ' 天',
+          labels: R.map(function (o2) { return o2.id.slice(-4); }), series: ser('天数', R.map(function (o2) { return Math.max(0, o2.slack); })) }),
+          tableB(['单号', '判断', '余量'], R.map(function (o2) { return [o2.id.slice(-4), causeOf(o2), o2.slack + ' 天']; }))],
         { type: 'set', path: 'filter', value: 'risk' }, R[0].id);
     }
     if (has(q, [v.line, '负荷', '瓶颈', '满负荷', '产能'])) {
       var over2 = S.lines.filter(function (L2) { return L2.status !== 'ok'; });
       return say('7 日平均负荷 ' + k.load7 + '%' + (over2.length ? '；' + over2.map(function (L2) { return L2.name + ' ' + L2.load7 + '%'; }).join('、') + '。' : '，没有满负荷' + v.line + '。'),
-        [tableB([v.line, '负荷'], S.lines.map(function (L2) { return [cut(L2.name, 8), L2.load7 + '%']; }))],
+        [loadChart(C)],
         { type: 'focus', ref: (over2[0] || S.lines[0]).id });
     }
     if (has(q, ['先处理', '先做', '怎么办', '下一步', '建议'])) {
       var L3 = lateOrders(C), o3 = L3[0] || riskOrders(C)[0];
       if (!o3) return say('在手' + v.orders + '按期，先把 ' + plan.summary.buy + ' 项采购单下掉。', null, { type: 'goto', step: 'stock' });
-      var a3 = actions(C.d, S, o3.id)[0];
+      var a3s = actions(C.d, S, o3.id), a3 = a3s[0];
       return say('先看 ' + o3.id + '（' + CAUSES[o3.cause].label + '，晚 ' + o3.lateDays + ' 天）'
         + (a3 ? '：' + a3.label + ' ' + a3.targetName + '，' + v.finish + ' ' + a3.effect.finishBefore + ' → ' + a3.effect.finishAfter + '，拖累 ' + a3.effect.affected + ' ' + v.counter + '，预计 ' + fmtN(a3.cost) + ' 元。' : '。'),
-        null, { type: 'set', path: 'focus', value: o3.id });
+        a3s.length ? [chartB({ chart: 'bar', title: o3.id + ' 三种处置的代价', unit: ' 元',
+          labels: a3s.map(function (a) { return a.label; }), series: ser('元', a3s.map(function (a) { return a.cost || 0; })) })] : [statusChart(C)],
+        { type: 'set', path: 'focus', value: o3.id });
     }
 
     if (step === 'insert') {
@@ -971,25 +1023,33 @@
         if (has(q, ['落单', '就按', '执行', '下单'])) {
           var use = has(q, ['推荐']) ? rec : cur;
           return say('按方案 ' + use.key + '（' + use.name + '）落单，' + v.finish + ' ' + use.finishLabel + '；落单后' + v.orders + '按新排程刷新。',
-            null, { type: 'apply', action: 'apply-insert', input: { strategy: use.key, req: sim.request } });
+            [chartB({ chart: 'column', title: '三个方案被拖累的' + v.orders, unit: ' ' + v.counter,
+              labels: sim.options.map(function (x) { return x.key; }), series: ser(v.counter, sim.options.map(function (x) { return x.affected || 0; })) })],
+            { type: 'apply', action: 'apply-insert', input: { strategy: use.key, req: sim.request } });
         }
         if (has(q, ['差在哪', '三个方案', '对比', '哪个好', '推荐'])) {
           return say(sim.options.map(function (op) { return op.key + ' ' + op.name + ' ' + op.finishLabel + (op.meetsDue ? ' 按期' : ' 晚 ' + op.lateDays + ' 天') + '，拖累 ' + op.affected + ' ' + v.counter + '，预计 ' + fmtN(op.cost) + ' 元'; }).join('\n') + '。\nAI 推荐 ' + sim.recommend + '：' + sim.reason + '。',
-            [tableB(['方案', v.finish, '拖累', '费用'], sim.options.map(function (op) { return [op.key, op.finishLabel, op.affected + ' ' + v.counter, fmtN(op.cost)]; }))],
+            [chartB({ chart: 'column', title: '三个方案被拖累的' + v.orders, unit: ' ' + v.counter,
+              labels: sim.options.map(function (x) { return x.key; }), series: ser(v.counter, sim.options.map(function (x) { return x.affected || 0; })) }),
+              tableB(['方案', v.finish, '拖累', '费用'], sim.options.map(function (op) { return [op.key, op.finishLabel, op.affected + ' ' + v.counter, fmtN(op.cost)]; }))],
             { type: 'set', path: 'insert.pick', value: sim.recommend });
         }
         if (has(q, ['拖累', '影响', '谁被', '哪些'])) {
           var aff = cur.rows.filter(function (r) { return r.delta > 0; });
           if (!aff.length) return say('方案 ' + cur.key + ' 不推后任何在手' + v.order + '。');
           return say('方案 ' + cur.key + ' 推后 ' + aff.length + ' ' + v.counter + '：' + aff.map(function (r) { return r.id + ' ' + r.before + ' → ' + r.after + '（+' + r.delta + ' 天）'; }).join('；') + '，转延期 ' + cur.newlyLate + ' ' + v.counter + '。',
-            [tableB(['单号', '前', '后'], aff.map(function (r) { return [r.id.slice(-4), r.before, r.after]; }))],
+            [chartB({ chart: 'bar', title: '被推后的天数', unit: ' 天',
+              labels: aff.slice(0, 6).map(function (r) { return r.id.slice(-4); }), series: ser('天数', aff.slice(0, 6).map(function (r) { return r.delta; })) }),
+              tableB(['单号', '前', '后'], aff.map(function (r) { return [r.id.slice(-4), r.before, r.after]; }))],
             { type: 'focus', ref: aff[0].id });
         }
         if (has(q, ['C', '加班', '多少钱', '费用'])) {
           var cOpt = optOf(sim, 'C');
           return say('方案 C ' + cOpt.name + '：' + v.finish + ' ' + cOpt.finishLabel + '，拖累 ' + cOpt.affected + ' ' + v.counter + '，预计加班费 ' + fmtN(cOpt.cost) + ' 元。'
             + (cOpt.notes.length ? '\n' + cOpt.notes.join('；') + '。' : ''),
-            null, { type: 'set', path: 'insert.pick', value: 'C' });
+            [chartB({ chart: 'column', title: '三个方案的代价', unit: ' 元',
+              labels: sim.options.map(function (x) { return x.key; }), series: ser('元', sim.options.map(function (x) { return x.cost || 0; })) })],
+            { type: 'set', path: 'insert.pick', value: 'C' });
         }
       }
     }
@@ -998,31 +1058,40 @@
       if (has(q, ['呆滞', '占用', '压着'])) {
         if (!plan.slow.length) return say('没有呆滞' + v.material + '。');
         return say('呆滞 ' + plan.slow.length + ' 项占用 ' + fmtN(plan.summary.slowCapital) + ' 元：' + plan.slow.map(function (x) { return x.name + ' ' + fmtN(x.stock) + ' ' + x.unit + '（' + fmtN(x.capital) + ' 元）'; }).join('；') + '。',
-          null, { type: 'open', panel: 'slow' });
+          [chartB({ chart: 'bar', title: '呆滞占用', unit: ' 元',
+            labels: plan.slow.slice(0, 6).map(function (x) { return cut(x.name, 6); }), series: ser('元', plan.slow.slice(0, 6).map(function (x) { return x.capital; })) })],
+          { type: 'open', panel: 'slow' });
       }
       if (has(q, ['今天', '今日', '要下单', '来不及', '截止'])) {
         var today = plan.items.filter(function (x) { return x.suggestQty > 0 && x.latestOrderDay <= 0; });
         if (!today.length) return say('今日没有到下单截止的' + v.material + '。');
         return say(today.length + ' 项今日到截止：' + today.map(function (x) { return x.name + ' ' + fmtN(x.suggestQty) + ' ' + x.unit + (x.overdue ? '（已过）' : ''); }).join('；') + '，合计预计 ' + fmtN(today.reduce(function (a, x) { return a + x.amount; }, 0)) + ' 元。',
-          [tableB([v.material, '建议', '截止'], today.map(function (x) { return [cut(x.name, 7), fmtN(x.suggestQty) + ' ' + x.unit, x.latestOrderLabel]; }))],
+          [chartB({ chart: 'bar', title: '今日到截止项金额', unit: ' 元',
+            labels: today.map(function (x) { return cut(x.name, 6); }), series: ser('元', today.map(function (x) { return x.amount; })) }),
+            tableB([v.material, '建议', '截止'], today.map(function (x) { return [cut(x.name, 7), fmtN(x.suggestQty) + ' ' + x.unit, x.latestOrderLabel]; }))],
           { type: 'focus', ref: today[0].id });
       }
       if (has(q, ['多少钱', '总共', '一共', '金额'])) {
         if (!plan.po.length) return say('当前没有需要下单的' + v.material + '。');
         return say(plan.po.length + ' 张采购单、' + plan.summary.buy + ' 项，预计 ' + fmtN(plan.summary.amount) + ' 元：' + plan.po.map(function (p) { return p.supplier + ' ' + fmtN(p.amount) + ' 元'; }).join('；') + '。',
-          [tableB([v.supplier, '金额'], plan.po.map(function (p) { return [cut(p.supplier, 8), fmtN(p.amount) + ' 元']; }))],
+          [chartB({ chart: 'bar', title: '各' + v.supplier + '金额', unit: ' 元',
+            labels: plan.po.map(function (p) { return cut(p.supplier, 6); }), series: ser('元', plan.po.map(function (p) { return p.amount; })) })],
           { type: 'focus', ref: plan.po[0].supplier });
       }
       if (has(q, ['生成', '下掉', '开单'])) {
         if (!plan.po.length) return say('当前没有需要下单的' + v.material + '。');
         return say('生成 ' + plan.po.length + ' 张采购单，预计 ' + fmtN(plan.summary.amount) + ' 元；计入在途后' + v.orders + '按到货日重排。',
-          null, { type: 'apply', action: 'apply-purchase', input: { ids: plan.items.filter(function (x) { return x.suggestQty > 0; }).map(function (x) { return x.id; }) } });
+          [chartB({ chart: 'bar', title: '各' + v.supplier + '金额', unit: ' 元',
+            labels: plan.po.map(function (p) { return cut(p.supplier, 6); }), series: ser('元', plan.po.map(function (p) { return p.amount; })) })],
+          { type: 'apply', action: 'apply-purchase', input: { ids: plan.items.filter(function (x) { return x.suggestQty > 0; }).map(function (x) { return x.id; }) } });
       }
       if (has(q, ['缺口', '缺料', '不够'])) {
         var sh2 = plan.items.filter(function (x) { return x.urgency === 'short' || x.urgency === 'safety'; });
         if (!sh2.length) return say('库存与在途覆盖排程内需求，没有缺口。');
         return say('缺口 ' + plan.summary.short + ' 项、低于安全库存 ' + plan.summary.safety + ' 项：' + sh2.slice(0, 4).map(function (x) { return x.name + ' 库存 ' + fmtN(x.stock) + ' / 需 ' + fmtN(x.demand) + ' ' + x.unit; }).join('；') + '。',
-          [tableB([v.material, '库存', '需求'], sh2.slice(0, 5).map(function (x) { return [cut(x.name, 7), fmtN(x.stock), fmtN(x.demand)]; }))],
+          [chartB({ chart: 'bar', title: '缺口（需求 − 库存）', unit: '',
+            labels: sh2.slice(0, 6).map(function (x) { return cut(x.name, 6); }), series: ser('缺口', sh2.slice(0, 6).map(function (x) { return Math.max(0, x.demand - x.stock); })) }),
+            tableB([v.material, '库存', '需求'], sh2.slice(0, 5).map(function (x) { return [cut(x.name, 7), fmtN(x.stock), fmtN(x.demand)]; }))],
           { type: 'focus', ref: sh2[0].id });
       }
     }
@@ -1030,25 +1099,27 @@
     if (step === 'daily' || has(q, ['日报', '今天能交', '明天', '发给谁'])) {
       if (has(q, ['发给谁', '收件', '微信', '发送'])) {
         return say('收件人：' + [v.handler, '车间主任', '总经理', '采购主管'].join('、') + '。' + v.daily + '是微信文本版，扫码接收。',
-          null, { type: 'open', panel: 'wechat' });
+          [statusChart(C)], { type: 'open', panel: 'wechat' });
       }
       if (has(q, ['今天能交', '今日交付', '几' + v.counter, '交几'])) {
         if (!D.deliveries.length) return say('今日没有到期' + v.order + '。');
         return say(D.deliveries.map(function (x) { return x.id + ' ' + cut(x.customer, 12) + ' ' + (x.ok ? '可交付' : '延至 ' + x.finishLabel); }).join('\n') + '。',
-          null, { type: 'focus', ref: D.deliveries[0].id });
+          [chartB({ chart: 'donut', title: '今日到期' + v.orders, unit: ' ' + v.counter, total: D.deliveries.length,
+            labels: ['可交付', '要延'], series: ser(v.counter, [D.deliveries.filter(function (x) { return x.ok; }).length, D.deliveries.filter(function (x) { return !x.ok; }).length]) })],
+          { type: 'focus', ref: D.deliveries[0].id });
       }
       if (has(q, ['明天', '明日', '注意'])) {
         if (!D.tomorrow.length) return say('明日无到期、开工与到货事项。');
-        return say(tomorrowList(C).slice(0, 6).map(function (t) { return tx(t.text); }).join('\n'), null, { type: 'goto', step: 'daily' });
+        return say(tomorrowList(C).slice(0, 6).map(function (t) { return tx(t.text); }).join('\n'), [loadChart(C)], { type: 'goto', step: 'daily' });
       }
     }
 
     if (has(q, ['插单', '加急', '模拟'])) {
       return say(v.insertNoun + '按三种策略各排一遍：' + v.strategies.A + ' / ' + v.strategies.B + ' / ' + v.strategies.C + '，逐' + v.counter + '对比受影响的在手' + v.order + '与代价。',
-        null, { type: 'goto', step: 'insert' });
+        [statusChart(C)], { type: 'goto', step: 'insert' });
     }
     if (has(q, ['多少' + v.counter, '在手', '几' + v.counter])) {
-      return say('在手 ' + k.open + ' ' + v.counter + '：按期 ' + (k.open - k.late) + '、风险 ' + k.risk + '、延期 ' + k.late + '；已完工待发运 ' + k.done + ' ' + v.counter + '。');
+      return say('在手 ' + k.open + ' ' + v.counter + '：按期 ' + (k.open - k.late) + '、风险 ' + k.risk + '、延期 ' + k.late + '；已完工待发运 ' + k.done + ' ' + v.counter + '。', [statusChart(C)]);
     }
     return null;
   }

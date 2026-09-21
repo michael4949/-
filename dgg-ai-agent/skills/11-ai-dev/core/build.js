@@ -766,6 +766,7 @@
   var SCREENS = [['connect', '接入'], ['build', '生成应用'], ['try', '试用'], ['test', '测试与产物'], ['ship', '发布'], ['iterate', '迭代交付']];
   var DOC_LABEL = { word: 'Word', excel: 'Excel', ppt: 'PPT', pdf: 'PDF', eml: '邮件', text: '文本' };
   var WORD_LABEL = { object: '业务对象', role: '角色', action: '动作', channel: '渠道', field: '字段', qty: '时限', time: '时限', stat: '统计', delta: '变更' };
+  var TEST_KIND = { required: '必填校验', boundary: '边界', transition: '流转', role: '越权', state: '状态', version: '版本', ref: '主数据', overdue: '超时' };
   var RULES = ['G-01 对象按词典正向长词优先匹配打分，并列取先出现的', 'G-02 字段来自对象库，需求句里命中的可选字段一并加入，否定词移除', 'G-03 模板由对象决定，动作序列与模板签名的公共子序列长度作证据', 'G-04 渠道固定 微信扫码 H5 · PC 后台', 'G-05 角色槽位按业态默认岗位填，句中角色词按其后的动作绑定槽位'];
 
   function screens() { return SCREENS.map(function (s) { return { key: s[0], label: s[1] }; }); }
@@ -776,6 +777,30 @@
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows.slice(0, 6) }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
   function textB(s) { return { type: 'text', text: s }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  /* 这句话被拆成了几类词 */
+  function wordChart(R) {
+    var by = {}, ev = (R.parsed.evidence || []);
+    ev.forEach(function (e) { var L = WORD_LABEL[e.type] || e.type; by[L] = (by[L] || 0) + 1; });
+    var ks = Object.keys(by);
+    return ks.length ? chartB({ chart: 'donut', title: '这句话里的词', unit: ' 词', total: ev.length, labels: ks, series: ser('词数', ks.map(function (x) { return by[x]; })) }) : null;
+  }
+  /* 生成出来的规格有多大 */
+  function specChart(R) {
+    var k = R.kpi;
+    return chartB({ chart: 'column', title: '这套应用的规模', unit: '', labels: ['页', '字段', '角色', '节点', '接口', '用例'],
+      series: ser('个数', [k.pages, k.fields, k.roles, k.states, k.apis, k.tests]) });
+  }
+  /* 用例按类型分布 */
+  function testChart(R) {
+    var by = {}, rows = (R.testResult && R.testResult.rows) || [];
+    rows.forEach(function (x) { var L = TEST_KIND[x.kind] || x.kind; by[L] = (by[L] || 0) + 1; });
+    var ks = Object.keys(by);
+    return ks.length ? chartB({ chart: 'bar', title: '用例按类型', unit: ' 条', labels: ks, series: ser('条数', ks.map(function (x) { return by[x]; })) }) : null;
+  }
   function rtRows(R) { return R.rt ? R.rt.rows : []; }
   function rowById(R, id) { return find(rtRows(R), function (r) { return r.id === id; }); }
   function waitOf(R, row) { return fmtDur(Math.max(0, R.rt.clock - row.createdAt)); }
@@ -792,31 +817,42 @@
     var R = resultOf(data, lib, result);
     if (!R.spec || step === 'connect') {
       var p = R.parsed, v = R.preview || R.kpi;
-      return '这句话命中 ' + p.hits + ' 词、未识别 ' + p.unknown + '，落下来是 ' + p.objectName + ' ' + v.pages + ' 页 ' + v.fields + ' 字段 ' + v.roles + ' 角色 ' + v.states + ' 节点。';
+      return { text: '这句话命中 ' + p.hits + ' 词、未识别 ' + p.unknown + '，落下来是 ' + p.objectName + ' ' + v.pages + ' 页 ' + v.fields + ' 字段 ' + v.roles + ' 角色 ' + v.states + ' 节点。',
+        blocks: [wordChart(R)].filter(Boolean) };
     }
     var s = R.spec, k = R.kpi;
     if (step === 'build') {
       var ph = R.pages.filter(function (p) { return p.device === 'phone'; }).length;
-      return s.id + ' ' + s.version + '：' + k.pages + ' 页里手机 ' + ph + ' 页、PC ' + (k.pages - ph) + ' 页，' + k.fields + ' 字段必填 ' + s.fields.filter(function (f) { return f.required; }).length + ' 个。';
+      return { text: s.id + ' ' + s.version + '：' + k.pages + ' 页里手机 ' + ph + ' 页、PC ' + (k.pages - ph) + ' 页，' + k.fields + ' 字段必填 ' + s.fields.filter(function (f) { return f.required; }).length + ' 个。',
+        blocks: [specChart(R)] };
     }
     if (step === 'try') {
       var st = R.stats, ov = st.overdue[0], row = ov ? rowById(R, ov.id) : null;
-      if (ov) return ov.id + ' 已等 ' + (row ? waitOf(R, row) : '—') + '，' + ov.text + '，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。';
-      return '今日' + s.verb + ' ' + st.todayNew + ' 单，' + stateLabel(s, initialState(s)) + ' ' + st.open + ' 单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '。';
+      var fb = [chartB({ chart: 'funnel', title: '单据流转', unit: ' 单',
+        labels: st.byStatus.map(function (x) { return x.label; }), series: ser('单数', st.byStatus.map(function (x) { return x.n; })) })];
+      if (ov) return { text: ov.id + ' 已等 ' + (row ? waitOf(R, row) : '—') + '，' + ov.text + '，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。', blocks: fb, ref: ov.id };
+      return { text: '今日' + s.verb + ' ' + st.todayNew + ' 单，' + stateLabel(s, initialState(s)) + ' ' + st.open + ' 单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '。', blocks: fb };
     }
     if (step === 'test') {
       var tr = R.testResult, sg = R.suggestion;
-      return tr.passed + ' / ' + tr.total + ' 条用例通过、越权拦截 ' + tr.roleBlocked + ' 次' + (sg && !sg.done ? '；' + sg.roleTitle + '默认看不到' + sg.pageName + '。' : '。');
+      return { text: tr.passed + ' / ' + tr.total + ' 条用例通过、越权拦截 ' + tr.roleBlocked + ' 次' + (sg && !sg.done ? '；' + sg.roleTitle + '默认看不到' + sg.pageName + '。' : '。'),
+        blocks: [testChart(R)].filter(Boolean) };
     }
     if (step === 'ship') {
       var ck = R.checklist;
-      return '发布前检查 ' + ck.passed + ' / ' + ck.total + '，' + s.version + (R.env === 'live' ? ' 已上线，冒烟通过。' : ' 还在测试环境，可发正式。');
+      return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '，' + s.version + (R.env === 'live' ? ' 已上线，冒烟通过。' : ' 还在测试环境，可发正式。'),
+        blocks: [chartB({ chart: 'gauge', title: '发布前检查', unit: ' 项', value: ck.passed, max: ck.total, target: ck.total })] };
     }
     if (step === 'iterate') {
       var last = R.changes[R.changes.length - 1];
-      if (last) return last.from + ' → ' + last.to + '：' + last.items.length + ' 项变更，旧用例 ' + last.oldPassed + ' / ' + last.oldTests + ' 仍通过，存量 ' + last.stock.rows + ' 条不动。';
-      var fu = R.followUps.slice().sort(function (a, b) { return (b.pages + b.fields + b.states + b.tests) - (a.pages + a.fields + a.states + a.tests); })[0];
-      if (fu) return '追加需求 ' + R.followUps.length + ' 条，改动大的一条「' + cut(fu.text, 14) + '」+' + fu.pages + ' 页 ' + fu.fields + ' 字段 ' + fu.tests + ' 用例。';
+      if (last) return { text: last.from + ' → ' + last.to + '：' + last.items.length + ' 项变更，旧用例 ' + last.oldPassed + ' / ' + last.oldTests + ' 仍通过，存量 ' + last.stock.rows + ' 条不动。',
+        blocks: [chartB({ chart: 'column', title: '旧用例回归', unit: ' 条', labels: ['仍通过', '需改'],
+          series: ser('条数', [last.oldPassed, Math.max(0, last.oldTests - last.oldPassed)]) })] };
+      var fus = R.followUps.slice().sort(function (a, b) { return (b.pages + b.fields + b.states + b.tests) - (a.pages + a.fields + a.states + a.tests); });
+      var fu = fus[0];
+      if (fu) return { text: '追加需求 ' + R.followUps.length + ' 条，改动大的一条「' + cut(fu.text, 14) + '」+' + fu.pages + ' 页 ' + fu.fields + ' 字段 ' + fu.tests + ' 用例。',
+        blocks: [chartB({ chart: 'bar', title: '每条追加需求的用例增量', unit: ' 条',
+          labels: fus.map(function (x) { return cut(x.text, 6); }), series: ser('用例', fus.map(function (x) { return x.tests; })) })] };
     }
     return null;
   }
@@ -843,23 +879,28 @@
     if (hasWord(q, ['命中', '哪些词', '识别', '没认出', '未识别', '解析', '哪几个词'])) {
       var p0 = R.parsed;
       return { text: '命中 ' + p0.hits + ' 词、未识别 ' + p0.unknown + '。' + p0.evidence.slice(0, 4).map(function (e) { return e.surface + ' → ' + e.canon; }).join('；') + '。',
-        blocks: [tableB(['识别词', '映射', '类型'], p0.evidence.slice(0, 6).map(function (e) { return [e.surface, e.canon, WORD_LABEL[e.type] || e.type]; }))],
+        blocks: [wordChart(R), tableB(['识别词', '映射', '类型'], p0.evidence.slice(0, 6).map(function (e) { return [e.surface, e.canon, WORD_LABEL[e.type] || e.type]; }))].filter(Boolean),
         act: { type: 'open', panel: 'parse' } };
     }
     if (hasWord(q, ['主数据', '数据源', '来源', '哪来', '同步', '台账', '名册', '接入', '通了', '连上'])) {
       var keys = Object.keys(R.refs).slice(0, 3);
       return { text: keys.map(function (x) { var r = R.refs[x]; return r.name + ' ' + fmtN(r.count) + ' ' + r.unit + '（' + r.system + ' · ' + (r.mode === 'direct' ? '系统直连' : '表格导入') + '，同步 ' + r.syncAt + '）'; }).join('\n'),
-        blocks: [tableB(['主数据', '条数', '方式'], keys.map(function (x) { var r = R.refs[x]; return [r.name, fmtN(r.count) + ' ' + r.unit, r.mode === 'direct' ? '直连' : '导入']; }))],
+        blocks: [chartB({ chart: 'bar', title: '主数据条数', unit: '',
+          labels: Object.keys(R.refs).map(function (x) { return R.refs[x].name; }), series: ser('条数', Object.keys(R.refs).map(function (x) { return R.refs[x].count; })) }),
+          tableB(['主数据', '条数', '方式'], keys.map(function (x) { var r = R.refs[x]; return [r.name, fmtN(r.count) + ' ' + r.unit, r.mode === 'direct' ? '直连' : '导入']; }))],
         act: { type: 'open', panel: 'source' } };
     }
     if (!s) {
       if (hasWord(q, ['几页', '多少页', '能生成', '多大'])) {
         var v0 = R.preview;
         return { text: R.parsed.objectName + ' ' + v0.pages + ' 页 · ' + v0.fields + ' 字段 · ' + v0.roles + ' 角色 · ' + v0.states + ' 节点，接口 ' + v0.apis + ' 个、用例 ' + v0.tests + ' 条。',
+          blocks: [chartB({ chart: 'column', title: '这套应用的规模', unit: '', labels: ['页', '字段', '角色', '节点', '接口', '用例'],
+            series: ser('个数', [v0.pages, v0.fields, v0.roles, v0.states, v0.apis, v0.tests]) })],
           act: { type: 'open', panel: 'preview' } };
       }
       if (hasWord(q, ['生成应用', '开始生成', '直接生成', '做出来'])) {
-        return { text: '按这句话生成 ' + R.parsed.objectName + '，' + R.preview.pages + ' 页 ' + R.preview.fields + ' 字段，一次 ' + CREDITS + ' 积分。', act: { type: 'apply', action: 'generate' } };
+        return { text: '按这句话生成 ' + R.parsed.objectName + '，' + R.preview.pages + ' 页 ' + R.preview.fields + ' 字段，一次 ' + CREDITS + ' 积分。',
+          blocks: [wordChart(R)].filter(Boolean), act: { type: 'apply', action: 'generate' } };
       }
       return null;
     }
@@ -890,19 +931,25 @@
     if (hasWord(q, ['哪几页', '几页', '页面', '手机上', 'PC 上', '有哪些页'])) {
       var ph = R.pages.filter(function (p) { return p.device === 'phone'; });
       return { text: k.pages + ' 页：手机 ' + ph.length + ' 页（' + ph.map(function (p) { return p.name; }).join(' / ') + '），PC ' + (k.pages - ph.length) + ' 页（' + R.pages.filter(function (p) { return p.device === 'pc'; }).map(function (p) { return p.name; }).join(' / ') + '）。',
-        blocks: [tableB(['页面', '端', '角色'], R.pages.map(function (p) { return [p.name, p.deviceName, p.roles.join('/')]; }))],
+        blocks: [chartB({ chart: 'donut', title: '页面分布', unit: ' 页', total: k.pages, labels: ['手机', 'PC'],
+          series: ser('页数', [ph.length, k.pages - ph.length]) }),
+          tableB(['页面', '端', '角色'], R.pages.map(function (p) { return [p.name, p.deviceName, p.roles.join('/')]; }))],
         act: { type: 'open', panel: 'pages' } };
     }
     if (hasWord(q, ['必填', '字段', '表单填什么'])) {
       var req = s.fields.filter(function (f) { return f.required; });
       return { text: k.fields + ' 个字段里必填 ' + req.length + ' 个：' + req.map(function (f) { return f.label; }).join('、') + '。\n非必填 ' + (k.fields - req.length) + ' 个，全部写进数据字典与用例。',
-        blocks: [tagsB(req.map(function (f) { return f.label; }))],
+        blocks: [chartB({ chart: 'donut', title: '字段', unit: ' 个', total: k.fields, labels: ['必填', '选填'],
+          series: ser('个数', [req.length, k.fields - req.length]) }),
+          tagsB(req.map(function (f) { return f.label; }))],
         act: { type: 'open', panel: 'page', ref: 'form' } };
     }
     var recHit = null;
     R.recommended.forEach(function (f) { if (q.indexOf(f.label) >= 0 || q.indexOf(f.label.replace(/（.*/, '')) >= 0) recHit = f; });
     if (recHit && hasWord(q, ['加', '添', '要', '补'])) {
       return { text: '把「' + recHit.label + '」加进表单、数据字典与用例，规格升一版；存量记录这一格置空。',
+        blocks: [chartB({ chart: 'column', title: '加这一个字段之后', unit: ' 个', labels: ['现在', '加完'],
+          series: ser('字段数', [k.fields, k.fields + 1]) })],
         act: { type: 'apply', action: 'add-field', input: { key: recHit.key } } };
     }
     if (hasWord(q, ['角色', '谁能', '谁看', '权限', '矩阵', '看不到', '越权'])) {
@@ -910,11 +957,14 @@
       if (hasWord(q, ['越权', '拦截'])) {
         var rb = tr.rows.filter(function (x) { return x.kind === 'role'; });
         return { text: '越权拦截 ' + tr.roleBlocked + ' 次：' + rb.map(function (x) { return x.name; }).join('；') + '，一律拒绝。',
-          blocks: [tableB(['用例', '实际'], rb.map(function (x) { return [x.name, x.actual]; }))],
+          blocks: [testChart(R), tableB(['用例', '实际'], rb.map(function (x) { return [x.name, x.actual]; }))].filter(Boolean),
           ref: rb[0] ? rb[0].id : null, act: rb[0] ? { type: 'focus', ref: rb[0].id } : { type: 'goto', step: 'test' } };
       }
       return { text: pm.rows.map(function (r) { return r.title + '（' + r.scope + '）可进 ' + pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length + ' 页'; }).join('；') + '。' + (sg0 && !sg0.done ? '\n' + sg0.text + '：' + sg0.reason + '。' : ''),
-        blocks: [tableB(['角色', '数据范围', '页数'], pm.rows.map(function (r) { return [r.title, r.scope, String(pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length)]; }))],
+        blocks: [chartB({ chart: 'bar', title: '每个角色能进几页', unit: ' 页',
+          labels: pm.rows.map(function (r) { return r.title; }),
+          series: ser('页数', pm.rows.map(function (r) { return pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length; })) }),
+          tableB(['角色', '数据范围', '页数'], pm.rows.map(function (r) { return [r.title, r.scope, String(pm.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length)]; }))],
         act: { type: 'open', panel: 'matrix' } };
     }
     if (hasWord(q, ['采纳', '开放', '建议'])) {
@@ -922,36 +972,52 @@
       if (!sg) return { text: '权限矩阵上没有待处理的建议。' };
       if (sg.done) return { text: sg.roleTitle + '已可查看' + sg.pageName + '，接口需要角色与用例同步更新。', act: { type: 'open', panel: 'sugg' } };
       return { text: '给' + sg.roleTitle + '开放' + sg.pageName + '的' + sg.op + '：' + sg.reason + '。\n开放后接口需要角色、手机页签与用例一起更新。',
+        blocks: [chartB({ chart: 'bar', title: '每个角色能进几页', unit: ' 页',
+          labels: R.perms.rows.map(function (r) { return r.title; }),
+          series: ser('页数', R.perms.rows.map(function (r) { return R.perms.pages.filter(function (p) { return (r.pages[p.key] || []).length; }).length; })) })],
         act: { type: 'apply', action: 'grant-permission', input: { role: sg.role, page: sg.page, op: sg.op } } };
     }
     if (hasWord(q, ['流程', '节点', '几步', '状态'])) {
       return { text: s.states.map(function (x) { return x.label; }).join(' → ') + '，' + s.transitions.length + ' 条流转。\n' + s.transitions.map(function (t2) { return roleTitle(s, t2.by[0]) + ' ' + t2.action + (t2.sla ? '（约定 ' + t2.sla + ' 小时）' : ''); }).join('；') + '。',
+        blocks: [chartB({ chart: 'funnel', title: '单据流转', unit: ' 单',
+          labels: st.byStatus.map(function (x) { return x.label; }), series: ser('单数', st.byStatus.map(function (x) { return x.n; })) })],
         act: { type: 'goto', step: 'build' } };
     }
 
     /* —— 试用与看板 —— */
     if (hasWord(q, ['超时', '等了', '最久', '拖了'])) {
-      if (!st.overdue.length) return { text: '没有超时单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，约定 ' + (st.slaHours || '—') + ' 小时。' };
+      if (!st.overdue.length) return { text: '没有超时单，平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，约定 ' + (st.slaHours || '—') + ' 小时。',
+        blocks: [chartB({ chart: 'funnel', title: '单据流转', unit: ' 单',
+          labels: st.byStatus.map(function (x) { return x.label; }), series: ser('单数', st.byStatus.map(function (x) { return x.n; })) })] };
       var o0 = st.overdue[0], r0 = rowById(R, o0.id);
       return { text: '超时 ' + st.overdueN + ' 单。' + o0.id + ' 已等 ' + (r0 ? waitOf(R, r0) : '—') + '，' + o0.text + '，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。',
-        blocks: [tableB(['编号', '状态', '已等'], st.overdue.map(function (o) { var r = rowById(R, o.id); return [o.id, r ? stateLabel(s, r.status) : '—', r ? waitOf(R, r) : '—']; }))],
+        blocks: [chartB({ chart: 'bar', title: '超时单已等', unit: ' 分',
+          labels: st.overdue.map(function (o) { return o.id.slice(-3); }), series: ser('分钟', st.overdue.map(function (o) { return o.waited; })),
+          note: '约定 ' + (st.slaHours || '—') + ' 小时' }),
+          tableB(['编号', '状态', '已等'], st.overdue.map(function (o) { var r = rowById(R, o.id); return [o.id, r ? stateLabel(s, r.status) : '—', r ? waitOf(R, r) : '—']; }))],
         ref: o0.id, act: { type: 'focus', ref: o0.id } };
     }
     if (hasWord(q, ['几单', '多少单', '看板', '统计', '分布', '今日', '今天'])) {
       return { text: '今日' + s.verb + ' ' + st.todayNew + ' 单，记录 ' + st.total + ' 条：' + st.byStatus.map(function (x) { return x.label + ' ' + x.n; }).join('、') + '；平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，超时 ' + st.overdueN + ' 单。',
-        blocks: [tableB(['状态', '单数'], st.byStatus.map(function (x) { return [x.label, String(x.n)]; }))],
+        blocks: [chartB({ chart: 'funnel', title: '单据流转', unit: ' 单',
+          labels: st.byStatus.map(function (x) { return x.label; }), series: ser('单数', st.byStatus.map(function (x) { return x.n; })) })],
         act: { type: 'open', panel: 'board' } };
     }
     if (hasWord(q, ['平均', '多久', '时效'])) {
       return { text: '平均' + st.acceptLabel + ' ' + (st.avgAcceptMin == null ? '—' : st.avgAcceptMin + ' 分') + '，约定 ' + (st.slaHours || '—') + ' 小时；按处理人看 ' + st.byAssignee.map(function (x) { return x.id + ' ' + x.n + ' 单'; }).join('、') + '。',
-        blocks: [tableB(['处理人', '单数', '完成'], st.byAssignee.map(function (x) { return [x.id, String(x.n), String(x.done)]; }))],
+        blocks: [chartB({ chart: 'bar', title: '各处理人单数', unit: ' 单',
+          labels: st.byAssignee.map(function (x) { return x.id; }), series: ser('单数', st.byAssignee.map(function (x) { return x.n; })) }),
+          tableB(['处理人', '单数', '完成'], st.byAssignee.map(function (x) { return [x.id, String(x.n), String(x.done)]; }))],
         act: { type: 'open', panel: 'perf' } };
     }
     if (hasWord(q, ['下一步', '走一步', '跑一单', '演一遍'])) {
-      if (R.scriptStep >= R.script.length) return { text: '走单脚本已走完 ' + R.script.length + ' 步，' + (R.scriptId || '') + ' 已到 ' + stateLabel(s, (rowById(R, R.scriptId) || { status: s.states[s.states.length - 1].key }).status) + '。' };
+      var scChart = chartB({ chart: 'progress', title: '走单脚本', unit: '%', max: 100, labels: ['已走'],
+        series: ser('进度', [Math.round(100 * Math.min(R.scriptStep, R.script.length) / (R.script.length || 1))]) });
+      if (R.scriptStep >= R.script.length) return { text: '走单脚本已走完 ' + R.script.length + ' 步，' + (R.scriptId || '') + ' 已到 ' + stateLabel(s, (rowById(R, R.scriptId) || { status: s.states[s.states.length - 1].key }).status) + '。',
+        blocks: [scChart] };
       var nx = R.script[R.scriptStep];
       return { text: '下一步：' + nx.actor.title + (nx.actor.emp ? ' ' + nx.actor.emp : '') + ' ' + nx.label + '，沙箱时钟走 ' + STEP_MIN + ' 分。',
-        act: { type: 'apply', action: 'next-script' } };
+        blocks: [scChart], act: { type: 'apply', action: 'next-script' } };
     }
 
     /* —— 用例 / 产物 —— */
@@ -960,48 +1026,66 @@
       return { text: tr.total + ' 条用例，通过 ' + tr.passed + '、失败 ' + tr.failed + '（通过率 ' + tr.passRate + '%），越权拦截 ' + tr.roleBlocked + ' 次。'
         + (bad.length ? '\n失败：' + bad.map(function (x) { return x.id + ' ' + x.name; }).join('；') + '。' : '\n没有失败用例。')
         + (tr.warnings.length ? '\n警告 ' + tr.warnings.map(function (x) { return x.id + ' ' + x.text; }).join('；') + '。' : ''),
-        blocks: [tableB(['分组', '条数', '通过'], tr.byKind.map(function (b) { return [b.kindName, String(b.n), String(b.passed)]; }))],
+        blocks: [chartB({ chart: 'bar', title: '用例按分组', unit: ' 条',
+          labels: tr.byKind.map(function (b) { return b.kindName; }), series: ser('条数', tr.byKind.map(function (b) { return b.n; })) }),
+          tableB(['分组', '条数', '通过'], tr.byKind.map(function (b) { return [b.kindName, String(b.n), String(b.passed)]; }))],
         act: { type: 'open', panel: 'tests' } };
     }
     if (hasWord(q, ['数据字典', '几列', '表结构', '索引', '数据表'])) {
-      var sc = R.schema;
+      var sc = R.schema, byReq = sc.columns.filter(function (c) { return c.required; }).length;
       return { text: sc.table + ' 一张表 ' + sc.columns.length + ' 列、' + sc.indexes.length + ' 个索引，来源逐列标注。',
+        blocks: [chartB({ chart: 'donut', title: '数据字典列', unit: ' 列', total: sc.columns.length, labels: ['必填', '选填'],
+          series: ser('列数', [byReq, sc.columns.length - byReq]) })],
         act: { type: 'open', panel: 'dict' } };
     }
     if (hasWord(q, ['接口', 'API', 'api', '几个接口'])) {
       return { text: R.apis.length + ' 个接口：' + R.apis.filter(function (a) { return a.method === 'POST'; }).length + ' 写、' + R.apis.filter(function (a) { return a.method === 'GET'; }).length + ' 读，每个都标了需要角色。',
-        blocks: [tableB(['编号', '方法', '接口'], R.apis.slice(0, 6).map(function (a) { return [a.id, a.method, a.name]; }))],
+        blocks: [chartB({ chart: 'donut', title: '接口', unit: ' 个', total: R.apis.length, labels: ['写', '读'],
+          series: ser('个数', [R.apis.filter(function (a) { return a.method === 'POST'; }).length, R.apis.filter(function (a) { return a.method === 'GET'; }).length]) }),
+          tableB(['编号', '方法', '接口'], R.apis.slice(0, 6).map(function (a) { return [a.id, a.method, a.name]; }))],
         act: { type: 'open', panel: 'api' } };
     }
 
     /* —— 发布 —— */
     if (hasWord(q, ['二维码', '扫码', '扫出来', '链接'])) {
       return { text: '二维码内容 ' + R.qrText + '，' + s.channels.map(function (c) { return c.name; }).join(' · ') + '，当前' + (R.env === 'live' ? '正式环境' : '测试环境') + '。',
+        blocks: [chartB({ chart: 'progress', title: '发布流水线', unit: '%', max: 100,
+          labels: R.pipeline.map(function (x) { return x.label; }),
+          series: ser('状态', R.pipeline.map(function (x) { return x.state === 'done' ? 100 : x.state === 'on' ? 50 : 0; })) })],
         act: { type: 'open', panel: 'entry' } };
     }
     if (hasWord(q, ['发布', '上线', '检查', '正式环境', '冒烟'])) {
       var ck = R.checklist;
       if (hasWord(q, ['发到', '发布到', '上线吧', '发正式'])) {
-        if (R.env === 'live') return { text: s.version + ' 已在正式环境，冒烟 ' + (R.releases[R.releases.length - 1].smoke || '—') + '。' };
-        if (!ck.all) return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '，未过：' + ck.items.filter(function (i) { return !i.ok; }).map(function (i) { return i.label; }).join('、') + '，先补齐再发。' };
+        var pipeChart = chartB({ chart: 'progress', title: '发布流水线', unit: '%', max: 100,
+          labels: R.pipeline.map(function (x) { return x.label; }),
+          series: ser('状态', R.pipeline.map(function (x) { return x.state === 'done' ? 100 : x.state === 'on' ? 50 : 0; })) });
+        if (R.env === 'live') return { text: s.version + ' 已在正式环境，冒烟 ' + (R.releases[R.releases.length - 1].smoke || '—') + '。', blocks: [pipeChart] };
+        if (!ck.all) return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '，未过：' + ck.items.filter(function (i) { return !i.ok; }).map(function (i) { return i.label; }).join('、') + '，先补齐再发。',
+          blocks: [chartB({ chart: 'gauge', title: '发布前检查', unit: ' 项', value: ck.passed, max: ck.total, target: ck.total })] };
         return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + ' 全通过，走构建 → 测试环境 → 冒烟 → 正式环境 → 已上线。',
-          act: { type: 'apply', action: 'publish' } };
+          blocks: [pipeChart], act: { type: 'apply', action: 'publish' } };
       }
       return { text: '发布前检查 ' + ck.passed + ' / ' + ck.total + '：' + ck.items.map(function (i) { return (i.ok ? '✓ ' : '✗ ') + i.label + ' ' + i.detail; }).join('；') + '。',
-        blocks: [tableB(['检查项', '结果'], ck.items.map(function (i) { return [i.label, i.ok ? '通过' : '未过']; }))],
+        blocks: [chartB({ chart: 'gauge', title: '发布前检查', unit: ' 项', value: ck.passed, max: ck.total, target: ck.total }),
+          tableB(['检查项', '结果'], ck.items.map(function (i) { return [i.label, i.ok ? '通过' : '未过']; }))],
         act: { type: 'open', panel: 'checks' } };
     }
 
     /* —— 迭代交付 —— */
     if (hasWord(q, ['存量', '旧数据', '老数据', '历史数据'])) {
       var lastC = R.changes[R.changes.length - 1];
-      if (!lastC) return { text: '还没生成新版本。追加变更后存量记录不动，新字段置空，已完结的可补填。' };
+      if (!lastC) return { text: '还没生成新版本。追加变更后存量记录不动，新字段置空，已完结的可补填。',
+        blocks: [chartB({ chart: 'funnel', title: '单据流转', unit: ' 单',
+          labels: st.byStatus.map(function (x) { return x.label; }), series: ser('单数', st.byStatus.map(function (x) { return x.n; })) })] };
       return { text: '存量 ' + lastC.stock.rows + ' 条不动，新字段置空；' + (lastC.stock.newFields.length ? lastC.stock.fillable + ' 条' + lastC.stock.terminalLabel + '的可补 ' + lastC.stock.newFields.join(' / ') : '本次无新字段') + '；旧用例 ' + lastC.oldPassed + ' / ' + lastC.oldTests + ' 仍通过。',
+        blocks: [chartB({ chart: 'column', title: '旧用例回归', unit: ' 条', labels: ['仍通过', '需改'],
+          series: ser('条数', [lastC.oldPassed, Math.max(0, lastC.oldTests - lastC.oldPassed)]) })],
         act: { type: 'open', panel: 'stock' } };
     }
     if (hasWord(q, ['交付', '清单', '产物', '报告', '发微信', '收件'])) {
       return { text: R.deliverables.length + ' 项产物：' + R.deliverables.map(function (x) { return x.name + ' ' + x.no + '（' + x.count + '）'; }).join('；') + '。收件 ' + R.report.recipients + '。',
-        blocks: [tableB(['产物', '编号', '数量'], R.deliverables.map(function (x) { return [x.name, x.no, x.count]; }))],
+        blocks: [specChart(R), tableB(['产物', '编号', '数量'], R.deliverables.map(function (x) { return [x.name, x.no, x.count]; }))],
         act: { type: 'open', panel: 'report' } };
     }
     var nextV = bump(s.version, 'minor');
@@ -1013,27 +1097,34 @@
         if (!pick) pick = R.followUps.filter(function (f) { return !f.applied; })[0];
         if (!pick) return { text: '追加需求都已生成，当前 ' + s.version + '。' };
         return { text: '按「' + pick.text + '」生成 ' + nextV + '：+' + pick.pages + ' 页 +' + pick.fields + ' 字段 +' + pick.states + ' 节点 +' + pick.tests + ' 用例，存量数据不动。',
+          blocks: [chartB({ chart: 'column', title: '这次加多少', unit: ' 个', labels: ['页', '字段', '节点', '用例'],
+            series: ser('增量', [pick.pages, pick.fields, pick.states, pick.tests]) })],
           act: { type: 'apply', action: 'apply-delta', input: { text: pick.text } } };
       }
       if (lastD) return { text: lastD.from + ' → ' + lastD.to + '：' + lastD.items.map(function (i) { return i.content; }).join('；') + '。用例 ' + lastD.passed + ' / ' + lastD.tests + ' 通过。',
-        blocks: [tableB(['类型', '内容', '用例'], lastD.items.map(function (i) { return [i.typeName, cut(String(i.content).replace(i.typeName + ' ', ''), 12), '+' + i.tests]; }))],
+        blocks: [chartB({ chart: 'bar', title: '每项变更的用例增量', unit: ' 条',
+          labels: lastD.items.map(function (i) { return i.typeName; }), series: ser('用例', lastD.items.map(function (i) { return i.tests; })) }),
+          tableB(['类型', '内容', '用例'], lastD.items.map(function (i) { return [i.typeName, cut(String(i.content).replace(i.typeName + ' ', ''), 12), '+' + i.tests]; }))],
         act: { type: 'open', panel: 'change' } };
       return { text: R.followUps.length + ' 条追加需求：' + R.followUps.map(function (f) { return '「' + cut(f.text, 12) + '」+' + f.tests + ' 用例'; }).join('；') + '；只认 ' + lib.deltas.types.length + ' 种变更，存量数据不动。',
-        blocks: [tableB(['追加需求', '页', '字段', '用例'], R.followUps.map(function (f) { return [cut(f.text, 10), '+' + f.pages, '+' + f.fields, '+' + f.tests]; }))],
+        blocks: [chartB({ chart: 'bar', title: '每条追加需求的用例增量', unit: ' 条',
+          labels: R.followUps.map(function (f) { return cut(f.text, 6); }), series: ser('用例', R.followUps.map(function (f) { return f.tests; })) }),
+          tableB(['追加需求', '页', '字段', '用例'], R.followUps.map(function (f) { return [cut(f.text, 10), '+' + f.pages, '+' + f.fields, '+' + f.tests]; }))],
         act: { type: 'open', panel: 'follow' } };
     }
 
     /* —— 为什么 / 怎么办 —— */
     if (hasWord(q, ['怎么生成', '为什么这么', '凭什么', '依据', '怎么判断'])) {
       return { text: '按五条规则落的：' + RULES.slice(0, 3).map(function (x) { return x; }).join('；') + '。',
-        act: { type: 'open', panel: 'judge' } };
+        blocks: [wordChart(R)].filter(Boolean), act: { type: 'open', panel: 'judge' } };
     }
     if (hasWord(q, ['为什么'])) {
       if (st.overdue.length) {
         var oW = st.overdue[0], rW = rowById(R, oW.id);
         return { text: oW.id + ' ' + oW.text + '：' + stateLabel(s, rW ? rW.status : '') + '，' + fmtMin(rW ? rW.createdAt : 0) + ' 提交到现在没人接，约定' + st.acceptLabel + ' ' + st.slaHours + ' 小时。', ref: oW.id, act: { type: 'focus', ref: oW.id } };
       }
-      return { text: s.title + ' 按' + s.flow.name + '模板落的，' + s.states.map(function (x) { return x.label; }).join(' → ') + '；' + tr.passed + ' / ' + tr.total + ' 条用例通过。', act: { type: 'open', panel: 'judge' } };
+      return { text: s.title + ' 按' + s.flow.name + '模板落的，' + s.states.map(function (x) { return x.label; }).join(' → ') + '；' + tr.passed + ' / ' + tr.total + ' 条用例通过。',
+        blocks: [specChart(R)], act: { type: 'open', panel: 'judge' } };
     }
     if (hasWord(q, ['怎么办', '下一步做什么', '接下来', '先做什么'])) {
       var sgN = R.suggestion;

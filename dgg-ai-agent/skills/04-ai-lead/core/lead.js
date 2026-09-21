@@ -19,6 +19,7 @@
   var DIM_LABEL = { sector: '行业大类', role: '决策人', size: '企业规模', region: '区域' };
   var SIZE_LABEL = { '1_20': '1–20 人', '21_50': '21–50 人', '51_100': '51–100 人', '101_300': '101–300 人', '300_plus': '300 人以上' };
   var CHANNEL_NAME = { fair: '展会扫码', inquiry: '平台询盘', web: '官网留资', wechat: '公众号', referral: '老客户转介绍', list: '名录导入' };
+  var CHAN_ORDER = ['fair', 'inquiry', 'web', 'wechat', 'referral', 'list'];
   var STAGE_ORDER = ['lead', 'contact', 'opp', 'quote', 'won'];
   var ACTION = { first: '首触', follow: '二次跟进', quote: '报价后跟进', wake: '沉睡唤醒', done: '转交付' };
 
@@ -541,10 +542,18 @@
         text: '在手 ' + pool2.length + ' 条里 A 级 ' + byGrade('A').length + ' 条、B 级 ' + byGrade('B').length + ' 条、C 级 '
           + byGrade('C').length + ' 条、D 级 ' + byGrade('D').length + ' 条。A 级按 ' + lib.stages.followUpDays.A + ' 天节奏跟，'
           + (unA ? '其中 ' + unA + ' 条还没分派。' : '已全部分派。'),
-        blocks: [bTable(['意向', '条数', '预计金额'], ['A', 'B', 'C', 'D'].map(function (g) {
-          var ls = byGrade(g);
-          return [g + ' 级', ls.length + ' 条', fmtW(ls.reduce(function (t, l) { return t + l.amountEst; }, 0))];
-        }))]
+        blocks: [
+          bChart({ chart: 'heat', title: '渠道 × 等级（条）',
+            labels: ['A', 'B', 'C', 'D'],
+            rows: CHAN_ORDER.filter(function (c) { return pool2.filter(function (l) { return l.channel === c; }).length; }).map(function (c) { return CHANNEL_NAME[c] || c; }),
+            matrix: CHAN_ORDER.filter(function (c) { return pool2.filter(function (l) { return l.channel === c; }).length; }).map(function (c) {
+              return ['A', 'B', 'C', 'D'].map(function (g) { return pool2.filter(function (l) { return l.channel === c && l.grade === g; }).length; });
+            }) }),
+          bTable(['意向', '条数', '预计金额'], ['A', 'B', 'C', 'D'].map(function (g) {
+            var ls = byGrade(g);
+            return [g + ' 级', ls.length + ' 条', fmtW(ls.reduce(function (t, l) { return t + l.amountEst; }, 0))];
+          }))
+        ]
       };
     }
 

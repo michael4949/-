@@ -409,7 +409,7 @@ function readme(m, manifest, datasets) {
       '```',
       '',
       '- `ask` / `brief` 答不上时是 `ok:true` + `data:null`（业务事实，不是调用失败），平台按 `data === null` 走自己的兜底。',
-      '- 回答是 `{ text, blocks?, act?, ref?, step? }`：`text` 必读得通，`blocks` 是纯数据（' + ((ft.blocks || []).join(' / ') || 'kv / table / tags') + '），',
+      '- 回答是 `{ text, blocks?, act?, ref?, step? }`：`text` 必读得通，`blocks` 是纯数据（' + ((ft.blocks || []).join(' / ') || 'kv / table / tags / chart') + '），',
       '  `act` 是声明式动作（' + ((ft.act || []).join(' / ') || 'goto / focus / open / apply / set') + '），平台只实现子集也合格，不认识的一律忽略。',
       ''
     ] : [],
@@ -638,8 +638,9 @@ const ID = '${id}';
    *   ④ step 是选填：不传照样 ok:true，且清单的 input.required 里不许有 step */
   const byName = {};
   cjs.manifest.actions.forEach((a) => { byName[a.name] = a; });
-  const BLOCKS = { kv: 1, table: 1, tags: 1, list: 1, metric: 1, text: 1 };
-  const ACTS = { goto: 1, focus: 1, open: 1, apply: 1, set: 1 };
+  const BLOCKS = { kv: 1, table: 1, tags: 1, list: 1, metric: 1, text: 1, chart: 1 };
+  const ACTS = { goto: 1, focus: 1, open: 1, apply: 1, set: 1, click: 1 };
+  const CHARTS = { column: 1, bar: 1, stack: 1, line: 1, area: 1, donut: 1, pie: 1, funnel: 1, gauge: 1, radar: 1, waterfall: 1, progress: 1, heat: 1, scatter: 1 };
   if (byName.ask && byName.suggest) {
     const screens = (cjs.manifest.screens || []).map((s) => s.key);
     const dsKeys = (cjs.manifest.datasets || []).map((d) => d.key);
@@ -651,6 +652,7 @@ const ID = '${id}';
       (out.blocks || []).forEach((b, i) => {
         if (!b || typeof b !== 'object' || Array.isArray(b) || typeof b.type !== 'string') notes.push(where + ' · blocks[' + i + '] 不是块：' + JSON.stringify(b));
         else if (!BLOCKS[b.type] && b.type.indexOf('x-') !== 0) notes.push(where + ' · blocks[' + i + '] 未知 type ' + b.type);
+        else if (b.type === 'chart' && !CHARTS[b.chart]) notes.push(where + ' · blocks[' + i + '] 图型不在词表里：' + b.chart);
       });
       const act = out.act;
       if (act == null) return;

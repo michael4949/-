@@ -698,10 +698,10 @@ function answerSchemas(manifest) {
   if (!ft.conversation && !ft.ingest) return out;
   out.Block = {
     type: 'object',
-    description: '平台中立的展示块（SPEC §10.6）：纯数据，六种 type，未知 type 一律忽略且不得报错（厂商扩展用 x- 前缀）。',
+    description: '平台中立的展示块（SPEC §10.6）：纯数据，七种 type，未知 type 一律忽略且不得报错（厂商扩展用 x- 前缀）。',
     required: ['type'],
     properties: {
-      type: { enum: ['kv', 'table', 'tags', 'list', 'metric', 'text'] },
+      type: { enum: ['kv', 'table', 'tags', 'list', 'metric', 'text', 'chart'] },
       title: { type: 'string' },
       head: { type: 'array', maxItems: 5, items: { type: 'string' } },
       align: { type: 'array', items: { enum: ['l', 'c', 'r'] } },
@@ -709,7 +709,19 @@ function answerSchemas(manifest) {
       items: { type: 'array', description: 'tags / list 是字符串数组；metric 是 { label, value, unit?, sub?, tone? } 数组' },
       text: { type: 'string' },
       ordered: { type: 'boolean' },
-      tone: { enum: ['ok', 'warn', 'bad', 'info'] }
+      tone: { enum: ['ok', 'warn', 'bad', 'info'] },
+      chart: { enum: ['column', 'bar', 'stack', 'line', 'area', 'donut', 'pie', 'funnel', 'gauge', 'radar', 'waterfall', 'progress', 'heat', 'scatter'], description: 'chart：图型（SPEC §10.6.1）；未知值按未知块型忽略' },
+      unit: { type: 'string', description: 'chart：数值单位，跟在数字后面' },
+      labels: { type: 'array', maxItems: 13, items: { type: 'string' }, description: 'chart：分类轴标签' },
+      series: { type: 'array', maxItems: 3, description: 'chart：[{ name, data: [数…] }]；scatter 用 points: [[x, y]…]' },
+      matrix: { type: 'array', description: 'chart heat：matrix[i][j] 对应 rows[i] × labels[j]' },
+      total: { type: 'number', description: 'chart donut：环心数' },
+      target: { type: 'number', description: 'chart gauge：目标线' },
+      max: { type: 'number', description: 'chart gauge / radar / progress：轴上限' },
+      value: { type: 'number', description: 'chart gauge：单值' },
+      xLabel: { type: 'string' },
+      yLabel: { type: 'string' },
+      note: { type: 'string', description: 'chart：一句脚注，≤ 10 字' }
     }
   };
   out.Act = {
@@ -717,7 +729,7 @@ function answerSchemas(manifest) {
     description: '声明式动作词表（SPEC §12）：纯数据的建议，不是命令。平台可以只实现子集，未知 type 一律忽略。',
     required: ['type'],
     properties: {
-      type: { enum: ['goto', 'focus', 'open', 'apply', 'set'] },
+      type: { enum: ['goto', 'focus', 'open', 'apply', 'set', 'click'] },
       step: { type: 'string', description: 'goto / focus / open：目标屏的 key' },
       ref: { type: 'string', description: 'focus / open：业务 id，不是数组下标' },
       panel: { type: 'string', description: 'open：面板名' },
@@ -725,6 +737,7 @@ function answerSchemas(manifest) {
       input: { type: 'object', description: 'apply：调用入参' },
       path: { type: 'string', description: 'set：业务数据上的点号路径' },
       value: { description: 'set：JSON 标量或小对象（≤ 1 KB）' },
+      aim: { type: 'string', description: 'click：按钮上写的字（前缀匹配）；没有界面的平台忽略' },
       note: { type: 'string', description: '给平台做 toast 或按钮文案，≤ 20 字' }
     }
   };

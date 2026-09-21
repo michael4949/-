@@ -36,18 +36,23 @@ MODS.forEach(([id, dir, file, sample]) => {
   /* 工序流的排产要借 AI ERP 的引擎；JSON 装不下函数，由宿主注入（原型里也是这么接的） */
   if (id === 'm8' && !lib.erp) lib.erp = require(path.join(__dirname, '..', 'skills', '10-ai-erp', 'core', 'sim.js'));
   const raw = lib.samples[sample] || lib.samples[Object.keys(lib.samples)[0]];
+  /* AI软件开发：六屏是「说一句话 → 生成 → 试用 → 测试 → 发布 → 迭代」，不先生成后五屏没有规格 */
+  const raw2 = (id === 'm11') ? core.generate(core.ensure(raw), lib) : raw;
   /* AI ERP 的入口是 normalize + schedule，不是 run；其余八个都是 run */
-  const R = core.run ? core.run(raw, lib) : core.schedule(core.normalize(raw, lib));
+  const R = core.run ? core.run(raw2, lib) : core.schedule(core.normalize(raw2, lib));
   core.screens().forEach((sc) => {
-    const b = core.brief(sc.key, R.data, lib, R);
+    /* AI软件开发 的接入屏是「还没生成」的状态，按生成后的结果问就走岔了 */
+    const raw3 = (id === 'm11' && sc.key === 'connect') ? core.ensure(raw) : raw2;
+    const Rs = (raw3 === raw2) ? R : core.run(raw3, lib);
+    const b = core.brief(sc.key, Rs.data || raw3, lib, Rs);
     briefs++;
     checkBlocks(id + '/' + sc.key + ' brief', b);
     const bc = chartOf(b);
     if (bc) { briefCharts++; kinds[bc.chart] = (kinds[bc.chart] || 0) + 1; }
     else gaps.push(id + '/' + sc.key + ' · brief 没有图');
-    const qs = core.suggest(sc.key, R.data, lib, R) || [];
+    const qs = core.suggest(sc.key, Rs.data || raw3, lib, Rs) || [];
     qs.forEach((q) => {
-      const a = core.ask(q, sc.key, R.data, lib, R);
+      const a = core.ask(q, sc.key, Rs.data || raw3, lib, Rs);
       tot++;
       checkBlocks(id + '/' + sc.key + ' 「' + q + '」', a);
       const c = chartOf(a);
