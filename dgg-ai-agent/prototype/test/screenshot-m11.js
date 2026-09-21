@@ -11,7 +11,7 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -67,9 +67,9 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('3a-try-error');
   // 三步走单
   const stepsN = R.script.length;
-  for (let i = 0; i < stepsN; i++) { await clickBtn('.m11-try', '下一步'); await page.waitForTimeout(500); d = core.nextScript(d, lib); R = core.run(d, lib); if (!d.state.lastResult.ok) errors.push('脚本第 ' + (i + 1) + ' 步失败 ' + d.state.lastResult.error); if (num(await kpiVal(2)) !== R.stats.open) errors.push('第 ' + (i + 1) + ' 步后待接单 ' + (await kpiVal(2)) + ' vs ' + R.stats.open); await shot('3' + 'bcd'[i] + '-try-step' + (i + 1)); }
+  for (let i = 0; i < stepsN; i++) { await clickBtn('.m11-try', '走一步'); await page.waitForTimeout(500); d = core.nextScript(d, lib); R = core.run(d, lib); if (!d.state.lastResult.ok) errors.push('脚本第 ' + (i + 1) + ' 步失败 ' + d.state.lastResult.error); if (num(await kpiVal(2)) !== R.stats.open) errors.push('第 ' + (i + 1) + ' 步后待接单 ' + (await kpiVal(2)) + ' vs ' + R.stats.open); await shot('3' + 'bcd'[i] + '-try-step' + (i + 1)); }
   await lintScreen('走单');
-  if (await hasBtn('.m11-try', '下一步')) errors.push('脚本走完后仍可点下一步');
+  if (await hasBtn('.m11-try', '走一步')) errors.push('脚本走完后仍可点走一步');
   if (num(await page.$eval('.pd-kpis .pd-kpi:nth-child(4) .v', (e) => e.textContent)) !== R.stats.done) errors.push('看板已完成 vs ' + R.stats.done);
   // 切主管视角
   await page.click('.m11-seg button:nth-child(3)'); await page.waitForTimeout(300);

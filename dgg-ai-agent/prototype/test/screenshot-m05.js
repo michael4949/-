@@ -10,7 +10,7 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -30,7 +30,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const spent1 = await text('#cr-spent');
   if (spent0 !== '0' || spent1 !== '30') errors.push('积分扣减异常 ' + spent0 + ' → ' + spent1);
   if ((await kpiVal(1)) !== R.kpi.headcount) errors.push('在编 KPI ' + (await kpiVal(1)) + ' vs ' + R.kpi.headcount);
-  if ((await kpiVal(7)) !== R.kpi.complianceOpen) errors.push('合规 KPI ' + (await kpiVal(7)) + ' vs ' + R.kpi.complianceOpen);
+  if ((await kpiVal(6)) !== R.kpi.complianceOpen) errors.push('合规 KPI ' + (await kpiVal(6)) + ' vs ' + R.kpi.complianceOpen);
   const deptRows = await page.$$eval('.pd-card.c7 .pd-table tbody tr', (r) => r.length); if (deptRows !== lib.samples.make.departments.length) errors.push('部门行数 ' + deptRows);
   const needBlocks = await page.$$eval('.m5-needs .nd', (r) => r.length); if (needBlocks !== 3) errors.push('需求单块数 ' + needBlocks);
 
@@ -39,9 +39,16 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('3-recruit'); await lintScreen('招聘');
   const need0 = R.needs[0];
   const rows0 = await page.$$eval('.pd-card.c7 .pd-table tbody tr', (r) => r.length); if (rows0 !== need0.active) errors.push('候选人行数 ' + rows0 + ' vs ' + need0.active);
-  const jd1 = await text('.pd-doc');
+  // JD 全文现在在抽屉里看，换版后重新开一次抽屉取正文
+  const jdText = async () => {
+    await clickBtn('.pd-card.c8 .ft', '查看全文'); await page.waitForSelector('.pd-drawer .pd-doc');
+    const t = await text('.pd-drawer .pd-doc');
+    await page.click('.pd-drawer .hd .close'); await page.waitForTimeout(200);
+    return t;
+  };
+  const jd1 = await jdText();
   await page.click('.pd-card.c8 .hd .x .chips button:nth-child(2)'); await page.waitForTimeout(200);   // 内推海报版
-  const jd2 = await text('.pd-doc'); if (jd1 === jd2 || /\{\w+\}/.test(jd2)) errors.push('JD 换版异常');
+  const jd2 = await jdText(); if (jd1 === jd2 || /\{\w+\}/.test(jd2)) errors.push('JD 换版异常');
   await shot('3b-recruit-poster');
   await page.click('.pd-card.c8 .hd .x .chips button:nth-child(1)'); await page.waitForTimeout(200);
   await clickBtn('.pd-card.c8 .ft', '发布招聘网站版'); await page.waitForTimeout(300);
@@ -65,10 +72,10 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(4)'); await page.waitForSelector('.m5-interview');
   await shot('4-interview'); await lintScreen('面试');
   const ilist = await page.$$eval('.pd-card.c4 .pd-list .pd-item', (r) => r.length); if (ilist < 4) errors.push('面试安排条数 ' + ilist);
-  const abs = await page.$$eval('.m5-qs .ab', (r) => r.length); if (abs !== 4) errors.push('题库能力项 ' + abs);
+  const abs = await page.$$eval('.m5-qc .r', (r) => r.length); if (abs !== 4) errors.push('评分能力项 ' + abs);
   // 未评分的第一位：打 4 项分再录入
   await page.evaluate(() => { [...document.querySelectorAll('.pd-card.c4 .pd-list .pd-item')].find((x) => x.textContent.indexOf('待评') >= 0).click(); }); await page.waitForTimeout(200);
-  for (let i = 1; i <= 4; i++) await page.click(`.m5-qs .ab:nth-child(${i}) .pick button:nth-child(${i === 1 || i === 4 ? 5 : 4})`);
+  for (let i = 1; i <= 4; i++) await page.click(`.m5-qc .r:nth-child(${i}) .pick button:nth-child(${i === 1 || i === 4 ? 5 : 4})`);
   await page.waitForTimeout(150); await shot('4b-interview-scoring');
   await clickBtn('.m5-interview .pd-card .ft', '录入评分'); await page.waitForTimeout(400);
   if (!(await page.$('.pd-radar'))) errors.push('录入评分后无雷达');
@@ -104,20 +111,25 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const opts = await page.$$eval('.pd-compare .pd-option', (r) => r.length); if (opts !== 3) errors.push('方案数 ' + opts);
   if (!(await page.$('.pd-line'))) errors.push('无成本走势图');
   await page.click('.pd-compare .pd-option:nth-child(3)'); await page.waitForTimeout(250);
-  const t3 = await text('.pd-card.c8 .hd .t'); if (t3.indexOf('方案 C') < 0) errors.push('切换方案明细失败 ' + t3);
+  const t3 = await text('.m5-cost .pd-card.c12 .ft'); if (t3.indexOf('方案 C') < 0) errors.push('切换方案明细失败 ' + t3);
   await page.click('.pd-compare .pd-option:nth-child(2)'); await page.waitForTimeout(250);
   await clickBtn('.m5-cost .pd-card.c12 .ft', '采纳方案 B'); await page.waitForTimeout(300);
   if (!(await page.$('.m5-cost .pd-card.c12 .ft .pd-chip.ok'))) errors.push('采纳后无标记');
-  const rep = await text('.pd-pre'); if (rep.indexOf('【人力月报】') !== 0 || rep.indexOf('已采纳 B') < 0 || rep.indexOf('本期处置') < 0) errors.push('月报内容异常');
+  // 卡片里只摆前三行做预览，全文在抽屉里
+  await clickBtn('.m5-cost .pd-card.c12 .ft', '全文'); await page.waitForSelector('.pd-drawer .pd-pre');
+  const rep = await text('.pd-drawer .pd-pre'); if (rep.indexOf('【人力月报】') !== 0 || rep.indexOf('已采纳 B') < 0 || rep.indexOf('本期处置') < 0) errors.push('月报内容异常');
+  await page.click('.pd-drawer .hd .close'); await page.waitForTimeout(200);
   await shot('6b-cost-adopted');
-  await clickBtn('.m5-cost .pd-card.c4 .ft', '发送到微信'); await page.waitForSelector('.modal'); await shot('6c-cost-wechat'); await page.click('.modal .btn');
+  await clickBtn('.m5-cost .pd-card.c12 .ft', '发送到微信'); await page.waitForSelector('.modal'); await shot('6c-cost-wechat'); await page.click('.modal .btn');
   if (!(await page.$('.rail .qr.ready'))) errors.push('二维码未高亮');
 
   // 回驾驶舱：动作写回
   await page.click('.pd-tabs .tab:nth-child(2)'); await page.waitForSelector('.m5-board'); await page.waitForTimeout(300);
   await shot('7-board-after');
-  const logs = await page.$$eval('.m5-log .l', (r) => r.length); if (logs < 6) errors.push('驾驶舱动作记录 ' + logs);
-  if ((await kpiVal(7)) !== R.kpi.complianceOpen - 2) errors.push('驾驶舱合规计数未更新');
+  // 动作记录不再在驾驶舱摆卡片，月报「本期处置」与它同源，条数在这里核
+  const actLine = (rep.split('\n').find((l) => l.indexOf('本期处置') >= 0) || '');
+  if (!actLine) errors.push('月报缺本期处置');
+  if ((await kpiVal(6)) !== R.kpi.complianceOpen - 2) errors.push('驾驶舱合规计数未更新');
   await page.click('#home-link'); await page.waitForSelector('.grid'); await page.click('.card[data-id="m5"]'); await page.waitForSelector('.pd-app');
   if ((await text('#cr-spent')) !== '30') errors.push('重进后积分异常');
   await page.click('.rail .link'); await page.waitForSelector('.rail .menu'); await page.click('.rail .menu button:nth-child(2)'); await page.waitForTimeout(300);

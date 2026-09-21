@@ -10,19 +10,20 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
   const lintScreen = async (n) => { const t = await page.$eval('.pd-app', (e) => e.innerText); const hits = lint.hard(t); if (hits.length) errors.push(n + ' 禁词: ' + hits.join(',')); };
   const text = (sel) => page.$eval(sel, (e) => e.innerText.trim());
+  const clickBtn = (scope, label) => page.evaluate(([s, l]) => { const b = [...document.querySelectorAll(s + ' .pd-btn')].find((x) => x.textContent.trim() === l); if (!b) throw new Error('no button ' + l); b.click(); }, [scope, label]);
   const R = core.run(lib.samples.make, lib);
 
   await page.goto(url + '?station=3'); await page.waitForSelector('.grid');
   await page.click('.card[data-id="m4"]'); await page.waitForSelector('.m4-connect');
   await shot('1-connect'); await lintScreen('接入');
   const spent0 = await text('#cr-spent');
-  await page.click('.m4-connect .go .pd-btn.primary');
+  await page.click('.m4-connect .ft .pd-btn.primary');
   await page.waitForSelector('.pd-funnel'); await page.waitForTimeout(900);
   await shot('2-board'); await lintScreen('驾驶舱');
   const spent1 = await text('#cr-spent');
@@ -46,7 +47,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(4)'); await page.waitForSelector('.m4-script');
   await shot('4-script'); await lintScreen('脚本');
   const t1 = await text('.pd-doc');
-  await page.click('.m4-script .pd-field .chips .pd-btn'); await page.waitForTimeout(200);   // 换一版
+  await page.evaluate(() => { [...document.querySelectorAll('.m4-script .pd-field')].find((f) => f.textContent.indexOf('版本') >= 0).querySelectorAll('.chips button')[1].click(); }); await page.waitForTimeout(200);   // 换一版
   const t2 = await text('.pd-doc'); if (t1 === t2) errors.push('换一版无变化');
   if (/\{\w+\}/.test(t2)) errors.push('脚本有未替换占位符');
   await page.click('.m4-script .pd-card .ft .pd-btn.primary'); await page.waitForTimeout(300);
@@ -82,14 +83,19 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(6)'); await page.waitForSelector('.m4-plan');
   await shot('6-plan'); await lintScreen('跟进');
   const dayCols = await page.$$eval('.m4-plan .day', (d) => d.length); if (dayCols !== 5) errors.push('日程列数 ' + dayCols);
-  const rep = await text('.pd-pre'); if (rep.indexOf('本周动作') < 0) errors.push('周报未包含本周动作');
+  // 卡片里只摆前三行做预览，全文在抽屉里
+  await clickBtn('.m4-plan .pd-card .ft', '看全文'); await page.waitForSelector('.pd-drawer .pd-pre');
+  const rep = await text('.pd-drawer .pd-pre'); if (rep.indexOf('本周动作') < 0) errors.push('周报未包含本周动作');
+  await page.click('.pd-drawer .hd .close'); await page.waitForTimeout(200);
   await page.click('.m4-plan .pd-card .ft .pd-btn.primary'); await page.waitForSelector('.modal'); await shot('6b-plan-wechat'); await page.click('.modal .btn');
   if (!(await page.$('.rail .qr.ready'))) errors.push('二维码未高亮');
 
   // 回驾驶舱：动作写回
   await page.click('.pd-tabs .tab:nth-child(2)'); await page.waitForSelector('.pd-funnel'); await page.waitForTimeout(300);
   await shot('7-board-after');
-  const logs = await page.$$eval('.m4-log .l', (r) => r.length); if (logs < 4) errors.push('驾驶舱动作记录 ' + logs);
+  // 动作记录改走对话面板（open panel:log），周报「本周动作」与它同一份 d.log，在这里核条数
+  const actLine = (rep.split('\n').find((l) => l.indexOf('本周动作：') === 0) || '').replace('本周动作：', '');
+  const logs = actLine ? actLine.split('；').length : 0; if (logs < 4) errors.push('动作记录 ' + logs);
   await page.click('#home-link'); await page.waitForSelector('.grid'); await page.click('.card[data-id="m4"]'); await page.waitForSelector('.pd-app');
   if ((await text('#cr-spent')) !== '30') errors.push('重进后积分异常');
   await page.click('.rail .link'); await page.waitForSelector('.rail .menu'); await page.click('.rail .menu button:nth-child(2)'); await page.waitForTimeout(300);

@@ -12,7 +12,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -33,23 +33,23 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('2-board'); await lintScreen('驾驶舱');
   const spent1 = await text('#cr-spent');
   if (spent0 !== '0' || spent1 !== '50') errors.push('积分扣减异常 ' + spent0 + ' → ' + spent1);
-  const kAnom = await page.$eval('.pd-kpis .pd-kpi:nth-child(7) .v', (e) => parseInt(e.textContent, 10));
+  const kAnom = await page.$eval('.pd-kpis .pd-kpi:nth-child(5) .v', (e) => parseInt(e.textContent, 10));
   if (kAnom !== R.reconcile.counts.bad) errors.push('勾稽异常 KPI ' + kAnom + ' vs ' + R.reconcile.counts.bad);
   const bars = await page.$$eval('.pd-line rect', (r) => r.length);
   if (bars !== 12) errors.push('趋势柱数 ' + bars);
 
   // 三表勾稽
-  await page.click('.pd-kpis .pd-kpi:nth-child(7)');
+  await page.click('.pd-kpis .pd-kpi:nth-child(5)');
   await page.waitForSelector('.m6-entry');
   await shot('3-recon'); await lintScreen('三表勾稽');
-  const badRows = await page.$$eval('.c7 .pd-table tbody tr', (rows) => rows.filter((r) => r.textContent.indexOf('异常') >= 0).length);
+  const badRows = await page.$$eval('.m6-sc .pd-table tbody tr', (rows) => rows.filter((r) => r.textContent.indexOf('异常') >= 0).length);
   if (badRows !== R.reconcile.counts.bad) errors.push('勾稽表异常行 ' + badRows + ' vs ' + R.reconcile.counts.bad);
   await page.click('.pd-action.best .pd-btn'); await page.waitForTimeout(400);
   await shot('3b-recon-fixed');
-  const fixedChip = await page.$$eval('.c7 .pd-table .pd-chip.handled', (c) => c.length);
+  const fixedChip = await page.$$eval('.m6-sc .pd-table .pd-chip.handled', (c) => c.length);
   if (fixedChip < 1) errors.push('调整后表中无已调整标记');
   // 第二条异常也调
-  await page.click('.c7 .pd-table tbody tr:nth-child(2)'); await page.waitForTimeout(200);
+  await page.click('.m6-sc .pd-table tbody tr:nth-child(2)'); await page.waitForTimeout(200);
   const fixBtn = await page.$('.pd-action.best .pd-btn');
   if (fixBtn) { await fixBtn.click(); await page.waitForTimeout(300); }
   const kFixed = await page.$eval('.pd-kpis .pd-kpi:nth-child(5) .v', (e) => parseInt(e.textContent, 10));
@@ -62,7 +62,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const pts = await page.$$eval('.pd-matrix .pt', (p) => p.length);
   if (pts !== R.risks.rows.length) errors.push('矩阵点数 ' + pts + ' vs ' + R.risks.rows.length);
   const riskBtn = await page.$('.pd-action.best .pd-btn');
-  if (riskBtn) { const t = await riskBtn.textContent(); if (t.trim() === '执行') { await riskBtn.click(); await page.waitForTimeout(400); await shot('4b-risk-handled'); const hd = await page.$$eval('.c12 .pd-table .pd-chip.handled', (c) => c.length); if (hd < 1) errors.push('处置后清单无标记'); } }
+  if (riskBtn) { const t = await riskBtn.textContent(); if (t.trim() === '执行') { await riskBtn.click(); await page.waitForTimeout(400); await shot('4b-risk-handled'); const hd = await page.$$eval('.m6-risk .pd-table tbody tr', (rs) => rs.filter((r) => r.textContent.indexOf('已处置') >= 0).length); if (hd < 1) errors.push('处置后清单无标记'); } }
   // 点矩阵上的 K01
   await page.evaluate(() => { const g = [...document.querySelectorAll('.pd-matrix .pt')].find((x) => x.textContent.indexOf('应收逾期') >= 0); if (g) g.dispatchEvent(new MouseEvent('click', { bubbles: true })); });
   await page.waitForTimeout(200); await shot('4c-risk-k01');
@@ -90,7 +90,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await addBtns[0].click(); await page.waitForTimeout(250);
   const addBtns2 = await page.$$('.c8 .pd-table .pd-btn');
   await addBtns2[1].click(); await page.waitForTimeout(250);
-  const listed = await page.$eval('.pd-kpis .pd-kpi:nth-child(4) .v', (e) => parseInt(e.textContent, 10));
+  const listed = await page.$eval('.pd-kpis .pd-kpi:nth-child(3) .v', (e) => parseInt(e.textContent, 10));
   if (listed !== 2) errors.push('申报清单数 ' + listed);
   await page.click('.c8 .pd-table tbody tr'); await page.waitForSelector('.pd-drawer'); await shot('6b-policy-drawer'); await page.click('.pd-drawer .close');
   await page.click('.m6-policy .pd-card .ft .pd-btn.primary'); await page.waitForSelector('.modal'); await shot('6c-policy-wechat'); await page.click('.modal .btn');

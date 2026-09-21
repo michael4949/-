@@ -102,7 +102,7 @@
 
   /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
      不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
-  var GUIDE_AIM = { connect: '生成应用', build: 'next', try: '下一步', test: '采纳', ship: '发布到正式环境', iterate: '生成 V' };
+  var GUIDE_AIM = { connect: '生成应用', build: 'next', try: '走一步', test: '采纳', ship: '发布到正式环境', iterate: '生成 V' };
 
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM11;
@@ -403,7 +403,9 @@
     if (!M.role) M.role = 'submitter';
     var openLabel = K.stateLabel(s, K.initialState(s));
     var g = h('div', { class: 'pd-grid' });
-    var nextBtn = P.btn(R.scriptStep >= R.script.length ? '脚本已走完' : '下一步 · ' + R.script[R.scriptStep].label, { cls: 'primary sm', disabled: R.scriptStep >= R.script.length, onClick: doNextScript });
+    /* 不叫「下一步」：屏底常驻的那条也叫下一步，同屏两个同名按钮，现场会点错 */
+    var nextBtn = P.btn(R.scriptStep >= R.script.length ? '脚本已走完' : '走一步 · ' + R.script[R.scriptStep].label, { cls: 'primary sm', disabled: R.scriptStep >= R.script.length, onClick: doNextScript });
+    if (R.scriptStep < R.script.length) nextBtn.setAttribute('data-guide', '1');   /* 这一屏的主操作就是它，箭头按元素指，不靠文字猜 */
     var fb = flowBar({ src: R.script.map(function (sc, i) { return [sc.actor.title + (sc.actor.emp ? ' ' + sc.actor.emp : ''), sc.label, i < R.scriptStep ? 'done' : i === R.scriptStep ? 'on' : '']; }),
       hub: '沙箱 ' + st.clockText, out: [s.short + ' ' + st.total + ' 条', [cnt(st.open, { suf: ' ' + openLabel }), ' · ', cnt(st.overdueN, { suf: ' 超时' })]],
       btn: '刷新看板', onClick: recalc, extra: [nextBtn] });
