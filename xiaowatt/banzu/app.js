@@ -38,7 +38,7 @@ function NAV_OF() {
     { g: '班组' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
   ];
   const nav = [
-    { g: '班组管理' }, { k: 'team', n: '班组画像', ic: 'star' }, { k: 'skills', n: '技能矩阵', ic: 'hex' }, { k: 'grow', n: '培养与梯队', ic: 'tree' }, { k: 'perf', n: '绩效与激励', ic: 'gauge' }, { k: 'care', n: '关怀与文化', ic: 'heart', badge: () => careList().filter(c => !LS.get('care_done', {})[c.k + '|' + c.who + '|' + c.when]).length }, { k: 'advise', n: '分析参谋', ic: 'doc' },
+    { g: '班组管理' }, { k: 'team', n: '班组画像', ic: 'star' }, { k: 'skills', n: '班员画像', ic: 'hex' }, { k: 'grow', n: '培养与梯队', ic: 'tree' }, { k: 'perf', n: '绩效与激励', ic: 'gauge' }, { k: 'care', n: '关怀与文化', ic: 'heart', badge: () => careList().filter(c => !LS.get('care_done', {})[c.k + '|' + c.who + '|' + c.when]).length }, { k: 'advise', n: '分析参谋', ic: 'doc' },
     { g: '日常业务' }, { k: 'home', n: '今日工作台', ic: 'sun', badge: () => HOMEPG.pending() }, { k: 'sched', n: '用工安排', ic: 'cal', badge: () => DB.jobs().filter(j => j.st === '待派').length }, { k: 'know', n: '知识库', ic: 'book' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
   ];
   if (DB.ext()) nav.push({ g: '扩展模块' }, { k: 'people', n: '人员档案', ic: 'people' }, { k: 'train', n: '培训考评', ic: 'check' }, { k: 'safety', n: '安全管理', ic: 'shield' }, { k: 'docs', n: '文稿中心', ic: 'pen' });
@@ -99,7 +99,7 @@ Object.assign(ACT, {
   'modal-close'() { $('#modal').hidden = true; },
   'stage-reset'() { DB.reset(); location.reload(); },
   'role-menu'() {},
-  'role-set'(el) { const r = el.dataset.r; if (!ROLES[r] || r === role()) return; DB.setRole(r); S.briefed = false; XW.clearChat(); location.hash = '#' + ROLES[r].home; render(); XW.answer(r === 'manager' ? '切到管理者了：先看年度指标任务，再看三个班组的画像、人员、结构、风险和关怀；督办、轮岗、调配都落到班长确认。' : '切到班组长了：先看' + TEAM.name + '的荣誉与星级建设差距，再看技能矩阵、培养、绩效、关怀。', null, { confirm: false, speak: false }); }
+  'role-set'(el) { const r = el.dataset.r; if (!ROLES[r] || r === role()) return; DB.setRole(r); S.briefed = false; XW.clearChat(); location.hash = '#' + ROLES[r].home; render(); XW.answer(r === 'manager' ? '切到管理者了：先看年度指标任务，再看三个班组的画像、人员、结构、风险和关怀；督办、轮岗、调配都落到班长确认。' : '切到班组长了：先看' + TEAM.name + '的荣誉与星级建设差距，再看班员画像、培养、绩效、关怀。', null, { confirm: false, speak: false }); }
 });
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act; if (ACT[a]) { if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) e.preventDefault(); ACT[a](el, e); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.target.id === 'cmdin' || e.target.id === 'chatin')) { const v = e.target.value.trim(); e.target.value = ''; if (v) XW.ask(v, false); } });

@@ -187,7 +187,7 @@ const FIVE = [
     { n: '图谱最弱模块', v: () => { const avg = MODS.map((m, i) => PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length); const wi = avg.indexOf(Math.min.apply(null, avg)); return MODS[wi].n.replace('能力', '') + ' L' + avg[wi].toFixed(1); }, th: '均值 ≥ L3', src: '能力图谱（考评定级回写）', use: '排课与带教对象', who: '班组长' }
   ] },
   { k: 'load', n: '工作量公平', d: '活有没有堆在几个人身上', items: [
-    { n: '本周超约定人数', v: () => PEOPLE.filter(p => p.week > WEEK_LIMIT).length + ' 人', th: '0 人（每周 ≤24h）', src: '工时台账', use: '派工时避开；下周计划均衡', who: '班组长' },
+    { n: '本周外勤超 24 小时人数', v: () => PEOPLE.filter(p => p.week > WEEK_LIMIT).length + ' 人', th: '0 人（班组约定每人每周外勤 ≤24h）', src: '工时台账', use: '派工时避开；下周计划均衡', who: '班组长' },
     { n: '最高与最低工时差', v: () => (Math.max.apply(null, PEOPLE.map(p => p.week)) - Math.min.apply(null, PEOPLE.filter(p => p.post !== '班长' && p.status !== '休假').map(p => p.week))) + ' 小时', th: '≤12 小时', src: '工时台账', use: '超过阈值提示换人', who: '班组长' },
     { n: '连续作业超 3 小时', v: () => DB.progressAll().filter(g => g.warn).length + ' 组', th: '高温期 0 组', src: '现场进度回传', use: '触发轮换通知', who: '班组长' }
   ] },

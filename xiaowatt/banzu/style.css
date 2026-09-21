@@ -838,3 +838,23 @@ table.t.cand td b,table.t.dims td b,table.t.goals td b{white-space:normal}
 .rt.on{background:var(--tint)}
 .jobs div.job.main{background:var(--tint)}.jobs div.job.add{background:#fafbfc}
 .heroxw{filter:none}
+/* 班员六维画像面板 */
+.hexwrap{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
+.hexl{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fcfdfe;display:flex;flex-direction:column;align-items:center;gap:4px}
+.hexl svg{max-width:100%}
+.hexr{display:flex;flex-direction:column;gap:6px}
+.hexr .hexhead span{font-size:11px;line-height:1.6}
+.hexr .sixrows>div{padding:3px 6px;border-radius:6px}
+.hexr .sixrows>div:hover{background:var(--tint)}
+.hexr .sixrows>div>span:first-child{color:var(--ink2)}
+.hexr .sixrows>div>b{text-align:right}
+.hexsum{border-top:1px dashed var(--line);padding-top:6px;font-size:11.5px;color:var(--ink2)}
+.bt .cf{font-size:10.5px;color:var(--ink3);align-self:center;margin-left:2px}
+table.t.skm tr.on td{background:var(--tint)}
+table.t.skm tr.on td:first-child{box-shadow:inset 3px 0 0 var(--pri)}
+table.t.skm tr:hover td{background:#f6f8fb}
+@media(max-width:1180px){.hexwrap{grid-template-columns:1fr}}
+table.t.skm td:nth-child(-n+6){white-space:nowrap}
+table.t.skm td:nth-child(7),table.t.skm th:nth-child(7){text-align:center}
+table.t td.rk{white-space:nowrap}
+table.t td.rk .dimbar{display:inline-block;width:150px;vertical-align:middle;margin:0 8px 0 0}

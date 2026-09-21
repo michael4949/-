@@ -1,4 +1,4 @@
-/* 冒烟回归（9/21 口径）：班组长 · 班组管理六页（班组画像 / 技能矩阵 / 培养与梯队 / 绩效与激励 / 关怀与文化 / 分析参谋）+ 日常业务主线（工作台派工 → 审票 → 开工 → 完工 → 回写）+ 知识库三类；管理者 · 八页（年度指标 / 横向对比 → 跨班组调配 / 团队画像 / 人员总览与六维画像 / 结构对比 / 风险画像 / 员工关怀 / 分析参谋）· 刷新持久 · 讲师演示台 · 界面禁词
+/* 冒烟回归（9/21 口径）：班组长 · 班组管理六页（班组画像 / 班员画像 / 培养与梯队 / 绩效与激励 / 关怀与文化 / 分析参谋）+ 日常业务主线（工作台派工 → 审票 → 开工 → 完工 → 回写）+ 知识库三类；管理者 · 八页（年度指标 / 横向对比 → 跨班组调配 / 团队画像 / 人员总览与六维画像 / 结构对比 / 风险画像 / 员工关怀 / 分析参谋）· 刷新持久 · 讲师演示台 · 界面禁词
    用法：node smoke.cjs  （需要 /home/user/-/node_modules/playwright 与 /opt/pw-browsers）期望：FAILS 0 ERR none */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const path = require('path');
@@ -30,12 +30,28 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('全部排进计划 · 提升建议全部标记', async () => (await pg.locator('#fixlist .tag.ok').count()) >= 5 && (await pg.locator('#fixlist button').count()) === 0);
   await clean('班组画像');
   await pg.screenshot({ path: SHOT + '/01_team.png' });
-  /* ---------- 技能矩阵与人才断层 ---------- */
+  /* ---------- 班员画像：六维个人画像 + 技能矩阵 + 人才断层 ---------- */
   await go('#skills', 700);
+  await t('左栏改名班员画像 · 路由不变', async () => (await pg.locator('#sb a').nth(1).innerText()).includes('班员画像') && (await ev(() => location.hash)) === '#skills' && (await main()).includes('六维个人画像'));
+  await t('六维雷达 + 六维条 6 行 · 默认韩雪 · 由班组长确认后使用', async () => (await pg.locator('.hexl svg').count()) >= 1 && (await pg.locator('.sixrows>div').count()) === 6 && (await pg.locator('.hexhead b').innerText()) === '韩雪' && (await pg.locator('.hexwrap .cf').innerText()).includes('由班组长确认后使用'));
+  await t('优势特长 / 可提升 + 均值对照', async () => { const x = await pg.locator('.hexwrap').innerText(); return /优势特长/.test(x) && /可提升/.test(x) && /均值/.test(x); });
   await t('技能矩阵 12 行 · 断层视图 9 类 · 高风险 ≥ 1', async () => (await pg.locator('table.skm tr').count()) === 13 && (await pg.locator('[data-act="skill-teach"]').count()) >= 1 && (await pg.locator('.s9').count()) === 12 && (await main()).includes('断层风险'));
+  await pg.click('table.skm tr[data-who="刘一鸣"]'); await w(600);
+  await t('点名单行切画像 · 当前行高亮', async () => (await pg.locator('.hexhead b').innerText()) === '刘一鸣' && (await pg.locator('table.skm tr.on').count()) === 1 && (await pg.locator('table.skm tr.on').getAttribute('data-who')) === '刘一鸣');
+  await pg.click('.sixrows>div[data-i="4"]'); await w(500);
+  await t('点某一维 · 本班 12 人排序弹层 + 差值', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 13 && (await pg.locator('#modal .mono.g, #modal .mono.b').count()) >= 10 && (await pg.locator('#modal').innerText()).includes('写作能力'));
+  await pg.click('#modal table tr:last-child [data-act="sk-pick"]'); await w(600);
+  await t('弹层里看画像 · 切到该员工', async () => (await pg.locator('#modal').isHidden()) && (await pg.locator('table.skm tr.on').count()) === 1 && (await pg.locator('.hexhead b').innerText()) === (await pg.locator('table.skm tr.on td b').innerText()));
+  const who1 = await pg.locator('.hexhead b').innerText();
+  await pg.click('[data-act="sk-plan"]'); await w(600);
+  await t('按短板排培养任务 · 写 plan + 通知', async () => { const p = await LS('plan'); const n = await LS('notices'); return p.some(x => x.who === who1 && x.why === '六维短板') && n.some(x => x.to === who1); });
+  await pg.click('[data-act="sk-talk"]'); await w(1600);
+  await t('写进面谈提纲 · 跳关怀与文化并出提纲', async () => { const h = await ev(() => location.hash); const c = await pg.locator('#chat').innerText(); return h.startsWith('#care') && c.includes(who1 + ' · ') && /提纲/.test(c) && (await pg.locator('#chat .doc').count()) >= 1; });
+  await t('重点关注名单已写入该员工', async () => (await main()).includes(who1));
+  await ev(() => XW.clearChat()); await go('#skills', 600);
   await pg.click('[data-act="sk-teachall"]'); await w(500);
   await t('高风险全部排带教 · 写 plan', async () => { const p = await LS('plan'); return p.filter(x => x.why === '断层风险 高').length >= 1; });
-  await clean('技能矩阵');
+  await clean('班员画像');
   await pg.screenshot({ path: SHOT + '/02_skills.png' });
   /* ---------- 培养与梯队 ---------- */
   await go('#grow', 700);
@@ -126,7 +142,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('刷新后班组画像 · 计划与确认仍在', async () => (await pg.locator('#sb a.on').textContent()).includes('班组画像') && (await pg.locator('#fixlist .tag.ok').count()) >= 5 && Object.keys(await LS('perf_ok')).length === 12);
   /* ---------- 管理者 ---------- */
   await pg.click('.rsw button[data-r="manager"]'); await w(1800);
-  await t('切到管理者 · 10 项 · 年度指标任务', async () => (await pg.locator('#sb a').count()) === 10 && (await ev(() => location.hash)) === '#goals' && (await pg.locator('table.goals tr').count()) === 14 && (await pg.locator('.card.kpi').count()) === 4);
+  await t('切到管理者 · 10 项 · 年度指标任务', async () => (await pg.locator('#sb a').count()) === 10 && (await ev(() => location.hash)) === '#goals' && (await pg.locator('table.goals tr').count()) === 13 && (await pg.locator('.card.kpi').count()) === 4);
   await t('红黄绿 · 目标值 / 摸高值 / 注意事项', async () => (await pg.locator('table.goals .rag.bad').count()) >= 2 && (await pg.locator('table.goals .rag.ok').count()) >= 5 && (await main()).includes('摸高值') && (await main()).includes('注意事项'));
   await pg.click('[data-act="goal-open"][data-k="g4"]'); await w(400);
   await t('指标下钻到班组 · 三班组行', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 4 && (await pg.locator('#modal').textContent()).includes('陈志远'));
@@ -135,7 +151,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await clean('年度指标任务');
   await pg.screenshot({ path: SHOT + '/09_goals.png' });
   await go('#compare', 700);
-  await t('横向对比 10 维 × 3 班组 · 最好 / 最需关注', async () => (await pg.locator('table.cmp tr').count()) === 11 && (await pg.locator('.cmpv.ok').count()) >= 8 && (await pg.locator('.cmpv.bad').count()) >= 5 && (await main()).includes('是否需要跨班组调配'));
+  await t('横向对比 9 维 × 3 班组 · 最好 / 最需关注', async () => (await pg.locator('table.cmp tr').count()) === 10 && (await pg.locator('.cmpv.ok').count()) >= 8 && (await pg.locator('.cmpv.bad').count()) >= 5 && (await main()).includes('是否需要跨班组调配'));
   await pg.click('[data-act="cmp-transfer"]'); await ws('.impact > div', 20000); await w(600);
   await t('发起跨班组调配 → 影响测算三格', async () => (await ev(() => location.hash)) === '#risk/sim' && (await pg.locator('.impact > div').count()) === 3);
   await pg.click('[data-act="sim-go"]'); await w(800);
