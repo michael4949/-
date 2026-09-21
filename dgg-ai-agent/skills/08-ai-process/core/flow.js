@@ -555,6 +555,22 @@
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
   function textB(s) { return { type: 'text', text: s }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  /* 各工序负荷：看板与诊断都用它，约束工序一眼看出来 */
+  function loadChart(R) {
+    return chartB({ chart: 'bar', title: '各工序 7 天负荷', unit: '%',
+      labels: R.flow.map(function (f) { return f.name; }), series: ser('负荷', R.flow.map(function (f) { return f.load7; })) });
+  }
+  /* 一天的时间去哪了：计划工时逐项减到有效切削 */
+  function lossChart(R) {
+    var l = R.loss, lb = ['计划'], dv = [l.start.value];
+    l.items.forEach(function (it) { lb.push(it.label); dv.push(it.value); });
+    lb.push('有效'); dv.push(null);
+    return chartB({ chart: 'waterfall', title: l.line.name + ' 每日工时去向', unit: ' h', labels: lb, series: ser('小时', dv) });
+  }
   function lineNameOf(R, id) { var L = R.es.lines.filter(function (l) { return l.id === id; })[0]; return L ? L.name : id; }
   function dayDiff(from, to) { return Math.round((Date.parse(to + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86400000); }
   function stdRef(row) { return 'ST-' + row.product + '|' + row.op; }
@@ -569,32 +585,53 @@
     if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, v = R.vocab, B = R.bottleneck, vr = R.verify;
     if (step === 'connect') {
-      if (!vr.pending) return '本周 ' + vr.total + ' 条' + v.report + '全部过核验，' + v.bottleneck + ' ' + B.line.name + ' 负荷 ' + k.load7 + '%。';
+      var vb = [chartB({ chart: 'donut', title: v.report + '核验', unit: ' 条', total: vr.total, labels: ['已通过', '待核验'],
+        series: ser('条数', [vr.total - vr.pending, vr.pending]) })];
+      if (!vr.pending) return { text: '本周 ' + vr.total + ' 条' + v.report + '全部过核验，' + v.bottleneck + ' ' + B.line.name + ' 负荷 ' + k.load7 + '%。', blocks: vb };
       var t0 = vr.rows.filter(function (r) { return !r.resolved; })[0];
-      return '本周 ' + vr.total + ' 条' + v.report + '里 ' + vr.pending + ' 条没过核验，' + t0.kindName + '这条：' + t0.suggest + '。';
+      return { text: '本周 ' + vr.total + ' 条' + v.report + '里 ' + vr.pending + ' 条没过核验，' + t0.kindName + '这条：' + t0.suggest + '。', blocks: vb, ref: t0.id };
     }
     if (step === 'board') {
       var a0 = openAlerts(R)[0];
-      return v.bottleneck + '在 ' + B.line.name + '，未来 7 天负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天'
-        + (a0 ? '；' + a0.ruleName + '这条待处置：' + a0.text + '。' : '。');
+      return {
+        text: v.bottleneck + '在 ' + B.line.name + '，未来 7 天负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天'
+          + (a0 ? '；' + a0.ruleName + '这条待处置：' + a0.text + '。' : '。'),
+        blocks: [loadChart(R)], ref: a0 ? a0.id : null
+      };
     }
     if (step === 'diag') {
       var l = R.loss;
-      return l.line.name + ' 每日 ' + l.start.value + ' h 计划' + v.run + '，' + v.cutting + '只剩 ' + l.end.value + ' h；'
-        + (l.primary ? l.primary.label + '每日吃掉 ' + Math.abs(l.primary.value) + ' h，占 ' + r0(100 * Math.abs(l.primary.value) / l.start.value) + '%。' : '各项损失都低于 10%。');
+      return {
+        text: l.line.name + ' 每日 ' + l.start.value + ' h 计划' + v.run + '，' + v.cutting + '只剩 ' + l.end.value + ' h；'
+          + (l.primary ? l.primary.label + '每日吃掉 ' + Math.abs(l.primary.value) + ' h，占 ' + r0(100 * Math.abs(l.primary.value) / l.start.value) + '%。' : '各项损失都低于 10%。'),
+        blocks: [lossChart(R)]
+      };
     }
     if (step === 'improve') {
       var pv = R.preview, rec = recCard(R);
-      return '方案 ' + rec.key + ' ' + rec.name + ' 把' + v.queue + '从 ' + pv.base.metrics.queueDays + ' 天压到 ' + rec.result.metrics.queueDays + ' 天，不加班，' + v.capacity + '多 ' + fmtN(rec.result.metrics.weeklyUnits - pv.base.metrics.weeklyUnits) + ' ' + v.unit + '。';
+      return {
+        text: '方案 ' + rec.key + ' ' + rec.name + ' 把' + v.queue + '从 ' + pv.base.metrics.queueDays + ' 天压到 ' + rec.result.metrics.queueDays + ' 天，不加班，' + v.capacity + '多 ' + fmtN(rec.result.metrics.weeklyUnits - pv.base.metrics.weeklyUnits) + ' ' + v.unit + '。',
+        blocks: [chartB({ chart: 'column', title: '各方案' + v.queue + '（天）', unit: ' 天',
+          labels: ['现状'].concat(pv.cards.map(function (c) { return c.key; })),
+          series: ser('天数', [pv.base.metrics.queueDays].concat(pv.cards.map(function (c) { return c.result.metrics.queueDays; }))) })],
+        ref: rec.key
+      };
     }
     if (step === 'exec') {
       var dp = R.dispatch;
-      return '明日 ' + dp.need + ' 个工位已排 ' + dp.filled + ' 人，' + v.support + ' ' + dp.support + ' 人；' + dp.overLimitNoOt + ' 人本月加班到 ' + d.otCap.month + ' h 上限，不再排加班。';
+      return {
+        text: '明日 ' + dp.need + ' 个工位已排 ' + dp.filled + ' 人，' + v.support + ' ' + dp.support + ' 人；' + dp.overLimitNoOt + ' 人本月加班到 ' + d.otCap.month + ' h 上限，不再排加班。',
+        blocks: [chartB({ chart: 'progress', title: v.op + '人员覆盖', unit: '%', max: 200,
+          labels: R.skills.coverage.slice(0, 6).map(function (c) { return c.op; }),
+          series: ser('覆盖', R.skills.coverage.slice(0, 6).map(function (c) { return r0(c.ratio * 100); })) })]
+      };
     }
     if (step === 'report') {
       var W = R.weekly, s0 = W.series[0], s1 = W.series[W.series.length - 1];
-      if (R.ledger.rows.length) return '本周采纳 ' + R.ledger.rows.length + ' 条建议，预计省 ' + k.savedH + ' h，折算 ' + fmtN(R.ledger.totals.units) + ' ' + v.unit + '。';
-      return '有效利用率 12 周从 ' + s0.effUtil + '% 走到 ' + s1.effUtil + '%，' + v.flowDays + ' ' + s0.flowDays + ' → ' + s1.flowDays + ' 天；增效账本周还是空的。';
+      var wb = [chartB({ chart: 'line', title: '有效利用率 12 周', unit: '%',
+        labels: W.series.map(function (x) { return x.label; }), series: ser('有效利用率', W.series.map(function (x) { return x.effUtil; })) })];
+      if (R.ledger.rows.length) return { text: '本周采纳 ' + R.ledger.rows.length + ' 条建议，预计省 ' + k.savedH + ' h，折算 ' + fmtN(R.ledger.totals.units) + ' ' + v.unit + '。', blocks: wb };
+      return { text: '有效利用率 12 周从 ' + s0.effUtil + '% 走到 ' + s1.effUtil + '%，' + v.flowDays + ' ' + s0.flowDays + ' → ' + s1.flowDays + ' 天；增效账本周还是空的。', blocks: wb };
     }
     return null;
   }
@@ -658,7 +695,7 @@
     /* —— 为什么是约束（六屏都答，排在点名产线之前） —— */
     if (has(q, ['为什么', '凭什么', '怎么定']) && has(q, ['约束', '瓶颈', B.line.name, '它'])) {
       return { text: B.line.name + ' 未来 7 天负荷 ' + B.load7 + '%，' + v.queue + ' ' + B.queueDays + ' 天，在全线居前；它每释放 1 h ≈ ' + fmtN(B.unitPerHour) + ' ' + v.unit + '，是全线产出的分母。负荷平衡率 ' + B.balanceRate + '%。',
-        blocks: [tableB([v.op, '负荷', v.wip], R.flow.map(function (f) { return [cut(f.name, 6), f.load7 + '%', fmtN(f.wipUnits)]; }))],
+        blocks: [loadChart(R), tableB([v.op, '负荷', v.wip], R.flow.map(function (f) { return [cut(f.name, 6), f.load7 + '%', fmtN(f.wipUnits)]; }))],
         ref: B.line.id, act: step === 'board' ? { type: 'open', panel: 'stage', ref: B.line.id } : { type: 'goto', step: 'board', ref: B.line.id } };
     }
     /* —— 点名某条产线 / 工序 —— */
@@ -668,7 +705,7 @@
       var st = R.flow.filter(function (f) { return f.lines.some(function (l) { return l.id === lineHit.id; }); })[0];
       var qd = queueDaysOf(R.S, [lineHit.id]);
       return { text: lineHit.name + '：未来 7 天负荷 ' + lineHit.load7 + '%，' + v.queue + ' ' + qd + ' 天' + (lineHit.id === B.line.id ? '，是本周' + v.bottleneck : '，非约束') + (st ? '；' + v.op + ' ' + st.name + '，标准 ' + st.stdText + '，实际 ' + st.actText : '') + '。',
-        ref: lineHit.id, act: { type: 'set', path: 'line', value: lineHit.id } };
+        blocks: [loadChart(R)], ref: lineHit.id, act: { type: 'set', path: 'line', value: lineHit.id } };
     }
     /* —— 方案 —— */
     m = q.match(/方案\s*([ABCD])|^([ABCD])\s*方案|([ABCD])\s*(?:方案|选项)/i);
@@ -676,7 +713,10 @@
       var key = (m[1] || m[2] || m[3]).toUpperCase();
       var pv = R.preview, cd = pv.cards.filter(function (c) { return c.key === key; })[0];
       if (cd) return { text: key + ' ' + cd.name + '：' + v.queue + ' ' + pv.base.metrics.queueDays + ' → ' + cd.result.metrics.queueDays + ' 天，' + v.capacity + ' ' + fmtN(pv.base.metrics.weeklyUnits) + ' → ' + fmtN(cd.result.metrics.weeklyUnits) + ' ' + v.unit + '，加班 ' + cd.result.metrics.otHours + ' h/周' + (cd.result.cost ? '，费用 ' + fmtN(cd.result.cost) + ' 元 · 预计' : '') + '。责任岗位 ' + cd.roleName + '。',
-        blocks: [tagsB(cd.result.notes.slice(0, 2).map(function (x) { return cut(x, 24); }))],
+        blocks: [chartB({ chart: 'column', title: '各方案' + v.queue + '（天）', unit: ' 天',
+          labels: ['现状'].concat(pv.cards.map(function (c) { return c.key; })),
+          series: ser('天数', [pv.base.metrics.queueDays].concat(pv.cards.map(function (c) { return c.result.metrics.queueDays; }))) }),
+          tagsB(cd.result.notes.slice(0, 2).map(function (x) { return cut(x, 24); }))],
         act: { type: 'set', path: 'pick', value: key } };
     }
     /* —— 调参数 —— */
@@ -685,16 +725,23 @@
       var mv = Math.max(10, Math.min(45, Math.round(parseFloat(m[1]) / 5) * 5));
       var pv2 = preview(d, lib, null, { setupMin: mv }, R), ca = pv2.cards.filter(function (c) { return c.key === 'A'; })[0];
       return { text: '停机' + v.setup + '时间按 ' + mv + ' min 重算：A ' + ca.name + ' 的' + v.queue + ' ' + pv2.base.metrics.queueDays + ' → ' + ca.result.metrics.queueDays + ' 天，' + v.capacity + ' ' + fmtN(ca.result.metrics.weeklyUnits) + ' ' + v.unit + '。参数已改好。',
+        blocks: [chartB({ chart: 'column', title: '改参数前后的' + v.queue, unit: ' 天', labels: ['现状', '按 ' + mv + ' min'],
+          series: ser('天数', [pv2.base.metrics.queueDays, ca.result.metrics.queueDays]) })],
         act: { type: 'set', path: 'params.setupMin', value: mv } };
     }
 
     if (step === 'connect') {
       if (has(q, ['待核验', '几条', '没过', '核验'])) return { text: '本周 ' + vr.total + ' 条' + v.report + '，待核验 ' + vr.pending + ' 条：' + vr.rows.filter(function (r) { return !r.resolved; }).map(function (r) { return r.kindName; }).join('、') + '。',
-        blocks: [tableB(['问题', v.report, 'AI 建议值'], vr.rows.slice(0, 5).map(function (r) { return [r.kindName, r.reportId || '—', cut(r.suggest, 14)]; }))],
+        blocks: [chartB({ chart: 'donut', title: v.report + '核验', unit: ' 条', total: vr.total, labels: ['已通过', '待核验'],
+          series: ser('条数', [vr.total - vr.pending, vr.pending]) }),
+          tableB(['问题', v.report, 'AI 建议值'], vr.rows.slice(0, 5).map(function (r) { return [r.kindName, r.reportId || '—', cut(r.suggest, 14)]; }))],
         ref: vr.rows[0] ? (vr.rows[0].reportId || vr.rows[0].id) : null };
       if (has(q, ['漏报', '补', '怎么补'])) {
         var ms = vr.rows.filter(function (r) { return r.kind === 'missing'; })[0];
         if (ms) return { text: ms.text + '。AI 建议：' + ms.suggest + '。确认后只补这一条，其余不动。', ref: ms.id,
+          blocks: [chartB({ chart: 'column', title: '核验问题分类', unit: ' 条',
+            labels: ['漏报', '偏差', '守恒', '重叠', '重复'],
+            series: ser('条数', [vr.counts.missing, vr.counts.dev, vr.counts.conserve, vr.counts.overlap, vr.counts.dup]) })],
           act: ms.resolved ? null : { type: 'apply', action: 'confirm-report', input: { id: ms.id } } };
       }
       if (has(q, ['直连', '来源', '导入', '同步'])) {
@@ -703,47 +750,71 @@
           blocks: [tableB(['来源', '方式', '条数'], d.sources.map(function (s) { return [cut(s.name, 6), s.mode === 'direct' ? '直连' : '导入', fmtN(s.rows)]; }))] };
       }
       if (has(q, ['全部确认', '进看板', '开始', '进入'])) return { text: '确认 ' + vr.pending + ' 条后进' + v.flowName + '看板：' + v.bottleneck + ' ' + B.line.name + '，负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天。',
+        blocks: [loadChart(R)],
         act: { type: 'apply', action: 'confirm-all-reports', input: {} } };
     }
 
     if (step === 'board') {
-      if (has(q, ['排队', '等待', '多少天'])) return { text: v.queue + ' ' + k.queueDays + ' 天（' + v.bottleneck + ' ' + B.line.name + ' 前）；' + v.flowDays + ' ' + R.weekly.current.flowDays + ' 天。' };
+      if (has(q, ['排队', '等待', '多少天'])) return { text: v.queue + ' ' + k.queueDays + ' 天（' + v.bottleneck + ' ' + B.line.name + ' 前）；' + v.flowDays + ' ' + R.weekly.current.flowDays + ' 天。',
+        blocks: [chartB({ chart: 'line', title: v.flowDays + ' 12 周', unit: ' 天',
+          labels: R.weekly.series.map(function (x) { return x.label; }), series: ser('天数', R.weekly.series.map(function (x) { return x.flowDays; })) })] };
       if (has(q, ['异常', '处置', '先处理', '哪一条'])) {
         var op0 = topAlert(R);
         if (!op0) return { text: '本周 ' + R.alerts.length + ' 起异常已全部处置。' };
         return { text: '先处置 ' + op0.id + ' ' + op0.ruleName + '：' + op0.text + '。根因 ' + op0.cause + '，' + op0.roleName + ' ' + op0.action + (op0.savedH ? '，预计回收 ' + op0.savedH + ' h' : '') + '。',
-          blocks: [tableB(['规则', '根因', '预计'], openAlerts(R).slice(0, 4).map(function (a) { return [cut(a.ruleName, 8), cut(a.cause, 10), (a.savedH || 0) + ' h']; }))],
+          blocks: [chartB({ chart: 'bar', title: '各条异常预计回收', unit: ' h',
+            labels: openAlerts(R).slice(0, 5).map(function (a) { return cut(a.ruleName, 6); }),
+            series: ser('小时', openAlerts(R).slice(0, 5).map(function (a) { return a.savedH || 0; })) }),
+            tableB(['规则', '根因', '预计'], openAlerts(R).slice(0, 4).map(function (a) { return [cut(a.ruleName, 8), cut(a.cause, 10), (a.savedH || 0) + ' h']; }))],
           ref: op0.id, act: { type: 'apply', action: 'handle-exception', input: { id: op0.id } } };
       }
       if (has(q, ['在制', '超限', '缓冲', '投料', '释放'])) {
         var b2 = R.buffer;
         return { text: '瓶颈前' + v.wip + '今日 ' + b2.today + ' h、明日 ' + b2.hours + ' h，上限 ' + b2.max + ' h（' + b2.capDays + ' 天）' + (b2.hours >= b2.max ? '，明日超限' : '，在上限内') + '。按节拍' + v.release + '后 ' + b2.release.line.name + ' 明日计划 ' + b2.release.before + ' → ' + b2.release.after + ' h。',
+          blocks: [chartB({ chart: 'column', title: '瓶颈前' + v.wip + '（h）', unit: ' h', labels: ['今日', '明日', '上限'],
+            series: ser('小时', [b2.today, b2.hours, b2.max]) })],
           act: { type: 'goto', step: 'diag' } };
       }
-      if (has(q, ['合格率', '质量'])) { var qa = R.alerts.filter(function (a) { return a.kind === 'quality'; })[0]; return { text: v.fpy + ' ' + k.fpy + '%，12 周基线 ' + R.weekly.current.fpy + '%。' + (qa ? qa.text + '。' : '') }; }
-      if (has(q, ['加班'])) return { text: '本周加班 ' + k.otHours + ' h，' + R.dispatch.overLimitNoOt + ' 人本月已到 ' + d.otCap.month + ' h 上限。', act: { type: 'goto', step: 'exec' } };
+      if (has(q, ['合格率', '质量'])) { var qa = R.alerts.filter(function (a) { return a.kind === 'quality'; })[0]; return { text: v.fpy + ' ' + k.fpy + '%，12 周基线 ' + R.weekly.current.fpy + '%。' + (qa ? qa.text + '。' : ''),
+        blocks: [chartB({ chart: 'line', title: v.fpy + ' 12 周', unit: '%',
+          labels: R.weekly.series.map(function (x) { return x.label; }), series: ser(v.fpy, R.weekly.series.map(function (x) { return x.fpy; })) })] }; }
+      if (has(q, ['加班'])) return { text: '本周加班 ' + k.otHours + ' h，' + R.dispatch.overLimitNoOt + ' 人本月已到 ' + d.otCap.month + ' h 上限。',
+        blocks: [chartB({ chart: 'line', title: '加班 12 周', unit: ' h',
+          labels: R.weekly.series.map(function (x) { return x.label; }), series: ser('小时', R.weekly.series.map(function (x) { return x.otHours; })) })],
+        act: { type: 'goto', step: 'exec' } };
     }
 
     if (step === 'diag') {
       var l2 = R.loss;
       if (has(q, ['时间', '花在', '损失', '构成'])) return { text: l2.line.name + ' 每日 ' + l2.start.value + ' h 计划' + v.run + '，' + v.cutting + ' ' + l2.end.value + ' h。' + l2.items.slice(0, 4).map(function (x) { return x.label + ' ' + Math.abs(x.value) + ' h'; }).join('，') + '。可用率 ' + l2.availability + '%，性能率 ' + l2.performance + '%。',
-        blocks: [tableB(['项', 'h/日'], l2.items.map(function (x) { return [x.label, Math.abs(x.value)]; }))] };
+        blocks: [lossChart(R)] };
       if (has(q, ['换型', '合批', '能省'])) return { text: v.setup + ' ' + R.sequence.before.changeovers + ' 次 ' + r1(R.sequence.before.minutes / 60) + ' h/日，合批后 ' + R.sequence.after.changeovers + ' 次 ' + r1(R.sequence.after.minutes / 60) + ' h/日，省 ' + R.sequence.savedHPerDay + ' h/日 ≈ ' + fmtN(r0(R.sequence.savedHPerDay / (B.hpu || 1))) + ' ' + v.unit + '/日。',
+        blocks: [chartB({ chart: 'column', title: v.setup + '合批前后', unit: ' h/日', labels: ['现在', '合批后'],
+          series: ser('小时', [r1(R.sequence.before.minutes / 60), r1(R.sequence.after.minutes / 60)]) })],
         act: { type: 'goto', step: 'improve' } };
       if (has(q, ['标准工时', '过期', '校准'])) {
         var ex = expiredStd(R);
         if (!ex.length) return { text: '标准工时与 12 周中位一致，暂无过期项。' };
         return { text: ex.length + ' 项标准工时过期：' + ex.map(function (c) { return c.productName + ' ' + c.op + ' ' + c.std + ' → ' + c.suggest + ' h（' + (c.dev > 0 ? '+' : '') + c.dev + '%）'; }).join('；') + '。采纳后排程与在制预测重算。',
-          blocks: [tableB(['产品', v.op, '偏差'], ex.map(function (c) { return [cut(c.productName, 8), c.op, (c.dev > 0 ? '+' : '') + c.dev + '%']; }))],
+          blocks: [chartB({ chart: 'column', title: '标准工时偏差', unit: '%',
+            labels: ex.map(function (c) { return cut(c.op, 4); }), series: ser('偏差', ex.map(function (c) { return c.dev; })) }),
+            tableB(['产品', v.op, '偏差'], ex.map(function (c) { return [cut(c.productName, 8), c.op, (c.dev > 0 ? '+' : '') + c.dev + '%']; }))],
           ref: stdRef(ex[0]), act: { type: 'apply', action: 'adopt-std', input: { product: ex[0].product, op: ex[0].op } } };
       }
       if (has(q, ['投料', '节拍', '释放', '缓冲'])) {
         var b3 = R.buffer;
         return { text: '明日允许' + v.release + ' ' + fmtN(b3.release.allowedUnits) + ' ' + v.unit + '，' + b3.release.line.name + ' 计划 ' + b3.release.before + ' → ' + b3.release.after + ' h，' + v.wip + '天数 ' + b3.wipDays.before + ' → ' + b3.wipDays.after + ' 天，释放人时 ' + fmtH(b3.release.freedHours) + '/日。',
+          blocks: [chartB({ chart: 'column', title: v.release + '前后', unit: ' h', labels: ['现计划', '按节拍', '上限'],
+            series: ser('小时', [b3.release.before, b3.release.after, b3.max]) })],
           act: d.releasePlan ? null : { type: 'apply', action: 'apply-release', input: {} } };
       }
-      if (has(q, ['等待', '等料', '等检'])) return { text: v.wait + '构成：' + l2.waitDist.map(function (x) { return x.label + ' ' + x.value + ' h'; }).join('，') + '。' + v.waitReasons[2] + '可由' + v.firstPieceCheck + '前移回收 80%。' };
-      if (has(q, ['利用率', '可用率', '性能率'])) return { text: '可用率 ' + l2.availability + '%，性能率 ' + l2.performance + '%，有效利用率 ' + l2.effUtil + '%；12 周 ' + l2.weekly[0].effUtil + '% → ' + l2.weekly[l2.weekly.length - 1].effUtil + '%。' };
+      if (has(q, ['等待', '等料', '等检'])) return { text: v.wait + '构成：' + l2.waitDist.map(function (x) { return x.label + ' ' + x.value + ' h'; }).join('，') + '。' + v.waitReasons[2] + '可由' + v.firstPieceCheck + '前移回收 80%。',
+        blocks: [chartB({ chart: 'bar', title: v.wait + '构成', unit: ' h',
+          labels: l2.waitDist.map(function (x) { return x.label; }), series: ser('小时', l2.waitDist.map(function (x) { return x.value; })) })] };
+      if (has(q, ['利用率', '可用率', '性能率'])) return { text: '可用率 ' + l2.availability + '%，性能率 ' + l2.performance + '%，有效利用率 ' + l2.effUtil + '%；12 周 ' + l2.weekly[0].effUtil + '% → ' + l2.weekly[l2.weekly.length - 1].effUtil + '%。',
+        blocks: [chartB({ chart: 'line', title: '有效利用率与可用率 12 周', unit: '%',
+          labels: l2.weekly.map(function (x) { return String(x.week).slice(5); }),
+          series: [{ name: '有效利用率', data: l2.weekly.map(function (x) { return x.effUtil; }) }, { name: '可用率', data: l2.weekly.map(function (x) { return x.availability; }) }] })] };
     }
 
     if (step === 'improve') {
@@ -751,47 +822,66 @@
       if (has(q, ['哪个方案', '推荐', '选哪', '好'])) {
         var rc = recCard(R);
         return { text: '推荐 ' + rc.key + ' ' + rc.name + '：' + v.queue + ' ' + pv4.base.metrics.queueDays + ' → ' + rc.result.metrics.queueDays + ' 天，加班 ' + rc.result.metrics.otHours + ' h/周，费用 0。组合 A+B+C 能到 ' + pv4.combo.result.metrics.queueDays + ' 天。',
-          blocks: [tableB(['方案', v.queue, '加班'], pv4.cards.map(function (c) { return [c.key, c.result.metrics.queueDays + ' 天', c.result.metrics.otHours + ' h']; }))],
+          blocks: [chartB({ chart: 'column', title: '各方案' + v.queue + '（天）', unit: ' 天',
+            labels: ['现状'].concat(pv4.cards.map(function (c) { return c.key; })).concat(['A+B+C']),
+            series: ser('天数', [pv4.base.metrics.queueDays].concat(pv4.cards.map(function (c) { return c.result.metrics.queueDays; })).concat([pv4.combo.result.metrics.queueDays])) }),
+            tableB(['方案', v.queue, '加班'], pv4.cards.map(function (c) { return [c.key, c.result.metrics.queueDays + ' 天', c.result.metrics.otHours + ' h']; }))],
           act: { type: 'set', path: 'pick', value: pv4.recommended } };
       }
       if (has(q, ['几个人', '支援', '多能工'])) {
         var cb = pv4.cards.filter(function (c) { return c.key === 'B'; })[0];
         return { text: cb.name + '：' + cb.result.notes.join('；') + '。责任岗位 ' + cb.roleName + '，' + v.queue + ' ' + pv4.base.metrics.queueDays + ' → ' + cb.result.metrics.queueDays + ' 天。',
+          blocks: [chartB({ chart: 'column', title: '现状与 B 方案', unit: ' 天', labels: ['现状', 'B 方案'],
+            series: ser('天数', [pv4.base.metrics.queueDays, cb.result.metrics.queueDays]) })],
           act: { type: 'set', path: 'pick', value: 'B' } };
       }
       if (has(q, ['换型', '合批', '顺序'])) {
         var q4 = R.sequence;
         return { text: v.setup + ' ' + q4.before.changeovers + ' 次 ' + r1(q4.before.minutes / 60) + ' h → ' + q4.after.changeovers + ' 次 ' + r1(q4.after.minutes / 60) + ' h，省 ' + q4.savedHPerDay + ' h/日；交期约束' + (q4.dueOk ? '满足' : '未满足') + '。',
-          blocks: [tableB(['序', v.lot, v.setup], q4.after.rows.slice(0, 5).map(function (r) { return [r.seq, r.id, (r.setupMin || 0) + ' min']; }))],
+          blocks: [chartB({ chart: 'column', title: v.setup + '合批前后', unit: ' h/日', labels: ['现在', '合批后'],
+            series: ser('小时', [r1(q4.before.minutes / 60), r1(q4.after.minutes / 60)]) }),
+            tableB(['序', v.lot, v.setup], q4.after.rows.slice(0, 5).map(function (r) { return [r.seq, r.id, (r.setupMin || 0) + ' min']; }))],
           act: d.jobSeq ? null : { type: 'apply', action: 'apply-sequence', input: {} } };
       }
       if (has(q, ['立项', '落地', '执行'])) {
         var kk = [pv4.recommended];
         return { text: '立项 ' + kk.join(' + ') + '，节点按天排期，进执行与' + v.dispatch.replace('单', '') + '跟踪。',
+          blocks: [chartB({ chart: 'column', title: '各方案' + v.queue + '（天）', unit: ' 天',
+            labels: ['现状'].concat(pv4.cards.map(function (c) { return c.key; })),
+            series: ser('天数', [pv4.base.metrics.queueDays].concat(pv4.cards.map(function (c) { return c.result.metrics.queueDays; }))) })],
           act: { type: 'apply', action: 'commit-project', input: { keys: kk } } };
       }
     }
 
     if (step === 'exec') {
       var dp2 = R.dispatch;
-      if (has(q, ['缺人', '未覆盖', '够不够', '需人'])) return { text: '明日需 ' + dp2.need + ' 人，已派 ' + dp2.filled + ' 人，' + v.support + ' ' + dp2.support + ' 人' + (dp2.supportEmps.length ? '（' + dp2.supportEmps.join('、') + '）' : '') + '，未覆盖 ' + sum(dp2.unmet, function (u) { return u.missing; }) + ' 人。' };
+      if (has(q, ['缺人', '未覆盖', '够不够', '需人'])) return { text: '明日需 ' + dp2.need + ' 人，已派 ' + dp2.filled + ' 人，' + v.support + ' ' + dp2.support + ' 人' + (dp2.supportEmps.length ? '（' + dp2.supportEmps.join('、') + '）' : '') + '，未覆盖 ' + sum(dp2.unmet, function (u) { return u.missing; }) + ' 人。',
+        blocks: [chartB({ chart: 'column', title: '明日' + v.dispatch.replace('单', ''), unit: ' 人', labels: ['需要', '已派', v.support, '未覆盖'],
+          series: ser('人数', [dp2.need, dp2.filled, dp2.support, sum(dp2.unmet, function (u) { return u.missing; })]) })] };
       if (has(q, ['加班上限', '上限', '谁在加班', '超限'])) {
         var over = dp2.rows.filter(function (r) { return r.overtimeH >= d.otCap.month; });
         return { text: dp2.overLimitNoOt + ' 人本月加班到 ' + d.otCap.month + ' h 上限，明日不排加班；本周加班 ' + dp2.otWeek.before + ' → ' + dp2.otWeek.after + ' h。',
-          blocks: over.length ? [tableB(['E-编号', v.line, '本月加班'], over.slice(0, 5).map(function (r) { return [r.emp, cut(r.lineName, 8), r.overtimeH + ' h']; }))] : null,
+          blocks: (over.length ? [chartB({ chart: 'bar', title: '本月加班', unit: ' h',
+            labels: over.slice(0, 6).map(function (r) { return r.emp; }), series: ser('小时', over.slice(0, 6).map(function (r) { return r.overtimeH; })), note: '上限 ' + d.otCap.month + ' h' })] : [])
+            .concat(over.length ? [tableB(['E-编号', v.line, '本月加班'], over.slice(0, 5).map(function (r) { return [r.emp, cut(r.lineName, 8), r.overtimeH + ' h']; }))] : []),
           ref: over.length ? over[0].emp : null };
       }
       if (has(q, ['落后', '看板', '达成', '计划'])) {
         var bh = R.planHit.filter(function (p) { return p.behind; });
-        if (!bh.length) return { text: '各线按计划推进，' + R.planHit.map(function (p) { return p.lineName + ' ' + p.pct + '%'; }).join('，') + '。' };
+        var hitChart = chartB({ chart: 'progress', title: '各线计划达成', unit: '%', max: 100,
+          labels: R.planHit.map(function (p) { return cut(p.lineName, 6); }), series: ser('达成', R.planHit.map(function (p) { return p.pct; })) });
+        if (!bh.length) return { text: '各线按计划推进，' + R.planHit.map(function (p) { return p.lineName + ' ' + p.pct + '%'; }).join('，') + '。', blocks: [hitChart] };
         return { text: bh.map(function (p) { return p.lineName + ' ' + p.pct + '%（' + fmtN(p.actual) + ' / ' + fmtN(p.target) + '）'; }).join('；') + ' 落后，已进异常预警。',
-          blocks: [tableB([v.line, '达成', '实际/计划'], R.planHit.map(function (p) { return [cut(p.lineName, 8), p.pct + '%', fmtN(p.actual) + '/' + fmtN(p.target)]; }))] };
+          blocks: [hitChart, tableB([v.line, '达成', '实际/计划'], R.planHit.map(function (p) { return [cut(p.lineName, 8), p.pct + '%', fmtN(p.actual) + '/' + fmtN(p.target)]; }))] };
       }
       if (has(q, ['单点', '技能', '带教', '矩阵'])) {
         var sg2 = R.skills.coverage.filter(function (c) { return c.single; });
         var p0 = R.skills.pairs[0];
         return { text: sg2.length + ' 个' + v.op + '是单点：' + sg2.map(function (c) { return c.op + '（2 级以上 ' + c.qualified + ' 人 / 每日需 ' + c.need + ' 人，覆盖度 ' + c.ratio + '）'; }).join('；') + '。覆盖度低于 1.5 算单点。',
-          blocks: R.skills.pairs.length ? [tagsB(R.skills.pairs.map(function (p) { return p.trainee + ' 由 ' + p.mentor + ' 带教 ' + p.op; }))] : null,
+          blocks: [chartB({ chart: 'progress', title: v.op + '人员覆盖', unit: '%', max: 200,
+            labels: R.skills.coverage.slice(0, 6).map(function (c) { return c.op; }),
+            series: ser('覆盖', R.skills.coverage.slice(0, 6).map(function (c) { return r0(c.ratio * 100); })), note: '低于 150% 算单点' })]
+            .concat(R.skills.pairs.length ? [tagsB(R.skills.pairs.map(function (p) { return p.trainee + ' 由 ' + p.mentor + ' 带教 ' + p.op; }))] : []),
           ref: p0 ? p0.trainee : null,
           act: (p0 && !p0.added) ? { type: 'apply', action: 'add-training', input: { trainee: p0.trainee, op: p0.op } } : null };
       }
@@ -799,9 +889,13 @@
         var md = R.maintenance.filter(function (x) { return !x.scheduled; });
         if (!md.length) return { text: v.maint + '已全部排入窗口。' };
         return { text: md.length + ' 台到期：' + md.map(function (x) { return x.machine + '（' + cut(x.reasons[0], 16) + '）'; }).join('；') + '。建议窗口 ' + (md[0].window ? md[0].window.label : '—') + '。',
+          blocks: [chartB({ chart: 'bar', title: v.maint + '时长', unit: ' min',
+            labels: md.map(function (x) { return x.machine; }), series: ser('分钟', md.map(function (x) { return x.minutes || 0; })) })],
           ref: md[0].machine, act: md[0].window ? { type: 'apply', action: 'schedule-maint', input: { machine: md[0].machine } } : null };
       }
       if (has(q, ['下发', '生成', '派工'])) return { text: v.dispatch + ' ' + dp2.id + '：' + dp2.filled + ' 人，' + v.support + ' ' + dp2.support + ' 人，未覆盖 ' + dp2.unmet.length + '。',
+        blocks: [chartB({ chart: 'column', title: '明日' + v.dispatch.replace('单', ''), unit: ' 人', labels: ['需要', '已派', v.support, '未覆盖'],
+          series: ser('人数', [dp2.need, dp2.filled, dp2.support, sum(dp2.unmet, function (u) { return u.missing; })]) })],
         act: d.dispatch ? null : { type: 'apply', action: 'apply-dispatch', input: {} } };
     }
 
@@ -809,15 +903,25 @@
       var W2 = R.weekly, L2 = R.ledger;
       if (has(q, ['省了', '多少', '增效', '节省'])) {
         if (!L2.rows.length) return { text: '本周还没有采纳记录，增效账是空的。每采纳一条 AI 建议按小时入账，' + v.bottleneck + '工时再折算' + v.unit + '。',
+          blocks: [chartB({ chart: 'bar', title: '各条异常预计回收', unit: ' h',
+            labels: openAlerts(R).slice(0, 5).map(function (a) { return cut(a.ruleName, 6); }),
+            series: ser('小时', openAlerts(R).slice(0, 5).map(function (a) { return a.savedH || 0; })) })],
           act: { type: 'goto', step: 'board' } };
         return { text: '本周采纳 ' + L2.rows.length + ' 条，预计省 ' + k.savedH + ' h（' + v.bottleneck + ' ' + L2.totals.bottleneckH + ' h、其他 ' + L2.totals.nonBottleneckH + ' h），折算 ' + fmtN(L2.totals.units) + ' ' + v.unit + '，加班少 ' + L2.totals.otH + ' h。',
-          blocks: [tableB(['类别', '节省'], L2.byKind.map(function (x) { return [x.label, x.value + ' h']; }))] };
+          blocks: [chartB({ chart: 'bar', title: '按类别节省', unit: ' h',
+            labels: L2.byKind.map(function (x) { return cut(x.label, 6); }), series: ser('小时', L2.byKind.map(function (x) { return x.value; })) }),
+            tableB(['类别', '节省'], L2.byKind.map(function (x) { return [x.label, x.value + ' h']; }))] };
       }
       if (has(q, ['走势', '趋势', '12 周', '利用率'])) return { text: '有效利用率 12 周 ' + W2.series[0].effUtil + '% → ' + W2.series[W2.series.length - 1].effUtil + '%；' + v.flowDays + ' ' + W2.series[0].flowDays + ' → ' + W2.series[W2.series.length - 1].flowDays + ' 天；加班 ' + W2.series[0].otHours + ' → ' + W2.series[W2.series.length - 1].otHours + ' h。',
-        blocks: [tableB(['周', '利用率', '加班'], W2.series.slice(-4).map(function (s) { return [s.label, s.effUtil + '%', s.otHours + ' h']; }))] };
+        blocks: [chartB({ chart: 'line', title: '有效利用率 12 周', unit: '%',
+          labels: W2.series.map(function (x) { return x.label; }), series: ser('有效利用率', W2.series.map(function (x) { return x.effUtil; })) }),
+          tableB(['周', '利用率', '加班'], W2.series.slice(-4).map(function (s) { return [s.label, s.effUtil + '%', s.otHours + ' h']; }))] };
       if (has(q, ['发给谁', '收件', '微信', '发送'])) return { text: '收件人：' + W2.recipients.join('、') + '。周报是微信文本版，扫码接收。',
+        blocks: [chartB({ chart: 'line', title: '周产出 12 周', unit: ' ' + v.unit,
+          labels: W2.series.map(function (x) { return x.label; }), series: ser('产出', W2.series.map(function (x) { return x.output; })) })],
         act: { type: 'open', panel: 'wechat' } };
-      if (has(q, ['回看板', '看板'])) return { text: v.bottleneck + ' ' + B.line.name + '，负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天。', act: { type: 'goto', step: 'board' } };
+      if (has(q, ['回看板', '看板'])) return { text: v.bottleneck + ' ' + B.line.name + '，负荷 ' + k.load7 + '%，' + v.queue + ' ' + k.queueDays + ' 天。',
+        blocks: [loadChart(R)], act: { type: 'goto', step: 'board' } };
     }
 
     /* —— 跨屏通用指标 —— */

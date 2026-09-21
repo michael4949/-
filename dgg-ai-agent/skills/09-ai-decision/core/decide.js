@@ -312,6 +312,28 @@
   function kvB(rows) { return { type: 'kv', rows: rows }; }
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  function wan(n) { return Math.round((+n || 0) / 1000) / 10; }         /* 元 → 万元，留一位 */
+  /* 某个指标节点的 12 个月走势 */
+  function trendChart(R, id, title) {
+    var n = R.tree.nodes[id];
+    if (!n || !n.values) return null;
+    var money = n.unit === '元', k = money ? wan : function (x) { return Math.round((+x || 0) * 100) / 100; };
+    return chartB({ chart: 'line', title: title || (n.name + ' 12 个月'), unit: money ? ' 万元' : (n.unit ? ' ' + n.unit : ''),
+      labels: R.data.months.map(function (m) { return m.slice(5) + '月'; }), series: ser(n.name, n.values.map(k)) });
+  }
+  /* 归因瀑布：上期 → 各因子 → 本期 */
+  function attrChart(A) {
+    var ls = A.leaves.slice(0, 5), lb = ['上期'], dv = [wan(A.from)];
+    ls.forEach(function (x) { lb.push(cut(x.name, 5)); dv.push(wan(x.value)); });
+    var rest = A.delta - ls.reduce(function (t, x) { return t + x.value; }, 0);
+    if (Math.abs(rest) > 1) { lb.push('其他'); dv.push(wan(rest)); }
+    lb.push('本期'); dv.push(null);
+    return chartB({ chart: 'waterfall', title: A.name + ' 变动归因', unit: ' 万元', labels: lb, series: ser('万元', dv) });
+  }
   function srcName(s) { return String(s.name || '').split(' · ')[0]; }
   function pct0(v) { return Math.round(v * 100); }
   function pct1(v) { return Math.round(v * 1000) / 10; }
@@ -390,36 +412,70 @@
     if (step === 'connect') {
       var rows = d.sources.reduce(function (t, s) { return t + s.rows; }, 0);
       var t0 = (d.sources[0] || {}).lastSync || d.today;
-      return t0.slice(-5) + ' ' + d.sources.length + ' 个模块同步了 ' + fmtN(rows) + ' 条，' + lib.metricTree.nodes.length + ' 个指标节点里 ' + T.counts.risk + ' 项亮红、' + T.counts.watch + ' 项贴着容差。';
+      return {
+        text: t0.slice(-5) + ' ' + d.sources.length + ' 个模块同步了 ' + fmtN(rows) + ' 条，' + lib.metricTree.nodes.length + ' 个指标节点里 ' + T.counts.risk + ' 项亮红、' + T.counts.watch + ' 项贴着容差。',
+        blocks: [chartB({ chart: 'donut', title: '指标节点核对', unit: ' 项', total: T.counts.ok + T.counts.watch + T.counts.risk,
+          labels: ['正常', '贴容差', '亮红'], series: ser('项数', [T.counts.ok, T.counts.watch, T.counts.risk]) })]
+      };
     }
     if (step === 'board') {
-      return '经营利润 ' + fmtW(k.profit) + '，' + devOf(N.profit).text
-        + (A.hurts.length ? '；缺口主要落在 ' + A.hurts.slice(0, 2).map(function (x) { return x.name + ' ' + x.valueText; }).join('、') : '；各因子都在容差内') + '。';
+      return {
+        text: '经营利润 ' + fmtW(k.profit) + '，' + devOf(N.profit).text
+          + (A.hurts.length ? '；缺口主要落在 ' + A.hurts.slice(0, 2).map(function (x) { return x.name + ' ' + x.valueText; }).join('、') : '；各因子都在容差内') + '。',
+        blocks: [trendChart(R, 'profit', '经营利润 12 个月')]
+      };
     }
     if (step === 'attr') {
       var top = A.leaves[0];
       if (!top) return A.name + ' ' + A.basisName + ' ' + A.deltaText + '，没有可拆的因子。';
-      return A.leaves.length + ' 个因子里 ' + top.name + ' ' + top.valueText + ' 居前，剔除一次性项后主因判给 ' + (A.rootCause ? A.rootCause.name + ' ' + A.rootCause.valueText : '无') + '。';
+      return {
+        text: A.leaves.length + ' 个因子里 ' + top.name + ' ' + top.valueText + ' 居前，剔除一次性项后主因判给 ' + (A.rootCause ? A.rootCause.name + ' ' + A.rootCause.valueText : '无') + '。',
+        blocks: [attrChart(A)], ref: A.rootCause ? A.rootCause.id : top.id
+      };
     }
     if (step === 'options') {
       var dr = draft(R, lib);
       if (!dr) return '这个根因方案库里还没有对应方案。';
       var rec = dr.sim, other = dr.S.sims.filter(function (s) { return !s.recommended; })[0];
-      return '方案 ' + rec.option.key + ' ' + rec.option.name + '，12 个月净效益 ' + fmtSigned(rec.totals.netBenefit, fmtW)
-        + (other ? '，比 ' + other.option.key + ' 多 ' + fmtW(Math.abs(rec.totals.netBenefit - other.totals.netBenefit)) : '') + '。';
+      return {
+        text: '方案 ' + rec.option.key + ' ' + rec.option.name + '，12 个月净效益 ' + fmtSigned(rec.totals.netBenefit, fmtW)
+          + (other ? '，比 ' + other.option.key + ' 多 ' + fmtW(Math.abs(rec.totals.netBenefit - other.totals.netBenefit)) : '') + '。',
+        blocks: [chartB({ chart: 'column', title: '各方案 12 个月净效益', unit: ' 万元',
+          labels: dr.S.sims.map(function (x) { return x.option.key; }), series: ser('万元', dr.S.sims.map(function (x) { return wan(x.totals.netBenefit); })) })],
+        ref: rec.option.key
+      };
     }
     if (step === 'approval') {
       var ap = pendingOf(d);
-      if (ap) return ap.id + ' 会签 ' + ap.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意' + (ap.objections ? '、' + ap.objections + ' 位反对' : '') + '，净效益 ' + fmtSigned(ap.totals.netBenefit, fmtW) + '，等 ' + lib.approvalRules.final.role + ' 终批。';
+      function signChart(ops) {
+        var ag = ops.filter(function (o) { return o.opinion === 'agree'; }).length;
+        var ob = ops.filter(function (o) { return o.opinion === 'object'; }).length;
+        return chartB({ chart: 'donut', title: '会签意见', unit: ' 位', total: ops.length, labels: ['同意', '有保留', '反对'],
+          series: ser('位数', [ag, Math.max(0, ops.length - ag - ob), ob]) });
+      }
+      if (ap) return { text: ap.id + ' 会签 ' + ap.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意' + (ap.objections ? '、' + ap.objections + ' 位反对' : '') + '，净效益 ' + fmtSigned(ap.totals.netBenefit, fmtW) + '，等 ' + lib.approvalRules.final.role + ' 终批。',
+        blocks: [signChart(ap.opinions)], ref: ap.id };
       var dr2 = draft(R, lib);
       if (!dr2) return '台账里还没有审批单。';
-      return '拟稿 ' + dr2.sim.option.key + ' ' + dr2.sim.option.name + '，会签预判 ' + dr2.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意，净效益 ' + fmtSigned(dr2.sim.totals.netBenefit, fmtW) + '，随时可发起。';
+      return { text: '拟稿 ' + dr2.sim.option.key + ' ' + dr2.sim.option.name + '，会签预判 ' + dr2.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意，净效益 ' + fmtSigned(dr2.sim.totals.netBenefit, fmtW) + '，随时可发起。',
+        blocks: [signChart(dr2.opinions)] };
     }
     if (step === 'execute') {
       var miss = R.decisions.filter(function (x) { return x.review && x.review.result === 'miss'; })[0];
-      if (miss) return miss.id + ' ' + miss.title + ' 复盘未达标：' + cut(String(miss.review.text).split('；')[0], 34) + '。';
+      function trackChart(dc) {
+        var tr = dc && dc.tracking;
+        if (!tr) return null;
+        var pctU = /率|占比/.test(tr.metricName || '');
+        var f = function (v) { return pctU ? Math.round(v * 1000) / 10 : Math.round(v * 100) / 100; };
+        return chartB({ chart: 'line', title: dc.id + ' ' + tr.metricName, unit: pctU ? '%' : '',
+          labels: tr.months.map(function (m) { return m.slice(5) + '月'; }),
+          series: [{ name: '目标', data: tr.target.map(f) }, { name: '实际', data: tr.actual.map(f) }] });
+      }
+      if (miss) return { text: miss.id + ' ' + miss.title + ' 复盘未达标：' + cut(String(miss.review.text).split('；')[0], 34) + '。',
+        blocks: [trackChart(miss)].filter(Boolean), ref: miss.id };
       var nx = R.decisions.filter(function (x) { return x.next; })[0];
-      return nx ? nx.id + ' 下一节点 ' + short(nx.next.due) + ' ' + nx.next.title + '，责任 ' + nx.owner + '。' : '台账里 ' + R.decisions.length + ' 项决议，节点全部完成。';
+      return nx ? { text: nx.id + ' 下一节点 ' + short(nx.next.due) + ' ' + nx.next.title + '，责任 ' + nx.owner + '。',
+        blocks: [trackChart(nx)].filter(Boolean), ref: nx.id } : '台账里 ' + R.decisions.length + ' 项决议，节点全部完成。';
     }
     return null;
   }
@@ -458,13 +514,17 @@
       var reds = riskNodes(R);
       if (!reds.length) return { text: lib.metricTree.nodes.length + ' 个指标节点都在容差内。' };
       return { text: reds.filter(function (n) { return n.status === 'risk'; }).length + ' 项亮红、' + reds.filter(function (n) { return n.status === 'watch'; }).length + ' 项贴着容差；排前面的是 ' + reds.slice(0, 3).map(function (n) { return n.name + ' ' + n.curText; }).join('、') + '。',
-        blocks: [tableB(['指标', '本期', '偏差'], reds.slice(0, 5).map(function (n) { return [n.name, n.curText, devOf(n).text.replace(/^较\S{2}\s/, '')]; }))],
+        blocks: [chartB({ chart: 'donut', title: '指标节点核对', unit: ' 项', total: T.counts.ok + T.counts.watch + T.counts.risk,
+          labels: ['正常', '贴容差', '亮红'], series: ser('项数', [T.counts.ok, T.counts.watch, T.counts.risk]) }),
+          tableB(['指标', '本期', '偏差'], reds.slice(0, 5).map(function (n) { return [n.name, n.curText, devOf(n).text.replace(/^较\S{2}\s/, '')]; }))],
         ref: reds[0].id, act: { type: 'focus', ref: reds[0].id } };
     }
     if (has(q, ['指标节点', '指标树', '几个节点', '多少指标', '指标有多少', '几个指标'])) {
       var gs = T.groups, worst = gs.slice().sort(function (a, b) { return offOf(b) - offOf(a); })[0];
       return { text: lib.metricTree.nodes.length + ' 个指标节点分 ' + gs.length + ' 组：' + gs.map(function (g) { return g.name + ' ' + g.nodes.length + ' 项'; }).join('、') + '；容差外 ' + (T.counts.risk + T.counts.watch) + ' 项，亮红 ' + T.counts.risk + ' 项、贴着容差 ' + T.counts.watch + ' 项，其中 ' + offOf(worst) + ' 项落在' + worst.name + '组。',
-        blocks: [tableB(['组', '指标', '容差外'], gs.map(function (g) { return [g.name, g.nodes.length + ' 项', offOf(g) ? offOf(g) + ' 项' : '—']; }))],
+        blocks: [chartB({ chart: 'bar', title: '各组容差外指标', unit: ' 项',
+          labels: gs.map(function (g) { return g.name; }), series: ser('项数', gs.map(function (g) { return offOf(g); })) }),
+          tableB(['组', '指标', '容差外'], gs.map(function (g) { return [g.name, g.nodes.length + ' 项', offOf(g) ? offOf(g) + ' 项' : '—']; }))],
         ref: worst.root, act: { type: 'focus', ref: worst.root } };
     }
     if (has(q, ['同步', '什么时候', '取数', '数据源', '几个模块'])) {
@@ -478,18 +538,18 @@
     if (has(q, ['为什么掉', '为什么降', '为什么少', '掉了', '降了', '为什么', '原因', '怎么回事']) && !has(q, ['复盘', '达标', '月报'])) {
       var lf = leafByName(q, A);
       if (lf) return { text: lf.name + ' ' + lf.factorText + '，对 ' + A.name + ' 的贡献 ' + lf.valueText + '，占变动 ' + Math.round(Math.abs(lf.share) * 100) + '%，数据来自 ' + lf.sourceName + '。' + (lf.adjText ? lf.adjText + '。' : ''),
-        blocks: [kvB([['路径', lf.pathNames.join(' › ')], ['贡献', lf.valueText], ['占比', Math.round(Math.abs(lf.share) * 100) + '%']])],
+        blocks: [attrChart(A), kvB([['路径', lf.pathNames.join(' › ')], ['贡献', lf.valueText], ['占比', Math.round(Math.abs(lf.share) * 100) + '%']])],
         ref: lf.id, act: { type: 'set', path: 'factor', value: lf.id } };
       var f0 = factorOf(A);
       return { text: A.name + ' ' + A.basisName + ' ' + A.fromText + ' → ' + A.toText + '（' + A.deltaText + '）。不利因子 ' + A.hurts.length + ' 个：' + A.hurts.slice(0, 3).map(function (x) { return x.name + ' ' + x.valueText; }).join('、') + '。',
-        blocks: [tableB(['因子', '贡献', '来源'], A.leaves.slice(0, 5).map(function (x) { return [x.name, x.valueText, x.sourceName]; }))],
+        blocks: [attrChart(A), tableB(['因子', '贡献', '来源'], A.leaves.slice(0, 5).map(function (x) { return [x.name, x.valueText, x.sourceName]; }))],
         ref: f0 ? f0.id : null, act: f0 ? { type: 'set', path: 'factor', value: f0.id } : null };
     }
     if (has(q, ['主因', '怎么定的', '根因', '判断依据'])) {
       if (!A.rootCause) return { text: '这一期因子都在容差内，没有判主因。' };
       var rc = A.rootCause;
       return { text: '主因 ' + rc.name + '：' + rc.factorText + '，贡献 ' + rc.valueText + '，占变动 ' + Math.round(Math.abs(rc.share) * 100) + '%。取的是剔除一次性项后对 ' + A.name + ' 伤害居前的因子；各因子贡献之和等于变动，校验通过。',
-        blocks: [tableB(['因子', '贡献'], A.hurts.slice(0, 4).map(function (x) { return [x.name, x.valueText]; }))],
+        blocks: [attrChart(A), tableB(['因子', '贡献'], A.hurts.slice(0, 4).map(function (x) { return [x.name, x.valueText]; }))],
         ref: rc.id, act: { type: 'set', path: 'factor', value: rc.id } };
     }
     if (has(q, ['证据', '在哪看', '凭什么', '哪来的'])) {
@@ -498,7 +558,7 @@
       var ev = evidence(d, lib, F.id, F.direction);
       if (!ev.length) return { text: F.name + ' 这个因子还没有证据卡。' };
       return { text: F.name + ' 有 ' + ev.length + ' 张证据卡：' + ev.map(function (e) { return e.moduleName + '「' + e.title + '」' + e.detail; }).join('；') + '。',
-        blocks: [tagsB(ev.map(function (e) { return e.moduleName + ' · ' + e.ref; }))],
+        blocks: [attrChart(A), tagsB(ev.map(function (e) { return e.moduleName + ' · ' + e.ref; }))],
         ref: F.id, act: { type: 'open', panel: 'evidence', ref: F.id } };
     }
 
@@ -514,7 +574,9 @@
           var np = {}; Object.keys(nw.sim.params).forEach(function (kk) { np[kk] = nw.sim.params[kk]; }); np[p0.key] = val;
           var s2 = simulate(d, lib, nw.cause, nw.sim.option.key, np), t2 = s2.totals;
           var tail = '期末毛利率 ' + pct1(t2.gmEnd) + '%，现金 ' + fmtSigned(t2.cashDelta12, fmtW) + '。';
-          var bk = [kvB([['参数', val + ' ' + p0.unit], ['净效益', fmtSigned(t2.netBenefit, fmtW)], ['投入', s2.option.invest ? fmtW(s2.option.invest) + '（预计）' : '无']])];
+          var bk = [chartB({ chart: 'column', title: '改参数前后的净效益', unit: ' 万元',
+            labels: [cur0 + ' ' + p0.unit, val + ' ' + p0.unit], series: ser('万元', [wan(nw.sim.totals.netBenefit), wan(t2.netBenefit)]) }),
+            kvB([['参数', val + ' ' + p0.unit], ['净效益', fmtSigned(t2.netBenefit, fmtW)], ['投入', s2.option.invest ? fmtW(s2.option.invest) + '（预计）' : '无']])];
           var ac = { type: 'set', path: 'params.' + nw.cause + '.' + nw.sim.option.key + '.' + p0.key, value: val };
           if (val === cur0) return { text: p0.label + ' 现在就是 ' + val + ' ' + p0.unit + '，这一档 12 个月净效益 ' + fmtSigned(t2.netBenefit, fmtW) + '，' + tail + '换一个数就重算。', blocks: bk, act: ac };
           return { text: p0.label + ' 从 ' + cur0 + ' 调到 ' + val + ' ' + p0.unit + '：12 个月净效益 ' + fmtSigned(nw.sim.totals.netBenefit, fmtW) + ' → ' + fmtSigned(t2.netBenefit, fmtW) + '，' + tail + '参数已改过来。',
@@ -526,13 +588,16 @@
       var n1 = draft(R, lib);
       if (!n1) return { text: '这个根因方案库里还没有对应方案，先换一个因子。', act: { type: 'goto', step: 'attr' } };
       return { text: n1.causeName + ' 有 ' + n1.S.sims.length + ' 个方案：' + n1.S.sims.map(function (s) { return s.option.key + ' ' + s.option.name + ' 净效益 ' + fmtSigned(s.totals.netBenefit, fmtW) + '（投入 ' + (s.option.invest ? fmtW(s.option.invest) : '无') + '，' + s.option.leadMonths + ' 个月见效）'; }).join('；') + '。推荐 ' + n1.sim.option.key + '。',
-        blocks: [tableB(['方案', '净效益', '投入'], n1.S.sims.map(function (s) { return [s.option.key, fmtSigned(s.totals.netBenefit, fmtW), s.option.invest ? fmtW(s.option.invest) : '无']; }))],
+        blocks: [chartB({ chart: 'column', title: '各方案 12 个月净效益', unit: ' 万元',
+          labels: n1.S.sims.map(function (s) { return s.option.key; }), series: ser('万元', n1.S.sims.map(function (s) { return wan(s.totals.netBenefit); })) }),
+          tableB(['方案', '净效益', '投入'], n1.S.sims.map(function (s) { return [s.option.key, fmtSigned(s.totals.netBenefit, fmtW), s.option.invest ? fmtW(s.option.invest) : '无']; }))],
         act: { type: 'goto', step: 'options' } };
     }
     if (has(q, ['见效', '多久', '几个月', '多长时间']) && !nodeByName(q, R)) {
       var n2 = draft(R, lib);
       if (n2) return { text: '方案 ' + n2.sim.option.key + ' ' + n2.sim.option.leadMonths + ' 个月见效，' + n2.sim.option.milestones.length + ' 个执行节点，责任 ' + n2.sim.option.owner + '；12 个月后期末毛利率 ' + pct1(n2.sim.totals.gmEnd) + '%、准时率 ' + pct0(n2.sim.totals.onTimeEnd) + '%。',
-        blocks: [tableB(['节点', '天数'], n2.sim.option.milestones.map(function (m) { return [cut(m.title, 14), m.days + ' 天']; }))] };
+        blocks: [chartB({ chart: 'bar', title: '执行节点', unit: ' 天',
+          labels: n2.sim.option.milestones.map(function (m) { return cut(m.title, 7); }), series: ser('天数', n2.sim.option.milestones.map(function (m) { return m.days; })) })] };
     }
 
     /* —— 审批 —— */
@@ -541,7 +606,11 @@
       var ops = ap1 ? ap1.opinions : dr1 ? dr1.opinions : [];
       if (!ops.length) return { text: '还没有可会签的方案，先在方案预演里选一个。', act: { type: 'goto', step: 'options' } };
       return { text: (ap1 ? ap1.id : '拟稿') + ' 会签：' + ops.map(function (o) { return o.role + ' ' + o.opinionName + '（' + o.text + '）'; }).join('；') + '。',
-        blocks: [tableB(['会签人', '意见'], ops.map(function (o) { return [o.role, o.opinionName]; }))],
+        blocks: [chartB({ chart: 'donut', title: '会签意见', unit: ' 位', total: ops.length, labels: ['同意', '有保留', '反对'],
+          series: ser('位数', [ops.filter(function (o) { return o.opinion === 'agree'; }).length,
+            ops.filter(function (o) { return o.opinion !== 'agree' && o.opinion !== 'object'; }).length,
+            ops.filter(function (o) { return o.opinion === 'object'; }).length]) }),
+          tableB(['会签人', '意见'], ops.map(function (o) { return [o.role, o.opinionName]; }))],
         ref: ap1 ? ap1.id : null, act: ap1 ? { type: 'focus', ref: ap1.id } : { type: 'goto', step: 'approval' } };
     }
     if (has(q, ['净效益', '怎么算', '算出来'])) {
@@ -549,7 +618,9 @@
       var Tt = ap2 ? ap2.totals : dr2 ? dr2.sim.totals : null;
       if (!Tt) return null;
       return { text: '净效益 = 12 个月利润增量 ' + fmtSigned(Tt.profitDelta12, fmtW) + ' 减一次性投入 ' + fmtW(Tt.invest) + '（预计），' + fmtSigned(Tt.netBenefit, fmtW) + '；同口径现金影响 ' + fmtSigned(Tt.cashDelta12, fmtW) + '。',
-        blocks: [kvB([['利润增量', fmtSigned(Tt.profitDelta12, fmtW)], ['投入', fmtW(Tt.invest) + '（预计）'], ['净效益', fmtSigned(Tt.netBenefit, fmtW)], ['现金影响', fmtSigned(Tt.cashDelta12, fmtW)]])] };
+        blocks: [chartB({ chart: 'waterfall', title: '净效益怎么来的', unit: ' 万元', labels: ['利润增量', '投入', '净效益'],
+          series: ser('万元', [wan(Tt.profitDelta12), -wan(Tt.invest), null]) }),
+          kvB([['利润增量', fmtSigned(Tt.profitDelta12, fmtW)], ['投入', fmtW(Tt.invest) + '（预计）'], ['净效益', fmtSigned(Tt.netBenefit, fmtW)], ['现金影响', fmtSigned(Tt.cashDelta12, fmtW)]])] };
     }
     /* 打听「批了会怎样」只讲不落单；说「批准」才真批 */
     if (has(q, ['批了会', '批了之后', '批了以后', '批准后', '批准会', '批了怎么', '批完'])) {
@@ -559,7 +630,9 @@
       var mQ = trackMetric(lib, apQ ? apQ.metricId : rootMetricOf(lib, drQ.cause));
       var tQ = apQ ? apQ.totals : drQ.sim.totals;
       return { text: (apQ ? apQ.id : '拟稿 ' + oQ.key) + ' 批准后转决议进台账，' + oQ.milestones.length + ' 个执行节点按 ' + d.today + ' 起排期，末节点 ' + short(dateOf(d.today, oQ.milestones[oQ.milestones.length - 1].days)) + ' 收口，责任 ' + oQ.owner + '，指标跟踪盯 ' + (N[mQ] ? N[mQ].name : mQ) + '，12 个月净效益 ' + fmtSigned(tQ.netBenefit, fmtW) + '。',
-        blocks: [tableB(['节点', '到期', '责任'], oQ.milestones.map(function (m) { return [cut(m.title, 12), short(dateOf(d.today, m.days)), m.owner || oQ.owner]; }))],
+        blocks: [chartB({ chart: 'bar', title: '执行节点', unit: ' 天',
+          labels: oQ.milestones.map(function (m) { return cut(m.title, 7); }), series: ser('天数', oQ.milestones.map(function (m) { return m.days; })) }),
+          tableB(['节点', '到期', '责任'], oQ.milestones.map(function (m) { return [cut(m.title, 12), short(dateOf(d.today, m.days)), m.owner || oQ.owner]; }))],
         ref: apQ ? apQ.id : null, act: apQ ? { type: 'focus', ref: apQ.id } : { type: 'goto', step: 'approval' } };
     }
     if (has(q, ['发起审批', '提交审批', '上会', '发起'])) {
@@ -569,16 +642,22 @@
       var drS = draft(R, lib);
       if (!drS) return { text: '现在没有可发起的拟稿，先在方案预演里选一个。', act: { type: 'goto', step: 'options' } };
       return { text: '发起后 ' + drS.sim.option.key + ' ' + drS.sim.option.name + ' 进 ' + lib.approvalRules.final.role + ' 终批队列，会签预判 ' + drS.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意。',
+        blocks: [chartB({ chart: 'column', title: '各方案 12 个月净效益', unit: ' 万元',
+          labels: drS.S.sims.map(function (x) { return x.option.key; }), series: ser('万元', drS.S.sims.map(function (x) { return wan(x.totals.netBenefit); })) })],
         act: { type: 'apply', action: 'submit', input: { cause: drS.cause, option: drS.sim.option.key, params: drS.sim.params } } };
     }
     if (has(q, ['批准', '批了', '通过它', '同意它'])) {
       var ap3 = pendingOf(d);
       if (ap3) return { text: '批准 ' + ap3.id + ' 转决议进台账，' + ap3.option.milestones.length + ' 个执行节点按 ' + d.today + ' 起排期，责任 ' + ap3.option.owner + '，指标跟踪盯 ' + (N[trackMetric(lib, ap3.metricId)] || { name: ap3.metricId }).name + '。',
+        blocks: [chartB({ chart: 'bar', title: '执行节点', unit: ' 天',
+          labels: ap3.option.milestones.map(function (m) { return cut(m.title, 7); }), series: ser('天数', ap3.option.milestones.map(function (m) { return m.days; })) })],
         ref: ap3.id, act: { type: 'apply', action: 'approve', input: { approvalId: ap3.id } } };
       var dr3 = draft(R, lib);
       if (!dr3) return { text: '现在没有可批的单子，先在方案预演里选一个。', act: { type: 'goto', step: 'options' } };
       var m3 = trackMetric(lib, rootMetricOf(lib, dr3.cause));
       return { text: '台账里还没发起单子，拟稿 ' + dr3.sim.option.key + ' ' + dr3.sim.option.name + ' 发起与终批一次做完：进 ' + lib.approvalRules.final.role + ' 终批队列，会签预判 ' + dr3.opinions.filter(function (o) { return o.opinion === 'agree'; }).length + ' 位同意，批准后转决议，' + dr3.sim.option.milestones.length + ' 个执行节点按 ' + d.today + ' 起排期，责任 ' + dr3.sim.option.owner + '，指标跟踪盯 ' + (N[m3] ? N[m3].name : m3) + '。',
+        blocks: [chartB({ chart: 'bar', title: '执行节点', unit: ' 天',
+          labels: dr3.sim.option.milestones.map(function (m) { return cut(m.title, 7); }), series: ser('天数', dr3.sim.option.milestones.map(function (m) { return m.days; })) })],
         act: { type: 'apply', action: 'approve', input: { cause: dr3.cause, option: dr3.sim.option.key, params: dr3.sim.params } } };
     }
 
@@ -589,28 +668,40 @@
       if (!od.length) {
         var nx2 = R.decisions.filter(function (x) { return x.next; })[0];
         return { text: '没有逾期节点。' + (nx2 ? nx2.id + ' 下一节点 ' + short(nx2.next.due) + ' ' + nx2.next.title + '，责任 ' + nx2.owner + '。' : ''),
+          blocks: [chartB({ chart: 'progress', title: '各项决议进度', unit: '%', max: 100,
+            labels: R.decisions.map(function (x) { return x.id.slice(-8); }), series: ser('进度', R.decisions.map(function (x) { return x.progress; })) })],
           ref: nx2 ? nx2.id : null, act: nx2 ? { type: 'focus', ref: nx2.id } : null };
       }
       return { text: od.length + ' 个节点逾期：' + od.map(function (x) { return x[0] + ' ' + x[1] + '（' + x[2] + '）'; }).join('；') + '。',
-        blocks: [tableB(['决议', '节点', '到期'], od.slice(0, 5))],
+        blocks: [chartB({ chart: 'progress', title: '各项决议进度', unit: '%', max: 100,
+          labels: R.decisions.map(function (x) { return x.id.slice(-8); }), series: ser('进度', R.decisions.map(function (x) { return x.progress; })) }),
+          tableB(['决议', '节点', '到期'], od.slice(0, 5))],
         ref: od[0][0], act: { type: 'focus', ref: od[0][0] } };
     }
     if (has(q, ['下一个节点', '下一节点', '执行节点', '节点', '进度']) && !has(q, ['指标节点', '指标树'])) {
       var dd = curDecision(R);
       if (!dd) return { text: '台账里还没有决议。' };
       return { text: dd.id + ' ' + dd.title + '，进度 ' + dd.progress + '%（' + dd.done + ' / ' + dd.total + ' 节点）' + (dd.next ? '，下一节点 ' + short(dd.next.due) + ' ' + dd.next.title + '，责任 ' + (dd.next.owner || dd.owner) : '，节点全部完成') + '。',
-        blocks: [tableB(['节点', '到期', '状态'], dd.milestones.map(function (m) { return [cut(m.title, 12), short(m.due), m.status === 'done' ? '完成' : m.status === 'doing' ? '进行' : '待办']; }))],
+        blocks: [chartB({ chart: 'donut', title: dd.id + ' 节点', unit: ' 个', total: dd.total, labels: ['完成', '进行', '待办'],
+          series: ser('个数', ['done', 'doing', 'todo'].map(function (st2) { return dd.milestones.filter(function (m) { return (m.status || 'todo') === st2; }).length; })) }),
+          tableB(['节点', '到期', '状态'], dd.milestones.map(function (m) { return [cut(m.title, 12), short(m.due), m.status === 'done' ? '完成' : m.status === 'doing' ? '进行' : '待办']; }))],
         ref: dd.id, act: { type: 'focus', ref: dd.id } };
     }
     if (has(q, ['复盘', '没达标', '未达标', '教训'])) {
       var rv = R.decisions.filter(function (x) { return x.review; });
       if (!rv.length) return { text: '还没有到复盘期的决议。' };
+      var tr0 = rv[0].tracking;
+      var pctU0 = tr0 && /率|占比/.test(tr0.metricName || '');
+      var f0r = function (v) { return pctU0 ? Math.round(v * 1000) / 10 : Math.round(v * 100) / 100; };
       return { text: rv.map(function (x) { return x.id + ' ' + x.title + '：' + (x.review.result === 'miss' ? '未达标。' : '达标。') + x.review.text; }).join('\n'),
+        blocks: tr0 ? [chartB({ chart: 'line', title: rv[0].id + ' ' + tr0.metricName, unit: pctU0 ? '%' : '',
+          labels: tr0.months.map(function (m) { return m.slice(5) + '月'; }),
+          series: [{ name: '目标', data: tr0.target.map(f0r) }, { name: '实际', data: tr0.actual.map(f0r) }] })] : [],
         ref: rv[0].id, act: { type: 'open', panel: 'review', ref: rv[0].id } };
     }
     if (has(q, ['月报', '发给谁', '收件', '微信'])) {
       return { text: '决策月报收件人：总经理、经营班子、各会签负责人；内容是指标、归因、审批、决议执行与复盘，微信文本版。',
-        blocks: [tagsB(['总经理', '经营班子', '各会签负责人'])],
+        blocks: [trendChart(R, 'profit', '经营利润 12 个月'), tagsB(['总经理', '经营班子', '各会签负责人'])].filter(Boolean),
         act: { type: 'open', panel: 'report' } };
     }
 
@@ -619,11 +710,12 @@
     if (n3) {
       var dv = devOf(n3);
       return { text: n3.name + ' ' + n3.curText + '，' + dv.text + '，上期 ' + n3.prevText + '，来自 ' + n3.sourceName + '。',
-        blocks: [kvB([['本期', n3.curText], ['上期', n3.prevText], [n3.budget != null ? '预算' : '近三月均值', n3.budget != null ? n3.budgetText : fmtVal(n3, n3.avg3)], ['状态', STATUS_NAME[n3.status]]])],
+        blocks: [trendChart(R, n3.id), kvB([['本期', n3.curText], ['上期', n3.prevText], [n3.budget != null ? '预算' : '近三月均值', n3.budget != null ? n3.budgetText : fmtVal(n3, n3.avg3)], ['状态', STATUS_NAME[n3.status]]])].filter(Boolean),
         ref: n3.id, act: n3.status === 'ok' ? null : { type: 'set', path: 'metric', value: n3.id } };
     }
     var lf2 = leafByName(q, A);
-    if (lf2) return { text: lf2.name + ' ' + lf2.factorText + '，贡献 ' + lf2.valueText + '，来自 ' + lf2.sourceName + '。', ref: lf2.id };
+    if (lf2) return { text: lf2.name + ' ' + lf2.factorText + '，贡献 ' + lf2.valueText + '，来自 ' + lf2.sourceName + '。',
+      blocks: [attrChart(A)], ref: lf2.id };
     /* 台账 / 审批单编号 */
     var hitD = R.decisions.filter(function (x) { return q.indexOf(x.id) >= 0; })[0];
     if (hitD) return { text: hitD.id + ' ' + hitD.title + '：' + hitD.statusName + '，进度 ' + hitD.progress + '%，责任 ' + hitD.owner + '，投入 ' + (hitD.invest ? fmtW(hitD.invest) + '（预计）' : '无') + '。',
@@ -634,20 +726,27 @@
     if (has(q, ['决议', '台账', '几项决议'])) {
       if (!R.decisions.length) return { text: '台账里还没有决议，审批批准后才会进台账。', act: { type: 'goto', step: 'approval' } };
       return { text: '决策台账 ' + R.decisions.length + ' 项：执行中 ' + k.executing + ' · 已完成 ' + k.doneDecisions + ' · 逾期节点 ' + k.overdueMilestones + ' 个。' + R.decisions.map(function (x) { return x.id + ' ' + x.title + ' ' + x.progress + '%'; }).join('；') + '。',
-        blocks: [tableB(['决议', '根因', '进度'], R.decisions.map(function (x) { return [x.id, x.causeName, x.progress + '%']; }))],
+        blocks: [chartB({ chart: 'progress', title: '各项决议进度', unit: '%', max: 100,
+          labels: R.decisions.map(function (x) { return x.id.slice(-8); }), series: ser('进度', R.decisions.map(function (x) { return x.progress; })) }),
+          tableB(['决议', '根因', '进度'], R.decisions.map(function (x) { return [x.id, x.causeName, x.progress + '%']; }))],
         ref: R.decisions[0].id, act: { type: 'focus', ref: R.decisions[0].id } };
     }
     if (has(q, ['打开', '抽屉', '明细', '全组', '组里', '还有哪些'])) {
       var grp = T.groups.filter(function (x) { return q.indexOf(x.name) >= 0; })[0] || T.groups[0];
       return { text: grp.name + ' 组 ' + grp.nodes.length + ' 个指标，' + offOf(grp) + ' 个在容差外。',
-        blocks: [tableB(['指标', '本期'], grp.nodes.slice(0, 6).map(function (x) { return [x.name, x.curText]; }))],
+        blocks: [trendChart(R, grp.root), tableB(['指标', '本期'], grp.nodes.slice(0, 6).map(function (x) { return [x.name, x.curText]; }))].filter(Boolean),
         ref: grp.root, act: { type: 'open', panel: 'group', ref: grp.key } };
     }
     if (has(q, ['待批', '审批单', '几单'])) {
       if (k.pending) return { text: '待终批 ' + k.pending + ' 单：' + d.approvals.filter(function (a) { return a.status === 'pending'; }).map(function (a) { return a.id + ' ' + a.option.name + ' ' + fmtSigned(a.totals.netBenefit, fmtW); }).join('；') + '。',
+        blocks: [chartB({ chart: 'bar', title: '待批单净效益', unit: ' 万元',
+          labels: d.approvals.filter(function (a) { return a.status === 'pending'; }).map(function (a) { return a.id.slice(-8); }),
+          series: ser('万元', d.approvals.filter(function (a) { return a.status === 'pending'; }).map(function (a) { return wan(a.totals.netBenefit); })) })],
         ref: pendingOf(d).id, act: { type: 'focus', ref: pendingOf(d).id } };
       var dr4 = draft(R, lib);
       return { text: '台账里没有待批单' + (dr4 ? '，拟稿是 ' + dr4.sim.option.key + ' ' + dr4.sim.option.name + '，净效益 ' + fmtSigned(dr4.sim.totals.netBenefit, fmtW) : '') + '。',
+        blocks: dr4 ? [chartB({ chart: 'column', title: '各方案 12 个月净效益', unit: ' 万元',
+          labels: dr4.S.sims.map(function (x) { return x.option.key; }), series: ser('万元', dr4.S.sims.map(function (x) { return wan(x.totals.netBenefit); })) })] : [],
         act: { type: 'goto', step: 'approval' } };
     }
     if (has(q, ['积分', '多少钱', '收费'])) return { text: '进一次决策驾驶舱扣 ' + CREDITS + ' 积分，指标树、归因、方案预演、审批与复盘都在这一次里。' };

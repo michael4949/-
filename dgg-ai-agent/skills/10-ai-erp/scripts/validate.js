@@ -125,8 +125,10 @@ Object.keys(data.samples).sort().forEach((k) => {
   const R = { S, plan, daily };
   steps.forEach((st) => {
     const b = core.brief(st, d, null, R);
-    ok(typeof b === 'string' && b.length > 10, k + ' brief ' + st + '：' + b);
-    clean(b, k + ' brief ' + st);
+    const bt = typeof b === 'string' ? b : (b && b.text);
+    ok(typeof bt === 'string' && bt.length > 10 && !/undefined|NaN|\{\w+\}/.test(bt), k + ' brief ' + st + '：' + bt);
+    ok(typeof b === 'string' || isBlocks(b.blocks), k + ' brief blocks 块型 ' + st);
+    clean(bt, k + ' brief ' + st);
     ok(core.brief(st, d, null) === b, k + ' brief 不传 result 结果不一致 ' + st);
     const sg = core.suggest(st, d, null, R);
     ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);
@@ -155,7 +157,7 @@ Object.keys(data.samples).sort().forEach((k) => {
       ok(dOt.log.length === d.log.length + 1 && JSON.stringify(d) === raw0, k + ' 加班动作可落单且不动入参');
     }
     const lQ = core.ask('延期的是哪几张', 'room', d, null, R);
-    ok(lQ && lQ.act.type === 'set' && lQ.act.path === 'filter' && lQ.act.value === 'late' && lQ.blocks[0].type === 'table', k + ' 延期清单');
+    ok(lQ && lQ.act.type === 'set' && lQ.act.path === 'filter' && lQ.act.value === 'late' && lQ.blocks.some((x) => x.type === 'table'), k + ' 延期清单');
   }
   const mTop = plan.items.filter((x) => x.suggestQty > 0)[0];
   if (mTop) {
@@ -201,7 +203,7 @@ Object.keys(data.samples).sort().forEach((k) => {
   const contract = docparse.parse({ name: 'contract.txt', bytes: Buffer.from('采购框架合同\n甲方：' + d.company + '\n乙方：宁波华兴紧固件有限公司\n第一条 合同金额：人民币 1,860,000 元。\n第二条 交付期限：2026 年 9 月 30 日前交付。\n第三条 逾期交付按日万分之五计违约金，累计不超过 5%。\n', 'utf8') });
   const cIn = core.ingest(contract, 'room', d, null, R);
   ok(cIn && cIn.text.indexOf('逾期口径按日万分之 5') >= 0 && cIn.text.indexOf('交付期限 2026-09-30') >= 0 && !cIn.data, k + ' ingest 合同算违约金、不动数');
-  ok(cIn.blocks[0].type === 'kv' && cIn.blocks[0].rows.filter((r) => r[0] === '预计违约金').length === 1, k + ' ingest 合同违约金块');
+  ok(cIn.blocks.some((x) => x.type === 'kv' && x.rows.filter((r) => r[0] === '预计违约金').length === 1), k + ' ingest 合同违约金块');
   ok(S.kpi.late === 0 || (cIn.act.type === 'set' && cIn.act.path === 'filter' && cIn.act.value === 'late'), k + ' ingest 合同动作');
   clean(cIn.text, k + ' ingest 合同');
   const ppt = mkDoc({ kind: 'ppt', name: 'review.pptx', ext: 'pptx', text: '2026 年三季度经营回顾 交付准时率 95% 客户投诉 3 起',

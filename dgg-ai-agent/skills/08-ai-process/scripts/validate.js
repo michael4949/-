@@ -268,8 +268,10 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && pure(a));
   steps.forEach((st) => {
     const b = K.brief(st, d, lib, R);
-    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
-    clean(b, k + ' brief ' + st);
+    const bt = typeof b === 'string' ? b : (b && b.text);
+    ok(typeof bt === 'string' && bt.length > 10 && !/undefined|NaN|\{\w+\}/.test(bt), k + ' brief ' + st + '：' + bt);
+    ok(typeof b === 'string' || isBlocks(b.blocks), k + ' brief blocks 块型 ' + st);
+    clean(bt, k + ' brief ' + st);
     ok(JSON.stringify(K.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
     const sg = K.suggest(st, d, lib, R);
     ok(Array.isArray(sg) && sg.length === 4, k + ' suggest ' + st + ' 固定 4 条，实得 ' + (Array.isArray(sg) ? sg.length : '非数组'));
@@ -300,7 +302,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   const mac0 = R.maintenance.filter((m) => !m.scheduled && m.window)[0];
   if (mac0) { const nMac = K.ask(mac0.machine + ' 要保养吗', 'exec', d, lib, R); ok(nMac && nMac.act.action === 'schedule-maint', k + ' 点名' + v.machine + ' ' + mac0.machine); }
   const nWhy = K.ask('为什么是' + R.bottleneck.line.name, 'board', d, lib, R);
-  ok(nWhy && nWhy.act.type === 'open' && nWhy.act.panel === 'stage' && nWhy.blocks[0].type === 'table', k + ' 为什么是约束');
+  ok(nWhy && nWhy.act.type === 'open' && nWhy.act.panel === 'stage' && nWhy.blocks.some((x) => x.type === 'table'), k + ' 为什么是约束');
   ok(K.ask('为什么是约束线', 'report', d, lib, R).act.type === 'goto', k + ' 为什么是约束不在看板先换屏');
   const other = R.S.lines.filter((l) => l.id !== R.bottleneck.line.id)[0];
   const nLine = K.ask(other.name + ' 怎么样', 'board', d, lib, R);

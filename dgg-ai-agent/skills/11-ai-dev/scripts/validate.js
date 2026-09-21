@@ -466,8 +466,10 @@ ARCHES.forEach((k) => {
     // 接入屏按未生成的状态核（原型也是在那一步问的），其余五屏按已生成的状态核
     const dd = st === 'connect' ? d0 : d, RR = st === 'connect' ? R0 : R;
     const b = K.brief(st, dd, lib, RR);
-    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
-    clean(b, k + ' brief ' + st);
+    const bt = typeof b === 'string' ? b : (b && b.text);
+    ok(typeof bt === 'string' && bt.length > 10 && !/undefined|NaN|\{\w+\}/.test(bt), k + ' brief ' + st + '：' + bt);
+    ok(typeof b === 'string' || isBlocks(b.blocks), k + ' brief blocks 块型 ' + st);
+    clean(bt, k + ' brief ' + st);
     ok(J(K.brief(st, dd, lib)) === J(b), k + ' brief 不传 result 结果不一致 ' + st);
     const sg = K.suggest(st, dd, lib, RR);
     ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st + ' 条数 ' + (sg || []).length);
