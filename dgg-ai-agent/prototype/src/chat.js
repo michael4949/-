@@ -360,8 +360,10 @@
       var w = o.work && o.work();
       if (!w || !aim) return null;
       var s2 = String(aim).replace(/\s+/g, '');
+      var bg = overlayBg();                                      /* 浮层开着就先在浮层里找 */
       var wide = (w.closest && w.closest('.pd-body')) || (w.parentNode && w.parentNode.nodeType === 1 ? w.parentNode : null);
-      return hunt(w, s2, false) || hunt(wide, s2, false) || hunt(w, s2, true) || hunt(wide, s2, true);
+      return hunt(bg, s2, false) || hunt(w, s2, false) || hunt(wide, s2, false)
+        || hunt(bg, s2, true) || hunt(w, s2, true) || hunt(wide, s2, true);
     }
     /* 先把按钮亮出来给客户看清楚，再替他按下去 —— 展台上要让人看见「AI 动了哪一下」 */
     function press(el2) {
@@ -370,8 +372,21 @@
       setTimeout(function () { try { el2.click(); } catch (e) { /* 忽略 */ } }, 560);
       return true;
     }
+    /* 浮层开着的时候，该点的在浮层里；再指屏底那条没用，隔着一层点不到 */
+    function overlayBg() {
+      var w = o.work && o.work();
+      var root2 = (w && w.closest && w.closest('.pd-app')) || document;
+      return root2.querySelector ? root2.querySelector('.pd-drawer-bg, .modal-bg') : null;
+    }
+    function overlayAim() {
+      var bg = overlayBg();
+      if (!bg) return null;
+      return bg.querySelector('.pd-btn.primary:not([disabled])') || bg.querySelector('button.close') || bg.querySelector('button:not([disabled])');
+    }
     /* 这一屏该点哪：跟引导箭头指的是同一个按钮，两处说法永远一致 */
     function aimBtn() {
+      var ov = overlayAim();
+      if (ov) return ov;
       var t = null;
       try { t = window.DGG.guide && window.DGG.guide.target ? window.DGG.guide.target() : null; } catch (e) { t = null; }
       if (t && t.offsetParent !== null) return t;
@@ -393,7 +408,12 @@
       }
       if (/^(下一步|继续|接下来|然后呢|再然后|走下去|往下走)/.test(s2) || /(该点哪|点哪里|点哪儿|怎么操作|下一步做什么|接下来做什么|现在做什么|下一步点什么)/.test(s2)) {
         t = aimBtn();
-        if (t) return { text: '这一屏点「' + labelOf(t) + '」，我替你点。', act: { type: 'click', aim: labelOf(t) } };
+        if (t) {
+          var inOv = overlayBg() && overlayBg().contains(t);
+          var lb = labelOf(t);
+          if (inOv && (lb === '×' || lb === '')) return { text: '先把这一层关掉，再走屏底那条「下一步」。', act: { type: 'click', aim: lb || '×' } };
+          return { text: '这一屏点「' + lb + '」，我替你点。', act: { type: 'click', aim: lb } };
+        }
         return { text: '这一屏看完了，走屏底那条「下一步」。', act: { type: 'click', aim: '下一步' } };
       }
       return null;
