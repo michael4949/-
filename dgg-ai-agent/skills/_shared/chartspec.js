@@ -25,6 +25,10 @@
     if (typeof x === 'number') return isFinite(x) ? { v: x, unit: '' } : null;
     var s = String(x == null ? '' : x).trim();
     if (!s) return null;
+    /* 日期、时间、带连字的编号（2026-09-14 / 09:30 / 2026/09/14）不是数：
+       正则会把它读成「2026 加个单位 -09-14」，一整列同一天时还会当成能配图的一列，
+       图上就出现「2,026-09-14」。数字后面紧跟分隔号再跟数字的，一律不当数。 */
+    if (/^[+-]?\s*\d[\d,]*\s*[-\/:]\s*\d/.test(s)) return null;
     var m = s.match(/^([+-]?)\s*[¥￥$]?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?)\s*([^\s0-9].*)?$/);
     if (!m) return null;
     var v = parseFloat(m[2].replace(/,/g, ''));
