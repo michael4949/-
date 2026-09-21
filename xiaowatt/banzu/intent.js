@@ -77,3 +77,28 @@ Object.assign(ACT, {
   'ask-quiz'(el) { const { q } = SAFETYPG.quizQ(); const i = +el.dataset.i; const ok = i === q.k; const done = LS.get('quiz', []); done.push({ ok, ts: Date.now() }); LS.set('quiz', done); XW.answer((ok ? '对。' : '不对，应为 ' + String.fromCharCode(65 + q.k) + '. ' + q.a[q.k] + '。') + '依据：' + (q.pg || q.src || '安规题库') + '。', null, { confirm: false }); },
   'doc-save-safety'() { const docs = LS.get('docs', {}); docs['safetyday'] = { t: '安全日讲稿 · 二次室作业验电与交换机取电复核', ts: Date.now(), body: SAFETYPG.DOC.join('\n'), adopted: true }; LS.set('docs', docs); XW.answer('存到文稿中心了，安全活动台账里本月安全日记为 2 次（含这次）。', null, { confirm: false }); }
 });
+
+/* ===== 9/21 管理功能意图（班组画像 / 技能矩阵 / 培养 / 绩效 / 关怀 / 参谋；管理者：指标 / 对比 / 画像 / 人员 / 结构 / 风险 / 关怀 / 参谋） ===== */
+(function () {
+  const ask0 = XW.ask;
+  const R = [
+    [/五星|星级|建设差距|党建|荣誉/, () => role() === 'manager' ? nav('portrait') : nav('team')],
+    [/断层|技能矩阵|谁能带|技师梯队/, () => nav('skills')],
+    [/师带徒|带得怎么样|骨干培养|申报|梯队/, () => role() === 'manager' ? nav('portrait') : nav('grow')],
+    [/系数|激励|绩效/, () => nav('perf')],
+    [/入职满|写一段话|记一次|关怀|慰问|最近怎么样/, () => role() === 'manager' ? nav('mcare') : nav('care')],
+    [/缺什么|值得培养|诊断报告|参谋/, () => role() === 'manager' ? nav('madvise') : nav('advise')],
+    [/红灯|指标|督办|下钻/, () => nav('goals')],
+    [/最忙|调人|横向|差多少/, () => nav('compare')],
+    [/在岗|技师有几个|六维|画像/, () => nav('staff')],
+    [/最弱|轮岗建议|年龄结构/, () => nav('structure')],
+    [/敏感岗位|考勤异常|借调多久/, () => nav('risks')],
+    [/面谈提纲|座谈会|长病/, () => nav('mcare')],
+    [/人均工作量|补人|五年/, () => nav('madvise', 'trend')],
+    [/综合分析报告/, () => { ensure('madvise', () => XW.at(300, () => ACT['ma-gen']({ dataset: { k: 'all' } }))); }]
+  ];
+  XW.ask = function (text, voice) {
+    if (text && !XW._expWait) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { hit[1](); XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
+    ask0.call(XW, text, voice);
+  };
+})();

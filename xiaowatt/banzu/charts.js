@@ -1,5 +1,5 @@
 /* ===== 手绘 SVG 图表（零依赖）：环形 / 横向条 / 折线面积 / 雷达 / 到期时间轴 / 计量条；悬停提示 + 点击下钻 ===== */
-const CPAL = ['#5a5bf0', '#e8791d', '#0f9bb0', '#d63384', '#2a9d4b', '#9a4dff']; // 类别色，固定顺序（已过色盲/对比校验）
+const CPAL = ['#1f5fbf', '#e8791d', '#0f9bb0', '#c2417f', '#2a9d4b', '#6b4de6']; // 类别色，固定顺序（已过色盲/对比校验）
 const CH = {
   tip: null,
   initTip() { if (this.tip) return; const t = document.createElement('div'); t.id = 'tip'; t.className = 'tip'; document.body.appendChild(t); this.tip = t;

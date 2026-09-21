@@ -1,5 +1,5 @@
 /* ===== 小图表（对话气泡与页面内嵌）：条 / 柱 / 环 / 线 / 雷达 / 时间轴 / 热力 / 甘特 / 漏斗 / 分组柱；同一套类别色 CPAL，顺序色 RAMP ===== */
-const RAMP = ['#eef0fb', '#c9cbf5', '#9a9cf5', '#6f70f0', '#5a5bf0', '#3d3ec7'];
+const RAMP = ['#eaf0fa', '#c5d5ef', '#93b1e0', '#5d88cf', '#1f5fbf', '#164a96'];
 CH.mini = {
   W: 300,
   attrs(o) { return (o.act ? ' data-act="' + h(o.act) + '"' : '') + (o.who ? ' data-who="' + h(o.who) + '"' : '') + (o.id != null ? ' data-id="' + h(o.id) + '"' : '') + (o.k != null ? ' data-k="' + h(o.k) + '"' : '') + (o.i != null ? ' data-i="' + o.i + '"' : '') + (o.tip ? ' data-tip="' + h(o.tip) + '"' : ''); },
