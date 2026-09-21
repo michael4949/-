@@ -77,7 +77,23 @@
       });
       root.appendChild(chat);
     }
-    return { root: root, work: work, body: body, tabs: tabEls, chat: chat };
+    /* 现场引导：屏底「下一步」+ 指向本屏该点那个按钮的箭头。
+       下一屏由 tabs 顺序自动算（跳过禁用的），模块不用额外写一行。 */
+    var guide = null;
+    if (window.DGG && window.DGG.guide && o.tabs && o.tabs.length) {
+      var list = o.tabs, ai = -1, i2;
+      for (i2 = 0; i2 < list.length; i2++) if (list[i2].key === o.active) { ai = i2; break; }
+      var nx = null;
+      for (i2 = ai + 1; i2 < list.length; i2++) if (!list[i2].disabled) { nx = list[i2]; break; }
+      guide = window.DGG.guide.mount({
+        root: root, work: work, barHost: body,
+        id: (o.chat && o.chat.id) || o.mark, step: o.active,
+        nextKey: nx ? nx.key : null, nextLabel: nx ? nx.label : '',
+        onNext: function (key) { if (o.onTab) o.onTab(key); },
+        onHome: function () { if (window.DGG.shell && window.DGG.shell.go) window.DGG.shell.go('home'); }
+      });
+    }
+    return { root: root, work: work, body: body, tabs: tabEls, chat: chat, guide: guide };
   }
 
   /* ---------- 基础件 ---------- */
