@@ -505,6 +505,17 @@
   function kvB(rows) { return { type: 'kv', rows: rows }; }
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  function wan(n) { return Math.round((+n || 0) / 1000) / 10; }         /* 元 → 万元，留一位 */
+  function weekChart(R, title, extra) {
+    var f = R.forecast, sx = [{ name: '周末余额', data: f.weeks.map(function (w) { return wan(w.ending); }) }];
+    if (extra) sx.push(extra);
+    return chartB({ chart: 'line', title: title || '13 周现金余额', unit: ' 万元',
+      labels: f.weeks.map(function (w) { return w.label; }), series: sx, note: '安全线 ' + wan(f.safety) + ' 万元' });
+  }
   function textB(t) { return { type: 'text', text: t }; }
   function screens() { return SCREENS.map(function (s) { return { key: s[0], label: s[1] }; }); }
   function badRows(R) { return R.reconcile.rows.filter(function (r) { return r.status === 'bad'; }); }
@@ -547,25 +558,47 @@
   function brief(step, data, lib, result) {
     if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), k = R.kpi, rec = R.reconcile, rk = R.risks, f = R.forecast, po = R.policies, m = rec.metrics;
-    if (step === 'connect') return '银行对账单余额 ' + W(m.bankBalance) + '，账面货币资金 ' + W(m.cashLedger) + '，差 ' + W(Math.abs(m.bankBalance - m.cashLedger)) + '，这笔要在勾稽里落账。';
-    if (step === 'board') return gapText(R) + '；本期收入 ' + W(k.rev) + '（环比 ' + (k.revMoM >= 0 ? '+' : '') + neg(k.revMoM) + '%），经营现金流 ' + W(k.cfo) + '。';
+    if (step === 'connect') return {
+      text: '银行对账单余额 ' + W(m.bankBalance) + '，账面货币资金 ' + W(m.cashLedger) + '，差 ' + W(Math.abs(m.bankBalance - m.cashLedger)) + '，这笔要在勾稽里落账。',
+      blocks: [chartB({ chart: 'column', title: '对账单与账面', unit: ' 万元', labels: ['对账单', '账面'], series: ser('万元', [wan(m.bankBalance), wan(m.cashLedger)]) })] };
+    if (step === 'board') return {
+      text: gapText(R) + '；本期收入 ' + W(k.rev) + '（环比 ' + (k.revMoM >= 0 ? '+' : '') + neg(k.revMoM) + '%），经营现金流 ' + W(k.cfo) + '。',
+      blocks: [weekChart(R)] };
     if (step === 'recon') {
       var b = badRows(R);
       if (!b.length) return rec.rows.length + ' 条勾稽关系全部在容差内，本期无需调整。';
       var r3 = rec.rows.filter(function (r) { return r.id === 'R03' && r.status !== 'ok'; })[0], r7 = rec.rows.filter(function (r) { return r.id === 'R07' && r.status !== 'ok'; })[0];
-      if (r3 && r7) return '一笔到账货款 ' + W(Math.abs(r3.diff)) + '没入账，同时抬高应收、压低账面现金，R03 与 R07 是同一件事。';
-      return b[0].id + ' ' + b[0].name + '差 ' + W(Math.abs(b[0].diff)) + '，容差 ' + fmtN(b[0].tol) + ' 元，' + b.length + ' 处异常里数额居前。';
+      var bc = [chartB({ chart: 'bar', title: '各处异常差异', unit: ' 万元',
+        labels: b.slice(0, 6).map(function (x) { return x.id; }), series: ser('差异', b.slice(0, 6).map(function (x) { return Math.abs(wan(x.diff)); })) })];
+      if (r3 && r7) return { text: '一笔到账货款 ' + W(Math.abs(r3.diff)) + '没入账，同时抬高应收、压低账面现金，R03 与 R07 是同一件事。', blocks: bc, ref: r3.id };
+      return { text: b[0].id + ' ' + b[0].name + '差 ' + W(Math.abs(b[0].diff)) + '，容差 ' + fmtN(b[0].tol) + ' 元，' + b.length + ' 处异常里数额居前。', blocks: bc, ref: b[0].id };
     }
-    if (step === 'risk') { var t = rk.rows[0]; return t.id + ' ' + t.name + '：概率 ' + Math.round(t.prob * 100) + '%，影响 ' + W(t.impact) + '；指标 ' + rv(t) + '，参考 ' + rband(t) + '。'; }
+    if (step === 'risk') {
+      var t = rk.rows[0], rr = rk.rows.slice(0, 8);
+      return {
+        text: t.id + ' ' + t.name + '：概率 ' + Math.round(t.prob * 100) + '%，影响 ' + W(t.impact) + '；指标 ' + rv(t) + '，参考 ' + rband(t) + '。',
+        blocks: [chartB({ chart: 'scatter', title: '概率 × 影响', xLabel: '概率 %', yLabel: '影响 万元',
+          series: ser('风险', rr.map(function (x) { return [Math.round(x.prob * 100), wan(x.impact)]; })) })],
+        ref: t.id
+      };
+    }
     if (step === 'cash') {
       var co = cashOptions(data, lib), pick = optOf(co.options, co.recommend);
-      if (f.gap) return '第 ' + (f.minWeek + 1) + ' 周现金 ' + W(f.minEnding) + '，缺口 ' + W(f.gap) + '，' + f.gapWeeks.length + ' 周低于安全线；方案 ' + pick.key + ' ' + pick.name + '能拉回 ' + W(pick.minEnding) + '。';
-      return '13 周低点 ' + W(f.minEnding) + '（第 ' + (f.minWeek + 1) + ' 周），高于安全线 ' + W(f.minEnding - f.safety) + '，窗口内无缺口周。';
+      var ac = [chartB({ chart: 'area', title: '13 周现金余额', unit: ' 万元',
+        labels: f.weeks.map(function (w) { return w.label; }), series: ser('周末余额', f.weeks.map(function (w) { return wan(w.ending); })),
+        note: '安全线 ' + wan(f.safety) + ' 万元' })];
+      if (f.gap) return { text: '第 ' + (f.minWeek + 1) + ' 周现金 ' + W(f.minEnding) + '，缺口 ' + W(f.gap) + '，' + f.gapWeeks.length + ' 周低于安全线；方案 ' + pick.key + ' ' + pick.name + '能拉回 ' + W(pick.minEnding) + '。', blocks: ac };
+      return { text: '13 周低点 ' + W(f.minEnding) + '（第 ' + (f.minWeek + 1) + ' 周），高于安全线 ' + W(f.minEnding - f.safety) + '，窗口内无缺口周。', blocks: ac };
     }
     if (step === 'policy') {
       var ok = po.rows.filter(function (p) { return p.status === 'ok'; }).sort(function (a, b2) { return b2.amount - a.amount; });
       if (!ok.length) return po.rows.length + ' 项政策按账套核对后暂无可享项，待补材料 ' + po.counts.pending + ' 项。';
-      return '可享 ' + po.counts.ok + ' 项预计 ' + W(po.amountOk) + '，其中' + ok[0].name + '预计 ' + W(ok[0].amount) + '；待补材料 ' + po.counts.pending + ' 项。';
+      return {
+        text: '可享 ' + po.counts.ok + ' 项预计 ' + W(po.amountOk) + '，其中' + ok[0].name + '预计 ' + W(ok[0].amount) + '；待补材料 ' + po.counts.pending + ' 项。',
+        blocks: [chartB({ chart: 'bar', title: '可享政策预计金额', unit: ' 万元',
+          labels: ok.slice(0, 5).map(function (x) { return cut(x.name, 7); }), series: ser('万元', ok.slice(0, 5).map(function (x) { return wan(x.amount); })) })],
+        ref: ok[0].id
+      };
     }
     return null;
   }
@@ -585,7 +618,9 @@
   /* 勾稽 / 风险 / 政策三张卡片的统一措辞，本屏与全局点名共用 */
   function ruleCard(rr, step) {
     return { text: rr.id + ' ' + rr.name + '（' + rr.pair + '）：' + (rr.status === 'na' ? '本企业无此科目。' : rr.lhsLabel + ' ' + fmtN(rr.lhs) + ' 元，' + rr.rhsLabel + ' ' + fmtN(rr.rhs) + ' 元，差 ' + fmtN(rr.diff) + ' 元，容差 ' + fmtN(rr.tol) + ' 元。' + rr.explain + '。'),
-      blocks: [kvB([['判断', STAT_NAME[rr.status]], ['差异', fmtN(rr.diff) + ' 元'], ['建议', rr.fixed ? '已调整' : rr.fix ? rr.fix.label + ' ' + fmtN(rr.fix.amount) + ' 元' : '核实原始凭证']])],
+      blocks: (rr.status === 'na' ? [] : [chartB({ chart: 'waterfall', title: rr.id + ' 两边差在哪', unit: ' 万元',
+        labels: [cut(rr.lhsLabel, 5), cut(rr.rhsLabel, 5), '差异'], series: ser('万元', [wan(rr.lhs), -wan(rr.rhs), null]) })])
+        .concat([kvB([['判断', STAT_NAME[rr.status]], ['差异', fmtN(rr.diff) + ' 元'], ['建议', rr.fixed ? '已调整' : rr.fix ? rr.fix.label + ' ' + fmtN(rr.fix.amount) + ' 元' : '核实原始凭证']])]),
       ref: step === 'recon' ? rr.id : null, act: { type: 'open', panel: 'rule', ref: rr.id } };
   }
   /* 点名字问到的那一条：措辞比点编号短一截，本屏问时不带小表也不重复关系对；
@@ -593,27 +628,34 @@
   function ruleCardNamed(nn, step, blocks, withPair) {
     var out = { text: nn.id + ' ' + nn.name + (withPair ? '（' + nn.pair + '）' : '') + '：' + (nn.status === 'na' ? '本企业无此科目。' : nn.lhsLabel + ' ' + fmtN(nn.lhs) + ' 元，' + nn.rhsLabel + ' ' + fmtN(nn.rhs) + ' 元，差 ' + fmtN(nn.diff) + ' 元，' + STAT_NAME[nn.status] + '。' + nn.explain + '。'),
       ref: step === 'recon' ? nn.id : null, act: { type: 'open', panel: 'rule', ref: nn.id } };
-    if (blocks) out.blocks = [kvB([['判断', STAT_NAME[nn.status]], ['差异', fmtN(nn.diff) + ' 元'], ['建议', nn.fixed ? '已调整' : nn.fix ? nn.fix.label + ' ' + fmtN(nn.fix.amount) + ' 元' : '核实原始凭证']])];
+    if (blocks) out.blocks = (nn.status === 'na' ? [] : [chartB({ chart: 'waterfall', title: nn.id + ' 两边差在哪', unit: ' 万元',
+      labels: [cut(nn.lhsLabel, 5), cut(nn.rhsLabel, 5), '差异'], series: ser('万元', [wan(nn.lhs), -wan(nn.rhs), null]) })])
+      .concat([kvB([['判断', STAT_NAME[nn.status]], ['差异', fmtN(nn.diff) + ' 元'], ['建议', nn.fixed ? '已调整' : nn.fix ? nn.fix.label + ' ' + fmtN(nn.fix.amount) + ' 元' : '核实原始凭证']])]);
     return out;
   }
   function riskCard(kr, step) {
     return { text: kr.id + ' ' + kr.name + '：' + kr.metricLabel + ' ' + rv(kr) + '，参考 ' + rband(kr) + '，概率 ' + Math.round(kr.prob * 100) + '%，影响 ' + W(kr.impact) + '（' + kr.impactNote + '）。\n' + kr.evidence[0] + '。',
-      blocks: [tagsB(kr.evidence.slice(1, 4).map(function (e) { return cut(e, 22); }))],
+      blocks: (kr.unit === '%' ? [chartB({ chart: 'gauge', title: cut(kr.metricLabel, 12), unit: '%', value: kr.value,
+        max: Math.max(100, Math.ceil(kr.value / 10) * 10), target: kr.dir === 'high' ? kr.band[1] : kr.band[0] })] : [])
+        .concat([tagsB(kr.evidence.slice(1, 4).map(function (e) { return cut(e, 22); }))]),
       ref: step === 'risk' ? kr.id : null, act: { type: 'open', panel: 'risk', ref: kr.id } };
   }
   function policyCard(pr, step) {
     return { text: pr.name + '（' + pr.level + '）：' + PSTAT_NAME[pr.status] + '。' + pr.reason + '。' + (pr.amount ? '预计 ' + W(pr.amount) + '，申报窗口 ' + pr.window + '。' : ''),
-      blocks: [tagsB(pr.need.slice(0, 3))],
+      blocks: [{ type: 'metric', items: [{ label: '核对', value: PSTAT_NAME[pr.status], tone: pr.status === 'ok' ? 'ok' : pr.status === 'pending' ? 'warn' : 'info' },
+        { label: '预计', value: pr.amount ? W(pr.amount) : '—' }] }, tagsB(pr.need.slice(0, 3))],
       ref: step === 'policy' ? pr.id : null, act: { type: 'open', panel: 'policy', ref: pr.id } };
   }
   function cashOption(co, i, q) {
     var o = co.options[i];
     var other = co.options.filter(function (x) { return x.clears && x.key !== o.key; })[0];
     var addon = o.clears || !other ? '' : '，补平要叠加方案 ' + other.key + ' ' + other.name;
+    var cmp = chartB({ chart: 'column', title: '各方案 13 周低点', unit: ' 万元',
+      labels: co.options.map(function (x) { return x.key; }), series: ser('低点', co.options.map(function (x) { return wan(x.minEnding); })) });
     if (askRun(q)) return { text: '已按方案 ' + o.key + ' ' + o.name + '执行：13 周低点 ' + W(o.minEnding) + (o.clears ? '，回到安全线以上。' : '，仍差 ' + W(o.gap) + addon + '。'),
-      act: { type: 'apply', action: 'apply-cash-option', input: { key: o.key } } };
+      blocks: [cmp], act: { type: 'apply', action: 'apply-cash-option', input: { key: o.key } } };
     return { text: '方案 ' + o.key + ' ' + o.name + '：13 周低点 ' + W(o.minEnding) + '，' + (o.clears ? '回到安全线以上' : '仍差 ' + W(o.gap) + '，单靠这一条补不平' + addon) + '；' + (o.cost ? '利息 ' + fmtN(o.cost) + ' 元' : '不增加资金成本') + '，' + o.side + '。这一步只做测算，本期处置未动。',
-      act: { type: 'open', panel: 'option', ref: o.key } };
+      blocks: [cmp], act: { type: 'open', panel: 'option', ref: o.key } };
   }
 
   /* 问答：认得的问法逐条作答，答不上返回 null 交给平台兜底 */
@@ -644,10 +686,16 @@
     if (m) {
       var wi = Math.max(0, Math.min(f.weeks.length - 1, (+m[1]) - 1)), ww = f.weeks[wi];
       return { text: '第 ' + (wi + 1) + ' 周（' + ww.label + ' 起）：期初 ' + W(ww.opening) + '，流入 ' + W(ww.inflow) + '，流出 ' + W(ww.outflow) + '，周末 ' + W(ww.ending) + (ww.ending < f.safety ? '，低于安全线 ' + W(f.safety - ww.ending) + '。' : '。'),
-        blocks: [weekItems(ww)], act: { type: 'open', panel: 'week', ref: wi } };
+        blocks: [chartB({ chart: 'waterfall', title: '第 ' + (wi + 1) + ' 周资金', unit: ' 万元', labels: ['期初', '流入', '流出', '周末'],
+          series: ser('万元', [wan(ww.opening), wan(ww.inflow), -wan(ww.outflow), null]) }), weekItems(ww)],
+        act: { type: 'open', panel: 'week', ref: wi } };
     }
     /* 换屏 */
-    if (has(q, ['进财务驾驶舱', '驾驶舱', '开始分析'])) return { text: '本期收入 ' + W(k.rev) + '，勾稽异常 ' + rec.counts.bad + ' 处，高风险 ' + rk.counts.high + ' 项，' + gapText(R) + '。', act: { type: 'goto', step: 'board' } };
+    if (has(q, ['进财务驾驶舱', '驾驶舱', '开始分析'])) return {
+      text: '本期收入 ' + W(k.rev) + '，勾稽异常 ' + rec.counts.bad + ' 处，高风险 ' + rk.counts.high + ' 项，' + gapText(R) + '。',
+      blocks: [chartB({ chart: 'line', title: '近 12 期收入', unit: ' 万元',
+        labels: R.statements.pl.map(function (p) { return p.label; }), series: ser('收入', R.statements.pl.map(function (p) { return wan(p.rev); })) })],
+      act: { type: 'goto', step: 'board' } };
 
     if (step === 'connect') {
       if (has(q, ['直连', '来源', '同步', '导入', '几个'])) {
@@ -658,7 +706,9 @@
       if (has(q, ['差多少', '对账单', '银行', '货币资金'])) {
         var mm = rec.metrics;
         return { text: '银行对账单 ' + fmtN(mm.bankBalance) + ' 元，账面货币资金 ' + fmtN(mm.cashLedger) + ' 元，差 ' + fmtN(mm.bankBalance - mm.cashLedger) + ' 元，落在 R07。',
-          blocks: [kvB([['对账单余额', fmtN(mm.bankBalance) + ' 元'], ['账面货币资金', fmtN(mm.cashLedger) + ' 元'], ['差额', fmtN(mm.bankBalance - mm.cashLedger) + ' 元']])],
+          blocks: [chartB({ chart: 'column', title: '对账单与账面', unit: ' 万元', labels: ['对账单', '账面', '差额'],
+            series: ser('万元', [wan(mm.bankBalance), wan(mm.cashLedger), wan(mm.bankBalance - mm.cashLedger)]) }),
+            kvB([['对账单余额', fmtN(mm.bankBalance) + ' 元'], ['账面货币资金', fmtN(mm.cashLedger) + ' 元'], ['差额', fmtN(mm.bankBalance - mm.cashLedger) + ' 元']])],
           act: { type: 'open', panel: 'rule', ref: 'R07' } };
       }
       if (has(q, ['能力', '开通', '能做'])) return { text: '已开通 4 项：' + CAP_NAMES.join('、') + '。' };
@@ -667,45 +717,61 @@
 
     if (step === 'board') {
       if (has(q, ['最紧', '吃紧', '哪一周', '缺口', '现金'])) return { text: gapText(R) + (f.gapWeeks.length ? '，缺口周：' + f.gapWeeks.map(function (x) { return '第 ' + (x + 1) + ' 周'; }).join('、') : '') + '。',
-        blocks: [tableB(['周', '周末余额'], f.weeks.slice(0, 6).map(function (x, idx) { return ['第 ' + (idx + 1) + ' 周', fmtN(x.ending)]; }))],
+        blocks: [weekChart(R)],
         act: { type: 'open', panel: 'week', ref: f.gapWeeks.length ? f.gapWeeks[0] : f.minWeek } };
       if (has(q, ['毛利', '为什么降', '收入'])) {
         var l3 = R.statements.pl.slice(-3);
         return { text: '本期收入 ' + W(k.rev) + '，环比 ' + (k.revMoM >= 0 ? '+' : '') + neg(k.revMoM) + '%；毛利率 ' + k.gm + '%，上期 ' + k.gmPrev + '%。近三期 ' + l3.map(function (p) { return (Math.round(p.gm * 1000) / 10) + '%'; }).join(' → ') + '。',
-          blocks: [tableB(['期间', '收入', '毛利率'], l3.map(function (p) { return [p.label, fmtN(Math.round(p.rev / 10000)) + ' 万', (Math.round(p.gm * 1000) / 10) + '%']; }))] };
+          blocks: [chartB({ chart: 'line', title: '近 12 期毛利率', unit: '%',
+            labels: R.statements.pl.map(function (p) { return p.label; }), series: ser('毛利率', R.statements.pl.map(function (p) { return Math.round(p.gm * 1000) / 10; })) }),
+            tableB(['期间', '收入', '毛利率'], l3.map(function (p) { return [p.label, fmtN(Math.round(p.rev / 10000)) + ' 万', (Math.round(p.gm * 1000) / 10) + '%']; }))] };
       }
       if (has(q, ['异常', '勾稽', '几处'])) return { text: '勾稽 ' + rec.rows.length + ' 条，异常 ' + rec.counts.bad + ' 处、正常 ' + rec.counts.ok + ' 条，已调整 ' + rec.counts.fixed + ' 笔。',
-        blocks: [tableB(['编号', '关系', '差异'], badRows(R).slice(0, 5).map(function (r) { return [r.id, cut(r.name, 10), fmtN(r.diff)]; }))],
+        blocks: [chartB({ chart: 'donut', title: '勾稽核对', unit: ' 条', total: rec.rows.length, labels: ['正常', '异常'], series: ser('条数', [rec.counts.ok, rec.counts.bad]) }),
+          tableB(['编号', '关系', '差异'], badRows(R).slice(0, 5).map(function (r) { return [r.id, cut(r.name, 10), fmtN(r.diff)]; }))],
         act: { type: 'goto', step: 'recon' } };
       if (has(q, ['先处理', '建议', '哪一件', '怎么办', '优先'])) {
         var t2 = rk.rows[0], b2 = badRows(R)[0];
         return { text: '先看 ' + t2.id + ' ' + t2.name + '：概率 ' + Math.round(t2.prob * 100) + '%、影响 ' + W(t2.impact) + '，动作是' + t2.actions[0].label + '；勾稽这边先调 ' + (b2 ? b2.id + ' ' + b2.name : '无') + '。',
+          blocks: [chartB({ chart: 'bar', title: '风险影响', unit: ' 万元',
+            labels: rk.rows.slice(0, 5).map(function (r) { return r.id; }), series: ser('影响', rk.rows.slice(0, 5).map(function (r) { return wan(r.impact); })) })],
           act: { type: 'open', panel: 'risk', ref: t2.id } };
       }
       if (has(q, ['风险', '高风险'])) return { text: '高 ' + rk.counts.high + ' 项、中 ' + rk.counts.mid + ' 项、已处置 ' + rk.counts.handled + ' 项；影响合计 ' + W(rk.rows.reduce(function (t, r) { return t + r.impact; }, 0)) + '。',
-        blocks: [tableB(['编号', '风险', '影响'], rk.rows.slice(0, 5).map(function (r) { return [r.id, cut(r.name, 8), W(r.impact)]; }))], act: { type: 'goto', step: 'risk' } };
-      if (has(q, ['政策', '可享', '退税'])) return { text: '可享 ' + po.counts.ok + ' 项预计 ' + W(po.amountOk) + '，待补材料 ' + po.counts.pending + ' 项。', act: { type: 'goto', step: 'policy' } };
+        blocks: [chartB({ chart: 'bar', title: '风险影响', unit: ' 万元',
+          labels: rk.rows.slice(0, 5).map(function (r) { return r.id; }), series: ser('影响', rk.rows.slice(0, 5).map(function (r) { return wan(r.impact); })) })],
+        act: { type: 'goto', step: 'risk' } };
+      if (has(q, ['政策', '可享', '退税'])) return { text: '可享 ' + po.counts.ok + ' 项预计 ' + W(po.amountOk) + '，待补材料 ' + po.counts.pending + ' 项。',
+        blocks: [chartB({ chart: 'donut', title: '政策核对', unit: ' 项', total: po.rows.length, labels: ['可享', '待补材料', '不适用'],
+          series: ser('项数', [po.counts.ok, po.counts.pending, Math.max(0, po.rows.length - po.counts.ok - po.counts.pending)]) })],
+        act: { type: 'goto', step: 'policy' } };
     }
 
     if (step === 'recon') {
       var cur = curRule(R, sel);
       if (has(q, ['哪几条', '哪些异常', '异常', '几处'])) return { text: rec.counts.bad + ' 处异常：' + badRows(R).map(function (r) { return r.id + ' ' + r.name + ' 差 ' + fmtN(r.diff) + ' 元'; }).join('；') + '。',
-        blocks: [tableB(['编号', '关系', '差异'], badRows(R).map(function (r) { return [r.id, cut(r.name, 10), fmtN(r.diff)]; }))],
+        blocks: [chartB({ chart: 'bar', title: '各处异常差异', unit: ' 万元',
+          labels: badRows(R).map(function (r) { return r.id; }), series: ser('差异', badRows(R).map(function (r) { return Math.abs(wan(r.diff)); })) }),
+          tableB(['编号', '关系', '差异'], badRows(R).map(function (r) { return [r.id, cut(r.name, 10), fmtN(r.diff)]; }))],
         ref: badRows(R).length ? badRows(R)[0].id : null };
       if (has(q, ['为什么', '怎么回事', '原因', '依据'])) return { text: cur.id + ' ' + cur.name + '：' + cur.lhsLabel + ' ' + fmtN(cur.lhs) + ' 元，' + cur.rhsLabel + ' ' + fmtN(cur.rhs) + ' 元。' + cur.explain + '。' + (rec.reasons.filter(function (t) { return t.indexOf('同源') >= 0; }).length && (cur.id === 'R03' || cur.id === 'R07') ? '\n' + rec.reasons.filter(function (t) { return t.indexOf('同源') >= 0; })[0] + '。' : ''),
+        blocks: [chartB({ chart: 'waterfall', title: cur.id + ' 两边差在哪', unit: ' 万元', labels: [cut(cur.lhsLabel, 5), cut(cur.rhsLabel, 5), '差异'],
+          series: ser('万元', [wan(cur.lhs), -wan(cur.rhs), null]) })],
         ref: cur.id };
       if (has(q, ['调整', '分录', '按建议', '改过来', '落账'])) {
         if (cur.fixed) return { text: cur.id + ' 已生成调整分录，待会计复核。', ref: cur.id };
         if (!cur.fix) return { text: cur.id + ' ' + cur.name + '没有可自动生成的分录，需要会计核对原始凭证。', ref: cur.id };
         return { text: '已按建议生成分录：' + cur.fix.label + ' ' + fmtN(cur.fix.amount) + ' 元。' + cur.fix.entry.map(function (e) { return e.join(' '); }).join('；') + '，三表与月报已重算。',
-          blocks: [tableB(['方向', '科目', '金额'], cur.fix.entry)],
+          blocks: [chartB({ chart: 'column', title: '调整前后差异', unit: ' 万元', labels: ['调整前', '调整后'], series: ser('万元', [Math.abs(wan(cur.diff)), 0] ) }),
+            tableB(['方向', '科目', '金额'], cur.fix.entry)],
           act: { type: 'apply', action: 'apply-fix', input: { rule: cur.id } } };
       }
       if (has(q, ['下钻', '明细', '未达', '单据', '看看'])) {
         if (!cur.drill) return null;
         var dr2 = cur.drill;
         return { text: cur.id + ' 下钻：' + dr2.title + '，' + (dr2.type === 'table' ? dr2.rows.length + ' 条。' : (dr2.rows.length + ' 项。')),
-          blocks: [dr2.type === 'table' ? tableB(dr2.cols.slice(0, 4), dr2.rows.slice(0, 5).map(function (r) { return r.slice(0, 4); })) : tableB(['项目', '金额'], dr2.rows)],
+          blocks: [dr2.type === 'table' ? tableB(dr2.cols.slice(0, 4), dr2.rows.slice(0, 5).map(function (r) { return r.slice(0, 4); })) : tableB(['项目', '金额'], dr2.rows),
+            chartB({ chart: 'column', title: cur.id + ' 两边', unit: ' 万元', labels: [cut(cur.lhsLabel, 5), cut(cur.rhsLabel, 5)], series: ser('万元', [wan(cur.lhs), wan(cur.rhs)]) })],
           ref: cur.id, act: { type: 'open', panel: 'drill', ref: cur.id } };
       }
       var nn = byName(q, rec.rows);
@@ -718,17 +784,29 @@
       if (has(q, ['高风险', '哪几项', '哪些风险'])) {
         var hi = rk.rows.filter(function (r) { return r.level === 'high'; });
         return { text: hi.length ? '高风险 ' + hi.length + ' 项：' + hi.map(function (r) { return r.id + ' ' + r.name + '（概率 ' + Math.round(r.prob * 100) + '%、影响 ' + W(r.impact) + '）'; }).join('；') + '。' : '当前无高风险项，中风险 ' + rk.counts.mid + ' 项。',
-          blocks: [tableB(['编号', '风险', '概率', '影响'], rk.rows.slice(0, 5).map(function (r) { return [r.id, cut(r.name, 8), Math.round(r.prob * 100) + '%', W(r.impact)]; }))],
+          blocks: [chartB({ chart: 'scatter', title: '概率 × 影响', xLabel: '概率 %', yLabel: '影响 万元',
+            series: ser('风险', rk.rows.slice(0, 8).map(function (r) { return [Math.round(r.prob * 100), wan(r.impact)]; })) }),
+            tableB(['编号', '风险', '概率', '影响'], rk.rows.slice(0, 5).map(function (r) { return [r.id, cut(r.name, 8), Math.round(r.prob * 100) + '%', W(r.impact)]; }))],
           ref: hi.length ? hi[0].id : null };
       }
-      if (has(q, ['一共', '合计', '多少钱', '影响'])) return { text: '影响金额合计 ' + W(rk.rows.reduce(function (t, r) { return t + r.impact; }, 0)) + '，高风险占 ' + W(rk.rows.filter(function (r) { return r.level === 'high'; }).reduce(function (t, r) { return t + r.impact; }, 0)) + '；应收逾期 ' + W(rk.arOverdue) + '，其中 90 天以上 ' + W(rk.arOverdue90) + '。' };
+      if (has(q, ['一共', '合计', '多少钱', '影响'])) {
+        var lv = ['high', 'mid', 'low'], lvn = ['高', '中', '低'];
+        var lvs = lv.map(function (L) { return wan(rk.rows.filter(function (r) { return r.level === L; }).reduce(function (t, r) { return t + r.impact; }, 0)); });
+        return { text: '影响金额合计 ' + W(rk.rows.reduce(function (t, r) { return t + r.impact; }, 0)) + '，高风险占 ' + W(rk.rows.filter(function (r) { return r.level === 'high'; }).reduce(function (t, r) { return t + r.impact; }, 0)) + '；应收逾期 ' + W(rk.arOverdue) + '，其中 90 天以上 ' + W(rk.arOverdue90) + '。',
+          blocks: [chartB({ chart: 'donut', title: '影响按等级', unit: ' 万元', total: lvs[0] + lvs[1] + lvs[2], labels: lvn, series: ser('万元', lvs) })] };
+      }
       if (has(q, ['依据', '证据', '为什么', '怎么算'])) return { text: cr.id + ' ' + cr.name + '：' + cr.metricLabel + ' ' + rv(cr) + '，参考 ' + rband(cr) + (cr.inBand ? '，在参考带内，按影响金额列入关注。' : '，超出参考带。') + '\n' + cr.evidence.slice(0, 2).join('；') + '。',
+        blocks: cr.unit === '%' ? [chartB({ chart: 'gauge', title: cut(cr.metricLabel, 12), unit: '%', value: cr.value,
+          max: Math.max(100, Math.ceil(cr.value / 10) * 10), target: cr.dir === 'high' ? cr.band[1] : cr.band[0] })] : [],
         ref: cr.id };
       if (has(q, ['处置', '怎么办', '执行', '动作'])) {
         var todo = cr.actions.filter(function (a) { return !cr.handled.filter(function (x) { return x.key === a.key; }).length; });
         if (!todo.length) return { text: cr.id + ' ' + cr.name + ' 的处置动作都已执行，概率已下调到 ' + Math.round(cr.prob * 100) + '%。', ref: cr.id };
         var a0 = todo[0];
+        var tot0 = rk.rows.reduce(function (t, r) { return t + r.impact; }, 0);
         return { text: '按 ' + cr.id + ' ' + cr.name + ' 执行「' + a0.label + '」：' + a0.desc + '。执行后概率下调，现金预测与月报一起重算。',
+          blocks: [chartB({ chart: 'waterfall', title: '影响合计的变化', unit: ' 万元', labels: ['当前', cr.id, '处置后'],
+            series: ser('万元', [wan(tot0), -wan(cr.impact), null]) })],
           act: { type: 'apply', action: 'apply-risk-action', input: { risk: cr.id, key: a0.key } } };
       }
       var nr = byName(q, rk.rows);
@@ -738,7 +816,9 @@
         var over = rk.aging.filter(function (a) { return a.overdueDays > 0; }).sort(function (a, b3) { return b3.overdueDays - a.overdueDays; });
         var k01 = rowById(rk.rows, 'K01') || rk.rows[0];
         return { text: '应收逾期 ' + W(rk.arOverdue) + '，90 天以上 ' + W(rk.arOverdue90) + '；逾期 ' + over.length + ' 笔。',
-          blocks: [tableB(['单号', '客户', '金额', '逾期'], over.slice(0, 4).map(function (a) { return [a.id, cut(a.customer, 12), fmtN(a.amount), a.overdueDays + ' 天']; }))],
+          blocks: [chartB({ chart: 'scatter', title: '逾期天数 × 金额', xLabel: '逾期天数', yLabel: '金额 万元',
+            series: ser('应收', over.slice(0, 10).map(function (a) { return [a.overdueDays, wan(a.amount)]; })) }),
+            tableB(['单号', '客户', '金额', '逾期'], over.slice(0, 4).map(function (a) { return [a.id, cut(a.customer, 12), fmtN(a.amount), a.overdueDays + ' 天']; }))],
           act: { type: 'open', panel: 'risk', ref: k01.id } };
       }
     }
@@ -746,10 +826,15 @@
     if (step === 'cash') {
       var co = cashOptions(data, lib), wi2 = curWeekIdx(R, sel), wkc = f.weeks[wi2];
       if (has(q, ['缺口', '差多少', '多少钱'])) return { text: f.gap ? '缺口 ' + W(f.gap) + '：13 周低点第 ' + (f.minWeek + 1) + ' 周 ' + W(f.minEnding) + '，安全线 ' + W(f.safety) + '，' + f.gapWeeks.length + ' 周低于安全线。' : '窗口内无缺口周，13 周低点 ' + W(f.minEnding) + '，高于安全线 ' + W(f.minEnding - f.safety) + '。',
+        blocks: [weekChart(R)],
         act: { type: 'open', panel: 'kpi', ref: 'gap' } };
-      if (has(q, ['最紧', '吃紧', '哪一周', '哪周'])) return { text: '第 ' + (f.minWeek + 1) + ' 周（' + f.weeks[f.minWeek].label + ' 起）吃紧，周末 ' + W(f.minEnding) + '；当周流出 ' + W(f.weeks[f.minWeek].outflow) + '。',
-        blocks: [weekItems(f.weeks[f.minWeek])],
-        act: { type: 'open', panel: 'week', ref: f.minWeek } };
+      if (has(q, ['最紧', '吃紧', '哪一周', '哪周'])) {
+        var mw = f.weeks[f.minWeek];
+        return { text: '第 ' + (f.minWeek + 1) + ' 周（' + mw.label + ' 起）吃紧，周末 ' + W(f.minEnding) + '；当周流出 ' + W(mw.outflow) + '。',
+          blocks: [chartB({ chart: 'waterfall', title: '第 ' + (f.minWeek + 1) + ' 周资金', unit: ' 万元', labels: ['期初', '流入', '流出', '周末'],
+            series: ser('万元', [wan(mw.opening), wan(mw.inflow), -wan(mw.outflow), null]) }), weekItems(mw)],
+          act: { type: 'open', panel: 'week', ref: f.minWeek } };
+      }
       if (has(q, ['催收', '方案 A', '方案A'])) return cashOption(co, 0, q);
       if (has(q, ['延付', '方案 B', '方案B'])) return cashOption(co, 1, q);
       if (has(q, ['授信', '提款', '100 万', '100万'])) {
@@ -757,45 +842,70 @@
         var f2 = forecast(data, { loanDraw: 1000000, loanDrawWeek: lw });
         var ic = Math.round(1000000 * d.cash.creditLine.rate / 12 * 3);
         return { text: '授信提款 100 万元（第 ' + (lw + 1) + ' 周提用）后：13 周低点 ' + W(f2.minEnding) + (f2.gap ? '，仍差 ' + W(f2.gap) : '，回到安全线以上') + '；按 ' + (d.cash.creditLine.rate * 100).toFixed(1) + '% 年化、用满三个月算利息 ' + fmtN(ic) + ' 元。已把这个开关打开重算。',
+          blocks: [chartB({ chart: 'line', title: '提款前后 13 周余额', unit: ' 万元', labels: f.weeks.map(function (w) { return w.label; }),
+            series: [{ name: '现状', data: f.weeks.map(function (w) { return wan(w.ending); }) }, { name: '提款后', data: f2.weeks.map(function (w) { return wan(w.ending); }) }],
+            note: '安全线 ' + wan(f.safety) + ' 万元' })],
           act: { type: 'set', path: 'cashScenario.loanDraw', value: 1000000 } };
       }
       if (has(q, ['融资', '方案 C', '方案C', '贷款', '额度'])) {
         var oc = co.options[2], runC = askRun(q);
         return { text: '方案 C ' + oc.name + '：' + d.cash.creditLine.bank + '授信额度 ' + W(d.cash.creditLine.limit) + '，按缺口提用 ' + W(oc.scenario.loanDraw) + '（第 ' + (oc.scenario.loanDrawWeek + 1) + ' 周），13 周低点 ' + W(oc.minEnding) + '，利息 ' + fmtN(oc.cost) + ' 元。' + (runC ? '已写回本期处置。' : '本期处置未动。'),
+          blocks: [chartB({ chart: 'column', title: '各方案 13 周低点', unit: ' 万元',
+            labels: co.options.map(function (x) { return x.key; }), series: ser('低点', co.options.map(function (x) { return wan(x.minEnding); })) })],
           act: runC ? { type: 'apply', action: 'apply-cash-option', input: { key: 'C' } } : { type: 'open', panel: 'option', ref: 'C' } };
       }
       if (has(q, ['推荐', '选哪个', '哪个方案', '怎么办'])) {
         var pk = optOf(co.options, co.recommend);
         return { text: '推荐方案 ' + pk.key + ' ' + pk.name + '：13 周低点 ' + W(pk.minEnding) + (pk.cost ? '，利息 ' + fmtN(pk.cost) + ' 元' : '，不增加资金成本') + '；' + pk.side + '。',
-          blocks: [tableB(['方案', '低点', '缺口周', '成本'], co.options.map(function (o) { return [o.key + ' ' + o.name, W(o.minEnding), o.gapWeeks + ' 周', o.cost ? fmtN(o.cost) : '0']; }))],
+          blocks: [chartB({ chart: 'column', title: '各方案 13 周低点', unit: ' 万元',
+            labels: co.options.map(function (o) { return o.key; }), series: ser('低点', co.options.map(function (o) { return wan(o.minEnding); })) }),
+            tableB(['方案', '低点', '缺口周', '成本'], co.options.map(function (o) { return [o.key + ' ' + o.name, W(o.minEnding), o.gapWeeks + ' 周', o.cost ? fmtN(o.cost) : '0']; }))],
           act: { type: 'apply', action: 'apply-cash-option', input: { key: co.recommend } } };
       }
       if (has(q, ['本周', '这一周', '明细', '收付'])) return { text: '第 ' + (wi2 + 1) + ' 周流入 ' + W(wkc.inflow) + '、流出 ' + W(wkc.outflow) + '、净额 ' + W(wkc.net) + '，' + wkc.items.length + ' 笔。',
-        blocks: [tableB(['项目', '金额'], wkc.items.slice(0, 5).map(function (it) { return [cut(it.label, 16), (it.amount < 0 ? '−' : '+') + fmtN(Math.abs(it.amount))]; }))],
+        blocks: [chartB({ chart: 'waterfall', title: '第 ' + (wi2 + 1) + ' 周资金', unit: ' 万元', labels: ['期初', '流入', '流出', '周末'],
+          series: ser('万元', [wan(wkc.opening), wan(wkc.inflow), -wan(wkc.outflow), null]) }),
+          tableB(['项目', '金额'], wkc.items.slice(0, 5).map(function (it) { return [cut(it.label, 16), (it.amount < 0 ? '−' : '+') + fmtN(Math.abs(it.amount))]; }))],
         act: { type: 'open', panel: 'week', ref: wi2 } };
     }
 
     if (step === 'policy') {
       if (has(q, ['多少钱', '可享', '合计', '预计'])) return { text: '可享 ' + po.counts.ok + ' 项预计 ' + W(po.amountOk) + '，待补材料 ' + po.counts.pending + ' 项预计 ' + W(po.amountPending) + '，已加入清单 ' + po.counts.listed + ' 项。',
-        blocks: [tableB(['政策', '核对', '预计金额'], po.rows.filter(function (p) { return p.status !== 'no'; }).slice(0, 5).map(function (p) { return [cut(p.name, 10), PSTAT_NAME[p.status], p.amount ? fmtN(p.amount) : '—']; }))] };
+        blocks: [chartB({ chart: 'bar', title: '各项预计金额', unit: ' 万元',
+          labels: po.rows.filter(function (p) { return p.status !== 'no'; }).slice(0, 5).map(function (p) { return cut(p.name, 7); }),
+          series: ser('万元', po.rows.filter(function (p) { return p.status !== 'no'; }).slice(0, 5).map(function (p) { return wan(p.amount); })) }),
+          tableB(['政策', '核对', '预计金额'], po.rows.filter(function (p) { return p.status !== 'no'; }).slice(0, 5).map(function (p) { return [cut(p.name, 10), PSTAT_NAME[p.status], p.amount ? fmtN(p.amount) : '—']; }))] };
       if (has(q, ['待补', '材料', '缺什么'])) {
         var pend = po.rows.filter(function (p) { return p.status === 'pending'; });
         return { text: pend.length ? '待补材料 ' + pend.length + ' 项：' + pend.map(function (p) { return p.name + '（补 ' + p.need[0] + '）'; }).join('；') + '。' : '没有待补材料的政策。',
-          blocks: pend.length ? [tableB(['政策', '需补', '窗口'], pend.map(function (p) { return [cut(p.name, 10), cut(p.need[0], 10), p.window]; }))] : null,
+          blocks: pend.length ? [chartB({ chart: 'bar', title: '待补材料项预计金额', unit: ' 万元',
+            labels: pend.map(function (p) { return cut(p.name, 7); }), series: ser('万元', pend.map(function (p) { return wan(p.amount); })) }),
+            tableB(['政策', '需补', '窗口'], pend.map(function (p) { return [cut(p.name, 10), cut(p.need[0], 10), p.window]; }))] : [],
           ref: pend.length ? pend[0].id : null };
       }
       if (has(q, ['加入', '清单', '申报'])) {
         var cand = po.rows.filter(function (p) { return p.status === 'ok' && !p.listed; }).sort(function (a, b4) { return b4.amount - a.amount; });
         var target = byName(q, po.rows) || cand[0];
         if (!target) return { text: '可享政策都已在申报清单里，合计预计 ' + W(po.amountListed) + '。' };
+        var listedNow = po.rows.filter(function (p) { return p.listed; }).reduce(function (t, p) { return t + p.amount; }, 0);
         return { text: '已把' + target.name + (target.listed ? '移出' : '加入') + '申报清单，预计 ' + W(target.amount) + '；材料要 ' + target.need.slice(0, 2).join('、') + '。',
+          blocks: [chartB({ chart: 'waterfall', title: '申报清单金额', unit: ' 万元', labels: ['原清单', target.id, '现清单'],
+            series: ser('万元', [wan(listedNow), (target.listed ? -1 : 1) * wan(target.amount), null]) })],
           act: { type: 'apply', action: 'toggle-policy', input: { id: target.id } } };
       }
       var np = byName(q, po.rows);
       if (np) return policyCard(np, step);
-      if (has(q, ['月报', '报告', '说了什么', '发给'])) return { text: negText(R.report.lines.slice(1, 4).join('\n')),
-        blocks: [tagsB(R.report.todo.slice(0, 3).map(function (t) { return cut(t, 18); }))] };
-      if (has(q, ['研发', '加计'])) return { text: '近 12 期研发费用 ' + W(po.env.rdExp12) + '，占收入 ' + Math.round(po.env.rdShare * 10) / 10 + '%；按 100% 加计扣除，预计 ' + W((rowById(po.rows, 'P02') || { amount: 0 }).amount) + '。' };
+      if (has(q, ['月报', '报告', '说了什么', '发给'])) {
+        var pl0 = R.statements.pl[R.statements.pl.length - 1];
+        var exp0 = pl0.sellExp + pl0.adminExp + pl0.rdExp + pl0.finExp;
+        return { text: negText(R.report.lines.slice(1, 4).join('\n')),
+          blocks: [chartB({ chart: 'waterfall', title: '本期利润怎么来的', unit: ' 万元', labels: ['收入', '成本', '费用', '税金', '所得税', '净利'],
+            series: ser('万元', [wan(pl0.rev), -wan(pl0.cogs), -wan(exp0), -wan(pl0.taxSurcharge), -wan(pl0.incomeTax), null]) }),
+            tagsB(R.report.todo.slice(0, 3).map(function (t) { return cut(t, 18); }))] };
+      }
+      if (has(q, ['研发', '加计'])) return { text: '近 12 期研发费用 ' + W(po.env.rdExp12) + '，占收入 ' + Math.round(po.env.rdShare * 10) / 10 + '%；按 100% 加计扣除，预计 ' + W((rowById(po.rows, 'P02') || { amount: 0 }).amount) + '。',
+        blocks: [chartB({ chart: 'line', title: '近 12 期研发费用', unit: ' 万元',
+          labels: R.statements.pl.map(function (p) { return p.label; }), series: ser('研发费用', R.statements.pl.map(function (p) { return wan(p.rdExp); })) })] };
     }
 
     /* 全局：点名字问某一条勾稽关系 / 某一项风险 / 某一项政策，不在本屏也能答并跳过去 */

@@ -280,6 +280,14 @@
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
   function textB(t) { return { type: 'text', text: t }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  function riskChart(R) {
+    var cs = R.contracts.slice(0, 6);
+    return chartB({ chart: 'bar', title: '各份合同风险分', unit: ' 分', labels: cs.map(function (c) { return c.id.slice(-7); }), series: ser('风险分', cs.map(function (c) { return c.score; })) });
+  }
   function industryName(lib, slug) {
     var src = lib && lib.industries, hit = null;
     if (!src) return slug;
@@ -311,30 +319,49 @@
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, reg = R.register, I = R.ip, S = R.setup;
     if (step === 'connect') {
       var dir = d.sources.filter(function (s) { return s.mode === 'direct'; }).length;
-      return d.sources.length + ' 个来源已接入（直连 ' + dir + ' 个）：合同 ' + k.contracts + ' 份、证照 ' + k.licTotal + ' 项、知产 ' + k.ipAssets + ' 项，其中高风险合同 ' + k.highRisk + ' 份。';
+      return {
+        text: d.sources.length + ' 个来源已接入（直连 ' + dir + ' 个）：合同 ' + k.contracts + ' 份、证照 ' + k.licTotal + ' 项、知产 ' + k.ipAssets + ' 项，其中高风险合同 ' + k.highRisk + ' 份。',
+        blocks: [chartB({ chart: 'column', title: '归集条目', unit: ' 项', labels: ['合同', '证照', '知产'], series: ser('项数', [k.contracts, k.licTotal, k.ipAssets]) })]
+      };
     }
     if (step === 'board') {
       var t = topContract(R), ls = licSoon(R);
-      return '合规分 ' + k.compliance + '；' + t.id + ' 风险分 ' + t.score + '，' + dsh(d, t.end) + ' 到期' + (ls && ls.daysLeft != null ? '；' + ls.name + ' ' + ls.stateName : '') + '。';
+      return {
+        text: '合规分 ' + k.compliance + '；' + t.id + ' 风险分 ' + t.score + '，' + dsh(d, t.end) + ' 到期' + (ls && ls.daysLeft != null ? '；' + ls.name + ' ' + ls.stateName : '') + '。',
+        blocks: [chartB({ chart: 'gauge', title: '合规分', value: k.compliance, max: 100, target: 85 })],
+        ref: t.id
+      };
     }
     if (step === 'contracts') {
       var C = curContract(R), ms = missingOf(C);
-      return C.id + ' ' + C.party + '：风险分 ' + C.score + '，' + (ms.length ? '缺「' + ms.map(function (x) { return x.clauseTitle; }).join('」「') + '」' : C.findings.length + ' 处待改') + '，高 ' + C.review.counts.high + ' 中 ' + C.review.counts.mid + '。';
+      return {
+        text: C.id + ' ' + C.party + '：风险分 ' + C.score + '，' + (ms.length ? '缺「' + ms.map(function (x) { return x.clauseTitle; }).join('」「') + '」' : C.findings.length + ' 处待改') + '，高 ' + C.review.counts.high + ' 中 ' + C.review.counts.mid + '。',
+        blocks: [riskChart(R)], ref: C.id
+      };
     }
     if (step === 'setup') {
       var lic = (S.licenses || [])[0], ld = lic ? (lib.setupRules.licenses[lic] || {}).days : 0;
+      var sb = [chartB({ chart: 'bar', title: '各节点天数', unit: ' 天',
+        labels: S.steps.map(function (x) { return x.title; }), series: ser('天数', S.steps.map(function (x) { return x.days; })) })];
       return S.equity
-        ? '股权 ' + S.equity.holders.map(function (x) { return x.pct + '%'; }).join(' / ') + ' 落在' + S.equity.control + '；' + (ld ? lic + ' ' + ld + ' 天与登记并行，' : '') + '全程 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成。'
-        : S.typeName + ' ' + S.name + '：' + S.steps.length + ' 个节点 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成，预计费用 ' + fmtN(S.fees.total) + ' 元。';
+        ? { text: '股权 ' + S.equity.holders.map(function (x) { return x.pct + '%'; }).join(' / ') + ' 落在' + S.equity.control + '；' + (ld ? lic + ' ' + ld + ' 天与登记并行，' : '') + '全程 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成。', blocks: sb }
+        : { text: S.typeName + ' ' + S.name + '：' + S.steps.length + ' 个节点 ' + S.totalDays + ' 天，' + short(S.endDate) + ' 完成，预计费用 ' + fmtN(S.fees.total) + ' 元。', blocks: sb };
     }
     if (step === 'ip') {
       var u = urgentIp(R)[0], gp = coreGap(R);
-      return (u ? ipT(u) + ' ' + u.dueLabel + ' 还有 ' + u.daysLeft + ' 天，预计 ' + fmtN(u.fee) + ' 元' : '60 天内无续展与缴费') + '；商标覆盖 ' + I.coverage + '%，缺口 ' + I.counts.gaps + ' 类' + (gp ? '，第 ' + gp.cls + ' 类' + gp.name + '属' + (gp.tier === 'core' ? '核心' : '延伸') + '类' : '') + '。';
+      return {
+        text: (u ? ipT(u) + ' ' + u.dueLabel + ' 还有 ' + u.daysLeft + ' 天，预计 ' + fmtN(u.fee) + ' 元' : '60 天内无续展与缴费') + '；商标覆盖 ' + I.coverage + '%，缺口 ' + I.counts.gaps + ' 类' + (gp ? '，第 ' + gp.cls + ' 类' + gp.name + '属' + (gp.tier === 'core' ? '核心' : '延伸') + '类' : '') + '。',
+        blocks: [chartB({ chart: 'gauge', title: '商标类别覆盖', unit: '%', value: I.coverage, max: 100, target: 100 })],
+        ref: u ? u.id : null
+      };
     }
     if (step === 'register') {
-      if (reg.counts.overdue) { var o = reg.overdue[0]; return o.kindName + '「' + o.title + '」逾期 ' + (-o.daysLeft) + ' 天；30 天内还有 ' + reg.counts.due30 + ' 项，其中证照 ' + reg.counts.license + ' 项。'; }
+      var wk = (reg.weeks || []).slice(0, 13);
+      var rb = [chartB({ chart: 'column', title: '90 天每周事项', unit: ' 项',
+        labels: wk.map(function (x) { return x.label; }), series: ser('项数', wk.map(function (x) { return x.items.length; })) })];
+      if (reg.counts.overdue) { var o = reg.overdue[0]; return { text: o.kindName + '「' + o.title + '」逾期 ' + (-o.daysLeft) + ' 天；30 天内还有 ' + reg.counts.due30 + ' 项，其中证照 ' + reg.counts.license + ' 项。', blocks: rb, ref: o.ref }; }
       var nx = nextItem(R);
-      return nx ? '下一项 ' + short(nx.date) + ' ' + nx.title + '（' + nx.daysLeft + ' 天后）；90 天台账共 ' + reg.counts.total + ' 项。' : '90 天内无到期事项。';
+      return nx ? { text: '下一项 ' + short(nx.date) + ' ' + nx.title + '（' + nx.daysLeft + ' 天后）；90 天台账共 ' + reg.counts.total + ' 项。', blocks: rb } : '90 天内无到期事项。';
     }
     return null;
   }
@@ -361,7 +388,9 @@
     if (m) {
       var cid = 'HT-' + m[1] + '-' + m[2], cc = R.byId[cid];
       if (cc) return { text: cc.id + ' ' + cc.title + '（' + cc.party + ' · ' + cc.typeName + ' · ' + cc.roleName + '）：风险分 ' + cc.score + '，' + LV_NAME[cc.level] + '，高 ' + cc.review.counts.high + ' 中 ' + cc.review.counts.mid + ' 低 ' + cc.review.counts.low + '，' + dsh(d, cc.start) + ' 至 ' + dsh(d, cc.end) + '（' + cc.endDays + ' 天）。',
-        blocks: [tableB(['等级', '条款', '问题'], cc.findings.slice(0, 4).map(function (f) { return [SEV_LABEL[f.severity], cut(f.clauseTitle, 8), cut(soft(f.issue), 16)]; }))],
+        blocks: [chartB({ chart: 'column', title: cc.id + ' 问题分布', unit: ' 处', labels: ['高', '中', '低'],
+          series: ser('处数', [cc.review.counts.high, cc.review.counts.mid, cc.review.counts.low]) }),
+          tableB(['等级', '条款', '问题'], cc.findings.slice(0, 4).map(function (f) { return [SEV_LABEL[f.severity], cut(f.clauseTitle, 8), cut(soft(f.issue), 16)]; }))],
         ref: cc.id, act: { type: 'open', panel: 'contract', ref: cid } };
     }
     /* 点名某项知产 */
@@ -393,6 +422,7 @@
       ref: lic0.id, act: { type: 'open', panel: 'license', ref: lic0.id } };
     /* 换屏 */
     if (has(q, ['进法务驾驶舱', '驾驶舱', '开始审查', '开始分析'])) return { text: '合规分 ' + k.compliance + '，合同 ' + k.contracts + ' 份、高风险 ' + k.highRisk + ' 份，30 天内到期 ' + k.due30 + ' 项。',
+      blocks: [chartB({ chart: 'gauge', title: '合规分', value: k.compliance, max: 100, target: 85 })],
       act: { type: 'goto', step: 'board' } };
 
     if (step === 'connect') {
@@ -402,7 +432,7 @@
           blocks: [tableB(['来源', '方式', '条数'], d.sources.map(function (s) { return [srcShort(s.name), s.mode === 'direct' ? '直连' : '导入', fmtN(s.rows)]; }))] };
       }
       if (has(q, ['高风险', '几份', '合同'])) return { text: '合同 ' + k.contracts + ' 份：高风险 ' + k.highRisk + ' 份、中风险 ' + k.midRisk + ' 份，待处理 ' + k.findingsOpen + ' 处，平均风险分 ' + k.avgScore + '。',
-        blocks: [tableB(['合同', '相对方', '风险分'], R.contracts.slice(0, 4).map(function (c) { return [c.id, cut(c.party, 10), c.score]; }))],
+        blocks: [riskChart(R)],
         act: { type: 'set', path: 'filter', value: 'high' } };
       if (has(q, ['能力', '开通', '能做'])) return { text: '已开通 ' + CAPS.length + ' 项：' + CAPS.join('、') + '。' };
       if (has(q, ['注册资本', '主体', '成立', '行业'])) return { text: d.company + '：' + industryName(lib, d.profile.industry) + '，注册资本 ' + fmtW(d.profile.capital) + (d.profile.province ? '，' + d.profile.province : '') + (d.profile.founded ? '，成立 ' + d.profile.founded.slice(0, 4) + ' 年' : '') + '。' };
@@ -410,19 +440,24 @@
 
     if (step === 'board') {
       if (has(q, ['合规分', '怎么算', '为什么低'])) return { text: '合规分 ' + k.compliance + ' = 合同平均风险分 ' + k.avgScore + ' × 40% + 证照有效率 ' + licOkPct(R) + '% × 30% + 商标布局覆盖 ' + k.coverage + '% × 30%。',
-        blocks: [kvB([['合同 40%', k.avgScore], ['证照 30%', licOkPct(R) + '%'], ['商标布局 30%', k.coverage + '%'], ['合规分', k.compliance]])] };
+        blocks: [chartB({ chart: 'radar', title: '三项分值', max: 100, labels: ['合同', '证照', '商标布局'],
+          series: ser('分值', [k.avgScore, licOkPct(R), k.coverage]) }),
+          kvB([['合同 40%', k.avgScore], ['证照 30%', licOkPct(R) + '%'], ['商标布局 30%', k.coverage + '%'], ['合规分', k.compliance]])] };
       if (has(q, ['风险高', '哪份', '哪几份', '高风险'])) {
         var hi = R.contracts.filter(function (c) { return c.level === 'high'; });
         return { text: hi.length ? '高风险 ' + hi.length + ' 份：' + hi.map(function (c) { return c.id + ' ' + c.party + '（' + c.score + ' 分）'; }).join('；') + '。' : '当前无高风险合同，中风险 ' + k.midRisk + ' 份。',
-          blocks: [tableB(['合同', '相对方', '风险分', '高'], hi.map(function (c) { return [c.id, cut(c.party, 10), c.score, c.review.counts.high]; }))],
+          blocks: [riskChart(R), tableB(['合同', '相对方', '风险分', '高'], hi.map(function (c) { return [c.id, cut(c.party, 10), c.score, c.review.counts.high]; }))],
           act: { type: 'set', path: 'filter', value: 'high' } };
       }
       if (has(q, ['30 天', '待办', '要办', '到期'])) return { text: '30 天内 ' + reg.counts.due30 + ' 项' + (reg.counts.overdue ? '，另有逾期 ' + reg.counts.overdue + ' 项' : '') + '：合同与节点 ' + reg.counts.contract + '、证照 ' + reg.counts.license + '、知产 ' + reg.counts.ip + '。',
-        blocks: [tableB(['日期', '事项', '剩余'], reg.overdue.concat(reg.due30).slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft < 0 ? '逾期 ' + (-it.daysLeft) : it.daysLeft + ' 天']; }))],
+        blocks: [chartB({ chart: 'donut', title: '30 天内事项', unit: ' 项', total: reg.counts.due30, labels: ['合同与节点', '证照', '知产', '设立'],
+          series: ser('项数', [reg.counts.contract, reg.counts.license, reg.counts.ip, reg.counts.setup]) }),
+          tableB(['日期', '事项', '剩余'], reg.overdue.concat(reg.due30).slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft < 0 ? '逾期 ' + (-it.daysLeft) : it.daysLeft + ' 天']; }))],
         act: { type: 'set', path: 'regKind', value: null } };
       if (has(q, ['先处理', '优先', '哪一件', '怎么办', '建议'])) {
         var t0 = topContract(R), u0 = urgentIp(R)[0], o0 = reg.overdue[0];
         return { text: '先看三件：' + (o0 ? o0.title + ' 已逾期 ' + (-o0.daysLeft) + ' 天；' : '') + t0.id + ' 风险分 ' + t0.score + '，' + (missingOf(t0).length ? '缺 ' + missingOf(t0).length + ' 项必备条款' : t0.findings.length + ' 处待改') + '；' + (u0 ? ipT(u0) + ' ' + u0.dueLabel + ' 还有 ' + u0.daysLeft + ' 天' : '知产无近期到期') + '。',
+          blocks: [riskChart(R)],
           ref: t0.id, act: { type: 'open', panel: 'contract', ref: t0.id } };
       }
       if (has(q, ['证照', '换证'])) {
@@ -432,6 +467,8 @@
           ref: l0 ? l0.id : null, act: l0 ? { type: 'open', panel: 'license', ref: l0.id } : null };
       }
       if (has(q, ['知产', '商标', '专利', '覆盖'])) return { text: '知产 ' + k.ipAssets + ' 项，待续展 / 缴费 ' + k.ipUrgent + ' 项；商标布局覆盖 ' + k.coverage + '%，缺口 ' + k.ipGaps + ' 类（核心类 ' + I.counts.coreGaps + '）。',
+        blocks: [chartB({ chart: 'donut', title: '知产构成', unit: ' 项', total: I.counts.total, labels: ['商标', '专利', '软著'],
+          series: ser('项数', [I.counts.trademarks, I.counts.patents, I.counts.software]) })],
         act: { type: 'goto', step: 'ip' } };
     }
 
@@ -441,7 +478,9 @@
         var ms = missingOf(C);
         return { text: ms.length ? C.id + ' 缺 ' + ms.length + ' 项必备条款：' + ms.map(function (x) { return '「' + x.clauseTitle + '」' + SEV_LABEL[x.severity] + '风险'; }).join('、') + '。采纳后按模板新增，风险分随之重算。'
           : C.id + ' 必备条款齐全，剩下 ' + C.findings.length + ' 处是条款内容的风险项。',
-          blocks: ms.length ? [tableB(['条款', '等级', '处理'], ms.map(function (x) { return [x.clauseTitle, SEV_LABEL[x.severity], x.fix ? '新增' : '人工核对']; }))] : null,
+          blocks: [chartB({ chart: 'column', title: C.id + ' 问题分布', unit: ' 处', labels: ['高', '中', '低'],
+            series: ser('处数', [C.review.counts.high, C.review.counts.mid, C.review.counts.low]) })]
+            .concat(ms.length ? [tableB(['条款', '等级', '处理'], ms.map(function (x) { return [x.clauseTitle, SEV_LABEL[x.severity], x.fix ? '新增' : '人工核对']; }))] : []),
           ref: C.id };
       }
       if (has(q, ['为什么', '凭什么', '依据', '判高', '判'])) {
@@ -455,27 +494,39 @@
         if (has(q, ['全部', '所有', '高风险'])) {
           if (!hiAll) return { text: '当前没有待采纳的高风险修订，已采纳 ' + k.revised + ' 处。' };
           return { text: '采纳全部高风险修订 ' + hiAll + ' 处：按条款模板新增或改写，' + R.contracts.filter(function (c) { return c.review.counts.high; }).map(function (c) { return c.id; }).join('、') + ' 的风险分一起重算。',
+            blocks: [chartB({ chart: 'bar', title: '待采纳的高风险处数', unit: ' 处',
+              labels: R.contracts.filter(function (c) { return c.review.counts.high; }).map(function (c) { return c.id.slice(-7); }),
+              series: ser('处数', R.contracts.filter(function (c) { return c.review.counts.high; }).map(function (c) { return c.review.counts.high; })) })],
             act: { type: 'apply', action: 'apply-all-high', input: {} } };
         }
         var f0 = C.findings.filter(function (x) { return x.fix; })[0];
         if (!f0) return { text: C.id + ' 没有可直接采纳的修订，剩下的要人工核对原件。' };
         return { text: C.id + ' ' + (f0.fix.mode === 'insert' ? '新增' : '修订') + '「' + f0.fix.title + '」：' + cut(f0.fix.text, 52) + '。采纳后风险分重算。',
+          blocks: [chartB({ chart: 'column', title: C.id + ' 问题分布', unit: ' 处', labels: ['高', '中', '低'],
+            series: ser('处数', [C.review.counts.high, C.review.counts.mid, C.review.counts.low]) })],
           ref: C.id, act: { type: 'apply', action: 'apply-fix', input: { contractId: C.id, findingId: f0.id } } };
       }
       if (has(q, ['账期', '90 天', '付款', '回款'])) {
         var long = [];
         R.contracts.forEach(function (c) { c.findings.forEach(function (f) { if (f.id === 'C01') long.push([c.id, cut(c.party, 10), f.issue.replace(/[^0-9]*(\d+).*/, '$1') + ' 天']); }); });
         return { text: long.length ? '账期超过 90 天的有 ' + long.length + ' 份：' + long.map(function (x) { return x[0] + '（' + x[2] + '）'; }).join('、') + '，我方为供方时资金占用与坏账风险高。' : '没有账期超过 90 天的销售合同。',
-          blocks: long.length ? [tableB(['合同', '相对方', '账期'], long)] : null };
+          blocks: long.length ? [chartB({ chart: 'bar', title: '账期', unit: ' 天',
+            labels: long.map(function (x) { return x[0].slice(-7); }), series: ser('天数', long.map(function (x) { return parseInt(x[2], 10) || 0; })) }),
+            tableB(['合同', '相对方', '账期'], long)] : [riskChart(R)] };
       }
       if (has(q, ['金额', '多少钱', '合计'])) {
         var tot = R.contracts.reduce(function (t, c) { return t + (c.amount || 0); }, 0);
         return { text: '在册合同金额合计 ' + fmtW(tot) + '，其中高风险 ' + fmtW(R.contracts.filter(function (c) { return c.level === 'high'; }).reduce(function (t, c) { return t + (c.amount || 0); }, 0)) + '。',
-          blocks: [tableB(['合同', '金额', '等级'], R.contracts.slice().sort(function (a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 4).map(function (c) { return [c.id, c.amount ? fmtW(c.amount) : '—', LV_NAME[c.level]]; }))] };
+          blocks: [chartB({ chart: 'bar', title: '合同金额', unit: ' 万元',
+            labels: R.contracts.slice().sort(function (a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 6).map(function (c) { return c.id.slice(-7); }),
+            series: ser('万元', R.contracts.slice().sort(function (a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 6).map(function (c) { return Math.round((c.amount || 0) / 1000) / 10; })) }),
+            tableB(['合同', '金额', '等级'], R.contracts.slice().sort(function (a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 4).map(function (c) { return [c.id, c.amount ? fmtW(c.amount) : '—', LV_NAME[c.level]]; }))] };
       }
       if (has(q, ['意见', '发给', '微信'])) {
         var raw0 = d.contracts.filter(function (x) { return x.id === C.id; })[0];
         return { text: softL(opinion(raw0, C.review, lib).lines.slice(0, 4)).join('\n'),
+          blocks: [chartB({ chart: 'column', title: C.id + ' 问题分布', unit: ' 处', labels: ['高', '中', '低'],
+            series: ser('处数', [C.review.counts.high, C.review.counts.mid, C.review.counts.low]) })],
           ref: C.id, act: { type: 'open', panel: 'opinion', ref: C.id } };
       }
     }
@@ -484,7 +535,8 @@
       if (has(q, ['多少天', '为什么', '几天', '工期', '天数'])) {
         var lp = S.steps.filter(function (x) { return x.kind === 'license'; });
         return { text: '全程 ' + S.totalDays + ' 天：' + S.steps.length + ' 个节点，' + short(S.startDate) + ' 启动、' + short(S.endDate) + ' 完成' + (lp.length ? '；' + lp.map(function (x) { return x.title + ' ' + x.days + ' 天'; }).join('、') + '与登记并行办理' : '') + '。',
-          blocks: [tableB(['节点', '天数'], S.steps.slice(0, 6).map(function (x) { return [x.order + '. ' + cut(x.title, 10), x.days + ' 天']; }))] };
+          blocks: [chartB({ chart: 'bar', title: '各节点天数', unit: ' 天',
+            labels: S.steps.map(function (x) { return x.title; }), series: ser('天数', S.steps.map(function (x) { return x.days; })) })] };
       }
       if (has(q, ['51', '49', '改成', '换成', '60', '50 / 50'])) {
         var pk = PRESETS.filter(function (p) { return q.indexOf(String(p[0])) >= 0 && q.indexOf(String(p[1])) >= 0; })[0] || [51, 49];
@@ -496,19 +548,31 @@
         for (i = 2; i < n2.length; i++) n2[i].pct = 0;
         var eq2 = equity(n2, lib);
         return { text: '改成 ' + pk[0] + ' / ' + pk[1] + '：落在' + eq2.control + (eq2.deadlock ? '，两方各半形成僵局' : '') + '；' + eq2.lines.map(function (l) { return l.label + (l.met ? ' 达到' : ' 未达'); }).join('、') + '。已按这个比例重算。',
+          blocks: [chartB({ chart: 'donut', title: '改后股权', unit: '%', total: 100,
+            labels: n2.filter(function (x) { return x.pct > 0; }).map(function (x) { return cut(x.holder, 8); }),
+            series: ser('占比', n2.filter(function (x) { return x.pct > 0; }).map(function (x) { return x.pct; })) })],
           act: { type: 'set', path: 'setup.shares', value: pk } };
       }
       if (has(q, ['控股', '控制', '够吗', '股权'])) {
         if (!S.equity) return { text: S.typeName + '不设股权，由总公司全资，' + S.typeDesc + '。' };
         return { text: '股权 ' + S.equity.holders.map(function (x) { return cut(x.holder, 10) + ' ' + x.pct + '%'; }).join(' / ') + '：控股股东 ' + r0(S.equity.top * 100) + '%，落在' + S.equity.control + '。' + S.equity.lines.map(function (l) { return l.label + ' ' + l.pct + '% ' + (l.met ? '达到' : '未达'); }).join('；') + '。',
-          blocks: [tableB(['控制线', '门槛', '判断'], S.equity.lines.map(function (l) { return [l.label.replace(/线.*/, '线'), l.pct + '%', l.met ? '达到' : '未达']; }))],
+          blocks: [chartB({ chart: 'donut', title: '股权结构', unit: '%', total: 100,
+            labels: S.equity.holders.map(function (x) { return cut(x.holder, 8); }), series: ser('占比', S.equity.holders.map(function (x) { return x.pct; })) }),
+            tableB(['控制线', '门槛', '判断'], S.equity.lines.map(function (l) { return [l.label.replace(/线.*/, '线'), l.pct + '%', l.met ? '达到' : '未达']; }))],
           ref: 'EQ-' + S.equity.lines[0].key };
       }
-      if (has(q, ['多少钱', '费用', '花'])) return { text: '预计费用 ' + fmtN(S.fees.total) + ' 元：刻章 ' + fmtN(S.fees.seal) + ' 元、代办 ' + fmtN(S.fees.agency) + ' 元。' + S.fees.note + '。' };
+      if (has(q, ['多少钱', '费用', '花'])) return { text: '预计费用 ' + fmtN(S.fees.total) + ' 元：刻章 ' + fmtN(S.fees.seal) + ' 元、代办 ' + fmtN(S.fees.agency) + ' 元。' + S.fees.note + '。',
+        blocks: [chartB({ chart: 'donut', title: '预计费用构成', unit: ' 元', total: S.fees.total, labels: ['刻章', '代办'], series: ser('元', [S.fees.seal, S.fees.agency]) })] };
       if (has(q, ['材料', '要交什么', '清单'])) return { text: '材料合计 ' + S.materials.length + ' 项，按节点分摊。',
-        blocks: [tableB(['节点', '材料'], S.materials.slice(0, 6).map(function (x) { return [cut(x.step, 10), cut(x.item, 14)]; }))] };
-      if (has(q, ['许可', '排污', '经营范围'])) return { text: (S.licenses || []).length ? '涉及许可 ' + S.licenses.join('、') + '，约 ' + S.licenses.map(function (n) { return (lib.setupRules.licenses[n] || {}).days; }).join(' / ') + ' 天，与登记并行；取得许可前不得开展相应业务。' : '当前方案不涉及前置或后置许可。' };
+        blocks: [chartB({ chart: 'bar', title: '各节点材料数', unit: ' 项',
+          labels: S.steps.map(function (x) { return x.title; }), series: ser('项数', S.steps.map(function (x) { return (x.materials || []).length; })) }),
+          tableB(['节点', '材料'], S.materials.slice(0, 6).map(function (x) { return [cut(x.step, 10), cut(x.item, 14)]; }))] };
+      if (has(q, ['许可', '排污', '经营范围'])) return { text: (S.licenses || []).length ? '涉及许可 ' + S.licenses.join('、') + '，约 ' + S.licenses.map(function (n) { return (lib.setupRules.licenses[n] || {}).days; }).join(' / ') + ' 天，与登记并行；取得许可前不得开展相应业务。' : '当前方案不涉及前置或后置许可。',
+        blocks: [chartB({ chart: 'bar', title: '各节点天数', unit: ' 天',
+          labels: S.steps.map(function (x) { return x.title; }), series: ser('天数', S.steps.map(function (x) { return x.days; })) })] };
       if (has(q, ['确认', '进台账'])) return { text: S.confirmed ? '方案已确认，' + S.steps.length + ' 个节点已进 90 天台账。' : '确认后 ' + S.steps.length + ' 个节点按日期进 90 天台账。',
+        blocks: [chartB({ chart: 'bar', title: '各节点天数', unit: ' 天',
+          labels: S.steps.map(function (x) { return x.title; }), series: ser('天数', S.steps.map(function (x) { return x.days; })) })],
         act: S.confirmed ? null : { type: 'apply', action: 'confirm-setup', input: {} } };
     }
 
@@ -517,45 +581,65 @@
         var pend = urgentIp(R).filter(function (a) { return !a.listed && a.action; });
         if (!pend.length) return { text: '待续展 / 缴费的都已在清单里，预计 ' + fmtN(I.renewFee) + ' 元。' };
         return { text: '把 ' + pend.length + ' 项加入清单：' + pend.map(function (a) { return ipT(a); }).join('、') + '，预计合计 ' + fmtN(pend.reduce(function (t, a) { return t + a.fee; }, 0)) + ' 元。',
+          blocks: [chartB({ chart: 'bar', title: '待办项预计费用', unit: ' 元',
+            labels: pend.map(function (a) { return cut(ipT(a), 7); }), series: ser('元', pend.map(function (a) { return a.fee; })) })],
           act: { type: 'apply', action: 'toggle-renew', input: { ids: pend.map(function (a) { return a.id; }) } } };
       }
       if (has(q, ['快到期', '到期', '几项', '续展', '年费'])) {
         var us = urgentIp(R);
         return { text: us.length ? '60 天内 ' + us.length + ' 项：' + us.map(function (a) { return ipT(a) + ' ' + a.dueLabel + ' ' + a.daysLeft + ' 天'; }).join('；') + '，预计合计 ' + fmtN(us.reduce(function (t, a) { return t + a.fee; }, 0)) + ' 元。' : '60 天内没有需要续展或缴费的资产。',
-          blocks: [tableB(['资产', '事项', '剩余', '预计'], us.map(function (a) { return [cut(ipT(a), 12), a.dueLabel, a.daysLeft + ' 天', fmtN(a.fee)]; }))],
+          blocks: (us.length ? [chartB({ chart: 'bar', title: '剩余天数', unit: ' 天',
+            labels: us.map(function (a) { return cut(ipT(a), 7); }), series: ser('天数', us.map(function (a) { return a.daysLeft; })) })] : [])
+            .concat([tableB(['资产', '事项', '剩余', '预计'], us.map(function (a) { return [cut(ipT(a), 12), a.dueLabel, a.daysLeft + ' 天', fmtN(a.fee)]; }))]),
           ref: us.length ? us[0].id : null };
       }
       if (has(q, ['缺口', '为什么要补', '补哪几类', '布局'])) {
         var cg = coreGap(R);
         return { text: '应覆盖 ' + (I.covered.length + I.gaps.length) + ' 类，已覆盖 ' + I.covered.length + ' 类（' + I.coverage + '%），缺 ' + I.gaps.length + ' 类，核心类 ' + I.counts.coreGaps + ' 类。' + (cg ? '第 ' + cg.cls + ' 类' + cg.name + '：' + cg.reason + '。' : ''),
-          blocks: [tableB(['类别', '核心 / 延伸', '预计'], I.gaps.map(function (x) { return ['第 ' + x.cls + ' 类 ' + x.name, x.tier === 'core' ? '核心' : '延伸', fmtN(x.fee)]; }))],
+          blocks: [chartB({ chart: 'donut', title: '类别覆盖', unit: ' 类', total: I.covered.length + I.gaps.length,
+            labels: ['已覆盖', '缺口'], series: ser('类数', [I.covered.length, I.gaps.length]) }),
+            tableB(['类别', '核心 / 延伸', '预计'], I.gaps.map(function (x) { return ['第 ' + x.cls + ' 类 ' + x.name, x.tier === 'core' ? '核心' : '延伸', fmtN(x.fee)]; }))],
           ref: cg ? 'CLS-' + cg.cls : null };
       }
       if (has(q, ['近似', '异议', '侵权', '线索', '怎么办'])) {
         if (!I.similar.length && !I.leads.length) return { text: '当前无近似商标与侵权线索。' };
         return { text: I.similar.map(function (s) { return '「' + s.name + '」第 ' + s.classes.join('、') + ' 类（' + s.holder + '，相似 ' + r0(s.similarity * 100) + '%）' + s.status + (s.deadline ? '，' + s.deadline + ' 前' + s.action + '，还有 ' + s.daysLeft + ' 天' : '，' + s.action); }).join('；') + (I.leads.length ? '。侵权线索 ' + I.leads.length + ' 条：' + I.leads.map(function (l) { return l.where + ' ' + l.action; }).join('；') : '') + '。',
-          blocks: [tagsB(I.leads.map(function (l) { return cut(l.where + ' · ' + l.note, 20); }))] };
+          blocks: (I.similar.length ? [chartB({ chart: 'progress', title: '近似度', unit: '%', max: 100,
+            labels: I.similar.map(function (x) { return cut(x.name, 6); }), series: ser('相似', I.similar.map(function (x) { return r0(x.similarity * 100); })) })] : [])
+            .concat([tagsB(I.leads.map(function (l) { return cut(l.where + ' · ' + l.note, 20); }))]) };
       }
-      if (has(q, ['多少钱', '费用', '合计', '预计'])) return { text: '续展 / 缴费清单 ' + I.renewCount + ' 项预计 ' + fmtN(I.renewFee) + ' 元，商标申请清单 ' + I.applyCount + ' 类预计 ' + fmtN(I.applyFee) + ' 元，合计 ' + fmtN(I.renewFee + I.applyFee) + ' 元（官费加预计代理费）。' };
+      if (has(q, ['多少钱', '费用', '合计', '预计'])) return { text: '续展 / 缴费清单 ' + I.renewCount + ' 项预计 ' + fmtN(I.renewFee) + ' 元，商标申请清单 ' + I.applyCount + ' 类预计 ' + fmtN(I.applyFee) + ' 元，合计 ' + fmtN(I.renewFee + I.applyFee) + ' 元（官费加预计代理费）。',
+        blocks: [chartB({ chart: 'column', title: '预计费用', unit: ' 元', labels: ['续展缴费', '商标申请'], series: ser('元', [I.renewFee, I.applyFee]) })] };
     }
 
     if (step === 'register') {
       if (has(q, ['逾期', '过期', '超了'])) return { text: reg.counts.overdue ? '逾期 ' + reg.counts.overdue + ' 项：' + reg.overdue.map(function (it) { return it.title + '（' + it.kindName + '，' + (-it.daysLeft) + ' 天）'; }).join('；') + '。' : '当前没有逾期事项，30 天内 ' + reg.counts.due30 + ' 项。',
+        blocks: [chartB({ chart: 'donut', title: '90 天台账构成', unit: ' 项', total: reg.counts.total, labels: ['合同与节点', '证照', '知产', '设立'],
+          series: ser('项数', [reg.counts.contract, reg.counts.license, reg.counts.ip, reg.counts.setup]) })],
         ref: reg.counts.overdue ? reg.overdue[0].ref : null,
         act: reg.counts.overdue ? jumpAct(reg.overdue[0]) : null };
       if (has(q, ['只看', '筛', '过滤'])) {
         var key = q.indexOf('证照') >= 0 ? 'license' : q.indexOf('知产') >= 0 || q.indexOf('商标') >= 0 || q.indexOf('专利') >= 0 ? 'ip' : q.indexOf('设立') >= 0 ? 'setup' : q.indexOf('合同') >= 0 ? 'contract' : null;
-        if (key) return { text: '只看' + KIND_NAME[key] + '：' + kindCount(R, key) + ' 项。', act: { type: 'set', path: 'regKind', value: key } };
+        if (key) return { text: '只看' + KIND_NAME[key] + '：' + kindCount(R, key) + ' 项。',
+          blocks: [chartB({ chart: 'column', title: '按类型', unit: ' 项', labels: ['合同', '证照', '知产', '设立'],
+            series: ser('项数', [reg.counts.contract, reg.counts.license, reg.counts.ip, reg.counts.setup]) })],
+          act: { type: 'set', path: 'regKind', value: key } };
       }
       if (has(q, ['哪一周', '哪周', '事多', '密集', '集中'])) {
         var top = reg.weeks.slice().sort(function (a, b) { return b.items.length - a.items.length; })[0];
         return { text: '第 ' + (top.w + 1) + ' 周（' + top.start + ' 起）事项 ' + top.items.length + ' 项：' + top.items.slice(0, 3).map(function (it) { return short(it.date) + ' ' + cut(it.title, 14); }).join('；') + '。',
-          blocks: [tableB(['日期', '事项', '类型'], top.items.slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.kindName]; }))] };
+          blocks: [chartB({ chart: 'column', title: '90 天每周事项', unit: ' 项',
+            labels: reg.weeks.map(function (x) { return x.label; }), series: ser('项数', reg.weeks.map(function (x) { return x.items.length; })) }),
+            tableB(['日期', '事项', '类型'], top.items.slice(0, 5).map(function (it) { return [it.label, cut(it.title, 14), it.kindName]; }))] };
       }
       if (has(q, ['月报', '报告', '写了什么', '发给'])) return { text: softL(R.report.lines.slice(1, 4)).join('\n'),
-        blocks: [tagsB(R.report.todo.slice(0, 3).map(function (t) { return cut(soft(t), 20); }))] };
+        blocks: [chartB({ chart: 'radar', title: '三项分值', max: 100, labels: ['合同', '证照', '商标布局'],
+          series: ser('分值', [k.avgScore, licOkPct(R), k.coverage]) }),
+          tagsB(R.report.todo.slice(0, 3).map(function (t) { return cut(soft(t), 20); }))] };
       if (has(q, ['30 天', '近期', '要办'])) return { text: '30 天内 ' + reg.counts.due30 + ' 项：合同与节点 ' + reg.counts.contract + '、证照 ' + reg.counts.license + '、知产 ' + reg.counts.ip + (reg.counts.setup ? '、设立 ' + reg.counts.setup : '') + '。',
-        blocks: [tableB(['日期', '事项', '剩余'], reg.due30.slice(0, 6).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft + ' 天']; }))] };
+        blocks: [chartB({ chart: 'donut', title: '30 天内事项', unit: ' 项', total: reg.counts.due30, labels: ['合同与节点', '证照', '知产', '设立'],
+          series: ser('项数', [reg.counts.contract, reg.counts.license, reg.counts.ip, reg.counts.setup]) }),
+          tableB(['日期', '事项', '剩余'], reg.due30.slice(0, 6).map(function (it) { return [it.label, cut(it.title, 14), it.daysLeft + ' 天']; }))] };
     }
     return null;
   }

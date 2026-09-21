@@ -92,24 +92,30 @@
   }
 
   /* ---------------- 各类图 ---------------- */
-  function drawColumn(spec, A) {                    /* 2.5D 柱：分类量级 */
+  function drawColumn(spec, A) {                    /* 2.5D 柱：分类量级，带负数时基线落在 0 上 */
     var W = A.W, labels = spec.labels || [], ss = spec.series || [];
-    var n = labels.length, pad = { l: 30, r: 10, t: 16, b: 20 };
+    var n = labels.length, pad = { l: 34, r: 10, t: 16, b: 20 };
     var H = A.H || 116, x0 = pad.l, x1 = W - pad.r, y0 = pad.t, y1 = H - pad.b;
-    var all = []; ss.forEach(function (s) { (s.data || []).forEach(function (v) { all.push(Math.abs(+v || 0)); }); });
-    var mx = nice(Math.max.apply(null, all.concat([0])) || 1);
+    var all = [];
+    ss.forEach(function (s) { (s.data || []).forEach(function (v) { if (v != null) all.push(+v || 0); }); });
+    if (!all.length) all = [0];
+    var hi = nice(Math.max.apply(null, all.concat([0]))), lo = Math.min.apply(null, all.concat([0]));
+    lo = lo < 0 ? -nice(-lo) : 0;
+    var span = (hi - lo) || 1;
+    var zero = y1 - ((0 - lo) / span) * (y1 - y0);
     var g = el('g', {});
-    grid(g, x0, x1, [y0, (y0 + y1) / 2, y1]);
-    g.appendChild(txt(x0 - 4, y0 + 3, fmt(mx), { anchor: 'end', size: 8.5, fill: MUTE, tabular: 1 }));
-    g.appendChild(txt(x0 - 4, y1 + 3, '0', { anchor: 'end', size: 8.5, fill: MUTE, tabular: 1 }));
+    grid(g, x0, x1, lo < 0 ? [y0, zero, y1] : [y0, (y0 + y1) / 2, y1]);
+    g.appendChild(txt(x0 - 4, y0 + 3, fmt(hi), { anchor: 'end', size: 8.5, fill: MUTE, tabular: 1 }));
+    g.appendChild(txt(x0 - 4, y1 + 3, fmt(lo), { anchor: 'end', size: 8.5, fill: MUTE, tabular: 1 }));
     var slot = (x1 - x0 - DX) / Math.max(1, n), k = ss.length;
     var bw = Math.max(5, (slot - 8) / Math.max(1, k) - 2);
     labels.forEach(function (lb, i) {
       ss.forEach(function (s, j) {
-        var v = Math.abs(+(s.data || [])[i] || 0), h = (v / mx) * (y1 - y0);
+        var raw = +((s.data || [])[i]) || 0, h = Math.abs(raw) / span * (y1 - y0);
         var x = x0 + slot * i + (slot - (bw + 2) * k) / 2 + j * (bw + 2);
-        box(g, x, y1 - h, bw, h, colorOf(spec, j, A.accent));
-        if (n * k <= 8) g.appendChild(txt(x + bw / 2 + DX / 2, y1 - h + DY - 3, fmt((s.data || [])[i]), { anchor: 'middle', size: k > 1 ? 8.5 : 9, fill: INK, weight: 700, tabular: 1 }));
+        var top = raw >= 0 ? zero - h : zero;
+        box(g, x, top, bw, h, colorOf(spec, j, A.accent));
+        if (n * k <= 8) g.appendChild(txt(x + bw / 2 + DX / 2, (raw >= 0 ? top + DY - 3 : top + h + 10), fmt(raw), { anchor: 'middle', size: k > 1 ? 8.5 : 9, fill: INK, weight: 700, tabular: 1 }));
       });
       if (n <= 9) g.appendChild(txt(x0 + slot * i + slot / 2, y1 + 12, lb, { anchor: 'middle', size: 8.5, fill: SUB }));
     });
