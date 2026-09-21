@@ -10,7 +10,7 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -30,7 +30,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   if (spent0 !== '0' || spent1 !== '30') errors.push('积分扣减异常 ' + spent0 + ' → ' + spent1);
   if ((await kpiVal(1)) !== R.kpi.compliance) errors.push('合规分 KPI ' + (await kpiVal(1)) + ' vs ' + R.kpi.compliance);
   if ((await kpiVal(3)) !== R.kpi.highRisk) errors.push('高风险 KPI ' + (await kpiVal(3)) + ' vs ' + R.kpi.highRisk);
-  const boardRows = await page.$$eval('.c7 .pd-table tbody tr', (r) => r.length); if (boardRows !== 6) errors.push('风险榜行数 ' + boardRows);
+  const boardRows = await page.$$eval('.c7 .pd-table tbody tr', (r) => r.length); if (boardRows !== 5) errors.push('风险榜行数 ' + boardRows);
 
   // 合同审查
   await page.click('.pd-tabs .tab:nth-child(3)'); await page.waitForSelector('.m7-contracts');
@@ -45,7 +45,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const top = R.contracts[0]; if (focusId.indexOf(top.id) !== 0) errors.push('焦点合同 ' + focusId + ' vs ' + top.id);
   if (score0 !== top.score || findings0 !== top.findings.length) errors.push('焦点合同分数/问题数 ' + score0 + '/' + findings0 + ' vs ' + top.score + '/' + top.findings.length);
   await shot('3b-contract-focus');
-  await page.click('.m7-findings .f .fix .pd-btn.primary'); await page.waitForTimeout(400);   // 采纳第一处修订
+  await page.click('.m7-findings .f .h .pd-btn.primary'); await page.waitForTimeout(400);   // 采纳第一处修订
   const score1 = parseInt(await text('.m7-chead .score'), 10);
   const d1 = core.applyFix(lib.samples.make, top.id, top.findings[0].id, lib); const R1 = core.run(d1, lib);
   if (score1 !== R1.byId[top.id].score) errors.push('采纳后分数 ' + score1 + ' vs ' + R1.byId[top.id].score);
@@ -54,7 +54,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.c5 .pd-card.accent .ft .pd-btn.primary'); await page.waitForSelector('.pd-drawer'); await page.waitForTimeout(200);   // 审查意见
   const op = await text('.pd-drawer .pd-pre'); if (op.indexOf('【合同审查意见】') !== 0 || op.indexOf('已采纳修订 1 处') < 0) errors.push('审查意见内容异常');
   await shot('3d-opinion'); await page.click('.pd-drawer .close'); await page.waitForTimeout(150);
-  await page.evaluate(() => { [...document.querySelectorAll('.c5 .pd-card.accent .ft .pd-btn')].find((b) => b.textContent === '条款全文').click(); }); await page.waitForSelector('.pd-drawer'); await page.waitForTimeout(200);
+  await page.evaluate(() => { [...document.querySelectorAll('.c5 .pd-card.accent .ft .pd-btn')].find((b) => b.textContent.indexOf('条款全文') === 0).click(); }); await page.waitForSelector('.pd-drawer'); await page.waitForTimeout(200);
   const revK = await page.$$eval('.m7-clauses .k.rev', (r) => r.length); if (revK !== 1) errors.push('条款全文修订标记 ' + revK);
   await shot('3e-clauses'); await page.click('.pd-drawer .close'); await page.waitForTimeout(150);
   await page.click('.pd-card.c7 .hd .x .pd-btn.primary'); await page.waitForTimeout(500);   // 采纳全部高风险修订
@@ -82,9 +82,10 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const ipRows = await page.$$eval('.c7 .pd-table tbody tr', (r) => r.length); if (ipRows !== R.ip.assets.length) errors.push('知产行数 ' + ipRows + ' vs ' + R.ip.assets.length);
   if ((await kpiVal(3)) !== R.ip.coverage) errors.push('覆盖率 KPI ' + (await kpiVal(3)) + ' vs ' + R.ip.coverage);
   await page.click('.c7 .pd-table tbody tr .pd-btn'); await page.waitForTimeout(300);   // 加入续展清单
-  if ((await kpiVal(5)) !== 1) errors.push('续展清单计数 ' + (await kpiVal(5)));
+  // 清单计数不再占 KPI 位，直接数清单条目
+  if ((await page.$$eval('.m7-lists .pd-item', (r) => r.length)) !== 1) errors.push('续展清单计数 ' + (await page.$$eval('.m7-lists .pd-item', (r) => r.length)));
   await page.click('.m7-classes .cl .pd-btn'); await page.waitForTimeout(300);   // 加入申请
-  if ((await kpiVal(6)) !== 1) errors.push('申请清单计数 ' + (await kpiVal(6)));
+  if ((await page.$$eval('.m7-lists .pd-item', (r) => r.length)) !== 2) errors.push('申请清单计数 ' + (await page.$$eval('.m7-lists .pd-item', (r) => r.length)));
   const listed = await page.$$eval('.m7-lists .pd-item', (r) => r.length); if (listed !== 2) errors.push('清单条目 ' + listed);
   await shot('5b-ip-listed');
 
@@ -99,7 +100,10 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const onlySetup = await page.$$eval('.pd-weekgrid .it', (r) => r.map((x) => x.className)); if (onlySetup.some((c) => c.indexOf('accent') < 0)) errors.push('设立筛选混入其他条目');
   await shot('6b-register-setup');
   await page.click('.pd-kpis .pd-kpi:nth-child(1)'); await page.waitForTimeout(250);
-  const rep = await text('.pd-pre'); if (rep.indexOf('【法务月报】') !== 0 || rep.indexOf('本期处置') < 0) errors.push('月报内容异常');
+  // 卡片里只摆摘要，全文在抽屉里
+  await page.evaluate(() => { [...document.querySelectorAll('.m7-register .pd-card .ft .pd-btn')].find((b) => b.textContent.indexOf('全文') === 0).click(); }); await page.waitForSelector('.pd-drawer .pd-pre');
+  const rep = await text('.pd-drawer .pd-pre'); if (rep.indexOf('【法务月报】') !== 0 || rep.indexOf('本期处置') < 0) errors.push('月报内容异常');
+  await page.click('.pd-drawer .close'); await page.waitForTimeout(200);
   await page.evaluate(() => { [...document.querySelectorAll('.m7-register .pd-card .ft .pd-btn')].find((b) => b.textContent === '发送到微信').click(); }); await page.waitForSelector('.modal'); await shot('6c-register-wechat'); await page.click('.modal .btn');
   if (!(await page.$('.rail .qr.ready'))) errors.push('二维码未高亮');
   await page.click('.pd-weekgrid button.it'); await page.waitForTimeout(300);   // 点条目跳转

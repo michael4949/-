@@ -11,7 +11,7 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -37,13 +37,13 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   if (parseFloat(await kpiVal(2)) !== R.kpi.queueDays) errors.push('排队 KPI ' + (await kpiVal(2)) + ' vs ' + R.kpi.queueDays);
   const stg = await page.$$eval('.m8-flow .stg', (r) => r.length); if (stg !== R.flow.length) errors.push('工序格数 ' + stg + ' vs ' + R.flow.length);
   if (!(await page.$('.m8-flow .stg.con'))) errors.push('无约束高亮');
-  const alertsN = await page.$$eval('.m8-board .pd-card.c6:nth-of-type(3) .pd-list .pd-item, .m8-board .pd-card.c6 .pd-list .pd-item', (r) => r.length); if (alertsN !== R.alerts.length) errors.push('异常条数 ' + alertsN + ' vs ' + R.alerts.length);
+  const alertsN = await page.$$eval('.m8-board .pd-card.c6 .pd-table tbody tr', (r) => r.length); if (alertsN !== R.alerts.length) errors.push('异常条数 ' + alertsN + ' vs ' + R.alerts.length);
   await page.click('.m8-flow .stg.con'); await page.waitForSelector('.pd-drawer'); await page.waitForTimeout(250);
   await shot('2b-board-judge'); await lintScreen('约束判断');
   await page.click('.pd-drawer .close'); await page.waitForTimeout(200);
   // 处置第一条异常
   const exId = R.alerts[0].id;
-  await clickBtn('.m8-board .pd-card.c6 .pd-list .pd-item', '处置'); await page.waitForTimeout(400);
+  await clickBtn('.m8-board .pd-card.c6 .pd-table tbody tr', '处置'); await page.waitForTimeout(400);
   d = core.handleException(d, lib, exId); R = core.run(d, lib);
   const badge = await page.$eval('.pd-tabs .tab:nth-child(2) .badge', (e) => e.textContent.trim()).catch(() => '0');
   if (parseInt(badge) !== R.kpi.alertsOpen) errors.push('看板角标 ' + badge + ' vs ' + R.kpi.alertsOpen);
@@ -53,7 +53,6 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(3)'); await page.waitForSelector('.m8-diag'); await page.waitForTimeout(400);
   await shot('3-diag'); await lintScreen('诊断');
   if (!(await page.$('.pd-waterfall'))) errors.push('无时间损失瀑布');
-  const counter = await text('.m8-counter').catch(() => ''); if (counter.indexOf('预计节省') < 0) errors.push('无页头计数器');
   // 采纳第一条过期标准工时
   const exp = R.calibration.filter((c) => c.status === 'expired')[0];
   await clickBtn('.m8-diag .pd-card.c12 .pd-table', '采纳'); await page.waitForTimeout(400);
@@ -74,6 +73,8 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await clickBtn('.m8-improve', 'AI 重排今日顺序'); await page.waitForTimeout(500);
   d = core.applySequence(d, lib); R = core.run(d, lib);
   await shot('4b-improve-sequence'); await lintScreen('合批');
+  // 页头计数器要等真的省出工时才挂上来（合批重排之后），诊断屏那会儿还是 0
+  const counter = await text('.m8-counter').catch(() => ''); if (counter.indexOf('预计节省') < 0) errors.push('无页头计数器 ' + counter);
   // 拖支援人数滑杆到 1
   await page.evaluate(() => { const r = [...document.querySelectorAll('.m8-params input[type=range]')].find((x) => x.max === '2'); if (r) { r.value = '1'; r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true })); } }); await page.waitForTimeout(600);
   await shot('4c-improve-param');
@@ -88,7 +89,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   // 执行与派工
   await page.click('.pd-tabs .tab:nth-child(5)'); await page.waitForSelector('.m8-exec'); await page.waitForTimeout(500);
   await shot('5-exec'); await lintScreen('执行');
-  const drows = await page.$$eval('.m8-exec .c7 .pd-card:nth-child(2) .pd-table tbody tr', (r) => r.length); if (drows !== R.dispatch.rows.length) errors.push('派工行数 ' + drows + ' vs ' + R.dispatch.rows.length);
+  const drows = await page.evaluate(() => { const c = [...document.querySelectorAll('.m8-exec .pd-card')].find((x) => (x.querySelector('.hd .t') || {}).textContent.indexOf('派工单') >= 0); return c ? c.querySelectorAll('.pd-table tbody tr').length : 0; }); if (drows !== R.dispatch.rows.length) errors.push('派工行数 ' + drows + ' vs ' + R.dispatch.rows.length);
   await clickBtn('.m8-exec', '生成明日'); await page.waitForTimeout(500);
   d = core.applyDispatch(d, lib); R = core.run(d, lib);
   await clickBtn('.m8-exec', '排入窗口'); await page.waitForTimeout(500);
@@ -104,7 +105,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('6-report'); await lintScreen('周报');
   if (parseFloat(await kpiVal(1)) !== R.kpi.savedH) errors.push('周报 KPI ' + (await kpiVal(1)) + ' vs ' + R.kpi.savedH);
   const pre = await text('.pd-pre'); if (pre.indexOf('【') !== 0 || pre.indexOf('增效账') < 0 || pre.indexOf(d.projects[0].id) < 0) errors.push('周报文本异常');
-  const lrows = await page.$$eval('.m8-report .c7 .pd-card:first-child .pd-table tbody tr', (r) => r.length); if (lrows !== R.ledger.rows.length) errors.push('增效账行数 ' + lrows + ' vs ' + R.ledger.rows.length);
+  const lrows = await page.evaluate(() => { const c = [...document.querySelectorAll('.m8-report .pd-card')].find((x) => (x.querySelector('.hd .t') || {}).textContent.indexOf('增效账') >= 0); return c ? c.querySelectorAll('.pd-table tbody tr').length : 0; }); if (lrows !== R.ledger.rows.length) errors.push('增效账行数 ' + lrows + ' vs ' + R.ledger.rows.length);
   await clickBtn('.m8-report', '发送到微信'); await page.waitForSelector('.modal'); await page.waitForTimeout(300);
   await shot('6b-report-sent'); await page.click('.modal .btn'); await page.waitForTimeout(300);
   // 回到首页再进：仍在最后一屏，积分不重复扣

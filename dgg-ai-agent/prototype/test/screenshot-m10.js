@@ -12,7 +12,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -50,7 +50,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('2b-room-late-filter');
   await page.click('.pd-kpis .pd-kpi:nth-child(3)'); await page.waitForTimeout(200);
   // 预警榜第一条 → 下钻
-  await page.click('.c4 .pd-list .pd-item');
+  await page.click('.pd-card.c8 .pd-table tbody tr');   // 预警改成订单全景表里点行下钻
   await page.waitForSelector('.m10-head');
 
   // 屏 3 订单下钻
@@ -59,7 +59,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('3-order'); await lintScreen('订单下钻');
   const ganttBars = await page.$$eval('.pd-gantt rect[rx]', (r) => r.length);
   if (!ganttBars) errors.push('甘特无条');
-  const best = await page.$('.pd-action.best .pd-btn');
+  const best = await page.$('.m10-act.best .pd-btn');
   if (best) {
     await best.click(); await page.waitForTimeout(400);
     const toast = await page.$('.pd-toast'); if (!toast) errors.push('处置后无提示'); /* 先查提示（提示 2.6 秒后自动消失，截图可能更慢） */
@@ -75,7 +75,9 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(4)');
   await page.waitForSelector('.m10-insert');
   await shot('4-insert-form');
-  await page.click('.m10-insert .pd-btn.primary.big');
+  // 插单屏现在进来就直接出方案对比，不再有单独一步「开始模拟」
+  const simBtn = await page.$('.m10-insert .pd-btn.primary.big');
+  if (simBtn) await simBtn.click();
   await page.waitForSelector('.pd-compare');
   await page.waitForTimeout(200);
   await shot('4b-insert-compare'); await lintScreen('插单模拟');
@@ -90,8 +92,6 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('4d-room-after-insert');
   const rows2 = await page.$$eval('.c8 .pd-table tbody tr', (r) => r.length);
   if (rows2 !== rowCount + 1) errors.push('落单后订单数 ' + rows2 + ' 应为 ' + (rowCount + 1));
-  const logCard = await page.$$eval('.m10-log .l', (r) => r.length);
-  if (logCard < 2) errors.push('处置日志条数 ' + logCard);
 
   // 屏 5 物料与库存
   await page.click('.pd-tabs .tab:nth-child(5)');
@@ -112,6 +112,9 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.click('.pd-tabs .tab:nth-child(6)');
   await page.waitForSelector('.m10-daily');
   await shot('6-daily'); await lintScreen('交付日报');
+  // 今日处置清单从指挥室挪到了交付日报里
+  const logCard = await page.$$eval('.m10-daily .m10-log .l', (r) => r.length);
+  if (logCard < 2) errors.push('处置日志条数 ' + logCard);
   await page.click('.m10-daily .pd-card .ft .pd-btn.primary');
   await page.waitForSelector('.modal');
   await shot('6b-daily-wechat');

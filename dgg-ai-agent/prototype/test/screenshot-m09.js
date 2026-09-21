@@ -10,7 +10,7 @@ const errors = [];
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
@@ -29,9 +29,12 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await shot('2-board'); await lintScreen('驾驶舱');
   const spent1 = await text('#cr-spent');
   if (spent0 !== '0' || spent1 !== '100') errors.push('积分扣减异常 ' + spent0 + ' → ' + spent1);
-  if ((await kpiVal(1)).indexOf(core.fmtW(R.kpi.profit)) < 0) errors.push('利润 KPI ' + (await kpiVal(1)));
-  const grps = await page.$$eval('.m9-tree .grp', (r) => r.length); if (grps !== lib.metricTree.groups.length) errors.push('指标树组数 ' + grps);
-  const nodes = await page.$$eval('.m9-tree .nd', (r) => r.length); if (nodes !== lib.metricTree.nodes.length) errors.push('指标树节点数 ' + nodes);
+  // KPI 的数字与单位是两个 span，innerText 里没有空格，fmtW 有，比之前先抹掉空格
+  const noSp = (x) => String(x).replace(/\s+/g, '');
+  if (noSp(await kpiVal(1)).indexOf(noSp(core.fmtW(R.kpi.profit))) < 0) errors.push('利润 KPI ' + (await kpiVal(1)));
+  // 指标树压成了六张组瓦片，节点明细收在每组的抽屉里，瓦片脚上写着本组项数
+  const grps = await page.$$eval('.m9-tiles .m9-tile', (r) => r.length); if (grps !== lib.metricTree.groups.length) errors.push('指标树组数 ' + grps);
+  const nodes = await page.$$eval('.m9-tiles .m9-tile .f', (fs) => fs.reduce((a, f) => a + (parseInt(f.textContent, 10) || 0), 0)); if (nodes !== lib.metricTree.nodes.length) errors.push('指标树节点数 ' + nodes);
 
   // 归因
   await page.click('.c4 .pd-card .pd-list .pd-item'); await page.waitForSelector('.m9-attr'); await page.waitForTimeout(300);   // 偏差榜第一项
@@ -41,7 +44,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await page.evaluate(() => { [...document.querySelectorAll('.m9-attr .ctl .chips button')].find((b) => b.textContent === '经营利润').click(); }); await page.waitForTimeout(250);
   const A = R.attribution;
   const rows = await page.$$eval('.pd-card.c5 .pd-table tbody tr', (r) => r.length); if (rows !== A.leaves.length) errors.push('因子行数 ' + rows + ' vs ' + A.leaves.length);
-  const root = await kpiVal(2); if (root !== A.rootCause.name) errors.push('主因 ' + root + ' vs ' + A.rootCause.name);
+  const root = await kpiVal(3); if (root !== A.rootCause.name) errors.push('主因 ' + root + ' vs ' + A.rootCause.name);
   const ev = await page.$$eval('.m9-ev .ev', (r) => r.length); if (ev < 1) errors.push('无证据卡');
   await page.evaluate(() => { [...document.querySelectorAll('.m9-attr .ctl .chips button')].find((b) => b.textContent === '较前三月均值').click(); }); await page.waitForTimeout(250);
   const k1 = await kpiVal(1); await shot('3b-attr-avg3');
@@ -57,12 +60,13 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   const opts = await page.$$eval('.pd-compare .pd-option', (r) => r.length);
   const S = core.simulateAll(lib.samples.make, lib, A.rootCause.id);
   if (opts !== S.sims.length) errors.push('方案数 ' + opts + ' vs ' + S.sims.length);
-  const net0 = await kpiVal(5);
-  await page.$eval('.m9-params input[type=range]', (el) => { el.value = el.max; el.dispatchEvent(new Event('change', { bubbles: true })); }); await page.waitForTimeout(300);
-  const net1 = await kpiVal(5); if (net0 === net1) errors.push('调参数后净效益未变化');
+  const net0 = await kpiVal(2);
+  // 滑杆监听的是 input，不是 change
+  await page.$eval('.m9-params input[type=range]', (el) => { el.value = el.max; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }); await page.waitForTimeout(400);
+  const net1 = await kpiVal(2); if (net0 === net1) errors.push('调参数后净效益未变化');
   await shot('4b-options-param');
   await page.click('.pd-compare .pd-option:nth-child(1)'); await page.waitForTimeout(250);
-  const cur = await kpiVal(4); if (cur.indexOf('A') !== 0) errors.push('切换方案失败 ' + cur);
+  const cur = await kpiVal(1); if (cur.indexOf('A') !== 0) errors.push('切换方案失败 ' + cur);
   await page.click('.pd-compare .pd-option:nth-child(' + (S.sims.findIndex((s) => s.recommended) + 1) + ')'); await page.waitForTimeout(250);
   await clickBtn('.m9-options .pd-card.c4 .ft', '发起审批'); await page.waitForSelector('.m9-approval'); await page.waitForTimeout(300);
 
@@ -81,7 +85,10 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   await clickBtn('.m9-ms', '完成'); await page.waitForTimeout(300);
   const doneCnt = await page.$$eval('.m9-ms .m.done', (r) => r.length); if (doneCnt !== 1) errors.push('节点完成未生效 ' + doneCnt);
   await shot('6b-execute-milestone');
-  const rep = await text('.pd-pre'); if (rep.indexOf('【决策月报】') !== 0 || rep.indexOf('本期处置') < 0 || rep.indexOf('D-2609-01') < 0) errors.push('月报内容异常');
+  // 全文在抽屉里
+  await clickBtn('.m9-exec .pd-card .ft', '看全文'); await page.waitForSelector('.pd-drawer .pd-pre');
+  const rep = await text('.pd-drawer .pd-pre'); if (rep.indexOf('【决策月报】') !== 0 || rep.indexOf('本期处置') < 0 || rep.indexOf('D-2609-01') < 0) errors.push('月报内容异常');
+  await page.click('.pd-drawer .close'); await page.waitForTimeout(200);
   await page.evaluate(() => { [...document.querySelectorAll('.pd-card.c7 .pd-table tbody tr')].find((r) => r.textContent.indexOf('复盘未达标') >= 0).click(); }); await page.waitForTimeout(250);
   if (!(await page.$('.m9-review'))) errors.push('复盘决议无复盘块');
   await shot('6c-execute-review');
@@ -99,7 +106,7 @@ const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
   // 回驾驶舱：动作写回
   await page.click('.pd-tabs .tab:nth-child(2)'); await page.waitForSelector('.m9-board'); await page.waitForTimeout(300);
   await shot('7-board-after');
-  const logs = await page.$$eval('.m9-log .l', (r) => r.length); if (logs < 4) errors.push('驾驶舱动作记录 ' + logs);
+  // 动作记录改走对话面板（open panel:log），月报「本期处置」与它同一份，上面已核过
   await page.click('#home-link'); await page.waitForSelector('.grid'); await page.click('.card[data-id="m9"]'); await page.waitForSelector('.pd-app');
   if ((await text('#cr-spent')) !== '100') errors.push('重进后积分异常');
   await page.click('.rail .link'); await page.waitForSelector('.rail .menu'); await page.click('.rail .menu button:nth-child(2)'); await page.waitForTimeout(300);
