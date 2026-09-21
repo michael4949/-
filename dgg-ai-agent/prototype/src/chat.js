@@ -342,24 +342,26 @@
 
     /* ---------- 替客户操作这一屏 ---------- */
     function labelOf(el2) { return ((el2 && el2.textContent) || '').replace(/\s+/g, ' ').trim(); }
-    function findBtn(aim) {
-      var w = o.work && o.work();
-      if (!w || !aim) return null;
-      var list = w.querySelectorAll('button:not([disabled]), a[role="button"]'), i, el2, t;
-      var s2 = String(aim).replace(/\s+/g, '');
+    function hunt(scope, s2, loose) {
+      if (!scope) return null;
+      var list = scope.querySelectorAll('button:not([disabled]), a[role="button"]'), i, el2, t;
       for (i = 0; i < list.length; i++) {
         el2 = list[i];
         if (el2.offsetParent === null) continue;
         t = labelOf(el2).replace(/\s+/g, '');
-        if (t && t.indexOf(s2) === 0) return el2;
-      }
-      for (i = 0; i < list.length; i++) {                        /* 退一步：包含也算 */
-        el2 = list[i];
-        if (el2.offsetParent === null) continue;
-        t = labelOf(el2).replace(/\s+/g, '');
-        if (t && s2.length >= 2 && t.indexOf(s2) >= 0) return el2;
+        if (!t) continue;
+        if (loose ? (s2.length >= 2 && t.indexOf(s2) >= 0) : t.indexOf(s2) === 0) return el2;
       }
       return null;
+    }
+    /* 先在工作区找，再把屏底那条「下一步」算上 —— 它挂在 .pd-body 上，不在工作区里，
+       只搜工作区的话「下一步点哪」永远点不动 */
+    function findBtn(aim) {
+      var w = o.work && o.work();
+      if (!w || !aim) return null;
+      var s2 = String(aim).replace(/\s+/g, '');
+      var wide = (w.closest && w.closest('.pd-body')) || (w.parentNode && w.parentNode.nodeType === 1 ? w.parentNode : null);
+      return hunt(w, s2, false) || hunt(wide, s2, false) || hunt(w, s2, true) || hunt(wide, s2, true);
     }
     /* 先把按钮亮出来给客户看清楚，再替他按下去 —— 展台上要让人看见「AI 动了哪一下」 */
     function press(el2) {
