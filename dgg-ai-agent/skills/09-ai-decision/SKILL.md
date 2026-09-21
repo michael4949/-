@@ -3,9 +3,9 @@ name: AI决策
 id: ai-decision
 kind: 产品
 credits: 100
-version: 1.2.0
+version: 1.2.1
 suite: 薯片AI智能体 2026.09
-updated: 2026-09-20
+updated: 2026-09-21
 triggers: [决策, 经营分析, 指标, 指标树, 归因, 偏差, 连环替代, 方案, 预演, 审批, 会签, 决议, 复盘, 经营月报, 老板看板]
 inputs: [data]
 data_files: 7

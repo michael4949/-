@@ -410,7 +410,7 @@ function readme(m, manifest, datasets) {
       '',
       '- `ask` / `brief` 答不上时是 `ok:true` + `data:null`（业务事实，不是调用失败），平台按 `data === null` 走自己的兜底。',
       '- 回答是 `{ text, blocks?, act?, ref?, step? }`：`text` 必读得通，`blocks` 是纯数据（' + ((ft.blocks || []).join(' / ') || 'kv / table / tags / chart') + '），',
-      '  `act` 是声明式动作（' + ((ft.act || []).join(' / ') || 'goto / focus / open / apply / set') + '），平台只实现子集也合格，不认识的一律忽略。',
+      '  `act` 是声明式动作（' + ((ft.act || []).join(' / ') || 'goto / focus / open / apply / set / click') + '），平台只实现子集也合格，不认识的一律忽略。',
       ''
     ] : [],
     ft.ingest ? [

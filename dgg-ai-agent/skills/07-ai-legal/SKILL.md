@@ -3,9 +3,9 @@ name: AI法务
 id: ai-legal
 kind: 产品
 credits: 30
-version: 1.2.0
+version: 1.2.1
 suite: 薯片AI智能体 2026.09
-updated: 2026-09-20
+updated: 2026-09-21
 triggers: [法务, 合同审查, 合同风险, 条款, 修订, 设立公司, 子公司, 分公司, 股权, 章程, 商标, 专利, 知识产权, 续展, 年费, 证照, 台账, 法务月报]
 inputs: [data]
 data_files: 6

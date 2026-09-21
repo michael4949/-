@@ -19,7 +19,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '2.2.0';
+  var VERSION = '2.2.1';
   var MODULE_NAME = '企业AI成熟度评估';
   var CREDITS = 20;
   var SIZE_ORDER = ['1_20', '21_50', '51_100', '101_300', '300_plus'];

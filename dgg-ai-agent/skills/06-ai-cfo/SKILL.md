@@ -3,9 +3,9 @@ name: AI CFO
 id: ai-cfo
 kind: 产品
 credits: 50
-version: 1.2.0
+version: 1.2.1
 suite: 薯片AI智能体 2026.09
-updated: 2026-09-20
+updated: 2026-09-21
 triggers: [三表, 勾稽, 对账, 财务风险, 现金流, 资金缺口, 回款, 应收, 税负, 政策, 补贴, 加计扣除, 小微, 月报]
 inputs: [data]
 data_files: 7

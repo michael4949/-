@@ -3,9 +3,9 @@ name: AI获客
 id: ai-lead
 kind: 产品
 credits: 30
-version: 1.2.0
+version: 1.2.1
 suite: 薯片AI智能体 2026.09
-updated: 2026-09-20
+updated: 2026-09-21
 triggers: [获客, 客户画像, 话术, 脚本, 线索, 跟进, 询盘, 转化, 分派, 成交预测, 周报]
 inputs: [data]
 data_files: 7

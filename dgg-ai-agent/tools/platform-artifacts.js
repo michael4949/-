@@ -538,7 +538,7 @@ function conversationMd(manifest) {
   L.push('');
   L.push('平台只渲染 `text` 也必须读得通 —— 这是底线，表格一律走 `blocks`。');
   L.push('');
-  L.push('## blocks：六种，纯数据');
+  L.push('## blocks：七种，纯数据');
   L.push('');
   L.push('| type | 字段 | 上限 |');
   L.push('|---|---|---|');
@@ -548,10 +548,13 @@ function conversationMd(manifest) {
   L.push('| `list` | `items`，`ordered?`，`title?` | items ≤ 8 |');
   L.push('| `metric` | `items: [{ label, value, unit?, sub?, tone? }]` | items ≤ 4 |');
   L.push('| `text` | `text` | ≤ 200 字 |');
+  L.push('| `chart` | `chart`（14 种图型之一），`series`，`labels?`，`title?`，`unit?` 等，见 SPEC §10.6.1 | 序列 ≤ 3，标签 ≤ 13 |');
   L.push('');
   L.push('单元格一律是字符串或数字，不是对象；`tone` 只有 `ok` / `warn` / `bad` / `info`；**未知 type 一律忽略且不得报错**（厂商扩展用 `x-` 前缀）。');
   L.push('');
-  L.push('## act：五个词，纯数据');
+  L.push('`chart` 只给**规格**不给画法：skill 不碰颜色、不碰像素、不碰 SVG。画不了图的平台把它退化成 `labels` + `series[].data` 两列表，或直接忽略——`text` 一定已经把结论说清楚了。');
+  L.push('');
+  L.push('## act：六个词，纯数据');
   L.push('');
   L.push('| type | 字段 | 平台最小实现 |');
   L.push('|---|---|---|');
@@ -560,8 +563,11 @@ function conversationMd(manifest) {
   L.push('| `open` | `panel`，`ref?`，`step?` | 打开下钻面板；不认识就退化成 `focus` 或忽略 |');
   L.push('| `apply` | `action`，`input?` | 按 §5 调一次本 skill 的动作 |');
   L.push('| `set` | `path`，`value` | 按点号路径改业务数据后重算 |');
+  L.push('| `click` | `aim` | 替用户按下屏上写着这几个字的按钮；没有界面的平台忽略 |');
   L.push('');
   L.push('- 一条回答最多一个 `act`；`ref` 必须是业务 id，不是数组下标、不是 DOM 选择器。');
+  L.push('- `click` 的 `aim` 写**按钮上的字**，不写选择器、不写 id。有界面的宿主按这个顺序找：**浮层（抽屉 / 弹窗）→ 当前屏工作区 → 整屏（含常驻的底栏、页头）**；三处都先做前缀匹配，都没命中再按「包含」松匹配走一遍同样的顺序。跳过禁用的和不可见的，比较前去掉空白。');
+  L.push('- 浮层开着的时候该点的一定在浮层里，指屏底那条隔着一层点不到——这两条是真机上踩出来的，照着实现能少走两轮。');
   L.push('- **防递归：由 `act` 触发的那次调用，其返回里的 `act` 只许呈现给用户，不许自动再执行**（深度上限固定为 1）。');
   L.push('- 平台执行 `apply` 前校验三条：动作在清单里、`family` 是 `core`、不是当前这次调用的动作名。任一不过就当未知 `act` 忽略。');
   L.push('- `act` 永远是**建议**不是命令，`apply` / `set` 这两种会改数的尤其应当先问用户。');

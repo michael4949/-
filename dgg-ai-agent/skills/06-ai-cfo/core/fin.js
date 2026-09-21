@@ -12,7 +12,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.2.1';
   var MODULE_NAME = 'AI CFO';
   var CREDITS = 50;
   var DAY = 86400000;

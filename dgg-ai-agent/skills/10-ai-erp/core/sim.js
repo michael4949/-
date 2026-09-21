@@ -16,7 +16,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.2.1';
   var MODULE_NAME = 'AI ERP';
   var CREDITS = 100;
   var HZ = 60;               // 产线日历长度（天），超出即视为无法排入

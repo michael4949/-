@@ -3,9 +3,9 @@ name: AI流程提效
 id: ai-process
 kind: 产品
 credits: 50
-version: 1.2.0
+version: 1.2.1
 suite: 薯片AI智能体 2026.09
-updated: 2026-09-20
+updated: 2026-09-21
 triggers: [流程提效, 工序流, 瓶颈, 约束工序, 在制品, 报工, 报工核验, 换型, 合批, 投料, 派工, 排队等待, 有效利用率, 标准工时, 保养窗口, 增效账, 提效周报]
 inputs: [data]
 data_files: 6
