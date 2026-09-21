@@ -42,10 +42,10 @@
     { id: 'm5',  name: 'AI人力官',              sub: 'JD简历面试合规成本',     icon: 'badge' },
     { id: 'm6',  name: 'AI CFO',                sub: '三表勾稽风险现金政策',   icon: 'coin' },
     { id: 'm7',  name: 'AI法务',                sub: '合同设立知产三件事',     icon: 'scale' },
-    { id: 'm8',  name: 'AI流程提效',            sub: '千户代账流水线作业',     icon: 'flow' },
-    { id: 'm9',  name: 'AI决策',                sub: '指标归因方案审批',       icon: 'compass' },
-    { id: 'm10', name: 'AI ERP',                sub: '订单交付指挥室',         icon: 'factory' },
-    { id: 'm11', name: 'AI软件开发',            sub: '一句需求变可点页面',     icon: 'code' }
+    { id: 'm8',  name: 'AI流程提效',            sub: '报工到派工全流程跑通',   icon: 'flow' },
+    { id: 'm9',  name: 'AI决策',                sub: '指标异常归因三套方案',   icon: 'compass' },
+    { id: 'm10', name: 'AI ERP',                sub: '插单重排交期成本一屏',   icon: 'factory' },
+    { id: 'm11', name: 'AI软件开发',            sub: '一句话需求变成可点页面', icon: 'code' }
   ];
   MODULES.forEach(function (m) { m.credits = DATA.credits.perRun[m.name]; });
   var ICONS = {
@@ -159,32 +159,112 @@
 
   // ---------- 明暗场：首页与待机页用暗场底（深空），模块页用浅场底 ----------
   function syncScheme() {
-    var dark = $body.getAttribute('data-module') === 'home' || ($idle && !$idle.classList.contains('hidden'));
+    var dark = !!($idle && !$idle.classList.contains('hidden'));   /* 展台版首页是亮场，只有待机页压暗 */
     $body.classList.toggle('dark-scheme', !!dark);
     if (window.DGG && window.DGG.FX && window.DGG.FX.setScheme) window.DGG.FX.setScheme(dark ? 'dark' : 'light');
   }
 
-  // ---------- 首页 11 宫格 ----------
-  function renderHome() {
-    $main.appendChild(h('div', { class: 'page-title' }, [h('h1', {}, ['薯片AI智能体']), h('span', { class: 'sub' }, ['AI 赋能企业经营全链路解决方案'])]));
-    $main.appendChild(gridEl(function (m) { if (BUILT[m.id]) go(m.id); }));
+  // ---------- 首页 · 展台版 ----------
+  /* 三列：左 4 张产品卡 / 中 3 张报告卡 + 企业应用 AI 地图 / 右 4 张产品卡。
+     11 张一律是 .card[data-id]，与走查脚本的点法保持同一套契约。 */
+  var HOME_LEFT  = ['m4', 'm5', 'm6', 'm7'];
+  var HOME_RIGHT = ['m8', 'm9', 'm10', 'm11'];
+  var HOME_TOP   = ['m1', 'm2', 'm3'];
+  function byId(id) { for (var i = 0; i < MODULES.length; i++) if (MODULES[i].id === id) return MODULES[i]; return null; }
+  function paletteOf(id) { return (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[id]) || null; }
+  function cardStyle(id) {
+    var pc = paletteOf(id);
+    return pc ? '--c-pa:' + pc.pa + ';--c-pa2:' + pc.pa2 + ';--c-soft:' + pc.soft + ';--c-ink:' + pc.ink + ';--c-hd1:' + pc.hd1 + ';--c-hd2:' + pc.hd2 + ';--c-hdt:' + pc.hdt : null;
   }
+  function openModule(m) { if (BUILT[m.id]) go(m.id); }
+  /* 待机页仍用朴素的 11 宫格：那一屏是循环点亮，不需要展板的三列版式 */
   function gridEl(onClick) {
-    var g = h('div', { class: 'grid' });
+    var g = h('div', { class: 'grid tiles' });
     MODULES.forEach(function (m) {
-      var pc = (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[m.id]) || null;
-      var card = h('button', {
-        class: 'card' + (m.big ? ' big' : ''), 'data-id': m.id, disabled: !BUILT[m.id], style: pc ? '--c-pa:' + pc.pa + ';--c-pa2:' + pc.pa2 + ';--c-soft:' + pc.soft + ';--c-ink:' + pc.ink + ';--c-hd1:' + pc.hd1 + ';--c-hd2:' + pc.hd2 + ';--c-hdt:' + pc.hdt : null,
+      g.appendChild(h('button', {
+        class: 'card' + (m.big ? ' big' : ''), 'data-id': m.id, disabled: !BUILT[m.id], style: cardStyle(m.id),
         onclick: function () { onClick && onClick(m); }
       }, [
         h('span', { class: 'icon', html: '<svg viewBox="0 0 24 24">' + ICONS[m.icon] + '</svg>' }),
         h('span', { class: 'name' }, [m.name]),
         h('span', { class: 'sub' }, [m.sub]),
         h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
-      ]);
-      g.appendChild(card);
+      ]));
     });
     return g;
+  }
+
+  function personCard(id) {
+    var m = byId(id), H = window.DGG.home;
+    var face = h('span', { class: 'face' });
+    face.appendChild(H.svg('0 0 100 100', H.faceSvg(id)));
+    return h('button', {
+      class: 'card person', 'data-id': id, disabled: !BUILT[id], style: cardStyle(id),
+      onclick: function () { openModule(m); }
+    }, [
+      face,
+      h('span', { class: 'body' }, [
+        h('span', { class: 'name' }, [m.name]),
+        h('span', { class: 'sub' }, [m.sub]),
+        h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
+      ])
+    ]);
+  }
+  function reportCard(id) {
+    var m = byId(id), H = window.DGG.home, pc = paletteOf(id), key = pc ? pc.pa : '#2F6BD4';
+    var pv = (DATA.homePreview || {})[id] || null;
+    var art = h('span', { class: 'art' });
+    if (pv) {
+      if (id === 'm1') art.appendChild(H.radarPreview(pv, key));
+      if (id === 'm2') art.appendChild(H.barsPreview(pv, key));
+      if (id === 'm3') {
+        var lw = h('span', { class: 'lw' });
+        lw.appendChild(h('span', { class: 'lg' }, [
+          h('i', { class: 'k1' }), h('span', {}, ['累计净额']), h('i', { class: 'k2' }), h('span', {}, ['累计投入'])
+        ]));
+        lw.appendChild(H.linePreview(pv, key));
+        lw.appendChild(h('span', { class: 'stats' }, pv.stats.map(function (st) {
+          return h('span', { class: 'st' }, [h('span', { class: 'k' }, [st.k]), h('b', { class: 'num' }, [st.v]), h('span', { class: 'u' }, [st.u])]);
+        })));
+        art.appendChild(lw);
+      }
+    }
+    return h('button', {
+      class: 'card report', 'data-id': id, disabled: !BUILT[id], style: cardStyle(id),
+      onclick: function () { openModule(m); }
+    }, [
+      h('span', { class: 'hd' }, [
+        h('span', { class: 'ic', html: '<svg viewBox="0 0 24 24">' + ICONS[m.icon] + '</svg>' }),
+        h('span', { class: 't' }, [m.name])
+      ]),
+      h('span', { class: 'bd' }, [
+        h('span', { class: 'sub' }, [m.sub]),
+        art,
+        h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
+      ])
+    ]);
+  }
+  function renderHome() {
+    var H = window.DGG.home;
+    $main.appendChild(h('div', { class: 'page-title' }, [
+      h('h1', {}, ['薯片AI智能体']),
+      h('span', { class: 'bar' }),
+      h('span', { class: 'sub' }, ['AI 赋能企业经营全链路解决方案'])
+    ]));
+    var stage = h('div', { class: 'grid stage' });
+    var colL = h('div', { class: 'col side' });
+    HOME_LEFT.forEach(function (id) { colL.appendChild(personCard(id)); });
+    var colR = h('div', { class: 'col side' });
+    HOME_RIGHT.forEach(function (id) { colR.appendChild(personCard(id)); });
+    var colC = h('div', { class: 'col mid' });
+    var row = h('div', { class: 'report-row' });
+    HOME_TOP.forEach(function (id) { row.appendChild(reportCard(id)); });
+    colC.appendChild(row);
+    var map = h('div', { class: 'ai-map' }, [h('div', { class: 'cap' }, ['企业应用AI地图'])]);
+    map.appendChild(H.aiMap());
+    colC.appendChild(map);
+    stage.appendChild(colL); stage.appendChild(colC); stage.appendChild(colR);
+    $main.appendChild(stage);
   }
 
   // ---------- 右侧常驻栏 ----------
@@ -269,8 +349,11 @@
   function renderPricebar() {
     clear($pricebar); popEl = null;
     PRICES.forEach(function (p) {
-      var pill = h('button', { class: 'pill' + (S.recommended === p.key ? ' rec' : ''), onclick: function (ev) { togglePop(p, ev.currentTarget); } }, [
-        h('span', {}, [p.name]), h('span', { class: 'p num' }, [fmt(p.price)]), h('span', { class: 'u' }, [p.unit])
+      var pill = h('button', { class: 'pill k-' + p.key + (S.recommended === p.key ? ' rec' : '') + (p.key === 'private' ? ' star' : ''), onclick: function (ev) { togglePop(p, ev.currentTarget); } }, [
+        h('span', { class: 'n' }, [p.key === 'private' ? h('i', { class: 'crown', html: '<svg viewBox="0 0 24 24"><path d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-1.6 9H4.6z" fill="currentColor"/></svg>' }) : null, p.name]),
+        h('span', { class: 'p num' }, [String(p.price)]),   /* 价格不加千分位：DM 与展板都是 1280 / 12800 */
+        h('span', { class: 'u' }, [p.unit, h('i', {}, [p.seats])]),
+        p.key === 'private' ? h('span', { class: 'flag' }, ['推荐']) : null
       ]);
       $pricebar.appendChild(pill);
     });
@@ -278,7 +361,7 @@
   function togglePop(p, anchor) {
     if (popEl) { $pricebar.removeChild(popEl); var same = popEl._key === p.key; popEl = null; if (same) return; }
     popEl = h('div', { class: 'pop' }, [
-      h('b', {}, [p.name, ' ', h('span', { class: 'num', style: 'color:var(--brand)' }, [fmt(p.price)]), ' ', p.unit]),
+      h('b', {}, [p.name, ' ', h('span', { class: 'num', style: 'color:var(--brand)' }, [String(p.price)]), ' ', p.unit]),
       h('div', { class: 'row' }, [h('span', {}, ['坐席']), h('span', {}, [p.seats])]),
       h('div', { class: 'row' }, [h('span', {}, ['积分']), h('span', {}, [p.pts])])
     ]);
