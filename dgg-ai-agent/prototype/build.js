@@ -85,6 +85,7 @@ html = put(html, '/*__CHARTS_M3_JS__*/', R('src/charts-m3.js'));
 html = put(html, '/*__MODULE_03_JS__*/', R('src/module-03.js'));
 html = put(html, '/*__ANIM_JS__*/', R('src/anim.js'));
 html = put(html, '/*__DOCPARSE_JS__*/', R('../skills/_shared/docparse.js') + '\n' + R('src/docparse.js'));  /* 解析内核下沉到 skills/_shared，原型只留 FileReader 薄包装 */
+html = put(html, '/*__CHAT_CHART_JS__*/', R('../skills/_shared/chartspec.js') + '\n' + R('src/chat-chart.js'));  /* 配图规则下沉到 skills/_shared，画法留在原型 */
 html = put(html, '/*__CHAT_JS__*/', R('src/chat.js'));
 html = put(html, '/*__GUIDE_JS__*/', R('src/guide.js'));
 html = put(html, '/*__PRODUCT_UI_JS__*/', R('src/product-ui.js'));

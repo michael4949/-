@@ -454,7 +454,7 @@ ARCHES.forEach((k) => {
   const dBefore11 = J(d), d0Before11 = J(d0);
   const STEPS11 = K.screens().map((x) => x.key);
   ok(STEPS11.length === 6 && K.screens().every((x) => x.key && x.label) && STEPS11.join() === 'connect,build,try,test,ship,iterate', k + ' screens 六屏登记');
-  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || (['kv', 'table', 'tags', 'list', 'metric', 'text', 'chart'].indexOf(b.type) >= 0 && (b.type !== 'chart' || ['column', 'bar', 'stack', 'line', 'area', 'donut', 'pie', 'funnel', 'gauge', 'radar', 'waterfall', 'progress', 'heat', 'scatter'].indexOf(b.chart) >= 0))));
   const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && J(a) === J(JSON.parse(J(a))));
   const askPair = (q, st, dd, RR) => {
     const a = K.ask(q, st, dd, lib, RR);

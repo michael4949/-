@@ -139,12 +139,14 @@ Object.keys(lib.samples).sort().forEach((k) => {
   // 10. 对话与文档摄入：六屏开场、快捷问句、问答、文档
   const steps = core.screens().map((x) => x.key);
   ok(steps.length === 6 && core.screens().every((x) => x.key && x.label), k + ' screens 六屏登记');
-  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && bs.every((b) => b == null || (['kv', 'table', 'tags', 'list', 'metric', 'text', 'chart'].indexOf(b.type) >= 0 && (b.type !== 'chart' || ['column', 'bar', 'stack', 'line', 'area', 'donut', 'pie', 'funnel', 'gauge', 'radar', 'waterfall', 'progress', 'heat', 'scatter'].indexOf(b.chart) >= 0))));
   const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && JSON.stringify(a) === JSON.stringify(JSON.parse(JSON.stringify(a))));
   steps.forEach((st) => {
     const b = core.brief(st, d, lib, R);
-    ok(typeof b === 'string' && b.length > 10 && !/undefined|NaN|\{\w+\}/.test(b), k + ' brief ' + st + '：' + b);
-    lintText(b, k + ' brief ' + st);
+    const bt = typeof b === 'string' ? b : (b && b.text);
+    ok(typeof bt === 'string' && bt.length > 10 && !/undefined|NaN|\{\w+\}/.test(bt), k + ' brief ' + st + '：' + bt);
+    ok(typeof b === 'string' || isBlocks(b.blocks), k + ' brief blocks 块型 ' + st);
+    lintText(bt, k + ' brief ' + st);
     ok(JSON.stringify(core.brief(st, d, lib)) === JSON.stringify(b), k + ' brief 不传 result 结果不一致 ' + st);
     const sg = core.suggest(st, d, lib, R);
     ok(Array.isArray(sg) && sg.length >= 2 && sg.length <= 4, k + ' suggest ' + st);

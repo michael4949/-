@@ -351,6 +351,11 @@
   function tableB(head, rows) { return { type: 'table', head: head, rows: rows }; }
   function tagsB(items) { return { type: 'tags', items: items }; }
   function textB(t) { return { type: 'text', text: t }; }
+  function listB(items) { return { type: 'list', items: items }; }
+  /* 图（SPEC §10.6）：纯数据的图表规格，平台画不了就当没看见 */
+  function chartB(o) { return { type: 'chart', chart: o.chart, title: o.title || '', unit: o.unit || '', labels: o.labels || [], series: o.series || [], total: o.total, target: o.target, max: o.max, value: o.value, xLabel: o.xLabel, yLabel: o.yLabel, note: o.note }; }
+  function ser(name, data) { return [{ name: name || '', data: data }]; }
+  function wan(n) { return Math.round((+n || 0) / 1000) / 10; }         /* 元 → 万元，留一位 */
   function focusOf(data) { var f = data && data.focus; return (f && typeof f === 'object') ? f : {}; }
   function firstNeed(R, F) { var id = F && F.need; return (id && R.needs.filter(function (n) { return n.id === id; })[0]) || R.needs[0] || null; }
   function needCands(R, n) { return n ? R.candidates.filter(function (c) { return c.needId === n.id; }) : []; }
@@ -378,28 +383,58 @@
     if (!step) step = SCREENS[0][0];                 /* 不传 step = 首屏（SPEC §10.2 / §10.3） */
     var R = ctxOf(data, lib, result), d = R.data, k = R.kpi, C = R.cost, comp = R.compliance, F = focusOf(data);
     if (step === 'connect') {
-      if (C.wages - C.socialBase <= 0) return '社保申报表的基数合计 ' + fmtW(C.socialBase) + ' / 月，与工资表 ' + fmtW(C.wages) + ' / 月是同一个口径，基数这块没有待补差额。';
-      return '社保申报表的基数合计 ' + fmtW(C.socialBase) + ' / 月，工资表 ' + fmtW(C.wages) + ' / 月，差 ' + fmtW(C.wages - C.socialBase) + '，这块按实际工资申报要补。';
+      var gg = chartB({ chart: 'gauge', title: '社保基数占工资', unit: '%', value: C.wages ? Math.round(100 * C.socialBase / C.wages) : 100, max: 100, target: 100 });
+      if (C.wages - C.socialBase <= 0) return { text: '社保申报表的基数合计 ' + fmtW(C.socialBase) + ' / 月，与工资表 ' + fmtW(C.wages) + ' / 月是同一个口径，基数这块没有待补差额。', blocks: [gg] };
+      return { text: '社保申报表的基数合计 ' + fmtW(C.socialBase) + ' / 月，工资表 ' + fmtW(C.wages) + ' / 月，差 ' + fmtW(C.wages - C.socialBase) + '，这块按实际工资申报要补。', blocks: [gg] };
     }
-    if (step === 'board') { var dp = topDept(R); if (!dp) return null; return dp.name + ' 在编 ' + dp.headcount + ' 人、缺编 ' + dp.vacancy + ' 人，' + dp.overtimeOver + ' 人上月加班超 ' + lib.complianceRules.overtimeMonthlyMax + ' 小时，缺编与加班是同一件事。'; }
+    if (step === 'board') {
+      var dp = topDept(R); if (!dp) return null;
+      var ds = R.org.byDept.slice(0, 6);
+      return {
+        text: dp.name + ' 在编 ' + dp.headcount + ' 人、缺编 ' + dp.vacancy + ' 人，' + dp.overtimeOver + ' 人上月加班超 ' + lib.complianceRules.overtimeMonthlyMax + ' 小时，缺编与加班是同一件事。',
+        blocks: [chartB({ chart: 'bar', title: '各部门在编', unit: ' 人', labels: ds.map(function (x) { return x.name; }), series: ser('在编', ds.map(function (x) { return x.headcount; })) })],
+        ref: dp.id
+      };
+    }
     if (step === 'recruit') {
       var n = firstNeed(R, F); if (!n) return null;
       var t = topCand(R, n);
       if (!t) return n.title + ' 还有 ' + n.dueDays + ' 天到岗期限，候选 0 人，简历进来后出打分。';
-      return n.title + ' 还有 ' + n.dueDays + ' 天到岗期限，候选 ' + n.active + ' 人里 A 级 ' + n.gradeA + ' 人；' + t.id + ' 匹配 ' + t.total + ' 分，期望 ' + fmtN(t.expected) + ' 元。';
+      var cs5 = needCands(R, n).slice(0, 5);
+      return {
+        text: n.title + ' 还有 ' + n.dueDays + ' 天到岗期限，候选 ' + n.active + ' 人里 A 级 ' + n.gradeA + ' 人；' + t.id + ' 匹配 ' + t.total + ' 分，期望 ' + fmtN(t.expected) + ' 元。',
+        blocks: [chartB({ chart: 'bar', title: '候选人匹配分', unit: ' 分', labels: cs5.map(function (c) { return c.id.slice(-3); }), series: ser('匹配分', cs5.map(function (c) { return c.total; })) })],
+        ref: t.id
+      };
     }
     if (step === 'interview') {
       var dn = scoredCands(R);
       if (!dn.length) return '待面试 ' + k.interviewing + ' 人，四项打分录入后出录用建议与定薪。';
-      var c0 = dn[0];
-      return c0.id + ' 综合 ' + c0.interview.avg + ' 分，' + c0.interview.lowest + ' 只有 ' + c0.interview.lowestScore + ' 分；建议定薪 ' + fmtN(c0.interview.suggested) + ' 元，正好卡在候选人期望上。';
+      var c0 = dn[0], it = c0.interview.radar || [];
+      return {
+        text: c0.id + ' 综合 ' + c0.interview.avg + ' 分，' + c0.interview.lowest + ' 只有 ' + c0.interview.lowestScore + ' 分；建议定薪 ' + fmtN(c0.interview.suggested) + ' 元，正好卡在候选人期望上。',
+        blocks: it.length ? [chartB({ chart: 'radar', title: c0.id + ' 四项评分', max: 5, labels: it.map(function (x) { return x.label; }), series: ser('得分', it.map(function (x) { return x.value; })) })] : [],
+        ref: c0.id
+      };
     }
-    if (step === 'compliance') { var t2 = topRule(R); if (!t2) return allClear(comp); return t2.id + ' ' + t2.name + ' 涉及 ' + t2.count + ' 人，影响预计 ' + fmtW(t2.impact) + '，占 ' + comp.counts.open + ' 项待处理影响的 ' + Math.round(100 * t2.impact / (comp.impact || 1)) + '%。'; }
+    if (step === 'compliance') {
+      var t2 = topRule(R);
+      if (!t2) return allClear(comp);
+      var op = comp.open.slice(0, 5), rest = comp.impact - op.reduce(function (a, x) { return a + x.impact; }, 0);
+      var lb = op.map(function (x) { return x.id; }), dv = op.map(function (x) { return wan(x.impact); });
+      if (rest > 0) { lb.push('其他'); dv.push(wan(rest)); }
+      return {
+        text: t2.id + ' ' + t2.name + ' 涉及 ' + t2.count + ' 人，影响预计 ' + fmtW(t2.impact) + '，占 ' + comp.counts.open + ' 项待处理影响的 ' + Math.round(100 * t2.impact / (comp.impact || 1)) + '%。',
+        blocks: [chartB({ chart: 'donut', title: '待处理影响构成', unit: ' 万元', total: wan(comp.impact), labels: lb, series: ser('影响', dv) })],
+        ref: t2.id
+      };
+    }
     if (step === 'cost') {
       var cs = '用工成本占收入 ' + C.share + '%，高于同行参考 ' + C.bench[0] + '–' + C.bench[1] + '%';
-      if (R.sim.socialDelta > 0) return cs + '；社保基数补到位每月多 ' + fmtW(R.sim.socialDelta) + '，一年 ' + fmtW(R.sim.socialDelta * 12) + '。';
+      var cg = [chartB({ chart: 'gauge', title: '用工成本占收入', unit: '%', value: C.share, max: Math.max(50, Math.ceil(C.share / 10) * 10), target: C.bench[1] })];
+      if (R.sim.socialDelta > 0) return { text: cs + '；社保基数补到位每月多 ' + fmtW(R.sim.socialDelta) + '，一年 ' + fmtW(R.sim.socialDelta * 12) + '。', blocks: cg };
       var h5 = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
-      return '社保基数已按实际工资申报到位' + (h5 && h5.status !== 'open' ? '，' + h5.id + ' 敞口已关闭' : '') + '；' + cs + '。';
+      return { text: '社保基数已按实际工资申报到位' + (h5 && h5.status !== 'open' ? '，' + h5.id + ' 敞口已关闭' : '') + '；' + cs + '。', blocks: cg };
     }
     return null;
   }
@@ -438,7 +473,10 @@
         ref: cc.id, act: { type: 'open', panel: 'candidate', ref: cc.id } };
     }
     /* 换屏 */
-    if (has(q, ['进人力驾驶舱', '驾驶舱', '开始分析'])) return { text: '在编 ' + k.headcount + ' / 编制 ' + k.budget + '，合规待处理 ' + k.complianceOpen + ' 项，影响预计 ' + fmtW(k.complianceImpact) + '。', act: { type: 'goto', step: 'board' } };
+    if (has(q, ['进人力驾驶舱', '驾驶舱', '开始分析'])) return {
+      text: '在编 ' + k.headcount + ' / 编制 ' + k.budget + '，合规待处理 ' + k.complianceOpen + ' 项，影响预计 ' + fmtW(k.complianceImpact) + '。',
+      blocks: [chartB({ chart: 'column', title: '在编与编制', unit: ' 人', labels: ['在编', '编制'], series: ser('人数', [k.headcount, k.budget]) })],
+      act: { type: 'goto', step: 'board' } };
 
     if (step === 'connect') {
       if (has(q, ['直连', '数据源', '同步', '导入'])) {
@@ -457,16 +495,32 @@
       }
       if (has(q, ['离职', '流失', '为什么高'])) {
         var rs = R.org.reasons.slice(0, 3);
-        return { text: '近 12 个月离职 ' + R.org.leavers12 + ' 人、离职率 ' + k.turnover + '%，行业参考 ' + k.turnoverBench + '%。原因前三：' + rs.map(function (x) { return x.label + ' ' + x.value + ' 人'; }).join('、') + '。' };
+        return {
+          text: '近 12 个月离职 ' + R.org.leavers12 + ' 人、离职率 ' + k.turnover + '%，行业参考 ' + k.turnoverBench + '%。原因前三：' + rs.map(function (x) { return x.label + ' ' + x.value + ' 人'; }).join('、') + '。',
+          blocks: [
+            chartB({ chart: 'line', title: '近 12 个月离职人数', unit: ' 人',
+              labels: R.org.leaversByMonth.map(function (x) { return x.label; }), series: ser('离职', R.org.leaversByMonth.map(function (x) { return x.count; })) }),
+            chartB({ chart: 'bar', title: '离职原因', unit: ' 人',
+              labels: R.org.reasons.map(function (x) { return x.label; }), series: ser('人数', R.org.reasons.map(function (x) { return x.value; })) })
+          ]
+        };
       }
       if (has(q, ['加班', '超限', '工时'])) {
         var ot = R.org.byDept.filter(function (x) { return x.overtimeOver > 0; });
-        return { text: otMonth(d) + ' 月加班超 ' + lib.complianceRules.overtimeMonthlyMax + ' 小时 ' + comp.overtimeOver + ' 人，全在 ' + ot.map(function (x) { return x.name; }).join('、') + '；加班费敞口预计 ' + fmtW(S.otPremium) + ' / 月。', ref: ot.length ? ot[0].id : null, act: ot.length ? { type: 'focus', ref: ot[0].id } : null };
+        return {
+          text: otMonth(d) + ' 月加班超 ' + lib.complianceRules.overtimeMonthlyMax + ' 小时 ' + comp.overtimeOver + ' 人，全在 ' + ot.map(function (x) { return x.name; }).join('、') + '；加班费敞口预计 ' + fmtW(S.otPremium) + ' / 月。',
+          blocks: [chartB({ chart: 'bar', title: '各部门加班超限人数', unit: ' 人',
+            labels: R.org.byDept.slice(0, 6).map(function (x) { return x.name; }), series: ser('超限', R.org.byDept.slice(0, 6).map(function (x) { return x.overtimeOver; })) })],
+          ref: ot.length ? ot[0].id : null, act: ot.length ? { type: 'focus', ref: ot[0].id } : null };
       }
       if (has(q, ['先处理', '建议', '哪一项', '怎么办'])) {
         var t3 = topRule(R);
         if (!t3) return { text: allClear(comp) };
-        return { text: '先处理 ' + t3.id + ' ' + t3.name + '：' + t3.count + ' 人，影响预计 ' + fmtW(t3.impact) + '。整改动作是' + t3.action.label + '。', act: { type: 'open', panel: 'rule', ref: t3.id } };
+        return {
+          text: '先处理 ' + t3.id + ' ' + t3.name + '：' + t3.count + ' 人，影响预计 ' + fmtW(t3.impact) + '。整改动作是' + t3.action.label + '。',
+          blocks: [chartB({ chart: 'bar', title: '待处理影响', unit: ' 万元',
+            labels: comp.open.slice(0, 5).map(function (x) { return x.id; }), series: ser('影响', comp.open.slice(0, 5).map(function (x) { return wan(x.impact); })) })],
+          act: { type: 'open', panel: 'rule', ref: t3.id } };
       }
       if (has(q, ['在招', '招聘', '需求单'])) return { text: '在招 ' + k.needCount + ' 人 / ' + k.needs + ' 张需求单，候选 ' + k.candidates + ' 人、A 级 ' + k.gradeA + '。', blocks: [tableB(['岗位', '人数', '到岗'], R.needs.map(function (n) { return [n.title, n.count, short(n.dueDate)]; }))], act: { type: 'goto', step: 'recruit' } };
       if (has(q, ['成本', '占收入', '人均'])) return { text: '用工成本占收入 ' + C.share + '%（参考 ' + C.bench[0] + '–' + C.bench[1] + '%），年化 ' + w0(C.annual) + '，人均产值 ' + fmtW(C.perCapitaRevenue) + '。', act: { type: 'goto', step: 'cost' } };
@@ -491,12 +545,21 @@
         if (!n2) return noNeed;
         var ds = all2.filter(function (c) { return c.grade === 'D'; });
         if (!ds.length) return { text: n2.title + (all2.length ? ' 本批没有不满足硬条件的候选人。' : ' 还没有候选人进来，简历进来后出硬门槛核对。') };
-        return { text: '不满足硬条件 ' + ds.length + ' 人。' + ds[0].id + '：' + ds[0].score.gates.join('；') + '。', blocks: [tableB(['候选人', '卡在哪'], ds.slice(0, 4).map(function (c) { return [c.id, cut(c.score.gates[0], 18)]; }))], act: { type: 'set', path: 'filter', value: 'fail' } };
+        return { text: '不满足硬条件 ' + ds.length + ' 人。' + ds[0].id + '：' + ds[0].score.gates.join('；') + '。',
+          blocks: [
+            chartB({ chart: 'donut', title: '硬条件核对', unit: ' 人', total: all2.length, labels: ['通过', '不通过'], series: ser('人数', [Math.max(0, all2.length - ds.length), ds.length]) }),
+            tableB(['候选人', '卡在哪'], ds.slice(0, 4).map(function (c) { return [c.id, cut(c.score.gates[0], 18)]; }))
+          ],
+          act: { type: 'set', path: 'filter', value: 'fail' } };
       }
       if (has(q, ['薪酬带', '多少钱', '工资', '期望'])) {
         if (!n2) return noNeed;
         if (!all2.length) return { text: n2.title + ' 薪酬带 ' + fmtN(n2.band[0]) + '–' + fmtN(n2.band[1]) + ' 元 / 月；本批还没有候选人，期望中位等简历进来再算。' };
-        return { text: n2.title + ' 薪酬带 ' + fmtN(n2.band[0]) + '–' + fmtN(n2.band[1]) + ' 元 / 月；候选人期望中位 ' + fmtN(pick(all2.map(function (c) { return c.expected; }))) + ' 元。' };
+        var exps = all2.slice(0, 6);
+        return { text: n2.title + ' 薪酬带 ' + fmtN(n2.band[0]) + '–' + fmtN(n2.band[1]) + ' 元 / 月；候选人期望中位 ' + fmtN(pick(all2.map(function (c) { return c.expected; }))) + ' 元。',
+          blocks: [chartB({ chart: 'bar', title: '候选人期望', unit: ' 元',
+            labels: exps.map(function (c) { return c.id.slice(-3); }), series: ser('期望', exps.map(function (c) { return c.expected; })),
+            note: '薪酬带 ' + fmtN(n2.band[0]) + '–' + fmtN(n2.band[1]) + ' 元' })] };
       }
       if (has(q, ['怎么打分', '打分', '匹配分', '怎么算'])) return { text: '匹配分 = 技能 ' + Math.round(lib.jobs.screenWeights.skills * 100) + '% + 经验 ' + Math.round(lib.jobs.screenWeights.years * 100) + '% + 行业 ' + Math.round(lib.jobs.screenWeights.industry * 100) + '% + 稳定性 ' + Math.round(lib.jobs.screenWeights.stability * 100) + '% + 薪酬 ' + Math.round(lib.jobs.screenWeights.salary * 100) + '% + 通勤 ' + Math.round(lib.jobs.screenWeights.commute * 100) + '%；学历、经验、必备技能、证书、到岗日期任一不过直接判不满足。' };
       if (has(q, ['JD', 'jd', '职位描述'])) {
@@ -517,12 +580,20 @@
         if (!cx) return { text: '还没有评分记录，四项打分后才有定薪建议。' };
         var r2 = cx.interview;
         return { text: cx.id + ' 建议定薪 ' + fmtN(r2.suggested) + ' 元 / 月：薪酬带 ' + fmtN(r2.band[0]) + '–' + fmtN(r2.band[1]) + '，内部中位 ' + fmtN(r2.median) + '，候选人期望 ' + fmtN(cx.expected) + '，综合 ' + r2.avg + ' 分在中位上' + (r2.avg >= 3.5 ? '浮' : '调') + '。',
-          blocks: [kvB([['薪酬带', fmtN(r2.band[0]) + '–' + fmtN(r2.band[1])], ['内部中位', fmtN(r2.median)], ['期望', fmtN(cx.expected)], ['建议定薪', fmtN(r2.suggested)]])], ref: cx.id };
+          blocks: [
+            chartB({ chart: 'column', title: '定薪对照', unit: ' 元', labels: ['带下限', '内部中位', '期望', '建议', '带上限'],
+              series: ser('元 / 月', [r2.band[0], r2.median, cx.expected, r2.suggested, r2.band[1]]) }),
+            kvB([['薪酬带', fmtN(r2.band[0]) + '–' + fmtN(r2.band[1])], ['内部中位', fmtN(r2.median)], ['期望', fmtN(cx.expected)], ['建议定薪', fmtN(r2.suggested)]])
+          ], ref: cx.id };
       }
       if (has(q, ['没评', '待评', '谁还'])) {
         var wait = R.candidates.filter(function (c) { return c.stage === 'interview'; });
         if (!wait.length) return { text: '没有待评分的候选人，面试安排里的都已录入评分。' };
-        return { text: '待评 ' + wait.length + ' 人：' + wait.map(function (c) { return c.id + ' ' + short(c.interviewDate); }).join('、') + '。', ref: wait[0].id };
+        var stg = [['已安排面试', 'interview'], ['面试完成', 'done'], ['已发 offer', 'offer']];
+        return { text: '待评 ' + wait.length + ' 人：' + wait.map(function (c) { return c.id + ' ' + short(c.interviewDate); }).join('、') + '。',
+          blocks: [chartB({ chart: 'funnel', title: '面试进度', unit: ' 人', labels: stg.map(function (x) { return x[0]; }),
+            series: ser('人数', stg.map(function (x) { return R.candidates.filter(function (c) { return c.stage === x[1]; }).length; })) })],
+          ref: wait[0].id };
       }
       if (has(q, ['为什么', '这个分', '评分', '几分'])) {
         var cy = (cur && cur.interview) ? cur : dn2[0];
@@ -533,7 +604,10 @@
       if (has(q, ['发 offer', '发offer', '录用', '要不要'])) {
         var cz = R.candidates.filter(function (c) { return c.stage === 'done' && c.interview && c.interview.verdict === 'hire'; })[0];
         if (!cz) return { text: '当前没有处在「面试完成 · 建议录用」的候选人。' };
-        return { text: cz.id + ' 综合 ' + cz.interview.avg + ' 分，建议录用，月薪 ' + fmtN(cz.interview.suggested) + ' 元；已按这个数发 offer。', act: { type: 'apply', action: 'make-offer', input: { id: cz.id, salary: cz.interview.suggested } } };
+        return { text: cz.id + ' 综合 ' + cz.interview.avg + ' 分，建议录用，月薪 ' + fmtN(cz.interview.suggested) + ' 元；已按这个数发 offer。',
+          blocks: [chartB({ chart: 'column', title: '定薪对照', unit: ' 元', labels: ['带下限', '内部中位', '期望', '建议', '带上限'],
+            series: ser('元 / 月', [cz.interview.band[0], cz.interview.median, cz.expected, cz.interview.suggested, cz.interview.band[1]]) })],
+          act: { type: 'apply', action: 'make-offer', input: { id: cz.id, salary: cz.interview.suggested } } };
       }
       if (has(q, ['题', '问什么', '题库'])) {
         if (!cur) return { text: '还没有面试安排，安排后才有题库与评分表。' };
@@ -545,12 +619,19 @@
       if (has(q, ['先处理', '哪一条', '最急', '怎么办', '建议'])) {
         var t4 = topRule(R);
         if (!t4) return { text: allClear(comp) };
-        return { text: '先处理 ' + t4.id + ' ' + t4.name + '：' + t4.count + ' 人，影响预计 ' + fmtW(t4.impact) + '，' + SEV_LABEL[t4.severity] + '风险。动作是' + t4.action.label + '。', ref: t4.id, act: { type: 'open', panel: 'rule', ref: t4.id } };
+        return {
+          text: '先处理 ' + t4.id + ' ' + t4.name + '：' + t4.count + ' 人，影响预计 ' + fmtW(t4.impact) + '，' + SEV_LABEL[t4.severity] + '风险。动作是' + t4.action.label + '。',
+          blocks: [chartB({ chart: 'bar', title: '待处理影响', unit: ' 万元',
+            labels: comp.open.slice(0, 5).map(function (x) { return x.id; }), series: ser('影响', comp.open.slice(0, 5).map(function (x) { return wan(x.impact); })) })],
+          ref: t4.id, act: { type: 'open', panel: 'rule', ref: t4.id } };
       }
       if (has(q, ['调基数', '按实际工资', '整改', '执行'])) {
         var h05 = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
         if (!h05 || h05.status !== 'open') return { text: 'H05 已处置，社保基数占工资 ' + comp.socialBaseRatio + '%。' };
-        return { text: 'H05 按实际工资调整基数：' + h05.count + ' 人写回花名册，年补缴敞口 ' + fmtW(h05.impact) + ' 关闭，每月社保多 ' + fmtW(S.socialDelta) + '。已执行。', act: { type: 'apply', action: 'resolve-compliance', input: { rule: 'H05' } } };
+        return { text: 'H05 按实际工资调整基数：' + h05.count + ' 人写回花名册，年补缴敞口 ' + fmtW(h05.impact) + ' 关闭，每月社保多 ' + fmtW(S.socialDelta) + '。已执行。',
+          blocks: [chartB({ chart: 'column', title: '每月社保（单位缴纳）', unit: ' 万元', labels: ['现在', '调整后'],
+            series: ser('万元 / 月', [wan(C.social), wan(C.social + S.socialDelta)]) })],
+          act: { type: 'apply', action: 'resolve-compliance', input: { rule: 'H05' } } };
       }
       if (has(q, ['影响', '多少钱', '金额'])) {
         if (!comp.counts.open) return { text: '待处理 0 项，影响预计合计 0 元；' + comp.items.length + ' 条规则里' + handledTail(comp) + '。' };
@@ -558,7 +639,10 @@
       }
       if (has(q, ['到期', '日历', '30 天', '30天'])) {
         var cal2 = R.calendar;
-        return { text: '30 天内 ' + cal2.due30.length + ' 项：合同到期 ' + cal2.due30.filter(function (x) { return x.kind === 'contract'; }).length + '、试用期届满 ' + cal2.due30.filter(function (x) { return x.kind === 'probation'; }).length + '、面试 ' + cal2.due30.filter(function (x) { return x.kind === 'interview'; }).length + '。接下来：' + cal2.items.slice(0, 3).map(function (x) { return short(x.date) + ' ' + x.kindName; }).join('、') + '。' };
+        var kinds = [['合同到期', 'contract'], ['试用期届满', 'probation'], ['面试', 'interview'], ['需求到期', 'need']];
+        var cnt = kinds.map(function (x) { return cal2.due30.filter(function (y) { return y.kind === x[1]; }).length; });
+        return { text: '30 天内 ' + cal2.due30.length + ' 项：合同到期 ' + cnt[0] + '、试用期届满 ' + cnt[1] + '、面试 ' + cnt[2] + '。接下来：' + cal2.items.slice(0, 3).map(function (x) { return short(x.date) + ' ' + x.kindName; }).join('、') + '。',
+          blocks: [chartB({ chart: 'bar', title: '30 天内到期', unit: ' 项', labels: kinds.map(function (x) { return x[0]; }), series: ser('项数', cnt) })] };
       }
       if (has(q, ['派遣'])) return { text: '派遣 ' + R.org.dispatch + ' 人，占 ' + comp.dispatchRatio + '%，上限 ' + Math.round(lib.complianceRules.dispatchMaxRatio * 100) + '%。' };
     }
@@ -567,22 +651,49 @@
       if (has(q, ['采纳', '就按', '定了'])) {
         var ak = m ? (m[1] || m[2]).toUpperCase() : null;
         var ap = (ak && S.plans.filter(function (p) { return p.key === ak; })[0]) || currentPlan(R, F);
-        return { text: '已采纳方案 ' + ap.key + '，12 个月预计 ' + fmtW(ap.total12) + '，月报按这个口径出。', act: { type: 'apply', action: 'adopt-plan', input: { key: ap.key } } };
+        return { text: '已采纳方案 ' + ap.key + '，12 个月预计 ' + fmtW(ap.total12) + '，月报按这个口径出。',
+          blocks: [chartB({ chart: 'column', title: '三个方案 12 个月预计', unit: ' 万元',
+            labels: S.plans.map(function (p2) { return p2.key; }), series: ser('万元', S.plans.map(function (p2) { return wan(p2.total12); })) })],
+          act: { type: 'apply', action: 'adopt-plan', input: { key: ap.key } } };
       }
       if (m) {
         var pk = (m[1] || m[2]).toUpperCase(), pp = S.plans.filter(function (p) { return p.key === pk; })[0];
         if (pp) return { text: '方案 ' + pp.key + ' ' + pp.name + '：12 个月预计 ' + fmtW(pp.total12) + '，较现状 ' + (pp.delta >= 0 ? '+' : '−') + fmtW(Math.abs(pp.delta)) + '；期末在编 ' + pp.endHeadcount + ' 人，缺编 ' + pp.vacancyAfter + '，用工占收入 ' + pp.share + '%。' + planNote(R, pp) + '。',
-          blocks: [kvB([['12 个月预计', fmtW(pp.total12)], ['较现状', (pp.delta >= 0 ? '+' : '−') + fmtW(Math.abs(pp.delta))], ['期末在编', pp.endHeadcount + ' 人'], ['用工占收入', pp.share + '%']])],
+          blocks: [
+            chartB({ chart: 'line', title: '逐月用工成本', unit: ' 万元', labels: S.labels,
+              series: [{ name: '现状', data: (S.base.months || []).map(function (x) { return wan(x.cost); }) },
+                { name: '方案 ' + pp.key, data: (pp.months || []).map(function (x) { return wan(x.cost); }) }] }),
+            kvB([['12 个月预计', fmtW(pp.total12)], ['较现状', (pp.delta >= 0 ? '+' : '−') + fmtW(Math.abs(pp.delta))], ['期末在编', pp.endHeadcount + ' 人'], ['用工占收入', pp.share + '%']])
+          ],
           act: { type: 'set', path: 'plan', value: pp.key } };
       }
-      if (has(q, ['逐月', '明细', '每个月'])) { var cp = currentPlan(R, F); return { text: '方案 ' + cp.key + ' 逐月明细已打开：12 个月在编与用工成本，以及较现状差额。', act: { type: 'open', panel: 'months', ref: cp.key } }; }
+      if (has(q, ['逐月', '明细', '每个月'])) {
+        var cp = currentPlan(R, F);
+        return { text: '方案 ' + cp.key + ' 逐月明细已打开：12 个月在编与用工成本，以及较现状差额。',
+          blocks: [chartB({ chart: 'area', title: '方案 ' + cp.key + ' 逐月用工成本', unit: ' 万元', labels: S.labels,
+            series: ser('万元 / 月', (cp.months || []).map(function (x) { return wan(x.cost); })) })],
+          act: { type: 'open', panel: 'months', ref: cp.key } };
+      }
       if (has(q, ['社保', '基数', '补齐'])) {
         var h5c = comp.items.filter(function (x) { return x.id === 'H05'; })[0];
         if (S.socialDelta <= 0) return { text: '社保基数已补齐，当前申报基数等于工资口径，无待补差额' + (h5c && h5c.status !== 'open' ? '；' + h5c.id + ' ' + STATUS_NAME[h5c.status] + '，补缴敞口已关闭' : '') + '。' };
-        return { text: '按实际工资申报后每月多 ' + fmtW(S.socialDelta) + '，12 个月 ' + fmtW(S.socialDelta * 12) + '；同时关闭 H05 的补缴敞口 ' + fmtW((h5c || {}).impact || 0) + '。' };
+        var acc = [], accV = 0, im;
+        for (im = 0; im < 12; im++) { accV += S.socialDelta; acc.push(wan(accV)); }
+        return { text: '按实际工资申报后每月多 ' + fmtW(S.socialDelta) + '，12 个月 ' + fmtW(S.socialDelta * 12) + '；同时关闭 H05 的补缴敞口 ' + fmtW((h5c || {}).impact || 0) + '。',
+          blocks: [chartB({ chart: 'area', title: '累计多缴社保', unit: ' 万元', labels: S.labels, series: ser('累计', acc) })] };
       }
-      if (has(q, ['人均', '产值', '成本结构', '结构'])) return { text: '人均成本 ' + fmtW(C.perCapitaCost) + ' / 年，人均产值 ' + fmtW(C.perCapitaRevenue) + '；年化结构：' + C.structure.slice(0, 4).map(function (x) { return x.label + ' ' + fmtW(x.value); }).join('、') + '。', blocks: [tableB(['项', '年化'], C.structure.map(function (x) { return [x.label, fmtW(x.value)]; }))] };
-      if (has(q, ['月报', '发', '微信'])) return { text: '人力月报 ' + R.report.lines.length + ' 段，收件人 ' + reportTo(F) + '。全文已打开。', act: { type: 'open', panel: 'report' } };
+      if (has(q, ['人均', '产值', '成本结构', '结构'])) return {
+        text: '人均成本 ' + fmtW(C.perCapitaCost) + ' / 年，人均产值 ' + fmtW(C.perCapitaRevenue) + '；年化结构：' + C.structure.slice(0, 4).map(function (x) { return x.label + ' ' + fmtW(x.value); }).join('、') + '。',
+        blocks: [
+          chartB({ chart: 'donut', title: '年化成本结构', unit: ' 万元', total: wan(C.annual),
+            labels: C.structure.map(function (x) { return x.label; }), series: ser('万元', C.structure.map(function (x) { return wan(x.value); })) }),
+          tableB(['项', '年化'], C.structure.map(function (x) { return [x.label, fmtW(x.value)]; }))
+        ] };
+      if (has(q, ['月报', '发', '微信'])) return {
+        text: '人力月报 ' + R.report.lines.length + ' 段，收件人 ' + reportTo(F) + '。全文已打开。',
+        blocks: [chartB({ chart: 'stack', title: '在编与缺编', unit: ' 人', labels: ['当前'],
+          series: [{ name: '在编', data: [k.headcount] }, { name: '缺编', data: [k.vacancy] }] })],
+        act: { type: 'open', panel: 'report' } };
     }
     return null;
   }

@@ -198,6 +198,7 @@
 
     var handle = {
       refresh: schedule,
+      target: function () { return pickTarget(); },
       stop: function () {
         stopped = true;
         clearTimeout(timer); clearInterval(tick);
@@ -220,5 +221,8 @@
     var k; for (k in USED) if (Object.prototype.hasOwnProperty.call(USED, k) && k.indexOf(id + '/') === 0) delete USED[k];
   }
 
-  window.DGG.guide = { mount: mount, clear: clear, resetModule: resetModule, _used: USED };
+  /* 这一屏该点哪：对话坞回答「下一步做什么」时要跟箭头指的是同一个按钮 */
+  function target() { try { return cur && cur.target ? cur.target() : null; } catch (e) { return null; } }
+
+  window.DGG.guide = { mount: mount, clear: clear, resetModule: resetModule, target: target, _used: USED };
 })();

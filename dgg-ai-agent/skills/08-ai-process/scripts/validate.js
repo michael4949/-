@@ -264,7 +264,7 @@ Object.keys(lib.samples).sort().forEach((k) => {
   ok(steps.length === 6 && K.screens().every((x) => x.key && x.label) && steps.join() === 'connect,board,diag,improve,exec,report', k + ' screens 六屏登记');
   // 纯数据 = 递归下去一个函数都没有。JSON 往返查不出函数（两边一样被丢掉，永远相等），必须自己走一遍
   const pure = (o) => o == null || (typeof o !== 'function' && (typeof o !== 'object' || Object.keys(o).every((key) => pure(o[key]))));
-  const isBlocks = (bs) => !bs || (Array.isArray(bs) && pure(bs) && bs.every((b) => b == null || ['kv', 'table', 'tags', 'text'].indexOf(b.type) >= 0));
+  const isBlocks = (bs) => !bs || (Array.isArray(bs) && pure(bs) && bs.every((b) => b == null || (['kv', 'table', 'tags', 'list', 'metric', 'text', 'chart'].indexOf(b.type) >= 0 && (b.type !== 'chart' || ['column', 'bar', 'stack', 'line', 'area', 'donut', 'pie', 'funnel', 'gauge', 'radar', 'waterfall', 'progress', 'heat', 'scatter'].indexOf(b.chart) >= 0))));
   const isAct = (a) => !a || (typeof a === 'object' && typeof a.type === 'string' && ['goto', 'focus', 'open', 'apply', 'set'].indexOf(a.type) >= 0 && pure(a));
   steps.forEach((st) => {
     const b = K.brief(st, d, lib, R);

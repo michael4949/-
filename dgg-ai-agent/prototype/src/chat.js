@@ -31,12 +31,17 @@
        {type:'table', head:[…], rows:[[…]…]}
        {type:'tags',  items:[…]}
        {type:'text',  text:'…'}
+       {type:'chart', chart:'column|bar|stack|line|area|donut|funnel|gauge|radar|waterfall|progress|heat|scatter',
+                      title, unit, labels[], series:[{name,data[]}], total / target / max / value / rows / matrix …}
+     内核没给 chart 时，DGG.chartspec 会替「整列同一单位」的 table / kv 自动配一张图（智能问数的效果）；
+     图由 DGG.chatChart 画成 2.5D 的 SVG。换平台时这两步都可以不做，块本身仍然是纯数据。
      act 是声明式动作，平台可以只实现子集，未知 type 一律忽略且不报错：
        {type:'goto',  step}                切到某一屏
        {type:'focus', ref}                 高亮某条业务记录（页面上用 data-ref 标出）
        {type:'open',  panel, ref}          打开下钻 / 抽屉
        {type:'apply', action, input}       调用本 skill 的某个动作（通常是写回类）
        {type:'set',   path, value}         改一个参数后重算
+       {type:'click', aim}                 替客户点这一屏该点的按钮（按钮文字前缀匹配）
      api = { say, saying, blocks…, go(step), highlight(sel), toast(msg), work() }
    ========================================================================== */
 (function () {
@@ -76,6 +81,18 @@
   };
   function svg(name) { return '<svg viewBox="0 0 24 24">' + (ICON[name] || ICON.text) + '</svg>'; }
 
+  /* ---------- 图表：块 → 2.5D SVG ---------- */
+  function accentNow() {
+    var app = document.querySelector('.pd-app'), c = '';
+    if (app && window.getComputedStyle) c = (window.getComputedStyle(app).getPropertyValue('--pa') || '').trim();
+    return c || '#2a78d6';
+  }
+  /* 自动配图的规则在 skills/_shared/chartspec.js（Node 与浏览器同一份，自测与展示同一套判断） */
+  function enrich(list) {
+    var C = window.DGG.chartspec;
+    return C ? C.promote(list || []) : (list || []);
+  }
+
   /* ---------- 平台中立的块 → DOM（气泡里的小表 / 键值 / 标签） ---------- */
   function renderBlock(b) {
     if (!b) return null;
@@ -106,6 +123,28 @@
       t.appendChild(tb);
       return t;
     }
+    if (b.type === 'chart') {
+      if (!window.DGG.chatChart) return null;
+      var node = window.DGG.chatChart.render(b, { width: 286, accent: accentNow() });
+      if (!node) return null;
+      return h('div', { class: 'cc' }, [node]);
+    }
+    if (b.type === 'list') {
+      var ul = h(b.ordered === false ? 'ul' : 'ol', { class: 'li' });
+      (b.items || []).forEach(function (x) { ul.appendChild(h('li', {}, [String(x == null ? '' : x)])); });
+      return ul;
+    }
+    if (b.type === 'metric') {
+      var mt = h('div', { class: 'mt' });
+      (b.items || []).slice(0, 4).forEach(function (x) {
+        mt.appendChild(h('div', { class: 'it' + (x.tone ? ' ' + x.tone : '') }, [
+          h('span', { class: 'k' }, [String(x.label == null ? '' : x.label)]),
+          h('b', {}, [String(x.value == null ? '' : x.value) + (x.unit || '')]),
+          x.sub ? h('span', { class: 'd' }, [String(x.sub)]) : null
+        ]));
+      });
+      return mt;
+    }
     if (b.type === 'tags') {
       var g = h('div', { class: 'tags' });
       (b.items || []).forEach(function (x) { g.appendChild(h('span', {}, [String(x == null ? '' : x)])); });
@@ -115,7 +154,7 @@
   }
   function renderBlocks(list) {
     var out = [];
-    (list || []).forEach(function (b) { var n = renderBlock(b); if (n) out.push(n); });
+    enrich(list).forEach(function (b) { var n = renderBlock(b); if (n) out.push(n); });
     return out;
   }
 
@@ -252,7 +291,10 @@
       return bb;
     }
     function putBlocks(bb, blocks) {
-      renderBlocks(blocks).forEach(function (b) { bb.appendChild(b); });
+      renderBlocks(blocks).forEach(function (b) {
+        if (b.className === 'cc') bb.classList.add('wide');      /* 带图的回答给更宽的版面 */
+        bb.appendChild(b);
+      });
       scroll();
     }
     /* 逐字显示：AI 的回答一个字一个字出来，是这个展台最该有的动效 */
@@ -288,6 +330,63 @@
     }
     function mine(text) { var bb = bubble('me'); bb.textContent = text; record('me', text); scroll(); }
 
+    /* ---------- 替客户操作这一屏 ---------- */
+    function labelOf(el2) { return ((el2 && el2.textContent) || '').replace(/\s+/g, ' ').trim(); }
+    function findBtn(aim) {
+      var w = o.work && o.work();
+      if (!w || !aim) return null;
+      var list = w.querySelectorAll('button:not([disabled]), a[role="button"]'), i, el2, t;
+      var s2 = String(aim).replace(/\s+/g, '');
+      for (i = 0; i < list.length; i++) {
+        el2 = list[i];
+        if (el2.offsetParent === null) continue;
+        t = labelOf(el2).replace(/\s+/g, '');
+        if (t && t.indexOf(s2) === 0) return el2;
+      }
+      for (i = 0; i < list.length; i++) {                        /* 退一步：包含也算 */
+        el2 = list[i];
+        if (el2.offsetParent === null) continue;
+        t = labelOf(el2).replace(/\s+/g, '');
+        if (t && s2.length >= 2 && t.indexOf(s2) >= 0) return el2;
+      }
+      return null;
+    }
+    /* 先把按钮亮出来给客户看清楚，再替他按下去 —— 展台上要让人看见「AI 动了哪一下」 */
+    function press(el2) {
+      if (!el2) return false;
+      focus(el2);
+      setTimeout(function () { try { el2.click(); } catch (e) { /* 忽略 */ } }, 560);
+      return true;
+    }
+    /* 这一屏该点哪：跟引导箭头指的是同一个按钮，两处说法永远一致 */
+    function aimBtn() {
+      var t = null;
+      try { t = window.DGG.guide && window.DGG.guide.target ? window.DGG.guide.target() : null; } catch (e) { t = null; }
+      if (t && t.offsetParent !== null) return t;
+      var w = o.work && o.work();
+      if (!w) return null;
+      var m = w.querySelector('[data-guide]:not([disabled])');
+      if (m && m.offsetParent !== null) return m;
+      var p = w.querySelector('.pd-btn.primary:not([disabled])');
+      return p && p.offsetParent !== null ? p : null;
+    }
+    /* 流程类问句在任何一屏都能答，也都能替客户点下去 */
+    function flowIntent(q) {
+      var s2 = String(q || '').replace(/[\s。.!！?？]/g, ''), m, t;
+      if (!s2) return null;
+      m = s2.match(/^(?:帮我|请|麻烦|你)?(?:点一下|点击一下|点击|点|按一下|按|执行|运行|触发|去)(.{2,12})$/);
+      if (m) {
+        t = findBtn(m[1]);
+        if (t) return { text: '这就点「' + labelOf(t) + '」。', act: { type: 'click', aim: labelOf(t) } };
+      }
+      if (/^(下一步|继续|接下来|然后呢|再然后|走下去|往下走)/.test(s2) || /(该点哪|点哪里|点哪儿|怎么操作|下一步做什么|接下来做什么|现在做什么|下一步点什么)/.test(s2)) {
+        t = aimBtn();
+        if (t) return { text: '这一屏点「' + labelOf(t) + '」，我替你点。', act: { type: 'click', aim: labelOf(t) } };
+        return { text: '这一屏看完了，走屏底那条「下一步」。', act: { type: 'click', aim: '下一步' } };
+      }
+      return null;
+    }
+
     function findRef(ref) {
       var w = o.work && o.work();
       if (!w || ref == null) return null;
@@ -299,6 +398,7 @@
     function applyAct(a) {
       if (!a || !a.type) return;
       if (brain.act) { try { if (brain.act(a, api) !== false) return; } catch (e) { /* 落到兜底 */ } }
+      if (a.type === 'click') { press(findBtn(a.aim || a.text) || (a.ref != null ? findRef(a.ref) : null)); return; }
       if (a.type === 'goto' && a.step) { api.go(a.step); return; }
       if ((a.type === 'focus' || a.type === 'open') && a.ref != null) { var el = findRef(a.ref); if (el) focus(el); }
     }
@@ -326,7 +426,8 @@
       var bb = thinking();
       setTimeout(function () {
         var res = null;
-        try { res = brain.answer ? brain.answer(q, o.step, api) : null; } catch (e) { res = null; }
+        try { res = flowIntent(q); } catch (e) { res = null; }        /* 「下一步」「点一下 XX」在任何一屏都先按操作处理 */
+        if (!res) { try { res = brain.answer ? brain.answer(q, o.step, api) : null; } catch (e2) { res = null; } }
         if (!res) res = genericAnswer(q, o.work && o.work());
         if (!res) res = fallback(o.work && o.work());
         apply(res, bb);
@@ -355,10 +456,12 @@
 
     function setSuggest(list) {
       sug.innerHTML = '';
-      (list || []).slice(0, 4).forEach(function (q) {
+      list = (list || []).slice(0, 3);
+      list.push('下一步做什么');                                  /* 哪一屏都留一条能把流程接下去的问句 */
+      list.forEach(function (q) {
         sug.appendChild(h('button', { onclick: function () { ask(q); } }, [q]));
       });
-      sug.style.display = (list && list.length) ? '' : 'none';
+      sug.style.display = '';
     }
 
     api = {

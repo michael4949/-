@@ -133,3 +133,30 @@
   .pd-chat .m .bb { max-width: 74%; }
 }
 @media print { .pd-chat { display: none !important; } }
+
+/* 气泡里的 2.5D 图：带图的回答给更宽的版面，图整幅铺满气泡内沿 */
+.pd-chat .m .bb.wide { max-width: 96%; }
+.pd-chat .bb .cc {
+  margin: 9px -4px 1px; padding: 9px 6px 6px; border-radius: 11px;
+  background: linear-gradient(180deg, #fff 0%, #FBFCFE 100%);
+  box-shadow: inset 0 0 0 1px var(--pd-line), 0 6px 16px -12px rgba(16, 32, 72, .55);
+}
+.pd-chat .bb .cc svg { width: 100%; height: auto; display: block; overflow: visible; }
+.pd-chat .bb .cc svg text { font-family: inherit; }
+.pd-chat .m.me .bb .cc { background: rgba(255, 255, 255, .96); }
+/* 图一出来先淡入，再让柱子从基线长起来，和页面里的动画是同一套节奏 */
+.pd-chat .bb .cc { animation: ccIn .42s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes ccIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pd-chat .bb .cc { animation: none; } }
+
+/* 列表块与指标块（SPEC §10.6 的 list / metric） */
+.pd-chat .bb .li { margin: 7px 0 0; padding-left: 18px; font-size: calc(12.5px * var(--scale)); line-height: 1.66; }
+.pd-chat .bb .li li { margin: 2px 0; }
+.pd-chat .bb .mt { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pd-chat .bb .mt .it { flex: 1 1 42%; padding: 6px 9px; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px var(--pd-line); display: grid; }
+.pd-chat .bb .mt .it .k { font-size: calc(11px * var(--scale)); color: var(--pd-sub); }
+.pd-chat .bb .mt .it b { font-size: calc(15px * var(--scale)); font-weight: 800; letter-spacing: .2px; }
+.pd-chat .bb .mt .it .d { font-size: calc(11px * var(--scale)); color: var(--pd-mute); }
+.pd-chat .bb .mt .it.ok b { color: #1baf7a; }
+.pd-chat .bb .mt .it.warn b { color: #eda100; }
+.pd-chat .bb .mt .it.bad b { color: #e34948; }
