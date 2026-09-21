@@ -72,7 +72,7 @@ function teamOfPerson(n) { return P[n] ? TEAM.name : LAB.people.some(p => p.n ==
 function personAny(n) { return P[n] || LAB.people.find(p => p.n === n) || TEAM3_PEOPLE.find(p => p.n === n); }
 function postClass(p) { return /班长/.test(p.post) ? '班长' : /技术员|专责/.test(p.post) ? '专责' : /高级/.test(p.post) ? '高级作业员' : /中级/.test(p.post) ? '中级作业员' : '初级作业员'; }
 function teamStat(team) { const ps = teamPeople(team); const on = team === TEAM.name ? ps.filter(p => p.status !== '休假').length : team === LAB.name ? ps.length - LAB.borrowed.length : ps.length - 1; const lv = {}; ps.forEach(p => { const l = skillLvOf(p.n); lv[l] = (lv[l] || 0) + 1; }); const posts = {}; ps.forEach(p => { const k = postClass(p); posts[k] = (posts[k] || 0) + 1; }); const avgAge = +(ps.reduce((s, p) => s + p.age, 0) / ps.length).toFixed(1); const young = ps.filter(p => p.age <= 30).length; const senior = ps.filter(p => /技师/.test(skillLvOf(p.n))).length; const high = ps.filter(p => /高级工|技师/.test(skillLvOf(p.n))).length; const eng = ps.filter(p => STAR_ENG[p.n]).length; return { team, n: ps.length, on, lv, posts, avgAge, young, senior, high, eng, expert: ps.filter(p => EXPERTS[p.n] && /^局级专家（/.test(EXPERTS[p.n])).length, stable: STABILITY[team] }; }
-const STABILITY = { '配电自动化班': { leave3y: 1, borrowed: 0, longSick: 0, intent: 0, avgYrs: 8.6 }, '试验班': { leave3y: 0, borrowed: 1, longSick: 1, intent: 1, avgYrs: 9.5 }, '配电运维一班': { leave3y: 2, borrowed: 0, longSick: 0, intent: 0, avgYrs: 7.0 } };
+const STABILITY = { '配电自动化班': { leave3y: 1, borrowed: 0, longSick: 0, intent: 0, avgYrs: 8.6 }, '试验班': { leave3y: 0, borrowed: 1, longSick: 1, intent: 1, avgYrs: 9.6 }, '配电运维一班': { leave3y: 2, borrowed: 0, longSick: 0, intent: 0, avgYrs: 7.0 } };
 
 /* ---------- 班长队伍与梯队 ---------- */
 const LEADERS = [
@@ -133,8 +133,17 @@ function riskAgg() {
 }
 
 /* ---------- 员工关怀：入职关键年份 / 回访 / 高强度 / 重点关注 ---------- */
-const JOIN = { '赵立群': '2004-07', '韩雪': '2011-08', '黄伟强': '2008-09', '李文博': '2016-10', '吴倩': '2018-07', '郭子扬': '2020-08', '赵敏': '2021-09', '王安': '2017-08', '陈浩': '2023-07', '周明': '2024-07', '林芷若': '2024-08', '刘一鸣': '2025-07' };
+const JOIN = { '赵立群': '2004-07', '韩雪': '2011-08', '黄伟强': '2008-09', '李文博': '2016-10', '吴倩': '2018-07', '郭子扬': '2020-08', '赵敏': '2021-09', '王安': '2017-08', '陈浩': '2023-07', '周明': '2024-07', '林芷若': '2024-08', '刘一鸣': '2025-09' };
 const KEY_YEARS = [5, 10, 15, 20, 25, 30];
+const JOIN_LAB = { '周建国': '2000-07', '张伟': '2009-07', '刘畅': '2014-08', '吴磊': '2017-07', '孙倩': '2020-08', '马涛': '2023-07', '何静': '2024-07', '陈晨': '2024-08' };
+const JOIN3 = { '陈志远': '2010-07', '林小虎': '2013-07', '郑浩': '2015-08', '邓丽': '2016-07', '冯超': '2018-07', '叶芳': '2020-07', '谭俊': '2021-08', '罗天': '2023-09', '曾静': '2024-07', '方远': '2024-08', '高子安': '2025-08' };
+function joinOf(n) { return JOIN[n] || JOIN_LAB[n] || JOIN3[n] || ''; }
+/* 新进人员窗口：相对今天（2026-08）向前 12 个月 / 36 个月 */
+const NEW_WIN = { y1: '2025-08', y3: '2023-08' };
+function newHires(team) { const ps = teamPeople(team); const rows = ps.map(p => ({ p, d: joinOf(p.n) })).filter(x => x.d).sort((a, b) => b.d.localeCompare(a.d));
+  const l1 = rows.filter(x => x.d >= NEW_WIN.y1), l3 = rows.filter(x => x.d >= NEW_WIN.y3);
+  return { team, y1: l1.length, y3: l3.length, list1: l1, list3: l3, pct3: Math.round(l3.length / ps.length * 100) }; }
+
 const FOLLOWUPS = [{ who: '黄伟强', t: '家中老人住院，已排两天室内；回访问恢复情况与下周排班', due: '2026-08-14', from: '2026-07-31 谈心' }, { who: '王安', t: '约定 8 月补两门课；回访学时进度', due: '2026-08-31', from: '2026-06-30 谈心' }, { who: '刘一鸣', t: '想学继保，已安排跟黄伟强旁站；回访旁站感受', due: '2026-08-17', from: '2026-07-17 谈心' }];
 function careList() {
   const out = [];

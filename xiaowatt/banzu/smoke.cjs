@@ -172,7 +172,12 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await clean('人员总览');
   await pg.screenshot({ path: SHOT + '/12_staff.png' });
   await go('#structure', 700);
-  await t('结构对比 · 强 / 弱标识 · 10 维', async () => (await main()).match(/弱/) && (await pg.locator('table.cmp tr').count()) === 11 && (await pg.locator('[data-act="stc-rotate"]').count()) === 3);
+  await t('结构对比 · 强 / 弱标识 · 11 维', async () => (await main()).match(/弱/) && (await pg.locator('table.cmp tr').count()) === 12 && (await pg.locator('[data-act="stc-rotate"]').count()) === 3);
+  await t('近 1 年 / 3 年入职新员工 · 三班组 1/3 · 0/2 · 1/4', async () => { const N = await ev(() => ['配电自动化班', '试验班', '配电运维一班'].map(x => newHires(x).y1 + '/' + newHires(x).y3)); return N.join(',') === '1/3,0/2,1/4' && (await main()).includes('近 1 年 / 3 年入职新员工'); });
+  await pg.click('[data-act="stc-new"][data-n="配电运维一班"]'); await w(600);
+  await t('点格出新员工名单 · 入职年月 / 岗位 / 师傅', async () => { const m = await pg.locator('#modal').innerText(); return (await pg.locator('#modal table tr').count()) === 5 && /2025 年 08 月/.test(m) && /高子安/.test(m) && /未结对/.test(m); });
+  await pg.click('#modal [data-act="stc-newnote"]'); await w(500);
+  await t('发新员工带教提醒 → 该班长待确认', async () => { const n = await LS('notices'); return n.some(x => x.to === '陈志远' && /新员工带教/.test(x.t) && /高子安/.test(x.t)); });
   await pg.click('[data-act="stc-rotate"][data-k="r1"]'); await w(500);
   await t('轮岗建议 → 两位班长待确认', async () => { const n = await LS('notices'); const s = await LS('rotate_sugg'); return s && s.r1 && n.filter(x => /轮岗建议/.test(x.t) && x.st === '待确认').length === 2; });
   await clean('班组结构对比');
