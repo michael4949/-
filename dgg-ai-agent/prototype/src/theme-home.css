@@ -1,266 +1,108 @@
-/* 首页 · 展台版（暖金展板）
-   只作用于 body[data-module="home"]，模块页与待机页不受影响。
-   底是米黄描金展板，卡片是白底金边，配色沿用各模块自己的主色（--c-pa），
-   这样首页上看到的颜色与点进去那一屏是同一套。 */
+/* 首页 · 定稿展板原图
+   首页整屏就是那张图（2000×1125），一个像素都不改：不重绘、不叠字、不改色。
+   外壳自己的顶栏 / 右栏 / 价格条在首页隐藏——图里已经画了这三块。
+   图上盖一层透明热区，坐标按原图像素折成百分比，图等比缩放时热区跟着走。 */
 @media screen {
 
-  body[data-module="home"] {
-    --gold:      #B8923F;
-    --gold-soft: #E0CB98;
-    --gold-pale: #F2E7CC;
-    --cream:     #FBF5E7;
-    --cream2:    #F4E9D2;
-    --ink:       #2A3346;
-    --ink-sub:   #6B7488;
-    background: var(--cream);
-    color: var(--ink);
-  }
-  /* 展板的描金外框：双线 + 四角云纹，纯 CSS/SVG，不外链 */
+  /* 图里已含顶栏、右栏、价格条，外壳那三块在首页让位 */
+  body[data-module="home"] .topbar,
+  body[data-module="home"] .rail,
+  body[data-module="home"] .pricebar { display: none; }
   body[data-module="home"] .app {
-    background:
-      radial-gradient(1200px 520px at 50% -8%, #FFFDF7 0%, rgba(255,253,247,0) 62%),
-      linear-gradient(180deg, #FBF6EA 0%, #F6EDDA 46%, #F1E6CE 100%);
-    padding: 10px; gap: 0;
+    grid-template-rows: 1fr; grid-template-columns: 1fr;
+    background: #0E1116;                      /* 视口比例与图不一致时，两侧留黑边，不拉伸图 */
   }
-  body[data-module="home"] .app::before {
-    content: ''; position: fixed; inset: 10px; pointer-events: none; z-index: 40;
-    border: 2px solid var(--gold); border-radius: 10px;
-    box-shadow: inset 0 0 0 4px #FFFDF6, inset 0 0 0 5.5px var(--gold-soft), 0 10px 40px rgba(120, 92, 30, .12);
+  body[data-module="home"] .main { padding: 0; overflow: hidden; }
+
+  body[data-module="home"] .grid.board {
+    display: grid; place-items: center; width: 100%; height: 100%; gap: 0;
+    grid-template-columns: none;              /* 盖掉 shell.css 的 12 栅格 */
   }
-  /* 四角角饰：只沿边框内侧走，不向内伸进白面板，免得压住 logo 和卡片 */
-  body[data-module="home"] .app::after {
-    content: ''; position: fixed; inset: 10px; pointer-events: none; z-index: 42; opacity: .85;
-    background-repeat: no-repeat;
-    background-size: 40px 40px, 40px 40px, 40px 40px, 40px 40px;
-    background-position: left 3px top 3px, right 3px top 3px, left 3px bottom 3px, right 3px bottom 3px;
-    background-image:
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><g fill='none' stroke='%23B8923F' stroke-width='1.6' stroke-linecap='round'><path d='M2 20V8a6 6 0 0 1 6-6h12'/><path d='M2 30V7.5A5.5 5.5 0 0 1 7.5 2H30'/><path d='M8 13.5h5.5V8'/><circle cx='9.6' cy='9.6' r='1.8' fill='%23B8923F' stroke='none'/></g></svg>"),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><g transform='translate(40,0) scale(-1,1)' fill='none' stroke='%23B8923F' stroke-width='1.6' stroke-linecap='round'><path d='M2 20V8a6 6 0 0 1 6-6h12'/><path d='M2 30V7.5A5.5 5.5 0 0 1 7.5 2H30'/><path d='M8 13.5h5.5V8'/><circle cx='9.6' cy='9.6' r='1.8' fill='%23B8923F' stroke='none'/></g></svg>"),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><g transform='translate(0,40) scale(1,-1)' fill='none' stroke='%23B8923F' stroke-width='1.6' stroke-linecap='round'><path d='M2 20V8a6 6 0 0 1 6-6h12'/><path d='M2 30V7.5A5.5 5.5 0 0 1 7.5 2H30'/><path d='M8 13.5h5.5V8'/><circle cx='9.6' cy='9.6' r='1.8' fill='%23B8923F' stroke='none'/></g></svg>"),
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><g transform='translate(40,40) scale(-1,-1)' fill='none' stroke='%23B8923F' stroke-width='1.6' stroke-linecap='round'><path d='M2 20V8a6 6 0 0 1 6-6h12'/><path d='M2 30V7.5A5.5 5.5 0 0 1 7.5 2H30'/><path d='M8 13.5h5.5V8'/><circle cx='9.6' cy='9.6' r='1.8' fill='%23B8923F' stroke='none'/></g></svg>");
+  /* 定宽比容器：图有多大热区就有多大，两者共用同一个盒子 */
+  body[data-module="home"] .boardbox {
+    position: relative; aspect-ratio: 2000 / 1125;
+    width: min(100%, calc(100vh * 2000 / 1125));
+    max-width: 100%; max-height: 100%;
+    line-height: 0;
+  }
+  body[data-module="home"] .boardbox .bg {
+    display: block; width: 100%; height: 100%; object-fit: contain;
+    -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
   }
 
-  /* ---------- 顶栏 ---------- */
-  body[data-module="home"] .topbar {
-    background: #FFFFFF; border-bottom: 1.5px solid var(--gold-soft);
-    border-radius: 8px 8px 0 0; margin: 5px 26px 0; padding: 0 20px;
+  /* ---------- 热区 ---------- */
+  /* 透明，不盖住图；只在指上去时给一圈金框提示可点，松开就没了 */
+  body[data-module="home"] .boardbox .hot,
+  body[data-module="home"] .boardbox .card.hot {
+    position: absolute; margin: 0; padding: 0; border: 0; background: transparent;
+    border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none;
+    transition: box-shadow .15s ease, background-color .15s ease;
   }
-  /* theme-shell 把 logo 滤成纯白（那是给深色顶栏用的），展板顶栏是白底，要还原本色 */
-  body[data-module="home"] .topbar .logo { filter: none; opacity: 1; height: 44px; }
-  body[data-module="home"] .topbar .divider { background: var(--gold-soft); height: 30px; }
-  body[data-module="home"] .topbar .product { color: var(--ink); font-size: calc(19px * var(--scale)); }
-  body[data-module="home"] .topbar .booth { color: var(--ink); font-size: calc(17px * var(--scale)); }
-  body[data-module="home"] .topbar .booth b { color: var(--ink); letter-spacing: .6px; }
-  body[data-module="home"] .topbar .industry { color: var(--ink-sub); }
-  body[data-module="home"] .topbar select {
-    background: #FFFDF7; border: 1.4px solid var(--gold-soft); color: var(--ink); border-radius: 8px; min-width: 132px;
+  body[data-module="home"] .boardbox .card.hot,
+  body[data-module="home"] .boardbox .card.hot.big {
+    grid-column: auto; min-height: 0; box-shadow: none; display: block;
   }
-
-  /* ---------- 主区 ---------- */
-  body[data-module="home"] .main { padding: 10px 14px 4px; overflow: hidden; display: flex; flex-direction: column; }
-  body[data-module="home"] .page-title { display: flex; align-items: baseline; gap: 14px; padding: 0 6px 6px; flex: 0 0 auto; }
-  body[data-module="home"] .page-title h1 {
-    margin: 0; font-size: calc(38px * var(--scale)); font-weight: 900; letter-spacing: 1px; line-height: 1.1;
-    background: linear-gradient(96deg, #2F6BD4 0%, #7C4FD0 26%, #C4467F 50%, #D9663F 72%, #1BAF7A 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+  body[data-module="home"] .boardbox .card.hot:not(:disabled):hover,
+  body[data-module="home"] .boardbox .hot.price:hover {
+    background: rgba(255, 246, 214, .20);
+    box-shadow: 0 0 0 2.5px rgba(184, 146, 63, .85), 0 8px 26px rgba(92, 68, 16, .28);
+    transform: none;
   }
-  body[data-module="home"] .page-title .bar {
-    position: absolute; margin-top: calc(40px * var(--scale)); width: calc(268px * var(--scale)); height: 5px; border-radius: 3px;
-    background: linear-gradient(90deg, #2F6BD4, #7C4FD0 30%, #C4467F 55%, #D9663F 78%, #1BAF7A);
+  body[data-module="home"] .boardbox .card.hot:not(:disabled):active {
+    background: rgba(255, 240, 190, .34);
   }
-  body[data-module="home"] .page-title .sub {
-    color: var(--ink-sub); font-size: calc(15px * var(--scale)); font-weight: 600;
-    padding-left: 14px; border-left: 2px solid var(--gold-soft);
+  body[data-module="home"] .boardbox .card.hot:disabled { cursor: default; opacity: 1; }
+  body[data-module="home"] .boardbox .card.hot:focus-visible,
+  body[data-module="home"] .boardbox .hot:focus-visible {
+    outline: 3px solid rgba(47, 107, 212, .9); outline-offset: 2px;
   }
 
-  /* ---------- 三列舞台 ---------- */
-  body[data-module="home"] .grid.stage {
-    flex: 1 1 auto; min-height: 0; display: grid; gap: 12px;
-    grid-template-columns: minmax(230px, 1fr) minmax(560px, 2.42fr) minmax(230px, 1fr);
+  /* 切换企业 */
+  body[data-module="home"] .boardbox .hot.pick { line-height: normal; }
+  body[data-module="home"] .boardbox .hot.pick .lnk {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    background: transparent; border: 0; border-radius: 8px; cursor: pointer;
+    transition: box-shadow .15s ease;
   }
-  body[data-module="home"] .stage .col { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
-  body[data-module="home"] .stage .col.side > .card { flex: 1 1 0; min-height: 0; }
-  body[data-module="home"] .stage .col.mid { gap: 12px; }
+  body[data-module="home"] .boardbox .hot.pick .lnk:hover {
+    box-shadow: 0 0 0 2px rgba(47, 107, 212, .75);
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu {
+    position: absolute; top: 104%; right: 0; z-index: 6; min-width: 230px;
+    background: #FFFFFF; border: 1.4px solid #E0CB98; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 12px 30px rgba(92, 68, 16, .26); line-height: 1.5;
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu button {
+    display: block; width: 100%; text-align: left; padding: 9px 14px; background: none; border: 0;
+    font-size: calc(14px * var(--scale)); color: #2A3346; cursor: pointer; white-space: nowrap;
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu button:hover { background: #F6EDDA; }
+  body[data-module="home"] .boardbox .hot.pick .menu button.muted { color: #6B7488; border-top: 1px solid #F0E6D0; }
 
-  /* ---------- 卡片通用 ---------- */
-  /* shell.css 的 .card 是给 12 栅格的 11 宫格写的（grid-column: span 3、.cr 绝对定位、
-     固定 min-height）。展板是三列自适应版式，这里把那几条一次性复位，免得卡片各自撑成整行。 */
-  body[data-module="home"] .stage .card,
-  body[data-module="home"] .stage .card.big {
-    grid-column: auto; min-height: 0; padding: 0; gap: 0;
+  /* 行业：真下拉，透明贴在图上那只选择框的位置 */
+  body[data-module="home"] .boardbox select.hot.ind {
+    color: transparent; background: transparent; border: 0; border-radius: 10px;
+    font-size: calc(15px * var(--scale)); cursor: pointer; outline: none;
   }
-  body[data-module="home"] .stage .card .cr { position: static; right: auto; bottom: auto; }
+  body[data-module="home"] .boardbox select.hot.ind:hover { box-shadow: 0 0 0 2px rgba(47, 107, 212, .7); }
+  body[data-module="home"] .boardbox select.hot.ind option { color: #2A3346; background: #FFFFFF; }
 
-  body[data-module="home"] .stage .card {
-    position: relative; text-align: left; background: #FFFFFF;
-    border: 1.6px solid var(--gold-soft); border-radius: 14px;
-    box-shadow: 0 3px 14px rgba(120, 92, 30, .10);
-    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+  /* 价格详情浮层 */
+  body[data-module="home"] .boardbox .boardpop {
+    position: absolute; z-index: 7; transform: translateX(-50%); line-height: 1.55;
+    min-width: 220px; padding: 10px 14px 11px;
+    background: #FFFFFF; border: 1.5px solid #E0CB98; border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(92, 68, 16, .26); color: #2A3346;
+    font-size: calc(13px * var(--scale));
   }
-  body[data-module="home"] .stage .card:not(:disabled):hover {
-    transform: translateY(-3px); border-color: var(--c-pa, var(--gold));
-    box-shadow: 0 10px 26px rgba(120, 92, 30, .20);
+  body[data-module="home"] .boardbox .boardpop b { display: block; margin-bottom: 4px; font-size: calc(14px * var(--scale)); }
+  body[data-module="home"] .boardbox .boardpop b .num { color: #B0862C; font-weight: 900; }
+  body[data-module="home"] .boardbox .boardpop .row {
+    display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid #F0E6D0; padding-top: 4px; margin-top: 4px;
   }
-  body[data-module="home"] .stage .card:disabled { opacity: .5; }
-  body[data-module="home"] .stage .card .cr { color: var(--ink-sub); font-weight: 700; white-space: nowrap; }
-  body[data-module="home"] .stage .card .cr b { color: #1B2A4A; }
-  body[data-module="home"] .stage .card .cr b { font-size: calc(30px * var(--scale)); font-weight: 900; line-height: 1; }
+  body[data-module="home"] .boardbox .boardpop .row span:first-child { color: #6B7488; }
+  body[data-module="home"] .boardbox .boardpop .row span:last-child { font-weight: 700; }
 
-  /* ---------- 人物卡（左右两列） ---------- */
-  body[data-module="home"] .card.person {
-    display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px;
-  }
-  body[data-module="home"] .card.person .face { flex: 0 0 auto; width: clamp(56px, 4.6vw, 82px); }
-  body[data-module="home"] .card.person .face svg { display: block; width: 100%; height: auto; }
-  body[data-module="home"] .card.person .body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  body[data-module="home"] .card.person .name {
-    font-size: calc(23px * var(--scale)); font-weight: 800; line-height: 1.15;
-    color: #2F6BD4; letter-spacing: .3px;
-  }
-  body[data-module="home"] .card.person .sub {
-    font-size: calc(12.5px * var(--scale)); color: var(--ink-sub); line-height: 1.3;
-  }
-  body[data-module="home"] .card.person .cr { margin-top: 2px; font-size: calc(12px * var(--scale)); }
-
-  /* ---------- 报告卡（中间一排三张） ---------- */
-  body[data-module="home"] .stage .report-row { flex: 0 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  body[data-module="home"] .card.report { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
-  body[data-module="home"] .card.report .hd {
-    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-    background: linear-gradient(100deg, var(--c-hd1, #2F6BD4), var(--c-hd2, #1E4E9E));
-    color: var(--c-hdt, #FFFFFF);
-  }
-  body[data-module="home"] .card.report .hd .ic {
-    flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.22);
-    display: grid; place-items: center;
-  }
-  body[data-module="home"] .card.report .hd .ic svg { width: 16px; height: 16px; color: currentColor; }
-  body[data-module="home"] .card.report .hd .t { font-size: calc(15px * var(--scale)); font-weight: 800; letter-spacing: .3px; }
-  body[data-module="home"] .card.report .bd {
-    flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px 10px; min-height: 0;
-  }
-  body[data-module="home"] .card.report .bd .sub { font-size: calc(12.5px * var(--scale)); color: var(--ink-sub); }
-  body[data-module="home"] .card.report .art { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
-  body[data-module="home"] .card.report .art svg { display: block; width: 100%; height: auto; max-height: 190px; }
-  body[data-module="home"] .card.report .cr { align-self: flex-end; font-size: calc(12px * var(--scale)); }
-  /* ROI 卡：图例 + 曲线 + 三个结论格 */
-  body[data-module="home"] .card.report .lw { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-  body[data-module="home"] .card.report .lg { display: flex; align-items: center; gap: 6px; font-size: calc(11px * var(--scale)); color: var(--ink-sub); }
-  body[data-module="home"] .card.report .lg i { width: 14px; height: 3px; border-radius: 2px; }
-  body[data-module="home"] .card.report .lg i.k1 { background: var(--c-pa, #1BAF7A); }
-  body[data-module="home"] .card.report .lg i.k2 { background: #2F6BD4; }
-  body[data-module="home"] .card.report .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-  body[data-module="home"] .card.report .st {
-    background: #FBF6EA; border: 1px solid var(--gold-pale); border-radius: 8px;
-    padding: 4px 4px 5px; text-align: center; display: flex; flex-direction: column; gap: 0;
-  }
-  body[data-module="home"] .card.report .st .k { font-size: calc(10.5px * var(--scale)); color: var(--ink-sub); }
-  body[data-module="home"] .card.report .st b { font-size: calc(18px * var(--scale)); font-weight: 900; color: var(--c-pa, #1BAF7A); line-height: 1.1; }
-  body[data-module="home"] .card.report .st .u { font-size: calc(10px * var(--scale)); color: var(--ink-sub); }
-
-  /* ---------- 企业应用 AI 地图 ---------- */
-  body[data-module="home"] .ai-map {
-    position: relative; flex: 1 1 auto; min-height: 0;
-    background: linear-gradient(180deg, #FFFDF7, #F7EFDD);
-    border: 1.6px solid var(--gold-soft); border-radius: 14px;
-    box-shadow: inset 0 0 0 3px #FFFDF6, 0 3px 14px rgba(120, 92, 30, .10);
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-  }
-  body[data-module="home"] .ai-map .cap {
-    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 2;
-    padding: 5px 20px; border-radius: 999px; background: #FFFFFF;
-    border: 1.5px solid var(--gold); color: #8A6A22;
-    font-size: calc(16px * var(--scale)); font-weight: 800; letter-spacing: 1px;
-    box-shadow: 0 2px 10px rgba(120, 92, 30, .16);
-  }
-  body[data-module="home"] .ai-map svg { display: block; width: 100%; height: 100%; }
-
-  /* ---------- 右侧常驻栏 ---------- */
-  body[data-module="home"] .rail {
-    background: linear-gradient(180deg, #FFFDF7, #F8F1E1);
-    border-left: 1.5px solid var(--gold-soft); border-radius: 0 8px 8px 0; margin: 4px 4px 0 0;
-    padding: 16px 16px; gap: 16px;
-  }
-  body[data-module="home"] .rail h4 { color: var(--ink-sub); font-size: calc(12.5px * var(--scale)); }
-  body[data-module="home"] .rail .company-name { color: var(--ink); font-size: calc(21px * var(--scale)); font-weight: 800; }
-  body[data-module="home"] .rail .company-meta { color: var(--ink-sub); }
-  body[data-module="home"] .rail .link { color: #B0862C; font-weight: 700; }
-  body[data-module="home"] .rail .link::after { content: ' ›'; }
-  body[data-module="home"] .rail .menu {
-    background: #FFFFFF; border: 1.4px solid var(--gold-soft); border-radius: 10px;
-    box-shadow: 0 8px 22px rgba(120, 92, 30, .18);
-  }
-  body[data-module="home"] .rail .menu button { color: var(--ink); }
-  body[data-module="home"] .rail .menu button:hover { background: var(--cream2); }
-  body[data-module="home"] .rail .credit {
-    background: #FFFFFF; border: 1.4px solid var(--gold-pale); border-radius: 10px;
-  }
-  body[data-module="home"] .rail .credit .k { color: var(--ink-sub); }
-  body[data-module="home"] .rail .credit .v { color: #8A6A22; font-weight: 900; }
-  body[data-module="home"] .rail .qr {
-    background: #FFFFFF; border: 1.5px solid var(--gold-soft); border-radius: 12px; padding: 10px;
-  }
-  body[data-module="home"] .rail .qr .cap { color: var(--ink-sub); }
-  body[data-module="home"] .rail .qr.ready { border-color: #1BAF7A; box-shadow: 0 0 0 3px rgba(27, 175, 122, .18); }
-
-  /* ---------- 底部价格条 ---------- */
-  body[data-module="home"] { --pricebar: 104px; }
-  body[data-module="home"] .pricebar {
-    background: linear-gradient(180deg, #FFFDF7, #F5ECD8);
-    border-top: 1.5px solid var(--gold-soft); border-radius: 0 0 8px 8px; margin: 0 26px 5px;
-    gap: 10px; padding: 8px 14px;
-  }
-  body[data-module="home"] .pricebar .pill {
-    position: relative; flex: 1 1 0; height: 100%; min-width: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px;
-    background: #FFFFFF; border: 1.5px solid var(--gold-soft); border-radius: 10px;
-    padding: 0 8px 6px; overflow: hidden;
-    transition: transform .14s ease, box-shadow .14s ease;
-  }
-  body[data-module="home"] .pricebar .pill:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(120, 92, 30, .20); }
-  body[data-module="home"] .pricebar .pill .n {
-    align-self: stretch; margin: 0 -8px 3px; padding: 4px 8px; text-align: center;
-    font-size: calc(14px * var(--scale)); font-weight: 800; color: #FFFFFF; letter-spacing: 1px;
-    display: flex; align-items: center; justify-content: center; gap: 5px;
-  }
-  body[data-module="home"] .pricebar .pill .n .crown { width: 16px; height: 16px; display: block; }
-  body[data-module="home"] .pricebar .pill .n .crown svg { width: 100%; height: 100%; color: #FFE39A; }
-  body[data-module="home"] .pricebar .pill.k-lite    .n { background: linear-gradient(100deg, #3E6FC4, #2B5199); }
-  body[data-module="home"] .pricebar .pill.k-std     .n { background: linear-gradient(100deg, #2E9B7A, #1E7458); }
-  body[data-module="home"] .pricebar .pill.k-adv     .n { background: linear-gradient(100deg, #D2A63C, #A87C22); }
-  body[data-module="home"] .pricebar .pill.k-flag    .n { background: linear-gradient(100deg, #DB7A33, #B0551C); }
-  body[data-module="home"] .pricebar .pill.k-diag    .n { background: linear-gradient(100deg, #CE4F3E, #A23628); }
-  body[data-module="home"] .pricebar .pill.k-private .n { background: linear-gradient(100deg, #27457E, #16294F); }
-  body[data-module="home"] .pricebar .pill .p {
-    font-size: calc(30px * var(--scale)); font-weight: 900; line-height: 1; color: #8A3B18;
-  }
-  body[data-module="home"] .pricebar .pill.k-lite .p { color: #2B5199; }
-  body[data-module="home"] .pricebar .pill .u {
-    font-size: calc(11px * var(--scale)); color: var(--ink-sub); display: flex; gap: 6px; align-items: baseline;
-  }
-  body[data-module="home"] .pricebar .pill .u i { font-style: normal; color: var(--ink-sub); }
-  body[data-module="home"] .pricebar .pill.star { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(184, 146, 63, .22); }
-  body[data-module="home"] .pricebar .pill .flag {
-    position: absolute; top: 5px; right: -22px; width: 74px; transform: rotate(38deg);
-    background: linear-gradient(90deg, #D8A13A, #B8862A); color: #FFF9E8;
-    font-size: calc(10px * var(--scale)); font-weight: 800; text-align: center; letter-spacing: 1px; line-height: 15px;
-  }
-  body[data-module="home"] .pricebar .pop {
-    background: #FFFFFF; border: 1.5px solid var(--gold-soft); border-radius: 10px;
-    box-shadow: 0 10px 28px rgba(120, 92, 30, .22); color: var(--ink);
-  }
-  body[data-module="home"] .pricebar .pop .row { border-top: 1px solid var(--gold-pale); }
-  body[data-module="home"] .pricebar .pop .row span:last-child { color: var(--ink); font-weight: 700; }
-
-  /* 展台是 1920×1080 定屏：窄屏时让舞台可纵向滚动，不挤成一团 */
-  @media (max-width: 1500px), (max-height: 860px) {
-    body[data-module="home"] .main { overflow: auto; }
-    body[data-module="home"] .grid.stage { grid-template-columns: 1fr 1.6fr 1fr; }
-    body[data-module="home"] .ai-map { min-height: 380px; }
-  }
-  @media (max-width: 1080px) {
-    body[data-module="home"] .grid.stage { grid-template-columns: 1fr; }
-    body[data-module="home"] .stage .col.side { flex-direction: row; flex-wrap: wrap; }
-    body[data-module="home"] .stage .col.side > .card { flex: 1 1 260px; }
-  }
+  /* 首页整屏一张图，不需要滚动提示 */
+  body[data-module="home"] .scroll-hint { display: none !important; }
 }

@@ -164,20 +164,53 @@
     if (window.DGG && window.DGG.FX && window.DGG.FX.setScheme) window.DGG.FX.setScheme(dark ? 'dark' : 'light');
   }
 
-  // ---------- 首页 · 展台版 ----------
-  /* 三列：左 4 张产品卡 / 中 3 张报告卡 + 企业应用 AI 地图 / 右 4 张产品卡。
-     11 张一律是 .card[data-id]，与走查脚本的点法保持同一套契约。 */
-  var HOME_LEFT  = ['m4', 'm5', 'm6', 'm7'];
-  var HOME_RIGHT = ['m8', 'm9', 'm10', 'm11'];
-  var HOME_TOP   = ['m1', 'm2', 'm3'];
+  // ---------- 首页 · 定稿展板原图 + 热区 ----------
+  /* 首页整屏就是定稿那张展板图（2000×1125），一个像素都不改。
+     上面盖一层透明热区：11 张卡连到各自模块，切换企业、行业、六档价格各连各的。
+     坐标按原图像素量出来，用百分比写，图等比缩放时热区跟着走。 */
+  var BOARD_W = 2000, BOARD_H = 1125;
+  var HOT = [
+    /* 左列四张 */
+    { id: 'm4',  x: 30,   y: 219, w: 360, h: 145 },
+    { id: 'm5',  x: 30,   y: 391, w: 360, h: 150 },
+    { id: 'm6',  x: 30,   y: 566, w: 360, h: 153 },
+    { id: 'm7',  x: 30,   y: 744, w: 360, h: 156 },
+    /* 中间三张报告卡 */
+    { id: 'm1',  x: 404,  y: 199, w: 377, h: 275 },
+    { id: 'm2',  x: 793,  y: 199, w: 344, h: 275 },
+    { id: 'm3',  x: 1149, y: 199, w: 334, h: 308 },
+    /* 右列四张 */
+    { id: 'm8',  x: 1494, y: 219, w: 291, h: 150 },
+    { id: 'm9',  x: 1494, y: 391, w: 291, h: 151 },
+    { id: 'm10', x: 1494, y: 563, w: 291, h: 156 },
+    { id: 'm11', x: 1494, y: 741, w: 291, h: 158 }
+  ];
+  var HOT_PRICE = [
+    { key: 'lite',    x: 45,   y: 931, w: 336, h: 142 },
+    { key: 'std',     x: 399,  y: 931, w: 302, h: 142 },
+    { key: 'adv',     x: 711,  y: 931, w: 310, h: 142 },
+    { key: 'flag',    x: 1034, y: 931, w: 299, h: 142 },
+    { key: 'diag',    x: 1347, y: 931, w: 297, h: 142 },
+    { key: 'private', x: 1659, y: 931, w: 297, h: 142 }
+  ];
+  var HOT_SWITCH   = { x: 1806, y: 240, w: 82,  h: 40 };
+  var HOT_INDUSTRY = { x: 1705, y: 28,  w: 189, h: 41 };
+
+  function fillIndustry(sel) {
+    DATA.industries.display.forEach(function (d) { sel.appendChild(h('option', { value: d.key }, [d.name])); });
+  }
+  function pct(v, total) { return (v / total * 100).toFixed(4) + '%'; }
+  function hotStyle(r) {
+    return 'left:' + pct(r.x, BOARD_W) + ';top:' + pct(r.y, BOARD_H) +
+           ';width:' + pct(r.w, BOARD_W) + ';height:' + pct(r.h, BOARD_H);
+  }
   function byId(id) { for (var i = 0; i < MODULES.length; i++) if (MODULES[i].id === id) return MODULES[i]; return null; }
-  function paletteOf(id) { return (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[id]) || null; }
   function cardStyle(id) {
-    var pc = paletteOf(id);
+    var pc = (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[id]) || null;
     return pc ? '--c-pa:' + pc.pa + ';--c-pa2:' + pc.pa2 + ';--c-soft:' + pc.soft + ';--c-ink:' + pc.ink + ';--c-hd1:' + pc.hd1 + ';--c-hd2:' + pc.hd2 + ';--c-hdt:' + pc.hdt : null;
   }
   function openModule(m) { if (BUILT[m.id]) go(m.id); }
-  /* 待机页仍用朴素的 11 宫格：那一屏是循环点亮，不需要展板的三列版式 */
+  /* 待机页仍用朴素的 11 宫格：那一屏是循环点亮，不需要展板 */
   function gridEl(onClick) {
     var g = h('div', { class: 'grid tiles' });
     MODULES.forEach(function (m) {
@@ -194,77 +227,65 @@
     return g;
   }
 
-  function personCard(id) {
-    var m = byId(id), H = window.DGG.home;
-    var face = h('span', { class: 'face' });
-    face.appendChild(H.svg('0 0 100 100', H.faceSvg(id)));
-    return h('button', {
-      class: 'card person', 'data-id': id, disabled: !BUILT[id], style: cardStyle(id),
-      onclick: function () { openModule(m); }
-    }, [
-      face,
-      h('span', { class: 'body' }, [
-        h('span', { class: 'name' }, [m.name]),
-        h('span', { class: 'sub' }, [m.sub]),
-        h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
-      ])
-    ]);
-  }
-  function reportCard(id) {
-    var m = byId(id), H = window.DGG.home, pc = paletteOf(id), key = pc ? pc.pa : '#2F6BD4';
-    var pv = (DATA.homePreview || {})[id] || null;
-    var art = h('span', { class: 'art' });
-    if (pv) {
-      if (id === 'm1') art.appendChild(H.radarPreview(pv, key));
-      if (id === 'm2') art.appendChild(H.barsPreview(pv, key));
-      if (id === 'm3') {
-        var lw = h('span', { class: 'lw' });
-        lw.appendChild(h('span', { class: 'lg' }, [
-          h('i', { class: 'k1' }), h('span', {}, ['累计净额']), h('i', { class: 'k2' }), h('span', {}, ['累计投入'])
-        ]));
-        lw.appendChild(H.linePreview(pv, key));
-        lw.appendChild(h('span', { class: 'stats' }, pv.stats.map(function (st) {
-          return h('span', { class: 'st' }, [h('span', { class: 'k' }, [st.k]), h('b', { class: 'num' }, [st.v]), h('span', { class: 'u' }, [st.u])]);
-        })));
-        art.appendChild(lw);
-      }
-    }
-    return h('button', {
-      class: 'card report', 'data-id': id, disabled: !BUILT[id], style: cardStyle(id),
-      onclick: function () { openModule(m); }
-    }, [
-      h('span', { class: 'hd' }, [
-        h('span', { class: 'ic', html: '<svg viewBox="0 0 24 24">' + ICONS[m.icon] + '</svg>' }),
-        h('span', { class: 't' }, [m.name])
-      ]),
-      h('span', { class: 'bd' }, [
-        h('span', { class: 'sub' }, [m.sub]),
-        art,
-        h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
-      ])
-    ]);
-  }
   function renderHome() {
-    var H = window.DGG.home;
-    $main.appendChild(h('div', { class: 'page-title' }, [
-      h('h1', {}, ['薯片AI智能体']),
-      h('span', { class: 'bar' }),
-      h('span', { class: 'sub' }, ['AI 赋能企业经营全链路解决方案'])
-    ]));
-    var stage = h('div', { class: 'grid stage' });
-    var colL = h('div', { class: 'col side' });
-    HOME_LEFT.forEach(function (id) { colL.appendChild(personCard(id)); });
-    var colR = h('div', { class: 'col side' });
-    HOME_RIGHT.forEach(function (id) { colR.appendChild(personCard(id)); });
-    var colC = h('div', { class: 'col mid' });
-    var row = h('div', { class: 'report-row' });
-    HOME_TOP.forEach(function (id) { row.appendChild(reportCard(id)); });
-    colC.appendChild(row);
-    var map = h('div', { class: 'ai-map' }, [h('div', { class: 'cap' }, ['企业应用AI地图'])]);
-    map.appendChild(H.aiMap());
-    colC.appendChild(map);
-    stage.appendChild(colL); stage.appendChild(colC); stage.appendChild(colR);
+    var stage = h('div', { class: 'grid board' });
+    var box = h('div', { class: 'boardbox' });
+    box.appendChild(h('img', { class: 'bg', src: CFG.homeBoard, alt: '薯片AI智能体 · AI 赋能企业经营全链路解决方案' }));
+    HOT.forEach(function (r) {
+      var m = byId(r.id);
+      box.appendChild(h('button', {
+        class: 'card hot', 'data-id': r.id, style: hotStyle(r), disabled: !BUILT[r.id],
+        title: m.name + ' · ' + m.credits + ' 积分', 'aria-label': m.name,
+        onclick: function () { openModule(m); }
+      }));
+    });
+    /* 切换企业：菜单挂在热区下面，样式与模块页那份一致 */
+    var picker = h('div', { class: 'hot pick', style: hotStyle(HOT_SWITCH) });
+    var menu = null;
+    picker.appendChild(h('button', { class: 'lnk', 'aria-label': '切换企业', onclick: function (e) {
+      e.stopPropagation();
+      if (menu) { picker.removeChild(menu); menu = null; return; }
+      menu = h('div', { class: 'menu' });
+      DATA.companies.forEach(function (sc) {
+        menu.appendChild(h('button', { onclick: function () { setCompany(sc.profile); picker.removeChild(menu); menu = null; } }, [sc.profile.name]));
+      });
+      menu.appendChild(h('button', { class: 'muted', onclick: function () { setCompany(null); picker.removeChild(menu); menu = null; } }, ['清空']));
+      picker.appendChild(menu);
+    } }));
+    box.appendChild(picker);
+    /* 行业：真下拉盖在图上那只选择框的位置，透明，选中后与顶栏那只同步 */
+    var sel = h('select', { class: 'hot ind', style: hotStyle(HOT_INDUSTRY), 'aria-label': '行业', onchange: function (e) {
+      S.industryDisplay = e.target.value;
+      var top = document.getElementById('industry'); if (top) top.value = e.target.value;
+      if (S.activeModule && BUILT[S.activeModule].onIndustry) BUILT[S.activeModule].onIndustry(api.displayIndustryDefault());
+    } });
+    fillIndustry(sel);
+    sel.value = S.industryDisplay;
+    box.appendChild(sel);
+    /* 六档价格 */
+    HOT_PRICE.forEach(function (r) {
+      var p = null;
+      for (var i = 0; i < PRICES.length; i++) if (PRICES[i].key === r.key) p = PRICES[i];
+      box.appendChild(h('button', {
+        class: 'hot price', style: hotStyle(r), 'data-price': r.key,
+        title: p.name + ' ' + p.price + ' ' + p.unit + ' · ' + p.seats + ' · ' + p.pts, 'aria-label': p.name,
+        onclick: function (e) { e.stopPropagation(); boardPop(box, p, r); }
+      }));
+    });
+    stage.appendChild(box);
     $main.appendChild(stage);
+  }
+  var boardPopEl = null;
+  function boardPop(box, p, r) {
+    if (boardPopEl && boardPopEl.parentNode) boardPopEl.parentNode.removeChild(boardPopEl);
+    if (boardPopEl && boardPopEl._key === p.key) { boardPopEl = null; return; }
+    boardPopEl = h('div', { class: 'boardpop', style: 'left:' + pct(r.x + r.w / 2, BOARD_W) + ';bottom:' + pct(BOARD_H - r.y + 10, BOARD_H) }, [
+      h('b', {}, [p.name, ' ', h('span', { class: 'num' }, [String(p.price)]), ' ', p.unit]),
+      h('div', { class: 'row' }, [h('span', {}, ['坐席']), h('span', {}, [p.seats])]),
+      h('div', { class: 'row' }, [h('span', {}, ['积分']), h('span', {}, [p.pts])])
+    ]);
+    boardPopEl._key = p.key;
+    box.appendChild(boardPopEl);
   }
 
   // ---------- 右侧常驻栏 ----------

@@ -32,34 +32,8 @@ const data = {
   m8: { vocab: m8.vocab, rules: m8.rules, improveLib: m8.improveLib, samples: m8.samples },
   m11: { lexicon: m11.lexicon, objects: m11.objects, flows: m11.flows, roles: m11.roles, components: m11.components, presets: m11.presets, tests: m11.tests, deltas: m11.deltas, integrations: m11.integrations, samples: m11.samples }
 };
-/* 首页三张报告卡的预览图不画示意数：构建期用各自内核跑同一家范本企业（S1 · 杭州锐合精密五金），
-   卡片上的数与点进去看到的是同一份。内核换了、样本换了，这里跟着变，不会各说各话。 */
-const homePreview = (function () {
-  const k1 = require(path.join(skills, '01-ai-maturity', 'core', 'compute.js'));
-  const k2 = require(path.join(skills, '02-scene-ranking', 'core', 'compute.js'));
-  const k3 = require(path.join(skills, '03-roi-calculator', 'core', 'compute.js'));
-  const inp = (d) => JSON.parse(fs.readFileSync(path.join(skills, d, 'examples', 'S1.input.json'), 'utf8'));
-  const r1 = k1.compute(inp('01-ai-maturity'), m1);
-  const r2 = k2.compute(inp('02-scene-ranking'), m2);
-  const r3 = k3.compute(inp('03-roi-calculator'), m3);
-  let invCum = 0;
-  const flow = r3.flow.map((p) => { invCum += p.cost; return { cum: Math.round(p.cum), invCum: Math.round(invCum) }; });
-  const wan = (n) => (Math.abs(n) >= 10000 ? (n / 10000).toFixed(1) : String(Math.round(n)));
-  return {
-    m1: { dims: r1.dimensions.map((d) => ({ name: d.name, pct: Math.round(d.pct) })), total: r1.total, max: r1.max, level: r1.level.name },
-    m2: { scenes: r2.ranked.slice(0, 8).map((x) => ({ name: x.name, score: x.score })) },
-    m3: {
-      flow: flow, paybackIdx: r3.payback ? r3.payback - 1 : -1,
-      stats: [
-        { k: '回收期', v: String(r3.payback), u: '期' },
-        { k: '首年净额', v: wan(r3.flow[11] ? r3.flow[11].cum : 0), u: '万元' },
-        { k: '12 期 ROI', v: String(Math.round(r3.roi.roi12)), u: '%' }
-      ]
-    }
-  };
-})();
-data.homePreview = homePreview;
-
+/* 首页整屏用定稿展板原图，不再用代码重画。内联成 data URI，保持断网可用、零外部请求。 */
+const homeBoard = 'data:image/webp;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'home-board.webp')).toString('base64');
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释
 const put = (html, marker, content) => { if (!html.includes(marker)) throw new Error('marker missing: ' + marker); return html.split(marker).join(content); };
@@ -102,7 +76,7 @@ html = put(html, '/*__CORE_M9_JS__*/', R('../skills/09-ai-decision/core/decide.j
 html = put(html, '/*__CORE_M8_JS__*/', R('../skills/08-ai-process/core/flow.js'));
 html = put(html, '/*__CORE_M11_JS__*/', R('../skills/11-ai-dev/core/build.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
-html = put(html, '/*__HOME_JS__*/', R('src/home.js'));
+html = put(html, '/*__HOME_BOARD_DATA_URI__*/', homeBoard);
 html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
 html = put(html, '/*__FX_JS__*/', R('src/fx.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
