@@ -2,12 +2,12 @@
 
 let __xwTyped = false;
 const COACH_IMGS = __COACH_IMGS__;   // 构建时由 assets/coaches/<id>.png 内联
-function goPage(h) { location.hash = '#' + h; }
+function goPage(h) { if ((location.hash || '').replace(/^#\/?/, '') === h) route(); else location.hash = '#' + h; }
 
 /* ---------------- 路由 ---------------- */
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
-  if (!['home', 'plaza', 'exam', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
+  if (!['home', 'center', 'ticket', 'expert', 'exam', 'assess', 'analytics', 'sys', 'plaza', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
   renderHPage(h); HomeFX.on();
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
 }
@@ -31,16 +31,17 @@ function homeBoot() {
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
-      <div class="brand"><img src="__LOGO__" alt="中国南方电网 深圳供电局有限公司"><div class="pill">小瓦特·练　AI智能陪练底座</div></div>
+      <div class="brand"><img src="__LOGO__" alt="中国南方电网 深圳供电局有限公司"><div class="pill">小瓦特·练　AI 智能陪练平台</div></div>
       <nav class="hnav" id="hnav">
         <span class="hnavi" data-h="home">工作台</span>
-        <span class="hnavi" data-h="plaza">教练中心</span>
+        <span class="hnavi" data-h="center">场景中心</span>
+        <span class="hnavi" data-h="ticket">操作票填写</span>
+        <span class="hnavi" data-h="expert">专家答辩</span>
         <span class="hnavi" data-h="exam">陪练关卡</span>
-        <span class="hnavi" data-h="review">评分复盘</span>
-        <span class="hnavi" data-h="growth">成长档案</span>
-        <span class="hnavi" data-h="classroom">知识课堂</span>
-        <span class="hnavi lk" data-lk="1" data-h="team">组长工作台<i>管理</i></span>
-        <span class="hnavi lk" data-lk="1" data-h="editor">教练编辑器<i>管理</i></span>
+        <span class="hnavi" data-h="assess">AI 测评</span>
+        <span class="hnavi" data-h="analytics">数据分析</span>
+        <span class="hnavi lk" data-lk="1" data-h="team">管理视角<i>管理</i></span>
+        <span class="hnavi lk" data-lk="1" data-h="sys">系统与权限<i>管理</i></span>
       </nav>
       <div class="huser"><span id="hclock" class="hclk"></span>
         <span class="uchip"><i>${HOME_USER.name.slice(0, 1)}</i>${HOME_USER.name} · ${HOME_USER.team}</span></div>
@@ -50,6 +51,12 @@ function homeBoot() {
   <div id="htip" hidden></div>
   <div class="demo2" id="demo2"><div class="bd"><div class="t">讲师演示台</div>
     <button data-dm="main">演示主线：组长下发 1163 考核 → 学员进入</button>
+    <button data-dm="tk_ok">操作票：一键按标准票填完（正确）</button>
+    <button data-dm="tk_swap">操作票：组内换序（应当不判错）</button>
+    <button data-dm="tk_order">操作票：先拉母线侧刀闸（顺序错误）</button>
+    <button data-dm="tk_danger">操作票：未验明无电压即合地刀（整票不合格）</button>
+    <button data-dm="tk_text">操作票：并项与缺双重名称（文字不规范）</button>
+    <button data-dm="ep_run">专家答辩：一键按范例作答五题</button>
     <button data-dm="red">触发红线：跳过验电直接合地刀</button>
     <button data-dm="run">一键跑完当前考试（正确路径）</button>
     <button data-dm="es">地刀两态：<b id="dm_es">随机</b></button>
@@ -80,10 +87,14 @@ function homeBoot() {
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'plaza' ? pagePlaza() : h === 'exam' ? pageExam() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.innerHTML = h === 'home' ? pageHome() : h === 'center' ? pageCenter() : h === 'ticket' ? pageTicket() : h === 'expert' ? pageExpert() : h === 'assess' ? pageAssess() : h === 'analytics' ? pageAnalytics() : h === 'sys' ? pageSys()
+    : h === 'plaza' ? pagePlaza() : h === 'exam' ? pageExam() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (typeof pageAfter === 'function') pageAfter(h);
   if (h === 'exam') examAfter(); else if (EX.timer) { clearInterval(EX.timer); EX.timer = null; }
+  if (h === 'ticket') ticketAfter(); else if (TK.timer && h !== 'ticket') { clearInterval(TK.timer); TK.timer = null; }
+  if (h === 'expert') expertAfter(); else if (EP.timer && h !== 'expert') { clearInterval(EP.timer); EP.timer = null; }
+  if (h === 'assess' || h === 'analytics') platAfter(h);
   countUp(pg);
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
@@ -525,6 +536,14 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台（底座页面） ---------------- */
 const IMPL_STATUS = [
+  ['操作票自动判卷：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、危险操作，同一根本错误只计一次', '确定性规则 · 真实运行（规则取自《操作票结构化标注确认表》70 行业务确认）'],
+  ['操作票错误解释的制度依据：文件名、条款编号、条文正文', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
+  ['操作票扣分值与危险操作规则清单', '扣分值为配置项（业务尚未最终确定，程序不写死）；危险规则已实现业务已确认的 4 条，完整清单待业务提供'],
+  ['专家选聘答辩打分：硬性（关键词命中 / 合规红线 / 流程步骤）、软性（表达 / 共情 / 逻辑 / 情绪）、结果（任务达成 / 是否满意）', '确定性规则 · 真实运行；核心能力与招标竞聘分档取自《专家选聘面试答辩评价标准》'],
+  ['三维能力地图：技能水平、通用能力、领导能力', '技能水平与通用能力由本机演练记录推导；领导能力本次仅展示，暂无实测数据'],
+  ['通用能力 / 领导能力的层级行为指标', '照录《素质模型》宣传册原文'],
+  ['多人员横向对比与场景聚合统计的同批次人员数据', '脱敏模拟 · 人物全部虚拟 · 入库待对接'],
+  ['标准票的空气开关与压板编号', '按试卷「其他资料」同构给出本间隔编号，实际编号待业务确认'],
   ['陪练关卡：选择 / 填空 / 问答即时判定与回应，操作关步骤提示与做完打分、操作前置与红线、地刀三位置一致性、汇报要素', '规则 · 真实运行'],
   ['知识库召回：问教练、口述汇报追问', '本机检索 · 真实运行（非在线大模型）'],
   ['语音识别：口述、汇报、答题', '联网且经 http 打开时浏览器识别（真实）；本地文件打开或内网时为兜底识别（按当前应答内容打入，可改后再发）'],
@@ -537,6 +556,22 @@ const IMPL_STATUS = [
   ['图片 / 视频动作识别', '不在本轮范围']
 ];
 function demoAct(k) {
+  if (k.indexOf('tk_') === 0) {
+    const kind = k.slice(3);
+    TK.res = null; tkStart('exam', false);
+    setTimeout(() => { TK.rows = tkAuto(kind).map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); toast('已按' + ({ ok: '标准票', swap: '组内换序', order: '顺序错误', danger: '危险操作', text: '文字不规范' }[kind]) + '填入，点「提交判卷」看判卷结果', 'ok'); }, 260);
+    $('#demo2').classList.remove('open'); return;
+  }
+  if (k === 'ep_run') {
+    EP.res = null; epStart(false);
+    const step = () => setTimeout(() => {
+      const inp = $('#ep_in'); if (!inp) return;
+      const q = EP.rounds[EP.i].q; inp.value = EXP_SAMPLE[q.k] || '';
+      epSend();
+      setTimeout(() => { const n = $('#ep_next'); if (n) { n.click(); step(); } }, 420);
+    }, 520);
+    step(); $('#demo2').classList.remove('open'); return;
+  }
   if (k === 'main') {
     const ex = EXAMS.find(e => e.id === 'e1163');
     const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: 'e1163', examName: ex.n, coach: '题库考试', plan: ex.short, mode: '考核模式', due: dateAfter(3), pass: 6, who: HOME_USER.name, dims: ['状态核对与确认', '安全措施与风险控制'], done: 0, total: 1, results: [] };

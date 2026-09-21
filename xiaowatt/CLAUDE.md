@@ -2,7 +2,7 @@
 
 本工作区承接两个全委托参赛项目的开发，此前已在对话式环境中完成大量工作，现迁入 Claude Code 继续。**动手前先读完本文件，再按 `docs/03_任务清单.md` 干活。**
 
-- 项目一「小瓦特·练」AI 智能陪练底座——**9/13 六次口径后的形态：底座 + 陪练关卡，陪练舱模块已整体删除**（docs/02 第 49 条）。主线偏向人力资源（作业授权认证表 → 8 维能力 → 陪练关卡取证 → 组长培训计划 → 认证表草稿）；陪练关卡＝做题 + 操作两种方式（第 47 条）、教练在侧即时回应、被打断台词必触发回调（第 48 条）；两份关卡（1163、雨淋阀）图示只画操作相关部件；朗读语音默认关。口径见 docs/02 第 44–49 条，客户材料解读见 docs/05
+- 项目一「小瓦特·练」AI 智能陪练平台——**9/21 按客户两份新材料升级为四大板块平台**（场景陪练 / AI 智能测评 / 可视化数据分析 / 权限与系统管理，docs/02 第 51 条）：场景按 A–F 六大类全量展示，本次可演练 4 个（操作票填写、倒闸操作 1163、雨淋阀、专家选聘答辩）；三维能力体系（技能水平 / 通用能力落地，领导能力仅展示）。9/13 六次口径的形态仍在（陪练舱已删除，docs/02 第 49 条）。主线偏向人力资源（作业授权认证表 → 8 维能力 → 陪练关卡取证 → 组长培训计划 → 认证表草稿）；陪练关卡＝做题 + 操作两种方式（第 47 条）、教练在侧即时回应、被打断台词必触发回调（第 48 条）；两份关卡（1163、雨淋阀）图示只画操作相关部件；朗读语音默认关。口径见 docs/02 第 44–49 条，客户材料解读见 docs/05
 - 项目二「小瓦特·班」供电所班组长 AI 助手——**9/21 按客户意见重构：业务减、管理加、简约风格、知识库三类、星级评价标准作为五星班组搭建依据**（docs/02 第 50 条），规格与代码地图见 `banzu/README.md`
 
 甲方＝深圳供电局有限公司人力资源部（南方电网直管全资子公司）。业务方：项目一＝福田供电局（联系人于然）；项目二＝光明供电局（联系人林洁怡）。叙事口径：**「大瓦特练机器，小瓦特练人」**。
@@ -46,12 +46,13 @@ xiaowatt/
 
 ```bash
 # 构建项目一（纯 Python3 标准库，无依赖）
-cd peilian && python3 build.py        # → dist/小瓦特练_AI智能陪练底座_高保真原型.html
+cd peilian && python3 build.py        # → dist/小瓦特练_AI智能陪练平台_高保真原型.html
 
 # 回归测试（需要 playwright）
 npm i playwright && npx playwright install chromium
 cd peilian
-node v2base.js     # 底座冒烟：八页渲染无错 / 首页下钻 / 复盘筛选与摘要 / 档案曲线点进复盘 / 课堂测验与计划 / 组长下发 / 编辑器试演 / 教练中心进关卡，期望 ERR none、nav has arena? false
+node v2plat.js     # 平台回归：场景中心 A–F / 操作票六种答卷判卷 / 真实条款 / 答辩五题 / 三维能力地图 / 数据分析 / 权限 / 讲师演示台 / 禁词，期望 ERR none
+node v2base.js     # 底座冒烟：十二页渲染无错 / 首页下钻 / 复盘筛选与摘要 / 档案曲线点进复盘 / 课堂测验与计划 / 组长下发 / 编辑器试演 / 教练中心进关卡，期望 ERR none、nav has arena? false
 node v2exam1163.js # 陪练关卡 · 1163（做题 + 操作，15 分制）：考核正确路径 score 15 steps 9 hints 0 / 训练说错+被制止 score 14.7 kinds judge,order hints 1（说错自动给一级提示）red false stopLine true / 考核红线 red true score 0 / 漏项 miss / 刷新后记录 4 listed 11（含 7 条模拟）/ 组长 rows 8 / 任务下发 / 学员待练 / ERR none
 node v2examrain.js # 陪练关卡 · 雨淋阀（做题 + 操作，13.5 分制）：训练正确路径 score 13.5 steps 8 / 考核关键错误路径 score 12.2 crit 2 kinds crit!,crit!,miss / 按住盒盖 boxOpen true / 拖手柄 handle 100 / run3 score 13.5 / ERR none
 
@@ -59,7 +60,7 @@ node v2examrain.js # 陪练关卡 · 雨淋阀（做题 + 操作，13.5 分制�
 python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 build.py
 ```
 
-**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base；动到能力模型、关卡引擎、关卡定义、场景图、首页或组长工作台必须再跑 v2exam1163 + v2examrain**。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
+**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base + v2plat；动到能力模型、关卡引擎、关卡定义、场景图、首页或组长工作台必须再跑 v2exam1163 + v2examrain；动到操作票数据 / 判卷引擎 / 制度条款 / 答辩题库必须跑 v2plat**。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
 
 ## 铁律（甲方多次强调，违反即打回）
 
@@ -89,17 +90,25 @@ python3 gen_data.py && python3 gen_know.py && python3 gen_lines.py && python3 bu
 | charts.js | 手绘 SVG 图表库：雷达 / 双轴柱线 / 环形 / 面积 / 热力矩阵 / 仪表盘 / 成长曲线 chSessionCurve（点：得分率 · 7日均线 · 用时 · 错误 · 提示 · 及格线）+ miniBars + 成长地图 chGrowthMap，交互经 data-* 委托 |
 | ability.js | 能力模型层：认证表 `CERT_UNITS`（8 技能单元 / 20 专业项目）、`ABILITY8` 八维、`DIMS/DIMK`、`CONFIRM_LOG` 专业规则确认记录（`xwt_confirm`）、`versionStamp`、`COACH_TYPES` 陪练类型地图 |
 | homedata.js | 首页数据层（全部脱敏模拟）：HOME_USER、`RADAR_BASE` 与 `abilityNow()`（基线与本机关卡记录 6:4 合成，`RADAR_NOW` 为全局 getter）、**近30天关卡记录 `HIST_SEED → EXAM_HIST()`**（按关卡定义推导轨迹 / 维度 / 建议）、`examHist()`＝本机 + 模拟、`dayOf/histPct/histPoints`、HOME_TASK（考核任务）、FITNESS、COURSES/HOUR_LOG、COACHES 18 教练（daozha `exam:'e1163'`、fire `exam:'rain'`）、`recoList()`、MYCOACH、`homeAgg()`（byDay / kindCnt / weeks / reds / avg / passRate）、GROWTH_NODES/EDGES |
-| home.js | 路由（home/plaza/exam/review/growth/classroom/team/editor）、`enterCoach`（进入教练＝进入其关卡）、`homeBoot` 框架与讲师演示台 `demo2`（演示主线 / 红线 / 一键跑完 / 地刀三态 / 雨淋阀异常 / 朗读语音 / 状态清单 `IMPL_STATUS` / 边界表 / 清空）、首页（认证进度、待考任务、8 维雷达、成长地图、关卡分布、关卡成绩、能力对标、用时次数、胜任度、推荐、最近复盘、我在练的教练）、教练中心、`openDrill` 下钻弹层（内部处理 data-exstart / data-exreview / data-go）、`examTable/errDimKey/DIM_EXAM`、`drillDim/Day/Plan/Week/Fit`、`nodeClick`、背景动效 HomeFX |
+| home.js | 路由（home/center/ticket/expert/exam/assess/analytics/sys/plaza/review/growth/classroom/team/editor，`goPage` 同 hash 也重渲染）、`enterCoach`（进入教练＝进入其关卡）、`homeBoot` 框架与讲师演示台 `demo2`（演示主线 / 操作票五种一键填票 / 答辩一键作答 / 红线 / 一键跑完 / 地刀三态 / 雨淋阀异常 / 朗读语音 / 状态清单 `IMPL_STATUS` / 边界表 / 清空）、首页（认证进度、待考任务、8 维雷达、成长地图、关卡分布、关卡成绩、能力对标、用时次数、胜任度、推荐、最近复盘、我在练的教练）、教练中心、`openDrill` 下钻弹层（内部处理 data-exstart / data-exreview / data-go）、`examTable/errDimKey/DIM_EXAM`、`drillDim/Day/Plan/Week/Fit`、`nodeClick`、背景动效 HomeFX |
 | pagedata.js | 底座各页数据：ROLE、TEAM 12 人、REDLINES、MILESTONES、LADDER、CLASSROOM、SAMPLE_TICKET、QUIZ 14 题、COURSE_LIB、ARCH_IF、BADGES 12 枚（条件以 examHist 判定）、localStorage 键与 lsGet/lsSet |
 | pages.js | 评分复盘（关卡记录列表 + 筛选 全部/本机/考核/否决/未及格 + `examReviewBody` 复盘正文 + 复盘摘要 `rvSummary`）/ 成长档案（8 维全景与三期对照、目标、得分率成长曲线点击进复盘、徽章、学习地图、晋升通道、里程碑、学时、证书）/ 知识课堂（接入关系图、课程库、随堂测验口答 `quizSay`、本周计划、边界表 `BOUNDARY`）/ 教练编辑器（八维权重、形象与试听、剧本步骤与试演、评分模板、知识库检索）/ 角色切换 / pagesClick·pagesInput·pageAfter |
 | scenes.js | 关卡场景图（SVG，只画与本关操作 / 检查相关的部件）：`SC` 工具；1163：`svgHmi1163`（一次小图 · 电压电流遥测 · 动作信号）、`svgMechBox`（分合闸指示 · 手动按钮只看不动）、`svgCabFace`（模拟接线位置指示 · 带电显示装置）、`svgGroundPanel`（合 / 分闸按钮 · 一次模拟）、`svgBayPanorama`（就地控制柜 · 机构箱 · 连杆），各自 `zoom*`；雨淋阀：`svgValveGroup`（两只压力表 · 进出水蝶阀 · 阀盒）、`svgRainPanorama`、`svgBoxOpen`、`svgTransformerSpray` |
 | exam.js | 陪练关卡引擎 · 做题 + 操作：做题情境 `type:'quiz'`（`examAskItem` 题目与选项进对话，`examAnswer/examPick` 判定，训练 / 演练可再答一次记半分，考核一次作答，`quizStationDone` 打分；没有活动题目时任何动作先重问；做题情境不显示场景图）；操作关（`exGuideHtml` 屏幕提示：训练 t+how / 演练 t / 考核只给任务；`examLook` 放大观察、`exOp` 按住、`exBindDrag` 拖动、`examSay` 口述 / 汇报 / 提问；`stationDone` 做完一句「本关得分 x/y，扣在：…」）；`coachSay`（数字人 `EX.dh`）、红线 / 关键错误 / 漏项、`examFinish`（记录 `xwt_exams`，含 `abn`）、`examReviewOpen/examReviewHtml/examReviewBody`、入口页（记录列表＝examHist）、`examAuto/examRun` 自动驾驶、`examMicText` |
 | exam_defs.js | `EXAM_1163`（9 情境：3 组题 + 5 关操作 + 1 系统完成，15 分制及格 9）与 `EXAM_RAIN`（8 情境：2 组题 + 6 关操作，13.5 分制及格 8）：做题 `items`（choice/fill/qa），操作关 `task/guide/brief/outro/goals/locs/spots`，读数解析 `readOC/readVolt/readPress/readValve`，依据条款只取既有 rule 原文 |
 | leader.js | 组长工作台：`teamExamRecs`（本机 + 本人模拟 + `TEAM_EXAM_MOCK`）、全组 8 维雷达格、短板热力、考试结果与建议（复核 `xwt_team_review`）、`ldSend` 制定培训计划（写 `xwt_tasks`）、`certSuggest/certDrill` 认证表草稿（`xwt_cert_confirm`）、专业规则确认记录、`leaderClick` |
+| rules.js | 制度文件库：`RULE_DOCS` 三份文件 + `RULES` 19 条真实条文（安规 6.1/6.2.1/6.2.3/6.3.1/6.3.7/6.3.8/9.2.1.1/9.3.5、导则 3.2.4/4.4.2/4.4.9/4.5.1/4.5.4/6.1.2/6.1.3/6.1.8/6.1.18/6.1.19/6.1.20），`ruleFind` 按安规→导则优先级检索，`RULE_NONE` 检索不到时的固定回复 |
+| optic.js | 操作票标准票与业务标注：`TICKET_META`（任务、运行方式、现场说明、5 个屏柜的空开压板、3 个状态阶段）、`TICKET_RAW → TICKET` 70 行（阶段 / 换序组 / 组内可换序 / 特殊顺序 / 漏写处理 / 文字要求 / 执行原因 / 关键字 / 动词 / 依据条款）、`TICKET_ORD`（seq / after / before / tight / child / last）、`TICKET_DANGER` 4 条危险规则、`TICKET_CFG` 扣分配置项、`tkRecords/tkSave` 演练档案 |
+| judge.js | 判卷引擎：`tkScore/tkMatchAll` 步骤匹配（同名步骤按位置取首个未用）、`tkText` 三档文字规则、`tkSwappable` 换序判定、`tkJudge`（危险 → 阶段越界 → 顺序 → 漏项 → 文字 / 层级 → 汇总，同一根本错误只计一次，整票不合格计 0 分并保留扣分前得分）、`tkAuto(kind)` 六种演示答卷 |
+| p_ticket.js | 写票考核页：`tkBusSVG` 110kV 仿真站主接线图（16 个可点设备）、四段式题目界面、逐项作答与主子项自动编号、压力模式调度来电、结果页九要素错误卡 / 答卷对照 / 命中条款三个页签、导出 |
+| expert.js | 专家选聘答辩数据与打分：`EXP_STD`（核心能力 40/30/30、招标竞聘 20/45/20/15，分档原文）、`EXP_Q` 六类问题、`EXP_RED` 合规红线、`expScore` 硬性 / 软性 / 结果三类指标、`expLevel` 分档折算、`expDims` 映射通用能力五项、`EXP_SAMPLE` 兜底作答 |
+| p_expert.js | 答辩页：数字人评委（七项定制）、逐题提问与即时点评、压力模式追问、测评报告（核心能力 / 招标竞聘 / 通用能力 / 逐题点评）、导出 |
+| model3.js | 三维能力体系：`M3`（技能水平 / 通用能力 / 领导能力，后两者四层级行为指标照录素质模型）、`SKILL_TK` 写票五项、`m3Scores` 能力地图取数、`SCENE_AF` A–F 六大类 20 场景、`SCENE_RISK` 风险维度、`ROLE_MX` 权限矩阵 |
+| p_plat.js | 平台四页：场景中心、AI 智能测评（能力地图 + 分层下钻）、可视化数据分析（`chWaterfall` / `chGroupBar` / `chLine` / `platBars` + 筛选 + 自定义视图 + 导出）、系统与权限；`platRecords` 三场景记录合流 |
 
-本机落盘：陪练关卡记录 `xwt_exams`；培训任务 `xwt_tasks`（results 回写）；组长复核 `xwt_team_review`；认证表确认 `xwt_cert_confirm`；专业规则确认 `xwt_confirm`；自建教练 `xwt_custom_coaches`；成长目标 `xwt_goals`；课程进度 `xwt_course_prog`、学时 `xwt_hours`、测验 `xwt_quiz`、计划 `xwt_plan`；朗读开关 `xwt_voice`。
+本机落盘：操作票演练档案 `xwt_ticket`；答辩档案 `xwt_expert`；数据分析自定义视图 `xwt_views`；陪练关卡记录 `xwt_exams`；培训任务 `xwt_tasks`（results 回写）；组长复核 `xwt_team_review`；认证表确认 `xwt_cert_confirm`；专业规则确认 `xwt_confirm`；自建教练 `xwt_custom_coaches`；成长目标 `xwt_goals`；课程进度 `xwt_course_prog`、学时 `xwt_hours`、测验 `xwt_quiz`、计划 `xwt_plan`；朗读开关 `xwt_voice`。
 
-关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音，也关朗读）、`window.__DH_SPEED`（语速倍率，测试用 0.05；<1 时不朗读、不触发卡住提醒）、`EX.arm.esCase`（地刀三态 ok / mech / rod）、`EX.arm.rainAbn`（压力异常注入）、`examStart(id, mode)`、`examAuto(kind) / examRun(plan)`（ok / wrong / red）、`examSay / examAnswer / examPick`、`examHist()`、`TTS.on / voiceToggle()`、`quizSay(text)`（课堂测验口答）、`ROLE.cur + renderRole()`（学员 / 班组长）。
+关键运行时钩子（测试与演示都靠它们）：`window.__DH_MUTE`（静音，也关朗读）、`window.__DH_SPEED`（语速倍率，测试用 0.05；<1 时不朗读、不触发卡住提醒）、`EX.arm.esCase`（地刀三态 ok / mech / rod）、`EX.arm.rainAbn`（压力异常注入）、`examStart(id, mode)`、`examAuto(kind) / examRun(plan)`（ok / wrong / red）、`examSay / examAnswer / examPick`、`examHist()`、`TTS.on / voiceToggle()`、`quizSay(text)`（课堂测验口答）、`ROLE.cur + renderRole()`（学员 / 班组长）；`tkAuto(kind) / tkJudge(rows)`（操作票六种答卷与判卷）、`tkStart(mode, stress)`、`epStart(stress) / expScore(text, q)`、`m3Scores()`、`platRecords() / platFiltered()`。
 
 ## 数字人（HeyGen）现状
 
@@ -118,4 +127,4 @@ cd banzu && python3 build.py && node smoke.cjs     # 期望 FAILS 0 ERR none；�
 
 ## 先后顺序
 
-P0（9/4 前必须）：清违规文案 ☑ → 项目一工作台 Dashboard ☑ → 项目二高保真原型 ☑。P1：教练中心 ☑、评分复盘页 ☑。P2：成长档案 ☑、教练编辑器 ☑、班组看板 ☑、知识课堂接入 ☑。**9/13 客户二次修改（项目一）☑**：能力模型 / 题库考试 / 1163 与雨淋阀关卡 / 组长工作台 / 偏人力资源首页；**9/13 三次修改 ☑**：全过程去点选（docs/02 第 46 条）；**四次修改 ☑**：陪练关卡改做题 + 操作、朗读语音默认关（第 47 条）；**五次修改 ☑**：被打断台词回调必触发（卡死根因）、做题重问、麦克风兜底识别（第 48 条）；**六次修改 ☑**：陪练舱模块删除、底座改基于关卡记录、关卡图示只留操作相关部件（第 49 条）；**项目二 9/21 客户修改 ☑**：业务减管理加、简约风格、知识库三类、星级评价 20 维初步评分（docs/02 第 50 条）；待办：专家审定题目与评分表、HeyGen 片段接入关卡教练、联网浏览器上试听语音识别；项目二非台账维度的初步得分与另外两个班组底数请客户确认。逐项细目与验收标准见 `docs/03_任务清单.md`。
+P0（9/4 前必须）：清违规文案 ☑ → 项目一工作台 Dashboard ☑ → 项目二高保真原型 ☑。P1：教练中心 ☑、评分复盘页 ☑。P2：成长档案 ☑、教练编辑器 ☑、班组看板 ☑、知识课堂接入 ☑。**9/13 客户二次修改（项目一）☑**：能力模型 / 题库考试 / 1163 与雨淋阀关卡 / 组长工作台 / 偏人力资源首页；**9/13 三次修改 ☑**：全过程去点选（docs/02 第 46 条）；**四次修改 ☑**：陪练关卡改做题 + 操作、朗读语音默认关（第 47 条）；**五次修改 ☑**：被打断台词回调必触发（卡死根因）、做题重问、麦克风兜底识别（第 48 条）；**六次修改 ☑**：陪练舱模块删除、底座改基于关卡记录、关卡图示只留操作相关部件（第 49 条）；**项目二 9/21 客户修改 ☑**：业务减管理加、简约风格、知识库三类、星级评价 20 维初步评分（docs/02 第 50 条）；**项目一 9/21 平台升级 ☑**：A–F 场景中心、操作票填写考核与判卷引擎、专家选聘答辩、三维能力地图、可视化数据分析、权限矩阵（docs/02 第 51 条）；待办：专家审定题目与评分表、HeyGen 片段接入关卡教练、联网浏览器上试听语音识别；项目一待客户确认一般顺序错误扣分值、完整危险操作清单、各阶段完成条件、部分步骤执行原因、1161 间隔实际空开与压板编号；项目二非台账维度的初步得分与另外两个班组底数请客户确认。逐项细目与验收标准见 `docs/03_任务清单.md`。

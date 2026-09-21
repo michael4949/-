@@ -1,6 +1,6 @@
 /* 底座冒烟：八个页面渲染无错 · 首页下钻（维度 / 天 / 关卡分布 / 周 / 胜任度 / 成长地图节点）· 复盘筛选与摘要 · 档案曲线点与徽章 · 课堂测验与计划 · 组长工作台 · 编辑器试演 · 教练中心进入关卡 */
 const { chromium } = require('playwright');
-const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_AI智能陪练底座_高保真原型.html')).href;
+const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_AI智能陪练平台_高保真原型.html')).href;
 const w = (p, ms) => p.waitForTimeout(ms);
 (async () => {
   const b = await chromium.launch();
@@ -9,7 +9,7 @@ const w = (p, ms) => p.waitForTimeout(ms);
   await p.goto(F); await w(p, 900);
   await p.evaluate(() => { window.__DH_MUTE = true; window.__DH_SPEED = 0.05; localStorage.clear(); });
   const closeMasks = () => p.evaluate(() => $$('.mask').forEach(m => m.remove()));
-  const pages = ['home', 'plaza', 'exam', 'review', 'growth', 'classroom'];
+  const pages = ['home', 'center', 'ticket', 'expert', 'exam', 'assess', 'analytics', 'sys', 'plaza', 'review', 'growth', 'classroom'];
   const out = {};
   for (const h of pages) { await p.evaluate(h => goPage(h), h); await w(p, 500); out[h] = await p.evaluate(() => document.querySelector('#hpage').innerHTML.length); }
   console.log('pages', JSON.stringify(out), '| nav has arena?', await p.evaluate(() => !!document.querySelector('[data-h="arena"]')), '| hist', await p.evaluate(() => examHist().length));
