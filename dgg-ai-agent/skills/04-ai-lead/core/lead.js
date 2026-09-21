@@ -574,7 +574,7 @@
       return {
         text: DIM_LABEL[dim2] + '按 ×' + mul + ' 重算：权重从 ' + r0(P.weights[dim2] * 100) + '% 起变，'
           + openOf(R).length + ' 条在手商机的匹配分跟着动，A 级条数可能变。正在重算。',
-        blocks: [bChart({ chart: 'radar', title: '改之前的四维权重', unit: '%', max: 100,
+        blocks: [bChart({ chart: 'radar', title: '改之前的四维权重', unit: '%',
           labels: DIMS.map(function (x) { return DIM_LABEL[x]; }), series: ser('权重', DIMS.map(function (x) { return r0(P.weights[x] * 100); })) })],
         act: { type: 'set', path: 'params.weights.' + dim2, value: mul }
       };
@@ -590,7 +590,7 @@
         text: DIM_LABEL[dim] + '权重 ' + r0(P.weights[dim] * 100) + '%：' + drows[0].label + ' 一家占 ' + r0(drows[0].share * 100)
           + '%，分布越集中越能预测成交，所以权重给得高。' + (drows[1] ? '第二是 ' + drows[1].label + ' ' + r0(drows[1].share * 100) + '%。' : ''),
         blocks: [
-          bChart({ chart: 'radar', title: '四维权重', unit: '%', max: 100,
+          bChart({ chart: 'radar', title: '四维权重', unit: '%',
             labels: DIMS.map(function (x) { return DIM_LABEL[x]; }), series: ser('权重', DIMS.map(function (x) { return r0(P.weights[x] * 100); })) }),
           bTable([DIM_LABEL[dim], '占成交价值'], drows.slice(0, 4).map(function (x) { return [x.label, r0(x.share * 100) + '%']; }))
         ],

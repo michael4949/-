@@ -82,9 +82,13 @@
   function svg(name) { return '<svg viewBox="0 0 24 24">' + (ICON[name] || ICON.text) + '</svg>'; }
 
   /* ---------- 图表：块 → 2.5D SVG ---------- */
+  /* 当前模块主色：读 body 上的 --m-pa（换屏重建对话坞时 .pd-app 还没挂进文档，读它会拿到上一屏的色） */
   function accentNow() {
-    var app = document.querySelector('.pd-app'), c = '';
-    if (app && window.getComputedStyle) c = (window.getComputedStyle(app).getPropertyValue('--pa') || '').trim();
+    var c = '';
+    if (window.getComputedStyle) {
+      c = (window.getComputedStyle(document.body).getPropertyValue('--m-pa') || '').trim();
+      if (!c) { var app = document.querySelector('.pd-app'); if (app) c = (window.getComputedStyle(app).getPropertyValue('--pa') || '').trim(); }
+    }
     return c || '#2a78d6';
   }
   /* 自动配图的规则在 skills/_shared/chartspec.js（Node 与浏览器同一份，自测与展示同一套判断） */
@@ -315,7 +319,13 @@
       bb.appendChild(h('span', { class: 'dots', html: '<i></i><i></i><i></i>' }));
       return bb;
     }
-    function record(who, text, blocks) { log.push({ who: who, text: text, blocks: blocks || null }); if (log.length > 120) log.shift(); }
+    /* 留存时把块一起留下（只留纯数据的，DOM 节点不能跨次渲染搬） */
+    function record(who, text, blocks) {
+      var keep = null;
+      if (blocks && blocks.length) { keep = blocks.filter(function (b) { return b && !b.nodeType; }); if (!keep.length) keep = null; }
+      log.push({ who: who, text: text, blocks: keep });
+      if (log.length > 120) log.shift();
+    }
 
     function say(text, blocks, opt) {
       opt = opt || {};
@@ -324,7 +334,7 @@
       setTimeout(function () {
         bb.innerHTML = '';
         type(bb, String(text || ''), function () { putBlocks(bb, blocks); if (opt.after) opt.after(); });
-        record('ai', text, null);
+        record('ai', text, blocks);
       }, delay);
       return bb;
     }
@@ -474,10 +484,11 @@
       el: root
     };
 
-    /* 回放本模块之前的消息（切屏不丢） */
+    /* 回放本模块之前的消息（切屏不丢）：文字与图都要回来，不然一换屏图就没了 */
     log.forEach(function (m) {
       var bb = bubble(m.who);
       bb.innerHTML = esc(m.text || '').replace(/\n/g, '<br>');
+      if (m.blocks && m.blocks.length) putBlocks(bb, m.blocks);
     });
 
     /* 进入这一屏时，AI 主动说一条「发现」（每屏只说一次） */

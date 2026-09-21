@@ -309,7 +309,9 @@
   function drawRadar(spec, A) {                     /* 雷达：多维画像 */
     var W = A.W, labels = spec.labels || [], ss = spec.series || [], H = 132;
     var cx = W / 2, cy = 66, R = 46, n = labels.length || 1;
-    var mx = spec.max || 100, g = el('g', {});
+    /* 没给 max 就按数据取个好看的上限 —— 给了 100 而数值只有三四十，图形会缩成中间一小块 */
+    var vals = []; ss.forEach(function (s2) { (s2.data || []).forEach(function (v) { vals.push(Math.abs(+v || 0)); }); });
+    var mx = spec.max || nice(Math.max.apply(null, vals.concat([1]))), g = el('g', {});
     function pt(i, v) { var a = -Math.PI / 2 + (i / n) * Math.PI * 2, rr = (v / mx) * R; return [cx + rr * Math.cos(a), cy + rr * Math.sin(a) * .88]; }
     [0.33, 0.66, 1].forEach(function (k) {
       var d = '', i; for (i = 0; i < n; i++) { var p = pt(i, mx * k); d += (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }
@@ -332,22 +334,25 @@
     var W = A.W, labels = spec.labels || [], s0 = (spec.series || [])[0] || { data: [] };
     var data = s0.data || [], pad = { l: 30, r: 10, t: 16, b: 22 }, H = A.H || 124;
     var x0 = pad.l, x1 = W - pad.r, y0 = pad.t, y1 = H - pad.b;
-    var acc = 0, pts = data.map(function (v) {
-      if (v == null) return { from: 0, to: acc, v: acc, total: true };       /* null = 这一根是累计合计 */
-      var s = acc; acc += (+v || 0); return { from: s, to: acc, v: +v || 0, total: false };
+    /* 第一根是期初、data 里的 null 是累计合计 —— 两者都不是增减，给中性色，别和绿红抢意思 */
+    var acc = 0, pts = data.map(function (v, i) {
+      if (v == null) return { from: 0, to: acc, v: acc, base: true };
+      if (i === 0) { acc = (+v || 0); return { from: 0, to: acc, v: acc, base: true }; }
+      var st = acc; acc += (+v || 0); return { from: st, to: acc, v: +v || 0, base: false };
     });
     var lo = Math.min(0, Math.min.apply(null, pts.map(function (p) { return Math.min(p.from, p.to); })));
     var hi = Math.max.apply(null, pts.map(function (p) { return Math.max(p.from, p.to); }).concat([1]));
     var span = (hi - lo) || 1, g = el('g', {});
     grid(g, x0, x1, [y0, y1]);
     var slot = (x1 - x0 - DX) / Math.max(1, pts.length), bw = Math.max(8, slot - 10);
-    var UP = '#1baf7a', DN = '#e34948';
+    var UP = '#1baf7a', DN = '#e34948', BASE = '#46536E';
+    var cut = Math.max(2, Math.floor(slot / 8.8));        /* 一格放得下几个字，按格宽算，别让标签叠在一起 */
     pts.forEach(function (p, i) {
       var yA = y1 - ((p.from - lo) / span) * (y1 - y0), yB = y1 - ((p.to - lo) / span) * (y1 - y0);
       var x = x0 + slot * i + (slot - bw) / 2;
-      box(g, x, Math.min(yA, yB), bw, Math.abs(yB - yA), p.total ? A.accent : (p.v >= 0 ? UP : DN));
-      g.appendChild(txt(x + bw / 2 + DX / 2, Math.min(yA, yB) + DY - 3, (p.total || p.v < 0 ? '' : '+') + fmt(p.v), { anchor: 'middle', size: 8.5, fill: INK, weight: 700, tabular: 1 }));
-      g.appendChild(txt(x + bw / 2, y1 + 12, String(labels[i] || '').slice(0, 5), { anchor: 'middle', size: 8.5, fill: SUB }));
+      box(g, x, Math.min(yA, yB), bw, Math.abs(yB - yA), p.base ? BASE : (p.v >= 0 ? UP : DN));
+      g.appendChild(txt(x + bw / 2 + DX / 2, Math.min(yA, yB) + DY - 3, (p.base || p.v < 0 ? '' : '+') + fmt(p.v), { anchor: 'middle', size: 8.5, fill: INK, weight: 700, tabular: 1 }));
+      g.appendChild(txt(x + bw / 2, y1 + 12, String(labels[i] || '').slice(0, cut), { anchor: 'middle', size: 8.5, fill: SUB }));
     });
     return { g: g, H: H };
   }
