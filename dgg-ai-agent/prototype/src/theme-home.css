@@ -10,23 +10,24 @@
   body[data-module="home"] .pricebar { display: none; }
   body[data-module="home"] .app {
     grid-template-rows: 1fr; grid-template-columns: 1fr;
-    background: #0E1116;                      /* 视口比例与图不一致时，两侧留黑边，不拉伸图 */
+    background: #F6EDDA;                      /* 图铺满，不留黑边；这只是图没解码完那一瞬的垫底色 */
   }
   body[data-module="home"] .main { padding: 0; overflow: hidden; }
 
   body[data-module="home"] .grid.board {
-    display: grid; place-items: center; width: 100%; height: 100%; gap: 0;
+    display: block; position: relative; width: 100%; height: 100%; gap: 0;
     grid-template-columns: none;              /* 盖掉 shell.css 的 12 栅格 */
   }
-  /* 定宽比容器：图有多大热区就有多大，两者共用同一个盒子 */
+  /* 盒子铺满整个视口，图用 fill 拉满 —— 视口不是 16:9 时不留黑边。
+     用 inset:0 绝对定位而不是 height:100%：后者在居中的网格项上解析不出来，会回落成按比例的
+     自然高度，于是窗口比 16:9 矮时图就溢出到屏幕下方去了。
+     热区是按这个盒子的百分比定位的，盒子与图完全重合，所以拉伸时热区跟着一起拉，仍然对齐。 */
   body[data-module="home"] .boardbox {
-    position: relative; aspect-ratio: 2000 / 1125;
-    width: min(100%, calc(100vh * 2000 / 1125));
-    max-width: 100%; max-height: 100%;
+    position: absolute; inset: 0;
     line-height: 0;
   }
   body[data-module="home"] .boardbox .bg {
-    display: block; width: 100%; height: 100%; object-fit: contain;
+    display: block; width: 100%; height: 100%; object-fit: fill;
     -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
   }
 
