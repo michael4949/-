@@ -50,6 +50,99 @@ Object.assign(ACT, {
   'pt-backup'(el) { const l = LEADERS[+el.dataset.i]; const b = l.backup.find(x => x[1] === '培养中') || l.backup[0]; const t = b[1] === '培养中' ? (/未取技师/.test(b[2]) ? '技师鉴定申报 + 主持 2 项作业组织' : '主持一次月度班务会 + 独立编制周计划') : '作为副班长代行班长职责一个月'; DB.notify(l.n, '班长后备培养 · ' + b[0] + '：' + t + '，请排进班组培养计划', '已发'); const s = LS.get('sup_talent', {}); s[b[0]] = { t, d: DB.now() }; LS.set('sup_talent', s); DB.log('梯队', l.team + ' 后备 ' + b[0] + '：' + t); XW.answer('给' + l.n + '发了：' + b[0] + '的后备培养任务"' + t + '"，由班长排进班组培养计划。', null, { confirm: false }); }
 });
 
+
+/* ---------- 班长绩效考评（管理者）：五维权重 · 逐条扣分与依据 · 确认 · 评价意见 · 下发与面谈 ---------- */
+const LPERFPG = {
+  all() { return lperfAll(); },
+  okMap() { return LS.get('lperf_ok', {}); },
+  fixMap() { return LS.get('lperf_fix', {}); },
+  sentMap() { return LS.get('lperf_sent', {}); },
+  dimTable() { const A = this.all();
+    return '<div class="tbl"><table class="t cmp"><tr><th>考评维度</th><th>权重</th>' + A.map(x => '<th>' + h(x.L.n) + '<br><span class="note">' + h(x.team) + '</span></th>').join('') + '<th>取数来源</th></tr>' +
+      LPERF_DIMS.map((d, i) => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td>' + A.map(x => { const dd = x.dims[i]; return '<td data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="' + d.k + '" style="cursor:pointer">' + MG.bar(dd.pct, dd.cls) + '<span class="mono">' + dd.sc + '</span><span class="note"> / ' + d.pts + '</span></td>'; }).join('') + '<td class="note">' + h(d.src) + '</td></tr>').join('') +
+      '<tr><td><b>综合得分</b></td><td class="mono">100</td>' + A.map(x => '<td><b class="mono ' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'b' : '') + '" style="font-size:15px">' + x.total + '</b>　<span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td>').join('') + '<td class="note">五维加总 · 由部门确认后使用</td></tr></table></div>'; },
+  sumTable() { const A = this.all(); const ok = this.okMap(); const sent = this.sentMap();
+    return '<div class="tbl"><table class="t cand"><tr><th>班长</th><th>综合 / 分档</th><th>环比</th><th>强项</th><th>短板</th><th>绩效结果应用</th><th>状态</th><th></th></tr>' +
+      A.map(x => '<tr class="' + (x.gradeCls === 'bad' ? 'hl' : '') + '"><td><b data-act="lp-who" data-who="' + h(x.L.n) + '" style="cursor:pointer">' + h(x.L.n) + '</b><br><span class="note">' + h(x.team) + ' · 任班长 ' + x.L.asLeader + ' 年</span></td>' +
+        '<td><b class="mono" style="font-size:15px">' + x.total + '</b>　<span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td>' +
+        '<td class="mono ' + (x.delta >= 0 ? 'g' : 'b') + '">' + (x.delta > 0 ? '+' : '') + x.delta + '</td>' +
+        '<td>' + x.strong.map(d => '<span class="tag ok">' + h(d.n) + ' ' + d.sc + '</span>').join('') + '</td>' +
+        '<td>' + x.weak.map(d => '<span class="tag ' + (d.cls === 'bad' ? 'bad' : d.cls === 'w' ? 'w' : '') + '" data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="' + d.k + '" style="cursor:pointer">' + h(d.n) + ' ' + d.sc + '</span>').join('') + '</td>' +
+        '<td class="note" style="max-width:250px">' + h(x.apply) + '</td>' +
+        '<td>' + (sent[x.L.n] ? '<span class="tag ok">已下发 ' + h(sent[x.L.n]) + '</span>' : ok[x.L.n] ? '<span class="tag">已确认 ' + h(ok[x.L.n]) + '</span>' : '<span class="tag w">待确认</span>') + '</td>' +
+        '<td><div class="bt">' + (ok[x.L.n] ? '' : '<button class="s" data-act="lp-ok" data-who="' + h(x.L.n) + '">确认考评结果</button>') + '<button class="s g" data-act="lp-doc" data-who="' + h(x.L.n) + '">生成评价意见</button>' + (ok[x.L.n] && !sent[x.L.n] ? '<button class="s g" data-act="lp-send" data-who="' + h(x.L.n) + '">下发到本人</button>' : '') + '<button class="s g" data-act="lp-talk" data-who="' + h(x.L.n) + '">绩效面谈提纲</button></div></td></tr>').join('') + '</table></div>'; },
+  fixHTML() { const A = this.all(); const fx = this.fixMap(); const rows = [];
+    A.forEach(x => x.weak.filter(d => d.cls !== 'ok').forEach(d => rows.push({ who: x.L.n, team: x.team, d, key: x.L.n + '|' + d.k })));
+    if (!rows.length) return '<div class="empty">三位班长五个维度得分率都在 90% 以上，本季度无需列改进要求</div>';
+    return rows.map(r => '<div class="fixrow"><div>' + MG.light(r.d.cls) + '<b>' + h(r.who) + ' · ' + h(r.d.n) + '</b><span class="note"> 得分 ' + r.d.sc + '/' + r.d.pts + '（' + r.d.pct + '%）</span><p>' + h(r.d.items.filter(i => i[1] > 0).map(i => i[0]).join('；') || '按维度规则折算') + '</p></div><div class="bt">' + (fx[r.key] ? '<span class="tag ok">已列入 ' + h(fx[r.key]) + '</span>' : '<button class="s" data-act="lp-fix" data-who="' + h(r.who) + '" data-k="' + r.d.k + '">列入下季度改进要求</button>') + '</div></div>').join(''); }
+};
+PAGES.lperf = {
+  render() { const A = LPERFPG.all(); const ok = LPERFPG.okMap();
+    return cmdHTML(['三位班长这季度谁的短板最大', '赵立群为什么履职与协同扣分', '生成陈志远的绩效评价意见', '把改进要求全部列入下季度']) +
+      pageHead('班长绩效', LPERF_Q.no + '（' + LPERF_Q.range + ' · ' + LPERF_Q.state + '）· 安全生产 25 / 生产任务 25 / 班组建设 20 / 队伍管理 20 / 履职与协同 10 · 初步评分由部门确认后使用', '<button class="s g" data-act="nav" data-to="goals">年度指标任务</button><button class="s g" data-act="nav" data-to="portrait">班长队伍</button>') +
+      '<div class="grid3">' + A.map(x => '<div class="card kpi" data-act="lp-who" data-who="' + h(x.L.n) + '" style="cursor:pointer"><span>' + h(x.L.n) + ' · ' + h(x.team) + '</span><b class="' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'bad' : 'w') + '">' + x.total + '<span style="font-size:12px;font-weight:500"> ' + h(x.grade) + '</span></b><em>环比' + (x.delta > 0 ? '升 ' + x.delta : x.delta < 0 ? '降 ' + (-x.delta) : '持平') + ' · 短板 ' + h(x.weak.map(d => d.n).join('、')) + (ok[x.L.n] ? ' · 已确认' : ' · 待确认') + '</em></div>').join('') + '</div>' +
+      '<div class="card"><div class="h"><b>考评维度与权重 · 逐维得分</b><span>权重分解自主管个人年度业绩责任书 · 绿 ≥ 90% · 黄 75–89% · 红 < 75% · 点格看逐条扣分与依据</span></div>' + LPERFPG.dimTable() + '</div>' +
+      '<div class="grid2"><div class="card"><div class="h"><b>近四季度综合得分</b><span>最后一组为本季度在评</span></div>' + CH.mini.group(LPERF_Q.qs, A.map((x, i) => ({ n: x.L.n, vals: x.hist, c: CPAL[i] })), { h: 150, max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '<div class="note" style="margin-top:6px">分档线：优秀 ≥ 90 · 良好 ≥ 80 · 合格 ≥ 70 · 需改进 < 70；本季度在评，得分随台账变化</div></div>' +
+      '<div class="card"><div class="h"><b>五维得分率对比</b><span>满分 100%</span></div>' + CH.mini.radar(LPERF_DIMS.map(d => d.n), A.map((x, i) => ({ n: x.L.n, vals: x.dims.map(d => d.pct), c: CPAL[i] })), { max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '</div></div>' +
+      '<div class="card"><div class="h"><b>综合得分 · 分档 · 绩效结果应用</b><span>分档不排名次 · 结果应用按局绩效管理办法 · 由部门确认后使用</span><div class="r"><button class="s g" data-act="lp-okall">全部确认</button><button class="s" data-act="lp-sheet">生成班长绩效考评表</button></div></div>' + LPERFPG.sumTable() + '</div>' +
+      '<div class="card"><div class="h"><b>下季度改进要求</b><span>取每位班长得分率最低的两维 · 列入后发到本人并同步到班组计划</span><div class="r"><button class="s" data-act="lp-fixall">全部列入</button></div></div><div id="lpfix">' + LPERFPG.fixHTML() + '</div></div>' +
+      '<div class="card"><div class="h"><b>计分规则与取数口径</b><span>规则公开到班长，可逐条核对</span></div><div class="tbl"><table class="t"><tr><th style="width:96px">维度</th><th style="width:52px">权重</th><th>计分规则</th><th style="width:230px">取数来源</th></tr>' + LPERF_DIMS.map(d => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td><td>' + h(d.rule) + '</td><td class="note">' + h(d.src) + '</td></tr>').join('') + '</table></div><div class="note" style="margin-top:6px">配电自动化班的违章、两票、派工、待审票、核心技能断层取本机台账实时值，班长在工作台处理后本页刷新即变；另两个班组的对应输入项与本季度关键节点达标周数取部门季度台账，右下角的状态清单里可核对每项的来源。</div></div>' +
+      '<div class="card doc" id="lpdoc" hidden><div class="empty">点某位班长的"生成评价意见"，意见逐段写在这里</div></div>'; },
+  after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const A = LPERFPG.all(); XW.at(400, () => XW.answer('三位班长本季度的初步得分：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。短板最大的是' + A.slice().sort((a, b) => a.total - b.total)[0].L.n + '，' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].n + '只拿到 ' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].pct + '%。每一格都能点开看逐条扣分和取数来源，确认后可以下发到本人并约面谈。', null, { confirm: false })); } }
+};
+Object.assign(ACT, {
+  'lp-dim'(el) { const x = lperfOf(el.dataset.who); const i = LPERF_DIMS.findIndex(d => d.k === el.dataset.k); if (i < 0) return; const d = x.dims[i]; const fx = LPERFPG.fixMap(); const key = x.L.n + '|' + d.k;
+    modal('<div class="t">' + h(x.L.n) + ' · ' + h(d.n) + '　' + MG.light(d.cls, d.sc + ' / ' + d.pts + '（' + d.pct + '%）') + '</div>' +
+      '<div class="tbl"><table class="t"><tr><th>计分项</th><th style="width:74px">扣分</th></tr>' + d.items.map(it => '<tr class="' + (it[1] > 0 ? 'hl' : '') + '"><td>' + h(it[0]) + '</td><td class="mono ' + (it[1] > 0 ? 'b' : 'g') + '">' + (it[1] > 0 ? '−' + it[1] : '0') + '</td></tr>').join('') + '<tr><td><b>本维度得分</b></td><td class="mono"><b>' + d.sc + '</b></td></tr></table></div>' +
+      '<div class="tbl" style="margin-top:8px"><table class="t"><tr><th style="width:86px">计分规则</th><td>' + h(d.rule) + '</td></tr><tr><th>取数来源</th><td class="note">' + h(d.src) + '</td></tr></table></div>' +
+      '<div class="bt">' + (fx[key] ? '<span class="tag ok">已列入改进要求 ' + h(fx[key]) + '</span>' : '<button data-act="lp-fix" data-who="' + h(x.L.n) + '" data-k="' + d.k + '">列入下季度改进要求</button>') + (d.k === 'task' ? '<button class="g" data-act="nav" data-to="goals">看年度指标</button>' : d.k === 'build' ? '<button class="g" data-act="nav" data-to="portrait">看星级与荣誉</button>' : d.k === 'crew' ? '<button class="g" data-act="nav" data-to="structure">看结构对比</button>' : '<button class="g" data-act="nav" data-to="ledger">看台账</button>') + '</div>');
+    XW.answer(x.L.n + '的' + d.n + '得 ' + d.sc + ' 分（满分 ' + d.pts + '）。扣分在：' + (d.items.filter(t => t[1] > 0).map(t => t[0] + ' −' + t[1]).join('；') || '无扣分') + '。取数来源：' + d.src + '。', null, { confirm: false, speak: false }); },
+  'lp-who'(el) { const x = lperfOf(el.dataset.who); const L = x.L;
+    modal('<div class="t">' + h(L.n) + ' · ' + h(x.team) + '　<b class="mono" style="font-size:16px">' + x.total + '</b> <span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span><span class="note">　' + LPERF_Q.no + ' · 由部门确认后使用</span></div>' +
+      '<div class="tbl"><table class="t"><tr><th style="width:96px">基本情况</th><td>' + L.age + ' 岁 · 工龄 ' + L.yrs + ' 年 · 任班长 ' + L.asLeader + ' 年 · ' + h(L.lv) + ' · ' + h(L.star) + ' · ' + h(L.edu) + (L.party ? ' · 党员' : '') + ' · 副班长 ' + h(L.deputy) + '</td></tr></table></div>' +
+      '<div class="sixrows" style="margin-top:8px">' + x.dims.map(d => '<div data-act="lp-dim" data-who="' + h(L.n) + '" data-k="' + d.k + '" style="cursor:pointer"><span>' + h(d.n) + '</span>' + MG.bar(d.pct, d.cls) + '<b class="mono">' + d.sc + '</b><i class="note">满分 ' + d.pts + ' · ' + h(d.items.filter(t => t[1] > 0).map(t => t[0]).join('；') || '无扣分') + '</i></div>').join('') + '</div>' +
+      '<div class="hexsum"><b style="color:var(--ok)">强项：</b>' + x.strong.map(d => h(d.n) + ' ' + d.pct + '%').join('、') + '　<b style="color:var(--warn)">短板：</b>' + x.weak.map(d => h(d.n) + ' ' + d.pct + '%').join('、') + '</div>' +
+      '<div class="alert" style="margin-top:8px">结果应用：' + h(x.apply) + '</div>' +
+      '<div class="bt"><button data-act="lp-doc" data-who="' + h(L.n) + '">生成评价意见</button><button class="g" data-act="lp-talk" data-who="' + h(L.n) + '">绩效面谈提纲</button><button class="g" data-act="pt-backup" data-i="' + LEADERS.indexOf(L) + '">看后备梯队</button></div>');
+    XW.answer(L.n + '本季度 ' + x.total + ' 分，' + x.grade + '档；强在' + x.strong.map(d => d.n).join('、') + '，短在' + x.weak.map(d => d.n).join('、') + '。' + x.apply, null, { confirm: false, speak: false }); },
+  'lp-ok'(el) { const who = el.dataset.who; const ok = LPERFPG.okMap(); ok[who] = DB.now(); LS.set('lperf_ok', ok); DB.log('班长绩效', who + ' 考评结果已确认'); render(); XW.fly('已确认 · ' + who); XW.answer(who + '的考评结果确认了，接下来可以下发到本人并约绩效面谈。', null, { confirm: false }); },
+  'lp-okall'() { const ok = LPERFPG.okMap(); let n = 0; LEADERS.forEach(l => { if (!ok[l.n]) { ok[l.n] = DB.now(); n++; } }); LS.set('lperf_ok', ok); DB.log('班长绩效', '三位班长考评结果已确认'); render(); XW.fly('已确认 ' + n + ' 位'); XW.answer(n ? n + ' 位班长的考评结果都确认了。下一步下发到本人，需改进档的还要约谈并限期整改。' : '三位都已确认。', null, { confirm: false }); },
+  'lp-send'(el) { const who = el.dataset.who; const ok = LPERFPG.okMap(); if (!ok[who]) { XW.answer('先确认' + who + '的考评结果再下发，未确认的结果不下发到本人。', null, { confirm: false }); return; } const x = lperfOf(who); const sent = LPERFPG.sentMap(); sent[who] = DB.now(); LS.set('lperf_sent', sent);
+    DB.notify(who, LPERF_Q.no + '绩效考评结果 · 综合 ' + x.total + ' 分（' + x.grade + '）：强项 ' + x.strong.map(d => d.n).join('、') + '，短板 ' + x.weak.map(d => d.n).join('、') + '；' + x.apply + '。请在三个工作日内确认或提出申诉', '待确认', true);
+    DB.log('班长绩效', who + ' 考评结果已下发'); render(); XW.fly('已下发 · ' + who); XW.answer(who + '的考评结果下发了：综合 ' + x.total + ' 分、' + x.grade + '档，短板' + x.weak.map(d => d.n).join('、') + '，三个工作日内确认或申诉。', null, { confirm: false }); },
+  'lp-doc'(el) { const who = el.dataset.who; const x = lperfOf(who); const host = $('#lpdoc'); if (!host) return; host.hidden = false; host.innerHTML = ''; host.scrollIntoView({ block: 'nearest' });
+    const paras = ['一、考评期与口径：' + LPERF_Q.no + '（' + LPERF_Q.range + '），按安全生产 25、生产任务 25、班组建设 20、队伍管理 20、履职与协同 10 五个维度评价，取数来自违章与两票台账、年度指标任务、星级班组评价、工时与师带徒记录、派工记录。',
+      '二、总体评价：' + who + '任' + x.team + '班长 ' + x.L.asLeader + ' 年，本季度初步综合得分 ' + x.total + ' 分，' + x.grade + '档，环比' + (x.delta > 0 ? '上升 ' + x.delta + ' 分' : x.delta < 0 ? '下降 ' + (-x.delta) + ' 分' : '持平') + '。',
+      '三、做得好的：' + x.strong.map(d => d.n + ' ' + d.sc + '/' + d.pts + '（' + d.pct + '%）').join('、') + '。' + (x.dims[0].pct >= 90 ? '安全生产本季度无事故事件，' + (x.input.vio ? '一般违章 ' + x.input.vio + ' 起全部自查自纠。' : '未发生一般违章。') : '生产任务口径下责任指标总体受控。'),
+      '四、需要改进的：' + x.weak.map(d => d.n + ' 只拿到 ' + d.pct + '%，扣分在' + (d.items.filter(t => t[1] > 0).map(t => t[0]).join('、') || '维度折算')).join('；') + '。',
+      '五、下季度要求：' + x.weak.map(d => LPERFPG_REQ(d.k, x)).join('；') + '。',
+      '六、结果应用：' + x.apply + '。以上为初步评价意见，由部门确认后与本人面谈并归档。'];
+    MG.stream(host, paras, { title: who + ' ' + LPERF_Q.no + '绩效评价意见', done() { host.insertAdjacentHTML('beforeend', '<div class="bt"><button data-act="lp-docsave" data-who="' + h(who) + '">存入文稿中心</button><button class="g" data-act="lp-talk" data-who="' + h(who) + '">转绩效面谈提纲</button></div>'); } });
+    XW.answer(who + '的绩效评价意见按六段写在右边的卡片里了：口径、总体评价、做得好的、需要改进的、下季度要求、结果应用。存入文稿中心后可以直接用于面谈。', null, { confirm: false }); },
+  'lp-docsave'(el) { const who = el.dataset.who; MG.saveDoc('lperf-' + who, who + ' ' + LPERF_Q.no + '绩效评价意见', $('#lpdoc')); XW.fly('已存入文稿中心'); XW.answer('存好了，在文稿中心能找到' + who + '这一份。', null, { confirm: false }); },
+  'lp-talk'(el) { const who = el.dataset.who; const x = lperfOf(who); const g = TALK_GUIDES['绩效面谈']; const host = document.createElement('div'); host.className = 'doc'; const d = XW.msg('a', who + ' · 班长绩效面谈提纲：'); d.appendChild(host); if ($('#modal')) $('#modal').hidden = true;
+    MG.stream(host, ['开场：' + g.open].concat(g.items.map((it, i) => (i + 1) + '. ' + it), ['本人情况：' + LPERF_Q.no + '综合 ' + x.total + ' 分（' + x.grade + '）；强项 ' + x.strong.map(t => t.n).join('、') + '；短板 ' + x.weak.map(t => t.n + ' ' + t.pct + '%').join('、') + '；' + x.apply], ['下季度要求：' + x.weak.map(t => LPERFPG_REQ(t.k, x)).join('；')], ['沟通要点：' + g.tips.join('；')]), { title: who + ' 班长绩效面谈提纲', done() { d.insertAdjacentHTML('beforeend', '<div class="bt"><button data-act="guide-save" data-who="' + h(who) + '" data-kind="班长绩效面谈">存入文稿中心</button><button class="g" data-act="lp-send" data-who="' + h(who) + '">下发考评结果</button></div>'); XW.scrollChat(); } }); },
+  'lp-fix'(el) { const who = el.dataset.who; const k = el.dataset.k; const x = lperfOf(who); const d = x.dims.find(q => q.k === k); if (!d) return; const fx = LPERFPG.fixMap(); fx[who + '|' + k] = DB.now(); LS.set('lperf_fix', fx);
+    const req = LPERFPG_REQ(k, x); DB.notify(who, '下季度改进要求 · ' + d.n + '（本季度 ' + d.pct + '%）：' + req, '待确认', true); if (x.team === TEAM.name) MG.planPush('班组', d.n + '改进：' + req, '班长绩效改进要求'); DB.log('班长绩效', who + ' ' + d.n + ' 改进要求已列入');
+    if ($('#modal')) $('#modal').hidden = true; if ($('#lpfix')) $('#lpfix').innerHTML = LPERFPG.fixHTML(); XW.fly('已列入 · ' + who); XW.answer(who + '的' + d.n + '列入下季度改进要求了：' + req + '。已发到本人待确认' + (x.team === TEAM.name ? '，同时排进了班组计划' : '') + '。', null, { confirm: false }); },
+  'lp-fixall'() { const A = LPERFPG.all(); const fx = LPERFPG.fixMap(); let n = 0;
+    A.forEach(x => x.weak.filter(d => d.cls !== 'ok').forEach(d => { const key = x.L.n + '|' + d.k; if (!fx[key]) { fx[key] = DB.now(); const req = LPERFPG_REQ(d.k, x); DB.notify(x.L.n, '下季度改进要求 · ' + d.n + '（本季度 ' + d.pct + '%）：' + req, '待确认', true); if (x.team === TEAM.name) MG.planPush('班组', d.n + '改进：' + req, '班长绩效改进要求'); n++; } }));
+    LS.set('lperf_fix', fx); DB.log('班长绩效', '改进要求 ' + n + ' 条已列入'); if ($('#lpfix')) $('#lpfix').innerHTML = LPERFPG.fixHTML(); XW.fly('已列入 ' + n + ' 条'); XW.answer(n ? n + ' 条改进要求都列入下季度了，每条都发到对应班长待确认。' : '改进要求都已列入。', null, { confirm: false }); },
+  'lp-sheet'() { const A = LPERFPG.all(); const ok = LPERFPG.okMap(); const miss = LEADERS.filter(l => !ok[l.n]);
+    if (miss.length) { XW.answer('还有 ' + miss.map(l => l.n).join('、') + ' 的考评结果没确认，考评表要三位都确认后才生成。点"全部确认"或逐个确认。', null, { confirm: false }); return; }
+    modal('<div class="t">' + LPERF_Q.no + ' 班长绩效考评表　<span class="note">由部门确认后使用 · 分档不排名次</span></div><div class="tbl"><table class="t"><tr><th>班长</th><th>班组</th>' + LPERF_DIMS.map(d => '<th>' + h(d.n) + '<br><span class="note">' + d.pts + '</span></th>').join('') + '<th>综合</th><th>分档</th><th>结果应用</th></tr>' + A.map(x => '<tr><td><b>' + h(x.L.n) + '</b></td><td class="note">' + h(x.team) + '</td>' + x.dims.map(d => '<td class="mono ' + (d.cls === 'ok' ? 'g' : d.cls === 'bad' ? 'b' : '') + '">' + d.sc + '</td>').join('') + '<td class="mono"><b>' + x.total + '</b></td><td><span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td><td class="note" style="max-width:220px">' + h(x.apply) + '</td></tr>').join('') + '</table></div><div class="bt"><button data-act="lp-sheetsave">存入文稿中心并报部门</button></div>');
+    XW.answer('考评表出来了：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。存入文稿中心后报部门，分档不排名次。', null, { confirm: false }); },
+  'lp-sheetsave'() { const A = LPERFPG.all(); const body = LPERF_Q.no + ' 班长绩效考评表\n' + A.map(x => x.L.n + ' ' + x.team + '：' + x.dims.map(d => d.n + ' ' + d.sc).join('、') + '，综合 ' + x.total + '，' + x.grade + '，' + x.apply).join('\n'); const docs = LS.get('docs', {}); docs['lperf-sheet'] = { t: LPERF_Q.no + ' 班长绩效考评表', ts: Date.now(), body: body }; LS.set('docs', docs); DB.log('文稿', '班长绩效考评表已保存'); if ($('#modal')) $('#modal').hidden = true; XW.fly('已存入文稿中心'); XW.answer('考评表存入文稿中心了，可以直接报部门。', null, { confirm: false }); }
+});
+function LPERFPG_REQ(k, x) {
+  const I = x.input;
+  if (k === 'safe') return '一般违章压到 1 起以内，安全活动全员到位，每月一次现场安全督查并留记录';
+  if (k === 'task') { const bad = x.goals.filter(r => r.lt === 'bad').map(r => r.g.n); return '把' + (bad.join('、') || '落后指标') + '追到目标值，每两周报一次进度' ; }
+  if (k === 'build') return '星级班组初步评分从 ' + I.star + ' 提到 85 以上，本季度关键节点周闭环达标 ' + I.nodeQ[0] + '/' + I.nodeQ[1] + ' 周提到 12/13 周';
+  if (k === 'crew') return (I.unpaired ? I.unpaired + ' 名新员工逐人结对师傅并报培养计划；' : '') + (I.over ? '外勤超 24 小时的 ' + I.over + ' 人下周排室内；' : '') + (I.gapHi ? I.gapHi + ' 类断层技能各补到 3 人可自主' : '人员稳定性逐月回访');
+  return '到期任务当日派完，两票当日审完，周报按期报送';
+}
+
 /* ---------- 多班组人员总览仪表盘 + 下钻 + 六维个人画像 ---------- */
 const STAFFPG = {
   all() { return MGR.teamOrder.reduce((a, t) => a.concat(teamPeople(t).map(p => Object.assign({ team: t }, p))), []); },

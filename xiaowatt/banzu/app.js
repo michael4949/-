@@ -34,7 +34,7 @@ const ICO = {
 function NAV_OF() {
   if (role() === 'manager') return [
     { g: '业务' }, { k: 'goals', n: '年度指标任务', ic: 'target', badge: () => goalsAll().filter(g => g.light === 'bad').length }, { k: 'compare', n: '班组横向对比', ic: 'cmpr' },
-    { g: '管理' }, { k: 'portrait', n: '团队画像总览', ic: 'star' }, { k: 'staff', n: '人员总览', ic: 'people' }, { k: 'structure', n: '班组结构对比', ic: 'hex' }, { k: 'risks', n: '团队风险画像', ic: 'warn', badge: () => riskAgg().filter(r => r.lv === '高').length }, { k: 'mcare', n: '员工关怀', ic: 'heart' }, { k: 'madvise', n: '分析参谋', ic: 'doc' },
+    { g: '管理' }, { k: 'portrait', n: '团队画像总览', ic: 'star' }, { k: 'lperf', n: '班长绩效', ic: 'gauge', badge: () => LEADERS.filter(l => !LS.get('lperf_ok', {})[l.n]).length }, { k: 'staff', n: '人员总览', ic: 'people' }, { k: 'structure', n: '班组结构对比', ic: 'hex' }, { k: 'risks', n: '团队风险画像', ic: 'warn', badge: () => riskAgg().filter(r => r.lv === '高').length }, { k: 'mcare', n: '员工关怀', ic: 'heart' }, { k: 'madvise', n: '分析参谋', ic: 'doc' },
     { g: '班组' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
   ];
   const nav = [
@@ -44,11 +44,11 @@ function NAV_OF() {
   if (DB.ext()) nav.push({ g: '扩展模块' }, { k: 'people', n: '人员档案', ic: 'people' }, { k: 'train', n: '培训考评', ic: 'check' }, { k: 'safety', n: '安全管理', ic: 'shield' }, { k: 'docs', n: '文稿中心', ic: 'pen' });
   return nav;
 }
-const ALLOW = { leader: ['team', 'skills', 'grow', 'perf', 'care', 'advise', 'home', 'ask', 'people', 'sched', 'train', 'know', 'ledger', 'safety', 'docs', 'star'], manager: ['goals', 'compare', 'portrait', 'staff', 'structure', 'risks', 'mcare', 'madvise', 'ledger', 'ask', 'risk', 'star', 'team', 'skills', 'people', 'sched', 'train', 'know', 'super', 'talent'] };
+const ALLOW = { leader: ['team', 'skills', 'grow', 'perf', 'care', 'advise', 'home', 'ask', 'people', 'sched', 'train', 'know', 'ledger', 'safety', 'docs', 'star'], manager: ['goals', 'compare', 'portrait', 'lperf', 'staff', 'structure', 'risks', 'mcare', 'madvise', 'ledger', 'ask', 'risk', 'star', 'team', 'skills', 'people', 'sched', 'train', 'know', 'super', 'talent'] };
 /* 功能实现状态清单（讲师演示台） */
 const STATUS_LIST = [
-  ['真实实现', ['状态层流程：派工 → 审票 → 开工 → 回传 → 完工 → 验收，每步写入本机、刷新可回看', '两票 Word / Excel / 文本离线读取与逐项审核、补齐、退回', '派工四条规则校验（证书 / 核心技能 / 工时 / 冲突）与逐人推荐、排除理由', '关键节点周闭环记录、核心技能实操量完工回写', '星级班组评价维度初步评分：台账驱动的维度（安全 / 培训 / 台账 / 绩效 / 帮扶 / 关怀 / 作业实施）随操作变化', '绩效系数由履职证据推导，确认、调整、分配表落本机', '关怀提醒、班组活动、文化活动、督办、轮岗建议、面谈提纲全部写通知或文稿', '跨班组调配：横向对比 → 影响测算 → 发起 → 班长确认 → 返岗评价']],
-  ['规则模拟', ['六维个人画像（业务技能 / 安全素质 / 领导力 / 沟通 / 写作 / 经验）按图谱、违章、负责人次数、协同、文稿、工龄推导', '班组特色标签（专家型 / 骨干型 / 基础型）按技能等级占比判定', '人才断层风险按可自主实施人数与年龄判定', '培养对象排序按断层技能、成绩、学时、年龄、六维优势加权', '年度指标红黄绿按目标值与时间进度判定', '近五年业务量与人力配置趋势外推', '值班表排班、添加任务推断、文稿逐段生成']],
+  ['真实实现', ['状态层流程：派工 → 审票 → 开工 → 回传 → 完工 → 验收，每步写入本机、刷新可回看', '两票 Word / Excel / 文本离线读取与逐项审核、补齐、退回', '派工四条规则校验（证书 / 核心技能 / 工时 / 冲突）与逐人推荐、排除理由', '关键节点周闭环记录、核心技能实操量完工回写', '星级班组评价维度初步评分：台账驱动的维度（安全 / 培训 / 台账 / 绩效 / 帮扶 / 关怀 / 作业实施）随操作变化', '绩效系数由履职证据推导，确认、调整、分配表落本机', '班长绩效：安全生产 / 生产任务 / 队伍管理 / 履职与协同四维中，配电自动化班的违章、两票、派工、待审票、断层技能取本机台账实时值，确认、下发、改进要求、考评表落本机', '关怀提醒、班组活动、文化活动、督办、轮岗建议、面谈提纲全部写通知或文稿', '跨班组调配：横向对比 → 影响测算 → 发起 → 班长确认 → 返岗评价']],
+  ['规则模拟', ['六维个人画像（业务技能 / 安全素质 / 领导力 / 沟通 / 写作 / 经验）按图谱、违章、负责人次数、协同、文稿、工龄推导', '班组特色标签（专家型 / 骨干型 / 基础型）按技能等级占比判定', '人才断层风险按可自主实施人数与年龄判定', '培养对象排序按断层技能、成绩、学时、年龄、六维优势加权', '年度指标红黄绿按目标值与时间进度判定', '班长绩效五维权重与分档线（优秀 90 / 良好 80 / 合格 70）按主管个人年度业绩责任书分解，另两个班组的违章、安全活动、周报报送、待派待审与本季度关键节点达标周数为预设', '近五年业务量与人力配置趋势外推', '值班表排班、添加任务推断、文稿逐段生成']],
   ['预设展示', ['星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
   ['待系统对接', ['OMS 缺陷与工单同步', 'OCS 终端在线状态', '电网管理平台两票与作业计划', '人资证书 / 学时 / 考勤 / 绩效台账', '党建管理系统与荣誉台账', '通知推送到个人', 'PDF 与照片文字读取']]
 ];

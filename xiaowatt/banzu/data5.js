@@ -83,15 +83,80 @@ const LEADERS = [
 function leaderStat() { const L = LEADERS; return { avgAge: +(L.reduce((s, l) => s + l.age, 0) / L.length).toFixed(1), avgLead: +(L.reduce((s, l) => s + l.asLeader, 0) / L.length).toFixed(1), party: L.filter(l => l.party).length, senior: L.filter(l => /技师/.test(l.lv)).length, ready: L.reduce((s, l) => s + l.backup.filter(b => b[1] === '可接任').length, 0), training: L.reduce((s, l) => s + l.backup.filter(b => b[1] === '培养中').length, 0), retire10: L.filter(l => l.retireIn <= 10).length }; }
 
 /* ---------- 年度指标任务（来源：组织经营业绩指标 / 主管个人年度业绩责任书）---------- */
-const YEAR_PCT = 60; // 2026-08-07 时间进度
+const YEAR_PCT = 60;
+/* ---------- 班长绩效考评（季度）：权重分解自主管个人年度业绩责任书，初步评分由部门确认后使用 ---------- */
+const LPERF_Q = { no: '2026 年第三季度', range: '2026-07-01 至 09-30', state: '在评', prev: ['2025 年第四季度', '2026 年第一季度', '2026 年第二季度'], qs: ['25Q4', '26Q1', '26Q2', '26Q3'] };
+const LPERF_DIMS = [
+  { k: 'safe', n: '安全生产', pts: 25, src: '违章台账 · 两票台账 · 安全活动台账', rule: '基准 25 分；一般违章每起 −0.5、两票合格率不足 100% 一次性 −2、安全活动缺席每人次 −0.5；发生事故事件本项计 0' },
+  { k: 'task', n: '生产任务', pts: 25, src: '年度指标任务 · 任务台账 · 缺陷台账', rule: '按该班组责任指标的红黄绿加权折算：绿 1.0 / 黄 0.85 / 红 0.6' },
+  { k: 'build', n: '班组建设', pts: 20, src: '星级班组评价 · 关键节点管控表 · 班务记录', rule: '按星级班组初步评分折算；本季度关键节点周闭环达标不足 80% 的周数再 −2' },
+  { k: 'crew', n: '队伍管理', pts: 20, src: '工时台账 · 师带徒 · 人员台账 · 核心技能台账', rule: '基准 20 分；外勤超 24 小时每人 −1、近 3 年新员工未结对师傅每人 −1、近三年离职每人 −1、转岗意向每人 −0.5、核心技能断层高风险每类 −0.5' },
+  { k: 'duty', n: '履职与协同', pts: 10, src: '派工记录 · 两票台账 · 周报报送 · 跨班组调配', rule: '基准 10 分；到期未派每项 −1、待审票每张 −0.5、周报漏报每期 −1' }
+];
+/* 未接入台账的两个班组给预设输入项，已在讲师演示台状态清单标注；配电自动化班一律取本机台账实时值 */
+const LPERF_IN = {
+  '配电自动化班': { absent: 1, wkMiss: 0, nodeQ: [11, 13] },
+  '试验班': { vio: 0, absent: 0, wkMiss: 0, late: 0, pend: 0, gapHi: 1, tkRate: 100, star: 93.2, nodeQ: [12, 13] },
+  '配电运维一班': { vio: 2, absent: 2, wkMiss: 1, late: 1, pend: 1, gapHi: 3, tkRate: 100, star: 76.4, nodeQ: [9, 13] }
+};
+const LPERF_GRADE = [[90, '优秀', 'ok'], [80, '良好', 'ok'], [70, '合格', 'w'], [0, '需改进', 'bad']];
+const LPERF_APPLY = { '优秀': '月度绩效上浮一档；推荐参评局级优秀班组长；可申报星级工程师升星', '良好': '月度绩效按标准档；短板项列入下季度改进要求', '合格': '月度绩效按标准档下限；由部门与本人签一份改进承诺，逐月回访', '需改进': '月度绩效下浮一档；部门约谈并限期两个月整改，整改期内不参加评优' };
+const LPERF_HIST = { '赵立群': [85.2, 86.4, 88.1], '周建国': [92.0, 92.8, 93.6], '陈志远': [80.4, 79.1, 77.6] };
+function lperfIn(team) {
+  const pre = LPERF_IN[team] || {}; const own = team === TEAM.name;
+  return {
+    vio: own ? VIOLATIONS.length : pre.vio,
+    absent: pre.absent,
+    wkMiss: pre.wkMiss,
+    tkRate: own ? +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1) : pre.tkRate,
+    star: own ? buildScore().pct : pre.star,
+    nodeQ: pre.nodeQ, nodeQPct: Math.round(pre.nodeQ[0] / pre.nodeQ[1] * 100), nodeWk: own ? DB.nodeRate() : null,
+    over: teamPeople(team).filter(p => (own ? p.week : (team === LAB.name ? LAB.week[p.n] : 0)) > WEEK_LIMIT).length,
+    unpaired: newHires(team).list3.filter(x => !MENTORS.some(m => m.s === x.p.n)).length,
+    leave3y: STABILITY[team].leave3y,
+    intent: STABILITY[team].intent,
+    gapHi: own ? skillCover().filter(c => { const ages = c.a.map(p => p.age); const young = ages.length ? Math.min.apply(null, ages) : 0; return c.a.length <= 2 || (c.a.length <= 4 && young >= 35); }).length : pre.gapHi,
+    late: own ? DB.jobs().filter(j => j.st === '待派' && j.dateIso <= TODAY).length : pre.late,
+    pend: own ? DB.tickets().filter(t => t.st === '待审').length : pre.pend
+  };
+}
+function lperfGoalW(team) {
+  const G = goalsAll().filter(g => g.teams && g.teams[team]);
+  const rows = G.map(g => { let lt = g.light; if (g.kind !== 'text') { const v = g.teams[team](); if (typeof v === 'number') { if (g.kind === 'rate') lt = v >= g.target ? 'ok' : v >= g.target * 0.985 ? 'w' : 'bad'; else if (g.kind === 'down') lt = v <= g.target ? 'ok' : v <= g.target * 1.05 ? 'w' : 'bad'; else { const pr = v / g.target * 100; lt = pr >= YEAR_PCT ? 'ok' : pr >= YEAR_PCT - 8 ? 'w' : 'bad'; } } } return { g, lt, v: g.kind === 'text' ? null : g.teams[team]() }; });
+  const w = { ok: 1, w: 0.85, bad: 0.6 };
+  return { rows, pct: rows.length ? rows.reduce((s, r) => s + w[r.lt], 0) / rows.length : 1 };
+}
+function lperfOf(name) {
+  const L = LEADERS.find(l => l.n === name) || LEADERS[0]; const team = L.team; const I = lperfIn(team); const GW = lperfGoalW(team);
+  const cut = (pts, items) => { const d = items.reduce((s, x) => s + x[1], 0); return { sc: +Math.max(0, pts - d).toFixed(1), items }; };
+  const D = LPERF_DIMS.map(d => {
+    let r;
+    if (d.k === 'safe') r = cut(d.pts, [['一般违章 ' + I.vio + ' 起（' + (team === TEAM.name ? '全部本班自查' : '含上级查处') + '）', +(I.vio * 0.5).toFixed(1)], ['两票合格率 ' + I.tkRate + '%', I.tkRate < 100 ? 2 : 0], ['安全活动缺席 ' + I.absent + ' 人次', +(I.absent * 0.5).toFixed(1)], ['安全生产事故事件 0 起', 0]]);
+    else if (d.k === 'task') r = { sc: +(d.pts * GW.pct).toFixed(1), items: GW.rows.map(x => [x.g.n + '：' + (x.v == null ? '按班组分解' : x.v + x.g.unit) + ' · ' + { ok: '绿灯', w: '黄灯', bad: '红灯' }[x.lt], +(d.pts / GW.rows.length * (1 - { ok: 1, w: 0.85, bad: 0.6 }[x.lt])).toFixed(2)]) };
+    else if (d.k === 'build') r = { sc: +Math.max(0, d.pts * I.star / 100 - (I.nodeQPct < 80 ? 2 : 0)).toFixed(1), items: [['星级班组初步评分 ' + I.star + ' 分', +(d.pts * (100 - I.star) / 100).toFixed(1)], ['本季度关键节点周闭环达标 ' + I.nodeQ[0] + '/' + I.nodeQ[1] + ' 周（' + I.nodeQPct + '%）', I.nodeQPct < 80 ? 2 : 0]] };
+    else if (d.k === 'crew') r = cut(d.pts, [['外勤超 24 小时 ' + I.over + ' 人', I.over], ['近 3 年新员工未结对师傅 ' + I.unpaired + ' 人', I.unpaired], ['近三年离职 ' + I.leave3y + ' 人', I.leave3y], ['转岗意向 ' + I.intent + ' 人', +(I.intent * 0.5).toFixed(1)], ['核心技能断层高风险 ' + I.gapHi + ' 类', +(I.gapHi * 0.5).toFixed(1)]]);
+    else r = cut(d.pts, [['到期未派 ' + I.late + ' 项', I.late], ['待审票 ' + I.pend + ' 张', +(I.pend * 0.5).toFixed(1)], ['周报漏报 ' + I.wkMiss + ' 期', I.wkMiss]]);
+    return Object.assign({}, d, r, { pct: Math.round(r.sc / d.pts * 100), cls: r.sc / d.pts >= 0.9 ? 'ok' : r.sc / d.pts >= 0.75 ? 'w' : 'bad' });
+  });
+  const total = +D.reduce((s, d) => s + d.sc, 0).toFixed(1);
+  const g = LPERF_GRADE.find(x => total >= x[0]);
+  const rank = D.slice().sort((a, b) => b.pct - a.pct);
+  const hist = LPERF_HIST[name] || [];
+  return { L, team, dims: D, total, grade: g[1], gradeCls: g[2], strong: rank.slice(0, 2), weak: rank.slice(-2).reverse(), apply: LPERF_APPLY[g[1]], hist: hist.concat([total]), delta: hist.length ? +(total - hist[hist.length - 1]).toFixed(1) : 0, goals: GW.rows, input: I };
+}
+function lperfAll() { return LEADERS.map(l => lperfOf(l.n)); }
+ // 2026-08-07 时间进度
+/* 第三方客户满意度（季度回访测评，按班组分解） */
+const CSAT = { '配电自动化班': 90.8, '试验班': 91.2, '配电运维一班': 87.4 };
+function csatAvg() { const ns = Object.keys(CSAT); const tot = ns.reduce((s, n) => s + teamStat(n).n, 0); return +(ns.reduce((s, n) => s + CSAT[n] * teamStat(n).n, 0) / tot).toFixed(1); }
 const GOALS = [
   { k: 'g1', n: '配电自动化终端在线率', unit: '%', src: '组织经营业绩指标', target: 99.5, stretch: 99.8, cur: () => WK29.val('online'), kind: 'rate', team: '配电自动化班', note: '雷雨季 7–9 月离线过夜终端要日清；主站侧通道中断不计入班组', teams: { '配电自动化班': () => WK29.val('online') } },
-  { k: 'g2', n: '遥控成功率', unit: '%', src: '组织经营业绩指标', target: 98.5, stretch: 99.2, cur: () => WK29.val('remote'), kind: 'rate', team: '配电自动化班', note: '晨操遥控失败当天查网线、把手位置、刀闸位置三项', teams: { '配电自动化班': () => WK29.val('remote') } },
+  { k: 'g2', n: '快速复电成功率', unit: '%', src: '组织经营业绩指标', target: 80, stretch: 85, cur: () => WK29.val('fastok'), kind: 'rate', team: '配电自动化班', note: '虽达年度目标，但低于全市 85.5%、全市排名靠后：站内 82.1%（32/39）、站外 66.7%（2/3）；失败逐单查永磁驱动终端与交换机取电', teams: { '配电自动化班': () => WK29.val('fastok') } },
   { k: 'g3', n: '自愈有效复电率', unit: '%', src: '组织经营业绩指标', target: 95, stretch: 98, cur: () => WK29.val('heal'), kind: 'rate', team: '配电自动化班', note: '自愈误动、拒动逐条分析，定值单与现场一致性每季核一次', teams: { '配电自动化班': () => WK29.val('heal') } },
   { k: 'g4', n: '缺陷限时闭环率', unit: '%', src: '主管个人年度业绩责任书', target: 100, stretch: 100, cur: () => WK29.val('close'), kind: 'rate', team: '三班组', note: '紧急 24 小时、重大 72 小时、一般 30 天；超期一单扣当月', teams: { '配电自动化班': () => WK29.val('close'), '试验班': () => 100, '配电运维一班': () => 98.9 } },
   { k: 'g5', n: '两票合格率', unit: '%', src: '主管个人年度业绩责任书', target: 100, stretch: 100, cur: () => +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1), kind: 'rate', team: '三班组', note: '退回票不计不合格，执行后发现缺项才计', teams: { '配电自动化班': () => +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1), '试验班': () => 100, '配电运维一班': () => 100 } },
   { k: 'g6', n: '配网自动化改造工程投运', unit: '座', src: '组织经营业绩指标', target: 36, stretch: 40, cur: () => 21, kind: 'count', team: '配电自动化班', note: '田寮站 F02 下周验收后 +1；9 月前投运 4 座才追上进度', teams: { '配电自动化班': () => 21 } },
-  { k: 'g7', n: '交接试验完成', unit: '条', src: '组织经营业绩指标', target: 420, stretch: 460, cur: () => LAB.total, kind: 'count', team: '试验班', note: '7–8 月为高峰，试验班人均外勤已超 24 小时，需调配支援', teams: { '试验班': () => LAB.total } },
+  { k: 'g7', n: '第三方客户满意度', unit: '分', src: '组织经营业绩指标', target: 90, stretch: 92, cur: () => csatAvg(), kind: 'rate', team: '三班组', note: '第三方季度回访测评，按工单回访、现场服务、停电告知三项打分；配电运维一班的停电告知与到场时效是主要失分项', teams: { '配电自动化班': () => CSAT['配电自动化班'], '试验班': () => CSAT['试验班'], '配电运维一班': () => CSAT['配电运维一班'] } },
   { k: 'g8', n: '中压客户平均停电时间', unit: '小时', src: '组织经营业绩指标', target: 1.2, stretch: 1.0, cur: () => 1.31, kind: 'down', team: '配电运维一班', note: '转供电方案预置率要到 100%；故障抢修到场 45 分钟', teams: { '配电运维一班': () => 1.31 } },
   { k: 'g9', n: '人均核心技能实操量', unit: '次', src: '主管个人年度业绩责任书', target: 30, stretch: 36, cur: () => skill9PerCap(), kind: 'count', team: '三班组', note: '附表 1：人均实操量 = 核心技能自主实施完成总次数 / 人数，按排名取得分比例', teams: { '配电自动化班': () => skill9PerCap(), '试验班': () => 34.5, '配电运维一班': () => 18.2 } },
   { k: 'g10', n: '年度生产计划完成率', unit: '%', src: '组织经营业绩指标', target: 95, stretch: 98, cur: () => +(DB.month().jobsDone / DB.month().jobs * 100).toFixed(1), kind: 'rate', team: '三班组', note: '按月计划口径；调整过的计划要留变更记录', teams: { '配电自动化班': () => +(DB.month().jobsDone / DB.month().jobs * 100).toFixed(1), '试验班': () => 100, '配电运维一班': () => 100 } },

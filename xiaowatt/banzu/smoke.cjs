@@ -1,4 +1,4 @@
-/* 冒烟回归（9/21 口径）：班组长 · 班组管理六页（班组画像 / 班员画像 / 培养与梯队 / 绩效与激励 / 关怀与文化 / 分析参谋）+ 日常业务主线（工作台派工 → 审票 → 开工 → 完工 → 回写）+ 知识库三类；管理者 · 八页（年度指标 / 横向对比 → 跨班组调配 / 团队画像 / 人员总览与六维画像 / 结构对比 / 风险画像 / 员工关怀 / 分析参谋）· 刷新持久 · 讲师演示台 · 界面禁词
+/* 冒烟回归（9/21 口径）：班组长 · 班组管理六页（班组画像 / 班员画像 / 培养与梯队 / 绩效与激励 / 关怀与文化 / 分析参谋）+ 日常业务主线（工作台派工 → 审票 → 开工 → 完工 → 回写）+ 知识库三类；管理者 · 九页（年度指标 / 横向对比 → 跨班组调配 / 团队画像 / 班长绩效 / 人员总览与六维画像 / 结构对比 / 风险画像 / 员工关怀 / 分析参谋）· 刷新持久 · 讲师演示台 · 界面禁词
    用法：node smoke.cjs  （需要 /home/user/-/node_modules/playwright 与 /opt/pw-browsers）期望：FAILS 0 ERR none */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const path = require('path');
@@ -142,9 +142,11 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('刷新后班组画像 · 计划与确认仍在', async () => (await pg.locator('#sb a.on').textContent()).includes('班组画像') && (await pg.locator('#fixlist .tag.ok').count()) >= 5 && Object.keys(await LS('perf_ok')).length === 12);
   /* ---------- 管理者 ---------- */
   await pg.click('.rsw button[data-r="manager"]'); await w(1800);
-  await t('切到管理者 · 10 项 · 年度指标任务', async () => (await pg.locator('#sb a').count()) === 10 && (await ev(() => location.hash)) === '#goals' && (await pg.locator('table.goals tr').count()) === 13 && (await pg.locator('.card.kpi').count()) === 4);
+  await t('切到管理者 · 11 项 · 年度指标任务', async () => (await pg.locator('#sb a').count()) === 11 && (await ev(() => location.hash)) === '#goals' && (await pg.locator('table.goals tr').count()) === 13 && (await pg.locator('.card.kpi').count()) === 4);
   await t('红黄绿 · 目标值 / 摸高值 / 注意事项', async () => (await pg.locator('table.goals .rag.bad').count()) >= 2 && (await pg.locator('table.goals .rag.ok').count()) >= 5 && (await main()).includes('摸高值') && (await main()).includes('注意事项'));
   await pg.click('[data-act="goal-open"][data-k="g4"]'); await w(400);
+  await t('指标改名 · 快速复电成功率 / 第三方客户满意度 · 无旧名', async () => { const x = await main(); return /快速复电成功率/.test(x) && /第三方客户满意度/.test(x) && !/遥控成功率/.test(x) && !/交接试验完成/.test(x) && (await ev(() => goalsAll().find(g => g.k === 'g7').v)) === 89.7; });
+
   await t('指标下钻到班组 · 三班组行', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 4 && (await pg.locator('#modal').textContent()).includes('陈志远'));
   await pg.click('#modal [data-act="goal-urge"] >> nth=0'); await w(600);
   await t('督办 → 班长通知 · 记录', async () => { const n = await LS('notices'); const u = await LS('goal_urge'); return u && u.g4 && n.some(x => x.to === '赵立群' && /督办 · 缺陷限时闭环率/.test(x.t)); });
@@ -163,6 +165,28 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('后备培养 → 班长通知', async () => { const n = await LS('notices'); const s = await LS('sup_talent'); return n.some(x => x.to === '陈志远' && /后备培养 · 林小虎/.test(x.t)) && s && s['林小虎']; });
   await clean('团队画像总览');
   await pg.screenshot({ path: SHOT + '/11_portrait.png' });
+  /* ---------- 班长绩效 ---------- */
+  await go('#lperf', 900);
+  await t('班长绩效 · 五维权重 · 三位班长 · 综合与分档', async () => { const x = await main(); const A = await ev(() => lperfAll().map(q => ({ n: q.L.n, t: q.total, g: q.grade }))); return (await pg.locator('table.cmp tr').count()) === 7 && /安全生产 25 \/ 生产任务 25 \/ 班组建设 20 \/ 队伍管理 20 \/ 履职与协同 10/.test(x) && A[1].t === 94.1 && A[1].g === '优秀' && A[2].t === 77.9 && A[2].g === '合格' && A[0].g === '良好' && A[0].t > 80 && A[0].t < 90 && /由部门确认后使用/.test(x) && /分档不排名次/.test(x); });
+  await t('履职与协同取派工与两票台账实时值 · 与台账对得上', async () => { const d = await ev(() => { const x = lperfOf('赵立群'); const late = DB.jobs().filter(j => j.st === '待派' && j.dateIso <= TODAY).length; const pend = DB.tickets().filter(q => q.st === '待审').length; return { sc: x.dims[4].sc, txt: x.dims[4].items.map(i => i[0]).join('|'), calc: +(10 - late - pend * 0.5).toFixed(1), late, pend }; }); return d.txt.includes('到期未派 ' + d.late + ' 项') && d.txt.includes('待审票 ' + d.pend + ' 张') && d.sc === d.calc; });
+  await t('班组建设与队伍管理取星级评分与人员台账', async () => { const d = await ev(() => { const x = lperfOf('赵立群'); return { b: x.dims[2].items[0][0], c: x.dims[3].items.map(i => i[0]).join('|'), star: buildScore().pct, un: newHires(TEAM.name).list3.filter(y => !MENTORS.some(m => m.s === y.p.n)).length }; }); return d.b.includes('星级班组初步评分 ' + d.star) && d.c.includes('近 3 年新员工未结对师傅 ' + d.un + ' 人'); });
+  await pg.click('[data-act="lp-dim"][data-who="赵立群"][data-k="duty"]'); await w(600);
+  await t('点格出逐条扣分 · 规则 · 取数来源', async () => { const m = await pg.locator('#modal').innerText(); return /到期未派/.test(m) && /待审票/.test(m) && /基准 10 分/.test(m) && /派工记录/.test(m) && (await pg.locator('#modal [data-act="lp-fix"]').count()) === 1; });
+  await pg.click('#modal [data-act="lp-fix"]'); await w(500);
+  await t('列入下季度改进要求 · 写本机 + 发本人 + 落班组计划', async () => { const f = await LS('lperf_fix'); const n = await LS('notices'); const p = await LS('plan'); return f && f['赵立群|duty'] && n.some(x => x.to === '赵立群' && /下季度改进要求/.test(x.t)) && p.some(x => /履职与协同改进/.test(x.t)); });
+  await t('未确认不下发', async () => { await pg.evaluate(() => ACT['lp-send']({ dataset: { who: '周建国' } })); await pg.waitForTimeout(300); return !(await LS('lperf_sent')); });
+  await pg.click('[data-act="lp-okall"]'); await w(600);
+  await t('全部确认 · 三位班长', async () => { const k = await LS('lperf_ok'); return k && Object.keys(k).length === 3; });
+  await pg.click('[data-act="lp-send"][data-who="周建国"]'); await w(600);
+  await t('下发考评结果 · 本人待确认', async () => { const st = await LS('lperf_sent'); const n = await LS('notices'); return st && st['周建国'] && n.some(x => x.to === '周建国' && /绩效考评结果/.test(x.t) && /94.1/.test(x.t)); });
+  await pg.click('[data-act="lp-doc"][data-who="陈志远"]'); await ws('[data-act="lp-docsave"]', 20000); await pg.click('[data-act="lp-docsave"]'); await w(400);
+  await t('绩效评价意见六段 · 存文稿', async () => { const d = await LS('docs'); return (await pg.locator('#lpdoc p').count()) >= 6 && d['lperf-陈志远'] && /绩效评价意见/.test(d['lperf-陈志远'].t); });
+  await pg.click('[data-act="lp-sheet"]'); await w(600);
+  await t('班长绩效考评表 · 三行 · 存文稿并报部门', async () => (await pg.locator('#modal table tr').count()) === 4 && (await pg.locator('#modal [data-act="lp-sheetsave"]').count()) === 1);
+  await pg.click('#modal [data-act="lp-sheetsave"]'); await w(400);
+  await t('考评表已存', async () => { const d = await LS('docs'); return d['lperf-sheet'] && /班长绩效考评表/.test(d['lperf-sheet'].t); });
+  await clean('班长绩效');
+  await pg.screenshot({ path: SHOT + '/10b_lperf.png' });
   await go('#staff', 700);
   await t('人员总览 · 31 人 · 三图 · 清单 12', async () => (await main()).includes('31') && (await pg.locator('#main svg.ch').count()) >= 3 && (await pg.locator('#stlist tr').count()) === 13);
   await pg.click('[data-act="st-team"][data-n="试验班"]'); await w(500);

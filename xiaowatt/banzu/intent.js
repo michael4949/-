@@ -14,7 +14,18 @@ XW.ask = function (text, voice) {
   if (role() === 'manager') {
     if (/借|调配|借调|支援/.test(t)) { go(() => ensure('risk', () => SUPER.simPreset(labWho ? labWho.n : '张伟', /\d+ ?天/.test(t) ? +(t.match(/(\d+) ?天/) || [0, 3])[1] : 3), 'sim')); return; }
     if (/缺电缆证|电缆证.*怎么办|电缆作业证/.test(t)) { go(() => ensure('talent', () => ACT['tal-cert']({ dataset: {} }), 'cert')); return; }
-    if (/履职|班长/.test(t) && !/画像/.test(t)) { go(() => ensure('duty', () => XW.answer('三个班长的履职看这几项客观数：派工及时、两票审核、关键节点周清、缺陷超期、工时均衡、培养在办。不排名，每项点开有台账。', null, { confirm: false }))); return; }
+    if (/班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职|班长/.test(t) && !/画像|后备|梯队/.test(t)) {
+      const L = LEADERS.find(l => t.includes(l.n));
+      if (/考评表/.test(t)) { go(() => ensure('lperf', () => ACT['lp-sheet']())); return; }
+      if (/改进要求/.test(t)) { go(() => ensure('lperf', () => { if (L && !/全部|都|所有/.test(t)) ACT['lp-fix']({ dataset: { who: L.n, k: lperfOf(L.n).weak[0].k } }); else ACT['lp-fixall'](); })); return; }
+      if (/评价意见/.test(t)) { go(() => ensure('lperf', () => ACT['lp-doc']({ dataset: { who: (L || LEADERS[0]).n } }))); return; }
+      if (/面谈/.test(t)) { go(() => ensure('lperf', () => ACT['lp-talk']({ dataset: { who: (L || LEADERS[0]).n } }))); return; }
+      if (/下发/.test(t) && L) { go(() => ensure('lperf', () => ACT['lp-send']({ dataset: { who: L.n } }))); return; }
+      if (/确认/.test(t)) { go(() => ensure('lperf', () => { if (L && !/全部|都/.test(t)) ACT['lp-ok']({ dataset: { who: L.n } }); else ACT['lp-okall'](); })); return; }
+      if (L && /扣分|为什么|短板|哪一项|哪项/.test(t)) { const x = lperfOf(L.n); const d = LPERF_DIMS.find(q => t.includes(q.n)) || x.weak[0]; go(() => ensure('lperf', () => ACT['lp-dim']({ dataset: { who: L.n, k: d.k } }))); return; }
+      if (L) { go(() => ensure('lperf', () => ACT['lp-who']({ dataset: { who: L.n } }))); return; }
+      go(() => ensure('lperf', () => { const A = lperfAll(); const low = A.slice().sort((a, b) => a.total - b.total)[0]; XW.answer('本季度三位班长的初步得分：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。短板最大的是' + low.L.n + '，' + low.weak[0].n + '只有 ' + low.weak[0].pct + '%，扣分在' + (low.weak[0].items.filter(i => i[1] > 0).map(i => i[0]).join('、') || '维度折算') + '；五维权重分解自主管个人年度业绩责任书，分档不排名次，由部门确认后使用。', null, { confirm: false }); })); return;
+    }
     if (/输出|梯队|断层|五年后/.test(t)) { go(() => ensure('talent', () => XW.answer('人才梯队页：近三年输出 ' + OUTPUT3.length + ' 人；五年后骨干断层最重的是试验班，班长和两名高级作业员五年后都在 41 岁以上，电缆证持证人平均 ' + SUPER.labCertAvg() + ' 岁。', null, { confirm: false }))); return; }
     if (/星级|对标|差距/.test(t)) { go(() => ensure('star', () => ACT['star-gap']())); return; }
     if (/效能|复盘/.test(t)) { go(() => ensure(/复盘/.test(t) ? 'report' : 'effect', () => { if (/复盘/.test(t)) ACT['rep-gen']({ dataset: { k: 'review' } }); })); return; }
@@ -85,7 +96,7 @@ Object.assign(ACT, {
     [/五星|星级|建设差距|党建|荣誉/, () => role() === 'manager' ? nav('portrait') : nav('team')],
     [/断层|技能矩阵|谁能带|技师梯队/, () => nav('skills')],
     [/师带徒|带得怎么样|骨干培养|申报|梯队/, () => role() === 'manager' ? nav('portrait') : nav('grow')],
-    [/系数|激励|绩效/, () => nav('perf')],
+    [/系数|激励|绩效/, () => role() === 'manager' ? nav('lperf') : nav('perf')],
     [/入职满|写一段话|记一次|关怀|慰问|最近怎么样/, () => role() === 'manager' ? nav('mcare') : nav('care')],
     [/缺什么|值得培养|诊断报告|参谋/, () => role() === 'manager' ? nav('madvise') : nav('advise')],
     [/红灯|指标|督办|下钻/, () => nav('goals')],
@@ -97,8 +108,9 @@ Object.assign(ACT, {
     [/人均工作量|补人|五年/, () => nav('madvise', 'trend')],
     [/综合分析报告/, () => { ensure('madvise', () => XW.at(300, () => ACT['ma-gen']({ dataset: { k: 'all' } }))); }]
   ];
+  const LPK = /班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职/;
   XW.ask = function (text, voice) {
-    if (text && !XW._expWait) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { hit[1](); XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
+    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { hit[1](); XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
     ask0.call(XW, text, voice);
   };
 })();
