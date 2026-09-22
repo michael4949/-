@@ -5318,16 +5318,16 @@ function perfCalc(vals) {
 }
 /* 自评建议：还有空间的方向、要补的证明材料、可申报项数余量 */
 function perfAdvice(r, vals) {
-  const out = [];
+  const out = []; const empty = [];
   r.groups.forEach(g => {
     const filled = g.items.filter(x => x.n > 0);
-    if (!filled.length) { out.push({ t: g.g, s: '本类一项未填', d: '「' + g.items[0].it.n + '」等项目若有业绩，按标准可直接计分，建议核对台账后补报。' }); return; }
+    if (!filled.length) { empty.push(g.g); return; }
     if (g.capped) out.push({ t: g.g, s: '已触上限', d: g.capNote + '，再补报同类业绩不再增分，建议把材料放到其他一级指标。' });
     filled.forEach(x => { if (x.it.max && x.n > x.it.max) out.push({ t: g.g, s: x.it.n + ' 超限填项数', d: '标准限填 ' + x.it.max + ' 项，超出部分不计分，建议只报最高等级的 ' + x.it.max + ' 项。' }); });
   });
   r.linked.forEach(L => { if (L.over) out.push({ t: '人才发展成果', s: L.n + ' 合计超上限', d: '两项合计上限 ' + L.cap + ' 分，自评填报折合 ' + L.raw + ' 分，超出部分不计入。' }); });
-  const zero = r.groups.filter(g => g.sum === 0).map(g => g.g);
-  if (zero.length) out.push({ t: '整体', s: '未覆盖的一级指标 ' + zero.length + ' 类', d: zero.join('、') + ' 目前为 0 分。业绩评价分组内合议、存疑修正、组织复评三个环节，没有发文依据的重要业绩事项可走清单制与申报制。' });
+  if (empty.length) out.push({ t: '还有空间的方向', s: empty.length + ' 类未填报', d: empty.join('、') + ' 目前一项未填。这几类按标准都可直接计分，建议核对近三年台账与获奖、发文记录后补报。' });
+  out.push({ t: '评价方式', s: '三个环节', d: '业绩评价分组内合议、存疑修正、组织复评三个环节；成果及排名已公开发文的按标准化成果计量，没有发文依据的重要业绩事项走清单制与申报制，两者不可重复。' });
   out.push({ t: '证明材料', s: '按标准逐项备齐', d: '工作成果类需技术研究报告、表彰决定、竣工验收报告等，技术报告要公告发文、三级领导人签字、报告原件与本部门盖章；奖项类需获奖证书；培养类需盖章的师徒协议与人才培养证明。' });
   return out;
 }
