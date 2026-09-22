@@ -23,6 +23,25 @@ function abilityNow() {
 }
 Object.defineProperty(window, 'RADAR_NOW', { get: abilityNow });   // 全局读取即为现值（随本机考试记录变化）
 
+/* 通用素质模型五项（《深圳供电局有限公司素质模型》通用素质模型）：首页与成长档案的主雷达，
+   数据由专家选聘答辩演练的各题得分映射，尚无实测时取脱敏模拟基线 */
+const GEN_DIMS = ['忠诚执行', '安全意识', '不断求进', '客户导向', '沟通协作'];
+const GEN_BASE = [82, 88, 70, 66, 74];
+const GEN_PREV = [76, 84, 62, 58, 68];
+const GEN_OLD = [72, 80, 56, 52, 62];
+const GEN_TEAM = [80, 85, 74, 72, 76];
+function genNow() {
+  const ex = (typeof expRecords === 'function' ? expRecords() : []).slice(0, 5);
+  if (!ex.length) return GEN_BASE.slice();
+  return GEN_BASE.map((b, i) => {
+    const vs = ex.map(r => (r.dims || []).find(d => d.n === GEN_DIMS[i])).filter(x => x && x.v != null).map(x => x.v);
+    if (!vs.length) return b;
+    return Math.round(b * 0.5 + vs.reduce((a, v) => a + v, 0) / vs.length * 0.5);
+  });
+}
+function genMeasured() { return (typeof expRecords === 'function' ? expRecords() : []).length; }
+Object.defineProperty(window, 'GEN_NOW', { get: genNow });
+
 /* 成长档案、首页、组长工作台同用 8 维（旧十维口径并入） */
 const DIMS10 = DIMS, RADAR10_PREV = RADAR_PREV, RADAR10_OLD = RADAR_OLD, TEAM_AVG10 = TEAM_AVG;
 Object.defineProperty(window, 'RADAR10_NOW', { get: abilityNow });

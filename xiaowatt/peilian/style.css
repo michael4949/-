@@ -1604,3 +1604,46 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .tkfile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .tkself{margin-top:2px}
 .tkselft td,.tkselft th{font-size:12px}
+/* 专家选聘：类别选择 / 业绩自测 */
+.epkinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:8px}
+.epk{border:1px solid var(--line);border-radius:8px;padding:8px 11px;cursor:pointer;background:#fff}
+.epk:hover{border-color:var(--ac)}
+.epk.on{border-color:var(--ac);background:var(--acbg)}
+.epk b{display:block;font-size:12.5px;margin-bottom:3px}
+.epk span{font-size:10.5px;color:var(--txt3)}
+.eppanel{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;margin-top:6px}
+.eppanel b{color:var(--txt2)}
+.eppanel span i{font-style:normal;color:var(--ac);margin-right:5px;font-weight:600}
+.epperfsum{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.epperfsum .big{text-align:center;padding-right:14px;border-right:1px solid var(--line)}
+.epperfsum .big b{display:block;font-size:26px;color:var(--ac);font-family:var(--mono)}
+.epperfsum .big span{font-size:11px;color:var(--txt3)}
+.epperfsum .pg{font-size:11.5px;display:flex;gap:5px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+.epperf{display:grid;grid-template-columns:1fr 330px;gap:12px;align-items:start}
+.epperfside{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.big2{text-align:center;padding:6px 0 10px}
+.big2 b{display:block;font-size:32px;color:var(--ac);font-family:var(--mono)}
+.big2 span{font-size:11.5px;color:var(--txt3)}
+.pft td,.pft th{font-size:11.5px;vertical-align:top}
+.pft .pfnote{color:var(--txt3);font-size:10.5px;line-height:1.6;margin:3px 0 0}
+.pfin{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.pfin select,.pfin input{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font:inherit;font-size:11.5px;max-width:160px}
+.pfin input{width:62px;font-family:var(--mono)}
+.pfsc{font-weight:600;color:var(--ac);text-align:right}
+.pfadv{border-top:1px dashed var(--line);padding:7px 0;font-size:11.5px}
+.pfadv:first-child{border-top:0}
+.pfadv b{margin-right:6px}
+.pfadv p{margin:4px 0 0;color:var(--txt3);line-height:1.7}
+.pfadvs{max-height:none}
+@media(max-width:1180px){.epperf{grid-template-columns:1fr}.epperfside{position:static}}
+.pfsite{display:flex;gap:10px;flex-wrap:wrap;font-size:12px}
+.pfsite label{display:flex;align-items:center;gap:5px}
+.pfsite input{width:72px;border:1px solid var(--line);border-radius:5px;padding:4px 7px;font:inherit;font-size:12px;font-family:var(--mono)}
+.tk3 .lk{color:var(--ac);cursor:pointer;border-bottom:1px dashed var(--ac)}
+.tk3 .lk:hover{opacity:.8}
+.chips .sep{display:inline-block;width:1px;height:12px;background:var(--line);margin:0 6px;vertical-align:middle}
+.lvs2{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.lvc2{border:1px solid var(--line);border-left:3px solid var(--line2);border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px}
+.lvc2.on{border-left-color:var(--ac);background:var(--acbg)}
+.lvc2 b{display:block;margin-bottom:3px}
+.lvc2 p{margin:0;color:var(--txt3);line-height:1.7}

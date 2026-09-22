@@ -144,12 +144,12 @@ function pageHome() {
   </section>
 
   <section class="cockpit">
-    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>8 维 · 本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS, now8, RADAR_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度按作业授权认证表 20 个专业项目与两项实操考试抽取 · v1.0 已审定</div></div></div>
+    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>通用素质模型五项 · 本月 vs 上月</span></div><div class="hcb">${chRadar(GEN_DIMS, GEN_NOW, GEN_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度取《深圳供电局有限公司素质模型》通用素质模型，各项四个层级行为指标照录宣传册原文；得分由专家选聘答辩演练的各题得分映射${genMeasured() ? '，已并入 ' + genMeasured() + ' 次答辩实测' : '，尚无答辩实测，现为历史口径基线'} · <span class="lk" onclick="goPage('assess')">看指标体系</span></div></div></div></div>
     <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
       <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
     <div class="hcard ck tr ho"><div class="hch"><b>关卡分布</b><span>近30天 · 按次数</span></div><div class="hcb">${chDonut(A.kindCnt)}</div></div>
     <div class="hcard ck bl ho"><div class="hch"><b>陪练关卡成绩</b><span>${hist.length ? '最近 ' + Math.min(5, hist.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${hist.length ? hist.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去陪练关卡</button>`}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>技能水平 · 八维对标</b><span>作业授权认证表口径 · 我 vs 班组均值</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
     <div class="hcard ck w hg"><div class="hch"><b>关卡用时与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
     <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
@@ -536,6 +536,13 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台（底座页面） ---------------- */
 const IMPL_STATUS = [
+  ['主接线图部件画法：断路器、隔离开关、接地刀闸、主变、电压互感器', '按业务提供的手绘简图定标准画法；导线在部件处断开不穿过开关，合位与分位两态分别绘制，图例同屏对照'],
+  ['操作票 Word / Excel 上传导入', '纯浏览器离线解析（zip + DecompressionStream），按《操作票上传模板》解析；不符合模板的行指明行号并跳过'],
+  ['训练模式的边写边判、即时纠错、三级提示与阶段进度', '确定性规则 · 真实运行；考核模式关闭全部提示，提交后一次性出结果'],
+  ['操作票票号', '由考核人员在票头手工填写，未填不给提交，随档案保存'],
+  ['业绩贡献自评', '分值表、等级、排名档、上限与限填项数照录《技能专家业绩贡献评价标准》附件5-5；自评结果由本人填报，最终得分以评审专家组复评为准'],
+  ['五类专家的面试答辩标准与综合评价权重', '照录《专家选聘工作方案》附件1 三、（二）与《专家选聘面试答辩评价标准》附件6；技能实操与理论水平为现场集中考评环节，按实际成绩录入'],
+  ['首页能力雷达与成长档案能力全景', '主轴为《素质模型》通用素质模型五项，由专家选聘答辩演练得分映射，尚无实测时取脱敏模拟基线；技能水平八维（作业授权认证表口径）可切换查看'],
   ['操作票自动判卷：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、危险操作，同一根本错误只计一次', '确定性规则 · 真实运行（规则取自《操作票结构化标注确认表》70 行业务确认）'],
   ['操作票错误解释的制度依据：文件名、条款编号、条文正文', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
   ['操作票扣分值与危险操作规则清单', '扣分值为配置项（业务尚未最终确定，程序不写死）；危险规则已实现业务已确认的 4 条，完整清单待业务提供'],

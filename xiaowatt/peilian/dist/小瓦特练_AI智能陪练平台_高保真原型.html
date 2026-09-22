@@ -1611,6 +1611,49 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .tkfile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .tkself{margin-top:2px}
 .tkselft td,.tkselft th{font-size:12px}
+/* 专家选聘：类别选择 / 业绩自测 */
+.epkinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:8px}
+.epk{border:1px solid var(--line);border-radius:8px;padding:8px 11px;cursor:pointer;background:#fff}
+.epk:hover{border-color:var(--ac)}
+.epk.on{border-color:var(--ac);background:var(--acbg)}
+.epk b{display:block;font-size:12.5px;margin-bottom:3px}
+.epk span{font-size:10.5px;color:var(--txt3)}
+.eppanel{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;margin-top:6px}
+.eppanel b{color:var(--txt2)}
+.eppanel span i{font-style:normal;color:var(--ac);margin-right:5px;font-weight:600}
+.epperfsum{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.epperfsum .big{text-align:center;padding-right:14px;border-right:1px solid var(--line)}
+.epperfsum .big b{display:block;font-size:26px;color:var(--ac);font-family:var(--mono)}
+.epperfsum .big span{font-size:11px;color:var(--txt3)}
+.epperfsum .pg{font-size:11.5px;display:flex;gap:5px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+.epperf{display:grid;grid-template-columns:1fr 330px;gap:12px;align-items:start}
+.epperfside{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.big2{text-align:center;padding:6px 0 10px}
+.big2 b{display:block;font-size:32px;color:var(--ac);font-family:var(--mono)}
+.big2 span{font-size:11.5px;color:var(--txt3)}
+.pft td,.pft th{font-size:11.5px;vertical-align:top}
+.pft .pfnote{color:var(--txt3);font-size:10.5px;line-height:1.6;margin:3px 0 0}
+.pfin{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.pfin select,.pfin input{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font:inherit;font-size:11.5px;max-width:160px}
+.pfin input{width:62px;font-family:var(--mono)}
+.pfsc{font-weight:600;color:var(--ac);text-align:right}
+.pfadv{border-top:1px dashed var(--line);padding:7px 0;font-size:11.5px}
+.pfadv:first-child{border-top:0}
+.pfadv b{margin-right:6px}
+.pfadv p{margin:4px 0 0;color:var(--txt3);line-height:1.7}
+.pfadvs{max-height:none}
+@media(max-width:1180px){.epperf{grid-template-columns:1fr}.epperfside{position:static}}
+.pfsite{display:flex;gap:10px;flex-wrap:wrap;font-size:12px}
+.pfsite label{display:flex;align-items:center;gap:5px}
+.pfsite input{width:72px;border:1px solid var(--line);border-radius:5px;padding:4px 7px;font:inherit;font-size:12px;font-family:var(--mono)}
+.tk3 .lk{color:var(--ac);cursor:pointer;border-bottom:1px dashed var(--ac)}
+.tk3 .lk:hover{opacity:.8}
+.chips .sep{display:inline-block;width:1px;height:12px;background:var(--line);margin:0 6px;vertical-align:middle}
+.lvs2{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.lvc2{border:1px solid var(--line);border-left:3px solid var(--line2);border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px}
+.lvc2.on{border-left-color:var(--ac);background:var(--acbg)}
+.lvc2 b{display:block;margin-bottom:3px}
+.lvc2 p{margin:0;color:var(--txt3);line-height:1.7}
 
 </style>
 </head>
@@ -2316,6 +2359,25 @@ function abilityNow() {
 }
 Object.defineProperty(window, 'RADAR_NOW', { get: abilityNow });   // 全局读取即为现值（随本机考试记录变化）
 
+/* 通用素质模型五项（《深圳供电局有限公司素质模型》通用素质模型）：首页与成长档案的主雷达，
+   数据由专家选聘答辩演练的各题得分映射，尚无实测时取脱敏模拟基线 */
+const GEN_DIMS = ['忠诚执行', '安全意识', '不断求进', '客户导向', '沟通协作'];
+const GEN_BASE = [82, 88, 70, 66, 74];
+const GEN_PREV = [76, 84, 62, 58, 68];
+const GEN_OLD = [72, 80, 56, 52, 62];
+const GEN_TEAM = [80, 85, 74, 72, 76];
+function genNow() {
+  const ex = (typeof expRecords === 'function' ? expRecords() : []).slice(0, 5);
+  if (!ex.length) return GEN_BASE.slice();
+  return GEN_BASE.map((b, i) => {
+    const vs = ex.map(r => (r.dims || []).find(d => d.n === GEN_DIMS[i])).filter(x => x && x.v != null).map(x => x.v);
+    if (!vs.length) return b;
+    return Math.round(b * 0.5 + vs.reduce((a, v) => a + v, 0) / vs.length * 0.5);
+  });
+}
+function genMeasured() { return (typeof expRecords === 'function' ? expRecords() : []).length; }
+Object.defineProperty(window, 'GEN_NOW', { get: genNow });
+
 /* 成长档案、首页、组长工作台同用 8 维（旧十维口径并入） */
 const DIMS10 = DIMS, RADAR10_PREV = RADAR_PREV, RADAR10_OLD = RADAR_OLD, TEAM_AVG10 = TEAM_AVG;
 Object.defineProperty(window, 'RADAR10_NOW', { get: abilityNow });
@@ -2632,12 +2694,12 @@ function pageHome() {
   </section>
 
   <section class="cockpit">
-    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>8 维 · 本月 vs 上月</span></div><div class="hcb">${chRadar(DIMS, now8, RADAR_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度按作业授权认证表 20 个专业项目与两项实操考试抽取 · v1.0 已审定</div></div></div>
+    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>通用素质模型五项 · 本月 vs 上月</span></div><div class="hcb">${chRadar(GEN_DIMS, GEN_NOW, GEN_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度取《深圳供电局有限公司素质模型》通用素质模型，各项四个层级行为指标照录宣传册原文；得分由专家选聘答辩演练的各题得分映射${genMeasured() ? '，已并入 ' + genMeasured() + ' 次答辩实测' : '，尚无答辩实测，现为历史口径基线'} · <span class="lk" onclick="goPage('assess')">看指标体系</span></div></div></div></div>
     <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
       <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
     <div class="hcard ck tr ho"><div class="hch"><b>关卡分布</b><span>近30天 · 按次数</span></div><div class="hcb">${chDonut(A.kindCnt)}</div></div>
     <div class="hcard ck bl ho"><div class="hch"><b>陪练关卡成绩</b><span>${hist.length ? '最近 ' + Math.min(5, hist.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${hist.length ? hist.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去陪练关卡</button>`}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>能力对标</b><span>我 vs 班组均值（组织级口径）</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>技能水平 · 八维对标</b><span>作业授权认证表口径 · 我 vs 班组均值</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
     <div class="hcard ck w hg"><div class="hch"><b>关卡用时与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
     <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
   </section>
@@ -3024,6 +3086,13 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台（底座页面） ---------------- */
 const IMPL_STATUS = [
+  ['主接线图部件画法：断路器、隔离开关、接地刀闸、主变、电压互感器', '按业务提供的手绘简图定标准画法；导线在部件处断开不穿过开关，合位与分位两态分别绘制，图例同屏对照'],
+  ['操作票 Word / Excel 上传导入', '纯浏览器离线解析（zip + DecompressionStream），按《操作票上传模板》解析；不符合模板的行指明行号并跳过'],
+  ['训练模式的边写边判、即时纠错、三级提示与阶段进度', '确定性规则 · 真实运行；考核模式关闭全部提示，提交后一次性出结果'],
+  ['操作票票号', '由考核人员在票头手工填写，未填不给提交，随档案保存'],
+  ['业绩贡献自评', '分值表、等级、排名档、上限与限填项数照录《技能专家业绩贡献评价标准》附件5-5；自评结果由本人填报，最终得分以评审专家组复评为准'],
+  ['五类专家的面试答辩标准与综合评价权重', '照录《专家选聘工作方案》附件1 三、（二）与《专家选聘面试答辩评价标准》附件6；技能实操与理论水平为现场集中考评环节，按实际成绩录入'],
+  ['首页能力雷达与成长档案能力全景', '主轴为《素质模型》通用素质模型五项，由专家选聘答辩演练得分映射，尚无实测时取脱敏模拟基线；技能水平八维（作业授权认证表口径）可切换查看'],
   ['操作票自动判卷：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、危险操作，同一根本错误只计一次', '确定性规则 · 真实运行（规则取自《操作票结构化标注确认表》70 行业务确认）'],
   ['操作票错误解释的制度依据：文件名、条款编号、条文正文', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
   ['操作票扣分值与危险操作规则清单', '扣分值为配置项（业务尚未最终确定，程序不写死）；危险规则已实现业务已确认的 4 条，完整清单待业务提供'],
@@ -3266,16 +3335,24 @@ function pageReview() {
 /* ================= 成长档案 ================= */
 const LMAP_MASTERY = { state: 92, sanshen: 88, wufang: 85, changpiao: 90, yandian: 74, gis: 58, erci: 80, yichang: 70, diaodu: 76 };
 const LMAP_EXAM = { gis: 'e1163', yandian: 'e1163', diaodu: 'e1163', sanshen: 'e1163', changpiao: 'e1163', yichang: 'rain', erci: 'e1163', wufang: 'e1163', state: 'e1163' };
-const GR = { cmp: 'prev', show: { score: true, dur: false, vio: false, hint: false, avg: true, pass: true } };
+const GR = { model: 'gen', cmp: 'prev', show: { score: true, dur: false, vio: false, hint: false, avg: true, pass: true } };
 function goalsGet() { return lsGet(LS_GOALS, {}); }
 function goalArr() { const g = goalsGet(); return DIMS10.map((_, i) => g[i] != null ? +g[i] : null); }
 function growthPredict(i) { const n = RADAR10_NOW[i], p = RADAR10_PREV[i], o = RADAR10_OLD[i]; return Math.max(0, Math.min(100, Math.round(n + (n - p) * .6 + (p - o) * .2))); }
+/* 主轴为通用素质模型五项，技能水平八维可切换 */
+function grModel() {
+  return GR.model === 'skill'
+    ? { k: 'skill', dims: DIMS10, now: RADAR10_NOW, prev: RADAR10_PREV, old: RADAR10_OLD, team: TEAM_AVG10, key: 'gdim', n: '技能水平 · 八维', src: '维度取技能类岗位胜任能力评价作业授权认证表的 20 个专业项目与两项实操考试内容' }
+    : { k: 'gen', dims: GEN_DIMS, now: GEN_NOW, prev: GEN_PREV, old: GEN_OLD, team: GEN_TEAM, key: 'gdim5', n: '通用素质模型 · 五项', src: '维度取《深圳供电局有限公司素质模型》通用素质模型，各项四个层级行为指标照录宣传册原文；得分由专家选聘答辩演练映射' };
+}
 function growthRadar() {
-  const g = goalArr(), hasGoal = g.some(v => v != null);
+  const M = grModel();
+  const g = goalArr(), hasGoal = M.k === 'skill' && g.some(v => v != null);
   const target = hasGoal ? g.map((v, i) => v != null ? v : RADAR10_NOW[i]) : null;
-  const cmp = GR.cmp === 'old' ? RADAR10_OLD : GR.cmp === 'team' ? TEAM_AVG10 : RADAR10_PREV;
+  const cmp = GR.cmp === 'old' ? M.old : GR.cmp === 'team' ? M.team : M.prev;
   const lb = GR.cmp === 'old' ? '前月' : GR.cmp === 'team' ? '班组均值' : '上月';
-  return chRadar(DIMS10, RADAR10_NOW, cmp, { w: 440, h: 320, l1: '本月', l2: lb, key: 'gdim', target, c2: GR.cmp === 'team' ? '#7aa0c8' : '#b3bfb2' });
+  return chRadar(M.dims, M.now, cmp, { w: 440, h: 320, l1: '本月', l2: lb, key: M.key, target, c2: GR.cmp === 'team' ? '#7aa0c8' : '#b3bfb2' })
+    + `<div class="tk3" style="text-align:center;margin-top:4px">${h(M.src)}</div>`;
 }
 function badgeList() { const L = examHist(); return BADGES.map(b => Object.assign({}, b, { lit: !!b.test(L) })); }
 function pageGrowth() {
@@ -3291,11 +3368,12 @@ function pageGrowth() {
       <div class="gmeta"><b>${HOME_USER.name}</b><span>${HOME_USER.post} · ${HOME_USER.team} · 2024-08 入职 · 带教师傅 陈志远</span></div>
       <div class="gkpis"><div class="kpi"><b>${A.cnt}</b><span>近30天关卡次数</span></div><div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div><div class="kpi"><b>${A.avg}%</b><span>平均得分率</span></div><div class="kpi"><b>${HOME_USER.hours.done}/${HOME_USER.hours.need}</b><span>年度学时</span></div><div class="kpi good"><b>${up}/10</b><span>维度上升</span></div><div class="kpi good"><b>${lit}/${badges.length}</b><span>能力徽章</span></div><div class="kpi good"><b>${done}</b><span>里程碑</span></div></div></section>
     <div class="gtwo g21">
-      <section class="hcard hg"><div class="hch"><b>能力全景</b><span>十维 · 本月 vs 对照 · 顶点可查明细</span>
-          <span class="phr chips">${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
+      <section class="hcard hg"><div class="hch"><b>能力全景</b><span>${h(grModel().n)} · 本月 vs 对照 · 顶点可查明细</span>
+          <span class="phr chips">${[['gen', '通用素质模型'], ['skill', '技能水平']].map(([k, n]) => `<span class="chip ${GR.model === k ? 'on' : ''}" data-gmodel="${k}">${n}</span>`).join('')}<i class="sep"></i>${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
         <div class="hcb" id="gradar">${growthRadar()}</div></section>
       <section class="hcard hg"><div class="hch"><b>三期对照与目标</b><em class="ai">AI 预测</em><span>前月 / 上月 / 本月 · 预测为测算参考 · 目标可直接填写</span></div><div class="hcb"><table class="htbl gtbl"><tr><th>维度</th><th>前月</th><th>上月</th><th>本月</th><th>变化</th><th>预测下月</th><th>本月目标</th><th>差距</th></tr>
-        ${DIMS10.map((n, i) => { const d = RADAR10_NOW[i] - RADAR10_PREV[i], g = goals[i]; return `<tr><td class="hitv" data-gdim="${i}" style="cursor:pointer">${n}</td><td class="mono">${RADAR10_OLD[i]}</td><td class="mono">${RADAR10_PREV[i]}</td><td class="mono">${RADAR10_NOW[i]}</td><td class="mono ${d >= 0 ? 'gv' : 'wv'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${growthPredict(i)}</td><td><input class="gin" type="number" min="0" max="100" data-goal="${i}" value="${g != null ? g : ''}" placeholder="—"></td><td class="mono ${g != null ? (RADAR10_NOW[i] >= g ? 'gv' : 'wv') : ''}" id="ggap${i}">${g != null ? (RADAR10_NOW[i] >= g ? '已达成' : (RADAR10_NOW[i] - g)) : '—'}</td></tr>`; }).join('')}</table>
+        ${(() => { const M = grModel(); return M.dims.map((n, i) => { const d = M.now[i] - M.prev[i]; const g = M.k === 'skill' ? goals[i] : null; return `<tr><td class="hitv" data-${M.key}="${i}" style="cursor:pointer">${n}</td><td class="mono">${M.old[i]}</td><td class="mono">${M.prev[i]}</td><td class="mono">${M.now[i]}</td><td class="mono ${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${M.k === 'skill' ? growthPredict(i) : Math.max(0, Math.min(100, Math.round(M.now[i] + (M.now[i] - M.prev[i]) * .6)))}</td><td>${M.k === 'skill' ? `<input class="gin" type="number" min="0" max="100" data-ggoal="${i}" value="${g == null ? '' : g}" placeholder="-">` : '<span class="note">由答辩映射</span>'}</td></tr>`; }).join(''); })()}
+      </table>
         <div class="tk3" style="margin-top:6px">预测按近三期趋势线性外推；目标由本人设定，达成情况以人工审核为准。</div></div></section>
     </div>
     <section class="hcard hg"><div class="hch"><b>成长曲线</b><span>近30天各次关卡 · 得分率 · 点击图例切换序列 · 点击数据点打开该次复盘</span>
@@ -3322,6 +3400,15 @@ function pageGrowth() {
         ${HOME_USER.certs.map(c => `<tr><td>${c.n}</td><td class="mono">${c.got}</td><td class="mono">${c.review}</td><td><span class="tag ok">有效</span></td></tr>`).join('')}</table></div></section>
     </div>
     <div class="tk3" style="margin:6px 4px 14px">能力与胜任度数据为系统测算参考，任职资格评定以人工审核结果为准。</div></div>`;
+}
+function growthGen(i) {
+  const nm = GEN_DIMS[i]; const gen = (typeof M3 !== 'undefined' ? M3 : []).find(x => x.k === 'gen');
+  const it = gen && gen.items.find(x => x.n === nm);
+  const now = GEN_NOW[i];
+  openDrill('通用素质 · ' + nm, '本月 ' + now + ' 分 · 上月 ' + GEN_PREV[i] + ' 分 · 班组均值 ' + GEN_TEAM[i] + ' 分', `
+    <div class="tk3">来源：《深圳供电局有限公司素质模型》通用素质模型${it ? '　' + h(it.d) : ''}。得分由专家选聘答辩演练中对应题目的得分映射，尚无实测时取历史口径基线。</div>
+    ${it ? `<div class="lvs2">${it.lv.map((l, j) => `<div class="lvc2 ${now >= (j + 1) * 22 ? 'on' : ''}"><b>层级 ${j + 1} · ${h(l[0])}</b><p>${h(l[1])}</p></div>`).join('')}</div>` : ''}
+    <div class="bt"><button class="btn s" onclick="goPage('expert')">去专家选聘答辩练这一项</button><button class="btn s g" onclick="goPage('assess')">看三维能力地图</button></div>`);
 }
 function growthDim(i) {
   const n = DIMS10[i], k = DIMK[i];
@@ -3717,7 +3804,9 @@ function pagesClick(e) {
   if (n = q('[data-rvsum]')) { const r = examHist().find(x => x.id === RV.sel); if (!r) return true; openDrill('复盘摘要', '提交班组长前由本人确认', `<div class="draft" id="rvsum_txt" style="white-space:pre-line">${rvSummary(r)}</div>`, '<button class="btn" data-copy="rvsum_txt">复制摘要</button>'); return true; }
   if (n = q('[data-copy]')) { const t = $('#' + n.dataset.copy); const txt = t ? t.innerText : ''; try { navigator.clipboard.writeText(txt); } catch (err) { } n.textContent = '已复制'; return true; }
   /* 档案 */
+  if (n = q('[data-gmodel]')) { GR.model = n.dataset.gmodel; goPage('growth'); return true; }
   if (n = q('[data-gcmp]')) { GR.cmp = n.dataset.gcmp; $$('[data-gcmp]').forEach(x => x.classList.toggle('on', x === n)); const g = $('#gradar'); if (g) g.innerHTML = growthRadar(); return true; }
+  if (n = q('[data-gdim5]')) { growthGen(+n.dataset.gdim5); return true; }
   if (n = q('[data-gshow]')) { const k = n.dataset.gshow; GR.show[k] = !GR.show[k]; n.classList.toggle('on', GR.show[k]); const c = $('#gcurve'); if (c) c.innerHTML = chSessionCurve(histPoints().slice().sort((a, b) => b.d - a.d), GR.show, { w: 980, h: 250 }); return true; }
   if (n = q('[data-gdim]')) { growthDim(+n.dataset.gdim); return true; }
   if (n = q('[data-badge]')) { badgeDrill(n.dataset.badge); return true; }
@@ -5094,6 +5183,266 @@ function leaderClick(e) {
 }
 
 
+/* ===== 业绩贡献评价（附件5-5 技能专家业绩贡献评价标准）+ 五类专家综合评价权重（附件1 三、（二）综合评价程序）=====
+   分值表、等级、排名档、上限与限填项数照录标准原文；自评结果由本人填报，最终得分以评审专家组复评为准。 */
+
+const PERF_R4 = ['项目负责排名第1', '项目负责排名第2', '项目负责排名前5', '其他主要参与人'];
+const PERF_R3 = ['主编', '核心起草人员', '一般人员'];
+/* 按排名等差递减：给定首位与末位分值，中间等差 */
+function perfRank(first, last, n, rank) { if (n <= 1) return first; const r = Math.max(1, Math.min(n, rank)); return +(first - (first - last) * (r - 1) / (n - 1)).toFixed(2); }
+
+const PERF_STD = [
+  {
+    g: '工作成果', items: [
+      { c: '101-104', n: '解决问题', d: '主持或重要参与解决电网、电厂运行建设中的生产技术问题，取得显著成效', type: 'grid', roles: PERF_R4, max: 23,
+        lv: [['国家级', [15, 12, 9, 6]], ['南网公司级', [10, 8, 6, 4]], ['分子公司级', [8, 6.4, 4, 3.2]], ['地市企业级', [5, 4, 2.5, 2]]],
+        note: '清单制与申报制结合；人资部公示 15 项任务清单，另可额外申报 8 项。需技术研究报告、表彰决定、竣工验收报告等证明，技术报告需公告发文、三级领导人签字、报告原件、本部门盖章。' },
+      { c: '201-204', n: '工艺创新', d: '研究新方法，开发新产品／新装置／新工艺／新材料，提高生产建设效率并推广实施，产生显著效益', type: 'grid', roles: PERF_R4, max: 5,
+        lv: [['国家级', [15, 12, 9, 6]], ['南网公司级', [10, 8, 6, 4]], ['分子公司级', [8, 6.4, 4, 3.2]], ['地市企业级', [5, 4, 2.5, 2]]],
+        note: '申报制，限填 5 项以内。需红头文件、推广应用成效及角色排名证明，由归口部门签字盖章。' }
+    ]
+  },
+  {
+    g: '技术标准', items: [
+      { c: '301-305', n: '技术标准编制', d: '主持或主要编制（修订）以正式文件发布的技术标准类文件', type: 'grid', roles: PERF_R3, max: 3,
+        lv: [['国际标准', [20, 10, 5]], ['国家标准', [10, 7, 3.5]], ['行业标准、地方标准', [6, 4, 2]], ['团体标准', [3, 2, 1]], ['企业标准', [3, 2, 1]]],
+        note: '限填 3 项以内。行业级及以上修订与新编等值，其他修订按新编的 50% 计；同一标准已获技术标准奖励的此处不重复计分。' }
+    ]
+  },
+  {
+    g: '规范编制', items: [
+      { c: '401-404', n: '规范编制', d: '制度规范、技术手册、管理规定、实施细则、业务指导书、作业指导书等', type: 'grid', roles: PERF_R3, max: 5,
+        lv: [['行业级及以上', [5, 3, 1.5]], ['南网公司级', [3, 2, 1]], ['分子公司级', [1, 0.5, 0.25]], ['地市企业级', [0.5, 0.25, 0.125]]],
+        note: '限填 5 项以内。已包含在制度、规范中的业务指导书不重复计分；同一标准不得按设备型号、一二次等维度拆分罗列。' }
+    ]
+  },
+  {
+    g: '工作质量', cap: 30, capNote: '501–505 合计上限 30 分，其中 501 项上限 10 分', items: [
+      { c: '501', n: '两票或营销类作业表单合格连续累计数', d: '近三年，安全生产信息系统中担任工作负责人、工作班成员、许可人、会签人、签发人的工作票与担任操作人、监护人的操作票累计数量', type: 'step', step: 50, per: 2, unit: '张', cap: 10, note: '满 50 张得 2 分，每增加 50 张加 2 分；本项上限 10 分。' },
+      { c: '502', n: '操作无差错连续累计次数', d: '近三年', type: 'step', step: 1000, per: 2, unit: '次', note: '满 1000 次得 2 分，每增加 1000 次增加 2 分。' },
+      { c: '503', n: '发现／处理缺陷累计数', d: '近三年', type: 'step', step: 30, per: 2, unit: '项', note: '满 30 项得 2 分，每增加 30 项增加 2 分。' },
+      { c: '504', n: '年度绩效 A 次数', d: '近三年', type: 'count', per: 4, unit: '次', note: '4 分／次。' },
+      { c: '505', n: '获得通报表扬', d: '近三年', type: 'grid', roles: ['次数'], lv: [['南网公司级', [3]], ['分子公司级', [2]], ['地市企业级', [1]]], note: '南网公司级 3 分／次、分子公司级 2 分／次、地市企业级 1 分／次。' }
+    ]
+  },
+  {
+    g: '新技能应用', items: [
+      { c: '601-603', n: '南方电网公司价值创造奖、管理创新奖、科技进步奖', type: 'rank',
+        lv: [['一等', 6, 3, 15], ['二等', 4, 2, 9], ['三等', 2.5, 1.5, 7]],
+        note: '按排名等差递减；科技进步奖按标准分值 1.5 倍计分；同一成果与解决问题、技改项目只按最高项计分。' },
+      { c: '604-606', n: '分子公司价值创造奖、管理创新奖、科技进步奖', type: 'rank',
+        lv: [['一等', 2, 0.6, 15], ['二等', 0.9, 0.2, 10], ['三等', 0.3, 0.05, 7]], note: '按排名等差递减。' }
+    ]
+  },
+  {
+    g: '获得专利奖励', cap: 10, capNote: '此项积分上限 10 分', items: [
+      { c: '701', n: '中国专利奖', type: 'grid', roles: ['排名第1', '排名第2', '排名第3'], lv: [['金奖', [30, 27, 14]], ['银奖', [22, 19, 10]], ['优秀奖', [15, 12, 7]]], note: '按最高等级获奖算分，单个专利不重复算分；此处计分的专利在「获得专利授权」不重复计分。' },
+      { c: '702', n: '省部级、行业级专利奖（含深圳市）', type: 'grid', roles: ['排名第1', '排名第2', '排名第3'], lv: [['金奖', [10, 7, 5]], ['银奖', [7, 5, 3]], ['优秀奖', [5, 3, 2]]] },
+      { c: '703', n: '地市专利奖', type: 'grid', roles: ['排名第1', '排名第2', '排名第3'], lv: [['金奖', [1.8, 1.2, 0.9]], ['银奖', [1.2, 0.6, 0.6]], ['优秀奖', [0.6, 0.3, 0.3]] ], note: '杰出级技能专家考评中，地市或分子公司专利奖不计分。' }
+    ]
+  },
+  {
+    g: '获得职工创新奖励', items: [
+      { c: '801', n: '全国职工优秀技术创新成果奖', type: 'rank', lv: [['一等', 10, 2.2, 7], ['二等', 6, 1.2, 7], ['三等', 4, 1, 7]], note: '各等级排名得分按首位与末位等差递减计算；需获奖证书；全国 QC 奖只认政府颁发。' },
+      { c: '802', n: '全国能源化学地质系统优秀职工技术创新成果奖、全国电力职工技术成果奖、国际 QC 奖', type: 'rank', lv: [['一等', 6, 1.2, 7], ['二等', 4, 0.4, 7], ['三等', 2.5, 0.1, 7]] },
+      { c: '803', n: '南网公司职工技术创新奖、全国 QC 奖', type: 'rank', lv: [['一等', 5, 0.8, 7], ['二等', 3, 0.3, 7], ['三等', 2, 0.1, 7]] },
+      { c: '804', n: '地市或分子公司职工技术创新奖、省部级（行业级）QC 奖', type: 'rank', lv: [['一等', 3, 0.5, 7], ['二等', 2, 0.3, 7], ['三等', 1, 0.1, 7]] },
+      { c: '805', n: '其他等级 QC 奖', type: 'rank', lv: [['一等', 2, 0.5, 7], ['二等', 1, 0.3, 7], ['三等', 0.7, 0.1, 7]] }
+    ]
+  },
+  {
+    g: '技能成果', items: [
+      { c: '901', n: '获得大众创新奖励', type: 'count', per: 0.1, unit: '项', cap: 1, note: '0.1 分／项，本项合计上限 1 分；杰出级、领军级技能专家不评估此项。' },
+      { c: '1001-1004', n: '获得专利授权', type: 'grid', roles: ['项数单价'], max: 5,
+        lv: [['国际发明专利', [5]], ['发明专利', [1]], ['实用新型专利（含软件著作）', [0.2]], ['外观设计专利', [0.1]]],
+        note: '限填 5 项以内。同一专利已获专利奖的此处不重复计分；1001 仅含美国、日本、英国、澳大利亚发明专利。' },
+      { c: '1101-1107', n: '参加技能竞赛并获奖', type: 'grid', roles: ['一等', '二等', '三等'],
+        lv: [['国际级技能竞赛', [45, 40, 35]], ['国家部委（级）主办的全国技能竞赛', [33, 30, 27]], ['国家部委下属司局（级）主办的全国行业技能竞赛', [25, 22, 20]], ['行业协会主办的全国行业技能竞赛', [20, 16, 14]], ['省级／南网公司级技能竞赛', [14, 12, 10]], ['地市级政府／分子公司级技能竞赛', [10, 8, 6]], ['三级单位级技能竞赛', [6, 4, 2]]],
+        note: '个人奖项按标准计分，团体奖项按标准的 20% 计分；竞赛获奖项目教练按相应项目得分标准的 40% 计分，教练积分上限 30 分。' }
+    ]
+  },
+  {
+    g: '人才发展成果', items: [
+      { c: '1201-1205', n: '入选人才支持计划', type: 'grid', roles: ['第一档', '第二档', '第三档'],
+        lv: [['国家级', [50, 45, 40]], ['省部级', [30, 25, 20]], ['地市政府级', [10, 8, 3]], ['南网公司级', [10, 8, 3]], ['分子公司级', [5, 3.5, 2]]],
+        note: '同一申报人入选多个人才支持计划的，仅按最高等级计分一次。', max: 1 },
+      { c: '1301-1306', n: '获得人才荣誉或奖励', type: 'grid', roles: ['第一档', '第二档', '第三档'],
+        lv: [['国家级', [20, 15, 10]], ['省部级／行业级', [10, 8, 5]], ['地市政府级', [5, 3.5, 2]], ['南网公司级', [5, 3.5, 2]], ['分子公司级', [3, 2, 1]], ['地市企业级', [1, 0.8, 0.5]]],
+        note: '指与专业领域相关的个人荣誉或奖励，以公司荣誉项目库为准；集体荣誉按标准的 20% 计分；仅按最高等级计分一次。', max: 1 },
+      { c: '1401-1404', n: '发挥人才培养作用', d: '主持或主要参与培训评价标准或课件编制开发、各类题库编制、竞赛技术手册编制、岗位评价标准编制、评价任务等', type: 'grid', roles: ['组长', '核心成员', '一般人员'],
+        lv: [['行业级及以上', [6, 4, 2.5]], ['南网公司级', [4, 3, 1]], ['分子公司级', [2, 1, 0.5]], ['地市企业级', [1, 0.5, 0.25]]],
+        note: '核心人员指该项工作除组长外前 30% 的完成人员；担任技能竞赛教练的不在此项计分。' },
+      { c: '1501-1504', n: '知识培训授课', type: 'grid', roles: ['1 个月及以上', '1 周及以上至 1 个月以下', '1 周以内'],
+        lv: [['行业级及以上', [6, 4, 2.5]], ['南网公司级', [4, 3, 1]], ['分子公司级', [2, 1, 0.5]], ['地市企业级', [1, 0.5, 0.25]]],
+        note: '按每项培训授课任务的培训周期计算，须提供红头文培训通知、课程安排表（含讲师姓名）。' },
+      { c: '1601-1604', n: '人才交流', type: 'grid', roles: ['1 年及以上', '6 个月及以上'], cap: 9,
+        lv: [['参与系统内交流挂职 · 南网公司级', [6, 3]], ['参与系统内交流挂职 · 分子公司级', [4, 2]], ['参与系统外交流挂职 · 国外交流', [9, 4.5]], ['参与系统外交流挂职 · 国内交流', [6, 3]]],
+        note: '此项积分上限 9 分；系统内外借用借调可计分，需有正式手续／发文。' },
+      { c: '1701', n: '人才培养成效 · 培养徒弟', d: '近三年发挥传帮带作用', type: 'count', per: 1, unit: '名', cap: 2, note: '每培养 1 名徒弟加 1 分，上限 2 分；必须提供所在部门（单位）盖章的师徒协议。' },
+      { c: '1702', n: '高技能等级人才培养 · 技师', d: '近三年辅导员工参加高技能等级考试', type: 'count', per: 1, unit: '名', note: '每培养 1 名技师加 1 分；须提供正式发文、资格证书与盖章的人才培养证明。' },
+      { c: '1702b', n: '高技能等级人才培养 · 高级技师', type: 'count', per: 2, unit: '名', note: '每培养 1 名高级技师加 2 分。' },
+      { c: '1703', n: '专家个人从技师提升为高级技师', d: '近三年', type: 'count', per: 2, unit: '次', max: 1, note: '加 2 分。' }
+    ]
+  }
+];
+/* 1401-1404 与 1501-1504 合计上限 20 分 */
+const PERF_LINK_CAP = [{ codes: ['1401-1404', '1501-1504'], cap: 20, n: '发挥人才培养作用 + 知识培训授课' }];
+
+function perfItemScore(it, v) {
+  if (!v) return 0;
+  const n = Math.max(0, +v.n || 0);
+  let sc = 0;
+  if (it.type === 'count') sc = n * it.per;
+  else if (it.type === 'step') sc = Math.floor(n / it.step) * it.per;
+  else if (it.type === 'rank') { const L = it.lv[v.lv | 0]; if (!L) return 0; sc = perfRank(L[1], L[2], L[3], +v.rank || 1) * n; }
+  else { const L = it.lv[v.lv | 0]; if (!L) return 0; sc = (L[1][v.role | 0] || 0) * n; }
+  if (it.max) sc = Math.min(sc, it.type === 'grid' || it.type === 'rank' ? sc : sc);
+  if (it.cap != null) sc = Math.min(sc, it.cap);
+  return +sc.toFixed(2);
+}
+function perfCalc(vals) {
+  const groups = PERF_STD.map(g => {
+    const items = g.items.map(it => ({ it, sc: perfItemScore(it, vals[it.c]), n: (vals[it.c] || {}).n || 0 }));
+    let sum = +items.reduce((a, b) => a + b.sc, 0).toFixed(2);
+    const capped = g.cap != null && sum > g.cap;
+    if (capped) sum = g.cap;
+    return { g: g.g, cap: g.cap, capNote: g.capNote, capped, items, sum };
+  });
+  const linked = PERF_LINK_CAP.map(L => {
+    const raw = +PERF_STD.flatMap(g => g.items).filter(it => L.codes.includes(it.c)).reduce((a, it) => a + perfItemScore(it, vals[it.c]), 0).toFixed(2);
+    return { n: L.n, cap: L.cap, raw, over: raw > L.cap };
+  });
+  let total = +groups.reduce((a, b) => a + b.sum, 0).toFixed(2);
+  linked.forEach(L => { if (L.over) total = +(total - (L.raw - L.cap)).toFixed(2); });
+  return { groups, linked, total: Math.min(100, total), raw: total };
+}
+/* 自评建议：还有空间的方向、要补的证明材料、可申报项数余量 */
+function perfAdvice(r, vals) {
+  const out = [];
+  r.groups.forEach(g => {
+    const filled = g.items.filter(x => x.n > 0);
+    if (!filled.length) { out.push({ t: g.g, s: '本类一项未填', d: '「' + g.items[0].it.n + '」等项目若有业绩，按标准可直接计分，建议核对台账后补报。' }); return; }
+    if (g.capped) out.push({ t: g.g, s: '已触上限', d: g.capNote + '，再补报同类业绩不再增分，建议把材料放到其他一级指标。' });
+    filled.forEach(x => { if (x.it.max && x.n > x.it.max) out.push({ t: g.g, s: x.it.n + ' 超限填项数', d: '标准限填 ' + x.it.max + ' 项，超出部分不计分，建议只报最高等级的 ' + x.it.max + ' 项。' }); });
+  });
+  r.linked.forEach(L => { if (L.over) out.push({ t: '人才发展成果', s: L.n + ' 合计超上限', d: '两项合计上限 ' + L.cap + ' 分，自评填报折合 ' + L.raw + ' 分，超出部分不计入。' }); });
+  const zero = r.groups.filter(g => g.sum === 0).map(g => g.g);
+  if (zero.length) out.push({ t: '整体', s: '未覆盖的一级指标 ' + zero.length + ' 类', d: zero.join('、') + ' 目前为 0 分。业绩评价分组内合议、存疑修正、组织复评三个环节，没有发文依据的重要业绩事项可走清单制与申报制。' });
+  out.push({ t: '证明材料', s: '按标准逐项备齐', d: '工作成果类需技术研究报告、表彰决定、竣工验收报告等，技术报告要公告发文、三级领导人签字、报告原件与本部门盖章；奖项类需获奖证书；培养类需盖章的师徒协议与人才培养证明。' });
+  return out;
+}
+
+/* ---------- 五类专家：面试答辩评价标准与综合评价权重 ---------- */
+/* 专业技术专家代表性成果评价标准（附件6 一、（一））：指标按权重折算，每项 0–100 分，分三档 */
+const EXP_ACH = {
+  tech: { n: '代表性成果评价标准 · 科研序列 / 技术序列', items: [
+    { k: 'orig', n: '原创性', w: 40, mean: '成果在业务攻关中解决关键难题并取得重大突破，掌握核心技术并进行集成创新的程度，自主创新在总体成果中的比重', lv: [['优秀', '有重大突破或创新，且完全自主创新', 90, 100], ['良好', '有明显突破或创新，多项子成果自主创新', 60, 89], ['一般', '创新程度不高，单项子成果有创新', 0, 59]] },
+    { k: 'adv', n: '先进性', w: 40, mean: '与国内外最先进的技术或成果相比，其总体水平、主要技术、理念、经济、环境、生态等指标所处的位置', lv: [['优秀', '达到同类技术领先水平', 90, 100], ['良好', '达到同类技术先进水平', 60, 89], ['一般', '接近同类技术先进水平', 0, 59]] },
+    { k: 'cplx', n: '复杂性', w: 20, mean: '技术或成果的实现对现有理论、模型、算法、其他技术的依赖程度，以及实现的难度和复杂程度', lv: [['优秀', '在自创的理论、模型等的支撑下的技术／成果实现，有很高的复杂性', 90, 100], ['良好', '引入跨领域的技术／成果得以实现，有较高的复杂性', 60, 89], ['一般', '在现有技术／成果基础上的改进，有一定的复杂性', 0, 59]] }
+  ] },
+  func: { n: '代表性成果评价标准 · 专业序列（职能类）', items: [
+    { k: 'new', n: '创新性', w: 30, mean: '成果在业务攻关中解决关键难题并取得重大突破的程度，自主创新在总体成果中的比重', lv: [['优秀', '有重大突破或创新，且完全自主创新', 90, 100], ['良好', '有明显突破或创新，多项子成果自主创新', 60, 89], ['一般', '成效、效率显著提升或效益贡献突出', 0, 59]] },
+    { k: 'use', n: '实用性', w: 40, mean: '成果已经达到实际应用的程度', lv: [['优秀', '该成果已经得到广泛应用，或该成果的落地应用程度高', 90, 100], ['良好', '该成果已经应用于实际工作，或该成果的落地应用程度较高', 60, 89], ['一般', '效率得到提升或效益贡献良好', 0, 59]] },
+    { k: 'ben', n: '效益性', w: 30, mean: '成果对于解决公司重点、难点问题所起的作用，以及带来的直接或间接经济效益', lv: [['优秀', '成效、效率显著提升或效益贡献突出', 90, 100], ['良好', '该成果基本具备落地应用的条件', 60, 89], ['一般', '效率提升或效益贡献一般，或虽有提升但产生了其他负面效应', 0, 59]] }
+  ] },
+  mkt: { n: '代表性成果评价标准 · 专业序列（市场类）', items: [
+    { k: 'new', n: '创新性', w: 20, mean: '成果在业务攻关中解决关键难题并取得重大突破，或在管理及商业模式上有重大的创新突破', lv: [['优秀', '有重大突破或创新，且完全自主创新', 90, 100], ['良好', '有明显突破或创新，多项子成果自主创新', 60, 89], ['一般', '创新程度不高，单项子成果有创新', 0, 59]] },
+    { k: 'comp', n: '竞争力', w: 40, mean: '成果对于解决行业、公司重点难点问题，推动公司转型升级，提高核心竞争力或相关业务领域实力的作用', lv: [['优秀', '显著促进相关专业领域发展，在国内外具有显著竞争优势', 90, 100], ['良好', '推动相关专业领域发展作用明显，在国内外具有一定竞争优势', 60, 89], ['一般', '对相关专业领域发展有一定作用，在国内外竞争优势一般', 0, 59]] },
+    { k: 'ben', n: '效益性', w: 40, mean: '成果有市场价值，能够带来直接或间接的经济效益', lv: [['优秀', '经济效益显著', 90, 100], ['良好', '经济效益良好', 60, 89], ['一般', '经济效益一般', 0, 59]] }
+  ] }
+};
+/* 综合评价各环节分数占比（附件1 三、（二））。技能专家的技能实操与理论水平为现场考评环节，本平台不测评，按现场成绩录入 */
+const EXP_KINDS = [
+  { k: 'skill', n: '技能专家', pos: '侧重选拔在公司生产经营各专业领域工作实绩突出、技能水平出众、发展潜力较大，在基层一线发挥示范带头作用的技能人才', face: 'core',
+    w: [['工作业绩评价', 'perf', 40], ['技能实操', 'lab', 30], ['理论水平', 'theory', 15], ['面试答辩（核心能力评价、招标竞聘）', 'face', 15]],
+    faceNote: '含自我介绍、工作实例及专业见解、专家招标竞聘答辩、专家自由提问四部分' },
+  { k: 'res', n: '专业技术专家（科研序列）', pos: '侧重选拔在工程科技领域开展关键核心技术攻关、解决关键科学技术问题并取得重要研究成果的科研人才', face: 'tech',
+    w: [['业绩贡献评价', 'perf', 60], ['代表性成果评价', 'ach', 25], ['发展潜力评价（招标竞聘）', 'bid', 15]],
+    faceNote: '含自我介绍、代表性成果展示、专家招标竞聘答辩、专家自由提问四部分' },
+  { k: 'tech', n: '专业技术专家（技术序列）', pos: '侧重选拔在电网规划、基建工程、生产运维、电力营销、调度控制、供应链、数字化、安全监管等领域完成重大工程建设支撑、解决重大安全和生产技术问题、开展重点项目攻关的技术人才', face: 'tech',
+    w: [['业绩贡献评价', 'perf', 60], ['代表性成果评价', 'ach', 25], ['发展潜力评价（招标竞聘）', 'bid', 15]],
+    faceNote: '含自我介绍、代表性成果展示、专家招标竞聘答辩、专家自由提问四部分' },
+  { k: 'func', n: '专业技术专家（专业序列-职能类）', pos: '侧重选拔在各非技术类职能业务领域解决重大问题、策划重大改革、推进重大专项工作并取得显著成效的专业技术人才', face: 'func',
+    w: [['业绩贡献评价', 'perf', 60], ['代表性成果评价', 'ach', 20], ['发展潜力评价（招标竞聘）', 'bid', 20]],
+    faceNote: '含自我介绍、代表性成果展示、专家招标竞聘答辩、专家自由提问四部分' },
+  { k: 'mkt', n: '专业技术专家（专业序列-市场类）', pos: '侧重选拔在新兴、国际、金融等市场化业务中做出突出贡献、产生显著效益的专业技术人才', face: 'mkt',
+    w: [['业绩贡献评价', 'perf', 60], ['代表性成果评价', 'ach', 25], ['发展潜力评价（招标竞聘）', 'bid', 15]],
+    faceNote: '含自我介绍、代表性成果展示、专家招标竞聘答辩、专家自由提问四部分' }
+];
+function expKind(k) { return EXP_KINDS.find(x => x.k === k) || EXP_KINDS[0]; }
+/* 面试答辩专家组（附件1 四、（三））：拔尖级 5 人 */
+const EXP_PANEL = [
+  ['组长', '业务归口部门三级干部（领军级由公司领导担任）'],
+  ['人资评委', '人力资源部三级干部'],
+  ['业务评委', '相关业务领域三级干部'],
+  ['专家评委', '不参与选聘的领军级及以上专家、专家委成员或内外部高水平专家']
+];
+/* 综合报告：业绩 + 面试按类别权重折算 */
+function expOverall(kindK, perfTotal, face) {
+  const K = expKind(kindK);
+  const rows = K.w.map(([n, k, w]) => {
+    let v = null, src = '';
+    if (k === 'perf') { v = perfTotal; src = '业绩贡献自评（附件5-5）'; }
+    else if (k === 'face') { v = face.core; src = '本次答辩 · 核心能力评价'; }
+    else if (k === 'ach') { v = face.ach; src = '本次答辩 · 代表性成果评价'; }
+    else if (k === 'bid') { v = face.bid; src = '本次答辩 · 招标竞聘'; }
+    else { v = (face.site && face.site[k] != null) ? face.site[k] : null; src = '现场考评环节 · ' + (v == null ? '未录入' : '已录入成绩'); }
+    return { n, k, w, v, src, part: v == null ? null : +(v * w / 100).toFixed(1) };
+  });
+  const got = rows.filter(r => r.part != null);
+  const wSum = got.reduce((a, b) => a + b.w, 0);
+  const sum = +got.reduce((a, b) => a + b.part, 0).toFixed(1);
+  return { K, rows, sum, wSum, norm: wSum ? +(sum / wSum * 100).toFixed(1) : 0 };
+}
+
+/* 代表性成果评价：把各题得分按指标映射折算成 0–100，再按权重合计 */
+const EXP_ACH_MAP = { tech: { orig: 'new', adv: 'adv', cplx: 'use' }, func: { new: 'new', use: 'use', ben: 'adv' }, mkt: { new: 'new', comp: 'adv', ben: 'use' } };
+function expAch(kindK, rounds) {
+  const K = expKind(kindK); const sheet = EXP_ACH[K.face]; if (!sheet) return null;
+  const map = EXP_ACH_MAP[K.face] || {};
+  const by = {}; rounds.forEach(r => { const s = r.q.std; (by[s] = by[s] || []).push(r.sc.total); });
+  const items = sheet.items.map(it => {
+    const src = map[it.k]; const arr = by[src] || [];
+    const v = arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+    const lv = v == null ? null : (it.lv.find(l => v >= l[2] && v <= l[3]) || it.lv[it.lv.length - 1]);
+    return { item: it, v, lv };
+  });
+  const got = items.filter(x => x.v != null);
+  const sum = got.length ? Math.round(got.reduce((a, b) => a + b.v * b.item.w, 0) / got.reduce((a, b) => a + b.item.w, 0)) : 0;
+  return { sheet, items, sum };
+}
+
+/* ---------- 导出 Excel：离线生成带格式的 .xls（HTML 表格 + Excel MIME），可直接用 Excel 打开 ---------- */
+function xlsEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+/* blocks: [{ t: 小标题, sub: 说明, head: [列名], rows: [[值]], w: [列宽], mark: (r,c,v)=>'ok'|'bad'|'w'|'' }] */
+function xlsDownload(fileName, title, sub, blocks) {
+  const sty = `<style>
+    table{border-collapse:collapse;font-family:"Microsoft YaHei",Arial;font-size:11pt}
+    td,th{border:.5pt solid #b8c0b8;padding:5px 8px;vertical-align:top}
+    .t1{font-size:16pt;font-weight:bold;color:#1f4d33;border:none;padding:10px 0 2px}
+    .t2{font-size:10pt;color:#6b7a6e;border:none;padding:0 0 10px}
+    .h{background:#e8efe9;font-weight:bold;color:#1f4d33}
+    .s{background:#f4f7f4;font-weight:bold;color:#1f4d33;font-size:12pt}
+    .ok{background:#eaf5ee;color:#1f6b42;font-weight:bold}
+    .bad{background:#fbeded;color:#a52a2a;font-weight:bold}
+    .w{background:#fdf6e7;color:#8a5a12;font-weight:bold}
+    .num{mso-number-format:"0.0#";text-align:right}
+  </style>`;
+  const body = blocks.map(b => {
+    const cols = (b.head || []).length || 1;
+    const head = b.head ? `<tr>${b.head.map(x => `<th class="h">${xlsEsc(x)}</th>`).join('')}</tr>` : '';
+    const rows = (b.rows || []).map((r, ri) => `<tr>${r.map((c, ci) => `<td class="${b.mark ? (b.mark(ri, ci, c) || '') : ''}">${xlsEsc(c)}</td>`).join('')}</tr>`).join('');
+    return `<tr><td class="s" colspan="${cols}">${xlsEsc(b.t)}${b.sub ? ' <span style="font-weight:normal;font-size:9pt;color:#6b7a6e">' + xlsEsc(b.sub) + '</span>' : ''}</td></tr>${head}${rows}<tr><td colspan="${cols}" style="border:none;height:8px"></td></tr>`;
+  }).join('');
+  const cols = Math.max.apply(null, blocks.map(b => (b.head || []).length || 1));
+  const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8">${sty}</head><body>
+    <table><tr><td class="t1" colspan="${cols}">${xlsEsc(title)}</td></tr><tr><td class="t2" colspan="${cols}">${xlsEsc(sub)}</td></tr>${body}</table></body></html>`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + html], { type: 'application/vnd.ms-excel;charset=utf-8' }));
+  a.download = fileName; a.click();
+}
+
+
 /* ===== 制度文件库：条款可追溯到原文件、条款编号、条文正文 =====
    检索优先级（《ai参考文件优先级》）：第一优先安规及释义 → 第二优先电气操作导则 → 其后调度实施细则、已发布标准票、结构化标注表。
    条文一律照录，检索不到时返回“未找到足够明确的制度依据，建议人工复核”，不得编造文件名、条款号或条文。 */
@@ -6239,16 +6588,16 @@ const EXP_SAMPLE = {
 /* ===== 场景 E · 专家选聘答辩页：数字人评委提问 → 学员作答 → 按标准打分 → 逐句点评 + 亮点 + 改进 ===== */
 
 const EP = {
-  on: false, i: 0, rounds: [], dh: null, sec: 0, timer: null, stress: false, res: null, asked: [],
+  on: false, i: 0, rounds: [], dh: null, sec: 0, timer: null, stress: false, res: null, asked: [], kind: 'skill', stage: 'intro', perf: {}, perfDone: false, site: {},
   /* 可定制的陪练 AI：性别、性格、年龄、教育背景、角色身份、情绪状态、语言风格 */
-  cfg: { sex: 'f', temper: '严谨', age: '45 岁', edu: '硕士 · 电气工程', role: '技术评委', mood: '平静', style: '书面严谨', name: '评委 · 林岚' }
+  cfg: { sex: 'f', temper: '严谨', age: '45 岁', edu: '硕士 · 电气工程', role: '业务评委', mood: '平静', style: '书面严谨', name: '评委 · 林岚' }
 };
 const EP_OPT = {
   sex: [['f', '女'], ['m', '男']],
   temper: [['严谨', '严谨'], ['温和', '温和'], ['犀利', '犀利']],
   age: [['38 岁', '38 岁'], ['45 岁', '45 岁'], ['52 岁', '52 岁']],
   edu: [['本科 · 电力系统', '本科 · 电力系统'], ['硕士 · 电气工程', '硕士 · 电气工程'], ['博士 · 高电压技术', '博士 · 高电压技术']],
-  role: [['评委长', '评委长'], ['技术评委', '技术评委'], ['人资评委', '人资评委']],
+  role: EXP_PANEL.map(x => [x[0], x[0] + '（' + x[1] + '）']),
   mood: [['平静', '平静'], ['专注', '专注'], ['追问', '追问']],
   style: [['书面严谨', '书面严谨'], ['口语平实', '口语平实'], ['简短直接', '简短直接']]
 };
@@ -6264,17 +6613,33 @@ function epSay(q, extra) {
 function pageExpert() {
   if (EP.res) return epResultHTML();
   if (EP.on) return epRunHTML();
+  if (EP.stage === 'perf') return epPerfHTML();
   return epIntroHTML();
 }
 function epIntroHTML() {
   const recs = expRecords();
+  const K = expKind(EP.kind);
   const sel = (k, cur) => `<select data-epcfg="${k}">${EP_OPT[k].map(o => `<option value="${h(o[0])}" ${o[0] === cur ? 'selected' : ''}>${h(o[1])}</option>`).join('')}</select>`;
+  const pr = EP.perfDone ? perfCalc(EP.perf) : null;
+  const ach = EXP_ACH[K.face];
   return `<div class="wrap epwrap">
-    <div class="ph"><h2>专家选聘答辩</h2><span class="sub">E 类 · 职业发展　${h(EP_META_KIND())}　评价标准：${h(EXP_META.src)}</span></div>
+    <div class="ph"><h2>专家选聘答辩</h2><span class="sub">E 类 · 职业发展　评价标准：《专家选聘面试答辩评价标准》附件6 · 《专家选聘工作方案》附件1 · 《技能专家业绩贡献评价标准》附件5-5</span></div>
+    <div class="card"><div class="ch"><b>选择专家类别</b><span class="note">五大类可选，不同类别的面试答辩标准与综合评价权重不同</span></div>
+      <div class="epkinds">${EXP_KINDS.map(x => `<div class="epk ${x.k === EP.kind ? 'on' : ''}" data-epkind="${x.k}"><b>${h(x.n)}</b><span>${x.w.map(w => w[0] + ' ' + w[2] + '%').join(' · ')}</span></div>`).join('')}</div>
+      <p class="epintro"><b>定位</b>${h(K.pos)}。<b>面试答辩</b>${h(K.faceNote)}。</p>
+      <div class="epstd"><b>综合评价各环节分数占比</b>${K.w.map(w => `<span><i>${h(w[0])}</i>${w[2]}%</span>`).join('')}</div>
+      ${K.face === 'core' ? `<div class="epstd"><b>核心能力评价标准（100 分）</b>${EXP_STD.core.map(x => `<span><i>${h(x.n)}</i>${x.w} 分</span>`).join('')}</div>` : `<div class="epstd"><b>${h(ach.n)}</b>${ach.items.map(x => `<span><i>${h(x.n)}</i>权重 ${x.w}%</span>`).join('')}</div>`}
+      <div class="epstd"><b>${K.face === 'core' ? '招标竞聘评价标准（100 分）' : '发展潜力评价 · 招标竞聘（100 分）'}</b>${EXP_STD.bid.map(x => `<span><i>${h(x.n)}</i>${x.w} 分</span>`).join('')}</div>
+    </div>
+    <div class="card"><div class="ch"><b>业绩贡献自测</b><span class="note">答辩前先做，按《技能专家业绩贡献评价标准》逐项自评，与面试得分一起折算综合分数</span>
+      <span class="r"><button class="btn ${pr ? 's g' : 'pri'}" id="epperf">${pr ? '重新自测 / 修改填报' : '开始业绩自测'}</button></span></div>
+      ${pr ? `<div class="epperfsum"><div class="big"><b>${pr.total}</b><span>业绩贡献自评 / 100</span></div>
+        ${pr.groups.map(g => `<div class="pg"><span>${h(g.g)}</span><b class="mono">${g.sum}</b>${g.capped ? '<i class="tag w">已达上限</i>' : ''}</div>`).join('')}</div>`
+      : '<div class="empty">还没有做业绩自测。业绩评价占比最高（技能专家 40%、专业技术专家 60%），建议先自评再答辩，报告会把两部分合起来给结论与建议。</div>'}
+    </div>
     <div class="card"><div class="ch"><b>场景说明</b></div>
-      <p class="epintro">${h(EXP_META.intro)}本次共 ${EXP_Q.length} 类问题，抽 5 题作答。系统按硬性指标（关键词命中、合规红线、流程步骤）、软性指标（表达、共情、逻辑、情绪）、结果指标（任务是否达成、是否满意）三类打分，并折算到核心能力评价标准的实用性、先进性、创新性三项。</p>
-      <div class="epstd"><b>核心能力评价标准（100 分）</b>${EXP_STD.core.map(s => `<span><i>${h(s.n)}</i>${s.w} 分</span>`).join('')}</div>
-      <div class="epstd"><b>招标竞聘评价标准（100 分）</b>${EXP_STD.bid.map(s => `<span><i>${h(s.n)}</i>${s.w} 分</span>`).join('')}</div>
+      <p class="epintro">${h(EXP_META.intro)}本次共 ${EXP_Q.length} 类问题，抽 5 题作答。系统按硬性指标（关键词命中、合规红线、流程步骤）、软性指标（表达、共情、逻辑、情绪）、结果指标（任务是否达成、是否满意）三类打分，并折算到${K.face === 'core' ? '核心能力评价标准的实用性、先进性、创新性三项' : ach.items.map(x => x.n).join('、') + '三项'}。</p>
+      <div class="eppanel"><b>面试答辩专家组</b>${EXP_PANEL.map(x => `<span><i>${h(x[0])}</i>${h(x[1])}</span>`).join('')}</div>
     </div>
     <div class="card"><div class="ch"><b>定制陪练 AI</b><span class="note">性别 · 性格 · 年龄 · 教育背景 · 角色身份 · 情绪状态 · 语言风格</span></div>
       <div class="epcfg">
@@ -6284,7 +6649,51 @@ function epIntroHTML() {
       <div class="tkgo"><label class="tkmd stress" style="margin-right:12px"><input type="checkbox" id="epstress"><b>压力模式</b><span>评委追问 · 每题限时 3 分钟</span></label><button class="btn pri" id="epstart">开始答辩</button></div>
     </div>
     <div class="card"><div class="ch"><b>我的答辩档案</b><span class="note">完整保存整场交互内容，可回看</span></div>
-      ${recs.length ? `<table class="tb"><tr><th>时间</th><th>用时</th><th>核心能力得分</th><th>结论</th><th>短板</th><th></th></tr>${recs.map((r, i) => `<tr><td>${h(r.d)}</td><td>${Math.floor(r.sec / 60)}分${r.sec % 60}秒</td><td class="mono">${r.core}</td><td>${r.core >= 60 ? '<span class="tag ok">通过</span>' : '<span class="tag bad">未通过</span>'}</td><td class="note">${h((r.weak || []).join('、') || '无')}</td><td><button class="btn s" data-epopen="${i}">回看</button></td></tr>`).join('')}</table>` : '<div class="empty">还没有答辩记录</div>'}
+      ${recs.length ? `<table class="tb"><tr><th>时间</th><th>类别</th><th>用时</th><th>面试得分</th><th>业绩自评</th><th>综合</th><th>短板</th><th></th></tr>${recs.map((r, i) => `<tr><td>${h(r.d)}</td><td class="note">${h(expKind(r.kind || 'skill').n)}</td><td>${Math.floor(r.sec / 60)}分${r.sec % 60}秒</td><td class="mono">${r.core}</td><td class="mono">${r.perf == null ? '未做' : r.perf}</td><td class="mono">${r.overall == null ? '—' : r.overall}</td><td class="note">${h((r.weak || []).join('、') || '无')}</td><td><button class="btn s" data-epopen="${i}">回看</button></td></tr>`).join('')}</table>` : '<div class="empty">还没有答辩记录</div>'}
+    </div>
+  </div>`;
+}
+/* ---------- 业绩贡献自测：按附件5-5 逐项填报，实时算分并给建议 ---------- */
+function epPerfHTML() {
+  const r = perfCalc(EP.perf);
+  const adv = perfAdvice(r, EP.perf);
+  const K = expKind(EP.kind);
+  const row = (it) => {
+    const v = EP.perf[it.c] || {};
+    const lvSel = it.type === 'grid' || it.type === 'rank'
+      ? `<select data-pf="lv" data-c="${it.c}">${it.lv.map((l, i) => `<option value="${i}" ${(v.lv | 0) === i ? 'selected' : ''}>${h(it.type === 'rank' ? l[0] : l[0])}</option>`).join('')}</select>` : '';
+    const roleSel = it.type === 'grid'
+      ? `<select data-pf="role" data-c="${it.c}">${it.roles.map((n, i) => `<option value="${i}" ${(v.role | 0) === i ? 'selected' : ''}>${h(n)}</option>`).join('')}</select>` : '';
+    const rankSel = it.type === 'rank'
+      ? `<select data-pf="rank" data-c="${it.c}">${Array.from({ length: it.lv[(v.lv | 0)] ? it.lv[(v.lv | 0)][3] : 7 }, (x, i) => `<option value="${i + 1}" ${(+v.rank || 1) === i + 1 ? 'selected' : ''}>排名第 ${i + 1}</option>`).join('')}</select>` : '';
+    const unit = it.unit || '项';
+    return `<tr><td><b>${h(it.n)}</b><span class="note mono"> ${h(it.c)}</span>${it.d ? `<p class="note">${h(it.d)}</p>` : ''}${it.note ? `<p class="pfnote">${h(it.note)}</p>` : ''}</td>
+      <td class="pfin">${lvSel}${roleSel}${rankSel}<input type="number" min="0" step="1" data-pf="n" data-c="${it.c}" value="${v.n || 0}"><span class="note">${h(unit)}</span>${it.max ? `<span class="note">限 ${it.max}</span>` : ''}</td>
+      <td class="mono pfsc">${perfItemScore(it, v)}</td></tr>`;
+  };
+  return `<div class="wrap epwrap">
+    <div class="ph"><h2>业绩贡献自测</h2><span class="sub">《技能专家业绩贡献评价标准》附件5-5　${h(K.n)}　业绩环节占综合评价 ${K.w[0][2]}%</span>
+      <span class="r"><button class="btn s g" id="epperfback">返回</button><button class="btn s g" id="epperfclear">清空重填</button><button class="btn pri" id="epperfok">完成自测，进入答辩</button></span></div>
+    <div class="epperf">
+      <div>
+        ${PERF_STD.map(g => `<div class="card"><div class="ch"><b>${h(g.g)}</b>${g.capNote ? `<span class="note">${h(g.capNote)}</span>` : ''}<span class="r mono">${r.groups.find(x => x.g === g.g).sum} 分</span></div>
+          <table class="tb pft"><tr><th>二级指标</th><th style="width:330px">等级 · 角色 · 项数</th><th style="width:56px">得分</th></tr>${g.items.map(row).join('')}</table></div>`).join('')}
+      </div>
+      <div class="epperfside">
+        <div class="card"><div class="ch"><b>自评合计</b></div>
+          <div class="big2"><b>${r.total}</b><span>业绩贡献自评 / 100</span></div>
+          <table class="tb s">${r.groups.map(g => `<tr><td>${h(g.g)}</td><td class="mono r">${g.sum}${g.capped ? ' <span class="tag w">上限</span>' : ''}</td></tr>`).join('')}
+            ${r.linked.map(L => `<tr><td class="note">${h(L.n)} 合计上限 ${L.cap}</td><td class="mono r">${L.raw}${L.over ? ' <span class="tag w">超</span>' : ''}</td></tr>`).join('')}</table>
+          <p class="note">自评结果由本人填报，最终得分由评审专家组经组内合议、存疑修正、组织复评确定。</p>
+        </div>
+        ${expKind(EP.kind).w.some(w => w[1] === 'lab' || w[1] === 'theory') ? `<div class="card"><div class="ch"><b>现场考评成绩</b><span class="note">技能实操与理论水平为集中考评环节，按实际成绩录入</span></div>
+          <div class="pfsite"><label>技能实操<input type="number" min="0" max="100" data-site="lab" value="${EP.site.lab == null ? '' : EP.site.lab}" placeholder="0-100"></label>
+            <label>理论水平<input type="number" min="0" max="100" data-site="theory" value="${EP.site.theory == null ? '' : EP.site.theory}" placeholder="0-100"></label></div>
+          <p class="note">技能实操成绩大于等于 80 分方可进入下一评价环节；高级技师无需参加实操理论考核，成绩按满分计算。</p></div>` : ''}
+        <div class="card"><div class="ch"><b>填报建议</b></div>
+          ${adv.map(a => `<div class="pfadv"><b>${h(a.t)}</b><span class="tag w">${h(a.s)}</span><p>${h(a.d)}</p></div>`).join('')}
+        </div>
+      </div>
     </div>
   </div>`;
 }
@@ -6373,21 +6782,24 @@ function epNext() {
   const coreSum = core.reduce((s, c) => s + c.sc, 0), bidSum = bid.reduce((s, c) => s + c.sc, 0);
   const dims = expDims(EP.rounds);
   const weak = EP.rounds.slice().sort((a, b) => a.sc.total - b.sc.total).slice(0, 2).map(r => r.q.n);
-  EP.res = { core, bid, coreSum, bidSum, dims, rounds: EP.rounds, avg, weak, sec: EP.sec };
+  const ach = expAch(EP.kind, EP.rounds);
+  const pf = EP.perfDone ? perfCalc(EP.perf) : null;
+  const ov = expOverall(EP.kind, pf ? pf.total : null, { core: coreSum, bid: bidSum, ach: ach ? ach.sum : null, site: EP.site });
+  EP.res = { core, bid, coreSum, bidSum, dims, rounds: EP.rounds, avg, weak, sec: EP.sec, kind: EP.kind, ach, perf: pf, ov };
   EP.on = false;
-  expSave({ d: stamp(), sec: EP.sec, core: coreSum, bid: bidSum, weak, dims, rounds: EP.rounds.map(r => ({ qn: r.q.n, qt: r.qt, ans: r.ans, total: r.sc.total, good: r.sc.good, bad: r.sc.bad })) });
+  expSave({ d: stamp(), kind: EP.kind, site: EP.site, sec: EP.sec, core: coreSum, bid: bidSum, perf: pf ? pf.total : null, overall: ov.sum, weak, dims, rounds: EP.rounds.map(r => ({ qn: r.q.n, qt: r.qt, ans: r.ans, total: r.sc.total, good: r.sc.good, bad: r.sc.bad })) });
   goPage('expert');
 }
 function epResultHTML() {
   const r = EP.res;
   const lvTag = l => `<span class="tag ${l[0] === '优秀' ? 'ok' : l[0] === '良好' ? '' : 'w'}">${l[0]}</span>`;
   return `<div class="wrap epwrap">
-    <div class="ph"><h2>答辩测评报告</h2><span class="sub">${h(EXP_META.kind)}　用时 ${Math.floor(r.sec / 60)} 分 ${r.sec % 60} 秒　评委 ${h(EP.cfg.name)}（${h(EP.cfg.role)}）</span>
+    <div class="ph"><h2>答辩测评报告</h2><span class="sub">${h(expKind(r.kind).n)}　用时 ${Math.floor(r.sec / 60)} 分 ${r.sec % 60} 秒　评委 ${h(EP.cfg.name)}（${h(EP.cfg.role)}）</span>
       <span class="r"><button class="btn s" id="epagain">再答一次</button><button class="btn s g" id="epexport">导出报告</button></span></div>
     <div class="epres">
       <div class="card epsc ${r.coreSum >= 60 ? 'ok' : 'bad'}"><b>${r.coreSum}</b><span>核心能力评价 / 100</span><div class="verd">${r.coreSum >= 80 ? '优秀' : r.coreSum >= 60 ? '通过' : '未通过'}</div>
         <div class="note">招标竞聘评价标准折算 ${r.bidSum} 分</div></div>
-      <div class="card"><div class="ch"><b>核心能力评价标准</b><span class="note">实用性 40 · 先进性 30 · 创新性 30</span></div>
+      <div class="card"><div class="ch"><b>核心能力评价标准</b><span class="note">实用性 40 · 先进性 30 · 创新性 30${expKind(r.kind).face === 'core' ? '' : '（本类别的面试答辩以代表性成果评价为准，见下表）'}</span></div>
         ${r.core.map(c => `<div class="epline"><b>${h(c.item.n)}</b>${lvTag(c.lv)}<div class="bar"><i style="width:${Math.round(c.sc / c.item.w * 100)}%"></i></div><span class="mono">${c.sc}/${c.item.w}</span><p class="note">${h(c.lv[1])}</p></div>`).join('')}</div>
       <div class="card"><div class="ch"><b>通用能力</b><span class="note">素质模型五项 · 由各题得分映射</span></div>
         ${r.dims.map(d => `<div class="epline"><b>${h(d.n)}</b><div class="bar"><i style="width:${d.v == null ? 0 : d.v}%"></i></div><span class="mono">${d.v == null ? '本次未考' : d.v}</span></div>`).join('')}</div>
@@ -6395,6 +6807,16 @@ function epResultHTML() {
     <div class="card"><div class="ch"><b>招标竞聘评价标准</b><span class="note">必要性 20 · 可行性 45 · 价值性 20 · 创新性 15</span></div>
       <table class="tb"><tr><th>评价指标</th><th>得分</th><th>档次</th><th>评分标准</th></tr>
       ${r.bid.map(c => `<tr><td><b>${h(c.item.n)}</b>（${c.item.w} 分）</td><td class="mono">${c.sc}</td><td>${lvTag(c.lv)}</td><td class="note">${h(c.lv[1])}</td></tr>`).join('')}</table></div>
+    <div class="card"><div class="ch"><b>综合评价 · ${h(expKind(r.kind).n)}</b><span class="note">按《专家选聘工作方案》附件1 三、（二）的环节占比折算　${r.ov.wSum < 100 ? '现场考评环节未录入，下表按已完成环节归一化' : ''}</span></div>
+      <table class="tb"><tr><th>评价环节</th><th>占比</th><th>得分</th><th>折合</th><th>取数</th></tr>
+      ${r.ov.rows.map(x => `<tr class="${x.part == null ? 'no' : ''}"><td><b>${h(x.n)}</b></td><td class="mono">${x.w}%</td><td class="mono">${x.v == null ? '未录入' : x.v}</td><td class="mono">${x.part == null ? '—' : x.part}</td><td class="note">${h(x.src)}</td></tr>`).join('')}
+      <tr><td><b>综合得分</b></td><td class="mono">${r.ov.wSum}%</td><td></td><td class="mono"><b>${r.ov.sum}</b></td><td class="note">已完成环节归一化后 ${r.ov.norm} 分</td></tr></table>
+      ${r.perf && r.perf.groups && r.perf.groups.length ? `<div class="ch2"><b>业绩贡献情况与建议</b></div><div class="pfadvs">${perfAdvice(r.perf, EP.perf).map(a => `<div class="pfadv"><b>${h(a.t)}</b><span class="tag w">${h(a.s)}</span><p>${h(a.d)}</p></div>`).join('')}</div>`
+        : '<div class="empty">本次没有做业绩自测。业绩环节占比最高，建议回到答辩首页先完成业绩贡献自测，报告才能给出完整的综合得分与业绩建议。</div>'}</div>
+    ${r.ach ? `<div class="card"><div class="ch"><b>${h(r.ach.sheet.n)}</b><span class="note">各指标按权重折算，分档与含义照录标准原文</span></div>
+      <table class="tb"><tr><th>评价指标</th><th>权重</th><th>得分</th><th>档次</th><th>指标含义</th></tr>
+      ${r.ach.items.map(x => `<tr><td><b>${h(x.item.n)}</b></td><td class="mono">${x.item.w}%</td><td class="mono">${x.v == null ? '本次未考' : x.v}</td><td>${x.lv ? `<span class="tag ${x.lv[0] === '优秀' ? 'ok' : x.lv[0] === '良好' ? '' : 'w'}">${x.lv[0]}</span><span class="note"> ${h(x.lv[1])}</span>` : ''}</td><td class="note">${h(x.item.mean)}</td></tr>`).join('')}
+      <tr><td><b>合计</b></td><td></td><td class="mono"><b>${r.ach.sum}</b></td><td colspan="2" class="note">按权重加权平均</td></tr></table></div>` : ''}
     <div class="card"><div class="ch"><b>逐题点评</b><span class="note">逐句点评 + 亮点 + 改进</span></div>
       ${r.rounds.map((x, i) => `<div class="eprv"><div class="rh"><span class="tag">${h(x.q.n)}</span><b>${h(x.qt)}</b><span class="r mono">${x.sc.total} 分</span></div>
         <div class="ra">${h(x.ans)}</div>
@@ -6415,6 +6837,20 @@ function expertAfter() {
     const x = $('#epexport'); if (x) x.onclick = epExport;
     return;
   }
+  if (EP.stage === 'perf') {
+    $$('[data-pf]').forEach(el => {
+      const f = el.dataset.pf, c = el.dataset.c;
+      const set = () => { const v = EP.perf[c] = EP.perf[c] || {}; v[f] = f === 'n' ? Math.max(0, +el.value || 0) : +el.value; goPage('expert'); };
+      if (el.tagName === 'SELECT') el.onchange = set; else { el.onchange = set; el.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); set(); } }; }
+    });
+    $$('[data-site]').forEach(el => { el.onchange = () => { const v = el.value === '' ? null : Math.max(0, Math.min(100, +el.value || 0)); EP.site[el.dataset.site] = v; goPage('expert'); }; });
+    const bk = $('#epperfback'); if (bk) bk.onclick = () => { EP.stage = 'intro'; goPage('expert'); };
+    const cl = $('#epperfclear'); if (cl) cl.onclick = () => { EP.perf = {}; EP.perfDone = false; goPage('expert'); };
+    const ok = $('#epperfok'); if (ok) ok.onclick = () => { EP.perfDone = true; EP.stage = 'intro'; goPage('expert'); toast('业绩自测已记录，综合报告会把业绩与面试按权重合起来', 'ok'); };
+    return;
+  }
+  $$('[data-epkind]').forEach(el => el.onclick = () => { EP.kind = el.dataset.epkind; goPage('expert'); });
+  const pf = $('#epperf'); if (pf) pf.onclick = () => { EP.stage = 'perf'; goPage('expert'); };
   $$('[data-epcfg]').forEach(s => s.onchange = () => {
     EP.cfg[s.dataset.epcfg] = s.value;
     EP.cfg.name = (EP.cfg.sex === 'f' ? '评委 · 林岚' : '评委 · 周建国');
@@ -6423,20 +6859,42 @@ function expertAfter() {
 }
 function epExport() {
   const r = EP.res; if (!r) return;
-  const L = [['题目类别', '问题', '作答', '得分', '亮点', '改进']];
-  r.rounds.forEach(x => L.push([x.q.n, x.qt, x.ans, x.sc.total, x.sc.good.join('；'), x.sc.bad.join('；')]));
-  L.push([]); L.push(['核心能力评价标准', '得分', '档次', '评分标准']);
-  r.core.forEach(c => L.push([c.item.n + '（' + c.item.w + '分）', c.sc, c.lv[0], c.lv[1]]));
-  const csv = '﻿' + L.map(x => x.map(c => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = '专家选聘答辩测评报告.csv'; a.click(); toast('测评报告已导出', 'ok');
+  const K = expKind(r.kind);
+  const blocks = [];
+  blocks.push({ t: '综合评价', sub: '按《专家选聘工作方案》附件1 三、（二）的环节占比折算', head: ['评价环节', '占比', '得分', '折合', '取数'],
+    rows: r.ov.rows.map(x => [x.n, x.w + '%', x.v == null ? '未录入' : x.v, x.part == null ? '—' : x.part, x.src])
+      .concat([['综合得分', r.ov.wSum + '%', '', r.ov.sum, '已完成环节归一化后 ' + r.ov.norm + ' 分']]),
+    mark: (ri, ci) => ci === 3 && ri === r.ov.rows.length ? 'ok' : '' });
+  if (r.perf && r.perf.groups && r.perf.groups.length) blocks.push({ t: '业绩贡献自评', sub: '《技能专家业绩贡献评价标准》附件5-5 · 自评结果由本人填报，最终得分以评审专家组复评为准', head: ['一级指标', '得分', '是否触上限'],
+    rows: r.perf.groups.map(g => [g.g, g.sum, g.capped ? '是（' + (g.capNote || '') + '）' : '否']).concat([['合计', r.perf.total, '']]) });
+  if (r.perf && r.perf.groups && r.perf.groups.length) blocks.push({ t: '业绩贡献情况与建议', head: ['方面', '结论', '建议'], rows: perfAdvice(r.perf, EP.perf).map(a => [a.t, a.s, a.d]) });
+  if (K.face === 'core') blocks.push({ t: '核心能力评价标准（100 分）', sub: '实用性 40 · 先进性 30 · 创新性 30', head: ['评价指标', '分值', '得分', '档次', '评分标准'],
+    rows: r.core.map(c => [c.item.n, c.item.w, c.sc, c.lv[0], c.lv[1]]).concat([['合计', 100, r.coreSum, r.coreSum >= 80 ? '优秀' : r.coreSum >= 60 ? '通过' : '未通过', '']]),
+    mark: (ri, ci, v) => ci === 3 ? (v === '优秀' || v === '通过' ? 'ok' : v === '未通过' ? 'bad' : 'w') : '' });
+  if (r.ach) blocks.push({ t: r.ach.sheet.n, head: ['评价指标', '权重', '得分', '档次', '指标含义'],
+    rows: r.ach.items.map(x => [x.item.n, x.item.w + '%', x.v == null ? '本次未考' : x.v, x.lv ? x.lv[0] : '', x.item.mean]).concat([['合计', '100%', r.ach.sum, '', '按权重加权平均']]),
+    mark: (ri, ci, v) => ci === 3 ? (v === '优秀' ? 'ok' : v === '一般' ? 'w' : '') : '' });
+  blocks.push({ t: '招标竞聘评价标准（100 分）', sub: '必要性 20 · 可行性 45 · 价值性 20 · 创新性 15', head: ['评价指标', '分值', '得分', '档次', '评分标准'],
+    rows: r.bid.map(c => [c.item.n, c.item.w, c.sc, c.lv[0], c.lv[1]]).concat([['合计', 100, r.bidSum, '', '']]),
+    mark: (ri, ci, v) => ci === 3 ? (v === '优秀' ? 'ok' : v === '一般' ? 'w' : '') : '' });
+  blocks.push({ t: '通用能力（素质模型五项）', sub: '由各题得分映射', head: ['能力项', '得分'], rows: r.dims.map(d => [d.n, d.v == null ? '本次未考' : d.v]) });
+  blocks.push({ t: '逐题点评', head: ['题目类别', '问题', '作答', '得分', '亮点', '改进'],
+    rows: r.rounds.map(x => [x.q.n, x.qt, x.ans, x.sc.total, (x.sc.good || []).join('；'), (x.sc.bad || []).join('；')]),
+    mark: (ri, ci, v) => ci === 3 ? (v >= 80 ? 'ok' : v < 60 ? 'bad' : 'w') : '' });
+  xlsDownload('专家选聘答辩测评报告_' + K.n + '.xls', '专家选聘答辩测评报告', K.n + '　' + new Date().toLocaleString('zh-CN') + '　评委 ' + EP.cfg.name + '（' + EP.cfg.role + '）　评价标准：附件1 选聘工作方案 · 附件5-5 业绩贡献评价标准 · 附件6 面试答辩评价标准', blocks);
+  toast('测评报告已导出（.xls，Excel 打开带格式）', 'ok');
 }
 document.addEventListener('click', e => {
   const op = e.target.closest('[data-epopen]');
   if (!op) return;
   const rec = expRecords()[+op.dataset.epopen]; if (!rec) return;
-  EP.res = { core: EXP_STD.core.map(it => Object.assign({ pct: 0 }, expLevel(it.k, rec.core))), bid: EXP_STD.bid.map(it => Object.assign({ pct: 0 }, expLevel(it.k, rec.bid))), coreSum: rec.core, bidSum: rec.bid, dims: rec.dims, sec: rec.sec, weak: rec.weak,
-    rounds: rec.rounds.map(x => ({ q: EXP_Q.find(q => q.n === x.qn) || EXP_Q[0], qt: x.qt, ans: x.ans, sc: { total: x.total, good: x.good, bad: x.bad, hitKeys: [], star: [], red: [], len: (x.ans || '').length }, follow: null })) };
+  const rounds = rec.rounds.map(x => ({ q: EXP_Q.find(q => q.n === x.qn) || EXP_Q[0], qt: x.qt, ans: x.ans, sc: { total: x.total, good: x.good, bad: x.bad, hitKeys: [], star: [], red: [], len: (x.ans || '').length }, follow: null }));
+  const kind = rec.kind || 'skill';
+  const ach = expAch(kind, rounds);
+  const pf = rec.perf == null ? null : { total: rec.perf, groups: [], linked: [] };
+  EP.kind = kind; EP.stage = 'intro';
+  EP.res = { core: EXP_STD.core.map(it => Object.assign({ pct: 0 }, expLevel(it.k, rec.core))), bid: EXP_STD.bid.map(it => Object.assign({ pct: 0 }, expLevel(it.k, rec.bid))), coreSum: rec.core, bidSum: rec.bid, dims: rec.dims, sec: rec.sec, weak: rec.weak, kind, ach, perf: pf,
+    ov: expOverall(kind, rec.perf, { core: rec.core, bid: rec.bid, ach: ach ? ach.sum : null, site: rec.site || {} }), rounds: rounds };
   EP.on = false; goPage('expert');
 });
 

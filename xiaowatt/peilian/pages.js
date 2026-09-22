@@ -42,16 +42,24 @@ function pageReview() {
 /* ================= 成长档案 ================= */
 const LMAP_MASTERY = { state: 92, sanshen: 88, wufang: 85, changpiao: 90, yandian: 74, gis: 58, erci: 80, yichang: 70, diaodu: 76 };
 const LMAP_EXAM = { gis: 'e1163', yandian: 'e1163', diaodu: 'e1163', sanshen: 'e1163', changpiao: 'e1163', yichang: 'rain', erci: 'e1163', wufang: 'e1163', state: 'e1163' };
-const GR = { cmp: 'prev', show: { score: true, dur: false, vio: false, hint: false, avg: true, pass: true } };
+const GR = { model: 'gen', cmp: 'prev', show: { score: true, dur: false, vio: false, hint: false, avg: true, pass: true } };
 function goalsGet() { return lsGet(LS_GOALS, {}); }
 function goalArr() { const g = goalsGet(); return DIMS10.map((_, i) => g[i] != null ? +g[i] : null); }
 function growthPredict(i) { const n = RADAR10_NOW[i], p = RADAR10_PREV[i], o = RADAR10_OLD[i]; return Math.max(0, Math.min(100, Math.round(n + (n - p) * .6 + (p - o) * .2))); }
+/* 主轴为通用素质模型五项，技能水平八维可切换 */
+function grModel() {
+  return GR.model === 'skill'
+    ? { k: 'skill', dims: DIMS10, now: RADAR10_NOW, prev: RADAR10_PREV, old: RADAR10_OLD, team: TEAM_AVG10, key: 'gdim', n: '技能水平 · 八维', src: '维度取技能类岗位胜任能力评价作业授权认证表的 20 个专业项目与两项实操考试内容' }
+    : { k: 'gen', dims: GEN_DIMS, now: GEN_NOW, prev: GEN_PREV, old: GEN_OLD, team: GEN_TEAM, key: 'gdim5', n: '通用素质模型 · 五项', src: '维度取《深圳供电局有限公司素质模型》通用素质模型，各项四个层级行为指标照录宣传册原文；得分由专家选聘答辩演练映射' };
+}
 function growthRadar() {
-  const g = goalArr(), hasGoal = g.some(v => v != null);
+  const M = grModel();
+  const g = goalArr(), hasGoal = M.k === 'skill' && g.some(v => v != null);
   const target = hasGoal ? g.map((v, i) => v != null ? v : RADAR10_NOW[i]) : null;
-  const cmp = GR.cmp === 'old' ? RADAR10_OLD : GR.cmp === 'team' ? TEAM_AVG10 : RADAR10_PREV;
+  const cmp = GR.cmp === 'old' ? M.old : GR.cmp === 'team' ? M.team : M.prev;
   const lb = GR.cmp === 'old' ? '前月' : GR.cmp === 'team' ? '班组均值' : '上月';
-  return chRadar(DIMS10, RADAR10_NOW, cmp, { w: 440, h: 320, l1: '本月', l2: lb, key: 'gdim', target, c2: GR.cmp === 'team' ? '#7aa0c8' : '#b3bfb2' });
+  return chRadar(M.dims, M.now, cmp, { w: 440, h: 320, l1: '本月', l2: lb, key: M.key, target, c2: GR.cmp === 'team' ? '#7aa0c8' : '#b3bfb2' })
+    + `<div class="tk3" style="text-align:center;margin-top:4px">${h(M.src)}</div>`;
 }
 function badgeList() { const L = examHist(); return BADGES.map(b => Object.assign({}, b, { lit: !!b.test(L) })); }
 function pageGrowth() {
@@ -67,11 +75,12 @@ function pageGrowth() {
       <div class="gmeta"><b>${HOME_USER.name}</b><span>${HOME_USER.post} · ${HOME_USER.team} · 2024-08 入职 · 带教师傅 陈志远</span></div>
       <div class="gkpis"><div class="kpi"><b>${A.cnt}</b><span>近30天关卡次数</span></div><div class="kpi"><b>${(A.totalMin / 60).toFixed(1)}h</b><span>累计时长</span></div><div class="kpi"><b>${A.avg}%</b><span>平均得分率</span></div><div class="kpi"><b>${HOME_USER.hours.done}/${HOME_USER.hours.need}</b><span>年度学时</span></div><div class="kpi good"><b>${up}/10</b><span>维度上升</span></div><div class="kpi good"><b>${lit}/${badges.length}</b><span>能力徽章</span></div><div class="kpi good"><b>${done}</b><span>里程碑</span></div></div></section>
     <div class="gtwo g21">
-      <section class="hcard hg"><div class="hch"><b>能力全景</b><span>十维 · 本月 vs 对照 · 顶点可查明细</span>
-          <span class="phr chips">${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
+      <section class="hcard hg"><div class="hch"><b>能力全景</b><span>${h(grModel().n)} · 本月 vs 对照 · 顶点可查明细</span>
+          <span class="phr chips">${[['gen', '通用素质模型'], ['skill', '技能水平']].map(([k, n]) => `<span class="chip ${GR.model === k ? 'on' : ''}" data-gmodel="${k}">${n}</span>`).join('')}<i class="sep"></i>${[['prev', '上月'], ['old', '前月'], ['team', '班组均值']].map(([k, n]) => `<span class="chip ${GR.cmp === k ? 'on' : ''}" data-gcmp="${k}">${n}</span>`).join('')}</span></div>
         <div class="hcb" id="gradar">${growthRadar()}</div></section>
       <section class="hcard hg"><div class="hch"><b>三期对照与目标</b><em class="ai">AI 预测</em><span>前月 / 上月 / 本月 · 预测为测算参考 · 目标可直接填写</span></div><div class="hcb"><table class="htbl gtbl"><tr><th>维度</th><th>前月</th><th>上月</th><th>本月</th><th>变化</th><th>预测下月</th><th>本月目标</th><th>差距</th></tr>
-        ${DIMS10.map((n, i) => { const d = RADAR10_NOW[i] - RADAR10_PREV[i], g = goals[i]; return `<tr><td class="hitv" data-gdim="${i}" style="cursor:pointer">${n}</td><td class="mono">${RADAR10_OLD[i]}</td><td class="mono">${RADAR10_PREV[i]}</td><td class="mono">${RADAR10_NOW[i]}</td><td class="mono ${d >= 0 ? 'gv' : 'wv'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${growthPredict(i)}</td><td><input class="gin" type="number" min="0" max="100" data-goal="${i}" value="${g != null ? g : ''}" placeholder="—"></td><td class="mono ${g != null ? (RADAR10_NOW[i] >= g ? 'gv' : 'wv') : ''}" id="ggap${i}">${g != null ? (RADAR10_NOW[i] >= g ? '已达成' : (RADAR10_NOW[i] - g)) : '—'}</td></tr>`; }).join('')}</table>
+        ${(() => { const M = grModel(); return M.dims.map((n, i) => { const d = M.now[i] - M.prev[i]; const g = M.k === 'skill' ? goals[i] : null; return `<tr><td class="hitv" data-${M.key}="${i}" style="cursor:pointer">${n}</td><td class="mono">${M.old[i]}</td><td class="mono">${M.prev[i]}</td><td class="mono">${M.now[i]}</td><td class="mono ${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${d}</td><td class="mono">${M.k === 'skill' ? growthPredict(i) : Math.max(0, Math.min(100, Math.round(M.now[i] + (M.now[i] - M.prev[i]) * .6)))}</td><td>${M.k === 'skill' ? `<input class="gin" type="number" min="0" max="100" data-ggoal="${i}" value="${g == null ? '' : g}" placeholder="-">` : '<span class="note">由答辩映射</span>'}</td></tr>`; }).join(''); })()}
+      </table>
         <div class="tk3" style="margin-top:6px">预测按近三期趋势线性外推；目标由本人设定，达成情况以人工审核为准。</div></div></section>
     </div>
     <section class="hcard hg"><div class="hch"><b>成长曲线</b><span>近30天各次关卡 · 得分率 · 点击图例切换序列 · 点击数据点打开该次复盘</span>
@@ -98,6 +107,15 @@ function pageGrowth() {
         ${HOME_USER.certs.map(c => `<tr><td>${c.n}</td><td class="mono">${c.got}</td><td class="mono">${c.review}</td><td><span class="tag ok">有效</span></td></tr>`).join('')}</table></div></section>
     </div>
     <div class="tk3" style="margin:6px 4px 14px">能力与胜任度数据为系统测算参考，任职资格评定以人工审核结果为准。</div></div>`;
+}
+function growthGen(i) {
+  const nm = GEN_DIMS[i]; const gen = (typeof M3 !== 'undefined' ? M3 : []).find(x => x.k === 'gen');
+  const it = gen && gen.items.find(x => x.n === nm);
+  const now = GEN_NOW[i];
+  openDrill('通用素质 · ' + nm, '本月 ' + now + ' 分 · 上月 ' + GEN_PREV[i] + ' 分 · 班组均值 ' + GEN_TEAM[i] + ' 分', `
+    <div class="tk3">来源：《深圳供电局有限公司素质模型》通用素质模型${it ? '　' + h(it.d) : ''}。得分由专家选聘答辩演练中对应题目的得分映射，尚无实测时取历史口径基线。</div>
+    ${it ? `<div class="lvs2">${it.lv.map((l, j) => `<div class="lvc2 ${now >= (j + 1) * 22 ? 'on' : ''}"><b>层级 ${j + 1} · ${h(l[0])}</b><p>${h(l[1])}</p></div>`).join('')}</div>` : ''}
+    <div class="bt"><button class="btn s" onclick="goPage('expert')">去专家选聘答辩练这一项</button><button class="btn s g" onclick="goPage('assess')">看三维能力地图</button></div>`);
 }
 function growthDim(i) {
   const n = DIMS10[i], k = DIMK[i];
@@ -493,7 +511,9 @@ function pagesClick(e) {
   if (n = q('[data-rvsum]')) { const r = examHist().find(x => x.id === RV.sel); if (!r) return true; openDrill('复盘摘要', '提交班组长前由本人确认', `<div class="draft" id="rvsum_txt" style="white-space:pre-line">${rvSummary(r)}</div>`, '<button class="btn" data-copy="rvsum_txt">复制摘要</button>'); return true; }
   if (n = q('[data-copy]')) { const t = $('#' + n.dataset.copy); const txt = t ? t.innerText : ''; try { navigator.clipboard.writeText(txt); } catch (err) { } n.textContent = '已复制'; return true; }
   /* 档案 */
+  if (n = q('[data-gmodel]')) { GR.model = n.dataset.gmodel; goPage('growth'); return true; }
   if (n = q('[data-gcmp]')) { GR.cmp = n.dataset.gcmp; $$('[data-gcmp]').forEach(x => x.classList.toggle('on', x === n)); const g = $('#gradar'); if (g) g.innerHTML = growthRadar(); return true; }
+  if (n = q('[data-gdim5]')) { growthGen(+n.dataset.gdim5); return true; }
   if (n = q('[data-gshow]')) { const k = n.dataset.gshow; GR.show[k] = !GR.show[k]; n.classList.toggle('on', GR.show[k]); const c = $('#gcurve'); if (c) c.innerHTML = chSessionCurve(histPoints().slice().sort((a, b) => b.d - a.d), GR.show, { w: 980, h: 250 }); return true; }
   if (n = q('[data-gdim]')) { growthDim(+n.dataset.gdim); return true; }
   if (n = q('[data-badge]')) { badgeDrill(n.dataset.badge); return true; }

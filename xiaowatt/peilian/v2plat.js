@@ -107,6 +107,46 @@ const BAN = /演示环境|本模块展示|待建|下一版本|评委打分演示
   });
   console.log('Word 模板解析', JSON.stringify(wd), '期望 task 为操作任务 · rows 4 · sub 2（$ 标记的是子项，说明文字被跳过）');
 
+  /* ---------- 专家选聘：五类专家 · 业绩自测 · 综合评价 ---------- */
+  await p.evaluate(() => { TK.res = null; TK.rec = null; TK.on = false; }); await go('expert', 700);
+  const kinds = await p.evaluate(() => ({
+    cards: document.querySelectorAll('.epk').length,
+    names: EXP_KINDS.map(x => x.n),
+    w: EXP_KINDS.map(x => x.n + '：' + x.w.map(y => y[0] + ' ' + y[2] + '%').join(' + ')),
+    role: EP_OPT.role.map(x => x[0]),
+    panel: EXP_PANEL.length
+  }));
+  console.log('五类专家', JSON.stringify(kinds.names), '期望 技能专家 + 科研 / 技术 / 专业-职能 / 专业-市场 四类专业技术专家');
+  kinds.w.forEach(x => console.log('  权重', x));
+  console.log('角色身份', JSON.stringify(kinds.role), '期望按附件1 四、（三）面试答辩专家组：组长 / 人资评委 / 业务评委 / 专家评委');
+  const ach = await p.evaluate(() => Object.keys(EXP_ACH).map(k => EXP_ACH[k].n + '：' + EXP_ACH[k].items.map(i => i.n + ' ' + i.w + '%').join('、')));
+  ach.forEach(x => console.log('  代表性成果标准', x));
+  const pf = await p.evaluate(() => {
+    EP.perf = { '101-104': { lv: 1, role: 0, n: 2 }, '501': { n: 260 }, '504': { n: 2 }, '1701': { n: 3 }, '1101-1107': { lv: 4, role: 0, n: 1 } };
+    const r = perfCalc(EP.perf);
+    return { total: r.total, g: r.groups.filter(x => x.sum).map(x => x.g + ' ' + x.sum), items: PERF_STD.reduce((a, g) => a + g.items.length, 0), groups: PERF_STD.length };
+  });
+  console.log('业绩贡献自评', JSON.stringify(pf), '期望 一级指标 9 类 · 南网级解决问题排名第1×2=20 · 两票 260 张=10（本项上限 10）· 绩效A 2 次=8 · 省级竞赛一等=14 · 带徒 3 名按上限计 2 · 合计 54');
+  const ov = await p.evaluate(() => {
+    EP.kind = 'skill'; EP.perfDone = true; EP.site = { lab: 86, theory: 78 };
+    const o1 = expOverall('skill', 54, { core: 80, bid: 75, ach: null, site: EP.site });
+    const o2 = expOverall('tech', 54, { core: 80, bid: 75, ach: 82, site: {} });
+    return { skill: o1.rows.map(r => r.n + ' ' + r.w + '% ' + (r.v == null ? '未录入' : r.v) + '→' + r.part), sum1: o1.sum, tech: o2.rows.map(r => r.n + ' ' + r.w + '% ' + r.v + '→' + r.part), sum2: o2.sum };
+  });
+  console.log('综合评价 · 技能专家', JSON.stringify(ov.skill), '合计', ov.sum1, '期望 业绩 40% + 实操 30% + 理论 15% + 答辩 15%');
+  console.log('综合评价 · 技术序列', JSON.stringify(ov.tech), '合计', ov.sum2, '期望 业绩 60% + 代表性成果 25% + 发展潜力 15%');
+  const xls = await p.evaluate(() => { let name = null; const c = document.createElement.bind(document); document.createElement = t => { const e = c(t); if (t === 'a') { e.click = () => { name = e.download; }; } return e; };
+    const blocks = [{ t: '测试', head: ['a'], rows: [['b']] }]; xlsDownload('x.xls', 'T', 'S', blocks); document.createElement = c; return name; });
+  console.log('导出格式', xls, '期望 .xls（HTML 表格 + Excel MIME，离线带格式）');
+
+  /* ---------- 首页与成长档案：能力项改为通用素质模型 ---------- */
+  await go('home', 700);
+  const rad = await p.evaluate(() => ({ head: document.querySelector('.ck.tl .hch').innerText.replace(/\n/g, ' '), dims: GEN_DIMS, skillCard: document.querySelector('.ck.br .hch').innerText.replace(/\n/g, ' ') }));
+  console.log('首页能力雷达', JSON.stringify(rad), '期望主雷达为通用素质模型五项，技能八维降为对标卡');
+  await go('growth', 700);
+  const gr = await p.evaluate(() => ({ model: GR.model, chips: document.querySelectorAll('[data-gmodel]').length, dims: Array.from(document.querySelectorAll('#gradar text')).map(t => t.textContent).filter(x => GEN_DIMS.includes(x)).length }));
+  console.log('成长档案能力全景', JSON.stringify(gr), '期望默认通用素质模型五维，可切换技能水平八维');
+
   /* ---------- 专家选聘答辩 ---------- */
   await p.evaluate(() => { TK.res = null; }); await go('expert', 600);
   const cfg = await p.evaluate(() => document.querySelectorAll('[data-epcfg]').length);
