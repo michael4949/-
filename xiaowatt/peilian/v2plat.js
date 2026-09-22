@@ -1,4 +1,4 @@
-/* AI 智能陪练平台回归：场景中心 A–F / 操作票填写与判卷六种答卷 / 专家选聘答辩 / 三维能力地图 / 数据分析 / 系统与权限 / 讲师演示台
+/* AI 智能陪练平台回归：场景中心 A–F / 操作票（标准画法主接线图 · 票号手填 · 子项定位 · 回车增行 · 训练与考核区分 · Word/Excel 导入 · 判定自测 · 六种答卷判卷）/ 专家选聘答辩 / 三维能力地图 / 数据分析 / 系统与权限 / 讲师演示台
    用法：node v2plat.js　期望：ERR none，各断言按注释对照 */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_AI智能陪练平台_高保真原型.html')).href;
@@ -49,7 +49,29 @@ const BAN = /演示环境|本模块展示|待建|下一版本|评委打分演示
     task: (document.querySelector('.tktask p') || {}).textContent
   }));
   console.log('题目界面', JSON.stringify(form), '期望 dev≥12（主接线图可点设备）· gear 5（空开压板屏柜）· runway 5');
-  await p.evaluate(() => { TK.rows = tkAuto('danger').map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); }); await w(p, 300);
+  /* 09-21 反馈：主接线图标准画法 / 票号手填 / 子项定位 / Enter 增行 / 训练与考核区分 / 上传导入 */
+  const sym = await p.evaluate(() => ({ legend: document.querySelectorAll('.tklg .tkdev').length, gnd: document.querySelectorAll('.tkbus .tkdev.gnd').length, fill: document.querySelectorAll('.tkbus rect.fill').length, noInput: !!document.querySelector('#tkno'), fixedNo: /票号 2609001/.test(document.querySelector('#hpage').innerText) }));
+  console.log('部件画法与票号', JSON.stringify(sym), '期望 legend 7（刀闸/开关/地刀 合分 + 主变）· gnd 3 · 票号为输入框且页面不再印死票号');
+  const sub = await p.evaluate(() => {
+    TK.rows = [{ t: '接调度令', child: false }, { t: '在110kV考核Ⅰ线1161间隔智能柜：', child: false }, { t: '汇报调度', child: false }];
+    TK.focus = 1; tkPaint(); tkAddChild();
+    return TK.rows.map(r => r.no + (r.child ? '子' : ''));
+  });
+  console.log('加子项定位', JSON.stringify(sub), '期望 ["1","2","2.1子","3"]：子项加在当前主项下，不落到最后一行');
+  const ent = await p.evaluate(() => { TK.focus = 0; tkEnterAt(0); return TK.rows.map(r => r.no + (r.child ? '子' : '')); });
+  console.log('回车增行', JSON.stringify(ent), '期望在第 1 项下方插入新的主项');
+  const teach = await p.evaluate(() => {
+    TK.mode = 'teach'; TK.rows = [{ t: '接调度令', child: false }, { t: '拉开11614刀闸', child: false }, { t: '合上考核Ⅰ线线路侧116140地刀', child: false }, { t: '随便写一句话', child: false }];
+    tkCheckAll();
+    return { fb: Object.keys(TK.fb).map(k => TK.fb[k].cls).join(''), step: /阶段A/.test(tkStepHTML()) };
+  });
+  console.log('训练模式即时判定', JSON.stringify(teach), '期望 fb = g r r w（对 / 未先断开关就拉刀闸属带负荷拉刀闸 / 未验电就合地刀 / 认不出）· 阶段进度可见');
+  const exam = await p.evaluate(() => { TK.mode = 'exam'; tkCheckAll(); return { fb: Object.keys(TK.fb).length, step: tkStepHTML() }; });
+  console.log('考核模式关闭提示', JSON.stringify({ fb: exam.fb, step: exam.step }), '期望 fb 0 且阶段条为空');
+  await p.evaluate(() => { TK.mode = 'exam'; TK.rows = tkAuto('danger').map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); }); await w(p, 300);
+  await p.click('#tksubmit'); await w(p, 500);
+  console.log('未填票号不给提交', await p.evaluate(() => TK.res == null), '期望 true');
+  await p.evaluate(() => { TK.no = '2609001'; const n = document.querySelector('#tkno'); if (n) n.value = '2609001'; });
   await p.click('#tksubmit'); await w(p, 1000);
   const res = await p.evaluate(() => ({
     score: TK.res.score, fatal: TK.res.fatal, errCards: document.querySelectorAll('.tkerr').length,
@@ -62,6 +84,28 @@ const BAN = /演示环境|本模块展示|待建|下一版本|评委打分演示
   console.log('答卷对照', JSON.stringify(cmp), '期望 rows = 学员项 + 表头');
   await p.evaluate(() => { document.querySelector('[data-tktab="rule"]').click(); }); await w(p, 500);
   console.log('命中条款', await p.evaluate(() => document.querySelectorAll('.cit.big').length), '期望 ≥ 2');
+
+  /* ---------- 上传导入：Word / Excel 按模板解析 ---------- */
+  await p.evaluate(() => { TK.res = null; TK.rec = null; goPage('ticket'); }); await w(p, 400);
+  const self = await p.evaluate(() => { document.querySelector('#tkself').click(); return 1; }); await w(p, 600);
+  console.log('判定逻辑自测', await p.evaluate(() => document.querySelectorAll('.tkselft tr').length), '期望 7（表头 + 六种答卷）');
+  await p.click('#tkstart'); await w(p, 500);
+  const up = await p.evaluate(async () => {
+    const mk = rows => rows.map(r => `<row><c t="inlineStr"><is><t>${r[0]}</t></is></c><c t="inlineStr"><is><t>${r[1]}</t></is></c></row>`).join('');
+    const rows = TICKET.map(s => [s.no, s.t]);
+    const sheet = `<worksheet><sheetData><row><c t="inlineStr"><is><t>序号</t></is></c><c t="inlineStr"><is><t>操作步骤</t></is></c></row>${mk(rows)}</sheetData></worksheet>`;
+    const r = TKUP.parseExcel((sheet.match(/<row[ >][\s\S]*?<\/row>/g) || []).map(x => (x.match(/<c [^>]*?(?:\/>|>[\s\S]*?<\/c>)/g) || []).map(c => (c.match(/<is><t[^>]*>([^<]*)<\/t>/) || [])[1] || '')));
+    TK.rows = r.rows.map(x => ({ t: x.t, child: x.child })); TK.no = '2609002'; tkPaint();
+    const j = tkJudge(TK.rows.filter(x => x.t.trim()));
+    return { rows: r.rows.length, sub: r.rows.filter(x => x.child).length, bad: r.bad.length, score: j.score, errs: j.errs.length };
+  });
+  console.log('Excel 模板导入 → 判卷', JSON.stringify(up), '期望 rows 70 · sub 22 · bad 0 · score 100 · errs 0');
+  const wd = await p.evaluate(() => {
+    const paras = ['#第一行填写操作任务', '将110kV考核Ⅰ线1161线路及开关由运行转检修', '', '接调度令', '在110kV考核Ⅰ线1161间隔智能柜：', '$检查11614刀闸合位指示灯灭', '$检查11614刀闸分位指示灯亮', '上方只截取了一部分操作票内容作为参考'];
+    const r = TKUP.parseWord(paras);
+    return { task: r.task, rows: r.rows.length, sub: r.rows.filter(x => x.child).length };
+  });
+  console.log('Word 模板解析', JSON.stringify(wd), '期望 task 为操作任务 · rows 4 · sub 2（$ 标记的是子项，说明文字被跳过）');
 
   /* ---------- 专家选聘答辩 ---------- */
   await p.evaluate(() => { TK.res = null; }); await go('expert', 600);

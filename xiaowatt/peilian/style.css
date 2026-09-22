@@ -1410,8 +1410,6 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .tkgear{margin-bottom:10px}.tkgear>b{font-size:11.5px}.tkgear>.note{margin-left:6px}
 .tkform .tkt input{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font:inherit;font-size:12.5px;background:#fff}
 .tkform .tkt input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acbg)}
-.tkt tr.sub td:first-child{padding-left:26px;color:var(--txt3)}
-.tkt tr.sub input{background:#fbfbf5}
 .tkck i{display:block;width:34px;height:16px;border:1px solid var(--line);border-radius:3px}
 .tkfoot{display:flex;gap:26px;font-size:11px;color:var(--txt3);margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
 .tkbreak{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:90;background:#fff;border:2px solid var(--or);border-radius:12px;padding:16px 20px;width:min(460px,86vw);box-shadow:0 20px 60px rgba(40,30,10,.3)}
@@ -1569,3 +1567,40 @@ svg.sim{background:repeating-linear-gradient(45deg,transparent 0 14px,rgba(201,1
 .sysf b{display:block;font-size:12px;margin-bottom:3px}
 .sysf span{font-size:11px;color:var(--txt2);line-height:1.7}
 @media (max-width:1280px){.tkmid,.eprun,.anrow{grid-template-columns:1fr}.tkres,.epres{grid-template-columns:1fr}.asrow{grid-template-columns:1fr 1fr}.scl,.sysf,.epcfg{grid-template-columns:repeat(2,1fr)}.lvgrid{grid-template-columns:1fr}}
+/* 主接线图：部件标准画法 */
+.tkbus .tkdev rect.fill{fill:#4a5a4e}
+.tkbus .tkdev.gnd line,.tkbus .tkdev.gnd circle,.tkbus .gnd line,.tkbus .gnd circle{stroke:var(--gnd)}
+.tkbus .tkdev.on rect.fill{fill:#3d6b4f;stroke:#3d6b4f}
+.tkbus.tklg{margin-top:4px;max-width:640px}
+.tkbus.tklg .tkl{font-size:9px}
+.tkbus .gb{stroke-width:2.2}
+/* 操作票：票头 / 训练模式反馈 / 阶段进度 */
+.tkform .tkhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 6px;font-size:12.5px}
+.tkform .tkhead label{display:flex;align-items:center;gap:6px;font-weight:600}
+.tkform .tkhead input{border:1px solid var(--line);border-radius:6px;padding:5px 9px;font:inherit;font-size:12.5px;width:150px;font-family:var(--mono)}
+.tkform .tkhead input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--acbg)}
+.tkform .tkhead .note.r{margin-left:auto}
+.tkup{cursor:pointer}
+.tkexamtip{font-size:12px;color:var(--txt3);background:#fbfbf5;border-left:3px solid var(--goldln);padding:6px 10px;border-radius:0 6px 6px 0;margin:6px 0}
+.tkstep{margin:6px 0 4px}
+.tkstgs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tkstg{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;background:#fff}
+.tkstg b{display:block;font-size:12px;margin-bottom:4px}
+.tkstg .bar{height:5px;border-radius:3px;background:#eceee9;overflow:hidden;margin:3px 0}
+.tkstg .bar i{display:block;height:100%;background:var(--ac)}
+.tkstg.ok .bar i{background:#2f8f5b}.tkstg.go .bar i{background:#c98a25}
+.tkstg em{display:block;font-style:normal;color:var(--txt3);margin-top:3px;line-height:1.5}
+.tkstat{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.tkhintbox{margin-top:6px;font-size:12.5px;background:var(--acbg);border-left:3px solid var(--ac);padding:7px 10px;border-radius:0 6px 6px 0;line-height:1.7}
+.tkhintbox b{margin-right:6px}
+.tkfb{font-size:11.5px;line-height:1.6;margin-top:4px;padding:4px 8px;border-radius:5px}
+.tkfb.g{background:#eef6f0;color:#2f6b4a}
+.tkfb.w{background:#fdf5e6;color:#8a5a12}
+.tkfb.r{background:#fdeeee;color:#a52a2a}
+.tkfb b{display:block}
+.tkt tr.fbr input{border-color:#e0a0a0}
+.tkt tr.fbw input{border-color:#e6c58a}
+.tkt tr.fbg input{border-color:#a9cfb8}
+.tkfile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.tkself{margin-top:2px}
+.tkselft td,.tkselft th{font-size:12px}
