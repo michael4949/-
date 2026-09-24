@@ -912,6 +912,11 @@ table.aut th.au-m{min-width:180px}
 .lvline span{background:var(--bg);border-radius:4px;padding:2px 7px}
 #hexhost .port2{grid-template-columns:1fr}
 @media(max-width:1180px){.port2{grid-template-columns:1fr}}
+/* 考核指标 / 班长绩效 */
+table.goals th:nth-child(2),table.goals td:nth-child(2){min-width:150px}
+table.goals td{vertical-align:middle}
+.kstar{color:var(--bad);font-weight:700}
+table.lpt td:nth-child(2){white-space:nowrap}
 
 </style>
 </head>
@@ -1814,7 +1819,7 @@ const STAR_BUILD = [
 const STAR_OM = {"metrics": [{"cat": "工作质量", "items": ["两票合格率", "设备台账（图纸）准确率", "线路故障率", "客户平均停电时间（中压）", "故障缺陷比", "居民端电压合格率"]}, {"cat": "工作能力", "items": ["员工技能水平（专业技术等级）", "人员实际在岗率"]}, {"cat": "工作效率", "items": ["生产计划完成率"]}], "build": [{"l1": "1 必备条件", "items": ["安全生产：事故事件、作业违章", "党风廉政：违法违纪事件", "行风舆情：社会舆论事件", "党建水平：所在党支部近五年须获得网公司及以上等级标杆党支部或先进党组织荣誉称号", "核心能力建设：人员核心技能（岗位证书、保命教育）、班站所核心业务（核心业务自主实施比例）", "班站标准化水平", "资源配置（基本配置、人员配置）"]}, {"l1": "2 通用部分", "items": ["基础管理（安健环设施管理）", "职业健康及应急管理", "人员及岗位配置", "计划管理", "会议管理", "培训管理", "绩效管理", "定置管理", "班组帮扶", "人文关怀", "党建与业务融合"]}, {"l1": "3 专业部分", "items": ["制度管理", "设备主人管控机制", "设备文档台账管理", "设备差异化运维", "缺陷管理", "运维分析管理", "负荷管理", "电压与无功管理", "特殊区段管理", "巡视与监测管理", "检修管理", "验收管理", "安全生产责任制管理（作业风险评估、两票、工器具、安全检查等管理）", "项目管理", "核心技能自主实施", "人均核心技能实操量"]}, {"l1": "4 加分项", "items": []}]};
 
 
-/* ===== 管理数据（9/21 客户口径：管理功能加重）：班组荣誉与特色标签、星级班组评价维度初步评分（依据分册建设工作 64 条 + 附表 1 得分比例）、六维个人画像、班长队伍、三班组名册、年度指标任务、同类班组横向对比、团队风险画像、员工关怀、文化活动、面谈提纲、近五年业务量与人力配置、绩效与激励、师带徒与骨干培养、知识库三类 ===== */
+/* ===== 管理数据（9/21 客户口径：管理功能加重）：班组荣誉与特色标签、星级班组评价维度初步评分（依据分册建设工作 64 条 + 附表 1 得分比例）、员工画像（综合画像 + 专业画像）、班长队伍、三班组名册、考核指标（分管副总 / 主管 / 班长）与班长绩效、同类班组横向对比、团队风险画像、员工关怀、文化活动、面谈提纲、近五年业务量与人力配置、绩效与激励、师带徒与骨干培养、知识库三类 ===== */
 
 /* ---------- 班组荣誉标签与特色标签（特色按规则判定：专家型 / 骨干型 / 基础型） ---------- */
 const KIND_RULE = [['专家型', '技师及以上占比 ≥ 40% 且有局级及以上专家'], ['骨干型', '高级工及以上占比 ≥ 50%'], ['基础型', '高级工及以上占比 < 50%，30 岁以下过半']];
@@ -1952,89 +1957,133 @@ const LEADERS = [
 ];
 function leaderStat() { const L = LEADERS; return { avgAge: +(L.reduce((s, l) => s + l.age, 0) / L.length).toFixed(1), avgLead: +(L.reduce((s, l) => s + l.asLeader, 0) / L.length).toFixed(1), party: L.filter(l => l.party).length, senior: L.filter(l => /技师/.test(l.lv)).length, ready: L.reduce((s, l) => s + l.backup.filter(b => b[1] === '可接任').length, 0), training: L.reduce((s, l) => s + l.backup.filter(b => b[1] === '培养中').length, 0), retire10: L.filter(l => l.retireIn <= 10).length }; }
 
-/* ---------- 年度指标任务（来源：组织经营业绩指标 / 主管个人年度业绩责任书）---------- */
-const YEAR_PCT = 60;
-/* ---------- 班长绩效考评（季度）：权重分解自主管个人年度业绩责任书，初步评分由部门确认后使用 ---------- */
-const LPERF_Q = { no: '2026 年第三季度', range: '2026-07-01 至 09-30', state: '在评', prev: ['2025 年第四季度', '2026 年第一季度', '2026 年第二季度'], qs: ['25Q4', '26Q1', '26Q2', '26Q3'] };
-const LPERF_DIMS = [
-  { k: 'safe', n: '安全生产', pts: 25, src: '违章台账 · 两票台账 · 安全活动台账', rule: '基准 25 分；一般违章每起 −0.5、两票合格率不足 100% 一次性 −2、安全活动缺席每人次 −0.5；发生事故事件本项计 0' },
-  { k: 'task', n: '生产任务', pts: 25, src: '年度指标任务 · 任务台账 · 缺陷台账', rule: '按该班组责任指标的红黄绿加权折算：绿 1.0 / 黄 0.85 / 红 0.6' },
-  { k: 'build', n: '班组建设', pts: 20, src: '星级班组评价 · 关键节点管控表 · 班务记录', rule: '按星级班组初步评分折算；本季度关键节点周闭环达标不足 80% 的周数再 −2' },
-  { k: 'crew', n: '队伍管理', pts: 20, src: '工时台账 · 师带徒 · 人员台账 · 作业授权台账', rule: '基准 20 分；外勤超 24 小时每人 −1、近 3 年新员工未结对师傅每人 −1、近三年离职每人 −1、转岗意向每人 −0.5、★模块断层高风险每个 −0.5' },
-  { k: 'duty', n: '履职与协同', pts: 10, src: '派工记录 · 两票台账 · 周报报送 · 跨班组调配', rule: '基准 10 分；到期未派每项 −1、待审票每张 −0.5、周报漏报每期 −1' }
-];
-/* 未接入台账的两个班组给预设输入项，已在讲师演示台状态清单标注；配电自动化班一律取本机台账实时值 */
-const LPERF_IN = {
-  '配电自动化班': { absent: 1, wkMiss: 0, nodeQ: [11, 13] },
-  '试验班': { vio: 0, absent: 0, wkMiss: 0, late: 0, pend: 0, gapHi: 1, tkRate: 100, star: 93.2, nodeQ: [12, 13] },
-  '配电运维一班': { vio: 2, absent: 2, wkMiss: 1, late: 1, pend: 1, gapHi: 3, tkRate: 100, star: 76.4, nodeQ: [9, 13] }
-};
-const LPERF_GRADE = [[90, '优秀', 'ok'], [80, '良好', 'ok'], [70, '合格', 'w'], [0, '需改进', 'bad']];
-const LPERF_APPLY = { '优秀': '月度绩效上浮一档；推荐参评局级优秀班组长；可申报星级工程师升星', '良好': '月度绩效按标准档；短板项列入下季度改进要求', '合格': '月度绩效按标准档下限；由部门与本人签一份改进承诺，逐月回访', '需改进': '月度绩效下浮一档；部门约谈并限期两个月整改，整改期内不参加评优' };
-const LPERF_HIST = { '赵立群': [85.2, 86.4, 88.1], '周建国': [92.0, 92.8, 93.6], '陈志远': [80.4, 79.1, 77.6] };
-function lperfIn(team) {
-  const pre = LPERF_IN[team] || {}; const own = team === TEAM.name;
-  return {
-    vio: own ? VIOLATIONS.length : pre.vio,
-    absent: pre.absent,
-    wkMiss: pre.wkMiss,
-    tkRate: own ? +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1) : pre.tkRate,
-    star: own ? buildScore().pct : pre.star,
-    nodeQ: pre.nodeQ, nodeQPct: Math.round(pre.nodeQ[0] / pre.nodeQ[1] * 100), nodeWk: own ? DB.nodeRate() : null,
-    over: teamPeople(team).filter(p => (own ? p.week : (team === LAB.name ? LAB.week[p.n] : 0)) > WEEK_LIMIT).length,
-    unpaired: newHires(team).list3.filter(x => !MENTORS.some(m => m.s === x.p.n)).length,
-    leave3y: STABILITY[team].leave3y,
-    intent: STABILITY[team].intent,
-    gapHi: own ? skillCover().filter(c => c.must).filter(c => { const ages = c.a.map(p => p.age); const young = ages.length ? Math.min.apply(null, ages) : 0; return c.a.length <= 2 || (c.a.length <= 4 && young >= 35); }).length : pre.gapHi,
-    late: own ? DB.jobs().filter(j => j.st === '待派' && j.dateIso <= TODAY).length : pre.late,
-    pend: own ? DB.tickets().filter(t => t.st === '待审').length : pre.pend
-  };
-}
-function lperfGoalW(team) {
-  const G = goalsAll().filter(g => g.teams && g.teams[team]);
-  const rows = G.map(g => { let lt = g.light; if (g.kind !== 'text') { const v = g.teams[team](); if (typeof v === 'number') { if (g.kind === 'rate') lt = v >= g.target ? 'ok' : v >= g.target * 0.985 ? 'w' : 'bad'; else if (g.kind === 'down') lt = v <= g.target ? 'ok' : v <= g.target * 1.05 ? 'w' : 'bad'; else { const pr = v / g.target * 100; lt = pr >= YEAR_PCT ? 'ok' : pr >= YEAR_PCT - 8 ? 'w' : 'bad'; } } } return { g, lt, v: g.kind === 'text' ? null : g.teams[team]() }; });
-  const w = { ok: 1, w: 0.85, bad: 0.6 };
-  return { rows, pct: rows.length ? rows.reduce((s, r) => s + w[r.lt], 0) / rows.length : 1 };
-}
-function lperfOf(name) {
-  const L = LEADERS.find(l => l.n === name) || LEADERS[0]; const team = L.team; const I = lperfIn(team); const GW = lperfGoalW(team);
-  const cut = (pts, items) => { const d = items.reduce((s, x) => s + x[1], 0); return { sc: +Math.max(0, pts - d).toFixed(1), items }; };
-  const D = LPERF_DIMS.map(d => {
-    let r;
-    if (d.k === 'safe') r = cut(d.pts, [['一般违章 ' + I.vio + ' 起（' + (team === TEAM.name ? '全部本班自查' : '含上级查处') + '）', +(I.vio * 0.5).toFixed(1)], ['两票合格率 ' + I.tkRate + '%', I.tkRate < 100 ? 2 : 0], ['安全活动缺席 ' + I.absent + ' 人次', +(I.absent * 0.5).toFixed(1)], ['安全生产事故事件 0 起', 0]]);
-    else if (d.k === 'task') r = { sc: +(d.pts * GW.pct).toFixed(1), items: GW.rows.map(x => [x.g.n + '：' + (x.v == null ? '按班组分解' : x.v + x.g.unit) + ' · ' + { ok: '绿灯', w: '黄灯', bad: '红灯' }[x.lt], +(d.pts / GW.rows.length * (1 - { ok: 1, w: 0.85, bad: 0.6 }[x.lt])).toFixed(2)]) };
-    else if (d.k === 'build') r = { sc: +Math.max(0, d.pts * I.star / 100 - (I.nodeQPct < 80 ? 2 : 0)).toFixed(1), items: [['星级班组初步评分 ' + I.star + ' 分', +(d.pts * (100 - I.star) / 100).toFixed(1)], ['本季度关键节点周闭环达标 ' + I.nodeQ[0] + '/' + I.nodeQ[1] + ' 周（' + I.nodeQPct + '%）', I.nodeQPct < 80 ? 2 : 0]] };
-    else if (d.k === 'crew') r = cut(d.pts, [['外勤超 24 小时 ' + I.over + ' 人', I.over], ['近 3 年新员工未结对师傅 ' + I.unpaired + ' 人', I.unpaired], ['近三年离职 ' + I.leave3y + ' 人', I.leave3y], ['转岗意向 ' + I.intent + ' 人', +(I.intent * 0.5).toFixed(1)], ['核心技能断层高风险 ' + I.gapHi + ' 类', +(I.gapHi * 0.5).toFixed(1)]]);
-    else r = cut(d.pts, [['到期未派 ' + I.late + ' 项', I.late], ['待审票 ' + I.pend + ' 张', +(I.pend * 0.5).toFixed(1)], ['周报漏报 ' + I.wkMiss + ' 期', I.wkMiss]]);
-    return Object.assign({}, d, r, { pct: Math.round(r.sc / d.pts * 100), cls: r.sc / d.pts >= 0.9 ? 'ok' : r.sc / d.pts >= 0.75 ? 'w' : 'bad' });
-  });
-  const total = +D.reduce((s, d) => s + d.sc, 0).toFixed(1);
-  const g = LPERF_GRADE.find(x => total >= x[0]);
-  const rank = D.slice().sort((a, b) => b.pct - a.pct);
-  const hist = LPERF_HIST[name] || [];
-  return { L, team, dims: D, total, grade: g[1], gradeCls: g[2], strong: rank.slice(0, 2), weak: rank.slice(-2).reverse(), apply: LPERF_APPLY[g[1]], hist: hist.concat([total]), delta: hist.length ? +(total - hist[hist.length - 1]).toFixed(1) : 0, goals: GW.rows, input: I };
-}
-function lperfAll() { return LEADERS.map(l => lperfOf(l.n)); }
- // 2026-08-07 时间进度
+/* ---------- 考核指标：分管副总 / 主管 / 班长三个维度（2026 年度业绩责任书原文口径）----------
+   基础值 / 满分值 / 挑战值与评分标准取责任书；当前值：快速复电成功率取周报光明值，配电自动化班安全生产过程管理按本机违章台账推算，其余为部门台账预设 */
+const YEAR_PCT = 60; // 2026-08-07 时间进度
 /* 第三方客户满意度（季度回访测评，按班组分解） */
 const CSAT = { '配电自动化班': 90.8, '试验班': 91.2, '配电运维一班': 87.4 };
 function csatAvg() { const ns = Object.keys(CSAT); const tot = ns.reduce((s, n) => s + teamStat(n).n, 0); return +(ns.reduce((s, n) => s + CSAT[n] * teamStat(n).n, 0) / tot).toFixed(1); }
-const GOALS = [
-  { k: 'g1', n: '配电自动化终端在线率', unit: '%', src: '组织经营业绩指标', target: 99.5, stretch: 99.8, cur: () => WK29.val('online'), kind: 'rate', team: '配电自动化班', note: '雷雨季 7–9 月离线过夜终端要日清；主站侧通道中断不计入班组', teams: { '配电自动化班': () => WK29.val('online') } },
-  { k: 'g2', n: '快速复电成功率', unit: '%', src: '组织经营业绩指标', target: 80, stretch: 85, cur: () => WK29.val('fastok'), kind: 'rate', team: '配电自动化班', note: '虽达年度目标，但低于全市 85.5%、全市排名靠后：站内 82.1%（32/39）、站外 66.7%（2/3）；失败逐单查永磁驱动终端与交换机取电', teams: { '配电自动化班': () => WK29.val('fastok') } },
-  { k: 'g3', n: '自愈有效复电率', unit: '%', src: '组织经营业绩指标', target: 95, stretch: 98, cur: () => WK29.val('heal'), kind: 'rate', team: '配电自动化班', note: '自愈误动、拒动逐条分析，定值单与现场一致性每季核一次', teams: { '配电自动化班': () => WK29.val('heal') } },
-  { k: 'g4', n: '缺陷限时闭环率', unit: '%', src: '主管个人年度业绩责任书', target: 100, stretch: 100, cur: () => WK29.val('close'), kind: 'rate', team: '三班组', note: '紧急 24 小时、重大 72 小时、一般 30 天；超期一单扣当月', teams: { '配电自动化班': () => WK29.val('close'), '试验班': () => 100, '配电运维一班': () => 98.9 } },
-  { k: 'g5', n: '两票合格率', unit: '%', src: '主管个人年度业绩责任书', target: 100, stretch: 100, cur: () => +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1), kind: 'rate', team: '三班组', note: '退回票不计不合格，执行后发现缺项才计', teams: { '配电自动化班': () => +(DB.month().ticketsOK / DB.month().tickets * 100).toFixed(1), '试验班': () => 100, '配电运维一班': () => 100 } },
-  { k: 'g6', n: '配网自动化改造工程投运', unit: '座', src: '组织经营业绩指标', target: 36, stretch: 40, cur: () => 21, kind: 'count', team: '配电自动化班', note: '田寮站 F02 下周验收后 +1；9 月前投运 4 座才追上进度', teams: { '配电自动化班': () => 21 } },
-  { k: 'g7', n: '第三方客户满意度', unit: '分', src: '组织经营业绩指标', target: 90, stretch: 92, cur: () => csatAvg(), kind: 'rate', team: '三班组', note: '第三方季度回访测评，按工单回访、现场服务、停电告知三项打分；配电运维一班的停电告知与到场时效是主要失分项', teams: { '配电自动化班': () => CSAT['配电自动化班'], '试验班': () => CSAT['试验班'], '配电运维一班': () => CSAT['配电运维一班'] } },
-  { k: 'g8', n: '中压客户平均停电时间', unit: '小时', src: '组织经营业绩指标', target: 1.2, stretch: 1.0, cur: () => 1.31, kind: 'down', team: '配电运维一班', note: '转供电方案预置率要到 100%；故障抢修到场 45 分钟', teams: { '配电运维一班': () => 1.31 } },
-  { k: 'g9', n: '人均核心技能实操量', unit: '次', src: '主管个人年度业绩责任书', target: 30, stretch: 36, cur: () => skill9PerCap(), kind: 'count', team: '三班组', note: '附表 1：人均实操量 = 核心技能自主实施完成总次数 / 人数，按排名取得分比例', teams: { '配电自动化班': () => skill9PerCap(), '试验班': () => 34.5, '配电运维一班': () => 18.2 } },
-  { k: 'g10', n: '年度生产计划完成率', unit: '%', src: '组织经营业绩指标', target: 95, stretch: 98, cur: () => +(DB.month().jobsDone / DB.month().jobs * 100).toFixed(1), kind: 'rate', team: '三班组', note: '按月计划口径；调整过的计划要留变更记录', teams: { '配电自动化班': () => +(DB.month().jobsDone / DB.month().jobs * 100).toFixed(1), '试验班': () => 100, '配电运维一班': () => 100 } },
-  { k: 'g12', n: '星级班组建设', unit: '', src: '主管个人年度业绩责任书', target: '配电自动化班保四星争五星 · 配电运维一班升四星', stretch: '两个班组同年升星', cur: () => '配电自动化班初步评分 ' + buildScore().pct + '（' + buildScore().lv + '）· 配电运维一班 三星', kind: 'text', light: () => buildScore().pct >= 90 ? 'ok' : buildScore().pct >= 85 ? 'w' : 'bad', team: '三班组', note: '五星必备条件 7 项一票否决，先补党建水平与核心能力建设', teams: { '配电自动化班': () => buildScore().pct + ' 分', '试验班': () => '五星（2024 评定）', '配电运维一班': () => '三星 · 初步评分 76.4' } },
-  { k: 'g13', n: '安全生产事故事件', unit: '起', src: '组织经营业绩指标', target: 0, stretch: 0, cur: () => 0, kind: 'down', team: '三班组', note: '一般违章本年 ' + VIOLATIONS.length + ' 起，全部本班自查；越级查处 0 起', teams: { '配电自动化班': () => 0, '试验班': () => 0, '配电运维一班': () => 0 } }
+const KPI_DEF = {
+  csat: { n: '第三方客户满意度', unit: '分', base: 87.6, full: 89.6, chal: null, dir: 1, fmt: v => v.toFixed(1),
+    rule: '满意度分数达到基础值得 100 分，达到满分值得 120 分，之间按线性插值法折算；低于基础值每低 0.1 分扣 2 分，扣完为止。指标得分由满意度分数得分和诉求管控质量得分（12398 投诉管控量、投诉（风险）升级率等）各占 50% 合计，最高 120 分',
+    score(v) { return v >= this.full ? 120 : v >= this.base ? 100 + (v - this.base) / (this.full - this.base) * 20 : Math.max(0, 100 - Math.round((this.base - v) * 10) * 2); } },
+  rel: { n: '综合供电可靠率', star: true, unit: '%', base: 99.9981, full: 99.9986, chal: 99.9987, dir: 1, fmt: v => v.toFixed(5),
+    rule: '达到基础值得 80 分，达到满分值得 100 分，达到挑战值得 110 分，之间按线性插值法计算；差于基础值每差 0.0001 个百分点扣 1 分。另有可靠性关键项目完成率、超 12 时户事件同比降幅、可靠性工作质量评价与数据质量加扣分；数据取自供电可靠性系统，剔除重大事件日及 3 分钟内停电',
+    score(v) { return v >= this.chal ? 110 : v >= this.full ? 100 + (v - this.full) / (this.chal - this.full) * 10 : v >= this.base ? 80 + (v - this.base) / (this.full - this.base) * 20 : Math.max(0, 80 - Math.round((this.base - v) / 0.0001)); } },
+  trip: { n: '中压线路故障跳闸次数', star: true, unit: '条次', base: 91, full: 83, chal: null, dir: -1, cum: true, fmt: v => String(Math.round(v)),
+    rule: '全年故障次数达到基础值得 100 分，达到满分值得 120 分，之间按线性插值法计算；差于基础值每增加 1 次扣 1 分。重复故障 3 次及以上线路每条扣 2 分；频繁停电线路和台区扣 60 分 / 条；超 3 小时复电故障超过考核值（光明 4 次）每次扣 1 分；故障瞒报、原因谎报每发现 1 次记为 3 次',
+    score(v) { return v <= this.full ? 120 : v <= this.base ? 100 + (this.base - v) / (this.base - this.full) * 20 : Math.max(0, 100 - (v - this.base)); } },
+  fast: { n: '快速复电成功率', unit: '%', base: null, full: 88, chal: null, dir: 1, fmt: v => v.toFixed(1),
+    rule: '达到或优于满分值得 120 分，每低于满分值 1% 扣 4 分，扣完为止。算法：成功次数 ÷ 具备快速复电条件的跳闸次数（剔除分界断路器动作、低压影响用户数为零、公线专用线路发生的跳闸）',
+    score(v) { return v >= this.full ? 120 : Math.max(0, 120 - (this.full - v) * 4); } },
+  duty: { n: '安全生产责任制履职评价', unit: '分', base: 100, full: 100, chal: null, dir: 1, fmt: v => String(v),
+    rule: '达到或优于满分值得 120 分；未达到满分值的，每低于满分值 1 分，在 120 分基础上扣 1 分，扣完为止',
+    score(v) { return v >= this.full ? 120 : Math.max(0, 120 - (this.full - v)); } },
+  outage: { n: '中压客户平均停电时间', unit: '时户', base: 307, full: 226, chal: 210, dir: -1, cum: true, fmt: v => String(Math.round(v)),
+    rule: '达到基础值得 80 分，达到满分值得 100 分，达到挑战值得 110 分，之间按线性插值法计算；可靠性关键项目完成率超过 95% 加 5 分；超 12 时户事件数同比减少 10% / 25% / 40% 分别加 1 / 3 / 5 分',
+    score(v) { return v <= this.chal ? 110 : v <= this.full ? 100 + (this.full - v) / (this.full - this.chal) * 10 : v <= this.base ? 80 + (this.base - v) / (this.base - this.full) * 20 : Math.max(0, 80 - (v - this.base)); } },
+  tripT: { n: '中压线路故障跳闸次数', unit: '次', base: 27, full: 26, chal: null, dir: -1, cum: true, fmt: v => String(Math.round(v)),
+    rule: '达到基础值得 100 分，达到满分值得 120 分，之间按线性插值法计算；差于基础值每增加 1 次扣 1 分。重复故障 3 次及以上线路每条扣 2 分，频繁停电线路扣 60 分 / 条，超 3 小时复电超过考核值每次扣 1 分',
+    score(v) { return v <= this.full ? 120 : v <= this.base ? 100 + (this.base - v) / (this.base - this.full) * 20 : Math.max(0, 100 - (v - this.base)); } },
+  drop: { n: '故障平均停电用户数降幅', unit: '%', base: -3, full: -3.5, chal: null, dir: -1, fmt: v => v.toFixed(1),
+    rule: '达到基础值（同比下降 3%）得 100 分，达到满分值（同比下降 3.5%）得 120 分，之间按线性插值法计算；指标同比增加时不得分（降幅不足 3% 时本页按比例折算）',
+    score(v) { return v <= this.full ? 120 : v <= this.base ? 100 + (this.base - v) / (this.base - this.full) * 20 : v >= 0 ? 0 : 100 * v / this.base; } },
+  proc: { n: '安全生产过程管理', unit: '分', base: null, full: 50, chal: null, dir: 1, risk: true, fmt: v => v.toFixed(1),
+    rule: '风险指标：安全生产过程管理考核得分与加分之和不低于 50 分时本项不扣分；低于 50 分时按差值扣分',
+    score(v) { return v >= this.full ? 0 : -(this.full - v); } }
+};
+const KPI_LV = [
+  { k: 'vp', n: '分管副总', who: '分管副总经理（分管配资业务）', doc: '直属单位经理层副职年度经营业绩责任书', share: 80, items: [['csat', 15], ['rel', 15], ['fast', 10], ['duty', 10]] },
+  { k: 'mgr', n: '主管', who: '陈国安 · 配网资产部主管', doc: '部门四级正干部年度业绩责任书', share: 80, items: [['csat', 15], ['rel', 15], ['trip', 15], ['duty', 5]] },
+  { k: 'lead', n: '班长', who: '赵立群 · 周建国 · 陈志远', doc: '员工年度业绩责任书（班长）', share: 50, items: [['csat', 10], ['outage', 10], ['fast', 10], ['proc', 0]] }
 ];
-function goalEval(g) { const v = g.cur(); let light, prog; if (g.kind === 'text') { light = g.light(); prog = null; } else if (g.kind === 'rate') { prog = +(v / g.target * 100).toFixed(1); light = v >= g.target ? 'ok' : v >= g.target * 0.985 ? 'w' : 'bad'; } else if (g.kind === 'down') { prog = null; light = v <= g.target ? 'ok' : v <= g.target * 1.05 ? 'w' : 'bad'; } else if (g.kind === 'prog') { prog = v; light = v >= YEAR_PCT ? 'ok' : v >= YEAR_PCT - 8 ? 'w' : 'bad'; } else { prog = +(v / g.target * 100).toFixed(1); light = prog >= YEAR_PCT ? 'ok' : prog >= YEAR_PCT - 8 ? 'w' : 'bad'; } return Object.assign({}, g, { v, light, prog, lightN: { ok: '绿', w: '黄', bad: '红' }[light] }); }
-function goalsAll() { return GOALS.map(goalEval); }
+/* 局级当前值（截至 2026-08-07；累计类按时间进度推算全年） */
+const KPI_CUR = { csat: { v: 88.9, src: '网公司第三方客户满意度调查 · 上半年' }, rel: { v: 99.99832, src: '供电可靠性系统 · 1–7 月' }, trip: { ytd: 53, src: 'OMS 故障跳闸记录 · 1–7 月累计' }, fast: { v: () => WK29.val('fastok'), src: '周报第 29 期 · 光明' }, duty: { v: 100, src: '安全生产责任制履职评价 · 上半年' } };
+/* 班长维度按班组取值：配电自动化班快速复电取周报、安全生产过程管理按本机违章台账推算；其余为部门台账预设 */
+const KPI_TEAM = {
+  '配电自动化班': { csat: { v: () => CSAT['配电自动化班'], src: '第三方季度回访测评' }, outage: { ytd: 145, src: '供电可靠性系统 · 1–7 月累计' }, fast: { v: () => WK29.val('fastok'), src: '周报第 29 期 · 光明' }, proc: { v: () => +(52 - VIOLATIONS.length * 0.5).toFixed(1), src: '安全生产过程管理考核 · 违章台账' }, tripT: { ytd: 11, src: 'OMS 故障跳闸记录 · 1–7 月累计' }, drop: { v: -3.6, src: '供电可靠性系统 · 同比' } },
+  '试验班': { csat: { v: () => CSAT['试验班'], src: '第三方季度回访测评' }, outage: { ytd: 131, src: '供电可靠性系统 · 1–7 月累计' }, fast: { v: 86.0, src: '部门台账' }, proc: { v: 53.5, src: '安全生产过程管理考核' }, tripT: { ytd: 14, src: 'OMS 故障跳闸记录 · 1–7 月累计' }, drop: { v: -3.8, src: '供电可靠性系统 · 同比' } },
+  '配电运维一班': { csat: { v: () => CSAT['配电运维一班'], src: '第三方季度回访测评' }, outage: { ytd: 178, src: '供电可靠性系统 · 1–7 月累计' }, fast: { v: 84.2, src: '部门台账' }, proc: { v: 47.0, src: '安全生产过程管理考核' }, tripT: { ytd: 17, src: 'OMS 故障跳闸记录 · 1–7 月累计' }, drop: { v: -2.6, src: '供电可靠性系统 · 同比' } }
+};
+function kpiLight(d, v) { if (d.risk) return v >= d.full ? 'ok' : 'bad'; if (d.dir < 0) return v <= d.full ? 'ok' : v <= d.base ? 'w' : 'bad'; if (d.base == null || d.base === d.full) return v >= d.full ? 'ok' : d.score(v) >= 108 ? 'w' : 'bad'; return v >= d.full ? 'ok' : v >= d.base ? 'w' : 'bad'; }
+function kpiRow(k, w, team) { const d = KPI_DEF[k]; const src = team ? (KPI_TEAM[team] || {})[k] : KPI_CUR[k]; let v = null, ytd = null; if (src) { if (src.ytd != null) { ytd = src.ytd; v = +(ytd / YEAR_PCT * 100).toFixed(1); } else v = typeof src.v === 'function' ? src.v() : src.v; }
+  const s = v == null ? null : +d.score(v).toFixed(1); const light = v == null ? 'w' : kpiLight(d, v);
+  return Object.assign({}, d, { k, w, team: team || null, v, ytd, s, light, lightN: { ok: '绿', w: '黄', bad: '红' }[light], src: src ? src.src : '', vTxt: v == null ? '—' : ytd != null ? '累计 ' + ytd + d.unit + ' · 推算全年 ' + d.fmt(v) + d.unit : d.fmt(v) + d.unit }); }
+function kpiRows(dimK) { const D = KPI_LV.find(x => x.k === dimK) || KPI_LV[0]; if (dimK !== 'lead') return D.items.map(([k, w]) => kpiRow(k, w));
+  const ord = { bad: 0, w: 1, ok: 2 }; return D.items.map(([k, w]) => { const teams = {}; TEAMS.forEach(t => { teams[t.n] = kpiRow(k, w, t.n); }); const worst = Object.values(teams).sort((a, b) => ord[a.light] - ord[b.light])[0]; return Object.assign({}, KPI_DEF[k], { k, w, teams, light: worst.light, lightN: worst.lightN }); }); }
+/* 汇总给导航角标、分析参谋：分管副总与主管去重，班长维度按三班组最差一格 */
+function goalsAll() { const out = []; ['vp', 'mgr'].forEach(dk => kpiRows(dk).forEach(r => { if (!out.some(x => x.k === r.k)) out.push(Object.assign({ dim: dk }, r)); })); kpiRows('lead').forEach(r => out.push(Object.assign({}, r, { k: 'L_' + r.k, dim: 'lead', n: '班长 · ' + r.n }))); return out; }
+
+/* ---------- 班长绩效（员工年度业绩责任书 · 班长）：考核指标 50% + 重点任务 10% + 综合评价 40% + 加扣分（≤ 2 分）+ 红线事项 ----------
+   单项得分上限 120 分，本页按 ÷1.2 折为百分制后乘权重；安全生产过程管理为风险指标，按差值扣分；初步评分由部门确认后使用 */
+const LPERF_Q = { no: '2026 年第三季度', range: '2026-07-01 至 09-30', state: '在评', prev: ['2025 年第四季度', '2026 年第一季度', '2026 年第二季度'], qs: ['25Q4', '26Q1', '26Q2', '26Q3'] };
+const LPERF_KPI = [['csat', 10], ['outage', 10], ['fast', 10], ['tripT', 10], ['drop', 10]];
+const LPERF_TASKS = [
+  { k: 't1', n: '落实调度安全生产工作任务', w: 4, src: '公司所属部门（单位）经营业绩考核', rule: '自愈覆盖率 100%（含新增线路）得 30 分，每降低 1 个百分点扣 1 分，90% 以下不得分；中压快速复电应用成效达到 67% 得 35 分，每增减 1 个百分点加减 1 分，最高 43 分；低压快速复电应用成效同中压；本项最高 120 分',
+    calc(team) { const I = LPERF_TASK_IN[team].t1; const heal = typeof I.heal === 'function' ? I.heal() : I.heal; const a = heal < 90 ? 0 : 30 - (100 - heal), b = Math.min(43, 35 + (I.mv - 67)), c = Math.min(43, 35 + (I.lv - 67)); return { s: +Math.min(120, a + b + c).toFixed(1), txt: '自愈覆盖率 ' + heal + '% → ' + a + ' 分；中压快速复电应用成效 ' + I.mv + '% → ' + b + ' 分；低压 ' + I.lv + '% → ' + c + ' 分' }; } },
+  { k: 't2', n: '推动配电网高质量发展', w: 4, src: '公司所属部门（单位）经营业绩考核', rule: '按时高质量完成所有里程碑节点得 110 分；任务滞后、完成质量和成效不理想、未推进完成的每项扣分（本页按每项 5 分预估）；在重点任务中获上级表彰或通报表扬每项加 5 分，最多加 10 分；最高 120 分',
+    calc(team) { const I = LPERF_TASK_IN[team].t2; const s = Math.min(120, 110 - I.late * 5 + Math.min(10, I.praise * 5)); return { s, txt: I.txt + (I.late ? '；滞后 ' + I.late + ' 项' : '；里程碑按期') + (I.praise ? '；通报表扬 ' + I.praise + ' 项' : '') }; } },
+  { k: 't3', n: '配网"六百二零"攻坚行动', w: 2, src: '光明局年度重点工作', rule: '用户出门隐患、城中村频繁停电风险、安全隐患架空线路段、电缆隐患、配网自动化主干节点覆盖等 8 项任务 100% 完成得 120 分；所有任务均值每降低 1 个百分点扣 1 分',
+    calc(team) { const I = LPERF_TASK_IN[team].t3; return { s: Math.max(0, 120 - (100 - I.avg)), txt: '8 项任务完成率均值 ' + I.avg + '%' + (I.txt ? '；' + I.txt : '') }; } }
+];
+/* 重点任务完成情况（局级任务按班组分解，部门台账预设；配电自动化班自愈覆盖率取周报） */
+const LPERF_TASK_IN = {
+  '配电自动化班': { t1: { heal: () => WK29.val('healcov'), mv: 72, lv: 70 }, t2: { late: 0, praise: 0, txt: '数字生产建设任务按节点推进' }, t3: { avg: 96, txt: '配网自动化主干节点覆盖为本班负责项' } },
+  '试验班': { t1: { heal: () => WK29.val('healcov'), mv: 72, lv: 70 }, t2: { late: 0, praise: 1, txt: '电缆附件质量抽检按期完成' }, t3: { avg: 100, txt: '' } },
+  '配电运维一班': { t1: { heal: () => WK29.val('healcov'), mv: 72, lv: 70 }, t2: { late: 1, praise: 0, txt: '电缆和通道全生命周期管理台账补录滞后' }, t3: { avg: 91, txt: '城中村频繁停电风险问题解决率 82%' } }
+};
+const LPERF_EVAL = [
+  { k: 'e1', n: '政治过硬', w: 15, base: 90, pt: '自觉用习近平新时代中国特色社会主义思想武装头脑，把忠诚拥护"两个确立"、坚决做到"两个维护"体现到日常工作中。想问题、做工作能自觉从大局出发、为全局考虑，刻苦工作、敢于斗争、乐于奉献，在推动公司战略部署落实落地中走在前、做表率。', ev: '党建与安全活动出勤、跨班组支援',
+    items(team, I) { const r = [['安全活动 / 党建学习缺席 ' + I.absent + ' 人次', -I.absent * 2]]; if (team === LAB.name) r.push(['借调骨干支援配电运维一班，服从全局调配', 2]); return r; } },
+  { k: 'e2', n: '勇于创新', w: 10, base: 80, pt: '发挥基层创新能动性，始终保持强烈的创新意识和进取精神，敢闯敢试、敢于攀登，以求真务实态度、追求卓越信念把工作不断推向更高水平。', ev: '创新与 QC 成果、本季度新增授权模块',
+    items(team) { const r = (LPERF_INNOV[team] || []).slice(); if (team === TEAM.name) { const n = Object.values(LS.get('skill9', {})).reduce((s, o) => s + Object.values(o).filter(v => v === 'A').length, 0); r.push(['本季度新增授权 ' + n + ' 项', Math.min(3, n)]); } if (!r.length) r.push(['本季度无创新成果登记', 0]); return r; } },
+  { k: 'e3', n: '作风优良', w: 15, base: 95, pt: '弘扬新风正气，廉洁自律、公道正派、规范用权，自觉遵守廉洁从业各项规定。践行"知行合一、以知促行"的执行力文化，攻坚克难、真抓实干，养成"严、勤、细、实"的工作作风和"马上就办、办就办好"的工作习惯。', ev: '到期未派、待审票、周报漏报、一般违章',
+    items(team, I) { return [['到期未派 ' + I.late + ' 项', -I.late * 3], ['待审票 ' + I.pend + ' 张', -I.pend * 2], ['周报漏报 ' + I.wkMiss + ' 期', -I.wkMiss * 3], ['一般违章 ' + I.vio + ' 起', -I.vio * 2]]; } }
+];
+const LPERF_INNOV = { '配电自动化班': [['永磁驱动终端频繁投退排查法 · 班组创新成果', 4]], '试验班': [['电缆振荡波试验作业卡优化 · QC 成果', 3], ['局职工创新项目 1 项', 3]], '配电运维一班': [] };
+const LPERF_ADJ = { '赵立群': [], '周建国': [['试验班获局级通报表扬（电缆振荡波试验零差错）', 1]], '陈志远': [['上级查处一般违章 1 起（部门考核扣分分解）', -0.5]] };
+const LPERF_RED = { '赵立群': null, '周建国': null, '陈志远': null };
+const LPERF_DIMS = [
+  { k: 'kpi', n: '考核指标', pts: 50, src: '考核指标页 · 班长维度 · 供电可靠性系统 · 周报 · 第三方回访', rule: '第三方客户满意度、中压客户平均停电时间、快速复电成功率、中压线路故障跳闸次数、故障平均停电用户数降幅各占 10%，单项得分 0–120 分按责任书评分标准计算；安全生产过程管理为风险指标，低于 50 分按差值扣分' },
+  { k: 'task', n: '重点任务', pts: 10, src: '员工年度业绩责任书 · 重点任务里程碑 · 周报', rule: '落实调度安全生产工作任务 4%、推动配电网高质量发展 4%、配网"六百二零"攻坚行动 2%，按各项里程碑计分规则计算，单项最高 120 分' },
+  { k: 'eval', n: '综合评价', pts: 40, src: '派工记录 · 两票台账 · 周报报送 · 违章台账 · 安全活动台账 · 创新成果登记', rule: '政治过硬 15%、勇于创新 10%、作风优良 15%，由部门按评价要点评价；页面按台账证据给出初步分（基准分加减证据项），由部门确认后使用' }
+];
+const LPERF_GRADE = [[90, '优秀', 'ok'], [80, '良好', 'ok'], [70, '合格', 'w'], [0, '需改进', 'bad']];
+const LPERF_APPLY = { '优秀': '月度绩效上浮一档；推荐参评局级优秀班组长；可申报星级工程师升星', '良好': '月度绩效按标准档；短板项列入下季度改进要求', '合格': '月度绩效按标准档下限；由部门与本人签一份改进承诺，逐月回访', '需改进': '月度绩效下浮一档；部门约谈并限期两个月整改，整改期内不参加评优' };
+const LPERF_HIST = { '赵立群': [85.2, 86.4, 88.1], '周建国': [92.0, 92.8, 93.6], '陈志远': [80.4, 79.1, 77.6] };
+/* 未接入台账的两个班组给预设输入项，已在讲师演示台状态清单标注；配电自动化班一律取本机台账实时值 */
+const LPERF_IN = {
+  '配电自动化班': { absent: 1, wkMiss: 0 },
+  '试验班': { vio: 0, absent: 0, wkMiss: 0, late: 0, pend: 0 },
+  '配电运维一班': { vio: 2, absent: 2, wkMiss: 1, late: 1, pend: 1 }
+};
+function lperfIn(team) {
+  const pre = LPERF_IN[team] || {}; const own = team === TEAM.name;
+  return { vio: own ? VIOLATIONS.length : pre.vio, absent: pre.absent, wkMiss: pre.wkMiss,
+    late: own ? DB.jobs().filter(j => j.st === '待派' && j.dateIso <= TODAY).length : pre.late,
+    pend: own ? DB.tickets().filter(t => t.st === '待审').length : pre.pend };
+}
+function lperfOf(name) {
+  const L = LEADERS.find(l => l.n === name) || LEADERS[0]; const team = L.team; const I = lperfIn(team);
+  const kpis = LPERF_KPI.map(([k, w]) => { const r = kpiRow(k, w, team); return Object.assign(r, { pts: +(r.s / 1.2 * w / 100).toFixed(2) }); });
+  const proc = kpiRow('proc', 0, team); const risk = proc.v != null && proc.v < 50 ? +(50 - proc.v).toFixed(1) : 0;
+  const tasks = LPERF_TASKS.map(t => { const r = t.calc(team); return Object.assign({}, t, r, { pts: +(r.s / 1.2 * t.w / 100).toFixed(2) }); });
+  const evals = LPERF_EVAL.map(e => { const items = e.items(team, I); const s = Math.max(0, Math.min(100, items.reduce((a, x) => a + x[1], e.base))); return Object.assign({}, e, { items, s, pts: +(s * e.w / 100).toFixed(2) }); });
+  const mk = (d, rows, items) => { const sc = +rows.reduce((a, x) => a + x.pts, 0).toFixed(1); const pct = Math.round(sc / d.pts * 100); return Object.assign({}, d, { sc, pct, cls: pct >= 90 ? 'ok' : pct >= 75 ? 'w' : 'bad', rows, items }); };
+  const D = [
+    mk(LPERF_DIMS[0], kpis, kpis.map(r => [r.n + ' ' + r.vTxt + '（' + r.s + ' 分）', +(r.w - r.pts).toFixed(1)])),
+    mk(LPERF_DIMS[1], tasks, tasks.map(r => [r.n + '：' + r.txt + '（' + r.s + ' 分）', +(r.w - r.pts).toFixed(1)])),
+    mk(LPERF_DIMS[2], evals, evals.map(r => [r.n + '：' + r.items.filter(x => x[1]).map(x => x[0]).join('、') + '（' + r.s + ' 分）', +(r.w - r.pts).toFixed(1)]))
+  ];
+  const adjRows = LPERF_ADJ[name] || []; const adj = Math.max(-2, Math.min(2, adjRows.reduce((s, x) => s + x[1], 0))); const red = LPERF_RED[name] || null;
+  let total = +(D.reduce((s, d) => s + d.sc, 0) - risk + adj).toFixed(1); if (red) total = Math.min(total, 69.9);
+  const g = LPERF_GRADE.find(x => total >= x[0]);
+  const rank = D.slice().sort((a, b) => b.pct - a.pct);
+  const hist = LPERF_HIST[name] || [];
+  const subs = kpis.map(r => ({ n: r.n, p: r.s / 1.2 })).concat(tasks.map(r => ({ n: r.n, p: r.s / 1.2 })), evals.map(r => ({ n: r.n, p: r.s }))).sort((a, b) => a.p - b.p);
+  return { L, team, dims: D, kpis, tasks, evals, proc, risk, adj, adjRows, red, total, grade: g[1], gradeCls: g[2], strong: rank.slice(0, 2), weak: rank.slice(-2).reverse(), lowSubs: subs.slice(0, 3), apply: LPERF_APPLY[g[1]], hist: hist.concat([total]), delta: hist.length ? +(total - hist[hist.length - 1]).toFixed(1) : 0, input: I };
+}
+function lperfAll() { return LEADERS.map(l => lperfOf(l.n)); }
 
 /* ---------- 同类班组横向对比（配网管理部三班组）---------- */
 function compareRows() { const m = DB.month(); const T = {}; TEAMS.forEach(t => { T[t.n] = t; }); const st = { '配电自动化班': teamStat('配电自动化班'), '试验班': teamStat('试验班'), '配电运维一班': teamStat('配电运维一班') };
@@ -2709,7 +2758,7 @@ const ICO = {
 /* 班组长：班组管理 6 项在前，日常业务 5 项在后；管理者：业务 2 项 + 管理 6 项 + 班组 2 项（9/21 客户口径：业务减、管理加） */
 function NAV_OF() {
   if (role() === 'manager') return [
-    { g: '业务' }, { k: 'goals', n: '年度指标任务', ic: 'target', badge: () => goalsAll().filter(g => g.light === 'bad').length }, { k: 'compare', n: '班组横向对比', ic: 'cmpr' },
+    { g: '业务' }, { k: 'goals', n: '考核指标', ic: 'target', badge: () => goalsAll().filter(g => g.light === 'bad').length }, { k: 'compare', n: '班组横向对比', ic: 'cmpr' },
     { g: '管理' }, { k: 'portrait', n: '团队画像总览', ic: 'star' }, { k: 'lperf', n: '班长绩效', ic: 'gauge', badge: () => LEADERS.filter(l => !LS.get('lperf_ok', {})[l.n]).length }, { k: 'staff', n: '人员总览', ic: 'people' }, { k: 'structure', n: '班组结构对比', ic: 'hex' }, { k: 'risks', n: '团队风险画像', ic: 'warn', badge: () => riskAgg().filter(r => r.lv === '高').length }, { k: 'mcare', n: '员工关怀', ic: 'heart' }, { k: 'madvise', n: '分析参谋', ic: 'doc' },
     { g: '班组' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
   ];
@@ -2723,9 +2772,9 @@ function NAV_OF() {
 const ALLOW = { leader: ['team', 'skills', 'auth', 'grow', 'perf', 'care', 'advise', 'home', 'ask', 'people', 'sched', 'train', 'know', 'ledger', 'safety', 'docs', 'star'], manager: ['goals', 'compare', 'portrait', 'lperf', 'staff', 'structure', 'risks', 'mcare', 'madvise', 'ledger', 'ask', 'risk', 'star', 'team', 'skills', 'auth', 'people', 'sched', 'train', 'know', 'super', 'talent'] };
 /* 功能实现状态清单（讲师演示台） */
 const STATUS_LIST = [
-  ['真实实现', ['状态层流程：派工 → 审票 → 开工 → 回传 → 完工 → 验收，每步写入本机、刷新可回看', '两票 Word / Excel / 文本离线读取与逐项审核、补齐、退回', '派工四条规则校验（证书 / 作业授权 / 工时 / 冲突）与逐人推荐、排除理由', '关键节点周闭环记录、授权模块实操量完工回写', '作业授权认证表：7 个技能单元 42 个模块逐人逐格确认授权 / 培训中 / 撤销，★按高 / 中 / 初级作业员标注，核心业务自主实施率与★模块断层实时计算，签认与导出 .xls 落本机', '星级班组评价维度初步评分：台账驱动的维度（安全 / 培训 / 台账 / 绩效 / 帮扶 / 关怀 / 作业实施）随操作变化', '绩效系数由履职证据推导，确认、调整、分配表落本机', '班长绩效：安全生产 / 生产任务 / 队伍管理 / 履职与协同四维中，配电自动化班的违章、两票、派工、待审票、断层技能取本机台账实时值，确认、下发、改进要求、考评表落本机', '关怀提醒、班组活动、文化活动、督办、轮岗建议、面谈提纲全部写通知或文稿', '跨班组调配：横向对比 → 影响测算 → 发起 → 班长确认 → 返岗评价']],
-  ['规则模拟', ['员工画像：综合画像（通用素质模型 5 项，L1–L4）与专业画像（岗位说明书 9 项二级业务，对照本岗级要求判到位 / 未到位），等级依据违章、两票、负责人次数、学时、协同、抢修与缺陷台账', '班组特色标签（专家型 / 骨干型 / 基础型）按技能等级占比判定', '人才断层风险按★模块已授权人数与年龄判定', '培养对象排序按断层★模块、自主实施率、成绩、学时、年龄、员工画像优势加权', '年度指标红黄绿按目标值与时间进度判定', '班长绩效五维权重与分档线（优秀 90 / 良好 80 / 合格 70）按主管个人年度业绩责任书分解，另两个班组的违章、安全活动、周报报送、待派待审与本季度关键节点达标周数为预设', '近五年业务量与人力配置趋势外推', '值班表排班、添加任务推断、文稿逐段生成']],
-  ['预设展示', ['专业画像暂按运维班高级作业员岗位说明书的 9 项二级业务，配电自动化班岗位说明书待提供后替换；综合画像与专业画像的各人初始等级为预设', '作业授权认证表暂用运维班口径（7 单元 42 模块、★按岗级），配电自动化班专用认证表待提供后替换；各人初始授权状态为预设，原九类核心技能的授权与实操次数已迁移到对应模块', '星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
+  ['真实实现', ['状态层流程：派工 → 审票 → 开工 → 回传 → 完工 → 验收，每步写入本机、刷新可回看', '两票 Word / Excel / 文本离线读取与逐项审核、补齐、退回', '派工四条规则校验（证书 / 作业授权 / 工时 / 冲突）与逐人推荐、排除理由', '关键节点周闭环记录、授权模块实操量完工回写', '作业授权认证表：7 个技能单元 42 个模块逐人逐格确认授权 / 培训中 / 撤销，★按高 / 中 / 初级作业员标注，核心业务自主实施率与★模块断层实时计算，签认与导出 .xls 落本机', '星级班组评价维度初步评分：台账驱动的维度（安全 / 培训 / 台账 / 绩效 / 帮扶 / 关怀 / 作业实施）随操作变化', '绩效系数由履职证据推导，确认、调整、分配表落本机', '班长绩效按员工年度业绩责任书（班长）：考核指标 50% / 重点任务 10% / 综合评价 40% / 加扣分 / 红线；配电自动化班的快速复电成功率取周报，违章、派工、待审票、新增授权取本机台账实时值，确认、下发、改进要求、考评表落本机', '考核指标分分管副总 / 主管 / 班长三个维度，基础值、满分值、挑战值与评分标准取 2026 年度业绩责任书原文，预计得分按责任书评分标准实时计算，督办写入班长通知', '关怀提醒、班组活动、文化活动、督办、轮岗建议、面谈提纲全部写通知或文稿', '跨班组调配：横向对比 → 影响测算 → 发起 → 班长确认 → 返岗评价']],
+  ['规则模拟', ['员工画像：综合画像（通用素质模型 5 项，L1–L4）与专业画像（岗位说明书 9 项二级业务，对照本岗级要求判到位 / 未到位），等级依据违章、两票、负责人次数、学时、协同、抢修与缺陷台账', '班组特色标签（专家型 / 骨干型 / 基础型）按技能等级占比判定', '人才断层风险按★模块已授权人数与年龄判定', '培养对象排序按断层★模块、自主实施率、成绩、学时、年龄、员工画像优势加权', '考核指标红黄绿：达到满分值为绿、达到基础值为黄、未达基础值为红；累计类指标按时间进度推算全年', '班长绩效单项得分（上限 120 分）按 ÷1.2 折为百分制后乘权重；综合评价三项（政治过硬 / 勇于创新 / 作风优良）按台账证据给初步分，由部门确认；分档线优秀 90 / 良好 80 / 合格 70', '近五年业务量与人力配置趋势外推', '值班表排班、添加任务推断、文稿逐段生成']],
+  ['预设展示', ['考核指标当前值：综合供电可靠率、中压线路故障跳闸次数、第三方客户满意度、安全生产责任制履职评价（局级）与三个班组的中压客户平均停电时间、跳闸次数、停电用户数降幅、安全生产过程管理（试验班、配电运维一班）为预设；配电自动化班与试验班班长责任书指标值暂按配电运行维护一班班长责任书模板；重点任务完成情况、创新成果与加扣分事项为预设', '专业画像暂按运维班高级作业员岗位说明书的 9 项二级业务，配电自动化班岗位说明书待提供后替换；综合画像与专业画像的各人初始等级为预设', '作业授权认证表暂用运维班口径（7 单元 42 模块、★按岗级），配电自动化班专用认证表待提供后替换；各人初始授权状态为预设，原九类核心技能的授权与实操次数已迁移到对应模块', '星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
   ['待系统对接', ['OMS 缺陷与工单同步', 'OCS 终端在线状态', '电网管理平台两票与作业计划', '人资证书 / 学时 / 考勤 / 绩效台账', '党建管理系统与荣誉台账', '通知推送到个人', 'PDF 与照片文字读取']]
 ];
 function shell() {
@@ -2775,7 +2824,7 @@ Object.assign(ACT, {
   'modal-close'() { $('#modal').hidden = true; },
   'stage-reset'() { DB.reset(); location.reload(); },
   'role-menu'() {},
-  'role-set'(el) { const r = el.dataset.r; if (!ROLES[r] || r === role()) return; DB.setRole(r); S.briefed = false; XW.clearChat(); location.hash = '#' + ROLES[r].home; render(); XW.answer(r === 'manager' ? '切到管理者了：先看年度指标任务，再看三个班组的画像、人员、结构、风险和关怀；督办、轮岗、调配都落到班长确认。' : '切到班组长了：先看' + TEAM.name + '的荣誉与星级建设差距，再看班员画像、培养、绩效、关怀。', null, { confirm: false, speak: false }); }
+  'role-set'(el) { const r = el.dataset.r; if (!ROLES[r] || r === role()) return; DB.setRole(r); S.briefed = false; XW.clearChat(); location.hash = '#' + ROLES[r].home; render(); XW.answer(r === 'manager' ? '切到管理者了：先看分管副总、主管、班长三个维度的考核指标，再看三个班组的画像、人员、结构、风险和关怀；督办、轮岗、调配都落到班长确认。' : '切到班组长了：先看' + TEAM.name + '的荣誉与星级建设差距，再看班员画像、培养、绩效、关怀。', null, { confirm: false, speak: false }); }
 });
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (!el) return; const a = el.dataset.act; if (ACT[a]) { if (!/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) e.preventDefault(); ACT[a](el, e); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.target.id === 'cmdin' || e.target.id === 'chatin')) { const v = e.target.value.trim(); e.target.value = ''; if (v) XW.ask(v, false); } });
@@ -4102,28 +4151,51 @@ Object.assign(ACT, {
 });
 
 
-/* ===== 管理者 · 八页（9/21 客户口径：业务功能减、管理功能加）：年度指标任务 / 班组横向对比 / 团队画像总览（星级 · 荣誉 · 特色 · 班长队伍与梯队）/ 人员总览仪表盘（下钻人员清单 · 员工画像）/ 班组结构对比 / 团队风险画像 / 员工关怀（面谈提纲 · 重点关注 · 文化活动）/ 分析参谋（分析报告 · 近五年趋势）===== */
+/* ===== 管理者 · 八页（9/21 客户口径：业务功能减、管理功能加）：考核指标（分管副总 / 主管 / 班长）/ 班组横向对比 / 团队画像总览（星级 · 荣誉 · 特色 · 班长队伍与梯队）/ 人员总览仪表盘（下钻人员清单 · 员工画像）/ 班组结构对比 / 团队风险画像 / 员工关怀（面谈提纲 · 重点关注 · 文化活动）/ 分析参谋（分析报告 · 近五年趋势）===== */
 SUPER.OM_PEOPLE = TEAM3_PEOPLE.map(p => p.n);
 SUPER.personOf = function (team, n) { if (team === TEAM.name) return P[n]; if (team === LAB.name) return LAB.people.find(p => p.n === n); return TEAM3_PEOPLE.find(p => p.n === n) || { n, post: '中级作业员', age: 34, cert: ['高压电工作业证', '岗位胜任能力证'] }; };
 const MGR = {
   teamOrder: TEAMS.map(t => t.n),
   leaderOf(team) { return (TEAMS.find(t => t.n === team) || {}).leader || '赵立群'; },
-  goalRow(g) { return '<tr data-act="goal-open" data-k="' + g.k + '" style="cursor:pointer" class="' + (g.light === 'bad' ? 'hl' : '') + '"><td>' + MG.light(g.light) + '</td><td><b>' + h(g.n) + '</b><br><span class="note">' + h(g.src) + '</span></td><td class="mono">' + h(g.kind === 'text' ? g.target : g.target + g.unit) + '</td><td class="mono">' + h(g.kind === 'text' ? g.stretch : g.stretch + g.unit) + '</td><td><b class="mono">' + h(g.kind === 'text' ? g.v : g.v + g.unit) + '</b></td><td>' + (g.prog != null ? MG.bar(g.prog, g.light) + '<span class="note">' + g.prog + '%' + (g.kind === 'count' || g.kind === 'prog' ? ' · 时间 ' + YEAR_PCT + '%' : '') + '</span>' : '<span class="note">' + (g.kind === 'down' ? '越低越好' : '') + '</span>') + '</td><td>' + h(g.team) + '</td><td class="note" style="max-width:260px">' + h(g.note) + '</td><td>' + (LS.get('goal_urge', {})[g.k] ? '<span class="tag ok">已督办 ' + h(LS.get('goal_urge', {})[g.k]) + '</span>' : '<button class="s g" data-act="goal-urge" data-k="' + g.k + '">督办</button>') + '</td></tr>'; }
 };
 
-/* ---------- 年度指标任务 ---------- */
+/* ---------- 考核指标：分管副总 / 主管 / 班长三个维度（2026 年度业绩责任书）---------- */
+const KPIPG = {
+  tab() { return ['vp', 'mgr', 'lead'].includes(S.sub) ? S.sub : 'mgr'; },
+  tgt(d, x) { return x == null ? '—' : d.fmt(x) + d.unit; },
+  urgeKey(dk, k, team) { return dk + ':' + k + (team ? ':' + team : ''); },
+  urged(dk, k, team) { return LS.get('goal_urge', {})[this.urgeKey(dk, k, team)]; },
+  sBar(r) { return r.s == null ? '—' : r.risk ? '<b class="mono ' + (r.s < 0 ? 'b' : 'g') + '">' + (r.s < 0 ? r.s : '不扣分') + '</b>' : MG.bar(Math.min(100, r.s / 120 * 100), r.light) + '<span class="mono">' + r.s + '</span>'; },
+  table(dk) { const D = KPI_LV.find(x => x.k === dk); const R = kpiRows(dk);
+    if (dk !== 'lead') return '<div class="tbl"><table class="t goals"><tr><th></th><th>指标</th><th>权重</th><th>基础值</th><th>满分值</th><th>挑战值</th><th>当前值</th><th style="min-width:120px">预计得分</th><th>取数</th><th></th></tr>' +
+      R.map(r => '<tr data-act="kpi-open" data-dim="' + dk + '" data-k="' + r.k + '" style="cursor:pointer" class="' + (r.light === 'bad' ? 'hl' : '') + '"><td>' + MG.light(r.light) + '</td><td><b>' + h(r.n) + (r.star ? ' <span class="kstar">*</span>' : '') + '</b></td><td class="mono">' + r.w + '%</td><td class="mono">' + this.tgt(r, r.base) + '</td><td class="mono">' + this.tgt(r, r.full) + '</td><td class="mono">' + this.tgt(r, r.chal) + '</td><td><b class="mono">' + h(r.vTxt) + '</b></td><td>' + this.sBar(r) + '</td><td class="note">' + h(r.src) + '</td><td>' + (this.urged(dk, r.k) ? '<span class="tag ok">已督办 ' + h(this.urged(dk, r.k)) + '</span>' : r.light === 'ok' ? '' : '<button class="s g" data-act="goal-urge" data-dim="' + dk + '" data-k="' + r.k + '">督办</button>') + '</td></tr>').join('') + '</table></div>';
+    return '<div class="tbl"><table class="t goals"><tr><th></th><th>指标</th><th>权重</th><th>基础值</th><th>满分值</th>' + TEAMS.map(t => '<th>' + h(MGR.leaderOf(t.n)) + '<br><span class="note">' + h(t.n) + '</span></th>').join('') + '</tr>' +
+      R.map(r => '<tr class="' + (r.light === 'bad' ? 'hl' : '') + '"><td>' + MG.light(r.light) + '</td><td><b data-act="kpi-open" data-dim="lead" data-k="' + r.k + '" style="cursor:pointer">' + h(r.n) + '</b>' + (r.risk ? '<br><span class="note">风险指标</span>' : '') + '</td><td class="mono">' + (r.risk ? '扣分' : r.w + '%') + '</td><td class="mono">' + this.tgt(r, r.base) + '</td><td class="mono">' + this.tgt(r, r.full) + '</td>' +
+        TEAMS.map(t => { const c = r.teams[t.n]; return '<td data-act="kpi-open" data-dim="lead" data-k="' + r.k + '" data-team="' + h(t.n) + '" style="cursor:pointer">' + MG.light(c.light) + '<b class="mono">' + h(c.vTxt.replace(/^累计 [^·]+· 推算全年 /, '全年 ')) + '</b><br><span class="note">' + (c.risk ? (c.s < 0 ? '扣 ' + (-c.s) + ' 分' : '不扣分') : '得分 ' + c.s) + (this.urged('lead', r.k, t.n) ? ' · 已督办' : '') + '</span></td>'; }).join('') + '</tr>').join('') + '</table></div>'; },
+  legend() { return '<div class="legend-note">颜色说明：绿灯 = 达到满分值（风险指标：不低于 50 分，不扣分）；黄灯 = 达到基础值、未到满分值（没有基础值的指标：得分在 108 分及以上）；红灯 = 未达基础值（风险指标：低于 50 分，按差值扣分），整行浅色底标出。带 * 的为年度重点考核指标。累计类指标（跳闸次数、平均停电时间）按时间进度 ' + YEAR_PCT + '% 推算全年后评判。预计得分按责任书评分标准计算，单项最高 120 分。</div>'; },
+  rules(dk) { const D = KPI_LV.find(x => x.k === dk); const R = kpiRows(dk); return '<div class="tbl"><table class="t"><tr><th style="width:150px">指标</th><th>评分标准（责任书原文）</th></tr>' + R.map(r => '<tr><td><b>' + h(r.n) + (r.star ? ' *' : '') + '</b><br><span class="note">' + (r.risk ? '风险指标' : '权重 ' + r.w + '%') + '</span></td><td class="note">' + h(r.rule) + '</td></tr>').join('') + '</table></div><div class="note" style="margin-top:6px">来源：' + h(D.doc) + '（' + h(D.who) + '），考核指标占总权重的 ' + D.share + '%。</div>'; }
+};
 PAGES.goals = {
-  render() { const G = goalsAll(); const cnt = { ok: 0, w: 0, bad: 0 }; G.forEach(g => cnt[g.light]++); const urged = LS.get('goal_urge', {});
-    return cmdHTML(['哪几项亮红灯', '终端在线率下钻到班组', '督办中压停电时间', '生成本月指标分析']) + pageHead('年度指标任务', '来源：组织经营业绩指标 / 主管个人年度业绩责任书 · 时间进度 ' + YEAR_PCT + '% · 目标值 / 摸高值 / 当前 / 预警', '<button class="s g" data-act="nav" data-to="compare">班组横向对比</button><button class="s g" data-act="nav" data-to="madvise">分析参谋</button>') +
-      '<div class="grid4"><div class="card kpi"><span>绿灯 · 达标或按进度</span><b class="g">' + cnt.ok + '</b><em>' + h(G.filter(g => g.light === 'ok').map(g => g.n).slice(0, 4).join('、')) + (cnt.ok > 4 ? ' 等' : '') + '</em></div><div class="card kpi"><span>黄灯 · 接近或略落后</span><b class="w">' + cnt.w + '</b><em>' + h(G.filter(g => g.light === 'w').map(g => g.n).join('、') || '无') + '</em></div><div class="card kpi"><span>红灯 · 落后</span><b class="bad">' + cnt.bad + '</b><em>' + h(G.filter(g => g.light === 'bad').map(g => g.n).join('、') || '无') + '</em></div><div class="card kpi"><span>已督办</span><b>' + Object.keys(urged).length + '</b><em>督办发到责任班组班长的通知里</em></div></div>' +
-      '<div class="card"><div class="h"><b>分管业务年度指标 · ' + G.length + ' 项</b><span>点一行下钻到班组；红黄绿按目标值与时间进度判定</span></div><div class="tbl"><table class="t goals"><tr><th></th><th>指标任务</th><th>目标值</th><th>摸高值</th><th>当前</th><th style="min-width:130px">进度</th><th>责任班组</th><th>注意事项</th><th></th></tr>' + G.map(g => MGR.goalRow(g)).join('') + '</table></div></div>' +
-      '<div class="grid2"><div class="card"><div class="h"><b>进度 · 数量类指标</b><span>灰线 = 时间进度</span></div>' + CH.mini.bars(G.filter(g => g.prog != null && g.kind !== 'rate').map(g => ({ n: g.n.slice(0, 9), v: Math.min(120, g.prog), txt: g.prog + '%', c: g.light === 'ok' ? '#18b97a' : g.light === 'w' ? '#d97706' : '#e5484d', act: 'goal-open', k: g.k })), { x0: 92, limit: YEAR_PCT, max: 120 }) + '</div><div class="card"><div class="h"><b>督办与注意事项</b><span>最近</span></div>' + (Object.keys(urged).length ? Object.keys(urged).map(k => { const g = G.find(x => x.k === k); return '<div class="jobs"><div><span style="white-space:normal">' + h(g ? g.n : k) + ' · 督办 → ' + h(g ? MGR.leaderOf(g.team === '三班组' ? TEAM.name : g.team) : '') + (g && g.team === '三班组' ? '、' + LAB.leader + '、' + TEAM3.leader : '') + '</span><span>' + h(urged[k]) + '</span></div></div>'; }).join('') : '<div class="empty">还没有督办记录，点表里的"督办"</div>') + '</div></div>'; },
-  after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const G = goalsAll(); const bad = G.filter(g => g.light === 'bad'), w = G.filter(g => g.light === 'w'); XW.at(400, () => XW.answer('年度指标 ' + G.length + ' 项：红灯 ' + bad.length + ' 项（' + bad.map(g => g.n).join('、') + '），黄灯 ' + w.length + ' 项。时间进度 ' + YEAR_PCT + '%，数量类指标里' + (G.find(g => g.k === 'g6') ? '配网自动化改造投运 ' + G.find(g => g.k === 'g6').prog + '% 落后最多' : '') + '。点任一行能下钻到班组，督办直接发到班长。', null, { confirm: false })); } }
+  render() { const dk = KPIPG.tab(); const D = KPI_LV.find(x => x.k === dk); const R = kpiRows(dk); const cells = dk === 'lead' ? R.reduce((a, r) => a.concat(Object.values(r.teams)), []) : R; const cnt = { ok: 0, w: 0, bad: 0 }; cells.forEach(c => cnt[c.light]++); const urged = Object.keys(LS.get('goal_urge', {})).length;
+    return cmdHTML(['哪几项亮红灯', '快速复电成功率为什么扣分', '督办第三方客户满意度', '生成本月指标分析']) + pageHead('考核指标', '按 2026 年度业绩责任书分三个维度：分管副总 / 主管 / 班长 · 带 * 的为年度重点考核指标 · 时间进度 ' + YEAR_PCT + '%', '<button class="s g" data-act="nav" data-to="lperf">班长绩效</button><button class="s g" data-act="nav" data-to="compare">班组横向对比</button>') +
+      tabsHTML(KPI_LV.map(x => ({ k: x.k, n: x.n + ' · ' + x.items.length + ' 项' })), dk) +
+      '<div class="grid4" style="margin-top:10px"><div class="card kpi"><span>绿灯 · 达到满分值</span><b class="g">' + cnt.ok + '</b><em>' + (dk === 'lead' ? '三位班长 × ' + R.length + ' 项 = ' + cells.length + ' 格' : h(R.filter(r => r.light === 'ok').map(r => r.n).join('、') || '无')) + '</em></div><div class="card kpi"><span>黄灯 · 达到基础值</span><b class="w">' + cnt.w + '</b><em>' + (dk === 'lead' ? '' : h(R.filter(r => r.light === 'w').map(r => r.n).join('、') || '无')) + '</em></div><div class="card kpi"><span>红灯 · 未达基础值</span><b class="bad">' + cnt.bad + '</b><em>' + h(R.filter(r => r.light === 'bad').map(r => r.n).join('、') || '无') + '</em></div><div class="card kpi"><span>已督办</span><b>' + urged + '</b><em>督办发到责任班长的通知里</em></div></div>' +
+      '<div class="card"><div class="h"><b>' + h(D.n) + '考核指标 · ' + h(D.who) + '</b><span>' + h(D.doc) + ' · 考核指标占总权重 ' + D.share + '% · 点一行看评分标准' + (dk === 'lead' ? '，点格看该班长' : '') + '</span></div>' + KPIPG.table(dk) + KPIPG.legend() + '</div>' +
+      '<div class="grid2" style="grid-template-columns:1fr 1.3fr"><div class="card"><div class="h"><b>预计得分</b><span>虚线 = 100 分</span></div>' + (dk === 'lead' ? CH.mini.group(R.filter(r => !r.risk).map(r => r.n.slice(0, 6)), TEAMS.map((t, i) => ({ n: MGR.leaderOf(t.n), vals: R.filter(r => !r.risk).map(r => r.teams[t.n].s), c: CPAL[i] })), { h: 140, max: 120 }) + CH.mini.legend(TEAMS.map((t, i) => ({ n: MGR.leaderOf(t.n) + ' · ' + t.n, c: CPAL[i] }))) : CH.mini.bars(R.filter(r => !r.risk).map(r => ({ n: r.n.slice(0, 8), v: r.s, c: r.light === 'ok' ? '#1f9d63' : r.light === 'w' ? '#d97706' : '#e5484d', act: 'kpi-open', k: r.k, tip: r.n + ' · ' + r.vTxt })), { x0: 96, limit: 100, max: 120, unit: ' 分' })) + '<div class="legend-note">' + (dk === 'lead' ? '颜色说明：三种颜色分别代表三位班长（' + TEAMS.map((t, i) => MGR.leaderOf(t.n)).join(' / ') + '），柱高为该项预计得分。' : '颜色说明：绿 = 达到满分值；黄 = 达到基础值；红 = 未达基础值。条长为预计得分，满分 120。') + '</div></div>' +
+      '<div class="card"><div class="h"><b>评分标准</b><span>取责任书原文，规则公开到人</span></div>' + KPIPG.rules(dk) + '</div></div>'; },
+  after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const G = goalsAll(); const bad = G.filter(g => g.light === 'bad'); XW.at(400, () => XW.answer('考核指标按责任书分三个维度：分管副总 4 项、主管 4 项、班长 4 项。现在亮红灯的有 ' + bad.length + ' 项：' + (bad.map(g => g.n).join('、') || '无') + '。快速复电成功率光明 ' + WK29.val('fastok') + '%，离满分值 88% 还差 ' + +(88 - WK29.val('fastok')).toFixed(1) + ' 个百分点，预计得分 ' + KPI_DEF.fast.score(WK29.val('fastok')).toFixed(0) + '。点任一行看评分标准，督办直接发到班长。', null, { confirm: false })); } }
 };
 Object.assign(ACT, {
-  'goal-open'(el) { const g = goalsAll().find(x => x.k === el.dataset.k); if (!g) return; const teams = Object.keys(g.teams); modal('<div class="t">' + MG.light(g.light, g.lightN + '灯') + '　' + h(g.n) + '</div><div class="note" style="margin-bottom:6px">' + h(g.src) + ' · 目标 ' + h(g.kind === 'text' ? g.target : g.target + g.unit) + ' · 摸高 ' + h(g.kind === 'text' ? g.stretch : g.stretch + g.unit) + '</div><div class="tbl"><table class="t"><tr><th>班组</th><th>当前</th><th>班长</th><th>对照</th><th></th></tr>' + teams.map(t => { const v = g.teams[t](); const ok = g.kind === 'text' ? null : g.kind === 'down' ? +v <= g.target : g.kind === 'rate' ? +v >= g.target : g.kind === 'prog' ? +v >= YEAR_PCT : +v / g.target * 100 >= YEAR_PCT; return '<tr><td><b>' + h(t) + '</b></td><td class="mono">' + h(g.kind === 'text' ? v : v + g.unit) + '</td><td>' + h(MGR.leaderOf(t)) + '</td><td>' + (ok == null ? '—' : ok ? '<span class="tag ok">达标</span>' : '<span class="tag bad">落后</span>') + '</td><td><button class="s g" data-act="goal-urge" data-k="' + g.k + '" data-team="' + h(t) + '">督办' + h(MGR.leaderOf(t)) + '</button>' + (t === TEAM.name ? ' <button class="s g" data-act="goal-team" data-k="' + g.k + '">看班组</button>' : '') + '</td></tr>'; }).join('') + '</table></div><div class="note" style="margin-top:8px"><b style="color:var(--ink)">注意事项：</b>' + h(g.note) + '</div>'); XW.answer(g.n + '：当前 ' + (g.kind === 'text' ? g.v : g.v + g.unit) + '，目标 ' + (g.kind === 'text' ? g.target : g.target + g.unit) + '，' + g.lightN + '灯。' + g.note, null, { confirm: false, speak: false }); },
-  'goal-urge'(el) { const g = goalsAll().find(x => x.k === el.dataset.k); if (!g) return; const teams = el.dataset.team ? [el.dataset.team] : (g.team === '三班组' ? MGR.teamOrder : [g.team]); teams.forEach(t => DB.notify(MGR.leaderOf(t), '督办 · ' + g.n + '：当前 ' + (g.kind === 'text' ? g.teams[t] ? g.teams[t]() : g.v : (g.teams[t] ? g.teams[t]() : g.v) + g.unit) + '，目标 ' + (g.kind === 'text' ? g.target : g.target + g.unit) + '。' + g.note, '已发', true)); const u = LS.get('goal_urge', {}); u[g.k] = DB.now(); LS.set('goal_urge', u); DB.log('督办', g.n + ' → ' + teams.map(t => MGR.leaderOf(t)).join('、')); $('#modal').hidden = true; if (S.page === 'goals') render(); XW.fly('督办已发 · ' + teams.map(t => MGR.leaderOf(t)).join('、')); XW.answer('督办发给' + teams.map(t => MGR.leaderOf(t)).join('、') + '了，班长的工作台会看到；注意事项一并带过去。', null, { confirm: false }); },
-  'goal-team'(el) { $('#modal').hidden = true; const g = goalsAll().find(x => x.k === el.dataset.k); if (/在线率|遥控|自愈|缺陷/.test(g.n)) nav('ledger', 'weekly'); else if (/星级/.test(g.n)) nav('team'); else if (/实操/.test(g.n)) nav('skills'); else nav('ledger'); }
+  'kpi-open'(el) { const dk = el.dataset.dim || KPIPG.tab(); const k = el.dataset.k; const team = el.dataset.team; const R = kpiRows(dk); const r = R.find(x => x.k === k); if (!r) return; const D = KPI_LV.find(x => x.k === dk);
+    const rows = dk === 'lead' ? TEAMS.map(t => r.teams[t.n]) : [r];
+    modal('<div class="t">' + MG.light(r.light, r.lightN + '灯') + '　' + h(D.n) + ' · ' + h(r.n) + (r.star ? ' *' : '') + '</div><div class="note" style="margin-bottom:6px">' + h(D.doc) + ' · ' + (r.risk ? '风险指标' : '权重 ' + r.w + '%') + ' · 基础值 ' + KPIPG.tgt(r, r.base) + ' · 满分值 ' + KPIPG.tgt(r, r.full) + (r.chal != null ? ' · 挑战值 ' + KPIPG.tgt(r, r.chal) : '') + '</div>' +
+      '<div class="tbl"><table class="t"><tr><th>' + (dk === 'lead' ? '班长 · 班组' : '口径') + '</th><th>当前值</th><th>预计得分</th><th>取数</th><th></th></tr>' + rows.map(c => '<tr class="' + (team && c.team === team ? 'hl' : '') + '"><td><b>' + h(c.team ? MGR.leaderOf(c.team) + ' · ' + c.team : '光明供电局') + '</b></td><td>' + MG.light(c.light) + '<span class="mono">' + h(c.vTxt) + '</span></td><td class="mono">' + (c.risk ? (c.s < 0 ? '扣 ' + (-c.s) : '不扣分') : c.s) + '</td><td class="note">' + h(c.src) + '</td><td>' + (c.light === 'ok' ? '' : KPIPG.urged(dk, k, c.team) ? '<span class="tag ok">已督办</span>' : '<button class="s g" data-act="goal-urge" data-dim="' + dk + '" data-k="' + k + '"' + (c.team ? ' data-team="' + h(c.team) + '"' : '') + '>督办' + (c.team ? h(MGR.leaderOf(c.team)) : '三位班长') + '</button>') + '</td></tr>').join('') + '</table></div>' +
+      '<div class="tbl" style="margin-top:8px"><table class="t"><tr><th style="width:86px">评分标准</th><td class="note">' + h(r.rule) + '</td></tr></table></div>' + KPIPG.legend());
+    const c = team ? r.teams[team] : r; XW.answer((team ? MGR.leaderOf(team) + '（' + team + '）' : '') + r.n + '：当前 ' + c.vTxt + '，' + (c.risk ? (c.s < 0 ? '低于 50 分，扣 ' + (-c.s) + ' 分' : '不低于 50 分，不扣分') : '按责任书预计得 ' + c.s + ' 分') + '，' + c.lightN + '灯。' + (c.light === 'ok' ? '' : '满分值是 ' + KPIPG.tgt(r, r.full) + '。'), null, { confirm: false, speak: false }); },
+  'goal-open'(el) { ACT['kpi-open'](el); },
+  'goal-urge'(el) { const dk = el.dataset.dim || KPIPG.tab(); const k = el.dataset.k; const R = kpiRows(dk); const r = R.find(x => x.k === k); if (!r) return; const teams = el.dataset.team ? [el.dataset.team] : TEAMS.map(t => t.n); const u = LS.get('goal_urge', {});
+    teams.forEach(t => { const c = dk === 'lead' ? r.teams[t] : r; DB.notify(MGR.leaderOf(t), '督办 · ' + r.n + '：当前 ' + c.vTxt + '，满分值 ' + KPIPG.tgt(r, r.full) + '，预计得分 ' + c.s + '。请本周报一次措施和进度', '已发', true); if (dk === 'lead') u[KPIPG.urgeKey(dk, k, t)] = DB.now(); });
+    if (dk !== 'lead' || !el.dataset.team) u[KPIPG.urgeKey(dk, k)] = DB.now(); LS.set('goal_urge', u); DB.log('督办', r.n + ' → ' + teams.map(t => MGR.leaderOf(t)).join('、')); $('#modal').hidden = true; if (S.page === 'goals') render(); XW.fly('督办已发 · ' + teams.map(t => MGR.leaderOf(t)).join('、')); XW.answer('督办发给' + teams.map(t => MGR.leaderOf(t)).join('、') + '了，班长的工作台会看到，评分标准一并带过去。', null, { confirm: false }); }
 });
 
 /* ---------- 同类班组横向对比看板 ---------- */
@@ -4162,9 +4234,14 @@ const LPERFPG = {
   fixMap() { return LS.get('lperf_fix', {}); },
   sentMap() { return LS.get('lperf_sent', {}); },
   dimTable() { const A = this.all();
-    return '<div class="tbl"><table class="t cmp"><tr><th>考评维度</th><th>权重</th>' + A.map(x => '<th>' + h(x.L.n) + '<br><span class="note">' + h(x.team) + '</span></th>').join('') + '<th>取数来源</th></tr>' +
-      LPERF_DIMS.map((d, i) => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td>' + A.map(x => { const dd = x.dims[i]; return '<td data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="' + d.k + '" style="cursor:pointer">' + MG.bar(dd.pct, dd.cls) + '<span class="mono">' + dd.sc + '</span><span class="note"> / ' + d.pts + '</span></td>'; }).join('') + '<td class="note">' + h(d.src) + '</td></tr>').join('') +
-      '<tr><td><b>综合得分</b></td><td class="mono">100</td>' + A.map(x => '<td><b class="mono ' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'b' : '') + '" style="font-size:15px">' + x.total + '</b>　<span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td>').join('') + '<td class="note">五维加总 · 由部门确认后使用</td></tr></table></div>'; },
+    return '<div class="tbl"><table class="t cmp lpt"><tr><th>考核内容</th><th>权重</th>' + A.map(x => '<th>' + h(x.L.n) + '<br><span class="note">' + h(x.team) + '</span></th>').join('') + '<th>取数来源</th></tr>' +
+      LPERF_DIMS.map((d, i) => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '%</td>' + A.map(x => { const dd = x.dims[i]; return '<td data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="' + d.k + '" style="cursor:pointer">' + MG.bar(dd.pct, dd.cls) + '<span class="mono">' + dd.sc + '</span><span class="note"> / ' + d.pts + '</span></td>'; }).join('') + '<td class="note">' + h(d.src) + '</td></tr>').join('') +
+      '<tr><td><b>风险指标</b><br><span class="note">安全生产过程管理</span></td><td class="mono">扣分</td>' + A.map(x => '<td data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="kpi" style="cursor:pointer">' + MG.light(x.risk ? 'bad' : 'ok') + '<span class="mono">' + x.proc.fmt(x.proc.v) + ' 分</span><span class="note">' + (x.risk ? ' · 扣 ' + x.risk : ' · 不扣分') + '</span></td>').join('') + '<td class="note">安全生产过程管理考核（不低于 50 分不扣分）</td></tr>' +
+      '<tr><td><b>加扣分项</b></td><td class="mono">±2</td>' + A.map(x => '<td>' + (x.adj ? '<b class="mono ' + (x.adj > 0 ? 'g' : 'b') + '">' + (x.adj > 0 ? '+' : '') + x.adj + '</b><br><span class="note">' + h(x.adjRows.map(r => r[0]).join('；')) + '</span>' : '<span class="note">无</span>') + '</td>').join('') + '<td class="note">个人最多加分不超过 2 分</td></tr>' +
+      '<tr><td><b>红线事项</b></td><td class="mono">—</td>' + A.map(x => '<td>' + (x.red ? '<span class="tag bad">触发 · ' + h(x.red) + '</span>' : '<span class="tag ok">未触发</span>') + '</td>').join('') + '<td class="note">安全生产、合规经营等，与公司责任追究管理规定、处分清单衔接</td></tr>' +
+      '<tr><td><b>综合得分</b></td><td class="mono">100</td>' + A.map(x => '<td><b class="mono ' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'b' : '') + '" style="font-size:15px">' + x.total + '</b>　<span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td>').join('') + '<td class="note">三部分加总 − 风险扣分 ± 加扣分 · 由部门确认后使用</td></tr></table></div>' +
+      '<div class="legend-note">颜色说明：条形与数字按得分率着色，绿 = 得分率 ≥ 90%；黄 = 75%–89%；红 = 低于 75%。风险指标绿灯 = 不低于 50 分不扣分，红灯 = 低于 50 分按差值扣分。分档：优秀 ≥ 90、良好 ≥ 80、合格 ≥ 70、需改进 < 70。</div>'; },
+  kpiTable() { const A = this.all(); return '<div class="tbl"><table class="t lpt"><tr><th>指标</th><th>权重</th><th>基础值</th><th>满分值</th>' + A.map(x => '<th>' + h(x.L.n) + '<br><span class="note">' + h(x.team) + '</span></th>').join('') + '</tr>' + LPERF_KPI.map(([k, w], i) => { const d = KPI_DEF[k]; return '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + w + '%</td><td class="mono">' + KPIPG.tgt(d, d.base) + '</td><td class="mono">' + KPIPG.tgt(d, d.full) + '</td>' + A.map(x => { const r = x.kpis[i]; return '<td data-act="lp-dim" data-who="' + h(x.L.n) + '" data-k="kpi" style="cursor:pointer">' + MG.light(r.light) + '<span class="mono">' + h(r.vTxt.replace(/^累计 [^·]+· 推算全年 /, '全年 ')) + '</span><br><span class="note">' + r.s + ' 分 · 折算 ' + r.pts + '</span></td>'; }).join('') + '</tr>'; }).join('') + '<tr><td><b>安全生产过程管理</b><br><span class="note">风险指标</span></td><td class="mono">扣分</td><td class="mono">—</td><td class="mono">50 分</td>' + A.map(x => '<td>' + MG.light(x.risk ? 'bad' : 'ok') + '<span class="mono">' + x.proc.fmt(x.proc.v) + ' 分</span><br><span class="note">' + (x.risk ? '扣 ' + x.risk + ' 分' : '不扣分') + '</span></td>').join('') + '</tr></table></div><div class="legend-note">颜色说明：绿灯 = 达到满分值；黄灯 = 达到基础值、未到满分值（快速复电成功率无基础值，得分 ≥ 108 为黄）；红灯 = 未达基础值。累计类指标按时间进度 ' + YEAR_PCT + '% 推算全年。</div>'; },
   sumTable() { const A = this.all(); const ok = this.okMap(); const sent = this.sentMap();
     return '<div class="tbl"><table class="t cand"><tr><th>班长</th><th>综合 / 分档</th><th>环比</th><th>强项</th><th>短板</th><th>绩效结果应用</th><th>状态</th><th></th></tr>' +
       A.map(x => '<tr class="' + (x.gradeCls === 'bad' ? 'hl' : '') + '"><td><b data-act="lp-who" data-who="' + h(x.L.n) + '" style="cursor:pointer">' + h(x.L.n) + '</b><br><span class="note">' + h(x.team) + ' · 任班长 ' + x.L.asLeader + ' 年</span></td>' +
@@ -4177,48 +4254,57 @@ const LPERFPG = {
         '<td><div class="bt">' + (ok[x.L.n] ? '' : '<button class="s" data-act="lp-ok" data-who="' + h(x.L.n) + '">确认考评结果</button>') + '<button class="s g" data-act="lp-doc" data-who="' + h(x.L.n) + '">生成评价意见</button>' + (ok[x.L.n] && !sent[x.L.n] ? '<button class="s g" data-act="lp-send" data-who="' + h(x.L.n) + '">下发到本人</button>' : '') + '<button class="s g" data-act="lp-talk" data-who="' + h(x.L.n) + '">绩效面谈提纲</button></div></td></tr>').join('') + '</table></div>'; },
   fixHTML() { const A = this.all(); const fx = this.fixMap(); const rows = [];
     A.forEach(x => x.weak.filter(d => d.cls !== 'ok').forEach(d => rows.push({ who: x.L.n, team: x.team, d, key: x.L.n + '|' + d.k })));
-    if (!rows.length) return '<div class="empty">三位班长五个维度得分率都在 90% 以上，本季度无需列改进要求</div>';
-    return rows.map(r => '<div class="fixrow"><div>' + MG.light(r.d.cls) + '<b>' + h(r.who) + ' · ' + h(r.d.n) + '</b><span class="note"> 得分 ' + r.d.sc + '/' + r.d.pts + '（' + r.d.pct + '%）</span><p>' + h(r.d.items.filter(i => i[1] > 0).map(i => i[0]).join('；') || '按维度规则折算') + '</p></div><div class="bt">' + (fx[r.key] ? '<span class="tag ok">已列入 ' + h(fx[r.key]) + '</span>' : '<button class="s" data-act="lp-fix" data-who="' + h(r.who) + '" data-k="' + r.d.k + '">列入下季度改进要求</button>') + '</div></div>').join(''); }
+    if (!rows.length) return '<div class="empty">三位班长三部分得分率都在 90% 以上，本季度无需列改进要求</div>';
+    return rows.map(r => '<div class="fixrow"><div>' + MG.light(r.d.cls) + '<b>' + h(r.who) + ' · ' + h(r.d.n) + '</b><span class="note"> 得分 ' + r.d.sc + '/' + r.d.pts + '（' + r.d.pct + '%）</span><p>' + h(r.d.items.filter(i => i[1] >= 0.3).map(i => i[0]).join('；') || '按责任书规则折算') + '</p></div><div class="bt">' + (fx[r.key] ? '<span class="tag ok">已列入 ' + h(fx[r.key]) + '</span>' : '<button class="s" data-act="lp-fix" data-who="' + h(r.who) + '" data-k="' + r.d.k + '">列入下季度改进要求</button>') + '</div></div>').join(''); }
 };
 PAGES.lperf = {
   render() { const A = LPERFPG.all(); const ok = LPERFPG.okMap();
-    return cmdHTML(['三位班长这季度谁的短板最大', '赵立群为什么履职与协同扣分', '生成陈志远的绩效评价意见', '把改进要求全部列入下季度']) +
-      pageHead('班长绩效', LPERF_Q.no + '（' + LPERF_Q.range + ' · ' + LPERF_Q.state + '）· 安全生产 25 / 生产任务 25 / 班组建设 20 / 队伍管理 20 / 履职与协同 10 · 初步评分由部门确认后使用', '<button class="s g" data-act="nav" data-to="goals">年度指标任务</button><button class="s g" data-act="nav" data-to="portrait">班长队伍</button>') +
-      '<div class="grid3">' + A.map(x => '<div class="card kpi" data-act="lp-who" data-who="' + h(x.L.n) + '" style="cursor:pointer"><span>' + h(x.L.n) + ' · ' + h(x.team) + '</span><b class="' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'bad' : 'w') + '">' + x.total + '<span style="font-size:12px;font-weight:500"> ' + h(x.grade) + '</span></b><em>环比' + (x.delta > 0 ? '升 ' + x.delta : x.delta < 0 ? '降 ' + (-x.delta) : '持平') + ' · 短板 ' + h(x.weak.map(d => d.n).join('、')) + (ok[x.L.n] ? ' · 已确认' : ' · 待确认') + '</em></div>').join('') + '</div>' +
-      '<div class="card"><div class="h"><b>考评维度与权重 · 逐维得分</b><span>权重分解自主管个人年度业绩责任书 · 绿 ≥ 90% · 黄 75–89% · 红 < 75% · 点格看逐条扣分与依据</span></div>' + LPERFPG.dimTable() + '</div>' +
-      '<div class="grid2"><div class="card"><div class="h"><b>近四季度综合得分</b><span>最后一组为本季度在评</span></div>' + CH.mini.group(LPERF_Q.qs, A.map((x, i) => ({ n: x.L.n, vals: x.hist, c: CPAL[i] })), { h: 150, max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '<div class="note" style="margin-top:6px">分档线：优秀 ≥ 90 · 良好 ≥ 80 · 合格 ≥ 70 · 需改进 < 70；本季度在评，得分随台账变化</div></div>' +
-      '<div class="card"><div class="h"><b>五维得分率对比</b><span>满分 100%</span></div>' + CH.mini.radar(LPERF_DIMS.map(d => d.n), A.map((x, i) => ({ n: x.L.n, vals: x.dims.map(d => d.pct), c: CPAL[i] })), { max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '</div></div>' +
+    return cmdHTML(['三位班长这季度谁的短板最大', '陈志远为什么考核指标扣分', '生成陈志远的绩效评价意见', '把改进要求全部列入下季度']) +
+      pageHead('班长绩效', LPERF_Q.no + '（' + LPERF_Q.state + '）· 员工年度业绩责任书（班长）：考核指标 50% / 重点任务 10% / 综合评价 40% · 加扣分 · 红线 · 由部门确认后使用', '<button class="s g" data-act="nav" data-to="goals" data-sub="lead">考核指标</button><button class="s g" data-act="nav" data-to="portrait">班长队伍</button>') +
+      '<div class="grid3">' + A.map(x => '<div class="card kpi" data-act="lp-who" data-who="' + h(x.L.n) + '" style="cursor:pointer"><span>' + h(x.L.n) + ' · ' + h(x.team) + '</span><b class="' + (x.gradeCls === 'ok' ? 'g' : x.gradeCls === 'bad' ? 'bad' : 'w') + '">' + x.total + '<span style="font-size:12px;font-weight:500"> ' + h(x.grade) + '</span></b><em>环比' + (x.delta > 0 ? '升 ' + x.delta : x.delta < 0 ? '降 ' + (-x.delta) : '持平') + ' · 最弱 ' + h(x.lowSubs.slice(0, 2).map(s => s.n).join('、')) + (x.risk ? ' · 风险扣 ' + x.risk : '') + (ok[x.L.n] ? ' · 已确认' : ' · 待确认') + '</em></div>').join('') + '</div>' +
+      '<div class="card"><div class="h"><b>考核内容与权重 · 逐项得分</b><span>结构照员工年度业绩责任书（班长） · 点格看逐项得分与依据</span></div>' + LPERFPG.dimTable() + '</div>' +
+      '<div class="card"><div class="h"><b>考核指标 · 五项 + 风险指标</b><span>单项得分按责任书评分标准，最高 120 分；折算 = 单项得分 ÷ 1.2 × 权重</span><div class="r"><button class="s g" data-act="nav" data-to="goals" data-sub="lead">看考核指标页</button></div></div>' + LPERFPG.kpiTable() + '</div>' +
+      '<div class="grid2"><div class="card"><div class="h"><b>近四季度综合得分</b><span>最后一组为本季度在评</span></div>' + CH.mini.group(LPERF_Q.qs, A.map((x, i) => ({ n: x.L.n, vals: x.hist, c: CPAL[i] })), { h: 150, max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '<div class="legend-note">颜色说明：三种颜色分别代表三位班长；分档线：优秀 ≥ 90 · 良好 ≥ 80 · 合格 ≥ 70 · 需改进 < 70。本季度在评，得分随台账变化。</div></div>' +
+      '<div class="card"><div class="h"><b>三部分得分率</b><span>满分 100%</span></div>' + CH.mini.group(LPERF_DIMS.map(d => d.n), A.map((x, i) => ({ n: x.L.n, vals: x.dims.map(d => d.pct), c: CPAL[i] })), { h: 150, max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '<div class="legend-note">颜色说明：三种颜色分别代表三位班长，柱高为该部分得分率。</div></div></div>' +
       '<div class="card"><div class="h"><b>综合得分 · 分档 · 绩效结果应用</b><span>分档不排名次 · 结果应用按局绩效管理办法 · 由部门确认后使用</span><div class="r"><button class="s g" data-act="lp-okall">全部确认</button><button class="s" data-act="lp-sheet">生成班长绩效考评表</button></div></div>' + LPERFPG.sumTable() + '</div>' +
-      '<div class="card"><div class="h"><b>下季度改进要求</b><span>取每位班长得分率最低的两维 · 列入后发到本人并同步到班组计划</span><div class="r"><button class="s" data-act="lp-fixall">全部列入</button></div></div><div id="lpfix">' + LPERFPG.fixHTML() + '</div></div>' +
-      '<div class="card"><div class="h"><b>计分规则与取数口径</b><span>规则公开到班长，可逐条核对</span></div><div class="tbl"><table class="t"><tr><th style="width:96px">维度</th><th style="width:52px">权重</th><th>计分规则</th><th style="width:230px">取数来源</th></tr>' + LPERF_DIMS.map(d => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td><td>' + h(d.rule) + '</td><td class="note">' + h(d.src) + '</td></tr>').join('') + '</table></div><div class="note" style="margin-top:6px">配电自动化班的违章、两票、派工、待审票、★模块断层取本机台账实时值，班长在工作台处理后本页刷新即变；另两个班组的对应输入项与本季度关键节点达标周数取部门季度台账，右下角的状态清单里可核对每项的来源。</div></div>' +
+      '<div class="card"><div class="h"><b>下季度改进要求</b><span>取每位班长得分率最低的两部分 · 列入后发到本人并同步到班组计划</span><div class="r"><button class="s" data-act="lp-fixall">全部列入</button></div></div><div id="lpfix">' + LPERFPG.fixHTML() + '</div></div>' +
+      '<div class="card"><div class="h"><b>计分规则与取数口径</b><span>规则公开到班长，可逐条核对</span></div><div class="tbl"><table class="t"><tr><th style="width:96px">考核内容</th><th style="width:52px">权重</th><th>计分规则</th><th style="width:230px">取数来源</th></tr>' + LPERF_DIMS.map(d => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '%</td><td>' + h(d.rule) + '</td><td class="note">' + h(d.src) + '</td></tr>').join('') +
+        '<tr><td><b>加扣分项</b></td><td class="mono">±2</td><td>应用所在部门经营业绩考核中对应本人负责领域的加分；引领性工作取得示范成效、参与巡视巡察表现优秀可加分，个人最多加分不超过 2 分；应用所在部门考核处分结果，对负有责任的人员扣分</td><td class="note">部门经营业绩考核 · 本部门考核</td></tr>' +
+        '<tr><td><b>红线事项</b></td><td class="mono">—</td><td>安全生产、合规经营等，与公司责任追究管理规定、公司处分清单衔接，按照责任界定对负有责任的人员进行责任追究</td><td class="note">公司责任追究管理规定、公司处分清单</td></tr></table></div><div class="note" style="margin-top:6px">年度经营业绩考核得分 = ∑考核指标得分 × 权重 + ∑重点任务得分 × 权重 + ∑综合评价 × 权重 − 风险指标扣分 + 加扣分项得分，按百分制折算（单项上限 120 分折为 100 分）。配电自动化班的快速复电、违章、派工、待审票、授权新增取本机台账实时值，班长在工作台处理后本页刷新即变；另两个班组的输入项取部门季度台账，右下角的状态清单里可核对每项的来源。</div></div>' +
       '<div class="card doc" id="lpdoc" hidden><div class="empty">点某位班长的"生成评价意见"，意见逐段写在这里</div></div>'; },
-  after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const A = LPERFPG.all(); XW.at(400, () => XW.answer('三位班长本季度的初步得分：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。短板最大的是' + A.slice().sort((a, b) => a.total - b.total)[0].L.n + '，' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].n + '只拿到 ' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].pct + '%。每一格都能点开看逐条扣分和取数来源，确认后可以下发到本人并约面谈。', null, { confirm: false })); } }
+  after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const A = LPERFPG.all(); const low = A.slice().sort((a, b) => a.total - b.total)[0]; XW.at(400, () => XW.answer('三位班长本季度的初步得分：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。短板最大的是' + low.L.n + '，最弱的两项是' + low.lowSubs.slice(0, 2).map(s => s.n).join('、') + (low.risk ? '，安全生产过程管理低于 50 分，扣 ' + low.risk + ' 分' : '') + '。结构照班长责任书：考核指标 50%、重点任务 10%、综合评价 40%，每一格都能点开看依据，确认后可以下发到本人并约面谈。', null, { confirm: false })); } }
 };
 Object.assign(ACT, {
   'lp-dim'(el) { const x = lperfOf(el.dataset.who); const i = LPERF_DIMS.findIndex(d => d.k === el.dataset.k); if (i < 0) return; const d = x.dims[i]; const fx = LPERFPG.fixMap(); const key = x.L.n + '|' + d.k;
+    const body = d.k === 'kpi' ? '<tr><th>指标</th><th>权重</th><th>满分值</th><th>当前值</th><th>单项得分</th><th>折算</th></tr>' + x.kpis.map(r => '<tr class="' + (r.light === 'bad' ? 'hl' : '') + '"><td>' + MG.light(r.light) + '<b>' + h(r.n) + '</b></td><td class="mono">' + r.w + '%</td><td class="mono">' + KPIPG.tgt(r, r.full) + '</td><td class="mono">' + h(r.vTxt) + '</td><td class="mono">' + r.s + '</td><td class="mono">' + r.pts + '</td></tr>').join('') + '<tr class="' + (x.risk ? 'hl' : '') + '"><td>' + MG.light(x.risk ? 'bad' : 'ok') + '<b>安全生产过程管理</b> <span class="note">风险指标</span></td><td class="mono">—</td><td class="mono">50 分</td><td class="mono">' + x.proc.fmt(x.proc.v) + ' 分</td><td class="mono">' + (x.risk ? '扣 ' + x.risk : '不扣分') + '</td><td class="mono ' + (x.risk ? 'b' : '') + '">' + (x.risk ? '−' + x.risk : '0') + '</td></tr>'
+      : d.k === 'task' ? '<tr><th>重点任务</th><th>权重</th><th>完成情况</th><th>任务得分</th><th>折算</th></tr>' + x.tasks.map(r => '<tr><td><b>' + h(r.n) + '</b><br><span class="note">' + h(r.src) + '</span></td><td class="mono">' + r.w + '%</td><td class="note">' + h(r.txt) + '</td><td class="mono">' + r.s + '</td><td class="mono">' + r.pts + '</td></tr>').join('')
+      : '<tr><th>评价项</th><th>权重</th><th>台账证据（基准分 ± 证据项）</th><th>初步分</th><th>折算</th></tr>' + x.evals.map(r => '<tr><td><b>' + h(r.n) + '</b></td><td class="mono">' + r.w + '%</td><td class="note">基准 ' + r.base + '；' + h(r.items.map(it => it[0] + (it[1] ? '（' + (it[1] > 0 ? '+' : '') + it[1] + '）' : '')).join('；')) + '</td><td class="mono">' + r.s + '</td><td class="mono">' + r.pts + '</td></tr>').join('');
     modal('<div class="t">' + h(x.L.n) + ' · ' + h(d.n) + '　' + MG.light(d.cls, d.sc + ' / ' + d.pts + '（' + d.pct + '%）') + '</div>' +
-      '<div class="tbl"><table class="t"><tr><th>计分项</th><th style="width:74px">扣分</th></tr>' + d.items.map(it => '<tr class="' + (it[1] > 0 ? 'hl' : '') + '"><td>' + h(it[0]) + '</td><td class="mono ' + (it[1] > 0 ? 'b' : 'g') + '">' + (it[1] > 0 ? '−' + it[1] : '0') + '</td></tr>').join('') + '<tr><td><b>本维度得分</b></td><td class="mono"><b>' + d.sc + '</b></td></tr></table></div>' +
-      '<div class="tbl" style="margin-top:8px"><table class="t"><tr><th style="width:86px">计分规则</th><td>' + h(d.rule) + '</td></tr><tr><th>取数来源</th><td class="note">' + h(d.src) + '</td></tr></table></div>' +
-      '<div class="bt">' + (fx[key] ? '<span class="tag ok">已列入改进要求 ' + h(fx[key]) + '</span>' : '<button data-act="lp-fix" data-who="' + h(x.L.n) + '" data-k="' + d.k + '">列入下季度改进要求</button>') + (d.k === 'task' ? '<button class="g" data-act="nav" data-to="goals">看年度指标</button>' : d.k === 'build' ? '<button class="g" data-act="nav" data-to="portrait">看星级与荣誉</button>' : d.k === 'crew' ? '<button class="g" data-act="nav" data-to="structure">看结构对比</button>' : '<button class="g" data-act="nav" data-to="ledger">看台账</button>') + '</div>');
-    XW.answer(x.L.n + '的' + d.n + '得 ' + d.sc + ' 分（满分 ' + d.pts + '）。扣分在：' + (d.items.filter(t => t[1] > 0).map(t => t[0] + ' −' + t[1]).join('；') || '无扣分') + '。取数来源：' + d.src + '。', null, { confirm: false, speak: false }); },
+      '<div class="tbl"><table class="t">' + body + '<tr><td><b>本部分得分</b></td><td colspan="' + (d.k === 'kpi' ? 4 : d.k === 'task' ? 2 : 3) + '"></td><td class="mono" colspan="' + (d.k === 'task' ? 2 : 1) + '"><b>' + d.sc + '</b></td></tr></table></div>' +
+      (d.k === 'eval' ? '<div class="tbl" style="margin-top:8px"><table class="t">' + x.evals.map(r => '<tr><th style="width:86px">' + h(r.n) + '</th><td class="note">' + h(r.pt) + '</td></tr>').join('') + '</table></div>' : '') +
+      '<div class="tbl" style="margin-top:8px"><table class="t"><tr><th style="width:86px">计分规则</th><td class="note">' + h(d.rule) + '</td></tr><tr><th>取数来源</th><td class="note">' + h(d.src) + '</td></tr></table></div>' +
+      '<div class="legend-note">' + (d.k === 'kpi' ? '颜色说明：绿灯 = 达到满分值；黄灯 = 达到基础值；红灯 = 未达基础值，整行浅色底标出。折算 = 单项得分 ÷ 1.2 × 权重。' : d.k === 'task' ? '说明：任务得分按各项里程碑计分规则计算，单项最高 120 分；折算 = 任务得分 ÷ 1.2 × 权重。' : '说明：综合评价由部门评价，页面按台账证据给初步分：基准分加减证据项（括号内为加减分），折算 = 初步分 × 权重。') + '</div>' +
+      '<div class="bt">' + (fx[key] ? '<span class="tag ok">已列入改进要求 ' + h(fx[key]) + '</span>' : '<button data-act="lp-fix" data-who="' + h(x.L.n) + '" data-k="' + d.k + '">列入下季度改进要求</button>') + (d.k === 'kpi' ? '<button class="g" data-act="nav" data-to="goals" data-sub="lead">看考核指标</button>' : d.k === 'task' ? '<button class="g" data-act="nav" data-to="ledger" data-sub="weekly">看周报指标</button>' : '<button class="g" data-act="nav" data-to="ledger">看台账</button>') + '<span class="cf">初步评分由部门确认后使用</span></div>');
+    XW.answer(x.L.n + '的' + d.n + '得 ' + d.sc + ' 分（满分 ' + d.pts + '）。' + (d.k === 'kpi' ? '失分在：' + (x.kpis.filter(r => r.light !== 'ok').map(r => r.n + ' ' + r.vTxt + '（' + r.s + ' 分）').join('；') || '无') + (x.risk ? '；安全生产过程管理 ' + x.proc.v + ' 分，低于 50 分扣 ' + x.risk + ' 分' : '') : d.k === 'task' ? x.tasks.map(r => r.n + ' ' + r.s + ' 分').join('、') : x.evals.map(r => r.n + ' ' + r.s).join('、') + '，依据是' + x.evals.map(r => r.items.filter(it => it[1]).map(it => it[0]).join('、')).filter(Boolean).join('；')) + '。', null, { confirm: false, speak: false }); },
   'lp-who'(el) { const x = lperfOf(el.dataset.who); const L = x.L;
     modal('<div class="t">' + h(L.n) + ' · ' + h(x.team) + '　<b class="mono" style="font-size:16px">' + x.total + '</b> <span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span><span class="note">　' + LPERF_Q.no + ' · 由部门确认后使用</span></div>' +
       '<div class="tbl"><table class="t"><tr><th style="width:96px">基本情况</th><td>' + L.age + ' 岁 · 工龄 ' + L.yrs + ' 年 · 任班长 ' + L.asLeader + ' 年 · ' + h(L.lv) + ' · ' + h(L.star) + ' · ' + h(L.edu) + (L.party ? ' · 党员' : '') + ' · 副班长 ' + h(L.deputy) + '</td></tr></table></div>' +
-      '<div class="sixrows" style="margin-top:8px">' + x.dims.map(d => '<div data-act="lp-dim" data-who="' + h(L.n) + '" data-k="' + d.k + '" style="cursor:pointer"><span>' + h(d.n) + '</span>' + MG.bar(d.pct, d.cls) + '<b class="mono">' + d.sc + '</b><i class="note">满分 ' + d.pts + ' · ' + h(d.items.filter(t => t[1] > 0).map(t => t[0]).join('；') || '无扣分') + '</i></div>').join('') + '</div>' +
-      '<div class="hexsum"><b style="color:var(--ok)">强项：</b>' + x.strong.map(d => h(d.n) + ' ' + d.pct + '%').join('、') + '　<b style="color:var(--warn)">短板：</b>' + x.weak.map(d => h(d.n) + ' ' + d.pct + '%').join('、') + '</div>' +
+      '<div class="sixrows" style="margin-top:8px">' + x.dims.map(d => '<div data-act="lp-dim" data-who="' + h(L.n) + '" data-k="' + d.k + '" style="cursor:pointer"><span>' + h(d.n) + '</span>' + MG.bar(d.pct, d.cls) + '<b class="mono">' + d.sc + '</b><i class="note">满分 ' + d.pts + ' · 得分率 ' + d.pct + '%</i></div>').join('') + '</div>' +
+      '<div class="hexsum">风险指标：安全生产过程管理 ' + x.proc.fmt(x.proc.v) + ' 分' + (x.risk ? '，扣 ' + x.risk + ' 分' : '，不扣分') + '　加扣分：' + (x.adj ? (x.adj > 0 ? '+' : '') + x.adj + '（' + h(x.adjRows.map(r => r[0]).join('；')) + '）' : '无') + '　红线：' + (x.red ? h(x.red) : '未触发') + '</div>' +
+      '<div class="hexsum"><b style="color:var(--ok)">强项：</b>' + x.strong.map(d => h(d.n) + ' ' + d.pct + '%').join('、') + '　<b style="color:var(--warn)">最弱的三项：</b>' + x.lowSubs.map(s => h(s.n) + ' ' + Math.round(s.p) + '%').join('、') + '</div>' +
       '<div class="alert" style="margin-top:8px">结果应用：' + h(x.apply) + '</div>' +
       '<div class="bt"><button data-act="lp-doc" data-who="' + h(L.n) + '">生成评价意见</button><button class="g" data-act="lp-talk" data-who="' + h(L.n) + '">绩效面谈提纲</button><button class="g" data-act="pt-backup" data-i="' + LEADERS.indexOf(L) + '">看后备梯队</button></div>');
-    XW.answer(L.n + '本季度 ' + x.total + ' 分，' + x.grade + '档；强在' + x.strong.map(d => d.n).join('、') + '，短在' + x.weak.map(d => d.n).join('、') + '。' + x.apply, null, { confirm: false, speak: false }); },
+    XW.answer(L.n + '本季度 ' + x.total + ' 分，' + x.grade + '档；强在' + x.strong.map(d => d.n).join('、') + '，最弱的是' + x.lowSubs.slice(0, 2).map(s => s.n).join('、') + '。' + x.apply, null, { confirm: false, speak: false }); },
   'lp-ok'(el) { const who = el.dataset.who; const ok = LPERFPG.okMap(); ok[who] = DB.now(); LS.set('lperf_ok', ok); DB.log('班长绩效', who + ' 考评结果已确认'); render(); XW.fly('已确认 · ' + who); XW.answer(who + '的考评结果确认了，接下来可以下发到本人并约绩效面谈。', null, { confirm: false }); },
   'lp-okall'() { const ok = LPERFPG.okMap(); let n = 0; LEADERS.forEach(l => { if (!ok[l.n]) { ok[l.n] = DB.now(); n++; } }); LS.set('lperf_ok', ok); DB.log('班长绩效', '三位班长考评结果已确认'); render(); XW.fly('已确认 ' + n + ' 位'); XW.answer(n ? n + ' 位班长的考评结果都确认了。下一步下发到本人，需改进档的还要约谈并限期整改。' : '三位都已确认。', null, { confirm: false }); },
   'lp-send'(el) { const who = el.dataset.who; const ok = LPERFPG.okMap(); if (!ok[who]) { XW.answer('先确认' + who + '的考评结果再下发，未确认的结果不下发到本人。', null, { confirm: false }); return; } const x = lperfOf(who); const sent = LPERFPG.sentMap(); sent[who] = DB.now(); LS.set('lperf_sent', sent);
     DB.notify(who, LPERF_Q.no + '绩效考评结果 · 综合 ' + x.total + ' 分（' + x.grade + '）：强项 ' + x.strong.map(d => d.n).join('、') + '，短板 ' + x.weak.map(d => d.n).join('、') + '；' + x.apply + '。请在三个工作日内确认或提出申诉', '待确认', true);
     DB.log('班长绩效', who + ' 考评结果已下发'); render(); XW.fly('已下发 · ' + who); XW.answer(who + '的考评结果下发了：综合 ' + x.total + ' 分、' + x.grade + '档，短板' + x.weak.map(d => d.n).join('、') + '，三个工作日内确认或申诉。', null, { confirm: false }); },
   'lp-doc'(el) { const who = el.dataset.who; const x = lperfOf(who); const host = $('#lpdoc'); if (!host) return; host.hidden = false; host.innerHTML = ''; host.scrollIntoView({ block: 'nearest' });
-    const paras = ['一、考评期与口径：' + LPERF_Q.no + '（' + LPERF_Q.range + '），按安全生产 25、生产任务 25、班组建设 20、队伍管理 20、履职与协同 10 五个维度评价，取数来自违章与两票台账、年度指标任务、星级班组评价、工时与师带徒记录、派工记录。',
+    const paras = ['一、考评期与口径：' + LPERF_Q.no + '（' + LPERF_Q.range + '），按员工年度业绩责任书（班长）评价：考核指标 50%（第三方客户满意度、中压客户平均停电时间、快速复电成功率、中压线路故障跳闸次数、故障平均停电用户数降幅各 10%，安全生产过程管理为风险指标）、重点任务 10%、综合评价 40%，另计加扣分与红线事项。',
       '二、总体评价：' + who + '任' + x.team + '班长 ' + x.L.asLeader + ' 年，本季度初步综合得分 ' + x.total + ' 分，' + x.grade + '档，环比' + (x.delta > 0 ? '上升 ' + x.delta + ' 分' : x.delta < 0 ? '下降 ' + (-x.delta) + ' 分' : '持平') + '。',
-      '三、做得好的：' + x.strong.map(d => d.n + ' ' + d.sc + '/' + d.pts + '（' + d.pct + '%）').join('、') + '。' + (x.dims[0].pct >= 90 ? '安全生产本季度无事故事件，' + (x.input.vio ? '一般违章 ' + x.input.vio + ' 起全部自查自纠。' : '未发生一般违章。') : '生产任务口径下责任指标总体受控。'),
-      '四、需要改进的：' + x.weak.map(d => d.n + ' 只拿到 ' + d.pct + '%，扣分在' + (d.items.filter(t => t[1] > 0).map(t => t[0]).join('、') || '维度折算')).join('；') + '。',
+      '三、做得好的：' + x.strong.map(d => d.n + ' ' + d.sc + '/' + d.pts + '（' + d.pct + '%）').join('、') + '。' + (x.kpis.filter(r => r.light === 'ok').length ? '考核指标中' + x.kpis.filter(r => r.light === 'ok').map(r => r.n).join('、') + '达到满分值。' : ''),
+      '四、需要改进的：' + x.lowSubs.map(s => s.n + '（得分率 ' + Math.round(s.p) + '%）').join('、') + (x.risk ? '；安全生产过程管理 ' + x.proc.v + ' 分，低于 50 分扣 ' + x.risk + ' 分' : '') + '。',
       '五、下季度要求：' + x.weak.map(d => LPERFPG_REQ(d.k, x)).join('；') + '。',
       '六、结果应用：' + x.apply + '。以上为初步评价意见，由部门确认后与本人面谈并归档。'];
     MG.stream(host, paras, { title: who + ' ' + LPERF_Q.no + '绩效评价意见', done() { host.insertAdjacentHTML('beforeend', '<div class="bt"><button data-act="lp-docsave" data-who="' + h(who) + '">存入文稿中心</button><button class="g" data-act="lp-talk" data-who="' + h(who) + '">转绩效面谈提纲</button></div>'); } });
@@ -4234,17 +4320,15 @@ Object.assign(ACT, {
     LS.set('lperf_fix', fx); DB.log('班长绩效', '改进要求 ' + n + ' 条已列入'); if ($('#lpfix')) $('#lpfix').innerHTML = LPERFPG.fixHTML(); XW.fly('已列入 ' + n + ' 条'); XW.answer(n ? n + ' 条改进要求都列入下季度了，每条都发到对应班长待确认。' : '改进要求都已列入。', null, { confirm: false }); },
   'lp-sheet'() { const A = LPERFPG.all(); const ok = LPERFPG.okMap(); const miss = LEADERS.filter(l => !ok[l.n]);
     if (miss.length) { XW.answer('还有 ' + miss.map(l => l.n).join('、') + ' 的考评结果没确认，考评表要三位都确认后才生成。点"全部确认"或逐个确认。', null, { confirm: false }); return; }
-    modal('<div class="t">' + LPERF_Q.no + ' 班长绩效考评表　<span class="note">由部门确认后使用 · 分档不排名次</span></div><div class="tbl"><table class="t"><tr><th>班长</th><th>班组</th>' + LPERF_DIMS.map(d => '<th>' + h(d.n) + '<br><span class="note">' + d.pts + '</span></th>').join('') + '<th>综合</th><th>分档</th><th>结果应用</th></tr>' + A.map(x => '<tr><td><b>' + h(x.L.n) + '</b></td><td class="note">' + h(x.team) + '</td>' + x.dims.map(d => '<td class="mono ' + (d.cls === 'ok' ? 'g' : d.cls === 'bad' ? 'b' : '') + '">' + d.sc + '</td>').join('') + '<td class="mono"><b>' + x.total + '</b></td><td><span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td><td class="note" style="max-width:220px">' + h(x.apply) + '</td></tr>').join('') + '</table></div><div class="bt"><button data-act="lp-sheetsave">存入文稿中心并报部门</button></div>');
+    modal('<div class="t">' + LPERF_Q.no + ' 班长绩效考评表　<span class="note">由部门确认后使用 · 分档不排名次</span></div><div class="tbl"><table class="t"><tr><th>班长</th><th>班组</th>' + LPERF_DIMS.map(d => '<th>' + h(d.n) + '<br><span class="note">' + d.pts + '</span></th>').join('') + '<th>风险扣分</th><th>加扣分</th><th>综合</th><th>分档</th><th>结果应用</th></tr>' + A.map(x => '<tr><td><b>' + h(x.L.n) + '</b></td><td class="note">' + h(x.team) + '</td>' + x.dims.map(d => '<td class="mono ' + (d.cls === 'ok' ? 'g' : d.cls === 'bad' ? 'b' : '') + '">' + d.sc + '</td>').join('') + '<td class="mono ' + (x.risk ? 'b' : '') + '">' + (x.risk ? '−' + x.risk : '0') + '</td><td class="mono">' + (x.adj > 0 ? '+' : '') + x.adj + '</td><td class="mono"><b>' + x.total + '</b></td><td><span class="tag ' + x.gradeCls + '">' + h(x.grade) + '</span></td><td class="note" style="max-width:220px">' + h(x.apply) + '</td></tr>').join('') + '</table></div><div class="bt"><button data-act="lp-sheetsave">存入文稿中心并报部门</button></div>');
     XW.answer('考评表出来了：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。存入文稿中心后报部门，分档不排名次。', null, { confirm: false }); },
-  'lp-sheetsave'() { const A = LPERFPG.all(); const body = LPERF_Q.no + ' 班长绩效考评表\n' + A.map(x => x.L.n + ' ' + x.team + '：' + x.dims.map(d => d.n + ' ' + d.sc).join('、') + '，综合 ' + x.total + '，' + x.grade + '，' + x.apply).join('\n'); const docs = LS.get('docs', {}); docs['lperf-sheet'] = { t: LPERF_Q.no + ' 班长绩效考评表', ts: Date.now(), body: body }; LS.set('docs', docs); DB.log('文稿', '班长绩效考评表已保存'); if ($('#modal')) $('#modal').hidden = true; XW.fly('已存入文稿中心'); XW.answer('考评表存入文稿中心了，可以直接报部门。', null, { confirm: false }); }
+  'lp-sheetsave'() { const A = LPERFPG.all(); const body = LPERF_Q.no + ' 班长绩效考评表\n' + A.map(x => x.L.n + ' ' + x.team + '：' + x.dims.map(d => d.n + ' ' + d.sc).join('、') + (x.risk ? '、风险扣分 ' + x.risk : '') + (x.adj ? '、加扣分 ' + x.adj : '') + '，综合 ' + x.total + '，' + x.grade + '，' + x.apply).join('\n'); const docs = LS.get('docs', {}); docs['lperf-sheet'] = { t: LPERF_Q.no + ' 班长绩效考评表', ts: Date.now(), body: body }; LS.set('docs', docs); DB.log('文稿', '班长绩效考评表已保存'); if ($('#modal')) $('#modal').hidden = true; XW.fly('已存入文稿中心'); XW.answer('考评表存入文稿中心了，可以直接报部门。', null, { confirm: false }); }
 });
 function LPERFPG_REQ(k, x) {
   const I = x.input;
-  if (k === 'safe') return '一般违章压到 1 起以内，安全活动全员到位，每月一次现场安全督查并留记录';
-  if (k === 'task') { const bad = x.goals.filter(r => r.lt === 'bad').map(r => r.g.n); return '把' + (bad.join('、') || '落后指标') + '追到目标值，每两周报一次进度' ; }
-  if (k === 'build') return '星级班组初步评分从 ' + I.star + ' 提到 85 以上，本季度关键节点周闭环达标 ' + I.nodeQ[0] + '/' + I.nodeQ[1] + ' 周提到 12/13 周';
-  if (k === 'crew') return (I.unpaired ? I.unpaired + ' 名新员工逐人结对师傅并报培养计划；' : '') + (I.over ? '外勤超 24 小时的 ' + I.over + ' 人下周排室内；' : '') + (I.gapHi ? I.gapHi + ' 类断层技能各补到 3 人可自主' : '人员稳定性逐月回访');
-  return '到期任务当日派完，两票当日审完，周报按期报送';
+  if (k === 'kpi') { const bad = x.kpis.filter(r => r.light !== 'ok'); return (bad.length ? bad.map(r => r.n + '从 ' + r.vTxt.replace(/^累计 [^·]+· 推算全年 /, '全年 ') + ' 追到满分值 ' + KPIPG.tgt(r, r.full)).join('、') : '考核指标保持满分值') + (x.risk ? '；安全生产过程管理补到 50 分以上' : '') + '，每两周报一次进度'; }
+  if (k === 'task') { const low = x.tasks.filter(r => r.s < 110); return (low.length ? low.map(r => r.n + '（' + r.txt + '）').join('；') + '，里程碑逐月对账' : '重点任务里程碑按期推进，逐月对账'); }
+  return [I.late ? '到期任务当日派完' : '', I.pend ? '两票当日审完' : '', I.wkMiss ? '周报按期报送' : '', I.vio ? '一般违章压到 1 起以内' : '', I.absent ? '安全活动与党建学习全员到位' : ''].filter(Boolean).join('、') || '保持"马上就办、办就办好"，每月登记一项改进或创新';
 }
 
 /* ---------- 多班组人员总览仪表盘 + 下钻 + 员工画像（综合画像 + 专业画像） ---------- */
@@ -4366,13 +4450,13 @@ PAGES.madvise = {
         '<div class="grid2" style="grid-template-columns:1fr 1.3fr"><div class="card"><div class="h"><b>人均工单</b><span>单 / 人 · 年</span></div>' + CH.mini.cols(T.years.map((y, i) => ({ n: y.replace(' 预计', ''), v: C.per[i], c: i === 4 ? CPAL[1] : CPAL[0] })), { labels: true, h: 130 }) + '<div class="tbl" style="margin-top:6px"><table class="t"><tr><th>班组</th>' + T.years.map(y => '<th>' + h(y.replace(' 预计', '')) + '</th>').join('') + '</tr>' + Object.keys(T.teams).map(n => '<tr><td>' + h(n) + '</td>' + T.teams[n].map(v => '<td class="mono">' + v + '</td>').join('') + '</tr>').join('') + '</table></div></div>' +
         '<div class="card"><div class="h"><b>人力资源配置参谋预警</b><span>由部门确认后使用</span></div><div class="advbox"><p>近五年部门工单 <b>+' + C.jobsG + '%</b>、终端数 <b>+' + C.termsG + '%</b>，在编人数只 <b>+' + C.headsG + '%</b>，人均工单从 ' + C.per[0] + ' 升到 ' + C.per[4] + '（<b>+' + C.perG + '%</b>）；平均年龄从 ' + T.avgAge[0] + ' 升到 ' + T.avgAge[4] + '。</p><p>按当前增速，2027 年人均工单约 <b>' + C.next + '</b>；要维持 2025 年的人均负荷，需增加 <b>' + C.need + '</b> 人；不全靠补人，则需把核心业务自主实施比例再提高约 8 个百分点（减少外委等待）并用跨班组柔性支援削峰。</p><p>建议：① 2027 年编制申请 2 人，优先配电运维一班（人均实操最低、近三年离职 2 人）；② 试验班 2029 年前有 2 名骨干进入退休窗口，2027 年起每年接收 1 名轮岗学员；③ 配电自动化班终端数五年翻 1.7 倍，先用跨班组柔性支援过 2026 年高峰，2027 年再评估定编。</p></div><div class="bt"><button data-act="ma-gen" data-k="hr">生成人力配置参谋报告</button></div></div></div>' +
         '<div class="card doc" id="madoc" hidden></div>'
-      : '<div class="grid2" style="grid-template-columns:1fr 1.2fr"><div class="card"><div class="h"><b>综合分析报告</b><span>取数：年度指标任务 · 班组横向对比 · 结构对比 · 风险画像 · 星级建设 · 班长队伍</span></div><div class="jobs">' + [['指标', '年度指标 ' + goalsAll().length + ' 项：红 ' + goalsAll().filter(g => g.light === 'bad').length + ' · 黄 ' + goalsAll().filter(g => g.light === 'w').length + ' · 绿 ' + goalsAll().filter(g => g.light === 'ok').length], ['班组', '最忙 ' + compareAdvice().busy + ' · 最需关注 ' + STRUCPG.strength().filter(s => s.tag === '弱').map(s => s.n).join('、')], ['风险', riskAgg().length + ' 项，高 ' + riskAgg().filter(r => r.lv === '高').length], ['星级', TEAM.name + ' 初步评分 ' + buildScore().pct + '，必备条件缺 ' + buildScore().mustBad.length + ' 项'], ['梯队', '可接任后备 ' + leaderStat().ready + '，培养中 ' + leaderStat().training]].map(x => '<div><span style="white-space:normal;color:var(--ink)"><b>' + h(x[0]) + '</b>　' + h(x[1]) + '</span></div>').join('') + '</div><div class="bt"><button data-act="ma-gen" data-k="all">生成综合分析报告</button>' + (docs['m-all'] ? '<span class="tag ok">上次 ' + new Date(docs['m-all'].ts).toTimeString().slice(0, 5) + '</span>' : '') + '</div></div><div class="card doc" id="madoc"><div class="empty">点"生成综合分析报告"，报告逐段写在这里</div></div></div>'); },
+      : '<div class="grid2" style="grid-template-columns:1fr 1.2fr"><div class="card"><div class="h"><b>综合分析报告</b><span>取数：考核指标 · 班组横向对比 · 结构对比 · 风险画像 · 星级建设 · 班长队伍</span></div><div class="jobs">' + [['指标', '年度指标 ' + goalsAll().length + ' 项：红 ' + goalsAll().filter(g => g.light === 'bad').length + ' · 黄 ' + goalsAll().filter(g => g.light === 'w').length + ' · 绿 ' + goalsAll().filter(g => g.light === 'ok').length], ['班组', '最忙 ' + compareAdvice().busy + ' · 最需关注 ' + STRUCPG.strength().filter(s => s.tag === '弱').map(s => s.n).join('、')], ['风险', riskAgg().length + ' 项，高 ' + riskAgg().filter(r => r.lv === '高').length], ['星级', TEAM.name + ' 初步评分 ' + buildScore().pct + '，必备条件缺 ' + buildScore().mustBad.length + ' 项'], ['梯队', '可接任后备 ' + leaderStat().ready + '，培养中 ' + leaderStat().training]].map(x => '<div><span style="white-space:normal;color:var(--ink)"><b>' + h(x[0]) + '</b>　' + h(x[1]) + '</span></div>').join('') + '</div><div class="bt"><button data-act="ma-gen" data-k="all">生成综合分析报告</button>' + (docs['m-all'] ? '<span class="tag ok">上次 ' + new Date(docs['m-all'].ts).toTimeString().slice(0, 5) + '</span>' : '') + '</div></div><div class="card doc" id="madoc"><div class="empty">点"生成综合分析报告"，报告逐段写在这里</div></div></div>'); },
   after() { CH.mount($('#main')); }
 };
 Object.assign(ACT, {
   'ma-gen'(el) { const k = el.dataset.k; const host = $('#madoc'); if (!host) return; host.hidden = false; host.scrollIntoView({ block: 'nearest' }); const G = goalsAll(); const bad = G.filter(g => g.light === 'bad'), w = G.filter(g => g.light === 'w'); const A = compareAdvice(); const R = riskAgg(); const B = buildScore(); const st = leaderStat(); const S3 = STRUCPG.strength(); const C = trendCalc(); const T = TREND5;
     const paras = k === 'hr' ? ['一、业务量变化：2022–2026 年部门工单 ' + T.jobs[0] + ' → ' + T.jobs[4] + '（+' + C.jobsG + '%），终端数 ' + T.terms[0] + ' → ' + T.terms[4] + '（+' + C.termsG + '%），缺陷 ' + T.defects[0] + ' → ' + T.defects[4] + '。', '二、人力配置变化：在编 ' + T.heads[0] + ' → ' + T.heads[4] + ' 人（+' + C.headsG + '%），平均年龄 ' + T.avgAge[0] + ' → ' + T.avgAge[4] + ' 岁，技师及以上 ' + T.senior[0] + ' → ' + T.senior[4] + ' 人；人均工单 ' + C.per[0] + ' → ' + C.per[4] + '（+' + C.perG + '%）。', '三、预警：按增速 2027 年人均工单约 ' + C.next + '；维持 2025 年人均负荷需增加 ' + C.need + ' 人，建议编制申请 2 人、其余靠自主实施比例与柔性支援消化。试验班平均 ' + teamStat('试验班').avgAge + ' 岁，2029 年前 2 名骨干进入退休窗口；配电运维一班近三年离职 2 人，人均实操最低。', '四、建议：① 2027 年编制申请 2 人，优先配电运维一班；② 试验班 2027 年起每年接收 1 名轮岗学员；③ 2026 年高峰用跨班组柔性支援（本周建议：' + A.idle + ' 借 ' + A.who + ' 到 ' + A.busy + '）；④ 核心业务自主实施比例每年提高 4 个百分点，减少外委等待。以上由部门确认后使用。']
-      : ['一、年度指标：' + G.length + ' 项中红灯 ' + bad.length + ' 项（' + bad.map(g => g.n).join('、') + '），黄灯 ' + w.length + ' 项（' + w.map(g => g.n).join('、') + '）。时间进度 ' + YEAR_PCT + '%。', '二、班组横向对比：' + A.busy + '本周人均外勤最高（' + compareRows().find(r => r.k === 'load').num[A.busy] + ' 小时），' + A.idle + '最低，建议借 ' + A.who + ' 支援 3 天。人均核心技能实操量：' + MGR.teamOrder.map(t => t + ' ' + compareRows().find(r => r.k === 'cap').num[t]).join('、') + '。', '三、团队结构：' + S3.map(s => s.n + ' ' + s.tag).join('、') + '；' + STRUCPG.advice()[0].t + '。', '四、风险画像：' + R.length + ' 项，高风险 ' + R.filter(r => r.lv === '高').map(r => r.who + '（' + r.g + '）').join('、') + '；敏感岗位超轮岗期 ' + R.filter(r => r.g === '敏感岗位轮岗').length + ' 个。', '五、星级建设与梯队：' + TEAM.name + ' 初步评分 ' + B.pct + '（' + B.lv + '线），必备条件不满足 ' + B.mustBad.map(d => d.n).join('、') + '；班长后备可接任 ' + st.ready + ' 人、培养中 ' + st.training + ' 人，配电运维一班后备最薄。', '六、本周部署：① 督办红灯指标到责任班组；② 发起 ' + A.who + ' 跨班组调配；③ 敏感岗位轮岗提醒 ' + R.filter(r => r.g === '敏感岗位轮岗').map(r => r.who).join('、') + '；④ 长病与低绩效人员本周面谈。以上由部门确认后使用。'];
+      : ['一、考核指标（分管副总 / 主管 / 班长三个维度）：' + G.length + ' 项中红灯 ' + bad.length + ' 项（' + bad.map(g => g.n).join('、') + '），黄灯 ' + w.length + ' 项（' + w.map(g => g.n).join('、') + '）。时间进度 ' + YEAR_PCT + '%。', '二、班组横向对比：' + A.busy + '本周人均外勤最高（' + compareRows().find(r => r.k === 'load').num[A.busy] + ' 小时），' + A.idle + '最低，建议借 ' + A.who + ' 支援 3 天。人均核心技能实操量：' + MGR.teamOrder.map(t => t + ' ' + compareRows().find(r => r.k === 'cap').num[t]).join('、') + '。', '三、团队结构：' + S3.map(s => s.n + ' ' + s.tag).join('、') + '；' + STRUCPG.advice()[0].t + '。', '四、风险画像：' + R.length + ' 项，高风险 ' + R.filter(r => r.lv === '高').map(r => r.who + '（' + r.g + '）').join('、') + '；敏感岗位超轮岗期 ' + R.filter(r => r.g === '敏感岗位轮岗').length + ' 个。', '五、星级建设与梯队：' + TEAM.name + ' 初步评分 ' + B.pct + '（' + B.lv + '线），必备条件不满足 ' + B.mustBad.map(d => d.n).join('、') + '；班长后备可接任 ' + st.ready + ' 人、培养中 ' + st.training + ' 人，配电运维一班后备最薄。', '六、本周部署：① 督办红灯指标到责任班组；② 发起 ' + A.who + ' 跨班组调配；③ 敏感岗位轮岗提醒 ' + R.filter(r => r.g === '敏感岗位轮岗').map(r => r.who).join('、') + '；④ 长病与低绩效人员本周面谈。以上由部门确认后使用。'];
     MG.stream(host, paras, { title: TEAM.dept + (k === 'hr' ? ' 人力资源配置参谋报告' : ' 综合分析报告') + ' · ' + TODAY, done() { host.insertAdjacentHTML('beforeend', '<div class="bt"><button data-act="ma-save" data-k="' + k + '">存入文稿中心</button><button class="g" data-act="ma-send" data-k="' + k + '">发三位班长</button></div>'); } }); },
   'ma-save'(el) { MG.saveDoc('m-' + el.dataset.k, TEAM.dept + (el.dataset.k === 'hr' ? ' 人力资源配置参谋报告' : ' 综合分析报告'), $('#madoc')); XW.answer('存到文稿中心了。', null, { confirm: false }); },
   'ma-send'(el) { MG.saveDoc('m-' + el.dataset.k, TEAM.dept + (el.dataset.k === 'hr' ? ' 人力资源配置参谋报告' : ' 综合分析报告'), $('#madoc')); MGR.teamOrder.forEach(t => DB.notify(MGR.leaderOf(t), (el.dataset.k === 'hr' ? '人力资源配置参谋报告' : '部门综合分析报告') + ' 已发，请查看涉及本班组的部署', '已发', true)); XW.fly('已发三位班长'); XW.answer('发给三位班长了。', null, { confirm: false }); }
@@ -4395,7 +4479,7 @@ XW.ask = function (text, voice) {
   if (role() === 'manager') {
     if (/借|调配|借调|支援/.test(t)) { go(() => ensure('risk', () => SUPER.simPreset(labWho ? labWho.n : '张伟', /\d+ ?天/.test(t) ? +(t.match(/(\d+) ?天/) || [0, 3])[1] : 3), 'sim')); return; }
     if (/缺电缆证|电缆证.*怎么办|电缆作业证/.test(t)) { go(() => ensure('talent', () => ACT['tal-cert']({ dataset: {} }), 'cert')); return; }
-    if (/班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职|班长/.test(t) && !/画像|后备|梯队/.test(t)) {
+    if (/班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职|班长/.test(t) && !/画像|后备|梯队/.test(t) && (LEADERS.some(l => t.includes(l.n)) || !/满意度|可靠率|快速复电|跳闸|停电时间|履职评价/.test(t))) {
       const L = LEADERS.find(l => t.includes(l.n));
       if (/考评表/.test(t)) { go(() => ensure('lperf', () => ACT['lp-sheet']())); return; }
       if (/改进要求/.test(t)) { go(() => ensure('lperf', () => { if (L && !/全部|都|所有/.test(t)) ACT['lp-fix']({ dataset: { who: L.n, k: lperfOf(L.n).weak[0].k } }); else ACT['lp-fixall'](); })); return; }
@@ -4481,7 +4565,7 @@ Object.assign(ACT, {
     [/系数|激励|绩效/, () => role() === 'manager' ? nav('lperf') : nav('perf')],
     [/入职满|写一段话|记一次|关怀|慰问|最近怎么样/, () => role() === 'manager' ? nav('mcare') : nav('care')],
     [/缺什么|值得培养|诊断报告|参谋/, () => role() === 'manager' ? nav('madvise') : nav('advise')],
-    [/红灯|指标|督办|下钻/, () => nav('goals')],
+    [/红灯|指标|督办|下钻|满意度|可靠率|快速复电|跳闸|停电时间/, t => { if (role() !== 'manager') return nav('goals'); if (/红灯/.test(t)) { ensure('goals', () => { const bad = goalsAll().filter(g => g.light === 'bad'); XW.answer('三个维度里亮红灯的有 ' + bad.length + ' 项：' + (bad.map(g => g.n).join('、') || '无') + '。班长维度按三位班长里最差的一格算，点「班长」页签能看到是谁。', null, { confirm: false }); }); return true; } const all = ['vp', 'mgr', 'lead'].map(dk => ({ dk, R: kpiRows(dk) })); const hit = all.map(x => ({ dk: x.dk, r: x.R.find(r => t.includes(r.n) || (r.n === '第三方客户满意度' && /满意度/.test(t)) || (r.n === '快速复电成功率' && /快速复电/.test(t))) })).find(x => x.r); if (hit && /督办/.test(t)) { ensure('goals', () => ACT['goal-urge']({ dataset: { dim: hit.dk, k: hit.r.k } }), hit.dk); return true; } if (hit) { ensure('goals', () => ACT['kpi-open']({ dataset: { dim: hit.dk, k: hit.r.k } }), hit.dk); return true; } nav('goals'); }],
     [/最忙|调人|横向|差多少/, () => nav('compare')],
     [/员工画像|综合画像|专业画像|忠诚执行|不断求进|安全意识|客户导向|沟通协作/, t => { if (role() === 'manager') { const w = STAFFPG.all().find(p => t.includes(p.n)); if (w) { ensure('staff', () => ACT['st-person']({ dataset: { who: w.n } }), teamOfPerson(w.n)); return true; } nav('staff'); return; }
       const who = PEOPLE.find(p => t.includes(p.n)); if (who) { ensure('skills', () => ACT['sk-pick']({ dataset: { who: who.n } })); return true; }
@@ -4495,7 +4579,7 @@ Object.assign(ACT, {
   ];
   const LPK = /班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职/;
   XW.ask = function (text, voice) {
-    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { if (!hit[1](text)) XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
+    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text) && (LEADERS.some(l => text.includes(l.n)) || !/满意度|可靠率|快速复电|跳闸|停电时间|履职评价/.test(text)))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { if (!hit[1](text)) XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
     ask0.call(XW, text, voice);
   };
 })();

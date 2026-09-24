@@ -14,7 +14,7 @@ XW.ask = function (text, voice) {
   if (role() === 'manager') {
     if (/借|调配|借调|支援/.test(t)) { go(() => ensure('risk', () => SUPER.simPreset(labWho ? labWho.n : '张伟', /\d+ ?天/.test(t) ? +(t.match(/(\d+) ?天/) || [0, 3])[1] : 3), 'sim')); return; }
     if (/缺电缆证|电缆证.*怎么办|电缆作业证/.test(t)) { go(() => ensure('talent', () => ACT['tal-cert']({ dataset: {} }), 'cert')); return; }
-    if (/班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职|班长/.test(t) && !/画像|后备|梯队/.test(t)) {
+    if (/班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职|班长/.test(t) && !/画像|后备|梯队/.test(t) && (LEADERS.some(l => t.includes(l.n)) || !/满意度|可靠率|快速复电|跳闸|停电时间|履职评价/.test(t))) {
       const L = LEADERS.find(l => t.includes(l.n));
       if (/考评表/.test(t)) { go(() => ensure('lperf', () => ACT['lp-sheet']())); return; }
       if (/改进要求/.test(t)) { go(() => ensure('lperf', () => { if (L && !/全部|都|所有/.test(t)) ACT['lp-fix']({ dataset: { who: L.n, k: lperfOf(L.n).weak[0].k } }); else ACT['lp-fixall'](); })); return; }
@@ -100,7 +100,7 @@ Object.assign(ACT, {
     [/系数|激励|绩效/, () => role() === 'manager' ? nav('lperf') : nav('perf')],
     [/入职满|写一段话|记一次|关怀|慰问|最近怎么样/, () => role() === 'manager' ? nav('mcare') : nav('care')],
     [/缺什么|值得培养|诊断报告|参谋/, () => role() === 'manager' ? nav('madvise') : nav('advise')],
-    [/红灯|指标|督办|下钻/, () => nav('goals')],
+    [/红灯|指标|督办|下钻|满意度|可靠率|快速复电|跳闸|停电时间/, t => { if (role() !== 'manager') return nav('goals'); if (/红灯/.test(t)) { ensure('goals', () => { const bad = goalsAll().filter(g => g.light === 'bad'); XW.answer('三个维度里亮红灯的有 ' + bad.length + ' 项：' + (bad.map(g => g.n).join('、') || '无') + '。班长维度按三位班长里最差的一格算，点「班长」页签能看到是谁。', null, { confirm: false }); }); return true; } const all = ['vp', 'mgr', 'lead'].map(dk => ({ dk, R: kpiRows(dk) })); const hit = all.map(x => ({ dk: x.dk, r: x.R.find(r => t.includes(r.n) || (r.n === '第三方客户满意度' && /满意度/.test(t)) || (r.n === '快速复电成功率' && /快速复电/.test(t))) })).find(x => x.r); if (hit && /督办/.test(t)) { ensure('goals', () => ACT['goal-urge']({ dataset: { dim: hit.dk, k: hit.r.k } }), hit.dk); return true; } if (hit) { ensure('goals', () => ACT['kpi-open']({ dataset: { dim: hit.dk, k: hit.r.k } }), hit.dk); return true; } nav('goals'); }],
     [/最忙|调人|横向|差多少/, () => nav('compare')],
     [/员工画像|综合画像|专业画像|忠诚执行|不断求进|安全意识|客户导向|沟通协作/, t => { if (role() === 'manager') { const w = STAFFPG.all().find(p => t.includes(p.n)); if (w) { ensure('staff', () => ACT['st-person']({ dataset: { who: w.n } }), teamOfPerson(w.n)); return true; } nav('staff'); return; }
       const who = PEOPLE.find(p => t.includes(p.n)); if (who) { ensure('skills', () => ACT['sk-pick']({ dataset: { who: who.n } })); return true; }
@@ -114,7 +114,7 @@ Object.assign(ACT, {
   ];
   const LPK = /班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职/;
   XW.ask = function (text, voice) {
-    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { if (!hit[1](text)) XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
+    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text) && (LEADERS.some(l => text.includes(l.n)) || !/满意度|可靠率|快速复电|跳闸|停电时间|履职评价/.test(text)))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { if (!hit[1](text)) XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
     ask0.call(XW, text, voice);
   };
 })();
