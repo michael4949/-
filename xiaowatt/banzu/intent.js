@@ -102,6 +102,9 @@ Object.assign(ACT, {
     [/缺什么|值得培养|诊断报告|参谋/, () => role() === 'manager' ? nav('madvise') : nav('advise')],
     [/红灯|指标|督办|下钻/, () => nav('goals')],
     [/最忙|调人|横向|差多少/, () => nav('compare')],
+    [/员工画像|综合画像|专业画像|忠诚执行|不断求进|安全意识|客户导向|沟通协作/, t => { if (role() === 'manager') { const w = STAFFPG.all().find(p => t.includes(p.n)); if (w) { ensure('staff', () => ACT['st-person']({ dataset: { who: w.n } }), teamOfPerson(w.n)); return true; } nav('staff'); return; }
+      const who = PEOPLE.find(p => t.includes(p.n)); if (who) { ensure('skills', () => ACT['sk-pick']({ dataset: { who: who.n } })); return true; }
+      const gi = GEN5.findIndex(d => t.includes(d.n)), pi = PRO9.findIndex(d => t.includes(d.n) || t.includes(d.s)); if (gi >= 0 || pi >= 0) { ensure('skills', () => ACT['sk-dim']({ dataset: { g: gi >= 0 ? 'gen' : 'pro', i: gi >= 0 ? gi : pi } })); return true; } nav('skills'); }],
     [/在岗|技师有几个|六维|画像/, () => nav('staff')],
     [/最弱|轮岗建议|年龄结构/, () => nav('structure')],
     [/敏感岗位|考勤异常|借调多久/, () => nav('risks')],

@@ -32,19 +32,22 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/01_team.png' });
   /* ---------- 班员画像：六维个人画像 + 技能矩阵 + 人才断层 ---------- */
   await go('#skills', 700);
-  await t('左栏改名班员画像 · 路由不变', async () => (await pg.locator('#sb a').nth(1).innerText()).includes('班员画像') && (await ev(() => location.hash)) === '#skills' && (await main()).includes('六维个人画像'));
-  await t('六维雷达 + 六维条 6 行 · 默认韩雪 · 由班组长确认后使用', async () => (await pg.locator('.hexl svg').count()) >= 1 && (await pg.locator('.sixrows>div').count()) === 6 && (await pg.locator('.hexhead b').innerText()) === '韩雪' && (await pg.locator('.hexwrap .cf').innerText()).includes('由班组长确认后使用'));
-  await t('优势特长 / 可提升 + 均值对照', async () => { const x = await pg.locator('.hexwrap').innerText(); return /优势特长/.test(x) && /可提升/.test(x) && /均值/.test(x); });
+  await t('左栏改名班员画像 · 路由不变', async () => (await pg.locator('#sb a').nth(1).innerText()).includes('班员画像') && (await ev(() => location.hash)) === '#skills' && (await main()).includes('综合画像') && (await main()).includes('专业画像'));
+  await t('员工画像 · 综合 5 项 + 专业 9 项 · 两张雷达 · 默认韩雪 · 由班组长确认后使用', async () => (await pg.locator('.portcol svg').count()) === 2 && (await pg.locator('.portcol:nth-child(1) .sixrows>div').count()) === 5 && (await pg.locator('.portcol:nth-child(2) .sixrows>div').count()) === 9 && (await pg.locator('.hexhead b').innerText()) === '韩雪' && (await pg.locator('.hexwrap1 .cf').innerText()).includes('由班组长确认后使用'));
+  await t('优势特长 / 可提升 + 均值对照 + 颜色说明', async () => { const x = await pg.locator('.hexwrap1').innerText(); return /优势特长/.test(x) && /可提升/.test(x) && /均值/.test(x) && (await main()).includes('颜色说明'); });
   await t('技能矩阵 12 行 · 作业授权列 · ★模块断层 高风险 ≥ 1', async () => (await pg.locator('table.skm tr').count()) === 13 && (await pg.locator('[data-act="au-teach"]').count()) >= 1 && (await pg.locator('table.skm .aurow').count()) === 12 && (await main()).includes('断层风险'));
   await pg.click('table.skm tr[data-who="刘一鸣"]'); await w(600);
   await t('点名单行切画像 · 当前行高亮', async () => (await pg.locator('.hexhead b').innerText()) === '刘一鸣' && (await pg.locator('table.skm tr.on').count()) === 1 && (await pg.locator('table.skm tr.on').getAttribute('data-who')) === '刘一鸣');
-  await pg.click('.sixrows>div[data-i="4"]'); await w(500);
-  await t('点某一维 · 本班 12 人排序弹层 + 差值', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 13 && (await pg.locator('#modal .mono.g, #modal .mono.b').count()) >= 10 && (await pg.locator('#modal').innerText()).includes('写作能力'));
+  await pg.click('.portcol:nth-child(1) .sixrows>div[data-i="2"]'); await w(500);
+  await t('点综合画像一项 · 定义 + 四级 + 本班 12 人排序', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 13 && (await pg.locator('#modal .mono.g, #modal .mono.b').count()) >= 10 && (await pg.locator('#modal').innerText()).includes('安全意识') && (await pg.locator('#modal .lvline span').count()) === 4);
+  await pg.click('#modal [data-act="modal-close"]'); await w(300);
+  await pg.click('.portcol:nth-child(2) .sixrows>div[data-i="6"]'); await w(500);
+  await t('点专业画像一项 · 三级业务 + 到位标准 + 本岗级要求列', async () => { const x = await pg.locator('#modal').innerText(); return (await pg.locator('#modal:not([hidden]) table tr').count()) === 13 && /到位标准/.test(x) && /本岗级要求/.test(x) && /两书、两票/.test(x); });
   await pg.click('#modal table tr:last-child [data-act="sk-pick"]'); await w(600);
   await t('弹层里看画像 · 切到该员工', async () => (await pg.locator('#modal').isHidden()) && (await pg.locator('table.skm tr.on').count()) === 1 && (await pg.locator('.hexhead b').innerText()) === (await pg.locator('table.skm tr.on td b').innerText()));
   const who1 = await pg.locator('.hexhead b').innerText();
   await pg.click('[data-act="sk-plan"]'); await w(600);
-  await t('按短板排培养任务 · 写 plan + 通知', async () => { const p = await LS('plan'); const n = await LS('notices'); return p.some(x => x.who === who1 && x.why === '六维短板') && n.some(x => x.to === who1); });
+  await t('按短板排培养任务 · 写 plan + 通知', async () => { const p = await LS('plan'); const n = await LS('notices'); return p.some(x => x.who === who1 && x.why === '画像短板') && n.some(x => x.to === who1); });
   await pg.click('[data-act="sk-talk"]'); await w(1600);
   await t('写进面谈提纲 · 跳关怀与文化并出提纲', async () => { const h = await ev(() => location.hash); const c = await pg.locator('#chat').innerText(); return h.startsWith('#care') && c.includes(who1 + ' · ') && /提纲/.test(c) && (await pg.locator('#chat .doc').count()) >= 1; });
   await t('重点关注名单已写入该员工', async () => (await main()).includes(who1));
@@ -209,7 +212,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.click('[data-act="st-team"][data-n="试验班"]'); await w(500);
   await t('下钻试验班 8 人', async () => (await pg.locator('#stlist tr').count()) === 9);
   await pg.click('#stlist tr[data-who="张伟"]'); await w(600);
-  await t('六维个人画像 · 六边形 + 均值 + 优势', async () => (await pg.locator('#hexhost svg polygon').count()) >= 7 && (await pg.locator('.sixrows > div').count()) === 6 && (await pg.locator('#hexhost').textContent()).includes('优势特长'));
+  await t('员工画像 · 综合 + 专业两张雷达 + 均值 + 优势', async () => (await pg.locator('#hexhost svg').count()) === 2 && (await pg.locator('#hexhost .sixrows > div').count()) === 14 && (await pg.locator('#hexhost').textContent()).includes('优势特长'));
   await clean('人员总览');
   await pg.screenshot({ path: SHOT + '/12_staff.png' });
   await go('#structure', 700);
@@ -250,7 +253,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   /* ---------- 讲师演示台 ---------- */
   await pg.click('.stagebtn'); await w(300);
   await pg.click('#stage [data-act="stage-status"]'); await w(300);
-  await t('功能实现状态清单 四类', async () => (await pg.locator('#modal .stl').count()) === 4 && (await pg.locator('#modal').textContent()).includes('六维个人画像'));
+  await t('功能实现状态清单 四类', async () => (await pg.locator('#modal .stl').count()) === 4 && (await pg.locator('#modal').textContent()).includes('员工画像') && (await pg.locator('#modal').textContent()).includes('配电自动化班专用认证表待提供'));
   await pg.click('[data-act="modal-close"]');
   await pg.click('#stage [data-act="stage-ext"]'); await w(500);
   await t('扩展模块打开 · 16 项（人员档案 / 培训考评 / 安全 / 文稿）', async () => (await pg.locator('#sb a').count()) === 16);

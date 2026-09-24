@@ -888,3 +888,20 @@ i.au.b{background:var(--warnbg);color:var(--warn);font-weight:400}
 @media(max-width:900px){.au-units{grid-template-columns:repeat(2,1fr)}}
 table.t button.s{white-space:nowrap}
 table.aut th.au-m{min-width:180px}
+/* 员工画像：综合画像 + 专业画像 */
+.hexwrap1{display:flex;flex-direction:column;gap:6px}
+.hexwrap1 .hexhead span{font-size:11px;line-height:1.6}
+.port2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.portcol{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fcfdfe;display:flex;flex-direction:column;gap:4px;min-width:0}
+.portcol svg.ch{max-width:340px;align-self:center}
+.ph3{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ph3 b{font-size:12.5px}.ph3 span{font-size:10.5px;color:var(--ink3)}
+.portcol .sixrows>div{grid-template-columns:62px 1fr 24px 1.3fr;padding:2px 4px;border-radius:5px}
+.portcol .sixrows>div:hover{background:var(--tint)}
+.portcol .sixrows>div>span:first-child{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.portcol .sixrows>div>b{text-align:right}
+.portcol .sixrows em.bad{font-style:normal;color:var(--bad)}
+.lvline{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--ink2)}
+.lvline span{background:var(--bg);border-radius:4px;padding:2px 7px}
+#hexhost .port2{grid-template-columns:1fr}
+@media(max-width:1180px){.port2{grid-template-columns:1fr}}
