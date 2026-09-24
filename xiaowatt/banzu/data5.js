@@ -3,8 +3,8 @@
 /* ---------- 班组荣誉标签与特色标签（特色按规则判定：专家型 / 骨干型 / 基础型） ---------- */
 const KIND_RULE = [['专家型', '技师及以上占比 ≥ 40% 且有局级及以上专家'], ['骨干型', '高级工及以上占比 ≥ 50%'], ['基础型', '高级工及以上占比 < 50%，30 岁以下过半']];
 const TEAM_TAGS = {
-  '配电自动化班': { star: '四星班组', starD: '2025-12 复评', honors: [['2025 年度安全生产先进班组', '局级', '2026-01'], ['2024 年工人先锋号', '局级', '2024-05']], kind: '骨干型', why: '高级工及以上 5/12，技师 2 人，★模块授权集中在骨干，无局级专家' },
-  '试验班': { star: '五星班组', starD: '2024-12 评定', honors: [['2023 年先进集体', '局级', '2024-01'], ['2025 年质量信得过班组', '市级', '2025-12']], kind: '专家型', why: '技师及以上 4/8，局级专家 1 人（周建国），交接试验 296 条全部自主实施' },
+  '配电自动化班': { star: '四星班组', starD: '2025-12 复评', honors: [['2025 年度安全生产先进班组', '局级', '2026-01'], ['2024 年工人先锋号', '局级', '2024-05']], kind: '骨干型', why: '高级工及以上 5/12，技师 2 人，★模块授权集中在骨干，无专家' },
+  '试验班': { star: '五星班组', starD: '2024-12 评定', honors: [['2023 年先进集体', '局级', '2024-01'], ['2025 年质量信得过班组', '市级', '2025-12']], kind: '专家型', why: '技师及以上 4/8，专家 1 人（周建国），交接试验 296 条全部自主实施' },
   '配电运维一班': { star: '三星班组', starD: '2025-12 评定', honors: [['2025 年青年文明号', '局级', '2025-05']], kind: '基础型', why: '30 岁以下 6/11，高级工 2 人，核心业务自主实施 5/9，人均实操 18.2 次' }
 };
 /* ---------- 星级班组评价维度 · 初步评分（维度 = 分册建设工作二级目录；标准分取自分册；本班现状取台账或班务记录）---------- */
@@ -120,12 +120,12 @@ const SKILL_LV3 = { '陈志远': '技师', '林小虎': '高级工', '郑浩': '
 function skillLvOf(n) { return (SKILLS[n] || {}).lv || SKILL_LV3[n] || '未定级'; }
 /* 星级工程师 / 专家（局级人才台账） */
 const STAR_ENG = { '韩雪': '三星工程师', '赵立群': '三星工程师', '李文博': '一星工程师', '周建国': '四星工程师', '张伟': '二星工程师', '刘畅': '一星工程师', '陈志远': '二星工程师', '郑浩': '一星工程师' };
-const EXPERTS = { '周建国': '局级专家（电气试验）', '韩雪': '局级专家候选（配电自动化）' };
+const EXPERTS = { '周建国': '专家（电气试验）', '韩雪': '专家候选（配电自动化）' };
 function teamPeople(team) { return team === TEAM.name ? PEOPLE : team === LAB.name ? LAB.people : TEAM3_PEOPLE; }
 function teamOfPerson(n) { return P[n] ? TEAM.name : LAB.people.some(p => p.n === n) ? LAB.name : TEAM3_PEOPLE.some(p => p.n === n) ? TEAM3.name : ''; }
 function personAny(n) { return P[n] || LAB.people.find(p => p.n === n) || TEAM3_PEOPLE.find(p => p.n === n); }
 function postClass(p) { return /班长/.test(p.post) ? '班长' : /技术员|专责/.test(p.post) ? '专责' : /高级/.test(p.post) ? '高级作业员' : /中级/.test(p.post) ? '中级作业员' : '初级作业员'; }
-function teamStat(team) { const ps = teamPeople(team); const on = team === TEAM.name ? ps.filter(p => p.status !== '休假').length : team === LAB.name ? ps.length - LAB.borrowed.length : ps.length - 1; const lv = {}; ps.forEach(p => { const l = skillLvOf(p.n); lv[l] = (lv[l] || 0) + 1; }); const posts = {}; ps.forEach(p => { const k = postClass(p); posts[k] = (posts[k] || 0) + 1; }); const avgAge = +(ps.reduce((s, p) => s + p.age, 0) / ps.length).toFixed(1); const young = ps.filter(p => p.age <= 30).length; const senior = ps.filter(p => /技师/.test(skillLvOf(p.n))).length; const high = ps.filter(p => /高级工|技师/.test(skillLvOf(p.n))).length; const eng = ps.filter(p => STAR_ENG[p.n]).length; return { team, n: ps.length, on, lv, posts, avgAge, young, senior, high, eng, expert: ps.filter(p => EXPERTS[p.n] && /^局级专家（/.test(EXPERTS[p.n])).length, stable: STABILITY[team] }; }
+function teamStat(team) { const ps = teamPeople(team); const on = team === TEAM.name ? ps.filter(p => p.status !== '休假').length : team === LAB.name ? ps.length - LAB.borrowed.length : ps.length - 1; const lv = {}; ps.forEach(p => { const l = skillLvOf(p.n); lv[l] = (lv[l] || 0) + 1; }); const posts = {}; ps.forEach(p => { const k = postClass(p); posts[k] = (posts[k] || 0) + 1; }); const avgAge = +(ps.reduce((s, p) => s + p.age, 0) / ps.length).toFixed(1); const young = ps.filter(p => p.age <= 30).length; const senior = ps.filter(p => /技师/.test(skillLvOf(p.n))).length; const high = ps.filter(p => /高级工|技师/.test(skillLvOf(p.n))).length; const eng = ps.filter(p => STAR_ENG[p.n]).length; return { team, n: ps.length, on, lv, posts, avgAge, young, senior, high, eng, expert: ps.filter(p => EXPERTS[p.n] && /^专家（/.test(EXPERTS[p.n])).length, stable: STABILITY[team] }; }
 const STABILITY = { '配电自动化班': { leave3y: 1, borrowed: 0, longSick: 0, intent: 0, avgYrs: 8.6 }, '试验班': { leave3y: 0, borrowed: 1, longSick: 1, intent: 1, avgYrs: 9.6 }, '配电运维一班': { leave3y: 2, borrowed: 0, longSick: 0, intent: 0, avgYrs: 7.0 } };
 
 /* ---------- 班长队伍与梯队 ---------- */
@@ -281,14 +281,12 @@ function compareRows() { const m = DB.month(); const T = {}; TEAMS.forEach(t => 
 function compareAdvice() { const rows = compareRows(); const load = rows.find(r => r.k === 'load'); const names = TEAMS.map(t => t.n); const hi = names.slice().sort((a, b) => load.num[b] - load.num[a]); return { busy: hi[0], idle: hi[hi.length - 1], gap: +(load.num[hi[0]] - load.num[hi[hi.length - 1]]).toFixed(1), who: hi[hi.length - 1] === '配电运维一班' ? '郑浩' : hi[hi.length - 1] === '试验班' ? '吴磊' : '李文博', need: hi[0] === '试验班' ? '8 月交接试验高峰（' + LAB.total + ' 条，本月 60 条）' : hi[0] === '配电自动化班' ? '田寮站验收与消缺并行' : '故障抢修' }; }
 
 /* ---------- 团队风险画像聚合 ---------- */
-const SENSITIVE_POSTS = [
-  { post: '工器具与仪器保管', team: '配电自动化班', who: '王安', since: '2022-03', limit: 3 }, { post: '工程验收签字', team: '配电自动化班', who: '韩雪', since: '2021-06', limit: 3 },
-  { post: '试验报告审核', team: '试验班', who: '张伟', since: '2020-01', limit: 3 }, { post: '物资领用', team: '试验班', who: '吴磊', since: '2024-09', limit: 3 },
-  { post: '缺陷登记专责', team: '配电运维一班', who: '郑浩', since: '2024-06', limit: 3 }, { post: '备品备件保管', team: '配电运维一班', who: '冯超', since: '2022-11', limit: 3 }
-];
+/* 敏感岗位轮岗只针对班长（班组负责人：派工、考勤、绩效分配、物资领用审批），普通员工不涉及；任职年限取班长队伍台账，轮岗期 5 年为预设 */
+const ROT_LIMIT = 5;
+const SENSITIVE_POSTS = LEADERS.map(l => ({ post: '班长（班组负责人）', team: l.team, who: l.n, since: (2026 - l.asLeader) + '-08', limit: ROT_LIMIT, backup: (l.backup[0] || [])[0] ? l.backup[0][0] + '（' + l.backup[0][1] + '）' : '' }));
 function yearsSince(ym) { const [y, m] = ym.split('-').map(Number); return +((2026 - y) + (8 - m) / 12).toFixed(1); }
 function riskAgg() {
-  const rot = SENSITIVE_POSTS.map(s => Object.assign({}, s, { yrs: yearsSince(s.since) })).filter(s => s.yrs >= s.limit).map(s => ({ g: '敏感岗位轮岗', lv: s.yrs >= s.limit + 2 ? '高' : '中', team: s.team, who: s.who, t: s.post + ' 任职 ' + s.yrs + ' 年，超过 ' + s.limit + ' 年轮岗期', act: 'rotate', src: '岗位任职台账' }));
+  const rot = SENSITIVE_POSTS.map(s => Object.assign({}, s, { yrs: yearsSince(s.since) })).filter(s => s.yrs >= s.limit).map(s => ({ g: '敏感岗位轮岗', lv: s.yrs >= s.limit + 2 ? '高' : '中', team: s.team, who: s.who, t: s.post + ' 任职 ' + s.yrs + ' 年，超过 ' + s.limit + ' 年轮岗期' + (s.backup ? '；后备 ' + s.backup : ''), act: 'rotate', src: '班长队伍台账' }));
   const att = [{ g: '考勤异常', lv: '高', team: '试验班', who: '何静', t: '近 30 天病假 12 天，长病关注', act: 'care', src: '考勤台账' }, { g: '考勤异常', lv: '低', team: '配电运维一班', who: '谭俊', t: '近 30 天迟到 3 次', act: 'remind', src: '考勤台账' }, { g: '考勤异常', lv: '中', team: '配电自动化班', who: '黄伟强', t: '连续三周外勤工时 ' + P['黄伟强'].week + ' 小时以上，家中老人住院', act: 'care', src: '工时台账 · 谈心记录' }];
   const perf = [{ g: '绩效持续偏低', lv: '中', team: '配电自动化班', who: '王安', t: '本月学时 0，核心技能实操量低于人均 30%，两季度履职证据偏少', act: 'talk', src: '学时台账 · 作业授权台账' }, { g: '绩效持续偏低', lv: '中', team: '配电运维一班', who: '罗天', t: '连续两季度考评靠后，岗位胜任评价待提升 2 项', act: 'talk', src: '绩效考评记录' }];
   const stab = [{ g: '队伍稳定性', lv: '中', team: '试验班', who: '刘畅', t: '借调配电运维一班 ' + Math.round((new Date(TODAY) - new Date(LAB.borrowed[0].since)) / 86400000) + ' 天，无返岗时间', act: 'transfer', src: '跨班组调配台账' }, { g: '队伍稳定性', lv: '中', team: '试验班', who: '陈晨', t: '学员提出转岗意向，试验班近一年无新进人员', act: 'talk', src: '谈心记录' }, { g: '队伍稳定性', lv: '低', team: '配电运维一班', who: '—', t: '近三年离职 2 人，30 岁以下 6/11，初级作业员 4 人只持准入证', act: 'ladder', src: '人员名册' }];
@@ -317,7 +315,7 @@ function careList() {
 }
 const FOCUS_PEOPLE = [
   { who: '何静', team: '试验班', tag: '长病', t: '近 30 天病假 12 天', do: '关怀面谈，问医疗与工作安排意愿，调整为室内试验记录整理' },
-  { who: '韩雪', team: '配电自动化班', tag: '高绩效', t: '局级技术能手、局级专家候选、班长后备', do: '绩效面谈，谈专家申报与班长梯队安排，防止流失' },
+  { who: '韩雪', team: '配电自动化班', tag: '高绩效', t: '局级技术能手、专家候选、班长后备', do: '绩效面谈，谈专家申报与班长梯队安排，防止流失' },
   { who: '张伟', team: '试验班', tag: '高绩效', t: '主持交接试验 120 条，报告审核 6 年', do: '绩效面谈，谈轮岗与二星升三星工程师' },
   { who: '王安', team: '配电自动化班', tag: '低绩效', t: '学时 0、实操量低于人均 30%', do: '绩效面谈，定 8 月两门课和两次带教任务' },
   { who: '罗天', team: '配电运维一班', tag: '低绩效', t: '连续两季度考评靠后', do: '关键事件面谈，对着两次超期缺陷谈' },
@@ -353,7 +351,7 @@ function perfAlloc() { const R = perfRows(); const sum = R.reduce((s, r) => s + 
 /* ---------- 师带徒与骨干培养 ---------- */
 const MENTEE = { '刘一鸣': { stage: '新员工', train: 28, proj: 3, contest: 0, cert: '高压电工作业证 · 岗位胜任能力证待考（2026-11）', theory: 40, lastProj: '田寮站验收随队' }, '周明': { stage: '次新员工', train: 24, proj: 5, contest: 0, cert: '岗位胜任能力证待考（2026-10）', theory: 74, lastProj: '楼村片区终端巡视' }, '林芷若': { stage: '次新员工', train: 36, proj: 4, contest: 1, cert: '岗位胜任能力证待考（2026-10）', theory: 80, lastProj: '主站定值核对' }, '陈浩': { stage: '次新员工', train: 20, proj: 6, contest: 1, cert: '岗位胜任能力证 ✓ · 电力电缆作业证待考', theory: 82, lastProj: '光侨路 3# 消缺' } };
 const BACKBONE = [
-  { who: '韩雪', now: '技师 · 三星工程师', next: '局级专家（配电自动化）', when: '2026-12 申报', items: ['主导 1 项技术革新（交换机取电排查规范）', '带徒 1 人出师（陈浩）', '发表 1 篇技术总结'], done: 2 },
+  { who: '韩雪', now: '技师 · 三星工程师', next: '专家（配电自动化）', when: '2026-12 申报', items: ['主导 1 项技术革新（交换机取电排查规范）', '带徒 1 人出师（陈浩）', '发表 1 篇技术总结'], done: 2 },
   { who: '李文博', now: '高级工 · 一星工程师', next: '技师 · 二星工程师', when: '2027-06 申报', items: ['技师鉴定理论 ≥ 80', '主持 2 项成套设备验收', '动作分析自主实施 5 次'], done: 1 },
   { who: '吴倩', now: '高级工', next: '一星工程师', when: '2027-03 申报', items: ['电缆试验自主实施 10 次', '完成局放检测培训', '带徒 1 人（周明）'], done: 1 },
   { who: '郭子扬', now: '中级工', next: '高级工', when: '2026-11 申报', items: ['倒闸操作实操 ≥ 85（已 88）', '终端调试自主实施 3 次', '二次回路理论 ≥ 80（79）'], done: 1 }
@@ -369,8 +367,8 @@ const KB3 = [
   { id: 'z1', cat3: '制度政策类', cat: '班组建设', t: '星级班组评价：必备条件与星级判定', src: STAR_SRC + ' · 总则', body: '必备条件 7 项一票否决（安全生产、党风廉政、行风舆情、党建水平、核心能力建设、班站标准化、资源配置）；通用部分 10 项 175 分、专业部分 2 项 800 分、加分最高 10 分；按得分比例定星级，复评班组周期取近两年。', tags: ['星级', '班组建设'] },
   { id: 'z2', cat3: '制度政策类', cat: '班组建设', t: '指标区间划分与得分比例（附表 1）', src: STAR_SRC + ' · 附表 1', body: '排名前三名得分比例 1，第四名 0.98，第五名 0.95，第六名 0.92，第七名 0.88，第八名 0.85，第九名 0.82，第十名 0.75，第十名后 0.7；人均实操量 = 核心技能自主实施完成总次数 / 人数。', tags: ['星级', '排名'] },
   { id: 'z3', cat3: '制度政策类', cat: '绩效', t: '班组月度绩效考评办法（摘）', src: '《供电局班组绩效管理实施细则》 · 第三章', body: '月度考评以安全、任务、质量、学习、协同五类证据为依据，系数区间 0.8–1.2；考评结果由班长确认、部门备案后用于当月绩效分配；连续两季度靠后的员工须安排面谈并记录。', tags: ['绩效', '考评'] },
-  { id: 'z4', cat3: '制度政策类', cat: '人才', t: '星级工程师与专家评聘条件（摘）', src: '《技术技能人才评聘管理办法》 · 附件 2', body: '一星工程师：高级工及以上、主持专业项目 2 项；二星：技师或工程师、技术总结 1 篇；三星：局级技术能手或竞赛前三；局级专家：三星工程师满两年、主导技术革新 1 项、带徒 1 人出师。', tags: ['星级工程师', '专家', '人才'] },
-  { id: 'z5', cat3: '制度政策类', cat: '安规', t: '敏感岗位轮岗要求', src: '《岗位廉洁风险防控手册》 · 第四章', body: '物资领用、工器具与仪器保管、工程验收签字、试验报告审核等关键敏感岗位任职满 3 年应轮岗；确需延长的由部门书面说明并备案，最长不超过 5 年。', tags: ['轮岗', '敏感岗位'] },
+  { id: 'z4', cat3: '制度政策类', cat: '人才', t: '星级工程师与专家评聘条件（摘）', src: '《技术技能人才评聘管理办法》 · 附件 2', body: '一星工程师：高级工及以上、主持专业项目 2 项；二星：技师或工程师、技术总结 1 篇；三星：局级技术能手或竞赛前三；专家：三星工程师满两年、主导技术革新 1 项、带徒 1 人出师。', tags: ['星级工程师', '专家', '人才'] },
+  { id: 'z5', cat3: '制度政策类', cat: '安规', t: '敏感岗位轮岗要求', src: '《岗位廉洁风险防控手册》 · 第四章', body: '班长（班组负责人）掌握派工、考勤、绩效分配与物资领用审批，属于关键敏感岗位，同一班组任职满 5 年应安排轮岗交流；确需延长的由部门书面说明并备案。普通作业人员不纳入敏感岗位轮岗。', tags: ['轮岗', '敏感岗位'] },
   { id: 'x1', cat3: '行政办公类', cat: '财务报销', t: '差旅与外勤费用报销', src: '《费用报销管理办法》 · 第二章', body: '外勤误餐按实际外勤日计，凭派工单与工时记录报销；市内交通按公务用车优先，打车需事前审批；报销单每月 5 日前交部门，附发票、派工单、工时台账截图。', tags: ['报销', '差旅'] },
   { id: 'x2', cat3: '行政办公类', cat: '劳动保护', t: '劳动保护用品发放标准', src: '《劳动防护用品管理规定》 · 附表', body: '绝缘手套、绝缘鞋每年检测一次、两年更换；安全帽三年更换；高温季节 6–9 月每人每月发放防暑用品；雷雨季外勤配备雨具与防滑鞋；领用登记在班组台账。', tags: ['劳保', '防暑'] },
   { id: 'x3', cat3: '行政办公类', cat: '考勤休假', t: '年休假与调休规则', src: '《员工考勤与休假管理规定》 · 第三章', body: '工龄满 1 年 5 天、满 10 年 10 天、满 20 年 15 天；值班后次日调休；病假 30 天以上须提交医院证明并转人事备案；休假期间不安排值班与外勤。', tags: ['休假', '考勤'] },
