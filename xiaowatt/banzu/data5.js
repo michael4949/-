@@ -3,7 +3,7 @@
 /* ---------- 班组荣誉标签与特色标签（特色按规则判定：专家型 / 骨干型 / 基础型） ---------- */
 const KIND_RULE = [['专家型', '技师及以上占比 ≥ 40% 且有局级及以上专家'], ['骨干型', '高级工及以上占比 ≥ 50%'], ['基础型', '高级工及以上占比 < 50%，30 岁以下过半']];
 const TEAM_TAGS = {
-  '配电自动化班': { star: '四星班组', starD: '2025-12 复评', honors: [['2025 年度安全生产先进班组', '局级', '2026-01'], ['2024 年工人先锋号', '局级', '2024-05']], kind: '骨干型', why: '高级工及以上 5/12，技师 2 人，九类核心技能可自主实施 6 类，无局级专家' },
+  '配电自动化班': { star: '四星班组', starD: '2025-12 复评', honors: [['2025 年度安全生产先进班组', '局级', '2026-01'], ['2024 年工人先锋号', '局级', '2024-05']], kind: '骨干型', why: '高级工及以上 5/12，技师 2 人，★模块授权集中在骨干，无局级专家' },
   '试验班': { star: '五星班组', starD: '2024-12 评定', honors: [['2023 年先进集体', '局级', '2024-01'], ['2025 年质量信得过班组', '市级', '2025-12']], kind: '专家型', why: '技师及以上 4/8，局级专家 1 人（周建国），交接试验 296 条全部自主实施' },
   '配电运维一班': { star: '三星班组', starD: '2025-12 评定', honors: [['2025 年青年文明号', '局级', '2025-05']], kind: '基础型', why: '30 岁以下 6/11，高级工 2 人，核心业务自主实施 5/9，人均实操 18.2 次' }
 };
@@ -14,7 +14,7 @@ const BUILD_PRE = [
   { k: 'b12', l1: '必备条件', n: '党风廉政', must: true, std: '评价周期内班组成员不发生违纪违法事件', now: () => '0 起', ok: () => true, path: '——' },
   { k: 'b13', l1: '必备条件', n: '行风舆情', must: true, std: '不发生因班组责任引发的社会舆论事件', now: () => '0 起', ok: () => true, path: '——' },
   { k: 'b14', l1: '必备条件', n: '党建水平', must: true, std: '五星：所在党支部近五年获网公司及以上标杆党支部或先进党组织称号', now: () => '所在党支部 2024 年获局级先进党支部，未获网公司级', ok: () => false, gap: '缺网公司级党建荣誉，五星必备条件不满足', fix: '2026 年申报网公司标杆党支部；把党建融合项目（终端在线率攻坚）做成支部书记项目' , path: '党建管理系统' },
-  { k: 'b15', l1: '必备条件', n: '核心能力建设', must: true, std: '岗位证书持证率 100%（新员工除外）；保命教育 100%；核心业务自主实施：五星 ≥ 35%（修编后 35 / 30 / 25 三档）', now: () => '岗位胜任能力证 ' + certHold('岗位胜任能力证').length + '/11；保命教育 12/12；九类核心技能可自主实施 ' + skillCover().filter(c => c.a.length >= 3).length + '/9 类，自主实施比例 ' + Math.round(PEOPLE.reduce((s, p) => s + skill9Of(p).q.filter(x => x === 'A').length, 0) / (PEOPLE.length * 9) * 100) + '%', ok: () => skillCover().filter(c => c.a.length >= 3).length >= 6, gap: '三类核心技能（光纤差动、终端调试、动作分析）可自主实施不足 3 人', fix: '按班员画像的断层项排带教：每类补到 3 人可自主', path: '班员画像 · 核心技能台账' },
+  { k: 'b15', l1: '必备条件', n: '核心能力建设', must: true, std: '岗位证书持证率 100%（新员工除外）；保命教育 100%；核心业务自主实施：五星 ≥ 35%（修编后 35 / 30 / 25 三档）', now: () => '岗位胜任能力证 ' + certHold('岗位胜任能力证').length + '/11；保命教育 12/12；核心业务自主实施率 ' + authRate() + '%（作业授权认证表：已授权★模块 ÷ 本岗级应授权★模块）；★模块 ≥ 3 人授权 ' + skillCover().filter(c => c.must && c.a.length >= 3).length + '/' + skillCover().filter(c => c.must).length + ' 个', ok: () => authRate() >= 35, gap: () => { const hi = skillCover().filter(c => c.must && c.a.length <= 2); return (hi.length ? '★模块已授权 ≤ 2 人的有 ' + hi.length + ' 个（' + hi.map(c => c.s.k + ' ' + c.s.n).join('、') + '）' : '★模块均有 3 人以上授权'); }, fix: '按授权认证页的断层模块排带教取证：每个★模块补到 3 人授权', path: '授权认证 · 作业授权台账' },
   { k: 'b16', l1: '必备条件', n: '班站标准化水平', must: true, std: '达到公司班站标准化建设达标要求', now: () => '2025-06 通过局级标准化达标验收', ok: () => true, path: '班组建设管理系统' },
   { k: 'b17', l1: '必备条件', n: '资源配置', must: true, std: '基本配置（场地、工器具、仪器）与人员配置符合规定', now: () => '定编 12 到岗 ' + PEOPLE.filter(p => p.status !== '休假').length + '；工器具定检 100%', ok: () => true, path: '人员名册 · 工器具台账' },
   { k: 'b21', l1: '通用部分', n: '安全管理', pts: 75, sc: () => 68 - DB.defects().filter(d => /超期/.test(d.st)).length * 2, std: '制度、责任制、风险评估、关键任务分析、作业指导书、工作票管理、职业健康、急救 10 项', gap: '关键任务分析未覆盖“交换机取电排查”这类新任务；作业指导书 2 份未按 2026 版规程修订', fix: '本月补关键任务分析 1 份、修订作业指导书 2 份（韩雪）', path: '安全生产管理系统' },
@@ -28,7 +28,7 @@ const BUILD_PRE = [
   { k: 'b29', l1: '通用部分', n: '绩效管理', pts: 10, sc: () => 6 + Math.min(4, Object.keys(LS.get('perf_ok', {})).length ? 3 : 0), std: '考评要求 5、定期开展绩效考评 5', gap: '2026 年只做了一季度考评，月度考评未留记录', fix: '绩效与激励页每月确认一次系数并留痕', path: '绩效考评记录' },
   { k: 'b210', l1: '通用部分', n: '党建融合', pts: 20, sc: () => 12, std: '党建与业务融合 20', gap: '党员责任区未与关键节点表挂钩；五星党员 1 名（修编后要求 ≥ 1，已满足）', fix: '把 19 项关键节点按党员责任区分片', path: '党建管理系统' },
   { k: 'b31', l1: '专业部分', n: '作业组织', pts: 300, sc: () => 258, std: '工器具、计划管理、作业过程与风险管控、事故事件、应急、二次设备运维 / 检修 / 调试、项目立项 11 项', gap: '二次设备常规检修计划完成 82%；应急演练本年 1 次（要求 2 次）', fix: '9 月补一次应急演练；检修计划按周计划排到 10 月', path: '生产管理系统' },
-  { k: 'b32', l1: '专业部分', n: '作业实施', pts: 500, sc: () => 445 + Math.min(10, DB.skillWrites().length * 2), std: '成套设备验收、保护定值管理、动作分析与故障定位、实操培训、设备维护、设备巡视 6 项', gap: '动作分析与故障定位自主实施 2 人；实操培训人均 ' + skill9PerCap() + ' 次（附表 1：人均实操量按排名取得分比例）', fix: '动作分析带教（韩雪带郭子扬、赵敏）；实操量低于人均 30% 的人优先派', path: '核心技能台账 · 任务台账' },
+  { k: 'b32', l1: '专业部分', n: '作业实施', pts: 500, sc: () => 445 + Math.min(10, DB.skillWrites().length * 2), std: '成套设备验收、保护定值管理、动作分析与故障定位、实操培训、设备维护、设备巡视 6 项', gap: () => { const c = skillCover().find(x => x.s.k === '2.2'); return '2.2 ' + c.s.n + '已授权 ' + c.a.length + ' 人；实操培训人均 ' + skill9PerCap() + ' 次（附表 1：人均实操量按排名取得分比例）'; }, fix: '2.2 带教取证（韩雪带郭子扬、赵敏）；实操量低于人均 30% 的人优先派', path: '作业授权台账 · 任务台账' },
   { k: 'b41', l1: '加分', pts: 10, n: '附加指标', sc: () => 4, std: '竞赛获奖、创新成果、专利等最高加 10 分', gap: '2025 年配网技能竞赛三等奖 +4；无创新成果', fix: '把“交换机取电排查规范”整理为创新成果申报', path: '荣誉台账' }
 ];
 function buildDims() { return BUILD_PRE.map(b => { const o = Object.assign({}, b); o.nowV = b.now ? b.now() : ''; o.okV = b.ok ? b.ok() : null; o.scV = b.sc ? b.sc() : null; o.gapV = typeof b.gap === 'function' ? b.gap() : b.gap || ''; if (b.pts) { o.pct = Math.round(o.scV / b.pts * 100); o.cls = o.pct >= 90 ? 'ok' : o.pct >= 75 ? 'w' : 'bad'; } else { o.cls = o.okV ? 'ok' : 'bad'; o.pct = o.okV ? 100 : 0; } return o; }); }
@@ -90,7 +90,7 @@ const LPERF_DIMS = [
   { k: 'safe', n: '安全生产', pts: 25, src: '违章台账 · 两票台账 · 安全活动台账', rule: '基准 25 分；一般违章每起 −0.5、两票合格率不足 100% 一次性 −2、安全活动缺席每人次 −0.5；发生事故事件本项计 0' },
   { k: 'task', n: '生产任务', pts: 25, src: '年度指标任务 · 任务台账 · 缺陷台账', rule: '按该班组责任指标的红黄绿加权折算：绿 1.0 / 黄 0.85 / 红 0.6' },
   { k: 'build', n: '班组建设', pts: 20, src: '星级班组评价 · 关键节点管控表 · 班务记录', rule: '按星级班组初步评分折算；本季度关键节点周闭环达标不足 80% 的周数再 −2' },
-  { k: 'crew', n: '队伍管理', pts: 20, src: '工时台账 · 师带徒 · 人员台账 · 核心技能台账', rule: '基准 20 分；外勤超 24 小时每人 −1、近 3 年新员工未结对师傅每人 −1、近三年离职每人 −1、转岗意向每人 −0.5、核心技能断层高风险每类 −0.5' },
+  { k: 'crew', n: '队伍管理', pts: 20, src: '工时台账 · 师带徒 · 人员台账 · 作业授权台账', rule: '基准 20 分；外勤超 24 小时每人 −1、近 3 年新员工未结对师傅每人 −1、近三年离职每人 −1、转岗意向每人 −0.5、★模块断层高风险每个 −0.5' },
   { k: 'duty', n: '履职与协同', pts: 10, src: '派工记录 · 两票台账 · 周报报送 · 跨班组调配', rule: '基准 10 分；到期未派每项 −1、待审票每张 −0.5、周报漏报每期 −1' }
 ];
 /* 未接入台账的两个班组给预设输入项，已在讲师演示台状态清单标注；配电自动化班一律取本机台账实时值 */
@@ -115,7 +115,7 @@ function lperfIn(team) {
     unpaired: newHires(team).list3.filter(x => !MENTORS.some(m => m.s === x.p.n)).length,
     leave3y: STABILITY[team].leave3y,
     intent: STABILITY[team].intent,
-    gapHi: own ? skillCover().filter(c => { const ages = c.a.map(p => p.age); const young = ages.length ? Math.min.apply(null, ages) : 0; return c.a.length <= 2 || (c.a.length <= 4 && young >= 35); }).length : pre.gapHi,
+    gapHi: own ? skillCover().filter(c => c.must).filter(c => { const ages = c.a.map(p => p.age); const young = ages.length ? Math.min.apply(null, ages) : 0; return c.a.length <= 2 || (c.a.length <= 4 && young >= 35); }).length : pre.gapHi,
     late: own ? DB.jobs().filter(j => j.st === '待派' && j.dateIso <= TODAY).length : pre.late,
     pend: own ? DB.tickets().filter(t => t.st === '待审').length : pre.pend
   };
@@ -192,7 +192,7 @@ function yearsSince(ym) { const [y, m] = ym.split('-').map(Number); return +((20
 function riskAgg() {
   const rot = SENSITIVE_POSTS.map(s => Object.assign({}, s, { yrs: yearsSince(s.since) })).filter(s => s.yrs >= s.limit).map(s => ({ g: '敏感岗位轮岗', lv: s.yrs >= s.limit + 2 ? '高' : '中', team: s.team, who: s.who, t: s.post + ' 任职 ' + s.yrs + ' 年，超过 ' + s.limit + ' 年轮岗期', act: 'rotate', src: '岗位任职台账' }));
   const att = [{ g: '考勤异常', lv: '高', team: '试验班', who: '何静', t: '近 30 天病假 12 天，长病关注', act: 'care', src: '考勤台账' }, { g: '考勤异常', lv: '低', team: '配电运维一班', who: '谭俊', t: '近 30 天迟到 3 次', act: 'remind', src: '考勤台账' }, { g: '考勤异常', lv: '中', team: '配电自动化班', who: '黄伟强', t: '连续三周外勤工时 ' + P['黄伟强'].week + ' 小时以上，家中老人住院', act: 'care', src: '工时台账 · 谈心记录' }];
-  const perf = [{ g: '绩效持续偏低', lv: '中', team: '配电自动化班', who: '王安', t: '本月学时 0，核心技能实操量低于人均 30%，两季度履职证据偏少', act: 'talk', src: '学时台账 · 核心技能台账' }, { g: '绩效持续偏低', lv: '中', team: '配电运维一班', who: '罗天', t: '连续两季度考评靠后，岗位胜任评价待提升 2 项', act: 'talk', src: '绩效考评记录' }];
+  const perf = [{ g: '绩效持续偏低', lv: '中', team: '配电自动化班', who: '王安', t: '本月学时 0，核心技能实操量低于人均 30%，两季度履职证据偏少', act: 'talk', src: '学时台账 · 作业授权台账' }, { g: '绩效持续偏低', lv: '中', team: '配电运维一班', who: '罗天', t: '连续两季度考评靠后，岗位胜任评价待提升 2 项', act: 'talk', src: '绩效考评记录' }];
   const stab = [{ g: '队伍稳定性', lv: '中', team: '试验班', who: '刘畅', t: '借调配电运维一班 ' + Math.round((new Date(TODAY) - new Date(LAB.borrowed[0].since)) / 86400000) + ' 天，无返岗时间', act: 'transfer', src: '跨班组调配台账' }, { g: '队伍稳定性', lv: '中', team: '试验班', who: '陈晨', t: '学员提出转岗意向，试验班近一年无新进人员', act: 'talk', src: '谈心记录' }, { g: '队伍稳定性', lv: '低', team: '配电运维一班', who: '—', t: '近三年离职 2 人，30 岁以下 6/11，初级作业员 4 人只持准入证', act: 'ladder', src: '人员名册' }];
   return rot.concat(att, perf, stab);
 }

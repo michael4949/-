@@ -18,7 +18,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   const clean = async (name) => { const txt = (await main()) + ' ' + (await pg.locator('#sb').innerText()) + ' ' + (await pg.locator('#chat').innerText().catch(() => '')) + ' ' + (await pg.locator('#modal').innerText().catch(() => '')); const m = txt.match(BAN); await t('禁词 ' + name, async () => { if (m) errs.push('ban ' + name + ': ' + m[0]); return !m; }); };
   await pg.goto(file); await w(2500);
   /* ---------- 班组长 · 班组画像（落地页） ---------- */
-  await t('shell 班组长 11 项 · 落地班组画像', async () => (await pg.locator('#sb a').count()) === 11 && (await pg.locator('#sb a.on').textContent()).includes('班组画像') && (await pg.locator('#xw').count()) === 1);
+  await t('shell 班组长 12 项 · 落地班组画像', async () => (await pg.locator('#sb a').count()) === 12 && (await pg.locator('#sb a.on').textContent()).includes('班组画像') && (await pg.locator('#xw').count()) === 1);
   await t('荣誉标签 · 星级 + 集体荣誉 2 + 特色标签', async () => (await pg.locator('.startag').count()) === 1 && (await pg.locator('.hitem').count()) === 2 && (await pg.locator('.kindrow .tag').textContent()) === '骨干型');
   await t('建设差距标识 · 初步评分四星 · 必备条件 6/7', async () => { const B = await ev(() => buildScore()); return B.pct >= 80 && B.pct < 90 && B.lv === '四星' && B.mustBad.length === 1 && (await pg.locator('.alert.bad').count()) === 1; });
   await t('星级维度 20 行 · 红黄绿标识', async () => (await pg.locator('table.dims tr').count()) === 21 && (await pg.locator('table.dims .rag.bad').count()) >= 1 && (await pg.locator('table.dims .rag.w').count()) >= 3 && (await pg.locator('table.dims .rag.ok').count()) >= 8);
@@ -35,7 +35,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('左栏改名班员画像 · 路由不变', async () => (await pg.locator('#sb a').nth(1).innerText()).includes('班员画像') && (await ev(() => location.hash)) === '#skills' && (await main()).includes('六维个人画像'));
   await t('六维雷达 + 六维条 6 行 · 默认韩雪 · 由班组长确认后使用', async () => (await pg.locator('.hexl svg').count()) >= 1 && (await pg.locator('.sixrows>div').count()) === 6 && (await pg.locator('.hexhead b').innerText()) === '韩雪' && (await pg.locator('.hexwrap .cf').innerText()).includes('由班组长确认后使用'));
   await t('优势特长 / 可提升 + 均值对照', async () => { const x = await pg.locator('.hexwrap').innerText(); return /优势特长/.test(x) && /可提升/.test(x) && /均值/.test(x); });
-  await t('技能矩阵 12 行 · 断层视图 9 类 · 高风险 ≥ 1', async () => (await pg.locator('table.skm tr').count()) === 13 && (await pg.locator('[data-act="skill-teach"]').count()) >= 1 && (await pg.locator('.s9').count()) === 12 && (await main()).includes('断层风险'));
+  await t('技能矩阵 12 行 · 作业授权列 · ★模块断层 高风险 ≥ 1', async () => (await pg.locator('table.skm tr').count()) === 13 && (await pg.locator('[data-act="au-teach"]').count()) >= 1 && (await pg.locator('table.skm .aurow').count()) === 12 && (await main()).includes('断层风险'));
   await pg.click('table.skm tr[data-who="刘一鸣"]'); await w(600);
   await t('点名单行切画像 · 当前行高亮', async () => (await pg.locator('.hexhead b').innerText()) === '刘一鸣' && (await pg.locator('table.skm tr.on').count()) === 1 && (await pg.locator('table.skm tr.on').getAttribute('data-who')) === '刘一鸣');
   await pg.click('.sixrows>div[data-i="4"]'); await w(500);
@@ -50,9 +50,26 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('重点关注名单已写入该员工', async () => (await main()).includes(who1));
   await ev(() => XW.clearChat()); await go('#skills', 600);
   await pg.click('[data-act="sk-teachall"]'); await w(500);
-  await t('高风险全部排带教 · 写 plan', async () => { const p = await LS('plan'); return p.filter(x => x.why === '断层风险 高').length >= 1; });
+  await t('高风险全部排带教 · 写 plan', async () => { const p = await LS('plan'); return p.filter(x => x.why === '授权断层 高').length >= 1; });
   await clean('班员画像');
   await pg.screenshot({ path: SHOT + '/02_skills.png' });
+  /* ---------- 授权认证：作业授权认证表 7 单元 42 模块 ---------- */
+  await ev(() => XW.clearChat()); await go('#auth', 700);
+  await t('授权认证 · 汇总表 42 模块 × 12 人 · 七个技能单元', async () => (await pg.locator('table.aut tr').count()) === 44 && (await pg.locator('table.aut th.au-p').count()) === 12 && (await pg.locator('.au-u').count()) === 7 && (await main()).includes('核心业务自主实施率'));
+  await t('表格 / 单元下方有颜色说明', async () => (await pg.locator('.legend-note').count()) >= 2);
+  const r0 = await ev(() => authRate());
+  await pg.click('td.au-c[data-who="刘一鸣"][data-k="1.3"]'); await w(400);
+  await t('点格 · 授权明细弹层 · 由班组长确认后生效', async () => (await pg.locator('#modal').innerText()).includes('由班组长确认后生效') && (await pg.locator('#modal [data-act="au-set"][data-v="A"]').count()) === 1);
+  await pg.click('#modal [data-act="au-set"][data-v="A"]'); await w(500);
+  await t('确认授权 → 写授权记录 · 自主实施率上升', async () => { const q = await LS('skill9'); return q['刘一鸣']['1.3'] === 'A' && (await ev(() => authRate())) > r0; });
+  await pg.click('.tabs button:has-text("初级作业员")'); await w(400);
+  await t('初级作业员分表 · 4 人', async () => (await pg.locator('table.aut th.au-p').count()) === 4);
+  await pg.click('[data-act="au-sign"]'); await w(500);
+  await t('确认本期授权 · 表尾授权人 + 报主管', async () => { const g = await LS('auth_sign'); const n = await LS('notices'); return g && g.by === '赵立群' && n.some(x => x.to === '陈国安' && /授权认证表/.test(x.t)) && (await pg.locator('.au-ft').innerText()).includes('赵立群'); });
+  await pg.click('.tabs button:has-text("★模块断层风险")'); await w(400);
+  await t('★模块断层风险 20 行', async () => (await pg.locator('#main table.t tr').count()) === 21);
+  await clean('授权认证');
+  await pg.screenshot({ path: SHOT + '/02b_auth.png' });
   /* ---------- 培养与梯队 ---------- */
   await go('#grow', 700);
   await t('师带徒 4 卡 · 骨干培养 4 人 · 梯队漏斗', async () => (await pg.locator('.mcard').count()) === 4 && (await pg.locator('.bbrow').count()) === 4 && (await pg.locator('.mrow').count()) === 4);
@@ -229,14 +246,14 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/16_madvise.png' });
   /* ---------- 回到班组长：通知与计划都在 ---------- */
   await pg.click('.rsw button[data-r="leader"]'); await w(1800);
-  await t('切回班组长 · 收到督办与培养提醒', async () => { const n = await LS('notices'); return (await pg.locator('#sb a').count()) === 11 && n.some(x => x.to === '赵立群' && /督办/.test(x.t)); });
+  await t('切回班组长 · 收到督办与培养提醒', async () => { const n = await LS('notices'); return (await pg.locator('#sb a').count()) === 12 && n.some(x => x.to === '赵立群' && /督办/.test(x.t)); });
   /* ---------- 讲师演示台 ---------- */
   await pg.click('.stagebtn'); await w(300);
   await pg.click('#stage [data-act="stage-status"]'); await w(300);
   await t('功能实现状态清单 四类', async () => (await pg.locator('#modal .stl').count()) === 4 && (await pg.locator('#modal').textContent()).includes('六维个人画像'));
   await pg.click('[data-act="modal-close"]');
   await pg.click('#stage [data-act="stage-ext"]'); await w(500);
-  await t('扩展模块打开 · 15 项（人员档案 / 培训考评 / 安全 / 文稿）', async () => (await pg.locator('#sb a').count()) === 15);
+  await t('扩展模块打开 · 16 项（人员档案 / 培训考评 / 安全 / 文稿）', async () => (await pg.locator('#sb a').count()) === 16);
   await pg.click('.stagebtn'); await w(200);
   console.log('FAILS', fails, 'ERR', errs.length ? errs.slice(0, 12).join('\n  ') : 'none');
   await br.close();

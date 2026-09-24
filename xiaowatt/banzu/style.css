@@ -859,3 +859,32 @@ table.t.skm td:nth-child(7),table.t.skm th:nth-child(7){text-align:center}
 table.t td.rk{white-space:nowrap}
 table.t td.rk .dimbar{display:inline-block;width:150px;vertical-align:middle;margin:0 8px 0 0}
 table.t.cand td .tag{white-space:nowrap}
+/* 授权认证 */
+.legend-note{font-size:10.5px;color:var(--ink3);line-height:1.55;margin-top:8px;padding:6px 9px;background:var(--bg);border-left:2px solid var(--line2);border-radius:0 4px 4px 0}
+.au-units{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.au-u{border:1px solid var(--line);border-radius:6px;padding:7px 9px;display:flex;flex-direction:column;gap:3px;cursor:pointer;font-size:11.5px}
+.au-u:hover{border-color:var(--pri)}
+.au-u em{font-style:normal;font-size:10.5px}
+.au-u .mono{font-size:11px;color:var(--ink2)}
+.au-hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:8px 0 4px;font-size:12.5px}
+.au-ft{display:flex;justify-content:flex-end;gap:28px;font-size:11.5px;color:var(--ink2);margin-top:6px}
+.au-wrap{max-height:560px}
+table.aut{font-size:11px}
+table.aut th,table.aut td{border:1px solid var(--line);padding:3px 5px;vertical-align:middle}
+table.aut th{position:sticky;top:0;background:#f7f8fa;z-index:1}
+table.aut td.c,table.aut th.c{text-align:center}
+table.aut tr.st td{background:#fbfaf2}
+table.aut td.star{color:var(--warn);font-weight:700}
+table.aut th.au-p{text-align:center;cursor:pointer;min-width:46px}
+table.aut th.au-p b{display:block;font-size:11px}
+table.aut th.au-p span{font-weight:400;font-size:9.5px;color:var(--ink3)}
+table.aut td.au-c{cursor:pointer;padding:2px}
+table.aut td.au-c:hover{background:var(--tint)}
+table.aut td.au-c.own{box-shadow:inset 0 0 0 1px #d9c98a}
+table.aut tr.au-foot td{background:#f7f8fa;font-size:10.5px}
+i.au{display:inline-block;width:18px;height:16px;line-height:16px;border-radius:3px;font-style:normal;font-size:10.5px;font-weight:700}
+i.au.a{background:var(--okbg);color:var(--ok)}
+i.au.b{background:var(--warnbg);color:var(--warn);font-weight:400}
+@media(max-width:900px){.au-units{grid-template-columns:repeat(2,1fr)}}
+table.t button.s{white-space:nowrap}
+table.aut th.au-m{min-width:180px}

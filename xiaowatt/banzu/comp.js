@@ -1,6 +1,6 @@
 /* ===== 通用组件：派工人员条带、照片识别、文稿流式、审票、值班表 ===== */
 
-/* ---------- 派工：四条规则逐人校验（证书 / 核心技能 / 工时 / 冲突）→ 推荐与排除理由 → 人员条带过滤排序 → 点人 → 她动手填单 ---------- */
+/* ---------- 派工：四条规则逐人校验（证书 / 作业授权 / 工时 / 冲突）→ 推荐与排除理由 → 人员条带过滤排序 → 点人 → 她动手填单 ---------- */
 const DISPATCH = {
   job: null, host: null, picked: null,
   skillOf(job) { return job && job.skill ? SKILL9.find(s => s.k === job.skill) : null; },
@@ -11,7 +11,7 @@ const DISPATCH = {
     if (p.status === '休假') { out = true; why.push('休假'); }
     const need = (job.need || []).filter(c => c !== '工作负责人资格');
     need.forEach(c => { if (!p.cert.includes(c)) { out = true; why.push('无' + c.replace('作业证', '证').replace('资格', '资格')); } else why.push('持' + c.replace('作业证', '证')); });
-    const sk = this.skillOf(job); if (sk) { const q = skill9Of(p).q[SKILL9.indexOf(sk)]; if (q === 'A') why.push('「' + sk.n + '」可自主实施，本年 ' + skill9Of(p).n[SKILL9.indexOf(sk)] + ' 次'); else if (q === 'B') { follow = true; why.push('「' + sk.n + '」需带教，只能随队'); } else { out = true; why.push('不具备「' + sk.n + '」资格'); } }
+    const sk = this.skillOf(job); if (sk) { const q = skill9Of(p).q[SKILL9.indexOf(sk)]; if (q === 'A') why.push('已取得「' + sk.k + ' ' + sk.n + '」授权，本年 ' + skill9Of(p).n[SKILL9.indexOf(sk)] + ' 次'); else if (q === 'B') { follow = true; why.push('「' + sk.k + ' ' + sk.n + '」培训中，只能随队'); } else { out = true; why.push('未取得「' + sk.k + ' ' + sk.n + '」授权'); } }
     if (/学员/.test(p.post)) { follow = true; why.push('学员随队学习'); }
     if (p.week >= WEEK_LIMIT) why.push('本周已 ' + p.week + 'h，超约定 ' + WEEK_LIMIT + 'h'); else why.push('本周 ' + p.week + 'h');
     const day = DB.whenOf(job).slice(0, 10); const clash = DB.jobs().find(j => j.id !== job.id && /已派|票已审|进行中|待开工/.test(j.st) && DB.whenOf(j).slice(0, 10) === day && DB.crewOf(j).includes(p.n)); if (clash) { out = true; why.push('当天已派「' + clash.t.slice(0, 12) + '」'); }
@@ -26,15 +26,15 @@ const DISPATCH = {
   defaults(job) { const e = this.explain(job); const crew = e.crew.map(x => x.p); const learn = e.follows.map(x => x.p); return { lead: e.lead ? e.lead.p : null, crew: crew.slice(0, 2), learn: learn[0] || null, follows: learn, explain: e }; },
   /* 推荐 / 排除表 */
   tableHTML(job) { const e = this.explain(job); const row = (x, tag, cls) => '<tr class="' + cls + '"><td><b>' + h(x.p.n) + '</b><br><span class="note">' + h(x.p.post.replace('副班长 · ', '')) + '</span></td><td><span class="tag ' + (cls === 'in' ? 'ok' : cls === 'fo' ? 'v' : cls === 'ov' ? 'w' : 'bad') + '">' + tag + '</span></td><td class="note" style="color:var(--ink)">' + h(x.why.join('；')) + '</td></tr>';
-    return '<div class="tbl"><table class="t xpl"><tr><th>人员</th><th>结论</th><th>四条规则逐条对照（证书 · 核心技能 · 工时 · 冲突）</th></tr>' + (e.lead ? row(e.lead, '推荐 · 工作负责人', 'in') : '') + e.crew.map(x => row(x, '推荐 · 班员', 'in')).join('') + e.follows.map(x => row(x, '随队', 'fo')).join('') + e.overs.map(x => row(x, '排除 · 超工时', 'ov')).join('') + e.outs.map(x => row(x, '排除', 'ex')).join('') + '</table></div>'; },
+    return '<div class="tbl"><table class="t xpl"><tr><th>人员</th><th>结论</th><th>四条规则逐条对照（证书 · 作业授权 · 工时 · 冲突）</th></tr>' + (e.lead ? row(e.lead, '推荐 · 工作负责人', 'in') : '') + e.crew.map(x => row(x, '推荐 · 班员', 'in')).join('') + e.follows.map(x => row(x, '随队', 'fo')).join('') + e.overs.map(x => row(x, '排除 · 超工时', 'ov')).join('') + e.outs.map(x => row(x, '排除', 'ex')).join('') + '</table></div>'; },
   render(host) { const row = $('.row', host); row.innerHTML = ''; PEOPLE.forEach((p, i) => { const d = document.createElement('div'); d.className = 'chip'; d.dataset.i = i; d.dataset.act = 'dispatch-pick'; d.dataset.who = p.n; d.innerHTML = '<b>' + h(p.n) + '</b><div class="hb"><i></i></div><span class="hr">' + p.week + ' h · 本周</span><span class="why"></span>'; row.appendChild(d); XW.at(80 + i * 50, () => { d.querySelector('.hb i').style.width = Math.min(100, p.week / 26 * 100) + '%'; }); }); },
-  /* 展开条带并"边想边筛"：证书 → 核心技能 → 工时 → 冲突 */
+  /* 展开条带并"边想边筛"：证书 → 作业授权 → 工时 → 冲突 */
   open(host, job, done) {
     this.host = host; this.job = job || DB.job(MAINLINE); this.picked = null; host.classList.add('on'); this.render(host);
     const tk = $('.tk', host); tk.classList.add('on'); XW.state('think');
     const e = this.explain(this.job); const sk = this.skillOf(this.job); const need = (this.job.need || []).filter(c => c !== '工作负责人资格');
     const memo = XW.mem.get('备选-' + DB.typeOf(this.job));
-    const txt = '这项' + (need.length ? '要' + need.map(c => c.replace('作业证', '证')).join('和') + '，有证的是' + PEOPLE.filter(p => need.every(c => p.cert.includes(c)) && p.post !== '班长').map(p => p.n).join('、') + '。' : '不要特殊证书。') + (sk ? '核心技能「' + sk.n + '」能自主实施的是' + PEOPLE.filter(p => skill9Of(p).q[SKILL9.indexOf(sk)] === 'A' && p.post !== '班长').map(p => p.n).join('、') + '，' + (e.follows.filter(x => !/学员/.test(x.p.post)).map(x => x.p.n).join('、') || '没有人') + '还在带教，只能随队。' : '') + '工作负责人要有负责人资格' + (e.lead ? '，' + e.lead.p.n + '有，这周 ' + e.lead.p.week + ' 小时。' : '。') + (e.overs.length ? e.overs.map(x => x.p.n + '这周已经 ' + x.p.week + ' 小时，超过你定的每周 ' + WEEK_LIMIT + ' 小时').join('；') + '，我没排。' : '') + (e.crew.length ? '剩下的按这周工时从少到多排……' + e.crew.map(x => x.p.n + ' ' + x.p.week).join('、') + '。' : '') + (memo ? '上次这类活你给了' + memo + '，这次我还是先想到他。' : '') + '每个人为什么推荐、为什么排除，表里都写了。你想换谁，点一下就行。';
+    const txt = '这项' + (need.length ? '要' + need.map(c => c.replace('作业证', '证')).join('和') + '，有证的是' + PEOPLE.filter(p => need.every(c => p.cert.includes(c)) && p.post !== '班长').map(p => p.n).join('、') + '。' : '不要特殊证书。') + (sk ? '授权模块「' + sk.k + ' ' + sk.n + '」已取得授权的是' + PEOPLE.filter(p => skill9Of(p).q[SKILL9.indexOf(sk)] === 'A' && p.post !== '班长').map(p => p.n).join('、') + '，' + (e.follows.filter(x => !/学员/.test(x.p.post)).map(x => x.p.n).join('、') || '没有人') + '还在培训中，只能随队。' : '') + '工作负责人要有负责人资格' + (e.lead ? '，' + e.lead.p.n + '有，这周 ' + e.lead.p.week + ' 小时。' : '。') + (e.overs.length ? e.overs.map(x => x.p.n + '这周已经 ' + x.p.week + ' 小时，超过你定的每周 ' + WEEK_LIMIT + ' 小时').join('；') + '，我没排。' : '') + (e.crew.length ? '剩下的按这周工时从少到多排……' + e.crew.map(x => x.p.n + ' ' + x.p.week).join('、') + '。' : '') + (memo ? '上次这类活你给了' + memo + '，这次我还是先想到他。' : '') + '每个人为什么推荐、为什么排除，表里都写了。你想换谁，点一下就行。';
     XW.type($('span:last-child', tk), txt, 30);
     XW.at(2600, () => $$('.chip', host).forEach(c => { const r = this.judge(PEOPLE[c.dataset.i], this.job); if (r.role === 'out') { c.classList.add('dim'); c.querySelector('.why').textContent = this.reason(PEOPLE[c.dataset.i], this.job); } if (r.role === 'follow') { c.classList.add('fo'); c.querySelector('.why').textContent = '随队'; } }));
     XW.at(5400, () => $$('.chip', host).forEach(c => { const p = PEOPLE[c.dataset.i]; if (e.lead && p === e.lead.p) { c.classList.add('lead'); c.querySelector('.why').textContent = '负责人'; } if (e.overs.some(x => x.p === p)) { c.classList.add('bad'); c.querySelector('.why').textContent = p.week + 'h，超约定 ' + WEEK_LIMIT + 'h'; } }));
@@ -49,8 +49,8 @@ const DISPATCH = {
     if (r.role === 'follow') { XW.answer(p.n + (/学员/.test(p.post) ? '还是学员，' : '「' + this.skillOf(job).n + '」还在带教，') + '只能随队，不能算工作班成员。我已经把他排在随队里了。', null, { confirm: false }); return; }
     if (def.lead && p === def.lead.p) { XW.answer(p.n + '是这次的工作负责人：有负责人资格，' + r.why.filter(w => /可自主|本周/.test(w)).join('，') + '。', null, { confirm: false }); return; }
     if (r.over) {
-      XW.think('班长点了' + p.n + '。证书和核心技能都够。这周工时……' + DB.hours().filter(x => x.who === p.n).map(x => x.d + ' ' + x.h).join('、') + '，已经 ' + p.week + ' 小时，再上 ' + (job.h || 6) + ' 小时就超过班组约定。那我提醒一句超时，其他照办。', () => {
-        XW.answer('可以换成' + p.n + '，证书和核心技能都够。只是提醒你：他这周已经 ' + p.week + ' 小时，再上 ' + (job.h || 6) + ' 小时会超过班组约定。要按你的安排执行吗？', '可以换成' + p.n + '，证书和核心技能都够。只是提醒你：<b>他这周已经 <u class="num" data-act="hours" data-who="' + p.n + '">' + p.week + ' 小时</u></b>，再上 ' + (job.h || 6) + ' 小时会超过班组约定。要按你的安排执行吗？<div class="bt"><button data-act="dispatch-go" data-who="' + p.n + '">仍然换</button><button class="g" data-act="dispatch-keep">保留' + h(cur ? cur.n : '原人选') + '</button></div>');
+      XW.think('班长点了' + p.n + '。证书和作业授权都够。这周工时……' + DB.hours().filter(x => x.who === p.n).map(x => x.d + ' ' + x.h).join('、') + '，已经 ' + p.week + ' 小时，再上 ' + (job.h || 6) + ' 小时就超过班组约定。那我提醒一句超时，其他照办。', () => {
+        XW.answer('可以换成' + p.n + '，证书和作业授权都够。只是提醒你：他这周已经 ' + p.week + ' 小时，再上 ' + (job.h || 6) + ' 小时会超过班组约定。要按你的安排执行吗？', '可以换成' + p.n + '，证书和核心技能都够。只是提醒你：<b>他这周已经 <u class="num" data-act="hours" data-who="' + p.n + '">' + p.week + ' 小时</u></b>，再上 ' + (job.h || 6) + ' 小时会超过班组约定。要按你的安排执行吗？<div class="bt"><button data-act="dispatch-go" data-who="' + p.n + '">仍然换</button><button class="g" data-act="dispatch-keep">保留' + h(cur ? cur.n : '原人选') + '</button></div>');
       }); return;
     }
     if (def.crew.some(x => x === p)) { XW.answer(p.n + '已经在推荐里：' + r.why.join('，') + '。', null, { confirm: false }); return; }

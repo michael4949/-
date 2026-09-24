@@ -32,7 +32,7 @@ PAGES.compare = {
   after() { CH.mount($('#main')); }
 };
 Object.assign(ACT, {
-  'cmp-cell'(el) { const r = compareRows().find(x => x.k === el.dataset.k); const n = el.dataset.n; if (!r) return; const src = { jobs: '任务台账 · 本月', load: '工时台账 · 本周', over: '工时台账 · 约定 24 小时', tk: '两票台账 · 本月', df: '缺陷台账', cap: '核心技能台账', cert: '证书台账 · 90 天内', on: '人员名册', high: '技能等级认定台账' }[r.k]; XW.answer((n || '三班组') + '的' + r.n + (n ? '是 ' + (r.vals ? r.vals[n] : r.num[n]) + (r.unit || '') : '') + '，取自' + src + '。三班组里最好的是' + r.best.join('、') + (r.worst.length ? '，最需关注' + r.worst.join('、') : '') + '。', null, { confirm: false }); },
+  'cmp-cell'(el) { const r = compareRows().find(x => x.k === el.dataset.k); const n = el.dataset.n; if (!r) return; const src = { jobs: '任务台账 · 本月', load: '工时台账 · 本周', over: '工时台账 · 约定 24 小时', tk: '两票台账 · 本月', df: '缺陷台账', cap: '作业授权台账', cert: '证书台账 · 90 天内', on: '人员名册', high: '技能等级认定台账' }[r.k]; XW.answer((n || '三班组') + '的' + r.n + (n ? '是 ' + (r.vals ? r.vals[n] : r.num[n]) + (r.unit || '') : '') + '，取自' + src + '。三班组里最好的是' + r.best.join('、') + (r.worst.length ? '，最需关注' + r.worst.join('、') : '') + '。', null, { confirm: false }); },
   'cmp-transfer'(el) { const who = el.dataset.who, from = el.dataset.from, to = el.dataset.to; const A = compareAdvice(); SUPER.simState = { from, who, to, days: 3, start: '2026-08-10', why: A.need }; const sent = LS.get('cmp_sent', {}); sent[who] = DB.now(); LS.set('cmp_sent', sent); ensure('risk', () => { const host = $('#riskbody'); if (host) { host.innerHTML = SUPER.simHTML(); CH.mount(host); } XW.at(300, () => ACT['sim-say']()); }, 'sim'); }
 });
 
@@ -86,7 +86,7 @@ PAGES.lperf = {
       '<div class="card"><div class="h"><b>五维得分率对比</b><span>满分 100%</span></div>' + CH.mini.radar(LPERF_DIMS.map(d => d.n), A.map((x, i) => ({ n: x.L.n, vals: x.dims.map(d => d.pct), c: CPAL[i] })), { max: 100 }) + CH.mini.legend(A.map((x, i) => ({ n: x.L.n, c: CPAL[i] }))) + '</div></div>' +
       '<div class="card"><div class="h"><b>综合得分 · 分档 · 绩效结果应用</b><span>分档不排名次 · 结果应用按局绩效管理办法 · 由部门确认后使用</span><div class="r"><button class="s g" data-act="lp-okall">全部确认</button><button class="s" data-act="lp-sheet">生成班长绩效考评表</button></div></div>' + LPERFPG.sumTable() + '</div>' +
       '<div class="card"><div class="h"><b>下季度改进要求</b><span>取每位班长得分率最低的两维 · 列入后发到本人并同步到班组计划</span><div class="r"><button class="s" data-act="lp-fixall">全部列入</button></div></div><div id="lpfix">' + LPERFPG.fixHTML() + '</div></div>' +
-      '<div class="card"><div class="h"><b>计分规则与取数口径</b><span>规则公开到班长，可逐条核对</span></div><div class="tbl"><table class="t"><tr><th style="width:96px">维度</th><th style="width:52px">权重</th><th>计分规则</th><th style="width:230px">取数来源</th></tr>' + LPERF_DIMS.map(d => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td><td>' + h(d.rule) + '</td><td class="note">' + h(d.src) + '</td></tr>').join('') + '</table></div><div class="note" style="margin-top:6px">配电自动化班的违章、两票、派工、待审票、核心技能断层取本机台账实时值，班长在工作台处理后本页刷新即变；另两个班组的对应输入项与本季度关键节点达标周数取部门季度台账，右下角的状态清单里可核对每项的来源。</div></div>' +
+      '<div class="card"><div class="h"><b>计分规则与取数口径</b><span>规则公开到班长，可逐条核对</span></div><div class="tbl"><table class="t"><tr><th style="width:96px">维度</th><th style="width:52px">权重</th><th>计分规则</th><th style="width:230px">取数来源</th></tr>' + LPERF_DIMS.map(d => '<tr><td><b>' + h(d.n) + '</b></td><td class="mono">' + d.pts + '</td><td>' + h(d.rule) + '</td><td class="note">' + h(d.src) + '</td></tr>').join('') + '</table></div><div class="note" style="margin-top:6px">配电自动化班的违章、两票、派工、待审票、★模块断层取本机台账实时值，班长在工作台处理后本页刷新即变；另两个班组的对应输入项与本季度关键节点达标周数取部门季度台账，右下角的状态清单里可核对每项的来源。</div></div>' +
       '<div class="card doc" id="lpdoc" hidden><div class="empty">点某位班长的"生成评价意见"，意见逐段写在这里</div></div>'; },
   after() { CH.mount($('#main')); if (!S.briefed) { S.briefed = true; const A = LPERFPG.all(); XW.at(400, () => XW.answer('三位班长本季度的初步得分：' + A.map(x => x.L.n + ' ' + x.total + '（' + x.grade + '）').join('、') + '。短板最大的是' + A.slice().sort((a, b) => a.total - b.total)[0].L.n + '，' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].n + '只拿到 ' + A.slice().sort((a, b) => a.total - b.total)[0].weak[0].pct + '%。每一格都能点开看逐条扣分和取数来源，确认后可以下发到本人并约面谈。', null, { confirm: false })); } }
 };
@@ -183,7 +183,7 @@ const STRUCPG = {
   advice() { const st = {}; MGR.teamOrder.forEach(n => { st[n] = teamStat(n); }); return [
     { t: '配电运维一班 年轻但技能弱：30 岁以下 ' + st['配电运维一班'].young + '/11，高级工及以上 ' + st['配电运维一班'].high + ' 人，人均实操 18.2 次（三班组最低）；近 3 年入职 ' + newHires('配电运维一班').y3 + ' 人全部未结对师傅', do: '先把 ' + newHires('配电运维一班').y3 + ' 名新员工逐人结对师傅；从配电自动化班派 1 名高级作业员（李文博）到配电运维一班轮岗 6 个月，带终端巡视与二次回路；同时接收该班 1 名初级作业员（罗天）到配电自动化班学动作分析', who: ['赵立群', '陈志远'], k: 'r1' },
     { t: '试验班 专家型但骨干集中：技师及以上 ' + st['试验班'].senior + '/8 全部 36 岁以上，30 岁以下 4 人中 3 人为初级工或学员，近 1 年无新进人员、近 3 年仅 ' + newHires('试验班').y3 + ' 人，学员有转岗意向', do: '试验班接收配电运维一班 1 名初级作业员（曾静）轮岗学交接试验 3 个月；刘畅借调到期返岗', who: ['周建国', '陈志远'], k: 'r2' },
-    { t: '配电自动化班 骨干型：九类核心技能中断层风险高的有 ' + SKILLPG.gaps().filter(g => g.risk === '高').length + ' 类，实操量集中在工作负责人', do: '班内轮岗：初级作业员按季度轮到工作负责人组；派工时把实操量低的人排进对应技能的活', who: ['赵立群'], k: 'r3' }
+    { t: '配电自动化班 骨干型：★模块中断层风险高的有 ' + SKILLPG.gaps().filter(g => g.risk === '高').length + ' 个，实操量集中在工作负责人', do: '班内轮岗：初级作业员按季度轮到工作负责人组；派工时把实操量低的人排进对应技能的活', who: ['赵立群'], k: 'r3' }
   ]; }
 };
 PAGES.structure = {

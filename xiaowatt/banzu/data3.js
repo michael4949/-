@@ -1,4 +1,4 @@
-/* ===== 数据层 3：五类画像指标模型 / 履职证据 / 岗位胜任评价 / 职业技能等级 / 九类核心技能 / 班组资质盘点 / 年龄与梯队 / 指标对照（全部脱敏模拟） =====
+/* ===== 数据层 3：五类画像指标模型 / 履职证据 / 岗位胜任评价 / 职业技能等级 / 作业授权认证 / 班组资质盘点 / 年龄与梯队 / 指标对照（全部脱敏模拟） =====
    本助手不输出绩效等级、不自动打分（需求文档 6.2）：只把台账证据按类别列出来，供班组长绩效沟通时引用。
    岗位胜任评价与技能等级是台账事实的对照，结论一律由班组长确认后使用；每类都写明数据授权、证据、用途、人工复核。 */
 
@@ -29,7 +29,7 @@ const DISCLOSE = {
   evid: { auth: '违章记录、任务台账、两票台账、缺陷台账、学时台账、成绩记录、师带徒、知识库；均为班组自有台账', ev: '每条证据后标出来自哪张台账，点开可核', use: '供班组长绩效沟通时引用，不出等级、不打分；正式绩效由公司绩效系统承接', review: '班组长逐条核对后使用' },
   post: { auth: '证书台账、能力图谱、成绩记录、实操评分表、违章记录、安全活动台账', ev: '对照岗位说明书四类要求逐项列出实际', use: '识别未达标项并转成培养重点；不用于排名', review: '结论由班组长确认后写入画像，确认人留名' },
   skill: { auth: '技能等级认定台账（局技能鉴定站）、申报条件、成绩记录', ev: '现等级、取得时间、鉴定成绩、本等级年限', use: '判断够不够岗位要求、何时具备申报条件', review: '报名由本人与班组长确认' },
-  skill9: { auth: '工作票工作负责人与工作班成员记录、培训台账', ev: '本年实操次数按工作票逐次累计；资格由班长确认', use: '派工时校验能否自主实施；星级评价"人均核心技能实操量"取数', review: '资格变更由班组长确认' }
+  skill9: { auth: '作业授权认证表（运维班口径 42 个模块）、工作票记录、培训台账', ev: '本年实操次数按工作票逐次累计；授权由班组长确认'  , use: '派工时校验是否已取得对应模块授权；核心业务自主实施率与星级评价"人均核心技能实操量"取数', review: '资格变更由班组长确认' }
 };
 
 /* ---------- 一、履职证据（替代原"绩效考核等级"）：五类只列证据、不出分数 ---------- */
@@ -76,7 +76,7 @@ function postEvalOf(p) {
   const sc = LS.get('scores', {})[p.n]; const prac = (SCORE_HIST[p.n] || []).filter(x => /实操/.test(x.t));
   const best = prac.length ? Math.max.apply(null, prac.map(x => x.s)) : (sc ? sc.total : 0);
   const s9 = skill9Of(p);
-  rows.push({ n: '技能操作', ok: best >= 80 || s9.a >= 5, req: '实操考核 ≥ 80 分，或九类核心技能可自主实施 ≥ 5 类', ev: (prac.length ? prac.map(x => ({ t: x.d + ' ' + x.t + ' ' + x.s + ' 分', s: '成绩记录' })) : [{ t: '本年无实操考核记录', s: '成绩记录' }]).concat(sc ? [{ t: sc.sheet + ' ' + sc.total + ' 分' + (sc.veto ? '（否决项）' : ''), s: '实操评分表' }] : [], [{ t: '核心技能可自主实施 ' + s9.a + '/9 类，本年实操 ' + s9.total + ' 次', s: '工作票 · 实操量' }]) });
+  rows.push({ n: '技能操作', ok: best >= 80 || s9.rate >= 80, req: '实操考核 ≥ 80 分，或本岗级★授权模块自主实施率 ≥ 80%', ev: (prac.length ? prac.map(x => ({ t: x.d + ' ' + x.t + ' ' + x.s + ' 分', s: '成绩记录' })) : [{ t: '本年无实操考核记录', s: '成绩记录' }]).concat(sc ? [{ t: sc.sheet + ' ' + sc.total + ' 分' + (sc.veto ? '（否决项）' : ''), s: '实操评分表' }] : [], [{ t: '本岗级★授权模块已授权 ' + s9.mustA + '/' + s9.mustN + '（自主实施率 ' + s9.rate + '%），本年实操 ' + s9.total + ' 次', s: '工作票 · 实操量' }]) });
   const vio = VIOLATIONS.filter(v => v.who === p.n);
   rows.push({ n: '安全履职', ok: !vio.some(v => v.lv === '严重'), req: '无严重违章；两票执行规范；安全活动全勤', ev: (vio.length ? vio.map(v => ({ t: v.d + ' ' + v.t + '（' + v.lv + '），处理：' + v.fix, s: '违章记录' })) : [{ t: '本年无违章记录', s: '违章记录' }]).concat([{ t: '安全活动参加 ' + SAFETY_ACT.length + ' 次', s: '安全活动台账' }]) });
   const ok = rows.filter(r => r.ok).length;
@@ -105,9 +105,18 @@ function skillOf(p) {
 }
 function skillEqAvg() { return +(PEOPLE.reduce((s, p) => s + (SKILL_EQ[(SKILLS[p.n] || {}).lv] || 0), 0) / PEOPLE.length).toFixed(2); }
 
-/* ---------- 四、九类核心技能：资格、实操量、覆盖 ---------- */
-function skill9Of(p) { const q = LS.get('skill9', {})[p.n] || {}; const base = SKILLQ[p.n] || { q: SKILL9.map(() => '-'), n: SKILL9.map(() => 0) }; const add = LS.get('skill9n', {})[p.n] || {}; const qs = base.q.map((v, i) => q[SKILL9[i].k] || v); const ns = base.n.map((v, i) => v + (add[SKILL9[i].k] || 0)); return { q: qs, n: ns, a: qs.filter(x => x === 'A').length, b: qs.filter(x => x === 'B').length, total: ns.reduce((s, x) => s + x, 0) }; }
-function skillCover() { return SKILL9.map((s, i) => { const a = PEOPLE.filter(p => skill9Of(p).q[i] === 'A'); const b = PEOPLE.filter(p => skill9Of(p).q[i] === 'B'); const n = PEOPLE.reduce((t, p) => t + skill9Of(p).n[i], 0); return { s, a, b, n, risk: a.length <= 2 ? '高' : a.length <= 4 ? '中' : '低' }; }); }
+/* ---------- 四、作业授权认证：逐人逐模块授权状态、实操量、覆盖、核心业务自主实施率 ----------
+   认证表取运维班口径（42 个模块、★ 按岗级），配电自动化班专用认证表待提供；原九类核心技能的资格与实操次数已迁移到对应模块 */
+function authLv(p) { const post = p.post || ''; return /中级/.test(post) ? '中' : /初级|学员/.test(post) ? '初' : '高'; }
+function authLvName(p) { return { 高: '高级作业员', 中: '中级作业员', 初: '初级作业员' }[authLv(p)]; }
+function skill9Of(p) { const q = LS.get('skill9', {})[p.n] || {}; const base = SKILLQ[p.n] || { q: SKILL9.map(() => '-'), n: SKILL9.map(() => 0) }; const add = LS.get('skill9n', {})[p.n] || {}; const qs = base.q.map((v, i) => q[SKILL9[i].k] || v); const ns = base.n.map((v, i) => v + (add[SKILL9[i].k] || 0));
+  const lv = authLv(p); const must = SKILL9.map(s => s.star[lv]); const mustN = must.filter(Boolean).length; const mustA = qs.filter((x, i) => must[i] && x === 'A').length; const mustB = qs.filter((x, i) => must[i] && x === 'B').length;
+  return { q: qs, n: ns, a: qs.filter(x => x === 'A').length, b: qs.filter(x => x === 'B').length, total: ns.reduce((s, x) => s + x, 0), lv, must, mustN, mustA, mustB, rate: mustN ? Math.round(mustA / mustN * 100) : 0 }; }
+/* 核心业务自主实施率（覆盖率）＝ 已授权的★模块 ÷ 本人岗级应授权的★模块；班组按人次合计 */
+function authRate(list) { const L = (list || PEOPLE).map(skill9Of); const n = L.reduce((s, x) => s + x.mustN, 0), a = L.reduce((s, x) => s + x.mustA, 0); return n ? Math.round(a / n * 100) : 0; }
+function authUnitRate(list, unit) { const idx = SKILL9.map((s, i) => s.unit === unit ? i : -1).filter(i => i >= 0); let n = 0, a = 0; (list || PEOPLE).forEach(p => { const x = skill9Of(p); idx.forEach(i => { if (x.must[i]) { n++; if (x.q[i] === 'A') a++; } }); }); return { n, a, pct: n ? Math.round(a / n * 100) : null }; }
+/* 模块覆盖与断层风险：只对班组必须覆盖的★模块（高级作业员口径）判风险 */
+function skillCover(list) { const L = list || PEOPLE; return SKILL9.map((s, i) => { const a = L.filter(p => skill9Of(p).q[i] === 'A'); const b = L.filter(p => skill9Of(p).q[i] === 'B'); const n = L.reduce((t, p) => t + skill9Of(p).n[i], 0); const must = s.star['高']; return { s, a, b, n, must, risk: !must ? '—' : a.length <= 2 ? '高' : a.length <= 4 ? '中' : '低' }; }); }
 function skill9PerCap() { return +(PEOPLE.reduce((s, p) => s + skill9Of(p).total, 0) / PEOPLE.length).toFixed(1); }
 function skill9Low() { const cap = skill9PerCap(); return PEOPLE.filter(p => p.post !== '班长' && !/学员/.test(p.post) && skill9Of(p).total < cap * 0.3); }
 
@@ -122,12 +131,12 @@ function certGap() {
     return { k, hold, n: hold.length, need, lack, due, cand, why: CERT_WHY[k] };
   });
 }
-/* 下次培训重点：资质缺口 + 核心技能覆盖薄弱 + 图谱短板 + 学时落后 */
+/* 下次培训重点：资质缺口 + 授权模块覆盖薄弱 + 图谱短板 + 学时落后 */
 function trainFocus() {
   const out = []; const gaps = certGap().filter(g => g.lack);
   gaps.forEach(g => out.push({ kind: '取证', t: g.k + ' 取证培训', who: g.cand.map(p => p.n), why: '班组下限 ' + g.need + ' 人，现有 ' + g.n + ' 人，缺 ' + g.lack + ' 人：' + g.why, when: /负责人|继电保护/.test(g.k) ? '9 月局培训班' : '9 月部内取证班' }));
   const weak9 = skillCover().filter(c => c.risk === '高');
-  weak9.slice(0, 2).forEach(c => out.push({ kind: '核心技能', t: '「' + c.s.n + '」带教实操', who: c.b.slice(0, 2).map(p => p.n), why: '可自主实施只有 ' + c.a.length + ' 人（' + c.a.map(p => p.n).join('、') + '），一人休假就派不出工；' + c.b.length + ' 人已在带教', when: '9 月随工作票安排' }));
+  weak9.slice(0, 2).forEach(c => out.push({ kind: '授权认证', t: '「' + c.s.k + ' ' + c.s.n + '」带教取证', who: (c.b.length ? c.b : PEOPLE.filter(p => /中级/.test(p.post))).slice(0, 2).map(p => p.n), why: '★模块已授权只有 ' + c.a.length + ' 人' + (c.a.length ? '（' + c.a.map(p => p.n).join('、') + '）' : '') + '，一人休假就派不出工；' + c.b.length + ' 人在培训中', when: '9 月随工作票安排' }));
   const avg = MODS.map((m, i) => PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length);
   const wi = avg.indexOf(Math.min.apply(null, avg)); const m = MODS[wi]; const c = COURSES.find(c => c.mod === m.k);
   const weak = PEOPLE.filter(p => PEOPLEPG.lv(p)[wi] <= 1).map(p => p.n);
@@ -164,7 +173,7 @@ function ageRisk() {
   const yNoCert = young.filter(p => p.cert.length <= 1);
   if (yNoCert.length) out.push({ lv: '中', t: '30 岁以下 ' + young.length + ' 人，其中 ' + yNoCert.length + ' 人只有高压电工作业证', d: yNoCert.map(p => p.n + '（' + p.age + ' 岁 · ' + p.yrs + ' 年）').join('、') + ' 只有准入证，没有岗位胜任能力证，能干的活受限，星级评价里也是缺项。', fix: '按工龄先给' + yNoCert.filter(p => p.yrs >= 1).slice(0, 2).map(p => p.n).join('、') + '排岗位胜任能力评价，取证后可独立参加作业。', who: yNoCert.filter(p => p.yrs >= 1).slice(0, 2).map(p => p.n) });
   const key9 = skillCover().filter(c => c.risk === '高' && c.a.length && ageAvg(c.a) >= 36);
-  key9.slice(0, 1).forEach(c => out.push({ lv: '高', t: '「' + c.s.n + '」只有 ' + c.a.length + ' 人能自主实施，平均 ' + ageAvg(c.a) + ' 岁', d: '这项是星级评价的完全自主实施类核心技能，能做的人是' + c.a.map(p => p.n + '（' + p.age + '）').join('、') + '，年轻人还没接上。', fix: '把带教中的' + (c.b.map(p => p.n).join('、') || '中级作业员') + '排进这项作业的工作班成员，年内独立完成一次并由负责人签字。', who: c.b.map(p => p.n) }));
+  key9.slice(0, 1).forEach(c => out.push({ lv: '高', t: '「' + c.s.k + ' ' + c.s.n + '」只有 ' + c.a.length + ' 人取得授权，平均 ' + ageAvg(c.a) + ' 岁', d: '这是认证表里高级作业员必须授权的★模块，已授权的是' + c.a.map(p => p.n + '（' + p.age + '）').join('、') + '，年轻人还没接上。', fix: '把带教中的' + (c.b.map(p => p.n).join('、') || '中级作业员') + '排进这项作业的工作班成员，年内独立完成一次并由负责人签字。', who: c.b.map(p => p.n) }));
   return out;
 }
 function ageIn(n) { return AGE_BANDS.map(b => PEOPLE.filter(p => p.age + n >= b[1] && p.age + n <= b[2]).length); }
@@ -181,8 +190,8 @@ const FIVE = [
     { n: '90 天内到期', v: () => certsDueWithin(90).length + ' 人', th: '到期前 30 天完成复审报名', src: '证书台账', use: '提醒本人并报名复审', who: '班组长' },
     { n: '作业下限缺口', v: () => certGap().filter(g => g.lack).length + ' 类', th: '0 类', src: '证书台账 · 作业下限', use: '缺口类别排取证；跨班组时看谁能借', who: '管理者' }
   ] },
-  { k: 'skill', n: '能力覆盖', d: '九类核心技能能不能自主实施、实操量够不够', items: [
-    { n: '核心技能可自主实施覆盖', v: () => skillCover().filter(c => c.a.length >= 3).length + '/9 类', th: '每类 ≥3 人可自主实施', src: '工作票 · 资格台账', use: '不足的类别排带教实操；派工校验', who: '班组长' },
+  { k: 'skill', n: '能力覆盖', d: '作业授权认证 42 个模块取得授权没有、★模块覆盖够不够、实操量够不够', items: [
+    { n: '核心业务自主实施率', v: () => authRate() + '%（★模块 ' + skillCover().filter(c => c.must && c.a.length >= 3).length + '/' + SKILL9.filter(s => s.star['高']).length + ' 个 ≥3 人授权）', th: '星级五星 ≥ 35%；★模块每个 ≥3 人授权', src: '作业授权认证表 · 工作票', use: '不足的模块排带教取证；派工校验', who: '班组长' },
     { n: '人均核心技能实操量', v: () => skill9PerCap() + ' 次', th: '具备资格者不低于人均 30%', src: '工作票逐次累计', use: '星级评价 3.2.2 取数；低于 30% 的人优先派', who: '管理者' },
     { n: '图谱最弱模块', v: () => { const avg = MODS.map((m, i) => PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length); const wi = avg.indexOf(Math.min.apply(null, avg)); return MODS[wi].n.replace('能力', '') + ' L' + avg[wi].toFixed(1); }, th: '均值 ≥ L3', src: '能力图谱（考评定级回写）', use: '排课与带教对象', who: '班组长' }
   ] },
@@ -204,7 +213,7 @@ const OUTPUT3 = [
 /* 指标模型确认记录（三上三下，虚拟人物） */
 const CONFIRM_LOG = [
   { d: '2026-07-15', who: '赵立群 · 配电自动化班 班长', what: '第一轮：五类指标、阈值、来源逐条过一遍，改了工作量公平的阈值（每周 24 小时）' },
-  { d: '2026-07-22', who: '陈国安 · 配网管理部 主管', what: '第二轮：确认能力覆盖按九类核心技能取数，人均实操量按星级评价口径' },
+  { d: '2026-07-22', who: '陈国安 · 配网管理部 主管', what: '第二轮：确认能力覆盖按作业授权认证表取数（原九类核心技能迁移到对应模块），人均实操量按星级评价口径' },
   { d: '2026-07-29', who: '周小敏 · 数据专责', what: '第三轮：核对每个指标的台账来源与取数字段，确认人写入模型' },
   { d: '2026-08-05', who: '班组全员会', what: '五类指标模型 V1 全员过目，无异议' }
 ];
@@ -221,6 +230,6 @@ function metricMap() {
     { n: '两票合格', v: m.ticketsOK + '/' + m.tickets, d: '待审 ' + DB.tickets().filter(t => t.st === '待审').length + ' 张', tab: 'ticket', act: 'six', k: 'jobs' },
     { n: '缺陷闭环', v: m.defectsClosed + '/' + m.defectsFound, d: '未闭环 ' + (m.defectsFound - m.defectsClosed) + ' 处', tab: 'defect', act: 'hz-stage', k: '已关闭' },
     { n: '周报指标 · 在线率', v: WK29.val('online') + '%', d: '全市第 ' + WK29.rank('online') + '，与周报第 29 期一致', tab: 'weekly', act: 'nav' },
-    { n: '核心技能实操量', v: skill9PerCap() + ' 次/人', d: skill9Low().length + ' 人低于人均 30%', tab: 'skill9', act: 'nav' }
+    { n: '核心业务自主实施率', v: authRate() + '%', d: '★模块覆盖不足 ' + skillCover().filter(c => c.must && c.a.length < 3).length + ' 个 · 人均实操 ' + skill9PerCap() + ' 次', tab: 'skill9', act: 'nav' }
   ];
 }

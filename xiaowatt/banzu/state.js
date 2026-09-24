@@ -74,7 +74,7 @@ const DB = {
   /* ---------- 核心技能实操量回写（完工后按工作票累计） ---------- */
   skillWrite(names, k, job) { const a = LS.get('skill9n', {}); names.forEach(n => { if (!P[n]) return; a[n] = a[n] || {}; a[n][k] = (a[n][k] || 0) + 1; }); LS.set('skill9n', a); const w = LS.get('skillw', []); w.unshift({ d: this.now(), k, who: names.filter(n => P[n]), job: job || '', ts: Date.now() }); LS.set('skillw', w.slice(0, 40)); this.log('能力回写', (SKILL9.find(s => s.k === k) || {}).n + ' 实操 +1：' + names.join('、')); },
   skillWrites() { return LS.get('skillw', []); },
-  setSkillQ(name, k, v) { const a = LS.get('skill9', {}); a[name] = a[name] || {}; a[name][k] = v; LS.set('skill9', a); this.log('核心技能资格', name + ' ' + (SKILL9.find(s => s.k === k) || {}).n + ' → ' + ({ A: '可自主实施', B: '需带教', '-': '不具备' }[v] || v)); },
+  setSkillQ(name, k, v) { const a = LS.get('skill9', {}); a[name] = a[name] || {}; a[name][k] = v; LS.set('skill9', a); this.log('作业授权', name + ' ' + k + ' ' + (SKILL9.find(s => s.k === k) || {}).n + ' → ' + ({ A: '已授权', B: '培训中', '-': '未授权' }[v] || v)); },
   /* ---------- 跨班组调配（管理者发起 → 班长确认 → 返岗评价） ---------- */
   transfers() { return LS.get('transfers', []); },
   addTransfer(t) { const a = LS.get('transfers', []); t.id = 'tr' + Date.now().toString(36); t.st = '待确认'; t.ts = Date.now(); a.unshift(t); LS.set('transfers', a); this.log('跨班组调配', t.who + '：' + t.from + ' → ' + t.to + '（' + t.why + '）'); return t; },

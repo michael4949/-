@@ -94,6 +94,7 @@ Object.assign(ACT, {
   const ask0 = XW.ask;
   const R = [
     [/五星|星级|建设差距|党建|荣誉/, () => role() === 'manager' ? nav('portrait') : nav('team')],
+    [/授权|认证表|自主实施率|★模块|高风险模块|还差哪些模块/, t => { const who = PEOPLE.find(p => t.includes(p.n)); if (/排带教|排培养/.test(t)) { ensure('auth', () => ACT['au-teachall'](), 'gap'); return true; } if (/生成|导出/.test(t)) { ensure('auth', () => ACT['au-export']()); return true; } if (who) { ensure('auth', () => ACT['au-person']({ dataset: { who: who.n } })); return true; } if (/一两个人|断层/.test(t)) { ensure('auth', () => { const G = AUTHPG.gaps().filter(g => g.a.length <= 2); XW.answer('已授权只有一两个人的★模块有 ' + G.length + ' 个：' + G.map(g => g.s.k + ' ' + g.s.n + '（' + g.a.map(p => p.n).join('、') + '）').join('；') + '。表里按断层风险排好了，高风险的可以直接排带教取证。', null, { confirm: false, speak: false }); }, 'gap'); return true; } nav('auth'); }],
     [/断层|技能矩阵|谁能带|技师梯队/, () => nav('skills')],
     [/师带徒|带得怎么样|骨干培养|申报|梯队/, () => role() === 'manager' ? nav('portrait') : nav('grow')],
     [/系数|激励|绩效/, () => role() === 'manager' ? nav('lperf') : nav('perf')],
@@ -110,7 +111,7 @@ Object.assign(ACT, {
   ];
   const LPK = /班长绩效|绩效考评|考评结果|考评表|评价意见|改进要求|绩效面谈|短板最大|扣分|履职/;
   XW.ask = function (text, voice) {
-    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { hit[1](); XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
+    if (text && !XW._expWait && !(role() === 'manager' && LPK.test(text))) { const hit = R.find(r => r[0].test(text)); if (hit && !PEOPLE.some(p => text.includes(p.n) && /工时|学时|证书/.test(text))) { XW.user(text, voice); XW.at(voice ? 2600 : 600, () => { if (!hit[1](text)) XW.answer('在这一页。', null, { confirm: false, speak: false }); }); return; } }
     ask0.call(XW, text, voice);
   };
 })();

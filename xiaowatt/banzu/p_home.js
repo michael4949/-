@@ -53,7 +53,7 @@ PAGES.home = {
     S.briefed = true; XW.clearChat();
     const sub = $('#sub'); const mirror = (t, ms, done) => { XW.state('talk'); XW.type($('#xwsub'), t, ms); XW.type(sub, t, ms, () => { XW.state(''); done && done(); }); };
     XW.at(300, () => mirror('早上好，赵班长。周报第 ' + WK29.no + ' 期今早七点半到了，我对了光明局的每一行：新建终端投运率 ' + WK29.val('newrun') + '%，11 个区局里第 ' + WK29.rank('newrun') + '；十五类异常信号待消 ' + WK29.val('abn15') + ' 项；晨操年度计划 ' + WK29.val('morning') + '%。', 50));
-    XW.at(7400, () => mirror('有' + HOMEPG.pending() + '件事要你拍板：' + (s.disp ? '' : '下周一田寮站 F02 的交接试验与验收还没派人，我按证书、核心技能、工时、冲突四条规则排了人选；') + (s.focus ? '' : '周报里排名靠后的几项要提成本周节点；') + (s.urged || /已派|进行中|待验收|已关闭|催办|已登记/.test(s.d5) ? '' : '华发民公用柜的电容故障超期两天了。'), 50));
+    XW.at(7400, () => mirror('有' + HOMEPG.pending() + '件事要你拍板：' + (s.disp ? '' : '下周一田寮站 F02 的交接试验与验收还没派人，我按证书、作业授权、工时、冲突四条规则排了人选；') + (s.focus ? '' : '周报里排名靠后的几项要提成本周节点；') + (s.urged || /已派|进行中|待验收|已关闭|催办|已登记/.test(s.d5) ? '' : '华发民公用柜的电容故障超期两天了。'), 50));
     XW.at(9000, () => $('#d1').classList.add('in')); XW.at(11200, () => $('#d2').classList.add('in')); XW.at(13000, () => $('#d3').classList.add('in'));
     XW.at(14800, () => mirror('你先看哪件？', 60));
     XW.at(16000, () => XW.card('早上说的事都在上面，点哪张卡我就办哪件。'));
