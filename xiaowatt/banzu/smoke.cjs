@@ -263,6 +263,8 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.click('#stage [data-act="stage-ext"]'); await w(500);
   await t('扩展模块打开 · 16 项（人员档案 / 培训考评 / 安全 / 文稿）', async () => (await pg.locator('#sb a').count()) === 16);
   await pg.click('.stagebtn'); await w(200);
+  const noLeg = []; for (const k of ['#team', '#skills', '#auth', '#grow', '#perf', '#care', '#advise', '#home', '#sched', '#know', '#ledger', '#people', '#train', '#safety', '#docs']) { await go(k, 350); if (!(await pg.locator('#main .pleg').count())) noLeg.push(k); }
+  await t('颜色说明 · 班组长各页底部都有 · 部门名为配网资产部', async () => { if (noLeg.length) errs.push('no legend ' + noLeg.join(',')); return !noLeg.length && (await ev(() => TEAM.full)).includes('配网资产部') && (await ev(() => WK29.by)) === '配网管理部、系统运行部'; });
   console.log('FAILS', fails, 'ERR', errs.length ? errs.slice(0, 12).join('\n  ') : 'none');
   await br.close();
 })();

@@ -614,7 +614,7 @@ table.t.nodes .ab{font-size:10.5px;color:var(--ink2)}
 /* ---------- 班组画像：五类指标 · 授权说明 · 四卡 ---------- */
 .five{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;flex:none}
 .five .fc{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:9px 10px;border-top:3px solid var(--pri);display:flex;flex-direction:column;gap:4px;min-width:0}
-.five .fc:nth-child(2){border-top-color:var(--warn)}.five .fc:nth-child(3){border-top-color:var(--ok)}.five .fc:nth-child(4){border-top-color:var(--info)}.five .fc:nth-child(5){border-top-color:var(--vio)}
+.five .fc:nth-child(1){border-top-color:#1f5fbf}.five .fc:nth-child(2){border-top-color:#6b4de6}.five .fc:nth-child(3){border-top-color:#0f9bb0}.five .fc:nth-child(4){border-top-color:#c2417f}.five .fc:nth-child(5){border-top-color:#5b6b8c}
 .five .fc>b{font-size:12.5px}.five .fc>span{font-size:10px;color:var(--ink3);min-height:28px;line-height:1.4}
 .five .fi{display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center;padding:4px 7px;border-radius:8px;background:var(--bg);cursor:pointer;border:1px solid transparent}
 .five .fi:hover{background:var(--tint);border-color:#c9cbf5}
@@ -910,3 +910,16 @@ table.goals th:nth-child(2),table.goals td:nth-child(2){min-width:150px}
 table.goals td{vertical-align:middle}
 .kstar{color:var(--bad);font-weight:700}
 table.lpt td:nth-child(2){white-space:nowrap}
+/* 班组固定颜色：配电自动化班 蓝 · 试验班 紫 · 配电运维一班 青（与图表类别色 CPAL 前三位一致） */
+.tag.t0{background:#e8eef9;color:#1f5fbf}.tag.t1{background:#efebfd;color:#6b4de6}.tag.t2{background:#e4f5f7;color:#0f8a9c}
+.tabs{flex-wrap:wrap}.tabs button{white-space:nowrap}
+/* 页面颜色说明 */
+.card.pleg{background:#fbfcfe}
+.card.pleg .h b{font-size:12.5px}
+.plrow{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:5px 0;border-top:1px dashed var(--line);font-size:11.5px;line-height:1.6;color:var(--ink2)}
+.plrow:first-of-type{border-top:0}
+.plrow>b{color:var(--ink);font-weight:600}
+i.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 3px 0 6px;vertical-align:-1px}
+i.sw:first-child{margin-left:0}
+i.sw.g{background:#18b97a}i.sw.y{background:#d97706}i.sw.r{background:#e5484d}i.sw.b{background:#1f5fbf}i.sw.p{background:#6b4de6}i.sw.t{background:#0f9bb0}i.sw.m{background:#c2417f}i.sw.s{background:#5b6b8c}i.sw.l{background:#3d8bd9}i.sw.n{background:#c5cad3}i.sw.gold{background:#c9a227}i.sw.c{background:#0f7fa8}i.sw.hl{background:#fdf3e6;border:1px solid #f0d9b5}i.sw.bl{background:#93b1e0}
+@media(max-width:900px){.plrow{grid-template-columns:1fr}}

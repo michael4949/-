@@ -264,7 +264,7 @@ function lperfOf(name) {
 }
 function lperfAll() { return LEADERS.map(l => lperfOf(l.n)); }
 
-/* ---------- 同类班组横向对比（配网管理部三班组）---------- */
+/* ---------- 同类班组横向对比（配网资产部三班组）---------- */
 function compareRows() { const m = DB.month(); const T = {}; TEAMS.forEach(t => { T[t.n] = t; }); const st = { '配电自动化班': teamStat('配电自动化班'), '试验班': teamStat('试验班'), '配电运维一班': teamStat('配电运维一班') };
   const hoursOf = { '配电自动化班': PEOPLE.reduce((s, p) => s + p.week, 0), '试验班': Object.values(LAB.week).reduce((s, x) => s + x, 0), '配电运维一班': 69 };
   return [
@@ -332,7 +332,7 @@ const TALK_GUIDES = {
 const CULTURE_DEPT = [
   { d: '2026-08-15', kind: '主题党日', t: '"终端在线率攻坚"主题党日', team: '三班组', st: '计划中', who: '党支部', n: 18 },
   { d: '2026-08-21', kind: '座谈会', t: '2025–2026 年新员工座谈会', team: '三班组', st: '待通知', who: '陈国安', n: 7 },
-  { d: '2026-09-12', kind: '团建', t: '配网管理部秋季团建（羊台山徒步）', team: '三班组', st: '待审批', who: '工会小组', n: 31 },
+  { d: '2026-09-12', kind: '团建', t: '配网资产部秋季团建（羊台山徒步）', team: '三班组', st: '待审批', who: '工会小组', n: 31 },
   { d: '2026-07-10', kind: '迎新会', t: '2026 届新员工迎新会', team: '三班组', st: '已举办', who: '陈国安', n: 29 },
   { d: '2026-06-20', kind: '座谈会', t: '班长座谈：关键节点表落地', team: '三班组', st: '已举办', who: '陈国安', n: 6 },
   { d: '2026-10-30', kind: '欢送会', t: '无退休、调离人员，本季不办', team: '—', st: '无需', who: '—', n: 0 }

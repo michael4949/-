@@ -1,5 +1,6 @@
 /* ===== 手绘 SVG 图表（零依赖）：环形 / 横向条 / 折线面积 / 雷达 / 到期时间轴 / 计量条；悬停提示 + 点击下钻 ===== */
-const CPAL = ['#1f5fbf', '#e8791d', '#0f9bb0', '#c2417f', '#2a9d4b', '#6b4de6']; // 类别色，固定顺序（已过色盲/对比校验）
+const CPAL = ['#1f5fbf', '#6b4de6', '#0f9bb0', '#c2417f', '#5b6b8c', '#3d8bd9']; // 类别色（班组 / 人 / 类型），固定顺序；不含红黄绿，避免与状态色混淆
+const SEM = { ok: '#18b97a', w: '#d97706', bad: '#e5484d' }; // 状态色：绿 = 达标 / 正常，黄 = 接近 / 关注，红 = 未达 / 风险
 const CH = {
   tip: null,
   initTip() { if (this.tip) return; const t = document.createElement('div'); t.id = 'tip'; t.className = 'tip'; document.body.appendChild(t); this.tip = t;
