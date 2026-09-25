@@ -3,27 +3,16 @@ import base64, os, io, re, sys
 B = os.path.dirname(os.path.abspath(__file__)) + os.sep
 logo = base64.b64encode(open(os.path.join(B, '..', 'assets', 'logo.png'), 'rb').read()).decode()
 css = open(B + 'style.css', encoding='utf-8').read()
-parts = ['data.js', 'know.js', 'avatar.js', 'core.js', 'charts.js', 'ability.js', 'homedata.js', 'home.js', 'pagedata.js', 'pages.js', 'scenes.js', 'exam.js', 'exam_defs.js', 'leader.js',
-         'perf.js', 'rules.js', 'optic.js', 'judge.js', 'p_ticket.js', 'expert.js', 'p_expert.js', 'model3.js', 'p_plat.js']
+parts = ['core.js', 'charts.js', 'rules.js', 'optic.js', 'judge.js', 'emerg.js', 'recs.js', 'home.js', 'pages.js', 'leader.js', 'p_ticket.js', 'p_emerg.js', 'p_plat.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
-import json
-imgs = {}
-cdir = os.path.join(B, '..', 'assets', 'coaches')
-if os.path.isdir(cdir):
-    for f in sorted(os.listdir(cdir)):
-        m = re.match(r'([a-z0-9_]+)\.(png|jpe?g|webp)$', f, re.I)
-        if m:
-            mime = {'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp'}[m.group(2).lower()]
-            imgs[m.group(1)] = 'data:%s;base64,%s' % (mime, base64.b64encode(open(os.path.join(cdir, f), 'rb').read()).decode())
-js = js.replace('__COACH_IMGS__', json.dumps(imgs, ensure_ascii=False))
 
 html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>小瓦特·练 · AI智能陪练底座</title>
+<title>小瓦特·练 · AI智能陪练平台</title>
 <style>
 {css}
 </style>

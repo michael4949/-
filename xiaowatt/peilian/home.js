@@ -1,24 +1,37 @@
-/* ===== 系统首页（工作台）· 路由 · AI 教练中心 · 背景动效 ===== */
+/* ===== 系统首页（工作台）· 路由 · 下钻 · 讲师演示台 · 背景动效 ===== */
 
 let __xwTyped = false;
-const COACH_IMGS = __COACH_IMGS__;   // 构建时由 assets/coaches/<id>.png 内联
 function goPage(h) { if ((location.hash || '').replace(/^#\/?/, '') === h) route(); else location.hash = '#' + h; }
+const PAGES = ['home', 'center', 'ticket', 'emerg', 'assess', 'analytics', 'review', 'growth', 'classroom', 'team', 'sys'];
 
 /* ---------------- 路由 ---------------- */
 function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
-  if (!['home', 'center', 'ticket', 'expert', 'exam', 'assess', 'analytics', 'sys', 'plaza', 'review', 'growth', 'classroom', 'team', 'editor'].includes(h)) h = 'home';
+  if (!PAGES.includes(h)) h = 'home';
+  if ((h === 'team' || h === 'sys') && ROLE.cur !== 'lead') h = 'home';
   renderHPage(h); HomeFX.on();
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
 }
 
-/* 进入教练＝进入该教练的陪练关卡（训练模式）；未开通或未配置关卡的教练只能申请开通 */
-function enterCoach(id, pre) {
-  const c = ALL_COACHES().find(x => x.id === id);
-  if (!c || !c.open) return toast('该教练在本单位尚未开通');
-  if (pre && String(pre).startsWith('exam:')) return examStart(pre.slice(5), 'teach');
-  if (c.exam) return examStart(c.exam, 'teach');
-  return toast('该教练的关卡内容待配置');
+/* 打开场景：tk / tk:exam / em / em:<情境>:<模式> */
+function startScene(spec) {
+  const [s, a, b] = String(spec || '').split(':');
+  if (s === 'tk') { TK.res = null; return tkStart(a === 'exam' ? 'exam' : 'teach', false); }
+  if (s === 'em') { if (a && EMGMAP[a]) return emStart(a, b === 'exam' ? 'exam' : 'teach'); EM.id = null; EM.res = null; return goPage('emerg'); }
+  goPage('center');
+}
+/* 打开某次演练的报告（本机记录与模拟记录同一入口） */
+function openRec(id) {
+  const r = recById(id); if (!r) return;
+  if (r.src === 'tk') {
+    TK.res = tkJudge(r.rows || []); TK.on = false; TK.tab = 'err';
+    TK.rec = { d: r.d, no: r.mock ? '—' : (r.sub || '').replace('票号 ', ''), mode: r.mode, sec: r.sec, score: r.score, pass: r.pass, fatal: r.fatal, rows: r.rows };
+    return goPage('ticket');
+  }
+  const e = EMGMAP[r.eid]; if (!e) return;
+  if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
+  EM.id = r.eid; EM.rec = { d: r.d, mode: r.mode === '考核模式' || r.mode === 'exam' ? 'exam' : 'teach', sec: r.sec, a: r.a }; EM.res = emgScore(e, r.a || {}); EM.mode = EM.rec.mode;
+  goPage('emerg');
 }
 
 /* ---------------- 首页框架（boot 时一次性建立） ---------------- */
@@ -36,8 +49,7 @@ function homeBoot() {
         <span class="hnavi" data-h="home">工作台</span>
         <span class="hnavi" data-h="center">场景中心</span>
         <span class="hnavi" data-h="ticket">操作票填写</span>
-        <span class="hnavi" data-h="expert">专家答辩</span>
-        <span class="hnavi" data-h="exam">陪练关卡</span>
+        <span class="hnavi" data-h="emerg">应急处置</span>
         <span class="hnavi" data-h="assess">AI 测评</span>
         <span class="hnavi" data-h="analytics">数据分析</span>
         <span class="hnavi lk" data-lk="1" data-h="team">管理视角<i>管理</i></span>
@@ -50,18 +62,16 @@ function homeBoot() {
   </div>
   <div id="htip" hidden></div>
   <div class="demo2" id="demo2"><div class="bd"><div class="t">讲师演示台</div>
-    <button data-dm="main">演示主线：组长下发 1163 考核 → 学员进入</button>
+    <button data-dm="main">演示主线：组长下发操作票考核 → 学员进入</button>
     <button data-dm="tk_ok">操作票：一键按标准票填完（正确）</button>
     <button data-dm="tk_swap">操作票：组内换序（应当不判错）</button>
-    <button data-dm="tk_order">操作票：先拉母线侧刀闸（顺序错误）</button>
-    <button data-dm="tk_danger">操作票：未验明无电压即合地刀（整票不合格）</button>
+    <button data-dm="tk_order">操作票：先拉2M侧刀闸（顺序错误）</button>
+    <button data-dm="tk_danger">操作票：未验电即合地刀（整票不合格）</button>
+    <button data-dm="tk_load">操作票：未转负荷即断开503（整票不合格）</button>
     <button data-dm="tk_text">操作票：并项与缺双重名称（文字不规范）</button>
-    <button data-dm="ep_run">专家答辩：一键按范例作答五题</button>
-    <button data-dm="red">触发红线：跳过验电直接合地刀</button>
-    <button data-dm="run">一键跑完当前考试（正确路径）</button>
-    <button data-dm="es">地刀两态：<b id="dm_es">随机</b></button>
-    <button data-dm="rain">雨淋阀压力异常注入：<b id="dm_rain">关</b></button>
-    <button data-dm="voice">数字人朗读语音：<b data-voicelbl>关</b></button>
+    <button data-dm="em_ok">应急处置：触电 · 完整作答</button>
+    <button data-dm="em_part">应急处置：触电 · 要点只答一半</button>
+    <button data-dm="em_key">应急处置：触电 · 事例没指出问题（关键遗漏）</button>
     <button data-dm="status">功能实现状态清单</button>
     <button data-dm="bound">系统边界表</button>
     <button data-dm="clear">清空本机记录</button></div>
@@ -70,12 +80,12 @@ function homeBoot() {
   $('#hnav').onclick = e => {
     const n = e.target.closest('.hnavi'); if (!n) return;
     if (n.dataset.lk && ROLE.cur !== 'lead') return toast('该模块需要班组长及以上权限（当前账号：学员）。点击右上角账号可切换为班组长。');
+    if (n.dataset.h === 'emerg') { EM.res = null; if (!EM.timer) EM.id = null; }
     goPage(n.dataset.h);
   };
   $('.uchip').onclick = toggleRole;
   $('#demo2tg').onclick = () => $('#demo2').classList.toggle('open');
   $('#demo2 .bd').onclick = e => { const b = e.target.closest('[data-dm]'); if (b) demoAct(b.dataset.dm); };
-  voiceLabel();
   renderRole();
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
@@ -84,96 +94,140 @@ function homeBoot() {
 }
 
 /* ---------------- 页面渲染 ---------------- */
+const PAGE_FN = {
+  home: () => pageHome(), center: () => pageCenter(), ticket: () => pageTicket(), emerg: () => pageEmerg(), assess: () => pageAssess(), analytics: () => pageAnalytics(),
+  review: () => pageReview(), growth: () => pageGrowth(), classroom: () => pageClassroom(), team: () => pageTeam(), sys: () => pageSys()
+};
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
   pg.dataset.cur = h;
-  pg.innerHTML = h === 'home' ? pageHome() : h === 'center' ? pageCenter() : h === 'ticket' ? pageTicket() : h === 'expert' ? pageExpert() : h === 'assess' ? pageAssess() : h === 'analytics' ? pageAnalytics() : h === 'sys' ? pageSys()
-    : h === 'plaza' ? pagePlaza() : h === 'exam' ? pageExam() : h === 'review' ? pageReview() : h === 'growth' ? pageGrowth() : h === 'classroom' ? pageClassroom() : h === 'team' ? pageTeam() : pageEditor();
+  pg.innerHTML = PAGE_FN[h]();
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
-  if (typeof pageAfter === 'function') pageAfter(h);
-  if (h === 'exam') examAfter(); else if (EX.timer) { clearInterval(EX.timer); EX.timer = null; }
-  if (h === 'ticket') ticketAfter(); else if (TK.timer && h !== 'ticket') { clearInterval(TK.timer); TK.timer = null; }
-  if (h === 'expert') expertAfter(); else if (EP.timer && h !== 'expert') { clearInterval(EP.timer); EP.timer = null; }
+  if (h === 'ticket') ticketAfter(); else if (TK.timer) { clearInterval(TK.timer); TK.timer = null; }
+  if (h === 'emerg') emerAfter(); else if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
   if (h === 'assess' || h === 'analytics') platAfter(h);
+  if (typeof pageAfter === 'function') pageAfter(h);
   countUp(pg);
   if (h === 'home' && !__xwTyped) { __xwTyped = true; typeInto($('#xwtxt'), $('#xwtxt').dataset.full); }
 }
+function rerender(h) { const pg = $('#hpage'); if (!pg) return; pg.innerHTML = PAGE_FN[h](); if (typeof pageAfter === 'function') pageAfter(h); }
 
 function greet() { const h = new Date().getHours(); return h < 6 ? '夜深了' : h < 9 ? '早上好' : h < 12 ? '上午好' : h < 18 ? '下午好' : '晚上好'; }
 function todayStr() { const d = new Date(); return `${d.getMonth() + 1}月${d.getDate()}日 ${'周' + '日一二三四五六'[d.getDay()]}`; }
 
+/* ---------------- 工作台推导：短板 → 推荐练什么 ---------------- */
+function weakOrder() { const now = abilityNow(); return SKILL9.map((s, i) => ({ s, i, v: now[i] })).sort((a, b) => a.v - b.v); }
+function recoFor(item) {
+  if (item.s.g === 'tk') return { spec: 'tk:teach', n: '操作票填写 · 训练模式', sub: '#3主变运行转检修 · 3M负荷转#2主变代供', why: `「${item.s.n}」${item.v} 分，训练模式边写边判，逐行对标准票` };
+  const L = allRecs().filter(r => r.src === 'em'); const best = {}; L.forEach(r => { best[r.eid] = Math.max(best[r.eid] || 0, r.score); });
+  const pool = EMG.filter(e => item.s.k === 'e2' ? e.cs : item.s.k === 'e3' ? (e.rep || []).length : item.s.k === 'e4' ? e.pts.some(p => EMG_AID.test(p.t)) : true);
+  const e = pool.slice().sort((a, b) => (best[a.id] == null ? -1 : best[a.id]) - (best[b.id] == null ? -1 : best[b.id]))[0] || EMG[0];
+  return { spec: 'em:' + e.id + ':teach', n: '应急处置 · ' + e.card + (e.sc ? ' · ' + e.sc.replace(/^场景[一二三四]：/, '') : ''), sub: best[e.id] == null ? '尚未练过' : '最好成绩 ' + best[e.id] + ' 分', why: `「${item.s.n}」${item.v} 分，${item.s.k === 'e2' ? '练事例纠错，找出违反注意事项的做法' : item.s.k === 'e3' ? '练电话首报与续报' : item.s.k === 'e4' ? '练急救与自我防护要点' : '把处置要点答全'}` };
+}
+/* 岗位胜任度（测算参考） */
+function fitCalc() {
+  const A = homeAgg(), now = abilityNow();
+  const lastExam = allRecs().find(r => r.src === 'tk' && /考核/.test(r.mode));
+  const parts = [
+    { n: '规程理论考试', v: '92 分', need: '≥ 80 分', ok: true },
+    { n: '操作票考核模式', v: lastExam ? lastExam.score + ' 分' : '未考', need: '最近一次 ≥ 60 分且无危险操作', ok: !!(lastExam && lastExam.pass), gap: '完成一次操作票考核模式并及格' },
+    { n: '应急处置卡覆盖', v: A.cards.size + ' / 17 类', need: '17 类全部练过', ok: A.cards.size >= 17, gap: '还有 ' + (17 - A.cards.size) + ' 类应急处置卡没有练过' },
+    { n: '危险操作', v: A.danger + ' 次', need: '近30天 0 次', ok: A.danger === 0, gap: '近30天出现过整票不合格的危险操作' },
+    { n: '年度培训学时', v: HOME_USER.hours.done + ' 学时', need: '≥ ' + HOME_USER.hours.need + ' 学时', ok: HOME_USER.hours.done >= HOME_USER.hours.need, gap: '知识课堂待修 ' + (HOME_USER.hours.need - HOME_USER.hours.done) + ' 学时' }
+  ];
+  const avg = Math.round(now.reduce((a, b) => a + b, 0) / now.length);
+  return { pct: Math.round(avg * .6 + parts.filter(p => p.ok).length / parts.length * 100 * .4), post: HOME_USER.post, parts };
+}
+function growthNodes() {
+  const A = homeAgg(), w = weakOrder()[0], todo = myTodo()[0];
+  const tkN = allRecs().filter(r => r.src === 'tk').length;
+  return [
+    { id: 'g1', x: 85, y: 505, s: 'done', t: '岗前培训', v: '已完成' },
+    { id: 'g2', x: 215, y: 435, s: 'done', t: '安规考试', v: '92 分' },
+    { id: 'g3', x: 345, y: 365, s: tkN ? 'done' : 'next', t: '操作票填写', v: tkN + ' 次' },
+    { id: 'g4', x: 465, y: 285, s: A.scenes.size ? 'done' : 'next', t: '应急处置情境', v: A.scenes.size + '/' + EMG.length },
+    { id: 'g5', x: 585, y: 340, s: 'cur', t: '短板补强·' + w.s.n, v: w.v + ' 分' },
+    { id: 'g6', x: 695, y: 250, s: 'next', t: todo ? '培训任务·' + (todo.targetN || '').slice(0, 10) : '操作票考核模式', v: todo ? todo.due + '截止' : '' },
+    { id: 'g7', x: 800, y: 165, s: 'ahead', t: '班组长复核', v: '' },
+    { id: 'g8', x: 818, y: 88, s: 'future', t: '胜任度认定', v: '人工审核' },
+    { id: 'b1', x: 555, y: 88, s: 'feed', t: '年度学时', v: HOME_USER.hours.done + '/' + HOME_USER.hours.need },
+    { id: 'b2', x: 425, y: 135, s: 'feed', t: '应急处置卡', v: A.cards.size + '/17 类' }
+  ];
+}
+const GROWTH_EDGES = [
+  { d: 'M85,505 C130,478 168,458 215,435', s: 'done' },
+  { d: 'M215,435 C258,412 300,388 345,365', s: 'done' },
+  { d: 'M345,365 C385,338 425,310 465,285', s: 'done' },
+  { d: 'M465,285 C505,303 545,322 585,340', s: 'done', p: 1 },
+  { d: 'M585,340 C620,310 658,278 695,250', s: 'act', p: 1 },
+  { d: 'M695,250 C730,222 765,192 800,165', s: 'future' },
+  { d: 'M800,165 C812,138 816,112 818,88', s: 'future' },
+  { d: 'M555,88 C640,98 725,125 795,158', s: 'feed', p: 1 },
+  { d: 'M425,135 C550,143 675,150 793,162', s: 'feed', p: 1 }
+];
+
 /* ---------------- 首页 ---------------- */
 function pageHome() {
-  const A = homeAgg();
-  const now8 = abilityNow();
-  const okDims = now8.filter(v => v >= 70).length;
-  const recs = examRecords().filter(r => r.who === HOME_USER.name);
-  const cert = certSuggest(TEAM[0]); const certOk = cert.filter(x => x.ok).length;
-  const certC = lsGet(LS_CERT, {})[HOME_USER.name];
-  const todo = examTasks().filter(t => !t.results || !t.results.some(r => r.who === HOME_USER.name));
-  const task = todo[0];
-  const order = DIMS.map((n, i) => [n, now8[i], i]).sort((x, y) => x[1] - y[1]);
-  const w1 = order[0], w2 = order[1];
-  const hist = examHist(); const lastEx = hist[0];
-  const xwFull = `「${w1[0]}」${w1[1]} 分、「${w2[0]}」${w2[1]} 分是当前两项短板；${task ? `班组长下发的「${task.examName || task.plan}」${task.due}截止，建议先完成考试` : `建议先考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」`}，教练全程在侧，成绩会直接落到能力雷达并反馈给班组长。`;
+  const A = homeAgg(), ab = abilityCalc(), W = weakOrder();
+  const w1 = W[0], w2 = W[1];
+  const todo = myTodo(), task = todo[0];
+  const lastTk = A.tk[0] || allRecs().find(r => r.src === 'tk');
+  const cards = Array.from(new Set(EMG.map(e => e.card)));
+  const best = {}; allRecs().filter(r => r.src === 'em').forEach(r => { const c = EMGMAP[r.eid].card; best[c] = Math.max(best[c] || 0, r.score); });
+  const cardOk = cards.filter(c => (best[c] || 0) >= EMG_CFG.pass).length;
+  const recent = allRecs().slice(0, 5);
+  const R1 = recoFor(w1), R2 = recoFor(w2.s.g === w1.s.g && W[2] ? W[2] : w2);
+  const xwFull = `「${w1.s.n}」${w1.v} 分、「${w2.s.n}」${w2.v} 分是当前两项短板；${task ? `班组长下发的「${task.targetN}」${task.due}截止，建议先完成` : `建议先练「${R1.n}」`}，成绩会直接落到能力雷达并反馈给班组长。`;
+  const taskBtn = task ? `<button class="btn pri" data-start="${task.scene}:${task.scene === 'em' ? (task.target || '') + ':' : ''}${task.mode}">开始</button>` : `<button class="btn pri" data-start="tk:exam">去完成</button>`;
   return `
   <section class="hero">
     <div class="hgreet">
       <h1>${greet()}，${HOME_USER.name}</h1>
-      <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 岗位胜任能力评价：${CERT_POST} · 今天 ${todayStr()}</div>
+      <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 场景陪练：操作票填写 · 应急处置 · 今天 ${todayStr()}</div>
       <div class="hkpis hg">
-        <div class="kpi ${certOk >= 16 ? 'good' : 'warn'}"><b>${certOk}/20</b><span>专业项目 建议授权</span></div>
-        <div class="kpi ${okDims < DIMS.length ? 'warn' : 'good'}"><b>${okDims}/${DIMS.length}</b><span>能力维度 达标</span></div>
-        <div class="kpi"><b>${A.cnt}</b><span>近30天关卡 次数</span></div>
-        <div class="kpi ${A.passRate >= 80 ? 'good' : 'warn'}"><b>${A.passRate}%</b><span>关卡及格率</span></div>
+        <div class="kpi"><b>${A.cnt}</b><span>近30天演练 次数</span></div>
+        <div class="kpi ${lastTk && lastTk.pass ? 'good' : 'warn'}"><b>${lastTk ? lastTk.score : 0}</b><span>操作票 最近得分</span></div>
+        <div class="kpi ${A.scenes.size >= EMG.length ? 'good' : 'warn'}"><b>${A.scenes.size}/${EMG.length}</b><span>应急情境 已练</span></div>
+        <div class="kpi ${A.passRate >= 80 ? 'good' : 'warn'}"><b>${A.passRate}%</b><span>近30天 及格率</span></div>
       </div>
-      <div class="hteam"><span class="lb">班组伙伴</span>${TEAM.map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : m.sess === 0 ? 'idle' : ''}" title="${m.n} · ${m.sess ? '近30天 ' + m.sess + ' 场' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${TEAM.filter(m => m.sess).length}/${TEAM.length} 人本月已练</span></div>
+      <div class="hteam"><span class="lb">班组伙伴</span>${teamRows().map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : !m.cnt ? 'idle' : ''}" title="${m.n} · ${m.cnt ? '近30天 ' + m.cnt + ' 次' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${teamRows().filter(m => m.cnt).length}/${TEAM.length} 人本月已练</span></div>
     </div>
     <div class="taskcard ho">
-      <div class="tk1">${task ? '待考任务' : '今日待练任务'}</div>
-      <div class="tk2">${task ? (task.examName || task.plan) : HOME_TASK.name}</div>
-      <div class="tk3">${task ? `${task.from} 下发 · ${task.due}截止 · ${task.mode} · 及格 ${task.pass}${task.dims && task.dims.length ? '<br>针对 ' + task.dims.join('、') : ''}` : `${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · 未完成`}</div>
-      ${task ? `<button class="btn pri" data-exstart="${task.exam}" data-exmode="${task.mode === '考核模式' ? 'exam' : task.mode === '演练模式' ? 'drill' : 'teach'}" data-extask="${task.id}">开始考试</button>` : `<button class="btn pri" data-exstart="${HOME_TASK.exam}" data-exmode="${HOME_TASK.mode}">去完成</button>`}
+      <div class="tk1">${task ? '待练任务' : '今日待练任务'}</div>
+      <div class="tk2">${h(task ? task.targetN : HOME_TASK.targetN)}</div>
+      <div class="tk3">${task ? `${h(task.from)} 下发 · ${task.due}截止 · ${task.mode === 'exam' ? '考核模式' : '训练模式'}${task.note ? '<br>' + h(task.note) : ''}` : `${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · ${HOME_TASK.note}`}</div>
+      ${taskBtn}
     </div>
     <div class="hourcard ho">
-      <div class="tk1">作业授权认证进度</div>
-      <div class="certprog">${cert.map(x => `<i class="${x.ok ? 'ok' : ''} ${x.it.star ? 'star' : ''}" data-tip="${x.it.code} ${x.it.n} · ${x.ok ? '建议授权' : '待训练'} · ${x.why}">${x.it.code}</i>`).join('')}</div>
-      <div class="tk3"><b class="mono">${certOk}</b> / 20 个专业项目建议授权 · ★ 岗位必备 · ${certC ? `已由班组授权人 ${certC.by} 确认` : '待班组授权人确认'}</div>
-      <button class="btn" data-cert="0">查看认证表草稿</button>
+      <div class="tk1">应急处置卡掌握</div>
+      <div class="certprog emprog">${cards.map(c => { const e = EMG.find(x => x.card === c); const v = best[c]; return `<i class="${v != null && v >= EMG_CFG.pass ? 'ok' : v != null ? 'star' : ''}" data-start="em:${e.id}:teach" data-tip="${c} · ${v == null ? '未练' : '最好 ' + v + ' 分'}">${EMG_SHORT[c] || c.slice(0, 2)}</i>`; }).join('')}</div>
+      <div class="tk3"><b class="mono">${cardOk}</b> / ${cards.length} 类合格 · 已练 ${A.cards.size} 类 · 点方块直接练</div>
+      <button class="btn" data-go="emerg">去应急处置</button>
     </div>
   </section>
 
   <section class="cockpit">
-    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>通用素质模型五项 · 本月 vs 上月</span></div><div class="hcb">${chRadar(GEN_DIMS, GEN_NOW, GEN_PREV, { w: 330, h: 236 })}<div class="tk3" style="text-align:center">维度取《深圳供电局有限公司素质模型》通用素质模型，各项四个层级行为指标照录宣传册原文；得分由专家选聘答辩演练的各题得分映射${genMeasured() ? '，已并入 ' + genMeasured() + ' 次答辩实测' : '，尚无答辩实测，现为历史口径基线'} · <span class="lk" onclick="goPage('assess')">看指标体系</span></div></div></div></div>
-    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 考试 → 能力 → 授权</span></div>
-      <div class="hcb">${chGrowthMap(GROWTH_NODES.map(n => n.id === 'g6' ? { ...n, v: task ? task.due + '截止' : '待下发' } : n.id === 'g7' ? { ...n, v: `${certOk}/20` } : n.id === 'b2' ? { ...n, v: `${recs.length} 次` } : n), GROWTH_EDGES)}</div></div>
-    <div class="hcard ck tr ho"><div class="hch"><b>关卡分布</b><span>近30天 · 按次数</span></div><div class="hcb">${chDonut(A.kindCnt)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>陪练关卡成绩</b><span>${hist.length ? '最近 ' + Math.min(5, hist.length) + ' 次' : '尚未考试'}</span></div><div class="hcb">${hist.length ? hist.slice(0, 5).map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${r.short}</b><b class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '否决' : r.score + '/' + r.max}</b><button class="btn sm" data-exreview="${r.id}">复盘</button></div>`).join('') : `<div class="tk3" style="padding:6px">两项考试内容：${EXAMS.map(e => e.short).join('、')}。成绩落到能力雷达并反馈班组长。</div><button class="btn pri" data-go="exam" style="margin:6px">去陪练关卡</button>`}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>技能水平 · 八维对标</b><span>作业授权认证表口径 · 我 vs 班组均值</span></div><div class="hcb">${chHeat(DIMS, now8, TEAM_AVG)}</div></div>
-    <div class="hcard ck w hg"><div class="hch"><b>关卡用时与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
-    <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${FITNESS.post}</span></div><div class="hcb">${chGauge(FITNESS)}</div></div>
+    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>技能水平九项 · 本期 vs 上期</span></div><div class="hcb">${chRadar(SK_N, ab.now, ab.prev, { w: 330, h: 236, l1: '本期', l2: '上期' })}<div class="tk3" style="text-align:center">操作票五项取判卷结果，应急四项取处置点评；本期为最近 3 次 · <span class="lk" onclick="goPage('assess')">看指标体系</span></div></div></div>
+    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 演练 → 能力 → 复核</span></div>
+      <div class="hcb">${chGrowthMap(growthNodes(), GROWTH_EDGES)}</div></div>
+    <div class="hcard ck tr ho"><div class="hch"><b>场景分布</b><span>近30天 · 按次数</span></div><div class="hcb">${chDonut(A.kindCnt)}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>最近演练成绩</b><span>最近 ${recent.length} 次</span></div><div class="hcb">${recent.map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${h(r.src === 'tk' ? '操作票填写' : (EMGMAP[r.eid] || {}).card || '应急处置')}</b><b class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</b><button class="btn sm" data-rec="${r.id}">复盘</button></div>`).join('')}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>九项对标</b><span>我 vs 班组均值</span></div><div class="hcb">${chHeat(SK_N, ab.now, TEAM_AVG9)}</div></div>
+    <div class="hcard ck w hg"><div class="hch"><b>演练用时与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
+    <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${h(HOME_USER.post)}</span></div><div class="hcb">${chGauge(fitCalc())}</div></div>
   </section>
 
   <section class="reco">
-    ${recoList().map(r => { if (r.exam) { const e = EXAMS.find(x => x.id === r.exam); return `
-      <div class="rcard hg">
-        <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
-        <b>${e.n}</b>
-        <div class="tk3">陪练关卡 · ${e.max} 分制 · 及格 ${e.pass} · 覆盖 ${e.cover.map(k => abilityOf(k).n).join('、')}</div>
-        <button class="btn pri" data-exstart="${e.id}" data-exmode="${r.mode || 'teach'}">${r.act}</button>
-      </div>`; } const c = COACHES.find(x => x.id === r.coach); return `
-      <div class="rcard hg">
-        <div class="rwhy"><i class="ai">AI 推荐</i>${r.why}</div>
-        <b>${c.n}</b>
-        <div class="tk3">${c.fam} · ${c.min} 分钟 · 已练 ${c.users} 人 · 平均提分 +${c.gain}</div>
-        <button class="btn ${c.open ? 'pri' : ''}" data-reco="${r.coach}">${r.act}</button>
-      </div>`; }).join('')}
+    ${[R1, R2].map(R => `<div class="rcard hg">
+      <div class="rwhy"><i class="ai">AI 推荐</i>${h(R.why)}</div>
+      <b>${h(R.n)}</b><div class="tk3">${h(R.sub)}</div>
+      <button class="btn pri" data-start="${R.spec}">去练</button></div>`).join('')}
     <div class="rcard lastr ho">
-      <div class="rwhy"><i>最近复盘</i>${lastEx ? stampOf(lastEx.ts) : ''}</div>
-      <b>${lastEx ? `${lastEx.short} · ${lastEx.red ? '否决' : lastEx.score + '/' + lastEx.max}` : '尚无记录'}</b>
-      <div class="tk3">${lastEx ? `${lastEx.modeName} · 用时 ${lastEx.dur} 分钟 · 错误 ${lastEx.errs.length} 项` : ''}</div>
-      <div class="tk3">${lastEx && lastEx.sugg && lastEx.sugg[0] ? lastEx.sugg[0].t : ''}</div>
-      ${lastEx ? `<button class="btn" data-exreview="${lastEx.id}">查看复盘</button>` : '<button class="btn" data-go="exam">去陪练关卡</button>'}
+      <div class="rwhy"><i>最近复盘</i>${recent[0] ? stampOf(recent[0].ts) : ''}</div>
+      <b>${recent[0] ? h(recent[0].n) + ' · ' + recent[0].score + ' 分' : '尚无记录'}</b>
+      <div class="tk3">${recent[0] ? h(recent[0].sub) : ''}</div>
+      <div class="tk3">${recent[0] ? h((recent[0].sum || []).join('、') || '没有失分项') : ''}</div>
+      ${recent[0] ? `<button class="btn" data-rec="${recent[0].id}">查看复盘</button>` : '<button class="btn" data-go="center">去场景中心</button>'}
     </div>
   </section>
 
@@ -181,158 +235,17 @@ function pageHome() {
     <div class="xwavt"><i></i>小瓦特</div>
     <div class="xwtxt" id="xwtxt" data-full="${xwFull}">${__xwTyped ? xwFull : ''}</div>
     <div class="xwbtns">
-      ${task ? `<button class="btn pri" data-exstart="${task.exam}" data-exmode="${task.mode === '考核模式' ? 'exam' : 'teach'}" data-extask="${task.id}">去完成考试</button>` : `<button class="btn pri" data-exstart="${DIM_EXAM[w1[0]] || 'e1163'}">考「${(EXAMS.find(e => e.id === (DIM_EXAM[w1[0]] || 'e1163')) || {}).short}」</button>`}
-      <button class="btn" data-go="classroom">去知识课堂</button>
+      ${task ? taskBtn.replace('>开始<', '>去完成任务<') : `<button class="btn pri" data-start="${R1.spec}">去练</button>`}
+      <button class="btn" data-go="review">评分复盘</button><button class="btn" data-go="growth">成长档案</button><button class="btn" data-go="classroom">知识课堂</button>
     </div>
-    <div class="xwsrc">由能力雷达与考试记录生成</div>
-  </section>
-
-  <section class="mycoach hg">
-    <div class="mch"><b>我在练的教练</b><span>本单位已为我开通 ${ALL_COACHES().filter(c => c.open).length} 位 · 开通申请 ${COACH_APPLY.length} 条</span>
-      <button class="btn" data-go="plaza">去教练中心</button></div>
-    <div class="mcrow">
-      ${MYCOACH.map(mc => { const c = ALL_COACHES().find(x => x.id === mc.id); if (!c) return '';
-        return `<div class="mcc">
-          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
-          <div class="mcm"><b>${c.n}</b><span>最近一次 ${mc.last} · 已练 ${mc.cnt} 场 · 最近得分 ${mc.score}</span>
-            <div class="mcbar"><i style="width:${mc.prog}%"></i></div><span class="mcp">本教练内容已练 ${mc.prog}%</span></div>
-          ${c.exam ? `<button class="btn pri" data-exstart="${c.exam}">继续练</button>` : `<button class="btn" data-go="plaza">查看</button>`}
-        </div>`; }).join('')}
-      ${COACH_APPLY.map(a => { const c = ALL_COACHES().find(x => x.id === a.id); if (!c) return '';
-        return `<div class="mcc apply">
-          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav">${COACH_GLYPH[c.fam] || '练'}</div>`}
-          <div class="mcm"><b>${c.n}</b><span>${a.at} · ${a.st}</span>
-            <span class="mcp">开通后出现在本条，可直接开练</span></div>
-          <button class="btn" data-go="plaza">查看</button>
-        </div>`; }).join('')}
-    </div>
+    <div class="xwsrc">由能力雷达与演练记录生成</div>
   </section>`;
-}
-function ALL_COACHES() { return COACHES.concat(typeof customCoaches === 'function' ? customCoaches() : []); }
-
-function hcard(t, sub, body) {
-  return `<div class="hcard"><div class="hch"><b>${t}</b><span>${sub}</span></div><div class="hcb">${body}</div></div>`;
-}
-
-/* ---------------- AI 教练中心 ---------------- */
-const PF = { fam: '全部', dom: '全部', tag: '全部' };
-const COACH_TYPE = { daozha: 'rule', abn: 'rule', patrol: 'rule', test: 'rule', anco: 'rule', relay: 'rule', dnet: 'rule', live: 'rule', term: 'lang', order: 'lang', cust: 'lang', comp: 'doc', biz: 'lang', angui: 'lang', fire: 'rule', space: 'rule', meet: 'lang', mentor: 'lang' };
-const COACH_GLYPH = { '变电运行': '运', '变电检修': '检', '配网': '配', '调度': '调', '营销服务': '营', '安全监督': '安', '班组管理': '班' };
-const COACH_GRAD = { '变电运行': ['#1e63b8', '#4d97e8'], '变电检修': ['#0e7a5f', '#2fd08a'], '配网': ['#8a5a14', '#e8b22a'], '调度': ['#5b3a9e', '#c3a8e8'], '营销服务': ['#9e3a5b', '#e88aa8'], '安全监督': ['#9e4a1e', '#ff8a3d'], '班组管理': ['#14648a', '#4dc3e8'] };
-
-function pagePlaza() {
-  const ALLC = COACHES.concat(customCoaches());
-  const doms = ['全部', ...new Set(ALLC.filter(c => PF.fam === '全部' || c.fam === PF.fam).map(c => c.dom))];
-  const tags = ['全部', ...new Set(ALLC.flatMap(c => c.tags))];
-  const list = ALLC.filter(c =>
-    (PF.fam === '全部' || c.fam === PF.fam) &&
-    (PF.dom === '全部' || c.dom === PF.dom) &&
-    (PF.tag === '全部' || c.tags.includes(PF.tag)));
-  const chip = (f, v, cur) => `<span class="fchip ${v === cur ? 'on' : ''}" data-fchip="${f}" data-v="${v}">${v}</span>`;
-  const openN = ALLC.filter(c => c.open).length, cusN = ALLC.length - COACHES.length;
-  const hot = ALLC.slice().sort((a, b) => b.users - a.users)[0];
-  return `
-  <section id="plaza" class="plaza">
-    <div class="pzhero ho">
-      <div class="pzt"><h1>AI 教练中心</h1>
-        <div class="hsub">本单位教练目录 · 开通与自建入口 · 由 ${HOME_USER.team} 培训专责统一管理</div></div>
-      <div class="pzk">
-        <div class="kpi"><b>${ALLC.length}</b><span>教练总数</span></div>
-        <div class="kpi"><b>${COACH_FAMS.length}</b><span>覆盖岗位族</span></div>
-        <div class="kpi good"><b>${openN}</b><span>已开通</span></div>
-        <div class="kpi warn"><b>${ALLC.length - openN}</b><span>未开通</span></div>
-        <div class="kpi"><b>${cusN}</b><span>本单位自建</span></div>
-      </div>
-      <div class="pzact">
-        <button class="btn pri" data-go="editor">新建教练</button>
-        <button class="btn" data-go="home">回工作台</button>
-      </div>
-      <div class="pzhot">本月最多人练：<b>${hot.n}</b> · ${hot.users} 人 · 平均提分 +${hot.gain}　｜　未开通的教练可提交开通申请，审核通过后出现在工作台「我在练的教练」。</div>
-    </div>
-    <section class="hcard hg"><div class="hch"><b>陪练类型地图</b><span>四类陪练与当前成熟度 · 本轮集中做深程序规则类样板</span></div><div class="hcb"><div class="typemap">${COACH_TYPES.map(t => `<div class="typec"><b>${t.n}</b><div class="lv">${[1, 2, 3].map(i => `<i class="${i <= t.lv ? 'on' : ''}"></i>`).join('')}<em>${t.lvn}</em></div><span>${t.d}</span><em>${t.ex.join(' · ')}</em></div>`).join('')}</div></div></section>
-    <div class="pzf"><label>岗位族</label>${['全部', ...COACH_FAMS].map(v => chip('fam', v, PF.fam)).join('')}</div>
-    <div class="pzf"><label>业务域</label>${doms.map(v => chip('dom', v, PF.dom)).join('')}</div>
-    <div class="pzf"><label>能力项</label>${tags.map(v => chip('tag', v, PF.tag)).join('')}</div>
-    <div class="pzcnt">筛选出 ${list.length} 位教练</div>
-    <div class="pzgrid">
-      ${list.map(c => {
-        const g = COACH_GRAD[c.fam];
-        return `<div class="ccard hg ${c.open ? 'openc' : 'lockc'}" data-coach="${c.id}">
-        <div class="crow1">
-          ${COACH_IMGS[c.avatar || c.id] ? `<img class="cav" src="${COACH_IMGS[c.avatar || c.id]}" alt="${c.n}">` : `<div class="cav" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${COACH_GLYPH[c.fam]}</div>`}
-          <div class="cmeta"><b>${c.n}</b><span>${c.fam} · ${c.dom}</span></div>
-          ${c.open ? '<span class="copen">已开通</span>' : c.custom ? '<span class="copen" style="color:#8a6d15;background:#faf3dc;border-color:#e3d49e">自建 · 待审核</span>' : '<span class="clock">未开通</span>'}
-        </div>
-        <div class="cdesc">${c.desc}</div>
-        <div class="ctags"><i class="ctype">${(COACH_TYPES.find(t => t.k === (COACH_TYPE[c.id] || 'rule')) || {}).n}</i>${c.tags.map(t => `<i>${t}</i>`).join('')}</div>
-        <div class="cstat"><span>难度 ${'●'.repeat(c.lvl)}${'○'.repeat(3 - c.lvl)}</span><span>${c.min} 分钟</span><span>已练 ${c.users} 人</span><span>平均提分 +${c.gain}</span></div>
-        ${c.open ? (c.exam && c.id !== 'daozha' ? `<button class="btn pri" data-exstart="${c.exam}">开始考试</button>` : c.exam ? `<span class="cgo2"><button class="btn pri" data-exstart="${c.exam}">1163 关卡考试</button><button class="btn cgo" data-coach="${c.id}">完整票练习</button></span>` : `<button class="btn pri cgo" data-coach="${c.id}">开始练习</button>`)
-          : c.custom ? `<button class="btn cgo" data-go="editor">在教练编辑器中继续完善</button>`
-          : COACH_APPLY.some(a => a.id === c.id) ? `<div class="capply">开通申请 ${COACH_APPLY.find(a => a.id === c.id).at} · ${COACH_APPLY.find(a => a.id === c.id).st}</div>`
-          : `<button class="btn cgo" data-apply="${c.id}">申请开通</button>`}
-      </div>`; }).join('')}
-      ${list.length ? '' : '<div class="pzempty">当前筛选条件下暂无教练</div>'}
-    </div>
-  </section>`;
-}
-
-/* 申请开通：写入本机开通申请，教练中心与工作台同步显示进度 */
-function applyCoach(id) {
-  const c = ALL_COACHES().find(x => x.id === id); if (!c) return;
-  if (COACH_APPLY.some(a => a.id === id)) return toast('该教练的开通申请已提交');
-  const d = new Date();
-  COACH_APPLY.push({ id, at: `${d.getMonth() + 1}月${d.getDate()}日 提交`, st: '培训专责审核中' });
-  try { localStorage.setItem('xwt_coach_apply', JSON.stringify(COACH_APPLY)); } catch (e) { }
-  toast(`已向培训专责提交「${c.n}」开通申请`);
-  refreshPlaza();
-}
-function loadCoachApply() {
-  try { const a = JSON.parse(localStorage.getItem('xwt_coach_apply') || 'null'); if (Array.isArray(a) && a.length) { COACH_APPLY.length = 0; a.forEach(x => COACH_APPLY.push(x)); } } catch (e) { }
-}
-
-function refreshPlaza() {
-  const old = $('#plaza'); if (!old) return;
-  const tmp = el('div', '', pagePlaza()); old.replaceWith(tmp.firstElementChild);
-}
-
-/* ---------------- 事件委托（首页与各薄页共用） ---------------- */
-function bindHPage() {
-  $('#hpage').oninput = pagesInput;
-  $('#hpage').onkeydown = examKey;
-  $('#hpage').onclick = e => {
-    if (examClick(e)) return;
-    if (leaderClick(e)) return;
-    if (pagesClick(e)) return;
-    const q = s => e.target.closest(s); let n;
-    if (n = q('[data-fchip]')) { PF[n.dataset.fchip] = n.dataset.v; if (n.dataset.fchip === 'fam') { PF.dom = '全部'; } refreshPlaza(); return; }
-    if (n = q('[data-apply]')) { return applyCoach(n.dataset.apply); }
-    if (n = q('.cgo[data-coach]')) return enterCoach(n.dataset.coach, null);
-    if (n = q('[data-coach]')) { const c = ALL_COACHES().find(x => x.id === n.dataset.coach); if (c && c.custom) return goPage('editor'); return c && c.open ? enterCoach(c.id, null) : toast('该教练在本单位尚未开通，可在教练中心提交开通申请'); }
-    if (n = q('[data-reco]')) return recoAct(n.dataset.reco);
-    if (n = q('[data-cert]')) return certDrill(+n.dataset.cert);
-    if (n = q('[data-go]')) return goPage(n.dataset.go);
-    if (n = q('[data-dim]')) return drillDim(+n.dataset.dim);
-    if (n = q('[data-hdim]')) return drillDim(+n.dataset.hdim);
-    if (n = q('[data-day]')) return drillDay(+n.dataset.day);
-    if (n = q('[data-plan]')) return drillPlan(n.dataset.plan);
-    if (n = q('[data-week]')) return drillWeek(+n.dataset.week);
-    if (n = q('[data-gauge]')) return drillFit();
-    if (n = q('[data-node]')) return nodeClick(n.dataset.node);
-    if (n = q('[data-row]')) { const d = $('#rx' + n.dataset.row); if (d) d.hidden = !d.hidden; return; }
-  };
-}
-
-function recoAct(id) {
-  const r = recoList().find(x => x.coach === id), c = COACHES.find(x => x.id === id);
-  if (c.open) return enterCoach(id, r.pre);
-  PF.fam = c.fam; PF.dom = '全部'; PF.tag = '全部'; refreshPlaza();
-  const p = $('#plaza'); if (p) p.scrollIntoView({ behavior: 'smooth' });
 }
 
 /* ---------------- 下钻弹层 ---------------- */
 function openDrill(title, sub, html, foot) {
   const m = el('div', 'mask lite');
-  m.innerHTML = `<div class="dlg" style="width:min(720px,95vw)">
+  m.innerHTML = `<div class="dlg" style="width:min(760px,95vw)">
     <div class="dh"><b>${title}</b><span style="font-size:11px;color:#93a9c4">${sub || ''}</span><span class="cls">×</span></div>
     <div class="db" style="max-height:64vh;overflow:auto">${html}</div>
     ${foot ? `<div class="df">${foot}</div>` : ''}</div>`;
@@ -341,78 +254,54 @@ function openDrill(title, sub, html, foot) {
   m.onclick = e => {
     if (e.target === m) return m.remove();
     const q = s => e.target.closest(s); let n;
-    if (n = q('[data-exstart]')) { m.remove(); return examStart(n.dataset.exstart, n.dataset.exmode || 'teach'); }
-    if (n = q('[data-exreview]')) { m.remove(); return examReviewOpen(n.dataset.exreview); }
+    if (n = q('[data-start]')) { m.remove(); return startScene(n.dataset.start); }
+    if (n = q('[data-rec]')) { m.remove(); return openRec(n.dataset.rec); }
     if (n = q('[data-go]')) { m.remove(); return goPage(n.dataset.go); }
     if (typeof pagesClick === 'function' && pagesClick(e)) return;
   };
   return m;
 }
-function examTable(list) {
-  return `<table class="htbl"><tr><th>时间</th><th>关卡</th><th>模式</th><th>用时</th><th>得分</th><th>错误</th><th></th></tr>
-    ${list.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td><td>${r.modeName}</td><td class="mono">${r.dur} 分钟</td>
-      <td class="mono ${r.red || r.score < r.pass ? 'wv' : 'gv'}">${r.red ? '0（否决）' : r.score}/${r.max}</td><td>${(r.errs || []).length ? (r.errs.length + ' 项') : '—'}</td><td><button class="btn sm" data-exreview="${r.id}">复盘</button></td></tr>`).join('')}</table>`;
+function recTable(list) {
+  return `<table class="htbl"><tr><th>时间</th><th>场景</th><th>情境</th><th>模式</th><th>用时</th><th>得分</th><th>失分点</th><th></th></tr>
+    ${list.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${h(r.n)}</td><td class="tk3">${h(r.sub)}</td><td>${h(r.mode === 'exam' ? '考核模式' : r.mode === 'teach' ? '训练模式' : r.mode)}</td><td class="mono">${Math.round((r.sec || 0) / 60)} 分钟</td>
+      <td class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</td><td class="tk3">${h((r.sum || []).join('、') || '—')}</td><td><button class="btn sm" data-rec="${r.id}">复盘</button></td></tr>`).join('')}</table>`;
 }
-/* 记录里某条错误落在哪个能力维度：按情境权重最大的维度 */
-function errDimKey(r, e) {
-  const ex = EXAMS.find(x => x.id === r.exam); const st = ex && ex.stations.find(x => x.id === e.sid);
-  if (!st || !st.dims) return null;
-  return Object.keys(st.dims).sort((a, b) => st.dims[b] - st.dims[a])[0];
-}
-/* 维度 → 陪练关卡内容 */
-const DIM_EXAM = { '设备辨识与定位': 'rain', '状态核对与确认': 'e1163', '操作程序与票务规范': 'e1163', '安全措施与风险控制': 'e1163', '异常与应急处置': 'rain', '仪表读数与工器具使用': 'rain', '缺陷发现与设备评价': 'rain', '后台系统与信息应用': 'e1163' };
-
 function drillDim(i) {
-  const n = DIMS[i], k = DIMK[i];
-  const L = examHist();
-  const errs = L.flatMap(r => (r.errs || []).filter(e => errDimKey(r, e) === k).map(e => ({ e, r })));
-  const low = L.filter(r => r.dims && r.dims[k] != null && r.dims[k] < 70);
-  const ex = EXAMS.find(x => x.id === (DIM_EXAM[n] || 'e1163'));
-  openDrill(`能力明细 · ${n}`, `本月 ${RADAR_NOW[i]} 分 · 上月 ${RADAR_PREV[i]} 分 · 班组均值 ${TEAM_AVG[i]} 分`, `
-    <div class="sec"><div class="st">相关错误记录（近30天）</div><div class="sc">
-      ${errs.length ? `<table class="htbl"><tr><th>时间</th><th>关卡 · 情境</th><th>错误</th><th>依据</th></tr>
-        ${errs.map(({ e, r }) => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short} · ${e.title || ''}</td>
-        <td><span class="tag ${e.kind === 'red' ? 'rl' : e.crit ? 'wn' : ''}">${ERR_KIND[e.kind] || e.kind}</span> ${e.text.replace(/<[^>]+>/g, '')}</td>
-        <td class="mono">${(e.rule || '').slice(0, 24)}</td></tr>`).join('')}</table>` : '近30天该维度无错误记录。'}</div></div>
-    <div class="sec"><div class="st">该维度低于 70 分的记录</div><div class="sc">${low.length ? examTable(low) : '近30天该维度各次均不低于 70 分。'}</div></div>`,
-    `<button class="btn pri" data-exstart="${ex.id}">练「${ex.short}」</button><button class="btn" data-go="review">打开评分复盘</button>`);
+  const s = SKILL9[i], ab = abilityCalc();
+  const L = allRecs().filter(r => r.src === s.g && r.dims && r.dims[s.k] != null);
+  const low = L.filter(r => r.dims[s.k] < 80);
+  const R = recoFor({ s, i, v: ab.now[i] });
+  openDrill(`能力明细 · ${s.n}`, `${SCENE_N[s.g]} · 本期 ${ab.now[i]} 分 · 上期 ${ab.prev[i]} 分 · 班组均值 ${TEAM_AVG9[i]} 分`, `
+    <div class="hrow">${h(s.d)}</div>
+    <div class="sec"><div class="st">这一项低于 80 分的演练（${low.length} 次）</div><div class="sc">${low.length ? recTable(low) : '近期各次均不低于 80 分。'}</div></div>
+    <div class="sec"><div class="st">取数口径</div><div class="sc tk3">${s.g === 'tk' ? '取自每次操作票判卷结果：操作顺序按顺序错误与阶段越界扣减，漏项控制按漏项扣减，文字规范按文字与层级错误扣减，危险辨识出现危险操作即降到 30 分以下，二次与压板按屏柜、压板、空开、把手类步骤的写全率。' : '取自每次应急处置点评：处置要点完整＝要点得分率；关键注意事项＝事例纠错得分率；信息报送＝报送要求答到率；现场急救与自我防护＝急救、防护类要点得分率。'}本期为最近 3 次均值，上期为再往前 3 次。</div></div>`,
+    `<button class="btn pri" data-start="${R.spec}">练「${h(R.n)}」</button><button class="btn" data-go="review">打开评分复盘</button>`);
 }
 function drillDay(d) {
-  const list = examHist().filter(r => dayOf(r) === d);
-  openDrill(`关卡明细 · ${dayLabel(d)}`, `${list.length} 次 · 合计 ${list.reduce((a, r) => a + r.dur, 0)} 分钟`, examTable(list),
-    `<button class="btn" data-go="review">打开评分复盘</button>`);
+  const list = allRecs().filter(r => dayOf(r) === d);
+  openDrill(`演练明细 · ${dayLabel(d)}`, `${list.length} 次`, recTable(list), `<button class="btn" data-go="review">打开评分复盘</button>`);
 }
 function drillPlan(k) {
-  const list = examHist().filter(r => `${r.short} · ${r.modeName.slice(0, 2)}` === k);
-  openDrill(`关卡明细 · ${k}`, `近30天 ${list.length} 次`, examTable(list),
-    `<button class="btn" data-go="review">打开评分复盘</button>`);
-}
-function drillWeek(w) {
-  const list = examHist().filter(r => Math.min(4, Math.floor(dayOf(r) / 7)) === w && (r.errs || []).length);
-  const errs = list.flatMap(r => r.errs.map(e => ({ e, r })));
-  openDrill(`错误明细 · ${w === 0 ? '本周' : w + ' 周前'}`, `错误权重 ${homeAgg().weeks[w]} · 红线 ${homeAgg().reds[w]} 次`, `
-    ${errs.length ? `<table class="htbl"><tr><th>时间</th><th>关卡</th><th>错误</th><th>依据</th></tr>
-      ${errs.map(({ e, r }) => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${r.short}</td>
-      <td><span class="tag ${e.kind === 'red' ? 'rl' : e.crit ? 'wn' : ''}">${ERR_KIND[e.kind] || e.kind}</span> ${e.title ? e.title + '：' : ''}${e.text.replace(/<[^>]+>/g, '')}</td>
-      <td class="mono">${(e.rule || '').slice(0, 24)}</td></tr>`).join('')}</table>` : '当周无错误记录。'}`,
-    `<button class="btn" data-go="review">打开评分复盘</button>`);
+  const list = allRecs().filter(r => dayOf(r) <= 30 && (r.src === 'tk' ? k === '操作票填写' : k === '应急 · ' + ((EMG_CAT.find(c => c.k === (EMGMAP[r.eid] || {}).cat) || {}).n)));
+  openDrill(`演练明细 · ${k}`, `近30天 ${list.length} 次`, recTable(list), `<button class="btn" data-go="review">打开评分复盘</button>`);
 }
 function drillFit() {
-  openDrill(`岗位胜任度构成 · ${FITNESS.post}`, `综合测算 ${FITNESS.pct}%`, `
+  const F = fitCalc();
+  openDrill(`岗位胜任度构成 · ${F.post}`, `综合测算 ${F.pct}%`, `
     <table class="htbl"><tr><th>构成项</th><th>当前</th><th>要求</th><th>状态</th></tr>
-      ${FITNESS.parts.map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td>
-        <td>${p.ok ? '<span class="tag ok">达标</span>' : '<span class="tag wn">待补齐</span>'}</td></tr>`).join('')}</table>
-    <div class="sec" style="margin-top:12px"><div class="st">差距项</div><div class="sc">
-      ${FITNESS.parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
-    <div class="tk3" style="margin-top:10px">胜任度为系统测算参考，任职资格评定以人工审核结果为准。</div>`,
-    `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-exstart="rain" data-exmode="exam">去考「雨淋阀机械手动启动」</button>`);
+      ${F.parts.map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td><td>${p.ok ? '<span class="tag ok">达标</span>' : '<span class="tag wn">待补齐</span>'}</td></tr>`).join('')}</table>
+    <div class="sec" style="margin-top:12px"><div class="st">差距项</div><div class="sc">${F.parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
+    <div class="tk3" style="margin-top:10px">胜任度＝九项能力均值 × 60% + 构成项达标率 × 40%，为系统测算参考，任职资格评定以人工审核结果为准。</div>`,
+    `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-start="tk:exam">去考操作票（考核模式）</button>`);
 }
-
-/* ---------------- 成长地图节点下钻 ---------------- */
 function nodeClick(id) {
-  if (id === 'g5') return drillDim(1);
-  if (id === 'g6') return examStart('e1163', 'exam');
-  if (id === 'g7') return certDrill(0);
+  const W = weakOrder();
+  if (id === 'g3') return drillPlan('操作票填写');
+  if (id === 'g4' || id === 'b2') return goPage('emerg');
+  if (id === 'g5') return drillDim(W[0].i);
+  if (id === 'g6') { const t = myTodo()[0]; return startScene(t ? `${t.scene}:${t.scene === 'em' ? (t.target || '') + ':' : ''}${t.mode}` : 'tk:exam'); }
+  if (id === 'g7') return openDrill('班组长复核', '演练成绩由班组长复核后作为能力评价依据', `<div class="hrow">近30天演练 ${homeAgg().cnt} 次，班组长 ${LEAD_USER.name} 在「管理视角」查看全组成绩、短板与危险操作记录，并下发针对性的培训任务。</div><div class="tk3">能力结论由班组长确认后使用。</div>`);
+  if (id === 'g8') return drillFit();
   if (id === 'b1') return goPage('classroom');
   if (id === 'g1') return openDrill('岗前培训', '入职培训记录', `
     <table class="htbl"><tr><th>项目</th><th>结果</th><th>日期</th></tr>
@@ -424,14 +313,25 @@ function nodeClick(id) {
     <tr><td>年度安规笔试</td><td class="mono gv">92 分</td><td class="mono">${dayLabel(80)}</td></tr>
     <tr><td>安规修编后复训</td><td><span class="tag wn">待安排</span></td><td class="mono">—</td></tr></table>`,
     `<button class="btn" data-go="classroom">查看知识课堂</button>`);
-  if (id === 'g3') { const l = examHist().filter(r => r.exam === 'e1163'); return openDrill('1163 开关与地刀检查', `近30天 ${l.length} 次`, examTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
-  if (id === 'g4') { const l = examHist().filter(r => r.exam === 'rain'); return openDrill('雨淋阀机械手动启动', `近30天 ${l.length} 次`, examTable(l), `<button class="btn" data-go="review">打开评分复盘</button>`); }
-  if (id === 'g8') return openDrill('作业授权 · 变电运行高级作业员', '当前差距项', `
-    <table class="htbl"><tr><th>差距项</th><th>当前</th><th>要求</th></tr>
-    ${FITNESS.parts.filter(p => !p.ok).map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td></tr>`).join('')}</table>
-    <div class="tk3" style="margin-top:10px">晋升资格以人工审核结果为准。</div>`,
-    `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-exstart="rain" data-exmode="exam">去考「雨淋阀机械手动启动」</button>`);
-  if (id === 'b2') return goPage('exam');
+}
+
+/* ---------------- 事件委托（首页与各薄页共用） ---------------- */
+function bindHPage() {
+  $('#hpage').oninput = e => { if (typeof pagesInput === 'function') pagesInput(e); };
+  $('#hpage').onclick = e => {
+    if (typeof leaderClick === 'function' && leaderClick(e)) return;
+    if (typeof pagesClick === 'function' && pagesClick(e)) return;
+    const q = s => e.target.closest(s); let n;
+    if (n = q('[data-start]')) return startScene(n.dataset.start);
+    if (n = q('[data-rec]')) return openRec(n.dataset.rec);
+    if (n = q('[data-go]')) return goPage(n.dataset.go);
+    if (n = q('[data-dim]')) return drillDim(+n.dataset.dim);
+    if (n = q('[data-hdim]')) return drillDim(+n.dataset.hdim);
+    if (n = q('[data-day]')) return drillDay(+n.dataset.day);
+    if (n = q('[data-plan]')) return drillPlan(n.dataset.plan);
+    if (n = q('[data-gauge]')) return drillFit();
+    if (n = q('[data-node]')) return nodeClick(n.dataset.node);
+  };
 }
 
 /* ---------------- 悬浮提示 ---------------- */
@@ -534,64 +434,51 @@ function silhouetteSVG() {
 }
 
 
-/* ---------------- 讲师演示台（底座页面） ---------------- */
+
+/* ---------------- 讲师演示台 ---------------- */
 const IMPL_STATUS = [
-  ['主接线图部件画法：断路器、隔离开关、接地刀闸、主变、电压互感器', '按业务提供的手绘简图定标准画法；导线在部件处断开不穿过开关，合位与分位两态分别绘制，图例同屏对照'],
-  ['操作票 Word / Excel 上传导入', '纯浏览器离线解析（zip + DecompressionStream），按《操作票上传模板》解析；不符合模板的行指明行号并跳过'],
-  ['训练模式的边写边判、即时纠错、三级提示与阶段进度', '确定性规则 · 真实运行；考核模式关闭全部提示，提交后一次性出结果'],
-  ['操作票票号', '由考核人员在票头手工填写，未填不给提交，随档案保存'],
-  ['业绩贡献自评', '分值表、等级、排名档、上限与限填项数照录《技能专家业绩贡献评价标准》附件5-5；自评结果由本人填报，最终得分以评审专家组复评为准'],
-  ['五类专家的面试答辩标准与综合评价权重', '照录《专家选聘工作方案》附件1 三、（二）与《专家选聘面试答辩评价标准》附件6；技能实操与理论水平为现场集中考评环节，按实际成绩录入'],
-  ['首页能力雷达与成长档案能力全景', '主轴为《素质模型》通用素质模型五项，由专家选聘答辩演练得分映射，尚无实测时取脱敏模拟基线；技能水平八维（作业授权认证表口径）可切换查看'],
-  ['操作票自动判卷：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、危险操作，同一根本错误只计一次', '确定性规则 · 真实运行（规则取自《操作票结构化标注确认表》70 行业务确认）'],
-  ['操作票错误解释的制度依据：文件名、条款编号、条文正文', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
-  ['操作票扣分值与危险操作规则清单', '扣分值为配置项（业务尚未最终确定，程序不写死）；危险规则已实现业务已确认的 4 条，完整清单待业务提供'],
-  ['专家选聘答辩打分：硬性（关键词命中 / 合规红线 / 流程步骤）、软性（表达 / 共情 / 逻辑 / 情绪）、结果（任务达成 / 是否满意）', '确定性规则 · 真实运行；核心能力与招标竞聘分档取自《专家选聘面试答辩评价标准》'],
-  ['三维能力地图：技能水平、通用能力、领导能力', '技能水平与通用能力由本机演练记录推导；领导能力本次仅展示，暂无实测数据'],
-  ['通用能力 / 领导能力的层级行为指标', '照录《素质模型》宣传册原文'],
-  ['多人员横向对比与场景聚合统计的同批次人员数据', '脱敏模拟 · 人物全部虚拟 · 入库待对接'],
-  ['标准票的空气开关与压板编号', '按试卷「其他资料」同构给出本间隔编号，实际编号待业务确认'],
-  ['陪练关卡：选择 / 填空 / 问答即时判定与回应，操作关步骤提示与做完打分、操作前置与红线、地刀三位置一致性、汇报要素', '规则 · 真实运行'],
-  ['知识库召回：问教练、口述汇报追问', '本机检索 · 真实运行（非在线大模型）'],
-  ['语音识别：口述、汇报、答题', '联网且经 http 打开时浏览器识别（真实）；本地文件打开或内网时为兜底识别（按当前应答内容打入，可改后再发）'],
-  ['能力维度 8 维抽取（认证表 20 项 + 两项考试）', '预置结果 · 已审定 v1.0'],
-  ['AI 复盘、针对性训练建议、提醒草稿', '规则模板生成（非在线大模型）'],
-  ['数字人语音', '默认字幕 + 口型；浏览器合成语音朗读可在讲师演示台打开（预渲染片段到货后优先用片段）'],
-  ['训练与考试记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
-  ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接'],
-  ['教练目录中 16 位未开通教练', '目录（非可训练功能）'],
-  ['图片 / 视频动作识别', '不在本轮范围']
+  ['操作票试卷与标准票', '照录《110kV考核站操作票考核试卷》运行方式、答题要求与 7 个屏柜附表；步骤内容以典型操作票为准'],
+  ['标准票编号口径', '典型票中屏柜、压板、空开、把手编号与试卷附表不一致的 10 处按附表改正（30P→11P 备自投屏、11LP2 / 11LP3→1FLP5 / 1FLP6、1QK→ZK、断路器控制方式把手→HK1、地刀电机电源→5ZK、27P→10P、1-4K / 3-4K→4K1 / 4K2）；按典型票原文填写会判编号不符，客户典型票 xlsx 原件导入判卷 90 分 · 待业务确认'],
+  ['标准票缺号', '典型票 43 之后接 50，缺 44～49、51、52、55，按原样不补、不重排 · 待业务确认是否漏页'],
+  ['刀闸电源 2QL 空开', '典型票 50.1「断开QS、QE刀闸电源2QL空气开关」在试卷附表中没有对应编号，暂按关键字「刀闸」「电源」判定 · 待业务确认'],
+  ['标准票未列的压板 / 空开操作', '学员写了附表中的压板或空开操作（如 #3主变保护跳532压板）而标准票没有的，不扣分，标「需人工复核」交考评员核对'],
+  ['判卷标注：阶段、换序组、特殊顺序、漏写处理、文字要求、执行原因', '本平台按《电气操作导则》与安规拟定 · 待业务专家确认；扣分值为配置项'],
+  ['危险操作 6 条：未验电接地、带负荷拉刀闸 / 摇小车、各侧未形成明显断开点即接地、未转负荷即断开503、先断变高后断变低、断开1103前未合中性点地刀', '本平台拟定 · 待业务专家确认；前三条可检索到安规 / 导则条款，后三条暂无条款原文，显示「建议人工复核」'],
+  ['主接线图', '试卷接线图为 CAD 嵌入对象无法读取，按试卷运行方式文字重绘；部件画法沿用手绘简图口径 · 待客户提供接线图截图或 PDF 核对'],
+  ['操作票 Word / Excel 上传', '纯浏览器离线解析（zip + DecompressionStream）；Excel 认「操作顺序 / 操作步骤」两列，Word 认操作票表格或逐行；格式不符的行指明行号并跳过'],
+  ['操作票自动判卷', '确定性规则 · 真实运行：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、并项识别、危险操作，同一根本错误只计一次'],
+  ['操作票制度依据', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
+  ['应急处置：处置要点与注意事项', '照录场景归类表与 15 张应急处置卡；表中注意事项为空的取处置卡原文（高温中暑、办公场所火灾），处置卡也没有的（中毒窒息、食物中毒、恐怖袭击、高处坠落、物体打击）只考处置要点；办公场所火灾一行的注意事项单元格误贴了整张处置卡，已取卡片注意事项'],
+  ['应急处置：事例', '16 个情境的处置经过事例由本平台编写，每个含 1～4 处违反注意事项的做法 · 待业务确认'],
+  ['应急处置：计分口径', '处置要点 60 + 事例纠错 40（无注意事项的情境处置要点计 100），信息报送每项加 2 分、总分封顶 100 · 本平台拟定待确认；野外四个情境名称（蜂群 / 犬只 / 毒蛇 / 蚂蚁）按处置卡标题补写'],
+  ['应急处置：要点判定与 AI 点评', '关键词组匹配 · 真实运行（非在线大模型）；点评为规则模板生成，遗漏要点补充处置卡原文'],
+  ['信息报送加分项', '照录《变电管理一所应急信息报送工作指引》：电话首报快报现象、7 类重大事件直报分管副总、缓报原因、10 分钟 elink 续报、慎用敏感字眼'],
+  ['近30天记录中的非本机记录、班组其他成员成绩', '脱敏模拟 · 人物全部虚拟；模拟记录由判卷引擎与应急计分对合成答卷实时计分'],
+  ['语音识别', '联网且经 http 打开时浏览器识别（真实）；本地文件打开或内网时为兜底识别（按当前应答内容打入，可改后再发）'],
+  ['演练记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
+  ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接']
 ];
 function demoAct(k) {
+  $('#demo2').classList.remove('open');
   if (k.indexOf('tk_') === 0) {
     const kind = k.slice(3);
     TK.res = null; tkStart('exam', false);
-    setTimeout(() => { TK.rows = tkAuto(kind).map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); toast('已按' + ({ ok: '标准票', swap: '组内换序', order: '顺序错误', danger: '危险操作', text: '文字不规范' }[kind]) + '填入，点「提交判卷」看判卷结果', 'ok'); }, 260);
-    $('#demo2').classList.remove('open'); return;
+    setTimeout(() => { TK.rows = tkAuto(kind).map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); toast('已按' + ({ ok: '标准票', swap: '组内换序', order: '顺序错误', danger: '危险操作', load: '危险操作', text: '文字不规范' }[kind]) + '填入，填票号后点「提交判卷」看结果', 'ok'); }, 260);
+    return;
   }
-  if (k === 'ep_run') {
-    EP.res = null; epStart(false);
-    const step = () => setTimeout(() => {
-      const inp = $('#ep_in'); if (!inp) return;
-      const q = EP.rounds[EP.i].q; inp.value = EXP_SAMPLE[q.k] || '';
-      epSend();
-      setTimeout(() => { const n = $('#ep_next'); if (n) { n.click(); step(); } }, 420);
-    }, 520);
-    step(); $('#demo2').classList.remove('open'); return;
+  if (k.indexOf('em_') === 0) {
+    const kind = k.slice(3), e = EMGMAP.shock;
+    emStart('shock', 'exam');
+    setTimeout(() => { EM.a = emgModel(e, kind); EM.step = emSteps(e).length - 1; emPaint(); toast('三步已按' + ({ ok: '完整作答', part: '只答一半', key: '漏指事例问题' }[kind]) + '填入，点「提交点评」看结果', 'ok'); }, 260);
+    return;
   }
   if (k === 'main') {
-    const ex = EXAMS.find(e => e.id === 'e1163');
-    const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, exam: 'e1163', examName: ex.n, coach: '题库考试', plan: ex.short, mode: '考核模式', due: dateAfter(3), pass: 6, who: HOME_USER.name, dims: ['状态核对与确认', '安全措施与风险控制'], done: 0, total: 1, results: [] };
+    const t = { id: 't' + Date.now(), from: '班组长 ' + LEAD_USER.name, scene: 'tk', target: '', targetN: '#3主变运行转检修操作票', mode: 'exam', due: dateAfter(3), who: [HOME_USER.name], note: '考核模式，及格 60 分，危险操作整票不合格', results: [] };
     const list = lsGet(LS_TASKS, []); list.unshift(t); lsSet(LS_TASKS, list.slice(0, 12));
-    ROLE.cur = 'student'; renderRole(); EX.arm.esCase = EX.arm.esCase || 'ok';
-    examStart('e1163', 'exam', { task: t.id }); toast('已按演示主线下发考核任务并进入考试', 'ok'); return;
+    ROLE.cur = 'student'; renderRole();
+    TK.res = null; tkStart('exam', false); toast('已按演示主线下发操作票考核任务并进入考核', 'ok'); return;
   }
-  if (k === 'red') { if (!EX.exam) return toast('请先进入 1163 考试', 'bad'); const s = examStation(); if (s.id !== 'k2_hub') return toast('当前不在关卡二「验电与接地」', 'bad'); examAuto('red'); return; }
-  if (k === 'run') { if (!EX.exam) return toast('请先开始一场考试', 'bad'); examRun(); return; }
-  if (k === 'es') { const seq = [null, 'ok', 'mech', 'rod']; const i = (seq.indexOf(EX.arm.esCase || null) + 1) % seq.length; EX.arm.esCase = seq[i]; $('#dm_es').textContent = { null: '随机', ok: '正常到位', mech: '机构箱不一致', rod: '连杆未到位' }[String(seq[i])]; return; }
-  if (k === 'voice') { voiceToggle(); toast(TTS.on ? '数字人朗读语音已打开' : '数字人朗读语音已关闭（只保留字幕与口型）'); return; }
-  if (k === 'rain') { EX.arm.rainAbn = !EX.arm.rainAbn; $('#dm_rain').textContent = EX.arm.rainAbn ? '开（下次开始生效）' : '关'; return; }
-  if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则模拟 / 预置 / 待对接', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
+  if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则 / 预置 / 模拟 / 待确认', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
   if (k === 'bound') return openDrill('系统边界表', '现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写', boundaryHtml());
-  if (k === 'clear') { Object.keys(localStorage).filter(x => x.startsWith('xwt_')).forEach(x => localStorage.removeItem(x)); toast('本机记录已清空'); route(); return; }
+  if (k === 'clear') { Object.keys(localStorage).filter(x => x.startsWith('xwt_')).forEach(x => localStorage.removeItem(x)); TK.res = null; EM.res = null; EM.id = null; toast('本机记录已清空'); route(); return; }
 }

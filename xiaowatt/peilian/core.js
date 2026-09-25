@@ -8,7 +8,7 @@ const now = () => { const d = new Date(); return d.toTimeString().slice(0, 8); }
 const stamp = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${d.toTimeString().slice(0, 5)}`; };
 
 
-function norm(s) { return (s || '').replace(/[\s，。、；：？！,.;:?!（）()"'"'·"" ]/g, ''); }
+function norm(s) { return (s || '').replace(/[\s，。、；：？！,.;:?!（）()"'“”‘’·「」 ]/g, ''); }
 function lcs(a, b) {
   const m = a.length, n = b.length; if (!m || !n) return 0;
   let prev = new Array(n + 1).fill(0), cur = new Array(n + 1).fill(0);
@@ -56,30 +56,9 @@ function micType(btn, inp, text) {
   }, 34);
 }
 
-/* 知识库召回（问教练 / 编辑器检索测试）：二元组匹配 9 主题知识地图 */
-function retrieve(q) {
-  const qs = norm(q);
-  const grams = new Set();
-  for (let i = 0; i < qs.length - 1; i++) grams.add(qs.slice(i, i + 2));
-  let best = null, bs = 0;
-  for (const k of KNOW) {
-    k.body.forEach((b, bi) => {
-      const tt = norm(k.t), th = norm(b[0]), tb = norm(b[1]);
-      let sc = 0;
-      grams.forEach(g => { if (tt.includes(g)) sc += 3; if (th.includes(g)) sc += 2; if (tb.includes(g)) sc += 1; });
-      if (bi === 0) sc += 2;
-      if (sc > bs) { bs = sc; best = { text: b[1], src: k.t + '（' + k.sub + '）', topic: k.id }; }
-    });
-  }
-  if (!best || bs < 6) best = { text: '这个问题知识库里没有直接对应的条款。你可以问我关于设备状态、三审票令、五防、唱票复诵、验电接地、GIS 位置核对、二次隔离、异常处置、调度记录这九类内容。', src: '知识地图', topic: null };
-  return best;
-}
-
-
 /* ---------------- 启动 ---------------- */
 function boot() {
   document.body.innerHTML = '<div id="pg_home"></div>';
-  loadCoachApply();
   homeBoot();
   route();
   window.addEventListener('hashchange', route);

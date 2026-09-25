@@ -53,23 +53,24 @@ function chCombo(byDay, opt) {
 /* ③ 练习方式分布 环形：分段可点击 */
 function chDonut(cnt) {
   const W = 330, H = 240, cx = W / 2 - 44, cy = H / 2, R = 74, sw = 26;
-  const CLR = { '完整操作票': 'var(--ac)', '分段练习': 'var(--acl)', '专项练习': '#c9a227', '错题重练': '#8fa08b' };
-  const keys = Object.keys(cnt), total = keys.reduce((a, k) => a + cnt[k], 0);
+  const PAL = ['var(--ac)', '#c9a227', 'var(--acl)', '#8fa08b', '#d98a3a', '#6f8fb8', '#b3bfb2'];
+  const keys = Object.keys(cnt), total = keys.reduce((a, k) => a + cnt[k], 0) || 1;
+  const CLR = {}; keys.forEach((k, i) => { CLR[k] = PAL[i % PAL.length]; });
   const C = 2 * Math.PI * R; let acc = 0;
   const segs = keys.map(k => {
     const frac = cnt[k] / total, off = acc; acc += frac;
-    return `<circle class="hitv anim-seg" data-plan="${k}" data-tip="${k} · ${cnt[k]} 场 · ${Math.round(frac * 100)}%"
+    return `<circle class="hitv anim-seg" data-plan="${k}" data-tip="${k} · ${cnt[k]} 次 · ${Math.round(frac * 100)}%"
       cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${CLR[k]}" stroke-width="${sw}"
       stroke-dasharray="${(frac * C - 2.5).toFixed(1)} ${(C - frac * C + 2.5).toFixed(1)}"
       stroke-dashoffset="${(-off * C).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
   }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" class="chsvg">${segs}
     <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="26" font-family="var(--mono)" fill="#1f2d24">${total}</text>
-    <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="#98a69c">近30天场次</text>
-    ${keys.map((k, i) => `<g class="hitv" data-plan="${k}" data-tip="点击查看${k}场次明细">
+    <text x="${cx}" y="${cy + 15}" text-anchor="middle" font-size="10" fill="#98a69c">近30天次数</text>
+    ${keys.map((k, i) => `<g class="hitv" data-plan="${k}" data-tip="点击查看${k}明细">
       <rect x="${W - 108}" y="${62 + i * 30}" width="9" height="9" rx="2" fill="${CLR[k]}"/>
       <text x="${W - 93}" y="${70 + i * 30}" font-size="11" fill="#6b7a70">${k}</text>
-      <text x="${W - 93}" y="${82 + i * 30}" font-size="10" font-family="var(--mono)" fill="#98a69c">${cnt[k]} 场</text></g>`).join('')}</svg>`;
+      <text x="${W - 93}" y="${82 + i * 30}" font-size="10" font-family="var(--mono)" fill="#98a69c">${cnt[k]} 次</text></g>`).join('')}</svg>`;
 }
 
 /* ④ 扣分与红线趋势 面积图：周点可点击 */
@@ -164,13 +165,6 @@ function chSessionCurve(pts, show, opt) {
       <text x="${X(i)}" y="${H - 5}" text-anchor="middle" font-size="8.5" fill="${s.mode === '考核模式' ? 'var(--acd)' : '#b3bfb2'}">${s.mode.slice(0, 2)}</text></g>`; }).join('')}
     ${show.dur ? `<text x="${W - pr + 4}" y="${pt + 4}" font-size="9" fill="#a8821b">${durMax}′</text>` : ''}
   </svg>`;
-}
-
-/* 小型六维条（复盘页展开行用） */
-function miniBars(vals) {
-  return `<div class="mbars">${DIMS6.map((n, i) => `<div class="mbar"><span>${n}</span>
-    <div class="mtrk"><div class="mfill" style="width:${vals[i]}%;background:${vals[i] < 70 ? '#c9a227' : 'var(--ac)'}"></div></div>
-    <b>${vals[i]}</b></div>`).join('')}</div>`;
 }
 
 /* ⑦ 学员成长地图（驾驶舱中心件）：流向边 + 流动粒子 + 状态节点，全节点可下钻 */
