@@ -1,0 +1,58 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.hd{position:absolute;left:60px;top:34px}
+.hd b{display:block;font-size:22px;color:#1f5fbf;letter-spacing:2px}
+.hd h1{font-size:34px;letter-spacing:3px;color:#0a2a66;margin-top:6px}
+.hd h1 em{font-style:normal;color:#1f7be8}
+.lay{position:absolute;left:60px;right:60px;border-radius:12px;opacity:0;transform:translateY(20px);transition:all .8s}
+.lay.on{opacity:1;transform:none}
+.lab{position:absolute;left:0;top:0;bottom:0;width:150px;border-radius:12px 0 0 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;letter-spacing:3px;background:linear-gradient(180deg,#2a8cff,#1557c4)}
+.lab small{font-size:15px;font-weight:400;letter-spacing:1px;opacity:.9;margin-top:4px}
+.cont{margin-left:150px;padding:14px 18px;background:#fff;border:2px solid #9cc4f5;border-left:0;border-radius:0 12px 12px 0;height:100%}
+#L3{top:124px;height:282px}
+#L2{top:426px;height:108px}
+#L1{top:552px;height:196px}
+.roles{display:flex;gap:16px;height:100%}
+.role{flex:1;border:1.5px solid #cfe0f7;border-radius:10px;padding:10px 14px;background:#f5f9ff}
+.role h3{font-size:22px;color:#0a2a66;margin-bottom:6px}.role h3 span{font-size:16px;color:#5a79a8;font-weight:400;margin-left:8px}
+.role .g{font-size:15px;color:#1f5fbf;margin:6px 0 4px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips i{font-style:normal;font-size:15.5px;padding:3px 10px;border-radius:14px;background:#e3eefc;color:#16407f;border:1px solid #bcd4f4}
+.xw{display:flex;align-items:center;gap:22px;height:100%}
+.xw img{height:92px}
+.xw .verbs{display:flex;gap:12px}
+.xw .verbs i{font-style:normal;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;background:radial-gradient(circle at 35% 30%,#56b4ff,#1557c4);box-shadow:0 4px 14px rgba(21,87,196,.35)}
+.xw p{font-size:19px;color:#0a2a66;line-height:1.6}
+.xw p b{color:#d9480f}
+.data{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;height:100%}
+.data div{border:1.5px solid #cfe0f7;border-radius:10px;background:#f5f9ff;padding:10px 14px}
+.data b{display:block;font-size:20px;color:#0a2a66}.data span{font-size:15.5px;color:#46618d}
+#loop{position:absolute;left:700px;top:338px;width:300px;height:64px;opacity:0;transition:opacity .8s}
+#loop.on{opacity:1}
+#loop svg{width:300px;height:30px}
+#loop span{position:absolute;left:30px;top:30px;width:240px;text-align:center;font-size:15px;color:#d9480f;font-weight:700;background:#fff8f2;border:1px solid #f3c9a8;border-radius:12px;padding:2px 6px}
+</style></head><body class="light"><div class="grid"></div><canvas id="fx"></canvas>
+<div class="hd"><b>整体方案设计</b><h1>一套数据 · 两个角色 · <em>一位助手</em></h1></div>
+<div class="lay" id="L3"><div class="lab">两个角色<small>同一套数据</small></div><div class="cont"><div class="roles">
+  <div class="role" id="L3a"><h3>班组长<span>赵立群 · 配电自动化班</span></h3>
+    <div class="g">班组管理</div><div class="chips"><i>班组画像</i><i>班员画像</i><i>授权认证</i><i>培养与梯队</i><i>绩效与激励</i><i>关怀与文化</i><i>分析参谋</i></div>
+    <div class="g">日常业务</div><div class="chips"><i>今日工作台</i><i>用工安排</i><i>知识库</i><i>台账中心</i><i>问小瓦特</i></div></div>
+  <div class="role" id="L3m"><h3>管理者<span>陈国安 · 配网资产部</span></h3>
+    <div class="g">业务</div><div class="chips"><i>考核指标</i><i>班组横向对比</i></div>
+    <div class="g">管理</div><div class="chips"><i>团队画像总览</i><i>班长绩效</i><i>人员总览</i><i>班组结构对比</i><i>团队风险画像</i><i>员工关怀</i><i>分析参谋</i></div></div>
+</div></div></div>
+<div class="lay" id="L2"><div class="lab">小瓦特<small>右栏常驻</small></div><div class="cont"><div class="xw"><img src="../../assets/xiaowatt/main.png">
+  <div class="verbs"><i>看</i><i>想</i><i>写</i><i>办</i><i>记</i></div>
+  <p>页面是舞台，班长点按钮，小瓦特当场看、想、写、办、记<br>涉及人的结论一律 <b>由班组长确认后使用</b></p></div></div></div>
+<div class="lay" id="L1"><div class="lab">数据底座<small>全部可追溯</small></div><div class="cont"><div class="data">
+  <div><b>班组台账 17 张</b><span>工时 · 证书 · 学时 · 任务 · 缺陷 · 两票 · 违章…</span></div>
+  <div><b>周报第 29 期 · 21 项指标</b><span>与台账中心同源，排名靠后项可追到节点</span></div>
+  <div><b>关键节点 19 项</b><span>周关键节点管控表</span></div>
+  <div><b>作业授权认证表</b><span>7 个技能单元 · 42 个模块</span></div>
+  <div><b>星级班组评价标准</b><span>20 个维度 · 初步评分与差距</span></div>
+  <div><b>年度业绩责任书</b><span>分管副总 / 主管 / 班长三个维度</span></div>
+</div></div></div>
+<div id="loop"><svg viewBox="0 0 300 30"><defs><marker id="ar" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#d9480f"/></marker></defs>
+  <path d="M290 22 C 220 2, 80 2, 10 22" fill="none" stroke="#d9480f" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#ar)"/></svg><span>督办 · 调配 · 提醒 → 班长确认</span></div>
+<script src="fx.js"></script><script>
+function reveal() { ['L1', 'L2', 'L3'].forEach((id, i) => setTimeout(() => document.getElementById(id).classList.add('on'), 250 + i * 650)); setTimeout(() => document.getElementById('loop').classList.add('on'), 2400); }
+</script></body></html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.body{position:absolute;left:140px;right:140px;top:176px;display:flex;flex-direction:column;gap:22px}
+.p{font-size:28px;line-height:1.7;letter-spacing:2px;color:#eaf6ff;opacity:0;text-indent:2em;min-height:96px}
+.p.hl{color:#fff}
+.icons{position:absolute;left:140px;right:140px;bottom:96px;display:flex;gap:24px}
+.ic{flex:1;border:1px solid rgba(140,215,255,.6);border-radius:8px;padding:12px 18px;font-size:19px;color:#bfe8ff;background:rgba(20,80,180,.35);opacity:0;transition:opacity .8s}
+.ic b{display:block;color:#fff;font-size:24px;margin-bottom:4px}
+</style></head><body class="dark"><div class="grid"></div><canvas id="fx"></canvas>
+<div class="tab">项目背景</div>
+<div class="frame"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i></div>
+<div class="body"><div class="p" id="p0"></div><div class="p" id="p1"></div><div class="p" id="p2"></div></div>
+<div class="icons"><div class="ic" id="c0"><b>事务多</b>派工 · 审票 · 盯现场 · 带徒 · 绩效 · 关怀</div><div class="ic" id="c1"><b>数据散</b>十几张台账 · 周报 · 关键节点表</div><div class="ic" id="c2"><b>判断靠经验</b>谁能去 · 谁该带 · 谁要关心</div></div>
+<div class="sweep" style="opacity:.5"></div>
+<script src="fx.js"></script><script>
+const TX = ['班组是供电企业最基层的管理单元，班长既要派工、审票、盯现场，也要带徒弟、算绩效、做关怀。',
+ '台账分散在十几张表里，周报排名靠后的指标要一条条对到关键节点；谁能去、谁该带、谁需要关心，多凭经验。',
+ '小瓦特·班：把台账、周报、认证表和星级评价标准接在一起，让每个判断有依据，每个动作有记录。'];
+function show(i) { typeText(document.getElementById('p' + i), TX[i], 11); const c = document.getElementById('c' + i); if (c) c.style.opacity = 1; }
+</script></body></html>

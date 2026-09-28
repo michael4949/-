@@ -35,6 +35,7 @@ xiaowatt/
 │   ├── dist/               构建产物（已含当前版本，双击可开）
 │   └── shots/              测试截图输出目录
 ├── banzu/                  项目二工作区（扁平结构：data.js(班组·关键节点·作业授权认证表 42 模块·周报·试验班)/data2.js/data3.js(履职证据·岗评·技能·五类指标·确认记录)/data4.js(星级评价标准，由 xlsx 生成)/data5.js(9/21 管理数据：星级 20 维初步评分·员工画像（综合 + 专业）·班长队伍·考核指标三维度·班长绩效·对比·风险·关怀·绩效·趋势·知识库三类)/state.js(状态层)/scenes.js/xw.js/comp.js(派工四规则)/upload.js/charts.js/charts2.js/app.js(两角色)/p_*.js(p_mgmt.js=班组长班组管理六页，p_mgr.js=管理者八页，p_auth.js=授权认证页，legend.js=每页颜色说明，p_super.js=旧管理者页仅供复用)/intent.js + build.py + smoke.cjs + gen_samples.py + samples/ + dist/）
+├── video/                  班组长 demo 8 分钟介绍视频的生成脚本（script.json 分镜 → 本地 TTS 配音 → Playwright 放慢 2.5 倍录 2 倍分辨率屏 → 合成镜头 / 红框 / 光标 / 字幕 → 合成背景音乐 → 混音 -16 LUFS）；成片、录屏帧、配音不入库，流程见 video/README.md
 ├── assets/photos/          隐患现场真实照片插槽（p7/tree/lock/ins/trench/nest.jpg，到货即替换矢量插画）
 ├── assets/xiaowatt/        小瓦特形象（main.png 甲方 3D 全身像已到，透明底；talk/think/look/work/listen.png 到货即按状态换图；提示词 docs/小瓦特形象_生成提示词.md）
 ├── heygen/                 数字人批量渲染工具箱（用户自行在 HeyGen 侧执行）

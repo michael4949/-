@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+.wm{position:absolute;left:0;right:0;top:120px;text-align:center;font-size:360px;font-weight:700;letter-spacing:30px;color:rgba(31,95,191,.07);font-style:italic}
+.city{position:absolute;left:0;right:0;bottom:0;height:260px;background:
+  repeating-linear-gradient(90deg,rgba(31,95,191,.10) 0 38px,transparent 38px 62px),linear-gradient(180deg,transparent,rgba(31,95,191,.10));
+  clip-path:polygon(0 60%,5% 60%,5% 30%,11% 30%,11% 55%,17% 55%,17% 20%,22% 20%,22% 50%,30% 50%,30% 35%,36% 35%,36% 62%,44% 62%,44% 25%,50% 25%,50% 48%,58% 48%,58% 15%,63% 15%,63% 55%,71% 55%,71% 32%,78% 32%,78% 58%,85% 58%,85% 22%,91% 22%,91% 50%,100% 50%,100% 100%,0 100%)}
+.s{position:absolute;left:0;right:0;text-align:center;font-size:48px;font-weight:700;letter-spacing:6px;opacity:0;font-style:italic;
+  background:linear-gradient(90deg,#1557c4,#2a9cff);-webkit-background-clip:text;color:transparent;transition:all 1s;transform:translateY(20px)}
+.s.on{opacity:1;transform:none}
+#s0{top:300px}#s1{top:390px;font-size:40px}
+.logo{position:absolute;left:60px;top:44px;height:62px}
+.bot{position:absolute;right:90px;bottom:70px;height:250px;opacity:.95}
+.tag{position:absolute;left:0;right:0;top:500px;text-align:center;font-size:24px;color:#46618d;letter-spacing:4px;opacity:0;transition:opacity 1s}
+.tag.on{opacity:1}
+</style></head><body class="light"><div class="grid"></div><canvas id="fx"></canvas><div class="wm">2026</div><div class="city"></div>
+<img class="logo" src="../../assets/logo.png"><img class="bot" src="../../assets/xiaowatt/main.png">
+<div class="s" id="s0">页面是舞台 · 小瓦特当场看、想、写、办</div>
+<div class="s" id="s1">每个判断有依据 · 每个动作有记录</div>
+<div class="tag" id="t1">小瓦特·班 · 供电所班组长 AI 助手</div>
+<script src="fx.js"></script><script>
+function show(i) { document.getElementById('s' + i).classList.add('on'); if (i === 1) setTimeout(() => document.getElementById('t1').classList.add('on'), 1200); }
+</script></body></html>

@@ -1,0 +1,19 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1440px;height:810px;overflow:hidden;font-family:"WenQuanYi Zen Hei","Noto Sans CJK SC",sans-serif}
+body.dark{background:radial-gradient(ellipse at 50% 38%,#1f64d6 0%,#0b3a93 42%,#061f5c 100%);color:#fff}
+body.light{background:linear-gradient(180deg,#f4f8ff 0%,#e3eefc 60%,#d6e6fb 100%);color:#0a2a66}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(120,190,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(120,190,255,.10) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
+body.light .grid{background-image:linear-gradient(rgba(31,95,191,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(31,95,191,.07) 1px,transparent 1px)}
+canvas#fx{position:absolute;inset:0;width:1440px;height:810px}
+.tab{position:absolute;left:58px;top:40px;height:58px;padding:0 64px 0 40px;display:flex;align-items:center;font-size:30px;font-weight:700;letter-spacing:4px;color:#fff;
+  background:linear-gradient(90deg,#1aa3ff,#35d0ff 60%,rgba(53,208,255,0));clip-path:polygon(0 0,92% 0,100% 100%,0 100%);text-shadow:0 2px 8px rgba(0,40,120,.6)}
+.tab::before{content:'';position:absolute;left:-18px;top:10px;width:10px;height:38px;background:#7fe3ff;box-shadow:0 0 12px #7fe3ff}
+.frame{position:absolute;left:58px;top:128px;width:1324px;height:612px;border:2px solid rgba(110,200,255,.75);border-radius:10px;
+  box-shadow:0 0 28px rgba(64,170,255,.55),inset 0 0 60px rgba(40,140,255,.25);background:rgba(8,40,110,.35)}
+.frame i{position:absolute;width:44px;height:44px;border-color:#8fe6ff;border-style:solid}
+.frame i.a{left:-4px;top:-4px;border-width:5px 0 0 5px}.frame i.b{right:-4px;top:-4px;border-width:5px 5px 0 0}
+.frame i.c{left:-4px;bottom:-4px;border-width:0 0 5px 5px}.frame i.d{right:-4px;bottom:-4px;border-width:0 5px 5px 0}
+.sweep{position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);background-size:300% 100%;animation:sw 5s linear infinite}
+@keyframes sw{from{background-position:150% 0}to{background-position:-150% 0}}
+@keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes zin{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}

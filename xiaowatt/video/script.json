@@ -1,0 +1,98 @@
+{
+  "title": "小瓦特·班 · 供电所班组长 AI 助手 · 介绍视频",
+  "voice": { "sid": 4, "speed": 1.0 },
+  "segments": [
+    { "id": "s00", "scene": "title", "text": "", "fixed": 5.0, "steps": [] },
+
+    { "id": "s01", "scene": "bg", "text": "班组是供电企业最基层的管理单元。一位班长，既要派工、审票、盯现场，也要带徒弟、算绩效、做关怀。",
+      "steps": [[0.2, "js", "show(0)"]] },
+    { "id": "s02", "scene": "bg", "text": "可台账分散在十几张表里，周报一来，排名靠后的指标要一条条对到关键节点；谁能去、谁该带、谁需要关心，多数时候只能凭经验。",
+      "steps": [[0.2, "js", "show(1)"]] },
+    { "id": "s03", "scene": "bg", "text": "小瓦特·班，就是给班长配的一位助手：把台账、周报、认证表和星级评价标准接在一起，让每个判断有依据，每个动作有记录。",
+      "steps": [[0.2, "js", "show(2)"]], "post": 0.9 },
+
+    { "id": "s04", "scene": "arch", "text": "整体方案可以概括为：一套数据、两个角色、一位助手。",
+      "steps": [[0.2, "js", "reveal(1)"]] },
+    { "id": "s05", "scene": "arch", "text": "数据底座接入十七张班组台账、周报第二十九期二十一项指标、十九项关键节点，以及作业授权认证表、星级班组评价标准和年度业绩责任书。",
+      "steps": [[0.3, "box", "#L1", 99]] },
+    { "id": "s06", "scene": "arch", "text": "右侧常驻的小瓦特，替班长看、想、写、办、记；凡是涉及人的结论，都标注由班组长确认后使用。",
+      "steps": [[0.3, "box", "#L2", 99]] },
+    { "id": "s07", "scene": "arch", "text": "同一套数据往上一层，就是管理者视角。管理者的督办、调配和提醒，最终都落到班长那里确认。",
+      "steps": [[0.3, "box", "#L3m", 99], [0.3, "box", "#loop", 99]], "post": 0.9 },
+
+    { "id": "s08", "scene": "banzu", "chapter": "班组长 · 班组画像", "pre": 0.6, "text": "先看班组长的落地页，班组画像。左侧是荣誉标签：四星班组、两项集体荣誉，以及骨干型的班组特色。",
+      "steps": [[0.3, "cam", "#main .grid2", 1.45], [2.6, "box", "#main .grid2 > .card:first-child", 4.8]] },
+    { "id": "s09", "scene": "banzu", "text": "右侧按《星级班组评价标准》二十个维度给出初步评分：八十五点五分，初步判定四星，距五星线还差四点五分；必备条件七项里有一项没满足，直接标红。",
+      "steps": [[0.2, "box", "#main .scorerow", 5.5], [0.2, "move", "#main .scorerow .big"], ["62%", "box", "#main .alert.bad", 4.5], ["62%", "move", "#main .alert.bad"]] },
+    { "id": "s10", "scene": "banzu", "text": "每个维度都能点开差距明细：建设标准、本班现状、差距、提升建议和查评路径，一目了然。",
+      "steps": [[0.1, "cam", null], [0.4, "scroll", "table.dims", 110], [2.0, "click", "[data-act=\"team-dim\"][data-k=\"b14\"]"], [3.2, "cam", "#modal .mbox", 1.5]] },
+    { "id": "s11", "scene": "banzu", "text": "提升建议按差距从大到小排好，可以逐条或者一键全部排进班组计划，同时通知副班长跟进。",
+      "steps": [[0.3, "click", "#modal [data-act=\"team-fix\"]"], [1.2, "cam", null], [1.6, "scroll", "#fixlist", 150], [3.4, "box", "#fixlist", 3.0], ["58%", "click", "[data-act=\"team-fixall\"]"]] },
+
+    { "id": "s12", "scene": "banzu", "chapter": "班组长 · 班员画像", "text": "班员画像回答“这个人几斤几两”：综合画像取素质模型五项，专业画像取岗位说明书九项业务，和本班均值、本岗级要求放在同一张雷达上对照。",
+      "steps": [[0.2, "nav", "skills"], [1.4, "scroll", ".portcol", 150], [2.6, "cam", ".portcol", 1.3], ["55%", "box", ".portcol:nth-child(2) svg", 4.0]] },
+    { "id": "s13", "scene": "banzu", "text": "点名单切换人员，点任一项，看定义、分级和全班排序；短板可以一键排成培养任务，也可以写进面谈提纲。",
+      "steps": [[0.1, "cam", null], [0.4, "scroll", "table.skm tr[data-who=\"刘一鸣\"]", 330], [1.4, "click", "table.skm tr[data-who=\"刘一鸣\"]"], [2.6, "scroll", ".portcol", 150], [3.6, "click", ".portcol:nth-child(1) .sixrows>div[data-i=\"2\"]"], [4.6, "cam", "#modal .mbox", 1.4], ["62%", "cam", null], ["64%", "click", "#modal [data-act=\"modal-close\"]"], ["76%", "click", "[data-act=\"sk-plan\"]"]] },
+    { "id": "s14", "scene": "banzu", "text": "下面的技能矩阵列出十二个人的岗评、技能等级、证书和作业授权，星号模块的断层风险也会标出来，直接排带教取证。",
+      "steps": [[0.3, "scroll", "table.skm", 120], [1.8, "box", "table.skm", 3.5], ["60%", "scroll", "#main .card:has(.aurow), #main .card:last-of-type", 110], ["70%", "move", "[data-act=\"sk-teachall\"]"]] },
+
+    { "id": "s15", "scene": "banzu", "chapter": "班组长 · 授权认证", "text": "授权认证页照原表版式呈现作业授权认证表：七个技能单元、四十二个模块，按高、中、初级作业员标注必须取得的星号模块。",
+      "steps": [[0.2, "nav", "auth"], [1.6, "box", "#main .grid4", 3.4], [5.4, "scroll", "table.aut", 120], ["70%", "cam", "table.aut", 1.35]] },
+    { "id": "s16", "scene": "banzu", "text": "点格就能确认授权或标为培训中，缺证的不能确认；核心业务自主实施率随之更新，本期确认后报主管。",
+      "steps": [[0.2, "cam", null], [0.5, "click", "td.au-c[data-who=\"刘一鸣\"][data-k=\"1.3\"]"], [1.8, "cam", "#modal .mbox", 1.4], ["45%", "click", "#modal [data-act=\"au-set\"][data-v=\"A\"]"], ["55%", "cam", null], ["58%", "scroll", 0], ["66%", "box", "#main .grid4 .card.kpi:first-child", 3.0]] },
+
+    { "id": "s17", "scene": "banzu", "chapter": "班组长 · 培养与梯队", "text": "培养与梯队页，新员工和次新员工的学时、项目、竞赛、成绩和资质一张卡看清，带教任务一键排给师傅；骨干培养计划逐项对照评聘条件。",
+      "steps": [[0.2, "nav", "grow"], [1.6, "cam", ".mcard", 1.3], [2.0, "box", ".mcard", 3.2], ["40%", "click", "[data-act=\"grow-task\"][data-who=\"刘一鸣\"]"], ["58%", "cam", null], ["60%", "scroll", ".bbrow", 170], ["70%", "box", ".bbrow", 3.0]] },
+
+    { "id": "s18", "subs": ["绩效与激励页", "十二个人的月度绩效初步系数", "由五类履职证据推导，规则写在页头。", "班长逐人确认之后", "小瓦特逐字写出本月的激励分配表。"], "scene": "banzu", "chapter": "班组长 · 绩效与激励", "text": "绩效与激励页，十二个人的月度绩效初步系数由五类履职证据推导，规则写在页头。班长逐人确认之后，小瓦特逐字写出本月的激励分配表。",
+      "steps": [[0.2, "nav", "perf"], [1.6, "box", "#main .ph1", 3.0], [4.4, "box", "table.perf", 3.0], ["58%", "click", "[data-act=\"perf-okall\"]"], ["70%", "click", "[data-act=\"perf-sheet\"]"]] },
+
+    { "id": "s19", "scene": "banzu", "chapter": "班组长 · 关怀与文化", "text": "关怀与文化页，入职关键年份、谈心回访到期、连续高强度外勤都会自动提醒；对重点关注的员工，一键生成绩效面谈提纲。",
+      "steps": [[0.2, "nav", "care"], [1.6, "box", "#main .grid2 > .card:first-child", 4.0], ["55%", "box", "#main .grid2 > .card:nth-child(2)", 3.0], ["62%", "click", "[data-act=\"focus-guide\"][data-who=\"王安\"]"]] },
+
+    { "id": "s20", "scene": "banzu", "chapter": "班组长 · 分析参谋", "text": "分析参谋给出队伍现状诊断：技能断层、资质集中、年龄断层等根因标签，配四段结论和两张趋势图，诊断报告逐段生成，存进文稿。",
+      "steps": [[0.2, "nav", "advise"], [1.6, "cam", "#main .grid2 > .card:first-child", 1.35], [2.0, "box", ".root", 3.0], ["50%", "cam", null], ["55%", "click", "[data-act=\"adv-report\"][data-k=\"diag\"]"]] },
+
+    { "id": "s21", "scene": "banzu", "chapter": "日常业务 · 今日工作台", "text": "日常业务从今日工作台开始。周报第二十九期发布后，三张决策卡把排名靠后的指标对到本周关键节点，等班长拍板。",
+      "steps": [[0.2, "nav", "home"], [1.6, "cam", "#dec", 1.4], [2.2, "box", "#dec", 5.0]] },
+    { "id": "s22", "subs": ["以田寮站 F02 田玉四线", "自动化改造工程的交接试验为例：", "派工按证书、作业授权、本周工时", "当天冲突四条规则逐人比对", "给出推荐、随队和排除的理由。"], "scene": "banzu", "text": "以田寮站 F02 田玉四线自动化改造工程的交接试验为例：派工按证书、作业授权、本周工时、当天冲突四条规则逐人比对，给出推荐、随队和排除的理由。",
+      "steps": [[0.1, "cam", null], [0.4, "click", "[data-act=\"home-swap\"]"], ["35%", "scroll", "#xpl.in", 110], ["50%", "cam", "#xpl.in", 1.3], ["55%", "box", "#xpl tr.in", 3.0], ["80%", "box", "#xpl tr.ex", 2.5]] },
+    { "id": "s23", "scene": "banzu", "text": "班长点人，她说这个人；确认派工后，派工单写进台账，工作票同步起草。",
+      "steps": [[0.1, "cam", null], [0.3, "click", "#ppl .chip[data-who=\"韩雪\"]"], ["55%", "click", "[data-act=\"home-go\"]"]] },
+    { "id": "s24", "scene": "banzu", "text": "周报里排名靠后的项，一键写成本周重点；超期的缺陷，直接发出催办。",
+      "steps": [[0.2, "click", "[data-act=\"nodes-plan\"]"], ["50%", "click", "[data-act=\"urge\"]"], ["75%", "click", "[data-act=\"urge-send\"]"]] },
+
+    { "id": "s25", "post": 3.4, "scene": "banzu", "chapter": "日常业务 · 用工安排", "text": "任务从审票到完工全程留痕。审票时，缺项被逐一圈出，补齐之后才允许开工。",
+      "steps": [[0.2, "hash", "#sched/pool"], [1.0, "click", "[data-act=\"job-start\"][data-id=\"j4\"]"], [2.2, "click", ".msg.a [data-act=\"job-ticket\"]"], [3.4, "click", "[data-act=\"ticket-review\"]"], ["72%", "click", "[data-act=\"ticket-fix\"]"], [6.6, "cam", [515, 215, 565, 380], 1.6], [7.85, "box", [538, 484, 242, 66], 2.65], [9.5, "cam", null]] },
+    { "id": "s26", "post": 1.6, "scene": "banzu", "text": "现场回传、完工以后，工时、票据和缺陷状态自动更新，实操量回写到本人的画像里，星级评价中“作业实施”的得分也跟着变化。",
+      "steps": [[0.2, "hash", "#sched/pool"], [1.0, "click", "[data-act=\"job-start\"][data-id=\"j4\"]"], [2.3, "click", "[data-act=\"job-report\"][data-id=\"j4\"]"], [3.6, "click", "[data-act=\"job-finish\"][data-id=\"j4\"]"], ["62%", "nav", "team"], ["72%", "scroll", "table.dims tr:has([data-k=\"b32\"])", 330], ["80%", "box", "table.dims tr:has([data-k=\"b32\"])", 2.4]] },
+
+    { "id": "s27", "scene": "banzu", "chapter": "日常业务 · 知识库", "text": "知识库分为制度政策、生产技术、行政办公三类，随口一问，回答都带着出处。",
+      "steps": [[0.2, "nav", "know"], [1.4, "box", ".kb3", 2.4], [2.6, "click", ".kb3c[data-k=\"行政办公类\"]"], [3.8, "click", "[data-act=\"kb-ask\"][data-q=\"差旅报销要附什么\"]"], ["75%", "box", "#kba", 2.4]] },
+
+    { "id": "s28", "subs": ["切换到管理者视角。", "考核指标按年度业绩责任书", "分成分管副总、主管、班长三个维度", "红黄绿灯一眼看清。"], "scene": "banzu", "chapter": "管理者 · 考核指标", "pre": 0.3, "text": "切换到管理者视角。考核指标按年度业绩责任书分成分管副总、主管、班长三个维度，红黄绿灯一眼看清。",
+      "steps": [[0.3, "role", "manager"], [2.4, "box", "#main .tabs", 2.6], ["60%", "box", "table.goals", 3.0]] },
+    { "id": "s29", "scene": "banzu", "text": "点开快速复电成功率，责任书原文的评分标准和预计得分都在这里，督办一键发给三位班长。",
+      "steps": [[0.2, "click", "#main .tabs button:nth-child(1)"], [1.2, "click", "[data-act=\"kpi-open\"][data-k=\"fast\"]"], [2.2, "cam", "#modal .mbox", 1.35], ["68%", "cam", null], ["72%", "click", "#modal [data-act=\"goal-urge\"]"]] },
+
+    { "id": "s30", "scene": "banzu", "chapter": "管理者 · 班组横向对比", "text": "班组横向对比九个维度，三个班组里最好和最需关注的格子直接标出；发起跨班组调配之前，先测算对两个班组的影响，再交两位班长确认。",
+      "steps": [[0.2, "hash", "#compare"], [1.2, "box", "table.cmp", 3.6], ["48%", "click", "[data-act=\"cmp-transfer\"]"], ["62%", "box", ".impact", 3.0], ["86%", "click", "[data-act=\"sim-go\"]"]] },
+
+    { "id": "s31", "scene": "banzu", "chapter": "管理者 · 班长绩效", "text": "班长绩效按班长的年度业绩责任书计分：考核指标占百分之五十，重点任务百分之十，综合评价百分之四十；分档不排名次，确认之后才下发。",
+      "steps": [[0.2, "hash", "#lperf"], [1.2, "box", "#main .grid3", 3.2], [4.6, "scroll", "#main .card:nth-of-type(2)", 110], ["55%", "click", "[data-act=\"lp-dim\"][data-who=\"赵立群\"][data-k=\"eval\"]"], ["66%", "cam", "#modal .mbox", 1.3], ["84%", "cam", null], ["86%", "click", "#modal [data-act=\"modal-close\"]"]] },
+
+    { "id": "s32", "scene": "banzu", "chapter": "管理者 · 结构与风险", "text": "班组结构对比和团队风险画像，把新员工带教、轮岗建议、考勤和绩效异常，汇总成一条条可以直接发出的动作。",
+      "steps": [[0.2, "hash", "#structure"], [1.0, "box", "#main .grid3", 2.4], [2.6, "click", "[data-act=\"stc-rotate\"][data-k=\"r1\"]"], ["50%", "hash", "#risks"], ["58%", "box", "#main .grid4", 2.4], ["80%", "click", "[data-act=\"rk-act\"]"]] },
+
+    { "id": "s33", "scene": "banzu", "chapter": "管理者 · 分析参谋", "text": "分析参谋一键生成六段综合分析报告，发给三位班长；近五年业务量与人力配置的变化，也给出配置参考。",
+      "steps": [[0.2, "hash", "#madvise"], [1.0, "click", "[data-act=\"ma-gen\"][data-k=\"all\"]"], ["66%", "hash", "#madvise/trend"], ["74%", "box", "#main .grid4", 2.4]] },
+
+    { "id": "s34", "scene": "banzu", "chapter": "回到班组长", "text": "再切回班组长视角，管理者发来的督办、轮岗建议和培养提醒，都已经在通知里等她确认。", "post": 1.0,
+      "steps": [[0.2, "role", "leader"], [2.2, "hash", "#ledger/notice"], [3.4, "box", "#main table", 3.2]] },
+
+    { "id": "s35", "scene": "end", "text": "小瓦特·班：页面是舞台，班长点按钮，小瓦特当场看、想、写、办。",
+      "steps": [[0.2, "js", "show(0)"]] },
+    { "id": "s36", "scene": "end", "text": "一套数据、两个角色、一位助手，让班组管理的每一个判断都有依据，每一个动作都有记录。",
+      "steps": [[0.2, "js", "show(1)"]], "post": 3.5 }
+  ]
+}
