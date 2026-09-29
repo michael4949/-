@@ -126,6 +126,9 @@ function teamOfPerson(n) { return P[n] ? TEAM.name : LAB.people.some(p => p.n ==
 function personAny(n) { return P[n] || LAB.people.find(p => p.n === n) || TEAM3_PEOPLE.find(p => p.n === n); }
 function postClass(p) { return /班长/.test(p.post) ? '班长' : /技术员|专责/.test(p.post) ? '专责' : /高级/.test(p.post) ? '高级作业员' : /中级/.test(p.post) ? '中级作业员' : '初级作业员'; }
 function teamStat(team) { const ps = teamPeople(team); const on = team === TEAM.name ? ps.filter(p => p.status !== '休假').length : team === LAB.name ? ps.length - LAB.borrowed.length : ps.length - 1; const lv = {}; ps.forEach(p => { const l = skillLvOf(p.n); lv[l] = (lv[l] || 0) + 1; }); const posts = {}; ps.forEach(p => { const k = postClass(p); posts[k] = (posts[k] || 0) + 1; }); const avgAge = +(ps.reduce((s, p) => s + p.age, 0) / ps.length).toFixed(1); const young = ps.filter(p => p.age <= 30).length; const senior = ps.filter(p => /技师/.test(skillLvOf(p.n))).length; const high = ps.filter(p => /高级工|技师/.test(skillLvOf(p.n))).length; const eng = ps.filter(p => STAR_ENG[p.n]).length; return { team, n: ps.length, on, lv, posts, avgAge, young, senior, high, eng, expert: ps.filter(p => EXPERTS[p.n] && /^专家（/.test(EXPERTS[p.n])).length, stable: STABILITY[team] }; }
+/* 班组统计用的性别与学历（人员名册）；个人明细只在成员明细里展示 */
+const SEX = { '赵立群': '男', '韩雪': '女', '黄伟强': '男', '李文博': '男', '吴倩': '女', '郭子扬': '男', '赵敏': '女', '王安': '男', '陈浩': '男', '周明': '男', '林芷若': '女', '刘一鸣': '男' };
+const EDU = { '赵立群': '本科', '韩雪': '本科', '黄伟强': '大专', '李文博': '本科', '吴倩': '本科', '郭子扬': '本科', '赵敏': '大专', '王安': '大专', '陈浩': '本科', '周明': '本科', '林芷若': '硕士', '刘一鸣': '本科' };
 const STABILITY = { '配电自动化班': { leave3y: 1, borrowed: 0, longSick: 0, intent: 0, avgYrs: 8.6 }, '试验班': { leave3y: 0, borrowed: 1, longSick: 1, intent: 1, avgYrs: 9.6 }, '配电运维一班': { leave3y: 2, borrowed: 0, longSick: 0, intent: 0, avgYrs: 7.0 } };
 
 /* ---------- 班长队伍与梯队 ---------- */
@@ -288,7 +291,7 @@ function yearsSince(ym) { const [y, m] = ym.split('-').map(Number); return +((20
 function riskAgg() {
   const rot = SENSITIVE_POSTS.map(s => Object.assign({}, s, { yrs: yearsSince(s.since) })).filter(s => s.yrs >= s.limit).map(s => ({ g: '敏感岗位轮岗', lv: s.yrs >= s.limit + 2 ? '高' : '中', team: s.team, who: s.who, t: s.post + ' 任职 ' + s.yrs + ' 年，超过 ' + s.limit + ' 年轮岗期' + (s.backup ? '；后备 ' + s.backup : ''), act: 'rotate', src: '班长队伍台账' }));
   const att = [{ g: '考勤异常', lv: '高', team: '试验班', who: '何静', t: '近 30 天病假 12 天，长病关注', act: 'care', src: '考勤台账' }, { g: '考勤异常', lv: '低', team: '配电运维一班', who: '谭俊', t: '近 30 天迟到 3 次', act: 'remind', src: '考勤台账' }, { g: '考勤异常', lv: '中', team: '配电自动化班', who: '黄伟强', t: '连续三周外勤工时 ' + P['黄伟强'].week + ' 小时以上，家中老人住院', act: 'care', src: '工时台账 · 谈心记录' }];
-  const perf = [{ g: '绩效持续偏低', lv: '中', team: '配电自动化班', who: '王安', t: '本月学时 0，核心技能实操量低于人均 30%，两季度履职证据偏少', act: 'talk', src: '学时台账 · 作业授权台账' }, { g: '绩效持续偏低', lv: '中', team: '配电运维一班', who: '罗天', t: '连续两季度考评靠后，岗位胜任评价待提升 2 项', act: 'talk', src: '绩效考评记录' }];
+  const perf = [{ g: '绩效持续偏低', lv: '中', team: '配电自动化班', who: '王安', t: '本月学时 0，工作量（工分）低于人均 70%，两季度履职证据偏少', act: 'talk', src: '培训台账 · 工分制考核台账' }, { g: '绩效持续偏低', lv: '中', team: '配电运维一班', who: '罗天', t: '连续两季度考评靠后，岗位胜任评价待提升 2 项', act: 'talk', src: '绩效考评记录' }];
   const stab = [{ g: '队伍稳定性', lv: '中', team: '试验班', who: '刘畅', t: '借调配电运维一班 ' + Math.round((new Date(TODAY) - new Date(LAB.borrowed[0].since)) / 86400000) + ' 天，无返岗时间', act: 'transfer', src: '跨班组调配台账' }, { g: '队伍稳定性', lv: '中', team: '试验班', who: '陈晨', t: '学员提出转岗意向，试验班近一年无新进人员', act: 'talk', src: '谈心记录' }, { g: '队伍稳定性', lv: '低', team: '配电运维一班', who: '—', t: '近三年离职 2 人，30 岁以下 6/11，初级作业员 4 人只持准入证', act: 'ladder', src: '人员名册' }];
   return rot.concat(att, perf, stab);
 }
@@ -317,13 +320,13 @@ const FOCUS_PEOPLE = [
   { who: '何静', team: '试验班', tag: '长病', t: '近 30 天病假 12 天', do: '关怀面谈，问医疗与工作安排意愿，调整为室内试验记录整理' },
   { who: '韩雪', team: '配电自动化班', tag: '高绩效', t: '局级技术能手、专家候选、班长后备', do: '绩效面谈，谈专家申报与班长梯队安排，防止流失' },
   { who: '张伟', team: '试验班', tag: '高绩效', t: '主持交接试验 120 条，报告审核 6 年', do: '绩效面谈，谈轮岗与二星升三星工程师' },
-  { who: '王安', team: '配电自动化班', tag: '低绩效', t: '学时 0、实操量低于人均 30%', do: '绩效面谈，定 8 月两门课和两次带教任务' },
+  { who: '王安', team: '配电自动化班', tag: '低绩效', t: '学时 0、工作量（工分）低于人均 70%', do: '绩效面谈，定 8 月两门课和两次带教任务' },
   { who: '罗天', team: '配电运维一班', tag: '低绩效', t: '连续两季度考评靠后', do: '关键事件面谈，对着两次超期缺陷谈' },
   { who: '刘畅', team: '试验班', tag: '借调', t: '借调配电运维一班 50 天以上', do: '谈返岗时间，避免两边都不管' },
   { who: '刘一鸣', team: '配电自动化班', tag: '新员工', t: '入职 13 个月，光差保护理论 40 分', do: '关怀面谈，问师带徒感受与困难' }
 ];
 const TALK_GUIDES = {
-  '绩效面谈': { open: '先肯定：说一件本季度对方做得好的具体事（带日期、地点）', items: ['对照指标：任务完成、两票、学时、实操量四项各说数据来源', '听对方讲：哪一项自己觉得没达到，原因是什么', '一起定：下季度 2 件可检查的事、时间、需要班组给什么支持', '收尾：把约定写进谈心记录，约下次回访时间'], tips: ['只说事实和台账数，不说"态度"', '一次谈一到两个问题，不翻旧账', '对方沉默时等 5 秒再说话', '结论由本人复述一遍'] },
+  '绩效面谈': { open: '先肯定：说一件本季度对方做得好的具体事（带日期、地点）', items: ['对照指标：任务完成、两票、学时、工作量（工分）四项各说数据来源', '听对方讲：哪一项自己觉得没达到，原因是什么', '一起定：下季度 2 件可检查的事、时间、需要班组给什么支持', '收尾：把约定写进谈心记录，约下次回访时间'], tips: ['只说事实和台账数，不说"态度"', '一次谈一到两个问题，不翻旧账', '对方沉默时等 5 秒再说话', '结论由本人复述一遍'] },
   '关键事件面谈': { open: '直接点明事件：时间、地点、发生了什么（不加评价）', items: ['还原过程：让对方按时间顺序讲一遍', '找原因：是规程不清、技能不够、还是当天安排问题', '定措施：对事不对人，写清谁在什么时候补什么', '说清后果：这件事在考评里怎么记，以后怎么消除影响'], tips: ['24 小时内谈，不拖', '有第二人在场（副班长或安全员）', '不与其他问题合并谈', '记录当天签字'] },
   '关怀面谈': { open: '从生活问起：身体、家里、通勤，不先谈工作', items: ['问困难：需要班组调整什么（排班、外勤、值班）', '给选项：两到三个可行的安排让对方选', '说边界：哪些能办、哪些要报部门', '约回访：两周内再问一次'], tips: ['不打听隐私，只问工作相关的困难', '承诺的事当天办', '长病、家庭变故的人不安排高风险作业'] }
 };
@@ -345,7 +348,24 @@ const CULTURE_TEAM = [
 
 /* ---------- 绩效与激励（月度考评系数由证据推导，班组长确认后使用）---------- */
 const PERF_POOL = 12000;
-function perfRows() { const ok = LS.get('perf_ok', {}); const adj = LS.get('perf_adj', {}); return PEOPLE.map(p => { const E = evidenceOf(p); const rows = E.rows || []; const n = rows.length; const s9 = skill9Of(p); const base = 1.0; let co = base; if (p.week > WEEK_LIMIT) co += 0.05; if (s9.total >= skill9PerCap()) co += 0.05; if (p.hours.m >= 5) co += 0.03; if (p.hours.m === 0) co -= 0.05; if (skill9Low().some(x => x.n === p.n)) co -= 0.05; if (HONORS.some(h => h.who === p.n && h.d >= '2026-01')) co += 0.05; if (MENTORS.some(m => m.m === p.n)) co += 0.03; co = +(co + (adj[p.n] || 0)).toFixed(2); const why = []; if (p.week > WEEK_LIMIT) why.push('外勤超 24 小时'); if (s9.total >= skill9PerCap()) why.push('实操量达人均'); if (p.hours.m >= 5) why.push('本月学时 ≥ 5'); if (p.hours.m === 0) why.push('本月学时 0'); if (skill9Low().some(x => x.n === p.n)) why.push('实操量低于人均 30%'); if (HONORS.some(h => h.who === p.n && h.d >= '2026-01')) why.push('本年获荣誉'); if (MENTORS.some(m => m.m === p.n)) why.push('带徒'); return { p, co, why, evid: n, ok: !!ok[p.n], nonm: co >= 1.08 ? '评优推荐' : co >= 1.03 ? '班务会表扬' : co < 1 ? '补课与带教任务' : '培训机会' }; }); }
+/* 工作量：直接引用工分制考核台账（月度工分）；学员与休假人员不参与人均比较 */
+const WORKPTS = { '赵立群': 118, '韩雪': 126, '黄伟强': 142, '李文博': 135, '吴倩': 121, '郭子扬': 95, '赵敏': 90, '王安': 62, '陈浩': 92, '周明': 66, '林芷若': 40, '刘一鸣': 58 };
+const WORK_LOW = 0.7;
+function workIn(p) { return !/学员/.test(p.post) && p.status !== '休假'; }
+function workAvg() { const L = PEOPLE.filter(workIn); return +(L.reduce((s, p) => s + (WORKPTS[p.n] || 0), 0) / L.length).toFixed(1); }
+function workOf(p) { const v = WORKPTS[p.n] || 0, avg = workAvg(); return { v, avg, in: workIn(p), hi: workIn(p) && v >= avg, low: workIn(p) && v < avg * WORK_LOW }; }
+/* 月度系数规则：每条写明本人情况与加减，页面、证据弹层、分配表共用 */
+function perfRules(p) { const wk = workOf(p); const hon = HONORS.filter(x => x.who === p.n && x.d >= '2026-01'); const men = MENTORS.filter(m => m.m === p.n);
+  return [
+    { n: '外勤超 24 小时', d: 0.05, hit: p.week > WEEK_LIMIT, now: '本周外勤 ' + p.week + ' 小时（班组约定 ' + WEEK_LIMIT + ' 小时）', src: '工时台账' },
+    { n: '工作量达人均', d: 0.05, hit: wk.hi, now: wk.in ? '本月 ' + wk.v + ' 工分，班组人均 ' + wk.avg + ' 工分' : '本月 ' + wk.v + ' 工分（' + (p.status === '休假' ? '休假' : '学员') + '，不参与人均比较）', src: '工分制考核台账' },
+    { n: '工作量低于人均 70%', d: -0.05, hit: wk.low, now: wk.in ? '人均 70% 为 ' + +(wk.avg * WORK_LOW).toFixed(1) + ' 工分' : '不参与比较', src: '工分制考核台账' },
+    { n: '本月学时 ≥ 5', d: 0.03, hit: p.hours.m >= 5, now: '本月学时 ' + p.hours.m + '/5', src: '培训台账 · 学时' },
+    { n: '本月学时 0', d: -0.05, hit: p.hours.m === 0, now: '本月学时 ' + p.hours.m, src: '培训台账 · 学时' },
+    { n: '本年获荣誉', d: 0.05, hit: hon.length > 0, now: hon.length ? hon.map(x => x.t).join('、') : '本年无', src: '荣誉台账' },
+    { n: '带徒', d: 0.03, hit: men.length > 0, now: men.length ? '带教 ' + men.map(m => m.s).join('、') : '本季度未带徒', src: '师带徒' }
+  ]; }
+function perfRows() { const ok = LS.get('perf_ok', {}); const adj = LS.get('perf_adj', {}); return PEOPLE.map(p => { const E = evidenceOf(p); const n = (E.rows || []).reduce((s, r) => s + r.ev.length, 0); const R = perfRules(p).filter(r => r.hit); const co = +(1 + R.reduce((s, r) => s + r.d, 0) + (adj[p.n] || 0)).toFixed(2); return { p, co, adj: adj[p.n] || 0, why: R.map(r => r.n), rules: perfRules(p), evid: n, evidK: (E.rows || []).length, work: workOf(p), ok: !!ok[p.n], nonm: co >= 1.08 ? '评优推荐' : co >= 1.03 ? '班务会表扬' : co < 1 ? '补课与带教任务' : '培训机会' }; }); }
 function perfAlloc() { const R = perfRows(); const sum = R.reduce((s, r) => s + r.co, 0); return R.map(r => Object.assign({}, r, { money: Math.round(PERF_POOL * r.co / sum / 10) * 10 })); }
 
 /* ---------- 师带徒与骨干培养 ---------- */

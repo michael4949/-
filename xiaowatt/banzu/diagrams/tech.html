@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>小瓦特·班 技术与数据架构</title><link rel="stylesheet" href="base.css"><style>
+.wrap{display:grid;grid-template-columns:1fr 300px;gap:20px}
+.layer{display:grid;grid-template-columns:150px 1fr;border-radius:12px;overflow:hidden;background:var(--sky);border:1.5px solid var(--line);margin-bottom:12px}
+.layer:last-child{margin-bottom:0}
+.lab{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;letter-spacing:2px;padding:8px}
+.lab small{font-size:13px;font-weight:400;opacity:.85;letter-spacing:.5px;margin-top:4px}
+.cells{display:grid;gap:10px;padding:10px 12px}
+.cell{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:9px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.cell b{font-size:18px;font-weight:800;color:var(--navy)}.cell span{font-size:13.5px;color:var(--grey);line-height:1.5;margin-top:3px}
+.cell.new{border-color:#2a74e0}
+.side{display:flex;flex-direction:column;gap:14px}
+.plat{background:linear-gradient(180deg,#0b2d6b,#1557c4);border-radius:14px;padding:16px 14px;color:#fff}
+.plat h3{font-size:19px;font-weight:800;margin-bottom:10px}
+.pc{background:rgba(255,255,255,.12);border-radius:9px;padding:10px 12px;margin-bottom:9px}.pc:last-child{margin-bottom:0}
+.pc b{display:block;font-size:15.5px;font-weight:700}.pc span{font-size:13px;opacity:.88;line-height:1.55}
+.gov{background:var(--goldbg);border:1.5px solid var(--goldln);border-radius:14px;padding:16px 16px}
+.gov h3{font-size:19px;font-weight:800;color:var(--gold);margin-bottom:8px}
+.gov li{list-style:none;font-size:14px;color:#5c4a22;line-height:1.9;padding-left:14px;position:relative}.gov li::before{content:'·';position:absolute;left:2px;font-weight:800;color:var(--gold)}
+</style></head><body><div class="board" id="board">
+<div class="ttl"><h1>小瓦特·班 技术与数据架构</h1><span>依托公司自主平台建设 · 规则可解释 · 结论由人确认</span></div>
+<div class="wrap"><div>
+  <div class="layer"><div class="lab" style="background:#0b2d6b">用户层</div><div class="cells" style="grid-template-columns:1fr 1fr"><div class="cell"><b>班组长</b><span>班组管理 · 日常业务 · 对话助手</span></div><div class="cell"><b>部门管理者</b><span>指标 · 对比 · 考评 · 风险 · 参谋</span></div></div></div>
+  <div class="layer"><div class="lab" style="background:#123f8c">应用层<small>21 个功能页</small></div><div class="cells" style="grid-template-columns:repeat(5,1fr)"><div class="cell"><b>画像与授权</b><span>班组 · 班员 · 授权认证 · 团队</span></div><div class="cell"><b>用工</b><span>派工 · 审票 · 调配</span></div><div class="cell"><b>培养与绩效</b><span>梯队 · 系数 · 班长考评</span></div><div class="cell"><b>关怀与风险</b><span>提醒 · 面谈 · 轮岗</span></div><div class="cell"><b>参谋与文稿</b><span>诊断 · 预警 · 报告</span></div></div></div>
+  <div class="layer"><div class="lab" style="background:#1557c4">能力层</div><div class="cells" style="grid-template-columns:repeat(4,1fr)"><div class="cell"><b>业务规则引擎</b><span>派工四规则 · 断层判定<br>红黄绿预警 · 绩效系数推导</span></div><div class="cell"><b>大模型能力</b><span>对话理解 · 文稿逐段生成<br>诊断归因 · 经验整理</span></div><div class="cell"><b>知识库</b><span>制度政策 · 生产技术 · 行政办公<br>案例与骨干经验 · 答案标注出处</span></div><div class="cell"><b>分析看板</b><span>画像雷达 · 热力 · 趋势<br>点数字追溯台账</span></div></div></div>
+  <div class="layer"><div class="lab" style="background:#1f6fd6">模型层</div><div class="cells" style="grid-template-columns:.85fr 1.35fr 1fr 1fr 1fr"><div class="cell"><b>能力图谱</b><span>8 模块 · 24 要素 · L1–L5</span></div><div class="cell"><b>员工画像（综合 + 专业）</b><span>综合：忠诚执行 · 不断求进 · 安全意识 · 客户导向 · 沟通协作<br>专业：岗位说明书九项 · L1–L4 · 对照本岗级要求</span></div><div class="cell"><b>作业授权认证</b><span>7 个技能单元 · 42 个模块<br>★按岗级 · 核心业务自主实施率</span></div><div class="cell"><b>星级评价初评</b><span>必备条件 · 通用 · 专业 · 加分<br>当前等级 → 目标等级</span></div><div class="cell"><b>考评与预警口径</b><span>班长责任书 · 考核指标三维度<br>工分系数 · 风险四类</span></div></div></div>
+  <div class="layer"><div class="lab" style="background:#3d5a86">数据层<small>17 张台账</small></div><div class="cells" style="grid-template-columns:1fr 1fr 1fr"><div class="cell"><b>人员主题</b><span>证书 · 作业授权认证 · 工时 · 工作量（工分） · 绩效 · 荣誉</span></div><div class="cell"><b>班组主题</b><span>任务 · 两票 · 缺陷 · 周报指标 · 安全活动 · 培训</span></div><div class="cell"><b>事件流水</b><span>派工 → 审票 → 开工 → 回传 → 完工 → 验收 · 每次确认留痕</span></div></div></div>
+  <div class="layer" style="border-style:dashed"><div class="lab" style="background:#8d9db8">数据来源</div><div class="cells" style="grid-template-columns:repeat(5,1fr)"><div class="cell"><b>人资系统</b><span>人员 · 证书 · 作业授权 · 考勤 · 绩效 · 工分</span></div><div class="cell"><b>OMS</b><span>缺陷 · 工单</span></div><div class="cell"><b>OCS</b><span>终端在线状态</span></div><div class="cell"><b>电网管理平台</b><span>两票 · 作业计划</span></div><div class="cell"><b>党建与荣誉</b><span>党建 · 集体与个人荣誉</span></div></div></div>
+</div>
+<div class="side">
+  <div class="plat"><h3>公司自主平台</h3><div class="pc"><b>电力人工智能创新平台</b><span>大瓦特大模型：对话、生成、知识问答、诊断归因</span></div><div class="pc"><b>云景自助分析工具</b><span>画像、指标看板与多维分析图表</span></div><div class="pc"><b>公司内网部署</b><span>数据不出域</span></div></div>
+  <div class="gov"><h3>安全与治理</h3><ul><li>按角色分级授权</li><li>人员信息最小必要展示</li><li>班组统计与个人明细分开展示</li><li>涉及人的结论须确认后生效</li><li>操作流水全程记录</li><li>指标口径有版本、有确认人</li></ul></div>
+</div></div>
+</div></body></html>

@@ -26,7 +26,7 @@ function certHold(kind) { return PEOPLE.filter(p => p.cert.includes(kind)); }
 
 /* ---------- 数据授权 · 证据 · 用途 · 人工复核（每类结论都带这四行） ---------- */
 const DISCLOSE = {
-  evid: { auth: '违章记录、任务台账、两票台账、缺陷台账、学时台账、成绩记录、师带徒、知识库；均为班组自有台账', ev: '每条证据后标出来自哪张台账，点开可核', use: '供班组长绩效沟通时引用，不出等级、不打分；正式绩效由公司绩效系统承接', review: '班组长逐条核对后使用' },
+  evid: { auth: '违章记录、任务台账、工分制考核台账、两票台账、缺陷台账、培训台账（学时与成绩）、师带徒、知识库', ev: '每条证据后标出来自哪张台账，点开可核', use: '供班组长绩效沟通时引用，不出等级、不打分；正式绩效由公司绩效系统承接', review: '班组长逐条核对后使用' },
   post: { auth: '证书台账、能力图谱、成绩记录、实操评分表、违章记录、安全活动台账', ev: '对照岗位说明书四类要求逐项列出实际', use: '识别未达标项并转成培养重点；不用于排名', review: '结论由班组长确认后写入画像，确认人留名' },
   skill: { auth: '技能等级认定台账（局技能鉴定站）、申报条件、成绩记录', ev: '现等级、取得时间、鉴定成绩、本等级年限', use: '判断够不够岗位要求、何时具备申报条件', review: '报名由本人与班组长确认' },
   skill9: { auth: '作业授权认证表（运维班口径 42 个模块）、工作票记录、培训台账', ev: '本年实操次数按工作票逐次累计；授权由班组长确认'  , use: '派工时校验是否已取得对应模块授权；核心业务自主实施率与星级评价"人均核心技能实操量"取数', review: '资格变更由班组长确认' }
@@ -35,9 +35,9 @@ const DISCLOSE = {
 /* ---------- 一、履职证据（替代原"绩效考核等级"）：五类只列证据、不出分数 ---------- */
 const EVID_ITEMS = [
   { k: 'safe', n: '安全生产', src: '违章记录 · 安全活动台账' },
-  { k: 'task', n: '任务完成', src: '任务台账 · 派工记录 · 关键节点闭环' },
+  { k: 'task', n: '任务完成', src: '任务台账 · 工分制考核台账 · 关键节点闭环' },
   { k: 'qual', n: '工作质量', src: '两票台账 · 缺陷台账' },
-  { k: 'study', n: '学习培训', src: '学时台账 · 成绩记录' },
+  { k: 'study', n: '学习培训', src: '培训台账（学时 · 成绩）' },
   { k: 'coop', n: '协同带教', src: '师带徒 · 班组知识库' }
 ];
 const HOURS_DUE = 35;  // 8 月应达学时（60 学时 / 年按月折算）
@@ -50,14 +50,14 @@ function evidenceOf(p) {
   const late = mine.filter(t => /超期/.test(t.st)).length;
   const over = Math.max(0, p.week - WEEK_LIMIT);
   const nodes = NODES.filter(n => n.a === p.n);
-  rows.push(Object.assign({}, EVID_ITEMS[1], { ev: [{ t: '本月参与作业 ' + mine.length + ' 项，完成 ' + done + ' 项' + (late ? '，超期 ' + late + ' 项' : '，无超期'), s: '任务台账' }, { t: nodes.length ? '关键节点 A 责任 ' + nodes.length + ' 项：' + nodes.map(n => n.t).join('、') + '，本周' + (DB.nodesDone().filter(id => nodes.some(n => n.id === id)).length) + ' 项已清' : '本周无关键节点 A 责任', s: '关键节点闭环' }, { t: '本周外勤 ' + p.week + ' 小时' + (over ? '，超出班组约定 ' + over + ' 小时' : '，在班组约定 ' + WEEK_LIMIT + ' 小时内'), s: '工时台账' }] }));
+  rows.push(Object.assign({}, EVID_ITEMS[1], { ev: [{ t: '本月参与作业 ' + mine.length + ' 项，完成 ' + done + ' 项' + (late ? '，超期 ' + late + ' 项' : '，无超期'), s: '任务台账' }, { t: nodes.length ? '关键节点 A 责任 ' + nodes.length + ' 项：' + nodes.map(n => n.t).join('、') + '，本周' + (DB.nodesDone().filter(id => nodes.some(n => n.id === id)).length) + ' 项已清' : '本周无关键节点 A 责任', s: '关键节点闭环' }, { t: '本周外勤 ' + p.week + ' 小时' + (over ? '，超出班组约定 ' + over + ' 小时' : '，在班组约定 ' + WEEK_LIMIT + ' 小时内'), s: '工时台账' }, (() => { const wk = workOf(p); return { t: '本月工作量 ' + wk.v + ' 工分' + (wk.in ? '，班组人均 ' + wk.avg + ' 工分' + (wk.low ? '，低于人均 70%' : wk.hi ? '，达到人均' : '') : '（' + (p.status === '休假' ? '休假' : '学员') + '，不参与人均比较）'), s: '工分制考核台账' }; })()] }));
   const tk = DB.tickets().filter(t => t.lead === p.n);
   const bad = tk.filter(t => t.st === '已退回').length;
   const found = DB.defects().filter(d => String(d.src).includes(p.n));
-  rows.push(Object.assign({}, EVID_ITEMS[2], { ev: [{ t: tk.length ? ('担任工作负责人 ' + tk.length + ' 张票' + (bad ? '，退回修改 ' + bad + ' 张' : '，无不合格')) : '本月未担任工作负责人', s: '两票台账' }, { t: found.length ? '发现并登记缺陷 ' + found.length + ' 处' : '本月未登记新发现的缺陷', s: '缺陷台账' }, { t: '核心技能本年实操 ' + skill9Of(p).total + ' 次，班组人均 ' + skill9PerCap() + ' 次', s: '工作票 · 实操量' }] }));
+  rows.push(Object.assign({}, EVID_ITEMS[2], { ev: [{ t: tk.length ? ('担任工作负责人 ' + tk.length + ' 张票' + (bad ? '，退回修改 ' + bad + ' 张' : '，无不合格')) : '本月未担任工作负责人', s: '两票台账' }, { t: found.length ? '发现并登记缺陷 ' + found.length + ' 处' : '本月未登记新发现的缺陷', s: '缺陷台账' }] }));
   const hs = SCORE_HIST[p.n] || [];
   const avg = hs.length ? Math.round(hs.reduce((s, x) => s + x.s, 0) / hs.length) : null;
-  rows.push(Object.assign({}, EVID_ITEMS[3], { ev: [{ t: '年度学时 ' + p.hours.done + '/60，8 月应达 ' + HOURS_DUE + '；本月 ' + p.hours.m + '/5', s: '学时台账' }, { t: hs.length ? '本年考试 ' + hs.length + ' 次，均分 ' + avg + '：' + hs.map(x => x.t + ' ' + x.s).join('、') : '本年尚无考试记录', s: '成绩记录' }, { t: '已学课程 ' + (TRAIN_DONE[p.n] || []).length + '/7 门', s: '培训台账' }] }));
+  rows.push(Object.assign({}, EVID_ITEMS[3], { ev: [{ t: '年度学时 ' + p.hours.done + '/60，8 月应达 ' + HOURS_DUE + '；本月 ' + p.hours.m + '/5', s: '培训台账 · 学时' }, { t: hs.length ? '本年考试 ' + hs.length + ' 次，均分 ' + avg + '：' + hs.map(x => x.t + ' ' + x.s).join('、') : '本年尚无考试记录', s: '成绩记录' }, { t: '已学课程 ' + (TRAIN_DONE[p.n] || []).length + '/7 门', s: '培训台账' }] }));
   const men = MENTORS.filter(m => m.m === p.n), stu = MENTORS.find(m => m.s === p.n);
   const cs = CASES.concat(CASES2).filter(a => a.who === p.n);
   const ex = EXPERIENCE.concat(EXPERIENCE2).filter(e => e.who === p.n);

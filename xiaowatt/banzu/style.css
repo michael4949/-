@@ -923,3 +923,33 @@ i.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 3px 
 i.sw:first-child{margin-left:0}
 i.sw.g{background:#18b97a}i.sw.y{background:#d97706}i.sw.r{background:#e5484d}i.sw.b{background:#1f5fbf}i.sw.p{background:#6b4de6}i.sw.t{background:#0f9bb0}i.sw.m{background:#c2417f}i.sw.s{background:#5b6b8c}i.sw.l{background:#3d8bd9}i.sw.n{background:#c5cad3}i.sw.gold{background:#c9a227}i.sw.c{background:#0f7fa8}i.sw.hl{background:#fdf3e6;border:1px solid #f0d9b5}i.sw.bl{background:#93b1e0}
 @media(max-width:900px){.plrow{grid-template-columns:1fr}}
+/* 9/29 绩效与激励：履职证据弹层、工作量条 */
+.dimbar.n i{background:#c3c8d4}
+.evidbtn{white-space:nowrap}
+table.t.evidt td,table.t.evidr td{font-size:12px;vertical-align:top}
+table.t.evidt td[rowspan]{background:var(--bg)}
+table.t.evidr td.g{color:var(--ok);font-weight:600}table.t.evidr td.b{color:var(--bad);font-weight:600}
+.rulebar{font-size:11.5px;color:var(--ink2);background:var(--bg);border-radius:6px;padding:7px 10px;margin:0 0 8px;line-height:1.6}.rulebar b{color:var(--pri);margin-right:8px}
+/* 9/29 班组画像：班组整体画像 */
+.tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+.tstats.two{grid-template-columns:repeat(2,1fr);margin-top:8px}
+.tstat{border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.tstat span{display:block;font-size:10.5px;color:var(--ink3)}
+.tstat b{display:block;font-family:var(--mono);font-size:17px;line-height:1.3;color:var(--pri);white-space:nowrap}
+.tstat.ok b{color:var(--ok)}.tstat.w b{color:var(--warn)}.tstat.bad b{color:var(--bad)}
+.tstat em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stackbar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin:4px 0}
+.stackbar i{display:block;height:100%}
+.stackleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--ink2);margin-bottom:4px}
+.stackleg em{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+.kpi4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.kpit{border:1px solid var(--line);border-radius:6px;padding:7px 10px;cursor:pointer;font-size:11.5px}
+.kpit span{color:var(--ink2)}.kpit b{display:block;font-size:12.5px;margin-top:2px}.kpit em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
+.abil3>div{border-right:1px dashed var(--line);padding-right:10px}.abil3>div:last-child{border-right:0}
+.abnote{font-size:11.5px;color:var(--ink2);margin-top:4px}
+.scorerow.five{grid-template-columns:repeat(5,1fr)}
+.scorerow.five .big b{font-size:21px}.scorerow.five .big span{white-space:nowrap}
+.updir{margin-top:8px;font-size:11.5px;line-height:1.65;background:var(--bg);border-radius:6px;padding:7px 10px}
+.updir b{color:var(--pri);margin-right:6px}.updir span{display:block}
+table.t.members td{font-size:12px;white-space:nowrap}table.t.members td:nth-child(6),table.t.members td:nth-child(7){white-space:normal;min-width:110px}
+table.t.members tr:hover td{background:var(--bg)}

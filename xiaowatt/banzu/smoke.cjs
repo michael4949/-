@@ -21,11 +21,14 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await t('shell 班组长 12 项 · 落地班组画像', async () => (await pg.locator('#sb a').count()) === 12 && (await pg.locator('#sb a.on').textContent()).includes('班组画像') && (await pg.locator('#xw').count()) === 1);
   await t('荣誉标签 · 星级 + 集体荣誉 2 + 特色标签', async () => (await pg.locator('.startag').count()) === 1 && (await pg.locator('.hitem').count()) === 2 && (await pg.locator('.kindrow .tag').textContent()) === '骨干型');
   await t('建设差距标识 · 初步评分四星 · 必备条件 6/7', async () => { const B = await ev(() => buildScore()); return B.pct >= 80 && B.pct < 90 && B.lv === '四星' && B.mustBad.length === 1 && (await pg.locator('.alert.bad').count()) === 1; });
+  await t('9/29 班组整体画像 · 概况四项 · 三条结构 · 核心指标 4 · 队伍能力两张雷达 · 无任务命令栏', async () => { const x = await main(); return (await pg.locator('#main .tstats').first().locator('.tstat').count()) === 4 && x.includes('平均年龄') && x.includes('性别比例') && (await pg.locator('#main .stackbar').count()) === 3 && (await pg.locator('#main .kpit').count()) === 4 && (await pg.locator('#main .abil3 svg').count()) >= 2 && (await pg.locator('#main .cmd').count()) === 0; });
+  await t('星级 · 当前等级 / 初步评分 / 目标等级 / 距目标分 / 必备条件 · 提升方向必备条件在前 · 不再用"建设差距"', async () => { const x = await main(); return (await pg.locator('.scorerow.five .big').count()) === 5 && x.includes('目标等级') && x.includes('提升方向') && /1\. 党建水平/.test(await pg.locator('.updir').innerText()) && !x.includes('建设差距'); });
+  await t('成员明细 12 行 · 个人荣誉只在明细里', async () => (await pg.locator('table.members tr').count()) === 13 && (await pg.locator('table.members').innerText()).includes('局级技术能手') && !(await pg.locator('#main .honors').innerText()).includes('技术能手'));
   await t('星级维度 20 行 · 红黄绿标识', async () => (await pg.locator('table.dims tr').count()) === 21 && (await pg.locator('table.dims .rag.bad').count()) >= 1 && (await pg.locator('table.dims .rag.w').count()) >= 3 && (await pg.locator('table.dims .rag.ok').count()) >= 8);
   await pg.click('[data-act="team-dim"][data-k="b14"]'); await w(400);
-  await t('差距明细弹层 · 标准 / 现状 / 差距 / 建议 / 路径', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 6 && (await pg.locator('#modal').textContent()).includes('提升建议'));
+  await t('维度明细弹层 · 标准 / 现状 / 差距指标 / 提升措施 / 路径', async () => (await pg.locator('#modal:not([hidden]) table tr').count()) === 6 && (await pg.locator('#modal').textContent()).includes('提升措施') && (await pg.locator('#modal').textContent()).includes('差距指标'));
   await pg.click('#modal [data-act="team-fix"]'); await w(500);
-  await t('排进班组计划 · 写 plan + 通知副班长', async () => { const p = await LS('plan'); const f = await LS('team_fix'); const n = await LS('notices'); return p && p.some(x => /党建水平/.test(x.t)) && f && f.b14 && n.some(x => x.to === '韩雪' && /星级建设差距/.test(x.t)); });
+  await t('排进班组计划 · 写 plan + 通知副班长', async () => { const p = await LS('plan'); const f = await LS('team_fix'); const n = await LS('notices'); return p && p.some(x => /党建水平/.test(x.t)) && f && f.b14 && n.some(x => x.to === '韩雪' && /星级提升措施/.test(x.t)); });
   await pg.click('[data-act="team-fixall"]'); await w(500);
   await t('全部排进计划 · 提升建议全部标记', async () => (await pg.locator('#fixlist .tag.ok').count()) >= 5 && (await pg.locator('#fixlist button').count()) === 0);
   await clean('班组画像');
@@ -84,6 +87,11 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/03_grow.png' });
   /* ---------- 绩效与激励 ---------- */
   await go('#perf', 700);
+  await t('9/29 规则写工作量（工分）不再写实操量 · 工作量列 · 履职证据按钮 12 个', async () => { const x = await main(); return x.includes('工作量达人均') && x.includes('工分制考核台账') && !/实操量/.test(x) && (await pg.locator('table.perf [data-act="rate-evid"]').count()) === 12; });
+  await pg.click('[data-act="rate-evid"][data-who="王安"]'); await w(400);
+  await t('履职证据弹层 · 五类逐条带出处 · 系数逐条推导与页面一致', async () => { const m = await pg.locator('#modal').innerText(); const co = await ev(() => perfAlloc().find(r => r.p.n === '王安').co.toFixed(2)); return (await pg.locator('#modal table.evidt tr').count()) >= 12 && (await pg.locator('#modal table.evidr tr').count()) >= 8 && m.includes('工分制考核台账') && m.includes(co) && m.includes('工作量低于人均 70%'); });
+  await pg.click('#modal [data-act="rate-evid-ask"]'); await w(400);
+  await t('让小瓦特讲讲 · 回答带命中规则', async () => (await pg.locator('.msg.a').last().innerText()).includes('初步系数'));
   await t('绩效表 12 行 · 系数 · 物质 / 非物质', async () => (await pg.locator('table.perf tr').count()) === 13 && (await main()).includes('评优推荐') && (await main()).includes('¥'));
   await pg.click('[data-act="perf-adj"][data-who="王安"][data-v="0.02"]'); await w(500);
   await t('系数调整落 perf_adj', async () => { const a = await LS('perf_adj'); return a && a['王安'] === 0.02; });
@@ -263,6 +271,10 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.click('#stage [data-act="stage-ext"]'); await w(500);
   await t('扩展模块打开 · 16 项（人员档案 / 培训考评 / 安全 / 文稿）', async () => (await pg.locator('#sb a').count()) === 16);
   await pg.click('.stagebtn'); await w(200);
+  await pg.evaluate(() => { DB.setRole('leader'); }); await go('#ledger/study', 700);
+  await t('9/29 台账中心 17 张 · 学时并入培训 · 作业授权认证 · 工作量（工分）', async () => { const tabs = await pg.locator('#main .tabs button').allInnerTexts(); return tabs.length === 17 && tabs.includes('作业授权认证') && tabs.includes('工作量（工分）') && !tabs.includes('学时') && (await pg.locator('#main .tabs button.on').innerText()) === '培训' && (await main()).includes('本月学时'); });
+  await go('#ledger/work', 600);
+  await t('工作量台账 12 人 · 取工分制考核台账 · 学员休假不参与', async () => { const x = await main(); return x.includes('工分制考核台账') && x.includes('不参与') && (await pg.locator('#ledtable tr').count()) >= 13; });
   const noLeg = []; for (const k of ['#team', '#skills', '#auth', '#grow', '#perf', '#care', '#advise', '#home', '#sched', '#know', '#ledger', '#people', '#train', '#safety', '#docs']) { await go(k, 350); if (!(await pg.locator('#main .pleg').count())) noLeg.push(k); }
   await t('颜色说明 · 班组长各页底部都有 · 部门名为配网资产部', async () => { if (noLeg.length) errs.push('no legend ' + noLeg.join(',')); return !noLeg.length && (await ev(() => TEAM.full)).includes('配网资产部') && (await ev(() => WK29.by)) === '配网管理部、系统运行部'; });
   console.log('FAILS', fails, 'ERR', errs.length ? errs.slice(0, 12).join('\n  ') : 'none');

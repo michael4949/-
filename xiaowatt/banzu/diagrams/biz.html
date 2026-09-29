@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>小瓦特·班 业务架构</title><link rel="stylesheet" href="base.css"><style>
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px}
+.rbar{border-radius:12px;padding:15px 22px;background:linear-gradient(90deg,#0b2d6b,#1a5bc0);color:#fff;display:flex;align-items:baseline;gap:18px;box-shadow:0 4px 12px rgba(11,45,107,.18)}
+.rbar b{font-size:27px;font-weight:800;letter-spacing:2px}.rbar span{font-size:17px;opacity:.85;letter-spacing:.5px}
+.mid{display:grid;grid-template-columns:1fr 520px 1fr;gap:22px;margin-bottom:18px}
+.panel{background:var(--sky);border:1.5px solid var(--line);border-radius:14px;padding:16px 20px 20px}
+.panel h3{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:10px}.panel h3 em{font-style:normal;font-size:15px;font-weight:400;color:var(--grey);margin-left:10px}
+.grp{font-size:15px;font-weight:700;color:var(--blue);margin:10px 0 7px}
+.grid3c{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.grid2c{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.grid3c .chip,.grid2c .chip{height:46px}
+.chip.new{border-color:#2a74e0;box-shadow:inset 0 0 0 1px #2a74e0}
+.ring{position:relative;height:500px}
+.ring svg{position:absolute;inset:0}
+.core{position:absolute;left:50%;top:50%;width:196px;height:196px;margin:-98px 0 0 -98px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#2c6fd6,#0b2d6b 75%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(11,45,107,.35)}
+.core b{font-size:27px;font-weight:800;letter-spacing:2px;line-height:1.35}.core span{font-size:14px;opacity:.85;margin-top:6px}
+.node{position:absolute;width:150px;height:72px;margin:-36px 0 0 -75px;border:2.5px solid #2a74e0;border-radius:36px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(21,87,196,.12)}
+.node b{font-size:20px;font-weight:800;color:var(--navy)}.node span{font-size:13px;color:var(--grey)}
+.ai{background:var(--goldbg);border:1.5px solid var(--goldln);border-radius:12px;padding:13px 22px;display:flex;align-items:baseline;gap:18px;margin-bottom:18px}
+.ai b{font-size:21px;font-weight:800;color:var(--gold);white-space:nowrap}.ai span{font-size:17px;color:#5c4a22}
+.data{background:var(--sky);border:1.5px solid var(--line);border-radius:14px;padding:14px 20px 18px}
+.data h3{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:12px}.data h3 em{font-style:normal;font-size:15px;font-weight:400;color:var(--grey);margin-left:10px}
+.dchips{display:grid;grid-template-columns:repeat(9,1fr);gap:9px;margin-bottom:10px}.dchips .chip{height:42px;font-size:16px}
+.srcs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.srcs .chip{height:40px;font-size:15.5px}
+</style></head><body><div class="board" id="board">
+<div class="ttl"><h1>小瓦特·班 业务架构</h1><span>两级用户 · 一个数据底座 · 队伍建设六环闭环</span></div>
+<div class="roles"><div class="rbar"><b>班组长</b><span>派工 · 审票 · 授权 · 培养 · 绩效 · 关怀 · 队伍建设</span></div><div class="rbar"><b>部门管理者</b><span>指标跟踪 · 班组对比 · 班长考评 · 风险防控 · 人力配置</span></div></div>
+<div class="mid">
+  <div class="panel"><h3>班组长端<em>12 个功能页 + 4 个扩展模块</em></h3>
+    <div class="grp">班组管理</div><div class="grid3c"><div class="chip">班组画像</div><div class="chip">班员画像</div><div class="chip">授权认证</div><div class="chip">培养与梯队</div><div class="chip">绩效与激励</div><div class="chip">关怀与文化</div><div class="chip">分析参谋</div></div>
+    <div class="grp">日常业务</div><div class="grid3c"><div class="chip">今日工作台</div><div class="chip">用工安排</div><div class="chip">知识库</div><div class="chip">台账中心</div><div class="chip">问小瓦特</div><div class="chip mute">扩展模块</div></div></div>
+  <div class="ring" id="ring"><svg viewBox="0 0 520 500"><circle cx="260" cy="250" r="185" fill="none" stroke="#8fb3ea" stroke-width="2.5" stroke-dasharray="7 7"/></svg>
+    <div class="core"><b>队伍建设<br>六环闭环</b><span>数据回写 · 持续提升</span></div></div>
+  <div class="panel"><h3>管理者端<em>9 个功能页</em></h3>
+    <div class="grp">业务</div><div class="grid2c"><div class="chip">考核指标</div><div class="chip">班组横向对比</div></div>
+    <div class="grp">管理</div><div class="grid2c"><div class="chip">团队画像总览</div><div class="chip">班长绩效</div><div class="chip">人员总览</div><div class="chip">班组结构对比</div><div class="chip">团队风险画像</div><div class="chip">员工关怀</div><div class="chip">分析参谋</div><div class="chip mute">台账 · 问小瓦特</div></div></div>
+</div>
+<div class="ai"><b>小瓦特 AI 助手</b><span>贯穿两端：查数配图 · 决策依据 · 文稿逐段生成 · 诊断归因 · 经验整理　｜　涉及人员评价的结论由班组长或部门确认后使用</span></div>
+<div class="data"><h3>数据底座<em>十七张班组台账 · 每个数字可追溯至原始记录</em></h3>
+  <div class="dchips"><div class="chip">工时</div><div class="chip">资质证书</div><div class="chip">作业授权认证</div><div class="chip">任务</div><div class="chip">缺陷</div><div class="chip">两票</div><div class="chip">周报指标</div><div class="chip">工作量（工分）</div><div class="chip">违章</div>
+    <div class="chip">安全活动</div><div class="chip">荣誉</div><div class="chip">培训</div><div class="chip">派工记录</div><div class="chip">跨班组调配</div><div class="chip">值班</div><div class="chip">通知</div><div class="chip">操作流水</div><div class="chip dark">17 张</div></div>
+  <div class="srcs"><div class="chip src">人资系统 · 工分制考核</div><div class="chip src">OMS 缺陷与工单</div><div class="chip src">OCS 终端在线</div><div class="chip src">电网管理平台 两票与计划</div><div class="chip src">党建系统 · 荣誉台账</div></div></div>
+</div>
+<script>
+/* 六个环节均匀分布在虚线圆上 */
+const N = [['能力识别', '画像 · 授权认证'], ['精准培养', '师带徒 · 带教'], ['实践锻炼', '派工 · 调配'], ['评价反馈', '考评 · 完工回写'], ['激励应用', '绩效系数 · 评优'], ['再提升', '提升目标 · 计划']];
+const ring = document.getElementById('ring');
+N.forEach(([b, s], i) => { const a = -Math.PI / 2 + i * Math.PI / 3; const d = document.createElement('div'); d.className = 'node'; d.style.left = (260 + 185 * Math.cos(a)) + 'px'; d.style.top = (250 + 185 * Math.sin(a)) + 'px'; d.innerHTML = '<b>' + b + '</b><span>' + s + '</span>'; ring.appendChild(d); });
+</script></body></html>
