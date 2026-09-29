@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=800">
+<title>工博会海报示意稿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* 画布 800×2000 px = 80×200 cm 易拉宝，1px = 1mm */
+  :root{
+    --blue:#2E62E6; --blue-d:#1B44B8; --blue-dd:#12308A; --blue-l:#EAF1FF; --blue-ll:#F5F8FF;
+    --amber:#F5A623; --ink:#16233F; --ink-2:#4A5873; --line:#D6E1F7; --todo:#E8590C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#fff}
+  body{width:800px;height:2000px;font-family:"Noto Sans SC","WenQuanYi Zen Hei",sans-serif;color:var(--ink);position:relative;overflow:hidden;
+       background:linear-gradient(180deg,#fff 0,#F3F7FF 40%,#E9F0FF 100%)}
+  .todo{color:var(--todo);border-bottom:2px dashed var(--todo);padding:0 2px}
+
+  /* ① 顶栏 0–110 */
+  .top{position:absolute;left:0;top:0;width:800px;height:110px;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;background:#fff}
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand img{height:62px}
+  .brand .sep{width:2px;height:48px;background:#C9D6F2}
+  .brand .ai{display:flex;flex-direction:column;line-height:1.05}
+  .brand .ai b{font-size:27px;font-weight:900;color:var(--blue)}
+  .brand .ai span{font-size:13px;color:var(--ink-2);letter-spacing:4px;margin-top:4px}
+  .expo{text-align:right;line-height:1.35}
+  .expo .l1{font-size:15px;font-weight:700;color:var(--blue-d)}
+  .expo .l2{font-size:15px;color:var(--ink-2)}
+  .expo .l3{display:inline-block;margin-top:4px;font-size:17px;font-weight:900;color:#fff;background:var(--blue);border-radius:16px;padding:2px 14px}
+
+  /* ② 主标题 110–400 */
+  .hero{position:absolute;left:0;top:110px;width:800px;height:316px;overflow:hidden;
+        background:linear-gradient(135deg,var(--blue-dd) 0%,var(--blue-d) 45%,var(--blue) 100%);color:#fff;padding:34px 40px 0}
+  .hero svg.bg{position:absolute;right:-10px;bottom:0;opacity:.18}
+  .eyebrow{display:inline-block;font-size:17px;font-weight:700;letter-spacing:2px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:18px;padding:3px 14px}
+  .h1{font-size:70px;font-weight:900;line-height:1.16;margin-top:14px;letter-spacing:1px}
+  .h1 em{font-style:normal;color:var(--amber)}
+  .sub{font-size:27px;font-weight:500;margin-top:10px;opacity:.95}
+
+  /* ③ 起步带 + 扫码 410–745 */
+  .start{position:absolute;left:28px;top:440px;width:744px;height:322px;background:#fff;border-radius:18px;
+         box-shadow:0 6px 24px rgba(30,70,160,.12);padding:24px 26px 0;overflow:hidden}
+  .start h2{font-size:29px;font-weight:900;color:var(--ink)}
+  .start h2 small{display:block;font-size:17px;font-weight:500;color:var(--ink-2);margin-bottom:4px}
+  .steps{margin-top:14px;width:460px}
+  .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+  .step .n{flex:0 0 auto;width:62px;height:40px;border-radius:10px;background:var(--blue);color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
+  .step .t{font-size:19px;line-height:1.35;padding-top:6px}
+  .step .t b{font-weight:700}
+  .step .t span{color:var(--ink-2);font-size:16px}
+  .qr{position:absolute;right:26px;top:26px;width:214px;text-align:center}
+  .qr .box{width:190px;height:190px;margin:0 auto;border:3px solid var(--blue);border-radius:12px;padding:10px;background:
+      repeating-linear-gradient(0deg,#E7ECF7 0 10px,#fff 10px 20px),#fff;display:flex;align-items:center;justify-content:center}
+  .qr .box span{background:#fff;font-size:14px;color:var(--todo);font-weight:700;line-height:1.3;padding:6px}
+  .qr .cta{font-size:20px;font-weight:900;color:var(--blue-d);margin-top:10px}
+  .qr .cta2{font-size:15px;color:var(--ink-2)}
+  .live{position:absolute;left:0;bottom:0;width:100%;height:52px;background:var(--blue-l);display:flex;align-items:center;padding:0 26px;font-size:19px;font-weight:700;color:var(--blue-dd)}
+  .live i{font-style:normal;display:inline-block;background:var(--amber);color:#fff;border-radius:6px;padding:1px 10px;margin-right:10px;font-size:16px}
+
+  /* ④ 六件事 765–1515 */
+  .six{position:absolute;left:28px;top:780px;width:744px}
+  .six h2{font-size:28px;font-weight:900;text-align:center}
+  .cols{display:flex;justify-content:space-between;margin:14px 0 8px}
+  .cols div{width:362px;text-align:center;font-size:18px;font-weight:700;color:var(--blue-d);background:var(--blue-l);border-radius:8px;padding:5px 0}
+  .grid{display:grid;grid-template-columns:362px 362px;column-gap:20px;row-gap:12px}
+  .card{background:#fff;border-radius:14px;border-top:6px solid var(--blue);box-shadow:0 4px 16px rgba(30,70,160,.10);height:196px;padding:12px 16px 10px;display:flex;flex-direction:column}
+  .card .tag{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--blue)}
+  .card .tag svg{width:24px;height:24px}
+  .card .q{font-size:24px;font-weight:900;line-height:1.3;margin-top:6px;color:var(--ink)}
+  .card .how{font-size:16px;line-height:1.4;color:var(--ink-2);margin-top:5px}
+  .card .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+  .card .out{font-size:14.5px;font-weight:700;color:var(--blue-dd)}
+  .card .out::before{content:"产出 ";color:var(--amber)}
+  .card .mod{margin-left:auto;font-size:12.5px;font-weight:500;color:#8A97B2}
+  .demo{margin-top:12px;text-align:center;font-size:18px;font-weight:700;color:var(--blue-dd)}
+  .demo b{color:var(--amber)}
+
+  /* ⑤ 信任条 1525–1640 */
+  .trust{position:absolute;left:28px;top:1536px;width:744px;height:100px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .trust div{background:#fff;border:1.5px solid var(--line);border-radius:12px;text-align:center;padding:10px 6px 0}
+  .trust b{display:block;font-size:19px;font-weight:900;color:var(--blue-d)}
+  .trust span{display:block;font-size:14px;color:var(--ink-2);margin-top:4px;line-height:1.35}
+
+  /* ⑥ 行业 + 园区/活动 1650–1790 */
+  .ind{position:absolute;left:28px;top:1648px;width:744px;text-align:center}
+  .ind p{font-size:16px;color:var(--ink-2);margin-bottom:8px}
+  .chips{display:flex;flex-wrap:nowrap;justify-content:center;gap:6px}
+  .chips span{font-size:15px;font-weight:700;color:var(--blue-d);border:1.5px solid var(--blue);border-radius:16px;padding:2px 9px;background:#fff;white-space:nowrap}
+  .extra{position:absolute;left:28px;top:1724px;width:744px;display:flex;justify-content:space-between;font-size:16px;color:var(--ink)}
+  .extra div{background:#fff;border-radius:10px;padding:8px 12px;border:1.5px dashed #BFCDEB;width:362px;line-height:1.4}
+
+  /* ⑦ 页脚 1810–2000（最下 100mm 为底座遮挡区，只放水印） */
+  .foot{position:absolute;left:0;top:1800px;width:800px;height:200px;background:linear-gradient(135deg,var(--blue-d),var(--blue));color:#fff;padding:14px 36px 0}
+  .foot .row{display:flex;justify-content:space-between;align-items:center}
+  .foot .slogan{font-size:21px;font-weight:700;letter-spacing:3px}
+  .foot .tel{font-size:18px}
+  .foot .note{font-size:12.5px;opacity:.85;margin-top:6px}
+  .foot .wm{position:absolute;left:0;bottom:4px;width:100%;text-align:center;font-size:74px;font-weight:900;letter-spacing:10px;color:rgba(255,255,255,.10)}
+  .base{position:absolute;left:0;top:1900px;width:800px;height:100px;border-top:1px dashed rgba(255,255,255,.45)}
+  .base span{position:absolute;right:12px;top:4px;font-size:11px;color:rgba(255,255,255,.55)}
+</style>
+</head>
+<body>
+
+<!-- ① 顶栏 -->
+<div class="top">
+  <div class="brand">
+    <img src="dgg-logo.png" alt="顶呱呱 政企一站式服务专家">
+    <div class="sep"></div>
+    <div class="ai"><b>薯片AI</b><span>智能体</span></div>
+  </div>
+  <div class="expo">
+    <div class="l1">CIIF 2026 中国工博会</div>
+    <div class="l2">6.2H 馆 · AI+制造场景区</div>
+    <div class="l3">展位 <span class="todo" style="color:#fff;border-color:#fff">待填</span></div>
+  </div>
+</div>
+
+<!-- ② 主标题 -->
+<div class="hero">
+  <svg class="bg" width="520" height="220" viewBox="0 0 520 220" fill="none" stroke="#fff" stroke-width="3">
+    <path d="M10 210 V120 L70 80 V120 L130 80 V120 L190 80 V120 L250 80 V210 Z"/>
+    <path d="M270 210 V60 H330 V210"/><path d="M345 210 V100 H420 V210"/>
+    <path d="M440 210 V30 H500 V210"/><path d="M0 210 H520"/>
+    <circle cx="300" cy="40" r="18"/><path d="M300 12 V22 M300 58 V68 M272 40 H282 M318 40 H328"/>
+    <path d="M20 60 L90 40 L150 50 L220 20" stroke-dasharray="6 6"/>
+  </svg>
+  <div class="eyebrow">AI+制造 · 中小制造企业 AI 落地路径</div>
+  <div class="h1">工厂上 AI，<br><em>先算清楚</em>再投入</div>
+  <div class="sub">管车间，也管接单、回款、用人、合同</div>
+</div>
+
+<!-- ③ 起步带 + 扫码 -->
+<div class="start">
+  <h2><small>不会转、不敢转？</small>先测 · 再排 · 后算</h2>
+  <div class="steps">
+    <div class="step"><div class="n">测</div><div class="t"><b>36 题问卷</b>，看工厂 AI 成熟度在哪一级</div></div>
+    <div class="step"><div class="n">排</div><div class="t"><b>制造业 13 个场景</b>，按您的痛点排先后</div></div>
+    <div class="step"><div class="n">算</div><div class="t"><b>投多少、多久回本</b><br><span>数据不全，不硬算回本期</span></div></div>
+  </div>
+  <div class="qr">
+    <div class="box"><span>渠道码<br>CIIF2026-海报<br>待替换</span></div>
+    <div class="cta">扫码登记</div>
+    <div class="cta2">领《AI 成熟度速览》</div>
+  </div>
+  <div class="live"><i>现场</i>选一件最头疼的事，大屏当场演给您看</div>
+</div>
+
+<!-- ④ 六件事 -->
+<div class="six">
+  <h2>从接单到拍板，六件事先让 AI 算一遍</h2>
+  <div class="cols"><div>订单 · 车间</div><div>钱 · 人 · 决策</div></div>
+  <div class="grid">
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5h3"/></svg>接单<div class="mod">AI获客</div></div>
+      <div class="q">「展会询盘一大把，<br>先跟哪家？」</div>
+      <div class="how">按成交客户画像给线索打分、分派</div>
+      <div class="ft"><div class="out">线索分级 · 本周跟进计划</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>回款<div class="mod">AI CFO</div></div>
+      <div class="q">「现金流<br>还能撑几周？」</div>
+      <div class="how">账、票、流水逐条对上，13 周现金标出缺口周</div>
+      <div class="ft"><div class="out">补缺三方案 · 政策核对清单</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h8M3 10h14M3 15h6M3 20h11"/><path d="M19 13l2 2-2 2"/></svg>排产<div class="mod">订单交付指挥室（AI ERP）</div></div>
+      <div class="q">「客户加急插单，<br>交期怎么排？」</div>
+      <div class="how">三种排法先预演，比拖累、比代价</div>
+      <div class="ft"><div class="out">插单方案 · 采购建议 · 交付日报</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4 3.4-6 6.5-6s5.7 2 6.5 6"/><path d="M17 8l1.5 1.5L22 6"/></svg>用人 · 合规<div class="mod">AI人力官 · AI法务</div></div>
+      <div class="q">「技工难招、加班超标，<br>合同谁来盯？」</div>
+      <div class="how">简历按岗打分，用工与合同逐条过规则</div>
+      <div class="ft"><div class="out">候选人排序 · 整改清单 · 90 天台账</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>车间<div class="mod">AI流程提效</div></div>
+      <div class="q">「报工对不上，<br>瓶颈卡在哪？」</div>
+      <div class="how">报工逐条核验，拆出换型、等待、停机损失</div>
+      <div class="ft"><div class="out">明日派工单 · 提效周报</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M6 16V9M11 16V5M16 16v-4"/><path d="M19 7l-3 3"/></svg>拍板<div class="mod">AI决策</div></div>
+      <div class="q">「利润比上月少了，<br>钱漏在哪？」</div>
+      <div class="how">利润变动拆到原因，方案预演 12 个月再审批</div>
+      <div class="ft"><div class="out">归因 · 方案对比 · 决议</div></div>
+    </div>
+  </div>
+  <div class="demo">▶ 六件事都能在展台大屏<b>现场演示</b></div>
+</div>
+
+<!-- ⑤ 信任条 -->
+<div class="trust">
+  <div><b>不换系统</b><span>读现有表格<br>与 ERP 导出</span></div>
+  <div><b>结果可复算</b><span>规则透明<br>数字有出处</span></div>
+  <div><b>断网可用</b><span>展台演示<br>全程不联网</span></div>
+  <div><b>私域部署</b><span>数据可不出厂<br><span class="todo" style="font-size:12px">范围待确认</span></span></div>
+</div>
+
+<!-- ⑥ 行业 + 园区/活动 -->
+<div class="ind">
+  <p>覆盖制造业 8 个细分行业</p>
+  <div class="chips"><span>机械五金</span><span>电子电器</span><span>汽车零部件</span><span>装备制造</span><span>化工新材料</span><span>纺织服装</span><span>家居建材</span><span>包装印刷</span></div>
+</div>
+<div class="extra">
+  <div>园区 / 协会组织企业集体诊断<br>请联系 <span class="todo">电话待填</span></div>
+  <div>10 月 <span class="todo">X</span> 日 <span class="todo">X</span> 点 · 专区现场分享<br><span class="todo">活动与题目待填</span></div>
+</div>
+
+<!-- ⑦ 页脚 -->
+<div class="foot">
+  <div class="row">
+    <div class="slogan">培育企业核心竞争力　让老板经营企业更简单</div>
+  </div>
+  <div class="row" style="margin-top:8px">
+    <div class="tel">咨询电话 <span class="todo" style="color:#fff;border-color:#fff">待填</span></div>
+  </div>
+  <div class="note">注：展台演示使用虚拟样本数据；具体方案以入企诊断为准。</div>
+  <div class="wm">DINGGUAGUA</div>
+</div>
+<div class="base"><span>↓ 底座遮挡区（约 10cm），不放文字</span></div>
+
+</body>
+</html>
