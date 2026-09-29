@@ -93,8 +93,10 @@ Object.assign(ACT, {
 (function () {
   const ask0 = XW.ask;
   const R = [
+    [/没派|待派|派了几单|派工情况|今日作业/, () => { const go = () => { const D = HOMEPG.dispStat(); XW.answer('今日作业 ' + D.J.length + ' 单：已派工 ' + D.sent + ' 单（进行中 ' + D.on + '、待开工 ' + D.wait + '），待派工 ' + D.pend.length + ' 单，其中今天要定 ' + D.today + ' 单。每一单我都按四条规则给了建议，在工作台最上面。', null, { confirm: false }); ACT['home-to-disp'](); }; ensure('home', go); }],
+    [/人数|平均年龄|男女|党员|政治面貌|学历|年龄结构|人员情况|团队情况/, () => nav('skills')],
     [/五星|星级|建设差距|提升目标|发展规划|班组概况|党建|荣誉/, () => role() === 'manager' ? nav('portrait') : nav('team')],
-    [/授权|认证表|自主实施率|★模块|高风险模块|还差哪些模块/, t => { const who = PEOPLE.find(p => t.includes(p.n)); if (/排带教|排培养/.test(t)) { ensure('auth', () => ACT['au-teachall'](), 'gap'); return true; } if (/生成|导出/.test(t)) { ensure('auth', () => ACT['au-export']()); return true; } if (who) { ensure('auth', () => ACT['au-person']({ dataset: { who: who.n } })); return true; } if (/一两个人|断层/.test(t)) { ensure('auth', () => { const G = AUTHPG.gaps().filter(g => g.a.length <= 2); XW.answer('已授权只有一两个人的★模块有 ' + G.length + ' 个：' + G.map(g => g.s.k + ' ' + g.s.n + '（' + g.a.map(p => p.n).join('、') + '）').join('；') + '。表里按断层风险排好了，高风险的可以直接排带教取证。', null, { confirm: false, speak: false }); }, 'gap'); return true; } nav('auth'); }],
+    [/授权|认证表|自主实施|★模块|高风险模块|还差哪些模块/, t => { const who = PEOPLE.find(p => t.includes(p.n)); if (/排带教|排培养/.test(t)) { ensure('auth', () => ACT['au-teachall'](), 'gap'); return true; } if (/生成|导出/.test(t)) { ensure('auth', () => ACT['au-export']()); return true; } if (who) { ensure('auth', () => ACT['au-person']({ dataset: { who: who.n } })); return true; } if (/一两个人|断层/.test(t)) { ensure('auth', () => { const G = AUTHPG.gaps().filter(g => g.a.length <= 2); XW.answer('已授权只有一两个人的★模块有 ' + G.length + ' 个：' + G.map(g => g.s.k + ' ' + g.s.n + '（' + g.a.map(p => p.n).join('、') + '）').join('；') + '。表里按断层风险排好了，高风险的可以直接排带教取证。', null, { confirm: false, speak: false }); }, 'gap'); return true; } nav('auth'); }],
     [/断层|技能矩阵|谁能带|技师梯队/, () => nav('skills')],
     [/师带徒|带得怎么样|骨干培养|申报|梯队/, () => role() === 'manager' ? nav('portrait') : nav('grow')],
     [/系数|激励|绩效/, () => role() === 'manager' ? nav('lperf') : nav('perf')],

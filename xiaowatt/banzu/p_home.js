@@ -15,10 +15,19 @@ const HOMEPG = {
       card('本月任务 · 按类型', '点一段看明细', CH.donut(types, String(MONTH.jobsDone), '完成 / ' + MONTH.jobs)) +
       card('本周工时', '约定 ' + WEEK_LIMIT + 'h · 点一条照亮台账', CH.bars(bars, WEEK_LIMIT)) +
       card('近 30 天缺陷 · 应用失败与异常信号', '点一天看当天', CH.area(DEF30.days, DEF30.found, DEF30.closed) + legend([[CPAL[0], '发现累计'], [CPAL[2], '闭环累计']])) +
-      card('班组能力 · 8 模块', '点一角看短板', CH.radar(MODS.map(m => m.n), avg, 3) + legend([[CPAL[0], '班组均值'], ['#7b849c', '目标 L3'], [SEM.w, '低于目标']])) +
-      card('证书复审 · 未来一年', '点一个看证书台账', CH.certline(CERTS)) +
+      card('两票 · 近 ' + DB.ticketM().m.length + ' 个月', '开出与合格 · 两票台账', CH.mini.line([{ n: '开出', vals: DB.ticketM().n, c: RAMP[2] }, { n: '合格', vals: DB.ticketM().ok, c: CPAL[0] }], DB.ticketM().m, { h: 150 }) + legend([[RAMP[2], '开出'], [CPAL[0], '合格']])) +
+      card('本周关键节点', '周关键节点管控表 · 周期类节点', CH.mini.donut([{ k: '已清', v: DB.nodeRate().done, c: SEM.ok }, { k: '待清', v: DB.nodeRate().n - DB.nodeRate().done, c: SEM.w }].filter(x => x.v), { hero: DB.nodeRate().done + '/' + DB.nodeRate().n, sub: '本周' })) +
       card('周报指标 · 第 ' + WK29.no + ' 期', '与台账中心同源 · 点一条看', CH.meters(meters)) + '</div>';
   },
+  /* 今日作业 · 派工情况（客户 9/29：工作台只放工作安排——今日几单、派了几单、待派的要不要派、怎么安排） */
+  urg(j) { return /超期/.test(j.when) ? { t: '超期 · 今天必须派', c: 'bad', o: 0 } : j.dateIso <= TODAY || /本周|周五/.test(j.when) ? { t: '本周要做 · 今天派', c: 'w', o: 1 } : { t: '下周 · 周五前派', c: '', o: 2 }; },
+  dispStat() { const J = DB.todayJobs(); const pend = J.filter(j => j.st === '待派'); const on = J.filter(j => /进行中/.test(j.st)).length, wait = J.filter(j => /待开工|已派|票已审/.test(j.st)).length, done = J.filter(j => /已完成|已关闭/.test(j.st)).length; return { J, pend, on, wait, done, sent: J.length - pend.length, today: pend.filter(j => this.urg(j).o <= 1).length }; },
+  dispHTML() { const D = this.dispStat(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length, off = PEOPLE.filter(p => p.status === '休假').length;
+    const rows = D.pend.slice().sort((a, b) => this.urg(a).o - this.urg(b).o || String(a.dateIso).localeCompare(String(b.dateIso))).map(j => { const u = this.urg(j); let d = null; try { d = DISPATCH.defaults(j); } catch (e) {} const sug = d && d.lead ? '负责人 ' + d.lead.n + (d.crew.length ? '，班员 ' + d.crew.map(p => p.n).join('、') : '') + (d.follows.length ? '，随队 ' + d.follows.map(p => p.n).join('、') : '') : '去用工安排按四条规则排';
+      return '<div class="drow"><span class="tag ' + u.c + '">' + h(u.t) + '</span><div><b>' + h(j.t) + '</b><span class="note">' + h(j.when) + ' · 需要 ' + h((j.need || []).join('、') || '—') + '</span><p>她的建议：' + h(sug) + '</p></div><div class="bt">' + (j.id === MAINLINE ? '<button class="s" data-act="home-to-d1">看理由再派</button>' : '<button class="s" data-act="home-disp" data-id="' + j.id + '">去派工</button>') + '</div></div>'; }).join('');
+    return '<div class="card" id="dispcard"><div class="h"><b>今日作业 · 派工情况</b><span>' + TODAY_CN + ' · 用工安排任务池同源</span><div class="r"><button class="s g" data-act="nav" data-to="sched" data-sub="pool">任务池</button></div></div>' +
+      '<div class="dstat"><div><span>今日作业</span><b>' + D.J.length + ' 单</b><em>含本周与下周已排入的任务</em></div><div><span>已派工</span><b class="g">' + D.sent + ' 单</b><em>进行中 ' + D.on + ' · 待开工 ' + D.wait + (D.done ? ' · 已完成 ' + D.done : '') + '</em></div><div><span>待派工</span><b class="' + (D.today ? 'bad' : 'w') + '">' + D.pend.length + ' 单</b><em>今天要定 ' + D.today + ' 单</em></div><div><span>可用人手</span><b>' + onsite + ' / ' + out + '</b><em>在岗 / 外勤 · 休假 ' + off + '</em></div></div>' +
+      (rows ? '<div class="ph3" style="margin-top:8px"><b>待派工 · 要不要派、怎么安排</b><span>按紧急程度排 · 建议按证书、作业授权、本周工时、当天冲突四条规则给出</span></div><div class="dlist">' + rows + '</div>' : '<div class="empty">今天的作业都派出去了</div>') + '</div>'; },
   jobsHTML() { return '<div class="jobs">' + DB.todayJobs().map(j => { const who = DB.crewOf(j); const cls = /已派|票已审|已完成|已关闭/.test(j.st) ? 'ok' : /进行中/.test(j.st) ? 'c' : ''; return '<div data-act="job-open" data-id="' + j.id + '" style="cursor:pointer"><span style="color:var(--ink);font-size:11.5px">' + h(j.t) + (j.added ? ' <i class="tag v">新</i>' : '') + (who.length ? ' · ' + h(who.join(' ')) : '') + '</span>' + (cls ? '<span class="tag ' + cls + '">' + h(j.st) + '</span>' : j.lv ? '<em>' + h(j.lv) + ' · ' + h(j.st) + '</em>' : '<span>' + h(j.when) + ' · ' + h(j.st) + '</span>') + '</div>'; }).join('') + '</div>'; },
   wkHTML() { const f = this.wkFocus(); return '<div class="wkl">' + f.map(x => '<div data-act="wk-item-home" data-k="' + x.it.k + '"><b>' + h(x.it.n) + '</b><span class="' + (x.rank >= 9 ? 'b' : x.rank >= 6 ? 'w' : '') + '">' + (typeof x.it.vals[0] === 'number' ? x.it.vals[WK29.gm()] + x.it.unit : x.it.vals[WK29.gm()]) + ' · 全市第 ' + x.rank + '</span><i>' + h(x.node.t) + ' · A ' + h(x.node.a) + '</i></div>').join('') + '</div>'; }
 };
@@ -26,9 +35,9 @@ PAGES.home = {
   render() {
     const s = HOMEPG.st(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length; const j = DB.job(MAINLINE);
     const d = DISPATCH.defaults(j); const nr = DB.nodeRate(); const d5 = DB.defect('d5');
-    return cmdHTML(['安排下周一田寮站 F02 的交接试验与验收', '黄伟强这周工时怎么算的', '三个月内证书到期的有谁', '周报里光明排名最靠后的是哪几项']) +
+    return cmdHTML(['安排下周一田寮站 F02 的交接试验与验收', '黄伟强这周工时怎么算的', '今天还有几单没派', '周报里光明排名最靠后的是哪几项']) +
       '<div class="hero' + (XW_IMGS && XW_IMGS.main ? ' hasxw' : '') + '">' + (XW_IMGS && XW_IMGS.main ? '<img class="heroxw" src="' + XW_IMGS.main + '" alt="">' : '') + '<div><div class="g">' + TODAY_CN + ' · ' + WEATHER + ' · <span id="clock">' + new Date().toTimeString().slice(0, 5) + '</span></div><h4>早上好，' + h(TEAM.leader) + ' · <em>小瓦特</em></h4><p class="sub" id="sub"></p></div>' +
-      '<div class="nums"><div data-act="nav" data-to="home"><b id="n1">' + HOMEPG.pending() + '</b><span>待拍板</span></div><div data-act="nav" data-to="sched"><b>' + DB.todayJobs().length + '</b><span>今日作业</span></div><div data-act="nav" data-to="sched" data-sub="nodes"><b>' + nr.done + '/' + nr.n + '</b><span>本周节点已清</span></div><div data-act="nav" data-to="people"><b>' + onsite + '/' + out + '</b><span>在岗/外勤</span></div></div></div>' +
+      '<div class="nums"><div data-act="nav" data-to="sched"><b>' + DB.todayJobs().length + '</b><span>今日作业</span></div><div data-act="nav" data-to="sched"><b>' + HOMEPG.dispStat().sent + '</b><span>已派工</span></div><div data-act="home-to-disp"><b>' + HOMEPG.dispStat().pend.length + '</b><span>待派工</span></div><div data-act="nav" data-to="home"><b id="n1">' + HOMEPG.pending() + '</b><span>待拍板</span></div></div></div>' + HOMEPG.dispHTML() +
       '<div class="sec"><i></i><b>今日待拍板</b><em id="badge2">' + HOMEPG.pending() + '</em><span>决定由班组长作出</span></div>' +
       (typeof SUPER !== 'undefined' ? SUPER.transferBlock() : '') +
       '<div class="grid3" id="dec">' +
@@ -44,7 +53,7 @@ PAGES.home = {
       '</div>' +
       '<div class="grid2"><div class="card" id="k1"><div class="h"><b id="k1h">今日作业</b><span id="k1s">' + DB.todayJobs().length + ' 项 · 点一行她说进展</span></div><div id="k1b">' + HOMEPG.jobsHTML() + '</div></div>' +
       '<div class="card" id="k2"><div class="h"><b>周报第 ' + WK29.no + ' 期 · 光明局排名靠后的项</b><span>' + h(WK29.period) + ' · 点一行看对应节点</span></div>' + HOMEPG.wkHTML() + '<div class="bt" style="margin-top:8px"><button class="g" data-act="nav" data-to="ledger" data-sub="weekly">全部 ' + WK29.items.length + ' 项</button><button class="g" data-act="nav" data-to="know">周报两个案例</button></div></div></div>' +
-      '<div class="sec"><i class="v"></i><b>班组一览</b><span>图表可点，点进去她照亮台账</span></div>' + HOMEPG.chartsHTML() +
+      '<div class="sec"><i class="v"></i><b>业务一览</b><span>只放工作相关的图表 · 点进去她照亮台账</span></div>' + HOMEPG.chartsHTML() +
       '<div class="card"><div class="h"><b>人员去向</b><span>' + onsite + ' 在岗 · ' + out + ' 外勤 · ' + PEOPLE.filter(p => p.status === '休假').length + ' 休假</span></div><div class="ppl on" style="margin:0;border:0;padding:0"><div class="row">' + PEOPLE.map(p => '<div class="chip" data-act="person" data-who="' + p.n + '" style="width:auto;flex-direction:row;align-items:center;gap:6px"><b>' + h(p.n) + '</b><span class="tag ' + (p.status === '在岗' ? 'ok' : p.status === '外勤' ? 'w' : '') + '" style="margin:0">' + h(p.status) + '</span></div>').join('') + '</div></div></div>';
   },
   after() {
@@ -60,6 +69,9 @@ PAGES.home = {
   }
 };
 Object.assign(ACT, {
+  'home-disp'(el) { const id = el.dataset.id; ensure('sched', () => ACT['pool-dispatch']({ dataset: { id } }), 'pool'); },
+  'home-to-d1'() { const d = $('#d1'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'center' }); },
+  'home-to-disp'() { const d = $('#dispcard'); if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
   'home-swap'() { const host = $('#ppl'); if (!host || host.classList.contains('on')) return; $('#d1').classList.add('wide'); DISPATCH.open(host, DB.job(MAINLINE)); },
   'dispatch-pick'(el) { DISPATCH.pick(el.dataset.who); },
   'disp-save'() { XW.answer('这张派工单她正在填，填完会自动发出去并通知到人。要改内容的话等她填完，在任务池里点那一行的「改」。', null, { confirm: false }); },

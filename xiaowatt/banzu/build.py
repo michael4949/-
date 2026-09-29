@@ -31,7 +31,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>小瓦特·班 · 班组长 AI 助手</title>
+<title>高效班组管理助手 · 班组长</title>
 <style>
 {css}
 </style>
@@ -42,7 +42,7 @@ html = f"""<!DOCTYPE html>
 try{{ boot(); }}catch(e){{ document.body.innerHTML='<pre style="color:#e5484d;padding:24px;white-space:pre-wrap">'+e.stack+'</pre>'; }}
 </script>
 </html>"""
-out = os.path.join(B, 'dist', '小瓦特班_班组长AI助手_高保真原型.html')
+out = os.path.join(B, 'dist', '高效班组管理助手_班组长_高保真原型.html')
 os.makedirs(os.path.join(B, 'dist'), exist_ok=True)
 open(out, 'w', encoding='utf-8').write(html)
 print('OK', len(html), out, 'xw imgs:', list(imgs.keys()) or 'builtin svg', 'photos:', list(photos.keys()) or 'vector scenes')

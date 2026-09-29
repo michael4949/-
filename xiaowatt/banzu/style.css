@@ -951,5 +951,33 @@ table.t.evidr td.g{color:var(--ok);font-weight:600}table.t.evidr td.b{color:var(
 .scorerow.five .big b{font-size:21px}.scorerow.five .big span{white-space:nowrap}
 .updir{margin-top:8px;font-size:11.5px;line-height:1.65;background:var(--bg);border-radius:6px;padding:7px 10px}
 .updir b{color:var(--pri);margin-right:6px}.updir span{display:block}
-table.t.members td{font-size:12px;white-space:nowrap}table.t.members td:nth-child(6),table.t.members td:nth-child(7){white-space:normal;min-width:110px}
+table.t.members td{font-size:12px;white-space:nowrap}table.t.members td:nth-child(4),table.t.members td:nth-child(5){white-space:normal;min-width:110px}
 table.t.members tr:hover td{background:var(--bg)}
+/* 9/29 二轮：故事线 · 团体 / 个人分区 */
+.scopebar{display:flex;align-items:baseline;gap:10px;margin:16px 2px 8px;padding-bottom:6px;border-bottom:1.5px solid var(--line)}
+.scopebar i{font-style:normal;font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:2px 8px;letter-spacing:1px}
+.scopebar.t i{background:var(--pri)}.scopebar.p i{background:#7a8599}
+.scopebar b{font-size:14px}.scopebar span{font-size:11.5px;color:var(--ink3)}
+.mx5{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+.mxcol{padding:2px 12px;border-right:1px dashed var(--line)}.mxcol:last-child{border-right:0}
+.mxh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.mxh b{font-size:13px;color:var(--pri)}.mxh u{font-size:11px}
+.mxi{padding:5px 0;border-bottom:1px solid var(--line)}.mxi:last-child{border-bottom:0}
+.mxi span{display:block;font-size:11px;color:var(--ink3)}.mxi b{font-size:16px;color:var(--ink)}.mxi em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
+.tcard{display:grid;grid-template-columns:1.35fr 1fr .8fr;gap:18px}
+.tcard h3{font-size:16px;margin:6px 0 4px}.tcard p{font-size:12.5px;line-height:1.7;color:var(--ink2)}
+.tc2,.tc3{border-left:1px dashed var(--line);padding-left:16px}
+.goal{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
+.goal span{display:block;font-size:11px;color:var(--ink3)}.goal b{display:block;font-size:18px;color:var(--ok);margin:2px 0}.goal em{font-style:normal;font-size:11.5px;color:var(--ink2)}
+.boxes3 .mini3 em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:4px}
+table.t.dims td.dgrp{vertical-align:middle;text-align:center;background:var(--bg);border-right:1px solid var(--line);min-width:92px}table.t.dims td.dgrp span{white-space:nowrap}.ragt{white-space:nowrap}
+table.t.dims td.dgrp b{display:block;font-size:12.5px}table.t.dims td.dgrp span{font-size:10.5px;color:var(--ink3)}
+.aubig{display:flex;align-items:center;gap:14px;margin-bottom:6px}.aubig b{font-size:30px;color:var(--pri)}.aubig span{font-size:11.5px;color:var(--ink2);line-height:1.6}
+.kpit.ctrl{cursor:pointer}
+/* 9/29 二轮：工作台 · 今日作业派工情况 */
+.dstat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dstat>div{border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.dstat span{display:block;font-size:10.5px;color:var(--ink3)}.dstat b{display:block;font-family:var(--mono);font-size:19px;color:var(--pri)}
+.dstat b.g{color:var(--ok)}.dstat b.w{color:var(--warn)}.dstat b.bad{color:var(--bad)}.dstat em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
+.dlist{display:flex;flex-direction:column}
+.drow{display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.drow:last-child{border-bottom:0}.drow .tag{justify-self:start}.drow b{font-weight:600}.drow .note{margin-left:8px}.drow p{color:var(--ink2);margin-top:2px}

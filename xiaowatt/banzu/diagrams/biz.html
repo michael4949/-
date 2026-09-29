@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>小瓦特·班 业务架构</title><link rel="stylesheet" href="base.css"><style>
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><title>高效班组管理助手 业务架构</title><link rel="stylesheet" href="base.css"><style>
 .roles{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px}
 .rbar{border-radius:12px;padding:15px 22px;background:linear-gradient(90deg,#0b2d6b,#1a5bc0);color:#fff;display:flex;align-items:baseline;gap:18px;box-shadow:0 4px 12px rgba(11,45,107,.18)}
 .rbar b{font-size:27px;font-weight:800;letter-spacing:2px}.rbar span{font-size:17px;opacity:.85;letter-spacing:.5px}
@@ -22,12 +22,13 @@
 .dchips{display:grid;grid-template-columns:repeat(9,1fr);gap:9px;margin-bottom:10px}.dchips .chip{height:42px;font-size:16px}
 .srcs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.srcs .chip{height:40px;font-size:15.5px}
 </style></head><body><div class="board" id="board">
-<div class="ttl"><h1>小瓦特·班 业务架构</h1><span>两级用户 · 一个数据底座 · 队伍建设六环闭环</span></div>
-<div class="roles"><div class="rbar"><b>班组长</b><span>派工 · 审票 · 授权 · 培养 · 绩效 · 关怀 · 队伍建设</span></div><div class="rbar"><b>部门管理者</b><span>指标跟踪 · 班组对比 · 班长考评 · 风险防控 · 人力配置</span></div></div>
+<div class="ttl"><h1>高效班组管理助手 业务架构</h1><span>两级用户 · 一个数据底座 · 队伍建设六环闭环</span></div>
+<div class="roles"><div class="rbar"><b>班组长</b><span>班组荣誉 → 人员情况 → 业务工作</span></div><div class="rbar"><b>部门管理者</b><span>指标跟踪 · 班组对比 · 班长考评 · 风险防控 · 人力配置</span></div></div>
 <div class="mid">
   <div class="panel"><h3>班组长端<em>12 个功能页 + 4 个扩展模块</em></h3>
-    <div class="grp">班组管理</div><div class="grid3c"><div class="chip">班组画像</div><div class="chip">班员画像</div><div class="chip">授权认证</div><div class="chip">培养与梯队</div><div class="chip">绩效与激励</div><div class="chip">关怀与文化</div><div class="chip">分析参谋</div></div>
-    <div class="grp">日常业务</div><div class="grid3c"><div class="chip">今日工作台</div><div class="chip">用工安排</div><div class="chip">知识库</div><div class="chip">台账中心</div><div class="chip">问小瓦特</div><div class="chip mute">扩展模块</div></div></div>
+    <div class="grp">班组整体 · 荣誉与发展</div><div class="grid3c"><div class="chip">班组画像</div></div>
+    <div class="grp">人员情况 · 团体为主、个人下钻</div><div class="grid3c"><div class="chip">班员画像</div><div class="chip">授权认证</div><div class="chip">培养与梯队</div><div class="chip">绩效与激励</div><div class="chip">关怀与文化</div><div class="chip">分析参谋</div></div>
+    <div class="grp">日常业务 · 工作安排</div><div class="grid3c"><div class="chip">今日工作台</div><div class="chip">用工安排</div><div class="chip">知识库</div><div class="chip">台账中心</div><div class="chip">问小瓦特</div><div class="chip mute">扩展模块</div></div></div>
   <div class="ring" id="ring"><svg viewBox="0 0 520 500"><circle cx="260" cy="250" r="185" fill="none" stroke="#8fb3ea" stroke-width="2.5" stroke-dasharray="7 7"/></svg>
     <div class="core"><b>队伍建设<br>六环闭环</b><span>数据回写 · 持续提升</span></div></div>
   <div class="panel"><h3>管理者端<em>9 个功能页</em></h3>

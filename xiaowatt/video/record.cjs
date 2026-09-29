@@ -7,7 +7,7 @@ const { chromium } = require('/home/user/-/node_modules/playwright');
 const fs = require('fs'), path = require('path');
 const ROOT = __dirname;
 const plan = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan.json'), 'utf8'));
-const APP = 'file://' + path.resolve(ROOT, '..', 'banzu', 'dist', '小瓦特班_班组长AI助手_高保真原型.html');
+const APP = 'file://' + path.resolve(ROOT, '..', 'banzu', 'dist', '高效班组管理助手_班组长_高保真原型.html');
 const W = 1440, H = 810, DSF = 2, TAIL = 0.8, SLOW = +(process.env.SLOW || 2.5);
 const only = process.argv.slice(2);
 const sleep = ms => new Promise(r => setTimeout(r, Math.max(0, ms)));

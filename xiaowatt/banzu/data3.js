@@ -29,7 +29,7 @@ const DISCLOSE = {
   evid: { auth: '违章记录、任务台账、工分制考核台账、两票台账、缺陷台账、培训台账（学时与成绩）、师带徒、知识库', ev: '每条证据后标出来自哪张台账，点开可核', use: '供班组长绩效沟通时引用，不出等级、不打分；正式绩效由公司绩效系统承接', review: '班组长逐条核对后使用' },
   post: { auth: '证书台账、能力图谱、成绩记录、实操评分表、违章记录、安全活动台账', ev: '对照岗位说明书四类要求逐项列出实际', use: '识别未达标项并转成培养重点；不用于排名', review: '结论由班组长确认后写入画像，确认人留名' },
   skill: { auth: '技能等级认定台账（局技能鉴定站）、申报条件、成绩记录', ev: '现等级、取得时间、鉴定成绩、本等级年限', use: '判断够不够岗位要求、何时具备申报条件', review: '报名由本人与班组长确认' },
-  skill9: { auth: '作业授权认证表（运维班口径 42 个模块）、工作票记录、培训台账', ev: '本年实操次数按工作票逐次累计；授权由班组长确认'  , use: '派工时校验是否已取得对应模块授权；核心业务自主实施率与星级评价"人均核心技能实操量"取数', review: '资格变更由班组长确认' }
+  skill9: { auth: '作业授权认证表（运维班口径 42 个模块）、工作票记录、培训台账', ev: '本年实操次数按工作票逐次累计；授权由班组长确认'  , use: '派工时校验是否已取得对应模块授权；核心业务自主实施能力与星级评价"人均核心技能实操量"取数', review: '资格变更由班组长确认' }
 };
 
 /* ---------- 一、履职证据（替代原"绩效考核等级"）：五类只列证据、不出分数 ---------- */
@@ -76,7 +76,7 @@ function postEvalOf(p) {
   const sc = LS.get('scores', {})[p.n]; const prac = (SCORE_HIST[p.n] || []).filter(x => /实操/.test(x.t));
   const best = prac.length ? Math.max.apply(null, prac.map(x => x.s)) : (sc ? sc.total : 0);
   const s9 = skill9Of(p);
-  rows.push({ n: '技能操作', ok: best >= 80 || s9.rate >= 80, req: '实操考核 ≥ 80 分，或本岗级★授权模块自主实施率 ≥ 80%', ev: (prac.length ? prac.map(x => ({ t: x.d + ' ' + x.t + ' ' + x.s + ' 分', s: '成绩记录' })) : [{ t: '本年无实操考核记录', s: '成绩记录' }]).concat(sc ? [{ t: sc.sheet + ' ' + sc.total + ' 分' + (sc.veto ? '（否决项）' : ''), s: '实操评分表' }] : [], [{ t: '本岗级★授权模块已授权 ' + s9.mustA + '/' + s9.mustN + '（自主实施率 ' + s9.rate + '%），本年实操 ' + s9.total + ' 次', s: '工作票 · 实操量' }]) });
+  rows.push({ n: '技能操作', ok: best >= 80 || s9.rate >= 80, req: '实操考核 ≥ 80 分，或本人★模块授权完成度 ≥ 80%', ev: (prac.length ? prac.map(x => ({ t: x.d + ' ' + x.t + ' ' + x.s + ' 分', s: '成绩记录' })) : [{ t: '本年无实操考核记录', s: '成绩记录' }]).concat(sc ? [{ t: sc.sheet + ' ' + sc.total + ' 分' + (sc.veto ? '（否决项）' : ''), s: '实操评分表' }] : [], [{ t: '本岗级★授权模块已授权 ' + s9.mustA + '/' + s9.mustN + '（★授权完成度 ' + s9.rate + '%），本年实操 ' + s9.total + ' 次', s: '工作票 · 实操量' }]) });
   const vio = VIOLATIONS.filter(v => v.who === p.n);
   rows.push({ n: '安全履职', ok: !vio.some(v => v.lv === '严重'), req: '无严重违章；两票执行规范；安全活动全勤', ev: (vio.length ? vio.map(v => ({ t: v.d + ' ' + v.t + '（' + v.lv + '），处理：' + v.fix, s: '违章记录' })) : [{ t: '本年无违章记录', s: '违章记录' }]).concat([{ t: '安全活动参加 ' + SAFETY_ACT.length + ' 次', s: '安全活动台账' }]) });
   const ok = rows.filter(r => r.ok).length;
@@ -105,14 +105,14 @@ function skillOf(p) {
 }
 function skillEqAvg() { return +(PEOPLE.reduce((s, p) => s + (SKILL_EQ[(SKILLS[p.n] || {}).lv] || 0), 0) / PEOPLE.length).toFixed(2); }
 
-/* ---------- 四、作业授权认证：逐人逐模块授权状态、实操量、覆盖、核心业务自主实施率 ----------
+/* ---------- 四、作业授权认证：逐人逐模块授权状态、实操量、覆盖、核心业务自主实施能力 ----------
    认证表取运维班口径（42 个模块、★ 按岗级），配电自动化班专用认证表待提供；原九类核心技能的资格与实操次数已迁移到对应模块 */
 function authLv(p) { const post = p.post || ''; return /中级/.test(post) ? '中' : /初级|学员/.test(post) ? '初' : '高'; }
 function authLvName(p) { return { 高: '高级作业员', 中: '中级作业员', 初: '初级作业员' }[authLv(p)]; }
 function skill9Of(p) { const q = LS.get('skill9', {})[p.n] || {}; const base = SKILLQ[p.n] || { q: SKILL9.map(() => '-'), n: SKILL9.map(() => 0) }; const add = LS.get('skill9n', {})[p.n] || {}; const qs = base.q.map((v, i) => q[SKILL9[i].k] || v); const ns = base.n.map((v, i) => v + (add[SKILL9[i].k] || 0));
   const lv = authLv(p); const must = SKILL9.map(s => s.star[lv]); const mustN = must.filter(Boolean).length; const mustA = qs.filter((x, i) => must[i] && x === 'A').length; const mustB = qs.filter((x, i) => must[i] && x === 'B').length;
   return { q: qs, n: ns, a: qs.filter(x => x === 'A').length, b: qs.filter(x => x === 'B').length, total: ns.reduce((s, x) => s + x, 0), lv, must, mustN, mustA, mustB, rate: mustN ? Math.round(mustA / mustN * 100) : 0 }; }
-/* 核心业务自主实施率（覆盖率）＝ 已授权的★模块 ÷ 本人岗级应授权的★模块；班组按人次合计 */
+/* 核心业务自主实施能力（班组）＝ 全班已授权★模块 ÷ 全班按岗级应授权★模块；本人★模块授权完成度同一算法按个人算 */
 function authRate(list) { const L = (list || PEOPLE).map(skill9Of); const n = L.reduce((s, x) => s + x.mustN, 0), a = L.reduce((s, x) => s + x.mustA, 0); return n ? Math.round(a / n * 100) : 0; }
 function authUnitRate(list, unit) { const idx = SKILL9.map((s, i) => s.unit === unit ? i : -1).filter(i => i >= 0); let n = 0, a = 0; (list || PEOPLE).forEach(p => { const x = skill9Of(p); idx.forEach(i => { if (x.must[i]) { n++; if (x.q[i] === 'A') a++; } }); }); return { n, a, pct: n ? Math.round(a / n * 100) : null }; }
 /* 模块覆盖与断层风险：只对班组必须覆盖的★模块（高级作业员口径）判风险 */
@@ -191,7 +191,7 @@ const FIVE = [
     { n: '作业下限缺口', v: () => certGap().filter(g => g.lack).length + ' 类', th: '0 类', src: '证书台账 · 作业下限', use: '缺口类别排取证；跨班组时看谁能借', who: '管理者' }
   ] },
   { k: 'skill', n: '能力覆盖', d: '作业授权认证 42 个模块取得授权没有、★模块覆盖够不够、实操量够不够', items: [
-    { n: '核心业务自主实施率', v: () => authRate() + '%', th: '星级五星 ≥ 35%；★模块 ' + SKILL9.filter(s => s.star['高']).length + ' 个，每个 ≥3 人授权（现 ' + skillCover().filter(c => c.must && c.a.length >= 3).length + ' 个）', src: '作业授权认证表 · 工作票', use: '不足的模块排带教取证；派工校验', who: '班组长' },
+    { n: '核心业务自主实施能力', v: () => authRate() + '%', th: '星级五星 ≥ 35%；★模块 ' + SKILL9.filter(s => s.star['高']).length + ' 个，每个 ≥3 人授权（现 ' + skillCover().filter(c => c.must && c.a.length >= 3).length + ' 个）', src: '作业授权认证表 · 工作票', use: '不足的模块排带教取证；派工校验', who: '班组长' },
     { n: '人均核心技能实操量', v: () => skill9PerCap() + ' 次', th: '具备资格者不低于人均 30%', src: '工作票逐次累计', use: '星级评价 3.2.2 取数；低于 30% 的人优先派', who: '管理者' },
     { n: '图谱最弱模块', v: () => { const avg = MODS.map((m, i) => PEOPLE.reduce((s, p) => s + PEOPLEPG.lv(p)[i], 0) / PEOPLE.length); const wi = avg.indexOf(Math.min.apply(null, avg)); return MODS[wi].n.replace('能力', '') + ' L' + avg[wi].toFixed(1); }, th: '均值 ≥ L3', src: '能力图谱（考评定级回写）', use: '排课与带教对象', who: '班组长' }
   ] },
@@ -230,6 +230,6 @@ function metricMap() {
     { n: '两票合格', v: m.ticketsOK + '/' + m.tickets, d: '待审 ' + DB.tickets().filter(t => t.st === '待审').length + ' 张', tab: 'ticket', act: 'six', k: 'jobs' },
     { n: '缺陷闭环', v: m.defectsClosed + '/' + m.defectsFound, d: '未闭环 ' + (m.defectsFound - m.defectsClosed) + ' 处', tab: 'defect', act: 'hz-stage', k: '已关闭' },
     { n: '周报指标 · 在线率', v: WK29.val('online') + '%', d: '全市第 ' + WK29.rank('online') + '，与周报第 29 期一致', tab: 'weekly', act: 'nav' },
-    { n: '核心业务自主实施率', v: authRate() + '%', d: '★模块覆盖不足 ' + skillCover().filter(c => c.must && c.a.length < 3).length + ' 个 · 人均实操 ' + skill9PerCap() + ' 次', tab: 'skill9', act: 'nav' }
+    { n: '核心业务自主实施能力', v: authRate() + '%', d: '★模块覆盖不足 ' + skillCover().filter(c => c.must && c.a.length < 3).length + ' 个 · 人均实操 ' + skill9PerCap() + ' 次', tab: 'skill9', act: 'nav' }
   ];
 }
