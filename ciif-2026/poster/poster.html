@@ -38,17 +38,17 @@
   .eyebrow{display:inline-block;font-size:17px;font-weight:700;letter-spacing:2px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:18px;padding:3px 14px}
   .h1{font-size:70px;font-weight:900;line-height:1.16;margin-top:14px;letter-spacing:1px}
   .h1 em{font-style:normal;color:var(--amber)}
-  .sub{font-size:27px;font-weight:500;margin-top:10px;opacity:.95}
+  .sub{font-size:25px;font-weight:500;margin-top:12px;letter-spacing:1px;opacity:.95}
 
   /* ③ 起步带 + 扫码 410–745 */
-  .start{position:absolute;left:28px;top:440px;width:744px;height:322px;background:#fff;border-radius:18px;
+  .start{position:absolute;left:28px;top:446px;width:744px;height:300px;background:#fff;border-radius:18px;
          box-shadow:0 6px 24px rgba(30,70,160,.12);padding:24px 26px 0;overflow:hidden}
   .start h2{font-size:29px;font-weight:900;color:var(--ink)}
   .start h2 small{display:block;font-size:17px;font-weight:500;color:var(--ink-2);margin-bottom:4px}
-  .steps{margin-top:14px;width:460px}
-  .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
-  .step .n{flex:0 0 auto;width:62px;height:40px;border-radius:10px;background:var(--blue);color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
-  .step .t{font-size:19px;line-height:1.35;padding-top:6px}
+  .steps{margin-top:12px;width:470px}
+  .step{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+  .step .n{flex:0 0 auto;width:62px;letter-spacing:1px;height:40px;border-radius:10px;background:var(--blue);color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
+  .step .t{font-size:19px;line-height:1.3;padding-top:0}
   .step .t b{font-weight:700}
   .step .t span{color:var(--ink-2);font-size:16px}
   .qr{position:absolute;right:26px;top:26px;width:214px;text-align:center}
@@ -61,31 +61,32 @@
   .live i{font-style:normal;display:inline-block;background:var(--amber);color:#fff;border-radius:6px;padding:1px 10px;margin-right:10px;font-size:16px}
 
   /* ④ 六件事 765–1515 */
-  .six{position:absolute;left:28px;top:780px;width:744px}
-  .six h2{font-size:28px;font-weight:900;text-align:center}
+  .six{position:absolute;left:28px;top:762px;width:744px}
+  .six h2{font-size:30px;font-weight:900;text-align:center}
+  .six .h2s{text-align:center;font-size:17px;color:var(--ink-2);margin-top:4px}
   .cols{display:flex;justify-content:space-between;margin:14px 0 8px}
   .cols div{width:362px;text-align:center;font-size:18px;font-weight:700;color:var(--blue-d);background:var(--blue-l);border-radius:8px;padding:5px 0}
   .grid{display:grid;grid-template-columns:362px 362px;column-gap:20px;row-gap:12px}
-  .card{background:#fff;border-radius:14px;border-top:6px solid var(--blue);box-shadow:0 4px 16px rgba(30,70,160,.10);height:196px;padding:12px 16px 10px;display:flex;flex-direction:column}
+  .card{background:#fff;border-radius:14px;border-top:6px solid var(--blue);box-shadow:0 4px 16px rgba(30,70,160,.10);height:204px;padding:12px 16px 10px;display:flex;flex-direction:column}
   .card .tag{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--blue)}
   .card .tag svg{width:24px;height:24px}
-  .card .q{font-size:24px;font-weight:900;line-height:1.3;margin-top:6px;color:var(--ink)}
-  .card .how{font-size:16px;line-height:1.4;color:var(--ink-2);margin-top:5px}
+  .card .q{font-size:25px;font-weight:900;line-height:1.3;margin-top:8px;color:var(--ink)}
+  .card .how{font-size:16px;line-height:1.5;color:var(--ink-2);margin-top:8px}
   .card .ft{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
   .card .out{font-size:14.5px;font-weight:700;color:var(--blue-dd)}
-  .card .out::before{content:"产出 ";color:var(--amber)}
+  .card .out::before{content:"交付物　";color:var(--amber)}
   .card .mod{margin-left:auto;font-size:12.5px;font-weight:500;color:#8A97B2}
   .demo{margin-top:12px;text-align:center;font-size:18px;font-weight:700;color:var(--blue-dd)}
   .demo b{color:var(--amber)}
 
   /* ⑤ 信任条 1525–1640 */
-  .trust{position:absolute;left:28px;top:1536px;width:744px;height:100px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .trust{position:absolute;left:28px;top:1560px;width:744px;height:100px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .trust div{background:#fff;border:1.5px solid var(--line);border-radius:12px;text-align:center;padding:10px 6px 0}
   .trust b{display:block;font-size:19px;font-weight:900;color:var(--blue-d)}
   .trust span{display:block;font-size:14px;color:var(--ink-2);margin-top:4px;line-height:1.35}
 
   /* ⑥ 行业 + 园区/活动 1650–1790 */
-  .ind{position:absolute;left:28px;top:1648px;width:744px;text-align:center}
+  .ind{position:absolute;left:28px;top:1690px;width:744px;text-align:center}
   .ind p{font-size:16px;color:var(--ink-2);margin-bottom:8px}
   .chips{display:flex;flex-wrap:nowrap;justify-content:center;gap:6px}
   .chips span{font-size:15px;font-weight:700;color:var(--blue-d);border:1.5px solid var(--blue);border-radius:16px;padding:2px 9px;background:#fff;white-space:nowrap}
@@ -128,88 +129,83 @@
     <circle cx="300" cy="40" r="18"/><path d="M300 12 V22 M300 58 V68 M272 40 H282 M318 40 H328"/>
     <path d="M20 60 L90 40 L150 50 L220 20" stroke-dasharray="6 6"/>
   </svg>
-  <div class="eyebrow">AI+制造 · 中小制造企业 AI 落地路径</div>
-  <div class="h1">工厂上 AI，<br><em>先算清楚</em>再投入</div>
-  <div class="sub">管车间，也管接单、回款、用人、合同</div>
+  <div class="eyebrow">AI+制造 · 制造企业经营智能体</div>
+  <div class="h1">制造企业 AI 落地，<br><em>从可量化</em>开始</div>
+  <div class="sub">贯通订单、生产、财务、人力与决策的全链路经营智能体</div>
 </div>
 
-<!-- ③ 起步带 + 扫码 -->
+<!-- ③ 方法论 + 扫码 -->
 <div class="start">
-  <h2><small>不会转、不敢转？</small>先测 · 再排 · 后算</h2>
+  <h2><small>AI 落地方法论</small>评估 · 规划 · 测算</h2>
   <div class="steps">
-    <div class="step"><div class="n">测</div><div class="t"><b>36 题问卷</b>，看工厂 AI 成熟度在哪一级</div></div>
-    <div class="step"><div class="n">排</div><div class="t"><b>制造业 13 个场景</b>，按您的痛点排先后</div></div>
-    <div class="step"><div class="n">算</div><div class="t"><b>投多少、多久回本</b><br><span>数据不全，不硬算回本期</span></div></div>
+    <div class="step"><div class="n">01</div><div class="t"><b>成熟度评估</b><br><span>六大维度 36 项指标，定位企业 AI 成熟度等级</span></div></div>
+    <div class="step"><div class="n">02</div><div class="t"><b>场景优先级规划</b><br><span>痛点、数据、见效周期、实施门槛四维模型排序</span></div></div>
+    <div class="step"><div class="n">03</div><div class="t"><b>投入产出测算</b><br><span>全周期现金流与投资回收期测算，口径透明可复算</span></div></div>
   </div>
   <div class="qr">
     <div class="box"><span>渠道码<br>CIIF2026-海报<br>待替换</span></div>
-    <div class="cta">扫码登记</div>
-    <div class="cta2">领《AI 成熟度速览》</div>
+    <div class="cta">扫码预约</div>
+    <div class="cta2">企业 AI 成熟度评估</div>
   </div>
-  <div class="live"><i>现场</i>选一件最头疼的事，大屏当场演给您看</div>
 </div>
 
-<!-- ④ 六件事 -->
+<!-- ④ 六大场景 -->
 <div class="six">
-  <h2>从接单到拍板，六件事先让 AI 算一遍</h2>
-  <div class="cols"><div>订单 · 车间</div><div>钱 · 人 · 决策</div></div>
+  <h2>六大经营场景智能体</h2>
+  <div class="h2s">覆盖从订单到决策的制造企业经营全链路</div>
+  <div class="cols"><div>运营侧</div><div>管理侧</div></div>
   <div class="grid">
     <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5h3"/></svg>接单<div class="mod">AI获客</div></div>
-      <div class="q">「展会询盘一大把，<br>先跟哪家？」</div>
-      <div class="how">按成交客户画像给线索打分、分派</div>
-      <div class="ft"><div class="out">线索分级 · 本周跟进计划</div></div>
-    </div>
-    <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>回款<div class="mod">AI CFO</div></div>
-      <div class="q">「现金流<br>还能撑几周？」</div>
-      <div class="how">账、票、流水逐条对上，13 周现金标出缺口周</div>
-      <div class="ft"><div class="out">补缺三方案 · 政策核对清单</div></div>
-    </div>
-    <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h8M3 10h14M3 15h6M3 20h11"/><path d="M19 13l2 2-2 2"/></svg>排产<div class="mod">订单交付指挥室（AI ERP）</div></div>
-      <div class="q">「客户加急插单，<br>交期怎么排？」</div>
-      <div class="how">三种排法先预演，比拖累、比代价</div>
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h8M3 10h14M3 15h6M3 20h11"/><path d="M19 13l2 2-2 2"/></svg>订单交付<div class="mod">AI ERP</div></div>
+      <div class="q">工序级排程 · 插单多情景预演</div>
+      <div class="how">延期原因自动归类，量化插单对交付的影响</div>
       <div class="ft"><div class="out">插单方案 · 采购建议 · 交付日报</div></div>
     </div>
     <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4 3.4-6 6.5-6s5.7 2 6.5 6"/><path d="M17 8l1.5 1.5L22 6"/></svg>用人 · 合规<div class="mod">AI人力官 · AI法务</div></div>
-      <div class="q">「技工难招、加班超标，<br>合同谁来盯？」</div>
-      <div class="how">简历按岗打分，用工与合同逐条过规则</div>
-      <div class="ft"><div class="out">候选人排序 · 整改清单 · 90 天台账</div></div>
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>财务管理<div class="mod">AI CFO</div></div>
+      <div class="q">三表勾稽 · 现金流滚动预测</div>
+      <div class="how">多源数据交叉核验，13 周资金滚动预测</div>
+      <div class="ft"><div class="out">风险预警 · 资金缺口方案 · 政策清单</div></div>
     </div>
     <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>车间<div class="mod">AI流程提效</div></div>
-      <div class="q">「报工对不上，<br>瓶颈卡在哪？」</div>
-      <div class="how">报工逐条核验，拆出换型、等待、停机损失</div>
-      <div class="ft"><div class="out">明日派工单 · 提效周报</div></div>
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>生产运营<div class="mod">AI流程提效</div></div>
+      <div class="q">报工核验 · 瓶颈工序识别</div>
+      <div class="how">量化换型、等待与停机损失，优化投料派工</div>
+      <div class="ft"><div class="out">派工计划 · 提效周报</div></div>
     </div>
     <div class="card">
-      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M6 16V9M11 16V5M16 16v-4"/><path d="M19 7l-3 3"/></svg>拍板<div class="mod">AI决策</div></div>
-      <div class="q">「利润比上月少了，<br>钱漏在哪？」</div>
-      <div class="how">利润变动拆到原因，方案预演 12 个月再审批</div>
-      <div class="ft"><div class="out">归因 · 方案对比 · 决议</div></div>
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4 3.4-6 6.5-6s5.7 2 6.5 6"/><path d="M17 8l1.5 1.5L22 6"/></svg>人力与合规<div class="mod">AI人力官 · AI法务</div></div>
+      <div class="q">人岗匹配 · 合规风险审查</div>
+      <div class="how">简历结构化评估，用工与合同风险规则化审查</div>
+      <div class="ft"><div class="out">候选人评估 · 整改清单 · 合规台账</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5h3"/></svg>市场获客<div class="mod">AI获客</div></div>
+      <div class="q">客户画像 · 线索智能评分</div>
+      <div class="how">基于成交客户反推画像，线索分级与智能分派</div>
+      <div class="ft"><div class="out">线索分级 · 跟进计划</div></div>
+    </div>
+    <div class="card">
+      <div class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M6 16V9M11 16V5M16 16v-4"/><path d="M19 7l-3 3"/></svg>经营决策<div class="mod">AI决策</div></div>
+      <div class="q">指标归因 · 方案推演</div>
+      <div class="how">指标变动因素分解，方案推演与审批闭环</div>
+      <div class="ft"><div class="out">归因报告 · 方案对比 · 经营决议</div></div>
     </div>
   </div>
-  <div class="demo">▶ 六件事都能在展台大屏<b>现场演示</b></div>
 </div>
 
-<!-- ⑤ 信任条 -->
+<!-- ⑤ 能力底座 -->
 <div class="trust">
-  <div><b>不换系统</b><span>读现有表格<br>与 ERP 导出</span></div>
-  <div><b>结果可复算</b><span>规则透明<br>数字有出处</span></div>
-  <div><b>断网可用</b><span>展台演示<br>全程不联网</span></div>
-  <div><b>私域部署</b><span>数据可不出厂<br><span class="todo" style="font-size:12px">范围待确认</span></span></div>
+  <div><b>系统兼容</b><span>对接现有 ERP<br>与业务数据</span></div>
+  <div><b>规则透明</b><span>计算过程<br>可追溯、可复算</span></div>
+  <div><b>离线运行</b><span>支持无网络<br>环境运行</span></div>
+  <div><b>私域部署</b><span>数据不出企业<br><span class="todo" style="font-size:12px">范围待确认</span></span></div>
 </div>
 
-<!-- ⑥ 行业 + 园区/活动 -->
+<!-- ⑥ 适用行业 -->
 <div class="ind">
-  <p>覆盖制造业 8 个细分行业</p>
+  <p>适用行业</p>
   <div class="chips"><span>机械五金</span><span>电子电器</span><span>汽车零部件</span><span>装备制造</span><span>化工新材料</span><span>纺织服装</span><span>家居建材</span><span>包装印刷</span></div>
-</div>
-<div class="extra">
-  <div>园区 / 协会组织企业集体诊断<br>请联系 <span class="todo">电话待填</span></div>
-  <div>10 月 <span class="todo">X</span> 日 <span class="todo">X</span> 点 · 专区现场分享<br><span class="todo">活动与题目待填</span></div>
 </div>
 
 <!-- ⑦ 页脚 -->
@@ -220,7 +216,7 @@
   <div class="row" style="margin-top:8px">
     <div class="tel">咨询电话 <span class="todo" style="color:#fff;border-color:#fff">待填</span></div>
   </div>
-  <div class="note">注：展台演示使用虚拟样本数据；具体方案以入企诊断为准。</div>
+  <div class="note">注：具体方案以企业诊断结果为准。</div>
   <div class="wm">DINGGUAGUA</div>
 </div>
 <div class="base"><span>↓ 底座遮挡区（约 10cm），不放文字</span></div>
