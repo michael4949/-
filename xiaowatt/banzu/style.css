@@ -947,8 +947,8 @@ table.t.evidr td.g{color:var(--ok);font-weight:600}table.t.evidr td.b{color:var(
 .kpit span{color:var(--ink2)}.kpit b{display:block;font-size:12.5px;margin-top:2px}.kpit em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
 .abil3>div{border-right:1px dashed var(--line);padding-right:10px}.abil3>div:last-child{border-right:0}
 .abnote{font-size:11.5px;color:var(--ink2);margin-top:4px}
-.scorerow.five{grid-template-columns:repeat(5,1fr)}
-.scorerow.five .big b{font-size:21px}.scorerow.five .big span{white-space:nowrap}
+.scorerow.sr5{grid-template-columns:repeat(5,1fr)}
+.scorerow.sr5 .big b{font-size:21px}.scorerow.sr5 .big span{white-space:nowrap}
 .updir{margin-top:8px;font-size:11.5px;line-height:1.65;background:var(--bg);border-radius:6px;padding:7px 10px}
 .updir b{color:var(--pri);margin-right:6px}.updir span{display:block}
 table.t.members td{font-size:12px;white-space:nowrap}table.t.members td:nth-child(4),table.t.members td:nth-child(5){white-space:normal;min-width:110px}
@@ -963,11 +963,11 @@ table.t.members tr:hover td{background:var(--bg)}
 .mxh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.mxh b{font-size:13px;color:var(--pri)}.mxh u{font-size:11px}
 .mxi{padding:5px 0;border-bottom:1px solid var(--line)}.mxi:last-child{border-bottom:0}
 .mxi span{display:block;font-size:11px;color:var(--ink3)}.mxi b{font-size:16px;color:var(--ink)}.mxi em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
-.tcard{display:grid;grid-template-columns:1.35fr 1fr .8fr;gap:18px}
-.tcard h3{font-size:16px;margin:6px 0 4px}.tcard p{font-size:12.5px;line-height:1.7;color:var(--ink2)}
-.tc2,.tc3{border-left:1px dashed var(--line);padding-left:16px}
-.goal{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
-.goal span{display:block;font-size:11px;color:var(--ink3)}.goal b{display:block;font-size:18px;color:var(--ok);margin:2px 0}.goal em{font-style:normal;font-size:11.5px;color:var(--ink2)}
+.tmcard{display:grid;grid-template-columns:1.35fr 1fr .8fr;gap:18px}
+.tmcard h3{font-size:16px;margin:6px 0 4px}.tmcard p{font-size:12.5px;line-height:1.7;color:var(--ink2)}
+.tmc2,.tmc3{border-left:1px dashed var(--line);padding-left:16px}
+.tmgoal{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg)}
+.tmgoal span{display:block;font-size:11px;color:var(--ink3)}.tmgoal b{display:block;font-size:18px;color:var(--ok);margin:2px 0}.tmgoal em{font-style:normal;font-size:11.5px;color:var(--ink2)}
 .boxes3 .mini3 em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:4px}
 table.t.dims td.dgrp{vertical-align:middle;text-align:center;background:var(--bg);border-right:1px solid var(--line);min-width:92px}table.t.dims td.dgrp span{white-space:nowrap}.ragt{white-space:nowrap}
 table.t.dims td.dgrp b{display:block;font-size:12.5px}table.t.dims td.dgrp span{font-size:10.5px;color:var(--ink3)}
@@ -981,3 +981,21 @@ table.t.dims td.dgrp b{display:block;font-size:12.5px}table.t.dims td.dgrp span{
 .dlist{display:flex;flex-direction:column}
 .drow{display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
 .drow:last-child{border-bottom:0}.drow .tag{justify-self:start}.drow b{font-weight:600}.drow .note{margin-left:8px}.drow p{color:var(--ink2);margin-top:2px}
+
+/* 9/29 二轮：管理者 · 团队画像总览排版（班组卡不挤字、班长队伍表整行） */
+.startag{white-space:nowrap}
+.tcard .hstar{flex-wrap:wrap;row-gap:4px}
+.tcard .hitem{flex-wrap:wrap;row-gap:2px}
+.tcard .hitem b{white-space:nowrap}
+table.t.ldtbl th,table.t.ldtbl td{white-space:nowrap;vertical-align:middle}
+.ldbk{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.grid2.ldrow{margin-top:12px;align-items:stretch}
+.ch .lb.lbw,.ch g[data-act]:hover .lb.lbw{fill:#fff}
+.ph1 .r{flex-shrink:0}.ph1 .r button{white-space:nowrap}
+.card .h>b{flex-shrink:0;max-width:70%}
+.note.nw{white-space:nowrap}
+table.t.sttbl th,table.t.sttbl td{white-space:nowrap;vertical-align:middle}
+table.t.cutbl th,table.t.cutbl td:nth-child(-n+2),table.t.cutbl td:nth-child(4),table.t.cutbl td:nth-child(5){white-space:nowrap}
+.casec div.bt{display:flex;flex-wrap:wrap;gap:6px}
+table.t.rktbl th,table.t.rktbl td:nth-child(-n+4),table.t.rktbl td:last-child{white-space:nowrap}
+.card .h .r{flex-shrink:0}.card .h .r button{white-space:nowrap}
