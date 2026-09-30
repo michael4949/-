@@ -1,4 +1,4 @@
-// 生成三套样本（制造主样本沿用杭州锐合：人数、工资总额、社保基数与 AI CFO 账套一致；在招岗位呼应 ERP 的 CNC 瓶颈、法务的华南子公司、获客的华南客户）
+// 生成三套样本（制造主样本沿用无锡恒驰：人数、工资总额、社保基数与 AI CFO 账套一致；在招岗位呼应 ERP 的 CNC 瓶颈、法务的华南子公司、获客的华南客户）
 // 员工为逐人记录（工号 + 岗位，不出现姓名），由固定种子生成；合规问题刻意埋在少数人身上
 const fs = require('fs');
 const path = require('path');
@@ -68,7 +68,7 @@ const MONTHS12 = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-0
 function scaleExpected(cands, k) { cands.forEach((c) => { c.expected = Math.round(c.expected * k / 100) * 100; }); return cands; }
 function cand(id, needId, o) { return Object.assign({ id, needId, stage: 'new', source: 'site', certs: [], industries: [], scores: null, interviewDate: null, offer: null }, o); }
 
-/* ---------------- 制造 · 杭州锐合 ---------------- */
+/* ---------------- 制造 · 无锡恒驰 ---------------- */
 (function () {
   const C = cfo('mfg'), P = C.external.payroll;
   const depts = [
@@ -136,8 +136,8 @@ function cand(id, needId, o) { return Object.assign({ id, needId, stage: 'new', 
     cand('C-2609-030', 'R-2609-03', { edu: 'college', years: 4, skills: ['b2b', 'quote', 'crm'], industries: ['mfg'], lastTenureMonths: 24, jobs5y: 2, expected: 10500, availableDays: 14, distanceKm: 0, age: 29, source: 'return' })
   ];
   W('mfg.json', {
-    archetype: 'make', sector: 'mfg', company: C.company, co: '锐合', today: TODAY, weekStart: '2026-09-14', overtimeMonth: '2026-08',
-    profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', founded: 2012, revenue12: C.ledger.pl.rev.reduce((a, b) => a + b, 0), product: '精密五金件与冲压件', lines: '八条产线：下料、冲压 A / B、CNC 车铣、热处理、电镀、装配包装', customers: '汽配、家电、储能设备', region: '华南', hotAllowancePaid: true, hotJobsDepts: ['prod', 'maint'], wageIndex: fin.wageIndex },
+    archetype: 'make', sector: 'mfg', company: C.company, co: '恒驰', today: TODAY, weekStart: '2026-09-14', overtimeMonth: '2026-08',
+    profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', founded: 2012, revenue12: C.ledger.pl.rev.reduce((a, b) => a + b, 0), product: '汽车零部件件与冲压件', lines: '八条产线：下料、冲压 A / B、CNC 车铣、热处理、电镀、装配包装', customers: '汽配、家电、储能设备', region: '华南', hotAllowancePaid: true, hotJobsDepts: ['prod', 'maint'], wageIndex: fin.wageIndex },
     sources: [
       { id: 'hr', name: '人事系统 · 花名册与合同', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 168 },
       { id: 'payroll', name: '工资表 · 8 月', mode: 'import', lastSync: '2026-09-10 18:00', rows: 168 },

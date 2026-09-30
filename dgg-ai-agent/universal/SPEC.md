@@ -82,7 +82,7 @@
   "runtime": { "engine": "js", "ecma": "es5", "entry": { "require": "dist/<id>.umd.js", "import": "dist/<id>.mjs", "browser": "dist/<id>.umd.js" } },
   "i18n": { "default": "zh-CN", "available": ["zh-CN"] },
   "datasets": [                     // 预置数据集：product 类用它开场，compute 类用 examples
-    { "key": "make", "label": "制造型样本", "note": "杭州锐合精密五金" }
+    { "key": "make", "label": "制造型样本", "note": "无锡恒驰汽车零部件" }
   ],
   "actions": [                      // 见 §4
     { "name": "run", "title": "一次成型", "kind": "compute", "mutates": false,

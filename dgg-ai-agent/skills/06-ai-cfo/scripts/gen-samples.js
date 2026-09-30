@@ -1,4 +1,4 @@
-// 生成三套账套样本（制造主样本沿用 AI ERP 的杭州锐合；贸易与服务为变体）
+// 生成三套账套样本（制造主样本沿用 AI ERP 的无锡恒驰；贸易与服务为变体）
 // 账套由驱动参数推出：收入序列 × 毛利率 → 成本；应收 / 存货 / 应付按目标路径反推回款、采购、付款；
 // 现金按各项流量累计；未分配利润按净利润累计——所以三表天然平衡。
 // 五处勾稽异常做在「外部来源」与账面的差异上：银行流水、ERP 库存、发票数据、固定资产台账、租赁合同。
@@ -83,9 +83,9 @@ function build(p) {
   return { ledger, external };
 }
 
-// ---------- 制造主样本：杭州锐合精密五金 ----------
+// ---------- 制造主样本：无锡恒驰汽车零部件 ----------
 const mfg = {
-  archetype: 'make', sector: 'mfg', company: '杭州锐合精密五金有限公司', period: '2026-08', today: '2026-09-17', vatRate: 0.13, citRate: 0.25,
+  archetype: 'make', sector: 'mfg', company: '无锡恒驰汽车零部件有限公司', period: '2026-08', today: '2026-09-17', vatRate: 0.13, citRate: 0.25,
   profile: { industry: 'mfg-machinery', size: '101_300', employees: 168, rdStaff: 19, province: '浙江', highTech: false, exportRev12: 0, unionFee12: 118000, insuredStable: true, trainingCert: 0 },
   sources: [
     { id: 'finance', name: '财务软件 · 科目余额与凭证', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 1284 },
@@ -144,7 +144,7 @@ const mfg = {
       { id: 'AP-0818', supplier: '宁波钢材贸易', amount: 520000, due: '2026-09-22', critical: true },
       { id: 'AP-0811', supplier: '无锡不锈钢材料', amount: 780000, due: '2026-09-28', critical: true },
       { id: 'AP-0803', supplier: '无锡不锈钢材料', amount: 460000, due: '2026-08-28', critical: true },
-      { id: 'AP-0820', supplier: '杭州铝业', amount: 380000, due: '2026-10-08', critical: true },
+      { id: 'AP-0820', supplier: '无锡铝业', amount: 380000, due: '2026-10-08', critical: true },
       { id: 'AP-0814', supplier: '绍兴表面处理材料', amount: 210000, due: '2026-10-02', critical: true },
       { id: 'AP-0809', supplier: '东莞模具', amount: 330000, due: '2026-10-15', critical: false },
       { id: 'AP-0822', supplier: '萧山纸箱厂', amount: 96000, due: '2026-09-30', critical: false },
@@ -156,7 +156,7 @@ const mfg = {
       { id: 'AP-0831', supplier: '宁波橡塑', amount: 72000, due: '2026-11-12', critical: false },
       { id: 'AP-0902', supplier: '无锡不锈钢材料', amount: 620000, due: '2026-10-18', critical: true },
       { id: 'AP-0905', supplier: '宁波钢材贸易', amount: 540000, due: '2026-10-25', critical: true },
-      { id: 'AP-0908', supplier: '杭州铝业', amount: 290000, due: '2026-11-02', critical: true },
+      { id: 'AP-0908', supplier: '无锡铝业', amount: 290000, due: '2026-11-02', critical: true },
       { id: 'AP-0910', supplier: '绍兴表面处理材料', amount: 160000, due: '2026-11-08', critical: false }
     ],
     orders: [

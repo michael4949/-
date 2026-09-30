@@ -1,4 +1,4 @@
-// 生成三套样本（制造主样本沿用杭州锐合：合同相对方就是 ERP / CFO / 获客里的那批；贸易、服务为变体）
+// 生成三套样本（制造主样本沿用无锡恒驰：合同相对方就是 ERP / CFO / 获客里的那批；贸易、服务为变体）
 // 合同为结构化条款：每条带类型标签与参数，审查规则对参数做算式；每份合同刻意埋 1–5 处问题
 const fs = require('fs');
 const path = require('path');
@@ -23,7 +23,7 @@ const T = {
 };
 
 const mfg = {
-  archetype: 'make', sector: 'mfg', company: '杭州锐合精密五金有限公司', co: '锐合', today: '2026-09-17', weekStart: '2026-09-14',
+  archetype: 'make', sector: 'mfg', company: '无锡恒驰汽车零部件有限公司', co: '恒驰', today: '2026-09-17', weekStart: '2026-09-14',
   profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', founded: '2012-05-18', legalRep: '法定代表人', capital: 10000000 },
   sources: [
     { id: 'oa', name: 'OA · 合同审批与用印', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 64 },
@@ -33,8 +33,8 @@ const mfg = {
     { id: 'erp', name: 'ERP · 客户与供应商', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 42 }
   ],
   contracts: [
-    contract({ id: 'HT-2609-018', type: 'sale', role: 'supply', title: '精密五金件年度供货合同', party: 'K-017 · 汽配一级供应商', amount: 4200000, signed: '2026-01-15', start: '2026-01-15', end: '2026-12-31', status: '履行中', milestones: [{ date: '2026-10-10', text: '第三季度对账' }, { date: '2026-12-15', text: '年度价格复核' }], clauses: [
-      T.subject('供方向需方供应精密五金件 Ø12×45、Ø8×30 等，具体型号、数量以需方月度订单为准。'), T.quality('双方确认的技术协议与封样'),
+    contract({ id: 'HT-2609-018', type: 'sale', role: 'supply', title: '汽车零部件件年度供货合同', party: 'K-017 · 汽配一级供应商', amount: 4200000, signed: '2026-01-15', start: '2026-01-15', end: '2026-12-31', status: '履行中', milestones: [{ date: '2026-10-10', text: '第三季度对账' }, { date: '2026-12-15', text: '年度价格复核' }], clauses: [
+      T.subject('供方向需方供应汽车零部件件 Ø12×45、Ø8×30 等，具体型号、数量以需方月度订单为准。'), T.quality('双方确认的技术协议与封样'),
       T.delivery('供方按需方订单约定日期交付至需方指定仓库，运费由供方承担。', true),
       T.payment('需方于每批货物验收合格后 120 日内支付该批货款。', { termDays: 120, advanceRatio: 0 }),
       T.acceptance(15), T.liability(null), T.penalty(0.5), T.dispute('counterparty'), T.force(), T.notice()
@@ -107,7 +107,7 @@ const mfg = {
       T.acceptance(15), C('warranty', '质量保证', '整机质保 10 个月。', { months: 10 }), T.liability(1), T.dispute('ours'), T.force()
     ] }),
     contract({ id: 'HT-2609-024', type: 'agency', role: 'principal', title: '海外市场代理协议', party: 'K-031 · 出口贸易公司', amount: 0, signed: '2026-09-01', start: '2026-09-01', end: '2029-08-31', status: '审查中', milestones: [{ date: '2026-09-25', text: '代理协议签署截止' }], clauses: [
-      T.subject('委托方授权代理方在东南亚市场代理销售委托方的精密五金件。'),
+      T.subject('委托方授权代理方在东南亚市场代理销售委托方的汽车零部件件。'),
       C('exclusivity', '独家代理', '代理方在代理区域内享有独家代理权。', { exclusive: true, minVolume: null }),
       T.term('本协议有效期 3 年，期满自动续期 3 年。', { autoRenew: true, exitNotice: false }),
       T.payment('代理方按订单金额预付 30%，发货前付清余款。', { termDays: 0, advanceRatio: 0 }),
@@ -133,30 +133,30 @@ const mfg = {
   ],
   ip: {
     trademarks: [
-      { id: 'TM-01', name: '锐合', regNo: '第 2306**** 号', classes: ['06'], regDate: '2017-03-14', status: '已注册' },
-      { id: 'TM-02', name: '锐合', regNo: '第 2306**** 号', classes: ['07'], regDate: '2017-03-14', status: '已注册' },
-      { id: 'TM-03', name: '锐合', regNo: '第 4187**** 号', classes: ['40'], regDate: '2020-08-21', status: '已注册' },
-      { id: 'TM-04', name: '锐合精工', regNo: '第 5522**** 号', classes: ['07'], regDate: '2021-11-07', status: '已注册' }
+      { id: 'TM-01', name: '恒驰', regNo: '第 2306**** 号', classes: ['06'], regDate: '2017-03-14', status: '已注册' },
+      { id: 'TM-02', name: '恒驰', regNo: '第 2306**** 号', classes: ['07'], regDate: '2017-03-14', status: '已注册' },
+      { id: 'TM-03', name: '恒驰', regNo: '第 4187**** 号', classes: ['40'], regDate: '2020-08-21', status: '已注册' },
+      { id: 'TM-04', name: '恒驰精工', regNo: '第 5522**** 号', classes: ['07'], regDate: '2021-11-07', status: '已注册' }
     ],
     patents: [
-      { id: 'ZL-01', title: '一种精密五金件多工位冷镦成型方法', kind: 'invention', appDate: '2019-11-20', grantDate: '2022-04-06', status: '有效' },
+      { id: 'ZL-01', title: '一种汽车零部件件多工位冷镦成型方法', kind: 'invention', appDate: '2019-11-20', grantDate: '2022-04-06', status: '有效' },
       { id: 'ZL-02', title: '一种薄壁铝合金外壳压铸工艺', kind: 'invention', appDate: '2023-06-08', grantDate: '2025-09-15', status: '有效' },
       { id: 'ZL-03', title: '一种冲压支架自动上料装置', kind: 'utility', appDate: '2022-11-02', grantDate: '2023-06-20', status: '有效' },
       { id: 'ZL-04', title: '一种密封圈装配检测治具', kind: 'utility', appDate: '2023-10-08', grantDate: '2024-04-12', status: '有效' },
       { id: 'ZL-05', title: '一种电镀挂具快换结构', kind: 'utility', appDate: '2024-01-15', grantDate: '2024-08-30', status: '有效' }
     ],
-    software: [{ id: 'RZ-01', title: '锐合生产报工系统 V1.0', regDate: '2024-03-18' }, { id: 'RZ-02', title: '锐合质检数据采集软件 V2.0', regDate: '2025-07-22' }],
+    software: [{ id: 'RZ-01', title: '恒驰生产报工系统 V1.0', regDate: '2024-03-18' }, { id: 'RZ-02', title: '恒驰质检数据采集软件 V2.0', regDate: '2025-07-22' }],
     domains: [{ name: 'ruihe-****.com', expiry: '2026-12-01' }],
     similarMarks: [
-      { name: '锐合五金', classes: ['07'], holder: '同行 · 华南', similarity: 0.82, status: '初审公告中', deadline: '2026-10-05', note: '公告期内可提异议' },
+      { name: '恒驰五金', classes: ['07'], holder: '同行 · 华南', similarity: 0.82, status: '初审公告中', deadline: '2026-10-05', note: '公告期内可提异议' },
       { name: '睿合', classes: ['06'], holder: '贸易商 · 华东', similarity: 0.61, status: '已注册', deadline: null, note: '可评估无效宣告' }
     ],
     infringementLeads: [
-      { where: '电商平台店铺', product: '精密五金件 Ø12×45 同款', note: '商品标题使用「锐合」字样，月销 300+', similarity: 0.9, found: '2026-09-10' },
+      { where: '电商平台店铺', product: '汽车零部件件 Ø12×45 同款', note: '商品标题使用「恒驰」字样，月销 300+', similarity: 0.9, found: '2026-09-10' },
       { where: '行业展会', product: '冲压支架', note: '展品外观与 ZL-03 装置相近', similarity: 0.7, found: '2026-09-12' }
     ]
   },
-  setup: { type: 'subsidiary', name: '锐合精密五金（华南）有限公司', region: '广东 · 东莞', capital: 5000000, shares: [{ holder: '杭州锐合精密五金有限公司', pct: 70 }, { holder: '华南业务团队持股平台', pct: 30, platform: true }], scope: ['精密五金件与冲压件销售', '金属材料加工'], licenses: ['排污许可'], confirmed: false, startDate: '2026-10-08', reason: 'K-048、K-074 等华南客户年采购额已超 500 万元，就近仓储与加工可缩短交期' },
+  setup: { type: 'subsidiary', name: '恒驰汽车零部件（华南）有限公司', region: '广东 · 东莞', capital: 5000000, shares: [{ holder: '无锡恒驰汽车零部件有限公司', pct: 70 }, { holder: '华南业务团队持股平台', pct: 30, platform: true }], scope: ['汽车零部件件与冲压件销售', '金属材料加工'], licenses: ['排污许可'], confirmed: false, startDate: '2026-10-08', reason: 'K-048、K-074 等华南客户年采购额已超 500 万元，就近仓储与加工可缩短交期' },
   renewList: [], applyList: [], log: []
 };
 
