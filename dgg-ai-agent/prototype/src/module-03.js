@@ -1,6 +1,9 @@
-/* 模块 3 · 企业AI投入ROI测算器
- * 屏 1 企业与场景 → 屏 2 投入方案 → 屏 3 收益端（按杠杆动态展开）→ 屏 4 测算台 → 屏 5 报告 28 页
+/* 模块 3 · 投入产出测算（内核 SKILL 名仍为「企业AI投入ROI测算器」）
+ * 屏 1 企业画像 → 屏 2 场景组合 → 屏 3 收益参数（按杠杆动态展开）→ 屏 4 投入方案 → 屏 5 测算台 → 屏 6 报告
  * 版式：账页标尺（竖脊 + 账行 + 金额栏对齐），暖墨 + 铜金
+ * 工博会版：角标「24 期现金流测算 · 3 档情景推演」；测算台顶部三档情景（保守 / 基准 / 乐观）一键切换；
+ * 演示企业无锡恒驰默认带入样例 S1 的 4 场景组合；屏上不出现积分；每屏挂现场引导「下一步」，
+ * 末屏（测算台 / 报告）挂交付物条「投入产出测算表」，「下一步」按外壳 FLOW 进入场景深潜。
  */
 (function () {
   'use strict';
@@ -42,25 +45,57 @@
   function trunc(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   function reportNo(r) { var d = r.meta && r.meta.date ? r.meta.date : '20260917'; return 'DGG-R-' + d + '-' + String(Math.abs(hashOf(r.profile.name)) % 100000).padStart(5, '0'); }
   function hashOf(s) { var x = 0; String(s).split('').forEach(function (c) { x = (x * 31 + c.charCodeAt(0)) | 0; }); return x; }
+  /* 工博会口径：屏上与报告封面用物料定稿的显示名；内核 meta.module 仍是 SKILL 名 */
+  function NAME() { return sh.moduleName ? sh.moduleName('m3') : '投入产出测算'; }
+  function TITLE() { return NAME() + '报告'; }
+  var BADGE = '24 期现金流测算 · 3 档情景推演';
+  var SKILL_NAME = '企业AI投入ROI测算器';
+  function showName(t) { return String(t || '').split(SKILL_NAME).join(NAME()).split('企业AI高价值场景排序').join(sh.moduleName ? sh.moduleName('m2') : '场景优先级规划'); }
+  function wrapH(h0) { return function (tag, attrs, kids) { return h0(tag, attrs, (kids || []).map(function (c) { return typeof c === 'string' ? showName(c) : c; })); }; }
+  function noCredits(t) { return String(t || '').replace(/[，,]?每次消耗积分/, ''); }
+  /* 三档情景：数据里叫 保守 / 中性 / 积极，测算台的切换按海报口径写 保守 / 基准 / 乐观 */
+  var SCEN = { cons: '保守', mid: '基准', opt: '乐观' };
+  function scenOf(r) { return r.scenarios.filter(function (x) { return x.key === M.scen; })[0] || r.scenarios[1]; }
+  /* 演示企业（样例 S1 · 无锡恒驰）的 4 场景组合与投入方案：进模块即带入，销售不用手填 */
+  var DEMO = { name: '无锡恒驰汽车零部件有限公司',
+    scenes: [
+      { sceneId: 'mfg-s01', gain: { errorFreqMonthly: 6, errorCostPerCase: 8000, opsPeople: 3, opsHoursPerDay: 2, opsSalary: 7500 } },
+      { sceneId: 'mfg-s03', gain: { dealsMonthly: 28, dealValue: 62000, grossMargin: 0.22 } },
+      { sceneId: 'mfg-s05', gain: { errorFreqMonthly: 9, errorCostPerCase: 4200, opsPeople: 4, opsHoursPerDay: 1.5, opsSalary: 6800 } },
+      { sceneId: 'mfg-s08', gain: { relatedRevenueMonthly: 4200000 } }
+    ],
+    plan: { tier: 'adv', dataState: 'excel', setupPeople: 2, setupSalary: 7500 } };
+  function isDemoCompany() { return !!(M.form && M.form.name === DEMO.name); }
+  function applyDemo() {
+    var list = DEMO.scenes.filter(function (x) { return !!sceneById(x.sceneId); });
+    if (!list.length) return false;
+    M.picks = JSON.parse(JSON.stringify(list));
+    var p = emptyPlan(); Object.keys(DEMO.plan).forEach(function (k) { p[k] = DEMO.plan[k]; }); M.plan = p;
+    M.result = null; M.base = null; M.baseSnap = null;
+    return true;
+  }
 
   // ---------- 生命周期 ----------
   function mount(root, step, shell) {
-    sh = shell; $root = root; h = sh.h; DATA = sh.DATA; CH = window.DGG.charts;
+    sh = shell; $root = root; h = wrapH(sh.h); DATA = sh.DATA; CH = window.DGG.charts;
     if (!M.form) M.form = sh.getCompany() ? fromProfile(sh.getCompany()) : emptyForm();
     if (!M.plan) M.plan = emptyPlan();
     if (!M.picks) M.picks = [];
+    if (!M.scen) M.scen = 'mid';
+    if (!M.picks.length && isDemoCompany()) applyDemo();
     M.step = step || (M.result ? 'report' : 'input');
     if ((M.step === 'report' || M.step === 'board') && !M.result) M.step = 'input';
     if ((M.step === 'gain' || M.step === 'plan') && !M.picks.length) M.step = 'scenes';
     if (M.step === 'scenes' && profileGaps().length) M.step = 'input';
     draw();
   }
-  function unmount() { }
+  function unmount() { if (window.DGG.guide) window.DGG.guide.clear(); }
   function onCompany(c) {
     // 本模块自己把画像写回外壳时会回调到这里，此时内容与当前状态一致，不应把用户弹回第一屏
     if (c && M.form && JSON.stringify(fromProfile(c)) === JSON.stringify(M.form)) return;
     M.form = c ? fromProfile(c) : emptyForm();
     M.result = null; M.base = null; M.baseSnap = null; M.picks = [];
+    if (isDemoCompany()) applyDemo();
     if (M.step !== 'input') setStep('input'); else draw();
   }
   function onIndustry(slug) {
@@ -122,6 +157,53 @@
   }
 
   // ---------- 通用件 ----------
+  function head() {
+    return h('div', { class: 'mod-head' }, [
+      h('div', { class: 'crumb' }, [h('button', { onclick: function () { sh.go('home'); } }, ['首页']), ' / ']),
+      h('h1', {}, [NAME()]),
+      h('span', { class: 'mod-badge' }, [BADGE])
+    ]);
+  }
+  function deliverBar(host) { if (sh.deliver) sh.deliver(host, { items: ['投入产出测算表'], scene: NAME() }); }
+  /* ---------- 现场引导：每屏常驻「下一步」；末屏（测算台 / 报告）由外壳 FLOW 接到「选一个场景深潜」 ---------- */
+  var GUIDE_ORDER = ['input', 'scenes', 'gain', 'plan', 'board'];
+  var GUIDE_LABEL = { input: '企业画像', scenes: '场景组合', gain: '收益参数', plan: '投入方案', board: '测算台' };
+  function mountGuide(work) {
+    if (!window.DGG.guide) return;
+    var i = GUIDE_ORDER.indexOf(M.step);
+    var nx = (i >= 0 && i < GUIDE_ORDER.length - 1) ? GUIDE_ORDER[i + 1] : null;
+    window.DGG.guide.mount({
+      root: work, work: work, barHost: $root, id: 'm3', step: M.step, aim: M.step === 'board' || M.step === 'report' ? 'next' : null,
+      nextKey: nx, nextLabel: nx ? GUIDE_LABEL[nx] : '',
+      onNext: function () { advance(); },
+      onHome: function () { sh.go('home'); }
+    });
+  }
+  /* 「下一步」= 本屏主操作；条件不满足时用演示企业的样例补齐，保证展台上一路点得下去 */
+  function advance() {
+    if (M.step === 'input') {
+      if (profileGaps().length) { var d = DATA.companies && DATA.companies[0]; if (d) M.form = fromProfile(d.profile); }
+      if (profileGaps().length) return;
+      sh.setCompany(JSON.parse(JSON.stringify(M.form)));
+      if (!M.picks.length && isDemoCompany()) applyDemo();
+      setStep('scenes');
+    } else if (M.step === 'scenes') {
+      if (!M.picks.length) applyDemo();
+      if (!M.picks.length) {
+        M.picks = secScenes().slice().sort(function (a, b) { return (b.value - a.value) || (a.weeks - b.weeks); }).slice(0, 4).map(function (x) { return { sceneId: x.id, gain: {} }; });
+      }
+      if (!M.picks.length) return;
+      setStep('gain');
+    } else if (M.step === 'gain') {
+      setStep('plan');
+    } else if (M.step === 'plan') {
+      var r = recompute();
+      if (!r.ok) return;
+      sh.charge(r.meta.credits); sh.setQrReady(false);
+      M.base = null; M.baseSnap = null;
+      setStep('board');
+    }
+  }
   function steps(n) {
     var names = ['企业画像', '场景组合', '收益参数', '投入方案', '测算台'];
     return h('div', { class: 'm3-steps-bar' }, names.map(function (t, i) {
@@ -143,6 +225,7 @@
   function screenInput() {
     var f = M.form, gaps = profileGaps();
     var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(head());
     pane.appendChild(steps(1));
     pane.appendChild(h('h2', { class: 'm3-h2' }, ['第一步　企业画像']));
     pane.appendChild(h('p', { class: 'm3-p' }, [
@@ -158,14 +241,12 @@
         ctrl = inp;
       } else if (fd.type === 'industry') {
         cls = 'span2';
-        var sec = sectorOf(f.industry) || DATA.industries.sectors[0], box = h('div');
-        box.appendChild(h('div', { class: 'm3-chips sm' }, DATA.industries.sectors.map(function (s) {
-          return h('button', { class: 'ch' + (s.key === sec.key ? ' on' : ''), onclick: function () { f.industry = s.industries[0].slug; M.picks = []; draw(); } }, [s.name]);
-        })));
-        box.appendChild(h('div', { class: 'm3-chips' }, sec.industries.map(function (i) {
-          return h('button', { class: 'ch' + (i.slug === f.industry ? ' on' : ''), onclick: function () { f.industry = i.slug; M.picks = []; draw(); } }, [i.name]);
-        })));
-        ctrl = box;
+        /* 工博会版：只列 8 个制造细分（外壳 mfgIndustries），默认取外壳当前行业；选择同步回顶栏 */
+        var mfg = sh.mfgIndustries ? sh.mfgIndustries() : [];
+        if (!mfg.some(function (i) { return i.slug === f.industry; }) && mfg.length) f.industry = (sh.industrySlug && sh.industrySlug()) || mfg[0].slug;
+        ctrl = h('div', { class: 'm3-chips' }, mfg.map(function (i) {
+          return h('button', { class: 'ch' + (i.slug === f.industry ? ' on' : ''), onclick: function () { f.industry = i.slug; M.picks = []; if (sh.setIndustry) sh.setIndustry(i.slug); draw(); } }, [i.name]);
+        }));
       } else if (fd.type === 'select') {
         var sel = h('select', { class: 'm3-sel', onchange: function () { f.province = sel.value; } });
         (DATA.provinces || ['浙江']).forEach(function (pv) { sel.appendChild(h('option', { value: pv, selected: pv === f.province }, [pv])); });
@@ -197,7 +278,7 @@
     pane.appendChild(h('div', { id: 'm3-gap1' }, [blocked(gaps, '还需填写：')].filter(Boolean)));
     pane.appendChild(h('div', { class: 'm3-act' }, [
       h('span', { class: 'm3-cnt' }, ['必填 ', h('b', {}, [(DATA.fields.filter(function (x) { return x.required; }).length - gaps.length) + ' / ' + DATA.fields.filter(function (x) { return x.required; }).length]), ' 项']),
-      h('button', { class: 'btn', id: 'm3-next1', disabled: gaps.length > 0, onclick: function () {
+      h('button', { class: 'btn', id: 'm3-next1', 'data-guide': '', disabled: gaps.length > 0, onclick: function () {
         sh.setCompany(JSON.parse(JSON.stringify(M.form)));
         setStep('scenes');
       } }, ['下一步：选场景组合'])
@@ -216,6 +297,7 @@
     });
     var pv = preview();
     var pane = h('div', { class: 'm3-pane wide' });
+    pane.appendChild(head());
     pane.appendChild(steps(2));
     pane.appendChild(h('h2', { class: 'm3-h2' }, ['第二步　选定拟实施的场景组合']));
     pane.appendChild(h('p', { class: 'm3-p' }, [
@@ -274,7 +356,7 @@
     pane.appendChild(h('div', { class: 'm3-act' }, [
       h('button', { class: 'btn ghost', onclick: function () { setStep('input'); } }, ['上一步']),
       M.picks.length ? null : h('span', { class: 'm3-cnt warn' }, ['请至少勾选 1 个场景']),
-      h('button', { class: 'btn', disabled: !M.picks.length, onclick: function () { setStep('gain'); } },
+      h('button', { class: 'btn', 'data-guide': '', disabled: !M.picks.length, onclick: function () { setStep('gain'); } },
         ['下一步：填收益参数' + (M.picks.length ? '（' + M.picks.length + ' 个场景）' : '')])
     ].filter(Boolean)));
     $root.appendChild(pane);
@@ -283,6 +365,7 @@
   // ================= 屏 3：逐场景收益参数 =================
   function screenGain() {
     var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(head());
     pane.appendChild(steps(3));
     var gap = gainGaps();
     pane.appendChild(h('h2', { class: 'm3-h2' }, ['第三步　逐场景填写收益参数']));
@@ -316,7 +399,7 @@
     pane.appendChild(h('div', { class: 'm3-act' }, [
       h('button', { class: 'btn ghost', onclick: function () { setStep('scenes'); } }, ['上一步']),
       h('span', { class: 'm3-cnt' + (gap ? ' warn' : '') }, [gap ? '尚有 ' + gap + ' 项未填，留空的场景不计入收益' : '全部参数已填齐']),
-      h('button', { class: 'btn', onclick: function () { setStep('plan'); } }, ['下一步：投入方案'])
+      h('button', { class: 'btn', 'data-guide': '', onclick: function () { setStep('plan'); } }, ['下一步：投入方案'])
     ]));
     $root.appendChild(pane);
   }
@@ -327,6 +410,7 @@
     var pv = preview();
     var refCustom = pv ? pv.invest.customRefTotal : null;
     var pane = h('div', { class: 'm3-pane' });
+    pane.appendChild(head());
     pane.appendChild(steps(4));
     pane.appendChild(h('h2', { class: 'm3-h2' }, ['第四步　投入方案']));
     pane.appendChild(h('p', { class: 'm3-p' }, [
@@ -391,7 +475,7 @@
     pane.appendChild(h('div', {}, [blocked(errs, '参数有误，无法进入测算台：')].filter(Boolean)));
     pane.appendChild(h('div', { class: 'm3-act' }, [
       h('button', { class: 'btn ghost', onclick: function () { setStep('gain'); } }, ['上一步']),
-      h('button', { class: 'btn', disabled: !chk.ok, onclick: function () {
+      h('button', { class: 'btn', 'data-guide': '', disabled: !chk.ok, onclick: function () {
         var r = recompute();
         if (!r.ok) return;
         sh.charge(r.meta.credits); sh.setQrReady(false);
@@ -477,13 +561,15 @@
     var r = M.result; if (!r) { setStep('input'); return; }
     if (!M.base) { M.base = JSON.parse(JSON.stringify(r)); M.baseSnap = snapshot(); }
     var wrap = h('div', { class: 'm3-console' });
+    wrap.appendChild(head());
     var bar = h('div', { class: 'cbar' }, [
-      h('div', { class: 'no' }, ['04']),
-      h('div', {}, [h('div', { class: 't' }, ['测算台']), h('div', { class: 'en' }, ['CALCULATION CONSOLE'])]),
+      h('div', { class: 'no' }, ['05']),
+      h('div', {}, [h('div', { class: 't' }, ['测算台']), h('div', { class: 'en' }, [BADGE])]),
       h('div', { class: 'rt', id: 'm3-cbarrt' }, [])
     ]);
     fillBarRight(bar.querySelector('#m3-cbarrt'));
     wrap.appendChild(bar);
+    var sw = h('div', { id: 'm3-scen' }); fillScen(sw); wrap.appendChild(sw);
     var grid = h('div', { class: 'cgrid' });
     var panel = h('div', { id: 'm3-cpanel' }), main = h('div', { id: 'm3-cmain' }), side = h('div', { id: 'm3-cside' });
     fillPanel(panel); fillMain(main); fillSide(side);
@@ -493,7 +579,27 @@
       h('button', { class: 'btn ghost', onclick: function () { setStep('plan'); } }, ['返回投入方案']),
       h('button', { class: 'btn', onclick: function () { sh.setQrReady(true); setStep('report'); } }, ['出具完整报告'])
     ]));
+    deliverBar(wrap);
     $root.appendChild(wrap);
+  }
+  /* 三档情景一键切换：保守 / 基准 / 乐观。切档只改中栏的口径展示，左栏参数与内核结果不动 */
+  function fillScen(box) {
+    var r = M.result;
+    box.className = 'scen-sw';
+    box.appendChild(h('div', { class: 'lb' }, [h('b', {}, ['三档情景']), h('span', {}, ['点一下切换，看回收期怎么变'])]));
+    r.scenarios.forEach(function (sc) {
+      var lab = SCEN[sc.key] || sc.name;
+      box.appendChild(h('button', { class: 'sb' + (sc.key === M.scen ? ' on' : ''), 'data-scen': sc.key, onclick: function () {
+        M.scen = sc.key;
+        var sw = document.getElementById('m3-scen'); if (sw) { sh.clear(sw); fillScen(sw); }
+        refreshBoard();
+      } }, [
+        h('span', { class: 'k' }, [lab + '档']),
+        h('span', { class: 'v' }, [sc.payback == null ? '> ' + r.meta.horizon + ' 期' : '第 ' + sc.payback + ' 期转正']),
+        h('span', { class: 's' }, ['收益 × ' + sc.benefitMul + ' · 投入 × ' + sc.costMul])
+      ]));
+    });
+    box.id = 'm3-scen';
   }
 
   function fillBarRight(box) {
@@ -618,15 +724,28 @@
   }
   function fillMain(box) {
     var r = M.result, b = M.base, pm = payMonth(r), bpm = b ? payMonth(b) : null;
+    /* 三档情景：基准档就是内核主口径；保守 / 乐观按情景系数复算逐期流（与报告第 06 章同式） */
+    var sc = scenOf(r), scen = sc.key !== 'mid' && r.flow.length ? scenFlow(r, sc) : null, lab = SCEN[sc.key] || sc.name, mid = r.scenarios[1];
+    var flow = scen ? scen.rows : r.flow, pay = scen ? scen.payback : r.payback;
+    if (scen) pm = scen.payback;
+    var monthly = scen ? sc.monthlyBenefit : r.benefit.cashMonthly, cash1 = scen ? sc.cashYear1 : r.invest.cashYear1;
     box.appendChild(h('div', { class: 'verd' }, [
       h('div', { class: 'big' }, [
         h('div', { class: 'lb' }, ['累计净现金流转正期次']),
         h('div', { class: 'v' }, [pm == null ? '> ' + r.meta.horizon : '第 ' + pm, h('small', {}, ['期'])]),
-        h('div', { class: 'bs' }, [payBasisLabel(r)])
+        h('div', { class: 'bs' }, [lab + '档 · ' + (scen ? '现金口径' : payBasisLabel(r))])
       ]),
-      h('div', { class: 'tx' }, [h('div', { class: 'hl' }, [r.verdict.headline]), h('div', { class: 'x' }, [r.verdict.text])])
+      h('div', { class: 'tx' }, [
+        h('div', { class: 'hl' }, [scen ? lab + '档：收益按基准的 ' + Math.round(sc.benefitMul * 100) + '%、投入按 ' + Math.round(sc.costMul * 100) + '% 计，' + (pm == null ? r.meta.horizon + ' 期内未转正' : '第 ' + pm + ' 期转正') + '，两年累计净额 ' + fmt(sc.cum24) + ' 元' : r.verdict.headline]),
+        h('div', { class: 'x' }, [scen ? sc.desc + '。基准档第 ' + (mid.payback == null ? '—' : mid.payback) + ' 期转正；投资决策与预算审批以保守档为准。' : r.verdict.text])
+      ])
     ]));
-    box.appendChild(h('div', { class: 'deltas' }, [
+    box.appendChild(h('div', { class: 'deltas' }, scen ? [
+      dlt('转正期次 · 对基准', pm == null ? '未转正' : '第 ' + pm + ' 期', (pm == null || mid.payback == null) ? null : pm - mid.payback, ' 期', 'down'),
+      dlt('月度现金收益 · 对基准', fmt(monthly) + ' 元', monthly - mid.monthlyBenefit, ' 元', 'up'),
+      dlt('首年现金支出 · 对基准', fmt(cash1) + ' 元', cash1 - mid.cashYear1, ' 元', 'down'),
+      dlt('首年投报率', sc.roi12 + ' %', Math.round((sc.roi12 - mid.roi12) * 10) / 10, ' %', 'up')
+    ] : [
       dlt('转正期次', pm == null ? '未转正' : '第 ' + pm + ' 期',
         (pm == null || bpm == null) ? null : pm - bpm, ' 期', 'down'),
       dlt('月度现金收益', fmt(r.benefit.cashMonthly) + ' 元', b ? r.benefit.cashMonthly - b.benefit.cashMonthly : null, ' 元', 'up'),
@@ -634,10 +753,10 @@
       dlt('参数可信度', r.confidence.score + ' 分', b ? r.confidence.score - b.confidence.score : null, ' 分', 'up')
     ]));
     box.appendChild(h('div', { class: 'card' }, [
-      h('h4', {}, ['累计净现金流', h('span', {}, ['CUMULATIVE NET CASH FLOW'])]),
-      r.flow.length ? CH.paybackCurve(r.flow, r.payback, { baseline: b && b.flow.length ? b.flow : null })
+      h('h4', {}, ['累计净现金流', h('span', {}, ['CUMULATIVE NET CASH FLOW · ' + lab + '档'])]),
+      flow.length ? CH.paybackCurve(flow, pay, { baseline: scen ? r.flow : (b && b.flow.length ? b.flow : null) })
         : h('div', { class: 'ghint' }, ['收益端参数补齐后方可出具本图。']),
-      h('div', { class: 'cap' }, ['实线为当前参数下的累计净额，灰色虚线为基线。金色标记为转正期次。'])
+      h('div', { class: 'cap' }, [scen ? '实线为' + lab + '档的累计净额，灰色虚线为基准档。金色标记为转正期次。' : '实线为当前参数下的累计净额，灰色虚线为基线。金色标记为转正期次。'])
     ]));
     box.appendChild(h('div', { class: 'card' }, [
       h('h4', {}, ['关键数字', h('span', {}, ['KEY FIGURES'])]),
@@ -657,8 +776,8 @@
       }))
     ]));
     box.appendChild(h('div', { class: 'card' }, [
-      h('h4', {}, ['24 期现金流', h('span', {}, ['CASH FLOW'])]),
-      r.flow.length ? CH.cashflowBars(r.flow) : h('div', { class: 'ghint' }, ['参数补齐后出具。'])
+      h('h4', {}, ['24 期现金流', h('span', {}, ['CASH FLOW · ' + lab + '档'])]),
+      flow.length ? CH.cashflowBars(flow) : h('div', { class: 'ghint' }, ['参数补齐后出具。'])
     ]));
     box.appendChild(h('div', { class: 'card' }, [
       h('h4', {}, ['敏感度', h('span', {}, ['SENSITIVITY'])]),
@@ -698,14 +817,23 @@
   }
 
   function draw() {
+    if (window.DGG.guide) window.DGG.guide.clear();
     sh.clear($root);
-    if (M.step === 'input') screenInput();
-    else if (M.step === 'scenes') screenScenes();
-    else if (M.step === 'gain') screenGain();
-    else if (M.step === 'plan') screenPlan();
-    else if (M.step === 'board') screenBoard();
-    else if (M.step === 'report') screenReport();
-    else { M.step = 'input'; screenInput(); }
+    /* 每屏内容放进一个工作区容器：引导箭头以它定位（随内容滚动），屏底「下一步」挂在外层 .main 上吸底 */
+    var work = h('div', { class: 'm3-work' });
+    $root.appendChild(work);
+    var host = $root; $root = work;
+    try {
+      if (M.step === 'input') screenInput();
+      else if (M.step === 'scenes') screenScenes();
+      else if (M.step === 'gain') screenGain();
+      else if (M.step === 'plan') screenPlan();
+      else if (M.step === 'board') screenBoard();
+      else if (M.step === 'report') screenReport();
+      else { M.step = 'input'; screenInput(); }
+    } finally { $root = host; }
+    if (M.step === 'board' && !M.result) return;   /* screenBoard 兜底跳回第一屏时不挂引导 */
+    mountGuide(work);
   }
 
   window.DGG.registerModule('m3', { mount: mount, unmount: unmount, onCompany: onCompany, onIndustry: onIndustry });
@@ -795,6 +923,7 @@
       h('button', { class: 'btn ghost', onclick: function () { sh.showWeChat(); } }, ['发到手机']),
       h('button', { class: 'btn ghost', onclick: function () { setStep('board'); } }, ['回测算台'])
     ]));
+    deliverBar($root);
     var wrap = h('div', { class: 'report' }), toc = h('nav', { class: 'toc' }), pages = h('div', { class: 'pages' });
     var add = function (title, el2, o) { o = o || {}; M.pages.push({ title: title, sub: o.sub, one: o.one, el: el2, brief: !!o.brief }); };
 
@@ -837,7 +966,7 @@
       pg.el.setAttribute('data-page', String(i + 1)); if (pg.brief) pg.el.classList.add('brief');
       if (i > 0 && i < M.pages.length - 1 && pg.el._w) pg.el._w.appendChild(h('div', { class: 'm3-foot' }, [
         h('div', { class: 'rule' }),
-        h('div', { class: 'row' }, [h('span', {}, [r.profile.name + '　·　' + RT().reportTitle + '　·　' + RT().issuer]),
+        h('div', { class: 'row' }, [h('span', {}, [r.profile.name + '　·　' + TITLE() + '　·　' + RT().issuer]),
           h('span', {}, ['第 ' + (i + 1) + ' 页 / 共 ' + M.pages.length + ' 页'])])
       ]));
       pages.appendChild(pg.el);
@@ -861,13 +990,20 @@
   // 情景逐期流的本地复算（与内核 flowFor 同式，测试断言其 cum12 / cum24 与内核一致）
   function scenFlow(r, sc) {
     var cst = C(), once = r.invest.cashOnce, yr = r.invest.cashYearly;
+    var list = (r.portfolio && r.portfolio.scenes) || [];
     var rows = [], cum = 0, pay = null;
     for (var m = 1; m <= cst.horizonMonths; m++) {
-      var bi = m <= cst.rampMonths.length ? cst.rampMonths[m - 1] : 1;
-      var ben = Math.round(r.benefit.cashMonthly * bi * sc.benefitMul);
+      var ben = 0;
+      list.forEach(function (x) {
+        if (m < x.startMonth) return;
+        var age = m - x.startMonth + 1;
+        var bi = age <= cst.rampMonths.length ? cst.rampMonths[age - 1] : 1;
+        ben += (x.cashMonthly || 0) * bi * sc.benefitMul;
+      });
+      ben = Math.round(ben);
       var out = m === 1 ? Math.round((once + yr) * sc.costMul) : (m === 13 ? Math.round(yr * sc.costMul) : 0);
       cum += ben - out;
-      rows.push({ m: m, benefit: ben, cost: out, net: ben - out, cum: cum });
+      rows.push({ m: m, benefit: ben, cost: out, net: ben - out, cum: cum, live: list.filter(function (x) { return m >= x.startMonth; }).length });
       if (cum > 0 && pay === null) pay = m;
     }
     return { name: sc.name, rows: rows, payback: pay, cum12: rows[11].cum, cum24: rows[23].cum };
@@ -917,7 +1053,7 @@
     var p = h('section', { class: 'page m3-front' });
     var pm = payMonth(r), basis = payBasisLabel(r), iv = r.invest;
     p.appendChild(h('div', { class: 'hero' }, [
-      CH.heroM3({ title: RT().reportTitle, en: RT().reportTitleEn }),
+      CH.heroM3({ title: TITLE(), en: RT().reportTitleEn }),
       h('img', { class: 'logo', src: sh.CFG.logo, alt: '顶呱呱' })
     ]));
     p.appendChild(h('div', { class: 'body' }, [
@@ -992,7 +1128,7 @@
         '正文十三章按投入、收益、回收期的顺序展开；附录三篇载常量、方法与场景原始数据，供口径追溯。', '共 33 页'),
       hh3('口径声明', 'BASIS OF PREPARATION'),
       list3(RT().honesty.items),
-      fn3('本报告为基于企业当场填报参数的测算结果，不构成对实际经营成果的承诺或保证。报告由「薯片AI智能体 · 企业AI投入ROI测算器」生成，测算过程离线运行，不依赖外部数据接口。全部常量取值见附录 A。')
+      fn3('本报告为基于企业当场填报参数的测算结果，不构成对实际经营成果的承诺或保证。报告由「薯片AI智能体 · ' + NAME() + '」生成，测算过程离线运行，不依赖外部数据接口。全部常量取值见附录 A。')
     ]);
   }
 
@@ -1817,7 +1953,7 @@
       tab3('档位对照', tbl3([['档位'], ['单套年费', 'n'], ['计价说明'], ['本次', 'c']],
         pr.subscription.map(function (t) {
           var on = t.key === r.plan.tier;
-          return [[t.name, on ? 'b' : ''], [t.yearly ? fmt(t.yearly) + ' 元 / 套年' : '0 元', 'n'], [t.desc],
+          return [[t.name, on ? 'b' : ''], [t.yearly ? fmt(t.yearly) + ' 元 / 套年' : '0 元', 'n'], [noCredits(t.desc)],
             [on ? '已计列' : '—', 'c' + (on ? ' pos' : '')]];
         }))),
       tab3('可选服务', tbl3([['服务'], ['价格', 'c'], ['服务内容']],
@@ -1993,7 +2129,7 @@
     p.appendChild(h('img', { src: sh.CFG.logo, alt: '顶呱呱' }));
     p.appendChild(h('div', { class: 'slogan' }, [c.slogan]));
     p.appendChild(h('div', { class: 'contact' }, [c.company, h('br', {}), c.booth, h('br', {})].concat(
-      c.lines.map(function (l) { return h('div', {}, [l]); }))));
+      c.lines.map(function (l) { return h('div', {}, [showName(l)]); }))));
     p.appendChild(h('div', { class: 'rule' }));
     p.appendChild(h('div', { class: 'disc' }, [RT().closing]));
     return p;

@@ -1,5 +1,7 @@
-/* 模块 2 · 企业AI高价值场景排序
- * 屏 1 企业画像 → 屏 2 痛点矩阵（16 选 3–8，带严重度）→ 屏 3 现状与目标 → 屏 4 排序台（权重可调，实时重排）→ 屏 5 报告 42 页
+/* 模块 2 · 场景优先级规划（内核 SKILL 名仍为「企业AI高价值场景排序」）
+ * 屏 1 企业画像 → 屏 2 痛点矩阵（16 选 3–8，带严重度）→ 屏 3 现状与目标 → 屏 4 优先级清单（权重可调，实时重排）→ 屏 5 报告
+ * 工博会版：角标「182 个场景库 · 4 维评估模型」；行业只留 8 个制造细分；屏上不出现积分；每屏挂现场引导「下一步」，
+ * 末屏（清单 / 报告）挂交付物条「场景优先级清单」，「下一步」按外壳 FLOW 进入投入产出测算。
  */
 (function () {
   'use strict';
@@ -30,10 +32,27 @@
   function defaultWeights() { var w = {}; AX().items.forEach(function (a) { w[a.key] = a.weight; }); return w; }
   function trunc(s, n) { s = String(s); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   function first(t) { return String(t || '').split('。')[0] + '。'; }
+  /* 工博会口径：屏上与报告封面用物料定稿的显示名；内核 meta.module 仍是 SKILL 名 */
+  function NAME() { return sh.moduleName ? sh.moduleName('m2') : '场景优先级规划'; }
+  function TITLE() { return NAME() + '报告'; }
+  /* 文案里凡出现内核 SKILL 名（含数据表里的），屏上一律换成物料定稿的显示名 */
+  function showName(t) { return String(t || '').split('企业AI高价值场景排序').join(NAME()).split('企业AI投入ROI测算器').join(sh.moduleName ? sh.moduleName('m3') : '投入产出测算'); }
+  function wrapH(h0) { return function (tag, attrs, kids) { return h0(tag, attrs, (kids || []).map(function (c) { return typeof c === 'string' ? showName(c) : c; })); }; }
+  var BADGE = '182 个场景库 · 4 维评估模型';
+  var ECO = '合作生态';
+  /* 合作生态：现有模块暂不能演示的场景，场景库里 module 写「合作生态」，屏上不给模块链接、只出一枚「合作生态承接」标签 */
+  function isEco(mod) { return mod === ECO; }
+  function modLabel(mod) { return isEco(mod) ? '合作生态承接' : mod; }
+  function modChip(mod) { return h('span', { class: 'mod' + (isEco(mod) ? ' eco' : '') }, [modLabel(mod)]); }
+  function modPill(mod) { return pill(modLabel(mod), isEco(mod) ? 'eco' : 'mod'); }
+  function ecoText(t) { return String(t || '').replace('在「' + ECO + '」里配置该场景', '由' + ECO + '伙伴承接该场景的配置').replace('对应' + ECO + '模块', '由' + ECO + '承接'); }
+  /* 演示兜底：销售只点「下一步」也能走完——痛点与现状取样例 S1（无锡恒驰）的作答 */
+  var DEMO_PAINS = [{ id: 'mfg-p05', severity: 5 }, { id: 'mfg-p06', severity: 4 }, { id: 'mfg-p09', severity: 4 }, { id: 'mfg-p13', severity: 3 }, { id: 'mfg-p01', severity: 3 }];
+  var DEMO_COND = { dataState: 'system', objective: 'efficiency', window: 'm6', capacity: 'part' };
 
   // ---------- 生命周期 ----------
   function mount(root, step, shell) {
-    sh = shell; $root = root; h = sh.h; DATA = sh.DATA; CH = window.DGG.charts;
+    sh = shell; $root = root; h = wrapH(sh.h); DATA = sh.DATA; CH = window.DGG.charts;
     if (!M.form) M.form = sh.getCompany() ? fromProfile(sh.getCompany()) : emptyForm();
     if (!M.weights) M.weights = defaultWeights();
     if (!M.cond) M.cond = { dataState: null, objective: null, window: null, capacity: null };
@@ -42,26 +61,80 @@
     if ((M.step === 'board') && !M.result) M.step = 'input';
     draw();
   }
-  function unmount() { }
+  function unmount() { if (window.DGG.guide) window.DGG.guide.clear(); }
   function onCompany(c) { M.form = c ? fromProfile(c) : emptyForm(); M.picks = []; M.result = null; if (M.step !== 'input') setStep('input'); else draw(); }
   function onIndustry(slug) { if (slug && M.form.industry !== slug) { M.form.industry = slug; M.picks = []; M.result = null; if (M.step === 'input') draw(); else setStep('input'); } }
   function setStep(s) { M.step = s; sh.go('m2', s); }
   function draw() {
+    if (window.DGG.guide) window.DGG.guide.clear();
     sh.clear($root);
-    if (M.step === 'input') drawInput();
-    else if (M.step === 'pains') drawPains();
-    else if (M.step === 'cond') drawCond();
-    else if (M.step === 'board') drawBoard();
-    else drawReport();
+    /* 每屏内容放进一个工作区容器：引导箭头以它定位（随内容滚动），屏底「下一步」挂在外层 .main 上吸底 */
+    var work = h('div', { class: 'm2-work' });
+    $root.appendChild(work);
+    var host = $root; $root = work;
+    try {
+      if (M.step === 'input') drawInput();
+      else if (M.step === 'pains') drawPains();
+      else if (M.step === 'cond') drawCond();
+      else if (M.step === 'board') drawBoard();
+      else drawReport();
+    } finally { $root = host; }
+    mountGuide(work);
     sh.touch();
   }
+  /* ---------- 现场引导：每屏常驻「下一步」；末屏（清单 / 报告）由外壳 FLOW 接到投入产出测算 ---------- */
+  var GUIDE_ORDER = ['input', 'pains', 'cond', 'board'];
+  function mountGuide(work) {
+    if (!window.DGG.guide) return;
+    var i = GUIDE_ORDER.indexOf(M.step);
+    var nx = (i >= 0 && i < GUIDE_ORDER.length - 1) ? GUIDE_ORDER[i + 1] : null;
+    var lb = nx ? STEPS.filter(function (x) { return x[0] === nx; })[0][1] : '';
+    window.DGG.guide.mount({
+      root: work, work: work, barHost: $root, id: 'm2', step: M.step, aim: M.step === 'board' || M.step === 'report' ? 'next' : null,
+      nextKey: nx, nextLabel: lb,
+      onNext: function () { advance(); },
+      onHome: function () { sh.go('home'); }
+    });
+  }
+  /* 「下一步」= 本屏主操作；条件不满足时用样例作答补齐，保证展台上一路点得下去 */
+  function advance() {
+    if (M.step === 'input') {
+      if (!formReady() || !secData()) { var d = DATA.companies && DATA.companies[0]; if (d) M.form = fromProfile(d.profile); }
+      if (!formReady() || !secData()) return;
+      sh.setCompany(JSON.parse(JSON.stringify(M.form))); sh.setQrReady(false); setStep('pains');
+    } else if (M.step === 'pains') {
+      var rng = CD().painRange;
+      if (M.picks.length < rng.min) demoPains();
+      if (M.picks.length < rng.min) return;
+      setStep('cond');
+    } else if (M.step === 'cond') {
+      CD().fields.forEach(function (f) {
+        if (M.cond[f.key]) return;
+        var want = DEMO_COND[f.key];
+        M.cond[f.key] = f.options.some(function (o) { return o.v === want; }) ? want : f.options[0].v;
+      });
+      run();
+    }
+  }
+  function demoPains() {
+    var sd = secData(); if (!sd) return;
+    var rng = CD().painRange;
+    var have = {}; M.picks.forEach(function (x) { have[x.id] = 1; });
+    DEMO_PAINS.forEach(function (p) {
+      if (M.picks.length >= rng.max || have[p.id]) return;
+      if (sd.pains.some(function (q) { return q.id === p.id; })) { M.picks.push({ id: p.id, severity: p.severity }); have[p.id] = 1; }
+    });
+    sd.pains.forEach(function (q) { if (M.picks.length < rng.min && !have[q.id]) { M.picks.push({ id: q.id, severity: rng.severityDefault }); have[q.id] = 1; } });
+  }
+  function deliverBar(host) { if (sh.deliver) sh.deliver(host, { items: ['场景优先级清单'], scene: NAME() }); }
   function head(title) {
     $root.appendChild(h('div', { class: 'mod-head' }, [
       h('div', { class: 'crumb' }, [h('button', { onclick: function () { sh.go('home'); } }, ['首页']), ' / ']),
-      h('h1', {}, [title || '企业AI高价值场景排序'])
+      h('h1', {}, [title || NAME()]),
+      h('span', { class: 'mod-badge' }, [BADGE])
     ]));
   }
-  var STEPS = [['input', '企业画像'], ['pains', '选痛点'], ['cond', '现状与目标'], ['board', '场景排序']];
+  var STEPS = [['input', '企业画像'], ['pains', '选痛点'], ['cond', '现状与目标'], ['board', '优先级清单']];
   function stepbar() {
     var cur = STEPS.map(function (x) { return x[0]; }).indexOf(M.step === 'report' ? 'board' : M.step);
     var box = h('div', { class: 'steps' });
@@ -84,14 +157,12 @@
       if (fd.type === 'text') { var inp = h('input', { type: 'text', value: f.name, placeholder: fd.placeholder || '', maxlength: '40', oninput: function () { f.name = inp.value; } }); ctrl = inp; }
       else if (fd.type === 'industry') {
         cls = 'span2';
-        var sec = sectorOf(f.industry) || DATA.industries.sectors[0], box = h('div');
-        box.appendChild(h('div', { class: 'chips sm sector-row' }, DATA.industries.sectors.map(function (s) {
-          return h('button', { class: 'chip' + (s.key === sec.key ? ' on' : ''), onclick: function () { f.industry = s.industries[0].slug; M.picks = []; draw(); } }, [s.name]);
-        })));
-        box.appendChild(h('div', { class: 'chips' }, sec.industries.map(function (i) {
-          return h('button', { class: 'chip' + (i.slug === f.industry ? ' on' : ''), onclick: function () { f.industry = i.slug; draw(); } }, [i.name]);
-        })));
-        ctrl = box;
+        /* 工博会版：只列 8 个制造细分（外壳 mfgIndustries），默认取外壳当前行业；选择同步回顶栏 */
+        var mfg = sh.mfgIndustries ? sh.mfgIndustries() : [];
+        if (!mfg.some(function (i) { return i.slug === f.industry; }) && mfg.length) f.industry = (sh.industrySlug && sh.industrySlug()) || mfg[0].slug;
+        ctrl = h('div', { class: 'chips' }, mfg.map(function (i) {
+          return h('button', { class: 'chip' + (i.slug === f.industry ? ' on' : ''), onclick: function () { f.industry = i.slug; M.picks = []; if (sh.setIndustry) sh.setIndustry(i.slug); draw(); } }, [i.name]);
+        }));
       } else if (fd.type === 'select') {
         var sel = h('select', { onchange: function () { f.province = sel.value; } });
         DATA.provinces.forEach(function (p) { sel.appendChild(h('option', { value: p, selected: p === f.province }, [p])); });
@@ -118,7 +189,7 @@
     $root.appendChild(grid);
     var rc = requiredCount(), sd = secData();
     $root.appendChild(h('div', { class: 'actions-bar form-status' }, [
-      h('button', { class: 'btn primary big', disabled: !formReady() || !sd, onclick: function () { sh.setCompany(JSON.parse(JSON.stringify(f))); sh.setQrReady(false); setStep('pains'); } }, ['下一步：选痛点']),
+      h('button', { class: 'btn primary big', 'data-guide': '', disabled: !formReady() || !sd, onclick: function () { sh.setCompany(JSON.parse(JSON.stringify(f))); sh.setQrReady(false); setStep('pains'); } }, ['下一步：选痛点']),
       h('span', { class: 'cnt' }, ['必填 ', h('b', { class: 'num' }, [rc[0] + ' / ' + rc[1]]), ' 项 · ' + (sd ? sd.sectorName + '场景库 ' + sd.scenes.length + ' 个场景' : '')])
     ]));
   }
@@ -176,7 +247,7 @@
     $root.appendChild(wrap);
     $root.appendChild(h('div', { class: 'actions-bar form-status' }, [
       h('button', { class: 'btn ghost', onclick: function () { setStep('input'); } }, ['上一步']),
-      h('button', { class: 'btn primary big', disabled: !ok, onclick: function () { setStep('cond'); } }, ['下一步：现状与目标']),
+      h('button', { class: 'btn primary big', 'data-guide': '', disabled: !ok, onclick: function () { setStep('cond'); } }, ['下一步：现状与目标']),
       h('span', { class: 'cnt' }, [sd.sectorName + ' · 共 ', h('b', { class: 'num' }, [String(sd.pains.length)]), ' 项候选，选 ' + rng.min + '–' + rng.max + ' 项'])
     ]));
   }
@@ -203,7 +274,7 @@
     var ok = CD().fields.every(function (f) { return !f.required || M.cond[f.key]; });
     $root.appendChild(h('div', { class: 'actions-bar form-status' }, [
       h('button', { class: 'btn ghost', onclick: function () { setStep('pains'); } }, ['上一步']),
-      h('button', { class: 'btn primary big', disabled: !ok, onclick: run }, ['生成场景排序']),
+      h('button', { class: 'btn primary big', 'data-guide': '', disabled: !ok, onclick: run }, ['生成优先级清单']),
       h('span', { class: 'cnt' }, ['四项现状会改变数据可得、见效周期与实施门槛的得分'])
     ]));
   }
@@ -243,6 +314,7 @@
     board.appendChild(left); board.appendChild(mid); board.appendChild(right);
     $root.appendChild(board);
     fillLeft(left); fillMid(mid); fillRight(right);
+    deliverBar($root);
   }
   function refresh() {
     var mid = document.getElementById('m2-mid'), right = document.getElementById('m2-right'), left = document.getElementById('m2-left');
@@ -307,7 +379,7 @@
     var vb = h('div', { class: 'bcard', style: 'background:linear-gradient(135deg,var(--brand-navy),#16347F);border:0;color:#fff;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center' }, [
       h('div', {}, [
         h('div', { style: 'font-size:11px;letter-spacing:2px;opacity:.75' }, [r.verdict.label]),
-        h('div', { style: 'font-size:19px;font-weight:800;line-height:1.35;margin:4px 0 6px' }, [r.verdict.headline]),
+        h('div', { style: 'font-size:19px;font-weight:800;line-height:1.35;margin:4px 0 6px' }, [ecoText(r.verdict.headline)]),
         h('div', { style: 'font-size:12px;opacity:.85;line-height:1.6' }, [r.verdict.text])
       ]),
       h('div', { style: 'text-align:right' }, [
@@ -325,7 +397,7 @@
     ]));
     var tbl = h('table', { class: 'rank-tbl' });
     tbl.appendChild(h('thead', {}, [h('tr', {}, [
-      h('th', { class: 'c' }, ['排名']), h('th', {}, ['场景']), h('th', {}, ['四维得分']), h('th', { class: 'r' }, ['总分']), h('th', {}, ['对应模块'])
+      h('th', { class: 'c' }, ['排名']), h('th', {}, ['场景']), h('th', {}, ['四维得分']), h('th', { class: 'r' }, ['总分']), h('th', {}, ['承接方式'])
     ])]));
     var tb = h('tbody');
     list.forEach(function (s) {
@@ -339,7 +411,7 @@
         h('td', {}, [h('div', { class: 'nm' }, [s.name]), h('div', { class: 'st' }, [s.stage + ' · ' + s.user])]),
         h('td', {}, [ax]),
         h('td', { class: 'r' }, [h('span', { class: 'sc' }, [s.score.toFixed(1)])]),
-        h('td', {}, [h('span', { class: 'mod' }, [s.module]), s.blocked ? h('span', { class: 'warn', style: 'margin-left:6px' }, ['需补数据']) : null])
+        h('td', {}, [modChip(s.module), s.blocked ? h('span', { class: 'warn', style: 'margin-left:6px' }, ['需补数据']) : null])
       ]);
       tb.appendChild(tr);
     });
@@ -360,7 +432,7 @@
       h('button', { class: 'btn', onclick: sh.showWeChat }, ['结果发送到微信']),
       h('button', { class: 'btn ghost', onclick: function () { setStep('cond'); } }, ['改条件']),
       h('span', { class: 'sp' }),
-      h('span', { class: 'note' }, ['本次消耗 ' + r.meta.credits + ' 积分 · ' + r.profile.sectorName + '场景库 ' + r.meta.sceneCount + ' 个场景'])
+      h('span', { class: 'note' }, [BADGE + ' · ' + r.profile.sectorName + '场景库 ' + r.meta.sceneCount + ' 个场景'])
     ]));
   }
   function fillRight(right) {
@@ -373,7 +445,7 @@
     var d = h('div', { class: 'bcard detail' });
     d.appendChild(h('div', { class: 'hd' }, [
       h('div', { class: 'rk' }, [String(s.rank)]),
-      h('div', {}, [h('div', { class: 't' }, [s.name]), h('div', { class: 's' }, [s.stage + ' · ' + s.module + ' · ' + s.weeks + ' 周 · ' + s.cost + '投入'])])
+      h('div', {}, [h('div', { class: 't' }, [s.name]), h('div', { class: 's' }, [s.stage + ' · ' + modLabel(s.module) + ' · ' + s.weeks + ' 周 · ' + s.cost + '投入'])])
     ]));
     var dl = h('dl');
     [['给谁用', s.user], ['替代什么', s.replaces], ['预期指标', s.metric], ['为什么排这里', s.reason]].forEach(function (kv) {
@@ -407,7 +479,7 @@
     var c = CH_COLOR[key] || CH_COLOR.nav;
     var p = h('section', { class: 'page m2 ' + (cls || ''), style: '--mc:' + c[0] + ';--mc2:' + c[1] });
     if (chapter !== null) p.appendChild(h('div', { class: 'm2-head' }, [
-      h('span', { class: 'ch' }, [h('i', {}), chapter || RT().reportTitle]),
+      h('span', { class: 'ch' }, [h('i', {}), chapter || TITLE()]),
       h('span', { class: 'rt' }, [r.profile.name + '　·　' + reportNo(r)])
     ]));
     var body = h('div', { class: 'page-body' }); p.appendChild(body); p._body = body; p._c = c; return p;
@@ -485,6 +557,7 @@
       h('span', { class: 'spacer' }), h('span', { class: 'pages-count', id: 'm2-pages-count' }),
       h('button', { class: 'btn ghost', onclick: function () { M.picks = []; M.result = null; M.cond = { dataState: null, objective: null, window: null, capacity: null }; M.weights = defaultWeights(); sh.setQrReady(false); setStep('input'); } }, [sh.station() === '1' ? '下一位' : '重新排序'])
     ]));
+    deliverBar($root);
     var wrap = h('div', { class: 'report' }), toc = h('nav', { class: 'toc' }), pages = h('div', { class: 'pages' });
     var add = function (title, el2, o) { o = o || {}; M.pages.push({ title: title, sub: o.sub, one: o.one, el: el2, brief: !!o.brief }); };
 
@@ -520,7 +593,7 @@
       pg.el.setAttribute('data-page', String(i + 1)); if (pg.brief) pg.el.classList.add('brief');
       if (i > 0 && i < M.pages.length - 1) pg.el.appendChild(h('div', { class: 'm2-foot' }, [
         h('div', { class: 'rule' }),
-        h('div', { class: 'row' }, [h('span', {}, [r.profile.name + '　·　' + RT().reportTitle + '　·　' + RT().issuer]), h('span', { class: 'num' }, ['第 ' + (i + 1) + ' 页 / 共 ' + M.pages.length + ' 页'])])
+        h('div', { class: 'row' }, [h('span', {}, [r.profile.name + '　·　' + TITLE() + '　·　' + RT().issuer]), h('span', { class: 'num' }, ['第 ' + (i + 1) + ' 页 / 共 ' + M.pages.length + ' 页'])])
       ]));
       pages.appendChild(pg.el);
     });
@@ -547,7 +620,7 @@
     hero.appendChild(h('img', { class: 'logo', src: sh.CFG.logo, alt: '顶呱呱' }));
     hero.appendChild(h('div', { class: 'ov' }, [
       h('div', { class: 'co' }, [r.profile.name]),
-      h('div', { class: 'rt' }, [RT().reportTitle]),
+      h('div', { class: 'rt' }, [TITLE()]),
       h('div', { class: 'en' }, [RT().reportTitleEn])
     ]));
     p._body.appendChild(hero);
@@ -557,7 +630,7 @@
         h('div', { class: 'lb' }, ['先做这一个 · START HERE']),
         h('div', { class: 'nm' }, [t1.name]),
         h('div', { class: 'mt' }, [t1.stage + ' 环节 · 给' + t1.user + '用 · 替代' + t1.replaces + '。预期' + t1.metric + '。']),
-        h('div', { class: 'chips' }, [h('span', {}, [t1.module]), h('span', {}, [t1.weeks + ' 周上线']), h('span', {}, [t1.cost + '投入 · ' + RT().investment.tiers.filter(function (x) { return x.key === t1.cost; })[0].range]), h('span', {}, ['综合 ' + t1.score.toFixed(1) + ' 分'])])
+        h('div', { class: 'chips' }, [h('span', {}, [modLabel(t1.module)]), h('span', {}, [t1.weeks + ' 周上线']), h('span', {}, [t1.cost + '投入 · ' + RT().investment.tiers.filter(function (x) { return x.key === t1.cost; })[0].range]), h('span', {}, ['综合 ' + t1.score.toFixed(1) + ' 分'])])
       ]),
       CH.dial(t1.score, '首选场景得分', '共 ' + r.meta.sceneCount + ' 个候选')
     ]));
@@ -613,7 +686,7 @@
       ], null, c[0], c[1]));
     });
     p._body.appendChild(g);
-    p._body.appendChild(h('div', { style: 'margin-top:16px' }, [block('总体判断 · VERDICT', r.verdict.headline, r.verdict.text, '#0A2A5E')]));
+    p._body.appendChild(h('div', { style: 'margin-top:16px' }, [block('总体判断 · VERDICT', ecoText(r.verdict.headline), r.verdict.text, '#0A2A5E')]));
     p._body.appendChild(stats([
       { k: '候选场景', v: String(r.meta.sceneCount), u: '个', s: r.profile.sectorName + '场景库', c: '#1157B5', c2: '#00C2F0' },
       { k: '命中所选痛点', v: String(r.funnel[2].count), u: '个', s: '与 ' + r.pains.length + ' 项痛点有交集', c: '#8A54DC', c2: '#C4457E' },
@@ -636,7 +709,7 @@
           [{ t: '替代', cls: 'k' }, trunc(sc.replaces, 16)],
           [{ t: '预期', cls: 'k' }, sc.metric],
           [{ t: '第一步', cls: 'k' }, sc.firstStep],
-          [{ t: '模块', cls: 'k' }, { el: h('span', {}, [pill(sc.module, 'mod'), ' ' + sc.weeks + ' 周 · ' + sc.cost + '投入']) }]
+          [{ t: '承接', cls: 'k' }, { el: h('span', {}, [modPill(sc.module), ' ' + sc.weeks + ' 周 · ' + sc.cost + '投入']) }]
         ])
       ], '综合 ' + sc.score.toFixed(1) + ' 分（痛 ' + sc.axis.pain + ' 数 ' + sc.axis.data + ' 效 ' + sc.axis.cycle + ' 槛 ' + sc.axis.barrier + '）', CS[i][0], CS[i][1]));
     });
@@ -763,7 +836,7 @@
   function pRank1(r) {
     var p = page2('05 场景排序总表', r, 'rank');
     p._body.appendChild(bar('05', '场景排序总表', 'RANKING', String(r.ranked.length), '个进入排序 / 共 ' + r.meta.sceneCount + ' 个'));
-    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['总分', 'r'], ['对应模块']],
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['痛点', 'c'], ['数据', 'c'], ['见效', 'c'], ['门槛', 'c'], ['总分', 'r'], ['承接方式']],
       r.ranked.map(function (sc) {
         return [
           { el: h('b', { style: 'color:' + (sc.rank <= 3 ? '#1157B5' : 'var(--r-sub)') + ';font-size:13px' }, [String(sc.rank)]), cls: 'c' },
@@ -771,7 +844,7 @@
           { t: String(sc.axis.pain), cls: 'c num' }, { t: String(sc.axis.data), cls: 'c num' },
           { t: String(sc.axis.cycle), cls: 'c num' }, { t: String(sc.axis.barrier), cls: 'c num' },
           { el: h('b', { class: 'num', style: 'color:var(--r-navy);font-size:14px' }, [sc.score.toFixed(1)]), cls: 'r' },
-          { el: h('span', {}, [pill(sc.module, 'mod'), sc.blocked ? h('span', {}, [' ', pill('需补数据', 'warn')]) : null]) }
+          { el: h('span', {}, [modPill(sc.module), sc.blocked ? h('span', {}, [' ', pill('需补数据', 'warn')]) : null]) }
         ];
       })));
     p._body.appendChild(hh('为什么排这里', 'RATIONALE'));
@@ -828,7 +901,7 @@
     var tier = RT().investment.tiers.filter(function (t) { return t.key === sc.cost; })[0];
     p._body.appendChild(barZh(String(sc.rank), sc.name, sc.stage + ' · ' + sc.user, sc.score.toFixed(1), '综合得分 · 排名第 ' + sc.rank));
     p._body.appendChild(stats([
-      { k: '对应模块', v: sc.module, s: '轻享版可开通', c: '#1157B5', c2: '#00C2F0' },
+      { k: isEco(sc.module) ? '承接方式' : '对应模块', v: isEco(sc.module) ? '合作生态承接' : sc.module, s: isEco(sc.module) ? '由生态伙伴实施' : '轻享版可开通', c: '#1157B5', c2: '#00C2F0' },
       { k: '上线周期', v: String(sc.weeks), u: '周', s: '含数据整理与试运行', c: '#0E9F6E', c2: '#0FA3C7' },
       { k: '投入档', v: sc.cost, s: tier.range, c: '#C9A227', c2: '#FF8A3D' },
       { k: '数据条件', v: sc.blocked ? '需补齐' : sc.dataDeps.length ? '已具备' : '零依赖', s: sc.blocked ? sc.missingSystemsName.join('、') : sc.dataDeps.length ? sc.presentSystems.join('、') : '无需接入业务系统', c: sc.blocked ? '#E0635C' : '#0E9F6E', c2: sc.blocked ? '#C4457E' : '#0FA3C7' }
@@ -847,7 +920,7 @@
         msteps([
           ['第一步　' + sc.firstStep, ''],
           ['补齐前置　' + sc.precondition, ''],
-          ['在 ' + sc.module + ' 中配置并试运行两周', '由' + sc.user + '使用，记录使用前后的对比：' + sc.metric + '。']
+          [isEco(sc.module) ? '由合作生态伙伴承接配置并试运行两周' : '在 ' + sc.module + ' 中配置并试运行两周', '由' + sc.user + '使用，记录使用前后的对比：' + sc.metric + '。']
         ])
       ]),
       h('div', {}, [
@@ -893,8 +966,8 @@
           block('测算 · IMPACT', '补齐「' + r.readiness.missing[0].name + '」', '该数据源关系到 ' + r.readiness.missing[0].unlock + ' 个场景，其中排名最高的是第 ' + r.readiness.missing[0].bestRank + ' 名。补齐后建议重新跑一次排序。', '#C9A227')
         ]), 'wl'));
       p._body.appendChild(hh('受影响的场景', 'BLOCKED SCENARIOS'));
-      p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['缺什么'], ['对应模块']], r.blocked.map(function (b) {
-        return [{ t: String(b.rank), cls: 'c num' }, { el: h('b', {}, [b.name]) }, { el: pill(b.missing.join('、'), 'warn') }, { el: pill(b.module, 'mod') }];
+      p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['缺什么'], ['承接方式']], r.blocked.map(function (b) {
+        return [{ t: String(b.rank), cls: 'c num' }, { el: h('b', {}, [b.name]) }, { el: pill(b.missing.join('、'), 'warn') }, { el: modPill(b.module) }];
       })));
     } else {
       p._body.appendChild(block('数据条件 · READY', '所需数据源均已具备', '本行业候选场景所需的业务系统贵司都已具备，可直接按排序推进，无需先做数据补齐。', '#0E9F6E'));
@@ -1001,7 +1074,7 @@
     p._body.appendChild(bar('16', '90 天启动清单', 'FIRST 90 DAYS', String(r.checklist.length), '项执行动作'));
     p._body.appendChild(mtbl([['✓', 'c'], ['时间'], ['要做的事'], ['类型', 'c'], ['负责人'], ['对应场景']], r.checklist.map(function (c) {
       return [{ el: h('span', { style: 'display:inline-block;width:13px;height:13px;border:1.5px solid var(--r-line);border-radius:3px' }), cls: 'c' },
-        { t: c.week, cls: 'k' }, { el: h('b', {}, [c.item]) }, { el: pill(c.kind, 'mod'), cls: 'c' }, c.owner, c.scene];
+        { t: c.week, cls: 'k' }, { el: h('b', {}, [ecoText(c.item)]) }, { el: pill(c.kind, 'mod'), cls: 'c' }, c.owner, c.scene];
     })));
     p._body.appendChild(two(
       block('验收 · ACCEPTANCE', r.ranked[0].name, r.ranked[0].metric + '。试运行两周后对比使用前后的数据，确认后再推第二批。', '#1157B5'),
@@ -1017,8 +1090,8 @@
   function pExcluded(r) {
     var p = page2('17 未入选与复盘', r, 'out');
     p._body.appendChild(bar('17', '未入选与复盘', 'NOT THIS ROUND', String(r.excluded.length), '个场景本轮暂缓'));
-    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['总分', 'r'], ['对应模块'], ['未入选原因']], r.excluded.map(function (x) {
-      return [{ t: String(x.rank), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.score.toFixed(1), cls: 'r num' }, { el: pill(x.module, 'mod') }, x.reason];
+    p._body.appendChild(mtbl([['排名', 'c'], ['场景'], ['总分', 'r'], ['承接方式'], ['未入选原因']], r.excluded.map(function (x) {
+      return [{ t: String(x.rank), cls: 'c num' }, { el: h('b', {}, [x.name]) }, { t: x.score.toFixed(1), cls: 'r num' }, { el: modPill(x.module) }, x.reason];
     })));
     p._body.appendChild(hh('什么时候值得重新跑一次排序', 'WHEN TO RE-RUN'));
     var g = h('div', { class: 'm2-cards c2' });
@@ -1043,7 +1116,7 @@
           { t: String(sc.axis.cycle), cls: 'c num' }, { t: String(sc.axis.barrier), cls: 'c num' },
           { el: h('span', { style: 'color:var(--r-sub);font-size:10px' }, [r.axes.map(function (a) { return sc.contrib[a.key].toFixed(1); }).join(' + ')]) },
           { el: h('b', { class: 'num' }, [sc.score.toFixed(1)]), cls: 'r' },
-          { el: pill(sc.module, 'mod') }];
+          { el: modPill(sc.module) }];
       })));
     p._body.appendChild(h('div', { style: 'font-size:10px;color:var(--r-sub);margin-top:8px' }, ['加权贡献顺序：' + r.axes.map(function (a) { return a.name; }).join(' + ') + '；门槛项按（6 − 门槛）× 权重计。']));
     return p;

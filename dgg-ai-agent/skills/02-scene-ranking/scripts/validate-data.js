@@ -4,7 +4,7 @@ const path = require('path');
 const dir = path.join(__dirname, '..', 'data', 'sectors');
 const industries = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '_shared', 'industries.json'), 'utf8'));
 const SYS = ['erp', 'finance', 'crm', 'oa', 'mes', 'shop', 'hr'];
-const MODS = ['AI获客', 'AI人力官', 'AI CFO', 'AI法务', 'AI流程提效', 'AI决策', 'AI ERP', 'AI软件开发'];
+const MODS = ['AI获客', 'AI人力官', 'AI CFO', 'AI法务', 'AI流程提效', 'AI决策', 'AI ERP', 'AI软件开发', '合作生态']; // 合作生态：现有模块暂不能演示、由生态伙伴承接的场景
 const COSTS = ['零', '轻', '中', '重'];
 const GROUPS = ['sales', 'deliver', 'cost', 'org'];
 let fail = 0, scenes = 0, pains = 0;

@@ -88,7 +88,7 @@ const SECTORS = Object.keys(data.sectors);
 pass(eq(D.axisKey.enum, data.axes.items.map((a) => a.key)), '四维 key 枚举 = axes.json');
 pass(eq(D.groupKey.enum, data.conditions.groups.map((g) => g.key)), '痛点分组枚举 = conditions.json');
 pass(eq(D.cost.enum, data.reportText.investment.tiers.map((t) => t.key)), '投入档枚举 = report-text.json 四档');
-pass(eq(D.module.enum, Object.keys(data.credits.perRun)), '模块名枚举 = credits.json 的 11 个模块');
+pass(eq(D.module.enum, Object.keys(data.credits.perRun).concat(['合作生态'])), '模块名枚举 = credits.json 的 11 个模块 + 合作生态');
 const sysField = data.fields.filter((f) => f.key === 'systems')[0];
 pass(eq(D.system.enum, sysField.options.filter((o) => o.v !== 'none').map((o) => o.v)), '业务系统枚举 = 画像字段表（不含「无」）');
 const presetKeys = data.axes.presets.map((p) => p.key).concat(['custom']);
