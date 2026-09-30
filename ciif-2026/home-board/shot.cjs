@@ -1,11 +1,19 @@
-// node shot.cjs → shot-1.png(入场中) shot-2.png(数字到位) shot-3.png(轮巡点亮)，1920×1080
+// node shot.cjs → 三种视口截图，并检查卡片是否落在底图画好的卡片上
 const { chromium } = require('playwright'); const path = require('path');
 (async () => {
-  const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
-  const errs=[]; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type()==='error') errs.push(m.text()); });
-  await p.goto('file://' + path.join(__dirname, 'index.html')); await p.evaluate(() => document.fonts.ready);
-  await p.waitForTimeout(350); await p.screenshot({ path: 'shot-1.png' });
-  await p.waitForTimeout(1900); await p.screenshot({ path: 'shot-2.png' });
-  await p.waitForTimeout(4200); await p.screenshot({ path: 'shot-3.png' });
-  console.log('errors:', errs.length ? errs : 'none'); await b.close();
+  const b = await chromium.launch();
+  for (const [name, w, h] of [['tv', 1920, 1080], ['arc', 2000, 1142], ['laptop', 1440, 900]]) {
+    const p = await b.newPage({ viewport: { width: w, height: h } });
+    const errs = []; p.on('pageerror', e => errs.push(e.message));
+    await p.goto('file://' + path.join(__dirname, 'index.html')); await p.waitForTimeout(6500);
+    const r = await p.evaluate(() => {
+      const st = document.getElementById('stage').getBoundingClientRect();
+      const img = document.querySelector('#stage img.bg').getBoundingClientRect();
+      const c = [...document.querySelectorAll('.card')].map(e => { const b = e.getBoundingClientRect(); return [Math.round(b.left - st.left), Math.round(b.top - st.top), Math.round(b.width), Math.round(b.height)]; });
+      return { stage: [Math.round(st.left), Math.round(st.width), Math.round(st.height)], img: [Math.round(img.width), Math.round(img.height)], firstCard: c[0], lastCard: c[8], overflow: [...document.querySelectorAll('.card')].filter(e => e.scrollWidth > e.clientWidth + 1).length };
+    });
+    console.log(name, JSON.stringify(r), errs.length ? errs : '');
+    await p.screenshot({ path: `shot-${name}.png` }); await p.close();
+  }
+  await b.close();
 })();
