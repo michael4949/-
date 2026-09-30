@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>工博会单页背面修改稿</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* A4 竖版 210×297mm = 794×1123 px；沿用设计稿右页版式，仅在六张卡片中加入量化指标 */
+  :root{--blue:#1F5FE0;--blue-d:#1747B8;--ink:#1B2233;--ink2:#4B5670;--card:#fff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:794px;height:1123px;position:relative;overflow:hidden;font-family:"Noto Sans SC","WenQuanYi Zen Hei",sans-serif;color:var(--ink);
+       background:linear-gradient(180deg,#EAF2FF 0%,#F1F6FF 60%,#E6EFFF 100%)}
+  .top{position:absolute;left:0;top:0;width:794px;height:144px;background:url(ref-top.png) center/cover no-repeat}
+  h1{position:absolute;left:0;top:92px;width:794px;text-align:center;font-size:25px;font-weight:900;letter-spacing:1px;padding-right:40px}
+  .grid{position:absolute;left:52px;top:144px;width:690px;display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .card{background:var(--card);border-radius:12px;box-shadow:0 4px 14px rgba(40,80,170,.08);height:196px;padding:16px 20px 0;display:flex;flex-direction:column}
+  .card h3{font-size:22px;font-weight:900;color:var(--blue);letter-spacing:.5px}
+  .kpi{display:flex;gap:18px;margin-top:8px;padding:8px 0 6px;border-top:1px dashed #D5E1F8;border-bottom:1px dashed #D5E1F8}
+  .kpi div{flex:1;line-height:1.2;white-space:nowrap}
+  .kpi b{font-size:34px;font-weight:900;color:var(--blue);letter-spacing:-.5px;margin-right:3px}
+  .kpi span{font-size:12.5px;color:var(--ink2);font-weight:500}
+  .desc{font-size:12.5px;color:var(--ink2);margin-top:8px;line-height:1.4}
+  .pill{margin-top:auto;margin-bottom:16px;height:28px;border-radius:14px;background:linear-gradient(90deg,var(--blue),#3C7BF0);display:flex;align-items:center;overflow:hidden}
+  .pill i{font-style:normal;height:100%;display:flex;align-items:center;background:#E8F0FF;color:var(--blue);font-size:11.5px;font-weight:700;padding:0 12px;border-radius:14px}
+  .pill span{color:#fff;font-size:11.5px;font-weight:700;padding-left:10px;white-space:nowrap}
+  h2{position:absolute;left:0;width:794px;text-align:center;font-size:22px;font-weight:900}
+  .adv{position:absolute;left:52px;top:822px;width:690px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .adv div{background:#fff;border-radius:10px;height:92px;text-align:center;padding-top:14px}
+  .adv b{display:block;font-size:16px;font-weight:900}
+  .adv span{display:block;font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.35}
+  .ind{position:absolute;left:52px;top:958px;width:690px;display:flex;justify-content:space-between}
+  .ind span{border:1.5px solid var(--blue);border-radius:13px;font-size:11.5px;font-weight:700;padding:3px 0;width:80px;text-align:center;background:#fff}
+  .foot{position:absolute;left:0;bottom:0;width:794px;height:128px;background:url(ref-foot.png) center/cover no-repeat}
+</style>
+</head>
+<body>
+<div class="top"></div>
+<h1>六大经营场景智能体</h1>
+
+<div class="grid">
+  <div class="card"><h3>AI获客</h3>
+    <div class="kpi"><div><b>8</b><span>类意向信号实时评分</span></div><div><b>4</b><span>级线索智能分级</span></div></div>
+    <div class="desc">反推目标客户画像，线索评分与智能分派</div>
+    <div class="pill"><i>交付物</i><span>客户画像 · 获客话术 · 线索分级 · 成交预测</span></div></div>
+  <div class="card"><h3>AI现金流与经营预警</h3>
+    <div class="kpi"><div><b>14</b><span>条三表勾稽规则</span></div><div><b>13</b><span>周资金滚动预测</span></div></div>
+    <div class="desc">多源数据交叉核验，13 周资金滚动预测</div>
+    <div class="pill"><i>交付物</i><span>风险预警 · 资金缺口方案 · 政策清单</span></div></div>
+  <div class="card"><h3>AI工序级排程</h3>
+    <div class="kpi"><div><b>3</b><span>套插单方案同步预演</span></div><div><b>3</b><span>类延期原因自动归因</span></div></div>
+    <div class="desc">延期原因自动归类，量化插单对交付的影响</div>
+    <div class="pill"><i>交付物</i><span>插单方案 · 采购建议 · 交付日报</span></div></div>
+  <div class="card"><h3>AI人岗匹配与用工合规</h3>
+    <div class="kpi"><div><b>12</b><span>条用工合规规则</span></div><div><b>4</b><span>维面试评估模型</span></div></div>
+    <div class="desc">简历结构化评估，用工与合同风险规则化审查</div>
+    <div class="pill"><i>交付物</i><span>候选人评估 · 整改清单 · 合规台账</span></div></div>
+  <div class="card"><h3>AI报工核验</h3>
+    <div class="kpi"><div><b>5</b><span>条报工核验规则</span></div><div><b>6</b><span>类生产异常识别</span></div></div>
+    <div class="desc">量化换型、等待与停机损失，优化投料派工</div>
+    <div class="pill"><i>交付物</i><span>派工计划 · 提效周报</span></div></div>
+  <div class="card"><h3>AI经营指标分析</h3>
+    <div class="kpi"><div><b>31</b><span>个经营指标节点</span></div><div><b>12</b><span>个月方案推演</span></div></div>
+    <div class="desc">指标变动因素分解，方案推演与审批闭环</div>
+    <div class="pill"><i>交付物</i><span>归因报告 · 方案对比 · 经营决议</span></div></div>
+</div>
+
+<h2 style="top:782px">薯片AI的4大优势</h2>
+<div class="adv">
+  <div><b>系统兼容</b><span>对接现有 ERP 及<br>业务数据</span></div>
+  <div><b>规则透明</b><span>计算过程<br>可追溯、可复算</span></div>
+  <div><b>本地运行</b><span>支持企业内网<br>环境部署</span></div>
+  <div><b>私有化部署</b><span>数据与知识留在<br>企业内部</span></div>
+</div>
+<h2 style="top:922px">适用行业</h2>
+<div class="ind"><span>机械五金</span><span>电子电器</span><span>汽车零部件</span><span>装备制造</span><span>化工新材料</span><span>纺织服装</span><span>家居建材</span><span>包装印刷</span></div>
+<div class="foot"></div>
+</body>
+</html>
