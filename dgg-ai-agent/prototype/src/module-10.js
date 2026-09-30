@@ -1,4 +1,5 @@
-/* AI ERP · 订单交付指挥室（六屏）
+/* AI工序级排程 · 订单交付指挥室（六屏）
+ * 工博会口径：显示名走 sh.moduleName('m10')（AI工序级排程），屏上不出现积分；最后一屏挂交付物条 P.deliver
  * 接入 → 指挥室 → 订单下钻 → 插单模拟 → 物料与库存 → 交付日报
  * 每屏三拍：接入（来源亮起、数据包飞向排程引擎）→ 展开（数字滚、路径画、条形长、行流入）→ 结论（一句话横幅 + 聚焦）
  * 全部计算走 DGG.coreM10（与 skill 同一份内核），开场发现 / 快捷问句 / 问答 / 文档摄入也在内核里
@@ -219,10 +220,10 @@
       { key: 'connect', label: '接入' }, { key: 'room', label: v.room, badge: k.late || 0 }, { key: 'order', label: v.order + '下钻' },
       { key: 'insert', label: v.insert }, { key: 'stock', label: v.materials, badge: M.plan.summary.short || 0 }, { key: 'daily', label: v.daily }
     ];
-    var F = P.frame({ mark: 'ERP', accent: ACCENT, modules: P.navModules('m10'),
-      crumbs: ['AI ERP', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
+    var F = P.frame({ mark: '排程', accent: ACCENT, modules: P.navModules('m10'),
+      crumbs: [sh.moduleName('m10'), tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
       tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm10', name: 'AI ERP', step: M.step, onGo: setStep },
+      chat: { id: 'm10', name: sh.moduleName('m10'), step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'room' && !M.charged) enterRoom(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'room' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
@@ -282,7 +283,7 @@
     g.appendChild(h('div', { class: 'c12 go' }, [
       h('div', {}, [h('div', { class: 't' }, [v.room]), h('div', { class: 's' }, ['延期 ' + k.late + ' · 风险 ' + k.risk])]),
       h('div', { class: 'sp' }),
-      h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']),
+      h('div', { class: 'cr' }, ['接在现有 ERP / MES 之上，读导出表，不改现有系统']),
       P.btn('进入' + v.room, { cls: 'primary big', onClick: enterRoom })
     ]));
     work.appendChild(g);
@@ -310,6 +311,8 @@
     var g = h('div', { class: 'pd-grid m10-g' });
     var fb = flowBar({ src: srcCells(), hub: '排程引擎', out: [k.onTimeRate + '%', '按期率'], btn: '重排', onClick: recalc });
     g.appendChild(fb);
+    /* 海报角标：数字是产品能力参数（三策略 A/B/C；缺料 / 产能不足 / 前道拖后），销售指着念 */
+    g.appendChild(h('div', { class: 'c12 m10-badges' }, [h('span', { class: 'b' }, [h('b', {}, ['3']), ' 套插单方案同步预演']), h('span', { class: 'b' }, [h('b', {}, ['3']), ' 类延期原因自动归因'])]));
     var filt = function (f) { return function () { M.filter = M.filter === f ? null : f; draw(); }; };
     var kpiRow = h('div', { class: 'c12' }, [P.kpis([
       { label: v.orders, value: cnt(k.open), unit: v.counter, sub: '完工 ' + k.done, onClick: filt(null), active: M.filter == null },
@@ -705,6 +708,8 @@
     ]);
     g.appendChild(right);
     work.appendChild(g);
+    /* 交付物条：文字与海报逐字一致 */
+    P.deliver(work, { items: ['插单方案', '采购建议', '交付日报'], scene: 'AI工序级排程' });
     story({ work: work, src: fb.srcs, from: fb.srcs[0], to: fb.hub, tail: fb.out, label: v.daily, scan: doc,
       rows: trs(doc, 10), bars: nodes(lines, '.pd-bar .trk i'), rise: nodes(doc, '.sec'),
       verdict: say, focus: doc.querySelector('.kp') });
