@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI法务 · 法务数据包",
+  "description": "一家企业的合同（结构化条款）、证照、知产清单与新设主体输入。合同代号 HT-年月-流水，客户相对方沿用 K-编号 · 行业，联系人只出现职务。",
+  "type": "object",
+  "required": ["archetype", "sector", "company", "today", "weekStart", "profile", "contracts", "licenses", "ip", "setup"],
+  "properties": {
+    "archetype": { "enum": ["make", "flow", "project", "service"] }, "sector": { "type": "string" }, "company": { "type": "string" }, "co": { "type": "string", "description": "简称" },
+    "today": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }, "weekStart": { "type": "string", "description": "90 天日历的第一周周一" },
+    "profile": { "type": "object", "required": ["industry"], "properties": { "industry": { "type": "string", "description": "对应 data/ip-classes.json byIndustry 的键，无则用 default" }, "size": { "type": "string" }, "province": { "type": "string" }, "founded": { "type": "string" }, "capital": { "type": "number" } } },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["id", "name", "mode"], "properties": { "mode": { "enum": ["direct", "import"] }, "lastSync": { "type": "string" }, "rows": { "type": "integer" } } } },
+    "contracts": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "type", "role", "title", "party", "start", "end", "status", "clauses"], "properties": {
+      "id": { "type": "string", "pattern": "^HT-\\d{4}-\\d{3}$" },
+      "type": { "enum": ["sale", "purchase", "framework", "loan", "lease", "processing", "nda", "labor", "equipment", "agency", "software", "service", "platform", "distribution"] },
+      "role": { "enum": ["supply", "buy", "borrower", "lessee", "orderer", "disclosing", "employer", "principal", "client", "provider", "merchant", "supplier"] },
+      "amount": { "type": "number" }, "signed": { "type": "string" }, "status": { "enum": ["审查中", "履行中", "已到期"] },
+      "milestones": { "type": "array", "items": { "type": "object", "required": ["date", "text"] } },
+      "clauses": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["no", "type", "title", "text"], "properties": { "no": { "type": "string" }, "type": { "type": "string", "description": "条款类型标签，与 contract-rules.json 的 required / templates / risks.clause 对应" }, "params": { "type": "object", "description": "供风险规则算式使用的参数（termDays、advanceRatio、rate、capMultiple、venue、objectionDays、owner、years、penalty、autoRenew、exitNotice、adjust、compensation、minVolume、months、latePenalty、priority、earlyExitMonths、enabled、threshold、cureDays、lossRate、days、allowedMonths 等）" }, "revised": { "type": "boolean" }, "inserted": { "type": "boolean" }, "before": { "type": "string", "description": "采纳修订前的原文" } } } },
+      "revisions": { "type": "array", "items": { "type": "object", "required": ["findingId", "mode", "clauseNo"] } }
+    } } },
+    "licenses": { "type": "array", "items": { "type": "object", "required": ["id", "name"], "properties": { "no": { "type": "string" }, "issuer": { "type": "string" }, "expiry": { "type": ["string", "null"], "description": "null 为长期有效" }, "status": { "type": "string" } } } },
+    "ip": { "type": "object", "required": ["trademarks", "patents", "software"], "properties": {
+      "trademarks": { "type": "array", "items": { "type": "object", "required": ["id", "name", "classes", "regDate"], "properties": { "classes": { "type": "array", "items": { "type": "string", "pattern": "^\\d{2}$" } }, "regNo": { "type": "string" }, "status": { "type": "string" } } } },
+      "patents": { "type": "array", "items": { "type": "object", "required": ["id", "title", "kind", "appDate"], "properties": { "kind": { "enum": ["invention", "utility", "design"] }, "grantDate": { "type": "string" } } } },
+      "software": { "type": "array", "items": { "type": "object", "required": ["id", "title", "regDate"] } },
+      "domains": { "type": "array", "items": { "type": "object", "required": ["name", "expiry"] } },
+      "similarMarks": { "type": "array", "items": { "type": "object", "required": ["name", "classes", "holder", "similarity", "status"], "properties": { "deadline": { "type": ["string", "null"], "description": "初审公告异议截止日；已注册的为 null" } } } },
+      "infringementLeads": { "type": "array", "items": { "type": "object", "required": ["where", "product", "similarity", "found"] } }
+    } },
+    "setup": { "type": "object", "required": ["type", "name"], "properties": {
+      "type": { "enum": ["subsidiary", "branch", "newco"] }, "name": { "type": "string" }, "region": { "type": "string" }, "capital": { "type": "number" },
+      "shares": { "type": "array", "items": { "type": "object", "required": ["holder", "pct"], "properties": { "pct": { "type": "number" }, "platform": { "type": "boolean", "description": "员工持股平台" } } }, "description": "分公司不填" },
+      "scope": { "type": "array", "items": { "type": "string" } }, "licenses": { "type": "array", "items": { "type": "string" }, "description": "经营范围涉及的许可，键对应 setup-rules.json licenses" },
+      "startDate": { "type": "string" }, "reason": { "type": "string" }, "confirmed": { "type": "boolean" }
+    } },
+    "renewList": { "type": "array", "items": { "type": "string" }, "description": "已加入续展 / 缴费清单的知产 id" },
+    "applyList": { "type": "array", "items": { "type": "string" }, "description": "已加入申请清单的商标类别" },
+    "log": { "type": "array", "items": { "type": "object", "required": ["seq", "kind", "label"] } }
+  }
+}

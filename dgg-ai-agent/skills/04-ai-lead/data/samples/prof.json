@@ -1,0 +1,946 @@
+{
+  "archetype": "service",
+  "sector": "prof",
+  "company": "成都启元财税服务有限公司",
+  "co": "启元",
+  "prod": "代理记账与财税服务",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "prof-accounting",
+    "size": "21_50"
+  },
+  "sources": [
+    {
+      "id": "crm",
+      "name": "CRM · 客户与合同",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 20
+    },
+    {
+      "id": "wechat",
+      "name": "公众号与朋友圈",
+      "mode": "direct",
+      "lastSync": "2026-09-17 06:00",
+      "rows": 320
+    },
+    {
+      "id": "web",
+      "name": "官网留资",
+      "mode": "direct",
+      "lastSync": "2026-09-17 06:00",
+      "rows": 46
+    },
+    {
+      "id": "referral",
+      "name": "老客户转介绍登记",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 22
+    },
+    {
+      "id": "list",
+      "name": "名录导入",
+      "mode": "import",
+      "lastSync": "2026-09-01 10:00",
+      "rows": 30
+    }
+  ],
+  "offers": [
+    {
+      "key": "monthly",
+      "text": "每月 10 日前出报表，含税负与现金提示"
+    },
+    {
+      "key": "switch",
+      "text": "账套交接 7 天内完成，不断档"
+    },
+    {
+      "key": "policy",
+      "text": "政策匹配每季一次，可享项目主动提醒"
+    },
+    {
+      "key": "fixed",
+      "text": "费用按年固定，不按次加价"
+    }
+  ],
+  "roleOffers": {
+    "总经理": [
+      "monthly",
+      "policy"
+    ],
+    "财务负责人": [
+      "switch",
+      "monthly"
+    ],
+    "店主": [
+      "fixed",
+      "monthly"
+    ],
+    "采购经理": [
+      "fixed",
+      "monthly"
+    ]
+  },
+  "proofs": [
+    {
+      "customer": "K-311 · 餐饮管理公司",
+      "sector": "life",
+      "text": "12 家门店账务统一，季度政策匹配拿到稳岗返还"
+    },
+    {
+      "customer": "K-342 · 电商公司",
+      "sector": "trade",
+      "text": "多平台账单核对由 3 天缩到半天"
+    },
+    {
+      "customer": "K-298 · 培训机构",
+      "sector": "edu",
+      "text": "课消与预收确认按月出，年度汇算提前两个月完成"
+    }
+  ],
+  "segmentPainTags": {
+    "life": [
+      "门店一致性",
+      "损耗"
+    ],
+    "trade": [
+      "账期",
+      "库存积压"
+    ],
+    "edu": [
+      "预收"
+    ],
+    "tech": [
+      "交期"
+    ],
+    "other": [
+      "报价慢"
+    ],
+    "mfg": [
+      "成本不清",
+      "应收拖期"
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "客户一组",
+      "sectors": [
+        "life",
+        "trade",
+        "other"
+      ],
+      "cap": 14
+    },
+    {
+      "id": "T2",
+      "name": "客户二组",
+      "sectors": [
+        "tech",
+        "edu",
+        "mfg"
+      ],
+      "cap": 14
+    },
+    {
+      "id": "T3",
+      "name": "大客户组",
+      "sectors": [
+        "life",
+        "trade",
+        "tech",
+        "edu",
+        "mfg",
+        "other"
+      ],
+      "cap": 10
+    }
+  ],
+  "channelCosts": {
+    "fair": 0,
+    "inquiry": 3000,
+    "web": 2500,
+    "wechat": 4000,
+    "referral": 0,
+    "list": 1500
+  },
+  "deals": [
+    {
+      "customer": "K-311 · 餐饮管理公司",
+      "industry": "餐饮管理公司",
+      "sector": "life",
+      "size": "101_300",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 20,
+      "amount": 216000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-10-20"
+    },
+    {
+      "customer": "K-287 · 贸易公司",
+      "industry": "贸易公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 15,
+      "amount": 96000,
+      "repeat": true,
+      "channel": "web",
+      "closedAt": "2025-11-12"
+    },
+    {
+      "customer": "K-342 · 电商公司",
+      "industry": "电商公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 25,
+      "amount": 144000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-01-08"
+    },
+    {
+      "customer": "K-298 · 培训机构",
+      "industry": "培训机构",
+      "sector": "edu",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 30,
+      "amount": 128000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-02-16"
+    },
+    {
+      "customer": "K-360 · 物流公司",
+      "industry": "物流公司",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 22,
+      "amount": 168000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-03-22"
+    },
+    {
+      "customer": "K-330 · 设计工作室",
+      "industry": "设计工作室",
+      "sector": "tech",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 7,
+      "amount": 36000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-04-05"
+    },
+    {
+      "customer": "K-256 · 建材经销商",
+      "industry": "建材经销商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 12,
+      "amount": 60000,
+      "repeat": true,
+      "channel": "list",
+      "closedAt": "2025-12-10"
+    },
+    {
+      "customer": "K-372 · 医疗器械公司",
+      "industry": "医疗器械公司",
+      "sector": "mfg",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 18,
+      "amount": 72000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-05-14"
+    },
+    {
+      "customer": "K-351 · 咨询公司",
+      "industry": "咨询公司",
+      "sector": "other",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 9,
+      "amount": 42000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-06-02"
+    },
+    {
+      "customer": "K-380 · 软件公司",
+      "industry": "软件公司",
+      "sector": "tech",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 14,
+      "amount": 84000,
+      "repeat": false,
+      "channel": "wechat",
+      "closedAt": "2026-08-28"
+    },
+    {
+      "customer": "K-382 · 连锁餐饮",
+      "industry": "连锁餐饮",
+      "sector": "life",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 16,
+      "amount": 132000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-03-03"
+    },
+    {
+      "customer": "K-384 · 电商公司",
+      "industry": "电商公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 11,
+      "amount": 78000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-07-09"
+    },
+    {
+      "customer": "K-386 · 教育科技公司",
+      "industry": "教育科技公司",
+      "sector": "edu",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 20,
+      "amount": 96000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-06-25"
+    },
+    {
+      "customer": "K-388 · 装修公司",
+      "industry": "装修公司",
+      "sector": "build",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 13,
+      "amount": 66000,
+      "repeat": true,
+      "channel": "list",
+      "closedAt": "2026-01-26"
+    },
+    {
+      "customer": "K-390 · 餐饮管理公司",
+      "industry": "餐饮管理公司",
+      "sector": "life",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 18,
+      "amount": 108000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-08-12"
+    },
+    {
+      "customer": "K-392 · 五金加工厂",
+      "industry": "五金加工厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 24,
+      "amount": 90000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-04-28"
+    },
+    {
+      "customer": "K-394 · 广告公司",
+      "industry": "广告公司",
+      "sector": "media",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 10,
+      "amount": 48000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-05-30"
+    },
+    {
+      "customer": "K-396 · 贸易公司",
+      "industry": "贸易公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 19,
+      "amount": 102000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-11-28"
+    },
+    {
+      "customer": "K-398 · 培训机构",
+      "industry": "培训机构",
+      "sector": "edu",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "cycleDays": 8,
+      "amount": 30000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-07-21"
+    },
+    {
+      "customer": "K-400 · 连锁餐饮",
+      "industry": "连锁餐饮",
+      "sector": "life",
+      "size": "101_300",
+      "region": "西南",
+      "role": "财务负责人",
+      "cycleDays": 21,
+      "amount": 156000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-02-27"
+    }
+  ],
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "餐饮管理公司",
+      "sector": "life",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "referral",
+      "createdAt": "2026-09-10",
+      "stage": "opp",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-10"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "K-311 引荐，已发方案"
+      },
+      "amountEst": 120000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "电商公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "wechat",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "form",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "微信沟通，客户要报价"
+      },
+      "amountEst": 84000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "软件公司",
+      "sector": "tech",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "web",
+      "createdAt": "2026-09-08",
+      "stage": "quote",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-08"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "报价已发"
+      },
+      "amountEst": 90000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "贸易公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 108000,
+      "note": "K-396 引荐"
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "培训机构",
+      "sector": "edu",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 60000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "装修公司",
+      "sector": "build",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "list",
+      "createdAt": "2026-08-18",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 36000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "连锁餐饮",
+      "sector": "life",
+      "size": "101_300",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-05",
+      "stage": "opp",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-05"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "方案沟通，谈费用"
+      },
+      "amountEst": 150000,
+      "note": "K-400 引荐"
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "咨询公司",
+      "sector": "other",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "web",
+      "createdAt": "2026-08-02",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-08-02"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-08-05",
+        "text": "电话沟通，客户观望"
+      },
+      "amountEst": 42000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "医疗器械公司",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "inquiry",
+      "createdAt": "2026-09-11",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "电话沟通，要案例"
+      },
+      "amountEst": 96000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "广告公司",
+      "sector": "media",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 48000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "电商公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "referral",
+      "createdAt": "2026-09-09",
+      "stage": "quote",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-13"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-13",
+        "text": "报价已发，客户比价"
+      },
+      "amountEst": 132000,
+      "note": "K-342 引荐"
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "五金加工厂",
+      "sector": "mfg",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "list",
+      "createdAt": "2026-08-10",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-06"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 72000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "设计工作室",
+      "sector": "tech",
+      "size": "1_20",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-06-22",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-06-22"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-06-26",
+        "text": "微信沟通后无回应"
+      },
+      "amountEst": 30000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "教育科技公司",
+      "sector": "edu",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "web",
+      "createdAt": "2026-09-13",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-13"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 102000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "物流公司",
+      "sector": "trade",
+      "size": "101_300",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-06",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-06"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-08",
+        "text": "电话沟通，要求到访"
+      },
+      "amountEst": 168000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "建材经销商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "referral",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 60000,
+      "note": "K-256 引荐"
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "餐饮管理公司",
+      "sector": "life",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-07-15",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-07-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-07-20",
+        "text": "客户暂缓"
+      },
+      "amountEst": 66000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "贸易公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "list",
+      "createdAt": "2026-08-22",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 78000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "连锁餐饮",
+      "sector": "life",
+      "size": "51_100",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "web",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 114000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "软件公司",
+      "sector": "tech",
+      "size": "51_100",
+      "region": "西南",
+      "role": "财务负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-03",
+      "stage": "opp",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-03"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-08"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-10",
+        "text": "方案已发，等反馈"
+      },
+      "amountEst": 120000,
+      "note": "K-380 引荐"
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "贸易公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "西南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-08-15",
+      "stage": "won",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-08-15"
+        },
+        {
+          "key": "quote",
+          "date": "2026-08-28"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-08",
+        "text": "签约，10 月起服务"
+      },
+      "amountEst": 72000,
+      "note": "",
+      "closedAt": "2026-09-08"
+    }
+  ],
+  "focusSegment": null,
+  "weights": {},
+  "adopted": {},
+  "planned": [],
+  "log": []
+}

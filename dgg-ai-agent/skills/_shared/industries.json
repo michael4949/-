@@ -1,0 +1,165 @@
+{
+  "_note": "两级行业：sector 大类 → industries 细分。参考带按「细分 × 规模」分格。display 为顶栏 6 行业到默认细分的映射。insight 为报告「行业视角」段落，aiFocus 为该行业最常见的三个 AI 切入点。",
+  "display": [
+    { "key": "finance",       "name": "财税", "default": "prof-accounting" },
+    { "key": "manufacturing", "name": "制造", "default": "mfg-machinery" },
+    { "key": "medical",       "name": "医疗", "default": "med-clinic" },
+    { "key": "ecommerce",     "name": "电商", "default": "trade-ecom" },
+    { "key": "education",     "name": "教育", "default": "edu-vocational" },
+    { "key": "logistics",     "name": "物流", "default": "logi-transport" }
+  ],
+  "sectors": [
+    {
+      "key": "mfg", "name": "制造业",
+      "insight": "制造企业的 AI 价值集中在交付、质量与成本三条线：订单交期预警、排产优化、来料与过程质检、设备预测性维护、报价自动化。多数中小制造企业已有 ERP 但缺 MES，车间数据靠人工回填，这是 AI 落地前最常见的数据断点。",
+      "aiFocus": ["订单交付预警与智能排产", "质检与设备预测维护", "报价与售后知识库"],
+      "industries": [
+        { "slug": "mfg-machinery",   "name": "机械与五金" },
+        { "slug": "mfg-electronics", "name": "电子与电器" },
+        { "slug": "mfg-auto",        "name": "汽车与零部件" },
+        { "slug": "mfg-process",     "name": "化工与新材料" },
+        { "slug": "mfg-textile",     "name": "纺织服装" },
+        { "slug": "mfg-furniture",   "name": "家具家居与建材" },
+        { "slug": "mfg-equipment",   "name": "装备制造" },
+        { "slug": "mfg-packaging",   "name": "包装印刷" }
+      ]
+    },
+    {
+      "key": "trade", "name": "商贸流通",
+      "insight": "商贸企业的核心是周转与转化：询盘分级、报价生成、库存周转预测、应收账款预警、多平台运营。数据大多沉淀在财务软件与平台后台，两者之间靠人工对账，AI 的第一步往往是把订单、库存、回款三类数据拉到一张表上。",
+      "aiFocus": ["询盘分级与自动报价", "库存周转与补货预测", "应收账款与回款预警"],
+      "industries": [
+        { "slug": "trade-wholesale", "name": "贸易与批发" },
+        { "slug": "trade-retail",    "name": "零售连锁" },
+        { "slug": "trade-ecom",      "name": "电商与跨境电商" },
+        { "slug": "trade-import",    "name": "进出口贸易" }
+      ]
+    },
+    {
+      "key": "life", "name": "生活服务",
+      "insight": "生活服务企业以门店为单位经营，痛点在获客成本、门店一致性与供应链损耗。AI 最先见效的是经营日报、投流优化、评价分析与补货建议；多门店企业的流程标准化程度直接决定 AI 能否复制到每一家店。",
+      "aiFocus": ["门店经营日报与异常预警", "投流与私域获客", "供应链补货与损耗控制"],
+      "industries": [
+        { "slug": "life-catering",  "name": "餐饮" },
+        { "slug": "life-hotel",     "name": "酒店与文旅" },
+        { "slug": "life-beauty",    "name": "美业与健康服务" },
+        { "slug": "life-property",  "name": "家政与物业" },
+        { "slug": "life-autocare",  "name": "汽车后市场" }
+      ]
+    },
+    {
+      "key": "prof", "name": "专业服务",
+      "insight": "专业服务企业卖的是人的时间与判断，AI 直接作用于交付效率：票据处理、异常凭证识别、合同审阅、政策匹配、客户经营报告。这类企业数据规范程度普遍较高，合规意识强，落地阻力主要来自交付标准的统一。",
+      "aiFocus": ["票据处理与异常凭证", "合同审阅与政策匹配", "客户经营报告自动生成"],
+      "industries": [
+        { "slug": "prof-accounting", "name": "代账与财税服务" },
+        { "slug": "prof-legal",      "name": "法律服务" },
+        { "slug": "prof-consulting", "name": "管理咨询与人力资源" },
+        { "slug": "prof-marketing",  "name": "广告营销与公关" },
+        { "slug": "prof-design",     "name": "设计与创意" },
+        { "slug": "prof-ip",         "name": "检测认证与知识产权" }
+      ]
+    },
+    {
+      "key": "build", "name": "建筑与地产",
+      "insight": "建筑与地产企业项目周期长、参与方多，AI 的价值点在投标文件生成、进度与成本预警、合规检查与资料归档。项目数据分散在各项目部，公司级汇总滞后，先把项目进度与成本按周回流是数字化的起点。",
+      "aiFocus": ["投标文件与资料生成", "进度与成本预警", "合规检查与资料归档"],
+      "industries": [
+        { "slug": "build-construction", "name": "建筑施工" },
+        { "slug": "build-design",       "name": "工程设计与勘察" },
+        { "slug": "build-decoration",   "name": "装饰装修" },
+        { "slug": "build-realestate",   "name": "房地产开发与经纪" },
+        { "slug": "build-landscape",    "name": "园林与市政" }
+      ]
+    },
+    {
+      "key": "med", "name": "医疗健康",
+      "insight": "医疗健康企业受监管约束最强，AI 落地必须以合规为前提：学术内容生产、患者随访管理、器械注册资料、供应链追溯是相对安全且见效快的切入点。个人健康信息的权限与留存规则是评估的重点。",
+      "aiFocus": ["随访与患者服务", "学术与注册资料生成", "供应链与追溯"],
+      "industries": [
+        { "slug": "med-clinic",    "name": "医疗机构（民营医院与诊所）" },
+        { "slug": "med-pharma",    "name": "医药生产与流通" },
+        { "slug": "med-device",    "name": "医疗器械" },
+        { "slug": "med-wellness",  "name": "大健康与养老" }
+      ]
+    },
+    {
+      "key": "edu", "name": "教育培训",
+      "insight": "教育企业的 AI 价值在内容生产与学员经营：课程内容生成、学员画像与续费预测、招生线索分级、教务排课。学员数据多在第三方教务系统，导出与打通是第一步；未成年人信息保护是合规重点。",
+      "aiFocus": ["课程内容与题库生成", "招生线索分级与续费预测", "教务排课与服务自动化"],
+      "industries": [
+        { "slug": "edu-k12",        "name": "学前与素质教育" },
+        { "slug": "edu-vocational", "name": "职业与成人教育" },
+        { "slug": "edu-tech",       "name": "教育科技与内容" }
+      ]
+    },
+    {
+      "key": "logi", "name": "物流与供应链",
+      "insight": "物流企业运营数据密度高，AI 在路径优化、仓储调度、异常预警、单据识别上回报直接。多数企业已有 TMS 或 WMS，但司机、仓库与客服之间的信息仍靠电话与微信，异常处理流程标准化是提效的前提。",
+      "aiFocus": ["路径优化与调度", "单据识别与异常预警", "客服与对账自动化"],
+      "industries": [
+        { "slug": "logi-transport", "name": "物流运输" },
+        { "slug": "logi-warehouse", "name": "仓储与配送" },
+        { "slug": "logi-scm",       "name": "供应链管理与货代" }
+      ]
+    },
+    {
+      "key": "tech", "name": "科技与互联网",
+      "insight": "科技企业技术基础好、人员接受度高，AI 落地的瓶颈往往在业务侧：需求文档生成、测试用例、客户成功与售前方案是最快见效的场景。评估重点看 AI 是否已进入交付流程，而非停留在个人工具层面。",
+      "aiFocus": ["需求与测试用例生成", "客户成功与售前方案", "研发流程自动化"],
+      "industries": [
+        { "slug": "tech-software",    "name": "软件与信息服务" },
+        { "slug": "tech-internet",    "name": "互联网平台与应用" },
+        { "slug": "tech-hardware",    "name": "硬件与智能终端" },
+        { "slug": "tech-integration", "name": "系统集成与 IT 服务" }
+      ]
+    },
+    {
+      "key": "agri", "name": "农业与食品",
+      "insight": "农业与食品企业数据采集难、季节性强，AI 价值集中在产销预测、质量追溯与合规资料。先把种养或加工环节的关键数据数字化记录下来，是所有后续应用的前提；食品安全追溯是监管与客户共同的要求。",
+      "aiFocus": ["产销预测与库存", "质量追溯与合规资料", "渠道与客户经营"],
+      "industries": [
+        { "slug": "agri-farming",    "name": "农业种养" },
+        { "slug": "agri-food",       "name": "食品加工" },
+        { "slug": "agri-distribute", "name": "农产品流通" }
+      ]
+    },
+    {
+      "key": "energy", "name": "能源与环保",
+      "insight": "能源与环保企业资产重、监测数据多，AI 在能耗优化、设备运维、排放监测与报告生成上有明确回报。项目型业务的投标资料与合规报告是文档类 AI 的直接场景。",
+      "aiFocus": ["能耗与设备运维优化", "监测数据分析与报告", "投标与合规资料生成"],
+      "industries": [
+        { "slug": "energy-newenergy", "name": "新能源与电力" },
+        { "slug": "energy-env",       "name": "环保与节能服务" }
+      ]
+    },
+    {
+      "key": "fin", "name": "金融与投资服务",
+      "insight": "金融服务企业合规要求高、流程规范，AI 适合从尽调资料整理、风险初筛、客户服务与报告生成切入。数据不出域、模型可解释是选型的硬约束，私有化部署通常是前提。",
+      "aiFocus": ["尽调资料整理与风险初筛", "客户服务与合规报告", "内部知识库"],
+      "industries": [
+        { "slug": "fin-leasing",   "name": "融资租赁与担保" },
+        { "slug": "fin-invest",    "name": "投资与资产管理" },
+        { "slug": "fin-insurance", "name": "保险代理" }
+      ]
+    },
+    {
+      "key": "media", "name": "文化传媒",
+      "insight": "文化传媒企业内容产量大、交付周期短，AI 在脚本与文案生成、素材管理、多渠道分发与效果分析上直接提效。版权与素材来源合规、内容审核是必须同步建立的规则。",
+      "aiFocus": ["内容生成与素材管理", "多渠道分发与效果分析", "版权与审核合规"],
+      "industries": [
+        { "slug": "media-video",      "name": "影视与内容制作" },
+        { "slug": "media-publishing", "name": "出版与广告媒体" },
+        { "slug": "media-event",      "name": "会展与活动" }
+      ]
+    },
+    {
+      "key": "other", "name": "其他行业",
+      "insight": "跨行业通用的 AI 切入点是文档处理、客户服务与内部知识库：它们对行业数据依赖低、见效快，适合作为第一个场景验证团队与流程的准备度。",
+      "aiFocus": ["文档处理与知识库", "客户服务自动化", "内部协同与流程自动化"],
+      "industries": [
+        { "slug": "other-general", "name": "其他" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,956 @@
+{
+  "archetype": "make",
+  "company": "杭州锐合精密五金有限公司",
+  "today": "2026-09-17",
+  "horizon": 21,
+  "workday": {
+    "restWeekdays": [
+      0
+    ]
+  },
+  "labor": {
+    "hourly": 42,
+    "overtimeMul": 1.3,
+    "note": "综合时薪 = 月薪 × 综合用工系数 1.3 ÷ 21.75 天 ÷ 8 小时"
+  },
+  "sources": [
+    {
+      "id": "erp",
+      "name": "ERP 生产订单",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 15
+    },
+    {
+      "id": "mes",
+      "name": "车间报工",
+      "mode": "import",
+      "lastSync": "2026-09-17 06:50",
+      "rows": 41
+    },
+    {
+      "id": "wms",
+      "name": "库存与在途",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 20
+    },
+    {
+      "id": "route",
+      "name": "工艺路线 / BOM",
+      "mode": "direct",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 6
+    }
+  ],
+  "lines": [
+    {
+      "id": "L1",
+      "name": "下料线",
+      "capHoursPerDay": 16,
+      "crew": 3,
+      "ops": [
+        "下料"
+      ]
+    },
+    {
+      "id": "L2",
+      "name": "冲压线 A",
+      "capHoursPerDay": 16,
+      "crew": 5,
+      "ops": [
+        "冲压"
+      ]
+    },
+    {
+      "id": "L3",
+      "name": "冲压线 B",
+      "capHoursPerDay": 8,
+      "crew": 3,
+      "ops": [
+        "冲压"
+      ],
+      "eff": 0.9
+    },
+    {
+      "id": "L4",
+      "name": "CNC 车铣中心",
+      "capHoursPerDay": 16,
+      "crew": 4,
+      "ops": [
+        "车削",
+        "铣削"
+      ]
+    },
+    {
+      "id": "L8",
+      "name": "CNC 车铣中心 B",
+      "capHoursPerDay": 8,
+      "crew": 2,
+      "ops": [
+        "车削",
+        "铣削"
+      ],
+      "eff": 0.85
+    },
+    {
+      "id": "L5",
+      "name": "热处理炉",
+      "capHoursPerDay": 8,
+      "crew": 2,
+      "ops": [
+        "热处理"
+      ]
+    },
+    {
+      "id": "L6",
+      "name": "电镀线",
+      "capHoursPerDay": 16,
+      "crew": 4,
+      "ops": [
+        "电镀"
+      ]
+    },
+    {
+      "id": "L7",
+      "name": "装配包装线",
+      "capHoursPerDay": 16,
+      "crew": 6,
+      "ops": [
+        "装配",
+        "包装"
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "P01",
+      "name": "精密五金件 Ø12×45",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.0008,
+          "setupHours": 0.5
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "hoursPerUnit": 0.0025,
+          "setupHours": 1
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "hoursPerUnit": 0.0015,
+          "setupHours": 0.5
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "hoursPerUnit": 0.002,
+          "setupHours": 1
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0005,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M02",
+          "qtyPer": 0.062
+        },
+        {
+          "material": "M07",
+          "qtyPer": 0.004,
+          "op": "电镀"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.01,
+          "op": "包装"
+        },
+        {
+          "material": "M13",
+          "qtyPer": 0.01,
+          "op": "包装"
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "精密五金件 Ø8×30",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.0006,
+          "setupHours": 0.5
+        },
+        {
+          "op": "车削",
+          "line": "L4",
+          "hoursPerUnit": 0.002,
+          "setupHours": 1
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "hoursPerUnit": 0.0015,
+          "setupHours": 1
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0004,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M02",
+          "qtyPer": 0.028
+        },
+        {
+          "material": "M07",
+          "qtyPer": 0.003,
+          "op": "电镀"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.005,
+          "op": "包装"
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "冲压支架 ZJ-210",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.0005,
+          "setupHours": 0.5
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "hoursPerUnit": 0.0012,
+          "setupHours": 2
+        },
+        {
+          "op": "电镀",
+          "line": "L6",
+          "hoursPerUnit": 0.0015,
+          "setupHours": 1
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "hoursPerUnit": 0.0015,
+          "setupHours": 0.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0005,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M01",
+          "qtyPer": 0.085
+        },
+        {
+          "material": "M06",
+          "qtyPer": 0.006,
+          "op": "电镀"
+        },
+        {
+          "material": "M17",
+          "qtyPer": 2,
+          "op": "装配"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.02,
+          "op": "包装"
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "铝合金外壳 AL-77",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.001,
+          "setupHours": 0.5
+        },
+        {
+          "op": "铣削",
+          "line": "L4",
+          "hoursPerUnit": 0.004,
+          "setupHours": 1.5
+        },
+        {
+          "op": "装配",
+          "line": "L7",
+          "hoursPerUnit": 0.0025,
+          "setupHours": 0.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0008,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M04",
+          "qtyPer": 0.14
+        },
+        {
+          "material": "M18",
+          "qtyPer": 1,
+          "op": "装配"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.05,
+          "op": "包装"
+        },
+        {
+          "material": "M14",
+          "qtyPer": 0.002,
+          "op": "包装"
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "螺纹套 M10×1.5",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.0005,
+          "setupHours": 0.5
+        },
+        {
+          "op": "车削",
+          "line": "L8",
+          "hoursPerUnit": 0.0015,
+          "setupHours": 1
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "hoursPerUnit": 0.001,
+          "setupHours": 0.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0004,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M03",
+          "qtyPer": 0.018
+        },
+        {
+          "material": "M09",
+          "qtyPer": 0.0005,
+          "op": "热处理"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.004,
+          "op": "包装"
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "name": "弹簧片 TP-05",
+      "unit": "件",
+      "route": [
+        {
+          "op": "下料",
+          "line": "L1",
+          "hoursPerUnit": 0.0003,
+          "setupHours": 0.5
+        },
+        {
+          "op": "冲压",
+          "line": "L2",
+          "hoursPerUnit": 0.0008,
+          "setupHours": 1.5
+        },
+        {
+          "op": "热处理",
+          "line": "L5",
+          "hoursPerUnit": 0.0006,
+          "setupHours": 0.5
+        },
+        {
+          "op": "包装",
+          "line": "L7",
+          "hoursPerUnit": 0.0003,
+          "setupHours": 0.3
+        }
+      ],
+      "bom": [
+        {
+          "material": "M05",
+          "qtyPer": 0.012
+        },
+        {
+          "material": "M09",
+          "qtyPer": 0.0003,
+          "op": "热处理"
+        },
+        {
+          "material": "M12",
+          "qtyPer": 0.005,
+          "op": "包装"
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "M01",
+      "name": "冷轧钢带 SPCC",
+      "spec": "1.0mm × 120mm",
+      "unit": "kg",
+      "stock": 2600,
+      "safety": 1500,
+      "onOrder": [],
+      "leadDays": 7,
+      "moq": 1000,
+      "pack": 100,
+      "unitCost": 5.2,
+      "supplier": "宁波钢材贸易",
+      "avgDailyUse": 180
+    },
+    {
+      "id": "M02",
+      "name": "不锈钢棒 304",
+      "spec": "Ø14 × 3000",
+      "unit": "kg",
+      "stock": 1450,
+      "safety": 600,
+      "onOrder": [],
+      "leadDays": 10,
+      "moq": 500,
+      "pack": 50,
+      "unitCost": 21,
+      "supplier": "无锡不锈钢材料",
+      "avgDailyUse": 95
+    },
+    {
+      "id": "M03",
+      "name": "黄铜棒 H62",
+      "spec": "Ø12 × 2500",
+      "unit": "kg",
+      "stock": 820,
+      "safety": 300,
+      "onOrder": [],
+      "leadDays": 12,
+      "moq": 300,
+      "pack": 50,
+      "unitCost": 52,
+      "supplier": "宁波铜材",
+      "avgDailyUse": 40
+    },
+    {
+      "id": "M04",
+      "name": "铝板 5052",
+      "spec": "2.0mm × 1220 × 2440",
+      "unit": "kg",
+      "stock": 640,
+      "safety": 400,
+      "onOrder": [
+        {
+          "po": "PO-2609-027",
+          "qty": 1200,
+          "eta": "2026-09-23"
+        }
+      ],
+      "leadDays": 8,
+      "moq": 500,
+      "pack": 50,
+      "unitCost": 24,
+      "supplier": "杭州铝业",
+      "avgDailyUse": 70
+    },
+    {
+      "id": "M05",
+      "name": "弹簧钢带 65Mn",
+      "spec": "0.5mm × 60mm",
+      "unit": "kg",
+      "stock": 380,
+      "safety": 200,
+      "onOrder": [
+        {
+          "po": "PO-2609-029",
+          "qty": 600,
+          "eta": "2026-09-25"
+        }
+      ],
+      "leadDays": 15,
+      "moq": 200,
+      "pack": 50,
+      "unitCost": 9.8,
+      "supplier": "宁波钢材贸易",
+      "avgDailyUse": 25
+    },
+    {
+      "id": "M06",
+      "name": "镀锌液",
+      "spec": "工业级 25kg/桶",
+      "unit": "L",
+      "stock": 260,
+      "safety": 150,
+      "onOrder": [],
+      "leadDays": 5,
+      "moq": 200,
+      "pack": 25,
+      "unitCost": 18,
+      "supplier": "绍兴表面处理材料",
+      "avgDailyUse": 30
+    },
+    {
+      "id": "M07",
+      "name": "镀镍添加剂",
+      "spec": "光亮剂 5L/桶",
+      "unit": "L",
+      "stock": 22,
+      "safety": 40,
+      "onOrder": [
+        {
+          "po": "PO-2609-031",
+          "qty": 100,
+          "eta": "2026-09-24"
+        }
+      ],
+      "leadDays": 6,
+      "moq": 50,
+      "pack": 5,
+      "unitCost": 96,
+      "supplier": "绍兴表面处理材料",
+      "avgDailyUse": 9
+    },
+    {
+      "id": "M08",
+      "name": "硬质合金刀片",
+      "spec": "CNMG120408",
+      "unit": "片",
+      "stock": 140,
+      "safety": 60,
+      "onOrder": [],
+      "leadDays": 4,
+      "moq": 50,
+      "pack": 10,
+      "unitCost": 38,
+      "supplier": "杭州刀具",
+      "avgDailyUse": 6
+    },
+    {
+      "id": "M09",
+      "name": "淬火油",
+      "spec": "快速淬火油 170kg/桶",
+      "unit": "L",
+      "stock": 410,
+      "safety": 150,
+      "onOrder": [],
+      "leadDays": 7,
+      "moq": 200,
+      "pack": 200,
+      "unitCost": 26,
+      "supplier": "上海工业油品",
+      "avgDailyUse": 12
+    },
+    {
+      "id": "M10",
+      "name": "冲压模具备件",
+      "spec": "ZJ-210 凸模",
+      "unit": "套",
+      "stock": 6,
+      "safety": 2,
+      "onOrder": [],
+      "leadDays": 20,
+      "moq": 1,
+      "pack": 1,
+      "unitCost": 1850,
+      "supplier": "东莞模具",
+      "avgDailyUse": 0.03
+    },
+    {
+      "id": "M11",
+      "name": "润滑脂",
+      "spec": "2 号锂基脂 15kg",
+      "unit": "kg",
+      "stock": 95,
+      "safety": 30,
+      "onOrder": [],
+      "leadDays": 5,
+      "moq": 20,
+      "pack": 15,
+      "unitCost": 45,
+      "supplier": "上海工业油品",
+      "avgDailyUse": 0.8
+    },
+    {
+      "id": "M12",
+      "name": "包装纸箱",
+      "spec": "400 × 300 × 200 五层",
+      "unit": "个",
+      "stock": 3000,
+      "safety": 1200,
+      "onOrder": [],
+      "leadDays": 3,
+      "moq": 1000,
+      "pack": 100,
+      "unitCost": 3.6,
+      "supplier": "萧山纸箱厂",
+      "avgDailyUse": 260
+    },
+    {
+      "id": "M13",
+      "name": "珍珠棉衬垫",
+      "spec": "390 × 290 × 10",
+      "unit": "片",
+      "stock": 9000,
+      "safety": 3000,
+      "onOrder": [],
+      "leadDays": 4,
+      "moq": 2000,
+      "pack": 500,
+      "unitCost": 0.9,
+      "supplier": "萧山纸箱厂",
+      "avgDailyUse": 300
+    },
+    {
+      "id": "M14",
+      "name": "防锈油",
+      "spec": "薄层防锈油 18L",
+      "unit": "L",
+      "stock": 130,
+      "safety": 40,
+      "onOrder": [],
+      "leadDays": 6,
+      "moq": 50,
+      "pack": 18,
+      "unitCost": 32,
+      "supplier": "上海工业油品",
+      "avgDailyUse": 3
+    },
+    {
+      "id": "M15",
+      "name": "缠绕膜",
+      "spec": "500mm × 300m",
+      "unit": "卷",
+      "stock": 48,
+      "safety": 20,
+      "onOrder": [],
+      "leadDays": 3,
+      "moq": 20,
+      "pack": 4,
+      "unitCost": 28,
+      "supplier": "萧山纸箱厂",
+      "avgDailyUse": 1.2
+    },
+    {
+      "id": "M16",
+      "name": "塑料托盘",
+      "spec": "1200 × 1000 田字",
+      "unit": "个",
+      "stock": 210,
+      "safety": 60,
+      "onOrder": [],
+      "leadDays": 7,
+      "moq": 50,
+      "pack": 10,
+      "unitCost": 65,
+      "supplier": "宁波塑业",
+      "avgDailyUse": 0.5
+    },
+    {
+      "id": "M17",
+      "name": "螺钉 M4×10",
+      "spec": "十字盘头 镀锌",
+      "unit": "个",
+      "stock": 15000,
+      "safety": 20000,
+      "onOrder": [
+        {
+          "po": "PO-2609-030",
+          "qty": 60000,
+          "eta": "2026-09-19"
+        }
+      ],
+      "leadDays": 5,
+      "moq": 10000,
+      "pack": 5000,
+      "unitCost": 0.08,
+      "supplier": "温州紧固件",
+      "avgDailyUse": 2500
+    },
+    {
+      "id": "M18",
+      "name": "密封圈 Ø22",
+      "spec": "丁腈橡胶",
+      "unit": "个",
+      "stock": 14000,
+      "safety": 2000,
+      "onOrder": [],
+      "leadDays": 9,
+      "moq": 2000,
+      "pack": 500,
+      "unitCost": 0.45,
+      "supplier": "宁波橡塑",
+      "avgDailyUse": 180
+    },
+    {
+      "id": "M19",
+      "name": "标签纸",
+      "spec": "60 × 40 热敏",
+      "unit": "卷",
+      "stock": 36,
+      "safety": 10,
+      "onOrder": [],
+      "leadDays": 3,
+      "moq": 10,
+      "pack": 10,
+      "unitCost": 15,
+      "supplier": "萧山纸箱厂",
+      "avgDailyUse": 0.6
+    },
+    {
+      "id": "M20",
+      "name": "铝棒 6061",
+      "spec": "Ø20 × 3000",
+      "unit": "kg",
+      "stock": 300,
+      "safety": 200,
+      "onOrder": [],
+      "leadDays": 8,
+      "moq": 300,
+      "pack": 50,
+      "unitCost": 27,
+      "supplier": "杭州铝业",
+      "avgDailyUse": 2
+    }
+  ],
+  "orders": [
+    {
+      "id": "SO-2609-0142",
+      "customer": "K-017 · 汽配一级供应商",
+      "product": "P01",
+      "qty": 12000,
+      "due": "2026-09-25",
+      "priority": 1,
+      "received": "2026-09-02",
+      "progress": {
+        "下料": 1,
+        "车削": 0.55
+      }
+    },
+    {
+      "id": "SO-2609-0138",
+      "customer": "K-003 · 家电整机厂",
+      "product": "P03",
+      "qty": 12000,
+      "due": "2026-09-23",
+      "priority": 1,
+      "received": "2026-08-28",
+      "progress": {
+        "下料": 1,
+        "冲压": 0.7
+      }
+    },
+    {
+      "id": "SO-2609-0151",
+      "customer": "K-022 · 电动工具制造商",
+      "product": "P04",
+      "qty": 6000,
+      "due": "2026-09-24",
+      "priority": 2,
+      "received": "2026-09-05",
+      "progress": {
+        "下料": 1,
+        "铣削": 0.3
+      }
+    },
+    {
+      "id": "SO-2609-0129",
+      "customer": "K-009 · 医疗器械配件商",
+      "product": "P05",
+      "qty": 30000,
+      "due": "2026-09-19",
+      "priority": 1,
+      "received": "2026-08-25",
+      "progress": {
+        "下料": 1,
+        "车削": 0.4
+      }
+    },
+    {
+      "id": "SO-2609-0133",
+      "customer": "K-031 · 出口贸易公司",
+      "product": "P02",
+      "qty": 8000,
+      "due": "2026-09-17",
+      "priority": 2,
+      "received": "2026-08-26",
+      "progress": {
+        "下料": 1,
+        "车削": 1,
+        "电镀": 1,
+        "包装": 1
+      }
+    },
+    {
+      "id": "SO-2609-0135",
+      "customer": "K-005 · 卫浴五金品牌",
+      "product": "P06",
+      "qty": 40000,
+      "due": "2026-09-18",
+      "priority": 2,
+      "received": "2026-08-27",
+      "progress": {
+        "下料": 1,
+        "冲压": 1,
+        "热处理": 1,
+        "包装": 1
+      }
+    },
+    {
+      "id": "SO-2609-0147",
+      "customer": "K-012 · 新能源电池壳体厂",
+      "product": "P04",
+      "qty": 4000,
+      "due": "2026-09-30",
+      "priority": 2,
+      "received": "2026-09-08",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0149",
+      "customer": "K-018 · 智能门锁厂商",
+      "product": "P03",
+      "qty": 15000,
+      "due": "2026-09-29",
+      "priority": 2,
+      "received": "2026-09-09",
+      "progress": {
+        "下料": 0.6
+      }
+    },
+    {
+      "id": "SO-2609-0153",
+      "customer": "K-003 · 家电整机厂",
+      "product": "P06",
+      "qty": 60000,
+      "due": "2026-10-02",
+      "priority": 2,
+      "received": "2026-09-10",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0155",
+      "customer": "K-017 · 汽配一级供应商",
+      "product": "P02",
+      "qty": 20000,
+      "due": "2026-10-05",
+      "priority": 1,
+      "received": "2026-09-11",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0156",
+      "customer": "K-026 · 电机制造商",
+      "product": "P05",
+      "qty": 18000,
+      "due": "2026-09-28",
+      "priority": 2,
+      "received": "2026-09-12",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0158",
+      "customer": "K-031 · 出口贸易公司",
+      "product": "P01",
+      "qty": 4000,
+      "due": "2026-10-06",
+      "priority": 3,
+      "received": "2026-09-13",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0159",
+      "customer": "K-009 · 医疗器械配件商",
+      "product": "P02",
+      "qty": 6000,
+      "due": "2026-09-26",
+      "priority": 1,
+      "received": "2026-09-14",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0160",
+      "customer": "K-005 · 卫浴五金品牌",
+      "product": "P03",
+      "qty": 8000,
+      "due": "2026-10-03",
+      "priority": 3,
+      "received": "2026-09-15",
+      "progress": {}
+    },
+    {
+      "id": "SO-2609-0161",
+      "customer": "K-022 · 电动工具制造商",
+      "product": "P04",
+      "qty": 3000,
+      "due": "2026-10-07",
+      "priority": 3,
+      "received": "2026-09-16",
+      "progress": {}
+    }
+  ],
+  "insertPresets": [
+    {
+      "customer": "K-017 · 汽配一级供应商",
+      "product": "P03",
+      "qty": 6000,
+      "due": "2026-09-24",
+      "note": "客户产线临时切换型号"
+    },
+    {
+      "customer": "K-040 · 新客户 · 储能设备厂",
+      "product": "P04",
+      "qty": 2500,
+      "due": "2026-09-26",
+      "note": "样品单转小批量"
+    }
+  ],
+  "overtime": [],
+  "log": []
+}

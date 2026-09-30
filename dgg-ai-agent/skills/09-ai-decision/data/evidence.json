@@ -1,0 +1,61 @@
+{
+  "note": "归因证据库：按驱动因子与变动方向（+ 上升 / − 下降）给证据卡，占位符由样本 facts 填充。screen 为对应模块的屏。",
+  "cards": {
+    "materialRatio+": [
+      { "module": "m6", "screen": "risks", "title": "主要材料采购均价上涨", "detail": "{steelName}近 3 个月采购均价 {materialPriceDelta}，材料领用金额与收入的比值随之抬高", "ref": "AI CFO 风险预警 · 采购价格" },
+      { "module": "m7", "screen": "contracts", "title": "框架供货协议为单方调价", "detail": "{frameworkContract} 约定供方可单方调价并事后通知，本期两次调价均已执行", "ref": "AI法务 合同审查 C11" },
+      { "module": "m10", "screen": "materials", "title": "紧急采购占比上升", "detail": "{urgentPurchaseNote}", "ref": "AI ERP 物料库存" }
+    ],
+    "materialRatio-": [{ "module": "m6", "screen": "risks", "title": "材料采购均价回落", "detail": "{steelName}采购均价 {materialPriceDelta}", "ref": "AI CFO" }],
+    "laborRatio+": [
+      { "module": "m5", "screen": "compliance", "title": "{bottleneck}加班超限", "detail": "{cncOvertime} 人月加班超过 36 小时，加班工资按 1.5 倍计入直接人工", "ref": "AI人力官 用工合规 H06" },
+      { "module": "m5", "screen": "recruit", "title": "{needJob}缺编", "detail": "需求单 {cncNeed} 缺 {cncNeedCount} 人，到岗前靠加班补产能", "ref": "AI人力官 招聘" }
+    ],
+    "laborRatio-": [{ "module": "m5", "screen": "board", "title": "直接人工回落", "detail": "加班减少或产量提升摊薄人工", "ref": "AI人力官" }],
+    "overheadRatio+": [{ "module": "m6", "screen": "statements", "title": "折旧与外协上升", "detail": "{overheadNote}", "ref": "AI CFO 三表" }],
+    "overheadRatio-": [{ "module": "m6", "screen": "statements", "title": "制造费用被产量摊薄", "detail": "{overheadNote}", "ref": "AI CFO 三表" }],
+    "avgOrder-": [
+      { "module": "m10", "screen": "orders", "title": "订单结构偏小批量", "detail": "{orderMixNote}", "ref": "AI ERP 订单" },
+      { "module": "m7", "screen": "contracts", "title": "年度价格未复核", "detail": "{k017Contract} 的年度价格复核节点在 {priceReviewDate}，本期售价未随材料调整", "ref": "AI法务 合同台账" }
+    ],
+    "avgOrder+": [{ "module": "m10", "screen": "orders", "title": "大批量订单占比上升", "detail": "{orderMixNote}", "ref": "AI ERP 订单" }],
+    "orders-": [
+      { "module": "m10", "screen": "board", "title": "延期订单挤占出库", "detail": "延期 {lateOrders} 单，准时交付率 {onTimeRate}%，部分订单出库推到下月", "ref": "AI ERP 指挥室" },
+      { "module": "m4", "screen": "board", "title": "新客成交节奏", "detail": "本月新客成交 {dealsMonth} 单，线索 {leadsMonth} 条", "ref": "AI获客 驾驶舱" }
+    ],
+    "orders+": [{ "module": "m10", "screen": "board", "title": "出库订单增加", "detail": "当月完成出库 {ordersMonth} 单", "ref": "AI ERP 指挥室" }],
+    "sellExp+": [{ "module": "m4", "screen": "board", "title": "展会与渠道投入", "detail": "{sellExpNote}", "ref": "AI获客 渠道" }],
+    "sellExp-": [{ "module": "m4", "screen": "board", "title": "渠道投入回落", "detail": "{sellExpNote}", "ref": "AI获客 渠道" }],
+    "adminExp+": [{ "module": "m6", "screen": "statements", "title": "管理费用上升", "detail": "{adminExpNote}", "ref": "AI CFO 三表" }],
+    "adminExp-": [{ "module": "m6", "screen": "statements", "title": "管理费用回落", "detail": "{adminExpNote}", "ref": "AI CFO 三表" }],
+    "rdExp+": [{ "module": "m6", "screen": "statements", "title": "研发投入", "detail": "研发人员 {rdStaff} 人，费用随试制项目波动", "ref": "AI CFO 三表" }],
+    "rdExp-": [{ "module": "m6", "screen": "statements", "title": "研发费用回落", "detail": "研发人员 {rdStaff} 人，费用随试制项目波动", "ref": "AI CFO 三表" }],
+    "finExp+": [{ "module": "m6", "screen": "cash", "title": "借款利息", "detail": "{finExpNote}", "ref": "AI CFO 现金" }],
+    "finExp-": [{ "module": "m6", "screen": "cash", "title": "利息收入或借款减少", "detail": "{finExpNote}", "ref": "AI CFO 现金" }],
+    "dso+": [
+      { "module": "m6", "screen": "cash", "title": "应收逾期扩大", "detail": "逾期应收 {arOverdue}，其中 {k017Name} {k017Overdue} 已超账期", "ref": "AI CFO 现金预测" },
+      { "module": "m7", "screen": "contracts", "title": "账期条款过长", "detail": "{k017Contract} 约定验收后 {k017TermDays} 日付款，高于行业常见 30–60 天", "ref": "AI法务 合同审查 C01" }
+    ],
+    "dso-": [{ "module": "m6", "screen": "cash", "title": "回款加快", "detail": "逾期应收 {arOverdue}", "ref": "AI CFO 现金预测" }],
+    "dio+": [
+      { "module": "m10", "screen": "materials", "title": "原材料与在制品上升", "detail": "{inventoryNote}", "ref": "AI ERP 物料库存" },
+      { "module": "m6", "screen": "reconcile", "title": "账面存货与 ERP 库存差异", "detail": "{inventoryDiffNote}", "ref": "AI CFO 三表勾稽 R04" }
+    ],
+    "dio-": [{ "module": "m10", "screen": "materials", "title": "库存回落", "detail": "{inventoryNote}", "ref": "AI ERP 物料库存" }],
+    "dpo+": [{ "module": "m6", "screen": "cash", "title": "应付账期延长", "detail": "{apNote}", "ref": "AI CFO 现金" }],
+    "dpo-": [{ "module": "m6", "screen": "risks", "title": "应付逾期与提前付款", "detail": "{apNote}", "ref": "AI CFO 风险 · 应付逾期" }],
+    "onTimeRate-": [
+      { "module": "m10", "screen": "board", "title": "{bottleneck}成为瓶颈", "detail": "瓶颈工序负荷 {load}%，延期 {lateOrders} 单，累计延期 {lateDaysTotal} 天", "ref": "AI ERP 指挥室" },
+      { "module": "m5", "screen": "recruit", "title": "{needJob}缺编", "detail": "需求单 {cncNeed} 缺 {cncNeedCount} 人", "ref": "AI人力官 招聘" }
+    ],
+    "onTimeRate+": [{ "module": "m10", "screen": "board", "title": "准时交付率回升", "detail": "延期 {lateOrders} 单", "ref": "AI ERP 指挥室" }],
+    "deals-": [{ "module": "m4", "screen": "leads", "title": "线索跟进逾期", "detail": "逾期未跟进 {leadOverdue} 条，未分派 {leadUnassigned} 条", "ref": "AI获客 线索池" }],
+    "deals+": [{ "module": "m4", "screen": "board", "title": "新客成交", "detail": "本月新客成交 {dealsMonth} 单", "ref": "AI获客 驾驶舱" }],
+    "turnover+": [{ "module": "m5", "screen": "board", "title": "一线离职集中", "detail": "近 12 个月离职 {leavers12} 人，生产部占多数，原因前两位是{leaveReasons}", "ref": "AI人力官 驾驶舱" }],
+    "complianceExposure+": [
+      { "module": "m5", "screen": "compliance", "title": "社保基数低于工资", "detail": "基数占工资 {socialBaseRatio}%，年敞口 {socialExposure}", "ref": "AI人力官 用工合规 H05" },
+      { "module": "m7", "screen": "contracts", "title": "高风险合同", "detail": "{highRiskContracts} 份合同风险分低于 60，最低 {worstContract}", "ref": "AI法务 合同审查" }
+    ],
+    "default": [{ "module": "m6", "screen": "board", "title": "按账套核对", "detail": "该因子本期变动在容差内，暂无单独证据", "ref": "AI CFO" }]
+  }
+}

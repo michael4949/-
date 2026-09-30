@@ -1,0 +1,725 @@
+{
+  "archetype": "service",
+  "sector": "prof",
+  "company": "成都启元财税服务有限公司",
+  "co": "启元",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "prof-accounting",
+    "size": "21_50",
+    "province": "四川",
+    "founded": "2016-08-22",
+    "capital": 2000000
+  },
+  "sources": [
+    {
+      "id": "contracts",
+      "name": "合同台账",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 8
+    },
+    {
+      "id": "licenses",
+      "name": "证照与资质清单",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 4
+    },
+    {
+      "id": "ip",
+      "name": "知产清单",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 4
+    },
+    {
+      "id": "crm",
+      "name": "CRM · 客户合同",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 46
+    }
+  ],
+  "contracts": [
+    {
+      "id": "HT-2609-211",
+      "type": "service",
+      "role": "provider",
+      "title": "代理记账服务合同",
+      "party": "K-311 · 餐饮管理公司",
+      "amount": 216000,
+      "signed": "2026-01-05",
+      "start": "2026-01-05",
+      "end": "2026-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-11-15",
+          "text": "续约谈判"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "服务方为客户方 12 家门店提供代理记账与纳税申报服务。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "每月 10 日前完成上月账务处理并出具报表。",
+          "params": {
+            "penalty": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "季度预付。",
+          "params": {
+            "termDays": 0,
+            "advanceRatio": 0.25
+          }
+        },
+        {
+          "no": "4",
+          "type": "confidentiality",
+          "title": "保密",
+          "text": "服务方对客户方财务信息保密，期限至合同终止后 1 年。",
+          "params": {
+            "years": 1,
+            "penalty": false
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应赔偿对方因此遭受的全部损失，包括直接损失与可得利益损失。",
+          "params": {
+            "capMultiple": null
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2608-205",
+      "type": "service",
+      "role": "provider",
+      "title": "年度汇算清缴与审计协作合同",
+      "party": "K-298 · 培训机构",
+      "amount": 86000,
+      "signed": "2026-08-10",
+      "start": "2026-08-10",
+      "end": "2027-06-30",
+      "status": "审查中",
+      "milestones": [
+        {
+          "date": "2026-09-30",
+          "text": "资料交接"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "服务方为客户方提供年度汇算清缴与审计协作服务。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "按税务机关时限完成申报。",
+          "params": {
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "签订后付 50%，完成后付 50%。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 0.5
+          }
+        },
+        {
+          "no": "4",
+          "type": "confidentiality",
+          "title": "保密",
+          "text": "保密期限至合同终止后 3 年，违约支付违约金 5 万元。",
+          "params": {
+            "years": 3,
+            "penalty": true
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2605-188",
+      "type": "labor",
+      "role": "employer",
+      "title": "劳动合同（会计岗模板）",
+      "party": "员工 · 会计岗",
+      "amount": 0,
+      "signed": "2026-05-01",
+      "start": "2026-05-01",
+      "end": "2028-04-30",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "用人单位聘用员工担任主办会计。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "劳动合同期限 2 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true,
+            "years": 2
+          }
+        },
+        {
+          "no": "3",
+          "type": "probation",
+          "title": "试用期",
+          "text": "试用期 2 个月。",
+          "params": {
+            "months": 2,
+            "allowedMonths": 2
+          }
+        },
+        {
+          "no": "4",
+          "type": "wage",
+          "title": "劳动报酬",
+          "text": "月薪制。",
+          "params": {}
+        },
+        {
+          "no": "5",
+          "type": "worktime",
+          "title": "工作时间",
+          "text": "标准工时制。",
+          "params": {}
+        },
+        {
+          "no": "6",
+          "type": "noncompete",
+          "title": "竞业限制",
+          "text": "离职后 12 个月内不得到同城代账机构任职。",
+          "params": {
+            "compensation": false,
+            "months": 12
+          }
+        },
+        {
+          "no": "7",
+          "type": "termination",
+          "title": "解除与终止",
+          "text": "双方依法解除或终止。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2512-160",
+      "type": "lease",
+      "role": "lessee",
+      "title": "写字楼租赁合同",
+      "party": "写字楼物业",
+      "amount": 336000,
+      "signed": "2025-12-01",
+      "start": "2026-01-01",
+      "end": "2027-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-01",
+          "text": "第四季度租金"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "出租人将 12 层 1206–1208 室共 420 ㎡出租给承租人办公。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "租赁期 2 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "rent",
+          "title": "租金",
+          "text": "月租金 28,000 元，季付。",
+          "params": {}
+        },
+        {
+          "no": "4",
+          "type": "renewal",
+          "title": "续租",
+          "text": "期满另行协商。",
+          "params": {
+            "priority": false
+          }
+        },
+        {
+          "no": "5",
+          "type": "improvements",
+          "title": "装修",
+          "text": "装修归出租人所有。",
+          "params": {
+            "owner": "lessor",
+            "compensated": false
+          }
+        },
+        {
+          "no": "6",
+          "type": "termination",
+          "title": "提前解约",
+          "text": "承租人提前解约支付 2 个月租金。",
+          "params": {
+            "earlyExitMonths": 2
+          }
+        },
+        {
+          "no": "7",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2607-196",
+      "type": "nda",
+      "role": "disclosing",
+      "title": "客户资料保密协议（外聘审核）",
+      "party": "合作事务所",
+      "amount": 0,
+      "signed": "2026-07-01",
+      "start": "2026-07-01",
+      "end": "2027-06-30",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "scope",
+          "title": "保密范围",
+          "text": "客户名单、账套数据与申报资料。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "confidentiality",
+          "title": "保密义务",
+          "text": "保密期限至协议终止后 2 年。",
+          "params": {
+            "years": 2,
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "term",
+          "title": "期限",
+          "text": "有效期 1 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2603-172",
+      "type": "software",
+      "role": "client",
+      "title": "财务软件账套授权合同",
+      "party": "软件服务商",
+      "amount": 27200,
+      "signed": "2026-03-01",
+      "start": "2026-03-01",
+      "end": "2027-02-28",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-12-01",
+          "text": "账套续费评估"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "40 套账套年度授权。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "月度可用率 99.5%。",
+          "params": {
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "data",
+          "title": "数据",
+          "text": "账套数据存储于服务方云端，服务方可用于产品优化。",
+          "params": {
+            "owner": "provider"
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "年付。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 1
+          }
+        },
+        {
+          "no": "5",
+          "type": "ip",
+          "title": "知识产权",
+          "text": "软件著作权归服务方。",
+          "params": {
+            "owner": "provider"
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2609-214",
+      "type": "service",
+      "role": "provider",
+      "title": "财税顾问服务合同",
+      "party": "K-342 · 电商公司",
+      "amount": 144000,
+      "signed": "2026-09-05",
+      "start": "2026-09-05",
+      "end": "2027-09-04",
+      "status": "审查中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "服务方为客户方提供多平台账单核对与财税顾问服务。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "每月 5 日前完成上月核对。",
+          "params": {
+            "penalty": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结。",
+          "params": {
+            "termDays": 30,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "4",
+          "type": "confidentiality",
+          "title": "保密",
+          "text": "保密期限至合同终止后 3 年，违约支付违约金 5 万元。",
+          "params": {
+            "years": 3,
+            "penalty": true
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2604-180",
+      "type": "agency",
+      "role": "principal",
+      "title": "客户推荐合作协议",
+      "party": "银行支行",
+      "amount": 0,
+      "signed": "2026-04-15",
+      "start": "2026-04-15",
+      "end": "2027-04-14",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "合作方向委托方推荐小微企业客户，委托方按签约客户支付推荐费。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "exclusivity",
+          "title": "排他",
+          "text": "合作方在辖区内独家推荐。",
+          "params": {
+            "exclusive": true,
+            "minVolume": null
+          }
+        },
+        {
+          "no": "3",
+          "type": "term",
+          "title": "期限",
+          "text": "有效期 1 年，期满自动续期。",
+          "params": {
+            "autoRenew": true,
+            "exitNotice": false
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "按季结算推荐费。",
+          "params": {
+            "termDays": 30,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "5",
+          "type": "termination",
+          "title": "终止",
+          "text": "任何一方提前 30 日通知可终止。",
+          "params": {}
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "id": "ZZ-01",
+      "name": "营业执照",
+      "no": "9151********03",
+      "issuer": "市场监督管理局",
+      "expiry": null,
+      "status": "长期"
+    },
+    {
+      "id": "ZZ-02",
+      "name": "代理记账许可证书",
+      "no": "川财会代 ****",
+      "issuer": "财政局",
+      "expiry": "2026-12-31",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-03",
+      "name": "税务师事务所行政登记",
+      "no": "****",
+      "issuer": "税务局",
+      "expiry": "2027-08-30",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-04",
+      "name": "专职会计从业人员备案（12 人）",
+      "no": "****",
+      "issuer": "财政局",
+      "expiry": "2026-10-31",
+      "status": "有效"
+    }
+  ],
+  "ip": {
+    "trademarks": [
+      {
+        "id": "TM-01",
+        "name": "启元财税",
+        "regNo": "第 3120**** 号",
+        "classes": [
+          "35"
+        ],
+        "regDate": "2016-11-28",
+        "status": "已注册"
+      }
+    ],
+    "patents": [],
+    "software": [
+      {
+        "id": "RZ-01",
+        "title": "启元票据识别与凭证初录系统 V1.0",
+        "regDate": "2025-02-14"
+      },
+      {
+        "id": "RZ-02",
+        "title": "启元客户经营月报生成工具 V1.0",
+        "regDate": "2026-01-20"
+      }
+    ],
+    "domains": [
+      {
+        "name": "qiyuan-****.com",
+        "expiry": "2027-02-10"
+      }
+    ],
+    "similarMarks": [
+      {
+        "name": "启源财税",
+        "classes": [
+          "35"
+        ],
+        "holder": "同行 · 西南",
+        "similarity": 0.79,
+        "status": "已注册",
+        "deadline": null,
+        "note": "可评估无效宣告"
+      }
+    ],
+    "infringementLeads": [
+      {
+        "where": "本地生活平台",
+        "product": "代理记账服务",
+        "note": "店铺名使用「启元」字样",
+        "similarity": 0.86,
+        "found": "2026-09-11"
+      }
+    ]
+  },
+  "setup": {
+    "type": "branch",
+    "name": "成都启元财税服务有限公司高新分公司",
+    "region": "四川 · 成都高新区",
+    "capital": 0,
+    "shares": [
+      {
+        "holder": "成都启元财税服务有限公司",
+        "pct": 100
+      }
+    ],
+    "scope": [
+      "财务咨询",
+      "代理记账"
+    ],
+    "licenses": [
+      "代理记账许可"
+    ],
+    "confirmed": false,
+    "startDate": "2026-10-09",
+    "reason": "高新区科技类客户占新签 40%，就近服务并申请园区扶持"
+  },
+  "renewList": [],
+  "applyList": [],
+  "log": []
+}

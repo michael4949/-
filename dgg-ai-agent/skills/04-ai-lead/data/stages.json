@@ -1,0 +1,13 @@
+{
+  "stages": [
+    { "key": "lead", "name": "线索", "prob": 0.05 },
+    { "key": "contact", "name": "已联系", "prob": 0.15 },
+    { "key": "opp", "name": "商机", "prob": 0.35 },
+    { "key": "quote", "name": "已报价", "prob": 0.6 },
+    { "key": "won", "name": "成交", "prob": 1 }
+  ],
+  "grades": { "A": 75, "B": 55, "C": 35 },
+  "followUpDays": { "A": 3, "B": 5, "C": 10, "D": 30 },
+  "dormantDays": 45,
+  "weights": { "match": 0.7, "signal": 0.3 }
+}

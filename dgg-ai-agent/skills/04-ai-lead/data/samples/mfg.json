@@ -1,0 +1,2105 @@
+{
+  "archetype": "make",
+  "sector": "mfg",
+  "company": "杭州锐合精密五金有限公司",
+  "co": "锐合",
+  "prod": "精密五金件与冲压件",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "mfg-machinery",
+    "size": "101_300"
+  },
+  "sources": [
+    {
+      "id": "crm",
+      "name": "CRM · 客户与成交记录",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 30
+    },
+    {
+      "id": "erp",
+      "name": "ERP · 订单与客户",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 214
+    },
+    {
+      "id": "fair",
+      "name": "展会扫码名单",
+      "mode": "import",
+      "lastSync": "2026-09-12 18:00",
+      "rows": 26
+    },
+    {
+      "id": "web",
+      "name": "官网留资与访问",
+      "mode": "direct",
+      "lastSync": "2026-09-17 06:00",
+      "rows": 88
+    },
+    {
+      "id": "wechat",
+      "name": "公众号互动",
+      "mode": "direct",
+      "lastSync": "2026-09-17 06:00",
+      "rows": 142
+    },
+    {
+      "id": "list",
+      "name": "名录导入",
+      "mode": "import",
+      "lastSync": "2026-09-08 10:00",
+      "rows": 60
+    }
+  ],
+  "offers": [
+    {
+      "key": "ontime",
+      "text": "交期准点率 96%，延期提前 3 天告知"
+    },
+    {
+      "key": "quote24",
+      "text": "报价 24 小时内出，附工艺路线"
+    },
+    {
+      "key": "quality",
+      "text": "批次全检，检测数据随货"
+    },
+    {
+      "key": "pilot",
+      "text": "小批量试产 7 天出样"
+    }
+  ],
+  "roleOffers": {
+    "采购经理": [
+      "ontime",
+      "quote24"
+    ],
+    "技术负责人": [
+      "quality",
+      "pilot"
+    ],
+    "总经理": [
+      "ontime",
+      "quality"
+    ],
+    "供应链总监": [
+      "ontime",
+      "quality"
+    ]
+  },
+  "proofs": [
+    {
+      "customer": "K-017 · 汽配一级供应商",
+      "sector": "mfg",
+      "text": "合作 4 年，月供 3 万件，准点率 97%"
+    },
+    {
+      "customer": "K-003 · 家电整机厂",
+      "sector": "mfg",
+      "text": "冲压支架年供 15 万件，两次改型都在两周内切换"
+    },
+    {
+      "customer": "K-022 · 电动工具制造商",
+      "sector": "mfg",
+      "text": "铝合金外壳从打样到批量 5 周"
+    },
+    {
+      "customer": "K-031 · 出口贸易公司",
+      "sector": "trade",
+      "text": "三年出口订单零批量质量投诉"
+    }
+  ],
+  "segmentPainTags": {
+    "mfg": [
+      "交期",
+      "质量追溯",
+      "库存积压",
+      "成本不清"
+    ],
+    "trade": [
+      "报价慢",
+      "交期",
+      "库存积压"
+    ],
+    "energy": [
+      "交期",
+      "备件与药剂"
+    ],
+    "tech": [
+      "交期"
+    ],
+    "other": [
+      "交期",
+      "报价慢"
+    ]
+  },
+  "teams": [
+    {
+      "id": "T1",
+      "name": "业务一组",
+      "sectors": [
+        "mfg"
+      ],
+      "cap": 18
+    },
+    {
+      "id": "T2",
+      "name": "业务二组",
+      "sectors": [
+        "mfg",
+        "energy"
+      ],
+      "cap": 18
+    },
+    {
+      "id": "T3",
+      "name": "业务三组",
+      "sectors": [
+        "trade",
+        "other",
+        "tech"
+      ],
+      "cap": 16
+    },
+    {
+      "id": "T4",
+      "name": "大客户组",
+      "sectors": [
+        "mfg"
+      ],
+      "cap": 12
+    }
+  ],
+  "channelCosts": {
+    "fair": 38000,
+    "inquiry": 12000,
+    "web": 6000,
+    "wechat": 3000,
+    "referral": 0,
+    "list": 4500
+  },
+  "deals": [
+    {
+      "customer": "K-017 · 汽配一级供应商",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 45,
+      "amount": 4200000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2025-10-08"
+    },
+    {
+      "customer": "K-003 · 家电整机厂",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 60,
+      "amount": 3600000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-11-20"
+    },
+    {
+      "customer": "K-022 · 电动工具制造商",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "cycleDays": 35,
+      "amount": 2100000,
+      "repeat": true,
+      "channel": "inquiry",
+      "closedAt": "2026-01-12"
+    },
+    {
+      "customer": "K-009 · 医疗器械配件商",
+      "industry": "医疗器械配件商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "cycleDays": 50,
+      "amount": 1500000,
+      "repeat": true,
+      "channel": "web",
+      "closedAt": "2025-12-03"
+    },
+    {
+      "customer": "K-012 · 新能源电池壳体厂",
+      "industry": "新能源电池壳体厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 40,
+      "amount": 1800000,
+      "repeat": false,
+      "channel": "fair",
+      "closedAt": "2026-03-18"
+    },
+    {
+      "customer": "K-005 · 卫浴五金品牌",
+      "industry": "卫浴五金品牌",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华南",
+      "role": "采购经理",
+      "cycleDays": 30,
+      "amount": 1250000,
+      "repeat": true,
+      "channel": "inquiry",
+      "closedAt": "2026-02-10"
+    },
+    {
+      "customer": "K-018 · 智能门锁厂商",
+      "industry": "智能门锁厂商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "cycleDays": 42,
+      "amount": 980000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-04-22"
+    },
+    {
+      "customer": "K-026 · 电机制造商",
+      "industry": "电机制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 38,
+      "amount": 860000,
+      "repeat": false,
+      "channel": "list",
+      "closedAt": "2026-05-06"
+    },
+    {
+      "customer": "K-031 · 出口贸易公司",
+      "industry": "出口贸易公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "cycleDays": 25,
+      "amount": 2300000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-09-15"
+    },
+    {
+      "customer": "K-040 · 储能设备厂",
+      "industry": "储能设备厂",
+      "sector": "energy",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 33,
+      "amount": 620000,
+      "repeat": false,
+      "channel": "fair",
+      "closedAt": "2026-08-30"
+    },
+    {
+      "customer": "K-044 · 汽配二级供应商",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 28,
+      "amount": 740000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-06-11"
+    },
+    {
+      "customer": "K-046 · 农机制造商",
+      "industry": "农机制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华中",
+      "role": "采购经理",
+      "cycleDays": 55,
+      "amount": 690000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-07-02"
+    },
+    {
+      "customer": "K-048 · 家电整机厂",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "供应链总监",
+      "cycleDays": 70,
+      "amount": 2800000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2025-10-26"
+    },
+    {
+      "customer": "K-050 · 汽配一级供应商",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华北",
+      "role": "供应链总监",
+      "cycleDays": 65,
+      "amount": 1900000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-01-28"
+    },
+    {
+      "customer": "K-052 · 电动工具制造商",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华南",
+      "role": "技术负责人",
+      "cycleDays": 36,
+      "amount": 560000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-03-05"
+    },
+    {
+      "customer": "K-054 · 五金工具贸易商",
+      "industry": "五金工具贸易商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "cycleDays": 20,
+      "amount": 480000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-04-14"
+    },
+    {
+      "customer": "K-056 · 智能家居厂商",
+      "industry": "智能家居厂商",
+      "sector": "tech",
+      "size": "51_100",
+      "region": "华南",
+      "role": "技术负责人",
+      "cycleDays": 48,
+      "amount": 720000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-05-20"
+    },
+    {
+      "customer": "K-058 · 汽配一级供应商",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 40,
+      "amount": 1650000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2026-06-25"
+    },
+    {
+      "customer": "K-060 · 医疗器械配件商",
+      "industry": "医疗器械配件商",
+      "sector": "mfg",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "cycleDays": 30,
+      "amount": 420000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-07-19"
+    },
+    {
+      "customer": "K-062 · 电梯配件厂",
+      "industry": "电梯配件厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 44,
+      "amount": 910000,
+      "repeat": true,
+      "channel": "list",
+      "closedAt": "2026-02-27"
+    },
+    {
+      "customer": "K-064 · 阀门制造商",
+      "industry": "阀门制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "cycleDays": 52,
+      "amount": 830000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-08-08"
+    },
+    {
+      "customer": "K-066 · 家电配件贸易商",
+      "industry": "家电配件贸易商",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "cycleDays": 22,
+      "amount": 560000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2025-12-18"
+    },
+    {
+      "customer": "K-068 · 光伏支架厂",
+      "industry": "光伏支架厂",
+      "sector": "energy",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 46,
+      "amount": 1100000,
+      "repeat": false,
+      "channel": "fair",
+      "closedAt": "2026-03-30"
+    },
+    {
+      "customer": "K-070 · 汽配二级供应商",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华中",
+      "role": "采购经理",
+      "cycleDays": 31,
+      "amount": 520000,
+      "repeat": true,
+      "channel": "wechat",
+      "closedAt": "2026-06-03"
+    },
+    {
+      "customer": "K-072 · 精密仪器厂",
+      "industry": "精密仪器厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "cycleDays": 58,
+      "amount": 640000,
+      "repeat": false,
+      "channel": "web",
+      "closedAt": "2026-04-05"
+    },
+    {
+      "customer": "K-074 · 卫浴五金品牌",
+      "industry": "卫浴五金品牌",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "采购经理",
+      "cycleDays": 34,
+      "amount": 1400000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2025-11-04"
+    },
+    {
+      "customer": "K-076 · 摩托车配件厂",
+      "industry": "摩托车配件厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "西南",
+      "role": "采购经理",
+      "cycleDays": 41,
+      "amount": 780000,
+      "repeat": false,
+      "channel": "list",
+      "closedAt": "2026-07-28"
+    },
+    {
+      "customer": "K-078 · 电动工具制造商",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "cycleDays": 62,
+      "amount": 2200000,
+      "repeat": true,
+      "channel": "referral",
+      "closedAt": "2026-02-14"
+    },
+    {
+      "customer": "K-080 · 机械设备厂",
+      "industry": "机械设备厂",
+      "sector": "other",
+      "size": "51_100",
+      "region": "华北",
+      "role": "总经理",
+      "cycleDays": 27,
+      "amount": 380000,
+      "repeat": false,
+      "channel": "inquiry",
+      "closedAt": "2026-05-29"
+    },
+    {
+      "customer": "K-082 · 家电整机厂",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "cycleDays": 39,
+      "amount": 1300000,
+      "repeat": true,
+      "channel": "fair",
+      "closedAt": "2026-08-19"
+    }
+  ],
+  "leads": [
+    {
+      "id": "L-2609-0001",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-11",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-11"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-15"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "电话沟通，索取报价单"
+      },
+      "amountEst": 1800000,
+      "note": "展会当天索样"
+    },
+    {
+      "id": "L-2609-0002",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "供应链总监",
+      "channel": "referral",
+      "createdAt": "2026-09-08",
+      "stage": "opp",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-08"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "K-048 引荐，已约下周到厂"
+      },
+      "amountEst": 2600000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0003",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "inquiry",
+      "createdAt": "2026-09-02",
+      "stage": "quote",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-02"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-06"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-10",
+        "text": "报价已发，等技术评审"
+      },
+      "amountEst": 950000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0004",
+      "industry": "新能源电池壳体厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "web",
+      "createdAt": "2026-08-28",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-08-28"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-09"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-01",
+        "text": "首次电话，发了资料"
+      },
+      "amountEst": 1200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0005",
+      "industry": "医疗器械配件商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "wechat",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-14"
+        },
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 600000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0006",
+      "industry": "出口贸易公司",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "referral",
+      "createdAt": "2026-09-10",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-10"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-11",
+        "text": "微信首触，客户要看案例"
+      },
+      "amountEst": 800000,
+      "note": "K-031 引荐"
+    },
+    {
+      "id": "L-2609-0007",
+      "industry": "储能设备厂",
+      "sector": "energy",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "opp",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-15"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-16",
+        "text": "样品单转小批量，要求 9-26 前报价"
+      },
+      "amountEst": 700000,
+      "note": "ERP 插单预置客户"
+    },
+    {
+      "id": "L-2609-0008",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华中",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-12",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 300000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0009",
+      "industry": "智能门锁厂商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-05",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-05"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-06",
+        "text": "电话沟通，客户在比价"
+      },
+      "amountEst": 450000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0010",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华北",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 2000000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0011",
+      "industry": "农机制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华中",
+      "role": "技术负责人",
+      "channel": "web",
+      "createdAt": "2026-07-30",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-07-30"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-08-02",
+        "text": "首次电话，暂无需求"
+      },
+      "amountEst": 500000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0012",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 2200000,
+      "note": "K-003 引荐"
+    },
+    {
+      "id": "L-2609-0013",
+      "industry": "五金工具贸易商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华南",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-08-20",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-08-20"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-03"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-04",
+        "text": "微信报价，客户嫌贵"
+      },
+      "amountEst": 260000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0014",
+      "industry": "阀门制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-09",
+      "stage": "opp",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-13"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-13",
+        "text": "样品已寄，约 9-22 回访"
+      },
+      "amountEst": 880000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0015",
+      "industry": "电梯配件厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "list",
+      "createdAt": "2026-08-25",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-10"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 640000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0016",
+      "industry": "光伏支架厂",
+      "sector": "energy",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-16",
+        "text": "电话沟通，要求下周报价"
+      },
+      "amountEst": 1500000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0017",
+      "industry": "摩托车配件厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "西南",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-06-18",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-06-18"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-06-25",
+        "text": "报价后无回应"
+      },
+      "amountEst": 420000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0018",
+      "industry": "精密仪器厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "web",
+      "createdAt": "2026-09-13",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-13"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 380000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0019",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "referral",
+      "createdAt": "2026-08-30",
+      "stage": "quote",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-08-30"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-08"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-08",
+        "text": "报价已发，客户内部走流程"
+      },
+      "amountEst": 3100000,
+      "note": "K-017 引荐"
+    },
+    {
+      "id": "L-2609-0020",
+      "industry": "机械设备厂",
+      "sector": "other",
+      "size": "51_100",
+      "region": "华北",
+      "role": "总经理",
+      "channel": "list",
+      "createdAt": "2026-08-01",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 200000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0021",
+      "industry": "卫浴五金品牌",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "wechat",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "展会后微信首触"
+      },
+      "amountEst": 720000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0022",
+      "industry": "电机制造商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-05-22",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-05-22"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-06-02",
+        "text": "客户暂缓采购"
+      },
+      "amountEst": 350000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0023",
+      "industry": "智能家居厂商",
+      "sector": "tech",
+      "size": "101_300",
+      "region": "华南",
+      "role": "技术负责人",
+      "channel": "web",
+      "createdAt": "2026-09-06",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-06"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-08",
+        "text": "电话沟通，要参数表"
+      },
+      "amountEst": 560000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0024",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 480000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0025",
+      "industry": "医疗器械配件商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-09-03",
+      "stage": "opp",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-03"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "样品测试通过，谈价"
+      },
+      "amountEst": 1050000,
+      "note": "K-009 引荐"
+    },
+    {
+      "id": "L-2609-0026",
+      "industry": "家电配件贸易商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-02"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 220000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0027",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "供应链总监",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 1700000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0028",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-14"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 900000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0029",
+      "industry": "农机制造商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华中",
+      "role": "总经理",
+      "channel": "web",
+      "createdAt": "2026-07-08",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-07-08"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 260000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0030",
+      "industry": "新能源电池壳体厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-07",
+      "stage": "opp",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-07"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "样品已寄，等测试"
+      },
+      "amountEst": 1400000,
+      "note": "K-012 引荐"
+    },
+    {
+      "id": "L-2609-0031",
+      "industry": "五金工具贸易商",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-01",
+      "stage": "quote",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-01"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-05"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-05",
+        "text": "报价已发"
+      },
+      "amountEst": 340000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0032",
+      "industry": "电梯配件厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-15",
+        "text": "电话沟通，客户要看产能"
+      },
+      "amountEst": 1600000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0033",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-05",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 280000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0034",
+      "industry": "精密仪器厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "inquiry",
+      "createdAt": "2026-08-26",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-08-26"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-08-28",
+        "text": "发了参数表，客户评估中"
+      },
+      "amountEst": 520000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0035",
+      "industry": "储能设备厂",
+      "sector": "energy",
+      "size": "51_100",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "web",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 430000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0036",
+      "industry": "智能门锁厂商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华南",
+      "role": "技术负责人",
+      "channel": "wechat",
+      "createdAt": "2026-06-30",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-06-30"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-07-03",
+        "text": "微信沟通后无回应"
+      },
+      "amountEst": 400000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0037",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华中",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-18",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 760000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0038",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-16",
+        "text": "索样，寄出"
+      },
+      "amountEst": 2400000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0039",
+      "industry": "阀门制造商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-11",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 310000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0040",
+      "industry": "出口贸易公司",
+      "sector": "trade",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "web",
+      "createdAt": "2026-08-22",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-08-22"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-08-24",
+        "text": "电话沟通，暂无订单"
+      },
+      "amountEst": 450000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0041",
+      "industry": "摩托车配件厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "西南",
+      "role": "技术负责人",
+      "channel": "wechat",
+      "createdAt": "2026-09-09",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-09"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 290000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0042",
+      "industry": "光伏支架厂",
+      "sector": "energy",
+      "size": "101_300",
+      "region": "华北",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-10",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 520000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0043",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-02",
+      "stage": "quote",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-02"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-05"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-12",
+        "text": "报价已发，客户技术复核"
+      },
+      "amountEst": 1350000,
+      "note": "K-058 引荐"
+    },
+    {
+      "id": "L-2609-0044",
+      "industry": "机械设备厂",
+      "sector": "other",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-09-10",
+      "stage": "contact",
+      "owner": "T3",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-10"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-11",
+        "text": "电话沟通"
+      },
+      "amountEst": 380000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0045",
+      "industry": "卫浴五金品牌",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华南",
+      "role": "供应链总监",
+      "channel": "referral",
+      "createdAt": "2026-08-26",
+      "stage": "opp",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-08-26"
+        },
+        {
+          "key": "inquiry",
+          "date": "2026-09-04"
+        },
+        {
+          "key": "sample",
+          "date": "2026-09-10"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-10",
+        "text": "样品测试中"
+      },
+      "amountEst": 1900000,
+      "note": "K-074 引荐"
+    },
+    {
+      "id": "L-2609-0046",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "web",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 340000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0047",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 560000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0048",
+      "industry": "电动工具制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-04-15",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-04-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-04-20",
+        "text": "报价后客户选了别家"
+      },
+      "amountEst": 600000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0049",
+      "industry": "智能家居厂商",
+      "sector": "tech",
+      "size": "51_100",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-13",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-13"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 250000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0050",
+      "industry": "医疗器械配件商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "供应链总监",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-15"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "展会后邮件跟进"
+      },
+      "amountEst": 1250000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0051",
+      "industry": "新能源电池壳体厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华南",
+      "role": "采购经理",
+      "channel": "list",
+      "createdAt": "2026-08-28",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 300000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0052",
+      "industry": "电梯配件厂",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华中",
+      "role": "采购经理",
+      "channel": "web",
+      "createdAt": "2026-09-04",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-04"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-05",
+        "text": "电话沟通，客户要样品"
+      },
+      "amountEst": 410000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0053",
+      "industry": "汽配一级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "wechat",
+      "createdAt": "2026-09-15",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "wechat",
+          "date": "2026-09-15"
+        },
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 980000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0054",
+      "industry": "农机制造商",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华中",
+      "role": "供应链总监",
+      "channel": "inquiry",
+      "createdAt": "2026-09-08",
+      "stage": "contact",
+      "owner": "T2",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-09-08"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-09",
+        "text": "电话沟通，客户要求到厂"
+      },
+      "amountEst": 1100000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0055",
+      "industry": "五金工具贸易商",
+      "sector": "trade",
+      "size": "21_50",
+      "region": "华北",
+      "role": "总经理",
+      "channel": "list",
+      "createdAt": "2026-08-03",
+      "stage": "lead",
+      "owner": null,
+      "signals": [],
+      "lastAction": null,
+      "amountEst": 180000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0056",
+      "industry": "电机制造商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "referral",
+      "createdAt": "2026-09-14",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-09-14"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 620000,
+      "note": "K-026 引荐"
+    },
+    {
+      "id": "L-2609-0057",
+      "industry": "精密仪器厂",
+      "sector": "mfg",
+      "size": "21_50",
+      "region": "华东",
+      "role": "总经理",
+      "channel": "web",
+      "createdAt": "2026-08-29",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-08-29"
+        },
+        {
+          "key": "revisit",
+          "date": "2026-09-11"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-01",
+        "text": "首次电话"
+      },
+      "amountEst": 240000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0058",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "300_plus",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-09-12",
+      "stage": "contact",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-09-12"
+        },
+        {
+          "key": "quote",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-16",
+        "text": "索取报价，要求 9-25 前"
+      },
+      "amountEst": 2100000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0059",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "51_100",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "inquiry",
+      "createdAt": "2026-07-12",
+      "stage": "contact",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "inquiry",
+          "date": "2026-07-12"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-07-18",
+        "text": "报价后无回应"
+      },
+      "amountEst": 330000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0060",
+      "industry": "光伏支架厂",
+      "sector": "energy",
+      "size": "101_300",
+      "region": "华东",
+      "role": "技术负责人",
+      "channel": "web",
+      "createdAt": "2026-09-16",
+      "stage": "lead",
+      "owner": null,
+      "signals": [
+        {
+          "key": "form",
+          "date": "2026-09-16"
+        }
+      ],
+      "lastAction": null,
+      "amountEst": 470000,
+      "note": ""
+    },
+    {
+      "id": "L-2609-0061",
+      "industry": "汽配二级供应商",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "referral",
+      "createdAt": "2026-08-06",
+      "stage": "won",
+      "owner": "T1",
+      "signals": [
+        {
+          "key": "referral",
+          "date": "2026-08-06"
+        },
+        {
+          "key": "quote",
+          "date": "2026-08-20"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-09",
+        "text": "签约，首批 9-30 交付"
+      },
+      "amountEst": 680000,
+      "note": "K-044 引荐",
+      "closedAt": "2026-09-09"
+    },
+    {
+      "id": "L-2609-0062",
+      "industry": "家电整机厂",
+      "sector": "mfg",
+      "size": "101_300",
+      "region": "华东",
+      "role": "采购经理",
+      "channel": "fair",
+      "createdAt": "2026-07-22",
+      "stage": "won",
+      "owner": "T4",
+      "signals": [
+        {
+          "key": "scan",
+          "date": "2026-07-22"
+        },
+        {
+          "key": "sample",
+          "date": "2026-08-02"
+        },
+        {
+          "key": "quote",
+          "date": "2026-08-18"
+        }
+      ],
+      "lastAction": {
+        "date": "2026-09-14",
+        "text": "签约，年度框架"
+      },
+      "amountEst": 1300000,
+      "note": "",
+      "closedAt": "2026-09-14"
+    }
+  ],
+  "focusSegment": null,
+  "weights": {},
+  "adopted": {},
+  "planned": [],
+  "log": []
+}

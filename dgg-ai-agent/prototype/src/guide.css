@@ -1,0 +1,79 @@
+/* ==========================================================================
+   guide.css · 现场引导层（配合 guide.js）
+   在 product.css / theme-product.css 之后加载；颜色跟随模块主色 --pa。
+   ========================================================================== */
+
+/* ---------- 屏底「下一步」 ---------- */
+.pd-next {
+  grid-row: 3; display: flex; align-items: center; justify-content: flex-end;
+  padding: 10px 24px 12px; border-top: 1px solid var(--pd-line);
+  background: #fff; box-shadow: 0 -6px 18px -14px rgba(12, 26, 74, .35);
+}
+.pd-next .go {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 20px 0 22px;
+  border-radius: 14px; border: 0; cursor: pointer;
+  background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%);
+  color: var(--hdt, #fff); box-shadow: 0 10px 26px -12px color-mix(in srgb, var(--pa) 75%, transparent);
+  transition: transform .16s cubic-bezier(.2, .7, .3, 1), box-shadow .16s, filter .16s;
+}
+.pd-next .go:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 16px 32px -14px color-mix(in srgb, var(--pa) 85%, transparent); }
+.pd-next .go:active { transform: translateY(0); }
+.pd-next .go .k { font-size: calc(12px * var(--scale)); opacity: .78; letter-spacing: .6px; }
+.pd-next .go .v { font-size: calc(15px * var(--scale)); font-weight: 700; letter-spacing: .4px; }
+.pd-next .go .ar { display: grid; place-items: center; width: 20px; height: 20px; }
+.pd-next .go .ar svg { width: 20px; height: 20px; }
+.pd-next.dim .go { background: #fff; color: var(--pa-ink); box-shadow: inset 0 0 0 1.5px var(--pd-line); }
+.pd-next.dim .go .k { opacity: .62; }
+.pd-next.dim .go:hover { background: var(--pa-soft); box-shadow: inset 0 0 0 1.5px var(--pa); }
+.pd-next.last .go { background: linear-gradient(100deg, #46506B 0%, #6B7695 100%); box-shadow: 0 10px 26px -12px rgba(70, 80, 107, .6); }
+
+/* 主体多一行：顶栏 / 工作区 / 下一步 */
+.pd-body { grid-template-rows: auto minmax(0, 1fr) auto; }
+
+/* ---------- 跟随式箭头 ---------- */
+.pd-arrow {
+  position: absolute; left: 0; top: 0; z-index: 26; pointer-events: none;
+  color: var(--pa); opacity: 0; transition: opacity .28s ease;
+  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--pa) 45%, transparent));
+}
+.pd-arrow.on { opacity: 1; }
+.pd-arrow .tip { display: block; width: 44px; height: 31px; }
+.pd-arrow .tip svg path { paint-order: stroke; stroke-linejoin: round; }
+.pd-arrow::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 58px; height: 42px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 255, 255, .92), rgba(255, 255, 255, 0) 78%);
+  z-index: -1;
+}
+.pd-arrow .tip svg { width: 44px; height: 31px; display: block; }
+.pd-arrow[data-side="top"] .tip { transform: rotate(90deg); }
+/* 一直轻轻推一下，告诉客户「点这里」 */
+.pd-arrow[data-side="left"] .tip { animation: pdArrowX 1.25s ease-in-out infinite; }
+.pd-arrow[data-side="top"] .tip { animation: pdArrowY 1.25s ease-in-out infinite; }
+@keyframes pdArrowX { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+@keyframes pdArrowY { 0%, 100% { transform: rotate(90deg) translateX(0); } 50% { transform: rotate(90deg) translateX(7px); } }
+/* 换目标时先跳一下，视线跟得上 */
+.pd-arrow.hop { animation: pdArrowHop .42s cubic-bezier(.2, .7, .3, 1) 1; }
+@keyframes pdArrowHop { 0% { opacity: .2; } 60% { opacity: 1; } }
+
+/* 目标外圈的呼吸环 */
+.pd-guide-ring {
+  position: absolute; left: 0; top: 0; z-index: 25; pointer-events: none; border-radius: 14px;
+  opacity: 0; transition: opacity .28s ease;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pa) 34%, transparent);
+  animation: pdRing 1.9s ease-out infinite;
+}
+.pd-guide-ring.on { opacity: 1; }
+@keyframes pdRing {
+  0% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa) 52%, transparent); }
+  70% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--pa) 0%, transparent); }
+  100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pa) 0%, transparent); }
+}
+
+@media (orientation: portrait) {
+  .pd-next { padding: 10px 20px 12px; }
+  .pd-next .go { min-height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-arrow .tip, .pd-arrow.hop, .pd-guide-ring { animation: none !important; }
+}
+@media print { .pd-next, .pd-arrow, .pd-guide-ring { display: none !important; } }

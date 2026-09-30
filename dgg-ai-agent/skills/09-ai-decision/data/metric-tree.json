@@ -1,0 +1,42 @@
+{
+  "note": "经营指标树：节点按公式从月度序列算出。kind sum（带符号求和，可含常数 base）、product（乘积）、leaf（直接取序列或按表达式算）。good 为向好方向，tol 为容差（与预算或上期比，超 1 倍容差为关注、超 2 倍为风险）。source 为数据来自哪个模块。",
+  "groups": [
+    { "key": "profit", "name": "利润", "root": "profit" }, { "key": "cash", "name": "现金", "root": "ccc" }, { "key": "delivery", "name": "交付", "root": "onTimeRate" },
+    { "key": "growth", "name": "获客", "root": "deals" }, { "key": "people", "name": "人效", "root": "perCapitaRevenue" }, { "key": "compliance", "name": "合规", "root": "complianceExposure" }
+  ],
+  "nodes": [
+    { "id": "profit", "name": "经营利润", "unit": "元", "kind": "sum", "children": [{ "id": "grossProfit", "sign": 1 }, { "id": "opex", "sign": -1 }], "good": "up", "tol": 0.08, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "毛利减去销售、管理、研发与财务费用" },
+    { "id": "grossProfit", "name": "毛利", "unit": "元", "kind": "product", "children": ["rev", "gm"], "good": "up", "tol": 0.05, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "收入 × 毛利率" },
+    { "id": "rev", "name": "收入", "unit": "元", "kind": "product", "children": ["orders", "avgOrder"], "good": "up", "tol": 0.03, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "出库订单数 × 平均订单金额", "budget": true },
+    { "id": "orders", "name": "出库订单", "unit": "单", "kind": "leaf", "calc": { "series": "orders" }, "good": "up", "tol": 0.05, "tolMode": "pct", "group": "profit", "source": "m10", "explain": "当月完成出库的销售订单数" },
+    { "id": "avgOrder", "name": "平均订单金额", "unit": "元", "kind": "leaf", "calc": { "expr": "rev / orders" }, "good": "up", "tol": 0.03, "tolMode": "pct", "group": "profit", "source": "m10", "explain": "收入 ÷ 出库订单数，反映客单与价格" },
+    { "id": "gm", "name": "毛利率", "unit": "%", "kind": "sum", "base": 1, "children": [{ "id": "materialRatio", "sign": -1 }, { "id": "laborRatio", "sign": -1 }, { "id": "overheadRatio", "sign": -1 }], "good": "up", "tol": 0.005, "tolMode": "abs", "group": "profit", "source": "m6", "explain": "1 − 材料占比 − 直接人工占比 − 制造费用占比", "budget": true },
+    { "id": "materialRatio", "name": "材料占比", "unit": "%", "kind": "leaf", "calc": { "expr": "material / rev" }, "good": "down", "tol": 0.004, "tolMode": "abs", "group": "profit", "source": "m6", "explain": "领用材料成本 ÷ 收入" },
+    { "id": "laborRatio", "name": "直接人工占比", "unit": "%", "kind": "leaf", "calc": { "expr": "labor / rev" }, "good": "down", "tol": 0.003, "tolMode": "abs", "group": "profit", "source": "m5", "explain": "直接人工（生产工资与社保的 78%，其余为间接人工计入制造费用）÷ 收入" },
+    { "id": "overheadRatio", "name": "制造费用占比", "unit": "%", "kind": "leaf", "calc": { "expr": "(cogs - material - labor) / rev" }, "good": "down", "tol": 0.003, "tolMode": "abs", "group": "profit", "source": "m6", "explain": "折旧、能耗、外协等 ÷ 收入" },
+    { "id": "opex", "name": "期间费用", "unit": "元", "kind": "sum", "children": [{ "id": "sellExp", "sign": 1 }, { "id": "adminExp", "sign": 1 }, { "id": "rdExp", "sign": 1 }, { "id": "finExp", "sign": 1 }], "good": "down", "tol": 0.05, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "销售 + 管理 + 研发 + 财务费用" },
+    { "id": "sellExp", "name": "销售费用", "unit": "元", "kind": "leaf", "calc": { "series": "sellExp" }, "good": "down", "tol": 0.08, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "" },
+    { "id": "adminExp", "name": "管理费用", "unit": "元", "kind": "leaf", "calc": { "series": "adminExp" }, "good": "down", "tol": 0.08, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "" },
+    { "id": "rdExp", "name": "研发费用", "unit": "元", "kind": "leaf", "calc": { "series": "rdExp" }, "good": "down", "tol": 0.1, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "" },
+    { "id": "finExp", "name": "财务费用", "unit": "元", "kind": "leaf", "calc": { "series": "finExp" }, "good": "down", "tol": 0.1, "tolMode": "pct", "group": "profit", "source": "m6", "explain": "" },
+    { "id": "ccc", "name": "现金周期", "unit": "天", "kind": "sum", "children": [{ "id": "dso", "sign": 1 }, { "id": "dio", "sign": 1 }, { "id": "dpo", "sign": -1 }], "good": "down", "tol": 5, "tolMode": "abs", "group": "cash", "source": "m6", "explain": "回款天数 + 库存天数 − 付款天数", "budget": true },
+    { "id": "dso", "name": "回款天数", "unit": "天", "kind": "leaf", "calc": { "expr": "ar / rev * 30" }, "good": "down", "tol": 4, "tolMode": "abs", "group": "cash", "source": "m6", "explain": "应收账款 ÷ 月收入 × 30" },
+    { "id": "dio", "name": "库存天数", "unit": "天", "kind": "leaf", "calc": { "expr": "inventory / cogs * 30" }, "good": "down", "tol": 5, "tolMode": "abs", "group": "cash", "source": "m10", "explain": "存货 ÷ 月成本 × 30" },
+    { "id": "dpo", "name": "付款天数", "unit": "天", "kind": "leaf", "calc": { "expr": "ap / purchases * 30" }, "good": "up", "tol": 5, "tolMode": "abs", "group": "cash", "source": "m6", "explain": "应付账款 ÷ 月采购 × 30" },
+    { "id": "arOverdue", "name": "应收逾期", "unit": "元", "kind": "leaf", "calc": { "series": "arOverdue" }, "good": "down", "tol": 0.1, "tolMode": "pct", "group": "cash", "source": "m6", "explain": "超过账期未回款的应收" },
+    { "id": "onTimeRate", "name": "准时交付率", "unit": "%", "kind": "leaf", "calc": { "series": "onTimeRate" }, "good": "up", "tol": 0.03, "tolMode": "abs", "group": "delivery", "source": "m10", "explain": "按承诺交期完成的订单占比", "budget": true },
+    { "id": "lateOrders", "name": "延期订单", "unit": "单", "kind": "leaf", "calc": { "series": "lateOrders" }, "good": "down", "tol": 1, "tolMode": "abs", "group": "delivery", "source": "m10", "explain": "当月延期交付的订单数" },
+    { "id": "load", "name": "瓶颈工序负荷", "unit": "%", "kind": "leaf", "calc": { "series": "load" }, "good": "down", "tol": 0.05, "tolMode": "abs", "group": "delivery", "source": "m10", "explain": "负荷最高工序的月度产能利用率" },
+    { "id": "deals", "name": "新客成交", "unit": "单", "kind": "leaf", "calc": { "series": "deals" }, "good": "up", "tol": 1, "tolMode": "abs", "group": "growth", "source": "m4", "explain": "当月成交的新客户数", "budget": true },
+    { "id": "leads", "name": "新增线索", "unit": "条", "kind": "leaf", "calc": { "series": "leads" }, "good": "up", "tol": 0.15, "tolMode": "pct", "group": "growth", "source": "m4", "explain": "当月进入线索池的条数" },
+    { "id": "winRate", "name": "商机转化率", "unit": "%", "kind": "leaf", "calc": { "series": "winRate" }, "good": "up", "tol": 0.03, "tolMode": "abs", "group": "growth", "source": "m4", "explain": "商机到成交的转化率（近 90 天）" },
+    { "id": "perCapitaRevenue", "name": "人均产值", "unit": "元", "kind": "leaf", "calc": { "expr": "rev * 12 / headcount" }, "good": "up", "tol": 0.05, "tolMode": "pct", "group": "people", "source": "m5", "explain": "月收入 × 12 ÷ 在编" },
+    { "id": "headcount", "name": "在编", "unit": "人", "kind": "leaf", "calc": { "series": "headcount" }, "good": "flat", "tol": 3, "tolMode": "abs", "group": "people", "source": "m5", "explain": "" },
+    { "id": "turnover", "name": "离职率", "unit": "%", "kind": "leaf", "calc": { "series": "turnover" }, "good": "down", "tol": 0.02, "tolMode": "abs", "group": "people", "source": "m5", "explain": "近 12 个月离职人数 ÷ 在编", "budget": true },
+    { "id": "overtimeOver", "name": "加班超限", "unit": "人", "kind": "leaf", "calc": { "series": "overtimeOver" }, "good": "down", "tol": 2, "tolMode": "abs", "group": "people", "source": "m5", "explain": "月加班超过 36 小时的人数" },
+    { "id": "complianceExposure", "name": "合规敞口", "unit": "元", "kind": "leaf", "calc": { "series": "complianceExposure" }, "good": "down", "tol": 0.1, "tolMode": "pct", "group": "compliance", "source": "m5", "explain": "用工合规待处理影响 + 高风险合同敞口" },
+    { "id": "highRiskContracts", "name": "高风险合同", "unit": "份", "kind": "leaf", "calc": { "series": "highRiskContracts" }, "good": "down", "tol": 1, "tolMode": "abs", "group": "compliance", "source": "m7", "explain": "审查评分 60 分以下的合同" }
+  ],
+  "attributable": ["profit", "grossProfit", "rev", "gm", "opex", "ccc"],
+  "modules": { "m4": "AI获客", "m5": "AI人力官", "m6": "AI CFO", "m7": "AI法务", "m10": "AI ERP" }
+}

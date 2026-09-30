@@ -1,0 +1,148 @@
+{
+  "note": "行业参考带，按行业大类；每条 band 给正常区间 [lo, hi] 与方向（high 表示越高越差，low 表示越低越差），以及超出时的概率映射。数值为顶呱呱在政企服务中接触到的常见区间，非统计调查数据。",
+  "bands": {
+    "arOverdue90Share": {
+      "dir": "high",
+      "unit": "%",
+      "by": {
+        "mfg": [
+          0,
+          8
+        ],
+        "trade": [
+          0,
+          6
+        ],
+        "service": [
+          0,
+          10
+        ],
+        "default": [
+          0,
+          8
+        ]
+      }
+    },
+    "top1Share": {
+      "dir": "high",
+      "unit": "%",
+      "by": {
+        "default": [
+          0,
+          30
+        ]
+      }
+    },
+    "inventoryDays": {
+      "dir": "high",
+      "unit": "天",
+      "by": {
+        "mfg": [
+          45,
+          75
+        ],
+        "trade": [
+          30,
+          60
+        ],
+        "default": [
+          30,
+          70
+        ]
+      }
+    },
+    "vatBurden": {
+      "dir": "low",
+      "unit": "%",
+      "by": {
+        "mfg": [
+          4.0,
+          7.5
+        ],
+        "trade": [
+          1.5,
+          3.5
+        ],
+        "service": [
+          3.0,
+          5.5
+        ],
+        "prof": [
+          3.0,
+          5.5
+        ],
+        "default": [
+          2.0,
+          5.0
+        ]
+      }
+    },
+    "cashMonths": {
+      "dir": "low",
+      "unit": "月",
+      "by": {
+        "default": [
+          3,
+          6
+        ]
+      }
+    },
+    "entertainShare": {
+      "dir": "high",
+      "unit": "‰",
+      "by": {
+        "default": [
+          0,
+          5
+        ]
+      }
+    },
+    "gmDrop3": {
+      "dir": "high",
+      "unit": "pct",
+      "by": {
+        "default": [
+          0,
+          1.5
+        ]
+      }
+    },
+    "apOverdue": {
+      "dir": "high",
+      "unit": "元",
+      "by": {
+        "default": [
+          0,
+          0
+        ]
+      }
+    },
+    "shortLoanCapexRatio": {
+      "dir": "high",
+      "unit": "%",
+      "by": {
+        "default": [
+          0,
+          30
+        ]
+      }
+    },
+    "socialBaseRatio": {
+      "dir": "low",
+      "unit": "%",
+      "by": {
+        "default": [
+          85,
+          100
+        ]
+      }
+    }
+  },
+  "badDebtRate": {
+    "90_180": 0.15,
+    "180_plus": 0.5
+  },
+  "capitalCost": 0.06,
+  "lateFeeDaily": 0.0005,
+  "socialRate": 0.26
+}

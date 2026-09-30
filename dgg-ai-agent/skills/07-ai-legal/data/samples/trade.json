@@ -1,0 +1,754 @@
+{
+  "archetype": "flow",
+  "sector": "trade",
+  "company": "义乌恒益日用品有限公司",
+  "co": "恒益",
+  "today": "2026-09-17",
+  "weekStart": "2026-09-14",
+  "profile": {
+    "industry": "trade-wholesale",
+    "size": "21_50",
+    "province": "浙江",
+    "founded": "2019-03-06",
+    "capital": 5000000
+  },
+  "sources": [
+    {
+      "id": "contracts",
+      "name": "合同台账",
+      "mode": "import",
+      "lastSync": "2026-09-16 18:00",
+      "rows": 8
+    },
+    {
+      "id": "licenses",
+      "name": "证照清单",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 5
+    },
+    {
+      "id": "ip",
+      "name": "知产清单",
+      "mode": "import",
+      "lastSync": "2026-09-15 18:00",
+      "rows": 5
+    },
+    {
+      "id": "oms",
+      "name": "订单系统 · 客户与供应商",
+      "mode": "direct",
+      "lastSync": "2026-09-17 07:30",
+      "rows": 60
+    }
+  ],
+  "contracts": [
+    {
+      "id": "HT-2609-102",
+      "type": "distribution",
+      "role": "supplier",
+      "title": "连锁便利店年度供货协议",
+      "party": "K-102 · 连锁便利店总部",
+      "amount": 5600000,
+      "signed": "2026-01-10",
+      "start": "2026-01-10",
+      "end": "2026-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-15",
+          "text": "第三季度返利结算"
+        },
+        {
+          "date": "2026-11-20",
+          "text": "下年度协议谈判"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "供方向需方 86 家门店供应常温饮料、休闲食品等品类，按门店订单配送。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "price",
+          "title": "价格",
+          "text": "供货价按附件价格表执行，需方有权根据市场情况单方调整供货价。",
+          "params": {
+            "adjust": "unilateral"
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结 90 天，需方于次月末支付上月货款，另扣 3% 返利。",
+          "params": {
+            "termDays": 90,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "4",
+          "type": "term",
+          "title": "期限",
+          "text": "本协议有效期 1 年，期满自动续期。",
+          "params": {
+            "autoRenew": true,
+            "exitNotice": false
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应赔偿对方因此遭受的全部损失，包括直接损失与可得利益损失。",
+          "params": {
+            "capMultiple": null
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        },
+        {
+          "no": "7",
+          "type": "notice",
+          "title": "通知与送达",
+          "text": "双方确认合同载明的地址、电子邮箱为有效送达地址，变更应提前 5 日书面通知。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2606-088",
+      "type": "platform",
+      "role": "merchant",
+      "title": "社区团购平台入驻协议",
+      "party": "K-117 · 社区团购平台",
+      "amount": 0,
+      "signed": "2026-06-01",
+      "start": "2026-06-01",
+      "end": "2027-05-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-09-30",
+          "text": "月度结算"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "入驻方在平台开设店铺销售日用百货与快消品。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "fee",
+          "title": "费用与费率",
+          "text": "平台按成交额收取 8% 服务费，平台有权调整费率并公示。",
+          "params": {
+            "adjust": "unilateral"
+          }
+        },
+        {
+          "no": "3",
+          "type": "settlement",
+          "title": "结算",
+          "text": "平台按月结算，于次月 45 日内支付。",
+          "params": {
+            "days": 45
+          }
+        },
+        {
+          "no": "4",
+          "type": "termination",
+          "title": "终止",
+          "text": "平台可提前 15 日通知终止本协议。",
+          "params": {}
+        },
+        {
+          "no": "5",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向乙方所在地人民法院提起诉讼。",
+          "params": {
+            "venue": "counterparty"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2604-071",
+      "type": "purchase",
+      "role": "buy",
+      "title": "品牌饮料区域经销采购合同",
+      "party": "品牌区域经销商",
+      "amount": 2600000,
+      "signed": "2026-04-01",
+      "start": "2026-04-01",
+      "end": "2027-03-31",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "需方向供方采购常温饮料，年度预计 2,600 万元。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "quality",
+          "title": "质量标准",
+          "text": "产品质量以国家食品安全标准与产品标签为准；无约定的按国家标准或行业标准执行。",
+          "params": {
+            "standard": "国家食品安全标准与产品标签"
+          }
+        },
+        {
+          "no": "3",
+          "type": "delivery",
+          "title": "交付",
+          "text": "供方在收到订单后 3 日内送达需方仓库。",
+          "params": {
+            "latePenalty": false
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "先款后货，需方下单时支付全款。",
+          "params": {
+            "termDays": 0,
+            "advanceRatio": 1
+          }
+        },
+        {
+          "no": "5",
+          "type": "acceptance",
+          "title": "验收与异议期",
+          "text": "需方应在到货后 7 日内验收；数量与外观异议当场提出，质量异议在 7 日内书面提出，逾期视为验收合格。",
+          "params": {
+            "objectionDays": 7,
+            "standard": "技术协议与封样"
+          }
+        },
+        {
+          "no": "6",
+          "type": "warranty",
+          "title": "保质",
+          "text": "供方保证到货时剩余保质期不少于三分之二。",
+          "params": {
+            "months": 12
+          }
+        },
+        {
+          "no": "7",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "8",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2512-044",
+      "type": "lease",
+      "role": "lessee",
+      "title": "仓库租赁合同",
+      "party": "物流园区",
+      "amount": 384000,
+      "signed": "2025-12-15",
+      "start": "2026-01-01",
+      "end": "2027-12-31",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-10-01",
+          "text": "第四季度租金"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "出租人将物流园 B 区 2,800 ㎡仓库出租给承租人。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "租赁期 2 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "rent",
+          "title": "租金",
+          "text": "月租金 32,000 元，季付。",
+          "params": {}
+        },
+        {
+          "no": "4",
+          "type": "renewal",
+          "title": "续租",
+          "text": "租赁期满承租人享有优先承租权，应提前 2 个月书面通知。",
+          "params": {
+            "priority": true
+          }
+        },
+        {
+          "no": "5",
+          "type": "improvements",
+          "title": "装修",
+          "text": "冷库改造经出租人同意，期满按未折旧价值补偿。",
+          "params": {
+            "owner": "lessor",
+            "compensated": true
+          }
+        },
+        {
+          "no": "6",
+          "type": "termination",
+          "title": "提前解约",
+          "text": "承租人提前解约支付 1 个月租金。",
+          "params": {
+            "earlyExitMonths": 1
+          }
+        },
+        {
+          "no": "7",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2603-058",
+      "type": "labor",
+      "role": "employer",
+      "title": "劳动合同（配送岗模板）",
+      "party": "员工 · 配送岗",
+      "amount": 0,
+      "signed": "2026-03-01",
+      "start": "2026-03-01",
+      "end": "2027-02-28",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "用人单位聘用员工担任配送司机岗位。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "term",
+          "title": "期限",
+          "text": "劳动合同期限 1 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true,
+            "years": 1
+          }
+        },
+        {
+          "no": "3",
+          "type": "probation",
+          "title": "试用期",
+          "text": "试用期 3 个月。",
+          "params": {
+            "months": 3,
+            "allowedMonths": 2
+          }
+        },
+        {
+          "no": "4",
+          "type": "wage",
+          "title": "劳动报酬",
+          "text": "月工资由基本工资与计件工资构成。",
+          "params": {}
+        },
+        {
+          "no": "5",
+          "type": "worktime",
+          "title": "工作时间",
+          "text": "综合计算工时制。",
+          "params": {}
+        },
+        {
+          "no": "6",
+          "type": "termination",
+          "title": "解除与终止",
+          "text": "双方依法解除或终止劳动合同。",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "id": "HT-2608-096",
+      "type": "service",
+      "role": "client",
+      "title": "冷链运输服务合同",
+      "party": "物流公司",
+      "amount": 420000,
+      "signed": "2026-08-01",
+      "start": "2026-08-01",
+      "end": "2027-07-31",
+      "status": "审查中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "服务方为客户方提供冷链配送服务，覆盖华东 6 市。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "次日达率不低于 97%。",
+          "params": {
+            "penalty": false
+          }
+        },
+        {
+          "no": "3",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "月结 30 天。",
+          "params": {
+            "termDays": 30,
+            "advanceRatio": 0
+          }
+        },
+        {
+          "no": "4",
+          "type": "confidentiality",
+          "title": "保密",
+          "text": "双方对门店清单与价格信息保密，期限至合同终止后 1 年。",
+          "params": {
+            "years": 1,
+            "penalty": false
+          }
+        },
+        {
+          "no": "5",
+          "type": "liability",
+          "title": "违约责任",
+          "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款的 1 倍为限，但因故意或重大过失造成的损失除外。",
+          "params": {
+            "capMultiple": 1
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2607-090",
+      "type": "nda",
+      "role": "disclosing",
+      "title": "选品与定价信息保密协议",
+      "party": "K-088 · 区域商超",
+      "amount": 0,
+      "signed": "2026-07-10",
+      "start": "2026-07-10",
+      "end": "2027-07-09",
+      "status": "履行中",
+      "milestones": [],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "scope",
+          "title": "保密范围",
+          "text": "选品清单、供货价与促销方案。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "confidentiality",
+          "title": "保密义务",
+          "text": "保密期限自协议终止后 3 年；违约支付违约金 10 万元。",
+          "params": {
+            "years": 3,
+            "penalty": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "term",
+          "title": "期限",
+          "text": "有效期 1 年。",
+          "params": {
+            "autoRenew": false,
+            "exitNotice": true
+          }
+        },
+        {
+          "no": "4",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    },
+    {
+      "id": "HT-2602-052",
+      "type": "software",
+      "role": "client",
+      "title": "订单与仓储系统订阅合同",
+      "party": "软件服务商",
+      "amount": 48000,
+      "signed": "2026-02-15",
+      "start": "2026-02-15",
+      "end": "2027-02-14",
+      "status": "履行中",
+      "milestones": [
+        {
+          "date": "2026-12-15",
+          "text": "续约评估"
+        }
+      ],
+      "clauses": [
+        {
+          "no": "1",
+          "type": "subject",
+          "title": "标的",
+          "text": "订单与仓储系统订阅，20 个账号。",
+          "params": {}
+        },
+        {
+          "no": "2",
+          "type": "sla",
+          "title": "服务水平",
+          "text": "月度可用率 99.5%，未达标按 10% 减免。",
+          "params": {
+            "penalty": true
+          }
+        },
+        {
+          "no": "3",
+          "type": "data",
+          "title": "数据",
+          "text": "客户数据归客户方所有。",
+          "params": {
+            "owner": "client"
+          }
+        },
+        {
+          "no": "4",
+          "type": "payment",
+          "title": "付款方式",
+          "text": "年付。",
+          "params": {
+            "termDays": 10,
+            "advanceRatio": 1
+          }
+        },
+        {
+          "no": "5",
+          "type": "ip",
+          "title": "知识产权",
+          "text": "软件著作权归服务方。",
+          "params": {
+            "owner": "provider"
+          }
+        },
+        {
+          "no": "6",
+          "type": "dispute",
+          "title": "争议解决",
+          "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地人民法院提起诉讼。",
+          "params": {
+            "venue": "ours"
+          }
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "id": "ZZ-01",
+      "name": "营业执照",
+      "no": "9133********02",
+      "issuer": "市场监督管理局",
+      "expiry": null,
+      "status": "长期"
+    },
+    {
+      "id": "ZZ-02",
+      "name": "食品经营许可证",
+      "no": "JY1330********",
+      "issuer": "市场监督管理局",
+      "expiry": "2026-11-08",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-03",
+      "name": "道路运输经营许可证",
+      "no": "浙交运管许可 ****",
+      "issuer": "交通运输局",
+      "expiry": "2027-06-30",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-04",
+      "name": "冷库特种设备使用登记",
+      "no": "****",
+      "issuer": "市场监督管理局",
+      "expiry": "2026-10-20",
+      "status": "有效"
+    },
+    {
+      "id": "ZZ-05",
+      "name": "进出口经营权备案",
+      "no": "****",
+      "issuer": "商务局",
+      "expiry": null,
+      "status": "长期"
+    }
+  ],
+  "ip": {
+    "trademarks": [
+      {
+        "id": "TM-01",
+        "name": "恒益优选",
+        "regNo": "第 3812**** 号",
+        "classes": [
+          "35"
+        ],
+        "regDate": "2019-10-21",
+        "status": "已注册"
+      },
+      {
+        "id": "TM-02",
+        "name": "恒益优选",
+        "regNo": "第 3812**** 号",
+        "classes": [
+          "30"
+        ],
+        "regDate": "2019-10-21",
+        "status": "已注册"
+      }
+    ],
+    "patents": [
+      {
+        "id": "ZL-01",
+        "title": "一种可折叠周转箱",
+        "kind": "design",
+        "appDate": "2023-05-12",
+        "grantDate": "2023-11-02",
+        "status": "有效"
+      }
+    ],
+    "software": [
+      {
+        "id": "RZ-01",
+        "title": "恒益门店订货小程序 V1.0",
+        "regDate": "2024-06-10"
+      }
+    ],
+    "domains": [
+      {
+        "name": "hengyi-****.cn",
+        "expiry": "2026-10-28"
+      }
+    ],
+    "similarMarks": [
+      {
+        "name": "恒亿优选",
+        "classes": [
+          "35"
+        ],
+        "holder": "同行 · 华东",
+        "similarity": 0.85,
+        "status": "初审公告中",
+        "deadline": "2026-10-12",
+        "note": "公告期内可提异议"
+      }
+    ],
+    "infringementLeads": [
+      {
+        "where": "社区团购店铺",
+        "product": "恒益优选同款礼盒",
+        "note": "包装使用「恒益优选」字样",
+        "similarity": 0.88,
+        "found": "2026-09-08"
+      }
+    ]
+  },
+  "setup": {
+    "type": "branch",
+    "name": "义乌恒益日用品有限公司华南分公司",
+    "region": "广东 · 广州",
+    "capital": 0,
+    "shares": [
+      {
+        "holder": "义乌恒益日用品有限公司",
+        "pct": 100
+      }
+    ],
+    "scope": [
+      "日用百货批发",
+      "食品销售"
+    ],
+    "licenses": [
+      "食品经营许可"
+    ],
+    "confirmed": false,
+    "startDate": "2026-10-12",
+    "reason": "K-154 华南连锁便利店总部已签年度协议，需就近仓配"
+  },
+  "renewList": [],
+  "applyList": [],
+  "log": []
+}

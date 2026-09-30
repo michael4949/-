@@ -1,0 +1,41 @@
+{
+  "note": "参考值仅覆盖两类企业负责人通常无法当场给出精确数值的字段。效益杠杆的核心参数（人数、次数、单量、金额、占用资金）一律不设默认值，缺失时在报告中明示测算受限，不代为赋值。",
+  "disclosure": "参考值取自顶呱呱在政企服务中接触到的常见区间，非统计调查数据。报告正文对每一处使用参考值的数字单独标注，附录列示全表。",
+  "opsSalary": {
+    "field": "opsSalary",
+    "by": "profile.size",
+    "values": {
+      "1_20": 5500,
+      "21_50": 6500,
+      "51_100": 7500,
+      "101_300": 8500,
+      "300_plus": 9500
+    },
+    "fallback": 6500,
+    "label": "按企业人员规模取值的月薪参考值"
+  },
+  "grossMargin": {
+    "field": "grossMargin",
+    "by": "profile.customers",
+    "values": {
+      "b2b": 0.2,
+      "b2c": 0.35,
+      "b2g": 0.18,
+      "mixed": 0.25
+    },
+    "fallback": 0.25,
+    "label": "按客户结构取值的毛利率参考值"
+  },
+  "setupWeeksBuffer": {
+    "note": "数据现状决定上线前的数据整理工作量，倍率作用于场景库所载基准周期。",
+    "by": "conditions.dataState",
+    "values": {
+      "paper": 1.6,
+      "scattered": 1.3,
+      "excel": 1.15,
+      "system": 1
+    },
+    "fallback": 1.15,
+    "label": "按数据现状取值的上线周期倍率"
+  }
+}

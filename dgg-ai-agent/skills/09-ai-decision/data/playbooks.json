@@ -1,0 +1,1381 @@
+{
+  "note": "方案库：按根因给两到三个方案。params 可在预演里调；effects 作用在指标树的驱动节点上：pct 按比例改变、pt 按绝对值改变比率（小数）、add 按金额加减（元 / 月）、days 改天数；表达式变量为参数 p.* 与样本 facts.f.*；ramp 为从见效月起线性到位的月数。milestones 为决议后的执行节点（天数相对批准日）。",
+  "riskFactor": {
+    "low": 1,
+    "mid": 0.85,
+    "high": 0.7
+  },
+  "causes": {
+    "materialRatio": {
+      "cause": "材料占比上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "对年度客户做价格复核",
+          "desc": "借 {k017Name} 等年度合同的价格复核节点，按材料涨幅传导售价",
+          "owner": "销售总监",
+          "tags": [
+            "price"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "pricePct",
+              "label": "调价幅度",
+              "min": 1,
+              "max": 6,
+              "step": 0.5,
+              "default": 3,
+              "unit": "%"
+            },
+            {
+              "key": "share",
+              "label": "覆盖收入占比",
+              "min": 20,
+              "max": 70,
+              "step": 5,
+              "default": 45,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "avgOrder",
+              "mode": "pct",
+              "expr": "p.pricePct / 100 * p.share / 100",
+              "ramp": 2
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "-0.004 * p.pricePct",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "梳理年度合同价格复核条款与客户清单",
+              "owner": "销售总监"
+            },
+            {
+              "days": 21,
+              "title": "与 {k017Name} 价格复核会议",
+              "owner": "销售总监"
+            },
+            {
+              "days": 45,
+              "title": "新价格执行并更新报价表",
+              "owner": "销售总监"
+            },
+            {
+              "days": 120,
+              "title": "复盘：毛利率与客户流失",
+              "owner": "总经理"
+            }
+          ],
+          "note": "调价超过 3% 时客户流失风险上升，建议分客户分批"
+        },
+        {
+          "key": "B",
+          "name": "框架协议改双向调价并集中议价",
+          "desc": "把 {frameworkContract} 的单方调价改为双向联动，年度量集中议价，同步引入第二供应商",
+          "owner": "采购负责人",
+          "tags": [
+            "supply",
+            "contract"
+          ],
+          "invest": 20000,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "cutPct",
+              "label": "材料采购价降幅",
+              "min": 1,
+              "max": 5,
+              "step": 0.5,
+              "default": 2.5,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "materialRatio",
+              "mode": "pct",
+              "expr": "-p.cutPct / 100",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 10,
+              "title": "起草框架协议补充条款（双向调价）",
+              "owner": "法务专员"
+            },
+            {
+              "days": 30,
+              "title": "与 {steelName}签署补充协议",
+              "owner": "采购负责人"
+            },
+            {
+              "days": 45,
+              "title": "第二供应商样品验证",
+              "owner": "品质负责人"
+            },
+            {
+              "days": 120,
+              "title": "复盘：材料占比与到货准时",
+              "owner": "总经理"
+            }
+          ],
+          "note": "投入为法务与样品验证费用，预计"
+        },
+        {
+          "key": "C",
+          "name": "{lossName}",
+          "desc": "{lossNote}",
+          "owner": "技术总监",
+          "tags": [
+            "process"
+          ],
+          "invest": 80000,
+          "leadMonths": 3,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "lossPt",
+              "label": "损耗率下降",
+              "min": 0.5,
+              "max": 2.5,
+              "step": 0.5,
+              "default": 1.5,
+              "unit": "个点"
+            }
+          ],
+          "effects": [
+            {
+              "node": "materialRatio",
+              "mode": "pt",
+              "expr": "-p.lossPt / 100 * 0.55",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 14,
+              "title": "选 3 个大批量件做排样优化试验",
+              "owner": "技术总监"
+            },
+            {
+              "days": 60,
+              "title": "工艺文件与程序更新",
+              "owner": "工艺主管"
+            },
+            {
+              "days": 90,
+              "title": "全线推行并统计损耗",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 150,
+              "title": "复盘：损耗率与材料占比",
+              "owner": "总经理"
+            }
+          ],
+          "note": "投入为试验材料与工时，预计"
+        }
+      ]
+    },
+    "laborRatio": {
+      "cause": "直接人工占比上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "{needJob}增员到编并取消长期加班",
+          "desc": "按需求单 {cncNeed} 招满 {cncNeedCount} 人，两班排产，加班回到 36 小时内",
+          "owner": "人事负责人",
+          "tags": [
+            "capacity",
+            "hiring"
+          ],
+          "invest": 12000,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "hires",
+              "label": "增员人数",
+              "min": 2,
+              "max": 6,
+              "step": 1,
+              "default": 4,
+              "unit": "人"
+            }
+          ],
+          "effects": [
+            {
+              "node": "laborRatio",
+              "mode": "pt",
+              "expr": "-0.0012 * p.hires + 0.0009 * p.hires * 0.5",
+              "ramp": 2
+            },
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.03 * p.hires",
+              "ramp": 3
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "0.006 * p.hires",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 3,
+              "title": "发布 JD 并启动面试",
+              "owner": "人事负责人"
+            },
+            {
+              "days": 35,
+              "title": "到岗并完成上机培训",
+              "owner": "车间主任"
+            },
+            {
+              "days": 60,
+              "title": "两班排产，加班回落",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 120,
+              "title": "复盘：人工占比与准时率",
+              "owner": "总经理"
+            }
+          ],
+          "note": "投入为招聘与培训，预计"
+        },
+        {
+          "key": "B",
+          "name": "{bottleneck}外协 20%",
+          "desc": "把标准工序外协给合作方，释放自有产能",
+          "owner": "生产负责人",
+          "tags": [
+            "outsourcing"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "outPct",
+              "label": "外协比例",
+              "min": 10,
+              "max": 30,
+              "step": 5,
+              "default": 20,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "laborRatio",
+              "mode": "pt",
+              "expr": "-0.00035 * p.outPct",
+              "ramp": 1
+            },
+            {
+              "node": "overheadRatio",
+              "mode": "pt",
+              "expr": "0.00045 * p.outPct",
+              "ramp": 1
+            },
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.005 * p.outPct",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "外协厂资质与样品验证",
+              "owner": "品质负责人"
+            },
+            {
+              "days": 21,
+              "title": "签外协加工合同（含知产条款）",
+              "owner": "法务专员"
+            },
+            {
+              "days": 30,
+              "title": "首批外协交付",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：外协质量与成本",
+              "owner": "总经理"
+            }
+          ],
+          "note": "外协单价高于自制，制造费用占比会上升"
+        },
+        {
+          "key": "C",
+          "name": "排班调整与技能矩阵",
+          "desc": "内部转岗 2 人到{bottleneck}，三班改两班，按技能矩阵排班",
+          "owner": "生产负责人",
+          "tags": [
+            "schedule"
+          ],
+          "invest": 6000,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "transfers",
+              "label": "转岗人数",
+              "min": 1,
+              "max": 4,
+              "step": 1,
+              "default": 2,
+              "unit": "人"
+            }
+          ],
+          "effects": [
+            {
+              "node": "laborRatio",
+              "mode": "pt",
+              "expr": "-0.0006 * p.transfers",
+              "ramp": 2
+            },
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.015 * p.transfers",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 5,
+              "title": "选人并安排带教",
+              "owner": "车间主任"
+            },
+            {
+              "days": 30,
+              "title": "转岗上机",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：加班与准时率",
+              "owner": "总经理"
+            }
+          ],
+          "note": "见效快但量有限，通常与增员并行"
+        }
+      ]
+    },
+    "dso": {
+      "cause": "回款天数拉长",
+      "options": [
+        {
+          "key": "A",
+          "name": "账期收紧到 60 天并逾期催收",
+          "desc": "{k017Contract} 续签时账期从 {k017TermDays} 天改到 60 天，逾期应收按周催收",
+          "owner": "财务负责人",
+          "tags": [
+            "credit"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "dsoCut",
+              "label": "回款天数目标下降",
+              "min": 5,
+              "max": 30,
+              "step": 5,
+              "default": 15,
+              "unit": "天"
+            }
+          ],
+          "effects": [
+            {
+              "node": "dso",
+              "mode": "days",
+              "expr": "-p.dsoCut",
+              "ramp": 3
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "-0.001 * p.dsoCut",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "逾期应收清单与催收分工",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 30,
+              "title": "{k017Name} 分期回款协议",
+              "owner": "销售总监"
+            },
+            {
+              "days": 60,
+              "title": "续签合同账期条款修订",
+              "owner": "法务专员"
+            },
+            {
+              "days": 120,
+              "title": "复盘：回款天数与逾期",
+              "owner": "总经理"
+            }
+          ],
+          "note": "大客户账期谈判可能影响续单，建议先谈分期"
+        },
+        {
+          "key": "B",
+          "name": "应收保理",
+          "desc": "对 {k017Name} 等优质客户应收做有追索保理，月费率约 1.2%",
+          "owner": "财务负责人",
+          "tags": [
+            "finance"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "factorAmt",
+              "label": "保理金额",
+              "min": 50,
+              "max": 300,
+              "step": 50,
+              "default": 150,
+              "unit": "万元"
+            }
+          ],
+          "effects": [
+            {
+              "node": "dso",
+              "mode": "days",
+              "expr": "-p.factorAmt * 10000 / f.revMonth * 30",
+              "ramp": 1
+            },
+            {
+              "node": "finExp",
+              "mode": "add",
+              "expr": "p.factorAmt * 10000 * 0.012",
+              "ramp": 1
+            }
+          ],
+          "milestones": [
+            {
+              "days": 10,
+              "title": "保理机构尽调与额度",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 25,
+              "title": "首笔应收转让",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：费用与现金周期",
+              "owner": "总经理"
+            }
+          ],
+          "note": "费用计入财务费用，利润下降换现金"
+        },
+        {
+          "key": "C",
+          "name": "新客户预付款与信用额度",
+          "desc": "新客户首单预付 30%，按 AI获客 的线索评级设信用额度",
+          "owner": "销售总监",
+          "tags": [
+            "credit",
+            "policy"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "prepayPct",
+              "label": "新客预付比例",
+              "min": 10,
+              "max": 50,
+              "step": 10,
+              "default": 30,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "dso",
+              "mode": "days",
+              "expr": "-p.prepayPct * 0.12",
+              "ramp": 4
+            }
+          ],
+          "milestones": [
+            {
+              "days": 14,
+              "title": "信用政策与额度表",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 30,
+              "title": "报价单与合同模板更新",
+              "owner": "法务专员"
+            },
+            {
+              "days": 120,
+              "title": "复盘：新客回款天数",
+              "owner": "总经理"
+            }
+          ],
+          "note": "只影响新客户，见效慢"
+        }
+      ]
+    },
+    "dio": {
+      "cause": "库存天数拉长",
+      "options": [
+        {
+          "key": "A",
+          "name": "原材料按订单采购并压降安全库存",
+          "desc": "按 AI ERP 采购建议执行，原材料库存目标下降 15%",
+          "owner": "采购负责人",
+          "tags": [
+            "inventory"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "invCut",
+              "label": "原材料库存下降",
+              "min": 5,
+              "max": 25,
+              "step": 5,
+              "default": 15,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "dio",
+              "mode": "pct",
+              "expr": "-p.invCut / 100 * 0.5",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "按 ERP 采购建议重排采购计划",
+              "owner": "采购负责人"
+            },
+            {
+              "days": 60,
+              "title": "安全库存参数更新",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 120,
+              "title": "复盘：库存天数与缺料",
+              "owner": "总经理"
+            }
+          ],
+          "note": "压得太低会增加缺料等待"
+        },
+        {
+          "key": "B",
+          "name": "呆滞库存处置",
+          "desc": "清理 12 个月无动销的库存商品与在制品，折价处置",
+          "owner": "生产负责人",
+          "tags": [
+            "inventory"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "disposeAmt",
+              "label": "处置金额",
+              "min": 20,
+              "max": 150,
+              "step": 10,
+              "default": 60,
+              "unit": "万元"
+            }
+          ],
+          "effects": [
+            {
+              "node": "dio",
+              "mode": "days",
+              "expr": "-p.disposeAmt * 10000 / f.cogsMonth * 30",
+              "ramp": 1
+            },
+            {
+              "node": "adminExp",
+              "mode": "add",
+              "expr": "p.disposeAmt * 10000 * 0.3 / 12",
+              "ramp": 1
+            }
+          ],
+          "milestones": [
+            {
+              "days": 14,
+              "title": "呆滞清单与处置价",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 45,
+              "title": "处置完成入账",
+              "owner": "财务负责人"
+            }
+          ],
+          "note": "折价损失分摊计入管理费用"
+        }
+      ]
+    },
+    "onTimeRate": {
+      "cause": "准时交付率下降",
+      "options": [
+        {
+          "key": "A",
+          "name": "{needJob}增员到编",
+          "desc": "与人力官需求单 {cncNeed} 一致，解除瓶颈",
+          "owner": "人事负责人",
+          "tags": [
+            "capacity",
+            "hiring"
+          ],
+          "invest": 12000,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "hires",
+              "label": "增员人数",
+              "min": 2,
+              "max": 6,
+              "step": 1,
+              "default": 4,
+              "unit": "人"
+            }
+          ],
+          "effects": [
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.04 * p.hires",
+              "ramp": 3
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "0.006 * p.hires",
+              "ramp": 3
+            },
+            {
+              "node": "laborRatio",
+              "mode": "pt",
+              "expr": "-0.0006 * p.hires",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 3,
+              "title": "发布 JD 并启动面试",
+              "owner": "人事负责人"
+            },
+            {
+              "days": 35,
+              "title": "到岗并完成上机培训",
+              "owner": "车间主任"
+            },
+            {
+              "days": 90,
+              "title": "复盘：准时率与延期单",
+              "owner": "总经理"
+            }
+          ],
+          "note": "投入为招聘与培训，预计"
+        },
+        {
+          "key": "B",
+          "name": "插单规则与承诺交期",
+          "desc": "按 AI ERP 插单预演确定承诺交期，非战略客户不再无条件插单",
+          "owner": "生产负责人",
+          "tags": [
+            "schedule",
+            "policy"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "bufferDays",
+              "label": "承诺交期缓冲",
+              "min": 1,
+              "max": 5,
+              "step": 1,
+              "default": 2,
+              "unit": "天"
+            }
+          ],
+          "effects": [
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.03 * p.bufferDays",
+              "ramp": 2
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "-0.002 * p.bufferDays",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "插单审批规则发布",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 30,
+              "title": "报价交期改为按排程承诺",
+              "owner": "销售总监"
+            },
+            {
+              "days": 90,
+              "title": "复盘：准时率",
+              "owner": "总经理"
+            }
+          ],
+          "note": "承诺交期变长可能影响部分急单"
+        },
+        {
+          "key": "C",
+          "name": "{bottleneck}外协 20%",
+          "desc": "释放瓶颈产能，外协单价高于自制",
+          "owner": "生产负责人",
+          "tags": [
+            "outsourcing"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "outPct",
+              "label": "外协比例",
+              "min": 10,
+              "max": 30,
+              "step": 5,
+              "default": 20,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.006 * p.outPct",
+              "ramp": 2
+            },
+            {
+              "node": "overheadRatio",
+              "mode": "pt",
+              "expr": "0.00045 * p.outPct",
+              "ramp": 1
+            },
+            {
+              "node": "laborRatio",
+              "mode": "pt",
+              "expr": "-0.00035 * p.outPct",
+              "ramp": 1
+            }
+          ],
+          "milestones": [
+            {
+              "days": 7,
+              "title": "外协厂资质与样品验证",
+              "owner": "品质负责人"
+            },
+            {
+              "days": 30,
+              "title": "首批外协交付",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：外协质量与成本",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "avgOrder": {
+      "cause": "平均订单金额下降",
+      "options": [
+        {
+          "key": "A",
+          "name": "对年度客户做价格复核",
+          "desc": "借年度合同的价格复核节点传导材料涨幅",
+          "owner": "销售总监",
+          "tags": [
+            "price"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "pricePct",
+              "label": "调价幅度",
+              "min": 1,
+              "max": 6,
+              "step": 0.5,
+              "default": 3,
+              "unit": "%"
+            },
+            {
+              "key": "share",
+              "label": "覆盖收入占比",
+              "min": 20,
+              "max": 70,
+              "step": 5,
+              "default": 45,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "avgOrder",
+              "mode": "pct",
+              "expr": "p.pricePct / 100 * p.share / 100",
+              "ramp": 2
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "-0.004 * p.pricePct",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 21,
+              "title": "与年度客户价格复核会议",
+              "owner": "销售总监"
+            },
+            {
+              "days": 45,
+              "title": "新价格执行",
+              "owner": "销售总监"
+            },
+            {
+              "days": 120,
+              "title": "复盘：客单与流失",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        },
+        {
+          "key": "B",
+          "name": "小批量订单设最低起订量与加急费",
+          "desc": "起订量以下按加急费计价，引导客户合并订单",
+          "owner": "销售总监",
+          "tags": [
+            "policy"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "moqPct",
+              "label": "小单加价",
+              "min": 3,
+              "max": 15,
+              "step": 1,
+              "default": 8,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "avgOrder",
+              "mode": "pct",
+              "expr": "p.moqPct / 100 * 0.2",
+              "ramp": 2
+            },
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "-0.003 * p.moqPct",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 10,
+              "title": "起订量与加急费政策",
+              "owner": "销售总监"
+            },
+            {
+              "days": 90,
+              "title": "复盘：订单结构",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "orders": {
+      "cause": "出库订单减少",
+      "options": [
+        {
+          "key": "A",
+          "name": "线索池一键分派并按周跟进",
+          "desc": "AI获客 的未分派与逾期线索本周清零，按等级节奏跟进",
+          "owner": "销售总监",
+          "tags": [
+            "sales"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "followPct",
+              "label": "逾期线索清理比例",
+              "min": 50,
+              "max": 100,
+              "step": 10,
+              "default": 100,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "0.00025 * p.followPct",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 3,
+              "title": "一键分派并发布跟进计划",
+              "owner": "销售总监"
+            },
+            {
+              "days": 60,
+              "title": "复盘：成交与订单",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        },
+        {
+          "key": "B",
+          "name": "解除交付瓶颈释放出库",
+          "desc": "延期订单出库后订单数回补，与准时交付率方案联动",
+          "owner": "生产负责人",
+          "tags": [
+            "capacity"
+          ],
+          "invest": 12000,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "hires",
+              "label": "{needJob}增员",
+              "min": 2,
+              "max": 6,
+              "step": 1,
+              "default": 4,
+              "unit": "人"
+            }
+          ],
+          "effects": [
+            {
+              "node": "orders",
+              "mode": "pct",
+              "expr": "0.008 * p.hires",
+              "ramp": 3
+            },
+            {
+              "node": "onTimeRate",
+              "mode": "pt",
+              "expr": "0.04 * p.hires",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 3,
+              "title": "发布 JD 并启动面试（AI人力官 需求单 {cncNeed}）",
+              "owner": "人事负责人"
+            },
+            {
+              "days": 35,
+              "title": "到岗并完成上机培训",
+              "owner": "车间主任"
+            },
+            {
+              "days": 60,
+              "title": "延期订单清零，出库回补",
+              "owner": "生产负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：出库与准时率",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "opex": {
+      "cause": "期间费用上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "管理费用预算制与审批线",
+          "desc": "业务招待与办公费用按部门预算，超预算走审批",
+          "owner": "财务负责人",
+          "tags": [
+            "policy"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "cutPct",
+              "label": "管理费用压降",
+              "min": 3,
+              "max": 15,
+              "step": 1,
+              "default": 8,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "adminExp",
+              "mode": "pct",
+              "expr": "-p.cutPct / 100",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 14,
+              "title": "部门预算与审批线发布",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：费用率",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        },
+        {
+          "key": "B",
+          "name": "短贷置换与利息压降",
+          "desc": "按 AI CFO 现金方案置换高息短贷",
+          "owner": "财务负责人",
+          "tags": [
+            "finance"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "rateCut",
+              "label": "综合利率下降",
+              "min": 0.5,
+              "max": 2,
+              "step": 0.5,
+              "default": 1,
+              "unit": "个点"
+            }
+          ],
+          "effects": [
+            {
+              "node": "finExp",
+              "mode": "add",
+              "expr": "-f.loanBalance * p.rateCut / 100 / 12",
+              "ramp": 2
+            }
+          ],
+          "milestones": [
+            {
+              "days": 30,
+              "title": "置换贷款放款",
+              "owner": "财务负责人"
+            },
+            {
+              "days": 120,
+              "title": "复盘：财务费用",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "overheadRatio": {
+      "cause": "制造费用占比上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "设备综合效率改善",
+          "desc": "热处理炉与电镀线按 OEE 排产，减少空转与换型",
+          "owner": "生产负责人",
+          "tags": [
+            "process"
+          ],
+          "invest": 30000,
+          "leadMonths": 3,
+          "risk": "mid",
+          "params": [
+            {
+              "key": "oeePt",
+              "label": "OEE 提升",
+              "min": 2,
+              "max": 10,
+              "step": 1,
+              "default": 5,
+              "unit": "个点"
+            }
+          ],
+          "effects": [
+            {
+              "node": "overheadRatio",
+              "mode": "pt",
+              "expr": "-0.0006 * p.oeePt",
+              "ramp": 3
+            }
+          ],
+          "milestones": [
+            {
+              "days": 30,
+              "title": "OEE 统计上线",
+              "owner": "设备部"
+            },
+            {
+              "days": 120,
+              "title": "复盘：制造费用占比",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "turnover": {
+      "cause": "离职率上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "一线工龄工资与带教津贴",
+          "desc": "对生产部一年以上员工设工龄工资，班组长带教津贴",
+          "owner": "人事负责人",
+          "tags": [
+            "retention"
+          ],
+          "invest": 0,
+          "leadMonths": 2,
+          "risk": "low",
+          "params": [
+            {
+              "key": "wagePct",
+              "label": "一线工资上调",
+              "min": 1,
+              "max": 5,
+              "step": 0.5,
+              "default": 2,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "laborRatio",
+              "mode": "pct",
+              "expr": "p.wagePct / 100",
+              "ramp": 1
+            },
+            {
+              "node": "turnover",
+              "mode": "pt",
+              "expr": "-0.01 * p.wagePct",
+              "ramp": 4
+            }
+          ],
+          "milestones": [
+            {
+              "days": 30,
+              "title": "薪酬方案发布",
+              "owner": "人事负责人"
+            },
+            {
+              "days": 180,
+              "title": "复盘：离职率",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    },
+    "complianceExposure": {
+      "cause": "合规敞口上升",
+      "options": [
+        {
+          "key": "A",
+          "name": "社保基数按实际工资申报",
+          "desc": "与 AI人力官 H05、AI CFO K10 同一处置，下一缴费年度按工资表申报",
+          "owner": "人事负责人",
+          "tags": [
+            "compliance"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "ratioPct",
+              "label": "基数到位比例",
+              "min": 50,
+              "max": 100,
+              "step": 10,
+              "default": 100,
+              "unit": "%"
+            }
+          ],
+          "effects": [
+            {
+              "node": "laborRatio",
+              "mode": "add",
+              "expr": "f.socialDeltaMonth * p.ratioPct / 100 * 0.83",
+              "ramp": 1
+            },
+            {
+              "node": "adminExp",
+              "mode": "add",
+              "expr": "f.socialDeltaMonth * p.ratioPct / 100 * 0.17",
+              "ramp": 1
+            },
+            {
+              "node": "complianceExposure",
+              "mode": "add",
+              "expr": "-f.socialExposure * p.ratioPct / 100",
+              "ramp": 1
+            }
+          ],
+          "milestones": [
+            {
+              "days": 30,
+              "title": "下月申报按新基数",
+              "owner": "人事负责人"
+            },
+            {
+              "days": 90,
+              "title": "复盘：敞口与人工成本",
+              "owner": "总经理"
+            }
+          ],
+          "note": ""
+        },
+        {
+          "key": "B",
+          "name": "高风险合同修订后签署",
+          "desc": "采纳 AI法务 的高风险修订，三份合同修订后再签或续签",
+          "owner": "法务专员",
+          "tags": [
+            "compliance",
+            "contract"
+          ],
+          "invest": 0,
+          "leadMonths": 1,
+          "risk": "low",
+          "params": [
+            {
+              "key": "contracts",
+              "label": "修订合同数",
+              "min": 1,
+              "max": 3,
+              "step": 1,
+              "default": 3,
+              "unit": "份"
+            }
+          ],
+          "effects": [
+            {
+              "node": "highRiskContracts",
+              "mode": "add",
+              "expr": "-p.contracts",
+              "ramp": 1
+            },
+            {
+              "node": "complianceExposure",
+              "mode": "add",
+              "expr": "-f.contractExposure * p.contracts / 3",
+              "ramp": 1
+            }
+          ],
+          "milestones": [
+            {
+              "days": 14,
+              "title": "修订稿发相对方",
+              "owner": "法务专员"
+            },
+            {
+              "days": 45,
+              "title": "签署完成",
+              "owner": "法务专员"
+            }
+          ],
+          "note": ""
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI CFO · 账套数据包",
+  "description": "一家企业接入后的 12 期账套、外部来源与现金预测输入。金额单位元；日期 YYYY-MM-DD；月份 YYYY-MM。",
+  "type": "object",
+  "required": ["archetype", "sector", "company", "period", "today", "vatRate", "citRate", "profile", "ledger", "external", "cash"],
+  "properties": {
+    "archetype": { "enum": ["make", "flow", "project", "service"] },
+    "sector": { "type": "string", "description": "行业大类，用于参考带" },
+    "company": { "type": "string" }, "period": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" }, "today": { "type": "string" },
+    "vatRate": { "type": "number" }, "citRate": { "type": "number" },
+    "profile": { "type": "object", "required": ["industry", "employees"], "properties": { "employees": { "type": "integer" }, "rdStaff": { "type": "integer" }, "highTech": { "type": "boolean" }, "exportRev12": { "type": "number" }, "unionFee12": { "type": "number" }, "insuredStable": { "type": "boolean" }, "trainingCert": { "type": "integer" } } },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["id", "name", "mode"], "properties": { "mode": { "enum": ["direct", "import"] } } } },
+    "ledger": { "type": "object", "required": ["months", "pl", "bs", "flows"], "properties": {
+      "months": { "type": "array", "minItems": 3, "items": { "type": "string" } },
+      "pl": { "type": "object", "required": ["rev", "cogs", "sellExp", "adminExp", "rdExp", "finExp", "otherIncome", "taxSurcharge", "incomeTax", "detail"], "description": "各科目 12 期发生额；detail 含 rent / entertain / dep / interest / fees / wages / social" },
+      "bs": { "type": "object", "required": ["cash", "ar", "inventory", "prepaid", "fixedGross", "accumDep", "ap", "wagesPayable", "taxesPayable", "shortLoan", "longLoan", "paidIn", "retained"], "description": "各科目 13 个月末余额（含期初）" },
+      "flows": { "type": "object", "required": ["collections", "purchases", "payments", "wagesPaid", "taxPaid", "opexCash", "capex", "loanDraw", "loanRepay", "dividends", "vatPayable"] } } },
+    "external": { "type": "object", "required": ["bank", "erp", "invoice", "assetRegister", "contracts", "payroll", "loans"], "properties": {
+      "bank": { "type": "object", "required": ["collections", "payments", "fees", "balance", "unmatched"] },
+      "erp": { "type": "object", "required": ["inventoryValue", "inventoryByCat"] },
+      "invoice": { "type": "object", "required": ["salesInvoiced", "uninvoicedItems", "inputVat"] },
+      "assetRegister": { "type": "array", "items": { "type": "object", "required": ["cls", "gross", "years", "monthly"] } },
+      "contracts": { "type": "object", "required": ["rentMonthly", "rentVouchers"] },
+      "payroll": { "type": "object", "required": ["gross", "social", "socialBase", "headcount"] },
+      "loans": { "type": "array", "items": { "type": "object", "required": ["id", "bank", "type", "principal", "rate", "due", "interestDay"] } } } },
+    "cash": { "type": "object", "required": ["safety", "weekStart", "weeks", "arItems", "apItems", "orders", "fixed", "creditLine"], "properties": {
+      "arItems": { "type": "array", "items": { "type": "object", "required": ["id", "customer", "amount", "invoiced", "due", "histDelay"] } },
+      "apItems": { "type": "array", "items": { "type": "object", "required": ["id", "supplier", "amount", "due", "critical"] } },
+      "orders": { "type": "array", "items": { "type": "object", "required": ["order", "customer", "amount", "delivery", "termDays"] } },
+      "fixed": { "type": "array", "items": { "type": "object", "required": ["key", "label", "amount"] } },
+      "recurring": { "type": "object", "properties": { "purchasesMonthly": { "type": "number" }, "dpoDays": { "type": "integer" }, "salesMonthly": { "type": "number" }, "dsoDays": { "type": "integer" }, "ordersUntil": { "type": "string" } } },
+      "creditLine": { "type": "object", "required": ["bank", "limit", "rate"] } } },
+    "adjustments": { "type": "array", "items": { "type": "object", "required": ["rule", "key", "amount"] } },
+    "actions": { "type": "array", "items": { "type": "object", "required": ["risk", "key", "label"] } },
+    "cashScenario": { "type": "object" }, "policyList": { "type": "array", "items": { "type": "string" } },
+    "log": { "type": "array", "items": { "type": "object", "required": ["seq", "kind", "label", "detail"] } }
+  }
+}

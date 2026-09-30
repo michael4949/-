@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dgg/02-scene-ranking/input",
+  "title": "企业AI高价值场景排序 · 输入",
+  "description": "profile 为共用企业画像（13 项，9 项必填）；pains 为本行业痛点库中勾选的 3–8 项，每项带 1–5 的严重度；conditions 为四项现状与目标；weights 可选，不传按标准权重（0.35 / 0.30 / 0.20 / 0.15）。",
+  "type": "object",
+  "properties": {
+    "profile": { "$ref": "../../_shared/company-profile.schema.json" },
+    "pains": {
+      "type": "array", "minItems": 3, "maxItems": 8,
+      "description": "勾选的痛点。id 必须属于 profile.industry 所在行业大类的痛点库（data/sectors/<sector>.json 的 pains，每个大类 16 项），不得重复。",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z]+-p(0[1-9]|1[0-6])$", "description": "如 mfg-p05" },
+          "severity": { "type": "integer", "minimum": 1, "maximum": 5, "description": "1 偶尔遇到 / 2 时常遇到 / 3 明显影响经营 / 4 每周都在处理 / 5 当前头等问题" }
+        },
+        "required": ["id", "severity"], "additionalProperties": false
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "description": "四项现状与目标，取值见 data/conditions.json；每一项都会改变对应维度的得分。",
+      "properties": {
+        "dataState": { "enum": ["paper", "excel", "system", "scattered"], "description": "数据现在放在哪：纸质为主 / Excel 为主 / 业务系统里 / 多系统未打通" },
+        "objective": { "enum": ["cost", "revenue", "efficiency", "compliance"], "description": "接下来半年最想改善：降成本 / 增收入 / 提效率 / 控风险" },
+        "window": { "enum": ["m3", "m6", "m12"], "description": "希望多久看见结果" },
+        "capacity": { "enum": ["none", "part", "one", "team"], "description": "能投入的人：暂无专人 / 现有人员兼职 / 1 名专职 / 一个小团队" }
+      },
+      "required": ["dataState", "objective", "window", "capacity"], "additionalProperties": false
+    },
+    "weights": {
+      "type": "object",
+      "description": "四维权重，可选。之和需大于 0，内部按和为 1 归一化。四个预设见 data/axes.json 的 presets。",
+      "properties": {
+        "pain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "data": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cycle": { "type": "number", "minimum": 0, "maximum": 1 },
+        "barrier": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["pain", "data", "cycle", "barrier"], "additionalProperties": false
+    }
+  },
+  "required": ["profile", "pains", "conditions"],
+  "additionalProperties": false
+}

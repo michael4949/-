@@ -1,0 +1,109 @@
+/* 首页 · 定稿展板原图
+   首页整屏就是那张图（2000×1125），一个像素都不改：不重绘、不叠字、不改色。
+   外壳自己的顶栏 / 右栏 / 价格条在首页隐藏——图里已经画了这三块。
+   图上盖一层透明热区，坐标按原图像素折成百分比，图等比缩放时热区跟着走。 */
+@media screen {
+
+  /* 图里已含顶栏、右栏、价格条，外壳那三块在首页让位 */
+  body[data-module="home"] .topbar,
+  body[data-module="home"] .rail,
+  body[data-module="home"] .pricebar { display: none; }
+  body[data-module="home"] .app {
+    grid-template-rows: 1fr; grid-template-columns: 1fr;
+    background: #F6EDDA;                      /* 图铺满，不留黑边；这只是图没解码完那一瞬的垫底色 */
+  }
+  body[data-module="home"] .main { padding: 0; overflow: hidden; }
+
+  body[data-module="home"] .grid.board {
+    display: block; position: relative; width: 100%; height: 100%; gap: 0;
+    grid-template-columns: none;              /* 盖掉 shell.css 的 12 栅格 */
+  }
+  /* 盒子铺满整个视口，图用 fill 拉满 —— 视口不是 16:9 时不留黑边。
+     用 inset:0 绝对定位而不是 height:100%：后者在居中的网格项上解析不出来，会回落成按比例的
+     自然高度，于是窗口比 16:9 矮时图就溢出到屏幕下方去了。
+     热区是按这个盒子的百分比定位的，盒子与图完全重合，所以拉伸时热区跟着一起拉，仍然对齐。 */
+  body[data-module="home"] .boardbox {
+    position: absolute; inset: 0;
+    line-height: 0;
+  }
+  body[data-module="home"] .boardbox .bg {
+    display: block; width: 100%; height: 100%; object-fit: fill;
+    -webkit-user-select: none; user-select: none; -webkit-user-drag: none;
+  }
+
+  /* ---------- 热区 ---------- */
+  /* 透明，不盖住图；只在指上去时给一圈金框提示可点，松开就没了 */
+  body[data-module="home"] .boardbox .hot,
+  body[data-module="home"] .boardbox .card.hot {
+    position: absolute; margin: 0; padding: 0; border: 0; background: transparent;
+    border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none;
+    transition: box-shadow .15s ease, background-color .15s ease;
+  }
+  body[data-module="home"] .boardbox .card.hot,
+  body[data-module="home"] .boardbox .card.hot.big {
+    grid-column: auto; min-height: 0; box-shadow: none; display: block;
+  }
+  body[data-module="home"] .boardbox .card.hot:not(:disabled):hover,
+  body[data-module="home"] .boardbox .hot.price:hover {
+    background: rgba(255, 246, 214, .20);
+    box-shadow: 0 0 0 2.5px rgba(184, 146, 63, .85), 0 8px 26px rgba(92, 68, 16, .28);
+    transform: none;
+  }
+  body[data-module="home"] .boardbox .card.hot:not(:disabled):active {
+    background: rgba(255, 240, 190, .34);
+  }
+  body[data-module="home"] .boardbox .card.hot:disabled { cursor: default; opacity: 1; }
+  body[data-module="home"] .boardbox .card.hot:focus-visible,
+  body[data-module="home"] .boardbox .hot:focus-visible {
+    outline: 3px solid rgba(47, 107, 212, .9); outline-offset: 2px;
+  }
+
+  /* 切换企业 */
+  body[data-module="home"] .boardbox .hot.pick { line-height: normal; }
+  body[data-module="home"] .boardbox .hot.pick .lnk {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    background: transparent; border: 0; border-radius: 8px; cursor: pointer;
+    transition: box-shadow .15s ease;
+  }
+  body[data-module="home"] .boardbox .hot.pick .lnk:hover {
+    box-shadow: 0 0 0 2px rgba(47, 107, 212, .75);
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu {
+    position: absolute; top: 104%; right: 0; z-index: 6; min-width: 230px;
+    background: #FFFFFF; border: 1.4px solid #E0CB98; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 12px 30px rgba(92, 68, 16, .26); line-height: 1.5;
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu button {
+    display: block; width: 100%; text-align: left; padding: 9px 14px; background: none; border: 0;
+    font-size: calc(14px * var(--scale)); color: #2A3346; cursor: pointer; white-space: nowrap;
+  }
+  body[data-module="home"] .boardbox .hot.pick .menu button:hover { background: #F6EDDA; }
+  body[data-module="home"] .boardbox .hot.pick .menu button.muted { color: #6B7488; border-top: 1px solid #F0E6D0; }
+
+  /* 行业：真下拉，透明贴在图上那只选择框的位置 */
+  body[data-module="home"] .boardbox select.hot.ind {
+    color: transparent; background: transparent; border: 0; border-radius: 10px;
+    font-size: calc(15px * var(--scale)); cursor: pointer; outline: none;
+  }
+  body[data-module="home"] .boardbox select.hot.ind:hover { box-shadow: 0 0 0 2px rgba(47, 107, 212, .7); }
+  body[data-module="home"] .boardbox select.hot.ind option { color: #2A3346; background: #FFFFFF; }
+
+  /* 价格详情浮层 */
+  body[data-module="home"] .boardbox .boardpop {
+    position: absolute; z-index: 7; transform: translateX(-50%); line-height: 1.55;
+    min-width: 220px; padding: 10px 14px 11px;
+    background: #FFFFFF; border: 1.5px solid #E0CB98; border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(92, 68, 16, .26); color: #2A3346;
+    font-size: calc(13px * var(--scale));
+  }
+  body[data-module="home"] .boardbox .boardpop b { display: block; margin-bottom: 4px; font-size: calc(14px * var(--scale)); }
+  body[data-module="home"] .boardbox .boardpop b .num { color: #B0862C; font-weight: 900; }
+  body[data-module="home"] .boardbox .boardpop .row {
+    display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid #F0E6D0; padding-top: 4px; margin-top: 4px;
+  }
+  body[data-module="home"] .boardbox .boardpop .row span:first-child { color: #6B7488; }
+  body[data-module="home"] .boardbox .boardpop .row span:last-child { font-weight: 700; }
+
+  /* 首页整屏一张图，不需要滚动提示 */
+  body[data-module="home"] .scroll-hint { display: none !important; }
+}

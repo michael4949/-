@@ -1,0 +1,792 @@
+{
+  "note": "合同审查规则。required 按合同类型列必备条款类型（缺失即提示并按 template 插入）；risks 对条款参数做算式（when），变量为该条款 params 加合同级 role。severity 扣分：high 20 / mid 10 / low 4。依据只写到法律名称一层。fix.mode replace 替换本条正文与参数，insert 新增条款。",
+  "weights": {
+    "high": 20,
+    "mid": 10,
+    "low": 4
+  },
+  "levels": {
+    "low": 80,
+    "mid": 60
+  },
+  "types": {
+    "sale": "销售合同",
+    "purchase": "采购合同",
+    "framework": "框架供货协议",
+    "loan": "借款合同",
+    "lease": "房屋租赁合同",
+    "processing": "加工承揽合同",
+    "nda": "保密协议",
+    "labor": "劳动合同",
+    "equipment": "设备采购合同",
+    "agency": "代理协议",
+    "software": "软件服务合同",
+    "service": "服务合同",
+    "platform": "平台入驻协议",
+    "distribution": "经销协议"
+  },
+  "roles": {
+    "supply": "我方为供方",
+    "buy": "我方为买方",
+    "borrower": "我方为借款人",
+    "lessee": "我方为承租人",
+    "orderer": "我方为定作方",
+    "disclosing": "我方为披露方",
+    "employer": "我方为用人单位",
+    "principal": "我方为委托方",
+    "client": "我方为客户方",
+    "provider": "我方为服务方",
+    "merchant": "我方为入驻方",
+    "supplier": "我方为供货方"
+  },
+  "required": {
+    "sale": [
+      "subject",
+      "quality",
+      "delivery",
+      "payment",
+      "acceptance",
+      "liability",
+      "dispute"
+    ],
+    "purchase": [
+      "subject",
+      "quality",
+      "delivery",
+      "payment",
+      "acceptance",
+      "warranty",
+      "liability",
+      "dispute"
+    ],
+    "framework": [
+      "subject",
+      "price",
+      "delivery",
+      "payment",
+      "term",
+      "dispute"
+    ],
+    "loan": [
+      "subject",
+      "interest",
+      "repayment",
+      "liability",
+      "dispute"
+    ],
+    "lease": [
+      "subject",
+      "term",
+      "rent",
+      "renewal",
+      "termination",
+      "dispute"
+    ],
+    "processing": [
+      "subject",
+      "material",
+      "quality",
+      "delivery",
+      "payment",
+      "ip",
+      "liability",
+      "dispute"
+    ],
+    "nda": [
+      "scope",
+      "term",
+      "penalty",
+      "dispute"
+    ],
+    "labor": [
+      "subject",
+      "term",
+      "wage",
+      "worktime",
+      "termination"
+    ],
+    "equipment": [
+      "subject",
+      "delivery",
+      "payment",
+      "acceptance",
+      "warranty",
+      "liability",
+      "dispute"
+    ],
+    "agency": [
+      "subject",
+      "exclusivity",
+      "term",
+      "payment",
+      "termination",
+      "dispute"
+    ],
+    "software": [
+      "subject",
+      "sla",
+      "data",
+      "payment",
+      "ip",
+      "dispute"
+    ],
+    "service": [
+      "subject",
+      "sla",
+      "payment",
+      "confidentiality",
+      "liability",
+      "dispute"
+    ],
+    "platform": [
+      "subject",
+      "fee",
+      "settlement",
+      "termination",
+      "dispute"
+    ],
+    "distribution": [
+      "subject",
+      "exclusivity",
+      "price",
+      "payment",
+      "term",
+      "dispute"
+    ]
+  },
+  "templates": {
+    "acceptance": {
+      "title": "验收标准与异议期",
+      "text": "货物到达交付地点后，需方应在 7 日内按双方确认的技术协议与样品进行验收；对数量、外观的异议应在验收时书面提出，对质量的异议应在 15 日内书面提出，逾期视为验收合格。",
+      "params": {
+        "objectionDays": 15,
+        "standard": "技术协议与样品"
+      }
+    },
+    "quality": {
+      "title": "质量标准",
+      "text": "产品质量以双方确认的技术协议、图纸与封样为准；无约定的按国家标准或行业标准执行。",
+      "params": {
+        "standard": "技术协议与封样"
+      }
+    },
+    "liability": {
+      "title": "违约责任",
+      "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款为限，但因故意或重大过失造成的损失除外。",
+      "params": {
+        "capMultiple": 1
+      }
+    },
+    "penalty": {
+      "title": "违约金",
+      "text": "一方逾期履行的，每逾期一日按逾期部分价款的 0.05% 支付违约金，累计不超过逾期部分价款的 10%。",
+      "params": {
+        "rate": 0.1,
+        "daily": 0.0005
+      }
+    },
+    "dispute": {
+      "title": "争议解决",
+      "text": "因本合同引起的争议，双方协商解决；协商不成的，任何一方可向我方住所地有管辖权的人民法院提起诉讼。",
+      "params": {
+        "venue": "ours"
+      }
+    },
+    "ip": {
+      "title": "知识产权",
+      "text": "定作方提供的图纸、技术资料及据此制作的模具、样品，其知识产权归定作方所有；承揽方不得用于本合同以外的用途，不得向第三方披露或交付。",
+      "params": {
+        "owner": "ours"
+      }
+    },
+    "material": {
+      "title": "材料与损耗",
+      "text": "定作方提供主要材料的，承揽方应妥善保管并按约定的损耗率（不超过 3%）核算，超出部分按材料采购价赔偿。",
+      "params": {
+        "lossRate": 0.03
+      }
+    },
+    "warranty": {
+      "title": "质量保证",
+      "text": "供方对产品提供自验收合格之日起 12 个月的质量保证；保证期内因产品质量问题导致的损失由供方承担。",
+      "params": {
+        "months": 12
+      }
+    },
+    "delivery": {
+      "title": "交付与逾期",
+      "text": "供方应按约定日期交付；逾期交付的，每逾期一日按逾期部分价款的 0.05% 支付违约金，逾期超过 30 日需方有权解除合同。",
+      "params": {
+        "latePenalty": true
+      }
+    },
+    "renewal": {
+      "title": "续租",
+      "text": "租赁期满承租人需继续承租的，应提前 3 个月书面通知出租人，同等条件下承租人享有优先承租权。",
+      "params": {
+        "priority": true
+      }
+    },
+    "exclusivity": {
+      "title": "独家代理与最低销量",
+      "text": "代理方在代理区域内享有独家代理权，年度最低采购量为 300 万元；未达最低采购量的，委托方有权取消独家代理权。",
+      "params": {
+        "exclusive": true,
+        "minVolume": 3000000
+      }
+    },
+    "data": {
+      "title": "数据归属与安全",
+      "text": "客户方在服务过程中产生的业务数据归客户方所有；服务方应采取必要的安全措施，未经书面同意不得使用、披露或迁移。",
+      "params": {
+        "owner": "client"
+      }
+    },
+    "sla": {
+      "title": "服务水平",
+      "text": "服务方保证系统月度可用率不低于 99.5%；未达标的，按当月服务费的 10% 减免，连续两个月未达标的客户方有权解除合同。",
+      "params": {
+        "penalty": true
+      }
+    },
+    "confidentiality": {
+      "title": "保密",
+      "text": "双方对在合作中知悉的对方商业秘密负有保密义务，保密期限自合同终止后 3 年；违反的，应支付违约金 20 万元并赔偿损失。",
+      "params": {
+        "years": 3,
+        "penalty": true
+      }
+    },
+    "term": {
+      "title": "期限",
+      "text": "本协议有效期 1 年；期满前 30 日任何一方书面提出终止的，协议到期终止；否则自动续期 1 年，续期次数不超过 2 次。",
+      "params": {
+        "autoRenew": true,
+        "exitNotice": true
+      }
+    },
+    "price": {
+      "title": "价格调整",
+      "text": "价格按附件价格表执行；主要原材料市场价格波动超过 8% 的，任何一方可提出调价，双方协商确定，协商不成的按原价执行至协商完成。",
+      "params": {
+        "adjust": "mutual"
+      }
+    },
+    "noncompete": {
+      "title": "竞业限制",
+      "text": "员工离职后 12 个月内不得到与本单位有竞争关系的单位任职；竞业限制期内本单位按月支付离职前月平均工资的 30% 作为经济补偿。",
+      "params": {
+        "compensation": true,
+        "months": 12
+      }
+    },
+    "subject": {
+      "title": "标的",
+      "text": "本合同标的为附件所列产品或服务，名称、规格、数量与单价以附件及双方确认的订单为准。",
+      "params": {}
+    },
+    "payment": {
+      "title": "付款方式",
+      "text": "合同签订后 5 日内支付 30% 预付款，其余款项在每批货物或服务验收合格后 60 日内支付；逾期支付的，每逾期一日按未付款项的 0.05% 支付违约金。",
+      "params": {
+        "termDays": 60,
+        "advanceRatio": 0.3
+      }
+    },
+    "interest": {
+      "title": "利率与计息",
+      "text": "借款利率按合同载明的年利率执行，按月结息；利率调整须经双方书面确认。",
+      "params": {}
+    },
+    "repayment": {
+      "title": "还款安排",
+      "text": "借款人按合同载明的期限归还本金；提前还款的，应提前 10 日书面通知贷款人，不另行收取费用。",
+      "params": {}
+    },
+    "rent": {
+      "title": "租金与支付",
+      "text": "租金按合同载明的金额按季度支付，每季度首月 10 日前支付；出租人应在收款后 5 日内开具发票。",
+      "params": {}
+    },
+    "termination": {
+      "title": "解除与终止",
+      "text": "任何一方严重违约且经书面催告 15 日内未纠正的，对方可书面通知解除本合同；承租人提前解除的，提前 2 个月书面通知并支付 2 个月租金作为补偿。",
+      "params": {
+        "earlyExitMonths": 2
+      }
+    },
+    "scope": {
+      "title": "保密范围",
+      "text": "保密信息包括披露方以书面、口头或电子形式提供的技术资料、图纸、工艺、报价、客户与合作信息，以及标注保密的其他资料。",
+      "params": {}
+    },
+    "wage": {
+      "title": "劳动报酬",
+      "text": "月工资由基本工资与绩效工资构成，用人单位每月 10 日前以货币形式支付上月工资，依法代扣代缴个人所得税与社会保险费。",
+      "params": {}
+    },
+    "worktime": {
+      "title": "工作时间与休息休假",
+      "text": "实行标准工时制，每日工作 8 小时、每周 40 小时；延长工作时间按法定标准支付加班工资或安排补休。",
+      "params": {}
+    },
+    "fee": {
+      "title": "平台费用",
+      "text": "平台服务费按附件费率表执行；费率调整应提前 30 日书面通知，入驻方不同意的有权在调整生效前终止协议且不承担违约责任。",
+      "params": {
+        "adjust": "mutual"
+      }
+    },
+    "settlement": {
+      "title": "结算与回款",
+      "text": "平台按自然月结算，于次月 15 日前将上月货款扣除约定费用后支付至入驻方指定账户。",
+      "params": {
+        "days": 15
+      }
+    }
+  },
+  "risks": [
+    {
+      "id": "C01",
+      "clause": "payment",
+      "when": "role == 'supply' && termDays > 90",
+      "severity": "high",
+      "issue": "账期 {termDays} 天，超过 90 天，我方资金占用与坏账风险高",
+      "basis": "民法典合同编关于价款支付期限约定的一般规定；行业常见账期 30–60 天",
+      "fix": {
+        "mode": "replace",
+        "title": "付款方式",
+        "text": "需方应在每批货物验收合格后 60 日内支付该批货款；逾期支付的，每逾期一日按未付款项的 0.05% 支付违约金。",
+        "params": {
+          "termDays": 60
+        }
+      }
+    },
+    {
+      "id": "C02",
+      "clause": "payment",
+      "when": "role == 'buy' && advanceRatio >= 0.5",
+      "severity": "mid",
+      "issue": "预付款比例 {advanceRatioPct}%，对方未交付时我方资金风险大",
+      "basis": "常见做法为预付 30% 以内，余款按到货与验收分期",
+      "fix": {
+        "mode": "replace",
+        "title": "付款方式",
+        "text": "合同签订后 5 日内需方支付 30% 预付款；货物验收合格后 10 日内支付 60%；余款 10% 作为质保金，质保期满无质量问题后 10 日内付清。",
+        "params": {
+          "advanceRatio": 0.3
+        }
+      }
+    },
+    {
+      "id": "C03",
+      "clause": "penalty",
+      "when": "rate > 0.3",
+      "severity": "mid",
+      "issue": "违约金比例 {ratePct}%，明显高于通常损失，实际主张时可能被调减",
+      "basis": "民法典合同编：约定的违约金过分高于造成的损失的，可请求予以适当减少",
+      "fix": {
+        "mode": "replace",
+        "title": "违约金",
+        "text": "一方逾期履行的，每逾期一日按逾期部分价款的 0.05% 支付违约金，累计不超过逾期部分价款的 10%；造成损失超过违约金的，另行赔偿。",
+        "params": {
+          "rate": 0.1
+        }
+      }
+    },
+    {
+      "id": "C04",
+      "clause": "liability",
+      "when": "capMultiple == null",
+      "severity": "mid",
+      "issue": "无赔偿责任上限，我方潜在赔偿敞口不可控",
+      "basis": "常见做法为以合同总价款或已收价款为上限，故意或重大过失除外",
+      "fix": {
+        "mode": "replace",
+        "title": "违约责任",
+        "text": "任何一方违约给对方造成损失的，应予赔偿；赔偿总额以本合同总价款为限，但因故意或重大过失造成的损失除外。",
+        "params": {
+          "capMultiple": 1
+        }
+      }
+    },
+    {
+      "id": "C05",
+      "clause": "dispute",
+      "when": "venue == 'counterparty'",
+      "severity": "mid",
+      "issue": "约定由对方所在地法院管辖，我方维权成本高",
+      "basis": "民法典合同编与民事诉讼法允许当事人书面协议选择与争议有实际联系地点的法院",
+      "fix": {
+        "mode": "replace",
+        "title": "争议解决",
+        "text": "因本合同引起的争议，双方协商解决；协商不成的，向合同签订地即我方住所地有管辖权的人民法院提起诉讼。",
+        "params": {
+          "venue": "ours"
+        }
+      }
+    },
+    {
+      "id": "C06",
+      "clause": "acceptance",
+      "when": "role == 'supply' && objectionDays > 30",
+      "severity": "low",
+      "issue": "质量异议期 {objectionDays} 天，过长，货款结算与责任确定被拖后",
+      "basis": "常见做法为外观数量当场、质量 15–30 日内提出",
+      "fix": {
+        "mode": "replace",
+        "title": "验收标准与异议期",
+        "text": "需方应在到货后 7 日内验收；数量与外观异议当场提出，质量异议在 15 日内书面提出，逾期视为验收合格。",
+        "params": {
+          "objectionDays": 15
+        }
+      }
+    },
+    {
+      "id": "C07",
+      "clause": "ip",
+      "when": "owner == 'counterparty'",
+      "severity": "high",
+      "issue": "图纸、模具等知识产权约定归对方，我方核心工艺可能外流",
+      "basis": "民法典合同编承揽合同章：承揽人应保守秘密，未经许可不得留存复制品或技术资料",
+      "fix": {
+        "mode": "replace",
+        "title": "知识产权",
+        "text": "定作方提供的图纸、技术资料及据此制作的模具、样品，其知识产权归定作方所有；承揽方不得用于本合同以外的用途，不得向第三方披露或交付。",
+        "params": {
+          "owner": "ours"
+        }
+      }
+    },
+    {
+      "id": "C08",
+      "clause": "confidentiality",
+      "when": "years < 2",
+      "severity": "mid",
+      "issue": "保密期限仅 {years} 年，短于技术资料的实际价值周期",
+      "basis": "常见做法为合同终止后 2–5 年，核心技术秘密约定至公开为止",
+      "fix": {
+        "mode": "replace",
+        "title": "保密",
+        "text": "双方对在合作中知悉的对方商业秘密负有保密义务，保密期限自合同终止后 3 年；技术秘密至其依法公开为止。",
+        "params": {
+          "years": 3,
+          "penalty": true
+        }
+      }
+    },
+    {
+      "id": "C09",
+      "clause": "confidentiality",
+      "when": "penalty == false",
+      "severity": "mid",
+      "issue": "保密条款无违约金，泄密后损失举证困难",
+      "basis": "民法典合同编允许约定违约金；商业秘密损失举证难度高，通常约定固定违约金",
+      "fix": {
+        "mode": "replace",
+        "title": "保密",
+        "text": "双方对在合作中知悉的对方商业秘密负有保密义务，保密期限自合同终止后 3 年；违反的，应支付违约金 20 万元，不足以弥补损失的另行赔偿。",
+        "params": {
+          "years": 3,
+          "penalty": true
+        }
+      }
+    },
+    {
+      "id": "C10",
+      "clause": "term",
+      "when": "autoRenew == true && exitNotice == false",
+      "severity": "mid",
+      "issue": "自动续约但无退出机制，我方被长期绑定",
+      "basis": "常见做法为约定期满前书面通知即可终止，续期次数设上限",
+      "fix": {
+        "mode": "replace",
+        "title": "期限",
+        "text": "本协议有效期 1 年；期满前 30 日任何一方书面提出终止的，协议到期终止；否则自动续期 1 年，续期次数不超过 2 次。",
+        "params": {
+          "autoRenew": true,
+          "exitNotice": true
+        }
+      }
+    },
+    {
+      "id": "C11",
+      "clause": "price",
+      "when": "adjust == 'unilateral'",
+      "severity": "mid",
+      "issue": "对方可单方调价，我方成本不可控",
+      "basis": "民法典合同编：合同变更应由当事人协商一致",
+      "fix": {
+        "mode": "replace",
+        "title": "价格调整",
+        "text": "价格按附件价格表执行；主要原材料市场价格波动超过 8% 的，任何一方可提出调价，双方协商确定，协商不成的按原价执行至协商完成。",
+        "params": {
+          "adjust": "mutual"
+        }
+      }
+    },
+    {
+      "id": "C12",
+      "clause": "noncompete",
+      "when": "compensation == false",
+      "severity": "mid",
+      "issue": "竞业限制未约定经济补偿，条款可能无法约束员工",
+      "basis": "劳动合同法：竞业限制期内用人单位应按月给予经济补偿",
+      "fix": {
+        "mode": "replace",
+        "title": "竞业限制",
+        "text": "员工离职后 12 个月内不得到与本单位有竞争关系的单位任职；竞业限制期内本单位按月支付离职前月平均工资的 30% 作为经济补偿。",
+        "params": {
+          "compensation": true,
+          "months": 12
+        }
+      }
+    },
+    {
+      "id": "C13",
+      "clause": "serviceterm",
+      "when": "penalty > trainingCost",
+      "severity": "low",
+      "issue": "服务期违约金 {penalty} 元超过培训费用，超出部分通常不被支持",
+      "basis": "劳动合同法：违约金不得超过用人单位提供的培训费用",
+      "fix": {
+        "mode": "replace",
+        "title": "服务期",
+        "text": "本单位出资对员工进行专项技术培训的，可约定服务期 3 年；员工违反服务期约定的，按尚未履行部分分摊的培训费用支付违约金。",
+        "params": {
+          "penalty": 0,
+          "trainingCost": 0
+        }
+      }
+    },
+    {
+      "id": "C14",
+      "clause": "exclusivity",
+      "when": "exclusive == true && minVolume == null",
+      "severity": "mid",
+      "issue": "独家代理无最低销量，对方占着区域不出量我方无法解约",
+      "basis": "常见做法为独家权与年度最低采购量挂钩，未达标即取消独家",
+      "fix": {
+        "mode": "replace",
+        "title": "独家代理与最低销量",
+        "text": "代理方在代理区域内享有独家代理权，年度最低采购量为 300 万元；未达最低采购量的，委托方有权取消独家代理权。",
+        "params": {
+          "exclusive": true,
+          "minVolume": 3000000
+        }
+      }
+    },
+    {
+      "id": "C15",
+      "clause": "data",
+      "when": "owner != 'client'",
+      "severity": "mid",
+      "issue": "业务数据归属未落在我方，迁移与二次使用受制于人",
+      "basis": "民法典关于数据权益保护的一般规定；常见做法为客户数据归客户",
+      "fix": {
+        "mode": "replace",
+        "title": "数据归属与安全",
+        "text": "客户方在服务过程中产生的业务数据归客户方所有；服务方应采取必要的安全措施，未经书面同意不得使用、披露或迁移，合同终止后 30 日内完整交付并删除。",
+        "params": {
+          "owner": "client"
+        }
+      }
+    },
+    {
+      "id": "C16",
+      "clause": "sla",
+      "when": "penalty == false",
+      "severity": "low",
+      "issue": "服务水平未达标无减免或解约机制",
+      "basis": "常见做法为可用率与费用减免挂钩",
+      "fix": {
+        "mode": "replace",
+        "title": "服务水平",
+        "text": "服务方保证系统月度可用率不低于 99.5%；未达标的，按当月服务费的 10% 减免，连续两个月未达标的客户方有权解除合同。",
+        "params": {
+          "penalty": true
+        }
+      }
+    },
+    {
+      "id": "C17",
+      "clause": "warranty",
+      "when": "role == 'buy' && months < 12",
+      "severity": "low",
+      "issue": "质保期仅 {months} 个月，短于同类设备常见的 12 个月",
+      "basis": "常见做法为设备质保 12 个月起",
+      "fix": {
+        "mode": "replace",
+        "title": "质量保证",
+        "text": "供方对设备提供自验收合格之日起 12 个月的质量保证；保证期内因设备质量问题导致的损失由供方承担。",
+        "params": {
+          "months": 12
+        }
+      }
+    },
+    {
+      "id": "C18",
+      "clause": "delivery",
+      "when": "role == 'buy' && latePenalty == false",
+      "severity": "mid",
+      "issue": "对方逾期交付无违约责任，我方生产受影响时无救济",
+      "basis": "民法典合同编：当事人可以约定一方违约时应支付一定数额的违约金",
+      "fix": {
+        "mode": "replace",
+        "title": "交付与逾期",
+        "text": "供方应按约定日期交付；逾期交付的，每逾期一日按逾期部分价款的 0.05% 支付违约金，逾期超过 30 日需方有权解除合同并要求赔偿损失。",
+        "params": {
+          "latePenalty": true
+        }
+      }
+    },
+    {
+      "id": "C19",
+      "clause": "renewal",
+      "when": "priority == false",
+      "severity": "mid",
+      "issue": "无优先承租权，租期届满可能被迫搬迁",
+      "basis": "民法典合同编：租赁期满承租人享有以同等条件优先承租的权利，建议在合同中明确通知与行使方式",
+      "fix": {
+        "mode": "replace",
+        "title": "续租",
+        "text": "租赁期满承租人需继续承租的，应提前 3 个月书面通知出租人，同等条件下承租人享有优先承租权。",
+        "params": {
+          "priority": true
+        }
+      }
+    },
+    {
+      "id": "C20",
+      "clause": "improvements",
+      "when": "owner == 'lessor' && compensated == false",
+      "severity": "low",
+      "issue": "装修改造归出租方且不补偿，我方投入退租时无法收回",
+      "basis": "民法典合同编：承租人经同意装饰装修的，租赁期满按约定处理，未约定的按公平原则",
+      "fix": {
+        "mode": "replace",
+        "title": "装修与附属设施",
+        "text": "承租人经出租人同意进行的装修改造，租赁期满可拆除的由承租人拆除，不可拆除的由出租人按未折旧价值补偿。",
+        "params": {
+          "owner": "lessor",
+          "compensated": true
+        }
+      }
+    },
+    {
+      "id": "C21",
+      "clause": "termination",
+      "when": "earlyExitMonths >= 3",
+      "severity": "low",
+      "issue": "提前解约违约金为 {earlyExitMonths} 个月租金，退出成本较高",
+      "basis": "常见做法为 1–2 个月租金",
+      "fix": {
+        "mode": "replace",
+        "title": "提前解约",
+        "text": "承租人需提前解除合同的，应提前 2 个月书面通知出租人，并支付 1 个月租金作为违约金。",
+        "params": {
+          "earlyExitMonths": 1
+        }
+      }
+    },
+    {
+      "id": "C22",
+      "clause": "crossdefault",
+      "when": "enabled == true && (threshold == null || cureDays == null)",
+      "severity": "mid",
+      "issue": "交叉违约条款：任一其他债务违约即触发本合同加速到期",
+      "basis": "常见做法为限定触发范围与金额门槛，并给予 30 日补救期",
+      "fix": {
+        "mode": "replace",
+        "title": "交叉违约",
+        "text": "借款人其他金额超过 500 万元的债务发生实质违约且未在 30 日内补救的，贷款人可宣布本合同借款提前到期。",
+        "params": {
+          "enabled": true,
+          "threshold": 5000000,
+          "cureDays": 30
+        }
+      }
+    },
+    {
+      "id": "C23",
+      "clause": "prepay",
+      "when": "penalty == true",
+      "severity": "low",
+      "issue": "提前还款需支付违约金，资金宽裕时无法降低利息成本",
+      "basis": "常见做法为提前 15 日通知即可提前还款，不收违约金或按剩余期限阶梯递减",
+      "fix": {
+        "mode": "replace",
+        "title": "提前还款",
+        "text": "借款人提前 15 日书面通知贷款人的，可提前归还部分或全部借款，不收取违约金；利息按实际占用天数计算。",
+        "params": {
+          "penalty": false
+        }
+      }
+    },
+    {
+      "id": "C24",
+      "clause": "material",
+      "when": "lossRate == null",
+      "severity": "mid",
+      "issue": "我方供料的损耗率未约定，材料流失无法追责",
+      "basis": "民法典合同编承揽合同章：承揽人对定作人提供的材料应妥善保管，不得擅自更换",
+      "fix": {
+        "mode": "replace",
+        "title": "材料与损耗",
+        "text": "定作方提供主要材料的，承揽方应妥善保管并按约定的损耗率（不超过 3%）核算，超出部分按材料采购价赔偿。",
+        "params": {
+          "lossRate": 0.03
+        }
+      }
+    },
+    {
+      "id": "C25",
+      "clause": "fee",
+      "when": "adjust == 'unilateral'",
+      "severity": "mid",
+      "issue": "平台可单方调整费率，我方毛利不可控",
+      "basis": "民法典合同编：格式条款提供方不得不合理地免除或减轻其责任、加重对方责任",
+      "fix": {
+        "mode": "replace",
+        "title": "费用与费率",
+        "text": "平台费率按附件执行；平台调整费率的，应提前 60 日书面通知，入驻方不接受的有权无责解除本协议。",
+        "params": {
+          "adjust": "notice"
+        }
+      }
+    },
+    {
+      "id": "C26",
+      "clause": "settlement",
+      "when": "days > 30",
+      "severity": "mid",
+      "issue": "结算周期 {days} 天，回款慢",
+      "basis": "常见做法为 T+7 至 T+30 结算",
+      "fix": {
+        "mode": "replace",
+        "title": "结算",
+        "text": "平台按自然月结算，于次月 15 日前将上月货款扣除约定费用后支付至入驻方账户。",
+        "params": {
+          "days": 15
+        }
+      }
+    },
+    {
+      "id": "C27",
+      "clause": "probation",
+      "when": "months > allowedMonths",
+      "severity": "high",
+      "issue": "试用期 {months} 个月，超过该合同期限允许的 {allowedMonths} 个月",
+      "basis": "劳动合同法：劳动合同期限一年以上不满三年的试用期不得超过两个月，三年以上固定期限的不得超过六个月",
+      "fix": {
+        "mode": "replace",
+        "title": "试用期",
+        "text": "试用期为 2 个月，试用期包含在劳动合同期限内；试用期工资不低于转正后工资的 80%。",
+        "params": {
+          "months": 2,
+          "allowedMonths": 2
+        }
+      }
+    }
+  ]
+}

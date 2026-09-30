@@ -1,0 +1,63 @@
+{
+  "_note": "三业态各 4 条预置需求句 + 3 条追加句。aliases 是同义改写（回归用），expect 是解析应得的对象 / 模板 / 模式，script 是试用屏第一步提交的预填值。",
+  "make": [
+    { "key": "repair", "text": "车间扫码提报设备故障，设备员接单处理，生产主管看停机与处理时效", "expect": { "object": "repair", "flow": "dispatch", "mode": "accept" },
+      "aliases": ["班组长手机报修，维修工接单维修，生产经理看处理时效", "机台坏了扫码报故障，设备员受理处理，主管看停机", "车间报修，机修接单，生产主管看板看时效", "扫码报修设备故障，维修员认领处理，车间主任查看进度", "设备故障手机上报，设备员接单，生产负责人看停机影响"],
+      "script": { "device": "CNC-03", "faultType": "机械", "desc": "主轴异响，转速上不去", "startedAt": "2026-09-17 08:40", "photo": 1, "urgency": "停机", "expectAt": "2026-09-17 16:00" }, "completeValues": { "result": "更换主轴轴承", "cost": 1200 } },
+    { "key": "inspection", "text": "每班扫码点检 CNC 设备，异常项自动转整改单，生产主管看整改进度", "expect": { "object": "inspection", "flow": "inspect" },
+      "aliases": ["每班手机点检设备，有异常转整改，主管看整改进度", "操作工扫码巡检设备，异常项整改，生产主管看板", "设备点检扫码填报，不合格项转整改单，生产经理看进度", "班组扫码做日常点检，异常自动整改，车间主任看整改率", "每班点检 CNC，异常整改，生产主管查看"],
+      "script": { "device": "CNC-03", "shift": "白班", "items": 12, "issues": 1, "issueDesc": "主轴润滑油位偏低", "photo": 1 }, "completeValues": { "fixResult": "已补充润滑油并复测", "recheckNote": "复检合格" } },
+    { "key": "mold", "text": "模具扫码领用登记工单号，归还登记，超期自动提醒", "expect": { "object": "mold", "flow": "approve" },
+      "aliases": ["模具领用扫码登记工单，归还登记，超期提醒", "领模具扫码登记，还回登记，逾期自动催", "模具借用手机登记工单号，归还时登记，超期通知", "班组长扫码领用模具，归还登记，超期提醒模具管理员", "模具扫码领用与归还登记，逾期提醒"],
+      "script": { "mold": "F-07", "workOrder": "SO-2609-0142", "machine": "CNC-02", "from": "2026-09-17 09:30", "to": "2026-09-19 18:00" }, "completeValues": { "condition": "完好", "shots": 3200 } },
+    { "key": "hazard", "text": "安全隐患拍照上报，班组长整改，生产主管复核关闭", "expect": { "object": "hazard", "flow": "inspect" },
+      "aliases": ["安全隐患手机拍照上报，班组长整改，主管复核", "员工扫码上报隐患，班长整改，生产经理验收关闭", "隐患拍照提报，组长整改，生产主管复查关闭", "不安全行为拍照上报，班组长纠正，主管复核", "安全问题手机上报，班组长整改，生产主管关闭"],
+      "script": { "area": "CNC 区", "type": "机械", "desc": "CNC-04 防护门联锁失效，开门仍可运行", "photo": 2, "level": "高" }, "completeValues": { "measure": "更换联锁开关并测试", "verify": "复核合格，联锁恢复" } }
+  ],
+  "flow": [
+    { "key": "return_order", "text": "门店扫码提交退换货申请，客服审核，仓库收货入库，仓配主管看本周退货原因分布", "expect": { "object": "return_order", "flow": "dispatch", "mode": "dual" },
+      "aliases": ["门店手机提交退货，客服审核，仓储员入库，仓配主管看退货原因", "店长扫码退换货，客服人员审核，仓库收货，主管看板看原因分布", "门店退货申请，客服审，仓管入库，仓配主管看退货数量", "加盟店扫码退换货，客服审核后仓库入库，物流主管看原因", "门店退换货扫码提交，客服审核，仓库收货入库，主管看分布"],
+      "script": { "customer": "K-102 · 连锁便利店总部", "product": "G02 · 休闲食品组合箱", "qty": 12, "reason": "破损", "type": "退货", "photo": 2, "desc": "外箱受潮破损 12 箱", "order": "SO-2609-0871" }, "completeValues": { "auditNote": "同意退货", "stock": 12 } },
+    { "key": "sample_req", "text": "业务员提交样品申请，仓配主管审批，仓库寄样并登记快递单号", "expect": { "object": "sample_req", "flow": "approve" },
+      "aliases": ["销售手机申请样品，仓配主管审批，仓库寄出登记快递", "业务员申请寄样，主管审核，仓储员寄样登记运单号", "样品申请扫码提交，仓储主管批准，仓库寄样", "销售代表申请样品，仓配主管审批，仓管寄出并填快递单号", "业务申请样品单，主管审批，仓库寄样登记"],
+      "script": { "customer": "K-117 · 社区团购平台", "product": "G03 · 冷藏乳品组合箱", "qty": 2, "purpose": "新客试用", "address": "客户仓库（杭州余杭）", "needBy": "2026-09-20" }, "completeValues": { "opinion": "同意寄样", "express": "SF-2609-118203" } },
+    { "key": "display_check", "text": "业务员拍照打卡门店陈列，督导复核，仓配主管看整改率", "expect": { "object": "display_check", "flow": "inspect" },
+      "aliases": ["销售拍照巡店陈列检查，督导复核，主管看整改率", "业务员手机拍门店陈列，区域督导复查，仓配主管看板", "门店陈列拍照打卡，督导验收，仓储主管看整改进度", "业务拍照检查陈列，督导复核，主管看整改率", "巡店拍照上报陈列问题，督导复核，仓配主管查看"],
+      "script": { "store": "K-088 · 区域商超", "date": "2026-09-17", "photo": 3, "items": 8, "issues": 2, "issueDesc": "堆头缺货、价签过期" }, "completeValues": { "fixResult": "已补货并更换价签", "verify": "复核合格" } },
+    { "key": "promo_material", "text": "促销物料扫码申领，运营审核，仓库发放登记", "expect": { "object": "promo_material", "flow": "approve" },
+      "aliases": ["促销物料手机申领，运营专员审核，仓储员发放", "宣传物料扫码申请，运营审批，仓库发放登记", "促销品申领扫码提交，市场部审核，仓管发放", "门店促销物料申领，运营审核，仓库发出登记", "物料申领扫码，运营审批，仓库发放"],
+      "script": { "item": "堆头", "qty": 6, "store": "K-102 · 连锁便利店总部", "campaign": "中秋礼盒专场", "needBy": "2026-09-19" }, "completeValues": { "opinion": "同意发放" } }
+  ],
+  "service": [
+    { "key": "client_onboard", "text": "客户经理提交新客户资料，账务组长分配代账会计，作业主管看接入进度", "expect": { "object": "client_onboard", "flow": "dispatch", "mode": "assign" },
+      "aliases": ["客户经理手机提交新客户，账务组长指派会计，作业主管看进度", "顾问录入新客户资料，账务主管分配代账会计，主管看接入进度", "新客户建档扫码提交，组长派给会计，作业主管看板", "客户专员提交开户资料，账务组长分配，业务主管看接入进度", "客户经理提交新客户接入，账务组长指派代账会计，作业主管查看进度"],
+      "script": { "customer": "K-311 · 餐饮管理公司", "taxType": "一般纳税人", "service": "V02 · 一般纳税人月度账务", "startMonth": "2026-10", "docs": "齐全", "photo": 1, "group": "G2 · 账务一组" }, "assignValues": { "assignee": "E-001" }, "completeValues": { "note": "账套已建，首月账期 2026-10" } },
+    { "key": "doc_handover", "text": "客户扫码上传当月票据，代账会计签收，逾期未交自动提醒", "expect": { "object": "doc_handover", "flow": "dispatch", "mode": "accept" },
+      "aliases": ["客户手机上传票据，会计签收，逾期提醒", "客户微信交票据，代账会计接收签收，未交自动催", "票据交接扫码上传，会计签收，逾期未交提醒", "客户扫码上传发票交接，记账会计签收，未按时交提醒", "客户上传当月票据，代账会计签收，超期提醒"],
+      "script": { "customer": "K-287 · 贸易公司", "period": "2026-08", "count": 46, "type": "进项发票", "photo": 2 }, "completeValues": { "signNote": "已签收，46 张与清单一致" } },
+    { "key": "consult", "text": "客户微信提交咨询，账务组长分配，代账会计答复", "expect": { "object": "consult", "flow": "dispatch", "mode": "assign" },
+      "aliases": ["客户手机提问，账务组长指派，会计回复", "客户微信咨询工单，组长分配，代账会计答复", "客户扫码提交咨询，账务主管派单，会计答复", "客户提问咨询，账务组长分配会计答复", "咨询单微信提交，组长派给代账会计答复"],
+      "script": { "customer": "K-330 · 设计工作室", "topic": "税务", "question": "小规模转一般纳税人的时点与准备材料", "urgency": "一般", "photo": 0 }, "assignValues": { "assignee": "E-001" }, "completeValues": { "answer": "连续 12 个月销售额超过 500 万元须登记为一般纳税人，需准备营业执照、财务负责人信息与银行开户资料" } },
+    { "key": "biz_change", "text": "客户经理提交工商变更材料，办理人受理，作业主管看办结时效", "expect": { "object": "biz_change", "flow": "approve" },
+      "aliases": ["客户经理提交工商变更，办理专员受理，主管看办结时效", "工商变更申请手机提交，外勤办理，作业主管看进度", "顾问提交变更材料，办理人受理办理，主管看时效", "客户经理提交执照变更材料，工商专员受理，作业主管看办结", "工商变更材料提交，办理人受理，服务主管看时效"],
+      "script": { "customer": "K-256 · 建材经销商", "changeType": "注册地址", "desc": "迁至新园区办公地址", "docs": "股东会决议、章程修正案、新地址证明", "photo": 3 }, "completeValues": { "opinion": "材料齐全，受理", "doneAt": "2026-09-24", "result": "已换发营业执照" } }
+  ],
+  "followUps": {
+    "make": [
+      { "text": "完成后让班组长打分评价", "expectOps": ["addState", "addField", "addField"], "expect": { "states": 1, "fields": 2, "pages": 1 }, "aliases": ["处理完成后班组长打分", "完成后提交人评价满意度", "让报修人给设备员评分"] },
+      { "text": "生产主管看板按设备员统计接单数与平均处理时长", "expectOps": ["addStat", "addStat"], "expect": { "states": 0, "fields": 0, "pages": 0 }, "aliases": ["看板按处理人统计单数和时长", "主管看板按维修工统计数量与时长"] },
+      { "text": "超过 2 小时未接单，自动提醒生产主管", "expectOps": ["addRule"], "expect": { "states": 0, "fields": 0, "pages": 0 }, "aliases": ["2 小时没人接单就提醒主管", "超过两小时未接单通知生产主管"] }
+    ],
+    "flow": [
+      { "text": "入库后让门店打分评价，仓配主管看满意度", "expectOps": ["addState", "addField", "addField", "addStat"], "expect": { "states": 1, "fields": 2, "pages": 1 }, "aliases": ["入库完成后门店评价，主管看满意度"] },
+      { "text": "退货原因改为必选，客服驳回要填驳回原因", "expectOps": ["addValidation", "addState", "addField"], "expect": { "states": 1, "fields": 1, "pages": 0 }, "aliases": ["退货原因必填，驳回时要填原因"] },
+      { "text": "仓配主管看板按商品统计本月退货数量", "expectOps": ["addStat"], "expect": { "states": 0, "fields": 0, "pages": 0 }, "aliases": ["看板按商品统计退货数量"] }
+    ],
+    "service": [
+      { "text": "完成后让客户打分评价", "expectOps": ["addState", "addField", "addField"], "expect": { "states": 1, "fields": 2, "pages": 1 }, "aliases": ["接入完成后客户评价"] },
+      { "text": "作业主管看板按代账会计统计在办客户数", "expectOps": ["addStat"], "expect": { "states": 0, "fields": 0, "pages": 0 }, "aliases": ["看板按会计统计在办客户数"] },
+      { "text": "超过 3 个工作日未分配，自动提醒作业主管", "expectOps": ["addRule"], "expect": { "states": 0, "fields": 0, "pages": 0 }, "aliases": ["三个工作日没分配就提醒主管"] }
+    ]
+  },
+  "unrelated": ["今天天气不错", "帮我写个周报", "把颜色换成蓝的"]
+}

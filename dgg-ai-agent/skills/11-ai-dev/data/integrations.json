@@ -1,0 +1,15 @@
+{
+  "_note": "主数据来源：只解析不复制。from = erp（AI ERP 样本）/ proc（AI流程提效 样本）/ hr（AI人力官 样本）；archeMap 把本模块业态映射到来源样本键。direct / import 由企业画像里的现有系统决定。",
+  "archeMap": { "make": { "erp": "make", "proc": "make", "hr": "make" }, "flow": { "erp": "flow", "proc": "flow", "hr": "flow" }, "service": { "erp": "service", "proc": "service", "hr": "service" } },
+  "sources": {
+    "machines": { "name": "设备台账", "system": "AI流程提效", "from": "proc", "path": "machines", "id": "id", "label": "{id}", "unit": "台", "directIf": ["mes", "erp"], "syncAt": "2026-09-17 07:30", "byArche": { "service": { "name": "系统台账" } } },
+    "lines": { "name": "产线主数据", "system": "AI ERP", "from": "erp", "path": "lines", "id": "id", "label": "{id} · {name}", "unit": "条", "directIf": ["erp", "mes"], "syncAt": "2026-09-17 07:30", "byArche": { "flow": { "name": "作业区主数据", "unit": "个" }, "service": { "name": "作业小组", "unit": "个" } } },
+    "groups": { "alias": "lines" },
+    "orders": { "name": "订单", "system": "AI ERP", "from": "erp", "path": "orders", "id": "id", "label": "{id}", "unit": "单", "directIf": ["erp"], "syncAt": "2026-09-17 08:00" },
+    "materials": { "name": "物料主数据", "system": "AI ERP", "from": "erp", "path": "materials", "id": "id", "label": "{id} · {name}", "unit": "种", "directIf": ["erp"], "syncAt": "2026-09-17 07:30" },
+    "products": { "name": "商品主数据", "system": "AI ERP", "from": "erp", "path": "products", "id": "id", "label": "{id} · {name}", "unit": "种", "directIf": ["erp", "shop"], "syncAt": "2026-09-17 07:30", "byArche": { "make": { "name": "产品主数据" }, "service": { "name": "服务项目" } } },
+    "services": { "alias": "products" },
+    "customers": { "name": "客户主数据", "system": "AI ERP", "from": "erp", "path": "orders", "id": "customer", "distinct": true, "label": "{id}", "unit": "家", "directIf": ["erp", "crm"], "syncAt": "2026-09-17 07:30" },
+    "employees": { "name": "员工名册", "system": "AI人力官", "from": "hr", "path": "employees", "id": "id", "label": "{id}", "unit": "人", "directIf": ["hr", "oa"], "syncAt": "2026-09-16 18:00", "byArche": { "flow": { "from": "proc", "system": "AI流程提效", "name": "仓配员工名册" } } }
+  }
+}

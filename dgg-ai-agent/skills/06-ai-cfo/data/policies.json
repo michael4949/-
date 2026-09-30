@@ -1,0 +1,17 @@
+{
+  "note": "政策库：名称用公开通称，条件按公开口径简化，金额由引擎按账套数据估算并一律标「预计」。cond 是引擎指标上的布尔算式；need 为材料清单；status 由引擎给：满足 / 待补材料 / 不符。",
+  "policies": [
+    { "id": "P01", "name": "小型微利企业所得税优惠", "level": "国家", "cond": "employees <= 300 && assets <= 50000000 && taxable12 <= 3000000", "condText": "从业人数 ≤ 300、资产总额 ≤ 5000 万、年应纳税所得额 ≤ 300 万", "amountKey": "smallMicro", "window": "季度预缴时直接享受，年度汇算清缴确认", "need": ["从业人数与资产总额季度平均值", "汇算清缴申报表"], "cash": true },
+    { "id": "P02", "name": "研发费用加计扣除", "level": "国家", "cond": "rdExp12 > 0", "condText": "有归集的研发费用，设研发辅助账", "amountKey": "rdDeduction", "window": "年度汇算清缴（次年 5 月 31 日前），可在 7 月预缴时享受上半年", "need": ["研发项目立项书", "研发费用辅助账", "研发人员名单与工时分配表"], "cash": true },
+    { "id": "P03", "name": "高新技术企业认定", "level": "国家", "cond": "rdShare >= 3 && employees > 0", "condText": "研发费用占收入 ≥ 3%（收入 2 亿以下）、科技人员 ≥ 10%、有自主知识产权", "amountKey": "highTech", "window": "每年 4–8 月申报，认定后三年享受 15% 税率", "need": ["知识产权证书（发明专利或 6 件以上实用新型 / 软著）", "近三年研发费用专项审计报告", "科技人员名单"], "cash": false, "pending": "knowledge" },
+    { "id": "P04", "name": "增值税期末留抵退税", "level": "国家", "cond": "vatCredit > 0", "condText": "期末有增值税留抵税额", "amountKey": "vatRefund", "window": "申报期内向主管税务机关申请", "need": ["留抵退税申请表"], "cash": true },
+    { "id": "P05", "name": "设备器具一次性税前扣除", "level": "国家", "cond": "capexEquip12 > 0", "condText": "新购进单位价值 500 万元以下的设备、器具", "amountKey": "capexDeduction", "window": "购进当年汇算清缴时一次性扣除", "need": ["设备购置发票与入账凭证", "固定资产台账"], "cash": true, "deferred": true },
+    { "id": "P06", "name": "六税两费减半征收", "level": "国家", "cond": "smallMicroOk", "condText": "小型微利企业", "amountKey": "sixTaxes", "window": "申报时直接享受", "need": ["小型微利企业判定资料"], "cash": true },
+    { "id": "P07", "name": "稳岗返还", "level": "省", "cond": "insuredStable", "condText": "上年度参保人数保持稳定、足额缴纳失业保险", "amountKey": "stableJob", "window": "按当地人社部门通知申报，多数地区免申即享", "need": ["参保缴费记录"], "cash": true },
+    { "id": "P08", "name": "残疾人就业保障金减免", "level": "国家", "cond": "employees <= 30", "condText": "在职职工 ≤ 30 人免征", "amountKey": "disability", "window": "年度申报", "need": ["职工人数申报"], "cash": true },
+    { "id": "P09", "name": "先进制造业增值税加计抵减", "level": "国家", "cond": "highTech && archetype == 'make'", "condText": "高新技术企业中的制造业一般纳税人", "amountKey": "advancedMfg", "window": "月度申报时抵减", "need": ["高新技术企业证书", "行业与产品目录核对"], "cash": true },
+    { "id": "P10", "name": "职业技能提升补贴", "level": "省", "cond": "employees > 0", "condText": "组织职工参加培训并取得证书", "amountKey": "training", "window": "培训结束后申报", "need": ["培训计划与签到", "取证名单", "培训费发票"], "cash": true, "pending": "training" },
+    { "id": "P11", "name": "出口退税", "level": "国家", "cond": "exportRev12 > 0", "condText": "自营或委托出口货物，有出口报关单", "amountKey": "exportRefund", "window": "货物出口次月申报期", "need": ["出口报关单", "购进增值税专用发票"], "cash": true },
+    { "id": "P12", "name": "工会经费全额返还", "level": "省", "cond": "employees <= 500 && unionFee12 > 0", "condText": "小微企业已缴工会经费全额返还（按各地政策）", "amountKey": "unionRefund", "window": "缴纳后按季返还", "need": ["工会经费缴纳凭证"], "cash": true, "pending": "union" }
+  ]
+}

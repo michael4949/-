@@ -1,0 +1,3625 @@
+{
+ "archetype": "flow",
+ "company": "宁波优选百货供应链有限公司",
+ "dept": "仓配作业部",
+ "today": "2026-09-17",
+ "weekStart": "2026-09-14",
+ "erpKey": "flow",
+ "sources": [
+  {
+   "id": "route",
+   "name": "工艺路线与标准工时",
+   "mode": "direct",
+   "lastSync": "2026-09-17 07:30",
+   "rows": 16
+  },
+  {
+   "id": "report",
+   "name": "PDA 扫描记录",
+   "mode": "direct",
+   "lastSync": "2026-09-17 12:00",
+   "rows": 28
+  },
+  {
+   "id": "machine",
+   "name": "设备运行记录",
+   "mode": "import",
+   "lastSync": "2026-09-17 07:00",
+   "rows": 6
+  },
+  {
+   "id": "roster",
+   "name": "班组排班",
+   "mode": "import",
+   "lastSync": "2026-09-16 18:00",
+   "rows": 25
+  }
+ ],
+ "constraintExpected": "P1",
+ "spareLine": "P1",
+ "releaseLine": "A1",
+ "supportIds": [
+  "E-030",
+  "E-032"
+ ],
+ "spcMachine": "PK-02",
+ "dueMachine": "PK-01",
+ "shiftHours": 8,
+ "otCap": {
+  "month": 36,
+  "day": 3
+ },
+ "buffers": {
+  "P1": {
+   "capDays": 1.5
+  }
+ },
+ "fixtures": {
+  "G01": {
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  },
+  "G02": {
+   "fixture": "常温线路",
+   "program": "纸箱 B"
+  },
+  "G03": {
+   "fixture": "冷链线路",
+   "program": "保温箱"
+  },
+  "G04": {
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  }
+ },
+ "setupMatrix": {
+  "sameProduct": 5,
+  "sameFixture": 15,
+  "diffFixture": 30
+ },
+ "setupSteps": [
+  {
+   "name": "波次单切换与复核",
+   "min": 4,
+   "internal": true
+  },
+  {
+   "name": "包材更换",
+   "min": 8,
+   "internal": true
+  },
+  {
+   "name": "首箱复核",
+   "min": 5,
+   "internal": true
+  },
+  {
+   "name": "下波次包材备料",
+   "min": 8,
+   "internal": false
+  },
+  {
+   "name": "面单与标签预打印",
+   "min": 5,
+   "internal": false
+  }
+ ],
+ "firstPieceItems": [
+  "商品与数量核对",
+  "包材与温区核对",
+  "面单信息",
+  "封箱与加固",
+  "首箱签字"
+ ],
+ "spare": {
+  "line": "P1",
+  "capPerPerson": 2,
+  "effTo": 1,
+  "defaultSupport": 1
+ },
+ "lunchH": 1,
+ "firstPieceMinPerSetup": 5,
+ "employees": [
+  {
+   "id": "E-015",
+   "job": "picker",
+   "overtimeH": 33
+  },
+  {
+   "id": "E-016",
+   "job": "picker",
+   "overtimeH": 19
+  },
+  {
+   "id": "E-017",
+   "job": "picker",
+   "overtimeH": 24
+  },
+  {
+   "id": "E-018",
+   "job": "picker",
+   "overtimeH": 28
+  },
+  {
+   "id": "E-019",
+   "job": "picker",
+   "overtimeH": 37
+  },
+  {
+   "id": "E-020",
+   "job": "picker",
+   "overtimeH": 39
+  },
+  {
+   "id": "E-021",
+   "job": "picker",
+   "overtimeH": 41
+  },
+  {
+   "id": "E-022",
+   "job": "picker",
+   "overtimeH": 43
+  },
+  {
+   "id": "E-023",
+   "job": "picker",
+   "overtimeH": 45
+  },
+  {
+   "id": "E-024",
+   "job": "picker",
+   "overtimeH": 47
+  },
+  {
+   "id": "E-025",
+   "job": "picker",
+   "overtimeH": 16
+  },
+  {
+   "id": "E-026",
+   "job": "picker",
+   "overtimeH": 29
+  },
+  {
+   "id": "E-027",
+   "job": "picker",
+   "overtimeH": 23
+  },
+  {
+   "id": "E-028",
+   "job": "picker",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-029",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-030",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-031",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-032",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-033",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-034",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-035",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-036",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-037",
+   "job": "delivery",
+   "overtimeH": 30
+  },
+  {
+   "id": "E-038",
+   "job": "delivery",
+   "overtimeH": 30
+  }
+ ],
+ "skills": [
+  {
+   "emp": "E-015",
+   "home": "A1",
+   "levels": {
+    "拣货": 3,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-016",
+   "home": "A1",
+   "levels": {
+    "拣货": 3,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-017",
+   "home": "C1",
+   "levels": {
+    "拣货": 0,
+    "复核": 3,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-018",
+   "home": "A2",
+   "levels": {
+    "拣货": 2,
+    "复核": 0,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-019",
+   "home": "A1",
+   "levels": {
+    "拣货": 3,
+    "复核": 0,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-020",
+   "home": "A1",
+   "levels": {
+    "拣货": 3,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-021",
+   "home": "C1",
+   "levels": {
+    "拣货": 2,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-022",
+   "home": "A2",
+   "levels": {
+    "拣货": 3,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-023",
+   "home": "A1",
+   "levels": {
+    "拣货": 2,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-024",
+   "home": "A1",
+   "levels": {
+    "拣货": 2,
+    "复核": 0,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-025",
+   "home": "C1",
+   "levels": {
+    "拣货": 0,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-026",
+   "home": "A2",
+   "levels": {
+    "拣货": 3,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-027",
+   "home": "A1",
+   "levels": {
+    "拣货": 2,
+    "复核": 2,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-028",
+   "home": "A1",
+   "levels": {
+    "拣货": 3,
+    "复核": 0,
+    "打包": 0,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-029",
+   "home": "P1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 3,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-030",
+   "home": "D1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 2,
+    "装车发运": 2
+   }
+  },
+  {
+   "emp": "E-031",
+   "home": "P1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 3,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-032",
+   "home": "D1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 2,
+    "装车发运": 3
+   }
+  },
+  {
+   "emp": "E-033",
+   "home": "P1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 3,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-034",
+   "home": "D1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 2,
+    "装车发运": 2
+   }
+  },
+  {
+   "emp": "E-035",
+   "home": "P1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 2,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-036",
+   "home": "D1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 2,
+    "装车发运": 2
+   }
+  },
+  {
+   "emp": "E-037",
+   "home": "P1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 1,
+    "装车发运": 0
+   }
+  },
+  {
+   "emp": "E-038",
+   "home": "D1",
+   "levels": {
+    "拣货": 0,
+    "复核": 0,
+    "打包": 0,
+    "装车发运": 3
+   }
+  }
+ ],
+ "empStats": [
+  {
+   "emp": "E-015",
+   "op": "拣货",
+   "n": 25,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-015",
+   "op": "复核",
+   "n": 10,
+   "effMed": 0.88
+  },
+  {
+   "emp": "E-016",
+   "op": "拣货",
+   "n": 19,
+   "effMed": 0.97
+  },
+  {
+   "emp": "E-016",
+   "op": "复核",
+   "n": 13,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-017",
+   "op": "复核",
+   "n": 15,
+   "effMed": 1.01
+  },
+  {
+   "emp": "E-018",
+   "op": "拣货",
+   "n": 6,
+   "effMed": 0.88
+  },
+  {
+   "emp": "E-019",
+   "op": "拣货",
+   "n": 34,
+   "effMed": 0.96
+  },
+  {
+   "emp": "E-020",
+   "op": "拣货",
+   "n": 30,
+   "effMed": 0.97
+  },
+  {
+   "emp": "E-020",
+   "op": "复核",
+   "n": 10,
+   "effMed": 0.93
+  },
+  {
+   "emp": "E-021",
+   "op": "拣货",
+   "n": 8,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-021",
+   "op": "复核",
+   "n": 13,
+   "effMed": 0.92
+  },
+  {
+   "emp": "E-022",
+   "op": "拣货",
+   "n": 21,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-022",
+   "op": "复核",
+   "n": 10,
+   "effMed": 0.89
+  },
+  {
+   "emp": "E-023",
+   "op": "拣货",
+   "n": 6,
+   "effMed": 0.85
+  },
+  {
+   "emp": "E-023",
+   "op": "复核",
+   "n": 7,
+   "effMed": 0.94
+  },
+  {
+   "emp": "E-024",
+   "op": "拣货",
+   "n": 11,
+   "effMed": 0.81
+  },
+  {
+   "emp": "E-025",
+   "op": "复核",
+   "n": 7,
+   "effMed": 0.93
+  },
+  {
+   "emp": "E-026",
+   "op": "拣货",
+   "n": 22,
+   "effMed": 1
+  },
+  {
+   "emp": "E-026",
+   "op": "复核",
+   "n": 9,
+   "effMed": 0.8
+  },
+  {
+   "emp": "E-027",
+   "op": "拣货",
+   "n": 9,
+   "effMed": 0.84
+  },
+  {
+   "emp": "E-027",
+   "op": "复核",
+   "n": 8,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-028",
+   "op": "拣货",
+   "n": 26,
+   "effMed": 0.99
+  },
+  {
+   "emp": "E-029",
+   "op": "打包",
+   "n": 18,
+   "effMed": 0.98
+  },
+  {
+   "emp": "E-030",
+   "op": "打包",
+   "n": 8,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-030",
+   "op": "装车发运",
+   "n": 10,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-031",
+   "op": "打包",
+   "n": 26,
+   "effMed": 0.97
+  },
+  {
+   "emp": "E-032",
+   "op": "打包",
+   "n": 9,
+   "effMed": 0.9
+  },
+  {
+   "emp": "E-032",
+   "op": "装车发运",
+   "n": 25,
+   "effMed": 1
+  },
+  {
+   "emp": "E-033",
+   "op": "打包",
+   "n": 18,
+   "effMed": 1
+  },
+  {
+   "emp": "E-034",
+   "op": "打包",
+   "n": 9,
+   "effMed": 0.88
+  },
+  {
+   "emp": "E-034",
+   "op": "装车发运",
+   "n": 6,
+   "effMed": 0.86
+  },
+  {
+   "emp": "E-035",
+   "op": "打包",
+   "n": 5,
+   "effMed": 0.89
+  },
+  {
+   "emp": "E-036",
+   "op": "打包",
+   "n": 10,
+   "effMed": 0.84
+  },
+  {
+   "emp": "E-036",
+   "op": "装车发运",
+   "n": 12,
+   "effMed": 0.87
+  },
+  {
+   "emp": "E-037",
+   "op": "打包",
+   "n": 1,
+   "effMed": 0.75
+  },
+  {
+   "emp": "E-038",
+   "op": "装车发运",
+   "n": 25,
+   "effMed": 1.01
+  }
+ ],
+ "roster": [
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A1",
+   "leader": null,
+   "emps": [
+    "E-015",
+    "E-016",
+    "E-019",
+    "E-020",
+    "E-023",
+    "E-024"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "A1",
+   "leader": null,
+   "emps": [
+    "E-027",
+    "E-028",
+    "E-015",
+    "E-016",
+    "E-019",
+    "E-020"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "A1",
+   "leader": null,
+   "emps": [
+    "E-023",
+    "E-024",
+    "E-027",
+    "E-028",
+    "E-015",
+    "E-016"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "A1",
+   "leader": null,
+   "emps": [
+    "E-019",
+    "E-020",
+    "E-023",
+    "E-024",
+    "E-027",
+    "E-028"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "A1",
+   "leader": null,
+   "emps": [
+    "E-015",
+    "E-016",
+    "E-019",
+    "E-020",
+    "E-023",
+    "E-024"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A2",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-022",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "A2",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-022",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "A2",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-022",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "A2",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-022",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "A2",
+   "leader": null,
+   "emps": [
+    "E-018",
+    "E-022",
+    "E-026"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "C1",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-021",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "C1",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-021",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "C1",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-021",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "C1",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-021",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "C1",
+   "leader": null,
+   "emps": [
+    "E-017",
+    "E-021",
+    "E-025"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "P1",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-031",
+    "E-033",
+    "E-035",
+    "E-037"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "P1",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-031",
+    "E-033",
+    "E-035",
+    "E-037"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "P1",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-031",
+    "E-033",
+    "E-035",
+    "E-037"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "P1",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-031",
+    "E-033",
+    "E-035",
+    "E-037"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "P1",
+   "leader": null,
+   "emps": [
+    "E-029",
+    "E-031",
+    "E-033",
+    "E-035",
+    "E-037"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "D1",
+   "leader": null,
+   "emps": [
+    "E-030",
+    "E-032",
+    "E-034",
+    "E-036"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "D1",
+   "leader": null,
+   "emps": [
+    "E-038",
+    "E-030",
+    "E-032",
+    "E-034"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "D1",
+   "leader": null,
+   "emps": [
+    "E-036",
+    "E-038",
+    "E-030",
+    "E-032"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "D1",
+   "leader": null,
+   "emps": [
+    "E-034",
+    "E-036",
+    "E-038",
+    "E-030"
+   ],
+   "planned": true
+  },
+  {
+   "date": "2026-09-18",
+   "shift": "A",
+   "line": "D1",
+   "leader": null,
+   "emps": [
+    "E-032",
+    "E-034",
+    "E-036",
+    "E-038"
+   ],
+   "planned": true
+  }
+ ],
+ "reports": [
+  {
+   "id": "RP-0917-01",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A1",
+   "machine": "CV-01",
+   "op": "拣货",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "emp": "E-016",
+   "qtyGood": 1058,
+   "qtyRework": 18,
+   "runMin": 853,
+   "setupMin": 11,
+   "waitMin": 65,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1409,
+   "source": "scan",
+   "verified": true,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-06",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0868",
+   "product": "G03",
+   "emp": "E-022",
+   "qtyGood": 157,
+   "qtyRework": 2,
+   "runMin": 190,
+   "setupMin": 23,
+   "waitMin": 53,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 746,
+   "source": "manual",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-12",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "C1",
+   "machine": "SC-01",
+   "op": "复核",
+   "order": "SO-2609-0868",
+   "product": "G03",
+   "emp": "E-021",
+   "qtyGood": 562,
+   "qtyRework": 14,
+   "runMin": 359,
+   "setupMin": 9,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 799,
+   "source": "scan",
+   "verified": false,
+   "std": 0.01
+  },
+  {
+   "id": "RP-0917-16",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-01",
+   "op": "打包",
+   "order": "SO-2609-0868",
+   "product": "G03",
+   "emp": "E-031",
+   "qtyGood": 402,
+   "qtyRework": 7,
+   "runMin": 419,
+   "setupMin": 9,
+   "waitMin": 53,
+   "waitReason": "等前道",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 961,
+   "source": "manual",
+   "verified": true,
+   "std": 0.015
+  },
+  {
+   "id": "RP-0917-24",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0868",
+   "product": "G03",
+   "emp": "E-032",
+   "qtyGood": 388,
+   "qtyRework": 8,
+   "runMin": 188,
+   "setupMin": 18,
+   "waitMin": 55,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 741,
+   "source": "scan",
+   "verified": true,
+   "std": 0.008
+  },
+  {
+   "id": "RP-0917-30",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A1",
+   "machine": "CV-01",
+   "op": "拣货",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "emp": "E-016",
+   "qtyGood": 1058,
+   "qtyRework": 18,
+   "runMin": 853,
+   "setupMin": 11,
+   "waitMin": 65,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1409,
+   "source": "manual",
+   "verified": false,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-07",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "emp": "E-018",
+   "qtyGood": 169,
+   "qtyRework": 6,
+   "runMin": 217,
+   "setupMin": 24,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 961,
+   "source": "scan",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-25",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "emp": "E-036",
+   "qtyGood": 506,
+   "qtyRework": 15,
+   "runMin": 186,
+   "setupMin": 20,
+   "waitMin": 68,
+   "waitReason": "等复核",
+   "firstPieceOk": true,
+   "startMin": 780,
+   "endMin": 1054,
+   "source": "manual",
+   "verified": true,
+   "std": 0.006
+  },
+  {
+   "id": "RP-0917-17",
+   "date": "2026-09-14",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-02",
+   "op": "打包",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "emp": "E-035",
+   "qtyGood": 528,
+   "qtyRework": 10,
+   "runMin": 423,
+   "setupMin": 0,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 960,
+   "endMin": 1383,
+   "source": "scan",
+   "verified": true,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-02",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "A1",
+   "machine": "CV-01",
+   "op": "拣货",
+   "order": "SO-2609-0878",
+   "product": "G04",
+   "emp": "E-015",
+   "qtyGood": 1189,
+   "qtyRework": 27,
+   "runMin": 741,
+   "setupMin": 14,
+   "waitMin": 91,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1326,
+   "source": "scan",
+   "verified": true,
+   "std": 0.01
+  },
+  {
+   "id": "RP-0917-08",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0880",
+   "product": "G03",
+   "emp": "E-018",
+   "qtyGood": 353,
+   "qtyRework": 9,
+   "runMin": 422,
+   "setupMin": 24,
+   "waitMin": 68,
+   "waitReason": "等货",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 994,
+   "source": "scan",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-13",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "C1",
+   "machine": "SC-01",
+   "op": "复核",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "emp": "E-025",
+   "qtyGood": 1845,
+   "qtyRework": 24,
+   "runMin": 852,
+   "setupMin": 7,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1339,
+   "source": "scan",
+   "verified": true,
+   "std": 0.008
+  },
+  {
+   "id": "RP-0917-18",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-01",
+   "op": "打包",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "emp": "E-035",
+   "qtyGood": 300,
+   "qtyRework": 9,
+   "runMin": 324,
+   "setupMin": 10,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 814,
+   "source": "scan",
+   "verified": true,
+   "std": 0.015
+  },
+  {
+   "id": "RP-0917-26",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "emp": "E-034",
+   "qtyGood": 291,
+   "qtyRework": 8,
+   "runMin": 150,
+   "setupMin": 17,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 647,
+   "source": "scan",
+   "verified": true,
+   "std": 0.008
+  },
+  {
+   "id": "RP-0917-19",
+   "date": "2026-09-15",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-02",
+   "op": "打包",
+   "order": "SO-2609-0878",
+   "product": "G04",
+   "emp": "E-029",
+   "qtyGood": 577,
+   "qtyRework": 47,
+   "runMin": 387,
+   "setupMin": 30,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": false,
+   "startMin": 960,
+   "endMin": 1347,
+   "source": "scan",
+   "verified": true,
+   "std": 0.01
+  },
+  {
+   "id": "RP-0917-09",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0868",
+   "product": "G03",
+   "emp": "E-022",
+   "qtyGood": 351,
+   "qtyRework": 4,
+   "runMin": 421,
+   "setupMin": 20,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 921,
+   "source": "scan",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-14",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "C1",
+   "machine": "SC-01",
+   "op": "复核",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "emp": "E-017",
+   "qtyGood": 310,
+   "qtyRework": 9,
+   "runMin": 203,
+   "setupMin": 6,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 689,
+   "source": "scan",
+   "verified": true,
+   "std": 0.01
+  },
+  {
+   "id": "RP-0917-20",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-01",
+   "op": "打包",
+   "order": "SO-2609-0875",
+   "product": "G02",
+   "emp": "E-037",
+   "qtyGood": 541,
+   "qtyRework": 14,
+   "runMin": 478,
+   "setupMin": 8,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 966,
+   "source": "scan",
+   "verified": true,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-27",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0878",
+   "product": "G04",
+   "emp": "E-036",
+   "qtyGood": 587,
+   "qtyRework": 18,
+   "runMin": 190,
+   "setupMin": 21,
+   "waitMin": 82,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 773,
+   "source": "scan",
+   "verified": true,
+   "std": 0.005
+  },
+  {
+   "id": "RP-0917-28",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0875",
+   "product": "G02",
+   "emp": "E-030",
+   "qtyGood": 522,
+   "qtyRework": 16,
+   "runMin": 188,
+   "setupMin": 0,
+   "waitMin": 76,
+   "waitReason": "等前道",
+   "firstPieceOk": true,
+   "startMin": 780,
+   "endMin": 1044,
+   "source": "scan",
+   "verified": true,
+   "std": 0.006
+  },
+  {
+   "id": "RP-0917-21",
+   "date": "2026-09-16",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-02",
+   "op": "打包",
+   "order": "SO-2609-0880",
+   "product": "G03",
+   "emp": "E-033",
+   "qtyGood": 434,
+   "qtyRework": 38,
+   "runMin": 475,
+   "setupMin": 30,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": false,
+   "startMin": 960,
+   "endMin": 1435,
+   "source": "scan",
+   "verified": true,
+   "std": 0.015
+  },
+  {
+   "id": "RP-0917-05",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "A1",
+   "machine": "CV-01",
+   "op": "拣货",
+   "order": "SO-2609-0885",
+   "product": "G01",
+   "emp": "E-028",
+   "qtyGood": 1061,
+   "qtyRework": 36,
+   "runMin": 1283,
+   "setupMin": 11,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1774,
+   "source": "scan",
+   "verified": false,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-10",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "emp": "E-026",
+   "qtyGood": 151,
+   "qtyRework": 3,
+   "runMin": 187,
+   "setupMin": 18,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 685,
+   "source": "scan",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-15",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "C1",
+   "machine": "SC-01",
+   "op": "复核",
+   "order": "SO-2609-0878",
+   "product": "G04",
+   "emp": "E-021",
+   "qtyGood": 1144,
+   "qtyRework": 35,
+   "runMin": 601,
+   "setupMin": 7,
+   "waitMin": 252,
+   "waitReason": "等前道",
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 1340,
+   "source": "manual",
+   "verified": true,
+   "std": 0.008
+  },
+  {
+   "id": "RP-0917-22",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-01",
+   "op": "打包",
+   "order": "SO-2609-0882",
+   "product": "G02",
+   "emp": "E-033",
+   "qtyGood": 537,
+   "qtyRework": 7,
+   "runMin": 394,
+   "setupMin": 8,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 882,
+   "source": "scan",
+   "verified": true,
+   "std": 0.012
+  },
+  {
+   "id": "RP-0917-29",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "D1",
+   "machine": "DK-01",
+   "op": "装车发运",
+   "order": "SO-2609-0880",
+   "product": "G03",
+   "emp": "E-038",
+   "qtyGood": 444,
+   "qtyRework": 13,
+   "runMin": 233,
+   "setupMin": 15,
+   "waitMin": 0,
+   "waitReason": null,
+   "firstPieceOk": true,
+   "startMin": 480,
+   "endMin": 728,
+   "source": "scan",
+   "verified": true,
+   "std": 0.008
+  },
+  {
+   "id": "RP-0917-11",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "A2",
+   "machine": "CV-02",
+   "op": "拣货",
+   "order": "SO-2609-0880",
+   "product": "G03",
+   "emp": "E-022",
+   "qtyGood": 185,
+   "qtyRework": 3,
+   "runMin": 237,
+   "setupMin": 0,
+   "waitMin": 56,
+   "waitReason": "等包材",
+   "firstPieceOk": true,
+   "startMin": 720,
+   "endMin": 1013,
+   "source": "scan",
+   "verified": true,
+   "std": 0.02
+  },
+  {
+   "id": "RP-0917-23",
+   "date": "2026-09-17",
+   "shift": "A",
+   "line": "P1",
+   "machine": "PK-02",
+   "op": "打包",
+   "order": "SO-2609-0885",
+   "product": "G01",
+   "emp": "E-037",
+   "qtyGood": 546,
+   "qtyRework": 51,
+   "runMin": 439,
+   "setupMin": 9,
+   "waitMin": 29,
+   "waitReason": "等前道",
+   "firstPieceOk": false,
+   "startMin": 960,
+   "endMin": 1437,
+   "source": "scan",
+   "verified": true,
+   "std": 0.012
+  }
+ ],
+ "missingSlot": {
+  "date": "2026-09-16",
+  "shift": "A",
+  "line": "A1",
+  "order": "SO-2609-0882",
+  "op": "拣货",
+  "product": "G02",
+  "suggestQty": 461,
+  "suggestRunMin": 417
+ },
+ "stdStats": [
+  {
+   "product": "G01",
+   "op": "拣货",
+   "line": "A1",
+   "std": 0.012,
+   "n": 17,
+   "median": 0.01344,
+   "p25": 0.012392,
+   "p75": 0.014488,
+   "setupN": 17,
+   "setupMedian": 11
+  },
+  {
+   "product": "G01",
+   "op": "复核",
+   "line": "C1",
+   "std": 0.008,
+   "n": 12,
+   "median": 0.00816,
+   "p25": 0.007605,
+   "p75": 0.008715,
+   "setupN": 12,
+   "setupMedian": 9
+  },
+  {
+   "product": "G01",
+   "op": "打包",
+   "line": "P1",
+   "std": 0.012,
+   "n": 6,
+   "median": 0.0126,
+   "p25": 0.009628,
+   "p75": 0.015572,
+   "setupN": 6,
+   "setupMedian": 9
+  },
+  {
+   "product": "G01",
+   "op": "装车发运",
+   "line": "D1",
+   "std": 0.006,
+   "n": 5,
+   "median": 0.00624,
+   "p25": 0.004792,
+   "p75": 0.007688,
+   "setupN": 5,
+   "setupMedian": 19
+  },
+  {
+   "product": "G02",
+   "op": "拣货",
+   "line": "A1",
+   "std": 0.015,
+   "n": 3,
+   "median": 0.01455,
+   "p25": 0.011839,
+   "p75": 0.017261,
+   "setupN": 3,
+   "setupMedian": 13
+  },
+  {
+   "product": "G02",
+   "op": "复核",
+   "line": "C1",
+   "std": 0.01,
+   "n": 25,
+   "median": 0.009,
+   "p25": 0.008313,
+   "p75": 0.009687,
+   "setupN": 25,
+   "setupMedian": 7
+  },
+  {
+   "product": "G02",
+   "op": "打包",
+   "line": "P1",
+   "std": 0.012,
+   "n": 10,
+   "median": 0.01188,
+   "p25": 0.011405,
+   "p75": 0.012355,
+   "setupN": 4,
+   "setupMedian": 8
+  },
+  {
+   "product": "G02",
+   "op": "装车发运",
+   "line": "D1",
+   "std": 0.006,
+   "n": 17,
+   "median": 0.00612,
+   "p25": 0.005477,
+   "p75": 0.006763,
+   "setupN": 17,
+   "setupMedian": 22
+  },
+  {
+   "product": "G03",
+   "op": "拣货",
+   "line": "A2",
+   "std": 0.02,
+   "n": 21,
+   "median": 0.02,
+   "p25": 0.017882,
+   "p75": 0.022118,
+   "setupN": 21,
+   "setupMedian": 18
+  },
+  {
+   "product": "G03",
+   "op": "复核",
+   "line": "C1",
+   "std": 0.01,
+   "n": 4,
+   "median": 0.0096,
+   "p25": 0.007344,
+   "p75": 0.011856,
+   "setupN": 4,
+   "setupMedian": 7
+  },
+  {
+   "product": "G03",
+   "op": "打包",
+   "line": "P1",
+   "std": 0.015,
+   "n": 13,
+   "median": 0.0174,
+   "p25": 0.0162,
+   "p75": 0.0186,
+   "setupN": 13,
+   "setupMedian": 11
+  },
+  {
+   "product": "G03",
+   "op": "装车发运",
+   "line": "D1",
+   "std": 0.008,
+   "n": 3,
+   "median": 0.00816,
+   "p25": 0.006543,
+   "p75": 0.009777,
+   "setupN": 3,
+   "setupMedian": 22
+  },
+  {
+   "product": "G04",
+   "op": "拣货",
+   "line": "A1",
+   "std": 0.01,
+   "n": 11,
+   "median": 0.0103,
+   "p25": 0.009417,
+   "p75": 0.011183,
+   "setupN": 11,
+   "setupMedian": 13
+  },
+  {
+   "product": "G04",
+   "op": "复核",
+   "line": "C1",
+   "std": 0.008,
+   "n": 5,
+   "median": 0.00792,
+   "p25": 0.006565,
+   "p75": 0.009275,
+   "setupN": 5,
+   "setupMedian": 8
+  },
+  {
+   "product": "G04",
+   "op": "打包",
+   "line": "P1",
+   "std": 0.01,
+   "n": 18,
+   "median": 0.0103,
+   "p25": 0.009644,
+   "p75": 0.010956,
+   "setupN": 18,
+   "setupMedian": 7
+  },
+  {
+   "product": "G04",
+   "op": "装车发运",
+   "line": "D1",
+   "std": 0.005,
+   "n": 14,
+   "median": 0.0049,
+   "p25": 0.004464,
+   "p75": 0.005336,
+   "setupN": 14,
+   "setupMedian": 19
+  }
+ ],
+ "lossWeekly": [
+  {
+   "week": "2026-06-29",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 144,
+   "downMin": 56,
+   "waitMin": {
+    "等货": 168,
+    "等前道": 133,
+    "等复核": 80,
+    "等包材": 32
+   },
+   "speedMin": 139,
+   "reworkMin": 77
+  },
+  {
+   "week": "2026-07-06",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 141,
+   "downMin": 84,
+   "waitMin": {
+    "等货": 134,
+    "等前道": 134,
+    "等复核": 60,
+    "等包材": 41
+   },
+   "speedMin": 122,
+   "reworkMin": 80
+  },
+  {
+   "week": "2026-07-13",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 150,
+   "downMin": 67,
+   "waitMin": {
+    "等货": 115,
+    "等前道": 170,
+    "等复核": 60,
+    "等包材": 41
+   },
+   "speedMin": 151,
+   "reworkMin": 79
+  },
+  {
+   "week": "2026-07-20",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 150,
+   "downMin": 78,
+   "waitMin": {
+    "等货": 158,
+    "等前道": 144,
+    "等复核": 71,
+    "等包材": 37
+   },
+   "speedMin": 144,
+   "reworkMin": 86
+  },
+  {
+   "week": "2026-07-27",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 142,
+   "downMin": 71,
+   "waitMin": {
+    "等货": 162,
+    "等前道": 151,
+    "等复核": 64,
+    "等包材": 39
+   },
+   "speedMin": 129,
+   "reworkMin": 76
+  },
+  {
+   "week": "2026-08-03",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 143,
+   "downMin": 83,
+   "waitMin": {
+    "等货": 117,
+    "等前道": 131,
+    "等复核": 74,
+    "等包材": 32
+   },
+   "speedMin": 161,
+   "reworkMin": 77
+  },
+  {
+   "week": "2026-08-10",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 148,
+   "downMin": 69,
+   "waitMin": {
+    "等货": 146,
+    "等前道": 139,
+    "等复核": 61,
+    "等包材": 38
+   },
+   "speedMin": 149,
+   "reworkMin": 83
+  },
+  {
+   "week": "2026-08-17",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 141,
+   "downMin": 67,
+   "waitMin": {
+    "等货": 140,
+    "等前道": 135,
+    "等复核": 79,
+    "等包材": 29
+   },
+   "speedMin": 135,
+   "reworkMin": 84
+  },
+  {
+   "week": "2026-08-24",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 145,
+   "downMin": 76,
+   "waitMin": {
+    "等货": 163,
+    "等前道": 155,
+    "等复核": 86,
+    "等包材": 32
+   },
+   "speedMin": 133,
+   "reworkMin": 74
+  },
+  {
+   "week": "2026-08-31",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 140,
+   "downMin": 73,
+   "waitMin": {
+    "等货": 170,
+    "等前道": 159,
+    "等复核": 69,
+    "等包材": 42
+   },
+   "speedMin": 143,
+   "reworkMin": 81
+  },
+  {
+   "week": "2026-09-07",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 146,
+   "downMin": 74,
+   "waitMin": {
+    "等货": 118,
+    "等前道": 148,
+    "等复核": 84,
+    "等包材": 40
+   },
+   "speedMin": 140,
+   "reworkMin": 58
+  },
+  {
+   "week": "2026-09-14",
+   "line": "A1",
+   "plannedMin": 5760,
+   "setupMin": 139,
+   "downMin": 66,
+   "waitMin": {
+    "等货": 161,
+    "等前道": 163,
+    "等复核": 59,
+    "等包材": 42
+   },
+   "speedMin": 141,
+   "reworkMin": 74
+  },
+  {
+   "week": "2026-06-29",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 74,
+   "downMin": 41,
+   "waitMin": {
+    "等货": 61,
+    "等前道": 58,
+    "等复核": 29,
+    "等包材": 17
+   },
+   "speedMin": 72,
+   "reworkMin": 34
+  },
+  {
+   "week": "2026-07-06",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 75,
+   "downMin": 29,
+   "waitMin": {
+    "等货": 66,
+    "等前道": 64,
+    "等复核": 42,
+    "等包材": 19
+   },
+   "speedMin": 68,
+   "reworkMin": 32
+  },
+  {
+   "week": "2026-07-13",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 74,
+   "downMin": 44,
+   "waitMin": {
+    "等货": 80,
+    "等前道": 77,
+    "等复核": 35,
+    "等包材": 14
+   },
+   "speedMin": 81,
+   "reworkMin": 30
+  },
+  {
+   "week": "2026-07-20",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 72,
+   "downMin": 40,
+   "waitMin": {
+    "等货": 68,
+    "等前道": 78,
+    "等复核": 36,
+    "等包材": 16
+   },
+   "speedMin": 76,
+   "reworkMin": 42
+  },
+  {
+   "week": "2026-07-27",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 73,
+   "downMin": 31,
+   "waitMin": {
+    "等货": 67,
+    "等前道": 71,
+    "等复核": 43,
+    "等包材": 19
+   },
+   "speedMin": 78,
+   "reworkMin": 31
+  },
+  {
+   "week": "2026-08-03",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 70,
+   "downMin": 39,
+   "waitMin": {
+    "等货": 76,
+    "等前道": 68,
+    "等复核": 32,
+    "等包材": 15
+   },
+   "speedMin": 79,
+   "reworkMin": 29
+  },
+  {
+   "week": "2026-08-10",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 73,
+   "downMin": 46,
+   "waitMin": {
+    "等货": 61,
+    "等前道": 67,
+    "等复核": 37,
+    "等包材": 15
+   },
+   "speedMin": 86,
+   "reworkMin": 40
+  },
+  {
+   "week": "2026-08-17",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 74,
+   "downMin": 42,
+   "waitMin": {
+    "等货": 86,
+    "等前道": 65,
+    "等复核": 36,
+    "等包材": 19
+   },
+   "speedMin": 59,
+   "reworkMin": 40
+  },
+  {
+   "week": "2026-08-24",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 72,
+   "downMin": 44,
+   "waitMin": {
+    "等货": 59,
+    "等前道": 67,
+    "等复核": 30,
+    "等包材": 16
+   },
+   "speedMin": 77,
+   "reworkMin": 31
+  },
+  {
+   "week": "2026-08-31",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 71,
+   "downMin": 40,
+   "waitMin": {
+    "等货": 86,
+    "等前道": 58,
+    "等复核": 39,
+    "等包材": 17
+   },
+   "speedMin": 66,
+   "reworkMin": 37
+  },
+  {
+   "week": "2026-09-07",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 74,
+   "downMin": 46,
+   "waitMin": {
+    "等货": 74,
+    "等前道": 76,
+    "等复核": 41,
+    "等包材": 21
+   },
+   "speedMin": 78,
+   "reworkMin": 33
+  },
+  {
+   "week": "2026-09-14",
+   "line": "A2",
+   "plannedMin": 2880,
+   "setupMin": 75,
+   "downMin": 40,
+   "waitMin": {
+    "等货": 66,
+    "等前道": 79,
+    "等复核": 38,
+    "等包材": 17
+   },
+   "speedMin": 61,
+   "reworkMin": 31
+  },
+  {
+   "week": "2026-06-29",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 141,
+   "downMin": 93,
+   "waitMin": {
+    "等货": 126,
+    "等前道": 167,
+    "等复核": 64,
+    "等包材": 41
+   },
+   "speedMin": 146,
+   "reworkMin": 61
+  },
+  {
+   "week": "2026-07-06",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 144,
+   "downMin": 82,
+   "waitMin": {
+    "等货": 145,
+    "等前道": 116,
+    "等复核": 70,
+    "等包材": 29
+   },
+   "speedMin": 143,
+   "reworkMin": 81
+  },
+  {
+   "week": "2026-07-13",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 151,
+   "downMin": 91,
+   "waitMin": {
+    "等货": 116,
+    "等前道": 171,
+    "等复核": 59,
+    "等包材": 42
+   },
+   "speedMin": 117,
+   "reworkMin": 82
+  },
+  {
+   "week": "2026-07-20",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 151,
+   "downMin": 51,
+   "waitMin": {
+    "等货": 119,
+    "等前道": 164,
+    "等复核": 76,
+    "等包材": 35
+   },
+   "speedMin": 134,
+   "reworkMin": 86
+  },
+  {
+   "week": "2026-07-27",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 144,
+   "downMin": 60,
+   "waitMin": {
+    "等货": 134,
+    "等前道": 160,
+    "等复核": 64,
+    "等包材": 35
+   },
+   "speedMin": 143,
+   "reworkMin": 81
+  },
+  {
+   "week": "2026-08-03",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 143,
+   "downMin": 85,
+   "waitMin": {
+    "等货": 145,
+    "等前道": 161,
+    "等复核": 86,
+    "等包材": 37
+   },
+   "speedMin": 170,
+   "reworkMin": 77
+  },
+  {
+   "week": "2026-08-10",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 137,
+   "downMin": 52,
+   "waitMin": {
+    "等货": 145,
+    "等前道": 164,
+    "等复核": 74,
+    "等包材": 40
+   },
+   "speedMin": 125,
+   "reworkMin": 64
+  },
+  {
+   "week": "2026-08-17",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 145,
+   "downMin": 56,
+   "waitMin": {
+    "等货": 121,
+    "等前道": 172,
+    "等复核": 75,
+    "等包材": 40
+   },
+   "speedMin": 171,
+   "reworkMin": 84
+  },
+  {
+   "week": "2026-08-24",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 138,
+   "downMin": 65,
+   "waitMin": {
+    "等货": 116,
+    "等前道": 165,
+    "等复核": 61,
+    "等包材": 40
+   },
+   "speedMin": 128,
+   "reworkMin": 81
+  },
+  {
+   "week": "2026-08-31",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 141,
+   "downMin": 69,
+   "waitMin": {
+    "等货": 157,
+    "等前道": 153,
+    "等复核": 63,
+    "等包材": 39
+   },
+   "speedMin": 169,
+   "reworkMin": 62
+  },
+  {
+   "week": "2026-09-07",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 141,
+   "downMin": 51,
+   "waitMin": {
+    "等货": 144,
+    "等前道": 162,
+    "等复核": 84,
+    "等包材": 34
+   },
+   "speedMin": 151,
+   "reworkMin": 79
+  },
+  {
+   "week": "2026-09-14",
+   "line": "C1",
+   "plannedMin": 5760,
+   "setupMin": 150,
+   "downMin": 77,
+   "waitMin": {
+    "等货": 144,
+    "等前道": 156,
+    "等复核": 59,
+    "等包材": 29
+   },
+   "speedMin": 172,
+   "reworkMin": 85
+  },
+  {
+   "week": "2026-06-29",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 677,
+   "downMin": 257,
+   "waitMin": {
+    "等货": 202,
+    "等前道": 271,
+    "等复核": 146,
+    "等包材": 172
+   },
+   "speedMin": 126,
+   "reworkMin": 90
+  },
+  {
+   "week": "2026-07-06",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 628,
+   "downMin": 192,
+   "waitMin": {
+    "等货": 240,
+    "等前道": 345,
+    "等复核": 202,
+    "等包材": 153
+   },
+   "speedMin": 147,
+   "reworkMin": 122
+  },
+  {
+   "week": "2026-07-13",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 615,
+   "downMin": 186,
+   "waitMin": {
+    "等货": 245,
+    "等前道": 258,
+    "等复核": 185,
+    "等包材": 149
+   },
+   "speedMin": 147,
+   "reworkMin": 103
+  },
+  {
+   "week": "2026-07-20",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 635,
+   "downMin": 206,
+   "waitMin": {
+    "等货": 196,
+    "等前道": 296,
+    "等复核": 180,
+    "等包材": 144
+   },
+   "speedMin": 121,
+   "reworkMin": 90
+  },
+  {
+   "week": "2026-07-27",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 634,
+   "downMin": 196,
+   "waitMin": {
+    "等货": 215,
+    "等前道": 233,
+    "等复核": 215,
+    "等包材": 127
+   },
+   "speedMin": 166,
+   "reworkMin": 97
+  },
+  {
+   "week": "2026-08-03",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 641,
+   "downMin": 175,
+   "waitMin": {
+    "等货": 203,
+    "等前道": 343,
+    "等复核": 195,
+    "等包材": 151
+   },
+   "speedMin": 165,
+   "reworkMin": 124
+  },
+  {
+   "week": "2026-08-10",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 622,
+   "downMin": 230,
+   "waitMin": {
+    "等货": 247,
+    "等前道": 344,
+    "等复核": 202,
+    "等包材": 124
+   },
+   "speedMin": 120,
+   "reworkMin": 97
+  },
+  {
+   "week": "2026-08-17",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 573,
+   "downMin": 248,
+   "waitMin": {
+    "等货": 186,
+    "等前道": 317,
+    "等复核": 155,
+    "等包材": 146
+   },
+   "speedMin": 147,
+   "reworkMin": 87
+  },
+  {
+   "week": "2026-08-24",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 608,
+   "downMin": 228,
+   "waitMin": {
+    "等货": 201,
+    "等前道": 298,
+    "等复核": 183,
+    "等包材": 127
+   },
+   "speedMin": 129,
+   "reworkMin": 97
+  },
+  {
+   "week": "2026-08-31",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 592,
+   "downMin": 275,
+   "waitMin": {
+    "等货": 215,
+    "等前道": 313,
+    "等复核": 186,
+    "等包材": 117
+   },
+   "speedMin": 128,
+   "reworkMin": 95
+  },
+  {
+   "week": "2026-09-07",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 548,
+   "downMin": 161,
+   "waitMin": {
+    "等货": 183,
+    "等前道": 276,
+    "等复核": 169,
+    "等包材": 122
+   },
+   "speedMin": 154,
+   "reworkMin": 94
+  },
+  {
+   "week": "2026-09-14",
+   "line": "P1",
+   "plannedMin": 5760,
+   "setupMin": 561,
+   "downMin": 242,
+   "waitMin": {
+    "等货": 238,
+    "等前道": 254,
+    "等复核": 188,
+    "等包材": 172
+   },
+   "speedMin": 122,
+   "reworkMin": 126
+  },
+  {
+   "week": "2026-06-29",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 88,
+   "downMin": 40,
+   "waitMin": {
+    "等货": 108,
+    "等前道": 102,
+    "等复核": 51,
+    "等包材": 19
+   },
+   "speedMin": 101,
+   "reworkMin": 44
+  },
+  {
+   "week": "2026-07-06",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 89,
+   "downMin": 32,
+   "waitMin": {
+    "等货": 93,
+    "等前道": 103,
+    "等复核": 37,
+    "等包材": 22
+   },
+   "speedMin": 88,
+   "reworkMin": 52
+  },
+  {
+   "week": "2026-07-13",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 89,
+   "downMin": 36,
+   "waitMin": {
+    "等货": 84,
+    "等前道": 83,
+    "等复核": 49,
+    "等包材": 27
+   },
+   "speedMin": 78,
+   "reworkMin": 38
+  },
+  {
+   "week": "2026-07-20",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 89,
+   "downMin": 50,
+   "waitMin": {
+    "等货": 105,
+    "等前道": 107,
+    "等复核": 47,
+    "等包材": 19
+   },
+   "speedMin": 95,
+   "reworkMin": 41
+  },
+  {
+   "week": "2026-07-27",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 89,
+   "downMin": 41,
+   "waitMin": {
+    "等货": 76,
+    "等前道": 93,
+    "等复核": 44,
+    "等包材": 27
+   },
+   "speedMin": 104,
+   "reworkMin": 51
+  },
+  {
+   "week": "2026-08-03",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 87,
+   "downMin": 51,
+   "waitMin": {
+    "等货": 97,
+    "等前道": 84,
+    "等复核": 48,
+    "等包材": 26
+   },
+   "speedMin": 98,
+   "reworkMin": 53
+  },
+  {
+   "week": "2026-08-10",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 88,
+   "downMin": 48,
+   "waitMin": {
+    "等货": 97,
+    "等前道": 80,
+    "等复核": 40,
+    "等包材": 20
+   },
+   "speedMin": 94,
+   "reworkMin": 51
+  },
+  {
+   "week": "2026-08-17",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 94,
+   "downMin": 53,
+   "waitMin": {
+    "等货": 85,
+    "等前道": 78,
+    "等复核": 51,
+    "等包材": 26
+   },
+   "speedMin": 93,
+   "reworkMin": 47
+  },
+  {
+   "week": "2026-08-24",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 93,
+   "downMin": 52,
+   "waitMin": {
+    "等货": 76,
+    "等前道": 77,
+    "等复核": 41,
+    "等包材": 27
+   },
+   "speedMin": 103,
+   "reworkMin": 40
+  },
+  {
+   "week": "2026-08-31",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 86,
+   "downMin": 33,
+   "waitMin": {
+    "等货": 84,
+    "等前道": 87,
+    "等复核": 43,
+    "等包材": 20
+   },
+   "speedMin": 96,
+   "reworkMin": 48
+  },
+  {
+   "week": "2026-09-07",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 92,
+   "downMin": 46,
+   "waitMin": {
+    "等货": 105,
+    "等前道": 103,
+    "等复核": 53,
+    "等包材": 18
+   },
+   "speedMin": 85,
+   "reworkMin": 48
+  },
+  {
+   "week": "2026-09-14",
+   "line": "D1",
+   "plannedMin": 3600,
+   "setupMin": 90,
+   "downMin": 45,
+   "waitMin": {
+    "等货": 105,
+    "等前道": 88,
+    "等复核": 46,
+    "等包材": 24
+   },
+   "speedMin": 99,
+   "reworkMin": 47
+  }
+ ],
+ "lossToday": [
+  {
+   "date": "2026-09-14",
+   "line": "A1",
+   "plannedMin": 960,
+   "setupMin": 26,
+   "downMin": 11,
+   "waitMin": {
+    "等货": 27,
+    "等前道": 23,
+    "等复核": 12,
+    "等包材": 5
+   },
+   "speedMin": 23,
+   "reworkMin": 14
+  },
+  {
+   "date": "2026-09-15",
+   "line": "A1",
+   "plannedMin": 960,
+   "setupMin": 23,
+   "downMin": 14,
+   "waitMin": {
+    "等货": 20,
+    "等前道": 20,
+    "等复核": 13,
+    "等包材": 6
+   },
+   "speedMin": 22,
+   "reworkMin": 13
+  },
+  {
+   "date": "2026-09-16",
+   "line": "A1",
+   "plannedMin": 960,
+   "setupMin": 26,
+   "downMin": 9,
+   "waitMin": {
+    "等货": 25,
+    "等前道": 24,
+    "等复核": 11,
+    "等包材": 5
+   },
+   "speedMin": 19,
+   "reworkMin": 12
+  },
+  {
+   "date": "2026-09-17",
+   "line": "A1",
+   "plannedMin": 480,
+   "setupMin": 11,
+   "downMin": 7,
+   "waitMin": {
+    "等货": 14,
+    "等前道": 13,
+    "等复核": 5,
+    "等包材": 3
+   },
+   "speedMin": 13,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-14",
+   "line": "A2",
+   "plannedMin": 480,
+   "setupMin": 13,
+   "downMin": 6,
+   "waitMin": {
+    "等货": 10,
+    "等前道": 10,
+    "等复核": 5,
+    "等包材": 3
+   },
+   "speedMin": 14,
+   "reworkMin": 6
+  },
+  {
+   "date": "2026-09-15",
+   "line": "A2",
+   "plannedMin": 480,
+   "setupMin": 11,
+   "downMin": 6,
+   "waitMin": {
+    "等货": 12,
+    "等前道": 13,
+    "等复核": 6,
+    "等包材": 3
+   },
+   "speedMin": 14,
+   "reworkMin": 5
+  },
+  {
+   "date": "2026-09-16",
+   "line": "A2",
+   "plannedMin": 480,
+   "setupMin": 13,
+   "downMin": 4,
+   "waitMin": {
+    "等货": 12,
+    "等前道": 13,
+    "等复核": 7,
+    "等包材": 3
+   },
+   "speedMin": 14,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-17",
+   "line": "A2",
+   "plannedMin": 240,
+   "setupMin": 6,
+   "downMin": 3,
+   "waitMin": {
+    "等货": 6,
+    "等前道": 5,
+    "等复核": 3,
+    "等包材": 1
+   },
+   "speedMin": 6,
+   "reworkMin": 4
+  },
+  {
+   "date": "2026-09-14",
+   "line": "C1",
+   "plannedMin": 960,
+   "setupMin": 22,
+   "downMin": 17,
+   "waitMin": {
+    "等货": 19,
+    "等前道": 26,
+    "等复核": 10,
+    "等包材": 6
+   },
+   "speedMin": 23,
+   "reworkMin": 14
+  },
+  {
+   "date": "2026-09-15",
+   "line": "C1",
+   "plannedMin": 960,
+   "setupMin": 23,
+   "downMin": 9,
+   "waitMin": {
+    "等货": 26,
+    "等前道": 19,
+    "等复核": 11,
+    "等包材": 5
+   },
+   "speedMin": 23,
+   "reworkMin": 12
+  },
+  {
+   "date": "2026-09-16",
+   "line": "C1",
+   "plannedMin": 960,
+   "setupMin": 25,
+   "downMin": 12,
+   "waitMin": {
+    "等货": 27,
+    "等前道": 27,
+    "等复核": 12,
+    "等包材": 7
+   },
+   "speedMin": 26,
+   "reworkMin": 14
+  },
+  {
+   "date": "2026-09-17",
+   "line": "C1",
+   "plannedMin": 480,
+   "setupMin": 13,
+   "downMin": 7,
+   "waitMin": {
+    "等货": 14,
+    "等前道": 14,
+    "等复核": 5,
+    "等包材": 3
+   },
+   "speedMin": 10,
+   "reworkMin": 5
+  },
+  {
+   "date": "2026-09-14",
+   "line": "P1",
+   "plannedMin": 960,
+   "setupMin": 100,
+   "downMin": 30,
+   "waitMin": {
+    "等货": 43,
+    "等前道": 39,
+    "等复核": 31,
+    "等包材": 23
+   },
+   "speedMin": 26,
+   "reworkMin": 18
+  },
+  {
+   "date": "2026-09-15",
+   "line": "P1",
+   "plannedMin": 960,
+   "setupMin": 88,
+   "downMin": 43,
+   "waitMin": {
+    "等货": 39,
+    "等前道": 49,
+    "等复核": 34,
+    "等包材": 28
+   },
+   "speedMin": 23,
+   "reworkMin": 20
+  },
+  {
+   "date": "2026-09-16",
+   "line": "P1",
+   "plannedMin": 960,
+   "setupMin": 103,
+   "downMin": 35,
+   "waitMin": {
+    "等货": 37,
+    "等前道": 47,
+    "等复核": 26,
+    "等包材": 27
+   },
+   "speedMin": 22,
+   "reworkMin": 21
+  },
+  {
+   "date": "2026-09-17",
+   "line": "P1",
+   "plannedMin": 480,
+   "setupMin": 48,
+   "downMin": 14,
+   "waitMin": {
+    "等货": 17,
+    "等前道": 24,
+    "等复核": 13,
+    "等包材": 12
+   },
+   "speedMin": 11,
+   "reworkMin": 10
+  },
+  {
+   "date": "2026-09-14",
+   "line": "D1",
+   "plannedMin": 600,
+   "setupMin": 14,
+   "downMin": 8,
+   "waitMin": {
+    "等货": 18,
+    "等前道": 15,
+    "等复核": 7,
+    "等包材": 4
+   },
+   "speedMin": 15,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-15",
+   "line": "D1",
+   "plannedMin": 600,
+   "setupMin": 16,
+   "downMin": 7,
+   "waitMin": {
+    "等货": 12,
+    "等前道": 15,
+    "等复核": 9,
+    "等包材": 3
+   },
+   "speedMin": 12,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-16",
+   "line": "D1",
+   "plannedMin": 600,
+   "setupMin": 16,
+   "downMin": 10,
+   "waitMin": {
+    "等货": 18,
+    "等前道": 14,
+    "等复核": 7,
+    "等包材": 4
+   },
+   "speedMin": 14,
+   "reworkMin": 7
+  },
+  {
+   "date": "2026-09-17",
+   "line": "D1",
+   "plannedMin": 300,
+   "setupMin": 7,
+   "downMin": 5,
+   "waitMin": {
+    "等货": 8,
+    "等前道": 6,
+    "等复核": 3,
+    "等包材": 2
+   },
+   "speedMin": 7,
+   "reworkMin": 4
+  }
+ ],
+ "machines": [
+  {
+   "id": "CV-01",
+   "line": "A1",
+   "cumRunH": 323,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [],
+   "stops12w": [
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    1,
+    1
+   ]
+  },
+  {
+   "id": "CV-02",
+   "line": "A2",
+   "cumRunH": 177,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-14",
+     "fromMin": 780,
+     "toMin": 815,
+     "reason": "扫描枪"
+    }
+   ],
+   "stops12w": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1
+   ]
+  },
+  {
+   "id": "SC-01",
+   "line": "C1",
+   "cumRunH": 236,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [],
+   "stops12w": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "PK-01",
+   "line": "P1",
+   "cumRunH": 486,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [
+    {
+     "date": "2026-09-16",
+     "fromMin": 580,
+     "toMin": 625,
+     "reason": "打包机"
+    },
+    {
+     "date": "2026-09-17",
+     "fromMin": 495,
+     "toMin": 527,
+     "reason": "打包机"
+    },
+    {
+     "date": "2026-09-17",
+     "fromMin": 650,
+     "toMin": 690,
+     "reason": "打包机"
+    }
+   ],
+   "stops12w": [
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "PK-02",
+   "line": "P1",
+   "cumRunH": 355,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [],
+   "stops12w": [
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "id": "DK-01",
+   "line": "D1",
+   "cumRunH": 352,
+   "pmIntervalH": 500,
+   "pmMinutes": 120,
+   "tooling": null,
+   "downEvents": [],
+   "stops12w": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0
+   ]
+  }
+ ],
+ "planHit": [
+  {
+   "line": "A1",
+   "shift": "A",
+   "plan": 1297,
+   "hours": [
+    143,
+    312,
+    474,
+    617
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "A2",
+   "shift": "A",
+   "plan": 360,
+   "hours": [
+    44,
+    87,
+    136,
+    182
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "C1",
+   "shift": "A",
+   "plan": 1300,
+   "hours": [
+    178,
+    356,
+    517,
+    673
+   ],
+   "elapsedH": 4
+  },
+  {
+   "line": "P1",
+   "shift": "A",
+   "plan": 351,
+   "hours": [
+    20,
+    44,
+    82,
+    123
+   ],
+   "elapsedH": 4
+  }
+ ],
+ "jobsToday": [
+  {
+   "id": "B-0917-01",
+   "order": "SO-2609-0871",
+   "product": "G01",
+   "op": "打包",
+   "qty": 346,
+   "dueDay": 2,
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  },
+  {
+   "id": "B-0917-02",
+   "order": "SO-2609-0886",
+   "product": "G03",
+   "op": "打包",
+   "qty": 76,
+   "dueDay": 1,
+   "fixture": "冷链线路",
+   "program": "保温箱"
+  },
+  {
+   "id": "B-0917-03",
+   "order": "SO-2609-0875",
+   "product": "G02",
+   "op": "打包",
+   "qty": 441,
+   "dueDay": 5,
+   "fixture": "常温线路",
+   "program": "纸箱 B"
+  },
+  {
+   "id": "B-0917-04",
+   "order": "SO-2609-0885",
+   "product": "G01",
+   "op": "打包",
+   "qty": 436,
+   "dueDay": 12,
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  },
+  {
+   "id": "B-0917-05",
+   "order": "SO-2609-0878",
+   "product": "G04",
+   "op": "打包",
+   "qty": 236,
+   "dueDay": 7,
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  },
+  {
+   "id": "B-0917-06",
+   "order": "SO-2609-0880",
+   "product": "G03",
+   "op": "打包",
+   "qty": 116,
+   "dueDay": 6,
+   "fixture": "冷链线路",
+   "program": "保温箱"
+  },
+  {
+   "id": "B-0917-07",
+   "order": "SO-2609-0875",
+   "product": "G02",
+   "op": "打包",
+   "qty": 306,
+   "dueDay": 5,
+   "fixture": "常温线路",
+   "program": "纸箱 B"
+  },
+  {
+   "id": "B-0917-08",
+   "order": "SO-2609-0885",
+   "product": "G01",
+   "op": "打包",
+   "qty": 332,
+   "dueDay": 12,
+   "fixture": "常温线路",
+   "program": "纸箱 A"
+  }
+ ],
+ "weekly": [
+  {
+   "week": "2026-06-29",
+   "flowDays": 3.6,
+   "balanceRate": 56,
+   "effUtil": 65.8,
+   "wipDays": 1.5,
+   "fpy": 97.3,
+   "otHours": 28,
+   "setupH": 18.7,
+   "waitH": 34.1,
+   "downH": 8.1,
+   "output": 5906,
+   "planHit": 86
+  },
+  {
+   "week": "2026-07-06",
+   "flowDays": 3.6,
+   "balanceRate": 57,
+   "effUtil": 66.7,
+   "wipDays": 1.6,
+   "fpy": 97.2,
+   "otHours": 33,
+   "setupH": 18,
+   "waitH": 35.3,
+   "downH": 7,
+   "output": 6018,
+   "planHit": 83
+  },
+  {
+   "week": "2026-07-13",
+   "flowDays": 3.5,
+   "balanceRate": 56,
+   "effUtil": 66.3,
+   "wipDays": 1.6,
+   "fpy": 97.3,
+   "otHours": 30,
+   "setupH": 18,
+   "waitH": 34.3,
+   "downH": 7.1,
+   "output": 5991,
+   "planHit": 86
+  },
+  {
+   "week": "2026-07-20",
+   "flowDays": 3.4,
+   "balanceRate": 56,
+   "effUtil": 66.9,
+   "wipDays": 1.5,
+   "fpy": 97.2,
+   "otHours": 37,
+   "setupH": 18.3,
+   "waitH": 34.9,
+   "downH": 7.1,
+   "output": 6020,
+   "planHit": 85
+  },
+  {
+   "week": "2026-07-27",
+   "flowDays": 3.3,
+   "balanceRate": 56,
+   "effUtil": 68.1,
+   "wipDays": 1.5,
+   "fpy": 97.1,
+   "otHours": 32,
+   "setupH": 18,
+   "waitH": 34,
+   "downH": 6.7,
+   "output": 6122,
+   "planHit": 87
+  },
+  {
+   "week": "2026-08-03",
+   "flowDays": 3.4,
+   "balanceRate": 57,
+   "effUtil": 68.9,
+   "wipDays": 1.4,
+   "fpy": 97,
+   "otHours": 38,
+   "setupH": 18.1,
+   "waitH": 35.4,
+   "downH": 7.2,
+   "output": 6206,
+   "planHit": 85
+  },
+  {
+   "week": "2026-08-10",
+   "flowDays": 3.4,
+   "balanceRate": 60,
+   "effUtil": 69.3,
+   "wipDays": 1.4,
+   "fpy": 97,
+   "otHours": 34,
+   "setupH": 17.8,
+   "waitH": 35.7,
+   "downH": 7.4,
+   "output": 6343,
+   "planHit": 87
+  },
+  {
+   "week": "2026-08-17",
+   "flowDays": 3.2,
+   "balanceRate": 59,
+   "effUtil": 69.7,
+   "wipDays": 1.3,
+   "fpy": 97.1,
+   "otHours": 42,
+   "setupH": 17.1,
+   "waitH": 34,
+   "downH": 7.8,
+   "output": 6372,
+   "planHit": 88
+  },
+  {
+   "week": "2026-08-24",
+   "flowDays": 3.4,
+   "balanceRate": 58,
+   "effUtil": 69.1,
+   "wipDays": 1.4,
+   "fpy": 96.8,
+   "otHours": 44,
+   "setupH": 17.6,
+   "waitH": 33.7,
+   "downH": 7.8,
+   "output": 6470,
+   "planHit": 89
+  },
+  {
+   "week": "2026-08-31",
+   "flowDays": 3.2,
+   "balanceRate": 60,
+   "effUtil": 69.7,
+   "wipDays": 1.5,
+   "fpy": 96.8,
+   "otHours": 38,
+   "setupH": 17.2,
+   "waitH": 35.3,
+   "downH": 8.2,
+   "output": 6586,
+   "planHit": 89
+  },
+  {
+   "week": "2026-09-07",
+   "flowDays": 3.3,
+   "balanceRate": 60,
+   "effUtil": 70.8,
+   "wipDays": 1.4,
+   "fpy": 97,
+   "otHours": 45,
+   "setupH": 16.7,
+   "waitH": 34.3,
+   "downH": 6.3,
+   "output": 6424,
+   "planHit": 91
+  },
+  {
+   "week": "2026-09-14",
+   "flowDays": 3.1,
+   "balanceRate": 64,
+   "effUtil": 71.1,
+   "wipDays": 1.2,
+   "fpy": 96.9,
+   "otHours": 41,
+   "setupH": 16.9,
+   "waitH": 35.5,
+   "downH": 7.8,
+   "output": 6502,
+   "planHit": 87
+  }
+ ],
+ "wipHistory": [
+  {
+   "week": "2026-06-29",
+   "units": 1016
+  },
+  {
+   "week": "2026-07-06",
+   "units": 974
+  },
+  {
+   "week": "2026-07-13",
+   "units": 957
+  },
+  {
+   "week": "2026-07-20",
+   "units": 936
+  },
+  {
+   "week": "2026-07-27",
+   "units": 918
+  },
+  {
+   "week": "2026-08-03",
+   "units": 859
+  },
+  {
+   "week": "2026-08-10",
+   "units": 915
+  },
+  {
+   "week": "2026-08-17",
+   "units": 907
+  },
+  {
+   "week": "2026-08-24",
+   "units": 831
+  },
+  {
+   "week": "2026-08-31",
+   "units": 787
+  },
+  {
+   "week": "2026-09-07",
+   "units": 822
+  },
+  {
+   "week": "2026-09-14",
+   "units": 816
+  }
+ ],
+ "facts": {
+  "bottleneck": "分拣打包",
+  "overtimeOver": 6
+ },
+ "focus": null,
+ "focusLoss": null,
+ "verified": {},
+ "adopted": {},
+ "releasePlan": null,
+ "jobSeq": null,
+ "projects": [],
+ "ledger": [],
+ "exceptions": {},
+ "dispatch": null,
+ "maintenance": [],
+ "training": [],
+ "log": []
+}

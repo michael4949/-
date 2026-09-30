@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI决策 · 经营决策数据包",
+  "description": "一家企业 12 个月的经营指标序列（从 AI CFO / AI ERP / AI获客 / AI人力官 / AI法务 取数）、预算、归因证据事实与决议台账。审批单 A-年月-流水，决议 D-年月-流水。",
+  "type": "object",
+  "required": ["archetype", "sector", "company", "today", "period", "months", "profile", "series", "budget", "facts", "decisions"],
+  "properties": {
+    "archetype": { "enum": ["make", "flow", "project", "service"] }, "sector": { "type": "string" }, "company": { "type": "string" }, "co": { "type": "string" },
+    "today": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }, "period": { "type": "string", "pattern": "^\\d{4}-\\d{2}$", "description": "本期账期月" },
+    "months": { "type": "array", "minItems": 4, "items": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" } }, "budgetYear": { "type": "integer" },
+    "profile": { "type": "object", "required": ["industry", "province", "city", "product"] },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["id", "name", "mode"], "properties": { "id": { "enum": ["m4", "m5", "m6", "m7", "m10"] }, "mode": { "enum": ["direct", "import"] } } } },
+    "series": { "type": "object", "description": "每个键为与 months 等长的数组；叶子指标按 metric-tree.json 的 calc 取用", "required": ["rev", "cogs", "material", "labor", "sellExp", "adminExp", "rdExp", "finExp", "orders", "ar", "inventory", "ap", "purchases", "arOverdue", "onTimeRate", "lateOrders", "load", "leads", "deals", "winRate", "headcount", "turnover", "overtimeOver", "complianceExposure", "highRiskContracts"], "additionalProperties": { "type": "array", "items": { "type": "number" } } },
+    "budget": { "type": "object", "properties": { "rev": { "type": "array", "items": { "type": "number" } }, "gm": { "type": "number" }, "opex": { "type": "number" }, "onTimeRate": { "type": "number" }, "ccc": { "type": "number" }, "deals": { "type": "number" }, "turnover": { "type": "number" } } },
+    "facts": { "type": "object", "description": "证据卡与方案文案的占位符取值，以及预演用的数值事实（revMonth、cogsMonth、cash、loanBalance、socialDeltaMonth、socialExposure、contractExposure）；oneOff 为本期含一次性金额的叶子（如 adminExp）", "required": ["revMonth", "cogsMonth", "cash", "bottleneck", "needJob"], "properties": { "oneOff": { "type": "object", "additionalProperties": { "type": "number" } } } },
+    "decisions": { "type": "array", "items": { "type": "object", "required": ["id", "title", "cause", "owner", "approvedAt", "status", "milestones"], "properties": {
+      "id": { "type": "string", "pattern": "^D-\\d{4}-\\d{2}$" }, "status": { "enum": ["executing", "done", "paused"] },
+      "milestones": { "type": "array", "items": { "type": "object", "required": ["title", "due", "status"], "properties": { "status": { "enum": ["todo", "doing", "done"] } } } },
+      "tracking": { "type": ["object", "null"], "properties": { "metric": { "type": "string" }, "months": { "type": "array" }, "target": { "type": "array" }, "actual": { "type": "array" } } },
+      "review": { "type": ["object", "null"], "properties": { "result": { "enum": ["hit", "miss"] }, "text": { "type": "string" }, "reviewedAt": { "type": "string" } } }
+    } } },
+    "approvals": { "type": "array", "items": { "type": "object", "required": ["id", "causeId", "option", "params", "opinions", "status"], "properties": { "id": { "type": "string", "pattern": "^A-\\d{4}-\\d{2}$" }, "status": { "enum": ["pending", "approved", "rejected"] } } } },
+    "log": { "type": "array", "items": { "type": "object", "required": ["seq", "kind", "label"] } }
+  }
+}
