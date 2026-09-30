@@ -1,8 +1,9 @@
-/* AI决策 · 指标 归因 方案 审批（六屏）
+/* AI经营指标分析 · 指标 归因 方案 审批（六屏）
  * 接入 → 决策驾驶舱 → 指标归因 → 方案预演 → 审批 → 执行与复盘
  * 每屏三拍：接入（来源亮起、数据包飞向指标树）→ 展开（数字滚、瀑布画、条形长、行流入）→ 结论（一句话横幅 + 聚焦）
  * 计算全部走 DGG.coreM9（与 skill 同一份内核）；对话大脑登记在 DGG.chatBrain('m9')
- * 指标从 AI CFO / AI ERP / AI获客 / AI人力官 / AI法务 取数；纯预制、断网可用；不用任何存储 API
+ * 指标从 AI现金流与经营预警 / AI工序级排程 / AI获客 / AI人岗匹配与用工合规 / 合同风险审查 取数；纯预制、断网可用；不用任何存储 API
+ * 样本与库里的模块旧叫法只在本文件的展示层按 NAME_MAP 换成海报新名，skills 数据不动
  */
 (function () {
   'use strict';
@@ -21,7 +22,7 @@
   function archeOf(slug) { var sec = sectorOf(slug); var a = (sec && DATA.m10.archetypes.map[sec]) || 'make'; if (a === 'project') a = 'service'; return DATA.m9.samples[a] ? a : 'make'; }
   function loadArche(a) {
     M.arche = a;
-    var sample = DATA.m9.samples[a], base = K.ensure(sample);
+    var sample = localLib('sample.' + a, DATA.m9.samples[a]), base = K.ensure(sample);
     if (M.name && M.name !== sample.company) base.company = M.name;
     M.data = base; M.metric = 'profit'; M.basis = 'prev'; M.factor = null; M.cause = null; M.params = {}; M.option = null; M.approval = null; M.decision = null; M.comment = ''; M.told = null;
     recompute();
@@ -159,16 +160,20 @@
     }).map(function (id) { return N[id]; });
   }
 
+  /* 海报新名：样本 / 指标树 / 证据库 / 方案库里引用其他模块的旧叫法，展示前统一换掉（只改字串值，键与数字不动） */
+  var NAME_MAP = [['AI CFO', 'AI现金流与经营预警'], ['AI ERP', 'AI工序级排程'], ['AI人力官', 'AI人岗匹配与用工合规'], ['AI法务', '合同风险审查'], ['AI流程提效', 'AI报工核验'], ['AI决策', 'AI经营指标分析']];
   /* 方案库里两条旧文案的叫法与排程口径对不上，取一份副本按现叫法改过来；参数键、金额、见效月份都不动 */
   var PB_RENAME = [['设最低起订量', '设起订量'], ['承诺交期', '排程交期'], ['按排程承诺', '按排程下发']];
-  var PB_LIB = null;
-  function playbookLib(pb) {
-    if (PB_LIB) return PB_LIB;
-    var s = JSON.stringify(pb);
-    PB_RENAME.forEach(function (w) { s = s.split(w[0]).join(w[1]); });
-    PB_LIB = JSON.parse(s);
-    return PB_LIB;
+  function localize(obj, extra) {
+    if (obj == null) return obj;
+    var s = JSON.stringify(obj);
+    NAME_MAP.concat(extra || []).forEach(function (w) { s = s.split(w[0]).join(w[1]); });
+    return JSON.parse(s);
   }
+  var PB_LIB = null;
+  function playbookLib(pb) { if (!PB_LIB) PB_LIB = localize(pb, PB_RENAME); return PB_LIB; }
+  var LOC_LIB = {};
+  function localLib(key, obj) { if (!LOC_LIB[key]) LOC_LIB[key] = localize(obj); return LOC_LIB[key]; }
 
   /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
      不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
@@ -176,7 +181,7 @@
 
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM9;
-    LIB = { metricTree: DATA.m9.metricTree, evidence: DATA.m9.evidence, playbooks: playbookLib(DATA.m9.playbooks), approvalRules: DATA.m9.approvalRules };
+    LIB = { metricTree: localLib('metricTree', DATA.m9.metricTree), evidence: localLib('evidence', DATA.m9.evidence), playbooks: playbookLib(DATA.m9.playbooks), approvalRules: localLib('approvalRules', DATA.m9.approvalRules) };
     P.init(sh);
     var c = sh.getCompany();
     if (!M.data) { M.company = c; M.name = c ? c.name : null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); }
@@ -197,8 +202,8 @@
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '决策驾驶舱', badge: k.risk || 0 }, { key: 'attr', label: '指标归因' }, { key: 'options', label: '方案预演' }, { key: 'approval', label: '审批', badge: k.pending || 0 }, { key: 'execute', label: '执行与复盘', badge: k.overdueMilestones || 0 }];
-    var F = P.frame({ mark: '决策', accent: ACCENT, modules: P.navModules('m9'), crumbs: ['AI决策', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + M.data.period.replace('-', ' 年 ') + ' 月账期' }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm9', name: 'AI决策', step: M.step, onGo: setStep },
+    var F = P.frame({ mark: '指标', accent: ACCENT, modules: P.navModules('m9'), crumbs: [sh.moduleName('m9'), tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + M.data.period.replace('-', ' 年 ') + ' 月账期' }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm9', name: sh.moduleName('m9'), step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
@@ -242,7 +247,7 @@
     g.appendChild(ccard);
     var go = h('div', { class: 'c12 go' }, [
       h('div', {}, [h('div', { class: 't' }, ['决策驾驶舱']), h('div', { class: 's' }, ['经营利润 ' + W(k.profit) + ' · 较上期 ' + K.fmtSigned(k.profitDelta, W) + ' · 风险 ' + T.counts.risk + ' · 执行中 ' + k.executing])]),
-      h('div', { class: 'sp' }), h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']),
+      h('div', { class: 'sp' }),
       P.btn('进入决策驾驶舱', { cls: 'primary big', onClick: enterBoard })]);
     g.appendChild(go);
     work.appendChild(g);
@@ -271,6 +276,8 @@
     var fb = flowBar({ src: d.sources.map(function (s) { return [srcName(s), fmtN(s.rows) + ' 条']; }),
       hub: '指标树 ' + LIB.metricTree.nodes.length + ' 节点', out: ['风险 ' + T.counts.risk, '关注 ' + T.counts.watch], btn: '重算指标' });
     g.appendChild(fb);
+    /* 海报角标：与场景卡上的量化指标逐字一致 */
+    g.appendChild(h('div', { class: 'c12 m9-badge' }, [h('b', {}, [LIB.metricTree.nodes.length + ' 个经营指标节点']), h('i', {}), h('b', {}, ['12 个月方案推演']), h('span', {}, ['归因基期取上期或前三月均值 · 红黄绿按容差判定'])]));
     function goAttr(id) { return function () { M.metric = attrOf(id) ? id : 'profit'; M.factor = attrOf(id) ? null : id; setStep('attr'); }; }
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([
       { label: '经营利润', value: cnt(Math.round(k.profit / 1000) / 10, { dec: 1 }), unit: '万元', tone: STATUS_TONE[N.profit.status], sub: devOf(N.profit).text, onClick: goAttr('profit') },
@@ -328,7 +335,7 @@
       hub: '连环替代', out: [A.rootCause ? A.rootCause.name : '—', A.rootCause ? A.rootCause.valueText : '在容差内'], btn: '重新归因' });
     g.appendChild(fb);
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([
-      { label: A.name + ' · 本期', value: cnt(Math.round(A.to / 1000) / 10, { dec: 1 }), unit: '万元', sub: '基期 ' + A.fromText },
+      { label: A.name + ' · 本期', value: cnt(Math.round(A.to / 1000) / 10, { dec: 1 }), unit: '万元', sub: '基期（' + K.BASIS_NAME[M.basis].replace(/^较/, '') + '）' + A.fromText },
       { label: '变动', value: A.deltaText, tone: A.delta === 0 ? 'ok' : (N[A.metric].good === 'down' ? A.delta > 0 : A.delta < 0) ? 'late' : 'ok', sub: A.basisName },
       { label: '主因', value: A.rootCause ? A.rootCause.name : '—', tone: 'accent', sub: A.rootCause ? A.rootCause.factorText : '因子都在容差内' },
       { label: '主因贡献', value: A.rootCause ? A.rootCause.valueText : '—', tone: 'late', sub: A.rootCause ? '占变动 ' + Math.round(Math.abs(A.rootCause.share) * 100) + '%' : '' }
@@ -336,13 +343,13 @@
     var say = vd((F === A.rootCause ? '主因 ' : '') + F.name + ' ' + F.factorText + '，贡献 ' + F.valueText + '。');
     g.appendChild(say);
     var mchips = h('div', { class: 'chips' }, LIB.metricTree.attributable.map(function (id) { return h('button', { class: M.metric === id ? 'on' : '', onclick: function () { M.metric = id; M.factor = null; draw(); } }, [N[id].name]); }));
-    var bchips = h('div', { class: 'chips' }, ['prev', 'avg3'].map(function (b) { return h('button', { class: M.basis === b ? 'on' : '', onclick: function () { M.basis = b; draw(); } }, [K.BASIS_NAME[b]]); }));
+    var bchips = h('div', { class: 'chips' }, [h('span', { class: 'lb' }, ['归因基期'])].concat(['prev', 'avg3'].map(function (b) { return h('button', { class: M.basis === b ? 'on' : '', onclick: function () { M.basis = b; draw(); } }, [K.BASIS_NAME[b].replace(/^较/, '')]); })));
     var wfItems = A.leaves.slice(0, 7).map(function (x) { return { id: x.id, label: x.name, value: x.value }; });
     var rest = A.leaves.slice(7); if (rest.length) wfItems.push({ id: null, label: '其他', value: rest.reduce(function (t, x) { return t + x.value; }, 0) });
     var unit = N[A.metric].unit;
     var fmt = unit === '元' ? function (v) { return Math.abs(v) >= 10000 ? (Math.round(v / 1000) / 10) + ' 万' : fmtN(v); } : unit === '%' ? function (v) { return (Math.round(v * 1000) / 10) + '%'; } : unit === '天' ? function (v) { return Math.round(v * 10) / 10 + ' 天'; } : function (v) { return fmtN(v); };
     var axisFmt = unit === '元' ? function (v) { return Math.round(v / 10000) + '万'; } : unit === '%' ? function (v) { return Math.round(v * 100) + '%'; } : function (v) { return Math.round(v) + ''; };
-    var wf = P.waterfall({ start: { label: '基期', value: A.from }, end: { label: '本期', value: A.to }, items: wfItems, fmt: fmt, axisFmt: axisFmt, active: M.factor, onPick: function (id) { if (id) { M.factor = id; draw(); } }, width: 880, height: 268 });
+    var wf = P.waterfall({ start: { label: K.BASIS_NAME[M.basis].replace(/^较/, ''), value: A.from }, end: { label: '本期', value: A.to }, items: wfItems, fmt: fmt, axisFmt: axisFmt, active: M.factor, onPick: function (id) { if (id) { M.factor = id; draw(); } }, width: 880, height: 268 });
     g.appendChild(P.card({ cls: 'c7', title: '贡献瀑布', sub: A.fromText + ' → ' + A.toText, body: [h('div', { class: 'ctl', style: 'margin-bottom:10px' }, [mchips, bchips]), wf] }));
     var tbl = P.table({ compact: true, cols: [
       { key: 'name', label: '因子' },
@@ -648,6 +655,7 @@
     right.appendChild(rcard);
     g.appendChild(right);
     work.appendChild(g);
+    P.deliver(work, { items: ['归因报告', '方案对比', '经营决议'], scene: sh.moduleName('m9') });
     story({ work: work, src: fb.srcs, from: fb.srcs[0], to: fb.hub, tail: fb.out, label: dec.length + ' 项决议',
       scan: tcard, verdict: say, paths: nodeList(work, '.pd-line path'), dots: nodeList(work, '.pd-line circle'), pop: nodeList(work, '.m9-ms .m'),
       rows: trs(tbl), rise: [rcard], focus: work.querySelector('.m9-review') || rowOf(work, M.decision) });

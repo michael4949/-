@@ -1,4 +1,4 @@
-/* ===================== AI决策 · 模块专属版式（组件全部来自 product.css） ===================== */
+/* ===================== AI经营指标分析 · 模块专属版式（组件全部来自 product.css） ===================== */
 /* ---------- 叙事件：接入带 · 结论横幅 · 滚动数字 ---------- */
 .m9-flowbar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
 .m9-flowbar .src { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -11,6 +11,11 @@
 .m9-flowbar .out b { display: block; font-size: calc(13px * var(--scale)); font-weight: 700; }
 .m9-flowbar .out span { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
 .m9-flowbar .sp { flex: 1; }
+.m9-badge { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 10px; background: var(--pa-soft); border: 1px dashed var(--pa); color: var(--pa-ink); }
+.m9-badge b { font-size: calc(14px * var(--scale)); font-weight: 800; white-space: nowrap; }
+.m9-badge i { width: 1px; height: 14px; background: var(--pa); opacity: .5; }
+.m9-badge span { margin-left: auto; color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
+.m9-attr .chips .lb { align-self: center; color: var(--pd-sub); font-size: calc(12px * var(--scale)); margin-right: 2px; }
 .m9-say { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; color: #fff; background: linear-gradient(100deg, var(--hd1, var(--pa-ink)) 0%, var(--hd2, var(--pa)) 100%); }
 .m9-say.off { opacity: 0; }
 .m9-say .ic { flex: 0 0 auto; font-size: calc(11px * var(--scale)); font-weight: 800; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; background: rgba(255, 255, 255, .22); }
