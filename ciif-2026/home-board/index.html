@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>薯片AI智能体 · 工博会首页</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* 首页展板：定稿图做底，九张卡片、光带、AI 核心用 HTML/SVG 叠在图上做动效。
+     舞台固定 2000×1136（与图同尺寸），按视口等比缩放，两侧留边，绝不拉伸。 */
+  :root{
+    --ink:#2B1F55; --ink2:#5B5380;
+    --c-lead:#FF6A3D; --c-scene:#8B5CF6; --c-roi:#F2B233;
+    --c-s1:#F0508A; --c-s2:#1FB98A; --c-s3:#E5484D; --c-s4:#C247D6; --c-s5:#19B3C9; --c-s6:#8BC34A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#EDE9F7;overflow:hidden;font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink)}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #stage{position:relative;width:2000px;height:1136px;transform-origin:center center;overflow:hidden;border-radius:6px}
+  #stage>img.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  /* —— 环境光：两团缓慢漂移的柔光 + 标题扫光 —— */
+  .glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;mix-blend-mode:screen;pointer-events:none}
+  .glow.a{width:700px;height:500px;left:-120px;top:-160px;background:radial-gradient(circle,#FFD9C2,transparent 60%);animation:driftA 14s ease-in-out infinite alternate}
+  .glow.b{width:800px;height:600px;right:-200px;bottom:-240px;background:radial-gradient(circle,#D9CCFF,transparent 60%);animation:driftB 18s ease-in-out infinite alternate}
+  @keyframes driftA{to{transform:translate(120px,60px)}}
+  @keyframes driftB{to{transform:translate(-140px,-80px)}}
+  .sweep{position:absolute;left:40px;top:100px;width:1300px;height:110px;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
+  .sweep::after{content:"";position:absolute;top:-40px;bottom:-40px;left:-30%;width:26%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.75) 50%,transparent);transform:skewX(-18deg);animation:sweep 7s ease-in-out infinite}
+  @keyframes sweep{0%,55%{left:-30%}85%,100%{left:130%}}
+
+  /* —— 光带与 AI 核心 —— */
+  svg.ribbons{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .rb{fill:none;stroke-width:5;stroke-linecap:round;opacity:.9;stroke-dasharray:26 34;animation:flow 1.6s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-60}}
+  .rb.glowline{stroke-width:14;opacity:.28;filter:blur(6px);stroke-dasharray:none;animation:none}
+  .dot{filter:drop-shadow(0 0 8px currentColor)}
+  .core{position:absolute;left:740px;top:635px;width:0;height:0;pointer-events:none}
+  .core i{position:absolute;left:-70px;top:-70px;width:140px;height:140px;border-radius:50%;border:2px solid rgba(255,140,60,.9);box-shadow:0 0 30px rgba(255,140,60,.6);animation:pulse 2.4s ease-out infinite}
+  .core i:nth-child(2){animation-delay:.8s}.core i:nth-child(3){animation-delay:1.6s}
+  @keyframes pulse{0%{transform:scale(.35);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+
+  /* —— 卡片（盖在图上对应位置） —— */
+  .card{position:absolute;border-radius:24px;background:rgba(255,255,255,.94);backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);
+        border:1.5px solid color-mix(in srgb,var(--c) 45%,#fff);box-shadow:0 10px 30px rgba(60,40,120,.10),inset 0 1px 0 #fff;
+        display:flex;align-items:center;gap:16px;padding:0 20px 0 24px;cursor:pointer;text-align:left;color:var(--ink);font-family:inherit;
+        opacity:0;transform:translateY(22px);animation:rise .7s cubic-bezier(.2,.8,.2,1) forwards;transition:transform .35s,box-shadow .35s,border-color .35s}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .card::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:5px;border-radius:0 4px 4px 0;background:var(--c);opacity:.9}
+  .card:hover,.card.lit{transform:translateY(-4px) scale(1.015);border-color:var(--c);box-shadow:0 18px 44px color-mix(in srgb,var(--c) 32%,transparent),0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent)}
+  .card:active{transform:scale(.99)}
+  .ic{flex:0 0 auto;width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at 30% 30%,#fff 0,color-mix(in srgb,var(--c) 70%,#fff) 30%,var(--c) 100%);box-shadow:0 8px 18px color-mix(in srgb,var(--c) 40%,transparent)}
+  .ic svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .card .t{flex:1;min-width:0;overflow:hidden}
+  .card b{display:block;font-size:25px;font-weight:900;letter-spacing:0;line-height:1.1;white-space:nowrap}
+  .card small{display:block;font-size:15px;color:var(--ink2);margin-top:5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .k{flex:0 0 auto;display:flex;gap:14px;align-items:flex-end}
+  .k div{text-align:center;line-height:1}
+  .k em{display:block;font-style:normal;font-size:44px;font-weight:900;color:var(--c);letter-spacing:-1px;text-shadow:0 2px 0 #fff}
+  .k span{display:block;font-size:13px;color:var(--ink2);margin-top:4px;font-weight:700}
+  .k .sl{font-size:30px;color:#C9C2DE;font-weight:300;padding-bottom:20px}
+  /* 场景卡 */
+  .card.sc{gap:12px;padding:0 12px 0 20px}
+  .card.sc img{width:74px;height:74px;border-radius:50%;flex:0 0 auto;border:3px solid var(--c);box-shadow:0 6px 16px color-mix(in srgb,var(--c) 35%,transparent);background:#fff}
+  .card.sc b{font-size:25px}
+  .role{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--c);border:1.5px solid color-mix(in srgb,var(--c) 55%,#fff);background:color-mix(in srgb,var(--c) 10%,#fff);border-radius:18px;padding:4px 10px;white-space:nowrap}
+  .hint{position:absolute;right:14px;top:6px;font-size:12px;color:var(--c);opacity:0;transition:opacity .3s;font-weight:700}
+  .card:hover .hint{opacity:.9}
+
+  /* 顶部与底部热区（透明，只接交互） */
+  .hot{position:absolute;background:transparent;border:0;cursor:pointer;border-radius:30px}
+  .hot:hover{box-shadow:0 0 0 3px rgba(255,106,61,.5)}
+  select.hot{appearance:none;color:transparent;font-size:24px}
+  select.hot option{color:#222;font-size:16px}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.card{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <img class="bg" src="board.jpg" alt="让AI成为工厂的经营合伙人">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="sweep"></div>
+
+  <!-- 四条光带 + 流动光点（坐标按图量出） -->
+  <svg class="ribbons" viewBox="0 0 2000 1136">
+    <defs>
+      <path id="pERP" d="M335 455 C 480 520, 600 590, 740 635"/>
+      <path id="pMES" d="M1170 460 C 1030 520, 890 590, 740 635"/>
+      <path id="pWMS" d="M335 825 C 480 770, 600 700, 740 635"/>
+      <path id="pXLS" d="M1035 825 C 930 770, 840 700, 740 635"/>
+    </defs>
+    <g stroke="#B79CFF"><use href="#pERP" class="rb glowline"/><use href="#pERP" class="rb"/></g>
+    <g stroke="#B79CFF"><use href="#pMES" class="rb glowline"/><use href="#pMES" class="rb"/></g>
+    <g stroke="#B79CFF"><use href="#pWMS" class="rb glowline"/><use href="#pWMS" class="rb"/></g>
+    <g stroke="#FF9A4D"><use href="#pXLS" class="rb glowline"/><use href="#pXLS" class="rb"/></g>
+    <circle r="9" fill="#fff" class="dot" style="color:#B79CFF"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#pERP"/></animateMotion></circle>
+    <circle r="9" fill="#fff" class="dot" style="color:#B79CFF"><animateMotion dur="2.9s" begin="0.7s" repeatCount="indefinite"><mpath href="#pMES"/></animateMotion></circle>
+    <circle r="9" fill="#fff" class="dot" style="color:#B79CFF"><animateMotion dur="2.7s" begin="1.3s" repeatCount="indefinite"><mpath href="#pWMS"/></animateMotion></circle>
+    <circle r="9" fill="#FFE6CC" class="dot" style="color:#FF9A4D"><animateMotion dur="2.4s" begin="0.4s" repeatCount="indefinite"><mpath href="#pXLS"/></animateMotion></circle>
+  </svg>
+  <div class="core"><i></i><i></i><i></i></div>
+
+  <!-- 方法论三卡 -->
+  <button class="card" data-route="m4" style="--c:var(--c-lead);left:36px;top:264px;width:486px;height:108px;animation-delay:.05s">
+    <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
+    <div class="t"><b>AI全域获客</b><small>多渠道 · 精准线索</small></div>
+    <div class="k"><div><em data-n="8">0</em><span>类意向信号</span></div><div class="sl">/</div><div><em data-n="4">0</em><span>级线索分级</span></div></div>
+    <span class="hint">▶ 进入</span>
+  </button>
+  <button class="card" data-route="m2" style="--c:var(--c-scene);left:546px;top:264px;width:456px;height:108px;animation-delay:.15s">
+    <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></div>
+    <div class="t"><b style="font-size:23px">场景优先级规划</b><small>聚焦高价值场景</small></div>
+    <div class="k"><div><em data-n="182">0</em><span>个场景库</span></div><div class="sl">/</div><div><em data-n="4">0</em><span>维评估模型</span></div></div>
+    <span class="hint">▶ 进入</span>
+  </button>
+  <button class="card" data-route="m3" style="--c:var(--c-roi);left:1020px;top:264px;width:422px;height:108px;animation-delay:.25s">
+    <div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h3M13 12h3M8 16h3M13 16h3"/></svg></div>
+    <div class="t"><b>投入产出测算</b><small>可视化回报</small></div>
+    <div class="k"><div><em data-n="24">0</em><span>期现金流</span></div><div class="sl">/</div><div><em data-n="3">0</em><span>档情景</span></div></div>
+    <span class="hint">▶ 进入</span>
+  </button>
+
+  <!-- 六张场景卡 -->
+  <button class="card sc" data-route="m4"  style="--c:var(--c-s1);left:1452px;top:185px;width:510px;height:116px;animation-delay:.35s"><img src="av-sales.png" alt=""><div class="t"><b>AI获客</b><small>反推目标客户画像，线索评分与智能分派</small></div><span class="role">销售总监</span><span class="hint">▶ 进入</span></button>
+  <button class="card sc" data-route="m6"  style="--c:var(--c-s2);left:1452px;top:315px;width:510px;height:116px;animation-delay:.45s"><img src="av-cfo.png" alt=""><div class="t"><b>AI现金流与经营预警</b><small>多源交叉核验，13 周资金滚动预测</small></div><span class="role">财务总监</span><span class="hint">▶ 进入</span></button>
+  <button class="card sc" data-route="m10" style="--c:var(--c-s3);left:1452px;top:445px;width:510px;height:116px;animation-delay:.55s"><img src="av-sched.png" alt=""><div class="t"><b>AI工序级排程</b><small>延期归因，量化插单对交付的影响</small></div><span class="role">生产调度</span><span class="hint">▶ 进入</span></button>
+  <button class="card sc" data-route="m5"  style="--c:var(--c-s4);left:1452px;top:575px;width:510px;height:116px;animation-delay:.65s"><img src="av-hr.png" alt=""><div class="t"><b>AI人岗匹配·用工合规</b><small>简历结构化评估，用工合同规则审查</small></div><span class="role">HR 经理</span><span class="hint">▶ 进入</span></button>
+  <button class="card sc" data-route="m8"  style="--c:var(--c-s5);left:1452px;top:705px;width:510px;height:116px;animation-delay:.75s"><img src="av-foreman.png" alt=""><div class="t"><b>AI报工核验</b><small>量化换型、等待与停机损失</small></div><span class="role">车间班长</span><span class="hint">▶ 进入</span></button>
+  <button class="card sc" data-route="m9"  style="--c:var(--c-s6);left:1452px;top:835px;width:510px;height:120px;animation-delay:.85s"><img src="av-gm.png" alt=""><div class="t"><b>AI经营指标分析</b><small>指标因素分解，方案推演与审批闭环</small></div><span class="role">总经理</span><span class="hint">▶ 进入</span></button>
+
+  <!-- 顶部热区：展位号、行业 -->
+  <select class="hot" aria-label="行业" style="left:1730px;top:22px;width:240px;height:64px">
+    <option>汽车零部件制造</option><option>机械五金</option><option>电子电器</option><option>装备制造</option><option>化工新材料</option><option>纺织服装</option><option>家居建材</option><option>包装印刷</option>
+  </select>
+</div></div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), W=2000, H=1136;
+  function fit(){var s=Math.min(innerWidth/W,innerHeight/H);stage.style.transform='scale('+s+')';}
+  addEventListener('resize',fit);fit();
+
+  /* 数字滚动：卡片升起后 1.4 秒内从 0 数到位 */
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('em[data-n]').forEach(function(el,i){
+    var n=+el.dataset.n; if(reduce){el.textContent=n;return;}
+    var t0=null, dur=1400, delay=300+i*90;
+    function step(ts){ if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/dur); p=1-Math.pow(1-p,3); el.textContent=Math.round(n*p); if(p<1)requestAnimationFrame(step); }
+    setTimeout(function(){requestAnimationFrame(step);},delay);
+  });
+
+  /* 待机轮巡：每 2.8 秒点亮一张卡；有鼠标停留时暂停 */
+  var cards=[].slice.call(document.querySelectorAll('.card')), idx=-1, paused=false;
+  function next(){ if(paused||reduce)return; cards.forEach(function(c){c.classList.remove('lit');}); idx=(idx+1)%cards.length; cards[idx].classList.add('lit'); }
+  setTimeout(function(){ next(); setInterval(next,2800); },1600);
+  stage.addEventListener('mouseenter',function(){paused=true;cards.forEach(function(c){c.classList.remove('lit');});});
+  stage.addEventListener('mouseleave',function(){paused=false;});
+
+  /* 点卡片 → 路由（接入外壳后由 shell 接管） */
+  cards.forEach(function(c){ c.addEventListener('click',function(){ location.hash='#/'+c.dataset.route; if(window.DGG_GO)window.DGG_GO(c.dataset.route); }); });
+})();
+</script>
+</body>
+</html>
