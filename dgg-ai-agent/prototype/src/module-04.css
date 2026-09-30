@@ -62,8 +62,6 @@
 .m4-connect .m4-facts .f b i { font-style: normal; font-size: calc(12px * var(--scale)); font-weight: 600; margin-left: 2px; }
 .m4-connect .m4-facts .f span { display: block; color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 600; }
 .m4-connect .pd-field .vv { font-weight: 700; }
-.m4-connect .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); }
-.m4-connect .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
 
 /* ---------- 屏 3 · 客户画像 ---------- */
 .m4-segs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -165,3 +163,31 @@
   .m4-plan .days { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .m4-vd { font-size: calc(15px * var(--scale)); }
 }
+
+/* ---------- 屏 2 · 驾驶舱：海报角标行 + 高意向线索占比指标卡 ---------- */
+.m4-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 2px 4px 0; color: var(--pd-ink); font-weight: 800; font-size: calc(15px * var(--scale)); }
+.m4-badges .bd b { color: var(--pa); font-size: calc(22px * var(--scale)); margin-right: 2px; }
+.m4-badges .bd.sub { color: var(--pd-sub); font-weight: 600; font-size: calc(12.5px * var(--scale)); }
+.m4-badges .dot { color: var(--pd-sub); }
+.m4-hi {
+  display: flex; flex-direction: column; gap: 8px; padding: 14px 18px 12px; border-radius: 14px;
+  background: linear-gradient(110deg, var(--pa-soft) 0%, #fff 70%);
+  border: 1px solid color-mix(in srgb, var(--pa) 30%, transparent);
+}
+.m4-hi .hk { display: flex; align-items: center; gap: 10px; }
+.m4-hi .hk .t { font-weight: 800; font-size: calc(15px * var(--scale)); color: var(--pd-ink); }
+.m4-hi .hk .tag { font-size: calc(11px * var(--scale)); font-weight: 700; color: var(--pd-sub); border: 1px solid var(--pd-line); border-radius: 6px; padding: 1px 7px; background: #fff; }
+.m4-hi .hv { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.m4-hi .st { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
+.m4-hi .st .l { color: var(--pd-sub); font-size: calc(12px * var(--scale)); font-weight: 700; }
+.m4-hi .st .n { font-weight: 800; font-size: calc(34px * var(--scale)); line-height: 1.1; color: var(--pd-ink); }
+.m4-hi .st .n i { font-style: normal; font-size: calc(16px * var(--scale)); margin-left: 2px; color: var(--pd-sub); }
+.m4-hi .st.on .n { color: var(--pa); }
+.m4-hi .st .s { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m4-hi .arw { font-size: calc(28px * var(--scale)); color: var(--pa); font-weight: 800; }
+.m4-hi .dl { margin-left: auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
+.m4-hi .dl .n { font-weight: 800; font-size: calc(30px * var(--scale)); line-height: 1.1; color: var(--t-ok, #1a9c5a); }
+.m4-hi .dl .n i { font-style: normal; font-size: calc(13px * var(--scale)); color: var(--pd-sub); }
+.m4-hi.down .dl .n { color: var(--t-late); }
+.m4-hi .dl .s { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); }
+.m4-hi .hm { color: var(--pd-sub); font-size: calc(11.5px * var(--scale)); line-height: 1.5; }

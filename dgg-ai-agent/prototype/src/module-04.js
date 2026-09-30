@@ -48,6 +48,8 @@
         if (s.id === 'erp' || s.id === 'oms') s.mode = sys.indexOf('erp') >= 0 || sys.indexOf('shop') >= 0 ? 'direct' : 'import';
       });
     }
+    /* 工博会口径：线索来源里「展会扫码」排第一位，现场收的名片可以当场录进去演示分派（只调运行时副本的顺序） */
+    base.sources.sort(function (a, b) { return (a.id === 'fair' ? 0 : 1) - (b.id === 'fair' ? 0 : 1); });
     M.data = base; M.lead = null; M.filter = null;
     M.scr = { segId: null, channel: 'phone', stage: 'first', variant: 0 };
     recompute();
@@ -131,10 +133,10 @@
       { key: 'script', label: '话术脚本' }, { key: 'leads', label: '线索池', badge: k.unassigned || 0 }, { key: 'plan', label: '跟进与周报', badge: k.overdue || 0 }];
     var F = P.frame({
       mark: '获客', accent: ACCENT, modules: P.navModules('m4'),
-      crumbs: ['AI获客', tabs.filter(function (t) { return t.key === M.step; })[0].label],
+      crumbs: [sh.moduleName('m4'), tabs.filter(function (t) { return t.key === M.step; })[0].label],
       company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step,
       guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm4', name: 'AI获客', step: M.step, onGo: setStep },
+      chat: { id: 'm4', name: sh.moduleName('m4'), step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); }
     });
     M.frame = F; $root.appendChild(F.root);
@@ -145,6 +147,19 @@
       if (M.anim) M.play();
       else { A.stopAll(); qa('.m4-vd').forEach(function (e) { e.style.visibility = ''; }); }
     }
+  }
+  /* 高意向线索占比口径（全部出自样本数据）：
+     open  = 在手线索（stage != won）
+     pre   = 接入前 · 仅凭销售阶段判断：已进入「商机 / 已报价」（stageIdx >= 2）的线索
+     post  = 接入后 · AI 综合评分 A/B 级（综合分 = 画像匹配 70% + 8 类行为信号 30%，达 B 级线 55 分）
+     early = post 中尚停在「线索 / 已联系」阶段的线索 —— 这些就是靠信号提前识别出来的 */
+  function hiShare(R) {
+    var open = R.leads.filter(function (l) { return l.stage !== 'won'; });
+    var pre = open.filter(function (l) { return l.stageIdx >= 2; });
+    var post = open.filter(function (l) { return l.grade === 'A' || l.grade === 'B'; });
+    var early = post.filter(function (l) { return l.stageIdx < 2; });
+    var n = open.length || 1, p1 = Math.round(1000 * pre.length / n) / 10, p2 = Math.round(1000 * post.length / n) / 10;
+    return { open: open.length, preN: pre.length, postN: post.length, early: early.length, pre: p1, post: p2, delta: Math.round(10 * (p2 - p1)) / 10 };
   }
   function col(cls, kids) { return h('div', { class: cls, style: 'display:flex;flex-direction:column;gap:16px' }, kids); }
   function gradeChip(g) { return P.chip(GRADE[g], g + ' 级'); }
@@ -218,7 +233,7 @@
     ]);
     g.appendChild(P.card({
       cls: 'c4', title: '企业', body: [form],
-      foot: [h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']), h('span', { style: 'flex:1' }), P.btn('进入获客驾驶舱', { cls: 'primary', onClick: enterBoard })]
+      foot: [h('span', { style: 'flex:1' }), P.btn('进入获客驾驶舱', { cls: 'primary', onClick: enterBoard })]
     }));
     work.appendChild(g);
 
@@ -246,6 +261,32 @@
     function kv(v) { var s = nspan(v); return s; }
     var n1 = kv(k.leads), n2 = kv(k.gradeA), n3 = kv(k.unassigned), n4 = kv(k.overdue), n5 = kv(W(k.expected)), n6 = kv(fmtN(k.costPerLead));
     ns.push({ el: n1, to: k.leads }, { el: n2, to: k.gradeA }, { el: n3, to: k.unassigned }, { el: n4, to: k.overdue }, { el: n5, to: k.expected, w: 1 }, { el: n6, to: k.costPerLead });
+    /* 海报角标：8 类意向信号 · 4 级线索分级（数字取自 signals.json / stages.json，不写死） */
+    var nSig = (DATA.m4.signals.signals || []).length, nGrade = Object.keys(DATA.m4.stages.grades || {}).length + 1;
+    g.appendChild(h('div', { class: 'c12 m4-badges' }, [
+      h('span', { class: 'bd' }, [h('b', { class: 'num' }, [String(nSig)]), ' 类意向信号实时评分']),
+      h('span', { class: 'dot' }, ['·']),
+      h('span', { class: 'bd' }, [h('b', { class: 'num' }, [String(nGrade)]), ' 级线索分级']),
+      h('span', { class: 'dot' }, ['·']),
+      h('span', { class: 'bd sub' }, ['A / B / C / D · 综合分 = 画像匹配 ' + Math.round(DATA.m4.stages.weights.match * 100) + '% + 行为信号 ' + Math.round(DATA.m4.stages.weights.signal * 100) + '%'])
+    ]));
+
+    /* 高意向线索占比：接入前 = 仅凭销售阶段判断（已到商机 / 已报价才算高意向）；接入后 = AI 综合评分 A/B 级。
+       口径完全来自样本数据，可当场追问；差值不是效果承诺，屏上标「示例数据」。 */
+    var HI = hiShare(R);
+    var hp = nspan(HI.pre.toFixed(1)), ha = nspan(HI.post.toFixed(1)), hd = nspan((HI.delta >= 0 ? '+' : '') + HI.delta.toFixed(1));
+    var hiCard = h('div', { class: 'c12 m4-hi' + (HI.delta >= 0 ? '' : ' down') }, [
+      h('div', { class: 'hk' }, [h('span', { class: 't' }, ['高意向线索占比']), h('span', { class: 'tag' }, ['示例数据'])]),
+      h('div', { class: 'hv' }, [
+        h('div', { class: 'st' }, [h('span', { class: 'l' }, ['接入前']), h('span', { class: 'n num' }, [hp, h('i', {}, ['%'])]), h('span', { class: 's' }, ['按销售阶段判断 · ' + HI.preN + ' / ' + HI.open + ' 条'])]),
+        h('span', { class: 'arw' }, ['→']),
+        h('div', { class: 'st on' }, [h('span', { class: 'l' }, ['接入后']), h('span', { class: 'n num' }, [ha, h('i', {}, ['%'])]), h('span', { class: 's' }, ['AI 综合评分 A/B 级 · ' + HI.postN + ' / ' + HI.open + ' 条'])]),
+        h('div', { class: 'dl' }, [h('span', { class: 'n num' }, [hd, h('i', {}, [' 个百分点'])]), h('span', { class: 's' }, [HI.early + ' 条尚在线索 / 已联系阶段，靠意向信号提前识别'])])
+      ]),
+      h('div', { class: 'hm' }, ['口径：在手线索 ' + HI.open + ' 条（不含成交）。接入前 = 已进入「商机 / 已报价」阶段的线索占比；接入后 = 画像匹配 × 行为信号综合评分达 B 级及以上的线索占比。'])
+    ]);
+    g.appendChild(hiCard);
+
     var kpiRow = h('div', { class: 'c12' }, [P.kpis([
       { label: '在手线索', value: n1, unit: '条', sub: '本周新增 ' + k.newWeek, onClick: function () { M.filter = null; setStep('leads'); } },
       { label: 'A 级线索', value: n2, unit: '条', tone: 'late', sub: 'B 级 ' + k.gradeB, onClick: function () { M.filter = 'A'; setStep('leads'); } },
@@ -301,12 +342,15 @@
 
     M.play = function () {
       var kpis = qa('.pd-kpi'), fnBars = armBars(fnCard.querySelectorAll('.pd-funnel .trk i')), trs = armRows(chCard.querySelectorAll('tbody tr'));
-      armNums(ns); armRise(kpis.concat(qa('.pd-list .pd-item')));
+      armNums(ns); armRise(kpis.concat(qa('.pd-list .pd-item')).concat([hiCard]));
+      hp.textContent = '0.0'; ha.textContent = '0.0'; hd.textContent = '0.0';
       var hiRow = null;
       Array.prototype.forEach.call(trs, function (tr) { if (hi && tr.textContent.indexOf(hi.name) >= 0) hiRow = tr; });
       var t = A.timeline();
       t.at(0, function () { A.rise(kpis, { stagger: 55, ms: 400, from: 'left' }); });
+      t.at(120, function () { A.rise([hiCard], { ms: 420, from: 'left' }); });
       t.at(280, function () { fly(kpis[0], fnCard, { count: 3, ms: 660, gap: 110, label: k.leads + ' 条' }); });
+      t.at(520, function () { countTo(hp, HI.pre, 820, 1); countTo(ha, HI.post, 820, 1); A.count(hd, HI.delta, { ms: 820, decimals: 1, fmt: function (v) { return (v >= 0 ? '+' : '') + v.toFixed(1); } }); });
       t.at(620, function () { A.scan(fnCard, { ms: 1200 }); });
       t.at(820, function () { ns.forEach(function (x) { if (x.w) countW(x.el, x.to, 820); else countTo(x.el, x.to, 820); }); });
       t.at(900, function () { A.grow(fnBars, { ms: 720, stagger: 90 }); });
@@ -684,6 +728,8 @@
       foot: [P.btn('看全文', { cls: 'sm', onClick: openReport }), P.btn('发送到微信', { cls: 'primary sm', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } })]
     }));
     work.appendChild(g);
+    /* 海报「交付物」条：文字与海报逐字一致，右侧固定「扫码领取 · 专家咨询」 */
+    P.deliver(work, { items: ['客户画像', '获客话术', '线索分级', '成交预测'], scene: sh.moduleName('m4') });
 
     M.play = function () {
       var kpis = qa('.pd-kpi'), trs = armRows(fcCard.querySelectorAll('tbody tr'));
