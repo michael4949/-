@@ -1,5 +1,5 @@
-/* AI法务 · 合同 设立 知产 三件事（六屏 · 动画叙事）
- * 接入 → 法务驾驶舱 → 合同审查 → 新设主体 → 知识产权 → 台账与提醒
+/* 合同风险审查（并入「AI人岗匹配与用工合规」入口的第三个页签 · 四屏 · 动画叙事）
+ * 接入 → 法务驾驶舱 → 合同审查 → 台账与提醒；工博会版隐藏了新设主体、知识产权两屏（代码保留，路由不可达）
  * 计算全部走 DGG.coreM7（与 skill 同一份内核）；采纳修订 / 确认设立 / 续展与申请清单都写回同一份数据
  * 每屏三拍：接入 0–0.8s（来源亮起、数据包飞向处理块）· 展开 0.8–2.2s（数字滚、线条画、条形长、表格流）
  *          · 结论 2.2–3.0s（一句话结论推上来，脉冲聚焦支撑它的那一行）；屏上的重算按钮重播时间轴
@@ -9,7 +9,10 @@
   'use strict';
   var sh, $root, h, DATA, P, K, LIB;
   var ACCENT = window.DGG.PALETTE.m7;
-  var CAPS = ['合同审查', '新设主体', '知识产权', '台账与提醒'];
+  var CAPS = ['合同审查', '台账与提醒'];
+  var STEPS = ['connect', 'board', 'contracts', 'register'];     /* setup / ip 两屏工博会不上台 */
+  var PARENT = 'AI人岗匹配与用工合规', NAME = '合同风险审查';
+  var DELIVER = ['合同审查意见', '合规台账'];                    /* 海报交付物，末屏逐字一致 */
   var LV = { high: 'late', mid: 'risk', low: 'ok' }, LV_NAME = { high: '高风险', mid: '中风险', low: '低风险' };
   var SEV = { high: 'late', mid: 'risk', low: 'watch' }, SEV_NAME = { high: '高', mid: '中', low: '低' };
   var IPK = { trademark: 'accent', patent: 'handled', software: 'done', domain: 'watch' };
@@ -156,7 +159,7 @@
 
   /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
      不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
-  var GUIDE_AIM = { connect: '进入法务驾驶舱', board: 'next', contracts: '采纳高风险修订', setup: '确认方案', ip: 'next', register: '发送到微信' };
+  var GUIDE_AIM = { connect: '进入法务驾驶舱', board: 'next', contracts: '采纳高风险修订', register: '发送到微信' };
 
   function mount(root, step, shell) {
     sh = shell; $root = root; h = sh.h; DATA = sh.DATA; P = window.DGG.pui; K = window.DGG.coreM7;
@@ -165,7 +168,7 @@
     var c = sh.getCompany();
     if (!M.data) { M.company = c; M.name = c ? c.name : null; loadArche(c ? archeOf(c.industry) : archeOf(sh.displayIndustryDefault())); }
     M.step = step || 'connect';
-    if (['connect', 'board', 'contracts', 'setup', 'ip', 'register'].indexOf(M.step) < 0) M.step = 'connect';
+    if (STEPS.indexOf(M.step) < 0) M.step = 'connect';
     draw();
   }
   function unmount() { M.told = null; M.replay = null; }
@@ -177,13 +180,13 @@
     sh.clear($root);
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
-    var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '法务驾驶舱' }, { key: 'contracts', label: '合同审查', badge: k.highRisk || 0 }, { key: 'setup', label: '新设主体' }, { key: 'ip', label: '知识产权', badge: k.ipUrgent || 0 }, { key: 'register', label: '台账与提醒', badge: k.overdue || 0 }];
-    var F = P.frame({ mark: '法务', accent: ACCENT, modules: P.navModules('m7'), crumbs: ['AI法务', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm7', name: 'AI法务', step: M.step, onGo: setStep },
+    var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '法务驾驶舱' }, { key: 'contracts', label: '合同审查', badge: k.highRisk || 0 }, { key: 'register', label: '台账与提醒', badge: k.overdue || 0 }];
+    var F = P.frame({ mark: '人岗', accent: ACCENT, modules: P.navModules('m7'), crumbs: [PARENT, NAME], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm7', name: NAME, step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
-    ({ connect: screenConnect, board: screenBoard, contracts: screenContracts, setup: screenSetup, ip: screenIp, register: screenRegister })[M.step](F.work);
+    ({ connect: screenConnect, board: screenBoard, contracts: screenContracts, register: screenRegister })[M.step](F.work);
   }
   function enterBoard() { setStep('board'); }
   function col(cls, kids) { return h('div', { class: cls, style: 'display:flex;flex-direction:column;gap:12px' }, kids); }
@@ -200,8 +203,7 @@
   }
   function jump(it) {
     if (it.kind === 'contract' || it.kind === 'milestone') { M.contract = it.ref; setStep('contracts'); }
-    else if (it.kind === 'ip') setStep('ip');
-    else if (it.kind === 'setup') setStep('setup');
+    else if (it.kind === 'ip' || it.kind === 'setup') { M.regKind = it.kind; if (M.step !== 'register') setStep('register'); else draw(); }   /* 知产、设立两屏已隐藏，落到台账筛选 */
     else if (it.kind === 'license') { var l = M.R.licenses.filter(function (x) { return x.id === it.ref; })[0]; if (l) openLicense(l); }
   }
 
@@ -246,7 +248,7 @@
     var d = M.data, R = M.R, k = R.kpi, pf = d.profile;
     work.classList.add('m7-connect');
     var g = grid();
-    var F = flowBar({ src: srcChips(), hub: 'AI法务', out: ['合同 ' + k.contracts + ' 份', '高风险 ' + k.highRisk + ' 份'], btn: '重新接入' });
+    var F = flowBar({ src: srcChips(), hub: '合同风险审查', out: ['合同 ' + k.contracts + ' 份', '高风险 ' + k.highRisk + ' 份'], btn: '重新接入' });
     g.appendChild(F);
     var nameIn = h('input', { type: 'text', value: d.company, oninput: function (e) { M.name = e.target.value; d.company = e.target.value; var co = M.frame.root.querySelector('.pd-top .co span:nth-child(2)'); if (co) co.textContent = e.target.value; } });
     var cCo = P.card({ cls: 'c4', title: '企业', body: [h('div', { class: 'pd-form' }, [
@@ -263,17 +265,17 @@
     d.sources.forEach(function (s) { srcs.appendChild(h('div', { class: 'src-row' }, [h('div', {}, [h('div', { class: 't' }, [s.name]), h('div', { class: 's' }, [s.lastSync + ' · ' + fmtN(s.rows) + ' 条'])]), P.chip(s.mode === 'direct' ? 'ok' : 'watch', s.mode === 'direct' ? '系统直连' : '表格导入'), h('span', { class: 'pd-dot ' + (s.mode === 'direct' ? 'ok' : 'risk') })])); });
     var cSrc = P.card({ cls: 'c4', title: '数据源', sub: d.sources.length + ' 个', body: [srcs] });
     g.appendChild(cSrc);
-    var say = vd('合同 ' + k.contracts + ' 份里 ' + k.highRisk + ' 份高风险；30 天内到期 ' + k.due30 + ' 项，知产待办 ' + k.ipUrgent + ' 项。');
+    var say = vd('合同 ' + k.contracts + ' 份里 ' + k.highRisk + ' 份高风险，待处理条款 ' + k.findingsOpen + ' 处；30 天内到期 ' + k.due30 + ' 项。');
     g.appendChild(h('div', { class: 'c12' }, [say]));
     var nums = h('div', { class: 'nums' }, [
       h('div', { class: 'n' }, [cnt(k.contracts), h('span', {}, ['合同 · 份'])]),
       h('div', { class: 'n' }, [cnt(k.highRisk), h('span', {}, ['高风险 · 份'])]),
       h('div', { class: 'n' }, [cnt(k.due30), h('span', {}, ['30 天内 · 项'])]),
-      h('div', { class: 'n' }, [cnt(ipCount(d)), h('span', {}, ['知产 · 项'])])
+      h('div', { class: 'n' }, [cnt(k.findingsOpen), h('span', {}, ['待处理条款 · 处'])])
     ]);
     g.appendChild(h('div', { class: 'c12 go' }, [
       nums,
-      h('div', { class: 'sp' }), h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']),
+      h('div', { class: 'sp' }),
       P.btn('进入法务驾驶舱', { cls: 'primary big', onClick: enterBoard })
     ]));
     work.appendChild(g);
@@ -284,10 +286,10 @@
 
   /* ---------- 屏 2 · 法务驾驶舱 ---------- */
   function screenBoard(work) {
-    var R = M.R, k = R.kpi, d = M.data, S = R.setup, reg = R.register;
+    var R = M.R, k = R.kpi, d = M.data, reg = R.register;
     work.classList.add('m7-board');
     var g = grid();
-    var F = flowBar({ src: [['合同', k.contracts + ' 份'], ['证照', k.licTotal + ' 项'], ['知产', k.ipAssets + ' 项'], ['设立', S.steps.length + ' 节点']], hub: '法务驾驶舱',
+    var F = flowBar({ src: [['合同', k.contracts + ' 份'], ['审查规则', LIB.contractRules.risks.length + ' 条'], ['证照', k.licTotal + ' 项'], ['台账', reg.counts.total + ' 项']], hub: '法务驾驶舱',
       out: ['高风险 ' + k.highRisk + ' 份', '30 天内 ' + k.due30 + ' 项'], btn: '刷新看板' });
     g.appendChild(F);
     var kpiEl = P.kpis([
@@ -295,13 +297,13 @@
       { label: '合同', value: cnt(k.contracts), unit: '份', sub: '审查中 ' + k.inReview, onClick: function () { M.filter = null; setStep('contracts'); } },
       { label: '高风险合同', value: cnt(k.highRisk), unit: '份', tone: k.highRisk ? 'late' : 'ok', sub: '待处理 ' + k.findingsOpen + ' 处', onClick: function () { M.filter = 'high'; setStep('contracts'); } },
       { label: '30 天内到期', value: cnt(k.due30), unit: '项', tone: k.due30 ? 'risk' : 'ok', sub: k.overdue ? '逾期 ' + k.overdue + ' 项' : '无逾期', onClick: function () { M.regKind = null; setStep('register'); } },
-      { label: '知产待办', value: cnt(k.ipUrgent), unit: '项', tone: k.ipUrgent ? 'risk' : 'ok', sub: k.ipAssets + ' 项资产', onClick: function () { setStep('ip'); } },
-      { label: '商标布局覆盖', value: cnt(k.coverage), unit: '%', tone: k.coverage >= 70 ? 'ok' : 'risk', sub: '缺口 ' + k.ipGaps + ' 类', onClick: function () { setStep('ip'); } }
+      { label: '待处理条款', value: cnt(k.findingsOpen), unit: '处', tone: k.findingsOpen ? 'risk' : 'ok', sub: '平均风险分 ' + k.avgScore, onClick: function () { M.filter = null; setStep('contracts'); } },
+      { label: '已采纳修订', value: cnt(k.revised), unit: '处', tone: 'accent', sub: '证照 ' + k.licTotal + ' 项 · 待办 ' + k.licDue, onClick: function () { M.regKind = null; setStep('register'); } }
     ]);
     g.appendChild(h('div', { class: 'c12' }, [kpiEl]));
     var kpiCards = Array.prototype.slice.call(kpiEl.children);
-    var low = [['合同', k.avgScore], ['证照', licOkPct()], ['商标布局', k.coverage]].sort(function (a, b) { return a[1] - b[1]; })[0];
-    var say = vd('合规分 ' + k.compliance + '：合同 ' + k.avgScore + ' · 证照 ' + licOkPct() + ' · 商标布局 ' + k.coverage + '，' + low[0] + '这项拖低了合规分。');
+    var low = [['合同', k.avgScore], ['证照', licOkPct()]].sort(function (a, b) { return a[1] - b[1]; })[0];
+    var say = vd('合规分 ' + k.compliance + '：合同 ' + k.avgScore + ' · 证照 ' + licOkPct() + '，' + low[0] + '这项拖低了合规分；高风险合同 ' + k.highRisk + ' 份先看。');
     g.appendChild(h('div', { class: 'c12' }, [say]));
     var tbl = P.table({ compact: true, cols: [
       { key: 'id', label: '合同', render: function (c) { return h('span', {}, [h('b', { class: 'id' }, [c.id]), h('span', { class: 'sub' }, [cut(c.title, 12)])]); } },
@@ -319,24 +321,19 @@
     var cTodo = P.card({ cls: 'c5', title: '近 30 天待办', sub: '逾期 ' + reg.counts.overdue + ' · 30 天内 ' + reg.counts.due30, body: [todo], extra: [P.btn('台账', { cls: 'sm', onClick: function () { M.regKind = null; setStep('register'); } })] });
     g.appendChild(cTodo);
     var wl = weekLine(reg.weeks);
-    var cW = P.card({ cls: 'c4', title: '90 天到期节奏', sub: reg.counts.total + ' 项', body: [wl, kindBars(reg.counts)] });
+    var cW = P.card({ cls: 'c6', title: '90 天到期节奏', sub: reg.counts.total + ' 项', body: [wl, kindBars(reg.counts)] });
     g.appendChild(cW);
     var lic = h('div', { class: 'pd-list' });
     R.licenses.slice().sort(function (a, b) { return (a.daysLeft == null ? 9999 : a.daysLeft) - (b.daysLeft == null ? 9999 : b.daysLeft); }).slice(0, 3).forEach(function (l) { lic.appendChild(tagRef(P.item({ tone: l.state === 'ok' ? 'ok' : l.state === 'due' ? 'risk' : 'late', icon: '证', title: cut(l.name, 14), sub: l.issuer, right: l.expiry ? dsh(l.expiry) : '长期', rightSub: l.state === 'ok' ? (l.expiry ? l.daysLeft + ' 天' : '') : l.stateName, onClick: function () { openLicense(l); } }), l.id)); });
-    var cLic = P.card({ cls: 'c4', title: '证照', sub: k.licTotal + ' 项 · 待办 ' + k.licDue, body: [lic] });
+    var cLic = P.card({ cls: 'c6', title: '证照', sub: k.licTotal + ' 项 · 待办 ' + k.licDue, body: [lic] });
     g.appendChild(cLic);
-    var cSet = P.card({ cls: 'c4', title: '新设主体', sub: S.typeName.replace(/（.*/, ''), accent: true, body: [
-      P.kv([['名称', S.name], ['工期', S.totalDays + ' 天 · ' + short(S.startDate) + ' → ' + short(S.endDate)], ['股权', S.equity ? S.equity.holders.map(function (x) { return x.pct + '%'; }).join(' / ') + ' · ' + S.equity.control : '总公司全资']]),
-      h('div', { style: 'margin-top:10px' }, [S.confirmed ? P.chip('ok', '已确认') : P.chip('watch', '待确认')])
-    ], foot: [P.btn('看方案', { cls: 'sm', onClick: function () { setStep('setup'); } }), S.confirmed ? null : P.btn('确认方案', { cls: 'primary sm', onClick: function () { commit(K.confirmSetup(d, LIB), '方案已确认，' + S.steps.length + ' 个节点已进台账'); } })] });
-    g.appendChild(cSet);
     if (d.log.length) g.appendChild(P.card({ cls: 'c12', title: '本期动作', sub: d.log.length + ' 条', body: [logList(d.log.slice(-4).reverse())] }));
     work.appendChild(g);
     var rows = trs(tbl);
     /* 结论落在哪一项，脉冲就打在哪一项的支撑数据上 */
-    var lowEl = low[0] === '商标布局' ? kpiCards[5] : low[0] === '证照' ? (nodes(cLic, '.pd-item')[0] || kpiCards[0]) : rows[0];
+    var lowEl = low[0] === '证照' ? (nodes(cLic, '.pd-item')[0] || kpiCards[0]) : rows[0];
     story({ work: work, src: F.srcs, from: F.srcWrap, to: F.hub, label: reg.counts.total + ' 项',
-      rise: [cTop, cTodo, cW, cLic, cSet], rows: rows, paths: wl.paths, bars: nodes(cW, '.m7-kinds .pd-bar i'),
+      rise: [cTop, cTodo, cW, cLic], rows: rows, paths: wl.paths, bars: nodes(cW, '.m7-kinds .pd-bar i'),
       verdict: say, focus: lowEl || rows[0] });
   }
 
@@ -376,7 +373,8 @@
     var hiAll = rows.reduce(function (t, c) { return t + c.review.counts.high; }, 0);
     var cList = P.card({ cls: 'c7', title: '合同台账', sub: shown.length + ' 份' + (f ? ' · 已筛选' : ''), tight: true,
       body: [h('div', { class: 'pd-scroll m7-tbl' }, [tbl])],
-      extra: [hiAll ? P.btn('采纳高风险修订 ' + hiAll + ' 处', { cls: 'primary sm', onClick: function () { doAllHigh(); } }) : null] });
+      extra: [hiAll ? P.btn('采纳高风险修订 ' + hiAll + ' 处', { cls: 'primary sm', onClick: function () { doAllHigh(); } }) : null,
+        P.btn('← 返回人岗匹配', { cls: 'sm', onClick: function () { sh.go('m5'); } })] });
     g.appendChild(cList);
     var fl = h('div', { class: 'm7-findings' });
     C.findings.forEach(function (x) {
@@ -609,6 +607,7 @@
     if (d.log.length) right.appendChild(P.card({ title: '本期动作', sub: d.log.length + ' 条', body: [logList(d.log.slice(-3).reverse())] }));
     g.appendChild(right);
     work.appendChild(g);
+    P.deliver(work, { items: DELIVER, scene: PARENT });
     var cells = nodes(cal, '.day.has');
     var items2 = nodes(due, '.pd-item');
     story({ work: work, src: F.srcs, from: F.srcWrap, to: F.hub, label: reg.counts.total + ' 项', scan: cCal,
@@ -661,8 +660,9 @@
     }
     if (a.panel === 'ip') {
       if (!R.ip.assets.some(function (x) { return x.id === a.ref; })) return false;
-      if (M.step !== 'ip') setStep('ip');
-      else refocus(a.ref);
+      M.regKind = 'ip';                                     /* 知产屏已隐藏，落到台账的知产筛选 */
+      if (M.step !== 'register') setStep('register');
+      else draw();
       return true;
     }
     if (a.panel === 'license') {
@@ -758,7 +758,7 @@
     act: function (a, api) {
       if (!a || !a.type || !M.R) return false;
       if (a.type === 'goto') {
-        if (['connect', 'board', 'contracts', 'setup', 'ip', 'register'].indexOf(a.step) < 0) return false;
+        if (STEPS.indexOf(a.step) < 0) return false;
         setStep(a.step);
         return true;
       }

@@ -1,4 +1,5 @@
-/* AI人力官 · 接入 / 人力驾驶舱 / 招聘 · JD 与简历 / 面试与录用 / 用工合规 / 成本与编制（六屏）
+/* AI人岗匹配与用工合规 · 接入 / 人力驾驶舱 / 招聘 · JD 与简历 / 面试与录用 / 用工合规 / 成本与编制（六屏）
+ * 第七个页签「合同审查」只是跳转入口：跳到 m7（合同风险审查），不在「下一步」链上；末屏成本与编制出交付物条
  * 每屏三拍：来源块亮起 → 数据包进处理块 → 数字滚动、图形画出、明细流入 → 一句结论推上来
  * 计算全部走 DGG.coreM5（与 skill 同一份内核）；发布 / 初筛 / 面试 / 评分 / offer / 整改 / 采纳方案都写回同一份数据
  * 纯预制、断网可用；不用任何存储 API
@@ -9,6 +10,9 @@
   var ACCENT = window.DGG.PALETTE.m5;
   var CAPS = [['招聘 · JD 与简历', 'JD · 简历打分'], ['面试与录用', '题库 · 评分 · 定薪'], ['用工合规', '12 条规则 · 人事日历'], ['成本与编制', '成本结构 · 三方案']];
   var STEPS = ['connect', 'board', 'recruit', 'interview', 'compliance', 'cost'];
+  var NAME = 'AI人岗匹配与用工合规';
+  var SPECS = ['12 条用工合规规则', '4 维面试评估模型'];       /* 海报量化指标，驾驶舱角标原样出现 */
+  var DELIVER = ['候选人评估', '整改清单', '合规台账'];         /* 海报交付物，末屏逐字一致 */
   var GRADE = { A: 'ok', B: 'handled', C: 'risk', D: 'done' }, GRADE_NAME = { A: 'A 级', B: 'B 级', C: 'C 级', D: '不满足' };
   var STAGE_TONE = { new: 'watch', screened: 'handled', interview: 'accent', done: 'risk', offer: 'ok', hired: 'ok', rejected: 'done' };
   var SEV = { high: 'late', mid: 'risk', low: 'watch' }, SEV_NAME = { high: '高', mid: '中', low: '低' };
@@ -35,6 +39,9 @@
   function short(s) { return K.short(s); }
   function mon() { return +M.data.overtimeMonth.slice(5); }
   function cut(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n) + '…' : s; }
+  /* 内核文案里引用的兄弟模块用的是内核原名（如「AI CFO 的 K10」），屏上按物料定稿改名显示；内核与 skills 数据不动 */
+  var NAME_MAP = [['AI CFO', 'AI现金流与经营预警'], ['AI ERP', 'AI工序级排程'], ['AI人力官', NAME], ['AI法务', '合同风险审查'], ['AI流程提效', 'AI报工核验'], ['AI决策', 'AI经营指标分析']];
+  function nm(s) { s = String(s == null ? '' : s); NAME_MAP.forEach(function (x) { s = s.split(x[0]).join(x[1]); }); return s; }
 
   /* ---------- 动画件 ---------- */
   function cnt(to, o) {
@@ -135,11 +142,17 @@
     M.replay = null;
     var R = M.R, c = M.company, k = R.kpi;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
-    var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '人力驾驶舱' }, { key: 'recruit', label: '招聘 · JD 与简历', badge: k.candidates ? R.candidates.filter(function (x) { return x.stage === 'new' && x.grade !== 'D'; }).length : 0 }, { key: 'interview', label: '面试与录用', badge: k.interviewing || 0 }, { key: 'compliance', label: '用工合规', badge: k.complianceOpen || 0 }, { key: 'cost', label: '成本与编制' }];
-    var F = P.frame({ mark: '人力', accent: ACCENT, modules: P.navModules('m5'), crumbs: ['AI人力官', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm5', name: 'AI人力官', step: M.step, onGo: setStep },
-      onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
+    var tabs = [{ key: 'connect', label: '接入' }, { key: 'board', label: '人力驾驶舱' }, { key: 'recruit', label: '招聘 · JD 与简历', badge: k.candidates ? R.candidates.filter(function (x) { return x.stage === 'new' && x.grade !== 'D'; }).length : 0 }, { key: 'interview', label: '面试与录用', badge: k.interviewing || 0 }, { key: 'compliance', label: '用工合规', badge: k.complianceOpen || 0 }, { key: 'cost', label: '成本与编制' },
+      { key: 'contracts', label: '合同审查' }];                 /* 跳转到 m7 的入口页签，放最后，不进「下一步」链 */
+    var F = P.frame({ mark: '人岗', accent: ACCENT, modules: P.navModules('m5'), crumbs: [NAME, tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm5', name: NAME, step: M.step, onGo: setStep },
+      onTab: function (key) { if (key === 'contracts') sh.go('m7', 'contracts'); else if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
+    if (F.tabs.contracts) F.tabs.contracts.classList.add('jump');
+    /* 成本与编制是本模块最后一屏：frame 按页签顺序会把「合同审查」算成下一步，这里重挂引导层，让它以「演示完成」收尾 */
+    if (M.step === 'cost' && window.DGG.guide) {
+      window.DGG.guide.mount({ root: F.root, work: F.work, barHost: F.body, id: 'm5', step: M.step, aim: GUIDE_AIM[M.step], nextKey: null, onHome: function () { sh.go('home'); } });
+    }
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
     ({ connect: screenConnect, board: screenBoard, recruit: screenRecruit, interview: screenInterview, compliance: screenCompliance, cost: screenCost })[M.step](F.work);
   }
@@ -166,7 +179,7 @@
     var d = M.data, R = M.R, k = R.kpi, pf = d.profile, C = R.cost;
     work.classList.add('m5-connect');
     var g = grid();
-    var F = flowBar({ src: [['花名册', k.headcount + ' 人'], ['工资表', mon() + ' 月'], ['考勤', mon() + ' 月'], ['简历', d.candidates.length + ' 份']], hub: 'AI人力官', out: ['已开通 4 项', '岗位库 ' + Object.keys(LIB.jobs.jobs).length + ' 个'], btn: '重新同步' });
+    var F = flowBar({ src: [['花名册', k.headcount + ' 人'], ['工资表', mon() + ' 月'], ['考勤', mon() + ' 月'], ['简历', d.candidates.length + ' 份']], hub: '人岗匹配与用工合规', out: ['已开通 4 项', '岗位库 ' + Object.keys(LIB.jobs.jobs).length + ' 个'], btn: '重新同步' });
     g.appendChild(F);
     var nameIn = h('input', { type: 'text', value: d.company, oninput: function (e) { M.name = e.target.value; d.company = e.target.value; var co = M.frame.root.querySelector('.pd-top .co span:nth-child(2)'); if (co) co.textContent = e.target.value; } });
     var cCo = P.card({ cls: 'c4', title: '企业', body: [h('div', { class: 'pd-form' }, [
@@ -186,7 +199,7 @@
     g.appendChild(cCap);
     var say = vd('社保申报基数 ' + W(C.socialBase) + ' / 月，工资表 ' + W(C.wages) + ' / 月，差 ' + W(C.wages - C.socialBase) + '。');
     g.appendChild(h('div', { class: 'c12' }, [say]));
-    g.appendChild(h('div', { class: 'c12 go' }, [h('div', {}, [h('div', { class: 't' }, ['人力驾驶舱']), h('div', { class: 's' }, ['在编 ' + k.headcount + ' / 编制 ' + k.budget + ' · 在招 ' + k.needCount + ' 人 · 合规待处理 ' + k.complianceOpen + ' 项 · 30 天内到期 ' + k.due30 + ' 项'])]), h('div', { class: 'sp' }), h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']), P.btn('进入人力驾驶舱', { cls: 'primary big', onClick: enterBoard })]));
+    g.appendChild(h('div', { class: 'c12 go' }, [h('div', {}, [h('div', { class: 't' }, ['人力驾驶舱']), h('div', { class: 's' }, ['在编 ' + k.headcount + ' / 编制 ' + k.budget + ' · 在招 ' + k.needCount + ' 人 · 合规待处理 ' + k.complianceOpen + ' 项 · 30 天内到期 ' + k.due30 + ' 项'])]), h('div', { class: 'sp' }), P.btn('进入人力驾驶舱', { cls: 'primary big', onClick: enterBoard })]));
     work.appendChild(g);
     var rows = Array.prototype.slice.call(srcs.children);
     story({ work: work, src: F.srcs, from: F.srcWrap, to: F.hub, label: fmtN(k.headcount) + ' 条', rise: [cCo, cSrc, cCap].concat(rows), verdict: say, focus: rows[rows.length - 1] });
@@ -199,6 +212,7 @@
     var g = grid();
     var F = flowBar({ src: [['花名册', k.headcount + ' 人'], ['工资表', mon() + ' 月'], ['考勤', mon() + ' 月'], ['需求单', k.needs + ' 张']], hub: '人力驾驶舱', out: ['待处理 ' + k.complianceOpen + ' 项', '影响预计 ' + W(k.complianceImpact)], btn: '刷新看板' });
     g.appendChild(F);
+    g.appendChild(h('div', { class: 'c12 m5-specs' }, [h('b', {}, [NAME])].concat(SPECS.map(function (t) { return h('span', {}, [t]); }))));
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([
       { label: '在编 / 编制', value: cnt(k.headcount), unit: '/ ' + k.budget, sub: '缺编 ' + k.vacancy + ' · 派遣 ' + O.dispatch, tone: k.vacancy ? 'risk' : 'ok' },
       { label: '在招', value: cnt(k.needCount), unit: '人', tone: 'accent', sub: k.needs + ' 张需求单', onClick: function () { M.filter = null; setStep('recruit'); } },
@@ -434,8 +448,8 @@
     var aff = h('div', { class: 'm5-aff' });
     I.affected.slice(0, 5).forEach(function (a) { aff.appendChild(h('div', { class: 'a', 'data-ref': a.id }, [h('b', {}, [a.id]), h('span', { class: 'd' }, [h('span', { class: 'j' }, [a.job + ' · ' + a.dept]), a.detail]), h('span', { class: 'num' }, [a.amount ? fmtN(a.amount) + ' 元' : ''])])); });
     var acts = h('div', { class: 'pd-actions' });
-    if (I.status === 'open') acts.appendChild(h('div', { class: 'pd-action best' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['1']), I.action.label]), P.btn(I.mode === 'fix' ? '执行并写回' : '进台账', { cls: 'primary sm', onClick: function () { commit(K.resolve(d, I.id, LIB), I.id + ' ' + I.action.label); } }), h('div', { class: 'd' }, [I.action.desc])]));
-    else acts.appendChild(h('div', { class: 'pd-action' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['·']), I.action.label]), P.chip(STATUS_TONE[I.status], STATUS_NAME[I.status]), h('div', { class: 'd' }, [I.status === 'clear' ? '本次核对未命中' : I.action.desc])]));
+    if (I.status === 'open') acts.appendChild(h('div', { class: 'pd-action best' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['1']), I.action.label]), P.btn(I.mode === 'fix' ? '执行并写回' : '进台账', { cls: 'primary sm', onClick: function () { commit(K.resolve(d, I.id, LIB), I.id + ' ' + I.action.label); } }), h('div', { class: 'd' }, [nm(I.action.desc)])]));
+    else acts.appendChild(h('div', { class: 'pd-action' }, [h('div', { class: 't' }, [h('span', { class: 'rank' }, ['·']), I.action.label]), P.chip(STATUS_TONE[I.status], STATUS_NAME[I.status]), h('div', { class: 'd' }, [I.status === 'clear' ? '本次核对未命中' : nm(I.action.desc)])]));
     var cDet = P.card({ title: I.id + ' ' + I.name, sub: I.cat + ' · ' + I.law, accent: true, extra: I.affected.length > 5 ? [P.btn('全部 ' + I.count + ' 人', { cls: 'sm', onClick: function () { affDrawer(I); } })] : null, body: [
       P.judge({ verdict: { tone: I.status !== 'open' ? 'ok' : SEV[I.severity] === 'watch' ? 'risk' : SEV[I.severity], chip: I.status === 'open' ? SEV_NAME[I.severity] + '风险' : STATUS_NAME[I.status], text: I.desc }, seen: ['涉及 ' + I.count + ' 人 · 影响预计 ' + W(I.impact), '口径：' + I.impactNote], reasons: I.affected.length ? I.affected.slice(0, 3).map(function (a) { return a.id + ' ' + a.job + '：' + a.detail; }) : ['本次核对未命中'], actionsEl: acts, actionsTitle: '整改' }),
       I.affected.length ? h('div', { class: 'm5-sub' }, ['涉及员工 ' + I.count + ' 人']) : null, I.affected.length ? aff : null
@@ -464,7 +478,7 @@
     P.drawer(M.frame.body, { title: '方案 ' + Pn.key + ' 逐月明细', sub: Pn.name + ' · 12 个月预计 ' + W(Pn.total12), body: [mt] });
   }
   function reportDrawer(R) {
-    P.drawer(M.frame.body, { title: '人力月报', sub: M.data.today.slice(0, 7).replace('-', ' 年 ') + ' 月 · ' + M.data.company, body: [h('div', { class: 'pd-pre' }, [R.report.text])], actions: [P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } })] });
+    P.drawer(M.frame.body, { title: '人力月报', sub: M.data.today.slice(0, 7).replace('-', ' 年 ') + ' 月 · ' + M.data.company, body: [h('div', { class: 'pd-pre' }, [nm(R.report.text)])], actions: [P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } })] });
   }
   function screenCost(work) {
     var R = M.R, d = M.data, C = R.cost, S = R.sim, k = R.kpi;
@@ -490,15 +504,16 @@
     var lc = P.lineChart({ labels: S.labels, right: true, series: [{ values: S.base.map(function () { return 0; }), color: colors.base, fmt: function () { return '现状'; } }].concat(S.plans.map(function (p) { return { values: p.months.map(function (m, i) { return Math.round((m.cost - S.base[i].cost) / 1000) / 10; }), color: colors[p.key], fmt: function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v) + ' 万'; } }; })), height: 230, width: 900 });
     var cLine = P.card({ cls: 'c7', title: '12 个月用工成本走势', sub: '较现状差额 · 万元 / 月', body: [lc, h('div', { class: 'pd-legend', style: 'margin-top:8px' }, [h('span', {}, [h('i', { style: 'background:' + colors.base }), '现状'])].concat(S.plans.map(function (p) { return h('span', {}, [h('i', { style: 'background:' + colors[p.key] }), p.key + ' ' + p.name]); })))] });
     g.appendChild(cLine);
-    var cmp = P.compare({ active: M.plan, onPick: function (key) { M.plan = key; draw(); }, options: S.plans.map(function (p) { return { key: p.key, name: p.name, recommended: p.recommended, headline: { big: W(p.total12), sub: (p.delta >= 0 ? '+' : '−') + W(Math.abs(p.delta)) + ' 较现状', tone: p.key === 'C' ? 'ok' : '' }, rows: [{ k: '期末在编', v: p.endHeadcount + ' 人' }, { k: '新增招聘', v: p.hires + ' 人' }, { k: '缺编', v: p.vacancyAfter + ' 人', tone: p.vacancyAfter > 0 ? 'bad' : 'good' }, { k: '用工占收入', v: p.share + '%' }, { k: '人均产值', v: W(p.perCapitaRevenue) }], notes: K.planNote(R, p) }; }) });
+    var cmp = P.compare({ active: M.plan, onPick: function (key) { M.plan = key; draw(); }, options: S.plans.map(function (p) { return { key: p.key, name: p.name, recommended: p.recommended, headline: { big: W(p.total12), sub: (p.delta >= 0 ? '+' : '−') + W(Math.abs(p.delta)) + ' 较现状', tone: p.key === 'C' ? 'ok' : '' }, rows: [{ k: '期末在编', v: p.endHeadcount + ' 人' }, { k: '新增招聘', v: p.hires + ' 人' }, { k: '缺编', v: p.vacancyAfter + ' 人', tone: p.vacancyAfter > 0 ? 'bad' : 'good' }, { k: '用工占收入', v: p.share + '%' }, { k: '人均产值', v: W(p.perCapitaRevenue) }], notes: nm(K.planNote(R, p)) }; }) });
     var cCmp = P.card({ cls: 'c12', title: '编制三方案', sub: '12 个月预计', extra: [P.btn('逐月明细', { cls: 'sm', onClick: function () { monthDrawer(Pn, S); } })], body: [cmp], foot: [
       d.plan === M.plan ? P.chip('ok', '已采纳 ' + M.plan) : P.btn('采纳方案 ' + M.plan, { cls: 'primary', onClick: function () { commit(K.adoptPlan(d, M.plan, LIB), '已采纳方案 ' + M.plan + '，月报已更新'); } })] });
     g.appendChild(cCmp);
     var who = h('div', { class: 'who' });
     ['总经理', '财务负责人', '各部门负责人'].forEach(function (w, i) { who.appendChild(h('button', { class: i === M.who ? 'on' : '', onclick: function () { M.who = i; draw(); } }, [w])); });
-    var cRep = P.card({ cls: 'c12', title: '人力月报', sub: d.today.slice(0, 7).replace('-', ' 年 ') + ' 月 · 微信文本版', extra: [who], body: [h('div', { class: 'pd-pre' }, [R.report.lines.slice(0, 3).join('\n')])], foot: [P.btn('全文', { cls: 'sm', onClick: function () { reportDrawer(R); } }), P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } }), P.btn('回到驾驶舱', { onClick: function () { setStep('board'); } })] });
+    var cRep = P.card({ cls: 'c12', title: '人力月报', sub: d.today.slice(0, 7).replace('-', ' 年 ') + ' 月 · 微信文本版', extra: [who], body: [h('div', { class: 'pd-pre' }, [nm(R.report.lines.slice(0, 3).join('\n'))])], foot: [P.btn('全文', { cls: 'sm', onClick: function () { reportDrawer(R); } }), P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } }), P.btn('回到驾驶舱', { onClick: function () { setStep('board'); } })] });
     g.appendChild(cRep);
     work.appendChild(g);
+    P.deliver(work, { items: DELIVER, scene: NAME });
     var opts = Array.prototype.slice.call(cmp.children);
     story({ work: work, src: F.srcs, from: F.srcWrap, to: cStr, label: W(C.monthly),
       rise: [cLine, cCmp, cRep].concat(opts), rows: [], bars: bars(work, '.pd-dist .trk i'), paths: bars(work, '.pd-line path'),
