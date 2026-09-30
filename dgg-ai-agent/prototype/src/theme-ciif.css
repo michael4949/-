@@ -41,8 +41,9 @@ body[data-module="home"] .boardbox select.hot.ind { appearance: none; -webkit-ap
 body[data-module="home"] .boardbox select.hot.ind option { color: #222; font-size: 16px; }
 @media (prefers-reduced-motion: reduce) { body[data-module="home"] .boardbox .glow, body[data-module="home"] .boardbox .sweep::after, body[data-module="home"] .boardbox .rb, body[data-module="home"] .boardbox .core i { animation: none !important; } }
 
-/* ---------- 顶栏：展位号 ---------- */
-.topbar .booth b { color: var(--brand); }
+/* ---------- 顶栏：跟随展板的靛紫 ---------- */
+:root { --sh-navy: linear-gradient(90deg, #2A1466 0%, #4A25B5 45%, #6A3BE0 80%, #8B5CF6 100%); --sh-hero: linear-gradient(92deg, #4A25B5 0%, #6A3BE0 40%, #B79CFF 70%, #FF9A4D 100%); }
+.topbar .booth b { color: #FFD9B8; }
 
 /* ---------- 数据接入页 ---------- */
 .cn-page { max-width: 1560px; margin: 0 auto; padding: 8px 8px 96px; }

@@ -35,7 +35,7 @@
     var bg = h('div', { class: 'modal-bg', onclick: function (e) { if (e.target === bg) close(); } });
     var fields = {};
     function fld(label, key, el) { fields[key] = el; return h('label', { class: 'lf-f' }, [h('span', {}, [label]), el]); }
-    var ind = h('select', {}); api.mfgIndustries().forEach(function (i) { ind.appendChild(h('option', { value: i.name }, [i.name])); });
+    var ind = h('select', {}); api.mfgIndustries().forEach(function (i) { ind.appendChild(h('option', { value: i.name, selected: i.slug === api.industrySlug() }, [i.name])); });
     var size = h('select', {}); SIZES.forEach(function (s) { size.appendChild(h('option', { value: s }, [s])); }); size.value = SIZES[2];
     var scene = h('select', {}); SCENES.forEach(function (s) { scene.appendChild(h('option', { value: s }, [s])); }); if (pre.scene) scene.value = pre.scene;
     var msg = h('div', { class: 'lf-msg' });
