@@ -15,7 +15,7 @@ input, select { font: inherit; color: inherit; }
 /* ===================== 外壳 ===================== */
 .app {
   display: grid; height: 100vh;
-  grid-template-rows: var(--topbar) 1fr var(--pricebar);
+  grid-template-rows: var(--topbar) 1fr;
   grid-template-columns: 1fr var(--rail);
 }
 .topbar {
@@ -283,3 +283,15 @@ body[data-station="1"] .btn { min-height: 58px; }
   .result-head { margin-bottom: 8px; }
 }
 .print-head, .print-foot { display: none; }
+
+/* ---------- 工博会版：待机横幅 · 右栏预约 ---------- */
+.idle.hidden { display: none; }
+.idle { position: fixed; inset: 0; z-index: 60; pointer-events: none; background: transparent; }
+.idle .idle-banner { position: absolute; left: 50%; bottom: 4vh; transform: translateX(-50%); display: flex; align-items: center; gap: 22px; padding: 16px 26px; border-radius: 22px; background: rgba(20, 12, 60, .82); color: #fff; backdrop-filter: blur(14px); box-shadow: 0 20px 50px rgba(0,0,0,.35); pointer-events: none; }
+.idle .idle-banner .t { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
+.idle .idle-banner .s { font-size: 14px; opacity: .8; margin-top: 4px; }
+.idle .idle-banner .q svg { width: 84px; height: 84px; background: #fff; padding: 5px; border-radius: 10px; display: block; }
+.rail .btn.lead { width: 100%; background: var(--brand); color: #fff; font-weight: 800; border-radius: 12px; padding: 12px; }
+.rail .lead-cnt { font-size: 12px; color: var(--text-sub); margin-top: 8px; text-align: center; }
+.rail .lead-cnt b { color: var(--brand); } .rail .lead-cnt a { color: var(--brand); margin-left: 4px; }
+.modal .btn.ghost { background: var(--surface-alt); color: var(--text); margin-top: 8px; }

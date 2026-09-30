@@ -118,7 +118,7 @@ body.push(new Paragraph({
   children: [t('薯片AI智能体 · 展台演示话术稿', { b: true, s: 34, c: 'FFFFFF' })],
   shading: { type: ShadingType.CLEAR, fill: KEY }, spacing: { after: 60, line: 320 }
 }));
-body.push(line('销售现场用 · 内部资料 · 请勿外发给客户 　|　 展位号 6A-B034-B035 　|　 配套版本：高保真原型 index.html（双击即开，断网可用）', { s: 17, c: SUB, after: 100 }));
+body.push(line('销售现场用 · 内部资料 · 请勿外发给客户 　|　 展位号 6.2H-B018 　|　 配套版本：高保真原型 index.html（双击即开，断网可用）', { s: 17, c: SUB, after: 100 }));
 
 body.push(h2('这份稿怎么用'));
 body.push(kv('三句话：', '① 别按顺序全讲，按客户行业挑 1 个模块演透；② 屏上出现的数字你直接念，不要自己编；③ 每一屏底部都有「下一步」，跟着箭头点就不会卡。'));

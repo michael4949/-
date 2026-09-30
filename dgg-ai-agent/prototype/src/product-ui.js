@@ -27,13 +27,17 @@
     m10: '<path d="M3 20V9l5 3V9l5 3V9l5 3v8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M17 12V5h3v7" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="7" y="15" width="3" height="3" fill="currentColor" opacity=".35"/><rect x="13" y="15" width="3" height="3" fill="currentColor" opacity=".35"/>',
     m11: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 5l-3 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
   };
+  /* 左导航按物料定稿的六大场景；m7 合同审查并入 m5 入口，m11 不上台 */
   var MODULES = [
-    { id: 'm4', name: 'AI获客' }, { id: 'm5', name: 'AI人力官' }, { id: 'm6', name: 'AI CFO' }, { id: 'm7', name: 'AI法务' },
-    { id: 'm8', name: 'AI流程提效' }, { id: 'm9', name: 'AI决策' }, { id: 'm10', name: 'AI ERP' }, { id: 'm11', name: 'AI软件开发' }
+    { id: 'm4', name: 'AI获客' }, { id: 'm6', name: 'AI现金流与经营预警' }, { id: 'm10', name: 'AI工序级排程' },
+    { id: 'm5', name: 'AI人岗匹配与用工合规' }, { id: 'm8', name: 'AI报工核验' }, { id: 'm9', name: 'AI经营指标分析' }
   ];
   function navModules(activeId) {
-    return MODULES.map(function (m) { return { id: m.id, name: m.name, icon: ICONS[m.id], on: m.id === activeId, disabled: !(sh.isBuilt && sh.isBuilt(m.id)), onClick: function () { if (m.id !== activeId) sh.go(m.id); } }; });
+    var act = activeId === 'm7' ? 'm5' : activeId;
+    return MODULES.map(function (m) { return { id: m.id, name: m.name, icon: ICONS[m.id], on: m.id === act, disabled: !(sh.isBuilt && sh.isBuilt(m.id)), onClick: function () { if (m.id !== act) sh.go(m.id); } }; });
   }
+  /* 交付物条：每个场景最后一屏调一次 */
+  function deliver(host, o) { return window.DGG.lead ? window.DGG.lead.deliver(host, o) : null; }
 
   var STATUS = { ok: '正常', risk: '风险', late: '延期', handled: '已处置', done: '已完工', watch: '跟踪', short: '缺口', safety: '低于安全库存', accent: '' };
 
@@ -579,5 +583,5 @@
   };
   window.DGG = window.DGG || {};
   window.DGG.PALETTE = PALETTE;
-  window.DGG.pui = { PALETTE: PALETTE, init: init, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, steps: steps, log: log, toast: toast, STATUS: STATUS };
+  window.DGG.pui = { PALETTE: PALETTE, init: init, deliver: deliver, navModules: navModules, ICONS: ICONS, MODULES: MODULES, svg: svg, fmtN: fmtN, clear: clear, frame: frame, kpi: kpi, kpis: kpis, chip: chip, bar: bar, card: card, btn: btn, kv: kv, empty: empty, item: item, table: table, heat: heat, gantt: gantt, drawer: drawer, compare: compare, judge: judge, action: action, spark: spark, matrix: matrix, cashChart: cashChart, lineChart: lineChart, funnel: funnel, dist: dist, weekGrid: weekGrid, KIND_ICON: KIND_ICON, radar: radar, waterfall: waterfall, steps: steps, log: log, toast: toast, STATUS: STATUS };
 })();

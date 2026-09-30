@@ -38,12 +38,11 @@
       <span class="divider"></span>
       <span class="product">薯片AI智能体</span>
     </button>
-    <span class="booth">展位号 <b>6A-B034-B035</b></span>
+    <span class="booth">CIIF 2026 · 6.2H 馆 · 展位号 <b>6.2H-B018</b></span>
     <label class="industry">行业 <select id="industry"></select></label>
   </header>
   <main class="main" id="main"></main>
   <aside class="rail" id="rail"></aside>
-  <footer class="pricebar" id="pricebar"></footer>
 </div>
 <div class="idle hidden" id="idle"></div>
 
@@ -70,13 +69,13 @@
   var q = new URLSearchParams(location.search);
   window.DGG_DATA = JSON.parse(document.getElementById('dgg-data').textContent);
   window.DGG_CONFIG = {
-    station: q.get('station') || '3',
+    station: ({ '1': 'pad', '2': 'tv', '3': 'desk' })[q.get('station')] || q.get('station') || 'desk',
     logo: '/*__LOGO_DATA_URI__*/',
     homeBoard: '/*__HOME_BOARD_DATA_URI__*/',
-    wechatUrl: q.get('wx') || 'https://platform.dgg.cn',
+    wechatUrl: q.get('wx') || 'https://work.weixin.qq.com/ca/dgg-ciif2026',  /* 企业微信活码，拿到后替换 */
     llm: { endpoint: q.get('llm') || '', model: q.get('model') || '', timeoutMs: 8000 },
-    idle: { defaultMs: 30000, quizMs: 60000, resultMs: 120000 },
-    credits: { start: 10000 }
+    idle: { defaultMs: 45000, quizMs: 90000, resultMs: 120000 },
+    credits: { start: 10000 }  /* 兼容内核；屏上不再显示 */
   };
 })();
 /*__SHELL_JS__*/

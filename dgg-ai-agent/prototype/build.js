@@ -33,7 +33,7 @@ const data = {
   m11: { lexicon: m11.lexicon, objects: m11.objects, flows: m11.flows, roles: m11.roles, components: m11.components, presets: m11.presets, tests: m11.tests, deltas: m11.deltas, integrations: m11.integrations, samples: m11.samples }
 };
 /* 首页整屏用定稿展板原图，不再用代码重画。内联成 data URI，保持断网可用、零外部请求。 */
-const homeBoard = 'data:image/webp;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'home-board.webp')).toString('base64');
+const homeBoard = 'data:image/jpeg;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'home-board.jpg')).toString('base64');
 const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'assets', 'dgg-logo.png')).toString('base64');
 // split/join：替换文本里的 $& $' $` 等不会被当作模式解释
 const put = (html, marker, content) => { if (!html.includes(marker)) throw new Error('marker missing: ' + marker); return html.split(marker).join(content); };
@@ -60,7 +60,7 @@ html = put(html, '/*__THEME_PRODUCT_CSS__*/', R('src/theme-product.css'));
 html = put(html, '/*__ANIM_CSS__*/', R('src/anim.css'));
 html = put(html, '/*__CHAT_CSS__*/', R('src/chat.css'));
 html = put(html, '/*__GUIDE_CSS__*/', R('src/guide.css'));
-html = put(html, '/*__THEME_HOME_CSS__*/', R('src/theme-home.css'));
+html = put(html, '/*__THEME_HOME_CSS__*/', R('src/theme-home.css') + '\n' + R('src/theme-ciif.css'));
 html = put(html, '/*__DATA_JSON__*/', JSON.stringify(data).replace(/<\/script/gi, '<\\/script'));
 html = put(html, '/*__QRCODE_JS__*/', R('vendor/qrcode.js'));
 html = put(html, '/*__LINT_JS__*/', R('../skills/_shared/lint.js'));
@@ -77,7 +77,7 @@ html = put(html, '/*__CORE_M8_JS__*/', R('../skills/08-ai-process/core/flow.js')
 html = put(html, '/*__CORE_M11_JS__*/', R('../skills/11-ai-dev/core/build.js'));
 html = put(html, '/*__LOGO_DATA_URI__*/', logo);
 html = put(html, '/*__HOME_BOARD_DATA_URI__*/', homeBoard);
-html = put(html, '/*__SHELL_JS__*/', R('src/shell.js'));
+html = put(html, '/*__SHELL_JS__*/', R('src/home.js') + '\n' + R('src/connect.js') + '\n' + R('src/lead.js') + '\n' + R('src/shell.js'));
 html = put(html, '/*__FX_JS__*/', R('src/fx.js'));
 html = put(html, '/*__CHARTS_JS__*/', R('src/charts.js'));
 html = put(html, '/*__MODULE_01_JS__*/', R('src/module-01.js'));

@@ -54,16 +54,19 @@
 
     /* ---------- 屏底「下一步」 ---------- */
     var isLast = !o.nextKey;
-    var bar = h('div', { class: 'pd-next' + (isLast ? ' last' : '') });
+    /* 15 分钟动线：末屏如果外壳登记了下一站（m2 → m3 → 选场景），就不写「返回首页」 */
+    var flow = isLast && window.DGG.shell && window.DGG.shell.flowNext ? window.DGG.shell.flowNext(o.id) : null;
+    var bar = h('div', { class: 'pd-next' + (isLast && !flow ? ' last' : '') });
     var goBtn = h('button', {
       class: 'go',
       onclick: function () {
-        if (isLast) { if (o.onHome) o.onHome(); }
+        if (flow) { window.DGG.shell.go(flow.id); }
+        else if (isLast) { if (o.onHome) o.onHome(); }
         else if (o.onNext) o.onNext(o.nextKey);
       }
     }, [
-      h('span', { class: 'k' }, [isLast ? '演示完成' : '下一步']),
-      h('span', { class: 'v' }, [isLast ? '返回首页' : (o.nextLabel || '')]),
+      h('span', { class: 'k' }, [isLast && !flow ? '演示完成' : '下一步']),
+      h('span', { class: 'v' }, [flow ? flow.label : (isLast ? '返回首页' : (o.nextLabel || ''))]),
       h('span', { class: 'ar', html: '<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' })
     ]);
     bar.appendChild(goBtn);

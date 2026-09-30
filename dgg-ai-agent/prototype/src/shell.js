@@ -34,20 +34,25 @@
   function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); return el; }
 
   // ---------- 模块登记（DM 3+4+4，一字不改） ----------
+  /* 工博会口径：显示名按物料定稿；key 是内核里的原名（积分表与内核 MODULE_NAME 仍按原名）。hidden 的模块不进导航与首页，但路由仍可达。 */
   var MODULES = [
-    { id: 'm1',  name: '企业AI成熟度评估',      sub: '六维打分，看清同行位置', big: true,  icon: 'radar' },
-    { id: 'm2',  name: '企业AI高价值场景排序',  sub: '先做哪个场景最值',       big: true,  icon: 'target' },
-    { id: 'm3',  name: '企业AI投入ROI测算器',   sub: '整批场景一次算清回收期',       big: true,  icon: 'calc' },
-    { id: 'm4',  name: 'AI获客',                sub: '画像脚本线索一次出',     icon: 'person' },
-    { id: 'm5',  name: 'AI人力官',              sub: 'JD简历面试合规成本',     icon: 'badge' },
-    { id: 'm6',  name: 'AI CFO',                sub: '三表勾稽风险现金政策',   icon: 'coin' },
-    { id: 'm7',  name: 'AI法务',                sub: '合同设立知产三件事',     icon: 'scale' },
-    { id: 'm8',  name: 'AI流程提效',            sub: '报工到派工全流程跑通',   icon: 'flow' },
-    { id: 'm9',  name: 'AI决策',                sub: '指标异常归因三套方案',   icon: 'compass' },
-    { id: 'm10', name: 'AI ERP',                sub: '插单重排交期成本一屏',   icon: 'factory' },
-    { id: 'm11', name: 'AI软件开发',            sub: '一句话需求变成可点页面', icon: 'code' }
+    { id: 'm1',  key: '企业AI成熟度评估',     name: '企业AI成熟度评估',      sub: '六维打分',               icon: 'radar',   hidden: true },
+    { id: 'm2',  key: '企业AI高价值场景排序', name: '场景优先级规划',        sub: '182 个场景库 · 4 维评估模型', icon: 'target' },
+    { id: 'm3',  key: '企业AI投入ROI测算器',  name: '投入产出测算',          sub: '24 期现金流 · 3 档情景',  icon: 'calc' },
+    { id: 'm4',  key: 'AI获客',               name: 'AI获客',                sub: '客户画像 · 线索评分 · 智能分派', icon: 'person' },
+    { id: 'm5',  key: 'AI人力官',             name: 'AI人岗匹配与用工合规',  sub: '人岗匹配 · 合规审查',     icon: 'badge' },
+    { id: 'm6',  key: 'AI CFO',               name: 'AI现金流与经营预警',    sub: '三表勾稽 · 13 周资金预测', icon: 'coin' },
+    { id: 'm7',  key: 'AI法务',               name: '合同风险审查',          sub: '合同逐条过规则',          icon: 'scale',   hidden: true },
+    { id: 'm8',  key: 'AI流程提效',           name: 'AI报工核验',            sub: '报工核验 · 瓶颈工序识别', icon: 'flow' },
+    { id: 'm9',  key: 'AI决策',               name: 'AI经营指标分析',        sub: '指标归因 · 方案推演',     icon: 'compass' },
+    { id: 'm10', key: 'AI ERP',               name: 'AI工序级排程',          sub: '工序级排程 · 插单多情景预演', icon: 'factory' },
+    { id: 'm11', key: 'AI软件开发',           name: 'AI软件开发',            sub: '一句话需求变成可点页面',  icon: 'code',    hidden: true }
   ];
-  MODULES.forEach(function (m) { m.credits = DATA.credits.perRun[m.name]; });
+  MODULES.forEach(function (m) { m.credits = DATA.credits.perRun[m.key] || 0; });
+  /* 制造业 8 个细分（首页与顶栏的行业下拉只列这些） */
+  var MFG = []; DATA.industries.sectors.forEach(function (sec) { sec.industries.forEach(function (i) { if (/^mfg-/.test(i.slug)) MFG.push({ slug: i.slug, name: i.name }); }); });
+  /* 15 分钟动线：模块末屏的「演示完成」改为「下一步」去这里 */
+  var FLOW = { m2: { id: 'm3', label: '投入产出测算' }, m3: { id: 'connect', label: '选一个场景深潜' } };
   var ICONS = {
     radar:   '<path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5l3.9 2.25v4.5L12 16.5l-3.9-2.25v-4.5z" fill="currentColor" opacity=".25"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>',
     target:  '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
@@ -78,6 +83,7 @@
     station: CFG.station,
     route: 'home',
     industryDisplay: 'manufacturing',
+    industrySlug: 'mfg-auto',
     company: null,
     credits: { spent: 0, remaining: CFG.credits.start },
     recommended: null,
@@ -88,7 +94,7 @@
   };
 
   // ---------- DOM 引用 ----------
-  var $main, $rail, $pricebar, $idle, $body = document.body;
+  var $main, $rail, $idle, $body = document.body;
 
   // ---------- 路由 ----------
   function parseHash() {
@@ -107,10 +113,10 @@
       S.activeModule = null;
     }
     clear($main);
-    setModuleTheme(r.route === 'home' || !BUILT[r.route] ? 'home' : r.route, r.step || '');
-    if (r.route === 'home' || !BUILT[r.route]) { renderHome(); S.recommended = null; }
+    setModuleTheme(r.route === 'home' || r.route === 'connect' || !BUILT[r.route] ? 'home' : r.route, r.step || '');
+    if (r.route === 'connect') { $body.setAttribute('data-module', 'connect'); window.DGG.connect.render($main, api, r.step || ''); }
+    else if (r.route === 'home' || !BUILT[r.route]) { renderHome(); S.recommended = null; }
     else { S.activeModule = r.route; BUILT[r.route].mount($main, r.step, api); }
-    renderPricebar();
     touch();
     scheduleHints();
   }
@@ -164,129 +170,29 @@
     if (window.DGG && window.DGG.FX && window.DGG.FX.setScheme) window.DGG.FX.setScheme(dark ? 'dark' : 'light');
   }
 
-  // ---------- 首页 · 定稿展板原图 + 热区 ----------
-  /* 首页整屏就是定稿那张展板图（2000×1125），一个像素都不改。
-     上面盖一层透明热区：11 张卡连到各自模块，切换企业、行业、六档价格各连各的。
-     坐标按原图像素量出来，用百分比写，图等比缩放时热区跟着走。 */
-  var BOARD_W = 2000, BOARD_H = 1125;
-  var HOT = [
-    /* 左列四张 */
-    { id: 'm4',  x: 30,   y: 219, w: 360, h: 145 },
-    { id: 'm5',  x: 30,   y: 391, w: 360, h: 150 },
-    { id: 'm6',  x: 30,   y: 566, w: 360, h: 153 },
-    { id: 'm7',  x: 30,   y: 744, w: 360, h: 156 },
-    /* 中间三张报告卡 */
-    { id: 'm1',  x: 404,  y: 199, w: 377, h: 275 },
-    { id: 'm2',  x: 793,  y: 199, w: 344, h: 275 },
-    { id: 'm3',  x: 1149, y: 199, w: 334, h: 308 },
-    /* 右列四张 */
-    { id: 'm8',  x: 1494, y: 219, w: 291, h: 150 },
-    { id: 'm9',  x: 1494, y: 391, w: 291, h: 151 },
-    { id: 'm10', x: 1494, y: 563, w: 291, h: 156 },
-    { id: 'm11', x: 1494, y: 741, w: 291, h: 158 }
-  ];
-  var HOT_PRICE = [
-    { key: 'lite',    x: 45,   y: 931, w: 336, h: 142 },
-    { key: 'std',     x: 399,  y: 931, w: 302, h: 142 },
-    { key: 'adv',     x: 711,  y: 931, w: 310, h: 142 },
-    { key: 'flag',    x: 1034, y: 931, w: 299, h: 142 },
-    { key: 'diag',    x: 1347, y: 931, w: 297, h: 142 },
-    { key: 'private', x: 1659, y: 931, w: 297, h: 142 }
-  ];
-  var HOT_SWITCH   = { x: 1806, y: 240, w: 82,  h: 40 };
-  var HOT_INDUSTRY = { x: 1705, y: 28,  w: 189, h: 41 };
-
-  function fillIndustry(sel) {
-    DATA.industries.display.forEach(function (d) { sel.appendChild(h('option', { value: d.key }, [d.name])); });
-  }
-  function pct(v, total) { return (v / total * 100).toFixed(4) + '%'; }
-  function hotStyle(r) {
-    return 'left:' + pct(r.x, BOARD_W) + ';top:' + pct(r.y, BOARD_H) +
-           ';width:' + pct(r.w, BOARD_W) + ';height:' + pct(r.h, BOARD_H);
-  }
+  // ---------- 首页 · 工博会展板（home.js） ----------
   function byId(id) { for (var i = 0; i < MODULES.length; i++) if (MODULES[i].id === id) return MODULES[i]; return null; }
   function cardStyle(id) {
     var pc = (window.DGG && window.DGG.PALETTE && window.DGG.PALETTE[id]) || null;
     return pc ? '--c-pa:' + pc.pa + ';--c-pa2:' + pc.pa2 + ';--c-soft:' + pc.soft + ';--c-ink:' + pc.ink + ';--c-hd1:' + pc.hd1 + ';--c-hd2:' + pc.hd2 + ';--c-hdt:' + pc.hdt : null;
   }
   function openModule(m) { if (BUILT[m.id]) go(m.id); }
-  /* 待机页仍用朴素的 11 宫格：那一屏是循环点亮，不需要展板 */
   function gridEl(onClick) {
     var g = h('div', { class: 'grid tiles' });
     MODULES.forEach(function (m) {
+      if (m.hidden) return;
       g.appendChild(h('button', {
-        class: 'card' + (m.big ? ' big' : ''), 'data-id': m.id, disabled: !BUILT[m.id], style: cardStyle(m.id),
+        class: 'card', 'data-id': m.id, disabled: !BUILT[m.id], style: cardStyle(m.id),
         onclick: function () { onClick && onClick(m); }
       }, [
         h('span', { class: 'icon', html: '<svg viewBox="0 0 24 24">' + ICONS[m.icon] + '</svg>' }),
         h('span', { class: 'name' }, [m.name]),
-        h('span', { class: 'sub' }, [m.sub]),
-        h('span', { class: 'cr' }, [h('b', { class: 'num' }, [String(m.credits)]), ' 积分'])
+        h('span', { class: 'sub' }, [m.sub])
       ]));
     });
     return g;
   }
-
-  function renderHome() {
-    var stage = h('div', { class: 'grid board' });
-    var box = h('div', { class: 'boardbox' });
-    box.appendChild(h('img', { class: 'bg', src: CFG.homeBoard, alt: '薯片AI智能体 · AI 赋能企业经营全链路解决方案' }));
-    HOT.forEach(function (r) {
-      var m = byId(r.id);
-      box.appendChild(h('button', {
-        class: 'card hot', 'data-id': r.id, style: hotStyle(r), disabled: !BUILT[r.id],
-        title: m.name + ' · ' + m.credits + ' 积分', 'aria-label': m.name,
-        onclick: function () { openModule(m); }
-      }));
-    });
-    /* 切换企业：菜单挂在热区下面，样式与模块页那份一致 */
-    var picker = h('div', { class: 'hot pick', style: hotStyle(HOT_SWITCH) });
-    var menu = null;
-    picker.appendChild(h('button', { class: 'lnk', 'aria-label': '切换企业', onclick: function (e) {
-      e.stopPropagation();
-      if (menu) { picker.removeChild(menu); menu = null; return; }
-      menu = h('div', { class: 'menu' });
-      DATA.companies.forEach(function (sc) {
-        menu.appendChild(h('button', { onclick: function () { setCompany(sc.profile); picker.removeChild(menu); menu = null; } }, [sc.profile.name]));
-      });
-      menu.appendChild(h('button', { class: 'muted', onclick: function () { setCompany(null); picker.removeChild(menu); menu = null; } }, ['清空']));
-      picker.appendChild(menu);
-    } }));
-    box.appendChild(picker);
-    /* 行业：真下拉盖在图上那只选择框的位置，透明，选中后与顶栏那只同步 */
-    var sel = h('select', { class: 'hot ind', style: hotStyle(HOT_INDUSTRY), 'aria-label': '行业', onchange: function (e) {
-      S.industryDisplay = e.target.value;
-      var top = document.getElementById('industry'); if (top) top.value = e.target.value;
-      if (S.activeModule && BUILT[S.activeModule].onIndustry) BUILT[S.activeModule].onIndustry(api.displayIndustryDefault());
-    } });
-    fillIndustry(sel);
-    sel.value = S.industryDisplay;
-    box.appendChild(sel);
-    /* 六档价格 */
-    HOT_PRICE.forEach(function (r) {
-      var p = null;
-      for (var i = 0; i < PRICES.length; i++) if (PRICES[i].key === r.key) p = PRICES[i];
-      box.appendChild(h('button', {
-        class: 'hot price', style: hotStyle(r), 'data-price': r.key,
-        title: p.name + ' ' + p.price + ' ' + p.unit + ' · ' + p.seats + ' · ' + p.pts, 'aria-label': p.name,
-        onclick: function (e) { e.stopPropagation(); boardPop(box, p, r); }
-      }));
-    });
-    stage.appendChild(box);
-    $main.appendChild(stage);
-  }
-  var boardPopEl = null;
-  function boardPop(box, p, r) {
-    if (boardPopEl && boardPopEl.parentNode) boardPopEl.parentNode.removeChild(boardPopEl);
-    if (boardPopEl && boardPopEl._key === p.key) { boardPopEl = null; return; }
-    boardPopEl = h('div', { class: 'boardpop', style: 'left:' + pct(r.x + r.w / 2, BOARD_W) + ';bottom:' + pct(BOARD_H - r.y + 10, BOARD_H) }, [
-      h('b', {}, [p.name, ' ', h('span', { class: 'num' }, [String(p.price)]), ' ', p.unit]),
-      h('div', { class: 'row' }, [h('span', {}, ['坐席']), h('span', {}, [p.seats])]),
-      h('div', { class: 'row' }, [h('span', {}, ['积分']), h('span', {}, [p.pts])])
-    ]);
-    boardPopEl._key = p.key;
-    box.appendChild(boardPopEl);
-  }
+  function renderHome() { window.DGG.home.render($main, api); }
 
   // ---------- 右侧常驻栏 ----------
   function renderRail() {
@@ -312,17 +218,13 @@
       meta ? h('div', { class: 'company-meta' }, [meta]) : null,
       picker
     ]));
-    $rail.appendChild(h('div', {}, [
-      h('h4', {}, ['积分']),
-      h('div', { class: 'credits' }, [
-        h('div', { class: 'credit spent' }, [h('div', { class: 'k' }, ['本次消耗']), h('div', { class: 'v num', id: 'cr-spent' }, [String(S.credits.spent)])]),
-        h('div', { class: 'credit' }, [h('div', { class: 'k' }, ['剩余']), h('div', { class: 'v num', id: 'cr-left' }, [fmt(S.credits.remaining)])])
-      ])
-    ]));
     var qrBox = h('div', { class: 'qr' + (S.qrReady ? ' ready' : ''), html: qrSvg(CFG.wechatUrl, 4) });
-    qrBox.appendChild(h('div', { class: 'cap' }, ['扫码接收结果']));
-    $rail.appendChild(h('div', {}, [h('h4', {}, ['结果发送到微信']), qrBox]));
-    if (S.station === '2') $rail.appendChild(h('div', { id: 'agent-status' }, [h('h4', {}, ['智能体状态'])]));
+    qrBox.appendChild(h('div', { class: 'cap' }, ['扫码领取报告 · 专家咨询']));
+    $rail.appendChild(h('div', {}, [h('h4', {}, ['企业微信']), qrBox]));
+    $rail.appendChild(h('div', {}, [
+      h('button', { class: 'btn lead', onclick: function () { window.DGG.lead.leadForm({}); } }, ['登记 · 预约 15 分钟演示']),
+      h('div', { class: 'lead-cnt', html: '今日已登记 <b>' + window.DGG.lead.count() + '</b> 条 · <a href="#" class="csv">导出</a>', onclick: function (e) { if (e.target.classList.contains('csv')) { e.preventDefault(); window.DGG.lead.exportCsv(); } } })
+    ]));
   }
   function animateNum(el, from, to, ms) {
     var t0 = performance.now();
@@ -335,9 +237,8 @@
   function charge(n) {
     var a = S.credits.spent, b = S.credits.remaining;
     S.credits.spent = n; S.credits.remaining = Math.max(0, b - n);
-    var e1 = document.getElementById('cr-spent'), e2 = document.getElementById('cr-left');
-    if (e1) animateNum(e1, a, n, 500);
-    if (e2) animateNum(e2, b, S.credits.remaining, 700);
+    /* 工博会版屏上不显示积分：只记状态，兼容内核的扣分回调 */
+    void a; void b;
   }
   function setQrReady(on) {
     S.qrReady = !!on;
@@ -365,34 +266,8 @@
     } catch (e) { return ''; }
   }
 
-  // ---------- 底栏价格条 ----------
-  var popEl = null;
-  function renderPricebar() {
-    clear($pricebar); popEl = null;
-    PRICES.forEach(function (p) {
-      var pill = h('button', { class: 'pill k-' + p.key + (S.recommended === p.key ? ' rec' : '') + (p.key === 'private' ? ' star' : ''), onclick: function (ev) { togglePop(p, ev.currentTarget); } }, [
-        h('span', { class: 'n' }, [p.key === 'private' ? h('i', { class: 'crown', html: '<svg viewBox="0 0 24 24"><path d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-1.6 9H4.6z" fill="currentColor"/></svg>' }) : null, p.name]),
-        h('span', { class: 'p num' }, [String(p.price)]),   /* 价格不加千分位：DM 与展板都是 1280 / 12800 */
-        h('span', { class: 'u' }, [p.unit, h('i', {}, [p.seats])]),
-        p.key === 'private' ? h('span', { class: 'flag' }, ['推荐']) : null
-      ]);
-      $pricebar.appendChild(pill);
-    });
-  }
-  function togglePop(p, anchor) {
-    if (popEl) { $pricebar.removeChild(popEl); var same = popEl._key === p.key; popEl = null; if (same) return; }
-    popEl = h('div', { class: 'pop' }, [
-      h('b', {}, [p.name, ' ', h('span', { class: 'num', style: 'color:var(--brand)' }, [String(p.price)]), ' ', p.unit]),
-      h('div', { class: 'row' }, [h('span', {}, ['坐席']), h('span', {}, [p.seats])]),
-      h('div', { class: 'row' }, [h('span', {}, ['积分']), h('span', {}, [p.pts])])
-    ]);
-    popEl._key = p.key;
-    popEl.style.left = anchor.offsetLeft + 'px';
-    $pricebar.appendChild(popEl);
-  }
-  document.addEventListener('click', function (e) {
-    if (popEl && !$pricebar.contains(e.target)) { $pricebar.removeChild(popEl); popEl = null; }
-  });
+  // ---------- 价格：工博会版不上屏 ----------
+  function renderPricebar() {}
 
   // ---------- 待机页 ----------
   var idleTimer = null, litTimer = null;
@@ -407,26 +282,20 @@
   function holdIdle(on) { S.idleHold += on ? 1 : -1; if (S.idleHold < 0) S.idleHold = 0; touch(); }
   function showIdle() {
     if (!$idle.classList.contains('hidden')) return;
+    /* 待机 = 回到首页展板让它自己轮巡，只压一条「扫码预约」横幅 */
+    go('home');
     clear($idle);
-    $idle.appendChild(h('div', { class: 'brand' }, [h('img', { src: CFG.logo, alt: '顶呱呱' }), h('div', { class: 't' }, ['薯片AI智能体'])]));
-    $idle.appendChild(h('div', { class: 'nums' }, [
-      h('div', { class: 'n' }, [h('div', { class: 'k' }, ['增值业绩增长率']), h('div', { class: 'v num' }, [h('span', { class: 'arrow' }, ['↑']), '30%'])]),
-      h('div', { class: 'n' }, [h('div', { class: 'k' }, ['解决方案输出时间']), h('div', { class: 'v num' }, [h('span', { class: 'arrow' }, ['↓']), '15分钟'])]),
-      h('div', { class: 'n' }, [h('div', { class: 'k' }, ['财务出错率']), h('div', { class: 'v num' }, [h('span', { class: 'arrow' }, ['↓']), '5%以下'])])
+    $idle.appendChild(h('div', { class: 'idle-banner' }, [
+      h('div', { class: 't' }, ['扫码预约 15 分钟现场演示']),
+      h('div', { class: 's' }, ['让 AI 真正为业务增长负责 · 展位 6.2H-B018']),
+      h('div', { class: 'q', html: qrSvg(CFG.wechatUrl, 4) })
     ]));
-    var g = gridEl(null); $idle.appendChild(g);
-    $idle.appendChild(h('div', { class: 'foot' }, [h('b', {}, ['18 年']), ' 行业沉淀 · ', h('b', {}, ['530 万+']), ' 真实数据验证　　培育企业核心竞争力，让老板经营企业更简单']));
     $idle.classList.remove('hidden');
     syncScheme();
-    var cards = g.querySelectorAll('.card'), i = 0;
-    litTimer = setInterval(function () {
-      cards.forEach(function (c) { c.classList.remove('lit'); });
-      cards[i % cards.length].classList.add('lit'); i++;
-    }, 1400);
   }
   function hideIdle() {
     if ($idle.classList.contains('hidden')) return;
-    $idle.classList.add('hidden'); clearInterval(litTimer);
+    $idle.classList.add('hidden');
     syncScheme();
     resetSession();
   }
@@ -437,7 +306,7 @@
     go.apply(null, defaultRoute());
   }
   function defaultRoute() {
-    if (S.station === '1') return ['m1', 'input'];
+    if (S.station === 'pad') return ['m2', 'input'];
     return ['home'];
   }
   ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
@@ -447,7 +316,7 @@
     }, { passive: true });
   });
   // 展会现场不希望屏幕停一会儿就跳回首页：默认关闭待机，?idle=on 时才启用
-  var IDLE_ON = /(?:^|[?&])idle=on(?:&|$)/.test(location.search);
+  var IDLE_ON = /(?:^|[?&])idle=on(?:&|$)/.test(location.search) || S.station === 'tv';
   idleTimer = setInterval(function () {
     if (!IDLE_ON) return;
     if (S.idleHold) return;
@@ -458,7 +327,8 @@
   function showWeChat() {
     holdIdle(true);
     var bg = h('div', { class: 'modal-bg', onclick: function (e) { if (e.target === bg) close(); } });
-    var box = h('div', { class: 'modal', html: '<h3>结果发送到微信</h3>' + qrSvg(CFG.wechatUrl, 6) + '<div class="cap">微信扫码，结果即刻送达</div>' });
+    var box = h('div', { class: 'modal', html: '<h3>扫码领取本报告</h3>' + qrSvg(CFG.wechatUrl, 6) + '<div class="cap">企业微信扫码 · 报告与专家咨询</div>' });
+    box.appendChild(h('button', { class: 'btn ghost', onclick: function () { close(); window.DGG.lead.leadForm({}); } }, ['留下联系方式，预约 15 分钟演示']));
     box.appendChild(h('button', { class: 'btn', onclick: close }, ['完成']));
     bg.appendChild(box); document.body.appendChild(bg);
     function close() { document.body.removeChild(bg); holdIdle(false); }
@@ -494,10 +364,19 @@
     holdIdle: holdIdle, touch: touch, showWeChat: showWeChat, print: print, llm: llm,
     industryNameOf: industryNameOf, optText: optText, station: function () { return S.station; },
     isBuilt: function (id) { return !!BUILT[id]; },
-    displayIndustryDefault: function () {
-      var d = DATA.industries.display.filter(function (x) { return x.key === S.industryDisplay; })[0];
-      return d ? d.default : null;
-    }
+    displayIndustryDefault: function () { return S.industrySlug; },
+    industrySlug: function () { return S.industrySlug; },
+    setIndustry: function (slug) {
+      S.industrySlug = slug;
+      var top = document.getElementById('industry'); if (top) top.value = slug;
+      if (S.activeModule && BUILT[S.activeModule] && BUILT[S.activeModule].onIndustry) BUILT[S.activeModule].onIndustry(slug);
+    },
+    mfgIndustries: function () { return MFG.slice(); },
+    modules: function () { return MODULES.filter(function (m) { return !m.hidden; }); },
+    moduleName: function (id) { var m = byId(id); return m ? m.name : id; },
+    flowNext: function (id) { return FLOW[id] || null; },
+    qrSvg: qrSvg,
+    deliver: function (host, o) { return window.DGG.lead.deliver(host, o); }
   };
   window.DGG.registerModule = function (id, impl) { BUILT[id] = impl; };
   window.DGG.shell = api;
@@ -505,21 +384,18 @@
   // ---------- 启动 ----------
   window.addEventListener('DOMContentLoaded', function () {
     $main = document.getElementById('main'); $rail = document.getElementById('rail');
-    $pricebar = document.getElementById('pricebar'); $idle = document.getElementById('idle');
-    $body.setAttribute('data-station', S.station || '3');
+    $idle = document.getElementById('idle');
+    $body.setAttribute('data-station', S.station || 'desk');
     document.getElementById('logo').src = CFG.logo;
     var sel = document.getElementById('industry');
-    DATA.industries.display.forEach(function (d) { sel.appendChild(h('option', { value: d.key }, [d.name])); });
-    sel.value = S.industryDisplay;
-    sel.addEventListener('change', function () {
-      S.industryDisplay = sel.value;
-      if (S.activeModule && BUILT[S.activeModule].onIndustry) BUILT[S.activeModule].onIndustry(api.displayIndustryDefault());
-    });
+    MFG.forEach(function (i) { sel.appendChild(h('option', { value: i.slug }, [i.name])); });
+    sel.value = S.industrySlug;
+    sel.addEventListener('change', function () { api.setIndustry(sel.value); });
     document.getElementById('home-link').addEventListener('click', function () { go('home'); });
     renderRail();
     window.addEventListener('hashchange', render);
     if (!location.hash) { var d = defaultRoute(); location.hash = '#/' + d.join('/'); }
     render();
-    if (S.station === '2') showIdle();
+    if (S.station === 'tv') showIdle();
   });
 })();
