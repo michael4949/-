@@ -1,10 +1,16 @@
-/* ===================== AI流程提效 · 模块专属版式（组件全部来自 product.css） ===================== */
+/* ===================== AI报工核验 · 模块专属版式（组件全部来自 product.css） ===================== */
 .m8-connect .src-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px 14px; align-items: center; padding: 9px 0; border-bottom: 1px solid #EEF1F7; }
 .m8-connect .src-row:last-child { border-bottom: 0; }
 .m8-connect .src-row .t { font-weight: 700; } .m8-connect .src-row .s { color: var(--pd-sub); font-size: calc(12px * var(--scale)); }
 .m8-connect .go { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #fff; border: 1px solid var(--pd-line); border-radius: 12px; }
 .m8-connect .go .t { font-weight: 800; font-size: calc(16px * var(--scale)); } .m8-connect .go .s { color: var(--pd-sub); font-size: calc(13px * var(--scale)); }
-.m8-connect .go .sp { flex: 1; } .m8-connect .go .cr { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); } .m8-connect .go .cr b { color: var(--pa); font-size: calc(16px * var(--scale)); }
+.m8-connect .go .sp { flex: 1; }
+/* 海报口径角标行：状态胶囊 + 两枚能力角标 + 一句数据来源说明 */
+.m8-cap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: -4px; }
+.m8-cap .cap { display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 999px; font-size: calc(12.5px * var(--scale)); font-weight: 700; color: var(--pa-ink); background: var(--pa-soft); border: 1px solid color-mix(in srgb, var(--pa) 30%, #fff); }
+.m8-cap .cap.lead { color: #fff; background: var(--pa); border-color: var(--pa); font-family: inherit; cursor: default; }
+.m8-cap button.cap.lead { cursor: pointer; }
+.m8-cap .note { color: var(--pd-sub); font-size: calc(12.5px * var(--scale)); margin-left: 4px; }
 /* 页头计数器 */
 .m8-counter { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; background: var(--pa-soft); color: var(--pa-ink); font-weight: 800; font-size: calc(12.5px * var(--scale)); white-space: nowrap; }
 .m8-counter b { font-size: calc(15px * var(--scale)); }

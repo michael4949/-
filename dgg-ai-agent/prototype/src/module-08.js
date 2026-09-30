@@ -1,4 +1,4 @@
-/* AI流程提效 · 生产部门的生产环节（六屏）
+/* AI报工核验 · 生产部门的生产环节（六屏）
  * 接入（报工核验）→ 工序流看板 → 工序诊断 → 改善预演 → 执行与派工 → 提效周报
  * 每屏三拍：接入（来源亮起、数据包飞向处理块）→ 展开（数字滚、路径画、条形长、行流入）→ 结论（一句话横幅 + 聚焦）
  * 计算全部走 DGG.coreM8（排程引擎依赖注入 DGG.coreM10）；对话坞的开场、问句、问答、文档摄入也走同一份内核
@@ -130,6 +130,17 @@
   }
   function srcAt(i, alt) { var s2 = (M.data.sources || [])[i]; return s2 || { name: alt, rows: 0 }; }
   function scroller(el, maxH) { return h('div', { class: 'm8-sc', style: 'max-height:' + maxH + 'px' }, [el]); }
+  /* 海报口径角标（08 SKILL.md：报工核验 5 条规则、异常 6 条规则）；可前置一段本屏状态，尾部可挂一句说明 */
+  var CAPS = ['5 条报工核验规则', '6 类生产异常识别'];
+  function capLine(lead, note, onLead) {
+    var kids = (lead || []).map(function (t) { return h(onLead ? 'button' : 'span', { class: 'cap lead', onclick: onLead }, [t]); })
+      .concat(CAPS.map(function (t) { return h('span', { class: 'cap' }, [t]); }));
+    if (note) kids.push(h('span', { class: 'note' }, [note]));
+    return h('div', { class: 'c12 m8-cap' }, kids);
+  }
+  /* 保养只按运行时长阈值给窗口，不是预测；内核文案里的「(设备)保养窗口」统一改成这个说法 */
+  var MAINT_WIN = '保养窗口（按运行时长阈值）';
+  function maintWord(text) { return String(text == null ? '' : text).replace(/(设备)?保养窗口(?!（)/g, MAINT_WIN); }
 
   /* 现场引导：每一屏箭头该指哪个按钮（按钮文字前缀匹配）。'next' = 本屏是总览，直接指屏底「下一步」。
      不靠「猜本屏第一个主按钮」，那样总览屏会指到角落里一张卡的侧向操作上去。 */
@@ -157,8 +168,8 @@
     var R = M.R, k = R.kpi, v = V(), c = M.company;
     var meta = c ? [sh.industryNameOf(c.industry), sh.optText('size', c.size)].filter(Boolean).join(' · ') : '';
     var tabs = [{ key: 'connect', label: '接入', badge: k.reportsPending || 0 }, { key: 'board', label: v.flowName + '看板', badge: k.alertsOpen || 0 }, { key: 'diag', label: v.op + '诊断', badge: k.stdExpired || 0 }, { key: 'improve', label: '改善预演' }, { key: 'exec', label: '执行与' + v.dispatch.replace('单', ''), badge: k.maintDue || 0 }, { key: 'report', label: '提效周报' }];
-    var F = P.frame({ mark: '提效', accent: ACCENT, modules: P.navModules('m8'), crumbs: ['AI流程提效', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm8', name: 'AI流程提效', step: M.step, onGo: setStep },
+    var F = P.frame({ mark: '核验', accent: ACCENT, modules: P.navModules('m8'), crumbs: [sh.moduleName('m8'), tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta + (meta ? ' · ' : '') + v.dept + ' · ' + K.short(M.data.weekStart) + ' 起本周' }, tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
+      chat: { id: 'm8', name: sh.moduleName('m8'), step: M.step, onGo: setStep },
       onTab: function (key) { if (key !== 'connect' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step !== 'connect' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
@@ -175,9 +186,10 @@
     var fb = flowBar({ src: d.sources.map(function (s) { return [cut(s.name, 5), fmtN(s.rows) + ' 条']; }), hub: v.report + '核验',
       out: [(vr.total - vr.pending) + ' / ' + vr.total, '已核验'], btn: '重新核验' });
     g.appendChild(fb);
+    g.appendChild(capLine([], '数据来自报工表与排程导出，不接设备、不改产线'));
     var kpiRow = h('div', { class: 'c12' }, [P.kpis([
       { label: '本周' + v.report, value: cnt(vr.total), unit: '条', sub: K.short(d.weekStart) + ' 起' },
-      { label: '待核验', value: cnt(vr.pending), unit: '条', tone: vr.pending ? 'late' : 'ok', sub: '六条规则' },
+      { label: '待核验', value: cnt(vr.pending), unit: '条', tone: vr.pending ? 'late' : 'ok', sub: '5 条核验规则' },
       { label: v.lines, value: cnt(k.lines), unit: '条', sub: v.op + ' ' + k.stages + ' 道' },
       { label: '在产' + v.lots, value: cnt(k.lots), unit: '个', sub: k.products + ' 种' },
       { label: v.bottleneck, value: cnt(k.load7), unit: '%', tone: k.load7 >= 100 ? 'late' : 'ok', sub: R.bottleneck.line.name }
@@ -212,7 +224,7 @@
       body: [h('div', { class: 'pd-form' }, [h('div', { class: 'pd-field' }, [h('label', {}, ['企业名称']), nameIn]), h('div', { class: 'pd-field' }, [h('label', {}, ['行业']), h('div', { style: 'font-weight:600' }, [M.company ? sh.industryNameOf(M.company.industry) + (M.company.size ? ' · ' + sh.optText('size', M.company.size) : '') : sh.industryNameOf(sh.displayIndustryDefault())])])]), h('div', { style: 'margin-top:8px' }, [srcs])] }));
     g.appendChild(h('div', { class: 'c12 go' }, [
       h('div', {}, [h('div', { class: 't' }, [v.flowName + '看板']), h('div', { class: 's' }, [v.bottleneck + ' ' + R.bottleneck.line.name + ' · ' + v.queue + ' ' + R.bottleneck.queueDays + ' 天 · 异常 ' + k.alertsTotal + ' 起'])]),
-      h('div', { class: 'sp' }), h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']),
+      h('div', { class: 'sp' }),
       P.btn(vr.pending ? '核验并进入' + v.flowName + '看板' : '进入' + v.flowName + '看板', { cls: 'primary big', onClick: enterBoard })]));
     work.appendChild(g);
     story({ work: work, src: fb.srcs, from: fb.srcs[1], to: fb.hub, tail: fb.out, label: v.report + ' ' + vr.total + ' 条',
@@ -258,6 +270,7 @@
     var fb = flowBar({ src: [[cut(v.report, 5), fmtN(k.reportsTotal) + ' 条'], [cut(srcAt(0, '工艺路线').name, 5), srcAt(0, '工艺路线').rows + ' 条'], [cut(srcAt(3, '班组排班').name, 5), srcAt(3, '班组排班').rows + ' 条']],
       hub: '约束识别', out: [B.line.name, v.bottleneck], btn: '刷新看板' });
     g.appendChild(fb);
+    g.appendChild(capLine([v.report + '核验 ' + (R.verify.total - R.verify.pending) + ' / ' + R.verify.total + ' 条'], null, function () { setStep('connect'); }));
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([
       { label: v.bottleneck + '负荷', value: cnt(k.load7), unit: '%', tone: k.load7 >= 100 ? 'late' : k.load7 >= 85 ? 'risk' : 'ok', sub: B.line.name, onClick: function () { openStage(R.flow.filter(function (f) { return f.isConstraint; })[0]); } },
       { label: v.queue, value: cnt(k.queueDays, { dec: k.queueDays % 1 ? 1 : 0 }), unit: '天', tone: k.queueDays > 7 ? 'late' : 'ok' },
@@ -382,7 +395,7 @@
     var g = h('div', { class: 'pd-grid m8-g' });
     if (!M.pick) M.pick = pv.recommended;
     var fb = flowBar({ src: [['今日' + v.lot, d.jobsToday.length + ' 个'], ['技能矩阵', R.skills.ops.length + ' ' + v.op], ['加班上限', d.otCap.month + ' h/月']],
-      hub: 'AI ERP 排程', out: ['方案 ' + pv.recommended, 'AI 推荐'], btn: '重新预演' });
+      hub: 'AI工序级排程', out: ['方案 ' + pv.recommended, 'AI 推荐'], btn: '重新预演' });
     g.appendChild(fb);
     var opts = pv.cards.map(function (c) {
       var m = c.result.metrics;
@@ -472,10 +485,10 @@
     R.planHit.forEach(function (p) { hit.appendChild(h('div', { class: 'r' }, [h('span', { class: 'lb', title: p.lineName }, [p.lineName]), P.bar(Math.min(100, p.pct), p.behind ? 'late' : 'ok', p.pct + '%'), h('span', { class: 'v' }, [fmtN(p.actual) + ' / ' + fmtN(p.target)])])); });
     right.appendChild(P.card({ title: v.report + '看板 · ' + v.shiftA, sub: '前 4 小时', body: [hit] }));
     var mt = h('div', { class: 'pd-list' });
-    R.maintenance.forEach(function (m) { mt.appendChild(P.item({ tone: m.scheduled ? 'done' : 'risk', icon: '保', title: m.machine + ' · ' + m.lineName, sub: cut(m.reasons[0], 18) + (m.window ? ' · ' + m.window.label : ''), right: m.scheduled ? P.chip('done', '已排 ' + K.short(m.scheduledAt)) : P.btn('排入窗口', { cls: 'sm', onClick: function () { commit(K.scheduleMaint(M.data, LIB, m.machine), m.machine + ' ' + v.maint + '排入 ' + m.window.label + ' · ' + m.role); }, disabled: !m.window }), rightSub: m.savedH ? '预计 ' + m.savedH + ' h' : '' })); });
+    R.maintenance.forEach(function (m) { mt.appendChild(P.item({ tone: m.scheduled ? 'done' : 'risk', icon: '保', title: m.machine + ' · ' + m.lineName, sub: cut(m.reasons[0], 18) + (m.window ? ' · ' + m.window.label : ''), right: m.scheduled ? P.chip('done', '已排 ' + K.short(m.scheduledAt)) : P.btn('排入窗口', { cls: 'sm', onClick: function () { commit(K.scheduleMaint(M.data, LIB, m.machine), m.machine + ' 排入' + MAINT_WIN + ' ' + m.window.label + ' · ' + m.role); }, disabled: !m.window }), rightSub: m.savedH ? '预计 ' + m.savedH + ' h' : '' })); });
     tagItems(mt, R.maintenance, function (m) { return m.machine; });
-    if (!R.maintenance.length) mt.appendChild(P.empty('无到期' + v.maint));
-    right.appendChild(P.card({ title: v.maint + '窗口', sub: '到期 ' + R.kpi.maintDue, body: [mt] }));
+    if (!R.maintenance.length) mt.appendChild(P.empty(MAINT_WIN + '：暂无到期' + v.machine));
+    right.appendChild(P.card({ title: MAINT_WIN, sub: '到期 ' + R.kpi.maintDue + ' 台', body: [mt] }));
     g.appendChild(right);
     var sk = h('div', { class: 'm8-skill' });
     R.skills.coverage.forEach(function (c) {
@@ -532,7 +545,7 @@
     var who = h('div', { class: 'who' });
     W.recipients.forEach(function (r) { who.appendChild(h('span', {}, [r])); });
     g.appendChild(P.card({ cls: 'c5', title: v.dept + '提效周报', sub: K.short(d.weekStart) + ' 周',
-      body: [h('div', { class: 'pd-field' }, [h('label', {}, ['收件人']), who]), h('div', { class: 'pd-pre m8-rep' }, [W.text])],
+      body: [h('div', { class: 'pd-field' }, [h('label', {}, ['收件人']), who]), h('div', { class: 'pd-pre m8-rep' }, [maintWord(W.text)])],
       foot: [P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } }), P.btn('回到看板', { onClick: function () { setStep('board'); } })] }));
     var wfItems = L.byKind.map(function (k) { return { id: k.kind, label: k.label, value: k.value }; });
     var lt = P.table({ compact: true, cols: [
@@ -551,6 +564,7 @@
       g.appendChild(P.card({ cls: 'c12', title: '效果核验', sub: d.projects.length + ' 项', body: [vf] }));
     }
     work.appendChild(g);
+    P.deliver(work, { items: ['派工计划', '提效周报'], scene: 'AI报工核验' });
     story({ work: work, src: fb.srcs, from: fb.srcs[0], to: fb.hub, tail: fb.out, label: '12 周指标',
       scan: tcard, verdict: say, rise: nodes(work, '.m8-rep, .who'), paths: nodes(chart, 'path'), dots: nodes(chart, 'circle'),
       rows: trs(lt).slice(0, 6), focus: work.querySelectorAll('.pd-kpi')[0] });
@@ -675,7 +689,7 @@
       var mt = R.maintenance.filter(function (x) { return x.machine === input.machine; })[0];
       if (!mt || mt.scheduled || !mt.window) return false;
       if (M.step !== 'exec') setStep('exec');
-      commit(K.scheduleMaint(M.data, LIB, mt.machine), mt.machine + ' ' + v.maint + '排入 ' + mt.window.label + ' · ' + mt.role);
+      commit(K.scheduleMaint(M.data, LIB, mt.machine), mt.machine + ' 排入' + MAINT_WIN + ' ' + mt.window.label + ' · ' + mt.role);
       refocus(mt.machine, 260);
       return true;
     }
