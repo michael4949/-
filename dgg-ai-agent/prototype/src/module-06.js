@@ -1,4 +1,4 @@
-/* AI CFO · 财务副驾驶（六屏）
+/* AI现金流与经营预警（六屏）
  * 接入 → 财务驾驶舱 → 三表勾稽 → 风险预警 → 现金预测 → 政策与月报
  * 每屏三拍：来源块亮起、数据包进处理块 → 数字滚动 / 图形画出 / 明细流入 → 一句结论推上来
  * 计算全部走 DGG.coreM6（与 skill 同一份内核）；调整分录 / 风险处置 / 现金方案 / 政策清单写回同一份账套，各屏随之重算
@@ -200,10 +200,11 @@
       { key: 'connect', label: '接入' }, { key: 'board', label: '财务驾驶舱' }, { key: 'recon', label: '三表勾稽', badge: R.reconcile.counts.bad || 0 },
       { key: 'risk', label: '风险预警', badge: R.risks.counts.high || 0 }, { key: 'cash', label: '现金预测', badge: R.forecast.gap > 0 ? '缺' : 0 }, { key: 'policy', label: '政策与月报' }
     ];
-    var F = P.frame({ mark: 'CFO', accent: ACCENT, modules: P.navModules('m6'),
-      crumbs: ['AI CFO', tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
+    var NAME = sh.moduleName('m6');
+    var F = P.frame({ mark: '现金', accent: ACCENT, modules: P.navModules('m6'),
+      crumbs: [NAME, tabs.filter(function (t) { return t.key === M.step; })[0].label], company: { name: M.data.company, meta: meta },
       tabs: tabs, active: M.step, guideAim: GUIDE_AIM[M.step],
-      chat: { id: 'm6', name: 'AI CFO', step: M.step, onGo: setStep },
+      chat: { id: 'm6', name: NAME, step: M.step, onGo: setStep },
       onTab: function (key) { if (key === 'board' && !M.charged) enterBoard(); else setStep(key); } });
     M.frame = F; $root.appendChild(F.root);
     if (M.step === 'board' && !M.charged) { M.charged = true; sh.charge(K.CREDITS); }
@@ -221,7 +222,7 @@
     var d = M.data, R = M.R, rec = R.reconcile, m = rec.metrics;
     work.classList.add('m6-connect');
     var g = grid();
-    var F = flowBar({ src: srcChips(5), hub: 'AI CFO', out: ['已开通 4 项', '勾稽 ' + LIB.rules.rules.length + ' 条 · 政策 ' + LIB.policies.policies.length + ' 项'], btn: '重新同步' });
+    var F = flowBar({ src: srcChips(5), hub: sh.moduleName('m6'), out: ['已开通 4 项', '勾稽 ' + LIB.rules.rules.length + ' 条 · 政策 ' + LIB.policies.policies.length + ' 项'], btn: '重新同步' });
     g.appendChild(F);
     var nameIn = h('input', { type: 'text', value: d.company, oninput: function (e) { M.name = e.target.value; d.company = e.target.value; var co = M.frame.root.querySelector('.pd-top .co span:nth-child(2)'); if (co) co.textContent = e.target.value; } });
     var cCo = P.card({ cls: 'c4', title: '企业', body: [h('div', { class: 'pd-form' }, [
@@ -244,7 +245,7 @@
     g.appendChild(h('div', { class: 'c12' }, [say]));
     g.appendChild(h('div', { class: 'c12 go' }, [
       h('div', {}, [h('div', { class: 't' }, ['财务驾驶舱']), h('div', { class: 's' }, ['本期收入 ' + W(R.kpi.rev) + ' · 勾稽异常 ' + rec.counts.bad + ' 处 · 高风险 ' + R.risks.counts.high + ' 项 · ' + gapText()])]),
-      h('div', { class: 'sp' }), h('div', { class: 'cr' }, [h('b', { class: 'num' }, [String(K.CREDITS)]), ' 积分 / 次']),
+      h('div', { class: 'sp' }),
       P.btn('进入财务驾驶舱', { cls: 'primary big', onClick: enterBoard })
     ]));
     work.appendChild(g);
@@ -258,8 +259,10 @@
     var R = M.R, k = R.kpi, st = R.statements, d = M.data, rec = R.reconcile, rk = R.risks, f = R.forecast, po = R.policies;
     work.classList.add('m6-board');
     var g = grid();
-    var F = flowBar({ src: srcChips(4), hub: '财务驾驶舱', out: ['勾稽异常 ' + rec.counts.bad + ' 处', '高风险 ' + rk.counts.high + ' 项'], btn: '刷新看板' });
+    var F = flowBar({ src: srcChips(4), hub: '财务驾驶舱', out: ['高风险 ' + rk.counts.high + ' 项', '勾稽异常 ' + rec.counts.bad + ' 处'], btn: '刷新看板' });
     g.appendChild(F);
+    /* 海报口径角标：销售指着念的两个数字 */
+    g.appendChild(h('div', { class: 'c12 m6-badges' }, [P.chip('accent', LIB.rules.rules.length + ' 条三表勾稽规则', true), h('span', { class: 'dot' }, ['·']), P.chip('accent', f.weeks.length + ' 周资金滚动预测', true), h('span', { class: 'tip' }, ['先看 13 周现金与风险预警，三表勾稽在第二层'])]));
     g.appendChild(h('div', { class: 'c12' }, [P.kpis([
       { label: '本期收入', value: cw(k.rev), sub: '环比 ' + (k.revMoM >= 0 ? '+' : '') + neg(k.revMoM) + '%', tone: k.revMoM < 0 ? 'risk' : 'ok' },
       { label: '毛利率', value: cnt(k.gm, { dec: 1 }), unit: '%', sub: '上期 ' + k.gmPrev + '%', tone: k.gm < k.gmPrev ? 'risk' : 'ok' },
@@ -270,6 +273,15 @@
     ])]));
     var say = vd(gapText() + '；勾稽异常 ' + rec.counts.bad + ' 处，高风险 ' + rk.counts.high + ' 项。');
     g.appendChild(h('div', { class: 'c12' }, [say]));
+    /* 首层：13 周现金 + 风险预警；第二层：收入趋势 + 三表勾稽 */
+    var cc = P.cashChart({ weeks: f.weeks, opening: f.opening, safety: f.safety, minWeek: f.minWeek, height: 220, onWeek: function (i) { M.week = i; setStep('cash'); } });
+    var cCash = P.card({ cls: 'c8', title: '13 周现金', sub: '期初 ' + W(f.opening) + ' · ' + gapText(), body: [cc], foot: [P.btn('看补缺方案', { cls: 'sm', onClick: function () { setStep('cash'); } })] });
+    g.appendChild(cCash);
+    var rl = h('div', { class: 'pd-list' });
+    rk.rows.filter(function (r) { return r.level !== 'low'; }).slice(0, 4).forEach(function (r) { rl.appendChild(P.item({ tone: LEVEL[r.level][0], icon: LEVEL[r.level][1], title: r.name, sub: '指标 ' + rv(r) + ' · 参考 ' + rband(r), right: W(r.impact), rightSub: '概率 ' + Math.round(r.prob * 100) + '%', onClick: function () { M.risk = r.id; setStep('risk'); } })); });
+    if (!rl.children.length) rl.appendChild(P.empty('无中高风险'));
+    var cRisk = P.card({ cls: 'c4', title: '风险预警', sub: '高 ' + rk.counts.high + ' · 中 ' + rk.counts.mid + ' · 已处置 ' + rk.counts.handled, body: [rl], extra: [P.btn('矩阵', { cls: 'sm', onClick: function () { setStep('risk'); } })] });
+    g.appendChild(cRisk);
     var labels = st.pl.map(function (p) { return p.label; });
     var lc = P.lineChart({ labels: labels, right: true, series: [
       { name: '收入', values: st.pl.map(function (p) { return Math.round(p.rev / 10000); }), color: '#0E9F6E', bar: true },
@@ -277,14 +289,6 @@
     ] });
     var cTrend = P.card({ cls: 'c8', title: '收入与毛利率', sub: '近 12 期 · 收入柱（万元）· 毛利率线（%）', body: [lc] });
     g.appendChild(cTrend);
-    var rl = h('div', { class: 'pd-list' });
-    rk.rows.filter(function (r) { return r.level !== 'low'; }).slice(0, 4).forEach(function (r) { rl.appendChild(P.item({ tone: LEVEL[r.level][0], icon: LEVEL[r.level][1], title: r.name, sub: '指标 ' + rv(r) + ' · 参考 ' + rband(r), right: W(r.impact), rightSub: '概率 ' + Math.round(r.prob * 100) + '%', onClick: function () { M.risk = r.id; setStep('risk'); } })); });
-    if (!rl.children.length) rl.appendChild(P.empty('无中高风险'));
-    var cRisk = P.card({ cls: 'c4', title: '风险榜', sub: '高 ' + rk.counts.high + ' · 中 ' + rk.counts.mid + ' · 已处置 ' + rk.counts.handled, body: [rl], extra: [P.btn('矩阵', { cls: 'sm', onClick: function () { setStep('risk'); } })] });
-    g.appendChild(cRisk);
-    var cc = P.cashChart({ weeks: f.weeks, opening: f.opening, safety: f.safety, minWeek: f.minWeek, height: 220, onWeek: function (i) { M.week = i; setStep('cash'); } });
-    var cCash = P.card({ cls: 'c8', title: '13 周现金', sub: '期初 ' + W(f.opening) + ' · ' + gapText(), body: [cc], foot: [P.btn('看补缺方案', { cls: 'sm', onClick: function () { setStep('cash'); } })] });
-    g.appendChild(cCash);
     var list = h('div', { class: 'pd-list' });
     badRows().slice(0, 4).forEach(function (r) { list.appendChild(P.item({ tone: 'late', icon: r.id, title: r.name, sub: r.pair, right: W(Math.abs(r.diff)), rightSub: '差异', onClick: function () { M.rule = r.id; setStep('recon'); } })); });
     if (!badRows().length) list.appendChild(P.empty(LIB.rules.rules.length + ' 条勾稽关系全部正常'));
@@ -293,9 +297,9 @@
     if (d.log.length) g.appendChild(P.card({ cls: 'c12', title: '本期处置', sub: d.log.length + ' 条', body: [logList(d.log.slice(-4).reverse())] }));
     work.appendChild(g);
     story({ work: work, src: F.srcs, from: F.srcWrap, to: F.hub, label: W(k.rev),
-      rise: [cTrend, cRisk, cCash, cRec].concat(Array.prototype.slice.call(rl.children)).concat(Array.prototype.slice.call(list.children)),
+      rise: [cCash, cRisk, cTrend, cRec].concat(Array.prototype.slice.call(rl.children)).concat(Array.prototype.slice.call(list.children)),
       paths: nodes(work, '.pd-line path').concat(nodes(work, '.pd-cash path')),
-      verdict: say, focus: work.querySelectorAll('.pd-kpi')[3], scan: cc });
+      verdict: say, focus: cCash, scan: cc });
   }
   function logList(log) {
     var el = h('div', { class: 'm6-log' });
@@ -586,6 +590,7 @@
       foot: [P.btn('发送到微信', { cls: 'primary', onClick: function () { sh.setQrReady(true); sh.showWeChat(); } }), P.btn('回到驾驶舱', { onClick: function () { setStep('board'); } })] });
     g.appendChild(col('c4', [cList, cRep]));
     work.appendChild(g);
+    P.deliver(work, { items: ['风险预警', '资金缺口方案', '政策清单'], scene: sh.moduleName('m6') });
     story({ work: work, src: F.srcs, from: F.srcWrap, to: F.hub, label: po.rows.length + ' 项政策',
       rise: [cTbl, cList, cRep], rows: trs(tbl).concat(Array.prototype.slice.call(ll.children)),
       verdict: say, focus: okRows.length ? rowOf(work, okRows[0].name) : null, scan: cRep });
