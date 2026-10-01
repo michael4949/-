@@ -137,7 +137,7 @@ function cand(id, needId, o) { return Object.assign({ id, needId, stage: 'new', 
   ];
   W('mfg.json', {
     archetype: 'make', sector: 'mfg', company: C.company, co: '恒驰', today: TODAY, weekStart: '2026-09-14', overtimeMonth: '2026-08',
-    profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', founded: 2012, revenue12: C.ledger.pl.rev.reduce((a, b) => a + b, 0), product: '汽车零部件件与冲压件', lines: '八条产线：下料、冲压 A / B、CNC 车铣、热处理、电镀、装配包装', customers: '汽配、家电、储能设备', region: '华南', hotAllowancePaid: true, hotJobsDepts: ['prod', 'maint'], wageIndex: fin.wageIndex },
+    profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', founded: 2012, revenue12: C.ledger.pl.rev.reduce((a, b) => a + b, 0), product: '汽车传动件与冲压件', lines: '八条产线：下料、冲压 A / B、CNC 车铣、热处理、电镀、装配包装', customers: '汽配、家电、储能设备', region: '华南', hotAllowancePaid: true, hotJobsDepts: ['prod', 'maint'], wageIndex: fin.wageIndex },
     sources: [
       { id: 'hr', name: '人事系统 · 花名册与合同', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 168 },
       { id: 'payroll', name: '工资表 · 8 月', mode: 'import', lastSync: '2026-09-10 18:00', rows: 168 },

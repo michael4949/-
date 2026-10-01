@@ -33,8 +33,8 @@ const mfg = {
     { id: 'erp', name: 'ERP · 客户与供应商', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 42 }
   ],
   contracts: [
-    contract({ id: 'HT-2609-018', type: 'sale', role: 'supply', title: '汽车零部件件年度供货合同', party: 'K-017 · 汽配一级供应商', amount: 4200000, signed: '2026-01-15', start: '2026-01-15', end: '2026-12-31', status: '履行中', milestones: [{ date: '2026-10-10', text: '第三季度对账' }, { date: '2026-12-15', text: '年度价格复核' }], clauses: [
-      T.subject('供方向需方供应汽车零部件件 Ø12×45、Ø8×30 等，具体型号、数量以需方月度订单为准。'), T.quality('双方确认的技术协议与封样'),
+    contract({ id: 'HT-2609-018', type: 'sale', role: 'supply', title: '汽车零部件年度供货合同', party: 'K-017 · 汽配一级供应商', amount: 4200000, signed: '2026-01-15', start: '2026-01-15', end: '2026-12-31', status: '履行中', milestones: [{ date: '2026-10-10', text: '第三季度对账' }, { date: '2026-12-15', text: '年度价格复核' }], clauses: [
+      T.subject('供方向需方供应传动轴套 Ø12×45、Ø8×30 等，具体型号、数量以需方月度订单为准。'), T.quality('双方确认的技术协议与封样'),
       T.delivery('供方按需方订单约定日期交付至需方指定仓库，运费由供方承担。', true),
       T.payment('需方于每批货物验收合格后 120 日内支付该批货款。', { termDays: 120, advanceRatio: 0 }),
       T.acceptance(15), T.liability(null), T.penalty(0.5), T.dispute('counterparty'), T.force(), T.notice()
@@ -107,7 +107,7 @@ const mfg = {
       T.acceptance(15), C('warranty', '质量保证', '整机质保 10 个月。', { months: 10 }), T.liability(1), T.dispute('ours'), T.force()
     ] }),
     contract({ id: 'HT-2609-024', type: 'agency', role: 'principal', title: '海外市场代理协议', party: 'K-031 · 出口贸易公司', amount: 0, signed: '2026-09-01', start: '2026-09-01', end: '2029-08-31', status: '审查中', milestones: [{ date: '2026-09-25', text: '代理协议签署截止' }], clauses: [
-      T.subject('委托方授权代理方在东南亚市场代理销售委托方的汽车零部件件。'),
+      T.subject('委托方授权代理方在东南亚市场代理销售委托方的汽车零部件。'),
       C('exclusivity', '独家代理', '代理方在代理区域内享有独家代理权。', { exclusive: true, minVolume: null }),
       T.term('本协议有效期 3 年，期满自动续期 3 年。', { autoRenew: true, exitNotice: false }),
       T.payment('代理方按订单金额预付 30%，发货前付清余款。', { termDays: 0, advanceRatio: 0 }),
@@ -139,7 +139,7 @@ const mfg = {
       { id: 'TM-04', name: '恒驰精工', regNo: '第 5522**** 号', classes: ['07'], regDate: '2021-11-07', status: '已注册' }
     ],
     patents: [
-      { id: 'ZL-01', title: '一种汽车零部件件多工位冷镦成型方法', kind: 'invention', appDate: '2019-11-20', grantDate: '2022-04-06', status: '有效' },
+      { id: 'ZL-01', title: '一种传动轴套多工位冷镦成型方法', kind: 'invention', appDate: '2019-11-20', grantDate: '2022-04-06', status: '有效' },
       { id: 'ZL-02', title: '一种薄壁铝合金外壳压铸工艺', kind: 'invention', appDate: '2023-06-08', grantDate: '2025-09-15', status: '有效' },
       { id: 'ZL-03', title: '一种冲压支架自动上料装置', kind: 'utility', appDate: '2022-11-02', grantDate: '2023-06-20', status: '有效' },
       { id: 'ZL-04', title: '一种密封圈装配检测治具', kind: 'utility', appDate: '2023-10-08', grantDate: '2024-04-12', status: '有效' },
@@ -152,11 +152,11 @@ const mfg = {
       { name: '睿合', classes: ['06'], holder: '贸易商 · 华东', similarity: 0.61, status: '已注册', deadline: null, note: '可评估无效宣告' }
     ],
     infringementLeads: [
-      { where: '电商平台店铺', product: '汽车零部件件 Ø12×45 同款', note: '商品标题使用「恒驰」字样，月销 300+', similarity: 0.9, found: '2026-09-10' },
+      { where: '电商平台店铺', product: '传动轴套 Ø12×45 同款', note: '商品标题使用「恒驰」字样，月销 300+', similarity: 0.9, found: '2026-09-10' },
       { where: '行业展会', product: '冲压支架', note: '展品外观与 ZL-03 装置相近', similarity: 0.7, found: '2026-09-12' }
     ]
   },
-  setup: { type: 'subsidiary', name: '恒驰汽车零部件（华南）有限公司', region: '广东 · 东莞', capital: 5000000, shares: [{ holder: '无锡恒驰汽车零部件有限公司', pct: 70 }, { holder: '华南业务团队持股平台', pct: 30, platform: true }], scope: ['汽车零部件件与冲压件销售', '金属材料加工'], licenses: ['排污许可'], confirmed: false, startDate: '2026-10-08', reason: 'K-048、K-074 等华南客户年采购额已超 500 万元，就近仓储与加工可缩短交期' },
+  setup: { type: 'subsidiary', name: '恒驰汽车零部件（华南）有限公司', region: '广东 · 东莞', capital: 5000000, shares: [{ holder: '无锡恒驰汽车零部件有限公司', pct: 70 }, { holder: '华南业务团队持股平台', pct: 30, platform: true }], scope: ['汽车传动件与冲压件销售', '金属材料加工'], licenses: ['排污许可'], confirmed: false, startDate: '2026-10-08', reason: 'K-048、K-074 等华南客户年采购额已超 500 万元，就近仓储与加工可缩短交期' },
   renewList: [], applyList: [], log: []
 };
 

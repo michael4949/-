@@ -10,12 +10,12 @@ const DP = require(path.join(ROOT, 'skills/_shared/docparse.js'));
 
 const MOD = {
   m4:  ['04-ai-lead', 'lead.js', 'AI获客'],
-  m5:  ['05-ai-hr', 'hr.js', 'AI人力官'],
-  m6:  ['06-ai-cfo', 'fin.js', 'AI CFO'],
-  m7:  ['07-ai-legal', 'legal.js', 'AI法务'],
-  m8:  ['08-ai-process', 'flow.js', 'AI流程提效'],
-  m9:  ['09-ai-decision', 'decide.js', 'AI决策'],
-  m10: ['10-ai-erp', 'sim.js', 'AI ERP'],
+  m5:  ['05-ai-hr', 'hr.js', 'AI人岗匹配与用工合规'],
+  m6:  ['06-ai-cfo', 'fin.js', 'AI现金流与经营预警'],
+  m7:  ['07-ai-legal', 'legal.js', '合同风险审查'],
+  m8:  ['08-ai-process', 'flow.js', 'AI报工核验'],
+  m9:  ['09-ai-decision', 'decide.js', 'AI经营指标分析'],
+  m10: ['10-ai-erp', 'sim.js', 'AI工序级排程'],
   m11: ['11-ai-dev', 'build.js', 'AI软件开发']
 };
 const ORDER = ['m4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10', 'm11'];
@@ -27,7 +27,7 @@ const MISS = ['没有识别到', '没有抽到', '没抽到', '读不出', '格�
 /* 上传位置：绝大多数进模块第一屏就能传；m11 的两份要等「生成应用」出了规格，
    对象库里才有字段可比对 —— 这两条是 tools/verify-demo-docs-browser.js 在真页面上跑出来的。 */
 const AT = {
-  'm11-备件申领台账-苏州华创精密.xlsx': '第 2 屏「生成应用」',
+  'm11-备件申领台账.xlsx': '第 2 屏「生成应用」',
   'm11-需求说明书-备件申领.docx': '第 2 屏「生成应用」'
 };
 const DOC = /\.(xlsx|docx|eml|pdf|pptx|csv|txt|json)$/i;

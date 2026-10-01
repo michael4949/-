@@ -11,7 +11,7 @@ function deals(rows) { return rows.map((r) => ({ customer: r[0], industry: r[1],
 function leads(prefix, rows) { return rows.map((r) => { const o = { id: prefix + String(r[0]).padStart(4, '0'), industry: r[1], sector: r[2], size: r[3], region: r[4], role: r[5], channel: r[6], createdAt: r[7], stage: r[8], owner: r[9] || null, signals: r[10].map((s) => ({ key: s[0], date: s[1] })), lastAction: r[11] ? { date: r[11][0], text: r[11][1] } : null, amountEst: r[12], note: r[13] || '' }; if (r[14]) o.closedAt = r[14]; return o; }); }
 
 const mfg = {
-  archetype: 'make', sector: 'mfg', company: '无锡恒驰汽车零部件有限公司', co: '恒驰', prod: '汽车零部件件与冲压件', today: '2026-09-17', weekStart: '2026-09-14',
+  archetype: 'make', sector: 'mfg', company: '无锡恒驰汽车零部件有限公司', co: '恒驰', prod: '汽车传动件与冲压件', today: '2026-09-17', weekStart: '2026-09-14',
   profile: { industry: 'mfg-machinery', size: '101_300' },
   sources: [
     { id: 'crm', name: 'CRM · 客户与成交记录', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 30 },

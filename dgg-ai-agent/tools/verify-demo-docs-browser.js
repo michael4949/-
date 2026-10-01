@@ -16,7 +16,7 @@ const DIR = path.join(__dirname, '..', 'demo-docs');
 /* 有的文档要先把屏推到位才认得出：m11 的两份要等「生成应用」出了规格，
    对象库才有字段可比对。值 = 上传前先点几次屏底「下一步」。 */
 const AT = {
-  'm11-备件申领台账-苏州华创精密.xlsx': 1,
+  'm11-备件申领台账.xlsx': 1,
   'm11-需求说明书-备件申领.docx': 1
 };
 const MISS = ['没有识别到','没有抽到','没抽到','读不出','格式不支持','没有可读','没法回填','里面没有',
@@ -58,9 +58,7 @@ function pick(fname) {                               /* 页内：取「文件名
     const p = await b.newPage({ viewport: { width: 1920, height: 1080 }, reducedMotion: 'reduce' });
     p.on('pageerror', (e) => errs.push(f + ' PAGEERR ' + e.message));
     p.on('console', (m) => { if (m.type() === 'error') errs.push(f + ' console: ' + m.text()); });
-    await p.goto('file://' + path.join(__dirname, '..', 'prototype/dist/index.html') + '?station=3');
-    await p.waitForSelector('.boardbox .bg');
-    await p.click('.card[data-id="' + id + '"]');
+    await p.goto('file://' + path.join(__dirname, '..', 'prototype/dist/index.html') + '?station=desk#/' + id);
     await p.waitForSelector('.pd-chat');
     await p.waitForTimeout(1500);                                  /* 让本屏开场白先说完 */
     for (let k = 0; k < (AT[f] || 0); k++) {                       /* 推到该传的那一屏 */

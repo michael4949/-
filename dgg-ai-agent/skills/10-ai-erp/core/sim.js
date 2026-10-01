@@ -1176,7 +1176,8 @@
       var subs = [], prod = C.d.products[0];
       if (map.prod != null) {
         var pn = String(row0[map.prod] || '').trim(), hit = null;
-        C.d.products.forEach(function (p) { if (pn && (p.name.indexOf(pn) >= 0 || pn.indexOf(p.name.slice(0, 4)) >= 0)) hit = p; });
+        C.d.products.forEach(function (p) { if (!hit && pn && (p.name === pn || p.name.indexOf(pn) >= 0)) hit = p; });
+        if (!hit) C.d.products.forEach(function (p) { if (pn && pn.indexOf(p.name.slice(0, 4)) >= 0) hit = p; });
         if (hit) prod = hit;
         else subs.push(pn ? '产品名「' + cut(pn, 14) + '」没对上在册' + v.product + '，按更贴近的「' + prod.name + '」排'
           : '这张表的' + v.product + '列是空的，按在册的「' + prod.name + '」排');

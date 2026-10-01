@@ -63,7 +63,7 @@ const M12 = (arr) => arr;
 /* ---------------- 制造 · 无锡恒驰 ---------------- */
 W('mfg.json', build({
   arche: 'make', erpArche: 'make', sector: 'mfg', co: '恒驰',
-  profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', product: '汽车零部件件与冲压件' },
+  profile: { industry: 'mfg-machinery', size: '101_300', province: '浙江', city: '杭州', product: '汽车传动件与冲压件' },
   sources: [
     { id: 'm6', name: 'AI CFO · 账套三表与现金', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 12 }, { id: 'm10', name: 'AI ERP · 订单交付与物料', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 15 },
     { id: 'm4', name: 'AI获客 · 线索与成交', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 60 }, { id: 'm5', name: 'AI人力官 · 花名册与合规', mode: 'direct', lastSync: '2026-09-17 07:30', rows: 168 },

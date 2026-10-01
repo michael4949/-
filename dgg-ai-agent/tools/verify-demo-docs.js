@@ -9,12 +9,12 @@ const DP = require(path.join(ROOT, 'skills/_shared/docparse.js'));
 
 const MOD = {
   m4:  ['04-ai-lead', 'lead.js', 'AI获客'],
-  m5:  ['05-ai-hr', 'hr.js', 'AI人力官'],
-  m6:  ['06-ai-cfo', 'fin.js', 'AI CFO'],
-  m7:  ['07-ai-legal', 'legal.js', 'AI法务'],
-  m8:  ['08-ai-process', 'flow.js', 'AI流程提效'],
-  m9:  ['09-ai-decision', 'decide.js', 'AI决策'],
-  m10: ['10-ai-erp', 'sim.js', 'AI ERP'],
+  m5:  ['05-ai-hr', 'hr.js', 'AI人岗匹配与用工合规'],
+  m6:  ['06-ai-cfo', 'fin.js', 'AI现金流与经营预警'],
+  m7:  ['07-ai-legal', 'legal.js', '合同风险审查'],
+  m8:  ['08-ai-process', 'flow.js', 'AI报工核验'],
+  m9:  ['09-ai-decision', 'decide.js', 'AI经营指标分析'],
+  m10: ['10-ai-erp', 'sim.js', 'AI工序级排程'],
   m11: ['11-ai-dev', 'build.js', 'AI软件开发']
 };
 /* 兜底话术：出现这些就说明没认出来，现场会很难看 */
