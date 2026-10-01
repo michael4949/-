@@ -82,6 +82,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   /* ---------- 培养与梯队 ---------- */
   await go('#grow', 700);
   await t('师带徒 4 卡 · 骨干培养 4 人 · 梯队漏斗', async () => (await pg.locator('.mcard').count()) === 4 && (await pg.locator('.bbrow').count()) === 4 && (await pg.locator('.mrow').count()) === 4);
+  await t('10/1 梯队台阶 5 级 · 二星断层 · 成长趋势纵轴 0–2 · 末端标签不重叠', async () => (await pg.locator('.gldr').count()) === 5 && (await pg.locator('.gldr.gnil').count()) >= 1 && (await pg.locator('.gldwarn').innerText()).includes('二星') && (await pg.evaluate(() => { const t = [...document.querySelectorAll('#gtrhost svg text')].map(x => x.textContent); const k = [...document.querySelectorAll('#gtrhost svg text.k')].map(x => x.getBBox().y).sort((a, b) => a - b); return t.includes('2.0') && !t.includes('4') && k.length === 3 && k.every((y, i) => !i || y - k[i - 1] >= 12); })));
   await pg.click('[data-act="grow-task"][data-who="刘一鸣"]'); await w(500);
   await t('排带教任务 · plan + 师傅通知', async () => { const p = await LS('plan'); const n = await LS('notices'); return p.some(x => x.who === '刘一鸣' && x.why === '师带徒') && n.some(x => x.to === '黄伟强' && /带教任务/.test(x.t)); });
   await pg.click('[data-act="grow-bb"][data-i="0"]'); await w(600);
@@ -90,6 +91,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/03_grow.png' });
   /* ---------- 绩效与激励 ---------- */
   await go('#perf', 700);
+  await t('10/1 物质激励 12 行相对人均 · 非物质激励四类名单', async () => (await pg.locator('.pfr').count()) === 12 && (await pg.locator('.nmrow').count()) === 4 && (await pg.locator('.nmbar i').count()) === 4 && (await main()).includes('人均 ¥1,000'));
   await t('9/29 规则写工作量（工分）不再写实操量 · 工作量列 · 履职证据按钮 12 个', async () => { const x = await main(); return x.includes('工作量达人均') && x.includes('工分制考核台账') && !/实操量/.test(x) && (await pg.locator('table.perf [data-act="rate-evid"]').count()) === 12; });
   await pg.click('[data-act="rate-evid"][data-who="王安"]'); await w(400);
   await t('履职证据弹层 · 五类逐条带出处 · 系数逐条推导与页面一致', async () => { const m = await pg.locator('#modal').innerText(); const co = await ev(() => perfAlloc().find(r => r.p.n === '王安').co.toFixed(2)); return (await pg.locator('#modal table.evidt tr').count()) >= 12 && (await pg.locator('#modal table.evidr tr').count()) >= 8 && m.includes('工分制考核台账') && m.includes(co) && m.includes('工作量低于人均 70%'); });
@@ -108,6 +110,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/04_perf.png' });
   /* ---------- 关怀与文化 ---------- */
   await go('#care', 700);
+  await t('10/1 班组活动统计 · 类型 4 行 + 按月 · 关怀提醒两列', async () => (await pg.locator('.cstat > div').count()) === 3 && (await pg.locator('.cbr').count()) >= 5 && (await pg.locator('.carelist.c2').count()) === 1);
   const careN = await pg.locator('.carerow').count();
   await t('关怀提醒 ≥ 6 · 三类 · 重点关注 3 · 活动记录 5', async () => careN >= 6 && (await main()).includes('入职关键年份') && (await main()).includes('回访提醒') && (await main()).includes('高强度关怀') && (await pg.locator('.focusrow').count()) === 3);
   await pg.click('[data-act="care-done"] >> nth=0'); await w(500);
@@ -122,7 +125,8 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.screenshot({ path: SHOT + '/05_care.png' });
   /* ---------- 分析参谋 ---------- */
   await go('#advise', 700);
-  await t('队伍诊断 · 根因标签 ≥ 3 · 四段结论 · 两图', async () => (await pg.locator('.root').count()) >= 3 && (await pg.locator('.diagtext li').count()) === 4 && (await pg.locator('#main svg.ch').count()) >= 2);
+  await t('队伍诊断 · 根因卡 ≥ 3 · 四段结论 · 年龄图 + ★模块 10 行', async () => (await pg.locator('.rtile').count()) >= 3 && (await pg.locator('.ditem').count()) === 4 && (await pg.locator('#main svg.ch').count()) >= 1 && (await pg.locator('.abr').count()) === 10);
+  await t('10/1 图表按实际宽度出图 · 字号不随卡片放大', async () => pg.evaluate(() => { const f = [...document.querySelectorAll('#main .chfit')]; return f.length > 0 && f.every(el => +el.dataset.w >= 300) && [...document.querySelectorAll('#main .chfit .ch .lb')].every(t => { const fs = parseFloat(getComputedStyle(t).fontSize) * (t.ownerSVGElement.getBoundingClientRect().width / t.ownerSVGElement.viewBox.baseVal.width); return fs <= 13.5; }); }));
   await pg.click('[data-act="adv-report"][data-k="diag"]'); await ws('[data-act="adv-save"]', 30000); await pg.click('[data-act="adv-save"]'); await w(400);
   await t('诊断报告逐段生成 · 存文稿', async () => { const d = await LS('docs'); return (await pg.locator('#advdoc p').count()) >= 6 && d['adv-diag']; });
   await go('#advise/grow', 700);

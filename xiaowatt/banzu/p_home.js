@@ -16,12 +16,16 @@ const HOMEPG = {
       card('本周工时', '约定 ' + WEEK_LIMIT + 'h · 点一条照亮台账', CH.bars(bars, WEEK_LIMIT)) +
       card('近 30 天缺陷 · 应用失败与异常信号', '点一天看当天', CH.area(DEF30.days, DEF30.found, DEF30.closed) + legend([[CPAL[0], '发现累计'], [CPAL[2], '闭环累计']])) +
       card('两票 · 近 ' + DB.ticketM().m.length + ' 个月', '开出与合格 · 两票台账', CH.mini.line([{ n: '开出', vals: DB.ticketM().n, c: RAMP[2] }, { n: '合格', vals: DB.ticketM().ok, c: CPAL[0] }], DB.ticketM().m, { h: 150 }) + legend([[RAMP[2], '开出'], [CPAL[0], '合格']])) +
-      card('本周关键节点', '周关键节点管控表 · 周期类节点', CH.mini.donut([{ k: '已清', v: DB.nodeRate().done, c: SEM.ok }, { k: '待清', v: DB.nodeRate().n - DB.nodeRate().done, c: SEM.w }].filter(x => x.v), { hero: DB.nodeRate().done + '/' + DB.nodeRate().n, sub: '本周' })) +
+      card('本周关键节点', '周关键节点管控表 · 周期类节点', HOMEPG.nodesHTML()) +
       card('周报指标 · 第 ' + WK29.no + ' 期', '与台账中心同源 · 点一条看', CH.meters(meters)) + '</div>';
   },
   /* 今日作业 · 派工情况（客户 9/29：工作台只放工作安排——今日几单、派了几单、待派的要不要派、怎么安排） */
   urg(j) { return /超期/.test(j.when) ? { t: '超期 · 今天必须派', c: 'bad', o: 0 } : j.dateIso <= TODAY || /本周|周五/.test(j.when) ? { t: '本周要做 · 今天派', c: 'w', o: 1 } : { t: '下周 · 周五前派', c: '', o: 2 }; },
   dispStat() { const J = DB.todayJobs(); const pend = J.filter(j => j.st === '待派'); const on = J.filter(j => /进行中/.test(j.st)).length, wait = J.filter(j => /待开工|已派|票已审/.test(j.st)).length, done = J.filter(j => /已完成|已关闭/.test(j.st)).length; return { J, pend, on, wait, done, sent: J.length - pend.length, today: pend.filter(j => this.urg(j).o <= 1).length }; },
+  nodesHTML() { const R = DB.nodeRate(); const done = DB.nodesDone(); const wk = NODES.filter(n => /周|限时|日日清/.test(n.cyc)); const cats = [...new Set(wk.map(n => n.cat))];
+    return '<div class="hnd" data-act="nav" data-to="sched" data-sub="nodes"><div class="hndh"><b>' + R.done + '<em> / ' + R.n + '</em></b><span>本周已清 · ' + R.pct + '%</span></div><div class="hndbar"><i style="width:' + Math.max(R.pct, 0) + '%"></i></div>' +
+      cats.map(c => { const L = wk.filter(n => n.cat === c), d = L.filter(n => done.includes(n.id)).length; return '<div class="hndr"><span>' + h(c) + '</span><div><i style="width:' + (d / L.length * 100).toFixed(0) + '%"></i></div><em>' + d + ' / ' + L.length + '</em></div>'; }).join('') +
+      '<div class="hndf">' + (R.done < R.n ? '待清 ' + (R.n - R.done) + ' 个 · 点开看逐个节点与责任人' : '本周节点全部已清') + '</div></div>'; },
   dispHTML() { const D = this.dispStat(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length, off = PEOPLE.filter(p => p.status === '休假').length;
     const rows = D.pend.slice().sort((a, b) => this.urg(a).o - this.urg(b).o || String(a.dateIso).localeCompare(String(b.dateIso))).map(j => { const u = this.urg(j); let d = null; try { d = DISPATCH.defaults(j); } catch (e) {} const sug = d && d.lead ? '负责人 ' + d.lead.n + (d.crew.length ? '，班员 ' + d.crew.map(p => p.n).join('、') : '') + (d.follows.length ? '，随队 ' + d.follows.map(p => p.n).join('、') : '') : '去用工安排按四条规则排';
       return '<div class="drow"><span class="tag ' + u.c + '">' + h(u.t) + '</span><div><b>' + h(j.t) + '</b><span class="note">' + h(j.when) + ' · 需要 ' + h((j.need || []).join('、') || '—') + '</span><p>她的建议：' + h(sug) + '</p></div><div class="bt">' + (j.id === MAINLINE ? '<button class="s" data-act="home-to-d1">看理由再派</button>' : '<button class="s" data-act="home-disp" data-id="' + j.id + '">去派工</button>') + '</div></div>'; }).join('');

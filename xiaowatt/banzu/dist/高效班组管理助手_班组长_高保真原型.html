@@ -787,7 +787,7 @@ table.t tr.hl td{background:#fff7ed}
 .bbitems{margin:4px 0 2px;padding-left:18px;font-size:11.5px;color:var(--ink2)}
 .bbitems li.done{color:var(--ok);text-decoration:line-through}
 .carelist{display:flex;flex-direction:column}
-.carerow{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px 10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.carerow{display:grid;grid-template-columns:92px auto 1fr auto;gap:6px 10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
 .carerow:last-child{border-bottom:0}
 .carerow.done{opacity:.55}
 .carerow b{cursor:pointer}.carerow em{font-style:normal;color:var(--bad);font-size:11px;white-space:nowrap}
@@ -986,7 +986,7 @@ table.t.dims td.dgrp b{display:block;font-size:12.5px}table.t.dims td.dgrp span{
 .dstat span{display:block;font-size:10.5px;color:var(--ink3)}.dstat b{display:block;font-family:var(--mono);font-size:19px;color:var(--pri)}
 .dstat b.g{color:var(--ok)}.dstat b.w{color:var(--warn)}.dstat b.bad{color:var(--bad)}.dstat em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3)}
 .dlist{display:flex;flex-direction:column}
-.drow{display:grid;grid-template-columns:150px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+.drow{display:grid;grid-template-columns:112px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
 .drow:last-child{border-bottom:0}.drow .tag{justify-self:start}.drow b{font-weight:600}.drow .note{margin-left:8px}.drow p{color:var(--ink2);margin-top:2px}
 
 /* 9/29 二轮：管理者 · 团队画像总览排版（班组卡不挤字、班长队伍表整行） */
@@ -1006,6 +1006,189 @@ table.t.cutbl th,table.t.cutbl td:nth-child(-n+2),table.t.cutbl td:nth-child(4),
 .casec div.bt{display:flex;flex-wrap:wrap;gap:6px}
 table.t.rktbl th,table.t.rktbl td:nth-child(-n+4),table.t.rktbl td:last-child{white-space:nowrap}
 .card .h .r{flex-shrink:0}.card .h .r button{white-space:nowrap}
+
+/* 10/1 培养与梯队：梯队台阶（点人看画像）+ 成长趋势（按卡片宽度出图） */
+.gld{padding:2px 0}
+.gldr{position:relative;display:grid;grid-template-columns:122px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.gldr.last{border-bottom:0}
+.gldr::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--line2)}
+.gldr:first-child::before{top:50%}.gldr.last::before{bottom:50%}
+.gldk{position:relative;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.gldk i{position:absolute;left:0;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px #fff;box-sizing:border-box}
+.gldr.gnil .gldk i{background:#fff;border:2px solid var(--warn)}
+.gldr.gnone .gldk i{background:#fff;border:2px solid var(--line2)}
+.gldgap.no{color:var(--ink3);font-weight:400}
+.gldk b{font-size:13px;font-weight:600;white-space:nowrap}
+.gldk span{font-size:11px;color:var(--ink3);white-space:nowrap}
+.gldp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:28px}
+.gldc{display:inline-flex;align-items:baseline;gap:6px;padding:4px 10px;border:1px solid var(--line2);border-radius:6px;background:var(--tint);cursor:pointer;font-size:12px;white-space:nowrap}
+.gldc b{font-weight:600}.gldc em{font-style:normal;font-size:11px;color:var(--ink3)}
+.gldc.up{background:#fff;border:1px dashed var(--pri)}.gldc.up em{color:var(--pri)}
+.gldc:hover{border-color:var(--pri)}
+.gldgap{font-size:12px;color:var(--warn);font-weight:600;margin-right:4px}
+.gldf{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:6px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--ink3)}
+.gldf i{display:inline-block;width:14px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--tint);border:1px solid var(--line2)}
+.gldf i.d{background:#fff;border:1px dashed var(--pri)}
+.gldwarn{flex-basis:100%;font-size:11.5px;color:var(--ink2)}
+.gldwarn b{color:var(--warn);margin-right:6px}
+#gtrhost{min-height:200px}
+.gtr{display:block;overflow:visible;font-family:var(--sans)}
+.gtr text{font-size:11px;fill:var(--ink3)}
+.gtr text.k{fill:var(--ink2);font-size:11.5px}.gtr text.k tspan{font-family:var(--mono);fill:var(--ink)}
+.gtr line.g{stroke:var(--line);stroke-width:1}.gtr line.g0{stroke:var(--line2);stroke-width:1}
+.gtr path.ld{fill:none;stroke:var(--line2);stroke-width:1}
+.gtr g.gx line{stroke:var(--ink3);stroke-width:1;stroke-dasharray:3 3;opacity:0}
+.gtr g.gx:hover line{opacity:.7}
+.gtrsum{margin-top:10px;border-top:1px solid var(--line)}
+.gtrsum>div{display:grid;grid-template-columns:10px 52px 92px 58px 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12px;cursor:pointer;white-space:nowrap}
+.gtrsum>div:last-child{border-bottom:0}.gtrsum>div:hover b{color:var(--pri)}
+.gtrsum i{width:10px;height:10px;border-radius:3px}
+.gtrsum em{font-style:normal;font-family:var(--mono);color:var(--ink3)}.gtrsum em.up{color:var(--ok)}
+.gtrsum .note b.bad{color:var(--bad)}
+
+/* 10/1 图表按实际宽度出图（charts2.js CH.fit）：数字不带下划线、字号统一 */
+.chfit{width:100%;min-width:0}
+.chfit .ch.mini{width:100%;height:auto}
+.ch .num{text-decoration:none;fill:var(--ink2)}
+.ch .lb{font-size:9.5px}
+
+/* 10/1 绩效与激励：物质激励（相对人均的分配条）+ 非物质激励（四类名单） */
+.pfgrid{align-items:stretch}
+.pfm{display:flex;flex-direction:column}
+.pfr{display:grid;grid-template-columns:56px 44px 1fr 64px 46px;gap:10px;align-items:center;height:30px;border-bottom:1px dashed var(--line);font-size:12.5px;cursor:pointer}
+.pfr:last-child{border-bottom:0}.pfr:hover{background:var(--tint)}
+.pfr>b{font-weight:600;padding-left:4px}
+.pfco{font-family:var(--mono);font-size:12px;text-align:right}
+.pfco.hi{color:var(--ok)}.pfco.lo{color:var(--bad)}.pfco.mid{color:var(--ink2)}
+.pftr{position:relative;height:12px}
+.pftr::before{content:'';position:absolute;left:50%;top:-9px;bottom:-9px;width:1px;background:var(--line2)}
+.pftr i{position:absolute;top:2px;height:8px;border-radius:4px}
+.pftr i.hi,.pfkey i.hi{background:var(--ok)}.pftr i.lo,.pfkey i.lo{background:var(--bad)}.pftr i.mid,.pfkey i.mid{background:#9aa6bb}
+.pfam{font-family:var(--mono);text-align:right;color:var(--ink)}
+.pfr em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--ink3)}.pfr em.up{color:var(--ok)}.pfr em.dn{color:var(--bad)}
+.pfaxis{display:grid;grid-template-columns:56px 44px 1fr 64px 46px;gap:10px;margin-top:4px;font-size:11px;color:var(--ink3)}
+.pfaxis>div{grid-column:3;display:flex;justify-content:space-between;align-items:center}.pfaxis b{font-weight:500;color:var(--ink2)}
+.pfkey{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:11px;color:var(--ink3)}
+.pfkey i{display:inline-block;width:12px;height:8px;border-radius:4px;margin-right:5px}
+.pfkey .note{margin-left:auto}
+.nmbar{display:flex;gap:2px;height:30px;border-radius:6px;overflow:hidden;margin-top:2px}
+.nmbar i{display:flex;align-items:center;padding-left:10px;color:#fff;font-size:12px}
+.nmbar i b{font-family:var(--mono);font-weight:600}
+.nmbar i.v,.nmk i.v{background:#6b4de6}.nmbar i.ok,.nmk i.ok{background:var(--ok)}.nmbar i.c,.nmk i.c{background:var(--pri)}.nmbar i.bad,.nmk i.bad{background:var(--bad)}
+.nmcap{display:flex;justify-content:space-between;gap:10px;margin:6px 0 4px;font-size:11px;color:var(--ink3)}
+.nmrow{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+.nmrow:last-child{border-bottom:0}
+.nmk{display:flex;align-items:baseline;gap:8px}
+.nmk i{width:10px;height:10px;border-radius:3px;align-self:center}
+.nmk b{font-size:13px;font-weight:600;white-space:nowrap}.nmk span{font-size:11px;color:var(--ink3)}
+.nmp{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1;padding-left:18px}
+.nmgo{white-space:nowrap;grid-row:1;grid-column:2;justify-self:end}
+.cstep{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:6px;overflow:hidden;white-space:nowrap}
+.cstep button{border:0;background:#fff;color:var(--ink2);width:24px;height:24px;padding:0;cursor:pointer;font-size:13px}
+.cstep button:hover{background:var(--tint);color:var(--pri)}
+.cstep b{min-width:40px;text-align:center;font-size:12.5px;border-left:1px solid var(--line);border-right:1px solid var(--line);line-height:24px}
+table.t.perf td:first-child .note{white-space:nowrap}
+
+/* 10/1 关怀与文化：活动统计卡 + 关怀提醒两列 + 重点关注三列 */
+.carerow>.tag{justify-self:start}
+.carelist.c2{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+.carelist.c2 .carerow{padding:10px 0;border-bottom:1px solid var(--line)}
+.carelist.c2 .carerow:last-child{border-bottom:1px solid var(--line)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.fgrid .focusrow{border:1px solid var(--line);border-radius:8px;padding:12px;align-content:flex-start}
+.fgrid .focusrow:last-child{border-bottom:1px solid var(--line)}
+.cstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.cstat>div{background:var(--tint);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.cstat b{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--ink)}.cstat b.w{color:var(--warn)}
+.cstat span{font-size:11px;color:var(--ink3)}
+.cph{margin:12px 0 4px}
+.cbr{display:grid;grid-template-columns:40px 1fr 44px;gap:10px;align-items:center;height:26px;font-size:12px}
+.cbr>span{color:var(--ink2)}.cbr>b{font-family:var(--mono);font-weight:500;text-align:right;color:var(--ink)}
+.cbr>div{height:10px;background:var(--tint);border-radius:5px;overflow:hidden}
+.cbr i{display:block;height:100%;border-radius:5px;min-width:2px}
+
+/* 10/1 分析参谋 · 队伍现状诊断：根因卡 + 四段结论 + 两张图等高 */
+.rootg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.rtile{position:relative;border:1px solid #f3c3c6;background:var(--badbg);border-radius:8px;padding:10px 12px 10px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.rtile::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--bad)}
+.rtile span{font-size:10.5px;color:#b4545a}.rtile b{font-size:14px;color:var(--bad)}.rtile em{font-style:normal;font-size:12px;color:#8a1f24}
+.rtile i{font-style:normal;font-size:11px;color:#b4545a;margin-top:4px}.rtile:hover{border-color:var(--bad)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ditem{border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.ditem>div{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.ditem em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--pri);font-weight:600}
+.ditem b{font-size:13px}.ditem p{margin:0;font-size:12.5px;line-height:1.75;color:var(--ink2)}
+.advg{margin-top:12px;align-items:stretch}
+.advsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.advsum>div{background:var(--tint);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.advsum b{font-family:var(--mono);font-size:18px;font-weight:600}.advsum b.w{color:var(--warn)}.advsum span{font-size:11px;color:var(--ink3)}
+.abl{display:flex;flex-direction:column}
+.abr{display:grid;grid-template-columns:minmax(150px,1.3fr) 1fr 40px minmax(60px,.8fr);gap:10px;align-items:center;min-height:30px;padding:3px 0;border-bottom:1px dashed var(--line);font-size:12px;cursor:pointer}
+.abr:last-child{border-bottom:0}.abr:hover{background:var(--tint)}
+.abn{color:var(--ink);line-height:1.35}.abn em{font-style:normal;font-family:var(--mono);color:var(--ink3);margin-right:6px}
+.abt{position:relative;height:10px;background:var(--tint);border-radius:5px}
+.abt i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.abt s{position:absolute;top:-5px;bottom:-5px;width:0;border-left:1px dashed var(--ink3)}
+.abt i.r,.pfkey i.lo{background:var(--bad)}.abt i.y,.pfkey i.mid2{background:var(--warn)}.abt i.g{background:var(--ok)}
+.abr>b{font-family:var(--mono);font-weight:500;text-align:right}.abr>b.r{color:var(--bad)}.abr>b.y{color:var(--warn)}.abr>b.g{color:var(--ink2)}
+.abw{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 10/1 台账中心：左栏随滚动停靠 + 数据来源时间线 */
+.grid2.ledg{grid-template-columns:minmax(300px,1fr) 2fr;align-items:start}
+.ledside{position:sticky;top:10px;display:flex;flex-direction:column;gap:10px}
+.ledsrc{display:flex;flex-direction:column;gap:3px;background:var(--tint);border-radius:8px;padding:10px 12px}
+.ledsrc span{font-size:11px;color:var(--ink3)}.ledsrc b{font-size:13px;font-weight:600;color:var(--ink)}
+.ledimp{position:relative;display:flex;flex-direction:column}
+.ledimp>div{position:relative;display:grid;grid-template-columns:14px 78px 1fr;grid-template-rows:auto auto;column-gap:6px;padding:6px 0;font-size:12px}
+.ledimp>div:not(:last-child)::after{content:'';position:absolute;left:4px;top:18px;bottom:-6px;width:2px;background:var(--line)}
+.ledimp i{grid-row:span 2;width:10px;height:10px;border-radius:50%;margin-top:3px;background:var(--pri);box-shadow:0 0 0 3px #fff;position:relative;z-index:1}
+.ledimp i.m{background:#fff;border:2px solid var(--pri);box-sizing:border-box}
+.ledimp em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.ledimp b{font-weight:500;color:var(--ink)}
+.ledimp span{grid-column:3;font-size:11px;color:var(--ink3)}
+/* 10/1 班组画像 · 提升措施：两列卡片 */
+#fixlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+#fixlist .fixrow{grid-template-columns:1fr auto;align-items:end;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px}
+#fixlist .fixrow:last-child{border-bottom:1px solid var(--line)}
+#fixlist .fixrow b{font-size:13px}
+#fixlist .fixrow p{margin-top:6px;font-size:12px;line-height:1.65}
+
+/* 10/1 证书复审 · 未来一年：时间轴 + 三档名单 */
+.crt{display:flex;flex-direction:column}
+.crtax{position:relative;margin:8px 10px 22px;border-bottom:1px solid var(--line2)}
+.crtax s{position:absolute;bottom:-5px;width:1px;height:5px;background:var(--line2)}
+.crtax s em{position:absolute;top:8px;left:0;transform:translateX(-50%);font-style:normal;font-size:11px;color:var(--ink3);white-space:nowrap}
+.crtax s:first-child em{transform:none}.crtax s:last-of-type em{transform:translateX(-100%)}
+.crtax i{position:absolute;width:10px;height:10px;margin-left:-5px;border-radius:50%;box-shadow:0 0 0 2px #fff;cursor:pointer}
+.crtax i.r,.crtk i.r{background:var(--bad)}.crtax i.y,.crtk i.y{background:var(--warn)}.crtax i.b,.crtk i.b{background:var(--pri)}
+.crtb{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:start;padding:8px 0;border-top:1px dashed var(--line)}
+.crtk{display:flex;align-items:baseline;gap:6px;white-space:nowrap}.crtk i{width:9px;height:9px;border-radius:50%;align-self:center}
+.crtk b{font-size:12.5px}.crtk span{font-size:11px;color:var(--ink3)}
+.crtp{display:flex;flex-wrap:wrap;gap:6px}
+.crtc{display:inline-flex;align-items:baseline;gap:6px;padding:3px 9px;border-radius:6px;font-size:11.5px;color:var(--ink2);background:var(--tint);border:1px solid var(--line);cursor:pointer;white-space:nowrap}
+.crtc b{color:var(--ink);font-weight:600}.crtc em{font-style:normal;font-family:var(--mono);font-size:11px}
+.crtc.r{background:var(--badbg);border-color:#f3c3c6}.crtc.r em{color:var(--bad)}.crtc.y{background:var(--warnbg);border-color:#f6d8a8}.crtc.y em{color:var(--warn)}.crtc.b em{color:var(--pri)}
+.crtf{font-size:11px;color:var(--ink3);padding-top:6px;border-top:1px dashed var(--line)}
+
+/* 10/1 工作台：派工行紧凑 + 本周关键节点按类别进度 */
+.drow .bt{margin:0;padding:0;align-self:center}
+.hnd{cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.hndh{display:flex;align-items:baseline;gap:10px}.hndh b{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--ink)}.hndh b em{font-style:normal;font-size:15px;color:var(--ink3)}
+.hndh span{font-size:11.5px;color:var(--ink3)}
+.hndbar{height:8px;border-radius:4px;background:var(--warnbg);overflow:hidden;margin:4px 0 10px}.hndbar i{display:block;height:100%;background:var(--ok);border-radius:4px}
+.hndr{display:grid;grid-template-columns:40px 1fr 44px;gap:10px;align-items:center;height:26px;font-size:12px}
+.hndr span{color:var(--ink2)}.hndr em{font-style:normal;font-family:var(--mono);font-size:11.5px;text-align:right;color:var(--ink2)}
+.hndr>div{height:8px;background:var(--warnbg);border-radius:4px;overflow:hidden}.hndr i{display:block;height:100%;background:var(--ok);border-radius:4px}
+.hndf{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--ink3)}
+.hnd:hover .hndf{color:var(--pri)}
+/* 10/1 知识库：条目列表在卡片内滚动，左右两列等高 */
+#kblist{max-height:980px;overflow:auto;padding-right:6px;scrollbar-width:thin}
+/* 10/1 问小瓦特：单数张卡时最后一张占满整行 */
+.grid2.askg>.card:last-child:nth-child(odd){grid-column:1/-1}
+/* 10/1 分析参谋 · 培养对象排序：列宽重新分配 */
+table.t.cand th:nth-child(3){width:27%}table.t.cand th:nth-child(4){width:15%}table.t.cand th:nth-child(5){width:31%}table.t.cand th:nth-child(6){width:12%}
+table.t.cand td:nth-child(2),table.t.cand td:last-child{white-space:nowrap}
+table.t.cand .planol{margin:0;padding-left:16px}table.t.cand .planol li{margin-bottom:3px}
 
 </style>
 </head>
@@ -2770,66 +2953,75 @@ const CH = {
     const dots = vals.map((v, i) => { const [x, y] = pt(i, v); return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4.5" fill="' + (v < target ? '#e8791d' : CPAL[0]) + '" class="dot vt" data-act="ch-mod" data-i="' + i + '" data-tip="' + h(dims[i]) + ' · 班组均值 L' + v.toFixed(1) + (v < target ? ' · 低于目标 L3' : '') + '"/>'; }).join('');
     return '<svg viewBox="0 0 300 184" class="ch">' + rings + axes + tgt + poly + dots + labels + '</svg>'; },
   /* 到期时间轴：未来 12 个月的证书复审 */
-  certline(certs) { const L = 14, R = 14, W = 300, Hh = 180; const t0 = new Date(TODAY).getTime(), span = 365 * 86400000; const x = d => L + Math.min(1, Math.max(0, (new Date(d).getTime() - t0) / span)) * (W - L - R);
-    const months = []; for (let m = 0; m < 13; m += 3) { const d = new Date(TODAY); d.setMonth(d.getMonth() + m); months.push(d); }
-    const ax = '<line x1="' + L + '" y1="120" x2="' + (W - R) + '" y2="120" class="grid"/>' + months.map(d => '<text x="' + x(d).toFixed(1) + '" y="136" text-anchor="middle" class="lb mute">' + (d.getFullYear() !== new Date(TODAY).getFullYear() ? (d.getMonth() + 1) + '月' : (d.getMonth() + 1) + '月') + '</text>').join('') + '<line x1="' + L + '" y1="24" x2="' + L + '" y2="120" class="thr"/><text x="' + (L + 3) + '" y="20" class="lb mute">今天</text>';
-    const inYear = certs.filter(c => !c.renewed && daysTo(c.due) >= 0 && daysTo(c.due) <= 365).sort((a, b) => daysTo(a.due) - daysTo(b.due)); const lanes = [];
-    const dots = inYear.map((c, i) => { const cx = x(c.due); let lane = 0; while (lanes[lane] != null && cx - lanes[lane] < 14) lane++; lanes[lane] = cx; const cy = 108 - lane * 18; const d = daysTo(c.due); const col = d <= 90 ? '#e5484d' : d <= 180 ? '#e8791d' : CPAL[0]; return '<g data-act="ch-cert" data-who="' + h(c.who) + '" data-tip="' + h(c.who) + ' · ' + h(c.name) + ' · ' + c.due + ' · 还有 ' + d + ' 天"><circle cx="' + cx.toFixed(1) + '" cy="' + cy + '" r="5" fill="' + col + '" class="dot"/>' + (d <= 90 ? '<text x="' + cx.toFixed(1) + '" y="' + (cy - 9) + '" text-anchor="middle" class="lb" fill="' + col + '">' + h(c.who) + '</text>' : '') + '</g>'; }).join('');
-    const later = certs.filter(c => !c.renewed && daysTo(c.due) > 365).length;
-    return '<svg viewBox="0 0 300 ' + Hh + '" class="ch">' + ax + dots + '<text x="' + (W - R) + '" y="160" text-anchor="end" class="lb mute">一年后到期 ' + later + ' 张</text><g><circle cx="20" cy="158" r="4" fill="#e5484d"/><text x="28" y="161" class="lb">90 天内</text><circle cx="78" cy="158" r="4" fill="#e8791d"/><text x="86" y="161" class="lb">半年内</text><circle cx="130" cy="158" r="4" fill="' + CPAL[0] + '"/><text x="138" y="161" class="lb">一年内</text></g></svg>'; },
+  certline(certs) { const span = 365, pos = d => Math.min(100, Math.max(0, daysTo(d) / span * 100)); const months = []; for (let m = 0; m <= 12; m += 3) { const d = new Date(TODAY); d.setMonth(d.getMonth() + m); months.push({ p: m / 12 * 100, t: m ? (d.getMonth() + 1) + ' 月' : '今天' }); }
+    const inYear = certs.filter(c => !c.renewed && daysTo(c.due) >= 0 && daysTo(c.due) <= span).sort((a, b) => daysTo(a.due) - daysTo(b.due)); const later = certs.filter(c => !c.renewed && daysTo(c.due) > span).length; const cls = d => d <= 90 ? 'r' : d <= 180 ? 'y' : 'b'; const lanes = [];
+    const dots = inYear.map(c => { const p = pos(c.due); let ln = 0; while (lanes[ln] != null && p - lanes[ln] < 3) ln++; lanes[ln] = p; const d = daysTo(c.due); return '<i class="' + cls(d) + '" style="left:' + p.toFixed(1) + '%;bottom:' + (8 + ln * 13) + 'px" data-act="ch-cert" data-who="' + h(c.who) + '" data-tip="' + h(c.who + ' · ' + c.name + ' · ' + c.due + ' · 还有 ' + d + ' 天') + '"></i>'; }).join('');
+    const B = [['r', '90 天内', 0, 90], ['y', '半年内', 91, 180], ['b', '一年内', 181, span]].map(b => ({ b, L: inYear.filter(c => daysTo(c.due) >= b[2] && daysTo(c.due) <= b[3]) }));
+    return '<div class="crt"><div class="crtax" style="height:' + (22 + Math.max(1, lanes.length) * 13) + 'px">' + months.map(m => '<s style="left:' + m.p + '%"><em>' + m.t + '</em></s>').join('') + dots + '</div>' +
+      B.map(x => '<div class="crtb"><div class="crtk"><i class="' + x.b[0] + '"></i><b>' + x.b[1] + '</b><span>' + x.L.length + ' 张</span></div><div class="crtp">' + (x.L.map(c => '<span class="crtc ' + x.b[0] + '" data-act="ch-cert" data-who="' + h(c.who) + '"><b>' + h(c.who) + '</b>' + h(c.name.replace(/作业证|资格|证$/, '')) + '<em>' + daysTo(c.due) + ' 天</em></span>').join('') || '<span class="note">无</span>') + '</div></div>').join('') +
+      '<div class="crtf">一年后到期 ' + later + ' 张 · 点名字看本人证书</div></div>'; },
   /* 计量条：单一比率对上限 */
   meters(items) { return '<div class="meters">' + items.map(it => '<div class="mt" data-act="ch-meter" data-k="' + h(it.k) + '" data-tip="' + h(it.tip) + '"><div class="ml"><span>' + h(it.n) + '</span><b class="num">' + h(it.txt) + '</b></div><div class="tr"><i style="width:0" data-w="' + Math.round(it.v * 100) + '" class="' + (it.v >= 1 ? 'full' : it.v < .7 ? 'low' : '') + '"></i></div></div>').join('') + '</div>'; },
   /* 挂载后触发生长动画 */
-  mount(root) { this.initTip(); requestAnimationFrame(() => { $$('.chart', root).forEach(c => c.classList.add('in')); $$('.meters .tr i', root).forEach(i => i.style.width = i.dataset.w + '%'); }); }
+  mount(root) { this.initTip(); if (this.fit) this.fit(root); requestAnimationFrame(() => { $$('.chart', root).forEach(c => c.classList.add('in')); $$('.meters .tr i', root).forEach(i => i.style.width = i.dataset.w + '%'); }); }
 };
 
 
 /* ===== 小图表（对话气泡与页面内嵌）：条 / 柱 / 环 / 线 / 雷达 / 时间轴 / 热力 / 甘特 / 漏斗 / 分组柱；同一套类别色 CPAL，顺序色 RAMP ===== */
 const RAMP = ['#eaf0fa', '#c5d5ef', '#93b1e0', '#5d88cf', '#1f5fbf', '#164a96'];
+/* 纵轴取整：上限取 2、4、6、8、10、12、16、20… 中第一个不小于数据的值，中线刻度为整数 */
+CH.nice = v => { if (!(v > 0)) return 2; const m = Math.pow(10, Math.floor(Math.log10(v))); for (const k of [1, 1.2, 1.6, 2, 3, 4, 5, 6, 8, 10]) { const c = k * m; if (c >= v && Number.isInteger(c / 2) || (c >= v && c / 2 >= 1 && m < 1)) return c; } return 10 * m; };
 CH.mini = {
   W: 300,
   attrs(o) { return (o.act ? ' data-act="' + h(o.act) + '"' : '') + (o.who ? ' data-who="' + h(o.who) + '"' : '') + (o.id != null ? ' data-id="' + h(o.id) + '"' : '') + (o.k != null ? ' data-k="' + h(o.k) + '"' : '') + (o.i != null ? ' data-i="' + o.i + '"' : '') + (o.tip ? ' data-tip="' + h(o.tip) + '"' : ''); },
-  bars(items, opt) { opt = opt || {}; const rh = opt.h || 14, x0 = opt.x0 || 50, W = 300 - x0 - 34; const max = opt.max || Math.max.apply(null, items.map(i => i.v)) * 1.12 || 1; const H = items.length * rh + 10;
-    const body = items.map((it, i) => { const y = 8 + i * rh; const w = Math.max(3, it.v / max * W); const c = it.c || CPAL[0]; return '<g' + this.attrs(it) + '><rect x="0" y="' + (y - 6) + '" width="300" height="' + rh + '" fill="transparent"/><text x="' + (x0 - 6) + '" y="' + (y + 3.5) + '" text-anchor="end" class="lb">' + h(it.n) + '</text><rect x="' + x0 + '" y="' + (y - 4) + '" width="' + w.toFixed(1) + '" height="8" rx="3" fill="' + c + '"/><text x="' + (x0 + w + 5).toFixed(1) + '" y="' + (y + 3.5) + '" class="lb num">' + (it.txt != null ? h(it.txt) : it.v + (opt.unit || '')) + '</text></g>'; }).join('');
+  bars(items, opt) { opt = opt || {}; const VW = this.W; const rh = Math.max(opt.h || 20, 18), x0 = opt.x0 || 50, W = VW - x0 - 34; const max = opt.max || Math.max.apply(null, items.map(i => i.v)) * 1.12 || 1; const H = items.length * rh + 6;
+    const body = items.map((it, i) => { const y = 8 + i * rh; const w = Math.max(3, it.v / max * W); const c = it.c || CPAL[0]; return '<g' + this.attrs(it) + '><rect x="0" y="' + (y - 6) + '" width="' + VW + '" height="' + rh + '" fill="transparent"/><text x="' + (x0 - 6) + '" y="' + (y + 3.5) + '" text-anchor="end" class="lb">' + h(it.n) + '</text><rect x="' + x0 + '" y="' + (y - 5) + '" width="' + w.toFixed(1) + '" height="10" rx="4" fill="' + c + '"/><text x="' + (x0 + w + 5).toFixed(1) + '" y="' + (y + 3.5) + '" class="lb num">' + (it.txt != null ? h(it.txt) : it.v + (opt.unit || '')) + '</text></g>'; }).join('');
     const lim = opt.limit ? '<line x1="' + (x0 + opt.limit / max * W).toFixed(1) + '" y1="2" x2="' + (x0 + opt.limit / max * W).toFixed(1) + '" y2="' + (H - 2) + '" class="thr"/>' : '';
-    return '<svg viewBox="0 0 300 ' + H + '" class="ch mini">' + body + lim + '</svg>'; },
-  cols(items, opt) { opt = opt || {}; const L = 24, B = 22, T = 14, Hh = opt.h || 120; const n = items.length; const bw = Math.min(22, (300 - L - 8) / n * 0.62); const max = opt.max || Math.max.apply(null, items.map(i => i.v)) * 1.15 || 1; const x = i => L + (i + .5) * (300 - L - 8) / n; const y = v => T + (1 - v / max) * (Hh - T - B);
-    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="292" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 3) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + Math.round(max * f) + '</text>').join('');
+    return '<svg viewBox="0 0 ' + VW + ' ' + H + '" class="ch mini">' + body + lim + '</svg>'; },
+  cols(items, opt) { opt = opt || {}; const VW = this.W; const L = 24, B = 22, T = 14, Hh = opt.h || 120; const n = items.length; const bw = Math.min(22, (VW - L - 8) / n * 0.62); const max = opt.max || CH.nice(Math.max.apply(null, items.map(i => i.v)) * 1.05); const x = i => L + (i + .5) * (VW - L - 8) / n; const y = v => T + (1 - v / max) * (Hh - T - B);
+    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="' + (VW - 8) + '" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 3) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + Math.round(max * f) + '</text>').join('');
     const body = items.map((it, i) => '<g' + this.attrs(it) + '><rect x="' + (x(i) - bw / 2).toFixed(1) + '" y="' + y(it.v).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y(0) - y(it.v)).toFixed(1) + '" rx="3" fill="' + (it.c || CPAL[0]) + '"/><text x="' + x(i).toFixed(1) + '" y="' + (Hh - 8) + '" text-anchor="middle" class="lb mute">' + h(it.n) + '</text>' + (opt.labels ? '<text x="' + x(i).toFixed(1) + '" y="' + (y(it.v) - 3).toFixed(1) + '" text-anchor="middle" class="lb num">' + it.v + '</text>' : '') + '</g>').join('');
-    return '<svg viewBox="0 0 300 ' + Hh + '" class="ch mini">' + grid + body + '</svg>'; },
-  donut(items, opt) { opt = opt || {}; const tot = items.reduce((s, i) => s + i.v, 0) || 1; let a = -Math.PI / 2; const gap = .05, cx = 64, cy = 64, r = 44;
+    return '<svg viewBox="0 0 ' + VW + ' ' + Hh + '" class="ch mini">' + grid + body + '</svg>'; },
+  donut(items, opt) { opt = opt || {}; const VW = this.W; const tot = items.reduce((s, i) => s + i.v, 0) || 1; let a = -Math.PI / 2; const gap = .05, cx = 64, cy = 64, r = 44;
     const segs = items.map((it, i) => { const sw = it.v / tot * Math.PI * 2; const d = CH.arc(cx, cy, r, a + gap / 2, Math.max(a + gap / 2 + .01, a + sw - gap / 2)); a += sw; return '<path d="' + d + '" stroke="' + (it.c || CPAL[i % 6]) + '" stroke-width="13" fill="none"' + this.attrs(Object.assign({ tip: it.k + ' ' + it.v }, it)) + '/>'; }).join('');
-    const leg = items.map((it, i) => '<g' + this.attrs(it) + '><rect x="132" y="' + (22 + i * 20) + '" width="9" height="9" rx="2" fill="' + (it.c || CPAL[i % 6]) + '"/><text x="146" y="' + (30 + i * 20) + '" class="lb">' + h(it.k) + '</text><text x="292" y="' + (30 + i * 20) + '" text-anchor="end" class="lb num">' + it.v + (opt.unit || '') + '</text></g>').join('');
-    return '<svg viewBox="0 0 300 ' + Math.max(128, 30 + items.length * 20) + '" class="ch mini">' + segs + '<text x="' + cx + '" y="' + (cy + 1) + '" text-anchor="middle" class="hero" style="font-size:18px">' + h(opt.hero != null ? opt.hero : tot) + '</text><text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" class="lb mute">' + h(opt.sub || '') + '</text>' + leg + '</svg>'; },
-  line(series, labels, opt) { opt = opt || {}; const L = 26, R = 12, T = 14, B = 22, Hh = opt.h || 130; const n = labels.length; const all = series.reduce((a, s) => a.concat(s.vals), []); const max = opt.max || (Math.max.apply(null, all) * 1.15 || 1); const x = i => L + i / Math.max(1, n - 1) * (300 - L - R); const y = v => T + (1 - v / max) * (Hh - T - B);
-    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="' + (300 - R) + '" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 4) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + (opt.pct ? Math.round(max * f) + '%' : Math.round(max * f)) + '</text>').join('');
+    const leg = items.map((it, i) => '<g' + this.attrs(it) + '><rect x="132" y="' + (22 + i * 20) + '" width="9" height="9" rx="2" fill="' + (it.c || CPAL[i % 6]) + '"/><text x="146" y="' + (30 + i * 20) + '" class="lb">' + h(it.k) + '</text><text x="' + Math.min(VW - 8, 270) + '" y="' + (30 + i * 20) + '" text-anchor="end" class="lb num">' + it.v + (opt.unit || '') + '</text></g>').join('');
+    return '<svg viewBox="0 0 ' + VW + ' ' + Math.max(128, 30 + items.length * 20) + '" class="ch mini">' + segs + '<text x="' + cx + '" y="' + (cy + 1) + '" text-anchor="middle" class="hero" style="font-size:18px">' + h(opt.hero != null ? opt.hero : tot) + '</text><text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" class="lb mute">' + h(opt.sub || '') + '</text>' + leg + '</svg>'; },
+  line(series, labels, opt) { opt = opt || {}; const VW = this.W; const L = 26, R = 12, T = 14, B = 22, Hh = opt.h || 130; const n = labels.length; const all = series.reduce((a, s) => a.concat(s.vals), []); const max = opt.max || CH.nice(Math.max.apply(null, all) * 1.05); const x = i => L + i / Math.max(1, n - 1) * (VW - L - R); const y = v => T + (1 - v / max) * (Hh - T - B);
+    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="' + (VW - R) + '" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 4) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + (opt.pct ? Math.round(max * f) + '%' : Math.round(max * f)) + '</text>').join('');
     const step = Math.max(1, Math.ceil(n / 6)); const xl = labels.map((l, i) => i % step === 0 || i === n - 1 ? '<text x="' + x(i).toFixed(1) + '" y="' + (Hh - 7) + '" text-anchor="middle" class="lb mute">' + h(l) + '</text>' : '').join('');
     const paths = series.map((s, si) => { const c = s.c || CPAL[si % 6]; const d = s.vals.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' '); return (s.area ? '<path d="' + d + ' L' + x(n - 1).toFixed(1) + ' ' + y(0).toFixed(1) + ' L' + x(0).toFixed(1) + ' ' + y(0).toFixed(1) + 'Z" fill="' + c + '" opacity=".1"/>' : '') + '<path d="' + d + '" fill="none" stroke="' + c + '" stroke-width="2" stroke-linejoin="round"/>' + s.vals.map((v, i) => '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="3.5" fill="' + c + '" class="dot" data-tip="' + h(labels[i]) + ' · ' + h(s.n) + ' ' + v + (opt.unit || '') + '"' + (s.act ? ' data-act="' + s.act + '" data-i="' + i + '"' : '') + '/>').join('') + '<text x="' + (x(n - 1) - 5).toFixed(1) + '" y="' + (y(s.vals[n - 1]) - 6).toFixed(1) + '" text-anchor="end" class="lb" fill="' + c + '">' + h(s.n) + ' ' + s.vals[n - 1] + (opt.unit || '') + '</text>'; }).join('');
-    return '<svg viewBox="0 0 300 ' + Hh + '" class="ch mini">' + grid + paths + xl + '</svg>'; },
-  radar(dims, series, opt) { opt = opt || {}; const cx = 150, cy = 84, R = 56, n = dims.length, max = opt.max || 5; const pt = (i, v) => { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [cx + R * v / max * Math.cos(a), cy + R * v / max * Math.sin(a)]; };
+    return '<svg viewBox="0 0 ' + VW + ' ' + Hh + '" class="ch mini">' + grid + paths + xl + '</svg>'; },
+  radar(dims, series, opt) { opt = opt || {}; const VW = this.W; const cx = VW / 2, cy = 84, R = 56, n = dims.length, max = opt.max || 5; const pt = (i, v) => { const a = -Math.PI / 2 + i / n * Math.PI * 2; return [cx + R * v / max * Math.cos(a), cy + R * v / max * Math.sin(a)]; };
     const nr = opt.rings || 5; const rings = Array.from({ length: nr }, (x, k) => k + 1).map(l => '<polygon points="' + dims.map((d, i) => pt(i, l * max / nr).map(v => v.toFixed(1)).join(',')).join(' ') + '" class="grid" fill="none"/>').join('');
     const labels = dims.map((d, i) => { const a = -Math.PI / 2 + i / n * Math.PI * 2; const x = cx + (R + 14) * Math.cos(a), y = cy + (R + 14) * Math.sin(a); return '<text x="' + x.toFixed(1) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="' + (Math.abs(Math.cos(a)) < .2 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end') + '" class="lb">' + h(d) + '</text>'; }).join('');
     const polys = series.map((s, si) => { const c = s.c || CPAL[si % 6]; return '<polygon points="' + s.vals.map((v, i) => pt(i, v).map(q => q.toFixed(1)).join(',')).join(' ') + '" fill="' + c + '" fill-opacity="' + (si ? .08 : .18) + '" stroke="' + c + '" stroke-width="2"' + (s.dash ? ' stroke-dasharray="4 3"' : '') + '/>' + s.vals.map((v, i) => { const [x, y] = pt(i, v); return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5" fill="' + c + '" class="dot" data-tip="' + h(dims[i]) + ' · ' + h(s.n) + ' ' + (opt.fmt ? opt.fmt(v) : v) + '"/>'; }).join(''); }).join('');
-    return '<svg viewBox="0 0 300 168" class="ch mini">' + rings + polys + labels + '</svg>'; },
-  timeline(items, opt) { opt = opt || {}; const L = 14, R = 14, span = opt.span || 365; const x = t => L + Math.min(1, Math.max(0, t / span)) * (300 - L - R); const lanes = []; const marks = (opt.marks || [0, 90, 180, 270, 365]).map(t => '<text x="' + x(t).toFixed(1) + '" y="70" text-anchor="middle" class="lb mute">' + (t === 0 ? '今天' : t + '天') + '</text>');
+    return '<svg viewBox="0 0 ' + VW + ' 168" class="ch mini">' + rings + polys + labels + '</svg>'; },
+  timeline(items, opt) { opt = opt || {}; const VW = this.W; const L = 14, R = 14, span = opt.span || 365; const x = t => L + Math.min(1, Math.max(0, t / span)) * (VW - L - R); const lanes = []; const marks = (opt.marks || [0, 90, 180, 270, 365]).map(t => '<text x="' + x(t).toFixed(1) + '" y="70" text-anchor="middle" class="lb mute">' + (t === 0 ? '今天' : t + '天') + '</text>');
     const dots = items.slice().sort((a, b) => a.t - b.t).map(it => { const cx = x(it.t); let lane = 0; while (lanes[lane] != null && cx - lanes[lane] < 16) lane++; lanes[lane] = cx; const cy = 50 - lane * 14; return '<g' + this.attrs(it) + '><circle cx="' + cx.toFixed(1) + '" cy="' + cy + '" r="5" fill="' + (it.c || CPAL[0]) + '" class="dot"/>' + (it.lbl ? '<text x="' + cx.toFixed(1) + '" y="' + (cy - 8) + '" text-anchor="middle" class="lb" fill="' + (it.c || CPAL[0]) + '">' + h(it.lbl) + '</text>' : '') + '</g>'; }).join('');
-    return '<svg viewBox="0 0 300 78" class="ch mini"><line x1="' + L + '" y1="58" x2="' + (300 - R) + '" y2="58" class="grid"/><line x1="' + L + '" y1="10" x2="' + L + '" y2="58" class="thr"/>' + marks.join('') + dots + '</svg>'; },
-  heat(rows, cols, vals, opt) { opt = opt || {}; const max = opt.max || 5; const W = opt.w || 300, L = opt.L || 58, rh = opt.rh || 14; const cw = Math.min(opt.cwmax || 22, (W - L - 2) / cols.length); const H = 16 + rows.length * rh; const col = v => opt.colors ? opt.colors[v] || '#e6e8f4' : RAMP[Math.min(5, Math.round(v / max * 5))];
+    return '<svg viewBox="0 0 ' + VW + ' 78" class="ch mini"><line x1="' + L + '" y1="58" x2="' + (VW - R) + '" y2="58" class="grid"/><line x1="' + L + '" y1="10" x2="' + L + '" y2="58" class="thr"/>' + marks.join('') + dots + '</svg>'; },
+  heat(rows, cols, vals, opt) { opt = opt || {}; const VW = this.W; const max = opt.max || 5; const W = opt.w || VW, L = opt.L || 58, rh = opt.rh || 14; const cw = Math.min(opt.cwmax || 22, (W - L - 2) / cols.length); const H = 16 + rows.length * rh; const col = v => opt.colors ? opt.colors[v] || '#e6e8f4' : RAMP[Math.min(5, Math.round(v / max * 5))];
     const hd = cols.map((c, j) => (cols.length <= 12 || j % Math.ceil(cols.length / 10) === 0) ? '<text x="' + (L + (j + .5) * cw).toFixed(1) + '" y="10" text-anchor="middle" class="lb mute">' + h(c) + '</text>' : '').join('');
     const body = rows.map((r, i) => '<text x="' + (L - 4) + '" y="' + (14 + i * rh + 8) + '" text-anchor="end" class="lb">' + h(r) + '</text>' + cols.map((c, j) => '<rect x="' + (L + j * cw + 1).toFixed(1) + '" y="' + (14 + i * rh + 1) + '" width="' + (cw - 2).toFixed(1) + '" height="' + (rh - 2) + '" rx="2" fill="' + col(vals[i][j]) + '"' + this.attrs({ act: opt.act, who: r, i: j, tip: r + ' · ' + c + ' · ' + (opt.fmt ? opt.fmt(vals[i][j]) : vals[i][j]) }) + '/>').join('')).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ch mini">' + hd + body + '</svg>'; },
-  gantt(items, days, opt) { opt = opt || {}; const W = opt.w || 300, L = opt.L || 100, rh = 16, n = days.length; const cw = (W - L - 6) / n; const H = 16 + items.length * rh;
+  gantt(items, days, opt) { opt = opt || {}; const VW = this.W; const W = opt.w || VW, L = opt.L || 100, rh = 16, n = days.length; const cw = (W - L - 6) / n; const H = 16 + items.length * rh;
     const hd = days.map((d, j) => '<text x="' + (L + (j + .5) * cw).toFixed(1) + '" y="10" text-anchor="middle" class="lb mute">' + h(d) + '</text><line x1="' + (L + j * cw).toFixed(1) + '" y1="14" x2="' + (L + j * cw).toFixed(1) + '" y2="' + H + '" class="grid"/>').join('');
     const body = items.map((it, i) => '<g' + this.attrs(it) + '><rect x="0" y="' + (14 + i * rh) + '" width="' + W + '" height="' + rh + '" fill="transparent"/><text x="' + (L - 6) + '" y="' + (14 + i * rh + 11) + '" text-anchor="end" class="lb">' + h(it.n.length > (opt.maxn || 11) ? it.n.slice(0, opt.maxn || 11) + '…' : it.n) + '</text><rect x="' + (L + it.d0 * cw + 1).toFixed(1) + '" y="' + (14 + i * rh + 3) + '" width="' + ((it.d1 - it.d0 + 1) * cw - 2).toFixed(1) + '" height="' + (rh - 6) + '" rx="4" fill="' + (it.c || CPAL[0]) + '"/></g>').join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ch mini">' + hd + body + '</svg>'; },
-  funnel(steps, opt) { opt = opt || {}; const max = Math.max.apply(null, steps.map(s => s.v)) || 1; const rh = 22; const H = steps.length * rh + 6;
-    return '<svg viewBox="0 0 300 ' + H + '" class="ch mini">' + steps.map((s, i) => { const w = Math.max(20, s.v / max * 200); const x = 150 - w / 2; return '<g' + this.attrs(s) + '><rect x="' + x.toFixed(1) + '" y="' + (3 + i * rh) + '" width="' + w.toFixed(1) + '" height="' + (rh - 5) + '" rx="4" fill="' + (s.c || RAMP[5 - Math.min(4, i)]) + '"/><text x="150" y="' + (3 + i * rh + 12) + '" text-anchor="middle" class="lb' + (s.c || 5 - Math.min(4, i) >= 3 ? ' lbw' : '') + '" font-weight="700">' + h(s.k) + ' ' + s.v + '</text></g>'; }).join('') + '</svg>'; },
-  group(cats, series, opt) { opt = opt || {}; const L = 26, B = 22, T = 14, Hh = opt.h || 130; const n = cats.length, m = series.length; const all = series.reduce((a, s) => a.concat(s.vals), []); const max = opt.max || (Math.max.apply(null, all) * 1.15 || 1); const gw = (300 - L - 8) / n; const bw = Math.min(14, gw * .7 / m); const y = v => T + (1 - v / max) * (Hh - T - B);
-    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="292" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 3) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + Math.round(max * f) + (opt.unit || '') + '</text>').join('');
+  funnel(steps, opt) { opt = opt || {}; const VW = this.W; const max = Math.max.apply(null, steps.map(s => s.v)) || 1; const rh = 22; const H = steps.length * rh + 6;
+    return '<svg viewBox="0 0 ' + VW + ' ' + H + '" class="ch mini">' + steps.map((s, i) => { const w = Math.max(20, s.v / max * Math.min(VW - 40, 260)); const x = VW / 2 - w / 2; return '<g' + this.attrs(s) + '><rect x="' + x.toFixed(1) + '" y="' + (3 + i * rh) + '" width="' + w.toFixed(1) + '" height="' + (rh - 5) + '" rx="4" fill="' + (s.c || RAMP[5 - Math.min(4, i)]) + '"/><text x="' + VW / 2 + '" y="' + (3 + i * rh + 12) + '" text-anchor="middle" class="lb' + (s.c || 5 - Math.min(4, i) >= 3 ? ' lbw' : '') + '" font-weight="700">' + h(s.k) + ' ' + s.v + '</text></g>'; }).join('') + '</svg>'; },
+  group(cats, series, opt) { opt = opt || {}; const VW = this.W; const L = 26, B = 22, T = 14, Hh = opt.h || 130; const n = cats.length, m = series.length; const all = series.reduce((a, s) => a.concat(s.vals), []); const max = opt.max || CH.nice(Math.max.apply(null, all) * 1.05); const gw = (VW - L - 8) / n; const bw = Math.min(14, gw * .7 / m); const y = v => T + (1 - v / max) * (Hh - T - B);
+    const grid = [0, .5, 1].map(f => '<line x1="' + L + '" y1="' + y(max * f).toFixed(1) + '" x2="' + (VW - 8) + '" y2="' + y(max * f).toFixed(1) + '" class="grid"/><text x="' + (L - 3) + '" y="' + (y(max * f) + 3).toFixed(1) + '" text-anchor="end" class="lb mute">' + Math.round(max * f) + (opt.unit || '') + '</text>').join('');
     const body = cats.map((c, i) => '<text x="' + (L + (i + .5) * gw).toFixed(1) + '" y="' + (Hh - 7) + '" text-anchor="middle" class="lb mute">' + h(c) + '</text>' + series.map((s, si) => { const x = L + (i + .5) * gw - (m * bw) / 2 + si * bw; return '<rect x="' + (x + 1).toFixed(1) + '" y="' + y(s.vals[i]).toFixed(1) + '" width="' + (bw - 2).toFixed(1) + '" height="' + (y(0) - y(s.vals[i])).toFixed(1) + '" rx="2.5" fill="' + (s.c || CPAL[si % 6]) + '"' + this.attrs({ act: s.act, k: c, who: s.n, tip: c + ' · ' + s.n + ' ' + s.vals[i] + (opt.unit || '') }) + '/>'; }).join('')).join('');
-    return '<svg viewBox="0 0 300 ' + Hh + '" class="ch mini">' + grid + body + '</svg>'; },
+    return '<svg viewBox="0 0 ' + VW + ' ' + Hh + '" class="ch mini">' + grid + body + '</svg>'; },
   legend(series) { return '<div class="legend">' + series.map((s, i) => '<span><i style="background:' + (s.c || CPAL[i % 6]) + '"></i>' + h(s.n) + '</span>').join('') + '</div>'; }
 };
+
+/* 图按容器实际宽度出图：先按 300 宽出占位，CH.mount 时量出容器宽度重画——字号不随卡片宽窄放大缩小，宽卡片里横向铺满 */
+CH.FIT = new Map(); CH.fitN = 0;
+['bars', 'cols', 'donut', 'line', 'radar', 'timeline', 'heat', 'gantt', 'funnel', 'group'].forEach(k => { const f = CH.mini[k]; CH.mini[k] = function () { const args = arguments, id = ++CH.fitN; CH.FIT.set(id, () => f.apply(CH.mini, args)); return '<div class="chfit" data-fit="' + id + '">' + f.apply(CH.mini, args) + '</div>'; }; });
+CH.fit = function (root) { $$('.chfit', root || document).forEach(el => { const fn = CH.FIT.get(+el.dataset.fit); const cw = el.clientWidth; if (!fn || !cw) return; const W = Math.max(300, Math.round(cw / 1.2)); if (+el.dataset.w === W) return; CH.mini.W = W; try { el.innerHTML = fn(); } finally { CH.mini.W = 300; } el.dataset.w = W; });
+  if (CH.FIT.size > 600) [...CH.FIT.keys()].forEach(id => { if (!document.querySelector('.chfit[data-fit="' + id + '"]')) CH.FIT.delete(id); }); };
+window.addEventListener('resize', () => { clearTimeout(CH.fitT); CH.fitT = setTimeout(() => CH.fit(document), 150); });
 
 
 /* ===== 应用框架：两个角色（班组长 / 管理者）、路由、左栏、命令栏、事件委托、讲师演示台（扩展模块 / 功能实现状态清单 / 案例日期） ===== */
@@ -2959,12 +3151,16 @@ const HOMEPG = {
       card('本周工时', '约定 ' + WEEK_LIMIT + 'h · 点一条照亮台账', CH.bars(bars, WEEK_LIMIT)) +
       card('近 30 天缺陷 · 应用失败与异常信号', '点一天看当天', CH.area(DEF30.days, DEF30.found, DEF30.closed) + legend([[CPAL[0], '发现累计'], [CPAL[2], '闭环累计']])) +
       card('两票 · 近 ' + DB.ticketM().m.length + ' 个月', '开出与合格 · 两票台账', CH.mini.line([{ n: '开出', vals: DB.ticketM().n, c: RAMP[2] }, { n: '合格', vals: DB.ticketM().ok, c: CPAL[0] }], DB.ticketM().m, { h: 150 }) + legend([[RAMP[2], '开出'], [CPAL[0], '合格']])) +
-      card('本周关键节点', '周关键节点管控表 · 周期类节点', CH.mini.donut([{ k: '已清', v: DB.nodeRate().done, c: SEM.ok }, { k: '待清', v: DB.nodeRate().n - DB.nodeRate().done, c: SEM.w }].filter(x => x.v), { hero: DB.nodeRate().done + '/' + DB.nodeRate().n, sub: '本周' })) +
+      card('本周关键节点', '周关键节点管控表 · 周期类节点', HOMEPG.nodesHTML()) +
       card('周报指标 · 第 ' + WK29.no + ' 期', '与台账中心同源 · 点一条看', CH.meters(meters)) + '</div>';
   },
   /* 今日作业 · 派工情况（客户 9/29：工作台只放工作安排——今日几单、派了几单、待派的要不要派、怎么安排） */
   urg(j) { return /超期/.test(j.when) ? { t: '超期 · 今天必须派', c: 'bad', o: 0 } : j.dateIso <= TODAY || /本周|周五/.test(j.when) ? { t: '本周要做 · 今天派', c: 'w', o: 1 } : { t: '下周 · 周五前派', c: '', o: 2 }; },
   dispStat() { const J = DB.todayJobs(); const pend = J.filter(j => j.st === '待派'); const on = J.filter(j => /进行中/.test(j.st)).length, wait = J.filter(j => /待开工|已派|票已审/.test(j.st)).length, done = J.filter(j => /已完成|已关闭/.test(j.st)).length; return { J, pend, on, wait, done, sent: J.length - pend.length, today: pend.filter(j => this.urg(j).o <= 1).length }; },
+  nodesHTML() { const R = DB.nodeRate(); const done = DB.nodesDone(); const wk = NODES.filter(n => /周|限时|日日清/.test(n.cyc)); const cats = [...new Set(wk.map(n => n.cat))];
+    return '<div class="hnd" data-act="nav" data-to="sched" data-sub="nodes"><div class="hndh"><b>' + R.done + '<em> / ' + R.n + '</em></b><span>本周已清 · ' + R.pct + '%</span></div><div class="hndbar"><i style="width:' + Math.max(R.pct, 0) + '%"></i></div>' +
+      cats.map(c => { const L = wk.filter(n => n.cat === c), d = L.filter(n => done.includes(n.id)).length; return '<div class="hndr"><span>' + h(c) + '</span><div><i style="width:' + (d / L.length * 100).toFixed(0) + '%"></i></div><em>' + d + ' / ' + L.length + '</em></div>'; }).join('') +
+      '<div class="hndf">' + (R.done < R.n ? '待清 ' + (R.n - R.done) + ' 个 · 点开看逐个节点与责任人' : '本周节点全部已清') + '</div></div>'; },
   dispHTML() { const D = this.dispStat(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length, off = PEOPLE.filter(p => p.status === '休假').length;
     const rows = D.pend.slice().sort((a, b) => this.urg(a).o - this.urg(b).o || String(a.dateIso).localeCompare(String(b.dateIso))).map(j => { const u = this.urg(j); let d = null; try { d = DISPATCH.defaults(j); } catch (e) {} const sug = d && d.lead ? '负责人 ' + d.lead.n + (d.crew.length ? '，班员 ' + d.crew.map(p => p.n).join('、') : '') + (d.follows.length ? '，随队 ' + d.follows.map(p => p.n).join('、') : '') : '去用工安排按四条规则排';
       return '<div class="drow"><span class="tag ' + u.c + '">' + h(u.t) + '</span><div><b>' + h(j.t) + '</b><span class="note">' + h(j.when) + ' · 需要 ' + h((j.need || []).join('、') || '—') + '</span><p>她的建议：' + h(sug) + '</p></div><div class="bt">' + (j.id === MAINLINE ? '<button class="s" data-act="home-to-d1">看理由再派</button>' : '<button class="s" data-act="home-disp" data-id="' + j.id + '">去派工</button>') + '</div></div>'; }).join('');
@@ -3756,7 +3952,7 @@ const LEDGERPG = {
     else if (s === 'notice') table = this.T(['时间', '通知', '接收人', '状态'], DB.notices().map(n => [n.d, h(n.t), h(n.to), '<span class="tag c">' + h(n.st) + '</span>']));
     else if (s === 'log') table = DB.logs().length ? this.T(['时间', '角色', '类别', '内容'], DB.logs().map(l => [l.d, '<span class="tag ' + (l.role === 'manager' ? 'v' : '') + '">' + (l.role === 'manager' ? '管理者' : '班组长') + '</span>', '<span class="tag">' + h(l.kind) + '</span>', h(l.text)])) : '<div class="empty">她还没经手任何操作。派一次工、审一张票、添加一项任务，这里就有记录</div>';
     else table = this.T(['日期', '人员', '作业', '小时'], DB.hours().map(r => [r.d, this.name(r.who), h(r.job) + (r.added ? ' <span class="tag ok">今日完工</span>' : ''), r.h]), { sum: 3 });
-    return '<div class="grid2" style="grid-template-columns:1fr 2fr"><div><div class="card"><div class="h"><b>汇总</b><span>点图她说</span></div>' + chart + '</div><div class="card" style="margin-top:10px"><div class="h"><b>数据来源</b></div><div class="note" style="color:var(--ink)">' + h(this.SRC[s]) + '</div><div class="note" style="margin-top:8px;margin-bottom:2px">最近导入</div>' + IMPORTS.map(i => '<div class="note" style="color:var(--ink);margin:2px 0">' + h(i.d) + ' ' + h(i.src) + ' <span class="note">' + i.n + ' 行 · ' + h(i.by) + '</span></div>').join('') + '</div></div>' +
+    return '<div class="grid2 ledg"><div class="ledside"><div class="card"><div class="h"><b>汇总</b><span>点图她说</span></div>' + chart + '</div><div class="card"><div class="h"><b>数据来源</b><span>本张台账</span></div><div class="ledsrc"><span>主数据源</span><b>' + h(this.SRC[s]) + '</b></div><div class="ph3 cph"><b>最近导入</b><span>' + IMPORTS.length + ' 次 · 自动导入 ' + IMPORTS.filter(i => i.by === '自动').length + ' 次</span></div><div class="ledimp">' + IMPORTS.map(i => '<div><i class="' + (i.by === '自动' ? 'a' : 'm') + '"></i><em>' + h(i.d) + '</em><b>' + h(i.src) + '</b><span>' + i.n + ' 行 · ' + (i.by === '自动' ? '自动' : h(i.by) + ' 上传') + '</span></div>').join('') + '</div></div></div>' +
       '<div class="card"><div class="h"><b>' + h(this.tabs.find(t => t.k === s).n.replace(/（.*）/, '')) + '台账</b><span>点人名她照亮那几行</span><div class="r"><button class="s g" data-act="led-export">导出</button></div></div><div class="ledf"><select id="ledwho"><option value="">全部人员</option>' + PEOPLE.map(p => '<option' + (p.n === this.who ? ' selected' : '') + '>' + h(p.n) + '</option>').join('') + '</select><input id="ledq" placeholder="搜索这张台账" value="' + h(this.q) + '"></div><div id="ledtable">' + table + '</div></div></div>'; }
 };
 PAGES.ledger = {
@@ -3766,7 +3962,7 @@ PAGES.ledger = {
 PAGES.ask = {
   render() { const mgr = role() === 'manager'; const G = mgr ? [{ t: '态势与风险', qs: ['三个班组这周的风险在哪', '哪个班组证书到期的最多', '下个月人力缺口在哪', '光明局在线率全市第几', '关键节点这周清了多少'] }, { t: '统筹与调配', qs: ['试验班张伟借到自动化班三天', '田寮站交接试验缺电缆证的人怎么办', '三个班本月两票合格率', '哪个班组工时最不均衡'] }, { t: '履职与梯队', qs: ['三个班长这周的履职情况', '近三年人才输出有哪些', '五年后哪个班组骨干断层最重', '电力电缆作业证三个班组各几人'] }, { t: '参谋输出', qs: ['写一份部门周汇报', '写一份组织效能复盘', '生成星级对标差距清单'] }] :
     [{ t: '查数', qs: ['三个月内证书到期的有谁', '本月学时未完成的名单', '李文博这周工时怎么算的', '华发民公用柜缺陷现在什么状态', '本月两票合格率', '本期周报在线率全市第几', '谁持有电力电缆作业证'] }, { t: '安排与决策参考', qs: ['加一个任务：光侨路 3# 公用柜 频繁投退处理', '下周一田寮站验收谁去合适', '排下周值班表', '关键节点这周清了多少', '下周谁的活最多', '谁适合参加下季度的技能竞赛'] }, { t: '生成', qs: ['上传一张工作票', '写今天的班前会材料', '生成本月的月度总结', '写下周计划', '从光差保护课件出五道题'] }, { t: '人', qs: ['刘一鸣最近怎么样', '黄伟强最近怎么样', '给郭子扬打倒闸操作实操分', '按陈浩的短板组一套卷'] }, { t: '知识', qs: ['站内馈线保护定值是多少', '缺陷限时闭环是几天', '遥控失败先查什么', '交换机取电怎么复核', '自主实施怎么认定', '考我一道安规题'] }];
-    return cmdHTML([]) + pageHead('问小瓦特', mgr ? '能查、能比、能发起调配、能写参谋材料；涉及人的结论由班组长确认' : '能查、能提醒、能生成、能办；答数字时她会配一张图；涉及人的结论由班组长确认') + '<div class="grid2">' + G.map(g => '<div class="card"><div class="h"><b>' + h(g.t) + '</b></div><div class="kbq">' + g.qs.map(q => '<b data-act="say" data-say="' + h(q) + '">' + h(q) + '</b>').join('') + '</div></div>').join('') + '</div>'; },
+    return cmdHTML([]) + pageHead('问小瓦特', mgr ? '能查、能比、能发起调配、能写参谋材料；涉及人的结论由班组长确认' : '能查、能提醒、能生成、能办；答数字时她会配一张图；涉及人的结论由班组长确认') + '<div class="grid2 askg">' + G.map(g => '<div class="card"><div class="h"><b>' + h(g.t) + '</b><span>' + g.qs.length + ' 条常用问法</span></div><div class="kbq">' + g.qs.map(q => '<b data-act="say" data-say="' + h(q) + '">' + h(q) + '</b>').join('') + '</div></div>').join('') + '</div>'; },
   after() { XW.at(300, () => { if (!$$('#chat .msg').length) XW.answer('想办什么点一条，或者直接打字。语音在输入框右边，说完我先复述一遍再办。', null, { confirm: false }); }); }
 };
 Object.assign(ACT, {
@@ -4033,7 +4229,7 @@ const TEAMPG = {
     return '<div class="tbl"><table class="t dims"><tr><th>目录</th><th>评价维度</th><th>标准分</th><th>当前得分</th><th style="min-width:120px">得分率</th><th>标识</th><th>提升方向</th><th></th></tr>' + grp.map(g => { const L = D.filter(d => d.l1 === g); const tot = L.reduce((s, d) => s + (d.pts || 0), 0); return L.map((d, i) => '<tr class="' + (d.cls === 'bad' ? 'hl' : '') + '">' + (i === 0 ? '<td class="dgrp" rowspan="' + L.length + '"><b>' + h(g) + '</b><span>' + L.length + ' 项' + (tot ? ' · ' + tot + ' 分' : '') + '</span></td>' : '') + '<td><b>' + h(d.n) + '</b></td><td class="mono">' + (d.pts || '—') + '</td><td class="mono">' + (d.pts ? d.scV : d.okV ? '满足' : '不满足') + '</td><td>' + MG.bar(d.pct, d.cls) + '</td><td>' + MG.light(d.cls, d.cls === 'ok' ? (d.pts ? '达标' : '满足') : TEAMPG.lbl(d.cls)) + '</td><td class="note" style="max-width:300px">' + h(d.cls === 'ok' ? '保持' : (d.fix || d.gapV || '—')) + '</td><td><button class="s g" data-act="team-dim" data-k="' + d.k + '">明细</button></td></tr>').join(''); }).join('') + '</table></div>'; },
   dirs() { const L = this.fixList().filter(d => d.fix); return L.filter(d => d.must).concat(L.filter(d => !d.must)); },
   fixList() { return buildDims().filter(d => d.cls !== 'ok').sort((a, b) => ((b.pts || 0) - (b.scV || 0)) - ((a.pts || 0) - (a.scV || 0))); },
-  fixHTML() { const L = this.dirs().concat(this.fixList().filter(d => !d.fix)); const done = LS.get('team_fix', {}); return L.map(d => '<div class="fixrow"><div>' + MG.light(d.cls) + '<b>' + h(d.n) + '</b><span class="note">' + (d.pts ? ' 距标准分 ' + (d.pts - d.scV) + ' 分' : ' 五星必备条件') + '</span><p>' + h(d.fix || '') + '</p></div><div class="bt">' + (done[d.k] ? '<span class="tag ok">已排进计划 ' + h(done[d.k]) + '</span>' : d.fix ? '<button class="s" data-act="team-fix" data-k="' + d.k + '">排进班组计划</button>' : '') + '</div></div>').join(''); }
+  fixHTML() { const L = this.dirs().concat(this.fixList().filter(d => !d.fix)); const done = LS.get('team_fix', {}); return L.map(d => '<div class="fixrow"><div>' + MG.light(d.cls) + '<b>' + h(d.n) + '</b><span class="note">' + (d.pts ? ' 距标准分 ' + (d.pts - d.scV) + ' 分' : ' 五星必备条件') + '</span><p>' + h(d.fix || '') + '</p></div><div class="bt">' + (done[d.k] ? '<span class="tag ok">已排进计划 ' + h(done[d.k]) + '</span>' : d.fix ? '<button class="s g" data-act="team-fix" data-k="' + d.k + '">排进班组计划</button>' : '') + '</div></div>').join(''); }
 };
 PAGES.team = {
   render() { const T = TEAM_TAGS[TEAM.name]; const B = buildScore(); const must = B.dims.filter(d => d.must); const okMust = must.filter(d => d.okV).length; const gen = B.dims.filter(d => d.l1 === '通用部分'), pro = B.dims.filter(d => d.l1 === '专业部分'), add = B.dims.filter(d => d.l1 === '加分'); const sum = l => l.reduce((s, d) => s + d.scV, 0), full = l => l.reduce((s, d) => s + d.pts, 0);
@@ -4042,7 +4238,7 @@ PAGES.team = {
     return pageHead('班组画像', TEAM.full + ' · 班组整体：荣誉 · 核心指标 · 星级与发展规划（人员情况见班员画像）', '<button class="s g" data-act="nav" data-to="skills">班员画像 →</button><button class="s g" data-act="nav" data-to="star">对标分册原文</button>') +
       '<div class="card tmcard"><div class="tmc1"><div class="hstar" data-act="team-honor" data-k="star">' + MG.starTag(T.star) + '<span class="note">' + h(T.starD) + '</span></div><h3>' + h(TEAM.full) + '</h3><p>' + h(TEAMPG.intro()) + '</p></div>' +
         '<div class="tmc2"><div class="ph3"><b>集体荣誉</b><span>荣誉台账</span></div><div class="honors">' + T.honors.map(x => '<div class="hitem" data-act="team-honor" data-k="' + h(x[0]) + '"><b>' + h(x[0]) + '</b><span class="note">' + h(x[1]) + ' · ' + h(x[2]) + '</span></div>').join('') + '</div><div class="kindrow" data-act="team-kind"><span class="note">班组特色</span>' + MG.kindTag(T.kind) + '<span class="note">' + h(T.why) + '</span></div></div>' +
-        '<div class="tmc3"><div class="tmgoal"><span>发展目标</span><b>创建五星班组</b><em>当前' + h(cur) + ' · 初步评分 ' + B.pct + ' · 距五星 ' + gap + ' 分</em></div><div class="note" style="margin-top:8px">定编 ' + PEOPLE.length + ' 人 · 人员构成、能力与授权见 <u class="num" data-act="nav" data-to="skills">班员画像</u></div></div></div>' +
+        '<div class="tmc3"><div class="tmgoal"><span>发展目标</span><b>创建五星班组</b><em>当前' + h(cur) + ' · 初步评分 ' + B.pct + ' · 距五星 ' + gap + ' 分</em></div><div class="note" style="margin-top:8px">定编 ' + PEOPLE.length + ' 人 · 人员构成、能力与授权见 <u class="num" style="white-space:nowrap" data-act="nav" data-to="skills">班员画像 →</u></div></div></div>' +
       '<div class="grid2"><div class="card"><div class="h"><b>班组核心 KPI</b><span>班长年度业绩责任书 · 点一项看评分标准</span></div><div class="kpi4">' + K.map(r => '<div class="kpit" data-act="team-kpi" data-k="' + r.k + '">' + MG.light(r.light) + '<span>' + h(r.n) + '</span><b class="mono">' + h(r.vTxt) + '</b><em>满分值 ' + (r.full != null ? r.full + r.unit : '—') + (r.risk ? ' · 风险指标' : '') + '</em></div>').join('') + '</div></div>' +
         '<div class="card"><div class="h"><b>核心业务管控</b><span>周报第 ' + WK29.no + ' 期与关键节点管控表 · 点一项看明细</span></div><div class="kpi4">' + C.map(r => '<div class="kpit ctrl" data-act="' + r.act + '" data-k="' + r.k + '">' + MG.light(r.cls) + '<span>' + h(r.n) + '</span><b class="mono">' + h(r.v) + '</b><em>' + h(r.sub) + '</em></div>').join('') + '</div></div></div>' +
       '<div class="card"><div class="h"><b>星级评价与班组发展规划</b><span>按《星级班组评价标准》维度初步评分 · 由班组长确认后使用</span></div><div class="grid2" style="grid-template-columns:1.25fr 1fr;gap:14px"><div>' +
@@ -4157,19 +4353,42 @@ Object.assign(ACT, {
 const GROWPG = {
   mentees() { return MENTORS.map(m => Object.assign({ m: m.m, s: m.s, since: m.since, focus: m.focus }, MENTEE[m.s] || {})).concat(Object.keys(MENTEE).filter(n => !MENTORS.some(m => m.s === n)).map(n => Object.assign({ m: '待定', s: n, since: '—', focus: '—' }, MENTEE[n]))); },
   menteeHTML() { const plan = LS.get('plan', []); return this.mentees().map(x => { const p = P[x.s]; const hs = SCORE_HIST[x.s] || []; const last = hs[hs.length - 1]; return '<div class="mcard"><div class="mh"><b data-act="sk-person" data-who="' + x.s + '">' + h(x.s) + '</b><span class="tag ' + (x.stage === '新员工' ? 'c' : '') + '">' + h(x.stage) + '</span><span class="note">' + h(p.post) + ' · 入职 ' + p.yrs + ' 年</span><span class="note" style="margin-left:auto">师傅 <b data-act="sk-person" data-who="' + x.m + '">' + h(x.m) + '</b> · 自 ' + h(x.since) + ' · ' + h(x.focus) + '</span></div><div class="mrow"><div><span>培训</span><b>' + x.train + '</b><em>学时 / 年度 60</em>' + MG.bar(x.train / 60 * 100, x.train >= 36 ? 'ok' : 'w') + '</div><div><span>项目参与</span><b>' + x.proj + '</b><em>' + h(x.lastProj) + '</em></div><div><span>竞赛</span><b>' + x.contest + '</b><em>' + (x.contest ? '局级竞赛 ' + x.contest + ' 次' : '未参加') + '</em></div><div><span>理论最近</span><b class="' + (x.theory < 60 ? 'bad' : '') + '">' + x.theory + '</b><em>' + h(last ? last.t : '') + '</em></div><div><span>资质</span><b class="note" style="font-size:11px">' + h(x.cert) + '</b></div></div><div class="bt"><button class="s" data-act="grow-task" data-who="' + x.s + '">排带教任务</button><button class="s g" data-act="grow-remind" data-who="' + x.s + '" data-m="' + x.m + '">提醒师傅</button><button class="s g" data-act="rec-row" data-who="' + x.s + '">看成绩</button>' + (plan.filter(q => q.who === x.s).length ? '<span class="note">计划中 ' + plan.filter(q => q.who === x.s).length + ' 项</span>' : '') + '</div></div>'; }).join(''); },
+  ladTiers() { const up = re => BACKBONE.filter(b => re.test(b.next)); return [
+    { k: '专家', has: PEOPLE.filter(p => /^专家（/.test(EXPERTS[p.n] || '')), up: up(/^专家/) },
+    { k: '三星工程师', has: PEOPLE.filter(p => STAR_ENG[p.n] === '三星工程师'), up: up(/三星/) },
+    { k: '二星工程师', has: PEOPLE.filter(p => STAR_ENG[p.n] === '二星工程师'), up: up(/二星/) },
+    { k: '一星工程师', has: PEOPLE.filter(p => STAR_ENG[p.n] === '一星工程师'), up: up(/一星/) },
+    { k: '高级工骨干', tip: '高级工及以上、尚未评星级工程师', has: PEOPLE.filter(p => !STAR_ENG[p.n] && /高级工|技师/.test(skillLvOf(p.n))), up: up(/^高级工$/) }]; },
+  ladderHTML() { const T = this.ladTiers(); const dn = LS.get('backbone', {}); let seen = false; const gaps = [];
+    const rows = T.map((t, i) => { const gap = !t.has.length && seen; if (t.has.length) seen = true; else if (gap) gaps.push(t);
+      const has = t.has.map(p => '<span class="gldc" data-act="sk-person" data-who="' + h(p.n) + '" data-tip="' + h(p.n + ' · ' + skillLvOf(p.n) + ' · ' + p.post) + '"><b>' + h(p.n) + '</b><em>' + h(skillLvOf(p.n)) + '</em></span>').join('');
+      const ups = t.up.map(b => { const d = dn[b.who] != null ? dn[b.who] : b.done; return '<span class="gldc up" data-act="sk-person" data-who="' + h(b.who) + '" data-tip="' + h(b.who + '：' + b.now + ' → ' + b.next + ' · 条件 ' + d + '/' + b.items.length) + '"><b>' + h(b.who) + '</b><em>↑ ' + h(b.when) + ' · ' + d + '/' + b.items.length + '</em></span>'; }).join('');
+      return '<div class="gldr' + (t.has.length ? '' : gap ? ' gnil' : ' gnone') + (i === T.length - 1 ? ' last' : '') + '" style="--c:' + RAMP[5 - i] + '"><div class="gldk"' + (t.tip ? ' data-tip="' + h(t.tip) + '"' : '') + '><i></i><b>' + h(t.k) + '</b><span>' + t.has.length + ' 人' + (t.up.length ? ' · 培养中 ' + t.up.length : '') + '</span></div><div class="gldp">' + (t.has.length ? '' : gap ? '<span class="gldgap">空缺</span>' : '<span class="gldgap no">本班暂无</span>') + has + ups + '</div></div>'; }).join('');
+    return '<div class="gld">' + rows + '</div><div class="gldf"><span><i></i>已取得</span><span><i class="d"></i>培养中 · ↑ 申报时间 · 条件完成数</span>' + (gaps.length ? '<div class="gldwarn"><b>断层</b>' + gaps.map(t => h(t.k) + '空缺' + (t.up.length ? '，' + t.up.map(b => h(b.who) + ' ' + h(b.when)).join('、') + '后可补上' : '，暂无培养对象')).join('；') + '</div>' : '') + '</div>'; },
+  trendSeries() { return [['刘一鸣', CPAL[0]], ['陈浩', CPAL[3]], ['周明', CPAL[2]]].map(([n, c]) => ({ n, c, v: LEVEL_HIST[n].map(q => +(q.reduce((s, x) => s + x, 0) / q.length).toFixed(2)) })); },
+  trendSVG(W) { const SR = this.trendSeries(), n = QUARTERS.length, max = 2, H = 200, L = 30, R = 104, T = 12, B = 28; const pw = W - L - R; const x = i => L + 18 + i / (n - 1) * (pw - 36); const y = v => T + (1 - Math.min(v, max) / max) * (H - T - B);
+    const grid = [0, .5, 1, 1.5, 2].map(v => '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" class="' + (v ? 'g' : 'g0') + '"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + (v ? v.toFixed(1) : '0') + '</text>').join('');
+    const xl = QUARTERS.map((q, i) => '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle">' + h(q.replace('Q', ' Q')) + '</text>').join('');
+    const cw = (pw - 36) / (n - 1); const hov = QUARTERS.map((q, i) => '<g class="gx" data-tip="' + h(q + '<br>' + SR.map(s => s.n + ' ' + s.v[i].toFixed(2)).join('<br>')) + '"><rect x="' + (x(i) - cw / 2) + '" y="' + T + '" width="' + cw + '" height="' + (H - T - B) + '" fill="transparent"/><line x1="' + x(i) + '" x2="' + x(i) + '" y1="' + T + '" y2="' + (H - B) + '"/></g>').join('');
+    const lines = SR.map(s => '<path d="' + s.v.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ') + '" fill="none" stroke="' + s.c + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>').join('') + SR.map(s => s.v.map((v, i) => '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="4" fill="' + s.c + '" stroke="#fff" stroke-width="2" pointer-events="none"/>').join('')).join('');
+    const ends = SR.map(s => ({ s, py: y(s.v[n - 1]), ly: y(s.v[n - 1]) })).sort((a, b) => a.py - b.py); for (let i = 1; i < ends.length; i++) ends[i].ly = Math.max(ends[i].ly, ends[i - 1].ly + 16); const over = ends[ends.length - 1].ly - (H - B); if (over > 0) ends.forEach(e => { e.ly -= over; });
+    const lab = ends.map(e => '<path d="M' + (x(n - 1) + 7).toFixed(1) + ' ' + e.py.toFixed(1) + ' L' + (W - R + 4) + ' ' + e.ly.toFixed(1) + '" class="ld"/><line x1="' + (W - R + 8) + '" x2="' + (W - R + 20) + '" y1="' + e.ly.toFixed(1) + '" y2="' + e.ly.toFixed(1) + '" stroke="' + e.s.c + '" stroke-width="2.5" stroke-linecap="round"/><text x="' + (W - R + 25) + '" y="' + (e.ly + 4).toFixed(1) + '" class="k">' + h(e.s.n) + ' <tspan>' + e.s.v[n - 1].toFixed(2) + '</tspan></text>').join('');
+    return '<svg class="gtr" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + grid + xl + lines + hov + lab + '</svg>'; },
+  trendSum() { return '<div class="gtrsum">' + this.trendSeries().map(s => { const d = s.v[s.v.length - 1] - s.v[0]; const m = MENTORS.find(q => q.s === s.n); const x = MENTEE[s.n] || {}; return '<div data-act="sk-person" data-who="' + h(s.n) + '"><i style="background:' + s.c + '"></i><b>' + h(s.n) + '</b><span class="mono">' + s.v[0].toFixed(2) + ' → ' + s.v[s.v.length - 1].toFixed(2) + '</span><em class="' + (d > 0 ? 'up' : '') + '">' + (d > 0 ? '▲ +' : '') + d.toFixed(2) + '</em><span class="note">师傅 ' + h(m ? m.m : '待定') + ' · 理论最近 <b class="' + (x.theory < 60 ? 'bad' : '') + '">' + (x.theory != null ? x.theory : '—') + '</b></span></div>'; }).join('') + '</div>'; },
+  drawTrend() { const host = $('#gtrhost'); if (host) host.innerHTML = this.trendSVG(Math.max(320, host.clientWidth)); },
   backboneHTML() { const done = LS.get('backbone', {}); return BACKBONE.map((b, i) => { const d = done[b.who] != null ? done[b.who] : b.done; return '<div class="bbrow"><div class="bbh"><b data-act="sk-person" data-who="' + b.who + '">' + h(b.who) + '</b><span class="note">' + h(b.now) + '</span><span class="arrow">→</span><span class="tag v">' + h(b.next) + '</span><span class="note">' + h(b.when) + '</span></div><ul class="bbitems">' + b.items.map((it, j) => '<li class="' + (j < d ? 'done' : '') + '">' + h(it) + '</li>').join('') + '</ul><div class="bt"><span class="note">进度 ' + d + '/' + b.items.length + '</span>' + (d < b.items.length ? '<button class="s g" data-act="grow-bb" data-i="' + i + '">记一项完成</button>' : '<span class="tag ok">条件齐</span>') + '<button class="s g" data-act="grow-bb-send" data-i="' + i + '">发给本人</button></div></div>'; }).join(''); }
 };
 PAGES.grow = {
-  render() { const M = GROWPG.mentees(); const newN = M.filter(x => x.stage === '新员工').length; const stars = PEOPLE.filter(p => STAR_ENG[p.n]); const lad = [{ k: '专家候选', v: PEOPLE.filter(p => EXPERTS[p.n]).length }, { k: '三星工程师', v: stars.filter(p => /三星/.test(STAR_ENG[p.n])).length }, { k: '二星工程师', v: stars.filter(p => /二星/.test(STAR_ENG[p.n])).length }, { k: '一星工程师', v: stars.filter(p => /一星/.test(STAR_ENG[p.n])).length }, { k: '骨干培养中', v: BACKBONE.length }];
+  render() { const M = GROWPG.mentees(); const newN = M.filter(x => x.stage === '新员工').length; const stars = PEOPLE.filter(p => STAR_ENG[p.n]);
     const hrs = Math.round(PEOPLE.reduce((s, p) => s + p.hours.done / p.hours.req, 0) / PEOPLE.length * 100); const th = M.map(x => x.theory).filter(v => v != null); const thAvg = th.length ? Math.round(th.reduce((a, b) => a + b, 0) / th.length) : 0;
     return cmdHTML(['刘一鸣带得怎么样', '骨干培养计划谁最接近申报', '给周明排一次终端调试带教']) + pageHead('培养与梯队', '全班培养与梯队 → 逐人培养：师带徒（新员工 ' + newN + ' · 次新员工 ' + (M.length - newN) + '）· 骨干培养计划 ' + BACKBONE.length + ' 人', '<button class="s g" data-act="nav" data-to="train" data-sub="write">考评定级与实操回写</button><button class="s g" data-act="nav" data-to="train" data-sub="plan">年度培训计划</button>') +
       MG.scopeBar('t', '全班培养与梯队', '师带徒 · 骨干培养 · 星级工程师与专家梯队 · 年度学时') +
       '<div class="grid4"><div class="card kpi"><span>师带徒</span><b>' + M.length + ' 对</b><em>新员工 ' + newN + ' · 次新员工 ' + (M.length - newN) + ' · 徒弟理论均分 ' + thAvg + '</em></div><div class="card kpi"><span>骨干培养</span><b>' + BACKBONE.length + ' 人</b><em>星级工程师 / 专家方向</em></div><div class="card kpi"><span>星级工程师</span><b>' + stars.length + ' 人</b><em>专家候选 ' + PEOPLE.filter(p => EXPERTS[p.n]).length + ' 人</em></div><div class="card kpi"><span>年度学时完成</span><b class="' + (hrs >= 60 ? 'g' : 'w') + '">' + hrs + '%</b><em>全班平均，8 月应达 ' + Math.round(HOURS_DUE / 60 * 100) + '%</em></div></div>' +
-      '<div class="grid2"><div class="card"><div class="h"><b>梯队</b><span>全班 · 由高到低</span></div>' + CH.mini.funnel(lad) + '</div><div class="card"><div class="h"><b>新员工成长趋势 · 近四季度模块等级</b><span>三名徒弟</span></div>' + CH.mini.line(['刘一鸣', '陈浩', '周明'].map((n, i) => ({ n, vals: LEVEL_HIST[n].map(q => +(q.reduce((s, x) => s + x, 0) / q.length).toFixed(2)), c: CPAL[i] })), QUARTERS, { max: 4, h: 120 }) + CH.mini.legend(['刘一鸣', '陈浩', '周明'].map((n, i) => ({ n, c: CPAL[i] }))) + '</div></div>' +
+      '<div class="grid2"><div class="card"><div class="h"><b>梯队</b><span>全班 · 由高到低 · 点人看画像</span></div>' + GROWPG.ladderHTML() + '</div><div class="card"><div class="h"><b>新员工成长趋势 · 近四季度模块平均等级</b><span>三名徒弟 · 悬停看各季度</span></div><div id="gtrhost"></div>' + CH.mini.legend(GROWPG.trendSeries().map(s => ({ n: s.n, c: s.c }))) + GROWPG.trendSum() + '</div></div>' +
       MG.scopeBar('p', '逐人培养', '每个徒弟的学时、项目、竞赛、资质与成绩 · 每个骨干的评聘条件') +
       '<div class="card"><div class="h"><b>师带徒 · 新员工与次新员工培养</b><span>培训学时 · 项目参与 · 竞赛 · 资质 · 理论成绩</span></div><div class="mlist">' + GROWPG.menteeHTML() + '</div></div>' +
       '<div class="card"><div class="h"><b>骨干培养计划 · 星级工程师与专家方向</b><span>评聘条件来自《技术技能人才评聘管理办法》</span></div>' + GROWPG.backboneHTML() + '</div>'; },
-  after() { CH.mount($('#main')); }
+  after() { CH.mount($('#main')); GROWPG.drawTrend(); if (!GROWPG.rs) { GROWPG.rs = 1; window.addEventListener('resize', () => { if (S.page === 'grow') GROWPG.drawTrend(); }); } }
 };
 Object.assign(ACT, {
   'grow-task'(el) { const n = el.dataset.who; const x = MENTEE[n]; const m = MENTORS.find(q => q.s === n); const s9 = skill9Of(P[n]); let bi = s9.q.findIndex((q, i) => q === 'B' && s9.must[i]); if (bi < 0) bi = s9.q.findIndex((q, i) => q !== 'A' && s9.must[i]); if (bi < 0) bi = s9.q.indexOf('B'); const sk = bi >= 0 ? SKILL9[bi].k + ' ' + SKILL9[bi].n : SKILL9[0].k + ' ' + SKILL9[0].n; const t = sk + ' 现场带教一次（' + (m ? m.m : '韩雪') + ' 带）'; MG.planPush(n, t, '师带徒'); if (m) DB.notify(m.m, '带教任务 · ' + n + '：' + t, '已发'); XW.answer('给' + n + '排了：' + t + '，下次派这类活时我会把' + (m ? m.m + '和' + n : n) + '放到一起。' + (x && x.theory < 60 ? '他上次理论 ' + x.theory + ' 分，先补课再上手。' : ''), null, { confirm: false }); },
@@ -4181,7 +4400,15 @@ Object.assign(ACT, {
 /* ---------- 绩效与激励 ---------- */
 const PERFPG = {
   RULE: '基准 1.00；外勤超 24 小时 +0.05 · 工作量达人均 +0.05 · 本月学时 ≥ 5 +0.03 · 本年荣誉 +0.05 · 带徒 +0.03 · 本月学时 0 −0.05 · 工作量低于人均 70% −0.05；工作量取工分制考核台账，学员与休假人员不参与人均比较',
-  table() { const R = perfAlloc(); const mx = Math.max.apply(null, R.map(r => r.work.v)); return '<div class="tbl"><table class="t perf"><tr><th>姓名</th><th>履职证据</th><th style="min-width:110px">工作量（工分）</th><th>初步系数</th><th>依据</th><th>物质激励（月度）</th><th>非物质激励</th><th>确认</th></tr>' + R.map(r => '<tr><td><b data-act="sk-person" data-who="' + r.p.n + '">' + h(r.p.n) + '</b><br><span class="note">' + h(r.p.post) + '</span></td><td><button class="s g evidbtn" data-act="rate-evid" data-who="' + r.p.n + '">' + r.evidK + ' 类 ' + r.evid + ' 条</button></td><td><span class="mono">' + r.work.v + '</span>' + (r.work.in ? '' : ' <span class="note">不比较</span>') + MG.bar(r.work.v / mx * 100, !r.work.in ? 'n' : r.work.low ? 'bad' : r.work.hi ? 'ok' : 'w') + '</td><td><b class="mono ' + (r.co >= 1.05 ? 'g' : r.co < 1 ? 'b' : '') + '">' + r.co.toFixed(2) + '</b> <button class="s g" data-act="perf-adj" data-who="' + r.p.n + '" data-v="-0.02">−</button><button class="s g" data-act="perf-adj" data-who="' + r.p.n + '" data-v="0.02">＋</button></td><td>' + (r.why.map(w => '<span class="tag ' + (/低于|学时 0/.test(w) ? 'bad' : 'ok') + '">' + h(w) + '</span>').join('') || '<span class="note">按基准</span>') + '</td><td><span class="mono">¥' + r.money + '</span>' + MG.bar(r.money / 1500 * 100) + '</td><td><span class="tag ' + (/评优/.test(r.nonm) ? 'v' : /表扬/.test(r.nonm) ? 'ok' : /补课/.test(r.nonm) ? 'bad' : '') + '">' + h(r.nonm) + '</span></td><td>' + (r.ok ? '<span class="tag ok">已确认</span>' : '<button class="s" data-act="perf-ok" data-who="' + r.p.n + '">确认</button>') + '</td></tr>').join('') + '</table></div><div class="legend-note">工作量条 ' + '绿 = 达到班组人均（' + workAvg() + ' 工分）、黄 = 人均 70%–100%、红 = 低于人均 70%、灰 = 学员或休假不参与比较；点「履职证据」看五类证据的出处和系数是怎么算出来的。</div>'; },
+  table() { const R = perfAlloc(); const mx = Math.max.apply(null, R.map(r => r.work.v)); return '<div class="tbl"><table class="t perf"><tr><th>姓名</th><th>履职证据</th><th style="min-width:110px">工作量（工分）</th><th>初步系数</th><th>依据</th><th>物质激励（月度）</th><th>非物质激励</th><th>确认</th></tr>' + R.map(r => '<tr><td><b data-act="sk-person" data-who="' + r.p.n + '">' + h(r.p.n) + '</b><br><span class="note">' + h(r.p.post) + '</span></td><td><button class="s g evidbtn" data-act="rate-evid" data-who="' + r.p.n + '">' + r.evidK + ' 类 ' + r.evid + ' 条</button></td><td><span class="mono">' + r.work.v + '</span>' + (r.work.in ? '' : ' <span class="note">不比较</span>') + MG.bar(r.work.v / mx * 100, !r.work.in ? 'n' : r.work.low ? 'bad' : r.work.hi ? 'ok' : 'w') + '</td><td><span class="cstep"><button data-act="perf-adj" data-who="' + r.p.n + '" data-v="-0.02" data-tip="系数 −0.02">−</button><b class="mono ' + (r.co >= 1.05 ? 'g' : r.co < 1 ? 'b' : '') + '">' + r.co.toFixed(2) + '</b><button data-act="perf-adj" data-who="' + r.p.n + '" data-v="0.02" data-tip="系数 +0.02">＋</button></span></td><td>' + (r.why.map(w => '<span class="tag ' + (/低于|学时 0/.test(w) ? 'bad' : 'ok') + '">' + h(w) + '</span>').join('') || '<span class="note">按基准</span>') + '</td><td><span class="mono">¥' + r.money + '</span>' + MG.bar(r.money / 1500 * 100) + '</td><td><span class="tag ' + (/评优/.test(r.nonm) ? 'v' : /表扬/.test(r.nonm) ? 'ok' : /补课/.test(r.nonm) ? 'bad' : '') + '">' + h(r.nonm) + '</span></td><td>' + (r.ok ? '<span class="tag ok">已确认</span>' : '<button class="s" data-act="perf-ok" data-who="' + r.p.n + '">确认</button>') + '</td></tr>').join('') + '</table></div><div class="legend-note">工作量条 ' + '绿 = 达到班组人均（' + workAvg() + ' 工分）、黄 = 人均 70%–100%、红 = 低于人均 70%、灰 = 学员或休假不参与比较；点「履职证据」看五类证据的出处和系数是怎么算出来的。</div>'; },
+  coCls(co) { return co >= 1.05 ? 'hi' : co < 1 ? 'lo' : 'mid'; },
+  moneyHTML() { const R = perfAlloc().slice().sort((a, b) => b.money - a.money); const avg = PERF_POOL / R.length; const dm = Math.max.apply(null, R.map(r => Math.abs(r.money - avg))) || 1;
+    return '<div class="pfm">' + R.map(r => { const d = r.money - avg, w = Math.abs(d) / dm * 50; return '<div class="pfr" data-act="sk-person" data-who="' + h(r.p.n) + '" data-tip="' + h(r.p.n + ' · 系数 ' + r.co.toFixed(2) + ' · ¥' + r.money + '（人均 ' + (d >= 0 ? '+' : '−') + Math.abs(d) + '）') + '"><b>' + h(r.p.n) + '</b><span class="pfco ' + this.coCls(r.co) + '">' + r.co.toFixed(2) + '</span><div class="pftr"><i class="' + this.coCls(r.co) + '" style="' + (d >= 0 ? 'left:50%' : 'right:50%') + ';width:' + Math.max(1.5, w).toFixed(1) + '%"></i></div><span class="pfam">¥' + r.money.toLocaleString() + '</span><em class="' + (d > 0 ? 'up' : d < 0 ? 'dn' : '') + '">' + (d > 0 ? '+' : d < 0 ? '−' : '±') + Math.abs(d) + '</em></div>'; }).join('') +
+      '</div><div class="pfaxis"><div><span>← 低于人均</span><b>人均 ¥' + avg.toLocaleString() + '</b><span>高于人均 →</span></div></div><div class="pfkey"><span><i class="hi"></i>系数 ≥ 1.05</span><span><i class="mid"></i>1.00–1.04</span><span><i class="lo"></i>&lt; 1.00</span><span class="note">金额 = 绩效池 × 本人系数 ÷ 全班系数合计</span></div>'; },
+  NONM: [['评优推荐', 'v', '同步进骨干培养计划', 'grow', ''], ['班务会表扬', 'ok', '下次班务会点名表扬', 'care', ''], ['培训机会', 'c', '排进年度培训计划', 'train', 'plan'], ['补课与带教任务', 'bad', '进关怀与文化回访', 'care', '']],
+  nonmHTML() { const R = perfAlloc(); const N = R.length; const G = this.NONM.map(c => ({ c, ps: R.filter(r => r.nonm === c[0]) })).filter(g => g.ps.length);
+    return '<div class="nmbar">' + G.map(g => '<i class="' + g.c[1] + '" style="flex:' + g.ps.length + '" data-tip="' + h(g.c[0] + ' ' + g.ps.length + ' 人') + '"><b>' + g.ps.length + '</b></i>').join('') + '</div><div class="nmcap"><span>全班 ' + N + ' 人，每人一项</span><span>按初步系数与履职证据给出，由班组长确认后使用</span></div>' +
+      G.map(g => '<div class="nmrow"><div class="nmk"><i class="' + g.c[1] + '"></i><b>' + h(g.c[0]) + '</b><span>' + g.ps.length + ' 人</span></div><div class="nmp">' + g.ps.map(r => '<span class="gldc" data-act="sk-person" data-who="' + h(r.p.n) + '"><b>' + h(r.p.n) + '</b><em>' + r.co.toFixed(2) + '</em></span>').join('') + '</div><button class="s g nmgo" data-act="nav" data-to="' + g.c[3] + '"' + (g.c[4] ? ' data-sub="' + g.c[4] + '"' : '') + '>' + h(g.c[2]) + ' →</button></div>').join(''); },
   evidHTML(n) { const p = P[n]; const r = perfAlloc().find(x => x.p.n === n); const E = evidenceOf(p);
     return '<div class="t">' + h(n) + ' · 履职证据 ' + r.evidK + ' 类 ' + r.evid + ' 条　<span class="note">' + h(p.post) + ' · ' + TODAY.slice(0, 7) + ' 月度考评</span></div>' +
       '<div class="tbl"><table class="t evidt"><tr><th style="width:84px">类别</th><th>证据（只列事实，不打分）</th><th style="width:130px">出处</th></tr>' + E.rows.map(c => c.ev.map((e, i) => '<tr>' + (i === 0 ? '<td rowspan="' + c.ev.length + '"><b>' + h(c.n) + '</b></td>' : '') + '<td>' + h(e.t) + '</td><td class="note">' + h(e.s) + '</td></tr>').join('')).join('') + '</table></div>' +
@@ -4194,7 +4421,7 @@ PAGES.perf = {
     return cmdHTML(['王安的系数为什么低', '生成本月激励分配表', '全部确认']) + pageHead('绩效与激励', '月度绩效考评（' + TODAY.slice(0, 7) + '）· 系数由五类履职证据推导 · 由班组长确认后使用', '<button class="s g" data-act="nav" data-to="people">履职证据</button>') +
       MG.scopeBar('t', '全班绩效', '绩效池 · 确认进度 · 系数分布 · 激励结构') +
       '<div class="grid4"><div class="card kpi"><span>月度绩效池</span><b>¥' + PERF_POOL.toLocaleString() + '</b><em>按确认后的系数分配</em></div><div class="card kpi"><span>系数已确认</span><b>' + okN + '/12</b><em>' + (okN === 12 ? '可生成分配表' : '确认完才能生成分配表') + '</em></div><div class="card kpi"><span>系数 ≥ 1.05</span><b class="g">' + R.filter(r => r.co >= 1.05).length + '</b><em>' + h(R.filter(r => r.co >= 1.05).map(r => r.p.n).join('、')) + '</em></div><div class="card kpi"><span>系数 < 1.00</span><b class="bad">' + R.filter(r => r.co < 1).length + '</b><em>' + h(R.filter(r => r.co < 1).map(r => r.p.n).join('、') || '无') + '</em></div></div>' +
-      '<div class="grid2"><div class="card"><div class="h"><b>物质激励分配</b><span>按系数占比</span></div>' + CH.mini.bars(R.slice().sort((a, b) => b.money - a.money).map(r => ({ n: r.p.n, v: r.money, txt: '¥' + r.money, act: 'sk-person', who: r.p.n })), { x0: 48, h: 13 }) + '</div><div class="card"><div class="h"><b>非物质激励</b><span>评优推荐 / 班务会表扬 / 培训机会 / 补课与带教任务</span></div>' + CH.mini.donut(Object.keys(nm).map((k, i) => ({ k, v: nm[k], c: CPAL[i % 6] })), { sub: '人' }) + '<div class="note" style="margin-top:6px">评优推荐的人同步进骨干培养计划；补课与带教任务的人进关怀与文化页的回访。</div></div></div>' +
+      '<div class="grid2 pfgrid"><div class="card"><div class="h"><b>物质激励分配</b><span>绩效池 ¥' + PERF_POOL.toLocaleString() + ' · 按系数分配 · 点人看档案</span></div>' + PERFPG.moneyHTML() + '</div><div class="card"><div class="h"><b>非物质激励</b><span>评优推荐 · 班务会表扬 · 培训机会 · 补课与带教</span></div>' + PERFPG.nonmHTML() + '</div></div>' +
       MG.scopeBar('p', '逐人考评', '履职证据 · 工作量 · 初步系数 · 确认') +
       '<div class="card"><div class="h"><b>员工绩效考评 · 系数与激励分配</b><span>系数由履职证据与工作量推导 · 由班组长确认后使用</span><div class="r"><button class="s g" data-act="perf-okall">全部确认</button><button class="s" data-act="perf-sheet">生成激励分配表</button></div></div><div class="rulebar"><b>计算规则</b>' + h(PERFPG.RULE) + '</div>' + PERFPG.table() + '</div>'; },
   after() { CH.mount($('#main')); }
@@ -4214,6 +4441,12 @@ const CAREPG = {
   key(c) { return c.k + '|' + c.who + '|' + c.when; },
   list() { const done = LS.get('care_done', {}); return careList().map(c => Object.assign(c, { done: done[this.key(c)] })); },
   careHTML() { const L = this.list(); const KN = { year: '入职关键年份', follow: '回访提醒', load: '高强度关怀' }; return L.length ? L.map(c => '<div class="carerow ' + (c.done ? 'done' : '') + '"><span class="tag ' + ({ year: 'v', follow: 'c', load: 'w' }[c.k]) + '">' + KN[c.k] + '</span><b data-act="sk-person" data-who="' + c.who + '">' + h(c.who) + '</b><span>' + h(c.t) + '</span><em>' + h(c.act) + '</em><i class="note">' + h(c.sug) + '</i><div class="bt">' + (c.done ? '<span class="tag ok">已办 ' + h(c.done) + '</span>' : '<button class="s" data-act="care-done" data-key="' + h(this.key(c)) + '">已办</button><button class="s g" data-act="care-msg" data-who="' + c.who + '" data-k="' + c.k + '">写一段话</button>' + (c.k !== 'follow' ? '<button class="s g" data-act="care-follow" data-who="' + c.who + '">排回访</button>' : '')) + '</div></div>').join('') : '<div class="empty">本季没有关怀提醒</div>'; },
+  actHTML() { const C = this.cultAll(), N = PEOPLE.length; const att = C.length ? Math.round(C.reduce((t, c) => t + (c.n || 0), 0) / C.length / N * 100) : 0; const miss = C.reduce((t, c) => t + Math.max(0, N - (c.n || 0)), 0);
+    const K = [['学习', '#0f7fa8'], ['分享', '#6b4de6'], ['座谈', '#9aa6bb'], ['帮扶', '#6b4de6']].map(k => ({ k: k[0], c: k[1], v: C.filter(x => x.kind === k[0]).length })); const byM = {}; C.forEach(x => { const m = x.d.slice(0, 7); byM[m] = (byM[m] || 0) + 1; }); const M = Object.keys(byM).sort().map(m => ({ k: +m.slice(5) + ' 月', c: 'var(--pri)', v: byM[m] }));
+    const bars = (L, mx) => L.map(x => '<div class="cbr"><span>' + h(x.k) + '</span><div><i style="width:' + (x.v / mx * 100).toFixed(1) + '%;background:' + x.c + '"></i></div><b>' + x.v + ' 次</b></div>').join('');
+    return '<div class="cstat"><div><b>' + C.length + '</b><span>活动次数</span></div><div><b>' + att + '%</b><span>平均参与率</span></div><div><b class="' + (miss ? 'w' : '') + '">' + miss + '</b><span>缺席人次</span></div></div>' +
+      '<div class="ph3 cph"><b>按类型</b><span>学习、分享计入「会议管理」，帮扶计入「班组帮扶」</span></div>' + bars(K, Math.max(1, ...K.map(x => x.v))) +
+      '<div class="ph3 cph"><b>按月</b><span>' + h(M.map(m => m.k).join(' · ')) + '</span></div>' + bars(M, Math.max(1, ...M.map(x => x.v))); },
   cultAll() { return CULTURE_TEAM.concat(LS.get('culture_add', [])).sort((a, b) => b.d.localeCompare(a.d)); },
   cultHTML() { return '<div class="tbl"><table class="t cutbl"><tr><th>日期</th><th>类型</th><th>活动 / 备注</th><th>主持</th><th>参加</th></tr>' + this.cultAll().map(c => '<tr><td class="mono">' + h(c.d) + '</td><td><span class="tag ' + ({ 学习: 'c', 分享: 'v', 座谈: '', 帮扶: 'v' }[c.kind] || '') + '">' + h(c.kind) + '</span></td><td><b>' + h(c.t) + '</b>' + (c.note ? '<br><span class="note">' + h(c.note) + '</span>' : '') + '</td><td>' + h(c.host) + '</td><td class="mono">' + c.n + '/12</td></tr>').join('') + '</table></div>'; }
 };
@@ -4222,10 +4455,10 @@ PAGES.care = {
     return cmdHTML(['这个月谁入职满 15 年', '给韩雪写一段话', '记一次班组学习', '刘一鸣最近怎么样']) + pageHead('关怀与文化', '全班关怀与班组文化 → 逐人关怀：提醒 ' + todo.length + ' 条待办 · 重点关注 ' + focus.length + ' 人', '<button class="s" data-act="cult-add">记一次活动</button>') +
       MG.scopeBar('t', '全班关怀与文化', '关怀待办 · 重点关注 · 高强度外勤 · 班组活动') +
       '<div class="grid4"><div class="card kpi"><span>关怀提醒待办</span><b class="' + (todo.length ? 'w' : 'g') + '">' + todo.length + ' 条</b><em>入职节点 · 谈心回访 · 高强度外勤</em></div><div class="card kpi"><span>重点关注</span><b>' + focus.length + ' 人</b><em>' + h(focus.map(f => f.tag).filter((x, i, a) => a.indexOf(x) === i).join(' · ')) + '</em></div><div class="card kpi"><span>本周外勤超 24 小时</span><b class="' + (heavy ? 'bad' : 'g') + '">' + heavy + ' 人</b><em>班组约定每周不超过 ' + WEEK_LIMIT + ' 小时</em></div><div class="card kpi"><span>班组活动</span><b>' + C.length + ' 次</b><em>平均参与率 ' + att + '% · 学习 / 分享 / 座谈 / 帮扶</em></div></div>' +
-      '<div class="grid2" style="grid-template-columns:1.5fr 1fr"><div class="card"><div class="h"><b>班组学习 · 分享 · 座谈记录</b><span>星级评价「会议管理」「班组帮扶」「人文关怀」取数于此</span></div>' + CAREPG.cultHTML() + '</div><div class="card"><div class="h"><b>活动次数 · 按月</b></div>' + CH.mini.cols(Object.keys(byM).sort().map(m => ({ n: m, v: byM[m] })), { labels: true, h: 110 }) + '<div class="note" style="margin-top:6px">类型：学习 ' + C.filter(c => c.kind === '学习').length + ' · 分享 ' + C.filter(c => c.kind === '分享').length + ' · 座谈 ' + C.filter(c => c.kind === '座谈').length + ' · 帮扶 ' + C.filter(c => c.kind === '帮扶').length + '</div></div></div>' +
+      '<div class="grid2" style="grid-template-columns:1.5fr 1fr"><div class="card"><div class="h"><b>班组学习 · 分享 · 座谈记录</b><span>星级评价「会议管理」「班组帮扶」「人文关怀」取数于此</span></div>' + CAREPG.cultHTML() + '</div><div class="card"><div class="h"><b>班组活动统计</b><span>近两个月</span></div>' + CAREPG.actHTML() + '</div></div>' +
       MG.scopeBar('p', '逐人关怀', '员工关怀提醒 · 重点关注人员与面谈提纲') +
-      '<div class="grid2" style="grid-template-columns:1.5fr 1fr"><div class="card"><div class="h"><b>员工关怀提醒</b><span>入职 5 / 10 / 15 / 20 年 · 谈心回访 · 连续高强度外勤</span></div><div class="carelist">' + CAREPG.careHTML() + '</div></div>' +
-      '<div class="card"><div class="h"><b>重点关注人员</b><span>长病 / 高绩效 / 低绩效 / 新员工</span></div>' + focus.map(f => '<div class="focusrow"><span class="tag ' + ({ 长病: 'bad', 高绩效: 'ok', 低绩效: 'w', 新员工: 'c', 借调: 'v' }[f.tag]) + '">' + h(f.tag) + '</span><b data-act="sk-person" data-who="' + f.who + '">' + h(f.who) + '</b><span class="note">' + h(f.t) + '</span><p>' + h(f.do) + '</p><div class="bt"><button class="s g" data-act="focus-guide" data-who="' + f.who + '" data-tag="' + f.tag + '">面谈提纲</button></div></div>').join('') + '</div></div>'; },
+      '<div class="card"><div class="h"><b>员工关怀提醒</b><span>入职 5 / 10 / 15 / 20 年 · 谈心回访 · 连续高强度外勤 · 按到期时间排</span></div><div class="carelist c2">' + CAREPG.careHTML() + '</div></div>' +
+      '<div class="card"><div class="h"><b>重点关注人员</b><span>长病 / 高绩效 / 低绩效 / 新员工 · 面谈提纲由小瓦特起草</span></div><div class="fgrid">' + focus.map(f => '<div class="focusrow"><span class="tag ' + ({ 长病: 'bad', 高绩效: 'ok', 低绩效: 'w', 新员工: 'c', 借调: 'v' }[f.tag]) + '">' + h(f.tag) + '</span><b data-act="sk-person" data-who="' + f.who + '">' + h(f.who) + '</b><span class="note">' + h(f.t) + '</span><p>' + h(f.do) + '</p><div class="bt"><button class="s g" data-act="focus-guide" data-who="' + f.who + '" data-tag="' + f.tag + '">面谈提纲</button></div></div>').join('') + '</div></div>'; },
   after() { CH.mount($('#main')); }
 };
 Object.assign(ACT, {
@@ -4250,9 +4483,15 @@ const ADVPG = {
       '演变趋势：按现有带教取证节奏，两年内已授权人数只在 ' + hi.map(c => c.s.k + ' ' + c.s.n).slice(0, 2).join('、') + ' 各增加 1 人；不调整派工方式，断层模块数不会减少。'
     ] }; },
   candidates() { return PEOPLE.filter(p => p.post !== '班长' && p.age <= 36).map(p => { const s9 = skill9Of(p); const hs = SCORE_HIST[p.n] || []; const avgS = hs.length ? Math.round(hs.reduce((s, x) => s + x.s, 0) / hs.length) : 0; const gen = genOf(p.n), pro = proOf(p.n); const proAvg = pro.reduce((t, x) => t + x, 0) / pro.length; const cov = skillCover(); const gapB = cov.filter(c => c.must && c.a.length <= 4 && s9.q[cov.indexOf(c)] === 'B'); const score = +(s9.mustB * 1.5 + s9.rate / 20 + (avgS >= 80 ? 2 : avgS >= 70 ? 1 : 0) + (36 - p.age) * 0.15 + p.hours.done / 60 * 2 + proAvg * 0.6 + gapB.length * 2).toFixed(1); const weak = []; if (avgS && avgS < 70) weak.push('理论成绩 ' + avgS); if (p.hours.done / p.hours.req < 0.5) weak.push('学时 ' + p.hours.done + '/60'); if (gen[0] <= 2) weak.push('忠诚执行 L' + gen[0]); if (gen[4] <= 2) weak.push('沟通协作 L' + gen[4]); if (proGap(p.n).length >= 3) weak.push('专业画像未到位 ' + proGap(p.n).length + ' 项'); if (p.cert.length <= 2) weak.push('证书 ' + p.cert.length + ' 本'); const plan = []; gapB.slice(0, 2).forEach(c => plan.push(c.s.k + ' ' + c.s.n + ' 带教取证（' + (c.a[0] ? c.a[0].n : '韩雪') + ' 带）')); const cg = certGap().find(x => x.lack && !p.cert.includes(x.k)); if (cg) plan.push('取证：' + cg.k); if (avgS && avgS < 70) plan.push('先补理论：' + (hs[hs.length - 1] || {}).t); if (!plan.length) plan.push('主持一次成套设备验收'); const risk = p.week > WEEK_LIMIT ? '本周外勤已超 24 小时，培养任务会加负荷' : p.age <= 26 ? '入职时间短，稳定性待观察' : gapB.length === 0 ? '当前没有培训中的断层★模块，培养回报慢' : ''; return { p, score, s9, avgS, gapB, weak, plan, risk, why: '本人★模块授权 ' + s9.rate + '%，★模块培训中 ' + s9.mustB + ' 个（其中断层模块 ' + gapB.length + ' 个）' + (avgS ? '，理论均分 ' + avgS : '') + '，' + p.age + ' 岁，优势 ' + portTop(p.n).map(x => x[0]).join('、') }; }).sort((a, b) => b.score - a.score); },
-  diagHTML() { const D = this.diag(); return '<div class="grid2" style="grid-template-columns:1.4fr 1fr"><div class="card"><div class="h"><b>诊断结论</b><span>自动读取名册、技能台账、证书台账、学时与成绩记录</span><div class="r"><button class="s" data-act="adv-report" data-k="diag">生成诊断报告</button></div></div><div class="roots">' + D.roots.map(r => '<span class="root" data-act="adv-root" data-k="' + h(r[0]) + '"><b>' + h(r[0]) + '</b>' + h(r[1]) + '</span>').join('') + '</div><ol class="diagtext">' + D.text.map(t => '<li>' + h(t) + '</li>').join('') + '</ol></div>' +
-    '<div><div class="card"><div class="h"><b>年龄结构 · 现在与 5 年后</b></div>' + CH.mini.group(AGE_BANDS.map(b => b[0].replace(' 岁', '')), [{ n: '现在', vals: D.st.map(s => s.list.length) }, { n: '5 年后', vals: D.in5, c: CPAL[1] }], { h: 120 }) + CH.mini.legend([{ n: '现在' }, { n: '5 年后', c: CPAL[1] }]) + '</div><div class="card" style="margin-top:10px"><div class="h"><b>★模块已授权人数 · 最少的 10 个</b><span>虚线 = 3 人</span></div>' + CH.mini.bars(D.cov.slice().sort((a, b) => a.a.length - b.a.length).slice(0, 10).map(c => ({ n: c.s.k + ' ' + c.s.n.slice(0, 6), v: c.a.length, c: c.a.length <= 2 ? '#e5484d' : c.a.length <= 4 ? '#d97706' : SEM.ok, tip: c.s.n })), { x0: 92, limit: 3, max: 12, unit: ' 人' }) + '<div class="legend-note">颜色说明：红 = 已授权 ≤ 2 人；黄 = 3–4 人；绿 = 5 人及以上。</div></div></div></div>'; },
-  advHTML() { const C = this.candidates(); const plan = LS.get('plan', []); return '<div class="card"><div class="h"><b>推荐培养对象 · 排序</b><span>依据班员画像的断层项、星级提升目标、成绩与学时、员工画像优势 · 由班组长确认后使用</span><div class="r"><button class="s g" data-act="adv-report" data-k="grow">生成参谋报告</button><button class="s" data-act="adv-planall">前三名排进计划</button></div></div><div class="tbl"><table class="t cand"><tr><th>#</th><th>人</th><th>推荐理由</th><th>潜在短板</th><th>培养方案</th><th>风险提示</th><th></th></tr>' + C.map((c, i) => '<tr class="' + (i < 3 ? 'hl' : '') + '"><td class="mono">' + (i + 1) + '</td><td><b data-act="sk-person" data-who="' + c.p.n + '">' + h(c.p.n) + '</b><br><span class="note">' + h(c.p.post) + ' · 综合 ' + c.score + '</span></td><td class="note" style="color:var(--ink)">' + h(c.why) + '</td><td>' + (c.weak.map(w => '<span class="tag w">' + h(w) + '</span>').join('') || '<span class="note">无明显短板</span>') + '</td><td><ol class="planol">' + c.plan.map(x => '<li>' + h(x) + '</li>').join('') + '</ol></td><td class="note">' + h(c.risk || '—') + '</td><td>' + (plan.some(q => q.who === c.p.n && /参谋/.test(q.why || '')) ? '<span class="tag ok">已排</span>' : '<button class="s" data-act="adv-plan" data-who="' + c.p.n + '">排进计划</button>') + '</td></tr>').join('') + '</table></div></div>'; }
+  diagHTML() { const D = this.diag(); const NUM = ['01', '02', '03', '04']; const top = D.cov.slice().sort((a, b) => a.a.length - b.a.length).slice(0, 10); const AX = 12;
+    const lvC = n => n <= 2 ? 'r' : n <= 4 ? 'y' : 'g';
+    return '<div class="card"><div class="h"><b>诊断结论</b><span>自动读取名册、技能台账、证书台账、学时与成绩记录</span><div class="r"><button class="s" data-act="adv-report" data-k="diag">生成诊断报告</button></div></div>' +
+      '<div class="rootg">' + D.roots.map(r => '<div class="rtile" data-act="adv-root" data-k="' + h(r[0]) + '"><span>根因</span><b>' + h(r[0]) + '</b><em>' + h(r[1]) + '</em><i>看明细 →</i></div>').join('') + '</div>' +
+      '<div class="dgrid">' + D.text.map((t, i) => { const k = t.indexOf('：'); return '<div class="ditem"><div><em>' + NUM[i] + '</em><b>' + h(t.slice(0, k)) + '</b></div><p>' + h(t.slice(k + 1)) + '</p></div>'; }).join('') + '</div></div>' +
+      '<div class="grid2 advg"><div class="card"><div class="h"><b>年龄结构 · 现在与 5 年后</b><span>人数 · 按年龄段</span></div>' + CH.mini.group(AGE_BANDS.map(b => b[0].replace(' 岁', '')), [{ n: '现在', vals: D.st.map(s => s.list.length) }, { n: '5 年后', vals: D.in5, c: CPAL[1] }], { h: 150 }) + CH.mini.legend([{ n: '现在' }, { n: '5 年后', c: CPAL[1] }]) +
+      '<div class="advsum"><div><b>' + D.avgAge + '</b><span>平均年龄（岁）</span></div><div><b>' + D.young.length + '</b><span>30 岁以下</span></div><div><b class="' + (D.over45in5 >= 4 ? 'w' : '') + '">' + D.over45in5 + '</b><span>5 年后 46 岁以上</span></div></div></div>' +
+      '<div class="card"><div class="h"><b>★模块已授权人数 · 最少的 10 个</b><span>满刻度 = 全班 ' + AX + ' 人 · 竖线 = 3 人</span></div><div class="abl">' + top.map(c => '<div class="abr" data-act="nav" data-to="auth" data-tip="' + h(c.s.k + ' ' + c.s.n + ' · 已授权：' + (c.a.map(p => p.n).join('、') || '无')) + '"><span class="abn"><em>' + h(c.s.k) + '</em>' + h(c.s.n) + '</span><div class="abt"><i class="' + lvC(c.a.length) + '" style="width:' + (c.a.length / AX * 100).toFixed(1) + '%"></i><s style="left:' + (3 / AX * 100).toFixed(1) + '%"></s></div><b class="' + lvC(c.a.length) + '">' + c.a.length + ' 人</b><span class="abw">' + h(c.a.map(p => p.n).join('、') || '—') + '</span></div>').join('') + '</div><div class="pfkey"><span><i class="lo"></i>≤ 2 人</span><span><i class="mid2"></i>3–4 人</span><span><i class="hi"></i>5 人及以上</span><span class="note">点一行去授权认证页</span></div></div></div>'; },
+  advHTML() { const C = this.candidates(); const plan = LS.get('plan', []); return '<div class="card"><div class="h"><b>推荐培养对象 · 排序</b><span>依据班员画像的断层项、星级提升目标、成绩与学时、员工画像优势 · 由班组长确认后使用</span><div class="r"><button class="s g" data-act="adv-report" data-k="grow">生成参谋报告</button><button class="s" data-act="adv-planall">前三名排进计划</button></div></div><div class="tbl"><table class="t cand"><tr><th>#</th><th>人</th><th>推荐理由</th><th>潜在短板</th><th>培养方案</th><th>风险提示</th><th></th></tr>' + C.map((c, i) => '<tr class="' + (i < 3 ? 'hl' : '') + '"><td class="mono">' + (i + 1) + '</td><td><b data-act="sk-person" data-who="' + c.p.n + '">' + h(c.p.n) + '</b><br><span class="note">' + h(c.p.post) + '</span><br><span class="note">综合 ' + c.score + '</span></td><td class="note" style="color:var(--ink)">' + h(c.why) + '</td><td>' + (c.weak.map(w => '<span class="tag w">' + h(w) + '</span>').join('') || '<span class="note">无明显短板</span>') + '</td><td><ol class="planol">' + c.plan.map(x => '<li>' + h(x) + '</li>').join('') + '</ol></td><td class="note">' + h(c.risk || '—') + '</td><td>' + (plan.some(q => q.who === c.p.n && /参谋/.test(q.why || '')) ? '<span class="tag ok">已排</span>' : '<button class="s" data-act="adv-plan" data-who="' + c.p.n + '">排进计划</button>') + '</td></tr>').join('') + '</table></div></div>'; }
 };
 PAGES.advise = {
   TABS: [{ k: 'diag', n: '队伍现状诊断' }, { k: 'grow', n: '培养及队伍建设参谋' }],
@@ -4678,7 +4917,7 @@ const PAGE_LEGEND = {
     ['结构条与等级条', '同一色系由深到浅只区分类别，不表示好坏'],
     ['员工素质与能力', '雷达图实线为本班均值，红色虚线为本班岗级要求均值；个人画像弹层里实线为本人、灰色虚线为本班均值'],
     ['核心业务自主实施能力', '单元条 ' + SW('g') + '≥ 80%、' + SW('y') + '60%–79%、' + SW('r') + '< 60%、灰 = 无★模块；成员明细里本人★模块授权条同一口径'],
-    ['证书与资质', '复审点 ' + SW('r') + '红 = 90 天内到期、' + SW('y') + '黄 = 半年内、' + SW('c') + '蓝 = 一年内；持证数 ' + SW('g') + '绿 = 够数、' + SW('r') + '红 = 不够']
+    ['证书与资质', '时间轴圆点与名单分三档 ' + SW('r') + '红 = 90 天内到期、' + SW('y') + '黄 = 半年内、' + SW('c') + '蓝 = 一年内；持证数 ' + SW('g') + '绿 = 够数、' + SW('r') + '红 = 不够']
   ],
   auth: [
     ['认证表与单元', '颜色含义写在各表格下方：√ 绿底 = 已授权、培 黄底 = 培训中、空白 = 未授权；★ 行浅黄底 = 本表岗级必须授权的模块'],
@@ -4687,33 +4926,33 @@ const PAGE_LEGEND = {
   grow: [
     ['新员工卡片', '学时条 ' + SW('g') + '绿 = 年度学时已过 36（进度达标）、' + SW('y') + '黄 = 低于 36；' + SW('r') + '红色理论成绩 = 低于 60 分；' + SW('c') + '蓝色标签 = 新员工 / 次新员工（入职年限类别）'],
     ['骨干培养计划', SW('p') + '紫色标签 = 目标星级工程师或专家等级；' + SW('g') + '绿色删除线 = 该评聘条件已完成'],
-    ['梯队与等级变化', '梯队漏斗为同一色系由深到浅（层级越高越深）；等级变化折线按人区分颜色']
+    ['梯队与成长趋势', '梯队节点由深到浅 = 层级由高到低；实线卡 = 已取得、虚线卡 = 培养中（↑ 申报时间与条件完成数）；' + SW('y') + '黄圈「空缺」= 断层（上一级有人、本级无人）；成长趋势折线按人区分颜色，末端直接标人名与当前等级']
   ],
   perf: [
     ['履职证据与工作量', '「履职证据」按钮打开五类证据与系数推导，命中的规则整行浅色底；工作量条 ' + SW('g') + '绿 = 达到班组人均工分、' + SW('y') + '黄 = 人均 70%–100%、' + SW('r') + '红 = 低于人均 70%、灰 = 学员或休假不参与比较'],
     ['系数与依据', '初步系数 ' + SW('g') + '绿 = 高于基准 1.00、' + SW('r') + '红 = 低于基准、黑色 = 等于基准；依据标签 ' + SW('g') + '绿 = 加分项、' + SW('r') + '红 = 减分项'],
-    ['非物质激励', SW('p') + '紫 = 评优推荐、' + SW('g') + '绿 = 班务会表扬、' + SW('r') + '红 = 补课与带教任务、' + SW('c') + '蓝 = 培训机会；环形图为四类激励人数（分类色）'],
-    ['物质激励分配', '蓝色条 = 按确认后系数分到每人的金额']
+    ['非物质激励', SW('p') + '紫 = 评优推荐、' + SW('g') + '绿 = 班务会表扬、' + SW('r') + '红 = 补课与带教任务、' + SW('c') + '蓝 = 培训机会；上方色条为四类人数占比，下方逐类列出名单与后续去向'],
+    ['物质激励分配', '以人均 ¥1,000 为中线：条向右 = 高于人均、向左 = 低于人均；颜色同初步系数 ' + SW('g') + '绿 ≥ 1.05、灰 = 1.00–1.04、' + SW('r') + '红 < 1.00']
   ],
   care: [
     ['关怀提醒', SW('y') + '黄 = 高强度关怀（外勤超约定）；' + SW('c') + '蓝 = 回访提醒；' + SW('p') + '紫 = 入职关键年份；右侧红字 = 距离到期的时间'],
     ['重点关注人员', SW('g') + '绿 = 高绩效、' + SW('y') + '黄 = 低绩效需帮扶、' + SW('c') + '蓝 = 新员工'],
-    ['学习 · 分享 · 座谈', '活动类型为分类色：' + SW('c') + '学习、' + SW('p') + '分享 / 帮扶、' + SW('n') + '座谈；柱状图为按月活动次数']
+    ['学习 · 分享 · 座谈', '活动类型为分类色：' + SW('c') + '学习、' + SW('p') + '分享 / 帮扶、' + SW('n') + '座谈；班组活动统计按类型、按月给出次数条']
   ],
   advise: sub => sub === 'plan' || sub === 'grow' ? [
     ['培养对象排序', '综合分越高排越前；' + SW('r') + '红 = 短板或风险项、' + SW('g') + '绿 = 已排进计划'],
     LG_STATE
   ] : [
-    ['诊断结论', SW('r') + '红色根因标签 = 已识别的问题（点开到对应页面）'],
+    ['诊断结论', SW('r') + '红色根因卡 = 已识别的问题（点开到对应页面）；下方四段结论依次为人员结构、技能结构、资质与实操、演变趋势'],
     ['年龄结构', SW('b') + '蓝 = 现在、' + SW('p') + '紫 = 5 年后（分类色）'],
-    ['★模块已授权人数', SW('r') + '红 = ≤ 2 人、' + SW('y') + '黄 = 3–4 人、' + SW('g') + '绿 = 5 人及以上；虚线 = 3 人']
+    ['★模块已授权人数', SW('r') + '红 = ≤ 2 人、' + SW('y') + '黄 = 3–4 人、' + SW('g') + '绿 = 5 人及以上；满刻度 = 全班 12 人，竖虚线 = 3 人；右侧为已授权人员']
   ],
   home: [
     ['今日作业 · 派工情况', '已派工数字 ' + SW('g') + '绿；待派工 ' + SW('r') + '红 = 有今天必须定的单、' + SW('y') + '黄 = 没有；待派工标签 ' + SW('r') + '红 = 超期今天必须派、' + SW('y') + '黄 = 本周要做今天派、' + SW('c') + '蓝 = 下周周五前派'],
     ['今日待拍板', '卡片顶部色条与标签 ' + SW('r') + '红 = 重点、' + SW('y') + '黄 = 周报时限 / 今日到期'],
     ['今日作业与人员去向', '红字 = 重点 / 超期 / 待派；状态标签 ' + SW('g') + '在岗、' + SW('y') + '外勤、' + SW('c') + '休假 / 进行中'],
     ['周报排名靠后项', '排名红字 = 全市第 9 名及以后'],
-    ['业务一览图表', '本周工时 ' + SW('r') + '红 = 超过约定 24 小时；关键节点 ' + SW('g') + '绿 = 已清、' + SW('y') + '黄 = 待清；周报指标条 ' + SW('y') + '黄 = 未到目标；任务类型、缺陷曲线、两票曲线为分类色']
+    ['业务一览图表', '本周工时 ' + SW('r') + '红 = 超过约定 24 小时；关键节点进度条 ' + SW('g') + '绿 = 已清、' + SW('y') + '浅黄底 = 待清；周报指标条 ' + SW('y') + '黄 = 未到目标；任务类型、缺陷曲线、两票曲线为分类色']
   ],
   sched: sub => {
     const L = {
