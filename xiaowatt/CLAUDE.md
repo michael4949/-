@@ -56,10 +56,11 @@ npm i playwright && npx playwright install chromium
 cd peilian
 node v2plat.js     # 平台回归：两大场景 / 操作票七种答卷判卷（100/100/97/92/98/0/0）/ 真实条款 / 未列压板不扣分 / 主接线图与 7 个屏柜附表 / 子项定位与回车增行 / 训练即时判定与三级提示 / Excel·Word·文本三种上传（客户典型票原件判 90）/ 应急 21 情境计分 / 三步作答与点评回看 / 九项测评 / 数据分析 / 系统与权限 / 讲师演示台 / 禁词，期望 ERR none
 node v2base.js     # 底座冒烟：十一页渲染 / 首页下钻 / 复盘筛选与摘要 / 档案曲线点与目标 / 课堂测验与计划 / 组长下发 → 学员完成 → 成绩回写 / 学员进不了管理页，期望 ERR none
+node vis.cjs 1440x900 [前缀]   # 视觉巡检：学员 10 页 + 组长 2 页 + 作答 / 结果 / 弹层 33 张截图到 shots/vis/（改样式后看一遍，docs/02 第 62 条）
 node v2scene.js    # 第二批冒烟：安规 / 保命 / 案例 / 制度（课件 → 数字人讲课 → 测验 → 考试分析）/ 工作票 五引擎走通并留痕、案例推送学习回写、知识课堂课件生产线（文件库 / 课件 / 出题考试 / 导入文件）、组长班组考试分析、班组长导入通报生成案例，期望 ERR none
 ```
 
-**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base + v2plat + v2scene**（上传测试用 `peilian/samples/` 里的 ASCII 文件名样例——本环境的无头浏览器上传中文文件名会静默失败）。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
+**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base + v2plat + v2scene**；改样式后再跑 `node vis.cjs` 看截图。10/2 视觉升级层在 `style.css` 末尾（`vz` 前缀：顶栏滑动页签 `vzNavInd`、换页浮现 `vzenter`、字体 Manrope），业务结构与 9/2 设计体系（金描边 + 绿 / 橙分卡）不动（上传测试用 `peilian/samples/` 里的 ASCII 文件名样例——本环境的无头浏览器上传中文文件名会静默失败）。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
 
 ## 铁律（甲方多次强调，违反即打回）
 

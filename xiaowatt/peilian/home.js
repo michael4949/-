@@ -11,7 +11,20 @@ function route() {
   if ((h === 'team' || h === 'sys') && ROLE.cur !== 'lead') h = 'home';
   renderHPage(h); HomeFX.on();
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
+  vzNavInd();
 }
+/* 顶栏当前页签的滑动胶囊：从上一位置滑到新位置（首次直接落位） */
+function vzNavInd() {
+  const nav = $('#hnav'); if (!nav) return;
+  let ind = nav.querySelector('.vzind'); if (!ind) { ind = el('div', 'vzind'); nav.insertBefore(ind, nav.firstChild); }
+  const on = nav.querySelector('.hnavi.on');
+  if (!on) { ind.style.width = '0px'; return; }
+  const first = !ind.dataset.on;
+  if (first) ind.style.transition = 'none';
+  ind.style.left = on.offsetLeft + 'px'; ind.style.width = on.offsetWidth + 'px'; ind.dataset.on = '1';
+  if (first) requestAnimationFrame(() => { ind.style.transition = ''; });
+}
+addEventListener('resize', () => vzNavInd());
 
 /* 打开场景：tk / tk:exam（操作票）· em / em:<情境>:<模式>（应急处置）· rule / life / case / inst[:<子项>[:<模式>]]（其余四个场景）· wt（工作票） */
 function startScene(spec) {
@@ -102,8 +115,9 @@ const PAGE_FN = {
 };
 function renderHPage(h) {
   const pg = $('#hpage'); if (!pg) return;
-  pg.dataset.cur = h;
+  const vzNew = pg.dataset.cur !== h; pg.dataset.cur = h;
   pg.innerHTML = PAGE_FN[h]();
+  if (vzNew) { pg.classList.add('vzenter'); clearTimeout(renderHPage.__vz); renderHPage.__vz = setTimeout(() => pg.classList.remove('vzenter'), 900); }
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (h === 'ticket') ticketAfter(); else if (TK.timer) { clearInterval(TK.timer); TK.timer = null; }
   if (h === 'emerg') emerAfter(); else if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
@@ -369,7 +383,7 @@ function bindTip() {
 
 /* ---------------- KPI 数字滚动（页面首次渲染时） ---------------- */
 function countUp(root) {
-  (root || document).querySelectorAll('.kpi b, .rvbig').forEach(b => {
+  (root || document).querySelectorAll('.kpi b, .rvbig, .sctile em').forEach(b => {
     if (b.__cu) return; b.__cu = true;
     const raw = b.textContent.trim(), m = /^(\d+(?:\.\d+)?)(.*)$/.exec(raw); if (!m) return;
     const end = parseFloat(m[1]), dec = (m[1].split('.')[1] || '').length, suf = m[2], t0 = performance.now(), dur = 700 + Math.min(500, end);

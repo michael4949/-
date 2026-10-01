@@ -3,6 +3,17 @@ import base64, os, io, re, sys
 B = os.path.dirname(os.path.abspath(__file__)) + os.sep
 logo = base64.b64encode(open(os.path.join(B, '..', 'assets', 'logo.png'), 'rb').read()).decode()
 css = open(B + 'style.css', encoding='utf-8').read()
+# 字体内联：../assets/fonts/*.woff2 → @font-face（Manrope 可变字重，拉丁与数字；中文走系统字体）
+fdir = os.path.join(B, '..', 'assets', 'fonts')
+faces = []
+if os.path.isdir(fdir):
+    for f in sorted(os.listdir(fdir)):
+        m = re.match(r'([A-Za-z]+)-(var|\d+)\.woff2$', f)
+        if m:
+            b64 = base64.b64encode(open(os.path.join(fdir, f), 'rb').read()).decode()
+            w = '200 800' if m.group(2) == 'var' else m.group(2)
+            faces.append("@font-face{font-family:'%s';font-style:normal;font-weight:%s;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}" % (m.group(1), w, b64))
+css = css.replace('/*__FONTS__*/', '\n'.join(faces))
 parts = ['core.js', 'charts.js', 'rules.js', 'optic.js', 'judge.js', 'emerg.js', 'recs.js', 'home.js', 'pages.js', 'leader.js', 'p_ticket.js', 'p_emerg.js', 'p_plat.js', 'avatar.js', 'pipe.js', 'learn.js', 'p_scene.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
