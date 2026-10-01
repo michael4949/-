@@ -2031,13 +2031,99 @@ html{scrollbar-width:thin;scrollbar-color:#cfccba transparent}
 .emdims{gap:8px}.emdims span{border-radius:9px;padding:6px 11px;font-size:11.5px}.emdims span b{font-weight:800;font-size:14px}
 .rvbig small{font-weight:600}
 
-/* ===== 10/3 背景动效改为流动光线（去掉粒子网络 #fxp 与上升人形 .hpeople）===== */
-#fxp,.hpeople{display:none !important}
-.vzflow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.85}
-.vzflow .vzrail{fill:none;stroke:rgba(14,143,90,.10);stroke-width:1.2}
-.vzflow .vzbeam{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:260 2600;stroke-dashoffset:2860;filter:drop-shadow(0 0 6px rgba(201,162,39,.5));animation:vzbeam 16s linear infinite}
-.vzflow .b2{animation-duration:22s;animation-delay:-7s;stroke-width:1.8}
-.vzflow .b3{animation-duration:19s;animation-delay:-12s}
-.vzflow .b4{animation-duration:26s;animation-delay:-4s;stroke-width:1.6}
-@keyframes vzbeam{to{stroke-dashoffset:0}}
-@media (prefers-reduced-motion:reduce){.vzflow{display:none}}
+/* ===== 10/4 科技质感层（vq 前缀）——用户：背景加元素但不用光带 / 光晕、不要漂浮颗粒；配色更高科技、更有质感、更时尚；仍是浅色 =====
+   设计体系不变（甲方 9/2：浅色底 + 金色描边 + 绿 / 橙分卡 + 金色光带），本层只换"质感"：
+   冷珍珠底 + 蓝图网格 + 两组等高线地形缓慢起伏 + 标语轮廓字滑过；卡片 = 白玻璃 + 金→翠亮边 + 翠色软投影；按钮 = 翠色渐变 + 顶部高光；
+   标题用 Noto Sans SC Black；绿系往翠绿 / 薄荷走，橙系往琥珀 / 珊瑚走，金色偏香槟。动画只动 transform / opacity，不用每帧重算的滤镜与背景模糊。 */
+#fxp,.hpeople,.vzflow{display:none !important}
+:root{--bg:#f2f6f4;--bg2:#e9f0ec;--panel:#fff;--panel2:#f6faf8;--line:#dbe4df;--line2:#c2cfc8;--txt:#0d1b15;--txt2:#3b4f45;--txt3:#647a6f;
+  --gold:#c9a227;--goldD:#866a0e;--goldln:#d8c47c;--goldsoft:#ead9a4;--goldbg:#fcf8ea;
+  --gr:#0b9a63;--grd:#077049;--grl:#3fcf93;--grbg:#e6f6ee;--grln:#a9e0c6;
+  --or:#ea6a1f;--ord:#bf4f0e;--orl:#ff9a4d;--orbg:#fff1e7;--orln:#f6c7a2;
+  --mint:#22c7a9;--disp:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --vqedge:linear-gradient(135deg,#fff 0%,rgba(201,162,39,.78) 28%,rgba(11,154,99,.42) 68%,rgba(255,255,255,.9) 100%);
+  --vqedgeh:linear-gradient(135deg,#fff 0%,rgba(201,162,39,1) 28%,rgba(11,154,99,.8) 68%,rgba(34,199,169,.5) 100%);
+  --vqglass:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.9));
+  --vzsh:0 1px 2px rgba(10,40,30,.04),0 16px 36px -18px rgba(11,154,99,.26),0 6px 18px -12px rgba(201,162,39,.18);
+  --vqshh:0 1px 2px rgba(10,40,30,.05),0 24px 48px -20px rgba(11,154,99,.36),0 10px 24px -12px rgba(201,162,39,.24)}
+/* ---- 底与背景层 ---- */
+#pg_home{background:linear-gradient(160deg,#f6f9f7 0%,#f0f5f2 55%,#e9f0ec 100%);color:var(--txt)}
+.vqbg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.vqgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(11,154,99,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(11,154,99,.075) 1px,transparent 1px);background-size:48px 48px;
+  -webkit-mask:radial-gradient(70% 60% at 50% 40%,transparent 20%,#000 90%);mask:radial-gradient(70% 60% at 50% 40%,transparent 20%,#000 90%)}
+.vqtg{position:absolute;width:900px;height:700px;animation:vqdrift 36s ease-in-out infinite alternate}
+.vqtg.t1{right:-200px;top:-150px}
+.vqtg.t2{left:-260px;bottom:-200px;animation-delay:-14s;animation-duration:44s}
+.vqtopo{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%}
+.vqtopo path{fill:none;stroke:rgba(11,154,99,.26);stroke-width:1.1;vector-effect:non-scaling-stroke}
+.vqtopo path.f{fill:rgba(11,154,99,.035)}
+.vqtopo.b path{stroke:rgba(201,162,39,.34);stroke-width:1}
+.vqtopo.a{animation:vqrotA 90s linear infinite}
+.vqtopo.b{animation:vqrotB 120s linear infinite}
+@keyframes vqdrift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-30px,22px,0) scale(1.06)}}
+@keyframes vqrotA{to{transform:rotate(360deg)}}
+@keyframes vqrotB{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+.vqmq{position:absolute;left:0;bottom:118px;white-space:nowrap;display:flex;font-family:var(--disp);font-weight:900;font-size:124px;line-height:1;letter-spacing:6px;color:transparent;
+  -webkit-text-stroke:1.2px rgba(11,154,99,.12);animation:vqmq 80s linear infinite;will-change:transform}
+.vqmq span{padding-right:40px}
+@keyframes vqmq{to{transform:translateX(-50%)}}
+.hsil{color:#8fa89c;opacity:.5}
+.wire{stroke:#c2d0c8}
+/* ---- 标题字 ---- */
+.slogan b,.hgreet h1,.wrap .ph h2,.ph b,.hch b,.card>.ch b,.casecard .tk2,.rvbig,.exh b,.demo2 .bd .t,.mask .mbox h3,.mbox h3{font-family:var(--disp);font-weight:900}
+.slogan b{letter-spacing:3px;background:linear-gradient(90deg,var(--grd),var(--gr) 35%,var(--gold) 60%,var(--gr) 80%,var(--grd));background-size:240% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.slogan span{color:var(--goldD);border-color:var(--goldln);background:linear-gradient(135deg,#fff,#fcf5dc)}
+.hsub{color:var(--txt3)}
+.wrap .ph h2,.ph b{color:var(--txt);letter-spacing:-.2px}
+.wrap .ph h2::before,.ph b::before{background:linear-gradient(180deg,var(--gold),var(--gr) 60%,var(--mint))}
+.hch b::before{background:linear-gradient(180deg,var(--gold),var(--ac) 60%,var(--mint))}
+/* ---- 顶栏 ---- */
+.hhead{background:rgba(255,255,255,.86);border-bottom:1px solid rgba(255,255,255,.9);box-shadow:0 1px 0 rgba(11,154,99,.08),0 12px 30px -20px rgba(11,154,99,.3)}
+.hhead::after{background:linear-gradient(90deg,transparent,var(--gr),var(--mint),var(--gold),var(--gr),transparent);background-size:220% 100%;opacity:.95}
+#pg_home .brand{border-right-color:var(--line)}
+#pg_home .brand .pill{color:var(--grd);border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;box-shadow:0 2px 8px -4px rgba(201,162,39,.4)}
+.hnav{background:#0f1f18;border-color:#0f1f18;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(13,27,21,.6)}
+.hnavi{color:rgba(255,255,255,.72)}
+.hnavi:hover{color:#fff}
+.hnavi.on{color:#fff}
+.hnavi.lk{color:rgba(255,255,255,.42)}
+.hnavi.lk i{color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+.hnav .vzind{background:linear-gradient(135deg,var(--gr),var(--mint));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 16px -6px rgba(34,199,169,.8)}
+.hclk{color:var(--goldD)}
+.uchip{border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;color:var(--txt2)}
+.uchip i{background:linear-gradient(135deg,var(--gr),var(--mint) 60%,var(--gold))}
+/* ---- 卡片：白玻璃 + 金→翠亮边 + 翠色软投影；金色光带（甲方口径）保留 ---- */
+.hcard,.card,.rcard,.taskcard,.hourcard,.casecard,.ckc,.pnl,.xwbar{border:1px solid transparent;background:var(--vqglass) padding-box,var(--vqedge) border-box;box-shadow:inset 0 1px 0 #fff,var(--vzsh)}
+.taskcard,.hourcard,.casecard{border-top:3px solid var(--gold)}
+.hcard:hover,.rcard:hover{background:var(--vqglass) padding-box,var(--vqedgeh) border-box;box-shadow:var(--vqshh);transform:translateY(-2px)}
+.caseit,.sctile{background:#fbfdfc;border-color:#e3ebe6}
+.caseit:hover,.sctile:hover{border-color:var(--grln);background:#fff}
+#pg_home .kpi{border:1px solid transparent;background:var(--vqglass) padding-box,var(--vqedge) border-box;box-shadow:var(--vzsh)}
+#pg_home .kpi b{background:linear-gradient(135deg,var(--grd),var(--gr));-webkit-background-clip:text;background-clip:text;color:transparent}
+#pg_home .kpi.warn b{background:linear-gradient(135deg,var(--goldD),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#pg_home .kpi.good b{background:linear-gradient(135deg,var(--grd),var(--gr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hbar{background:#e6eee9}
+.hfill{background:linear-gradient(90deg,var(--gold),var(--ac) 60%,var(--mint))}
+.hch{border-bottom:1px dashed #e3ebe6}
+.hch span,.card>.ch span{color:var(--txt3)}
+/* ---- 按钮：翠色渐变 + 顶部高光 + 翠色投影；橙卡上自动走琥珀 ---- */
+.btn,#pg_home .btn,.mask.lite .btn{border:1px solid var(--line);background:#fff;color:var(--txt2)}
+.btn:hover,#pg_home .btn:hover,.mask.lite .btn:hover{border-color:var(--ac);color:var(--acd);background:#fff}
+.btn.pri,#pg_home .btn.pri,.mask.lite .btn.pri{background:linear-gradient(135deg,color-mix(in srgb,var(--acd) 72%,#000),var(--acd) 55%,var(--ac));border-color:transparent;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 10px 22px -10px color-mix(in srgb,var(--ac) 80%,transparent)}
+.btn.pri:hover,#pg_home .btn.pri:hover,.mask.lite .btn.pri:hover{background:linear-gradient(135deg,color-mix(in srgb,var(--acd) 72%,#000),var(--acd) 40%,var(--ac));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 28px -10px color-mix(in srgb,var(--ac) 90%,transparent)}
+.btn.pri::after,#pg_home .btn.pri::after{content:'';position:absolute;top:0;bottom:0;left:0;width:55%;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.32) 50%,transparent 80%);transform:translateX(-200%);animation:vqbtn 8s ease-in-out infinite;pointer-events:none}
+.btn.pri,#pg_home .btn.pri{position:relative;overflow:hidden}
+@keyframes vqbtn{0%,72%{transform:translateX(-200%)}100%{transform:translateX(300%)}}
+/* ---- 标签 / 胶囊 / 表格 ---- */
+.chip{background:#f1f6f3;border-color:#dbe4df;color:var(--txt2)}
+.chip:hover{border-color:var(--grln);color:var(--grd)}
+.tb th{color:var(--txt3);border-bottom:1px solid var(--line)}
+.tb tr:hover td{background:#f4f9f6}
+.hch em.ai,.rwhy i.ai,.ai-tag{background:linear-gradient(135deg,var(--acd),var(--ac) 65%,var(--mint))}
+.hteam .tm{background:linear-gradient(135deg,var(--gr),var(--mint))}
+.hteam .tm.me{background:linear-gradient(135deg,var(--gold),#e8d27a)}
+/* ---- 响应式 / 减少动态偏好 ---- */
+@media (max-width:1366px){.vqmq{font-size:104px}}
+@media (max-width:960px){.vqtg.t2,.vqmq{display:none}.vqtg.t1{right:-320px}}
+@media (prefers-reduced-motion:reduce){.vqtg,.vqtopo,.vqmq,.btn.pri::after{animation:none}}

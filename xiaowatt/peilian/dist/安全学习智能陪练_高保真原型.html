@@ -2078,16 +2078,102 @@ html{scrollbar-width:thin;scrollbar-color:#cfccba transparent}
 .emdims{gap:8px}.emdims span{border-radius:9px;padding:6px 11px;font-size:11.5px}.emdims span b{font-weight:800;font-size:14px}
 .rvbig small{font-weight:600}
 
-/* ===== 10/3 背景动效改为流动光线（去掉粒子网络 #fxp 与上升人形 .hpeople）===== */
-#fxp,.hpeople{display:none !important}
-.vzflow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.85}
-.vzflow .vzrail{fill:none;stroke:rgba(14,143,90,.10);stroke-width:1.2}
-.vzflow .vzbeam{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:260 2600;stroke-dashoffset:2860;filter:drop-shadow(0 0 6px rgba(201,162,39,.5));animation:vzbeam 16s linear infinite}
-.vzflow .b2{animation-duration:22s;animation-delay:-7s;stroke-width:1.8}
-.vzflow .b3{animation-duration:19s;animation-delay:-12s}
-.vzflow .b4{animation-duration:26s;animation-delay:-4s;stroke-width:1.6}
-@keyframes vzbeam{to{stroke-dashoffset:0}}
-@media (prefers-reduced-motion:reduce){.vzflow{display:none}}
+/* ===== 10/4 科技质感层（vq 前缀）——用户：背景加元素但不用光带 / 光晕、不要漂浮颗粒；配色更高科技、更有质感、更时尚；仍是浅色 =====
+   设计体系不变（甲方 9/2：浅色底 + 金色描边 + 绿 / 橙分卡 + 金色光带），本层只换"质感"：
+   冷珍珠底 + 蓝图网格 + 两组等高线地形缓慢起伏 + 标语轮廓字滑过；卡片 = 白玻璃 + 金→翠亮边 + 翠色软投影；按钮 = 翠色渐变 + 顶部高光；
+   标题用 Noto Sans SC Black；绿系往翠绿 / 薄荷走，橙系往琥珀 / 珊瑚走，金色偏香槟。动画只动 transform / opacity，不用每帧重算的滤镜与背景模糊。 */
+#fxp,.hpeople,.vzflow{display:none !important}
+:root{--bg:#f2f6f4;--bg2:#e9f0ec;--panel:#fff;--panel2:#f6faf8;--line:#dbe4df;--line2:#c2cfc8;--txt:#0d1b15;--txt2:#3b4f45;--txt3:#647a6f;
+  --gold:#c9a227;--goldD:#866a0e;--goldln:#d8c47c;--goldsoft:#ead9a4;--goldbg:#fcf8ea;
+  --gr:#0b9a63;--grd:#077049;--grl:#3fcf93;--grbg:#e6f6ee;--grln:#a9e0c6;
+  --or:#ea6a1f;--ord:#bf4f0e;--orl:#ff9a4d;--orbg:#fff1e7;--orln:#f6c7a2;
+  --mint:#22c7a9;--disp:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --vqedge:linear-gradient(135deg,#fff 0%,rgba(201,162,39,.78) 28%,rgba(11,154,99,.42) 68%,rgba(255,255,255,.9) 100%);
+  --vqedgeh:linear-gradient(135deg,#fff 0%,rgba(201,162,39,1) 28%,rgba(11,154,99,.8) 68%,rgba(34,199,169,.5) 100%);
+  --vqglass:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.9));
+  --vzsh:0 1px 2px rgba(10,40,30,.04),0 16px 36px -18px rgba(11,154,99,.26),0 6px 18px -12px rgba(201,162,39,.18);
+  --vqshh:0 1px 2px rgba(10,40,30,.05),0 24px 48px -20px rgba(11,154,99,.36),0 10px 24px -12px rgba(201,162,39,.24)}
+/* ---- 底与背景层 ---- */
+#pg_home{background:linear-gradient(160deg,#f6f9f7 0%,#f0f5f2 55%,#e9f0ec 100%);color:var(--txt)}
+.vqbg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.vqgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(11,154,99,.075) 1px,transparent 1px),linear-gradient(90deg,rgba(11,154,99,.075) 1px,transparent 1px);background-size:48px 48px;
+  -webkit-mask:radial-gradient(70% 60% at 50% 40%,transparent 20%,#000 90%);mask:radial-gradient(70% 60% at 50% 40%,transparent 20%,#000 90%)}
+.vqtg{position:absolute;width:900px;height:700px;animation:vqdrift 36s ease-in-out infinite alternate}
+.vqtg.t1{right:-200px;top:-150px}
+.vqtg.t2{left:-260px;bottom:-200px;animation-delay:-14s;animation-duration:44s}
+.vqtopo{position:absolute;inset:0;width:100%;height:100%;overflow:visible;transform-origin:50% 50%}
+.vqtopo path{fill:none;stroke:rgba(11,154,99,.26);stroke-width:1.1;vector-effect:non-scaling-stroke}
+.vqtopo path.f{fill:rgba(11,154,99,.035)}
+.vqtopo.b path{stroke:rgba(201,162,39,.34);stroke-width:1}
+.vqtopo.a{animation:vqrotA 90s linear infinite}
+.vqtopo.b{animation:vqrotB 120s linear infinite}
+@keyframes vqdrift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-30px,22px,0) scale(1.06)}}
+@keyframes vqrotA{to{transform:rotate(360deg)}}
+@keyframes vqrotB{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+.vqmq{position:absolute;left:0;bottom:118px;white-space:nowrap;display:flex;font-family:var(--disp);font-weight:900;font-size:124px;line-height:1;letter-spacing:6px;color:transparent;
+  -webkit-text-stroke:1.2px rgba(11,154,99,.12);animation:vqmq 80s linear infinite;will-change:transform}
+.vqmq span{padding-right:40px}
+@keyframes vqmq{to{transform:translateX(-50%)}}
+.hsil{color:#8fa89c;opacity:.5}
+.wire{stroke:#c2d0c8}
+/* ---- 标题字 ---- */
+.slogan b,.hgreet h1,.wrap .ph h2,.ph b,.hch b,.card>.ch b,.casecard .tk2,.rvbig,.exh b,.demo2 .bd .t,.mask .mbox h3,.mbox h3{font-family:var(--disp);font-weight:900}
+.slogan b{letter-spacing:3px;background:linear-gradient(90deg,var(--grd),var(--gr) 35%,var(--gold) 60%,var(--gr) 80%,var(--grd));background-size:240% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.slogan span{color:var(--goldD);border-color:var(--goldln);background:linear-gradient(135deg,#fff,#fcf5dc)}
+.hsub{color:var(--txt3)}
+.wrap .ph h2,.ph b{color:var(--txt);letter-spacing:-.2px}
+.wrap .ph h2::before,.ph b::before{background:linear-gradient(180deg,var(--gold),var(--gr) 60%,var(--mint))}
+.hch b::before{background:linear-gradient(180deg,var(--gold),var(--ac) 60%,var(--mint))}
+/* ---- 顶栏 ---- */
+.hhead{background:rgba(255,255,255,.86);border-bottom:1px solid rgba(255,255,255,.9);box-shadow:0 1px 0 rgba(11,154,99,.08),0 12px 30px -20px rgba(11,154,99,.3)}
+.hhead::after{background:linear-gradient(90deg,transparent,var(--gr),var(--mint),var(--gold),var(--gr),transparent);background-size:220% 100%;opacity:.95}
+#pg_home .brand{border-right-color:var(--line)}
+#pg_home .brand .pill{color:var(--grd);border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;box-shadow:0 2px 8px -4px rgba(201,162,39,.4)}
+.hnav{background:#0f1f18;border-color:#0f1f18;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(13,27,21,.6)}
+.hnavi{color:rgba(255,255,255,.72)}
+.hnavi:hover{color:#fff}
+.hnavi.on{color:#fff}
+.hnavi.lk{color:rgba(255,255,255,.42)}
+.hnavi.lk i{color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+.hnav .vzind{background:linear-gradient(135deg,var(--gr),var(--mint));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 16px -6px rgba(34,199,169,.8)}
+.hclk{color:var(--goldD)}
+.uchip{border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;color:var(--txt2)}
+.uchip i{background:linear-gradient(135deg,var(--gr),var(--mint) 60%,var(--gold))}
+/* ---- 卡片：白玻璃 + 金→翠亮边 + 翠色软投影；金色光带（甲方口径）保留 ---- */
+.hcard,.card,.rcard,.taskcard,.hourcard,.casecard,.ckc,.pnl,.xwbar{border:1px solid transparent;background:var(--vqglass) padding-box,var(--vqedge) border-box;box-shadow:inset 0 1px 0 #fff,var(--vzsh)}
+.taskcard,.hourcard,.casecard{border-top:3px solid var(--gold)}
+.hcard:hover,.rcard:hover{background:var(--vqglass) padding-box,var(--vqedgeh) border-box;box-shadow:var(--vqshh);transform:translateY(-2px)}
+.caseit,.sctile{background:#fbfdfc;border-color:#e3ebe6}
+.caseit:hover,.sctile:hover{border-color:var(--grln);background:#fff}
+#pg_home .kpi{border:1px solid transparent;background:var(--vqglass) padding-box,var(--vqedge) border-box;box-shadow:var(--vzsh)}
+#pg_home .kpi b{background:linear-gradient(135deg,var(--grd),var(--gr));-webkit-background-clip:text;background-clip:text;color:transparent}
+#pg_home .kpi.warn b{background:linear-gradient(135deg,var(--goldD),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+#pg_home .kpi.good b{background:linear-gradient(135deg,var(--grd),var(--gr));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hbar{background:#e6eee9}
+.hfill{background:linear-gradient(90deg,var(--gold),var(--ac) 60%,var(--mint))}
+.hch{border-bottom:1px dashed #e3ebe6}
+.hch span,.card>.ch span{color:var(--txt3)}
+/* ---- 按钮：翠色渐变 + 顶部高光 + 翠色投影；橙卡上自动走琥珀 ---- */
+.btn,#pg_home .btn,.mask.lite .btn{border:1px solid var(--line);background:#fff;color:var(--txt2)}
+.btn:hover,#pg_home .btn:hover,.mask.lite .btn:hover{border-color:var(--ac);color:var(--acd);background:#fff}
+.btn.pri,#pg_home .btn.pri,.mask.lite .btn.pri{background:linear-gradient(135deg,color-mix(in srgb,var(--acd) 72%,#000),var(--acd) 55%,var(--ac));border-color:transparent;color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 10px 22px -10px color-mix(in srgb,var(--ac) 80%,transparent)}
+.btn.pri:hover,#pg_home .btn.pri:hover,.mask.lite .btn.pri:hover{background:linear-gradient(135deg,color-mix(in srgb,var(--acd) 72%,#000),var(--acd) 40%,var(--ac));box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 28px -10px color-mix(in srgb,var(--ac) 90%,transparent)}
+.btn.pri::after,#pg_home .btn.pri::after{content:'';position:absolute;top:0;bottom:0;left:0;width:55%;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.32) 50%,transparent 80%);transform:translateX(-200%);animation:vqbtn 8s ease-in-out infinite;pointer-events:none}
+.btn.pri,#pg_home .btn.pri{position:relative;overflow:hidden}
+@keyframes vqbtn{0%,72%{transform:translateX(-200%)}100%{transform:translateX(300%)}}
+/* ---- 标签 / 胶囊 / 表格 ---- */
+.chip{background:#f1f6f3;border-color:#dbe4df;color:var(--txt2)}
+.chip:hover{border-color:var(--grln);color:var(--grd)}
+.tb th{color:var(--txt3);border-bottom:1px solid var(--line)}
+.tb tr:hover td{background:#f4f9f6}
+.hch em.ai,.rwhy i.ai,.ai-tag{background:linear-gradient(135deg,var(--acd),var(--ac) 65%,var(--mint))}
+.hteam .tm{background:linear-gradient(135deg,var(--gr),var(--mint))}
+.hteam .tm.me{background:linear-gradient(135deg,var(--gold),#e8d27a)}
+/* ---- 响应式 / 减少动态偏好 ---- */
+@media (max-width:1366px){.vqmq{font-size:104px}}
+@media (max-width:960px){.vqtg.t2,.vqmq{display:none}.vqtg.t1{right:-320px}}
+@media (prefers-reduced-motion:reduce){.vqtg,.vqtopo,.vqmq,.btn.pri::after{animation:none}}
 
 </style>
 </head>
@@ -3579,7 +3665,7 @@ function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
   if (!PAGES.includes(h)) h = 'home';
   if ((h === 'team' || h === 'sys') && ROLE.cur !== 'lead') h = 'home';
-  renderHPage(h); HomeFX.on();
+  renderHPage(h);
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
   vzNavInd();
 }
@@ -3625,8 +3711,8 @@ function openRec(id) {
 function homeBoot() {
   const hm = $('#pg_home');
   hm.innerHTML = `
+  ${vqBgHTML()}
   <div class="hsil">${silhouetteSVG()}</div>
-  ${vzFlowSVG()}
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
@@ -3674,7 +3760,6 @@ function homeBoot() {
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
   bindTip(); bindHPage();
-  HomeFX.init();
 }
 
 /* ---------------- 页面渲染 ---------------- */
@@ -3973,52 +4058,35 @@ function typeInto(node, text) {
   const t = setInterval(() => { i += 1; node.textContent = text.slice(0, i); if (i >= text.length) clearInterval(t); }, 26);
 }
 
-/* ---------------- 背景动效：粒子 + 变电站剪影 ---------------- */
-const HomeFX = (() => {
-  let cv, ctx, raf = 0, active = false, N = [];
-  function init() {
-    cv = $('#fxp'); if (!cv) return;
-    ctx = cv.getContext('2d');
-    const rs = () => { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; };
-    rs(); addEventListener('resize', rs);
-    N = Array.from({ length: 56 }, () => ({
-      x: Math.random(), y: Math.random(),
-      vx: (Math.random() - .5) * 22e-5, vy: (Math.random() - .5) * 22e-5,
-      r: 1 + Math.random() * 1.8
-    }));
-  }
-  function tick() {
-    if (!active || !ctx) return;
-    const W = cv.width, H = cv.height, dp = devicePixelRatio;
-    ctx.clearRect(0, 0, W, H);
-    N.forEach(p => {
-      p.x = (p.x + p.vx + 1) % 1; p.y = (p.y + p.vy + 1) % 1;
-      ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.r * dp, 0, 7);
-      ctx.fillStyle = 'color-mix(in srgb,var(--ac) 38%,transparent)'; ctx.fill();
-    });
-    for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
-      const dx = (N[i].x - N[j].x) * W, dy = (N[i].y - N[j].y) * H, d2 = dx * dx + dy * dy, lim = (130 * dp) ** 2;
-      if (d2 < lim) {
-        ctx.beginPath(); ctx.moveTo(N[i].x * W, N[i].y * H); ctx.lineTo(N[j].x * W, N[j].y * H);
-        ctx.strokeStyle = `rgba(178,142,32,${(.26 * (1 - d2 / lim)).toFixed(3)})`; ctx.lineWidth = dp * .7; ctx.stroke();
-      }
+/* ---------------- 背景（10/4）：等高线地形 + 蓝图网格 + 标语轮廓字 + 变电站剪影 ----------------
+   用户口径：陪练的背景元素要和班组长不同——不用光带 / 光晕，不要任何漂浮颗粒（粒子网络、上升人形、沿线流光均已删除）。
+   等高线：两组程序化生成的嵌套闭合曲线（固定种子，截图稳定），各自整块缓慢漂移 / 微旋转 / 呼吸（只动 transform，合成器跑，不逐帧重绘）；
+   两组叠在一起反向慢转，交叠处像地形在缓慢起伏。蓝图网格：静态细线。标语轮廓字：超大镂空字横向缓慢滑过。 */
+function vqContours(seed, cx, cy, r0, r1, n, amp) {
+  let x = seed; const rnd = () => (x = (x * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const K = [2, 3, 5, 7], A = [amp, amp * .7, amp * .45, amp * .3], PH = K.map(() => rnd() * Math.PI * 2);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const R = r0 + (r1 - r0) * i / (n - 1), m = 1 + .35 * Math.sin(i * 1.7 + seed), pts = [];
+    for (let j = 0; j < 144; j++) {
+      const t = j / 144 * Math.PI * 2; let f = 1; K.forEach((k, q) => { f += A[q] * m * Math.sin(k * t + PH[q] + i * .18); });
+      pts.push([(cx + R * f * Math.cos(t)).toFixed(1), (cy + R * f * .78 * Math.sin(t)).toFixed(1)]);
     }
-    raf = requestAnimationFrame(tick);
+    out.push('M' + pts.map(p => p.join(' ')).join('L') + 'Z');
   }
-  return {
-    init,
-    on() { if (active) return; active = true; raf = requestAnimationFrame(tick); },
-    off() { active = false; cancelAnimationFrame(raf); }
-  };
-})();
-
-/* 背景流动光线（10/3：替代粒子网络与上升人形）：四条长曲线 + 沿线走的绿金流光，不用颗粒 / 球体 */
-function vzFlowSVG() {
-  const P = ['M-100 160 C 300 40, 700 300, 1100 160 S 1700 20, 2000 200', 'M-100 500 C 400 400, 600 680, 1000 540 S 1600 360, 2000 520', 'M-100 800 C 300 680, 800 880, 1200 740 S 1700 620, 2000 780', 'M200 -50 C 500 300, 300 650, 900 980'];
-  return '<svg class="vzflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
-    '<linearGradient id="vzg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#57bd8b" stop-opacity="0"/><stop offset=".45" stop-color="#0e8f5a"/><stop offset=".75" stop-color="#c9a227"/><stop offset="1" stop-color="#c9a227" stop-opacity="0"/></linearGradient>' +
-    '<linearGradient id="vzg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227" stop-opacity="0"/><stop offset=".5" stop-color="#e3c05a"/><stop offset="1" stop-color="#0e8f5a" stop-opacity="0"/></linearGradient></defs>' +
-    P.map((d, i) => '<path class="vzrail" d="' + d + '"/><path class="vzbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vzg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+  return out;
+}
+function vqTopoSVG(cls, seed, cx, cy, r0, r1, n, amp, fillEvery) {
+  const ps = vqContours(seed, cx, cy, r0, r1, n, amp);
+  return '<svg class="vqtopo ' + cls + '" viewBox="0 0 900 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
+    ps.map((d, i) => '<path d="' + d + '"' + (fillEvery && i % fillEvery === 1 ? ' class="f"' : '') + '/>').join('') + '</svg>';
+}
+function vqBgHTML() {
+  const mq = APP_SLOGAN + '  ·  ' + APP_NAME + '  ·  ';
+  return '<div class="vqbg" aria-hidden="true"><div class="vqgrid"></div>' +
+    '<div class="vqtg t1">' + vqTopoSVG('a', 7, 470, 350, 60, 330, 8, .12, 3) + vqTopoSVG('b', 19, 430, 370, 90, 300, 6, .16, 0) + '</div>' +
+    '<div class="vqtg t2">' + vqTopoSVG('a', 31, 450, 360, 50, 300, 7, .13, 3) + vqTopoSVG('b', 43, 480, 330, 80, 270, 5, .17, 0) + '</div>' +
+    '<div class="vqmq"><span>' + mq + '</span><span>' + mq + '</span></div></div>';
 }
 /* 程序化变电站剪影（实景照片素材到位前的占位层，含能量流动效） */
 function silhouetteSVG() {

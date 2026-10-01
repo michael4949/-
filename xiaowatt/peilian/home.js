@@ -9,7 +9,7 @@ function route() {
   let h = (location.hash || '').replace(/^#\/?/, '') || 'home';
   if (!PAGES.includes(h)) h = 'home';
   if ((h === 'team' || h === 'sys') && ROLE.cur !== 'lead') h = 'home';
-  renderHPage(h); HomeFX.on();
+  renderHPage(h);
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
   vzNavInd();
 }
@@ -55,8 +55,8 @@ function openRec(id) {
 function homeBoot() {
   const hm = $('#pg_home');
   hm.innerHTML = `
+  ${vqBgHTML()}
   <div class="hsil">${silhouetteSVG()}</div>
-  ${vzFlowSVG()}
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
@@ -104,7 +104,6 @@ function homeBoot() {
   const clk = () => { const d = new Date(); $('#hclock').textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   clk(); setInterval(clk, 20000);
   bindTip(); bindHPage();
-  HomeFX.init();
 }
 
 /* ---------------- 页面渲染 ---------------- */
@@ -403,52 +402,35 @@ function typeInto(node, text) {
   const t = setInterval(() => { i += 1; node.textContent = text.slice(0, i); if (i >= text.length) clearInterval(t); }, 26);
 }
 
-/* ---------------- 背景动效：粒子 + 变电站剪影 ---------------- */
-const HomeFX = (() => {
-  let cv, ctx, raf = 0, active = false, N = [];
-  function init() {
-    cv = $('#fxp'); if (!cv) return;
-    ctx = cv.getContext('2d');
-    const rs = () => { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; };
-    rs(); addEventListener('resize', rs);
-    N = Array.from({ length: 56 }, () => ({
-      x: Math.random(), y: Math.random(),
-      vx: (Math.random() - .5) * 22e-5, vy: (Math.random() - .5) * 22e-5,
-      r: 1 + Math.random() * 1.8
-    }));
-  }
-  function tick() {
-    if (!active || !ctx) return;
-    const W = cv.width, H = cv.height, dp = devicePixelRatio;
-    ctx.clearRect(0, 0, W, H);
-    N.forEach(p => {
-      p.x = (p.x + p.vx + 1) % 1; p.y = (p.y + p.vy + 1) % 1;
-      ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.r * dp, 0, 7);
-      ctx.fillStyle = 'color-mix(in srgb,var(--ac) 38%,transparent)'; ctx.fill();
-    });
-    for (let i = 0; i < N.length; i++) for (let j = i + 1; j < N.length; j++) {
-      const dx = (N[i].x - N[j].x) * W, dy = (N[i].y - N[j].y) * H, d2 = dx * dx + dy * dy, lim = (130 * dp) ** 2;
-      if (d2 < lim) {
-        ctx.beginPath(); ctx.moveTo(N[i].x * W, N[i].y * H); ctx.lineTo(N[j].x * W, N[j].y * H);
-        ctx.strokeStyle = `rgba(178,142,32,${(.26 * (1 - d2 / lim)).toFixed(3)})`; ctx.lineWidth = dp * .7; ctx.stroke();
-      }
+/* ---------------- 背景（10/4）：等高线地形 + 蓝图网格 + 标语轮廓字 + 变电站剪影 ----------------
+   用户口径：陪练的背景元素要和班组长不同——不用光带 / 光晕，不要任何漂浮颗粒（粒子网络、上升人形、沿线流光均已删除）。
+   等高线：两组程序化生成的嵌套闭合曲线（固定种子，截图稳定），各自整块缓慢漂移 / 微旋转 / 呼吸（只动 transform，合成器跑，不逐帧重绘）；
+   两组叠在一起反向慢转，交叠处像地形在缓慢起伏。蓝图网格：静态细线。标语轮廓字：超大镂空字横向缓慢滑过。 */
+function vqContours(seed, cx, cy, r0, r1, n, amp) {
+  let x = seed; const rnd = () => (x = (x * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const K = [2, 3, 5, 7], A = [amp, amp * .7, amp * .45, amp * .3], PH = K.map(() => rnd() * Math.PI * 2);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const R = r0 + (r1 - r0) * i / (n - 1), m = 1 + .35 * Math.sin(i * 1.7 + seed), pts = [];
+    for (let j = 0; j < 144; j++) {
+      const t = j / 144 * Math.PI * 2; let f = 1; K.forEach((k, q) => { f += A[q] * m * Math.sin(k * t + PH[q] + i * .18); });
+      pts.push([(cx + R * f * Math.cos(t)).toFixed(1), (cy + R * f * .78 * Math.sin(t)).toFixed(1)]);
     }
-    raf = requestAnimationFrame(tick);
+    out.push('M' + pts.map(p => p.join(' ')).join('L') + 'Z');
   }
-  return {
-    init,
-    on() { if (active) return; active = true; raf = requestAnimationFrame(tick); },
-    off() { active = false; cancelAnimationFrame(raf); }
-  };
-})();
-
-/* 背景流动光线（10/3：替代粒子网络与上升人形）：四条长曲线 + 沿线走的绿金流光，不用颗粒 / 球体 */
-function vzFlowSVG() {
-  const P = ['M-100 160 C 300 40, 700 300, 1100 160 S 1700 20, 2000 200', 'M-100 500 C 400 400, 600 680, 1000 540 S 1600 360, 2000 520', 'M-100 800 C 300 680, 800 880, 1200 740 S 1700 620, 2000 780', 'M200 -50 C 500 300, 300 650, 900 980'];
-  return '<svg class="vzflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
-    '<linearGradient id="vzg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#57bd8b" stop-opacity="0"/><stop offset=".45" stop-color="#0e8f5a"/><stop offset=".75" stop-color="#c9a227"/><stop offset="1" stop-color="#c9a227" stop-opacity="0"/></linearGradient>' +
-    '<linearGradient id="vzg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227" stop-opacity="0"/><stop offset=".5" stop-color="#e3c05a"/><stop offset="1" stop-color="#0e8f5a" stop-opacity="0"/></linearGradient></defs>' +
-    P.map((d, i) => '<path class="vzrail" d="' + d + '"/><path class="vzbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vzg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+  return out;
+}
+function vqTopoSVG(cls, seed, cx, cy, r0, r1, n, amp, fillEvery) {
+  const ps = vqContours(seed, cx, cy, r0, r1, n, amp);
+  return '<svg class="vqtopo ' + cls + '" viewBox="0 0 900 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
+    ps.map((d, i) => '<path d="' + d + '"' + (fillEvery && i % fillEvery === 1 ? ' class="f"' : '') + '/>').join('') + '</svg>';
+}
+function vqBgHTML() {
+  const mq = APP_SLOGAN + '  ·  ' + APP_NAME + '  ·  ';
+  return '<div class="vqbg" aria-hidden="true"><div class="vqgrid"></div>' +
+    '<div class="vqtg t1">' + vqTopoSVG('a', 7, 470, 350, 60, 330, 8, .12, 3) + vqTopoSVG('b', 19, 430, 370, 90, 300, 6, .16, 0) + '</div>' +
+    '<div class="vqtg t2">' + vqTopoSVG('a', 31, 450, 360, 50, 300, 7, .13, 3) + vqTopoSVG('b', 43, 480, 330, 80, 270, 5, .17, 0) + '</div>' +
+    '<div class="vqmq"><span>' + mq + '</span><span>' + mq + '</span></div></div>';
 }
 /* 程序化变电站剪影（实景照片素材到位前的占位层，含能量流动效） */
 function silhouetteSVG() {
