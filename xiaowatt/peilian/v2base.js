@@ -1,7 +1,7 @@
 /* 底座冒烟：十一个页面渲染无错 · 首页下钻（能力项 / 天 / 场景分布 / 胜任度 / 成长地图节点 / 最近成绩）· 复盘筛选、摘要与打开报告 ·
    档案（曲线点 / 徽章 / 目标）· 课堂（测验 / 计划 / 课程）· 组长（复核 / 下发任务）→ 学员待练 → 完成回写 · 角色切换 */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
-const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '小瓦特练_AI智能陪练平台_高保真原型.html')).href;
+const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '安全学习智能陪练_高保真原型.html')).href;
 const w = (p, ms) => p.waitForTimeout(ms);
 (async () => {
   const b = await chromium.launch();
@@ -14,16 +14,18 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const pages = ['home', 'center', 'ticket', 'emerg', 'assess', 'analytics', 'review', 'growth', 'classroom'];
   const out = {};
   for (const h of pages) { await p.evaluate(h => goPage(h), h); await w(p, 450); out[h] = await p.evaluate(() => document.querySelector('#hpage').innerText.length); }
-  console.log('pages', JSON.stringify(out), '| 旧模块已删', await p.evaluate(() => ['pageExpert', 'pageExam', 'pagePlaza', 'pageEditor', 'examStart', 'epStart'].filter(f => typeof window[f] === 'function').length === 0), '| 记录', await p.evaluate(() => allRecs().length));
+  console.log('pages', JSON.stringify(out), '| 旧模块已删', await p.evaluate(() => ['pageExpert', 'pageExam', 'pagePlaza', 'pageEditor', 'examStart', 'epStart'].filter(f => typeof window[f] === 'function').length === 0), '| 记录', await p.evaluate(() => allRecs().length), '| 成熟度', await p.evaluate(() => JSON.stringify(maturity().pct + ' ' + maturity().lv + ' ' + maturity().dims.map(d => d.score).join('/'))), '| 品牌', await p.evaluate(() => document.querySelector('.brand .pill').innerText));
   /* 首页下钻 */
   await p.evaluate(() => goPage('home')); await w(p, 500);
+  console.log('标语', await p.evaluate(() => (document.querySelector('.slogan b') || {}).innerText), '期望 一切事故都可以预防 · 顶栏页签', await p.evaluate(() => [...document.querySelectorAll('#hnav [data-h]')].map(n => n.dataset.h).join(',')));
   const dr = {};
-  for (const sel of ['[data-dim]', '[data-hdim]', '[data-day]', '[data-plan]', '[data-gauge]', '[data-node="g3"]', '[data-node="g5"]', '[data-node="g8"]', '[data-node="g7"]']) { await fire(sel); await w(p, 200); dr[sel] = await p.evaluate(() => document.querySelectorAll('.mask').length); await closeMasks(); }
-  console.log('home drills (弹层数)', JSON.stringify(dr), '期望全部 1');
+  for (const sel of ['[data-dimk]', '[data-mat]', '[data-scene="rule"]', '[data-node="end"]', '[data-node="dim:op"]', '[data-node="kn1"]', '[data-case]']) { await fire(sel); await w(p, 200); dr[sel] = await p.evaluate(() => document.querySelectorAll('.mask').length); await closeMasks(); }
+  console.log('home drills (弹层数)', JSON.stringify(dr), '期望全部 1 · 案例推送卡', await p.evaluate(() => document.querySelectorAll('.casecard .caseit').length), '期望 2');
   await fire('.hcard.bl [data-rec]'); await w(p, 400); console.log('最近成绩 → 报告', await p.evaluate(() => location.hash));
   await p.evaluate(() => goPage('home')); await w(p, 400);
-  await fire('.emprog i'); await w(p, 400); console.log('应急处置卡方块 → 情境', await p.evaluate(() => location.hash + ' ' + EM.id));
+  await fire('[data-node="em1"]'); await w(p, 400); console.log('路径图应急节点 → 应急处置陪练', await p.evaluate(() => location.hash), '期望 #emerg');
   await p.evaluate(() => { if (EM.timer) { clearInterval(EM.timer); EM.timer = null; } EM.id = null; goPage('home'); }); await w(p, 400);
+  await p.click('[data-radar="em"]'); await w(p, 200); console.log('雷达切换六场景', await p.evaluate(() => document.querySelectorAll('[data-radar]').length + ' · ' + document.querySelector('#radarbox').innerText.includes('应急处置陪练')), '期望 6 · true');
   /* 复盘 */
   await p.evaluate(() => goPage('review')); await w(p, 500);
   const rv = await p.evaluate(() => document.querySelectorAll('.rvit').length);
@@ -39,8 +41,8 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const gr = await p.evaluate(() => ({ pts: document.querySelectorAll('#gcurve .hitv').length, badges: document.querySelectorAll('.badge').length, lit: document.querySelectorAll('.badge.lit').length, cards: document.querySelectorAll('.emc').length }));
   await p.click('[data-gshow="dur"]'); await w(p, 200);
   await p.click('.badge'); await w(p, 200); const bd = await p.evaluate(() => document.querySelectorAll('.mask').length); await closeMasks();
-  await p.fill('[data-goal="0"]', '95'); await w(p, 200); const gl = await p.evaluate(() => goalArr()[0]);
-  await fire('[data-gdim="3"]'); await w(p, 200); const gd = await p.evaluate(() => document.querySelectorAll('.mask').length); await closeMasks();
+  await p.fill('[data-goal="tk"]', '95'); await w(p, 200); const gl = await p.evaluate(() => goalArr()[0]);
+  await fire('[data-gdim4="1"]'); await w(p, 200); const gd = await p.evaluate(() => document.querySelectorAll('.mask').length); await closeMasks();
   await fire('#gcurve .hitv[data-sess]'); await w(p, 400);
   console.log('growth', JSON.stringify(gr), 'badge', bd, 'goal', gl, 'dim', gd, '曲线点 →', await p.evaluate(() => location.hash), '期望 cards 17');
   /* 课堂 */
@@ -59,8 +61,8 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const t0 = await p.evaluate(() => { const t = taskList()[0]; return { n: t.targetN, who: t.who, mode: t.mode }; });
   await p.screenshot({ path: './shots/base_team.png', fullPage: true });
   await p.evaluate(() => { ROLE.cur = 'student'; renderRole(); goPage('home'); }); await w(p, 500);
-  const todo = await p.evaluate(() => ({ task: document.querySelector('.taskcard .tk2').innerText, todo: myTodo().length }));
-  await p.click('.taskcard [data-start]'); await w(p, 500);
+  const todo = await p.evaluate(() => ({ task: document.querySelector('.reco .rcard:last-child > b').innerText, todo: myTodo().length }));
+  await p.click('.reco .rcard:last-child [data-start]'); await w(p, 500);
   await p.evaluate(() => { TK.rows = tkAuto('ok').map(r => ({ t: r.t, child: !!r.parent })); tkPaint(); }); await p.fill('#tkno', '2609002'); await p.evaluate(() => $('#tksubmit').click()); await w(p, 500);
   const back = await p.evaluate(() => ({ todo: myTodo().length, res: (taskList()[0].results || []).map(r => r.who + ' ' + r.score) }));
   console.log('team', JSON.stringify(tm), '下发', JSON.stringify(t0), '学员待练', JSON.stringify(todo), '完成回写', JSON.stringify(back), '期望 cells 10 · 回写 任玲玲 100 · todo 0');

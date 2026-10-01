@@ -211,7 +211,7 @@ function pageTicket() {
 function tkIntroHTML() {
   const recs = tkRecords();
   return `<div class="wrap tkwrap">
-    <div class="ph"><h2>操作票填写</h2><span class="sub">${h(TICKET_META.station)}　标准票 ${h(TICKET_META.ver)}　票号由考核人员填写</span></div>
+    <div class="ph"><h2>两票填写陪练 · 操作票</h2><span class="sub">${h(TICKET_META.station)}　标准票 ${h(TICKET_META.ver)}　票号由考核人员填写</span><span class="r"><button class="btn s g" data-go="center">返回场景中心</button></span></div>
     <div class="card tkintro">
       <div class="tktask"><b>操作任务</b><p>${h(TICKET_META.task)}</p></div>
       <div class="tkask"><b>作答要求</b><ol>${TICKET_META.ask.map(x => `<li>${h(x)}</li>`).join('')}</ol></div>
@@ -239,7 +239,7 @@ function tkIntroHTML() {
 }
 function tkFormPage() {
   return `<div class="wrap tkwrap">
-    <div class="ph"><h2>操作票填写</h2><span class="sub">${h(TICKET_META.station)}　${h(TICKET_META.kind)}</span>
+    <div class="ph"><h2>两票填写陪练 · 操作票</h2><span class="sub">${h(TICKET_META.station)}　${h(TICKET_META.kind)}</span>
       <span class="tktimer" id="tktimer">00:00</span>${TK.stress ? '<span class="tag bad">压力模式</span>' : ''}<span class="tag">${TK.mode === 'exam' ? '考核模式' : '训练模式'}</span></div>
     <div class="card tktop"><div class="tktask"><b>操作任务</b><p>${h(TICKET_META.task)}</p></div>
       <ol class="tkask2">${TICKET_META.ask.map(x => `<li>${h(x)}</li>`).join('')}</ol></div>

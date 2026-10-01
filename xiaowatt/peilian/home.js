@@ -2,7 +2,7 @@
 
 let __xwTyped = false;
 function goPage(h) { if ((location.hash || '').replace(/^#\/?/, '') === h) route(); else location.hash = '#' + h; }
-const PAGES = ['home', 'center', 'ticket', 'emerg', 'assess', 'analytics', 'review', 'growth', 'classroom', 'team', 'sys'];
+const PAGES = ['home', 'center', 'ticket', 'emerg', 'scene', 'assess', 'analytics', 'review', 'growth', 'classroom', 'team', 'sys'];
 
 /* ---------------- 路由 ---------------- */
 function route() {
@@ -13,11 +13,12 @@ function route() {
   $$('#hnav .hnavi').forEach(a => a.classList.toggle('on', a.dataset.h === h));
 }
 
-/* 打开场景：tk / tk:exam / em / em:<情境>:<模式> */
+/* 打开场景：tk / tk:exam（操作票）· em / em:<情境>:<模式>（应急处置）· rule / life / case / inst[:<子项>[:<模式>]]（其余四个场景）· wt（工作票） */
 function startScene(spec) {
   const [s, a, b] = String(spec || '').split(':');
   if (s === 'tk') { TK.res = null; return tkStart(a === 'exam' ? 'exam' : 'teach', false); }
   if (s === 'em') { if (a && EMGMAP[a]) return emStart(a, b === 'exam' ? 'exam' : 'teach'); EM.id = null; EM.res = null; return goPage('emerg'); }
+  if (typeof scStart === 'function' && (SCENE_MAP[s] || s === 'wt')) return scStart(s, a, b);
   goPage('center');
 }
 /* 打开某次演练的报告（本机记录与模拟记录同一入口） */
@@ -28,10 +29,13 @@ function openRec(id) {
     TK.rec = { d: r.d, no: r.mock ? '—' : (r.sub || '').replace('票号 ', ''), mode: r.mode, sec: r.sec, score: r.score, pass: r.pass, fatal: r.fatal, rows: r.rows };
     return goPage('ticket');
   }
-  const e = EMGMAP[r.eid]; if (!e) return;
-  if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
-  EM.id = r.eid; EM.rec = { d: r.d, mode: r.mode === '考核模式' || r.mode === 'exam' ? 'exam' : 'teach', sec: r.sec, a: r.a }; EM.res = emgScore(e, r.a || {}); EM.mode = EM.rec.mode;
-  goPage('emerg');
+  if (r.src === 'em') {
+    const e = EMGMAP[r.eid]; if (!e) return;
+    if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
+    EM.id = r.eid; EM.rec = { d: r.d, mode: r.mode === '考核模式' || r.mode === 'exam' ? 'exam' : 'teach', sec: r.sec, a: r.a, sit: r.sit }; EM.res = emgScore(e, r.a || {}, r.sec); EM.mode = EM.rec.mode;
+    return goPage('emerg');
+  }
+  if (typeof scOpenRec === 'function') return scOpenRec(r);
 }
 
 /* ---------------- 首页框架（boot 时一次性建立） ---------------- */
@@ -44,12 +48,10 @@ function homeBoot() {
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
-      <div class="brand"><img src="__LOGO__" alt="中国南方电网 深圳供电局有限公司"><div class="pill">小瓦特·练　AI 智能陪练平台</div></div>
+      <div class="brand"><img src="__LOGO__" alt="中国南方电网 深圳供电局有限公司"><div class="pill">${APP_NAME}</div></div>
       <nav class="hnav" id="hnav">
         <span class="hnavi" data-h="home">工作台</span>
         <span class="hnavi" data-h="center">场景中心</span>
-        <span class="hnavi" data-h="ticket">操作票填写</span>
-        <span class="hnavi" data-h="emerg">应急处置</span>
         <span class="hnavi" data-h="assess">AI 测评</span>
         <span class="hnavi" data-h="analytics">数据分析</span>
         <span class="hnavi lk" data-lk="1" data-h="team">管理视角<i>管理</i></span>
@@ -72,6 +74,7 @@ function homeBoot() {
     <button data-dm="em_ok">应急处置：触电 · 完整作答</button>
     <button data-dm="em_part">应急处置：触电 · 要点只答一半</button>
     <button data-dm="em_key">应急处置：触电 · 事例没指出问题（关键遗漏）</button>
+    <button data-dm="case_push">案例推送：导入通报 → 生成 → 推送</button>
     <button data-dm="status">功能实现状态清单</button>
     <button data-dm="bound">系统边界表</button>
     <button data-dm="clear">清空本机记录</button></div>
@@ -80,7 +83,6 @@ function homeBoot() {
   $('#hnav').onclick = e => {
     const n = e.target.closest('.hnavi'); if (!n) return;
     if (n.dataset.lk && ROLE.cur !== 'lead') return toast('该模块需要班组长及以上权限（当前账号：学员）。点击右上角账号可切换为班组长。');
-    if (n.dataset.h === 'emerg') { EM.res = null; if (!EM.timer) EM.id = null; }
     goPage(n.dataset.h);
   };
   $('.uchip').onclick = toggleRole;
@@ -95,7 +97,7 @@ function homeBoot() {
 
 /* ---------------- 页面渲染 ---------------- */
 const PAGE_FN = {
-  home: () => pageHome(), center: () => pageCenter(), ticket: () => pageTicket(), emerg: () => pageEmerg(), assess: () => pageAssess(), analytics: () => pageAnalytics(),
+  home: () => pageHome(), center: () => pageCenter(), ticket: () => pageTicket(), emerg: () => pageEmerg(), scene: () => (typeof pageScene === 'function' ? pageScene() : pageCenter()), assess: () => pageAssess(), analytics: () => pageAnalytics(),
   review: () => pageReview(), growth: () => pageGrowth(), classroom: () => pageClassroom(), team: () => pageTeam(), sys: () => pageSys()
 };
 function renderHPage(h) {
@@ -105,6 +107,7 @@ function renderHPage(h) {
   pg.scrollTop = 0; const hm = $('#pg_home'); if (hm && h !== 'home') hm.scrollTop = 0;
   if (h === 'ticket') ticketAfter(); else if (TK.timer) { clearInterval(TK.timer); TK.timer = null; }
   if (h === 'emerg') emerAfter(); else if (EM.timer) { clearInterval(EM.timer); EM.timer = null; }
+  if (h === 'scene' && typeof sceneAfter === 'function') sceneAfter(); else if (typeof SC !== 'undefined' && SC.timer) { clearInterval(SC.timer); SC.timer = null; }
   if (h === 'assess' || h === 'analytics') platAfter(h);
   if (typeof pageAfter === 'function') pageAfter(h);
   countUp(pg);
@@ -116,105 +119,106 @@ function greet() { const h = new Date().getHours(); return h < 6 ? '夜深了' :
 function todayStr() { const d = new Date(); return `${d.getMonth() + 1}月${d.getDate()}日 ${'周' + '日一二三四五六'[d.getDay()]}`; }
 
 /* ---------------- 工作台推导：短板 → 推荐练什么 ---------------- */
-function weakOrder() { const now = abilityNow(); return SKILL9.map((s, i) => ({ s, i, v: now[i] })).sort((a, b) => a.v - b.v); }
 function recoFor(item) {
-  if (item.s.g === 'tk') return { spec: 'tk:teach', n: '操作票填写 · 训练模式', sub: '#3主变运行转检修 · 3M负荷转#2主变代供', why: `「${item.s.n}」${item.v} 分，训练模式边写边判，逐行对标准票` };
-  const L = allRecs().filter(r => r.src === 'em'); const best = {}; L.forEach(r => { best[r.eid] = Math.max(best[r.eid] || 0, r.score); });
-  const pool = EMG.filter(e => item.s.k === 'e2' ? e.cs : item.s.k === 'e3' ? (e.rep || []).length : item.s.k === 'e4' ? e.pts.some(p => EMG_AID.test(p.t)) : true);
-  const e = pool.slice().sort((a, b) => (best[a.id] == null ? -1 : best[a.id]) - (best[b.id] == null ? -1 : best[b.id]))[0] || EMG[0];
-  return { spec: 'em:' + e.id + ':teach', n: '应急处置 · ' + e.card + (e.sc ? ' · ' + e.sc.replace(/^场景[一二三四]：/, '') : ''), sub: best[e.id] == null ? '尚未练过' : '最好成绩 ' + best[e.id] + ' 分', why: `「${item.s.n}」${item.v} 分，${item.s.k === 'e2' ? '练事例纠错，找出违反注意事项的做法' : item.s.k === 'e3' ? '练电话首报与续报' : item.s.k === 'e4' ? '练急救与自我防护要点' : '把处置要点答全'}` };
+  const g = item.g, v = item.none ? '尚未练过' : item.v + ' 分';
+  if (g === 'tk') return { spec: 'tk:teach', n: '两票填写陪练 · 操作票 · 训练模式', sub: '#3主变运行转检修 · 3M负荷转#2主变代供', why: `「${item.n}」${v}，训练模式边写边判，逐行对标准票` };
+  if (g === 'em') {
+    const L = allRecs().filter(r => r.src === 'em'); const best = {}; L.forEach(r => { best[r.eid] = Math.max(best[r.eid] || 0, r.score); });
+    const pool = EMG.filter(e => item.k === 'e3' ? e.cs : item.k === 'e4' ? (e.rep || []).length : item.k === 'e1' ? e.pts.length <= 5 : true);
+    const e = pool.slice().sort((a, b) => (best[a.id] == null ? -1 : best[a.id]) - (best[b.id] == null ? -1 : best[b.id]))[0] || EMG[0];
+    return { spec: 'em:' + e.id + ':teach', n: '应急处置陪练 · ' + e.card + (e.sc ? ' · ' + e.sc.replace(/^场景[一二三四]：/, '') : ''), sub: best[e.id] == null ? '尚未练过' : '最好成绩 ' + best[e.id] + ' 分', why: `「${item.n}」${v}，${item.k === 'e3' ? '练事例纠错，找出事例里的问题' : item.k === 'e4' ? '练电话首报与续报' : item.k === 'e1' ? '限时作答，先把要点说出来再补充' : '把处置要点答全，意思对就得分'}` };
+  }
+  const S = SCENE_MAP[g] || SCENE_MAP.rule;
+  return { spec: g + '::teach', n: S.n + ' · 训练模式', sub: S.sub, why: `「${item.n}」${v}，${item.none ? '这个场景还没练过，先练一次拿到基准分' : '针对这一项的题目优先出'}` };
 }
-/* 岗位胜任度（测算参考） */
-function fitCalc() {
-  const A = homeAgg(), now = abilityNow();
+/* 安全能力成熟度构成（下钻用） */
+function matParts() {
+  const M = maturity(), A = homeAgg();
   const lastExam = allRecs().find(r => r.src === 'tk' && /考核/.test(r.mode));
-  const parts = [
-    { n: '规程理论考试', v: '92 分', need: '≥ 80 分', ok: true },
-    { n: '操作票考核模式', v: lastExam ? lastExam.score + ' 分' : '未考', need: '最近一次 ≥ 60 分且无危险操作', ok: !!(lastExam && lastExam.pass), gap: '完成一次操作票考核模式并及格' },
-    { n: '应急处置卡覆盖', v: A.cards.size + ' / 17 类', need: '17 类全部练过', ok: A.cards.size >= 17, gap: '还有 ' + (17 - A.cards.size) + ' 类应急处置卡没有练过' },
-    { n: '危险操作', v: A.danger + ' 次', need: '近30天 0 次', ok: A.danger === 0, gap: '近30天出现过整票不合格的危险操作' },
-    { n: '年度培训学时', v: HOME_USER.hours.done + ' 学时', need: '≥ ' + HOME_USER.hours.need + ' 学时', ok: HOME_USER.hours.done >= HOME_USER.hours.need, gap: '知识课堂待修 ' + (HOME_USER.hours.need - HOME_USER.hours.done) + ' 学时' }
-  ];
-  const avg = Math.round(now.reduce((a, b) => a + b, 0) / now.length);
-  return { pct: Math.round(avg * .6 + parts.filter(p => p.ok).length / parts.length * 100 * .4), post: HOME_USER.post, parts };
+  const parts = M.dims.map(d => ({ n: d.n, v: d.score == null ? '待练' : d.score + ' 分', need: '≥ 75（熟练）', ok: d.score != null && d.score >= 75, gap: d.score == null ? d.missing.join('、') + ' 还没练过' : d.score < 75 ? '再练 ' + d.scenes.filter(x => x.score != null && x.score < 75).map(x => x.n).join('、') : '' }));
+  parts.push({ n: '操作票考核模式', v: lastExam ? lastExam.score + ' 分' : '未考', need: '最近一次 ≥ 60 分且无危险操作', ok: !!(lastExam && lastExam.pass), gap: '完成一次操作票考核模式并及格' });
+  parts.push({ n: '应急处置卡覆盖', v: A.cards.size + ' / 17 类', need: '17 类全部练过', ok: A.cards.size >= 17, gap: '还有 ' + (17 - A.cards.size) + ' 类应急处置卡没有练过' });
+  parts.push({ n: '危险操作', v: A.danger + ' 次', need: '近30天 0 次', ok: A.danger === 0, gap: '近30天出现过整票不合格的危险操作' });
+  return { M, parts };
 }
-function growthNodes() {
-  const A = homeAgg(), w = weakOrder()[0], todo = myTodo()[0];
-  const tkN = allRecs().filter(r => r.src === 'tk').length;
-  return [
-    { id: 'g1', x: 85, y: 505, s: 'done', t: '岗前培训', v: '已完成' },
-    { id: 'g2', x: 215, y: 435, s: 'done', t: '安规考试', v: '92 分' },
-    { id: 'g3', x: 345, y: 365, s: tkN ? 'done' : 'next', t: '操作票填写', v: tkN + ' 次' },
-    { id: 'g4', x: 465, y: 285, s: A.scenes.size ? 'done' : 'next', t: '应急处置情境', v: A.scenes.size + '/' + EMG.length },
-    { id: 'g5', x: 585, y: 340, s: 'cur', t: '短板补强·' + w.s.n, v: w.v + ' 分' },
-    { id: 'g6', x: 695, y: 250, s: 'next', t: todo ? '培训任务·' + (todo.targetN || '').slice(0, 10) : '操作票考核模式', v: todo ? todo.due + '截止' : '' },
-    { id: 'g7', x: 800, y: 165, s: 'ahead', t: '班组长复核', v: '' },
-    { id: 'g8', x: 818, y: 88, s: 'future', t: '胜任度认定', v: '人工审核' },
-    { id: 'b1', x: 555, y: 88, s: 'feed', t: '年度学时', v: HOME_USER.hours.done + '/' + HOME_USER.hours.need },
-    { id: 'b2', x: 425, y: 135, s: 'feed', t: '应急处置卡', v: A.cards.size + '/17 类' }
-  ];
+/* 员工安全技能提升路径图：四条泳道（四个能力维度）→ 安全能力成熟度认定 */
+function growthLanes() {
+  const A = abilityCalc(), AG = homeAgg(), M = A.mat, W = weakOrder().filter(x => !x.none)[0];
+  const cases = typeof caseList === 'function' ? caseList() : [];
+  const sc = k => A.scene[k], cnt = k => sc(k).cnt;
+  const lastExam = allRecs().find(r => r.src === 'tk' && /考核/.test(r.mode));
+  const st = (ok, started) => ok ? 'done' : started ? 'next' : 'future';
+  const lanes = [
+    { k: 'kn', nodes: [
+      { id: 'kn1', t: '安规考试', v: '92 分', s: 'done' },
+      { id: 'kn2', t: '安规知识陪练', v: cnt('rule') ? cnt('rule') + ' 次 · ' + sc('rule').score + ' 分' : '未练', s: st(cnt('rule') >= 3 && sc('rule').score >= 75, cnt('rule')) },
+      { id: 'kn3', t: '制度学习陪练', v: cnt('inst') ? cnt('inst') + ' 次 · ' + sc('inst').score + ' 分' : '未练', s: st(cnt('inst') >= 2 && sc('inst').score >= 75, cnt('inst')) }] },
+    { k: 'op', nodes: [
+      { id: 'op1', t: '操作票填写', v: cnt('tk') + ' 次', s: st(cnt('tk') > 0, cnt('tk')) },
+      { id: 'op2', t: '操作票考核及格', v: lastExam ? lastExam.score + ' 分' : '未考', s: st(!!(lastExam && lastExam.pass), !!lastExam) },
+      { id: 'op3', t: '保命技能陪练', v: cnt('life') ? cnt('life') + ' 次 · ' + sc('life').score + ' 分' : '未练', s: st(cnt('life') >= 3 && sc('life').score >= 75, cnt('life')) }] },
+    { k: 'em', nodes: [
+      { id: 'em1', t: '应急处置情境', v: AG.scenes.size + '/' + EMG.length, s: st(AG.scenes.size >= 10, AG.scenes.size) },
+      { id: 'em2', t: '处置卡覆盖', v: AG.cards.size + '/17 类', s: st(AG.cards.size >= 17, AG.cards.size) },
+      { id: 'em3', t: '应急考核 ≥ 80', v: sc('em').score != null ? '本期 ' + sc('em').score : '未练', s: st(sc('em').score >= 80, cnt('em')) }] },
+    { k: 'rv', nodes: [
+      { id: 'rv1', t: '推送案例学习', v: cases.filter(c => c.done).length + '/' + cases.length, s: st(cases.length && cases.every(c => c.done), cases.some(c => c.done)) },
+      { id: 'rv2', t: '案例分析陪练', v: cnt('case') ? cnt('case') + ' 次 · ' + sc('case').score + ' 分' : '未练', s: st(cnt('case') >= 3 && sc('case').score >= 75, cnt('case')) },
+      { id: 'rv3', t: '警示复盘 ≥ 75', v: sc('case').score != null ? '本期 ' + sc('case').score : '未练', s: st(sc('case').score >= 75, cnt('case')) }] }
+  ].map(L => { const d = DIM4_MAP[L.k], D = M.dims.find(x => x.k === L.k); return Object.assign(L, { n: d.n, sc: D.score, lv: maturityLv(D.score), scenes: d.scenes.map(k => SCENE_MAP[k].short).join(' · ') }); });
+  /* 当前步：最弱维度里第一个没完成的节点 */
+  const weakDim = M.dims.filter(d => d.score != null).sort((a, b) => a.score - b.score)[0] || M.dims[0];
+  const L = lanes.find(x => x.k === weakDim.k); const cur = L && L.nodes.find(n => n.s !== 'done'); if (cur) cur.s = 'cur';
+  const allDone = lanes.every(x => x.nodes.every(n => n.s === 'done')) && M.pct >= 75;
+  return { lanes, end: { id: 'end', t: '安全能力成熟度认定', v: '人工审核 · 四维度 ≥ 75', big: M.pct == null ? '—' : M.pct, lv: M.lv, s: allDone ? 'done' : 'future' }, weak: W };
 }
-const GROWTH_EDGES = [
-  { d: 'M85,505 C130,478 168,458 215,435', s: 'done' },
-  { d: 'M215,435 C258,412 300,388 345,365', s: 'done' },
-  { d: 'M345,365 C385,338 425,310 465,285', s: 'done' },
-  { d: 'M465,285 C505,303 545,322 585,340', s: 'done', p: 1 },
-  { d: 'M585,340 C620,310 658,278 695,250', s: 'act', p: 1 },
-  { d: 'M695,250 C730,222 765,192 800,165', s: 'future' },
-  { d: 'M800,165 C812,138 816,112 818,88', s: 'future' },
-  { d: 'M555,88 C640,98 725,125 795,158', s: 'feed', p: 1 },
-  { d: 'M425,135 C550,143 675,150 793,162', s: 'feed', p: 1 }
-];
 
 /* ---------------- 首页 ---------------- */
+const HM = { radar: 'tk' };
+function radarBox() {
+  const A = abilityCalc(), S = SCENE_MAP[HM.radar], sc = A.scene[HM.radar], dims = skillsOf(HM.radar), T = teamAvgOf();
+  const now = dims.map(d => sc.now[d.k] == null ? 0 : sc.now[d.k]), prev = dims.map(d => sc.prev[d.k] == null ? 0 : sc.prev[d.k]);
+  return `<div class="chips rdchips">${SCENES.map(x => `<span class="chip ${x.k === HM.radar ? 'on' : ''}" data-radar="${x.k}">${x.short}</span>`).join('')}</div>
+    ${sc.cnt ? chRadar(dims.map(d => d.n), now, prev, { w: 330, h: 222, l1: '本期', l2: '上期', key: 'dimk' }).replace(/data-dimk="(\d+)"/g, (m, i2) => `data-dimk="${dims[+i2].k}"`) : `<div class="empty" style="height:200px;display:flex;align-items:center;justify-content:center">「${S.n}」还没有演练记录<br>练一次就有雷达</div>`}
+    <div class="tk3" style="text-align:center">${S.n} · ${sc.cnt ? '本期 ' + sc.score + ' 分（最近 3 次）· 班组均值 ' + T.sc[HM.radar] : '尚未练过'} · 取自${S.src} · <span class="lk" onclick="goPage('assess')">看指标体系</span></div>`;
+}
+function sceneTilesHTML() {
+  const A = abilityCalc(), T = teamAvgOf();
+  return `<div class="sctiles">${SCENES.map(x => { const sc = A.scene[x.k]; return `<div class="sctile hitv ${sc.cnt ? (sc.score >= 75 ? 'ok' : 'w') : 'na'}" data-scene="${x.k}" data-tip="${x.n} · ${sc.cnt ? '本期 ' + sc.score + ' 分 · 最好 ' + sc.best + ' 分 · 练过 ' + sc.cnt + ' 次' : '尚未练过'}">
+    <b>${h(x.n)}</b><em class="mono">${sc.cnt ? sc.score : '—'}</em><span>${sc.cnt ? '练过 ' + sc.cnt + ' 次 · 班组 ' + T.sc[x.k] : '未练 · 点击开始'}</span></div>`; }).join('')}</div>`;
+}
 function pageHome() {
-  const A = homeAgg(), ab = abilityCalc(), W = weakOrder();
-  const w1 = W[0], w2 = W[1];
+  const A = homeAgg(), AB = abilityCalc(), M = AB.mat, W = weakOrder();
+  const w1 = W[0], w2 = W.find(x => x.g !== w1.g) || W[1];
   const todo = myTodo(), task = todo[0];
-  const lastTk = A.tk[0] || allRecs().find(r => r.src === 'tk');
-  const cards = Array.from(new Set(EMG.map(e => e.card)));
-  const best = {}; allRecs().filter(r => r.src === 'em').forEach(r => { const c = EMGMAP[r.eid].card; best[c] = Math.max(best[c] || 0, r.score); });
-  const cardOk = cards.filter(c => (best[c] || 0) >= EMG_CFG.pass).length;
-  const recent = allRecs().slice(0, 5);
-  const R1 = recoFor(w1), R2 = recoFor(w2.s.g === w1.s.g && W[2] ? W[2] : w2);
-  const xwFull = `「${w1.s.n}」${w1.v} 分、「${w2.s.n}」${w2.v} 分是当前两项短板；${task ? `班组长下发的「${task.targetN}」${task.due}截止，建议先完成` : `建议先练「${R1.n}」`}，成绩会直接落到能力雷达并反馈给班组长。`;
-  const taskBtn = task ? `<button class="btn pri" data-start="${task.scene}:${task.scene === 'em' ? (task.target || '') + ':' : ''}${task.mode}">开始</button>` : `<button class="btn pri" data-start="tk:exam">去完成</button>`;
+  const recent = allRecs().slice(0, 6);
+  const R1 = recoFor(w1), R2 = recoFor(w2);
+  const played = SCENES.filter(x => AB.scene[x.k].cnt).length;
+  const xwFull = `安全能力成熟度 ${M.pct == null ? '待练' : M.pct + '（' + M.lv + '）'}；「${w1.n}」${w1.none ? '尚未练过' : w1.v + ' 分'}、「${w2.n}」${w2.none ? '尚未练过' : w2.v + ' 分'}是当前两项短板；${task ? `班组长下发的「${task.targetN}」${task.due}截止，建议先完成` : `建议先练「${R1.n}」`}，成绩会直接落到安全能力雷达并反馈给班组长。`;
+  const taskBtn = task ? `<button class="btn pri" data-start="${task.scene}:${task.scene === 'em' ? (task.target || '') + ':' : ''}${task.mode}">去完成任务</button>` : `<button class="btn pri" data-start="${R1.spec}">去练</button>`;
   return `
-  <section class="hero">
+  <section class="hero hero2">
     <div class="hgreet">
-      <h1>${greet()}，${HOME_USER.name}</h1>
-      <div class="hsub">${HOME_USER.team} · ${HOME_USER.post} · 场景陪练：操作票填写 · 应急处置 · 今天 ${todayStr()}</div>
+      <div class="slogan"><b>${APP_SLOGAN}</b><span>${APP_NAME}</span></div>
+      <div class="hsub">${greet()}，${HOME_USER.name} · ${HOME_USER.team} · ${HOME_USER.post} · 今天 ${todayStr()}${task ? ` · 待练任务：${h(task.targetN)}（${task.due}截止）` : ''}</div>
       <div class="hkpis hg">
         <div class="kpi"><b>${A.cnt}</b><span>近30天演练 次数</span></div>
-        <div class="kpi ${lastTk && lastTk.pass ? 'good' : 'warn'}"><b>${lastTk ? lastTk.score : 0}</b><span>操作票 最近得分</span></div>
-        <div class="kpi ${A.scenes.size >= EMG.length ? 'good' : 'warn'}"><b>${A.scenes.size}/${EMG.length}</b><span>应急情境 已练</span></div>
+        <div class="kpi ${M.pct == null ? 'warn' : M.pct >= 75 ? 'good' : 'warn'}"><b>${M.pct == null ? '—' : M.pct}</b><span>安全能力成熟度 ${M.lv}</span></div>
+        <div class="kpi ${played >= SCENES.length ? 'good' : 'warn'}"><b>${played}/${SCENES.length}</b><span>陪练场景 已练</span></div>
         <div class="kpi ${A.passRate >= 80 ? 'good' : 'warn'}"><b>${A.passRate}%</b><span>近30天 及格率</span></div>
       </div>
       <div class="hteam"><span class="lb">班组伙伴</span>${teamRows().map(m => `<i class="tm ${m.n === HOME_USER.name ? 'me' : !m.cnt ? 'idle' : ''}" title="${m.n} · ${m.cnt ? '近30天 ' + m.cnt + ' 次' : '本月未练'}">${m.n.slice(0, 1)}</i>`).join('')}<span class="tmx">${teamRows().filter(m => m.cnt).length}/${TEAM.length} 人本月已练</span></div>
     </div>
-    <div class="taskcard ho">
-      <div class="tk1">${task ? '待练任务' : '今日待练任务'}</div>
-      <div class="tk2">${h(task ? task.targetN : HOME_TASK.targetN)}</div>
-      <div class="tk3">${task ? `${h(task.from)} 下发 · ${task.due}截止 · ${task.mode === 'exam' ? '考核模式' : '训练模式'}${task.note ? '<br>' + h(task.note) : ''}` : `${HOME_TASK.from} 下发 · ${dateAfter(HOME_TASK.dueDays)}截止 · ${HOME_TASK.note}`}</div>
-      ${taskBtn}
-    </div>
-    <div class="hourcard ho">
-      <div class="tk1">应急处置卡掌握</div>
-      <div class="certprog emprog">${cards.map(c => { const e = EMG.find(x => x.card === c); const v = best[c]; return `<i class="${v != null && v >= EMG_CFG.pass ? 'ok' : v != null ? 'star' : ''}" data-start="em:${e.id}:teach" data-tip="${c} · ${v == null ? '未练' : '最好 ' + v + ' 分'}">${EMG_SHORT[c] || c.slice(0, 2)}</i>`; }).join('')}</div>
-      <div class="tk3"><b class="mono">${cardOk}</b> / ${cards.length} 类合格 · 已练 ${A.cards.size} 类 · 点方块直接练</div>
-      <button class="btn" data-go="emerg">去应急处置</button>
-    </div>
+    ${caseCardHTML()}
   </section>
 
-  <section class="cockpit">
-    <div class="hcard ck tl hg"><div class="hch"><b>能力雷达</b><span>技能水平九项 · 本期 vs 上期</span></div><div class="hcb">${chRadar(SK_N, ab.now, ab.prev, { w: 330, h: 236, l1: '本期', l2: '上期' })}<div class="tk3" style="text-align:center">操作票五项取判卷结果，应急四项取处置点评；本期为最近 3 次 · <span class="lk" onclick="goPage('assess')">看指标体系</span></div></div></div>
-    <div class="hcard ckc hg"><div class="hch"><b>学员成长地图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 演练 → 能力 → 复核</span></div>
-      <div class="hcb">${chGrowthMap(growthNodes(), GROWTH_EDGES)}</div></div>
-    <div class="hcard ck tr ho"><div class="hch"><b>场景分布</b><span>近30天 · 按次数</span></div><div class="hcb">${chDonut(A.kindCnt)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>最近演练成绩</b><span>最近 ${recent.length} 次</span></div><div class="hcb">${recent.map(r => `<div class="hrow" style="display:flex;gap:8px;align-items:center"><span class="mono tk3">${stampOf(r.ts)}</span><b style="flex:1">${h(r.src === 'tk' ? '操作票填写' : (EMGMAP[r.eid] || {}).card || '应急处置')}</b><b class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</b><button class="btn sm" data-rec="${r.id}">复盘</button></div>`).join('')}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>九项对标</b><span>我 vs 班组均值</span></div><div class="hcb">${chHeat(SK_N, ab.now, TEAM_AVG9)}</div></div>
-    <div class="hcard ck w hg"><div class="hch"><b>演练用时与次数</b><span>近30天 · 按日</span></div><div class="hcb">${chCombo(A.byDay, { w: 720, h: 190 })}</div></div>
-    <div class="hcard ck g ho"><div class="hch"><b>岗位胜任度</b><span>${h(HOME_USER.post)}</span></div><div class="hcb">${chGauge(fitCalc())}</div></div>
+  <section class="cockpit cp2">
+    <div class="hcard ck tl hg"><div class="hch"><b>安全能力雷达</b><span>六个场景各一份 · 本期 vs 上期</span></div><div class="hcb" id="radarbox">${radarBox()}</div></div>
+    <div class="hcard ckc hg"><div class="hch"><b>员工安全技能提升路径图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 按四个能力维度生成 · 节点可点</span></div>
+      <div class="hcb">${(() => { const G = growthLanes(); return chPath4(G.lanes, G.end); })()}</div></div>
+    <div class="hcard ck tr ho"><div class="hch"><b>安全能力成熟度</b><span>${h(HOME_USER.post)} · 四维度综合</span></div><div class="hcb">${chMaturity(M)}</div></div>
+    <div class="hcard ck bl ho"><div class="hch"><b>最近演练成绩</b><span>最近 ${recent.length} 次 · 点复盘看报告</span></div><div class="hcb">${recent.map(r => `<div class="hrow rcrow"><span class="mono tk3">${stampOf(r.ts)}</span><b>${h(SCENE_MAP[r.src] ? SCENE_MAP[r.src].short : r.n)}<i class="tk3">${h(r.src === 'em' ? ((EMGMAP[r.eid] || {}).card || '') : (r.sub || '').split(' · ')[0])}</i></b><b class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</b><button class="btn sm" data-rec="${r.id}">复盘</button></div>`).join('')}</div></div>
+    <div class="hcard ck br hg"><div class="hch"><b>六个场景掌握</b><span>本期得分 · 点击直接练</span></div><div class="hcb">${sceneTilesHTML()}</div></div>
   </section>
 
   <section class="reco">
@@ -229,16 +233,22 @@ function pageHome() {
       <div class="tk3">${recent[0] ? h((recent[0].sum || []).join('、') || '没有失分项') : ''}</div>
       ${recent[0] ? `<button class="btn" data-rec="${recent[0].id}">查看复盘</button>` : '<button class="btn" data-go="center">去场景中心</button>'}
     </div>
+    <div class="rcard ho">
+      <div class="rwhy"><i>${task ? '待练任务' : '本周安排'}</i>${task ? h(task.from) + ' 下发' : '按短板与课程进度'}</div>
+      <b>${task ? h(task.targetN) : '生成本周学习计划'}</b>
+      <div class="tk3">${task ? `${task.due}截止 · ${task.mode === 'exam' ? '考核模式' : '训练模式'}${task.note ? ' · ' + h(task.note) : ''}` : '课程 · 演练 · 测验各占一天，由本人确认后生效'}</div>
+      ${task ? taskBtn : '<button class="btn" data-go="classroom">去知识课堂</button>'}
+    </div>
   </section>
 
   <section class="xwbar hg">
-    <div class="xwavt"><i></i>小瓦特</div>
+    <div class="xwavt"><i></i>AI 陪练</div>
     <div class="xwtxt" id="xwtxt" data-full="${xwFull}">${__xwTyped ? xwFull : ''}</div>
     <div class="xwbtns">
-      ${task ? taskBtn.replace('>开始<', '>去完成任务<') : `<button class="btn pri" data-start="${R1.spec}">去练</button>`}
+      ${taskBtn}
       <button class="btn" data-go="review">评分复盘</button><button class="btn" data-go="growth">成长档案</button><button class="btn" data-go="classroom">知识课堂</button>
     </div>
-    <div class="xwsrc">由能力雷达与演练记录生成</div>
+    <div class="xwsrc">由安全能力雷达与演练记录生成</div>
   </section>`;
 }
 
@@ -257,6 +267,8 @@ function openDrill(title, sub, html, foot) {
     if (n = q('[data-start]')) { m.remove(); return startScene(n.dataset.start); }
     if (n = q('[data-rec]')) { m.remove(); return openRec(n.dataset.rec); }
     if (n = q('[data-go]')) { m.remove(); return goPage(n.dataset.go); }
+    if (n = q('[data-casegen]')) return caseGen();
+    if (n = q('[data-dim]')) { m.remove(); return drillDim(n.dataset.dim); }
     if (typeof pagesClick === 'function' && pagesClick(e)) return;
   };
   return m;
@@ -266,53 +278,55 @@ function recTable(list) {
     ${list.map(r => `<tr><td class="mono">${stampOf(r.ts)}</td><td>${h(r.n)}</td><td class="tk3">${h(r.sub)}</td><td>${h(r.mode === 'exam' ? '考核模式' : r.mode === 'teach' ? '训练模式' : r.mode)}</td><td class="mono">${Math.round((r.sec || 0) / 60)} 分钟</td>
       <td class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</td><td class="tk3">${h((r.sum || []).join('、') || '—')}</td><td><button class="btn sm" data-rec="${r.id}">复盘</button></td></tr>`).join('')}</table>`;
 }
-function drillDim(i) {
-  const s = SKILL9[i], ab = abilityCalc();
-  const L = allRecs().filter(r => r.src === s.g && r.dims && r.dims[s.k] != null);
-  const low = L.filter(r => r.dims[s.k] < 80);
-  const R = recoFor({ s, i, v: ab.now[i] });
-  openDrill(`能力明细 · ${s.n}`, `${SCENE_N[s.g]} · 本期 ${ab.now[i]} 分 · 上期 ${ab.prev[i]} 分 · 班组均值 ${TEAM_AVG9[i]} 分`, `
-    <div class="hrow">${h(s.d)}</div>
-    <div class="sec"><div class="st">这一项低于 80 分的演练（${low.length} 次）</div><div class="sc">${low.length ? recTable(low) : '近期各次均不低于 80 分。'}</div></div>
-    <div class="sec"><div class="st">取数口径</div><div class="sc tk3">${s.g === 'tk' ? '取自每次操作票判卷结果：操作顺序按顺序错误与阶段越界扣减，漏项控制按漏项扣减，文字规范按文字与层级错误扣减，危险辨识出现危险操作即降到 30 分以下，二次与压板按屏柜、压板、空开、把手类步骤的写全率。' : '取自每次应急处置点评：处置要点完整＝要点得分率；关键注意事项＝事例纠错得分率；信息报送＝报送要求答到率；现场急救与自我防护＝急救、防护类要点得分率。'}本期为最近 3 次均值，上期为再往前 3 次。</div></div>`,
+function drillDim(k) {
+  const d = SKILL_MAP[k]; if (!d) return;
+  const A = abilityCalc(), sc = A.scene[d.g], T = teamAvgOf();
+  const L = allRecs().filter(r => r.src === d.g && r.dims && r.dims[k] != null);
+  const low = L.filter(r => r.dims[k] < 80);
+  const item = { s: d, k, g: d.g, n: d.n, v: sc.now[k] == null ? 0 : sc.now[k], none: sc.now[k] == null };
+  const R = recoFor(item);
+  openDrill(`能力明细 · ${d.n}`, `${SCENE_N[d.g]} · 本期 ${sc.now[k] == null ? '待练' : sc.now[k] + ' 分'} · 上期 ${sc.prev[k] == null ? '—' : sc.prev[k] + ' 分'} · 班组均值 ${T.dims[k]} 分`, `
+    <div class="hrow">${h(d.d)}</div>
+    <div class="sec"><div class="st">这一项低于 80 分的演练（${low.length} 次）</div><div class="sc">${low.length ? recTable(low) : L.length ? '近期各次均不低于 80 分。' : '还没有这个场景的演练记录。'}</div></div>
+    <div class="sec"><div class="st">取数口径</div><div class="sc tk3">${d.g === 'tk' ? '取自每次操作票判卷结果：操作顺序按顺序错误与阶段越界扣减，漏项控制按漏项扣减，文字规范按文字与层级错误扣减，危险辨识出现危险操作即降到 30 分以下，二次与压板按屏柜、压板、空开、把手类步骤的写全率。' : d.g === 'em' ? '取自每次应急处置点评：快速决策＝作答用时对基准时长；知识储备＝处置要点得分率（意思对即得分）；风险识别＝事例纠错得分率；高效上报＝报送要求答到率。' : '取自每次' + SCENE_N[d.g] + '的判定结果。'}本期为最近 3 次均值，上期为再往前 3 次。</div></div>`,
     `<button class="btn pri" data-start="${R.spec}">练「${h(R.n)}」</button><button class="btn" data-go="review">打开评分复盘</button>`);
+}
+function drillScene(k) {
+  const S = SCENE_MAP[k]; if (!S) return;
+  const A = abilityCalc(), sc = A.scene[k], T = teamAvgOf(), L = allRecs().filter(r => r.src === k);
+  openDrill(`场景 · ${S.n}`, `${sc.cnt ? '本期 ' + sc.score + ' 分 · 最好 ' + sc.best + ' 分 · 练过 ' + sc.cnt + ' 次' : '尚未练过'} · 班组均值 ${T.sc[k]}`, `
+    <table class="htbl"><tr><th>指标</th><th>上期</th><th>本期</th><th>班组均值</th><th>口径</th></tr>${skillsOf(k).map(d => `<tr><td class="hitv" data-dim="${d.k}" style="cursor:pointer"><b>${d.n}</b></td><td class="mono">${sc.prev[d.k] == null ? '—' : sc.prev[d.k]}</td><td class="mono ${sc.now[d.k] == null ? '' : sc.now[d.k] >= 75 ? 'gv' : 'wv'}">${sc.now[d.k] == null ? '待练' : sc.now[d.k]}</td><td class="mono">${T.dims[d.k]}</td><td class="tk3">${h(d.d)}</td></tr>`).join('')}</table>
+    ${L.length ? `<div class="sec" style="margin-top:10px"><div class="st">最近演练</div>${recTable(L.slice(0, 5))}</div>` : ''}`,
+    `<button class="btn pri" data-start="${k === 'tk' ? 'tk:teach' : k === 'em' ? 'em' : k + '::teach'}">去练</button>`);
 }
 function drillDay(d) {
   const list = allRecs().filter(r => dayOf(r) === d);
   openDrill(`演练明细 · ${dayLabel(d)}`, `${list.length} 次`, recTable(list), `<button class="btn" data-go="review">打开评分复盘</button>`);
 }
 function drillPlan(k) {
-  const list = allRecs().filter(r => dayOf(r) <= 30 && (r.src === 'tk' ? k === '操作票填写' : k === '应急 · ' + ((EMG_CAT.find(c => c.k === (EMGMAP[r.eid] || {}).cat) || {}).n)));
+  const list = allRecs().filter(r => dayOf(r) <= 30 && SCENE_N[r.src] === k);
   openDrill(`演练明细 · ${k}`, `近30天 ${list.length} 次`, recTable(list), `<button class="btn" data-go="review">打开评分复盘</button>`);
 }
-function drillFit() {
-  const F = fitCalc();
-  openDrill(`岗位胜任度构成 · ${F.post}`, `综合测算 ${F.pct}%`, `
+function drillMat() {
+  const { M, parts } = matParts();
+  openDrill(`安全能力成熟度构成 · ${HOME_USER.post}`, `综合 ${M.pct == null ? '待练' : M.pct + ' · ' + M.lv}`, `
     <table class="htbl"><tr><th>构成项</th><th>当前</th><th>要求</th><th>状态</th></tr>
-      ${F.parts.map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td><td>${p.ok ? '<span class="tag ok">达标</span>' : '<span class="tag wn">待补齐</span>'}</td></tr>`).join('')}</table>
-    <div class="sec" style="margin-top:12px"><div class="st">差距项</div><div class="sc">${F.parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
-    <div class="tk3" style="margin-top:10px">胜任度＝九项能力均值 × 60% + 构成项达标率 × 40%，为系统测算参考，任职资格评定以人工审核结果为准。</div>`,
+      ${parts.map(p => `<tr><td>${p.n}</td><td class="mono">${p.v}</td><td class="mono">${p.need}</td><td>${p.ok ? '<span class="tag ok">达标</span>' : '<span class="tag wn">待补齐</span>'}</td></tr>`).join('')}</table>
+    <div class="sec" style="margin-top:12px"><div class="st">差距项</div><div class="sc">${parts.filter(p => !p.ok).map(p => `<div class="hrow">· ${p.gap}</div>`).join('') || '无'}</div></div>
+    <div class="tk3" style="margin-top:10px">成熟度＝四个能力维度得分的平均值；维度得分＝所属场景本期得分（最近 3 次）的平均值。分级：待提升 &lt;60 · 合格 60–74 · 熟练 75–89 · 精通 ≥90。为系统测算参考，任职评定以人工审核结果为准。</div>`,
     `<button class="btn" data-go="growth">查看成长档案</button><button class="btn pri" data-start="tk:exam">去考操作票（考核模式）</button>`);
 }
 function nodeClick(id) {
-  const W = weakOrder();
-  if (id === 'g3') return drillPlan('操作票填写');
-  if (id === 'g4' || id === 'b2') return goPage('emerg');
-  if (id === 'g5') return drillDim(W[0].i);
-  if (id === 'g6') { const t = myTodo()[0]; return startScene(t ? `${t.scene}:${t.scene === 'em' ? (t.target || '') + ':' : ''}${t.mode}` : 'tk:exam'); }
-  if (id === 'g7') return openDrill('班组长复核', '演练成绩由班组长复核后作为能力评价依据', `<div class="hrow">近30天演练 ${homeAgg().cnt} 次，班组长 ${LEAD_USER.name} 在「管理视角」查看全组成绩、短板与危险操作记录，并下发针对性的培训任务。</div><div class="tk3">能力结论由班组长确认后使用。</div>`);
-  if (id === 'g8') return drillFit();
-  if (id === 'b1') return goPage('classroom');
-  if (id === 'g1') return openDrill('岗前培训', '入职培训记录', `
-    <table class="htbl"><tr><th>项目</th><th>结果</th><th>日期</th></tr>
-    <tr><td>入职集中培训</td><td><span class="tag ok">结业</span></td><td class="mono">2024-08-30</td></tr>
-    <tr><td>导师带教期</td><td><span class="tag ok">通过</span></td><td class="mono">2025-02-28</td></tr></table>`,
-    `<button class="btn" data-go="growth">查看成长档案</button>`);
-  if (id === 'g2') return openDrill('安规考试 · 变电部分', '年度考试与复训', `
+  if (id === 'end') return drillMat();
+  if (id.indexOf('dim:') === 0) { const d = DIM4_MAP[id.slice(4)]; const S = d.scenes[0]; return openDrill(d.n, d.d, `<table class="htbl"><tr><th>场景</th><th>本期</th><th>练过</th><th></th></tr>${d.scenes.map(k => { const sc = abilityCalc().scene[k]; return `<tr><td>${SCENE_N[k]}</td><td class="mono">${sc.score == null ? '待练' : sc.score}</td><td class="mono">${sc.cnt} 次</td><td><button class="btn sm" data-start="${k === 'tk' ? 'tk:teach' : k === 'em' ? 'em' : k + '::teach'}">去练</button></td></tr>`; }).join('')}</table>`, `<button class="btn pri" data-start="${S === 'tk' ? 'tk:teach' : S === 'em' ? 'em' : S + '::teach'}">练「${SCENE_N[S]}」</button>`); }
+  const map = { kn2: 'rule::teach', kn3: 'inst::teach', op1: 'tk:teach', op2: 'tk:exam', op3: 'life::teach', em1: 'em', em2: 'em', em3: 'em', rv2: 'case::teach', rv3: 'case::teach' };
+  if (map[id]) return startScene(map[id]);
+  if (id === 'rv1') { const c = (typeof caseList === 'function' ? caseList() : []).find(x => !x.done) || (caseList() || [])[0]; return c ? caseOpen(c.id) : goPage('center'); }
+  if (id === 'kn1') return openDrill('安规考试 · 变电部分', '年度考试与复训', `
     <table class="htbl"><tr><th>项目</th><th>成绩/状态</th><th>日期</th></tr>
     <tr><td>年度安规笔试</td><td class="mono gv">92 分</td><td class="mono">${dayLabel(80)}</td></tr>
     <tr><td>安规修编后复训</td><td><span class="tag wn">待安排</span></td><td class="mono">—</td></tr></table>`,
-    `<button class="btn" data-go="classroom">查看知识课堂</button>`);
+    `<button class="btn pri" data-start="rule::teach">去安规知识陪练</button>`);
 }
 
 /* ---------------- 事件委托（首页与各薄页共用） ---------------- */
@@ -325,12 +339,17 @@ function bindHPage() {
     if (n = q('[data-start]')) return startScene(n.dataset.start);
     if (n = q('[data-rec]')) return openRec(n.dataset.rec);
     if (n = q('[data-go]')) return goPage(n.dataset.go);
-    if (n = q('[data-dim]')) return drillDim(+n.dataset.dim);
-    if (n = q('[data-hdim]')) return drillDim(+n.dataset.hdim);
+    if (n = q('[data-dim]')) return drillDim(n.dataset.dim);
+    if (n = q('[data-dimk]')) return drillDim(n.dataset.dimk);
+    if (n = q('[data-hdim]')) return drillDim(n.dataset.hdim);
     if (n = q('[data-day]')) return drillDay(+n.dataset.day);
     if (n = q('[data-plan]')) return drillPlan(n.dataset.plan);
-    if (n = q('[data-gauge]')) return drillFit();
+    if (n = q('[data-mat]')) return drillMat();
+    if (n = q('[data-scene]')) return drillScene(n.dataset.scene);
+    if (n = q('[data-radar]')) { HM.radar = n.dataset.radar; const b = $('#radarbox'); if (b) b.innerHTML = radarBox(); return; }
     if (n = q('[data-node]')) return nodeClick(n.dataset.node);
+    if (n = q('[data-case]')) return caseOpen(n.dataset.case);
+    if (n = q('[data-casepush]')) return casePushDlg();
   };
 }
 
@@ -437,23 +456,24 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台 ---------------- */
 const IMPL_STATUS = [
-  ['操作票试卷与标准票', '照录《110kV考核站操作票考核试卷》运行方式、答题要求与 7 个屏柜附表；步骤内容以典型操作票为准'],
-  ['标准票编号口径', '典型票中屏柜、压板、空开、把手编号与试卷附表不一致的 10 处按附表改正（30P→11P 备自投屏、11LP2 / 11LP3→1FLP5 / 1FLP6、1QK→ZK、断路器控制方式把手→HK1、地刀电机电源→5ZK、27P→10P、1-4K / 3-4K→4K1 / 4K2）；按典型票原文填写会判编号不符，客户典型票 xlsx 原件导入判卷 90 分 · 待业务确认'],
-  ['标准票缺号', '典型票 43 之后接 50，缺 44～49、51、52、55，按原样不补、不重排 · 待业务确认是否漏页'],
-  ['刀闸电源 2QL 空开', '典型票 50.1「断开QS、QE刀闸电源2QL空气开关」在试卷附表中没有对应编号，暂按关键字「刀闸」「电源」判定 · 待业务确认'],
-  ['标准票未列的压板 / 空开操作', '学员写了附表中的压板或空开操作（如 #3主变保护跳532压板）而标准票没有的，不扣分，标「需人工复核」交考评员核对'],
+  ['产品名与口号', '安全学习智能陪练 · 一切事故都可以预防（10/1 客户意见）；六个陪练场景对应安全能力成熟度四个维度'],
+  ['安全能力成熟度', '四维度＝所属场景本期得分（最近 3 次）平均，成熟度＝四维度平均，分级 待提升 / 合格 / 熟练 / 精通 由本平台拟定 · 待业务确认；由班组长确认后使用'],
+  ['两票填写 · 操作票试卷与标准票', '照录《110kV考核站操作票考核试卷》运行方式、答题要求与 7 个屏柜附表；步骤内容以典型操作票为准'],
+  ['两票填写 · 工作票', '第一种工作票安全措施填写由本平台按安规 6.1 拟定 · 待客户提供票样与判卷标准'],
+  ['标准票编号口径', '典型票中屏柜、压板、空开、把手编号与试卷附表不一致的 10 处按附表改正；按典型票原文填写会判编号不符，客户典型票 xlsx 原件导入判卷 90 分 · 待业务确认'],
   ['判卷标注：阶段、换序组、特殊顺序、漏写处理、文字要求、执行原因', '本平台按《电气操作导则》与安规拟定 · 待业务专家确认；扣分值为配置项'],
-  ['危险操作 6 条：未验电接地、带负荷拉刀闸 / 摇小车、各侧未形成明显断开点即接地、未转负荷即断开503、先断变高后断变低、断开1103前未合中性点地刀', '本平台拟定 · 待业务专家确认；前三条可检索到安规 / 导则条款，后三条暂无条款原文，显示「建议人工复核」'],
-  ['主接线图', '试卷接线图为 CAD 嵌入对象无法读取，按试卷运行方式文字重绘；部件画法沿用手绘简图口径 · 待客户提供接线图截图或 PDF 核对'],
-  ['操作票 Word / Excel 上传', '纯浏览器离线解析（zip + DecompressionStream）；Excel 认「操作顺序 / 操作步骤」两列，Word 认操作票表格或逐行；格式不符的行指明行号并跳过'],
-  ['操作票自动判卷', '确定性规则 · 真实运行：步骤匹配、状态阶段、可换序组、特殊顺序、漏项、三档文字要求、并项识别、危险操作，同一根本错误只计一次'],
-  ['操作票制度依据', '真实条款检索（安规及释义、电气操作导则）；检索不到返回「建议人工复核」，不编造'],
-  ['应急处置：处置要点与注意事项', '照录场景归类表与 15 张应急处置卡；表中注意事项为空的取处置卡原文（高温中暑、办公场所火灾），处置卡也没有的（中毒窒息、食物中毒、恐怖袭击、高处坠落、物体打击）只考处置要点；办公场所火灾一行的注意事项单元格误贴了整张处置卡，已取卡片注意事项'],
-  ['应急处置：事例', '16 个情境的处置经过事例由本平台编写，每个含 1～4 处违反注意事项的做法 · 待业务确认'],
-  ['应急处置：计分口径', '处置要点 60 + 事例纠错 40（无注意事项的情境处置要点计 100），信息报送每项加 2 分、总分封顶 100 · 本平台拟定待确认；野外四个情境名称（蜂群 / 犬只 / 毒蛇 / 蚂蚁）按处置卡标题补写'],
-  ['应急处置：要点判定与 AI 点评', '关键词组匹配 · 真实运行（非在线大模型）；点评为规则模板生成，遗漏要点补充处置卡原文'],
-  ['信息报送加分项', '照录《变电管理一所应急信息报送工作指引》：电话首报快报现象、7 类重大事件直报分管副总、缓报原因、10 分钟 elink 续报、慎用敏感字眼'],
-  ['近30天记录中的非本机记录、班组其他成员成绩', '脱敏模拟 · 人物全部虚拟；模拟记录由判卷引擎与应急计分对合成答卷实时计分'],
+  ['危险操作 6 条', '本平台拟定 · 待业务专家确认；前三条可检索到安规 / 导则条款，后三条暂无条款原文，显示「建议人工复核」'],
+  ['主接线图', '试卷接线图为 CAD 嵌入对象无法读取，按试卷运行方式文字重绘 · 待客户提供接线图截图或 PDF 核对'],
+  ['操作票 Word / Excel 上传', '纯浏览器离线解析；Excel 认「操作顺序 / 操作步骤」两列，Word 认操作票表格或逐行'],
+  ['应急处置：处置要点与注意事项', '照录场景归类表与 15 张应急处置卡；高温中暑场景一新增「不得让患者独自留下、不能自己继续巡视」要点与对应注意事项（10/1 客户意见，本平台拟写 · 待业务确认）'],
+  ['应急处置：AI 生成情境', '同一张处置卡按时间 / 地点 / 人员 / 现场情况组合生成（规则模板，非在线大模型），第 0 版为场景归类表原文；朗读用浏览器语音，没有中文语音时提示阅读'],
+  ['应急处置：四项指标', '快速决策＝作答用时对基准时长（每个要点 45 秒、事例纠错 2 分钟、报送 1.5 分钟）；知识储备＝要点得分率（关键词组匹配，意思对即得分）；风险识别＝事例纠错得分率；高效上报＝报送答到率 · 本平台拟定待确认'],
+  ['应急处置：事例', '16 个情境的处置经过事例由本平台编写，分句标 ①②③ · 待业务确认'],
+  ['应急处置：计分口径', '处置要点 60 + 事例纠错 40（无注意事项的情境处置要点计 100），信息报送每项加 2 分、总分封顶 100 · 本平台拟定待确认'],
+  ['安规知识 / 保命技能 / 案例分析 / 制度学习四个场景', '题目与标准答案由本平台按安规、处置卡、脱敏案例拟定 · 待业务确认；近30天的历史记录为预设'],
+  ['案例推送学习', '预置 2 个脱敏虚构案例；班组长导入通报后按规则抽取经过 / 原因 / 条款 / 要点生成案例（规则抽取，非在线大模型）'],
+  ['课件 / 数字人讲课 / 自动出题 / 考试分析', '课件与题目由文件规则抽取；数字人为内置形象 + 浏览器语音（HeyGen 真人数字人视频可接入）；考试分析由判定结果与班组均值生成'],
+  ['近30天记录中的非本机记录、班组其他成员成绩、同批次人员', '脱敏模拟 · 人物全部虚拟；两票 / 应急的模拟记录由判卷引擎与应急计分对合成答卷实时计分'],
   ['语音识别', '联网且经 http 打开时浏览器识别（真实）；本地文件打开或内网时为兜底识别（按当前应答内容打入，可改后再发）'],
   ['演练记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],
   ['学习平台、人资域（课程、题库、考试、人员主数据）', '文件导入 + 接口模拟 · 真实联调待对接']
@@ -478,6 +498,7 @@ function demoAct(k) {
     ROLE.cur = 'student'; renderRole();
     TK.res = null; tkStart('exam', false); toast('已按演示主线下发操作票考核任务并进入考核', 'ok'); return;
   }
+  if (k === 'case_push') { ROLE.cur = 'lead'; renderRole(); goPage('team'); setTimeout(casePushDlg, 300); return; }
   if (k === 'status') return openDrill('功能实现状态清单', '真实 / 规则 / 预置 / 模拟 / 待确认', `<table class="htbl statlist"><tr><th>功能</th><th>实现状态</th></tr>${IMPL_STATUS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>`);
   if (k === 'bound') return openDrill('系统边界表', '现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写', boundaryHtml());
   if (k === 'clear') { Object.keys(localStorage).filter(x => x.startsWith('xwt_')).forEach(x => localStorage.removeItem(x)); TK.res = null; EM.res = null; EM.id = null; toast('本机记录已清空'); route(); return; }

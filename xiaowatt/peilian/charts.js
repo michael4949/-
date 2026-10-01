@@ -200,3 +200,71 @@ function chGrowthMap(nodes, edges) {
       <circle cx="190" cy="0" r="5" fill="#fff" stroke="#b9c4b9"/><text x="200" y="3">规划中</text></g>
   </svg>`;
 }
+
+/* ⑨ 员工安全技能提升路径图（驾驶舱中心件）：四条泳道 = 四个能力维度，各自的里程碑汇到「安全能力成熟度认定」 */
+function chPath4(lanes, end) {
+  const W = 880, H = 600, X = [218, 392, 566], EX = 800, EY = 300, LY = i => 92 + i * 128;
+  const NC = { done: 'var(--ac)', cur: '#c9a227', next: '#c9a227', future: '#b9c4b9' };
+  const node = (n, x, y) => {
+    const c = NC[n.s] || NC.future, r = n.s === 'cur' ? 16 : 13;
+    return `<g class="hitv gnode" data-node="${n.id}" data-tip="${h(n.t)}${n.v ? ' · ' + h(n.v) : ''}">
+      ${n.s === 'cur' ? `<circle cx="${x}" cy="${y}" r="26" fill="rgba(201,162,39,.2)"><animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".55;.1;.55" dur="2s" repeatCount="indefinite"/></circle>` : ''}
+      <circle cx="${x}" cy="${y}" r="${r}" fill="${n.s === 'done' || n.s === 'cur' ? c : '#fff'}" stroke="${c}" stroke-width="${n.s === 'next' ? 2.6 : 2}" ${n.s === 'next' ? 'stroke-dasharray="5 4"' : ''}/>
+      ${n.s === 'done' ? `<path d="M ${x - 6} ${y} l 4.2 5 l 8 -9.4" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>` : ''}
+      ${n.s === 'cur' ? `<circle cx="${x}" cy="${y}" r="6" fill="#fff"/>` : ''}
+      ${n.s === 'next' ? `<text x="${x}" y="${y + 4.5}" text-anchor="middle" font-size="13" fill="#a8821b" font-weight="700">!</text>` : ''}
+      <text x="${x}" y="${y + r + 17}" text-anchor="middle" font-size="12" fill="#2c3c31" font-weight="600">${h(n.t)}</text>
+      ${n.v ? `<text x="${x}" y="${y + r + 32}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="${n.s === 'cur' ? '#a8821b' : n.s === 'future' ? '#98a69c' : 'var(--ac)'}">${h(n.v)}</text>` : ''}</g>`;
+  };
+  const lane = (L, i) => {
+    const y = LY(i), done = L.nodes.filter(n => n.s === 'done').length, act = L.nodes.some(n => n.s === 'cur');
+    const toEnd = `M${X[2]},${y} C${X[2] + 110},${y} ${EX - 120},${EY} ${EX - 16},${EY}`;
+    return `<g>
+      <path d="M${X[0] - 40},${y} L${X[2]},${y}" fill="none" stroke="${L.sc != null ? '#eef1e2' : '#f3f3ea'}" stroke-width="40" stroke-linecap="round"/>
+      <path d="M${X[2]},${y} L${X[2]},${y}" />
+      <path d="${toEnd}" fill="none" stroke="#f2f4e9" stroke-width="22" stroke-linecap="round"/>
+      <path d="M${X[0]},${y} L${X[2]},${y}" class="gedge ${done === L.nodes.length ? 'gdone' : act ? 'gact' : 'gfut'}" fill="none"/>
+      <path d="${toEnd}" class="gedge ${done === L.nodes.length ? 'gdone' : 'gfut'}" fill="none"/>
+      ${act || done === L.nodes.length ? `<circle r="3.2" fill="${act ? '#c9a227' : 'var(--ac)'}" opacity=".9"><animateMotion dur="${act ? '2.2s' : '3.6s'}" repeatCount="indefinite" path="M${X[0]},${y} L${X[2]},${y} ${toEnd.replace(/^M[^ ]+ /, '')}"/></circle>` : ''}
+      <g class="hitv" data-node="dim:${L.k}" data-tip="${h(L.n)} · ${L.sc == null ? '尚未练过' : L.sc + ' 分 · ' + h(L.lv)}">
+        <rect x="18" y="${y - 24}" width="150" height="48" rx="10" fill="#fff" stroke="${L.sc == null ? '#d9d6c5' : 'var(--acln)'}"/>
+        <text x="30" y="${y - 5}" font-size="12.5" font-weight="700" fill="#2c3c31">${h(L.n)}</text>
+        <text x="30" y="${y + 13}" font-size="11" font-family="var(--mono)" fill="${L.sc == null ? '#98a69c' : L.sc >= 75 ? 'var(--ac)' : '#a8821b'}">${L.sc == null ? '待练' : L.sc + ' 分 · ' + h(L.lv)}</text>
+        <text x="158" y="${y + 4}" text-anchor="end" font-size="10" fill="#98a69c">${h(L.scenes)}</text></g>
+      ${L.nodes.map((n, j) => node(n, X[j], y)).join('')}</g>`;
+  };
+  return `<svg viewBox="0 0 ${W} ${H}" class="chsvg gmap">
+    ${lanes.map(lane).join('')}
+    <g class="hitv gnode" data-node="${end.id}" data-tip="${h(end.t)} · ${h(end.v)}">
+      <circle cx="${EX}" cy="${EY}" r="30" fill="${end.s === 'done' ? 'var(--ac)' : '#fff'}" stroke="${end.s === 'done' ? 'var(--ac)' : '#c9a227'}" stroke-width="2.4" ${end.s === 'done' ? '' : 'stroke-dasharray="6 5"'}/>
+      <text x="${EX}" y="${EY - 3}" text-anchor="middle" font-size="16" font-family="var(--mono)" font-weight="700" fill="${end.s === 'done' ? '#fff' : 'var(--acd)'}">${h(end.big)}</text>
+      <text x="${EX}" y="${EY + 12}" text-anchor="middle" font-size="9.5" fill="${end.s === 'done' ? '#fff' : '#a8821b'}">${h(end.lv)}</text>
+      <text x="${EX}" y="${EY + 50}" text-anchor="middle" font-size="12.5" fill="#2c3c31" font-weight="600">${h(end.t)}</text>
+      <text x="${EX}" y="${EY + 66}" text-anchor="middle" font-size="10.5" fill="#98a69c">${h(end.v)}</text></g>
+    <g font-size="11" fill="#98a69c" transform="translate(26,${H - 22})">
+      <circle cx="5" cy="0" r="5" fill="var(--ac)"/><text x="15" y="3">已完成</text>
+      <circle cx="66" cy="0" r="5" fill="#c9a227"/><text x="76" y="3">进行中</text>
+      <circle cx="128" cy="0" r="5" fill="#fff" stroke="#c9a227" stroke-dasharray="3 3"/><text x="138" y="3">待完成</text>
+      <circle cx="190" cy="0" r="5" fill="#fff" stroke="#b9c4b9"/><text x="200" y="3">规划中</text>
+      <text x="${W - 56}" y="3" text-anchor="end">路径按四个能力维度生成，节点可点</text></g>
+  </svg>`;
+}
+
+/* ⑩ 安全能力成熟度：半圆表 + 四维度条，整体可点击下钻 */
+function chMaturity(M) {
+  const W = 300, H = 128, cx = 150, cy = 118, R = 92, a0 = Math.PI, a1 = 0;
+  const arc = (f0, f1, col, w2, cls) => { const s = a0 + (a1 - a0) * f0, e = a0 + (a1 - a0) * f1; return `<path class="${cls || ''}" d="M ${cx + Math.cos(s) * R} ${cy - Math.sin(s) * R} A ${R} ${R} 0 0 1 ${cx + Math.cos(e) * R} ${cy - Math.sin(e) * R}" fill="none" stroke="${col}" stroke-width="${w2}" stroke-linecap="round"/>`; };
+  const pct = M.pct == null ? 0 : M.pct;
+  const segs = [[0, .6, '#e8dcc0'], [.6, .75, '#e6d59a'], [.75, .9, '#cfdcb8'], [.9, 1, '#b9d6b0']];
+  return `<div class="matbox hitv" data-mat="1" data-tip="点击查看四项能力构成与差距">
+    <svg viewBox="0 0 ${W} ${H}" class="chsvg">
+      ${segs.map(s => arc(s[0], s[1], s[2], 11)).join('')}
+      ${M.pct != null ? arc(0, pct / 100, 'url(#gmat)', 11, 'anim-line') : ''}
+      ${[[0, '0'], [.6, '60'], [.75, '75'], [.9, '90'], [1, '100']].map(([f, t]) => { const a = a0 + (a1 - a0) * f; return `<text x="${cx + Math.cos(a) * (R + 16)}" y="${cy - Math.sin(a) * (R + 16) + 3}" text-anchor="middle" font-size="9" fill="#98a69c">${t}</text>`; }).join('')}
+      <text x="${cx}" y="${cy - 30}" text-anchor="middle" font-size="36" font-family="var(--mono)" fill="var(--ac)">${M.pct == null ? '—' : M.pct}<tspan font-size="13" fill="#98a69c">${M.pct == null ? '' : '%'}</tspan></text>
+      <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="12.5" font-weight="700" fill="${M.pct == null ? '#98a69c' : pct >= 75 ? 'var(--acd)' : '#a8821b'}">${h(M.lv)}${M.prev != null && M.pct != null ? `<tspan font-size="10" font-weight="400" fill="#98a69c" font-family="var(--mono)">　较上期 ${M.pct - M.prev >= 0 ? '+' : ''}${M.pct - M.prev}</tspan>` : ''}</text>
+      <defs><linearGradient id="gmat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227"/><stop offset="1" stop-color="var(--ac)"/></linearGradient></defs></svg>
+    <div class="matdims">${M.dims.map(d => `<div class="md"><span>${h(d.n)}</span><div class="hbar"><div class="hfill" style="width:${d.score == null ? 0 : d.score}%${d.score != null && d.score < 60 ? ';background:#c9a227' : ''}"></div></div><b class="mono ${d.score == null ? 'na' : d.score >= 75 ? 'gv' : 'wv'}">${d.score == null ? '待练' : d.score}</b></div>`).join('')}</div>
+    <div class="tk3" style="text-align:center">由四项能力综合判定 · 待提升 &lt;60 · 合格 60–74 · 熟练 75–89 · 精通 ≥90 · 人工确认后作为评价依据</div>
+  </div>`;
+}

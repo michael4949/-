@@ -1704,3 +1704,60 @@ ol.tkask2 li::before{content:none}
 @media (max-width:1280px){.emgrid{grid-template-columns:repeat(3,1fr)}.emcov{grid-template-columns:repeat(4,1fr)}.scduo{grid-template-columns:1fr}}
 #pg_home .tag.bad,.mask.lite .tag.bad{background:#fbe9e7;color:#b3372c;border:1px solid #eac1bb}
 #pg_home .tag.w,.mask.lite .tag.w{background:#faf3dc;color:#8a6d15;border:1px solid #e3d49e}
+
+/* ===== 10/1 安全学习智能陪练：首页重排（标语 · 案例推送 · 雷达切换 · 路径图 · 成熟度 · 六场景） ===== */
+.hero.hero2{grid-template-columns:1fr 560px}
+.slogan{display:flex;align-items:baseline;gap:14px;margin:2px 0 6px}
+.slogan b{font-size:30px;letter-spacing:3px;font-weight:800;background:linear-gradient(90deg,var(--acd),var(--ac) 55%,#b8912e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.slogan span{font-size:12px;color:#8a6d15;border:1px solid #d9cba0;background:#fdf9ec;border-radius:12px;padding:2px 10px;letter-spacing:1px}
+.casecard{background:#fff;border:1px solid var(--goldln);border-top:3px solid var(--gold);position:relative;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:7px;box-shadow:0 6px 22px rgba(90,100,80,.09)}
+.casecard .tk2{display:flex;align-items:baseline;gap:6px}
+.caselist{display:flex;flex-direction:column;gap:5px;margin:2px 0}
+.caseit{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;padding:7px 10px;border:1px solid #efecdf;border-radius:8px;background:#fdfdf8;cursor:pointer}
+.caseit:hover{border-color:var(--ac)}
+.caseit .ctag{grid-row:span 2;font-style:normal;font-size:10px;color:#8a6d15;background:#fdf9ec;border:1px solid #e3d7a9;border-radius:4px;padding:2px 6px;white-space:nowrap}
+.caseit b{font-size:12.5px;color:#22352a}
+.caseit.done b{color:#8b988c;text-decoration:line-through}
+.casebtns{display:flex;gap:8px;margin-top:auto}
+.casebtns .btn{padding:7px 14px}
+.cockpit.cp2{grid-template-areas:"tl c tr" "bl c br"}
+.rdchips{padding:4px 2px 6px;gap:4px}
+.rdchips .chip{padding:2px 8px}
+.sctiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 2px}
+.sctile{border:1px solid #e9e6d8;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;gap:3px;background:#fdfdf8}
+.sctile:hover{border-color:var(--ac);background:#f6f8f0}
+.sctile b{font-size:12px;color:#22352a}
+.sctile em{font-style:normal;font-size:20px;line-height:1.1;color:var(--ac)}
+.sctile.w em{color:#a8821b}.sctile.na em{color:#b3bfb2}
+.sctile span{font-size:10px;color:#93a094}
+.matbox{padding:4px 4px 0}
+.matdims{display:flex;flex-direction:column;gap:6px;padding:4px 6px 8px}
+.matdims .md{display:grid;grid-template-columns:78px 1fr 34px;gap:8px;align-items:center;font-size:11.5px;color:#43584a}
+.matdims .md b{text-align:right}.matdims .md b.na{color:#b3bfb2;font-size:11px}
+.rcrow{display:flex;gap:8px;align-items:center}
+.rcrow>b{flex:1;display:flex;flex-direction:column;line-height:1.25}
+.rcrow>b i{font-style:normal;font-weight:400}
+.gv{color:var(--ac)}.wv{color:#a8821b}
+/* 场景中心：六个场景 */
+.scgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.scgrid .scbig:first-child{grid-column:1/-1}
+.scsub{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 10px}
+.scsubi{border:1px solid #efecdf;border-radius:10px;padding:10px 12px;background:#fdfdf8}
+.scsubi>b{font-size:13px;color:#22352a}
+.scsubi .sct{font-size:13px;margin:4px 0 8px}
+.scsubi .scgo{margin-top:8px}
+.scft{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--txt2);border-top:1px dashed #efecdf;padding-top:8px}
+.scft i{font-style:normal;display:inline-block;width:40px;color:var(--txt3)}
+.tag.dim4t{background:#fdf9ec;color:#8a6d15;border:1px solid #e3d7a9;margin-left:6px}
+.scbig .ch .tag{margin-left:8px}
+.tb tr.me td{background:#f6f8f0;font-weight:600}
+/* 应急处置：AI 情境 · 分句 · 四项指标 */
+.emsitbar{display:flex;align-items:center;gap:10px;margin-top:8px;padding-top:8px;border-top:1px dashed #efecdf;font-size:11px}
+.emsitbar .r{margin-left:auto;display:flex;gap:6px}
+.emcase .sno{display:inline-block;font-style:normal;font-size:11px;color:#8a6d15;margin-right:2px;vertical-align:1px}
+.emdims{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.emdims span{display:inline-flex;align-items:baseline;gap:6px;border:1px solid #e9e6d8;border-radius:6px;padding:3px 8px;background:#fdfdf8;font-size:11px}
+.emdims span i{font-style:normal;color:#6b7a70}.emdims span b{font-size:13px}
+.frm label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#43584a;margin-bottom:8px}
+.frm input,.frm select,.frm textarea{border:1px solid #d9d6c5;border-radius:6px;padding:7px 9px;font-family:inherit;font-size:12.5px}
+@media (max-width:1180px){.hero.hero2{grid-template-columns:1fr}.cockpit.cp2{grid-template-areas:"c" "tl" "tr" "bl" "br"}.scgrid{grid-template-columns:1fr}.scsub{grid-template-columns:1fr}}

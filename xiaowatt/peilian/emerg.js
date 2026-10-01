@@ -25,6 +25,7 @@ const EMG_REP_BODY = ['R1', 'R2', 'R3', 'R4'], EMG_REP_FIRE = ['R1', 'R2', 'R3',
 /* 处置要点写法：[原文, 关键字组…]；ex 为补充说明（原文附注） */
 const EPT = (t, ...k) => ({ t, k });
 const HEAT_NOTE = ['不要惊慌，立即拨打120急救电话，及时报告上级。'];
+const HEAT_NOTE1 = HEAT_NOTE.concat(['中暑人员不得独自留置，应留人陪护观察病情变化，不得自行继续作业或巡视。']);
 const FIELD_NOTE = ['建议将对应解毒药品加入急救包：蛇毒血清快速识别卡、抗过敏药、季德胜蛇药片。', '遇到多发袭击时，遵循“脱离威胁→防二次伤害→基础救治→精准求救”四步原则。'];
 const FIELD_TAIL = [
   EPT('袭击后，应组织尽快远离威胁，防止二次伤害。完成基础救治后立即根据现场情况拨打120急救或者应尽快就医。所有犬咬伤24小时内必须注射狂犬疫苗。', '远离|脱离|撤离', '二次', '120|就医|医院|狂犬疫苗'),
@@ -52,11 +53,12 @@ const EMG = [
       EPT('立即停止作业，寻找凉爽、通风的环境进行休息；', '停止作业|停止工作|停工', '凉爽|通风|阴凉|树荫'),
       EPT('去除多余或紧身的衣物；', '衣物|衣服|解开|脱'),
       EPT('寻找湿毛巾放置患者头部或躯干，能找到冰袋的话将冰袋至于患者腋下、颈侧、腹股沟处进行降温；', '湿毛巾|冰袋|冰块|降温', '腋下|颈侧|腹股沟|头部|躯干'),
-      EPT('让患者饮用富含电解质的饮料，如果汁、牛奶、蔬菜汁或口服盐液等。', '电解质|盐水|口服盐液|果汁|饮料|补液')
+      EPT('让患者饮用富含电解质的饮料，如果汁、牛奶、蔬菜汁或口服盐液等；', '电解质|盐水|口服盐液|果汁|饮料|补液'),
+      EPT('不得让患者独自留下，不能自己继续巡视，应留人陪护观察病情变化。', '陪护|陪同|留人|留下陪|不能离开|不得离开|不要离开|不能自己|不得自己|不要自己|独自|单独|守着|看护|照看')
     ],
-    notes: HEAT_NOTE, nsrc: '处置卡',
+    notes: HEAT_NOTE1, nsrc: '处置卡',
     cs: { text: '7 月午后，小王在 220kV 某站户外巡视时出现头晕、大量出汗、乏力，意识清醒。同组的小张让他在树荫下坐着，自己继续巡视。二十分钟后小王开始恶心、站不稳，小张一下慌了神，先在工作群里问大家怎么办，又拖了二十多分钟才想起给班站长打电话，始终没有拨打 120。',
-      bad: [{ n: 0, t: '小张慌了神，先在群里问怎么办，没有立即拨打 120 急救电话', k: ['120|急救电话|急救|惊慌|慌'] }, { n: 0, t: '拖了二十多分钟才报告班站长，没有及时报告上级', k: ['报告|汇报|上级|班站长'] }] } },
+      bad: [{ n: 1, t: '小张让小王独自在树荫下坐着，自己继续巡视，没有留人陪护观察', k: ['继续巡视|自己巡视|去巡视|独自|单独|一个人|陪护|陪同|留人|离开|丢下|留下'] }, { n: 0, t: '小张慌了神，先在群里问怎么办，没有立即拨打 120 急救电话', k: ['120|急救电话|急救|惊慌|慌'] }, { n: 0, t: '拖了二十多分钟才报告班站长，没有及时报告上级', k: ['报告|汇报|上级|班站长'] }] } },
   { id: 'heat2', no: '1', card: '高温中暑', cat: 'body', sc: '场景二：中暑人员意识丧失', phen: '人员因高温中暑', who: '变电管理一所巡维中心全体人员',
     sit: '高温天户外作业，同事突然晕倒，呼之不应。',
     pts: [
@@ -300,8 +302,13 @@ function emgHitGroups(text, groups) {
   const need = groups.length <= 2 ? groups.length : groups.length - 1;
   return { hit, need, full: hit >= need, part: hit > 0 && hit < need };
 }
-function emgScore(e, a) {
-  a = a || {};
+/* 作答去序号：1. / 1、/ ①… 不参与关键字匹配 */
+function emgStrip(t) { return String(t || '').replace(/^\s*(?:[\d]+[.、．:：)）]|[①②③④⑤⑥⑦⑧⑨⑩])\s*/gm, ''); }
+/* 快速决策基准时长（秒）：每个处置要点 45 秒，事例纠错 120 秒，信息报送 90 秒 */
+function emTBase(e) { return e.pts.length * 45 + (e.cs && e.cs.bad && e.cs.bad.length ? 120 : 0) + ((e.rep || []).length ? 90 : 0); }
+function emSpeed(e, sec) { if (sec == null || sec <= 0) return null; const r = sec / emTBase(e); return r <= 0.5 ? 100 : r >= 2.5 ? 40 : Math.round(100 - (r - 0.5) / 2 * 60); }
+function emgScore(e, a, sec) {
+  a = { pts: emgStrip((a || {}).pts), cs: emgStrip((a || {}).cs), rep: emgStrip((a || {}).rep) };
   const hasN = !!(e.cs && e.cs.bad && e.cs.bad.length);
   const ptot = hasN ? EMG_CFG.pts : EMG_CFG.pts + EMG_CFG.notes, per = ptot / e.pts.length;
   const pts = e.pts.map((p, i) => {
@@ -323,10 +330,10 @@ function emgScore(e, a) {
     pts, bads, rep, sp: Math.round(sp * 10) / 10, sn: Math.round(sn * 10) / 10, sb, base, score, pass: score >= EMG_CFG.pass, ptot, hasN,
     keyMiss: bads.filter(x => x.st === 'miss').length,
     dims: {
-      e1: Math.round(pts.reduce((s, x) => s + x.got, 0) / ptot * 100),
-      e2: hasN ? Math.round(sn / EMG_CFG.notes * 100) : null,
-      e3: rep.length ? Math.round(rep.filter(x => x.st === 'ok').length / rep.length * 100) : null,
-      e4: aid.length ? Math.round(aid.reduce((s, x) => s + x.got / x.per, 0) / aid.length * 100) : null
+      e1: emSpeed(e, sec),
+      e2: Math.round(pts.reduce((s, x) => s + x.got, 0) / ptot * 100),
+      e3: hasN ? Math.round(sn / EMG_CFG.notes * 100) : null,
+      e4: rep.length ? Math.round(rep.filter(x => x.st === 'ok').length / rep.length * 100) : null
     }
   };
 }

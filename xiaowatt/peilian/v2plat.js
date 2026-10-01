@@ -3,7 +3,7 @@
    用法：node v2plat.js　期望：ERR none，各断言按注释对照 */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const path = require('path');
-const F = require('url').pathToFileURL(path.resolve(__dirname, 'dist', '小瓦特练_AI智能陪练平台_高保真原型.html')).href;
+const F = require('url').pathToFileURL(path.resolve(__dirname, 'dist', '安全学习智能陪练_高保真原型.html')).href;
 const SMP = f => path.resolve(__dirname, 'samples', f);
 const w = (p, ms) => p.waitForTimeout(ms);
 const BAN = /演示环境|本模块展示|待建|下一版本|一期范围|陪练关卡|专家答辩|教练中心/;
@@ -17,7 +17,7 @@ const BAN = /演示环境|本模块展示|待建|下一版本|一期范围|陪�
 
   /* ---------- 场景中心：两大场景 ---------- */
   await go('center', 600);
-  console.log('场景中心', JSON.stringify(await p.evaluate(() => ({ scenes: document.querySelectorAll('.scbig').length, cats: document.querySelectorAll('.emcatrow .chip').length, nav: Array.from(document.querySelectorAll('#hnav .hnavi')).map(n => n.textContent.replace(/管理$/, '')).join('/') }))), '期望 scenes 2 · cats 6 · 导航 工作台/场景中心/操作票填写/应急处置/AI 测评/数据分析/管理视角/系统与权限');
+  console.log('场景中心', JSON.stringify(await p.evaluate(() => ({ scenes: document.querySelectorAll('.scbig').length, cats: document.querySelectorAll('.scbig.hg .emcatrow .chip').length, nav: Array.from(document.querySelectorAll('#hnav .hnavi')).map(n => n.textContent.replace(/管理$/, '')).join('/') }))), '期望 scenes 6 · cats ≥ 6 · 导航 工作台/场景中心/AI 测评/数据分析/管理视角/系统与权限');
 
   /* ---------- 操作票判卷：七种答卷 ---------- */
   const J = await p.evaluate(() => ['ok', 'swap', 'order', 'miss', 'text', 'danger', 'load'].map(k => { const r = tkJudge(tkAuto(k)); return { k, score: r.score, raw: r.raw, fatal: r.fatal.length, kinds: r.byKind }; }));
@@ -83,19 +83,23 @@ const BAN = /演示环境|本模块展示|待建|下一版本|一期范围|陪�
   await p.fill('#em_in', '电话报告时间地点，原因在检查中，10分钟内elink报送，报分管副总'); await clk('#emsubmit'); await w(p, 500);
   const er = await p.evaluate(() => ({ score: EM.res.score, sp: EM.res.sp, sn: EM.res.sn, sb: EM.res.sb, keyMiss: EM.res.keyMiss, add: document.querySelectorAll('.emadd li').length, rec: emRecords().length }));
   console.log('应急三步作答', JSON.stringify(st), '| 提示', h1.replace(/\n/g, ' ').slice(0, 40), '| 事例', cs, '| 点评', JSON.stringify(er), '期望 steps 4 · sn 40 · keyMiss 0 · rec 1');
+  console.log('应急四项指标', JSON.stringify(await p.evaluate(() => EM.res.dims)), '· AI 情境', await p.evaluate(() => !!EM.sit && EM.sit !== EMGMAP[EM.id].sit), '· 分句', await p.evaluate(() => document.querySelectorAll('.emcase .sno').length > 0), '期望 e1..e4 非空（e4 对 confined 为 null 可接受）· 情境 true · 分句 true');
+  const heat = await p.evaluate(() => { const e = EMGMAP.heat1; const r = emgScore(e, { pts: '1. 停止作业到阴凉处\n2. 解开衣服\n3. 湿毛巾冰袋降温腋下\n4. 喝电解质饮料\n5. 留人陪护不能自己继续巡视', cs: '②小张让小王独自坐着自己继续巡视没有陪护\n③慌了神没打120\n拖了二十分钟才报告班站长', rep: '' }, 120); return { score: r.score, pts: r.pts.length, bads: r.bads.length, keyMiss: r.keyMiss, e1: r.dims.e1 }; });
+  console.log('高温中暑补点（陪护）', JSON.stringify(heat), '期望 pts 5 · bads 3 · keyMiss 0 · score 100');
   await p.screenshot({ path: './shots/plat_emerg_result.png', fullPage: true });
   await clk('#emlist'); await w(p, 300); await clk('[data-emopen="0"]'); await w(p, 400);
   console.log('回看', await p.evaluate(() => EM.res && EM.res.score));
 
   /* ---------- AI 测评 / 数据分析 / 系统与权限 ---------- */
   await go('assess', 500);
-  const as = await p.evaluate(() => ({ groups: document.querySelectorAll('.asdim').length, chips: document.querySelectorAll('.asl span').length, recs: document.querySelectorAll('.asrec').length }));
-  await p.evaluate(() => { const n = document.querySelector('.asdim[data-tri="tk"]'); n.dispatchEvent(new MouseEvent('click', { bubbles: true })); }); await w(p, 400);
-  console.log('AI 测评', JSON.stringify(as), '下钻行', await p.evaluate(() => document.querySelectorAll('.card .tb tr').length - 1), '期望 groups 2 · chips 9 · 下钻 5');
+  const as = await p.evaluate(() => ({ dims: document.querySelectorAll('[data-tri]').length, radars: document.querySelectorAll('[data-radar]').length, recs: document.querySelectorAll('.asrec').length, ana: document.querySelectorAll('[data-ana]').length }));
+  await p.evaluate(() => { const n = document.querySelector('[data-tri="kn"]'); n.dispatchEvent(new MouseEvent('click', { bubbles: true })); }); await w(p, 400);
+  console.log('AI 测评', JSON.stringify(as), '安全知识指标体系行', await p.evaluate(() => Array.from(document.querySelectorAll('.card .tb tr')).filter(tr => tr.querySelector('[data-dim]')).length), '期望 dims 4 · radars 6 · recs 8 · 指标 8');
+  await p.evaluate(() => { const n = document.querySelector('[data-ana]'); n.click(); }); await w(p, 400); console.log('自动分析弹层', await p.evaluate(() => document.querySelectorAll('.mask').length + ' · ' + /指标得分|失分原因/.test(document.querySelector('.mask').innerText))); await p.evaluate(() => $$('.mask').forEach(m => m.remove()));
   await go('analytics', 500);
   const an0 = await p.evaluate(() => platFiltered().length);
   await p.selectOption('[data-pf="scene"]', 'em'); await w(p, 400);
-  console.log('数据分析', JSON.stringify({ all: an0, em: await p.evaluate(() => platFiltered().length), charts: await p.evaluate(() => document.querySelectorAll('.anrow .card svg').length) }), '期望 em < all');
+  console.log('数据分析', JSON.stringify({ all: an0, em: await p.evaluate(() => platFiltered().length), charts: await p.evaluate(() => document.querySelectorAll('.anrow .card svg').length), rank: await p.evaluate(() => document.querySelectorAll('.tb.rk tr').length - 1), heat: await p.evaluate(() => document.querySelectorAll('.theat .heatc').length) }), '期望 em < all · rank 8 · heat 48');
   await p.evaluate(() => { ROLE.cur = 'lead'; renderRole(); }); await go('sys', 400);
   console.log('系统与权限', JSON.stringify(await p.evaluate(() => ({ roles: document.querySelector('.wrap .card .tb').rows.length - 1, text: /17 类/.test(document.querySelector('#hpage').innerText) }))), '期望 roles 3 · text true');
 
