@@ -24,7 +24,7 @@ function startScene(spec) {
 /* 打开某次演练的报告（本机记录与模拟记录同一入口） */
 function openRec(id) {
   const r = recById(id); if (!r) return;
-  if (r.src === 'tk') {
+  if (r.src === 'tk' && !r.wt) {
     TK.res = tkJudge(r.rows || []); TK.on = false; TK.tab = 'err';
     TK.rec = { d: r.d, no: r.mock ? '—' : (r.sub || '').replace('票号 ', ''), mode: r.mode, sec: r.sec, score: r.score, pass: r.pass, fatal: r.fatal, rows: r.rows };
     return goPage('ticket');
@@ -134,7 +134,7 @@ function recoFor(item) {
 /* 安全能力成熟度构成（下钻用） */
 function matParts() {
   const M = maturity(), A = homeAgg();
-  const lastExam = allRecs().find(r => r.src === 'tk' && /考核/.test(r.mode));
+  const lastExam = allRecs().find(r => r.src === 'tk' && !r.wt && /考核/.test(r.mode));
   const parts = M.dims.map(d => ({ n: d.n, v: d.score == null ? '待练' : d.score + ' 分', need: '≥ 75（熟练）', ok: d.score != null && d.score >= 75, gap: d.score == null ? d.missing.join('、') + ' 还没练过' : d.score < 75 ? '再练 ' + d.scenes.filter(x => x.score != null && x.score < 75).map(x => x.n).join('、') : '' }));
   parts.push({ n: '操作票考核模式', v: lastExam ? lastExam.score + ' 分' : '未考', need: '最近一次 ≥ 60 分且无危险操作', ok: !!(lastExam && lastExam.pass), gap: '完成一次操作票考核模式并及格' });
   parts.push({ n: '应急处置卡覆盖', v: A.cards.size + ' / 17 类', need: '17 类全部练过', ok: A.cards.size >= 17, gap: '还有 ' + (17 - A.cards.size) + ' 类应急处置卡没有练过' });
@@ -146,7 +146,7 @@ function growthLanes() {
   const A = abilityCalc(), AG = homeAgg(), M = A.mat, W = weakOrder().filter(x => !x.none)[0];
   const cases = typeof caseList === 'function' ? caseList() : [];
   const sc = k => A.scene[k], cnt = k => sc(k).cnt;
-  const lastExam = allRecs().find(r => r.src === 'tk' && /考核/.test(r.mode));
+  const lastExam = allRecs().find(r => r.src === 'tk' && !r.wt && /考核/.test(r.mode));
   const st = (ok, started) => ok ? 'done' : started ? 'next' : 'future';
   const lanes = [
     { k: 'kn', nodes: [
@@ -332,6 +332,7 @@ function nodeClick(id) {
 /* ---------------- 事件委托（首页与各薄页共用） ---------------- */
 function bindHPage() {
   $('#hpage').oninput = e => { if (typeof pagesInput === 'function') pagesInput(e); };
+  $('#hpage').onchange = e => { if (typeof sceneChange === 'function') sceneChange(e); };
   $('#hpage').onclick = e => {
     if (typeof leaderClick === 'function' && leaderClick(e)) return;
     if (typeof pagesClick === 'function' && pagesClick(e)) return;
@@ -470,9 +471,13 @@ const IMPL_STATUS = [
   ['应急处置：四项指标', '快速决策＝作答用时对基准时长（每个要点 45 秒、事例纠错 2 分钟、报送 1.5 分钟）；知识储备＝要点得分率（关键词组匹配，意思对即得分）；风险识别＝事例纠错得分率；高效上报＝报送答到率 · 本平台拟定待确认'],
   ['应急处置：事例', '16 个情境的处置经过事例由本平台编写，分句标 ①②③ · 待业务确认'],
   ['应急处置：计分口径', '处置要点 60 + 事例纠错 40（无注意事项的情境处置要点计 100），信息报送每项加 2 分、总分封顶 100 · 本平台拟定待确认'],
-  ['安规知识 / 保命技能 / 案例分析 / 制度学习四个场景', '题目与标准答案由本平台按安规、处置卡、脱敏案例拟定 · 待业务确认；近30天的历史记录为预设'],
-  ['案例推送学习', '预置 2 个脱敏虚构案例；班组长导入通报后按规则抽取经过 / 原因 / 条款 / 要点生成案例（规则抽取，非在线大模型）'],
-  ['课件 / 数字人讲课 / 自动出题 / 考试分析', '课件与题目由文件规则抽取；数字人为内置形象 + 浏览器语音（HeyGen 真人数字人视频可接入）；考试分析由判定结果与班组均值生成'],
+  ['安规知识陪练', '题目从安规与导则条文自动生成（单选 / 判断 / 口述填空 + 依据条款指认），答错给条款原文，错题复练；指标：条款理解 / 依据引用 / 作答速度 / 易错巩固 · 口径由本平台拟定待确认'],
+  ['保命技能陪练', '停电 / 验电 / 接地 / 遮栏与标示牌 / 触电急救五项：步骤排序 + 要点填空 + 禁止事项多选；标准步骤按安规 6.1～6.3 与应急处置卡由本平台整理 · 待业务确认'],
+  ['案例分析陪练', '4 个预置脱敏案例（变电 / 配网 / 通用，人物单位全部虚构）+ 班组长推送案例；四方面作答按关键词组逐项比对（意思对即得分），标准分析由本平台拟定 · 待业务确认'],
+  ['制度学习陪练', '制度文件（预置两票管理细则节选 / 应急信息报送指引 / 安规技术措施条文，或本机上传）→ 课件 → 数字人讲课 → 自动出题 → 考试 → 考试分析，全程本机规则生成'],
+  ['工作票陪练', '第一种工作票安全措施四栏勾选判定（含干扰项），缺停电 / 接地措施按危险判定；标准措施按安规由本平台拟定 · 待业务确认；成绩与操作票同记入两票填写陪练'],
+  ['案例推送学习', '预置 2 个脱敏虚构案例；班组长导入通报（Word / 文本）后按规则抽取经过 / 原因 / 条款 / 要点生成案例课件与 3 道题推送全班；班员学完回写（规则抽取，非在线大模型）'],
+  ['课件生成 / 数字人讲课 / 自动出题 / 考试分析', '课件：文件按章节与条款句自动分页并生成讲稿；数字人：内置形象引擎 + 浏览器中文语音朗读（无语音时口型与字幕照常），HeyGen 真人数字人视频预留接口（HEYGEN_CLIPS）；出题：判断（改动情态词）/ 单选（挖空数字或术语）/ 简答（关键词比对），每题附依据原文；考试分析：个人章节掌握 + 关键条款 + 速度，班组对比为脱敏模拟分布'],
   ['近30天记录中的非本机记录、班组其他成员成绩、同批次人员', '脱敏模拟 · 人物全部虚拟；两票 / 应急的模拟记录由判卷引擎与应急计分对合成答卷实时计分'],
   ['语音识别', '联网且经 http 打开时浏览器识别（真实）；本地文件打开或内网时为兜底识别（按当前应答内容打入，可改后再发）'],
   ['演练记录保存', '浏览器本地存储：同一浏览器刷新保留；换浏览器或账号不保留 · 入库待对接'],

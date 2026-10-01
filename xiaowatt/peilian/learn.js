@@ -36,33 +36,71 @@ function caseCardHTML() {
     <div class="caselist">${L.slice(0, 3).map(c => `<div class="caseit ${c.done ? 'done' : ''}" data-case="${c.id}"><i class="ctag">${h(c.kind)}</i><b>${h(c.t)}</b><span class="tk3">${c.done ? '已完成 · ' + stampOf(c.done.ts) + (c.done.score != null ? ' · ' + c.done.score + ' 分' : '') : h(c.from) + ' 推送 · ' + h(c.due) + '截止'}</span></div>`).join('')}</div>
     <div class="casebtns">${todo.length ? `<button class="btn pri" data-case="${todo[0].id}">开始学习</button>` : `<button class="btn pri" data-start="case">去案例分析陪练</button>`}<button class="btn" data-go="center">去场景中心</button></div></div>`;
 }
-/* 案例学习（点开案例）：看通报要点 → 进入案例分析陪练 */
+/* 案例学习（点开案例）：看课件 → 数字人讲课 → 答 3 题 → 完成回写；成绩计入「警示复盘能力」 */
+const CP = { c: null, cw: null, step: 0, res: null };
+function caseDocOf(c) { return { id: c.id, n: c.t, text: `一、事故经过\n${c.brief}\n二、原因分析\n${c.cause.map(x => x + '。').join('\n')}\n三、违反条款\n${c.rules.map(x => '违反 ' + x + '。').join('\n')}\n四、警示要点\n${c.lessons.map(x => x + '。').join('\n')}` }; }
 function caseOpen(id) {
   const c = caseList().find(x => x.id === id); if (!c) return;
-  openDrill(`案例学习 · ${c.t}`, `${c.kind} · ${c.src} · ${c.from} 推送`, `
-    <div class="sec"><div class="st">事故经过</div><div class="sc quote">${h(c.brief)}</div></div>
-    <div class="sec"><div class="st">原因分析</div><div class="sc">${c.cause.map(x => `<div>· ${h(x)}</div>`).join('')}</div></div>
-    <div class="sec"><div class="st">违反条款</div><div class="sc">${c.rules.map(x => `<div>· ${h(x)}</div>`).join('')}</div></div>
-    <div class="sec"><div class="st">警示要点</div><div class="sc">${c.lessons.map(x => `<div>· ${h(x)}</div>`).join('')}</div></div>
-    <div class="tk3">学完后进入案例分析陪练作答，成绩计入「警示复盘能力」。</div>`,
-    `<button class="btn pri" data-start="case:${c.id}">进入案例分析陪练</button>`);
+  CP.c = c; CP.cw = cwGen(caseDocOf(c)); CP.step = 0; CP.res = null;
+  $$('.mask').forEach(m => m.remove());
+  const m = openDrill(`案例学习 · ${c.t}`, `${c.kind} · ${c.src} · ${c.from} 推送 · ${c.due}截止`, `<div id="cpbox">${caseStepHTML()}</div>`);
+  m.querySelector('.dlg').style.width = 'min(980px,96vw)';
+}
+function caseStepHTML() {
+  const c = CP.c, cw = CP.cw, steps = ['看案例课件', '数字人讲课', '答 3 题', '完成'];
+  const head = `<div class="emsteps" style="margin:0 0 10px">${steps.map((s, i) => `<span class="${i === CP.step ? 'on' : i < CP.step ? 'done' : ''}"><i>${i + 1}</i>${s}</span>`).join('')}</div>`;
+  if (CP.step === 0 || CP.step === 1) return head + `<div class="cwwrap"><div class="cwnav">${cw.slides.map((s, i) => `<div class="cwth ${i === (CP.i || 0) ? 'on' : ''} ${cwSeen(cw.id)[i] ? 'seen' : ''}" data-cpgo="${i}"><i>${i + 1}</i><span>${h(s.t)}</span></div>`).join('')}</div><div class="cwmain">${slideHTML(cw, CP.i || 0)}</div></div>
+    <div class="embar"><span class="tk3">课件由通报自动生成：经过 → 原因 → 条款 → 要点；学完答 3 题，成绩计入「警示复盘能力」并回写给班组长</span><span class="r"><button class="btn s" data-cpgo="${(CP.i || 0) - 1}">上一页</button><button class="btn s" data-cpgo="${(CP.i || 0) + 1}">下一页</button><button class="btn s g" data-cplec="1">数字人讲课</button><button class="btn pri" data-cpexam="1">开始答题</button></span></div>`;
+  if (CP.step === 2) return head + `<div id="cpex"></div>`;
+  const r = CP.res;
+  return head + `<div class="exres"><div class="rvhead"><div class="rvbig ${r.pass ? '' : 'wv'}">${r.score}</div><div><div class="hrow">${r.pass ? '<span class="tag ok">完成</span>' : '<span class="tag wn">完成 · 建议再学一遍</span>'} 答对 ${r.right} / ${r.n} · 用时 ${fmtSec(r.sec)} · 已回写给 ${h(c.from)}</div><div class="hrow"><em class="ai">AI</em> ${h(r.score >= 80 ? '案例要点掌握了，记住：' + c.lessons[0] + '。' : '原因和条款还没记牢，回到课件再看一遍「原因分析」与「违反条款」。')}</div></div></div>
+    ${r.wrong.length ? `<table class="htbl"><tr><th>错题</th><th>正确答案</th><th>依据</th></tr>${r.wrong.map(x => `<tr><td>${h(x.q.stem)}</td><td class="gv">${h(x.q.type === 'choice' ? 'ABCD'[x.q.ans] + '，' + x.q.opts[x.q.ans] : x.q.type === 'judge' ? (x.q.ans ? '正确' : '错误') : x.q.ans)}</td><td class="tk3">${h(x.q.orig)}</td></tr>`).join('')}</table>` : '<div class="hrow"><span class="tag ok">三题全对</span></div>'}
+    <div class="scgo" style="margin-top:10px"><button class="btn pri" data-start="case:${c.id}:teach">进入案例分析陪练（深入分析）</button><button class="btn" data-go="home">回工作台</button></div></div>`;
+}
+function casePaint() { const b = $('#cpbox'); if (b) b.innerHTML = caseStepHTML(); }
+function caseExam() {
+  CP.step = 2; casePaint();
+  const qs = qGen(caseDocOf(CP.c), 3, Date.now(), { types: ['judge', 'choice', 'judge'] });
+  examStart(qs, { title: '案例学习 · ' + CP.c.t, mode: 'teach', mount: 'cpex', src: 'case', base: 40, onDone: res => {
+    CP.res = res; CP.step = 3;
+    const dims = { c1: res.score, c2: res.keyRate == null ? res.score : res.keyRate, c3: res.score, c4: null };
+    recSave({ src: 'case', ts: Date.now(), d: stampOf(Date.now()), sub: '案例推送 · ' + CP.c.t, mode: '训练模式', score: res.score, pass: res.score >= 60, sec: res.sec, sum: res.wrong.length ? ['答错 ' + res.wrong.length + ' 题'] : [], dims, wrong: res.wrong.map(x => ({ t: x.q.stem, cite: x.q.orig })), caseId: CP.c.id, push: true });
+    caseDone(CP.c.id, res.score);
+    toast(`案例学习完成 · ${res.score} 分，已回写给${CP.c.from}`, 'ok');
+    casePaint();
+    const cur = (location.hash || '').replace('#', '') || 'home'; if (cur === 'home' || cur === 'team') rerender(cur);
+  } });
+}
+function caseClick(e) {
+  const q = s => e.target.closest(s); let n;
+  if (n = q('[data-cpgo]')) { CP.i = Math.max(0, Math.min(CP.cw.slides.length - 1, +n.dataset.cpgo)); cwMark(CP.cw.id, CP.i); casePaint(); return true; }
+  if (n = q('[data-cplec]')) { CP.step = 1; lecOpen(CP.cw, { from: CP.i || 0, char: 'leader', onExam: () => { caseOpen(CP.c.id); caseExam(); } }); return true; }
+  if (n = q('[data-cpexam]')) { caseExam(); return true; }
+  return false;
 }
 /* 班组长：导入通报（文件或粘贴）→ 自动生成案例 → 推送 */
 function casePushDlg() {
   openDrill('导入通报 · 生成案例 · 推送', '支持 Word / 文本；生成的案例由班组长确认后推送', `
     <div class="frm"><label>通报标题<input id="cp_t" placeholder="如 10kV 配网线路带电作业触电事故通报"></label>
       <label>通报正文（或上传文件）<textarea id="cp_body" rows="6" placeholder="粘贴通报正文：事故经过、原因、暴露问题……"></textarea></label>
-      <label class="btn tkup" style="align-self:flex-start">选择文件<input type="file" id="cp_file" accept=".docx,.txt" class="tkfile"></label>
+      <label class="btn tkup" style="align-self:flex-start">选择文件<input type="file" id="cp_file" accept=".docx,.txt" class="tkfile"></label><span class="tk3" id="cp_fn"></span>
       <div class="tk3">系统从正文里抽取事故经过、直接 / 间接原因、违反条款与警示要点，生成案例课件与 3 道测验题。</div></div>`,
     `<button class="btn pri" data-casegen="1">生成并推送给全班</button>`);
+  const f = $('#cp_file'); if (f) f.onchange = async e => { const file = e.target.files[0]; if (!file) return; try { const ext = (file.name.split('.').pop() || '').toLowerCase(); let text = ''; if (ext === 'docx') { const d = await TKUP.docx(file); text = d.paras.concat(d.rows.map(r => r.join('　'))).join('\n'); } else text = await file.text(); const t = $('#cp_t'), b = $('#cp_body'); if (b) b.value = text.trim(); if (t && !t.value) t.value = (text.split('\n').map(x => x.trim()).find(x => x.length >= 6) || file.name.replace(/\.[^.]+$/, '')); const fn = $('#cp_fn'); if (fn) fn.textContent = '已读入 ' + file.name; } catch (err) { toast('读取失败：' + err.message, 'bad'); } };
 }
 function caseGen() {
   const t = ($('#cp_t') || {}).value || '', body = ($('#cp_body') || {}).value || '';
   if (t.trim().length < 4) { toast('先写通报标题', 'bad'); return; }
   const sents = body.replace(/\s+/g, '').split(/[。；;]/).filter(x => x.length > 6);
-  const pick = re => sents.filter(s => re.test(s)).slice(0, 2);
-  const c = { id: 'cp' + Date.now(), t: t.trim(), kind: /配网|线路|台区/.test(t + body) ? '配网' : /变电|站/.test(t + body) ? '变电' : '通用', from: '班组长 ' + LEAD_USER.name, ago: 0, dueDays: 3, src: '班组长导入', dim: 'rv',
-    brief: sents[0] || t, cause: pick(/原因|未|没有|违反/).map((s, i) => (i ? '间接原因：' : '直接原因：') + s), rules: pick(/规程|安规|条|规定/).length ? pick(/规程|安规|条|规定/) : ['待对照安规条款（由安全员补充）'], lessons: pick(/应|必须|严禁|不得/).length ? pick(/应|必须|严禁|不得/) : ['按通报要求整改，纳入班前会学习'] };
+  const used = new Set();
+  const take = (re, n, strip) => sents.filter(s => !used.has(s) && re.test(s)).slice(0, n).map(s => { used.add(s); return strip ? s.replace(strip, '') : s; });
+  const direct = take(/直接原因/, 1, /^.*?直接原因(是|为|：|:)?/), indirect = take(/间接原因|管理原因/, 1, /^.*?(间接|管理)原因(是|为|：|:)?/);
+  const cause = [].concat(direct.map(s => '直接原因：' + s), indirect.map(s => '间接原因：' + s));
+  if (!direct.length) { const d = take(/未|没有|违反|擅自/, 1); if (d.length) cause.unshift('直接原因：' + d[0]); }
+  if (!indirect.length) { const d = take(/监护|交底|管理|班前会|审核|培训/, 1); if (d.length) cause.push('间接原因：' + d[0]); }
+  const rules = take(/违反|规程|安规|条|规定/, 2, /^.*?违反(了)?/), lessons = take(/应|必须|严禁|不得/, 3);
+  const c = { id: 'cp' + Date.now(), t: t.trim(), kind: /配网|线路|台区|杆/.test(t + body) ? '配网' : /变电|站/.test(t + body) ? '变电' : '通用', from: '班组长 ' + LEAD_USER.name, ago: 0, dueDays: 3, src: '班组长导入', dim: 'rv',
+    brief: sents[0] || t, cause, rules: rules.length ? rules : ['待对照安规条款（由安全员补充）'], lessons: lessons.length ? lessons : ['按通报要求整改，纳入班前会学习'] };
   if (!c.cause.length) c.cause = ['直接原因：待从通报正文确认', '间接原因：待从通报正文确认'];
   caseAdd(c); $$('.mask').forEach(m => m.remove());
   toast(`已生成案例「${c.t}」并推送给全班 ${TEAM.length} 人`, 'ok');

@@ -107,13 +107,13 @@ function rvNext(r) {
   return low.length ? '「' + low.join('、') + '」偏低，针对这几项的题目再练一组。' : r.score < 80 ? '错题复练一遍，再做一次考核模式。' : '保持，换一个主题继续。';
 }
 function rvDetail(r) {
-  if (r.src === 'tk') {
+  if (r.src === 'tk' && !r.wt) {
     const res = tkJudge(r.rows || []);
     const top = res.errs.slice().sort((a, b) => (b.fatalHit ? 1 : 0) - (a.fatalHit ? 1 : 0)).slice(0, 6);
     return `<div class="rvstg">${res.stages.map(s => `<div class="stg"><b>${h(s.n)}</b><div class="bar"><i style="width:${s.pct}%"></i></div><span class="mono">${s.done}/${s.n2}</span></div>`).join('')}</div>
       <table class="htbl"><tr><th>错误</th><th>位置</th><th>处理</th><th>建议写法</th></tr>${top.map(e => `<tr><td><span class="tag ${e.kind === 'danger' ? 'rl' : ''}">${ERR_KINDS[e.kind].n}</span> ${h(e.title)}</td><td class="mono">${e.stdNo}</td><td>${e.fatalHit ? '整票不合格' : e.deduct ? '扣 ' + e.deduct : '复核'}</td><td class="tk3">${h(e.fix)}</td></tr>`).join('') || '<tr><td colspan="4">没有判出错误</td></tr>'}</table>`;
   }
-  if (r.src !== 'em') return `<table class="htbl"><tr><th>指标</th><th>本次</th></tr>${skillsOf(r.src).map(d => `<tr><td>${d.n}</td><td class="mono ${(r.dims || {})[d.k] == null ? '' : r.dims[d.k] >= 75 ? 'gv' : 'wv'}">${(r.dims || {})[d.k] == null ? '—' : r.dims[d.k]}</td></tr>`).join('')}</table>${(r.wrong || []).length ? `<table class="htbl" style="margin-top:8px"><tr><th>错题 / 失分项</th><th>依据</th></tr>${r.wrong.map(w => `<tr><td>${h(w.t)}</td><td class="tk3">${h(w.cite || '')}</td></tr>`).join('')}</table>` : ''}`;
+  if (r.src !== 'em') return `<table class="htbl"><tr><th>指标</th><th>本次</th></tr>${skillsOf(r.src).filter(d => !r.wt || (r.dims || {})[d.k] != null).map(d => `<tr><td>${d.n}</td><td class="mono ${(r.dims || {})[d.k] == null ? '' : r.dims[d.k] >= 75 ? 'gv' : 'wv'}">${(r.dims || {})[d.k] == null ? '—' : r.dims[d.k]}</td></tr>`).join('')}</table>${(r.wrong || []).length ? `<table class="htbl" style="margin-top:8px"><tr><th>错题 / 失分项</th><th>依据</th></tr>${r.wrong.map(w => `<tr><td>${h(w.t)}</td><td class="tk3">${h(w.cite || '')}</td></tr>`).join('')}</table>` : ''}`;
   const e = EMGMAP[r.eid], s = emgScore(e, r.a || {}, r.sec);
   return `<table class="htbl"><tr><th>处置要点</th><th>结果</th></tr>${s.pts.map(x => `<tr><td class="tk3">${h(x.t)}</td><td>${x.st === 'ok' ? '<span class="tag ok">答到</span>' : x.st === 'part' ? '<span class="tag wn">不完整</span>' : '<span class="tag rl">遗漏</span>'}</td></tr>`).join('')}</table>
     ${s.bads.length ? `<table class="htbl" style="margin-top:8px"><tr><th>事例中的问题</th><th>结果</th></tr>${s.bads.map(x => `<tr><td class="tk3">${h(x.t)}</td><td>${x.st === 'ok' ? '<span class="tag ok">已指出</span>' : '<span class="tag rl">关键遗漏</span>'}</td></tr>`).join('')}</table>` : ''}`;
@@ -280,6 +280,7 @@ function pageClassroom() {
   return `<div class="ppage">
     <section class="hcard ho"><div class="hch"><b>系统边界</b><span>现有平台负责课程、题库、考试、人员主数据；本产品负责情境练习、过程纠错、复训与回写</span></div><div class="hcb">${boundaryHtml()}</div></section>
     <div class="ph"><b>知识课堂</b><span>南网人工智能知识课堂 · 上次同步 ${CLASSROOM.syncAt}</span><span class="phr"><button class="btn sm ${CL.syncing ? 'busy' : ''}" data-sync="1">${CL.syncing ? '同步中…' : '立即同步'}</button></span></div>
+    ${typeof pipeHTML === 'function' ? pipeHTML() : ''}
     <section class="hcard hg"><div class="hch"><b>接入关系</b><span>课程 / 题库 / 学员画像 供给 → 平台；演练学时 → 课堂回写 · 点击节点查看接口</span></div><div class="hcb">${archSVG()}</div></section>
     <div class="syncline">${CLASSROOM.supply.map(s => `<span class="sy ok ${CL.syncing ? 'busy' : ''}" data-arch="${s.k}">${s.n} ${s.dir === 'in' ? '已同步' : '已回写'} · ${s.v}</span>`).join('')}</div>
     <div class="gtwo g32">
@@ -369,7 +370,7 @@ function archDrill(k) {
 }
 
 /* ================= 页面渲染后的挂载 ================= */
-function pageAfter(h) { }
+function pageAfter(h) { if (typeof pipeAfter === 'function') pipeAfter(h); }
 
 /* ================= 角色切换（学员 ⇄ 班组长） ================= */
 function renderRole() {
@@ -389,6 +390,9 @@ function toggleRole() {
 /* ================= 页面内点击（在 bindHPage 之前拦截） ================= */
 function pagesClick(e) {
   const q = s => e.target.closest(s); let n;
+  if (typeof pipeClick === 'function' && pipeClick(e)) return true;
+  if (typeof sceneClick === 'function' && sceneClick(e)) return true;
+  if (typeof caseClick === 'function' && caseClick(e)) return true;
   /* 复盘 */
   if (n = q('[data-sess]')) { RV.sel = n.dataset.sess; if (location.hash === '#review') rerender('review'); else goPage('review'); return true; }
   if (n = q('[data-rvf]')) { RV.filter = n.dataset.rvf; rerender('review'); return true; }
@@ -419,6 +423,7 @@ function pagesClick(e) {
 }
 function pagesInput(e) {
   let n;
+  if (typeof sceneInput === 'function' && sceneInput(e)) return;
   if (n = e.target.closest('[data-goal]')) {
     const k = n.dataset.goal, g = goalsGet(); if (n.value === '') delete g[k]; else g[k] = Math.max(0, Math.min(100, +n.value)); lsSet(LS_GOALS, g);
     const now = abilityCalc().scene[k].score;

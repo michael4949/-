@@ -14,7 +14,7 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const pages = ['home', 'center', 'ticket', 'emerg', 'assess', 'analytics', 'review', 'growth', 'classroom'];
   const out = {};
   for (const h of pages) { await p.evaluate(h => goPage(h), h); await w(p, 450); out[h] = await p.evaluate(() => document.querySelector('#hpage').innerText.length); }
-  console.log('pages', JSON.stringify(out), '| 旧模块已删', await p.evaluate(() => ['pageExpert', 'pageExam', 'pagePlaza', 'pageEditor', 'examStart', 'epStart'].filter(f => typeof window[f] === 'function').length === 0), '| 记录', await p.evaluate(() => allRecs().length), '| 成熟度', await p.evaluate(() => JSON.stringify(maturity().pct + ' ' + maturity().lv + ' ' + maturity().dims.map(d => d.score).join('/'))), '| 品牌', await p.evaluate(() => document.querySelector('.brand .pill').innerText));
+  console.log('pages', JSON.stringify(out), '| 旧模块已删', await p.evaluate(() => ['pageExpert', 'pageExam', 'pagePlaza', 'pageEditor', 'epStart'].filter(f => typeof window[f] === 'function').length === 0), '| 记录', await p.evaluate(() => allRecs().length), '| 成熟度', await p.evaluate(() => JSON.stringify(maturity().pct + ' ' + maturity().lv + ' ' + maturity().dims.map(d => d.score).join('/'))), '| 品牌', await p.evaluate(() => document.querySelector('.brand .pill').innerText));
   /* 首页下钻 */
   await p.evaluate(() => goPage('home')); await w(p, 500);
   console.log('标语', await p.evaluate(() => (document.querySelector('.slogan b') || {}).innerText), '期望 一切事故都可以预防 · 顶栏页签', await p.evaluate(() => [...document.querySelectorAll('#hnav [data-h]')].map(n => n.dataset.h).join(',')));

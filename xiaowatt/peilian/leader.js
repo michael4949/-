@@ -69,7 +69,9 @@ function pageTeam() {
         ${tasks.map(t => `<tr><td>${h(t.targetN)}${t.dims && t.dims.length ? `<div class="tk3">针对 ${t.dims.map(k => SCENE_MAP[k] ? SCENE_MAP[k].short : k).join('、')}</div>` : ''}</td><td>${t.mode === 'exam' ? '考核模式' : '训练模式'}</td><td class="mono">${t.due}</td><td class="tk3">${h((t.who || []).join('、') || '全班')}</td><td class="mono">${(t.results || []).length}/${(t.who || []).length || T.length}${(t.results || []).length ? `<div class="tk3">${t.results.map(r => `${r.who} ${r.score}`).join('、')}</div>` : ''}</td></tr>`).join('')}</table>` : '<div class="tk3">本月还没有下发培训任务，左侧确认后下发。</div>'}
         <div class="hch" style="padding:12px 0 6px"><b>案例推送学习</b><span>${cases.length} 个案例 · 班员学完即回写</span></div>
         ${cases.map(c => `<div class="hrow"><b>${h(c.t)}</b> <span class="tk3">${h(c.pushed)} 推送 · ${h(c.due)}截止 · ${c.done ? '本人已完成' : '本人未完成'} · 全班完成 ${c.done ? 7 : 6}/${T.length}</span></div>`).join('')}
-        <button class="btn" data-casepush="1" style="margin-top:8px">导入通报 · 生成案例 · 推送</button></div></section>
+        <button class="btn" data-casepush="1" style="margin-top:8px">导入通报 · 生成案例 · 推送</button>
+        <div class="hch" style="padding:12px 0 6px"><b>班组考试分析</b><span>制度测验 · 同一套题的班组分布</span></div>
+        ${(typeof examHist === 'function' ? examHist() : []).slice(0, 3).map((e, i) => `<div class="hrow"><b>${h(e.title)}</b> <span class="tk3">${stampOf(e.ts)} · 班组平均 ${e.team.avg} · 及格率 ${e.team.passRate}% · 最易错：${h((e.team.hardest[0] || {}).stem || '').slice(0, 18)}…</span> <button class="btn sm" data-examhist="${i}">看分析</button></div>`).join('') || '<div class="tk3">班员完成制度测验后，这里出现班组考试分析。</div>'}</div></section>
       <section class="hcard ho"><div class="hch"><b>未练与待提醒</b><em class="ai">AI 草稿</em><span>${T.filter(m => !m.cnt || m.last > 6).length} 人</span></div><div class="hcb">
         ${T.filter(m => !m.cnt || m.last > 6).map(m => `<div class="hrow"><b>${m.n}</b> <span class="tk3">${!m.cnt ? '本月未练' : m.last + ' 天未练'}</span></div>`).join('') || '<div class="tk3">全员近一周都练过。</div>'}
         <button class="btn" data-remind="1" style="margin-top:8px">生成提醒草稿</button>
