@@ -55,9 +55,8 @@ function openRec(id) {
 function homeBoot() {
   const hm = $('#pg_home');
   hm.innerHTML = `
-  <canvas id="fxp"></canvas>
   <div class="hsil">${silhouetteSVG()}</div>
-  <div class="hpeople">${peopleSVG()}</div>
+  ${vzFlowSVG()}
   <img class="bgph" id="bgph1" alt=""><img class="bgph bgph2" id="bgph2" alt="">
   <div class="hshell">
     <header class="hhead">
@@ -443,6 +442,14 @@ const HomeFX = (() => {
   };
 })();
 
+/* 背景流动光线（10/3：替代粒子网络与上升人形）：四条长曲线 + 沿线走的绿金流光，不用颗粒 / 球体 */
+function vzFlowSVG() {
+  const P = ['M-100 160 C 300 40, 700 300, 1100 160 S 1700 20, 2000 200', 'M-100 500 C 400 400, 600 680, 1000 540 S 1600 360, 2000 520', 'M-100 800 C 300 680, 800 880, 1200 740 S 1700 620, 2000 780', 'M200 -50 C 500 300, 300 650, 900 980'];
+  return '<svg class="vzflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
+    '<linearGradient id="vzg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#57bd8b" stop-opacity="0"/><stop offset=".45" stop-color="#0e8f5a"/><stop offset=".75" stop-color="#c9a227"/><stop offset="1" stop-color="#c9a227" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="vzg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c9a227" stop-opacity="0"/><stop offset=".5" stop-color="#e3c05a"/><stop offset="1" stop-color="#0e8f5a" stop-opacity="0"/></linearGradient></defs>' +
+    P.map((d, i) => '<path class="vzrail" d="' + d + '"/><path class="vzbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vzg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+}
 /* 程序化变电站剪影（实景照片素材到位前的占位层，含能量流动效） */
 function silhouetteSVG() {
   const tower = x => `<g transform="translate(${x} 0)">

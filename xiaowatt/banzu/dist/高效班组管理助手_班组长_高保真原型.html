@@ -1645,6 +1645,72 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 @media (max-width:1366px){.hero h4{font-size:24px}.hero .nums div{min-width:82px;padding:8px 12px}.hero .nums b{font-size:22px}}
 @media (max-width:960px){.hero,.hero.hasxw{grid-template-columns:1fr;padding:18px 18px 20px}.hero .heroxw{display:none}.hero>div:not(.nums),.hero .nums{grid-column:1}.hero .nums{flex-wrap:wrap}.sb .me i{margin:0 auto}}
 
+/* ===== 10/3 动效层（用户：每页都要有动效，更高级、有动感；不要颗粒 / 球体，用流动线条与光）===== */
+@property --vta{syntax:'<angle>';inherits:false;initial-value:0deg}
+/* ---- 背景流动光线：四条长曲线 + 沿线走的流光 ---- */
+.vtflow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.9}
+.vtflow .vtrail{fill:none;stroke:rgba(59,130,246,.10);stroke-width:1.2}
+.vtflow .vtbeam{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:260 2600;stroke-dashoffset:2860;filter:drop-shadow(0 0 6px rgba(99,102,241,.55));animation:vtbeam 16s linear infinite}
+.vtflow .b2{animation-duration:22s;animation-delay:-7s;stroke-width:1.8}
+.vtflow .b3{animation-duration:19s;animation-delay:-12s}
+.vtflow .b4{animation-duration:26s;animation-delay:-4s;stroke-width:1.6}
+@keyframes vtbeam{to{stroke-dashoffset:0}}
+/* ---- 卡片光边流光：一段亮光沿描边缓慢绕行（卡片各自错开相位） ---- */
+.card,.dc{position:relative}
+.card::after,.dc::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;opacity:.9;
+  background:conic-gradient(from var(--vta),transparent 0 60%,rgba(96,165,250,0) 64%,rgba(96,165,250,.95) 73%,rgba(167,139,250,.95) 79%,rgba(34,211,238,.7) 85%,transparent 91%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:vtsweep 14s linear infinite}
+@keyframes vtsweep{to{--vta:360deg}}
+.card:nth-child(2n)::after,.dc:nth-child(2n)::after{animation-delay:-5s}
+.card:nth-child(3n)::after,.dc:nth-child(3n)::after{animation-delay:-9s;animation-duration:17s}
+.grid2>.card:nth-child(2)::after,.grid3>.card:nth-child(3)::after{animation-delay:-3s}
+.card.pleg::after,.card.chart .card::after{display:none}
+.card:hover::after,.dc:hover::after{animation-duration:4s}
+/* ---- 卡头光点呼吸、分区色条流光 ---- */
+.card .h b::before{animation:vtdot 3s ease-in-out infinite}
+@keyframes vtdot{0%,100%{box-shadow:0 0 0 3px rgba(59,130,246,.14),0 0 10px rgba(139,92,246,.6)}50%{box-shadow:0 0 0 5px rgba(59,130,246,.08),0 0 18px rgba(139,92,246,.95)}}
+.sec i,.scopebar i,.ph1 .vzeb::after{background-size:200% 100%;animation:vtsheen 4s linear infinite}
+.scopebar i{background-image:linear-gradient(135deg,#2563eb,#7c3aed 40%,#db2777 60%,#2563eb)}
+.sec i{background-image:linear-gradient(180deg,#3b82f6,#8b5cf6 40%,#ec4899 60%,#3b82f6);background-size:100% 220%;animation:vtsheenv 4s linear infinite}
+@keyframes vtsheen{to{background-position:200% 0}}
+@keyframes vtsheenv{to{background-position:0 220%}}
+.ph1 .vzeb::after{animation:vtgrow .9s var(--ease) both,vtsheen 4s linear 1s infinite;background-image:linear-gradient(90deg,var(--nb),var(--nv),var(--nc),var(--nb))}
+@keyframes vtgrow{from{width:0;opacity:0}to{width:44px;opacity:1}}
+/* ---- 进度条 / 指标条：光带扫过 ---- */
+.mt .tr i,.dimbar i,.hndbar i,.star8 .barw i,.mod .bar i,.prog .pb i,.chip .hb i,.pftr i,.gldbar i,.hndr div i{position:relative;overflow:hidden}
+.mt .tr i::after,.dimbar i::after,.hndbar i::after,.star8 .barw i::after,.mod .bar i::after,.prog .pb i::after,.chip .hb i::after,.pftr i::after,.hndr div i::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0,rgba(255,255,255,.55) 50%,transparent 100%);transform:translateX(-120%);animation:vtshine 3.6s ease-in-out infinite}
+.dimbar:nth-child(2n) i::after,.mt:nth-child(2n) .tr i::after{animation-delay:-1.4s}
+@keyframes vtshine{0%{transform:translateX(-120%)}60%,100%{transform:translateX(120%)}}
+/* ---- 英雄面板：光团呼吸 + 一道光横扫 + 底线流光 ---- */
+.hero,.hero.hasxw{background:
+  radial-gradient(55% 95% at 6% 18%,rgba(59,130,246,.6),transparent 62%),
+  radial-gradient(42% 85% at 94% 10%,rgba(139,92,246,.55),transparent 62%),
+  radial-gradient(38% 60% at 68% 115%,rgba(236,72,153,.4),transparent 62%),
+  radial-gradient(30% 50% at 40% -10%,rgba(34,211,238,.25),transparent 60%),
+  linear-gradient(118deg,#0b1026 0%,#111a3f 48%,#1a1550 100%);background-size:100% 100%}
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(28% 160% at 50% 60%,rgba(96,165,250,.28),transparent 60%);transform:translateX(-70%);animation:vthsweep 9s ease-in-out infinite}
+@keyframes vthsweep{0%{transform:translateX(-70%)}55%,100%{transform:translateX(70%)}}
+.hero::after{background:linear-gradient(90deg,transparent,#22d3ee 18%,#3b82f6 40%,#a855f7 62%,#22d3ee 84%,transparent);background-size:200% 100%;animation:vtsheen 6s linear infinite}
+.hero .nums div{position:relative;overflow:hidden}
+.hero .nums div::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);background-size:260% 100%;animation:vtnum 7s ease-in-out infinite}
+.hero .nums div:nth-child(2)::after{animation-delay:-1.5s}.hero .nums div:nth-child(3)::after{animation-delay:-3s}.hero .nums div:nth-child(4)::after{animation-delay:-4.5s}
+@keyframes vtnum{0%,60%{background-position:120% 0}100%{background-position:-60% 0}}
+/* ---- 主按钮闲时光扫（低调）、当前导航呼吸、红灯脉冲 ---- */
+button.b,.bt button:not(.g),.inp button,.ph1 .r button.pri{position:relative;overflow:hidden}
+button.b::after,.bt button:not(.g)::after,.inp button::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);background-size:250% 100%;background-position:120% 0;animation:vtbtn 7s ease-in-out infinite;pointer-events:none}
+@keyframes vtbtn{0%,70%{background-position:120% 0}100%{background-position:-50% 0}}
+.sb a.on i{animation:vtglow 3s ease-in-out infinite}
+@keyframes vtglow{0%,100%{box-shadow:0 0 18px -2px rgba(124,58,237,.8)}50%{box-shadow:0 0 26px 0 rgba(124,58,237,1),0 0 10px rgba(37,99,235,.6)}}
+.rag.bad{animation:vtrag 2.2s ease-in-out infinite}
+@keyframes vtrag{0%,100%{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor,0 0 10px currentColor}50%{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor,0 0 18px 3px currentColor}}
+.side .sh.full .xw .ring{animation:vthalo 4s ease-in-out infinite}
+@keyframes vthalo{50%{transform:scale(1.06);opacity:.85}}
+.cmd .ic::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(124,58,237,.5);animation:vtringx 2.6s ease-out infinite}
+@keyframes vtringx{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+@media (max-width:960px){.vtflow{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.vtflow{display:none}.card::after,.dc::after{display:none}}
+
 </style>
 </head>
 <body></body>
@@ -3533,8 +3599,16 @@ const STATUS_LIST = [
   ['预设展示', ['工作量（工分）为按工分制考核台账口径预设的月度值；人员性别、学历、政治面貌为预设', '待客户确认：核心业务自主实施能力的定义与展示方式（现按作业授权认证表 已授权★模块 ÷ 本岗级应授权★模块）', '待客户确认：星级评价模型、综合评价模型是否接入（现为按分册维度的初步评分与员工画像综合画像）', '待客户确认：班组荣誉标签与核心指标口径（现取荣誉台账集体荣誉与班长年度业绩责任书四项）', '考核指标当前值：综合供电可靠率、中压线路故障跳闸次数、第三方客户满意度、安全生产责任制履职评价（局级）与三个班组的中压客户平均停电时间、跳闸次数、停电用户数降幅、安全生产过程管理（试验班、配电运维一班）为预设；配电自动化班与试验班班长责任书指标值暂按配电运行维护一班班长责任书模板；重点任务完成情况、创新成果与加扣分事项为预设', '团队风险画像的敏感岗位轮岗只针对三位班长，轮岗期 5 年为预设，待部门确认', '专业画像暂按运维班高级作业员岗位说明书的 9 项二级业务，配电自动化班岗位说明书待提供后替换；综合画像与专业画像的各人初始等级为预设', '作业授权认证表暂用运维班口径（7 单元 42 模块、★按岗级），配电自动化班专用认证表待提供后替换；各人初始授权状态为预设，原九类核心技能的授权与实操次数已迁移到对应模块', '星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
   ['待系统对接', ['工分制考核台账（月度工分）', 'OMS 缺陷与工单同步', 'OCS 终端在线状态', '电网管理平台两票与作业计划', '人资证书 / 学时 / 考勤 / 绩效台账', '党建管理系统与荣誉台账', '通知推送到个人', 'PDF 与照片文字读取']]
 ];
+/* 背景流动光线（每页常驻）：四条长曲线上各有一段发光的流光来回走；不用颗粒 / 球体 */
+function vtFlowSVG() {
+  const P = ['M-100 180 C 300 60, 700 320, 1100 180 S 1700 40, 2000 220', 'M-100 520 C 400 420, 600 700, 1000 560 S 1600 380, 2000 540', 'M-100 820 C 300 700, 800 900, 1200 760 S 1700 640, 2000 800', 'M200 -50 C 500 300, 300 650, 900 980'];
+  return '<svg class="vtflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
+    '<linearGradient id="vtg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee" stop-opacity="0"/><stop offset=".4" stop-color="#3b82f6"/><stop offset=".7" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></linearGradient>' +
+    '<linearGradient id="vtg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6" stop-opacity="0"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>' +
+    P.map((d, i) => '<path class="vtrail" d="' + d + '"/><path class="vtbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vtg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+}
 function shell() {
-  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' +
+  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtFlowSVG() +
     '<button class="vzfab" data-act="side-toggle"><i></i>小瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
   $('#side').innerHTML = XW.sideHTML();
 }
