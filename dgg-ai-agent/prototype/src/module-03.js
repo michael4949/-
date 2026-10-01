@@ -164,7 +164,12 @@
       h('span', { class: 'mod-badge' }, [BADGE])
     ]);
   }
-  function deliverBar(host) { if (sh.deliver) sh.deliver(host, { items: ['投入产出测算表'], scene: NAME() }); }
+  function deliverBar(host) {
+    if (sh.deliver) sh.deliver(host, { items: ['投入产出测算表'], scene: NAME() });
+    /* 15 分钟动线：末屏接到下一站（m2 → 投入产出测算，m3 → 选一个场景深潜） */
+    var nx = sh.flowNext && sh.flowNext('m3');
+    if (nx) host.appendChild(h('div', { class: 'flow-next' }, [h('button', { onclick: function () { sh.go(nx.id); } }, [h('span', { class: 'k' }, ['下一步']), h('span', {}, [nx.label]), h('span', {}, ['→'])])]));
+  }
   /* ---------- 现场引导：每屏常驻「下一步」；末屏（测算台 / 报告）由外壳 FLOW 接到「选一个场景深潜」 ---------- */
   var GUIDE_ORDER = ['input', 'scenes', 'gain', 'plan', 'board'];
   var GUIDE_LABEL = { input: '企业画像', scenes: '场景组合', gain: '收益参数', plan: '投入方案', board: '测算台' };
@@ -833,7 +838,7 @@
       else { M.step = 'input'; screenInput(); }
     } finally { $root = host; }
     if (M.step === 'board' && !M.result) return;   /* screenBoard 兜底跳回第一屏时不挂引导 */
-    mountGuide(work);
+    /* 工博会版：不叠加吸底引导条，用模块自带的「下一步」；末屏衔接见 deliverBar */
   }
 
   window.DGG.registerModule('m3', { mount: mount, unmount: unmount, onCompany: onCompany, onIndustry: onIndustry });

@@ -2,6 +2,7 @@
    在 theme-home.css 之后加载。配色跟随定稿展板：淡紫底、靛紫主色、珊瑚橙强调。 */
 @media screen {
 :root {
+  --pricebar: 0px;   /* 工博会版没有底部价格条：各处按「视口 − 顶栏 − 价格条」算高度的地方不再留 60px 空带 */
   --brand: #6A3BE0; --brand-deep: #4A25B5; --brand-cyan: #B79CFF; --brand-gold: #FF9A4D;
   --bg: #F3F0FA; --surface-alt: #EFE9FE; --chart-primary: #6A3BE0;
 }
@@ -101,15 +102,34 @@ body[data-module="home"] .boardbox select.hot.ind option { color: #222; font-siz
 .lf-f { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 13px; color: var(--text-sub); font-weight: 600; }
 .lf-f input, .lf-f select { font: inherit; font-size: 16px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--text); }
 .lf-f input:focus, .lf-f select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(106, 59, 224, .15); }
+.lf-sub { margin: -6px 0 14px; color: var(--text-sub); font-size: 13px; }
+.lf-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lf-mode .opt { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 16px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; cursor: pointer; }
+.lf-mode .opt b { display: block; font-size: 17px; color: var(--text); white-space: nowrap; }
+.lf-mode .opt span { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+.lf-mode .opt.on { border-color: var(--brand); background: var(--surface-alt); box-shadow: 0 0 0 3px rgba(106, 59, 224, .15); }
+.lf-mode .opt.on b { color: var(--brand); }
+.lf-when { display: flex; gap: 8px; flex-wrap: wrap; }
+.lf-when .pill { padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; font-size: 14px; color: var(--text); cursor: pointer; }
+.lf-when .pill.on { border-color: var(--brand); background: var(--brand); color: #fff; }
 .lf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .lf-agree { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-sub); margin: 4px 0 8px; }
 .lf-msg { min-height: 18px; color: var(--risk); font-size: 13px; margin-bottom: 6px; }
 .lf-acts { display: flex; justify-content: flex-end; gap: 10px; }
-.lf .btn.ghost { background: var(--surface-alt); color: var(--text); }
+.lf .btn.ghost { background: #fff; color: var(--text-sub); border: 1.5px solid var(--line); box-shadow: none; }
+.lf .btn[type=submit] { background: linear-gradient(135deg, var(--brand-deep), var(--brand)); color: #fff; border: 0; box-shadow: 0 8px 20px rgba(106, 59, 224, .28); padding-left: 28px; padding-right: 28px; }
 .lf-done { text-align: center; } .lf-done b { font-size: 22px; display: block; margin-bottom: 6px; } .lf-done p { color: var(--text-sub); margin: 0 0 12px; } .lf-done svg { width: 160px; height: 160px; margin: 0 auto 14px; display: block; }
 
 /* ---------- 站位：pad 放大 ---------- */
 body[data-station="pad"] { --scale: 1.22; --topbar: 76px; }
 body[data-station="pad"] .rail { display: none; }
 body[data-station="pad"] .app { grid-template-columns: 1fr; }
+}
+
+/* ---------- m2 / m3 末屏：动线衔接按钮（接在交付物条下面） ---------- */
+@media screen {
+.flow-next { display: flex; justify-content: flex-end; margin: 10px 0 0; }
+.flow-next button { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 12px 22px; font-weight: 800; font-size: calc(15px * var(--scale));
+  color: #fff; background: linear-gradient(90deg, var(--m-ink, var(--brand-deep)), var(--m-pa, var(--brand))); box-shadow: 0 10px 24px color-mix(in srgb, var(--m-pa, var(--brand)) 30%, transparent); cursor: pointer; }
+.flow-next button .k { font-weight: 600; opacity: .8; font-size: .9em; }
 }

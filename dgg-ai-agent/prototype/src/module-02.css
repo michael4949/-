@@ -173,7 +173,3 @@
 body[data-module="m2"] .main, body[data-module="m3"] .main {
   --pa: var(--m-pa); --pa2: var(--m-pa2); --pa-ink: var(--m-ink); --pa-soft: var(--m-soft);
   --hd1: var(--m-hd1); --hd2: var(--m-hd2); --hdt: var(--m-hdt); --pd-line: var(--line); }
-body[data-module="m2"] .main > .pd-next, body[data-module="m3"] .main > .pd-next {
-  position: sticky; bottom: 0; z-index: 30; margin: 18px -32px -84px; padding: 12px 32px 14px;
-  background: rgba(255, 255, 255, .94); backdrop-filter: blur(8px); }
-@media print { body[data-module="m2"] .main > .pd-next, body[data-module="m3"] .main > .pd-next { display: none !important; } }

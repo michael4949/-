@@ -79,7 +79,7 @@
       else if (M.step === 'board') drawBoard();
       else drawReport();
     } finally { $root = host; }
-    mountGuide(work);
+    /* 工博会版：不叠加吸底引导条，用模块自带的「下一步」；末屏衔接见 deliverBar */
     sh.touch();
   }
   /* ---------- 现场引导：每屏常驻「下一步」；末屏（清单 / 报告）由外壳 FLOW 接到投入产出测算 ---------- */
@@ -126,7 +126,12 @@
     });
     sd.pains.forEach(function (q) { if (M.picks.length < rng.min && !have[q.id]) { M.picks.push({ id: q.id, severity: rng.severityDefault }); have[q.id] = 1; } });
   }
-  function deliverBar(host) { if (sh.deliver) sh.deliver(host, { items: ['场景优先级清单'], scene: NAME() }); }
+  function deliverBar(host) {
+    if (sh.deliver) sh.deliver(host, { items: ['场景优先级清单'], scene: NAME() });
+    /* 15 分钟动线：末屏接到下一站（m2 → 投入产出测算，m3 → 选一个场景深潜） */
+    var nx = sh.flowNext && sh.flowNext('m2');
+    if (nx) host.appendChild(h('div', { class: 'flow-next' }, [h('button', { onclick: function () { sh.go(nx.id); } }, [h('span', { class: 'k' }, ['下一步']), h('span', {}, [nx.label]), h('span', {}, ['→'])])]));
+  }
   function head(title) {
     $root.appendChild(h('div', { class: 'mod-head' }, [
       h('div', { class: 'crumb' }, [h('button', { onclick: function () { sh.go('home'); } }, ['首页']), ' / ']),

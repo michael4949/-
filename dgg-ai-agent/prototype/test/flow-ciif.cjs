@@ -9,7 +9,7 @@ const { chromium } = require('playwright'); const path = require('path');
   await p.click('.cn-all'); await p.waitForTimeout(300);
   await p.click('.boardbox, .topbar .home-link').catch(() => {}); await p.goto(f + '#/home'); await p.waitForTimeout(500);
   await p.click('.boardbox .hot[aria-label="场景优先级规划"]'); await p.waitForTimeout(700); log('2 首页→m2', await p.evaluate(() => location.hash));
-  for (let i = 0; i < 12; i++) { const t = await p.evaluate(() => { const g = document.querySelector('.pd-next .go'); return g ? g.innerText.replace(/\s+/g, ' ') : null; }); log('   m2/m3 next:', t, await p.evaluate(() => location.hash)); if (!t) break; await p.click('.pd-next .go'); await p.waitForTimeout(900); if (await p.evaluate(() => location.hash.startsWith('#/connect'))) break; }
+  for (let i = 0; i < 12; i++) { const t = await p.evaluate(() => { const g = document.querySelector('.pd-next .go, .flow-next button'); return g ? g.innerText.replace(/\s+/g, ' ') : null; }); log('   m2/m3 next:', t, await p.evaluate(() => location.hash)); if (!t) break; await p.click('.pd-next .go'); await p.waitForTimeout(900); if (await p.evaluate(() => location.hash.startsWith('#/connect'))) break; }
   log('3 m3 末屏→', await p.evaluate(() => location.hash));
   await p.click('.cn-scene.ok'); await p.waitForTimeout(800); log('4 接入页→场景', await p.evaluate(() => location.hash));
   for (let i = 0; i < 8; i++) { const done = await p.evaluate(() => !!document.querySelector('.dl-bar')); if (done) break; await p.click('.pd-next .go'); await p.waitForTimeout(700); }

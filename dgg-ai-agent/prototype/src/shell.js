@@ -222,8 +222,8 @@
     qrBox.appendChild(h('div', { class: 'cap' }, ['扫码领取报告 · 专家咨询']));
     $rail.appendChild(h('div', {}, [h('h4', {}, ['企业微信']), qrBox]));
     $rail.appendChild(h('div', {}, [
-      h('button', { class: 'btn lead', onclick: function () { window.DGG.lead.leadForm({}); } }, ['登记 · 预约 15 分钟演示']),
-      h('div', { class: 'lead-cnt', html: '今日已登记 <b>' + window.DGG.lead.count() + '</b> 条 · <a href="#" class="csv">导出</a>', onclick: function (e) { if (e.target.classList.contains('csv')) { e.preventDefault(); window.DGG.lead.exportCsv(); } } })
+      h('button', { class: 'btn lead', onclick: function () { window.DGG.lead.leadForm({}); } }, [h('b', {}, ['预约专家 · 入企 / 线上交流']), h('span', {}, ['顾问一对一 · 2 个工作日内联系'])]),
+      h('div', { class: 'lead-cnt', html: '已预约 <b>' + window.DGG.lead.count() + '</b> 家企业 · <a href="#" class="csv">导出</a>', onclick: function (e) { if (e.target.classList.contains('csv')) { e.preventDefault(); window.DGG.lead.exportCsv(); } } })
     ]));
   }
   function animateNum(el, from, to, ms) {
@@ -328,7 +328,7 @@
     holdIdle(true);
     var bg = h('div', { class: 'modal-bg', onclick: function (e) { if (e.target === bg) close(); } });
     var box = h('div', { class: 'modal', html: '<h3>扫码领取本报告</h3>' + qrSvg(CFG.wechatUrl, 6) + '<div class="cap">企业微信扫码 · 报告与专家咨询</div>' });
-    box.appendChild(h('button', { class: 'btn ghost', onclick: function () { close(); window.DGG.lead.leadForm({}); } }, ['留下联系方式，预约 15 分钟演示']));
+    box.appendChild(h('button', { class: 'btn ghost', onclick: function () { close(); window.DGG.lead.leadForm({}); } }, ['预约专家 · 入企 / 线上交流']));
     box.appendChild(h('button', { class: 'btn', onclick: close }, ['完成']));
     bg.appendChild(box); document.body.appendChild(bg);
     function close() { document.body.removeChild(bg); holdIdle(false); }

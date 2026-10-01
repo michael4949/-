@@ -331,7 +331,7 @@
     var NAME_MAP = [['AI CFO', 'AI现金流与经营预警'], ['AI ERP', 'AI工序级排程'], ['AI人力官', 'AI人岗匹配与用工合规'], ['AI法务', '合同风险审查'], ['AI流程提效', 'AI报工核验'], ['AI决策', 'AI经营指标分析'], ['企业AI高价值场景排序', '场景优先级规划'], ['企业AI投入ROI测算器', '投入产出测算']];
     function localize(t) {
       t = String(t == null ? '' : t);
-      if (/积分|收费|多少钱|价格/.test(t)) return '现场演示不计费。具体方案与报价请扫码联系展台专家，或点「登记 · 预约演示」。';
+      if (/积分|收费|多少钱|价格/.test(t)) return '现场演示不计费。具体方案与报价请扫码联系展台专家，或点「预约专家 · 入企 / 线上交流」。';
       NAME_MAP.forEach(function (m) { t = t.split(m[0]).join(m[1]); });
       return t;
     }

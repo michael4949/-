@@ -291,7 +291,9 @@ body[data-station="1"] .btn { min-height: 58px; }
 .idle .idle-banner .t { font-size: 26px; font-weight: 900; letter-spacing: 1px; }
 .idle .idle-banner .s { font-size: 14px; opacity: .8; margin-top: 4px; }
 .idle .idle-banner .q svg { width: 84px; height: 84px; background: #fff; padding: 5px; border-radius: 10px; display: block; }
-.rail .btn.lead { width: 100%; background: var(--brand); color: #fff; font-weight: 800; border-radius: 12px; padding: 12px; }
+.rail .btn.lead { width: 100%; background: linear-gradient(135deg, var(--brand-deep), var(--brand)); color: #fff; border-radius: 14px; padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; align-items: center; box-shadow: 0 10px 24px rgba(106, 59, 224, .28); }
+.rail .btn.lead b { font-weight: 800; font-size: calc(16px * var(--scale)); letter-spacing: .5px; }
+.rail .btn.lead span { font-weight: 500; font-size: calc(12px * var(--scale)); opacity: .85; }
 .rail .lead-cnt { font-size: 12px; color: var(--text-sub); margin-top: 8px; text-align: center; }
 .rail .lead-cnt b { color: var(--brand); } .rail .lead-cnt a { color: var(--brand); margin-left: 4px; }
 .modal .btn.ghost { background: var(--surface-alt); color: var(--text); margin-top: 8px; }
