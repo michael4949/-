@@ -15,6 +15,9 @@ if os.path.isdir(fdir):
             b64 = base64.b64encode(open(os.path.join(fdir, f), 'rb').read()).decode()
             w = '200 800' if m.group(2) == 'var' else m.group(2)
             faces.append("@font-face{font-family:'%s';font-style:normal;font-weight:%s;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}" % (m.group(1), w, b64))
+    for f in sorted(os.listdir(fdir)):
+        if f.endswith('.css'):
+            faces.append(open(os.path.join(fdir, f), encoding='utf-8').read())
 css = css.replace('/*__FONTS__*/', '\n'.join(faces))
 parts = ['data.js', 'data2.js', 'data3.js', 'data4.js', 'data5.js', 'state.js', 'scenes.js', 'xw.js', 'comp.js', 'upload.js', 'charts.js', 'charts2.js', 'app.js', 'p_home.js', 'p_people.js', 'p_sched.js', 'p_task.js', 'p_safety.js', 'p_train.js', 'p_doc.js', 'p_know.js', 'p_ledger.js', 'p_super.js', 'p_mgmt.js', 'p_auth.js', 'p_mgr.js', 'legend.js', 'intent.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)

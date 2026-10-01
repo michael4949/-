@@ -1427,3 +1427,189 @@ button.s{padding:4px 10px;font-size:11.5px;border-radius:7px}
 .abr>b.y,.advsum b.w,.card.kpi b.w,.crtc.y em,.cstat b.w,.dc.w .lv,.lv.w,.dstat b.w,.gldgap,.gldwarn b,.hero .nums b,.pc .st.o,.rd em,.sb .me i,.scorerow .big.w b,.sheat .c.warn,.tag.w,.ticket .pane div.it.tip,.tstat.w b,.wxd.w i,i.au.b,table.aut td.star{color:var(--warnt)}
 .abr>b.r,.card.kpi b.bad,.carerow em,.chip.bad .why,.cmd .tools em.rec,.cmpv.bad,.crtc.r em,.dstat b.bad,.gtrsum .note b.bad,.impact>div.bad i,.inp em.rec,.jf .err,.jobs div em,.kstar,.lv,.mono.b,.mrow>div b.bad,.pfco.lo,.pfr em.dn,.portcol .sixrows em.bad,.qs div.q .mark.bad,.root b,.rtile b,.scorerow .big.bad b,.sheat .c.bad,.sheet .veto,.tag.bad,.ticket .pane .fr.miss,.ticket .pane .fr.miss em.none,.ticket .pane div.it.bad,.ticket .pane div.it.miss,.tstat.bad b,table.t.evidr td.b{color:var(--badt)}
 @media (max-width:1400px){table.t.goals td.note{min-width:96px;font-size:11px}table.t.goals :is(th,td){padding-left:7px;padding-right:7px}}
+
+/* ===== 10/3 科技感视觉层（用户 10/2 指示：总体配色 / 构图 / 动效大调整，参考霓虹风格但保持浅色）=====
+   蓝 → 紫 → 青 渐变主色、极光底、玻璃卡片、发光按钮、渐变标题与图标牌、光球英雄区；状态色（绿 / 黄 / 红）与三个班组固定色不动。新增类一律 vt 前缀。 */
+:root{--bg:#f3f5fc;--paper:#fff;--tint:#eef2ff;--pril:#dbe4ff;--line:#e3e7f3;--line2:#cfd6e8;--ink:#0b1020;--ink2:#3b4663;--ink3:#687391;
+  --pri:#2f6bff;--prid:#1f4fd6;--vio:#7c4dff;--cyan:#06b6d4;--pink:#d946ef;--info:#0891b2;
+  --grad:linear-gradient(135deg,#2f6bff 0%,#7c4dff 55%,#c04bff 100%);--grad2:linear-gradient(135deg,#06b6d4,#2f6bff);--grad3:linear-gradient(135deg,#7c4dff,#d946ef);
+  --gradtx:linear-gradient(92deg,#0b1020 0%,#1d2f6e 40%,#2f6bff 100%);
+  --disp:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  --glass:rgba(255,255,255,.72);--glassb:rgba(255,255,255,.9);--vtsh:0 1px 0 rgba(255,255,255,.9) inset,0 14px 44px -20px rgba(47,107,255,.32),0 0 0 1px rgba(47,107,255,.06);--vtshh:0 1px 0 rgba(255,255,255,.9) inset,0 24px 60px -24px rgba(124,77,255,.45),0 0 0 1px rgba(124,77,255,.22)}
+/* ---- 极光底 + 点阵 ---- */
+body{background:#f3f5fc}
+body::before{content:'';position:fixed;inset:-18%;z-index:0;pointer-events:none;background:
+  radial-gradient(40% 38% at 16% 20%,rgba(47,107,255,.26),transparent 70%),
+  radial-gradient(34% 34% at 84% 14%,rgba(124,77,255,.22),transparent 70%),
+  radial-gradient(38% 36% at 72% 88%,rgba(6,182,212,.18),transparent 70%),
+  radial-gradient(28% 28% at 28% 84%,rgba(217,70,239,.12),transparent 70%);
+  filter:blur(44px);animation:vtaur 38s ease-in-out infinite alternate;will-change:transform}
+@keyframes vtaur{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-2.5%,2%) scale(1.06)}100%{transform:translate(2%,-2.5%) scale(1.02)}}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(47,107,255,.16) 1px,transparent 1.3px);background-size:26px 26px;-webkit-mask-image:radial-gradient(ellipse at 50% 42%,#000 25%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 42%,#000 25%,transparent 78%)}
+#app{position:relative;z-index:1}
+#main{background:transparent}
+/* ---- 标题字：Noto Sans SC Black ---- */
+.ph1 h2,.hero h4,.tmcard h3,.scopebar b,.sec b,.mbox h3,.mbox .t,.sb .brand b,.card .h b,.dc b.t,.side .sh .nm b,.spot .h b,.rt .rh b,.ph3 b,.bbh b{font-family:var(--disp);font-weight:900}
+.ph1 h2{font-size:28px;letter-spacing:-.4px;background:var(--gradtx);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:4px}
+.ph1 .vzeb{letter-spacing:1.5px;color:var(--ink3);font-family:var(--mono)}
+.ph1 .vzeb::before{content:'//';color:var(--pri);font-weight:800;letter-spacing:0}
+.ph1 .vzeb b{color:var(--pri)}
+.ph1 .vzeb::after{background:linear-gradient(90deg,rgba(47,107,255,.6),transparent);width:40px}
+.scopebar b{font-size:17px}
+.scopebar i{background:var(--grad);box-shadow:0 6px 14px -6px rgba(124,77,255,.6)}
+.scopebar.p i{background:linear-gradient(135deg,#64748b,#94a3b8)}
+.sec b{font-size:16px}
+.sec i{width:6px;height:18px;border-radius:3px;background:var(--grad)}
+.sec i.v{background:var(--grad3)}.sec i.c,.sec i.g{background:var(--grad2)}
+/* ---- 左栏：玻璃面板 · 渐变图标牌按故事线段落配色 · 渐变序号 ---- */
+.sb{background:rgba(255,255,255,.62);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-right:1px solid rgba(255,255,255,.8);box-shadow:1px 0 0 rgba(47,107,255,.06)}
+.sb .brand{border-bottom:1px solid rgba(47,107,255,.1)}
+.sb .brand b{font-size:14.5px;background:var(--gradtx);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sb .grp{color:var(--ink2);font-family:var(--mono);letter-spacing:1px}
+.sb .grp::before{background:var(--grad);border:0;color:#fff;box-shadow:0 4px 10px -4px rgba(47,107,255,.7)}
+.sb .grp[data-g="2"]::before{background:var(--grad3);box-shadow:0 4px 10px -4px rgba(217,70,239,.6)}
+.sb .grp[data-g="3"]::before{background:var(--grad2);box-shadow:0 4px 10px -4px rgba(6,182,212,.6)}
+.sb .grp::after,.sb a::before{background:rgba(47,107,255,.14)}
+.sb a{padding:6px 10px 6px 34px;border-radius:10px;color:var(--ink2)}
+.sb a i,.sb a i.v,.sb a i.g,.sb a i.o,.sb a i.c,.sb a i.r{width:26px;height:26px;border-radius:8px;background:var(--grad);color:#fff;box-shadow:0 6px 14px -6px rgba(47,107,255,.65),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .25s var(--ease),box-shadow .25s}
+.sb a[data-g="2"] i{background:var(--grad3);box-shadow:0 6px 14px -6px rgba(217,70,239,.6),inset 0 1px 0 rgba(255,255,255,.45)}
+.sb a[data-g="3"] i{background:var(--grad2);box-shadow:0 6px 14px -6px rgba(6,182,212,.6),inset 0 1px 0 rgba(255,255,255,.45)}
+.sb a i svg{stroke:#fff;width:14px;height:14px;stroke-width:1.9;filter:drop-shadow(0 1px 1px rgba(0,0,0,.2))}
+.sb a:hover{background:rgba(47,107,255,.07);color:var(--ink)}
+.sb a:hover i{transform:translateY(-1px) scale(1.06)}
+.sb a.on{background:rgba(255,255,255,.85);color:var(--pri);box-shadow:0 10px 24px -14px rgba(47,107,255,.45),0 0 0 1px rgba(47,107,255,.18)}
+.sb a.on::before{background:var(--grad)}
+.sb a.on i{color:#fff}
+.sb .vzind{background:rgba(47,107,255,.08)}
+.sb a em{background:var(--grad3);box-shadow:0 4px 10px -4px rgba(217,70,239,.7)}
+.sb .me i{background:var(--grad);color:#fff}
+.sb .me .rsw button.on{background:var(--grad);border-color:transparent}
+/* ---- 命令栏：玻璃 + 渐变 AI 点 ---- */
+.cmd{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glassb);box-shadow:var(--vtsh)}
+.cmd:focus-within{border-color:rgba(47,107,255,.5);box-shadow:0 0 0 4px rgba(47,107,255,.14),var(--vtsh)}
+.cmd .ic{background:var(--grad);box-shadow:0 0 0 0 rgba(124,77,255,.4);animation:vtpulse 2.6s ease-out infinite}
+@keyframes vtpulse{0%,100%{box-shadow:0 0 0 0 rgba(124,77,255,.45)}60%{box-shadow:0 0 0 8px rgba(124,77,255,0)}}
+.cmd .tools em{background:rgba(255,255,255,.7);border-color:rgba(47,107,255,.15)}
+.cmd .sug b{background:rgba(255,255,255,.75);border-color:rgba(47,107,255,.16);color:var(--ink2)}
+.cmd .sug b:hover{background:var(--tint);border-color:var(--pri);color:var(--pri);box-shadow:0 8px 18px -10px rgba(47,107,255,.5)}
+/* ---- 卡片：玻璃 · 蓝紫投影 · 悬停辉光 ---- */
+.card,.dc,.mets>div,.gauge3>div,.steps5>div,.hero,.hero .nums div,.kpit,.scorerow .big,.mini3,.tmgoal,.rt,.mcard,.docit{background:var(--glass);border:1px solid var(--glassb);box-shadow:var(--vtsh);transition:box-shadow .3s var(--ease),transform .25s var(--ease),border-color .25s}
+.card:hover,.dc:hover{box-shadow:var(--vtshh);transform:translateY(-2px)}
+.card .h{border-bottom:1px solid rgba(47,107,255,.1)}
+.card .h b{display:flex;align-items:center;gap:8px;font-size:14.5px;letter-spacing:-.1px}
+.card .h b::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--grad);box-shadow:0 0 0 3px rgba(47,107,255,.14);flex:none}
+.card.pleg{background:rgba(255,255,255,.45);border:1px dashed rgba(47,107,255,.25);box-shadow:none}
+.card.pleg .h b::before{display:none}
+.dc::before{height:3px;background:var(--grad)}.dc.ok::before{background:linear-gradient(90deg,#18b97a,#3ad29a)}.dc.w::before{background:linear-gradient(90deg,#d97706,#f59e0b)}.dc:not(.ok):not(.w):not(.n)::before{background:linear-gradient(90deg,#e5484d,#ff7e5f)}
+.dc b.t{font-size:15px}
+.lv{background:var(--tint);color:var(--pri)}
+.kpit:hover,.hero .nums div:hover,.rt:hover,.docit:hover{box-shadow:var(--vtshh);border-color:rgba(124,77,255,.3)}
+/* ---- 大数字：渐变字 ---- */
+.scorerow .big b,.card.kpi b:not(.g):not(.w):not(.bad),.mets>div b,.gauge3>div b,.mxi b,.dstat b:not(.g):not(.w):not(.bad),.hero .nums b,.flowbar>div b,.tstat b:not(.g):not(.w):not(.bad),.aubig b,.mini3 b,.six div b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.scorerow .big.w b,.scorerow .big.bad b,.scorerow .big.ok b{background:none;-webkit-text-fill-color:initial}
+.scorerow .big.ok b{color:var(--ok)}.scorerow .big.w b{color:var(--warn)}.scorerow .big.bad b{color:var(--bad)}
+.card.kpi::before{background:var(--grad)}
+/* ---- 按钮：渐变发光 + 流光 ---- */
+button.b,.bt button,.jobs div.job span.ops button,.inp button,.ph1 .r button.pri{background:var(--grad);background-size:200% 100%;background-position:0 0;border:0;color:#fff;box-shadow:0 10px 22px -10px rgba(124,77,255,.75),inset 0 1px 0 rgba(255,255,255,.35);transition:background-position .5s var(--ease),transform .15s var(--ease),box-shadow .25s}
+button.b:hover,.bt button:hover,.inp button:hover{background-position:100% 0;transform:translateY(-1px);box-shadow:0 16px 30px -12px rgba(124,77,255,.85),inset 0 1px 0 rgba(255,255,255,.35)}
+button.b:active,.bt button:active{transform:translateY(0) scale(.98)}
+button.g,.bt button.g,.jobs div.job span.ops button.g,.ph1 .r button,.spot .h button,button{background:rgba(255,255,255,.78);border:1px solid rgba(47,107,255,.18);color:var(--ink2);box-shadow:0 1px 0 rgba(255,255,255,.8) inset}
+button.g:hover,.bt button.g:hover,.ph1 .r button:hover,button:hover{border-color:rgba(47,107,255,.5);color:var(--pri);background:#fff;box-shadow:0 10px 22px -12px rgba(47,107,255,.45)}
+.tabs{border-bottom-color:rgba(47,107,255,.12)}
+.tabs button.on::after{background:var(--grad);height:3px;border-radius:3px}
+.tag{background:rgba(47,107,255,.1);color:var(--pri)}
+.tag.v{background:rgba(124,77,255,.12);color:var(--vio)}.tag.c,.tag.n{background:rgba(6,182,212,.12);color:var(--info)}
+.rag{box-shadow:0 0 0 2px #fff,0 0 0 3.5px currentColor,0 0 10px currentColor}
+/* ---- 表格 ---- */
+table.t th{color:var(--ink3);border-bottom:1px solid rgba(47,107,255,.14)}
+table.t td{border-bottom:1px solid rgba(47,107,255,.08)}
+table.t tr:hover td{background:rgba(47,107,255,.05)}
+.tbl{border-radius:10px}
+/* ---- 进度条 / 图表发光 ---- */
+.mt .tr i,.dimbar i,.hndbar i,.star8 .barw i,.chip .hb i,.mod .bar i,.prog .pb i{background:var(--grad)}
+.mt .tr i.full,.hndbar i{background:linear-gradient(90deg,#18b97a,#3ad29a)}.mt .tr i.low{background:linear-gradient(90deg,#f59e0b,#e8791d)}
+.dimbar.ok i{background:linear-gradient(90deg,#18b97a,#3ad29a)}.dimbar.w i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}.dimbar.bad i{background:linear-gradient(90deg,#e5484d,#ff7e5f)}
+.mt .tr,.dimbar,.hndbar,.star8 .barw{background:rgba(47,107,255,.08)}
+.ch .ln{filter:drop-shadow(0 3px 5px rgba(47,107,255,.35))}
+.ch .poly{filter:drop-shadow(0 6px 12px rgba(47,107,255,.25))}
+.ch .dot{filter:drop-shadow(0 2px 4px rgba(47,107,255,.4))}
+.ch .grid{stroke:rgba(47,107,255,.1)}
+.legend i{box-shadow:0 2px 6px -2px currentColor}
+/* ---- 工作台英雄区：光球 + 轨道环 + 渐变问候 ---- */
+.hero{position:relative;overflow:hidden;min-height:156px;background:linear-gradient(115deg,rgba(255,255,255,.92),rgba(255,255,255,.66) 60%,rgba(238,242,255,.7));padding:18px 22px}
+.hero>div{position:relative;z-index:1}
+.hero .heroxw{position:relative;z-index:1;filter:drop-shadow(0 12px 18px rgba(47,107,255,.35))}
+.hero h4{font-size:24px;letter-spacing:-.3px;background:var(--gradtx);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h4 em{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.hero .g{font-family:var(--mono);letter-spacing:.5px;color:var(--ink3)}
+.hero .g::before{content:'// ';color:var(--pri);font-weight:800}
+.hero .sub{font-size:13px;color:var(--ink2)}
+.hero .nums{gap:10px}
+.hero .nums div{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);background:rgba(255,255,255,.66)}
+.vtorb{position:absolute;right:318px;top:50%;width:230px;height:230px;margin-top:-115px;pointer-events:none;z-index:0;perspective:700px;transform-style:preserve-3d;--rx:72deg;--rz:-20deg}
+.vtorb i{position:absolute;display:block;border-radius:50%}
+.vtorb .o1{inset:20%;background:radial-gradient(circle at 32% 28%,#fff 0%,#d6e3ff 16%,#86a7ff 42%,#6c63ff 68%,#a455ff 100%);box-shadow:0 26px 70px -14px rgba(90,90,255,.55),inset -16px -20px 44px rgba(60,40,170,.32),0 0 0 10px rgba(124,77,255,.06),0 0 0 22px rgba(47,107,255,.04);animation:vtfloat 7s ease-in-out infinite}
+.vtorb .o2,.vtorb .o3{inset:0;border:1.5px solid transparent;background:linear-gradient(#fff0,#fff0) padding-box,conic-gradient(from 0deg,rgba(47,107,255,0) 0%,rgba(47,107,255,.95) 28%,rgba(192,75,255,.95) 52%,rgba(6,182,212,.0) 78%) border-box;animation:vtring 16s linear infinite;filter:drop-shadow(0 0 6px rgba(124,77,255,.45))}
+.vtorb .o3{inset:-14%;--rx:66deg;--rz:40deg;animation-duration:26s;animation-direction:reverse;opacity:.7}
+@keyframes vtring{from{transform:rotateX(var(--rx)) rotateZ(var(--rz))}to{transform:rotateX(var(--rx)) rotateZ(calc(var(--rz) + 360deg))}}
+@keyframes vtfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* ---- 右栏：玻璃 · 小瓦特光环 · 渐变气泡 ---- */
+.side{background:rgba(255,255,255,.62);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-left:1px solid rgba(255,255,255,.8)}
+.side .sh{border-bottom:1px solid rgba(47,107,255,.1)}
+.side .sh .nm b{background:var(--gradtx);-webkit-background-clip:text;background-clip:text;color:transparent}
+.side .sh.full .xw .ring{background:radial-gradient(ellipse at 50% 45%,rgba(47,107,255,.32),rgba(124,77,255,.16) 50%,rgba(6,182,212,.08) 70%,transparent 76%);filter:blur(6px)}
+.side .sh.full .xw::before{content:'';position:absolute;left:50%;top:58%;width:150px;height:56px;margin:-28px 0 0 -75px;border-radius:50%;border:1.5px solid transparent;background:linear-gradient(#fff0,#fff0) padding-box,conic-gradient(from 90deg,rgba(47,107,255,0),rgba(47,107,255,.9) 30%,rgba(192,75,255,.9) 55%,rgba(6,182,212,0) 80%) border-box;animation:vtspin 12s linear infinite;pointer-events:none;z-index:0}
+@keyframes vtspin{to{transform:rotate(360deg)}}
+.side .sh.full .xw img.full{z-index:1}
+.side .sub{background:linear-gradient(135deg,rgba(47,107,255,.1),rgba(124,77,255,.08));border-left:3px solid transparent;border-image:var(--grad) 1;color:var(--ink2)}
+.side .sub::before{color:var(--pri)}
+.msg.a{background:rgba(255,255,255,.8);border:1px solid rgba(47,107,255,.12);box-shadow:0 8px 20px -14px rgba(47,107,255,.3)}
+.msg.u{background:var(--grad);color:#fff;box-shadow:0 10px 22px -12px rgba(124,77,255,.6)}
+.msg.u .wave i{background:#fff}
+.inp{background:rgba(255,255,255,.8);border-color:rgba(47,107,255,.2)}
+.inp:focus-within{border-color:rgba(47,107,255,.5);box-shadow:0 0 0 4px rgba(47,107,255,.12)}
+.inp em{background:var(--tint);color:var(--pri)}
+/* ---- 弹层 / 聚光 / 提示 / 讲师演示台 ---- */
+#modal{background:rgba(11,16,32,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.mbox{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);box-shadow:0 40px 100px -24px rgba(31,47,110,.45),0 0 0 1px rgba(47,107,255,.1)}
+.spot .box{background:rgba(255,255,255,.94);border-color:rgba(47,107,255,.2)}
+.fly{border-left-width:3px;box-shadow:0 14px 34px -14px rgba(47,107,255,.35)}
+.tip{background:#0b1020}
+.stagebtn{background:rgba(255,255,255,.8);border-color:rgba(47,107,255,.2);color:var(--ink3)}
+.stage{background:rgba(255,255,255,.92);backdrop-filter:blur(12px)}
+.stage button{background:var(--tint);color:var(--pri)}.stage button.on{background:var(--grad);color:#fff}
+.vzfab{background:var(--grad);color:#fff;border:0;box-shadow:0 14px 30px -10px rgba(124,77,255,.7)}.vzfab i{background:#fff}
+.chip.lead,.chip.pick{box-shadow:0 8px 18px -10px rgba(47,107,255,.5)}
+.six div{border-top-width:3px}.six div:nth-child(1){border-top-color:var(--pri)}.six div:nth-child(5){border-top-color:var(--vio)}
+.honor{background:linear-gradient(90deg,#fff8e1,rgba(255,255,255,.7))}
+.startag{background:linear-gradient(135deg,#fff8e1,#fff3c4);border-color:#f0dc8f;box-shadow:0 8px 18px -10px rgba(201,162,39,.6)}
+.alert.bad{background:rgba(229,72,77,.08);border:1px solid rgba(229,72,77,.2)}
+.updir{background:rgba(47,107,255,.06)}
+.updir b{color:var(--pri)}
+@media (max-width:1366px){.vtorb{right:290px;width:190px;height:190px;margin-top:-95px}}
+@media (max-width:1180px){.vtorb{right:-30px;top:-40px;margin-top:0;opacity:.7}}
+@media (max-width:960px){.vtorb{display:none}}
+/* ---- 10/3 修正：光球不参与网格（.hero>div 优先级覆盖）、KPI 卡状态色带、问候字号 ---- */
+.hero .vtorb{position:absolute;z-index:0;right:40px;top:-74px;margin-top:0;width:250px;height:250px}
+.hero>div.vtorb{position:absolute}
+.card.kpi:has(b.g)::before{background:linear-gradient(180deg,#18b97a,#3ad29a)}.card.kpi:has(b.w)::before{background:linear-gradient(180deg,#d97706,#f59e0b)}.card.kpi:has(b.bad)::before{background:linear-gradient(180deg,#e5484d,#ff7e5f)}
+.hero h4{font-size:26px}
+/* ---- 10/3 构图修正：英雄区改两行（问候 / 数字牌）+ 右侧光球独占，牌子不再被光球压住 ---- */
+.hero,.hero.hasxw{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;min-height:196px;padding:20px 300px 18px 22px;gap:6px 18px}
+.hero .heroxw{grid-column:1;grid-row:1/3;height:118px;align-self:center}
+.hero>div:not(.vtorb):not(.nums){grid-column:2;grid-row:1}
+.hero .nums{grid-column:2;grid-row:2;justify-content:flex-start;margin-top:4px}
+.hero .sub{min-height:0}
+.hero .vtorb{right:30px;top:50%;margin-top:-128px;width:256px;height:256px}
+@media (max-width:1500px){.hero,.hero.hasxw{padding-right:270px}.hero .vtorb{right:22px;width:230px;height:230px;margin-top:-115px}}
+@media (max-width:1366px){.hero,.hero.hasxw{padding-right:230px}.hero .vtorb{right:14px;width:200px;height:200px;margin-top:-100px}}
+@media (max-width:1180px){.hero,.hero.hasxw{padding-right:170px}.hero .vtorb{right:-20px;width:190px;height:190px;margin-top:-95px;opacity:.75}}
+@media (max-width:960px){.hero,.hero.hasxw{padding-right:22px}.hero .vtorb{display:none}.hero .heroxw{display:none}}
+/* ---- 10/3 对比度：小字主色用深蓝（AA）、按钮渐变略深、青色标签文字加深 ---- */
+:root{--gradbtn:linear-gradient(135deg,#2a62ea 0%,#6b3fe0 55%,#9333ea 100%)}
+.num,.tag:not(.ok):not(.w):not(.bad):not(.v):not(.c):not(.n),.sb a.on,.sb a.on i,.lv:not(.w):not(.ok):not(.c),.updir b,.side .sub::before,.sb .me .rsw button.on,.inp em,.cmd .tools em:hover,.doc .chips b,.rel b,.kbq b:hover,.tabs button.on,.tabs button:hover,.hero .g::before,.ph1 .vzeb b,.ph1 .vzeb::before{color:var(--prid)}
+.sb a.on i{color:#fff}
+.tag.c,.tag.n,.kc i,.kba .src{color:#0e7490}
+button.b,.bt button,.jobs div.job span.ops button,.inp button,.ph1 .r button.pri,.vzfab,.stage button.on,.msg.u{background-image:var(--gradbtn)}
+.msg.u{background:var(--gradbtn)}
+@media (max-width:960px){.sb .me i{margin:0 auto}.sb a.on{box-shadow:0 0 0 1px rgba(47,107,255,.18)}}

@@ -58,9 +58,9 @@ function shell() {
   $('#side').innerHTML = XW.sideHTML();
 }
 function renderNav() {
-  const R = ROLES[role()]; const NAV = NAV_OF();
+  const R = ROLES[role()]; const NAV = NAV_OF(); renderNav.__g = 0;
   $('#sb').innerHTML = '<div class="brand"><img src="__LOGO__" alt=""><div><b>高效班组管理助手</b><span>' + h(TAGLINE) + '</span></div></div>' +
-    NAV.map(n => n.g ? '<div class="grp">' + n.g + '</div>' : '<a class="' + (S.page === n.k ? 'on' : '') + '" data-act="nav" data-to="' + n.k + '"><i class="' + (n.i || '') + '">' + '<svg viewBox="0 0 24 24">' + ICO[n.ic] + '</svg></i><span>' + n.n + '</span>' + (n.badge && n.badge() ? '<em>' + n.badge() + '</em>' : '') + '</a>').join('') +
+    NAV.map(n => n.g ? (renderNav.__g = (renderNav.__g || 0) + 1, '<div class="grp" data-g="' + renderNav.__g + '">' + n.g + '</div>') : '<a class="' + (S.page === n.k ? 'on' : '') + '" data-g="' + (renderNav.__g || 1) + '" data-act="nav" data-to="' + n.k + '"><i class="' + (n.i || '') + '">' + '<svg viewBox="0 0 24 24">' + ICO[n.ic] + '</svg></i><span>' + n.n + '</span>' + (n.badge && n.badge() ? '<em>' + n.badge() + '</em>' : '') + '</a>').join('') +
     '<div class="me" data-act="role-menu"><i>' + h(R.who[0]) + '</i><div>' + h(R.who) + '<span>' + h(R.scope) + ' · ' + h(R.n) + '</span></div><div class="rsw">' + Object.keys(ROLES).map(k => '<button data-act="role-set" data-r="' + k + '" class="' + (k === role() ? 'on' : '') + '">' + ROLES[k].n + '</button>').join('') + '</div></div>';
   const sn = $('#stagenav'); if (sn) sn.innerHTML = NAV.filter(n => n.k).map(n => '<button data-act="nav" data-to="' + n.k + '">' + n.n + '</button>').join('');
   vzNavInd();
