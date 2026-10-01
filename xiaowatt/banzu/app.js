@@ -52,16 +52,24 @@ const STATUS_LIST = [
   ['预设展示', ['工作量（工分）为按工分制考核台账口径预设的月度值；人员性别、学历、政治面貌为预设', '待客户确认：核心业务自主实施能力的定义与展示方式（现按作业授权认证表 已授权★模块 ÷ 本岗级应授权★模块）', '待客户确认：星级评价模型、综合评价模型是否接入（现为按分册维度的初步评分与员工画像综合画像）', '待客户确认：班组荣誉标签与核心指标口径（现取荣誉台账集体荣誉与班长年度业绩责任书四项）', '考核指标当前值：综合供电可靠率、中压线路故障跳闸次数、第三方客户满意度、安全生产责任制履职评价（局级）与三个班组的中压客户平均停电时间、跳闸次数、停电用户数降幅、安全生产过程管理（试验班、配电运维一班）为预设；配电自动化班与试验班班长责任书指标值暂按配电运行维护一班班长责任书模板；重点任务完成情况、创新成果与加扣分事项为预设', '团队风险画像的敏感岗位轮岗只针对三位班长，轮岗期 5 年为预设，待部门确认', '专业画像暂按运维班高级作业员岗位说明书的 9 项二级业务，配电自动化班岗位说明书待提供后替换；综合画像与专业画像的各人初始等级为预设', '作业授权认证表暂用运维班口径（7 单元 42 模块、★按岗级），配电自动化班专用认证表待提供后替换；各人初始授权状态为预设，原九类核心技能的授权与实操次数已迁移到对应模块', '星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
   ['待系统对接', ['工分制考核台账（月度工分）', 'OMS 缺陷与工单同步', 'OCS 终端在线状态', '电网管理平台两票与作业计划', '人资证书 / 学时 / 考勤 / 绩效台账', '党建管理系统与荣誉台账', '通知推送到个人', 'PDF 与照片文字读取']]
 ];
-/* 背景流动光线（每页常驻）：四条长曲线上各有一段发光的流光来回走；不用颗粒 / 球体 */
-function vtFlowSVG() {
-  const P = ['M-100 180 C 300 60, 700 320, 1100 180 S 1700 40, 2000 220', 'M-100 520 C 400 420, 600 700, 1000 560 S 1600 380, 2000 540', 'M-100 820 C 300 700, 800 900, 1200 760 S 1700 640, 2000 800', 'M200 -50 C 500 300, 300 650, 900 980'];
-  return '<svg class="vtflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
-    '<linearGradient id="vtg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee" stop-opacity="0"/><stop offset=".4" stop-color="#3b82f6"/><stop offset=".7" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></linearGradient>' +
-    '<linearGradient id="vtg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6" stop-opacity="0"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>' +
-    P.map((d, i) => '<path class="vtrail" d="' + d + '"/><path class="vtbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vtg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+/* 背景光圈光带（每页常驻）：多道柔和的光弧 / 光环 / 光线交叠，缓慢绕行、呼吸、漂移（用户 10/3 三轮：要参考图红框里那种柔和光线与光圈，不是细线、不是颗粒 / 球体） */
+function vtRing(cls, vars) { return '<i class="r ' + cls + '" style="' + vars + '"><s class="gl"></s><s class="co"></s></i>'; }
+function vtLightHTML() {
+  return '<div class="vtlight" aria-hidden="true">' +
+    '<div class="vtl a">' + vtRing('r1', '--tx:68deg;--tz:-20deg;--c1:#22d3ee;--c2:#3b82f6;--c3:#8b5cf6;--d:46s') + vtRing('r2', '--tx:58deg;--tz:32deg;--c1:#8b5cf6;--c2:#ec4899;--c3:#f9a8d4;--d:58s;--dir:reverse') + vtRing('r3', '--tx:76deg;--tz:-56deg;--c1:#fb923c;--c2:#f472b6;--c3:#a78bfa;--d:72s') + '<b class="rb"></b></div>' +
+    '<div class="vtl b">' + vtRing('r1', '--tx:70deg;--tz:24deg;--c1:#3b82f6;--c2:#22d3ee;--c3:#67e8f9;--d:52s') + vtRing('r2', '--tx:60deg;--tz:-34deg;--c1:#a78bfa;--c2:#8b5cf6;--c3:#3b82f6;--d:64s;--dir:reverse') + '<b class="rb"></b></div>' +
+    '<div class="vtl c">' + vtRing('r1', '--tx:72deg;--tz:-10deg;--c1:#ec4899;--c2:#8b5cf6;--c3:#22d3ee;--d:50s') + vtRing('r3', '--tx:64deg;--tz:48deg;--c1:#22d3ee;--c2:#3b82f6;--c3:#a78bfa;--d:66s;--dir:reverse') + '</div>' +
+    '<u class="vtray" style="--x:-8%;--y:36%;--a:-22deg;--l:1100px;--c1:#60a5fa;--c2:#c084fc;--d:16s"></u>' +
+    '<u class="vtray" style="--x:42%;--y:-4%;--a:38deg;--l:900px;--c1:#22d3ee;--c2:#3b82f6;--d:21s;--dl:-9s"></u>' +
+    '<u class="vtray" style="--x:52%;--y:72%;--a:-16deg;--l:1000px;--c1:#f472b6;--c2:#a78bfa;--d:19s;--dl:-5s"></u>' +
+    '</div>';
+}
+/* 英雄面板右侧的光圈组（深色面板上更亮） */
+function vtHeroLight() {
+  return '<div class="vtl h" aria-hidden="true">' + vtRing('r1', '--tx:66deg;--tz:-18deg;--c1:#67e8f9;--c2:#60a5fa;--c3:#a78bfa;--d:34s') + vtRing('r2', '--tx:56deg;--tz:34deg;--c1:#a78bfa;--c2:#f472b6;--c3:#fbcfe8;--d:44s;--dir:reverse') + vtRing('r3', '--tx:78deg;--tz:-58deg;--c1:#fb923c;--c2:#f472b6;--c3:#c4b5fd;--d:56s') + '<b class="rb"></b></div>';
 }
 function shell() {
-  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtFlowSVG() +
+  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtLightHTML() +
     '<button class="vzfab" data-act="side-toggle"><i></i>小瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
   $('#side').innerHTML = XW.sideHTML();
 }

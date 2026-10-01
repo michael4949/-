@@ -92,6 +92,7 @@ python3 gen_samples.py           # 重新生成 samples/ 两票样例（改票�
 - 拼接顺序：data.js → data2.js → data3.js → data4.js → state.js → scenes.js → xw.js → comp.js（派工四规则 `DISPATCH.judge/explain/tableHTML` / 照片识别 / 文稿流式 / 审票 / 值班表）→ upload.js → charts.js → charts2.js → app.js（两角色 `ROLES/NAV_OF/ALLOW`、路由、讲师演示台：角色 / 扩展模块 / 功能实现状态清单 / 案例日期）→ p_home.js → p_people.js → p_sched.js → p_task.js → p_safety.js → p_train.js → p_doc.js → p_know.js → p_ledger.js → p_super.js（旧管理者页，左栏已移除；跨班组调配 / 星级对标 / 人才梯队复用）→ **p_mgmt.js（班组长 · 班组管理六页）→ p_mgr.js（管理者八页）**；数据顺序 data.js → data2.js → data3.js → data4.js → **data5.js** → state.js → intent.js（按角色分流）。
 - 讲师演示台（右下角，唯一允许出现"演示"二字的地方）：角色切换、扩展模块开关、**功能实现状态清单**（真实实现 / 规则模拟 / 预设展示 / 待系统对接 四类，只在这里出现）、案例日期、语速、重播简报、清空本机记录、跳页。
 - 运行时钩子：`window.__XW_SPEED`（时长倍率，测试用 0.03）。
+- 10/3 动效层（docs/02 第 64 条）：`app.js` `vtLightHTML()` 背景光圈光带（三组倾斜光环 + 光带 + 柔光线，每页常驻）、`vtHeroLight()` 工作台英雄面板光环组；卡片光边绕行、进度条光带、按钮闲时光扫等见 `style.css` 末尾。不用颗粒 / 球体。
 - 10/3 科技感视觉层（docs/02 第 63 条）：`style.css` 末尾 `vt` 前缀，浅色光影质感（饱和光源底 / 玻璃光边卡 / 发光按钮 / 深邃发光英雄面板），中文标题字 Noto Sans SC Black 子集内联；状态色与班组色不动。
 - 10/2 视觉升级层：`style.css` 末尾 `vz` 前缀；字体 `../assets/fonts/*.woff2` 由 build.py 内联到 `/*__FONTS__*/`；`node vis.cjs 1440x900 [前缀]` 两角色 21 页截图到 `shots/vis/` 供自检（docs/02 第 61 条）。
 

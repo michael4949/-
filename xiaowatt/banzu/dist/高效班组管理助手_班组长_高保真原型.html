@@ -1645,16 +1645,39 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 @media (max-width:1366px){.hero h4{font-size:24px}.hero .nums div{min-width:82px;padding:8px 12px}.hero .nums b{font-size:22px}}
 @media (max-width:960px){.hero,.hero.hasxw{grid-template-columns:1fr;padding:18px 18px 20px}.hero .heroxw{display:none}.hero>div:not(.nums),.hero .nums{grid-column:1}.hero .nums{flex-wrap:wrap}.sb .me i{margin:0 auto}}
 
-/* ===== 10/3 动效层（用户：每页都要有动效，更高级、有动感；不要颗粒 / 球体，用流动线条与光）===== */
+/* ===== 10/3 动效层（用户：每页都要有动效，更高级、有动感；不要颗粒 / 球体。三轮口径：要参考图红框那种多道柔和光弧、光环、光线交叠的发光构成）===== */
 @property --vta{syntax:'<angle>';inherits:false;initial-value:0deg}
-/* ---- 背景流动光线：四条长曲线 + 沿线走的流光 ---- */
-.vtflow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.9}
-.vtflow .vtrail{fill:none;stroke:rgba(59,130,246,.10);stroke-width:1.2}
-.vtflow .vtbeam{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:260 2600;stroke-dashoffset:2860;filter:drop-shadow(0 0 6px rgba(99,102,241,.55));animation:vtbeam 16s linear infinite}
-.vtflow .b2{animation-duration:22s;animation-delay:-7s;stroke-width:1.8}
-.vtflow .b3{animation-duration:19s;animation-delay:-12s}
-.vtflow .b4{animation-duration:26s;animation-delay:-4s;stroke-width:1.6}
-@keyframes vtbeam{to{stroke-dashoffset:0}}
+/* ---- 背景光圈光带（每页常驻）：三组光环（每环 = 宽柔光带 + 细亮芯，倾斜成椭圆，各自绕行）+ 三道柔和光线斜穿 ---- */
+.vtlight{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.vtl{position:absolute;perspective:1100px;animation:vtbreath 18s ease-in-out infinite}
+.vtl.a{width:800px;height:800px;right:-150px;top:-330px}
+.vtl.b{width:600px;height:600px;left:-190px;bottom:-250px;animation-delay:-8s}
+.vtl.c{width:460px;height:460px;left:36%;bottom:-290px;animation-delay:-4s}
+@keyframes vtbreath{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-14px,12px,0) scale(1.05)}}
+.vtl .r{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(var(--tx,66deg)) rotateZ(var(--tz,0deg))}
+.vtl .r2{inset:7%}.vtl .r3{inset:15%}
+.vtl .r s{position:absolute;inset:0;display:block;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 5%,var(--c1) 18%,var(--c2) 42%,var(--c3) 62%,transparent 84%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px));
+  animation:vtspin var(--d,40s) linear infinite;animation-direction:var(--dir,normal);will-change:transform}
+.vtl .r s.gl{--w:34px;filter:blur(24px);opacity:.72}
+.vtl .r s.co{--w:3px;filter:blur(.5px);opacity:.92}
+.vtl .r3 s.gl{--w:22px;filter:blur(18px);opacity:.6}
+@keyframes vtspin{to{transform:rotate(360deg)}}
+.vtl .rb{position:absolute;inset:30% -4%;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(59,130,246,.5) 35%,rgba(139,92,246,.55) 65%,transparent);filter:blur(36px);transform:rotate(-24deg);opacity:.55;animation:vtrib 15s ease-in-out infinite}
+@keyframes vtrib{0%,100%{transform:rotate(-24deg) translateX(-4%)}50%{transform:rotate(-20deg) translateX(4%);opacity:.75}}
+.vtray{position:absolute;display:block;height:2px;width:var(--l,900px);left:var(--x);top:var(--y);transform-origin:0 50%;
+  background:linear-gradient(90deg,transparent,var(--c1) 30%,var(--c2) 60%,transparent);filter:blur(1px);opacity:0;
+  animation:vtray var(--d,14s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+.vtray::before{content:'';position:absolute;inset:-18px 0;background:inherit;filter:blur(20px);opacity:.75}
+@keyframes vtray{0%{transform:rotate(var(--a)) translateX(-22%);opacity:0}35%,60%{opacity:.9}100%{transform:rotate(var(--a)) translateX(22%);opacity:0}}
+/* 英雄面板（工作台）右侧光圈组：深色面板上光更亮、更饱满 */
+.hero .vtl.h{position:absolute;grid-column:auto;grid-row:auto;right:-80px;top:-170px;width:500px;height:500px;z-index:0;animation-duration:16s}
+.hero .vtl.h .r s.gl{opacity:.95;--w:40px;filter:blur(26px)}
+.hero .vtl.h .r s.co{opacity:1;filter:blur(.3px) drop-shadow(0 0 6px rgba(255,255,255,.6))}
+.hero .nums div{background:rgba(10,14,38,.55);border-color:rgba(255,255,255,.22)}
+.hero .nums div:hover{background:rgba(10,14,38,.65)}
+.hero .vtl.h .rb{opacity:.7;background:linear-gradient(90deg,transparent,rgba(96,165,250,.7) 35%,rgba(167,139,250,.75) 65%,transparent)}
 /* ---- 卡片光边流光：一段亮光沿描边缓慢绕行（卡片各自错开相位） ---- */
 .card,.dc{position:relative}
 .card::after,.dc::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;opacity:.9;
@@ -1708,8 +1731,8 @@ button.b::after,.bt button:not(.g)::after,.inp button::after{content:'';position
 @keyframes vthalo{50%{transform:scale(1.06);opacity:.85}}
 .cmd .ic::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(124,58,237,.5);animation:vtringx 2.6s ease-out infinite}
 @keyframes vtringx{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
-@media (max-width:960px){.vtflow{opacity:.6}}
-@media (prefers-reduced-motion:reduce){.vtflow{display:none}.card::after,.dc::after{display:none}}
+@media (max-width:960px){.vtlight{opacity:.7}.vtl.c{display:none}}
+@media (prefers-reduced-motion:reduce){.vtlight,.hero .vtl.h{display:none}.card::after,.dc::after{display:none}}
 
 </style>
 </head>
@@ -3599,16 +3622,24 @@ const STATUS_LIST = [
   ['预设展示', ['工作量（工分）为按工分制考核台账口径预设的月度值；人员性别、学历、政治面貌为预设', '待客户确认：核心业务自主实施能力的定义与展示方式（现按作业授权认证表 已授权★模块 ÷ 本岗级应授权★模块）', '待客户确认：星级评价模型、综合评价模型是否接入（现为按分册维度的初步评分与员工画像综合画像）', '待客户确认：班组荣誉标签与核心指标口径（现取荣誉台账集体荣誉与班长年度业绩责任书四项）', '考核指标当前值：综合供电可靠率、中压线路故障跳闸次数、第三方客户满意度、安全生产责任制履职评价（局级）与三个班组的中压客户平均停电时间、跳闸次数、停电用户数降幅、安全生产过程管理（试验班、配电运维一班）为预设；配电自动化班与试验班班长责任书指标值暂按配电运行维护一班班长责任书模板；重点任务完成情况、创新成果与加扣分事项为预设', '团队风险画像的敏感岗位轮岗只针对三位班长，轮岗期 5 年为预设，待部门确认', '专业画像暂按运维班高级作业员岗位说明书的 9 项二级业务，配电自动化班岗位说明书待提供后替换；综合画像与专业画像的各人初始等级为预设', '作业授权认证表暂用运维班口径（7 单元 42 模块、★按岗级），配电自动化班专用认证表待提供后替换；各人初始授权状态为预设，原九类核心技能的授权与实操次数已迁移到对应模块', '星级评价中党建 / 标准化 / 定置 / 作业组织等非台账维度的初步得分', '试验班与配电运维一班人员明细、荣誉、稳定性', '敏感岗位任职、考勤异常、离职与借调等团队风险底数', '近 30 天出勤与近四季度成长轨迹', '照片隐患识别、语音转写']],
   ['待系统对接', ['工分制考核台账（月度工分）', 'OMS 缺陷与工单同步', 'OCS 终端在线状态', '电网管理平台两票与作业计划', '人资证书 / 学时 / 考勤 / 绩效台账', '党建管理系统与荣誉台账', '通知推送到个人', 'PDF 与照片文字读取']]
 ];
-/* 背景流动光线（每页常驻）：四条长曲线上各有一段发光的流光来回走；不用颗粒 / 球体 */
-function vtFlowSVG() {
-  const P = ['M-100 180 C 300 60, 700 320, 1100 180 S 1700 40, 2000 220', 'M-100 520 C 400 420, 600 700, 1000 560 S 1600 380, 2000 540', 'M-100 820 C 300 700, 800 900, 1200 760 S 1700 640, 2000 800', 'M200 -50 C 500 300, 300 650, 900 980'];
-  return '<svg class="vtflow" viewBox="0 0 1900 950" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>' +
-    '<linearGradient id="vtg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22d3ee" stop-opacity="0"/><stop offset=".4" stop-color="#3b82f6"/><stop offset=".7" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ec4899" stop-opacity="0"/></linearGradient>' +
-    '<linearGradient id="vtg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8b5cf6" stop-opacity="0"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>' +
-    P.map((d, i) => '<path class="vtrail" d="' + d + '"/><path class="vtbeam b' + (i + 1) + '" d="' + d + '" stroke="url(#vtg' + (i % 2 + 1) + ')"/>').join('') + '</svg>';
+/* 背景光圈光带（每页常驻）：多道柔和的光弧 / 光环 / 光线交叠，缓慢绕行、呼吸、漂移（用户 10/3 三轮：要参考图红框里那种柔和光线与光圈，不是细线、不是颗粒 / 球体） */
+function vtRing(cls, vars) { return '<i class="r ' + cls + '" style="' + vars + '"><s class="gl"></s><s class="co"></s></i>'; }
+function vtLightHTML() {
+  return '<div class="vtlight" aria-hidden="true">' +
+    '<div class="vtl a">' + vtRing('r1', '--tx:68deg;--tz:-20deg;--c1:#22d3ee;--c2:#3b82f6;--c3:#8b5cf6;--d:46s') + vtRing('r2', '--tx:58deg;--tz:32deg;--c1:#8b5cf6;--c2:#ec4899;--c3:#f9a8d4;--d:58s;--dir:reverse') + vtRing('r3', '--tx:76deg;--tz:-56deg;--c1:#fb923c;--c2:#f472b6;--c3:#a78bfa;--d:72s') + '<b class="rb"></b></div>' +
+    '<div class="vtl b">' + vtRing('r1', '--tx:70deg;--tz:24deg;--c1:#3b82f6;--c2:#22d3ee;--c3:#67e8f9;--d:52s') + vtRing('r2', '--tx:60deg;--tz:-34deg;--c1:#a78bfa;--c2:#8b5cf6;--c3:#3b82f6;--d:64s;--dir:reverse') + '<b class="rb"></b></div>' +
+    '<div class="vtl c">' + vtRing('r1', '--tx:72deg;--tz:-10deg;--c1:#ec4899;--c2:#8b5cf6;--c3:#22d3ee;--d:50s') + vtRing('r3', '--tx:64deg;--tz:48deg;--c1:#22d3ee;--c2:#3b82f6;--c3:#a78bfa;--d:66s;--dir:reverse') + '</div>' +
+    '<u class="vtray" style="--x:-8%;--y:36%;--a:-22deg;--l:1100px;--c1:#60a5fa;--c2:#c084fc;--d:16s"></u>' +
+    '<u class="vtray" style="--x:42%;--y:-4%;--a:38deg;--l:900px;--c1:#22d3ee;--c2:#3b82f6;--d:21s;--dl:-9s"></u>' +
+    '<u class="vtray" style="--x:52%;--y:72%;--a:-16deg;--l:1000px;--c1:#f472b6;--c2:#a78bfa;--d:19s;--dl:-5s"></u>' +
+    '</div>';
+}
+/* 英雄面板右侧的光圈组（深色面板上更亮） */
+function vtHeroLight() {
+  return '<div class="vtl h" aria-hidden="true">' + vtRing('r1', '--tx:66deg;--tz:-18deg;--c1:#67e8f9;--c2:#60a5fa;--c3:#a78bfa;--d:34s') + vtRing('r2', '--tx:56deg;--tz:34deg;--c1:#a78bfa;--c2:#f472b6;--c3:#fbcfe8;--d:44s;--dir:reverse') + vtRing('r3', '--tx:78deg;--tz:-58deg;--c1:#fb923c;--c2:#f472b6;--c3:#c4b5fd;--d:56s') + '<b class="rb"></b></div>';
 }
 function shell() {
-  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtFlowSVG() +
+  document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtLightHTML() +
     '<button class="vzfab" data-act="side-toggle"><i></i>小瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
   $('#side').innerHTML = XW.sideHTML();
 }
@@ -3738,7 +3769,7 @@ PAGES.home = {
     const s = HOMEPG.st(); const onsite = PEOPLE.filter(p => p.status === '在岗').length, out = PEOPLE.filter(p => p.status === '外勤').length; const j = DB.job(MAINLINE);
     const d = DISPATCH.defaults(j); const nr = DB.nodeRate(); const d5 = DB.defect('d5');
     return cmdHTML(['安排下周一田寮站 F02 的交接试验与验收', '黄伟强这周工时怎么算的', '今天还有几单没派', '周报里光明排名最靠后的是哪几项']) +
-      '<div class="hero' + (XW_IMGS && XW_IMGS.main ? ' hasxw' : '') + '">' + (XW_IMGS && XW_IMGS.main ? '<img class="heroxw" src="' + XW_IMGS.main + '" alt="">' : '') + '<div><div class="g">' + TODAY_CN + ' · ' + WEATHER + ' · <span id="clock">' + new Date().toTimeString().slice(0, 5) + '</span></div><h4>早上好，' + h(TEAM.leader) + ' · <em>小瓦特</em></h4><p class="sub" id="sub"></p></div>' +
+      '<div class="hero' + (XW_IMGS && XW_IMGS.main ? ' hasxw' : '') + '">' + vtHeroLight() + (XW_IMGS && XW_IMGS.main ? '<img class="heroxw" src="' + XW_IMGS.main + '" alt="">' : '') + '<div><div class="g">' + TODAY_CN + ' · ' + WEATHER + ' · <span id="clock">' + new Date().toTimeString().slice(0, 5) + '</span></div><h4>早上好，' + h(TEAM.leader) + ' · <em>小瓦特</em></h4><p class="sub" id="sub"></p></div>' +
       '<div class="nums"><div data-act="nav" data-to="sched"><b>' + DB.todayJobs().length + '</b><span>今日作业</span></div><div data-act="nav" data-to="sched"><b>' + HOMEPG.dispStat().sent + '</b><span>已派工</span></div><div data-act="home-to-disp"><b>' + HOMEPG.dispStat().pend.length + '</b><span>待派工</span></div><div data-act="nav" data-to="home"><b id="n1">' + HOMEPG.pending() + '</b><span>待拍板</span></div></div></div>' + HOMEPG.dispHTML() +
       '<div class="sec"><i></i><b>今日待拍板</b><em id="badge2">' + HOMEPG.pending() + '</em><span>决定由班组长作出</span></div>' +
       (typeof SUPER !== 'undefined' ? SUPER.transferBlock() : '') +
