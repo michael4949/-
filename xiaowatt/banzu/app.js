@@ -54,24 +54,57 @@ const STATUS_LIST = [
 ];
 function shell() {
   document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' +
-    '<button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
+    '<button class="vzfab" data-act="side-toggle"><i></i>小瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
   $('#side').innerHTML = XW.sideHTML();
 }
 function renderNav() {
   const R = ROLES[role()]; const NAV = NAV_OF();
   $('#sb').innerHTML = '<div class="brand"><img src="__LOGO__" alt=""><div><b>高效班组管理助手</b><span>' + h(TAGLINE) + '</span></div></div>' +
-    NAV.map(n => n.g ? '<div class="grp">' + n.g + '</div>' : '<a class="' + (S.page === n.k ? 'on' : '') + '" data-act="nav" data-to="' + n.k + '"><i class="' + (n.i || '') + '">' + '<svg viewBox="0 0 24 24">' + ICO[n.ic] + '</svg></i>' + n.n + (n.badge && n.badge() ? '<em>' + n.badge() + '</em>' : '') + '</a>').join('') +
+    NAV.map(n => n.g ? '<div class="grp">' + n.g + '</div>' : '<a class="' + (S.page === n.k ? 'on' : '') + '" data-act="nav" data-to="' + n.k + '"><i class="' + (n.i || '') + '">' + '<svg viewBox="0 0 24 24">' + ICO[n.ic] + '</svg></i><span>' + n.n + '</span>' + (n.badge && n.badge() ? '<em>' + n.badge() + '</em>' : '') + '</a>').join('') +
     '<div class="me" data-act="role-menu"><i>' + h(R.who[0]) + '</i><div>' + h(R.who) + '<span>' + h(R.scope) + ' · ' + h(R.n) + '</span></div><div class="rsw">' + Object.keys(ROLES).map(k => '<button data-act="role-set" data-r="' + k + '" class="' + (k === role() ? 'on' : '') + '">' + ROLES[k].n + '</button>').join('') + '</div></div>';
   const sn = $('#stagenav'); if (sn) sn.innerHTML = NAV.filter(n => n.k).map(n => '<button data-act="nav" data-to="' + n.k + '">' + n.n + '</button>').join('');
+  vzNavInd();
+}
+/* 左栏当前项的滑动高亮：记住上一次位置，从那里滑到新位置 */
+let __vzInd = null;
+function vzNavInd() {
+  const sb = $('#sb'), on = sb && sb.querySelector('a.on'); if (!sb || !on) return;
+  const ind = document.createElement('div'); ind.className = 'vzind';
+  const to = { top: on.offsetTop, h: on.offsetHeight };
+  const from = __vzInd || to;
+  ind.style.top = from.top + 'px'; ind.style.height = from.h + 'px';
+  sb.insertBefore(ind, sb.firstChild);
+  if (__vzInd && (window.__XW_SPEED || 1) >= 1) requestAnimationFrame(() => requestAnimationFrame(() => { ind.style.top = to.top + 'px'; ind.style.height = to.h + 'px'; }));
+  else { ind.style.top = to.top + 'px'; ind.style.height = to.h + 'px'; }
+  __vzInd = to;
+}
+/* 大数字滚动计数（页面进入时；讲师演示台快进与减少动态偏好时不滚） */
+function vzCountUp(root) {
+  if ((window.__XW_SPEED || 1) < 1 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const sel = '.scorerow .big b,.mets>div b,.gauge3>div b,.card.kpi b,.flowbar>div b,.hero .nums b,.mxi b,.tstat b,.cstat b,.dstat b,.aubig b,.mini3 b,.six div b';
+  root.querySelectorAll(sel).forEach(el => {
+    if (el.children.length || el.dataset.vzcu) return;
+    const txt = el.textContent; const m = txt.match(/-?\d[\d,]*(?:\.\d+)?/); if (!m) return;
+    const num = parseFloat(m[0].replace(/,/g, '')); if (!isFinite(num) || num === 0) return;
+    const dec = (m[0].split('.')[1] || '').length, pre = txt.slice(0, m.index), suf = txt.slice(m.index + m[0].length), comma = m[0].includes(',');
+    el.dataset.vzcu = '1'; const t0 = performance.now(), dur = 700;
+    const fmt = v => { let s = v.toFixed(dec); if (comma) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ','); return pre + s + suf; };
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(num * e); if (k < 1) requestAnimationFrame(step); else el.textContent = txt; };
+    requestAnimationFrame(step);
+  });
 }
 function cmdHTML(sugs) { return '<div class="cmd"><i class="ic"></i><input id="cmdin" placeholder="输入要办的事，回车"><div class="tools"><em id="mic1" data-act="mic1" title="按住说话">🎙</em><em data-act="up-photo" title="拍照或上传照片">📷</em><em data-act="up-file" title="拖入台账文件">📎</em></div><div class="sug">' + (sugs || []).map(s => '<b data-act="say" data-say="' + h(s) + '">' + h(s) + '</b>').join('') + '</div></div>'; }
-function pageHead(title, sub, right) { return '<div class="ph1"><h2>' + h(title) + '</h2><span>' + (sub || '') + '</span><div class="r">' + (right || '') + '</div></div>'; }
+/* 页头眉题：所属故事线段落的序号与名称（01 班组整体 / 02 人员情况 / 03 日常业务） */
+function vzEyebrow() { const NAV = NAV_OF(); let g = null, n = 0; for (const it of NAV) { if (it.g) { g = it.g; n++; } else if (it.k === S.page) return '<i class="vzeb"><b>' + String(n).padStart(2, '0') + '</b>' + h(g || '') + '</i>'; } return ''; }
+function pageHead(title, sub, right) { return '<div class="ph1">' + vzEyebrow() + '<h2>' + h(title) + '</h2><span>' + (sub || '') + '</span><div class="r">' + (right || '') + '</div></div>'; }
 function tabsHTML(list, cur) { return '<div class="tabs">' + list.map(t => '<button class="' + (t.k === cur ? 'on' : '') + '" data-act="nav" data-to="' + S.page + '" data-sub="' + t.k + '">' + h(t.n) + '</button>').join('') + '</div>'; }
 function route() { const hs = (location.hash || '#' + ROLES[role()].home).slice(1).split('/'); let pg = PAGES[hs[0]] ? hs[0] : ROLES[role()].home; if (!ALLOW[role()].includes(pg)) pg = ROLES[role()].home; if (!DB.ext() && (pg === 'safety' || pg === 'docs') && role() === 'leader') pg = 'home'; S.page = pg; let sub = hs[1] || ''; try { sub = decodeURIComponent(sub); } catch (e) {} S.sub = sub; render(); }
 function render() {
   XW.cancel(); XW.unspot(); const pg = PAGES[S.page]; const m = $('#main');
   m.innerHTML = pg.render() + (typeof legendHTML === 'function' ? legendHTML(S.page) : '') + '<div class="cursor" id="cur"><svg viewBox="0 0 20 20"><path d="M3 2 L17 10 L10 11.5 L7 18 Z" fill="#5a5bf0" stroke="#fff" stroke-width="1.2"/></svg><span class="lbl">小瓦特</span></div>';
-  renderNav(); m.scrollTop = 0; pg.after && pg.after();
+  const vzKey = S.page + '/' + S.sub, vzNew = vzKey !== render.__vzLast; render.__vzLast = vzKey;
+  if (vzNew) { m.classList.remove('vzenter'); void m.offsetWidth; m.classList.add('vzenter'); } else m.classList.remove('vzenter');
+  renderNav(); m.scrollTop = 0; pg.after && pg.after(); if (vzNew) vzCountUp(m);
   if (S.pending) { const f = S.pending; S.pending = null; XW.at(300, f); }
 }
 function nav(page, sub) { const hsh = '#' + page + (sub ? '/' + sub : ''); if (location.hash === hsh) render(); else location.hash = hsh; }
@@ -92,6 +125,7 @@ Object.assign(ACT, {
   'up-photo'() { XW.answer('把照片拖进来或者从相册选，我先按文件名对台账，票面上的字要 Word 或 Excel 版才能逐条读。', null, { confirm: false }); },
   'up-file'() { XW.answer('台账表拖进来我自己对表头；两票在用工安排的审票里上传，Word、Excel、文本都能读。最近一次导入是今早 07:30 的周报第 29 期。', '台账表拖进来我自己对表头；两票在用工安排的审票里上传。<div class="bt"><button data-act="nav" data-to="sched" data-sub="ticket">去上传两票</button></div>', { confirm: false }); },
   stage() { $('#stage').classList.toggle('on'); },
+  'side-toggle'() { document.body.classList.toggle('vzside'); },
   'stage-speed'(el) { XW.speed = +el.dataset.v; $$('#stage [data-act="stage-speed"]').forEach(b => b.classList.toggle('on', b === el)); },
   'stage-brief'() { S.briefed = false; XW.clearChat(); if (role() !== 'leader') { DB.setRole('leader'); } location.hash = '#home'; render(); },
   'stage-ext'(el) { LS.set('ext', !DB.ext()); el.textContent = '扩展模块' + (DB.ext() ? '：开' : '：关'); renderNav(); XW.answer(DB.ext() ? '扩展模块打开了：人员档案、培训考评、安全管理、文稿中心在左栏最下面。' : '扩展模块收起了，左栏只留班组管理与日常业务。', null, { confirm: false, speak: false }); },
