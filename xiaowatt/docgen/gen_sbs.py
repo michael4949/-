@@ -60,10 +60,17 @@ def mkpic(rid, w_pt, h_pt, n):
     return p
 
 TBLS = re.findall(r'<w:tbl>.*?</w:tbl>', DOC, flags=re.S)
-def mktable(tpl_idx, rows):
-    """用模板第 tpl_idx 张表（表头行 + 第一数据行）生成新表；rows = [[c1, c2, c3], ...]，单元格内 \n 分段"""
+def mktable(tpl_idx, rows, headers=None):
+    """用模板第 tpl_idx 张表（表头行 + 第一数据行）生成新表；rows = [[c1, c2, c3], ...]，单元格内 \n 分段；headers 给出则换表头文字"""
     t = TBLS[tpl_idx]; trs = re.findall(r'<w:tr[ >].*?</w:tr>', t, flags=re.S)
     pre = t[:t.index(trs[0])]; hdr = trs[0]; dtpl = trs[1]
+    if headers:
+        htcs = re.findall(r'<w:tc>.*?</w:tc>', hdr, flags=re.S); cells = []
+        for i, tc in enumerate(htcs):
+            tcpr = re.search(r'<w:tcPr>.*?</w:tcPr>', tc, flags=re.S).group(0); pm = re.search(r'<w:p[ >].*?</w:p>', tc, flags=re.S).group(0)
+            cells.append('<w:tc>' + tcpr + mk(pm, headers[i]) + '</w:tc>')
+        hh = re.match(r'<w:tr[^>]*>', hdr).group(0); hp = re.search(r'<w:trPr>.*?</w:trPr>', hdr, flags=re.S); hp = hp.group(0) if hp else ''
+        hdr = re.sub(r'w14:paraId="[0-9A-F]+"', 'w14:paraId="%s"' % pid(), hh) + hp + ''.join(cells) + '</w:tr>'
     tcs = re.findall(r'<w:tc>.*?</w:tc>', dtpl, flags=re.S)
     out = []
     for r in rows:
@@ -86,9 +93,9 @@ class Doc:
         im = Image.open(path); h = w_pt * im.height / im.width
         rid = 'rId%d' % (7 + n) if n < 22 else 'rId%d' % (200 + n)
         return mkpic(rid, w_pt, h, n) + mk(M['cap'], '图%d　%s' % (self.fig_no, cap))
-    def tbl(self, tpl_idx, cap, rows):
+    def tbl(self, tpl_idx, cap, rows, headers=None):
         self.tbl_no += 1
-        return mk(M['tcap'], '表%d　%s' % (self.tbl_no, cap)) + mktable(tpl_idx, rows) + SPACER
+        return mk(M['tcap'], '表%d　%s' % (self.tbl_no, cap)) + mktable(tpl_idx, rows, headers) + SPACER
 
 def part2(d, sections):
     """第二部分大表：每节一行一格；sections = [[('h1',t)|('h2',t)|('p',t)|('fig',path,cap)], ...]"""
@@ -116,7 +123,7 @@ def part3(d, items):
         elif k == 'p': out += mk(M['p3'], it[1])
         elif k == 'item': out += mk(M['item'], it[1])
         elif k == 'fig': out += d.fig(it[1], it[2])
-        elif k == 'tbl': out += d.tbl(it[1], it[2], it[3])
+        elif k == 'tbl': out += d.tbl(it[1], it[2], it[3], it[4] if len(it) > 4 else None)
     return out
 
 def build(name, title, areas, p2_sections, p3_items):
@@ -334,7 +341,7 @@ def banzu():
             ['安全生产责任制与本质安全', '两票审核、作业授权、断层风险、违章与关键节点管控在派工环节前置把关；关键节点19项逐周闭环；安全与帮扶活动回写星级得分', '派工理由表、两票审核记录、关键节点闭环记录、安全活动台账'],
             ['基层减负', '班前会材料、月度总结、分配表、面谈提纲、诊断与参谋报告逐段生成，查数即问即答', '每月事务性用时减少约25小时的操作流水证据、文稿记录'],
             ['人力资源数智化创新与人工智能应用（大瓦特）', '班组长AI助手依托公司电力人工智能创新平台与大瓦特大模型，查数、决策依据、文稿、诊断、经验整理五类能力，人在回路', '可复制的班组级AI助手样板；每次确认留名留痕'],
-            ['数据安全与员工权益保护', '公司内网部署、数据不出域；按角色分级授权、人员信息最小必要展示；涉及人的结论由班组长或部门确认后生效', '权限矩阵、确认记录、操作流水']]),
+            ['数据安全与员工权益保护', '公司内网部署、数据不出域；按角色分级授权、人员信息最小必要展示；涉及人的结论由班组长或部门确认后生效', '权限矩阵、确认记录、操作流水']], ['南方电网集团要求', '成果建成后的响应机制', '可检查的输出']),
     ]
     build('申报书_高效班组管理助手_班组数字画像与班组长AI助手_V2.0.docx', '「高效班组管理助手」班组数字画像与班组长AI助手', AREAS_BZ, p2, p3)
 
@@ -495,7 +502,7 @@ def peilian():
             ['事故案例警示教育', '公司下发的事故通报由班组长导入即生成案例课件与题目推送全班，班员看课件、听讲课、答题后回写', '警示教育覆盖率、完成率与成绩统计；案例学习记入警示复盘能力'],
             ['数字化转型与人工智能应用（大瓦特）', '情境生成、讲稿与点评语言组织、通报要点抽取依托公司电力人工智能创新平台与大瓦特大模型；判卷与计分为可配置规则引擎', '“大瓦特练机器、小瓦特练人”可复制样板；规则配置项与版本记录'],
             ['基层减负', '班组长不再自己出题判卷统计；一份文件生成课件与题目，一份通报生成案例推送', '培训管理每月减少约20小时用时；内容生产与推送记录'],
-            ['数据安全与员工权益保护', '公司内网部署；人员与成绩脱敏；按三类角色分级授权；判卷标注与标准答案经业务专家审定；成熟度与能力结论由班组长确认', '权限矩阵、审定记录、确认记录、作答留痕']]),
+            ['数据安全与员工权益保护', '公司内网部署；人员与成绩脱敏；按三类角色分级授权；判卷标注与标准答案经业务专家审定；成熟度与能力结论由班组长确认', '权限矩阵、审定记录、确认记录、作答留痕']], ['南方电网集团要求', '成果建成后的响应机制', '可检查的输出']),
     ]
     build('申报书_安全学习智能陪练_V2.0.docx', '「安全学习智能陪练」六场景安全能力训练与成熟度评价', AREAS_PE, p2, p3)
 
