@@ -1468,7 +1468,7 @@ body::after{content:none}
 .card,.dc,.cmd,.mets>div,.gauge3>div,.steps5>div,.kpit,.scorerow .big,.mini3,.tmgoal,.rt,.mcard,.docit,.kc,.wkd,.wxd,.teams .tc,.mbox,.spot .box,.msg.a,.dstat>div,.rtile,.cph,.ditem{
   border:1px solid transparent;background:var(--glassbg) padding-box,var(--edge) border-box;box-shadow:var(--vtsh);
   transition:box-shadow .3s var(--ease),transform .25s var(--ease)}
-.card,.dc{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+/* 10/3 四轮：卡片不再做背景模糊（后面有动画层时每帧重算，弱显卡频闪） */
 .card:hover,.dc:hover,.kpit:hover,.rt:hover,.docit:hover,.scorerow .big:hover,.mets>div:hover{box-shadow:var(--vtshh);transform:translateY(-2px);background:var(--glassbg) padding-box,var(--edgeh) border-box}
 .card .h{border-bottom:1px solid rgba(37,99,235,.12)}
 .card .h b{display:flex;align-items:center;gap:8px;font-size:14.5px}
@@ -1519,7 +1519,7 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 .ch .grid{stroke:rgba(37,99,235,.1)}
 .legend i{box-shadow:0 0 8px -1px currentColor}
 /* ---- 左栏：玻璃 + 光边图标牌（按故事线三段配色），当前项渐变实心 ---- */
-.sb{background:rgba(255,255,255,.58);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-right:1px solid rgba(255,255,255,.9);box-shadow:1px 0 0 rgba(37,99,235,.08)}
+.sb{background:rgba(255,255,255,.74);border-right:1px solid rgba(255,255,255,.9);box-shadow:1px 0 0 rgba(37,99,235,.08)}
 .sb .brand{border-bottom:1px solid rgba(37,99,235,.12)}
 .sb .brand b{font-size:14.5px;color:var(--ink)}
 .sb .grp{color:var(--ink2);font-family:var(--mono);letter-spacing:1px}
@@ -1564,12 +1564,12 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 .hero h4 em{background:linear-gradient(90deg,#7dd3fc,#a78bfa 50%,#f9a8d4);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .hero .sub{min-height:0;color:rgba(255,255,255,.8);font-size:13px}
 .hero .cur::after{color:#22d3ee}
-.hero .nums div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 16px;min-width:90px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 30px -16px rgba(0,0,0,.7);transition:border-color .25s,box-shadow .25s,transform .25s var(--ease)}
+.hero .nums div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 16px;min-width:90px;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 12px 30px -16px rgba(0,0,0,.7);transition:border-color .25s,box-shadow .25s,transform .25s var(--ease)}
 .hero .nums div:hover{border-color:rgba(165,180,252,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 28px -4px rgba(99,102,241,.75);transform:translateY(-2px)}
 .hero .nums b{background:linear-gradient(90deg,#7dd3fc,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:26px}
 .hero .nums span{color:rgba(255,255,255,.66)}
 /* ---- 右栏：玻璃 + 小瓦特光晕 + 渐变气泡 ---- */
-.side{background:rgba(255,255,255,.58);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);border-left:1px solid rgba(255,255,255,.9)}
+.side{background:rgba(255,255,255,.74);border-left:1px solid rgba(255,255,255,.9)}
 .side .sh{border-bottom:1px solid rgba(37,99,235,.12)}
 .side .sh .nm b{color:var(--ink)}
 .side .sh.full .xw .ring{background:radial-gradient(ellipse at 50% 46%,rgba(59,130,246,.42),rgba(139,92,246,.22) 48%,rgba(236,72,153,.1) 66%,transparent 74%);filter:blur(8px)}
@@ -1600,52 +1600,24 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 
 /* ===== 10/3 动效层（用户：每页都要有动效，更高级、有动感；不要颗粒 / 球体。三轮口径：要参考图红框那种多道柔和光弧、光环、光线交叠的发光构成）===== */
 @property --vta{syntax:'<angle>';inherits:false;initial-value:0deg}
-/* ---- 背景光圈光带（每页常驻）：三组光环（每环 = 宽柔光带 + 细亮芯，倾斜成椭圆，各自绕行）+ 三道柔和光线斜穿 ---- */
-.vtlight{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.vtl{position:absolute;perspective:1100px;animation:vtbreath 18s ease-in-out infinite}
-.vtl.a{width:800px;height:800px;right:-150px;top:-330px}
-.vtl.b{width:600px;height:600px;left:-190px;bottom:-250px;animation-delay:-8s}
-.vtl.c{width:460px;height:460px;left:36%;bottom:-290px;animation-delay:-4s}
-@keyframes vtbreath{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-14px,12px,0) scale(1.05)}}
-.vtl .r{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(var(--tx,66deg)) rotateZ(var(--tz,0deg))}
-.vtl .r2{inset:7%}.vtl .r3{inset:15%}
-.vtl .r s{position:absolute;inset:0;display:block;border-radius:50%;
-  background:conic-gradient(from 0deg,transparent 0 5%,var(--c1) 18%,var(--c2) 42%,var(--c3) 62%,transparent 84%);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px));mask:radial-gradient(farthest-side,transparent calc(100% - var(--w)),#000 calc(100% - var(--w) + 1px));
-  animation:vtspin var(--d,40s) linear infinite;animation-direction:var(--dir,normal);will-change:transform}
-.vtl .r s.gl{--w:34px;filter:blur(24px);opacity:.72}
-.vtl .r s.co{--w:3px;filter:blur(.5px);opacity:.92}
-.vtl .r3 s.gl{--w:22px;filter:blur(18px);opacity:.6}
-@keyframes vtspin{to{transform:rotate(360deg)}}
-.vtl .rb{position:absolute;inset:30% -4%;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(59,130,246,.5) 35%,rgba(139,92,246,.55) 65%,transparent);filter:blur(36px);transform:rotate(-24deg);opacity:.55;animation:vtrib 15s ease-in-out infinite}
-@keyframes vtrib{0%,100%{transform:rotate(-24deg) translateX(-4%)}50%{transform:rotate(-20deg) translateX(4%);opacity:.75}}
-.vtray{position:absolute;display:block;height:2px;width:var(--l,900px);left:var(--x);top:var(--y);transform-origin:0 50%;
-  background:linear-gradient(90deg,transparent,var(--c1) 30%,var(--c2) 60%,transparent);filter:blur(1px);opacity:0;
-  animation:vtray var(--d,14s) ease-in-out infinite;animation-delay:var(--dl,0s)}
-.vtray::before{content:'';position:absolute;inset:-18px 0;background:inherit;filter:blur(20px);opacity:.75}
-@keyframes vtray{0%{transform:rotate(var(--a)) translateX(-22%);opacity:0}35%,60%{opacity:.9}100%{transform:rotate(var(--a)) translateX(22%);opacity:0}}
-/* 英雄面板（工作台）右侧光圈组：深色面板上光更亮、更饱满 */
-.hero .vtl.h{position:absolute;grid-column:auto;grid-row:auto;right:-80px;top:-170px;width:500px;height:500px;z-index:0;animation-duration:16s}
-.hero .vtl.h .r s.gl{opacity:.95;--w:40px;filter:blur(26px)}
-.hero .vtl.h .r s.co{opacity:1;filter:blur(.3px) drop-shadow(0 0 6px rgba(255,255,255,.6))}
+/* ---- 背景光圈光带（每页常驻）：三组光环（每环 = 宽柔光带 + 细亮芯，倾斜成椭圆，各自绕行）+ 光带 + 三道柔和光线。
+   10/3 四轮（用户：页面频闪、内容出不来）：改为单张画布 + 预渲染精灵（app.js VTL），不再用带 CSS 模糊滤镜的 3D 元素逐帧合成 ---- */
+canvas.vtlight{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hero canvas.vth{position:absolute;right:-80px;top:-170px;width:500px;height:500px;z-index:0;pointer-events:none}
 .hero .nums div{background:rgba(10,14,38,.55);border-color:rgba(255,255,255,.22)}
 .hero .nums div:hover{background:rgba(10,14,38,.65)}
-.hero .vtl.h .rb{opacity:.7;background:linear-gradient(90deg,transparent,rgba(96,165,250,.7) 35%,rgba(167,139,250,.75) 65%,transparent)}
 /* ---- 卡片光边流光：一段亮光沿描边缓慢绕行（卡片各自错开相位） ---- */
 .card,.dc{position:relative}
 .card::after,.dc::after{content:'';position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;z-index:2;opacity:.9;
   background:conic-gradient(from var(--vta),transparent 0 60%,rgba(96,165,250,0) 64%,rgba(96,165,250,.95) 73%,rgba(167,139,250,.95) 79%,rgba(34,211,238,.7) 85%,transparent 91%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
-  animation:vtsweep 14s linear infinite}
+  opacity:0;transition:opacity .35s}
 @keyframes vtsweep{to{--vta:360deg}}
-.card:nth-child(2n)::after,.dc:nth-child(2n)::after{animation-delay:-5s}
-.card:nth-child(3n)::after,.dc:nth-child(3n)::after{animation-delay:-9s;animation-duration:17s}
-.grid2>.card:nth-child(2)::after,.grid3>.card:nth-child(3)::after{animation-delay:-3s}
 .card.pleg::after,.card.chart .card::after{display:none}
-.card:hover::after,.dc:hover::after{animation-duration:4s}
+.card:hover::after,.dc:hover::after{opacity:.9;animation:vtsweep 4s linear infinite}
 /* ---- 卡头光点呼吸、分区色条流光 ---- */
 .card .h b::before{animation:vtdot 3s ease-in-out infinite}
-@keyframes vtdot{0%,100%{box-shadow:0 0 0 3px rgba(59,130,246,.14),0 0 10px rgba(139,92,246,.6)}50%{box-shadow:0 0 0 5px rgba(59,130,246,.08),0 0 18px rgba(139,92,246,.95)}}
+@keyframes vtdot{50%{opacity:.55}}
 .sec i,.scopebar i,.ph1 .vzeb::after{background-size:200% 100%;animation:vtsheen 4s linear infinite}
 .scopebar i{background-image:linear-gradient(135deg,#2563eb,#7c3aed 40%,#db2777 60%,#2563eb)}
 .sec i{background-image:linear-gradient(180deg,#3b82f6,#8b5cf6 40%,#ec4899 60%,#3b82f6);background-size:100% 220%;animation:vtsheenv 4s linear infinite}
@@ -1674,8 +1646,8 @@ table.t tr:hover td{background:rgba(37,99,235,.05)}
 @keyframes vtnum{0%,60%{background-position:120% 0}100%{background-position:-60% 0}}
 /* ---- 主按钮闲时光扫（低调）、当前导航呼吸、红灯脉冲 ---- */
 button.b,.bt button:not(.g),.inp button,.ph1 .r button.pri{position:relative;overflow:hidden}
-button.b::after,.bt button:not(.g)::after,.inp button::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);background-size:250% 100%;background-position:120% 0;animation:vtbtn 7s ease-in-out infinite;pointer-events:none}
-@keyframes vtbtn{0%,70%{background-position:120% 0}100%{background-position:-50% 0}}
+button.b::after,.bt button:not(.g)::after,.inp button::after{content:'';position:absolute;top:0;bottom:0;left:0;width:60%;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.35) 50%,transparent 80%);transform:translateX(-180%);animation:vtbtn 7s ease-in-out infinite;pointer-events:none}
+@keyframes vtbtn{0%,70%{transform:translateX(-180%)}100%{transform:translateX(280%)}}
 .sb a.on i{animation:vtglow 3s ease-in-out infinite}
 @keyframes vtglow{0%,100%{box-shadow:0 0 18px -2px rgba(124,58,237,.8)}50%{box-shadow:0 0 26px 0 rgba(124,58,237,1),0 0 10px rgba(37,99,235,.6)}}
 .rag.bad{animation:vtrag 2.2s ease-in-out infinite}
@@ -1684,5 +1656,5 @@ button.b::after,.bt button:not(.g)::after,.inp button::after{content:'';position
 @keyframes vthalo{50%{transform:scale(1.06);opacity:.85}}
 .cmd .ic::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(124,58,237,.5);animation:vtringx 2.6s ease-out infinite}
 @keyframes vtringx{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
-@media (max-width:960px){.vtlight{opacity:.7}.vtl.c{display:none}}
-@media (prefers-reduced-motion:reduce){.vtlight,.hero .vtl.h{display:none}.card::after,.dc::after{display:none}}
+
+@media (prefers-reduced-motion:reduce){.card::after,.dc::after{display:none}}

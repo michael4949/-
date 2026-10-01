@@ -144,7 +144,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.click('#ppl .chip[data-who="韩雪"]'); await w(600);
   await pg.click('[data-act="home-go"]'); await ws('#d1.ok', 20000); await w(400);
   await t('派工单落 DB · 票据草稿', async () => { const d = await LS('dispatch'); const tk = await LS('tickets_add'); return d && d.j1 && d.j1.lead === '韩雪' && Array.isArray(tk) && tk.some(x => x.jobId === 'j1'); });
-  await pg.click('[data-act="nodes-plan"]'); await w(2500);
+  await pg.click('[data-act="nodes-plan"]'); for (let i = 0; i < 80; i++) { const f = await LS('nodefocus'); if (Array.isArray(f) && f.length >= 3) break; await w(150); } await w(300);
   await t('周报靠后项写成本周重点', async () => { const f = await LS('nodefocus'); return Array.isArray(f) && f.length >= 3; });
   await pg.click('[data-act="urge"]'); await ws('[data-act="urge-send"]'); await pg.click('[data-act="urge-send"]'); await w(500);
   await t('催办已发 · 缺陷状态改', async () => { const d = await LS('defects'); return d && d.d5 && /催办/.test(d.d5.st); });
