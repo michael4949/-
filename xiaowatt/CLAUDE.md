@@ -42,7 +42,7 @@ xiaowatt/
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
 ├── assets/coaches/         讲师形象图（10/1 起 term / angui / daozha 三个及 _hd 版由 build.py 内联，供数字人讲课）
 ├── assets/fonts/           Manrope 可变字重拉丁子集（OFL），banzu/build.py 内联为 @font-face（10/2）
-└── docgen/                 正式文档生成脚本（Node docx）：gen_docs_v2.cjs 两份需求文档 V2.0（NODE_PATH 指向含 docx 的 node_modules；仓库根 package.json 为 ESM 故用 .cjs）；gen_docs.js / gen_tech.js 为 V1.0 旧版；架构图源在 peilian/diagrams、banzu/diagrams（node render.cjs）
+└── docgen/                 正式文档生成脚本：gen_sbs.py 两份参赛申报书（按客户《附件3-1 申报书》原 docx 版式在 XML 上原位替换，需模板文件作参数，docs/02 第 66 条）；gen_docs_v2.cjs（Node docx）两份需求文档 V2.0（NODE_PATH 指向含 docx 的 node_modules；仓库根 package.json 为 ESM 故用 .cjs）；gen_docs.js / gen_tech.js 为 V1.0 旧版；架构图源在 peilian/diagrams、banzu/diagrams（node render.cjs）
 ```
 
 ## 环境与命令

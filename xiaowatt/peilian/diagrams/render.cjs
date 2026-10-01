@@ -3,7 +3,7 @@ const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwr
 const path = require('path');
 (async () => {
   const br = await chromium.launch(); const pg = await (await br.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 2 })).newPage();
-  for (const [f, name] of [['arch', '安全学习智能陪练_总体架构'], ['ability', '安全学习智能陪练_能力体系与成长闭环'], ['pipeline', '安全学习智能陪练_内容生产线']]) {
+  for (const [f, name] of [['arch', '安全学习智能陪练_总体架构'], ['ability', '安全学习智能陪练_能力体系与成长闭环'], ['pipeline', '安全学习智能陪练_内容生产线'], ['tech', '安全学习智能陪练_技术与数据架构']]) {
     await pg.goto('file://' + path.join(__dirname, f + '.html')); await pg.waitForTimeout(500);
     await (await pg.$('#board')).screenshot({ path: path.join(__dirname, 'out', name + '.png') });
     console.log('ok', name);
