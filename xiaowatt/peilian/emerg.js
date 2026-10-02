@@ -329,14 +329,21 @@ function emgScore(e, a, sec) {
   return {
     pts, bads, rep, sp: Math.round(sp * 10) / 10, sn: Math.round(sn * 10) / 10, sb, base, score, pass: score >= EMG_CFG.pass, ptot, hasN,
     keyMiss: bads.filter(x => x.st === 'miss').length,
-    dims: {
+    dims: Object.assign({
       e1: emSpeed(e, sec),
       e2: Math.round(pts.reduce((s, x) => s + x.got, 0) / ptot * 100),
       e3: hasN ? Math.round(sn / EMG_CFG.notes * 100) : null,
       e4: rep.length ? Math.round(rep.filter(x => x.st === 'ok').length / rep.length * 100) : null
-    }
+    }, { ['em_' + e.cat]: Math.round(Math.min(100, Math.round((base + sb) * 10) / 10)) })   /* 雷达维度＝处置卡情境类别（10/2 客户意见：维度按内容分类） */
   };
 }
+/* 过程指标（结果页展示，不进雷达） */
+const EM_PROC = [
+  { k: 'e1', n: '快速决策', d: '作答用时：按情境基准时长（每个处置要点 45 秒、事例纠错 2 分钟、信息报送 1.5 分钟）折算，越快得分越高' },
+  { k: 'e2', n: '知识储备', d: '处置要点答得完整：按应急处置卡逐项比对，意思对即得分，不要求与原文一致' },
+  { k: 'e3', n: '风险识别', d: '能指出事例中存在的问题（违反注意事项的做法）' },
+  { k: 'e4', n: '高效上报', d: '电话首报快报现象、缓报原因、7 类重大事件直报分管副总、10 分钟 elink 续报' }
+];
 /* AI 点评：答到什么、漏了什么（补充原文）、事例里没指出的关键问题 */
 function emgReview(e, r) {
   const ok = r.pts.filter(x => x.st === 'ok').length, part = r.pts.filter(x => x.st === 'part'), miss = r.pts.filter(x => x.st === 'miss');

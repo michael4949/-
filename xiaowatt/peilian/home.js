@@ -136,12 +136,14 @@ function recoFor(item) {
   if (g === 'tk') return { spec: 'tk:teach', n: '两票填写陪练 · 操作票 · 训练模式', sub: '#3主变运行转检修 · 3M负荷转#2主变代供', why: `「${item.n}」${v}，训练模式边写边判，逐行对标准票` };
   if (g === 'em') {
     const L = allRecs().filter(r => r.src === 'em'); const best = {}; L.forEach(r => { best[r.eid] = Math.max(best[r.eid] || 0, r.score); });
-    const pool = EMG.filter(e => item.k === 'e3' ? e.cs : item.k === 'e4' ? (e.rep || []).length : item.k === 'e1' ? e.pts.length <= 5 : true);
-    const e = pool.slice().sort((a, b) => (best[a.id] == null ? -1 : best[a.id]) - (best[b.id] == null ? -1 : best[b.id]))[0] || EMG[0];
-    return { spec: 'em:' + e.id + ':teach', n: '应急处置陪练 · ' + e.card + (e.sc ? ' · ' + e.sc.replace(/^场景[一二三四]：/, '') : ''), sub: best[e.id] == null ? '尚未练过' : '最好成绩 ' + best[e.id] + ' 分', why: `「${item.n}」${v}，${item.k === 'e3' ? '练事例纠错，找出事例里的问题' : item.k === 'e4' ? '练电话首报与续报' : item.k === 'e1' ? '限时作答，先把要点说出来再补充' : '把处置要点答全，意思对就得分'}` };
+    const cat = String(item.k).replace(/^em_/, ''); const pool = EMG.filter(e => e.cat === cat);
+    const e = (pool.length ? pool : EMG).slice().sort((a, b) => (best[a.id] == null ? -1 : best[a.id]) - (best[b.id] == null ? -1 : best[b.id]))[0] || EMG[0];
+    return { spec: 'em:' + e.id + ':teach', n: '应急处置陪练 · ' + e.card + (e.sc ? ' · ' + e.sc.replace(/^场景[一二三四]：/, '') : ''), sub: best[e.id] == null ? '这个情境尚未练过' : '最好成绩 ' + best[e.id] + ' 分', why: `「${item.n}」类情境${v}，先练这一类里${best[e.id] == null ? '没练过' : '成绩最低'}的情境，把处置要点答全，意思对就得分` };
   }
   const S = SCENE_MAP[g] || SCENE_MAP.rule;
-  return { spec: g + '::teach', n: S.n + ' · 训练模式', sub: S.sub, why: `「${item.n}」${v}，${item.none ? '这个场景还没练过，先练一次拿到基准分' : '针对这一项的题目优先出'}` };
+  if (g === 'rule' || g === 'life') return { spec: `${g}:${item.k}:teach`, n: S.n + ' · ' + item.n + ' · 训练模式', sub: (g === 'rule' ? '安规题库只抽「' : '保命题型只抽「') + item.n + '」类 · 8 题 · ' + (typeof qbPro === 'function' ? qbPro().n : ''), why: `「${item.n}」${v}，${item.none ? '这一类题还没练过，先练一次拿到基准分' : '专练这一类题，答错当场看条款内容'}` };
+  if (g === 'inst') { const d = docAll().find(x => x.theme === item.k); return { spec: 'inst:' + (d ? d.id : '') + ':teach', n: S.n + ' · ' + item.n, sub: d ? d.n : S.sub, why: `「${item.n}」${v}，${item.none ? '这个主题的制度文件还没学过，先学课件再测一次' : '回到课件重学再测一次'}` }; }
+  return { spec: 'case::teach', n: S.n + ' · 训练模式', sub: '题库小案例 / 大案例 · 子题含「' + item.n + '」', why: `「${item.n}」${v}，${item.none ? '案例题还没练过，先练一个小案例拿到基准分' : '再做一个案例，重点看这一类子题'}` };
 }
 /* 安全能力成熟度构成（下钻用） */
 function matParts() {
@@ -149,7 +151,8 @@ function matParts() {
   const lastExam = allRecs().find(r => r.src === 'tk' && !r.wt && /考核/.test(r.mode));
   const parts = M.dims.map(d => ({ n: d.n, v: d.score == null ? '待练' : d.score + ' 分', need: '≥ 75（熟练）', ok: d.score != null && d.score >= 75, gap: d.score == null ? d.missing.join('、') + ' 还没练过' : d.score < 75 ? '再练 ' + d.scenes.filter(x => x.score != null && x.score < 75).map(x => x.n).join('、') : '' }));
   parts.push({ n: '操作票考核模式', v: lastExam ? lastExam.score + ' 分' : '未考', need: '最近一次 ≥ 60 分且无危险操作', ok: !!(lastExam && lastExam.pass), gap: '完成一次操作票考核模式并及格' });
-  parts.push({ n: '应急处置卡覆盖', v: A.cards.size + ' / 17 类', need: '17 类全部练过', ok: A.cards.size >= 17, gap: '还有 ' + (17 - A.cards.size) + ' 类应急处置卡没有练过' });
+  const nCards = new Set(EMG.map(e => e.card)).size;
+  parts.push({ n: '应急处置卡覆盖', v: A.cards.size + ' / ' + nCards + ' 类', need: nCards + ' 类全部练过', ok: A.cards.size >= nCards, gap: '还有 ' + (nCards - A.cards.size) + ' 类应急处置卡没有练过' });
   parts.push({ n: '危险操作', v: A.danger + ' 次', need: '近30天 0 次', ok: A.danger === 0, gap: '近30天出现过整票不合格的危险操作' });
   return { M, parts };
 }
@@ -158,7 +161,7 @@ function growthLanes() {
   const A = abilityCalc(), AG = homeAgg(), M = A.mat, W = weakOrder().filter(x => !x.none)[0];
   const cases = typeof caseList === 'function' ? caseList() : [];
   const sc = k => A.scene[k], cnt = k => sc(k).cnt;
-  const lastExam = allRecs().find(r => r.src === 'tk' && !r.wt && /考核/.test(r.mode));
+  const lastExam = allRecs().find(r => r.src === 'tk' && !r.wt && /考核/.test(r.mode)), nCards = new Set(EMG.map(e => e.card)).size;
   const st = (ok, started) => ok ? 'done' : started ? 'next' : 'future';
   const lanes = [
     { k: 'kn', nodes: [
@@ -171,7 +174,7 @@ function growthLanes() {
       { id: 'op3', t: '保命技能陪练', v: cnt('life') ? cnt('life') + ' 次 · ' + sc('life').score + ' 分' : '未练', s: st(cnt('life') >= 3 && sc('life').score >= 75, cnt('life')) }] },
     { k: 'em', nodes: [
       { id: 'em1', t: '应急处置情境', v: AG.scenes.size + '/' + EMG.length, s: st(AG.scenes.size >= 10, AG.scenes.size) },
-      { id: 'em2', t: '处置卡覆盖', v: AG.cards.size + '/17 类', s: st(AG.cards.size >= 17, AG.cards.size) },
+      { id: 'em2', t: '处置卡覆盖', v: AG.cards.size + '/' + nCards + ' 类', s: st(AG.cards.size >= nCards, AG.cards.size) },
       { id: 'em3', t: '应急考核 ≥ 80', v: sc('em').score != null ? '本期 ' + sc('em').score : '未练', s: st(sc('em').score >= 80, cnt('em')) }] },
     { k: 'rv', nodes: [
       { id: 'rv1', t: '推送案例学习', v: cases.filter(c => c.done).length + '/' + cases.length, s: st(cases.length && cases.every(c => c.done), cases.some(c => c.done)) },
@@ -186,7 +189,7 @@ function growthLanes() {
 }
 
 /* ---------------- 首页 ---------------- */
-const HM = { radar: 'tk' };
+const HM = { radar: SCENES[0].k };
 function radarBox() {
   const A = abilityCalc(), S = SCENE_MAP[HM.radar], sc = A.scene[HM.radar], dims = skillsOf(HM.radar), T = teamAvgOf();
   const now = dims.map(d => sc.now[d.k] == null ? 0 : sc.now[d.k]), prev = dims.map(d => sc.prev[d.k] == null ? 0 : sc.prev[d.k]);
@@ -225,12 +228,12 @@ function pageHome() {
   </section>
 
   <section class="cockpit cp2">
-    <div class="hcard ck tl hg"><div class="hch"><b>安全能力雷达</b><span>六个场景各一份 · 本期 vs 上期</span></div><div class="hcb" id="radarbox">${radarBox()}</div></div>
+    <div class="hcard ck tl ho"><div class="hch"><b>安全能力成熟度</b><span>${h(HOME_USER.post)} · 四个能力综合</span></div><div class="hcb">${chMaturity(M)}</div></div>
     <div class="hcard ckc hg"><div class="hch"><b>员工安全技能提升路径图</b><em class="ai">AI</em><span>${HOME_USER.name} · ${HOME_USER.post} · 按四个能力维度生成 · 节点可点</span></div>
       <div class="hcb">${(() => { const G = growthLanes(); return chPath4(G.lanes, G.end); })()}</div></div>
-    <div class="hcard ck tr ho"><div class="hch"><b>安全能力成熟度</b><span>${h(HOME_USER.post)} · 四维度综合</span></div><div class="hcb">${chMaturity(M)}</div></div>
-    <div class="hcard ck bl ho"><div class="hch"><b>最近演练成绩</b><span>最近 ${recent.length} 次 · 点复盘看报告</span></div><div class="hcb">${recent.map(r => `<div class="hrow rcrow"><span class="mono tk3">${stampOf(r.ts)}</span><b>${h(SCENE_MAP[r.src] ? SCENE_MAP[r.src].short : r.n)}<i class="tk3">${h(r.src === 'em' ? ((EMGMAP[r.eid] || {}).card || '') : (r.sub || '').split(' · ')[0])}</i></b><b class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</b><button class="btn sm" data-rec="${r.id}">复盘</button></div>`).join('')}</div></div>
-    <div class="hcard ck br hg"><div class="hch"><b>六个场景掌握</b><span>本期得分 · 点击直接练</span></div><div class="hcb">${sceneTilesHTML()}</div></div>
+    <div class="hcard ck bl hg"><div class="hch"><b>安全能力雷达</b><span>六个场景各一份 · 本期 vs 上期</span></div><div class="hcb" id="radarbox">${radarBox()}</div></div>
+    <div class="hcard ck tr hg"><div class="hch"><b>六个场景掌握</b><span>本期得分 · 点击直接练</span></div><div class="hcb">${sceneTilesHTML()}</div></div>
+    <div class="hcard ck br ho"><div class="hch"><b>最近演练成绩</b><span>最近 ${recent.length} 次 · 点复盘看报告</span></div><div class="hcb">${recent.map(r => `<div class="hrow rcrow"><span class="mono tk3">${stampOf(r.ts)}</span><b>${h(SCENE_MAP[r.src] ? SCENE_MAP[r.src].short : r.n)}<i class="tk3">${h(r.src === 'em' ? ((EMGMAP[r.eid] || {}).card || '') : (r.sub || '').split(' · ')[0])}</i></b><b class="mono ${r.pass ? 'gv' : 'wv'}">${r.score}</b><button class="btn sm" data-rec="${r.id}">复盘</button></div>`).join('')}</div></div>
   </section>
 
   <section class="reco">
@@ -460,8 +463,10 @@ function silhouetteSVG() {
 
 /* ---------------- 讲师演示台 ---------------- */
 const IMPL_STATUS = [
-  ['产品名与口号', '安全学习智能陪练 · 一切事故都可以预防（10/1 客户意见）；六个陪练场景对应安全能力成熟度四个维度'],
-  ['安全能力成熟度', '四维度＝所属场景本期得分（最近 3 次）平均，成熟度＝四维度平均，分级 待提升 / 合格 / 熟练 / 精通 由本平台拟定 · 待业务确认；由班组长确认后使用'],
+  ['产品名与口号', '安全学习智能陪练 · 一切事故都可以预防（10/1 客户意见）；六个陪练场景按四个能力分组（10/2 客户意见）：安全知识（安规知识、制度学习）· 安全作业（两票填写、保命技能）· 应急处置 · 警示复盘（案例分析），场景中心、工作台雷达页签、六个场景掌握、路径图同一顺序'],
+  ['安全能力成熟度', '四个能力＝所属场景本期得分（最近 3 次）平均，成熟度＝四个能力平均，分级 待提升 / 合格 / 熟练 / 精通 由本平台拟定 · 待业务确认；由班组长确认后使用'],
+  ['雷达维度口径（10/2 客户意见：每个场景 ≥ 5 个维度，按内容分类）', '两票填写 5 项按判卷错误类别；应急处置 6 类按处置卡情境类别；安规知识 6 类、保命技能 6 类、案例分析 6 类按题库题目内容关键词自动分类（gen_bank.py 打标，类别名由本平台拟定 · 待业务确认）；制度学习 6 个主题按客户制度文件分组；维度得分＝该类题目答对率，本次没抽到的类别为空'],
+  ['安规考试题库（10/2 客户提供）', '《安规考试题库 0407 更新》27 个专业全部内置，默认变电运行类，场景中心可切换专业（本机记住）；安规知识＝单选 + 多选 + 判断，保命技能＝「是否保命题型 = 是」的题，案例分析＝小案例题 / 大案例题（题干 + 子题）；依据取题库「制度名称及条款内容」列'],
   ['两票填写 · 操作票试卷与标准票', '照录《110kV考核站操作票考核试卷》运行方式、答题要求与 7 个屏柜附表；步骤内容以典型操作票为准'],
   ['两票填写 · 工作票', '第一种工作票安全措施填写由本平台按安规 6.1 拟定 · 待客户提供票样与判卷标准'],
   ['标准票编号口径', '典型票中屏柜、压板、空开、把手编号与试卷附表不一致的 10 处按附表改正；按典型票原文填写会判编号不符，客户典型票 xlsx 原件导入判卷 90 分 · 待业务确认'],
@@ -474,10 +479,9 @@ const IMPL_STATUS = [
   ['应急处置：四项指标', '快速决策＝作答用时对基准时长（每个要点 45 秒、事例纠错 2 分钟、报送 1.5 分钟）；知识储备＝要点得分率（关键词组匹配，意思对即得分）；风险识别＝事例纠错得分率；高效上报＝报送答到率 · 本平台拟定待确认'],
   ['应急处置：事例', '16 个情境的处置经过事例由本平台编写，分句标 ①②③ · 待业务确认'],
   ['应急处置：计分口径', '处置要点 60 + 事例纠错 40（无注意事项的情境处置要点计 100），信息报送每项加 2 分、总分封顶 100 · 本平台拟定待确认'],
-  ['安规知识陪练', '题目从安规与导则条文自动生成（单选 / 判断 / 口述填空 + 依据条款指认），答错给条款原文，错题复练；指标：条款理解 / 依据引用 / 作答速度 / 易错巩固 · 口径由本平台拟定待确认'],
-  ['保命技能陪练', '停电 / 验电 / 接地 / 遮栏与标示牌 / 触电急救五项：步骤排序 + 要点填空 + 禁止事项多选；标准步骤按安规 6.1～6.3 与应急处置卡由本平台整理 · 待业务确认'],
-  ['案例分析陪练', '4 个预置脱敏案例（变电 / 配网 / 通用，人物单位全部虚构）+ 班组长推送案例；四方面作答按关键词组逐项比对（意思对即得分），标准分析由本平台拟定 · 待业务确认'],
-  ['制度学习陪练', '制度文件（预置两票管理细则节选 / 应急信息报送指引 / 安规技术措施条文，或本机上传）→ 课件 → 数字人讲课 → 自动出题 → 考试 → 考试分析，全程本机规则生成'],
+  ['安规知识陪练 / 保命技能陪练', '题库作答：训练 8 题 · 考核 12 题，六个内容类别轮流抽（也可按类别专练）；答错当场给出制度名称及条款内容，每题再指认依据（三选一），训练模式错题复练；得分＝首答答对率 70% + 依据指认 15% + 复练 15%（无依据题时首答 85%）· 口径由本平台拟定待确认'],
+  ['案例分析陪练', '题库小案例题 / 大案例题：读案例题干逐道子题作答，子题按内容类别计入雷达；班组长推送的通报案例仍走案例推送学习（课件 → 3 题 → 回写），成绩按章节归入案例子题类别'],
+  ['制度学习陪练（10/2 客户提供制度文件）', '六个主题 10 份客户制度文件（应急处置条例 · 隐患判定标准 · 安全生产硬措施 · 有限空间作业 · 动火作业 · 高处作业防高坠；国务院令扫描件经 OCR，PDF 取文字部分并裁到 1.2 万字）→ 课件 → 数字人讲课 → 测验 → 考试分析；隐患判定、硬措施两个主题从客户题库（41 号令测试题库 60 题、事故隐患与安全生产硬措施考试复习资料 452 题）抽题，其余主题从课件自动出题；维度＝该主题得分'],
   ['工作票陪练', '第一种工作票安全措施四栏勾选判定（含干扰项），缺停电 / 接地措施按危险判定；标准措施按安规由本平台拟定 · 待业务确认；成绩与操作票同记入两票填写陪练'],
   ['案例推送学习', '预置 2 个脱敏虚构案例；班组长导入通报（Word / 文本）后按规则抽取经过 / 原因 / 条款 / 要点生成案例课件与 3 道题推送全班；班员学完回写（规则抽取，非在线大模型）'],
   ['课件生成 / 数字人讲课 / 自动出题 / 考试分析', '课件：文件按章节与条款句自动分页并生成讲稿；数字人：内置形象引擎 + 浏览器中文语音朗读（无语音时口型与字幕照常），HeyGen 真人数字人视频预留接口（HEYGEN_CLIPS）；出题：判断（改动情态词）/ 单选（挖空数字或术语）/ 简答（关键词比对），每题附依据原文；考试分析：个人章节掌握 + 关键条款 + 速度，班组对比为脱敏模拟分布'],

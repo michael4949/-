@@ -25,14 +25,14 @@ const w = (p, ms) => p.waitForTimeout(ms);
   await p.evaluate(() => emStart('heat1', 'teach')); await w(p, 400); await shot('emerg_form');
   await p.evaluate(() => { EM.a = emgModel(EMGMAP.heat1, 'part'); EM.step = emSteps(EMGMAP.heat1).length - 1; emPaint(); }); await w(p, 200); await p.evaluate(() => $('#emsubmit').click()); await shot('emerg_res');
   /* 五个场景 */
-  await p.evaluate(() => { if (EM.timer) { clearInterval(EM.timer); EM.timer = null; } EM.id = null; EM.res = null; startScene('rule:verify:teach'); }); await shot('sc_rule');
-  await p.evaluate(() => startScene('life:verify:teach')); await shot('sc_life');
-  await p.evaluate(() => startScene('case:cl1:teach')); await shot('sc_case');
-  await p.evaluate(() => startScene('inst:d_ticket:teach')); await shot('sc_inst');
+  await p.evaluate(() => { if (EM.timer) { clearInterval(EM.timer); EM.timer = null; } EM.id = null; EM.res = null; startScene('rule:r_tech:teach'); }); await shot('sc_rule');
+  await p.evaluate(() => startScene('life::teach')); await shot('sc_life');
+  await p.evaluate(() => startScene('case:small:teach')); await shot('sc_case');
+  await p.evaluate(() => startScene('inst:z2a:teach')); await shot('sc_inst');
   await p.evaluate(() => startScene('wt::teach')); await shot('sc_wt');
   await p.evaluate(() => { WT.secs.forEach(s => { SC.pool[s.k].forEach((o, i) => { if (o.ok) SC.a[s.k][i] = true; }); }); wtSubmit(); }); await shot('sc_wt_res');
   /* 讲课弹层与测验 */
-  await p.evaluate(() => startScene('inst:d_report:teach')); await w(p, 300); await p.evaluate(() => { lecOpen(SC.cw, { from: 1 }); }); await w(p, 1200); await shot('lecture'); await p.evaluate(() => lecClose());
+  await p.evaluate(() => startScene('inst:z1:teach')); await w(p, 300); await p.evaluate(() => { lecOpen(SC.cw, { from: 1 }); }); await w(p, 1200); await shot('lecture'); await p.evaluate(() => lecClose());
   await p.evaluate(() => instExam()); await w(p, 400); await shot('exam');
   await p.evaluate(() => { EX.qs.forEach(q => { EX.ans[q.id] = q.ans; }); examGrade(); }); await w(p, 300); await shot('exam_res');
   /* 下钻弹层 */

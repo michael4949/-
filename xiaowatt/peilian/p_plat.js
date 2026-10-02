@@ -95,7 +95,7 @@ function chLine(pts, w) {
   </svg>`;
 }
 function chTri(sum) {
-  const R = [58, 44, 30], C = ['#a8821b', '#1f6fb3', '#0e8f5a'], K = ['all', 'tk', 'em'], N = ['技能水平', '操作票五项', '应急处置四项'];
+  const R = [58, 44, 30], C = ['#a8821b', '#1f6fb3', '#0e8f5a'], K = ['all', 'tk', 'em'], N = ['技能水平', '两票填写五项', '应急处置六类'];
   return `<svg viewBox="0 0 260 150" class="chtri">${K.map((k, i) => {
     const v = sum[k], p = v == null ? 0 : v / 100, r = R[i], cir = 2 * Math.PI * r;
     return `<g data-tri="${k}" class="tri ${v == null ? 'na' : ''}"><circle cx="75" cy="75" r="${r}" class="trk"/><circle cx="75" cy="75" r="${r}" stroke="${C[i]}" class="trv" stroke-dasharray="${(cir * p).toFixed(1)} ${cir.toFixed(1)}" transform="rotate(-90 75 75)"/>
@@ -104,43 +104,51 @@ function chTri(sum) {
   }).join('')}</svg>`;
 }
 
-/* ---------- 场景中心：六个陪练场景 ---------- */
+/* ---------- 场景中心：六个陪练场景按四个能力分组（10/2 客户意见） ---------- */
 function pageCenter() {
   const A = homeAgg(), AB = abilityCalc(), lastTk = allRecs().find(r => r.src === 'tk');
   const cards = new Set(EMG.map(e => e.card)).size;
   const SC_ = typeof SC_DEF !== 'undefined' ? SC_DEF : {};
   const sc = k => AB.scene[k];
   const stat = k => sc(k).cnt ? `本期 ${sc(k).score} 分 · 练过 ${sc(k).cnt} 次` : '尚未练过';
-  const dimTag = k => `<span class="tag dim4t">${DIM4_MAP[SCENE_MAP[k].dim].short}</span>`;
-  return `<div class="wrap">
-    <div class="ph"><h2>场景中心</h2><span class="sub">六个陪练场景 · 对应安全能力成熟度四个维度　选场景进入陪练</span></div>
-    <div class="scgrid">
-      <div class="card scbig ho">
-        <div class="ch"><b>两票填写陪练</b>${dimTag('tk')}<span class="r note">${h(TICKET_META.station)} · 第一种工作票</span></div>
+  const P = qbPro();
+  const groups = {}; QBANK.pros.forEach(p => { (groups[p.g] = groups[p.g] || []).push(p); });
+  const proSel = `<label class="qbpro"><span>题库专业</span><select data-qbpro="1">${Object.keys(groups).map(g => `<optgroup label="${h(g)}">${groups[g].map(p => `<option value="${p.id}" ${p.id === P.id ? 'selected' : ''}>${h(p.n)}（${p.q.length} 题）</option>`).join('')}</optgroup>`).join('')}</select></label>`;
+  const chipN = (k, c) => k === 'rule' || k === 'life' ? qbPool(k, c[0]).length : k === 'case' ? P.cases.filter(x => x.kind === c[0]).length : k === 'inst' ? docAll().filter(d => d.theme === c[0]).length : 0;
+  const card = k => {
+    if (k === 'tk') return `<div class="card scbig wide ho">
+        <div class="ch"><b>两票填写陪练</b><span class="r note">${h(TICKET_META.station)} · 第一种工作票</span></div>
         <div class="scsub"><div class="scsubi"><b>操作票陪练</b><p class="sct">${h(TICKET_META.task)}</p>
           <div class="scm"><span><i>给出</i>主接线图 · 运行方式 · 7 个屏柜附表</span><span><i>判卷</i>标准票 ${TICKET.filter(s => !s.parent).length} 项 · ${TICKET_DANGER.length} 条危险操作 · 依据安规与电气操作导则</span></div>
           <div class="scgo"><button class="btn pri" data-start="tk:teach">训练模式</button><button class="btn" data-start="tk:exam">考核模式</button><button class="btn g" data-go="ticket">上传已填好的票</button></div></div>
           <div class="scsubi"><b>工作票陪练</b><p class="sct">${h((SC_.wt || {}).task || '变电站第一种工作票 · 安全措施填写')}</p>
           <div class="scm"><span><i>给出</i>工作任务 · 工作地点 · 运行方式</span><span><i>判卷</i>停电 · 验电 · 接地 · 遮栏与标示牌逐项比对 · 本平台按安规拟定，待业务确认</span></div>
           <div class="scgo"><button class="btn pri" data-start="wt::teach">训练模式</button><button class="btn" data-start="wt::exam">考核模式</button></div></div></div>
-        <div class="scft"><span><i>能力</i>操作顺序 · 漏项控制 · 文字规范 · 危险辨识 · 二次与压板</span><span class="note">${stat('tk')}${lastTk ? ' · 最近 ' + lastTk.score + ' 分' : ''}</span></div>
-      </div>
-      <div class="card scbig hg">
-        <div class="ch"><b>应急处置陪练</b>${dimTag('em')}<span class="r note">变电管理一所巡维中心</span></div>
+        <div class="scft"><span><i>维度</i>${skillsOf('tk').map(d => d.n).join(' · ')}</span><span class="note">${stat('tk')}${lastTk ? ' · 最近 ' + lastTk.score + ' 分' : ''}</span></div>
+      </div>`;
+    if (k === 'em') return `<div class="card scbig wide hg">
+        <div class="ch"><b>应急处置陪练</b><span class="r note">变电管理一所巡维中心</span></div>
         <p class="sct">${cards} 类应急处置卡 · ${EMG.length} 个情境 · 情境由 AI 生成，每次不同</p>
         <div class="scm"><span><i>作答</i>处置要点（可口述）→ 事例纠错 → 信息报送</span><span><i>点评</i>逐项判定，意思对即得分，补充遗漏的处置卡原文</span>
-          <span><i>依据</i>应急处置卡 · 场景归类表 · 应急信息报送工作指引</span><span><i>能力</i>快速决策 · 知识储备 · 风险识别 · 高效上报</span></div>
+          <span><i>依据</i>应急处置卡 · 场景归类表 · 应急信息报送工作指引</span><span><i>维度</i>${skillsOf('em').map(d => d.n).join(' · ')}（按情境类别）</span></div>
         <div class="emcatrow">${EMG_CAT.map(c => `<span class="chip" data-emcat="${c.k}">${c.n} ${EMG.filter(e => e.cat === c.k).length}</span>`).join('')}</div>
         <div class="scgo"><button class="btn pri" data-start="em">选择情境</button><span class="note">已练 ${A.scenes.size}/${EMG.length} 个情境 · ${A.cards.size}/${cards} 类处置卡 · ${stat('em')}</span></div>
-      </div>
-      ${['rule', 'life', 'case', 'inst'].map(k => { const S = SCENE_MAP[k], D = SC_[k] || {}; return `<div class="card scbig ${k === 'rule' || k === 'inst' ? 'hg' : 'ho'}">
-        <div class="ch"><b>${h(S.n)}</b>${dimTag(k)}<span class="r note">${h(D.src || '')}</span></div>
+      </div>`;
+    const S = SCENE_MAP[k], D = SC_[k] || {}, bank = k === 'rule' || k === 'life' || k === 'case';
+    const src = bank ? '安规考试题库 · ' + P.n + (k === 'case' ? ' · 小案例 ' + P.cases.filter(x => x.kind === 'small').length + ' · 大案例 ' + P.cases.filter(x => x.kind === 'big').length : ' · ' + qbPool(k, '').length + ' 题') : (D.src || '');
+    return `<div class="card scbig ${k === 'case' ? 'wide' : ''} ${k === 'rule' || k === 'inst' ? 'hg' : 'ho'}">
+        <div class="ch"><b>${h(S.n)}</b><span class="r note">${h(src)}</span></div>
         <p class="sct">${h(D.title || S.sub)}</p>
-        <div class="scm">${(D.how || []).map(x => `<span><i>${h(x[0])}</i>${h(x[1])}</span>`).join('')}<span><i>能力</i>${skillsOf(k).map(d => d.n).join(' · ')}</span></div>
-        ${D.chips ? `<div class="emcatrow">${D.chips.map(c => `<span class="chip" data-start="${k}:${c[0]}:teach">${h(c[1])}</span>`).join('')}</div>` : ''}
+        <div class="scm">${(D.how || []).map(x => `<span><i>${h(x[0])}</i>${h(x[1])}</span>`).join('')}<span><i>维度</i>${skillsOf(k).map(d => d.n).join(' · ')}</span></div>
+        ${D.chips ? `<div class="emcatrow">${D.chips.map(c => `<span class="chip" data-start="${k}:${c[0]}:teach">${h(c[1])} ${chipN(k, c) || ''}</span>`).join('')}</div>` : ''}
         <div class="scgo"><button class="btn pri" data-start="${k}::teach">训练模式</button><button class="btn" data-start="${k}::exam">考核模式</button><span class="note">${stat(k)}</span></div>
-      </div>`; }).join('')}
-    </div>
+      </div>`;
+  };
+  return `<div class="wrap">
+    <div class="ph"><h2>场景中心</h2><span class="sub">六个陪练场景按四个能力分组　选场景进入陪练</span><span class="r">${proSel}</span></div>
+    ${DIM4.map((d, gi) => { const D = AB.dim4.find(x => x.k === d.k) || {}; return `<section class="scgrp">
+      <div class="scgh"><i>${gi + 1}</i><b>${h(d.n)}</b><span>${d.scenes.map(k => SCENE_N[k]).join(' · ')}</span><em>${h(d.d.replace(/^[^：]*：/, ''))}</em><span class="r mono">${D.score == null ? '本期 —' : '本期 ' + D.score + ' 分 · ' + maturityLv(D.score)}</span></div>
+      <div class="scgrid">${d.scenes.map(card).join('')}</div></section>`; }).join('')}
   </div>`;
 }
 
@@ -287,7 +295,8 @@ function pageSys() {
         <tr><td>标准票</td><td>${h(TICKET_META.task)}　<span class="tag">${h(TICKET_META.ver)} 已发布冻结</span></td></tr>
         <tr><td>判卷标注</td><td>${TICKET.length} 行：${TICKET_META.stages.length} 个设备状态阶段、${Array.from(new Set(TICKET.map(s => s.grp))).length} 个换序组、${TICKET.filter(s => s.miss === '整票不合格').length} 处漏写即整票不合格、3 档文字要求</td></tr>
         <tr><td>危险操作规则</td><td>${TICKET_DANGER.map(d => h(d.n)).join('；')}　规则优先级高于普通扣分</td></tr>
-        <tr><td>制度文件库</td><td>${RULE_DOCS.map(d => h(d.short)).join(' · ')}　共 ${RULES.length} 条可检索条款，每条可追溯到文件名、条款编号与条文正文</td></tr>
+        <tr><td>制度文件库</td><td>${ZTHEMES.map(t => h(t[1])).join(' · ')}　六个主题 ${ZDOCS.length} 份客户制度文件，课件按章节自动生成，隐患判定、硬措施两个主题用客户题库考试</td></tr>
+        <tr><td>安规考试题库</td><td>《安规考试题库 0407 更新》${QBANK.pros.length} 个专业，当前「${h(qbPro().n)}」；安规知识＝单选 + 多选 + 判断，保命技能＝保命题型，案例分析＝小案例 / 大案例；维度按题目内容分类（本平台打标 · 待业务确认）</td></tr>
         <tr><td>操作票扣分配置</td><td>漏项 ${TICKET_CFG.miss} · 顺序错误 ${TICKET_CFG.order} · 阶段越界 ${TICKET_CFG.cross} · 文字不规范 ${TICKET_CFG.text} · 无关步骤 ${TICKET_CFG.extra} · 及格 ${TICKET_CFG.pass}</td></tr>
         <tr><td>应急处置计分配置</td><td>处置要点 ${EMG_CFG.pts} · 事例纠错 ${EMG_CFG.notes} · 信息报送每项 +${EMG_CFG.bonus}（封顶 100） · 及格 ${EMG_CFG.pass}；四项指标：快速决策（用时对基准）· 知识储备 · 风险识别 · 高效上报</td></tr>
         <tr><td>安全能力成熟度</td><td>四个维度：${DIM4.map(d => d.n + '（' + d.scenes.map(k => SCENE_N[k]).join('、') + '）').join('；')}；分级 待提升 &lt;60 · 合格 60–74 · 熟练 75–89 · 精通 ≥90；由班组长确认后使用</td></tr>
@@ -299,7 +308,10 @@ function pageSys() {
         <tr><td>应急处置卡</td><td class="mono">${new Set(EMG.map(e => e.card)).size} 类 / ${EMG.length} 个情境 / 处置要点 ${nPts} 条</td><td class="note">${h(EMG_SRC)}</td></tr>
         <tr><td>事例纠错</td><td class="mono">${nCase} 个事例</td><td class="note">按注意事项编写</td></tr>
         <tr><td>随堂测验</td><td class="mono">${QUIZ.length} 题</td><td class="note">试卷、典型票、处置卡与报送指引</td></tr>
-        <tr><td>制度条款</td><td class="mono">${RULES.length} 条</td><td class="note">安规及释义 · 电气操作导则</td></tr>
+        <tr><td>安规考试题库</td><td class="mono">${QBANK.pros.length} 个专业 / ${QBANK.pros.reduce((s, p) => s + p.q.length, 0)} 题 / 案例 ${QBANK.pros.reduce((s, p) => s + p.cases.length, 0)} 个</td><td class="note">客户《安规考试题库 0407 更新》· 当前专业「${h(qbPro().n)}」${qbPool('rule', '').length} 题，其中保命题型 ${qbPool('life', '').length} 题</td></tr>
+        <tr><td>制度题库</td><td class="mono">${ZBANK.length} 题</td><td class="note">41 号令测试题库 · 事故隐患与安全生产硬措施考试复习资料</td></tr>
+        <tr><td>制度文件</td><td class="mono">${ZDOCS.length} 份 / 六个主题</td><td class="note">客户提供：${ZDOCS.map(d => h(d.n)).join('；')}</td></tr>
+        <tr><td>两票判卷依据条款</td><td class="mono">${RULES.length} 条</td><td class="note">安规及释义 · 电气操作导则（操作票判卷与危险操作规则引用）</td></tr>
       </table></div>
     <div class="card"><div class="ch"><b>通用功能</b></div>
       <div class="sysf">${[['演练上下文记忆', '完整保存整场演练的全部作答，用于后续复盘分析'], ['压力模式开关', '写票开启后有调度来电打断、限时 20 分钟'], ['演练计时', '记录完成演练的耗时，写在演练档案里'], ['演练存档', '每一次演练生成唯一档案，本机存储，随时调回看完整过程'], ['文件上传', 'Word / Excel 操作票离线解析后直接判卷'], ['数据导出', '判卷结果、点评结果、分析明细导出为表格文件，用于测评归档']].map(x => `<div><b>${h(x[0])}</b><span>${h(x[1])}</span></div>`).join('')}</div></div>

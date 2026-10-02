@@ -54,8 +54,8 @@ function caseStepHTML() {
   if (CP.step === 2) return head + `<div id="cpex"></div>`;
   const r = CP.res;
   return head + `<div class="exres"><div class="rvhead"><div class="rvbig ${r.pass ? '' : 'wv'}">${r.score}</div><div><div class="hrow">${r.pass ? '<span class="tag ok">完成</span>' : '<span class="tag wn">完成 · 建议再学一遍</span>'} 答对 ${r.right} / ${r.n} · 用时 ${fmtSec(r.sec)} · 已回写给 ${h(c.from)}</div><div class="hrow"><em class="ai">AI</em> ${h(r.score >= 80 ? '案例要点掌握了，记住：' + c.lessons[0] + '。' : '原因和条款还没记牢，回到课件再看一遍「原因分析」与「违反条款」。')}</div></div></div>
-    ${r.wrong.length ? `<table class="htbl"><tr><th>错题</th><th>正确答案</th><th>依据</th></tr>${r.wrong.map(x => `<tr><td>${h(x.q.stem)}</td><td class="gv">${h(x.q.type === 'choice' ? 'ABCD'[x.q.ans] + '，' + x.q.opts[x.q.ans] : x.q.type === 'judge' ? (x.q.ans ? '正确' : '错误') : x.q.ans)}</td><td class="tk3">${h(x.q.orig)}</td></tr>`).join('')}</table>` : '<div class="hrow"><span class="tag ok">三题全对</span></div>'}
-    <div class="scgo" style="margin-top:10px"><button class="btn pri" data-start="case:${c.id}:teach">进入案例分析陪练（深入分析）</button><button class="btn" data-go="home">回工作台</button></div></div>`;
+    ${r.wrong.length ? `<table class="htbl"><tr><th>错题</th><th>正确答案</th><th>依据</th></tr>${r.wrong.map(x => `<tr><td>${h(x.q.stem)}</td><td class="gv">${h(exAnsText(x.q, x.q.ans))}</td><td class="tk3">${h(x.q.orig)}</td></tr>`).join('')}</table>` : '<div class="hrow"><span class="tag ok">三题全对</span></div>'}
+    <div class="scgo" style="margin-top:10px"><button class="btn pri" data-start="case::teach">进入案例分析陪练（题库案例题）</button><button class="btn" data-go="home">回工作台</button></div></div>`;
 }
 function casePaint() { const b = $('#cpbox'); if (b) b.innerHTML = caseStepHTML(); }
 function caseExam() {
@@ -63,7 +63,10 @@ function caseExam() {
   const qs = qGen(caseDocOf(CP.c), 3, Date.now(), { types: ['judge', 'choice', 'judge'] });
   examStart(qs, { title: '案例学习 · ' + CP.c.t, mode: 'teach', mount: 'cpex', src: 'case', base: 40, onDone: res => {
     CP.res = res; CP.step = 3;
-    const dims = { c1: res.score, c2: res.keyRate == null ? res.score : res.keyRate, c3: res.score, c4: null };
+    /* 维度 = 子题内容类别答对率：课件章节（经过 / 原因 / 条款 / 要点）对应 事故定性 / 原因分析 / 违规辨识 / 防范措施，其余按题干分类 */
+    const SEC_CAT = { '一、事故经过': 'c_hazard', '二、原因分析': 'c_cause', '三、违反条款': 'c_viol', '四、警示要点': 'c_measure' };
+    const by = {}; res.per.forEach(x => { const c = SEC_CAT[x.q.secT] || caseCatOf(x.q.stem); (by[c] = by[c] || []).push(x.pt); });
+    const dims = {}; skillsOf('case').forEach(d => { dims[d.k] = by[d.k] ? clamp(by[d.k].reduce((a, b) => a + b, 0) / by[d.k].length * 100) : null; });
     recSave({ src: 'case', ts: Date.now(), d: stampOf(Date.now()), sub: '案例推送 · ' + CP.c.t, mode: '训练模式', score: res.score, pass: res.score >= 60, sec: res.sec, sum: res.wrong.length ? ['答错 ' + res.wrong.length + ' 题'] : [], dims, wrong: res.wrong.map(x => ({ t: x.q.stem, cite: x.q.orig })), caseId: CP.c.id, push: true });
     caseDone(CP.c.id, res.score);
     toast(`案例学习完成 · ${res.score} 分，已回写给${CP.c.from}`, 'ok');

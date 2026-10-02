@@ -4,44 +4,12 @@
 
 const LS_DOCS = 'xwt_docs', LS_EXAMS = 'xwt_exams', LS_CWSEEN = 'xwt_cw_seen';
 
-/* ---------- 文件库：预置制度文件（节选整理，待业务提供正式文件后替换）+ 本机上传 ---------- */
-const DOC_LIB = [
-  { id: 'd_ticket', n: '两票管理细则（节选）', kind: '制度文件', tag: '两票', src: '预置 · 节选整理', text: `第一章 总则
-第一条 为规范操作票、工作票（以下简称“两票”）的填写、审核、执行与管理，保证人身与设备安全，制定本细则。
-第二条 本细则适用于变电站内一切倒闸操作与检修、试验、安装工作。两票是保证安全的组织措施，必须严格执行。
-第三条 两票实行“谁填写、谁负责，谁审核、谁负责，谁执行、谁负责”的责任制。
-第二章 操作票
-第四条 倒闸操作必须填写操作票，一张操作票只能填写一个操作任务。
-第五条 操作票应由操作人填写，监护人审核，值班负责人批准后方可执行。
-第六条 操作票应使用设备双重名称，一个操作项目栏内只能填写一个操作动作，不得并项填写。
-第七条 操作票填写可以修改，修改处应清晰、易于辨别，一张操作票修改不得超过 3 处。
-第八条 操作中发生疑问时，应立即停止操作并向值班调度员或值班负责人报告，不得擅自更改操作票。
-第九条 操作票应保存 1 年。
-第三章 工作票
-第十条 在变电站电气设备上工作，必须填写工作票。第一种工作票适用于高压设备上工作需要全部停电或部分停电者。
-第十一条 工作票应由工作负责人填写，工作票签发人审核签发，工作许可人许可后方可开工。
-第十二条 工作票签发人不得兼任该项工作的工作负责人；工作许可人不得签发工作票。
-第十三条 第一种工作票应在工作前 1 日送达运行人员，临时工作可在工作开始前直接交给工作许可人。
-第十四条 工作票的有效期以批准的检修期为限，最长不超过 5 天；需要延期时应在有效期前 2 小时由工作负责人向工作许可人提出。
-第十五条 工作许可人应会同工作负责人到现场检查停电、验电、接地、遮栏与标示牌等安全措施完备后，双方签名，方可开工。
-第十六条 工作间断后继续工作，应由工作负责人重新检查安全措施，工作班成员不得擅自进入工作地点。
-第十七条 工作终结时，工作负责人应清点人员与工器具，拆除自装的接地线，向工作许可人交代，双方签名后工作票方告终结。
-第四章 考核
-第十八条 操作票、工作票由班组每月统计合格率，无票操作、无票工作按严重违章处理。
-第十九条 填写不规范、审核把关不严的，按规定进行考核。` },
-  { id: 'd_report', n: '变电管理一所应急信息报送工作指引', kind: '制度文件', tag: '应急', src: '预置 · 整理', text: `一、报送原则
-1. 发生突发事件后，应先用电话口头报告，快报现象，后续再报原因；节点之间信息传递不超过 2 分钟。
-2. 人员轻伤及以上、110kV 及以上变电站变压器起火等 7 类重大突发事件，由第一时间获知的员工直接电话向变电一所分管副总经理汇报。
-3. 原因（结论）未明确前不得自行对外报送，统一以“在检查中”报送。
-二、报送内容
-4. 电话首报内容应包括发生时间、地点（变电站、设备）和现象，以及报送人姓名与联系方式。
-5. 续报：10 分钟内在 elink 应急信息群报送发生时间、地点及简单经过；1 小时内报送初步原因与已采取措施；3 小时内报送处置进展。
-6. 对外沟通应避免使用“爆炸”“着火”等敏感字眼，可用“故障”“冒烟”代替。
-三、责任
-7. 迟报、漏报、瞒报的，按应急管理有关规定追究责任。
-8. 各班组每季度至少组织 1 次信息报送演练。` },
-  { id: 'd_aq', n: '安规 · 保证安全的技术措施（条文汇编）', kind: '制度文件', tag: '安规', src: '预置 · 安规条文照录', text: '一、保证安全的技术措施\n' + (typeof RULES !== 'undefined' ? RULES.filter(r => r.doc === 'aq').map(r => r.no + ' ' + r.t + '：' + r.body).join('\n') : '') }
-];
+/* ---------- 文件库：客户提供的六个主题制度文件（zlib.js，由 gen_zlib.py 生成）+ 本机上传 ---------- */
+const DOC_LIB = typeof ZDOCS !== 'undefined' ? ZDOCS : [];
+function docThemeOf(name, text) {
+  const t = String(name || '') + ' ' + String(text || '').slice(0, 3000);
+  return /应急处置和调查处理|应急处置条例|调查处理条例/.test(t) ? 'z1' : /隐患判定|重大事故隐患|较大事故隐患|隐患排查治理/.test(t) ? 'z2' : /硬措施/.test(t) ? 'z3' : /有限空间/.test(t) ? 'z4' : /动火/.test(t) ? 'z5' : /高处作业|高坠|防坠|安全带/.test(t) ? 'z6' : '';
+}
 function docUploads() { return lsGet(LS_DOCS, []); }
 function docAll() { return docUploads().concat(DOC_LIB); }
 function docById(id) { return docAll().find(d => d.id === id); }
@@ -56,14 +24,15 @@ async function docImport(file, after) {
     else throw new Error('只支持 Word（.docx）与纯文本（.txt）');
     text = text.replace(/\r/g, '').split('\n').map(x => x.trim()).filter(Boolean).join('\n');
     if (text.length < 40) throw new Error('文件里没有足够的正文');
-    const d = { id: 'u' + Date.now(), n: file.name.replace(/\.[^.]+$/, ''), kind: '上传文件', tag: /安规|规程/.test(text) ? '安规' : /应急|报送/.test(text) ? '应急' : /操作票|工作票|两票/.test(text) ? '两票' : '通用', src: '本机上传 · ' + stampOf(Date.now()), text: text.slice(0, 20000) };
-    docAdd(d); toast(`已导入「${d.n}」，${docSecs(d.text).length} 节 · ${sentAll(d).length} 句`, 'ok');
+    const name = file.name.replace(/\.[^.]+$/, ''), theme = docThemeOf(name, text);
+    const d = { id: 'u' + Date.now(), n: name, kind: '上传文件', theme, tag: theme ? (ZTHEMES.find(t => t[0] === theme) || [])[1] : /安规|规程/.test(text) ? '安规' : /应急|报送/.test(text) ? '应急' : /操作票|工作票|两票/.test(text) ? '两票' : '通用', src: '本机上传 · ' + stampOf(Date.now()), text: text.slice(0, 20000) };
+    docAdd(d); toast(`已导入「${d.n}」，${docSecs(d.text).length} 节 · ${sentAll(d).length} 句${theme ? ' · 归入「' + d.tag + '」主题' : ''}`, 'ok');
     if (after) after(d);
   } catch (e) { toast('导入失败：' + e.message, 'bad'); }
 }
 
 /* ---------- 文本结构：章节 → 段落 → 句子；条款句（应 / 必须 / 不得 / 严禁……）为关键句 ---------- */
-const HEAD_RE = /^(第[一二三四五六七八九十百]+[章节]|[一二三四五六七八九十]+、|[（(][一二三四五六七八九十]+[)）])/;
+const HEAD_RE = /^(第[一二三四五六七八九十百]+[章节]|[一二三四五六七八九十]+、|[（(][一二三四五六七八九十]+[)）]|\d{1,2}(\.\d{1,2}){0,2}\s+[^\d\s])/;
 const KEY_RE = /应当|应|必须|严禁|不得|不应|禁止|不超过|不少于|至少|方可|只能/;
 function docSecs(text) {
   const lines = String(text || '').split(/\r?\n/).map(x => x.trim()).filter(Boolean);
@@ -125,22 +94,26 @@ function cwGo(i) { const cw = CW.cw; if (!cw) return; CW.i = Math.max(0, Math.mi
 /* ---------- 课件 → 自动出题：判断（改动情态词）/ 单选（挖空数字或术语）/ 简答（说出要求），每题带依据原文 ---------- */
 const TERM_ROLE = ['工作负责人', '工作票签发人', '工作许可人', '监护人', '操作人', '值班负责人', '值班调度员', '分管副总经理', '班组长', '安全员', '运维人员', '工作班成员'];
 const TERM_ACT = ['停电', '验电', '接地', '遮栏', '标示牌', '双重名称', '操作票', '工作票', '续报', '首报', '电话', 'elink 应急信息群', '在检查中', '接地线', '接地刀闸', '带电显示装置', '闭锁', '机械锁'];
+/* 同一组内互为干扰项：防护用品 / 作业程序 / 隐患与事故等级 */
+const TERM_PPE = ['安全带', '安全帽', '安全绳', '速差自控器', '攀登自锁器', '安全网', '呼吸器', '绝缘手套', '绝缘靴', '灭火器', '气体检测仪'];
+const TERM_PROC = ['气体检测', '通风', '置换', '隔离', '围栏', '警戒线', '动火证', '作业许可', '审批', '备案', '应急预案', '安全教育', '风险辨识', '专家论证', '监护'];
+const TERM_GRADE = ['重大隐患', '较大隐患', '一般隐患', '特别重大事故', '重大事故', '较大事故', '一般事故'];
+const TERM_GROUPS = [TERM_ROLE, TERM_ACT, TERM_PPE, TERM_PROC, TERM_GRADE];
 const MODAL_SWAP = [['不得', '可以'], ['严禁', '可以'], ['不应', '应'], ['不超过', '不少于'], ['不少于', '不超过'], ['至少', '最多'], ['必须', '可以不'], ['应当', '不必'], ['方可', '即可'], ['只能', '可以'], ['应', '不应']];
 function rng(seed) { let a = (seed >>> 0) || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function shuffled(arr, r) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function qFromSent(s, type, r, pool) {
   const base = { id: 'q' + Math.floor(r() * 1e9), cite: s.cite, orig: s.t, key: !!s.key, sec: s.sec, secT: s.secT };
   if (type === 'choice') {
-    const num = s.t.match(/(\d+)\s*(分钟|小时|天|日|年|处|次|人|类|kV|米)/);
+    const num = s.t.match(/(\d+)\s*(分钟|小时|天|日|年|处|次|人|类|kV|米|m|mm|%|℃|级|秒|个工作日|工作日|日内|万元)/);
     if (num) {
       const v = +num[1], u = num[2], cand = Array.from(new Set([v * 2, Math.max(1, Math.floor(v / 2)), v + 1, v + 5, v * 10].filter(x => x !== v))).slice(0, 3);
       const opts = shuffled([v].concat(cand).map(x => x + ' ' + u), r);
       return Object.assign(base, { type: 'choice', stem: s.t.replace(num[0], '____ ' + u), opts, ans: opts.indexOf(v + ' ' + u), blank: num[1] + ' ' + u });
     }
-    const roles = TERM_ROLE.filter(t => s.t.includes(t)).sort((a, b) => b.length - a.length);
-    const acts = TERM_ACT.filter(t => s.t.includes(t)).sort((a, b) => b.length - a.length);
-    const grp = roles.length ? TERM_ROLE : acts.length ? TERM_ACT : null, term = roles[0] || acts[0];
-    if (grp) {
+    let grp = null, term = '';
+    TERM_GROUPS.forEach(G => { const hit = G.filter(t => s.t.includes(t)).sort((a, b) => b.length - a.length); if (hit.length && (!term || hit[0].length > term.length)) { grp = G; term = hit[0]; } });
+    if (grp && grp.filter(t => t !== term && !s.t.includes(t)).length >= 3) {
       const dis = shuffled(grp.filter(t => t !== term && !s.t.includes(t)), r).slice(0, 3);
       const opts = shuffled([term].concat(dis), r);
       return Object.assign(base, { type: 'choice', stem: s.t.replace(term, '____'), opts, ans: opts.indexOf(term), blank: term });
@@ -154,8 +127,22 @@ function qFromSent(s, type, r, pool) {
   }
   return Object.assign(base, { type: 'short', stem: `请说出${s.secT && s.secT !== '正文' ? '「' + s.secT + '」中' : ''}关于“${(s.t.match(/[一-龥]{2,6}/) || [''])[0]}”的要求（口述或文字作答，意思对即得分）`, ans: s.t });
 }
+/* 客户制度题库（bank.js ZBANK：41 号令测试题库 / 事故隐患与安全生产硬措施考试复习资料）→ 考试题：单选 / 多选 / 判断，题型轮流抽 */
+const Q_L = 'ABCDEFGHI';
+function zbQs(theme, n, r) {
+  const pool = (typeof ZBANK !== 'undefined' ? ZBANK : []).filter(q => q.theme === theme);
+  const by = { single: [], multi: [], judge: [] }; shuffled(pool, r).forEach(q => { (by[q.t] || by.single).push(q); });
+  const keys = ['single', 'multi', 'judge'], out = []; let i = 0;
+  while (out.length < n && keys.some(k => by[k].length)) { const g = by[keys[i % 3]]; if (g.length) out.push(g.shift()); i++; }
+  return shuffled(out, r).map((q, j) => {
+    const type = q.t === 'judge' ? 'judge' : q.t === 'multi' ? 'multi' : 'choice', opts = q.opts || [];
+    const ans = type === 'judge' ? !!q.ans : type === 'multi' ? String(q.ans).split('').map(c => Q_L.indexOf(c)).filter(x => x >= 0 && x < opts.length).sort((a, b) => a - b) : Q_L.indexOf(String(q.ans)[0]);
+    return { id: 'z' + j + '_' + Math.floor(r() * 1e6), type, stem: q.stem, opts, ans, cite: q.src, orig: q.basis || '', key: /严禁|不得|应当|必须|禁止/.test(q.stem), secT: type === 'choice' ? '单选题' : type === 'multi' ? '多选题' : '判断题', bank: theme };
+  });
+}
 function qGen(doc, n, seed, opt) {
   opt = opt || {}; const r = rng(seed || Date.now());
+  if (doc.bank && !opt.noBank) { const zq = zbQs(doc.bank, n, r); if (zq.length >= Math.min(n, 4)) return zq; }
   const all = sentAll(doc), keys = shuffled(all.filter(s => s.key), r), rest = shuffled(all.filter(s => !s.key), r);
   const picked = keys.concat(rest).slice(0, n);
   const types = opt.types || ['choice', 'judge', 'choice', 'judge', 'short', 'choice', 'judge', 'choice'];
@@ -169,7 +156,7 @@ const EX = { on: false, qs: [], i: 0, ans: {}, sec: 0, timer: null, mode: 'teach
 function examStart(qs, opt) {
   opt = opt || {};
   if (EX.timer) clearInterval(EX.timer);
-  Object.assign(EX, { on: true, qs, i: 0, ans: {}, sec: 0, mode: opt.mode || 'teach', title: opt.title || '测验', mount: opt.mount || 'exbox', onDone: opt.onDone || null, res: null, src: opt.src || '', showWhy: false, base: opt.base || 40, meta: opt.meta || {} });
+  Object.assign(EX, { on: true, qs, i: 0, ans: {}, pick: [], sec: 0, mode: opt.mode || 'teach', title: opt.title || '测验', mount: opt.mount || 'exbox', onDone: opt.onDone || null, res: null, src: opt.src || '', showWhy: false, base: opt.base || 40, meta: opt.meta || {} });
   EX.timer = setInterval(() => { EX.sec++; const t = $('#extimer'); if (t) t.textContent = fmtSec(EX.sec); }, 1000);
   examPaint();
 }
@@ -178,23 +165,33 @@ function examPaint() { const m = document.getElementById(EX.mount); if (m) m.inn
 function examHTML() {
   const q = EX.qs[EX.i], a = EX.ans[q.id], done = a != null, teach = EX.mode === 'teach', last = EX.i === EX.qs.length - 1;
   const ok = done ? qRight(q, a) : null;
-  const opts = q.type === 'choice' ? `<div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ${done ? (i === q.ans ? 'ok' : a === i ? 'bad' : '') : ''} ${a === i ? 'on' : ''}" data-exopt="${i}"><b>${'ABCD'[i]}</b><span>${h(o)}</span></div>`).join('')}</div>`
+  const pick = EX.pick || [];
+  const opts = q.type === 'choice' ? `<div class="qzopts">${q.opts.map((o, i) => `<div class="qzo ${done ? (i === q.ans ? 'ok' : a === i ? 'bad' : '') : ''} ${a === i ? 'on' : ''}" data-exopt="${i}"><b>${Q_L[i]}</b><span>${h(o)}</span></div>`).join('')}</div>`
+    : q.type === 'multi' ? `<div class="qzopts">${q.opts.map((o, i) => { const on = done ? (Array.isArray(a) && a.includes(i)) : pick.includes(i); return `<div class="qzo ${done ? (q.ans.includes(i) ? 'ok' : on ? 'bad' : '') : ''} ${on ? 'on' : ''}" data-exmulti="${i}"><b>${on ? '✓' : Q_L[i]}</b><span>${h(o)}</span></div>`; }).join('')}</div>${done ? '' : `<div class="embar"><span class="tk3">多选题：勾选全部正确项后确认</span><span class="r"><button class="btn s pri" data-excommit="1">确认本题</button></span></div>`}`
     : q.type === 'judge' ? `<div class="qzopts row">${[[true, '正确'], [false, '错误']].map(([v, n]) => `<div class="qzo ${done ? (v === q.ans ? 'ok' : a === v ? 'bad' : '') : ''} ${a === v ? 'on' : ''}" data-exjudge="${v ? 1 : 0}"><b>${v ? '√' : '×'}</b><span>${n}</span></div>`).join('')}</div>`
       : `<div class="exshort"><textarea id="ex_in" rows="3" placeholder="写出要求的内容，可按麦克风口述…" ${done ? 'disabled' : ''}>${h(done ? a : '')}</textarea><div class="embar"><button class="mic" id="ex_mic" title="语音输入"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4"/></svg></button>${done ? '' : '<button class="btn s" data-exsay="1">提交这一题</button>'}</div></div>`;
   return `<div class="exq">
-    <div class="exh"><span class="tag">${teach ? '训练模式' : '考核模式'}</span><b>第 ${EX.i + 1} / ${EX.qs.length} 题</b><i class="ctag">${q.type === 'choice' ? '单选' : q.type === 'judge' ? '判断' : '简答'}</i>${q.key ? '<i class="ctag key">关键条款</i>' : ''}<span class="tktimer" id="extimer">${fmtSec(EX.sec)}</span></div>
+    <div class="exh"><span class="tag">${teach ? '训练模式' : '考核模式'}</span><b>第 ${EX.i + 1} / ${EX.qs.length} 题</b><i class="ctag">${q.type === 'choice' ? '单选' : q.type === 'multi' ? '多选' : q.type === 'judge' ? '判断' : '简答'}</i>${q.key ? '<i class="ctag key">关键条款</i>' : ''}<span class="tktimer" id="extimer">${fmtSec(EX.sec)}</span></div>
     <div class="exprog">${EX.qs.map((x, i) => `<i class="${i === EX.i ? 'on' : EX.ans[x.id] != null ? (qRight(x, EX.ans[x.id]) ? 'ok' : (teach ? 'bad' : 'done')) : ''}" data-exgo="${i}"></i>`).join('')}</div>
     <div class="qzq">${h(q.stem)}</div>
     ${opts}
-    ${done && teach ? `<div class="tkhintbox ${ok === false || ok === 'part' ? 'bad' : ''}"><b>${ok === true ? '答对' : ok === 'part' ? '基本答到' : '答错'}</b>${h(q.type === 'short' ? '标准答案：' + q.ans : q.type === 'choice' ? '正确答案：' + 'ABCD'[q.ans] + '，' + q.opts[q.ans] : q.ans ? '这句话与原文一致。' : '这句话被改动过，' + (q.why || ''))}<div class="tk3" style="margin-top:4px">依据 · ${h(q.cite)}：${h(q.orig)}</div></div>` : ''}
+    ${done && teach ? `<div class="tkhintbox ${ok === false || ok === 'part' ? 'bad' : ''}"><b>${ok === true ? '答对' : ok === 'part' ? '基本答到' : '答错'}</b>${h(q.type === 'short' ? '标准答案：' + q.ans : q.type === 'choice' || q.type === 'multi' ? '正确答案：' + exAnsText(q, q.ans) : q.bank ? '正确答案：' + (q.ans ? '正确' : '错误') : q.ans ? '这句话与原文一致。' : '这句话被改动过，' + (q.why || ''))}<div class="tk3 qbasis" style="margin-top:4px">依据 · ${h(q.cite)}${q.orig ? '：' + h(q.orig) : ''}</div></div>` : ''}
     <div class="embar"><span class="tk3">${teach ? '答错当场给出依据原文' : '交卷后统一分析'}</span><span class="r">${EX.i > 0 ? '<button class="btn s" data-exgo="' + (EX.i - 1) + '">上一题</button>' : ''}${last ? `<button class="btn pri" data-exsubmit="1">交卷 · 自动分析</button>` : `<button class="btn pri" data-exgo="${EX.i + 1}">下一题</button>`}</span></div>
   </div>`;
 }
 function shortScore(q, a) { const s = sim(a, q.ans); const kw = (q.ans.match(/[一-龥]{2,}/g) || []).filter(w => w.length >= 2); const hit = kw.filter(w => norm(a).includes(w.slice(0, 2))).length / (kw.length || 1); return Math.max(s, hit); }
-function qRight(q, a) { if (a == null) return false; if (q.type === 'short') { const v = shortScore(q, a); return v >= .55 ? true : v >= .3 ? 'part' : false; } return a === q.ans; }
+function qRight(q, a) { if (a == null) return false; if (q.type === 'short') { const v = shortScore(q, a); return v >= .55 ? true : v >= .3 ? 'part' : false; } if (q.type === 'multi') { if (!Array.isArray(a)) return false; const x = a.slice().sort((p, q2) => p - q2); return x.length === q.ans.length && x.every((v, i) => v === q.ans[i]); } return a === q.ans; }
+/* 答案文本：单选 字母＋选项；多选 字母串；判断 正确 / 错误；简答 原文 */
+function exAnsText(q, a) {
+  if (a == null) return '未作答';
+  if (q.type === 'judge') return a ? '正确' : '错误';
+  if (q.type === 'multi') return (Array.isArray(a) ? a : []).slice().sort((p, q2) => p - q2).map(i => Q_L[i]).join('') || '未作答';
+  if (q.type === 'choice') return Q_L[a] + '，' + ((q.opts || [])[a] || '');
+  return String(a);
+}
 function examAnswer(v) {
   const q = EX.qs[EX.i]; if (!q || EX.ans[q.id] != null) return;
-  EX.ans[q.id] = v; examPaint();
+  EX.ans[q.id] = v; EX.pick = []; examPaint();
 }
 function examGrade() {
   if (EX.timer) { clearInterval(EX.timer); EX.timer = null; }
@@ -230,14 +227,14 @@ function examResultHTML(res, opt) {
       <div class="hrow">${res.pass ? '<span class="tag ok">合格</span>' : '<span class="tag rl">不合格</span>'} <span class="tag">${res.mode === 'teach' ? '训练模式' : '考核模式'}</span> 答对 ${res.right} / ${res.n}${res.keyRate != null ? ' · 关键条款题 ' + res.keyRate + '%' : ''} · 用时 ${fmtSec(res.sec)}${res.unanswered ? ' · 未作答 ' + res.unanswered : ''}</div>
       <div class="hrow"><em class="ai">AI 考试分析</em> ${h(examAdvice(res))}</div></div></div>`}
     <div class="gtwo">
-      <div><div class="st">按章节掌握</div>${res.secRows.map(s => `<div class="exbar"><span>${h(s.t)}</span><div class="btrk"><div class="bfill ${s.pct < 60 ? 'w' : ''}" style="width:${s.pct}%"></div></div><b class="mono">${s.pct}%</b></div>`).join('')}
+      <div><div class="st">${(res.meta || {}).secLabel || '按章节掌握'}</div>${res.secRows.map(s => `<div class="exbar"><span>${h(s.t)}</span><div class="btrk"><div class="bfill ${s.pct < 60 ? 'w' : ''}" style="width:${s.pct}%"></div></div><b class="mono">${s.pct}%</b></div>`).join('')}
         <div class="st" style="margin-top:10px">作答速度</div><div class="exbar"><span>用时对基准</span><div class="btrk"><div class="bfill" style="width:${res.speed}%"></div></div><b class="mono">${res.speed}</b></div></div>
       <div><div class="st">班组对比 · 同一套题</div>
         <div class="hrow">班组平均 <b class="mono">${T.avg}</b> · 及格率 <b class="mono">${T.passRate}%</b> · 本人排第 <b class="mono">${T.rank}</b> / ${T.total}</div>
         ${T.dist.map(d => `<div class="exbar"><span>${d[0]}</span><div class="btrk"><div class="bfill" style="width:${Math.round(d[1] / T.total * 100)}%"></div></div><b class="mono">${d[1]} 人</b></div>`).join('')}
         <div class="st" style="margin-top:8px">全班最容易错的题</div>${T.hardest.map(x => `<div class="hrow tk3">答对率 <b class="mono">${x.rate}%</b> · ${h(x.stem.slice(0, 40))}${x.stem.length > 40 ? '…' : ''}${x.me ? '' : ' <i class="tag wn">本人也错</i>'}</div>`).join('')}</div>
     </div>
-    ${res.wrong.length ? `<div class="st" style="margin-top:10px">错题与依据原文（${res.wrong.length} 题）</div><table class="htbl"><tr><th>题目</th><th>你的答案</th><th>正确答案</th><th>依据</th></tr>${res.wrong.map(x => `<tr><td>${h(x.q.stem)}</td><td class="wv">${h(x.a == null ? '未作答' : x.q.type === 'choice' ? 'ABCD'[x.a] + '，' + x.q.opts[x.a] : x.q.type === 'judge' ? (x.a ? '正确' : '错误') : x.a)}</td><td class="gv">${h(x.q.type === 'choice' ? 'ABCD'[x.q.ans] + '，' + x.q.opts[x.q.ans] : x.q.type === 'judge' ? (x.q.ans ? '正确' : '错误（' + (x.q.why || '') + '）') : x.q.ans)}</td><td class="tk3">${h(x.q.cite)}<div>${h(x.q.orig)}</div></td></tr>`).join('')}</table>` : '<div class="hrow"><span class="tag ok">全部答对</span></div>'}
+    ${res.wrong.length ? `<div class="st" style="margin-top:10px">错题与依据原文（${res.wrong.length} 题）</div><table class="htbl"><tr><th>题目</th><th>你的答案</th><th>正确答案</th><th>依据</th></tr>${res.wrong.map(x => `<tr><td>${h(x.q.stem)}</td><td class="wv">${h(exAnsText(x.q, x.a))}</td><td class="gv">${h(x.q.type === 'judge' && !x.q.ans && x.q.why ? '错误（' + x.q.why + '）' : exAnsText(x.q, x.q.ans))}</td><td class="tk3 qbasis">${h(x.q.cite)}<div>${h(x.q.orig)}</div></td></tr>`).join('')}</table>` : '<div class="hrow"><span class="tag ok">全部答对</span></div>'}
     <div class="tk3" style="margin-top:8px">分析由判定结果自动生成；班组对比为同一套题的班组成绩分布，正式考评以人工审核为准。</div>
   </div>`;
 }
@@ -337,11 +334,11 @@ function lecClose() {
 /* ---------- 知识课堂 · 课件生产线板块 ---------- */
 function pipeHTML() {
   const docs = docAll(), hist = examHist();
-  const steps = [['文件', '制度 / 通报 / 课程文档'], ['课件', '按章节自动生成'], ['数字人讲课', '讲稿逐句讲解'], ['自动出题', '判断 · 单选 · 简答'], ['考试', '训练 / 考核'], ['考试分析', '个人 + 班组']];
-  return `<section class="hcard ho"><div class="hch"><b>课件生产线</b><em class="ai">AI</em><span>导入文件 → 生成课件 → 数字人讲课 → 自动出题 → 考试 → 考试分析 · 制度学习陪练与案例推送学习走同一条线</span></div><div class="hcb">
+  const steps = [['文件', '制度 / 通报 / 课程文档'], ['课件', '按章节自动生成'], ['数字人讲课', '讲稿逐句讲解'], ['自动出题', '单选 · 多选 · 判断'], ['考试', '训练 / 考核'], ['考试分析', '个人 + 班组']];
+  return `<section class="hcard ho"><div class="hch"><b>课件生产线</b><em class="ai">AI</em><span>导入文件 → 生成课件 → 数字人讲课 → 自动出题 → 考试 → 考试分析 · 制度学习陪练与案例推送学习走同一条线 · 隐患判定、硬措施两个主题用客户题库出题</span></div><div class="hcb">
     <div class="pipesteps">${steps.map((s, i) => `<div class="pst"><i>${i + 1}</i><b>${s[0]}</b><span>${s[1]}</span></div>`).join('<em>→</em>')}</div>
     <div class="gtwo g32">
-      <div><div class="st">文件库 · ${docs.length} 份</div><div class="doclist">${docs.map(d => { const cw = cwGen(d); const seen = cwSeenRatio(cw); return `<div class="docit"><div class="doc1"><i class="ctag">${h(d.tag)}</i><b>${h(d.n)}</b><span class="tk3">${h(d.kind)} · ${h(d.src)} · ${cw.nSec} 节 ${cw.nSent} 条 · 关键条款 ${cw.nKey}${seen ? ' · 课件已看 ' + seen + '%' : ''}</span></div>
+      <div><div class="st">文件库 · ${docs.length} 份</div><div class="doclist">${docs.map(d => { const cw = cwGen(d); const seen = cwSeenRatio(cw); return `<div class="docit"><div class="doc1"><i class="ctag">${h(d.tag)}</i><b>${h(d.n)}</b><span class="tk3">${h(d.kind)} · ${h(d.src)} · ${cw.nSec} 节 ${cw.nSent} 条 · 关键条款 ${cw.nKey}${d.bank ? ' · 客户题库出题' : ''}${seen ? ' · 课件已看 ' + seen + '%' : ''}</span></div>
         <div class="doc2"><button class="btn sm" data-doccw="${d.id}">生成课件</button><button class="btn sm" data-doclec="${d.id}">数字人讲课</button><button class="btn sm pri" data-docexam="${d.id}">出题考试</button>${d.kind === '上传文件' ? `<button class="btn sm" data-docdel="${d.id}">删除</button>` : ''}</div></div>`; }).join('')}</div>
         <div class="tkupb" style="margin-top:8px"><label class="btn tkup">导入文件<input type="file" class="tkfile pipefile" accept=".docx,.txt"></label><span class="tk3">Word（.docx）或文本（.txt）：制度文件、事故通报、培训讲义；导入后即可生成课件与题目</span></div></div>
       <div><div class="st">最近考试分析 · ${hist.length} 次</div>${hist.length ? `<table class="htbl nw"><tr><th>时间</th><th>内容</th><th>得分</th><th>关键条款</th><th>班组</th><th></th></tr>${hist.slice(0, 5).map((e, i) => `<tr><td class="mono">${stampOf(e.ts)}</td><td>${h(e.title)}</td><td class="mono ${e.score >= 60 ? 'gv' : 'wv'}">${e.score}</td><td class="mono">${e.keyRate == null ? '—' : e.keyRate + '%'}</td><td class="tk3">均 ${e.team.avg} · 第 ${e.team.rank}/${e.team.total}</td><td><button class="btn sm" data-examhist="${i}">看分析</button></td></tr>`).join('')}</table>` : '<div class="tk3">还没有考试记录：在左侧选一份文件「出题考试」，交卷后自动生成个人分析与班组对比。</div>'}</div>
@@ -352,9 +349,9 @@ function docExam(doc, mode, opt) {
   opt = opt || {};
   const qs = qGen(doc, opt.n || 6, opt.seed);
   $$('.mask').forEach(m => m.remove());
-  const m = openDrill(`测验 · ${doc.n}`, `${qs.length} 题 · 从文件自动出题 · 关键条款必考`, `<div id="exbox"></div>`);
+  const m = openDrill(`测验 · ${doc.n}`, `${qs.length} 题 · ${doc.bank ? '客户题库抽题 · 单选 多选 判断' : '从文件自动出题 · 关键条款必考'}`, `<div id="exbox"></div>`);
   m.querySelector('.dlg').style.width = 'min(900px,96vw)';
-  examStart(qs, { title: doc.n, mode: mode || 'teach', mount: 'exbox', src: 'doc', onDone: opt.onDone });
+  examStart(qs, { title: doc.n, mode: mode || 'teach', mount: 'exbox', src: 'doc', onDone: opt.onDone, meta: { secLabel: doc.bank ? '按题型掌握' : '按章节掌握' } });
 }
 function pipeClick(e) {
   const q = s => e.target.closest(s); let n;
@@ -368,6 +365,8 @@ function pipeClick(e) {
   if (n = q('[data-cwlec]')) { const cw = CW.cw, cb = CW.onExam; if (cw) lecOpen(cw, { from: CW.i, onExam: cb }); return true; }
   if (n = q('[data-cwexam]')) { const cb = CW.onExam; if (cb) cb(); return true; }
   if (n = q('[data-exopt]')) { examAnswer(+n.dataset.exopt); return true; }
+  if (n = q('[data-exmulti]')) { const qq = EX.qs[EX.i]; if (qq && EX.ans[qq.id] == null) { const i = +n.dataset.exmulti; EX.pick = (EX.pick || []).includes(i) ? EX.pick.filter(x => x !== i) : (EX.pick || []).concat([i]); examPaint(); } return true; }
+  if (n = q('[data-excommit]')) { if (!(EX.pick || []).length) { toast('先勾选正确项', 'bad'); return true; } examAnswer(EX.pick.slice().sort((a, b) => a - b)); return true; }
   if (n = q('[data-exjudge]')) { examAnswer(n.dataset.exjudge === '1'); return true; }
   if (n = q('[data-exsay]')) { const i = $('#ex_in'); const v = i ? i.value.trim() : ''; if (!v) { toast('先写一句', 'bad'); return true; } examAnswer(v); return true; }
   if (n = q('#ex_mic')) { const qq = EX.qs[EX.i]; micStart(n, $('#ex_in'), qq ? qq.ans : ''); return true; }

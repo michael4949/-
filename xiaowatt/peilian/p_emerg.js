@@ -158,7 +158,7 @@ function emResultHTML() {
         <div class="verd">${r.pass ? '合格' : '不合格'}</div>
         ${r.keyMiss ? `<div class="fat"><span>关键遗漏 ${r.keyMiss} 处</span></div>` : ''}
         <div class="note">处置要点 ${r.sp}/${r.ptot}${r.hasN ? '　事例纠错 ' + r.sn + '/' + EMG_CFG.notes : ''}${r.rep.length ? '　信息报送 +' + r.sb : ''}　及格线 ${EMG_CFG.pass}</div>
-        <div class="emdims">${skillsOf('em').map(d => `<span class="hitv" data-dim="${d.k}" data-tip="${h(d.d)}"><i>${h(d.n)}</i><b class="mono ${r.dims[d.k] == null ? '' : r.dims[d.k] >= 75 ? 'gv' : 'wv'}">${r.dims[d.k] == null ? '—' : r.dims[d.k]}</b></span>`).join('')}</div>
+        <div class="emdims">${EM_PROC.map(d => `<span class="hitv" data-dim="${d.k}" data-tip="${h(d.d)}"><i>${h(d.n)}</i><b class="mono ${r.dims[d.k] == null ? '' : r.dims[d.k] >= 75 ? 'gv' : 'wv'}">${r.dims[d.k] == null ? '—' : r.dims[d.k]}</b></span>`).join('')}</div>
         <div class="note">用时 ${Math.floor((rec.sec || 0) / 60)} 分 ${(rec.sec || 0) % 60} 秒 · 基准 ${Math.round(emTBase(e) / 60)} 分钟</div></div>
       <div class="card emai hg"><div class="ch"><b>AI 点评</b><em class="ai">AI</em><span class="note">按处置卡逐项比对后生成</span></div>
         <p>${h(rv.sum)}</p>

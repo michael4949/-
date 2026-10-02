@@ -17,7 +17,7 @@ if os.path.isdir(fdir):
         if f.endswith('.css'):
             faces.append(open(os.path.join(fdir, f), encoding='utf-8').read())
 css = css.replace('/*__FONTS__*/', '\n'.join(faces))
-parts = ['core.js', 'charts.js', 'rules.js', 'optic.js', 'judge.js', 'emerg.js', 'recs.js', 'home.js', 'pages.js', 'leader.js', 'p_ticket.js', 'p_emerg.js', 'p_plat.js', 'avatar.js', 'pipe.js', 'learn.js', 'p_scene.js']
+parts = ['core.js', 'charts.js', 'rules.js', 'optic.js', 'judge.js', 'emerg.js', 'bank.js', 'zlib.js', 'recs.js', 'home.js', 'pages.js', 'leader.js', 'p_ticket.js', 'p_emerg.js', 'p_plat.js', 'avatar.js', 'pipe.js', 'learn.js', 'p_scene.js']
 js = '\n\n'.join(open(B + p, encoding='utf-8').read() for p in parts)
 js = js.replace('__LOGO__', 'data:image/png;base64,' + logo)
 # 数字人讲师形象（assets/coaches）：只打包讲课用到的三个形象，_hd 为 512px 版本

@@ -1,4 +1,4 @@
-/* 第二批冒烟：安规知识 / 保命技能 / 案例分析 / 制度学习（课件 → 数字人讲课 → 测验 → 考试分析）/ 工作票 五个引擎走通并留痕 ·
+/* 场景冒烟：安规知识 / 保命技能 / 案例分析（题库作答引擎）/ 制度学习（客户制度文件 · 课件 → 数字人讲课 → 测验 → 考试分析）/ 工作票 走通并留痕 · 场景中心四分组与专业切换 ·
    案例推送学习（课件 → 3 题 → 回写）· 知识课堂课件生产线（文件库 / 课件 / 出题考试 / 考试分析）· 班组考试分析 · 复盘打开新记录 */
 const { chromium } = require(process.env.PW || '/home/user/-/node_modules/playwright');
 const F = require('url').pathToFileURL(require('path').resolve(__dirname, 'dist', '安全学习智能陪练_高保真原型.html')).href;
@@ -12,45 +12,67 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const fire = sel => p.evaluate(sel => { const n = document.querySelector(sel); if (!n) return -1; n.dispatchEvent(new MouseEvent('click', { bubbles: true })); return 1; }, sel);
   const n0 = await p.evaluate(() => allRecs().length);
   const shot = (f) => p.screenshot({ path: './shots/' + f, fullPage: true });
-  /* 安规知识 */
-  await p.evaluate(() => startScene('rule:verify:teach')); await w(p, 500);
+  /* 安规知识：按类别专练 → 全对 */
+  await p.evaluate(() => startScene('rule:r_tech:teach')); await w(p, 500);
   await shot('sc_rule.png');
-  for (let i = 0; i < 6; i++) {
-    await p.evaluate(() => { const q = SC.qs[SC.i]; if (q.type === 'say') ruleAnswer(q.ans); else ruleAnswer(q.ans); SC.cites[q.id] = q.rule.id; });
-    await w(p, 150); if (i < 5) await fire('[data-rulego="' + (i + 1) + '"]'); await w(p, 150);
-  }
-  await fire('[data-rulesubmit]'); await w(p, 400);
-  const rule = await p.evaluate(() => ({ step: SC.step, score: SC.res.score, dims: SC.res.dims, recs: allRecs().length, n: allRecs()[0].n, sub: allRecs()[0].sub }));
-  console.log('安规', JSON.stringify(rule), '期望 score 100 · r1 r2 r4 100');
-  /* 安规：答错 → 复练 */
-  await p.evaluate(() => startScene('rule:switch:teach')); await w(p, 300);
-  await p.evaluate(() => { SC.qs.forEach((q, i) => { SC.a[q.id] = q.type === 'say' ? '随便' : q.type === 'choice' ? (q.ans + 1) % 4 : !q.ans; }); SC.i = 5; rerender('scene'); }); await w(p, 100);
-  await fire('[data-rulesubmit]'); await w(p, 300);
+  const rule0 = await p.evaluate(() => ({ n: SC.qs.length, cats: Array.from(new Set(SC.qs.map(q => q.cat))).join(','), types: Array.from(new Set(SC.qs.map(q => q.type))).join(','), opts: document.querySelectorAll('[data-qbopt],[data-qbmulti],[data-qbjudge]').length, cite: document.querySelectorAll('[data-qbcite]').length, pro: qbPro().n }));
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; SC.cites[q.id] = q.basis; }); SC.i = SC.qs.length - 1; rerender('scene'); }); await w(p, 100);
+  await fire('[data-qbsubmit]'); await w(p, 400);
+  const rule = await p.evaluate(() => ({ step: SC.step, score: SC.res.score, dims: SC.res.dims, recs: allRecs().length, n: allRecs()[0].n, sub: allRecs()[0].sub, pro: allRecs()[0].pro }));
+  console.log('安规', JSON.stringify(rule0), '→', JSON.stringify(rule), '期望 n 8 · cats r_tech · score 100 · r_tech 100 其余 null · 变电运行类');
+  await shot('sc_rule_res.png');
+  /* 安规：随机抽题（类别轮流）→ 全错 → 复练 → 全对 */
+  await p.evaluate(() => startScene('rule::teach')); await w(p, 300);
+  const rule1 = await p.evaluate(() => ({ n: SC.qs.length, cats: new Set(SC.qs.map(q => q.cat)).size }));
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.type === 'judge' ? !q.ans : q.type === 'multi' ? [(q.ans[0] + 1) % q.opts.length] : (q.ans + 1) % q.opts.length; }); SC.i = SC.qs.length - 1; rerender('scene'); }); await w(p, 100);
+  await fire('[data-qbsubmit]'); await w(p, 300);
   const retry = await p.evaluate(() => ({ retry: !!SC.retry, n: SC.qs.length, step: SC.step }));
-  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; }); SC.i = SC.qs.length - 1; rerender('scene'); }); await fire('[data-rulesubmit]'); await w(p, 300);
-  console.log('安规错题复练', JSON.stringify(retry), '→', await p.evaluate(() => SC.step + ' ' + SC.res.score + ' r4=' + SC.res.dims.r4), '期望 retry true · n 6 · r4 100');
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; }); SC.i = SC.qs.length - 1; rerender('scene'); }); await fire('[data-qbsubmit]'); await w(p, 300);
+  console.log('安规随机', JSON.stringify(rule1), '错题复练', JSON.stringify(retry), '→', await p.evaluate(() => SC.step + ' ' + SC.res.score + ' retry=' + SC.res.retryRate + ' wrong=' + SC.res.wrong.length + ' retryOk=' + SC.res.wrong.filter(x => x.retry).length), '期望 cats ≥ 4 · retry true · n 8 · result · retry 100 · wrong 8 全部复练答对');
+  /* 多选题点击路径 */
+  await p.evaluate(() => startScene('rule::teach')); await w(p, 200);
+  const mi = await p.evaluate(() => { const i = SC.qs.findIndex(q => q.type === 'multi'); if (i >= 0) { SC.i = i; rerender('scene'); } return i; });
+  if (mi >= 0) {
+    const ans = await p.evaluate(() => SC.qs[SC.i].ans);
+    for (const i of ans) { await fire('[data-qbmulti="' + i + '"]'); await w(p, 60); }
+    await fire('[data-qbcommit]'); await w(p, 150);
+    console.log('多选题', JSON.stringify(await p.evaluate(() => ({ a: SC.a[SC.qs[SC.i].id], ok: qbOk(SC.qs[SC.i], SC.a[SC.qs[SC.i].id]), hint: !!document.querySelector('.tkhintbox') }))), '期望 ok true · hint true');
+  } else console.log('多选题 本次未抽到');
   /* 保命技能 */
-  await p.evaluate(() => startScene('life:verify:teach')); await w(p, 400);
+  await p.evaluate(() => startScene('life::teach')); await w(p, 400);
   await shot('sc_life.png');
-  const nst = await p.evaluate(() => LIFE[SC.sub].steps.length);
-  for (let i = 0; i < nst; i++) { await fire('[data-lifepick="' + i + '"]'); await w(p, 80); }
-  await fire('[data-lifepart="1"]'); await w(p, 150);
-  await p.evaluate(() => { LIFE[SC.sub].fill.forEach((f, i) => { document.querySelector('[data-lifefill="' + i + '"]').value = f[1]; }); });
-  await fire('[data-lifepart="2"]'); await w(p, 150);
-  await p.evaluate(() => { SC.acts.forEach(a => { if (a.bad) SC.a.acts[a.i] = true; }); rerender('scene'); }); await w(p, 100);
-  await fire('[data-lifesubmit]'); await w(p, 400);
-  console.log('保命', await p.evaluate(() => JSON.stringify({ score: SC.res.score, dims: SC.res.dims, recs: allRecs().length })), '期望 score 100');
+  const life0 = await p.evaluate(() => ({ n: SC.qs.length, cats: new Set(SC.qs.map(q => q.cat)).size, lifeOnly: SC.qs.every(q => /^l_/.test(q.cat)) }));
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; }); SC.i = SC.qs.length - 1; rerender('scene'); });
+  await fire('[data-qbsubmit]'); await w(p, 400);
+  console.log('保命', JSON.stringify(life0), '→', await p.evaluate(() => JSON.stringify({ score: SC.res.score, dims: SC.res.dims, recs: allRecs().length, sub: allRecs()[0].sub })), '期望 n 8 · lifeOnly true · score 85（无依据指认权重）或 100');
   await shot('sc_life_res.png');
-  /* 案例分析 */
-  await p.evaluate(() => startScene('case:cl1:teach')); await w(p, 400);
+  /* 案例分析：小案例 */
+  await p.evaluate(() => startScene('case:small:teach')); await w(p, 400);
   await shot('sc_case.png');
-  await p.evaluate(() => { const c = SC.case; ['c1', 'c2', 'c3', 'c4'].forEach(k => { document.querySelector('[data-casein="' + k + '"]').value = c.std[k].join('；'); }); });
-  await fire('[data-casesubmit]'); await w(p, 400);
-  console.log('案例', await p.evaluate(() => JSON.stringify({ score: SC.res.score, dims: SC.res.dims, recs: allRecs().length })), '期望 score ≥ 90');
+  const case0 = await p.evaluate(() => ({ kind: SC.case && SC.case.kind, n: SC.qs.length, stem: !!document.querySelector('.emsit'), cats: SC.qs.map(q => q.cat).join(',') }));
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; SC.cites[q.id] = q.basis; }); SC.i = SC.qs.length - 1; rerender('scene'); });
+  await fire('[data-qbsubmit]'); await w(p, 400);
+  console.log('案例', JSON.stringify(case0), '→', await p.evaluate(() => JSON.stringify({ score: SC.res.score, dims: SC.res.dims, recs: allRecs().length, sub: allRecs()[0].sub })), '期望 kind small · stem true · score 100');
   await shot('sc_case_res.png');
-  /* 制度学习：课件 → 讲课 → 测验 → 分析 */
-  await p.evaluate(() => startScene('inst:d_ticket:teach')); await w(p, 400);
-  const inst0 = await p.evaluate(() => ({ step: SC.step, slides: SC.cw.slides.length, nKey: SC.cw.nKey, th: document.querySelectorAll('.cwth').length }));
+  /* 大案例 + 复盘重开记录 */
+  await p.evaluate(() => startScene('case:big:exam')); await w(p, 300);
+  const big = await p.evaluate(() => ({ kind: SC.case.kind, n: SC.qs.length }));
+  await p.evaluate(() => { SC.qs.forEach(q => { SC.a[q.id] = q.ans; }); SC.i = SC.qs.length - 1; rerender('scene'); }); await fire('[data-qbsubmit]'); await w(p, 300);
+  await p.evaluate(() => { const r = allRecs()[0]; scOpenRec(r); }); await w(p, 300);
+  console.log('大案例', JSON.stringify(big), '重开记录', await p.evaluate(() => SC.step + ' ' + !!document.querySelector('.emres') + ' ' + document.querySelector('.ph h2').textContent), '期望 big · n 5 · result true 案例分析陪练');
+  /* 专业切换 */
+  await p.evaluate(() => goPage('center')); await w(p, 400);
+  await shot('sc_center.png');
+  const ctr = await p.evaluate(() => ({ groups: document.querySelectorAll('.scgrp').length, heads: Array.from(document.querySelectorAll('.scgh b')).map(x => x.textContent).join('|'), cards: document.querySelectorAll('.scbig').length, sel: !!document.querySelector('[data-qbpro]'), opts: document.querySelectorAll('[data-qbpro] option').length }));
+  await p.selectOption('[data-qbpro]', 'p18'); await w(p, 400);
+  const sw = await p.evaluate(() => ({ pro: qbPro().n, ls: localStorage.getItem('xwt_pro'), txt: document.querySelector('#hpage').innerText.includes('配电运检类') }));
+  await p.evaluate(() => startScene('rule::teach')); await w(p, 200);
+  const sw2 = await p.evaluate(() => qbPro().n + ' ' + SC.qs.length);
+  await p.evaluate(() => qbSetPro('p14'));
+  console.log('场景中心', JSON.stringify(ctr), '切换专业', JSON.stringify(sw), sw2, '期望 groups 4 · 安全知识能力|安全作业能力|应急处置能力|警示复盘能力 · cards 6 · opts 27 · 配电运检类');
+  /* 制度学习：客户题库主题（隐患判定）课件 → 讲课 → 测验 → 分析 */
+  await p.evaluate(() => startScene('inst:z2a:teach')); await w(p, 400);
+  const inst0 = await p.evaluate(() => ({ step: SC.step, doc: SC.doc.id, theme: SC.doc.theme, bank: SC.doc.bank, slides: SC.cw.slides.length, nKey: SC.cw.nKey, th: document.querySelectorAll('.cwth').length, groups: document.querySelectorAll('#inst_doc optgroup').length, docs: document.querySelectorAll('#inst_doc option').length }));
   await fire('[data-instgo="2"]'); await w(p, 150);
   await shot('sc_inst_cw.png');
   await fire('[data-instlec]'); await w(p, 900);
@@ -61,14 +83,20 @@ const w = (p, ms) => p.waitForTimeout(ms);
   await p.evaluate(() => lecEnd()); await w(p, 200);
   const lecBtn = await p.evaluate(() => !!document.querySelector('[data-lecexam]'));
   await fire('[data-lecexam]'); await w(p, 500);
-  console.log('制度课件', JSON.stringify(inst0), '讲课', JSON.stringify(lec), '翻页', lec2, '讲完→测验按钮', lecBtn, '期望 pav true · 字幕非空 · 翻页 第 4');
-  const ex0 = await p.evaluate(() => ({ step: SC.step, on: EX.on, n: EX.qs.length, types: EX.qs.map(q => q.type).join(','), box: !!document.querySelector('#exbox .exq') }));
+  console.log('制度课件', JSON.stringify(inst0), '讲课', JSON.stringify(lec), '翻页', lec2, '讲完→测验按钮', lecBtn, '期望 z2a z2 bank z2 · groups 6 · docs 10 · pav true · 字幕非空 · 翻页 第 4');
+  const ex0 = await p.evaluate(() => ({ step: SC.step, on: EX.on, n: EX.qs.length, types: EX.qs.map(q => q.type).join(','), bank: EX.qs.every(q => q.bank === 'z2'), box: !!document.querySelector('#exbox .exq') }));
   await shot('sc_inst_exam.png');
-  for (let i = 0; i < ex0.n; i++) { await p.evaluate(() => { const q = EX.qs[EX.i]; examAnswer(q.type === 'short' ? q.ans : q.ans); }); await w(p, 100); if (i < ex0.n - 1) await fire('[data-exgo="' + (i + 1) + '"]'); await w(p, 100); }
+  for (let i = 0; i < ex0.n; i++) { await p.evaluate(() => { const q = EX.qs[EX.i]; examAnswer(q.ans); }); await w(p, 100); if (i < ex0.n - 1) await fire('[data-exgo="' + (i + 1) + '"]'); await w(p, 100); }
   await fire('[data-exsubmit]'); await w(p, 500);
-  const inst = await p.evaluate(() => ({ step: SC.step, score: SC.res.score, dims: SC.res.dims, team: !!document.querySelector('.exres'), hist: examHist().length, recs: allRecs().length, hours: hourLog()[0].n }));
-  console.log('制度测验', JSON.stringify(ex0), '→', JSON.stringify(inst), '期望 n 6 · score ≥ 90 · hist 1');
+  const inst = await p.evaluate(() => ({ step: SC.step, score: SC.res.score, dims: SC.res.dims, team: !!document.querySelector('.exres'), secLabel: (document.querySelector('.exres .st') || {}).textContent, hist: examHist().length, recs: allRecs().length, hours: hourLog()[0].n, proc: !!SC.res.proc }));
+  console.log('制度测验', JSON.stringify(ex0), '→', JSON.stringify(inst), '期望 n 8 · 含 multi · bank true · score ≥ 90 · dims {z2} · 按题型掌握 · hist 1');
   await shot('sc_inst_res.png');
+  /* 制度学习：无题库主题（有限空间）从课件自动出题 */
+  await p.evaluate(() => startScene('inst:z4:teach')); await w(p, 300);
+  await p.evaluate(() => instExam()); await w(p, 300);
+  console.log('制度 · 课件出题', await p.evaluate(() => SC.doc.id + ' ' + SC.doc.theme + ' n=' + EX.qs.length + ' types=' + Array.from(new Set(EX.qs.map(q => q.type))).join(',') + ' bank=' + EX.qs.some(q => q.bank)), '期望 z4a z4 · n 6 · bank false');
+  await p.evaluate(() => { EX.qs.forEach(q => { EX.ans[q.id] = q.ans; }); EX.i = EX.qs.length - 1; examPaint(); }); await fire('[data-exsubmit]'); await w(p, 300);
+  console.log('制度 · 有限空间结果', await p.evaluate(() => SC.step + ' ' + JSON.stringify(SC.res.dims)), '期望 result {z4:…}');
   /* 工作票 */
   await p.evaluate(() => startScene('wt::teach')); await w(p, 400);
   await shot('sc_wt.png');
@@ -102,7 +130,7 @@ const w = (p, ms) => p.waitForTimeout(ms);
   await p.evaluate(() => goPage('classroom')); await w(p, 500);
   const pipe = await p.evaluate(() => ({ docs: document.querySelectorAll('.docit').length, steps: document.querySelectorAll('.pst').length, hist: document.querySelectorAll('[data-examhist]').length }));
   await shot('sc_classroom.png');
-  await fire('[data-doccw="d_report"]'); await w(p, 300);
+  await fire('[data-doccw="z5b"]'); await w(p, 300);
   const cw = await p.evaluate(() => ({ mask: document.querySelectorAll('.mask').length, slides: document.querySelectorAll('.cwth').length, cur: CW.i }));
   await fire('[data-cwpage="1"]'); await w(p, 150); const cw2 = await p.evaluate(() => CW.i);
   await p.screenshot({ path: './shots/sc_cw.png' });
@@ -112,13 +140,13 @@ const w = (p, ms) => p.waitForTimeout(ms);
   const dres = await p.evaluate(() => ({ score: EX.res.score, team: EX.res.team.total, hist: examHist().length }));
   await p.screenshot({ path: './shots/sc_exam_res.png' });
   await p.evaluate(() => $$('.mask').forEach(m => m.remove()));
-  console.log('课件生产线', JSON.stringify(pipe), '课件', JSON.stringify(cw), '翻页', cw2, '出题', JSON.stringify(dex), '→', JSON.stringify(dres), '期望 docs 3 · steps 6 · slides ≥ 4 · n 6 · hist 2');
+  console.log('课件生产线', JSON.stringify(pipe), '课件', JSON.stringify(cw), '翻页', cw2, '出题', JSON.stringify(dex), '→', JSON.stringify(dres), '期望 docs 10 · steps 6 · slides ≥ 4 · n 6 · hist 3');
   /* 导入文本文件 → 文件库 +1 */
   await p.setInputFiles('.pipefile', { name: '班组安全学习材料.txt', mimeType: 'text/plain', buffer: Buffer.from('第一章 总则\n第一条 作业前必须开班前会，交代风险点。\n第二条 进入作业现场应正确佩戴安全帽，不得穿拖鞋。\n第二章 现场\n第三条 高处作业必须系安全带，安全带应高挂低用。\n第四条 作业结束后应在 10 分钟内清点工器具。\n第五条 发现隐患应立即报告班组长，不得隐瞒。') }); await w(p, 600);
-  console.log('导入文件', await p.evaluate(() => document.querySelectorAll('.docit').length + ' 份 · ' + docAll()[0].n + ' · 题 ' + qGen(docAll()[0], 6, 1).length), '期望 4 份 · 班组安全学习材料');
+  console.log('导入文件', await p.evaluate(() => document.querySelectorAll('.docit').length + ' 份 · ' + docAll()[0].n + ' · 主题 ' + (docAll()[0].theme || '无') + ' · 题 ' + qGen(docAll()[0], 6, 1).length), '期望 11 份 · 班组安全学习材料 · 主题 z6（高处作业）');
   /* 组长：班组考试分析 */
   await p.evaluate(() => { ROLE.cur = 'lead'; renderRole(); goPage('team'); }); await w(p, 600);
-  console.log('组长 班组考试分析', await p.evaluate(() => document.querySelectorAll('[data-examhist]').length), '期望 ≥ 2 · 案例完成', await p.evaluate(() => document.querySelector('#hpage').innerText.includes('本人已完成')));
+  console.log('组长 班组考试分析', await p.evaluate(() => document.querySelectorAll('[data-examhist]').length), '期望 ≥ 3 · 案例完成', await p.evaluate(() => document.querySelector('#hpage').innerText.includes('本人已完成')));
   await fire('[data-examhist="0"]'); await w(p, 300); console.log('看分析弹层', await p.evaluate(() => document.querySelectorAll('.mask').length)); await p.evaluate(() => $$('.mask').forEach(m => m.remove()));
   /* 班组长导入通报 → 生成 → 推送 */
   await fire('[data-casepush]'); await w(p, 300);
