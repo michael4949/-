@@ -35,11 +35,11 @@ function NAV_OF() {
   if (role() === 'manager') return [
     { g: '业务' }, { k: 'goals', n: '考核指标', ic: 'target', badge: () => goalsAll().filter(g => g.light === 'bad').length }, { k: 'compare', n: '班组横向对比', ic: 'cmpr' },
     { g: '管理' }, { k: 'portrait', n: '团队画像总览', ic: 'star' }, { k: 'lperf', n: '班长绩效', ic: 'gauge', badge: () => LEADERS.filter(l => !LS.get('lperf_ok', {})[l.n]).length }, { k: 'staff', n: '人员总览', ic: 'people' }, { k: 'structure', n: '班组结构对比', ic: 'hex' }, { k: 'risks', n: '团队风险画像', ic: 'warn', badge: () => riskAgg().filter(r => r.lv === '高').length }, { k: 'mcare', n: '员工关怀', ic: 'heart' }, { k: 'madvise', n: '分析参谋', ic: 'doc' },
-    { g: '班组' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
+    { g: '班组' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问大瓦特', ic: 'spark' }
   ];
   const nav = [
     { g: '班组整体' }, { k: 'team', n: '班组画像', ic: 'star' }, { g: '人员情况' }, { k: 'skills', n: '班员画像', ic: 'hex' }, { k: 'auth', n: '授权认证', ic: 'check' }, { k: 'grow', n: '培养与梯队', ic: 'tree' }, { k: 'perf', n: '绩效与激励', ic: 'gauge' }, { k: 'care', n: '关怀与文化', ic: 'heart', badge: () => careList().filter(c => !LS.get('care_done', {})[c.k + '|' + c.who + '|' + c.when]).length }, { k: 'advise', n: '分析参谋', ic: 'doc' },
-    { g: '日常业务' }, { k: 'home', n: '今日工作台', ic: 'sun', badge: () => HOMEPG.pending() }, { k: 'sched', n: '用工安排', ic: 'cal', badge: () => DB.jobs().filter(j => j.st === '待派').length }, { k: 'know', n: '知识库', ic: 'book' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问小瓦特', ic: 'spark' }
+    { g: '日常业务' }, { k: 'home', n: '今日工作台', ic: 'sun', badge: () => HOMEPG.pending() }, { k: 'sched', n: '用工安排', ic: 'cal', badge: () => DB.jobs().filter(j => j.st === '待派').length }, { k: 'know', n: '知识库', ic: 'book' }, { k: 'ledger', n: '台账中心', ic: 'grid' }, { k: 'ask', n: '问大瓦特', ic: 'spark' }
   ];
   if (DB.ext()) nav.push({ g: '扩展模块' }, { k: 'people', n: '人员档案', ic: 'people' }, { k: 'train', n: '培训考评', ic: 'check' }, { k: 'safety', n: '安全管理', ic: 'shield' }, { k: 'docs', n: '文稿中心', ic: 'pen' });
   return nav;
@@ -151,7 +151,7 @@ function vtHeroLight() {
 }
 function shell() {
   document.body.innerHTML = '<div id="app"><nav class="sb" id="sb"></nav><section id="main"></section><aside class="side" id="side"></aside></div>' + vtLightHTML() +
-    '<button class="vzfab" data-act="side-toggle"><i></i>小瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
+    '<button class="vzfab" data-act="side-toggle"><i></i>大瓦特</button><button class="stagebtn" data-act="stage">讲师演示台</button><div class="stage" id="stage"><div class="t">讲师演示台 <span class="note">案例日期 ' + TODAY + ' · 周报第 ' + WK29.no + ' 期</span></div><div class="row">语速 <button data-act="stage-speed" data-v="1" class="on">正常</button><button data-act="stage-speed" data-v=".5">快</button><button data-act="stage-speed" data-v=".2">极快</button></div><div class="row">角色 <button data-act="role-set" data-r="leader">班组长</button><button data-act="role-set" data-r="manager">管理者</button></div><div class="row"><button data-act="stage-brief">重播晨间简报</button><button data-act="stage-ext">扩展模块' + (DB.ext() ? '：开' : '：关') + '</button><button data-act="stage-status">功能实现状态清单</button><button data-act="stage-reset">清空本机记录</button></div><div class="row" id="stagenav"></div></div><div class="modal" id="modal" hidden></div>';
   $('#side').innerHTML = XW.sideHTML();
 }
 function renderNav() {
@@ -198,7 +198,7 @@ function tabsHTML(list, cur) { return '<div class="tabs">' + list.map(t => '<but
 function route() { const hs = (location.hash || '#' + ROLES[role()].home).slice(1).split('/'); let pg = PAGES[hs[0]] ? hs[0] : ROLES[role()].home; if (!ALLOW[role()].includes(pg)) pg = ROLES[role()].home; if (!DB.ext() && (pg === 'safety' || pg === 'docs') && role() === 'leader') pg = 'home'; S.page = pg; let sub = hs[1] || ''; try { sub = decodeURIComponent(sub); } catch (e) {} S.sub = sub; render(); }
 function render() {
   XW.cancel(); XW.unspot(); const pg = PAGES[S.page]; const m = $('#main');
-  m.innerHTML = pg.render() + (typeof legendHTML === 'function' ? legendHTML(S.page) : '') + '<div class="cursor" id="cur"><svg viewBox="0 0 20 20"><path d="M3 2 L17 10 L10 11.5 L7 18 Z" fill="#5a5bf0" stroke="#fff" stroke-width="1.2"/></svg><span class="lbl">小瓦特</span></div>';
+  m.innerHTML = pg.render() + (typeof legendHTML === 'function' ? legendHTML(S.page) : '') + '<div class="cursor" id="cur"><svg viewBox="0 0 20 20"><path d="M3 2 L17 10 L10 11.5 L7 18 Z" fill="#5a5bf0" stroke="#fff" stroke-width="1.2"/></svg><span class="lbl">大瓦特</span></div>';
   const vzKey = S.page + '/' + S.sub, vzNew = vzKey !== render.__vzLast; render.__vzLast = vzKey;
   if (vzNew) { m.classList.remove('vzenter'); void m.offsetWidth; m.classList.add('vzenter'); } else m.classList.remove('vzenter');
   renderNav(); m.scrollTop = 0; pg.after && pg.after(); if (vzNew) vzCountUp(m); VTL.scan();

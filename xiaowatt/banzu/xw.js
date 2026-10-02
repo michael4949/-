@@ -1,4 +1,4 @@
-/* ===== 小瓦特引擎：形象、状态、字幕、对话、光标、通知、台账聚光、记忆 ===== */
+/* ===== 大瓦特引擎：形象、状态、字幕、对话、光标、通知、台账聚光、记忆 ===== */
 const XW_IMGS = __XW_IMGS__; // build.py 内联 assets/xiaowatt/*.png（main/talk/think/look/work/listen）；没有则用内置 SVG
 const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 function h(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
@@ -38,7 +38,7 @@ const XW = {
   scrollChat() { const c = $('#chat'); if (c) c.scrollTop = c.scrollHeight; },
   msg(kind, html) { const d = document.createElement('div'); d.className = 'msg ' + kind; d.innerHTML = html || ''; $('#chat').appendChild(d); requestAnimationFrame(() => { d.classList.add('in'); this.scrollChat(); }); return d; },
   user(text, voice) { const d = this.msg('u', (voice ? '<div class="wave">' + '<i></i>'.repeat(16) + '</div>' : '') + '<span></span>'); this.type(d.querySelector('span'), text, voice ? 70 : 28, () => d.classList.add('done')); return d; },
-  think(text, done) { this.state('think'); const d = this.msg('t', '<span class="lbl">小瓦特在想</span><span></span>'); this.type(d.querySelector('span:last-child'), text, 34, () => { this.state(''); done && done(); }); return d; },
+  think(text, done) { this.state('think'); const d = this.msg('t', '<span class="lbl">大瓦特在想</span><span></span>'); this.type(d.querySelector('span:last-child'), text, 34, () => { this.state(''); done && done(); }); return d; },
   /* answer(text, html, opt)：先逐字出 text，完成后若给 html 则替换为 html（含按钮）；opt.speak=false 不上字幕 */
   answer(text, html, opt) { opt = opt || {}; this.state('talk'); const d = this.msg('a', '');
     this.type(d, text, 40, () => { if (html) d.innerHTML = html; if (opt.chart) { const c = document.createElement('div'); c.className = 'mchart'; c.innerHTML = opt.chart; const bt = d.querySelector('.bt'); if (bt) d.insertBefore(c, bt); else d.appendChild(c); } if (opt.confirm !== false && /建议|人选|等级|评价|安排/.test(text) && !/由班组长|由你/.test(text)) d.insertAdjacentHTML('beforeend', '<div class="cf">由班组长确认后使用</div>'); this.state(''); this.scrollChat(); opt.done && opt.done(); });
@@ -76,7 +76,7 @@ const XW = {
   },
   /* 右栏结构 */
   sideHTML() {
-    return '<div class="sh' + (XW_IMGS && XW_IMGS.main ? ' full' : '') + '"><div class="xw breath" id="xw"><div class="ring"></div>' + this.avatarHTML() + '</div><div class="nm"><b>小瓦特</b><span id="xwst"><i>待命</i> · 由班组长确认后使用</span><span>' + h(TEAM.name) + '</span></div></div>' +
+    return '<div class="sh' + (XW_IMGS && XW_IMGS.main ? ' full' : '') + '"><div class="xw breath" id="xw"><div class="ring"></div>' + this.avatarHTML() + '</div><div class="nm"><b>大瓦特</b><span id="xwst"><i>待命</i> · 由班组长确认后使用</span><span>' + h(TEAM.name) + '</span></div></div>' +
       '<div class="sub" id="xwsub"></div><div class="chat" id="chat"></div>' +
       '<div class="inp"><input id="chatin" placeholder="问她，或点页面上的按钮"><em id="mic2" data-act="mic2">🎙</em><button data-act="send2">发送</button></div>';
   },

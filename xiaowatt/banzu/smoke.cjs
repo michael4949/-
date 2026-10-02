@@ -96,7 +96,7 @@ const BAN = /演示|待建|下一版本|比赛|评委|一期|门禁|手术|骨�
   await pg.click('[data-act="rate-evid"][data-who="王安"]'); await w(400);
   await t('履职证据弹层 · 五类逐条带出处 · 系数逐条推导与页面一致', async () => { const m = await pg.locator('#modal').innerText(); const co = await ev(() => perfAlloc().find(r => r.p.n === '王安').co.toFixed(2)); return (await pg.locator('#modal table.evidt tr').count()) >= 12 && (await pg.locator('#modal table.evidr tr').count()) >= 8 && m.includes('工分制考核台账') && m.includes(co) && m.includes('工作量低于人均 70%'); });
   await pg.click('#modal [data-act="rate-evid-ask"]'); await w(400);
-  await t('让小瓦特讲讲 · 回答带命中规则', async () => (await pg.locator('.msg.a').last().innerText()).includes('初步系数'));
+  await t('让大瓦特讲讲 · 回答带命中规则', async () => (await pg.locator('.msg.a').last().innerText()).includes('初步系数'));
   await t('绩效表 12 行 · 系数 · 物质 / 非物质', async () => (await pg.locator('table.perf tr').count()) === 13 && (await main()).includes('评优推荐') && (await main()).includes('¥'));
   await pg.click('[data-act="perf-adj"][data-who="王安"][data-v="0.02"]'); await w(500);
   await t('系数调整落 perf_adj', async () => { const a = await LS('perf_adj'); return a && a['王安'] === 0.02; });
