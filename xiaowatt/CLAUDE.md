@@ -27,7 +27,7 @@ xiaowatt/
 │   ├── 01_项目背景.md       甲方、合同、评分维度、客户现有系统基线
 │   ├── 02_已定决策.md       所有已拍板的产品与技术决策（不要推翻）
 │   ├── 03_任务清单.md       ← 干活看这里，含每页验收标准
-│   └── 正式交付物/          四份 V1.0 需求/技术文档 + 两份 V2.0 需求文档 + 两份申报书（按客户附件3-1 版式）+ 班组长申报 PPT V3.0 模板版（10/4 参赛站位版，docs/02 第 66、67 条）
+│   └── 正式交付物/          四份 V1.0 需求/技术文档 + 两份 V2.0 需求文档 + 两份申报书（按客户附件3-1 版式）+ 两份申报 PPT V3.0 模板版（10/4 参赛站位版，docs/02 第 66、67、68 条）
 ├── peilian/                项目一工作区（扁平结构，源码 + 回归脚本 + samples/ 上传样例同目录；10/1 起六个陪练场景 + 内容生产线 + 案例推送学习）
 │   ├── build.py            构建：拼接源码 → dist/ 单文件 HTML
 │   ├── core.js …           见下方「代码地图」
@@ -42,7 +42,7 @@ xiaowatt/
 ├── assets/logo.png         客户 logo（透明底 820×290，构建时 base64 内联）
 ├── assets/coaches/         讲师形象图（10/1 起 term / angui / daozha 三个及 _hd 版由 build.py 内联，供数字人讲课）
 ├── assets/fonts/           Manrope 可变字重拉丁子集（OFL），banzu/build.py 内联为 @font-face（10/2）
-└── docgen/                 正式文档生成脚本：gen_sbs.py 两份参赛申报书（按客户《附件3-1 申报书》原 docx 版式在 XML 上原位替换，需模板文件作参数，docs/02 第 66 条）；gen_docs_v2.cjs（Node docx）两份需求文档 V2.0（NODE_PATH 指向含 docx 的 node_modules；仓库根 package.json 为 ESM 故用 .cjs）；gen_docs.js / gen_tech.js 为 V1.0 旧版；架构图源在 peilian/diagrams、banzu/diagrams（node render.cjs）；**参赛 PPT**：pptkit/（bg.html 深色霓虹素材 + render.cjs 用 Playwright 出背景 / 图标 / 精灵 / 相框截图 / 深色架构图，lib.cjs 公共库：主题、四个版式、玻璃卡 / 胶囊 / 光球 / 大数字 / 流程 / 表格元件、目录页、theme1.xml 写主题色）+ gen_ppt_banzu.cjs（班组长 31 页，docs/02 第 67 条；需先 `cd banzu && node vis.cjs 1440x900` 出截图，再 `PW=… node pptkit/render.cjs`，再 `NODE_PATH=… node gen_ppt_banzu.cjs`，相框 / 背景 PNG / 缩小精灵图不入库；**该版已被用户否决**）+ **gen_ppt_banzu_tpl.py <模板.pptx>**（V3.0 模板版，python-pptx 在客户《附件3-2》模板原件上直接改：保留封面 / 声明 / 目录 / 汇报完毕与版式，按模板要点逐条新增内容页，只用模板色与微软雅黑，28 页；模板原件不入库；美化方向待用户指示，docs/02 第 67 条 ⑥）
+└── docgen/                 正式文档生成脚本：gen_sbs.py 两份参赛申报书（按客户《附件3-1 申报书》原 docx 版式在 XML 上原位替换，需模板文件作参数，docs/02 第 66 条）；gen_docs_v2.cjs（Node docx）两份需求文档 V2.0（NODE_PATH 指向含 docx 的 node_modules；仓库根 package.json 为 ESM 故用 .cjs）；gen_docs.js / gen_tech.js 为 V1.0 旧版；架构图源在 peilian/diagrams、banzu/diagrams（node render.cjs）；**参赛 PPT**：pptkit/（bg.html 深色霓虹素材 + render.cjs 用 Playwright 出背景 / 图标 / 精灵 / 相框截图 / 深色架构图，lib.cjs 公共库：主题、四个版式、玻璃卡 / 胶囊 / 光球 / 大数字 / 流程 / 表格元件、目录页、theme1.xml 写主题色）+ gen_ppt_banzu.cjs（班组长 31 页，docs/02 第 67 条；需先 `cd banzu && node vis.cjs 1440x900` 出截图，再 `PW=… node pptkit/render.cjs`，再 `NODE_PATH=… node gen_ppt_banzu.cjs`，相框 / 背景 PNG / 缩小精灵图不入库；**该版已被用户否决**）+ **ppttpl.py 公共骨架 + gen_ppt_banzu_tpl.py / gen_ppt_peilian_tpl.py <模板.pptx>**（V3.0 模板版，python-pptx 在客户《附件3-2》模板原件上直接改：保留封面 / 声明 / 目录 / 汇报完毕与版式，按模板要点逐条新增内容页，只用模板色与微软雅黑；班组长 30 页、陪练 33 页，页面结构一一对应；模板原件不入库；正文不得有内部标注与口语；美化方向待用户指示，docs/02 第 67、68 条）
 ```
 
 ## 环境与命令
