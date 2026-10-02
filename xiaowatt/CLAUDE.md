@@ -60,7 +60,7 @@ node vis.cjs 1440x900 [前缀]   # 视觉巡检：学员 10 页 + 组长 2 页 +
 node v2scene.js    # 第二批冒烟：安规 / 保命 / 案例 / 制度（课件 → 数字人讲课 → 测验 → 考试分析）/ 工作票 五引擎走通并留痕、案例推送学习回写、知识课堂课件生产线（文件库 / 课件 / 出题考试 / 导入文件）、组长班组考试分析、班组长导入通报生成案例，期望 ERR none
 ```
 
-**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base + v2plat + v2scene**；改样式后再跑 `node vis.cjs` 看截图。10/2 视觉升级层（`vz` 前缀：顶栏滑动页签 `vzNavInd`、换页浮现 `vzenter`、字体 Manrope）与 10/4 科技质感层（`vq` 前缀：冷珍珠底 + 等高线背景、翠绿薄荷 / 琥珀珊瑚 / 香槟金令牌、玻璃卡金→翠亮边、墨色页签胶囊、Noto Sans SC Black 标题，docs/02 第 65 条）都在 `style.css` 末尾，业务结构与 9/2 设计体系（金描边 + 绿 / 橙分卡）不动（上传测试用 `peilian/samples/` 里的 ASCII 文件名样例——本环境的无头浏览器上传中文文件名会静默失败）。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
+**改任何 JS/CSS 后必须 `python3 build.py` 重新构建**（dist 是拼接产物，不要直接改 dist）。**改任何页面或数据层必须跑 v2base + v2plat + v2scene**；改样式后再跑 `node vis.cjs` 看截图。10/2 视觉升级层（`vz` 前缀：顶栏滑动页签 `vzNavInd`、换页浮现 `vzenter`、字体 Manrope）与 10/4 科技质感层（`vq` 前缀：冷珍珠底 + 等高线背景、翠绿薄荷 / 琥珀珊瑚 / 香槟金令牌、玻璃卡金→翠亮边、顶栏页签胶囊为珍珠白底 + 金→翠细边（10/2 用户否决墨色底）、Noto Sans SC Black 标题，docs/02 第 65 条）都在 `style.css` 末尾，业务结构与 9/2 设计体系（金描边 + 绿 / 橙分卡）不动（上传测试用 `peilian/samples/` 里的 ASCII 文件名样例——本环境的无头浏览器上传中文文件名会静默失败）。铁律 grep：`grep -c "演示" dist/*.html` 只允许讲师演示台相关命中；`grep -c 陪练舱 dist/*.html` 应为 0。
 
 ## 铁律（甲方多次强调，违反即打回）
 

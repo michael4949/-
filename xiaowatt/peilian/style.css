@@ -2092,12 +2092,14 @@ html{scrollbar-width:thin;scrollbar-color:#cfccba transparent}
 .hhead::after{background:linear-gradient(90deg,transparent,var(--gr),var(--mint),var(--gold),var(--gr),transparent);background-size:220% 100%;opacity:.95}
 #pg_home .brand{border-right-color:var(--line)}
 #pg_home .brand .pill{color:var(--grd);border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;box-shadow:0 2px 8px -4px rgba(201,162,39,.4)}
-.hnav{background:#0f1f18;border-color:#0f1f18;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(13,27,21,.6)}
-.hnavi{color:rgba(255,255,255,.72)}
-.hnavi:hover{color:#fff}
+/* 顶栏页签胶囊：珍珠白底 + 金→翠细边，与卡片同一套令牌（10/2 用户意见：去墨色底） */
+.hnav{border:1px solid transparent;background:linear-gradient(#fff,#f7f9f4) padding-box,var(--vqedge) border-box;box-shadow:inset 0 1px 0 #fff,0 8px 20px -14px rgba(11,154,99,.35)}
+.hnavi{color:#3c5245}
+.hnavi:hover{color:var(--grd)}
 .hnavi.on{color:#fff}
-.hnavi.lk{color:rgba(255,255,255,.42)}
-.hnavi.lk i{color:rgba(255,255,255,.55);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
+.hnavi.lk{color:#93a398}
+.hnavi.lk i{color:var(--goldD);border-color:var(--goldln);background:var(--goldbg)}
+.hnavi.lk.unlocked{color:#3c5245}
 .hnav .vzind{background:linear-gradient(135deg,var(--gr),var(--mint));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 16px -6px rgba(34,199,169,.8)}
 .hclk{color:var(--goldD)}
 .uchip{border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--vqedge) border-box;color:var(--txt2)}
